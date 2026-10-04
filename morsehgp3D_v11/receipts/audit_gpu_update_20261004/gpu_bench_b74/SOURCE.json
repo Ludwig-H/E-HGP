@@ -1,0 +1,12 @@
+{
+  "commit": "b74f9ea3a0b986f659d388b8140067b0b35be0c2",
+  "source_kind": "published_commit",
+  "source_sha256": {
+    "morsehgp3D_v11/bench/ab_g4.py": "93fe9d58efe580e243bbeb50f740efa0ad349b613b2d765fd2c5a77c34767acf",
+    "morsehgp3D_v11/bench/full_campaign.py": "60b177d0109fdd7f3e4057ccb8cd47bd79071b422967429ed21aabd0f789bf6c",
+    "morsehgp3D_v11/bench/full_probe.cpp": "8367fa6b2cccdf25b6b347b9d1fd76b9e1cfa2a84a13b900bc39c8b042b60fad",
+    "morsehgp3D_v11/bench/gpu_ab.py": "1191a66c7214e1046c199b254f583722c4ef2ae5b37996cf821125130c1018fd",
+    "morsehgp3D_v11/bench/gpu_profile.py": "499c86b8a275f25f9a067133e379d6478dfa662aaf4883764297d8a0b7d465cd",
+    "morsehgp3D_v11/tests/tower/full_bench_io.py": "2a9063f281c1dcea73092ca79f8e69cdd36281236a9b114c77c23ecaa4bf9894"
+  }
+}

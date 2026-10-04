@@ -5,6 +5,13 @@
 c40f40798 (FULL), b87285378 (pipeline), ab1a739d1/f1a53fe1c (banc de points).
 Suivi ciblé **c22be4e41 → 66372e621** : tête E1, protocole P08, correctifs P1/P2,
 ports et lecteurs des mesures, réponses aux sept questions de vitesse.
+Actualisation ciblée **462dca187 / 82fff7543 / 77db5738e** : juge Euler/J1
+et feuilles CPU/device/CUDA, transport mémoire et banc froid/chaud.
+**d5b1d0179 / 61da03749** : réponses aux lecteurs et nouvelles mesures CPU ;
+les prédicats device restent ceux du pin77. **00800dd88** : plafond du lot,
+ordre GPU et préchauffage relus. Banc revérifié au pin **b74f9ea3a** ;
+les nouveaux transports scratch/pool **b74** et warp/copie **16b482169**
+restent hors de cette contrelecture. Les six sources du banc sont inchangées à16.
 Cadre : `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
@@ -146,14 +153,17 @@ centre, tag3, certificats, niveau brut sans PGCD, contacts, support et
 compteurs logiques. Le catalogue matérialise après S*/admission géométrique,
 avant un éventuel refus du Collector ; MEB après inclusion de toute la partie.
 **1 983 + 1 344 gardes exactes**. Le différentiel eager partage la factory
-réécrite : garder aussi le juge arithmétique indépendant. Qualification G4
-et gain restent distincts des essais locaux annoncés.
+réécrite : garder aussi le juge arithmétique indépendant. **Qualification
+G4 Release/u21 q3+R acquise dans claudeab8** : 673 portes et sept mutants
+(num/catalogue) ; aucun ASan/UBSan ou TSan dans cette session. Les gains
+restent descriptifs, voir les nouvelles captures ci-dessous.
 
 **Compteurs locaux, 0c358261c : raccord R1 favorable.** Quinze champs
 initialisés et vidés par `checked_add` après une feuille réussie ; réduction
 des tâches inchangée. m≤1024 est contrôlé, borne conservatrice
 140464088678400<2^49. Les préfixes logiques sont conservés, les refus
-remontent sans sortie partielle. Portes/mutants relus ; G4 et gain attendus.
+remontent sans sortie partielle. Portes/mutants relus ; les essais G4 e49
+sont publiés avec le refus de style et leur portée partielle conservés.
 
 **Lemme R, 9b9244a00 : raccord favorable.** Dominance stricte sur la fermeture
 Q + centre dans Q + générateurs de coquille certifient intérieur/extérieur.
@@ -163,14 +173,14 @@ les autres contacts sont testés. **103 200 gardes**, dont masques multi-mots
 la formule de `CATALOGUE.md` : **16C⌈C/64⌉**, au lieu de 8C⌈C/64⌉ ; ce
 reliquat documentaire n'est pas un défaut d'admission. Les 43 % annoncés
 concernent des classements par masque, sans gain chronométrique acquis.
+Le raccord q3+R a désormais la qualification G4 Release/u21 claudeab8.
 
-**Banc 54c167bb6 : corriger l'ordre pour N pair.** Rotation rep%N puis
-inversion à chaque prise fixe toujours **base→new pour N=2** ; pour N pair,
-chaque variante conserve la parité de sa position. Inverser après un cycle
-complet de N rotations, cas vide protégé, équilibre les positions et les
-précédences sur 2N prises. **482 gardes AST** ; l'ancien banc à deux variantes
-alternait correctement. Le plan annoncé base/q3/q3+R, à N=3, reste utile :
-les différences mesurent q3 puis R conditionnel à q3, sans estimer l'interaction.
+**Ordre A/B : corrigé dans les sources d5b1d0179.** Williams alterne
+correctement les deux variantes ; un cycle complet équilibre positions et
+successions dirigées. Cinq répétitions/N2 annoncent `balanced=false`.
+La campagne ancienne n'est pas rééquilibrée rétroactivement. Base/q3/q3+R
+mesure q3 puis R conditionnel à q3, sans interaction estimée.
+[Correctifs et 237 gardes portables](../receipts/audit_gpu_euler_20261004/mesure_protocol_live/README.md).
 
 **Réponse D : contrat J3 accepté comme voie explicite.** Aucun besoin de
 reproduire les hits du cache. `fallback` signifie cache demandé mais
@@ -192,29 +202,110 @@ tétraèdre appartient à l'enveloppe des quatre sommets. Doublement exact,
 face basse incluse/haute
 exclue, filtre strict et prolongements q3→q4 sont préservés. `q4_candidates`
 reste compté avant E4. **7 552 gardes Gram/Fraction**, profils et permutations
-compris ; portes/mutants cohérents en source, qualification G4 et gain attendus.
+compris ; portes/mutants cohérents. Essais G4 e49 publiés : portes numériques
+et mutants passent, refus de style conservé ; aucun gain établi (§ captures CPU).
 
-**Lecteur pipeline e49 : retirer un ordre temporel injustifié.** Il impose
-dernier départ des voies ≤ première fin. Sans barrière de départ, une voie
-peut finir avant qu'une autre, même sans travail, démarre : le lecteur refuse
-alors un FULL correct. Remplacer cette relation par les deux bornes sur
-`forest_ns` ; **97 gardes** rejouent le lecteur et une seule substitution AST.
-La collecte paraît sûre en lecture : cases privées, réduction après le pool,
-allocations budgétées. CPU et attente couvrent toute la tâche ; une queue
-exportée nulle perd sa durée complète. Ajouter sa fin ou sa durée pour ce
-diagnostic. L'attente autour d'`atomic::wait` inclut du CPU et la reprise :
-CPU+attente n'est pas une partition exacte du mur, ni une attribution au SMT.
+**Lecteur pipeline : corrigé dans les sources d5b1d0179.** L'ordre injustifié
+dernier départ≤première fin est retiré ; les bornes portent sur `forest_ns`.
+`publish_end`, `vertical_end` et `lanes_last_finish` sont désormais exportés :
+une queue nulle conserve la durée complète par end−start. La porte Python
+inclut des voies disjointes dans le temps. La collecte reste favorable en
+source ; qualification native de la télémétrie distincte des captures e49.
+CPU et attente couvrent toute la tâche ; CPU+attente n'est pas une partition
+exacte du mur, ni une attribution au SMT.
+[Réponse et contrôles](../receipts/audit_gpu_euler_20261004/lecteurs_published/README.md).
 
-**Bancs 0cf/663 : conserver refus et contexte.** Le lecteur apparié calcule
-correctement ratios et test des signes, mais son dérivé perd verdict parent,
-identité canonique et exclusions. Les conserver, avec nombres attendus et
-retenus ; distinguer diagnostic et preuve. Son code 0 signifie « lu ».
-Un timeout du banc de tailles interrompt l'écriture finale et perd les prises
-déjà terminées : checkpoint par prise, statut d'échec et diagnostics persistés.
-Avec cinq paires, p bilatérale minimale=0,0625 : portée descriptive à 5 %,
-sans ajout rétrospectif de prises. Les tranches de sites ne qualifient pas
-une trame entière ; rattacher chaque entrée à sa provenance.
-[Sources, témoins et rejeux bornés](../receipts/audit_enveloppes_mesures_20261004/README.md).
+**Bancs : contexte et timeout corrigés au pin61da.** Le dérivé A/B conserve
+verdict/refus, identité, plan et empreinte du parent, exclut les dumps
+étrangers et publie paires attendues/retenues. Le timeout du banc de tailles
+est persisté, les prises achevées sont checkpointées et le banc poursuit
+avant son code1 final. **237 gardes**, appels entièrement simulés.
+Le dérivé reste un diagnostic : code0 signifie «lu». Avec cinq paires,
+p bilatérale minimale=0,0625 ; garder cette portée descriptive à 5 %.
+Les tranches de sites ne qualifient pas une trame entière.
+[Réponse et témoins](../receipts/audit_gpu_euler_20261004/mesure_protocol_live/README.md),
+[observations initiales conservées](../receipts/audit_enveloppes_mesures_20261004/README.md).
+
+## Juge Euler/J1 et voie GPU : sources et domaine de la contrelecture
+
+**Euler/J1 : raccord favorable.** Le regroupement par MEB et la différence
+finie sur les intérieurs justifient `Cat_(K+2)` pour vérifier les ordres 1..K.
+Un tétraèdre avec son centre montre que K+1 ne suffit pas : à k2, Euler vaut
+2 sur Cat3, 1 sur Cat4. Les supports positifs, la fermeture des masques et
+la restriction J1 sont cohérents. Le niveau brut est bien recalculé depuis
+le premier support **retenu**, si le premier du grand catalogue est filtré.
+**3 623 gardes exactes** sur modèles bornés ; aucun défaut matériel établi.
+Le refus coquille>24 précède le travail du juge, après construction des
+catalogues ; à 24, le brouillon vaut 2 Mio par fil. Compensation et omissions
+communes restent possibles : ce juge ne certifie ni la complétude I/U ni FULL.
+Les limites sont déjà annoncées par le développeur. [Preuve et témoins](../receipts/audit_gpu_euler_20261004/euler/README.md).
+
+**Feuilles device : géométrie et repli relus favorablement.** Contacts,
+propriétaire demi-ouvert, S*, préfixes obtus et arité de présentation sont
+préservés. En u21/u24, certains q3 dépassent le certificat i128 : le port
+arrête avant multiplication, efface tout apport partiel, puis rejoue la
+feuille entière sur CPU avant admission. Les Levels restent construits sur
+l'hôte. **145 391 gardes Fraction/Gram**, sans natif ; rapprochement des
+prédicats avec le commit publié. Garder en portes G4 le q3 extrême, q4
+au seuil de cube 2^20/+1, le préfixe obtus et la coquille à qmin2.
+[Formules, domaine certifié et fixtures](../receipts/audit_gpu_euler_20261004/device_geometry/README.md),
+[rapprochement publié](../receipts/audit_gpu_euler_20261004/device_published_bindings/README.md).
+
+**R7 mémoire : corrigé aux pins77/008.** Le WIP de 14:50 ne réservait
+pas les allocations CUDA ; `BudgetReservation` les réserve maintenant dans
+le compte commun avant `cudaMalloc`, libère après `cudaFree` et rembourse
+l'échec d'allocation. Les sorties hôtes téléchargées coexistent sous ce
+plafond. Le contexte CUDA et les cadres des noyaux restent des coûts externes annoncés ;
+`device_bytes` ne mesure pas le pic global. Qualification native encore
+attendue. [Réservation, bornes et refus](../receipts/audit_gpu_euler_20261004/batch_transport_live/README.md).
+
+**Plafond feuilles≤sites : corrigé dans les sources 00800dd88.** Nos deux
+modèles exacts donnent 80 feuilles pour neuf sites (159 nœuds/648 entrées),
+ce qui réfute la garde du pin61da. Les listes de sites K-certifiées se recouvrent.
+Les exécuteurs imposent désormais 2^40 jobs au total, CUDA 2^32 pour ses
+ordinaux u32 : sommes strictement sous 2^62/2^54. Le refus est typé ressource,
+sans hypothèse géométrique count≤n. Une porte de 3 000 sites et lot>n
+a été ajoutée ; les résultats locaux annoncés restent distincts de la
+qualification G4. Tri stable par taille, écriture par ordinal et réservations nouvelles
+relus favorablement ; préchauffage CUDA **dans** le chrono FULL, rejoint
+avant le lot. Sa durée chevauche le CPU et ne s'additionne pas aux phases.
+[Témoin initial](../receipts/audit_gpu_euler_20261004/centre_leaf_counterexample/README.md),
+[correctif et contrelecture008](../receipts/audit_gpu_update_20261004/README.md).
+
+**Réponse E : aucune objection au retrait CPU de M3/E4.** Ces filtres
+éliminent uniquement des candidats déjà exclus par positivité/propriétaire.
+Garder les tests d’aiguïté et de poids stricts, le propriétaire, la récursion
+indépendante des q3 rejetés et le placement de `q4_candidates` ;
+sorties et ledger doivent rester identiques.
+Après patch, jouer la porte différentielle existante et adapter les mutants
+visant les textes supprimés. Le coût mono observé reste descriptif ; mesurer
+séparément leur intérêt GPU, sans transférer la conclusion CPU.
+
+**Banc GPU : fermer la non-vacuité des régimes.** Encore au pinb74, il accepte
+« conforme » avec `reps=0`, ou `warm_passes=1` et six médianes chaudes nulles.
+Il accepte également le flux simulé sans lignes de passes demandées, malgré
+un dump et un ledger finaux égaux. Exiger reps≥1 et P≥2 pour revendiquer les
+deux régimes, puis les passes exactement 1..P et leur succès ; un diagnostic
+partiel peut annoncer sa portée. **75 gardes AST**, processus entièrement
+simulés. Le contrôle du ledger final et l'alternance CPU/GPU sont favorables.
+Le producteur ne sérialise que la dernière passe : qualifier chaque passe
+chronométrée exige aussi son identité canonique, hors chrono FULL ; la
+portée « dernier dump » suffit à un diagnostic explicitement borné.
+Les temps sous Nsight restent séparés des prises ordinaires.
+[Témoins rejoués au pinb74 et périmètre FULL](../receipts/audit_gpu_update_20261004/gpu_bench_b74/README.md).
+
+**Coût physique, route008 : distinguer les diagnostics du ledger.** Le front
+est parcouru une fois, mais count et fill examinent chacun les feuilles
+résolues ; les non résolues ajoutent le rejeu CPU. `geometry_passes=1` ne
+compte donc pas les examens physiques. `seen` conserve les hits J2 historiques,
+mais recalcule la relation même sur hit. Garder le ledger contractuel ;
+ajouter ou mesurer séparément les calculs physiques et les replis pour
+interpréter un éventuel gain GPU. Aucun défaut géométrique n'en découle,
+aucun gain CUDA ni contrat 100 ms n'est acquis par cette lecture.
+Les transports scratch/pool **b74f9ea3a** et warp/copie **16b482169**
+modifient ces chemins après le pin008 : **non audités par ces modèles**,
+ils ne reprennent pas leurs résultats.
+La description des deux examens géométriques concerne la route008 sans scratch.
 
 ## Ce que les mesures G4 prouvent
 
@@ -287,6 +378,38 @@ profil u21 pour ces chronos ; portes des autres profils distinctes.
 [pipeline](../receipts/developpement_20261003/pipeline_g4/README.md).
 **100/200 ms, GPU, temps sur plusieurs séquences, massif et points natifs
 restent ouverts.** Aucun nouveau chrono natif dans cette contrelecture.
+
+## Nouvelles captures CPU : portée du reçu 61da
+
+**126 prises A/B** des sessions claudeab8/claudediag1 ont code0, statut ok
+et dump égal à leur référence. Elles exécutent **54c167bb6 et e49ea4690**,
+pas 61da. claudeab8 est completed (673 portes) ; claudediag1 reste
+failed_remote/verdict refus : 676/678 portes, huit TSan et sept mutants
+passent, seules deux portes de style échouent. Les deux
+arrêts ciblés sont certifiés dans les reçus. Les résultats conservés ne
+promouvront pas silencieusement ce second refus en qualification globale.
+[Lecture et sources des mesures](../receipts/audit_gpu_euler_20261004/mesures_bindings/README.md).
+
+| Diagnostics CPU u21/W48, mur FULL ms | ng00 | ng01 | ng02 |
+|---|---:|---:|---:|
+| K5, feuilles16, affinité libre | 408,4 | 296,1 | 359,7 |
+| K10, feuilles16 | 3 284,7 | 2 506,4 | 2 738,8 |
+| K10, feuilles24 | 2 506,1 | 1 822,5 | 2 064,5 |
+
+**Ces 48 prises de diagnostic n'enregistrent pas de hash de dump.** Leur
+statut ok et leurs médianes sont recoupés ; l'identité canonique n'est
+établie que pour les 126 prises A/B. Préciser la phrase «toutes les prises,
+dumps identiques» dans le reçu développeur. Les K10 restent au-dessus d'une
+seconde ; aucune nouvelle qualification GPU ou 100 ms n'en découle.
+
+À W1, une seule paire par trame indique environ −1 % pour q3 différé,
+neutralité de R/R1 et +1 % pour M3/E4 : diagnostics, sans variance estimée.
+À W48, cinq paires et le bras A/A ne permettent pas de gain qualifié à 5 %.
+Le rapport W48 libre/W24 épinglé change **workers et affinité** : il mesure
+ces configurations, sans attribuer seul le gain au SMT ou à une attente
+mémoire. Comparer à affinité commune et mesurer occupation/attentes avant
+cette attribution. Les sorties actuelles du lecteur dérivé conservent
+correctement le contexte et le refus parent.
 
 ## Idées anciennes retenues pour la v11
 

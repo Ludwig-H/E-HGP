@@ -1,0 +1,9 @@
+{
+  "commands": [
+    "python3 -B -S check.py",
+    "python3 -B -O -S check.py"
+  ],
+  "no_native_no_gcp": true,
+  "normal_optimized_expected_identical": true,
+  "scope": "copy immutable source capsules; stdlib models only"
+}

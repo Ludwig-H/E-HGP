@@ -1,0 +1,13 @@
+{
+  "checks": 23,
+  "commit": "77db5738eb2dd5bc84ecdc4d85ade833124c58f8",
+  "conditional_batch_bound_bits": 54,
+  "identical_sources": 11,
+  "inserted_lines": 8,
+  "leaf_counter_bound": 3979008,
+  "prefix_bound": 41448,
+  "remaining_bytes_identical": true,
+  "scope": "publication/source binding and scalar count arithmetic; no native qualification",
+  "status": "PASS",
+  "total_sources": 12
+}

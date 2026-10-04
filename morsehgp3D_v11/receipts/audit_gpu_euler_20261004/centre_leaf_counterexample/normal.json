@@ -1,0 +1,101 @@
+{
+  "Morton_model": {
+    "all_leaves_enqueue_admissible": true,
+    "common_centre_in_all_leaves": true,
+    "common_centre_siteidx": 1,
+    "empty": 0,
+    "leaf_size_counts": {
+      "8": 72,
+      "9": 8
+    },
+    "leaves": 80,
+    "max_depth": 12,
+    "new_guard_model_result": "catalogue_invariant",
+    "nodes": 159,
+    "queued_site_incidences": 648,
+    "sites": 9
+  },
+  "checks": 3842,
+  "integer_fixture": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      16
+    ],
+    [
+      0,
+      16,
+      0
+    ],
+    [
+      0,
+      16,
+      16
+    ],
+    [
+      16,
+      0,
+      0
+    ],
+    [
+      16,
+      0,
+      16
+    ],
+    [
+      16,
+      16,
+      0
+    ],
+    [
+      16,
+      16,
+      16
+    ],
+    [
+      8,
+      8,
+      8
+    ]
+  ],
+  "parameters": {
+    "adaptive_frontier": false,
+    "all_weights": 1,
+    "batch_leaves": true,
+    "kmax": 5,
+    "leaf_size": 8,
+    "max_leaf": 32,
+    "max_nodes": 0,
+    "pair_graph": true,
+    "single_pass": true
+  },
+  "pin": "77db5738eb2dd5bc84ecdc4d85ade833124c58f8",
+  "profile_domain": [
+    18,
+    21,
+    24
+  ],
+  "scope": "pure eight-corner distance model; no C++/GPU execution",
+  "status": "PASS",
+  "unordered_geometry_model": {
+    "all_leaves_enqueue_admissible": true,
+    "common_centre_in_all_leaves": true,
+    "common_centre_siteidx": 8,
+    "empty": 0,
+    "leaf_size_counts": {
+      "8": 72,
+      "9": 8
+    },
+    "leaves": 80,
+    "max_depth": 12,
+    "new_guard_model_result": "catalogue_invariant",
+    "nodes": 159,
+    "queued_site_incidences": 648,
+    "sites": 9
+  }
+}

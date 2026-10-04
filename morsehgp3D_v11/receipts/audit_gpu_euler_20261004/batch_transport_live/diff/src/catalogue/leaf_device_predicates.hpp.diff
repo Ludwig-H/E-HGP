@@ -1,0 +1,17 @@
+--- snapshot_145018/src/catalogue/leaf_device_predicates.hpp
++++ 77db5738eb2dd5bc84ecdc4d85ade833124c58f8/src/catalogue/leaf_device_predicates.hpp
+@@ -26,6 +26,14 @@
+ inline constexpr int kBits = MHGP11_COORD_BITS;
+ static_assert(kBits == 18 || kBits == 21 || kBits == 24, "leaf_device : profil 18, 21 ou 24 bits");
+ inline constexpr u32 kMaxSites = 32;
++// Compteurs d'une feuille de m<=kMaxSites sites (preuve R1 de leaf.cpp) : prefixes <= sum_{q<=4} C(32,q) = P,
++// demandes <= 3P, census et incidences <= mP ; chaque champ, et les boules et incidences emises, < kCountBound < 2^22.
++// Un lot compte au plus 2^32 feuilles (disjointes, non vides, sites indexes en u32 : les executeurs refusent un lot
++// de plus de feuilles que de sites) : toute somme de lot, par fil, bloc, ouvrier ou totale, reste < 2^54 et ne
++// deborde pas u64 ; les reductions de lot n'ont donc pas besoin d'addition controlee.
++inline constexpr u64 kPrefixBound = 32 + 496 + 4960 + 35960;
++inline constexpr u64 kCountBound = u64{kMaxSites} * 3 * kPrefixBound;
++static_assert(kMaxSites == 32 && kCountBound < (u64{1} << 22), "leaf_device : compteurs de feuille bornes");
+ inline constexpr u32 kNoSite = 0xFFFFFFFFu;
+ inline constexpr u32 kOk = 0, kUnresolved = 1;
+ // Cache J2 simule : un bit par triplet i<j<k<32, rang combinatoire dense de center_line_cache.hpp.

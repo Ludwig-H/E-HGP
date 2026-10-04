@@ -1,0 +1,38 @@
+{
+  "actor_head": "dfbe3adf608a85c8a9072f36c395efbc5496d662",
+  "actor_status": "",
+  "checked_utc": "2026-10-04T16:04:54.454121+00:00",
+  "normal_optimized_identical": true,
+  "origin": "b74f9ea3a0b986f659d388b8140067b0b35be0c2",
+  "pin": "00800dd88d5d1368b1987e399a05e87a17f208ae",
+  "sources": [
+    {
+      "origin_sha256": "aafeed4145a6f85823bd70578a81830fcf79c988c52c33d7c5edaa5b753361f9",
+      "path": "morsehgp3D_v11/src/catalogue/leaf_batch.cpp",
+      "same_origin": false,
+      "sha256": "f049a61a48901b808d071b0d0319c2e9064df6c02af90656516a24e67d95998b",
+      "unchanged_snapshot": true
+    },
+    {
+      "origin_sha256": "3d46fd7362e2ab5d80f04b33d3c8da8777c2b656e7ffe70fbd65af873a19cb90",
+      "path": "morsehgp3D_v11/src/catalogue/leaf_batch_cuda.cu",
+      "same_origin": false,
+      "sha256": "1c70704c5651fc818621f476be371f897d4fcb6a4bb0c2072219600f4769c7a8",
+      "unchanged_snapshot": true
+    },
+    {
+      "origin_sha256": "0750d42a3d42f5d25e19efd700f81bff28ee0528cf0d24bf255b236282f255af",
+      "path": "morsehgp3D_v11/src/catalogue/leaf_batch.hpp",
+      "same_origin": false,
+      "sha256": "6b821e7296f6a41dfc434a3bc032bb80bdb1cd84b134b5fae09f0dd72023e345",
+      "unchanged_snapshot": true
+    },
+    {
+      "origin_sha256": "b44f65873b81008a8a954a432ffec20a2f051f42804a3a7445d20ee1d9946305",
+      "path": "morsehgp3D_v11/src/catalogue/leaf_device_predicates.hpp",
+      "same_origin": true,
+      "sha256": "b44f65873b81008a8a954a432ffec20a2f051f42804a3a7445d20ee1d9946305",
+      "unchanged_snapshot": true
+    }
+  ]
+}

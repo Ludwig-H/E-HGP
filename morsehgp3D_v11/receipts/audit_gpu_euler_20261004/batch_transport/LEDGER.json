@@ -1,0 +1,155 @@
+{
+  "schema": "ehgp.audit.closed_payloads.v1",
+  "scope": "read-only static transport review; no native/build/nvcc/fit/GCP operations",
+  "payloads": [
+    {
+      "path": "BILAN.json",
+      "bytes": 674,
+      "sha256": "f931f7c201dbfa338f041f4ef38e0d9ecd34c071199e33d4fb4ec3f397d326f6"
+    },
+    {
+      "path": "COMMANDS.json",
+      "bytes": 553,
+      "sha256": "d1528b78fb3314a95fe39384945d1f57e1800c9f7af4a7d8060eab5399d44fbb"
+    },
+    {
+      "path": "MATRIX.json",
+      "bytes": 5405,
+      "sha256": "0bb17aa8fe2adb62e2d922aef1bce70ebf8495f8bd9239560d921bc35b331af0"
+    },
+    {
+      "path": "README.md",
+      "bytes": 3585,
+      "sha256": "1a63d06f4ac9f6e15421bf62f550b3259b92dfdd4f9484c62a3704598b7ed962"
+    },
+    {
+      "path": "SOURCE_AFTER.json",
+      "bytes": 4877,
+      "sha256": "305eb81bee96109a2976d735a07aca60adc212121f37c9c9727a9df6c7624567"
+    },
+    {
+      "path": "SOURCE_BEFORE.json",
+      "bytes": 5207,
+      "sha256": "8f01f0863c49ce0191f466ac98f0a8e8f40a2c57bee53179f7f219cf2bd4d53f"
+    },
+    {
+      "path": "review_transport.py",
+      "bytes": 3175,
+      "sha256": "1e5f6135b8c1dd6277555108c3c8877619c5b9c694230e0fbb4beb9db52b1bcd"
+    },
+    {
+      "path": "sources/CMakeLists.txt",
+      "bytes": 17365,
+      "sha256": "7f9fd46643ea1469a51dbd7fd775074c763690a37295c47ed027aef98be5f68c"
+    },
+    {
+      "path": "sources/docs/ARCHITECTURE.md",
+      "bytes": 16374,
+      "sha256": "a55e5f61bec2a95e2f2a8bee546039e51c1e3dd888c374bbb5581c7eab66249a"
+    },
+    {
+      "path": "sources/src/catalogue/boxes.cpp",
+      "bytes": 7508,
+      "sha256": "2fc06e5e781ef51891ceecb324ecc460b023ea8e15079a32d22eb7d159ecc5a2"
+    },
+    {
+      "path": "sources/src/catalogue/catalogue.cpp",
+      "bytes": 5492,
+      "sha256": "5182608b52102b42a86ac5438c56767afeef277be8fab870ef8bf4b37cbd6663"
+    },
+    {
+      "path": "sources/src/catalogue/catalogue.hpp",
+      "bytes": 11259,
+      "sha256": "32ec841c84450d7304722d102feb04afa374b39eefcb50fa3d12eda6244d2808"
+    },
+    {
+      "path": "sources/src/catalogue/internal.hpp",
+      "bytes": 6409,
+      "sha256": "ed015ca9881eb23ac3ffe96526d008267f23859efd49c34b65126c83612675a1"
+    },
+    {
+      "path": "sources/src/catalogue/leaf.cpp",
+      "bytes": 24756,
+      "sha256": "ceb3782295e6bf77957e962136efba5240291f5d15ed3f5b26ba29ee28488a26"
+    },
+    {
+      "path": "sources/src/catalogue/leaf_batch.cpp",
+      "bytes": 5654,
+      "sha256": "24feca50486a03d635e75c91a18fdb086868df9681329c3c87dc97afcda4ae92"
+    },
+    {
+      "path": "sources/src/catalogue/leaf_batch.hpp",
+      "bytes": 3556,
+      "sha256": "32b721d73d6ed88d9f41c24e8365b2abe57581111b0803044dcf2f96536de9f4"
+    },
+    {
+      "path": "sources/src/catalogue/leaf_batch_cuda.cu",
+      "bytes": 11558,
+      "sha256": "8f83708292f1d6ad166fe02b5b6c971024676e0217c47da0d6156bf409f6929a"
+    },
+    {
+      "path": "sources/src/catalogue/leaf_device.hpp",
+      "bytes": 14142,
+      "sha256": "438d953d0b8c225a14a9e74718079b78a1865cab60fdbf1abd50cc8b69e1298d"
+    },
+    {
+      "path": "sources/src/catalogue/leaf_queue.hpp",
+      "bytes": 2843,
+      "sha256": "ed2bbfb72c50901dfcb763c598f06af0bebae6c53cd7ee9a0103a8d4dcd95a43"
+    },
+    {
+      "path": "sources/src/catalogue/module.cmake",
+      "bytes": 827,
+      "sha256": "506d402e81f9401b35d0c211873dc354072011655caeb422c37d0e14ec65a216"
+    },
+    {
+      "path": "sources/src/catalogue/parallel.cpp",
+      "bytes": 9935,
+      "sha256": "e8d6eceb283840377196f03ef1969522de1743d15a7ff3a2b09626516c64b54a"
+    },
+    {
+      "path": "sources/src/catalogue/single_pass.cpp",
+      "bytes": 12915,
+      "sha256": "98dffba631b571db73e74d1b33b20ac0fdc46c3ee28b619c1f041c9aadd79d78"
+    },
+    {
+      "path": "sources/src/catalogue/single_pass_batch.cpp",
+      "bytes": 8141,
+      "sha256": "fa8a20cfd5a3057bd2a09dc6d92b474b8d8fa5bc69b23c5aaca1d2c05cfb62e7"
+    },
+    {
+      "path": "sources/src/catalogue/single_pass_storage.hpp",
+      "bytes": 5715,
+      "sha256": "0bf2d416b6bf0cb47c976dc77881738380a8dc0670a9d017ed17c7e1c0e3296c"
+    },
+    {
+      "path": "sources/src/core/buffer.hpp",
+      "bytes": 9808,
+      "sha256": "d14dd76c030a49cf5f4f6968378da4dbad3f8b7505daff8c9d2515e75e7f6ae4"
+    },
+    {
+      "path": "stderr_normal.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "stderr_optimized.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "stdout_normal.json",
+      "bytes": 231,
+      "sha256": "53db80dea3510e46d13d7e92f7b46489ca2b78c7b329805eed7fb0f6715fcbdc"
+    },
+    {
+      "path": "stdout_optimized.json",
+      "bytes": 231,
+      "sha256": "53db80dea3510e46d13d7e92f7b46489ca2b78c7b329805eed7fb0f6715fcbdc"
+    }
+  ],
+  "excludes_exact_paths": [
+    "LEDGER.json",
+    "SHA256SUMS"
+  ]
+}

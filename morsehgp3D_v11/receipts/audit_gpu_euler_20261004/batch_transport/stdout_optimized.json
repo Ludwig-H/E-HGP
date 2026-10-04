@@ -1,0 +1,1 @@
+{"checks": 153, "contracts": 9, "findings": ["device_payload_budget"], "schema": "ehgp.audit.gpu_batch_transport.check.v1", "scope": "source/provenance only; no native, CUDA, numerical or performance qualification", "sources": 18}

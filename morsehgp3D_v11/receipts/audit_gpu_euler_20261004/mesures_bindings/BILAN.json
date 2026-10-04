@@ -1,0 +1,23 @@
+{
+  "schema": "ehgp.audit.measure_bindings.bilan.v1",
+  "publication_commit": "61da03749344a6acc4fea2b9eee875606cc857e8",
+  "played_commits": {
+    "claudeab8": "54c167bb6466e790f5259b44870725f3e02ed43f",
+    "claudediag1": "e49ea46907e3c4bb9e0942e2205cf490748136e4"
+  },
+  "producer_reader_controls": 176,
+  "metadata_checks": 354,
+  "canonical_AB_takes": 126,
+  "extra_process_success_takes_without_output_hash": 48,
+  "CPU_q3_R": "qualified_in_Release_u21_at_54c_on_673_gates_and_3num_plus_4catalogue_mutants",
+  "diag1": "failed_remote_due_only_to_two_style_gates;8_TSan_gates_and_7_mutants_pass",
+  "archives_results_verified_payloads": 520,
+  "native_or_cloud_operation_by_review": false,
+  "GPU_measurement": false,
+  "table_advice": "add dated CPU diagnostic row408.36/296.06/359.70ms; preserve previous source-qualified row, no cross-session gain inference",
+  "material_scope_fixes": [
+    "restrict all-dumps-equal statement to126_AB_takes",
+    "do not attribute W48_free_vs_W24_pinned to hyperthreading/memory alone"
+  ],
+  "normal_O_identical": true
+}

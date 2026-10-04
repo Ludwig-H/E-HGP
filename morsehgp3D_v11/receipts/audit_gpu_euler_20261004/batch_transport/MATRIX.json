@@ -1,0 +1,115 @@
+{
+  "schema": "ehgp.audit.gpu_batch_transport.matrix.v1",
+  "rows": [
+    {
+      "id": "cpu_coexistence",
+      "status": "favorable_by_source",
+      "sources": [
+        "src/core/buffer.hpp:131",
+        "src/catalogue/leaf_queue.hpp:24",
+        "src/catalogue/single_pass_batch.cpp:79",
+        "src/catalogue/single_pass_batch.cpp:141",
+        "src/catalogue/single_pass.cpp:193"
+      ],
+      "conclusion": "Queues, gathered inputs, executor host outputs, materialized Level/population and final compaction use budgeted Buffer/pages while simultaneous storage remains live."
+    },
+    {
+      "id": "device_payload_budget",
+      "status": "P1_confirmed_by_source",
+      "sources": [
+        "docs/ARCHITECTURE.md:161",
+        "src/catalogue/leaf_batch_cuda.cu:87",
+        "src/catalogue/leaf_batch_cuda.cu:123",
+        "src/catalogue/leaf_batch_cuda.cu:132",
+        "src/catalogue/leaf_batch_cuda.cu:157",
+        "src/catalogue/leaf_batch_cuda.cu:181",
+        "src/catalogue/leaf_batch_cuda.cu:218"
+      ],
+      "conclusion": "DeviceArray counts bytes diagnostically, then cudaMalloc, with no effective budget reservation/cap and no checked count*sizeof(T) or cumulative addition. Caller MemoryBudget admits only host Buffer payloads. Runtime/context/device stack and any implicit staging are separate, not included in device_bytes."
+    },
+    {
+      "id": "whole_leaf_fallback",
+      "status": "favorable_by_source",
+      "sources": [
+        "src/catalogue/leaf_batch_cuda.cu:58",
+        "src/catalogue/leaf_batch_cuda.cu:60",
+        "src/catalogue/leaf_batch_cuda.cu:76",
+        "src/catalogue/leaf_batch.cpp:45",
+        "src/catalogue/single_pass_batch.cpp:97",
+        "src/catalogue/single_pass_batch.cpp:105"
+      ],
+      "conclusion": "Unresolved leaf contributes zero records/incidences and no resolved ledger; fill skips it; fallback recomputes its full leaf with deferred batch disabled."
+    },
+    {
+      "id": "count_prefix_fill",
+      "status": "favorable_conditional_on_certified_producer",
+      "sources": [
+        "src/catalogue/leaf_batch.hpp:35",
+        "src/catalogue/leaf_batch_cuda.cu:72",
+        "src/catalogue/leaf_batch_cuda.cu:153",
+        "src/catalogue/leaf_batch_cuda.cu:167",
+        "src/catalogue/leaf_batch_cuda.cu:177",
+        "src/catalogue/leaf_batch_cuda.cu:187",
+        "src/catalogue/leaf_batch_cuda.cu:208"
+      ],
+      "conclusion": "Count and fill consume the same immutable leaf inputs; exclusive output ranges are checked after fill. CPU prefix uses checked_add. CUDA total/product additions are unchecked; do not claim an admitted-input overflow or wrong result was demonstrated."
+    },
+    {
+      "id": "identities_domain",
+      "status": "favorable_on_public_path",
+      "sources": [
+        "src/catalogue/catalogue.cpp:10",
+        "src/catalogue/parallel.cpp:196",
+        "src/catalogue/boxes.cpp:174",
+        "src/catalogue/leaf.cpp:451",
+        "src/catalogue/leaf_queue.hpp:35",
+        "src/catalogue/single_pass_batch.cpp:129"
+      ],
+      "conclusion": "Public path rejects nonunit multiplicities and kmax outside 1..12, preserves valid ordered SiteIdx lists in certified T0 leaves, and queues only 1..32 sites. Internal LeafBatchView/queue are not foreign-input validators."
+    },
+    {
+      "id": "cuda_completion_lifetime",
+      "status": "favorable_by_source_not_runtime_certified",
+      "sources": [
+        "src/catalogue/leaf_batch_cuda.cu:91",
+        "src/catalogue/leaf_batch_cuda.cu:153",
+        "src/catalogue/leaf_batch_cuda.cu:187",
+        "src/catalogue/leaf_batch_cuda.cu:199",
+        "src/catalogue/leaf_batch_cuda.cu:208"
+      ],
+      "conclusion": "Kernel phases synchronize before host consumption, arrays are RAII-owned until CUDA executor returns. No device leak/quiescence certification is inferred from source; destructor ignores cudaFree return."
+    },
+    {
+      "id": "public_transaction",
+      "status": "favorable_by_source",
+      "sources": [
+        "src/catalogue/parallel.cpp:200",
+        "src/catalogue/parallel.cpp:204",
+        "src/catalogue/single_pass.cpp:236",
+        "src/catalogue/single_pass_batch.cpp:132"
+      ],
+      "conclusion": "Partial local executor/materialization buffers do not publish a successful Catalogue; public diagnostics/timings swap only after success and Assembly::finish returns final Catalogue."
+    },
+    {
+      "id": "logical_vs_physical_work",
+      "status": "diagnostic_scope_to_clarify",
+      "sources": [
+        "src/catalogue/single_pass.cpp:228",
+        "src/catalogue/leaf_batch_cuda.cu:56",
+        "src/catalogue/leaf_batch_cuda.cu:82",
+        "src/catalogue/single_pass_batch.cpp:110",
+        "src/catalogue/single_pass_batch.cpp:151"
+      ],
+      "conclusion": "geometry_passes=1 describes one catalogue front/storage route, whereas resolved batch leaves run geometry in count and fill; unresolved leaves add a CPU fallback. Keep one logical ledger; separately disclose physical enumeration work."
+    },
+    {
+      "id": "cmake_qualification",
+      "status": "not_claimed",
+      "sources": [
+        "CMakeLists.txt",
+        "src/catalogue/module.cmake"
+      ],
+      "conclusion": "CUDA route is optional and sanitizer incompatibility declared. This review does not compile or qualify nvcc, kernels, native output, CPU/GPU parity, FULL performance or the 100ms contract."
+    }
+  ]
+}

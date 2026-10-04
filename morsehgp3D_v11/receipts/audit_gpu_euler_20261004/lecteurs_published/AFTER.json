@@ -1,0 +1,53 @@
+{
+  "normal_optimized_identical": true,
+  "product_gates_executed": false,
+  "source_kind": "Git objects only; no evolving product execution",
+  "sources": [
+    {
+      "path": "morsehgp3D_v11/bench/full_acceleration_diagnostics.py",
+      "revision": "published",
+      "same_source_hash": true
+    },
+    {
+      "path": "morsehgp3D_v11/bench/full_probe.cpp",
+      "revision": "published",
+      "same_source_hash": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest.hpp",
+      "revision": "published",
+      "same_source_hash": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_pipeline.cpp",
+      "revision": "published",
+      "same_source_hash": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/full_pipeline_reader_test.py",
+      "revision": "published",
+      "same_source_hash": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/tests.cmake",
+      "revision": "published",
+      "same_source_hash": true
+    },
+    {
+      "path": "morsehgp3D_v11/bench/ab_g4.py",
+      "revision": "published",
+      "same_source_hash": true
+    },
+    {
+      "path": "morsehgp3D_v11/bench/ab_summary.py",
+      "revision": "published",
+      "same_source_hash": true
+    },
+    {
+      "path": "morsehgp3D_v11/bench/full_acceleration_diagnostics.py",
+      "revision": "historical",
+      "same_source_hash": true
+    }
+  ],
+  "verified_utc": "2026-10-04T15:37:38.827597+00:00"
+}

@@ -1,0 +1,39 @@
+{
+  "actor_head": "dfbe3adf608a85c8a9072f36c395efbc5496d662",
+  "actor_status": "",
+  "captured_utc": "2026-10-04T16:01:51.765480+00:00",
+  "chronology": "Git stat/diff read before capsule; full source read/model follow copies",
+  "geometry_binding": {
+    "identical77": true,
+    "path": "morsehgp3D_v11/src/catalogue/leaf_device.hpp",
+    "sha256": "438d953d0b8c225a14a9e74718079b78a1865cab60fdbf1abd50cc8b69e1298d"
+  },
+  "pin": "00800dd88d5d1368b1987e399a05e87a17f208ae",
+  "previous": "77db5738eb2dd5bc84ecdc4d85ade833124c58f8",
+  "sources": [
+    {
+      "blob": "9dbdf65cb5b2d48654b85b1af7d579f67a2b9221",
+      "copy": "sources/leaf_batch.cpp",
+      "path": "morsehgp3D_v11/src/catalogue/leaf_batch.cpp",
+      "sha256": "f049a61a48901b808d071b0d0319c2e9064df6c02af90656516a24e67d95998b"
+    },
+    {
+      "blob": "0053646e2870c73c97b59814338c2778c36a692f",
+      "copy": "sources/leaf_batch_cuda.cu",
+      "path": "morsehgp3D_v11/src/catalogue/leaf_batch_cuda.cu",
+      "sha256": "1c70704c5651fc818621f476be371f897d4fcb6a4bb0c2072219600f4769c7a8"
+    },
+    {
+      "blob": "f67c5e45c8ea6dc9c10ee823881caa90d1d65d1b",
+      "copy": "sources/leaf_batch.hpp",
+      "path": "morsehgp3D_v11/src/catalogue/leaf_batch.hpp",
+      "sha256": "6b821e7296f6a41dfc434a3bc032bb80bdb1cd84b134b5fae09f0dd72023e345"
+    },
+    {
+      "blob": "c4cecfaabadc08ddc6f1c3d3d9c0079f841e3f35",
+      "copy": "sources/leaf_device_predicates.hpp",
+      "path": "morsehgp3D_v11/src/catalogue/leaf_device_predicates.hpp",
+      "sha256": "b44f65873b81008a8a954a432ffec20a2f051f42804a3a7445d20ee1d9946305"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "python_version": "3.12.1",
+  "commands": [
+    {
+      "command": "python3 -B -S check_device_geometry.py > checks.normal.json 2> checks.normal.stderr",
+      "exit": 0
+    },
+    {
+      "command": "python3 -O -B -S check_device_geometry.py > checks.optimized.json 2> checks.optimized.stderr",
+      "exit": 0
+    }
+  ],
+  "failed_read": {
+    "command": "nl -ba src/catalogue/center_line_cache.cpp",
+    "exit": 1,
+    "stderr": "nl: src/catalogue/center_line_cache.cpp: No such file or directory",
+    "resolution": "Read and copied center_line_cache.hpp, actual implementation"
+  },
+  "no_native_compilation_or_execution": true
+}

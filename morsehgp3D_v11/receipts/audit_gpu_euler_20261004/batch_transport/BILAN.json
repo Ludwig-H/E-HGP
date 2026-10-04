@@ -1,0 +1,25 @@
+{
+  "schema": "ehgp.audit.gpu_batch_transport.bilan.v1",
+  "read_only_snapshot_base": "66372e621dcee58daaa7d7309875ab157894acf4",
+  "native_qualification": "not_claimed",
+  "checks": 153,
+  "source_files": 18,
+  "coverage_rows": 9,
+  "primary_finding": {
+    "severity": "P1",
+    "id": "device_payload_budget",
+    "status": "source_confirmed_developer_WIP",
+    "no_native_failure_claim": true
+  },
+  "secondary_scope_clarification": "geometry_passes=1 is not the physical count/fill enumeration count",
+  "source_copies_stable": true,
+  "normal_and_optimized_identical": true,
+  "not_executed": [
+    "C++",
+    "nvcc",
+    "CUDA",
+    "FULL",
+    "GCP",
+    "fit"
+  ]
+}

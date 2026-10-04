@@ -1,0 +1,22 @@
+{
+  "capsule_manifests": {
+    "batch_transport": "9ea794f14d40faea04bb4433e686512793ba4f5175d92e38458ee0e25fef1fdc",
+    "batch_transport_live": "679286995f3f9ec62aafbb241e7f13b150ba2fc71cb625f4c74e744339560fd6",
+    "centre_leaf_counterexample": "084ba11471ab708a549283596dcccd1909b0c7936faf9dcc67163368b76db58e",
+    "device_geometry": "3b98ec95473aed5587897376b5811186ba937c415c33aa7a4864689db88bd6dc",
+    "device_published_bindings": "1f07ca88afda650fbcfa58c5446cbe4fecf1252a22f638ee21851a70e29241e4",
+    "euler": "9616d7d94578ff24fdafd0f4b2d15a8e59a0618e0fe7141caf925ea736dfbddf",
+    "gpu_bench_current": "a192e3e7b1d3e77e51dd32f023dd158d5c0290736a98bd74fabc128d8d7b6598",
+    "lecteurs_published": "91db9a8601058b4f227af760bbbb2ddda57d574b98cb60cc4bfe82be01b7ba1f",
+    "mesure_protocol_live": "105aff7c93469893bdfe08f2d458b3efac16508df9ae705ff92c9f791baf9183",
+    "mesures_bindings": "9a06ab64f2869433717976e5146b7a0dde0466bba91e34ce61f5a601af3726ff"
+  },
+  "closure_utc": "2026-10-04T15:53:00.068276+00:00",
+  "first_snapshot_utc": "2026-10-04T14:50:18.534697+00:00",
+  "gcp_actions": 0,
+  "gpu_and_euler_source_pin": "77db5738eb2dd5bc84ecdc4d85ade833124c58f8",
+  "native_runs": 0,
+  "publication_pin": "61da03749344a6acc4fea2b9eee875606cc857e8",
+  "snapshot_base": "66372e621dcee58daaa7d7309875ab157894acf4",
+  "source_kind": "frozen WIP source copies with explicit published bindings; pinned Git sources and receipt metadata"
+}

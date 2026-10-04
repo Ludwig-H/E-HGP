@@ -1,0 +1,13 @@
+--- snapshot_145018/src/core/buffer.cpp
++++ 77db5738eb2dd5bc84ecdc4d85ade833124c58f8/src/core/buffer.cpp
+@@ -47,4 +47,10 @@
+   account.used.fetch_sub(bytes, std::memory_order_relaxed);
+ }
+ 
++bool budget_reserve_only(BudgetAccount& account, u64 bytes) noexcept { return budget_reserve(account, bytes); }
++
++void budget_release_only(BudgetAccount& account, u64 bytes) noexcept {
++  account.used.fetch_sub(bytes, std::memory_order_relaxed);
++}
++
+ }  // namespace mhgp11::detail

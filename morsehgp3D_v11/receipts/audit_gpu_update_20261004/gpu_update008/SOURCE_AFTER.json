@@ -1,0 +1,40 @@
+{
+  "source_commit": "00800dd88d5d1368b1987e399a05e87a17f208ae",
+  "time_utc": "2026-10-04T16:09:47.346560+00:00",
+  "actor_HEAD_at_close": "dfbe3adf608a85c8a9072f36c395efbc5496d662",
+  "origin_main_at_close": "16b482169a6251c17cd5bcd2361f7c6f8ff974a2",
+  "scope": "Git pin remains immutable; source copies checked before and after; newer HEAD is not execution qualification",
+  "files": {
+    "sources/bench/full_probe.cpp": {
+      "sha256": "d2e5e60369654a51aeb4bb7981c5cf079716676c749db0f0e64bb6d19551fc7a",
+      "bytes": 25401,
+      "matches_before_and_copy": true
+    },
+    "sources/src/catalogue/leaf_batch_cuda.cu": {
+      "sha256": "1c70704c5651fc818621f476be371f897d4fcb6a4bb0c2072219600f4769c7a8",
+      "bytes": 16327,
+      "matches_before_and_copy": true
+    },
+    "sources/src/catalogue/leaf_batch.hpp": {
+      "sha256": "6b821e7296f6a41dfc434a3bc032bb80bdb1cd84b134b5fae09f0dd72023e345",
+      "bytes": 3803,
+      "matches_before_and_copy": true
+    },
+    "sources/src/catalogue/leaf_batch.cpp": {
+      "sha256": "f049a61a48901b808d071b0d0319c2e9064df6c02af90656516a24e67d95998b",
+      "bytes": 5890,
+      "matches_before_and_copy": true
+    },
+    "sources/src/catalogue/leaf_device_predicates.hpp": {
+      "sha256": "b44f65873b81008a8a954a432ffec20a2f051f42804a3a7445d20ee1d9946305",
+      "bytes": 10295,
+      "matches_before_and_copy": true
+    },
+    "sources/src/catalogue/single_pass.cpp": {
+      "sha256": "9b09d4ab9b61d7b63914a9fa481ffad5e8b050a28635a7a328380e4096e2091e",
+      "bytes": 13030,
+      "matches_before_and_copy": true
+    }
+  },
+  "wiring_excerpt_bindings_rechecked": 2
+}

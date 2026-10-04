@@ -1,0 +1,15 @@
+{
+  "source_native_identity": {
+    "morsehgp3D_v11/src": {
+      "commit_9b9244a00_object": "e33288e457df5116e93dfd58bbd630809688cb83",
+      "commit_54c167bb6_object": "e33288e457df5116e93dfd58bbd630809688cb83",
+      "identical": true
+    },
+    "morsehgp3D_v11/CMakeLists.txt": {
+      "commit_9b9244a00_object": "ebd7992fc806a6fe082242bcc923f6576cbaab85",
+      "commit_54c167bb6_object": "ebd7992fc806a6fe082242bcc923f6576cbaab85",
+      "identical": true
+    }
+  },
+  "scope": "Git tree/blob identity, not binary hash identity"
+}

@@ -1,0 +1,223 @@
+{
+  "checks": 3623,
+  "closure_counts": [
+    {
+      "counts": [
+        0,
+        0,
+        1
+      ],
+      "m": 2
+    },
+    {
+      "counts": [
+        0,
+        0,
+        2,
+        1
+      ],
+      "m": 3
+    },
+    {
+      "counts": [
+        0,
+        0,
+        2,
+        3,
+        1
+      ],
+      "m": 4
+    },
+    {
+      "counts": [
+        0,
+        0,
+        2,
+        5,
+        4,
+        1
+      ],
+      "m": 5
+    },
+    {
+      "counts": [
+        0,
+        0,
+        2,
+        7,
+        9,
+        5,
+        1
+      ],
+      "m": 6
+    },
+    {
+      "counts": [
+        0,
+        0,
+        2,
+        9,
+        16,
+        14,
+        6,
+        1
+      ],
+      "m": 7
+    },
+    {
+      "counts": [
+        0,
+        0,
+        2,
+        11,
+        25,
+        30,
+        20,
+        7,
+        1
+      ],
+      "m": 8
+    },
+    {
+      "counts": [
+        0,
+        0,
+        2,
+        13,
+        36,
+        55,
+        50,
+        27,
+        8,
+        1
+      ],
+      "m": 9
+    },
+    {
+      "counts": [
+        0,
+        0,
+        2,
+        15,
+        49,
+        91,
+        105,
+        77,
+        35,
+        9,
+        1
+      ],
+      "m": 10
+    }
+  ],
+  "compensation5_after_common_omission": [
+    1,
+    2,
+    0
+  ],
+  "dt_regular_witnesses": [
+    {
+      "combined_contributions": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        -1,
+        1
+      ],
+      "name": "dt13",
+      "p": 4,
+      "sites": 13
+    },
+    {
+      "combined_contributions": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        -1,
+        1
+      ],
+      "name": "dt23",
+      "p": 9,
+      "sites": 23
+    }
+  ],
+  "fixtures": [
+    {
+      "balls": 0,
+      "extended": 0,
+      "name": "singleton",
+      "parts": 1,
+      "sites": 1
+    },
+    {
+      "balls": 4,
+      "extended": 0,
+      "name": "triangle",
+      "parts": 7,
+      "sites": 3
+    },
+    {
+      "balls": 5,
+      "extended": 1,
+      "name": "cross4",
+      "parts": 15,
+      "sites": 4
+    },
+    {
+      "balls": 11,
+      "extended": 0,
+      "name": "tetra4",
+      "parts": 15,
+      "sites": 4
+    },
+    {
+      "balls": 15,
+      "extended": 0,
+      "name": "tetra_center5",
+      "parts": 31,
+      "sites": 5
+    },
+    {
+      "balls": 21,
+      "extended": 1,
+      "name": "octa6",
+      "parts": 63,
+      "sites": 6
+    },
+    {
+      "balls": 14,
+      "extended": 0,
+      "name": "triangle_two_interiors5",
+      "parts": 31,
+      "sites": 5
+    },
+    {
+      "balls": 13,
+      "extended": 0,
+      "name": "compensation5",
+      "parts": 31,
+      "sites": 5
+    }
+  ],
+  "full_qualification": false,
+  "native": false,
+  "raw_level25_filtered": [
+    100,
+    4
+  ],
+  "raw_level25_large": [
+    409600,
+    16384
+  ],
+  "status": "ok",
+  "tetra_center5_euler_order2_cat3": 2
+}

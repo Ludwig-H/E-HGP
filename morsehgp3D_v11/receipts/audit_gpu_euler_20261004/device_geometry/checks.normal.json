@@ -1,0 +1,73 @@
+{
+  "balls": 408,
+  "cache_request_model": {
+    "logical_evaluations": 4,
+    "logical_hits": 3,
+    "physical_calls": 7
+  },
+  "canonical_cases": 6,
+  "causal_q3_refusal": [
+    {
+      "profile": 18,
+      "q3_certificate": true,
+      "side_result": 1,
+      "uncertified_first_product_bits": 113
+    },
+    {
+      "profile": 21,
+      "q3_certificate": false,
+      "side_result": null,
+      "uncertified_first_product_bits": 131
+    },
+    {
+      "profile": 24,
+      "q3_certificate": false,
+      "side_result": null,
+      "uncertified_first_product_bits": 149
+    }
+  ],
+  "center_orientations": 7368,
+  "checks": 145391,
+  "cube_unresolved_cases": 48,
+  "device_header_sha256": "438d953d0b8c225a14a9e74718079b78a1865cab60fdbf1abd50cc8b69e1298d",
+  "measured_partial_magnitude_bits": {
+    "i128": 124,
+    "i64": 50
+  },
+  "native_powers": 2370,
+  "native_q4_weights": 240,
+  "obtuse_prefix_fixture": {
+    "angles": [
+      -1,
+      12,
+      58
+    ],
+    "points": [
+      [
+        1,
+        2,
+        4
+      ],
+      [
+        2,
+        1,
+        7
+      ],
+      [
+        8,
+        4,
+        2
+      ],
+      [
+        7,
+        8,
+        5
+      ]
+    ]
+  },
+  "predicates_header_sha256": "11d5ca5887d5677bfd368123a7c2557438635a66ce7ce70b1b65835e4f34ca43",
+  "sat_cases": 324,
+  "scope": "independent Fraction/Gram plus source guards; no host/device native execution",
+  "snapshot_base": "66372e621dcee58daaa7d7309875ab157894acf4",
+  "status": "PASS"
+}

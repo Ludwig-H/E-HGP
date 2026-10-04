@@ -1,0 +1,54 @@
+{
+  "pin": "77db5738eb2dd5bc84ecdc4d85ade833124c58f8",
+  "scope": "Git source bindings only; source copies remain in sibling batch_transport_live, no native execution",
+  "files": {
+    "boxes.cpp": {
+      "path": "morsehgp3D_v11/src/catalogue/boxes.cpp",
+      "sha256": "2fc06e5e781ef51891ceecb324ecc460b023ea8e15079a32d22eb7d159ecc5a2",
+      "git_blob": "8439634bbf6f80e6508593e72cf3e08597dbe896"
+    },
+    "frontier.cpp": {
+      "path": "morsehgp3D_v11/src/catalogue/frontier.cpp",
+      "sha256": "b6bc99030b4a660832e71f61f02592418b599cf4504ef6c19237baeb13b86b5a",
+      "git_blob": "961902b6a96cb75eadf25fd05f26401ccc006158"
+    },
+    "leaf.cpp": {
+      "path": "morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "sha256": "ceb3782295e6bf77957e962136efba5240291f5d15ed3f5b26ba29ee28488a26",
+      "git_blob": "9a704bdc5cd666566973ab2a86ecba2e941f86bf"
+    },
+    "leaf_queue.hpp": {
+      "path": "morsehgp3D_v11/src/catalogue/leaf_queue.hpp",
+      "sha256": "ed2bbfb72c50901dfcb763c598f06af0bebae6c53cd7ee9a0103a8d4dcd95a43",
+      "git_blob": "d10c0309b1c545d08949b6dd4768253e869fa248"
+    },
+    "leaf_batch.cpp": {
+      "path": "morsehgp3D_v11/src/catalogue/leaf_batch.cpp",
+      "sha256": "69cd063b5490779dec4925eee0bb18ad5c1365ffd8d83bbb705ca6c6781e55f0",
+      "git_blob": "0f257a1e4d97eb78a99f114729274819361248a4",
+      "guard": {
+        "line": 72,
+        "text": "if (view.count > view.cloud_sites) return fail(Reason::catalogue_invariant);"
+      }
+    },
+    "leaf_batch_cuda.cu": {
+      "path": "morsehgp3D_v11/src/catalogue/leaf_batch_cuda.cu",
+      "sha256": "a3c19c510f5a8e345bcbbf6bfd815a057e34a6c95b24195309b52d4951bb5f0c",
+      "git_blob": "6250beb9d1ff989ffdc0685b3de54bbc5a03ddef",
+      "guard": {
+        "line": 185,
+        "text": "if (view.count > view.cloud_sites) return fail(Reason::catalogue_invariant);"
+      }
+    },
+    "single_pass.cpp": {
+      "path": "morsehgp3D_v11/src/catalogue/single_pass.cpp",
+      "sha256": "98dffba631b571db73e74d1b33b20ac0fdc46c3ee28b619c1f041c9aadd79d78",
+      "git_blob": "5d40ba0b6de7f3981ca00c2e5a282b22acdcb999"
+    },
+    "parallel.cpp": {
+      "path": "morsehgp3D_v11/src/catalogue/parallel.cpp",
+      "sha256": "e8d6eceb283840377196f03ef1969522de1743d15a7ff3a2b09626516c64b54a",
+      "git_blob": "baf8c315865b9d2ed8dc51942007f4bd594ad516"
+    }
+  }
+}

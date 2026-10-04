@@ -1,0 +1,52 @@
+--- snapshot_145018/src/core/buffer.hpp
++++ 77db5738eb2dd5bc84ecdc4d85ade833124c58f8/src/core/buffer.hpp
+@@ -56,6 +56,9 @@
+ [[nodiscard]] void* buffer_acquire(BudgetAccount& account, u64 bytes) noexcept;
+ // Rend un bloc obtenu par buffer_acquire avec la meme taille, et sa reservation.
+ void buffer_release(BudgetAccount& account, void* block, u64 bytes) noexcept;
++// Reservation seule, sans bloc (BudgetReservation) : memes regles que buffer_acquire ; et son retour.
++[[nodiscard]] bool budget_reserve_only(BudgetAccount& account, u64 bytes) noexcept;
++void budget_release_only(BudgetAccount& account, u64 bytes) noexcept;
+ 
+ }  // namespace detail
+ 
+@@ -97,7 +100,39 @@
+  private:
+   template <class T>
+   friend class Buffer;
++  friend class BudgetReservation;
+   std::shared_ptr<detail::BudgetAccount> account_;
++};
++
++// Octets reserves dans un budget sans allocation hote, pour une memoire que le processus ne tient pas par operator
++// new (tableaux du GPU, contrat R7) : comptes avec les Buffer du meme budget, donc dans leurs coexistences et le pic,
++// et rendus a la destruction ou par reset. Memes refus que Buffer::allocate (memory_budget, rien de reserve).
++class BudgetReservation {
++ public:
++  BudgetReservation() = default;
++  BudgetReservation(const BudgetReservation&) = delete;
++  BudgetReservation& operator=(const BudgetReservation&) = delete;
++  ~BudgetReservation() { reset(); }
++
++  // Rend d'abord la reservation precedente ; zero octet ne reserve rien.
++  [[nodiscard]] Outcome reserve(u64 bytes, MemoryBudget& budget) noexcept {
++    reset();
++    if (bytes == 0) return {};
++    if (!detail::budget_reserve_only(*budget.account_, bytes)) return fail(Reason::memory_budget);
++    account_ = budget.account_;
++    bytes_ = bytes;
++    return {};
++  }
++  void reset() noexcept {
++    if (bytes_ != 0) detail::budget_release_only(*account_, bytes_);
++    bytes_ = 0;
++    account_.reset();
++  }
++  u64 bytes() const noexcept { return bytes_; }
++
++ private:
++  std::shared_ptr<detail::BudgetAccount> account_;
++  u64 bytes_ = 0;
+ };
+ 
+ template <class T>

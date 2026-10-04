@@ -1,0 +1,149 @@
+{
+  "capacities": [
+    {
+      "count": 0,
+      "cuda_cardinality_admitted": true,
+      "host_cardinality_admitted": true
+    },
+    {
+      "count": 1,
+      "cuda_cardinality_admitted": true,
+      "host_cardinality_admitted": true
+    },
+    {
+      "count": 80,
+      "cuda_cardinality_admitted": true,
+      "host_cardinality_admitted": true
+    },
+    {
+      "count": 4294967295,
+      "cuda_cardinality_admitted": true,
+      "host_cardinality_admitted": true
+    },
+    {
+      "count": 4294967296,
+      "cuda_cardinality_admitted": true,
+      "host_cardinality_admitted": true
+    },
+    {
+      "count": 4294967297,
+      "cuda_cardinality_admitted": false,
+      "host_cardinality_admitted": true
+    },
+    {
+      "count": 1099511627776,
+      "cuda_cardinality_admitted": false,
+      "host_cardinality_admitted": true
+    },
+    {
+      "count": 1099511627777,
+      "cuda_cardinality_admitted": false,
+      "host_cardinality_admitted": false
+    }
+  ],
+  "cases": [
+    {
+      "jobs": 0,
+      "padded": 0,
+      "population": 0,
+      "records": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "jobs": 1,
+      "padded": 127,
+      "population": 2,
+      "records": 1,
+      "sha256": "50b09cc6ac3f87c4f159215d482e0de4da1e640968ebd4f986fbfdc66d9359ad"
+    },
+    {
+      "jobs": 1,
+      "padded": 127,
+      "population": 0,
+      "records": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "jobs": 6,
+      "padded": 122,
+      "population": 15,
+      "records": 6,
+      "sha256": "f6c717231390cc70ead41f821ac3d21ef692da966016b1432e247dc97a521f25"
+    },
+    {
+      "jobs": 32,
+      "padded": 96,
+      "population": 134,
+      "records": 53,
+      "sha256": "20988d5687ce2ab3d8e0b32fd2b402df9f09ef7a04dfec1b64f5d162c59ccad7"
+    },
+    {
+      "jobs": 32,
+      "padded": 96,
+      "population": 0,
+      "records": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "jobs": 80,
+      "padded": 48,
+      "population": 308,
+      "records": 137,
+      "sha256": "0773804fed031b2aa5f825b675eb03b2c908f4dd1c802614496ed95edd8b32a6"
+    },
+    {
+      "jobs": 31,
+      "padded": 97,
+      "population": 134,
+      "records": 53,
+      "sha256": "20988d5687ce2ab3d8e0b32fd2b402df9f09ef7a04dfec1b64f5d162c59ccad7"
+    },
+    {
+      "jobs": 32,
+      "padded": 96,
+      "population": 134,
+      "records": 53,
+      "sha256": "20988d5687ce2ab3d8e0b32fd2b402df9f09ef7a04dfec1b64f5d162c59ccad7"
+    },
+    {
+      "jobs": 33,
+      "padded": 95,
+      "population": 136,
+      "records": 54,
+      "sha256": "c23e29fb1acaeda5c6a1cd88eddecac690b34ff43ae0da01a2ef147e8336b5de"
+    },
+    {
+      "jobs": 127,
+      "padded": 1,
+      "population": 544,
+      "records": 217,
+      "sha256": "a1428f6a0c4a2028dba0cc67531c144eebf71adc7bb1a879ca06c17988249cc8"
+    },
+    {
+      "jobs": 128,
+      "padded": 0,
+      "population": 550,
+      "records": 220,
+      "sha256": "4f2ddafb337d7151dc88157cc29c35ab651cf40fb776af34cd17523ff1431e56"
+    },
+    {
+      "jobs": 129,
+      "padded": 127,
+      "population": 552,
+      "records": 221,
+      "sha256": "f3348b2dbc5b65b2513082fda82a9443feafeb4fe9c2c96dad6e0c69bf9e27fd"
+    },
+    {
+      "jobs": 257,
+      "padded": 127,
+      "population": 1096,
+      "records": 438,
+      "sha256": "5a7348c264d9c15ed22cd5a211f916726d5acf582fe1e928e72bceddf351ae49"
+    }
+  ],
+  "checks": 6852,
+  "native_executed": false,
+  "schema": "ehgp.audit.gpu_order008.v1",
+  "scope": "scalar scheduling and sink model, geometry bound to unchanged77; not CUDA execution",
+  "verdict": "pass"
+}

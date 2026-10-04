@@ -1,0 +1,28 @@
+{
+  "schema": "ehgp.audit.gpu_batch_live.bilan.v1",
+  "source_commit": "77db5738eb2dd5bc84ecdc4d85ade833124c58f8",
+  "old_device_payload_budget": "corrected_in_source",
+  "budget_common_host_device": true,
+  "reservation_live_during_download": true,
+  "cudaFree_precedes_reservation_destructor": true,
+  "malloc_failure_reservation_reset": true,
+  "counter_sum_lt_2pow54": "correct_conditional_on_enforced_leaf_count_cap",
+  "new_limit": "count <= cloud_sites is documented but unnecessarily restrictive; not a geometric invariant",
+  "witness": {
+    "fixed_frontier_tasks": 48,
+    "max_depth": 12,
+    "max_leaf_sites": 9,
+    "nodes": 159,
+    "prefix_nodes": 95,
+    "queued_leaves": 80,
+    "queued_site_entries": 648,
+    "suffix_nodes": 64
+  },
+  "witness_guard_result_model": "catalogue_invariant",
+  "action": "replace count<=sites with checked accumulator-size arithmetic and explicit CUB/grid domain; retain common memory reservations",
+  "checks": 196,
+  "normal_optimized_identical": true,
+  "qualification_native": "not_claimed",
+  "full_wrong_result_or_runtime_failure_demonstrated": false,
+  "live_changed_after_capture": []
+}

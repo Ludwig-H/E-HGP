@@ -1,0 +1,32 @@
+{
+  "scope": "published stdlib reader, temporary JSON copies, metadata only; no native/cloud",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-S",
+        "review_measures.py",
+        "--repo",
+        "/workspaces/E-HGP/build/v11-auditor-20261003"
+      ],
+      "exit_code": 0,
+      "stdout": "stdout_normal.json",
+      "stderr": "stderr_normal.txt"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "-S",
+        "review_measures.py",
+        "--repo",
+        "/workspaces/E-HGP/build/v11-auditor-20261003"
+      ],
+      "exit_code": 0,
+      "stdout": "stdout_optimized.json",
+      "stderr": "stderr_optimized.txt"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "source_commit": "77db5738eb2dd5bc84ecdc4d85ade833124c58f8",
+  "model": "public fixed frontier + deferred queue, exact integer source model",
+  "nodes": 159,
+  "prefix_nodes": 95,
+  "suffix_nodes": 64,
+  "tasks": 48,
+  "queued_leaves": 80,
+  "sites": 9,
+  "queued_site_entries": 648,
+  "max_leaf_sites": 9,
+  "max_depth": 12,
+  "center_morton_site": 1,
+  "new_guard_result_model": "catalogue_invariant",
+  "normal_O_stdout_equal": true,
+  "native_executed": false
+}

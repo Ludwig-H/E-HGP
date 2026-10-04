@@ -1,0 +1,28 @@
+{
+  "runs": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-S",
+        "check_update008.py"
+      ],
+      "exit_code": 0,
+      "stdout": "stdout_normal.json"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "-S",
+        "check_update008.py"
+      ],
+      "exit_code": 0,
+      "stdout": "stdout_opt.json"
+    }
+  ],
+  "outputs_identical": true,
+  "native_cuda_cloud_commands": 0,
+  "source_notes": "Git reads and scalar Python only"
+}

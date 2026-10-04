@@ -1,0 +1,139 @@
+{
+  "all_nonempty_subsets": 194,
+  "checks": 3623,
+  "critical_balls": 83,
+  "full_subset_cases": 8,
+  "mutant_bindings": [
+    {
+      "gate": "mhgp11_catalogue_euler_scale8000",
+      "id": "euler_feuille_q3_omise_commune",
+      "native_not_run": true,
+      "source_anchor_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_catalogue_euler_scale8000",
+      "id": "euler_admission_q3_bord_selon_k",
+      "native_not_run": true,
+      "source_anchor_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_catalogue_euler_oracle",
+      "id": "euler_etendue_comptee_reguliere",
+      "native_not_run": true,
+      "source_anchor_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_catalogue_euler_oracle",
+      "id": "euler_signe_terme_superieur",
+      "native_not_run": true,
+      "source_anchor_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_catalogue_euler_oracle",
+      "id": "euler_restriction_filtre_strict",
+      "native_not_run": true,
+      "source_anchor_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_catalogue_euler_oracle",
+      "id": "euler_fermeture_sans_mots_hauts",
+      "native_not_run": true,
+      "source_anchor_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_catalogue_euler_oracle",
+      "id": "euler_supports_sans_tetraedres",
+      "native_not_run": true,
+      "source_anchor_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_catalogue_euler_limits",
+      "id": "euler_ordres_verifiables_k_moins_2",
+      "native_not_run": true,
+      "source_anchor_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_catalogue_euler_limits",
+      "id": "euler_terme_des_sites_omis",
+      "native_not_run": true,
+      "source_anchor_occurrences": 1
+    }
+  ],
+  "normal_optimized_equal": true,
+  "published_source_match": {
+    "commit": "77db5738eb2dd5bc84ecdc4d85ade833124c58f8",
+    "files": [
+      {
+        "path": "morsehgp3D_v11/bench/catalogue_euler.hpp",
+        "sha256": "f293df6ea1a2cc8d5fef6e78453de66343728a61d3013a5d1613cfdbb374dd18",
+        "snapshot_identical": true
+      },
+      {
+        "path": "morsehgp3D_v11/bench/catalogue_euler.cpp",
+        "sha256": "ad4651e6613d0e62b87ae7b0125fb1920760250bd8907946ca163cf6ed6966ce",
+        "snapshot_identical": true
+      }
+    ],
+    "scope": "these two judge files only; no native qualification transfer",
+    "time": "2026-10-04T15:10:49.179590+00:00"
+  },
+  "scope": "the fixed 14:50 snapshot only, no claim about subsequent LIVE",
+  "source_rows": [
+    {
+      "frozen_snapshot_unchanged": true,
+      "path": "morsehgp3D_v11/bench/catalogue_euler.hpp",
+      "sha256": "f293df6ea1a2cc8d5fef6e78453de66343728a61d3013a5d1613cfdbb374dd18"
+    },
+    {
+      "frozen_snapshot_unchanged": true,
+      "path": "morsehgp3D_v11/bench/catalogue_euler.cpp",
+      "sha256": "ad4651e6613d0e62b87ae7b0125fb1920760250bd8907946ca163cf6ed6966ce"
+    },
+    {
+      "frozen_snapshot_unchanged": true,
+      "path": "morsehgp3D_v11/tests/catalogue/euler_oracle.py",
+      "sha256": "8ba595e4772b2e7ad143fd980276763ba57153fbf3c43a04c61381e4a4586c19"
+    },
+    {
+      "frozen_snapshot_unchanged": true,
+      "path": "morsehgp3D_v11/tests/catalogue/euler_limits.py",
+      "sha256": "5cc8467414d13c048465184e5f9f7353f24333821bab7496fad57032af535f16"
+    },
+    {
+      "frozen_snapshot_unchanged": true,
+      "path": "morsehgp3D_v11/tests/catalogue/fraction_model.py",
+      "sha256": "19d52412a48000efdc238b18493671327c44c587c7d4831c99fdb5a37e592a1a"
+    },
+    {
+      "frozen_snapshot_unchanged": true,
+      "path": "morsehgp3D_v11/tests/catalogue/fixtures.py",
+      "sha256": "401833e258cd3caf1fa6528663e58fd1c14bd623e4ffff079c672dd252fa5466"
+    },
+    {
+      "frozen_snapshot_unchanged": true,
+      "path": "morsehgp3D_v11/tests/catalogue/tests.cmake",
+      "sha256": "16961b01fe899e6b9dfc3d7b049977dec35b61a33ddac7b1681ec4fa178feff2"
+    },
+    {
+      "frozen_snapshot_unchanged": true,
+      "path": "morsehgp3D_v11/tests/mutants/catalogue.json",
+      "sha256": "517e596ee2ad505aed65d98505fa3bb8d9b1813821f28534479a5047f4bd61ea"
+    },
+    {
+      "frozen_snapshot_unchanged": true,
+      "path": "morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "sha256": "6377791300c2f40b7ebc95495b6d9f96a14a3f381e7ee9b06c168c94425fc568"
+    },
+    {
+      "frozen_snapshot_unchanged": true,
+      "path": "morsehgp3D_v11/docs/CATALOGUE.md",
+      "sha256": "f82c623e7aebee12c96e04aaa59ac490b3a0602f2d1bf8559184a8ffd227da7c"
+    },
+    {
+      "frozen_snapshot_unchanged": true,
+      "path": "morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "sha256": "ceb3782295e6bf77957e962136efba5240291f5d15ed3f5b26ba29ee28488a26"
+    }
+  ],
+  "time": "2026-10-04T15:09:20.707812+00:00"
+}

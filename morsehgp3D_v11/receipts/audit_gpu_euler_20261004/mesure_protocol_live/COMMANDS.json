@@ -1,0 +1,24 @@
+{
+  "initial_auxiliary_search": {
+    "command": "rg README.md from backup parent",
+    "exit_code": 2,
+    "reason": "no README at that parent; corrected scope to actor audit"
+  },
+  "reads": [
+    "Git diff77..61da",
+    "published Git blobs61da; no live source used"
+  ],
+  "runs": [
+    {
+      "command": "python3 -B -S check.py > normal.json 2> normal.stderr",
+      "exit_code": 0
+    },
+    {
+      "command": "python3 -O -B -S check.py > optimized.json 2> optimized.stderr",
+      "exit_code": 0
+    }
+  ],
+  "versions": {
+    "python": "Python 3.12.1"
+  }
+}

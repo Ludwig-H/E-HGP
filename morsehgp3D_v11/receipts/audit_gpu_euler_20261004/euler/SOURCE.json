@@ -1,0 +1,66 @@
+{
+  "time": "2026-10-04T14:59:14.511099+00:00",
+  "snapshot_time": "2026-10-04T14:50:18.534697+00:00",
+  "base_commit": "66372e621dcee58daaa7d7309875ab157894acf4",
+  "actor_main": "81e32cd7019f666aa5bf1f768ef29d6ee6fbecb1",
+  "snapshot_metadata_sha256": "4b3dc312070231956afff99142608465c8504bb09bd3cecd8a10d6fba620b856",
+  "scope": "frozen WIP snapshot, not a qualified published product",
+  "rows": [
+    {
+      "path": "morsehgp3D_v11/bench/catalogue_euler.hpp",
+      "sha256": "f293df6ea1a2cc8d5fef6e78453de66343728a61d3013a5d1613cfdbb374dd18",
+      "wip": true
+    },
+    {
+      "path": "morsehgp3D_v11/bench/catalogue_euler.cpp",
+      "sha256": "ad4651e6613d0e62b87ae7b0125fb1920760250bd8907946ca163cf6ed6966ce",
+      "wip": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/euler_oracle.py",
+      "sha256": "8ba595e4772b2e7ad143fd980276763ba57153fbf3c43a04c61381e4a4586c19",
+      "wip": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/euler_limits.py",
+      "sha256": "5cc8467414d13c048465184e5f9f7353f24333821bab7496fad57032af535f16",
+      "wip": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/fraction_model.py",
+      "sha256": "19d52412a48000efdc238b18493671327c44c587c7d4831c99fdb5a37e592a1a",
+      "wip": false
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/fixtures.py",
+      "sha256": "401833e258cd3caf1fa6528663e58fd1c14bd623e4ffff079c672dd252fa5466",
+      "wip": false
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/tests.cmake",
+      "sha256": "16961b01fe899e6b9dfc3d7b049977dec35b61a33ddac7b1681ec4fa178feff2",
+      "wip": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/mutants/catalogue.json",
+      "sha256": "517e596ee2ad505aed65d98505fa3bb8d9b1813821f28534479a5047f4bd61ea",
+      "wip": true
+    },
+    {
+      "path": "morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "sha256": "6377791300c2f40b7ebc95495b6d9f96a14a3f381e7ee9b06c168c94425fc568",
+      "wip": false
+    },
+    {
+      "path": "morsehgp3D_v11/docs/CATALOGUE.md",
+      "sha256": "f82c623e7aebee12c96e04aaa59ac490b3a0602f2d1bf8559184a8ffd227da7c",
+      "wip": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "sha256": "ceb3782295e6bf77957e962136efba5240291f5d15ed3f5b26ba29ee28488a26",
+      "wip": true,
+      "capture_phase": "later dependency from same immutable snapshot"
+    }
+  ]
+}

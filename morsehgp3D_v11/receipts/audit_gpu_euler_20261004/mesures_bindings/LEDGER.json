@@ -1,0 +1,80 @@
+{
+  "schema": "ehgp.audit.closed_payloads.v1",
+  "scope": "CPU G4 receipt bindings and measurements metadata only",
+  "payloads": [
+    {
+      "path": "ARCHIVE_BINDINGS.json",
+      "bytes": 7150,
+      "sha256": "8fc8f2b19ae4f24d3a3bfa858c1b6c70b97d85bc7642964070ed533fbbca8817"
+    },
+    {
+      "path": "BILAN.json",
+      "bytes": 1066,
+      "sha256": "388b56641928d0db9c625b1d5c1b14928d7026fb2230921728d0b84a67fc2320"
+    },
+    {
+      "path": "COMMANDS.json",
+      "bytes": 704,
+      "sha256": "3f00076b73b4823b3f062beca2a24c0b5eaa5460f34bdf590ba09690df8efe38"
+    },
+    {
+      "path": "README.md",
+      "bytes": 4529,
+      "sha256": "4b998f51f6d15eaf83f0b6469c44c0a8b82d6d1872646f4ecf99884b9cf84424"
+    },
+    {
+      "path": "SOURCE_AFTER.json",
+      "bytes": 3067,
+      "sha256": "7f9595dd7a64e8640af3ca8b77cc1b024290742527a988d27f05c98344cbf49c"
+    },
+    {
+      "path": "SOURCE_BEFORE.json",
+      "bytes": 4480,
+      "sha256": "0b92269a4e4f23eb2f9007cae64a9508e17f88101fb44aa00088b2e01470c07d"
+    },
+    {
+      "path": "SOURCE_RELATIONS.json",
+      "bytes": 537,
+      "sha256": "84097f174e473a96318361eb27f08b2266097c0a3ce07fc09f5865a73b1b591e"
+    },
+    {
+      "path": "review_measures.py",
+      "bytes": 9413,
+      "sha256": "5b4260b44a0f8376fafee1ea6b8d7b80cfe0ddcff82a692bdfd35870f9e9d031"
+    },
+    {
+      "path": "sources/README.md",
+      "bytes": 4497,
+      "sha256": "6ec27e9d45eaed9f0ecfc57342df3c087e2199ea64de93446c0d702f3667f63f"
+    },
+    {
+      "path": "sources/check.py",
+      "bytes": 3947,
+      "sha256": "df6581baaaf651ed8cbee397693db78780865dc3a9dbd2f46244645ccaab3053"
+    },
+    {
+      "path": "stderr_normal.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "stderr_optimized.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "stdout_normal.json",
+      "bytes": 12398,
+      "sha256": "840d6db153991200ca408a0ad2ff73a5d35a70312be4bae7ba683f4d9960d398"
+    },
+    {
+      "path": "stdout_optimized.json",
+      "bytes": 12398,
+      "sha256": "840d6db153991200ca408a0ad2ff73a5d35a70312be4bae7ba683f4d9960d398"
+    }
+  ],
+  "excludes_exact_paths": [
+    "LEDGER.json",
+    "SHA256SUMS"
+  ]
+}

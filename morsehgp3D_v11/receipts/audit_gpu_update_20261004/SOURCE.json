@@ -1,0 +1,35 @@
+{
+  "backend": "cpu_reference",
+  "bench_review_commit": "b74f9ea3a0b986f659d388b8140067b0b35be0c2",
+  "children": [
+    {
+      "checks": 198,
+      "expected_output": "stdout_normal.json",
+      "inventory_sha256": "f04355c882c1bc1369d967ab9e6f032e35bd03fbff7f1cd84f377ce133a25cc9",
+      "name": "gpu_update008",
+      "script": "check_update008.py"
+    },
+    {
+      "checks": 6852,
+      "expected_output": "normal.json",
+      "inventory_sha256": "3b7a9554587a02d4264f588931459630f12c201105369af56ecb93d5f2e5b5ef",
+      "name": "gpu_order_008",
+      "script": "check.py"
+    },
+    {
+      "checks": 75,
+      "expected_output": "normal.json",
+      "inventory_sha256": "6a4eace16bc4d614823e9ab608f1d894bcbb51a8e8a18b582903482071b655e0",
+      "name": "gpu_bench_b74",
+      "script": "check.py"
+    }
+  ],
+  "created_utc": "2026-10-04T16:15:38.964611+00:00",
+  "gcp_actions": 0,
+  "native_runs": 0,
+  "pending": "b74 scratch/pool transport and native GPU qualification",
+  "phase": "exploration_v11_hors_registre",
+  "product_review_commit": "00800dd88d5d1368b1987e399a05e87a17f208ae",
+  "profile": "quantized_u21_input_only",
+  "public_status": "not_claimed"
+}

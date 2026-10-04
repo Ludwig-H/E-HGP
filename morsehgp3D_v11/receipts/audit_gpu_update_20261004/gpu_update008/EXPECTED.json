@@ -1,0 +1,16 @@
+{
+  "bounds": {
+    "C": 3979008,
+    "CPU_field_upper": 4374965563013726208,
+    "CPU_jobs_max": 1099511627776,
+    "CUDA_field_upper": 17089709230522368,
+    "CUDA_grid_at_max": 33554432,
+    "CUDA_jobs_max": 4294967296,
+    "P": 41448
+  },
+  "checks": 198,
+  "order_cases": 41,
+  "scope": "stdlib scalar order/arithmetic plus source bindings; no native/CUDA/GCP; no runtime qualification",
+  "source_commit": "00800dd88d5d1368b1987e399a05e87a17f208ae",
+  "verdict": "source_and_scalar_model_conforme"
+}

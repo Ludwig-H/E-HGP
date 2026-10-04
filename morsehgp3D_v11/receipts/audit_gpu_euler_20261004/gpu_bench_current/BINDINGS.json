@@ -1,0 +1,12 @@
+{
+  "current_source_commit": "61da03749344a6acc4fea2b9eee875606cc857e8",
+  "previous_source_commit": "77db5738eb2dd5bc84ecdc4d85ade833124c58f8",
+  "protocol_functions_ast_identical": [
+    "main",
+    "median",
+    "take_summary",
+    "phases"
+  ],
+  "qualification": "no native qualification",
+  "source_changes": "nvcc discovery/build diagnostics, FULL pipeline timing endpoints; final-pass dump scope unchanged"
+}

@@ -1,0 +1,82 @@
+{
+  "captured_utc": "2026-10-04T15:34:30.860478+00:00",
+  "files": [
+    {
+      "bytes": 5754,
+      "latest_sha256": "496d60371f0f9686b5d2c8f642c13a54a34debef6c224c90d57e6e4ea969299e",
+      "path": "morsehgp3D_v11/bench/full_acceleration_diagnostics.py",
+      "revision": "published",
+      "same_at_latest": true,
+      "sha256": "496d60371f0f9686b5d2c8f642c13a54a34debef6c224c90d57e6e4ea969299e"
+    },
+    {
+      "bytes": 25238,
+      "latest_sha256": "9c07e5142805bd1ae0bd335ec8a3d197735fdf5f985aefc7fe0374efbb71b3b0",
+      "path": "morsehgp3D_v11/bench/full_probe.cpp",
+      "revision": "published",
+      "same_at_latest": true,
+      "sha256": "9c07e5142805bd1ae0bd335ec8a3d197735fdf5f985aefc7fe0374efbb71b3b0"
+    },
+    {
+      "bytes": 9926,
+      "latest_sha256": "f1014b0332eed89d36866eabb4eb659a5f5fdf66b4f96d4703c3ef596d910e28",
+      "path": "morsehgp3D_v11/src/tower/forest.hpp",
+      "revision": "published",
+      "same_at_latest": true,
+      "sha256": "f1014b0332eed89d36866eabb4eb659a5f5fdf66b4f96d4703c3ef596d910e28"
+    },
+    {
+      "bytes": 13141,
+      "latest_sha256": "ea7fdfebb46e9ff273e48b2478cb42d564008aaed1ff0efd5d96aa6b41e972e4",
+      "path": "morsehgp3D_v11/src/tower/forest_pipeline.cpp",
+      "revision": "published",
+      "same_at_latest": true,
+      "sha256": "ea7fdfebb46e9ff273e48b2478cb42d564008aaed1ff0efd5d96aa6b41e972e4"
+    },
+    {
+      "bytes": 5456,
+      "latest_sha256": "2ea3f3e6842cf2a77095712a65b111b5d71a71e5f1f9a0a9d60949eb7b35d530",
+      "path": "morsehgp3D_v11/tests/tower/full_pipeline_reader_test.py",
+      "revision": "published",
+      "same_at_latest": true,
+      "sha256": "2ea3f3e6842cf2a77095712a65b111b5d71a71e5f1f9a0a9d60949eb7b35d530"
+    },
+    {
+      "bytes": 18148,
+      "latest_sha256": "8ad614c5ce8378ce83038738a7f388cb669cd498359a525b81edeec1659564dd",
+      "path": "morsehgp3D_v11/tests/tower/tests.cmake",
+      "revision": "published",
+      "same_at_latest": true,
+      "sha256": "8ad614c5ce8378ce83038738a7f388cb669cd498359a525b81edeec1659564dd"
+    },
+    {
+      "bytes": 15293,
+      "latest_sha256": "93fe9d58efe580e243bbeb50f740efa0ad349b613b2d765fd2c5a77c34767acf",
+      "path": "morsehgp3D_v11/bench/ab_g4.py",
+      "revision": "published",
+      "same_at_latest": true,
+      "sha256": "93fe9d58efe580e243bbeb50f740efa0ad349b613b2d765fd2c5a77c34767acf"
+    },
+    {
+      "bytes": 6831,
+      "latest_sha256": "7d459894c67ac858cff54d2f1e40f74a561bff3235f9fe42f50617a3f1da8e34",
+      "path": "morsehgp3D_v11/bench/ab_summary.py",
+      "revision": "published",
+      "same_at_latest": true,
+      "sha256": "7d459894c67ac858cff54d2f1e40f74a561bff3235f9fe42f50617a3f1da8e34"
+    },
+    {
+      "bytes": 5014,
+      "path": "morsehgp3D_v11/bench/full_acceleration_diagnostics.py",
+      "revision": "historical",
+      "sha256": "fccc06ff548de66d17e3d3293f1ee6c12cb813739a6a53083eec48b750543d7c"
+    }
+  ],
+  "forbidden_actions": "no native/build/G4/product gate/active note edit",
+  "revisions": {
+    "historical": "e49ea46907e3c4bb9e0942e2205cf490748136e4",
+    "latest": "61da03749344a6acc4fea2b9eee875606cc857e8",
+    "published": "d5b1d0179f52f5ccdce1e661b3eaebf95a077333"
+  },
+  "source_kind": "immutable Git objects, no product execution"
+}

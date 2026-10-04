@@ -1,0 +1,31 @@
+[
+  {
+    "cause": "metadata_checks key in the receipt-metadata model; fixed only in the master reader, closed child capsules unchanged",
+    "command": "python3 -B -S check.py",
+    "exit_code": 1,
+    "scope": "pre-closure master replay integration"
+  },
+  {
+    "command": [
+      "python3",
+      "-B",
+      "-S",
+      "check.py"
+    ],
+    "exit_code": 0,
+    "stderr_bytes": 0,
+    "stdout_sha256": "1a19e02ebd27053874521f6faccac2b4579cdd87e49f60d2f240651cfb8f1aed"
+  },
+  {
+    "command": [
+      "python3",
+      "-B",
+      "-O",
+      "-S",
+      "check.py"
+    ],
+    "exit_code": 0,
+    "stderr_bytes": 0,
+    "stdout_sha256": "1a19e02ebd27053874521f6faccac2b4579cdd87e49f60d2f240651cfb8f1aed"
+  }
+]

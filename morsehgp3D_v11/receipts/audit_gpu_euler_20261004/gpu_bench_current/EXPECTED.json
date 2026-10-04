@@ -1,0 +1,49 @@
+{
+  "checks": 73,
+  "fixtures": {
+    "complete": {
+      "cold_rows": 6,
+      "fake_invocations": 12,
+      "requested_repetitions": 1,
+      "requested_warm_passes": 3,
+      "verdict": "conforme",
+      "warm_metrics_without_later_pass": 0,
+      "warm_rows": 6,
+      "warm_rows_without_passes": 0
+    },
+    "no_cold_repetitions": {
+      "cold_rows": 0,
+      "fake_invocations": 6,
+      "requested_repetitions": 0,
+      "requested_warm_passes": 3,
+      "verdict": "conforme",
+      "warm_metrics_without_later_pass": 0,
+      "warm_rows": 6,
+      "warm_rows_without_passes": 0
+    },
+    "no_later_warm_pass": {
+      "cold_rows": 6,
+      "fake_invocations": 12,
+      "requested_repetitions": 1,
+      "requested_warm_passes": 1,
+      "verdict": "conforme",
+      "warm_metrics_without_later_pass": 6,
+      "warm_rows": 6,
+      "warm_rows_without_passes": 6
+    },
+    "warm_rows_missing": {
+      "cold_rows": 6,
+      "fake_invocations": 12,
+      "requested_repetitions": 1,
+      "requested_warm_passes": 3,
+      "verdict": "conforme",
+      "warm_metrics_without_later_pass": 6,
+      "warm_rows": 6,
+      "warm_rows_without_passes": 6
+    }
+  },
+  "gcp_actions": 0,
+  "native_runs": 0,
+  "source_kind": "published_commit",
+  "status": "PASS"
+}

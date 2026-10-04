@@ -1,0 +1,16 @@
+{
+  "python_version": "3.12.1",
+  "git_command_template": "git show 77db5738eb2dd5bc84ecdc4d85ade833124c58f8:morsehgp3D_v11/<path> (12 paths in BINDINGS.json)",
+  "git_show_exits": 0,
+  "python_commands": [
+    {
+      "command": "python3 -B -S check_bindings.py > checks.normal.json 2> checks.normal.stderr",
+      "exit": 0
+    },
+    {
+      "command": "python3 -O -B -S check_bindings.py > checks.optimized.json 2> checks.optimized.stderr",
+      "exit": 0
+    }
+  ],
+  "no_native": true
+}

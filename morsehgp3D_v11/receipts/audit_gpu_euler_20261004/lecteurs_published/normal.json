@@ -1,0 +1,98 @@
+{
+  "calendars": [
+    {
+      "first_finish": 2,
+      "historical_admits": true,
+      "lanes": 1,
+      "last_finish": 2,
+      "last_start": 1,
+      "published_model_admits": true,
+      "wall": 9
+    },
+    {
+      "first_finish": 2,
+      "historical_admits": false,
+      "lanes": 2,
+      "last_finish": 5,
+      "last_start": 4,
+      "published_model_admits": true,
+      "wall": 12
+    },
+    {
+      "first_finish": 2,
+      "historical_admits": false,
+      "lanes": 3,
+      "last_finish": 8,
+      "last_start": 7,
+      "published_model_admits": true,
+      "wall": 15
+    },
+    {
+      "first_finish": 2,
+      "historical_admits": false,
+      "lanes": 4,
+      "last_finish": 11,
+      "last_start": 10,
+      "published_model_admits": true,
+      "wall": 18
+    },
+    {
+      "first_finish": 2,
+      "historical_admits": false,
+      "lanes": 5,
+      "last_finish": 14,
+      "last_start": 13,
+      "published_model_admits": true,
+      "wall": 21
+    },
+    {
+      "first_finish": 2,
+      "historical_admits": false,
+      "lanes": 6,
+      "last_finish": 17,
+      "last_start": 16,
+      "published_model_admits": true,
+      "wall": 24
+    },
+    {
+      "first_finish": 2,
+      "historical_admits": false,
+      "lanes": 7,
+      "last_finish": 20,
+      "last_start": 19,
+      "published_model_admits": true,
+      "wall": 27
+    },
+    {
+      "first_finish": 2,
+      "historical_admits": false,
+      "lanes": 8,
+      "last_finish": 23,
+      "last_start": 22,
+      "published_model_admits": true,
+      "wall": 30
+    }
+  ],
+  "checks": 81,
+  "historical_finding": "e49 overlap rejection corrected in source d5",
+  "native_executed": false,
+  "product_gates_executed": false,
+  "scope": "AST inspection and independent scalar chronology only; no native qualification or timing gain",
+  "verdict": "conforme_modele_statique",
+  "zero_tail": {
+    "R": 20,
+    "durations": [
+      5,
+      17
+    ],
+    "ends": [
+      7,
+      19
+    ],
+    "start": 2,
+    "tails": [
+      0,
+      0
+    ]
+  }
+}

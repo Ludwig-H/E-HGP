@@ -1,0 +1,33 @@
+{
+  "actor_head": "61da03749344a6acc4fea2b9eee875606cc857e8",
+  "actor_status": " M morsehgp3D_v11/audits/AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md\n M morsehgp3D_v11/audits/README.md\n?? morsehgp3D_v11/receipts/audit_gpu_euler_20261004/\n",
+  "checked_utc": "2026-10-04T15:32:31.700984+00:00",
+  "outputs_identical": true,
+  "pin": "61da03749344a6acc4fea2b9eee875606cc857e8",
+  "sources": [
+    {
+      "equals_before": true,
+      "equals_copy": true,
+      "path": "morsehgp3D_v11/bench/ab_g4.py",
+      "sha256": "93fe9d58efe580e243bbeb50f740efa0ad349b613b2d765fd2c5a77c34767acf"
+    },
+    {
+      "equals_before": true,
+      "equals_copy": true,
+      "path": "morsehgp3D_v11/bench/ab_summary.py",
+      "sha256": "7d459894c67ac858cff54d2f1e40f74a561bff3235f9fe42f50617a3f1da8e34"
+    },
+    {
+      "equals_before": true,
+      "equals_copy": true,
+      "path": "morsehgp3D_v11/bench/full_timing.py",
+      "sha256": "7c85570a0dc48d542d984bf543219702fc754f51378e3e11ec34bdb2d56b8668"
+    },
+    {
+      "equals_before": true,
+      "equals_copy": true,
+      "path": "morsehgp3D_v11/tests/tower/full_pipeline_reader_test.py",
+      "sha256": "2ea3f3e6842cf2a77095712a65b111b5d71a71e5f1f9a0a9d60949eb7b35d530"
+    }
+  ]
+}

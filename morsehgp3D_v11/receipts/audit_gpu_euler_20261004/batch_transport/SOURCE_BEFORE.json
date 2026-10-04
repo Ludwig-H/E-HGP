@@ -1,0 +1,120 @@
+{
+  "schema": "ehgp.audit.gpu_batch_transport.provenance.v1",
+  "snapshot_time": "2026-10-04T14:50:18.534697+00:00",
+  "base_commit": "66372e621dcee58daaa7d7309875ab157894acf4",
+  "actor_main": "81e32cd7019f666aa5bf1f768ef29d6ee6fbecb1",
+  "original_snapshot_sha256": "4b3dc312070231956afff99142608465c8504bb09bd3cecd8a10d6fba620b856",
+  "changed_during_original_copy": [],
+  "source_status": "frozen developer WIP; not a Git publication or native qualification",
+  "scope": "read-only static transport review; no native/build/nvcc/fit/GCP operations",
+  "files": {
+    "sources/CMakeLists.txt": {
+      "sha256": "7f9fd46643ea1469a51dbd7fd775074c763690a37295c47ed027aef98be5f68c",
+      "bytes": 17365,
+      "snapshot_path": "snapshot/morsehgp3D_v11/CMakeLists.txt",
+      "wip_path": true
+    },
+    "sources/docs/ARCHITECTURE.md": {
+      "sha256": "a55e5f61bec2a95e2f2a8bee546039e51c1e3dd888c374bbb5581c7eab66249a",
+      "bytes": 16374,
+      "snapshot_path": "snapshot/morsehgp3D_v11/docs/ARCHITECTURE.md",
+      "wip_path": false
+    },
+    "sources/src/core/buffer.hpp": {
+      "sha256": "d14dd76c030a49cf5f4f6968378da4dbad3f8b7505daff8c9d2515e75e7f6ae4",
+      "bytes": 9808,
+      "snapshot_path": "snapshot/morsehgp3D_v11/src/core/buffer.hpp",
+      "wip_path": false
+    },
+    "sources/src/catalogue/catalogue.hpp": {
+      "sha256": "32ec841c84450d7304722d102feb04afa374b39eefcb50fa3d12eda6244d2808",
+      "bytes": 11259,
+      "snapshot_path": "snapshot/morsehgp3D_v11/src/catalogue/catalogue.hpp",
+      "wip_path": true
+    },
+    "sources/src/catalogue/catalogue.cpp": {
+      "sha256": "5182608b52102b42a86ac5438c56767afeef277be8fab870ef8bf4b37cbd6663",
+      "bytes": 5492,
+      "snapshot_path": "snapshot/morsehgp3D_v11/src/catalogue/catalogue.cpp",
+      "wip_path": false
+    },
+    "sources/src/catalogue/internal.hpp": {
+      "sha256": "ed015ca9881eb23ac3ffe96526d008267f23859efd49c34b65126c83612675a1",
+      "bytes": 6409,
+      "snapshot_path": "snapshot/morsehgp3D_v11/src/catalogue/internal.hpp",
+      "wip_path": true
+    },
+    "sources/src/catalogue/module.cmake": {
+      "sha256": "506d402e81f9401b35d0c211873dc354072011655caeb422c37d0e14ec65a216",
+      "bytes": 827,
+      "snapshot_path": "snapshot/morsehgp3D_v11/src/catalogue/module.cmake",
+      "wip_path": true
+    },
+    "sources/src/catalogue/parallel.cpp": {
+      "sha256": "e8d6eceb283840377196f03ef1969522de1743d15a7ff3a2b09626516c64b54a",
+      "bytes": 9935,
+      "snapshot_path": "snapshot/morsehgp3D_v11/src/catalogue/parallel.cpp",
+      "wip_path": false
+    },
+    "sources/src/catalogue/boxes.cpp": {
+      "sha256": "2fc06e5e781ef51891ceecb324ecc460b023ea8e15079a32d22eb7d159ecc5a2",
+      "bytes": 7508,
+      "snapshot_path": "snapshot/morsehgp3D_v11/src/catalogue/boxes.cpp",
+      "wip_path": false
+    },
+    "sources/src/catalogue/leaf.cpp": {
+      "sha256": "ceb3782295e6bf77957e962136efba5240291f5d15ed3f5b26ba29ee28488a26",
+      "bytes": 24756,
+      "snapshot_path": "snapshot/morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "wip_path": true
+    },
+    "sources/src/catalogue/leaf_device.hpp": {
+      "sha256": "438d953d0b8c225a14a9e74718079b78a1865cab60fdbf1abd50cc8b69e1298d",
+      "bytes": 14142,
+      "snapshot_path": "snapshot/morsehgp3D_v11/src/catalogue/leaf_device.hpp",
+      "wip_path": true
+    },
+    "sources/src/catalogue/leaf_batch.hpp": {
+      "sha256": "32b721d73d6ed88d9f41c24e8365b2abe57581111b0803044dcf2f96536de9f4",
+      "bytes": 3556,
+      "snapshot_path": "snapshot/morsehgp3D_v11/src/catalogue/leaf_batch.hpp",
+      "wip_path": true
+    },
+    "sources/src/catalogue/leaf_batch.cpp": {
+      "sha256": "24feca50486a03d635e75c91a18fdb086868df9681329c3c87dc97afcda4ae92",
+      "bytes": 5654,
+      "snapshot_path": "snapshot/morsehgp3D_v11/src/catalogue/leaf_batch.cpp",
+      "wip_path": true
+    },
+    "sources/src/catalogue/leaf_batch_cuda.cu": {
+      "sha256": "8f83708292f1d6ad166fe02b5b6c971024676e0217c47da0d6156bf409f6929a",
+      "bytes": 11558,
+      "snapshot_path": "snapshot/morsehgp3D_v11/src/catalogue/leaf_batch_cuda.cu",
+      "wip_path": true
+    },
+    "sources/src/catalogue/leaf_queue.hpp": {
+      "sha256": "ed2bbfb72c50901dfcb763c598f06af0bebae6c53cd7ee9a0103a8d4dcd95a43",
+      "bytes": 2843,
+      "snapshot_path": "snapshot/morsehgp3D_v11/src/catalogue/leaf_queue.hpp",
+      "wip_path": true
+    },
+    "sources/src/catalogue/single_pass.cpp": {
+      "sha256": "98dffba631b571db73e74d1b33b20ac0fdc46c3ee28b619c1f041c9aadd79d78",
+      "bytes": 12915,
+      "snapshot_path": "snapshot/morsehgp3D_v11/src/catalogue/single_pass.cpp",
+      "wip_path": true
+    },
+    "sources/src/catalogue/single_pass_batch.cpp": {
+      "sha256": "fa8a20cfd5a3057bd2a09dc6d92b474b8d8fa5bc69b23c5aaca1d2c05cfb62e7",
+      "bytes": 8141,
+      "snapshot_path": "snapshot/morsehgp3D_v11/src/catalogue/single_pass_batch.cpp",
+      "wip_path": true
+    },
+    "sources/src/catalogue/single_pass_storage.hpp": {
+      "sha256": "0bf2d416b6bf0cb47c976dc77881738380a8dc0670a9d017ed17c7e1c0e3296c",
+      "bytes": 5715,
+      "snapshot_path": "snapshot/morsehgp3D_v11/src/catalogue/single_pass_storage.hpp",
+      "wip_path": false
+    }
+  }
+}

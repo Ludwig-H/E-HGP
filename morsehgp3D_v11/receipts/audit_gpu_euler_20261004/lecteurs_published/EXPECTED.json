@@ -1,0 +1,7 @@
+{
+  "checks": 81,
+  "native_executed": false,
+  "normal_and_optimized_sha256": "a89ca5f17eb50851127cfd071f05e1239e99734f5d81fc9dc886ce7dc684730b",
+  "product_gates_executed": false,
+  "verdict": "conforme_modele_statique"
+}

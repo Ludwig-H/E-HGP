@@ -1,0 +1,14 @@
+{
+  "native_commands": [],
+  "python": "Python 3.12.1",
+  "runs": [
+    {
+      "command": "python3 -B -S check.py > normal.json 2> normal.stderr",
+      "exit_code": 0
+    },
+    {
+      "command": "python3 -O -B -S check.py > optimized.json 2> optimized.stderr",
+      "exit_code": 0
+    }
+  ]
+}

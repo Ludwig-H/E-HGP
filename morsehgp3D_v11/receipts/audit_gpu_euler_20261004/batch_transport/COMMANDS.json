@@ -1,0 +1,29 @@
+{
+  "scope": "portable Python source/provenance checks only",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-S",
+        "review_transport.py"
+      ],
+      "exit_code": 0,
+      "stdout": "stdout_normal.json",
+      "stderr": "stderr_normal.txt"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "-S",
+        "review_transport.py"
+      ],
+      "exit_code": 0,
+      "stdout": "stdout_optimized.json",
+      "stderr": "stderr_optimized.txt"
+    }
+  ],
+  "identical_output": true
+}

@@ -1,0 +1,67 @@
+{
+  "time_utc": "2026-10-04T15:46:27.457400+00:00",
+  "publication_commit": "61da03749344a6acc4fea2b9eee875606cc857e8",
+  "unchanged_git_files": [
+    {
+      "git_path": "morsehgp3D_v11/receipts/developpement_20261004/mesures_g4_ab8_diag1/README.md",
+      "sha256": "6ec27e9d45eaed9f0ecfc57342df3c087e2199ea64de93446c0d702f3667f63f",
+      "bytes": 4497
+    },
+    {
+      "git_path": "morsehgp3D_v11/receipts/developpement_20261004/mesures_g4_ab8_diag1/check.py",
+      "sha256": "df6581baaaf651ed8cbee397693db78780865dc3a9dbd2f46244645ccaab3053",
+      "bytes": 3947
+    },
+    {
+      "git_path": "morsehgp3D_v11/receipts/developpement_20261004/mesures_g4_ab8_diag1/sessions/claudeab8/ab_report.json",
+      "sha256": "4dd71edc64bb3f5e5a3de263dd9fc5207a2a2c081dc3b8ac6a1c3c9d54a54cde",
+      "bytes": 200750
+    },
+    {
+      "git_path": "morsehgp3D_v11/receipts/developpement_20261004/mesures_g4_ab8_diag1/sessions/claudeab8/plan.json",
+      "sha256": "229548a9506e61e4ed76447181556bbe4987b8694f8b8320b142d99359e85518",
+      "bytes": 2603
+    },
+    {
+      "git_path": "morsehgp3D_v11/receipts/developpement_20261004/mesures_g4_ab8_diag1/sessions/claudeab8/receipt.json",
+      "sha256": "6e021fa951d5fb2a152942f66a9d756d110a0264e9e5a4f25680dc645c9b2ee8",
+      "bytes": 29328
+    },
+    {
+      "git_path": "morsehgp3D_v11/receipts/developpement_20261004/mesures_g4_ab8_diag1/sessions/claudediag1/ab_report.json",
+      "sha256": "0b77b22853192e72fab8b0b46d6e295e322a34423ccd573a49abaf71a6eeafcc",
+      "bytes": 266430
+    },
+    {
+      "git_path": "morsehgp3D_v11/receipts/developpement_20261004/mesures_g4_ab8_diag1/sessions/claudediag1/k10_leaf16.json",
+      "sha256": "21d2b235d0501eb680ed58e1144b9afdde04739aae3534863d14c2199ba10486",
+      "bytes": 3022
+    },
+    {
+      "git_path": "morsehgp3D_v11/receipts/developpement_20261004/mesures_g4_ab8_diag1/sessions/claudediag1/k10_leaf24.json",
+      "sha256": "2093472bcda1c61d7ad2678cee3ad6ae8da05a1f6a5aa8ca7170b43f7098e6b8",
+      "bytes": 2992
+    },
+    {
+      "git_path": "morsehgp3D_v11/receipts/developpement_20261004/mesures_g4_ab8_diag1/sessions/claudediag1/plan.json",
+      "sha256": "d4707fe921fd05e65c6dd9f7add6be7332e1a8d7b3390121533a07baa07965d3",
+      "bytes": 3275
+    },
+    {
+      "git_path": "morsehgp3D_v11/receipts/developpement_20261004/mesures_g4_ab8_diag1/sessions/claudediag1/receipt.json",
+      "sha256": "b312b28ed4a796a5906f5afa098e9d1bb1d47094f250235feebe2b00defd8222",
+      "bytes": 26749
+    },
+    {
+      "git_path": "morsehgp3D_v11/receipts/developpement_20261004/mesures_g4_ab8_diag1/sessions/claudediag1/w24_pinned.json",
+      "sha256": "d1ae2c099f57368158cb44df34b7bd454f76aa8ef1201234e65390a4b2521f39",
+      "bytes": 4331
+    },
+    {
+      "git_path": "morsehgp3D_v11/receipts/developpement_20261004/mesures_g4_ab8_diag1/sessions/claudediag1/w48_free.json",
+      "sha256": "d26a18148b143ca8731fb275cdb3f3784288c65de7d83e8f19245eefd3c8fc5b",
+      "bytes": 4337
+    }
+  ],
+  "scope": "pinned Git objects; no claim about new LIVE benchmark sources"
+}

@@ -1,0 +1,199 @@
+{
+  "schema": "ehgp.audit.measure_bindings.archive.v1",
+  "scope": "existing local archives rehashed, exhaustive results manifest, selected primary source blobs; no native/GCP",
+  "sessions": {
+    "claudeab8": {
+      "source_commit": "54c167bb6466e790f5259b44870725f3e02ed43f",
+      "package_sha256_verified": "6af278ba732f1b857526efa3ccc54355ba2bc2cdbab154f70bd39fbde586825d",
+      "results_sha256_verified": "f255831012feb7d90cd2d40748bb6c4c644535728b7454a83ae95ff2f828eb5e",
+      "done": "0",
+      "archive_manifest_payloads": 285,
+      "published_files_matched": {
+        "ab_report.json": "4dd71edc64bb3f5e5a3de263dd9fc5207a2a2c081dc3b8ac6a1c3c9d54a54cde"
+      },
+      "package_selected_sources": {
+        "morsehgp3D_v11/CMakeLists.txt": "af154e57a9cdf9786d8a883745c2850698dd7b25c2c1e1a8cdfdf5aa1f1a72a9",
+        "morsehgp3D_v11/bench/ab_g4.py": "bd3f8bb7acaf02ac5ff0316029ec3e48654bc35a4cf0810eebdf153cff5be69f",
+        "morsehgp3D_v11/src/catalogue/leaf.cpp": "2be7e330d396462d14cbc11aad0997a7f505bd2326358196cacc983d5916b6f6",
+        "morsehgp3D_v11/src/tower/forest_pipeline.cpp": "0853ae5603277f40710f521f09e97d60958a2484d1ee365b8f42cb7ed997adc9"
+      },
+      "failed_test_names": [],
+      "mutants": [
+        {
+          "module": "catalogue",
+          "id": "q3_candidat_obtus_admis",
+          "verdict": "TUE",
+          "detail": "code",
+          "judge": "mhgp11_catalogue_fraction"
+        },
+        {
+          "module": "catalogue",
+          "id": "lemme_r_exterieur_par_dominants",
+          "verdict": "TUE",
+          "detail": "code",
+          "judge": "mhgp11_catalogue_fraction"
+        },
+        {
+          "module": "catalogue",
+          "id": "lemme_r_interieur_en_coquille",
+          "verdict": "TUE",
+          "detail": "code",
+          "judge": "mhgp11_catalogue_fraction"
+        },
+        {
+          "module": "catalogue",
+          "id": "lemme_r_transposee_inversee",
+          "verdict": "TUE",
+          "detail": "code",
+          "judge": "mhgp11_catalogue_fraction"
+        },
+        {
+          "module": "num",
+          "id": "presentation_q3_taguee_q4_u21",
+          "verdict": "TUE",
+          "detail": "code",
+          "judge": "mhgp11_num_unit_power_paths"
+        },
+        {
+          "module": "num",
+          "id": "candidat_q3_tague_q4_u21",
+          "verdict": "TUE",
+          "detail": "code",
+          "judge": "mhgp11_num_unit_q3_candidate"
+        },
+        {
+          "module": "num",
+          "id": "candidat_q3_niveau_brut_change",
+          "verdict": "TUE",
+          "detail": "code",
+          "judge": "mhgp11_num_unit_q3_candidate"
+        }
+      ],
+      "ctest_lines": [
+        "100% tests passed, 0 tests failed out of 673"
+      ],
+      "skipped_test_lines": [],
+      "configure_flags": {
+        "cfg_base": [
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DMHGP11_COORD_BITS=21"
+        ],
+        "cfg_q3": [
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DMHGP11_COORD_BITS=21"
+        ],
+        "cfg_new": [
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DMHGP11_COORD_BITS=21"
+        ]
+      }
+    },
+    "claudediag1": {
+      "source_commit": "e49ea46907e3c4bb9e0942e2205cf490748136e4",
+      "package_sha256_verified": "4926b9a011b2c6555b4e91fede97d4cca590e47fef591cd2b0a3f83ccb7b67ce",
+      "results_sha256_verified": "f968f7ce25c61ffe8ce2c2bee50c72908b603cfa94c13a1d1440f5778a968246",
+      "done": "3",
+      "archive_manifest_payloads": 235,
+      "published_files_matched": {
+        "w48_free.json": "d26a18148b143ca8731fb275cdb3f3784288c65de7d83e8f19245eefd3c8fc5b",
+        "ab_report.json": "0b77b22853192e72fab8b0b46d6e295e322a34423ccd573a49abaf71a6eeafcc",
+        "k10_leaf24.json": "2093472bcda1c61d7ad2678cee3ad6ae8da05a1f6a5aa8ca7170b43f7098e6b8",
+        "k10_leaf16.json": "21d2b235d0501eb680ed58e1144b9afdde04739aae3534863d14c2199ba10486",
+        "w24_pinned.json": "d1ae2c099f57368158cb44df34b7bd454f76aa8ef1201234e65390a4b2521f39"
+      },
+      "package_selected_sources": {
+        "morsehgp3D_v11/CMakeLists.txt": "af154e57a9cdf9786d8a883745c2850698dd7b25c2c1e1a8cdfdf5aa1f1a72a9",
+        "morsehgp3D_v11/bench/ab_g4.py": "bd3f8bb7acaf02ac5ff0316029ec3e48654bc35a4cf0810eebdf153cff5be69f",
+        "morsehgp3D_v11/src/catalogue/leaf.cpp": "fb3bb1ec778e5f8f4d74db6d8112e7bffef274e3e9f246b577f92ebef7ccee88",
+        "morsehgp3D_v11/src/tower/forest_pipeline.cpp": "834a18c8884b9aa1b2c0831a68796363ad9b2a600cb73f6355b61cf2e4539ca0"
+      },
+      "failed_test_names": [
+        "mhgp11_style",
+        "mhgp11_style_opt"
+      ],
+      "mutants": [
+        {
+          "module": "catalogue",
+          "id": "lignes_vivantes_compte_logique_omis",
+          "verdict": "TUE",
+          "detail": "code",
+          "judge": "mhgp11_catalogue_pair_graph_live_rows"
+        },
+        {
+          "module": "catalogue",
+          "id": "compteurs_vidage_sans_controle",
+          "verdict": "TUE",
+          "detail": "code",
+          "judge": "mhgp11_catalogue_leaf_counts_flush_overflow"
+        },
+        {
+          "module": "catalogue",
+          "id": "compteurs_census_non_vides",
+          "verdict": "TUE",
+          "detail": "code",
+          "judge": "mhgp11_catalogue_leaf_counts_engraved"
+        },
+        {
+          "module": "catalogue",
+          "id": "compteurs_dominance_formule",
+          "verdict": "TUE",
+          "detail": "code",
+          "judge": "mhgp11_catalogue_leaf_counts_large_leaves"
+        },
+        {
+          "module": "catalogue",
+          "id": "enveloppe_bord_bas_ferme",
+          "verdict": "TUE",
+          "detail": "code",
+          "judge": "mhgp11_catalogue_region_median_envelope"
+        },
+        {
+          "module": "catalogue",
+          "id": "enveloppe_tetra_trois_sommets",
+          "verdict": "TUE",
+          "detail": "code",
+          "judge": "mhgp11_catalogue_region_median_envelope"
+        },
+        {
+          "module": "catalogue",
+          "id": "enveloppe_q4_avant_comptage",
+          "verdict": "TUE",
+          "detail": "code",
+          "judge": "mhgp11_catalogue_region_median_envelope"
+        }
+      ],
+      "ctest_lines": [
+        "src/tower/forest_pipeline.cpp:131: [taille_fonction] 110 lignes, au plus 100",
+        "src/tower/forest_pipeline.cpp:131: [taille_fonction] 110 lignes, au plus 100",
+        "99% tests passed, 2 tests failed out of 678"
+      ],
+      "skipped_test_lines": [],
+      "tsan_lines": [
+        "100% tests passed, 0 tests failed out of 8"
+      ],
+      "configure_flags": {
+        "cfg_qr": [
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DMHGP11_COORD_BITS=21"
+        ],
+        "cfg_qr2": [
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DMHGP11_COORD_BITS=21"
+        ],
+        "cfg_r1": [
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DMHGP11_COORD_BITS=21"
+        ],
+        "cfg_new": [
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DMHGP11_COORD_BITS=21"
+        ],
+        "cfg_tsan": [
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DMHGP11_COORD_BITS=21",
+          "-DMHGP11_TSAN=ON"
+        ]
+      }
+    }
+  }
+}

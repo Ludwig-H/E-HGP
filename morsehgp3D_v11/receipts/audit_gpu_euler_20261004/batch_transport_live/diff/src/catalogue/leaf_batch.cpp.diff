@@ -1,0 +1,11 @@
+--- snapshot_145018/src/catalogue/leaf_batch.cpp
++++ 77db5738eb2dd5bc84ecdc4d85ade833124c58f8/src/catalogue/leaf_batch.cpp
+@@ -68,6 +68,8 @@
+ Outcome run_leaf_batch_host(const LeafBatchView& view, sched::Pool& pool, MemoryBudget& budget,
+                             LeafBatchResult& result) noexcept {
+   const Stopwatch total;
++  // Hypothese de la borne des sommes (leaf_device::kCountBound) : pas plus de feuilles que de sites.
++  if (view.count > view.cloud_sites) return fail(Reason::catalogue_invariant);
+   u64 bytes = 0;
+   MHGP11_TRY(add_bytes<u8>(bytes, view.count));
+   MHGP11_TRY(add_bytes<u64>(bytes, 2 * view.count));

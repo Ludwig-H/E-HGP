@@ -1,0 +1,22 @@
+{
+  "python_version": "3.12.1",
+  "initial_dispatch_failure": {
+    "workdir": "/workspaces/.ehgp-backups/gpu_euler_review_20261004/centre_leaf_counterexample",
+    "message": "Failed to create unified exec process: No such file or directory (os error 2)",
+    "process_started": false,
+    "resolution": "create directory from existing workdir; retry"
+  },
+  "runs": [
+    {
+      "command": "python3 -B -S check.py > normal.json 2> normal.stderr",
+      "exit": 0
+    },
+    {
+      "command": "python3 -O -B -S check.py > optimized.json 2> optimized.stderr",
+      "exit": 0
+    }
+  ],
+  "source_command_template": "git show 77db5738eb2dd5bc84ecdc4d85ade833124c58f8:morsehgp3D_v11/src/catalogue/<file>",
+  "source_commands_exit": 0,
+  "native_executed": false
+}

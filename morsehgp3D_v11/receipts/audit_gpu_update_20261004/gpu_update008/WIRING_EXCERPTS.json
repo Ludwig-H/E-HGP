@@ -1,0 +1,74 @@
+{
+  "source_commit": "00800dd88d5d1368b1987e399a05e87a17f208ae",
+  "scope": "immutable Git source; excerpts only, no native execution",
+  "files": [
+    {
+      "git_path": "morsehgp3D_v11/src/catalogue/catalogue.hpp",
+      "sha256": "50b7aa3902ccadd457d185f675ac13efcb93a597b87e6a970dcc21453ef0dc43",
+      "bytes": 11734,
+      "git_blob": "89703d7098b1db2cd727f0f3e4534aa84a8d1394",
+      "excerpts": [
+        {
+          "first_line": 85,
+          "last_line": 90,
+          "lines": [
+            "  u64 batch_gather_ns = 0, batch_count_ns = 0, batch_scan_ns = 0, batch_fill_ns = 0, batch_executor_ns = 0;",
+            "  u64 batch_device_init_ns = 0, batch_upload_ns = 0, batch_download_ns = 0, batch_device_bytes = 0;",
+            "  u64 batch_levels_ns = 0, batch_fallback_ns = 0;",
+            "  u64 batch_prefetch_ns = 0;  // ouverture du contexte GPU en arriere-plan (prefetch_device_context), recouverte",
+            "};",
+            ""
+          ]
+        },
+        {
+          "first_line": 186,
+          "last_line": 192,
+          "lines": [
+            "                                               MemoryBudget& budget) noexcept;",
+            "",
+            "// Voie cuda_leaves : ouvre le contexte du GPU dans un fil d'arriere-plan, une fois par processus, pour recouvrir son",
+            "// ouverture par le travail CPU qui precede le lot ; l'executeur en attend la fin. Sans CUDA, ne fait rien. La passe",
+            "// unique l'appelle d'elle-meme ; un client peut l'appeler plus tot (avant l'index).",
+            "void prefetch_device_context() noexcept;",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "git_path": "morsehgp3D_v11/src/catalogue/single_pass_batch.cpp",
+      "sha256": "a35efa7073102a70d1033f8d08702ac066263ade210f5df06be16794e140b578",
+      "bytes": 8319,
+      "git_blob": "87152bd0e7df7ea69414a200597aab62b6f9c909",
+      "excerpts": [
+        {
+          "first_line": 155,
+          "last_line": 164,
+          "lines": [
+            "  if (timings != nullptr) {",
+            "    const auto& t = result.timings;",
+            "    timings->batch_jobs = t.jobs; timings->batch_unresolved = t.unresolved;",
+            "    timings->batch_records = t.records; timings->batch_population = t.population;",
+            "    timings->batch_gather_ns = gather_ns; timings->batch_count_ns = t.count_ns; timings->batch_scan_ns = t.scan_ns;",
+            "    timings->batch_fill_ns = t.fill_ns; timings->batch_executor_ns = executor_ns;",
+            "    timings->batch_device_init_ns = t.device_init_ns; timings->batch_upload_ns = t.upload_ns;",
+            "    timings->batch_download_ns = t.download_ns; timings->batch_device_bytes = t.device_bytes;",
+            "    timings->batch_levels_ns = levels_ns; timings->batch_fallback_ns = fallback_ns;",
+            "    timings->batch_prefetch_ns = t.prefetch_ns;"
+          ]
+        },
+        {
+          "first_line": 169,
+          "last_line": 173,
+          "lines": [
+            "}  // namespace mhgp11::catalogue_detail",
+            "",
+            "namespace mhgp11 {",
+            "void prefetch_device_context() noexcept { catalogue_detail::prefetch_cuda_context(); }",
+            "}  // namespace mhgp11"
+          ]
+        }
+      ]
+    }
+  ]
+}

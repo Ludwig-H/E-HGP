@@ -1,0 +1,65 @@
+{
+  "capsules": {
+    "batch_transport_live": {
+      "checks": 196,
+      "normal_optimized_identical": true,
+      "payloads": 37
+    },
+    "centre_leaf_counterexample": {
+      "checks": 3842,
+      "normal_optimized_identical": true,
+      "payloads": 8
+    },
+    "device_geometry": {
+      "checks": 145391,
+      "normal_optimized_identical": true,
+      "payloads": 22
+    },
+    "device_published_bindings": {
+      "checks": 23,
+      "normal_optimized_identical": true,
+      "payloads": 12
+    },
+    "euler": {
+      "checks": 3623,
+      "normal_optimized_identical": true,
+      "payloads": 18
+    },
+    "gpu_bench_current": {
+      "checks": 73,
+      "normal_optimized_identical": true,
+      "payloads": 14
+    },
+    "lecteurs_published": {
+      "checks": 81,
+      "normal_optimized_identical": true,
+      "payloads": 16
+    },
+    "mesure_protocol_live": {
+      "checks": 237,
+      "normal_optimized_identical": true,
+      "payloads": 14
+    },
+    "mesures_bindings": {
+      "checks": 354,
+      "normal_optimized_identical": true,
+      "payloads": 15
+    }
+  },
+  "commit": "61da03749344a6acc4fea2b9eee875606cc857e8",
+  "gcp_actions": 0,
+  "inventories": {
+    "batch_transport": 30,
+    "batch_transport_live": 37,
+    "centre_leaf_counterexample": 8,
+    "device_geometry": 22,
+    "device_published_bindings": 12,
+    "euler": 18,
+    "gpu_bench_current": 14,
+    "lecteurs_published": 16,
+    "mesure_protocol_live": 14,
+    "mesures_bindings": 15
+  },
+  "native_runs": 0,
+  "status": "PASS"
+}
