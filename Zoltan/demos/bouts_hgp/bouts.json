@@ -1,0 +1,1710 @@
+{
+ "schema": "ehgp.zoltan.bouts_hgp.v1",
+ "criteres": "Choix des bouts de scène où la hiérarchie HDBSCAN échoue et la hiérarchie HGP réussit, images et catalogue.\n\n    python3 Zoltan/demos/tools/choisir_bouts.py --bouts SORTIE/bouts.json --data SORTIE/data         --results RESULTATS_DE_SESSION/lidar --out Zoltan/demos/bouts_hgp [--par-famille 8]\n\nMesure (comme les démos de Zoltan/) : pour chaque objet du bout, le meilleur IoU atteint par un nœud quelconque de la\nhiérarchie, au même ordre k (HDBSCAN : `min_samples` = k, arbre de liaison simple de scikit-learn ; HGP : hiérarchie de\npoints H^r_{k+1} de morsehgp3D_v11, règle `margin_r`). Critères, fixés avant de lire les résultats :\n- HDBSCAN échoue à l'ordre k : au moins un objet du bout a un meilleur IoU <= 1/2 ;\n- HGP réussit à l'ordre k : tous les objets du bout ont un meilleur IoU > 1/2 ;\n- bout retenu : il existe un k où HDBSCAN échoue et où HGP réussit ; échec « à tous les ordres » de HDBSCAN quand il\n  échoue aux quatre ordres mesurés (2, 3, 5, 10) ;\n- l'inverse (HGP échoue, HDBSCAN réussit au même k) est compté et publié.\nClassement dans une famille : échec à tous les ordres d'abord, puis le plus grand écart entre le pire objet de HGP et\nle pire objet de HDBSCAN ; un seul bout par trame et par famille (le plus grand groupe d'abord).\n",
+ "comptes": {
+  "voitures": {
+   "bouts": 263,
+   "hdbscan_echoue": 0,
+   "gagnes": 0,
+   "gagnes_tous_ordres": 0,
+   "perdus": 0
+  },
+  "velos": {
+   "bouts": 81,
+   "hdbscan_echoue": 23,
+   "gagnes": 11,
+   "gagnes_tous_ordres": 2,
+   "perdus": 5
+  },
+  "velos_pietons": {
+   "bouts": 16,
+   "hdbscan_echoue": 4,
+   "gagnes": 2,
+   "gagnes_tous_ordres": 1,
+   "perdus": 0
+  }
+ },
+ "bouts": [
+  {
+   "name": "b00_001472_velos_40_42_59",
+   "kind": "velos",
+   "seq": "00",
+   "frame": "001472",
+   "velodyne_sha256": "407b49e3808d074e551a00e63d59283ec41730cad53f9f244e93ab54792cd2d5",
+   "labels_sha256": "24d00155802b1adf0825e56f4b6d69ca117dae699a708b27e78884dd31c4db8e",
+   "keys": [
+    2621451,
+    2752523,
+    3866635
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    82,
+    139,
+    161
+   ],
+   "sites": 382,
+   "gaps": {
+    "2621451-2752523": 0.3565,
+    "2752523-3866635": 0.067
+   },
+   "difficulty": 0.0773,
+   "sites_sha256": "77a6e0a60cf9f8c619afb9cad8dc6747e2249ffaae63fe80c367ae2b5aa55104",
+   "crop_labels_sha256": "f168de2e2c3439a11bf8bbae57aadc543721ec10a1b0853fbb64f9394363954e",
+   "order": "5",
+   "wins": [
+    "2",
+    "5",
+    "10"
+   ],
+   "losses": [],
+   "strong": true,
+   "image": "b00_001472_velos_40_42_59_k5.png",
+   "orders": {
+    "2": {
+     "hdbscan": [
+      0.836735,
+      0.472222,
+      0.5875
+     ],
+     "hgp": [
+      0.836735,
+      0.561151,
+      0.566901
+     ],
+     "cover": [
+      0.836735,
+      0.57554,
+      0.566901
+     ],
+     "core": [
+      0.836735,
+      0.44086,
+      0.570922
+     ],
+     "hdbscan_mean": 0.6321523333333333,
+     "hgp_mean": 0.654929,
+     "hdbscan_fails": true,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": false
+    },
+    "3": {
+     "hdbscan": [
+      0.836735,
+      0.42953,
+      0.568905
+     ],
+     "hgp": [
+      0.836735,
+      0.43038,
+      0.568905
+     ],
+     "cover": [
+      0.836735,
+      0.427984,
+      0.568905
+     ],
+     "core": [
+      0.836735,
+      0.421429,
+      0.568905
+     ],
+     "hdbscan_mean": 0.6117233333333333,
+     "hgp_mean": 0.6120066666666667,
+     "hdbscan_fails": true,
+     "hgp_succeeds": false,
+     "hgp_fails": true,
+     "hdbscan_succeeds": false
+    },
+    "5": {
+     "hdbscan": [
+      0.836735,
+      0.413428,
+      0.566901
+     ],
+     "hgp": [
+      0.836735,
+      0.722973,
+      0.602484
+     ],
+     "cover": [
+      0.836735,
+      0.72973,
+      0.621118
+     ],
+     "core": [
+      0.845361,
+      0.51773,
+      0.566901
+     ],
+     "hdbscan_mean": 0.605688,
+     "hgp_mean": 0.7207306666666667,
+     "hdbscan_fails": true,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": false
+    },
+    "10": {
+     "hdbscan": [
+      0.836735,
+      0.428571,
+      0.566901
+     ],
+     "hgp": [
+      0.836735,
+      0.756757,
+      0.566901
+     ],
+     "cover": [
+      0.836735,
+      0.75,
+      0.566901
+     ],
+     "core": [
+      0.845361,
+      0.428571,
+      0.565371
+     ],
+     "hdbscan_mean": 0.6107356666666667,
+     "hgp_mean": 0.720131,
+     "hdbscan_fails": true,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": false
+    }
+   }
+  },
+  {
+   "name": "b08_002776_velos_17_64",
+   "kind": "velos",
+   "seq": "08",
+   "frame": "002776",
+   "velodyne_sha256": "6ca5e73344dac5a580ac02ea2da16e1c4b46dcd8bed866a7deb73d75ba9c9ad7",
+   "labels_sha256": "6202bd505ebaa52d63b6c94d47f42691929b89f5890d8bbfe4839c69bcdf25c8",
+   "keys": [
+    1114123,
+    4194315
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    198,
+    95
+   ],
+   "sites": 293,
+   "gaps": {
+    "1114123-4194315": 0.1297
+   },
+   "difficulty": 0.1642,
+   "sites_sha256": "5da353559a0e4d0a49db09052f195e7157133a395d88698767e845383bbf261e",
+   "crop_labels_sha256": "cb68d15bd2350f5049e6a2bc850d121fa3124e67eb3df1c00ba836823766ef69",
+   "order": "5",
+   "wins": [
+    "3",
+    "5"
+   ],
+   "losses": [],
+   "strong": true,
+   "image": "b08_002776_velos_17_64_k5.png",
+   "orders": {
+    "2": {
+     "hdbscan": [
+      0.752852,
+      0.421053
+     ],
+     "hgp": [
+      0.694737,
+      0.491525
+     ],
+     "cover": [
+      0.694737,
+      0.491525
+     ],
+     "core": [
+      0.701068,
+      0.473373
+     ],
+     "hdbscan_mean": 0.5869525,
+     "hgp_mean": 0.5931310000000001,
+     "hdbscan_fails": true,
+     "hgp_succeeds": false,
+     "hgp_fails": true,
+     "hdbscan_succeeds": false
+    },
+    "3": {
+     "hdbscan": [
+      0.751908,
+      0.410526
+     ],
+     "hgp": [
+      0.694737,
+      0.511765
+     ],
+     "cover": [
+      0.694737,
+      0.511765
+     ],
+     "core": [
+      0.702509,
+      0.462428
+     ],
+     "hdbscan_mean": 0.581217,
+     "hgp_mean": 0.603251,
+     "hdbscan_fails": true,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": false
+    },
+    "5": {
+     "hdbscan": [
+      0.748092,
+      0.363636
+     ],
+     "hgp": [
+      0.697183,
+      0.527607
+     ],
+     "cover": [
+      0.697183,
+      0.52439
+     ],
+     "core": [
+      0.708029,
+      0.46
+     ],
+     "hdbscan_mean": 0.555864,
+     "hgp_mean": 0.612395,
+     "hdbscan_fails": true,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": false
+    },
+    "10": {
+     "hdbscan": [
+      0.697183,
+      0.446667
+     ],
+     "hgp": [
+      0.697183,
+      0.485876
+     ],
+     "cover": [
+      0.699647,
+      0.480226
+     ],
+     "core": [
+      0.697183,
+      0.384615
+     ],
+     "hdbscan_mean": 0.571925,
+     "hgp_mean": 0.5915295,
+     "hdbscan_fails": true,
+     "hgp_succeeds": false,
+     "hgp_fails": true,
+     "hdbscan_succeeds": false
+    }
+   }
+  },
+  {
+   "name": "b08_002852_velos_6_51",
+   "kind": "velos",
+   "seq": "08",
+   "frame": "002852",
+   "velodyne_sha256": "d52cb6a1c68d370e626d95b67b715ac579f49dc49200128050276eb3462a673c",
+   "labels_sha256": "e05bc28d0f4d1d7b34e4838ec260c5765b4d3aaa4fe21a6f9dade2baac81d6ff",
+   "keys": [
+    393227,
+    3342347
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    157,
+    122
+   ],
+   "sites": 279,
+   "gaps": {
+    "393227-3342347": 0.0518
+   },
+   "difficulty": 0.1292,
+   "sites_sha256": "f21e1cf7c8cb194b7a3b57da1fd7183d6d9c418a134d4d67e67d8fbd3834ee2e",
+   "crop_labels_sha256": "48a00cb6559dd55e1d674e135e649da9f2a5d0bf6b5b00fca3c5da0d4d2a58f2",
+   "order": "5",
+   "wins": [
+    "5"
+   ],
+   "losses": [],
+   "strong": false,
+   "image": "b08_002852_velos_6_51_k5.png",
+   "orders": {
+    "2": {
+     "hdbscan": [
+      0.808917,
+      0.733333
+     ],
+     "hgp": [
+      0.866242,
+      0.848921
+     ],
+     "cover": [
+      0.859873,
+      0.842857
+     ],
+     "core": [
+      0.815287,
+      0.784173
+     ],
+     "hdbscan_mean": 0.7711250000000001,
+     "hgp_mean": 0.8575815,
+     "hdbscan_fails": false,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": true
+    },
+    "3": {
+     "hdbscan": [
+      0.796178,
+      0.684211
+     ],
+     "hgp": [
+      0.859873,
+      0.842857
+     ],
+     "cover": [
+      0.866242,
+      0.848921
+     ],
+     "core": [
+      0.796178,
+      0.751825
+     ],
+     "hdbscan_mean": 0.7401945000000001,
+     "hgp_mean": 0.8513649999999999,
+     "hdbscan_fails": false,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": true
+    },
+    "5": {
+     "hdbscan": [
+      0.738854,
+      0.437276
+     ],
+     "hgp": [
+      0.847134,
+      0.828571
+     ],
+     "cover": [
+      0.847134,
+      0.828571
+     ],
+     "core": [
+      0.764331,
+      0.746154
+     ],
+     "hdbscan_mean": 0.5880650000000001,
+     "hgp_mean": 0.8378525,
+     "hdbscan_fails": true,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": false
+    },
+    "10": {
+     "hdbscan": [
+      0.726115,
+      0.437276
+     ],
+     "hgp": [
+      0.847134,
+      0.496296
+     ],
+     "cover": [
+      0.847134,
+      0.496296
+     ],
+     "core": [
+      0.681529,
+      0.437276
+     ],
+     "hdbscan_mean": 0.5816954999999999,
+     "hgp_mean": 0.6717150000000001,
+     "hdbscan_fails": true,
+     "hgp_succeeds": false,
+     "hgp_fails": true,
+     "hdbscan_succeeds": false
+    }
+   }
+  },
+  {
+   "name": "b00_001470_velos_43_61",
+   "kind": "velos",
+   "seq": "00",
+   "frame": "001470",
+   "velodyne_sha256": "8f3e42f7b78bcc12ba301da339063e3806982ddaacbc8ec05d8da93fcad5df97",
+   "labels_sha256": "74c75849ca7c42d17bad17e7322470122688a98f6038a2030b8644d20276c199",
+   "keys": [
+    2818059,
+    3997707
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    138,
+    112
+   ],
+   "sites": 250,
+   "gaps": {
+    "2818059-3997707": 0.1229
+   },
+   "difficulty": 0.2801,
+   "sites_sha256": "5c7e09bed1c58c0b3f8af926b966950fdad341aaa047807661ba7ba6af529610",
+   "crop_labels_sha256": "5577d2f2ad37106690277b6d3dc5be94283a78662d232a76c28fd2d70f4ff828",
+   "order": "5",
+   "wins": [
+    "3",
+    "5"
+   ],
+   "losses": [],
+   "strong": false,
+   "image": "b00_001470_velos_43_61_k5.png",
+   "orders": {
+    "2": {
+     "hdbscan": [
+      0.949275,
+      0.508929
+     ],
+     "hgp": [
+      0.963768,
+      0.719298
+     ],
+     "cover": [
+      0.963768,
+      0.719298
+     ],
+     "core": [
+      0.898551,
+      0.705357
+     ],
+     "hdbscan_mean": 0.7291019999999999,
+     "hgp_mean": 0.841533,
+     "hdbscan_fails": false,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": true
+    },
+    "3": {
+     "hdbscan": [
+      0.913043,
+      0.491071
+     ],
+     "hgp": [
+      0.963768,
+      0.508929
+     ],
+     "cover": [
+      0.963768,
+      0.508929
+     ],
+     "core": [
+      0.847826,
+      0.473214
+     ],
+     "hdbscan_mean": 0.702057,
+     "hgp_mean": 0.7363485,
+     "hdbscan_fails": true,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": false
+    },
+    "5": {
+     "hdbscan": [
+      0.818841,
+      0.482143
+     ],
+     "hgp": [
+      0.963768,
+      0.710526
+     ],
+     "cover": [
+      0.942029,
+      0.719298
+     ],
+     "core": [
+      0.818841,
+      0.672566
+     ],
+     "hdbscan_mean": 0.6504920000000001,
+     "hgp_mean": 0.837147,
+     "hdbscan_fails": true,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": false
+    },
+    "10": {
+     "hdbscan": [
+      0.615023,
+      0.451613
+     ],
+     "hgp": [
+      0.623853,
+      0.482143
+     ],
+     "cover": [
+      0.618182,
+      0.5
+     ],
+     "core": [
+      0.603687,
+      0.451613
+     ],
+     "hdbscan_mean": 0.533318,
+     "hgp_mean": 0.552998,
+     "hdbscan_fails": true,
+     "hgp_succeeds": false,
+     "hgp_fails": true,
+     "hdbscan_succeeds": false
+    }
+   }
+  },
+  {
+   "name": "b08_001170_velos_43_57",
+   "kind": "velos",
+   "seq": "08",
+   "frame": "001170",
+   "velodyne_sha256": "d336cb1462def26ba417893e1f36f58a1ca1f37e910581cef651d390f233fa00",
+   "labels_sha256": "077ab0bfb425040513b54233346315f0dfee6367d1a414d3e661356002769fde",
+   "keys": [
+    2818059,
+    3735563
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    141,
+    100
+   ],
+   "sites": 241,
+   "gaps": {
+    "2818059-3735563": 0.1062
+   },
+   "difficulty": 0.3535,
+   "sites_sha256": "2a287aef665a020caf3ff776f3de122e2173905b3b7ad17a22d9c5bc87cac45a",
+   "crop_labels_sha256": "311dd5a9085f096ba2757a3a6d3066801429091bf6d6e648d745ae3d6997289a",
+   "order": "5",
+   "wins": [
+    "5",
+    "10"
+   ],
+   "losses": [],
+   "strong": false,
+   "image": "b08_001170_velos_43_57_k5.png",
+   "orders": {
+    "2": {
+     "hdbscan": [
+      0.856164,
+      0.623762
+     ],
+     "hgp": [
+      0.93617,
+      0.656863
+     ],
+     "cover": [
+      0.915493,
+      0.656863
+     ],
+     "core": [
+      0.815603,
+      0.61
+     ],
+     "hdbscan_mean": 0.739963,
+     "hgp_mean": 0.7965165,
+     "hdbscan_fails": false,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": true
+    },
+    "3": {
+     "hdbscan": [
+      0.815068,
+      0.6
+     ],
+     "hgp": [
+      0.943262,
+      0.676471
+     ],
+     "cover": [
+      0.93617,
+      0.666667
+     ],
+     "core": [
+      0.680851,
+      0.54
+     ],
+     "hdbscan_mean": 0.707534,
+     "hgp_mean": 0.8098665,
+     "hdbscan_fails": false,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": true
+    },
+    "5": {
+     "hdbscan": [
+      0.695035,
+      0.43
+     ],
+     "hgp": [
+      0.943262,
+      0.653465
+     ],
+     "cover": [
+      0.943262,
+      0.643564
+     ],
+     "core": [
+      0.59322,
+      0.414938
+     ],
+     "hdbscan_mean": 0.5625175,
+     "hgp_mean": 0.7983635,
+     "hdbscan_fails": true,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": false
+    },
+    "10": {
+     "hdbscan": [
+      0.61086,
+      0.414938
+     ],
+     "hgp": [
+      0.658768,
+      0.594059
+     ],
+     "cover": [
+      0.668269,
+      0.607843
+     ],
+     "core": [
+      0.61086,
+      0.414938
+     ],
+     "hdbscan_mean": 0.512899,
+     "hgp_mean": 0.6264135,
+     "hdbscan_fails": true,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": false
+    }
+   }
+  },
+  {
+   "name": "b00_001502_velos_28_66",
+   "kind": "velos",
+   "seq": "00",
+   "frame": "001502",
+   "velodyne_sha256": "01f1f2602c49f6975ee7345ce9f1cc28424ce04cf32c61e58c58978c760d4cfe",
+   "labels_sha256": "ee7152817a53b95e73b059e9e5403ac57cddcf8fdc4be7073566503cc47b407d",
+   "keys": [
+    1835019,
+    4325387
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    146,
+    63
+   ],
+   "sites": 209,
+   "gaps": {
+    "1835019-4325387": 0.0349
+   },
+   "difficulty": 0.122,
+   "sites_sha256": "7e061bb61e2a7f37d33a1c0c01f873f8f72c1a9a395c660238d6d934ddc6af9e",
+   "crop_labels_sha256": "3199964ece10faa8b7734c06d0034c92667c19c16100eaa2bf54c11820504499",
+   "order": "5",
+   "wins": [
+    "5",
+    "10"
+   ],
+   "losses": [],
+   "strong": false,
+   "image": "b00_001502_velos_28_66_k5.png",
+   "orders": {
+    "2": {
+     "hdbscan": [
+      0.751323,
+      0.671875
+     ],
+     "hgp": [
+      0.926174,
+      0.619048
+     ],
+     "cover": [
+      0.926174,
+      0.634921
+     ],
+     "core": [
+      0.812081,
+      0.52381
+     ],
+     "hdbscan_mean": 0.711599,
+     "hgp_mean": 0.772611,
+     "hdbscan_fails": false,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": true
+    },
+    "3": {
+     "hdbscan": [
+      0.737968,
+      0.609375
+     ],
+     "hgp": [
+      0.84,
+      0.603175
+     ],
+     "cover": [
+      0.833333,
+      0.603175
+     ],
+     "core": [
+      0.748663,
+      0.460317
+     ],
+     "hdbscan_mean": 0.6736715,
+     "hgp_mean": 0.7215875,
+     "hdbscan_fails": false,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": true
+    },
+    "5": {
+     "hdbscan": [
+      0.735135,
+      0.396825
+     ],
+     "hgp": [
+      0.775401,
+      0.603175
+     ],
+     "cover": [
+      0.783784,
+      0.555556
+     ],
+     "core": [
+      0.740541,
+      0.396825
+     ],
+     "hdbscan_mean": 0.5659799999999999,
+     "hgp_mean": 0.689288,
+     "hdbscan_fails": true,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": false
+    },
+    "10": {
+     "hdbscan": [
+      0.817568,
+      0.428571
+     ],
+     "hgp": [
+      0.966887,
+      0.603175
+     ],
+     "cover": [
+      0.960526,
+      0.634921
+     ],
+     "core": [
+      0.810811,
+      0.428571
+     ],
+     "hdbscan_mean": 0.6230694999999999,
+     "hgp_mean": 0.785031,
+     "hdbscan_fails": true,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": false
+    }
+   }
+  },
+  {
+   "name": "b06_000800_velos_8_12_13",
+   "kind": "velos",
+   "seq": "06",
+   "frame": "000800",
+   "velodyne_sha256": "fc8c5662ef94ddf3cf2aec0bc1aacb6ad2050a044db258c8197b226b1bf23bc0",
+   "labels_sha256": "1c0eae54634c5c5563e8d26f488eb96b71672578cdc442a67cc30fa6646ae959",
+   "keys": [
+    524299,
+    786443,
+    851979
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    86,
+    101,
+    77
+   ],
+   "sites": 264,
+   "gaps": {
+    "524299-786443": 0.0391,
+    "786443-851979": 0.3958
+   },
+   "difficulty": 0.1029,
+   "sites_sha256": "6e1b9d2f708fd47175c6f63b00a67f807e12335227121735480997f4dbf56190",
+   "crop_labels_sha256": "ce55ff7581618fcca8fa0e858a5dad067682efcbf34aadd8a5dc37b2a8a26b6d",
+   "order": "5",
+   "wins": [
+    "2",
+    "3",
+    "5"
+   ],
+   "losses": [],
+   "strong": false,
+   "image": "b06_000800_velos_8_12_13_k5.png",
+   "orders": {
+    "2": {
+     "hdbscan": [
+      0.459893,
+      0.70297,
+      1.0
+     ],
+     "hgp": [
+      0.643678,
+      0.633663,
+      1.0
+     ],
+     "cover": [
+      0.643678,
+      0.633663,
+      1.0
+     ],
+     "core": [
+      0.586207,
+      0.594059,
+      0.987013
+     ],
+     "hdbscan_mean": 0.7209543333333333,
+     "hgp_mean": 0.7591136666666666,
+     "hdbscan_fails": true,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": false
+    },
+    "3": {
+     "hdbscan": [
+      0.459893,
+      0.693069,
+      1.0
+     ],
+     "hgp": [
+      0.643678,
+      0.581395,
+      1.0
+     ],
+     "cover": [
+      0.643678,
+      0.575581,
+      1.0
+     ],
+     "core": [
+      0.563218,
+      0.549708,
+      0.987013
+     ],
+     "hdbscan_mean": 0.717654,
+     "hgp_mean": 0.741691,
+     "hdbscan_fails": true,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": false
+    },
+    "5": {
+     "hdbscan": [
+      0.462069,
+      0.55814,
+      1.0
+     ],
+     "hgp": [
+      0.639535,
+      0.693069,
+      1.0
+     ],
+     "cover": [
+      0.643678,
+      0.683168,
+      1.0
+     ],
+     "core": [
+      0.528736,
+      0.556213,
+      0.922078
+     ],
+     "hdbscan_mean": 0.673403,
+     "hgp_mean": 0.7775346666666666,
+     "hdbscan_fails": true,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": false
+    },
+    "10": {
+     "hdbscan": [
+      0.503145,
+      0.521739,
+      0.87013
+     ],
+     "hgp": [
+      0.643678,
+      0.70297,
+      1.0
+     ],
+     "cover": [
+      0.643678,
+      0.722772,
+      1.0
+     ],
+     "core": [
+      0.525641,
+      0.431694,
+      0.792208
+     ],
+     "hdbscan_mean": 0.6316713333333333,
+     "hgp_mean": 0.782216,
+     "hdbscan_fails": false,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": true
+    }
+   }
+  },
+  {
+   "name": "b08_001182_velos_55_56_57",
+   "kind": "velos",
+   "seq": "08",
+   "frame": "001182",
+   "velodyne_sha256": "4fae0de383cef39377d05c1c67694c6b9cd7eb14fb0e1f63e9b54930bad99d46",
+   "labels_sha256": "6b24c1b4aa4518c37beb087c3095f9ca30dadf482322b52475e3288fcc42cab3",
+   "keys": [
+    3604491,
+    3670027,
+    3735563
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    73,
+    132,
+    444
+   ],
+   "sites": 649,
+   "gaps": {
+    "3604491-3670027": 0.0897,
+    "3604491-3735563": 0.7373,
+    "3670027-3735563": 0.0332
+   },
+   "difficulty": 0.1073,
+   "sites_sha256": "311012b3ea5349989c64c2e4dd78f4b914693087b9e2fe89c791d9800fefe084",
+   "crop_labels_sha256": "8ed3be62f83f11e49aad880c4b0c7188689b07d44fa2d85b44f72c862a5df552",
+   "order": "10",
+   "wins": [
+    "10"
+   ],
+   "losses": [
+    "2"
+   ],
+   "strong": false,
+   "image": "b08_001182_velos_55_56_57_k10.png",
+   "orders": {
+    "2": {
+     "hdbscan": [
+      0.821918,
+      0.560606,
+      0.943694
+     ],
+     "hgp": [
+      0.684932,
+      0.492424,
+      0.988739
+     ],
+     "cover": [
+      0.684932,
+      0.492424,
+      0.988739
+     ],
+     "core": [
+      0.657534,
+      0.462121,
+      0.970721
+     ],
+     "hdbscan_mean": 0.7754059999999999,
+     "hgp_mean": 0.7220316666666666,
+     "hdbscan_fails": false,
+     "hgp_succeeds": false,
+     "hgp_fails": true,
+     "hdbscan_succeeds": true
+    },
+    "3": {
+     "hdbscan": [
+      0.808219,
+      0.55303,
+      0.939189
+     ],
+     "hgp": [
+      0.794521,
+      0.560606,
+      0.981982
+     ],
+     "cover": [
+      0.767123,
+      0.560606,
+      0.97973
+     ],
+     "core": [
+      0.726027,
+      0.522727,
+      0.961712
+     ],
+     "hdbscan_mean": 0.7668126666666667,
+     "hgp_mean": 0.7790363333333333,
+     "hdbscan_fails": false,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": true
+    },
+    "5": {
+     "hdbscan": [
+      0.767123,
+      0.515152,
+      0.927928
+     ],
+     "hgp": [
+      0.783784,
+      0.507576,
+      0.988739
+     ],
+     "cover": [
+      0.783784,
+      0.5,
+      0.988739
+     ],
+     "core": [
+      0.726027,
+      0.401515,
+      0.952703
+     ],
+     "hdbscan_mean": 0.7367343333333333,
+     "hgp_mean": 0.760033,
+     "hdbscan_fails": false,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": true
+    },
+    "10": {
+     "hdbscan": [
+      0.671233,
+      0.37234,
+      0.945946
+     ],
+     "hgp": [
+      0.773333,
+      0.514925,
+      0.997748
+     ],
+     "cover": [
+      0.773333,
+      0.540741,
+      0.997748
+     ],
+     "core": [
+      0.671233,
+      0.340909,
+      0.939189
+     ],
+     "hdbscan_mean": 0.663173,
+     "hgp_mean": 0.762002,
+     "hdbscan_fails": true,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": false
+    }
+   }
+  },
+  {
+   "name": "b00_001466_velos_42_59",
+   "kind": "velos",
+   "seq": "00",
+   "frame": "001466",
+   "velodyne_sha256": "be2a1fb6a05b90e9516e71092bf6a30a48a5679b8db0693f600a407026f5d934",
+   "labels_sha256": "4bbac730c897f4172e33626d3deb0dd5d19693c13f4dc32c1ba0df7e69f9e8d5",
+   "keys": [
+    2752523,
+    3866635
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    192,
+    118
+   ],
+   "sites": 310,
+   "gaps": {
+    "2752523-3866635": 0.0284
+   },
+   "difficulty": 0.0545,
+   "sites_sha256": "de58a6597a832575ac2374bc2535acb7a3bc44b8a8cf52a3cc4e5e3c44268c58",
+   "crop_labels_sha256": "7747a7932103717d24458393ebbf19e43d9cad0b709b32de3c5d485c00ea22c7",
+   "order": "10",
+   "wins": [
+    "10"
+   ],
+   "losses": [
+    "2"
+   ],
+   "strong": false,
+   "image": "b00_001466_velos_42_59_k10.png",
+   "orders": {
+    "2": {
+     "hdbscan": [
+      0.642857,
+      0.550847
+     ],
+     "hgp": [
+      0.637874,
+      0.401235
+     ],
+     "cover": [
+      0.637874,
+      0.385093
+     ],
+     "core": [
+      0.637874,
+      0.380645
+     ],
+     "hdbscan_mean": 0.5968519999999999,
+     "hgp_mean": 0.5195545,
+     "hdbscan_fails": false,
+     "hgp_succeeds": false,
+     "hgp_fails": true,
+     "hdbscan_succeeds": true
+    },
+    "3": {
+     "hdbscan": [
+      0.637874,
+      0.466102
+     ],
+     "hgp": [
+      0.644444,
+      0.380645
+     ],
+     "cover": [
+      0.642857,
+      0.380645
+     ],
+     "core": [
+      0.637874,
+      0.380645
+     ],
+     "hdbscan_mean": 0.551988,
+     "hgp_mean": 0.5125445,
+     "hdbscan_fails": true,
+     "hgp_succeeds": false,
+     "hgp_fails": true,
+     "hdbscan_succeeds": false
+    },
+    "5": {
+     "hdbscan": [
+      0.637874,
+      0.380645
+     ],
+     "hgp": [
+      0.648551,
+      0.380645
+     ],
+     "cover": [
+      0.648551,
+      0.380645
+     ],
+     "core": [
+      0.637874,
+      0.380645
+     ],
+     "hdbscan_mean": 0.5092595,
+     "hgp_mean": 0.514598,
+     "hdbscan_fails": true,
+     "hgp_succeeds": false,
+     "hgp_fails": true,
+     "hdbscan_succeeds": false
+    },
+    "10": {
+     "hdbscan": [
+      0.637874,
+      0.380645
+     ],
+     "hgp": [
+      0.682292,
+      0.519481
+     ],
+     "cover": [
+      0.703125,
+      0.525641
+     ],
+     "core": [
+      0.637874,
+      0.380645
+     ],
+     "hdbscan_mean": 0.5092595,
+     "hgp_mean": 0.6008865,
+     "hdbscan_fails": true,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": false
+    }
+   }
+  },
+  {
+   "name": "b10_000424_velos_2_3",
+   "kind": "velos",
+   "seq": "10",
+   "frame": "000424",
+   "velodyne_sha256": "5b2d777d6f7aa51ac5240f83de81bc205fd4b13af488d259793a4feed92ce632",
+   "labels_sha256": "89e1484b6f0a5e1d6e6f05472f9a306ee48ca4d4f8c978fbeae585e3d554a738",
+   "keys": [
+    131083,
+    196619
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    163,
+    98
+   ],
+   "sites": 261,
+   "gaps": {
+    "131083-196619": 0.0432
+   },
+   "difficulty": 0.0751,
+   "sites_sha256": "348b8e3ce48d3880ee6bfccf9610404fa5cc389045944d041020d9d197e4f1de",
+   "crop_labels_sha256": "11d75bd68f707bc2838e1cc85c21bea793073e6b69b4b51e122c24be7da78ec9",
+   "order": "5",
+   "wins": [
+    "5"
+   ],
+   "losses": [],
+   "strong": false,
+   "image": "b10_000424_velos_2_3_k5.png",
+   "orders": {
+    "2": {
+     "hdbscan": [
+      0.778846,
+      0.510204
+     ],
+     "hgp": [
+      0.884848,
+      0.510204
+     ],
+     "cover": [
+      0.872727,
+      0.510204
+     ],
+     "core": [
+      0.806061,
+      0.5
+     ],
+     "hdbscan_mean": 0.644525,
+     "hgp_mean": 0.697526,
+     "hdbscan_fails": false,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": true
+    },
+    "3": {
+     "hdbscan": [
+      0.77512,
+      0.5
+     ],
+     "hgp": [
+      0.778846,
+      0.5
+     ],
+     "cover": [
+      0.77512,
+      0.510204
+     ],
+     "core": [
+      0.77512,
+      0.5
+     ],
+     "hdbscan_mean": 0.63756,
+     "hgp_mean": 0.6394230000000001,
+     "hdbscan_fails": true,
+     "hgp_succeeds": false,
+     "hgp_fails": true,
+     "hdbscan_succeeds": false
+    },
+    "5": {
+     "hdbscan": [
+      0.77512,
+      0.5
+     ],
+     "hgp": [
+      0.790244,
+      0.510204
+     ],
+     "cover": [
+      0.794118,
+      0.510204
+     ],
+     "core": [
+      0.77512,
+      0.5
+     ],
+     "hdbscan_mean": 0.63756,
+     "hgp_mean": 0.6502239999999999,
+     "hdbscan_fails": true,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": false
+    },
+    "10": {
+     "hdbscan": [
+      0.786408,
+      0.459184
+     ],
+     "hgp": [
+      0.809783,
+      0.5
+     ],
+     "cover": [
+      0.809783,
+      0.5
+     ],
+     "core": [
+      0.785366,
+      0.428571
+     ],
+     "hdbscan_mean": 0.622796,
+     "hgp_mean": 0.6548915,
+     "hdbscan_fails": true,
+     "hgp_succeeds": false,
+     "hgp_fails": true,
+     "hdbscan_succeeds": false
+    }
+   }
+  },
+  {
+   "name": "b06_000800_velos_pietons_2_8_12",
+   "kind": "velos_pietons",
+   "seq": "06",
+   "frame": "000800",
+   "velodyne_sha256": "fc8c5662ef94ddf3cf2aec0bc1aacb6ad2050a044db258c8197b226b1bf23bc0",
+   "labels_sha256": "1c0eae54634c5c5563e8d26f488eb96b71672578cdc442a67cc30fa6646ae959",
+   "keys": [
+    131102,
+    524299,
+    786443
+   ],
+   "classes": [
+    "person",
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    117,
+    86,
+    101
+   ],
+   "sites": 304,
+   "gaps": {
+    "131102-524299": 0.1463,
+    "131102-786443": 0.5663,
+    "524299-786443": 0.0391
+   },
+   "difficulty": 0.1029,
+   "sites_sha256": "2fba808ca8c79d19b93d725199b18f5269ec68166ba9b21eb8f2d87b4b16e9e1",
+   "crop_labels_sha256": "5beba7355bb14218048f702e858c1364cb55810f20be31c5f1f1ec90e05d30b9",
+   "order": "10",
+   "wins": [
+    "2",
+    "3",
+    "5",
+    "10"
+   ],
+   "losses": [],
+   "strong": true,
+   "image": "b06_000800_velos_pietons_2_8_12_k10.png",
+   "orders": {
+    "2": {
+     "hdbscan": [
+      0.983193,
+      0.451613,
+      0.70297
+     ],
+     "hgp": [
+      0.991525,
+      0.643678,
+      0.633663
+     ],
+     "cover": [
+      0.983193,
+      0.643678,
+      0.633663
+     ],
+     "core": [
+      0.991453,
+      0.586207,
+      0.594059
+     ],
+     "hdbscan_mean": 0.712592,
+     "hgp_mean": 0.7562886666666667,
+     "hdbscan_fails": true,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": false
+    },
+    "3": {
+     "hdbscan": [
+      0.991525,
+      0.454054,
+      0.693069
+     ],
+     "hgp": [
+      0.991525,
+      0.643678,
+      0.581395
+     ],
+     "cover": [
+      0.991525,
+      0.643678,
+      0.575581
+     ],
+     "core": [
+      0.974576,
+      0.563218,
+      0.549708
+     ],
+     "hdbscan_mean": 0.7128826666666667,
+     "hgp_mean": 0.7388659999999999,
+     "hdbscan_fails": true,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": false
+    },
+    "5": {
+     "hdbscan": [
+      0.991525,
+      0.462069,
+      0.55814
+     ],
+     "hgp": [
+      0.991525,
+      0.639535,
+      0.693069
+     ],
+     "cover": [
+      0.991525,
+      0.643678,
+      0.683168
+     ],
+     "core": [
+      0.957627,
+      0.528736,
+      0.556213
+     ],
+     "hdbscan_mean": 0.670578,
+     "hgp_mean": 0.7747096666666667,
+     "hdbscan_fails": true,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": false
+    },
+    "10": {
+     "hdbscan": [
+      0.983051,
+      0.503145,
+      0.428571
+     ],
+     "hgp": [
+      0.991525,
+      0.643678,
+      0.70297
+     ],
+     "cover": [
+      0.991525,
+      0.643678,
+      0.722772
+     ],
+     "core": [
+      0.966102,
+      0.483444,
+      0.425743
+     ],
+     "hdbscan_mean": 0.6382556666666667,
+     "hgp_mean": 0.779391,
+     "hdbscan_fails": true,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": false
+    }
+   }
+  },
+  {
+   "name": "b00_002140_velos_pietons_1_6",
+   "kind": "velos_pietons",
+   "seq": "00",
+   "frame": "002140",
+   "velodyne_sha256": "954f79440c0f21a85bd7e1a07fcf756f473767e55fac05c7a7548a9209b16c11",
+   "labels_sha256": "3c93b8f8b37aa4d57a12fa44038c3d5066c00cafbf88b91f53545ecd63d72ec4",
+   "keys": [
+    65566,
+    393227
+   ],
+   "classes": [
+    "person",
+    "bicycle"
+   ],
+   "points": [
+    82,
+    78
+   ],
+   "sites": 160,
+   "gaps": {
+    "65566-393227": 0.0967
+   },
+   "difficulty": 0.4045,
+   "sites_sha256": "6b10e820502d7bde5dcac8c0efbd3a3956594db00b2264f91b45d02fd9f9174d",
+   "crop_labels_sha256": "5b3a82c275145390bd6b045c802088cc19dcd3b16191f062490e47be0c8281a9",
+   "order": "10",
+   "wins": [
+    "10"
+   ],
+   "losses": [],
+   "strong": false,
+   "image": "b00_002140_velos_pietons_1_6_k10.png",
+   "orders": {
+    "2": {
+     "hdbscan": [
+      0.621951,
+      0.886076
+     ],
+     "hgp": [
+      0.95122,
+      0.9375
+     ],
+     "cover": [
+      0.95122,
+      0.936709
+     ],
+     "core": [
+      0.878049,
+      0.794872
+     ],
+     "hdbscan_mean": 0.7540135,
+     "hgp_mean": 0.94436,
+     "hdbscan_fails": false,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": true
+    },
+    "3": {
+     "hdbscan": [
+      0.621951,
+      0.858974
+     ],
+     "hgp": [
+      0.95122,
+      0.938272
+     ],
+     "cover": [
+      0.95122,
+      0.938272
+     ],
+     "core": [
+      0.902439,
+      0.846154
+     ],
+     "hdbscan_mean": 0.7404625,
+     "hgp_mean": 0.944746,
+     "hdbscan_fails": false,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": true
+    },
+    "5": {
+     "hdbscan": [
+      0.902439,
+      0.782051
+     ],
+     "hgp": [
+      0.939759,
+      0.91358
+     ],
+     "cover": [
+      0.963415,
+      0.91358
+     ],
+     "core": [
+      0.890244,
+      0.74359
+     ],
+     "hdbscan_mean": 0.842245,
+     "hgp_mean": 0.9266695,
+     "hdbscan_fails": false,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": true
+    },
+    "10": {
+     "hdbscan": [
+      0.756098,
+      0.4875
+     ],
+     "hgp": [
+      0.939024,
+      0.86747
+     ],
+     "cover": [
+      0.939024,
+      0.879518
+     ],
+     "core": [
+      0.780488,
+      0.493671
+     ],
+     "hdbscan_mean": 0.621799,
+     "hgp_mean": 0.9032469999999999,
+     "hdbscan_fails": true,
+     "hgp_succeeds": true,
+     "hgp_fails": false,
+     "hdbscan_succeeds": false
+    }
+   }
+  }
+ ]
+}

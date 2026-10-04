@@ -40,6 +40,11 @@ seuil d'appariement de la qualité panoptique (PQ).
 | [05 témoin](05_temoin_voitures_en_file/) | 08/002554, sans sol | trois voitures garées à 0,7–1,2 m l'une de l'autre | 0,86 / 0,98 / 0,99 | 0,83 / 0,98 / 0,99 | 0,88 / 0,99 / 0,97 | K5 [sombre](05_temoin_voitures_en_file/05_temoin_voitures_en_file_hdbscan_K5_sombre.mp4) · [clair](05_temoin_voitures_en_file/05_temoin_voitures_en_file_hdbscan_K5_clair.mp4) ; ALPINE [sombre](05_temoin_voitures_en_file/05_temoin_voitures_en_file_alpine_bev_sombre.mp4) · [clair](05_temoin_voitures_en_file/05_temoin_voitures_en_file_alpine_bev_clair.mp4) |
 <!-- catalogue:fin -->
 
+**Bouts de scène où HGP réussit** : [`bouts_hgp/`](bouts_hgp/README.md) rassemble douze bouts SemanticKITTI réduits
+aux seuls points de deux ou trois objets proches (vélos, vélos et piétons). Sur chacun, au même ordre k, la hiérarchie
+de HDBSCAN manque un objet que la hiérarchie de points de HGP (morsehgp3D_v11) retrouve. Ce dossier, lui, montre des
+résultats Morse HGP 3D, mesurés sur G4 (`public_status=not_claimed`) ; les démos 01 à 05 n'en montrent aucun.
+
 Pour **tout** K de 1 à 10 (courbe du bilan de chaque vidéo), le vélo B de
 01, les vélos A et B de 02, le piéton A de 03 et les trois vélos de 04
 restent sous 0,5 : aucune valeur de `min_samples` ne les isole. Chaque dossier contient
