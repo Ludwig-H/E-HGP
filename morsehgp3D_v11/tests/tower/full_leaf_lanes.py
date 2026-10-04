@@ -7,7 +7,8 @@ de feuilles sur le Pool (49147) rendent le meme dump et le meme registre du cata
 Nuage uniforme de 3 000 sites (random.Random(20261004), cube de cote 2^16, PointId = rang), K = 5, feuilles de 16,
 quatre fils. Les feuilles se recouvrent : la porte exige un lot plus nombreux que les sites (le regime qu'une garde
 fausse « feuilles <= sites » refusait le 4 octobre 2026), au moins une boule par voie de lot, et aucune feuille du lot
-hors des voies 49147. Bibliotheque standard seule ; aucune assertion Python. Code 0 : conforme.
+hors des voies 49147 ; les deux chemins d'ecriture du lot (copie des cases du comptage, seconde passe des feuilles
+qui debordent) doivent servir. Bibliotheque standard seule ; aucune assertion Python. Code 0 : conforme.
 """
 import hashlib
 import json
@@ -72,8 +73,10 @@ def main():
         batch = seen['lot_hote']['batch']
         need(batch['jobs'] > SITES, 'lot de feuilles pas plus nombreux que les sites (%d)' % batch['jobs'])
         need(batch['records'] > 0 and batch['population'] > 0 and batch['unresolved'] <= batch['jobs'], 'lot vide')
-        print('full_leaf_lanes_verdict conforme sites%d boules%d lot%d non_resolues%d' % (
-            SITES, reference['balls'], batch['jobs'], batch['unresolved']))
+        # Les deux chemins d'ecriture servent : copie des cases et seconde passe des feuilles qui debordent.
+        need(0 < batch['fill_jobs'] < batch['jobs'], 'chemins d ecriture non exerces (%d)' % batch['fill_jobs'])
+        print('full_leaf_lanes_verdict conforme sites%d boules%d lot%d non_resolues%d rejouees%d' % (
+            SITES, reference['balls'], batch['jobs'], batch['unresolved'], batch['fill_jobs']))
 
 
 if __name__ == '__main__':

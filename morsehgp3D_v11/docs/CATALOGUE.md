@@ -273,6 +273,16 @@ passe unique (64), et les deux exécuteurs de lot s'excluent.
   par feuille, préfixes CUB), construit seulement avec `-DMHGP11_ENABLE_CUDA=ON` (`sm_120`, nvcc réel) ; sans CUDA,
   l'option est refusée avant tout calcul.
 
+**Exécution du lot.** Chaque feuille est d'abord comptée : ses compteurs et ses émissions sont rangés dans une case
+fixe (32 enregistrements, 256 incidences), dans l'ordre d'émission. Après les préfixes exclusifs, les cases sont
+copiées à leur place, et seules les feuilles qui émettent et débordent de leur case rejouent leur feuille pour
+l'écrire (`fill_jobs` : 1,7 à 2,5 % des feuilles sur les trames à K = 5 ; la moitié des feuilles n'émet rien).
+Sur le GPU, les fils prennent les feuilles par taille décroissante (tri stable par comptage) ; les sorties gardent
+leur place par feuille. Le contexte CUDA s'ouvre dans un fil d'arrière-plan dès le début de FULL
+(`prefetch_device_context`), recouvert par l'index et le parcours ; les tableaux viennent du pool du périphérique
+(`cudaMallocAsync`), qui garde la mémoire rendue pour les passes suivantes. Sur l'hôte, les mêmes cases et la même
+copie valident cette logique (`mhgp11_tower_full_leaf_lanes` exige les deux chemins d'écriture).
+
 **Mémoire.** Les tableaux du GPU sont réservés dans le même `MemoryBudget` que l'hôte (`BudgetReservation`, sans
 allocation hôte), avant `cudaMalloc` : coexistences et pic compris. Ne sont pas comptés le contexte CUDA ni la mémoire
 locale que le pilote réserve pour le cadre statique des noyaux (3 248 et 3 264 octets par fil, sans débordement de
@@ -283,9 +293,10 @@ $2^{62}$ : les réductions de lot sont exactes.
 
 **Validé localement** (u21, trames sans sol, K = 5) : dumps FULL et registres identiques à la voie CPU pour
 `device_leaf` (ng00, ng02) et `batch_leaves` (ng00, ng01, ng02, à froid et à chaud) ; la porte
-`mhgp11_tower_full_bench_io` couvre ces deux modes sur son petit témoin.
-Le jeu des feuilles par `leaf_device.hpp` sur l'hôte est plus lent que `leaf.cpp` (exécuteur de lot ×1,4 à ×1,6 à six fils) :
-c'est le prix de la source unique, que le GPU doit racheter. **Non établi** : l'identité de la voie CUDA et son
+`mhgp11_tower_full_bench_io` couvre ces deux modes sur son petit témoin, `mhgp11_tower_full_leaf_lanes` un nuage de
+3 000 sites. Avant les cases, l'exécuteur de lot sur l'hôte rejouait toute feuille deux fois et coûtait ×1,4 à ×1,6
+la passe unique CPU (six fils locaux) ; avec elles, ses feuilles prennent 1,3 à 1,7 s contre 2,4 à 2,6 s pour la
+passe CPU sur ces trames, mesure locale indicative. **Non établi** : l'identité de la voie CUDA et son
 temps, mesurés sur G4 par [`gpu_ab.py`](../bench/gpu_ab.py) (CPU contre GPU, à froid et à chaud, dumps et registres
 exigés identiques) et examinés par [`gpu_profile.py`](../bench/gpu_profile.py) (Nsight Systems et Nsight Compute,
 outils épinglés par empreinte).

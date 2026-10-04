@@ -170,7 +170,8 @@ void catalogue_execution(const Catalogue& catalogue, const CatalogueTimings& tim
             << ",\"executor_ns\":" << t.batch_executor_ns << ",\"device_init_ns\":" << t.batch_device_init_ns
             << ",\"upload_ns\":" << t.batch_upload_ns << ",\"download_ns\":" << t.batch_download_ns
             << ",\"device_bytes\":" << t.batch_device_bytes << ",\"levels_ns\":" << t.batch_levels_ns
-            << ",\"fallback_ns\":" << t.batch_fallback_ns << ",\"prefetch_ns\":" << t.batch_prefetch_ns << '}';
+            << ",\"fallback_ns\":" << t.batch_fallback_ns << ",\"prefetch_ns\":" << t.batch_prefetch_ns
+            << ",\"fill_jobs\":" << t.batch_fill_jobs << '}';
 }
 
 void catalogue_work(const Catalogue& catalogue, bool pair_graph) {

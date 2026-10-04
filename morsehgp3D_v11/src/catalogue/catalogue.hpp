@@ -86,6 +86,7 @@ struct CatalogueTimings {
   u64 batch_device_init_ns = 0, batch_upload_ns = 0, batch_download_ns = 0, batch_device_bytes = 0;
   u64 batch_levels_ns = 0, batch_fallback_ns = 0;
   u64 batch_prefetch_ns = 0;  // ouverture du contexte GPU en arriere-plan (prefetch_device_context), recouverte
+  u64 batch_fill_jobs = 0;    // feuilles rejouees par la seconde passe du GPU (celles qui emettent)
 };
 
 // Travail de stockage distinct de la geometrie ; valeurs de l'option une passe, zero sinon sauf passes=2.

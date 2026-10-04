@@ -1,13 +1,19 @@
 // Voie lot de la passe unique : ramassage des files, executeur (Pool ou GPU), Level depuis les supports, repli exact.
 #include "catalogue/leaf_queue.hpp"
-#include "catalogue/adaptive_frontier.hpp"  // add_catalogue_ledger
+#include "catalogue/adaptive_frontier.hpp"  // add_catalogue_ledger, kAdaptiveTasks
+#include "catalogue/frontier.hpp"           // kFrontierTasks
 
+#include <algorithm>
+#include <array>
 #include <optional>
 
 #include "sched/sched.hpp"
 
 namespace mhgp11::catalogue_detail {
 namespace {
+
+// Au plus une file par tache de la passe unique (frontiere adaptative ou fixe).
+inline constexpr u64 kMaxGatherQueues = std::max<u64>(kAdaptiveTasks, kFrontierTasks);
 
 CatalogueLedger ledger_of(const leaf_device::Counts& c) noexcept {
   CatalogueLedger l;
@@ -68,12 +74,34 @@ struct Materialize {
   }
 };
 
-Outcome gather(MemoryBudget& budget, std::span<const TaskLeafQueue* const> queues, Buffer<LeafJob>& jobs,
-               Buffer<u32>& sites) noexcept {
+// Rassemblement des files : decalages par file (prefixes), puis une copie par file sur le Pool, a places fixes.
+struct Gather {
+  std::span<const TaskLeafQueue* const> queues;
+  std::span<LeafJob> jobs;
+  std::span<u32> sites;
+  std::array<u64, 2 * kMaxGatherQueues> offsets{};  // debut des feuilles, puis des sites, par file
+
+  static Outcome body(void* context, u64 begin, u64 end, u32) noexcept {
+    const auto& self = *static_cast<const Gather*>(context);
+    for (u64 i = begin; i < end; ++i) {
+      const auto* q = self.queues[i];
+      const u64 job_at = self.offsets[2 * i], site_at = self.offsets[2 * i + 1];
+      MHGP11_TRY(q->copy_to(self.jobs.subspan(job_at, q->jobs()), self.sites.subspan(site_at, q->sites()), site_at));
+    }
+    return {};
+  }
+};
+
+Outcome gather(MemoryBudget& budget, sched::Pool& pool, std::span<const TaskLeafQueue* const> queues,
+               Buffer<LeafJob>& jobs, Buffer<u32>& sites) noexcept {
+  if (queues.size() > kMaxGatherQueues) return fail(Reason::catalogue_invariant);
+  Gather gathering{queues, {}, {}};
   u64 job_count = 0, site_count = 0;
-  for (const auto* q : queues) {
-    MHGP11_TRY(checked_add(job_count, q->jobs()));
-    MHGP11_TRY(checked_add(site_count, q->sites()));
+  for (u64 i = 0; i < queues.size(); ++i) {
+    gathering.offsets[2 * i] = job_count;
+    gathering.offsets[2 * i + 1] = site_count;
+    MHGP11_TRY(checked_add(job_count, queues[i]->jobs()));
+    MHGP11_TRY(checked_add(site_count, queues[i]->sites()));
   }
   u64 bytes = 0;
   MHGP11_TRY(add_bytes<LeafJob>(bytes, job_count));
@@ -81,11 +109,9 @@ Outcome gather(MemoryBudget& budget, std::span<const TaskLeafQueue* const> queue
   MHGP11_TRY(budget.admit(bytes));
   MHGP11_TRY(jobs.allocate(job_count, budget));
   MHGP11_TRY(sites.allocate(site_count, budget));
-  u64 job_at = 0, site_at = 0;
-  for (const auto* q : queues) {
-    MHGP11_TRY(q->copy_to(jobs.span().subspan(job_at, q->jobs()), sites.span().subspan(site_at, q->sites()), site_at));
-    job_at += q->jobs(); site_at += q->sites();
-  }
+  gathering.jobs = jobs.span();
+  gathering.sites = sites.span();
+  if (!queues.empty()) MHGP11_TRY(pool.parallel_for(queues.size(), 1, &gathering, Gather::body));
   return {};
 }
 
@@ -123,7 +149,7 @@ Outcome process_leaf_batch(const Cloud& cloud, const CatalogueParams& params, Me
   stage.emplace();
   Buffer<LeafJob> jobs;
   Buffer<u32> sites;
-  MHGP11_TRY(gather(budget, queues, jobs, sites));
+  MHGP11_TRY(gather(budget, pool, queues, jobs, sites));
   const u64 gather_ns = stage->nanoseconds();
   LeafBatchView view;
   view.x = cloud.x().data(); view.y = cloud.y().data(); view.z = cloud.z().data(); view.cloud_sites = cloud.sites();
@@ -131,7 +157,7 @@ Outcome process_leaf_batch(const Cloud& cloud, const CatalogueParams& params, Me
   view.kmax = params.kmax; view.cache = params.cache_center_lines;
   LeafBatchResult result;
   stage.emplace();
-  if (params.cuda_leaves) MHGP11_TRY(run_leaf_batch_cuda(view, budget, result));
+  if (params.cuda_leaves) MHGP11_TRY(run_leaf_batch_cuda(view, pool, budget, result));
   else MHGP11_TRY(run_leaf_batch_host(view, pool, budget, result));
   const u64 executor_ns = stage->nanoseconds();
   // Level et population du lot, puis repli des non resolues.
@@ -161,7 +187,7 @@ Outcome process_leaf_batch(const Cloud& cloud, const CatalogueParams& params, Me
     timings->batch_device_init_ns = t.device_init_ns; timings->batch_upload_ns = t.upload_ns;
     timings->batch_download_ns = t.download_ns; timings->batch_device_bytes = t.device_bytes;
     timings->batch_levels_ns = levels_ns; timings->batch_fallback_ns = fallback_ns;
-    timings->batch_prefetch_ns = t.prefetch_ns;
+    timings->batch_prefetch_ns = t.prefetch_ns; timings->batch_fill_jobs = t.fill_jobs;
   }
   return {};
 }

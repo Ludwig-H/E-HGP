@@ -5,10 +5,10 @@
         [--modes cpu=16379,gpu=81915] [--reps 5] [--workers 48] [--warm-passes 5] [--kmax 5] [--leaf 16]
 
 Un seul binaire (construit avec MHGP11_ENABLE_CUDA) joue chaque mode : 16379 est la voie CPU de reference, 81915
-ajoute le bit 65536 (feuilles en lot sur le GPU). Avec --src, le binaire est construit (ou repris s'il existe) dans
+ajoute le bit 65536 (feuilles en lot sur le GPU), 49147 le bit 32768 (meme lot sur le Pool de l'hote). Avec --src, le binaire est construit (ou repris s'il existe) dans
 --work/b_cuda : Release, MHGP11_COORD_BITS=21, MHGP11_ENABLE_CUDA=ON, nvcc trouve comme les sessions G4 precedentes
-(PATH, CUDA_HOME, /usr/local/cuda, /usr/local/cuda-12.9), cible mhgp11_full_bench. A froid : un processus neuf par prise, modes alternes et inverses une
-prise sur deux, sur lidar_ng00/01/02 ; chaque dump est hache puis efface et doit egaler celui de la premiere prise CPU
+(PATH, CUDA_HOME, /usr/local/cuda, /usr/local/cuda-12.9), cible mhgp11_full_bench. A froid : un processus neuf par prise, modes ordonnes par un carre de
+Williams (bench/ab_g4.py), sur lidar_ng00/01/02 ; chaque dump est hache puis efface et doit egaler celui de la premiere prise CPU
 de sa trame, et le registre du catalogue (catalogue_work) doit egaler le sien. A chaud : un processus par (trame, mode) qui enchaine --warm-passes passes FULL (Pool, memoire et contexte
 GPU vivants) ; on garde chaque ligne "pass" et le dump de la derniere passe, lui aussi compare. Le rapport publie les
 medianes par trame, mode et regime (mur, domaine, passe unique, executeur du lot, forets) et le detail du lot GPU
@@ -23,6 +23,9 @@ import shutil
 import subprocess
 import sys
 import time
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from ab_g4 import williams  # noqa: E402  (meme carre equilibre que le banc A/B)
 
 FRAMES = ('lidar_ng00', 'lidar_ng01', 'lidar_ng02')
 
@@ -69,9 +72,7 @@ def take_summary(got):
                 domain_ms=ms(full.get('domain_ns')), forest_ms=ms(full.get('forest_ns')),
                 single_pass_ms=ms(domain.get('single_pass_ns')), prefix_ms=ms(domain.get('prefix_ns')),
                 sort_ms=ms(domain.get('sort_ns')), cpu_seconds=full.get('cpu_seconds'),
-                batch={k: batch.get(k) for k in ('jobs', 'unresolved', 'records', 'population', 'count_ns', 'fill_ns',
-                                                  'executor_ns', 'device_init_ns', 'upload_ns', 'download_ns',
-                                                  'device_bytes', 'levels_ns', 'gather_ns', 'fallback_ns')})
+                batch=dict(batch))
 
 
 def find_nvcc():
@@ -173,10 +174,12 @@ def main():
                                                                              (digest or '')[:12]))
         return row
 
+    orders = williams(len(modes))
+    report['orders'] = [[modes[i][0] for i in o] for o in orders]
     for workers in args.workers.split(','):
         for rep in range(args.reps):
             for frame in FRAMES:
-                order = modes if rep % 2 == 0 else list(reversed(modes))
+                order = [modes[i] for i in orders[rep % len(orders)]]
                 for name, mode in order:
                     row = one(frame, name, mode, workers, 1)
                     row['rep'] = rep

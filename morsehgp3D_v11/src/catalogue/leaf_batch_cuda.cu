@@ -3,9 +3,11 @@
 // prefixes exclusifs (CUB), passe d'ecriture aux places fixees, retour des emissions dans l'ordre du lot.
 // Exactitude : aucun flottant ; les chemins non certifies rendent la feuille non resolue (refaite sur l'hote).
 #include "catalogue/leaf_batch.hpp"
+#include "sched/sched.hpp"
 
 #include <cuda_runtime.h>
 #include <cub/device/device_scan.cuh>
+#include <cub/device/device_select.cuh>
 
 #include <chrono>
 #include <mutex>
@@ -16,7 +18,6 @@ namespace {
 
 constexpr int kThreads = 128;
 constexpr int kCountFields = 15;
-
 struct DeviceView {
   const u32* x;
   const u32* y;
@@ -47,7 +48,8 @@ __device__ void counts_to_array(const leaf_device::Counts& c, unsigned long long
   out[14] = c.region_line_fallbacks;
 }
 
-__global__ void count_kernel(DeviceView v, u8* status, u64* balls, u64* incidences, unsigned long long* totals) {
+__global__ void count_kernel(DeviceView v, u8* status, u64* balls, u64* incidences, unsigned long long* totals,
+                             LeafRecord* scratch_records, u32* scratch_population, u8* stored) {
   __shared__ unsigned long long block_totals[kCountFields];
   if (threadIdx.x < kCountFields) block_totals[threadIdx.x] = 0;
   __syncthreads();
@@ -56,11 +58,12 @@ __global__ void count_kernel(DeviceView v, u8* status, u64* balls, u64* incidenc
     const u64 j = v.order[thread];
     const leaf_device::Input in = device_input(v, j);
     leaf_device::Counts c;
-    leaf_device::CountSink sink;
+    ScratchSink sink{scratch_records + j * kScratchRecords, scratch_population + j * kScratchPopulation};
     const u32 s = leaf_device::run_leaf(in, c, sink);
     status[j] = static_cast<u8>(s);
     balls[j] = s == leaf_device::kOk ? sink.balls : 0;
     incidences[j] = s == leaf_device::kOk ? sink.incidences : 0;
+    stored[j] = s == leaf_device::kOk && sink.fits;
     if (s == leaf_device::kOk) {
       // Sommes de bloc et totales < 2^62 (leaf_device::kCountBound, lot <= kMaxBatchJobs) : atomicAdd exact.
       unsigned long long local[kCountFields];
@@ -74,13 +77,28 @@ __global__ void count_kernel(DeviceView v, u8* status, u64* balls, u64* incidenc
     atomicAdd(&totals[threadIdx.x], block_totals[threadIdx.x]);
 }
 
-__global__ void fill_kernel(DeviceView v, const u8* status, const u64* record_begin, const u64* population_begin,
-                            LeafRecord* records, u32* population, u64 total_records, u64 total_population,
-                            unsigned* errors) {
+// Copie des cases rangees au comptage vers leurs places (prefixes) ; population_begin recale au debut de la feuille.
+__global__ void copy_kernel(u64 count, const u8* stored, const u64* balls, const u64* incidences,
+                            const u64* record_begin, const u64* population_begin, const LeafRecord* scratch_records,
+                            const u32* scratch_population, LeafRecord* records, u32* population) {
+  const u64 j = u64(blockIdx.x) * blockDim.x + threadIdx.x;
+  if (j >= count || !stored[j] || balls[j] == 0) return;
+  copy_scratch(j, balls[j], incidences[j], record_begin[j], population_begin[j], scratch_records, scratch_population,
+               records, population);
+}
+
+// Seconde passe sur la seule liste des feuilles resolues qui emettent et ont deborde de leur case (selection stable
+// dans l'ordre par taille).
+__global__ void fill_kernel(DeviceView v, const u32* list, u64 list_count, const u8* status, const u64* record_begin,
+                            const u64* population_begin, LeafRecord* records, u32* population, u64 total_records,
+                            u64 total_population, unsigned* errors) {
   const u64 thread = u64(blockIdx.x) * blockDim.x + threadIdx.x;
-  if (thread >= v.count) return;
-  const u64 j = v.order[thread];
-  if (status[j] != leaf_device::kOk) return;
+  if (thread >= list_count) return;
+  const u64 j = list[thread];
+  if (status[j] != leaf_device::kOk) {
+    atomicAdd(errors, 1u);
+    return;
+  }
   const leaf_device::Input in = device_input(v, j);
   leaf_device::Counts c;
   FillSink sink{records, population, record_begin[j], population_begin[j]};
@@ -91,8 +109,20 @@ __global__ void fill_kernel(DeviceView v, const u8* status, const u64* record_be
     atomicAdd(errors, 1u);
 }
 
+// Feuille resolue qui emet au moins une boule : seule a rejouer pour l'ecriture (la moitie des feuilles LiDAR
+// n'emet rien a K = 5).
+struct Emits {
+  const u8* status;
+  const u64* balls;
+  const u8* stored;
+  __device__ bool operator()(u32 j) const { return status[j] == leaf_device::kOk && balls[j] != 0 && !stored[j]; }
+};
+
 // Proprietaire RAII d'une allocation device, reservee d'abord dans le budget commun (R7 : hote et device ensemble,
-// coexistences comprises), liberee puis rendue au budget a la destruction ; octets ajoutes a device_bytes.
+// coexistences comprises), liberee puis rendue au budget a la destruction ; octets ajoutes a device_bytes. Allocation
+// ordonnee sur le flux par defaut (cudaMallocAsync) dans le pool du peripherique, qui garde la memoire rendue : une
+// passe chaude la reprend sans repasser par le pilote. Le budget compte les reservations vivantes, pas la memoire que
+// le pool garde ensuite (comme operator new cote hote).
 template <class T>
 struct DeviceArray {
   T* data = nullptr;
@@ -100,13 +130,13 @@ struct DeviceArray {
   DeviceArray() = default;
   DeviceArray(const DeviceArray&) = delete;
   DeviceArray& operator=(const DeviceArray&) = delete;
-  ~DeviceArray() { if (data != nullptr) cudaFree(data); }
+  ~DeviceArray() { if (data != nullptr) cudaFreeAsync(data, 0); }
   Outcome allocate(u64 count, MemoryBudget& budget, u64& bytes) noexcept {
     if (count == 0) return {};
     u64 size = 0;
     MHGP11_TRY(add_bytes<T>(size, count));
     MHGP11_TRY(reservation.reserve(size, budget));
-    if (cudaMalloc(&data, size) != cudaSuccess) {
+    if (cudaMallocAsync(reinterpret_cast<void**>(&data), size, 0) != cudaSuccess) {
       data = nullptr;
       reservation.reset();
       return fail(Reason::memory_budget);
@@ -137,6 +167,18 @@ struct Prefetch {
 Prefetch& prefetch_state() {
   static Prefetch state;
   return state;
+}
+
+// Le pool du peripherique garde toute memoire rendue (seuil de liberation maximal) : les passes suivantes la
+// reprennent. Idempotent.
+Outcome keep_pool_memory() noexcept {
+  int device = 0;
+  cudaMemPool_t pool;
+  u64 keep = ~u64{0};
+  if (!ok(cudaGetDevice(&device)) || !ok(cudaDeviceGetDefaultMemPool(&pool, device)) ||
+      !ok(cudaMemPoolSetAttribute(pool, cudaMemPoolAttrReleaseThreshold, &keep)))
+    return fail(Reason::parameter_out_of_range);
+  return {};
 }
 
 // Attend l'ouverture anticipee si elle a eu lieu ; rend sa duree (0 sinon).
@@ -186,16 +228,98 @@ Outcome scan(u64 count, const u64* balls, const u64* incidences, u64* record_beg
   return {};
 }
 
+// Liste des feuilles a ecrire : selection stable des feuilles qui emettent, dans l'ordre des fils (par taille).
+Outcome select_emitting(u64 count, const u32* order, const u8* status, const u64* balls, const u8* stored,
+                        DeviceArray<u32>& list,
+                        DeviceArray<unsigned long long>& selected, DeviceArray<unsigned char>& temp,
+                        MemoryBudget& budget, u64& device_bytes, u64& fill_count) noexcept {
+  fill_count = 0;
+  if (count == 0) return {};
+  MHGP11_TRY(list.allocate(count, budget, device_bytes));
+  MHGP11_TRY(selected.allocate(1, budget, device_bytes));
+  const Emits emits{status, balls, stored};
+  size_t temp_bytes = 0;
+  if (!ok(cub::DeviceSelect::If(nullptr, temp_bytes, order, list.data, selected.data, count, emits)))
+    return fail(Reason::parameter_out_of_range);
+  MHGP11_TRY(temp.allocate(temp_bytes, budget, device_bytes));
+  if (!ok(cub::DeviceSelect::If(temp.data, temp_bytes, order, list.data, selected.data, count, emits)))
+    return fail(Reason::parameter_out_of_range);
+  unsigned long long chosen = 0;
+  if (!ok(cudaMemcpy(&chosen, selected.data, sizeof(chosen), cudaMemcpyDeviceToHost)))
+    return fail(Reason::parameter_out_of_range);
+  if (chosen > count) return fail(Reason::catalogue_invariant);
+  fill_count = chosen;
+  return {};
+}
+
+// Ecriture : copie des cases rangees au comptage vers leurs places, puis seconde passe des seules feuilles qui
+// emettent et ont deborde de leur case.
+struct WritePhase {
+  const DeviceView& dv;
+  const u8* status;
+  const u8* stored;
+  const u64* balls;
+  const u64* incidences;
+  const u64* record_begin;
+  const u64* population_begin;
+  const LeafRecord* scratch_records;
+  const u32* scratch_population;
+  LeafRecord* records;
+  u32* population;
+  u64 total_records, total_population;
+  unsigned* errors;
+
+  Outcome run(MemoryBudget& budget, u64& device_bytes, u64& fill_jobs) const noexcept {
+    fill_jobs = 0;
+    if (dv.count == 0) return {};
+    const unsigned grid = static_cast<unsigned>((dv.count + kThreads - 1) / kThreads);
+    copy_kernel<<<grid, kThreads>>>(dv.count, stored, balls, incidences, record_begin, population_begin,
+                                    scratch_records, scratch_population, records, population);
+    if (!ok(cudaGetLastError())) return fail(Reason::parameter_out_of_range);
+    DeviceArray<u32> list;
+    DeviceArray<unsigned long long> selected;
+    DeviceArray<unsigned char> temp;
+    MHGP11_TRY(select_emitting(dv.count, dv.order, status, balls, stored, list, selected, temp, budget, device_bytes,
+                               fill_jobs));
+    const unsigned fill_grid = static_cast<unsigned>((fill_jobs + kThreads - 1) / kThreads);
+    if (fill_jobs != 0)
+      fill_kernel<<<fill_grid, kThreads>>>(dv, list.data, fill_jobs, status, record_begin, population_begin, records,
+                                           population, total_records, total_population, errors);
+    if (!ok(cudaGetLastError()) || !ok(cudaDeviceSynchronize())) return fail(Reason::parameter_out_of_range);
+    return {};
+  }
+};
+
+// Pages neuves d'un tampon hote touchees en parallele avant la copie du retour : sinon chaque page fait faute pendant
+// cudaMemcpy, sur un seul fil (77 Mo en 19 ms sur G4, 4 Go/s, contre 28 Go/s a l'envoi).
+struct Touch {
+  u8* base;
+  u64 bytes;
+  static Outcome body(void* context, u64 begin, u64 end, u32) noexcept {
+    const auto& self = *static_cast<const Touch*>(context);
+    for (u64 page = begin; page < end; ++page) self.base[page * 4096] = 0;
+    return {};
+  }
+};
+
+Outcome touch_pages(sched::Pool& pool, u8* base, u64 bytes) noexcept {
+  if (bytes == 0) return {};
+  Touch touch{base, bytes};
+  return pool.parallel_for((bytes + 4095) / 4096, 64, &touch, Touch::body);
+}
+
 // Retour : emissions et population (tampons hote budgetes), statuts, compteurs du lot, erreurs de remplissage.
 Outcome download(u64 count, const u8* status, const LeafRecord* records, const u32* population,
                  const unsigned long long* totals, const unsigned* errors, u64 total_records, u64 total_population,
-                 MemoryBudget& budget, LeafBatchResult& result) noexcept {
+                 sched::Pool& pool, MemoryBudget& budget, LeafBatchResult& result) noexcept {
   u64 host_bytes = 0;
   MHGP11_TRY(add_bytes<LeafRecord>(host_bytes, total_records));
   MHGP11_TRY(add_bytes<u32>(host_bytes, total_population));
   MHGP11_TRY(budget.admit(host_bytes));
   MHGP11_TRY(result.records.allocate(total_records, budget));
   MHGP11_TRY(result.population.allocate(total_population, budget));
+  MHGP11_TRY(touch_pages(pool, reinterpret_cast<u8*>(result.records.data()), total_records * sizeof(LeafRecord)));
+  MHGP11_TRY(touch_pages(pool, reinterpret_cast<u8*>(result.population.data()), total_population * sizeof(u32)));
   unsigned long long counts[kCountFields] = {};
   unsigned fill_errors = 0;
   if ((total_records != 0 && !ok(cudaMemcpy(result.records.data(), records, total_records * sizeof(LeafRecord),
@@ -239,7 +363,8 @@ bool cuda_leaf_batch_available() noexcept {
   return cudaGetDeviceCount(&devices) == cudaSuccess && devices > 0;
 }
 
-Outcome run_leaf_batch_cuda(const LeafBatchView& view, MemoryBudget& budget, LeafBatchResult& result) noexcept {
+Outcome run_leaf_batch_cuda(const LeafBatchView& view, sched::Pool& pool, MemoryBudget& budget,
+                            LeafBatchResult& result) noexcept {
   const u64 start = now_ns();
   auto& t = result.timings;
   // Hypothese de la borne des sommes (leaf_device::kCountBound) : au plus kMaxBatchJobs feuilles. L'ordre des fils
@@ -251,6 +376,7 @@ Outcome run_leaf_batch_cuda(const LeafBatchView& view, MemoryBudget& budget, Lea
   // dimensionne par le pilote au lancement.
   t.prefetch_ns = join_prefetch();
   if (!ok(cudaFree(nullptr))) return fail(Reason::parameter_out_of_range);
+  MHGP11_TRY(keep_pool_memory());
   t.device_init_ns = now_ns() - start;
   Buffer<u32> order;
   MHGP11_TRY(size_order(view, budget, order));
@@ -267,6 +393,9 @@ Outcome run_leaf_batch_cuda(const LeafBatchView& view, MemoryBudget& budget, Lea
   DeviceArray<u64> balls, incidences;
   DeviceArray<unsigned long long> totals;
   DeviceArray<unsigned> errors;
+  DeviceArray<LeafRecord> scratch_records;
+  DeviceArray<u32> scratch_population;
+  DeviceArray<u8> stored;
   MHGP11_TRY(x.allocate(view.cloud_sites, budget, device_bytes));
   MHGP11_TRY(y.allocate(view.cloud_sites, budget, device_bytes));
   MHGP11_TRY(z.allocate(view.cloud_sites, budget, device_bytes));
@@ -278,6 +407,9 @@ Outcome run_leaf_batch_cuda(const LeafBatchView& view, MemoryBudget& budget, Lea
   MHGP11_TRY(incidences.allocate(view.count, budget, device_bytes));
   MHGP11_TRY(totals.allocate(kCountFields, budget, device_bytes));
   MHGP11_TRY(errors.allocate(1, budget, device_bytes));
+  MHGP11_TRY(scratch_records.allocate(view.count * kScratchRecords, budget, device_bytes));  // count <= 2^32
+  MHGP11_TRY(scratch_population.allocate(view.count * kScratchPopulation, budget, device_bytes));
+  MHGP11_TRY(stored.allocate(view.count, budget, device_bytes));
   const u64 upload = now_ns();
   if (!ok(cudaMemcpy(x.data, view.x, view.cloud_sites * sizeof(u32), cudaMemcpyHostToDevice)) ||
       !ok(cudaMemcpy(y.data, view.y, view.cloud_sites * sizeof(u32), cudaMemcpyHostToDevice)) ||
@@ -293,7 +425,9 @@ Outcome run_leaf_batch_cuda(const LeafBatchView& view, MemoryBudget& budget, Lea
   const DeviceView dv{x.data, y.data, z.data, jobs.data, threads.data, view.count, sites.data, view.kmax, view.cache};
   const unsigned grid = static_cast<unsigned>((view.count + kThreads - 1) / kThreads);
   const u64 count = now_ns();
-  if (view.count != 0) count_kernel<<<grid, kThreads>>>(dv, status.data, balls.data, incidences.data, totals.data);
+  if (view.count != 0)
+    count_kernel<<<grid, kThreads>>>(dv, status.data, balls.data, incidences.data, totals.data, scratch_records.data,
+                                     scratch_population.data, stored.data);
   if (!ok(cudaGetLastError()) || !ok(cudaDeviceSynchronize())) return fail(Reason::parameter_out_of_range);
   t.count_ns = now_ns() - count;
   // Prefixes exclusifs (CUB), puis totaux.
@@ -311,15 +445,15 @@ Outcome run_leaf_batch_cuda(const LeafBatchView& view, MemoryBudget& budget, Lea
   MHGP11_TRY(records.allocate(total_records, budget, device_bytes));
   MHGP11_TRY(population.allocate(total_population, budget, device_bytes));
   const u64 fill = now_ns();
-  if (view.count != 0)
-    fill_kernel<<<grid, kThreads>>>(dv, status.data, record_begin.data, population_begin.data, records.data,
-                                    population.data, total_records, total_population, errors.data);
-  if (!ok(cudaGetLastError()) || !ok(cudaDeviceSynchronize())) return fail(Reason::parameter_out_of_range);
+  const WritePhase write{dv, status.data, stored.data, balls.data, incidences.data, record_begin.data,
+                         population_begin.data, scratch_records.data, scratch_population.data, records.data,
+                         population.data, total_records, total_population, errors.data};
+  MHGP11_TRY(write.run(budget, device_bytes, t.fill_jobs));
   t.fill_ns = now_ns() - fill;
   // Retour des emissions, statuts et compteurs.
   const u64 download_start = now_ns();
   MHGP11_TRY(download(view.count, status.data, records.data, population.data, totals.data, errors.data, total_records,
-                      total_population, budget, result));
+                      total_population, pool, budget, result));
   t.download_ns = now_ns() - download_start;
   t.jobs = view.count; t.records = total_records; t.population = total_population;
   for (u64 j = 0; j < view.count; ++j)

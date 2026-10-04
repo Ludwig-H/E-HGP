@@ -2,7 +2,7 @@
 """Profil G4 de la voie GPU du catalogue : Nsight Systems (frise CPU/GPU) et Nsight Compute (metriques des noyaux).
 
     python3 bench/gpu_profile.py --bench BUILD/mhgp11_full_bench --data DIR --work DIR --out DIR
-        [--frame lidar_ng00] [--mode 81915] [--workers 48] [--passes 3] [--kmax 5]
+        [--frame lidar_ng00] [--mode 81915] [--workers 48] [--passes 3] [--kmax 5] [--leaf 16]
 
 Outils telecharges sur la VM depuis le depot officiel NVIDIA, empreintes et tailles epinglees avant usage :
 Nsight Systems CLI 2025.3.1 (paquet .deb de la v9, extrait sans installation) et Nsight Compute 2025.2.1.3 (archive
@@ -105,6 +105,7 @@ def main():
     ap.add_argument('--workers', default='48')
     ap.add_argument('--passes', type=int, default=3)
     ap.add_argument('--kmax', default='5')
+    ap.add_argument('--leaf', default='16')
     args = ap.parse_args()
     if not args.bench.is_file():
         print('refus : banc absent', file=sys.stderr)
@@ -116,7 +117,7 @@ def main():
     log, report, problems = [], dict(schema='ehgp.v11.gpu_profile.v1', frame=args.frame, mode=args.mode,
                                      workers=args.workers, passes=args.passes), []
     app = [str(args.bench), str(args.data / (args.frame + '.u32le')), str(args.data / (args.frame + '.ids.u32le')),
-           '/dev/null', args.kmax, '16', '256', '0', '4294967295', '8589934592', args.workers, args.mode]
+           '/dev/null', args.kmax, args.leaf, '256', '0', '4294967295', '8589934592', args.workers, args.mode]
     smi = command(log, 'gpu_inventory', ['nvidia-smi', '--query-gpu=name,driver_version,memory.total,compute_cap,'
                                          'clocks.max.sm,clocks.max.mem,power.limit', '--format=csv'], 60)
     report['gpu'] = smi.stdout.strip()
