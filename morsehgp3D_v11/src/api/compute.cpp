@@ -216,7 +216,9 @@ Result<Product> compute_supports(Session& session, const CloudView& cloud, Order
                                  RunReport* report, SupportsDiagnostics* diagnostics) noexcept {
   RunReport local;
   SupportsDiagnostics seen;
-  Result<SupportsParts> parts = guarded([&]() { return supports_parts(session, cloud, k, local, route, &seen); });
+  // Sans diagnostic demande, aucun registre : le journal n'est pas hache dans l'etage tree (audit 6eba951df).
+  SupportsDiagnostics* wanted = diagnostics == nullptr ? nullptr : &seen;
+  Result<SupportsParts> parts = guarded([&]() { return supports_parts(session, cloud, k, local, route, wanted); });
   if (!parts.ok()) return parts.outcome();
   if (report != nullptr) {
     for (Stage stage : {Stage::cloud, Stage::index, Stage::domain, Stage::tree, Stage::attach, Stage::output})

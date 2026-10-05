@@ -1,6 +1,6 @@
 {
   "module": "api",
-  "plancher": 22,
+  "plancher": 23,
   "mutants": [
     {
       "id": "session_sans_liberation",
@@ -177,6 +177,14 @@
       "remplace": "",
       "porte": "mhgp11_api_publish_reader",
       "note": "budget declare nul publie : manifeste refuse par le lecteur officiel (audit abc30ed06)"
+    },
+    {
+      "id": "voie_supports_order_tree",
+      "fichier": "src/api/internal.hpp",
+      "cherche": "inline constexpr SupportsRoute kSupportsRoute = SupportsRoute::full_tower;",
+      "remplace": "inline constexpr SupportsRoute kSupportsRoute = SupportsRoute::order_tree;",
+      "porte": "mhgp11_api_supports_route_scale8000",
+      "note": "compute(supports) reprend l'arbre d'ordre K seul alors que la regle de L2 a decide la voie FULL"
     }
   ]
 }
