@@ -1,0 +1,90 @@
+{
+  "module": "head",
+  "plancher": 10,
+  "construction": [
+    "head",
+    "cli"
+  ],
+  "mutants": [
+    {
+      "id": "seuil_moins_un",
+      "fichier": "src/head/condense.cpp",
+      "cherche": "    if (m_new < mcs) {\n",
+      "remplace": "    if (m_new + 1 < mcs) {\n",
+      "porte": "mhgp11_cli_plat",
+      "note": "un bloc est gros des mcs - 1 sites engages (critere A decale)"
+    },
+    {
+      "id": "jonction_masse_entiere",
+      "fichier": "src/head/condense.cpp",
+      "cherche": "      c = big_first;\n      MHGP11_TRY(join(c, p, newcomers));\n",
+      "remplace": "      c = big_first;\n      MHGP11_TRY(join(c, p, m_new));\n",
+      "porte": "mhgp11_cli_plat",
+      "note": "un cluster qui continue compte toute la masse du bloc a chaque plateau, pas seulement les nouveaux venus"
+    },
+    {
+      "id": "egalite_enfants",
+      "fichier": "src/head/select.cpp",
+      "cherche": "      if (sign >= 0) {  // parent sur egalite certifiee\n",
+      "remplace": "      if (sign > 0) {  // parent sur egalite certifiee\n",
+      "porte": "mhgp11_head_unit_equalities",
+      "note": "egalite certifiee donnee aux enfants"
+    },
+    {
+      "id": "encadrement_seul",
+      "fichier": "src/head/select.cpp",
+      "cherche": "        else if (high.sign() < 0) sign = -1, decided = true;\n",
+      "remplace": "        else sign = -1, decided = true;\n",
+      "porte": "mhgp11_head_unit_equalities",
+      "note": "aucun repli exact : un encadrement qui ne separe pas tranche pour les enfants"
+    },
+    {
+      "id": "racine_admise",
+      "fichier": "src/head/select.cpp",
+      "cherche": "    if (selector.chosen[i] && up != kNone) selected[i] = 1;\n",
+      "remplace": "    if (selector.chosen[i] || up == kNone) selected[i] = 1;\n",
+      "porte": "mhgp11_head_unit_fixtures",
+      "note": "racine retenue"
+    },
+    {
+      "id": "niveau_carre",
+      "fichier": "src/head/select.cpp",
+      "cherche": "    MHGP11_TRY(detail::bracket_plateaus(tree, levels, params.z, budget, brackets));\n",
+      "remplace": "    MHGP11_TRY(detail::bracket_plateaus(tree, levels, 2 * params.z, budget, brackets));\n",
+      "porte": "mhgp11_cli_plat",
+      "note": "encadrements a l'exposant 2z (phi d'un niveau carre au lieu d'un rayon)"
+    },
+    {
+      "id": "inverse_terme_mixte",
+      "fichier": "src/head/score.cpp",
+      "cherche": "    MHGP11_TRY(num::divide(Rational::from_i64(-2), delta, out.coef[7]));\n",
+      "remplace": "    MHGP11_TRY(num::divide(Rational::from_i64(2), delta, out.coef[7]));\n",
+      "porte": "mhgp11_head_unit_dates",
+      "note": "signe du terme sqrt(tmq) de la reciproque d'une date"
+    },
+    {
+      "id": "ordre_des_sites",
+      "fichier": "src/head/select.cpp",
+      "cherche": "    out[i] = site_labels[s];\n",
+      "remplace": "    out[i] = site_labels[i];\n",
+      "porte": "mhgp11_head_unit_order",
+      "note": "etiquettes rendues dans l'ordre des sites au lieu de l'ordre d'entree"
+    },
+    {
+      "id": "plus_grand_pointid",
+      "fichier": "src/head/select.cpp",
+      "cherche": "    if (idx(canon[o]) == kNone || idx(tree.site_ids[s]) < idx(canon[o])) canon[o] = tree.site_ids[s];\n",
+      "remplace": "    if (idx(canon[o]) == kNone || idx(tree.site_ids[s]) > idx(canon[o])) canon[o] = tree.site_ids[s];\n",
+      "porte": "mhgp11_head_unit_order",
+      "note": "identifiant canonique autre que le plus petit PointId"
+    },
+    {
+      "id": "racine_non_bornee",
+      "fichier": "src/head/score.cpp",
+      "cherche": "    if (rt > kMaxRoot || (!sq && (cache.at(tree.plateau_m[p]) > kMaxRoot || cache.at(tree.plateau_q[p]) > kMaxRoot))) {\n",
+      "remplace": "    if (false) {\n",
+      "porte": "mhgp11_head_unit_huge",
+      "note": "racines hors de 2^100 converties en i128 sans garde (audit 100fcc12b)"
+    }
+  ]
+}

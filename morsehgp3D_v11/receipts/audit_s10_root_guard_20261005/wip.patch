@@ -1,0 +1,82 @@
+diff --git a/morsehgp3D_v11/src/head/internal.hpp b/morsehgp3D_v11/src/head/internal.hpp
+--- a/morsehgp3D_v11/src/head/internal.hpp
++++ b/morsehgp3D_v11/src/head/internal.hpp
+@@ -11,6 +11,10 @@
+ inline constexpr u32 kFixedShift = 192;
+ // E = 2^64 e en dessous de 2^40 (e < 2^-24) : aucun encadrement utile, le repli exact decide.
+ inline constexpr u32 kMinBracketBits = 40;
++// Racines encadrees : au plus 2^100 (le catalogue les borne a 2^(B+65) <= 2^89) ; au-dela, sommes et differences de
++// trois racines sortiraient de i128 : plateau sans encadrement.
++inline constexpr u32 kMaxRootBits = 100;
++inline constexpr u128 kMaxRoot = u128{1} << kMaxRootBits;
+ 
+ // Arbre condense (Condensed de bench/points_flat.py) : clusters dans l'ordre de naissance, enfants avant parents,
+ // racine virtuelle en dernier pour une foret. top = kNone : haut infini (phi = 0). Jonctions en CSR par cluster.
+diff --git a/morsehgp3D_v11/src/head/score.cpp b/morsehgp3D_v11/src/head/score.cpp
+--- a/morsehgp3D_v11/src/head/score.cpp
++++ b/morsehgp3D_v11/src/head/score.cpp
+@@ -84,7 +84,15 @@
+     out.zero[p] = out.open[p] = 0;
+     i128 e_lo = 0, e_hi = 0;
+     const u128 rt = cache.at(tree.plateau_t[p]);
+-    if (tree.plateau_m[p] == tree.plateau_q[p]) {
++    const bool sq = tree.plateau_m[p] == tree.plateau_q[p];
++    // Racines au-dela de 2^kMaxRootBits (source abstraite : le catalogue les borne a 2^89) : aucune conversion signee,
++    // aucun encadrement, le repli exact decide (audit 100fcc12b).
++    if (rt > kMaxRoot || (!sq && (cache.at(tree.plateau_m[p]) > kMaxRoot || cache.at(tree.plateau_q[p]) > kMaxRoot))) {
++      out.open[p] = 1;
++      ++out.unbracketed;
++      continue;
++    }
++    if (sq) {
+       if (rt == 0) {
+         num::Rational value;
+         MHGP11_TRY(levels.value(tree.plateau_t[p], value));
+diff --git a/morsehgp3D_v11/tests/head/head_test.cpp b/morsehgp3D_v11/tests/head/head_test.cpp
+--- a/morsehgp3D_v11/tests/head/head_test.cpp
++++ b/morsehgp3D_v11/tests/head/head_test.cpp
+@@ -6,6 +6,7 @@
+ //              irrationnelle a z = 1 (1/sqrt 2 + 1/sqrt 8 = 2 / sqrt(32/9), classe de sqrt 2), a z = 2
+ //              (1 + 1/49 = 2 / (7/5)^2) ; la meme geometrie a l'autre z n'est pas une egalite (une egalite a z = 1 ne
+ //              prouve rien a z = 2) ; compteurs exact et equalities ;
++//   huge       racines hors de 2^100 (source abstraite) : plateaux sans encadrement, repli exact (audit 100fcc12b) ;
+ //   dates      repli exact des dates (port de _inverse_date et _mask_mul, recu eom_exact_audit_20261004) : egalites
+ //              certifiees phi(date) = phi(niveau) a z = 1, 2, 3 pour (4, 9, 4) contre 9, (8, 2, 8) contre 2
+ //              (classe de sqrt 2), tous deux a Delta != 0, et (9, 4, 1) contre 16 (Delta = 0) ; date a trois racines sqrt 2 + sqrt 3 - 1
+@@ -272,6 +273,24 @@
+   CHECK(same_groups(r2, Groups{{0, 1}, {2, 3}, {4, 5}}) && r2.value().stats.equalities == 0);
+ }
+ 
++// Egalite rationnelle a l'echelle 2^62 : racines R = floor(2^64 sqrt(l)) jusqu'a 3 2^126, hors de i128 une fois
++// sommees (audit 100fcc12b) : plateaux sans encadrement, repli exact, egalite certifiee.
++MHGP11_TEST(huge, 3) {
++  auto scaled = [](i64 a, i64 b) {
++    Big n, d;
++    static_cast<void>(num::shift_left(Big::from_i64(a), 124, n));
++    d = Big::from_i64(b);
++    Rational out;
++    static_cast<void>(Rational::make(n, d, out));
++    return out;
++  };
++  const Tree t = tie(scaled(1, 1), scaled(9, 4), scaled(9, 1));
++  const auto got = run(t, 2, 1, head::Selection::eom);
++  CHECK(same_groups(got, Groups{{0, 1, 2, 3}, {4, 5}}));
++  CHECK(got.ok() && got.value().stats.equalities == 1);
++  CHECK(got.ok() && got.value().stats.unbracketed >= 1);
++}
++
+ MHGP11_TEST(dates, 25) {
+   Outcome status;
+   for (u32 z = 1; z <= 3; ++z) {
+diff --git a/morsehgp3D_v11/tests/head/tests.cmake b/morsehgp3D_v11/tests/head/tests.cmake
+--- a/morsehgp3D_v11/tests/head/tests.cmake
++++ b/morsehgp3D_v11/tests/head/tests.cmake
+@@ -3,7 +3,7 @@
+ # Unitaires sur arbres abstraits : F14a a F14e (attendus manuels de clusters), egalites EOM certifiees (z = 1
+ # rationnelle et irrationnelle, z = 2), repli exact des dates (Delta != 0 et Delta = 0, trois racines), ordre d'entree,
+ # refus, budget rendu.
+-mhgp11_add_unit(mhgp11_head_unit SOURCES head_test.cpp GROUPS fixtures equalities dates order refusals budget
++mhgp11_add_unit(mhgp11_head_unit SOURCES head_test.cpp GROUPS fixtures equalities huge dates order refusals budget
+                 LABELS fast)
+ 
+ if(TARGET mhgp11_cli)

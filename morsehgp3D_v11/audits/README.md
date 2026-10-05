@@ -4,13 +4,14 @@
 quantized_u21_input_only / not_claimed`. Notes maintenues en place ;
 preuves détaillées dans les reçus immuables.
 
-**S10 en cours : borner les racines avant leur conversion signée.**
-L'API `TreeView`/`LevelSource` accepte un arbre abstrait valide dont la
-racine fixe vaut `2^127−1`. Le calcul de la borne haute ajoute ensuite 1
-en `i128` et déborde. Rendre l'encadrement indisponible et passer au
-repli exact avant cette conversion, ou calculer les bornes en entier large.
-Le constat porte sur cette API abstraite ; aucun nuage u21/u24 n'est
-présenté comme témoin. [Preuve exacte et portée](../receipts/audit_s10_wip_20261005/math/README.md).
+**S10 publiée en 076d9142b ; garde numérique corrigée dans le brouillon.**
+La garde `2^100` précède les conversions signées et renvoie les grandes
+racines de l'API abstraite au calcul exact. Lecture favorable : sommes
+et marges tiennent alors en `i128`. Pour vérifier la correction native,
+réutiliser le témoin `R=2^127−1` sous UBSan : le nouveau test `huge`
+peut déjà passer sans la garde. La correction n'est pas encore publiée
+ni qualifiée sur G4.
+[Correction, témoin et portée](../receipts/audit_s10_root_guard_20261005/README.md).
 
 **Qualification S10 : ajouter sa session différentielle.** Les quatre
 portes `head_vs_python` comparent toutes les étiquettes, le bruit et les
@@ -148,7 +149,7 @@ et réétiquetages **W48 sur ng02 et ng00** sont désormais conformes, avec
   [échange du 3 octobre archivé](../receipts/audit_supports_contract_20261005/notes_before/README.md).
 - [Audit indépendant, maintenu par son auteur](AUDIT_OUVERTURE_ET_REPRISE_V10_20261002.md).
 
-**Supports et arbre K seul livrés ; sortie points en développement.** S0/S1 **5adf6a59f** et
+**Supports, arbre K seul, points et tête plate livrés ; qualification à terminer.** S0/S1 **5adf6a59f** et
 la demande **9290cf3bf** sont relus favorablement : lemmes P/W, deux
 lectures E5, D2 et 13 mutants causaux. S2/257aabb92 et S4/f98aeed67 sont
 livrés, ainsi que S6a/19b2fb218. Les gardes p+q/traces sont corrigées ; D2/E5 sont
@@ -172,8 +173,8 @@ Les preuves antérieures restent immuables, liées dans les deux notes.
 **Tour FULL et temps.** La référence qualifiée K5/u21/W48 donne
 **412 /352 /381 ms** sur trois trames sans sol de la séquence08.
 Le banc F qualifie export FULL natif + projection Python exacte.
-Sorties paramétrées points/plat natives, **100 ms, GPU et massif restent
-ouverts**. Les nouveaux diagnostics CPU, comparaisons v10 et cohortes
+Les sorties paramétrées points/plat natives sont publiées ; leur qualification,
+**100 ms, GPU et massif restent ouverts**. Les nouveaux diagnostics CPU, comparaisons v10 et cohortes
 réelles restent dans les deux notes, avec leurs limites de preuve.
 
 **Suite GPU.** Compression22 mesurée dans GPU6 ; K5/W48 chaud reste plus

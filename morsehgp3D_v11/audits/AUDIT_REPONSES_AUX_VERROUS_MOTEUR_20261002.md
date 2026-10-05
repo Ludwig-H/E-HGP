@@ -8,23 +8,27 @@ aux reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 Note maintenue en place ; détails et échanges clos dans les reçus.
 
-## S10 native en cours : encadrement entier et frontière de capacité
+## S10 native publiée : encadrement entier et frontière de capacité
 
-Le brouillon au-dessus de **311ef5e3c** remplace le filtre flottant par
+La tranche **076d9142b** remplace le filtre flottant par
 des encadrements entiers, puis conserve le repli exact. Les réciproques
 z=1/2/3 relues suivent les identités déjà vérifiées ; les poids d'un
 même plateau sont compensés avant leur expansion en radicaux. Le budget
 de la tête est porté explicitement à 4 096 termes, avec refus de l'appel
 entier à épuisement ; les comparaisons de dates gardent leur défaut de 16.
 
-**Une frontière numérique manque dans le filtre.** Le contrat public
+**Frontière numérique corrigée dans le brouillon suivant.** Le contrat public
 `LevelSource` borne la racine fixe à `u128`, mais la borne haute est
 calculée en `i128`. Le niveau rationnel positif
 `((2^127−1)/2^64)^2` donne une racine admissible dont l'ajout de 1
 déborde. Ce témoin est un arbre abstrait, sans qualification ni
-contre-exemple géométrique LiDAR déduits. Contrôler la largeur avant
-conversion, puis désactiver ce filtre pour les valeurs trop grandes et
-laisser le repli exact décider.
+contre-exemple géométrique LiDAR déduits. La garde locale `2^100`
+contrôle les trois racines utiles avant conversion ; leurs sommes et
+marges sont sûres. Les grandes valeurs passent au repli exact : avis
+favorable sur la correction, publication et qualification natives à suivre.
+Le témoin initial `R=2^127−1` est à reprendre sous UBSan ; le test
+`huge` ajouté peut passer avec l'ancien filtre.
+[Correction et preuve de borne](../receipts/audit_s10_root_guard_20261005/README.md).
 [Preuve, source et correction ciblée](../receipts/audit_s10_wip_20261005/math/README.md).
 
 Les nouvelles portes F14 comparent les groupes de sites attendus à

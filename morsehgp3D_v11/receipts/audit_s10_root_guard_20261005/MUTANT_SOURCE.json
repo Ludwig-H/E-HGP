@@ -1,0 +1,16 @@
+{
+  "capture_twice_stable": true,
+  "mutant": {
+    "cherche": "    if (rt > kMaxRoot || (!sq && (cache.at(tree.plateau_m[p]) > kMaxRoot || cache.at(tree.plateau_q[p]) > kMaxRoot))) {\n",
+    "fichier": "src/head/score.cpp",
+    "id": "racine_non_bornee",
+    "note": "racines hors de 2^100 converties en i128 sans garde (audit 100fcc12b)",
+    "porte": "mhgp11_head_unit_huge",
+    "remplace": "    if (false) {\n"
+  },
+  "native_executed": false,
+  "path": "morsehgp3D_v11/tests/mutants/head.json",
+  "pin": "076d9142b724623d4ee4c6deebd125781fa8ba72",
+  "sha256": "e019ae3b489c92fd2cebe3d7792a3da370ca13c6bf09c3e54467f1598802efaa",
+  "timestamp_utc": "2026-10-05T19:55:45.009742+00:00"
+}

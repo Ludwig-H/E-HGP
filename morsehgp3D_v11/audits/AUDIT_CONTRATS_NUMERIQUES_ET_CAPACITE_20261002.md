@@ -10,9 +10,10 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
-## S10 en cours : sécuriser la conversion du filtre entier
+## S10 publiée : garde numérique corrigée dans le brouillon
 
-Brouillon de `build/v11-impl-l3` sur **311ef5e3c**, non publié.
+S10 publiée en **076d9142b**. Les trois sources causales sont identiques
+à la capture initiale sur **311ef5e3c**.
 `LevelSource::root` admet toute racine fixe qui tient en `u128`.
 `bracket_plateaus` la convertit en `i128`, puis calcule `rt+1`, ou
 `rt+rm-rq` pour une date. La façade `flat_sites` n'ajoute aucune garde
@@ -25,18 +26,31 @@ contrat public. Pourtant `e_hi=i128(R)+1` dépasse le maximum signé.
 Le constat est arithmétique, sans exécution native ; il ne démontre pas
 un débordement sur les niveaux issus d'un nuage u21/u24.
 
-**Correction ciblée :** garder les racines en `u128` jusqu'au contrôle
-de largeur, avec une marge pour toute la somme et les décalages ±1/2.
-Hors du domaine sûr du filtre, marquer le plateau sans encadrement et
-laisser la sélection employer le repli exact ; un calcul des bornes en
-entier large convient aussi. Un refus explicite avant conversion serait
-sûr, mais restreindrait le contrat admis. Rejouer le témoin à la porte de
-la tête, sous UBSan. Les formules réciproques et la condensation relues
+**Correction locale relue favorablement, au-dessus de 076d9142b.**
+Le filtre contrôle chaque racine utile en `u128` contre `L=2^100`
+avant conversion. Sinon, le plateau est marqué sans encadrement et la
+sélection utilise le repli exact. Dans le domaine conservé,
+`rt+rm-rq` appartient à `[-L,2L]` ; les marges −1/+2 restent dans
+`i128`. Le contrat abstrait est conservé et les racines géométriques
+u21/u24 ne sont pas écartées par cette garde.
+
+**Test utile : reprendre la frontière exacte déjà fournie.** Le nouveau
+test `huge` emploie les racines `2^126`, `3·2^125`, `3·2^126` ; les
+deux premières acceptent l'ajout de 1, et la dernière se convertit en
+valeur négative avant le chemin déjà sans encadrement. Le contrôle
+`unbracketed>=1` ne distingue donc pas nécessairement l'ancien code.
+Rejouer `R=2^127−1` à la porte de la tête sous UBSan vérifie le
+débordement initial. Aucun résultat natif du nouveau mutant n'est déduit
+de sa seule déclaration. Correction et qualification G4 restent à
+publier ; ce point de test ne remet pas en cause la preuve de la garde.
+[Correction figée et preuve de borne](../receipts/audit_s10_root_guard_20261005/README.md).
+
+Les formules réciproques, la condensation publiée et le raccord relus
 n'apportent pas d'autre défaut important établi à cette capture.
 [Sources figées, témoin et limites](../receipts/audit_s10_wip_20261005/math/README.md).
 
 **Qualification de la tête plate : le différentiel complet doit être joué.**
-Les quatre portes `head_vs_python` du brouillon comparent les partitions,
+Les quatre portes `head_vs_python` publiées comparent les partitions,
 le bruit et le plus petit `PointId` de chaque cluster à la tête Python,
 sur le même arbre de points publié. Les fixtures manuelles F14 vérifient
 bien les clusters retenus dans leurs portes natives distinctes. Lecture

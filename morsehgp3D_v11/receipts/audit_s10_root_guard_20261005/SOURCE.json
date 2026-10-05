@@ -1,0 +1,12 @@
+{
+  "capture_twice_stable": true,
+  "files": {
+    "morsehgp3D_v11/src/head/internal.hpp": "23f0dc4905c274d09e2922e1910c9a40f81dbe0103e6a6e99019539b5375f9ec",
+    "morsehgp3D_v11/src/head/score.cpp": "557e2e2e0bae0374c06cc41878691bcc54e1809ffb5b2985e4ce616657ed7468",
+    "morsehgp3D_v11/tests/head/head_test.cpp": "db55d92042109e5bbd035ecb5b246e3912fa797e2d3e8d83b3c20c9f1310fa3e",
+    "morsehgp3D_v11/tests/head/tests.cmake": "5b396f4aae9beed3ba67c56ba6f84cf871ff63e74a786b8285117f259a85b3c5"
+  },
+  "pin": "076d9142b724623d4ee4c6deebd125781fa8ba72",
+  "source_state": "WIP fix after published S10",
+  "timestamp_utc": "20261005T195043Z"
+}

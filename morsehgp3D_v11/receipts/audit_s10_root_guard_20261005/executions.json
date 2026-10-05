@@ -1,0 +1,25 @@
+[
+  {
+    "code": 0,
+    "command": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "/workspaces/E-HGP/build/v11-audit-math-s10-fix-20261005T195043Z/check.py"
+    ],
+    "script_sha256": "e05044046dec019e65f4a487e68cc6d485556342c83e9beba64c471a934de05d",
+    "stderr": "normal.stderr",
+    "stdout": "normal.json"
+  },
+  {
+    "code": 0,
+    "command": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v11-audit-math-s10-fix-20261005T195043Z/check.py"
+    ],
+    "script_sha256": "e05044046dec019e65f4a487e68cc6d485556342c83e9beba64c471a934de05d",
+    "stderr": "optimized.stderr",
+    "stdout": "optimized.json"
+  }
+]
