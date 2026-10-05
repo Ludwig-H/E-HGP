@@ -9,12 +9,21 @@ preuves détaillées dans les reçus immuables.
 le port de z=2. Aucun troisième oracle complet n'est demandé.
 [Réponse aux trois questions du développeur](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md#réponse-aux-trois-questions-avant-s10--note-développeur-d26328fe2).
 
-**L2b en cours : retirer le diagnostic du chemin normal.** Dans le
-brouillon capturé, `compute_supports` active le hachage de tout le journal
-des graines même quand aucun diagnostic n'est demandé. Ce parcours
-supplémentaire est payé dans l'étage `tree`. Propager un pointeur nul
-jusqu'à `build_order_full` dans ce cas, avant la mesure de la nouvelle voie.
-[Constat de source et correction ciblée](../receipts/audit_l2b_wip_20261005/README.md).
+**G4 S : 60 portes TSan d'échelle et LiDAR conformes.** Les cinq lots
+32k CLI, 32k hors CLI et ng00/ng01/ng02 sont clos sur **d26328fe2**.
+Les autres lots restent partiels. ASan conserve trois refus de lecture
+`roots_cost`, avec les fichiers synthétiques absents du paquet ; les six fichiers requis sont
+présents et conformes dans `data_complet`, à utiliser pour la reprise.
+La matrice **8b2ca400e** prépare onze lots ; elle n'est pas encore exécutée.
+[Résultats, causes et reprise](../receipts/audit_g4_s_20261005/README.md).
+
+**L2b : diagnostic inutile corrigé dans le commit local 311ef5e3c.**
+Les trois fichiers sont identiques à la capture relue. Le correctif
+transmet un pointeur nul quand aucun diagnostic
+n'est demandé : le hachage de tout le journal disparaît alors du chemin
+public. Lecture favorable ; publication, identité native et qualification
+G4 du nouveau chemin restent à constater.
+[Correction et limites](../receipts/audit_l2b_followup_20261005/README.md).
 
 **S9 : correctif du refus de tri publié en 3d47eaa93.** Les quatre fichiers
 correspondent exactement à la capture relue favorablement. Le tri par
@@ -47,8 +56,8 @@ chemin devra conserver les octets MHGP11SP et être qualifié sous TSan.
 certifié. Les dix portes CLI ordinaires auparavant manquantes passent.
 Les tests longs non mutants et le complément supports W48 passent depuis
 dans leurs sessions dédiées. La couverture sanitizer reste partielle :
-c97776ea8 avait retiré les portes d'échelle et LiDAR ; **a7711b506 les
-rétablit en huit lots dédiés**, encore à exécuter.
+la session S ci-dessus complète les portes d'échelle et LiDAR sur
+une source plus récente, avec des lots encore interrompus.
 Aucun contrat 100 ms n'est acquis.
 [Reçu A2 vérifié](../receipts/audit_g4_a2_20261005/README.md).
 Les premières sessions interrompues et les **459 mutants u18 détectés**
@@ -58,10 +67,9 @@ gardent leur [preuve distincte](../receipts/audit_g4_sorties_20261005/README.md)
 u24 passe 774/824 tests, TSan u21 759/824 ; les autres n'ont pas de résultat
 après l'échéance globale. Aucun échec individuel terminé ; arrêt ciblé
 certifié. Les portes API/IO et oracles supports passent dans les deux
-configurations. Les **50 et 65 portes manquantes**, retirées par
-c97776ea8, sont reprises par le découpage a7711b506 : deux lots ASan/UBSan
-et six TSan. Aucune nouvelle exécution n'est encore constatée ; A2 ne
-les qualifie pas sous instrumentation.
+configurations. Les **50 et 65 portes manquantes** de cette capture gardent leur
+inventaire historique ; la session S ci-dessus publie ses résultats propres
+sur d26328fe2. A2 ne qualifie pas les portes sous instrumentation.
 [Reçu B vérifié](../receipts/audit_g4_b_20261005/README.md).
 
 **S8 : arithmétique exacte relue, qualification native à poursuivre.**

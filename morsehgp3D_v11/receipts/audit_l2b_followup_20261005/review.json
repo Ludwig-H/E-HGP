@@ -1,0 +1,38 @@
+{
+  "source_verdict": "lecture_favorable_correction_FNV_WIP",
+  "base_head": "cc73784f0a55a18afe7c6957a2f68cd702e8cb83",
+  "commit_itself_is_fixed": false,
+  "worktree_snapshot_is_fixed": true,
+  "scope": "Trois fichiers correctifs capturés; aucun build/test natif ni GCP. Dix fichiers natifs cc73784f0 comparés auparavant: identiques au WIP18:03, sans nouveau défaut important établi.",
+  "causal_chain": [
+    {
+      "source": "src/api/compute.cpp:219-221",
+      "fact": "wanted est nullptr quand diagnostics est nullptr; seul un diagnostic demandé transmet &seen."
+    },
+    {
+      "source": "src/api/compute.cpp:125-136",
+      "fact": "diagnostics nullptr => registers nullptr transmis à build_order_full."
+    },
+    {
+      "source": "src/tower/order_tree.cpp:107,136",
+      "fact": "registers nullptr ne sélectionne pas registers_of(log); empreinte FNV retirée du chemin public sans diagnostic. Avec diagnostic, calcul et publication des registres préservés."
+    }
+  ],
+  "cost_removed_on_unrequested_diagnostic": {
+    "words": "2C+G",
+    "FNV_iterations": "16C+8G",
+    "duration_or_gain_measured": false
+  },
+  "gates_added_not_executed": [
+    {
+      "source": "tests/api/supports_route.cpp:233-234,367-386",
+      "fact": "Ajout d’appel public api::compute à W1 sans diagnostic; exige succès, mêmes octets/manifeste que full_tower, pic tree égal à FULL et différent d’ordre seul sur les portes K5 d’échelle/trames."
+    },
+    {
+      "source": "tests/mutants/api.json",
+      "fact": "voie_supports_order_tree remplace la constante de production par order_tree et choisit supports_route_scale8000; plancher23. Verdict du mutant non déduit de sa déclaration."
+    }
+  ],
+  "ownership_concurrency_status": "Pas de modification du journal/ownership/concurrence dans ces trois fichiers; portée de lecture du commit inchangé uniquement, aucune qualification transférée.",
+  "qualification_status": "Correction non commitée à la capture. Identité sans diagnostic et test de voie seulement ajoutés; aucun résultat ni délai déduit. Requalification de la source finale propre à L2b requise."
+}

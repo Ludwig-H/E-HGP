@@ -1,0 +1,163 @@
+{
+  "captured_utc": "2026-10-05T19:04:16.424269+00:00",
+  "kind": "local_preparation_metadata_only_not_g4_execution",
+  "no_payload_copied": true,
+  "directories": [
+    {
+      "directory": "/workspaces/E-HGP/build/v11-persist/qual_sorties/data",
+      "manifest_sha256": "acddfeb0306be40160884dbbf6531c30ecb530565fb4da89f9d3497bdca4807e",
+      "cases": [
+        {
+          "name": "uniform_u18_n8000",
+          "count": 8000,
+          "files": [
+            {
+              "name": "uniform_u18_n8000.u32le",
+              "exists": false,
+              "bytes": null,
+              "expected_bytes": 96000,
+              "sha256": null,
+              "expected_sha256": "038662b2cb241ce2920705f127acc8d5e2eae73d41d15cb35613467e1642049d",
+              "conforming": false
+            },
+            {
+              "name": "uniform_u18_n8000.ids.u32le",
+              "exists": false,
+              "bytes": null,
+              "expected_bytes": 32000,
+              "sha256": null,
+              "expected_sha256": "564d7ad84a134f7cee7cb2c85c8d0b6c82301bd2abccd203979350c384ec014b",
+              "conforming": false
+            }
+          ]
+        },
+        {
+          "name": "uniform_u18_n16000",
+          "count": 16000,
+          "files": [
+            {
+              "name": "uniform_u18_n16000.u32le",
+              "exists": false,
+              "bytes": null,
+              "expected_bytes": 192000,
+              "sha256": null,
+              "expected_sha256": "184c9d62e4a7d00dd407a96b5e5d0d76ba5e9680516f5dc75461d23eca26d4db",
+              "conforming": false
+            },
+            {
+              "name": "uniform_u18_n16000.ids.u32le",
+              "exists": false,
+              "bytes": null,
+              "expected_bytes": 64000,
+              "sha256": null,
+              "expected_sha256": "5fd0363db4cb908208a445c1b0c80e0a3a1f427d7153593efbf3b0d5abe5657a",
+              "conforming": false
+            }
+          ]
+        },
+        {
+          "name": "uniform_u18_n32000",
+          "count": 32000,
+          "files": [
+            {
+              "name": "uniform_u18_n32000.u32le",
+              "exists": false,
+              "bytes": null,
+              "expected_bytes": 384000,
+              "sha256": null,
+              "expected_sha256": "08b66f9c6b7ec4142303b9f86e4da1230d175b5391640069828a3a23c15144e9",
+              "conforming": false
+            },
+            {
+              "name": "uniform_u18_n32000.ids.u32le",
+              "exists": false,
+              "bytes": null,
+              "expected_bytes": 128000,
+              "sha256": null,
+              "expected_sha256": "4e29eabcb1c72af6e4569317cd6b367a5bc506a46ac5ef80275ee22dda19b576",
+              "conforming": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "directory": "/workspaces/E-HGP/build/v11-persist/qual_sorties/data_complet",
+      "manifest_sha256": "acddfeb0306be40160884dbbf6531c30ecb530565fb4da89f9d3497bdca4807e",
+      "cases": [
+        {
+          "name": "uniform_u18_n8000",
+          "count": 8000,
+          "files": [
+            {
+              "name": "uniform_u18_n8000.u32le",
+              "exists": true,
+              "bytes": 96000,
+              "expected_bytes": 96000,
+              "sha256": "038662b2cb241ce2920705f127acc8d5e2eae73d41d15cb35613467e1642049d",
+              "expected_sha256": "038662b2cb241ce2920705f127acc8d5e2eae73d41d15cb35613467e1642049d",
+              "conforming": true
+            },
+            {
+              "name": "uniform_u18_n8000.ids.u32le",
+              "exists": true,
+              "bytes": 32000,
+              "expected_bytes": 32000,
+              "sha256": "564d7ad84a134f7cee7cb2c85c8d0b6c82301bd2abccd203979350c384ec014b",
+              "expected_sha256": "564d7ad84a134f7cee7cb2c85c8d0b6c82301bd2abccd203979350c384ec014b",
+              "conforming": true
+            }
+          ]
+        },
+        {
+          "name": "uniform_u18_n16000",
+          "count": 16000,
+          "files": [
+            {
+              "name": "uniform_u18_n16000.u32le",
+              "exists": true,
+              "bytes": 192000,
+              "expected_bytes": 192000,
+              "sha256": "184c9d62e4a7d00dd407a96b5e5d0d76ba5e9680516f5dc75461d23eca26d4db",
+              "expected_sha256": "184c9d62e4a7d00dd407a96b5e5d0d76ba5e9680516f5dc75461d23eca26d4db",
+              "conforming": true
+            },
+            {
+              "name": "uniform_u18_n16000.ids.u32le",
+              "exists": true,
+              "bytes": 64000,
+              "expected_bytes": 64000,
+              "sha256": "5fd0363db4cb908208a445c1b0c80e0a3a1f427d7153593efbf3b0d5abe5657a",
+              "expected_sha256": "5fd0363db4cb908208a445c1b0c80e0a3a1f427d7153593efbf3b0d5abe5657a",
+              "conforming": true
+            }
+          ]
+        },
+        {
+          "name": "uniform_u18_n32000",
+          "count": 32000,
+          "files": [
+            {
+              "name": "uniform_u18_n32000.u32le",
+              "exists": true,
+              "bytes": 384000,
+              "expected_bytes": 384000,
+              "sha256": "08b66f9c6b7ec4142303b9f86e4da1230d175b5391640069828a3a23c15144e9",
+              "expected_sha256": "08b66f9c6b7ec4142303b9f86e4da1230d175b5391640069828a3a23c15144e9",
+              "conforming": true
+            },
+            {
+              "name": "uniform_u18_n32000.ids.u32le",
+              "exists": true,
+              "bytes": 128000,
+              "expected_bytes": 128000,
+              "sha256": "4e29eabcb1c72af6e4569317cd6b367a5bc506a46ac5ef80275ee22dda19b576",
+              "expected_sha256": "4e29eabcb1c72af6e4569317cd6b367a5bc506a46ac5ef80275ee22dda19b576",
+              "conforming": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

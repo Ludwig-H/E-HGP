@@ -1,0 +1,64 @@
+--- cc73784f0a55a18afe7c6957a2f68cd702e8cb83:morsehgp3D_v11/tests/api/supports_route.cpp
++++ WIP:morsehgp3D_v11/tests/api/supports_route.cpp
+@@ -20,6 +20,9 @@
+ //     supports_route_verdict conforme k=<K> n=<n> noeuds=<N> boules=<B> supports=<S> etendues=<e> multiples=<m>
+ //       cellules=<c> graines=<g> fichier=<sha256, 16 premiers chiffres> manifeste=<idem> journal=<fnv1a64>
+ //       fils=<W,...>
++// A W1 (si W1 est demande), un troisieme calcul par l'appel public api::compute, sans diagnostic : memes fichier et
++//   manifeste que full_tower, et pic comptable de l'etage tree egal a celui de full_tower et different de celui
++//   d'order_tree (ligne JSON "route":"compute") ; observe la voie de production (relecture de L2b).
+ // Codes : 0 conforme ; 1 ecart entre les voies ou entre les W ; 2 refus (usage, entree, refus du produit en mode
+ // echelle) ; 3 plancher, ou invariant (Session non rendue).
+ #include <algorithm>
+@@ -29,6 +32,7 @@
+ #include <fstream>
+ #include <iostream>
+ #include <iterator>
++#include <optional>
+ #include <sstream>
+ #include <string>
+ #include <vector>
+@@ -204,8 +208,9 @@
+   api::RunReport report;
+ };
+ 
+-Published run_route(const api::CloudView& view, Order k, u32 workers, u64 budget, api_detail::SupportsRoute route,
+-                    const std::string& folder) {
++// route vide : voie de production, par l'appel public api::compute (sans diagnostic : journal non hache).
++Published run_route(const api::CloudView& view, Order k, u32 workers, u64 budget,
++                    std::optional<api_detail::SupportsRoute> route, const std::string& folder) {
+   Published out;
+   std::error_code error;
+   std::filesystem::remove_all(folder, error);
+@@ -227,7 +232,8 @@
+   provenance.ids_bytes = u64{4} * view.x.size();
+   api::Publication result{};
+   {
+-    auto product = api_detail::compute_supports(session, view, k, route, &out.report, &out.diagnostics);
++    auto product = route ? api_detail::compute_supports(session, view, k, *route, &out.report, &out.diagnostics)
++                         : api::compute(session, view, api::Request{api::SupportsRequest{k}}, &out.report);
+     if (!product.ok()) {
+       out.outcome = product.outcome();
+       static_cast<void>(session.close());
+@@ -358,6 +364,21 @@
+       std::printf("ECART W%u : sorties differentes de W%u\n", w, o.workers.front());
+       agree = false;
+     }
++    if (w == 1) {
++      // Voie de production observee : a W1, le pic comptable de l'etage tree est deterministe et distingue FULL
++      // (masque 16379, tous les ordres) de l'arbre d'ordre K seul. compute doit suivre full_tower (regle de L2).
++      Published c = run_route(view, static_cast<Order>(o.k), w, MemoryBudget::kUnlimited, std::nullopt, base + "_c");
++      const u64 peak_a = a.report.at(api::Stage::tree).peak_bytes, peak_b = b.report.at(api::Stage::tree).peak_bytes,
++                peak_c = c.report.at(api::Stage::tree).peak_bytes;
++      std::printf("{\"route\":\"compute\",\"tree_peak\":%llu,\"order_tree_peak\":%llu,\"full_tower_peak\":%llu}\n",
++                  static_cast<unsigned long long>(peak_c), static_cast<unsigned long long>(peak_a),
++                  static_cast<unsigned long long>(peak_b));
++      if (!c.outcome.ok() || c.file != b.file || c.manifest != b.manifest || peak_a == peak_b || peak_c != peak_b) {
++        std::printf("ECART W1 : la voie de compute n'est pas full_tower (fichier %d, pics %d/%d)\n", c.file == b.file,
++                    peak_c == peak_b, peak_a != peak_b);
++        agree = false;
++      }
++    }
+     if (!first) first.emplace(std::move(b));
+   }
+   if (!agree) return kMismatch;

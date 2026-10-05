@@ -74,15 +74,50 @@ Les 53 portes API/IO/contrat CLI et les oracles supports normal/`-O`
 passent dans chaque profil. Sous sanitizer, le contrat CLI omet les
 préchargements : ce succès ne rejoue pas le crochet variadique.
 
-Les 50 absents ASan sont inclus dans les 65 absents TSan. La matrice
-c97776ea8 avait retiré 82 portes d'échelle/LiDAR de chacune de ces
-anciennes sélections, dont tous les absents. **a7711b506 revient sur ce
-choix et les répartit en huit lots dédiés**, deux ASan/UBSan u24 et six
-TSan u21. C'est le découpage demandé ; il reste à constater les résultats
-sur la source intégrée. Ni le nouveau plan ni A2 ne complètent à eux seuls
-les captures B. Les inventaires de reprise gardent les noms exacts.
+Les 50 absents ASan sont inclus dans les 65 absents TSan. Le retrait
+par c97776ea8 a été corrigé par les huit lots de a7711b506. Leur exécution
+est maintenant documentée dans S ci-dessous, sur une source intégrant S8/S9 ;
+les inventaires et qualifications des deux sources restent distincts.
 [Preuve B et noms des portes manquantes](../receipts/audit_g4_b_20261005/README.md).
 [Ensembles de reprise exacts par module](../receipts/audit_g4_b_restart_20261005/README.md).
+
+**S ferme cinq lots TSan à l'échelle sur d26328fe2.** La session
+`claudequals` est close, avec arrêt ciblé certifié et chaîne
+source/paquet/plan/résultats vérifiée. Elle reste globalement partielle.
+
+| Lots | Conformes / sélectionnés | Échecs / sans résultat |
+| --- | ---: | ---: |
+| TSan u21 : 32k CLI, 32k hors CLI, ng00, ng01, ng02 | 60 / 60 | 0 / 0 |
+| TSan u21 : reste | 28 / 40 | 3 / 9 |
+| ASan/UBSan u24 : grand lot | 34 / 55 | 0 / 21 |
+| ASan/UBSan u24 : reste | 42 / 45 | 3 / 0 |
+
+Les trois échecs de chaque configuration sont les mêmes cas
+`num_roots_cost_uniform_u18_n{8000,16000,32000}_k5`. ASan conserve
+les trois raisons `input_unreadable` ; les fichiers sont absents du paquet.
+TSan conserve les trois échecs, sans leur diagnostic brut : la même cause
+y est déduite des entrées absentes et de la source. Aucun résultat
+mathématique incorrect n'est établi. La préparation
+locale **`build/v11-persist/qual_sorties/data_complet`** contient depuis
+les six fichiers requis, aux tailles et empreintes du manifeste ; le
+répertoire `data` les omet toujours. Utiliser le premier pour la reprise.
+Ce contrôle de préparation ne rejoue aucun test.
+
+S9 passe ses portes CLI LiDAR normal/`-O` sous TSan sur les trois trames.
+ASan passe les trois trames en normal, ainsi que ng00 sous `-O` ;
+les jumelles `-O` de ng01/ng02 n'ont pas de résultat. Les portes courtes `num_roots` et `points_unit_sort_refusal`
+ne sont **pas sélectionnées dans S** ; les quatre `points_vs_python`
+restent également dans leur campagne dédiée. Aucun transfert vers L2b,
+absente de la source S.
+
+**Reprise préparée en 8b2ca400e : onze lots, quatre ASan et sept TSan.**
+Sur les inventaires S, leur union est exacte et disjointe pour les
+68 portes sans suffixe `_opt` par configuration. Les 32 jumelles `_opt`
+sont désormais exclues explicitement ; aucun succès ne leur est attribué
+par ce redécoupage. Les seuils de sélection sont satisfaits sur cet
+inventaire. La nouvelle matrice n'a pas encore de résultats : terminer
+les lots et les trois cas d'entrée réparée reste nécessaire.
+[Preuve S, inventaires et contrôle du découpage](../receipts/audit_g4_s_20261005/README.md).
 
 **L ferme 27 portes non mutantes et sept campagnes de mutants en Release u21 :
 34 résultats conformes sur les 38 sélectionnés.**
@@ -95,8 +130,8 @@ sous `-O` et ne sont pas qualifiés en u18/u24 ou sous sanitizers.
 **Mesure et complément W48 désormais joués.** La session
 `claudequalmesure`, sur b319efc84, ferme la mesure appariée et les
 permutations/réétiquetages supports W48 sur ng02 et ng00 : 14 appels par
-porte, verdicts conformes. La couverture des 50/65 portes sanitizers de B
-reste absente ; S8/S9 et la future voie L2b restent à qualifier. Aucun contrat
+porte, verdicts conformes. Les résultats sanitizers plus récents de S
+sont détaillés ci-dessus ; ils ne qualifient pas la future voie L2b. Aucun contrat
 100 ms n'est acquis. Les fermetures ciblées et les empreintes sont relues.
 [Reçus L/mesure et portée](../receipts/audit_l2_decision_20261005/README.md).
 [Preuve A2, noms exacts et rejeu](../receipts/audit_g4_a2_20261005/README.md).
@@ -151,21 +186,26 @@ octet pour octet par les deux voies**, TSan sur le pipeline et les mutants.
 L2b n'est pas encore une nouvelle voie qualifiée.
 [Contrelecture de la décision et de ses entrées](../receipts/audit_l2_decision_20261005/README.md).
 
-**Brouillon L2b, capture du 5 octobre à 18:03:24 UTC : diagnostic activé
-sur le chemin normal.** `api_detail::compute_supports` passe toujours
-`&seen` à `supports_parts`, même lorsque son argument `diagnostics` est
-nul. Ce pointeur descend jusqu'à `registers_of(log)` dans
-`build_order_full`. Le calcul public de `supports` balaie donc tout le
-journal et calcule son empreinte FNV destinée aux portes.
+**Diagnostic du chemin normal : correction locale favorable.** La
+capture initiale puis le commit local **cc73784f0** passent toujours
+`&seen` à `supports_parts`, même sans diagnostic demandé. Le hachage
+FNV du journal coûte alors exactement **2C+G mots**, soit **16C+8G
+itérations** par octet, dans `Stage::tree`.
 
-Pour C cellules et G graines, ce diagnostic traite exactement **2C+G
-mots**, soit **16C+8G itérations** de hachage par octet. Ce travail est
-compté dans `Stage::tree`, avant le rattachement. Il pénalise le chemin
-que L2b doit accélérer ; aucun gain chiffré n'est déduit de cette lecture.
-**Correction ciblée :** passer `diagnostics ? &seen : nullptr`, en gardant
-les registres disponibles aux portes qui les demandent. Vérifier ensuite
-l'identité MHGP11SP et mesurer le chemin public avec diagnostics absents.
-[Capture, chemin d'appel et portée du constat](../receipts/audit_l2b_wip_20261005/README.md).
+Le correctif, commité localement en **311ef5e3c**, est identique aux
+trois fichiers capturés. Il prépare désormais
+`wanted = diagnostics == nullptr ? nullptr : &seen`, puis transmet
+`wanted`. Le pointeur nul parvient à `build_order_full` :
+`registers_of(log)` n'est plus appelé sur le chemin public normal.
+La porte ajoutée compare aussi les fichiers et manifestes de l'appel
+public sans diagnostic à ceux de la voie FULL, et observe cette voie
+à W1. Le mutant `voie_supports_order_tree` cible le retour involontaire
+à l'ancienne voie. Ces ajouts sont relus dans les sources ; leur présence
+ne constitue pas un résultat d'exécution. Publier puis qualifier cette
+version et mesurer l'appel public sans diagnostic. Aucun gain chiffré
+n'est déduit de la correction.
+[Capture initiale](../receipts/audit_l2b_wip_20261005/README.md).
+[Correction locale, source figée et limites](../receipts/audit_l2b_followup_20261005/README.md).
 
 ## S8 : socle numérique de la sortie points
 
@@ -179,14 +219,16 @@ indécidable dans le budget rend `radical_sign_budget`, jamais zéro.
 La contre-épreuve indépendante Python contrôle signes, égalités,
 collision de signature, bornes de table et refus. Elle ne teste pas le
 C++ : les rapports locaux S8 restent distincts, et A2 sur b319efc84
-précède cette tranche. Qualification S8 u18/u24, sanitizers, mutants
-numériques complets et coût W48 restent à jouer sur G4.
+précède cette tranche. La session S couvre certains coûts de table LiDAR, mais pas
+la porte courte `num_roots`. La qualification numérique complète aux
+profils annoncés, ses mutants et le coût W48 restent à constater sur G4.
 
 Pour le raccord S9, conserver l'admission de tous les temporaires par
 worker et payer la table entière même quand seuls certains rangs sont
 remplis. Les égalités de dates et le refus K=n≥2 doivent être jugés sur
-la sortie points assemblée. S8 fournit les primitives ; S9, encore en
-développement, n'est pas une livraison qualifiée.
+la sortie points assemblée. S8 fournit les primitives ; S9 est publiée,
+avec une qualification G4 partielle et un différentiel exact sur trames
+encore à jouer.
 [Sources, contre-épreuve et limites](../receipts/audit_s8_20261005/README.md).
 
 ## Audit général du 5 octobre : décisions importantes

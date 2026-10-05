@@ -1,0 +1,40 @@
+{
+  "snapshot_utc": "2026-10-05T19:05:51.503614+00:00",
+  "developer_worktree": "/workspaces/E-HGP/build/v11-impl-l2",
+  "base_head": "cc73784f0a55a18afe7c6957a2f68cd702e8cb83",
+  "developer_head_after_capture": "cc73784f0a55a18afe7c6957a2f68cd702e8cb83",
+  "status": "WIP_non_qualifie",
+  "files": {
+    "morsehgp3D_v11/src/api/compute.cpp": {
+      "snapshot_sha256": "f35bd31fbc4e788f9838e63d0f4c9a35e8d6dd504c44e1dcdbdb6796cea19bf1",
+      "after_capture_sha256": "f35bd31fbc4e788f9838e63d0f4c9a35e8d6dd504c44e1dcdbdb6796cea19bf1",
+      "stable_during_capture": true,
+      "commit_sha256": "46e3c3ea46189b5558665bd545627b2821ccb91f2917ab2147f4c62d5c113a28",
+      "bytes": 11514
+    },
+    "morsehgp3D_v11/tests/api/supports_route.cpp": {
+      "snapshot_sha256": "2db41f412d4894ffb8688b86e6cc16b5e3a1a9e7329a6cce13a4330dc692fb42",
+      "after_capture_sha256": "2db41f412d4894ffb8688b86e6cc16b5e3a1a9e7329a6cce13a4330dc692fb42",
+      "stable_during_capture": true,
+      "commit_sha256": "18a77d606566604d15882d9cb6c139dea8b25c466674aae16fa79e48a071f796",
+      "bytes": 19388
+    },
+    "morsehgp3D_v11/tests/mutants/api.json": {
+      "snapshot_sha256": "19c4202f458a58ec7491382fd75c0bfdf6c8a6166d0383371a7577bae66cb7cf",
+      "after_capture_sha256": "19c4202f458a58ec7491382fd75c0bfdf6c8a6166d0383371a7577bae66cb7cf",
+      "stable_during_capture": true,
+      "commit_sha256": "e39f1a25b0924c4c5a2b7d440955ce6ed150fcf661f9ee24479dc1749e2ed927",
+      "bytes": 8934
+    }
+  },
+  "unchanged_dependencies_at_base_pin": {
+    "morsehgp3D_v11/src/api/internal.hpp": {
+      "sha256": "356816a110e8bda38150f07543390198b358585c8065107544846294f9635e0a",
+      "developer_file_matches_pin_at_capture": true
+    },
+    "morsehgp3D_v11/src/tower/order_tree.cpp": {
+      "sha256": "c5fd5c3859a525932cdfb9f4d7d420efec01ba95661a0b587689fa8d0159e5ab",
+      "developer_file_matches_pin_at_capture": true
+    }
+  }
+}

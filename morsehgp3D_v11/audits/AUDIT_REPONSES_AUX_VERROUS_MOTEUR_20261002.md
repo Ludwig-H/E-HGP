@@ -58,12 +58,16 @@ qualifie la sortie native S9. Le lecteur du fichier contrôle des
 conditions nécessaires ; le plancher maximal et l'arbre complet sont
 recoupés par les portes différentielles du moteur.
 
-**Qualification S9 :** la matrice c97776ea8 exclut désormais les quatre
-différentiels `points_vs_python`. Garder leur exécution dédiée sur G4,
-notamment sur les trois trames entières : l'oracle borné et le lecteur ne
+**Qualification S9 :** la session G4 `claudequals`, sur **d26328fe2**,
+ferme les portes CLI des trois trames LiDAR normal/`-O` sous TSan. Les
+portes courtes de signes et de refus de tri ne font pas partie de cette
+sélection. Ces succès ne remplacent pas les quatre différentiels
+`points_vs_python`, toujours exclus par la matrice. Garder leur exécution
+dédiée sur G4, notamment sur les trois trames entières : l'oracle borné et le lecteur ne
 certifient pas seuls l'identité complète des champs à K5, dont le plancher
 maximal. Le moteur conserve sa certification exacte de ce plancher ;
 aucun défaut produit n'est déduit de cette limite des portes.
+[Résultats G4 S et périmètre exact](../receipts/audit_g4_s_20261005/README.md).
 [Contre-épreuve ciblée et plan Python épinglé](../receipts/audit_s9_qualification_scope_20261005/README.md).
 [Périmètre, contre-épreuve et alerte de tri](../receipts/audit_s9_wip_20261005/README.md).
 
@@ -87,8 +91,9 @@ La capacité finie reste une limite déclarée, pas une décision approchée.
 
 Le rejeu Python porte sur ces formules et sur les sources figées ; il
 ne qualifie pas l'implémentation C++. A2 sur **b319efc84** précède S8.
-Les portes natives de la sortie points S9, notamment les égalités de
-dates et le refus K=n≥2, restent à constater sur le produit assemblé.
+La session S apporte depuis les résultats LiDAR cités ci-dessus ; elle
+ne sélectionne pas la porte courte `num_roots`. La qualification complète
+des égalités de dates et des refus conserve ses propres portes.
 [Preuve bornée et périmètre](../receipts/audit_s8_20261005/math/REPORT.md).
 
 ## Contre-épreuve générale du 5 octobre

@@ -1,0 +1,62 @@
+{
+  "closed_utc": "2026-10-05T19:05:51.527177+00:00",
+  "base_head": "cc73784f0a55a18afe7c6957a2f68cd702e8cb83",
+  "developer_head": "cc73784f0a55a18afe7c6957a2f68cd702e8cb83",
+  "developer_status": " M morsehgp3D_v11/src/api/compute.cpp\n M morsehgp3D_v11/tests/api/supports_route.cpp\n M morsehgp3D_v11/tests/mutants/api.json\n",
+  "sources": {
+    "morsehgp3D_v11/src/api/compute.cpp": {
+      "snapshot_sha256": "f35bd31fbc4e788f9838e63d0f4c9a35e8d6dd504c44e1dcdbdb6796cea19bf1",
+      "closure_sha256": "f35bd31fbc4e788f9838e63d0f4c9a35e8d6dd504c44e1dcdbdb6796cea19bf1",
+      "unchanged_since_capture": true
+    },
+    "morsehgp3D_v11/tests/api/supports_route.cpp": {
+      "snapshot_sha256": "2db41f412d4894ffb8688b86e6cc16b5e3a1a9e7329a6cce13a4330dc692fb42",
+      "closure_sha256": "2db41f412d4894ffb8688b86e6cc16b5e3a1a9e7329a6cce13a4330dc692fb42",
+      "unchanged_since_capture": true
+    },
+    "morsehgp3D_v11/tests/mutants/api.json": {
+      "snapshot_sha256": "19c4202f458a58ec7491382fd75c0bfdf6c8a6166d0383371a7577bae66cb7cf",
+      "closure_sha256": "19c4202f458a58ec7491382fd75c0bfdf6c8a6166d0383371a7577bae66cb7cf",
+      "unchanged_since_capture": true
+    }
+  },
+  "new_native_or_cloud_executions": 0,
+  "files": {
+    "README.md": {
+      "sha256": "9acb506d5a35d0044e170bd9769449460f665b342b24695f15a8afe60d6b3e2e",
+      "bytes": 1807
+    },
+    "diffs/morsehgp3D_v11/src/api/compute.cpp.diff": {
+      "sha256": "462d37d3049a6bb081d9acc04beed40c3e9acf3c6ebac68f21947d0c8cd2512a",
+      "bytes": 894
+    },
+    "diffs/morsehgp3D_v11/tests/api/supports_route.cpp.diff": {
+      "sha256": "13f8c9d8c05a17a87d9d98b6e7bd94261883c4511b046ac128912cc757cdd0ad",
+      "bytes": 3627
+    },
+    "diffs/morsehgp3D_v11/tests/mutants/api.json.diff": {
+      "sha256": "51f55cd2c0843014b27730de1fada968246f190775a609206a255be6b14af2bb",
+      "bytes": 936
+    },
+    "review.json": {
+      "sha256": "03a13708bae6d79e850a932277f5380665cad37703666b346b45c7935e92d96f",
+      "bytes": 2144
+    },
+    "source_manifest.json": {
+      "sha256": "a53b1413debea0e77a263acce7ebb80f034e09ef96556dfd8dab598d3ad66182",
+      "bytes": 1916
+    },
+    "sources/morsehgp3D_v11/src/api/compute.cpp": {
+      "sha256": "f35bd31fbc4e788f9838e63d0f4c9a35e8d6dd504c44e1dcdbdb6796cea19bf1",
+      "bytes": 11514
+    },
+    "sources/morsehgp3D_v11/tests/api/supports_route.cpp": {
+      "sha256": "2db41f412d4894ffb8688b86e6cc16b5e3a1a9e7329a6cce13a4330dc692fb42",
+      "bytes": 19388
+    },
+    "sources/morsehgp3D_v11/tests/mutants/api.json": {
+      "sha256": "19c4202f458a58ec7491382fd75c0bfdf6c8a6166d0383371a7577bae66cb7cf",
+      "bytes": 8934
+    }
+  }
+}

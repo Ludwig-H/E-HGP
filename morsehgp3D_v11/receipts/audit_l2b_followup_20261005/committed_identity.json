@@ -1,0 +1,22 @@
+{
+  "observed_utc": "2026-10-05T19:09:11.999064+00:00",
+  "local_commit": "311ef5e3cdd37967471d0148794ad12f81349b0f",
+  "captured_three_blobs_identical": {
+    "morsehgp3D_v11/src/api/compute.cpp": {
+      "git_sha256": "f35bd31fbc4e788f9838e63d0f4c9a35e8d6dd504c44e1dcdbdb6796cea19bf1",
+      "snapshot_sha256": "f35bd31fbc4e788f9838e63d0f4c9a35e8d6dd504c44e1dcdbdb6796cea19bf1",
+      "identical": true
+    },
+    "morsehgp3D_v11/tests/api/supports_route.cpp": {
+      "git_sha256": "2db41f412d4894ffb8688b86e6cc16b5e3a1a9e7329a6cce13a4330dc692fb42",
+      "snapshot_sha256": "2db41f412d4894ffb8688b86e6cc16b5e3a1a9e7329a6cce13a4330dc692fb42",
+      "identical": true
+    },
+    "morsehgp3D_v11/tests/mutants/api.json": {
+      "git_sha256": "19c4202f458a58ec7491382fd75c0bfdf6c8a6166d0383371a7577bae66cb7cf",
+      "snapshot_sha256": "19c4202f458a58ec7491382fd75c0bfdf6c8a6166d0383371a7577bae66cb7cf",
+      "identical": true
+    }
+  },
+  "qualification_inferred": false
+}
