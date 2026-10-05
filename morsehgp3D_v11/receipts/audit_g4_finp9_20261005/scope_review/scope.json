@@ -1,0 +1,431 @@
+{
+  "schema": "mhgp11.audit.p9_differential_scope.v1",
+  "pin": "38b76701b9b0198fc1c37afe16e1480e638e513c",
+  "session": "v11.20261005.claudefinp9",
+  "scope": "source and existing direct archive review only",
+  "native_runs_by_auditor": 0,
+  "cloud_calls_by_auditor": 0,
+  "sources": [
+    {
+      "path": "morsehgp3D_v11/tests/points/points_vs_python.py",
+      "sha256": "469314b16f28f1c7197619f281012043d033bc065cdbcce1b51250f6a52028dc",
+      "anchors": [
+        {
+          "line": 84,
+          "text": "def call(argv, timeout=3600):"
+        },
+        {
+          "line": 86,
+          "text": "    if done.returncode != 0:"
+        },
+        {
+          "line": 101,
+          "text": "def compare(native, order, hang, tree, ids):"
+        },
+        {
+          "line": 105,
+          "text": "    need(native['n'] == n and native['ids'] == [int(i) for i in ids], 'sites')"
+        },
+        {
+          "line": 108,
+          "text": "    for s in range(n):"
+        },
+        {
+          "line": 113,
+          "text": "        need(native['floor'][s] == int(hang.floor[s]) and native['strict'][s] == int(bool(hang.strict[s])),"
+        },
+        {
+          "line": 122,
+          "text": "    need(native['block_parent'] == [NONE if p < 0 else p for p in tree.block_parent], 'blocs : parents')"
+        },
+        {
+          "line": 128,
+          "text": "def one(args, name, xyz, idp, k, m, stats):"
+        },
+        {
+          "line": 132,
+          "text": "    call([args.export, xyz, idp, ph_path, str(k), str(k), str(args.workers), str(1 << 40)])"
+        },
+        {
+          "line": 136,
+          "text": "    hang = prad.hang_margin_radius(order, m)"
+        },
+        {
+          "line": 137,
+          "text": "    tree = pf.tower_point_tree(hang)"
+        },
+        {
+          "line": 154,
+          "text": "    out += [('c%04d' % i, random_cloud(rng)) for i in range(args.clouds)]"
+        },
+        {
+          "line": 155,
+          "text": "    out += [('u%d' % n, uniform(n)) for n in args.uniform]"
+        },
+        {
+          "line": 165,
+          "text": "    parser.add_argument('--seed', type=int, default=20261005)"
+        },
+        {
+          "line": 170,
+          "text": "    parser.add_argument('--workers', type=int, default=2)"
+        },
+        {
+          "line": 181,
+          "text": "        for frame in args.data:"
+        },
+        {
+          "line": 186,
+          "text": "                if n is not None and (k > n or (k >= 2 and k >= n)):"
+        },
+        {
+          "line": 188,
+          "text": "                ms = sorted({prad.qualification(k)} | ({1, k + 1} if args.m_all and k >= 2 else set()))"
+        },
+        {
+          "line": 191,
+          "text": "            stats['clouds'] += 1"
+        },
+        {
+          "line": 192,
+          "text": "    except Gap as error:"
+        },
+        {
+          "line": 195,
+          "text": "    except (Refusal, OSError, ValueError) as error:"
+        },
+        {
+          "line": 198,
+          "text": "    if code == 0 and (stats['clouds'] < args.min_clouds or stats['sites'] < args.min_sites or"
+        },
+        {
+          "line": 203,
+          "text": "    return code"
+        }
+      ]
+    },
+    {
+      "path": "morsehgp3D_v11/tests/points/tests.cmake",
+      "sha256": "fab2d65223c63c72f62dd9f2bffe631e83a6a84607f8c6ee17d02c6ce296175a",
+      "anchors": [
+        {
+          "line": 39,
+          "text": "mhgp11_python_gate(mhgp11_points_vs_python 0 points_vs_python.py --probe $<TARGET_FILE:mhgp11_points_probe>"
+        },
+        {
+          "line": 41,
+          "text": "                   --m-all --uniform=300,2000,8000 --k=1,2,3,4,5 --min-clouds 407 --min-sites 100000"
+        },
+        {
+          "line": 42,
+          "text": "                   --min-delayed 50000 LABELS long TIMEOUT 3600)"
+        },
+        {
+          "line": 43,
+          "text": "foreach(frame ng00 ng01 ng02)"
+        },
+        {
+          "line": 46,
+          "text": "                     --work ${PROJECT_BINARY_DIR}/points_vs_python_${frame} --clouds 0 --data=lidar_${frame} --k=5"
+        },
+        {
+          "line": 47,
+          "text": "                     --workers 8 --min-sites 30000 --min-delayed 20000 LABELS lidar long TIMEOUT 3600)"
+        }
+      ]
+    },
+    {
+      "path": "morsehgp3D_v11/cmake/gates.cmake",
+      "sha256": "8abaa4b9a533f0988cd2a4b436665905c3ad1be92a4f33f360da2fce34c1d70a",
+      "anchors": [
+        {
+          "line": 82,
+          "text": "function(_mhgp11_register name expected program)"
+        },
+        {
+          "line": 113,
+          "text": "    list(APPEND defs \"-DREQUIRE_DIR_ENV=${MHGP11_DATA_DIR_ENV}\")"
+        },
+        {
+          "line": 190,
+          "text": "function(mhgp11_python_gate name expected script)"
+        },
+        {
+          "line": 209,
+          "text": "  if(NOT \"long\" IN_LIST gate_labels)"
+        }
+      ]
+    },
+    {
+      "path": "morsehgp3D_v11/cmake/run_expect.cmake",
+      "sha256": "165d02c686bb71d32fbf9edb3fb3afa80c03ca3c8d6deb40b8444eeb6443646e",
+      "anchors": [
+        {
+          "line": 52,
+          "text": "  if(\"${required_dir}\" STREQUAL \"\" OR NOT IS_DIRECTORY \"${required_dir}\")"
+        },
+        {
+          "line": 54,
+          "text": "    run_expect_say(\"run_expect_verdict sautee\")"
+        },
+        {
+          "line": 99,
+          "text": "  if(NOT run_expect_in_out EQUAL -1 OR NOT run_expect_in_err EQUAL -1)"
+        },
+        {
+          "line": 108,
+          "text": "if(NOT \"${rc}\" MATCHES \"^[0-9]+$\")"
+        },
+        {
+          "line": 117,
+          "text": "if(NOT \"${rc}\" STREQUAL \"${EXPECTED}\")"
+        }
+      ]
+    },
+    {
+      "path": "morsehgp3D_v11/bench/whole_input.hpp",
+      "sha256": "95ee29ceda8d47d18c92fda9b83409e3da80ddd5dfc8ae0c2137ad532cd963c2",
+      "anchors": [
+        {
+          "line": 27,
+          "text": "Result<Input> read_input(const char* xyz, const char* ids, MemoryBudget& budget) {"
+        },
+        {
+          "line": 33,
+          "text": "  const u64 count = static_cast<u64>(bytes / 12);"
+        },
+        {
+          "line": 43,
+          "text": "  for (u64 begin = 0; begin < count; begin += 4096) {"
+        }
+      ]
+    },
+    {
+      "path": "morsehgp3D_v11/bench/points_hierarchy.py",
+      "sha256": "fa12f16f3ce599a5299737d740bd252454cddcb9c475edf593d7aab3cd426c17",
+      "anchors": [
+        {
+          "line": 86,
+          "text": "def read_export(path):"
+        },
+        {
+          "line": 104,
+          "text": "    result = dict(bits=bits, kmax=kmax, n=n, xyz=sites[:, :3], ids=sites[:, 3], levels=levels, orders={})"
+        },
+        {
+          "line": 119,
+          "text": "    need(pos[0] == len(raw), 'octets_en_trop')"
+        }
+      ]
+    },
+    {
+      "path": "morsehgp3D_v11/bench/points_radius.py",
+      "sha256": "59a6adcadba51522a1d557b31d46edfbf15d55b92140aa34dd03c3f94ecf02ae",
+      "anchors": [
+        {
+          "line": 184,
+          "text": "def floor_rank_radius(levels, value):"
+        },
+        {
+          "line": 188,
+          "text": "    while r + 1 < len(levels) and value.cmp_level(levels, r + 1) >= 0:"
+        },
+        {
+          "line": 195,
+          "text": "def ancestor_at_radius(order, start, value):"
+        },
+        {
+          "line": 208,
+          "text": "def hang_margin_radius(order, m, rule='margin_r'):"
+        },
+        {
+          "line": 276,
+          "text": "def qualification(k):"
+        },
+        {
+          "line": 279,
+          "text": "    return 1 if k == 1 else k + 1"
+        }
+      ]
+    },
+    {
+      "path": "morsehgp3D_v11/bench/points_flat.py",
+      "sha256": "4647de0762b500fb36ca917941a34120d58931f0b0033b570490821860fdd3bc",
+      "anchors": [
+        {
+          "line": 462,
+          "text": "def tower_point_tree(hanging, split_entries=False, binarize=False):"
+        }
+      ]
+    },
+    {
+      "path": "morsehgp3D_v11/tests/points/points_probe.cpp",
+      "sha256": "a91486dba7c5bd2399e5803050613e6b77f4f32225d9bc4959c662e28d37d86e",
+      "anchors": [
+        {
+          "line": 158,
+          "text": "Outcome dump(const Args& a, const OrderTree& tree, const points::PointHierarchy& h, MemoryBudget& budget) {"
+        },
+        {
+          "line": 172,
+          "text": "  column(out, \"x\", cloud.x());"
+        },
+        {
+          "line": 181,
+          "text": "  column(out, \"referenced\", h.levels());"
+        },
+        {
+          "line": 202,
+          "text": "  auto input = bench::read_input(a.xyz.c_str(), a.ids.c_str(), budget);"
+        },
+        {
+          "line": 225,
+          "text": "  auto h = points::hang_qualified(tree.value(), m, budget, pool.value().get());"
+        }
+      ]
+    }
+  ],
+  "observed": {
+    "archive_sha256": "e1497f2db57f5351048a2709e83352e8fe3b579f20061b72b2a20da3b0f72a57",
+    "tests": [
+      {
+        "test": "mhgp11_points_vs_python",
+        "stdout_member": "results/cmd/000_points_python_synthetique/stdout",
+        "stdout_sha256": "a99d1dc2c417534ae09127af2ca577337b6abfc92fa198f14f23c0c2d2a4ace2",
+        "meta_member": "results/cmd/000_points_python_synthetique/meta.txt",
+        "direct_ctest_verdict": "Passed",
+        "direct_command_exit": 0
+      },
+      {
+        "test": "mhgp11_points_vs_python_lidar_ng00_k5",
+        "stdout_member": "results/cmd/001_points_python_ng00/stdout",
+        "stdout_sha256": "9367ad9185ee2734707d0a77e971bf810ab950750db7093cdc5ddd293a75f1c9",
+        "meta_member": "results/cmd/001_points_python_ng00/meta.txt",
+        "direct_ctest_verdict": "Passed",
+        "direct_command_exit": 0
+      },
+      {
+        "test": "mhgp11_points_vs_python_lidar_ng01_k5",
+        "stdout_member": "results/cmd/002_points_python_ng01/stdout",
+        "stdout_sha256": "7b3c3590c934c0ffc4efdbc6e88129a0047a6e82b3c93af7c2a8c985e78bfce1",
+        "meta_member": "results/cmd/002_points_python_ng01/meta.txt",
+        "direct_ctest_verdict": "Passed",
+        "direct_command_exit": 0
+      },
+      {
+        "test": "mhgp11_points_vs_python_lidar_ng02_k5",
+        "stdout_member": "results/cmd/003_points_python_ng02/stdout",
+        "stdout_sha256": "ff9f9d681427759b0bba2e0e5be17f1c65386730e17f066517e50c7a7dc06b05",
+        "meta_member": "results/cmd/003_points_python_ng02/meta.txt",
+        "direct_ctest_verdict": "Passed",
+        "direct_command_exit": 0
+      }
+    ],
+    "business_counter_lines_archived": 0,
+    "exact_business_totals_observed": null
+  },
+  "contract_consequences": {
+    "synthetic": {
+      "random_clouds": 400,
+      "random_seed": 20261005,
+      "fixed_witnesses": 4,
+      "uniform_counts": [
+        300,
+        2000,
+        8000
+      ],
+      "orders_requested": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "qualification": "K1:m1; K>=2:m1 and m(K)=K+1",
+      "workers": 2,
+      "minimum_cloud_counter": 407,
+      "minimum_cumulative_sites": 100000,
+      "minimum_cumulative_delayed_sites": 50000
+    },
+    "lidar_each": {
+      "order": 5,
+      "qualification": 6,
+      "workers": 8,
+      "minimum_cumulative_sites": 30000,
+      "minimum_cumulative_delayed_sites": 20000,
+      "whole_input_without_subsampling_in_judge": true,
+      "fixed_witnesses_also_listed": 4,
+      "fixed_witnesses_executed_at_K5": [
+        "triangles:n6",
+        "huit:n8"
+      ],
+      "fixed_witnesses_omitted_at_K5": [
+        "cinq:n5",
+        "plateau:n4"
+      ]
+    },
+    "exact_compared_fields": [
+      "site count and Morton-order PointIds",
+      "entire forest parent and rank arrays",
+      "every site: exact t/M/Q Fraction values, owner, floor, strict",
+      "every site referenced t/M/Q/floor level value against MHGP11PH catalogue",
+      "complete plateau date triples (M=Q normalized to zero)",
+      "complete block_plateau and block_parent arrays",
+      "complete site_block and site_plateau arrays"
+    ],
+    "no_silent_refusal": "nonzero native exit -> code2; mismatch -> code1; failed minima -> code3; all fail expected code0",
+    "only_CTest_skip": "missing MHGP11_DATA_DIR precontrol; actual four direct outputs are Passed, not Skipped",
+    "scope_floor_closure": "floor/strict differential runs on every admitted site; no sampling loop in compare"
+  },
+  "input_metadata": {
+    "manifest_sha256": "acddfeb0306be40160884dbbf6531c30ecb530565fb4da89f9d3497bdca4807e",
+    "verification": "metadata manifest hash equals P9 preflight; real payloads not copied or reprocessed",
+    "frames": [
+      {
+        "name": "lidar_ng00",
+        "count": 39885,
+        "sha256": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf",
+        "ids_sha256": "c73a41965f6f2e1042b5f3ba876d12ae0811b7f24aa73c886aa07830974e33c6",
+        "profile": "quantized_u18_input_only",
+        "sequence": "08",
+        "frame": "000000",
+        "whole_frame_after_ground_mask": true,
+        "subsampling": false,
+        "original_return_ids": true
+      },
+      {
+        "name": "lidar_ng01",
+        "count": 35551,
+        "sha256": "ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f",
+        "ids_sha256": "bb699c2511a87618813a32657399539fe90e8f1e4f1187656ac88c03f2fee6a4",
+        "profile": "quantized_u18_input_only",
+        "sequence": "08",
+        "frame": "000100",
+        "whole_frame_after_ground_mask": true,
+        "subsampling": false,
+        "original_return_ids": true
+      },
+      {
+        "name": "lidar_ng02",
+        "count": 45845,
+        "sha256": "a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af",
+        "ids_sha256": "121e76f3ef1fcedb05cb65da9a95bfb84fe4b8305076a7485483fff113d128cc",
+        "profile": "quantized_u18_input_only",
+        "sequence": "08",
+        "frame": "000200",
+        "whole_frame_after_ground_mask": true,
+        "subsampling": false,
+        "original_return_ids": true
+      }
+    ],
+    "same_sequence_frames": true
+  },
+  "limits": [
+    "P9 direct archive contains no points_vs_python_verdict counter line; exact historical totals are not newly observed",
+    "cloud counter includes fixed witnesses even when every requested order is omitted at K>=n",
+    "XYZ and dump k/m/referenced fields are not explicitly compared; both programs receive the same inputs and requested parameters",
+    "Python point hierarchy derives from native MHGP11PH; this is not an independent FULL construction oracle",
+    "long gates have no optimized twin; P9 alone supplies no native or numpy differential -O execution",
+    "u21 Release build, input values in explicit u18 domain; no u24 or K10 LiDAR qualification from P9"
+  ]
+}

@@ -8,39 +8,32 @@ aux reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 Note maintenue en place ; détails et échanges clos dans les reçus.
 
-**Suivi G4 fina2, source 38b76701b.** Les portes unitaires S10, y compris
-la racine `2^127−1`, et les portes plates CLI/échelle/LiDAR passent dans
-les quatre profils ordinaires. Le refus du tri S9 et `num_roots`
-passent également. La campagne reste partielle à l'échéance ; ses
-échecs `supports_route` u18/u24 révèlent un attendu de hashes commun
-inadapté aux profils, sans défaut mathématique du moteur établi.
-Sanitizers et différentiels complets S9/S10 restent distincts.
-La session finm au même pin détecte effectivement les 10 mutants de
-head, 6 de points et 57 de num. Ses deux campagnes API/CLI non
-conformes sont traitées comme des problèmes de qualification : témoin
-API aux SHA du mauvais profil, et mutant CLI devenu inactif pour sa
-porte supports après L2b. Aucun nouveau défaut mathématique établi.
-[Mutants et périmètre](../receipts/audit_g4_finm_20261005/README.md).
-[Résultats et portée](../receipts/audit_g4_fina2_20261005/README.md),
-[constat de qualification](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#fina2--attendu-de-qualification-l2b-à-corriger-par-profil).
+**Qualification finale au pin 38b76701b.** Les portes prioritaires S9/S10
+passent dans les quatre profils ordinaires de
+[fina2](../receipts/audit_g4_fina2_20261005/README.md). Les mutants head,
+points et num sont tous détectés dans
+[finm](../receipts/audit_g4_finm_20261005/README.md). Les problèmes de
+qualification API/CLI sont détaillés dans la note moteur ; aucun
+nouveau défaut mathématique n’en est déduit.
 
-**Suivi sanitizer fins au même pin.** Les portes points, plates et
-`roots_cost` passent sur les trois tailles et trois trames sous
-ASan/UBSan u24 et TSan u21. TSan termine 80/80 portes ; ASan/UBSan
-74/80, avec les six échecs de la porte supports multiprofil.
-Aucune porte manquante. Le complément finb termine ensuite 783/783
-portes courtes dans chacun des deux profils sanitizer : la frontière
-S10 exacte et le refus S9 passent, ainsi que les CLI points/plat et
-`num_roots`. Les différentiels complets S9/S10 restent à qualifier.
-[Reçu finb](../receipts/audit_g4_finb_20261005/README.md).
-[Reçu fins](../receipts/audit_g4_fins_20261005/README.md).
+Les portes points/plat/racines d’échelle et LiDAR passent sous
+ASan/UBSan u24 et TSan u21 dans
+[fins](../receipts/audit_g4_fins_20261005/README.md). Le complément
+[finb](../receipts/audit_g4_finb_20261005/README.md) termine 783/783 portes
+courtes dans chaque profil, dont la racine exacte `2^127−1` et le refus
+du tri S9. Les onze portes K10 et dix-sept références FULL exactes
+passent dans [finl](../receipts/audit_g4_finl_20261005/README.md).
 
-**Suivi finl.** Les onze portes K10 et dix-sept références FULL
-exactes passent au même pin. La coupure globale ne laisse que six
-campagnes mutants u21 sans résultat ; aucune de ces 28 portes
-fonctionnelles n’est manquante. Les différentiels points/tête Python
-étaient exclus de L et gardent leurs sessions dédiées.
-[Reçu finl](../receipts/audit_g4_finl_20261005/README.md).
+**Les huit différentiels dédiés passent en Release u21.**
+[P9](../receipts/audit_g4_finp9_20261005/README.md) contrôle l’arbre de
+points contre sa construction Python, site par site, avec dates,
+plateaux et parents. [P10](../receipts/audit_g4_finp10_20261005/README.md)
+contrôle ensuite la tête sur le même arbre natif : partitions, bruit,
+étiquettes canoniques, EOM z=1/2/3 et feuilles. Chaque lot couvre ses
+cas synthétiques et les trois trames entières. Les PASS CTest sont
+lus ; les compteurs internes ne sont pas conservés. Les minima P9,
+et les 1 944 appels sans refus Python de P10, sont des conséquences
+des contrats du juge épinglé, explicitement distinguées dans les reçus.
 
 ## S10 native publiée : encadrement entier et frontière de capacité
 

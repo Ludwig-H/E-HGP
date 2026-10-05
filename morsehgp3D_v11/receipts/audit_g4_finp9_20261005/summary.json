@@ -1,0 +1,314 @@
+{
+  "archive_sha256": "e1497f2db57f5351048a2709e83352e8fe3b579f20061b72b2a20da3b0f72a57",
+  "audit_native_or_cloud_runs": 0,
+  "backend": "cpu_reference",
+  "counter_evidence": [
+    {
+      "business_verdict_line_directly_preserved": false,
+      "exact_business_counts_not_observed": true,
+      "lower_bounds_implied_by_passed_gate": {
+        "min_clouds": 407,
+        "min_delayed": 50000,
+        "min_sites": 100000
+      },
+      "parameters": {
+        "fixed_fixtures": 4,
+        "k": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "m_all": true,
+        "random_clouds": 400,
+        "uniform_sizes": [
+          300,
+          2000,
+          8000
+        ],
+        "workers": 2
+      },
+      "python_refusals_counter_not_instrumented": true,
+      "refusal_skipping_not_present_in_judge": true,
+      "test": "mhgp11_points_vs_python"
+    },
+    {
+      "business_verdict_line_directly_preserved": false,
+      "exact_business_counts_not_observed": true,
+      "lower_bounds_implied_by_passed_gate": {
+        "min_clouds": 0,
+        "min_delayed": 20000,
+        "min_sites": 30000
+      },
+      "parameters": {
+        "data": "lidar_ng00",
+        "fixed_fixtures_compared_at_k5": 2,
+        "fixed_fixtures_listed": 4,
+        "full_frame": true,
+        "k": [
+          5
+        ],
+        "m_all": false,
+        "workers": 8
+      },
+      "python_refusals_counter_not_instrumented": true,
+      "refusal_skipping_not_present_in_judge": true,
+      "test": "mhgp11_points_vs_python_lidar_ng00_k5"
+    },
+    {
+      "business_verdict_line_directly_preserved": false,
+      "exact_business_counts_not_observed": true,
+      "lower_bounds_implied_by_passed_gate": {
+        "min_clouds": 0,
+        "min_delayed": 20000,
+        "min_sites": 30000
+      },
+      "parameters": {
+        "data": "lidar_ng01",
+        "fixed_fixtures_compared_at_k5": 2,
+        "fixed_fixtures_listed": 4,
+        "full_frame": true,
+        "k": [
+          5
+        ],
+        "m_all": false,
+        "workers": 8
+      },
+      "python_refusals_counter_not_instrumented": true,
+      "refusal_skipping_not_present_in_judge": true,
+      "test": "mhgp11_points_vs_python_lidar_ng01_k5"
+    },
+    {
+      "business_verdict_line_directly_preserved": false,
+      "exact_business_counts_not_observed": true,
+      "lower_bounds_implied_by_passed_gate": {
+        "min_clouds": 0,
+        "min_delayed": 20000,
+        "min_sites": 30000
+      },
+      "parameters": {
+        "data": "lidar_ng02",
+        "fixed_fixtures_compared_at_k5": 2,
+        "fixed_fixtures_listed": 4,
+        "full_frame": true,
+        "k": [
+          5
+        ],
+        "m_all": false,
+        "workers": 8
+      },
+      "python_refusals_counter_not_instrumented": true,
+      "refusal_skipping_not_present_in_judge": true,
+      "test": "mhgp11_points_vs_python_lidar_ng02_k5"
+    }
+  ],
+  "coverage": {
+    "budget_interruptions": 0,
+    "business_verdict_line_directly_preserved": false,
+    "common_full_tower_catalogue_comparison": true,
+    "complete_frame_inputs": true,
+    "direct_passed_ctests": 4,
+    "every_site_and_all_point_tree_records_compared": true,
+    "exact_counts_claimed": false,
+    "expected_fields": [
+      "Morton_order_PointIds",
+      "forest_parent_rank",
+      "exact_fraction_t_M_Q",
+      "owner",
+      "floor",
+      "strict",
+      "referenced_rank_levels",
+      "plateau_levels",
+      "block_plateau_parent",
+      "site_block_plateau"
+    ],
+    "failed_ctests": 0,
+    "lidar_k5_m6": true,
+    "missing_ctests": 0,
+    "native_gate_python_opt_qualified": false,
+    "synthetic_qualification_k1_m1_and_k2to5_m1_kplus1": true
+  },
+  "data_manifest_sha256": "826643041e3336c1f0582e687a6c47595a3926e7a8f0541232282a9f7b9a6095",
+  "data_verified_remote": true,
+  "delivered_data_names": [
+    "lidar_ng00.ids.u32le",
+    "lidar_ng00.u32le",
+    "lidar_ng01.ids.u32le",
+    "lidar_ng01.u32le",
+    "lidar_ng02.ids.u32le",
+    "lidar_ng02.u32le",
+    "manifest.json",
+    "uniform_u18_n16000.ids.u32le",
+    "uniform_u18_n16000.u32le",
+    "uniform_u18_n32000.ids.u32le",
+    "uniform_u18_n32000.u32le",
+    "uniform_u18_n8000.ids.u32le",
+    "uniform_u18_n8000.u32le"
+  ],
+  "differential_scope_conforming": true,
+  "done": "0",
+  "global_qualification_complete": false,
+  "limits": [
+    "Les quatre PASS CTest sont observes ; les totaux nuages/ordres/sites/retardes/plateaux ne sont pas conserves dans un log metier.",
+    "P9 impose des planchers, aucune LINE de totaux exacts ; seuls ces minima et le parcours programme sont qualifiables ici.",
+    "Le juge ne possede pas de compteur python_refusals ni de voie comptant puis sautant un refus ; aucun total de refus Python mesure nest affirme.",
+    "Chaque commande LiDAR liste aussi quatre fixtures ; K5 en compare deux, les deux autres etant hors domaine. Ce ne sont pas cinq nuages effectivement pendus.",
+    "Differentiel points sur le meme catalogue/tour ; ne constitue pas un nouvel oracle independant de construction de FULL.",
+    "Portes longues sans jumelles -O ; les rejeux -O de cet auditeur ne sont pas une execution native des portes sous Python optimise.",
+    "Qualification bornee a Release u21 ; aucun contrat temps FULL ni qualification globale u18/u24/sanitizers/mutants.",
+    "Rejeu dependant des archives locales et du commit Git ; aucun journal brut, binaire natif ou octet LiDAR copie."
+  ],
+  "package_sha256": "cca3c3105a654426127fca54362c1c6954701224c4a0c3bd3db9ae05752a2354",
+  "phase": "exploration_v11_hors_registre",
+  "plan_sha256": "0a184704cff0f517cd4a2bb8b4354f792dfb40936f7c7c8fcbc5d7d5dad922fc",
+  "profile": "quantized_u21_input_only",
+  "public_status": "not_claimed",
+  "python_environment": {
+    "observed_versions": {
+      "hdbscan": "0.8.44",
+      "numpy": "2.2.6",
+      "scikit-learn": "1.7.2",
+      "scipy": "1.15.3"
+    },
+    "observed_versions_sha256": "8fc27d254729744279a591541834ab6b07574e9ed699b73ed2a2a50876b591f2",
+    "policy": "pinned"
+  },
+  "receipt_sha256": "8ebaf46b6a2159c742745c66d041fe4320bafbe2e30d1436bbd0ee2e2d05fa1f",
+  "receipt_status": "completed",
+  "schema": "ehgp.v11.audit.finp9_differential_read.v1",
+  "session": "v11.20261005.claudefinp9",
+  "source_commit": "38b76701b9b0198fc1c37afe16e1480e638e513c",
+  "source_contracts": {
+    "morsehgp3D_v11/CMakeLists.txt": {
+      "sha256": "82fa1054e14a2bf16e28195cac32a4d81dec56bb81d6481d9d9214d5c87f555d"
+    },
+    "morsehgp3D_v11/bench/points_radius.py": {
+      "sha256": "59a6adcadba51522a1d557b31d46edfbf15d55b92140aa34dd03c3f94ecf02ae"
+    },
+    "morsehgp3D_v11/cmake/gates.cmake": {
+      "sha256": "8abaa4b9a533f0988cd2a4b436665905c3ad1be92a4f33f360da2fce34c1d70a"
+    },
+    "morsehgp3D_v11/cmake/run_expect.cmake": {
+      "sha256": "165d02c686bb71d32fbf9edb3fb3afa80c03ca3c8d6deb40b8444eeb6443646e"
+    },
+    "morsehgp3D_v11/tests/points/points_vs_python.py": {
+      "sha256": "469314b16f28f1c7197619f281012043d033bc065cdbcce1b51250f6a52028dc"
+    },
+    "morsehgp3D_v11/tests/points/tests.cmake": {
+      "sha256": "fab2d65223c63c72f62dd9f2bffe631e83a6a84607f8c6ee17d02c6ce296175a"
+    }
+  },
+  "source_tree_verification": {
+    "extra_or_missing_files": false,
+    "files_verified": 635,
+    "includes_docs_or_receipts": false,
+    "manifest_sha256": "b2be29128bacb5c3b63e0c6807e52e973ef937629fcf0a529592176636acd423",
+    "method": "git_archive_selectif_egalite_exacte",
+    "paths": [
+      "gcp-migration/v11_worker.sh",
+      "morsehgp3D_v11/CMakeLists.txt",
+      "morsehgp3D_v11/src",
+      "morsehgp3D_v11/tests",
+      "morsehgp3D_v11/cmake",
+      "morsehgp3D_v11/bench",
+      "morsehgp3D_v11/reference",
+      "morsehgp3D_v11/tools",
+      "morsehgp3D_v11/cli"
+    ],
+    "source_commit": "38b76701b9b0198fc1c37afe16e1480e638e513c"
+  },
+  "state": "closed",
+  "targeted_closure_verified": true,
+  "tests": [
+    {
+      "completed_passed_count": 1,
+      "expected_single_test": "mhgp11_points_vs_python",
+      "failed_tests": [],
+      "kind": "direct_ctest",
+      "metadata": {
+        "exit_code": "0",
+        "status": "ok",
+        "wall_seconds": "50.151"
+      },
+      "missing_tests": [],
+      "name": "points_python_synthetique",
+      "stdout_sha256": "a99d1dc2c417534ae09127af2ca577337b6abfc92fa198f14f23c0c2d2a4ace2",
+      "timeout_seconds": 500,
+      "verdicts": [
+        {
+          "seconds": "50.12",
+          "state": "Passed",
+          "test": "mhgp11_points_vs_python"
+        }
+      ]
+    },
+    {
+      "completed_passed_count": 1,
+      "expected_single_test": "mhgp11_points_vs_python_lidar_ng00_k5",
+      "failed_tests": [],
+      "kind": "direct_ctest",
+      "metadata": {
+        "exit_code": "0",
+        "status": "ok",
+        "wall_seconds": "11.197"
+      },
+      "missing_tests": [],
+      "name": "points_python_ng00",
+      "stdout_sha256": "9367ad9185ee2734707d0a77e971bf810ab950750db7093cdc5ddd293a75f1c9",
+      "timeout_seconds": 150,
+      "verdicts": [
+        {
+          "seconds": "11.17",
+          "state": "Passed",
+          "test": "mhgp11_points_vs_python_lidar_ng00_k5"
+        }
+      ]
+    },
+    {
+      "completed_passed_count": 1,
+      "expected_single_test": "mhgp11_points_vs_python_lidar_ng01_k5",
+      "failed_tests": [],
+      "kind": "direct_ctest",
+      "metadata": {
+        "exit_code": "0",
+        "status": "ok",
+        "wall_seconds": "9.423"
+      },
+      "missing_tests": [],
+      "name": "points_python_ng01",
+      "stdout_sha256": "7b3c3590c934c0ffc4efdbc6e88129a0047a6e82b3c93af7c2a8c985e78bfce1",
+      "timeout_seconds": 150,
+      "verdicts": [
+        {
+          "seconds": "9.39",
+          "state": "Passed",
+          "test": "mhgp11_points_vs_python_lidar_ng01_k5"
+        }
+      ]
+    },
+    {
+      "completed_passed_count": 1,
+      "expected_single_test": "mhgp11_points_vs_python_lidar_ng02_k5",
+      "failed_tests": [],
+      "kind": "direct_ctest",
+      "metadata": {
+        "exit_code": "0",
+        "status": "ok",
+        "wall_seconds": "11.737"
+      },
+      "missing_tests": [],
+      "name": "points_python_ng02",
+      "stdout_sha256": "ff9f9d681427759b0bba2e0e5be17f1c65386730e17f066517e50c7a7dc06b05",
+      "timeout_seconds": 150,
+      "verdicts": [
+        {
+          "seconds": "11.71",
+          "state": "Passed",
+          "test": "mhgp11_points_vs_python_lidar_ng02_k5"
+        }
+      ]
+    }
+  ],
+  "worker_exit_code": 0
+}

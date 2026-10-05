@@ -1,0 +1,39 @@
+{
+  "files": [
+    {
+      "bytes": 1316,
+      "path": "README.md",
+      "sha256": "01548ef8cdf81060185b7b9ec990f668ed1dbc74958e816ad6a41099645bc755"
+    },
+    {
+      "bytes": 18516,
+      "path": "proof.json",
+      "sha256": "e4e8e54fcfc4096b4f04637ef3ed5c6201555ce3f4d6866477b4f5a917a0f0d3"
+    },
+    {
+      "bytes": 2058,
+      "path": "replay.py",
+      "sha256": "8d6ae31a8571167664b0a289c507bfdfea8e9f818f27450b712c0c635f26b516"
+    }
+  ],
+  "native_or_cloud_actions": 0,
+  "normal_opt_identical": true,
+  "replay_checks": [
+    {
+      "command": [
+        "python3",
+        "replay.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "python3",
+        "-O",
+        "replay.py"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "schema": "mhgp11_audit_capsule_manifest_v1"
+}

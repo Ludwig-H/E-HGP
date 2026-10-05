@@ -31,6 +31,8 @@ ci-dessous ont des sources vérifiées et un arrêt ciblé certifié.
 | [Fins](../receipts/audit_g4_fins_20261005/README.md) | TSan u21 80/80 ; ASan/UBSan u24 74/80 ; mêmes 80 portes d’échelle/LiDAR terminées | Six refus du juge aux hashes u21 ; aucun diagnostic sanitizer trouvé |
 | [Finb](../receipts/audit_g4_finb_20261005/README.md) | 783/783 portes courtes sous chacun des deux profils sanitizer | Différentiels longs distincts |
 | [Finl](../receipts/audit_g4_finl_20261005/README.md) | 28/28 portes longues hors mutants : onze K10 et dix-sept références FULL | Bilan brut 35/41 : six campagnes mutants u21 sans résultat après échéance ; aucune identité longue manquante |
+| [P10](../receipts/audit_g4_finp10_20261005/README.md) | 4/4 différentiels de la sortie plate : synthétiques et trois trames entières | Sur le même arbre de points natif ; son contrôle propre est dans P9 |
+| [P9](../receipts/audit_g4_finp9_20261005/README.md) | 4/4 différentiels de l’arbre de points : sites, dates, plateaux et parents | Sur le même catalogue et la même tour FULL exportés |
 
 **Reprise ciblée préparée.** Les 41 absences ordinaires sont onze
 noms CLI −O, répartis 8/11/11/11 entre les quatre profils. La matrice
@@ -42,12 +44,12 @@ restent des reprises séparées après correction. Aucun rejeu des
 28 portes longues fonctionnelles déjà terminées n’est demandé.
 [Plan, intégration et contrôle indépendant](../receipts/proposition_reprise_41_20261005/README.md).
 
-**Suite en cours : huit différentiels complets S10/S9.** Les plans
-Python épinglés sont adoptés ; leurs sessions sont successives au
-même pin final : quatre portes pour la sortie plate, puis quatre pour
-l’arbre de points. Ils comparent l’arbre, les partitions plates, le
-bruit et les identifiants canoniques ; le lecteur de fichiers seul
-ne les remplace pas. Aucun résultat de ces deux lots encore acquis ici.
+**Les huit différentiels complets S10/S9 passent.** P10 compare la
+sortie plate native à la tête Python sur le même arbre de points :
+partitions, bruit et étiquettes canoniques, avec EOM z=1/2/3 et feuilles.
+P9 compare séparément l’arbre natif à la construction Python. Chaque
+lot couvre ses cas synthétiques et les trois trames sans sol entières,
+au même pin final en Release u21.
 [Plan S10](../receipts/audit_s10_differential_plan_20261005/README.md),
 [plan S9](../receipts/audit_s9_qualification_scope_20261005/README.md).
 
@@ -67,6 +69,16 @@ ne les remplace pas. Aucun résultat de ces deux lots encore acquis ici.
   lorsque le diagnostic n’est pas demandé. Les six identités de voies
   passent notamment sous TSan u21. [Décision mesurée](../receipts/audit_l2_decision_20261005/README.md),
   [raccord et limites](../receipts/audit_l2b_followup_20261005/README.md).
+
+**Portée du banc final à corriger.** Il mesure FULL et supports/L2b,
+qui utilisent tous deux la voie FULL. Son ancien verdict
+`build_order_par_defaut` ne peut donc plus choisir entre FULL et
+l’arbre K seul : désactiver cette décision historique. Le plan passe
+aussi l’ancien commit `b319efc84` comme simple étiquette, alors que la
+session est épinglée à `38b76701b`. Conserver les mesures pour leur
+périmètre réel et rectifier leur attribution. Points et plat ne sont
+pas mesurés par ce banc.
+[Preuve de source et correction ciblée](../receipts/audit_finmesure_scope_20261005/README.md).
 
 **Le contrat de 100 ms reste ouvert.** La référence FULL qualifiée
 K5/u21/W48 est à 352–412 ms sur trois trames sans sol de la séquence08.

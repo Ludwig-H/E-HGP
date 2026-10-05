@@ -1,0 +1,251 @@
+{
+  "actual_source_commit": "38b76701b9b0198fc1c37afe16e1480e638e513c",
+  "authority": "Static source and local preflight/plan only; running session is not promoted or qualified here.",
+  "bounded_model": {
+    "constants": {
+      "OUTPUTS": [
+        [
+          "full",
+          "full.mhgp11ful1",
+          16379
+        ],
+        [
+          "supports",
+          "supports.mhgp11sp",
+          16379
+        ]
+      ],
+      "RULE_FRAMES": [
+        "ng00",
+        "ng01",
+        "ng02"
+      ],
+      "RULE_WORKERS": 48
+    },
+    "fixtures": [
+      {
+        "defects": [],
+        "k": 5,
+        "observed": {
+          "decision": "build_order_par_defaut",
+          "frames_within_rule": [
+            "ng00",
+            "ng01",
+            "ng02"
+          ],
+          "rule": "mediane tree(supports) <= 1,1 mediane tree(full) a W48 sur au moins deux des trois trames"
+        },
+        "prises": 3,
+        "ratios": [
+          {
+            "frame": "ng00",
+            "within_rule": true,
+            "workers": 48
+          },
+          {
+            "frame": "ng01",
+            "within_rule": true,
+            "workers": 48
+          },
+          {
+            "frame": "ng02",
+            "within_rule": true,
+            "workers": 48
+          }
+        ]
+      },
+      {
+        "defects": [],
+        "k": 5,
+        "observed": {
+          "decision": "livrer_L2b",
+          "frames_within_rule": [],
+          "rule": "mediane tree(supports) <= 1,1 mediane tree(full) a W48 sur au moins deux des trois trames"
+        },
+        "prises": 3,
+        "ratios": [
+          {
+            "frame": "ng00",
+            "within_rule": false,
+            "workers": 48
+          },
+          {
+            "frame": "ng01",
+            "within_rule": false,
+            "workers": 48
+          },
+          {
+            "frame": "ng02",
+            "within_rule": false,
+            "workers": 48
+          }
+        ]
+      }
+    ],
+    "function_sha256": "45e54e206cc91fc0ef701fac112554b701bf3eb5f02dad6b27df053bf0c77205",
+    "function_source": "def decide(ratios, defects, prises, k):\n    \"\"\"Regle de L2, a W48 sur ng00, ng01, ng02 ; non evaluee hors de ses conditions.\"\"\"\n    if defects:\n        return dict(decision='non_evaluee', reason='mesure invalide : %d defaut(s)' % len(defects))\n    if k != 5:\n        return dict(decision='non_evaluee', reason='la regle porte sur K = 5')\n    at48 = dict((r['frame'], r) for r in ratios if r['workers'] == RULE_WORKERS)\n    missing = [f for f in RULE_FRAMES if f not in at48]\n    if missing:\n        return dict(decision='non_evaluee', reason='W48 absent pour %s' % ','.join(missing))\n    if prises < 3:\n        return dict(decision='non_evaluee', reason='moins de trois prises (%d)' % prises)\n    held = [f for f in RULE_FRAMES if at48[f]['within_rule']]\n    keep = len(held) >= 2\n    return dict(decision='build_order_par_defaut' if keep else 'livrer_L2b', frames_within_rule=held,\n                rule='mediane tree(supports) <= 1,1 mediane tree(full) a W48 sur au moins deux des trois trames')",
+    "kind": "Pure pinned decide() with three boolean relation records; no performance samples, cloud inputs, native execution or measured decision."
+  },
+  "call_paths": {
+    "full": [
+      "sorties_g4.run_one: --sortie=full",
+      "cli execute: FullRequest",
+      "api::compute: full_tower",
+      "build_full(domain, full_params=16379)"
+    ],
+    "supports": [
+      "sorties_g4.run_one: --sortie=supports",
+      "cli execute: SupportsRequest",
+      "api::compute: compute_supports(kSupportsRoute=full_tower)",
+      "supports_parts -> order_tree(route=full_tower)",
+      "build_order_full(domain,k,full_params=16379)",
+      "build_forests(domain,kmax,...) then retain order K; remaining orders and verticals dropped"
+    ]
+  },
+  "confirmed_scope": [
+    "FULL output versus supports output through L2b; both build forests 1..K under full_params.",
+    "Order-only build_order at mask7035 is not called by either measured output.",
+    "The bench OUTPUTS tuple has only full/supports; it does not measure points or plat.",
+    "The --commit argument is an unchecked annotation copied directly into provenance.commit, distinct from actual worker source authority."
+  ],
+  "declared_bench_commit_argument": "b319efc84",
+  "finding": "decide() still emits the historical order-only versus L2b choice even though the order-only candidate is absent from the measured call paths. It can therefore output build_order_par_defaut without measuring build_order.",
+  "limitations": [
+    "No final finmesure native result or shutdown certificate is reviewed here.",
+    "No statistical recommendation or timing-contract conclusion.",
+    "No product geometry defect or automatic change of the public engine route is alleged."
+  ],
+  "native_or_cloud_actions": 0,
+  "plan_command": {
+    "argv": [
+      "python3",
+      "{src}/morsehgp3D_v11/bench/sorties_g4.py",
+      "--cli",
+      "{build}/mhgp11",
+      "--data-dir",
+      "{data}",
+      "--fils",
+      "1,48",
+      "--prises",
+      "3",
+      "--k10",
+      "ng00",
+      "--commit",
+      "b319efc84",
+      "--work",
+      "{build}/mesure",
+      "--out",
+      "{out}/sorties_g4.json",
+      "--timeout",
+      "850"
+    ],
+    "name": "mesure_l2",
+    "timeout_seconds": 900
+  },
+  "plan_note": "Mesure appariee de la regle de L2 (Claude, 5 octobre 2026), commit b319efc84 : FULL 16379 contre --sortie=supports 7035, trames ng00-02, W1 et W48, trois prises, ng00 a K10 descriptif ; puis le complement W48 de l'audit 4acbae533 (fragment w48_plan_fragment.json : ng02 puis ng00, 14 appels chacun).",
+  "plan_sha256": "6810edeb451e85f69d58200f105d480270654ac4a78ae7f960232c7c7d367e8d",
+  "preflight_sha256": "3dc60f293ee8e139c34fde76f2f397be6c79a7b2dade443f19fdb94beaee2cca",
+  "recommendation": [
+    "Keep current raw measurements and identity checks as FULL versus supports/L2b evidence. No new campaign is required to use that bounded scope.",
+    "Associate the receipt-verified actual commit with the measurements, retain original declared annotation visibly as incorrect metadata; do not rewrite raw evidence silently.",
+    "Disable historical route choice for this post-L2b comparison, or require an explicitly identified order_tree variant if a future route choice is actually requested."
+  ],
+  "schema": "mhgp11_finmesure_route_review_v1",
+  "sources": [
+    {
+      "anchors": [
+        {
+          "end": 11,
+          "start": 7,
+          "text": "Memes entree, profil et K pour les deux sorties : --sortie=full (forets 1 a K de build_full, masque 16379) contre\n--sortie=supports. Jusqu'a L2b, supports construisait l'arbre d'ordre K seul par build_order, au masque 7035 = 16379\nsans verticales paralleles 128, reemploi vertical 1024 ni ordres concurrents 8192, que build_order refuse. La regle a\ndecide livrer_L2b : depuis, supports tire l'ordre K de FULL au masque 16379 (build_order_full, journal des graines sur\nl'ordre K), et la mesure, refaite sur G4, decrit le cout de cette voie. Pour chaque trame"
+        },
+        {
+          "end": 51,
+          "start": 48,
+          "text": "OUTPUTS = (('full', 'full.mhgp11ful1', 16379), ('supports', 'supports.mhgp11sp', 16379))  # supports : L2b\nRULE_FRAMES = ('ng00', 'ng01', 'ng02')\nRULE_WORKERS = 48\nRULE_RATIO = (11, 10)  # T_supports <= 1,1 T_full, en entiers"
+        },
+        {
+          "end": 81,
+          "start": 72,
+          "text": "def run_one(args, frame, output, k, workers, phase, prise):\n    \"\"\"Un appel du CLI ; rend l'enregistrement de l'appel (ok, etages, pics, comptes, empreintes).\"\"\"\n    points = os.path.join(args.data_dir, 'lidar_%s.u32le' % frame)\n    ids = os.path.join(args.data_dir, 'lidar_%s.ids.u32le' % frame)\n    folder = tempfile.mkdtemp(prefix='g4', dir=args.work)\n    directory = os.path.join(folder, 'D')\n    name = dict((o, f) for o, f, _ in OUTPUTS)[output]\n    argv = [args.cli, '--sortie=' + output, '--points=' + points, '--ids=' + ids, '--dossier=' + directory,\n            '--k=%d' % k, '--fils=%d' % workers]\n    record = dict(frame=frame, output=output, k=k, workers=workers, phase=phase, prise=prise, ok=False)"
+        },
+        {
+          "end": 191,
+          "start": 176,
+          "text": "def decide(ratios, defects, prises, k):\n    \"\"\"Regle de L2, a W48 sur ng00, ng01, ng02 ; non evaluee hors de ses conditions.\"\"\"\n    if defects:\n        return dict(decision='non_evaluee', reason='mesure invalide : %d defaut(s)' % len(defects))\n    if k != 5:\n        return dict(decision='non_evaluee', reason='la regle porte sur K = 5')\n    at48 = dict((r['frame'], r) for r in ratios if r['workers'] == RULE_WORKERS)\n    missing = [f for f in RULE_FRAMES if f not in at48]\n    if missing:\n        return dict(decision='non_evaluee', reason='W48 absent pour %s' % ','.join(missing))\n    if prises < 3:\n        return dict(decision='non_evaluee', reason='moins de trois prises (%d)' % prises)\n    held = [f for f in RULE_FRAMES if at48[f]['within_rule']]\n    keep = len(held) >= 2\n    return dict(decision='build_order_par_defaut' if keep else 'livrer_L2b', frames_within_rule=held,\n                rule='mediane tree(supports) <= 1,1 mediane tree(full) a W48 sur au moins deux des trois trames')"
+        },
+        {
+          "end": 247,
+          "start": 238,
+          "text": "    document = dict(\n        schema=SCHEMA, phase='exploration_v11_hors_registre', backend='cpu_reference', public_status='not_claimed',\n        rule='docs/SORTIES.md, paragraphe 11', engine_masks=dict((o, m) for o, _f, m in OUTPUTS),\n        provenance=dict(commit=args.commit or None, cli_sha256=sha256_file(args.cli), host=platform.node(),\n                        machine=platform.machine(), cpu_count=os.cpu_count(), python=platform.python_version(),\n                        begin_utc=begin, end_utc=utc_now()),\n        configuration=dict(frames=frames, k=args.k, workers=workers, prises=args.prises, k10=args.k10 or None,\n                           cold='premier appel de la configuration, cache non vide'),\n        calls=calls, defects=defects, medians=medians, medians_k10=medians10, ratios=ratios,\n        decision=decide(ratios, defects, args.prises, args.k))"
+        }
+      ],
+      "path": "morsehgp3D_v11/bench/sorties_g4.py",
+      "sha256": "1a94d049b06379bbd7a067f2723a6f159240fb7c635cf8ce5be625057f0c1da6"
+    },
+    {
+      "anchors": [
+        {
+          "end": 296,
+          "start": 289,
+          "text": "    run.step = Step::compute;\n    const api::CloudView view{in.x.span(), in.y.span(), in.z.span(), in.ids.span()};\n    const api::Request request =\n        o.output == api::OutputKind::supports ? api::Request(api::SupportsRequest{o.k})\n        : o.output == api::OutputKind::points ? api::Request(api::PointsRequest{o.k})\n        : o.output == api::OutputKind::flat   ? api::Request(api::FlatRequest{o.k, o.mcs, o.z, o.selection})\n                                              : api::Request(api::FullRequest{o.k});\n    Result<api::Product> product = api::compute(session, view, request, &run.report);"
+        }
+      ],
+      "path": "morsehgp3D_v11/cli/mhgp11.cpp",
+      "sha256": "e2a42977381f0be50ec2c5f9f5a10a07117a444fb6d556013ebf24e575a216aa"
+    },
+    {
+      "anchors": [
+        {
+          "end": 37,
+          "start": 30,
+          "text": "// Voie de l'arbre d'ordre K de la sortie supports (livraison L2b, docs/SORTIES.md paragraphe 11) : full_tower,\n// build_order_full au masque 16379 de FULL (journal des graines sur l'ordre K, extraction de l'ordre K) ; order_tree,\n// build_order au masque 7035. La regle de L2, ecrite d'avance, a decide livrer_L2b (mesure appariee G4 du 5 octobre\n// 2026, rapports supports/full de l'etage tree a W48 de 1,21, 1,18 et 1,09) : full_tower est la voie de compute.\n// order_tree reste disponible et jugee : les portes mhgp11_api_supports_route* exigent MHGP11SP et manifeste\n// identiques a l'octet par les deux voies, et les registres du journal egaux.\nenum class SupportsRoute : u8 { full_tower, order_tree };\ninline constexpr SupportsRoute kSupportsRoute = SupportsRoute::full_tower;"
+        }
+      ],
+      "path": "morsehgp3D_v11/src/api/internal.hpp",
+      "sha256": "e87b55c33a37b811435f5efc1b151ef31a7cf79c8e26b8108569024816c4d8b6"
+    },
+    {
+      "anchors": [
+        {
+          "end": 106,
+          "start": 97,
+          "text": "Result<FullTower> full_tower(Session& session, const CloudView& view, Order k, RunReport& report) noexcept {\n  Result<FullDomain> domain = prepare_domain(session, view, k, report);\n  if (!domain.ok()) return domain.outcome();\n  MemoryBudget& budget = session.budget();\n  Stopwatch tree_clock;\n  Result<FullTower> tower =\n      build_full(std::move(domain.value()), budget, nullptr, api_detail::full_params(), &session.pool());\n  if (!tower.ok()) return tower.outcome();\n  close_stage(report, Stage::tree, tree_clock, budget);\n  return std::move(tower).take();"
+        },
+        {
+          "end": 132,
+          "start": 118,
+          "text": "Result<OrderTree> order_tree(Session& session, const CloudView& view, Order k, RunReport& report, bool strict,\n                             api_detail::SupportsRoute route = api_detail::SupportsRoute::order_tree,\n                             api_detail::SupportsDiagnostics* diagnostics = nullptr) noexcept {\n  Result<FullDomain> domain = prepare_domain(session, view, k, report, strict);\n  if (!domain.ok()) return domain.outcome();\n  MemoryBudget& budget = session.budget();\n  Stopwatch tree_clock;\n  u64 attach_ns = 0;\n  SeedLogRegisters* registers = diagnostics == nullptr ? nullptr : &diagnostics->log;\n  Result<OrderTree> tree =\n      route == api_detail::SupportsRoute::full_tower\n          ? build_order_full(std::move(domain.value()), k, budget, api_detail::full_params(), &session.pool(),\n                             nullptr, &attach_ns, registers)\n          : build_order(std::move(domain.value()), k, budget, api_detail::order_params(), &session.pool(), nullptr,\n                        &attach_ns, registers);"
+        },
+        {
+          "end": 153,
+          "start": 142,
+          "text": "Result<SupportsParts> supports_parts(Session& session, const CloudView& view, Order k, RunReport& report,\n                                     api_detail::SupportsRoute route,\n                                     api_detail::SupportsDiagnostics* diagnostics) noexcept {\n  Result<OrderTree> tree = order_tree(session, view, k, report, false, route, diagnostics);\n  if (!tree.ok()) return tree.outcome();\n  MemoryBudget& budget = session.budget();\n  Stopwatch output_clock;\n  Result<supports::SupportHierarchy> hierarchy =\n      supports::build_support_hierarchy(tree.value(), budget, &session.pool());\n  if (!hierarchy.ok()) return hierarchy.outcome();\n  close_stage(report, Stage::output, output_clock, budget);\n  return SupportsParts{std::move(tree).take(), std::move(hierarchy).take()};"
+        },
+        {
+          "end": 212,
+          "start": 208,
+          "text": "Result<Product> compute(Session& session, const CloudView& cloud, const Request& request,\n                        RunReport* report) noexcept {\n  RunReport local;\n  if (const SupportsRequest* wanted = std::get_if<SupportsRequest>(&request))\n    return api_detail::compute_supports(session, cloud, wanted->k, api_detail::kSupportsRoute, report);"
+        },
+        {
+          "end": 245,
+          "start": 237,
+          "text": "  const FullRequest* full = std::get_if<FullRequest>(&request);\n  if (full == nullptr) return fail(Reason::parameter_out_of_range);\n  Result<FullTower> tower = guarded([&]() { return full_tower(session, cloud, full->k, local); });\n  if (!tower.ok()) return tower.outcome();\n  if (report != nullptr) {\n    for (Stage stage : {Stage::cloud, Stage::index, Stage::domain, Stage::tree, Stage::attach})\n      report->at(stage) = local.at(stage);\n  }\n  return Product(request, std::move(tower).take(), session.identity());"
+        }
+      ],
+      "path": "morsehgp3D_v11/src/api/compute.cpp",
+      "sha256": "dca6aa8f4627241087552237372b808d780a4dbd8c6e50c3495bc9d9146b7298"
+    },
+    {
+      "anchors": [
+        {
+          "end": 149,
+          "start": 119,
+          "text": "Result<OrderTree> build_order_full(FullDomain&& domain, Order k, MemoryBudget& budget, FullParams params,\n                                   sched::Pool* pool, FullTimings* timings, u64* attach_ns,\n                                   SeedLogRegisters* registers) noexcept {\n  // Refus de parametres de build_full d'abord, puis l'ordre demande ; aucun effet avant.\n  const Order kmax = domain.catalogue().kmax();\n  if (kmax == 0 || kmax > domain.index().cloud().sites()) return fail(Reason::parameter_out_of_range);\n  if (k == 0 || k > kmax) return fail(Reason::parameter_out_of_range);\n  MHGP11_TRY(ForestParallel::validate(params, pool));\n  FullTimings draft;\n  // Journal admis avant toute allocation de FULL, par le majorant de build_order ; vit jusqu'au balayage.\n  auto made = SeedLog::make(domain.catalogue(), k, budget);\n  if (!made.ok()) return made.outcome();\n  SeedLog log = std::move(made.value());\n  std::array<std::optional<OrderForest>, kMaxMebSites> orders;\n  MHGP11_TRY(build_forests(domain, kmax, budget, timings == nullptr ? nullptr : &draft, params, pool,\n                           OrderLog{&log, k}, orders));\n  log.close();\n  const SeedLogRegisters logged = registers == nullptr ? SeedLogRegisters{} : registers_of(log);\n  // Extraction : la seule foret d'ordre k, sans ses verticales ; les autres ordres rendus avant le balayage.\n  OrderForest forest(std::move(*orders[k - 1]));\n  for (auto& order : orders) order.reset();\n  drop_verticals(forest);\n  const Stopwatch clock;\n  auto attachment = attach_window(domain, forest, log, budget);\n  if (!attachment.ok()) return attachment.outcome();\n  const u64 attached = clock.nanoseconds();\n  log = SeedLog{};  // journal rendu avant le transfert du domaine\n  if (timings != nullptr) *timings = draft;\n  if (attach_ns != nullptr) *attach_ns = attached;\n  if (registers != nullptr) *registers = logged;\n  return OrderTree(std::move(domain), std::move(forest), std::move(attachment.value()));"
+        }
+      ],
+      "path": "morsehgp3D_v11/src/tower/order_tree.cpp",
+      "sha256": "c5fd5c3859a525932cdfb9f4d7d420efec01ba95661a0b587689fa8d0159e5ab"
+    }
+  ]
+}

@@ -1,0 +1,305 @@
+{
+  "archive_sha256": "0a8aae431925ef07271f752ee42b328432e25bc513192bdd627fcf4c8fafcd89",
+  "audit_native_or_cloud_runs": 0,
+  "backend": "cpu_reference",
+  "counter_evidence": [
+    {
+      "business_json_directly_preserved": false,
+      "counters_implied_by_passed_gate": {
+        "calls": 1920,
+        "clouds": 120,
+        "clusters": 16474,
+        "noise": 49474,
+        "selected": 16474
+      },
+      "inference": "Appels exiges = maximum des boucles fixes ; un refus Python incremente python_refusals et saute cet appel.",
+      "line_required_on_same_successful_execution": "head_vs_python_verdict conforme nuages=120 appels=1920 clusters=16474 retenus=16474 bruit=49474",
+      "parameters": {
+        "clouds_input": 24,
+        "k": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "mcs": [
+          3,
+          5,
+          10,
+          20
+        ]
+      },
+      "planned_flat_comparisons": 1920,
+      "python_refusals_implied": 0,
+      "test": "mhgp11_head_vs_python"
+    },
+    {
+      "business_json_directly_preserved": false,
+      "counters_implied_by_passed_gate": {
+        "calls": 8,
+        "clouds": 1,
+        "clusters": 6086,
+        "noise": 52434,
+        "selected": 6086
+      },
+      "inference": "Appels exiges = maximum des boucles fixes ; un refus Python incremente python_refusals et saute cet appel.",
+      "line_required_on_same_successful_execution": "head_vs_python_verdict conforme nuages=1 appels=8 clusters=6086 retenus=6086 bruit=52434",
+      "parameters": {
+        "data": "lidar_ng00",
+        "k": [
+          5
+        ],
+        "mcs": [
+          10,
+          20
+        ]
+      },
+      "planned_flat_comparisons": 8,
+      "python_refusals_implied": 0,
+      "test": "mhgp11_head_vs_python_lidar_ng00_k5"
+    },
+    {
+      "business_json_directly_preserved": false,
+      "counters_implied_by_passed_gate": {
+        "calls": 8,
+        "clouds": 1,
+        "clusters": 4774,
+        "noise": 42194,
+        "selected": 4774
+      },
+      "inference": "Appels exiges = maximum des boucles fixes ; un refus Python incremente python_refusals et saute cet appel.",
+      "line_required_on_same_successful_execution": "head_vs_python_verdict conforme nuages=1 appels=8 clusters=4774 retenus=4774 bruit=42194",
+      "parameters": {
+        "data": "lidar_ng01",
+        "k": [
+          5
+        ],
+        "mcs": [
+          10,
+          20
+        ]
+      },
+      "planned_flat_comparisons": 8,
+      "python_refusals_implied": 0,
+      "test": "mhgp11_head_vs_python_lidar_ng01_k5"
+    },
+    {
+      "business_json_directly_preserved": false,
+      "counters_implied_by_passed_gate": {
+        "calls": 8,
+        "clouds": 1,
+        "clusters": 4978,
+        "noise": 52770,
+        "selected": 4978
+      },
+      "inference": "Appels exiges = maximum des boucles fixes ; un refus Python incremente python_refusals et saute cet appel.",
+      "line_required_on_same_successful_execution": "head_vs_python_verdict conforme nuages=1 appels=8 clusters=4978 retenus=4978 bruit=52770",
+      "parameters": {
+        "data": "lidar_ng02",
+        "k": [
+          5
+        ],
+        "mcs": [
+          10,
+          20
+        ]
+      },
+      "planned_flat_comparisons": 8,
+      "python_refusals_implied": 0,
+      "test": "mhgp11_head_vs_python_lidar_ng02_k5"
+    }
+  ],
+  "coverage": {
+    "budget_interruptions": 0,
+    "business_json_directly_preserved": false,
+    "cases": "24 nuages synthetiques x K1..5 ; trois trames sans-sol completes K5",
+    "common_point_tree_comparison": true,
+    "direct_passed_ctests": 4,
+    "failed_ctests": 0,
+    "flat_comparisons_implied": 1944,
+    "missing_ctests": 0,
+    "native_cluster_label_is_minimum_PointId": true,
+    "native_gate_python_opt_qualified": false,
+    "partition_cluster_bijection_and_noise": true,
+    "python_refusals_implied": 0,
+    "same_tree_k_sha256": true
+  },
+  "data_manifest_sha256": "826643041e3336c1f0582e687a6c47595a3926e7a8f0541232282a9f7b9a6095",
+  "data_verified_remote": true,
+  "delivered_data_names": [
+    "lidar_ng00.ids.u32le",
+    "lidar_ng00.u32le",
+    "lidar_ng01.ids.u32le",
+    "lidar_ng01.u32le",
+    "lidar_ng02.ids.u32le",
+    "lidar_ng02.u32le",
+    "manifest.json",
+    "uniform_u18_n16000.ids.u32le",
+    "uniform_u18_n16000.u32le",
+    "uniform_u18_n32000.ids.u32le",
+    "uniform_u18_n32000.u32le",
+    "uniform_u18_n8000.ids.u32le",
+    "uniform_u18_n8000.u32le"
+  ],
+  "differential_scope_conforming": true,
+  "done": "0",
+  "global_qualification_complete": false,
+  "limits": [
+    "Les quatre PASS CTest sont observes ; les compteurs sont imposes par LINE/planchers dans le juge epingle, pas lus dans un JSON conserve.",
+    "Zero refus Python deduit des 1944 appels exiges, maximum des boucles fixes ; aucune mesure directe du compteur python_refusals conservee.",
+    "Differentiel head sur le meme arbre de points ; ne constitue pas un nouvel oracle independant de construction de cet arbre.",
+    "Portes longues sans jumelles -O ; les rejeux -O de cet auditeur ne sont pas une execution native des portes sous Python optimise.",
+    "Qualification bornee a Release u21 et aux selections declarees ; aucun contrat temps FULL, ni requalification globale u18/u24/sanitizers/mutants.",
+    "Rejeu dependant des archives locales et du commit Git ; aucun journal brut, binaire natif ou octet LiDAR copie."
+  ],
+  "package_sha256": "cca3c3105a654426127fca54362c1c6954701224c4a0c3bd3db9ae05752a2354",
+  "phase": "exploration_v11_hors_registre",
+  "plan_sha256": "05140a7cfde5b523599e2c8612186ef0dac41467340781ff4558bcdcce092658",
+  "profile": "quantized_u21_input_only",
+  "public_status": "not_claimed",
+  "python_environment": {
+    "observed_versions": {
+      "hdbscan": "0.8.44",
+      "numpy": "2.2.6",
+      "scikit-learn": "1.7.2",
+      "scipy": "1.15.3"
+    },
+    "observed_versions_sha256": "8fc27d254729744279a591541834ab6b07574e9ed699b73ed2a2a50876b591f2",
+    "policy": "pinned"
+  },
+  "receipt_sha256": "3785031a70dc53838087215fd3879410e02325014a6902c66d3d0c104046efa8",
+  "receipt_status": "completed",
+  "schema": "ehgp.v11.audit.finp10_differential_read.v1",
+  "session": "v11.20261005.claudefinp10",
+  "source_commit": "38b76701b9b0198fc1c37afe16e1480e638e513c",
+  "source_contracts": {
+    "morsehgp3D_v11/CMakeLists.txt": {
+      "sha256": "82fa1054e14a2bf16e28195cac32a4d81dec56bb81d6481d9d9214d5c87f555d"
+    },
+    "morsehgp3D_v11/cmake/gates.cmake": {
+      "sha256": "8abaa4b9a533f0988cd2a4b436665905c3ad1be92a4f33f360da2fce34c1d70a"
+    },
+    "morsehgp3D_v11/cmake/run_expect.cmake": {
+      "sha256": "165d02c686bb71d32fbf9edb3fb3afa80c03ca3c8d6deb40b8444eeb6443646e"
+    },
+    "morsehgp3D_v11/tests/head/head_vs_python.py": {
+      "sha256": "e6f8e10820c49b450df0ff8364bd4e55b157f49bb87f3e67bcd088f01f0c1fd7"
+    },
+    "morsehgp3D_v11/tests/head/tests.cmake": {
+      "sha256": "5b396f4aae9beed3ba67c56ba6f84cf871ff63e74a786b8285117f259a85b3c5"
+    }
+  },
+  "source_tree_verification": {
+    "extra_or_missing_files": false,
+    "files_verified": 635,
+    "includes_docs_or_receipts": false,
+    "manifest_sha256": "b2be29128bacb5c3b63e0c6807e52e973ef937629fcf0a529592176636acd423",
+    "method": "git_archive_selectif_egalite_exacte",
+    "paths": [
+      "gcp-migration/v11_worker.sh",
+      "morsehgp3D_v11/CMakeLists.txt",
+      "morsehgp3D_v11/src",
+      "morsehgp3D_v11/tests",
+      "morsehgp3D_v11/cmake",
+      "morsehgp3D_v11/bench",
+      "morsehgp3D_v11/reference",
+      "morsehgp3D_v11/tools",
+      "morsehgp3D_v11/cli"
+    ],
+    "source_commit": "38b76701b9b0198fc1c37afe16e1480e638e513c"
+  },
+  "state": "closed",
+  "targeted_closure_verified": true,
+  "tests": [
+    {
+      "completed_passed_count": 1,
+      "expected_single_test": "mhgp11_head_vs_python",
+      "failed_tests": [],
+      "kind": "direct_ctest",
+      "metadata": {
+        "exit_code": "0",
+        "status": "ok",
+        "wall_seconds": "32.202"
+      },
+      "missing_tests": [],
+      "name": "head_python_synthetique",
+      "stdout_sha256": "7d693d42093ee8cafa8df91069b1c8742038e339cccabefae36ef79ea7b12b67",
+      "timeout_seconds": 300,
+      "verdicts": [
+        {
+          "seconds": "32.17",
+          "state": "Passed",
+          "test": "mhgp11_head_vs_python"
+        }
+      ]
+    },
+    {
+      "completed_passed_count": 1,
+      "expected_single_test": "mhgp11_head_vs_python_lidar_ng00_k5",
+      "failed_tests": [],
+      "kind": "direct_ctest",
+      "metadata": {
+        "exit_code": "0",
+        "status": "ok",
+        "wall_seconds": "30.456"
+      },
+      "missing_tests": [],
+      "name": "head_python_ng00",
+      "stdout_sha256": "888cae7cc32479f6bba50bb229b70d6970cc3a9afce04680840771fb8e8ae312",
+      "timeout_seconds": 200,
+      "verdicts": [
+        {
+          "seconds": "30.43",
+          "state": "Passed",
+          "test": "mhgp11_head_vs_python_lidar_ng00_k5"
+        }
+      ]
+    },
+    {
+      "completed_passed_count": 1,
+      "expected_single_test": "mhgp11_head_vs_python_lidar_ng01_k5",
+      "failed_tests": [],
+      "kind": "direct_ctest",
+      "metadata": {
+        "exit_code": "0",
+        "status": "ok",
+        "wall_seconds": "24.130"
+      },
+      "missing_tests": [],
+      "name": "head_python_ng01",
+      "stdout_sha256": "1254ede7399a1f3665adb8bf07ce2bfa33a503044b69a42724791c49be29a070",
+      "timeout_seconds": 200,
+      "verdicts": [
+        {
+          "seconds": "24.10",
+          "state": "Passed",
+          "test": "mhgp11_head_vs_python_lidar_ng01_k5"
+        }
+      ]
+    },
+    {
+      "completed_passed_count": 1,
+      "expected_single_test": "mhgp11_head_vs_python_lidar_ng02_k5",
+      "failed_tests": [],
+      "kind": "direct_ctest",
+      "metadata": {
+        "exit_code": "0",
+        "status": "ok",
+        "wall_seconds": "29.170"
+      },
+      "missing_tests": [],
+      "name": "head_python_ng02",
+      "stdout_sha256": "f09cc620d0b4d9e8809599dd4de3592b44b28e62a856bbf8b09a7fa41d9ce5f6",
+      "timeout_seconds": 200,
+      "verdicts": [
+        {
+          "seconds": "29.14",
+          "state": "Passed",
+          "test": "mhgp11_head_vs_python_lidar_ng02_k5"
+        }
+      ]
+    }
+  ],
+  "worker_exit_code": 0
+}

@@ -10,6 +10,67 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
+## Banc final après L2b : neutraliser la décision devenue inapplicable
+
+Au pin **38b76701b**, `sorties_g4.py` appelle seulement `full` et
+`supports`, tous deux au masque 16379. Le chemin public supports
+construit désormais les forêts FULL avec son journal puis en extrait
+K. Aucune variante `order_tree`/7035, points ou plat n’est mesurée.
+Pourtant `decide()` peut encore émettre `build_order_par_defaut` ou
+`livrer_L2b`. Ce verdict ne peut plus décider entre deux algorithmes,
+puisque la voie K seule ne figure plus dans les appels du banc.
+
+Désactiver ce choix historique pour ce mode ; une nouvelle décision
+sur la voie K seule exigerait une variante explicitement mesurée.
+Les valeurs actuelles restent utilisables comme FULL versus sortie
+supports/L2b, une fois le reçu clos vérifié : aucun nouveau run n’est
+demandé pour ce périmètre. Le modèle source joint démontre la branche
+erronément nommée avec de simples booléens, sans argument statistique.
+
+Le plan de finmesure passe aussi `--commit b319efc84`, que le banc
+copie sans vérification dans `provenance.commit`. Le préflight épingle
+réellement **38b76701b**. Corriger l’étiquette du banc et attribuer
+l’analyse au pin vérifié du reçu, en conservant l’annotation originale
+comme erreur de métadonnée ; ne pas réécrire le reçu brut. Aucun
+résultat de la session encore ouverte n’est promu par cette preuve.
+[Chaînes d’appels, plan et modèle borné](../receipts/audit_finmesure_scope_20261005/README.md).
+
+## P9 : comparaison complète de l’arbre de points conforme
+
+La session `v11.20261005.claudefinp9` est close au même pin
+**38b76701b**, avec arrêt ciblé certifié. Les quatre CTests passent :
+cas synthétiques K1..5, puis les trois trames entières K5 en Release u21.
+Le juge compare tous les sites, leurs dates et rattachements, les
+plateaux, les parents et les entrées de blocs avec la construction
+Python, sur le même catalogue et la même tour FULL exportés. P9 complète les quatre portes de tête P10 ; les huit
+comparaisons dédiées sont désormais terminées avec succès.
+
+Les stdout gardent les PASS, sans compteurs métier. Contrairement à
+P10, ces portes ne gravent pas de ligne de totaux exacts : leurs succès
+imposent seulement les minima déclarés (synthétique : 407 nuages,
+100 000 sites, 50 000 retardés ; chaque LiDAR : 30 000 sites et
+20 000 retardés), ainsi que les contrôles complets du juge. Aucun
+total historique ni compteur inexistant `python_refusals` n’est ajouté.
+[Reçu, minima et portée mathématique](../receipts/audit_g4_finp9_20261005/README.md).
+
+## P10 : comparaison exacte de la sortie plate conforme
+
+La session `v11.20261005.claudefinp10` est close au pin **38b76701b**,
+avec arrêt ciblé certifié. Les quatre CTests passent : un ensemble
+synthétique et les trois trames sans sol entières, en Release u21.
+Le juge compare la sortie plate native à la tête Python sur le même
+arbre de points natif : partitions, bruit et étiquettes minimales par
+PointId, pour EOM z=1/2/3 et la sélection des feuilles.
+
+Les stdout archivés conservent les quatre verdicts PASS. Ils ne
+conservent pas les compteurs internes, car `--output-on-failure` ne
+les imprime pas en cas de succès et aucun LastTest/JUnit n’est archivé.
+Les **1 920 + 3×8 appels** et l’absence de refus Python se déduisent
+des boucles fixes, des planchers et des lignes exactes imposées par le
+juge épinglé ; ce ne sont pas des compteurs JSON directement lus.
+Le différentiel S9 de l’arbre lui-même est passé séparément dans P9.
+[Reçu, contrat jugé et limites de conservation](../receipts/audit_g4_finp10_20261005/README.md).
+
 ## Reprise ciblée après correction des portes
 
 Les 41 occurrences ordinaires sans résultat de fina2 ne figurent pas

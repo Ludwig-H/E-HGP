@@ -1,0 +1,253 @@
+{
+  "archive_sha256": "0a8aae431925ef07271f752ee42b328432e25bc513192bdd627fcf4c8fafcd89",
+  "archive_size": 14191,
+  "dependencies": {
+    "evidence": [
+      {
+        "member": "results/env/python_packages.txt",
+        "sha256": "8fc27d254729744279a591541834ab6b07574e9ed699b73ed2a2a50876b591f2",
+        "size": 59
+      },
+      {
+        "member": "results/env/pip_freeze.txt",
+        "sha256": "2dc2743d48b5e9d91ed774caaca697baf4ae1c6e7efd669037043abca3622a9f",
+        "size": 1358
+      },
+      {
+        "member": "results/setup/pip/argv.txt",
+        "sha256": "9054db925c19aa6eb9a95d14a5abdf3e53c3e224e932e172b8bc0bccb2a4bf5b",
+        "size": 165
+      },
+      {
+        "member": "results/setup/pip/meta.txt",
+        "sha256": "d9d076ff3f0a1ec2bd5119b603dfb4f6efcdbc3535742b634c12558875bdac34",
+        "size": 384
+      },
+      {
+        "member": "results/env/python3.txt",
+        "sha256": "f6b75e07f1488db28a89724a522725e3e01af3dc78f6fd365f17eb4059e41056",
+        "size": 15
+      }
+    ],
+    "explicit_install_pins": true,
+    "observed_versions": {
+      "hdbscan": "0.8.44",
+      "numpy": "2.2.6",
+      "scikit-learn": "1.7.2",
+      "scipy": "1.15.3"
+    },
+    "pip_freeze_matching": {
+      "hdbscan": "0.8.44",
+      "numpy": "2.2.6",
+      "scikit-learn": "1.7.2",
+      "scipy": "1.15.3"
+    },
+    "python_version": "Python 3.10.12",
+    "receipt_pins": {
+      "hdbscan": "0.8.44",
+      "numpy": "2.2.6",
+      "scikit-learn": "1.7.2",
+      "scipy": "1.15.3"
+    },
+    "setup_exit_code": 0
+  },
+  "judge_scope": [
+    "Head differential on the same native-published PointTree, not an independent oracle for constructing that PointTree.",
+    "The LiDAR helper reads whole supplied coordinate/ID files; no sampling or cap. python_tree and partitions_agree traverse range(f.n), covering every site of that published tree.",
+    "Cluster correspondence is checked in both directions, noise membership point by point, and each native cluster label must equal its minimum PointId. Native labels are reindexed through shuffled input PointIds.",
+    "The points/flat tree_k_sha256 values must match; the official reader validates output structure, counts, headers and hashes."
+  ],
+  "limits": [
+    "Successful CTest stdout is preserved, but no per-call gate output or LastTest/JUnit is present in the archive. Precise business totals are enforced by the pinned registered EXPECT_LINE and PASS, rather than directly printed in the archived CTest stdout.",
+    "The four long gates are ordinary Python mode; no _opt twin is claimed here.",
+    "No build, native test or cloud action by this auditor."
+  ],
+  "min_calls_proof": [
+    {
+      "case": "synthetic",
+      "clouds": 24,
+      "k": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "maximum_calls": 1920,
+      "mcs": [
+        3,
+        5,
+        10,
+        20
+      ],
+      "minimum_calls": 1920,
+      "minimum_cloud_k_pairs": 120,
+      "minimum_clusters": 16000,
+      "selections_per_mcs": 4
+    },
+    {
+      "case": "each LiDAR frame",
+      "clouds": 1,
+      "k": [
+        5
+      ],
+      "maximum_calls": 8,
+      "mcs": [
+        10,
+        20
+      ],
+      "minimum_calls": 8,
+      "minimum_cloud_k_pairs": 1,
+      "minimum_clusters": 1000,
+      "selections_per_mcs": 4
+    }
+  ],
+  "refusal_guard": "pf.Refusal increments python_refusals and skips a call. At these fixed configurations min-calls equals the exact maximum possible call count, so any such skip fails the floor. Native refusals also fail the Gate even though calls counts attempts.",
+  "runtime_tests": [
+    {
+      "command_exit_code": 0,
+      "name": "mhgp11_head_vs_python",
+      "seconds": 32.17,
+      "stderr_size": 0,
+      "stdout_member": "results/cmd/000_head_python_synthetique/stdout",
+      "stdout_sha256": "7d693d42093ee8cafa8df91069b1c8742038e339cccabefae36ef79ea7b12b67",
+      "verdict": "Passed"
+    },
+    {
+      "command_exit_code": 0,
+      "name": "mhgp11_head_vs_python_lidar_ng00_k5",
+      "seconds": 30.43,
+      "stderr_size": 0,
+      "stdout_member": "results/cmd/001_head_python_ng00/stdout",
+      "stdout_sha256": "888cae7cc32479f6bba50bb229b70d6970cc3a9afce04680840771fb8e8ae312",
+      "verdict": "Passed"
+    },
+    {
+      "command_exit_code": 0,
+      "name": "mhgp11_head_vs_python_lidar_ng01_k5",
+      "seconds": 24.1,
+      "stderr_size": 0,
+      "stdout_member": "results/cmd/002_head_python_ng01/stdout",
+      "stdout_sha256": "1254ede7399a1f3665adb8bf07ce2bfa33a503044b69a42724791c49be29a070",
+      "verdict": "Passed"
+    },
+    {
+      "command_exit_code": 0,
+      "name": "mhgp11_head_vs_python_lidar_ng02_k5",
+      "seconds": 29.14,
+      "stderr_size": 0,
+      "stdout_member": "results/cmd/003_head_python_ng02/stdout",
+      "stdout_sha256": "f09cc620d0b4d9e8809599dd4de3592b44b28e62a856bbf8b09a7fa41d9ce5f6",
+      "verdict": "Passed"
+    }
+  ],
+  "schema": "mhgp11_p10_native_scope_review_v1",
+  "selections": [
+    {
+      "method": "eom",
+      "z": 1
+    },
+    {
+      "method": "eom",
+      "z": 2
+    },
+    {
+      "method": "eom",
+      "z": 3
+    },
+    {
+      "method": "feuilles",
+      "z": 1
+    }
+  ],
+  "source_anchors": [
+    {
+      "anchors": [
+        {
+          "end": 91,
+          "start": 55,
+          "text": "def python_tree(f):\n    \"\"\"points_flat.PointTree de l'arbre de points publie (plateaux en valeur exacte, indices de sites natifs).\"\"\"\n    pt = pf.PointTree(f.n)\n    for t, m, q in zip(f.plateau_t, f.plateau_M, f.plateau_Q):\n        pt.add_plateau(pf.Level(f.level(t), f.level(m), f.level(q)))\n    for b, (plateau, parent) in enumerate(zip(f.block_plateau, f.block_parent)):\n        pt.block_plateau.append(plateau)\n        pt.block_parent.append(-1 if parent == formats.NONE else parent)\n        pt.block_merged.append(False)\n    for b, parent in enumerate(pt.block_parent):\n        if parent >= 0:\n            pt.block_merged[parent] = True\n    for s in range(f.n):\n        pt.enter(s, f.site_block[s], f.site_plateau[s])\n    return pt.finish()\n\n\ndef partitions_agree(gate, where, f, python_labels, native_by_pid):\n    \"\"\"Bijection des clusters, meme bruit ; etiquette native = plus petit PointId du cluster. Rend les clusters.\"\"\"\n    pairs = {}\n    reverse = {}\n    members = {}\n    ok = True\n    for s in range(f.n):\n        py, nat = int(python_labels[s]), native_by_pid[f.point_id[s]]\n        if (py < 0) != (nat < 0):\n            ok = False\n            break\n        if py < 0:\n            continue\n        if pairs.setdefault(py, nat) != nat or reverse.setdefault(nat, py) != py:\n            ok = False\n            break\n        members.setdefault(nat, []).append(f.point_id[s])\n    gate.check(ok, '%s : partitions differentes' % where)\n    gate.check(all(label == min(ids) for label, ids in members.items()),\n               '%s : etiquette differente du plus petit PointId du cluster' % where)"
+        },
+        {
+          "end": 133,
+          "start": 95,
+          "text": "def run_case(args, gate, work, name, points, ids, k, stats):\n    folder = tempfile.mkdtemp(prefix='c', dir=work)\n    order = list(range(len(points)))\n    random.Random(len(points) * 31 + k).shuffle(order)\n    xyz, names = cs.write_inputs(folder, points, ids, order)\n    d = os.path.join(folder, 'P')\n    result, rows = cs.run_cli(cs.cli_argv(args.cli, xyz, names, d, k, 1, output='points'), timeout=3600)\n    if not gate.check(result.code == 0 and rows and rows[0].get('status') == 'ok',\n                      '%s K%d points : %s' % (name, k, result.describe())):\n        return\n    read = formats.check_directory(d, args.bits, exact=False)\n    f, tree_sha = read['decoded'], read['manifest']['tree_k_sha256']\n    pt = python_tree(f)\n    input_order_pids = [ids[i] for i in order]\n    for mcs in args.mcs:\n        for method, z in LINES:\n            where = '%s K%d mcs%d %s z%d' % (name, k, mcs, method, z)\n            try:\n                labels, _ = pf.flat(pt, mcs, z, 'eom' if method == 'eom' else 'leaf')\n            except pf.Refusal:\n                stats['python_refusals'] += 1\n                continue\n            out = os.path.join(folder, 'F%d%s%d' % (mcs, method, z))\n            extra = ['--mcs=%d' % mcs, '--z=%d' % z, '--selection=' + method]\n            result, rows = cs.run_cli(cs.cli_argv(args.cli, xyz, names, out, k, 4, extra=extra, output='plat'),\n                                      timeout=3600)\n            stats['calls'] += 1\n            if not gate.check(result.code == 0 and rows and rows[0].get('status') == 'ok',\n                              '%s : %s %s' % (where, result.describe(), (result.stderr or '')[-300:])):\n                continue\n            got = formats.check_directory(out, args.bits)\n            gate.check_eq(got['manifest']['tree_k_sha256'], tree_sha, '%s : tree_k_sha256' % where)\n            native = got['decoded']['labels']\n            by_pid = dict(zip(input_order_pids, native))\n            stats['clusters'] += partitions_agree(gate, where, f, labels, by_pid)\n            stats['selected'] += got['manifest']['counts']['selected']\n            stats['noise'] += got['manifest']['counts']['noise']\n            stats['exact'] += got['manifest']['counts']['exact']\n            shutil.rmtree(out, ignore_errors=True)"
+        },
+        {
+          "end": 187,
+          "start": 162,
+          "text": "        if args.data:\n            points, ids = cs.lidar(args.data)\n            for k in ks:\n                run_case(args, gate, work, args.data, points, ids, k, stats)\n        else:\n            rng = random.Random(20261005)\n            for index in range(args.clouds):\n                n = rng.randrange(40, 400)\n                points = clustered(rng, n)\n                ids = cs.distinct_ids(n, rng)\n                for k in ks:\n                    if k >= 2 and k >= n:\n                        continue\n                    run_case(args, gate, work, 'amas%d' % index, points, ids, k, stats)\n    finally:\n        shutil.rmtree(work, ignore_errors=True)\n    print('{\"clouds\":%d,\"calls\":%d,\"clusters\":%d,\"selected\":%d,\"noise\":%d,\"exact\":%d,\"python_refusals\":%d}' %\n          (stats['clouds'], stats['calls'], stats['clusters'], stats['selected'], stats['noise'], stats['exact'],\n           stats['python_refusals']))\n    if stats['clouds'] < args.min_clouds or stats['calls'] < args.min_calls or stats['clusters'] < args.min_clusters:\n        print('PLANCHER nuages=%d appels=%d clusters=%d' % (stats['clouds'], stats['calls'], stats['clusters']))\n        return mhgp11_gate.FLOOR\n    if gate.failures == 0:\n        print('head_vs_python_verdict conforme nuages=%d appels=%d clusters=%d retenus=%d bruit=%d'\n              % (stats['clouds'], stats['calls'], stats['clusters'], stats['selected'], stats['noise']))\n    return gate.finish(floor=1)"
+        }
+      ],
+      "path": "morsehgp3D_v11/tests/head/head_vs_python.py",
+      "sha256": "e6f8e10820c49b450df0ff8364bd4e55b157f49bb87f3e67bcd088f01f0c1fd7"
+    },
+    {
+      "anchors": [
+        {
+          "end": 27,
+          "start": 15,
+          "text": "  mhgp11_python_gate(mhgp11_head_vs_python 0 head_vs_python.py --cli $<TARGET_FILE:mhgp11_cli>\n                     --bits ${MHGP11_COORD_BITS} --work ${PROJECT_BINARY_DIR}/head_vs_python --clouds 24\n                     --k=1,2,3,4,5 --mcs=3,5,10,20 --min-clouds 120 --min-calls 1920 --min-clusters 16000\n                     LINE \"head_vs_python_verdict conforme nuages=120 appels=1920 clusters=16474 retenus=16474 bruit=49474\"\n                     LABELS long TIMEOUT 3600)\n  foreach(case \"ng00;clusters=6086 retenus=6086 bruit=52434\" \"ng01;clusters=4774 retenus=4774 bruit=42194\"\n               \"ng02;clusters=4978 retenus=4978 bruit=52770\")\n    list(GET case 0 frame)\n    list(GET case 1 counts)\n    mhgp11_python_gate(mhgp11_head_vs_python_lidar_${frame}_k5 0 head_vs_python.py --cli $<TARGET_FILE:mhgp11_cli>\n                       --bits ${MHGP11_COORD_BITS} --work ${PROJECT_BINARY_DIR}/head_vs_python_${frame}\n                       --data=lidar_${frame} --k=5 --mcs=10,20 --min-calls 8 --min-clusters 1000\n                       LINE \"head_vs_python_verdict conforme nuages=1 appels=8 ${counts}\" LABELS lidar long TIMEOUT 3600)"
+        }
+      ],
+      "path": "morsehgp3D_v11/tests/head/tests.cmake",
+      "sha256": "5b396f4aae9beed3ba67c56ba6f84cf871ff63e74a786b8285117f259a85b3c5"
+    },
+    {
+      "anchors": [
+        {
+          "end": 33,
+          "start": 24,
+          "text": "def write_inputs(folder, points, ids, order=None, prefix=''):\n    \"\"\"Ecrit <prefix>points.u32le et <prefix>ids.u32le dans l'ordre `order` (indices) ; rend les deux chemins.\"\"\"\n    order = tuple(range(len(points))) if order is None else tuple(order)\n    xyz = os.path.join(folder, prefix + 'points.u32le')\n    names = os.path.join(folder, prefix + 'ids.u32le')\n    with open(xyz, 'wb') as handle:\n        handle.write(b''.join(struct.pack('<III', *points[i]) for i in order))\n    with open(names, 'wb') as handle:\n        handle.write(b''.join(struct.pack('<I', ids[i]) for i in order))\n    return xyz, names"
+        },
+        {
+          "end": 88,
+          "start": 79,
+          "text": "def lidar(name):\n    \"\"\"Trame du dossier MHGP11_DATA_DIR : (points, ids) ; jamais copiee hors de ce dossier.\"\"\"\n    folder = mhgp11_gate.require_data_dir()\n    with open(os.path.join(folder, name + '.u32le'), 'rb') as handle:\n        raw = handle.read()\n    with open(os.path.join(folder, name + '.ids.u32le'), 'rb') as handle:\n        names = handle.read()\n    points = [struct.unpack_from('<III', raw, 12 * i) for i in range(len(raw) // 12)]\n    ids = [struct.unpack_from('<I', names, 4 * i)[0] for i in range(len(names) // 4)]\n    return points, ids"
+        }
+      ],
+      "path": "morsehgp3D_v11/tests/cli/cli_support.py",
+      "sha256": "dd0e51308d06de8b34118ef542dfb90656bd40b23e2879b1ff09b03f845aae06"
+    },
+    {
+      "anchors": [
+        {
+          "end": 225,
+          "start": 197,
+          "text": "    need(type(inputs) is list and len(inputs) == 2, 'manifeste : deux entrees')\n    for name, entry in zip(('points', 'ids'), inputs):\n        _keys(entry, INPUT_KEYS, 'inputs')\n        need(entry['name'] == name, 'manifeste : nom d\\'entree')\n        _integer(entry['bytes'], 'bytes')\n        _digest(entry['sha256'], 'd\\'entree')\n    need(inputs[0]['bytes'] == 3 * inputs[1]['bytes'], 'manifeste : 12 et 4 octets par point')\n    files = manifest['files']\n    need(type(files) is list and len(files) == 1, 'manifeste : un fichier pour la sortie %s' % output)\n    _keys(files[0], FILE_KEYS, 'files')\n    name, form, smallest = OUTPUT_FILES[output]\n    need((files[0]['name'], files[0]['format'], files[0]['version']) == (name, form, 1),\n         'manifeste : fichier %s' % output)\n    _integer(files[0]['bytes'], 'bytes', smallest)\n    _digest(files[0]['sha256'], 'de fichier')\n    _digest(manifest['tree_k_sha256'], 'tree_k_sha256')\n    if output == 'full':\n        _full_counts(manifest['counts'], k)\n        need(inputs[1]['bytes'] == 4 * manifest['counts']['points'], 'manifeste : points et octets d\\'entree')\n    elif output == 'points':\n        _points_counts(manifest['counts'], k)\n        need(inputs[1]['bytes'] == 4 * manifest['counts']['sites'], 'manifeste : points et octets d\\'entree')\n    elif output == 'plat':\n        _flat_counts(manifest['counts'], k)\n        need(inputs[1]['bytes'] == 4 * manifest['counts']['sites'], 'manifeste : points et octets d\\'entree')\n        need(files[0]['bytes'] == FLAT_HEADER + 8 * manifest['counts']['sites'], 'manifeste : taille de MHGP11ET')\n    else:\n        _supports_counts(manifest['counts'], k)\n        need(inputs[1]['bytes'] == 4 * manifest['counts']['sites'], 'manifeste : points et octets d\\'entree')"
+        },
+        {
+          "end": 271,
+          "start": 255,
+          "text": "    if manifest['output'] == 'plat':\n        with open(file_path, 'rb') as handle:\n            et = read_flat(handle.read())\n        parameters = manifest['parameters']\n        need((et['k'], et['mcs'], et['z'], FLAT_METHODS[et['selection']]) ==\n             (manifest['k'], parameters['mcs'], parameters['z'], parameters['selection']),\n             'MHGP11ET : en-tete et parametres du manifeste')\n        need(et['n'] == counts['sites'] and et['labels'].count(-1) == counts['noise'],\n             'MHGP11ET : points ou bruit du manifeste')\n        return dict(manifest=manifest, manifest_sha256=hashlib.sha256(raw).hexdigest(), decoded=et)\n    if manifest['output'] == 'points':\n        with open(file_path, 'rb') as handle:\n            pt = read_points(handle.read(), bits, exact)\n        need(pt.k == manifest['k'], 'MHGP11PT : K du fichier et du manifeste')\n        recount = pt.manifest_counts()\n        need(recount == counts, 'manifeste : comptes publies %r, recomptes depuis MHGP11PT %r' % (counts, recount))\n        return dict(manifest=manifest, manifest_sha256=hashlib.sha256(raw).hexdigest(), decoded=pt)"
+        }
+      ],
+      "path": "morsehgp3D_v11/bench/mhgp11_formats.py",
+      "sha256": "2b5d8147d7c8b5d267a6ebaa1bde1326066b108dfb8c0f91d034386e96cfd40f"
+    },
+    {
+      "anchors": [
+        {
+          "end": 898,
+          "start": 891,
+          "text": "def flat(pt, mcs, z=1, method='eom', inject=None, budget_bits=8192):\n    \"\"\"Chaine complete : (labels par PointId, statistiques). Refusal propage.\"\"\"\n    cond, first = condense(pt, mcs, inject)\n    sel = select(pt, cond, z, method, inject, budget_bits)\n    lab = labels(pt, cond, first, sel)\n    stats = dict(sel.stats)\n    stats.update(selected=int(sum(sel.selected)), noise=int(np.sum(lab < 0)))\n    return lab, stats"
+        }
+      ],
+      "path": "morsehgp3D_v11/bench/points_flat.py",
+      "sha256": "4647de0762b500fb36ca917941a34120d58931f0b0033b570490821860fdd3bc"
+    },
+    {
+      "anchors": [
+        {
+          "end": 127,
+          "start": 117,
+          "text": "if(NOT \"${rc}\" STREQUAL \"${EXPECTED}\")\n  run_expect_say(\"run_expect_verdict code\")\n  message(FATAL_ERROR \"code de sortie ${rc}, attendu ${EXPECTED}\")\nendif()\nif(DEFINED EXPECT_LINE AND NOT \"${EXPECT_LINE}\" STREQUAL \"\")\n  string(REPLACE \"\\r\\n\" \"\\n\" run_expect_normalized \"${run_stdout}\")\n  string(FIND \"\\n${run_expect_normalized}\\n\" \"\\n${EXPECT_LINE}\\n\" run_expect_pos)\n  if(run_expect_pos EQUAL -1)\n    run_expect_say(\"run_expect_verdict ligne_absente\")\n    message(FATAL_ERROR \"ligne attendue ABSENTE de la sortie standard de la MEME execution : ${EXPECT_LINE}\")\n  endif()"
+        }
+      ],
+      "path": "morsehgp3D_v11/cmake/run_expect.cmake",
+      "sha256": "165d02c686bb71d32fbf9edb3fb3afa80c03ca3c8d6deb40b8444eeb6443646e"
+    }
+  ],
+  "source_commit": "38b76701b9b0198fc1c37afe16e1480e638e513c",
+  "verdict": "Favorable within the stated head differential scope; full supplied inputs, exhaustive published-site comparison, no permitted Refusal skip under exact min-calls floors, observed pinned Python versions match receipt."
+}
