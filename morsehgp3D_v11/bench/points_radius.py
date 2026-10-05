@@ -271,3 +271,9 @@ def ultrametric_radius(hanging):
                 value = max(value, math.sqrt(order.levels.approx[int(order.rank[w])]))
             u[i][j] = u[j][i] = value
     return u
+
+
+def qualification(k):
+    """Seuil de qualification m(k) des pendaisons H^r : 1 a k = 1 (liaison simple, aucune qualification), k + 1 sinon.
+    Convention figee pour le port natif (docs/HIERARCHIE_POINTS.md, paragraphe 9 ; MHGP11PT publie m)."""
+    return 1 if k == 1 else k + 1

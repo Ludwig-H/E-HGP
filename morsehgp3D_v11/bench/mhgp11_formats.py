@@ -10,7 +10,12 @@ Specification de la sortie parametree, paragraphes 6.1 a 6.7 (tranche S5), et do
     DERIVE tout ce que le paragraphe 6 declare derive (enfants, postordre, tailles de sous-arbre, rattachement, q_min,
     niveaux et centres exacts, feuilles de K = 1, comptes par boule et par support) et CONTROLE tout ce qu'il y declare
     controle (voir read_supports) ; check_directory recompte les agregats du manifeste et recalcule tree_k_sha256
-    (signature version 2) depuis le seul fichier, independamment du moteur.
+    (signature version 2) depuis le seul fichier, independamment du moteur ;
+  - points.mhgp11pt, format MHGP11PT version 1 (tranche S9, docs/SORTIES.md, paragraphe 7) : decode par read_points,
+    qui controle la forme, la pendaison (t <= Q < M, proprietaire vivant au plancher) et l'arbre de points, et, en
+    lecture exacte (exact=True), le plancher, le drapeau strict et l'ordre des plateaux par sommes de racines exactes
+    (radical_sign, ecrit a neuf) ; check_directory recompte les comptes du manifeste. tree_k_sha256 n'en est pas
+    recalculable (S* absent) : les portes le comparent a celui de --sortie=supports.
 
 Toute violation leve ValueError (full_semantic.need). Usage :
 
@@ -46,9 +51,11 @@ FULL_NAME = 'full.mhgp11ful1'
 FULL_MAGIC = b'MHGP11FUL1'
 SUPPORTS_NAME = 'supports.mhgp11sp'
 SUPPORTS_MAGIC = b'MHGP11SP'
+POINTS_NAME = 'points.mhgp11pt'
 NONE = (1 << 32) - 1
 # Fichier de donnees de chaque sortie : nom, format, taille minimale (en-tete).
-OUTPUT_FILES = {'full': (FULL_NAME, 'MHGP11FUL1', 42), 'supports': (SUPPORTS_NAME, 'MHGP11SP', 136)}
+OUTPUT_FILES = {'full': (FULL_NAME, 'MHGP11FUL1', 42), 'supports': (SUPPORTS_NAME, 'MHGP11SP', 136),
+                'points': (POINTS_NAME, 'MHGP11PT', 144)}
 MAX_DECIMAL = 64
 
 TOP_KEYS = ('schema', 'output', 'status', 'public_status', 'coord_bits', 'k', 'parameters', 'inputs', 'files',
@@ -191,6 +198,9 @@ def read_manifest(raw):
     if output == 'full':
         _full_counts(manifest['counts'], k)
         need(inputs[1]['bytes'] == 4 * manifest['counts']['points'], 'manifeste : points et octets d\'entree')
+    elif output == 'points':
+        _points_counts(manifest['counts'], k)
+        need(inputs[1]['bytes'] == 4 * manifest['counts']['sites'], 'manifeste : points et octets d\'entree')
     else:
         _supports_counts(manifest['counts'], k)
         need(inputs[1]['bytes'] == 4 * manifest['counts']['sites'], 'manifeste : points et octets d\'entree')
@@ -205,7 +215,7 @@ def sha256_file(path):
     return digest.hexdigest()
 
 
-def check_directory(path, bits):
+def check_directory(path, bits, exact=True):
     """Dossier publie : inventaire exact (fichiers du manifeste et manifeste), D.pending absent, tailles et sha256 des
     fichiers, decodage strict de MHGP11FUL1 ou de MHGP11SP et comptes recoupes ; pour supports, agregats du manifeste
     recomptes et tree_k_sha256 recalcule depuis le fichier. Rend le manifeste, son sha256 et le decodage (dict de
@@ -223,6 +233,13 @@ def check_directory(path, bits):
     need(os.path.getsize(file_path) == entry['bytes'], 'taille du fichier %s' % manifest['output'])
     need(sha256_file(file_path) == entry['sha256'], 'empreinte du fichier %s' % manifest['output'])
     counts = manifest['counts']
+    if manifest['output'] == 'points':
+        with open(file_path, 'rb') as handle:
+            pt = read_points(handle.read(), bits, exact)
+        need(pt.k == manifest['k'], 'MHGP11PT : K du fichier et du manifeste')
+        recount = pt.manifest_counts()
+        need(recount == counts, 'manifeste : comptes publies %r, recomptes depuis MHGP11PT %r' % (counts, recount))
+        return dict(manifest=manifest, manifest_sha256=hashlib.sha256(raw).hexdigest(), decoded=pt)
     if manifest['output'] == 'supports':
         with open(file_path, 'rb') as handle:
             sp = read_supports(handle.read(), bits)
@@ -811,3 +828,247 @@ def _check_canonical(f):
     for v in range(f.births, f.N - 1):
         need((f.rank[v], low[v]) < (f.rank[v + 1], low[v + 1]),
              'MHGP11SP : fusions %d et %d hors de l\'ordre (niveau, plus petite naissance)' % (v, v + 1))
+
+
+# ---------------------------------------------------------------- MHGP11PT version 1 (tranche S9)
+
+PT_HEADER = 8 + 17 * 8
+POINTS_COUNT_KEYS = ('sites', 'nodes', 'qualification', 'kappa', 'levels', 'plateaus', 'blocks', 'root_blocks',
+                     'delayed', 'strict')
+
+
+def qualification(k):
+    """Seuil de qualification m(K) des points : 1 a K = 1, K + 1 sinon (docs/HIERARCHIE_POINTS.md, paragraphe 9)."""
+    return 1 if k == 1 else k + 1
+
+
+def _points_counts(counts, k):
+    _keys(counts, POINTS_COUNT_KEYS, 'counts')
+    sites = _integer(counts['sites'], 'sites', k if k == 1 else k + 1, (1 << 32) - 2)
+    _integer(counts['nodes'], 'nodes', 1)
+    need(counts['qualification'] == qualification(k) and counts['kappa'] == 1, 'manifeste : qualification ou kappa')
+    _integer(counts['levels'], 'levels', 1)
+    plateaus = _integer(counts['plateaus'], 'plateaus', 1)
+    blocks = _integer(counts['blocks'], 'blocks', 1, 2 * sites - 1)
+    need(1 <= _integer(counts['root_blocks'], 'root_blocks') <= blocks and plateaus <= 2 * sites + counts['nodes'],
+         'manifeste : blocs racines ou plateaux')
+    need(_integer(counts['strict'], 'strict') <= _integer(counts['delayed'], 'delayed') <= sites,
+         'manifeste : sites stricts et retardes')
+
+
+def _sqrt_bounds(value, bits):
+    """[lo, hi] encadrant sqrt(value) (Fraction >= 0) a 2^-bits pres, par racine entiere."""
+    from fractions import Fraction
+    n, d = value.numerator, value.denominator
+    s = math.isqrt((n * d) << (2 * bits))
+    return Fraction(s, d << bits), Fraction(s + 1, d << bits)
+
+
+def radical_sign(terms, budget=8192):
+    """Signe exact de la somme de c sqrt(f) (c entier, f Fraction >= 0), ecrit a neuf pour le lecteur : classes de
+    carres (f / g carre parfait : meme classe, radicaux de classes distinctes independants sur Q), puis encadrements
+    de precision croissante ; ValueError si une somme non nulle reste non separee dans le budget."""
+    from fractions import Fraction
+    classes = []
+    for coef, value in terms:
+        if not coef or not value:
+            continue
+        for entry in classes:
+            ratio = value / entry[0]
+            a, b = math.isqrt(ratio.numerator), math.isqrt(ratio.denominator)
+            if a * a == ratio.numerator and b * b == ratio.denominator:
+                entry[1] += coef * Fraction(a, b)
+                break
+        else:
+            classes.append([value, Fraction(coef)])
+    classes = [(value, coef) for value, coef in classes if coef]
+    if not classes:
+        return 0
+    if len(classes) == 1:
+        return 1 if classes[0][1] > 0 else -1
+    bits = 96
+    while bits <= budget:
+        lo = hi = Fraction(0)
+        for value, coef in classes:
+            a, b = _sqrt_bounds(value, bits)
+            lo += coef * (a if coef > 0 else b)
+            hi += coef * (b if coef > 0 else a)
+        if lo > 0:
+            return 1
+        if hi < 0:
+            return -1
+        bits *= 2
+    raise ValueError('somme de radicaux non separee')
+
+
+class PointsFile:
+    """MHGP11PT decode et controle (read_points). Colonnes : x, y, z, point_id (par SiteIdx) ; ranks, num, den
+    (LEVELS) ; parent, rank (par noeud) ; t, M, Q, owner, floor, strict (par site) ; plateau_t, plateau_M,
+    plateau_Q, block_plateau, block_parent, site_block, site_plateau (arbre de points). level(r) : niveau exact
+    (Fraction) d'un rang reference ; date(s) : (l_t, l_M, l_Q) du site s."""
+
+    def level(self, r):
+        need(r in self.levels, 'MHGP11PT : rang %d non reference' % r)
+        return self.levels[r]
+
+    def date(self, s):
+        return (self.level(self.t[s]), self.level(self.M[s]), self.level(self.Q[s]))
+
+    def plateau(self, p):
+        return (self.level(self.plateau_t[p]), self.level(self.plateau_M[p]), self.level(self.plateau_Q[p]))
+
+    def manifest_counts(self):
+        return dict(sites=self.n, nodes=self.N, qualification=self.m, kappa=self.kappa, levels=self.L,
+                    plateaus=self.P, blocks=self.Bk, root_blocks=sum(1 for p in self.block_parent if p == NONE),
+                    delayed=sum(1 for value in self.M if value != 0), strict=sum(self.strict))
+
+
+def compare_dates(a, b):
+    """Ordre exact de deux dates (l_t, l_M, l_Q) : sqrt t + sqrt M - sqrt Q."""
+    return radical_sign([(1, a[0]), (1, a[1]), (-1, a[2]), (-1, b[0]), (-1, b[1]), (1, b[2])])
+
+
+def read_points(data, bits, exact=True):
+    """Decode MHGP11PT version 1 et controle (docs/SORTIES.md, paragraphe 7) :
+      - en-tete : magie, version 1, profil, 1 <= K <= 12, m = m(K), kappa = 1, K < n a K >= 2, W du profil, decalages
+        egaux a la disposition des colonnes, taille egale a celle du fichier ; bourrage nul ;
+      - sites : coordonnees dans le profil, ordre de Morton strict, PointId distincts ;
+      - LEVELS : rangs strictement croissants, le rang 0 de niveau nul, denominateurs positifs, niveaux strictement
+        croissants en valeur exacte (l'ordre des rangs est celui des niveaux) ;
+      - arbre : une racine, la derniere ; parent de numero et de rang plus grands ; naissances d'abord, puis fusions
+        d'au moins deux enfants ; rangs des noeuds references ;
+      - pendaison : sans rival M = Q = 0, plancher t, non strict ; avec rival t <= Q < M et t <= plancher <= M ;
+        proprietaire vivant au plancher ; avec exact, plancher et drapeau strict certifies (sqrt l_plancher <= date,
+        egalite si et seulement si non strict) ;
+      - arbre de points : plateaux references, de la forme (r, 0, 0) ou d'une date (M > Q) ; blocs de parent de numero
+        et de plateau plus grands, au moins deux enfants pour un bloc de fusion, une entree a sa creation pour un bloc
+        d'entree ; entree de chaque site au plateau (plancher, 0, 0) si non strict, a un plateau de sa date sinon (egalite
+        exacte avec exact) ; avec exact, plateaux strictement croissants en valeur exacte.
+    Leve ValueError a la premiere violation."""
+    from fractions import Fraction
+    need(type(data) in (bytes, bytearray) and len(data) >= PT_HEADER and data[:8] == b'MHGP11PT', 'MHGP11PT : signature')
+    words = struct.unpack_from('<17Q', data, 8)
+    version, coord_bits, k, m, kappa, n, nlevels, width, nodes, plateaus, blocks = words[:11]
+    need(version == 1 and coord_bits == bits and bits in (18, 21, 24), 'MHGP11PT : version ou profil')
+    need(1 <= k <= 12 and m == qualification(k) and kappa == 1, 'MHGP11PT : K, m ou kappa')
+    need(1 <= n < NONE and (k == 1 or k < n) and 1 <= nodes < NONE and nlevels >= 1, 'MHGP11PT : n, N ou L')
+    need(width == (4 if bits == 24 else 3), 'MHGP11PT : mots par niveau')
+    layout = [PT_HEADER]
+    layout.append(layout[-1] + 4 * _pad8(4 * n))
+    layout.append(layout[-1] + _pad8(4 * nlevels) + 2 * 8 * width * nlevels)
+    layout.append(layout[-1] + 2 * _pad8(4 * nodes))
+    layout.append(layout[-1] + 5 * _pad8(4 * n) + _pad8(n))
+    layout.append(layout[-1] + 3 * _pad8(4 * plateaus) + 2 * _pad8(4 * blocks) + 2 * _pad8(4 * n))
+    need(list(words[11:17]) == layout and layout[-1] == len(data), 'MHGP11PT : decalages ou taille')
+    f = PointsFile()
+    f.bits, f.k, f.m, f.kappa, f.n, f.L, f.W, f.N, f.P, f.Bk = bits, k, m, kappa, n, nlevels, width, nodes, plateaus, \
+        blocks
+    at = layout[0]
+    for name in ('x', 'y', 'z', 'point_id'):
+        values, at = _column(data, at, n, 4, name)
+        setattr(f, name, values)
+    f.ranks, at = _column(data, at, nlevels, 4, 'levels.rank')
+    limbs = struct.unpack_from('<%dQ' % (2 * width * nlevels), data, at)
+    at += 16 * width * nlevels
+    f.levels = {}
+    for j, r in enumerate(f.ranks):
+        num = sum(limbs[j * width + w] << (64 * w) for w in range(width))
+        den = sum(limbs[(nlevels + j) * width + w] << (64 * w) for w in range(width))
+        need(den > 0, 'MHGP11PT : denominateur nul')
+        f.levels[r] = Fraction(num, den)
+    for name in ('parent', 'rank'):
+        values, at = _column(data, at, nodes, 4, name)
+        setattr(f, name, values)
+    for name in ('t', 'M', 'Q', 'owner', 'floor'):
+        values, at = _column(data, at, n, 4, name)
+        setattr(f, name, values)
+    f.strict, at = _column(data, at, n, 1, 'strict')
+    for name, count in (('plateau_t', plateaus), ('plateau_M', plateaus), ('plateau_Q', plateaus),
+                        ('block_plateau', blocks), ('block_parent', blocks), ('site_block', n), ('site_plateau', n)):
+        values, at = _column(data, at, count, 4, name)
+        setattr(f, name, values)
+    need(at == len(data), 'MHGP11PT : colonnes et taille')
+    _check_points_sites(f)
+    _check_points_levels(f)
+    _check_points_tree(f)
+    _check_hanging(f, exact)
+    _check_point_tree(f, exact)
+    return f
+
+
+def _check_points_sites(f):
+    limit = 1 << f.bits
+    points = list(zip(f.x, f.y, f.z))
+    need(all(c < limit for p in points for c in p), 'MHGP11PT : coordonnee hors du profil')
+    keys = [morton(p) for p in points]
+    need(all(keys[i] < keys[i + 1] for i in range(len(keys) - 1)), 'MHGP11PT : sites hors de l\'ordre de Morton')
+    need(len(set(f.point_id)) == f.n, 'MHGP11PT : PointId en double')
+
+
+def _check_points_levels(f):
+    ranks = list(f.ranks)
+    need(ranks[0] == 0 and f.levels[0] == 0, 'MHGP11PT : rang 0 de niveau nul')
+    need(all(ranks[i] < ranks[i + 1] and f.levels[ranks[i]] < f.levels[ranks[i + 1]] for i in range(len(ranks) - 1)),
+         'MHGP11PT : rangs ou niveaux non strictement croissants')
+
+
+def _check_points_tree(f):
+    need(f.parent[f.N - 1] == NONE, 'MHGP11PT : racine')
+    children = [0] * f.N
+    for v in range(f.N - 1):
+        up = f.parent[v]
+        need(v < up < f.N and f.rank[v] < f.rank[up], 'MHGP11PT : parent du noeud %d' % v)
+        children[up] += 1
+    births = sum(1 for c in children if c == 0)
+    need(all(children[v] == 0 for v in range(births)) and all(children[v] >= 2 for v in range(births, f.N)),
+         'MHGP11PT : naissances puis fusions d\'au moins deux enfants')
+    need(all(r in f.levels for r in f.rank), 'MHGP11PT : rang de noeud non reference')
+    f.births = births
+
+
+def _check_hanging(f, exact):
+    for s in range(f.n):
+        t, big_m, q, owner, floor, strict = f.t[s], f.M[s], f.Q[s], f.owner[s], f.floor[s], f.strict[s]
+        need(all(r in f.levels for r in (t, big_m, q, floor)) and owner < f.N and strict in (0, 1),
+             'MHGP11PT : site %d hors domaine' % s)
+        if big_m == 0:
+            need(q == 0 and floor == t and strict == 0, 'MHGP11PT : site %d sans rival' % s)
+        else:
+            need(t <= q < big_m and t <= floor <= big_m, 'MHGP11PT : site %d : t <= Q < M, t <= plancher <= M' % s)
+        up = f.parent[owner]
+        need(f.rank[owner] <= floor and (up == NONE or f.rank[up] > floor),
+             'MHGP11PT : proprietaire du site %d non vivant au plancher' % s)
+        if exact and big_m != 0:
+            sign = radical_sign([(1, f.levels[t]), (1, f.levels[big_m]), (-1, f.levels[q]), (-1, f.levels[floor])])
+            need(sign >= 0 and (sign > 0) == (strict == 1), 'MHGP11PT : plancher ou drapeau strict du site %d' % s)
+
+
+def _check_point_tree(f, exact):
+    plateau_of = []
+    for p in range(f.P):
+        t, big_m, q = f.plateau_t[p], f.plateau_M[p], f.plateau_Q[p]
+        need(all(r in f.levels for r in (t, big_m, q)) and ((big_m == 0 and q == 0) or q < big_m),
+             'MHGP11PT : plateau %d' % p)
+        plateau_of.append((t, big_m, q))
+        if exact and p > 0:
+            need(compare_dates(f.plateau(p - 1), f.plateau(p)) < 0, 'MHGP11PT : plateaux %d et %d' % (p - 1, p))
+    kids = [0] * f.Bk
+    for b in range(f.Bk):
+        up = f.block_parent[b]
+        need(f.block_plateau[b] < f.P and (up == NONE or (b < up < f.Bk and f.block_plateau[b] < f.block_plateau[up])),
+             'MHGP11PT : bloc %d' % b)
+        if up != NONE:
+            kids[up] += 1
+    created = [False] * f.Bk
+    for s in range(f.n):
+        b, p = f.site_block[s], f.site_plateau[s]
+        need(b < f.Bk and p < f.P and f.block_plateau[b] <= p, 'MHGP11PT : entree du site %d' % s)
+        created[b] = created[b] or f.block_plateau[b] == p
+        if f.strict[s] == 0:
+            need(plateau_of[p] == (f.floor[s], 0, 0), 'MHGP11PT : plateau du site non strict %d' % s)
+        else:
+            need(plateau_of[p][1] != 0 and (plateau_of[p] == (f.t[s], f.M[s], f.Q[s]) or
+                                            (exact and compare_dates(f.plateau(p), f.date(s)) == 0)),
+                 'MHGP11PT : plateau du site strict %d' % s)
+    need(all(kids[b] >= 2 or (kids[b] == 0 and created[b]) for b in range(f.Bk)),
+         'MHGP11PT : bloc ni fusion d\'au moins deux blocs ni cree par une entree')

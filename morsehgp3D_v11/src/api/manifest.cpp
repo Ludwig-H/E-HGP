@@ -231,20 +231,24 @@ Publication publish(Session& session, const Product& product, io::OutputDirector
   if (!checked.ok()) return {checked, PublicationState::none, {}};
   MemoryBudget& budget = session.budget();
   RunReport local;
-  const bool supports = product.kind() == OutputKind::supports;
+  const bool supports = product.kind() == OutputKind::supports, points = product.kind() == OutputKind::points;
   const Outcome written = guarded([&]() -> Outcome {
-    // Sortie full : le produit est la tour elle-meme, l'etage output est vide. Sortie supports : l'etage output est
-    // l'assemblage, mesure par compute. write couvre le fichier, l'empreinte de l'arbre, le manifeste et la
-    // publication (synchronisations et renommage compris).
-    if (!supports) local.at(Stage::output) = {0, budget.restart_peak()};
+    // Sortie full : le produit est la tour elle-meme, l'etage output est vide. Sorties supports et points : l'etage
+    // output est l'assemblage ou la pendaison, mesure par compute. write couvre le fichier, l'empreinte de l'arbre, le
+    // manifeste et la publication (synchronisations et renommage compris).
+    if (!supports && !points) local.at(Stage::output) = {0, budget.restart_peak()};
     else budget.restart_peak();
     Stopwatch write_clock;
-    Result<io::FileWriter*> file = directory.create(supports ? kSupportsFileName : kFullFileName);
+    Result<io::FileWriter*> file =
+        directory.create(supports ? kSupportsFileName : (points ? kPointsFileName : kFullFileName));
     if (!file.ok()) return file.outcome();
     std::string manifest;
     if (supports) {
       MHGP11_TRY(api_detail::write_supports(*file.value(), product.order_tree(), product.hierarchy()));
       manifest = api_detail::supports_manifest(product, provenance, file.value()->size(), file.value()->digest());
+    } else if (points) {
+      MHGP11_TRY(api_detail::write_points(*file.value(), product.order_tree(), product.points()));
+      manifest = api_detail::points_manifest(product, provenance, file.value()->size(), file.value()->digest());
     } else {
       MHGP11_TRY(api_detail::write_full(*file.value(), product.full()));
       manifest = api_detail::full_manifest(product, provenance, file.value()->size(), file.value()->digest());
@@ -257,7 +261,7 @@ Publication publish(Session& session, const Product& product, io::OutputDirector
   // withdraw le retire, ou declare published_complete.
   if (!written.ok()) return withdraw(written, directory);
   if (report != nullptr) {
-    if (!supports) report->at(Stage::output) = local.at(Stage::output);
+    if (!supports && !points) report->at(Stage::output) = local.at(Stage::output);
     report->at(Stage::write) = local.at(Stage::write);
   }
   return state_of(written, directory);
@@ -302,6 +306,35 @@ Outcome check_provenance(const Provenance& provenance, u64 points) noexcept {
     if (declared ? !api::valid_origin_coordinate(axis) : !axis.empty()) return fail(Reason::parameter_out_of_range);
   return {};
 }
+
+std::string manifest_head(const api::Product& product, const Provenance& provenance, std::string_view name,
+                          std::string_view format, u64 bytes, const io::Digest& sha256, const io::Digest& tree) {
+  std::string out;
+  out.reserve(2048);
+  out.append("{\"schema\":");
+  quoted(out, api::kManifestSchema);
+  out.append(",\"output\":");
+  quoted(out, api::output_name(product.kind()));
+  out.append(",\"status\":\"complete\",\"public_status\":\"not_claimed\",\"coord_bits\":");
+  number(out, static_cast<u64>(kCoordBits));
+  out.append(",\"k\":");
+  number(out, product.k());
+  parameters(out, provenance);
+  inputs(out, provenance);
+  out.append(",\"files\":[{\"name\":");
+  quoted(out, name);
+  out.append(",\"format\":");
+  quoted(out, format);
+  out.append(",\"version\":1,\"bytes\":");
+  number(out, bytes);
+  out.append(",\"sha256\":");
+  hex(out, sha256);
+  out.append("}],\"tree_k_sha256\":");
+  hex(out, tree);
+  return out;
+}
+
+void manifest_number(std::string& out, u64 value) { number(out, value); }
 
 std::string full_manifest(const api::Product& product, const Provenance& provenance, u64 file_bytes,
                           const io::Digest& file_sha256) {

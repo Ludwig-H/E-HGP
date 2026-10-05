@@ -1,0 +1,54 @@
+{
+  "module": "points",
+  "plancher": 6,
+  "mutants": [
+    {
+      "id": "qualification_decalee",
+      "fichier": "src/points/qualify.cpp",
+      "cherche": "  Select select{&node_offsets, &ranks, &qual, m};",
+      "remplace": "  Select select{&node_offsets, &ranks, &qual, m - 1};",
+      "porte": "mhgp11_points_fixtures",
+      "note": "seuil de qualification m - 1 au lieu de m (bench/points_gate.py, Mutant qualification_decalee) : les deux triangles a m = 3 perdent ABC | DEF (F1)"
+    },
+    {
+      "id": "marge_carree",
+      "fichier": "src/points/hang.cpp",
+      "cherche": "    MHGP11_TRY(roots->two_vs_two(meet, q, big_m, r, sign, tallies[worker]));",
+      "remplace": "    num::Rational lm, lr, lb, lq, x, y;\n    MHGP11_TRY(num::Rational::from_level(levels[meet], lm));\n    MHGP11_TRY(num::Rational::from_level(levels[r], lr));\n    MHGP11_TRY(num::Rational::from_level(levels[big_m], lb));\n    MHGP11_TRY(num::Rational::from_level(levels[q], lq));\n    MHGP11_TRY(num::subtract(lm, lr, x));\n    MHGP11_TRY(num::subtract(lb, lq, y));\n    MHGP11_TRY(num::compare(x, y, sign));",
+      "porte": "mhgp11_points_oracle",
+      "note": "rival maximal choisi par la marge en niveau carre l_M - l_Q (regle Q_1 de la v10) au lieu de sqrt(l_M) - sqrt(l_Q) : dates differentes de l'oracle"
+    },
+    {
+      "id": "sans_marge",
+      "fichier": "src/points/hang.cpp",
+      "cherche": "    if (meet <= r) continue;  // terme nul ou negatif : pas un rival effectif",
+      "remplace": "    continue;  // aucun rival : premiere couverture qualifiee",
+      "porte": "mhgp11_points_fixtures",
+      "note": "regle first (premiere couverture qualifiee, sans marge) : le point 0 des cinq points entre a sqrt(100/9) au lieu de 6 (F3)"
+    },
+    {
+      "id": "coupe_ouverte",
+      "fichier": "src/points/settle.cpp",
+      "cherche": "      ok = below >= 0;  // coupe fermee : rayon de naissance <= date",
+      "remplace": "      ok = below > 0;  // coupe ouverte",
+      "porte": "mhgp11_points_fixtures",
+      "note": "egalite date = naissance du parent tranchee comme stricte : le proprietaire du site 0 des quatre sites reste l'enfant (F6)"
+    },
+    {
+      "id": "m_k1_deux",
+      "fichier": "src/points/points.hpp",
+      "cherche": "constexpr u32 qualification(Order k) noexcept { return k == 1 ? 1 : u32{k} + 1; }",
+      "remplace": "constexpr u32 qualification(Order k) noexcept { return u32{k} + 1; }",
+      "porte": "mhgp11_points_fixtures",
+      "note": "m(1) = 2 (divergence des bancs Python avant L3) : les entrees de K = 1 ne sont plus a 0 (F13)"
+    },
+    {
+      "id": "tri_refus_ignore",
+      "fichier": "src/points/internal.hpp",
+      "cherche": "      MHGP11_TRY(less(first[root], first[child], smaller));\n",
+      "remplace": "      static_cast<void>(less(first[root], first[child], smaller));\n",
+      "porte": "mhgp11_points_unit_sort_refusal",
+      "note": "refus d'une comparaison exacte ignore pendant le tri des dates strictes (audit d448b3d03)"
+    }
+  ]
+}

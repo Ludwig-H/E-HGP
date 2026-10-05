@@ -48,14 +48,17 @@ Chaque règle est vérifiable ; `tools/check_style.py` contrôle celles qui se l
 | `supports` | hiérarchie des supports d'ordre K : supports positifs minimaux par boule, comptes dérivés, postordre et assemblage (`SupportHierarchy`) | `tower` |
 | `points` | hiérarchie de points $H^{r}_{K+1}$ : pendaisons et arbre de points | `tower` |
 | `head` | condensation, scores exacts, sélection, étiquettes | `points` |
-| `api` | façade publique `api/api.hpp` et `Session` | `core`, `num`, `sched`, `cloud`, `io`, `index`, `catalogue`, `tower`, `supports` |
+| `api` | façade publique `api/api.hpp` et `Session` | `core`, `num`, `sched`, `cloud`, `io`, `index`, `catalogue`, `tower`, `supports`, `points` |
 
 `cli/` contient un seul exécutable, `mhgp11` (cible `mhgp11_cli`), à paramètre de sortie obligatoire
 `--sortie=full|supports|points|plat` ([contrat des sorties](SORTIES.md)) ; `reference/` l'oracle exact borné en
 Python ; `bench/` les bancs (synthétique, LiDAR, G4) ; `tests/` les portes, par module.
 
-Les modules de la table qui n'ont pas encore de dossier sous `src/` (`points`, `head`) sont planifiés : leur place
-est fixée d'avance, et `tools/check_style.py` ne contrôle que les dossiers présents. Le rattachement des boules et
+Le module de la table qui n'a pas encore de dossier sous `src/` (`head`) est planifié : sa place est fixée d'avance, et
+`tools/check_style.py` ne contrôle que les dossiers présents. Le module `points` existe depuis la tranche S9 :
+incidences fortes tirées du rattachement, qualification, pendaison $H^{r}_{K+1}$ et arbre de points
+(`points::hang`, [hiérarchie de points](HIERARCHIE_POINTS.md)) ; l'index d'ancêtres par pointeurs de saut qu'il emploie
+(`AncestorIndex`) vit dans `tower`. Le rattachement des boules et
 l'arbre d'ordre K seul arrivent dans `tower` à la tranche S3. Le module `supports` existe depuis la tranche S6a :
 supports positifs minimaux $\mathcal{Q}_b$ par boule, fermeture et comptes du lemme G ; son assemblage
 (`SupportHierarchy`, `build_support_hierarchy`) est livré par la tranche S6b ([sorties](SORTIES.md), § 6). Le module
@@ -63,7 +66,8 @@ supports positifs minimaux $\mathcal{Q}_b$ par boule, fermeture et comptes du le
 `--sortie=full`) ; `api` porte à terme les requêtes, les produits, les écrivains des quatre formats et le manifeste.
 Ses dépendances **croissent avec les livraisons**, car `CMakeLists.txt` refuse la configuration dès qu'un module de la
 fermeture d'un module présent manque : de `core` à `tower` pour la façade et `--sortie=full` (S5), puis `supports`
-(S7), `points` (S9) et `head` (S10), chacune ajoutée à la table et à sa copie CMake dans le commit de sa tranche.
+(S7), `points` (S9, `--sortie=points`) et `head` (S10), chacune ajoutée à la table et à sa copie CMake dans le commit
+de sa tranche.
 
 La première préparation de `cloud` est séquentielle et ne dépend pas de
 `sched`. Son résultat possède un stockage privé, exposé par des vues constantes ;

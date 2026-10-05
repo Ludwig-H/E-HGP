@@ -5,8 +5,10 @@
 // sites, avant tout calcul) et le rapport d'etages (temps et pic d'octets reserves, mesures par le pilote seul).
 // Sortie supports (tranche S7) : meme nuage, index et domaine, puis l'arbre d'ordre K seul (build_order, masque 7035 :
 // order_params) et l'assemblage de la hierarchie des supports (build_support_hierarchy), sur le Pool de la Session.
+// Sortie points (tranche S9) : meme arbre d'ordre K seul, puis la hierarchie de points H^r_{K+1} (points::hang, etage
+// output) ; K >= n refuse pour K >= 2 avec K > n, au meme point du parcours (decision K = n de docs/SORTIES.md).
 // Portes : mhgp11_api_session_* (refus, identite des forets avec build_full), mhgp11_cli_full_identity,
-// mhgp11_cli_supports_oracle, mhgp11_cli_supports_scale*.
+// mhgp11_cli_supports_oracle, mhgp11_cli_supports_scale*, mhgp11_cli_points, mhgp11_points_*.
 #include <algorithm>
 #include <variant>
 
@@ -63,8 +65,10 @@ void close_stage(RunReport& report, Stage stage, const Stopwatch& clock, MemoryB
   report.at(stage) = {clock.nanoseconds(), budget.restart_peak()};
 }
 
-// Etages cloud, index et domain, communs aux sorties : nuage prepare, index global, domaine FULL de kmax = k.
-Result<FullDomain> prepare_domain(Session& session, const CloudView& view, Order k, RunReport& report) noexcept {
+// Etages cloud, index et domain, communs aux sorties : nuage prepare, index global, domaine FULL de kmax = k. strict :
+// sortie points, K = n refuse aussi pour K >= 2.
+Result<FullDomain> prepare_domain(Session& session, const CloudView& view, Order k, RunReport& report,
+                                  bool strict = false) noexcept {
   if (k < 1 || k > kMaxOrder) return fail(Reason::parameter_out_of_range);
   MemoryBudget& budget = session.budget();
   budget.restart_peak();
@@ -74,6 +78,7 @@ Result<FullDomain> prepare_domain(Session& session, const CloudView& view, Order
   // FULL exige des sites de poids un (docs/ARCHITECTURE.md, paragraphe 7.3), puis K au plus le nombre de sites.
   if (cloud.value().weight() != cloud.value().sites()) return fail(Reason::multiplicity_unsupported);
   if (k > cloud.value().sites()) return fail(Reason::parameter_out_of_range);
+  if (strict && k >= 2 && k == cloud.value().sites()) return fail(Reason::parameter_out_of_range);
   close_stage(report, Stage::cloud, cloud_clock, budget);
   Stopwatch index_clock;
   Result<GlobalIndex> index = build_index(std::move(cloud.value()), {}, budget);
@@ -106,9 +111,10 @@ struct SupportsParts {
 };
 
 // Etages tree et attach : build_order, dont le balayage du rattachement (attach_ns, diagnostic de build_order) est
-// retire de tree et publie a part ; etage output : build_support_hierarchy. Le pic de build_order va a tree.
-Result<SupportsParts> supports_parts(Session& session, const CloudView& view, Order k, RunReport& report) noexcept {
-  Result<FullDomain> domain = prepare_domain(session, view, k, report);
+// retire de tree et publie a part. Le pic de build_order va a tree.
+Result<OrderTree> order_tree(Session& session, const CloudView& view, Order k, RunReport& report,
+                             bool strict) noexcept {
+  Result<FullDomain> domain = prepare_domain(session, view, k, report, strict);
   if (!domain.ok()) return domain.outcome();
   MemoryBudget& budget = session.budget();
   Stopwatch tree_clock;
@@ -119,12 +125,38 @@ Result<SupportsParts> supports_parts(Session& session, const CloudView& view, Or
   const u64 tree_ns = tree_clock.nanoseconds();
   report.at(Stage::tree) = {tree_ns - std::min(tree_ns, attach_ns), budget.restart_peak()};
   report.at(Stage::attach) = {attach_ns, 0};
+  return tree;
+}
+
+// Etages tree et attach (order_tree), puis output : build_support_hierarchy.
+Result<SupportsParts> supports_parts(Session& session, const CloudView& view, Order k, RunReport& report) noexcept {
+  Result<OrderTree> tree = order_tree(session, view, k, report, false);
+  if (!tree.ok()) return tree.outcome();
+  MemoryBudget& budget = session.budget();
   Stopwatch output_clock;
   Result<supports::SupportHierarchy> hierarchy =
       supports::build_support_hierarchy(tree.value(), budget, &session.pool());
   if (!hierarchy.ok()) return hierarchy.outcome();
   close_stage(report, Stage::output, output_clock, budget);
   return SupportsParts{std::move(tree).take(), std::move(hierarchy).take()};
+}
+
+// Produit de la sortie points : arbre d'ordre K seul et hierarchie de points.
+struct PointsParts {
+  OrderTree tree;
+  points::PointHierarchy points;
+};
+
+// Etages tree et attach (order_tree, K = n refuse a K >= 2), puis output : points::hang.
+Result<PointsParts> points_parts(Session& session, const CloudView& view, Order k, RunReport& report) noexcept {
+  Result<OrderTree> tree = order_tree(session, view, k, report, true);
+  if (!tree.ok()) return tree.outcome();
+  MemoryBudget& budget = session.budget();
+  Stopwatch output_clock;
+  Result<points::PointHierarchy> hanging = points::hang(tree.value(), budget, &session.pool());
+  if (!hanging.ok()) return hanging.outcome();
+  close_stage(report, Stage::output, output_clock, budget);
+  return PointsParts{std::move(tree).take(), std::move(hanging).take()};
 }
 
 }  // namespace
@@ -141,6 +173,16 @@ Result<Product> compute(Session& session, const CloudView& cloud, const Request&
     }
     SupportsParts made = std::move(parts).take();
     return Product(request, std::move(made.tree), std::move(made.hierarchy), session.identity());
+  }
+  if (const PointsRequest* wanted = std::get_if<PointsRequest>(&request)) {
+    Result<PointsParts> parts = guarded([&]() { return points_parts(session, cloud, wanted->k, local); });
+    if (!parts.ok()) return parts.outcome();
+    if (report != nullptr) {
+      for (Stage stage : {Stage::cloud, Stage::index, Stage::domain, Stage::tree, Stage::attach, Stage::output})
+        report->at(stage) = local.at(stage);
+    }
+    PointsParts made = std::move(parts).take();
+    return Product(request, std::move(made.tree), std::move(made.points), session.identity());
   }
   const FullRequest* full = std::get_if<FullRequest>(&request);
   if (full == nullptr) return fail(Reason::parameter_out_of_range);

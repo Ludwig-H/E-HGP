@@ -9,7 +9,7 @@ HDBSCAN tel quel (R0), sur scenes synthetiques gelees ou trames LiDAR.
     python3 bench/points_flat_campaign.py --mode lidar --data DIR ...   (trames : points_manifest.json)
 
 Par scene : export natif (FULL 1..kmax) ; par ordre k :
-  T      pendaison H^r_{k+1} (points_radius, m = k + 1) -> arbre de points (points_flat) ;
+  T      pendaison H^r_{k+1} (points_radius, m = qualification(k)) -> arbre de points (points_flat) ;
   R0     fit public de sklearn HDBSCAN(min_cluster_size = 20, min_samples = k, eom, epsilon 0, alpha 1, racine
          exclue, kd_tree, n_jobs = 1) : labels_ (sortie officielle a mcs 20) ; aux autres mcs et pour 'leaf' (R0L),
          tree_to_labels COMPILE de sklearn sur le meme arbre ; controle tree_to_labels = labels_ au mcs public, sinon
@@ -161,7 +161,7 @@ def one_scene(args, name, xyz, truth):
     for k in args.orders:
         row = dict(lines={}, timing={}, invariants={}, refusals=[])
         t0 = time.monotonic()
-        hanging = prad.hang_margin_radius(data['orders'][k], k + 1, 'margin_r')
+        hanging = prad.hang_margin_radius(data['orders'][k], prad.qualification(k), 'margin_r')
         pt = pf.tower_point_tree(hanging)
         pt.ids = ids
         row['timing']['tower'] = round(time.monotonic() - t0, 3)

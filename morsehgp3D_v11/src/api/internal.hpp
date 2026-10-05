@@ -47,6 +47,23 @@ static_assert(kOrderMask == (kEngineMask & ~(u64{128} | u64{1024} | u64{8192})),
 // Peut lever std::bad_alloc (guarded dans publish). Precondition : provenance controlee.
 [[nodiscard]] std::string supports_manifest(const api::Product& product, const api::Provenance& provenance,
                                             u64 bytes, const io::Digest& sha256);
+// Ecrit la hierarchie de points au format MHGP11PT version 1 (docs/SORTIES.md, paragraphe 7) : en-tete, colonnes
+// alignees sur 8 octets, bourrage nul. Refus : output_unwritable (ecriture), points_invariant (arbre et hierarchie
+// incoherents, sans porte possible sur un produit de compute).
+[[nodiscard]] Outcome write_points(io::FileWriter& out, const OrderTree& tree, const points::PointHierarchy& h) noexcept;
+// Manifeste de la sortie points (docs/SORTIES.md, paragraphe 8) : memes cles d'en-tete, fichier points.mhgp11pt
+// (MHGP11PT, version 1), tree_k_sha256 de l'arbre d'ordre K, comptes recalculables depuis le fichier. Peut lever
+// std::bad_alloc (guarded dans publish). Precondition : provenance controlee.
+[[nodiscard]] std::string points_manifest(const api::Product& product, const api::Provenance& provenance, u64 bytes,
+                                          const io::Digest& sha256);
+// Debut commun des manifestes, jusqu'a la valeur de tree_k_sha256 comprise (schema, sortie, statuts, profil, K,
+// parametres, entrees, fichier) ; le manifeste se termine par les comptes, puis "}\n". Peut lever std::bad_alloc.
+[[nodiscard]] std::string manifest_head(const api::Product& product, const api::Provenance& provenance,
+                                        std::string_view name, std::string_view format, u64 bytes,
+                                        const io::Digest& sha256, const io::Digest& tree);
+// Entier decimal du manifeste. Peut lever std::bad_alloc.
+void manifest_number(std::string& out, u64 value);
+
 // Provenance coherente avec le nuage du produit de `points` points (12 et 4 octets par point, budget declare non nul)
 // et dans sa forme (pas, origine entiere ou absente, decimaux controles) : parameter_out_of_range sinon.
 [[nodiscard]] Outcome check_provenance(const api::Provenance& provenance, u64 points) noexcept;

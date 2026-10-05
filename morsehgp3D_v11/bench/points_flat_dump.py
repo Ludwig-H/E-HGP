@@ -6,7 +6,8 @@
 
 Les exports natifs bruts sont trop gros pour revenir de la VM (3,6 Go pour 36 scenes) ; on publie, par scene et par
 ordre k, ce dont toute selection plate a besoin :
-  - <scene>_k<k>_tower.npz  arbre de points de H^r_{k+1} (pendaison points_radius.hang_margin_radius, m = k + 1,
+  - <scene>_k<k>_tower.npz  arbre de points de H^r_{k+1} (pendaison points_radius.hang_margin_radius,
+                            m = qualification(k),
                             puis points_flat.tower_point_tree) : au plus 2n - 1 blocs, plateaux atomiques deja
                             tranches EXACTEMENT sur la VM ; niveaux exacts (--exact, table de rationnels) ou flottants
                             avec la borne rigoureuse de leur erreur relative ;
@@ -64,11 +65,11 @@ def dump_scene(args, name, xyz, data, exact):
         order = data['orders'][k]
         row = dict(full_nodes=int(order.size))
         t0 = time.monotonic()
-        hanging = prad.hang_margin_radius(order, k + 1, 'margin_r')
+        hanging = prad.hang_margin_radius(order, prad.qualification(k), 'margin_r')
         pt = pf.tower_point_tree(hanging)
         pt.ids = ids.astype(np.int64)
         path = args.out / ('%s_k%d_tower.npz' % (name, k))
-        pt.save(path, meta=dict(scene=name, k=k, m=k + 1, rule='margin_r', exact=exact), exact=exact)
+        pt.save(path, meta=dict(scene=name, k=k, m=prad.qualification(k), rule='margin_r', exact=exact), exact=exact)
         row.update(tower_blocks=pt.blocks(), tower_plateaus=len(pt.levels), delayed=hanging.extra.get('delayed'),
                    tower_seconds=round(time.monotonic() - t0, 3), tower_bytes=path.stat().st_size)
         tree, labels, info = sklearn_tree(xyz, k)

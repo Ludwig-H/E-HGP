@@ -151,6 +151,14 @@ entrée et même K. L'arbre d'ordre K seul y est construit au masque 7 035 (16 3
 contrôle tout le fichier ; la porte `mhgp11_cli_supports_oracle` exige qu'il égale le vidage canonique de l'oracle S1
 sur 963 ordres. `bench/sorties_g4.py` prépare la mesure appariée de la règle de L2 (§ 11 du contrat).
 
+Commitée localement le 5 octobre 2026 (tranche S9, L3), qualification G4 en attente : `mhgp11 --sortie=points`. Le
+module `points` porte, décision par décision, la chaîne Python qualifiée de la [hiérarchie de points](docs/HIERARCHIE_POINTS.md)
+($H^{r}_{K+1}$, $m(1)=1$, $\kappa=1$) : incidences fortes tirées du rattachement, qualification, rival maximal, propriétaire
+et plancher exacts (table des racines de `num`, puis repli exact), arbre de points à plateaux atomiques. L'exécutable
+publie `points.mhgp11pt` (`MHGP11PT` version 1, § 7 du [contrat](docs/SORTIES.md)) et refuse $K\geq n$ dès $K\geq 2$. Il
+est identique site par site à `bench/points_radius.py` sur le même export (porte `long` `mhgp11_points_vs_python`) et
+à l'oracle de la définition (`mhgp11_points_oracle`).
+
 **Clause de report de `plat`.** La livraison L4 peut être reportée, par une décision écrite de l'utilisateur,
 consignée ici et dans une note aux auditeurs, tant que le § 3.4 de la [sortie plate](docs/SORTIE_PLATE.md) porte la
 mention « Ouvert » (règle qui garde les séparations fugaces sans déchiqueter les objets à lignes de balayage). Le

@@ -6,12 +6,12 @@
     python3 bench/points_flat_gate.py --reference --work DIR --out FICHIER.json   # essai local, PAS une qualification
 
 Cote banc : export natif (ou, avec --reference, l'ordre du banc construit sur les coupes de la definition), pendaison
-H^r_{k+1} (points_radius, m = k + 1), arbre de points, condensation, selection, labels ; cote HDBSCAN : arbre du lien
-simple de sklearn (min_samples = k) relu exactement, meme tete. L'oracle recalcule tout depuis la definition, avec sa
-propre arithmetique (parties sans facteur carre par factorisation), et enumere les antichaines. Comparaison exacte
-des labels canoniques (plus petit PointId du cluster, -1 = bruit), pour k <= 4, mcs 2, 3, 4, EOM z = 1, 2 et 3,
-feuilles, des deux cotes. Codes : 0 conforme ; 1 desaccord ; 2 refus d'entree ; 3 plancher non atteint, fixture
-fausse ou mutant non tue.
+H^r_{k+1} (points_radius, m = qualification(k) : 1 a k = 1), arbre de points, condensation, selection, labels ;
+cote HDBSCAN : arbre du lien simple de sklearn (min_samples = k) relu exactement, meme tete. L'oracle recalcule tout
+depuis la definition, avec sa propre arithmetique (parties sans facteur carre par factorisation), et enumere les
+antichaines. Comparaison exacte des labels canoniques (plus petit PointId du cluster, -1 = bruit), pour k <= 4,
+mcs 2, 3, 4, EOM z = 1, 2 et 3, feuilles, des deux cotes. Codes : 0 conforme ; 1 desaccord ; 2 refus d'entree ;
+3 plancher non atteint, fixture fausse ou mutant non tue.
 """
 import argparse
 from fractions import Fraction
@@ -114,7 +114,7 @@ class Bench(object):
         orders, ids = self.orders(points, name, kmax)
         out = self.cache[key] = {}
         for k in range(1, kmax + 1):
-            hang = prad.hang_margin_radius(orders[k], k + 1)
+            hang = prad.hang_margin_radius(orders[k], prad.qualification(k))
             pt = pf.tower_point_tree(hang, split_entries=mutant == 'entrees_separees', binarize=mutant == 'binarise')
             pt.ids = ids
             tree, _ = sklearn_tree(points, k)

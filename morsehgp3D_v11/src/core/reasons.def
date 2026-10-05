@@ -64,3 +64,7 @@ MHGP11_REASON(environment_selftest, invariant_violated, api)
 // somme de radicaux (num::RadicalSum, num::Big) : signe non separe par les encadrements jusqu'a 2^-8192, entier au-dela
 // de la capacite de Big (16384 + 1024 bits), ou plus de termes que le budget declare ; jamais une egalite supposee
 MHGP11_REASON(radical_sign_budget, resource_exhausted, num)
+// hierarchie de points H^r_{K+1} (tranche S9) : incidence forte, qualification, depart, proprietaire, rang plancher ou
+// arbre de points incoherents (site sans incidence, jamais qualifie a K < n, proprietaire non vivant, plancher non
+// certifie, fusions hors de l'ordre des rangs)
+MHGP11_REASON(points_invariant, invariant_violated, points)

@@ -353,7 +353,14 @@ contrat des points ci-dessus ne change pas : ce paragraphe fige deux conventions
   - `bench/points_flat_dump.py:67`, qui écrit aussi $m=k+1$ dans les métadonnées `.npz` (`:71`) ;
   - `bench/points_campaign.py:135-138`, pour `first`, `margin` et `margin_r`.
 
-  Les deux derniers n'emploient $m=2$ à $k=1$ que si `--orders` contient 1 ; leur défaut est `2,3,5,10`. Ces bancs
-  seront alignés sur $m(1)=1$, et la fixture `F13_identite_k1` de `points_flat_gate.py` rejouée, avant tout
-  différentiel natif contre Python (livraison L3). D'ici là, leurs résultats à $k=1$ portent sur $m=2$ et ne se
-  comparent pas au port natif.
+  Les deux derniers n'emploient $m=2$ à $k=1$ que si `--orders` contient 1 ; leur défaut est `2,3,5,10`.
+
+  **Alignés le 5 octobre 2026** (tranche S9, avant tout différentiel natif) : les quatre bancs appellent
+  `points_radius.qualification(k)` ($1$ à $k=1$, $k+1$ sinon), et `points_flat_dump.py` publie ce $m$ dans ses
+  métadonnées. La fixture `F13_identite_k1` de `points_flat_gate.py` a été rejouée sous $m(1)=1$ : conforme sur ses
+  24 nuages, en ordre de référence Python comme sur l'export natif (rapport `impl_s9.md`). Les résultats antérieurs à
+  $k=1$ portent sur $m=2$ et ne se comparent pas au port natif.
+- **Port natif** (tranche S9, `src/points/`, `--sortie=points`, format `MHGP11PT` de [SORTIES.md](SORTIES.md), § 7) :
+  identique site par site à `hang_margin_radius(order, m(K))` et à `tower_point_tree` sur le même `MHGP11PH` (porte
+  `mhgp11_points_vs_python`), et à l'oracle de la définition (`mhgp11_points_oracle`). $K\geq n$ est refusé dès
+  $K\geq 2$ (SORTIES.md, § 3, étape 6).

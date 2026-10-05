@@ -117,3 +117,12 @@ foreach(case "ng00;sites=39885 k=5 noeuds=576371 boules=789886 supports=789889 e
                      --bits ${MHGP11_COORD_BITS} --data=lidar_${frame} --k=5 --fils=1,4 --min-balls=500000
                      --min-extended=50 LINE "cli_supports_scale_verdict conforme ${counts}" LABELS lidar TIMEOUT 3600)
 endforeach()
+
+# ---- Sortie points (tranche S9) : points.mhgp11pt (MHGP11PT version 1) relu par le lecteur officiel en lecture exacte
+# (read_points : plancher et drapeau strict certifies, plateaux strictement croissants, entree de chaque site a un
+# plateau de sa date, comptes du manifeste recomptes) ; tree_k_sha256 egal a --sortie=supports (et full sur les
+# temoins) a meme entree et meme K ; W1 et W4, permutation, reetiquetage ; refus K = n a K >= 2 (n = 2, 5, 8 :
+# parameter_out_of_range a l'etape compute, ni D ni D.pending), K = 1 admis a n = 1 et 2 ; plat reste refuse.
+mhgp11_python_gate(mhgp11_cli_points 0 cli_points.py --cli ${mhgp11_cli} --bits ${MHGP11_COORD_BITS}
+                   LINE "cli_points_verdict conforme cas=52 appels=267 refus=4 retardes=105 plateaux=242"
+                   LABELS fast TIMEOUT 600)

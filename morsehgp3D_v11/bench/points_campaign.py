@@ -132,10 +132,10 @@ def one_scene(args, item):
         order = data['orders'][k]
         row = dict(nodes=order.size, incidences=int(len(order.inc_rank)))
         builds = dict(core=lambda: ph.hang_core(order), cover=lambda: ph.hang_first(order, 1, 'cover'),
-                      first=lambda: ph.hang_first(order, k + 1, 'first'),
+                      first=lambda: ph.hang_first(order, prad.qualification(k), 'first'),
                       margin1=lambda: ph.hang_margin(order, 1, 'margin1'),
-                      margin=lambda: ph.hang_margin(order, k + 1, 'margin'),
-                      margin_r=lambda: prad.hang_margin_radius(order, k + 1, 'margin_r'))
+                      margin=lambda: ph.hang_margin(order, prad.qualification(k), 'margin'),
+                      margin_r=lambda: prad.hang_margin_radius(order, prad.qualification(k), 'margin_r'))
         t0 = time.monotonic()
         tree = ph.hdbscan_tree(xyz, k)
         hdb = ph.evaluate_linkage(tree, len(xyz), obj, void, objects)

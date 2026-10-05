@@ -1,8 +1,8 @@
 // Executable mhgp11 : sortie parametree de la v11 (docs/SORTIES.md), au-dessus de la facade api (seul en-tete
-// inclus). Tranches S5 (--sortie=full) et S7 (--sortie=supports) ; points et plat sont refuses
-// (parameter_out_of_range) jusqu'a la livraison de leur tranche.
+// inclus). Tranches S5 (--sortie=full), S7 (--sortie=supports) et S9 (--sortie=points) ; plat est refuse
+// (parameter_out_of_range) jusqu'a la livraison de sa tranche.
 //
-//   mhgp11 --sortie=<full|supports> --points=<x.u32le> --ids=<ids.u32le> --dossier=<D> --k=<K>
+//   mhgp11 --sortie=<full|supports|points> --points=<x.u32le> --ids=<ids.u32le> --dossier=<D> --k=<K>
 //          [--fils=<W>] [--budget=<octets>] [--pas=<decimal>] [--origine=<x,y,z>]
 //
 // Ordre deterministe des refus, les neuf etapes du paragraphe 3 de docs/SORTIES.md ; la cle stage de la ligne de
@@ -19,7 +19,8 @@
 //   5. a 7. (stage compute, api::compute) : nuage dans l'ordre de prepare_cloud (empty_input,
 //      coordinate_out_of_domain, memory_budget, duplicate_point_id, memory_budget), positions repetees
 //      (multiplicity_unsupported), K > n (parameter_out_of_range, connu seulement apres la preparation du nuage),
-//      calcul (supports : support_shell_capacity pour l'appel entier si une coquille etendue depasse 24 sites) ;
+//      calcul (supports : support_shell_capacity pour l'appel entier si une coquille etendue depasse 24 sites ;
+//      points : K = n refuse a K >= 2, parameter_out_of_range, puis radical_sign_budget, points_invariant) ;
 //   8. ecriture et publication (stage publish, api::publish) : output_unwritable, output_conflict ;
 //   9. apres la publication : fin de session (stage close, api::finish : budget_not_released, code 3), puis ligne
 //      d'etat sur la sortie standard (stage report : output_unwritable, code 2). Chacun retire le dossier publie
@@ -33,8 +34,8 @@
 // fichier rendent une erreur d'ecriture (EPIPE, ENOSPC, EFBIG) et un refus, jamais un arret par signal qui laisserait
 // un D.pending orphelin. Codes de sortie : 0 conforme, 2 refus, 3 invariant viole.
 // Portes : mhgp11_cli_contract, mhgp11_cli_full_identity, mhgp11_cli_full_determinism, mhgp11_cli_full_relabel,
-// mhgp11_cli_supports_oracle, mhgp11_cli_supports_scale*, mhgp11_cli_supports_lidar_* ; mutants de
-// tests/mutants/cli.json.
+// mhgp11_cli_supports_oracle, mhgp11_cli_supports_scale*, mhgp11_cli_supports_lidar_*, mhgp11_cli_points ; mutants
+// de tests/mutants/cli.json.
 #include <fcntl.h>
 #include <signal.h>
 #include <sys/stat.h>
@@ -142,8 +143,9 @@ const char* parse(int argc, char** argv, Options& o) noexcept {
   if (const char* why = read_arguments(argc, argv, raw)) return why;
   if (!raw.seen[kSortie]) return "option --sortie absente";
   const std::string_view output = raw.value[kSortie];
-  if (output == "points" || output == "plat") return "sortie non livree dans cette tranche";
+  if (output == "plat") return "sortie non livree dans cette tranche";
   if (output == api::output_name(api::OutputKind::supports)) o.output = api::OutputKind::supports;
+  else if (output == api::output_name(api::OutputKind::points)) o.output = api::OutputKind::points;
   else if (output != api::output_name(api::OutputKind::full)) return "sortie inconnue";
   for (std::size_t slot = 0; slot < kKnown.size(); ++slot)
     if (raw.seen[slot] && kKnown[slot].plat_only) return "option propre a la sortie plat";
@@ -210,11 +212,21 @@ struct Run {
   u32 workers = 0, sites = 0;
   u64 nodes = 0, births = 0, edges = 0;          // full : totaux des ordres 1 a K
   u64 balls = 0, supports = 0, prior = 0;        // supports : noeuds (nodes), boules, supports, branches
+  u64 levels = 0, plateaus = 0, blocks = 0, delayed = 0;  // points : noeuds (nodes), rangs, plateaux, blocs, retards
   api::Publication publication;  // issue, etat du dossier et empreinte du manifeste de D publie
 };
 
 void tally(const api::Product& product, Run& run) noexcept {
   run.sites = product.domain().index().cloud().sites();
+  if (product.kind() == api::OutputKind::points) {
+    const points::PointHierarchy& h = product.points();
+    run.nodes = product.order_tree().forest().nodes().size();
+    run.levels = h.levels().size();
+    run.plateaus = h.tree().plateau_t().size();
+    run.blocks = h.tree().block_plateau().size();
+    run.delayed = h.stats().delayed;
+    return;
+  }
   if (product.kind() == api::OutputKind::supports) {
     run.nodes = product.order_tree().forest().nodes().size();
     run.balls = product.hierarchy().balls().size();
@@ -249,6 +261,7 @@ api::Publication execute(const Options& o, io::OutputDirectory& directory, Run& 
     run.step = Step::compute;
     const api::CloudView view{in.x.span(), in.y.span(), in.z.span(), in.ids.span()};
     const api::Request request = o.output == api::OutputKind::supports ? api::Request(api::SupportsRequest{o.k})
+                                 : o.output == api::OutputKind::points ? api::Request(api::PointsRequest{o.k})
                                                                          : api::Request(api::FullRequest{o.k});
     Result<api::Product> product = api::compute(session, view, request, &run.report);
     if (!product.ok()) return {product.outcome()};
@@ -333,8 +346,12 @@ bool success_line(const Options& o, const Run& run) noexcept {
   }
   const auto manifest = io::to_hex(run.publication.manifest_sha256);
   // counts : full, totaux des ordres 1 a K (noeuds, naissances, aretes) ; supports, arbre d'ordre K et hierarchie
-  // (noeuds, boules, supports, branches publiees).
-  if (run.output == api::OutputKind::supports)
+  // (noeuds, boules, supports, branches publiees) ; points, arbre d'ordre K et hierarchie de points (noeuds, rangs
+  // references, plateaux, blocs, sites retardes), egaux au manifeste.
+  if (run.output == api::OutputKind::points)
+    std::printf("},\"counts\":{\"nodes\":%llu,\"levels\":%llu,\"plateaus\":%llu,\"blocks\":%llu,\"delayed\":%llu}",
+                ull(run.nodes), ull(run.levels), ull(run.plateaus), ull(run.blocks), ull(run.delayed));
+  else if (run.output == api::OutputKind::supports)
     std::printf("},\"counts\":{\"nodes\":%llu,\"balls\":%llu,\"supports\":%llu,\"prior\":%llu}", ull(run.nodes),
                 ull(run.balls), ull(run.supports), ull(run.prior));
   else
