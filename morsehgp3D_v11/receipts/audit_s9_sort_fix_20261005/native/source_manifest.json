@@ -1,0 +1,32 @@
+{
+  "snapshot_utc": "20261005T171040Z",
+  "developer_worktree": "/workspaces/E-HGP/build/v11-impl-l3",
+  "base_head": "451301787c7e02b8f5e1a4c08064275b6af6de1e",
+  "status": "WIP_non_qualifie",
+  "files": {
+    "morsehgp3D_v11/src/points/internal.hpp": {
+      "sha256": "cfb4de6a99309262d37c7819a32b93fc14a0f89d4b9021a88e9770a0e170356e",
+      "bytes": 9087,
+      "lines": 184,
+      "same_after_capture": true
+    },
+    "morsehgp3D_v11/src/points/point_tree.cpp": {
+      "sha256": "f85d5dad50b3353c50207047cb02e2f48dc5fda801aaecd3fbbe9dc776e8c60c",
+      "bytes": 8585,
+      "lines": 190,
+      "same_after_capture": true
+    },
+    "morsehgp3D_v11/tests/points/points_test.cpp": {
+      "sha256": "be3791aa38cb0c923bbfe394dce17422382549d8364f087fc0793f46c996bdb1",
+      "bytes": 8897,
+      "lines": 213,
+      "same_after_capture": true
+    },
+    "morsehgp3D_v11/tests/points/tests.cmake": {
+      "sha256": "fab2d65223c63c72f62dd9f2bffe631e83a6a84607f8c6ee17d02c6ce296175a",
+      "bytes": 5565,
+      "lines": 74,
+      "same_after_capture": true
+    }
+  }
+}

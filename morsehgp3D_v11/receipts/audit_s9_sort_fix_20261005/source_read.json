@@ -1,0 +1,26 @@
+{
+  "kind": "lecture_de_propagation_et_destruction_pas_test_natif",
+  "pin_local": "451301787c7e02b8f5e1a4c08064275b6af6de1e",
+  "files": {
+    "morsehgp3D_v11/src/points/settle.cpp": {
+      "sha256": "a7d7c6c32f9ca369d9b1f515a4add1dcb73ae8abc3a06efa7a1da0ba3ea9617d",
+      "bytes": 8758
+    },
+    "morsehgp3D_v11/src/api/compute.cpp": {
+      "sha256": "cb8125869d3dac396ef4f000b53afacc315fc615f5839eea716ab96b48cf241e",
+      "bytes": 9500
+    },
+    "morsehgp3D_v11/cli/mhgp11.cpp": {
+      "sha256": "b7d664aa98d982ba4bea8fd713731fc082b60f92a87f74bb88206333fd1f6e14",
+      "bytes": 21884
+    },
+    "morsehgp3D_v11/src/core/buffer.hpp": {
+      "sha256": "3f520dd045226ff115ea67b26859b43ec7415e855ef1c8f4542e8217414c7940",
+      "bytes": 11306
+    },
+    "morsehgp3D_v11/src/core/status.hpp": {
+      "sha256": "e6004beb5ec4e78fb2b582004f4122611602809d360ff9f1b3bf4679348f6594",
+      "bytes": 8148
+    }
+  }
+}

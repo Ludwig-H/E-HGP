@@ -1,0 +1,33 @@
+{
+  "script_sha256": "26c69cb2a0d13f8f0f8805837fc94e89753d6ed90ee37b7e2149e7fc90b80bf9",
+  "runs": [
+    {
+      "argv": [
+        "python3",
+        "-S",
+        "-B",
+        "/workspaces/E-HGP/build/v11-audit-geant-native-20261005/build/native_evidence/s9_sort_fix_20261005T171040Z/heap_sort_port.py"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "seconds": 9.114017,
+      "output": "heap_port.json",
+      "sha256": "b334def84df478cbed3d9260a3b1945f9dabaf6d77dbe29b2c3a218fc5a04f19"
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "-S",
+        "-B",
+        "/workspaces/E-HGP/build/v11-audit-geant-native-20261005/build/native_evidence/s9_sort_fix_20261005T171040Z/heap_sort_port.py"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "seconds": 8.330976,
+      "output": "heap_port_opt.json",
+      "sha256": "b334def84df478cbed3d9260a3b1945f9dabaf6d77dbe29b2c3a218fc5a04f19"
+    }
+  ],
+  "normal_O_identical": true
+}

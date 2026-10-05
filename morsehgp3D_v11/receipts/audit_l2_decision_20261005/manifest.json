@@ -1,0 +1,183 @@
+{
+  "gcp_calls": 0,
+  "native_runs": 0,
+  "observed_utc": "2026-10-05T17:19:06.721660+00:00",
+  "published": {
+    "a_original_receipt_path": "/workspaces/.ehgp-sessions/v11.20261005.claudequalA/receipt.json",
+    "base": "morsehgp3D_v11/receipts/developpement_20261005/qualification_sorties/",
+    "commit": "484fb98ee7f3e64ab9965b1b3beb180608129beb",
+    "sha256sums_sha256": "920c945d4161dfcbb36690329852205d35c1d8e239f0aa46834e0d77faccefa1"
+  },
+  "schema": "ehgp.v11.audit.g4_long_measure_snapshot.v1",
+  "sessions": [
+    {
+      "done": "3",
+      "exact_plan": "{\n  \"schema\": \"ehgp.v11.session_plan.v1\",\n  \"note\": \"Qualification L1 + L2 de la sortie parametree (Claude, 5 octobre 2026), commit b319efc84 : portes de label long seules, Release u21 (identites K10 a l'echelle et sur trame).\",\n  \"python_packages\": \"none\",\n  \"default_build\": false,\n  \"results_cap_bytes\": 134217728,\n  \"commands\": [\n    {\n      \"name\": \"matrice\",\n      \"timeout_seconds\": 2200,\n      \"argv\": [\n        \"python3\",\n        \"{src}/morsehgp3D_v11/tools/g4_matrix.py\",\n        \"--src\",\n        \"{src}\",\n        \"--out\",\n        \"{out}\",\n        \"--data\",\n        \"{data}\",\n        \"--work\",\n        \"{build}/matrix\",\n        \"--budget-seconds\",\n        \"2100\",\n        \"--only\",\n        \"release_long\"\n      ]\n    }\n  ]\n}",
+      "kind": "long",
+      "local_session_path": "/workspaces/.ehgp-sessions/v11.20261005.claudequall",
+      "published_summary_name": "matrix_summary.json",
+      "receipt_fields": {
+        "backend": "reference_cpu",
+        "closing_generation": "2026-10-05T09:01:53.777-07:00",
+        "closure": "stopped",
+        "commands": [
+          {
+            "exit_code": "1",
+            "index": "0",
+            "max_rss_kb": "6246844",
+            "name": "matrice",
+            "status": "failed",
+            "timeout_seconds": "2200",
+            "wall_seconds": "2100.470"
+          }
+        ],
+        "commit": "b319efc8477fec234afc0b31e86f8a43e3023641",
+        "errors": [],
+        "evidence_grade": "pushed_commit",
+        "generation": "2026-10-05T09:01:53.777-07:00",
+        "observed_after": {
+          "lastStartTimestamp": "2026-10-05T09:01:53.777-07:00",
+          "lastStopTimestamp": "2026-10-05T09:40:47.367-07:00",
+          "name": "ehgp-v7-3b1d496aed430749ea7e049f",
+          "status": "TERMINATED"
+        },
+        "oslogin_key_removed": true,
+        "overflow": {
+          "evicted": [],
+          "truncated_streams": []
+        },
+        "package_sha256": "9531ff2a108981bea0999ed6c3f13cde7b5a3f13f5b667a1df9e31e23f7ffac2",
+        "plan_sha256": "5f886435ca435f8a3a04be5ed0cc9c6d75b62a4ad4ad444f7d33717c71242b01",
+        "pre_start_generation": "2026-10-05T08:21:46.155-07:00",
+        "private_key_deleted": true,
+        "public_status": "not_claimed",
+        "reserve_released": true,
+        "results_bytes": 35848,
+        "results_expanded_bytes": 222473,
+        "results_sha256": "5524402b9d9f48d047fda43ca679af68cb03de86619c62b5756a966e87bee080",
+        "results_skipped_members": [],
+        "results_verified": true,
+        "schema": "ehgp.v11.session_receipt.v1",
+        "source": null,
+        "source_kind": "commit",
+        "start_certified": true,
+        "status": "failed_remote",
+        "target": {
+          "instance": "ehgp-v7-3b1d496aed430749ea7e049f",
+          "project": "devpod-gpu-exploration",
+          "zone": "us-central1-c"
+        },
+        "targeted_shutdown_certified": true,
+        "warnings": [],
+        "worker_exit_code": 1,
+        "worker_outcome": "exited",
+        "worker_plan_sha256": "28eaf5cdc69ba5515ced80308a0d38438802efae66097c6acba0a73867f54817"
+      },
+      "receipt_sha256": "7752b55b0ff35ed4676fcab233d1e82ff0aae91639a7e1082dde1ff9ce37ea2b",
+      "session": "v11.20261005.claudequall",
+      "summary_member": "results/cmd/000_matrice/files/matrix/summary.json",
+      "summary_sha256": "42f85f52ac7d3be87a9b0d39754e3f7c2c4ca486ac29ddf4d5c09037ad7141cc"
+    },
+    {
+      "done": "0",
+      "exact_plan": "{\n  \"schema\": \"ehgp.v11.session_plan.v1\",\n  \"note\": \"Mesure appariee de la regle de L2 (Claude, 5 octobre 2026), commit b319efc84 : FULL 16379 contre --sortie=supports 7035, trames ng00-02, W1 et W48, trois prises, ng00 a K10 descriptif ; puis le complement W48 de l'audit 4acbae533 (fragment w48_plan_fragment.json : ng02 puis ng00, 14 appels chacun).\",\n  \"python_packages\": \"none\",\n  \"default_build\": true,\n  \"results_cap_bytes\": 134217728,\n  \"commands\": [\n    {\n      \"name\": \"mesure_l2\",\n      \"timeout_seconds\": 900,\n      \"argv\": [\n        \"python3\",\n        \"{src}/morsehgp3D_v11/bench/sorties_g4.py\",\n        \"--cli\",\n        \"{build}/mhgp11\",\n        \"--data-dir\",\n        \"{data}\",\n        \"--fils\",\n        \"1,48\",\n        \"--prises\",\n        \"3\",\n        \"--k10\",\n        \"ng00\",\n        \"--commit\",\n        \"b319efc84\",\n        \"--work\",\n        \"{build}/mesure\",\n        \"--out\",\n        \"{out}/sorties_g4.json\",\n        \"--timeout\",\n        \"850\"\n      ]\n    },\n    {\n      \"name\": \"supports_w48_ng02\",\n      \"timeout_seconds\": 300,\n      \"argv\": [\n        \"python3\",\n        \"{src}/morsehgp3D_v11/tests/cli/cli_supports_scale.py\",\n        \"--cli\",\n        \"{build}/mhgp11\",\n        \"--bits\",\n        \"21\",\n        \"--data=lidar_ng02\",\n        \"--k=5\",\n        \"--fils=1,4,48\",\n        \"--min-balls=500000\",\n        \"--min-extended=50\"\n      ]\n    },\n    {\n      \"name\": \"supports_w48_ng00\",\n      \"timeout_seconds\": 300,\n      \"argv\": [\n        \"python3\",\n        \"{src}/morsehgp3D_v11/tests/cli/cli_supports_scale.py\",\n        \"--cli\",\n        \"{build}/mhgp11\",\n        \"--bits\",\n        \"21\",\n        \"--data=lidar_ng00\",\n        \"--k=5\",\n        \"--fils=1,4,48\",\n        \"--min-balls=500000\",\n        \"--min-extended=50\"\n      ]\n    }\n  ]\n}",
+      "kind": "measure",
+      "local_session_path": "/workspaces/.ehgp-sessions/v11.20261005.claudequalmesure",
+      "published_summary_name": "sorties_g4.json",
+      "receipt_fields": {
+        "backend": "reference_cpu",
+        "closing_generation": "2026-10-05T09:42:55.795-07:00",
+        "closure": "stopped",
+        "commands": [
+          {
+            "exit_code": "0",
+            "index": "0",
+            "max_rss_kb": "2668856",
+            "name": "mesure_l2",
+            "status": "ok",
+            "timeout_seconds": "900",
+            "wall_seconds": "291.875"
+          },
+          {
+            "exit_code": "0",
+            "index": "1",
+            "max_rss_kb": "1027580",
+            "name": "supports_w48_ng02",
+            "status": "ok",
+            "timeout_seconds": "300",
+            "wall_seconds": "30.132"
+          },
+          {
+            "exit_code": "0",
+            "index": "2",
+            "max_rss_kb": "980072",
+            "name": "supports_w48_ng00",
+            "status": "ok",
+            "timeout_seconds": "300",
+            "wall_seconds": "30.241"
+          }
+        ],
+        "commit": "b319efc8477fec234afc0b31e86f8a43e3023641",
+        "errors": [],
+        "evidence_grade": "pushed_commit",
+        "generation": "2026-10-05T09:42:55.795-07:00",
+        "observed_after": {
+          "lastStartTimestamp": "2026-10-05T09:42:55.795-07:00",
+          "lastStopTimestamp": "2026-10-05T09:53:46.213-07:00",
+          "name": "ehgp-v7-3b1d496aed430749ea7e049f",
+          "status": "TERMINATED"
+        },
+        "oslogin_key_removed": true,
+        "overflow": {
+          "evicted": [],
+          "truncated_streams": []
+        },
+        "package_sha256": "9531ff2a108981bea0999ed6c3f13cde7b5a3f13f5b667a1df9e31e23f7ffac2",
+        "plan_sha256": "6810edeb451e85f69d58200f105d480270654ac4a78ae7f960232c7c7d367e8d",
+        "pre_start_generation": "2026-10-05T09:01:53.777-07:00",
+        "private_key_deleted": true,
+        "public_status": "not_claimed",
+        "reserve_released": true,
+        "results_bytes": 27958,
+        "results_expanded_bytes": 125065,
+        "results_sha256": "99124d1a56e692208d5d3b1053ae3f4c9235cc93db52b19eb3d8cc213827c96c",
+        "results_skipped_members": [],
+        "results_verified": true,
+        "schema": "ehgp.v11.session_receipt.v1",
+        "source": null,
+        "source_kind": "commit",
+        "start_certified": true,
+        "status": "completed",
+        "target": {
+          "instance": "ehgp-v7-3b1d496aed430749ea7e049f",
+          "project": "devpod-gpu-exploration",
+          "zone": "us-central1-c"
+        },
+        "targeted_shutdown_certified": true,
+        "warnings": [],
+        "worker_exit_code": 0,
+        "worker_outcome": "exited",
+        "worker_plan_sha256": "d073bb5b497a4deb50dbc1b7c9c9fc927a1afbaf67575161c6a9f5ebdfdeb8d8"
+      },
+      "receipt_sha256": "78a53fd377cacf492047aad7f8bbd3cacb3dfe8cd94bab78cefe4624a1d49876",
+      "session": "v11.20261005.claudequalmesure",
+      "summary_member": "results/cmd/000_mesure_l2/files/sorties_g4.json",
+      "summary_sha256": "1813a4d690144f8eb42d7a9cfa54d5eb1e56b6f7ce38c3b48847f562b7d8e3c8",
+      "w48": [
+        {
+          "exact_stdout": "cli_supports_scale_verdict conforme sites=45845 k=5 noeuds=609376 boules=832386 supports=832394 etendues=354 multiples=8 branches=610022 kparties=3189636 cofaces=471577 appels=14\ncli_supports_scale_ok controles=52\n",
+          "frame": "ng02",
+          "member": "results/cmd/001_supports_w48_ng02/stdout",
+          "sha256": "a3cedb38cc5d2d821e6ef99d8bd0542b9b17bd2f2084543974b143c27c6dfc8f"
+        },
+        {
+          "exact_stdout": "cli_supports_scale_verdict conforme sites=39885 k=5 noeuds=576371 boules=789886 supports=789889 etendues=141 multiples=3 branches=576483 kparties=3034691 cofaces=449011 appels=14\ncli_supports_scale_ok controles=52\n",
+          "frame": "ng00",
+          "member": "results/cmd/002_supports_w48_ng00/stdout",
+          "sha256": "3a60ca57bfc9f9d3c2b579ffd9e7c6fe3a3bc56c2fd2f5e0518b03b23bce76ee"
+        }
+      ]
+    }
+  ],
+  "source_commit": "b319efc8477fec234afc0b31e86f8a43e3023641"
+}

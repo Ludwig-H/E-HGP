@@ -1,0 +1,50 @@
+[
+  {
+    "command": [
+      "/home/codespace/.python/current/bin/python3",
+      "morsehgp3D_v11/receipts/audit_s9_sort_fix_20261005/replay.py"
+    ],
+    "optimized": false,
+    "proof": "sort_fix",
+    "returncode": 0,
+    "stderr": "",
+    "stdout": "audit_s9_sort_fix: hashes=ok immediate_refusal_model=ok source_correction=favorable native_runs=0 gcp_calls=0\n"
+  },
+  {
+    "command": [
+      "/home/codespace/.python/current/bin/python3",
+      "-O",
+      "morsehgp3D_v11/receipts/audit_s9_sort_fix_20261005/replay.py"
+    ],
+    "optimized": true,
+    "proof": "sort_fix",
+    "returncode": 0,
+    "stderr": "",
+    "stdout": "audit_s9_sort_fix: hashes=ok immediate_refusal_model=ok source_correction=favorable native_runs=0 gcp_calls=0\n"
+  },
+  {
+    "command": [
+      "/home/codespace/.python/current/bin/python3",
+      "morsehgp3D_v11/receipts/audit_s9_sort_fix_20261005/math/replay.py",
+      "/workspaces/E-HGP"
+    ],
+    "optimized": false,
+    "proof": "math_delta",
+    "returncode": 0,
+    "stderr": "",
+    "stdout": "{\"F2_groups_at_level1\":[[0,1],[4,5]],\"F6_closed_cut\":true,\"F6_date\":[\"2\",\"18\",\"8\"],\"F6_owner_birth\":\"8\",\"F6_owner_cover\":[0,1,3],\"native_executed\":false,\"pin\":\"451301787c7e02b8f5e1a4c08064275b6af6de1e\",\"scope\":\"two newly graved m1 fixture expectations from exact Definition\"}\n"
+  },
+  {
+    "command": [
+      "/home/codespace/.python/current/bin/python3",
+      "-O",
+      "morsehgp3D_v11/receipts/audit_s9_sort_fix_20261005/math/replay.py",
+      "/workspaces/E-HGP"
+    ],
+    "optimized": true,
+    "proof": "math_delta",
+    "returncode": 0,
+    "stderr": "",
+    "stdout": "{\"F2_groups_at_level1\":[[0,1],[4,5]],\"F6_closed_cut\":true,\"F6_date\":[\"2\",\"18\",\"8\"],\"F6_owner_birth\":\"8\",\"F6_owner_cover\":[0,1,3],\"native_executed\":false,\"pin\":\"451301787c7e02b8f5e1a4c08064275b6af6de1e\",\"scope\":\"two newly graved m1 fixture expectations from exact Definition\"}\n"
+  }
+]

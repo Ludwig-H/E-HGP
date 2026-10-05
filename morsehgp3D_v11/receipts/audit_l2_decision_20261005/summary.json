@@ -1,0 +1,181 @@
+{
+  "full_sanitizer_qualification": false,
+  "gcp_calls": 0,
+  "long": {
+    "ctest_args": [
+      "-L",
+      "^long$"
+    ],
+    "k10_identity_passed": [
+      "mhgp11_cli_full_identity_scale32000_k10",
+      "mhgp11_cli_full_identity_lidar_ng00_k10"
+    ],
+    "matrix_complete": true,
+    "matrix_conforming": false,
+    "missing_tests": [
+      "mhgp11_mutants_api",
+      "mhgp11_mutants_cli",
+      "mhgp11_mutants_supports",
+      "mhgp11_mutants_tower"
+    ],
+    "non_mutant_passed_count": 27,
+    "passed_tests": [
+      "mhgp11_catalogue_euler_lidar_ng00_k10",
+      "mhgp11_catalogue_euler_lidar_ng01_k10",
+      "mhgp11_catalogue_euler_lidar_ng02_k10",
+      "mhgp11_cli_full_identity_lidar_ng00_k10",
+      "mhgp11_cli_full_identity_scale32000_k10",
+      "mhgp11_mutants_catalogue",
+      "mhgp11_mutants_cloud",
+      "mhgp11_mutants_core",
+      "mhgp11_mutants_index",
+      "mhgp11_mutants_io",
+      "mhgp11_mutants_num",
+      "mhgp11_mutants_sched",
+      "mhgp11_reference_full",
+      "mhgp11_reference_full_0",
+      "mhgp11_reference_full_1",
+      "mhgp11_reference_full_10",
+      "mhgp11_reference_full_11",
+      "mhgp11_reference_full_12",
+      "mhgp11_reference_full_13",
+      "mhgp11_reference_full_14",
+      "mhgp11_reference_full_15",
+      "mhgp11_reference_full_2",
+      "mhgp11_reference_full_3",
+      "mhgp11_reference_full_4",
+      "mhgp11_reference_full_5",
+      "mhgp11_reference_full_6",
+      "mhgp11_reference_full_7",
+      "mhgp11_reference_full_8",
+      "mhgp11_reference_full_9",
+      "mhgp11_supports_hierarchy_lidar_ng00_k10",
+      "mhgp11_supports_registers_lidar_ng00_k10",
+      "mhgp11_supports_registers_lidar_ng01_k10",
+      "mhgp11_supports_registers_lidar_ng02_k10",
+      "mhgp11_tower_order_identity_lidar_ng00_k10"
+    ],
+    "receipt_status": "failed_remote",
+    "session": "v11.20261005.claudequall",
+    "targeted_closure_verified": true,
+    "tests": {
+      "ctest_failed": null,
+      "ctest_total": null,
+      "failed": 0,
+      "not_run": 4,
+      "passed": 34,
+      "selected": 38
+    },
+    "worker_exit_code": 1
+  },
+  "measure": {
+    "all_ok": true,
+    "all_stages_present": [
+      "cloud",
+      "index",
+      "domain",
+      "tree",
+      "attach",
+      "output",
+      "write",
+      "total"
+    ],
+    "calls": 52,
+    "configuration": {
+      "cold": "premier appel de la configuration, cache non vide",
+      "frames": [
+        "ng00",
+        "ng01",
+        "ng02"
+      ],
+      "k": 5,
+      "k10": "ng00",
+      "prises": 3,
+      "workers": [
+        1,
+        48
+      ]
+    },
+    "decision": "livrer_L2b",
+    "declared_cli_sha256": "4a458a0d1a52ba5597b213affc035d2757e45014bb554235e97f42f725e3c4bf",
+    "declared_commit": "b319efc84",
+    "engine_masks": {
+      "full": 16379,
+      "supports": 7035
+    },
+    "files_manifests_identical_between_workers_and_takes": true,
+    "frames_within_rule": [
+      "ng02"
+    ],
+    "k10_descriptive_calls": 4,
+    "k5_calls": 48,
+    "receipt_status": "completed",
+    "rule_basis": [
+      {
+        "frame": "ng00",
+        "k": 5,
+        "stage": "tree",
+        "within_rule": false,
+        "workers": 48
+      },
+      {
+        "frame": "ng01",
+        "k": 5,
+        "stage": "tree",
+        "within_rule": false,
+        "workers": 48
+      },
+      {
+        "frame": "ng02",
+        "k": 5,
+        "stage": "tree",
+        "within_rule": true,
+        "workers": 48
+      }
+    ],
+    "session": "v11.20261005.claudequalmesure",
+    "targeted_closure_verified": true,
+    "tree_identity_full_supports": true,
+    "unique_complete_coverage": true,
+    "worker_exit_code": 0
+  },
+  "native_runs": 0,
+  "published": {
+    "A_receipt_exact_original": true,
+    "A_source_in_README": "b319efc84",
+    "A_source_in_receipt": "00bd979ac2c24aff422421525d484488dff0c993",
+    "B_missing": {
+      "gcc_asan_ubsan": 50,
+      "gcc_tsan": 65
+    },
+    "L_measure_receipts_summaries_exact_archive_copies": true,
+    "commit": "484fb98ee7f3e64ab9965b1b3beb180608129beb",
+    "sha_entries_verified": 41
+  },
+  "schema": "ehgp.v11.audit.g4_long_measure_summary.v1",
+  "source_commit": "b319efc8477fec234afc0b31e86f8a43e3023641",
+  "supports_w48": [
+    {
+      "calls": 14,
+      "controls": 52,
+      "frame": "ng02",
+      "verdict": "conforme",
+      "workers": [
+        1,
+        4,
+        48
+      ]
+    },
+    {
+      "calls": 14,
+      "controls": 52,
+      "frame": "ng00",
+      "verdict": "conforme",
+      "workers": [
+        1,
+        4,
+        48
+      ]
+    }
+  ]
+}

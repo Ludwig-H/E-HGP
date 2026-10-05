@@ -4,21 +4,29 @@
 quantized_u21_input_only / not_claimed`. Notes maintenues en place ;
 preuves détaillées dans les reçus immuables.
 
-**S9 en développement : corriger le refus pendant le tri des dates.**
-Dans la capture du brouillon, `entry_order` remplace l'ordre exact par
-l'ordre des sites après un refus, puis laisse `std::sort` continuer.
-Le contrôle du refus arrive trop tard : un modèle du partitionnement
-GCC montre une lecture hors tableau avec 17 entrées et un refus injecté.
-Arrêter le tri dès le refus, puis rendre son `Outcome`. Aucun crash natif
-ni nuage u21 déclenchant naturellement ce refus n'est revendiqué.
-[Constat, preuve et correction attendue](../receipts/audit_s9_wip_20261005/README.md).
+**S9 : correctif local du refus de tri relu favorablement.** Le tri par
+tas renvoie immédiatement l'`Outcome` refusé ; l'ordre de comparaison ne
+change plus. La contre-épreuve Python contrôle l'arrêt à chaque position
+de refus, les bornes et la permutation. Le refus remonte jusqu'au CLI
+avant publication, en lecture du code. Publication du correctif et
+qualification native G4 restent à confirmer.
+[Correction et portée](../receipts/audit_s9_sort_fix_20261005/README.md),
+[défaut initial conservé](../receipts/audit_s9_wip_20261005/README.md).
+
+**Décision L2 : livrer L2b.** La mesure G4 appariée déclenche la règle
+fixée avant la campagne : raccorder le journal des graines à la voie
+concurrente de FULL pour `supports`. L'identité des fichiers entre prises
+est conforme ; le complément W48 sur ng00 et ng02 passe. Le nouveau
+chemin devra conserver les octets MHGP11SP et être qualifié sous TSan.
+[Mesure, décision et limites](../receipts/audit_l2_decision_20261005/README.md).
 
 **G4 A2 : la sélection ordinaire est entièrement conforme.** Sur
 **b319efc84**, les profils u18/u21/u24 et poison u21 passent respectivement
 **914/824/824/825 tests**, sans échec ni résultat manquant ; arrêt ciblé
 certifié. Les dix portes CLI ordinaires auparavant manquantes passent.
-Restent les tests `long`, la fin des sanitizers/TSan et le complément
-supports LiDAR W48 ; aucun nouveau contrat de temps n'est acquis.
+Les tests longs non mutants et le complément supports W48 passent depuis
+dans leurs sessions dédiées ; la fin des sanitizers/TSan reste ouverte.
+Aucun contrat 100 ms n'est acquis.
 [Reçu A2 vérifié](../receipts/audit_g4_a2_20261005/README.md).
 Les premières sessions interrompues et les **459 mutants u18 détectés**
 gardent leur [preuve distincte](../receipts/audit_g4_sorties_20261005/README.md).
@@ -66,7 +74,7 @@ relues en ee8a69f1a. S3 est publiée en **165def5ab**, avec E1/E2 sur le
 catalogue étroit et D2 ; le différentiel contre l'oracle exact et le témoin
 K10 sont maintenant inscrits dans ses portes. L'assemblage S6b est publié
 en **9e7428995** et relu favorablement ; S7 est publiée en **966a351be**,
-qualification G4 partielle. Pour la future L3, K=n est refusé par `points`/`plat`
+qualification G4 limitée au périmètre ci-dessus. Pour la future L3, K=n est refusé par `points`/`plat`
 quand K≥2 ; FULL/supports le conservent.
 [Contrelecture précédente](../receipts/audit_l1_followup_20261005/README.md).
 
@@ -74,14 +82,14 @@ quand K≥2 ; FULL/supports le conservent.
 ceux sans coface. Le plafond de 24 sites est contrôlé sur l'appel entier
 avant allocation ; count/fill gardent les mêmes positions et des tampons
 privés par worker. Comptes et admission mémoire restent dans leurs bornes.
-S7 livre désormais le fichier ; premiers résultats G4 partiels ci-dessus.
+S7 livre désormais le fichier ; résultats G4 et périmètres ci-dessus.
 [Périmètre et contre-épreuves](../receipts/audit_s6b_20261005/README.md).
 
 **S7 : sortie complète livrée, qualification à terminer.** L'API, l'écrivain
 MHGP11SP et le lecteur sont relus sans défaut important établi. Les portes
-comparent le fichier à S1 et la signature d'arbre à FULL. Le développeur a
-ajouté au plan de mesure les permutations et réétiquetages **W48 sur ng02
-et ng00**, conformément à la demande ; leur exécution reste à constater.
+comparent le fichier à S1 et la signature d'arbre à FULL. Les permutations
+et réétiquetages **W48 sur ng02 et ng00** sont désormais conformes, avec
+14 appels par porte, au pin b319efc84.
 [Revue et complément W48](../receipts/audit_s7_20261005/README.md).
 
 - [Mathématiques : supports, frontières, hiérarchies et sélection](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).

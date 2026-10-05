@@ -1,0 +1,56 @@
+{
+  "closed_utc": "2026-10-05T17:17:09.398020+00:00",
+  "dev_head": "451301787c7e02b8f5e1a4c08064275b6af6de1e",
+  "main_head": "d448b3d03b6931e4f699846f9dd45187dd6f39a3",
+  "sources": {
+    "morsehgp3D_v11/src/points/internal.hpp": {
+      "snapshot_sha256": "cfb4de6a99309262d37c7819a32b93fc14a0f89d4b9021a88e9770a0e170356e",
+      "current_sha256": "cfb4de6a99309262d37c7819a32b93fc14a0f89d4b9021a88e9770a0e170356e",
+      "unchanged_since_capture": true,
+      "matches_dev_commit": false,
+      "exists_in_main_commit": false,
+      "matches_main_commit": false
+    },
+    "morsehgp3D_v11/src/points/point_tree.cpp": {
+      "snapshot_sha256": "f85d5dad50b3353c50207047cb02e2f48dc5fda801aaecd3fbbe9dc776e8c60c",
+      "current_sha256": "f85d5dad50b3353c50207047cb02e2f48dc5fda801aaecd3fbbe9dc776e8c60c",
+      "unchanged_since_capture": true,
+      "matches_dev_commit": false,
+      "exists_in_main_commit": false,
+      "matches_main_commit": false
+    },
+    "morsehgp3D_v11/tests/points/points_test.cpp": {
+      "snapshot_sha256": "be3791aa38cb0c923bbfe394dce17422382549d8364f087fc0793f46c996bdb1",
+      "current_sha256": "be3791aa38cb0c923bbfe394dce17422382549d8364f087fc0793f46c996bdb1",
+      "unchanged_since_capture": true,
+      "matches_dev_commit": false,
+      "exists_in_main_commit": false,
+      "matches_main_commit": false
+    },
+    "morsehgp3D_v11/tests/points/tests.cmake": {
+      "snapshot_sha256": "fab2d65223c63c72f62dd9f2bffe631e83a6a84607f8c6ee17d02c6ce296175a",
+      "current_sha256": "fab2d65223c63c72f62dd9f2bffe631e83a6a84607f8c6ee17d02c6ce296175a",
+      "unchanged_since_capture": true,
+      "matches_dev_commit": false,
+      "exists_in_main_commit": false,
+      "matches_main_commit": false
+    }
+  },
+  "reports": {
+    "/workspaces/E-HGP/build/v11-persist/sortie_supports/impl_s9.md": {
+      "sha256": "e7d01307e4810fb81b85a8e6a608358ed330dba45321acead4ef5bac884de550",
+      "bytes": 16333,
+      "authority": "rapport_local_PRE_correctif_sur_HEAD451301787"
+    },
+    "/workspaces/E-HGP/build/v11-persist/sortie_supports/verif_s9.md": {
+      "sha256": "169604e01d9716a4e14cefab061bebb4a5ea1ddf72bbc06883a6e5236363e497",
+      "bytes": 8888,
+      "authority": "rapport_local_PRE_correctif_sur_HEAD451301787"
+    },
+    "/workspaces/E-HGP/build/v11-persist/sortie_supports/APPORTS_AUDIT_d448b3d03.md": {
+      "sha256": "5fdeb33194acd84901f3cd2542edba6308b0337a4e9dc9328b04ccaebb987636",
+      "bytes": 1306,
+      "authority": "rapport_local_PRE_correctif_sur_HEAD451301787"
+    }
+  }
+}

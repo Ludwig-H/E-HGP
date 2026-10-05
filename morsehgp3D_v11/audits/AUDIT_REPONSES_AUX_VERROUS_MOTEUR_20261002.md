@@ -18,9 +18,11 @@ atomiques. Six petits témoins recoupent **43 qualifications, 387 LCA et
 les entrées dans un bloc vivant. Les propositions flottantes sont
 corrigées par les deux certificats exacts du plancher et de son successeur.
 
-Cette contre-épreuve exclut le chemin de refus du tri :
-**le changement de comparateur après refus dans `entry_order` doit être
-corrigé**, selon le constat moteur. Aucun succès de ce modèle Python ne
+Cette contre-épreuve exclut le chemin de refus du tri. Le correctif local
+remplace depuis le tri défaillant par un tri qui propage immédiatement
+le refus ; relecture favorable, publication et qualification G4 à confirmer.
+[Correctif et portée](../receipts/audit_s9_sort_fix_20261005/README.md).
+Aucun succès de ce modèle Python ne
 qualifie la sortie native S9. Le lecteur du fichier contrôle des
 conditions nécessaires ; le plancher maximal et l'arbre complet sont
 recoupés par les portes différentielles du moteur.

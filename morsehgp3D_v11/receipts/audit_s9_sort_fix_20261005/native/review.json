@@ -1,0 +1,58 @@
+{
+  "source_verdict": "correctif_favorable_en_lecture_et_port_python_borne",
+  "source_status": "WIP",
+  "base_head": "451301787c7e02b8f5e1a4c08064275b6af6de1e",
+  "closed_dev_head": "451301787c7e02b8f5e1a4c08064275b6af6de1e",
+  "closed_main_head": "d448b3d03b6931e4f699846f9dd45187dd6f39a3",
+  "proof_scope": "Lecture des 4 fichiers correctifs et 3 rapports ; port Python du helper avec controles de bornes. Aucun build/test natif/GCP.",
+  "source_facts": [
+    {
+      "source": "src/points/internal.hpp:95-116",
+      "fact": "Chaque Outcome est teste avant utilisation de bool, swap ou comparaison suivante ; retour exact du refus, tas en place sans allocation ni Buffer supplementaire."
+    },
+    {
+      "source": "src/points/point_tree.cpp:68-89",
+      "fact": "date_less propage refus avant de definir less ; entry_order appelle helper pour chaque groupe strict, propage immediatement ; std::sort restant compare seulement floor/strict/SiteIdx, sans voie de refus."
+    },
+    {
+      "source": "src/points/internal.hpp:97",
+      "fact": "Production n <= UINT32_MAX-1, root<n donc 2root+1<=8589934587<2^64 ; indices enfant/racine gardes avant usage."
+    },
+    {
+      "source": "tests/points/points_test.cpp:119-153",
+      "fact": "Porte helper : 48 tailles 17..64, fail_at 4/9/30, raison radical_sign_budget, valeurs comparees dans domaine, permutation, ordre total sur succes avec ties SiteIdx ; 528 checks, raccord GROUPS sort_refusal fast."
+    }
+  ],
+  "portable_port": {
+    "patterns": 6011,
+    "success_orders_checked": 6011,
+    "first_refusal_positions_checked": 133456,
+    "all_indices_checked": true,
+    "refusal_calls_stop_exactly": true,
+    "outcome_original_preserved": true,
+    "source_sha256": "cfb4de6a99309262d37c7819a32b93fc14a0f89d4b9021a88e9770a0e170356e",
+    "witness17": [
+      {
+        "calls": 4,
+        "fail_at": 4,
+        "permutation_preserved": true,
+        "reason": "radical_sign_budget"
+      },
+      {
+        "calls": 9,
+        "fail_at": 9,
+        "permutation_preserved": true,
+        "reason": "radical_sign_budget"
+      },
+      {
+        "calls": 30,
+        "fail_at": 30,
+        "permutation_preserved": true,
+        "reason": "radical_sign_budget"
+      }
+    ]
+  },
+  "qualification_limit": "Rapports lus : HEAD451301787 PRE-correctif. Ils ne qualifient pas le helper WIP. Porte helper sans MemoryBudget/publication ; helper n alloue rien. Propagation globale/liberation/absence de publication : lecture, root lit PointTreeBuilder→HangBuilder→compute/CLI. G4 native/ASan attendue ; pas nouveau blocage.",
+  "targeted_nonblocking_suggestion": "CHECK_EQ(calls,fail_at) : compteur deja present, grave arret immediat. Aucun nouveau scenario requis.",
+  "recommendation_status": "Ancien P1 tri source corrige dans capture ; ne pas clore qualification G4 par modele ou tests anterieurs rapportes."
+}

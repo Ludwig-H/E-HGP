@@ -1,0 +1,35 @@
+{
+  "all_indices_checked": true,
+  "first_refusal_positions_checked": 133456,
+  "outcome_original_preserved": true,
+  "patterns": 6011,
+  "production_child_expression_max": 8589934587,
+  "production_n_max": 4294967294,
+  "refusal_calls_stop_exactly": true,
+  "schema": "ehgp.audit.heap_sort_port.v1",
+  "scope": "port Python et borne de lecture, aucune qualification native/ASan/API/CLI",
+  "source": "sources/morsehgp3D_v11/src/points/internal.hpp",
+  "source_sha256": "cfb4de6a99309262d37c7819a32b93fc14a0f89d4b9021a88e9770a0e170356e",
+  "success_orders_checked": 6011,
+  "tie_order": "date/key puis SiteIdx",
+  "witness17": [
+    {
+      "calls": 4,
+      "fail_at": 4,
+      "permutation_preserved": true,
+      "reason": "radical_sign_budget"
+    },
+    {
+      "calls": 9,
+      "fail_at": 9,
+      "permutation_preserved": true,
+      "reason": "radical_sign_budget"
+    },
+    {
+      "calls": 30,
+      "fail_at": 30,
+      "permutation_preserved": true,
+      "reason": "radical_sign_budget"
+    }
+  ]
+}

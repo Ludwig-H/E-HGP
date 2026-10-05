@@ -10,7 +10,7 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
-## S9 en développement : refus du tri à corriger avant livraison
+## S9 : correctif du refus de tri relu, qualification à poursuivre
 
 **Constat important sur le brouillon, base 53c027fe8.** Dans
 `src/points/point_tree.cpp`, `entry_order` trie les dates strictes avec
@@ -27,14 +27,20 @@ immédiatement le refus s'arrête proprement. C'est une preuve du danger
 du chemin de refus, pas un crash natif ni la construction d'un nuage u21
 épuisant réellement les 6 144 bits de raffinement.
 
-**Correction attendue :** arrêter le tri au premier `Outcome` refusé,
-sans produire une réponse de comparaison de remplacement. Utiliser un
-tri qui propage `Outcome`, ou une exception interne interceptée **dans**
-la fonction `noexcept` qui contient le tri. Ne pas laisser cette exception
-remonter à travers `entry_order noexcept`. Une porte G4 doit injecter le
-refus après plusieurs comparaisons réussies, vérifier sa propagation et
-la restitution du budget, sans publication. Les égalités exactes restent
-départagées par SiteIdx dans le chemin réussi.
+**Correction locale relue au-dessus de 451301787 : favorable.**
+`heap_sort_until_refusal` arrête chaque étape au premier `Outcome`
+refusé, avant d'utiliser la réponse de comparaison. Il n'alloue aucun
+tampon. `date_less` conserve le départage SiteIdx des égalités exactes ;
+`entry_order` propage le refus sans substitution.
+
+Le modèle Python compare le succès au tri de référence et injecte le
+premier refus à chaque position : arrêt immédiat, même raison, permutation
+et bornes conservés. Le raccord `PointTreeBuilder` → `HangBuilder` → API
+→ CLI retourne avant publication ; les brouillons possédés sont détruits
+au retour. Ce dernier constat est une lecture de source, pas une injection
+native de bout en bout. La nouvelle porte `sort_refusal` exerce le helper ;
+son exécution G4 et la publication du correctif restent à confirmer.
+[Correctif, preuves bornées et limites](../receipts/audit_s9_sort_fix_20261005/README.md).
 [Sources figées, modèle et limites](../receipts/audit_s9_wip_20261005/README.md).
 
 ## Qualification G4 du 5 octobre : acquis et limites
@@ -74,15 +80,21 @@ des résultats ; une source plus récente exige sa propre requalification.
 [Preuve B et noms des portes manquantes](../receipts/audit_g4_b_20261005/README.md).
 [Ensembles de reprise exacts par module](../receipts/audit_g4_b_restart_20261005/README.md).
 
-**Restent à clore :** la fin des sanitizers/TSan, les identités FULL K10
-32k/ng00 classées `long`, puis les mesures L2 et les permutations et
-réétiquetages supports **W48 sur ng02 et ng00**. Les portes supports de
-cette matrice utilisent W1/W4. Le succès du déterminisme FULL W48 ne
-qualifie pas ce complément supports. La session dédiée `claudequall`
-est encore ouverte à la capture ; aucun résultat ne lui est attribué.
-Aucun chrono de contrat n'est acquis par ces matrices. Les tests longs prévus en Release u21
-ne sont pas doublés sous `-O` ; leur futur succès ne qualifiera pas leur
-exécution en u18/u24 ou sous sanitizers.
+**L ferme 27 portes non mutantes et sept campagnes de mutants en Release u21 :
+34 résultats conformes sur les 38 sélectionnés.**
+Les identités FULL K10 32k et ng00 passent. Le résumé global reste
+non conforme : quatre campagnes de mutants sélectionnées n'ont pas de
+résultat dans cette session ; les résultats antérieurs de ces campagnes
+restent attachés à leur propre reçu. Les tests longs ne sont pas doublés
+sous `-O` et ne sont pas qualifiés en u18/u24 ou sous sanitizers.
+
+**Mesure et complément W48 désormais joués.** La session
+`claudequalmesure`, sur b319efc84, ferme la mesure appariée et les
+permutations/réétiquetages supports W48 sur ng02 et ng00 : 14 appels par
+porte, verdicts conformes. Restent les 50/65 portes sanitizers de B,
+la qualification de S8/S9 et celle de la future voie L2b. Aucun contrat
+100 ms n'est acquis. Les fermetures ciblées et les empreintes sont relues.
+[Reçus L/mesure et portée](../receipts/audit_l2_decision_20261005/README.md).
 [Preuve A2, noms exacts et rejeu](../receipts/audit_g4_a2_20261005/README.md).
 
 Les premières captures **claudequalmatrice/claudequalA**, au pin
@@ -92,6 +104,23 @@ terminé et **459 mutants u18 détectés**, dont 15 supports, 22 API et
 résultats A2 ont leur propre source et reçu. Le produit et ses portes
 sont inchangés entre 00bd979ac et b319efc84.
 [Preuve antérieure](../receipts/audit_g4_sorties_20261005/README.md).
+
+## Décision utile au développeur : passer à L2b
+
+La mesure complète respecte le protocole écrit avant la campagne :
+FULL/16379 et supports/7035, trames entières ng00/ng01/ng02, K5, W1/W48,
+prises appariées, identité des fichiers et des manifestes. La règle sur
+l'étage `tree` rend **`livrer_L2b`** : le chemin d'ordre K seul ne satisfait
+pas le critère sur deux trames. L'avantage d'écriture de MHGP11SP ne
+change pas cette décision d'architecture.
+
+Raccorder le journal au constructeur de l'ordre K dans la voie concurrente
+de FULL, comme prévu dans `SORTIES.md` § 11. Conserver tous les supports,
+le rattachement après fermeture des plateaux et les admissions mémoire
+avec le journal vivant. Les portes décisives restent **MHGP11SP identique
+octet pour octet par les deux voies**, TSan sur le pipeline et les mutants.
+L2b n'est pas encore une nouvelle voie qualifiée.
+[Contrelecture de la décision et de ses entrées](../receipts/audit_l2_decision_20261005/README.md).
 
 ## S8 : socle numérique de la sortie points
 
@@ -163,13 +192,14 @@ entier. Aucun nouveau défaut important établi. Les résultats natifs
 annoncés dans les rapports locaux restent distincts des résultats G4 :
 les acquis partiels ci-dessus comprennent la campagne de mutants u18 ;
 les configurations ordinaires sont depuis conformes dans A2 ;
-sanitizers/TSan, tests longs K10 et complément supports W48 restent à clore.
+la fin des sanitizers/TSan reste à clore. L apporte les tests longs
+non mutants u21, et le complément supports W48 est désormais conforme.
 S7 livre depuis **966a351be** l'écriture et la lecture du fichier,
 la comparaison des signatures FULL/supports et le pilote de mesure.
 La qualification de toute la chaîne reste à clore sur G4.
 [Sources, contre-épreuves et limites](../receipts/audit_s6b_20261005/README.md).
 
-**S7 : revue favorable ; complément W48 inscrit au plan.**
+**S7 : revue favorable ; complément W48 conforme.**
 Le produit possède ensemble l'arbre et sa hiérarchie ; la publication garde
 les contrôles de Session et de provenance avant toute écriture. L'écrivain
 conserve les colonnes canoniques ; le lecteur recalcule les comptes et la
@@ -183,8 +213,9 @@ réétiquetages à W48. Le développeur a ajouté au plan de mesure
 `cli_supports_scale.py --fils=1,4,48` pour ng02 et ng00,
 avec leur boîte cosphérique. Hors CTest, le script exige
 **14 appels**, y compris répétition, permutation et nouveaux IDs à W48,
-contre 12 dans les lignes CTest actuelles. Ce complément ferme une
-couverture de qualification lorsqu'il sera joué, pas un défaut produit observé.
+contre 12 dans les lignes CTest actuelles. Ce complément a été joué
+conformément dans `claudequalmesure` au pin b319efc84 ; la couverture
+demandée est close sur ces deux trames et cette source.
 [Relecture, limites et fragment de plan validé](../receipts/audit_s7_20261005/README.md).
 
 **Manifeste S5 : correctif confirmé par sa porte native G4.**
@@ -217,11 +248,11 @@ autres portes API ont maintenant un résultat `Passed` dans les quatre
 configurations de la session A. Le constat initial `a65903a7b` est clos
 sur ce périmètre natif ; cela ne clôt pas les suites interrompues.
 
-**Priorité performance : mesurer le chemin qui sera livré.** Les temps
+**Priorité performance : réaliser L2b selon la mesure complète.** Les temps
 S3 obtenus journal désactivé ne donnent pas le coût des attaches ni de
-`supports`. Apparier FULL/16379 et ordre seul/7035, journal actif, mêmes
-entrées entières, puis payer l'énumération, l'assemblage et l'écriture
-séparément. La voie K seule reste un candidat à mesurer. Les **100 ms**,
+`supports`. La mesure complète apparie FULL/16379 et ordre seul/7035,
+journal actif, mêmes entrées entières, avec l'énumération, l'assemblage
+et l'écriture relevés séparément. Elle est close et impose L2b. Les **100 ms**,
 la projection native et une qualification récente de la chaîne entière
 restent ouverts. Le rejeu des reçus c40 retrouve leur qualification et
 leurs 81 prises conformes ; il ne qualifie ni HEAD ni les brouillons.
@@ -229,8 +260,8 @@ Les trois trames de séquence08 ne deviennent pas plusieurs séquences,
 et les comparaisons c40/baseline v11 ne ferment pas le différentiel
 canonique v10/v11 sur LiDAR entier.
 
-Pour poursuivre : qualifier L1/L2 intégrés ; prendre ensuite la
-décision de chemin sur les mesures complètes. Aucune réserve générale
+Pour poursuivre : terminer les portes sanitizers manquantes et réaliser
+L2b selon la décision mesurée. Aucune réserve générale
 nouvelle n'est opposée à l'intégration de S3. **Aucun build/test natif ni
 GCP lancé par cet audit.**
 
