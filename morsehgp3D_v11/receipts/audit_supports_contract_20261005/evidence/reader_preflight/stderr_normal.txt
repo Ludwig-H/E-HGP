@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/workspaces/.ehgp-backups/supports_followup_20261005/evidence/check_l0_s1.py", line 150, in <module>
+    print(json.dumps(main(), ensure_ascii=False, indent=2, sort_keys=True))
+                     ^^^^^^
+  File "/workspaces/.ehgp-backups/supports_followup_20261005/evidence/check_l0_s1.py", line 112, in main
+    check(counters.get(key) == want, 'captured counter mismatch ' + key)
+  File "/workspaces/.ehgp-backups/supports_followup_20261005/evidence/check_l0_s1.py", line 23, in check
+    raise ValueError(why)
+ValueError: captured counter mismatch arity2

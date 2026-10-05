@@ -1,0 +1,22 @@
+{
+  "time": "2026-10-05T06:04:13.303164+00:00",
+  "actor": "/workspaces/E-HGP/build/v11-impl-s3",
+  "head": "f98aeed67d4030dd78e11d5faf7d8556c4d17aaf",
+  "sources": [
+    {
+      "path": "morsehgp3D_v11/src/tower/attachment.cpp",
+      "sha256": "77f84f00506729b253c22216860ec8c0c9bcd579dcac1c9ed3ac8c54dadb01cd",
+      "bytes": 10684
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/order_tree_support.hpp",
+      "sha256": "5dec9c016130007ea89b04d85d28666fd5428f84f3637886a7671c5c8fde335d",
+      "bytes": 7960
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/order_tree_test.cpp",
+      "sha256": "4f3e10078cc065e11c169c2f9939828dede942de3e21c2712794a24684ef83c7",
+      "bytes": 10010
+    }
+  ]
+}

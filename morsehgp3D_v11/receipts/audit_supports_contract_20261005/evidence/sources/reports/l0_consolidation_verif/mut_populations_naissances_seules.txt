@@ -1,0 +1,2 @@
+mutant populations_naissances_seules tue par 1 ecart(s) ; premier : growth_abcz@3 : InvariantError : lemme H : noeud 0 coupe 25 : K-polyedre [0, 1, 2, 3], union W_K [0, 1, 2], fortes [0, 1, 2, 3]
+mutant_killed populations_naissances_seules

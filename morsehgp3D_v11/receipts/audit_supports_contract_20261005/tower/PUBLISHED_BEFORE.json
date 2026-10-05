@@ -1,0 +1,47 @@
+{
+  "time": "2026-10-05T05:56:19.095215+00:00",
+  "repo": "/workspaces/E-HGP/build/v11-auditor-20261003",
+  "pin": "5adf6a59f3d3b99fdf947e676e8548d4102ab48f",
+  "sources": [
+    {
+      "path": "morsehgp3D_v11/reference/hgp11_ref/supports.py",
+      "sha256": "826f3f94ce9eeb66e6ed04edce8266dd70b52498fd929c2ec7f7dbc01538a541",
+      "bytes": 39510
+    },
+    {
+      "path": "morsehgp3D_v11/reference/test_supports.py",
+      "sha256": "beaa65092a9651364f1c09dfd64733e5cc5382636f0193c964e71dee47acdd52",
+      "bytes": 37225
+    },
+    {
+      "path": "morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "sha256": "f1873c10b669922a3c41ce5f03b57d91fd8bd6b9e53c7459699be4d66bd1bb44",
+      "bytes": 72776
+    },
+    {
+      "path": "morsehgp3D_v11/audits/REPONSE_CLAUDE_SUPPORTS_20261004.md",
+      "sha256": "10872891be1def0c351c3d78bc81c4287e01e79120be85c866e40ff32de179d6",
+      "bytes": 17586
+    },
+    {
+      "path": "morsehgp3D_v11/audits/AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md",
+      "sha256": "3941f76df6b67ec25cabc5e38a0d1a82db4646fe0395e97c88c55144af86ca08",
+      "bytes": 22677
+    },
+    {
+      "path": "morsehgp3D_v11/docs/ARCHITECTURE.md",
+      "sha256": "ab00b2ebfc799a946c8621835b736181b8e7258d5342fc739d26cb56c3da79bc",
+      "bytes": 18393
+    },
+    {
+      "path": "morsehgp3D_v11/docs/PROVENANCE.md",
+      "sha256": "2e85a50f5e681792dc01f48727a6b935f5b31607e2ff6ad5d44d98a4bb6c0dfc",
+      "bytes": 45364
+    },
+    {
+      "path": "morsehgp3D_v11/README.md",
+      "sha256": "1eef3c30d90c01470f069f8ba123821d6a246ad87560a812632b0dc31b4187d2",
+      "bytes": 10234
+    }
+  ]
+}

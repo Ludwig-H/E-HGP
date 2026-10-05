@@ -1,0 +1,65 @@
+{
+  "schema": "mhgp11.audit.supports_followup_20261005.v1",
+  "status": "favorable_source_and_existing_evidence_review",
+  "source_pin": "5adf6a59f3d3b99fdf947e676e8548d4102ab48f",
+  "delta_doc_pin": "9290cf3bfe51147ede73d178dce8bf62e31c82d8",
+  "checks": 208,
+  "normal_opt_identical": true,
+  "native_or_geo_suite_executed": false,
+  "sources": 47,
+  "unchanged": 47,
+  "report_closure": {
+    "payloads": 28,
+    "matched": 28
+  },
+  "report_gate": {
+    "counters": {
+      "arity2": 10158,
+      "arity3": 5640,
+      "arity4": 1145,
+      "balls": 15062,
+      "births": 6558,
+      "clouds": 210,
+      "cofaces": 20463,
+      "cuts": 48074,
+      "extended": 2551,
+      "extended_higher_arity": 226,
+      "gabriel": 17058,
+      "internal": 2736,
+      "invariance": 70,
+      "kparties": 54659,
+      "merge_balls": 5768,
+      "merges": 4428,
+      "multi_support": 530,
+      "nary_merges": 1890,
+      "nodes": 12441,
+      "non_gabriel": 40053,
+      "orders": 951,
+      "passing": 271,
+      "permuted": 70,
+      "shared_cofaces": 277,
+      "strong": 7584,
+      "supports": 16943,
+      "weak": 7478
+    },
+    "ctest_total": 90,
+    "facts": 50,
+    "mutant_gates": 26,
+    "python_outputs_sha256": "7618b734a230b2255435a18b8bdf8e4766df3e0dc3642e2141ae4bd051e38dc7",
+    "suite_digest": "9bddd8aa22694f013dd81e7e70c0f1f352fa2e7a893e0c0dd66bd440d95fc697",
+    "supports_gates": 30
+  },
+  "new_material_defects": [],
+  "closed_source_reservations": [
+    "D2 legacy hidden BallIdx signature replaced by explicitV2 SP-autonomous contract; native implementation remains pending",
+    "Aggregate K-parts incidence scope and permutation/relabel exceptions corrected in normative doc",
+    "Oracle floor/nonvacuity and13 causal mutants match final report90CTest with30S1gates"
+  ],
+  "remaining_limits": [
+    "Source D2 signature norm is adopted; no native signature emitter/reader qualified here.",
+    "Permanent S1 suite K<=5, maxshell12. Independent report highK is separate, not a permanent CMake gate.",
+    "No native shell24 refusal/profile/time/CPU-GPU claims transferred."
+  ],
+  "reader_preflight": "Our initial private regexp omitted digits in arity2/3/4 and failed; preserved in reader_preflight/, parser corrected. This was not an oracle/source failure.",
+  "scope": "No native build/test/fit/GCP or geometric oracle suite; copied source AST and fake branches plus hash/report parsing only"
+}

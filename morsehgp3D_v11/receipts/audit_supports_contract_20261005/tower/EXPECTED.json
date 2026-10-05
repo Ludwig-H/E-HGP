@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "checks": 795,
+  "independent_guards": 652,
+  "independent_mebs": 152,
+  "fixtures": 7,
+  "cuts": 40,
+  "mutants_causally_killed": 13,
+  "normal_optimized_equal": true
+}

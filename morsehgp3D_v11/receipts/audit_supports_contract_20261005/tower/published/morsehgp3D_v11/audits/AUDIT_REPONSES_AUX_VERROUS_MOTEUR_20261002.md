@@ -1,89 +1,79 @@
 # Audit mathématique courant — supports, hiérarchies et clustering plat
 
-5 octobre 2026. Relecture du contrat S0 et de l'oracle S1 au commit
-**5adf6a59f**, puis de la demande du développeur **9290cf3bf** et des WIP
-S3/S5/S6. Le socle FULL et les travaux sur les points/tête restent épinglés
-aux reçus liés ci-dessous. Cadre :
-`exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
-Note maintenue en place ; détails et échanges clos dans les reçus.
+4 octobre 2026. Audit depuis les fondations, **contrelecture complète e02a6c235** ;
+démos **8f68622b2** relues ensuite, moteur inchangé ;
+recherche privée `build/v11-points-select/` figée par les reçus ci-dessous.
+Suivi ciblé **c22be4e41 → 723cf6e43** : tête E1 et contrelecture du développeur.
+Cadre : `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
+Cette note est mise à jour en place. Les détails des anciens échanges sont
+[dans les reçus](../receipts/audit_dialogues_20261004/README.md), sans journal supplémentaire.
 
 ## Sortie supports : revue du contrat et du raccord
 
-**Contrat S0/S1 relu : favorable sur les points difficiles.** Les lemmes
-P/W, les deux lectures du retrait E5 et le témoin D2 concordent avec les
-modèles exacts indépendants. D2 ne borne pas la naissance d'une trace par
-le niveau précédent : `41<64<1681/25` reste le contre-exemple permanent.
-La constance de H₀ transporte sa classe. Le juge E2 admet `initial≤λ`,
-puis l'ancêtre fermé ; le journal conserve les traces strictes `initial<λ`.
-Le journal et les supports sont attribués après tout le plateau, sans
-confondre unions DSU et composantes intrinsèques.
+**Réponse au contrat S0 et aux questions D.1–D.4 du développeur.**
+Les WIP S3/S5/S6 et L0, base f98aeed67, sont relus séparément ; aucune
+qualification native ne passe d'un acteur à l'autre. Le contrat courant
+reprend Q_b seul, les comptes par boule et les exceptions d'invariance.
+Le journal S3 respecte par lecture les graines, l'attribution après plateau
+et les continuations ; l'énumérateur S6 sépare bien Q_b de la fermeture
+Euler et conserve les q4 à K1. La façade S5 est encore `full` seule.
 
-Les **13 mutants S1** sont tués avec leur cause nommée sur les copies
-figées ; les coupes exactes de sept fixtures sont recoupées par un
-solveur/Γ indépendant. Ce rejeu borné ne remplace ni toute la suite S1,
-ni les tests natifs G4. Aucun nouveau défaut mathématique établi dans S0.
+**Capacités : un correctif repris, une garde encore à ajouter.**
 
-**Deux gardes désormais corrigées dans les WIP.** S6 contrôle `p≤11`
-avant `p+q`, avec refus UINT32_MAX et frontière `(11,24,2,12)`.
-La nouvelle capture S3, `attachment.cpp` SHA **77f84f0050…**, appelle
-`published_traces(end−begin)` avant conversion : au-delà de UINT32_MAX,
-refus `tower_capacity`. Le plafond 24 de `supports` reste distinct de FULL.
-Les fixtures D2/E5 sont maintenant présentes en S3. Ces corrections sont
-relues, sans nouvelle qualification native.
+- S6, `make_shape` : `p+q` est comparé en u32 sans borne préalable sur p.
+  `(p,m,q,K)=(UINT32_MAX,2,2,1)` est accepté par repli de la somme et
+  permet des comptes faux dans la capture initiale. **Corrigé en WIP** :
+  `p≤11` est maintenant contrôlé avant l'addition, qui ne peut plus
+  dépasser15. La porte UINT32_MAX et la frontière `(11,24,2,12)` sont
+  présentes, non exécutées ici. Le chemin Catalogue était déjà protégé ;
+  seul l'appel direct de la factory était concerné. Qualification attendue.
+- S3, `attachment.cpp` : garder `end−begin≤UINT32_MAX` avant le cast de
+  `strict_traces`, ou élargir ce champ. Une coquille entière à150 sites,
+  rayon15, K8, fournit au moins `C(69,8)=8 361 453 672` traces strictes.
+  C'est un minorant scalaire ; cette construction n'a pas été exécutée.
+  Un budget peut refuser plus tôt. Ne pas imposer le plafond24 de l'export
+  supports au constructeur de forêt FULL pour réparer ce cast.
 
-**D.1–D.4 sont adoptés par le contrat.** Les agrégats `kparties_reliees`
-comptent des incidences `(b,F)` ; les cofaces sont distinctes par boule.
-L'indépendance à Q_b ne vaut qu'à p,m,K fixés. La signature V2 est
-recalculable depuis SP, sans PointId/BallIdx ; FUL1 garde ses octets et
-ne suffit pas à ce recalcul. L'état `published_complete` et le SHA du
-manifeste fermé distinguent publication, transport et durabilité. La
-stricte descente du sélecteur comprimé faible ne se transfère pas à toute
-K-partie. [Contrat courant](../docs/SORTIES.md),
-[réponse du développeur](REPONSE_CLAUDE_SUPPORTS_20261004.md).
-Ces engagements V2/publication sont encore à intégrer dans la capture S5.
+**D.1 — Agrégats.** Garder les cofaces par boule suffit ; l'incidence par
+Q reste calculable, donc facultative dans le manifeste. L'unicité de MEB
+rend les cofaces de boules distinctes disjointes, pour les événements W_K
+exportés ; cela ne compte pas toutes les liaisons de Γ_K hors fenêtre.
+En revanche, `kparties_reliees.sum` compte des incidences `(b,F)` : sur
+la ligne0/1/2 à K2, les comptes1/1/3 donnent5, mais seulement3 paires
+distinctes. Préciser ce sens. La dépendance à p,m,K évite celle à Q_b
+**à p,m fixés**, sans stabilité générale sous perturbations : sortir un
+point de coquille d'une boule diamétrale fixe fait passer ce compte3→1
+alors que Q_b garde le même diamètre.
 
-[Relecture actuelle et témoins](../receipts/audit_supports_contract_20261005/README.md).
-Les constats et réponses précédents restent figés dans les reçus
-[1 119 gardes](../receipts/audit_supports_implementation_20261004/README.md),
-[6 456 gardes](../receipts/audit_supports_followup_20261004/README.md) et
-[première revue supports](../receipts/audit_supports_20261004/README.md).
+**D.2 — Empreinte autonome.** Oui : une signature versionnée sur les
+champs disponibles dans SP est préférable au `BallIdx` non publié.
+Proposition : contexte version/profil/K et géométrie SITES sans PointId,
+puis parent, rang, kind, naissance par site à K1 ou S* à K≥2, enfants.
+Le moteur FULL dispose de ces données dans son domaine/catalogue.
+L'ancien dump FUL1 seul stocke les centres de naissance, pas S* : ne pas
+promettre son recalcul direct sans census, et ne pas changer ses octets
+qualifiés pour cette signature. Le SHA du fichier reste une autre clé.
 
-**Réponse à la question du 5 octobre : une coquille mixte au plafond.**
-La sphère entière $x^2+y^2+z^2=5$ a 24 sites. Après translation par
-`(2,2,2)`, elle est une entrée valide des trois profils. Elle donne
-**12 q2, 24 q3, 792 q4**, soit 828 supports stricts, sur toute la coquille.
-Exemples avant translation :
+**D.3 — Échec après publication.** Publier un état distinct de publication
+complète, même si transport ou synchronisation échoue. Un code2 ne doit
+pas signifier silencieusement « rien publié ». Conserver l'empreinte du
+manifeste fermé dans ce cas ; S4 l'affecte actuellement après `publish`,
+donc la laisse nulle si le dossier complet persiste en erreur. Le CLI S5
+essaie déjà le retrait sur ses échecs après publication. Les doubles
+échecs ne donnent ni sortie partielle ni succès de durabilité ; ils
+demandent leurs portes de faute G4. Aucune faute IO provoquée ici.
 
-- q2 : `(2,1,0),(-2,-1,0)` ; poids1/2 chacun.
-- q3 : `(2,1,0),(-2,1,0),(1,-2,0)` ; poids`(1/4,5/12,1/3)`.
-- q4 : `(2,1,0),(-2,1,0),(0,-1,2),(0,-1,-2)` ; poids1/4,
-  déterminant−32.
+**D.4 — Juge E2.** Pour une boule positive, naissance⇒forte et
+faible⇒jamais naissance. La partie du sélecteur historique, **tout I puis
+K−p sites U**, est stricte si la boule est faible. Cela ne vaut pas pour
+toute K-partie : AC de la ligne0/1/2 a le niveau1 de la boule faible,
+AB et BC le niveau1/4. Le juge général garde donc `initial≤λ` et
+l'ancêtre **fermé** ; le journal de traces strictes garde `initial<λ`.
+Le WIP E2 respecte cette distinction. Les naissances de sites K1 restent
+un cas séparé. Ajouter le témoin D2 à ses fixtures avant les optimisations.
 
-La fermeture est non triviale : $N_2=12$, $N_3=288$, $N_4=3906$.
-À K3, la somme des cofaces par support vaut 4068, contre 3906 cofaces
-uniques : ce témoin tue précisément leur confusion. À K1, les 792 q4
-restent publiés malgré zéro coface par q4.
-
-| K, p=0 | K-parties reliées | Traces strictes | Cofaces par boule |
-| --- | ---: | ---: | ---: |
-| 1 | 24 | 24 | 12 |
-| 2 | 276 | 264 | 288 |
-| 3 | 2024 | 1736 | 3906 |
-
-Le dénombrement exact par combinaisons≤4 est confronté au Gram Fraction,
-sans parcourir les $2^{24}$ masques. C'est un bon oracle `long` **des
-primitives Q_b/N_j**, avec seulement j≤K+1 pour K≤3. Remplacer le seul
-calcul N_j dans l'oracle S1 complet ne suffit pas :
-`_minimal_nonseparable` prolonge aussi les sous-parties séparables
-jusqu'à m. Garder un budget/refus explicite pour cette extension ; aucune
-censure silencieuse ni qualification de tout S1 à 24 sites par ce témoin.
-Les autres sphères proposées sont des compléments facultatifs ; préférer
-ce cas mixte, puis 25 des 30 sites de rayon carré9, en conservant les six
-points axiaux, pour le refus support_shell_capacity de l'appel entier.
-Le plafond ne s'applique pas à FULL. La boule canonique de ce témoin
-vient d'un diamètre : il exerce Q3/Q4 sur une présentation q2 et ne
-remplace pas les portes numériques des centres de présentation q3/q4.
-[Énumération indépendante et mutations](../receipts/audit_supports_contract_20261005/qb/README.md).
+[Copies, modèles et réponses](../receipts/audit_supports_implementation_20261004/README.md) :
+**1 119 gardes portables**, normal/−O identiques ; aucun build, natif ou GCP.
 
 **Décisions courantes : Q_b seul, puis points, puis plat.** La réponse primaire
 du 4 octobre à 20:25 UTC retient le squelette des supports ; la proposition
@@ -326,8 +316,7 @@ rejet n'établit pas la nullité. [Six recoupes du décalage](../receipts/audit_
 Règle étudiée à k≥2 fixé : P1 après qualification m=k+1, en rayon, coupes
 fermées ; e=t′+sup_q(m(p,q)−h(q)), propriétaire vivant au plateau exact.
 [Q1–Q8, preuves détaillées](../receipts/points_answers_20261003/README.md),
-[contrat courant](../docs/HIERARCHIE_POINTS.md) ;
-[réponse du 3 octobre archivée à l’octet](../receipts/audit_supports_contract_20261005/notes_before/REPONSE_CLAUDE_POINTS_20261003.md).
+[réponse courante du développeur](REPONSE_CLAUDE_POINTS_20261003.md).
 
 | Question | Résultat actuel et portée |
 |---|---|

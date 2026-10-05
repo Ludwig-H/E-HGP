@@ -1,0 +1,7 @@
+{
+  "exit_normal": 1,
+  "exit_optimized": 1,
+  "failure": "ValueError: passenger at whole-plateau merger",
+  "cause": "audit harness erroneously tested the documented K1 passenger at K2",
+  "native_or_product_failure": false
+}

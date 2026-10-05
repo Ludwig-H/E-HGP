@@ -1,0 +1,2 @@
+mutant att_coupe_ouverte tue par 2 ecart(s) ; premier : triangle_aigu@2 : InvariantError : lemme A (T3) : les 3 K-parties de P_b donnent les noeuds {0, 1, 2}
+mutant_killed att_coupe_ouverte

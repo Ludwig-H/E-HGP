@@ -1,0 +1,2 @@
+mutant c3_une_fusion tue par 1 ecart(s) ; premier : passagere@1 : InvariantError : lemme C.3 : fusion 4, branches [0, 1] contre enfants (0, 1, 2)
+mutant_killed c3_une_fusion

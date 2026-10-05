@@ -1,0 +1,445 @@
+{
+  "capacity": {
+    "closure_scratch_bytes_W48_m24": 100663296,
+    "closure_scratch_bytes_m24": 2097152,
+    "future_admission_formula": "resident domain + resident tree + count metadata + W_active * (8*closure_words(max_selected_m) + support_capacity(max_selected_m)*sizeof(Support)) + exact admitted output arrays",
+    "global_S_at_B_u32max": 55516747255170,
+    "global_Z_upper_at_B_u32max": 222066989020680,
+    "max_cofaces_per_ball": 1476337800,
+    "max_cofaces_sum_at_B_u32max": 6340822567372251000,
+    "max_kparties_per_ball": 834451800,
+    "max_kparties_sum_at_B_u32max": 3583943190253881000,
+    "max_supports_per_ball": 12926,
+    "sizeof_Support_measured": false
+  },
+  "checks": 13491,
+  "fixed_shape": {
+    "large_p_refusals": 36,
+    "valid_cases_retained": 398
+  },
+  "native_executed": false,
+  "other_spheres": [
+    {
+      "N2_N3_N4": {
+        "2": 12,
+        "3": 272,
+        "4": 3768
+      },
+      "Q_by_arity": {
+        "2": 12,
+        "3": 8,
+        "4": 918
+      },
+      "proof": "exact determinants and containment of minimal masks; no independent Gram cross-check on this row",
+      "sites": 24,
+      "squared_radius": 6
+    },
+    {
+      "N2_N3_N4": {
+        "2": 12,
+        "3": 288,
+        "4": 3906
+      },
+      "Q_by_arity": {
+        "2": 12,
+        "3": 24,
+        "4": 792
+      },
+      "proof": "exact determinants and containment of minimal masks; no independent Gram cross-check on this row",
+      "sites": 24,
+      "squared_radius": 10
+    },
+    {
+      "N2_N3_N4": {
+        "2": 12,
+        "3": 264,
+        "4": 3696
+      },
+      "Q_by_arity": {
+        "2": 12,
+        "3": 0,
+        "4": 990
+      },
+      "proof": "exact determinants and containment of minimal masks; no independent Gram cross-check on this row",
+      "sites": 24,
+      "squared_radius": 11
+    },
+    {
+      "N2_N3_N4": {
+        "2": 12,
+        "3": 288,
+        "4": 3906
+      },
+      "Q_by_arity": {
+        "2": 12,
+        "3": 24,
+        "4": 792
+      },
+      "proof": "exact determinants and containment of minimal masks; no independent Gram cross-check on this row",
+      "sites": 24,
+      "squared_radius": 13
+    }
+  ],
+  "scope": [
+    "Source S6 WIP at basef98, published S1 helpers Git5ad; new documentation929 separately pinned.",
+    "Sphere5 cross-check uses all12926 presentations versus independent Gram; other4 rows only determinant/containment computation.",
+    "No enumeration of2**24 subsets, native execution, memory allocation stress, G4 or wall-time claim.",
+    "S6a primitive takes caller buffers; global count/fill assembly/admission not delivered in this snapshot."
+  ],
+  "source_sha256": {
+    "published/reference/hgp11_ref/supports.py": "826f3f94ce9eeb66e6ed04edce8266dd70b52498fd929c2ec7f7dbc01538a541",
+    "wip/src/supports/counts.cpp": "23e01a8784e54d0dbe8d60ce3a2ec7ad9f4cae53f8668f39a5f2d4e728e8989a",
+    "wip/src/supports/counts.hpp": "c3e91e1de8bc7f72f5dc7b7067e1d72d6e9e82f924dd713cfc5287231092883e",
+    "wip/src/supports/enumerate.cpp": "3a8fcd0d7af148e4d7748234c8c02bec5f75158bfef41c5e7c5299177dbe7c86",
+    "wip/src/supports/supports.hpp": "cd0c4dd4aee1868b2eb266e9bcba7340247dc3e2fc36d8706c44c14de358993b"
+  },
+  "sphere5": {
+    "N2_N3_N4": {
+      "2": 12,
+      "3": 288,
+      "4": 3906
+    },
+    "Q_by_arity": {
+      "2": 12,
+      "3": 24,
+      "4": 792
+    },
+    "Q_total": 828,
+    "counts_K1_K2_K3": [
+      {
+        "cofaces": 12,
+        "compressed_parts": 24,
+        "gabriel_cofaces": 12,
+        "k": 1,
+        "kparties_reliees": 24,
+        "per_support_cofaces": {
+          "2": 1,
+          "3": 0,
+          "4": 0
+        },
+        "strict_traces": 24
+      },
+      {
+        "cofaces": 288,
+        "compressed_parts": 276,
+        "gabriel_cofaces": 288,
+        "k": 2,
+        "kparties_reliees": 276,
+        "per_support_cofaces": {
+          "2": 22,
+          "3": 1,
+          "4": 0
+        },
+        "strict_traces": 264
+      },
+      {
+        "cofaces": 3906,
+        "compressed_parts": 2024,
+        "gabriel_cofaces": 3906,
+        "k": 3,
+        "kparties_reliees": 2024,
+        "per_support_cofaces": {
+          "2": 231,
+          "3": 21,
+          "4": 1
+        },
+        "strict_traces": 1736
+      }
+    ],
+    "mutation_guards": [
+      "replace minimal Q by closure",
+      "omit zeta when counting N",
+      "remove q4 at K1 because cofaces0"
+    ],
+    "nonminimal_zeta_example3": [
+      [
+        -2,
+        -1,
+        0
+      ],
+      [
+        -2,
+        0,
+        -1
+      ],
+      [
+        2,
+        0,
+        1
+      ]
+    ],
+    "points": [
+      [
+        -2,
+        -1,
+        0
+      ],
+      [
+        -2,
+        0,
+        -1
+      ],
+      [
+        -2,
+        0,
+        1
+      ],
+      [
+        -2,
+        1,
+        0
+      ],
+      [
+        -1,
+        -2,
+        0
+      ],
+      [
+        -1,
+        0,
+        -2
+      ],
+      [
+        -1,
+        0,
+        2
+      ],
+      [
+        -1,
+        2,
+        0
+      ],
+      [
+        0,
+        -2,
+        -1
+      ],
+      [
+        0,
+        -2,
+        1
+      ],
+      [
+        0,
+        -1,
+        -2
+      ],
+      [
+        0,
+        -1,
+        2
+      ],
+      [
+        0,
+        1,
+        -2
+      ],
+      [
+        0,
+        1,
+        2
+      ],
+      [
+        0,
+        2,
+        -1
+      ],
+      [
+        0,
+        2,
+        1
+      ],
+      [
+        1,
+        -2,
+        0
+      ],
+      [
+        1,
+        0,
+        -2
+      ],
+      [
+        1,
+        0,
+        2
+      ],
+      [
+        1,
+        2,
+        0
+      ],
+      [
+        2,
+        -1,
+        0
+      ],
+      [
+        2,
+        0,
+        -1
+      ],
+      [
+        2,
+        0,
+        1
+      ],
+      [
+        2,
+        1,
+        0
+      ]
+    ],
+    "presentations_up_to4": 12926,
+    "q3_weights": [
+      "1/4",
+      "5/12",
+      "1/3"
+    ],
+    "q4_determinant": -32,
+    "q4_weights": [
+      "1/4",
+      "1/4",
+      "1/4",
+      "1/4"
+    ],
+    "sites": 24,
+    "squared_radius": 5
+  },
+  "sphere9_refusal_subset25": {
+    "expected_refusal": "support_shell_capacity",
+    "full_shell_size": 30,
+    "k": 1,
+    "qmin": 2,
+    "scope": "mathematical cloud and scalar public factory, not native rejection/FULL execution",
+    "selected_points": [
+      [
+        -3,
+        0,
+        0
+      ],
+      [
+        0,
+        -3,
+        0
+      ],
+      [
+        0,
+        0,
+        -3
+      ],
+      [
+        0,
+        0,
+        3
+      ],
+      [
+        0,
+        3,
+        0
+      ],
+      [
+        3,
+        0,
+        0
+      ],
+      [
+        -2,
+        -2,
+        -1
+      ],
+      [
+        -2,
+        -2,
+        1
+      ],
+      [
+        -2,
+        -1,
+        -2
+      ],
+      [
+        -2,
+        -1,
+        2
+      ],
+      [
+        -2,
+        1,
+        -2
+      ],
+      [
+        -2,
+        1,
+        2
+      ],
+      [
+        -2,
+        2,
+        -1
+      ],
+      [
+        -2,
+        2,
+        1
+      ],
+      [
+        -1,
+        -2,
+        -2
+      ],
+      [
+        -1,
+        -2,
+        2
+      ],
+      [
+        -1,
+        2,
+        -2
+      ],
+      [
+        -1,
+        2,
+        2
+      ],
+      [
+        1,
+        -2,
+        -2
+      ],
+      [
+        1,
+        -2,
+        2
+      ],
+      [
+        1,
+        2,
+        -2
+      ],
+      [
+        1,
+        2,
+        2
+      ],
+      [
+        2,
+        -2,
+        -1
+      ],
+      [
+        2,
+        -2,
+        1
+      ],
+      [
+        2,
+        -1,
+        -2
+      ]
+    ],
+    "squared_radius": 9
+  },
+  "status": "PASS"
+}

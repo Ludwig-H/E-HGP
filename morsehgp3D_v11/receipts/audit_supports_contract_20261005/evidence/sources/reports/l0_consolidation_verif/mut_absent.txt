@@ -1,0 +1,19 @@
+refus : mutant inconnu 'absent'
+Porte de l'oracle borne des supports d'ordre K (tranche S1 de la sortie parametree de mhgp11).
+
+    python3 test_supports.py                  faits graves (fixtures de la spec, paragraphe 2.9, et de l'audit
+                                              1bf4be68f), puis la suite : fixtures et familles a positions distinctes,
+                                              K <= min(5, n - 1) ; zero ecart, invariance par permutation et par
+                                              reetiquetage, compteurs exacts, planchers, empreintes des sorties
+    python3 test_supports.py --inject=NOM     mutant de ref_mutants.SUPPORT_MUTANTS : 4 s'il est tue par sa cause
+    python3 test_supports.py --list-mutants
+    python3 test_supports.py --dump=NOM       sortie canonique (JSON) d'une fixture, a tous ses ordres
+
+Codes de sortie (docs/ARCHITECTURE.md, paragraphe 5) : 0 conforme ; 1 ecart (fait grave, lemme viole, empreinte
+d'une fixture, invariance) ; 2 refus d'usage ; 3 plancher, compteur exact ou empreinte de la suite ; 4 mutant tue
+(--inject seulement ; un mutant qui survit rend 0 et ecrit mutant_survives).
+
+L'oracle (hgp11_ref/supports.py) et le generateur des familles sont charges SANS le paquet hgp11_ref (ni __init__, ni
+constructive, ni judge, ni dumps) par ref_mutants.load_private : l'oracle ne s'appuie que sur l'etage A. Python 3.10
+nu ; aucun assert : la porte rend le meme code et la meme ligne sous python3 -O.
+

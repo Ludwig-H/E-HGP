@@ -1,6 +1,6 @@
 # Audits courants de la v11
 
-4 octobre 2026. Cadre : `exploration_v11_hors_registre / cpu_reference /
+5 octobre 2026. Cadre : `exploration_v11_hors_registre / cpu_reference /
 quantized_u21_input_only / not_claimed`. Notes maintenues en place ;
 preuves détaillées dans les reçus immuables.
 
@@ -8,25 +8,26 @@ preuves détaillées dans les reçus immuables.
 - [Moteur : qualification, performances et intégration](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md).
 - [Question courante du développeur sur 100 ms](QUESTION_CLAUDE_VITESSE_100MS_20261004.md).
 - [Réponse courante du développeur sur les supports](REPONSE_CLAUDE_SUPPORTS_20261004.md) : gardes adoptées, réponses D.1 à D.4 intégrées au contrat S0.
-- [Réponse du développeur sur les points](REPONSE_CLAUDE_POINTS_20261003.md).
+- [Contrat courant des points](../docs/HIERARCHIE_POINTS.md), avec
+  [échange du 3 octobre archivé](../receipts/audit_supports_contract_20261005/notes_before/README.md).
 - [Audit indépendant, maintenu par son auteur](AUDIT_OUVERTURE_ET_REPRISE_V10_20261002.md).
 
-**Chantier courant : supports, arbre K seul.** La décision primaire à
-20:25 UTC retient **Q_b seul**, **K-parties reliées par la boule**, puis
-supports → points → plat. S2/257aabb92 livre l'en-tête public ;
-S4/f98aeed67 livre io. **WIP S3/S5/S6 et contrat S0 relus** : journal
-et énumération favorables ; validation de p+q corrigée en WIP, garde du
-nombre de traces avant cast u32 encore à ajouter. Les quatre questions
-du développeur ont leur réponse dans la note mathématique : agrégats,
-empreinte autonome, état publié après erreur et juge E2 faible.
-[Revue et **1 119 gardes portables**](../receipts/audit_supports_implementation_20261004/README.md).
-Ces WIP restent à qualifier sur G4. La preuve D2 (`41<64<1681/25`) et les
-exceptions d'invariance sont reprises dans L0. Les portes Q_b avant
-fermeture Euler et q4 à cofaces nulles sont respectées par lecture.
-[Décision, preuves et **6 456 gardes portables**](../receipts/audit_supports_followup_20261004/README.md).
-Les conseils précédents sur les comptes, événements faibles et attribution
-des plateaux sont repris dans la conception ; Q_b comme carrier reste
-discontinu. [Contrelecture précédente](../receipts/audit_supports_20261004/README.md).
+**Chantier courant : supports, arbre K seul.** S0/S1 **5adf6a59f** et
+la demande **9290cf3bf** sont relus favorablement : lemmes P/W, deux
+lectures E5, D2 et 13 mutants causaux. S2/257aabb92 et S4/f98aeed67 sont
+livrés. Les WIP S3/S6 ont maintenant leurs gardes p+q/traces ; D2/E5 sont
+présents en S3. Qualification native G4 encore attendue.
+
+**Réponse utile au développeur.** La sphère entière de rayon carré5,
+24 sites, mêle 12 q2, 24 q3, 792 q4 ; N4=3906 diffère des 4068 incidences
+par support. Elle fournit la porte au plafond, avec 25/30 sites de rayon
+carré9 pour le refus entier. Le futur oracle `long` doit borner aussi
+`_minimal_nonseparable`, pas seulement remplacer le parcours2^m de N_j.
+S5 doit intégrer signature V2/publication, fermer SIGXFSZ et juger le
+champ de signature publié. Matrice G4 proposée favorable, séparée par
+livraison et profil, avec coût des nouvelles portes fixé avant session.
+[Relecture et preuves bornées](../receipts/audit_supports_contract_20261005/README.md).
+Les preuves antérieures restent immuables, liées dans les deux notes.
 
 **Tour FULL et temps.** La référence qualifiée K5/u21/W48 donne
 **412 /352 /381 ms** sur trois trames sans sol de la séquence08.
@@ -53,7 +54,8 @@ Pour la tête plate, B se calcule par LCA, avec date stable3ε et plafond
 sB≤t′+d_k/2 ; perte de frontières et stabilité des labels restent distinctes.
 
 **Six Markdown actifs**, sans nouveau journal. Les échanges dépassés sont
-[archivés avec leurs empreintes](../receipts/audit_dialogues_20261004/README.md).
+[archivés avec leurs empreintes](../receipts/audit_dialogues_20261004/README.md),
+[réponse points comprise](../receipts/audit_supports_contract_20261005/notes_before/README.md).
 Une contradiction utile devient une fixture liée à ses sources et à son
 domaine. Aucun nouveau build/test natif, fit ou GCP lancé par les auditeurs
 pour cette publication. Les rapports locaux S2/S4 ne sont pas promus en

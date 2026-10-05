@@ -1,0 +1,111 @@
+{
+  "schema": "mhgp11.audit.l1_matrix_advice.v1",
+  "status": "proposal_only_no_native_or_G4_qualification",
+  "request_doc_pin": "9290cf3bfe51147ede73d178dce8bf62e31c82d8",
+  "source_code_review_pin": "5adf6a59f3d3b99fdf947e676e8548d4102ab48f",
+  "oracle_mutants": {
+    "ant_coupe_fermee": {
+      "cause": "lemme C",
+      "fixtures": [
+        "triangle_aigu@2",
+        "passagere@1"
+      ]
+    },
+    "att_coupe_ouverte": {
+      "cause": "lemme A",
+      "fixtures": [
+        "triangle_aigu@2",
+        "passagere@1"
+      ]
+    },
+    "c3_une_fusion": {
+      "cause": "lemme C.3",
+      "fixtures": [
+        "passagere@1"
+      ]
+    },
+    "cofaces_ordre_k": {
+      "cause": "lemme G",
+      "fixtures": [
+        "carre@1",
+        "ligne3@2"
+      ]
+    },
+    "fenetre_forte": {
+      "cause": "perimetre",
+      "fixtures": [
+        "triangle_equilateral@2",
+        "carre@1"
+      ]
+    },
+    "h_fortes_etroites": {
+      "cause": "lemme H",
+      "fixtures": [
+        "growth_abcz@3",
+        "carre@3"
+      ]
+    },
+    "interne_vie_inversee": {
+      "cause": "interne hors de la vie",
+      "fixtures": [
+        "carre@1"
+      ]
+    },
+    "m1_support_inverse": {
+      "cause": "lemme F (M1)",
+      "fixtures": [
+        "carre@2"
+      ]
+    },
+    "populations_naissances_seules": {
+      "cause": "lemme H",
+      "fixtures": [
+        "growth_abcz@3"
+      ]
+    },
+    "premier_support_seul": {
+      "cause": "lemme F",
+      "fixtures": [
+        "cube@2",
+        "growth_abcz@3"
+      ]
+    },
+    "regle_parent_inversee": {
+      "cause": "regle du parent",
+      "fixtures": [
+        "triangle_aigu@2"
+      ]
+    },
+    "triangle_droit_admis": {
+      "cause": "lemme F",
+      "fixtures": [
+        "triangle_droit@1",
+        "carre@2"
+      ]
+    },
+    "w4_gabriel_juge": {
+      "cause": "lemme W.4",
+      "fixtures": [
+        "triangle_aigu@2",
+        "carre@1"
+      ]
+    }
+  },
+  "requested_scope": [
+    "GCC Release u21 and u24, distinct coordinate-width builds and exact source/compiler/flags/binary pins",
+    "ASan+UBSan and TSan, each qualified only for executed profile/configuration",
+    "tower/supports/io/api/cli mutation gates from actual integrated source, named causal disagreements or expected refusals; compile failure/signal not a successful kill",
+    "scale8000/16000/32000 diagnostics separate from whole-LiDAR K5 performance and no global100ms claim from scales",
+    "shell24 successful complete Q_b and shell25 named refusal/transaction, plus independent long oracle K<=3"
+  ],
+  "u18": "explicit separate profile; no automatic qualification transfer from u21/u24 or historical foundations; new ports not claimed unless executed",
+  "prerequisites": [
+    "Integrated final S3/S5/S6 source before matrix; reports/WIP placeholders are not source/binary qualification",
+    "Requested/selected/played gates and exclusions recorded, sanitizer skips/failures preserved",
+    "No native FULL/supports/points/GPU/profile/time qualification established by these Python source/report checks"
+  ],
+  "long_oracle_warning": {
+    "source": "reference/hgp11_ref/supports.py:241-267 and486-526",
+    "detail": "N_j rewrite alone does not bound independent minimal_nonseparable frontier, which iterates to shell size; keep explicit long label/deadline and preserve censorship. For K<=3, count only N_j needed up to K+1, still enumerate all minimal supports arities2..4."
+  }
+}

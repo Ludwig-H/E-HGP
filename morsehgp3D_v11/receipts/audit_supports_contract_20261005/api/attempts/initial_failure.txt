@@ -1,0 +1,1 @@
+ValueError: substring not found. Inspection expected assignment from variable manifest; actual source assigns writers_[kMaxOutputFiles].digest(). Audit checker corrected, product source unchanged.

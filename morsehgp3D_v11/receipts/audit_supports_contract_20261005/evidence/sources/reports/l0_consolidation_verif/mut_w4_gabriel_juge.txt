@@ -1,0 +1,2 @@
+mutant w4_gabriel_juge tue par 2 ecart(s) ; premier : triangle_aigu@2 : InvariantError : lemme W.4 : liaison non Gabriel (0, 1, 2) separante (branches [0, 1, 2])
+mutant_killed w4_gabriel_juge

@@ -1,0 +1,48 @@
+{
+  "time": "2026-10-05T05:56:19.097228+00:00",
+  "repo": "/workspaces/E-HGP/build/v11-impl-s3",
+  "head": "f98aeed67d4030dd78e11d5faf7d8556c4d17aaf",
+  "status": " M morsehgp3D_v11/docs/FULL_FORESTS.md\n M morsehgp3D_v11/docs/PROVENANCE.md\n M morsehgp3D_v11/src/tower/forest_internal.hpp\n M morsehgp3D_v11/src/tower/forest_plateau.cpp\n M morsehgp3D_v11/src/tower/module.cmake\n M morsehgp3D_v11/src/tower/tower.hpp\n M morsehgp3D_v11/tests/mutants/tower.json\n M morsehgp3D_v11/tests/tower/public_header_test.cpp\n M morsehgp3D_v11/tests/tower/tests.cmake\n?? morsehgp3D_v11/src/tower/attachment.cpp\n?? morsehgp3D_v11/src/tower/order_tree.cpp\n?? morsehgp3D_v11/src/tower/order_tree.hpp\n?? morsehgp3D_v11/src/tower/seed_log.hpp\n?? morsehgp3D_v11/tests/tower/attach_export_gate.py\n?? morsehgp3D_v11/tests/tower/attach_judge.cpp\n?? morsehgp3D_v11/tests/tower/attach_probe.cpp\n?? morsehgp3D_v11/tests/tower/attach_test.cpp\n?? morsehgp3D_v11/tests/tower/order_tree_fault.cpp\n?? morsehgp3D_v11/tests/tower/order_tree_support.hpp\n?? morsehgp3D_v11/tests/tower/order_tree_test.cpp\n",
+  "sources": [
+    {
+      "path": "morsehgp3D_v11/src/tower/order_tree.cpp",
+      "sha256": "90cd183e46431940262bc6393e72f2f118e7319274bf12c277c5c32e7d5a92b0",
+      "bytes": 5007
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/order_tree.hpp",
+      "sha256": "eb969eaae761bbf7e190d46f07ce35aa18205ad166c051d4c78ac9705ebc1265",
+      "bytes": 5353
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/attachment.cpp",
+      "sha256": "7bcbc62b88a8e679cb71f340c6066a204bad706b0f6c9cb7ff3fa1a770d3120e",
+      "bytes": 10362
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/seed_log.hpp",
+      "sha256": "71254bc166f1098b01a78fe1d30af0fc343dfd9c087faa95632b9d46d93778ec",
+      "bytes": 3859
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_plateau.cpp",
+      "sha256": "0494d978fdc2188f288cf5a55dbf6bbe18bbb9436bde8c2756da070d16bc0300",
+      "bytes": 7060
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/order_tree_support.hpp",
+      "sha256": "c75b45d2478f2a23b21f1d49d3f7887a229fa68fc0ab465212d54a3bf8ab7654",
+      "bytes": 7175
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/order_tree_test.cpp",
+      "sha256": "4f3e10078cc065e11c169c2f9939828dede942de3e21c2712794a24684ef83c7",
+      "bytes": 10010
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/order_tree_fault.cpp",
+      "sha256": "4650a63380bba6ada6c47b0b5bd75ae7e1de9c5930022bdfc2b2569a25d2f7cf",
+      "bytes": 4461
+    }
+  ]
+}

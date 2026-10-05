@@ -1,0 +1,2 @@
+mutant h_fortes_etroites tue par 1 ecart(s) ; premier : growth_abcz@3 : InvariantError : lemme H : noeud 0 coupe 16 : K-polyedre [0, 1, 2], union W_K [0, 1, 2], fortes []
+mutant_killed h_fortes_etroites

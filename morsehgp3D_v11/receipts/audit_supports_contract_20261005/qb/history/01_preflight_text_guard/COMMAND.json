@@ -1,0 +1,5 @@
+{
+  "command": "python3 -B -S check_followup.py > normal.json 2> normal.stderr",
+  "exit_code": 1,
+  "cause": "Verifier source-text check used uppercase Un registre but the captured comment splits Un and registre on two lines; no product execution or defect."
+}

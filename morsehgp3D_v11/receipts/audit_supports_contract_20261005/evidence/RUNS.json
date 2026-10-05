@@ -1,0 +1,25 @@
+[
+  {
+    "command": [
+      "python3",
+      "-B",
+      "-S",
+      "check_l0_s1.py"
+    ],
+    "exit_code": 0,
+    "stdout_sha256": "fc50da4df436cae956e707d159436fcc8946fc438643fca73205c2ce741c19f1",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "command": [
+      "python3",
+      "-B",
+      "-O",
+      "-S",
+      "check_l0_s1.py"
+    ],
+    "exit_code": 0,
+    "stdout_sha256": "fc50da4df436cae956e707d159436fcc8946fc438643fca73205c2ce741c19f1",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

@@ -1,0 +1,21 @@
+{
+  "time": "2026-10-05T05:58:43.617944+00:00",
+  "pin": "5adf6a59f3d3b99fdf947e676e8548d4102ab48f",
+  "files": [
+    {
+      "path": "morsehgp3D_v11/reference/hgp11_ref/definition.py",
+      "sha256": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43",
+      "bytes": 14676
+    },
+    {
+      "path": "morsehgp3D_v11/reference/hgp11_ref/model.py",
+      "sha256": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c",
+      "bytes": 3172
+    },
+    {
+      "path": "morsehgp3D_v11/reference/hgp11_ref/intgeom.py",
+      "sha256": "d0f7b1cecbbb1b25c3091bc1e3d3d062b9ee0f16b1d81c7117bf60b0d13a3f4b",
+      "bytes": 8511
+    }
+  ]
+}

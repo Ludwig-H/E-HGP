@@ -1,0 +1,188 @@
+[
+  {
+    "source": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/src/api/api.hpp",
+    "copy": "morsehgp3D_v11/src/api/api.hpp",
+    "sha256": "88a1eb6d02d8cc960528838c278906b05f3f8bb1fa2f1aa89203a7581cd94a7e",
+    "bytes": 9050
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/src/api/selftest.cpp",
+    "copy": "morsehgp3D_v11/src/api/selftest.cpp",
+    "sha256": "340188732e0bfc369c39d123822796b9b6a58eb9e36d3bec2a86e317954a4342",
+    "bytes": 5795
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/src/api/write_full.cpp",
+    "copy": "morsehgp3D_v11/src/api/write_full.cpp",
+    "sha256": "b6cf88730e7574142d47ce9df237eaf707e577e3058f0ae70c66fb7501f29d66",
+    "bytes": 6050
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/src/api/manifest.cpp",
+    "copy": "morsehgp3D_v11/src/api/manifest.cpp",
+    "sha256": "ff45297c0a0568e976a64696d43755b2cad5edff0d51e381b65b9cd13d20cee4",
+    "bytes": 8642
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/src/api/selftest.hpp",
+    "copy": "morsehgp3D_v11/src/api/selftest.hpp",
+    "sha256": "c8a330b8bcf3c2bb144cc4f2400c6103ec4a8125ddefebd3ba9418a46f8fc8c0",
+    "bytes": 1749
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/src/api/compute.cpp",
+    "copy": "morsehgp3D_v11/src/api/compute.cpp",
+    "sha256": "aa72035c79192a812e41bd4e162c9e0467965b09864c4c1a2a4f19e5d1d9b27c",
+    "bytes": 4221
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/src/api/internal.hpp",
+    "copy": "morsehgp3D_v11/src/api/internal.hpp",
+    "sha256": "8ff52cdbb2b1aef7c32a74caa5cd5b78422182f2b876eafce210b0b3abafaa64",
+    "bytes": 2251
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/src/api/module.cmake",
+    "copy": "morsehgp3D_v11/src/api/module.cmake",
+    "sha256": "c30b487bbccb030d554e6a04da84dc379fd83d884613c380bf663097e28aa888",
+    "bytes": 170
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/src/api/session.cpp",
+    "copy": "morsehgp3D_v11/src/api/session.cpp",
+    "sha256": "266526e1728d016378070148a6ebf13b30516a7ddaacc7b8dbff416831163439",
+    "bytes": 2185
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/cli/cli.cmake",
+    "copy": "morsehgp3D_v11/cli/cli.cmake",
+    "sha256": "cc15e61af47feb94da5880bf53a741bab2f0b5dc5d6d74b3f831cdbbdebf799b",
+    "bytes": 465
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/cli/mhgp11.cpp",
+    "copy": "morsehgp3D_v11/cli/mhgp11.cpp",
+    "sha256": "6277bb7a453496113f89681a0326dbda94018c7e57c58d2519dca3cf0bd3cd63",
+    "bytes": 16114
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/api/session_fault.cpp",
+    "copy": "morsehgp3D_v11/tests/api/session_fault.cpp",
+    "sha256": "d4a5d41e1ea8a671db52eafed5c448eb4beddd692ff9f4a9ff3cfb84f443d32b",
+    "bytes": 6959
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/api/session_test.cpp",
+    "copy": "morsehgp3D_v11/tests/api/session_test.cpp",
+    "sha256": "481d738118df4f267adabb16d4ba8384cb645fc8ad38337301f01e72f74332d5",
+    "bytes": 12455
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/api/api_support.hpp",
+    "copy": "morsehgp3D_v11/tests/api/api_support.hpp",
+    "sha256": "2b6d29c7cb01271c85f625e0c4d0172d8b9ec2b9099a40c32609eee2ed7d4770",
+    "bytes": 5927
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/api/selftest_fault.cpp",
+    "copy": "morsehgp3D_v11/tests/api/selftest_fault.cpp",
+    "sha256": "d297aa844b86d27a0380b87b840c3a936c5eb3944170132e3a75732b86251228",
+    "bytes": 2618
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/api/selftest_test.cpp",
+    "copy": "morsehgp3D_v11/tests/api/selftest_test.cpp",
+    "sha256": "e5c960a6aa414dc13c9bef1fe63e014ead999d04bf15f522530b4a5073ab9c7b",
+    "bytes": 3117
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/api/tests.cmake",
+    "copy": "morsehgp3D_v11/tests/api/tests.cmake",
+    "sha256": "16604ca8e5b2b79fa522180d378b55358f72a0d4af7b1c48c018ad1d99f0e1fc",
+    "bytes": 1523
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/cli/cli_full_invariance.py",
+    "copy": "morsehgp3D_v11/tests/cli/cli_full_invariance.py",
+    "sha256": "a5427170e4e98b9aa6915d4ae5e72a5e8cbd39ca0faa76ae1ac8aee0a07824eb",
+    "bytes": 7695
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/cli/cli_support.py",
+    "copy": "morsehgp3D_v11/tests/cli/cli_support.py",
+    "sha256": "d514a812d65413abef3d6504d4e85140c119a41336dd4c6358f3396e87c55f2a",
+    "bytes": 4243
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/cli/cli_full_identity.py",
+    "copy": "morsehgp3D_v11/tests/cli/cli_full_identity.py",
+    "sha256": "de7cbd615f37c8ec454ac62be55decdab11d5605ab14615a054324630740e30b",
+    "bytes": 9623
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/cli/cli_contract.py",
+    "copy": "morsehgp3D_v11/tests/cli/cli_contract.py",
+    "sha256": "5e5906a968a3910a05d226e2dad0cca5d8d78e5a5861a0009b2c637520826f0f",
+    "bytes": 15720
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/cli/fenv_preload.cpp",
+    "copy": "morsehgp3D_v11/tests/cli/fenv_preload.cpp",
+    "sha256": "a8d2dc0cde9fa63985626ecbab7873ad8ff7d83fee249873d9e6b40ba3b729d7",
+    "bytes": 603
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/cli/tests.cmake",
+    "copy": "morsehgp3D_v11/tests/cli/tests.cmake",
+    "sha256": "00bb07e46cfa99af05b8863b8eb763fc8f841a0738e0348d456a734b3c8cdb8d",
+    "bytes": 4292
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/src/io/directory.cpp",
+    "copy": "morsehgp3D_v11/src/io/directory.cpp",
+    "sha256": "ad6065d8097cb582e32649bce24d127d9d51818b39da816815bc812f3e693627",
+    "bytes": 12132
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/src/core/reasons.def",
+    "copy": "morsehgp3D_v11/src/core/reasons.def",
+    "sha256": "e3040c19a2f3deae8feca756a263550896f2f5770980a775baea8c56314b2449",
+    "bytes": 4345
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/mutants/api.json",
+    "copy": "morsehgp3D_v11/tests/mutants/api.json",
+    "sha256": "60dfe0471df266bb57b54d0358aee39f9cc76fc2665157c47a48d1ec295ed321",
+    "bytes": 3252
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/mutants/cli.json",
+    "copy": "morsehgp3D_v11/tests/mutants/cli.json",
+    "sha256": "43815b3446af591060bc5e4fb1d76743d326f7ac6218e7d25fabcfd6cc8ab0f0",
+    "bytes": 4008
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-auditor-20261003/morsehgp3D_v11/docs/SORTIES.md",
+    "copy": "L0/morsehgp3D_v11/docs/SORTIES.md",
+    "sha256": "2cfb849d388542f198ad413ad2f9f77999ab738d5eff921fbcf3288804df8c1a",
+    "bytes": 43418
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-auditor-20261003/morsehgp3D_v11/docs/ARCHITECTURE.md",
+    "copy": "L0/morsehgp3D_v11/docs/ARCHITECTURE.md",
+    "sha256": "ab00b2ebfc799a946c8621835b736181b8e7258d5342fc739d26cb56c3da79bc",
+    "bytes": 18393
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-persist/sortie_supports/verif_s5.md",
+    "copy": "reports/verif_s5.md",
+    "sha256": "2dd26debfe6d9cdc3bbff2cf1ec4c44b585f433bccfb410ea01eee46862bd08e",
+    "bytes": 24583
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-persist/sortie_supports/impl_s5.md",
+    "copy": "reports/impl_s5.md",
+    "sha256": "e984fe47099cc61a48d6ceac1d758d91578eacd03199cfdd25a732bf9bcd215a",
+    "bytes": 29370
+  }
+]

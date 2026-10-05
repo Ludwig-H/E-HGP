@@ -1,0 +1,15 @@
+{
+  "utc": "2026-10-05T06:03:01.049957+00:00",
+  "scope": "new doc-only developer questions before G4; code base remains5ad",
+  "sources": [
+    {
+      "kind": "git_blob",
+      "repo": "/workspaces/E-HGP/build/v11-auditor-20261003",
+      "pin": "9290cf3bfe51147ede73d178dce8bf62e31c82d8",
+      "path": "morsehgp3D_v11/audits/REPONSE_CLAUDE_SUPPORTS_20261004.md",
+      "copy": "sources/git_delta/morsehgp3D_v11/audits/REPONSE_CLAUDE_SUPPORTS_20261004.md",
+      "sha256": "88205062ad968085db007d6bbbc589fdbc8650ae9053abeb0dc7f582adb6352f",
+      "bytes": 20419
+    }
+  ]
+}

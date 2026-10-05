@@ -1,0 +1,95 @@
+{
+  "module": "cli",
+  "plancher": 11,
+  "construction": ["cli"],
+  "mutants": [
+    {
+      "id": "option_hors_sortie_admise",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "    if (raw.seen[slot] && kKnown[slot].plat_only) return \"option propre a la sortie plat\";",
+      "remplace": "    if (raw.seen[slot] && kKnown[slot].plat_only && slot == kKnown.size()) return \"option propre a la sortie plat\";",
+      "porte": "mhgp11_cli_contract",
+      "note": "--mcs, --z, --selection admis avec --sortie=full"
+    },
+    {
+      "id": "k_treize_admis",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "number < 1 || number > api::kMaxOrder) return \"--k hors de 1..12\";",
+      "remplace": "number < 1 || number > api::kMaxOrder + 1) return \"--k hors de 1..12\";",
+      "porte": "mhgp11_cli_contract",
+      "note": "--k=13 passe les options et n'est refuse qu'au calcul"
+    },
+    {
+      "id": "budget_nul_admis",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "    if (!parse_u64(raw.value[kBudget], number) || number == 0) return",
+      "remplace": "    if (!parse_u64(raw.value[kBudget], number) || number == 1) return",
+      "porte": "mhgp11_cli_contract",
+      "note": "--budget=0 admis par les options"
+    },
+    {
+      "id": "budget_ignore",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "api::Session::make({o.budget.value_or(MemoryBudget::kUnlimited), o.workers});",
+      "remplace": "api::Session::make({MemoryBudget::kUnlimited, o.workers});",
+      "porte": "mhgp11_cli_contract",
+      "note": "--budget sans effet"
+    },
+    {
+      "id": "fils_ignores",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "api::Session::make({o.budget.value_or(MemoryBudget::kUnlimited), o.workers});",
+      "remplace": "api::Session::make({o.budget.value_or(MemoryBudget::kUnlimited), 1});",
+      "porte": "mhgp11_cli_full_identity",
+      "note": "--fils sans effet : la ligne standard rapporte un seul fil"
+    },
+    {
+      "id": "entree_sur_sortie_standard_admise",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "        standard.input = true;",
+      "remplace": "        standard.input = false;",
+      "porte": "mhgp11_cli_contract",
+      "note": "la ligne JSON est ajoutee a une entree"
+    },
+    {
+      "id": "sortie_standard_non_controlee",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "  const bool flushed = std::fflush(stdout) == 0;\n  return flushed && std::ferror(stdout) == 0;",
+      "remplace": "  std::fflush(stdout);\n  return true;",
+      "porte": "mhgp11_cli_contract",
+      "note": "code 0 et dossier publie alors que la ligne standard est perdue"
+    },
+    {
+      "id": "retrait_omis",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "    const bool retracted = directory.retract().ok();",
+      "remplace": "    const bool retracted = false;",
+      "porte": "mhgp11_cli_contract",
+      "note": "refus apres la publication sans retrait du dossier publie"
+    },
+    {
+      "id": "pas_non_recopie",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "                                     o.budget,         o.grid_step,   o.origin};",
+      "remplace": "                                     o.budget,         {},            o.origin};",
+      "porte": "mhgp11_cli_contract",
+      "note": "--pas absent du manifeste"
+    },
+    {
+      "id": "ecriture_full_permutee",
+      "fichier": "src/api/write_full.cpp",
+      "cherche": "    out.word(node.child_begin);\n    out.word(node.child_count);",
+      "remplace": "    out.word(node.child_count);\n    out.word(node.child_begin);",
+      "porte": "mhgp11_cli_full_identity",
+      "note": "champs d'un noeud permutes : octets differents du dump de la sonde"
+    },
+    {
+      "id": "manifeste_taille_fausse",
+      "fichier": "src/api/manifest.cpp",
+      "cherche": "  number(out, file_bytes);",
+      "remplace": "  number(out, file_bytes + 1);",
+      "porte": "mhgp11_cli_full_identity",
+      "note": "taille du fichier full fausse dans le manifeste"
+    }
+  ]
+}

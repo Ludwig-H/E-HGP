@@ -1,0 +1,2 @@
+mutant triangle_droit_admis tue par 2 ecart(s) ; premier : triangle_droit@1 : InvariantError : lemme F : Q_b [(0, 1, 2), (1, 2)] contre parties non separables minimales [(1, 2)]
+mutant_killed triangle_droit_admis

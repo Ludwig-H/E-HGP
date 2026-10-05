@@ -1,0 +1,2 @@
+mutant fenetre_forte tue par 2 ecart(s) ; premier : triangle_equilateral@2 : InvariantError : perimetre : liaison de Gabriel (0, 1, 2) de boule hors de W_K (p=0, q=3)
+mutant_killed fenetre_forte

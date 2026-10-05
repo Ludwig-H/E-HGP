@@ -1,0 +1,2 @@
+mutant ant_coupe_fermee tue par 2 ecart(s) ; premier : triangle_aigu@2 : InvariantError : lemme C.1 : branches des traces comprimees frozenset({0, 1, 2}) contre frozenset({3})
+mutant_killed ant_coupe_fermee

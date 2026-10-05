@@ -1,0 +1,203 @@
+{
+  "captured_utc": "2026-10-05T05:56:58.469942+00:00",
+  "actor": "/workspaces/E-HGP/build/v11-auditor-20261003",
+  "head": "5adf6a59f3d3b99fdf947e676e8548d4102ab48f",
+  "source_pin": "5adf6a59f3d3b99fdf947e676e8548d4102ab48f",
+  "sources": [
+    {
+      "kind": "git_blob",
+      "repo": "/workspaces/E-HGP/build/v11-auditor-20261003",
+      "pin": "5adf6a59f3d3b99fdf947e676e8548d4102ab48f",
+      "path": "AGENTS.md",
+      "copy": "sources/git/AGENTS.md",
+      "sha256": "6c903c0afee18e274130184c535891f51a1e75a7b4a89d1deee9d8c4cc0d3420",
+      "bytes": 128803
+    },
+    {
+      "kind": "git_blob",
+      "repo": "/workspaces/E-HGP/build/v11-auditor-20261003",
+      "pin": "5adf6a59f3d3b99fdf947e676e8548d4102ab48f",
+      "path": "morsehgp3D_v11/README.md",
+      "copy": "sources/git/morsehgp3D_v11/README.md",
+      "sha256": "1eef3c30d90c01470f069f8ba123821d6a246ad87560a812632b0dc31b4187d2",
+      "bytes": 10234
+    },
+    {
+      "kind": "git_blob",
+      "repo": "/workspaces/E-HGP/build/v11-auditor-20261003",
+      "pin": "5adf6a59f3d3b99fdf947e676e8548d4102ab48f",
+      "path": "morsehgp3D_v11/docs/ARCHITECTURE.md",
+      "copy": "sources/git/morsehgp3D_v11/docs/ARCHITECTURE.md",
+      "sha256": "ab00b2ebfc799a946c8621835b736181b8e7258d5342fc739d26cb56c3da79bc",
+      "bytes": 18393
+    },
+    {
+      "kind": "git_blob",
+      "repo": "/workspaces/E-HGP/build/v11-auditor-20261003",
+      "pin": "5adf6a59f3d3b99fdf947e676e8548d4102ab48f",
+      "path": "morsehgp3D_v11/docs/PROVENANCE.md",
+      "copy": "sources/git/morsehgp3D_v11/docs/PROVENANCE.md",
+      "sha256": "2e85a50f5e681792dc01f48727a6b935f5b31607e2ff6ad5d44d98a4bb6c0dfc",
+      "bytes": 45364
+    },
+    {
+      "kind": "git_blob",
+      "repo": "/workspaces/E-HGP/build/v11-auditor-20261003",
+      "pin": "5adf6a59f3d3b99fdf947e676e8548d4102ab48f",
+      "path": "morsehgp3D_v11/docs/SORTIES.md",
+      "copy": "sources/git/morsehgp3D_v11/docs/SORTIES.md",
+      "sha256": "2cfb849d388542f198ad413ad2f9f77999ab738d5eff921fbcf3288804df8c1a",
+      "bytes": 43418
+    },
+    {
+      "kind": "git_blob",
+      "repo": "/workspaces/E-HGP/build/v11-auditor-20261003",
+      "pin": "5adf6a59f3d3b99fdf947e676e8548d4102ab48f",
+      "path": "morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "copy": "sources/git/morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "sha256": "f1873c10b669922a3c41ce5f03b57d91fd8bd6b9e53c7459699be4d66bd1bb44",
+      "bytes": 72776
+    },
+    {
+      "kind": "git_blob",
+      "repo": "/workspaces/E-HGP/build/v11-auditor-20261003",
+      "pin": "5adf6a59f3d3b99fdf947e676e8548d4102ab48f",
+      "path": "morsehgp3D_v11/docs/HIERARCHIE_POINTS.md",
+      "copy": "sources/git/morsehgp3D_v11/docs/HIERARCHIE_POINTS.md",
+      "sha256": "035af984a31d870ea3b56f08abf13f087015437d02297c9072b3e0aff689ce94",
+      "bytes": 33611
+    },
+    {
+      "kind": "git_blob",
+      "repo": "/workspaces/E-HGP/build/v11-auditor-20261003",
+      "pin": "5adf6a59f3d3b99fdf947e676e8548d4102ab48f",
+      "path": "morsehgp3D_v11/reference/hgp11_ref/supports.py",
+      "copy": "sources/git/morsehgp3D_v11/reference/hgp11_ref/supports.py",
+      "sha256": "826f3f94ce9eeb66e6ed04edce8266dd70b52498fd929c2ec7f7dbc01538a541",
+      "bytes": 39510
+    },
+    {
+      "kind": "git_blob",
+      "repo": "/workspaces/E-HGP/build/v11-auditor-20261003",
+      "pin": "5adf6a59f3d3b99fdf947e676e8548d4102ab48f",
+      "path": "morsehgp3D_v11/reference/test_supports.py",
+      "copy": "sources/git/morsehgp3D_v11/reference/test_supports.py",
+      "sha256": "beaa65092a9651364f1c09dfd64733e5cc5382636f0193c964e71dee47acdd52",
+      "bytes": 37225
+    },
+    {
+      "kind": "git_blob",
+      "repo": "/workspaces/E-HGP/build/v11-auditor-20261003",
+      "pin": "5adf6a59f3d3b99fdf947e676e8548d4102ab48f",
+      "path": "morsehgp3D_v11/reference/ref_mutants.py",
+      "copy": "sources/git/morsehgp3D_v11/reference/ref_mutants.py",
+      "sha256": "b6750ae0b3cbeb6dfcd8febdee8ba71dfcfa5bac8e55c340fe28bc9568d24231",
+      "bytes": 23198
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_consolidation.md",
+      "copy": "sources/reports/l0_consolidation.md",
+      "sha256": "9869dab06a6e23f096dfa2373f4d020787d182b81c1141ae6eddc6b0b7db80c3",
+      "bytes": 27181,
+      "mtime_ns": 1791154583267653771
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_verif_docs.md",
+      "copy": "sources/reports/l0_verif_docs.md",
+      "sha256": "79883254d14e526555f75a16d5c10be134fd52c343b127818b868d0fa297cd92",
+      "bytes": 27658,
+      "mtime_ns": 1791151692854613321
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_verif_oracle.md",
+      "copy": "sources/reports/l0_verif_oracle.md",
+      "sha256": "7643f626fb1753edf6ddc49e153187fcb1a101ddab5d0fdf1b909ef52145bce2",
+      "bytes": 31363,
+      "mtime_ns": 1791152378521622917
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l1_s1_oracle.md",
+      "copy": "sources/reports/l1_s1_oracle.md",
+      "sha256": "8e67745f4fa0011e8a0c0f0082d992946e12626474ce05f4f21d499197feb567",
+      "bytes": 23366,
+      "mtime_ns": 1791150232533592885
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/DECISIONS_UTILISATEUR.md",
+      "copy": "sources/reports/DECISIONS_UTILISATEUR.md",
+      "sha256": "0a122dd8b7da6515814ec155b4e128243db33e8ed708ecf208151fab7d992cbe",
+      "bytes": 7866,
+      "mtime_ns": 1791146226182536819
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_consolidation_verif/d2_enfants.py",
+      "copy": "sources/reports/l0_consolidation_verif/d2_enfants.py",
+      "sha256": "1ef25e821c105bd064f63001a8431e3c207fcb6fec28c3b81ab0e6fc187e420f",
+      "bytes": 2355,
+      "mtime_ns": 1791154408352651323
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_consolidation_verif/d2_enfants.out",
+      "copy": "sources/reports/l0_consolidation_verif/d2_enfants.out",
+      "sha256": "ce1d7a8455afa9ddc5ad2359ac4b7ab30b025b5ea4804e0f2242836d8a50e01a",
+      "bytes": 157,
+      "mtime_ns": 1791154408513651325
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_consolidation_verif/gate_py310.out",
+      "copy": "sources/reports/l0_consolidation_verif/gate_py310.out",
+      "sha256": "7618b734a230b2255435a18b8bdf8e4766df3e0dc3642e2141ae4bd051e38dc7",
+      "bytes": 589,
+      "mtime_ns": 1791154400048651207
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_consolidation_verif/gate_py310_O.out",
+      "copy": "sources/reports/l0_consolidation_verif/gate_py310_O.out",
+      "sha256": "7618b734a230b2255435a18b8bdf8e4766df3e0dc3642e2141ae4bd051e38dc7",
+      "bytes": 589,
+      "mtime_ns": 1791154400052651207
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_consolidation_verif/gate_py312.out",
+      "copy": "sources/reports/l0_consolidation_verif/gate_py312.out",
+      "sha256": "7618b734a230b2255435a18b8bdf8e4766df3e0dc3642e2141ae4bd051e38dc7",
+      "bytes": 589,
+      "mtime_ns": 1791154400031651206
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_consolidation_verif/gate_py312_O.out",
+      "copy": "sources/reports/l0_consolidation_verif/gate_py312_O.out",
+      "sha256": "7618b734a230b2255435a18b8bdf8e4766df3e0dc3642e2141ae4bd051e38dc7",
+      "bytes": 589,
+      "mtime_ns": 1791154400038651206
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_consolidation_verif/ctest_reference_LE_long.txt",
+      "copy": "sources/reports/l0_consolidation_verif/ctest_reference_LE_long.txt",
+      "sha256": "030e784375f8e99d2479bdc9a1cd6f0f1d40163cf0009e0a81ecc23b80c4f33c",
+      "bytes": 15520,
+      "mtime_ns": 1791154400059651207
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_consolidation_verif/SHA256SUMS",
+      "copy": "sources/reports/l0_consolidation_verif/SHA256SUMS",
+      "sha256": "b5d4eebff54be5af652719caa33fafebcc4a7b724f77ad4f795b451d59c06701",
+      "bytes": 2479,
+      "mtime_ns": 1791154408552651326
+    }
+  ],
+  "scope": "read-only S0/S1 contracts and report metadata; no native/build/GCP/fit/geometric suite"
+}

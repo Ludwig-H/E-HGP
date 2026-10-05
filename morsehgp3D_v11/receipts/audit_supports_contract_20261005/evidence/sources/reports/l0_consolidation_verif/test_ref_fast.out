@@ -1,0 +1,7 @@
+...............
+----------------------------------------------------------------------
+Ran 15 tests in 8.591s
+
+OK
+reference_fast faits=15 ecarts=0 clouds=342 orders=1362 cuts=48234 levels=21771 nodes=13029 births=8205 merges=4824 nary_merges=1580 plateau_levels=142 mixed_levels=392 verticals=9641 core_entries=8232 core_at_node_level=3127 cover_entries=8232 cover_ties=595 balls=9318 extended_balls=760 weighted_balls=264 general_births=794 general_joins=954 general_inert=1113 jumps=145 descents=56405 steps=10501 adhoc_spheres=34 weighted_clouds=34
+reference_fast_ok nuages=342 ordres=1362 coupes=48234 noeuds=13029

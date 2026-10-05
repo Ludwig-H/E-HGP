@@ -1,0 +1,519 @@
+{
+  "capture_end_utc": "2026-10-05T05:57:22.989665+00:00",
+  "captures": [
+    {
+      "bytes": 22941,
+      "head_blob_present": true,
+      "head_blob_sha256": "f293df6ea1a2cc8d5fef6e78453de66343728a61d3013a5d1613cfdbb374dd18",
+      "live_equals_head": true,
+      "origin": "dev_live_wip",
+      "owned": "wip/bench/catalogue_euler.hpp",
+      "path": "bench/catalogue_euler.hpp",
+      "present": true,
+      "sha256": "f293df6ea1a2cc8d5fef6e78453de66343728a61d3013a5d1613cfdbb374dd18"
+    },
+    {
+      "bytes": 16540,
+      "head_blob_present": true,
+      "head_blob_sha256": "a55e5f61bec2a95e2f2a8bee546039e51c1e3dd888c374bbb5581c7eab66249a",
+      "live_equals_head": false,
+      "origin": "dev_live_wip",
+      "owned": "wip/docs/ARCHITECTURE.md",
+      "path": "docs/ARCHITECTURE.md",
+      "present": true,
+      "sha256": "6212482760bb27495574699930d161b881db21109f50b93de648fbff40d3b108"
+    },
+    {
+      "bytes": 47302,
+      "head_blob_present": true,
+      "head_blob_sha256": "c5d6ef4a0e747710e1f479fecf58425f1e3452ca5a121c6204a9b7a627898043",
+      "live_equals_head": false,
+      "origin": "dev_live_wip",
+      "owned": "wip/docs/PROVENANCE.md",
+      "path": "docs/PROVENANCE.md",
+      "present": true,
+      "sha256": "1816019e2ad8e82f2b6d868b3e4062b1c6078203ec4bbd10c8d5c709f9ccbc25"
+    },
+    {
+      "bytes": 12031,
+      "head_blob_present": true,
+      "head_blob_sha256": "b30ccf094af665dd20ec7b2f87ca53919039bf1ecaedb68fde5b25d4d386e9ff",
+      "live_equals_head": true,
+      "origin": "dev_live_wip",
+      "owned": "wip/src/catalogue/catalogue.hpp",
+      "path": "src/catalogue/catalogue.hpp",
+      "present": true,
+      "sha256": "b30ccf094af665dd20ec7b2f87ca53919039bf1ecaedb68fde5b25d4d386e9ff"
+    },
+    {
+      "bytes": 7270,
+      "head_blob_present": true,
+      "head_blob_sha256": "dd04b4f051cf356a0a12639d29c037594cacc4f9d9913a1238d94faafbbcfc68",
+      "live_equals_head": true,
+      "origin": "dev_live_wip",
+      "owned": "wip/src/cloud/cloud.hpp",
+      "path": "src/cloud/cloud.hpp",
+      "present": true,
+      "sha256": "dd04b4f051cf356a0a12639d29c037594cacc4f9d9913a1238d94faafbbcfc68"
+    },
+    {
+      "bytes": 2213,
+      "head_blob_present": true,
+      "head_blob_sha256": "0654a7849aac687f9c8213784ee22e76033427582779de0d26adf297b307116e",
+      "live_equals_head": true,
+      "origin": "dev_live_wip",
+      "owned": "wip/src/core/buffer.cpp",
+      "path": "src/core/buffer.cpp",
+      "present": true,
+      "sha256": "0654a7849aac687f9c8213784ee22e76033427582779de0d26adf297b307116e"
+    },
+    {
+      "bytes": 11306,
+      "head_blob_present": true,
+      "head_blob_sha256": "3f520dd045226ff115ea67b26859b43ec7415e855ef1c8f4542e8217414c7940",
+      "live_equals_head": true,
+      "origin": "dev_live_wip",
+      "owned": "wip/src/core/buffer.hpp",
+      "path": "src/core/buffer.hpp",
+      "present": true,
+      "sha256": "3f520dd045226ff115ea67b26859b43ec7415e855ef1c8f4542e8217414c7940"
+    },
+    {
+      "bytes": 325,
+      "head_blob_present": true,
+      "head_blob_sha256": "5b3703641031c27e7bf907b2a8c05c79007ee1cae47da7d8e5f94ea435c563d3",
+      "live_equals_head": true,
+      "origin": "dev_live_wip",
+      "owned": "wip/src/core/core.hpp",
+      "path": "src/core/core.hpp",
+      "present": true,
+      "sha256": "5b3703641031c27e7bf907b2a8c05c79007ee1cae47da7d8e5f94ea435c563d3"
+    },
+    {
+      "bytes": 3337,
+      "head_blob_present": true,
+      "head_blob_sha256": "7cad3a8604b2f4553b0653cb75613394ca7f55765811b6281584dce49b92a773",
+      "live_equals_head": true,
+      "origin": "dev_live_wip",
+      "owned": "wip/src/core/ledger.cpp",
+      "path": "src/core/ledger.cpp",
+      "present": true,
+      "sha256": "7cad3a8604b2f4553b0653cb75613394ca7f55765811b6281584dce49b92a773"
+    },
+    {
+      "bytes": 3326,
+      "head_blob_present": true,
+      "head_blob_sha256": "5c14715e44557374d83639160825b87bd323e15fccba42d5461c219328d9e998",
+      "live_equals_head": true,
+      "origin": "dev_live_wip",
+      "owned": "wip/src/core/ledger.hpp",
+      "path": "src/core/ledger.hpp",
+      "present": true,
+      "sha256": "5c14715e44557374d83639160825b87bd323e15fccba42d5461c219328d9e998"
+    },
+    {
+      "bytes": 4413,
+      "head_blob_present": true,
+      "head_blob_sha256": "0063e8eefdef7e6e5efbaa5187f985eae851150bb5acf75c198de409abb721a2",
+      "live_equals_head": false,
+      "origin": "dev_live_wip",
+      "owned": "wip/src/core/reasons.def",
+      "path": "src/core/reasons.def",
+      "present": true,
+      "sha256": "a0d38d86466f797616395500f9071a332b0e8e9291ce2b045c2cbccdd9632c75"
+    },
+    {
+      "bytes": 8148,
+      "head_blob_present": true,
+      "head_blob_sha256": "e6004beb5ec4e78fb2b582004f4122611602809d360ff9f1b3bf4679348f6594",
+      "live_equals_head": true,
+      "origin": "dev_live_wip",
+      "owned": "wip/src/core/status.hpp",
+      "path": "src/core/status.hpp",
+      "present": true,
+      "sha256": "e6004beb5ec4e78fb2b582004f4122611602809d360ff9f1b3bf4679348f6594"
+    },
+    {
+      "bytes": 4385,
+      "head_blob_present": true,
+      "head_blob_sha256": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954",
+      "live_equals_head": true,
+      "origin": "dev_live_wip",
+      "owned": "wip/src/core/types.hpp",
+      "path": "src/core/types.hpp",
+      "present": true,
+      "sha256": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954"
+    },
+    {
+      "bytes": 2586,
+      "head_blob_present": true,
+      "head_blob_sha256": "b86c7918573e473a9492b3c26c463f9cb340cec5e97d092e774a5c0af44c062e",
+      "live_equals_head": true,
+      "origin": "dev_live_wip",
+      "owned": "wip/src/num/budgets.hpp",
+      "path": "src/num/budgets.hpp",
+      "present": true,
+      "sha256": "b86c7918573e473a9492b3c26c463f9cb340cec5e97d092e774a5c0af44c062e"
+    },
+    {
+      "bytes": 10136,
+      "head_blob_present": true,
+      "head_blob_sha256": "3f1baafbd9cbd8d7640cf49c19fe227d3a3a0d14fe642f3dd4531a42f8724c11",
+      "live_equals_head": true,
+      "origin": "dev_live_wip",
+      "owned": "wip/src/num/geometry.hpp",
+      "path": "src/num/geometry.hpp",
+      "present": true,
+      "sha256": "3f1baafbd9cbd8d7640cf49c19fe227d3a3a0d14fe642f3dd4531a42f8724c11"
+    },
+    {
+      "bytes": 1473,
+      "head_blob_present": true,
+      "head_blob_sha256": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97",
+      "live_equals_head": true,
+      "origin": "dev_live_wip",
+      "owned": "wip/src/num/geometry_internal.hpp",
+      "path": "src/num/geometry_internal.hpp",
+      "present": true,
+      "sha256": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97"
+    },
+    {
+      "bytes": 1443,
+      "head_blob_present": true,
+      "head_blob_sha256": "c769f20addcc11ef9e249031baee3ce79d538c7aff61d0035e069237d73193e9",
+      "live_equals_head": true,
+      "origin": "dev_live_wip",
+      "owned": "wip/src/num/level.hpp",
+      "path": "src/num/level.hpp",
+      "present": true,
+      "sha256": "c769f20addcc11ef9e249031baee3ce79d538c7aff61d0035e069237d73193e9"
+    },
+    {
+      "bytes": 177,
+      "head_blob_present": true,
+      "head_blob_sha256": "16cc7bc78385c64b38f297a173ce01b5819eed5521576b2cecf2c5ca7b2404c9",
+      "live_equals_head": true,
+      "origin": "dev_live_wip",
+      "owned": "wip/src/num/num.hpp",
+      "path": "src/num/num.hpp",
+      "present": true,
+      "sha256": "16cc7bc78385c64b38f297a173ce01b5819eed5521576b2cecf2c5ca7b2404c9"
+    },
+    {
+      "bytes": 783,
+      "head_blob_present": true,
+      "head_blob_sha256": "f8571e6274677a3af1f93948a544b9091ee0e2b1d910cba26bf01b7a8cdc4ec0",
+      "live_equals_head": true,
+      "origin": "dev_live_wip",
+      "owned": "wip/src/num/orientation_certificate.hpp",
+      "path": "src/num/orientation_certificate.hpp",
+      "present": true,
+      "sha256": "f8571e6274677a3af1f93948a544b9091ee0e2b1d910cba26bf01b7a8cdc4ec0"
+    },
+    {
+      "bytes": 742,
+      "head_blob_present": true,
+      "head_blob_sha256": "ba545b4f5d5bb7cd2d2b6198162241bbd4b89b3e6b725485f54f0387d6a804c0",
+      "live_equals_head": true,
+      "origin": "dev_live_wip",
+      "owned": "wip/src/num/power_certificate.hpp",
+      "path": "src/num/power_certificate.hpp",
+      "present": true,
+      "sha256": "ba545b4f5d5bb7cd2d2b6198162241bbd4b89b3e6b725485f54f0387d6a804c0"
+    },
+    {
+      "bytes": 1132,
+      "head_blob_present": true,
+      "head_blob_sha256": "e38083a1cb0d1f4b90df711ecd47496ddd3d7998306b5ba713062107a610228b",
+      "live_equals_head": true,
+      "origin": "dev_live_wip",
+      "owned": "wip/src/num/power_checked.hpp",
+      "path": "src/num/power_checked.hpp",
+      "present": true,
+      "sha256": "e38083a1cb0d1f4b90df711ecd47496ddd3d7998306b5ba713062107a610228b"
+    },
+    {
+      "bytes": 17687,
+      "head_blob_present": true,
+      "head_blob_sha256": "4bfa98717529baffb9072a3c014078a64c8d96f23d69856b4136a210f3ae6d6a",
+      "live_equals_head": true,
+      "origin": "dev_live_wip",
+      "owned": "wip/src/num/predicates.cpp",
+      "path": "src/num/predicates.cpp",
+      "present": true,
+      "sha256": "4bfa98717529baffb9072a3c014078a64c8d96f23d69856b4136a210f3ae6d6a"
+    },
+    {
+      "bytes": 6323,
+      "head_blob_present": true,
+      "head_blob_sha256": "4da1b9bf57afdc068e91afe9616491a70787ed934add72e0d25cf1a8b81a9dc3",
+      "live_equals_head": true,
+      "origin": "dev_live_wip",
+      "owned": "wip/src/num/sphere.cpp",
+      "path": "src/num/sphere.cpp",
+      "present": true,
+      "sha256": "4da1b9bf57afdc068e91afe9616491a70787ed934add72e0d25cf1a8b81a9dc3"
+    },
+    {
+      "bytes": 3204,
+      "head_blob_present": false,
+      "origin": "dev_live_wip",
+      "owned": "wip/src/supports/counts.cpp",
+      "path": "src/supports/counts.cpp",
+      "present": true,
+      "sha256": "23e01a8784e54d0dbe8d60ce3a2ec7ad9f4cae53f8668f39a5f2d4e728e8989a"
+    },
+    {
+      "bytes": 6901,
+      "head_blob_present": false,
+      "origin": "dev_live_wip",
+      "owned": "wip/src/supports/counts.hpp",
+      "path": "src/supports/counts.hpp",
+      "present": true,
+      "sha256": "c3e91e1de8bc7f72f5dc7b7067e1d72d6e9e82f924dd713cfc5287231092883e"
+    },
+    {
+      "bytes": 11558,
+      "head_blob_present": false,
+      "origin": "dev_live_wip",
+      "owned": "wip/src/supports/enumerate.cpp",
+      "path": "src/supports/enumerate.cpp",
+      "present": true,
+      "sha256": "3a8fcd0d7af148e4d7748234c8c02bec5f75158bfef41c5e7c5299177dbe7c86"
+    },
+    {
+      "bytes": 268,
+      "head_blob_present": false,
+      "origin": "dev_live_wip",
+      "owned": "wip/src/supports/module.cmake",
+      "path": "src/supports/module.cmake",
+      "present": true,
+      "sha256": "95342e4228ddb1f92d2ccdf487f2b4fc2e08c7c7804ffecb6db2e91fdac8535e"
+    },
+    {
+      "bytes": 625,
+      "head_blob_present": false,
+      "origin": "dev_live_wip",
+      "owned": "wip/src/supports/source_pins.json",
+      "path": "src/supports/source_pins.json",
+      "present": true,
+      "sha256": "08ac193093184ff7e99b9ef8d8d91c0c41963a39a304b13d705dc871f52bd1b1"
+    },
+    {
+      "bytes": 6037,
+      "head_blob_present": false,
+      "origin": "dev_live_wip",
+      "owned": "wip/src/supports/supports.hpp",
+      "path": "src/supports/supports.hpp",
+      "present": true,
+      "sha256": "cd0c4dd4aee1868b2eb266e9bcba7340247dc3e2fc36d8706c44c14de358993b"
+    },
+    {
+      "bytes": 3698,
+      "head_blob_present": true,
+      "head_blob_sha256": "662074316fe5d424141ab9400320bf3af85debd7c34f02945af449772164e604",
+      "live_equals_head": true,
+      "origin": "dev_live_wip",
+      "owned": "wip/src/tower/full_domain.hpp",
+      "path": "src/tower/full_domain.hpp",
+      "present": true,
+      "sha256": "662074316fe5d424141ab9400320bf3af85debd7c34f02945af449772164e604"
+    },
+    {
+      "bytes": 4139,
+      "head_blob_present": false,
+      "origin": "dev_live_wip",
+      "owned": "wip/tests/mutants/supports.json",
+      "path": "tests/mutants/supports.json",
+      "present": true,
+      "sha256": "461c031de0c5f1cbb67e6acb0377915a5484360329b801f589e48cd7292e6ebe"
+    },
+    {
+      "bytes": 21368,
+      "head_blob_present": false,
+      "origin": "dev_live_wip",
+      "owned": "wip/tests/supports/sample_judge.py",
+      "path": "tests/supports/sample_judge.py",
+      "present": true,
+      "sha256": "1c8285c81213411c3f9e0ed28b45c912e447232be5e246043ec5a4141ca5caad"
+    },
+    {
+      "bytes": 21655,
+      "head_blob_present": false,
+      "origin": "dev_live_wip",
+      "owned": "wip/tests/supports/supports_probe.cpp",
+      "path": "tests/supports/supports_probe.cpp",
+      "present": true,
+      "sha256": "2e1dd632478c568b7383d5a8ced8afb1447a85318b893c93bcfd98ff88fcbbab"
+    },
+    {
+      "bytes": 3928,
+      "head_blob_present": false,
+      "origin": "dev_live_wip",
+      "owned": "wip/tests/supports/supports_support.hpp",
+      "path": "tests/supports/supports_support.hpp",
+      "present": true,
+      "sha256": "4863cdf0456418c18be60d3937bd643857652d19134ff3c68b22f4570673cd11"
+    },
+    {
+      "bytes": 27365,
+      "head_blob_present": false,
+      "origin": "dev_live_wip",
+      "owned": "wip/tests/supports/supports_test.cpp",
+      "path": "tests/supports/supports_test.cpp",
+      "present": true,
+      "sha256": "4f2c84098c25811f3a3457f772f3d1d756d46d8fabe723e22f8c2873d743960f"
+    },
+    {
+      "bytes": 7388,
+      "head_blob_present": false,
+      "origin": "dev_live_wip",
+      "owned": "wip/tests/supports/tests.cmake",
+      "path": "tests/supports/tests.cmake",
+      "present": true,
+      "sha256": "324cd2d8cb21d376eb72d337f4a582ec2408c4e56ba3da982ab366f33e3e5781"
+    },
+    {
+      "bytes": 43418,
+      "live_before_sha256": "2cfb849d388542f198ad413ad2f9f77999ab738d5eff921fbcf3288804df8c1a",
+      "live_equals_git_before": true,
+      "origin": "git_pin",
+      "owned": "published/docs/SORTIES.md",
+      "path": "docs/SORTIES.md",
+      "present": true,
+      "sha256": "2cfb849d388542f198ad413ad2f9f77999ab738d5eff921fbcf3288804df8c1a"
+    },
+    {
+      "bytes": 18393,
+      "live_before_sha256": "ab00b2ebfc799a946c8621835b736181b8e7258d5342fc739d26cb56c3da79bc",
+      "live_equals_git_before": true,
+      "origin": "git_pin",
+      "owned": "published/docs/ARCHITECTURE.md",
+      "path": "docs/ARCHITECTURE.md",
+      "present": true,
+      "sha256": "ab00b2ebfc799a946c8621835b736181b8e7258d5342fc739d26cb56c3da79bc"
+    },
+    {
+      "bytes": 72776,
+      "live_before_sha256": "f1873c10b669922a3c41ce5f03b57d91fd8bd6b9e53c7459699be4d66bd1bb44",
+      "live_equals_git_before": true,
+      "origin": "git_pin",
+      "owned": "published/docs/MATHEMATIQUES.md",
+      "path": "docs/MATHEMATIQUES.md",
+      "present": true,
+      "sha256": "f1873c10b669922a3c41ce5f03b57d91fd8bd6b9e53c7459699be4d66bd1bb44"
+    },
+    {
+      "bytes": 17586,
+      "live_before_sha256": "10872891be1def0c351c3d78bc81c4287e01e79120be85c866e40ff32de179d6",
+      "live_equals_git_before": true,
+      "origin": "git_pin",
+      "owned": "published/audits/REPONSE_CLAUDE_SUPPORTS_20261004.md",
+      "path": "audits/REPONSE_CLAUDE_SUPPORTS_20261004.md",
+      "present": true,
+      "sha256": "10872891be1def0c351c3d78bc81c4287e01e79120be85c866e40ff32de179d6"
+    },
+    {
+      "bytes": 39510,
+      "live_before_sha256": "826f3f94ce9eeb66e6ed04edce8266dd70b52498fd929c2ec7f7dbc01538a541",
+      "live_equals_git_before": true,
+      "origin": "git_pin",
+      "owned": "published/reference/hgp11_ref/supports.py",
+      "path": "reference/hgp11_ref/supports.py",
+      "present": true,
+      "sha256": "826f3f94ce9eeb66e6ed04edce8266dd70b52498fd929c2ec7f7dbc01538a541"
+    },
+    {
+      "bytes": 37225,
+      "live_before_sha256": "beaa65092a9651364f1c09dfd64733e5cc5382636f0193c964e71dee47acdd52",
+      "live_equals_git_before": true,
+      "origin": "git_pin",
+      "owned": "published/reference/test_supports.py",
+      "path": "reference/test_supports.py",
+      "present": true,
+      "sha256": "beaa65092a9651364f1c09dfd64733e5cc5382636f0193c964e71dee47acdd52"
+    },
+    {
+      "bytes": 8511,
+      "live_before_sha256": "d0f7b1cecbbb1b25c3091bc1e3d3d062b9ee0f16b1d81c7117bf60b0d13a3f4b",
+      "live_equals_git_before": true,
+      "origin": "git_pin",
+      "owned": "published/reference/hgp11_ref/intgeom.py",
+      "path": "reference/hgp11_ref/intgeom.py",
+      "present": true,
+      "sha256": "d0f7b1cecbbb1b25c3091bc1e3d3d062b9ee0f16b1d81c7117bf60b0d13a3f4b"
+    },
+    {
+      "bytes": 14676,
+      "live_before_sha256": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43",
+      "live_equals_git_before": true,
+      "origin": "git_pin",
+      "owned": "published/reference/hgp11_ref/definition.py",
+      "path": "reference/hgp11_ref/definition.py",
+      "present": true,
+      "sha256": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43"
+    },
+    {
+      "bytes": 24468,
+      "live_before_sha256": "7e97f89789cafb4f241903e6d0f0e636425cdf3d526697e4e891d483f868fedc",
+      "live_equals_git_before": true,
+      "origin": "git_pin",
+      "owned": "published/reference/hgp11_ref/constructive.py",
+      "path": "reference/hgp11_ref/constructive.py",
+      "present": true,
+      "sha256": "7e97f89789cafb4f241903e6d0f0e636425cdf3d526697e4e891d483f868fedc"
+    },
+    {
+      "bytes": 3172,
+      "live_before_sha256": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c",
+      "live_equals_git_before": true,
+      "origin": "git_pin",
+      "owned": "published/reference/hgp11_ref/model.py",
+      "path": "reference/hgp11_ref/model.py",
+      "present": true,
+      "sha256": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c"
+    },
+    {
+      "bytes": 943,
+      "live_before_sha256": "5309faf36a56bfb719d9fff4fb5872045aad87b1b35b2fc3992fd2c37791ad3e",
+      "live_equals_git_before": true,
+      "origin": "git_pin",
+      "owned": "published/reference/hgp11_ref/__init__.py",
+      "path": "reference/hgp11_ref/__init__.py",
+      "present": true,
+      "sha256": "5309faf36a56bfb719d9fff4fb5872045aad87b1b35b2fc3992fd2c37791ad3e"
+    },
+    {
+      "bytes": 33103,
+      "origin": "report_live",
+      "owned": "reports/fix_s6.md",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/fix_s6.md",
+      "present": true,
+      "sha256": "7d9efa90993c28487d432dac0d3b290a71bd645c6732515fc8e2f6b34b3a6d19"
+    },
+    {
+      "bytes": 27362,
+      "origin": "report_live",
+      "owned": "reports/verif_s6.md",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/verif_s6.md",
+      "present": true,
+      "sha256": "3e6752bcbabe4b3bf4cf4d9236be6afed48381c874ab4f05abcaab003dbf7242"
+    },
+    {
+      "bytes": 28649,
+      "origin": "report_live",
+      "owned": "reports/impl_s6.md",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/impl_s6.md",
+      "present": true,
+      "sha256": "850231659a40cbedfe154bf11c7ef4b6c3929b937e6c7078c3ea63a3df919a96"
+    }
+  ],
+  "dev_head": "f98aeed67d4030dd78e11d5faf7d8556c4d17aaf",
+  "dev_head_end": "f98aeed67d4030dd78e11d5faf7d8556c4d17aaf",
+  "dev_status": " M morsehgp3D_v11/cmake/modules.cmake\n M morsehgp3D_v11/docs/ARCHITECTURE.md\n M morsehgp3D_v11/docs/PROVENANCE.md\n M morsehgp3D_v11/src/core/reasons.def\n M morsehgp3D_v11/tests/core/status_test.cpp\n?? morsehgp3D_v11/src/supports/\n?? morsehgp3D_v11/tests/mutants/supports.json\n?? morsehgp3D_v11/tests/supports/\n",
+  "native_executed": false,
+  "published_live_head": "5adf6a59f3d3b99fdf947e676e8548d4102ab48f",
+  "published_live_status": "",
+  "published_pin": "5adf6a59f3d3b99fdf947e676e8548d4102ab48f",
+  "utc": "2026-10-05T05:57:22.453791+00:00"
+}

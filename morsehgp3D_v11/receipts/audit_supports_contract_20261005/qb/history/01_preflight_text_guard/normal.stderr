@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/workspaces/.ehgp-backups/supports_followup_20261005/qb/check_followup.py", line 152, in <module>
+    if __name__=='__main__':main()
+                            ^^^^^^
+  File "/workspaces/.ehgp-backups/supports_followup_20261005/qb/check_followup.py", line 75, in main
+    need('Un registre par fil' in public and 'apres la jointure' in public,'private ledgers contract')
+  File "/workspaces/.ehgp-backups/supports_followup_20261005/qb/check_followup.py", line 21, in need
+    if not ok:raise RuntimeError(why)
+              ^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: private ledgers contract

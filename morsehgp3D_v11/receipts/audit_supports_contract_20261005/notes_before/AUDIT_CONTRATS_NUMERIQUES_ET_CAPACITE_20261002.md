@@ -1,51 +1,20 @@
 # Audit courant v11 — contrats, performance et intégration
 
-5 octobre 2026. Contrat S0/S1 **5adf6a59f**, demande **9290cf3bf** et
-brouillons natifs S3/S5/S6 relus ; qualification G4 des nouvelles tranches
-encore attendue. Le socle qualifié et chaque capture CPU/GPU gardent leur
-source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
-`exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
+4 octobre 2026. Audit transversal, **deuxième lecture complète au pin e02a6c235** ;
+**8f68622b2** relu ensuite, sans modification native. Sources qualifiées :
+c40f40798 (FULL), b87285378 (pipeline), ab1a739d1/f1a53fe1c (banc de points).
+Suivi ciblé **c22be4e41 → 66372e621** : tête E1, protocole P08, correctifs P1/P2,
+ports et lecteurs des mesures, réponses aux sept questions de vitesse.
+Actualisation ciblée **462dca187 / 82fff7543 / 77db5738e** : juge Euler/J1
+et feuilles CPU/device/CUDA, transport mémoire et banc froid/chaud.
+**d5b1d0179 / 61da03749** : réponses aux lecteurs et nouvelles mesures CPU ;
+**22a6af6aa** : transports scratch/pool et warp/copie, format compact4ec,
+réduction, réservations et banc relus. Corps géométriques inchangés depuis77 ;
+le header de prédicats ajoute seulement le plafond des compteurs008.
+Les métadonnées GPU3–5 sont figées séparément, aux pins008/b74/16 :
+aucune qualification de la compression22 ne leur est transférée.
+Cadre : `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
-
-## Sorties paramétrées : avant intégration et G4
-
-**S5 : fermer le chemin SIGXFSZ et les portes de publication.** Le CLI
-capturé ignore SIGPIPE seulement. Sous RLIMIT_FSIZE, SIGXFSZ peut tuer
-l'appel et laisser D.pending orphelin (C2 du contrelecteur S5). Ignorer
-également SIGXFSZ permet à l'erreur EFBIG de passer par le refus contrôlé ;
-ajouter la porte native code2/output_unwritable, sans D ni D.pending,
-et son mutant. Le mécanisme Linux est recoupé sur un enfant Python borné
-à 64 octets ; le CLI natif n'a pas été exécuté par cet audit.
-
-S0 adopte `published_complete` et le SHA du manifeste dès sa fermeture.
-La capture S5/io les attend encore : couvrir fsync parent + retour
-impossibles, stdout + retrait impossibles et Session.close + retrait
-impossibles. Conserver le code de refus et l'empreinte du dossier complet.
-Juger aussi **le champ publié** `tree_k_sha256` contre la sérialisation
-indépendante V2 aux K distincts : égalité entre appels ou fonction isolée
-ne tue pas un manifeste constant/à l'ordre1. Les gardes stdout/inode,
-liens symboliques et O_RDONLY sont correctes par lecture ; ajouter leurs
-portes causales. [Source, portée et preuve bornée](../receipts/audit_supports_contract_20261005/api/README.md).
-
-**Matrice proposée : favorable, à découper par livraison.** L1 qualifie
-S3/S6 intégrés sur la même source figée ; io/api/cli et leurs fautes sont
-la qualification L2 dès S5/S7 intégrés. GCC Release u21 et u24 séparés,
-ASan/UBSan et TSan selon les profils réellement joués, mutants des modules
-modifiés, identité build_order/build_full, plateau E1/E2 et déterminisme
-W1/W4/W48. Inclure coquille 24 admise, 25 refusée pour l'appel supports
-entier et q4 à K1 malgré zéro coface. S6a juge les primitives ; ajouter
-budget/refus et count/fill parallèles lorsque l’assemblage est livré.
-Garder u18 explicite si livré, sans transfert de qualification.
-
-Les tailles 8k/16k/32k et LiDAR K5 restent des portes d'échelle, avec
-l'oracle exact sur petits cas. Fixer le coût des jumelles Python/−O,
-des mutants et sanitizers avant la session : la matrice existante a
-un budget global 1380s et des configurations à1200/1300s, sans réserve
-prouvée pour ces ajouts. Séparer un lot `long` plutôt que laisser un délai
-censurer des portes. La mesure L2 apparie FULL/arbre K seul, même masque,
-même entrée et K ; `output` et `write` sont publiés séparément.
-Une seule session gardée, arrêt ciblé certifié, reçu rejugé normal/−O.
-Aucun GCP ni build/test natif lancé pour cet audit.
 
 ## Socle relu et correctifs P1/P2
 

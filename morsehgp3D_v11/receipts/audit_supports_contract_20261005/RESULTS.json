@@ -1,0 +1,18 @@
+{
+  "schema": "ehgp.v11.audit.supports_contract.v1",
+  "source_commit": "5adf6a59f3d3b99fdf947e676e8548d4102ab48f",
+  "developer_note_commit": "9290cf3bfe51147ede73d178dce8bf62e31c82d8",
+  "guard_counts": {
+    "tower": 1447,
+    "qb": 13491,
+    "evidence": 208,
+    "api": 83
+  },
+  "total_guards": 15229,
+  "normal_optimized_equal": true,
+  "native_hgp_executed": false,
+  "native_qualification": "pending_G4",
+  "gcp_used": false,
+  "source_scope": "frozen published S0/S1 and separately pinned WIP snapshots; no claim transferred to later mutations",
+  "cleanliness": "six current audit Markdown; point reply archived byte-identically"
+}

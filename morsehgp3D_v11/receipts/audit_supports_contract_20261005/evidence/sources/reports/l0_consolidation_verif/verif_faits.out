@@ -1,0 +1,21 @@
+OK  D2 arbre : [('1', 0), ('49/2', 0), ('49/2', 0), ('41', 0), ('41', 0), ('65/2', 3), ('1681/25', 3)]
+OK  D2 boule ABC : [('fusion', 0, 3, 3, 3, [3, 4, 5])]
+OK  D2 trace AB : niveau, p, q, hors Cat_2 : (Fraction(64, 1), 2, 2, True)
+OK  D2 niveau precedent de Cat_2 et 41 < 64 < 1681/25 : (Fraction(41, 1), True)
+OK  D2 graine ZW : niveau 1, naissance : (Fraction(1, 1), True)
+OK  D2 AB et ZW meme composante a la coupe 64 : True
+OK  D2 noeud de ZW a la coupe 41 = noeud de AB a la coupe ouverte : True
+OK  D2 lemme W.2 (sommets gardes / retires) : ([(Fraction(65, 2), 3), (Fraction(1681, 25), 3), (Fraction(145, 2), 2)], [(Fraction(65, 2), 3), (Fraction(1681, 25), 2), (Fraction(145, 2), 2)])
+E5 vrai T_2 : 7 naissances ['9/2', '9/2', '11/2', '9', '21/2', '31/2', '41/2'] ; fusions [(Fraction(162, 25), 3), (Fraction(189, 17), 3), (Fraction(83886, 3563), 3)]
+E5 sommets gardes : 8 naissances ['9/2', '9/2', '11/2', '9', '21/2', '31/2', '33/2', '41/2'] ; fusions [(Fraction(162, 25), 3), (Fraction(189, 17), 3), (Fraction(83886, 3563), 3), (Fraction(24, 1), 2)]
+E5 sommets retires : 7 naissances ; fusions [(Fraction(162, 25), 3), (Fraction(189, 17), 3), (Fraction(83886, 3563), 2), (Fraction(24, 1), 2)]
+OK  E5 controle du vrai T_2 par le meme balayage (toutes les liaisons) : [(Fraction(162, 25), 3), (Fraction(189, 17), 3), (Fraction(83886, 3563), 3)]
+OK  E5 nombre de naissances : vrai, sommets gardes, sommets retires : (7, 8, 7)
+OK  E5 AC naissance isolee a 33/2 dans la lecture sommets gardes : True
+OK  diametre, (10,10) sur le cercle : kparties 3 : [('100', 0, 3, 3, [[[0, 0, 0], [20, 0, 0]]])]
+OK  diametre, (10,11) hors du cercle : kparties 1, meme Q_b : [('100', 0, 2, 1, [[[0, 0, 0], [20, 0, 0]]])]
+OK  ligne 0,1,2 : kparties par boule, somme, paires distinctes : ([1, 1, 3], 5, 3)
+OK  cube K1 : boule de niveau 3, arites et cofaces par support : [([2, 2, 2, 2, 4, 4], [1, 1, 1, 1, 0, 0])]
+OK  carre : cote (0,1) neuf au niveau 1, dans P de la diagonale de niveau 2 : (Fraction(1, 1), True, Fraction(2, 1))
+translation entiere : 14 cas, numerotation identique : oui
+verif_faits ok ecarts=0

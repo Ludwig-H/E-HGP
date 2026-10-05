@@ -1,0 +1,2 @@
+mutant cofaces_ordre_k tue par 2 ecart(s) ; premier : carre@1 : InvariantError : lemme G : cofaces = 0 par enumeration, 1 par formule (boule 1, p=0, m=2, K=1)
+mutant_killed cofaces_ordre_k

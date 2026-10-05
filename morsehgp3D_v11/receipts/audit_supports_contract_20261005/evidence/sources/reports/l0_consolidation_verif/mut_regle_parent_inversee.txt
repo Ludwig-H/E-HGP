@@ -1,0 +1,2 @@
+mutant regle_parent_inversee tue par 1 ecart(s) ; premier : triangle_aigu@2 : InvariantError : lemme C.2 (regle du parent) : branche 0 donne 0, att(b) = 3
+mutant_killed regle_parent_inversee

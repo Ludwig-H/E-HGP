@@ -1,0 +1,204 @@
+{
+  "utc": "2026-10-05T06:00:40.944061+00:00",
+  "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_consolidation_verif",
+  "sha256sum_inventory": "b5d4eebff54be5af652719caa33fafebcc4a7b724f77ad4f795b451d59c06701",
+  "scope": "reads hashes of original closed report payloads, no script execution",
+  "entries": [
+    {
+      "path": "check_docs_base_origin_main.txt",
+      "expected": "8910a36a857153903d5ea61037382757d2c7d47ac01bc89b66b45e941bec7c4b",
+      "observed": "8910a36a857153903d5ea61037382757d2c7d47ac01bc89b66b45e941bec7c4b",
+      "match": true,
+      "bytes": 18099
+    },
+    {
+      "path": "check_docs_worktree_final.txt",
+      "expected": "8910a36a857153903d5ea61037382757d2c7d47ac01bc89b66b45e941bec7c4b",
+      "observed": "8910a36a857153903d5ea61037382757d2c7d47ac01bc89b66b45e941bec7c4b",
+      "match": true,
+      "bytes": 18099
+    },
+    {
+      "path": "ctest_reference_LE_long.txt",
+      "expected": "030e784375f8e99d2479bdc9a1cd6f0f1d40163cf0009e0a81ecc23b80c4f33c",
+      "observed": "030e784375f8e99d2479bdc9a1cd6f0f1d40163cf0009e0a81ecc23b80c4f33c",
+      "match": true,
+      "bytes": 15520
+    },
+    {
+      "path": "d2_enfants.out",
+      "expected": "ce1d7a8455afa9ddc5ad2359ac4b7ab30b025b5ea4804e0f2242836d8a50e01a",
+      "observed": "ce1d7a8455afa9ddc5ad2359ac4b7ab30b025b5ea4804e0f2242836d8a50e01a",
+      "match": true,
+      "bytes": 157
+    },
+    {
+      "path": "d2_enfants.py",
+      "expected": "1ef25e821c105bd064f63001a8431e3c207fcb6fec28c3b81ab0e6fc187e420f",
+      "observed": "1ef25e821c105bd064f63001a8431e3c207fcb6fec28c3b81ab0e6fc187e420f",
+      "match": true,
+      "bytes": 2355
+    },
+    {
+      "path": "gate_py310.out",
+      "expected": "7618b734a230b2255435a18b8bdf8e4766df3e0dc3642e2141ae4bd051e38dc7",
+      "observed": "7618b734a230b2255435a18b8bdf8e4766df3e0dc3642e2141ae4bd051e38dc7",
+      "match": true,
+      "bytes": 589
+    },
+    {
+      "path": "gate_py310_O.out",
+      "expected": "7618b734a230b2255435a18b8bdf8e4766df3e0dc3642e2141ae4bd051e38dc7",
+      "observed": "7618b734a230b2255435a18b8bdf8e4766df3e0dc3642e2141ae4bd051e38dc7",
+      "match": true,
+      "bytes": 589
+    },
+    {
+      "path": "gate_py312.out",
+      "expected": "7618b734a230b2255435a18b8bdf8e4766df3e0dc3642e2141ae4bd051e38dc7",
+      "observed": "7618b734a230b2255435a18b8bdf8e4766df3e0dc3642e2141ae4bd051e38dc7",
+      "match": true,
+      "bytes": 589
+    },
+    {
+      "path": "gate_py312_O.out",
+      "expected": "7618b734a230b2255435a18b8bdf8e4766df3e0dc3642e2141ae4bd051e38dc7",
+      "observed": "7618b734a230b2255435a18b8bdf8e4766df3e0dc3642e2141ae4bd051e38dc7",
+      "match": true,
+      "bytes": 589
+    },
+    {
+      "path": "mut_absent.txt",
+      "expected": "f8bd63d0ffc950cd3e6a29388f963ca03dfc6e86d0a94e2954e9226fa13a049d",
+      "observed": "f8bd63d0ffc950cd3e6a29388f963ca03dfc6e86d0a94e2954e9226fa13a049d",
+      "match": true,
+      "bytes": 1466
+    },
+    {
+      "path": "mut_ant_coupe_fermee.txt",
+      "expected": "79da1ccb987165e176aa7b2153d49021d6d339078faa34a2871d0e280fbe1d3c",
+      "observed": "79da1ccb987165e176aa7b2153d49021d6d339078faa34a2871d0e280fbe1d3c",
+      "match": true,
+      "bytes": 207
+    },
+    {
+      "path": "mut_att_coupe_ouverte.txt",
+      "expected": "87946ae9a3c3537f7f79b07321c4cd08a30d9667a33811292f08d843fad413b2",
+      "observed": "87946ae9a3c3537f7f79b07321c4cd08a30d9667a33811292f08d843fad413b2",
+      "match": true,
+      "bytes": 190
+    },
+    {
+      "path": "mut_c3_une_fusion.txt",
+      "expected": "1e79fbb30fe639b0a574f9a6f1a509d0123ea5c81ad7eb999952424e0406000e",
+      "observed": "1e79fbb30fe639b0a574f9a6f1a509d0123ea5c81ad7eb999952424e0406000e",
+      "match": true,
+      "bytes": 174
+    },
+    {
+      "path": "mut_cofaces_ordre_k.txt",
+      "expected": "db4dd18ff2f95c47161410b41a3d5f7af4ad54bd7487b51b8d376f03a58a33f5",
+      "observed": "db4dd18ff2f95c47161410b41a3d5f7af4ad54bd7487b51b8d376f03a58a33f5",
+      "match": true,
+      "bytes": 189
+    },
+    {
+      "path": "mut_fenetre_forte.txt",
+      "expected": "213e370f893d0b9265d79f4178a7ddc22c911b1919b0ee70596c01ac48b94c2e",
+      "observed": "213e370f893d0b9265d79f4178a7ddc22c911b1919b0ee70596c01ac48b94c2e",
+      "match": true,
+      "bytes": 195
+    },
+    {
+      "path": "mut_h_fortes_etroites.txt",
+      "expected": "da3d73f68d50922c35ee19a93a7587c4d932ff70c40c32839256bf0e1d381565",
+      "observed": "da3d73f68d50922c35ee19a93a7587c4d932ff70c40c32839256bf0e1d381565",
+      "match": true,
+      "bytes": 203
+    },
+    {
+      "path": "mut_interne_vie_inversee.txt",
+      "expected": "cd7635e458b34801c60e64fcc0b96c7fc98e74e21332c79e0e967b4bd1e66667",
+      "observed": "cd7635e458b34801c60e64fcc0b96c7fc98e74e21332c79e0e967b4bd1e66667",
+      "match": true,
+      "bytes": 181
+    },
+    {
+      "path": "mut_m1_support_inverse.txt",
+      "expected": "8695d6c50371d7b625726de4336628977dca467fedfb3ab5817d78298e7c560d",
+      "observed": "8695d6c50371d7b625726de4336628977dca467fedfb3ab5817d78298e7c560d",
+      "match": true,
+      "bytes": 174
+    },
+    {
+      "path": "mut_populations_naissances_seules.txt",
+      "expected": "51d61c7cd5eb677761744865c58177e55d6869faec00c98c0b1cf7627c1ce87b",
+      "observed": "51d61c7cd5eb677761744865c58177e55d6869faec00c98c0b1cf7627c1ce87b",
+      "match": true,
+      "bytes": 240
+    },
+    {
+      "path": "mut_premier_support_seul.txt",
+      "expected": "55953c5c6859c0c92e595218c0325265e7f6792b3df56568f63de2f07bea425c",
+      "observed": "55953c5c6859c0c92e595218c0325265e7f6792b3df56568f63de2f07bea425c",
+      "match": true,
+      "bytes": 200
+    },
+    {
+      "path": "mut_regle_parent_inversee.txt",
+      "expected": "8e53cd97afbc1bd36ee1ed210b09f03ab49cd3cb55311a11f3b939fa14119287",
+      "observed": "8e53cd97afbc1bd36ee1ed210b09f03ab49cd3cb55311a11f3b939fa14119287",
+      "match": true,
+      "bytes": 191
+    },
+    {
+      "path": "mut_triangle_droit_admis.txt",
+      "expected": "35134923d18c055113a5b0189e988f4b84feb75fd7532a705e0a46cf83c43991",
+      "observed": "35134923d18c055113a5b0189e988f4b84feb75fd7532a705e0a46cf83c43991",
+      "match": true,
+      "bytes": 213
+    },
+    {
+      "path": "mut_w4_gabriel_juge.txt",
+      "expected": "2196b3a1daa48c9bb117967f566b572c88665c602e9d98f95a1b20cee0c6bd2c",
+      "observed": "2196b3a1daa48c9bb117967f566b572c88665c602e9d98f95a1b20cee0c6bd2c",
+      "match": true,
+      "bytes": 192
+    },
+    {
+      "path": "test_ref_fast.out",
+      "expected": "55a55f305e385c4a461854373ad052f1b63720a277a49740a928893d151676bf",
+      "observed": "55a55f305e385c4a461854373ad052f1b63720a277a49740a928893d151676bf",
+      "match": true,
+      "bytes": 619
+    },
+    {
+      "path": "validate_md.py",
+      "expected": "f4cffd22ba362066c9bbcbf0d59cc36e0434480674531968731e9b33b0b31ccf",
+      "observed": "f4cffd22ba362066c9bbcbf0d59cc36e0434480674531968731e9b33b0b31ccf",
+      "match": true,
+      "bytes": 1933
+    },
+    {
+      "path": "verif_faits.out",
+      "expected": "dd8edf15cd79fbdfbccab12c414b242cf98e541f78b6feff842f41576de6a45e",
+      "observed": "dd8edf15cd79fbdfbccab12c414b242cf98e541f78b6feff842f41576de6a45e",
+      "match": true,
+      "bytes": 2103
+    },
+    {
+      "path": "verif_faits.py",
+      "expected": "9f4aa81b6bc5d2e9d9467ac7771c350fd7a4efcf4ad44063e1260ea9cb3ea9b3",
+      "observed": "9f4aa81b6bc5d2e9d9467ac7771c350fd7a4efcf4ad44063e1260ea9cb3ea9b3",
+      "match": true,
+      "bytes": 8343
+    },
+    {
+      "path": "verif_faits_O.out",
+      "expected": "dd8edf15cd79fbdfbccab12c414b242cf98e541f78b6feff842f41576de6a45e",
+      "observed": "dd8edf15cd79fbdfbccab12c414b242cf98e541f78b6feff842f41576de6a45e",
+      "match": true,
+      "bytes": 2103
+    }
+  ]
+}

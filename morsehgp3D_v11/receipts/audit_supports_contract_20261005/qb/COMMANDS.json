@@ -1,0 +1,25 @@
+{
+  "all_wip_sources_unchanged": true,
+  "closed": true,
+  "commands": [
+    {
+      "checks": 13491,
+      "command": "python3 -B -S check_followup.py > normal.json 2> normal.stderr",
+      "exit_code": 0
+    },
+    {
+      "checks": 13491,
+      "command": "python3 -B -S -O check_followup.py > optimized.json 2> optimized.stderr",
+      "exit_code": 0
+    },
+    {
+      "command": "cmp normal.json optimized.json",
+      "exit_code": 0
+    }
+  ],
+  "native_executed": false,
+  "preflight_failure_preserved": "history/01_preflight_text_guard/COMMAND.json",
+  "python_version": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "stderr_empty": true,
+  "stdout_identical": true
+}

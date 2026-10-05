@@ -1,0 +1,2 @@
+mutant interne_vie_inversee tue par 1 ecart(s) ; premier : carre@1 : InvariantError : lemme B : interne hors de la vie [a_v, a_parent) du noeud 4
+mutant_killed interne_vie_inversee

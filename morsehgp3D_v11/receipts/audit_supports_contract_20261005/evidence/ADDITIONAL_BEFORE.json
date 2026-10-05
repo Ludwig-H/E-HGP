@@ -1,0 +1,136 @@
+{
+  "utc": "2026-10-05T05:58:44.140975+00:00",
+  "scope": "source-bound current CMake gates and final mutant logs, copied before deriving",
+  "sources": [
+    {
+      "kind": "git_blob",
+      "repo": "/workspaces/E-HGP/build/v11-auditor-20261003",
+      "pin": "5adf6a59f3d3b99fdf947e676e8548d4102ab48f",
+      "path": "morsehgp3D_v11/reference/tests.cmake",
+      "copy": "sources/git/morsehgp3D_v11/reference/tests.cmake",
+      "sha256": "3b343e82648b99c73dcfb220d822818be70ac49c5ff4e0d202ff0f457dfb78c7",
+      "bytes": 9851
+    },
+    {
+      "kind": "git_blob",
+      "repo": "/workspaces/E-HGP/build/v11-auditor-20261003",
+      "pin": "5adf6a59f3d3b99fdf947e676e8548d4102ab48f",
+      "path": "morsehgp3D_v11/reference/README.md",
+      "copy": "sources/git/morsehgp3D_v11/reference/README.md",
+      "sha256": "9f5ddb160fbb08caf28f86e3094b7a4d0469d989439c5c2339b9d2985f7c746a",
+      "bytes": 20366
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_consolidation_verif/mut_absent.txt",
+      "copy": "sources/reports/l0_consolidation_verif/mut_absent.txt",
+      "sha256": "f8bd63d0ffc950cd3e6a29388f963ca03dfc6e86d0a94e2954e9226fa13a049d",
+      "bytes": 1466,
+      "mtime_ns": 1791154400072651207
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_consolidation_verif/mut_ant_coupe_fermee.txt",
+      "copy": "sources/reports/l0_consolidation_verif/mut_ant_coupe_fermee.txt",
+      "sha256": "79da1ccb987165e176aa7b2153d49021d6d339078faa34a2871d0e280fbe1d3c",
+      "bytes": 207,
+      "mtime_ns": 1791154400078651207
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_consolidation_verif/mut_att_coupe_ouverte.txt",
+      "copy": "sources/reports/l0_consolidation_verif/mut_att_coupe_ouverte.txt",
+      "sha256": "87946ae9a3c3537f7f79b07321c4cd08a30d9667a33811292f08d843fad413b2",
+      "bytes": 190,
+      "mtime_ns": 1791154400084651207
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_consolidation_verif/mut_c3_une_fusion.txt",
+      "copy": "sources/reports/l0_consolidation_verif/mut_c3_une_fusion.txt",
+      "sha256": "1e79fbb30fe639b0a574f9a6f1a509d0123ea5c81ad7eb999952424e0406000e",
+      "bytes": 174,
+      "mtime_ns": 1791154400089651207
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_consolidation_verif/mut_cofaces_ordre_k.txt",
+      "copy": "sources/reports/l0_consolidation_verif/mut_cofaces_ordre_k.txt",
+      "sha256": "db4dd18ff2f95c47161410b41a3d5f7af4ad54bd7487b51b8d376f03a58a33f5",
+      "bytes": 189,
+      "mtime_ns": 1791154400097651207
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_consolidation_verif/mut_fenetre_forte.txt",
+      "copy": "sources/reports/l0_consolidation_verif/mut_fenetre_forte.txt",
+      "sha256": "213e370f893d0b9265d79f4178a7ddc22c911b1919b0ee70596c01ac48b94c2e",
+      "bytes": 195,
+      "mtime_ns": 1791154400103651207
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_consolidation_verif/mut_h_fortes_etroites.txt",
+      "copy": "sources/reports/l0_consolidation_verif/mut_h_fortes_etroites.txt",
+      "sha256": "da3d73f68d50922c35ee19a93a7587c4d932ff70c40c32839256bf0e1d381565",
+      "bytes": 203,
+      "mtime_ns": 1791154400109651207
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_consolidation_verif/mut_interne_vie_inversee.txt",
+      "copy": "sources/reports/l0_consolidation_verif/mut_interne_vie_inversee.txt",
+      "sha256": "cd7635e458b34801c60e64fcc0b96c7fc98e74e21332c79e0e967b4bd1e66667",
+      "bytes": 181,
+      "mtime_ns": 1791154400119651208
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_consolidation_verif/mut_m1_support_inverse.txt",
+      "copy": "sources/reports/l0_consolidation_verif/mut_m1_support_inverse.txt",
+      "sha256": "8695d6c50371d7b625726de4336628977dca467fedfb3ab5817d78298e7c560d",
+      "bytes": 174,
+      "mtime_ns": 1791154400125651208
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_consolidation_verif/mut_populations_naissances_seules.txt",
+      "copy": "sources/reports/l0_consolidation_verif/mut_populations_naissances_seules.txt",
+      "sha256": "51d61c7cd5eb677761744865c58177e55d6869faec00c98c0b1cf7627c1ce87b",
+      "bytes": 240,
+      "mtime_ns": 1791154400130651208
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_consolidation_verif/mut_premier_support_seul.txt",
+      "copy": "sources/reports/l0_consolidation_verif/mut_premier_support_seul.txt",
+      "sha256": "55953c5c6859c0c92e595218c0325265e7f6792b3df56568f63de2f07bea425c",
+      "bytes": 200,
+      "mtime_ns": 1791154400136651208
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_consolidation_verif/mut_regle_parent_inversee.txt",
+      "copy": "sources/reports/l0_consolidation_verif/mut_regle_parent_inversee.txt",
+      "sha256": "8e53cd97afbc1bd36ee1ed210b09f03ab49cd3cb55311a11f3b939fa14119287",
+      "bytes": 191,
+      "mtime_ns": 1791154400145651208
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_consolidation_verif/mut_triangle_droit_admis.txt",
+      "copy": "sources/reports/l0_consolidation_verif/mut_triangle_droit_admis.txt",
+      "sha256": "35134923d18c055113a5b0189e988f4b84feb75fd7532a705e0a46cf83c43991",
+      "bytes": 213,
+      "mtime_ns": 1791154400151651208
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_consolidation_verif/mut_w4_gabriel_juge.txt",
+      "copy": "sources/reports/l0_consolidation_verif/mut_w4_gabriel_juge.txt",
+      "sha256": "2196b3a1daa48c9bb117967f566b572c88665c602e9d98f95a1b20cee0c6bd2c",
+      "bytes": 192,
+      "mtime_ns": 1791154400158651208
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "utc": "2026-10-05T06:01:08.483093+00:00",
+  "scope": "remaining small closure payloads only; copy before portable rehash, scripts not executed",
+  "sources": [
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_consolidation_verif/check_docs_base_origin_main.txt",
+      "copy": "sources/reports/l0_consolidation_verif/check_docs_base_origin_main.txt",
+      "sha256": "8910a36a857153903d5ea61037382757d2c7d47ac01bc89b66b45e941bec7c4b",
+      "bytes": 18099,
+      "mtime_ns": 1791154400015651206
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_consolidation_verif/check_docs_worktree_final.txt",
+      "copy": "sources/reports/l0_consolidation_verif/check_docs_worktree_final.txt",
+      "sha256": "8910a36a857153903d5ea61037382757d2c7d47ac01bc89b66b45e941bec7c4b",
+      "bytes": 18099,
+      "mtime_ns": 1791154400025651206
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_consolidation_verif/test_ref_fast.out",
+      "copy": "sources/reports/l0_consolidation_verif/test_ref_fast.out",
+      "sha256": "55a55f305e385c4a461854373ad052f1b63720a277a49740a928893d151676bf",
+      "bytes": 619,
+      "mtime_ns": 1791154400066651207
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_consolidation_verif/validate_md.py",
+      "copy": "sources/reports/l0_consolidation_verif/validate_md.py",
+      "sha256": "f4cffd22ba362066c9bbcbf0d59cc36e0434480674531968731e9b33b0b31ccf",
+      "bytes": 1933,
+      "mtime_ns": 1791153933882644683
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_consolidation_verif/verif_faits.out",
+      "copy": "sources/reports/l0_consolidation_verif/verif_faits.out",
+      "sha256": "dd8edf15cd79fbdfbccab12c414b242cf98e541f78b6feff842f41576de6a45e",
+      "bytes": 2103,
+      "mtime_ns": 1791154384717650992
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_consolidation_verif/verif_faits.py",
+      "copy": "sources/reports/l0_consolidation_verif/verif_faits.py",
+      "sha256": "9f4aa81b6bc5d2e9d9467ac7771c350fd7a4efcf4ad44063e1260ea9cb3ea9b3",
+      "bytes": 8343,
+      "mtime_ns": 1791152948408630892
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_consolidation_verif/verif_faits_O.out",
+      "copy": "sources/reports/l0_consolidation_verif/verif_faits_O.out",
+      "sha256": "dd8edf15cd79fbdfbccab12c414b242cf98e541f78b6feff842f41576de6a45e",
+      "bytes": 2103,
+      "mtime_ns": 1791154385271651000
+    }
+  ]
+}

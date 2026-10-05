@@ -1,0 +1,190 @@
+Internal ctest changing into directory: /tmp/v11-l0-consolidation/build
+Test project /tmp/v11-l0-consolidation/build
+      Start   1: mhgp11_reference_projection_contracts
+      Start   3: mhgp11_reference_fast
+      Start   7: mhgp11_reference_refusal
+ 1/90 Test   #7: mhgp11_reference_refusal .............................................   Passed    0.26 sec
+      Start   9: mhgp11_reference_mutant_admission_strict
+ 2/90 Test   #1: mhgp11_reference_projection_contracts ................................   Passed    0.31 sec
+      Start  11: mhgp11_reference_mutant_ancestor_open
+ 3/90 Test   #9: mhgp11_reference_mutant_admission_strict .............................   Passed    0.33 sec
+      Start  13: mhgp11_reference_mutant_binarize
+ 4/90 Test  #11: mhgp11_reference_mutant_ancestor_open ................................   Passed    0.40 sec
+      Start  15: mhgp11_reference_mutant_core_next_neighbour
+ 5/90 Test  #13: mhgp11_reference_mutant_binarize .....................................   Passed    0.31 sec
+      Start  17: mhgp11_reference_mutant_cover_node_open
+ 6/90 Test  #15: mhgp11_reference_mutant_core_next_neighbour ..........................   Passed    0.40 sec
+      Start  19: mhgp11_reference_mutant_cover_population
+ 7/90 Test  #17: mhgp11_reference_mutant_cover_node_open ..............................   Passed    0.39 sec
+      Start  21: mhgp11_reference_mutant_drop_last_rep
+ 8/90 Test  #19: mhgp11_reference_mutant_cover_population .............................   Passed    0.44 sec
+      Start  23: mhgp11_reference_mutant_edge_at_vertex_level
+ 9/90 Test  #21: mhgp11_reference_mutant_drop_last_rep ................................   Passed    0.39 sec
+      Start  25: mhgp11_reference_mutant_first_rep_last
+10/90 Test  #23: mhgp11_reference_mutant_edge_at_vertex_level .........................   Passed    0.37 sec
+      Start  27: mhgp11_reference_mutant_hull_no_pairs
+11/90 Test  #27: mhgp11_reference_mutant_hull_no_pairs ................................   Passed    0.41 sec
+      Start  29: mhgp11_reference_mutant_hull_no_tetra
+12/90 Test  #25: mhgp11_reference_mutant_first_rep_last ...............................   Passed    0.79 sec
+      Start  31: mhgp11_reference_mutant_hull_strict_triangle
+13/90 Test  #29: mhgp11_reference_mutant_hull_no_tetra ................................   Passed    0.44 sec
+      Start  33: mhgp11_reference_mutant_join_missing
+14/90 Test  #33: mhgp11_reference_mutant_join_missing .................................   Passed    0.32 sec
+      Start  35: mhgp11_reference_mutant_jump_any
+15/90 Test  #35: mhgp11_reference_mutant_jump_any .....................................   Passed    0.61 sec
+      Start  37: mhgp11_reference_mutant_meb_largest
+16/90 Test  #37: mhgp11_reference_mutant_meb_largest ..................................   Passed    0.48 sec
+      Start  39: mhgp11_reference_mutant_meb_three
+17/90 Test  #31: mhgp11_reference_mutant_hull_strict_triangle .........................   Passed    1.97 sec
+      Start  41: mhgp11_reference_mutant_numbering_by_catalogue
+18/90 Test  #39: mhgp11_reference_mutant_meb_three ....................................   Passed    0.47 sec
+      Start  43: mhgp11_reference_mutant_numbering_by_sweep
+19/90 Test  #41: mhgp11_reference_mutant_numbering_by_catalogue .......................   Passed    0.38 sec
+      Start  45: mhgp11_reference_mutant_plateau_split
+20/90 Test  #43: mhgp11_reference_mutant_numbering_by_sweep ...........................   Passed    0.64 sec
+      Start  47: mhgp11_reference_mutant_point_open
+21/90 Test  #45: mhgp11_reference_mutant_plateau_split ................................   Passed    0.48 sec
+      Start  49: mhgp11_reference_mutant_regular_join_pieces
+22/90 Test  #49: mhgp11_reference_mutant_regular_join_pieces ..........................   Passed    0.28 sec
+      Start  51: mhgp11_reference_mutant_vertical_merge_child
+23/90 Test  #47: mhgp11_reference_mutant_point_open ...................................   Passed    0.38 sec
+      Start  53: mhgp11_reference_mutant_vertical_open
+24/90 Test  #53: mhgp11_reference_mutant_vertical_open ................................   Passed    0.76 sec
+      Start  55: mhgp11_reference_mutant_weighted_as_regular
+25/90 Test  #51: mhgp11_reference_mutant_vertical_merge_child .........................   Passed    0.87 sec
+      Start  57: mhgp11_reference_mutant_window_low
+26/90 Test  #57: mhgp11_reference_mutant_window_low ...................................   Passed    0.36 sec
+      Start  59: mhgp11_reference_supports
+27/90 Test  #55: mhgp11_reference_mutant_weighted_as_regular ..........................   Passed    0.46 sec
+      Start  61: mhgp11_reference_supports_refusal
+28/90 Test  #61: mhgp11_reference_supports_refusal ....................................   Passed    0.20 sec
+      Start  63: mhgp11_reference_supports_mutant_ant_coupe_fermee
+29/90 Test  #63: mhgp11_reference_supports_mutant_ant_coupe_fermee ....................   Passed    0.25 sec
+      Start  65: mhgp11_reference_supports_mutant_att_coupe_ouverte
+30/90 Test  #65: mhgp11_reference_supports_mutant_att_coupe_ouverte ...................   Passed    0.25 sec
+      Start  67: mhgp11_reference_supports_mutant_c3_une_fusion
+31/90 Test  #67: mhgp11_reference_supports_mutant_c3_une_fusion .......................   Passed    0.38 sec
+      Start  69: mhgp11_reference_supports_mutant_cofaces_ordre_k
+32/90 Test  #69: mhgp11_reference_supports_mutant_cofaces_ordre_k .....................   Passed    0.32 sec
+      Start  71: mhgp11_reference_supports_mutant_fenetre_forte
+33/90 Test  #71: mhgp11_reference_supports_mutant_fenetre_forte .......................   Passed    0.27 sec
+      Start  73: mhgp11_reference_supports_mutant_h_fortes_etroites
+34/90 Test  #73: mhgp11_reference_supports_mutant_h_fortes_etroites ...................   Passed    0.26 sec
+      Start  75: mhgp11_reference_supports_mutant_interne_vie_inversee
+35/90 Test  #75: mhgp11_reference_supports_mutant_interne_vie_inversee ................   Passed    0.35 sec
+      Start  77: mhgp11_reference_supports_mutant_m1_support_inverse
+36/90 Test  #77: mhgp11_reference_supports_mutant_m1_support_inverse ..................   Passed    0.37 sec
+      Start  79: mhgp11_reference_supports_mutant_populations_naissances_seules
+37/90 Test  #79: mhgp11_reference_supports_mutant_populations_naissances_seules .......   Passed    0.25 sec
+      Start  81: mhgp11_reference_supports_mutant_premier_support_seul
+38/90 Test  #81: mhgp11_reference_supports_mutant_premier_support_seul ................   Passed    0.42 sec
+      Start  83: mhgp11_reference_supports_mutant_regle_parent_inversee
+39/90 Test  #83: mhgp11_reference_supports_mutant_regle_parent_inversee ...............   Passed    0.22 sec
+      Start  85: mhgp11_reference_supports_mutant_triangle_droit_admis
+40/90 Test  #85: mhgp11_reference_supports_mutant_triangle_droit_admis ................   Passed    0.24 sec
+      Start  87: mhgp11_reference_supports_mutant_w4_gabriel_juge
+41/90 Test  #87: mhgp11_reference_supports_mutant_w4_gabriel_juge .....................   Passed    0.30 sec
+      Start 106: mhgp11_style
+42/90 Test #106: mhgp11_style .........................................................   Passed    0.40 sec
+      Start   2: mhgp11_reference_projection_contracts_opt
+43/90 Test   #2: mhgp11_reference_projection_contracts_opt ............................   Passed    0.25 sec
+      Start   8: mhgp11_reference_refusal_opt
+44/90 Test   #8: mhgp11_reference_refusal_opt .........................................   Passed    0.27 sec
+      Start  10: mhgp11_reference_mutant_admission_strict_opt
+45/90 Test  #10: mhgp11_reference_mutant_admission_strict_opt .........................   Passed    0.32 sec
+      Start  12: mhgp11_reference_mutant_ancestor_open_opt
+46/90 Test  #12: mhgp11_reference_mutant_ancestor_open_opt ............................   Passed    0.36 sec
+      Start  14: mhgp11_reference_mutant_binarize_opt
+47/90 Test  #14: mhgp11_reference_mutant_binarize_opt .................................   Passed    0.37 sec
+      Start  16: mhgp11_reference_mutant_core_next_neighbour_opt
+48/90 Test  #16: mhgp11_reference_mutant_core_next_neighbour_opt ......................   Passed    0.38 sec
+      Start  18: mhgp11_reference_mutant_cover_node_open_opt
+49/90 Test  #18: mhgp11_reference_mutant_cover_node_open_opt ..........................   Passed    0.50 sec
+      Start  20: mhgp11_reference_mutant_cover_population_opt
+50/90 Test  #20: mhgp11_reference_mutant_cover_population_opt .........................   Passed    0.46 sec
+      Start  22: mhgp11_reference_mutant_drop_last_rep_opt
+51/90 Test  #22: mhgp11_reference_mutant_drop_last_rep_opt ............................   Passed    0.37 sec
+      Start  24: mhgp11_reference_mutant_edge_at_vertex_level_opt
+52/90 Test  #24: mhgp11_reference_mutant_edge_at_vertex_level_opt .....................   Passed    0.43 sec
+      Start  26: mhgp11_reference_mutant_first_rep_last_opt
+53/90 Test  #26: mhgp11_reference_mutant_first_rep_last_opt ...........................   Passed    0.79 sec
+      Start  28: mhgp11_reference_mutant_hull_no_pairs_opt
+54/90 Test  #28: mhgp11_reference_mutant_hull_no_pairs_opt ............................   Passed    0.49 sec
+      Start  30: mhgp11_reference_mutant_hull_no_tetra_opt
+55/90 Test  #30: mhgp11_reference_mutant_hull_no_tetra_opt ............................   Passed    0.38 sec
+      Start  32: mhgp11_reference_mutant_hull_strict_triangle_opt
+56/90 Test  #32: mhgp11_reference_mutant_hull_strict_triangle_opt .....................   Passed    2.16 sec
+      Start  34: mhgp11_reference_mutant_join_missing_opt
+57/90 Test  #34: mhgp11_reference_mutant_join_missing_opt .............................   Passed    0.32 sec
+      Start  36: mhgp11_reference_mutant_jump_any_opt
+58/90 Test  #36: mhgp11_reference_mutant_jump_any_opt .................................   Passed    0.53 sec
+      Start  38: mhgp11_reference_mutant_meb_largest_opt
+59/90 Test  #38: mhgp11_reference_mutant_meb_largest_opt ..............................   Passed    0.45 sec
+      Start  40: mhgp11_reference_mutant_meb_three_opt
+60/90 Test  #40: mhgp11_reference_mutant_meb_three_opt ................................   Passed    0.49 sec
+      Start  42: mhgp11_reference_mutant_numbering_by_catalogue_opt
+61/90 Test  #42: mhgp11_reference_mutant_numbering_by_catalogue_opt ...................   Passed    0.79 sec
+      Start  44: mhgp11_reference_mutant_numbering_by_sweep_opt
+62/90 Test  #44: mhgp11_reference_mutant_numbering_by_sweep_opt .......................   Passed    0.51 sec
+      Start  46: mhgp11_reference_mutant_plateau_split_opt
+63/90 Test  #46: mhgp11_reference_mutant_plateau_split_opt ............................   Passed    0.28 sec
+      Start  48: mhgp11_reference_mutant_point_open_opt
+64/90 Test  #48: mhgp11_reference_mutant_point_open_opt ...............................   Passed    0.36 sec
+      Start  50: mhgp11_reference_mutant_regular_join_pieces_opt
+65/90 Test  #50: mhgp11_reference_mutant_regular_join_pieces_opt ......................   Passed    0.38 sec
+      Start  52: mhgp11_reference_mutant_vertical_merge_child_opt
+66/90 Test  #52: mhgp11_reference_mutant_vertical_merge_child_opt .....................   Passed    0.45 sec
+      Start  54: mhgp11_reference_mutant_vertical_open_opt
+67/90 Test  #54: mhgp11_reference_mutant_vertical_open_opt ............................   Passed    0.70 sec
+      Start  56: mhgp11_reference_mutant_weighted_as_regular_opt
+68/90 Test  #56: mhgp11_reference_mutant_weighted_as_regular_opt ......................   Passed    0.50 sec
+      Start  58: mhgp11_reference_mutant_window_low_opt
+69/90 Test  #58: mhgp11_reference_mutant_window_low_opt ...............................   Passed    0.45 sec
+      Start  62: mhgp11_reference_supports_refusal_opt
+70/90 Test  #62: mhgp11_reference_supports_refusal_opt ................................   Passed    0.18 sec
+      Start  64: mhgp11_reference_supports_mutant_ant_coupe_fermee_opt
+71/90 Test  #64: mhgp11_reference_supports_mutant_ant_coupe_fermee_opt ................   Passed    0.23 sec
+      Start  66: mhgp11_reference_supports_mutant_att_coupe_ouverte_opt
+72/90 Test  #66: mhgp11_reference_supports_mutant_att_coupe_ouverte_opt ...............   Passed    0.27 sec
+      Start  68: mhgp11_reference_supports_mutant_c3_une_fusion_opt
+73/90 Test   #3: mhgp11_reference_fast ................................................   Passed   26.04 sec
+      Start   4: mhgp11_reference_fast_opt
+74/90 Test  #68: mhgp11_reference_supports_mutant_c3_une_fusion_opt ...................   Passed    0.44 sec
+      Start  70: mhgp11_reference_supports_mutant_cofaces_ordre_k_opt
+75/90 Test  #70: mhgp11_reference_supports_mutant_cofaces_ordre_k_opt .................   Passed    0.30 sec
+      Start  72: mhgp11_reference_supports_mutant_fenetre_forte_opt
+76/90 Test  #72: mhgp11_reference_supports_mutant_fenetre_forte_opt ...................   Passed    0.30 sec
+      Start  74: mhgp11_reference_supports_mutant_h_fortes_etroites_opt
+77/90 Test  #74: mhgp11_reference_supports_mutant_h_fortes_etroites_opt ...............   Passed    0.25 sec
+      Start  76: mhgp11_reference_supports_mutant_interne_vie_inversee_opt
+78/90 Test  #76: mhgp11_reference_supports_mutant_interne_vie_inversee_opt ............   Passed    0.42 sec
+      Start  78: mhgp11_reference_supports_mutant_m1_support_inverse_opt
+79/90 Test  #78: mhgp11_reference_supports_mutant_m1_support_inverse_opt ..............   Passed    0.42 sec
+      Start  80: mhgp11_reference_supports_mutant_populations_naissances_seules_opt
+80/90 Test  #80: mhgp11_reference_supports_mutant_populations_naissances_seules_opt ...   Passed    0.31 sec
+      Start  82: mhgp11_reference_supports_mutant_premier_support_seul_opt
+81/90 Test  #82: mhgp11_reference_supports_mutant_premier_support_seul_opt ............   Passed    0.37 sec
+      Start  84: mhgp11_reference_supports_mutant_regle_parent_inversee_opt
+82/90 Test  #84: mhgp11_reference_supports_mutant_regle_parent_inversee_opt ...........   Passed    0.27 sec
+      Start  86: mhgp11_reference_supports_mutant_triangle_droit_admis_opt
+83/90 Test  #86: mhgp11_reference_supports_mutant_triangle_droit_admis_opt ............   Passed    0.24 sec
+      Start  88: mhgp11_reference_supports_mutant_w4_gabriel_juge_opt
+84/90 Test  #88: mhgp11_reference_supports_mutant_w4_gabriel_juge_opt .................   Passed    0.26 sec
+      Start 107: mhgp11_style_opt
+85/90 Test #107: mhgp11_style_opt .....................................................   Passed    0.32 sec
+86/90 Test  #59: mhgp11_reference_supports ............................................   Passed   40.37 sec
+      Start  60: mhgp11_reference_supports_opt
+87/90 Test   #4: mhgp11_reference_fast_opt ............................................   Passed   25.36 sec
+88/90 Test  #60: mhgp11_reference_supports_opt ........................................   Passed   38.47 sec
+      Start   5: mhgp11_reference_fast_split
+89/90 Test   #5: mhgp11_reference_fast_split ..........................................   Passed   14.22 sec
+      Start   6: mhgp11_reference_fast_split_opt
+90/90 Test   #6: mhgp11_reference_fast_split_opt ......................................   Passed   14.51 sec
+
+100% tests passed, 0 tests failed out of 90
+
+Label Time Summary:
+fast      = 252.97 sec*proc (90 tests)
+oracle    = 252.26 sec*proc (88 tests)
+
+Total Test time (real) = 114.43 sec

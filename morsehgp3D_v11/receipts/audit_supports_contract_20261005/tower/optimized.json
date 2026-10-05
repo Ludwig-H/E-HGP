@@ -1,0 +1,267 @@
+{
+  "checks": 795,
+  "fixtures": {
+    "cube": {
+      "balls": 19,
+      "cuts": 4,
+      "extra": {},
+      "n": 8
+    },
+    "d2": {
+      "balls": 10,
+      "cuts": 9,
+      "extra": {
+        "direct_gamma_previous": "64",
+        "initial": "64",
+        "invalid_trace_query_rejected": true,
+        "previous_catalogue": "41",
+        "target": "1681/25",
+        "window_readings": {
+          "False": [
+            [
+              "65/2",
+              3
+            ],
+            [
+              "1681/25",
+              2
+            ],
+            [
+              "145/2",
+              2
+            ]
+          ],
+          "True": [
+            [
+              "65/2",
+              3
+            ],
+            [
+              "1681/25",
+              3
+            ],
+            [
+              "145/2",
+              2
+            ]
+          ]
+        }
+      },
+      "n": 5
+    },
+    "e5": {
+      "balls": 12,
+      "cuts": 15,
+      "extra": {
+        "window_readings": {
+          "False": [
+            [
+              "162/25",
+              3
+            ],
+            [
+              "189/17",
+              3
+            ],
+            [
+              "83886/3563",
+              2
+            ],
+            [
+              "24",
+              2
+            ]
+          ],
+          "True": [
+            [
+              "162/25",
+              3
+            ],
+            [
+              "189/17",
+              3
+            ],
+            [
+              "83886/3563",
+              3
+            ],
+            [
+              "24",
+              2
+            ]
+          ]
+        }
+      },
+      "n": 5
+    },
+    "equilateral": {
+      "balls": 4,
+      "cuts": 2,
+      "extra": {},
+      "n": 3
+    },
+    "growth": {
+      "balls": 6,
+      "cuts": 4,
+      "extra": {},
+      "n": 4
+    },
+    "line_weak": {
+      "balls": 3,
+      "cuts": 2,
+      "extra": {},
+      "n": 3
+    },
+    "passenger": {
+      "balls": 5,
+      "cuts": 4,
+      "extra": {},
+      "n": 4
+    }
+  },
+  "independent_guards": 652,
+  "independent_mebs": 152,
+  "mutants": {
+    "ant_coupe_fermee": {
+      "cause": "lemme C",
+      "errors": [
+        "lemme C.1 : branches des traces comprimees frozenset({0, 1, 2}) contre frozenset({3})",
+        "lemme C.1 : branches des traces comprimees frozenset({0, 1}) contre frozenset({4})"
+      ],
+      "fixtures": [
+        "triangle_aigu@2",
+        "passagere@1"
+      ]
+    },
+    "att_coupe_ouverte": {
+      "cause": "lemme A",
+      "errors": [
+        "lemme A (T3) : les 3 K-parties de P_b donnent les noeuds {0, 1, 2}",
+        "lemme A (T3) : les 2 K-parties de P_b donnent les noeuds {0, 1}"
+      ],
+      "fixtures": [
+        "triangle_aigu@2",
+        "passagere@1"
+      ]
+    },
+    "c3_une_fusion": {
+      "cause": "lemme C.3",
+      "errors": [
+        "lemme C.3 : fusion 4, branches [0, 1] contre enfants (0, 1, 2)"
+      ],
+      "fixtures": [
+        "passagere@1"
+      ]
+    },
+    "cofaces_ordre_k": {
+      "cause": "lemme G",
+      "errors": [
+        "lemme G : cofaces = 0 par enumeration, 1 par formule (boule 1, p=0, m=2, K=1)",
+        "lemme G : cofaces = 1 par enumeration, 0 par formule (boule 1/4, p=0, m=2, K=2)"
+      ],
+      "fixtures": [
+        "carre@1",
+        "ligne3@2"
+      ]
+    },
+    "fenetre_forte": {
+      "cause": "perimetre",
+      "errors": [
+        "perimetre : liaison de Gabriel (0, 1, 2) de boule hors de W_K (p=0, q=3)",
+        "perimetre : liaison de Gabriel (0, 1) de boule hors de W_K (p=0, q=2)"
+      ],
+      "fixtures": [
+        "triangle_equilateral@2",
+        "carre@1"
+      ]
+    },
+    "h_fortes_etroites": {
+      "cause": "lemme H",
+      "errors": [
+        "lemme H : noeud 0 coupe 16 : K-polyedre [0, 1, 2], union W_K [0, 1, 2], fortes []"
+      ],
+      "fixtures": [
+        "growth_abcz@3",
+        "carre@3"
+      ]
+    },
+    "interne_vie_inversee": {
+      "cause": "interne hors de la vie",
+      "errors": [
+        "lemme B : interne hors de la vie [a_v, a_parent) du noeud 4"
+      ],
+      "fixtures": [
+        "carre@1"
+      ]
+    },
+    "m1_support_inverse": {
+      "cause": "lemme F (M1)",
+      "errors": [
+        "lemme F (M1) : le support (0, 1) ne redonne pas sa boule"
+      ],
+      "fixtures": [
+        "carre@2"
+      ]
+    },
+    "populations_naissances_seules": {
+      "cause": "lemme H",
+      "errors": [
+        "lemme H : noeud 0 coupe 25 : K-polyedre [0, 1, 2, 3], union W_K [0, 1, 2], fortes [0, 1, 2, 3]"
+      ],
+      "fixtures": [
+        "growth_abcz@3"
+      ]
+    },
+    "premier_support_seul": {
+      "cause": "lemme F",
+      "errors": [
+        "lemme F : Q_b [(0, 3)] contre parties non separables minimales [(0, 3), (1, 2)]",
+        "lemme F : Q_b [(1, 3)] contre parties non separables minimales [(0, 2, 3), (1, 3)]"
+      ],
+      "fixtures": [
+        "cube@2",
+        "growth_abcz@3"
+      ]
+    },
+    "regle_parent_inversee": {
+      "cause": "regle du parent",
+      "errors": [
+        "lemme C.2 (regle du parent) : branche 0 donne 0, att(b) = 3"
+      ],
+      "fixtures": [
+        "triangle_aigu@2"
+      ]
+    },
+    "triangle_droit_admis": {
+      "cause": "lemme F",
+      "errors": [
+        "lemme F : Q_b [(0, 1, 2), (1, 2)] contre parties non separables minimales [(1, 2)]",
+        "lemme F : Q_b [(0, 1, 2), (0, 1, 3), (0, 2), (0, 2, 3), (1, 2, 3), (1, 3)] contre parties non separables minimales [(0, 2), (1, 3)]"
+      ],
+      "fixtures": [
+        "triangle_droit@1",
+        "carre@2"
+      ]
+    },
+    "w4_gabriel_juge": {
+      "cause": "lemme W.4",
+      "errors": [
+        "lemme W.4 : liaison non Gabriel (0, 1, 2) separante (branches [0, 1, 2])",
+        "lemme W.4 : liaison non Gabriel (0, 1) separante (branches [0, 2])"
+      ],
+      "fixtures": [
+        "triangle_aigu@2",
+        "carre@1"
+      ]
+    }
+  },
+  "scope": "seven bounded exact fixtures + 13 oracle mutants; no native or full S1 suite",
+  "script_sha256": "4cb324ec443b64b05fb1e7b47de0dd97462b5b73232e0ef0702e2bb8ff049ae7",
+  "sources": {
+    "independent/gram_gamma.py": "cd7bcdb859ee7a4d309a4cd768edf96efea3cd5b2b03a3368083ce309e75af5c",
+    "published/morsehgp3D_v11/reference/hgp11_ref/definition.py": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43",
+    "published/morsehgp3D_v11/reference/hgp11_ref/model.py": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c",
+    "published/morsehgp3D_v11/reference/hgp11_ref/supports.py": "826f3f94ce9eeb66e6ed04edce8266dd70b52498fd929c2ec7f7dbc01538a541"
+  },
+  "status": "PASS"
+}

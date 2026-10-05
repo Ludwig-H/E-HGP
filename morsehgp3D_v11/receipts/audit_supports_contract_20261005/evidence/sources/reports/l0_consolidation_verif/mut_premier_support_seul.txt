@@ -1,0 +1,2 @@
+mutant premier_support_seul tue par 2 ecart(s) ; premier : cube@2 : InvariantError : lemme F : Q_b [(0, 3)] contre parties non separables minimales [(0, 3), (1, 2)]
+mutant_killed premier_support_seul

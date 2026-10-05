@@ -1,0 +1,78 @@
+{
+  "module": "api",
+  "plancher": 9,
+  "mutants": [
+    {
+      "id": "session_sans_liberation",
+      "fichier": "src/api/session.cpp",
+      "cherche": "  return budget_->released();",
+      "remplace": "  return {};",
+      "porte": "mhgp11_api_session_product_alive",
+      "note": "close conforme alors qu'un produit vit encore dans le budget de la Session"
+    },
+    {
+      "id": "selftest_omis",
+      "fichier": "src/api/session.cpp",
+      "cherche": "  MHGP11_TRY(api_detail::environment_selftest());\n",
+      "remplace": "",
+      "porte": "mhgp11_api_selftest_fault_inexact",
+      "note": "Session creee sous une exception flottante demasquee"
+    },
+    {
+      "id": "selftest_pieges_ignores",
+      "fichier": "src/api/selftest.cpp",
+      "cherche": "  if (!probe.traps_masked) return fail(Reason::environment_selftest);\n",
+      "remplace": "",
+      "porte": "mhgp11_api_selftest_judge",
+      "note": "exception demasquee admise par le juge"
+    },
+    {
+      "id": "selftest_noyaux_entiers_omis",
+      "fichier": "src/api/selftest.cpp",
+      "cherche": "  for (std::size_t i = 0; i < kWitnessCount; ++i) {",
+      "remplace": "  for (std::size_t i = 7; i < kWitnessCount; ++i) {",
+      "porte": "mhgp11_api_selftest_judge",
+      "note": "temoins F2 et de precision non juges"
+    },
+    {
+      "id": "selftest_precision_etendue_admise",
+      "fichier": "src/api/selftest.cpp",
+      "cherche": "    {Op::excess, 0x1p53, 1.0, 0, 0.0, 2.0},",
+      "remplace": "    {Op::excess, 0x1p53, 1.0, 0, 0.0, 1.0},",
+      "porte": "mhgp11_api_selftest_judge",
+      "note": "((2^53 + 1) - 2^53) = 1 admis : precision etendue non detectee"
+    },
+    {
+      "id": "multiplicite_apres_k",
+      "fichier": "src/api/compute.cpp",
+      "cherche": "  if (cloud.value().weight() != cloud.value().sites()) return fail(Reason::multiplicity_unsupported);\n  if (k > cloud.value().sites()) return fail(Reason::parameter_out_of_range);",
+      "remplace": "  if (k > cloud.value().sites()) return fail(Reason::parameter_out_of_range);\n  if (cloud.value().weight() != cloud.value().sites()) return fail(Reason::multiplicity_unsupported);",
+      "porte": "mhgp11_api_session_refusals",
+      "note": "K > sites juge avant les positions repetees (ordre du paragraphe 5)"
+    },
+    {
+      "id": "tree_k_sans_enfants",
+      "fichier": "src/api/manifest.cpp",
+      "cherche": "  for (const NodeIdx child : forest.edges()) out.u32le(idx(child));\n",
+      "remplace": "",
+      "porte": "mhgp11_api_session_tree_digest",
+      "note": "empreinte de l'arbre sans la liste des enfants"
+    },
+    {
+      "id": "provenance_non_controlee",
+      "fichier": "src/api/manifest.cpp",
+      "cherche": "  MHGP11_TRY(api_detail::check_provenance(provenance));\n",
+      "remplace": "",
+      "porte": "mhgp11_api_session_provenance",
+      "note": "decimaux hors forme recopies dans le manifeste"
+    },
+    {
+      "id": "pas_nul_admis",
+      "fichier": "src/api/manifest.cpp",
+      "cherche": "  return unsigned_decimal(text) && text.find_first_not_of(\"0.\") != std::string_view::npos;",
+      "remplace": "  return unsigned_decimal(text);",
+      "porte": "mhgp11_api_session_provenance",
+      "note": "pas de grille nul admis"
+    }
+  ]
+}

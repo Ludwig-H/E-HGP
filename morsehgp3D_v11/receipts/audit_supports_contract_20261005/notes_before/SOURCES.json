@@ -1,0 +1,35 @@
+{
+  "head": "9290cf3bfe51147ede73d178dce8bf62e31c82d8",
+  "sources": [
+    {
+      "original": "morsehgp3D_v11/audits/README.md",
+      "file": "README.md",
+      "sha256": "095d81d829fbb8d0c5d29d481497eab057354e1aeef773e2a8bf1097b173d0b0",
+      "bytes": 4108
+    },
+    {
+      "original": "morsehgp3D_v11/audits/AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md",
+      "file": "AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md",
+      "sha256": "3941f76df6b67ec25cabc5e38a0d1a82db4646fe0395e97c88c55144af86ca08",
+      "bytes": 22677
+    },
+    {
+      "original": "morsehgp3D_v11/audits/AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md",
+      "file": "AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md",
+      "sha256": "8e4177f97e6ac1982f8566dfecc6baaef21979d047b96a01d849a72390cec7dd",
+      "bytes": 39703
+    },
+    {
+      "original": "morsehgp3D_v11/audits/REPONSE_CLAUDE_POINTS_20261003.md",
+      "file": "REPONSE_CLAUDE_POINTS_20261003.md",
+      "sha256": "ccae08b38cba61141e2b57771e04cfcda8ef2c18cfc9ad78e1b71ebfd85a7d4f",
+      "bytes": 4714
+    },
+    {
+      "original": "morsehgp3D_v11/audits/REPONSE_CLAUDE_SUPPORTS_20261004.md",
+      "file": "REPONSE_CLAUDE_SUPPORTS_20261004.md",
+      "sha256": "88205062ad968085db007d6bbbc589fdbc8650ae9053abeb0dc7f582adb6352f",
+      "bytes": 20419
+    }
+  ]
+}

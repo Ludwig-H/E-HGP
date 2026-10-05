@@ -1,0 +1,137 @@
+{
+  "checks": 208,
+  "limitations": [
+    "Source D2 signature norm is adopted; no native signature emitter/reader qualified here.",
+    "Permanent S1 suite K<=5, maxshell12. Independent report highK is separate, not a permanent CMake gate.",
+    "No native shell24 refusal/profile/time/CPU-GPU claims transferred."
+  ],
+  "mutants": {
+    "ant_coupe_fermee": {
+      "cause": "lemme C",
+      "fixtures": [
+        "triangle_aigu@2",
+        "passagere@1"
+      ]
+    },
+    "att_coupe_ouverte": {
+      "cause": "lemme A",
+      "fixtures": [
+        "triangle_aigu@2",
+        "passagere@1"
+      ]
+    },
+    "c3_une_fusion": {
+      "cause": "lemme C.3",
+      "fixtures": [
+        "passagere@1"
+      ]
+    },
+    "cofaces_ordre_k": {
+      "cause": "lemme G",
+      "fixtures": [
+        "carre@1",
+        "ligne3@2"
+      ]
+    },
+    "fenetre_forte": {
+      "cause": "perimetre",
+      "fixtures": [
+        "triangle_equilateral@2",
+        "carre@1"
+      ]
+    },
+    "h_fortes_etroites": {
+      "cause": "lemme H",
+      "fixtures": [
+        "growth_abcz@3",
+        "carre@3"
+      ]
+    },
+    "interne_vie_inversee": {
+      "cause": "interne hors de la vie",
+      "fixtures": [
+        "carre@1"
+      ]
+    },
+    "m1_support_inverse": {
+      "cause": "lemme F (M1)",
+      "fixtures": [
+        "carre@2"
+      ]
+    },
+    "populations_naissances_seules": {
+      "cause": "lemme H",
+      "fixtures": [
+        "growth_abcz@3"
+      ]
+    },
+    "premier_support_seul": {
+      "cause": "lemme F",
+      "fixtures": [
+        "cube@2",
+        "growth_abcz@3"
+      ]
+    },
+    "regle_parent_inversee": {
+      "cause": "regle du parent",
+      "fixtures": [
+        "triangle_aigu@2"
+      ]
+    },
+    "triangle_droit_admis": {
+      "cause": "lemme F",
+      "fixtures": [
+        "triangle_droit@1",
+        "carre@2"
+      ]
+    },
+    "w4_gabriel_juge": {
+      "cause": "lemme W.4",
+      "fixtures": [
+        "triangle_aigu@2",
+        "carre@1"
+      ]
+    }
+  },
+  "report_gate": {
+    "counters": {
+      "arity2": 10158,
+      "arity3": 5640,
+      "arity4": 1145,
+      "balls": 15062,
+      "births": 6558,
+      "clouds": 210,
+      "cofaces": 20463,
+      "cuts": 48074,
+      "extended": 2551,
+      "extended_higher_arity": 226,
+      "gabriel": 17058,
+      "internal": 2736,
+      "invariance": 70,
+      "kparties": 54659,
+      "merge_balls": 5768,
+      "merges": 4428,
+      "multi_support": 530,
+      "nary_merges": 1890,
+      "nodes": 12441,
+      "non_gabriel": 40053,
+      "orders": 951,
+      "passing": 271,
+      "permuted": 70,
+      "shared_cofaces": 277,
+      "strong": 7584,
+      "supports": 16943,
+      "weak": 7478
+    },
+    "ctest_total": 90,
+    "facts": 50,
+    "mutant_gates": 26,
+    "python_outputs_sha256": "7618b734a230b2255435a18b8bdf8e4766df3e0dc3642e2141ae4bd051e38dc7",
+    "suite_digest": "9bddd8aa22694f013dd81e7e70c0f1f352fa2e7a893e0c0dd66bd440d95fc697",
+    "supports_gates": 30
+  },
+  "schema": "mhgp11.audit.l0_s1_review.v1",
+  "scope": "copied-source AST/fakes and existing-report rehash only; no geometry suite/native/build/GCP/fit",
+  "source_count": 47,
+  "source_pin": "5adf6a59f3d3b99fdf947e676e8548d4102ab48f"
+}

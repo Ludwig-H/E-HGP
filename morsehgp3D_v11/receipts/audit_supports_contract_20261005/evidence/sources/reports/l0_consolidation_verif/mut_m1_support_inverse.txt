@@ -1,0 +1,2 @@
+mutant m1_support_inverse tue par 1 ecart(s) ; premier : carre@2 : InvariantError : lemme F (M1) : le support (0, 1) ne redonne pas sa boule
+mutant_killed m1_support_inverse

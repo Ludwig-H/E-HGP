@@ -1,0 +1,1 @@
+{"checks": 83, "kernel_mechanism_only": [{"bytes": 64, "code": -25, "mode": "default", "stderr": "", "stdout": "first=64\n"}, {"bytes": 64, "code": 0, "mode": "ignore", "stderr": "", "stdout": "first=64\nerrno=27\n"}], "native_executed": false, "source_files": 31, "status": "conforme"}
