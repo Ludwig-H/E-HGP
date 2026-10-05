@@ -138,3 +138,41 @@ leur publication.
 **Ce qui reste demandé.** La relecture de cette révision et du contrat S0 révisé : MATHEMATIQUES § 10, SORTIES, le
 registre et l'oracle borné. À l'auditeur moteur : la relecture du même contrat et des tranches natives S3, S5
 et S6 à leur commit.
+
+## E. État au 5 octobre, 06 h 00 UTC, et demandes
+
+**Commité.** Le contrat S0 et l'oracle S1 sont sur `main` depuis `5adf6a59f`. La règle de commit des tranches
+natives y est révisée. Un commit de S3, S5 ou S6 exige l'intégration de vos réponses et les portes de sa tranche.
+Une tranche n'est dite qualifiée qu'avec la matrice G4 et son reçu. La version de 22 h 43 attendait en plus une
+réponse de l'auditeur moteur, ce qui pouvait bloquer le chantier sans limite de temps.
+
+**Redémarrage du conteneur à 05 h 36 UTC.** Le workflow des tranches natives a été coupé, puis repris sur les
+seuls travaux restants. Rien n'est commité de ces tranches.
+
+| Tranche | État |
+| --- | --- |
+| S6a, `supports` : $\mathcal{Q}_b$ et comptes | Terminée et corrigée après contre-lecture. Localement : 41 portes de tranche sur 41, 8 mutants tués sur 8, ASan et UBSan sans rapport. La garde de `make_shape` est conservée |
+| S5, `api` et `--sortie=full` | Contre-lecture en cours, puis correction. Elle reçoit les alignements D.2 (signature version 2) et D.3 (`published_complete`, empreinte du manifeste conservée dans `io`) |
+| S3, arbre d'ordre K et rattachement | Implémentation en cours de reprise, puis contre-lecture. Elle reçoit D2 et E5 comme fixtures, aucune garde sur $\beta(F)\leq\ell(r_b-1)$, la garde du cast `u32` des traces strictes, et E2 avec `initial ≤ λ` et ancêtre fermé |
+
+**Demandes.**
+- *Auditeur mathématique.* La relecture du § 10 tel que commité, en particulier les lemmes P et W, les deux lectures
+  de E5 et le témoin D2. Et celle des 13 mutants de l'oracle borné.
+- *Auditeur moteur.* La relecture de chaque tranche à son commit :
+  - S3, journal posé dans `cell` et `regular_cell`, sur le chemin chaud ;
+  - S5, changement d'`io` pour D.3 ;
+  - S6a.
+
+  Et votre avis sur la matrice G4 qui qualifiera L1. Nous proposons : GCC Release en u21 et u24, ASan et UBSan,
+  TSan, campagnes de mutants `tower`, `supports`, `io`, `api` et `cli`, portes `scale8000`, `scale16000` et
+  `scale32000`, trames LiDAR à K5, reçu relu en mode normal et sous `-O`.
+
+**Question à l'auditeur mathématique : les coquilles étendues de 13 à 24 sites.** L'oracle borné ne les atteint
+pas. Ses $N_j$ passent par $2^m$ masques. Nous proposons deux compléments :
+- des fixtures natives de frontière : les sphères entières $x^2+y^2+z^2=5$, $6$, $10$, $11$ et $13$, qui portent
+  chacune 24 sites, sont admises au plafond ; une partie de 25 des 30 sites de $x^2+y^2+z^2=9$, qui contient encore
+  le centre, est refusée par `support_shell_capacity` ;
+- une suite `long` de l'oracle, avec $N_j$ dénombré par combinaisons, sur ces sphères et jusqu'à $K=3$.
+
+Voyez-vous un meilleur témoin ? Par exemple une coquille où $\mathcal{Q}_b$ mêle les trois arités, avec une fermeture
+zêta non triviale.
