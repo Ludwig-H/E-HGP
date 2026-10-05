@@ -1,0 +1,233 @@
+{
+  "budget_seconds": 2100,
+  "complete": true,
+  "configurations": [
+    {
+      "build_provenance": "matrix/release_long/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": false,
+      "ctest_args": [
+        "-L",
+        "^long$"
+      ],
+      "description": "GCC Release, profil 21 bits : les seules portes de label long (identites K10 a l'echelle et sur trame, juges K10), sorties des autres configurations pour qu'aucune n'en soit coupee par son echeance (qualification de la sortie parametree, 5 octobre 2026).",
+      "failures": [],
+      "logs": [
+        "matrix/release_long/LastTest.log",
+        "matrix/release_long/build.log",
+        "matrix/release_long/build_provenance.json",
+        "matrix/release_long/configure.log",
+        "matrix/release_long/ctest.log",
+        "matrix/release_long/tests.json"
+      ],
+      "name": "release_long",
+      "not_run": [
+        {
+          "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+          "excerpt": [],
+          "labels": [
+            "long",
+            "mutant"
+          ],
+          "seconds": 0.0,
+          "state": "no_result",
+          "test": "mhgp11_mutants_tower"
+        },
+        {
+          "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+          "excerpt": [],
+          "labels": [
+            "long",
+            "mutant"
+          ],
+          "seconds": 0.0,
+          "state": "no_result",
+          "test": "mhgp11_mutants_supports"
+        },
+        {
+          "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+          "excerpt": [],
+          "labels": [
+            "long",
+            "mutant"
+          ],
+          "seconds": 0.0,
+          "state": "no_result",
+          "test": "mhgp11_mutants_api"
+        },
+        {
+          "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+          "excerpt": [],
+          "labels": [
+            "long",
+            "mutant"
+          ],
+          "seconds": 0.0,
+          "state": "no_result",
+          "test": "mhgp11_mutants_cli"
+        }
+      ],
+      "optional": false,
+      "passed_labels": {
+        "lidar": 9,
+        "long": 34,
+        "mutant": 7,
+        "oracle": 17,
+        "scale32000": 1
+      },
+      "reason": "ctest : timeout",
+      "seconds": 2100.325,
+      "slowest": [
+        {
+          "seconds": 764.7,
+          "test": "mhgp11_cli_full_identity_scale32000_k10"
+        },
+        {
+          "seconds": 322.74,
+          "test": "mhgp11_cli_full_identity_lidar_ng00_k10"
+        },
+        {
+          "seconds": 188.19,
+          "test": "mhgp11_mutants_catalogue"
+        },
+        {
+          "seconds": 70.58,
+          "test": "mhgp11_mutants_num"
+        },
+        {
+          "seconds": 57.19,
+          "test": "mhgp11_supports_registers_lidar_ng00_k10"
+        },
+        {
+          "seconds": 48.1,
+          "test": "mhgp11_reference_full_2"
+        },
+        {
+          "seconds": 45.81,
+          "test": "mhgp11_supports_registers_lidar_ng02_k10"
+        },
+        {
+          "seconds": 45.69,
+          "test": "mhgp11_reference_full_1"
+        },
+        {
+          "seconds": 45.3,
+          "test": "mhgp11_reference_full_15"
+        },
+        {
+          "seconds": 45.25,
+          "test": "mhgp11_reference_full_9"
+        }
+      ],
+      "started_epoch": 1791216228.593,
+      "started_utc": "2026-10-05T16:03:48Z",
+      "status": "timeout",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.otrq1bqG7U/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.otrq1bqG7U/build/matrix/release_long/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_COORD_BITS=21"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.714,
+          "status": "ok",
+          "timeout_seconds": 2100.0
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.otrq1bqG7U/build/matrix/release_long/build",
+            "-j",
+            "16",
+            "--",
+            "-k"
+          ],
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 17.969,
+          "status": "ok",
+          "timeout_seconds": 2099.3
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-L",
+            "^long$"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.032,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "2000",
+            "-j",
+            "16",
+            "-L",
+            "^long$",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.otrq1bqG7U/build/matrix/release_long/junit.xml"
+          ],
+          "exit_code": -9,
+          "name": "test",
+          "seconds": 2081.606,
+          "status": "timeout",
+          "timed_out": true,
+          "timeout_seconds": 2081.3
+        }
+      ],
+      "tests": {
+        "ctest_failed": null,
+        "ctest_total": null,
+        "failed": 0,
+        "not_run": 4,
+        "passed": 34,
+        "selected": 38
+      },
+      "threads": 16
+    }
+  ],
+  "conforming": false,
+  "data_dir": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.otrq1bqG7U/data",
+  "ended_utc": "2026-10-05T16:38:48Z",
+  "exit_code": 1,
+  "host": {
+    "clangxx": "absent",
+    "cmake": "cmake version 3.22.1",
+    "ctest": "ctest version 3.22.1",
+    "gxx": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+    "junit": true,
+    "nproc": 48,
+    "python": "3.10.12"
+  },
+  "requested": [
+    "release_long"
+  ],
+  "schema": "ehgp.v11.g4_matrix_summary.v1",
+  "signals": [],
+  "started_utc": "2026-10-05T16:03:48Z",
+  "statuses": {
+    "release_long": "timeout"
+  },
+  "thread_budget": 48
+}

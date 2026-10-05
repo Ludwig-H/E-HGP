@@ -1,0 +1,16 @@
+{
+  "pid": 284618,
+  "receipt": "/workspaces/.ehgp-sessions/v11.20261005.claudequalmatrice/receipt.json",
+  "recover": "python3 gcp-migration/v11_session.py --recover --session-dir /workspaces/.ehgp-sessions/v11.20261005.claudequalmatrice",
+  "run_dir": "/tmp/ehgp-v11-runs/v11.20261005.claudequalmatrice-83b859eb690d",
+  "sentinel": "/workspaces/.ehgp-sessions/v11.20261005.claudequalmatrice/DONE",
+  "session": "/workspaces/.ehgp-sessions/v11.20261005.claudequalmatrice",
+  "started_utc": "2026-10-05T13:21:12Z",
+  "status": "launched",
+  "stderr": "/workspaces/.ehgp-sessions/v11.20261005.claudequalmatrice/session.stderr",
+  "target": {
+    "instance": "ehgp-v7-3b1d496aed430749ea7e049f",
+    "project": "devpod-gpu-exploration",
+    "zone": "us-central1-c"
+  }
+}

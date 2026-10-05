@@ -1,0 +1,167 @@
+{
+  "build_provenance": "matrix/bits24/build_provenance.json",
+  "cmake_options": [
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DMHGP11_COORD_BITS=24"
+  ],
+  "compiler": "g++",
+  "compiler_path": "/usr/bin/g++",
+  "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+  "conforming": true,
+  "ctest_args": [
+    "-LE",
+    "^(mutant|long)$",
+    "-E",
+    "^mhgp11_reference_"
+  ],
+  "description": "Profil de coordonnees a 24 bits (MHGP11_COORD_BITS) : memes sources ; non qualifie tant qu'il n'a pas ses propres portes.",
+  "failures": [],
+  "logs": [
+    "matrix/bits24/LastTest.log",
+    "matrix/bits24/build.log",
+    "matrix/bits24/build_provenance.json",
+    "matrix/bits24/configure.log",
+    "matrix/bits24/ctest.log",
+    "matrix/bits24/junit.xml",
+    "matrix/bits24/tests.json"
+  ],
+  "name": "bits24",
+  "not_run": [],
+  "optional": false,
+  "passed_labels": {
+    "fast": 743,
+    "lidar": 39,
+    "oracle": 146,
+    "scale16000": 10,
+    "scale32000": 11,
+    "scale8000": 22,
+    "unit": 508
+  },
+  "reason": "",
+  "seconds": 1988.528,
+  "slowest": [
+    {
+      "seconds": 113.32,
+      "test": "mhgp11_cli_full_identity_scale32000"
+    },
+    {
+      "seconds": 112.19,
+      "test": "mhgp11_cli_full_identity_scale32000_opt"
+    },
+    {
+      "seconds": 74.14,
+      "test": "mhgp11_cli_supports_scale32000"
+    },
+    {
+      "seconds": 73.59,
+      "test": "mhgp11_cli_supports_scale32000_opt"
+    },
+    {
+      "seconds": 68.05,
+      "test": "mhgp11_cli_full_identity_lidar_ng02_k5_opt"
+    },
+    {
+      "seconds": 66.52,
+      "test": "mhgp11_cli_full_identity_lidar_ng02_k5"
+    },
+    {
+      "seconds": 64.34,
+      "test": "mhgp11_cli_full_determinism_scale8000_opt"
+    },
+    {
+      "seconds": 64.17,
+      "test": "mhgp11_cli_full_determinism_scale8000"
+    },
+    {
+      "seconds": 63.49,
+      "test": "mhgp11_cli_full_identity_lidar_ng00_k5_opt"
+    },
+    {
+      "seconds": 63.13,
+      "test": "mhgp11_cli_full_identity_lidar_ng00_k5"
+    }
+  ],
+  "started_epoch": 1791211516.836,
+  "started_utc": "2026-10-05T14:45:16Z",
+  "status": "ok",
+  "steps": [
+    {
+      "argv": [
+        "cmake",
+        "-S",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.LcnOOfoWke/src/morsehgp3D_v11",
+        "-B",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.LcnOOfoWke/build/matrix/bits24/build",
+        "-DCMAKE_CXX_COMPILER=g++",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "exit_code": 0,
+      "name": "configure",
+      "seconds": 0.716,
+      "status": "ok",
+      "timeout_seconds": 2100.0
+    },
+    {
+      "argv": [
+        "cmake",
+        "--build",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.LcnOOfoWke/build/matrix/bits24/build",
+        "-j",
+        "4",
+        "--",
+        "-k"
+      ],
+      "exit_code": 0,
+      "name": "build",
+      "seconds": 70.782,
+      "status": "ok",
+      "timeout_seconds": 2099.3
+    },
+    {
+      "argv": [
+        "ctest",
+        "--show-only=json-v1",
+        "-LE",
+        "^(mutant|long)$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "exit_code": 0,
+      "name": "list",
+      "seconds": 0.064,
+      "status": "ok",
+      "timeout_seconds": 120
+    },
+    {
+      "argv": [
+        "ctest",
+        "--no-tests=error",
+        "--timeout",
+        "600",
+        "-j",
+        "4",
+        "-LE",
+        "^(mutant|long)$",
+        "-E",
+        "^mhgp11_reference_",
+        "--output-junit",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.LcnOOfoWke/build/matrix/bits24/junit.xml"
+      ],
+      "exit_code": 0,
+      "name": "test",
+      "seconds": 1916.95,
+      "status": "ok",
+      "timeout_seconds": 2028.4
+    }
+  ],
+  "tests": {
+    "ctest_failed": 0,
+    "ctest_total": 824,
+    "failed": 0,
+    "not_run": 0,
+    "passed": 824,
+    "selected": 824
+  },
+  "threads": 4
+}

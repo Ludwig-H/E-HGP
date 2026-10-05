@@ -1,0 +1,172 @@
+{
+  "build_provenance": "matrix/gcc_release/build_provenance.json",
+  "cmake_options": [
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DMHGP11_COORD_BITS=18"
+  ],
+  "compiler": "g++",
+  "compiler_path": "/usr/bin/g++",
+  "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+  "conforming": true,
+  "ctest_args": [
+    "-LE",
+    "^(mutant|long)$"
+  ],
+  "description": "GCC Release, profil 18 bits : toutes les portes sauf les mutants (dont la suite complete de la reference, en tranches paralleles).",
+  "failures": [],
+  "logs": [
+    "matrix/gcc_release/LastTest.log",
+    "matrix/gcc_release/build.log",
+    "matrix/gcc_release/build_provenance.json",
+    "matrix/gcc_release/configure.log",
+    "matrix/gcc_release/ctest.log",
+    "matrix/gcc_release/junit.xml",
+    "matrix/gcc_release/tests.json"
+  ],
+  "name": "gcc_release",
+  "not_run": [],
+  "optional": false,
+  "passed_labels": {
+    "fast": 833,
+    "lidar": 39,
+    "oracle": 236,
+    "scale16000": 10,
+    "scale32000": 11,
+    "scale8000": 22,
+    "unit": 508
+  },
+  "probes": [
+    {
+      "executable": "mhgp11_sched_probe",
+      "isolation": "not_certified",
+      "name": "sched_probe",
+      "status": "absent"
+    }
+  ],
+  "reason": "",
+  "seconds": 1822.85,
+  "slowest": [
+    {
+      "seconds": 109.41,
+      "test": "mhgp11_cli_full_identity_scale32000_opt"
+    },
+    {
+      "seconds": 109.27,
+      "test": "mhgp11_cli_full_identity_scale32000"
+    },
+    {
+      "seconds": 72.7,
+      "test": "mhgp11_cli_supports_scale32000_opt"
+    },
+    {
+      "seconds": 72.42,
+      "test": "mhgp11_cli_supports_scale32000"
+    },
+    {
+      "seconds": 66.38,
+      "test": "mhgp11_cli_full_identity_lidar_ng02_k5_opt"
+    },
+    {
+      "seconds": 65.33,
+      "test": "mhgp11_cli_full_determinism_scale8000_opt"
+    },
+    {
+      "seconds": 65.33,
+      "test": "mhgp11_cli_full_identity_lidar_ng02_k5"
+    },
+    {
+      "seconds": 62.89,
+      "test": "mhgp11_cli_full_determinism_scale8000"
+    },
+    {
+      "seconds": 62.56,
+      "test": "mhgp11_cli_full_identity_lidar_ng00_k5_opt"
+    },
+    {
+      "seconds": 61.17,
+      "test": "mhgp11_cli_full_identity_lidar_ng00_k5"
+    }
+  ],
+  "started_epoch": 1791211516.836,
+  "started_utc": "2026-10-05T14:45:16Z",
+  "status": "ok",
+  "steps": [
+    {
+      "argv": [
+        "cmake",
+        "-S",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.LcnOOfoWke/src/morsehgp3D_v11",
+        "-B",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.LcnOOfoWke/build/matrix/gcc_release/build",
+        "-DCMAKE_CXX_COMPILER=g++",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=18"
+      ],
+      "exit_code": 0,
+      "name": "configure",
+      "seconds": 0.714,
+      "status": "ok",
+      "timeout_seconds": 2100.0
+    },
+    {
+      "argv": [
+        "cmake",
+        "--build",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.LcnOOfoWke/build/matrix/gcc_release/build",
+        "-j",
+        "16",
+        "--",
+        "-k"
+      ],
+      "exit_code": 0,
+      "name": "build",
+      "seconds": 20.22,
+      "status": "ok",
+      "timeout_seconds": 2099.3
+    },
+    {
+      "argv": [
+        "ctest",
+        "--show-only=json-v1",
+        "-LE",
+        "^(mutant|long)$"
+      ],
+      "exit_code": 0,
+      "name": "list",
+      "seconds": 0.064,
+      "status": "ok",
+      "timeout_seconds": 120
+    },
+    {
+      "argv": [
+        "ctest",
+        "--no-tests=error",
+        "--timeout",
+        "600",
+        "-j",
+        "16",
+        "-LE",
+        "^(mutant|long)$",
+        "--output-junit",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.LcnOOfoWke/build/matrix/gcc_release/junit.xml"
+      ],
+      "exit_code": 0,
+      "name": "test",
+      "seconds": 1801.825,
+      "status": "ok",
+      "timeout_seconds": 2079.0
+    }
+  ],
+  "tests": {
+    "ctest_failed": 0,
+    "ctest_total": 914,
+    "failed": 0,
+    "not_run": 0,
+    "passed": 914,
+    "selected": 914
+  },
+  "threads": 16,
+  "truncated_logs": {
+    "LastTest.log": 1164929
+  }
+}

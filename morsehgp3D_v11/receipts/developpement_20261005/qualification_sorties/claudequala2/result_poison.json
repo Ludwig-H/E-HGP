@@ -1,0 +1,169 @@
+{
+  "build_provenance": "matrix/poison/build_provenance.json",
+  "cmake_options": [
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DMHGP11_POISON=ON",
+    "-DMHGP11_COORD_BITS=21"
+  ],
+  "compiler": "g++",
+  "compiler_path": "/usr/bin/g++",
+  "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+  "conforming": true,
+  "ctest_args": [
+    "-LE",
+    "^(mutant|long)$",
+    "-E",
+    "^mhgp11_reference_"
+  ],
+  "description": "Tampons empoisonnes (MHGP11_POISON). Profil explicite 21 bits.",
+  "failures": [],
+  "logs": [
+    "matrix/poison/LastTest.log",
+    "matrix/poison/build.log",
+    "matrix/poison/build_provenance.json",
+    "matrix/poison/configure.log",
+    "matrix/poison/ctest.log",
+    "matrix/poison/junit.xml",
+    "matrix/poison/tests.json"
+  ],
+  "name": "poison",
+  "not_run": [],
+  "optional": false,
+  "passed_labels": {
+    "fast": 744,
+    "lidar": 39,
+    "oracle": 146,
+    "scale16000": 10,
+    "scale32000": 11,
+    "scale8000": 22,
+    "unit": 509
+  },
+  "reason": "",
+  "seconds": 1980.623,
+  "slowest": [
+    {
+      "seconds": 111.61,
+      "test": "mhgp11_cli_full_identity_scale32000_opt"
+    },
+    {
+      "seconds": 111.14,
+      "test": "mhgp11_cli_full_identity_scale32000"
+    },
+    {
+      "seconds": 74.22,
+      "test": "mhgp11_cli_supports_scale32000_opt"
+    },
+    {
+      "seconds": 73.36,
+      "test": "mhgp11_cli_supports_scale32000"
+    },
+    {
+      "seconds": 67.51,
+      "test": "mhgp11_cli_full_identity_lidar_ng02_k5_opt"
+    },
+    {
+      "seconds": 67.11,
+      "test": "mhgp11_cli_full_identity_lidar_ng02_k5"
+    },
+    {
+      "seconds": 64.9,
+      "test": "mhgp11_cli_full_determinism_scale8000_opt"
+    },
+    {
+      "seconds": 63.69,
+      "test": "mhgp11_cli_full_determinism_scale8000"
+    },
+    {
+      "seconds": 63.16,
+      "test": "mhgp11_cli_full_identity_lidar_ng00_k5_opt"
+    },
+    {
+      "seconds": 62.81,
+      "test": "mhgp11_cli_full_identity_lidar_ng00_k5"
+    }
+  ],
+  "started_epoch": 1791211516.837,
+  "started_utc": "2026-10-05T14:45:16Z",
+  "status": "ok",
+  "steps": [
+    {
+      "argv": [
+        "cmake",
+        "-S",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.LcnOOfoWke/src/morsehgp3D_v11",
+        "-B",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.LcnOOfoWke/build/matrix/poison/build",
+        "-DCMAKE_CXX_COMPILER=g++",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_POISON=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "exit_code": 0,
+      "name": "configure",
+      "seconds": 0.714,
+      "status": "ok",
+      "timeout_seconds": 2100.0
+    },
+    {
+      "argv": [
+        "cmake",
+        "--build",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.LcnOOfoWke/build/matrix/poison/build",
+        "-j",
+        "4",
+        "--",
+        "-k"
+      ],
+      "exit_code": 0,
+      "name": "build",
+      "seconds": 71.082,
+      "status": "ok",
+      "timeout_seconds": 2099.3
+    },
+    {
+      "argv": [
+        "ctest",
+        "--show-only=json-v1",
+        "-LE",
+        "^(mutant|long)$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "exit_code": 0,
+      "name": "list",
+      "seconds": 0.064,
+      "status": "ok",
+      "timeout_seconds": 120
+    },
+    {
+      "argv": [
+        "ctest",
+        "--no-tests=error",
+        "--timeout",
+        "600",
+        "-j",
+        "4",
+        "-LE",
+        "^(mutant|long)$",
+        "-E",
+        "^mhgp11_reference_",
+        "--output-junit",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.LcnOOfoWke/build/matrix/poison/junit.xml"
+      ],
+      "exit_code": 0,
+      "name": "test",
+      "seconds": 1908.744,
+      "status": "ok",
+      "timeout_seconds": 2028.1
+    }
+  ],
+  "tests": {
+    "ctest_failed": 0,
+    "ctest_total": 825,
+    "failed": 0,
+    "not_run": 0,
+    "passed": 825,
+    "selected": 825
+  },
+  "threads": 4
+}

@@ -1,0 +1,293 @@
+{
+  "build_provenance": "matrix/gcc_release/build_provenance.json",
+  "cmake_options": [
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DMHGP11_COORD_BITS=18"
+  ],
+  "compiler": "g++",
+  "compiler_path": "/usr/bin/g++",
+  "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+  "conforming": false,
+  "ctest_args": [
+    "-LE",
+    "^mutant$"
+  ],
+  "description": "GCC Release, profil 18 bits : toutes les portes sauf les mutants (dont la suite complete de la reference, en tranches paralleles).",
+  "failures": [],
+  "logs": [
+    "matrix/gcc_release/LastTest.log",
+    "matrix/gcc_release/build.log",
+    "matrix/gcc_release/build_provenance.json",
+    "matrix/gcc_release/configure.log",
+    "matrix/gcc_release/ctest.log",
+    "matrix/gcc_release/tests.json"
+  ],
+  "name": "gcc_release",
+  "not_run": [
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "long",
+        "scale32000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_full_identity_scale32000_k10"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale8000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_full_determinism_scale8000_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_full_identity_lidar_ng00_k5_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_full_identity_lidar_ng01_k5_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_full_identity_lidar_ng02_k5_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar",
+        "long"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_full_identity_lidar_ng00_k10"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale8000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_supports_scale8000_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale16000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_supports_scale16000_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale32000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_supports_scale32000_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_supports_lidar_ng00_k5_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_supports_lidar_ng01_k5_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_supports_lidar_ng02_k5_opt"
+    }
+  ],
+  "optional": false,
+  "passed_labels": {
+    "fast": 833,
+    "lidar": 41,
+    "long": 25,
+    "oracle": 253,
+    "scale16000": 9,
+    "scale32000": 10,
+    "scale8000": 20,
+    "unit": 508
+  },
+  "probes": [
+    {
+      "executable": "mhgp11_sched_probe",
+      "isolation": "not_certified",
+      "name": "sched_probe",
+      "status": "absent"
+    }
+  ],
+  "reason": "ctest : timeout",
+  "seconds": 2100.116,
+  "slowest": [
+    {
+      "seconds": 109.68,
+      "test": "mhgp11_cli_full_identity_scale32000_opt"
+    },
+    {
+      "seconds": 106.99,
+      "test": "mhgp11_cli_full_identity_scale32000"
+    },
+    {
+      "seconds": 70.74,
+      "test": "mhgp11_cli_supports_scale32000"
+    },
+    {
+      "seconds": 67.41,
+      "test": "mhgp11_cli_full_identity_lidar_ng02_k5"
+    },
+    {
+      "seconds": 62.76,
+      "test": "mhgp11_cli_full_determinism_scale8000"
+    },
+    {
+      "seconds": 59.73,
+      "test": "mhgp11_cli_full_identity_lidar_ng00_k5"
+    },
+    {
+      "seconds": 56.02,
+      "test": "mhgp11_supports_registers_lidar_ng00_k10"
+    },
+    {
+      "seconds": 52.35,
+      "test": "mhgp11_cli_full_identity_scale16000_opt"
+    },
+    {
+      "seconds": 51.52,
+      "test": "mhgp11_cli_full_identity_scale16000"
+    },
+    {
+      "seconds": 51.07,
+      "test": "mhgp11_cli_full_identity_lidar_ng01_k5"
+    }
+  ],
+  "started_epoch": 1791209028.671,
+  "started_utc": "2026-10-05T14:03:48Z",
+  "status": "timeout",
+  "steps": [
+    {
+      "argv": [
+        "cmake",
+        "-S",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.ya9MJ9wJjI/src/morsehgp3D_v11",
+        "-B",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.ya9MJ9wJjI/build/matrix/gcc_release/build",
+        "-DCMAKE_CXX_COMPILER=g++",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=18"
+      ],
+      "exit_code": 0,
+      "name": "configure",
+      "seconds": 0.714,
+      "status": "ok",
+      "timeout_seconds": 2100.0
+    },
+    {
+      "argv": [
+        "cmake",
+        "--build",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.ya9MJ9wJjI/build/matrix/gcc_release/build",
+        "-j",
+        "16",
+        "--",
+        "-k"
+      ],
+      "exit_code": 0,
+      "name": "build",
+      "seconds": 19.92,
+      "status": "ok",
+      "timeout_seconds": 2099.3
+    },
+    {
+      "argv": [
+        "ctest",
+        "--show-only=json-v1",
+        "-LE",
+        "^mutant$"
+      ],
+      "exit_code": 0,
+      "name": "list",
+      "seconds": 0.064,
+      "status": "ok",
+      "timeout_seconds": 120
+    },
+    {
+      "argv": [
+        "ctest",
+        "--no-tests=error",
+        "--timeout",
+        "600",
+        "-j",
+        "16",
+        "-LE",
+        "^mutant$",
+        "--output-junit",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.ya9MJ9wJjI/build/matrix/gcc_release/junit.xml"
+      ],
+      "exit_code": -9,
+      "name": "test",
+      "seconds": 2079.4,
+      "status": "timeout",
+      "timed_out": true,
+      "timeout_seconds": 2079.3
+    }
+  ],
+  "tests": {
+    "ctest_failed": null,
+    "ctest_total": null,
+    "failed": 0,
+    "not_run": 12,
+    "passed": 929,
+    "selected": 941
+  },
+  "threads": 16
+}

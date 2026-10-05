@@ -1,0 +1,949 @@
+{
+  "build_provenance": "matrix/bits21/build_provenance.json",
+  "cmake_options": [
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DMHGP11_COORD_BITS=21"
+  ],
+  "compiler": "g++",
+  "compiler_path": "/usr/bin/g++",
+  "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+  "conforming": false,
+  "ctest_args": [
+    "-LE",
+    "^mutant$",
+    "-E",
+    "^mhgp11_reference_"
+  ],
+  "description": "Profil de coordonnees a 21 bits (MHGP11_COORD_BITS) : memes sources ; non qualifie tant qu'il n'a pas ses propres portes.",
+  "failures": [],
+  "logs": [
+    "matrix/bits21/LastTest.log",
+    "matrix/bits21/build.log",
+    "matrix/bits21/build_provenance.json",
+    "matrix/bits21/configure.log",
+    "matrix/bits21/ctest.log",
+    "matrix/bits21/tests.json"
+  ],
+  "name": "bits21",
+  "not_run": [
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "fast",
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_support_lidar_sentinel"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale8000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_catalogue_euler_scale8000"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale16000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_catalogue_euler_scale16000"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale32000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_catalogue_euler_scale32000"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_catalogue_euler_lidar_ng00_k5"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_catalogue_euler_lidar_ng01_k5"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_catalogue_euler_lidar_ng02_k5"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar",
+        "long"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_catalogue_euler_lidar_ng00_k10"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar",
+        "long"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_catalogue_euler_lidar_ng01_k10"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar",
+        "long"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_catalogue_euler_lidar_ng02_k10"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale8000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_tower_order_identity_scale8000"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale8000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_tower_attach_scale8000"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale16000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_tower_order_identity_scale16000"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale16000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_tower_attach_scale16000"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale32000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_tower_order_identity_scale32000"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale32000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_tower_attach_scale32000"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale8000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_tower_attach_e1e2_scale8000"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale32000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_tower_attach_e1e2_scale32000"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_tower_order_identity_lidar_ng00_k5"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_tower_attach_e1e2_lidar_ng00_k5"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_tower_attach_export_lidar_ng00_k5_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_tower_order_identity_lidar_ng01_k5"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_tower_attach_e1e2_lidar_ng01_k5"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_tower_attach_export_lidar_ng01_k5_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_tower_order_identity_lidar_ng02_k5"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_tower_attach_e1e2_lidar_ng02_k5"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_tower_attach_export_lidar_ng02_k5_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar",
+        "long"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_tower_order_identity_lidar_ng00_k10"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale8000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_supports_sample_judge_scale8000_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale8000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_supports_sample_judge_grid8000_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_supports_sample_judge_lidar_ng00_k5_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale8000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_supports_registers_uniform8000_k5_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale8000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_supports_registers_grid8000_k5_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale16000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_supports_registers_uniform16000_k5_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale32000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_supports_registers_uniform32000_k5_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_supports_registers_lidar_ng00_k5_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_supports_registers_lidar_ng01_k5_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_supports_registers_lidar_ng02_k5_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar",
+        "long"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_supports_registers_lidar_ng00_k10"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar",
+        "long"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_supports_registers_lidar_ng01_k10"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar",
+        "long"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_supports_registers_lidar_ng02_k10"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale8000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_supports_hierarchy_scale8000"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale16000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_supports_hierarchy_scale16000"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale32000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_supports_hierarchy_scale32000"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale8000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_supports_hierarchy_permutation_scale8000"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale8000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_supports_hierarchy_grid8000"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale8000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_supports_hierarchy_permutation_grid8000"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_supports_hierarchy_lidar_ng00_k5"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_supports_hierarchy_lidar_ng01_k5"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_supports_hierarchy_lidar_ng02_k5"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar",
+        "long"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_supports_hierarchy_lidar_ng00_k10"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale8000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_full_identity_scale8000_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale16000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_full_identity_scale16000_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale32000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_full_identity_scale32000"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale32000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_full_identity_scale32000_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "long",
+        "scale32000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_full_identity_scale32000_k10"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale8000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_full_determinism_scale8000"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale8000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_full_determinism_scale8000_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_full_identity_lidar_ng00_k5"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_full_identity_lidar_ng00_k5_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_full_identity_lidar_ng01_k5"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_full_identity_lidar_ng01_k5_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_full_identity_lidar_ng02_k5"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_full_identity_lidar_ng02_k5_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar",
+        "long"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_full_identity_lidar_ng00_k10"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale8000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_supports_scale8000"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale8000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_supports_scale8000_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale16000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_supports_scale16000"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale16000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_supports_scale16000_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale32000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_supports_scale32000"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "scale32000"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_supports_scale32000_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_supports_lidar_ng00_k5"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_supports_lidar_ng00_k5_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_supports_lidar_ng01_k5"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_supports_lidar_ng01_k5_opt"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_supports_lidar_ng02_k5"
+    },
+    {
+      "detail": "aucun resultat (ctest coupe, ou porte jamais lancee)",
+      "excerpt": [],
+      "labels": [
+        "lidar"
+      ],
+      "seconds": 0.0,
+      "state": "no_result",
+      "test": "mhgp11_cli_supports_lidar_ng02_k5_opt"
+    }
+  ],
+  "optional": false,
+  "passed_labels": {
+    "fast": 742,
+    "lidar": 7,
+    "oracle": 146,
+    "scale16000": 2,
+    "scale32000": 1,
+    "scale8000": 5,
+    "unit": 508
+  },
+  "reason": "ctest : timeout",
+  "seconds": 591.719,
+  "slowest": [
+    {
+      "seconds": 57.91,
+      "test": "mhgp11_tower_full_campaign"
+    },
+    {
+      "seconds": 56.05,
+      "test": "mhgp11_tower_full_campaign_opt"
+    },
+    {
+      "seconds": 54.47,
+      "test": "mhgp11_cli_full_identity_scale16000"
+    },
+    {
+      "seconds": 35.56,
+      "test": "mhgp11_cli_supports_oracle"
+    },
+    {
+      "seconds": 30.44,
+      "test": "mhgp11_cli_supports_oracle_opt"
+    },
+    {
+      "seconds": 27.16,
+      "test": "mhgp11_cli_full_identity_scale8000"
+    },
+    {
+      "seconds": 25.86,
+      "test": "mhgp11_supports_registers_uniform32000_k5"
+    },
+    {
+      "seconds": 22.82,
+      "test": "mhgp11_cli_full_determinism"
+    },
+    {
+      "seconds": 20.4,
+      "test": "mhgp11_cli_full_determinism_opt"
+    },
+    {
+      "seconds": 17.85,
+      "test": "mhgp11_supports_fraction"
+    }
+  ],
+  "started_epoch": 1791208128.07,
+  "started_utc": "2026-10-05T13:48:48Z",
+  "status": "timeout",
+  "steps": [
+    {
+      "argv": [
+        "cmake",
+        "-S",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.XCvswHSkfQ/src/morsehgp3D_v11",
+        "-B",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.XCvswHSkfQ/build/matrix/bits21/build",
+        "-DCMAKE_CXX_COMPILER=g++",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "exit_code": 0,
+      "name": "configure",
+      "seconds": 0.614,
+      "status": "ok",
+      "timeout_seconds": 591.4
+    },
+    {
+      "argv": [
+        "cmake",
+        "--build",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.XCvswHSkfQ/build/matrix/bits21/build",
+        "-j",
+        "4",
+        "--",
+        "-k"
+      ],
+      "exit_code": 0,
+      "name": "build",
+      "seconds": 73.836,
+      "status": "ok",
+      "timeout_seconds": 590.8
+    },
+    {
+      "argv": [
+        "ctest",
+        "--show-only=json-v1",
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "exit_code": 0,
+      "name": "list",
+      "seconds": 0.075,
+      "status": "ok",
+      "timeout_seconds": 120
+    },
+    {
+      "argv": [
+        "ctest",
+        "--no-tests=error",
+        "--timeout",
+        "600",
+        "-j",
+        "4",
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_",
+        "--output-junit",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.XCvswHSkfQ/build/matrix/bits21/junit.xml"
+      ],
+      "exit_code": -9,
+      "name": "test",
+      "seconds": 517.171,
+      "status": "timeout",
+      "timed_out": true,
+      "timeout_seconds": 516.9
+    }
+  ],
+  "tests": {
+    "ctest_failed": null,
+    "ctest_total": null,
+    "failed": 0,
+    "not_run": 77,
+    "passed": 757,
+    "selected": 834
+  },
+  "threads": 4
+}

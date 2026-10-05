@@ -1,0 +1,25 @@
+{
+  "cmake_options": [
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DMHGP11_COORD_BITS=21"
+  ],
+  "compiler": "clang++",
+  "conforming": false,
+  "ctest_args": [
+    "-LE",
+    "^mutant$",
+    "-E",
+    "^mhgp11_reference_"
+  ],
+  "description": "Clang Release, si clang++ existe sur la VM ; sinon la configuration est relevee absente, sans echec. Profil explicite 21 bits.",
+  "logs": [],
+  "name": "clang_release",
+  "optional": true,
+  "reason": "outil absent du PATH : clang++",
+  "seconds": 0.0,
+  "started_epoch": 1791208128.07,
+  "started_utc": "2026-10-05T13:48:48Z",
+  "status": "absent",
+  "steps": [],
+  "threads": 6
+}
