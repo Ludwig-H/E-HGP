@@ -1,0 +1,566 @@
+{
+  "archive_sha256": "1ab6efd4708f1d185398175c0a4fe4b016a031767fd1c0154c4b7883b229cbd7",
+  "audit_native_or_cloud_runs": 0,
+  "backend": "cpu_reference",
+  "configurations": [
+    {
+      "all_selected_passed": true,
+      "api_session_verdicts": {
+        "mhgp11_api_session_after_publish": "Passed",
+        "mhgp11_api_session_destroyed_live": "Passed",
+        "mhgp11_api_session_destroyed_released": "Passed",
+        "mhgp11_api_session_engine": "Passed",
+        "mhgp11_api_session_equivalence": "Passed",
+        "mhgp11_api_session_fault_inventaire": "Passed",
+        "mhgp11_api_session_fault_publication": "Passed",
+        "mhgp11_api_session_fault_session": "Passed",
+        "mhgp11_api_session_fault_starvation": "Passed",
+        "mhgp11_api_session_inventaire": "Passed",
+        "mhgp11_api_session_product_alive": "Passed",
+        "mhgp11_api_session_provenance": "Passed",
+        "mhgp11_api_session_refusals": "Passed",
+        "mhgp11_api_session_released": "Passed",
+        "mhgp11_api_session_session_identity": "Passed",
+        "mhgp11_api_session_tree_digest": "Passed"
+      },
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=18"
+      ],
+      "conforming": true,
+      "coord_bits": 18,
+      "critical_verdicts": {
+        "mhgp11_api_publish_reader": "Passed",
+        "mhgp11_api_publish_reader_opt": "Passed",
+        "mhgp11_api_session_provenance": "Passed",
+        "mhgp11_api_supports_route_oracle": "Passed",
+        "mhgp11_api_supports_route_oracle_opt": "Passed",
+        "mhgp11_cli_contract": "Passed",
+        "mhgp11_cli_contract_opt": "Passed",
+        "mhgp11_cli_plat": "Passed",
+        "mhgp11_cli_plat_opt": "Passed",
+        "mhgp11_head_unit_huge": "Passed",
+        "mhgp11_num_roots": "Passed",
+        "mhgp11_num_roots_opt": "Passed",
+        "mhgp11_points_unit_sort_refusal": "Passed"
+      },
+      "ctest_args": [
+        "-LE",
+        "^(mutant|long|scale8000|scale16000|scale32000|lidar)$"
+      ],
+      "ctest_log_sha256": "8be99850d75132651a201d806ccf827450d46825423b79d38425217ed102193f",
+      "failed_tests": [],
+      "head_unit_verdicts": {
+        "mhgp11_head_unit_budget": "Passed",
+        "mhgp11_head_unit_dates": "Passed",
+        "mhgp11_head_unit_equalities": "Passed",
+        "mhgp11_head_unit_fixtures": "Passed",
+        "mhgp11_head_unit_huge": "Passed",
+        "mhgp11_head_unit_inventaire": "Passed",
+        "mhgp11_head_unit_order": "Passed",
+        "mhgp11_head_unit_refusals": "Passed"
+      },
+      "inventory_sha256": "7a5ce58c437e1537c6884df99a6e30c5a0968f41a195a9da40aacf21ef687f52",
+      "junit_counts": {
+        "passed": 873
+      },
+      "junit_sha256": "1b137802351fa0e4c69e3e228e31b11023807b4b5866f23452f867548dcdcb66",
+      "junit_state": "concordant",
+      "labels_selected": [
+        "fast",
+        "oracle",
+        "unit"
+      ],
+      "missing_tests": [],
+      "name": "gcc_release",
+      "result_sha256": "98b843f285c9399fb70a8e8e51d160ab3e4688fd815e5e14c0beb6ab537b1f88",
+      "status": "ok",
+      "steps": [
+        {
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.765,
+          "status": "ok",
+          "timeout_seconds": 2100.0
+        },
+        {
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 21.22,
+          "status": "ok",
+          "timeout_seconds": 2099.2
+        },
+        {
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 90.649,
+          "status": "ok",
+          "timeout_seconds": 2077.9
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 873,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 873,
+        "selected": 873
+      }
+    },
+    {
+      "all_selected_passed": true,
+      "api_session_verdicts": {
+        "mhgp11_api_session_after_publish": "Passed",
+        "mhgp11_api_session_destroyed_live": "Passed",
+        "mhgp11_api_session_destroyed_released": "Passed",
+        "mhgp11_api_session_engine": "Passed",
+        "mhgp11_api_session_equivalence": "Passed",
+        "mhgp11_api_session_fault_inventaire": "Passed",
+        "mhgp11_api_session_fault_publication": "Passed",
+        "mhgp11_api_session_fault_session": "Passed",
+        "mhgp11_api_session_fault_starvation": "Passed",
+        "mhgp11_api_session_inventaire": "Passed",
+        "mhgp11_api_session_product_alive": "Passed",
+        "mhgp11_api_session_provenance": "Passed",
+        "mhgp11_api_session_refusals": "Passed",
+        "mhgp11_api_session_released": "Passed",
+        "mhgp11_api_session_session_identity": "Passed",
+        "mhgp11_api_session_tree_digest": "Passed"
+      },
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "conforming": true,
+      "coord_bits": 21,
+      "critical_verdicts": {
+        "mhgp11_api_publish_reader": "Passed",
+        "mhgp11_api_publish_reader_opt": "Passed",
+        "mhgp11_api_session_provenance": "Passed",
+        "mhgp11_api_supports_route_oracle": "Passed",
+        "mhgp11_api_supports_route_oracle_opt": "Passed",
+        "mhgp11_cli_contract": "Passed",
+        "mhgp11_cli_contract_opt": "Passed",
+        "mhgp11_cli_plat": "Passed",
+        "mhgp11_cli_plat_opt": "Passed",
+        "mhgp11_head_unit_huge": "Passed",
+        "mhgp11_num_roots": "Passed",
+        "mhgp11_num_roots_opt": "Passed",
+        "mhgp11_points_unit_sort_refusal": "Passed"
+      },
+      "ctest_args": [
+        "-LE",
+        "^(mutant|long|scale8000|scale16000|scale32000|lidar)$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "ctest_log_sha256": "aca80625a5bd4a66e1f53cadf5a2bd4dc72faf623077877645d04af6799c12ec",
+      "failed_tests": [],
+      "head_unit_verdicts": {
+        "mhgp11_head_unit_budget": "Passed",
+        "mhgp11_head_unit_dates": "Passed",
+        "mhgp11_head_unit_equalities": "Passed",
+        "mhgp11_head_unit_fixtures": "Passed",
+        "mhgp11_head_unit_huge": "Passed",
+        "mhgp11_head_unit_inventaire": "Passed",
+        "mhgp11_head_unit_order": "Passed",
+        "mhgp11_head_unit_refusals": "Passed"
+      },
+      "inventory_sha256": "49cfbe12914ae5867b3a6518ca8327684b2627d4bd6b365a108ad0ea959fe397",
+      "junit_counts": {
+        "passed": 783
+      },
+      "junit_sha256": "ff6eaaefea50a1d75d930c11376c719d0d0b0f25da790ec70bb778ff9ca5e321",
+      "junit_state": "concordant",
+      "labels_selected": [
+        "fast",
+        "oracle",
+        "unit"
+      ],
+      "missing_tests": [],
+      "name": "bits21",
+      "result_sha256": "8ce073345b499bd8573550edbf809ed06f9c8f869ac948cc6c8273114a9814b3",
+      "status": "ok",
+      "steps": [
+        {
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.764,
+          "status": "ok",
+          "timeout_seconds": 2100.0
+        },
+        {
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 76.384,
+          "status": "ok",
+          "timeout_seconds": 2099.2
+        },
+        {
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 179.848,
+          "status": "ok",
+          "timeout_seconds": 2022.8
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 783,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 783,
+        "selected": 783
+      }
+    },
+    {
+      "all_selected_passed": true,
+      "api_session_verdicts": {
+        "mhgp11_api_session_after_publish": "Passed",
+        "mhgp11_api_session_destroyed_live": "Passed",
+        "mhgp11_api_session_destroyed_released": "Passed",
+        "mhgp11_api_session_engine": "Passed",
+        "mhgp11_api_session_equivalence": "Passed",
+        "mhgp11_api_session_fault_inventaire": "Passed",
+        "mhgp11_api_session_fault_publication": "Passed",
+        "mhgp11_api_session_fault_session": "Passed",
+        "mhgp11_api_session_fault_starvation": "Passed",
+        "mhgp11_api_session_inventaire": "Passed",
+        "mhgp11_api_session_product_alive": "Passed",
+        "mhgp11_api_session_provenance": "Passed",
+        "mhgp11_api_session_refusals": "Passed",
+        "mhgp11_api_session_released": "Passed",
+        "mhgp11_api_session_session_identity": "Passed",
+        "mhgp11_api_session_tree_digest": "Passed"
+      },
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "conforming": true,
+      "coord_bits": 24,
+      "critical_verdicts": {
+        "mhgp11_api_publish_reader": "Passed",
+        "mhgp11_api_publish_reader_opt": "Passed",
+        "mhgp11_api_session_provenance": "Passed",
+        "mhgp11_api_supports_route_oracle": "Passed",
+        "mhgp11_api_supports_route_oracle_opt": "Passed",
+        "mhgp11_cli_contract": "Passed",
+        "mhgp11_cli_contract_opt": "Passed",
+        "mhgp11_cli_plat": "Passed",
+        "mhgp11_cli_plat_opt": "Passed",
+        "mhgp11_head_unit_huge": "Passed",
+        "mhgp11_num_roots": "Passed",
+        "mhgp11_num_roots_opt": "Passed",
+        "mhgp11_points_unit_sort_refusal": "Passed"
+      },
+      "ctest_args": [
+        "-LE",
+        "^(mutant|long|scale8000|scale16000|scale32000|lidar)$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "ctest_log_sha256": "ca9c9b44efe8c05a26267f35406e654e5d08b25f708f5753f5b4540c6263ccd2",
+      "failed_tests": [],
+      "head_unit_verdicts": {
+        "mhgp11_head_unit_budget": "Passed",
+        "mhgp11_head_unit_dates": "Passed",
+        "mhgp11_head_unit_equalities": "Passed",
+        "mhgp11_head_unit_fixtures": "Passed",
+        "mhgp11_head_unit_huge": "Passed",
+        "mhgp11_head_unit_inventaire": "Passed",
+        "mhgp11_head_unit_order": "Passed",
+        "mhgp11_head_unit_refusals": "Passed"
+      },
+      "inventory_sha256": "49cfbe12914ae5867b3a6518ca8327684b2627d4bd6b365a108ad0ea959fe397",
+      "junit_counts": {
+        "passed": 783
+      },
+      "junit_sha256": "d5470a02812e45a36b4329ffd51d1cbf993428d77393ca96fcc50fd36a11a86b",
+      "junit_state": "concordant",
+      "labels_selected": [
+        "fast",
+        "oracle",
+        "unit"
+      ],
+      "missing_tests": [],
+      "name": "bits24",
+      "result_sha256": "3c8e91da9c9da7f60e8bc669bae1f34191b3e063d154011dffa44f3fd5ef0683",
+      "status": "ok",
+      "steps": [
+        {
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.764,
+          "status": "ok",
+          "timeout_seconds": 2100.0
+        },
+        {
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 76.734,
+          "status": "ok",
+          "timeout_seconds": 2099.2
+        },
+        {
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 180.043,
+          "status": "ok",
+          "timeout_seconds": 2022.4
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 783,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 783,
+        "selected": 783
+      }
+    },
+    {
+      "all_selected_passed": true,
+      "api_session_verdicts": {
+        "mhgp11_api_session_after_publish": "Passed",
+        "mhgp11_api_session_destroyed_live": "Passed",
+        "mhgp11_api_session_destroyed_released": "Passed",
+        "mhgp11_api_session_engine": "Passed",
+        "mhgp11_api_session_equivalence": "Passed",
+        "mhgp11_api_session_fault_inventaire": "Passed",
+        "mhgp11_api_session_fault_publication": "Passed",
+        "mhgp11_api_session_fault_session": "Passed",
+        "mhgp11_api_session_fault_starvation": "Passed",
+        "mhgp11_api_session_inventaire": "Passed",
+        "mhgp11_api_session_product_alive": "Passed",
+        "mhgp11_api_session_provenance": "Passed",
+        "mhgp11_api_session_refusals": "Passed",
+        "mhgp11_api_session_released": "Passed",
+        "mhgp11_api_session_session_identity": "Passed",
+        "mhgp11_api_session_tree_digest": "Passed"
+      },
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_POISON=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "conforming": true,
+      "coord_bits": 21,
+      "critical_verdicts": {
+        "mhgp11_api_publish_reader": "Passed",
+        "mhgp11_api_publish_reader_opt": "Passed",
+        "mhgp11_api_session_provenance": "Passed",
+        "mhgp11_api_supports_route_oracle": "Passed",
+        "mhgp11_api_supports_route_oracle_opt": "Passed",
+        "mhgp11_cli_contract": "Passed",
+        "mhgp11_cli_contract_opt": "Passed",
+        "mhgp11_cli_plat": "Passed",
+        "mhgp11_cli_plat_opt": "Passed",
+        "mhgp11_head_unit_huge": "Passed",
+        "mhgp11_num_roots": "Passed",
+        "mhgp11_num_roots_opt": "Passed",
+        "mhgp11_points_unit_sort_refusal": "Passed"
+      },
+      "ctest_args": [
+        "-LE",
+        "^(mutant|long|scale8000|scale16000|scale32000|lidar)$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "ctest_log_sha256": "9328d4c1239d6eba89b2a702c0515e8e9025cef5fd515e6b911eb508b87566bf",
+      "failed_tests": [],
+      "head_unit_verdicts": {
+        "mhgp11_head_unit_budget": "Passed",
+        "mhgp11_head_unit_dates": "Passed",
+        "mhgp11_head_unit_equalities": "Passed",
+        "mhgp11_head_unit_fixtures": "Passed",
+        "mhgp11_head_unit_huge": "Passed",
+        "mhgp11_head_unit_inventaire": "Passed",
+        "mhgp11_head_unit_order": "Passed",
+        "mhgp11_head_unit_refusals": "Passed"
+      },
+      "inventory_sha256": "91adbafc3337ebffe655efb60662d75bb03c70d5bdd29abdc7dcd28d3f5c279a",
+      "junit_counts": {
+        "passed": 784
+      },
+      "junit_sha256": "ae9627b4f03c305a649d9c4378a4d1b172dfc93ca0b4f219646b472e4ae80ed8",
+      "junit_state": "concordant",
+      "labels_selected": [
+        "fast",
+        "oracle",
+        "unit"
+      ],
+      "missing_tests": [],
+      "name": "poison",
+      "result_sha256": "7f5bba695c20988e9c9bd4064a2ef0d4be9ad7324f23759a4259073a6d900537",
+      "status": "ok",
+      "steps": [
+        {
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.764,
+          "status": "ok",
+          "timeout_seconds": 2100.0
+        },
+        {
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 76.334,
+          "status": "ok",
+          "timeout_seconds": 2099.2
+        },
+        {
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 180.199,
+          "status": "ok",
+          "timeout_seconds": 2022.8
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 784,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 784,
+        "selected": 784
+      }
+    }
+  ],
+  "coverage": {
+    "all_selected_have_terminal_pass": true,
+    "bits21_bits24_inventories_identical": true,
+    "budget_interruptions": 0,
+    "common_names_count": 783,
+    "common_names_sha256": "b797b64540dd264c6aa44648a273936db807130e65df5931b567966b3e22604e",
+    "excluded_labels": [
+      "mutant",
+      "long",
+      "scale8000",
+      "scale16000",
+      "scale32000",
+      "lidar"
+    ],
+    "gcc_release_reference_extra_count": 90,
+    "inventories_unique": true,
+    "missing_count": 0,
+    "native_unit_single_gates": [
+      "mhgp11_head_unit_huge",
+      "mhgp11_points_unit_sort_refusal"
+    ],
+    "poison_extra": [
+      "mhgp11_core_poison"
+    ],
+    "reference_excluded_outside_gcc_release": true
+  },
+  "data_manifest_sha256": "826643041e3336c1f0582e687a6c47595a3926e7a8f0541232282a9f7b9a6095",
+  "data_verified_remote": true,
+  "delivered_data_names": [
+    "lidar_ng00.ids.u32le",
+    "lidar_ng00.u32le",
+    "lidar_ng01.ids.u32le",
+    "lidar_ng01.u32le",
+    "lidar_ng02.ids.u32le",
+    "lidar_ng02.u32le",
+    "manifest.json",
+    "uniform_u18_n16000.ids.u32le",
+    "uniform_u18_n16000.u32le",
+    "uniform_u18_n32000.ids.u32le",
+    "uniform_u18_n32000.u32le",
+    "uniform_u18_n8000.ids.u32le",
+    "uniform_u18_n8000.u32le"
+  ],
+  "done": "0",
+  "global_qualification_complete": false,
+  "limits": [
+    "Portee courte ordinaire des quatre profils au pin 98a009550 ; aucune qualification globale ni transfert vers les profils sanitizer.",
+    "Echelle, LiDAR, long et campagnes mutants exclus. Les 41 occurrences ordinaires interrompues de fina2 et les six API supports_route par profil sont hors de R1.",
+    "Les unites natives huge et sort_refusal possedent une porte ; les jumelles Python -O num_roots, cli_plat et cli_contract passent explicitement.",
+    "Les 90 references Python courtes sont propres a gcc_release ; aucune assimilation aux campagnes natives mhgp11_mutants_ exclues.",
+    "Rejeu dependant des archives locales et du commit Git ; aucun journal brut, binaire natif ou octet LiDAR copie."
+  ],
+  "matrix": {
+    "budget_seconds": 2100,
+    "complete": true,
+    "conforming": true,
+    "ended_utc": "2026-10-05T23:43:42Z",
+    "exit_code": 0,
+    "requested": [
+      "gcc_release",
+      "bits21",
+      "bits24",
+      "poison"
+    ],
+    "started_utc": "2026-10-05T23:39:24Z",
+    "statuses": {
+      "bits21": "ok",
+      "bits24": "ok",
+      "gcc_release": "ok",
+      "poison": "ok"
+    },
+    "summary_sha256": "267f7c11e49bb9e9c9b04cfb269a3219bb5a41f5de4a4de8a421fe73d927d2cb",
+    "thread_budget": 48
+  },
+  "package_sha256": "59b08d707c47914c62b52fd810506491fdfdad11572ca0568916ecd760738023",
+  "phase": "exploration_v11_hors_registre",
+  "plan_sha256": "123bfead2cdfd90ef5004f3b752f434801ff5f937d2fce80dbcd38053dc30469",
+  "profile": "quantized_u21_input_only",
+  "public_status": "not_claimed",
+  "receipt_sha256": "4b9555c579ee8ac1455c51dd63605edca093d77490017dd138fd919ad9d72210",
+  "receipt_status": "completed",
+  "schema": "ehgp.v11.audit.repriser1_short_inventory_read.v1",
+  "session": "v11.20261005.clauderepriser1",
+  "short_ordinary_scope_conforming": true,
+  "source_commit": "98a00955083d483306c4f92b9031e382e81b0e59",
+  "source_matrix_sha256": "26b8ce49043ad7bb7d3faea9afb76b64df7d39a168f0273a36f3bddf9867b574",
+  "source_tree_verification": {
+    "extra_or_missing_files": false,
+    "files_verified": 635,
+    "includes_docs_or_receipts": false,
+    "manifest_sha256": "1e16b170fb29452473a90311b08bd4d2631bf7be196378e9dd89278695df3019",
+    "method": "git_archive_selectif_egalite_exacte",
+    "paths": [
+      "gcp-migration/v11_worker.sh",
+      "morsehgp3D_v11/CMakeLists.txt",
+      "morsehgp3D_v11/src",
+      "morsehgp3D_v11/tests",
+      "morsehgp3D_v11/cmake",
+      "morsehgp3D_v11/bench",
+      "morsehgp3D_v11/reference",
+      "morsehgp3D_v11/tools",
+      "morsehgp3D_v11/cli"
+    ],
+    "source_commit": "98a00955083d483306c4f92b9031e382e81b0e59"
+  },
+  "state": "closed",
+  "targeted_closure_verified": true,
+  "worker_exit_code": 0
+}

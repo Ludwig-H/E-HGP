@@ -37,7 +37,10 @@ ci-dessous ont des sources vérifiées et un arrêt ciblé certifié.
 quatre sessions successives : R1 lots courts des quatre profils ;
 R2 huit lots d’échelle couvrant les 41 absences et les identités
 supports ; R3 mutants, dont API/CLI ; R4 quatre lots ASan/UBSan u24.
-Le préflight R1 est lu ; aucun résultat de reprise n’est encore acquis.
+**R1 est clos et entièrement conforme** : 873/873 u18, 783/783 u21,
+783/783 u24, 784/784 poison u21. Aucun échec ni résultat manquant.
+[Reçu R1 vérifié](../receipts/audit_g4_repriser1_20261005/README.md).
+R2 est en cours ; R3/R4 restent à juger.
 L’arrêt ciblé certifié est exigé entre sessions. Les 28 portes longues
 fonctionnelles déjà terminées ne sont pas rejouées. La
 [proposition antérieure limitée aux 41 absences](../receipts/proposition_reprise_41_20261005/README.md)

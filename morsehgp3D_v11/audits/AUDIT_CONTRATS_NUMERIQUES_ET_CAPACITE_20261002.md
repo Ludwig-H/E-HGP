@@ -10,6 +10,27 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
+## R1 clos : les quatre profils courts passent au pin corrigé
+
+La session `v11.20261005.clauderepriser1`, source **98a009550**,
+termine avec succès et arrêt ciblé certifié. Les sources utiles du
+paquet correspondent exactement au pin ; inventaires, journaux et
+JUnit concordent : **873/873 u18, 783/783 u21, 783/783 u24 et 784/784
+poison u21**. Aucun échec, résultat manquant ni coupure de budget.
+
+Les contrôles S9 du refus de tri et S10 de la racine frontière passent
+explicitement dans les quatre profils, ainsi que les sorties points/plat,
+les racines exactes, les sessions/provenances et l’oracle API supports.
+Le lot court `gcc_release` est réellement conforme après suppression
+de l’exigence LiDAR impossible : la preuve source est complétée par R1.
+
+Cette sélection exclut les échelles, LiDAR, longs et mutants. Elle ne
+ferme ni les 41 absences antérieures ni les six supports_route par
+profil : R2 les reprend, R3 juge les mutants et R4 les routes sous
+ASan/UBSan u24. Aucun contrat de temps ne découle de ces portes courtes.
+[Reçu R1, inventaires et portée](../receipts/audit_g4_repriser1_20261005/README.md),
+[contrelecture indépendante des flags et portes prioritaires](../receipts/audit_g4_repriser1_20261005/native_review.json).
+
 ## Matrice G4 : exigence LiDAR impossible corrigée en 98a009550
 
 La correction publiée retire `require_labels_if_data=["lidar"]`
@@ -145,11 +166,11 @@ Le différentiel S9 de l’arbre lui-même est passé séparément dans P9.
 ## Reprise G4 après correction : quatre sessions au pin 98a009550
 
 La chaîne `clauderepriser1` à `clauderepriser4` utilise le commit
-corrigé **98a009550** et `data_complet`. Le préflight R1 est lu et la
-session est ouverte ; aucun nouveau PASS n’est acquis à ce stade.
+corrigé **98a009550** et `data_complet`. R1 est clos et entièrement
+conforme, avec reçu lié ci-dessus. R2 est en cours ; R3/R4 restent à juger.
 Les plans adoptés se répartissent ainsi :
 
-- R1 : lots courts u18/u21/u24/poison, dont l’exigence impossible est corrigée ;
+- R1 clos : lots courts u18/u21/u24/poison, tous conformes ;
 - R2 : huit lots d’échelle, couvrant les 41 absences et les six supports_route de chaque profil ;
 - R3 : campagnes mutants u18, y compris API et CLI après correction ;
 - R4 : quatre lots ASan/UBSan u24, y compris les six supports_route.

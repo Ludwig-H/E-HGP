@@ -1,0 +1,1329 @@
+{
+  "schema": "ehgp.v11.audit.r1_native_review.v1",
+  "source_pin": "98a00955083d483306c4f92b9031e382e81b0e59",
+  "archive": {
+    "sha256": "1ab6efd4708f1d185398175c0a4fe4b016a031767fd1c0154c4b7883b229cbd7",
+    "session": "v11.20261005.clauderepriser1"
+  },
+  "method": "Read-only Git source, archive metadata, CTest/JUnit verdicts and actual compiled flags; no build/native/cloud launched.",
+  "verdict": "favorable_with_bounded_scope",
+  "profiles": {
+    "gcc_release": {
+      "coordinate_bits": 18,
+      "library_poison": false,
+      "counts": {
+        "ctest_failed": 0,
+        "ctest_total": 873,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 873,
+        "selected": 873
+      },
+      "inventory_junit_ctest_sets_equal": true,
+      "names_sha256_sorted_newline": "5bedf8f3fd828ff70cad0f9ffa02035e04c03dd0e3ef1e399b841b2e14cb44c8",
+      "unique_names": 873,
+      "disabled": 0,
+      "junit_statuses": {
+        "run": 873
+      },
+      "junit_failure_error_skipped": 0,
+      "actual_compile_flags": {
+        "CMakeFiles/mhgp11.dir/flags.make": {
+          "sha256": "371818c94faf4912d0636eb2b04e0aa4ac977c544e328b0600952979d7e8e819",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=18",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+        },
+        "CMakeFiles/mhgp11_head_unit.dir/flags.make": {
+          "sha256": "3048425223e3319e517df5940735a6cbafaf1d928fb648b15eba0f353b3adbf8",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=18",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+        },
+        "CMakeFiles/mhgp11_num_roots_probe.dir/flags.make": {
+          "sha256": "371818c94faf4912d0636eb2b04e0aa4ac977c544e328b0600952979d7e8e819",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=18",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+        },
+        "CMakeFiles/mhgp11_points_unit.dir/flags.make": {
+          "sha256": "96ceb17bc43b2dbeb517adce69a5ac1a509aafdc211f5f170fa6fc059fb205e0",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=18",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+        }
+      },
+      "priority_gates": [
+        {
+          "name": "mhgp11_num_roots",
+          "status": "PASS",
+          "seconds": "0.252404",
+          "verdict_lines": [
+            "num_roots_verdict conforme bits=18 racines=3314 sommes=4054 replis=709 egalites=529 raffinees=180",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_num_roots_opt",
+          "status": "PASS",
+          "seconds": "0.386214",
+          "verdict_lines": [
+            "num_roots_verdict conforme bits=18 racines=3314 sommes=4054 replis=709 egalites=529 raffinees=180",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_unit_ancestors",
+          "status": "PASS",
+          "seconds": "0.118487",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=180438",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_unit_determinism",
+          "status": "PASS",
+          "seconds": "0.185824",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=176",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_unit_sort_refusal",
+          "status": "PASS",
+          "seconds": "0.0146114",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=528",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_unit_refusals",
+          "status": "PASS",
+          "seconds": "0.0309479",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=17",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_unit_budget",
+          "status": "PASS",
+          "seconds": "0.0401844",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=9",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_unit_inventaire",
+          "status": "PASS",
+          "seconds": "0.0148741",
+          "verdict_lines": [
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_fixtures",
+          "status": "PASS",
+          "seconds": "0.909259",
+          "verdict_lines": [
+            "points_fixtures_verdict conforme fixtures=13/13 nuages_k1=30 comparaisons=7000",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_fixtures_opt",
+          "status": "PASS",
+          "seconds": "0.898062",
+          "verdict_lines": [
+            "points_fixtures_verdict conforme fixtures=13/13 nuages_k1=30 comparaisons=7000",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_oracle",
+          "status": "PASS",
+          "seconds": "11.1283",
+          "verdict_lines": [
+            "points_oracle_verdict conforme nuages=164 ordres=1086 comparaisons=7088 retardes=3022 plateaux=5720 replis=12",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_oracle_opt",
+          "status": "PASS",
+          "seconds": "10.9306",
+          "verdict_lines": [
+            "points_oracle_verdict conforme nuages=164 ordres=1086 comparaisons=7088 retardes=3022 plateaux=5720 replis=12",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_head_unit_fixtures",
+          "status": "PASS",
+          "seconds": "0.0152587",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=7",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_head_unit_equalities",
+          "status": "PASS",
+          "seconds": "0.0171287",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=8",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_head_unit_huge",
+          "status": "PASS",
+          "seconds": "0.0174402",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=6",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_head_unit_dates",
+          "status": "PASS",
+          "seconds": "0.0141371",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=26",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_head_unit_order",
+          "status": "PASS",
+          "seconds": "0.0165647",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=7",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_head_unit_refusals",
+          "status": "PASS",
+          "seconds": "0.0123462",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=8",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_head_unit_budget",
+          "status": "PASS",
+          "seconds": "0.0178759",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=3",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_head_unit_inventaire",
+          "status": "PASS",
+          "seconds": "0.0116866",
+          "verdict_lines": [
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_cli_points",
+          "status": "PASS",
+          "seconds": "2.9023",
+          "verdict_lines": [
+            "cli_points_verdict conforme cas=52 appels=266 refus=3 retardes=105 plateaux=242",
+            "cli_points_ok controles=726",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_cli_points_opt",
+          "status": "PASS",
+          "seconds": "2.7618",
+          "verdict_lines": [
+            "cli_points_verdict conforme cas=52 appels=266 refus=3 retardes=105 plateaux=242",
+            "cli_points_ok controles=726",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_cli_plat",
+          "status": "PASS",
+          "seconds": "1.86053",
+          "verdict_lines": [
+            "cli_plat_verdict conforme cas=40 appels=112 refus=2 egalites=3 retenus=318",
+            "cli_plat_ok controles=330",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_cli_plat_opt",
+          "status": "PASS",
+          "seconds": "1.7938",
+          "verdict_lines": [
+            "cli_plat_verdict conforme cas=40 appels=112 refus=2 egalites=3 retenus=318",
+            "cli_plat_ok controles=330",
+            "run_expect_verdict conforme"
+          ]
+        }
+      ],
+      "ctest_args": [
+        "-LE",
+        "^(mutant|long|scale8000|scale16000|scale32000|lidar)$"
+      ],
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=18"
+      ],
+      "logs_scan": [
+        {
+          "member": "results/cmd/000_matrice/files/matrix/gcc_release/LastTest.log",
+          "sha256": "70ec8fb81a87af91ec6804899b0aaf58766215bd7b462edf6e83c0f71dd32055",
+          "bytes": 1048657,
+          "marker_counts": {}
+        },
+        {
+          "member": "results/cmd/000_matrice/files/matrix/gcc_release/junit.xml",
+          "sha256": "1b137802351fa0e4c69e3e228e31b11023807b4b5866f23452f867548dcdcb66",
+          "bytes": 288932,
+          "marker_counts": {}
+        },
+        {
+          "member": "results/cmd/000_matrice/files/matrix/gcc_release/ctest.log",
+          "sha256": "8be99850d75132651a201d806ccf827450d46825423b79d38425217ed102193f",
+          "bytes": 145841,
+          "marker_counts": {}
+        }
+      ],
+      "runtime_diagnostic_marker_hits": []
+    },
+    "bits21": {
+      "coordinate_bits": 21,
+      "library_poison": false,
+      "counts": {
+        "ctest_failed": 0,
+        "ctest_total": 783,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 783,
+        "selected": 783
+      },
+      "inventory_junit_ctest_sets_equal": true,
+      "names_sha256_sorted_newline": "b797b64540dd264c6aa44648a273936db807130e65df5931b567966b3e22604e",
+      "unique_names": 783,
+      "disabled": 0,
+      "junit_statuses": {
+        "run": 783
+      },
+      "junit_failure_error_skipped": 0,
+      "actual_compile_flags": {
+        "CMakeFiles/mhgp11.dir/flags.make": {
+          "sha256": "17368d95c5855d43b2ad9f8c390cb2a51cb92d42326c483dbfca516b45cbdfa9",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=21",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+        },
+        "CMakeFiles/mhgp11_head_unit.dir/flags.make": {
+          "sha256": "7b80160d335a8dadf46304959fcb7529c78ed1d9e04aafe4a4addf19eb5234a7",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=21",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+        },
+        "CMakeFiles/mhgp11_num_roots_probe.dir/flags.make": {
+          "sha256": "17368d95c5855d43b2ad9f8c390cb2a51cb92d42326c483dbfca516b45cbdfa9",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=21",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+        },
+        "CMakeFiles/mhgp11_points_unit.dir/flags.make": {
+          "sha256": "69871c8a3f432f00191a2c5cb5adb2f3f71dab88ce9d6180545ea1f6b7e21023",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=21",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+        }
+      },
+      "priority_gates": [
+        {
+          "name": "mhgp11_num_roots",
+          "status": "PASS",
+          "seconds": "0.239092",
+          "verdict_lines": [
+            "num_roots_verdict conforme bits=21 racines=3314 sommes=4062 replis=692 egalites=512 raffinees=180",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_num_roots_opt",
+          "status": "PASS",
+          "seconds": "0.287008",
+          "verdict_lines": [
+            "num_roots_verdict conforme bits=21 racines=3314 sommes=4062 replis=692 egalites=512 raffinees=180",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_unit_ancestors",
+          "status": "PASS",
+          "seconds": "0.0889745",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=180438",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_unit_determinism",
+          "status": "PASS",
+          "seconds": "0.184841",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=176",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_unit_sort_refusal",
+          "status": "PASS",
+          "seconds": "0.00990891",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=528",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_unit_refusals",
+          "status": "PASS",
+          "seconds": "0.0212958",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=17",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_unit_budget",
+          "status": "PASS",
+          "seconds": "0.0366351",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=9",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_unit_inventaire",
+          "status": "PASS",
+          "seconds": "0.00914621",
+          "verdict_lines": [
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_fixtures",
+          "status": "PASS",
+          "seconds": "0.671706",
+          "verdict_lines": [
+            "points_fixtures_verdict conforme fixtures=13/13 nuages_k1=30 comparaisons=7000",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_fixtures_opt",
+          "status": "PASS",
+          "seconds": "0.749866",
+          "verdict_lines": [
+            "points_fixtures_verdict conforme fixtures=13/13 nuages_k1=30 comparaisons=7000",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_oracle",
+          "status": "PASS",
+          "seconds": "7.49685",
+          "verdict_lines": [
+            "points_oracle_verdict conforme nuages=164 ordres=1086 comparaisons=7088 retardes=3022 plateaux=5720 replis=12",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_oracle_opt",
+          "status": "PASS",
+          "seconds": "7.81429",
+          "verdict_lines": [
+            "points_oracle_verdict conforme nuages=164 ordres=1086 comparaisons=7088 retardes=3022 plateaux=5720 replis=12",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_head_unit_fixtures",
+          "status": "PASS",
+          "seconds": "0.00936466",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=7",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_head_unit_equalities",
+          "status": "PASS",
+          "seconds": "0.00835932",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=8",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_head_unit_huge",
+          "status": "PASS",
+          "seconds": "0.00829434",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=6",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_head_unit_dates",
+          "status": "PASS",
+          "seconds": "0.0087489",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=26",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_head_unit_order",
+          "status": "PASS",
+          "seconds": "0.00821165",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=7",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_head_unit_refusals",
+          "status": "PASS",
+          "seconds": "0.00811196",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=8",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_head_unit_budget",
+          "status": "PASS",
+          "seconds": "0.00859891",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=3",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_head_unit_inventaire",
+          "status": "PASS",
+          "seconds": "0.00853833",
+          "verdict_lines": [
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_cli_points",
+          "status": "PASS",
+          "seconds": "2.69131",
+          "verdict_lines": [
+            "cli_points_verdict conforme cas=52 appels=266 refus=3 retardes=105 plateaux=242",
+            "cli_points_ok controles=726",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_cli_points_opt",
+          "status": "PASS",
+          "seconds": "2.74132",
+          "verdict_lines": [
+            "cli_points_verdict conforme cas=52 appels=266 refus=3 retardes=105 plateaux=242",
+            "cli_points_ok controles=726",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_cli_plat",
+          "status": "PASS",
+          "seconds": "1.57665",
+          "verdict_lines": [
+            "cli_plat_verdict conforme cas=40 appels=112 refus=2 egalites=3 retenus=318",
+            "cli_plat_ok controles=330",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_cli_plat_opt",
+          "status": "PASS",
+          "seconds": "1.69313",
+          "verdict_lines": [
+            "cli_plat_verdict conforme cas=40 appels=112 refus=2 egalites=3 retenus=318",
+            "cli_plat_ok controles=330",
+            "run_expect_verdict conforme"
+          ]
+        }
+      ],
+      "ctest_args": [
+        "-LE",
+        "^(mutant|long|scale8000|scale16000|scale32000|lidar)$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "logs_scan": [
+        {
+          "member": "results/cmd/000_matrice/files/matrix/bits21/LastTest.log",
+          "sha256": "4a66ebc1034d846abc45fe408aac6e2661be001e9bf1be5c6614117e862f1b87",
+          "bytes": 918032,
+          "marker_counts": {}
+        },
+        {
+          "member": "results/cmd/000_matrice/files/matrix/bits21/junit.xml",
+          "sha256": "ff6eaaefea50a1d75d930c11376c719d0d0b0f25da790ec70bb778ff9ca5e321",
+          "bytes": 247076,
+          "marker_counts": {}
+        },
+        {
+          "member": "results/cmd/000_matrice/files/matrix/bits21/ctest.log",
+          "sha256": "aca80625a5bd4a66e1f53cadf5a2bd4dc72faf623077877645d04af6799c12ec",
+          "bytes": 123762,
+          "marker_counts": {}
+        }
+      ],
+      "runtime_diagnostic_marker_hits": []
+    },
+    "bits24": {
+      "coordinate_bits": 24,
+      "library_poison": false,
+      "counts": {
+        "ctest_failed": 0,
+        "ctest_total": 783,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 783,
+        "selected": 783
+      },
+      "inventory_junit_ctest_sets_equal": true,
+      "names_sha256_sorted_newline": "b797b64540dd264c6aa44648a273936db807130e65df5931b567966b3e22604e",
+      "unique_names": 783,
+      "disabled": 0,
+      "junit_statuses": {
+        "run": 783
+      },
+      "junit_failure_error_skipped": 0,
+      "actual_compile_flags": {
+        "CMakeFiles/mhgp11.dir/flags.make": {
+          "sha256": "5a54d0d6f7fb4ae44c08ed355282d991aeaa3de7e5924c954fbeae08658b2c23",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=24",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+        },
+        "CMakeFiles/mhgp11_head_unit.dir/flags.make": {
+          "sha256": "e435ae47665499e08b5a466f3e34c4bb998dd825c24f0f6587fbbc1d9c16c19e",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=24",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+        },
+        "CMakeFiles/mhgp11_num_roots_probe.dir/flags.make": {
+          "sha256": "5a54d0d6f7fb4ae44c08ed355282d991aeaa3de7e5924c954fbeae08658b2c23",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=24",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+        },
+        "CMakeFiles/mhgp11_points_unit.dir/flags.make": {
+          "sha256": "c542457f7df909395bf8dc71968106e43e8a0773d5605d9875a6754dc791dd7c",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=24",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+        }
+      },
+      "priority_gates": [
+        {
+          "name": "mhgp11_num_roots",
+          "status": "PASS",
+          "seconds": "0.250569",
+          "verdict_lines": [
+            "num_roots_verdict conforme bits=24 racines=3314 sommes=4073 replis=724 egalites=544 raffinees=180",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_num_roots_opt",
+          "status": "PASS",
+          "seconds": "0.296682",
+          "verdict_lines": [
+            "num_roots_verdict conforme bits=24 racines=3314 sommes=4073 replis=724 egalites=544 raffinees=180",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_unit_ancestors",
+          "status": "PASS",
+          "seconds": "0.0875585",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=180438",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_unit_determinism",
+          "status": "PASS",
+          "seconds": "0.18118",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=176",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_unit_sort_refusal",
+          "status": "PASS",
+          "seconds": "0.00829949",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=528",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_unit_refusals",
+          "status": "PASS",
+          "seconds": "0.019932",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=17",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_unit_budget",
+          "status": "PASS",
+          "seconds": "0.0361164",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=9",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_unit_inventaire",
+          "status": "PASS",
+          "seconds": "0.00821373",
+          "verdict_lines": [
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_fixtures",
+          "status": "PASS",
+          "seconds": "0.678415",
+          "verdict_lines": [
+            "points_fixtures_verdict conforme fixtures=13/13 nuages_k1=30 comparaisons=7000",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_fixtures_opt",
+          "status": "PASS",
+          "seconds": "0.74345",
+          "verdict_lines": [
+            "points_fixtures_verdict conforme fixtures=13/13 nuages_k1=30 comparaisons=7000",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_oracle",
+          "status": "PASS",
+          "seconds": "7.60584",
+          "verdict_lines": [
+            "points_oracle_verdict conforme nuages=164 ordres=1086 comparaisons=7088 retardes=3022 plateaux=5720 replis=12",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_oracle_opt",
+          "status": "PASS",
+          "seconds": "7.94444",
+          "verdict_lines": [
+            "points_oracle_verdict conforme nuages=164 ordres=1086 comparaisons=7088 retardes=3022 plateaux=5720 replis=12",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_head_unit_fixtures",
+          "status": "PASS",
+          "seconds": "0.0117607",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=7",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_head_unit_equalities",
+          "status": "PASS",
+          "seconds": "0.00963336",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=8",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_head_unit_huge",
+          "status": "PASS",
+          "seconds": "0.00904169",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=6",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_head_unit_dates",
+          "status": "PASS",
+          "seconds": "0.0111763",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=26",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_head_unit_order",
+          "status": "PASS",
+          "seconds": "0.0100443",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=7",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_head_unit_refusals",
+          "status": "PASS",
+          "seconds": "0.00864264",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=8",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_head_unit_budget",
+          "status": "PASS",
+          "seconds": "0.00968831",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=3",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_head_unit_inventaire",
+          "status": "PASS",
+          "seconds": "0.00884493",
+          "verdict_lines": [
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_cli_points",
+          "status": "PASS",
+          "seconds": "2.72505",
+          "verdict_lines": [
+            "cli_points_verdict conforme cas=52 appels=266 refus=3 retardes=105 plateaux=242",
+            "cli_points_ok controles=726",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_cli_points_opt",
+          "status": "PASS",
+          "seconds": "2.8392",
+          "verdict_lines": [
+            "cli_points_verdict conforme cas=52 appels=266 refus=3 retardes=105 plateaux=242",
+            "cli_points_ok controles=726",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_cli_plat",
+          "status": "PASS",
+          "seconds": "1.60247",
+          "verdict_lines": [
+            "cli_plat_verdict conforme cas=40 appels=112 refus=2 egalites=3 retenus=318",
+            "cli_plat_ok controles=330",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_cli_plat_opt",
+          "status": "PASS",
+          "seconds": "1.65185",
+          "verdict_lines": [
+            "cli_plat_verdict conforme cas=40 appels=112 refus=2 egalites=3 retenus=318",
+            "cli_plat_ok controles=330",
+            "run_expect_verdict conforme"
+          ]
+        }
+      ],
+      "ctest_args": [
+        "-LE",
+        "^(mutant|long|scale8000|scale16000|scale32000|lidar)$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "logs_scan": [
+        {
+          "member": "results/cmd/000_matrice/files/matrix/bits24/LastTest.log",
+          "sha256": "6b578d6c892cdaa9fe24a2bf175de8efd0ffcc76802a7ee2e56ac91c5f9a44a4",
+          "bytes": 918148,
+          "marker_counts": {}
+        },
+        {
+          "member": "results/cmd/000_matrice/files/matrix/bits24/junit.xml",
+          "sha256": "d5470a02812e45a36b4329ffd51d1cbf993428d77393ca96fcc50fd36a11a86b",
+          "bytes": 247430,
+          "marker_counts": {}
+        },
+        {
+          "member": "results/cmd/000_matrice/files/matrix/bits24/ctest.log",
+          "sha256": "ca9c9b44efe8c05a26267f35406e654e5d08b25f708f5753f5b4540c6263ccd2",
+          "bytes": 123762,
+          "marker_counts": {}
+        }
+      ],
+      "runtime_diagnostic_marker_hits": []
+    },
+    "poison": {
+      "coordinate_bits": 21,
+      "library_poison": true,
+      "counts": {
+        "ctest_failed": 0,
+        "ctest_total": 784,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 784,
+        "selected": 784
+      },
+      "inventory_junit_ctest_sets_equal": true,
+      "names_sha256_sorted_newline": "f3aa6a76f2767e6f69a8c331bd5ccbb017801a3aef543e4a4f70a9180f3cf72c",
+      "unique_names": 784,
+      "disabled": 0,
+      "junit_statuses": {
+        "run": 784
+      },
+      "junit_failure_error_skipped": 0,
+      "actual_compile_flags": {
+        "CMakeFiles/mhgp11.dir/flags.make": {
+          "sha256": "1803c7e1944b9686c2027da6538c1166f6bcc7901a45d4fa8451ba038d93025b",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=21 -DMHGP11_POISON",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+        },
+        "CMakeFiles/mhgp11_head_unit.dir/flags.make": {
+          "sha256": "7b80160d335a8dadf46304959fcb7529c78ed1d9e04aafe4a4addf19eb5234a7",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=21",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+        },
+        "CMakeFiles/mhgp11_num_roots_probe.dir/flags.make": {
+          "sha256": "17368d95c5855d43b2ad9f8c390cb2a51cb92d42326c483dbfca516b45cbdfa9",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=21",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+        },
+        "CMakeFiles/mhgp11_points_unit.dir/flags.make": {
+          "sha256": "69871c8a3f432f00191a2c5cb5adb2f3f71dab88ce9d6180545ea1f6b7e21023",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=21",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+        }
+      },
+      "priority_gates": [
+        {
+          "name": "mhgp11_num_roots",
+          "status": "PASS",
+          "seconds": "0.238421",
+          "verdict_lines": [
+            "num_roots_verdict conforme bits=21 racines=3314 sommes=4062 replis=692 egalites=512 raffinees=180",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_num_roots_opt",
+          "status": "PASS",
+          "seconds": "0.287321",
+          "verdict_lines": [
+            "num_roots_verdict conforme bits=21 racines=3314 sommes=4062 replis=692 egalites=512 raffinees=180",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_unit_ancestors",
+          "status": "PASS",
+          "seconds": "0.0881465",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=180438",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_unit_determinism",
+          "status": "PASS",
+          "seconds": "0.180774",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=176",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_unit_sort_refusal",
+          "status": "PASS",
+          "seconds": "0.00903821",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=528",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_unit_refusals",
+          "status": "PASS",
+          "seconds": "0.0198676",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=17",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_unit_budget",
+          "status": "PASS",
+          "seconds": "0.0366321",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=9",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_unit_inventaire",
+          "status": "PASS",
+          "seconds": "0.00827827",
+          "verdict_lines": [
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_fixtures",
+          "status": "PASS",
+          "seconds": "0.681594",
+          "verdict_lines": [
+            "points_fixtures_verdict conforme fixtures=13/13 nuages_k1=30 comparaisons=7000",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_fixtures_opt",
+          "status": "PASS",
+          "seconds": "0.760237",
+          "verdict_lines": [
+            "points_fixtures_verdict conforme fixtures=13/13 nuages_k1=30 comparaisons=7000",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_oracle",
+          "status": "PASS",
+          "seconds": "7.50492",
+          "verdict_lines": [
+            "points_oracle_verdict conforme nuages=164 ordres=1086 comparaisons=7088 retardes=3022 plateaux=5720 replis=12",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_points_oracle_opt",
+          "status": "PASS",
+          "seconds": "8.02524",
+          "verdict_lines": [
+            "points_oracle_verdict conforme nuages=164 ordres=1086 comparaisons=7088 retardes=3022 plateaux=5720 replis=12",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_head_unit_fixtures",
+          "status": "PASS",
+          "seconds": "0.00918609",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=7",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_head_unit_equalities",
+          "status": "PASS",
+          "seconds": "0.00928829",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=8",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_head_unit_huge",
+          "status": "PASS",
+          "seconds": "0.00997355",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=6",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_head_unit_dates",
+          "status": "PASS",
+          "seconds": "0.00962768",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=26",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_head_unit_order",
+          "status": "PASS",
+          "seconds": "0.00920094",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=7",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_head_unit_refusals",
+          "status": "PASS",
+          "seconds": "0.00846317",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=8",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_head_unit_budget",
+          "status": "PASS",
+          "seconds": "0.00998969",
+          "verdict_lines": [
+            "mhgp11_test_ok tests=1 controles=3",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_head_unit_inventaire",
+          "status": "PASS",
+          "seconds": "0.00889716",
+          "verdict_lines": [
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_cli_points",
+          "status": "PASS",
+          "seconds": "2.74575",
+          "verdict_lines": [
+            "cli_points_verdict conforme cas=52 appels=266 refus=3 retardes=105 plateaux=242",
+            "cli_points_ok controles=726",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_cli_points_opt",
+          "status": "PASS",
+          "seconds": "2.77783",
+          "verdict_lines": [
+            "cli_points_verdict conforme cas=52 appels=266 refus=3 retardes=105 plateaux=242",
+            "cli_points_ok controles=726",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_cli_plat",
+          "status": "PASS",
+          "seconds": "1.6402",
+          "verdict_lines": [
+            "cli_plat_verdict conforme cas=40 appels=112 refus=2 egalites=3 retenus=318",
+            "cli_plat_ok controles=330",
+            "run_expect_verdict conforme"
+          ]
+        },
+        {
+          "name": "mhgp11_cli_plat_opt",
+          "status": "PASS",
+          "seconds": "1.76413",
+          "verdict_lines": [
+            "cli_plat_verdict conforme cas=40 appels=112 refus=2 egalites=3 retenus=318",
+            "cli_plat_ok controles=330",
+            "run_expect_verdict conforme"
+          ]
+        }
+      ],
+      "ctest_args": [
+        "-LE",
+        "^(mutant|long|scale8000|scale16000|scale32000|lidar)$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_POISON=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "logs_scan": [
+        {
+          "member": "results/cmd/000_matrice/files/matrix/poison/LastTest.log",
+          "sha256": "017e1a01896edb357d2cea9936c7c86d16cabd0156b87ff248a25b60e5ce383a",
+          "bytes": 919014,
+          "marker_counts": {}
+        },
+        {
+          "member": "results/cmd/000_matrice/files/matrix/poison/junit.xml",
+          "sha256": "ae9627b4f03c305a649d9c4378a4d1b172dfc93ca0b4f219646b472e4ae80ed8",
+          "bytes": 247333,
+          "marker_counts": {}
+        },
+        {
+          "member": "results/cmd/000_matrice/files/matrix/poison/ctest.log",
+          "sha256": "9328d4c1239d6eba89b2a702c0515e8e9025cef5fd515e6b911eb508b87566bf",
+          "bytes": 123905,
+          "marker_counts": {}
+        }
+      ],
+      "runtime_diagnostic_marker_hits": []
+    }
+  },
+  "important_findings": [],
+  "source_anchors": [
+    {
+      "path": "morsehgp3D_v11/src/core/types.hpp",
+      "sha256": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954",
+      "byte_identical_to_38b76701b": true,
+      "ranges": [
+        [
+          31,
+          33
+        ],
+        [
+          66,
+          70
+        ]
+      ]
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/buffer.hpp",
+      "sha256": "3f520dd045226ff115ea67b26859b43ec7415e855ef1c8f4542e8217414c7940",
+      "byte_identical_to_38b76701b": true,
+      "ranges": [
+        [
+          19,
+          22
+        ]
+      ]
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/buffer.cpp",
+      "sha256": "0654a7849aac687f9c8213784ee22e76033427582779de0d26adf297b307116e",
+      "byte_identical_to_38b76701b": true,
+      "ranges": [
+        [
+          39,
+          41
+        ]
+      ]
+    },
+    {
+      "path": "morsehgp3D_v11/src/points/internal.hpp",
+      "sha256": "cfb4de6a99309262d37c7819a32b93fc14a0f89d4b9021a88e9770a0e170356e",
+      "byte_identical_to_38b76701b": true,
+      "ranges": [
+        [
+          90,
+          116
+        ]
+      ]
+    },
+    {
+      "path": "morsehgp3D_v11/src/points/point_tree.cpp",
+      "sha256": "f85d5dad50b3353c50207047cb02e2f48dc5fda801aaecd3fbbe9dc776e8c60c",
+      "byte_identical_to_38b76701b": true,
+      "ranges": [
+        [
+          87,
+          89
+        ]
+      ]
+    },
+    {
+      "path": "morsehgp3D_v11/tests/points/points_test.cpp",
+      "sha256": "be3791aa38cb0c923bbfe394dce17422382549d8364f087fc0793f46c996bdb1",
+      "byte_identical_to_38b76701b": true,
+      "ranges": [
+        [
+          119,
+          138
+        ],
+        [
+          142,
+          150
+        ]
+      ]
+    },
+    {
+      "path": "morsehgp3D_v11/tests/points/tests.cmake",
+      "sha256": "fab2d65223c63c72f62dd9f2bffe631e83a6a84607f8c6ee17d02c6ce296175a",
+      "byte_identical_to_38b76701b": true,
+      "ranges": [
+        [
+          18,
+          19
+        ],
+        [
+          32,
+          36
+        ]
+      ]
+    },
+    {
+      "path": "morsehgp3D_v11/src/head/score.cpp",
+      "sha256": "557e2e2e0bae0374c06cc41878691bcc54e1809ffb5b2985e4ce616657ed7468",
+      "byte_identical_to_38b76701b": true,
+      "ranges": [
+        [
+          86,
+          105
+        ]
+      ]
+    },
+    {
+      "path": "morsehgp3D_v11/tests/head/head_test.cpp",
+      "sha256": "9f5153919e6f4935476b129116af288c0a7b9993e5699286c1bf89625426388b",
+      "byte_identical_to_38b76701b": true,
+      "ranges": [
+        [
+          279,
+          294
+        ],
+        [
+          295,
+          314
+        ]
+      ]
+    },
+    {
+      "path": "morsehgp3D_v11/tests/head/tests.cmake",
+      "sha256": "5b396f4aae9beed3ba67c56ba6f84cf871ff63e74a786b8285117f259a85b3c5",
+      "byte_identical_to_38b76701b": true,
+      "ranges": [
+        [
+          6,
+          7
+        ]
+      ]
+    }
+  ],
+  "source_findings": [
+    "Coordinate domains are compiled as explicit 18/21/24 bits; types.hpp requires one of these domains and computes maximum 2^B-1.",
+    "Poison is applied in the out-of-line Buffer allocator (buffer.cpp:39-41); test translation units need not define MHGP11_POISON, by buffer.hpp:19-22.",
+    "S9 heap comparator refusal is propagated immediately; PointTreeBuilder uses MHGP11_TRY. Real sort_refusal gate reports 528 controls, failures=0 in all four configurations.",
+    "S10 root guard precedes signed conversion/addition. Real huge gate reports six controls, failures=0 in all four configurations, including test source R=2^127-1 and unbracketed==3 witnesses."
+  ],
+  "limitations": [
+    "R1 is ordinary short Release/poison qualification. No ASan/UBSan/TSan flags are present in the inspected priority targets; zero sanitizer-text hits is not sanitizer qualification.",
+    "The selected inventories exclude mutant, long, scale8000/16000/32000 and lidar labels. No claim is made for R2/R3/R4, LiDAR, long gates, mutant kills, performance, or head_vs_python from this R1 review.",
+    "gcc_release LastTest.log is capped at roughly one MiB; complete ctest.log and junit.xml independently cover all 873 selected verdicts. No claim of an untruncated detailed u18 LastTest log.",
+    "The source SHA anchors are read at Git pin 98a; global delivery/receipt/source-pack closure is handled by the global evidence review."
+  ],
+  "scope": {
+    "profiles": 4,
+    "total_passed_occurrences": 3223,
+    "new_native_execution_by_auditor": false
+  }
+}
