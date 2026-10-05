@@ -1,0 +1,12 @@
+{
+  "observed_utc": "2026-10-05T10:55:53.319577+00:00",
+  "changes": [
+    {
+      "path": "morsehgp3D_v11/tests/mutants/api.json",
+      "before_sha256": "af05a1997da7daec08b36c88a7320471def2e43329faf7c54f7e989366d6ba2e",
+      "after_sha256": "2862c910ffc248ab78d30a3bd73ef7201b358e8ed0866387811b24190669c4c1"
+    }
+  ],
+  "native_executed": false,
+  "verdict": "Le mutant provenance_tailles_ignorees conserve maintenant une lecture de points par static_cast<void>(points). Reserve de compilation corrigee en source, sans execution de mutant."
+}

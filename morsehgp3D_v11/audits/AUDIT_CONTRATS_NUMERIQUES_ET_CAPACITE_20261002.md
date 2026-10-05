@@ -41,27 +41,21 @@ au-delà de 24 sites doit porter sur **l'appel supports entier**. Budget,
 count/fill, concurrence et absence de publication partielle doivent être
 jugés sur l'assemblage, pas déduits des seuls helpers S6a.
 
-**Défaut S5 ouvert : un succès API peut publier un manifeste illisible.**
-`publish` accepte `Provenance{}` pour un produit non vide : les tailles
-publiées valent zéro, alors que `counts.points` est positif. Le lecteur
-livré avec S5 refuse ce manifeste (`points et octets d'entrée`). Les
-portes API actuelles attendent pourtant un succès pour cet appel. Une
-provenance indiquant une autre taille d'entrée, ou un budget déclaré nul,
-franchit également `check_provenance` puis échoue au lecteur. Le CLI
-fournit les tailles issues de sa lecture et refuse un budget nul ; aucun
-défaut de son chemin normal ni du calcul FULL n'est établi ici.
+**Manifeste S5 : constat corrigé en source, qualification attendue.**
+Dans le WIP de `build/v11-impl-l0`, contexte **59743c210**, `publish`
+exige désormais `points_bytes=12n`, `ids_bytes=4n` et un budget déclaré
+absent ou strictement positif. Le nombre de points vient du poids du
+nuage du produit. Le refus précède la création de fichiers, le budget et
+le rapport. Les anciennes portes avec `Provenance{}` utilisent une
+provenance cohérente.
 
-Avant toute création ou modification du rapport, contrôler les tailles
-contre le produit (`points_bytes=12n`, `ids_bytes=4n`) et le domaine du
-budget déclaré. Si une provenance sans fichiers est souhaitée pour l'API,
-elle exige un schéma explicitement accepté par le lecteur. La porte à
-ajouter est un aller-retour **publication API réussie → lecteur officiel**,
-avec refus sans sortie pour les métadonnées incohérentes. Une simple
-vérification d'inventaire ou de SHA ne détecte pas ce défaut.
-[Preuve et sources WIP](../receipts/audit_api_publication_20261005/README.md).
-Le développeur a repris cette correction dans son plan. Au commit local
-**d8735d095**, les sources concernées sont encore identiques à la preuve :
-le contrôle manque toujours.
+La nouvelle porte **publication API → lecteur officiel** est câblée ;
+elle contrôle aussi les quatre provenances incohérentes, sans `D` ni
+`D.pending`. Le constat de source est clos. Les portes et mutants natifs
+ne sont pas qualifiés par cette relecture ; la protection du rapport est
+établie par l'ordre des contrôles dans le code.
+[Correctif et contrelecture](../receipts/audit_corrections_s3_s5_20261005/README.md),
+[défaut initial conservé](../receipts/audit_api_publication_20261005/README.md).
 
 **Identité Session : corrigée dans S5 locale, qualification attendue.**
 Le produit garde désormais l'identité du budget alloué sur le tas, stable
@@ -85,8 +79,7 @@ Les trois trames de séquence08 ne deviennent pas plusieurs séquences,
 et les comparaisons c40/baseline v11 ne ferment pas le différentiel
 canonique v10/v11 sur LiDAR entier.
 
-Pour poursuivre : intégrer et qualifier L1 ; fermer la cohérence entre
-publication API et lecteur avant L2 ; prendre ensuite la
+Pour poursuivre : intégrer les correctifs et qualifier L1/L2 ; prendre ensuite la
 décision de chemin sur les mesures complètes. Aucune réserve générale
 nouvelle n'est opposée à l'intégration de S3. **Aucun build/test natif ni
 GCP lancé par cet audit.**
@@ -108,7 +101,12 @@ sources et portes que **ee8a69f1a**. S5 est commitée localement en
 **d8735d095** : les 31 fichiers API/IO et portes de notre capture corrigée
 sont identiques. S3 vient d'être importée dans `build/v11-impl-l1b` :
 cœur, E1/E2 sur catalogue étroit et témoin D2 identiques au WIP déjà relu.
-Le juge Fraction des attaches doit encore rejoindre les portes permanentes.
+Le juge Fraction des attaches et le témoin K10 sont désormais câblés
+dans les portes permanentes de S3 : domaine étroit, comparaison des
+attaches fermées et des antécédents ouverts, voies W1/W3 et permutation
+d'entrée. Le témoin de 12 sites couvre K1..12. La qualification native
+reste à jouer sur la source assemblée.
+[Contrelecture de ces nouvelles portes](../receipts/audit_corrections_s3_s5_20261005/README.md).
 Les résultats natifs annoncés par le développeur restent
 distincts des vérifications Python de l'audit et de la qualification G4.
 
@@ -139,7 +137,7 @@ après tout le plateau ; capacités admises avant allocation, diagnostics
 inchangés sur refus. Le nouveau modèle abstrait recoupe le compactage et
 120 ordres de terminaison, sans devenir un TSan. Le rapport local annonce
 951 cas différentiels contre Fraction et 58 identités FULL avant/après ;
-le prototype oracle doit encore rejoindre les portes permanentes. Ses
+le prototype oracle est maintenant intégré aux portes permanentes. Ses
 temps avant/après concernent **journal désactivé** : ils ne mesurent pas
 le coût du journal actif et des attaches. G4 et suite complète restent
 attendus. [Raccord, coexistences et portée](../receipts/audit_native_integration_20261005/tower/README.md).

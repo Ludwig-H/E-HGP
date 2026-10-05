@@ -51,6 +51,15 @@ Aucun nouveau défaut mathématique établi ; portes natives, raccord S3 et
 assemblage S6b restent à qualifier sur la source intégrée.
 [Capture, résultats et limites](../receipts/audit_l1_followup_20261005/README.md).
 
+**Rattachement S3 : différentiel exact désormais câblé.** La nouvelle
+porte compare `build_order` sur `Cat_K` à la définition S1 : arbre,
+attaches à la coupe fermée, antécédents à la coupe ouverte, rôles et traces
+strictes. Elle exerce W1 et W3 avec permutation d'entrée, D2/E5 et le
+témoin de 12 sites à K1..12. Ce raccord ferme la demande d'inscription du
+juge permanent ; son exécution native et l'assemblage S6b/S7 restent
+distincts de la relecture Python.
+[Preuve et limites](../receipts/audit_corrections_s3_s5_20261005/README.md).
+
 **Contrat S0/S1 relu : favorable sur les points difficiles.** Les lemmes
 P/W, les deux lectures du retrait E5 et le témoin D2 concordent avec les
 modèles exacts indépendants. D2 ne borne pas la naissance d'une trace par

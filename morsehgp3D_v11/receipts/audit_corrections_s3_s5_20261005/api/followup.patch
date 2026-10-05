@@ -1,0 +1,24 @@
+--- a/morsehgp3D_v11/tests/mutants/api.json
++++ b/morsehgp3D_v11/tests/mutants/api.json
+@@ -61,10 +61,10 @@
+     {
+       "id": "provenance_non_controlee",
+       "fichier": "src/api/manifest.cpp",
+-      "cherche": "  const Outcome checked = api_detail::check_provenance(provenance);\n  if (!checked.ok()) return {checked, PublicationState::none, {}};\n",
++      "cherche": "  const Outcome checked = api_detail::check_provenance(provenance, product.full().domain().index().cloud().weight());\n  if (!checked.ok()) return {checked, PublicationState::none, {}};\n",
+       "remplace": "",
+       "porte": "mhgp11_api_session_provenance",
+-      "note": "decimaux hors forme recopies dans le manifeste"
++      "note": "provenance non controlee : decimaux hors forme et tailles incoherentes recopies dans le manifeste"
+     },
+     {
+       "id": "pas_nul_admis",
+@@ -166,7 +166,7 @@
+       "id": "provenance_tailles_ignorees",
+       "fichier": "src/api/manifest.cpp",
+       "cherche": "  if (provenance.points_bytes != 12 * points || provenance.ids_bytes != 4 * points)\n    return fail(Reason::parameter_out_of_range);\n",
+-      "remplace": "",
++      "remplace": "  static_cast<void>(points);\n",
+       "porte": "mhgp11_api_publish_reader",
+       "note": "provenance incoherente avec le nuage du produit publiee : manifeste refuse par le lecteur officiel (audit abc30ed06)"
+     },

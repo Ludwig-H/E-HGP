@@ -1,0 +1,49 @@
+{
+  "attempts": [
+    {
+      "command": "python3 check_gate.py > normal.json",
+      "cwd": "/workspaces/E-HGP/build/v11-audit-math-attach-fraction-20261005",
+      "result": {
+        "chunk_id": "1bfddf",
+        "wall_time_seconds": 2.35064363,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      }
+    },
+    {
+      "command": "python3 -O check_gate.py > optimized.json",
+      "cwd": "/workspaces/E-HGP/build/v11-audit-math-attach-fraction-20261005",
+      "result": {
+        "chunk_id": "bddc6d",
+        "wall_time_seconds": 3.056934014,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      }
+    },
+    {
+      "command": "python3 replay.py > replay.normal.json",
+      "cwd": "/workspaces/E-HGP/build/v11-audit-math-attach-fraction-20261005",
+      "result": {
+        "chunk_id": "23ef28",
+        "wall_time_seconds": 3.26088243,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      }
+    },
+    {
+      "command": "python3 replay.py --optimized > replay.optimized.json",
+      "cwd": "/workspaces/E-HGP/build/v11-audit-math-attach-fraction-20261005",
+      "result": {
+        "chunk_id": "4cde0e",
+        "wall_time_seconds": 3.96708067,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      }
+    }
+  ],
+  "failed_attempts": []
+}

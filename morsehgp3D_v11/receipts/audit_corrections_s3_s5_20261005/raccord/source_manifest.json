@@ -1,0 +1,38 @@
+{
+  "observed_utc": "2026-10-05T10:50:05.253295+00:00",
+  "head": "19b2fb218b86411a138e5ea351e1b42e265c1127",
+  "worktree": "/workspaces/E-HGP/build/v11-impl-l1b",
+  "status": "WIP non commis ; capture de lecture, pas de verification LIVE au rejeu",
+  "sources": [
+    {
+      "path": "morsehgp3D_v11/tests/tower/attach_fraction.py",
+      "sha256": "16d43206c5436b7e89f71538173ef02172dc62012b296b08544ecc422ec372ad",
+      "bytes": 14248
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/attach_probe.cpp",
+      "sha256": "ae0534485dd04457c3fed6b9cc0b3ea8f4ad626963ca7b382adab520d6ab3919",
+      "bytes": 21002
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/attach_test.cpp",
+      "sha256": "00c52dce267978a935fa7e5b706e90f9b044bdf9e407f2d4880e206992a2b16d",
+      "bytes": 25562
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/tests.cmake",
+      "sha256": "77bfe163ac6e65eb71dd50f1cb0ea29f994d695daa60766a69e5e8148c67a400",
+      "bytes": 29626
+    },
+    {
+      "path": "morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "sha256": "ef11f025f11068f7179dbad7b7268ffd2aafd479851ec895e4a847203c61714d",
+      "bytes": 73256
+    },
+    {
+      "path": "morsehgp3D_v11/docs/SORTIES.md",
+      "sha256": "19903ab5ab7e2c5ed41c3cce100fdc04637b1806474c0b4d6e86648f59b76936",
+      "bytes": 46337
+    }
+  ]
+}

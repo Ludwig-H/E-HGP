@@ -1,0 +1,2112 @@
+--- a/morsehgp3D_v11/docs/MATHEMATIQUES.md
++++ b/morsehgp3D_v11/docs/MATHEMATIQUES.md
+@@ -684,7 +684,11 @@
+ 
+ *Réalisation (E2).* C'est la descente suivie de l'ancêtre fermé de `ball_nodes` (`bench/points_export.cpp`), avec la
+ fenêtre de $W_K$ au lieu du prédicat fort. Elle sert de juge de test et ne figure jamais dans le produit. Ses fixtures
+-comprennent le témoin D2.
++comprennent le témoin D2, sur le domaine étroit $\mathrm{Cat}_K$ ($k_{\max}=K=2$) : dès $k_{\max}\geq 3$, la boule de
++$AB$ entre au catalogue, $\ell(r_b-1)$ vaut 64 et D2 n'est plus un contre-cas. La porte `mhgp11_tower_attach_e1e2` juge
++donc les deux domaines, $\mathrm{Cat}_{k_{\max}}$ et $\mathrm{Cat}_K$, et compte les traces nées après $\ell(r_b-1)$ ; le
++différentiel `mhgp11_tower_attach_fraction` compare le rattachement natif à l'oracle borné sur le domaine étroit
++(intégration L1 de S3).
+ 
+ ### 10.6 Supports positifs minimaux
+ 
+--- a/morsehgp3D_v11/docs/SORTIES.md
++++ b/morsehgp3D_v11/docs/SORTIES.md
+@@ -65,6 +65,16 @@
+ `bench/points_export.cpp`. Les sorties `supports`, `points` et `plat` construisent l'arbre d'ordre K seul
+ (`build_order`, tranche S3) avec les mêmes paramètres, à deux exceptions près : les ordres concurrents, que
+ `build_order` refuse jusqu'à la tranche S11, et les verticales, sans objet pour un seul ordre.
++
++**Arbre d'ordre K seul** (tranche S3, intégrée en L1 le 5 octobre 2026, qualification G4 en attente). `build_order`
++refuse (`parameter_out_of_range`) les trois options sans objet pour un ordre seul, au lieu de les ignorer : ordres
++concurrents (bit 8 192 du masque), verticales parallèles (128) et réemploi des verticales régulières (1 024). La façade
++(S7) les retirera du masque 16 379 : l'arbre d'ordre K seul prend le masque 7 035, et FULL garde 16 379 (mesure
++appariée du § 11, audit `238734f1d`). Les autres paramètres sont honorés, ce que la porte
++`mhgp11_tower_order_same_params` exige (table de populations consultée, mémo interrogé, lookup dense construit ;
++mutants `table_population_ignoree`, `memo_ordre_ignore`, `lookup_dense_ignore`) : sans elle, la règle de L2
++comparerait à FULL une autre configuration que celle annoncée. La tour peut refuser `tower_capacity` quand une cellule
++a plus de $2^{32}-1$ traces strictes, sans qu'aucun plafond de coquille soit imposé à FULL.
+ 
+ ## 2. Les quatre sorties
+ 
+@@ -158,7 +168,8 @@
+   - `index` ;
+   - `domain` : catalogue $\mathrm{Cat}_K$ ;
+   - `tree` : forêts $1$ à $K$ de FULL pour `full`, arbre d'ordre K seul pour les trois autres sorties ;
+-  - `attach` : rattachement des boules (nul pour `full`) ;
++  - `attach` : rattachement des boules, diagnostic `attach_ns` de `build_order` (balayage du lemme D et contrôles du
++    produit, tranche S3) ; nul pour `full` ;
+   - `output` : produit (supports et assemblage, hiérarchie de points ou tête plate) ;
+   - `write` : écriture et publication.
+ - En refus, la ligne porte le statut et la raison et, si un dossier reste publié (§ 9), l'état `published_complete`
+--- a/morsehgp3D_v11/reference/README.md
++++ b/morsehgp3D_v11/reference/README.md
+@@ -184,6 +184,14 @@
+   des formules du lemme G, et les incidences par support valent 4 068 à $K=3$. La force brute du lemme F refuse
+   explicitement. Environ deux secondes : label `fast`. Cette porte ne qualifie pas tout S1 à 24 sites ; la porte
+   native correspondante est `mhgp11_supports_unit_sphere5`.
++- **Différentiels natifs contre cet oracle.** `mhgp11_supports_fraction` (tranche S6a, `tests/supports/`) et
++  `mhgp11_tower_attach_fraction` (tranche S3, `tests/tower/attach_fraction.py`). Le second confronte l'arbre d'ordre K
++  seul et le rattachement natifs (sonde `mhgp11_tower_attach_probe`, domaine préparé à l'ordre K) à
++  `canonical(k, ids)`, projeté sur les champs de S3, sur les nuages de la suite et à ses ordres. Il y ajoute le petit
++  témoin à $K$ élevé de l'auditeur (`receipts/audit_native_integration_20261005/qb/normal.json` : quatre coins d'un
++  carré de côté 20 et huit sites intérieurs) à $K=1..12$ ; l'oracle le traite en moins d'une seconde, lemmes A à H
++  contrôlés. C'est le seul cas borné de l'arbre et du rattachement à $K\geq 6$, mais il ne lève pas la limite
++  ci-dessus pour les coquilles de 13 à 24 sites.
+ 
+ ## Familles gravées (`hgp11_ref/families.py`)
+ 
+--- /dev/null
++++ b/morsehgp3D_v11/src/tower/attachment.cpp
+@@ -0,0 +1,203 @@
++// Rattachement exact de W_K sans descente (lemme D) : les graines du journal sont relevees a la coupe ouverte
++// r_b - 1 par un seul balayage ferme croissant, puis att(b) suit la regle du parent ; roles par les rangs (lemme B),
++// branches dedupliquees a la coupe stricte (lemme C). Controles I1 a I4 dans le produit : tout ecart rend
++// tower_invariant, sans resultat.
++#include <algorithm>
++#include "tower/forest_ancestor_sweep.hpp"
++#include "tower/order_tree.hpp"
++#include "tower/seed_log.hpp"
++
++namespace mhgp11::tower_detail {
++
++struct AttachmentBuilder {
++  const FullDomain& domain;
++  const OrderForest& forest;
++  SeedLog& log;
++  MemoryBudget& budget;
++  WindowAttachment result{};
++  Buffer<u32> stamp;  // noeud -> rang du dernier plateau qui l'a touche (kNone : jamais)
++  u64 position = 0;   // curseur de W_K, cellules du journal en BallIdx croissants
++  // Registres recomptes depuis le rattachement (I3, I4) et branches compactees dans le journal.
++  u64 births = 0, traces = 0, combinations = 0, plateaus = 0, touched = 0, continuations = 0, merged = 0;
++  u64 prior_total = 0;
++
++  AttachmentBuilder(const FullDomain& d, const OrderForest& f, SeedLog& l, MemoryBudget& b) noexcept
++      : domain(d), forest(f), log(l), budget(b) {}
++
++  // I1 : W_K recalcule depuis le catalogue par la fenetre, BallIdx croissants ; resultat et marques admis ici.
++  Outcome window() noexcept {
++    const auto balls = domain.catalogue().balls_data();
++    const u32 k = forest.order();
++    u64 count = 0;
++    for (const auto& ball : balls) count += in_window(ball, k) ? 1 : 0;
++    const u64 nodes = forest.nodes().size();
++    // count <= B < 2^32 et nodes < 2^32 : somme < 2^38.
++    const u64 bytes = count * (sizeof(BallIdx) + sizeof(NodeIdx) + sizeof(BallRole) + 2 * sizeof(u32)) +
++                      (count + 1) * sizeof(u64) + nodes * sizeof(u32);
++    MHGP11_TRY(budget.admit(bytes));
++    MHGP11_TRY(result.balls_.allocate(count, budget));
++    MHGP11_TRY(result.node_.allocate(count, budget));
++    MHGP11_TRY(result.role_.allocate(count, budget));
++    MHGP11_TRY(result.strict_.allocate(count, budget));
++    MHGP11_TRY(result.components_.allocate(count, budget));
++    MHGP11_TRY(result.prior_offsets_.allocate(count + 1, budget));
++    MHGP11_TRY(stamp.allocate(nodes, budget));
++    u64 at = 0;
++    for (u32 b = 0; b < balls.size(); ++b) {
++      if (!in_window(balls[b], k)) continue;
++      result.balls_[at] = BallIdx{b};
++      result.node_[at] = NodeIdx{kNone};
++      result.role_[at] = BallRole::internal;
++      result.strict_[at] = 0;
++      result.components_[at++] = 0;
++    }
++    std::fill(stamp.begin(), stamp.end(), kNone);
++    return {};
++  }
++
++  // Lemme B, naissances (K >= 2) : chaque naissance de la foret est une boule de W_K, de meme rang, rattachee a son
++  // propre noeud ; elle est forte (p+q <= K), donc une boule faible (K = p+q-1) n'est jamais une naissance. A K = 1 les
++  // naissances sont les sites : aucune boule n'en est une.
++  Outcome birth_nodes() noexcept {
++    if (forest.order() == 1) return {};
++    const auto balls = domain.catalogue().balls_data();
++    const auto window = result.balls_.span();
++    for (u32 v = 0; v < forest.births(); ++v) {
++      const auto& node = forest.nodes()[v];
++      const auto found = std::lower_bound(window.begin(), window.end(), BallIdx{node.birth_key},
++                                          [](BallIdx a, BallIdx b) noexcept { return idx(a) < idx(b); });
++      if (found == window.end() || idx(*found) != node.birth_key) return fail(Reason::tower_invariant);
++      const u64 at = static_cast<u64>(found - window.begin());
++      const auto& data = balls[node.birth_key];
++      if (result.node_[at] != NodeIdx{kNone} || data.rank != node.rank || u64{data.p} + data.qmin > forest.order())
++        return fail(Reason::tower_invariant);
++      result.node_[at] = NodeIdx{v};
++      result.role_[at] = BallRole::birth;
++      ++births;
++    }
++    return {};
++  }
++
++  // Une cellule du journal au rang r, balayage deja avance a r - 1 (coupe ouverte). Graines -> noeuds de coupe
++  // ouverte (u), dedupliques : ant(b). Regle du parent : a(u) = parent(u) si ce parent a le rang r, sinon u ; une
++  // seule valeur pour toutes les traces (T3). Role par les rangs ; branches publiees pour le role fusion seulement.
++  Outcome cell(u32 c, LevelRank rank, ClosedAncestorSweep& sweep, ForestLedger& work) noexcept {
++    const BallIdx ball = log.ball(c);
++    while (position < result.balls_.size() && idx(result.balls_[position]) < idx(ball)) ++position;
++    if (position == result.balls_.size() || result.balls_[position] != ball ||
++        result.node_[position] != NodeIdx{kNone}) return fail(Reason::tower_invariant);
++    const u64 begin = log.begin(c), end = log.end(c);
++    if (begin >= end || end > log.storage().size()) return fail(Reason::tower_invariant);
++    auto strict = published_traces(end - begin);  // avant toute conversion en u32
++    if (!strict.ok()) return strict.outcome();
++    const auto nodes = forest.nodes();
++    auto seeds = log.storage().subspan(begin, end - begin);
++    for (NodeIdx& seed : seeds) {
++      if (idx(seed) >= forest.births() || idx(nodes[idx(seed)].rank) >= idx(rank)) return fail(Reason::tower_invariant);
++      auto open = sweep.query(seed, work);
++      if (!open.ok()) return open.outcome();
++      seed = open.value();
++    }
++    std::sort(seeds.begin(), seeds.end(), [](NodeIdx a, NodeIdx b) noexcept { return idx(a) < idx(b); });
++    const u64 branches = static_cast<u64>(std::unique(seeds.begin(), seeds.end()) - seeds.begin());
++    NodeIdx att{kNone};
++    for (NodeIdx u : seeds.first(branches)) {
++      const NodeIdx parent = nodes[idx(u)].parent;
++      const NodeIdx a = parent != NodeIdx{kNone} && nodes[idx(parent)].rank == rank ? parent : u;
++      if (att != NodeIdx{kNone} && a != att) return fail(Reason::tower_invariant);
++      att = a;
++      if (stamp[idx(u)] == idx(rank)) continue;  // deja touche a ce plateau
++      stamp[idx(u)] = idx(rank);
++      ++touched;
++      if (a == u) ++continuations; else ++merged;
++    }
++    const BallRole role = nodes[idx(att)].rank == rank ? BallRole::merge : BallRole::internal;
++    MHGP11_TRY(check_roles(att, role, rank, branches));
++    const auto& data = domain.catalogue().balls_data()[idx(ball)];
++    auto universe = cell_binomial(data.m, forest.order() - data.p);
++    if (!universe.ok()) return universe.outcome();
++    MHGP11_TRY(cell_add(combinations, universe.value()));
++    MHGP11_TRY(cell_add(traces, end - begin));
++    result.node_[position] = att;
++    result.role_[position] = role;
++    result.strict_[position] = strict.value();
++    result.components_[position] = static_cast<u32>(branches);  // branches <= traces <= UINT32_MAX
++    if (role == BallRole::merge) {
++      // Branches compactees en tete du journal : prior_total <= begin (une branche par graine au plus).
++      if (prior_total != begin) std::copy(seeds.begin(), seeds.begin() + branches, log.storage().begin() + prior_total);
++      prior_total += branches;
++    }
++    return {};
++  }
++
++  // Lemmes B et C : fusion creee a ce plateau, ou continuation d'une seule branche vivante a la coupe fermee.
++  Outcome check_roles(NodeIdx att, BallRole role, LevelRank rank, u64 branches) const noexcept {
++    const auto nodes = forest.nodes();
++    const ForestNode& node = nodes[idx(att)];
++    if (role == BallRole::merge)
++      return idx(att) >= forest.births() && node.rank == rank ? Outcome{} : fail(Reason::tower_invariant);
++    const bool alive = node.parent == NodeIdx{kNone} || idx(nodes[idx(node.parent)].rank) > idx(rank);
++    return branches == 1 && idx(node.rank) < idx(rank) && alive ? Outcome{} : fail(Reason::tower_invariant);
++  }
++
++  // Groupes du journal de meme rang (strictement croissants) : un seul advance(r - 1) par plateau, monotone.
++  Outcome cells() noexcept {
++    auto sweep = ClosedAncestorSweep::make(forest, budget);
++    if (!sweep.ok()) return sweep.outcome();
++    ForestLedger work;
++    const auto balls = domain.catalogue().balls_data();
++    std::optional<LevelRank> previous;
++    for (u32 c = 0; c < log.cells();) {
++      const LevelRank rank = balls[idx(log.ball(c))].rank;
++      if (idx(rank) == 0 || (previous && idx(rank) <= idx(*previous))) return fail(Reason::tower_invariant);
++      MHGP11_TRY(sweep.value().advance(LevelRank{idx(rank) - 1}, work));
++      ++plateaus;
++      for (; c < log.cells() && balls[idx(log.ball(c))].rank == rank; ++c)
++        MHGP11_TRY(cell(c, rank, sweep.value(), work));
++      previous = rank;
++    }
++    return {};
++  }
++
++  // I1 (chaque boule de W_K une fois, naissances), I3 (toute fusion recoit toutes ses branches par ses boules de role
++  // fusion) et I4 (registres de la foret calcules par une autre voie : DSU, cellules, descentes).
++  Outcome registers() const noexcept {
++    for (NodeIdx node : result.node_.span()) if (node == NodeIdx{kNone}) return fail(Reason::tower_invariant);
++    const auto& ledger = forest.ledger();
++    const bool ok = births == (forest.order() == 1 ? 0 : forest.births()) && merged == forest.edges().size() &&
++                    traces == ledger.trace_resolutions && combinations == ledger.cells.combinations &&
++                    log.cells() == ledger.replayed_cells && plateaus == ledger.plateaus &&
++                    touched == ledger.touched_components && continuations == ledger.continuations;
++    return ok ? Outcome{} : fail(Reason::tower_invariant);
++  }
++
++  // Branches du role fusion, dans l'ordre de W_K : tableau exact, decalages par sommes prefixes.
++  Outcome publish_prior() noexcept {
++    stamp.reset();
++    MHGP11_TRY(budget.admit(prior_total * sizeof(NodeIdx)));
++    MHGP11_TRY(result.prior_.allocate(prior_total, budget));
++    std::copy_n(log.storage().begin(), prior_total, result.prior_.begin());
++    u64 offset = 0;
++    for (u64 at = 0; at < result.balls_.size(); ++at) {
++      result.prior_offsets_[at] = offset;
++      if (result.role_[at] == BallRole::merge) offset += result.components_[at];
++    }
++    result.prior_offsets_[result.balls_.size()] = offset;
++    return offset == prior_total ? Outcome{} : fail(Reason::tower_invariant);
++  }
++};
++
++Result<WindowAttachment> attach_window(const FullDomain& domain, const OrderForest& forest, SeedLog& log,
++                                       MemoryBudget& budget) noexcept {
++  if (forest.nodes().empty() || forest.order() == 0 || forest.order() > domain.catalogue().kmax())
++    return fail(Reason::tower_invariant);
++  AttachmentBuilder builder(domain, forest, log, budget);
++  MHGP11_TRY(builder.window());
++  MHGP11_TRY(builder.birth_nodes());
++  MHGP11_TRY(builder.cells());
++  MHGP11_TRY(builder.registers());
++  MHGP11_TRY(builder.publish_prior());
++  return std::move(builder.result);
++}
++
++}  // namespace mhgp11::tower_detail
+--- a/morsehgp3D_v11/src/tower/forest_plateau.cpp
++++ b/morsehgp3D_v11/src/tower/forest_plateau.cpp
+@@ -2,6 +2,7 @@
+ #include "tower/forest_internal.hpp"
+ #include "tower/forest_parallel.hpp"
+ #include "tower/regular_vertical_seeds.hpp"
++#include "tower/seed_log.hpp"
+ 
+ namespace mhgp11::tower_detail {
+ 
+@@ -46,6 +47,7 @@
+   const auto& level = domain.catalogue().levels()[idx(data.rank)];
+   std::optional<u32> first;
+   std::optional<NodeIdx> representative;
++  if (seed_log != nullptr) MHGP11_TRY(seed_log->open(ball));
+   for (const auto& trace : made.value().traces()) {
+     auto down = resolve_descent(domain, trace.part(), k, budget, memo, extended_scratch, population);
+     if (!down.ok()) return down.outcome();
+@@ -55,6 +57,7 @@
+     MHGP11_TRY(add_descent(result.ledger_.descent, down.value().ledger()));
+     const auto seed = result.birth_node(down.value().seed());
+     if (!seed || idx(result.nodes_[idx(*seed)].rank) >= idx(data.rank)) return fail(Reason::tower_invariant);
++    if (seed_log != nullptr) MHGP11_TRY(seed_log->add(*seed));  // la naissance rendue, jamais sa racine
+     if (vertical_seeds != nullptr && !representative) representative = *seed;
+     const u32 root = find(idx(*seed));
+     MHGP11_TRY(touch(root));
+@@ -104,10 +107,12 @@
+   MHGP11_TRY(cell_add(result.ledger_.replayed_cells, 1));
+   MHGP11_TRY(cell_add(result.ledger_.cells.combinations, data.qmin));
+   MHGP11_TRY(cell_add(result.ledger_.trace_resolutions, data.qmin));
++  if (seed_log != nullptr) MHGP11_TRY(seed_log->open(ball));
+   std::optional<u32> first;
+   for (NodeIdx seed : seeds) {
+     if (idx(seed) >= result.births_ || idx(result.nodes_[idx(seed)].rank) >= idx(data.rank))
+       return fail(Reason::tower_invariant);
++    if (seed_log != nullptr) MHGP11_TRY(seed_log->add(seed));  // graine reguliere, jamais sa racine
+     const u32 root = find(idx(seed));
+     MHGP11_TRY(touch(root));
+     if (first) MHGP11_TRY(unite_roots(*first, root)); else first = root;  // racine courante, deja touchee
+--- /dev/null
++++ b/morsehgp3D_v11/src/tower/order_tree.cpp
+@@ -0,0 +1,99 @@
++// Ordre K seul : mise en place de la boucle non concurrente de build_full (forest_vertical.cpp) pour le seul ordre K,
++// sans verticales, plus le journal des graines ; le rattachement est dans attachment.cpp. build_full n'est pas modifie.
++#include "tower/order_tree.hpp"
++#include "tower/census_slots.hpp"
++#include "tower/forest_internal.hpp"
++#include "tower/forest_parallel.hpp"
++#include "tower/population_lookup.hpp"
++#include "tower/seed_log.hpp"
++
++namespace mhgp11::tower_detail {
++
++Result<SeedLog> SeedLog::make(const Catalogue& catalogue, u32 k, MemoryBudget& budget) noexcept {
++  u64 cells = 0, seeds = 0;
++  for (const auto& ball : catalogue.balls_data()) {
++    if (!in_window(ball, k)) continue;
++    if (ball.m == ball.qmin) {
++      if (k == u64{ball.p} + ball.qmin) continue;  // naissance reguliere : aucune trace stricte
++      MHGP11_TRY(cell_add(cells, 1));
++      MHGP11_TRY(cell_add(seeds, ball.qmin));      // jonction reguliere : ses q faces
++      continue;
++    }
++    const u32 t = k - ball.p;  // 1 <= t <= m par la fenetre
++    if (t == ball.m) continue;  // P_b est la K-partie : naissance
++    auto traces = cell_binomial(ball.m, t);
++    if (!traces.ok()) return traces.outcome();
++    MHGP11_TRY(cell_add(cells, 1));
++    MHGP11_TRY(cell_add(seeds, traces.value()));
++  }
++  if (cells >= kNone || seeds > Buffer<NodeIdx>::kMaxCount / 2) return fail(Reason::tower_capacity);
++  // cells < 2^32 : 12 cells + 8 < 2^36 ; seeds < 2^61 : 4 seeds < 2^63 ; somme sans debordement.
++  MHGP11_TRY(budget.admit(cells * sizeof(BallIdx) + (cells + 1) * sizeof(u64) + seeds * sizeof(NodeIdx)));
++  SeedLog log;
++  MHGP11_TRY(log.balls_.allocate(cells, budget));
++  MHGP11_TRY(log.offsets_.allocate(cells + 1, budget));
++  MHGP11_TRY(log.seeds_.allocate(seeds, budget));
++  log.offsets_[0] = 0;
++  return log;
++}
++
++namespace {
++// Foret d'un ordre et son journal ; contextes de la boucle non concurrente de build_full, rendus au retour (avant le
++// balayage du rattachement), constructeur compris.
++Result<OrderForest> order_forest(const FullDomain& domain, Order k, MemoryBudget& budget, const FullParams& params,
++                                 sched::Pool* pool, OrderTimings* timings, SeedLog& log) noexcept {
++  std::optional<PopulationLookup> population;
++  if (params.population_lookup) {
++    auto made = PopulationLookup::make(domain, budget, pool);
++    if (!made.ok()) return made.outcome();
++    population.emplace(std::move(made.value()));
++  }
++  const u32 workspace_count = ForestParallel::census_workspaces(params, pool);
++  auto scratch = CensusSlots::make(domain, workspace_count, budget);
++  if (!scratch.ok()) return scratch.outcome();
++  auto memo = DescentMemo::make(domain, params.memo_capacity, budget, scratch.value().get(0));
++  if (!memo.ok()) return memo.outcome();
++  DescentMemo* context = params.memo_capacity == 0 && workspace_count == 0 ? nullptr : &memo.value();
++  std::optional<ForestParallel> parallel;
++  if (params.regular_batch_capacity != 0) {
++    auto made = ForestParallel::make(domain, params, budget, *pool, workspace_count == 0 ? nullptr : &scratch.value());
++    if (!made.ok()) return made.outcome();
++    parallel.emplace(std::move(made.value()));
++  }
++  auto made = SeedLog::make(domain.catalogue(), k, budget);
++  if (!made.ok()) return made.outcome();
++  log = std::move(made.value());
++  ForestBuilder builder(domain, k, budget, timings, context, parallel ? &*parallel : nullptr,
++                        params.dense_birth_lookup);
++  builder.population = population ? &*population : nullptr;
++  builder.seed_log = &log;
++  auto forest = builder.run();
++  if (!forest.ok()) return forest.outcome();
++  log.close();
++  return std::move(forest.value());
++}
++}  // namespace
++
++Result<OrderTree> build_order(FullDomain&& domain, Order k, MemoryBudget& budget, FullParams params,
++                              sched::Pool* pool, OrderTimings* timings, u64* attach_ns) noexcept {
++  if (k == 0 || k > domain.catalogue().kmax() || k > domain.index().cloud().sites())
++    return fail(Reason::parameter_out_of_range);
++  // Ordres concurrents : voie pipeline a un ordre (tranche S11), pas encore livree. Verticales : sans objet.
++  if (params.concurrent_orders || params.parallel_verticals || params.reuse_regular_verticals)
++    return fail(Reason::parameter_out_of_range);
++  MHGP11_TRY(ForestParallel::validate(params, pool));
++  OrderTimings draft;
++  SeedLog log;
++  auto forest = order_forest(domain, k, budget, params, pool, timings == nullptr ? nullptr : &draft, log);
++  if (!forest.ok()) return forest.outcome();
++  const Stopwatch clock;
++  auto attachment = attach_window(domain, forest.value(), log, budget);
++  if (!attachment.ok()) return attachment.outcome();
++  const u64 attached = clock.nanoseconds();
++  log = SeedLog{};  // journal rendu avant le transfert du domaine
++  if (timings != nullptr) *timings = draft;
++  if (attach_ns != nullptr) *attach_ns = attached;
++  return OrderTree(std::move(domain), std::move(forest.value()), std::move(attachment.value()));
++}
++
++}  // namespace mhgp11::tower_detail
+--- /dev/null
++++ b/morsehgp3D_v11/src/tower/seed_log.hpp
+@@ -0,0 +1,88 @@
++// Journal des graines de l'arbre d'ordre K (tranche S3), interne a tower : pour chaque cellule appliquee, en ordre
++// BallIdx strictement croissant, les naissances rendues par la descente de chacune de ses traces strictes (jamais une
++// racine du DSU ni un top). Ecrit par le seul fil qui applique les cellules (ForestBuilder::cell et regular_cell) ;
++// capacites majorees sur la fenetre et admises avant le parcours. Lu ensuite par le balayage du lemme D.
++#pragma once
++#include "tower/forest.hpp"
++
++namespace mhgp11::tower_detail {
++
++// Fenetre des evenements d'ordre K : W_K = {b dans Cat_K : p+q-1 <= K <= p+m}, evenements FAIBLES compris
++// (MATHEMATIQUES.md, T3 ; meme fenetre que classify_range). Ce n'est pas le predicat fort p+q <= K des temoins P3.
++inline bool in_window(const CatalogueBall& ball, u64 k) noexcept {
++  return u64{ball.p} + ball.qmin - 1 <= k && k <= u64{ball.p} + ball.m;
++}
++
++// Traces strictes d'une cellule, publiees en u32 (WindowAttachment::strict_traces ; components en est majore) : au-dela
++// de UINT32_MAX, refus tower_capacity AVANT la conversion, sans resultat partiel. Garde de l'audit aef7182b3 : une
++// coquille entiere de 150 sites a K8 donne au moins C(69,8) = 8 361 453 672 traces. Le constructeur de FULL ne recoit
++// aucun plafond de coquille pour autant (celui de la sortie supports reste propre a cette sortie).
++inline Result<u32> published_traces(u64 count) noexcept {
++  if (count > u64{0xFFFFFFFFu}) return fail(Reason::tower_capacity);
++  return static_cast<u32>(count);
++}
++
++class SeedLog {
++ public:
++  SeedLog() = default;
++  SeedLog(const SeedLog&) = delete;
++  SeedLog& operator=(const SeedLog&) = delete;
++  SeedLog(SeedLog&& other) noexcept
++      : balls_(std::move(other.balls_)), offsets_(std::move(other.offsets_)), seeds_(std::move(other.seeds_)),
++        cells_(std::exchange(other.cells_, 0)), count_(std::exchange(other.count_, 0)) {}
++  // Remplacement : les tampons precedents sont rendus a leur budget.
++  SeedLog& operator=(SeedLog&& other) noexcept {
++    balls_ = std::move(other.balls_);
++    offsets_ = std::move(other.offsets_);
++    seeds_ = std::move(other.seeds_);
++    cells_ = std::exchange(other.cells_, 0);
++    count_ = std::exchange(other.count_, 0);
++    return *this;
++  }
++
++  // Capacites de l'ordre k sur la fenetre : une cellule possible par boule de W_K hors naissance reguliere, q graines
++  // pour une jonction reguliere, C(m,t) pour une coquille etendue (t=K-p ; majorant du nombre de traces strictes,
++  // naissances etendues comprises). Octets 4C+8(C+1)+4G admis avant allocation.
++  static Result<SeedLog> make(const Catalogue& catalogue, u32 k, MemoryBudget& budget) noexcept;
++
++  // Nouvelle cellule : BallIdx strictement croissant, capacite respectee ; sinon tower_invariant.
++  Outcome open(BallIdx ball) noexcept {
++    if (cells_ >= balls_.size() || (cells_ != 0 && idx(balls_[cells_ - 1]) >= idx(ball)))
++      return fail(Reason::tower_invariant);
++    balls_[cells_] = ball;
++    offsets_[cells_++] = count_;
++    return {};
++  }
++  // Graine de naissance de la cellule ouverte.
++  Outcome add(NodeIdx seed) noexcept {
++    if (cells_ == 0 || count_ >= seeds_.size()) return fail(Reason::tower_invariant);
++    seeds_[count_++] = seed;
++    return {};
++  }
++  // Fin de la construction : borne de la derniere cellule.
++  void close() noexcept { offsets_[cells_] = count_; }
++
++  u32 cells() const noexcept { return cells_; }
++  u64 seeds() const noexcept { return count_; }
++  BallIdx ball(u32 cell) const noexcept { return balls_[cell]; }
++  u64 begin(u32 cell) const noexcept { return offsets_[cell]; }
++  u64 end(u32 cell) const noexcept { return offsets_[cell + 1]; }
++  // Le balayage reecrit les graines en place (noeuds de coupe ouverte, puis branches compactees).
++  std::span<NodeIdx> storage() noexcept { return seeds_.span().first(count_); }
++
++ private:
++  Buffer<BallIdx> balls_;
++  Buffer<u64> offsets_;
++  Buffer<NodeIdx> seeds_;
++  u32 cells_ = 0;
++  u64 count_ = 0;
++};
++
++class WindowAttachment;
++// Balayage du lemme D apres finish() : rattachement a la coupe FERMEE de chaque boule de W_K, roles par les rangs,
++// branches a la coupe OUVERTE ; controles I1 a I4 contre la foret et son registre, tout ecart rend tower_invariant.
++// Consomme le journal (graines reecrites en place). attachment.cpp.
++[[nodiscard]] Result<WindowAttachment> attach_window(const FullDomain&, const OrderForest&, SeedLog&,
++                                                    MemoryBudget&) noexcept;
++
++}  // namespace mhgp11::tower_detail
+--- /dev/null
++++ b/morsehgp3D_v11/tests/tower/attach_fraction.py
+@@ -0,0 +1,257 @@
++#!/usr/bin/env python3
++"""Porte mhgp11_tower_attach_fraction (tranche S3 ; apports des auditeurs du 5 octobre 2026) : differentiel de la
++sonde du rattachement (mhgp11_tower_attach_probe, mode requetes) contre l'oracle borne S1
++(reference/hgp11_ref/supports.py : Fraction, etage A seul), projete sur les champs de S3.
++
++    python3 attach_fraction.py <mhgp11_tower_attach_probe> --bits=<18|21|24> [--workers=<W>[,<W>...]]
++            [--min-clouds=N] [--min-orders=N] [--min-balls=N] [--min-nodes=N] [--min-births=N] [--min-merges=N]
++            [--min-internals=N] [--min-passing=N] [--min-weak=N] [--min-wide=N] [--min-high=N]
++
++Nuages :
++  - ceux de la suite de l'oracle (reference/test_supports.py : fixtures de la specification et des audits, dont les
++    temoins D2 et E5, nuages d'Euler, fixtures historiques a positions distinctes, puis 16 nuages de 5 a 10 points par
++    famille, graine 31), a leurs ordres (ceux de la specification, et 1 a min(5, n - 1)) ;
++  - le petit temoin a K eleve de l'auditeur (receipts/audit_native_integration_20261005/qb/normal.json : les quatre
++    coins d'un carre de cote 20 et huit sites interieurs, 12 sites), a tous ses ordres 1 a 12 : la boule de centre
++    (10, 10, 10) et de niveau 200 (p = 8, m = 4, qmin = 2) y est interne a K9, fusion de quatre branches a K10
++    (quatre traces strictes) et naissance a K11 et K12. La suite de l'oracle s'arrete a K5 : ce temoin est le seul
++    cas borne de l'arbre et du rattachement a K >= 6.
++PointId arbitraires, non denses : 2654435761 (i + 1) mod 2^32 pour le i-ieme point de l'oracle.
++
++Pour chaque (nuage, K), la sonde prepare Cat_K (kmax = K : le domaine etroit de la facade, seul ou le temoin D2 est un
++contre-cas) et construit l'arbre d'ordre K seul (build_order), une fois par valeur de --workers : la voie serielle
++(W = 1) recoit les points dans l'ordre de l'oracle, la voie par lots (W > 1, Pool de W fils) dans l'ordre inverse
++(permutation effective des que n >= 2 ; la sortie canonique n'en depend pas). L'oracle rend la sortie canonique de
++l'ordre K (canonical(k, ids)) : arbre par la definition (composantes de Gamma_K sur toutes les K-parties), W_K,
++att(b) a la coupe fermee sur toutes les K-parties de P_b, ant(b) a la coupe ouverte des K-parties strictes, roles par
++les niveaux, traces strictes par enumeration, lemmes A a H controles.
++
++Controles, pour chaque (nuage, K, W) :
++  - la sonde rend une ligne JSON par requete, code 0, rien sur la sortie d'erreur ; format hgp11_attach_probe,
++    version 1, exactement les cles attendues (document, noeuds, boules) ;
++  - le document, sans format, version et s_star, egale la projection de l'oracle sur les champs de S3 : k, n, sites
++    (ordre lexicographique), ids ; noeuds (level, parent, children, kind, post, balls, birth_center) ; boules dans
++    l'ordre (postordre du noeud, niveau, centre exact) avec node (att(b)), level, center, role, p, m, qmin,
++    components (|ant(b)|), prior (ant(b), role fusion seulement) et strict_traces ;
++  - S* de la sonde (s_star) est un support positif minimal de l'oracle, d'arite qmin.
++Un nuage hors du domaine du profil (une coordonnee >= 2^bits) est exclu et compte (u18 : les deux cercles n = 1023
++de la specification) ; tous les autres sont compares.
++Codes : 0 conforme ; 1 ecart (dont un refus ou un arret de la sonde, et un lemme viole par l'oracle) ; 2 refus
++d'usage ; 3 plancher. Dernieres lignes :
++    attach_fraction_couverture bits=<b> nuages=<c> exclus=<x> ordres=<o> boules=<w> noeuds=<v> naissances=<n>
++        fusions=<f> internes=<i> passageres=<s> faibles=<a> fusions_3plus=<t> ordres_6plus=<h> fils=<W,...>
++    attach_fraction_ok controles=<n>
++Les compteurs viennent de l'oracle, une fois par (nuage, K) ; chaque valeur de --workers les compare tous.
++Python 3.10 nu, bibliotheque standard seule, aucun assert. L'oracle est charge sans le paquet hgp11_ref
++(ref_mutants.load_private, comme reference/test_supports.py) ; la porte ne cree aucun bytecode
++(PYTHONDONTWRITEBYTECODE). Prototype : impl_s3/attach_vs_oracle.py du rapport S3 (hors depot).
++"""
++import json
++import os
++import sys
++
++HERE = os.path.dirname(os.path.abspath(__file__))
++sys.path.insert(0, os.path.join(HERE, '..', 'support'))
++sys.path.insert(0, os.path.join(HERE, '..', '..', 'reference'))
++import mhgp11_gate  # noqa: E402
++import test_supports  # noqa: E402  (suite de l'oracle S1 : fixtures, familles, chargement prive)
++
++DOC_KEYS = ('balls', 'format', 'ids', 'k', 'n', 'nodes', 'sites', 'version')
++NODE_KEYS = ('balls', 'birth_center', 'children', 'kind', 'level', 'parent', 'post')
++BALL_KEYS = ('center', 'components', 'level', 'm', 'node', 'p', 'prior', 'qmin', 'role', 'strict_traces')
++PROBE_BALL_KEYS = BALL_KEYS + ('s_star',)
++FLOORS = ('clouds', 'orders', 'balls', 'nodes', 'births', 'merges', 'internals', 'passing', 'weak', 'wide', 'high')
++BUDGET = 1 << 32   # octets par requete (MemoryBudget de la sonde)
++MAX_SITES = 14     # mode requetes de la sonde
++ABSENT = '<absent>'
++# Petit temoin a K eleve de l'auditeur (receipts/audit_native_integration_20261005/qb/normal.json) : quatre coins,
++# huit sites interieurs ; ordres 1 a 12 (K <= n).
++WITNESS_K10 = ('temoin_k10_audit',
++               [(0, 0, 10), (0, 20, 10), (20, 0, 10), (20, 20, 10), (9, 9, 10), (9, 10, 10), (9, 11, 10),
++                (10, 9, 10), (10, 10, 10), (10, 11, 10), (11, 9, 10), (11, 10, 10)],
++               tuple(range(1, 13)))
++
++
++class Usage(Exception):
++    pass
++
++
++def options(argv):
++    if len(argv) < 3:
++        raise Usage('arguments manquants')
++    out = {'probe': argv[1], 'bits': 0, 'workers': [1], 'floors': {}}
++    for arg in argv[2:]:
++        key, _, value = arg.partition('=')
++        if key == '--bits' and value in ('18', '21', '24'):
++            out['bits'] = int(value)
++        elif key == '--workers' and value and all(w.isdigit() and 1 <= int(w) <= 64 for w in value.split(',')):
++            out['workers'] = [int(w) for w in value.split(',')]
++        elif key.startswith('--min-') and key[6:] in FLOORS and value.isdigit():
++            out['floors'][key[6:]] = int(value)
++        else:
++            raise Usage('option inconnue ou invalide %s' % arg)
++    if out['bits'] == 0:
++        raise Usage('--bits=18|21|24 obligatoire')
++    if len(set(out['workers'])) != len(out['workers']):
++        raise Usage('--workers : valeurs en double')
++    return out
++
++
++def point_ids(count):
++    return [(2654435761 * (i + 1)) & 0xFFFFFFFF for i in range(count)]
++
++
++def project(doc):
++    """Champs de S3 d'un document (sonde ou oracle) ; une cle absente vaut ABSENT, jamais une exception."""
++    out = dict((key, doc.get(key, ABSENT)) for key in ('k', 'n', 'sites', 'ids'))
++    nodes, balls = doc.get('nodes'), doc.get('balls')
++    out['nodes'] = ([dict((key, node.get(key, ABSENT)) for key in NODE_KEYS) for node in nodes]
++                    if isinstance(nodes, list) and all(isinstance(node, dict) for node in nodes) else ABSENT)
++    out['balls'] = ([dict((key, ball.get(key, ABSENT)) for key in BALL_KEYS) for ball in balls]
++                    if isinstance(balls, list) and all(isinstance(ball, dict) for ball in balls) else ABSENT)
++    return out
++
++
++def first_difference(got, want, path):
++    """Premier chemin ou deux valeurs JSON different, ou None."""
++    if type(got) is not type(want):
++        return '%s : %r contre %r' % (path, got, want)
++    if isinstance(want, dict):
++        for key in sorted(set(got) | set(want)):
++            if key not in got or key not in want:
++                return '%s.%s : cle presente d\'un seul cote' % (path, key)
++            found = first_difference(got[key], want[key], '%s.%s' % (path, key))
++            if found:
++                return found
++        return None
++    if isinstance(want, list):
++        if len(got) != len(want):
++            return '%s : longueur %d contre %d' % (path, len(got), len(want))
++        for i, (a, b) in enumerate(zip(got, want)):
++            found = first_difference(a, b, '%s[%d]' % (path, i))
++            if found:
++                return found
++        return None
++    return None if got == want else '%s : %r contre %r' % (path, got, want)
++
++
++def oracle_cases(gate, bits, clouds):
++    """(nom, points, ids, K, document de l'oracle normalise par JSON) des nuages du profil ; exclus comptes."""
++    oracle_module = test_supports.STAGE['supports']
++    cases, excluded, compared = [], 0, 0
++    for name, points, ks in clouds:
++        if max(c for p in points for c in p) >= 1 << bits or min(c for p in points for c in p) < 0:
++            excluded += 1
++            continue
++        if not gate.check(len(points) <= MAX_SITES, '%s : %d sites, au plus %d en mode requetes'
++                          % (name, len(points), MAX_SITES)):
++            continue
++        compared += 1
++        ids = point_ids(len(points))
++        try:
++            oracle = oracle_module.Supports(points)
++            docs = [json.loads(json.dumps(oracle.canonical(k, ids), sort_keys=True)) for k in ks]
++        except Exception as exc:  # noqa: BLE001 -- un lemme viole par l'oracle est un ecart, pas une trace Python
++            gate.check(False, '%s : oracle : %s : %s' % (name, type(exc).__name__, exc))
++            continue
++        for k, doc in zip(ks, docs):
++            cases.append((name, points, ids, k, doc))
++    return cases, compared, excluded
++
++
++def requests(cases, reverse):
++    text = []
++    for _name, points, ids, k, _doc in cases:
++        order = list(range(len(points)))
++        if reverse:
++            order.reverse()
++        text.append('%d %d %d\n' % (k, BUDGET, len(points)))
++        text.extend('%d %d %d %d\n' % (points[i][0], points[i][1], points[i][2], ids[i]) for i in order)
++    return ''.join(text)
++
++
++def compare_run(gate, probe, workers, cases):
++    """Une execution de la sonde sur toutes les requetes ; chaque ligne comparee a l'oracle."""
++    done = mhgp11_gate.run([probe, '--workers=%d' % workers], timeout=600, stdin=requests(cases, workers > 1))
++    lines = (done.stdout or '').splitlines()
++    ok = gate.check(done.code == 0 and not (done.stderr or ''), 'sonde W%d : %s, sortie d\'erreur %r'
++                    % (workers, done.describe(), (done.stderr or '')[-300:]))
++    if not gate.check(len(lines) == len(cases), 'sonde W%d : %d lignes pour %d requetes'
++                      % (workers, len(lines), len(cases))) or not ok:
++        return
++    shown = 0
++    for (name, _points, _ids, k, want), line in zip(cases, lines):
++        where = '%s K%d W%d' % (name, k, workers)
++        try:
++            got = json.loads(line)
++        except ValueError:
++            gate.check(False, '%s : ligne illisible %r' % (where, line[:200]))
++            continue
++        if not gate.check(isinstance(got, dict) and 'status' not in got, '%s : refus %r' % (where, line[:200])):
++            continue
++        gate.check(got.get('format') == 'hgp11_attach_probe' and got.get('version') == 1,
++                   '%s : format %r version %r' % (where, got.get('format'), got.get('version')))
++        nodes, balls = got.get('nodes'), got.get('balls')
++        shape = (sorted(got) == sorted(DOC_KEYS) and isinstance(nodes, list) and isinstance(balls, list) and
++                 all(isinstance(v, dict) and sorted(v) == sorted(NODE_KEYS) for v in nodes) and
++                 all(isinstance(b, dict) and sorted(b) == sorted(PROBE_BALL_KEYS) for b in balls))
++        gate.check(shape, '%s : cles du document, des noeuds ou des boules' % where)
++        found = first_difference(project(got), project(want), 'doc')
++        if not gate.check(found is None, '%s : %s' % (where, found)):
++            shown += 1
++            if shown <= 3:
++                print('  sonde  : %s' % json.dumps(project(got), sort_keys=True)[:600])
++                print('  oracle : %s' % json.dumps(project(want), sort_keys=True)[:600])
++            continue
++        for at, (mine, theirs) in enumerate(zip(balls, want['balls'])):
++            star = mine.get('s_star')
++            supports = [sorted(map(tuple, s)) for s in theirs['supports']]
++            gate.check(isinstance(star, list) and len(star) == theirs['qmin'] and
++                       sorted(map(tuple, star)) in supports,
++                       '%s boule %d (%s) : S* %r hors des supports d\'arite qmin' % (where, at, theirs['level'], star))
++
++
++def count(cases, compared, excluded):
++    totals = dict((name, 0) for name in FLOORS)
++    totals['clouds'] = compared
++    for _name, _points, _ids, k, doc in cases:
++        totals['orders'] += 1
++        totals['high'] += k >= 6
++        totals['nodes'] += len(doc['nodes'])
++        totals['wide'] += sum(len(node['children']) >= 3 for node in doc['nodes'])
++        for ball in doc['balls']:
++            totals['balls'] += 1
++            totals['births'] += ball['role'] == 'naissance'
++            totals['merges'] += ball['role'] == 'fusion'
++            totals['internals'] += ball['role'] == 'interne'
++            totals['passing'] += ball['role'] == 'fusion' and ball['components'] == 1
++            totals['weak'] += ball['p'] + ball['qmin'] == k + 1
++    totals['excluded'] = excluded
++    return totals
++
++
++def main():
++    gate = mhgp11_gate.Gate('attach_fraction')
++    try:
++        o = options(sys.argv)
++    except Usage as error:
++        print('usage : %s' % error)
++        return mhgp11_gate.REFUSAL
++    clouds = test_supports.fixtures() + test_supports.family_clouds() + [WITNESS_K10]
++    cases, compared, excluded = oracle_cases(gate, o['bits'], clouds)
++    for workers in o['workers']:
++        compare_run(gate, o['probe'], workers, cases)
++    t = count(cases, compared, excluded)
++    print('attach_fraction_couverture bits=%d nuages=%d exclus=%d ordres=%d boules=%d noeuds=%d naissances=%d '
++          'fusions=%d internes=%d passageres=%d faibles=%d fusions_3plus=%d ordres_6plus=%d fils=%s'
++          % (o['bits'], t['clouds'], t['excluded'], t['orders'], t['balls'], t['nodes'], t['births'], t['merges'],
++             t['internals'], t['passing'], t['weak'], t['wide'], t['high'], ','.join(map(str, o['workers']))))
++    below = [name for name in FLOORS if t[name] < o['floors'].get(name, 0)]
++    if gate.failures == 0 and below:
++        print('PLANCHER attach_fraction : %s sous %s' % (', '.join(below), json.dumps(o['floors'], sort_keys=True)))
++        return mhgp11_gate.FLOOR
++    return gate.finish(floor=1)
++
++
++if __name__ == '__main__':
++    sys.exit(main())
+--- /dev/null
++++ b/morsehgp3D_v11/tests/tower/attach_probe.cpp
+@@ -0,0 +1,440 @@
++// Sonde du rattachement de W_K (tranche S3), hors produit. Deux modes :
++//   requetes (defaut) : sur l'entree standard, des requetes "K budget n" puis n lignes "x y z PointId" (n <= 14) ;
++//     pour chacune, une ligne JSON au format du vidage canonique de l'oracle borne S1 (Supports.canonical(k, ids) de
++//     reference/hgp11_ref/supports.py, cles triees, sans espace), restreint aux champs de la tranche S3, pour le futur
++//     differentiel mhgp11_tower_attach_fraction (cable apres l'integration du contrat L0) :
++//       format "hgp11_attach_probe", version 1, k, n ; sites : coordonnees en ordre lexicographique (pas Morton) ;
++//       ids : PointId dans le meme ordre ;
++//       nodes[v] (numerotation canonique de la foret d'ordre K) : level (fraction reduite ecrite comme
++//       str(fractions.Fraction) : "a/b", ou "a"), parent (null a la racine), children, kind (0 feuille-site a K = 1,
++//       1 naissance, 2 fusion), post (rang de postordre, enfants par numero croissant), balls (indices des boules
++//       propres), birth_center (centre exact de la boule de naissance, le site a K = 1 ; null pour une fusion) ;
++//       balls, ordre (postordre du noeud, niveau, centre exact) : node (att(b), coupe FERMEE), level, center, role
++//       (naissance, fusion, interne), p, m, qmin, components (|ant(b)|), prior (ant(b), coupe OUVERTE, role fusion
++//       seulement), strict_traces (journal), et s_star (S* en coordonnees, ordre des SiteIdx : seul champ propre a la
++//       sonde, que le differentiel ignore).
++//     Option --workers=W (W > 1) : voie par lots sur un Pool de W fils (memes sorties attendues).
++//   --incidences=<sortie> --input=<xyz.u32le>,<ids.u32le> --k=K [--workers=W] : ecrit, en mots u64 petit-boutistes,
++//     le bloc de foret (k, N, naissances, racine, N x (parent, rang)) puis le bloc d'incidences fortes
++//     (T, decalages n+1, T mots rang << 32 | noeud, groupes par site et tries) tires de WindowAttachment, aux memes
++//     conventions que l'ordre K de MHGP11PH (bench/points_export.cpp, write_order sans le bloc core) : porte
++//     mhgp11_tower_attach_export.
++// Codes : 0 succes, 2 usage ou refus, 3 invariant (exit_code du refus).
++#include <algorithm>
++#include <bit>
++#include <charconv>
++#include <fstream>
++#include <iostream>
++#include <string>
++#include <utility>
++#include <vector>
++
++#include "whole_input.hpp"
++#include "sched/sched.hpp"
++#include "tower/order_tree.hpp"
++
++using namespace mhgp11;
++using namespace mhgp11::bench;
++using namespace mhgp11::tower_detail;
++
++namespace {
++// Entier naturel en mots de 32 bits (petit-boutiste, sans zero de tete) : reduction exacte et ecriture decimale des
++// niveaux, dont le numerateur depasse 128 bits (8B+12 bits au profil B). Outil de sonde, jamais dans le produit.
++struct Natural {
++  std::vector<u32> w;
++  bool zero() const { return w.empty(); }
++  void trim() { while (!w.empty() && w.back() == 0) w.pop_back(); }
++  u64 bits() const { return w.empty() ? 0 : 32 * (w.size() - 1) + (32 - std::countl_zero(w.back())); }
++  bool bit(u64 i) const { return ((w[i / 32] >> (i % 32)) & 1u) != 0; }
++};
++Natural natural(u128 value) {
++  Natural out;
++  for (; value != 0; value >>= 32) out.w.push_back(static_cast<u32>(value));
++  return out;
++}
++template <int Words>
++Natural natural(const num::Wide<Words>& value) {  // magnitude ; le signe est lu a part
++  Natural out;
++  for (u64 word : value.words) { out.w.push_back(static_cast<u32>(word)); out.w.push_back(static_cast<u32>(word >> 32)); }
++  out.trim();
++  return out;
++}
++int compare(const Natural& a, const Natural& b) {
++  if (a.w.size() != b.w.size()) return a.w.size() < b.w.size() ? -1 : 1;
++  for (std::size_t i = a.w.size(); i-- > 0;) if (a.w[i] != b.w[i]) return a.w[i] < b.w[i] ? -1 : 1;
++  return 0;
++}
++void subtract(Natural& a, const Natural& b) {  // a >= b
++  u64 borrow = 0;
++  for (std::size_t i = 0; i < a.w.size(); ++i) {
++    const u64 take = u64{i < b.w.size() ? b.w[i] : 0u} + borrow;
++    borrow = a.w[i] < take ? 1 : 0;
++    a.w[i] = static_cast<u32>((u64{a.w[i]} + (borrow << 32)) - take);
++  }
++  a.trim();
++}
++void shift_in(Natural& r, bool bit) {  // r = 2r + bit
++  u32 carry = bit ? 1u : 0u;
++  for (u32& x : r.w) { const u32 next = x >> 31; x = (x << 1) | carry; carry = next; }
++  if (carry != 0) r.w.push_back(carry);
++}
++std::pair<Natural, Natural> divide(const Natural& a, const Natural& b) {  // b non nul ; decalages et soustractions
++  Natural q, r;
++  q.w.assign(a.w.size(), 0);
++  for (u64 i = a.bits(); i-- > 0;) {
++    shift_in(r, a.bit(i));
++    if (compare(r, b) >= 0) { subtract(r, b); q.w[i / 32] |= u32{1} << (i % 32); }
++  }
++  q.trim();
++  return {std::move(q), std::move(r)};
++}
++Natural gcd(Natural a, Natural b) {
++  while (!b.zero()) { Natural r = divide(a, b).second; a = std::move(b); b = std::move(r); }
++  return a;
++}
++std::string decimal(Natural a) {
++  if (a.zero()) return "0";
++  std::string out;
++  while (!a.zero()) {
++    u64 rest = 0;
++    for (std::size_t i = a.w.size(); i-- > 0;) {
++      const u64 current = (rest << 32) | a.w[i];
++      a.w[i] = static_cast<u32>(current / 10); rest = current % 10;
++    }
++    a.trim();
++    out.push_back(static_cast<char>('0' + rest));
++  }
++  std::reverse(out.begin(), out.end());
++  return out;
++}
++// Fraction reduite ecrite comme str(fractions.Fraction) : "a/b", "a" si b = 1, signe en tete ; den non nul.
++std::string fraction(bool negative, const Natural& num, const Natural& den) {
++  if (num.zero()) return "0";
++  const Natural g = gcd(num, den);
++  const std::string n = decimal(divide(num, g).first), d = decimal(divide(den, g).first);
++  return (negative ? "-" : "") + (d == "1" ? n : n + "/" + d);
++}
++std::string level_text(const num::Level& level) {
++  const auto n = num::to_wide(level.numerator());  // largeurs differentes selon le profil (u24 : 4 et 3 mots)
++  const auto d = num::to_wide(level.denominator());
++  return fraction(n.sign() < 0, natural(n), natural(d));
++}
++// Coordonnees exactes du centre a + N/D (|a_i D + N_i| < 2^(5B+6) <= 2^126 : i128, comme num::compare_centers).
++std::array<std::string, 3> center_text(const num::Sphere& sphere) {
++  std::array<std::string, 3> out;
++  const i128 den = sphere.denominator();
++  for (u32 axis = 0; axis < 3; ++axis) {
++    const i128 value = i128{sphere.anchor().coordinates()[axis]} * den + sphere.numerator()[axis];
++    const u128 magnitude = value < 0 ? u128{0} - static_cast<u128>(value) : static_cast<u128>(value);
++    out[axis] = fraction(value < 0, natural(magnitude), natural(static_cast<u128>(den)));
++  }
++  return out;
++}
++const char* role_name(BallRole role) {
++  return role == BallRole::birth ? "naissance" : role == BallRole::merge ? "fusion" : "interne";
++}
++
++FullParams params_for(u32 workers) {
++  FullParams p;
++  if (workers > 1) {
++    p.regular_batch_capacity = 4096; p.descent_lanes = 48;
++    p.reuse_census_workspace = p.dense_birth_lookup = p.population_lookup = true;
++  }
++  return p;
++}
++
++Result<num::Point> point_of(const Cloud& cloud, SiteIdx s) {
++  return num::Point::make(cloud.x()[idx(s)], cloud.y()[idx(s)], cloud.z()[idx(s)]);
++}
++Result<num::Sphere> ball_sphere(const Cloud& cloud, const CatalogueBall& ball) {
++  std::array<num::Point, 4> points{};
++  for (u32 j = 0; j < ball.qmin; ++j) {
++    auto p = point_of(cloud, ball.support[j]);
++    if (!p.ok()) return p.outcome();
++    points[j] = p.value();
++  }
++  auto made = ball.qmin == 2 ? num::Sphere::through(points[0], points[1]) : ball.qmin == 3 ?
++      num::Sphere::through(points[0], points[1], points[2]) :
++      num::Sphere::through(points[0], points[1], points[2], points[3]);
++  if (!made.ok()) return made.outcome();
++  if (!made.value()) return fail(Reason::tower_invariant);
++  return *made.value();
++}
++std::string xyz(const Cloud& cloud, SiteIdx s) {
++  return "[" + std::to_string(cloud.x()[idx(s)]) + "," + std::to_string(cloud.y()[idx(s)]) + "," +
++         std::to_string(cloud.z()[idx(s)]) + "]";
++}
++std::string strings(const std::array<std::string, 3>& values) {
++  return "[\"" + values[0] + "\",\"" + values[1] + "\",\"" + values[2] + "\"]";
++}
++template <class Range>
++std::string list(const Range& values) {
++  std::string out = "[";
++  for (const auto& v : values) { if (out.size() > 1) out += ','; out += std::to_string(v); }
++  return out + "]";
++}
++
++// Postordre iteratif depuis la racine, enfants par numero croissant (meme convention que l'oracle et SP).
++std::vector<u32> postorder(const OrderForest& forest) {
++  std::vector<u32> post(forest.nodes().size(), kNone);
++  std::vector<std::pair<u32, bool>> stack{{idx(forest.root()), false}};
++  u32 rank = 0;
++  while (!stack.empty()) {
++    const auto [v, done] = stack.back();
++    stack.pop_back();
++    if (done) { post[v] = rank++; continue; }
++    stack.push_back({v, true});
++    const auto kids = forest.children(NodeIdx{v});
++    for (std::size_t j = kids.size(); j-- > 0;) stack.push_back({idx(kids[j]), false});
++  }
++  return post;
++}
++
++Outcome json(std::ostream& out, const OrderTree& tree) {
++  const auto& domain = tree.domain();
++  const auto& cloud = domain.index().cloud();
++  const auto& cat = domain.catalogue();
++  const auto& forest = tree.forest();
++  const auto& a = tree.attachment();
++  const u32 k = tree.order(), n = cloud.sites();
++  // Sites en ordre lexicographique des coordonnees, PointId dans le meme ordre (poids un : un identifiant par site).
++  std::vector<u32> lex(n);
++  for (u32 s = 0; s < n; ++s) lex[s] = s;
++  std::sort(lex.begin(), lex.end(), [&](u32 l, u32 r) {
++    return std::array<u32, 3>{cloud.x()[l], cloud.y()[l], cloud.z()[l]} <
++           std::array<u32, 3>{cloud.x()[r], cloud.y()[r], cloud.z()[r]};
++  });
++  // Boules de W_K : spheres de S*, puis ordre canonique (postordre du noeud, niveau, centre exact).
++  std::vector<num::Sphere> spheres;
++  for (BallIdx b : a.balls()) {
++    auto made = ball_sphere(cloud, cat.balls_data()[idx(b)]);
++    if (!made.ok()) return made.outcome();
++    spheres.push_back(made.value());
++  }
++  const auto post = postorder(forest);
++  for (u32 v : post) if (v == kNone) return fail(Reason::tower_invariant);
++  std::vector<u32> order(a.size());
++  for (u32 i = 0; i < a.size(); ++i) order[i] = i;
++  std::stable_sort(order.begin(), order.end(), [&](u32 l, u32 r) {
++    const u32 pl = post[idx(a.node()[l])], pr = post[idx(a.node()[r])];
++    if (pl != pr) return pl < pr;
++    const u32 rl = idx(cat.balls_data()[idx(a.balls()[l])].rank), rr = idx(cat.balls_data()[idx(a.balls()[r])].rank);
++    if (rl != rr) return rl < rr;
++    return num::compare_centers(spheres[l], spheres[r]) < 0;
++  });
++  std::vector<std::vector<u32>> own(forest.nodes().size());
++  for (u32 i = 0; i < order.size(); ++i) own[idx(a.node()[order[i]])].push_back(i);
++  out << "{\"balls\":[";
++  for (u32 i = 0; i < order.size(); ++i) {
++    const u32 at = order[i];
++    const auto& ball = cat.balls_data()[idx(a.balls()[at])];
++    std::vector<u32> prior;
++    for (u64 j = a.prior_offsets()[at]; j < a.prior_offsets()[at + 1]; ++j) prior.push_back(idx(a.prior()[j]));
++    std::string s_star = "[";
++    for (u32 j = 0; j < ball.qmin; ++j) { if (j) s_star += ','; s_star += xyz(cloud, ball.support[j]); }
++    out << (i ? "," : "") << "{\"center\":" << strings(center_text(spheres[at]))
++        << ",\"components\":" << a.components()[at] << ",\"level\":\"" << level_text(cat.levels()[idx(ball.rank)])
++        << "\",\"m\":" << ball.m << ",\"node\":" << idx(a.node()[at]) << ",\"p\":" << ball.p
++        << ",\"prior\":" << list(prior) << ",\"qmin\":" << unsigned{ball.qmin} << ",\"role\":\""
++        << role_name(a.role()[at]) << "\",\"s_star\":" << s_star << "],\"strict_traces\":" << a.strict_traces()[at]
++        << '}';
++  }
++  out << "],\"format\":\"hgp11_attach_probe\",\"ids\":[";
++  for (u32 j = 0; j < n; ++j) out << (j ? "," : "") << idx(cloud.ids()[cloud.offsets()[lex[j]]]);
++  out << "],\"k\":" << k << ",\"n\":" << n << ",\"nodes\":[";
++  for (u32 v = 0; v < forest.nodes().size(); ++v) {
++    const auto& node = forest.nodes()[v];
++    const auto kids = forest.children(NodeIdx{v});
++    std::vector<u32> children;
++    for (NodeIdx c : kids) children.push_back(idx(c));
++    std::string center = "null";
++    if (v < forest.births() && k == 1) {
++      const SiteIdx s{node.birth_key};
++      center = "[\"" + std::to_string(cloud.x()[idx(s)]) + "\",\"" + std::to_string(cloud.y()[idx(s)]) + "\",\"" +
++               std::to_string(cloud.z()[idx(s)]) + "\"]";
++    } else if (v < forest.births()) {
++      auto made = ball_sphere(cloud, cat.balls_data()[node.birth_key]);
++      if (!made.ok()) return made.outcome();
++      center = strings(center_text(made.value()));
++    }
++    const u32 kind = v >= forest.births() ? 2 : k == 1 ? 0 : 1;
++    out << (v ? "," : "") << "{\"balls\":" << list(own[v]) << ",\"birth_center\":" << center
++        << ",\"children\":" << list(children) << ",\"kind\":" << kind << ",\"level\":\""
++        << level_text(cat.levels()[idx(node.rank)]) << "\",\"parent\":";
++    if (node.parent == NodeIdx{kNone}) out << "null"; else out << idx(node.parent);
++    out << ",\"post\":" << post[v] << '}';
++  }
++  out << "],\"sites\":[";
++  for (u32 j = 0; j < n; ++j) out << (j ? "," : "") << xyz(cloud, SiteIdx{lex[j]});
++  out << "],\"version\":1}\n";
++  return {};
++}
++
++template <class T>
++bool number(std::string_view word, T& value) {
++  const auto result = std::from_chars(word.data(), word.data() + word.size(), value);
++  return !word.empty() && result.ec == std::errc{} && result.ptr == word.data() + word.size();
++}
++template <class T>
++bool next(T& value) { std::string word; return bool(std::cin >> word) && number(word, value); }
++
++Outcome request(u32 k, u64 bytes, const std::vector<u32>& x, const std::vector<u32>& y, const std::vector<u32>& z,
++                const std::vector<PointId>& ids, u32 workers) {
++  MemoryBudget budget(bytes);
++  auto cloud = prepare_cloud(x, y, z, ids, CoordWidth{}, budget);
++  if (!cloud.ok()) return cloud.outcome();
++  auto index = build_index(std::move(cloud.value()), IndexParams{2}, budget);
++  if (!index.ok()) return index.outcome();
++  CatalogueParams params;
++  params.kmax = static_cast<int>(k);
++  auto domain = prepare_full_domain(std::move(index.value()), params, budget);
++  if (!domain.ok()) return domain.outcome();
++  std::unique_ptr<sched::Pool> pool;
++  if (workers > 1) {
++    auto made = sched::make_pool({workers});
++    if (!made.ok()) return made.outcome();
++    pool = std::move(made.value());
++  }
++  auto tree = build_order(std::move(domain.value()), static_cast<Order>(k), budget, params_for(workers), pool.get());
++  if (!tree.ok()) return tree.outcome();
++  return json(std::cout, tree.value());
++}
++
++int requests(u32 workers) {
++  std::string first;
++  int code = 0;
++  while (std::cin >> first) {
++    u32 k = 0, n = 0;
++    u64 bytes = 0;
++    if (!number(first, k) || !next(bytes) || !next(n) || n == 0 || n > 14) return 2;
++    std::vector<u32> x(n), y(n), z(n);
++    std::vector<PointId> ids(n);
++    for (u32 i = 0; i < n; ++i) {
++      u32 id = 0;
++      if (!next(x[i]) || !next(y[i]) || !next(z[i]) || !next(id)) return 2;
++      ids[i] = PointId{id};
++    }
++    const Outcome outcome = guarded([&]() { return request(k, bytes, x, y, z, ids, workers); });
++    if (!outcome.ok()) {
++      std::cout << "{\"k\":" << k << ",\"status\":\"" << status_name(outcome.status()) << "\",\"reason\":\""
++                << reason_name(outcome.reason) << "\"}\n";
++      code = std::max(code, exit_code(outcome));
++    }
++  }
++  return code;
++}
++
++// Bloc de foret et bloc d'incidences fortes de l'ordre K, conventions de write_order (bench/points_export.cpp).
++Outcome write_blocks(std::ostream& out, const OrderTree& tree) {
++  const auto& domain = tree.domain();
++  const auto& cat = domain.catalogue();
++  const auto& forest = tree.forest();
++  const auto& a = tree.attachment();
++  const u32 n = domain.index().cloud().sites(), k = tree.order();
++  word(out, k); word(out, forest.nodes().size()); word(out, forest.births()); word(out, idx(forest.root()));
++  for (const auto& node : forest.nodes()) { word(out, idx(node.parent)); word(out, idx(node.rank)); }
++  std::vector<u64> offsets(u64{n} + 1, 0), cursor;
++  std::vector<u64> packed;
++  std::vector<NodeIdx> leaf(n, NodeIdx{kNone});
++  auto strong = [&](u64 at) {
++    const auto& ball = cat.balls_data()[idx(a.balls()[at])];
++    return u64{ball.p} + ball.qmin <= k && k <= u64{ball.p} + ball.m;
++  };
++  auto each_site = [&](u64 at, auto&& run) {
++    for (SiteIdx s : cat.interior(a.balls()[at])) run(idx(s));
++    for (SiteIdx s : cat.shell(a.balls()[at])) run(idx(s));
++  };
++  if (k == 1) {
++    for (u32 v = 0; v < forest.births(); ++v) leaf[forest.nodes()[v].birth_key] = NodeIdx{v};
++    for (u32 s = 0; s < n; ++s) offsets[s + 1] = 1;
++  } else {
++    for (u64 at = 0; at < a.size(); ++at)
++      if (strong(at)) each_site(at, [&](u32 s) { offsets[s + 1] += 1; });
++  }
++  for (u32 s = 0; s < n; ++s) offsets[s + 1] += offsets[s];
++  packed.resize(offsets[n]);
++  cursor.assign(offsets.begin(), offsets.end() - 1);
++  if (k == 1) {
++    for (u32 s = 0; s < n; ++s) {
++      if (leaf[s] == NodeIdx{kNone}) return fail(Reason::tower_invariant);
++      packed[cursor[s]++] = idx(leaf[s]);
++    }
++  } else {
++    for (u64 at = 0; at < a.size(); ++at) {
++      if (!strong(at)) continue;
++      const u64 value = (u64{idx(cat.balls_data()[idx(a.balls()[at])].rank)} << 32) | u64{idx(a.node()[at])};
++      each_site(at, [&](u32 s) { packed[cursor[s]++] = value; });
++    }
++  }
++  for (u32 s = 0; s < n; ++s) {
++    if (cursor[s] != offsets[s + 1] || offsets[s + 1] == offsets[s]) return fail(Reason::tower_invariant);
++    std::sort(packed.begin() + static_cast<std::ptrdiff_t>(offsets[s]),
++              packed.begin() + static_cast<std::ptrdiff_t>(offsets[s + 1]));
++  }
++  word(out, offsets[n]);
++  for (u64 value : offsets) word(out, value);
++  for (u64 value : packed) word(out, value);
++  return {};
++}
++
++Outcome incidences(const std::string& path, const std::string& xyz, const std::string& ids, u32 k, u32 workers) {
++  MemoryBudget budget(u64{32} << 30);
++  auto input = read_input(xyz.c_str(), ids.c_str(), budget);
++  if (!input.ok()) return input.outcome();
++  auto cloud = prepare_cloud(input.value().x.span(), input.value().y.span(), input.value().z.span(),
++                             input.value().ids.span(), CoordWidth(), budget);
++  if (!cloud.ok()) return cloud.outcome();
++  if (cloud.value().weight() != cloud.value().sites()) return fail(Reason::multiplicity_unsupported);
++  if (k > cloud.value().sites()) return fail(Reason::parameter_out_of_range);
++  auto pool = sched::make_pool({workers});
++  if (!pool.ok()) return pool.outcome();
++  CatalogueParams params;
++  params.kmax = static_cast<int>(k); params.leaf_size = 16; params.max_leaf = 256;
++  params.cache_center_lines = params.indirect_sort = params.adaptive_frontier = true;
++  params.parallel_assembly = params.single_pass = params.pair_graph = true;
++  auto index = build_index(std::move(cloud.value()), {}, budget);
++  if (!index.ok()) return index.outcome();
++  auto domain = prepare_full_domain(std::move(index.value()), params, budget, *pool.value());
++  if (!domain.ok()) return domain.outcome();
++  FullParams full;
++  full.regular_batch_capacity = 4096; full.descent_lanes = 48;
++  full.reuse_census_workspace = full.dense_birth_lookup = full.population_lookup = true;
++  auto tree = build_order(std::move(domain.value()), static_cast<Order>(k), budget, full, pool.value().get());
++  if (!tree.ok()) return tree.outcome();
++  std::ofstream out(path, std::ios::binary | std::ios::trunc);
++  if (!out) return fail(Reason::output_unwritable);
++  MHGP11_TRY(write_blocks(out, tree.value()));
++  out.close();
++  if (!out) return fail(Reason::output_unwritable);
++  std::cout << "{\"phase\":\"attach_incidences\",\"k\":" << k << ",\"sites\":" << tree.value().domain().index().cloud().sites()
++            << ",\"nodes\":" << tree.value().forest().nodes().size() << ",\"balls\":" << tree.value().attachment().size()
++            << "}\n";
++  return {};
++}
++}  // namespace
++
++int main(int argc, char** argv) {
++  std::string path, xyz, ids;
++  u64 k = 0, workers = 1;
++  for (int i = 1; i < argc; ++i) {
++    const std::string_view a(argv[i]);
++    if (a.substr(0, 13) == "--incidences=") path = std::string(a.substr(13));
++    else if (a.substr(0, 8) == "--input=") {
++      const auto comma = a.find(',');
++      if (comma == std::string_view::npos) return 2;
++      xyz = std::string(a.substr(8, comma - 8)); ids = std::string(a.substr(comma + 1));
++    } else if (a.substr(0, 4) == "--k=") { if (!parse(a.substr(4), k)) return 2; }
++    else if (a.substr(0, 10) == "--workers=") {
++      if (!parse(a.substr(10), workers) || workers == 0 || workers > sched::kMaxWorkers) return 2;
++    } else return 2;
++  }
++  if (path.empty()) return xyz.empty() && k == 0 ? requests(static_cast<u32>(workers)) : 2;
++  if (xyz.empty() || k == 0 || k > kMaxMebSites) return 2;
++  const Outcome outcome = guarded([&]() {
++    return incidences(path, xyz, ids, static_cast<u32>(k), static_cast<u32>(workers));
++  });
++  if (!outcome.ok())
++    std::cout << "{\"phase\":\"attach_incidences\",\"status\":\"" << status_name(outcome.status())
++              << "\",\"reason\":\"" << reason_name(outcome.reason) << "\"}\n";
++  return exit_code(outcome);
++}
+--- /dev/null
++++ b/morsehgp3D_v11/tests/tower/attach_test.cpp
+@@ -0,0 +1,420 @@
++// Rattachement de W_K (tranche S3) : fixtures gravees 1, 4, 7 et 8 du paragraphe 2.9 de la specification et temoins
++// D2 et E5 du contrat (MATHEMATIQUES 10.3 et 10.11), attendus recalcules en Fraction par l'oracle borne S1
++// (reference/hgp11_ref/supports.py, definition : composantes de Gamma_K a toutes les K-parties) ; puis E1 = E2 sur des
++// nuages bornes : descente d'une K-partie et ancetre ferme (lemme E), seconde K-partie (T3, I7), branches recomptees
++// par descentes neuves des traces strictes, I1 a I4 recomptes hors du produit ; garde de capacite des traces publiees.
++#include "order_tree_support.hpp"
++#include "test.hpp"
++#include "tower/seed_log.hpp"
++using namespace order_tree_test;
++
++namespace {
++struct Expected {
++  std::vector<Xyz> support;  // sites de S*, ordre libre
++  i64 num, den;              // niveau exact
++  BallRole role;
++  u32 node, strict, components;
++  std::vector<u32> prior;    // role fusion seulement
++};
++using Graved = std::pair<std::vector<Xyz>, std::array<i64, 2>>;  // partie (ou S*), niveau exact num/den
++struct Fixture {
++  const char* name; std::vector<Xyz> points; Order k; std::vector<Expected> balls;
++  std::vector<std::vector<Xyz>> outside = {};  // supports sans boule du catalogue : boule minimale hors de Cat_K
++  std::vector<Graved> meb_levels = {};         // niveau de la boule minimale d'une partie (MEB bornee)
++  std::vector<Graved> open_cuts = {};          // niveau l(r_b - 1) de la coupe ouverte d'une boule de S* donne
++  std::vector<std::pair<u32, std::vector<u32>>> children = {};  // enfants graves de fusions
++};
++
++constexpr BallRole B = BallRole::birth, M = BallRole::merge, I = BallRole::internal;
++std::vector<Fixture> fixtures() {
++  const std::vector<Xyz> square{{0,0,0},{2,0,0},{2,2,0},{0,2,0}};
++  const std::vector<Xyz> passing{{0,0,0},{2,2,0},{4,0,0},{8,0,0}};
++  const std::vector<Xyz> tetra{{20,20,20},{20,0,0},{0,20,0},{0,0,20},{10,10,10},{11,10,10},{10,11,10}};
++  const Xyz a{2,10,0}, b{18,10,0}, c{10,20,0}, z{9,3,0}, w{11,3,0};             // temoin D2
++  const Xyz ea{0,0,7}, eb{0,9,6}, ec{1,4,0}, ed{0,0,1}, ee{4,1,2};               // temoin E5
++  return {
++    {"carre_k1", square, 1, {{{{0,0,0},{2,0,0}}, 1, 1, M, 4, 2, 2, {0, 2}}, {{{0,0,0},{0,2,0}}, 1, 1, M, 4, 2, 2, {0, 1}},
++                            {{{2,0,0},{2,2,0}}, 1, 1, M, 4, 2, 2, {2, 3}}, {{{0,2,0},{2,2,0}}, 1, 1, M, 4, 2, 2, {1, 3}},
++                            {{{0,0,0},{2,2,0}}, 2, 1, I, 4, 4, 1, {}}}},
++    {"carre_k2", square, 2, {{{{0,0,0},{2,0,0}}, 1, 1, B, 1, 0, 0, {}}, {{{0,0,0},{0,2,0}}, 1, 1, B, 0, 0, 0, {}},
++                            {{{2,0,0},{2,2,0}}, 1, 1, B, 3, 0, 0, {}}, {{{0,2,0},{2,2,0}}, 1, 1, B, 2, 0, 0, {}},
++                            {{{0,0,0},{2,2,0}}, 2, 1, M, 4, 4, 4, {0, 1, 2, 3}}}},
++    {"carre_k3", square, 3, {{{{0,0,0},{2,2,0}}, 2, 1, B, 0, 0, 0, {}}}},
++    {"carre_k4", square, 4, {{{{0,0,0},{2,2,0}}, 2, 1, B, 0, 0, 0, {}}}},
++    // Cellule passagere : {a,b,c} au niveau 4 (diametre ac, b sur le cercle) est de role fusion a une seule branche.
++    {"passagere_k1", passing, 1, {{{{0,0,0},{2,2,0}}, 2, 1, M, 4, 2, 2, {0, 1}},
++                                 {{{2,2,0},{4,0,0}}, 2, 1, M, 4, 2, 2, {1, 2}},
++                                 {{{0,0,0},{4,0,0}}, 4, 1, M, 5, 3, 1, {4}},
++                                 {{{4,0,0},{8,0,0}}, 4, 1, M, 5, 2, 2, {3, 4}}}},
++    // Evenement faible (p+q-1 = K) : trois naissances de paires au niveau 2, fusion a trois enfants au niveau 8/3.
++    {"equilateral_k2", {{0,0,0},{2,2,0},{2,0,2}}, 2,
++     {{{{0,0,0},{2,2,0}}, 2, 1, B, 1, 0, 0, {}}, {{{0,0,0},{2,0,2}}, 2, 1, B, 0, 0, 0, {}},
++      {{{2,2,0},{2,0,2}}, 2, 1, B, 2, 0, 0, {}}, {{{0,0,0},{2,2,0},{2,0,2}}, 8, 3, M, 3, 3, 3, {0, 1, 2}}}},
++    // Plateau K5 : six composantes au niveau 200, quatre boules de face au niveau 800/3 (trois branches chacune),
++    // une fusion a six enfants ; aucune donnee d'unions effectuees.
++    {"tetraedre_k5", tetra, 5,
++     {{{{20,0,0},{0,20,0}}, 200, 1, B, 2, 0, 0, {}}, {{{20,0,0},{0,0,20}}, 200, 1, B, 1, 0, 0, {}},
++      {{{20,0,0},{20,20,20}}, 200, 1, B, 5, 0, 0, {}}, {{{0,20,0},{0,0,20}}, 200, 1, B, 0, 0, 0, {}},
++      {{{0,20,0},{20,20,20}}, 200, 1, B, 4, 0, 0, {}}, {{{0,0,20},{20,20,20}}, 200, 1, B, 3, 0, 0, {}},
++      {{{20,0,0},{0,20,0},{0,0,20}}, 800, 3, M, 6, 3, 3, {0, 1, 2}},
++      {{{20,0,0},{0,20,0},{20,20,20}}, 800, 3, M, 6, 3, 3, {2, 4, 5}},
++      {{{20,0,0},{0,0,20},{20,20,20}}, 800, 3, M, 6, 3, 3, {1, 3, 5}},
++      {{{0,20,0},{0,0,20},{20,20,20}}, 800, 3, M, 6, 3, 3, {0, 3, 4}}}},
++    // Temoin D2 (auditeur, de4ab58a8) : la boule faible ABC (niveau 1681/25, p = 0, q = m = 3) fusionne trois
++    // branches ; sa trace stricte AB a une boule minimale de niveau 64 hors de Cat_2 (Z et W interieurs), nee apres le
++    // niveau 41 de rang r_b - 1 : aucune garde beta(F) <= l(r_b - 1) n'est admise (MATHEMATIQUES 10.2 et 10.5).
++    {"temoin_d2_k2", witness_d2(), 2,
++     {{{z, w}, 1, 1, B, 0, 0, 0, {}}, {{a, z}, 49, 2, B, 1, 0, 0, {}}, {{w, b}, 49, 2, B, 2, 0, 0, {}},
++      {{a, w}, 65, 2, M, 5, 2, 2, {0, 1}}, {{z, b}, 65, 2, M, 5, 2, 2, {0, 2}},
++      {{a, c}, 41, 1, B, 3, 0, 0, {}}, {{c, b}, 41, 1, B, 4, 0, 0, {}},
++      {{a, b, c}, 1681, 25, M, 6, 3, 3, {3, 4, 5}},
++      {{z, c}, 145, 2, I, 6, 2, 1, {}}, {{w, c}, 145, 2, I, 6, 2, 1, {}}},
++     {{a, b}}, {{{a, b}, {64, 1}}}, {{{a, b, c}, {41, 1}}}, {{5, {0, 1, 2}}, {6, {3, 4, 5}}}},
++    // Temoin E5 du lemme W, point 2 : la boule de AC (niveau 33/2, interieurs D et E) est hors fenetre ; ses liaisons
++    // rattachent AC a la composante de DE, si bien que la fusion de niveau 83886/3563 a trois enfants : {AB} (noeud 6),
++    // {AC, AD, AE, CD, CE, DE} (fusion 8) et {BC} (noeud 5). Le calcul lit le vrai Gamma_K, jamais W_K seul.
++    {"temoin_e5_k2", witness_e5(), 2,
++     {{{ed, ee}, 9, 2, B, 1, 0, 0, {}}, {{ed, ec}, 9, 2, B, 0, 0, 0, {}}, {{ee, ec}, 11, 2, B, 2, 0, 0, {}},
++      {{ed, ee, ec}, 162, 25, M, 7, 3, 3, {0, 1, 2}},
++      {{ed, ea}, 9, 1, B, 3, 0, 0, {}}, {{ee, ea}, 21, 2, B, 4, 0, 0, {}},
++      {{ed, ee, ea}, 189, 17, M, 8, 3, 3, {3, 4, 7}},
++      {{ec, eb}, 31, 2, B, 5, 0, 0, {}}, {{ea, eb}, 41, 2, B, 6, 0, 0, {}},
++      {{ec, ea, eb}, 83886, 3563, M, 9, 3, 3, {5, 6, 8}},
++      {{ee, eb}, 24, 1, I, 9, 2, 1, {}}, {{ed, eb}, 53, 2, I, 9, 2, 1, {}}},
++     {{ea, ec}}, {{{ea, ec}, {33, 2}}}, {}, {{7, {0, 1, 2}}, {8, {3, 4, 7}}, {9, {5, 6, 8}}}},
++  };
++}
++
++std::vector<u32> sites_of(const FullDomain& domain, const std::vector<Xyz>& points) {
++  std::vector<u32> out;
++  for (const auto& p : points) out.push_back(idx(site(domain.index().cloud(), p)));
++  std::sort(out.begin(), out.end());
++  return out;
++}
++std::vector<u32> support_of(const CatalogueBall& data) {
++  std::vector<u32> own;
++  for (u32 j = 0; j < data.qmin; ++j) own.push_back(idx(data.support[j]));
++  return own;
++}
++// Position dans W_K de la boule de support donne (ensemble de sites), ou kNone.
++u64 position_of(const OrderTree& tree, const std::vector<Xyz>& support) {
++  const auto& domain = tree.domain();
++  const auto wanted = sites_of(domain, support);
++  const auto window = tree.attachment().balls();
++  for (u64 at = 0; at < window.size(); ++at)
++    if (support_of(domain.catalogue().balls_data()[idx(window[at])]) == wanted) return at;
++  return kNone;
++}
++// Une boule du catalogue (Cat_K entier, pas seulement W_K) a-t-elle ce support canonique ?
++bool in_catalogue(const OrderTree& tree, const std::vector<Xyz>& support) {
++  const auto wanted = sites_of(tree.domain(), support);
++  for (const auto& data : tree.domain().catalogue().balls_data()) if (support_of(data) == wanted) return true;
++  return false;
++}
++bool level_equal(const num::Level& level, const std::array<i64, 2>& expected) {
++  return level_is(level, expected[0], expected[1]);
++}
++// Controles des temoins : boules hors de Cat_K, niveaux de boules minimales, coupes ouvertes, enfants graves.
++void witness_checks(const Fixture& fixture, const OrderTree& tree, u64& checked) {
++  const auto& domain = tree.domain();
++  const auto levels = domain.catalogue().levels();
++  for (const auto& support : fixture.outside) { CHECK(!in_catalogue(tree, support)); ++checked; }
++  for (const auto& [part, level] : fixture.meb_levels) {
++    std::vector<SiteIdx> ids;
++    for (u32 s : sites_of(domain, part)) ids.push_back(SiteIdx{s});
++    auto meb = bounded_meb(domain.index().cloud(), ids); REQUIRE(meb.ok());
++    CHECK(level_equal(meb.value().sphere().level(), level)); ++checked;
++  }
++  for (const auto& [support, level] : fixture.open_cuts) {
++    const u64 at = position_of(tree, support); REQUIRE(at != kNone);
++    const auto rank = domain.catalogue().balls_data()[idx(tree.attachment().balls()[at])].rank;
++    REQUIRE(idx(rank) >= 1);
++    CHECK(level_equal(levels[idx(rank) - 1], level)); ++checked;
++  }
++  for (const auto& [node, kids] : fixture.children) {
++    REQUIRE(node < tree.forest().nodes().size());
++    std::vector<u32> got;
++    for (NodeIdx child : tree.forest().children(NodeIdx{node})) got.push_back(idx(child));
++    CHECK(got == kids); ++checked;
++  }
++}
++}  // namespace
++
++MHGP11_TEST(fixtures, 823) {
++  auto pool = sched::make_pool({4}); REQUIRE(pool.ok());
++  FullParams batch; batch.regular_batch_capacity = 4096; batch.descent_lanes = 4; batch.population_lookup = true;
++  batch.dense_birth_lookup = true; batch.reuse_census_workspace = true;
++  u64 checked = 0, witnesses = 0;
++  for (const auto& fixture : fixtures()) {
++    for (bool lots : {false, true}) {
++      MemoryBudget owner(MemoryBudget::kUnlimited), work(MemoryBudget::kUnlimited);
++      auto domain = domain_of(Input(fixture.points), owner, fixture.k); REQUIRE(domain.ok());
++      auto tree = build_order(std::move(domain.value()), fixture.k, work, lots ? batch : FullParams{},
++                              lots ? pool.value().get() : nullptr);
++      if (!tree.ok()) std::printf("refus %s raison=%s\n", fixture.name,
++                                  std::string(reason_name(tree.outcome().reason)).c_str());
++      REQUIRE(tree.ok());
++      const auto& a = tree.value().attachment();
++      const auto levels = tree.value().domain().catalogue().levels();
++      CHECK_EQ(a.size(), fixture.balls.size());
++      for (const auto& e : fixture.balls) {
++        const u64 at = position_of(tree.value(), e.support);
++        REQUIRE(at != kNone);
++        const auto& data = tree.value().domain().catalogue().balls_data()[idx(a.balls()[at])];
++        CHECK(level_is(levels[idx(data.rank)], e.num, e.den));
++        CHECK(a.role()[at] == e.role);
++        CHECK_EQ(idx(a.node()[at]), e.node);
++        CHECK_EQ(a.strict_traces()[at], e.strict);
++        CHECK_EQ(a.components()[at], e.components);
++        const auto begin = a.prior_offsets()[at], end = a.prior_offsets()[at + 1];
++        std::vector<u32> prior;
++        for (u64 j = begin; j < end; ++j) prior.push_back(idx(a.prior()[j]));
++        CHECK(prior == e.prior);
++        ++checked;
++      }
++      witness_checks(fixture, tree.value(), witnesses);
++    }
++  }
++  CHECK_EQ(checked, 2u * 52u); CHECK_EQ(witnesses, 2u * 10u);
++}
++
++// Garde de capacite des traces publiees en u32 (audit aef7182b3), jouee directement sur des valeurs synthetiques : le
++// cas reel, une coquille entiere de 150 sites a K8 (au moins C(69,8) = 8 361 453 672 traces strictes), est hors de
++// portee d'un test. Refus tower_capacity au-dela de UINT32_MAX, aucune valeur tronquee.
++MHGP11_TEST(capacity, 12) {
++  auto top = published_traces(u64{0xFFFFFFFFu}); REQUIRE(top.ok()); CHECK_EQ(top.value(), 0xFFFFFFFFu);
++  auto small = published_traces(3); REQUIRE(small.ok()); CHECK_EQ(small.value(), 3u);
++  auto over = published_traces(u64{1} << 32); CHECK(!over.ok()); CHECK_EQ(over.outcome().reason, Reason::tower_capacity);
++  auto huge = cell_binomial(69, 8); REQUIRE(huge.ok()); CHECK_EQ(huge.value(), u64{8361453672});
++  auto audit = published_traces(huge.value());
++  CHECK(!audit.ok()); CHECK_EQ(audit.outcome().reason, Reason::tower_capacity);
++  auto last = published_traces(~u64{0}); CHECK(!last.ok()); CHECK_EQ(last.outcome().reason, Reason::tower_capacity);
++}
++
++// Petit temoin a K eleve de l'auditeur (integration L1 ; receipts/audit_native_integration_20261005/qb/normal.json) :
++// les quatre coins d'un carre de cote 20 et huit sites interieurs, domaine prepare a l'ordre K (kmax = K, domaine
++// etroit de la facade), voies serielle et lots W4. La boule de centre (10, 10, 10) et de niveau 200 (p = 8, m = 4,
++// qmin = 2 ; quatre traces strictes a K10 selon le recu) est interne a K9, fusion des quatre naissances de niveau 101
++// a K10 (dont deux sur des coquilles etendues, m = 4 > qmin = 3), naissance a K11 et K12. Attendus de l'oracle borne
++// S1 (Supports.canonical, Fraction), jamais du produit ; chaque boule est reperee par sa coquille U_b, egale ici a
++// l'union de ses supports (m = taille de cette union pour chacune). La suite des petits nuages s'arrete a K5 : avec la
++// porte mhgp11_tower_attach_fraction (K1 a K12), c'est le seul cas borne de l'arbre et du rattachement a K >= 6.
++namespace {
++struct ShellBall {
++  std::vector<Xyz> shell;    // U_b, ordre libre
++  i64 num, den;              // niveau exact
++  u32 p, m, q;
++  BallRole role;
++  u32 node, strict, components;
++  std::vector<u32> prior;    // role fusion seulement
++};
++struct HighOrder {
++  Order k; u32 nodes, births;
++  std::pair<u32, std::vector<u32>> merge;  // fusion gravee et ses enfants (noeud kNone : aucune)
++  std::vector<ShellBall> balls;
++};
++std::vector<Xyz> witness_k10() {
++  return {{0,0,10},{0,20,10},{20,0,10},{20,20,10},{9,9,10},{9,10,10},{9,11,10},{10,9,10},{10,10,10},{10,11,10},
++          {11,9,10},{11,10,10}};
++}
++std::vector<HighOrder> high_orders() {
++  const Xyz o{0,0,10}, n{0,20,10}, e{20,0,10}, ne{20,20,10};                       // coins
++  const Xyz a{9,9,10}, b{9,11,10}, c{10,11,10}, d{11,9,10}, f{11,10,10};          // sites interieurs utiles
++  const std::vector<Xyz> corners{o, n, e, ne};
++  return {
++    {9, 7, 6, {6, {0, 1, 2, 3, 4, 5}},
++     {{{o, c, f}, 48841, 882, 6, 3, 3, B, 0, 0, 0, {}}, {{n, d}, 121, 2, 7, 2, 2, B, 1, 0, 0, {}},
++      {{b, e}, 121, 2, 7, 2, 2, B, 2, 0, 0, {}}, {{a, ne}, 121, 2, 7, 2, 2, B, 3, 0, 0, {}},
++      {{o, n, f}, 48841, 484, 6, 3, 3, B, 4, 0, 0, {}}, {{o, c, e}, 48841, 484, 6, 3, 3, B, 5, 0, 0, {}},
++      {{o, n, d}, 101, 1, 7, 3, 3, M, 6, 3, 3, {0, 1, 4}}, {{o, b, e}, 101, 1, 7, 3, 3, M, 6, 3, 3, {0, 2, 5}},
++      {{n, a, ne, d}, 101, 1, 6, 4, 3, M, 6, 2, 2, {1, 3}}, {{a, e, ne, b}, 101, 1, 6, 4, 3, M, 6, 2, 2, {2, 3}},
++      {corners, 200, 1, 8, 4, 2, I, 6, 4, 1, {}}}},
++    {10, 5, 4, {4, {0, 1, 2, 3}},
++     {{{o, n, d}, 101, 1, 7, 3, 3, B, 0, 0, 0, {}}, {{o, b, e}, 101, 1, 7, 3, 3, B, 1, 0, 0, {}},
++      {{n, a, ne, d}, 101, 1, 6, 4, 3, B, 2, 0, 0, {}}, {{a, e, ne, b}, 101, 1, 6, 4, 3, B, 3, 0, 0, {}},
++      {corners, 200, 1, 8, 4, 2, M, 4, 4, 4, {0, 1, 2, 3}}}},
++    {11, 1, 1, {kNone, {}}, {{corners, 200, 1, 8, 4, 2, B, 0, 0, 0, {}}}},
++    {12, 1, 1, {kNone, {}}, {{corners, 200, 1, 8, 4, 2, B, 0, 0, 0, {}}}},
++  };
++}
++}  // namespace
++
++MHGP11_TEST(square_k10, 446) {
++  auto pool = sched::make_pool({4}); REQUIRE(pool.ok());
++  FullParams batch; batch.regular_batch_capacity = 4096; batch.descent_lanes = 4; batch.population_lookup = true;
++  batch.dense_birth_lookup = true; batch.reuse_census_workspace = true;
++  u64 judged = 0;
++  for (const auto& order : high_orders()) {
++    for (bool lots : {false, true}) {
++      MemoryBudget owner(MemoryBudget::kUnlimited), work(MemoryBudget::kUnlimited);
++      auto domain = domain_of(Input(witness_k10()), owner, static_cast<int>(order.k)); REQUIRE(domain.ok());
++      auto tree = build_order(std::move(domain.value()), order.k, work, lots ? batch : FullParams{},
++                              lots ? pool.value().get() : nullptr);
++      REQUIRE(tree.ok());
++      const auto& forest = tree.value().forest();
++      const auto& a = tree.value().attachment();
++      const auto& cat = tree.value().domain().catalogue();
++      CHECK_EQ(forest.nodes().size(), std::size_t{order.nodes}); CHECK_EQ(forest.births(), order.births);
++      CHECK_EQ(a.size(), order.balls.size());
++      if (order.merge.first != kNone) {
++        REQUIRE(order.merge.first < forest.nodes().size());
++        std::vector<u32> kids;
++        for (NodeIdx child : forest.children(NodeIdx{order.merge.first})) kids.push_back(idx(child));
++        CHECK(kids == order.merge.second);
++      }
++      for (const auto& e : order.balls) {
++        const auto wanted = sites_of(tree.value().domain(), e.shell);
++        u64 at = kNone;
++        for (u64 j = 0; j < a.size(); ++j) {
++          std::vector<u32> shell;
++          for (SiteIdx s : cat.shell(a.balls()[j])) shell.push_back(idx(s));
++          std::sort(shell.begin(), shell.end());
++          if (shell == wanted) { CHECK(at == kNone); at = j; }
++        }
++        REQUIRE(at != kNone);
++        const auto& data = cat.balls_data()[idx(a.balls()[at])];
++        CHECK(level_is(cat.levels()[idx(data.rank)], e.num, e.den));
++        CHECK_EQ(u32{data.p}, e.p); CHECK_EQ(u32{data.m}, e.m); CHECK_EQ(u32{data.qmin}, e.q);
++        CHECK(a.role()[at] == e.role);
++        CHECK_EQ(idx(a.node()[at]), e.node);
++        CHECK_EQ(a.strict_traces()[at], e.strict);
++        CHECK_EQ(a.components()[at], e.components);
++        std::vector<u32> prior;
++        for (u64 j = a.prior_offsets()[at]; j < a.prior_offsets()[at + 1]; ++j) prior.push_back(idx(a.prior()[j]));
++        CHECK(prior == e.prior);
++        ++judged;
++      }
++    }
++  }
++  CHECK_EQ(judged, 2u * 18u);
++}
++
++// E1 = E2 sur toutes les boules des nuages bornes, voie serielle et lots W4, sur deux domaines : Cat_kmax du nuage
++// (large) et Cat_K pour K < kmax (etroit : configuration de la facade, domaine prepare a l'ordre demande). Le
++// contre-cas D2, une trace stricte nee apres l(r_b - 1), n'apparait que sur le domaine etroit : a kmax >= 3 la boule
++// de AB entre au catalogue, et l(r_b - 1) vaut 64 au lieu de 41 pour ABC (contre-lecture S3). I1 a I4 recomptes hors
++// du produit.
++namespace {
++struct E1E2Counts {
++  u64 judged = 0, births = 0, merges = 0, internals = 0, passing = 0, wide = 0, extended = 0, weak = 0, late = 0;
++};
++void print_counts(const char* domain, const E1E2Counts& c) {
++  std::printf("attach_e1e2 domaine=%s boules=%llu naissances=%llu fusions=%llu internes=%llu passageres=%llu "
++              "fusions_3plus=%llu etendues=%llu faibles=%llu tardives=%llu\n", domain,
++              (unsigned long long)c.judged, (unsigned long long)c.births, (unsigned long long)c.merges,
++              (unsigned long long)c.internals, (unsigned long long)c.passing, (unsigned long long)c.wide,
++              (unsigned long long)c.extended, (unsigned long long)c.weak, (unsigned long long)c.late);
++}
++}  // namespace
++
++MHGP11_TEST(e1e2, 1090000) {
++  auto pool = sched::make_pool({4}); REQUIRE(pool.ok());
++  FullParams batch; batch.regular_batch_capacity = 64; batch.descent_lanes = 4; batch.memo_capacity = 8;
++  batch.lane_memo_capacity = 8; batch.population_lookup = true;
++  std::array<E1E2Counts, 2> counted{};  // 0 : domaine large Cat_kmax ; 1 : domaine etroit Cat_K, K < kmax
++  for (const auto& cloud : clouds()) for (bool lots : {false, true}) for (Order k = 1; k <= cloud.kmax; ++k)
++    for (u32 pass = 0; pass < 2; ++pass) {
++    if (pass == 1 && k == cloud.kmax) continue;  // meme domaine que la passe large
++    auto& [judged, births, merges, internals, passing, wide, extended, weak, late] = counted[pass];
++    MemoryBudget owner(MemoryBudget::kUnlimited), work(MemoryBudget::kUnlimited), judge(MemoryBudget::kUnlimited);
++    auto domain = domain_of(Input(cloud.points), owner, pass == 0 ? cloud.kmax : k); REQUIRE(domain.ok());
++    auto tree = build_order(std::move(domain.value()), k, work, lots ? batch : FullParams{},
++                            lots ? pool.value().get() : nullptr);
++    REQUIRE(tree.ok());
++    const auto& d = tree.value().domain();
++    const auto& forest = tree.value().forest();
++    const auto& a = tree.value().attachment();
++    const auto nodes = forest.nodes();
++    const auto balls = d.catalogue().balls_data();
++    // I1 : W_K recalcule, BallIdx croissants, naissances de la foret (K >= 2).
++    u64 window = 0;
++    for (const auto& ball : balls) window += window_ball(ball, k) ? 1 : 0;
++    CHECK_EQ(a.size(), window);
++    u64 sum_s = 0, sum_c = 0, cells = 0, touched = 0, continuing = 0, own_births = 0;
++    std::set<u32> ranks;
++    std::vector<std::set<u32>> covered(nodes.size());
++    std::vector<std::pair<u32, u32>> touched_at, internal_at;  // (rang, noeud)
++    for (u64 at = 0; at < a.size(); ++at) {
++      const BallIdx ball = a.balls()[at];
++      const auto& data = balls[idx(ball)];
++      const NodeIdx att = a.node()[at];
++      CHECK(at == 0 || idx(a.balls()[at - 1]) < idx(ball));
++      CHECK(window_ball(data, k));
++      // Lemme E et T3 : deux K-parties de P_b donnent le meme noeud ferme.
++      auto first = judge_e2(d, forest, ball, true, judge); REQUIRE(first.ok());
++      auto last = judge_e2(d, forest, ball, false, judge); REQUIRE(last.ok());
++      CHECK(first.value() == att); CHECK(last.value() == att);
++      if (data.m != data.qmin) ++extended;
++      // Contrat D.4 : une naissance est forte (p+q <= K), une boule faible (p+q-1 = K) n'est jamais une naissance.
++      if (u64{data.p} + data.qmin == u64{k} + 1) { CHECK(a.role()[at] != BallRole::birth); ++weak; }
++      if (a.role()[at] == BallRole::birth) {
++        CHECK(u64{data.p} + data.qmin <= k);
++        CHECK(k >= 2 && idx(att) < forest.births() && nodes[idx(att)].birth_key == idx(ball));
++        CHECK(nodes[idx(att)].rank == data.rank);
++        CHECK_EQ(a.strict_traces()[at], 0u); CHECK_EQ(a.components()[at], 0u);
++        CHECK_EQ(a.prior_offsets()[at + 1], a.prior_offsets()[at]);
++        ++own_births; ++judged;
++        continue;
++      }
++      u64 traces = 0;
++      auto branches = judge_branches(d, forest, ball, traces, late, judge); REQUIRE(branches.ok());
++      CHECK_EQ(a.strict_traces()[at], traces); CHECK_EQ(a.components()[at], branches.value().size());
++      sum_s += traces; ++cells; ranks.insert(idx(data.rank));
++      auto universe = cell_binomial(data.m, k - data.p); REQUIRE(universe.ok());
++      sum_c += universe.value();
++      for (u32 u : branches.value()) touched_at.push_back({idx(data.rank), u});
++      if (a.role()[at] == BallRole::merge) {
++        // Lemmes B et C : fusion creee au rang de la boule, branches parmi ses enfants, publiees.
++        CHECK(idx(att) >= forest.births() && nodes[idx(att)].rank == data.rank);
++        std::vector<u32> prior;
++        for (u64 j = a.prior_offsets()[at]; j < a.prior_offsets()[at + 1]; ++j) prior.push_back(idx(a.prior()[j]));
++        CHECK(prior == branches.value());
++        for (u32 u : prior) { CHECK(nodes[u].parent == att); covered[idx(att)].insert(u); }
++        ++merges; passing += prior.size() == 1 ? 1 : 0; wide += prior.size() >= 3 ? 1 : 0;
++      } else {
++        CHECK(a.role()[at] == BallRole::internal);
++        CHECK(branches.value() == std::vector<u32>{idx(att)});
++        CHECK(idx(nodes[idx(att)].rank) < idx(data.rank));
++        CHECK(nodes[idx(att)].parent == NodeIdx{kNone} || idx(nodes[idx(nodes[idx(att)].parent)].rank) > idx(data.rank));
++        CHECK_EQ(a.prior_offsets()[at + 1], a.prior_offsets()[at]);
++        internal_at.push_back({idx(data.rank), idx(att)});
++        ++internals;
++      }
++      ++judged;
++    }
++    // I3 : chaque fusion recoit toutes ses branches par ses boules de role fusion.
++    for (u32 v = forest.births(); v < nodes.size(); ++v) {
++      const auto kids = forest.children(NodeIdx{v});
++      std::set<u32> expected;
++      for (NodeIdx c : kids) expected.insert(idx(c));
++      CHECK(covered[v] == expected);
++    }
++    // I4 : registres de la foret.
++    std::sort(touched_at.begin(), touched_at.end());
++    touched = static_cast<u64>(std::unique(touched_at.begin(), touched_at.end()) - touched_at.begin());
++    std::sort(internal_at.begin(), internal_at.end());
++    continuing = static_cast<u64>(std::unique(internal_at.begin(), internal_at.end()) - internal_at.begin());
++    const auto& ledger = forest.ledger();
++    CHECK_EQ(sum_s, ledger.trace_resolutions); CHECK_EQ(sum_c, ledger.cells.combinations);
++    CHECK_EQ(cells, ledger.replayed_cells); CHECK_EQ(ranks.size(), ledger.plateaus);
++    CHECK_EQ(touched, ledger.touched_components); CHECK_EQ(continuing, ledger.continuations);
++    CHECK_EQ(own_births, k == 1 ? 0u : forest.births());
++    births += own_births;
++  }
++  // Planchers graves (voies serielle et par lots comptees chacune) : passageres, fusions a trois branches ou plus,
++  // coquilles etendues, internes et boules faibles presentes en nombre. Traces nees apres l(r_b - 1), une par voie
++  // et par cellule : passe large, la grappe de 120 points a K = kmax = 5 (domaine qui est aussi Cat_K) ; passe
++  // etroite, le temoin D2 a K = 2 (trace AB, niveau 64 apres 41), le nuage de 70 points a K = 2 et celui de 60 points
++  // a K = 3 et 4. Aucune a kmax > K sur ces nuages.
++  print_counts("large", counted[0]); print_counts("etroit", counted[1]);
++  const auto& [judged, births, merges, internals, passing, wide, extended, weak, late] = counted[0];
++  CHECK_EQ(judged, 45896u); CHECK_EQ(births, 17216u); CHECK_EQ(merges, 15886u); CHECK_EQ(internals, 12794u);
++  CHECK_EQ(passing, 3196u); CHECK_EQ(wide, 4588u); CHECK_EQ(extended, 5884u); CHECK_EQ(weak, 26276u);
++  CHECK_EQ(late, 2u);
++  const E1E2Counts& narrow = counted[1];
++  CHECK_EQ(narrow.judged, 30088u); CHECK_EQ(narrow.births, 10494u); CHECK_EQ(narrow.merges, 10624u);
++  CHECK_EQ(narrow.internals, 8970u); CHECK_EQ(narrow.passing, 2306u); CHECK_EQ(narrow.wide, 2738u);
++  CHECK_EQ(narrow.extended, 4330u); CHECK_EQ(narrow.weak, 17866u); CHECK_EQ(narrow.late, 8u);
++}
++
++MHGP11_TEST_MAIN()
+--- /dev/null
++++ b/morsehgp3D_v11/tests/tower/order_tree_support.hpp
+@@ -0,0 +1,152 @@
++// Harnais de l'arbre d'ordre K et du rattachement (tranche S3) : nuages, identite des forets avec build_full,
++// juge E2 par descente (port de ball_nodes, bench/points_export.cpp, fenetre au lieu du predicat fort) et branches
++// recomptees par descentes neuves des traces strictes ; jamais inclus par le produit.
++#pragma once
++#include <random>
++#include <set>
++
++#include "forest_support.hpp"
++#include "sched/sched.hpp"
++#include "tower/order_tree.hpp"
++
++namespace order_tree_test {
++using namespace forest_test;
++
++// Fenetre de W_K ecrite ici, independamment du produit (seed_log.hpp) : evenements faibles compris.
++inline bool window_ball(const CatalogueBall& ball, u64 k) {
++  return u64{ball.p} + ball.qmin <= k + 1 && k <= u64{ball.p} + ball.m;
++}
++
++inline std::vector<Xyz> random_cloud(u32 count, u32 side, u32 seed, bool clustered) {
++  std::mt19937 rng(seed);
++  std::vector<Xyz> points;
++  std::set<std::array<u32, 3>> seen;
++  auto draw = [&rng](u32 bound) { return static_cast<u32>(rng() % bound); };
++  while (points.size() < count) {
++    const u32 centre = clustered ? side / 4 * draw(3) : 0, spread = clustered ? side / 8 : side;
++    const std::array<u32, 3> p{centre + draw(spread), centre + draw(spread), draw(spread)};
++    if (seen.insert(p).second) points.push_back({p[0], p[1], p[2]});
++  }
++  return points;
++}
++
++struct Cloud3 { std::vector<Xyz> points; Order kmax; };
++// Temoin D2 de l'auditeur (de4ab58a8 ; MATHEMATIQUES 10.11) : A, B, C, Z, W. A K = 2, la trace stricte AB de la boule
++// faible ABC (niveau 1681/25) nait au niveau 64, apres le niveau 41 de rang r_b - 1 (boule de AB hors de Cat_2).
++inline std::vector<Xyz> witness_d2() { return {{2,10,0},{18,10,0},{10,20,0},{9,3,0},{11,3,0}}; }
++// Temoin E5 du lemme W, point 2 (MATHEMATIQUES 10.3) : A, B, C, D, E. A K = 2, la boule de AC (niveau 33/2, p = 2)
++// est hors fenetre, mais ses liaisons ACD et ACE rattachent AC a la composante de DE : la fusion de niveau
++// 83886/3563 a trois enfants, {AB}, {AC, AD, AE, CD, CE, DE} et {BC}.
++inline std::vector<Xyz> witness_e5() { return {{0,0,7},{0,9,6},{1,4,0},{0,0,1},{4,1,2}}; }
++// Nuages bornes : fixtures du paragraphe 2.9 de la specification, temoins D2 et E5, coquilles etendues (petites
++// grilles) et grappes.
++inline std::vector<Cloud3> clouds() {
++  return {{{{0,0,0},{2,0,0},{2,2,0},{0,2,0}}, 4},
++          {{{0,0,0},{2,2,0},{4,0,0},{8,0,0}}, 4},
++          {{{0,0,0},{2,2,0},{2,0,2}}, 3},
++          {{{20,20,20},{20,0,0},{0,20,0},{0,0,20},{10,10,10},{11,10,10},{10,11,10}}, 5},
++          {witness_d2(), 4}, {witness_e5(), 4},
++          {{{0,0,0},{4,0,0},{6,0,0},{8,0,0},{12,0,0}}, 4},
++          {{{0,0,0},{2,0,0},{4,0,0},{6,0,0},{8,0,0},{10,0,0},{12,0,0},{14,0,0},{16,0,0}}, 5},
++          {{{0,0,0},{2,0,0},{0,2,0},{2,2,0},{10,0,0},{12,0,0},{11,2,0}}, 5},
++          {random_cloud(40, 6, 3, false), 5}, {random_cloud(70, 16, 5, false), 5},
++          {random_cloud(90, 64, 7, false), 5}, {random_cloud(120, 256, 11, true), 5},
++          {random_cloud(60, 8, 13, false), 5}};
++}
++
++// Foret d'ordre k identique noeud pour noeud (rangs, parents, enfants, cles de naissance), verticales exclues.
++inline bool same_tree(const OrderForest& a, const OrderForest& b) {
++  if (a.order() != b.order() || a.births() != b.births() || a.root() != b.root() ||
++      a.nodes().size() != b.nodes().size() || a.edges().size() != b.edges().size() ||
++      !std::equal(a.edges().begin(), a.edges().end(), b.edges().begin())) return false;
++  for (u32 i = 0; i < a.nodes().size(); ++i) {
++    const auto& x = a.nodes()[i]; const auto& y = b.nodes()[i];
++    if (x.rank != y.rank || x.parent != y.parent || x.child_count != y.child_count ||
++        x.child_begin != y.child_begin || x.birth_key != y.birth_key) return false;
++  }
++  return true;
++}
++// Champs logiques du registre de la foret : sans travail paye des descentes (memos, census) ni travail vertical.
++inline ForestLedger logical(ForestLedger value) {
++  value.descent = {};
++  value.ancestor_hops = value.vertical_descents = value.vertical_checks = value.vertical_reuses = 0;
++  value.ancestor_queries = value.ancestor_activations = value.ancestor_unions = value.ancestor_find_steps = 0;
++  return value;
++}
++inline bool same_attachment(const WindowAttachment& a, const WindowAttachment& b) {
++  auto eq = [](auto x, auto y) { return x.size() == y.size() && std::equal(x.begin(), x.end(), y.begin()); };
++  return eq(a.balls(), b.balls()) && eq(a.node(), b.node()) && eq(a.role(), b.role()) &&
++         eq(a.strict_traces(), b.strict_traces()) && eq(a.components(), b.components()) &&
++         eq(a.prior_offsets(), b.prior_offsets()) && eq(a.prior(), b.prior());
++}
++
++// Parametres exerces : voie serielle, lots Q=1 et Q=4096, memos, table de populations, census reutilises, lookup dense.
++inline std::vector<FullParams> variants() {
++  std::vector<FullParams> out(1);
++  for (u32 q : {1u, 4096u}) for (unsigned flags = 0; flags < 8; ++flags) {
++    FullParams p;
++    p.regular_batch_capacity = q; p.descent_lanes = 4;
++    p.memo_capacity = (flags & 1u) != 0 ? 8 : 0; p.lane_memo_capacity = p.memo_capacity;
++    p.population_lookup = (flags & 2u) != 0;
++    p.reuse_census_workspace = (flags & 4u) != 0;
++    p.dense_birth_lookup = q == 4096;
++    out.push_back(p);
++  }
++  return out;
++}
++
++inline std::vector<SiteIdx> population(const FullDomain& domain, BallIdx ball) {
++  std::vector<SiteIdx> part;
++  for (SiteIdx s : domain.catalogue().interior(ball)) part.push_back(s);
++  for (SiteIdx s : domain.catalogue().shell(ball)) part.push_back(s);
++  return part;
++}
++
++// Lemme E : noeud vivant a la coupe fermee lambda_b de la naissance rendue par la descente d'une K-partie de P_b.
++// first : les K premiers sites (interieurs puis coquille, comme ball_nodes) ; sinon les K derniers (T3, I7).
++inline Result<NodeIdx> judge_e2(const FullDomain& domain, const OrderForest& forest, BallIdx ball, bool first,
++                                MemoryBudget& budget) {
++  const auto pop = population(domain, ball);
++  const u32 k = forest.order();
++  if (pop.size() < k) return fail(Reason::tower_invariant);
++  std::vector<SiteIdx> part(first ? pop.begin() : pop.end() - k, first ? pop.begin() + k : pop.end());
++  std::sort(part.begin(), part.end(), [](SiteIdx a, SiteIdx b) { return idx(a) < idx(b); });
++  const auto& data = domain.catalogue().balls_data()[idx(ball)];
++  auto down = descend(domain, part, k, budget);
++  if (!down.ok()) return down.outcome();
++  if (num::compare(down.value().initial_level(), domain.catalogue().levels()[idx(data.rank)]) > 0)
++    return fail(Reason::tower_invariant);
++  const auto birth = forest.birth_node(down.value().seed());
++  if (!birth) return fail(Reason::tower_invariant);
++  u64 hops = 0;
++  return forest.ancestor_closed(*birth, data.rank, hops);
++}
++
++// Branches par une autre voie : traces strictes de build_cell, descentes neuves sans memo, noeud vivant a la coupe
++// fermee r_b - 1 par la marche des parents (ancestor_closed), dedupliques. late compte les traces nees APRES le niveau
++// l(r_b - 1) de la coupe ouverte (contre-cas D2 : beta(F) > l(r_b - 1), boule minimale de F hors du catalogue).
++inline Result<std::vector<u32>> judge_branches(const FullDomain& domain, const OrderForest& forest, BallIdx ball,
++                                               u64& traces, u64& late, MemoryBudget& budget) {
++  std::vector<u32> out;
++  const auto& data = domain.catalogue().balls_data()[idx(ball)];
++  if (idx(data.rank) == 0) return fail(Reason::tower_invariant);
++  const num::Level& open_level = domain.catalogue().levels()[idx(data.rank) - 1];
++  auto cell = build_cell(domain, ball, forest.order(), budget);
++  if (!cell.ok()) return cell.outcome();
++  traces = cell.value().traces().size();
++  for (const auto& trace : cell.value().traces()) {
++    auto down = descend(domain, trace.part(), forest.order(), budget);
++    if (!down.ok()) return down.outcome();
++    if (num::compare(down.value().initial_level(), open_level) > 0) ++late;
++    const auto birth = forest.birth_node(down.value().seed());
++    if (!birth) return fail(Reason::tower_invariant);
++    u64 hops = 0;
++    auto open = forest.ancestor_closed(*birth, LevelRank{idx(data.rank) - 1}, hops);
++    if (!open.ok()) return open.outcome();
++    out.push_back(idx(open.value()));
++  }
++  std::sort(out.begin(), out.end());
++  out.erase(std::unique(out.begin(), out.end()), out.end());
++  return out;
++}
++}  // namespace order_tree_test
+--- /dev/null
++++ b/morsehgp3D_v11/tests/tower/order_tree_test.cpp
+@@ -0,0 +1,195 @@
++// Arbre d'ordre K seul (build_order, tranche S3) : identite I10 avec build_full(...).order(K) sur le meme domaine
++// (noeuds, enfants, rangs, cles de naissance, champs logiques du registre), K = 1..5, W1/W2/W4, voie serielle et
++// lots ; rattachement identique quelles que soient la voie et le nombre de fils ; refus avant tout effet.
++#include "order_tree_support.hpp"
++#include "test.hpp"
++using namespace order_tree_test;
++
++namespace {
++Result<OrderTree> order_of(const Input& input, Order kmax, Order k, MemoryBudget& owner, MemoryBudget& work,
++                           const FullParams& params = {}, sched::Pool* pool = nullptr) {
++  auto domain = domain_of(input, owner, kmax);
++  if (!domain.ok()) return domain.outcome();
++  return build_order(std::move(domain.value()), k, work, params, pool);
++}
++}  // namespace
++
++MHGP11_TEST(identity, 6000) {
++  auto p1 = sched::make_pool({1}), p2 = sched::make_pool({2}), p4 = sched::make_pool({4});
++  REQUIRE(p1.ok() && p2.ok() && p4.ok());
++  u64 compared = 0, narrowed = 0, attachments = 0, balls = 0;
++  for (const auto& cloud : clouds()) {
++    MemoryBudget owner(MemoryBudget::kUnlimited), work(MemoryBudget::kUnlimited);
++    const Input input(cloud.points);
++    // Reference : build_full serielle sur le meme domaine (Cat_kmax), et sur Cat_k pour l'arbre propre a l'ordre.
++    auto full = tower_of(input, cloud.kmax, owner, work); REQUIRE(full.ok());
++    const u64 held = work.used();
++    for (Order k = 1; k <= cloud.kmax; ++k) {
++      std::optional<OrderTree> first;
++      auto own = tower_of(input, k, owner, work); REQUIRE(own.ok());
++      // Chaque variante de lots tourne sur W1, W2 ou W4 selon (variante + K) : les trois Pool voient toutes les
++      // variantes au fil des ordres.
++      const std::array<sched::Pool*, 3> pools{p1.value().get(), p2.value().get(), p4.value().get()};
++      const auto all = variants();
++      // Nuages de plus de 14 points : une variante sur trois (cout sous ASan) ; les fixtures les voient toutes.
++      const u64 step = cloud.points.size() > 14 ? 3 : 1;
++      for (u64 v = 0; v < all.size(); v += step) {
++        const auto& params = all[v];
++        sched::Pool* pool = v == 0 ? nullptr : pools[(v + k) % 3];
++        auto order = order_of(input, cloud.kmax, k, owner, work, params, pool);
++        REQUIRE(order.ok());
++        const OrderForest& forest = order.value().forest();
++        CHECK(same_tree(forest, full.value().order(k)));
++        CHECK(logical(forest.ledger()) == logical(full.value().order(k).ledger()));
++        CHECK(forest.lower().empty()); CHECK(structure(forest));
++        CHECK_EQ(order.value().order(), k);
++        ++compared;
++        if (v == 0 || v + step >= all.size()) {
++          // Meme arbre sur Cat_k (domaine propre a l'ordre, cles de naissance propres a Cat_k).
++          auto narrow = order_of(input, k, k, owner, work, params, pool); REQUIRE(narrow.ok());
++          CHECK(same_tree(narrow.value().forest(), own.value().order(k)));
++          CHECK(logical(narrow.value().forest().ledger()) == logical(own.value().order(k).ledger()));
++          ++narrowed;
++        }
++        if (!first) { balls += order.value().attachment().size(); first.emplace(std::move(order.value())); continue; }
++        // Rattachement identique quels que soient la voie, les memos, la table et le nombre de fils.
++        CHECK(same_attachment(order.value().attachment(), first->attachment()));
++        ++attachments;
++      }
++      CHECK(first.has_value());
++    }
++    CHECK_EQ(work.used(), held);
++  }
++  CHECK(compared > 500); CHECK(narrowed > 100); CHECK(balls > 10000);
++  std::printf("order_identity compared=%llu narrowed=%llu attachments=%llu balls=%llu\n",
++              (unsigned long long)compared, (unsigned long long)narrowed, (unsigned long long)attachments,
++              (unsigned long long)balls);
++}
++
++// Identite avec build_full aux memes parametres non concurrents (verticales en moins) : W4, lots et voie serielle.
++// Les parametres de cout demandes sont honores, faute de quoi les sorties seraient les memes a un autre cout et la
++// mesure appariee de L2 comparerait une autre configuration a FULL (contre-lecture S3) : table de populations
++// consultee (somme des population_hits > 0 sur les variantes qui la demandent, 0 sans table), memo interroge pour
++// chaque trace resolue sans table (memo.queries = trace_resolutions, comme forest_parallel_test ; 0 sans memo),
++// lookup dense construit si demande. Les registres de descente ne s'egalent pas a ceux de build_full : ses contextes
++// sont partages entre ordres.
++MHGP11_TEST(same_params, 2900) {
++  auto pool = sched::make_pool({4}); REQUIRE(pool.ok());
++  u64 compared = 0, population_hits = 0, memo_queries = 0;
++  for (const auto& cloud : clouds()) {
++    MemoryBudget owner(MemoryBudget::kUnlimited), work(MemoryBudget::kUnlimited);
++    const Input input(cloud.points);
++    const auto all = variants();
++    // Une variante sur deux (une sur quatre au-dela de 14 points) : serielle, puis lots alternes.
++    const u64 step = cloud.points.size() > 14 ? 4 : 2;
++    for (u64 v = 0; v < all.size(); v += step) {
++      const auto& params = all[v];
++      sched::Pool* p = params.regular_batch_capacity == 0 ? nullptr : pool.value().get();
++      auto domain = domain_of(input, owner, cloud.kmax); REQUIRE(domain.ok());
++      auto full = build_full(std::move(domain.value()), work, nullptr, params, p); REQUIRE(full.ok());
++      for (Order k = 1; k <= cloud.kmax; ++k) {
++        auto other = domain_of(input, owner, cloud.kmax); REQUIRE(other.ok());
++        auto order = build_order(std::move(other.value()), k, work, params, p); REQUIRE(order.ok());
++        CHECK(same_tree(order.value().forest(), full.value().order(k)));
++        CHECK(logical(order.value().forest().ledger()) == logical(full.value().order(k).ledger()));
++        const ForestLedger& paid = order.value().forest().ledger();
++        if (params.population_lookup) population_hits += paid.descent.population_hits;
++        else CHECK_EQ(paid.descent.population_hits, 0u);
++        if (params.memo_capacity == 0) CHECK_EQ(paid.descent.memo.queries, 0u);
++        else if (!params.population_lookup) CHECK_EQ(paid.descent.memo.queries, paid.trace_resolutions);
++        memo_queries += paid.descent.memo.queries;
++        CHECK(order.value().forest().dense_birth_lookup() == params.dense_birth_lookup);
++        ++compared;
++      }
++    }
++  }
++  CHECK(compared > 350); CHECK(population_hits > 0); CHECK(memo_queries > 0);
++  std::printf("order_same_params compared=%llu population_hits=%llu memo_queries=%llu\n",
++              (unsigned long long)compared, (unsigned long long)population_hits, (unsigned long long)memo_queries);
++}
++
++MHGP11_TEST(refusals, 100) {
++  MemoryBudget owner(MemoryBudget::kUnlimited), work(MemoryBudget::kUnlimited);
++  const Input input(clouds()[1].points);
++  auto pool = sched::make_pool({4}); REQUIRE(pool.ok());
++  auto domain = domain_of(input, owner, 3); REQUIRE(domain.ok());
++  const auto* xyz = domain.value().index().cloud().x().data();
++  OrderTimings timings{7, 11, 13, 17}; const auto saved = timings;
++  u64 attach = 99;
++  FullParams batch; batch.regular_batch_capacity = 8; batch.descent_lanes = 2;
++  auto refuse = [&](FullDomain& d, Order k, FullParams params, sched::Pool* p, Reason reason, MemoryBudget& b) {
++    const auto* sites = d.index().cloud().x().data();
++    const u64 before = b.used();
++    auto refused = build_order(std::move(d), k, b, params, p, &timings, &attach);
++    CHECK(!refused.ok()); CHECK_EQ(refused.outcome().reason, reason);
++    CHECK(d.index().cloud().x().data() == sites);  // domaine conserve, non deplace
++    CHECK(timings == saved); CHECK_EQ(attach, 99u); CHECK_EQ(b.used(), before);
++  };
++  refuse(domain.value(), 0, {}, nullptr, Reason::parameter_out_of_range, work);
++  refuse(domain.value(), 4, {}, nullptr, Reason::parameter_out_of_range, work);  // k > kmax
++  FullParams concurrent = batch; concurrent.concurrent_orders = true;
++  refuse(domain.value(), 2, concurrent, pool.value().get(), Reason::parameter_out_of_range, work);
++  FullParams verticals = batch; verticals.parallel_verticals = true;
++  refuse(domain.value(), 2, verticals, pool.value().get(), Reason::parameter_out_of_range, work);
++  FullParams reuse; reuse.reuse_regular_verticals = true;
++  refuse(domain.value(), 2, reuse, nullptr, Reason::parameter_out_of_range, work);
++  refuse(domain.value(), 2, batch, nullptr, Reason::parameter_out_of_range, work);  // lots sans Pool
++  FullParams lanes = batch; lanes.descent_lanes = 0;
++  refuse(domain.value(), 2, lanes, pool.value().get(), Reason::parameter_out_of_range, work);
++  {
++    // K > n : deux sites, Cat_3 ; k = 3 refuse, k = 2 accepte (une seule naissance, aucune cellule).
++    auto small = domain_of(Input({{0,0,0},{2,0,0}}), owner, 3); REQUIRE(small.ok());
++    refuse(small.value(), 3, {}, nullptr, Reason::parameter_out_of_range, work);
++    auto two = build_order(std::move(small.value()), 2, work); REQUIRE(two.ok());
++    CHECK_EQ(two.value().forest().births(), 1u); CHECK_EQ(two.value().attachment().size(), 1u);
++    CHECK(two.value().attachment().role()[0] == BallRole::birth);
++    CHECK_EQ(two.value().attachment().prior_offsets().size(), 2u);
++  }
++  CHECK_EQ(work.used(), 0u);
++  // Budget trop court : refus memory_budget, rien de retenu, diagnostics intacts ; domaine neuf a chaque essai. Voie
++  // serielle : pic exact deterministe, refus a pic - 1 et succes au pic ; lots : refus aux petits plafonds.
++  u64 exact = 0;
++  {
++    MemoryBudget probe(MemoryBudget::kUnlimited);
++    auto fresh = domain_of(input, owner, 3); REQUIRE(fresh.ok());
++    auto made = build_order(std::move(fresh.value()), 2, probe); REQUIRE(made.ok());
++    exact = probe.peak();
++  }
++  std::printf("order_refusals pic_exact=%llu\n", static_cast<unsigned long long>(exact));
++  REQUIRE(exact > 256);
++  u64 refusals = 0, successes = 0;
++  struct Trial { u64 limit; bool lots; };
++  for (const Trial trial : {Trial{64, true}, Trial{512, true}, Trial{64, false}, Trial{exact / 2, false},
++                            Trial{exact - 1, false}, Trial{exact, false}}) {
++    auto fresh = domain_of(input, owner, 3); REQUIRE(fresh.ok());
++    const auto* sites = fresh.value().index().cloud().x().data();
++    MemoryBudget tight(trial.limit);
++    timings = saved; attach = 99;
++    {
++      auto made = build_order(std::move(fresh.value()), 2, tight, trial.lots ? batch : FullParams{},
++                              trial.lots ? pool.value().get() : nullptr, &timings, &attach);
++      if (made.ok()) {
++        ++successes; CHECK_EQ(trial.limit, exact);
++      } else {
++        CHECK_EQ(made.outcome().reason, Reason::memory_budget); ++refusals;
++        CHECK(timings == saved); CHECK_EQ(attach, 99u);
++        CHECK(fresh.value().index().cloud().x().data() == sites);
++      }
++    }
++    CHECK_EQ(tight.used(), 0u);
++  }
++  CHECK_EQ(refusals, 5u); CHECK_EQ(successes, 1u);
++  timings = saved; attach = 99;
++  // Succes : diagnostics publies, domaine transfere, budget rendu a la destruction du resultat.
++  {
++    auto made = build_order(std::move(domain.value()), 2, work, batch, pool.value().get(), &timings, &attach);
++    REQUIRE(made.ok());
++    CHECK(attach != 99u); CHECK(!(timings == saved));
++    CHECK_EQ(timings.verticals_ns, 0u); CHECK(timings.regular_batches >= 1u);
++    CHECK(made.value().domain().index().cloud().x().data() == xyz);
++    CHECK(work.used() > 0u);
++  }
++  CHECK_EQ(work.used(), 0u);
++}
++
++MHGP11_TEST_MAIN()
+--- a/morsehgp3D_v11/tests/tower/tests.cmake
++++ b/morsehgp3D_v11/tests/tower/tests.cmake
+@@ -98,7 +98,7 @@
+                 GROUPS equivalence refusals concurrency LABELS fast)
+ mhgp11_add_unit(mhgp11_tower_memo_fault SOURCES memo_fault.cpp GROUPS starvation LABELS fast)
+ # Parapluie public tower/tower.hpp : noms publics de la tour FULL sans tower_detail (tranche S2, aucun octet change).
+-mhgp11_add_unit(mhgp11_tower_public_header SOURCES public_header_test.cpp GROUPS umbrella LABELS fast)
++mhgp11_add_unit(mhgp11_tower_public_header SOURCES public_header_test.cpp GROUPS umbrella order_tree LABELS fast)
+ mhgp11_python_gate(mhgp11_tower_forest_memo_fraction 0 forest_oracle.py
+                     $<TARGET_FILE:mhgp11_tower_forest_probe> --memo 64 LABELS oracle fast TIMEOUT 180)
+ mhgp11_python_gate(mhgp11_tower_full_memo_collector 0 full_memo_collector_test.py
+@@ -223,3 +223,122 @@
+ # verticales et compteurs que la voie par etages (W48 repete contre W1) ; abandon de l'ordre bas pendant l'attente.
+ mhgp11_add_unit(mhgp11_tower_pipeline SOURCES forest_pipeline_test.cpp GROUPS decisions equivalence abandon
+                 LABELS fast TIMEOUT 600)
++
++# Arbre d'ordre K seul et rattachement de W_K (tranche S3 de la sortie parametree, build_order) : identite I10 avec
++# l'ordre K de build_full, parametres de cout honores (table de populations, memo, lookup dense), fixtures 1, 4, 7 et
++# 8 du paragraphe 2.9 de la specification et temoins D2 et E5 du contrat (attendus de l'oracle borne S1, recalcules
++# en Fraction), garde de capacite des traces publiees (valeurs synthetiques), petit temoin a K eleve de l'auditeur
++# (square_k10, integration L1 : 12 sites, K9 a K12 sur le domaine etroit, attendus de l'oracle S1), E1 = E2 (descente
++# d'une K-partie puis ancetre ferme : port de ball_nodes comme juge de test) sur Cat_kmax et sur Cat_K (domaine etroit
++# de la facade, seul a porter le contre-cas D2), branches recomptees par descentes neuves, refus, pannes d'allocation
++# sans resultat partiel. Delai de 900 s pour les deux executables : order_identity a pris 536 s seule sous ASan + UBSan
++# (Debug, machine chargee, contre-lecture S3), et e1e2 juge desormais deux domaines.
++mhgp11_add_unit(mhgp11_tower_order SOURCES order_tree_test.cpp GROUPS identity same_params refusals
++                LABELS fast TIMEOUT 900)
++mhgp11_add_unit(mhgp11_tower_attach SOURCES attach_test.cpp GROUPS fixtures capacity square_k10 e1e2
++                LABELS fast TIMEOUT 900)
++mhgp11_add_unit(mhgp11_tower_order_fault SOURCES order_tree_fault.cpp LABELS fast TIMEOUT 300)
++add_executable(mhgp11_tower_attach_probe ${CMAKE_CURRENT_LIST_DIR}/attach_probe.cpp)
++target_link_libraries(mhgp11_tower_attach_probe PRIVATE mhgp11)
++target_include_directories(mhgp11_tower_attach_probe PRIVATE ${PROJECT_SOURCE_DIR}/bench)
++add_executable(mhgp11_tower_attach_judge ${CMAKE_CURRENT_LIST_DIR}/attach_judge.cpp)
++target_link_libraries(mhgp11_tower_attach_judge PRIVATE mhgp11)
++target_include_directories(mhgp11_tower_attach_judge PRIVATE ${PROJECT_SOURCE_DIR}/bench)
++# Incidences fortes tirees de WindowAttachment = bloc d'incidences de MHGP11PH (mhgp11_points_export, kmax = K,
++# ordres = K), a l'octet, avec le bloc de foret (I10 entre l'export 16379 et l'ordre K seul) : 60 cas bornes K = 1..5,
++# temoins D2 et E5 compris. Delai 900 s, comme mhgp11_tower_order : 284 s jouee seule sous ASan + UBSan (Debug,
++# machine chargee), au-dela de 300 s une fois (contre-lecture S3).
++mhgp11_python_gate(mhgp11_tower_attach_export 0 attach_export_gate.py --probe $<TARGET_FILE:mhgp11_tower_attach_probe>
++                   --export $<TARGET_FILE:mhgp11_points_export> --work ${CMAKE_BINARY_DIR}/attach_export
++                   --min-cases 60 --min-incidences 647622
++                   LINE "attach_export_verdict conforme cas=60 noeuds=270799 incidences=647622 octets=9687200"
++                   LABELS fast TIMEOUT 900)
++# Differentiel contre l'oracle borne S1 (reference/hgp11_ref/supports.py, Fraction, etage A ; apport des auditeurs du
++# 5 octobre 2026, integration L1) : la ligne JSON de la sonde (mode requetes, Cat_K prepare a l'ordre K, arbre d'ordre K
++# seul par build_order) egale la projection de Supports.canonical(k, ids) sur les champs de S3 (arbre et niveaux,
++# att(b), ant(b), roles, traces strictes), et S* est un support de l'oracle d'arite qmin. Nuages de la suite de
++# l'oracle a ses ordres (210 nuages, 951 ordres, dont D2 et E5 sur le domaine etroit) et petit temoin a K eleve de
++# l'auditeur a K1..K12 ; voie serielle W1 (points dans l'ordre de l'oracle) et voie par lots W3 (ordre inverse). Un
++# nuage hors du domaine du profil est exclu et compte (u18 : les deux cercles n = 1023 de la specification) ; couverture
++# gravee par profil, planchers aux valeurs de u18.
++if(MHGP11_COORD_BITS EQUAL 18)
++  set(mhgp11_attach_fraction_line "attach_fraction_couverture bits=18 nuages=209 exclus=2 ordres=957 boules=15246 noeuds=12552 naissances=6641 fusions=5848 internes=2757 passageres=277 faibles=7553 fusions_3plus=1911 ordres_6plus=7 fils=1,3")
++  set(mhgp11_attach_fraction_floors --min-clouds=209 --min-orders=957 --min-balls=15246 --min-nodes=12552)
++else()
++  set(mhgp11_attach_fraction_line "attach_fraction_couverture bits=${MHGP11_COORD_BITS} nuages=211 exclus=0 ordres=963 boules=15270 noeuds=12576 naissances=6651 fusions=5858 internes=2761 passageres=277 faibles=7564 fusions_3plus=1915 ordres_6plus=7 fils=1,3")
++  set(mhgp11_attach_fraction_floors --min-clouds=211 --min-orders=963 --min-balls=15270 --min-nodes=12576)
++endif()
++mhgp11_python_gate(mhgp11_tower_attach_fraction 0 attach_fraction.py $<TARGET_FILE:mhgp11_tower_attach_probe>
++                   --bits=${MHGP11_COORD_BITS} --workers=1,3 ${mhgp11_attach_fraction_floors} --min-births=6641
++                   --min-merges=5848 --min-internals=2757 --min-passing=277 --min-weak=7553 --min-wide=1911
++                   --min-high=7 LINE "${mhgp11_attach_fraction_line}" LABELS oracle fast TIMEOUT 600)
++# Juge a l'echelle (attach_judge.cpp), I1 a I4 recomptes a chaque execution, memes nuages que
++# mhgp11_catalogue_euler_scale* : I10 contre build_full en mode 16379, l'ordre K seul etant construit par la voie par
++# lots W3 (mhgp11_tower_order_identity_*) ou par la voie serielle sans Pool, avec la meme empreinte attache= de
++# WindowAttachment (mhgp11_tower_attach_scale*) ; E1 = E2 (mhgp11_tower_attach_e1e2_* : toutes les boules a 8 000
++# points, 2 000 tirees a graine fixe a 32 000).
++set(mhgp11_s3_counts_8000 "boules=395667 naissances=164842 fusions=108813 internes=122012 branches=273654 traces=737362 noeuds=273655")
++set(mhgp11_s3_counts_16000 "boules=819004 naissances=340057 fusions=225041 internes=253906 branches=565097 traces=1530768 noeuds=565098")
++set(mhgp11_s3_counts_32000 "boules=1690045 naissances=700184 fusions=463577 internes=526284 branches=1163760 traces=3165977 noeuds=1163756")
++set(mhgp11_s3_floor_8000 --min-balls=395667 --min-merges=108813 --min-internals=122012)
++set(mhgp11_s3_floor_16000 --min-balls=819004 --min-merges=225041 --min-internals=253906)
++set(mhgp11_s3_floor_32000 --min-balls=1690045 --min-merges=463577 --min-internals=526284)
++set(mhgp11_s3_tail_8000 "attache=845bdf1deb8c7bb3 entree=3be1324202d28360")
++set(mhgp11_s3_tail_16000 "attache=efb95876c7aa639b entree=3469c29b4c34b7e3")
++set(mhgp11_s3_tail_32000 "attache=9b07979d0029104e entree=aea3dec129cef911")
++foreach(n 8000 16000 32000)
++  mhgp11_expect_code(mhgp11_tower_order_identity_scale${n} 0 mhgp11_tower_attach_judge --uniform18=${n},20261002
++                     --k=5 --workers=3 --identity ${mhgp11_s3_floor_${n}}
++                     LINE "attach_judge_verdict conforme k=5 n=${n} ${mhgp11_s3_counts_${n}} e2=0 identite=1 ${mhgp11_s3_tail_${n}}"
++                     LABELS scale${n} TIMEOUT 1800)
++  mhgp11_expect_code(mhgp11_tower_attach_scale${n} 0 mhgp11_tower_attach_judge --uniform18=${n},20261002
++                     --k=5 --workers=3 --serial --identity ${mhgp11_s3_floor_${n}}
++                     LINE "attach_judge_verdict conforme k=5 n=${n} ${mhgp11_s3_counts_${n}} e2=0 identite=1 ${mhgp11_s3_tail_${n}}"
++                     LABELS scale${n} TIMEOUT 1800)
++endforeach()
++foreach(case "8000;all;395667" "32000;2000,7;2000")
++  list(GET case 0 n)
++  list(GET case 1 e2)
++  list(GET case 2 judged)
++  mhgp11_expect_code(mhgp11_tower_attach_e1e2_scale${n} 0 mhgp11_tower_attach_judge --uniform18=${n},20261002 --k=5
++                     --workers=3 --e2=${e2} ${mhgp11_s3_floor_${n}} --min-e2=${judged}
++                     LINE "attach_judge_verdict conforme k=5 n=${n} ${mhgp11_s3_counts_${n}} e2=${judged} identite=0 ${mhgp11_s3_tail_${n}}"
++                     LABELS scale${n} TIMEOUT 1800)
++endforeach()
++# Trames LiDAR entieres sans sol (MHGP11_DATA_DIR, jamais copiees dans le depot) a K5 : |W_5| = 789 886, 652 958 et
++# 832 386 boules ; identite I10 (voie par lots W3), E1 = E2 sur 20 000 boules tirees, export a l'octet.
++foreach(case "ng00;39885;789886;235401;213404;naissances=341081 fusions=235401 internes=213404 branches=576483 traces=1350288 noeuds=576371;attache=8d4ad62e754ba32d entree=975c390e5912fabe;576371;1705735;23186944"
++             "ng01;35551;652958;195173;174578;naissances=283207 fusions=195173 internes=174578 branches=478385 traces=1102505 noeuds=478265;attache=72a8bf3900de9b61 entree=6b918ef47e9ae56e;478265;1416180;19266136"
++             "ng02;45845;832386;248676;222384;naissances=361326 fusions=248676 internes=222384 branches=610022 traces=1393952 noeuds=609376;attache=04381e7f08032a30 entree=6e11fa8bc5ee6432;609376;1807322;24575400")
++  list(GET case 0 frame)
++  list(GET case 1 n)
++  list(GET case 2 balls)
++  list(GET case 3 merges)
++  list(GET case 4 internals)
++  list(GET case 5 counts)
++  list(GET case 6 tail)
++  list(GET case 7 nodes)
++  list(GET case 8 incidences)
++  list(GET case 9 bytes)
++  set(floors --min-balls=${balls} --min-merges=${merges} --min-internals=${internals})
++  mhgp11_expect_code(mhgp11_tower_order_identity_lidar_${frame}_k5 0 mhgp11_tower_attach_judge --data=lidar_${frame}
++                     --k=5 --workers=3 --identity ${floors}
++                     LINE "attach_judge_verdict conforme k=5 n=${n} boules=${balls} ${counts} e2=0 identite=1 ${tail}"
++                     LABELS lidar TIMEOUT 1800)
++  mhgp11_expect_code(mhgp11_tower_attach_e1e2_lidar_${frame}_k5 0 mhgp11_tower_attach_judge --data=lidar_${frame}
++                     --k=5 --workers=3 --e2=20000,7 ${floors} --min-e2=20000
++                     LINE "attach_judge_verdict conforme k=5 n=${n} boules=${balls} ${counts} e2=20000 identite=0 ${tail}"
++                     LABELS lidar TIMEOUT 1800)
++  mhgp11_python_gate(mhgp11_tower_attach_export_lidar_${frame}_k5 0 attach_export_gate.py
++                     --probe $<TARGET_FILE:mhgp11_tower_attach_probe> --export $<TARGET_FILE:mhgp11_points_export>
++                     --work ${CMAKE_BINARY_DIR}/attach_export_${frame} --data lidar_${frame} --k 5 --workers 3
++                     --min-incidences ${incidences}
++                     LINE "attach_export_verdict conforme cas=1 noeuds=${nodes} incidences=${incidences} octets=${bytes}"
++                     LABELS lidar TIMEOUT 1800)
++endforeach()
++# K10 sur ng00 (Cat_10, pic de 3,4 Gio en local a W4) : identite contre build_full K1..10 et E1 = E2 sur 2 000 boules.
++mhgp11_expect_code(mhgp11_tower_order_identity_lidar_ng00_k10 0 mhgp11_tower_attach_judge --data=lidar_ng00 --k=10
++                   --workers=8 --identity --e2=2000,7 --min-balls=2117675 --min-merges=659261 --min-internals=479064
++                   --min-e2=2000
++                   LINE "attach_judge_verdict conforme k=10 n=39885 boules=2117675 naissances=979350 fusions=659261 internes=479064 branches=1638612 traces=3831491 noeuds=1638573 e2=2000 identite=1 attache=719d801e659bebe9 entree=975c390e5912fabe"
++                   LABELS lidar long TIMEOUT 3600)

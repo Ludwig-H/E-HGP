@@ -1,0 +1,26 @@
+{
+  "frame": "exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed",
+  "scope": "Lecture seulement : nouveau raccord gate Fraction, protocole de sonde, temoin natif K10, et docs. Logique Fraction contre-lue separément par auditeur math.",
+  "native_delta": {
+    "checked_against": "integration_abc30ed06/s3_import_observed.json",
+    "same_src_tower_files": 37,
+    "changed": 0,
+    "note": "Aucune recapture des37 fichiers dans cette capsule et aucun transfert de qualification."
+  },
+  "wiring": {
+    "cmake": "tests/tower/tests.cmake : declare et lie attach_probe avant mhgp11_tower_attach_fraction ; code attendu0, bits compile, --workers=1,3, planchers par profil, ligne exacte et labels oracle/fast, delai600s. Groupe square_k10 declare dans mhgp11_tower_attach.",
+    "protocol": "attach_fraction.py envoie les memes cas a chaque W ; W1 ordre source, W3 positions/IDs inverses ensemble. attach_probe prepare Cat_K (kmax=K), appelle build_order(K), n<=14, budget4GiB par requete. Aucun appel natif execute par cet audit.",
+    "failure_path": "Code de sonde nonzero, signal/delai, stderr, nombre de lignes different, refus JSON, cles/champs incorrects, divergence ou S* invalide alimentent Gate.failures. gate.finish() refuse tout echec ; ligne de couverture seule ne transforme aucun refus en succes. Planchers et ligne exacte CMake exigent aussi le nombre de cas attendu."
+  },
+  "k10": {
+    "fraction": "WITNESS_K10 ajoute12 sites, K1..K12 ; sept ordres>=6 et plancher --min-high=7. W1 etW3 comparent chaque cas. Le temoin K10 ne reste pas une constante hors du pilote.",
+    "native": "square_k10 boucle les attentes K9,K10,K11,K12 aux voies serielle et par lotsW4 ; exige build_order succes, nombre de noeuds/naissances/boules, enfants de fusion, niveaux, p/m/qmin, role, attache, traces, composantes/prior et36 boules effectivement jugees. Test non execute ici."
+  },
+  "docs": "MATHEMATIQUES precise D2 sur Cat_K et le nouveau differentiel ; SORTIES garde qualification G4 en attente et distingue attach du cout tree, masque7035 contre FULL16379. Aucune nouvelle promesse temps ni resultat qualifie tiré de cette lecture.",
+  "verdict": "Aucun nouveau faux succes, refus masque ou defaut de capacite/budget significatif etabli. Delta substantiel = nouveau harnais/temoin, sans changement du moteur.",
+  "limitations": [
+    "Aucun build/test natif, sanitizer, mutant, GPU/GCP ou benchmark.",
+    "Couverture calculee par oracle et comparaisons natives sont differentes ; le verdict favorable ci-dessus porte sur le raccord et les refus par lecture.",
+    "Les empreintes sont ponctuelles ; un changement ulterieur demande de relire le delta."
+  ]
+}

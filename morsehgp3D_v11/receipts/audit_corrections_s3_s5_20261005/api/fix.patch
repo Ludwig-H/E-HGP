@@ -1,0 +1,312 @@
+diff --git a/morsehgp3D_v11/docs/SORTIES.md b/morsehgp3D_v11/docs/SORTIES.md
+index 70cb3ac3f..8325cb7b5 100644
+--- a/morsehgp3D_v11/docs/SORTIES.md
++++ b/morsehgp3D_v11/docs/SORTIES.md
+@@ -124,7 +124,9 @@ donc jamais, à lui seul, « rien n'est publié ».
+      `head_invariant`, `arithmetic_invariant`, `task_exception` (`sched`).
+ 8. Écriture et publication (§ 9) : `output_unwritable` ; `output_conflict` si $D$ ou `D.pending` est apparu depuis le
+    plan. L'API refuse aussi, avant toute création de fichier et toute écriture du rapport, le produit d'une autre
+-   `Session` (`parameter_out_of_range` ; le CLI n'a qu'une `Session`).
++   `Session`, puis une provenance incohérente avec le nuage du produit (tailles différentes de $12n$ et $4n$ octets,
++   budget déclaré nul ; § 8) : `parameter_out_of_range`. Le CLI n'a qu'une `Session` et remplit la provenance depuis
++   sa lecture.
+ 9. Après la publication : fermeture de la `Session` (`api::finish` : `budget_not_released`, code 3), puis écriture de
+    la ligne d'état sur la sortie standard (`output_unwritable`, code 2). Un refus de cette étape retire le dossier
+    publié (`api::withdraw`, `retract()`, § 9).
+@@ -448,6 +450,11 @@ Exemple pour `supports`, présenté ici sur plusieurs lignes pour la lecture :
+   - pour `plat`, s'y ajoutent `mcs`, `z` et `selection`.
+ - `inputs` : taille et SHA-256 des deux fichiers d'entrée, pris au fil de la lecture. `files` : taille et SHA-256 de
+   chaque fichier de données, pris au fil de l'écriture.
++- Cohérence exigée par la publication (audit `abc30ed06`) : pour un produit de $n$ points, `inputs` porte $12n$ et
++  $4n$ octets, et `budget_bytes` est `null` ou strictement positif. L'API refuse toute autre provenance
++  (`parameter_out_of_range`, étape 8 du § 3) ; le CLI la remplit depuis sa lecture. Les empreintes déclarées ne sont pas
++  vérifiables depuis la provenance seule. La porte `mhgp11_api_publish_reader` fait relire par le lecteur officiel un
++  dossier publié par l'API, et refuse sans sortie les provenances incohérentes.
+ - `counts` de `supports`, dans cet ordre :
+ 
+   | Clé | Sens |
+diff --git a/morsehgp3D_v11/src/api/api.hpp b/morsehgp3D_v11/src/api/api.hpp
+index f208b37fa..e97f911dd 100644
+--- a/morsehgp3D_v11/src/api/api.hpp
++++ b/morsehgp3D_v11/src/api/api.hpp
+@@ -160,7 +160,9 @@ inline constexpr std::size_t kMaxDecimal = 64;
+ [[nodiscard]] bool valid_origin_coordinate(std::string_view text) noexcept;
+ 
+ // Provenance d'un appel, recopiee dans le manifeste : empreintes et tailles des deux fichiers d'entree (jamais leurs
+-// chemins), budget declare et declarations de grille. Aucun temps ni nombre de fils.
++// chemins), budget declare et declarations de grille. Aucun temps ni nombre de fils. publish exige sa coherence avec
++// le nuage du produit de n points : points_bytes = 12n, ids_bytes = 4n, budget declare absent ou strictement positif
++// (le lecteur officiel refuse tout autre manifeste) ; les empreintes ne sont pas verifiables depuis la provenance.
+ struct Provenance {
+   io::Digest points_sha256{}, ids_sha256{};
+   u64 points_bytes = 0, ids_bytes = 0;
+@@ -192,8 +194,9 @@ struct Publication {
+ 
+ // Ecrit le produit dans `directory` (planifie par io::OutputDirectory::plan, sans fichier cree), puis le manifeste en
+ // dernier, et publie (commit) : conforme, published_complete et l'empreinte du manifeste publie. Refus (etape 8 de
+-// docs/SORTIES.md, paragraphe 3) : parameter_out_of_range (produit calcule par une autre Session, puis provenance hors
+-// de sa forme : avant toute creation de fichier et toute ecriture du rapport),
++// docs/SORTIES.md, paragraphe 3) : parameter_out_of_range (produit calcule par une autre Session, puis provenance
++// incoherente avec le nuage du produit ou hors de sa forme : avant toute creation de fichier et toute ecriture du
++// rapport),
+ // output_unwritable, output_conflict (io), memory_budget, tower_invariant (sphere de naissance absente) ; rien n'est
+ // publie (none), le destructeur de `directory` retire D.pending. Seul double echec : le commit refuse alors que D est
+ // publie (synchronisation du parent, puis son retour, en echec) ; withdraw le retire alors, ou le declare.
+diff --git a/morsehgp3D_v11/src/api/internal.hpp b/morsehgp3D_v11/src/api/internal.hpp
+index dab507e52..194d4e841 100644
+--- a/morsehgp3D_v11/src/api/internal.hpp
++++ b/morsehgp3D_v11/src/api/internal.hpp
+@@ -29,7 +29,8 @@ inline constexpr u64 kEngineMask = 16379;
+ // controlee par check_provenance.
+ [[nodiscard]] std::string full_manifest(const api::Product& product, const api::Provenance& provenance,
+                                         u64 file_bytes, const io::Digest& file_sha256);
+-// Provenance dans sa forme : parameter_out_of_range sinon (pas, origine entiere ou absente, decimaux controles).
+-[[nodiscard]] Outcome check_provenance(const api::Provenance& provenance) noexcept;
++// Provenance coherente avec le nuage du produit de `points` points (12 et 4 octets par point, budget declare non nul)
++// et dans sa forme (pas, origine entiere ou absente, decimaux controles) : parameter_out_of_range sinon.
++[[nodiscard]] Outcome check_provenance(const api::Provenance& provenance, u64 points) noexcept;
+ 
+ }  // namespace mhgp11::api_detail
+diff --git a/morsehgp3D_v11/src/api/manifest.cpp b/morsehgp3D_v11/src/api/manifest.cpp
+index fc074ded7..2faff1113 100644
+--- a/morsehgp3D_v11/src/api/manifest.cpp
++++ b/morsehgp3D_v11/src/api/manifest.cpp
+@@ -226,7 +226,7 @@ Publication publish(Session& session, const Product& product, io::OutputDirector
+   // Produit d'une autre Session (audit general a65903a7b, P1) : ses tampons sont comptes dans un autre budget ; refus
+   // avant toute creation de fichier et toute ecriture du rapport. Porte mhgp11_api_session_session_identity.
+   if (!product.computed_by(session)) return {fail(Reason::parameter_out_of_range), PublicationState::none, {}};
+-  const Outcome checked = api_detail::check_provenance(provenance);
++  const Outcome checked = api_detail::check_provenance(provenance, product.full().domain().index().cloud().weight());
+   if (!checked.ok()) return {checked, PublicationState::none, {}};
+   MemoryBudget& budget = session.budget();
+   RunReport local;
+@@ -279,7 +279,13 @@ std::string_view publication_state_name(PublicationState state) noexcept {
+ 
+ namespace api_detail {
+ 
+-Outcome check_provenance(const Provenance& provenance) noexcept {
++Outcome check_provenance(const Provenance& provenance, u64 points) noexcept {
++  // Tailles des deux entrees du nuage du produit (12 et 4 octets par point) et budget declare strictement positif :
++  // le lecteur officiel (bench/mhgp11_formats.py) refuse tout autre manifeste (audit abc30ed06). Porte
++  // mhgp11_api_publish_reader (aller-retour vers le lecteur) et groupe provenance de mhgp11_api_session.
++  if (provenance.points_bytes != 12 * points || provenance.ids_bytes != 4 * points)
++    return fail(Reason::parameter_out_of_range);
++  if (provenance.budget_bytes && *provenance.budget_bytes == 0) return fail(Reason::parameter_out_of_range);
+   if (!provenance.grid_step.empty() && !api::valid_grid_step(provenance.grid_step))
+     return fail(Reason::parameter_out_of_range);
+   const bool declared = !provenance.origin[0].empty();
+diff --git a/morsehgp3D_v11/tests/api/api_support.hpp b/morsehgp3D_v11/tests/api/api_support.hpp
+index 259ed3723..7c847db1e 100644
+--- a/morsehgp3D_v11/tests/api/api_support.hpp
++++ b/morsehgp3D_v11/tests/api/api_support.hpp
+@@ -36,6 +36,14 @@ struct Points {
+   u32 size() const { return static_cast<u32>(x.size()); }
+ };
+ 
++// Provenance coherente d'un nuage (12 et 4 octets par point), sans empreintes : le lecteur n'en controle que la forme.
++inline api::Provenance provenance_of(const Points& p) {
++  api::Provenance provenance;
++  provenance.points_bytes = u64{12} * p.size();
++  provenance.ids_bytes = u64{4} * p.size();
++  return provenance;
++}
++
+ inline Points points_of(std::initializer_list<std::array<u32, 3>> list, u32 first_id = 7) {
+   Points p;
+   u32 id = first_id;
+diff --git a/morsehgp3D_v11/tests/api/publish_test.cpp b/morsehgp3D_v11/tests/api/publish_test.cpp
+index 692574752..172fe2c10 100644
+--- a/morsehgp3D_v11/tests/api/publish_test.cpp
++++ b/morsehgp3D_v11/tests/api/publish_test.cpp
+@@ -146,7 +146,7 @@ MHGP11_TEST(after_publish, 54) {
+     {
+       auto product = api::compute(session, points.view(), api::FullRequest{3});
+       REQUIRE(product.ok());
+-      const api::Publication published = api::publish(session, product.value(), planned.value(), {});
++      const api::Publication published = api::publish(session, product.value(), planned.value(), provenance_of(points));
+       CHECK(published.ok());
+       CHECK(published.state == api::PublicationState::published_complete);
+       CHECK(published.manifest_sha256 == file_digest(d + "/manifeste.json"));
+@@ -167,7 +167,7 @@ MHGP11_TEST(after_publish, 54) {
+     auto product = api::compute(session, points.view(), api::FullRequest{3});
+     REQUIRE(product.ok());
+     REQUIRE(::mkdir(d.c_str(), 0700) == 0);
+-    const api::Publication refused = api::publish(session, product.value(), planned.value(), {});
++    const api::Publication refused = api::publish(session, product.value(), planned.value(), provenance_of(points));
+     CHECK_EQ(refused.outcome.reason, Reason::output_conflict);
+     CHECK(refused.state == api::PublicationState::none);
+     CHECK(refused.manifest_sha256 == io::Digest{});
+@@ -181,7 +181,7 @@ MHGP11_TEST(after_publish, 54) {
+     REQUIRE(planned.ok());
+     auto product = api::compute(session, points.view(), api::FullRequest{3});
+     REQUIRE(product.ok());
+-    REQUIRE(api::publish(session, product.value(), planned.value(), {}).ok());
++    REQUIRE(api::publish(session, product.value(), planned.value(), provenance_of(points)).ok());
+     CHECK(exists(d));
+     const api::Publication finished = api::finish(session, planned.value());
+     CHECK_EQ(finished.outcome.reason, Reason::budget_not_released);
+@@ -199,7 +199,7 @@ MHGP11_TEST(after_publish, 54) {
+     REQUIRE(planned.ok());
+     auto product = api::compute(session, points.view(), api::FullRequest{3});
+     REQUIRE(product.ok());
+-    const api::Publication published = api::publish(session, product.value(), planned.value(), {});
++    const api::Publication published = api::publish(session, product.value(), planned.value(), provenance_of(points));
+     REQUIRE(published.ok());
+     REQUIRE(::mkdir((d + ".pending").c_str(), 0700) == 0);
+     const api::Publication finished = api::finish(session, planned.value());
+@@ -247,7 +247,7 @@ MHGP11_TEST(session_identity, 24) {
+   api::RunReport report;
+   report.at(api::Stage::output) = {11, 22};
+   report.at(api::Stage::write) = {33, 44};
+-  const api::Publication refused = api::publish(b, *product, planned.value(), {}, &report);
++  const api::Publication refused = api::publish(b, *product, planned.value(), provenance_of(points), &report);
+   CHECK_EQ(refused.outcome.reason, Reason::parameter_out_of_range);
+   CHECK(refused.state == api::PublicationState::none);
+   CHECK(refused.manifest_sha256 == io::Digest{});
+@@ -259,7 +259,7 @@ MHGP11_TEST(session_identity, 24) {
+   api::Session moved(std::move(a));
+   CHECK(product->computed_by(moved));
+   CHECK(!product->computed_by(a));
+-  const api::Publication published = api::publish(moved, *product, planned.value(), {}, &report);
++  const api::Publication published = api::publish(moved, *product, planned.value(), provenance_of(points), &report);
+   CHECK(published.ok());
+   CHECK(published.state == api::PublicationState::published_complete);
+   CHECK(entries(d) == kPublished);
+diff --git a/morsehgp3D_v11/tests/api/session_fault.cpp b/morsehgp3D_v11/tests/api/session_fault.cpp
+index 92cf0fc8d..7451850fd 100644
+--- a/morsehgp3D_v11/tests/api/session_fault.cpp
++++ b/morsehgp3D_v11/tests/api/session_fault.cpp
+@@ -172,7 +172,7 @@ MHGP11_TEST(publication, 14) {
+     auto planned = io::OutputDirectory::plan(s.path("M").c_str(), {});
+     REQUIRE(planned.ok());
+     const unsigned long long before = allocations.load();
+-    const api::Publication published = api::publish(session, product.value(), planned.value(), {});
++    const api::Publication published = api::publish(session, product.value(), planned.value(), provenance_of(points));
+     count = allocations.load() - before;
+     REQUIRE(published.ok());
+   }
+@@ -184,7 +184,7 @@ MHGP11_TEST(publication, 14) {
+       auto planned = io::OutputDirectory::plan(d.c_str(), {});
+       REQUIRE(planned.ok());
+       allocation_left.store(static_cast<long long>(position));
+-      const api::Publication refused = api::publish(session, product.value(), planned.value(), {});
++      const api::Publication refused = api::publish(session, product.value(), planned.value(), provenance_of(points));
+       allocation_left.store(-1);
+       CHECK_EQ(refused.outcome.reason, Reason::memory_budget);
+       CHECK(refused.state == api::PublicationState::none && refused.manifest_sha256 == io::Digest{});
+@@ -195,7 +195,7 @@ MHGP11_TEST(publication, 14) {
+   {
+     auto planned = io::OutputDirectory::plan(s.path("Z").c_str(), {});
+     REQUIRE(planned.ok());
+-    CHECK(api::publish(session, product.value(), planned.value(), {}).ok());
++    CHECK(api::publish(session, product.value(), planned.value(), provenance_of(points)).ok());
+   }
+   CHECK(entries(s.path("Z")) == std::vector<std::string>({"full.mhgp11ful1", "manifeste.json"}));
+ }
+diff --git a/morsehgp3D_v11/tests/api/session_test.cpp b/morsehgp3D_v11/tests/api/session_test.cpp
+index 0b22b8802..86c0b82b1 100644
+--- a/morsehgp3D_v11/tests/api/session_test.cpp
++++ b/morsehgp3D_v11/tests/api/session_test.cpp
+@@ -180,7 +180,7 @@ MHGP11_TEST(released, 372) {
+       REQUIRE(planned.ok());
+       api::RunReport report;
+       const api::Publication published =
+-          api::publish(session, product.value(), planned.value(), api::Provenance{}, &report);
++          api::publish(session, product.value(), planned.value(), provenance_of(fixtures()[0]), &report);
+       REQUIRE(published.ok());
+       CHECK(planned.value().committed());
+       CHECK(published.state == api::PublicationState::published_complete);
+@@ -319,7 +319,7 @@ MHGP11_TEST(tree_digest, 314) {
+       const std::string d = s.path("T" + std::to_string(published++));
+       auto planned = io::OutputDirectory::plan(d.c_str(), {});
+       REQUIRE(planned.ok());
+-      REQUIRE(api::publish(session, a.value(), planned.value(), api::Provenance{}).ok());
++      REQUIRE(api::publish(session, a.value(), planned.value(), provenance_of(p)).ok());
+       CHECK_EQ(published_tree(read_text(d + "/manifeste.json")), hex_of(digest));
+     }
+     for (std::size_t i = 1; i < per_order.size(); ++i) CHECK(per_order[i] != per_order[i - 1]);
+@@ -328,7 +328,7 @@ MHGP11_TEST(tree_digest, 314) {
+   CHECK(session.close().ok());
+ }
+ 
+-MHGP11_TEST(provenance, 48) {
++MHGP11_TEST(provenance, 64) {
+   for (const char* good : {"0.001", "1", "12.5", "0.10", "3"}) CHECK(api::valid_grid_step(good));
+   for (const char* bad : {"0", "0.0", "", ".5", "5.", "-1", "+1", "1e-3", "1,5", "1.2.3", " 1", "1 "})
+     CHECK(!api::valid_grid_step(bad));
+@@ -345,13 +345,20 @@ MHGP11_TEST(provenance, 48) {
+   auto product = api::compute(session, fixtures()[1].view(), api::FullRequest{2});
+   REQUIRE(product.ok());
+   const std::string d = s.path("D");
+-  api::Provenance bad_step, partial, good;
++  // Provenances refusees avant tout fichier : decimaux hors de leur forme, puis incoherences avec le nuage du produit
++  // (3 points : 36 et 12 octets) ou un budget declare nul, que le lecteur officiel refuserait (audit abc30ed06).
++  const api::Provenance coherent = provenance_of(fixtures()[1]);
++  api::Provenance bad_step = coherent, partial = coherent, good = coherent, empty, ratio = coherent, count = coherent,
++                  zero_budget = coherent;
+   bad_step.grid_step = "1e-3";
+   partial.origin = {"1", "", ""};
+   good.grid_step = "0.001";
+   good.origin = {"-1.5", "2", "0"};
+   good.budget_bytes = 123456789;
+-  for (const api::Provenance* p : {&bad_step, &partial}) {
++  ratio.points_bytes = 33;                                   // 11 octets par point
++  count.points_bytes = 72, count.ids_bytes = 24;             // rapport 12/4, mais six points
++  zero_budget.budget_bytes = 0;
++  for (const api::Provenance* p : {&bad_step, &partial, &empty, &ratio, &count, &zero_budget}) {
+     auto planned = io::OutputDirectory::plan(d.c_str(), {});
+     REQUIRE(planned.ok());
+     const api::Publication refused = api::publish(session, product.value(), planned.value(), *p);
+diff --git a/morsehgp3D_v11/tests/api/tests.cmake b/morsehgp3D_v11/tests/api/tests.cmake
+index 3134a6550..923ed9ce2 100644
+--- a/morsehgp3D_v11/tests/api/tests.cmake
++++ b/morsehgp3D_v11/tests/api/tests.cmake
+@@ -12,6 +12,13 @@ target_link_libraries(mhgp11_api_session_misuse_probe PRIVATE mhgp11)
+ mhgp11_expect_abnormal_stop(mhgp11_api_session_destroyed_live mhgp11_api_session_misuse_probe vivant LABELS unit fast)
+ mhgp11_expect_code(mhgp11_api_session_destroyed_released 0 mhgp11_api_session_misuse_probe rendu
+                    LINE "session_misuse rendu" LABELS unit fast)
++# Aller-retour publication de l'API -> lecteur officiel (audit abc30ed06) : une provenance coherente est relue sans
++# refus par bench/mhgp11_formats.py ; tailles nulles, rapport faux, compte faux et budget nul sont refuses
++# parameter_out_of_range avant toute creation (ni D ni D.pending).
++add_executable(mhgp11_api_publish_probe ${CMAKE_CURRENT_LIST_DIR}/publish_probe.cpp)
++target_link_libraries(mhgp11_api_publish_probe PRIVATE mhgp11)
++mhgp11_python_gate(mhgp11_api_publish_reader 0 publish_reader.py --probe $<TARGET_FILE:mhgp11_api_publish_probe>
++                   --bits ${MHGP11_COORD_BITS} LINE "api_publish_reader_verdict conforme cas5" LABELS fast)
+ # Pannes injectees : operator new et pthread_create remplaces dans cet executable seulement.
+ mhgp11_add_unit(mhgp11_api_session_fault SOURCES session_fault.cpp GROUPS session starvation publication LABELS fast)
+ target_link_libraries(mhgp11_api_session_fault PRIVATE ${CMAKE_DL_LIBS})
+diff --git a/morsehgp3D_v11/tests/mutants/api.json b/morsehgp3D_v11/tests/mutants/api.json
+index f51d9baef..df8f56a2e 100644
+--- a/morsehgp3D_v11/tests/mutants/api.json
++++ b/morsehgp3D_v11/tests/mutants/api.json
+@@ -1,6 +1,6 @@
+ {
+   "module": "api",
+-  "plancher": 20,
++  "plancher": 22,
+   "mutants": [
+     {
+       "id": "session_sans_liberation",
+@@ -161,6 +161,22 @@
+       "remplace": "",
+       "porte": "mhgp11_api_session_destroyed_live",
+       "note": "destruction d'une Session dont le budget n'est pas revenu a zero, sans controle (ARCHITECTURE, paragraphe 7.1)"
++    },
++    {
++      "id": "provenance_tailles_ignorees",
++      "fichier": "src/api/manifest.cpp",
++      "cherche": "  if (provenance.points_bytes != 12 * points || provenance.ids_bytes != 4 * points)\n    return fail(Reason::parameter_out_of_range);\n",
++      "remplace": "",
++      "porte": "mhgp11_api_publish_reader",
++      "note": "provenance incoherente avec le nuage du produit publiee : manifeste refuse par le lecteur officiel (audit abc30ed06)"
++    },
++    {
++      "id": "provenance_budget_nul_admis",
++      "fichier": "src/api/manifest.cpp",
++      "cherche": "  if (provenance.budget_bytes && *provenance.budget_bytes == 0) return fail(Reason::parameter_out_of_range);\n",
++      "remplace": "",
++      "porte": "mhgp11_api_publish_reader",
++      "note": "budget declare nul publie : manifeste refuse par le lecteur officiel (audit abc30ed06)"
+     }
+   ]
+ }

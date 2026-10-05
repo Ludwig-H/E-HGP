@@ -7,25 +7,26 @@ preuves détaillées dans les reçus immuables.
 **Audit général au pin 238734f1d, suivi jusqu'à 19b2fb218.** Aucun nouveau défaut
 mathématique FULL établi ; contre-épreuve du nerf complet, des coupes et
 des verticales conforme sur 65 ordres. Le point important du raccord est
-la qualification de l'assemblage L1 entier. L'identité Session est
-désormais corrigée dans S5 intégrée localement ; une incohérence entre
-publication API et lecteur reste à fermer. Pour juger la voie K seule, mesurer le journal actif et
+la qualification de l'assemblage L1 entier. L'identité Session et la
+cohérence du manifeste sont corrigées dans les sources S5 locales.
+Pour juger la voie K seule, mesurer le journal actif et
 la sortie réellement livrée. [Verdict et priorités du développeur](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#audit-général-du-5-octobre--décisions-importantes),
 [preuve et périmètre](../receipts/audit_geant_20261005/README.md).
 
-**S5 : publication et lecture doivent être cohérentes.** L'API accepte
-actuellement des tailles d'entrée nulles ou incompatibles avec son produit,
-publie un manifeste `complete`, puis son lecteur le refuse. Corriger la
-validation avant écriture et ajouter la lecture de toute publication API
-annoncée réussie. Correction reprise par le développeur, encore absente
-du commit local S5 **d8735d095**. Aucun défaut du chemin CLI normal établi.
-[Constat et preuve](../receipts/audit_api_publication_20261005/README.md).
+**S5 : manifeste corrigé en source, porte ajoutée.** La provenance est
+contrôlée contre le nombre de points avant toute écriture ; les tailles
+incohérentes et le budget déclaré nul sont refusés. La nouvelle porte
+fait relire une publication API par le lecteur officiel et vérifie les
+quatre refus sans dossier créé. Constats de source clos ; exécution native
+de ces portes encore attendue.
+[Correction et portée](../receipts/audit_corrections_s3_s5_20261005/README.md).
 
 **Suivi des corrections.** Identité stable de Session, contrôle de fin de
 vie et hook IO typé sont corrigés dans S5 **d8735d095**, encore local.
 S6a est publiée sur `main` en **19b2fb218**, identique aux sources déjà
 relues en ee8a69f1a. S3 est importée localement, avec E1/E2 sur le
-catalogue étroit et D2 ; aucun nouveau delta de son cœur. L'assemblage
+catalogue étroit et D2 ; le différentiel contre l'oracle exact et le témoin
+K10 sont maintenant inscrits dans ses portes. L'assemblage
 S6b/S7 et la qualification G4 restent à faire. Pour la future L3, K=n est refusé par `points`/`plat`
 quand K≥2 ; FULL/supports le conservent.
 [Contrelecture précédente](../receipts/audit_l1_followup_20261005/README.md).

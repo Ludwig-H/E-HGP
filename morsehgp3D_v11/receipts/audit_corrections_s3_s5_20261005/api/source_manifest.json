@@ -1,0 +1,78 @@
+{
+  "changed_during_capture": [],
+  "cloud_calls": 0,
+  "files": [
+    {
+      "bytes": 51022,
+      "path": "morsehgp3D_v11/docs/SORTIES.md",
+      "sha256": "53dfa5d7e347a0e88ec8ef31a8b620e38d6c9445967474efe42f513aabcb3b53"
+    },
+    {
+      "bytes": 14255,
+      "path": "morsehgp3D_v11/src/api/api.hpp",
+      "sha256": "eafd4e937a98e4d90a6bbaea6b653faabe5af7cde2689bd94b140b1dcf12ad2d"
+    },
+    {
+      "bytes": 2374,
+      "path": "morsehgp3D_v11/src/api/internal.hpp",
+      "sha256": "65e3a3233d54eaa2f0745eca38681c98db925ebd122feaf0648322e8c3d787d7"
+    },
+    {
+      "bytes": 13783,
+      "path": "morsehgp3D_v11/src/api/manifest.cpp",
+      "sha256": "b1818276f687ee556c2072f8e876b91d2c12fbe957d5b3ec4793394fdee69456"
+    },
+    {
+      "bytes": 6635,
+      "path": "morsehgp3D_v11/tests/api/api_support.hpp",
+      "sha256": "2eabf22ac91d784414cee47189c9f327407e604cbfef3dc8911f5685c5315e8c"
+    },
+    {
+      "bytes": 14878,
+      "path": "morsehgp3D_v11/tests/api/publish_test.cpp",
+      "sha256": "c45ba018dda066ab668958aff44195318082625d911567bcbe6d7b7c5bdeaecb"
+    },
+    {
+      "bytes": 9162,
+      "path": "morsehgp3D_v11/tests/api/session_fault.cpp",
+      "sha256": "803707d3c05649880221c51cd871055ed3a4bf040bdf76737595981b26862dfa"
+    },
+    {
+      "bytes": 18826,
+      "path": "morsehgp3D_v11/tests/api/session_test.cpp",
+      "sha256": "d460f3340e4a6eaf567f997e8e4d0898a4f839f520d18625ff4c4227ff484764"
+    },
+    {
+      "bytes": 3081,
+      "path": "morsehgp3D_v11/tests/api/tests.cmake",
+      "sha256": "951693631b1e9afbff93847e12913fb070a03b63c67fef1acb75a737bf582e86"
+    },
+    {
+      "bytes": 8359,
+      "path": "morsehgp3D_v11/tests/mutants/api.json",
+      "sha256": "af05a1997da7daec08b36c88a7320471def2e43329faf7c54f7e989366d6ba2e"
+    },
+    {
+      "bytes": 2372,
+      "path": "morsehgp3D_v11/tests/api/publish_probe.cpp",
+      "sha256": "e2aa91ce2fb98cae84e902f89dc37e4d90ece8f46c311f04651380f8d7d6491c"
+    },
+    {
+      "bytes": 3212,
+      "path": "morsehgp3D_v11/tests/api/publish_reader.py",
+      "sha256": "fd0cc378c49f9b8e42ffbd71e0669c88f73604ad9074fc26b59f29fa1c2b6837"
+    }
+  ],
+  "head": "59743c21000bfa216a5301655a48e98b90aaa20a",
+  "native_runs": 0,
+  "reader": {
+    "git_blob": "b634572dd503158e26e0a4f52a9d7d78dd88a0e0",
+    "git_commit": "59743c21000bfa216a5301655a48e98b90aaa20a",
+    "path": "morsehgp3D_v11/bench/mhgp11_formats.py",
+    "sha256": "cb1e0616984792f314457f996613f6d617414c0705f61b679cd16af5159ba038",
+    "unchanged": true
+  },
+  "schema": "ehgp.v11.audit.s5_provenance_fix_capture.v1",
+  "source_kind": "uncommitted_delta",
+  "source_worktree": "/workspaces/E-HGP/build/v11-impl-l0"
+}
