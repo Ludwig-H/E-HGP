@@ -4,6 +4,14 @@
 quantized_u21_input_only / not_claimed`. Notes maintenues en place ;
 preuves détaillées dans les reçus immuables.
 
+**S10 en cours : borner les racines avant leur conversion signée.**
+L'API `TreeView`/`LevelSource` accepte un arbre abstrait valide dont la
+racine fixe vaut `2^127−1`. Le calcul de la borne haute ajoute ensuite 1
+en `i128` et déborde. Rendre l'encadrement indisponible et passer au
+repli exact avant cette conversion, ou calculer les bornes en entier large.
+Le constat porte sur cette API abstraite ; aucun nuage u21/u24 n'est
+présenté comme témoin. [Preuve exacte et portée](../receipts/audit_s10_wip_20261005/math/README.md).
+
 **Réponse avant S10 :** refuser l'appel entier si une comparaison EOM
 épuise son budget ; réutiliser les preuves exactes existantes et compléter
 le port de z=2. Aucun troisième oracle complet n'est demandé.

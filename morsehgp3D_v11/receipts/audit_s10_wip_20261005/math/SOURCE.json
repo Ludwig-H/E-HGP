@@ -1,0 +1,12 @@
+{
+  "capture_twice_stable": true,
+  "capture_utc": "2026-10-05T19:23:28.377773+00:00",
+  "files": {
+    "morsehgp3D_v11/src/head/head.hpp": "494c8f4a165dde1b4e0c82db26f31d1d5877f8ef0aa0621c78789109b99ac601",
+    "morsehgp3D_v11/src/head/score.cpp": "67ccc880b9c14393e2989772ebebdec82962f3777415a3e126224af72617a81f",
+    "morsehgp3D_v11/src/head/select.cpp": "60b14166a925f2304ecacedbbcf1b7fb382be271d5083cce03e206e862f510c6"
+  },
+  "pin": "311ef5e3cdd37967471d0148794ad12f81349b0f",
+  "scope": "public abstract TreeView/LevelSource bound only; no native/cloud execution",
+  "source_state": "untracked WIP head files; not native qualified"
+}

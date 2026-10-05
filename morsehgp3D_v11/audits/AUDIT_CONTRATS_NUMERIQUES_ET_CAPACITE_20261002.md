@@ -10,6 +10,31 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
+## S10 en cours : sécuriser la conversion du filtre entier
+
+Brouillon de `build/v11-impl-l3` sur **311ef5e3c**, non publié.
+`LevelSource::root` admet toute racine fixe qui tient en `u128`.
+`bracket_plateaus` la convertit en `i128`, puis calcule `rt+1`, ou
+`rt+rm-rq` pour une date. La façade `flat_sites` n'ajoute aucune garde
+de largeur avant cet appel.
+
+Un arbre abstrait valide suffit : deux racines de deux sites, un plateau
+positif, `mcs=2`. Avec `R=2^127−1` et le niveau exact
+`l=(R/2^64)^2`, la racine retournée est exactement R et respecte le
+contrat public. Pourtant `e_hi=i128(R)+1` dépasse le maximum signé.
+Le constat est arithmétique, sans exécution native ; il ne démontre pas
+un débordement sur les niveaux issus d'un nuage u21/u24.
+
+**Correction ciblée :** garder les racines en `u128` jusqu'au contrôle
+de largeur, avec une marge pour toute la somme et les décalages ±1/2.
+Hors du domaine sûr du filtre, marquer le plateau sans encadrement et
+laisser la sélection employer le repli exact ; un calcul des bornes en
+entier large convient aussi. Un refus explicite avant conversion serait
+sûr, mais restreindrait le contrat admis. Rejouer le témoin à la porte de
+la tête, sous UBSan. Les formules réciproques et la condensation relues
+n'apportent pas d'autre défaut important établi à cette capture.
+[Sources figées, témoin et limites](../receipts/audit_s10_wip_20261005/math/README.md).
+
 ## S9 : correctif du refus de tri publié, qualification à poursuivre
 
 **Constat important sur le brouillon, base 53c027fe8.** Dans

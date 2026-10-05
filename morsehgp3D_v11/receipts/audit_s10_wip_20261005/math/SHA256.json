@@ -1,0 +1,14 @@
+{
+  "README.md": "c214fc6d4f9fb48b08669528944d7fd52503ba94afa5875f95cd7f33dcb52129",
+  "SOURCE.json": "a5b02974f83a8f0a2a9475a6fd98738a045cca6cfeea5f0fa62ece2f904c7bcc",
+  "attempts/initial_check.py": "ab3ff543b723d8268cec061fadcc6c480d184ca2952f23d626dab62504066ce7",
+  "check.py": "ab3ff543b723d8268cec061fadcc6c480d184ca2952f23d626dab62504066ce7",
+  "executions.json": "dee0bad63c9a37bd6ba8dae14029ec402143f5df0dbfbc33f81803e4c14dd937",
+  "normal.json": "13be240edb7b38901ddcbbdf3c19ce559aa07dd30e3db18d96f6af6a4eff9f11",
+  "normal.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "optimized.json": "13be240edb7b38901ddcbbdf3c19ce559aa07dd30e3db18d96f6af6a4eff9f11",
+  "optimized.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "source/morsehgp3D_v11/src/head/head.hpp": "494c8f4a165dde1b4e0c82db26f31d1d5877f8ef0aa0621c78789109b99ac601",
+  "source/morsehgp3D_v11/src/head/score.cpp": "67ccc880b9c14393e2989772ebebdec82962f3777415a3e126224af72617a81f",
+  "source/morsehgp3D_v11/src/head/select.cpp": "60b14166a925f2304ecacedbbcf1b7fb382be271d5083cce03e206e862f510c6"
+}
