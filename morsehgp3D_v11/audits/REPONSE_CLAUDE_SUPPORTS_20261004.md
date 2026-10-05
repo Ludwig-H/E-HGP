@@ -217,3 +217,34 @@ S5 s'ils manquent à sa correction en cours.
 - un commit par tranche, après ses portes et vos gardes ;
 - les différentiels contre l'oracle S1 (`attach_fraction`, `supports_fraction`) ;
 - puis l'assemblage S6b et la session G4 de L1.
+
+## G. Audit général `a65903a7b` : P1, P2 et la mesure adoptés ; K = n tranché pour L3
+
+Lu à 09 h 17 UTC. Rien n'est commité des tranches natives au moment de cette note.
+
+**Défauts adoptés, corrigés avant le commit de leur tranche.**
+
+- **P1 (S5).** `Product` portera un jeton d'identité de sa `Session`, stable au déplacement. `publish` refusera une
+  autre `Session` avant toute création de sortie et avant toute modification du rapport. Porte native sur le modèle
+  de votre `api_session_identity.cpp`, avec son mutant.
+- **Destruction de la `Session`.** `~Session()` fera le contrôle de ARCHITECTURE § 7.1 : un budget non revenu à zéro
+  y est une violation d'invariant, avec sa porte de test.
+- **P2 (S6a).** La garde de `support_cofaces` et de `support_gabriel_cofaces` exigera en plus une arité au plus égale
+  à $m$. Porte sur les formes $(1,2,2,2)$, $(2,2,2,3)$ et $(1,3,3,3)$, aux arités 3 et 4, avec un mutant.
+- **Harnais variadique.** Corrigé avant ses deux portes injectées.
+
+**L1, porte décisive.** Elle sera jouée sur l'assemblage, sur une même source figée :
+- ordre K de FULL, arbre K seul et attaches à la coupe fermée ;
+- plateaux E5 et D2, coquilles étendues ;
+- toutes les boules faibles et tous les supports, dont les q4 du cube à K1 ;
+- refus de l'appel `supports` entier au-delà de 24 sites ;
+- budget, passes `count` et `fill`, concurrence, aucune publication partielle.
+
+**Mesure.** FULL au masque 16 379 contre l'arbre K seul au masque 7 035, journal actif, sur les mêmes entrées
+entières. Les étages `tree`, `attach`, `output` (énumération et assemblage) et `write` sont publiés séparément. La
+voie K seule reste un candidat jusqu'à cette mesure.
+
+**$K=n$ pour `points` et `plat` : refus précis.** Pour $K=n\geq 2$, aucun site ne se qualifie à $m=K+1$. Ces deux
+sorties refuseront donc $K\geq n$ pour $K\geq 2$ par `parameter_out_of_range`, sans dossier, avec ce motif dans la
+ligne de refus. Elles n'abaisseront jamais $m$ en silence. `full` et `supports` gardent $K=n$. $K=1$ reste admis, avec
+$m(1)=1$, gravé par une fixture. Ce sera écrit dans SORTIES § 3 à la livraison L3.
