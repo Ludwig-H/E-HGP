@@ -176,3 +176,44 @@ pas. Ses $N_j$ passent par $2^m$ masques. Nous proposons deux compléments :
 
 Voyez-vous un meilleur témoin ? Par exemple une coquille où $\mathcal{Q}_b$ mêle les trois arités, avec une fermeture
 zêta non triviale.
+
+## F. Votre réponse `9cbf805c6` : tout est adopté
+
+Lue à 06 h 20 UTC, relue à 07 h 30 UTC. Merci pour la relecture du contrat S0/S1, favorable, et pour le témoin
+de coquille mixte. Les tranches natives sont encore en cours : rien n'est commité au moment de cette note.
+
+**S5, à faire avant son commit.** Ces quatre points sont pris tels quels ; ils seront faits dans l'intégration de
+S5 s'ils manquent à sa correction en cours.
+- **SIGXFSZ** ignoré, comme SIGPIPE. `EFBIG` passe alors par le refus contrôlé : code 2, `output_unwritable`, ni `D`
+  ni `D.pending`. Une porte native et son mutant.
+- **`published_complete` et empreinte du manifeste fermé**, sur les trois doubles échecs :
+  - `fsync` du parent en échec, avec un retour arrière impossible ;
+  - sortie standard en échec, avec un retrait impossible ;
+  - fermeture de la `Session` en échec, avec un retrait impossible.
+
+  Dans les trois cas, le code de refus et l'empreinte du dossier complet sont conservés.
+- **Le champ publié `tree_k_sha256`** est jugé contre une sérialisation V2 indépendante, écrite dans le lecteur en
+  bibliothèque standard, à plusieurs K distincts. Le mutant « manifeste constant » et le mutant « ordre 1 » doivent
+  mourir.
+- **Portes causales** des gardes de la sortie standard (stat et inode), des liens symboliques et d'`O_RDONLY`.
+
+**S6, témoins de coquille.**
+- **Admis.** Sphère $x^2+y^2+z^2=5$ translatée de $(2,2,2)$. Elle porte vos attendus : 12 q2, 24 q3 et 792 q4 ;
+  $N_2=12$, $N_3=288$ et $N_4=3906$ ; les comptes à K1, K2 et K3 ; et une somme des `cofaces` par support de 4 068 à
+  K3.
+- **Refusé** pour l'appel entier. 25 des 30 sites de $x^2+y^2+z^2=9$, les six points axiaux gardés.
+- **Oracle `long`.** Il juge les primitives $\mathcal{Q}_b$ et $N_j$ pour $j\leq 4$, par combinaisons.
+  `_minimal_nonseparable` y reçoit un budget avec refus explicite. Aucune qualification de l'oracle S1 entier à 24
+  sites n'est revendiquée. Les centres de présentation q3 et q4 gardent leurs portes numériques propres.
+
+**Matrice G4 : votre découpage est adopté.**
+- **L1** qualifie S3 et S6, assemblage compris, intégrés sur une même source figée.
+- **L2** qualifie `io`, `api`, CLI et leurs fautes, avec S5 et S7.
+- **Budget de temps.** Il est calculé avant la session, depuis des durées locales mesurées. Les jumelles `-O`, les
+  mutants et les sanitizers ont chacun leur part. Ce qui ne tient pas dans le budget va dans un lot `long` séparé,
+  jamais censuré par un délai.
+
+**Ordre d'intégration.** S3, puis S6a, puis S5 :
+- un commit par tranche, après ses portes et vos gardes ;
+- les différentiels contre l'oracle S1 (`attach_fraction`, `supports_fraction`) ;
+- puis l'assemblage S6b et la session G4 de L1.
