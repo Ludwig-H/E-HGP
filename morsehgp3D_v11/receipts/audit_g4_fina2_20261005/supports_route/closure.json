@@ -1,0 +1,82 @@
+{
+  "pin": "38b76701b9b0198fc1c37afe16e1480e638e513c",
+  "normal_optimized_identical": true,
+  "files": {
+    "README.md": {
+      "sha256": "1aa56e5f19ab0a88a1454124b40242dddac54dbb4dde1d9df5d0121f14741a2b",
+      "bytes": 3989
+    },
+    "log_facts.json": {
+      "sha256": "139b46b72f1eb1df34eeca8992758e44b9a4b2ccc606f17f5d67dd02bf2c859c",
+      "bytes": 5013
+    },
+    "logs/bits21/LastTest.log": {
+      "sha256": "7887d5db2c45f9858191032cbf371972c6b6d784c7a4440b1f2b439b3a6d8a80",
+      "bytes": 121
+    },
+    "logs/bits21/route_ctest_excerpt.log": {
+      "sha256": "78a9c593d7149a41ab7993acba8167c1438b79e8264a662779d6113d951120bd",
+      "bytes": 1292
+    },
+    "logs/bits24/LastTest.log": {
+      "sha256": "7887d5db2c45f9858191032cbf371972c6b6d784c7a4440b1f2b439b3a6d8a80",
+      "bytes": 121
+    },
+    "logs/bits24/route_ctest_excerpt.log": {
+      "sha256": "6a1e63414f7470b0a5c683ac6085904a1c2f8527e17e85ebe1b261da12a86969",
+      "bytes": 1292
+    },
+    "logs/gcc_release/LastTest.log": {
+      "sha256": "51ed368ac3ddea34b49dc2d10dfe3bdd05bf0c3cf849e8d0cd3f818cc0c04bdd",
+      "bytes": 121
+    },
+    "logs/gcc_release/route_ctest_excerpt.log": {
+      "sha256": "623daa58ce8de52ba3664ecb0e3a3dff32a76c607713f1693b57d2809604c1d1",
+      "bytes": 1356
+    },
+    "logs/poison/LastTest.log": {
+      "sha256": "7887d5db2c45f9858191032cbf371972c6b6d784c7a4440b1f2b439b3a6d8a80",
+      "bytes": 121
+    },
+    "logs/poison/route_ctest_excerpt.log": {
+      "sha256": "3ee26d02527975f19d390af67e3862e40d247c24e44c860ca48117b08d5a60b6",
+      "bytes": 1292
+    },
+    "replay.py": {
+      "sha256": "9a6ce43250795dfffaa4e74894d733026e8508630d428eeae0597ebd022df32a",
+      "bytes": 3388
+    },
+    "source_anchors.json": {
+      "sha256": "6f9b1378b955490330365d909a50e431c6857e597dfc4b7685fc7f74fbc276a1",
+      "bytes": 2295
+    },
+    "source_manifest.json": {
+      "sha256": "7863866ec8b08c7ae10ad798cf5eb7e76ecfa07c24c25803e547c9a93857e842",
+      "bytes": 1183
+    },
+    "sources/morsehgp3D_v11/cmake/run_expect.cmake": {
+      "sha256": "165d02c686bb71d32fbf9edb3fb3afa80c03ca3c8d6deb40b8444eeb6443646e",
+      "bytes": 7181
+    },
+    "sources/morsehgp3D_v11/src/api/manifest.cpp": {
+      "sha256": "1839c63b76c405a88f226f4cef1b88cce8428939d6da17ac7e36d5e0899a1263",
+      "bytes": 20042
+    },
+    "sources/morsehgp3D_v11/src/api/write_supports.cpp": {
+      "sha256": "958190caf962931018134077e560200d9ac256428eb37d3de78daefe452c6898",
+      "bytes": 10598
+    },
+    "sources/morsehgp3D_v11/tests/api/supports_route.cpp": {
+      "sha256": "2db41f412d4894ffb8688b86e6cc16b5e3a1a9e7329a6cce13a4330dc692fb42",
+      "bytes": 19388
+    },
+    "sources/morsehgp3D_v11/tests/api/tests.cmake": {
+      "sha256": "f962a6912f995bc9de78c79f9b8fd8445f6fca90a22a57ee6da19a90a1c3afdb",
+      "bytes": 7876
+    },
+    "static_proof.json": {
+      "sha256": "b739ccae579a18a278ccc83b45bd7b30edca8fe1c2421ee269b3da5f0e64491e",
+      "bytes": 2749
+    }
+  }
+}

@@ -7,8 +7,8 @@ place ; preuves détaillées dans les reçus immuables.
 **Fina2 : corriger l'attendu multiprofil de la porte L2b.** Sur
 **38b76701b**, les six portes `api_supports_route` d'échelle et LiDAR
 échouent en u18/u24 et passent en u21/poison. Leur déclaration CMake
-grave les mêmes hashes de manifeste issus d'u21 pour tous les profils,
-alors que le manifeste porte les bits : cet attendu doit dépendre du
+grave les mêmes hashes de fichier et de manifeste issus d'u21 pour tous
+les profils, alors que ces deux objets portent les bits : cet attendu doit dépendre du
 profil. La sortie précise des échecs manque dans l'archive ; aucun
 défaut produit n'en est déduit. Cette porte sert aussi de référence au
 mutant `voie_supports_order_tree`, dans la campagne u18.
@@ -22,6 +22,7 @@ commit, avec `data_complet` et arrêt ciblé certifié. Les quatre
 configurations ordinaires restent partielles à l'échéance ; leurs
 portes S10 (unitaires, CLI, échelle et LiDAR) passent toutes. Les
 échecs L2b ci-dessus doivent être traités avant qualification globale.
+[Reçu vérifié et périmètre](../receipts/audit_g4_fina2_20261005/README.md).
 
 Les plans suivants conservent les mutants, les onze lots sanitizer et
 les **huit différentiels complets S9/S10**. Les deux sessions
@@ -39,15 +40,17 @@ abstraite au calcul exact. Les deux sources correctives sont identiques
 renforcé détecte la suppression de la garde et vérifie aussi la racine
 exacte `R=2^127−1`, ses groupes et l'égalité EOM. La condensation,
 les réciproques z=1/2/3 et la propagation des refus sont relues sans
-nouveau défaut important établi. Qualification G4 à poursuivre.
+nouveau défaut important établi. Les portes ordinaires passent dans
+fina2 ; sanitizers et différentiel complet restent à qualifier.
 [Correction et portée](../receipts/audit_s10_root_guard_20261005/README.md),
 [preuve initiale](../receipts/audit_s10_wip_20261005/math/README.md).
 
 **S9 : refus du tri corrigé en 3d47eaa93.** Le tri par tas s'arrête au
 premier refus, sans changement de relation d'ordre. Les sources
 correspondent à la capture favorable ; le modèle vérifie arrêt, bornes
-et permutation. Qualification native du refus et différentiel complet
-sur les trois trames restent leurs propres portes.
+et permutation. La porte native du refus passe dans les quatre profils
+ordinaires de fina2 ; sanitizers et différentiel complet restent leurs
+propres portes.
 [Correction et preuve](../receipts/audit_s9_sort_fix_20261005/README.md).
 
 **L2b : raccord livré, qualification à terminer.** La mesure G4 appariée
@@ -55,8 +58,8 @@ avait imposé de raccorder le journal des graines à la voie concurrente
 FULL pour `supports`. L2b est publiée en **0810962ac**. Le correctif
 **311ef5e3c** supprime le hachage diagnostic de tout le journal quand il
 n'est pas demandé ; les trois fichiers correspondent à la capture
-relue. L'identité MHGP11SP et la qualification TSan du nouveau chemin
-restent à constater sur la source intégrée.
+relue. L'identité des voies à W1/W4 passe en u21/poison dans fina2.
+Les attendus u18/u24 ci-dessus et la qualification TSan restent ouverts.
 [Décision mesurée](../receipts/audit_l2_decision_20261005/README.md),
 [correction et limites](../receipts/audit_l2b_followup_20261005/README.md).
 

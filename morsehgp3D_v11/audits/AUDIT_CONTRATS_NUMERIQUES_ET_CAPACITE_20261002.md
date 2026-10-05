@@ -19,11 +19,18 @@ certifié le 5 octobre à 20:43:51 UTC. Les six portes
 configurations u18 et u24, mais passent en u21 et poison u21.
 
 **Défaut certain de l'attendu.** `tests/api/tests.cmake:66–87` grave les
-mêmes lignes `LINE`, dont les hashes de manifeste capturés en u21,
-pour les trois profils. La sonde hache le manifeste brut, lequel
-contient la précision du profil. La référence u21 ne peut donc servir
+mêmes lignes `LINE`, dont les hashes de fichier et de manifeste capturés
+en u21, pour les trois profils. La sonde hache les objets bruts ;
+MHGP11SP écrit les bits à l'offset 16, et le manifeste les inclut
+directement ainsi que dans ses signatures. La référence u21 ne peut donc servir
 de référence multiprofil. Corriger l'attendu par profil en conservant
 les comparaisons exactes entre voies, workers et publication publique.
+Une correction minimale conserve les références gravées u21 ; en
+u18/u24, elle grave les comptes et le journal tout en publiant les SHA
+réels séparément, sans leur imposer ceux d'un autre profil. Elle garde
+l'identité brute entre voies, workers et appel public dans les trois
+profils ; aucun changement du moteur ou du format n'est nécessaire.
+[Sources, preuve et proposition](../receipts/audit_g4_fina2_20261005/supports_route/README.md).
 
 Les journaux conservés donnent les verdicts Failed, mais pas leur
 sortie détaillée ; les `LastTest.log` ne contiennent que leur en-tête.
@@ -31,6 +38,14 @@ Cette anomalie de porte ne démontre donc pas à elle seule la cause
 exclusive des douze échecs. Aucun défaut de résultats du moteur n'est
 établi. La garde sur les pics mémoire ne doit être incriminée que si
 une sortie réelle l'établit.
+
+**Préserver les diagnostics de la reprise.** Le runner au même pin
+(`tools/g4_matrix.py:535–538,735–741`) ne demande pas
+`--output-on-failure` et préfère `LastTest.log` dès qu'il existe,
+même si un `.tmp` plus récent est présent lors de l'interruption.
+Conserver aussi le journal actif et activer les sorties sur échec
+permettra de diagnostiquer les prochains refus. L'archive ne conserve
+pas le `.tmp` : son contenu effectif n'est pas affirmé ici.
 
 **Reprise ciblée utile.** Capturer les stdout/stderr de ces six portes
 en u18/u24 après correction de l'attendu. La campagne mutants est en
@@ -45,8 +60,10 @@ u21 **890/901** (0 échec, 11 manquants), u24 **884/901** (6 échecs,
 11 manquants), poison **891/902** (0 échec, 11 manquants). Les portes
 S10 unitaires, CLI et échelle/LiDAR, le refus du tri S9 et `num_roots`
 passent dans les quatre profils. Les différentiels complets S9/S10
-restent dans leurs sessions dédiées. La capsule de lecture de cette
-capture est en consolidation ; aucune qualification globale déduite.
+restent dans leurs sessions dédiées. Source, paquet et 635 fichiers
+utiles sont vérifiés ; rejeu de lecture normal/`-O` conforme. Aucune
+qualification globale déduite.
+[Reçu, verdicts individuels et manquants](../receipts/audit_g4_fina2_20261005/README.md).
 
 ## S10 publiée : garde numérique corrigée en 510dae50e
 

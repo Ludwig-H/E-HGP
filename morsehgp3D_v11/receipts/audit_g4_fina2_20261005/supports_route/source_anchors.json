@@ -1,0 +1,76 @@
+{
+  "morsehgp3D_v11/cmake/run_expect.cmake": [
+    {
+      "line": 123,
+      "text": "string(FIND \"\\n${run_expect_normalized}\\n\" \"\\n${EXPECT_LINE}\\n\" run_expect_pos)"
+    }
+  ],
+  "morsehgp3D_v11/src/api/manifest.cpp": [
+    {
+      "line": 164,
+      "text": "out.u64le(static_cast<u64>(kCoordBits));"
+    },
+    {
+      "line": 202,
+      "text": "out.u64le(static_cast<u64>(kCoordBits));"
+    },
+    {
+      "line": 332,
+      "text": "number(out, static_cast<u64>(kCoordBits));"
+    },
+    {
+      "line": 362,
+      "text": "number(out, static_cast<u64>(kCoordBits));"
+    },
+    {
+      "line": 456,
+      "text": "number(out, static_cast<u64>(kCoordBits));"
+    }
+  ],
+  "morsehgp3D_v11/src/api/write_supports.cpp": [
+    {
+      "line": 140,
+      "text": "const std::array<u64, 16> words = {1,          static_cast<u64>(kCoordBits),"
+    }
+  ],
+  "morsehgp3D_v11/tests/api/supports_route.cpp": [
+    {
+      "line": 255,
+      "text": "out.file = read_file(directory + \"/\" + std::string(api::kSupportsFileName));"
+    },
+    {
+      "line": 256,
+      "text": "out.manifest = read_file(directory + \"/manifeste.json\");"
+    },
+    {
+      "line": 264,
+      "text": "return a.file == b.file && a.manifest == b.manifest && a.diagnostics.log == b.diagnostics.log && a.nodes == b.nodes &&"
+    },
+    {
+      "line": 363,
+      "text": "if (first && !same(*first, b)) {"
+    },
+    {
+      "line": 376,
+      "text": "if (!c.outcome.ok() || c.file != b.file || c.manifest != b.manifest || peak_a == peak_b || peak_c != peak_b) {"
+    },
+    {
+      "line": 397,
+      "text": "static_cast<unsigned long long>(p.diagnostics.log.seeds), sha_hex(p.file).substr(0, 16).c_str(),"
+    },
+    {
+      "line": 398,
+      "text": "sha_hex(p.manifest).substr(0, 16).c_str(), hex64(p.diagnostics.log.digest).c_str(),"
+    }
+  ],
+  "morsehgp3D_v11/tests/api/tests.cmake": [
+    {
+      "line": 66,
+      "text": "foreach(case \"scale8000;8000;uniform18=8000,20261002;noeuds=273655 boules=395667 supports=395667 etendues=0 multiples=0 cellules=230825 graines=737362 fichier=9b77614618bbdfc9 manifeste=d61003785c2ff158 journal=a6c3b688a7fe1b4a;395667;230825\""
+    },
+    {
+      "line": 86,
+      "text": "LINE \"supports_route_verdict conforme k=5 n=${n} ${counts} fils=1,4\""
+    }
+  ]
+}

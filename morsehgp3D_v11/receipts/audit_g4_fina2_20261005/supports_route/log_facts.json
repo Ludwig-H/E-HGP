@@ -1,0 +1,177 @@
+{
+  "archive": "/workspaces/.ehgp-sessions/v11.20261005.claudefina2/results/results.tar.gz",
+  "archive_sha256": "42425a0969d728688672785f34f3302b698cf2daea83ca6c62891d6ff9b28631",
+  "profiles": {
+    "gcc_release": {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=18"
+      ],
+      "route_failures": [
+        {
+          "detail": "Failed",
+          "excerpt": [],
+          "labels": [
+            "scale8000"
+          ],
+          "seconds": 11.78,
+          "state": "failed",
+          "test": "mhgp11_api_supports_route_scale8000"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [],
+          "labels": [
+            "scale16000"
+          ],
+          "seconds": 26.35,
+          "state": "failed",
+          "test": "mhgp11_api_supports_route_scale16000"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [],
+          "labels": [
+            "scale32000"
+          ],
+          "seconds": 57.77,
+          "state": "failed",
+          "test": "mhgp11_api_supports_route_scale32000"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [],
+          "labels": [
+            "lidar"
+          ],
+          "seconds": 32.52,
+          "state": "failed",
+          "test": "mhgp11_api_supports_route_lidar_ng00_k5"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [],
+          "labels": [
+            "lidar"
+          ],
+          "seconds": 25.09,
+          "state": "failed",
+          "test": "mhgp11_api_supports_route_lidar_ng01_k5"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [],
+          "labels": [
+            "lidar"
+          ],
+          "seconds": 30.12,
+          "state": "failed",
+          "test": "mhgp11_api_supports_route_lidar_ng02_k5"
+        }
+      ],
+      "LastTest_bytes": 121,
+      "LastTest_sha256": "51ed368ac3ddea34b49dc2d10dfe3bdd05bf0c3cf849e8d0cd3f818cc0c04bdd",
+      "ctest_sha256": "47ed3957161e44bef1e0125704c699232f15bce41cfef6d36dabff7e4c02409f",
+      "route_runtime_ECART_lines": 0,
+      "route_runtime_verdict_lines": 0
+    },
+    "bits21": {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "route_failures": [],
+      "LastTest_bytes": 121,
+      "LastTest_sha256": "7887d5db2c45f9858191032cbf371972c6b6d784c7a4440b1f2b439b3a6d8a80",
+      "ctest_sha256": "dfd7084ba409733eab49e633294fd23a69bdd489228ed693c118805ef3faec4d",
+      "route_runtime_ECART_lines": 0,
+      "route_runtime_verdict_lines": 0
+    },
+    "bits24": {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "route_failures": [
+        {
+          "detail": "Failed",
+          "excerpt": [],
+          "labels": [
+            "scale8000"
+          ],
+          "seconds": 12.12,
+          "state": "failed",
+          "test": "mhgp11_api_supports_route_scale8000"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [],
+          "labels": [
+            "scale16000"
+          ],
+          "seconds": 27.32,
+          "state": "failed",
+          "test": "mhgp11_api_supports_route_scale16000"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [],
+          "labels": [
+            "scale32000"
+          ],
+          "seconds": 59.61,
+          "state": "failed",
+          "test": "mhgp11_api_supports_route_scale32000"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [],
+          "labels": [
+            "lidar"
+          ],
+          "seconds": 33.43,
+          "state": "failed",
+          "test": "mhgp11_api_supports_route_lidar_ng00_k5"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [],
+          "labels": [
+            "lidar"
+          ],
+          "seconds": 25.98,
+          "state": "failed",
+          "test": "mhgp11_api_supports_route_lidar_ng01_k5"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [],
+          "labels": [
+            "lidar"
+          ],
+          "seconds": 31.29,
+          "state": "failed",
+          "test": "mhgp11_api_supports_route_lidar_ng02_k5"
+        }
+      ],
+      "LastTest_bytes": 121,
+      "LastTest_sha256": "7887d5db2c45f9858191032cbf371972c6b6d784c7a4440b1f2b439b3a6d8a80",
+      "ctest_sha256": "845ba2f94b113c75efea6de62c9d78173f8e4213f9bf85697345cd4f8f77aede",
+      "route_runtime_ECART_lines": 0,
+      "route_runtime_verdict_lines": 0
+    },
+    "poison": {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_POISON=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "route_failures": [],
+      "LastTest_bytes": 121,
+      "LastTest_sha256": "7887d5db2c45f9858191032cbf371972c6b6d784c7a4440b1f2b439b3a6d8a80",
+      "ctest_sha256": "7a867fcacf456924fc17628517fb3c3cf73544c465f25dc3d63821f9d61ec53f",
+      "route_runtime_ECART_lines": 0,
+      "route_runtime_verdict_lines": 0
+    }
+  }
+}

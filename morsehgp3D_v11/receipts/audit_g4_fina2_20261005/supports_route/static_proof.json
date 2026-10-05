@@ -1,0 +1,105 @@
+{
+  "checks": {
+    "SP_header_embeds_bits": true,
+    "geometry_and_tree_signature_embed_bits": true,
+    "identity_between_routes_retained": true,
+    "identity_between_workers_retained": true,
+    "judge_requires_exact_LINE": true,
+    "manifest_embeds_bits": true,
+    "probe_emits_raw_hash_prefixes": true,
+    "probe_reads_raw_file": true,
+    "probe_reads_raw_manifest": true,
+    "public_compute_identity_retained": true
+  },
+  "engine_defect_established": false,
+  "header_prefix_24bytes": {
+    "18": "4d4847503131535001000000000000001200000000000000",
+    "21": "4d4847503131535001000000000000001500000000000000",
+    "24": "4d4847503131535001000000000000001800000000000000"
+  },
+  "native_runtime_cause": "not_recorded_in_archived_test_output",
+  "pin": "38b76701b9b0198fc1c37afe16e1480e638e513c",
+  "profiles": {
+    "bits21": {
+      "LastTest_bytes": 121,
+      "failed_route_gates": 0,
+      "runtime_ECART_lines": 0,
+      "runtime_verdict_lines": 0
+    },
+    "bits24": {
+      "LastTest_bytes": 121,
+      "failed_route_gates": 6,
+      "runtime_ECART_lines": 0,
+      "runtime_verdict_lines": 0
+    },
+    "gcc_release": {
+      "LastTest_bytes": 121,
+      "failed_route_gates": 6,
+      "runtime_ECART_lines": 0,
+      "runtime_verdict_lines": 0
+    },
+    "poison": {
+      "LastTest_bytes": 121,
+      "failed_route_gates": 0,
+      "runtime_ECART_lines": 0,
+      "runtime_verdict_lines": 0
+    }
+  },
+  "static_hash_records": [
+    {
+      "hashes": {
+        "fichier": "9b77614618bbdfc9",
+        "manifeste": "d61003785c2ff158"
+      },
+      "label": "scale8000",
+      "n": 8000,
+      "request": "uniform18=8000,20261002"
+    },
+    {
+      "hashes": {
+        "fichier": "dd524ffd991873eb",
+        "manifeste": "baa658ac05a8eee8"
+      },
+      "label": "scale16000",
+      "n": 16000,
+      "request": "uniform18=16000,20261002"
+    },
+    {
+      "hashes": {
+        "fichier": "6543988436d3d582",
+        "manifeste": "751e5f52d5c1477e"
+      },
+      "label": "scale32000",
+      "n": 32000,
+      "request": "uniform18=32000,20261002"
+    },
+    {
+      "hashes": {
+        "fichier": "830db973140e720d",
+        "manifeste": "7c119d733528e2d0"
+      },
+      "label": "lidar",
+      "n": 39885,
+      "request": "data=lidar_ng00"
+    },
+    {
+      "hashes": {
+        "fichier": "ed899fede2bbe761",
+        "manifeste": "09d1d8c0070ab73a"
+      },
+      "label": "lidar",
+      "n": 35551,
+      "request": "data=lidar_ng01"
+    },
+    {
+      "hashes": {
+        "fichier": "28532835cc5915f8",
+        "manifeste": "6b6d1ee970c80839"
+      },
+      "label": "lidar",
+      "n": 45845,
+      "request": "data=lidar_ng02"
+    }
+  ],
+  "verdict": "static_gate_contract_invalid_outside_its_u21_hash_baseline"
+}

@@ -1,0 +1,493 @@
+{
+  "archive_sha256": "42425a0969d728688672785f34f3302b698cf2daea83ca6c62891d6ff9b28631",
+  "audit_native_or_cloud_runs": 0,
+  "backend": "cpu_reference",
+  "configurations": [
+    {
+      "conforming": false,
+      "ctest_log_sha256": "47ed3957161e44bef1e0125704c699232f15bce41cfef6d36dabff7e4c02409f",
+      "failed_tests": [
+        "mhgp11_api_supports_route_lidar_ng00_k5",
+        "mhgp11_api_supports_route_lidar_ng01_k5",
+        "mhgp11_api_supports_route_lidar_ng02_k5",
+        "mhgp11_api_supports_route_scale16000",
+        "mhgp11_api_supports_route_scale32000",
+        "mhgp11_api_supports_route_scale8000"
+      ],
+      "inventory_sha256": "cc30ac0434ed2b10c78a3bd4ca5c9e64e36c621e7753e45e494d29de78e33353",
+      "missing_tests": [
+        "mhgp11_cli_full_identity_lidar_ng01_k5_opt",
+        "mhgp11_cli_full_identity_lidar_ng02_k5_opt",
+        "mhgp11_cli_supports_lidar_ng00_k5_opt",
+        "mhgp11_cli_supports_lidar_ng01_k5_opt",
+        "mhgp11_cli_supports_lidar_ng02_k5_opt",
+        "mhgp11_cli_supports_scale16000_opt",
+        "mhgp11_cli_supports_scale32000_opt",
+        "mhgp11_cli_supports_scale8000_opt"
+      ],
+      "name": "gcc_release",
+      "priority_profile_specific_verdicts": {
+        "mhgp11_api_supports_route_lidar_ng00_k5": "***Failed",
+        "mhgp11_api_supports_route_lidar_ng01_k5": "***Failed",
+        "mhgp11_api_supports_route_lidar_ng02_k5": "***Failed",
+        "mhgp11_api_supports_route_scale16000": "***Failed",
+        "mhgp11_api_supports_route_scale32000": "***Failed",
+        "mhgp11_api_supports_route_scale8000": "***Failed"
+      },
+      "reason": "ctest : timeout",
+      "result_sha256": "e3b34b4883fc46f64dc5b4f391864cf0787c12c5fd195e89a04189cd6e1d9287",
+      "status": "timeout",
+      "steps": [
+        {
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.714,
+          "status": "ok",
+          "timeout_seconds": 2100.0
+        },
+        {
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 21.17,
+          "status": "ok",
+          "timeout_seconds": 2099.3
+        },
+        {
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.114,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "exit_code": -9,
+          "name": "test",
+          "seconds": 2078.406,
+          "status": "timeout",
+          "timed_out": true,
+          "timeout_seconds": 2078.0
+        }
+      ],
+      "tests": {
+        "ctest_failed": null,
+        "ctest_total": null,
+        "failed": 6,
+        "not_run": 8,
+        "passed": 977,
+        "selected": 991
+      }
+    },
+    {
+      "conforming": false,
+      "ctest_log_sha256": "dfd7084ba409733eab49e633294fd23a69bdd489228ed693c118805ef3faec4d",
+      "failed_tests": [],
+      "inventory_sha256": "6c36910a3e789c41f8ff5352b5735e978bcb41771576086bf2d7afb2d59df8b7",
+      "missing_tests": [
+        "mhgp11_cli_full_determinism_scale8000_opt",
+        "mhgp11_cli_full_identity_lidar_ng00_k5_opt",
+        "mhgp11_cli_full_identity_lidar_ng01_k5_opt",
+        "mhgp11_cli_full_identity_lidar_ng02_k5_opt",
+        "mhgp11_cli_full_identity_scale32000_opt",
+        "mhgp11_cli_supports_lidar_ng00_k5_opt",
+        "mhgp11_cli_supports_lidar_ng01_k5_opt",
+        "mhgp11_cli_supports_lidar_ng02_k5_opt",
+        "mhgp11_cli_supports_scale16000_opt",
+        "mhgp11_cli_supports_scale32000_opt",
+        "mhgp11_cli_supports_scale8000_opt"
+      ],
+      "name": "bits21",
+      "priority_profile_specific_verdicts": {
+        "mhgp11_api_supports_route_lidar_ng00_k5": "Passed",
+        "mhgp11_api_supports_route_lidar_ng01_k5": "Passed",
+        "mhgp11_api_supports_route_lidar_ng02_k5": "Passed",
+        "mhgp11_api_supports_route_scale16000": "Passed",
+        "mhgp11_api_supports_route_scale32000": "Passed",
+        "mhgp11_api_supports_route_scale8000": "Passed"
+      },
+      "reason": "ctest : timeout",
+      "result_sha256": "93bc19f209df6a6f65173e4025e2e89e319be0de06f5a7586fdd8cd9134281de",
+      "status": "timeout",
+      "steps": [
+        {
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.714,
+          "status": "ok",
+          "timeout_seconds": 2100.0
+        },
+        {
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 76.884,
+          "status": "ok",
+          "timeout_seconds": 2099.3
+        },
+        {
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "exit_code": -9,
+          "name": "test",
+          "seconds": 2022.402,
+          "status": "timeout",
+          "timed_out": true,
+          "timeout_seconds": 2022.3
+        }
+      ],
+      "tests": {
+        "ctest_failed": null,
+        "ctest_total": null,
+        "failed": 0,
+        "not_run": 11,
+        "passed": 890,
+        "selected": 901
+      }
+    },
+    {
+      "conforming": false,
+      "ctest_log_sha256": "845ba2f94b113c75efea6de62c9d78173f8e4213f9bf85697345cd4f8f77aede",
+      "failed_tests": [
+        "mhgp11_api_supports_route_lidar_ng00_k5",
+        "mhgp11_api_supports_route_lidar_ng01_k5",
+        "mhgp11_api_supports_route_lidar_ng02_k5",
+        "mhgp11_api_supports_route_scale16000",
+        "mhgp11_api_supports_route_scale32000",
+        "mhgp11_api_supports_route_scale8000"
+      ],
+      "inventory_sha256": "6c36910a3e789c41f8ff5352b5735e978bcb41771576086bf2d7afb2d59df8b7",
+      "missing_tests": [
+        "mhgp11_cli_full_determinism_scale8000_opt",
+        "mhgp11_cli_full_identity_lidar_ng00_k5_opt",
+        "mhgp11_cli_full_identity_lidar_ng01_k5_opt",
+        "mhgp11_cli_full_identity_lidar_ng02_k5_opt",
+        "mhgp11_cli_full_identity_scale32000_opt",
+        "mhgp11_cli_supports_lidar_ng00_k5_opt",
+        "mhgp11_cli_supports_lidar_ng01_k5_opt",
+        "mhgp11_cli_supports_lidar_ng02_k5_opt",
+        "mhgp11_cli_supports_scale16000_opt",
+        "mhgp11_cli_supports_scale32000_opt",
+        "mhgp11_cli_supports_scale8000_opt"
+      ],
+      "name": "bits24",
+      "priority_profile_specific_verdicts": {
+        "mhgp11_api_supports_route_lidar_ng00_k5": "***Failed",
+        "mhgp11_api_supports_route_lidar_ng01_k5": "***Failed",
+        "mhgp11_api_supports_route_lidar_ng02_k5": "***Failed",
+        "mhgp11_api_supports_route_scale16000": "***Failed",
+        "mhgp11_api_supports_route_scale32000": "***Failed",
+        "mhgp11_api_supports_route_scale8000": "***Failed"
+      },
+      "reason": "ctest : timeout",
+      "result_sha256": "74ff3f4a05de82fd98553c0e203ce31aee16169499954d4ee4ba0dc872637864",
+      "status": "timeout",
+      "steps": [
+        {
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.714,
+          "status": "ok",
+          "timeout_seconds": 2100.0
+        },
+        {
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 76.237,
+          "status": "ok",
+          "timeout_seconds": 2099.3
+        },
+        {
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "exit_code": -9,
+          "name": "test",
+          "seconds": 2023.39,
+          "status": "timeout",
+          "timed_out": true,
+          "timeout_seconds": 2023.0
+        }
+      ],
+      "tests": {
+        "ctest_failed": null,
+        "ctest_total": null,
+        "failed": 6,
+        "not_run": 11,
+        "passed": 884,
+        "selected": 901
+      }
+    },
+    {
+      "conforming": false,
+      "ctest_log_sha256": "7a867fcacf456924fc17628517fb3c3cf73544c465f25dc3d63821f9d61ec53f",
+      "failed_tests": [],
+      "inventory_sha256": "970a70880ab08627a682a17eb9e037630cda83259e84c7944e40ae4b7146d2f7",
+      "missing_tests": [
+        "mhgp11_cli_full_determinism_scale8000_opt",
+        "mhgp11_cli_full_identity_lidar_ng00_k5_opt",
+        "mhgp11_cli_full_identity_lidar_ng01_k5_opt",
+        "mhgp11_cli_full_identity_lidar_ng02_k5_opt",
+        "mhgp11_cli_full_identity_scale32000_opt",
+        "mhgp11_cli_supports_lidar_ng00_k5_opt",
+        "mhgp11_cli_supports_lidar_ng01_k5_opt",
+        "mhgp11_cli_supports_lidar_ng02_k5_opt",
+        "mhgp11_cli_supports_scale16000_opt",
+        "mhgp11_cli_supports_scale32000_opt",
+        "mhgp11_cli_supports_scale8000_opt"
+      ],
+      "name": "poison",
+      "priority_profile_specific_verdicts": {
+        "mhgp11_api_supports_route_lidar_ng00_k5": "Passed",
+        "mhgp11_api_supports_route_lidar_ng01_k5": "Passed",
+        "mhgp11_api_supports_route_lidar_ng02_k5": "Passed",
+        "mhgp11_api_supports_route_scale16000": "Passed",
+        "mhgp11_api_supports_route_scale32000": "Passed",
+        "mhgp11_api_supports_route_scale8000": "Passed"
+      },
+      "reason": "ctest : timeout",
+      "result_sha256": "1e9c3f36ab6747736fcae3bce7ee7aae40b5014e38c1609f36d4be8f383ac825",
+      "status": "timeout",
+      "steps": [
+        {
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.715,
+          "status": "ok",
+          "timeout_seconds": 2100.0
+        },
+        {
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 76.333,
+          "status": "ok",
+          "timeout_seconds": 2099.3
+        },
+        {
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "exit_code": -9,
+          "name": "test",
+          "seconds": 2022.912,
+          "status": "timeout",
+          "timed_out": true,
+          "timeout_seconds": 2022.9
+        }
+      ],
+      "tests": {
+        "ctest_failed": null,
+        "ctest_total": null,
+        "failed": 0,
+        "not_run": 11,
+        "passed": 891,
+        "selected": 902
+      }
+    }
+  ],
+  "data_manifest_sha256": "826643041e3336c1f0582e687a6c47595a3926e7a8f0541232282a9f7b9a6095",
+  "data_verified_remote": true,
+  "delivered_data_names": [
+    "lidar_ng00.ids.u32le",
+    "lidar_ng00.u32le",
+    "lidar_ng01.ids.u32le",
+    "lidar_ng01.u32le",
+    "lidar_ng02.ids.u32le",
+    "lidar_ng02.u32le",
+    "manifest.json",
+    "uniform_u18_n16000.ids.u32le",
+    "uniform_u18_n16000.u32le",
+    "uniform_u18_n32000.ids.u32le",
+    "uniform_u18_n32000.u32le",
+    "uniform_u18_n8000.ids.u32le",
+    "uniform_u18_n8000.u32le"
+  ],
+  "done": "3",
+  "failure_runtime_details_preserved": false,
+  "head_differential_tests_not_selected": [
+    "mhgp11_head_vs_python",
+    "mhgp11_head_vs_python_lidar_ng00_k5",
+    "mhgp11_head_vs_python_lidar_ng01_k5",
+    "mhgp11_head_vs_python_lidar_ng02_k5"
+  ],
+  "limits": [
+    "Quatre configurations coupees par le budget global ; qualification totale ouverte.",
+    "Six portes supports_route echouent en u18 et en u24 ; detail runtime non conserve.",
+    "Les verdicts natifs S10 ne remplacent pas les differentiels Python longs exclus.",
+    "Rejeu dependant des archives locales et du commit Git ; aucune archive native ou donnee copiee."
+  ],
+  "matrix": {
+    "budget_seconds": 2100,
+    "complete": true,
+    "conforming": false,
+    "ended_utc": "2026-10-05T20:42:03Z",
+    "exit_code": 1,
+    "requested": [
+      "gcc_release",
+      "bits21",
+      "bits24",
+      "poison"
+    ],
+    "started_utc": "2026-10-05T20:07:03Z",
+    "statuses": {
+      "bits21": "timeout",
+      "bits24": "timeout",
+      "gcc_release": "timeout",
+      "poison": "timeout"
+    },
+    "summary_sha256": "d6623760128f76eae3699daae227e888fadab8707f8e354721096e0becac794e",
+    "thread_budget": 48
+  },
+  "package_sha256": "cca3c3105a654426127fca54362c1c6954701224c4a0c3bd3db9ae05752a2354",
+  "phase": "exploration_v11_hors_registre",
+  "plan_sha256": "2ddaf88ef6d0d5c454b8484bf688fcf06746416a7733de1505245eed5096c782",
+  "priority_passed_in_all_four_profiles": [
+    "mhgp11_api_publish_reader",
+    "mhgp11_api_publish_reader_opt",
+    "mhgp11_api_selftest_fault_denormal",
+    "mhgp11_api_selftest_fault_ftz_daz",
+    "mhgp11_api_selftest_fault_inexact",
+    "mhgp11_api_selftest_fault_none",
+    "mhgp11_api_selftest_fault_underflow",
+    "mhgp11_api_selftest_fault_upward",
+    "mhgp11_api_selftest_inventaire",
+    "mhgp11_api_selftest_judge",
+    "mhgp11_api_selftest_modes",
+    "mhgp11_api_session_after_publish",
+    "mhgp11_api_session_destroyed_live",
+    "mhgp11_api_session_destroyed_released",
+    "mhgp11_api_session_engine",
+    "mhgp11_api_session_equivalence",
+    "mhgp11_api_session_fault_inventaire",
+    "mhgp11_api_session_fault_publication",
+    "mhgp11_api_session_fault_session",
+    "mhgp11_api_session_fault_starvation",
+    "mhgp11_api_session_inventaire",
+    "mhgp11_api_session_product_alive",
+    "mhgp11_api_session_provenance",
+    "mhgp11_api_session_refusals",
+    "mhgp11_api_session_released",
+    "mhgp11_api_session_session_identity",
+    "mhgp11_api_session_tree_digest",
+    "mhgp11_api_supports_route_oracle",
+    "mhgp11_api_supports_route_oracle_opt",
+    "mhgp11_cli_contract",
+    "mhgp11_cli_contract_opt",
+    "mhgp11_cli_plat",
+    "mhgp11_cli_plat_opt",
+    "mhgp11_head_unit_budget",
+    "mhgp11_head_unit_dates",
+    "mhgp11_head_unit_equalities",
+    "mhgp11_head_unit_fixtures",
+    "mhgp11_head_unit_huge",
+    "mhgp11_head_unit_inventaire",
+    "mhgp11_head_unit_order",
+    "mhgp11_head_unit_refusals",
+    "mhgp11_io_fault_inventaire",
+    "mhgp11_io_fault_starvation",
+    "mhgp11_io_sha256",
+    "mhgp11_io_sha256_opt",
+    "mhgp11_io_transaction_commit",
+    "mhgp11_io_transaction_create_names",
+    "mhgp11_io_transaction_discard",
+    "mhgp11_io_transaction_inventaire",
+    "mhgp11_io_transaction_noreplace",
+    "mhgp11_io_transaction_orphan",
+    "mhgp11_io_transaction_parent_unwritable",
+    "mhgp11_io_transaction_plan_conflicts",
+    "mhgp11_io_transaction_plan_inputs",
+    "mhgp11_io_transaction_plan_parent",
+    "mhgp11_io_transaction_plan_syntax",
+    "mhgp11_io_transaction_retract",
+    "mhgp11_io_transaction_write_failure",
+    "mhgp11_io_unit_hex",
+    "mhgp11_io_unit_input",
+    "mhgp11_io_unit_input_budget",
+    "mhgp11_io_unit_input_sizes",
+    "mhgp11_io_unit_input_unreadable",
+    "mhgp11_io_unit_inventaire",
+    "mhgp11_io_unit_sha256",
+    "mhgp11_num_roots",
+    "mhgp11_num_roots_cost_lidar_ng00_k5",
+    "mhgp11_num_roots_cost_lidar_ng01_k5",
+    "mhgp11_num_roots_cost_lidar_ng02_k5",
+    "mhgp11_num_roots_cost_uniform_u18_n16000_k5",
+    "mhgp11_num_roots_cost_uniform_u18_n32000_k5",
+    "mhgp11_num_roots_cost_uniform_u18_n8000_k5",
+    "mhgp11_num_roots_opt",
+    "mhgp11_plat_lidar_ng00_k5",
+    "mhgp11_plat_lidar_ng00_k5_opt",
+    "mhgp11_plat_lidar_ng01_k5",
+    "mhgp11_plat_lidar_ng01_k5_opt",
+    "mhgp11_plat_lidar_ng02_k5",
+    "mhgp11_plat_lidar_ng02_k5_opt",
+    "mhgp11_plat_scale16000",
+    "mhgp11_plat_scale16000_opt",
+    "mhgp11_plat_scale32000",
+    "mhgp11_plat_scale32000_opt",
+    "mhgp11_plat_scale8000",
+    "mhgp11_plat_scale8000_opt",
+    "mhgp11_points_fixtures",
+    "mhgp11_points_fixtures_opt",
+    "mhgp11_points_lidar_ng00_k5",
+    "mhgp11_points_lidar_ng00_k5_opt",
+    "mhgp11_points_lidar_ng01_k5",
+    "mhgp11_points_lidar_ng01_k5_opt",
+    "mhgp11_points_lidar_ng02_k5",
+    "mhgp11_points_lidar_ng02_k5_opt",
+    "mhgp11_points_oracle",
+    "mhgp11_points_oracle_opt",
+    "mhgp11_points_scale16000",
+    "mhgp11_points_scale16000_opt",
+    "mhgp11_points_scale32000",
+    "mhgp11_points_scale32000_opt",
+    "mhgp11_points_scale8000",
+    "mhgp11_points_scale8000_opt",
+    "mhgp11_points_unit_ancestors",
+    "mhgp11_points_unit_budget",
+    "mhgp11_points_unit_determinism",
+    "mhgp11_points_unit_inventaire",
+    "mhgp11_points_unit_refusals",
+    "mhgp11_points_unit_sort_refusal"
+  ],
+  "profile": "quantized_u21_input_only",
+  "public_status": "not_claimed",
+  "qualification_complete": false,
+  "receipt_sha256": "2d716c0f0c27d2fe7d56f7c2f38bad4b4d08b00be78a3a20177477698ae49436",
+  "receipt_status": "failed_remote",
+  "schema": "ehgp.v11.audit.fina2_read.v1",
+  "session": "v11.20261005.claudefina2",
+  "source_commit": "38b76701b9b0198fc1c37afe16e1480e638e513c",
+  "source_tree_verification": {
+    "extra_or_missing_files": false,
+    "files_verified": 635,
+    "includes_docs_or_receipts": false,
+    "manifest_sha256": "b2be29128bacb5c3b63e0c6807e52e973ef937629fcf0a529592176636acd423",
+    "method": "git_archive_selectif_egalite_exacte",
+    "paths": [
+      "gcp-migration/v11_worker.sh",
+      "morsehgp3D_v11/CMakeLists.txt",
+      "morsehgp3D_v11/src",
+      "morsehgp3D_v11/tests",
+      "morsehgp3D_v11/cmake",
+      "morsehgp3D_v11/bench",
+      "morsehgp3D_v11/reference",
+      "morsehgp3D_v11/tools",
+      "morsehgp3D_v11/cli"
+    ],
+    "source_commit": "38b76701b9b0198fc1c37afe16e1480e638e513c"
+  },
+  "state": "closed",
+  "targeted_closure_verified": true,
+  "worker_exit_code": 1
+}

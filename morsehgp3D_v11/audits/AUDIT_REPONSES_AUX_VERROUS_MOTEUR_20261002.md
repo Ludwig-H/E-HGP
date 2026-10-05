@@ -8,6 +8,16 @@ aux reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 Note maintenue en place ; détails et échanges clos dans les reçus.
 
+**Suivi G4 fina2, source 38b76701b.** Les portes unitaires S10, y compris
+la racine `2^127−1`, et les portes plates CLI/échelle/LiDAR passent dans
+les quatre profils ordinaires. Le refus du tri S9 et `num_roots`
+passent également. La campagne reste partielle à l'échéance ; ses
+échecs `supports_route` u18/u24 révèlent un attendu de hashes commun
+inadapté aux profils, sans défaut mathématique du moteur établi.
+Sanitizers et différentiels complets S9/S10 restent distincts.
+[Résultats et portée](../receipts/audit_g4_fina2_20261005/README.md),
+[constat de qualification](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#fina2--attendu-de-qualification-l2b-à-corriger-par-profil).
+
 ## S10 native publiée : encadrement entier et frontière de capacité
 
 La tranche **076d9142b** remplace le filtre flottant par
