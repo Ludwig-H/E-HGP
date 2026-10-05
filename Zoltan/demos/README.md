@@ -100,8 +100,9 @@ et clair) pour chaque ordre où HGP réussit et HDBSCAN échoue (k = 5 sinon) :
 - `sans_sol/` : la scène nettoyée automatiquement par Patchwork++, sans étiquette, dans la boîte des objets élargie de
   1 m (murs, végétation, autres objets, sol résiduel).
 
-Deux colonnes, mêmes points, même k : HGP à gauche, HDBSCAN (scikit-learn 1.7.2, `min_samples` = k) à droite ; le niveau
-r commun croît et s'arrête à chaque événement. Sur les 97 groupes de vélos et de piétons, HGP gagne 10 fois à k = 5 en
+Deux colonnes, mêmes points, même k : HGP à gauche, HDBSCAN (scikit-learn 1.7.2, `min_samples` = k) à droite. r est à
+la même échelle spatiale dans les deux colonnes (rayon des boules pour HGP, distance d'atteignabilité mutuelle pour
+HDBSCAN) ; HDBSCAN balaie d'abord, puis HGP, chaque balayage s'arrêtant à chaque événement. Sur les 97 groupes de vélos et de piétons, HGP gagne 10 fois à k = 5 en
 « instances » (1 perte) ; sans sol, 8 gains et 9 pertes à k = 5 (toutes dans une même rangée de vélos), 25 gains et
 aucune perte à k = 10. Critères, lecture, contrôle et reproduction : [README des vidéos](videos_hgp_hdbscan/README.md).
 

@@ -6,10 +6,10 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="00_001300_deux_velos_53_67_sans_sol_k10_sombre_instant_cle.png">
-  <img alt="Instant clé, k = 10, r = 17,1 cm : HGP, B, IoU maximal : 0,75 ; ✓ A et B retrouvés, encore séparés ; HDBSCAN, A et B déjà réunis" src="00_001300_deux_velos_53_67_sans_sol_k10_clair_instant_cle.png">
+  <img alt="Instant clé, k = 10, r = 17,1 cm : HGP, B, IoU maximal : 0,75 ; ✓ A et B retrouvés, encore séparés ; HDBSCAN au même r, IoU au même r : A 0,28  ·  B 0,30" src="00_001300_deux_velos_53_67_sans_sol_k10_clair_instant_cle.png">
 </picture>
 
-Vidéo de 46 s, k = 10, 1920 × 1080 : [thème sombre](00_001300_deux_velos_53_67_sans_sol_k10_sombre.mp4) · [thème clair](00_001300_deux_velos_53_67_sans_sol_k10_clair.mp4) ; image finale : [sombre](00_001300_deux_velos_53_67_sans_sol_k10_sombre_bilan.png) · [clair](00_001300_deux_velos_53_67_sans_sol_k10_clair_bilan.png).
+Vidéo de 67 s, k = 10, 1920 × 1080 : [thème sombre](00_001300_deux_velos_53_67_sans_sol_k10_sombre.mp4) · [thème clair](00_001300_deux_velos_53_67_sans_sol_k10_clair.mp4) ; image finale : [sombre](00_001300_deux_velos_53_67_sans_sol_k10_sombre_bilan.png) · [clair](00_001300_deux_velos_53_67_sans_sol_k10_clair_bilan.png).
 
 Points : tout ce que Patchwork++ (paramètres de la v8) ne classe pas en sol dans la boîte horizontale des objets élargie de 1 m, à toutes hauteurs : 3 527 points, dont 185 des objets (A 36, B 149) ; 111 points des objets retirés comme sol. Aucune étiquette ne sert au nettoyage : elles ne servent qu'à mesurer.
 
@@ -24,15 +24,20 @@ En gras : objet à 0,5 ou moins, qu'aucun groupe de la hiérarchie ne recouvre �
 
 ## Événements de la vidéo à k = 10
 
-Le niveau r croît pour les deux colonnes à la fois et s'arrête à chaque événement des groupes qui suivent les objets (mêmes textes que les bandeaux) :
+Mêmes textes que les bandeaux. Premier balayage, HDBSCAN seul (HGP attend) :
 
-| r | HGP | HDBSCAN |
+| r | HDBSCAN |
+| --- | --- |
+| 23,9 cm | ✓ B, IoU maximal : 0,73 |
+| 23,9 cm | ✗ A et B réunis : A jamais retrouvé |
+| 30,0 cm | ✗ A et B, déjà réunis, fusionnent avec la végétation |
+
+Second balayage, HGP ; HDBSCAN le suit au même r, sans pause propre :
+
+| r | HGP | HDBSCAN au même r |
 | --- | --- | --- |
-| 11,9 cm |  | ✓ B, IoU maximal : 0,73 |
-| 12,0 cm |  | ✗ A et B réunis : A jamais retrouvé |
-| 15,0 cm |  | ✗ A et B, déjà réunis, fusionnent avec la végétation |
-| 15,6 cm | ✓ A, IoU maximal : 0,56 |  |
-| 17,1 cm | ✓ B, IoU maximal : 0,75 ; ✓ A et B retrouvés, encore séparés | ✗ A et B déjà réunis |
+| 15,6 cm | ✓ A, IoU maximal : 0,56 | IoU au même r : A 0,17 |
+| 17,1 cm | ✓ B, IoU maximal : 0,75 ; ✓ A et B retrouvés, encore séparés | IoU au même r : A 0,28  ·  B 0,30 |
 | 17,7 cm | ✓ A et B réunis, chacun retrouvé avant |  |
 | 23,7 cm | ✗ A et B, déjà réunis, fusionnent avec la végétation |  |
 

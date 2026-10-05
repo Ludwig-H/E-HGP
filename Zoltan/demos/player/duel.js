@@ -104,14 +104,15 @@
 
   // ---------------------------------------------------------------- scène
   function prepare(scene) {
-    if (scene.schema !== 'ehgp.zoltan.duel.v2') throw new Error('scène inconnue : relancer tools/duel_scene.py');
+    if (scene.schema !== 'ehgp.zoltan.duel.v3') throw new Error('scène inconnue : relancer tools/duel_scene.py');
     for (const p of scene.timing.pauses) for (const key of ['hgp', 'hdbscan']) for (const b of p.badges[key]) { roleColor(b.border); b.parts.forEach((q) => roleColor(q[1])); }
     const n = scene.points.x.length;
     const S = {
       scene, n, nobj: scene.objects.length,
       x: Float64Array.from(scene.points.x), y: Float64Array.from(scene.points.y), z: Float64Array.from(scene.points.z),
       gt: Int8Array.from(scene.gt), timing: scene.timing, background: scene.gt.some((g) => g < 0),
-      keyT: scene.timing.schedule.map((k) => k[0]), keyR: scene.timing.schedule.map((k) => k[1]),
+      keyT: scene.timing.schedule.map((k) => k[0]),
+      keyR: { hdbscan: scene.timing.schedule.map((k) => k[1]), hgp: scene.timing.schedule.map((k) => k[2]) },
       rmin: scene.timing.rmin, rmax: scene.timing.rmax,
       methods: {},
     };
@@ -127,9 +128,10 @@
     return S;
   }
 
-  // Niveau au temps t : log-linéaire entre les jalons, ralenti à l'approche des pauses, exact pendant les pauses.
-  function rAt(S, t) {
-    const T = S.keyT, R = S.keyR;
+  // Niveau d'une colonne au temps t : log-linéaire entre les jalons, exact pendant les pauses. HDBSCAN balaie
+  // d'abord (HGP attend à rmin), revient à rmin, puis HGP balaie et HDBSCAN le suit au même r.
+  function rAt(S, t, key = 'hgp') {
+    const T = S.keyT, R = S.keyR[key];
     if (t <= T[0]) return R[0];
     for (let i = 1; i < T.length; i++) {
       if (t <= T[i]) {
@@ -141,6 +143,12 @@
     return R[R.length - 1];
   }
   // Avancement du balayage (0 à 1), figé pendant les pauses : il pilote le lent panoramique de la caméra.
+  // Plus grand niveau déjà atteint par une colonne : sa courbe d'IoU reste tracée jusque-là.
+  function revealAt(S, t, key) {
+    let m = rAt(S, t, key);
+    for (let i = 0; i < S.keyT.length && S.keyT[i] <= t; i++) m = Math.max(m, S.keyR[key][i]);
+    return m;
+  }
   function sweepProgress(S, r) {
     return clamp(Math.log(r / S.rmin) / Math.log(S.rmax / S.rmin), 0, 1);
   }
@@ -360,7 +368,7 @@
   }
 
   // IoU de chaque branche suivie en fonction de r (axe log commun aux deux colonnes).
-  function drawLanes(ctx, S, col, r, phase) {
+  function drawLanes(ctx, S, col, r, phase, reveal = r) {
     const M = S.methods[col.key].m, nobj = S.nobj;
     panel(ctx, col.x, LANES.y, col.w, LANES.h);
     const x0 = col.x + 76, x1 = col.x + col.w - 120;
@@ -369,10 +377,10 @@
     const laneH = Math.min(70, (axisY - LANES.y - 40) / nobj);
     const top0 = LANES.y + 36 + (axisY - LANES.y - 40 - laneH * nobj) / 2;
     text(ctx, 'IoU du groupe qui suit chaque objet', col.x + 18, LANES.y + 26, 17, C.dim);
-    const rShow = phase === 'intro' ? 0 : r;
+    const rShow = phase === 'intro' ? 0 : reveal;
     // graduations en centimètres
     ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
-    const ticks = [0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2].filter((v) => v >= S.rmin * 0.999 && v <= S.rmax * 1.001);
+    const ticks = [0.005, 0.01, 0.02, 0.03, 0.05, 0.1, 0.15, 0.2, 0.3, 0.5, 1, 2].filter((v) => v >= S.rmin * 0.999 && v <= S.rmax * 1.001);
     for (const v of ticks) {
       const xx = X(v);
       ctx.beginPath(); ctx.moveTo(xx, top0 - 4); ctx.lineTo(xx, axisY); ctx.stroke();
@@ -442,7 +450,7 @@
     }
   }
 
-  function drawHeader(ctx, S, r, phase) {
+  function drawHeader(ctx, S, r, phase, waiting) {
     const m = S.scene.meta;
     text(ctx, m.title, 24, 52, 34, C.text, { bold: true });
     text(ctx, m.subtitle, 24, 86, 20, C.dim);
@@ -458,6 +466,7 @@
       const sub = isH ? `Morse HGP 3D v11 · hiérarchie de points Hʳₖ₊₁ · k = ${m.k}` : `scikit-learn 1.7.2 · min_samples = ${m.k}`;
       text(ctx, name, col.x + 4, 140, 32, C.text, { bold: true });
       text(ctx, sub, col.x + 14 + measure(ctx, name, 32, true), 139, 19, C.dim);
+      if (waiting === col.key) text(ctx, 'ensuite', col.x + col.w - 6, 139, 21, C.dim, { bold: true, align: 'right' });
     }
   }
 
@@ -472,7 +481,7 @@
     item((xx, yy) => { ctx.fillStyle = C.other; ctx.beginPath(); disc(ctx, xx + 6, yy, 3.6); ctx.fill(); }, 'autre groupe');
     item((xx, yy) => { ctx.fillStyle = C.alone; ctx.beginPath(); disc(ctx, xx + 6, yy, 2.4); ctx.fill(); }, 'point seul');
     if (S.background) item((xx, yy) => { ctx.fillStyle = C.other; ctx.beginPath(); disc(ctx, xx + 6, yy, 2.1); ctx.fill(); }, 'petits points : le fond (hors objets)');
-    text(ctx, 'r : rayon des boules d\'ordre k ; pour HDBSCAN, distance d\'atteignabilité mutuelle / 2 · SemanticKITTI (CC BY-NC-SA)',
+    text(ctx, 'r : rayon des boules d\'ordre k ; pour HDBSCAN, distance d\'atteignabilité mutuelle (rayon de la boule des k voisins) · SemanticKITTI (CC BY-NC-SA)',
       28, y + 26, 15, C.dim);
   }
 
@@ -529,23 +538,27 @@
   function renderAt(ctx, S, t) {
     const T = S.timing;
     const phase = t < T.intro ? 'intro' : (t >= T.summary ? 'summary' : 'sweep');
-    const r = phase === 'intro' ? S.rmin : rAt(S, t);
+    const rCol = { hdbscan: phase === 'intro' ? S.rmin : rAt(S, t, 'hdbscan'), hgp: phase === 'intro' ? S.rmin : rAt(S, t, 'hgp') };
+    const first = t < T.switch;  // HDBSCAN balaie ; HGP attend
+    const r = first ? rCol.hdbscan : rCol.hgp;
+    const waiting = phase === 'sweep' && first ? 'hgp' : null;
     const mix = phase === 'intro' ? 0 : smooth((t - T.intro) / (T.sweep - T.intro));
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
-    drawHeader(ctx, S, r, phase);
+    drawHeader(ctx, S, r, phase, waiting);
     const cam = cameraOf(S, t, r);
     // états des deux hiérarchies au niveau r
     const states = {};
     for (const col of COLS) {
       const Mq = S.methods[col.key];
-      const h = hierarchyAt(S, Mq, phase === 'intro' ? 0 : r);
+      const rc = rCol[col.key];
+      const h = hierarchyAt(S, Mq, phase === 'intro' ? 0 : rc);  // en attente : rc = rmin, rien de formé
       const seedRoot = Mq.m.seeds.map((s) => (h.big[s] ? h.root[s] : -1));
       const fusedRoot = new Set();
       seedRoot.forEach((x, o) => { if (x >= 0 && seedRoot.some((y, q) => q !== o && y === x)) fusedRoot.add(x); });
       const marks = S.scene.objects.map((_, o) => {
-        if (phase === 'intro') return '';
-        if (foundBy(Mq.m.tracks[o], r)) return '✓';
+        if (phase === 'intro' || waiting === col.key) return '';
+        if (foundBy(Mq.m.tracks[o], rc)) return '✓';
         return fusedRoot.has(seedRoot[o]) ? '✗' : '';
       });
       // pulsation pendant la pause d'une fusion (points réunis) ou d'un effondrement (groupe de l'objet) de cette colonne
@@ -570,7 +583,8 @@
       drawView(ctx, S, col, cam, phase === 'intro' ? null : states[col.key], mix);
       if (phase === 'summary') drawSummary(ctx, S, col, smooth((t - T.summary) / 0.6));
       else drawBadges(ctx, col, badges[col.key]);
-      drawLanes(ctx, S, col, phase === 'summary' ? S.rmax : r, phase);
+      const lanePhase = waiting === col.key ? 'intro' : phase;
+      drawLanes(ctx, S, col, phase === 'summary' ? S.rmax : rCol[col.key], lanePhase, phase === 'summary' ? S.rmax : revealAt(S, t, col.key));
     }
     drawFooter(ctx, S);
     return { r, phase };

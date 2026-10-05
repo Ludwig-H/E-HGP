@@ -18,8 +18,10 @@ l'ordre montré par la variante.
 - Contrôle : le meilleur IoU de chaque objet doit être exactement celui de bout.json (tools/mesurer_bouts.py) et, si
   --members est donné, le meilleur bloc doit avoir exactement les points publiés par G4 ; sinon refus, code 1.
 
-Niveau commun r, convention de la thèse : le rayon pour HGP, la distance d'atteignabilité mutuelle divisée par 2 pour
-HDBSCAN (celle où les deux hiérarchies coïncident à k = 1, la liaison simple).
+Niveau r à la même échelle spatiale (consigne du 5 oct. 2026) : le rayon des boules d'ordre k pour HGP, la distance
+d'atteignabilité mutuelle pour HDBSCAN (rayon de la boule des k voisins centrée sur un point), sans le facteur 1/2 de
+la thèse, qui faisait détecter HDBSCAN à des r environ deux fois plus petits. HDBSCAN balaie d'abord (HGP attend),
+puis HGP balaie, HDBSCAN suivant au même r sans pause propre.
 
 Suivi : pour chaque objet et chaque méthode, une graine prise dans le meilleur bloc de l'objet ; la branche suivie est
 le bloc qui contient la graine, à chaque niveau. Parmi les points de l'objet dans ce meilleur bloc, la graine est
@@ -177,7 +179,9 @@ def hgp_plateaus(hanging, ids):
 
 
 def hdbscan_plateaus(tree, n):
-    """Événements de l'arbre du lien simple, fusions ex aequo d'un même plateau ; niveau = distance / 2 (mm)."""
+    """Événements de l'arbre du lien simple, fusions ex aequo d'un même plateau ; niveau = distance d'atteignabilité
+    mutuelle (mm), sans le facteur 1/2 de la thèse : la distance au k-ième voisin est le rayon d'une boule centrée sur
+    un point, à la même échelle que le rayon r des boules de HGP (consigne du 5 oct. 2026)."""
     left = tree['left_node'] if tree.dtype.names else tree[:, 0]
     right = tree['right_node'] if tree.dtype.names else tree[:, 1]
     value = tree['value'] if tree.dtype.names else tree[:, 2]
@@ -192,7 +196,7 @@ def hdbscan_plateaus(tree, n):
             rep[n + j] = a
             out.append(('union', a, b))
             j += 1
-        plateaus.append((level / 2.0, out))
+        plateaus.append((float(level), out))
     return plateaus
 
 
@@ -567,7 +571,7 @@ def events_of(method, m, objects):
     return out
 
 
-HOLD = dict(best=1.6, sep=2.8, chute=2.8, fusion_bad=3.4, fusion_good=2.6)
+HOLD = dict(best=2.0, sep=2.8, chute=2.8, fusion_bad=3.4, fusion_good=2.6)
 # ce qu'une branche absorbe, nommé par la classe SemanticKITTI majoritaire de ses points du fond
 ABSORBED = {'building': 'le bâtiment', 'fence': 'la clôture', 'vegetation': 'la végétation', 'trunk': 'un tronc',
             'terrain': 'le sol', 'road': 'le sol', 'sidewalk': 'le sol', 'parking': 'le sol', 'other-ground': 'le sol',
@@ -628,7 +632,7 @@ def badges(scene, pause):
     les affiche tels quels ; les README en tirent le tableau des événements (une seule source de texte)."""
     out = dict(hgp=[], hdbscan=[])
     r = pause['r']
-    collapsed = {}
+    collapsed, compared = {}, []
     for role in pause['roles']:
         kind, method, what = role.split(':')
         m = scene['methods'][method]
@@ -636,6 +640,7 @@ def badges(scene, pause):
         mo = scene['methods'][other]
         if kind == 'best':
             o = int(what)
+            compared += [(method, o)]
             row = row_at(m['tracks'][o], r)
             out[method].append(dict(border='obj%d' % o, parts=[['✓ ', 'ok', True], [LETTERS[o], 'obj%d' % o, True],
                                                                [', IoU maximal : ' + iou_text(row[1]), 'text', True]]))
@@ -647,9 +652,7 @@ def badges(scene, pause):
             group = [int(x) for x in what.split('+')]
             out[method].append(dict(border='ok', parts=[['✓ ', 'ok', True],
                                                         [listing(group) + ' retrouvés, encore séparés', 'text', True]]))
-            for objs in fused_groups(mo, group, r):
-                out[other].append(dict(border='fusion', parts=[['✗ ', 'fusion', True],
-                                                               [listing(objs) + ' déjà réunis', 'text', True]]))
+            compared += [(method, o) for o in group]
         else:
             objs = [int(x) for x in what.split('+')]
             f = next(f for f in m['fusions'] if f['r'] == r and f['objects'] == objs)
@@ -665,6 +668,26 @@ def badges(scene, pause):
                                                             [why, 'fusion', True]]))
             if separate(mo, objs, r):
                 out[other].append(dict(border='dim', parts=[[listing(objs) + ' encore séparés', 'text', True]]))
+    # pause réussie de HGP (les pauses de HDBSCAN viennent d'abord, HGP attend) : la colonne HDBSCAN dit, au même r,
+    # quels objets y sont déjà réunis et l'IoU des autres (en rouge s'il ne dépasse pas 1/2)
+    for method in ('hgp',):
+        objs = sorted(set(o for mm, o in compared if mm == method))
+        if not objs:
+            continue
+        mo = scene['methods']['hdbscan']
+        fused = [g for g in fused_groups(mo, list(range(len(scene['objects']))), r) if set(g) & set(objs)]
+        for group in fused:
+            out['hdbscan'].append(dict(border='fusion', parts=[['✗ ', 'fusion', True],
+                                                               [listing(group) + ' déjà réunis', 'text', True]]))
+        rest = [o for o in objs if not any(o in g for g in fused)]
+        if rest:
+            parts = [['IoU au même r : ', 'dim', False]]
+            for j, o in enumerate(rest):
+                row = row_at(mo['tracks'][o], r)
+                v = 0.0 if row is None or row[2] == NONE else row[1]
+                parts += ([['  ·  ', 'dim', False]] if j else []) + [[LETTERS[o], 'obj%d' % o, True],
+                                                                     [' ' + iou_text(v), 'text' if v > 0.5 else 'fusion', True]]
+            out['hdbscan'].append(dict(border='dim', parts=parts))
     for (method, _), objs in collapsed.items():
         m = scene['methods'][method]
         chutes = [next(c for c in m['chutes'] if c['r'] == r and c['objet'] == o and not c['fusion']) for o in objs]
@@ -689,49 +712,70 @@ def badge_text(b):
 
 
 def schedule(scene):
-    """Temps -> niveau : introduction, balayage log-linéaire ralenti à l'approche de chaque pause, une pause par
-    niveau d'événement (les deux colonnes s'arrêtent ensemble), conclusion."""
+    """Temps -> niveaux des deux colonnes : introduction, balayage de HDBSCAN seul (HGP attend à rmin), retour de
+    HDBSCAN à rmin, puis balayage de HGP, HDBSCAN au même r (sans pause propre) ; une pause par niveau d'événement de
+    la colonne qui balaie, balayage log-linéaire ; conclusion. schedule : lignes [t, r_hdbscan, r_hgp]."""
     hgp, hdb = scene['methods']['hgp'], scene['methods']['hdbscan']
     objects = len(scene['objects'])
-    events = events_of('hgp', hgp, objects) + events_of('hdbscan', hdb, objects)
-    levels = sorted(set(r for r, _ in events))
-    holds = []
-    for r in levels:
-        roles = [role for rr, role in events if rr == r]
-        hold = 0.0
-        for role in roles:
-            kind = role.split(':')[0]
-            if kind == 'fusion':
-                method, what = role.split(':')[1:]
-                f = next(f for f in scene['methods'][method]['fusions'] if f['r'] == r and
-                         '+'.join(map(str, f['objects'])) == what)
-                hold = max(hold, HOLD['fusion_good'] if all(f['before']) else HOLD['fusion_bad'])
-            else:
-                hold = max(hold, HOLD[kind])
-        holds.append((r, hold, roles))
+
+    def holds_of(method):
+        events = events_of(method, scene['methods'][method], objects)
+        out = []
+        for r in sorted(set(r for r, _ in events)):
+            roles = [role for rr, role in events if rr == r]
+            hold = 0.0
+            for role in roles:
+                kind = role.split(':')[0]
+                if kind == 'fusion':
+                    what = role.split(':')[2]
+                    f = next(f for f in scene['methods'][method]['fusions'] if f['r'] == r and
+                             '+'.join(map(str, f['objects'])) == what)
+                    hold = max(hold, HOLD['fusion_good'] if all(f['before']) else HOLD['fusion_bad'])
+                else:
+                    hold = max(hold, HOLD[kind])
+            out.append((r, hold, roles))
+        return out
+
+    holds = dict(hdbscan=holds_of('hdbscan'), hgp=holds_of('hgp'))
+    levels = [r for h in holds.values() for r, _, _ in h]
     appear = [first_level(m['tracks'][o], lambda row: row[2] != NONE) for m in (hgp, hdb) for o in range(objects)]
     r0 = 0.75 * min(a for a in appear if a)
     r1 = 1.25 * max(levels) if levels else 8 * r0
-    # introduction : la vérité terrain immobile (HOLD_INTRO s, objets en couleur, nommés), puis une courte orbite
     intro, outro = 4.4, 5.0
-    rate = math.log(r1 / r0) / 17.0  # environ 17 s de balayage hors pauses
+    rate = math.log(r1 / r0) / 17.0  # environ 17 s de balayage hors pauses, pour chaque colonne
     t = intro + 0.6
-    sched = [[0.0, r0], [t, r0]]
-    pauses, prev = [], r0
-    for r, hold, roles in holds:
-        t += max(0.6, math.log(r / prev) / rate)
-        sched.append([round(t, 4), r])
-        pauses.append(dict(t0=round(t, 4), t1=round(t + hold, 4), r=r, roles=roles))
-        t += hold
-        sched.append([round(t, 4), r])
-        prev = r
-    t += max(0.8, math.log(r1 / prev) / rate)
-    sched.append([round(t, 4), r1])
+    sched = [[0.0, r0, r0], [t, r0, r0]]
+    pauses = []
+
+    def sweep(method, t):
+        prev = r0
+        for r, hold, roles in holds[method]:
+            t += max(0.6, math.log(r / prev) / rate)
+            row = [r, r0] if method == 'hdbscan' else [r, r]
+            sched.append([round(t, 4)] + row)
+            pauses.append(dict(t0=round(t, 4), t1=round(t + hold, 4), r=r, roles=roles, method=method))
+            t += hold
+            sched.append([round(t, 4)] + row)
+            prev = r
+        t += max(0.8, math.log(r1 / prev) / rate)
+        sched.append([round(t, 4)] + ([r1, r0] if method == 'hdbscan' else [r1, r1]))
+        return t
+
+    t = sweep('hdbscan', t)
+    t += 1.0  # HDBSCAN complet, un temps
+    sched.append([round(t, 4), r1, r0])
+    switch = t
+    t += 1.6  # HDBSCAN revient à rmin, HGP démarre
+    sched.append([round(t, 4), r0, r0])
+    t += 0.4
+    sched.append([round(t, 4), r0, r0])
+    t = sweep('hgp', t)
     summary = t + 0.4
-    # image fixe : HGP retrouve tous les objets, encore séparés, quand HDBSCAN les a déjà réunis ; sinon la fusion
-    # trop précoce de HDBSCAN
     for p in pauses:
         p['badges'] = badges(scene, p)
+        if p['method'] == 'hdbscan':  # HGP attend : rien à comparer au même r
+            p['badges']['hgp'] = []
+
     def first(test):
         return next((p for p in pauses if any(test(r) for r in p['roles'])), None)
 
@@ -739,10 +783,16 @@ def schedule(scene):
         kind, method, what = role.split(':')
         return kind == 'fusion' and not all(next(f for f in scene['methods'][method]['fusions'] if
                                                  '+'.join(map(str, f['objects'])) == what)['before'])
-    key = first(lambda r: r.startswith('sep:hgp')) or first(lambda r: r.startswith('fusion:hdbscan') and bad(r)) \
-        or first(bad) or first(lambda r: r.startswith('sep:')) or (pauses[-1] if pauses else None)
+    # image fixe, prise dans le balayage de HGP (HDBSCAN au même r) : HGP retrouve tous les objets, encore séparés ;
+    # sinon HGP au maximum d'un objet que HDBSCAN ne reconnaît jamais ; sinon une mauvaise fusion
+    def missed(role):  # maximum HGP d'un objet que HDBSCAN ne reconnaît jamais
+        kind, method, what = role.split(':')
+        return kind == 'best' and method == 'hgp' and hdb['best'][int(what)] <= 0.5
+    key = first(lambda r: r.startswith('sep:hgp')) or first(missed) \
+        or first(lambda r: r.startswith('fusion:hgp') and bad(r)) \
+        or first(lambda r: r.startswith('fusion:hdbscan') and bad(r)) or first(bad) or (pauses[-1] if pauses else None)
     t_key = round((key['t0'] + key['t1']) / 2, 4) if key else round(summary - 1.0, 4)
-    return dict(intro=intro, hold=HOLD_INTRO, sweep=intro + 0.6, summary=round(summary, 4),
+    return dict(intro=intro, hold=HOLD_INTRO, sweep=intro + 0.6, switch=round(switch, 4), summary=round(summary, 4),
                 duration=round(summary + outro, 4), schedule=sched, pauses=pauses, rmin=r0, rmax=r1, key=t_key)
 
 
@@ -795,7 +845,7 @@ def build(args, folder):
     else:
         detail = 'instances de la vérité terrain seules · %s points' % thousands(n)
     scene = dict(
-        schema='ehgp.zoltan.duel.v2', variante=variante,
+        schema='ehgp.zoltan.duel.v3', variante=variante,
         meta=dict(title='%s · SemanticKITTI %s/%s' % (title(entry['classes']), entry['seq'], entry['frame']),
                   subtitle='même ordre k = %d pour les deux hiérarchies · %s' % (k, detail),
                   k=k, exemple=folder.parent.name, sites=n, gaps=entry['gaps']),
@@ -808,13 +858,13 @@ def build(args, folder):
     data.mkdir(exist_ok=True)
     (data / ('duel_k%d.js' % k)).write_text('window.DUEL_SCENE = ' + json.dumps(scene, separators=(',', ':')) + ';\n')
     result = dict(
-        schema='ehgp.zoltan.resultats_duel.v2', exemple=folder.parent.name, variante=variante, bout=entry['name'],
+        schema='ehgp.zoltan.resultats_duel.v3', exemple=folder.parent.name, variante=variante, bout=entry['name'],
         k=k, sites=n,
         hgp=dict(regle='H^r_{k+1} (morsehgp3D_v11, bench/points_radius.py, margin_r)', export=dict(
             status=report.get('status'), levels=report.get('levels'), nodes=report['orders'][ORDERS.index(k)]['nodes']
             if 'orders' in report else None)),
-        hdbscan=dict(regle='scikit-learn HDBSCAN(min_samples=k), arbre du lien simple ; niveau = distance / 2'),
-        convention='r = rayon (HGP) ; r = distance d\'atteignabilité mutuelle / 2 (HDBSCAN), convention de la thèse',
+        hdbscan=dict(regle='scikit-learn HDBSCAN(min_samples=k), arbre du lien simple ; niveau = distance d\'atteignabilité mutuelle'),
+        convention='r = rayon des boules (HGP) ; r = distance d\'atteignabilité mutuelle (HDBSCAN), même échelle spatiale',
         vue=view,
         methods={name: dict(best=m['best'], best_level_m=m['best_level'], seeds=m['seeds'], fusions=m['fusions'],
                             tracks=m['tracks'], plateaus=len(m['levels']))

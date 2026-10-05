@@ -6,10 +6,10 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="10_000424_deux_velos_2_3_instances_k5_sombre_instant_cle.png">
-  <img alt="Instant clé, k = 5, r = 29,7 cm : HGP, B, IoU maximal : 0,51 ; ✓ A et B retrouvés, encore séparés ; HDBSCAN, A et B déjà réunis" src="10_000424_deux_velos_2_3_instances_k5_clair_instant_cle.png">
+  <img alt="Instant clé, k = 5, r = 29,7 cm : HGP, B, IoU maximal : 0,51 ; ✓ A et B retrouvés, encore séparés ; HDBSCAN au même r, IoU au même r : A 0,77  ·  B 0,50" src="10_000424_deux_velos_2_3_instances_k5_clair_instant_cle.png">
 </picture>
 
-Vidéo de 40 s, k = 5, 1920 × 1080 : [thème sombre](10_000424_deux_velos_2_3_instances_k5_sombre.mp4) · [thème clair](10_000424_deux_velos_2_3_instances_k5_clair.mp4) ; image finale : [sombre](10_000424_deux_velos_2_3_instances_k5_sombre_bilan.png) · [clair](10_000424_deux_velos_2_3_instances_k5_clair_bilan.png).
+Vidéo de 61 s, k = 5, 1920 × 1080 : [thème sombre](10_000424_deux_velos_2_3_instances_k5_sombre.mp4) · [thème clair](10_000424_deux_velos_2_3_instances_k5_clair.mp4) ; image finale : [sombre](10_000424_deux_velos_2_3_instances_k5_sombre_bilan.png) · [clair](10_000424_deux_velos_2_3_instances_k5_clair_bilan.png).
 
 Points : les seuls points des objets du groupe (vérité terrain SemanticKITTI), 261 points (A 163, B 98) : ni sol, ni fond, ni autre objet.
 
@@ -24,14 +24,19 @@ En gras : objet à 0,5 ou moins, qu'aucun groupe de la hiérarchie ne recouvre �
 
 ## Événements de la vidéo à k = 5
 
-Le niveau r croît pour les deux colonnes à la fois et s'arrête à chaque événement des groupes qui suivent les objets (mêmes textes que les bandeaux) :
+Mêmes textes que les bandeaux. Premier balayage, HDBSCAN seul (HGP attend) :
 
-| r | HGP | HDBSCAN |
+| r | HDBSCAN |
+| --- | --- |
+| 29,2 cm | ✓ A, IoU maximal : 0,78 |
+| 30,3 cm | ✗ A et B réunis : B jamais retrouvé |
+
+Second balayage, HGP ; HDBSCAN le suit au même r, sans pause propre :
+
+| r | HGP | HDBSCAN au même r |
 | --- | --- | --- |
-| 14,6 cm |  | ✓ A, IoU maximal : 0,78 |
-| 15,1 cm | A et B encore séparés | ✗ A et B réunis : B jamais retrouvé |
-| 17,1 cm | ✓ A, IoU maximal : 0,79 |  |
-| 29,7 cm | ✓ B, IoU maximal : 0,51 ; ✓ A et B retrouvés, encore séparés | ✗ A et B déjà réunis |
+| 17,1 cm | ✓ A, IoU maximal : 0,79 | IoU au même r : A 0,48 |
+| 29,7 cm | ✓ B, IoU maximal : 0,51 ; ✓ A et B retrouvés, encore séparés | IoU au même r : A 0,77  ·  B 0,50 |
 | 31,6 cm | ✓ A et B réunis, chacun retrouvé avant |  |
 
 Nombres : [`resultats_duel_k5.json`](resultats_duel_k5.json).

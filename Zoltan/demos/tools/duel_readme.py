@@ -69,7 +69,9 @@ def key_alt(result, k):
     if p is None:
         return 'Image finale, k = %d' % k
     side = lambda s: ' ; '.join(text(b) for b in p['badges'][s]).lstrip('✓✗ ') or '—'
-    return 'Instant clé, k = %d, r = %s : HGP, %s ; HDBSCAN, %s' % (k, cm(p['r']), side('hgp'), side('hdbscan'))
+    if p.get('method') == 'hdbscan':  # premier balayage : HGP attend
+        return 'Instant clé, k = %d, r = %s : HDBSCAN, %s ; HGP en attente' % (k, cm(p['r']), side('hdbscan'))
+    return 'Instant clé, k = %d, r = %s : HGP, %s ; HDBSCAN au même r, %s' % (k, cm(p['r']), side('hgp'), side('hdbscan'))
 
 
 def picture(prefix, stem, alt):
@@ -123,12 +125,17 @@ def variant_readme(variant):
     out += ['', 'En gras : objet à 0,5 ou moins, qu\'aucun groupe de la hiérarchie ne recouvre à plus de la moitié. Une '
             'vidéo par ordre où HGP réussit et HDBSCAN échoue ; sans gain, une seule, à k = 5.', '']
     for k, res, stem in found:
+        pauses = res['timing']['pauses']
         out += ['## Événements de la vidéo à k = %d' % k, '',
-                'Le niveau r croît pour les deux colonnes à la fois et s\'arrête à chaque événement des groupes qui suivent '
-                'les objets (mêmes textes que les bandeaux) :', '', '| r | HGP | HDBSCAN |', '| --- | --- | --- |']
-        for p in res['timing']['pauses']:
-            row = [' ; '.join(text(b) for b in p['badges'][side]) for side in ('hgp', 'hdbscan')]
-            out.append('| %s | %s | %s |' % (cm(p['r']), row[0], row[1]))
+                'Mêmes textes que les bandeaux. Premier balayage, HDBSCAN seul (HGP attend) :', '',
+                '| r | HDBSCAN |', '| --- | --- |']
+        out += ['| %s | %s |' % (cm(p['r']), ' ; '.join(text(b) for b in p['badges']['hdbscan']))
+                for p in pauses if p['method'] == 'hdbscan']
+        out += ['', 'Second balayage, HGP ; HDBSCAN le suit au même r, sans pause propre :', '',
+                '| r | HGP | HDBSCAN au même r |', '| --- | --- | --- |']
+        out += ['| %s | %s | %s |' % (cm(p['r']), ' ; '.join(text(b) for b in p['badges']['hgp']),
+                                      ' ; '.join(text(b) for b in p['badges']['hdbscan']))
+                for p in pauses if p['method'] == 'hgp']
         out += ['', 'Nombres : [`resultats_duel_k%d.json`](resultats_duel_k%d.json).' % (k, k), '']
     if found:
         out += ['Lecture, légende et convention de niveau : [README de la liste](../../README.md#lire-une-vidéo).', '']

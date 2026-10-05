@@ -98,17 +98,20 @@ bien. Les sorties plates des bouts sont dans leurs dossiers de catégorie (secti
   Gros point de la couleur d'un objet : le groupe de la hiérarchie qui suit cet objet ; gros point rouge : un groupe qui
   réunit les groupes de deux objets ou plus ; point gris moyen : un autre groupe ; petit point pâle : point encore seul.
   Les points du fond ont les mêmes états, en plus petit.
-- **Niveau commun** : r croît en échelle logarithmique, le même pour les deux colonnes. Convention de la thèse : rayon
-  des boules d'ordre k pour HGP, distance d'atteignabilité mutuelle divisée par 2 pour HDBSCAN (les deux hiérarchies
-  coïncident alors à k = 1). Le verdict de chaque colonne n'en dépend pas ; l'alignement des colonnes, si.
+- **Deux balayages, même échelle** : HDBSCAN balaie d'abord r en échelle logarithmique (HGP attend, marqué
+  « ensuite »), revient au départ, puis HGP balaie ; HDBSCAN le suit alors au même r, sans pause propre. r est à la
+  même échelle spatiale dans les deux colonnes : rayon des boules d'ordre k pour HGP, distance d'atteignabilité mutuelle
+  (rayon de la boule des k voisins centrée sur un point) pour HDBSCAN, sans le facteur 1/2 de la thèse, qui faisait
+  détecter HDBSCAN à des r environ deux fois plus petits. Le verdict de chaque colonne n'en dépend pas.
 - **Pauses**, à tous les ordres et dans les deux variantes : chaque objet reconnu au moment où l'IoU de sa branche est
   **maximal** (pas à son premier passage au-dessus de 0,5) ; les objets tous reconnus et encore séparés, au moment où le
   moins bien reconnu l'est le mieux ; chaque **effondrement** de l'IoU d'une branche (baisse d'au moins 0,10 et d'au
   moins un quart) quand elle absorbe le fond (le mur, la végétation, le sol laissé par Patchwork++, nommés d'après la
   classe SemanticKITTI majoritaire des points absorbés) ou une partie d'un autre objet : après son maximum pour un objet
   reconnu, à chaque fois pour un objet jamais reconnu ; chaque fusion de branches, en rouge si un objet réuni n'avait
-  pas encore été retrouvé, en vert sinon. Au même r, l'autre colonne dit si ces objets y sont encore séparés ou déjà
-  réunis. Sous chaque vue, l'IoU du groupe qui suit chaque objet en fonction de r.
+  pas encore été retrouvé, en vert sinon. Quand HGP retrouve un objet, la colonne HDBSCAN donne au même r les
+  objets déjà réunis et l'IoU des autres (en rouge s'il ne dépasse pas 0,5) ; à une mauvaise fusion de HGP, elle dit
+  si ces objets y sont encore séparés. L'instant clé (affiche du README) est pris dans le balayage de HGP. Sous chaque vue, l'IoU du groupe qui suit chaque objet en fonction de r.
 - **Fin** : le meilleur IoU de chaque objet dans chaque hiérarchie.
 - **Groupe qui suit un objet** : une graine dans le meilleur bloc de l'objet ; à chaque niveau, le bloc qui la contient.
   Il passe par le meilleur bloc, et son meilleur IoU est celui des tableaux (contrôlé).

@@ -6,10 +6,10 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="08_002776_deux_velos_17_64_sans_sol_k5_sombre_instant_cle.png">
-  <img alt="Instant clé, k = 5, r = 6,5 cm : HGP, A et B encore séparés ; HDBSCAN, A et B réunis : A et B jamais retrouvés" src="08_002776_deux_velos_17_64_sans_sol_k5_clair_instant_cle.png">
+  <img alt="Instant clé, k = 5, r = 11,3 cm : HGP, A et B réunis : A et B jamais retrouvés ; HDBSCAN au même r, A et B encore séparés" src="08_002776_deux_velos_17_64_sans_sol_k5_clair_instant_cle.png">
 </picture>
 
-Vidéo de 46 s, k = 5, 1920 × 1080 : [thème sombre](08_002776_deux_velos_17_64_sans_sol_k5_sombre.mp4) · [thème clair](08_002776_deux_velos_17_64_sans_sol_k5_clair.mp4) ; image finale : [sombre](08_002776_deux_velos_17_64_sans_sol_k5_sombre_bilan.png) · [clair](08_002776_deux_velos_17_64_sans_sol_k5_clair_bilan.png).
+Vidéo de 65 s, k = 5, 1920 × 1080 : [thème sombre](08_002776_deux_velos_17_64_sans_sol_k5_sombre.mp4) · [thème clair](08_002776_deux_velos_17_64_sans_sol_k5_clair.mp4) ; image finale : [sombre](08_002776_deux_velos_17_64_sans_sol_k5_sombre_bilan.png) · [clair](08_002776_deux_velos_17_64_sans_sol_k5_clair_bilan.png).
 
 Points : tout ce que Patchwork++ (paramètres de la v8) ne classe pas en sol dans la boîte horizontale des objets élargie de 1 m, à toutes hauteurs : 6 141 points, dont 283 des objets (A 197, B 86) ; 10 points des objets retirés comme sol. Aucune étiquette ne sert au nettoyage : elles ne servent qu'à mesurer.
 
@@ -24,15 +24,20 @@ En gras : objet à 0,5 ou moins, qu'aucun groupe de la hiérarchie ne recouvre �
 
 ## Événements de la vidéo à k = 5
 
-Le niveau r croît pour les deux colonnes à la fois et s'arrête à chaque événement des groupes qui suivent les objets (mêmes textes que les bandeaux) :
+Mêmes textes que les bandeaux. Premier balayage, HDBSCAN seul (HGP attend) :
 
-| r | HGP | HDBSCAN |
+| r | HDBSCAN |
+| --- | --- |
+| 13,0 cm | ✗ A et B réunis : A et B jamais retrouvés |
+| 17,3 cm | ✗ B fusionne avec le sol · IoU 0,36 → 0,04 |
+| 39,5 cm | ✗ A fusionne avec le bâtiment · IoU 0,16 → 0,05 |
+
+Second balayage, HGP ; HDBSCAN le suit au même r, sans pause propre :
+
+| r | HGP | HDBSCAN au même r |
 | --- | --- | --- |
-| 6,5 cm | A et B encore séparés | ✗ A et B réunis : A et B jamais retrouvés |
-| 8,7 cm |  | ✗ B fusionne avec le sol · IoU 0,36 → 0,04 |
-| 11,3 cm | ✗ A et B réunis : A et B jamais retrouvés |  |
+| 11,3 cm | ✗ A et B réunis : A et B jamais retrouvés | A et B encore séparés |
 | 15,4 cm | ✗ B fusionne avec le sol · IoU 0,43 → 0,05 |  |
-| 19,7 cm |  | ✗ A fusionne avec le bâtiment · IoU 0,16 → 0,05 |
 | 20,9 cm | ✗ A fusionne avec le bâtiment · IoU 0,16 → 0,05 |  |
 
 Nombres : [`resultats_duel_k5.json`](resultats_duel_k5.json).

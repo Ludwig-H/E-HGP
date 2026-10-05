@@ -32,14 +32,14 @@ En gras : objet à 0,5 ou moins, qu'aucun groupe de la hiérarchie ne recouvre �
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="instances/08_002776_deux_velos_17_64_instances_k5_sombre_instant_cle.png">
-  <img alt="Instant clé, k = 5, r = 16,0 cm : HGP, B, IoU maximal : 0,53 ; ✓ A et B retrouvés, encore séparés ; HDBSCAN, A et B déjà réunis" src="instances/08_002776_deux_velos_17_64_instances_k5_clair_instant_cle.png">
+  <img alt="Instant clé, k = 5, r = 16,0 cm : HGP, B, IoU maximal : 0,53 ; ✓ A et B retrouvés, encore séparés ; HDBSCAN au même r, IoU au même r : A 0,56  ·  B 0,28" src="instances/08_002776_deux_velos_17_64_instances_k5_clair_instant_cle.png">
 </picture>
 
 **Sol retiré automatiquement (Patchwork++)**, k = 5 :
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="sans_sol/08_002776_deux_velos_17_64_sans_sol_k5_sombre_instant_cle.png">
-  <img alt="Instant clé, k = 5, r = 6,5 cm : HGP, A et B encore séparés ; HDBSCAN, A et B réunis : A et B jamais retrouvés" src="sans_sol/08_002776_deux_velos_17_64_sans_sol_k5_clair_instant_cle.png">
+  <img alt="Instant clé, k = 5, r = 11,3 cm : HGP, A et B réunis : A et B jamais retrouvés ; HDBSCAN au même r, A et B encore séparés" src="sans_sol/08_002776_deux_velos_17_64_sans_sol_k5_clair_instant_cle.png">
 </picture>
 
 <!-- video:fin -->

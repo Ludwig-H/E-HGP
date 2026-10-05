@@ -6,19 +6,19 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="08_001170_deux_velos_43_57_instances_k5_sombre_instant_cle.png">
-  <img alt="Instant clé, k = 5, r = 16,1 cm : HGP, B, IoU maximal : 0,65 ; ✓ A et B retrouvés, encore séparés ; HDBSCAN, A et B déjà réunis" src="08_001170_deux_velos_43_57_instances_k5_clair_instant_cle.png">
+  <img alt="Instant clé, k = 5, r = 16,1 cm : HGP, B, IoU maximal : 0,65 ; ✓ A et B retrouvés, encore séparés ; HDBSCAN au même r, IoU au même r : A 0,49  ·  B 0,32" src="08_001170_deux_velos_43_57_instances_k5_clair_instant_cle.png">
 </picture>
 
-Vidéo de 41 s, k = 5, 1920 × 1080 : [thème sombre](08_001170_deux_velos_43_57_instances_k5_sombre.mp4) · [thème clair](08_001170_deux_velos_43_57_instances_k5_clair.mp4) ; image finale : [sombre](08_001170_deux_velos_43_57_instances_k5_sombre_bilan.png) · [clair](08_001170_deux_velos_43_57_instances_k5_clair_bilan.png).
+Vidéo de 62 s, k = 5, 1920 × 1080 : [thème sombre](08_001170_deux_velos_43_57_instances_k5_sombre.mp4) · [thème clair](08_001170_deux_velos_43_57_instances_k5_clair.mp4) ; image finale : [sombre](08_001170_deux_velos_43_57_instances_k5_sombre_bilan.png) · [clair](08_001170_deux_velos_43_57_instances_k5_clair_bilan.png).
 
 **k = 10** (HGP réussit, HDBSCAN échoue) :
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="08_001170_deux_velos_43_57_instances_k10_sombre_instant_cle.png">
-  <img alt="Instant clé, k = 10, r = 21,2 cm : HGP, B, IoU maximal : 0,59 ; ✓ A et B retrouvés, encore séparés ; HDBSCAN, A et B déjà réunis" src="08_001170_deux_velos_43_57_instances_k10_clair_instant_cle.png">
+  <img alt="Instant clé, k = 10, r = 21,2 cm : HGP, B, IoU maximal : 0,59 ; ✓ A et B retrouvés, encore séparés ; HDBSCAN au même r, IoU au même r : A 0,28  ·  B 0,30" src="08_001170_deux_velos_43_57_instances_k10_clair_instant_cle.png">
 </picture>
 
-Vidéo de 43 s, k = 10, 1920 × 1080 : [thème sombre](08_001170_deux_velos_43_57_instances_k10_sombre.mp4) · [thème clair](08_001170_deux_velos_43_57_instances_k10_clair.mp4) ; image finale : [sombre](08_001170_deux_velos_43_57_instances_k10_sombre_bilan.png) · [clair](08_001170_deux_velos_43_57_instances_k10_clair_bilan.png).
+Vidéo de 64 s, k = 10, 1920 × 1080 : [thème sombre](08_001170_deux_velos_43_57_instances_k10_sombre.mp4) · [thème clair](08_001170_deux_velos_43_57_instances_k10_clair.mp4) ; image finale : [sombre](08_001170_deux_velos_43_57_instances_k10_sombre_bilan.png) · [clair](08_001170_deux_velos_43_57_instances_k10_clair_bilan.png).
 
 Points : les seuls points des objets du groupe (vérité terrain SemanticKITTI), 241 points (A 141, B 100) : ni sol, ni fond, ni autre objet.
 
@@ -33,30 +33,40 @@ En gras : objet à 0,5 ou moins, qu'aucun groupe de la hiérarchie ne recouvre �
 
 ## Événements de la vidéo à k = 5
 
-Le niveau r croît pour les deux colonnes à la fois et s'arrête à chaque événement des groupes qui suivent les objets (mêmes textes que les bandeaux) :
+Mêmes textes que les bandeaux. Premier balayage, HDBSCAN seul (HGP attend) :
 
-| r | HGP | HDBSCAN |
+| r | HDBSCAN |
+| --- | --- |
+| 17,3 cm | ✓ A, IoU maximal : 0,70 |
+| 17,4 cm | ✗ A et B réunis : B jamais retrouvé |
+
+Second balayage, HGP ; HDBSCAN le suit au même r, sans pause propre :
+
+| r | HGP | HDBSCAN au même r |
 | --- | --- | --- |
-| 8,7 cm |  | ✓ A, IoU maximal : 0,70 |
-| 8,7 cm | A et B encore séparés | ✗ A et B réunis : B jamais retrouvé |
-| 15,9 cm | ✓ A, IoU maximal : 0,94 |  |
-| 16,1 cm | ✓ B, IoU maximal : 0,65 ; ✓ A et B retrouvés, encore séparés | ✗ A et B déjà réunis |
+| 15,9 cm | ✓ A, IoU maximal : 0,94 | IoU au même r : A 0,48 |
+| 16,1 cm | ✓ B, IoU maximal : 0,65 ; ✓ A et B retrouvés, encore séparés | IoU au même r : A 0,49  ·  B 0,32 |
 | 16,2 cm | ✓ A et B réunis, chacun retrouvé avant |  |
 
 Nombres : [`resultats_duel_k5.json`](resultats_duel_k5.json).
 
 ## Événements de la vidéo à k = 10
 
-Le niveau r croît pour les deux colonnes à la fois et s'arrête à chaque événement des groupes qui suivent les objets (mêmes textes que les bandeaux) :
+Mêmes textes que les bandeaux. Premier balayage, HDBSCAN seul (HGP attend) :
 
-| r | HGP | HDBSCAN |
+| r | HDBSCAN |
+| --- | --- |
+| 22,7 cm | ✗ A et B réunis : B jamais retrouvé |
+| 31,4 cm | ✓ A, IoU maximal : 0,61 |
+
+Second balayage, HGP ; HDBSCAN le suit au même r, sans pause propre :
+
+| r | HGP | HDBSCAN au même r |
 | --- | --- | --- |
-| 11,3 cm |  | ✗ A et B réunis : B jamais retrouvé |
-| 15,7 cm |  | ✓ A, IoU maximal : 0,61 |
-| 21,2 cm | ✓ B, IoU maximal : 0,59 ; ✓ A et B retrouvés, encore séparés | ✗ A et B déjà réunis |
+| 21,2 cm | ✓ B, IoU maximal : 0,59 ; ✓ A et B retrouvés, encore séparés | IoU au même r : A 0,28  ·  B 0,30 |
 | 21,2 cm | ✗ B fusionne avec une partie de A · IoU 0,59 → 0,40 |  |
 | 22,9 cm | ✓ A et B réunis, chacun retrouvé avant |  |
-| 23,6 cm | ✓ A, IoU maximal : 0,66 |  |
+| 23,6 cm | ✓ A, IoU maximal : 0,66 | ✗ A et B déjà réunis |
 
 Nombres : [`resultats_duel_k10.json`](resultats_duel_k10.json).
 

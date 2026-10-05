@@ -50,14 +50,14 @@ Les groupes sont nommés par les numéros d'instance SemanticKITTI de leurs obje
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="instances/08_001170_deux_velos_43_57_instances_k5_sombre_instant_cle.png">
-  <img alt="Instant clé, k = 5, r = 16,1 cm : HGP, B, IoU maximal : 0,65 ; ✓ A et B retrouvés, encore séparés ; HDBSCAN, A et B déjà réunis" src="instances/08_001170_deux_velos_43_57_instances_k5_clair_instant_cle.png">
+  <img alt="Instant clé, k = 5, r = 16,1 cm : HGP, B, IoU maximal : 0,65 ; ✓ A et B retrouvés, encore séparés ; HDBSCAN au même r, IoU au même r : A 0,49  ·  B 0,32" src="instances/08_001170_deux_velos_43_57_instances_k5_clair_instant_cle.png">
 </picture>
 
 **Sol retiré automatiquement (Patchwork++)**, k = 5 :
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="sans_sol/08_001170_deux_velos_43_57_sans_sol_k5_sombre_instant_cle.png">
-  <img alt="Instant clé, k = 5, r = 16,0 cm : HGP, B, IoU maximal : 0,72 ; ✓ A et B retrouvés, encore séparés ; HDBSCAN, A et B déjà réunis" src="sans_sol/08_001170_deux_velos_43_57_sans_sol_k5_clair_instant_cle.png">
+  <img alt="Instant clé, k = 5, r = 16,0 cm : HGP, B, IoU maximal : 0,72 ; ✓ A et B retrouvés, encore séparés ; HDBSCAN au même r, IoU au même r : A 0,51  ·  B 0,33" src="sans_sol/08_001170_deux_velos_43_57_sans_sol_k5_clair_instant_cle.png">
 </picture>
 
 <!-- video:fin -->

@@ -32,14 +32,14 @@ En gras : objet à 0,5 ou moins, qu'aucun groupe de la hiérarchie ne recouvre �
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="instances/00_002140_pieton_velo_1_6_instances_k10_sombre_instant_cle.png">
-  <img alt="Instant clé, k = 10, r = 17,2 cm : HGP, A, IoU maximal : 0,94 ; ✓ A et B retrouvés, encore séparés ; HDBSCAN, A et B déjà réunis" src="instances/00_002140_pieton_velo_1_6_instances_k10_clair_instant_cle.png">
+  <img alt="Instant clé, k = 10, r = 17,2 cm : HGP, A, IoU maximal : 0,94 ; ✓ A et B retrouvés, encore séparés ; HDBSCAN au même r, A et B déjà réunis" src="instances/00_002140_pieton_velo_1_6_instances_k10_clair_instant_cle.png">
 </picture>
 
 **Sol retiré automatiquement (Patchwork++)**, k = 5 :
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="sans_sol/00_002140_pieton_velo_1_6_sans_sol_k5_sombre_instant_cle.png">
-  <img alt="Instant clé, k = 5, r = 12,2 cm : HGP, B, IoU maximal : 0,93 ; ✓ A et B retrouvés, encore séparés ; HDBSCAN, A et B déjà réunis" src="sans_sol/00_002140_pieton_velo_1_6_sans_sol_k5_clair_instant_cle.png">
+  <img alt="Instant clé, k = 5, r = 12,2 cm : HGP, B, IoU maximal : 0,93 ; ✓ A et B retrouvés, encore séparés ; HDBSCAN au même r, IoU au même r : A 0,64  ·  B 0,75" src="sans_sol/00_002140_pieton_velo_1_6_sans_sol_k5_clair_instant_cle.png">
 </picture>
 
 <!-- video:fin -->

@@ -44,14 +44,14 @@ Les groupes sont nommés par les numéros d'instance SemanticKITTI de leurs obje
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="instances/06_000774_trois_velos_6_14_15_instances_k5_sombre_instant_cle.png">
-  <img alt="Instant clé, k = 5, r = 9,4 cm : HGP, B et C encore séparés ; HDBSCAN, B et C réunis : B jamais retrouvé" src="instances/06_000774_trois_velos_6_14_15_instances_k5_clair_instant_cle.png">
+  <img alt="Instant clé, k = 5, r = 14,6 cm : HGP, B et C réunis : B jamais retrouvé ; HDBSCAN au même r, B et C encore séparés" src="instances/06_000774_trois_velos_6_14_15_instances_k5_clair_instant_cle.png">
 </picture>
 
 **Sol retiré automatiquement (Patchwork++)**, k = 10 :
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="sans_sol/06_000774_trois_velos_6_14_15_sans_sol_k10_sombre_instant_cle.png">
-  <img alt="Instant clé, k = 10, r = 15,0 cm : HGP, B et C encore séparés ; HDBSCAN, B et C réunis : B et C jamais retrouvés" src="sans_sol/06_000774_trois_velos_6_14_15_sans_sol_k10_clair_instant_cle.png">
+  <img alt="Instant clé, k = 10, r = 18,5 cm : HGP, B, IoU maximal : 0,51 ; HDBSCAN au même r, IoU au même r : B 0,27" src="sans_sol/06_000774_trois_velos_6_14_15_sans_sol_k10_clair_instant_cle.png">
 </picture>
 
 <!-- video:fin -->

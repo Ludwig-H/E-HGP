@@ -111,10 +111,11 @@ class Oracles(unittest.TestCase):
         events = ds.events_of('hgp', dict(tracks=track, fusions=fusions, best=best, chutes=chutes), 1)
         self.assertEqual(events, [(1.2, 'best:hgp:0'), (2.0, 'chute:hgp:0')])
 
-    def test_hdbscan_plateaus_group_ties_and_halve(self):
+    def test_hdbscan_plateaus_group_ties_full_distance(self):
+        # niveau = distance d'atteignabilité mutuelle entière (même échelle que le rayon de HGP), plus de facteur 1/2
         tree = np.array([[0, 1, 4.0, 2], [2, 3, 4.0, 2], [4, 5, 10.0, 4]], dtype=np.float64)
         plateaus = ds.hdbscan_plateaus(tree, 4)
-        self.assertEqual([lv for lv, _ in plateaus], [0.0, 2.0, 5.0])
+        self.assertEqual([lv for lv, _ in plateaus], [0.0, 4.0, 10.0])
         self.assertEqual(plateaus[1][1], [('union', 0, 1), ('union', 2, 3)])
         self.assertEqual(plateaus[2][1], [('union', 0, 2)])
 
@@ -147,7 +148,7 @@ class LocalScenes(unittest.TestCase):
         roles = {'ok', 'fusion', 'text', 'dim', 'obj0', 'obj1', 'obj2'}
         for path in self.scenes:
             scene = load(path)
-            self.assertEqual(scene['schema'], 'ehgp.zoltan.duel.v2')
+            self.assertEqual(scene['schema'], 'ehgp.zoltan.duel.v3')
             k = scene['meta']['k']
             spec = json.loads((path.parents[1] / 'bout.json').read_text(encoding='utf-8'))
             self.assertEqual(scene['variante'], spec['variante'], path)
@@ -162,6 +163,19 @@ class LocalScenes(unittest.TestCase):
             self.assertEqual(times, sorted(times), path)
             self.assertTrue(all(t['sweep'] <= p['t0'] < p['t1'] <= t['summary'] for p in t['pauses']), path)
             self.assertTrue(any(p['t0'] <= t['key'] <= p['t1'] for p in t['pauses']), path)
+            # HDBSCAN balaie d'abord, HGP attend à rmin ; puis HGP balaie et HDBSCAN le suit au même r
+            self.assertTrue(all(p['t1'] <= t['switch'] for p in t['pauses'] if p['method'] == 'hdbscan'), path)
+            self.assertTrue(all(p['t0'] > t['switch'] for p in t['pauses'] if p['method'] == 'hgp'), path)
+            self.assertTrue(all(row[2] == t['rmin'] for row in t['schedule'] if row[0] <= t['switch']), path)
+            after = [row for row in t['schedule'] if row[0] > t['switch'] + 1.6]
+            self.assertTrue(after and all(row[1] == row[2] for row in after), path)
+            self.assertEqual(max(row[1] for row in t['schedule'] if row[0] <= t['switch']), t['rmax'], path)
+            self.assertEqual(max(row[2] for row in t['schedule']), t['rmax'], path)
+            self.assertTrue(all(all(r.split(':')[1] == p['method'] for r in p['roles']) for p in t['pauses']), path)
+            self.assertTrue(all(not p['badges']['hgp'] for p in t['pauses'] if p['method'] == 'hdbscan'), path)
+            key = next(p for p in t['pauses'] if p['t0'] <= t['key'] <= p['t1'])
+            if spec['issues'][str(k)] == 'win':  # l'affiche montre HGP et HDBSCAN au même r
+                self.assertEqual(key['method'], 'hgp', path)
             for p in t['pauses']:
                 for side in ('hgp', 'hdbscan'):
                     for b in p['badges'][side]:

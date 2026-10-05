@@ -6,10 +6,10 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="08_000656_deux_velos_37_61_instances_k5_sombre_instant_cle.png">
-  <img alt="Instant clé, k = 5, r = 17,4 cm : HGP, B, IoU maximal : 0,95 ; ✓ A et B retrouvés, encore séparés ; HDBSCAN, A et B déjà réunis" src="08_000656_deux_velos_37_61_instances_k5_clair_instant_cle.png">
+  <img alt="Instant clé, k = 5, r = 17,4 cm : HGP, B, IoU maximal : 0,95 ; ✓ A et B retrouvés, encore séparés ; HDBSCAN au même r, IoU au même r : A 0,85  ·  B 0,89" src="08_000656_deux_velos_37_61_instances_k5_clair_instant_cle.png">
 </picture>
 
-Vidéo de 42 s, k = 5, 1920 × 1080 : [thème sombre](08_000656_deux_velos_37_61_instances_k5_sombre.mp4) · [thème clair](08_000656_deux_velos_37_61_instances_k5_clair.mp4) ; image finale : [sombre](08_000656_deux_velos_37_61_instances_k5_sombre_bilan.png) · [clair](08_000656_deux_velos_37_61_instances_k5_clair_bilan.png).
+Vidéo de 63 s, k = 5, 1920 × 1080 : [thème sombre](08_000656_deux_velos_37_61_instances_k5_sombre.mp4) · [thème clair](08_000656_deux_velos_37_61_instances_k5_clair.mp4) ; image finale : [sombre](08_000656_deux_velos_37_61_instances_k5_sombre_bilan.png) · [clair](08_000656_deux_velos_37_61_instances_k5_clair_bilan.png).
 
 Points : les seuls points des objets du groupe (vérité terrain SemanticKITTI), 291 points (A 52, B 239) : ni sol, ni fond, ni autre objet.
 
@@ -24,15 +24,20 @@ En gras : objet à 0,5 ou moins, qu'aucun groupe de la hiérarchie ne recouvre �
 
 ## Événements de la vidéo à k = 5
 
-Le niveau r croît pour les deux colonnes à la fois et s'arrête à chaque événement des groupes qui suivent les objets (mêmes textes que les bandeaux) :
+Mêmes textes que les bandeaux. Premier balayage, HDBSCAN seul (HGP attend) :
 
-| r | HGP | HDBSCAN |
+| r | HDBSCAN |
+| --- | --- |
+| 22,0 cm | ✓ A, IoU maximal : 0,90 |
+| 24,6 cm | ✓ B, IoU maximal : 0,95 ; ✓ A et B retrouvés, encore séparés |
+| 24,8 cm | ✓ A et B réunis, chacun retrouvé avant |
+
+Second balayage, HGP ; HDBSCAN le suit au même r, sans pause propre :
+
+| r | HGP | HDBSCAN au même r |
 | --- | --- | --- |
-| 11,0 cm |  | ✓ A, IoU maximal : 0,90 |
-| 12,3 cm |  | ✓ B, IoU maximal : 0,95 ; ✓ A et B retrouvés, encore séparés |
-| 12,4 cm |  | ✓ A et B réunis, chacun retrouvé avant |
-| 15,2 cm | ✓ A, IoU maximal : 0,90 |  |
-| 17,4 cm | ✓ B, IoU maximal : 0,95 ; ✓ A et B retrouvés, encore séparés | ✗ A et B déjà réunis |
+| 15,2 cm | ✓ A, IoU maximal : 0,90 | IoU au même r : A 0,83 |
+| 17,4 cm | ✓ B, IoU maximal : 0,95 ; ✓ A et B retrouvés, encore séparés | IoU au même r : A 0,85  ·  B 0,89 |
 | 19,1 cm | ✓ A et B réunis, chacun retrouvé avant |  |
 
 Nombres : [`resultats_duel_k5.json`](resultats_duel_k5.json).
