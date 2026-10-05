@@ -1,8 +1,8 @@
 # Audit courant v11 — contrats, performance et intégration
 
 5 octobre 2026. Contrat S0/S1 **5adf6a59f**, demande **9290cf3bf** et
-tranches natives S3/S5/S6 relues ; S6a publiée en **19b2fb218**, S3/S5
-intégrées localement, qualification G4 des nouvelles tranches encore
+tranches natives S3/S5/S6 relues ; S6a publiée en **19b2fb218**, S3 en
+**165def5ab**, S5 et S6b publiées jusqu'à **9e7428995**, qualification G4 encore
 attendue. Le socle qualifié et chaque capture CPU/GPU gardent leur
 source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
@@ -30,8 +30,8 @@ petits nuages. Aucun transfert de ces succès Python au binaire courant.
 
 **Priorité de livraison : fermer L1 sur le vrai produit assemblé.**
 Au pin de l'audit général, `build_order`, l'attachement et les primitives
-de supports étaient des brouillons. S6a est depuis publiée, S3/S5 sont
-intégrées localement ; S6b/S7 restent à raccorder. Les preuves mathématiques autorisent leur
+de supports étaient des brouillons. S3/S6a sont depuis publiées, S5 et
+S6b sont publiées ; S7 reste à raccorder. Les preuves mathématiques autorisent leur
 intégration ; elles ne remplacent pas les portes natives de l'assemblage.
 La porte décisive doit comparer l'ordre K de FULL, l'arbre K seul et les
 attaches à la coupe fermée, sur la même source figée, avec les plateaux
@@ -41,8 +41,28 @@ au-delà de 24 sites doit porter sur **l'appel supports entier**. Budget,
 count/fill, concurrence et absence de publication partielle doivent être
 jugés sur l'assemblage, pas déduits des seuls helpers S6a.
 
+**S6b : conditions d'assemblage implémentées, contrelecture favorable.**
+Au commit publié **9e7428995**, la pré-passe refuse une coquille trop grande
+avant toute allocation. L'admission couvre les sorties, les temporaires,
+la fermeture et la liste de supports de chaque worker. Les deux passes
+utilisent les mêmes positions et le même `BallIdx` ; leurs écritures sont
+disjointes et les registres sont sommés après jointure. Tous les supports
+sont conservés, même lorsque leur compte de cofaces est nul.
+
+Le différentiel complet compare aussi les supports, les comptes par
+boule et par support, le rattachement et les tailles de sous-arbre.
+Les portes d'admission et du plafond portent maintenant sur l'appel
+entier. Aucun nouveau défaut important établi. Les résultats natifs
+annoncés dans les rapports locaux restent distincts d'une réception G4 ;
+u18/u24, sanitizers, TSan, mutants complets et K10 restent à qualifier.
+**S7 n'est pas encore livrée** : conserver la comparaison des signatures
+d'arbre FULL/supports, la lecture du fichier publié et la mesure de toute
+la chaîne comme portes de livraison.
+[Sources, contre-épreuves et limites](../receipts/audit_s6b_20261005/README.md).
+
 **Manifeste S5 : constat corrigé en source, qualification attendue.**
-Dans le WIP de `build/v11-impl-l0`, contexte **59743c210**, `publish`
+Dans le correctif publié **a5e4019b4**, identique au WIP relu au contexte
+**59743c210**, `publish`
 exige désormais `points_bytes=12n`, `ids_bytes=4n` et un budget déclaré
 absent ou strictement positif. Le nombre de points vient du poids du
 nuage du produit. Le refus précède la création de fichiers, le budget et
@@ -57,7 +77,7 @@ ne sont pas qualifiés par cette relecture ; la protection du rapport est
 [Correctif et contrelecture](../receipts/audit_corrections_s3_s5_20261005/README.md),
 [défaut initial conservé](../receipts/audit_api_publication_20261005/README.md).
 
-**Identité Session : corrigée dans S5 locale, qualification attendue.**
+**Identité Session : corrigée dans S5 publiée, qualification attendue.**
 Le produit garde désormais l'identité du budget alloué sur le tas, stable
 au déplacement de la Session. `publish` refuse une autre Session avant la
 provenance, les fichiers et le rapport. La nouvelle porte déplace la
@@ -97,20 +117,21 @@ cette capture. Aucun nouveau verrou général n'est opposé à cette suite.
 [État exact et preuve](../receipts/audit_l1_followup_20261005/README.md).
 
 S6a est désormais publiée sur `main` en **19b2fb218**, avec les mêmes
-sources et portes que **ee8a69f1a**. S5 est commitée localement en
-**d8735d095** : les 31 fichiers API/IO et portes de notre capture corrigée
-sont identiques. S3 vient d'être importée dans `build/v11-impl-l1b` :
-cœur, E1/E2 sur catalogue étroit et témoin D2 identiques au WIP déjà relu.
+sources et portes que **ee8a69f1a**. S5 est publiée en **d6082be62**, puis
+corrigée en **a5e4019b4** pour la provenance : sources identiques aux
+captures relues. S3 est publiée en **165def5ab** : cœur, E1/E2 sur
+catalogue étroit et témoin D2 identiques au WIP déjà relu.
 Le juge Fraction des attaches et le témoin K10 sont désormais câblés
 dans les portes permanentes de S3 : domaine étroit, comparaison des
 attaches fermées et des antécédents ouverts, voies W1/W3 et permutation
 d'entrée. Le témoin de 12 sites couvre K1..12. La qualification native
-reste à jouer sur la source assemblée.
+reste à jouer sur la source assemblée ; S6b est désormais présente en
+**9e7428995**, S7 restant à livrer.
 [Contrelecture de ces nouvelles portes](../receipts/audit_corrections_s3_s5_20261005/README.md).
 Les résultats natifs annoncés par le développeur restent
 distincts des vérifications Python de l'audit et de la qualification G4.
 
-**S5 : anciennes alertes corrigées dans le commit local.** Le CLI ignore désormais
+**S5 : anciennes alertes corrigées dans les commits publiés.** Le CLI ignore désormais
 SIGXFSZ et la porte rétablit son comportement par défaut avant exec avec
 RLIMIT_FSIZE. Signature V2 à l'ordre demandé, SHA du manifeste fermé et
 `published_complete` sont intégrés. Les portes jugent le champ réellement
@@ -129,7 +150,7 @@ arguments de `SYS_renameat2` : `int,const char*,int,const char*,unsigned`.
 Un autre numéro invalide explicitement la porte. Les deux cas injectés
 utilisent W1 ; cette relecture ne qualifie pas le préchargement pour les
 attentes futex de W>1. L'ancien constat variadique est clos au niveau du
-code WIP ; les portes natives restent à jouer sur la source intégrée.
+code publié ; les portes natives restent à jouer sur la source intégrée.
 
 **S3 : raccord final favorable, mesure du journal encore distincte.**
 Naissances enregistrées avant DSU, lots appliqués par ordinal et attribués
@@ -148,12 +169,12 @@ la qualification L2 dès S5/S7 intégrés. GCC Release u21 et u24 séparés,
 ASan/UBSan et TSan selon les profils réellement joués, mutants des modules
 modifiés, identité build_order/build_full, plateau E1/E2 et déterminisme
 W1/W4/W48. Inclure coquille 24 admise, 25 refusée pour l'appel supports
-entier et q4 à K1 malgré zéro coface. S6a juge les primitives ; ajouter
-budget/refus et count/fill parallèles lorsque l’assemblage est livré.
+entier et q4 à K1 malgré zéro coface. S6a juge les primitives ; S6b ajoute
+budget/refus et count/fill parallèles, à qualifier avec l'assemblage.
 Garder u18 explicite si livré, sans transfert de qualification. Ajouter
 les attendus indépendants K10/K12 de la note mathématique ; la porte K12
-proposée vise les primitives, pas FULL12. Pour le futur raccord S6b, admettre
-domaine/arbre, métadonnées, sorties et, par worker actif, **scratch de
+proposée vise les primitives, pas FULL12. S6b admet désormais
+domaine/arbre, métadonnées, sorties et, par worker du Pool, **scratch de
 fermeture plus liste temporaire de supports**. Les 2 Mio par worker à 24
 sites (96 Mio à W48) ne sont que le scratch ; la liste a au plus 12 926
 entrées, avec `sizeof(Support)` du build. Sommes d'offsets u64 vérifiées

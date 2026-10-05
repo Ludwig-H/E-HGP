@@ -1,0 +1,49 @@
+{
+  "attempts": [
+    {
+      "command": "python3 check_assembly.py > normal.json",
+      "cwd": "/workspaces/E-HGP/build/v11-audit-math-s6b-20261005",
+      "result": {
+        "chunk_id": "cae5d4",
+        "wall_time_seconds": 0.253494868,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      }
+    },
+    {
+      "command": "python3 -O check_assembly.py > optimized.json",
+      "cwd": "/workspaces/E-HGP/build/v11-audit-math-s6b-20261005",
+      "result": {
+        "chunk_id": "c7a3fd",
+        "wall_time_seconds": 0.328659268,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      }
+    },
+    {
+      "command": "python3 replay.py > replay.normal.json",
+      "cwd": "/workspaces/E-HGP/build/v11-audit-math-s6b-20261005",
+      "result": {
+        "chunk_id": "cb5021",
+        "wall_time_seconds": 0.397906965,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      }
+    },
+    {
+      "command": "python3 replay.py --optimized > replay.optimized.json",
+      "cwd": "/workspaces/E-HGP/build/v11-audit-math-s6b-20261005",
+      "result": {
+        "chunk_id": "9ec97c",
+        "wall_time_seconds": 0.396291062,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      }
+    }
+  ],
+  "failed_attempts": []
+}

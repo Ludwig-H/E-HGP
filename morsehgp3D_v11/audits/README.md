@@ -4,11 +4,11 @@
 quantized_u21_input_only / not_claimed`. Notes maintenues en place ;
 preuves détaillées dans les reçus immuables.
 
-**Audit général au pin 238734f1d, suivi jusqu'à 19b2fb218.** Aucun nouveau défaut
+**Audit général au pin 238734f1d, suivi de S3/165def5ab et S6b/9e7428995.** Aucun nouveau défaut
 mathématique FULL établi ; contre-épreuve du nerf complet, des coupes et
 des verticales conforme sur 65 ordres. Le point important du raccord est
 la qualification de l'assemblage L1 entier. L'identité Session et la
-cohérence du manifeste sont corrigées dans les sources S5 locales.
+cohérence du manifeste sont corrigées dans les sources S5 publiées.
 Pour juger la voie K seule, mesurer le journal actif et
 la sortie réellement livrée. [Verdict et priorités du développeur](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#audit-général-du-5-octobre--décisions-importantes),
 [preuve et périmètre](../receipts/audit_geant_20261005/README.md).
@@ -22,14 +22,23 @@ de ces portes encore attendue.
 [Correction et portée](../receipts/audit_corrections_s3_s5_20261005/README.md).
 
 **Suivi des corrections.** Identité stable de Session, contrôle de fin de
-vie et hook IO typé sont corrigés dans S5 **d8735d095**, encore local.
+vie et hook IO typé sont corrigés dans S5 ; le correctif du manifeste est
+publié en **a5e4019b4**, identique à la capture relue.
 S6a est publiée sur `main` en **19b2fb218**, identique aux sources déjà
-relues en ee8a69f1a. S3 est importée localement, avec E1/E2 sur le
+relues en ee8a69f1a. S3 est publiée en **165def5ab**, avec E1/E2 sur le
 catalogue étroit et D2 ; le différentiel contre l'oracle exact et le témoin
-K10 sont maintenant inscrits dans ses portes. L'assemblage
-S6b/S7 et la qualification G4 restent à faire. Pour la future L3, K=n est refusé par `points`/`plat`
+K10 sont maintenant inscrits dans ses portes. L'assemblage S6b est publié
+en **9e7428995** et relu favorablement ; la sortie S7 et la
+qualification G4 restent à faire. Pour la future L3, K=n est refusé par `points`/`plat`
 quand K≥2 ; FULL/supports le conservent.
 [Contrelecture précédente](../receipts/audit_l1_followup_20261005/README.md).
+
+**S6b : assemblage relu.** Tous les supports sont conservés, y compris
+ceux sans coface. Le plafond de 24 sites est contrôlé sur l'appel entier
+avant allocation ; count/fill gardent les mêmes positions et des tampons
+privés par worker. Comptes et admission mémoire restent dans leurs bornes.
+La sortie fichier S7 et ses mesures ne sont pas encore livrées.
+[Périmètre et contre-épreuves](../receipts/audit_s6b_20261005/README.md).
 
 - [Mathématiques : supports, frontières, hiérarchies et sélection](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 - [Moteur : qualification, performances et intégration](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md).
@@ -49,11 +58,11 @@ signature V2, état publié et SIGXFSZ. Qualification native G4 encore attendue.
 **Réponse utile au développeur.** La sphère entière de rayon carré5,
 24 sites, mêle 12 q2, 24 q3, 792 q4 ; N4=3906 diffère des 4068 incidences
 par support. Elle fournit la porte au plafond, avec 25/30 sites de rayon
-carré9 pour le refus entier. L'oracle WIP borne désormais
+carré9 pour le refus entier. L'oracle publié borne désormais
 `_minimal_nonseparable`, en plus du calcul N_j par petites combinaisons.
 Deux portes exactes complètent les K élevés : 12 sites à K10 et la
 coquille de 24 sites à K12, **116 traces strictes**, sans construire FULL12.
-Le hook variadique des deux fautes IO est corrigé dans S5 locale. Comparer les masques
+Le hook variadique des deux fautes IO est corrigé dans S5 publiée. Comparer les masques
 FULL 16379 et ordre seul 7035, avec mêmes options applicables. Matrice G4 séparée
 par livraison/profil, coût des portes fixé avant session.
 [Relecture et 19 713 gardes portables nouvelles](../receipts/audit_native_integration_20261005/README.md).

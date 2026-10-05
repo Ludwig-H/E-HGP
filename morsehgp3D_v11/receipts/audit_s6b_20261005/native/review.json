@@ -1,0 +1,45 @@
+{
+  "verdict": "no new important correctness, ownership, concurrency or resource defect established by reading",
+  "head": "9e7428995e3b359301d58d882610d9d4ee720fad",
+  "close_utc": "2026-10-05T12:12:33.360048+00:00",
+  "hash_changes_during_review": [],
+  "source_scope": {
+    "full": [
+      "src/supports/hierarchy.cpp",
+      "src/supports/supports.hpp",
+      "src/core/buffer.hpp",
+      "src/core/buffer.cpp",
+      "src/sched/sched.hpp",
+      "src/supports/counts.cpp",
+      "tests/supports/hierarchy_test.cpp",
+      "tests/supports/hierarchy_fault.cpp"
+    ],
+    "selected": [
+      "src/supports/counts.hpp",
+      "src/supports/enumerate.cpp",
+      "docs/SORTIES.md",
+      "docs/PROVENANCE.md",
+      "docs/ARCHITECTURE.md"
+    ],
+    "prior_reports": [
+      "build/v11-persist/sortie_supports/impl_s6b.md",
+      "build/v11-persist/sortie_supports/verif_s6b.md"
+    ]
+  },
+  "findings": [
+    "Prepass check_shell covers every extended shell before any Buffer allocation (hierarchy.cpp:65-92). Regular shells necessarily have m=qmin<=4.",
+    "The source OrderTree is explicitly borrowed, immutable and must survive reads of SiteIdx/NodeIdx; all hierarchy payloads own Buffer reservations and moves transfer these reservations (supports.hpp).",
+    "First admission matches all first-stage output, origin, ledgers, scratch and list payloads, including per-Pool-worker multiplicity. Second admission runs while every first-stage buffer remains alive (hierarchy.cpp:95-110,223-237).",
+    "Count writes ball metadata/support counts at disjoint slot positions. Worker ID selects private list, closure scratch and ledger. Fill uses the same origin-fixed BallIdx and private scratch; output ranges derive from joined count results and verified prefixes (197-272).",
+    "Every Pool return joins workers before checking outcome, summing ledgers, publishing timings or releasing Assembly buffers; pool_busy or per-task refusal returns no SupportHierarchy. Timings is written only after successful fill (277-300; sched.hpp:37-47).",
+    "Postorder visits parent-checked sorted children without a heap stack; the immutable tree contract makes subtree additions disjoint and bounded by N. Reverse bucket fill preserves ascending BallIdx within each node (113-170).",
+    "Prepared-domain combinatorial upper bounds fit u32 for per-ball/per-support counts, and fit u64 for offsets, ledgers and both admissions. bounds.json derives these independently with math.comb.",
+    "The extra conservative second-stage multiplication guard is unreachable within the prepared-shell domain; no reachable false resource refusal established."
+  ],
+  "known_limit_not_new_alert": [
+    "Allocating scratch for all Pool workers, even if fewer tasks are active, is already declared in verif_s6b; not re-reported.",
+    "No qualification transferred from reported Release checks or from byte-identical earlier sources.",
+    "No execution of u18/u21/u24 native, sanitizers, TSan, mutations, LiDAR or GCP.",
+    "No native harnais or product changes; no active audit note edited."
+  ]
+}

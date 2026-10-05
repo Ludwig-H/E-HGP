@@ -1,0 +1,78 @@
+{
+  "kind": "independent exact-integer domain bound, stdlib math.comb; no native execution",
+  "conditions": [
+    "prepared immutable OrderTree; every published shell m<=24 after prepass",
+    "I1-I4: every ant branch has at least one strict trace; prior is stored only for merge",
+    "N < UINT32_MAX; B <= UINT32_MAX; 1<=W<=256",
+    "Declared ABI assumptions: sizeof(Support)=20, sizeof(Ball)=40, sizeof(SupportLedger)=64; native source formulas use sizeof, not executed here"
+  ],
+  "shapes_enumerated": 3896,
+  "maxima": {
+    "kparties": {
+      "value": 834451800,
+      "shape": [
+        11,
+        24,
+        2,
+        12
+      ]
+    },
+    "compressed": {
+      "value": 2704156,
+      "shape": [
+        0,
+        24,
+        2,
+        12
+      ]
+    },
+    "cofaces_bound": {
+      "value": 1476337800,
+      "shape": [
+        11,
+        24,
+        2,
+        12
+      ]
+    },
+    "support_cofaces": {
+      "value": 193536720,
+      "shape": [
+        11,
+        24,
+        2,
+        12,
+        2
+      ]
+    },
+    "gabriel_bound": {
+      "value": 2704156,
+      "shape": [
+        0,
+        24,
+        2,
+        11
+      ]
+    }
+  },
+  "upper_dimensions": {
+    "nodes": 4294967294,
+    "balls": 4294967295,
+    "prior": 11614261580578020,
+    "supports": 55516747255170,
+    "workers": 256
+  },
+  "upper_bytes": {
+    "per_worker": 2355736,
+    "first": 46457373342894924,
+    "second": 1332401934124080,
+    "first_plus_second": 47789775277019004
+  },
+  "all_counts_below_u32": true,
+  "all_admission_sums_below_u64": true,
+  "extra_second_guard_inactive_in_prepared_domain": true,
+  "limitations": [
+    "Not a proof that an arbitrary forged/corrupted OrderTree satisfies I1-I4.",
+    "Does not execute native sizeof or test profile-specific primitives."
+  ]
+}

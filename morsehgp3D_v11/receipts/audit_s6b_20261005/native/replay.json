@@ -1,0 +1,19 @@
+{
+  "commands": [
+    "python3 -S -B bounds.py > bounds.json",
+    "python3 -O -S -B bounds.py > bounds_opt.json"
+  ],
+  "return_codes": [
+    0,
+    0
+  ],
+  "stderr_bytes": [
+    0,
+    0
+  ],
+  "stdout_byte_identical": true,
+  "script_sha256": "887bc1ebfe78dbb4db5eaf02ad17fb8df80db498a4d8a6ec0ac25f114480a2e0",
+  "stdout_sha256": "d17f668cf6ff758c5c9173df16a70c87fabb2761bd4dbdd9bf592fa7508913d3",
+  "abi_sizes": "declared assumptions; no native sizeof evaluated",
+  "native_executed": false
+}

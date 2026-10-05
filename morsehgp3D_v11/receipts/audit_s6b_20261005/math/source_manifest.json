@@ -1,0 +1,62 @@
+{
+  "developer_reports": {
+    "impl_s6b.md": {
+      "original": "/workspaces/E-HGP/build/v11-persist/sortie_supports/impl_s6b.md",
+      "sha256": "34650f31642193c0b0803f9a8bb3239240cca6b3cbbef830c430cd9ca7a09972",
+      "stable_during_copy": true
+    },
+    "verif_s6b.md": {
+      "original": "/workspaces/E-HGP/build/v11-persist/sortie_supports/verif_s6b.md",
+      "sha256": "489da1e1ff2f64cc8945e6827841fa52e2a0076baf84792f11053e596fee73d1",
+      "stable_during_copy": true
+    }
+  },
+  "files": {
+    "morsehgp3D_v11/docs/MATHEMATIQUES.md": "ef11f025f11068f7179dbad7b7268ffd2aafd479851ec895e4a847203c61714d",
+    "morsehgp3D_v11/docs/SORTIES.md": "9943e31e5912189f7c6d0f3159cfb62bcecb7b4273526bb10d364c5fe7cb3c37",
+    "morsehgp3D_v11/reference/README.md": "bd2159adc845e21aaa4fda75330f5ec7da49ecdb235adffdb4a8b29a5b560ced",
+    "morsehgp3D_v11/reference/hgp11_ref/__init__.py": "5309faf36a56bfb719d9fff4fb5872045aad87b1b35b2fc3992fd2c37791ad3e",
+    "morsehgp3D_v11/reference/hgp11_ref/constructive.py": "7e97f89789cafb4f241903e6d0f0e636425cdf3d526697e4e891d483f868fedc",
+    "morsehgp3D_v11/reference/hgp11_ref/definition.py": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43",
+    "morsehgp3D_v11/reference/hgp11_ref/dumps.py": "2ece0b491430e314091de7b40a72233e299c543f236bcc00bbd5f84b38338373",
+    "morsehgp3D_v11/reference/hgp11_ref/families.py": "244b9b325a7c9f43c7086cc7e9674bdc04ec2307a01bf69e2b12d5f02e75d73a",
+    "morsehgp3D_v11/reference/hgp11_ref/intgeom.py": "d0f7b1cecbbb1b25c3091bc1e3d3d062b9ee0f16b1d81c7117bf60b0d13a3f4b",
+    "morsehgp3D_v11/reference/hgp11_ref/judge.py": "09e65a40f7ff33400c04eb91c442a430579bf020b115589b69ad8384529d6507",
+    "morsehgp3D_v11/reference/hgp11_ref/model.py": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c",
+    "morsehgp3D_v11/reference/hgp11_ref/supports.py": "970f645462a019639cead958cf8f45b1324cf3083bb61fc9a0891ddc523254ee",
+    "morsehgp3D_v11/reference/interval_oracle.py": "4fcd49d8d41c09ebc9ebdd4bf79c5dffd8e848d58f12f284c420272f39f0d427",
+    "morsehgp3D_v11/reference/ref_mutants.py": "b6750ae0b3cbeb6dfcd8febdee8ba71dfcfa5bac8e55c340fe28bc9568d24231",
+    "morsehgp3D_v11/reference/test_dump_v10.py": "b858a324ffceb71f70c33249130f069f9ddef3c83a7e08efd88cf3e0a6871695",
+    "morsehgp3D_v11/reference/test_projection_contracts.py": "61c222b4e5717eb7c5f98bb9abfd35a17cf51e2570d7e033ff7806c7bab29936",
+    "morsehgp3D_v11/reference/test_ref.py": "e89e1f15b0dad7c47467ab5f3b586f197679d0ffd9bbcb27eb93b67bc7f1da68",
+    "morsehgp3D_v11/reference/test_supports.py": "1b90fdadfd896fa6b92ea02d34e457d111c80659683ddcc92117e3a07d205b12",
+    "morsehgp3D_v11/reference/tests.cmake": "98f4f68668bda999ba7fd6cc6a8633797c7e0e902564579dfcb11862871c7d15",
+    "morsehgp3D_v11/src/catalogue/assemble.cpp": "3690de6d856e05e72ce4cebbe1eda14152d609a262bb45efb4c2e7f45a1f13a5",
+    "morsehgp3D_v11/src/catalogue/sort_indices.cpp": "1a29095f472a98ae5a44108a4dd3352f1c9be0cbc48d107dd81130fa57aff0c0",
+    "morsehgp3D_v11/src/supports/counts.cpp": "23e01a8784e54d0dbe8d60ce3a2ec7ad9f4cae53f8668f39a5f2d4e728e8989a",
+    "morsehgp3D_v11/src/supports/counts.hpp": "5f1d7e75513bfc2bcfb234208c3f14fac486fb4db7d72a6a8b62caefadcd3a3b",
+    "morsehgp3D_v11/src/supports/enumerate.cpp": "3a8fcd0d7af148e4d7748234c8c02bec5f75158bfef41c5e7c5299177dbe7c86",
+    "morsehgp3D_v11/src/supports/hierarchy.cpp": "0221bdcd356de6b6c2a3f540e2f11d85d1873c26a415c862be5bbaa6e2c41155",
+    "morsehgp3D_v11/src/supports/module.cmake": "637e243bb43e4fe8f252b01b3006ccaaad69b5fec416c8857d8149ba5789e927",
+    "morsehgp3D_v11/src/supports/source_pins.json": "1b61359c5c6c2a82233120d04b959c423d8ec7fca69d7c1fd05c97bd8545066b",
+    "morsehgp3D_v11/src/supports/supports.hpp": "e1c44d577a34b13ad88cae37453ede739e6ca45874268b4d0a69e22e167c3ffc",
+    "morsehgp3D_v11/src/tower/forest.hpp": "f1014b0332eed89d36866eabb4eb659a5f5fdf66b4f96d4703c3ef596d910e28",
+    "morsehgp3D_v11/src/tower/order_tree.hpp": "e4e0996973e1157eddc203512913eb501aea982f55ada01435b7c62242361f4b",
+    "morsehgp3D_v11/tests/support/mhgp11_gate.py": "8812cb11d632534ed372a8ca7c88c7b3ad138920f1b46eeb5fd60222a2a2c4f0",
+    "morsehgp3D_v11/tests/supports/fraction_diff.py": "5e810ed1c3aa056020a865bcd51b5293b966a578844153135b735346e830ef70",
+    "morsehgp3D_v11/tests/supports/hierarchy_fault.cpp": "80bd56ab6a07ad456c3b1205d9991d0e85f7f024d0ed0df40bd85583c87115de",
+    "morsehgp3D_v11/tests/supports/hierarchy_fraction.py": "238ac40401abe5c1d9cc1e61cd3ba2715abb31830f13f7fc1908760799ab5024",
+    "morsehgp3D_v11/tests/supports/hierarchy_probe.cpp": "2488645336d70370d57b4627b09bb8b6d8ca82ece706ff745feec4f7e07fc28c",
+    "morsehgp3D_v11/tests/supports/hierarchy_support.hpp": "75231fd97044b25840d0442eddb131b8509b81900f7632dce28409201f5eb28b",
+    "morsehgp3D_v11/tests/supports/hierarchy_test.cpp": "564b176875507a26ccdadb66b572343b891d47f94ee703cb4e84cca2bb8bc4fd",
+    "morsehgp3D_v11/tests/supports/sample_judge.py": "1c8285c81213411c3f9e0ed28b45c912e447232be5e246043ec5a4141ca5caad",
+    "morsehgp3D_v11/tests/supports/supports_probe.cpp": "2e1dd632478c568b7383d5a8ced8afb1447a85318b893c93bcfd98ff88fcbbab",
+    "morsehgp3D_v11/tests/supports/supports_support.hpp": "4863cdf0456418c18be60d3937bd643857652d19134ff3c68b22f4570673cd11",
+    "morsehgp3D_v11/tests/supports/supports_test.cpp": "4f2c84098c25811f3a3457f772f3d1d756d46d8fabe723e22f8c2873d743960f",
+    "morsehgp3D_v11/tests/supports/tests.cmake": "41a9239ecd57b5f035994caf2ad7e4ecd5b91dd9c47b6c24c206675d8c74c3d6",
+    "morsehgp3D_v11/tests/supports/witness_test.cpp": "d9fc6d0e6237b28054e55f986ebb2546c3ee77ad0d479472d95497949367da7e",
+    "morsehgp3D_v11/tests/tower/attach_fraction.py": "16d43206c5436b7e89f71538173ef02172dc62012b296b08544ecc422ec372ad"
+  },
+  "pin": "9e7428995e3b359301d58d882610d9d4ee720fad",
+  "scope": "committed S6b 9e7428995, not yet qualification by this audit"
+}

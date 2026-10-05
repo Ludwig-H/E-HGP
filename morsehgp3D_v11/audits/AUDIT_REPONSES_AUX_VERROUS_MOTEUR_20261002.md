@@ -2,7 +2,7 @@
 
 5 octobre 2026. Relecture du contrat S0 et de l'oracle S1 au commit
 **5adf6a59f**, puis de la demande du développeur **9290cf3bf** et des WIP
-S3/S5/S6. Le socle FULL et les travaux sur les points/tête restent épinglés
+S3/S5/S6, publiées jusqu'à **9e7428995**. Le socle FULL et les travaux sur les points/tête restent épinglés
 aux reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 Note maintenue en place ; détails et échanges clos dans les reçus.
@@ -56,9 +56,20 @@ porte compare `build_order` sur `Cat_K` à la définition S1 : arbre,
 attaches à la coupe fermée, antécédents à la coupe ouverte, rôles et traces
 strictes. Elle exerce W1 et W3 avec permutation d'entrée, D2/E5 et le
 témoin de 12 sites à K1..12. Ce raccord ferme la demande d'inscription du
-juge permanent ; son exécution native et l'assemblage S6b/S7 restent
-distincts de la relecture Python.
+juge permanent ; son exécution native et la qualification S6b/S7 restent
+distinctes de la relecture Python. S3 est publiée en **165def5ab**.
 [Preuve et limites](../receipts/audit_corrections_s3_s5_20261005/README.md).
+
+**S6b : assemblage mathématique relu au commit publié 9e7428995.**
+Postordre, seaux stables, tous les supports positifs minimaux et comptes
+par boule/support concordent avec le contrat. L'égalité entre le compte
+des traces strictes et le journal est contrôlée avant publication.
+L'ordre `BallIdx` à niveau égal coïncide avec l'ordre lexicographique de
+S* : deux supports positifs minimaux distincts de même rayon ne peuvent
+être préfixes l'un de l'autre. Le rembourrage par `kNone` ne change donc
+pas cet ordre. Aucun nouveau défaut mathématique établi ; fichier S7 et
+qualification native restent ouverts.
+[Contre-épreuves et périmètre](../receipts/audit_s6b_20261005/README.md).
 
 **Contrat S0/S1 relu : favorable sur les points difficiles.** Les lemmes
 P/W, les deux lectures du retrait E5 et le témoin D2 concordent avec les
@@ -74,7 +85,7 @@ figées ; les coupes exactes de sept fixtures sont recoupées par un
 solveur/Γ indépendant. Ce rejeu borné ne remplace ni toute la suite S1,
 ni les tests natifs G4. Aucun nouveau défaut mathématique établi dans S0.
 
-**Deux gardes désormais corrigées dans les WIP.** S6 contrôle `p≤11`
+**Deux gardes corrigées dans les sources publiées.** S6 contrôle `p≤11`
 avant `p+q`, avec refus UINT32_MAX et frontière `(11,24,2,12)`.
 La nouvelle capture S3, `attachment.cpp` SHA **77f84f0050…**, appelle
 `published_traces(end−begin)` avant conversion : au-delà de UINT32_MAX,
@@ -133,7 +144,7 @@ sans parcourir les $2^{24}$ masques. C'est un bon oracle `long` **des
 primitives Q_b/N_j**, avec seulement j≤K+1 pour K≤3. Remplacer le seul
 calcul N_j dans l'oracle S1 complet ne suffit pas :
 `_minimal_nonseparable` prolonge aussi les sous-parties séparables
-jusqu'à m. Le brouillon L1 ajoute désormais un budget/refus explicite pour
+jusqu'à m. S6a contient un budget/refus explicite pour
 cette extension ; aucune
 censure silencieuse ni qualification de tout S1 à 24 sites par ce témoin.
 Les autres sphères proposées sont des compléments facultatifs ; préférer
@@ -158,9 +169,10 @@ FULL12, ni `ball_shape` à K12 sur un domaine préparé à K1.
 Un deuxième témoin, seulement 12 sites, exerce p=8,m=4,qmin2 à K10 :
 **66 parties reliées, 6 comprimées, 4 traces strictes, 12 cofaces et
 4 Gabriel**, contre 20 incidences par Q. Il complète la porte LiDAR longue
-et les petits cas S3 actuellement K≤5. Les portes S6a du brouillon L1
-reprennent désormais ces attendus indépendants aux indices intermédiaires
-hauts. Leur exécution native reste à qualifier ; aucun échec natif observé.
+et les cas S3 usuels K≤5. Les portes S6a publiées reprennent ces attendus
+indépendants aux indices intermédiaires hauts ; S3 et S6b exercent aussi
+le témoin de 12 sites jusqu'à K12. Leur exécution native reste à qualifier ;
+aucun échec natif observé.
 [Coordonnées, preuve et 4 135 gardes exactes](../receipts/audit_native_integration_20261005/qb/README.md).
 
 **Décisions courantes : Q_b seul, puis points, puis plat.** La réponse primaire
@@ -170,9 +182,9 @@ explicitement les sommets de Γ_K reliés **par la boule**, distincts des
 cofaces et des unions DSU. Le triangle aigu à K2 en relie trois, alors
 qu'aucune K-partie ne contient son Q de taille3 : ce dernier compteur ne
 répondrait pas au choix utilisateur. **S2/257aabb92 et S4/f98aeed67 sont livrés en
-source** : en-tête public et io. L'attribution S3 et l'énumération Q_b/S6
-ne sont pas encore livrées dans ces sources ; leurs rapports locaux ne
-constituent pas une qualification G4 du futur export.
+source** : en-tête public et io. L'attribution S3 et l'assemblage Q_b/S6
+sont désormais publiés jusqu'à **9e7428995** ; leurs rapports locaux ne
+constituent pas une qualification G4 du futur export S7.
 
 **D2 : correction de preuve reprise dans le contrat mathématique L0.**
 L'ancienne justification `β(F)≤niveau critique précédent` est fausse. À K2, prendre
