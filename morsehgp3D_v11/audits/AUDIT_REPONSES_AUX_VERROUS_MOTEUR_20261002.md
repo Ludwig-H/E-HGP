@@ -35,6 +35,13 @@ S10 exacte et le refus S9 passent, ainsi que les CLI points/plat et
 [Reçu finb](../receipts/audit_g4_finb_20261005/README.md).
 [Reçu fins](../receipts/audit_g4_fins_20261005/README.md).
 
+**Suivi finl.** Les onze portes K10 et dix-sept références FULL
+exactes passent au même pin. La coupure globale ne laisse que six
+campagnes mutants u21 sans résultat ; aucune de ces 28 portes
+fonctionnelles n’est manquante. Les différentiels points/tête Python
+étaient exclus de L et gardent leurs sessions dédiées.
+[Reçu finl](../receipts/audit_g4_finl_20261005/README.md).
+
 ## S10 native publiée : encadrement entier et frontière de capacité
 
 La tranche **076d9142b** remplace le filtre flottant par

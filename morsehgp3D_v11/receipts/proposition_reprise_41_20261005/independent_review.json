@@ -1,0 +1,164 @@
+{
+  "archive_sha256": "42425a0969d728688672785f34f3302b698cf2daea83ca6c62891d6ff9b28631",
+  "budgets": {
+    "command_timeout": 2200,
+    "configuration_timeout_all": [
+      2100
+    ],
+    "matrix_default": 2200,
+    "original_matrix_default": 2200,
+    "per_test_timeout_all": [
+      600
+    ],
+    "runner_cli_override": 2100
+  },
+  "configurations": [
+    {
+      "configuration": "gcc_release",
+      "exact_tests": [
+        "mhgp11_cli_full_identity_lidar_ng01_k5_opt",
+        "mhgp11_cli_full_identity_lidar_ng02_k5_opt",
+        "mhgp11_cli_supports_lidar_ng00_k5_opt",
+        "mhgp11_cli_supports_lidar_ng01_k5_opt",
+        "mhgp11_cli_supports_lidar_ng02_k5_opt",
+        "mhgp11_cli_supports_scale16000_opt",
+        "mhgp11_cli_supports_scale32000_opt",
+        "mhgp11_cli_supports_scale8000_opt"
+      ],
+      "expected_count": 8,
+      "extra": [],
+      "inventory_sha256": "cc30ac0434ed2b10c78a3bd4ca5c9e64e36c621e7753e45e494d29de78e33353",
+      "missing": [],
+      "profile_and_limits_preserved": {
+        "cmake_options": true,
+        "compiler": true,
+        "test_timeout_seconds": true,
+        "threads": true,
+        "timeout_seconds": true
+      },
+      "selected_count": 8
+    },
+    {
+      "configuration": "bits21",
+      "exact_tests": [
+        "mhgp11_cli_full_determinism_scale8000_opt",
+        "mhgp11_cli_full_identity_lidar_ng00_k5_opt",
+        "mhgp11_cli_full_identity_lidar_ng01_k5_opt",
+        "mhgp11_cli_full_identity_lidar_ng02_k5_opt",
+        "mhgp11_cli_full_identity_scale32000_opt",
+        "mhgp11_cli_supports_lidar_ng00_k5_opt",
+        "mhgp11_cli_supports_lidar_ng01_k5_opt",
+        "mhgp11_cli_supports_lidar_ng02_k5_opt",
+        "mhgp11_cli_supports_scale16000_opt",
+        "mhgp11_cli_supports_scale32000_opt",
+        "mhgp11_cli_supports_scale8000_opt"
+      ],
+      "expected_count": 11,
+      "extra": [],
+      "inventory_sha256": "6c36910a3e789c41f8ff5352b5735e978bcb41771576086bf2d7afb2d59df8b7",
+      "missing": [],
+      "profile_and_limits_preserved": {
+        "cmake_options": true,
+        "compiler": true,
+        "test_timeout_seconds": true,
+        "threads": true,
+        "timeout_seconds": true
+      },
+      "selected_count": 11
+    },
+    {
+      "configuration": "bits24",
+      "exact_tests": [
+        "mhgp11_cli_full_determinism_scale8000_opt",
+        "mhgp11_cli_full_identity_lidar_ng00_k5_opt",
+        "mhgp11_cli_full_identity_lidar_ng01_k5_opt",
+        "mhgp11_cli_full_identity_lidar_ng02_k5_opt",
+        "mhgp11_cli_full_identity_scale32000_opt",
+        "mhgp11_cli_supports_lidar_ng00_k5_opt",
+        "mhgp11_cli_supports_lidar_ng01_k5_opt",
+        "mhgp11_cli_supports_lidar_ng02_k5_opt",
+        "mhgp11_cli_supports_scale16000_opt",
+        "mhgp11_cli_supports_scale32000_opt",
+        "mhgp11_cli_supports_scale8000_opt"
+      ],
+      "expected_count": 11,
+      "extra": [],
+      "inventory_sha256": "6c36910a3e789c41f8ff5352b5735e978bcb41771576086bf2d7afb2d59df8b7",
+      "missing": [],
+      "profile_and_limits_preserved": {
+        "cmake_options": true,
+        "compiler": true,
+        "test_timeout_seconds": true,
+        "threads": true,
+        "timeout_seconds": true
+      },
+      "selected_count": 11
+    },
+    {
+      "configuration": "poison",
+      "exact_tests": [
+        "mhgp11_cli_full_determinism_scale8000_opt",
+        "mhgp11_cli_full_identity_lidar_ng00_k5_opt",
+        "mhgp11_cli_full_identity_lidar_ng01_k5_opt",
+        "mhgp11_cli_full_identity_lidar_ng02_k5_opt",
+        "mhgp11_cli_full_identity_scale32000_opt",
+        "mhgp11_cli_supports_lidar_ng00_k5_opt",
+        "mhgp11_cli_supports_lidar_ng01_k5_opt",
+        "mhgp11_cli_supports_lidar_ng02_k5_opt",
+        "mhgp11_cli_supports_scale16000_opt",
+        "mhgp11_cli_supports_scale32000_opt",
+        "mhgp11_cli_supports_scale8000_opt"
+      ],
+      "expected_count": 11,
+      "extra": [],
+      "inventory_sha256": "970a70880ab08627a682a17eb9e037630cda83259e84c7944e40ae4b7146d2f7",
+      "missing": [],
+      "profile_and_limits_preserved": {
+        "cmake_options": true,
+        "compiler": true,
+        "test_timeout_seconds": true,
+        "threads": true,
+        "timeout_seconds": true
+      },
+      "selected_count": 11
+    }
+  ],
+  "distinct_test_names": 11,
+  "forbidden_python_dash_c": false,
+  "integration_note_present": true,
+  "integration_path": "morsehgp3D_v11/tools/g4_reprise_41_20261005.json",
+  "limits": [
+    "Selection verified against old-pin inventories, to be rechecked at the corrected pushed commit.",
+    "validate_plan accepts the command form but does not check the --matrix target. The JSON must be committed under tools/ at the chosen corrected commit; receipts/ is not a worker source authority.",
+    "No timing guarantee or execution verdict is inferred."
+  ],
+  "load_matrix": {
+    "configurations": [
+      "gcc_release",
+      "bits21",
+      "bits24",
+      "poison"
+    ],
+    "conforme": true,
+    "validator_sha256": "2c41d275732618539fc483962139c8a844c10636628b827dfd74cb2705dd9c21"
+  },
+  "native_or_cloud_actions": 0,
+  "proposal_hashes": {
+    "g4_reprise_41.json": "01dd1061e379d2340fa59668b02e95f9f61f5938fddea75738afc6e4b24ead38",
+    "plan_reprise_41.json": "8c56dc229d892f4c370922d282cb00a50c5095665002f30a43fad061199564a2",
+    "scope.json": "45050406b61fd50f5e5b6a91a6bfd48e63e5b5f5cb77e8e25a304cdb661eb8c4"
+  },
+  "schema": "mhgp11_reprise_41_independent_review_v1",
+  "source_commit": "38b76701b9b0198fc1c37afe16e1480e638e513c",
+  "total_selected_occurrences": 41,
+  "validate_plan": {
+    "commands": 1,
+    "conforme": true,
+    "default_build": false,
+    "matrix_path_not_checked_by_validate_plan": true,
+    "matrix_present_at_old_pin": false,
+    "python_packages": "none",
+    "validator_sha256": "b86e5ff85d8cad6c7bd9da4e0dfbe4febc6fb980a1048a26a5478bcfbd92461d"
+  },
+  "verdict": "Favorable conditional proposal: exactly 41 missing ordinary occurrences, same profiles/poison/thread and timeout settings, form validators accept. Integration of matrix into pushed corrected source remains required."
+}

@@ -1,0 +1,125 @@
+{
+  "budget_seconds": 2200,
+  "configurations": [
+    {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=18"
+      ],
+      "compiler": "g++",
+      "ctest_args": [
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "^(mhgp11_cli_full_identity_lidar_ng01_k5_opt|mhgp11_cli_full_identity_lidar_ng02_k5_opt|mhgp11_cli_supports_lidar_ng00_k5_opt|mhgp11_cli_supports_lidar_ng01_k5_opt|mhgp11_cli_supports_lidar_ng02_k5_opt|mhgp11_cli_supports_scale16000_opt|mhgp11_cli_supports_scale32000_opt|mhgp11_cli_supports_scale8000_opt)$"
+      ],
+      "description": "Reprise ciblee fina2 : 8 portes ordinaires sans resultat ; memes options du profil gcc_release.",
+      "min_tests": 8,
+      "name": "gcc_release",
+      "require_labels": [
+        "lidar",
+        "scale16000",
+        "scale32000",
+        "scale8000"
+      ],
+      "require_labels_if_data": [
+        "lidar"
+      ],
+      "test_timeout_seconds": 600,
+      "threads": 16,
+      "timeout_seconds": 2100
+    },
+    {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "compiler": "g++",
+      "ctest_args": [
+        "-LE",
+        "^(mutant|long)$",
+        "-E",
+        "^mhgp11_reference_",
+        "-R",
+        "^(mhgp11_cli_full_determinism_scale8000_opt|mhgp11_cli_full_identity_lidar_ng00_k5_opt|mhgp11_cli_full_identity_lidar_ng01_k5_opt|mhgp11_cli_full_identity_lidar_ng02_k5_opt|mhgp11_cli_full_identity_scale32000_opt|mhgp11_cli_supports_lidar_ng00_k5_opt|mhgp11_cli_supports_lidar_ng01_k5_opt|mhgp11_cli_supports_lidar_ng02_k5_opt|mhgp11_cli_supports_scale16000_opt|mhgp11_cli_supports_scale32000_opt|mhgp11_cli_supports_scale8000_opt)$"
+      ],
+      "description": "Reprise ciblee fina2 : 11 portes ordinaires sans resultat ; memes options du profil bits21.",
+      "min_tests": 11,
+      "name": "bits21",
+      "require_labels": [
+        "lidar",
+        "scale16000",
+        "scale32000",
+        "scale8000"
+      ],
+      "test_timeout_seconds": 600,
+      "threads": 4,
+      "timeout_seconds": 2100
+    },
+    {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "compiler": "g++",
+      "ctest_args": [
+        "-LE",
+        "^(mutant|long)$",
+        "-E",
+        "^mhgp11_reference_",
+        "-R",
+        "^(mhgp11_cli_full_determinism_scale8000_opt|mhgp11_cli_full_identity_lidar_ng00_k5_opt|mhgp11_cli_full_identity_lidar_ng01_k5_opt|mhgp11_cli_full_identity_lidar_ng02_k5_opt|mhgp11_cli_full_identity_scale32000_opt|mhgp11_cli_supports_lidar_ng00_k5_opt|mhgp11_cli_supports_lidar_ng01_k5_opt|mhgp11_cli_supports_lidar_ng02_k5_opt|mhgp11_cli_supports_scale16000_opt|mhgp11_cli_supports_scale32000_opt|mhgp11_cli_supports_scale8000_opt)$"
+      ],
+      "description": "Reprise ciblee fina2 : 11 portes ordinaires sans resultat ; memes options du profil bits24.",
+      "min_tests": 11,
+      "name": "bits24",
+      "require_labels": [
+        "lidar",
+        "scale16000",
+        "scale32000",
+        "scale8000"
+      ],
+      "test_timeout_seconds": 600,
+      "threads": 4,
+      "timeout_seconds": 2100
+    },
+    {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_POISON=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "compiler": "g++",
+      "ctest_args": [
+        "-LE",
+        "^(mutant|long)$",
+        "-E",
+        "^mhgp11_reference_",
+        "-R",
+        "^(mhgp11_cli_full_determinism_scale8000_opt|mhgp11_cli_full_identity_lidar_ng00_k5_opt|mhgp11_cli_full_identity_lidar_ng01_k5_opt|mhgp11_cli_full_identity_lidar_ng02_k5_opt|mhgp11_cli_full_identity_scale32000_opt|mhgp11_cli_supports_lidar_ng00_k5_opt|mhgp11_cli_supports_lidar_ng01_k5_opt|mhgp11_cli_supports_lidar_ng02_k5_opt|mhgp11_cli_supports_scale16000_opt|mhgp11_cli_supports_scale32000_opt|mhgp11_cli_supports_scale8000_opt)$"
+      ],
+      "description": "Reprise ciblee fina2 : 11 portes ordinaires sans resultat ; memes options du profil poison.",
+      "min_tests": 11,
+      "name": "poison",
+      "require_labels": [
+        "lidar",
+        "scale16000",
+        "scale32000",
+        "scale8000"
+      ],
+      "test_timeout_seconds": 600,
+      "threads": 4,
+      "timeout_seconds": 2100
+    }
+  ],
+  "limits": {
+    "excerpt_line_chars": 400,
+    "excerpt_lines": 40,
+    "failures_listed": 100,
+    "log_bytes": 1048576
+  },
+  "note": "Proposition auditeur : seules les 41 occurrences ordinaires sans resultat du recu fina2 au pin 38b76701b (8/11/11/11), memes profils et options. Aucun verdict nouveau. Integrer ce JSON sous tools/ dans un commit corrige pousse avant utilisation. Supports_route et mutants API/CLI restent des reprises distinctes.",
+  "schema": "ehgp.v11.g4_matrix.v1",
+  "source_dir": "morsehgp3D_v11",
+  "thread_budget": 0
+}

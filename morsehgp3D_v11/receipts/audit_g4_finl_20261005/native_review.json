@@ -1,0 +1,290 @@
+{
+  "archive_bytes": 37844,
+  "archive_sha256": "2fc873bed69674bb060561387cac09e8b3ba7a793d62bda30d9a1ec14fbc39ee",
+  "authority": "Read-only diagnosis of archived runtime records. Global receipt and shutdown certification are reviewed separately by root; this report does not certify closure.",
+  "cmake_options": [
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DMHGP11_COORD_BITS=21"
+  ],
+  "configuration": "release_long",
+  "counts": {
+    "ctest_failed": null,
+    "ctest_total": null,
+    "failed": 0,
+    "not_run": 6,
+    "passed": 35,
+    "selected": 41
+  },
+  "diagnosis": [
+    "The matrix runner terminated the CTest step at the configuration deadline; test step exit -9, timed_out true, 2080.469 elapsed seconds for 2080.4 allotted seconds.",
+    "35 terminal Passed records are present; no terminal Failed or per-test Timeout record is present.",
+    "mhgp11_mutants_tower was started after mhgp11_mutants_catalogue Passed, but has no preserved terminal result. The next five mutant gates have no preserved start record.",
+    "The preserved LastTest.log has only 121 bytes from the initial listing, so no causal native output is available for the interrupted tower mutant lot.",
+    "768.06 s and 319.93 s are whole identity-gate durations, not engine-only performance measurements."
+  ],
+  "elapsed_configuration_seconds": 2100.036,
+  "failed_terminal_verdicts": [],
+  "lasttest_detail_available": false,
+  "logs": [
+    {
+      "bytes": 4778,
+      "marker_hits": {},
+      "member": "results/cmd/000_matrice/files/matrix/release_long/ctest.log",
+      "sha256": "bda27d6864bd17745353eef67e04b27008b222f44eea6af7e901c100c59671fa"
+    },
+    {
+      "bytes": 121,
+      "marker_hits": {},
+      "member": "results/cmd/000_matrice/files/matrix/release_long/LastTest.log",
+      "sha256": "b33180ebb964acdb9ce3fc63bec0238a5aa75277b18bc0fa01ed26c704610982"
+    },
+    {
+      "bytes": 611,
+      "marker_hits": {},
+      "member": "results/cmd/000_matrice/stdout",
+      "sha256": "a45db983d4a2f4774ffb7da466a90148c64d5dd4964fc102fe91022267e148f5"
+    },
+    {
+      "bytes": 0,
+      "marker_hits": {},
+      "member": "results/cmd/000_matrice/stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "missing": [
+    {
+      "interpretation": "started but no terminal verdict preserved",
+      "name": "mhgp11_mutants_tower",
+      "started_in_ctest_log": true,
+      "verdict": "no_result"
+    },
+    {
+      "interpretation": "no start or terminal verdict preserved",
+      "name": "mhgp11_mutants_supports",
+      "started_in_ctest_log": false,
+      "verdict": "no_result"
+    },
+    {
+      "interpretation": "no start or terminal verdict preserved",
+      "name": "mhgp11_mutants_points",
+      "started_in_ctest_log": false,
+      "verdict": "no_result"
+    },
+    {
+      "interpretation": "no start or terminal verdict preserved",
+      "name": "mhgp11_mutants_head",
+      "started_in_ctest_log": false,
+      "verdict": "no_result"
+    },
+    {
+      "interpretation": "no start or terminal verdict preserved",
+      "name": "mhgp11_mutants_api",
+      "started_in_ctest_log": false,
+      "verdict": "no_result"
+    },
+    {
+      "interpretation": "no start or terminal verdict preserved",
+      "name": "mhgp11_mutants_cli",
+      "started_in_ctest_log": false,
+      "verdict": "no_result"
+    }
+  ],
+  "passed": [
+    {
+      "line": "1/41 Test #1014: mhgp11_reference_full_13 .....................   Passed   39.13 sec",
+      "name": "mhgp11_reference_full_13",
+      "seconds": 39.13
+    },
+    {
+      "line": "2/41 Test #1006: mhgp11_reference_full_5 ......................   Passed   39.98 sec",
+      "name": "mhgp11_reference_full_5",
+      "seconds": 39.98
+    },
+    {
+      "line": "3/41 Test #1007: mhgp11_reference_full_6 ......................   Passed   40.34 sec",
+      "name": "mhgp11_reference_full_6",
+      "seconds": 40.34
+    },
+    {
+      "line": "4/41 Test #1015: mhgp11_reference_full_14 .....................   Passed   40.51 sec",
+      "name": "mhgp11_reference_full_14",
+      "seconds": 40.51
+    },
+    {
+      "line": "5/41 Test #1008: mhgp11_reference_full_7 ......................   Passed   40.72 sec",
+      "name": "mhgp11_reference_full_7",
+      "seconds": 40.72
+    },
+    {
+      "line": "6/41 Test #1013: mhgp11_reference_full_12 .....................   Passed   40.90 sec",
+      "name": "mhgp11_reference_full_12",
+      "seconds": 40.9
+    },
+    {
+      "line": "7/41 Test #1005: mhgp11_reference_full_4 ......................   Passed   41.56 sec",
+      "name": "mhgp11_reference_full_4",
+      "seconds": 41.56
+    },
+    {
+      "line": "8/41 Test #1009: mhgp11_reference_full_8 ......................   Passed   42.39 sec",
+      "name": "mhgp11_reference_full_8",
+      "seconds": 42.39
+    },
+    {
+      "line": "9/41 Test #1011: mhgp11_reference_full_10 .....................   Passed   42.41 sec",
+      "name": "mhgp11_reference_full_10",
+      "seconds": 42.41
+    },
+    {
+      "line": "10/41 Test #1001: mhgp11_reference_full_0 ......................   Passed   42.49 sec",
+      "name": "mhgp11_reference_full_0",
+      "seconds": 42.49
+    },
+    {
+      "line": "11/41 Test #1012: mhgp11_reference_full_11 .....................   Passed   42.75 sec",
+      "name": "mhgp11_reference_full_11",
+      "seconds": 42.75
+    },
+    {
+      "line": "12/41 Test #1004: mhgp11_reference_full_3 ......................   Passed   42.93 sec",
+      "name": "mhgp11_reference_full_3",
+      "seconds": 42.93
+    },
+    {
+      "line": "13/41 Test #1016: mhgp11_reference_full_15 .....................   Passed   43.14 sec",
+      "name": "mhgp11_reference_full_15",
+      "seconds": 43.14
+    },
+    {
+      "line": "14/41 Test #1010: mhgp11_reference_full_9 ......................   Passed   43.39 sec",
+      "name": "mhgp11_reference_full_9",
+      "seconds": 43.39
+    },
+    {
+      "line": "15/41 Test #1002: mhgp11_reference_full_1 ......................   Passed   43.98 sec",
+      "name": "mhgp11_reference_full_1",
+      "seconds": 43.98
+    },
+    {
+      "line": "16/41 Test #1003: mhgp11_reference_full_2 ......................   Passed   46.37 sec",
+      "name": "mhgp11_reference_full_2",
+      "seconds": 46.37
+    },
+    {
+      "line": "17/41 Test  #193: mhgp11_num_roots_cost_lidar_ng00_k10 .........   Passed    7.72 sec",
+      "name": "mhgp11_num_roots_cost_lidar_ng00_k10",
+      "seconds": 7.72
+    },
+    {
+      "line": "18/41 Test  #424: mhgp11_catalogue_euler_lidar_ng00_k10 ........   Passed   21.49 sec",
+      "name": "mhgp11_catalogue_euler_lidar_ng00_k10",
+      "seconds": 21.49
+    },
+    {
+      "line": "19/41 Test  #425: mhgp11_catalogue_euler_lidar_ng01_k10 ........   Passed   16.83 sec",
+      "name": "mhgp11_catalogue_euler_lidar_ng01_k10",
+      "seconds": 16.83
+    },
+    {
+      "line": "20/41 Test  #426: mhgp11_catalogue_euler_lidar_ng02_k10 ........   Passed   19.96 sec",
+      "name": "mhgp11_catalogue_euler_lidar_ng02_k10",
+      "seconds": 19.96
+    },
+    {
+      "line": "21/41 Test  #722: mhgp11_tower_order_identity_lidar_ng00_k10 ...   Passed   19.27 sec",
+      "name": "mhgp11_tower_order_identity_lidar_ng00_k10",
+      "seconds": 19.27
+    },
+    {
+      "line": "22/41 Test  #766: mhgp11_supports_registers_lidar_ng00_k10 .....   Passed   56.41 sec",
+      "name": "mhgp11_supports_registers_lidar_ng00_k10",
+      "seconds": 56.41
+    },
+    {
+      "line": "23/41 Test  #767: mhgp11_supports_registers_lidar_ng01_k10 .....   Passed   39.09 sec",
+      "name": "mhgp11_supports_registers_lidar_ng01_k10",
+      "seconds": 39.09
+    },
+    {
+      "line": "24/41 Test  #768: mhgp11_supports_registers_lidar_ng02_k10 .....   Passed   45.33 sec",
+      "name": "mhgp11_supports_registers_lidar_ng02_k10",
+      "seconds": 45.33
+    },
+    {
+      "line": "25/41 Test  #789: mhgp11_supports_hierarchy_lidar_ng00_k10 .....   Passed    5.47 sec",
+      "name": "mhgp11_supports_hierarchy_lidar_ng00_k10",
+      "seconds": 5.47
+    },
+    {
+      "line": "26/41 Test  #883: mhgp11_cli_full_identity_scale32000_k10 ......   Passed  768.06 sec",
+      "name": "mhgp11_cli_full_identity_scale32000_k10",
+      "seconds": 768.06
+    },
+    {
+      "line": "27/41 Test  #892: mhgp11_cli_full_identity_lidar_ng00_k10 ......   Passed  319.93 sec",
+      "name": "mhgp11_cli_full_identity_lidar_ng00_k10",
+      "seconds": 319.93
+    },
+    {
+      "line": "28/41 Test #1017: mhgp11_reference_full ........................   Passed    3.54 sec",
+      "name": "mhgp11_reference_full",
+      "seconds": 3.54
+    },
+    {
+      "line": "29/41 Test #1022: mhgp11_mutants_core ..........................   Passed   43.22 sec",
+      "name": "mhgp11_mutants_core",
+      "seconds": 43.22
+    },
+    {
+      "line": "30/41 Test #1025: mhgp11_mutants_num ...........................   Passed   89.44 sec",
+      "name": "mhgp11_mutants_num",
+      "seconds": 89.44
+    },
+    {
+      "line": "31/41 Test #1028: mhgp11_mutants_sched .........................   Passed    6.35 sec",
+      "name": "mhgp11_mutants_sched",
+      "seconds": 6.35
+    },
+    {
+      "line": "32/41 Test #1031: mhgp11_mutants_cloud .........................   Passed    8.71 sec",
+      "name": "mhgp11_mutants_cloud",
+      "seconds": 8.71
+    },
+    {
+      "line": "33/41 Test #1034: mhgp11_mutants_io ............................   Passed   16.32 sec",
+      "name": "mhgp11_mutants_io",
+      "seconds": 16.32
+    },
+    {
+      "line": "34/41 Test #1037: mhgp11_mutants_index .........................   Passed   19.92 sec",
+      "name": "mhgp11_mutants_index",
+      "seconds": 19.92
+    },
+    {
+      "line": "35/41 Test #1040: mhgp11_mutants_catalogue .....................   Passed  183.49 sec",
+      "name": "mhgp11_mutants_catalogue",
+      "seconds": 183.49
+    }
+  ],
+  "reason": "ctest : timeout",
+  "schema": "mhgp11_finl_runtime_review_v1",
+  "scope_limits": [
+    "No native failure cause can be inferred for the six no_result gates.",
+    "No promotion to a completed long suite: six selected tests still have no terminal result.",
+    "No build, native test, or cloud action was executed by this auditor."
+  ],
+  "selection": [
+    "-L",
+    "^long$",
+    "-E",
+    "_vs_python"
+  ],
+  "status": "timeout",
+  "test_step": {
+    "exit_code": -9,
+    "seconds": 2080.469,
+    "status": "timeout",
+    "timed_out": true,
+    "timeout_seconds": 2080.4
+  }
+}

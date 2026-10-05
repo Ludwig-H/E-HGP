@@ -10,6 +10,42 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
+## Reprise ciblée après correction des portes
+
+Les 41 occurrences ordinaires sans résultat de fina2 ne figurent pas
+dans L/P10/P9/mesure. La proposition jointe conserve les quatre
+configurations et sélectionne exactement leurs 8/11/11/11 noms, sans
+rejouer la matrice entière. Les deux validateurs et une contrelecture
+indépendante confirment profils, poison, délais et sélection. Le JSON
+ciblé doit être intégré sous `tools/` au commit corrigé poussé avant
+exécution : le paquet exclut `receipts/` et le contrôleur refuse
+`python3 -c`. Aucun contournement, aucune session lancée par l’audit.
+
+Les reprises des six portes supports_route en u18/u24 et ASan u24,
+puis des seules campagnes API/CLI u18, restent distinctes après leurs
+corrections. Les 28 identités/références longues terminées dans finl
+ne sont pas ajoutées à cette reprise. Les profils des campagnes
+mutants u18 et u21 restent séparés.
+[Plan concret, noms exacts et intégration requise](../receipts/proposition_reprise_41_20261005/README.md).
+
+## Finl : portes longues fonctionnelles terminées, mutants séparés
+
+La session `v11.20261005.claudefinl` est close au pin **38b76701b**,
+avec arrêt ciblé certifié. Les **28 portes longues hors mutants**
+passent : onze K10 et dix-sept références FULL exactes. Le filtre
+`long` a aussi sélectionné les treize campagnes mutants ; sept passent
+en u21, puis l’échéance globale interrompt tower et laisse cinq autres
+campagnes sans démarrage consigné. Bilan CTest : **35/41 PASS, zéro
+Failed, six sans résultat** ; état matriciel `timeout` conservé.
+
+Aucune identité K10 ni référence FULL de ce lot ne manque. Exclure
+le label `mutant` d’une future sélection L lui rend son périmètre
+fonctionnel ; aucun rejeu de ses 28 portes n’est demandé à cause de
+cette coupure. M reste une campagne en u18, sans transfert à u21.
+Les réparations API/CLI de finm et les huit différentiels P10/P9
+restent distincts. Aucun défaut moteur établi par le délai global.
+[Reçu, inventaire et interruption](../receipts/audit_g4_finl_20261005/README.md).
+
 ## Finb : contrôles sanitizer courts intégralement conformes
 
 Session `v11.20261005.claudefinb`, source **38b76701b**, terminée avec

@@ -1,0 +1,368 @@
+{
+  "backend": "cpu_reference",
+  "configurations": [
+    {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=18"
+      ],
+      "configuration": "gcc_release",
+      "exact_tests": [
+        "mhgp11_cli_full_identity_lidar_ng01_k5_opt",
+        "mhgp11_cli_full_identity_lidar_ng02_k5_opt",
+        "mhgp11_cli_supports_lidar_ng00_k5_opt",
+        "mhgp11_cli_supports_lidar_ng01_k5_opt",
+        "mhgp11_cli_supports_lidar_ng02_k5_opt",
+        "mhgp11_cli_supports_scale16000_opt",
+        "mhgp11_cli_supports_scale32000_opt",
+        "mhgp11_cli_supports_scale8000_opt"
+      ],
+      "expected_count": 8,
+      "inventory_member": "results/cmd/000_matrice/files/matrix/gcc_release/tests.json",
+      "inventory_sha256": "cc30ac0434ed2b10c78a3bd4ca5c9e64e36c621e7753e45e494d29de78e33353",
+      "probes_not_repeated": [
+        {
+          "executable": "mhgp11_sched_probe",
+          "name": "sched_probe",
+          "timeout_seconds": 180
+        }
+      ],
+      "removed_require_labels": [
+        "unit",
+        "fast"
+      ],
+      "selected_labels": [
+        "lidar",
+        "scale16000",
+        "scale32000",
+        "scale8000"
+      ]
+    },
+    {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "configuration": "bits21",
+      "exact_tests": [
+        "mhgp11_cli_full_determinism_scale8000_opt",
+        "mhgp11_cli_full_identity_lidar_ng00_k5_opt",
+        "mhgp11_cli_full_identity_lidar_ng01_k5_opt",
+        "mhgp11_cli_full_identity_lidar_ng02_k5_opt",
+        "mhgp11_cli_full_identity_scale32000_opt",
+        "mhgp11_cli_supports_lidar_ng00_k5_opt",
+        "mhgp11_cli_supports_lidar_ng01_k5_opt",
+        "mhgp11_cli_supports_lidar_ng02_k5_opt",
+        "mhgp11_cli_supports_scale16000_opt",
+        "mhgp11_cli_supports_scale32000_opt",
+        "mhgp11_cli_supports_scale8000_opt"
+      ],
+      "expected_count": 11,
+      "inventory_member": "results/cmd/000_matrice/files/matrix/bits21/tests.json",
+      "inventory_sha256": "6c36910a3e789c41f8ff5352b5735e978bcb41771576086bf2d7afb2d59df8b7",
+      "probes_not_repeated": [],
+      "removed_require_labels": [
+        "unit"
+      ],
+      "selected_labels": [
+        "lidar",
+        "scale16000",
+        "scale32000",
+        "scale8000"
+      ]
+    },
+    {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "configuration": "bits24",
+      "exact_tests": [
+        "mhgp11_cli_full_determinism_scale8000_opt",
+        "mhgp11_cli_full_identity_lidar_ng00_k5_opt",
+        "mhgp11_cli_full_identity_lidar_ng01_k5_opt",
+        "mhgp11_cli_full_identity_lidar_ng02_k5_opt",
+        "mhgp11_cli_full_identity_scale32000_opt",
+        "mhgp11_cli_supports_lidar_ng00_k5_opt",
+        "mhgp11_cli_supports_lidar_ng01_k5_opt",
+        "mhgp11_cli_supports_lidar_ng02_k5_opt",
+        "mhgp11_cli_supports_scale16000_opt",
+        "mhgp11_cli_supports_scale32000_opt",
+        "mhgp11_cli_supports_scale8000_opt"
+      ],
+      "expected_count": 11,
+      "inventory_member": "results/cmd/000_matrice/files/matrix/bits24/tests.json",
+      "inventory_sha256": "6c36910a3e789c41f8ff5352b5735e978bcb41771576086bf2d7afb2d59df8b7",
+      "probes_not_repeated": [],
+      "removed_require_labels": [
+        "unit"
+      ],
+      "selected_labels": [
+        "lidar",
+        "scale16000",
+        "scale32000",
+        "scale8000"
+      ]
+    },
+    {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_POISON=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "configuration": "poison",
+      "exact_tests": [
+        "mhgp11_cli_full_determinism_scale8000_opt",
+        "mhgp11_cli_full_identity_lidar_ng00_k5_opt",
+        "mhgp11_cli_full_identity_lidar_ng01_k5_opt",
+        "mhgp11_cli_full_identity_lidar_ng02_k5_opt",
+        "mhgp11_cli_full_identity_scale32000_opt",
+        "mhgp11_cli_supports_lidar_ng00_k5_opt",
+        "mhgp11_cli_supports_lidar_ng01_k5_opt",
+        "mhgp11_cli_supports_lidar_ng02_k5_opt",
+        "mhgp11_cli_supports_scale16000_opt",
+        "mhgp11_cli_supports_scale32000_opt",
+        "mhgp11_cli_supports_scale8000_opt"
+      ],
+      "expected_count": 11,
+      "inventory_member": "results/cmd/000_matrice/files/matrix/poison/tests.json",
+      "inventory_sha256": "970a70880ab08627a682a17eb9e037630cda83259e84c7944e40ae4b7146d2f7",
+      "probes_not_repeated": [],
+      "removed_require_labels": [
+        "unit"
+      ],
+      "selected_labels": [
+        "lidar",
+        "scale16000",
+        "scale32000",
+        "scale8000"
+      ]
+    }
+  ],
+  "data_manifest_sha256": "826643041e3336c1f0582e687a6c47595a3926e7a8f0541232282a9f7b9a6095",
+  "data_names": [
+    "lidar_ng00.ids.u32le",
+    "lidar_ng00.u32le",
+    "lidar_ng01.ids.u32le",
+    "lidar_ng01.u32le",
+    "lidar_ng02.ids.u32le",
+    "lidar_ng02.u32le",
+    "manifest.json",
+    "uniform_u18_n16000.ids.u32le",
+    "uniform_u18_n16000.u32le",
+    "uniform_u18_n32000.ids.u32le",
+    "uniform_u18_n32000.u32le",
+    "uniform_u18_n8000.ids.u32le",
+    "uniform_u18_n8000.u32le"
+  ],
+  "distinct_test_names": 11,
+  "fina2_archive_sha256": "42425a0969d728688672785f34f3302b698cf2daea83ca6c62891d6ff9b28631",
+  "fina2_receipt_sha256": "2d716c0f0c27d2fe7d56f7c2f38bad4b4d08b00be78a3a20177477698ae49436",
+  "input_data_directory": "build/v11-persist/qual_sorties/data_complet",
+  "integration_steps": [
+    "Copier g4_reprise_41.json vers morsehgp3D_v11/tools/g4_reprise_41_20261005.json ; seul fichier produit nouveau requis.",
+    "Revoir le delta au commit corrige, garder les quatre profils et leurs options ; pousser ce commit sur main.",
+    "Verifier que la matrice est dans git ls-tree au commit choisi, puis valider le plan et le preflight avec ce commit et data_complet.",
+    "Executer ensuite une seule session gardee, apres fermeture certifiee de la session precedente ; conserver inventaire, verdict par nom et arret cible certifie."
+  ],
+  "limits": [
+    "La validation de forme du plan ne verifie pas lexistence du chemin --matrix : integration explicite indispensable.",
+    "Selection demontree sur les inventaires fina2 du pin 38b76701b, pas inventaire dune future source corrigee.",
+    "Les 783 PASS sanitizers courts de finb et les 80 portes normales par profil de fins ne sont pas des verdicts ordinaires _opt dans les quatre configurations.",
+    "Delais 2100/2200 conserves ; aucune garantie de temps ni recommandation de taille VM.",
+    "Aucune execution ni donnees LiDAR ou sortie binaire copies ; archives locales necessaires au rejeu de selection."
+  ],
+  "matrix_integration_path": "morsehgp3D_v11/tools/g4_reprise_41_20261005.json",
+  "native_or_cloud_runs": 0,
+  "ordinary_occurrences": 41,
+  "ordinary_tests_covered_by_remaining_chain": [],
+  "phase": "exploration_v11_hors_registre",
+  "profile": "quantized_u21_input_only",
+  "public_status": "not_claimed",
+  "remaining_chain_plans": [
+    {
+      "plan": "plan_l.json",
+      "selectors": [
+        {
+          "command": "matrice",
+          "ctest_regex": null,
+          "only": "release_long",
+          "script_or_ctest": [
+            "python3",
+            "{src}/morsehgp3D_v11/tools/g4_matrix.py"
+          ]
+        }
+      ],
+      "sha256": "5f886435ca435f8a3a04be5ed0cc9c6d75b62a4ad4ad444f7d33717c71242b01"
+    },
+    {
+      "plan": "plan_p10.json",
+      "selectors": [
+        {
+          "command": "head_python_synthetique",
+          "ctest_regex": "^mhgp11_head_vs_python$",
+          "only": null,
+          "script_or_ctest": [
+            "ctest",
+            "--no-tests=error"
+          ]
+        },
+        {
+          "command": "head_python_ng00",
+          "ctest_regex": "^mhgp11_head_vs_python_lidar_ng00_k5$",
+          "only": null,
+          "script_or_ctest": [
+            "ctest",
+            "--no-tests=error"
+          ]
+        },
+        {
+          "command": "head_python_ng01",
+          "ctest_regex": "^mhgp11_head_vs_python_lidar_ng01_k5$",
+          "only": null,
+          "script_or_ctest": [
+            "ctest",
+            "--no-tests=error"
+          ]
+        },
+        {
+          "command": "head_python_ng02",
+          "ctest_regex": "^mhgp11_head_vs_python_lidar_ng02_k5$",
+          "only": null,
+          "script_or_ctest": [
+            "ctest",
+            "--no-tests=error"
+          ]
+        }
+      ],
+      "sha256": "05140a7cfde5b523599e2c8612186ef0dac41467340781ff4558bcdcce092658"
+    },
+    {
+      "plan": "plan_p9.json",
+      "selectors": [
+        {
+          "command": "points_python_synthetique",
+          "ctest_regex": "^mhgp11_points_vs_python$",
+          "only": null,
+          "script_or_ctest": [
+            "ctest",
+            "--no-tests=error"
+          ]
+        },
+        {
+          "command": "points_python_ng00",
+          "ctest_regex": "^mhgp11_points_vs_python_lidar_ng00_k5$",
+          "only": null,
+          "script_or_ctest": [
+            "ctest",
+            "--no-tests=error"
+          ]
+        },
+        {
+          "command": "points_python_ng01",
+          "ctest_regex": "^mhgp11_points_vs_python_lidar_ng01_k5$",
+          "only": null,
+          "script_or_ctest": [
+            "ctest",
+            "--no-tests=error"
+          ]
+        },
+        {
+          "command": "points_python_ng02",
+          "ctest_regex": "^mhgp11_points_vs_python_lidar_ng02_k5$",
+          "only": null,
+          "script_or_ctest": [
+            "ctest",
+            "--no-tests=error"
+          ]
+        }
+      ],
+      "sha256": "0a184704cff0f517cd4a2bb8b4354f792dfb40936f7c7c8fcbc5d7d5dad922fc"
+    },
+    {
+      "plan": "plan_mesure.json",
+      "selectors": [
+        {
+          "command": "mesure_l2",
+          "ctest_regex": null,
+          "only": null,
+          "script_or_ctest": [
+            "python3",
+            "{src}/morsehgp3D_v11/bench/sorties_g4.py"
+          ]
+        },
+        {
+          "command": "supports_w48_ng02",
+          "ctest_regex": null,
+          "only": null,
+          "script_or_ctest": [
+            "python3",
+            "{src}/morsehgp3D_v11/tests/cli/cli_supports_scale.py"
+          ]
+        },
+        {
+          "command": "supports_w48_ng00",
+          "ctest_regex": null,
+          "only": null,
+          "script_or_ctest": [
+            "python3",
+            "{src}/morsehgp3D_v11/tests/cli/cli_supports_scale.py"
+          ]
+        }
+      ],
+      "sha256": "6810edeb451e85f69d58200f105d480270654ac4a78ae7f960232c7c7d367e8d"
+    }
+  ],
+  "schema": "ehgp.v11.audit.targeted_reprise_proposal.v1",
+  "separate_repair_scope": {
+    "long": {
+      "mutant_campaigns_in_finl": 13,
+      "mutant_campaigns_missing_u21": 6,
+      "mutant_campaigns_passed_u21": 7,
+      "no_nonmutant_replay_added": true,
+      "no_transfer_from_finm_u18": true,
+      "nonmutants_in_finl": 28,
+      "nonmutants_passed": 28,
+      "suggestion": "Pour une future voie L visant K10, ajouter -LE ^mutant$ au filtre long ; les campagnes mutants ont leur voie et leur profil explicites."
+    },
+    "mutants": {
+      "api_unjudged_at_finm": 23,
+      "cli_observed_survivor_at_finm": "sp_masque_16379",
+      "configuration": "mutants",
+      "exact_campaigns": [
+        "mhgp11_mutants_api",
+        "mhgp11_mutants_cli"
+      ],
+      "not_in_41_plan": true,
+      "profile": "u18",
+      "required_before_replay": "API : temoin non mute conforme apres correction supports_route. CLI : porte effectivement sensible a order_params (mhgp11_cli_points), compiler puis juger les individus."
+    },
+    "supports_route": {
+      "additional_sanitizer_configuration": "gcc_asan_ubsan_u24",
+      "additional_sanitizer_occurrences": 6,
+      "exact_names": [
+        "mhgp11_api_supports_route_lidar_ng00_k5",
+        "mhgp11_api_supports_route_lidar_ng01_k5",
+        "mhgp11_api_supports_route_lidar_ng02_k5",
+        "mhgp11_api_supports_route_scale16000",
+        "mhgp11_api_supports_route_scale32000",
+        "mhgp11_api_supports_route_scale8000"
+      ],
+      "not_in_41_plan": true,
+      "ordinary_configurations": [
+        "gcc_release",
+        "bits24"
+      ],
+      "ordinary_occurrences": 12,
+      "required_before_replay": "Corriger les attentes de hashes dependantes du profil ; conserver les assertions metier et comparaisons calcul/FULL/ordre."
+    }
+  },
+  "source_commit": "38b76701b9b0198fc1c37afe16e1480e638e513c",
+  "source_matrix_path": "morsehgp3D_v11/tools/g4_matrix.json",
+  "source_matrix_sha256": "da013a34d8908267d60a7fec0751802103c7ab975f8183709c2f968efe5f360c",
+  "state": "proposal_not_executed_integration_required",
+  "validator_sources": {
+    "gcp-migration/v11_session.py": "b86e5ff85d8cad6c7bd9da4e0dfbe4febc6fb980a1048a26a5478bcfbd92461d",
+    "morsehgp3D_v11/tools/g4_matrix.py": "2c41d275732618539fc483962139c8a844c10636628b827dfd74cb2705dd9c21"
+  }
+}
