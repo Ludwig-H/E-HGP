@@ -1,5 +1,5 @@
 {
-  "status": "Tranche S6a de la sortie parametree (Q_b et comptes) ; assemblage (hierarchy.cpp) en attente du rattachement S3 ; qualification native G4 non acquise",
+  "status": "Tranches S6a (Q_b et comptes) et S6b (assemblage, hierarchy.cpp, ecrit a neuf sans port) de la sortie parametree ; qualification native G4 non acquise",
   "sources": [
     {
       "commit": "462dca187bc2c38ae774f600f2975874d50733ee",

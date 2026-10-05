@@ -1,6 +1,6 @@
 {
   "module": "supports",
-  "plancher": 9,
+  "plancher": 15,
   "mutants": [
     {
       "id": "triangle_droit_accepte",
@@ -80,6 +80,61 @@
       "remplace": "constexpr u32 support_cofaces(const Shape& s, u32 arity) noexcept {\n  if (arity < 2 || arity > 4) return 0;",
       "porte": "mhgp11_supports_unit_impossible_arity",
       "note": "audit general a65903a7b, P2 : arite superieure a m admise, support_cofaces(make_shape(2, 2, 2, 3), 3) rend C(1, 1) = 1 ; la meme clause retiree de support_gabriel_cofaces est equivalente (C(m - a, .) deja nul)"
+    },
+    {
+      "id": "boules_propres_decroissantes",
+      "fichier": "src/supports/hierarchy.cpp",
+      "cherche": "  for (u64 i = b; i-- > 0;) origin[--off[u64{post[idx(a.node()[i])]} + 1]] = static_cast<u32>(i);",
+      "remplace": "  for (u64 i = 0; i < b; ++i) origin[--off[u64{post[idx(a.node()[i])]} + 1]] = static_cast<u32>(i);",
+      "porte": "mhgp11_supports_hierarchy_fixtures",
+      "note": "seaux remplis dans l'ordre croissant des BallIdx avec la fin decrementee : listes propres en rangs decroissants, premiere boule propre hors du rang du noeud (I11)"
+    },
+    {
+      "id": "supports_tri_pointid",
+      "fichier": "src/supports/hierarchy.cpp",
+      "cherche": "  const auto before = [](const Support& l, const Support& r) noexcept {",
+      "remplace": "  const auto before = [&cloud = s.tree.domain().index().cloud()](const Support& l, const Support& r) noexcept {",
+      "aussi": [
+        {
+          "fichier": "src/supports/hierarchy.cpp",
+          "cherche": "      if (l.sites[j] != r.sites[j]) return idx(l.sites[j]) < idx(r.sites[j]);",
+          "remplace": "      if (l.sites[j] != r.sites[j]) return idx(cloud.ids()[cloud.offsets()[idx(l.sites[j])]]) > idx(cloud.ids()[cloud.offsets()[idx(r.sites[j])]]);"
+        }
+      ],
+      "porte": "mhgp11_supports_hierarchy_fixtures",
+      "note": "supports d'une boule tries par PointId (decroissants) au lieu des SiteIdx : ordre publie (arite, SiteIdx) rompu, S* plus en tete (I5)"
+    },
+    {
+      "id": "admission_brouillon_oublie",
+      "fichier": "src/supports/supports.hpp",
+      "cherche": "(widest == 0 ? 0 : sizeof(u64) * closure_words(static_cast<u32>(widest)))",
+      "remplace": "u64{0}",
+      "porte": "mhgp11_supports_hierarchy_admission",
+      "note": "brouillon de fermeture par fil oublie dans l'admission (apports des auditeurs 238734f1d) : sous le premier etage d'un octet, les sorties s'allouent avant le refus (pic non nul)"
+    },
+    {
+      "id": "admission_liste_oubliee",
+      "fichier": "src/supports/supports.hpp",
+      "cherche": "sizeof(Support) * (widest == 0 ? 1 : support_capacity(static_cast<u32>(widest)))",
+      "remplace": "u64{0}",
+      "porte": "mhgp11_supports_hierarchy_admission",
+      "note": "liste temporaire de supports par fil (au plus 12 926 entrees) oubliee dans l'admission : refus apres allocation des sorties"
+    },
+    {
+      "id": "admission_un_seul_fil",
+      "fichier": "src/supports/supports.hpp",
+      "cherche": "           workers * per_worker();",
+      "remplace": "           per_worker();",
+      "porte": "mhgp11_supports_hierarchy_admission",
+      "note": "tampons d'un seul fil admis quel que soit le Pool : sous-estimation a W2 et W4"
+    },
+    {
+      "id": "prepasse_plafond_omise",
+      "fichier": "src/supports/hierarchy.cpp",
+      "cherche": "    MHGP11_TRY(check_shell(data.m));\n    widest = std::max<u64>(widest, data.m);",
+      "remplace": "    widest = std::max<u64>(widest, std::min<u64>(data.m, kMaxShell));",
+      "porte": "mhgp11_supports_hierarchy_sphere9",
+      "note": "plafond de l'appel entier retire de la pre-passe : le refus support_shell_capacity ne vient plus que de ball_supports, apres l'allocation des sorties (pic non nul a 25 sites)"
     }
   ]
 }

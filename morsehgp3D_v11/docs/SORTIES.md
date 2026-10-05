@@ -342,7 +342,7 @@ de coquille hors de tout support sont interchangeables.
 - Les unions effectuées par le constructeur dépendent de l'ordre de traitement : elles ne sont jamais publiées.
 
 **API native des primitives** (tranche S6a, `src/supports/supports.hpp`, intégrée en L1 le 5 octobre 2026 ;
-l'assemblage, postordre et `SupportHierarchy`, vient avec S6b).
+l'assemblage est décrit plus bas, tranche S6b).
 - `ball_supports` rend $\mathcal{Q}_b$ d'une boule du catalogue dans l'ordre publié, $S^*$ en tête, et sa fermeture
   $N_0..N_m$ (`Closure`, jamais stockée). $\mathcal{Q}_b$ ne dépend pas de $K$.
 - `ball_shape` (ou `make_shape`) donne la forme $(p,m,q_{\min},K)$ ; `ball_counts` rend les comptes de la boule
@@ -359,6 +359,30 @@ l'assemblage, postordre et `SupportHierarchy`, vient avec S6b).
   foi (G2).
 - `SupportLedger` est un registre de mesure, jamais une décision, et il n'est pas protégé : un registre par fil,
   sommé par `SupportLedger::add` après la jointure.
+
+**Assemblage** (tranche S6b, `build_support_hierarchy(const OrderTree&, MemoryBudget&, sched::Pool*,
+HierarchyTimings*)`, 5 octobre 2026, qualification G4 en attente). Il rend `SupportHierarchy`, la hiérarchie en
+mémoire que l'écrivain `MHGP11SP` (S7) sérialisera.
+- Contenu : `post` et `subtree_size` par `NodeIdx` ; `ball_offsets` ($N+1$, indexés par rang de postordre) ; les
+  boules de $W_K$ dans l'ordre (postordre du nœud de rattachement, rang, `BallIdx`) avec leurs comptes en mémoire
+  (`Ball` : `kparties_reliees`, `compressed_parts`, `strict_traces`, `cofaces`, `gabriel_cofaces`, `components`) ;
+  `support_offsets` et `supports` dans l'ordre publié, `support_cofaces` (incidences par support) ;
+  `prior_offsets` et `prior`, rôle fusion seulement ; le registre `SupportLedger` de la passe count. Rien de cela
+  n'entre tel quel dans le fichier : seules les colonnes de la table ci-dessus y sont écrites.
+- Étapes : pré-passe du plafond sur **toutes** les coquilles étendues de $W_K$, avant toute allocation ; admission ;
+  postordre itératif depuis la racine, enfants par `NodeIdx` croissant, sans pile ; tri des boules par seaux stables ;
+  passe count parallèle ($\mathcal{Q}_b$, comptes, contre-épreuve $S_{\mathrm{journal}}=\binom{m}{t}-N_t$) ; sommes
+  préfixes vérifiées des décalages `u64` ; passe fill à positions fixes (même position, même `BallIdx` ; même nombre
+  de supports qu'en count, sinon `supports_invariant`). Sorties identiques à l'octet quel que soit le Pool.
+- Admission (formule `HierarchyAdmission`, recalculée par la porte) : avant la passe count, les sorties connues, un
+  temporaire de $4B$ octets et, **par fil actif**, le registre, le brouillon de fermeture ($8\cdot 2^{w-6}$ octets
+  pour la plus grande coquille étendue $w$ de $W_K$, 2 Mio à $w=24$) et la liste temporaire de supports
+  (`support_capacity(w)` entrées de `sizeof(Support)`, au plus 12 926) ; avant la passe fill, les supports et leurs
+  incidences. Un refus d'admission précède toute allocation.
+- Refus : `support_shell_capacity` pour l'appel entier si une boule de $W_K$ a $m>24$, avant tout calcul de
+  $\mathcal{Q}_b$ et sans rien allouer ; `memory_budget` ; `supports_invariant` (contre-épreuve du journal, nombre de
+  supports entre les passes, et gardes d'arbre et de rattachement sans porte possible) ; ceux des primitives et du
+  Pool. Aucun résultat partiel ; les diagnostics `HierarchyTimings` ne sont écrits qu'au succès.
 
 **Ce que le lecteur contrôle**, sans la coquille :
 - l'arbre est bien formé ;

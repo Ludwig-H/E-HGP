@@ -129,10 +129,11 @@ Plan :
 
 Déjà livrés : en-tête public de la tour (S2, `257aabb92`) et module `io` (S4, `f98aeed67`). Intégrées en L1 le
 5 octobre 2026, qualification G4 en attente : les primitives du module `supports` (S6a : $\mathcal{Q}_b$, fermeture et
-comptes du lemme G ; l'assemblage vient avec S6b), puis la façade `api` et l'exécutable `mhgp11 --sortie=full` (S5).
-Celui-ci publie un dossier $D$ (`full.mhgp11ful1`, octet pour octet le dump de la sonde, et `manifeste.json`) et
-écrit une ligne JSON ; codes 0, 2 (refus) et 3 (invariant violé) ; la ligne de refus déclare l'état du dossier
-(`publication`, `manifest_sha256`). La règle qui décide en L2 entre l'arbre d'ordre K seul et le
+comptes du lemme G ; l'assemblage `SupportHierarchy` est livré par S6b, qualification G4 en attente), puis la façade
+`api` et l'exécutable `mhgp11 --sortie=full` (S5). Celui-ci publie un dossier $D$ (`full.mhgp11ful1`, octet pour
+octet le dump de la sonde, et `manifeste.json`) et écrit une ligne JSON ; codes 0, 2 (refus) et 3 (invariant violé) ;
+la ligne de refus déclare l'état du dossier (`publication`, `manifest_sha256`). La règle qui décide en L2 entre
+l'arbre d'ordre K seul et le
 journal posé dans `build_full` est écrite d'avance (§ 11 du contrat). Un commit natif de S3, S5 ou S6, dont les
 brouillons ont été écrits en parallèle de L0, exige l'intégration des réponses de l'auditeur mathématique (faite pour
 `aef7182b3`) et les portes de la tranche ; la qualification exige la matrice G4.

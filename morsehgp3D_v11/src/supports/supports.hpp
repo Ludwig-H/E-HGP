@@ -1,6 +1,7 @@
 // En-tete public de supports : supports positifs minimaux Q_b des boules du catalogue et comptes exacts du lemme G
-// (sortie parametree, tranche S6). Un autre module n'inclut que ce fichier. L'assemblage (postordre, tri des boules,
-// SupportHierarchy) viendra avec le rattachement de la tour (WindowAttachment, tranche S3).
+// (sortie parametree, tranche S6a), et leur assemblage en hierarchie des supports d'ordre K sur l'arbre d'ordre K et
+// le rattachement de la tour (SupportHierarchy, build_support_hierarchy, tranche S6b). Un autre module n'inclut que ce
+// fichier.
 //
 // Q_b = { Q inclus dans U_b : Q affinement independant, c_b dans l'interieur relatif de conv(Q), 2 <= |Q| <= 4 } : les
 // parties non separables MINIMALES de la coquille (lemme F, Caratheodory strict ; docs/MATHEMATIQUES.md, M1). Q_b est
@@ -18,6 +19,10 @@
 #include "num/num.hpp"
 #include "supports/counts.hpp"
 #include "tower/tower.hpp"
+
+namespace mhgp11::sched {
+class Pool;
+}
 
 namespace mhgp11::supports {
 
@@ -91,5 +96,121 @@ struct BallSupports {
 // supports_invariant (forme hors du domaine de Shape : K hors de 1..kMaxOrder, ou boule hors de Cat_K a cet ordre,
 // p + qmin > K + 1 ; les autres clauses de ce domaine sont des invariants du catalogue).
 [[nodiscard]] Result<Shape> ball_shape(const FullDomain& domain, BallIdx ball, Order k) noexcept;
+
+// ---------------------------------------------------------------- assemblage (tranche S6b)
+
+namespace supports_detail {
+struct Assembly;
+}
+
+// Boule publiee de W_K : identite, rattachement de la tour, forme, et comptes du lemme G calcules en memoire (jamais
+// stockes dans MHGP11SP). strict_traces est C(m, t) - N_t, egal au journal du constructeur (contre-epreuve) ;
+// components est |ant(b)| du rattachement (0 naissance, 1 interne).
+struct Ball {
+  BallIdx key;      // boule du catalogue
+  NodeIdx node;     // att(b), coupe FERMEE
+  LevelRank rank;   // lambda_b
+  u32 kparties_reliees = 0, compressed_parts = 0, strict_traces = 0, cofaces = 0, gabriel_cofaces = 0;
+  u32 components = 0;
+  BallRole role = BallRole::birth;
+  u8 p = 0, m = 0, qmin = 0;
+  friend bool operator==(const Ball&, const Ball&) = default;
+};
+
+// Diagnostics d'un assemblage, publies au succes seulement (mesure, jamais une decision).
+//   tree_ns  : pre-passe, admission, postordre et tri des boules ; count_ns, fill_ns : les deux passes de Q_b
+//   workers  : fils actifs (taille du Pool, appelant compris ; 1 sans Pool) ; widest : plus grande coquille etendue
+//   admitted : octets admis avant la passe count (premier) et avant la passe fill (second), formule de l'en-tete
+struct HierarchyTimings {
+  u64 tree_ns = 0, count_ns = 0, fill_ns = 0;
+  u64 workers = 0, widest = 0;
+  std::array<u64, 2> admitted{};
+  friend bool operator==(const HierarchyTimings&, const HierarchyTimings&) = default;
+};
+
+// Hierarchie des supports d'ordre K (docs/SORTIES.md, section 6 ; MATHEMATIQUES.md, section 10). Deplacement seulement.
+// Les SiteIdx des supports et les NodeIdx se rapportent a l'OrderTree source, qui doit survivre a leur lecture.
+//   post, subtree_size : NodeIdx -> rang de postordre (racine en dernier, enfants par NodeIdx croissant), taille
+//   ball_offsets       : N + 1 decalages, indexes par RANG DE POSTORDRE : les boules propres du noeud de rang j sont
+//                        balls()[ball_offsets[j], ball_offsets[j + 1]) ; un sous-arbre est une tranche contigue
+//   balls              : W_K entiere, ordre (postordre du noeud de rattachement, rang, BallIdx)
+//   support_offsets, supports, support_cofaces : Q_b de chaque boule (B + 1 decalages), ordre (arite, SiteIdx
+//                        lexicographiques), donc S* en tete ; incidences (Q, G) de chaque support
+//   prior_offsets, prior : ant(b) croissants (B + 1 decalages), role fusion seulement
+//   ledger             : travail de ball_supports pendant la passe count (une enumeration par boule)
+class SupportHierarchy {
+ public:
+  SupportHierarchy(const SupportHierarchy&) = delete;
+  SupportHierarchy& operator=(const SupportHierarchy&) = delete;
+  SupportHierarchy& operator=(SupportHierarchy&&) = delete;
+  SupportHierarchy(SupportHierarchy&&) noexcept = default;
+  Order order() const noexcept { return order_; }
+  NodeIdx root() const noexcept { return root_; }
+  std::span<const u32> post() const noexcept { return post_.span(); }
+  std::span<const u32> subtree_size() const noexcept { return size_.span(); }
+  std::span<const u64> ball_offsets() const noexcept { return ball_offsets_.span(); }
+  std::span<const Ball> balls() const noexcept { return balls_.span(); }
+  std::span<const u64> support_offsets() const noexcept { return support_offsets_.span(); }
+  std::span<const Support> supports() const noexcept { return supports_.span(); }
+  std::span<const u32> support_cofaces() const noexcept { return support_cofaces_.span(); }
+  std::span<const u64> prior_offsets() const noexcept { return prior_offsets_.span(); }
+  std::span<const NodeIdx> prior() const noexcept { return prior_.span(); }
+  const SupportLedger& ledger() const noexcept { return ledger_; }
+
+ private:
+  friend struct supports_detail::Assembly;
+  SupportHierarchy() noexcept = default;
+  Buffer<u32> post_, size_;
+  Buffer<u64> ball_offsets_;
+  Buffer<Ball> balls_;
+  Buffer<u64> support_offsets_;
+  Buffer<Support> supports_;
+  Buffer<u32> support_cofaces_;
+  Buffer<u64> prior_offsets_;
+  Buffer<NodeIdx> prior_;
+  SupportLedger ledger_;
+  Order order_ = 0;
+  NodeIdx root_{kNone};
+};
+
+// Octets admis par build_support_hierarchy (formule normative, recalculee par les portes). N noeuds, B = |W_K|,
+// A = |prior| du rattachement, W fils actifs, w la plus grande coquille etendue de W_K (0 s'il n'y en a aucune).
+//   avant la passe count : retenus 4N + 4N + 8(N+1) + sizeof(Ball) B + 8(B+1) + 8(B+1) + 4A, temporaire 4B (boule
+//                          d'origine de chaque position), et PAR FIL ACTIF sizeof(SupportLedger), le brouillon de
+//                          fermeture 8 closure_words(w) (0 si w = 0) et la liste temporaire de supports
+//                          sizeof(Support) support_capacity(w) entrees (1 si w = 0) ;
+//   avant la passe fill  : (sizeof(Support) + 4) S, S = somme des |Q_b|, tous les tampons precedents vivants.
+struct HierarchyAdmission {
+  u64 nodes = 0, balls = 0, prior = 0, workers = 0, widest = 0;
+  constexpr u64 per_worker() const noexcept {
+    return sizeof(SupportLedger) + (widest == 0 ? 0 : sizeof(u64) * closure_words(static_cast<u32>(widest))) +
+           sizeof(Support) * (widest == 0 ? 1 : support_capacity(static_cast<u32>(widest)));
+  }
+  constexpr u64 first() const noexcept {
+    return 8 * nodes + 8 * (nodes + 1) + sizeof(Ball) * balls + 16 * (balls + 1) + 4 * prior + 4 * balls +
+           workers * per_worker();
+  }
+  static constexpr u64 second(u64 supports) noexcept { return (sizeof(Support) + sizeof(u32)) * supports; }
+};
+
+// Assemblage de la hierarchie des supports de l'arbre d'ordre K (docs/SORTIES.md, section 6) :
+//   1. pre-passe sur W_K : plafond check_shell de TOUTES les coquilles etendues, avant toute allocation et tout calcul
+//      de Q_b ; un refus support_shell_capacity vaut pour l'appel entier ;
+//   2. admission du premier etage (HierarchyAdmission::first), puis postordre iteratif depuis la racine (enfants par
+//      NodeIdx croissant, sans pile : le curseur d'enfant vit dans post), tailles de sous-arbre ; tri des boules par
+//      seaux stables selon le postordre de leur noeud (dans un seau, l'ordre des BallIdx, donc des rangs) ;
+//   3. passe count, parallele par tranches de positions : metadonnees (rattachement, catalogue), Q_b par
+//      ball_supports dans le brouillon du fil, comptes du lemme G, contre-epreuve strict_traces = journal (sinon
+//      supports_invariant) ; |Q_b| a sa position ;
+//   4. sommes prefixes verifiees des decalages (u64), admission du second etage, passe fill a positions fixes : la
+//      meme position designe la meme boule (meme BallIdx) qu'en count ; le nombre de supports doit etre le meme
+//      (sinon supports_invariant), tri (arite, SiteIdx), incidences par support, branches ant(b) recopiees.
+// Sorties identiques a l'octet quel que soit le Pool. Refus : support_shell_capacity ; memory_budget (admission,
+// avant les taches, ou allocation) ; supports_invariant (arbre ou rattachement incoherents, contre-epreuve) ; ceux de
+// ball_supports, make_shape, ball_counts ; ceux du Pool (pool_busy...). Aucun resultat partiel : sur refus, rien n'est
+// publie, les reservations de l'appel sont rendues et *timings reste intact.
+[[nodiscard]] Result<SupportHierarchy> build_support_hierarchy(const OrderTree& tree, MemoryBudget& budget,
+                                                               sched::Pool* pool = nullptr,
+                                                               HierarchyTimings* timings = nullptr) noexcept;
 
 }  // namespace mhgp11::supports

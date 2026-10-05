@@ -293,7 +293,7 @@ produit ne change que par la correction P2 ci-dessous.
   $\mathrm{Cat}_1$ par `ball_supports`, puis `make_shape(0, 24, 2, 12)` et `ball_counts` : 2 704 156, 116, 2 496 144
   et 149 954 688 incidences ; le petit témoin à $K=10$ (66, 6, 4, 12, 4 ; 20 incidences) ; le refus de la primitive à
   25 sites (25 des 30 sites de $x^2+y^2+z^2=9$, les six points axiaux gardés). Le refus de l'appel `supports` entier
-  viendra avec l'assemblage (S6b).
+  est livré avec l'assemblage (S6b, section suivante, porte `mhgp11_supports_hierarchy_sphere9`).
 - `tests/supports/fraction_diff.py` (porte `mhgp11_supports_fraction`) : la sonde native contre l'oracle S1
   (`reference/hgp11_ref/supports.py`), sur les 210 nuages et les 951 ordres de sa suite ; mêmes boules de $W_K$,
   mêmes $(p,m,q_{\min})$, mêmes comptes, mêmes comptes par support réordonnés ; 15 062 boules. Reprend le
@@ -301,6 +301,26 @@ produit ne change que par la correction P2 ci-dessous.
 - `reference/hgp11_ref/supports.py` et `reference/test_supports.py` : budget explicite de la force brute du lemme F
   (`BudgetRefusal`, $2^{m}-1$ candidats au plus) et primitives sur sphere5 (porte
   `mhgp11_reference_supports_primitives`) ; voir `reference/README.md`.
+
+## Assemblage de la hiérarchie des supports (tranche S6b, 5 octobre 2026)
+
+Écrit à neuf, sans port : spécification de la sortie paramétrée (§ 4, 7.3 à 7.5), [sorties](SORTIES.md) § 6 et
+apports des auditeurs (`238734f1d` : admission par fil du brouillon et de la liste temporaire ; `9cbf805c6` et
+`a65903a7b` : refus de l'appel entier à 25 sites, jugement de l'assemblage et non des seules primitives). Seule
+l'idée du postordre itératif vient de l'oracle S1 (`reference/hgp11_ref/supports.py`, `_postorder`) et de la sonde
+`tests/tower/attach_probe.cpp` ; la version native n'a pas de pile (le curseur d'enfant vit dans `post`).
+
+| Fichier v11 | Contenu | Portes v11 |
+| --- | --- | --- |
+| `src/supports/hierarchy.cpp`, `src/supports/supports.hpp` (`Ball`, `SupportHierarchy`, `HierarchyAdmission`, `HierarchyTimings`, `build_support_hierarchy`) | pré-passe du plafond de tout $W_K$ avant allocation ; admission exacte par fil actif ; postordre sans pile ; seaux stables (rang, `BallIdx`) ; passes count et fill à positions fixes ; contre-épreuve du journal ; tri explicite des supports (arité, `SiteIdx`) ; décalages `u64` aux sommes vérifiées ; registres par fil sommés après la jointure | `mhgp11_supports_hierarchy_*` (fixtures, déterminisme, permutation, `sphere5` à 24 sites, `sphere9` à 25 sites, admission), `mhgp11_supports_hierarchy_fault_starvation`, `mhgp11_supports_hierarchy_fraction` (différentiel complet contre S1), `mhgp11_supports_hierarchy_scale8000`, `_scale16000`, `_scale32000`, `_grid8000`, `_permutation_*`, `_lidar_ng0{0,1,2}_k5`, `_lidar_ng00_k10` (long) ; mutants `boules_propres_decroissantes`, `supports_tri_pointid`, `admission_brouillon_oublie`, `admission_liste_oubliee`, `admission_un_seul_fil`, `prepasse_plafond_omise` |
+
+**Gardes sans porte possible** de `hierarchy.cpp` (même statut que celles de S6a ci-dessus) : tailles incohérentes
+du rattachement, `BallIdx` non croissants ou hors du catalogue, nœud hors de l'arbre, branches décroissantes, forme
+de boule hors domaine (`prepass`) ; racine, enfants non croissants ou de parent différent, parcours trop long, nœuds
+non atteints (`postorder`) ; somme des branches différente du rattachement (`sort_balls`) ; fil hors du Pool ;
+contre-épreuve du journal et nombre de supports différent entre les passes. `build_order` contrôle déjà l'arbre et le
+rattachement (I1 à I4) ; la contre-épreuve recoupe deux arithmétiques distinctes (journal du constructeur, fermeture
+zêta). Un mutant qui en retire une est équivalent sur tout arbre construit et n'entre pas au manifeste.
 
 ## Arbre d'ordre K seul et rattachement (tranche S3, 4 et 5 octobre 2026)
 
