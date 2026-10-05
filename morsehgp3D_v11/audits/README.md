@@ -4,11 +4,11 @@
 quantized_u21_input_only / not_claimed`. Notes maintenues en place ;
 preuves détaillées dans les reçus immuables.
 
-**Audit général repris au pin 238734f1d.** Aucun nouveau défaut
+**Audit général au pin 238734f1d, suivi jusqu'à 19b2fb218.** Aucun nouveau défaut
 mathématique FULL établi ; contre-épreuve du nerf complet, des coupes et
 des verticales conforme sur 65 ordres. Le point important du raccord est
 la qualification de l'assemblage L1 entier. L'identité Session est
-désormais corrigée dans le brouillon S5 ; une nouvelle incohérence entre
+désormais corrigée dans S5 intégrée localement ; une incohérence entre
 publication API et lecteur reste à fermer. Pour juger la voie K seule, mesurer le journal actif et
 la sortie réellement livrée. [Verdict et priorités du développeur](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#audit-général-du-5-octobre--décisions-importantes),
 [preuve et périmètre](../receipts/audit_geant_20261005/README.md).
@@ -17,13 +17,16 @@ la sortie réellement livrée. [Verdict et priorités du développeur](AUDIT_CON
 actuellement des tailles d'entrée nulles ou incompatibles avec son produit,
 publie un manifeste `complete`, puis son lecteur le refuse. Corriger la
 validation avant écriture et ajouter la lecture de toute publication API
-annoncée réussie. Aucun défaut du chemin CLI normal établi.
+annoncée réussie. Correction reprise par le développeur, encore absente
+du commit local S5 **d8735d095**. Aucun défaut du chemin CLI normal établi.
 [Constat et preuve](../receipts/audit_api_publication_20261005/README.md).
 
 **Suivi des corrections.** Identité stable de Session, contrôle de fin de
-vie et hook IO typé sont corrigés en WIP. S6a est commitée localement en
-**ee8a69f1a**, avec les témoins difficiles. L'assemblage et sa qualification
-G4 restent à faire. Pour la future L3, K=n est refusé par `points`/`plat`
+vie et hook IO typé sont corrigés dans S5 **d8735d095**, encore local.
+S6a est publiée sur `main` en **19b2fb218**, identique aux sources déjà
+relues en ee8a69f1a. S3 est importée localement, avec E1/E2 sur le
+catalogue étroit et D2 ; aucun nouveau delta de son cœur. L'assemblage
+S6b/S7 et la qualification G4 restent à faire. Pour la future L3, K=n est refusé par `points`/`plat`
 quand K≥2 ; FULL/supports le conservent.
 [Contrelecture précédente](../receipts/audit_l1_followup_20261005/README.md).
 
@@ -38,7 +41,7 @@ quand K≥2 ; FULL/supports le conservent.
 **Chantier courant : supports, arbre K seul.** S0/S1 **5adf6a59f** et
 la demande **9290cf3bf** sont relus favorablement : lemmes P/W, deux
 lectures E5, D2 et 13 mutants causaux. S2/257aabb92 et S4/f98aeed67 sont
-livrés. Les WIP S3/S6 ont maintenant leurs gardes p+q/traces ; D2/E5 sont
+livrés, ainsi que S6a/19b2fb218. Les gardes p+q/traces sont corrigées ; D2/E5 sont
 présents en S3. Raccord final du journal relu favorablement ; S5 intègre
 signature V2, état publié et SIGXFSZ. Qualification native G4 encore attendue.
 
@@ -49,7 +52,7 @@ carré9 pour le refus entier. L'oracle WIP borne désormais
 `_minimal_nonseparable`, en plus du calcul N_j par petites combinaisons.
 Deux portes exactes complètent les K élevés : 12 sites à K10 et la
 coquille de 24 sites à K12, **116 traces strictes**, sans construire FULL12.
-Le hook variadique des deux fautes IO est désormais corrigé en WIP. Comparer les masques
+Le hook variadique des deux fautes IO est corrigé dans S5 locale. Comparer les masques
 FULL 16379 et ordre seul 7035, avec mêmes options applicables. Matrice G4 séparée
 par livraison/profil, coût des portes fixé avant session.
 [Relecture et 19 713 gardes portables nouvelles](../receipts/audit_native_integration_20261005/README.md).

@@ -1,8 +1,9 @@
 # Audit courant v11 — contrats, performance et intégration
 
 5 octobre 2026. Contrat S0/S1 **5adf6a59f**, demande **9290cf3bf** et
-brouillons natifs S3/S5/S6 relus ; qualification G4 des nouvelles tranches
-encore attendue. Le socle qualifié et chaque capture CPU/GPU gardent leur
+tranches natives S3/S5/S6 relues ; S6a publiée en **19b2fb218**, S3/S5
+intégrées localement, qualification G4 des nouvelles tranches encore
+attendue. Le socle qualifié et chaque capture CPU/GPU gardent leur
 source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
@@ -28,8 +29,9 @@ les supports et les pendaisons de points sont également recoupés sur ces
 petits nuages. Aucun transfert de ces succès Python au binaire courant.
 
 **Priorité de livraison : fermer L1 sur le vrai produit assemblé.**
-`build_order`, l'attachement et les primitives de supports restent des
-brouillons au pin audité. Les preuves mathématiques autorisent leur
+Au pin de l'audit général, `build_order`, l'attachement et les primitives
+de supports étaient des brouillons. S6a est depuis publiée, S3/S5 sont
+intégrées localement ; S6b/S7 restent à raccorder. Les preuves mathématiques autorisent leur
 intégration ; elles ne remplacent pas les portes natives de l'assemblage.
 La porte décisive doit comparer l'ordre K de FULL, l'arbre K seul et les
 attaches à la coupe fermée, sur la même source figée, avec les plateaux
@@ -39,7 +41,7 @@ au-delà de 24 sites doit porter sur **l'appel supports entier**. Budget,
 count/fill, concurrence et absence de publication partielle doivent être
 jugés sur l'assemblage, pas déduits des seuls helpers S6a.
 
-**Nouveau défaut S5 : un succès API peut publier un manifeste illisible.**
+**Défaut S5 ouvert : un succès API peut publier un manifeste illisible.**
 `publish` accepte `Provenance{}` pour un produit non vide : les tailles
 publiées valent zéro, alors que `counts.points` est positif. Le lecteur
 livré avec S5 refuse ce manifeste (`points et octets d'entrée`). Les
@@ -57,8 +59,11 @@ ajouter est un aller-retour **publication API réussie → lecteur officiel**,
 avec refus sans sortie pour les métadonnées incohérentes. Une simple
 vérification d'inventaire ou de SHA ne détecte pas ce défaut.
 [Preuve et sources WIP](../receipts/audit_api_publication_20261005/README.md).
+Le développeur a repris cette correction dans son plan. Au commit local
+**d8735d095**, les sources concernées sont encore identiques à la preuve :
+le contrôle manque toujours.
 
-**Identité Session : corrigée dans le brouillon L1, qualification attendue.**
+**Identité Session : corrigée dans S5 locale, qualification attendue.**
 Le produit garde désormais l'identité du budget alloué sur le tas, stable
 au déplacement de la Session. `publish` refuse une autre Session avant la
 provenance, les fichiers et le rapport. La nouvelle porte déplace la
@@ -98,12 +103,16 @@ de leur succès. S3/S5 et l'assemblage S6b ne sont pas encore raccordés dans
 cette capture. Aucun nouveau verrou général n'est opposé à cette suite.
 [État exact et preuve](../receipts/audit_l1_followup_20261005/README.md).
 
-S6a est désormais commitée **localement en ee8a69f1a** ; S5 est en cours
-d'intégration dans le même worktree. Les résultats natifs annoncés par le
-développeur restent distincts des vérifications Python de l'audit et de
-la qualification G4. Le cœur S3 reste identique aux sources déjà relues.
+S6a est désormais publiée sur `main` en **19b2fb218**, avec les mêmes
+sources et portes que **ee8a69f1a**. S5 est commitée localement en
+**d8735d095** : les 31 fichiers API/IO et portes de notre capture corrigée
+sont identiques. S3 vient d'être importée dans `build/v11-impl-l1b` :
+cœur, E1/E2 sur catalogue étroit et témoin D2 identiques au WIP déjà relu.
+Le juge Fraction des attaches doit encore rejoindre les portes permanentes.
+Les résultats natifs annoncés par le développeur restent
+distincts des vérifications Python de l'audit et de la qualification G4.
 
-**S5 : anciennes alertes corrigées en WIP.** Le CLI ignore désormais
+**S5 : anciennes alertes corrigées dans le commit local.** Le CLI ignore désormais
 SIGXFSZ et la porte rétablit son comportement par défaut avant exec avec
 RLIMIT_FSIZE. Signature V2 à l'ordre demandé, SHA du manifeste fermé et
 `published_complete` sont intégrés. Les portes jugent le champ réellement

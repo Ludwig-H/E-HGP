@@ -40,13 +40,13 @@ la future livraison L3, pas un défaut d'une sortie native déjà livrée.
 
 ## Sortie supports : revue du contrat et du raccord
 
-**Suivi L1 : témoins difficiles désormais inscrits dans S6a.** La capture
-du brouillon intègre la coquille de 24 sites, les comptes K10/K12 et le refus à 25 sites au
+**Suivi L1 : témoins difficiles publiés dans S6a/19b2fb218.** Les sources
+sont identiques à la capture relue : coquille de 24 sites, comptes K10/K12 et refus à 25 sites au
 niveau des primitives. Les nouvelles primitives Python sont rejugées en
 normal et `-O` ; les 4 096 choix antipodaux retrouvent 116 traces strictes
 à K12 avec les supports Gram de S1. Le budget de `_minimal_nonseparable`
 et `_lemma_f` refuse avant tout appel MEB de ces primitives à 24 sites.
-La garde d'arité impossible est aussi corrigée dans les helpers WIP.
+La garde d'arité impossible est aussi corrigée dans les helpers publiés.
 Aucun nouveau défaut mathématique établi ; portes natives, raccord S3 et
 assemblage S6b restent à qualifier sur la source intégrée.
 [Capture, résultats et limites](../receipts/audit_l1_followup_20261005/README.md).
