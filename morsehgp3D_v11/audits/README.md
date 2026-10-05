@@ -13,10 +13,20 @@ contrat mémoire. Pour juger la voie K seule, mesurer le journal actif et
 la sortie réellement livrée. [Verdict et priorités du développeur](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#audit-général-du-5-octobre--décisions-importantes),
 [preuve et périmètre](../receipts/audit_geant_20261005/README.md).
 
+**Suivi du raccord L1.** Le développeur a repris les demandes importantes
+en **4f1e0fb3a**. Les portes de la coquille de 24 sites et de K10/K12 sont intégrées au brouillon S6a ;
+les nouvelles primitives Python et leur refus budgété sont rejugés conformes.
+L'assemblage et sa qualification G4 restent à faire. Une fixture précise
+complète la correction S5 : déplacer la Session avec un produit vivant,
+puis vérifier le refus d'une Session étrangère avant toute écriture.
+La frontière K=n est tranchée pour la future L3 : refus explicite de
+`points`/`plat` pour K≥2, FULL/supports conservés.
+[Contrelecture et preuve bornée](../receipts/audit_l1_followup_20261005/README.md).
+
 - [Mathématiques : supports, frontières, hiérarchies et sélection](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 - [Moteur : qualification, performances et intégration](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md).
 - [Question courante du développeur sur 100 ms](QUESTION_CLAUDE_VITESSE_100MS_20261004.md).
-- [Réponse courante du développeur sur les supports](REPONSE_CLAUDE_SUPPORTS_20261004.md) : gardes adoptées, réponses D.1 à D.4 intégrées au contrat S0.
+- [Réponse courante du développeur sur les supports](REPONSE_CLAUDE_SUPPORTS_20261004.md) : demandes de l'audit général adoptées, frontière K=n tranchée pour L3.
 - [Contrat courant des points](../docs/HIERARCHIE_POINTS.md), avec
   [échange du 3 octobre archivé](../receipts/audit_supports_contract_20261005/notes_before/README.md).
 - [Audit indépendant, maintenu par son auteur](AUDIT_OUVERTURE_ET_REPRISE_V10_20261002.md).
@@ -31,8 +41,8 @@ signature V2, état publié et SIGXFSZ. Qualification native G4 encore attendue.
 **Réponse utile au développeur.** La sphère entière de rayon carré5,
 24 sites, mêle 12 q2, 24 q3, 792 q4 ; N4=3906 diffère des 4068 incidences
 par support. Elle fournit la porte au plafond, avec 25/30 sites de rayon
-carré9 pour le refus entier. Le futur oracle `long` doit borner aussi
-`_minimal_nonseparable`, pas seulement remplacer le parcours2^m de N_j.
+carré9 pour le refus entier. L'oracle WIP borne désormais
+`_minimal_nonseparable`, en plus du calcul N_j par petites combinaisons.
 Deux portes exactes complètent les K élevés : 12 sites à K10 et la
 coquille de 24 sites à K12, **116 traces strictes**, sans construire FULL12.
 Corriger le hook variadique des deux fautes IO avant G4 ; ce constat

@@ -1,0 +1,37 @@
+{
+  "observed_utc": "2026-10-05T09:26:32.807831+00:00",
+  "sources": [
+    {
+      "worktree": "v11-impl-s5",
+      "path": "morsehgp3D_v11/tests/api/session_test.cpp",
+      "sha256": "626896dbedd376800268af9b075f49c4dba65373b4c5388d821b765168e82cc7"
+    },
+    {
+      "worktree": "v11-impl-s5",
+      "path": "morsehgp3D_v11/src/core/status.hpp",
+      "sha256": "e6004beb5ec4e78fb2b582004f4122611602809d360ff9f1b3bf4679348f6594"
+    },
+    {
+      "worktree": "v11-impl-s5",
+      "path": "morsehgp3D_v11/src/api/api.hpp",
+      "sha256": "6f2017bb51d69b861d247930d8636901151949cb7bfd714f9c75597759807481"
+    },
+    {
+      "worktree": "v11-impl-s5",
+      "path": "morsehgp3D_v11/src/api/manifest.cpp",
+      "sha256": "3eec59ae0c4033bef9ac2c47c9bc023f163efe80694a8cf4b2da62af9d05b3e4"
+    },
+    {
+      "worktree": "v11-impl-s5",
+      "path": "morsehgp3D_v11/src/api/session.cpp",
+      "sha256": "266526e1728d016378070148a6ebf13b30516a7ddaacc7b8dbff416831163439"
+    },
+    {
+      "worktree": "v11-impl-l1",
+      "path": "morsehgp3D_v11/src/supports/counts.hpp",
+      "sha256": "5f1d7e75513bfc2bcfb234208c3f14fac486fb4db7d72a6a8b62caefadcd3a3b"
+    }
+  ],
+  "fixture_sha256": "e6f345447c52c2ab0890a384d9a14f8f024220beb4f35ac238ed27dc350b2e96",
+  "fixture_status": "proposed_not_compiled"
+}

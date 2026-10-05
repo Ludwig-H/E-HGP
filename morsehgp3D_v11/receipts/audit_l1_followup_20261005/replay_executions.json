@@ -1,0 +1,51 @@
+{
+  "commands": [
+    "python3 -B morsehgp3D_v11/receipts/audit_l1_followup_20261005/replay.py",
+    "python3 -O -B morsehgp3D_v11/receipts/audit_l1_followup_20261005/replay.py"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v11-audit-geant-20261005",
+  "initial": [
+    {
+      "status": "fulfilled",
+      "value": {
+        "chunk_id": "f9c8e5",
+        "wall_time_seconds": 1.001117884,
+        "session_id": 95312,
+        "original_token_count": 0,
+        "output": ""
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "chunk_id": "871b75",
+        "wall_time_seconds": 1.002589918,
+        "session_id": 89829,
+        "original_token_count": 0,
+        "output": ""
+      }
+    }
+  ],
+  "completion": [
+    {
+      "status": "fulfilled",
+      "value": {
+        "chunk_id": "61af3e",
+        "wall_time_seconds": 0.000015479,
+        "exit_code": 0,
+        "original_token_count": 17,
+        "output": "audit_l1_replay_ok primitives=1 temoin_K12=1 refus_budget=2 natif=0\n"
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "chunk_id": "91ca08",
+        "wall_time_seconds": 0.000011582,
+        "exit_code": 0,
+        "original_token_count": 17,
+        "output": "audit_l1_replay_ok primitives=1 temoin_K12=1 refus_budget=2 natif=0\n"
+      }
+    }
+  ]
+}

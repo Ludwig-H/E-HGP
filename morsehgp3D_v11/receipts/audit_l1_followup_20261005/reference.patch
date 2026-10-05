@@ -1,0 +1,196 @@
+--- a/morsehgp3D_v11/reference/hgp11_ref/supports.py
++++ b/morsehgp3D_v11/reference/hgp11_ref/supports.py
+@@ -54,7 +54,11 @@
+ centre au lieu de S* en SiteIdx) sont geometriques : la sortie ne depend pas de l'ordre des points d'entree.
+ 
+ Domaine : n <= 12 a 14 (cout de l'etage A) ; coquilles quelconques (pas de plafond ici : le plafond natif de 24 et le
+-refus support_shell_capacity se constatent sur m, voir shell_ball).
++refus support_shell_capacity se constatent sur m, voir shell_ball). Seule la force brute du lemme F
++(_minimal_nonseparable) a un budget : au plus 2^m - 1 parties candidates (MINIMAL_BUDGET, coquilles de 16 sites au
++plus) ; au-dela, refus explicite BudgetRefusal AVANT tout calcul, jamais un resultat partiel (apport des auditeurs du
++5 octobre 2026). Sur une coquille plus grande (sphere5, m = 24), seules les primitives Q_b (_supports, Gram) et
++N_j pour j petit (closure_upto, par combinaisons) se calculent : elles ne qualifient pas tout S1 a 24 sites.
+ """
+ from fractions import Fraction
+ from itertools import combinations
+@@ -66,6 +70,12 @@
+ ROLE_BIRTH, ROLE_MERGE, ROLE_INTERNAL = 'naissance', 'fusion', 'interne'
+ KIND_SITE, KIND_BIRTH, KIND_MERGE = 0, 1, 2
+ SHELL_CAPACITY = 24  # plafond natif de coquille etendue (kMaxShell) ; au-dela, refus support_shell_capacity
++MINIMAL_BUDGET = (1 << 16) - 1  # parties candidates de _minimal_nonseparable (au plus 2^m - 1) : m <= 16
++
++
++class BudgetRefusal(Exception):
++    """Refus explicite d'un calcul de l'oracle au-dela de son budget, pris avant tout calcul : jamais une censure
++    silencieuse ni un resultat partiel. Ce n'est pas un lemme viole (InvariantError) : l'oracle est borne."""
+ 
+ 
+ def _gauss(rows, rhs):
+@@ -238,11 +248,17 @@
+         supports = found
+         return tuple(supports)
+ 
+-    def _minimal_nonseparable(self, ball):
++    def _minimal_nonseparable(self, ball, budget=MINIMAL_BUDGET):
+         """Lemme F par force brute : parties non separables minimales de U_b, toutes arites. A est separable si et
+         seulement si beta(A) < lambda_b (M1 : B(A) = b si et seulement si c_b est dans conv(A), A sur la sphere ; T2).
+         Les candidats de taille s prolongent les parties separables de taille s - 1 (la separabilite descend aux
+-        sous-parties) : toute partie minimale est examinee."""
++        sous-parties) : toute partie minimale est examinee. Budget : un candidat est une partie non vide de U_b, formee
++        une seule fois (sa base est elle-meme privee de son plus grand site), donc au plus 2^m - 1 candidats et autant
++        de boules minimales ; si cette borne depasse le budget, refus BudgetRefusal avant tout calcul."""
++        if (1 << ball.m) - 1 > budget:
++            raise BudgetRefusal('lemme F : %d parties candidates possibles sur une coquille de %d sites, au-dela du '
++                                'budget %d de _minimal_nonseparable : refus explicite, aucun resultat partiel'
++                                % ((1 << ball.m) - 1, ball.m, budget))
+         beta = self.definition.beta
+         separable = set([()])
+         frontier = [()]
+@@ -265,6 +281,21 @@
+             if not frontier:
+                 break
+         return minimal
++
++    def closure_upto(self, ball, jmax):
++        """N_0 .. N_jmax par combinaisons : nombre de parties de U_b a j sites qui contiennent un support de Q_b
++        (ball.supports, rempli par ball_of), sans parcourir les 2^m masques de _counts. Primitive des coquilles hors
++        de la force brute (sphere5, m = 24, suite primitives de test_supports.py)."""
++        pos = dict((x, j) for j, x in enumerate(ball.shell))
++        masks = [sum(1 << pos[x] for x in q) for q in ball.supports]
++        closure = []
++        for size in range(jmax + 1):
++            count = 0
++            for part in combinations(range(ball.m), size):
++                mask = sum(1 << i for i in part)
++                count += any(q & mask == q for q in masks)
++            closure.append(count)
++        return closure
+ 
+     # ------------------------------------------------------------ un ordre
+ 
+--- a/morsehgp3D_v11/reference/test_supports.py
++++ b/morsehgp3D_v11/reference/test_supports.py
+@@ -9,6 +9,12 @@
+     python3 test_supports.py --inject=NOM     mutant de ref_mutants.SUPPORT_MUTANTS : 4 s'il est tue par sa cause
+     python3 test_supports.py --list-mutants
+     python3 test_supports.py --dump=NOM       sortie canonique (JSON) d'une fixture, a tous ses ordres
++    python3 test_supports.py --suite=primitives
++                                              suite longue des primitives sur sphere5 (24 sites de x^2 + y^2 + z^2 = 5,
++                                              translates de (2, 2, 2) ; apport des auditeurs du 5 octobre 2026) : Q_b
++                                              par Gram (12, 24 et 792 supports), N_j pour j <= 4 par combinaisons,
++                                              comptes de K1 a K3 par les formules du lemme G, refus explicite de la
++                                              force brute du lemme F (budget) ; ne qualifie pas tout S1 a 24 sites
+ 
+ Codes de sortie (docs/ARCHITECTURE.md, paragraphe 5) : 0 conforme ; 1 ecart (fait grave, lemme viole, empreinte
+ d'une fixture, invariance ; une exception levee dans un fait ou dans la contre-epreuve d'invariance est un ecart,
+@@ -24,6 +30,7 @@
+ import os
+ import sys
+ from fractions import Fraction
++from math import comb
+ 
+ HERE = os.path.dirname(os.path.abspath(__file__))
+ sys.path.insert(0, HERE)
+@@ -459,7 +466,31 @@
+     return [] if got == want else ['d2 : %r au lieu de %r' % (got, want)]
+ 
+ 
+-EXTRA_FACTS = (sphere50, circle_witness, e5_window, d2_witness)
++def minimal_budget(modules):
++    """Budget de la force brute du lemme F (_minimal_nonseparable, au plus 2^m - 1 candidats) : fixture d'egalite sur
++    la boule de la diagonale du carre (m = 4) : refus BudgetRefusal au budget 14, parties minimales egales a Q_b au
++    budget 15 ; refus explicite, avant tout calcul, sur la coquille de sphere50 (m = 84) au budget par defaut."""
++    S = modules['supports']
++    oracle = S.Supports(FIXTURES['carre'][0])
++    ball = oracle.ball_of((0, 2))
++    got = [ball.m]
++    for budget in (14, 15):
++        try:
++            got.append(sorted(oracle._minimal_nonseparable(ball, budget)) == sorted(ball.supports))
++        except S.BudgetRefusal:
++            got.append('refus')
++    wide = S.Supports(SPHERE50)
++    big = wide.shell_ball((SPHERE50.index((15, 15, 10)), SPHERE50.index((5, 5, 10))))
++    try:
++        wide._minimal_nonseparable(big)
++        got.append('calcule')
++    except S.BudgetRefusal:
++        got.append('refus')
++    want = [4, 'refus', True, 'refus']
++    return [] if got == want else ['budget du lemme F : %r au lieu de %r' % (got, want)]
++
++
++EXTRA_FACTS = (sphere50, circle_witness, e5_window, d2_witness, minimal_budget)
+ 
+ 
+ SHIFT = (5, 11, 17)  # translation entiere de la contre-epreuve d'invariance (MATHEMATIQUES 10.10)
+@@ -610,9 +641,69 @@
+     return REFUSAL
+ 
+ 
++# Sphere5 (apport des auditeurs du 5 octobre 2026, receipts/audit_supports_contract_20261005/qb) : les 24 points
++# entiers de x^2 + y^2 + z^2 = 5, translates de (2, 2, 2) ; une coquille mixte au plafond natif de 24 sites.
++SPHERE_NORM5 = [(x + 2, y + 2, z + 2) for x in range(-2, 3) for y in range(-2, 3) for z in range(-2, 3)
++                if x * x + y * y + z * z == 5]
++# (K, kparties_reliees, strict_traces, cofaces) de la boule centrale (p = 0, m = 24), d'apres le recu des auditeurs.
++SPHERE_NORM5_COUNTS = ((1, 24, 24, 12), (2, 276, 264, 288), (3, 2024, 1736, 3906))
++
++
++def sphere5_primitives(S):
++    """Primitives de l'oracle sur la boule centrale de sphere5 : rend (ecarts, ligne de couverture)."""
++    errors = []
++    oracle = S.Supports(SPHERE_NORM5)
++    ball = oracle.ball_of((SPHERE_NORM5.index((0, 1, 2)), SPHERE_NORM5.index((4, 3, 2))))
++    arities = [sum(1 for q in ball.supports if len(q) == a) for a in (2, 3, 4)]
++    shape = (len(SPHERE_NORM5), str(ball.level), [str(c) for c in ball.center], ball.p, ball.m, ball.q, arities)
++    if shape != (24, '5', ['2', '2', '2'], 0, 24, 2, [12, 24, 792]):
++        errors.append('sphere5 : boule centrale %r' % (shape,))
++    closure = oracle.closure_upto(ball, 4)
++    if closure != [0, 0, 12, 288, 3906]:
++        errors.append('sphere5 : N_0..N_4 = %r au lieu de [0, 0, 12, 288, 3906]' % (closure,))
++    for k, kparts, strict, cofaces in SPHERE_NORM5_COUNTS:
++        got = (comb(24, k), comb(24, k) - closure[k], closure[k + 1])
++        incidences = sum(comb(24 - len(q), k + 1 - len(q)) for q in ball.supports if k + 1 >= len(q))
++        q4 = sum(comb(20, k - 3) for q in ball.supports if len(q) == 4 and k + 1 >= 4)
++        want = {1: 12, 2: 288, 3: 4068}[k]
++        if got != (kparts, strict, cofaces) or incidences != want or (k == 1 and q4 != 0):
++            errors.append('sphere5 K%d : %r au lieu de %r, incidences %d au lieu de %d, q4 %d'
++                          % (k, got, (kparts, strict, cofaces), incidences, want, q4))
++    refusals = 0
++    for name, call in (('_minimal_nonseparable', lambda: oracle._minimal_nonseparable(ball)),
++                       ('_lemma_f', lambda: oracle._lemma_f(ball))):
++        try:
++            call()
++            errors.append('sphere5 : %s calcule au lieu d\'un refus explicite' % name)
++        except S.BudgetRefusal:
++            refusals += 1
++    line = ('reference_supports_primitives_ok sites=24 supports=%d q2=%d q3=%d q4=%d N2=%d N3=%d N4=%d refus=%d'
++            % (len(ball.supports), arities[0], arities[1], arities[2], closure[2], closure[3], closure[4], refusals))
++    return errors, line
++
++
++def main_primitives():
++    """Suite longue des primitives sur sphere5 : Q_b (Gram), N_j pour j <= 4 (combinaisons), comptes de K1 a K3 par
++    les formules du lemme G (p = 0 : cofaces = N_{K+1}, traces strictes C(24, K) - N_K), incidences par support
++    (4 068 a K3 ; les 792 tetraedres sans coface a K1), et refus explicite de la force brute du lemme F au budget par
++    defaut. Une exception levee est un ecart, jamais une trace Python. Rend le code de la porte."""
++    try:
++        errors, line = sphere5_primitives(STAGE['supports'])
++    except Exception as exc:  # noqa: BLE001 -- un lemme viole ou un refus inattendu est un ecart
++        errors, line = ['sphere5 : %s : %s' % (type(exc).__name__, exc)], ''
++    for error in errors[:10]:
++        print('ECART %s' % error[:400])
++    if errors:
++        return DISAGREEMENT
++    print(line)
++    return OK
++
++
+ def main(argv):
+     if not argv:
+         return main_gate()
++    if argv == ['--suite=primitives']:
++        return main_primitives()
+     if argv == ['--list-mutants']:
+         for name in sorted(ref_mutants.SUPPORT_MUTANTS):
+             print('%s %s' % (name, 'equivalent' if ref_mutants.SUPPORT_MUTANTS[name]['equivalent'] else 'reel'))

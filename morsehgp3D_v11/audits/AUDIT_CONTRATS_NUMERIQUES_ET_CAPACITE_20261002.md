@@ -75,6 +75,23 @@ GCP lancé par cet audit.**
 
 ## Sorties paramétrées : avant intégration et G4
 
+**Raccord L1 relu : avancer vers l'assemblage.** Le développeur a repris
+les demandes de l'audit `a65903a7b` dans sa réponse **4f1e0fb3a**.
+Dans la capture de `build/v11-impl-l1`,
+S6a contient maintenant le différentiel S1 à 951 ordres u21/u24 et les
+témoins à 24 sites et K10/K12 demandés. Les primitives Python et le refus budgété de
+l'oracle passent en normal et `-O` ; aucune exécution native n'est déduite
+de leur succès. S3/S5 et l'assemblage S6b ne sont pas encore raccordés dans
+cette capture. Aucun nouveau verrou général n'est opposé à cette suite.
+[État exact et preuve](../receipts/audit_l1_followup_20261005/README.md).
+
+Pour la correction de l'identité S5, la porte doit aussi **déplacer la
+Session avec un produit encore vivant**, puis déplacer le Product :
+refus d'une Session étrangère, mais publication acceptée par la propriétaire
+déplacée. Le test existant ne déplace qu'une Session vide. La
+[fixture proposée](../receipts/audit_l1_followup_20261005/api_session_move_identity.cpp)
+vérifie cette distinction et la libération finale ; elle reste non compilée.
+
 **S5 : anciennes alertes corrigées en WIP.** Le CLI ignore désormais
 SIGXFSZ et la porte rétablit son comportement par défaut avant exec avec
 RLIMIT_FSIZE. Signature V2 à l'ordre demandé, SHA du manifeste fermé et

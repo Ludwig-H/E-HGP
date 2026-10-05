@@ -1,0 +1,53 @@
+{
+  "attempts": [
+    {
+      "name": "primitives.normal",
+      "cwd": "/workspaces/E-HGP/build/v11-audit-math-l1-20261005/snapshot/morsehgp3D_v11/reference",
+      "command": "python3 test_supports.py --suite=primitives",
+      "result": {
+        "chunk_id": "1ed043",
+        "wall_time_seconds": 2.603415838,
+        "exit_code": 0,
+        "original_token_count": 26,
+        "output": "reference_supports_primitives_ok sites=24 supports=828 q2=12 q3=24 q4=792 N2=12 N3=288 N4=3906 refus=2\n"
+      }
+    },
+    {
+      "name": "primitives.optimized",
+      "cwd": "/workspaces/E-HGP/build/v11-audit-math-l1-20261005/snapshot/morsehgp3D_v11/reference",
+      "command": "python3 -O test_supports.py --suite=primitives",
+      "result": {
+        "chunk_id": "b455a5",
+        "wall_time_seconds": 3.032742557,
+        "exit_code": 0,
+        "original_token_count": 26,
+        "output": "reference_supports_primitives_ok sites=24 supports=828 q2=12 q3=24 q4=792 N2=12 N3=288 N4=3906 refus=2\n"
+      }
+    },
+    {
+      "name": "k12.normal",
+      "cwd": "/workspaces/E-HGP/build/v11-audit-math-l1-20261005",
+      "command": "python3 check_k12.py > k12.normal.json",
+      "result": {
+        "chunk_id": "fd62cf",
+        "wall_time_seconds": 6.379535981,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      }
+    },
+    {
+      "name": "k12.optimized",
+      "cwd": "/workspaces/E-HGP/build/v11-audit-math-l1-20261005",
+      "command": "python3 -O check_k12.py > k12.optimized.json",
+      "result": {
+        "chunk_id": "757fde",
+        "wall_time_seconds": 5.5522625439999995,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      }
+    }
+  ],
+  "failed_attempts": []
+}

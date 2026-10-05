@@ -27,16 +27,29 @@ que A/S1 : aucun transfert au moteur ou à la référence constructive u24.
 Sorties normal/`-O` identiques ; fixtures, commandes, limites et tentatives
 initiales du harnais sont conservées dans le reçu.
 
-**Décision à fixer avant L3, sans bloquer FULL/supports.** Pour K=n≥2,
+**Frontière L3 tranchée par le développeur en 4f1e0fb3a.** Pour K=n≥2,
 la qualification des points à m=K+1 ne peut réussir. Le contrat général
 de `--k` admet pourtant K=n ; le banc de points refuse alors
 `jamais_qualifie`. Garder K=n pour FULL et supports, où l'unique naissance
-B(X) est correcte. Pour `points`/`plat`, écrire soit un refus précis,
-soit la représentation des points inactifs ; ne pas abaisser m
-silencieusement. Graver aussi K=1 avec m(1)=1. Cette frontière concerne
+B(X) est correcte. La [réponse G](REPONSE_CLAUDE_SUPPORTS_20261004.md#g-audit-général-a65903a7b--p1-p2-et-la-mesure-adoptés--k--n-tranché-pour-l3)
+retient pour `points`/`plat` un refus `parameter_out_of_range` à K≥n,
+pour K≥2, sans publication ni abaissement de m. K=1 reste admis avec
+m(1)=1. Décision cohérente, à inscrire dans le contrat et les portes L3.
+Cette frontière concerne
 la future livraison L3, pas un défaut d'une sortie native déjà livrée.
 
 ## Sortie supports : revue du contrat et du raccord
+
+**Suivi L1 : témoins difficiles désormais inscrits dans S6a.** La capture
+du brouillon intègre la coquille de 24 sites, les comptes K10/K12 et le refus à 25 sites au
+niveau des primitives. Les nouvelles primitives Python sont rejugées en
+normal et `-O` ; les 4 096 choix antipodaux retrouvent 116 traces strictes
+à K12 avec les supports Gram de S1. Le budget de `_minimal_nonseparable`
+et `_lemma_f` refuse avant tout appel MEB de ces primitives à 24 sites.
+La garde d'arité impossible est aussi corrigée dans les helpers WIP.
+Aucun nouveau défaut mathématique établi ; portes natives, raccord S3 et
+assemblage S6b restent à qualifier sur la source intégrée.
+[Capture, résultats et limites](../receipts/audit_l1_followup_20261005/README.md).
 
 **Contrat S0/S1 relu : favorable sur les points difficiles.** Les lemmes
 P/W, les deux lectures du retrait E5 et le témoin D2 concordent avec les
@@ -111,7 +124,8 @@ sans parcourir les $2^{24}$ masques. C'est un bon oracle `long` **des
 primitives Q_b/N_j**, avec seulement j≤K+1 pour K≤3. Remplacer le seul
 calcul N_j dans l'oracle S1 complet ne suffit pas :
 `_minimal_nonseparable` prolonge aussi les sous-parties séparables
-jusqu'à m. Garder un budget/refus explicite pour cette extension ; aucune
+jusqu'à m. Le brouillon L1 ajoute désormais un budget/refus explicite pour
+cette extension ; aucune
 censure silencieuse ni qualification de tout S1 à 24 sites par ce témoin.
 Les autres sphères proposées sont des compléments facultatifs ; préférer
 ce cas mixte, puis 25 des 30 sites de rayon carré9, en conservant les six
@@ -135,9 +149,9 @@ FULL12, ni `ball_shape` à K12 sur un domaine préparé à K1.
 Un deuxième témoin, seulement 12 sites, exerce p=8,m=4,qmin2 à K10 :
 **66 parties reliées, 6 comprimées, 4 traces strictes, 12 cofaces et
 4 Gabriel**, contre 20 incidences par Q. Il complète la porte LiDAR longue
-et les petits cas S3 actuellement K≤5. S6 compare déjà N2/N3/N24 à 24 sites ;
-ces témoins ajoutent un attendu indépendant aux indices intermédiaires hauts.
-Ce sont des lacunes de couverture, sans échec natif observé.
+et les petits cas S3 actuellement K≤5. Les portes S6a du brouillon L1
+reprennent désormais ces attendus indépendants aux indices intermédiaires
+hauts. Leur exécution native reste à qualifier ; aucun échec natif observé.
 [Coordonnées, preuve et 4 135 gardes exactes](../receipts/audit_native_integration_20261005/qb/README.md).
 
 **Décisions courantes : Q_b seul, puis points, puis plat.** La réponse primaire
