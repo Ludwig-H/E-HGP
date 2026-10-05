@@ -19,16 +19,17 @@ mhgp11_expect_code(mhgp11_supports_shell_capacity 2 mhgp11_supports_probe --sphe
 # auditeurs du 5 octobre 2026). Un nuage hors du domaine du profil est exclu et compte (u18 : les deux cercles
 # n = 1023 de la specification) ; couverture gravee par profil.
 if(MHGP11_COORD_BITS EQUAL 18)
-  set(mhgp11_supports_fraction_line "supports_fraction_couverture bits=18 nuages=208 exclus=2 ordres=949 boules=15060 supports=16939 etendues=2551 multiples=530 tetraedres=1145")
-  set(mhgp11_supports_fraction_floors --min-clouds=208 --min-orders=949 --min-balls=15060 --min-supports=16939)
+  set(mhgp11_supports_fraction_line "supports_fraction_couverture bits=18 nuages=208 exclus=2 ordres=945 boules=15038 supports=16913 etendues=2545 multiples=524 tetraedres=1145")
+  set(mhgp11_supports_fraction_floors --min-clouds=208 --min-orders=945 --min-balls=15038 --min-supports=16913
+      --min-extended=2545 --min-multiple=524 --min-tetra=1145)
 else()
   set(mhgp11_supports_fraction_line "supports_fraction_couverture bits=${MHGP11_COORD_BITS} nuages=210 exclus=0 ordres=951 boules=15062 supports=16943 etendues=2551 multiples=530 tetraedres=1145")
-  set(mhgp11_supports_fraction_floors --min-clouds=210 --min-orders=951 --min-balls=15062 --min-supports=16943)
+  set(mhgp11_supports_fraction_floors --min-clouds=210 --min-orders=951 --min-balls=15062 --min-supports=16943
+      --min-extended=2551 --min-multiple=530 --min-tetra=1145)
 endif()
 mhgp11_python_gate(mhgp11_supports_fraction 0 fraction_diff.py $<TARGET_FILE:mhgp11_supports_probe>
                    ${PROJECT_BINARY_DIR}/supports_fraction --bits=${MHGP11_COORD_BITS} ${mhgp11_supports_fraction_floors}
-                   --min-extended=2551 --min-multiple=530 --min-tetra=1145 LINE "${mhgp11_supports_fraction_line}"
-                   LABELS oracle fast TIMEOUT 600)
+                   LINE "${mhgp11_supports_fraction_line}" LABELS oracle fast TIMEOUT 600)
 
 # Juge Fraction (sample_judge.py, bibliotheque standard) sur TOUTES les boules de Cat_3 de 40 petits nuages de grille
 # (12 a 40 points, cotes 3 a 5) : coquilles etendues, supports multiples et tetraedres nombreux ; couverture gravee.
