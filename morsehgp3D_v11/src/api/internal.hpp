@@ -19,16 +19,34 @@ namespace mhgp11::api_detail {
 [[nodiscard]] FullParams full_params() noexcept;
 // Masque des sondes qui designe ces parametres (bench/full_probe.cpp, champ "optimizations" de sa ligne "full").
 inline constexpr u64 kEngineMask = 16379;
+// Arbre d'ordre K seul de la sortie supports (build_order) : full_params sans les trois options que build_order
+// refuse, sans objet pour un ordre seul (verticales paralleles 128, reemploi des verticales regulieres 1024, ordres
+// concurrents 8192) ; masque 7035 des sondes. Difference publiee (docs/SORTIES.md, paragraphe 1 ; audit 238734f1d) :
+// FULL garde 16379, la mesure appariee de L2 compare ces deux configurations.
+[[nodiscard]] FullParams order_params() noexcept;
+inline constexpr u64 kOrderMask = 7035;
+static_assert(kOrderMask == (kEngineMask & ~(u64{128} | u64{1024} | u64{8192})), "api : masque 7035 = 16379 - 9344");
 
 // Ecrit la tour au format MHGP11FUL1 (paragraphe 6.2) : port octet pour octet de serialize, bench/full_probe.cpp.
 // Refus : output_unwritable (ecriture), tower_invariant (sphere de naissance absente), arithmetic_invariant (num).
 [[nodiscard]] Outcome write_full(io::FileWriter& out, const FullTower& tower) noexcept;
+
+// Ecrit la hierarchie des supports au format MHGP11SP version 1 (docs/SORTIES.md, paragraphe 6) : en-tete, colonnes
+// alignees sur 8 octets, bourrage nul, aucun compte. Refus : output_unwritable (ecriture), supports_invariant (arbre
+// et hierarchie incoherents, sans porte possible sur un produit de compute).
+[[nodiscard]] Outcome write_supports(io::FileWriter& out, const OrderTree& tree,
+                                     const supports::SupportHierarchy& hierarchy) noexcept;
 
 // Manifeste de la sortie full (paragraphe 6.6), terminee par un saut de ligne : JSON a cles en ordre fixe, sans
 // espace, entiers decimaux. Peut lever std::bad_alloc (frontiere : guarded dans publish). Precondition : provenance
 // controlee par check_provenance.
 [[nodiscard]] std::string full_manifest(const api::Product& product, const api::Provenance& provenance,
                                         u64 file_bytes, const io::Digest& file_sha256);
+// Manifeste de la sortie supports (docs/SORTIES.md, paragraphe 8) : memes cles d'en-tete que full, fichier
+// supports.mhgp11sp (MHGP11SP, version 1), tree_k_sha256 de l'arbre d'ordre K, comptes et agregats de la hierarchie.
+// Peut lever std::bad_alloc (guarded dans publish). Precondition : provenance controlee.
+[[nodiscard]] std::string supports_manifest(const api::Product& product, const api::Provenance& provenance,
+                                            u64 bytes, const io::Digest& sha256);
 // Provenance coherente avec le nuage du produit de `points` points (12 et 4 octets par point, budget declare non nul)
 // et dans sa forme (pas, origine entiere ou absente, decimaux controles) : parameter_out_of_range sinon.
 [[nodiscard]] Outcome check_provenance(const api::Provenance& provenance, u64 points) noexcept;

@@ -37,8 +37,8 @@ def sha256_of(path):
     return formats.sha256_file(path)
 
 
-def cli_argv(cli, xyz, names, directory, k, workers=None, extra=()):
-    argv = [cli, '--sortie=full', '--points=' + xyz, '--ids=' + names, '--dossier=' + directory, '--k=%d' % k]
+def cli_argv(cli, xyz, names, directory, k, workers=None, extra=(), output='full'):
+    argv = [cli, '--sortie=' + output, '--points=' + xyz, '--ids=' + names, '--dossier=' + directory, '--k=%d' % k]
     if workers is not None:
         argv.append('--fils=%d' % workers)
     return argv + list(extra)

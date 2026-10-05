@@ -15,7 +15,7 @@ set(MHGP11_DEPS_tower catalogue index)
 set(MHGP11_DEPS_supports tower)
 set(MHGP11_DEPS_points tower)
 set(MHGP11_DEPS_head points)
-set(MHGP11_DEPS_api core num sched cloud io index catalogue tower)
+set(MHGP11_DEPS_api core num sched cloud io index catalogue tower supports)
 
 # mhgp11_module_closure(<sortie> <module>...) : les modules donnes et toutes leurs dependances, directes ou non, dans
 # l'ordre de la table. Un nom hors table est une erreur de configuration.

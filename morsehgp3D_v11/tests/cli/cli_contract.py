@@ -128,7 +128,7 @@ def option_cases(c):
         ('option inconnue', base + ['--sortiee=full']),
         ('option repetee', base + ['--k=3']),
         ('sans signe egal', base + ['--fils']),
-        ('sortie supports', swap('--sortie=', '--sortie=supports')),
+        ('mcs avec supports', swap('--sortie=', '--sortie=supports') + ['--mcs=20']),
         ('sortie points', swap('--sortie=', '--sortie=points')),
         ('sortie plat', swap('--sortie=', '--sortie=plat')),
         ('sortie inconnue', swap('--sortie=', '--sortie=FULL')),

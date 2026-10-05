@@ -9,13 +9,19 @@
 // (withdraw) ; si ce retrait echoue, le resultat le declare : etat published_complete et empreinte du manifeste
 // (docs/SORTIES.md, paragraphes 3 et 9). Aucune fonction ne leve.
 //
-// Seule la sortie full est livree : full.mhgp11ful1 est octet pour octet le dump MHGP11FUL1 de la sonde
-// bench/full_probe.cpp sur les memes entrees (porte mhgp11_cli_full_identity). Les sorties supports, points et plat
-// viendront avec leurs tranches (S7, S9, S10).
+// Sorties livrees : full (tranche S5) et supports (tranche S7). full.mhgp11ful1 est octet pour octet le dump
+// MHGP11FUL1 de la sonde bench/full_probe.cpp sur les memes entrees (porte mhgp11_cli_full_identity) ;
+// supports.mhgp11sp est le format MHGP11SP version 1 (docs/SORTIES.md, paragraphe 6), relu par le lecteur
+// bench/mhgp11_formats.py (portes mhgp11_cli_supports_*). Les sorties points et plat viendront avec leurs tranches
+// (S9, S10).
 //
 // Moteur : parametres FIXES, ceux du masque qualifie 16379 des sondes (bench/points_export.cpp : feuilles de 16 a 256
 // sites, graphe de paires, tables de populations, ordres concurrents, sans memo) ; aucune option de moteur (regle 6).
-// Le nombre de fils ne change aucun octet publie (portes mhgp11_cli_full_determinism).
+// La sortie supports construit l'arbre d'ordre K seul (build_order) au masque 7035 : 16379 sans les trois options
+// que build_order refuse, sans objet pour un ordre seul (verticales paralleles 128, reemploi des verticales regulieres
+// 1024, ordres concurrents 8192) ; FULL garde 16379 (audit 238734f1d, mesure appariee de docs/SORTIES.md,
+// paragraphe 11).
+// Le nombre de fils ne change aucun octet publie (portes mhgp11_cli_full_determinism, mhgp11_cli_supports_*).
 #pragma once
 
 #include <array>
@@ -28,6 +34,7 @@
 #include "core/core.hpp"
 #include "io/io.hpp"
 #include "sched/sched.hpp"
+#include "supports/supports.hpp"
 #include "tower/tower.hpp"
 
 namespace mhgp11::api {
@@ -36,8 +43,8 @@ namespace mhgp11::api {
 inline constexpr Order kMaxOrder = 12;
 static_assert(kMaxOrder == kMaxMebSites, "api : K borne par la MEB bornee");
 
-// Sorties livrees. --sortie=supports|points|plat est refuse (parameter_out_of_range) tant que sa tranche manque.
-enum class OutputKind : u8 { full };
+// Sorties livrees. --sortie=points|plat est refuse (parameter_out_of_range) tant que sa tranche manque.
+enum class OutputKind : u8 { full, supports };
 [[nodiscard]] std::string_view output_name(OutputKind kind) noexcept;
 
 struct SessionParams {
@@ -91,12 +98,19 @@ struct CloudView {
 struct FullRequest {
   Order k = 0;
 };
-using Request = std::variant<FullRequest>;
+// Sortie supports : arbre d'ordre K seul, boules de W_K rattachees, tous leurs supports positifs minimaux.
+struct SupportsRequest {
+  Order k = 0;
+};
+using Request = std::variant<FullRequest, SupportsRequest>;
+[[nodiscard]] OutputKind request_kind(const Request& request) noexcept;
 
-// Etages d'un appel. compute remplit cloud (preparation du nuage ; le CLI y ajoute la lecture), index, domain, tree ;
-// publish remplit output (produit propre a la sortie : vide pour full, dont le produit est la tour) et write
-// (fichiers, empreinte de l'arbre, manifeste, synchronisations et renommage) ; attach reste nul pour full ; total
-// revient a l'appelant. Pic : octets reserves les plus hauts pendant l'etage (MemoryBudget::restart_peak), mesure.
+// Etages d'un appel. compute remplit cloud (preparation du nuage ; le CLI y ajoute la lecture), index, domain, tree
+// (forets 1 a K de FULL ; arbre d'ordre K seul pour supports, balayage du rattachement exclu), attach (supports :
+// diagnostic attach_ns de build_order ; nul pour full) et, pour supports, output (assemblage de la hierarchie des
+// supports, build_support_hierarchy) ; publish remplit output pour full (vide : le produit est la tour) et write
+// (fichiers, empreinte de l'arbre, manifeste, synchronisations et renommage) ; total revient a l'appelant. Pic :
+// octets reserves les plus hauts pendant l'etage (MemoryBudget::restart_peak), mesure.
 enum class Stage : u8 { cloud, index, domain, tree, attach, output, write, total };
 inline constexpr std::size_t kStageCount = 8;
 [[nodiscard]] std::string_view stage_name(Stage stage) noexcept;
@@ -112,13 +126,15 @@ struct RunReport {
 class Product;
 
 // Calcule le produit d'une requete. Ordre des refus (docs/SORTIES.md, paragraphe 3, etapes 5 a 7) :
-//   parameter_out_of_range (k hors de 1..12) ;
+//   parameter_out_of_range (k hors de 1..12, requete inconnue) ;
 //   preparation du nuage (prepare_cloud) : empty_input, size_mismatch, index_overflow_u32, coordinate_out_of_domain,
 //     memory_budget (tri), duplicate_point_id, memory_budget (tableaux du nuage) ;
 //   multiplicity_unsupported (positions repetees : la tour exige des sites de poids un) ;
 //   parameter_out_of_range (k superieur au nombre de sites) : le nombre de sites n'est connu qu'apres la preparation
 //     du nuage, dont le memory_budget precede donc ce refus (K = n + 1 sous un budget trop petit : memory_budget) ;
-//   calcul : memory_budget, tower_capacity, invariants des modules.
+//   calcul : memory_budget, tower_capacity, invariants des modules ; pour supports, support_shell_capacity (une
+//     coquille etendue de W_K de plus de 24 sites : l'appel entier est refuse, avant tout calcul de Q_b) et
+//     supports_invariant.
 // Un refus ne laisse aucune reservation dans le budget de la Session ; le rapport n'est ecrit qu'en cas de succes.
 [[nodiscard]] Result<Product> compute(Session& session, const CloudView& cloud, const Request& request,
                                       RunReport* report = nullptr) noexcept;
@@ -134,10 +150,16 @@ class Product {
   Product& operator=(Product&&) = delete;
   ~Product() = default;
 
-  OutputKind kind() const noexcept { return OutputKind::full; }
+  OutputKind kind() const noexcept { return request_kind(request_); }
   const Request& request() const noexcept { return request_; }
-  Order k() const noexcept { return tower_->kmax(); }
+  Order k() const noexcept { return tower_ ? tower_->kmax() : order_->order(); }
+  // Domaine du produit (nuage, index, catalogue), quelle que soit la sortie.
+  const FullDomain& domain() const noexcept { return tower_ ? tower_->domain() : order_->domain(); }
+  // Precondition : kind() == full.
   const FullTower& full() const noexcept { return *tower_; }
+  // Precondition : kind() == supports. Arbre d'ordre K seul (et rattachement), hierarchie des supports.
+  const OrderTree& order_tree() const noexcept { return *order_; }
+  const supports::SupportHierarchy& hierarchy() const noexcept { return *hierarchy_; }
   // Vrai si ce produit a ete calcule par cette Session (meme jeton d'identite, non nul).
   bool computed_by(const Session& session) const noexcept {
     return session_ != nullptr && session_ == session.identity();
@@ -147,8 +169,13 @@ class Product {
   friend Result<Product> compute(Session&, const CloudView&, const Request&, RunReport*) noexcept;
   Product(const Request& request, FullTower&& tower, const void* session) noexcept
       : request_(request), tower_(std::move(tower)), session_(session) {}
+  Product(const Request& request, OrderTree&& tree, supports::SupportHierarchy&& hierarchy,
+          const void* session) noexcept
+      : request_(request), order_(std::move(tree)), hierarchy_(std::move(hierarchy)), session_(session) {}
   Request request_;
   std::optional<FullTower> tower_;
+  std::optional<OrderTree> order_;
+  std::optional<supports::SupportHierarchy> hierarchy_;
   const void* session_ = nullptr;
 };
 
@@ -171,9 +198,10 @@ struct Provenance {
   std::array<std::string_view, 3> origin{};  // --origine ; trois vides : non declaree
 };
 
-// Nom du fichier de la sortie full dans le dossier publie, schema du manifeste et version de la signature
+// Noms des fichiers des sorties full et supports dans le dossier publie, schema du manifeste et version de la signature
 // tree_k_sha256 que ce schema fixe (docs/SORTIES.md, paragraphe 8).
 inline constexpr std::string_view kFullFileName = "full.mhgp11ful1";
+inline constexpr std::string_view kSupportsFileName = "supports.mhgp11sp";
 inline constexpr std::string_view kManifestSchema = "ehgp.v11.output.v1";
 inline constexpr u64 kTreeSignatureVersion = 2;
 
@@ -204,7 +232,8 @@ struct Publication {
                                   const Provenance& provenance, RunReport* report = nullptr) noexcept;
 
 // Refus constate quand `directory` a peut-etre publie D (docs/SORTIES.md, paragraphe 3 : commit en double echec a
-// l'etape 8, fin de session ou ligne d'etat a l'etape 9). Si D est publie, il est retire (io::OutputDirectory::retract).
+// l'etape 8, fin de session ou ligne d'etat a l'etape 9). Si D est publie, il est retire
+// (io::OutputDirectory::retract).
 // Rend `refusal` inchange et l'etat : none si plus rien n'est publie (retrait reussi, ou rien ne l'etait),
 // published_complete et l'empreinte du manifeste si D reste publie (retrait refuse). Precondition : refus.
 [[nodiscard]] Publication withdraw(const Outcome& refusal, io::OutputDirectory& directory) noexcept;
@@ -222,7 +251,8 @@ struct Publication {
 // 1 naissance de boule, 2 fusion) et arite a de la naissance, les a SiteIdx de la naissance en u32 (le site a K = 1,
 // S* de la boule de naissance sinon, rien pour une fusion), u32 nombre d'enfants, puis les enfants croissants en u32 ;
 // petit-boutiste, sans bourrage. Ni PointId ni BallIdx : elle ne depend ni des etiquettes, ni de l'ordre d'entree,
-// ni du nombre de fils. Precondition : `forest` est construite sur `domain` (FullTower::order sur FullTower::domain).
+// ni du nombre de fils. Precondition : `forest` est construite sur `domain` (FullTower::order sur FullTower::domain, ou
+// OrderTree::forest sur OrderTree::domain : les deux voies donnent la meme foret, porte I10).
 [[nodiscard]] io::Digest tree_k_sha256(const FullDomain& domain, const OrderForest& forest) noexcept;
 
 }  // namespace mhgp11::api

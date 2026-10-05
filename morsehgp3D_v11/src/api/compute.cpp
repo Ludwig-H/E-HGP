@@ -3,7 +3,11 @@
 // bench/points_export.cpp (run) : prepare_cloud, build_index, prepare_full_domain sur le Pool, build_full ; ce qui
 // change est l'ordre des refus du paragraphe 5 de la specification (positions repetees, puis K superieur au nombre de
 // sites, avant tout calcul) et le rapport d'etages (temps et pic d'octets reserves, mesures par le pilote seul).
-// Portes : mhgp11_api_session_* (refus, identite des forets avec build_full), mhgp11_cli_full_identity.
+// Sortie supports (tranche S7) : meme nuage, index et domaine, puis l'arbre d'ordre K seul (build_order, masque 7035 :
+// order_params) et l'assemblage de la hierarchie des supports (build_support_hierarchy), sur le Pool de la Session.
+// Portes : mhgp11_api_session_* (refus, identite des forets avec build_full), mhgp11_cli_full_identity,
+// mhgp11_cli_supports_oracle, mhgp11_cli_supports_scale*.
+#include <algorithm>
 #include <variant>
 
 #include "api/internal.hpp"
@@ -39,6 +43,14 @@ FullParams full_params() noexcept {
   return params;
 }
 
+FullParams order_params() noexcept {
+  FullParams params = full_params();
+  params.parallel_verticals = false;       // 128
+  params.reuse_regular_verticals = false;  // 1024
+  params.concurrent_orders = false;        // 8192
+  return params;
+}
+
 }  // namespace mhgp11::api_detail
 
 namespace mhgp11::api {
@@ -51,7 +63,8 @@ void close_stage(RunReport& report, Stage stage, const Stopwatch& clock, MemoryB
   report.at(stage) = {clock.nanoseconds(), budget.restart_peak()};
 }
 
-Result<FullTower> full_tower(Session& session, const CloudView& view, Order k, RunReport& report) noexcept {
+// Etages cloud, index et domain, communs aux sorties : nuage prepare, index global, domaine FULL de kmax = k.
+Result<FullDomain> prepare_domain(Session& session, const CloudView& view, Order k, RunReport& report) noexcept {
   if (k < 1 || k > kMaxOrder) return fail(Reason::parameter_out_of_range);
   MemoryBudget& budget = session.budget();
   budget.restart_peak();
@@ -71,6 +84,13 @@ Result<FullTower> full_tower(Session& session, const CloudView& view, Order k, R
       prepare_full_domain(std::move(index.value()), api_detail::catalogue_params(k), budget, session.pool());
   if (!domain.ok()) return domain.outcome();
   close_stage(report, Stage::domain, domain_clock, budget);
+  return domain;
+}
+
+Result<FullTower> full_tower(Session& session, const CloudView& view, Order k, RunReport& report) noexcept {
+  Result<FullDomain> domain = prepare_domain(session, view, k, report);
+  if (!domain.ok()) return domain.outcome();
+  MemoryBudget& budget = session.budget();
   Stopwatch tree_clock;
   Result<FullTower> tower =
       build_full(std::move(domain.value()), budget, nullptr, api_detail::full_params(), &session.pool());
@@ -79,13 +99,51 @@ Result<FullTower> full_tower(Session& session, const CloudView& view, Order k, R
   return std::move(tower).take();
 }
 
+// Produit de la sortie supports : arbre d'ordre K seul et hierarchie des supports.
+struct SupportsParts {
+  OrderTree tree;
+  supports::SupportHierarchy hierarchy;
+};
+
+// Etages tree et attach : build_order, dont le balayage du rattachement (attach_ns, diagnostic de build_order) est
+// retire de tree et publie a part ; etage output : build_support_hierarchy. Le pic de build_order va a tree.
+Result<SupportsParts> supports_parts(Session& session, const CloudView& view, Order k, RunReport& report) noexcept {
+  Result<FullDomain> domain = prepare_domain(session, view, k, report);
+  if (!domain.ok()) return domain.outcome();
+  MemoryBudget& budget = session.budget();
+  Stopwatch tree_clock;
+  u64 attach_ns = 0;
+  Result<OrderTree> tree = build_order(std::move(domain.value()), k, budget, api_detail::order_params(),
+                                       &session.pool(), nullptr, &attach_ns);
+  if (!tree.ok()) return tree.outcome();
+  const u64 tree_ns = tree_clock.nanoseconds();
+  report.at(Stage::tree) = {tree_ns - std::min(tree_ns, attach_ns), budget.restart_peak()};
+  report.at(Stage::attach) = {attach_ns, 0};
+  Stopwatch output_clock;
+  Result<supports::SupportHierarchy> hierarchy =
+      supports::build_support_hierarchy(tree.value(), budget, &session.pool());
+  if (!hierarchy.ok()) return hierarchy.outcome();
+  close_stage(report, Stage::output, output_clock, budget);
+  return SupportsParts{std::move(tree).take(), std::move(hierarchy).take()};
+}
+
 }  // namespace
 
 Result<Product> compute(Session& session, const CloudView& cloud, const Request& request,
                         RunReport* report) noexcept {
+  RunReport local;
+  if (const SupportsRequest* wanted = std::get_if<SupportsRequest>(&request)) {
+    Result<SupportsParts> parts = guarded([&]() { return supports_parts(session, cloud, wanted->k, local); });
+    if (!parts.ok()) return parts.outcome();
+    if (report != nullptr) {
+      for (Stage stage : {Stage::cloud, Stage::index, Stage::domain, Stage::tree, Stage::attach, Stage::output})
+        report->at(stage) = local.at(stage);
+    }
+    SupportsParts made = std::move(parts).take();
+    return Product(request, std::move(made.tree), std::move(made.hierarchy), session.identity());
+  }
   const FullRequest* full = std::get_if<FullRequest>(&request);
   if (full == nullptr) return fail(Reason::parameter_out_of_range);
-  RunReport local;
   Result<FullTower> tower = guarded([&]() { return full_tower(session, cloud, full->k, local); });
   if (!tower.ok()) return tower.outcome();
   if (report != nullptr) {

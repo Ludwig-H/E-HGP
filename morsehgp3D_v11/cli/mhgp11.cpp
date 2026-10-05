@@ -1,8 +1,8 @@
 // Executable mhgp11 : sortie parametree de la v11 (docs/SORTIES.md), au-dessus de la facade api (seul en-tete
-// inclus). Tranche S5 : --sortie=full seulement ; supports, points et plat sont refuses (parameter_out_of_range)
-// jusqu'a la livraison de leur tranche.
+// inclus). Tranches S5 (--sortie=full) et S7 (--sortie=supports) ; points et plat sont refuses
+// (parameter_out_of_range) jusqu'a la livraison de leur tranche.
 //
-//   mhgp11 --sortie=full --points=<x.u32le> --ids=<ids.u32le> --dossier=<D> --k=<K>
+//   mhgp11 --sortie=<full|supports> --points=<x.u32le> --ids=<ids.u32le> --dossier=<D> --k=<K>
 //          [--fils=<W>] [--budget=<octets>] [--pas=<decimal>] [--origine=<x,y,z>]
 //
 // Ordre deterministe des refus, les neuf etapes du paragraphe 3 de docs/SORTIES.md ; la cle stage de la ligne de
@@ -19,7 +19,7 @@
 //   5. a 7. (stage compute, api::compute) : nuage dans l'ordre de prepare_cloud (empty_input,
 //      coordinate_out_of_domain, memory_budget, duplicate_point_id, memory_budget), positions repetees
 //      (multiplicity_unsupported), K > n (parameter_out_of_range, connu seulement apres la preparation du nuage),
-//      calcul ;
+//      calcul (supports : support_shell_capacity pour l'appel entier si une coquille etendue depasse 24 sites) ;
 //   8. ecriture et publication (stage publish, api::publish) : output_unwritable, output_conflict ;
 //   9. apres la publication : fin de session (stage close, api::finish : budget_not_released, code 3), puis ligne
 //      d'etat sur la sortie standard (stage report : output_unwritable, code 2). Chacun retire le dossier publie
@@ -32,8 +32,9 @@
 // paragraphe 9). SIGPIPE et SIGXFSZ sont ignores : un tube sans lecteur, une sortie pleine ou une limite de taille de
 // fichier rendent une erreur d'ecriture (EPIPE, ENOSPC, EFBIG) et un refus, jamais un arret par signal qui laisserait
 // un D.pending orphelin. Codes de sortie : 0 conforme, 2 refus, 3 invariant viole.
-// Portes : mhgp11_cli_contract, mhgp11_cli_full_identity, mhgp11_cli_full_determinism, mhgp11_cli_full_relabel ;
-// mutants de tests/mutants/cli.json.
+// Portes : mhgp11_cli_contract, mhgp11_cli_full_identity, mhgp11_cli_full_determinism, mhgp11_cli_full_relabel,
+// mhgp11_cli_supports_oracle, mhgp11_cli_supports_scale*, mhgp11_cli_supports_lidar_* ; mutants de
+// tests/mutants/cli.json.
 #include <fcntl.h>
 #include <signal.h>
 #include <sys/stat.h>
@@ -80,6 +81,7 @@ constexpr std::array<Known, 12> kKnown = {{{"sortie", false},
 enum Slot : std::size_t { kSortie, kPoints, kIds, kDossier, kK, kFils, kBudget, kPas, kOrigine };
 
 struct Options {
+  api::OutputKind output = api::OutputKind::full;
   const char* points = nullptr;
   const char* ids = nullptr;
   const char* directory = nullptr;
@@ -140,8 +142,9 @@ const char* parse(int argc, char** argv, Options& o) noexcept {
   if (const char* why = read_arguments(argc, argv, raw)) return why;
   if (!raw.seen[kSortie]) return "option --sortie absente";
   const std::string_view output = raw.value[kSortie];
-  if (output == "supports" || output == "points" || output == "plat") return "sortie non livree dans cette tranche";
-  if (output != api::output_name(api::OutputKind::full)) return "sortie inconnue";
+  if (output == "points" || output == "plat") return "sortie non livree dans cette tranche";
+  if (output == api::output_name(api::OutputKind::supports)) o.output = api::OutputKind::supports;
+  else if (output != api::output_name(api::OutputKind::full)) return "sortie inconnue";
   for (std::size_t slot = 0; slot < kKnown.size(); ++slot)
     if (raw.seen[slot] && kKnown[slot].plat_only) return "option propre a la sortie plat";
   for (const Slot slot : {kPoints, kIds, kDossier, kK})
@@ -200,17 +203,26 @@ StandardOutput inspect_stdout(int argc, char** argv) noexcept {
 // Etat d'un appel, pour la ligne de la sortie standard.
 struct Run {
   Step step = Step::options;
+  api::OutputKind output = api::OutputKind::full;
   bool stdout_usable = true;
   api::RunReport report;
   u64 read_ns = 0;
   u32 workers = 0, sites = 0;
-  u64 nodes = 0, births = 0, edges = 0;
+  u64 nodes = 0, births = 0, edges = 0;          // full : totaux des ordres 1 a K
+  u64 balls = 0, supports = 0, prior = 0;        // supports : noeuds (nodes), boules, supports, branches
   api::Publication publication;  // issue, etat du dossier et empreinte du manifeste de D publie
 };
 
 void tally(const api::Product& product, Run& run) noexcept {
+  run.sites = product.domain().index().cloud().sites();
+  if (product.kind() == api::OutputKind::supports) {
+    run.nodes = product.order_tree().forest().nodes().size();
+    run.balls = product.hierarchy().balls().size();
+    run.supports = product.hierarchy().supports().size();
+    run.prior = product.hierarchy().prior().size();
+    return;
+  }
   const FullTower& tower = product.full();
-  run.sites = tower.domain().index().cloud().sites();
   for (u32 k = 1; k <= tower.kmax(); ++k) {
     const OrderForest& forest = tower.order(static_cast<Order>(k));
     run.nodes += forest.nodes().size();
@@ -236,7 +248,9 @@ api::Publication execute(const Options& o, io::OutputDirectory& directory, Run& 
     const io::InputFiles& in = input.value();
     run.step = Step::compute;
     const api::CloudView view{in.x.span(), in.y.span(), in.z.span(), in.ids.span()};
-    Result<api::Product> product = api::compute(session, view, api::FullRequest{o.k}, &run.report);
+    const api::Request request = o.output == api::OutputKind::supports ? api::Request(api::SupportsRequest{o.k})
+                                                                         : api::Request(api::FullRequest{o.k});
+    Result<api::Product> product = api::compute(session, view, request, &run.report);
     if (!product.ok()) return {product.outcome()};
     tally(product.value(), run);
     run.step = Step::publish;
@@ -255,12 +269,15 @@ api::Publication execute(const Options& o, io::OutputDirectory& directory, Run& 
 void refusal_line(std::FILE* stream, const Outcome& outcome, const Run& run) noexcept {
   const std::string_view status = status_name(outcome.status()), reason = reason_name(outcome.reason);
   const std::string_view stage = step_name(run.step);
+  const bool named = run.step != Step::options;  // la sortie n'est connue qu'apres les options
+  const std::string_view output = api::output_name(run.output);
   const api::PublicationState state = run.publication.state;
   const std::string_view publication = api::publication_state_name(state);
   std::fprintf(stream,
-               "{\"phase\":\"mhgp11\",\"output\":%s,\"status\":\"%.*s\",\"reason\":\"%.*s\",\"stage\":\"%.*s\","
-               "\"coord_bits\":%d,\"publication\":\"%.*s\",\"manifest_sha256\":",
-               run.step != Step::options ? "\"full\"" : "null", static_cast<int>(status.size()), status.data(),
+               "{\"phase\":\"mhgp11\",\"output\":%s%.*s%s,\"status\":\"%.*s\",\"reason\":\"%.*s\","
+               "\"stage\":\"%.*s\",\"coord_bits\":%d,\"publication\":\"%.*s\",\"manifest_sha256\":",
+               named ? "\"" : "", named ? static_cast<int>(output.size()) : 4, named ? output.data() : "null",
+               named ? "\"" : "", static_cast<int>(status.size()), status.data(),
                static_cast<int>(reason.size()), reason.data(), static_cast<int>(stage.size()), stage.data(),
                kCoordBits, static_cast<int>(publication.size()), publication.data());
   if (state == api::PublicationState::published_complete) {
@@ -294,9 +311,10 @@ unsigned long long ull(u64 value) noexcept { return static_cast<unsigned long lo
 bool success_line(const Options& o, const Run& run) noexcept {
   using api::Stage;
   const auto& r = run.report;
-  std::printf("{\"phase\":\"mhgp11\",\"output\":\"full\",\"status\":\"ok\",\"reason\":\"none\",\"coord_bits\":%d,"
+  const std::string_view output = api::output_name(run.output);
+  std::printf("{\"phase\":\"mhgp11\",\"output\":\"%.*s\",\"status\":\"ok\",\"reason\":\"none\",\"coord_bits\":%d,"
               "\"k\":%u,\"workers\":%u,\"sites\":%u,\"stages_ns\":{",
-              kCoordBits, unsigned{o.k}, run.workers, run.sites);
+              static_cast<int>(output.size()), output.data(), kCoordBits, unsigned{o.k}, run.workers, run.sites);
   constexpr std::array<Stage, 8> kTimed = {Stage::cloud,  Stage::index,  Stage::domain, Stage::tree,
                                            Stage::attach, Stage::output, Stage::write,  Stage::total};
   for (std::size_t i = 0; i < kTimed.size(); ++i) {
@@ -314,9 +332,16 @@ bool success_line(const Options& o, const Run& run) noexcept {
                 ull(r.at(kPeaks[i]).peak_bytes));
   }
   const auto manifest = io::to_hex(run.publication.manifest_sha256);
-  std::printf("},\"counts\":{\"nodes\":%llu,\"births\":%llu,\"edges\":%llu},\"publication\":\"published_complete\","
-              "\"manifest_sha256\":\"%.*s\"}\n",
-              ull(run.nodes), ull(run.births), ull(run.edges), static_cast<int>(manifest.size()), manifest.data());
+  // counts : full, totaux des ordres 1 a K (noeuds, naissances, aretes) ; supports, arbre d'ordre K et hierarchie
+  // (noeuds, boules, supports, branches publiees).
+  if (run.output == api::OutputKind::supports)
+    std::printf("},\"counts\":{\"nodes\":%llu,\"balls\":%llu,\"supports\":%llu,\"prior\":%llu}", ull(run.nodes),
+                ull(run.balls), ull(run.supports), ull(run.prior));
+  else
+    std::printf("},\"counts\":{\"nodes\":%llu,\"births\":%llu,\"edges\":%llu}", ull(run.nodes), ull(run.births),
+                ull(run.edges));
+  std::printf(",\"publication\":\"published_complete\",\"manifest_sha256\":\"%.*s\"}\n",
+              static_cast<int>(manifest.size()), manifest.data());
   const bool flushed = std::fflush(stdout) == 0;
   return flushed && std::ferror(stdout) == 0;
 }
@@ -332,6 +357,7 @@ int main(int argc, char** argv) {
   Run run;
   run.stdout_usable = standard.writable && !standard.input;
   if (const char* why = parse(argc, argv, o)) return refuse(fail(Reason::parameter_out_of_range), run, why);
+  run.output = o.output;
   // Etape 2, avant toute ouverture de fichier par le processus : sortie standard, puis dossier.
   run.step = Step::plan;
   if (!standard.writable) return refuse(fail(Reason::output_unwritable), run, "sortie standard fermee ou en lecture");

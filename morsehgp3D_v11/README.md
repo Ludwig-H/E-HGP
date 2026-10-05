@@ -142,6 +142,15 @@ Intégrés aussi en L1 le 5 octobre 2026, qualification G4 en attente : l'arbre 
 boules de $W_K$ (S3 : `build_order`, journal des graines, `WindowAttachment`, juge E2 de test, différentiel
 `mhgp11_tower_attach_fraction` contre l'oracle S1 ; [forêts FULL](docs/FULL_FORESTS.md), dernière section).
 
+Commitée localement le 5 octobre 2026 (tranche S7, L2), qualification G4 et mesure appariée en attente :
+`mhgp11 --sortie=supports`. L'exécutable publie `supports.mhgp11sp` (`MHGP11SP` version 1, § 6 du
+[contrat](docs/SORTIES.md) : arbre d'ordre K, boules de $W_K$, tous leurs supports positifs minimaux, branches ; aucun
+compte stocké) et un manifeste de comptes et d'agrégats, dont `tree_k_sha256`, égal à celui de `--sortie=full` à même
+entrée et même K. L'arbre d'ordre K seul y est construit au masque 7 035 (16 379 sans les trois options que
+`build_order` refuse), FULL gardant 16 379. Le lecteur en bibliothèque standard `bench/mhgp11_formats.py` dérive et
+contrôle tout le fichier ; la porte `mhgp11_cli_supports_oracle` exige qu'il égale le vidage canonique de l'oracle S1
+sur 963 ordres. `bench/sorties_g4.py` prépare la mesure appariée de la règle de L2 (§ 11 du contrat).
+
 **Clause de report de `plat`.** La livraison L4 peut être reportée, par une décision écrite de l'utilisateur,
 consignée ici et dans une note aux auditeurs, tant que le § 3.4 de la [sortie plate](docs/SORTIE_PLATE.md) porte la
 mention « Ouvert » (règle qui garde les séparations fugaces sans déchiqueter les objets à lignes de balayage). Le

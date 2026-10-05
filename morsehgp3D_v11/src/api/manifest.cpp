@@ -14,6 +14,7 @@
 // mhgp11_cli_full_relabel, mhgp11_cli_full_identity, mhgp11_cli_contract ; mutants de tests/mutants/api.json
 // (tree_k_*, retrait_omis_fin_de_session) et de tests/mutants/cli.json (manifeste_taille_fausse,
 // retrait_omis_double_echec).
+#include <algorithm>
 #include <charconv>
 #include <span>
 
@@ -226,20 +227,28 @@ Publication publish(Session& session, const Product& product, io::OutputDirector
   // Produit d'une autre Session (audit general a65903a7b, P1) : ses tampons sont comptes dans un autre budget ; refus
   // avant toute creation de fichier et toute ecriture du rapport. Porte mhgp11_api_session_session_identity.
   if (!product.computed_by(session)) return {fail(Reason::parameter_out_of_range), PublicationState::none, {}};
-  const Outcome checked = api_detail::check_provenance(provenance, product.full().domain().index().cloud().weight());
+  const Outcome checked = api_detail::check_provenance(provenance, product.domain().index().cloud().weight());
   if (!checked.ok()) return {checked, PublicationState::none, {}};
   MemoryBudget& budget = session.budget();
   RunReport local;
+  const bool supports = product.kind() == OutputKind::supports;
   const Outcome written = guarded([&]() -> Outcome {
-    // Sortie full : le produit est la tour elle-meme, l'etage output est vide ; write couvre le fichier, l'empreinte
-    // de l'arbre, le manifeste et la publication (synchronisations et renommage compris).
-    local.at(Stage::output) = {0, budget.restart_peak()};
+    // Sortie full : le produit est la tour elle-meme, l'etage output est vide. Sortie supports : l'etage output est
+    // l'assemblage, mesure par compute. write couvre le fichier, l'empreinte de l'arbre, le manifeste et la
+    // publication (synchronisations et renommage compris).
+    if (!supports) local.at(Stage::output) = {0, budget.restart_peak()};
+    else budget.restart_peak();
     Stopwatch write_clock;
-    Result<io::FileWriter*> file = directory.create(kFullFileName);
+    Result<io::FileWriter*> file = directory.create(supports ? kSupportsFileName : kFullFileName);
     if (!file.ok()) return file.outcome();
-    MHGP11_TRY(api_detail::write_full(*file.value(), product.full()));
-    const std::string manifest =
-        api_detail::full_manifest(product, provenance, file.value()->size(), file.value()->digest());
+    std::string manifest;
+    if (supports) {
+      MHGP11_TRY(api_detail::write_supports(*file.value(), product.order_tree(), product.hierarchy()));
+      manifest = api_detail::supports_manifest(product, provenance, file.value()->size(), file.value()->digest());
+    } else {
+      MHGP11_TRY(api_detail::write_full(*file.value(), product.full()));
+      manifest = api_detail::full_manifest(product, provenance, file.value()->size(), file.value()->digest());
+    }
     MHGP11_TRY(directory.commit(manifest));
     local.at(Stage::write) = {write_clock.nanoseconds(), budget.restart_peak()};
     return {};
@@ -248,7 +257,7 @@ Publication publish(Session& session, const Product& product, io::OutputDirector
   // withdraw le retire, ou declare published_complete.
   if (!written.ok()) return withdraw(written, directory);
   if (report != nullptr) {
-    report->at(Stage::output) = local.at(Stage::output);
+    if (!supports) report->at(Stage::output) = local.at(Stage::output);
     report->at(Stage::write) = local.at(Stage::write);
   }
   return state_of(written, directory);
@@ -318,6 +327,100 @@ std::string full_manifest(const api::Product& product, const Provenance& provena
   out.append("}],\"tree_k_sha256\":");
   hex(out, api::tree_k_sha256(tower.domain(), tower.order(product.k())));
   full_counts(out, tower);
+  out.append("}\n");
+  return out;
+}
+
+namespace {
+
+// Comptes de la sortie supports (docs/SORTIES.md, paragraphe 8), dans l'ordre fixe du contrat.
+void supports_counts(std::string& out, const OrderTree& tree, const supports::SupportHierarchy& h) {
+  const OrderForest& forest = tree.forest();
+  std::array<u64, 3> roles{}, arities{};
+  u64 extended = 0, multiple = 0, widest = 0, kparties_sum = 0, kparties_max = 0, cofaces_sum = 0, cofaces_max = 0;
+  const auto offsets = h.support_offsets();
+  for (u64 b = 0; b < h.balls().size(); ++b) {
+    const supports::Ball& ball = h.balls()[b];
+    ++roles[static_cast<std::size_t>(ball.role)];
+    const u64 count = offsets[b + 1] - offsets[b];
+    extended += ball.m > ball.qmin;
+    multiple += count >= 2;
+    widest = std::max(widest, count);
+    kparties_sum += ball.kparties_reliees;
+    kparties_max = std::max<u64>(kparties_max, ball.kparties_reliees);
+    cofaces_sum += ball.cofaces;
+    cofaces_max = std::max<u64>(cofaces_max, ball.cofaces);
+  }
+  for (const supports::Support& support : h.supports()) ++arities[support.arity - 2];
+  out.append(",\"counts\":{\"sites\":");
+  number(out, tree.domain().index().cloud().sites());
+  out.append(",\"nodes\":");
+  number(out, forest.nodes().size());
+  out.append(",\"births\":");
+  number(out, forest.births());
+  out.append(",\"merges\":");
+  number(out, forest.nodes().size() - forest.births());
+  out.append(",\"balls\":");
+  number(out, h.balls().size());
+  out.append(",\"roles\":{\"birth\":");
+  number(out, roles[0]);
+  out.append(",\"merge\":");
+  number(out, roles[1]);
+  out.append(",\"internal\":");
+  number(out, roles[2]);
+  out.append("},\"supports\":");
+  number(out, h.supports().size());
+  out.append(",\"arities\":{\"2\":");
+  number(out, arities[0]);
+  out.append(",\"3\":");
+  number(out, arities[1]);
+  out.append(",\"4\":");
+  number(out, arities[2]);
+  out.append("},\"extended_shells\":");
+  number(out, extended);
+  out.append(",\"multi_support_balls\":");
+  number(out, multiple);
+  out.append(",\"max_supports_per_ball\":");
+  number(out, widest);
+  out.append(",\"prior\":");
+  number(out, h.prior().size());
+  out.append(",\"kparties_reliees\":{\"sum\":");
+  number(out, kparties_sum);
+  out.append(",\"max\":");
+  number(out, kparties_max);
+  out.append("},\"cofaces\":{\"sum\":");
+  number(out, cofaces_sum);
+  out.append(",\"max\":");
+  number(out, cofaces_max);
+  out.append("}}");
+}
+
+}  // namespace
+
+std::string supports_manifest(const api::Product& product, const Provenance& provenance, u64 bytes,
+                              const io::Digest& sha256) {
+  const OrderTree& tree = product.order_tree();
+  std::string out;
+  out.reserve(2048);
+  out.append("{\"schema\":");
+  quoted(out, api::kManifestSchema);
+  out.append(",\"output\":");
+  quoted(out, api::output_name(product.kind()));
+  out.append(",\"status\":\"complete\",\"public_status\":\"not_claimed\",\"coord_bits\":");
+  number(out, static_cast<u64>(kCoordBits));
+  out.append(",\"k\":");
+  number(out, product.k());
+  parameters(out, provenance);
+  inputs(out, provenance);
+  out.append(",\"files\":[{\"name\":");
+  quoted(out, api::kSupportsFileName);
+  out.append(",\"format\":\"MHGP11SP\",\"version\":1,\"bytes\":");
+  number(out, bytes);
+  out.append(",\"sha256\":");
+  hex(out, sha256);
+  out.append("}],\"tree_k_sha256\":");
+  hex(out, api::tree_k_sha256(tree.domain(), tree.forest()));
+  supports_counts(out, tree, product.hierarchy());
   out.append("}\n");
   return out;
 }

@@ -1,6 +1,6 @@
 {
   "module": "cli",
-  "plancher": 20,
+  "plancher": 28,
   "construction": [
     "cli"
   ],
@@ -128,8 +128,8 @@
     {
       "id": "ligne_refus_sortie_toujours_full",
       "fichier": "cli/mhgp11.cpp",
-      "cherche": "run.step != Step::options ? \"\\\"full\\\"\" : \"null\"",
-      "remplace": "\"\\\"full\\\"\"",
+      "cherche": "  const bool named = run.step != Step::options;",
+      "remplace": "  const bool named = true;",
       "porte": "mhgp11_cli_contract",
       "note": "cle output de la ligne de refus jamais null a l'etape des options"
     },
@@ -164,6 +164,70 @@
       "remplace": "  if (!written.ok()) return state_of(written, directory);",
       "porte": "mhgp11_cli_contract",
       "note": "commit en double echec sans tentative de retrait par l'api (bibliotheque prechargee)"
+    },
+    {
+      "id": "sp_colonnes_echangees",
+      "fichier": "src/api/write_supports.cpp",
+      "cherche": "  for (const supports::Ball& ball : balls) out.u32v(idx(ball.rank));\n  MHGP11_TRY(out.end());\n  for (u64 b = 0; b < at.balls; ++b) out.u32v(static_cast<u32>(prior_offsets[b + 1] - prior_offsets[b]));\n",
+      "remplace": "  for (u64 b = 0; b < at.balls; ++b) out.u32v(static_cast<u32>(prior_offsets[b + 1] - prior_offsets[b]));\n  MHGP11_TRY(out.end());\n  for (const supports::Ball& ball : balls) out.u32v(idx(ball.rank));\n",
+      "porte": "mhgp11_cli_supports_oracle",
+      "note": "colonnes BALLS.rank et BALLS.prior_count echangees dans MHGP11SP"
+    },
+    {
+      "id": "sp_ordre_supports",
+      "fichier": "src/api/write_supports.cpp",
+      "cherche": "    return h.supports()[support_offsets[b] + j];",
+      "remplace": "    return h.supports()[support_offsets[b + 1] - 1 - j];",
+      "porte": "mhgp11_cli_supports_oracle",
+      "note": "supports d'une boule ecrits dans l'ordre inverse : S* n'est plus en tete"
+    },
+    {
+      "id": "sp_branches_omises",
+      "fichier": "src/api/write_supports.cpp",
+      "cherche": "  for (const NodeIdx node : h.prior()) out.u32v(idx(node));\n",
+      "remplace": "  for (const NodeIdx node : h.prior()) out.u32v(idx(node) == 0 ? 0 : 0);\n",
+      "porte": "mhgp11_cli_supports_oracle",
+      "note": "branches ant(b) de la section PRIOR remplacees par le noeud 0"
+    },
+    {
+      "id": "sp_signature_v1",
+      "fichier": "src/api/manifest.cpp",
+      "cherche": "      for (u32 j = 0; j < ball.qmin; ++j) out.u32le(idx(ball.support[j]));\n",
+      "remplace": "      for (u32 j = 0; j < ball.qmin; ++j) out.u32le(node.birth_key);\n",
+      "porte": "mhgp11_cli_supports_oracle",
+      "note": "signature version 1 : naissance par BallIdx au lieu de S* en SiteIdx (egale entre full et supports, refusee par le lecteur)"
+    },
+    {
+      "id": "sp_manifeste_constant",
+      "fichier": "src/api/manifest.cpp",
+      "cherche": "  number(out, kparties_sum);",
+      "remplace": "  number(out, 4096);",
+      "porte": "mhgp11_cli_supports_oracle",
+      "note": "somme de kparties_reliees constante dans le manifeste de supports"
+    },
+    {
+      "id": "sp_signature_fichier",
+      "fichier": "src/api/manifest.cpp",
+      "cherche": "  hex(out, api::tree_k_sha256(tree.domain(), tree.forest()));",
+      "remplace": "  hex(out, sha256);",
+      "porte": "mhgp11_cli_supports_oracle",
+      "note": "tree_k_sha256 de supports remplace par l'empreinte du fichier"
+    },
+    {
+      "id": "sp_sortie_supports_comme_full",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "  if (output == api::output_name(api::OutputKind::supports)) o.output = api::OutputKind::supports;",
+      "remplace": "  if (output == api::output_name(api::OutputKind::supports)) o.output = api::OutputKind::full;",
+      "porte": "mhgp11_cli_supports_oracle",
+      "note": "--sortie=supports publie la sortie full"
+    },
+    {
+      "id": "sp_masque_16379",
+      "fichier": "src/api/compute.cpp",
+      "cherche": "  params.concurrent_orders = false;        // 8192\n",
+      "remplace": "",
+      "porte": "mhgp11_cli_supports_oracle",
+      "note": "arbre d'ordre K au masque de FULL : build_order refuse les ordres concurrents"
     }
   ]
 }

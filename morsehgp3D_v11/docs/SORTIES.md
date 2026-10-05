@@ -28,8 +28,10 @@ puis la spécification finale du workflow de conception `wf_a7dbdf1a-21c`. Ces t
 
 **État.** Intégrés le 5 octobre 2026 (commits locaux de l'intégration L1, qualification G4 en attente) : l'exécutable
 `mhgp11` et la façade `api` pour `--sortie=full` (tranche S5), et les primitives du module `supports` (tranche S6a,
-§ 6). Les sorties `supports`, `points` et `plat` restent refusées `parameter_out_of_range` jusqu'à leur tranche
-(§ 11). Existent aussi le module `io` (lecture, empreintes, transaction de dossier, § 9) et l'en-tête public de la
+§ 6). Livrés ensuite le 5 octobre 2026, qualification G4 en attente : l'assemblage de la hiérarchie des supports
+(tranche S6b, § 6), puis `--sortie=supports` (tranche S7) : écrivain `MHGP11SP`, manifeste de supports, lecteur
+`bench/mhgp11_formats.py` et préparation de la mesure appariée (`bench/sorties_g4.py`, § 11). Les sorties `points` et
+`plat` restent refusées `parameter_out_of_range` jusqu'à leur tranche (§ 11). Existent aussi le module `io` (lecture, empreintes, transaction de dossier, § 9) et l'en-tête public de la
 tour. Ce qui est fixé par S5 est signalé « fixé par S5 » ci-dessous.
 
 ## 1. L'exécutable
@@ -77,8 +79,10 @@ ceux, qualifiés, des sondes de banc : masque 16 379 de `bench/full_probe.cpp`, 
 **Arbre d'ordre K seul** (tranche S3, intégrée en L1 le 5 octobre 2026, qualification G4 en attente). `build_order`
 refuse (`parameter_out_of_range`) les trois options sans objet pour un ordre seul, au lieu de les ignorer : ordres
 concurrents (bit 8 192 du masque), verticales parallèles (128) et réemploi des verticales régulières (1 024). La façade
-(S7) les retirera du masque 16 379 : l'arbre d'ordre K seul prend le masque 7 035, et FULL garde 16 379 (mesure
-appariée du § 11, audit `238734f1d`). Les autres paramètres sont honorés, ce que la porte
+(S7) les retire du masque 16 379 : l'arbre d'ordre K seul prend le masque 7 035 (`api_detail::order_params`,
+`kOrderMask`, avec une assertion statique de la différence), et FULL garde 16 379 (mesure appariée du § 11, audit
+`238734f1d`). C'est la seule différence entre les moteurs des deux sorties ; éteindre ces options dans FULL changerait
+la référence qualifiée, ce qui n'est pas fait. Les autres paramètres sont honorés, ce que la porte
 `mhgp11_tower_order_same_params` exige (table de populations consultée, mémo interrogé, lookup dense construit ;
 mutants `table_population_ignoree`, `memo_ordre_ignore`, `lookup_dense_ignore`) : sans elle, la règle de L2
 comparerait à FULL une autre configuration que celle annoncée. La tour peut refuser `tower_capacity` quand une cellule
@@ -182,7 +186,8 @@ Un arrêt par signal est toujours un échec. Les codes 1 et 4 appartiennent aux 
 - Succès : clés `phase`, `output`, `status` (`ok`), `reason` (`none`), `coord_bits`, `k`, `workers`, `sites`,
   `stages_ns` (`cloud`, `index`, `domain`, `tree`, `attach`, `output`, `write`, `total`), `peaks_bytes` (`cloud`,
   `index`, `domain`, `tree`, `output`, `write`), `counts`, `publication` (`published_complete`), `manifest_sha256`,
-  dans cet ordre. Les `counts` de `full` sont les totaux des ordres 1 à K : `nodes`, `births`, `edges`.
+  dans cet ordre. Les `counts` de `full` sont les totaux des ordres 1 à K : `nodes`, `births`, `edges`. Ceux de
+  `supports` (fixés par S7) : `nodes` ($N$), `balls` ($B$), `supports` ($S$), `prior` ($A$), égaux au manifeste.
 - Refus : clés `phase`, `output` (`null` à l'étape des options, le nom de la sortie ensuite), `status`, `reason`,
   `stage` (`options`, `plan`, `session`, `read`, `compute`, `publish`, `close`, `report`), `coord_bits`,
   `publication` (`none` ou `published_complete`), `manifest_sha256` (`null` ou l'empreinte du manifeste publié),
@@ -198,10 +203,12 @@ Un arrêt par signal est toujours un échec. Les codes 1 et 4 appartiennent aux 
   - `cloud` : lecture et préparation du nuage ;
   - `index` ;
   - `domain` : catalogue $\mathrm{Cat}_K$ ;
-  - `tree` : forêts $1$ à $K$ de FULL pour `full`, arbre d'ordre K seul pour les trois autres sorties ;
+  - `tree` : forêts $1$ à $K$ de FULL pour `full`, arbre d'ordre K seul pour les trois autres sorties ; pour ces
+    dernières, `build_order` sans son balayage du rattachement (durée de `build_order` moins `attach_ns`) ;
   - `attach` : rattachement des boules, diagnostic `attach_ns` de `build_order` (balayage du lemme D et contrôles du
-    produit, tranche S3) ; nul pour `full` ;
-  - `output` : produit (supports et assemblage, hiérarchie de points ou tête plate) ;
+    produit, tranche S3) ; nul pour `full` ; son pic est compté dans celui de `tree` ;
+  - `output` : produit (supports et assemblage, hiérarchie de points ou tête plate) ; pour `supports`,
+    `build_support_hierarchy` (pré-passe du plafond, postordre, passes count et fill) ; vide pour `full` ;
   - `write` : écriture et publication.
 - En refus, la ligne porte le statut et la raison et, si un dossier reste publié (§ 9), l'état `published_complete`
   avec l'empreinte du manifeste publié (forme ci-dessus).
@@ -384,6 +391,21 @@ mémoire que l'écrivain `MHGP11SP` (S7) sérialisera.
   supports entre les passes, et gardes d'arbre et de rattachement sans porte possible) ; ceux des primitives et du
   Pool. Aucun résultat partiel ; les diagnostics `HierarchyTimings` ne sont écrits qu'au succès.
 
+**Écrivain et lecteur** (tranche S7, 5 octobre 2026). `src/api/write_supports.cpp` écrit ce format à neuf, sans
+source portée : tailles et décalages calculés avant l'écriture et contrôlés à chaque section, valeurs par paquets sur la
+pile, `SITES.point_id` égal à l'unique `PointId` du site (poids un). Le lecteur `bench/mhgp11_formats.py`
+(`read_supports`, classe `SupportsFile`) dérive tout ce qui est déclaré dérivé ci-dessus et contrôle tout ce qui suit ;
+`check_directory` recompte les agrégats du manifeste (§ 8) et recalcule `tree_k_sha256` depuis le fichier seul. Les
+prédicats exacts sont écrits en entiers : centre $C/D$ ($D>0$) et rayon carré $\mathrm{num}/D^2$ de la sphère de
+$S^*$, puis égalités et signes stricts, ce qui équivaut aux prédicats en `Fraction`. $N_j$ est compté sur la réunion des
+supports d'une boule (parties sans support, par branchement), puis complété par les sites de coquille hors de tout
+support, interchangeables. Le lecteur exige aussi la numérotation canonique (naissances par (niveau, centre), fusions
+par (niveau, plus petite naissance)), des rangs cohérents avec les niveaux exacts (égalité et ordre), les sites en ordre
+de Morton strict, et l'ordre (rang, $S^*$) des boules d'un nœud, $S^*$ complété par `kNone` : c'est l'ordre des
+`BallIdx` du catalogue (remarque M1 ci-dessus), que la mémoire de l'assemblage suit. Portes :
+`mhgp11_cli_supports_oracle` (le fichier lu égale le vidage canonique de l'oracle S1), `mhgp11_cli_supports_scale*`,
+`mhgp11_cli_supports_lidar_*` (`tests/cli/tests.cmake`).
+
 **Ce que le lecteur contrôle**, sans la coquille :
 - l'arbre est bien formé ;
 - les rangs croissent strictement vers la racine ;
@@ -537,6 +559,10 @@ Propriétés :
   (sérialisation indépendante, $K=1$ à 4, et valeurs gravées de l'auditeur par profil) et par
   `mhgp11_cli_tree_signature` (champ publié par l'exécutable contre une sérialisation en bibliothèque standard des
   trois fixtures de l'auditeur, à $K=1$ et $K=2$).
+- Sortie `supports` (S7) : le moteur la calcule sur l'arbre d'ordre K seul (`OrderTree::forest`, même forêt que
+  `FullTower::order(K)`, porte I10). Le lecteur la recalcule depuis `MHGP11SP` (`SupportsFile.tree_signature`) et
+  `check_directory` l'exige égale au champ publié. `mhgp11_cli_supports_oracle` l'exige égale entre `--sortie=full` et
+  `--sortie=supports` à $K=1$ à 4 sur 810 ordres ; les portes d'échelle et LiDAR, à $K=5$.
 
 ## 9. Transaction de dossier, telle qu'implémentée dans `src/io/`
 
@@ -646,7 +672,7 @@ Limites :
 | --- | --- | --- | --- |
 | L0 | aucune | S0 (ce document, MATHEMATIQUES section 10, registre des preuves), S1 (oracle borné des supports) | en cours |
 | L1 | G4 n° 1 | S2 (en-tête public de la tour), S3 (`build_order`, journal des graines, `WindowAttachment`, juge E2), S6 (module `supports`) | S2 livrée (`257aabb92`) |
-| L2 | G4 n° 2 | S4 (`io`, avec `retract()`), S5 (`api`, `Session`, manifeste, `--sortie=full`), S7 (`--sortie=supports`, écrivain et lecteur `MHGP11SP`, mesure appariée) | S4 livrée (`f98aeed67`) |
+| L2 | G4 n° 2 | S4 (`io`, avec `retract()`), S5 (`api`, `Session`, manifeste, `--sortie=full`), S7 (`--sortie=supports`, écrivain et lecteur `MHGP11SP`, mesure appariée) | S4 livrée (`f98aeed67`) ; S5 et S7 commitées localement le 5 octobre, qualification G4 et mesure en attente |
 | L2b | conditionnelle | journal des graines posé dans `build_full` | selon la règle ci-dessous |
 | L3 | G4 n° 3 | S8 (`num`), S9 (`--sortie=points`) | — |
 | L4 | G4 n° 4, reportable | S10 (`--sortie=plat`) | — |
@@ -654,7 +680,7 @@ Limites :
 
 - Valeurs de `--sortie` admises : aucune avant L2 ; `full` puis `supports` en L2 ; `points` en L3 ; `plat` en L4.
   Toute autre est refusée `parameter_out_of_range`. `full` est admise par le code depuis l'intégration de S5
-  (5 octobre 2026) ; sa qualification relève de la session G4 de L2.
+  (5 octobre 2026), `supports` depuis S7 (5 octobre 2026) ; leur qualification relève de la session G4 de L2.
 - Un commit natif des tranches S3, S5 et S6, dont les brouillons ont été écrits en parallèle de L0, exige
   l'intégration des réponses de l'auditeur mathématique (faite pour `aef7182b3`) et les portes de la tranche ; sa
   qualification exige la matrice G4 et un reçu. La relecture du contrat S0 est demandée aux deux auditeurs : leurs
@@ -683,6 +709,11 @@ Limites :
   - Qualification : TSan sur `mhgp11_tower_pipeline` et rejeu du manifeste des mutants.
   - Ni l'objet ni les octets de sortie ne changent.
 - La voie pipeline à un ordre (S11, L5) ne devient la voie par défaut que sur reçu.
+- *Outil* (S7) : `bench/sorties_g4.py` joue cette mesure (trames, W, passes à froid puis prises à chaud, `full` et
+  `supports` alternés, étages `tree`, `attach`, `output`, `write` relevés à part, identité des fichiers et des
+  manifestes entre prises et entre W, `tree_k_sha256` commun) et rend un document JSON prêt pour un reçu, avec la
+  décision de la règle, évaluée seulement à W48 sur les trois trames avec trois prises et des sorties identiques. Un
+  essai local (W1, W4) valide l'outil, jamais la règle.
 
 **Clause de report de `plat`.** La livraison L4 (tranche S10) peut être reportée.
 - *Qui décide.* L'utilisateur, par une décision écrite que le développeur consigne dans le [README](../README.md) et

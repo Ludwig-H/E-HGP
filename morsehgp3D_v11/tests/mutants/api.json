@@ -61,7 +61,7 @@
     {
       "id": "provenance_non_controlee",
       "fichier": "src/api/manifest.cpp",
-      "cherche": "  const Outcome checked = api_detail::check_provenance(provenance, product.full().domain().index().cloud().weight());\n  if (!checked.ok()) return {checked, PublicationState::none, {}};\n",
+      "cherche": "  const Outcome checked = api_detail::check_provenance(provenance, product.domain().index().cloud().weight());\n  if (!checked.ok()) return {checked, PublicationState::none, {}};\n",
       "remplace": "",
       "porte": "mhgp11_api_session_provenance",
       "note": "provenance non controlee : decimaux hors forme et tailles incoherentes recopies dans le manifeste"

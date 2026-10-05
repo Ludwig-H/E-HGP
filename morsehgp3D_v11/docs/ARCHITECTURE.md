@@ -48,7 +48,7 @@ Chaque règle est vérifiable ; `tools/check_style.py` contrôle celles qui se l
 | `supports` | hiérarchie des supports d'ordre K : supports positifs minimaux par boule, comptes dérivés, postordre et assemblage (`SupportHierarchy`) | `tower` |
 | `points` | hiérarchie de points $H^{r}_{K+1}$ : pendaisons et arbre de points | `tower` |
 | `head` | condensation, scores exacts, sélection, étiquettes | `points` |
-| `api` | façade publique `api/api.hpp` et `Session` | `core`, `num`, `sched`, `cloud`, `io`, `index`, `catalogue`, `tower` |
+| `api` | façade publique `api/api.hpp` et `Session` | `core`, `num`, `sched`, `cloud`, `io`, `index`, `catalogue`, `tower`, `supports` |
 
 `cli/` contient un seul exécutable, `mhgp11` (cible `mhgp11_cli`), à paramètre de sortie obligatoire
 `--sortie=full|supports|points|plat` ([contrat des sorties](SORTIES.md)) ; `reference/` l'oracle exact borné en
