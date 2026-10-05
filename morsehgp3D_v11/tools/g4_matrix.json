@@ -112,6 +112,216 @@
       ]
     },
     {
+      "name": "gcc_asan_scale_large",
+      "description": "ASan+UBSan u24 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (noms contenant scale16000|scale32000|uniform16000|uniform32000|lidar_ng01|lidar_ng02), reunion des lots = toutes ces portes. Audit G4 B du 5 octobre 2026 : 50 et 65 portes coupees par l'echeance. Plancher : 80 % du compte a b319efc84.",
+      "compiler": "g++",
+      "sanitizer": "address,undefined",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_SANITIZE=ON",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "scale16000|scale32000|uniform16000|uniform32000|lidar_ng01|lidar_ng02",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "threads": 6,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 900,
+      "require_labels": [],
+      "env": {
+        "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+      },
+      "min_tests": 36
+    },
+    {
+      "name": "gcc_asan_scale_rest",
+      "description": "ASan+UBSan u24 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (reste des portes), reunion des lots = toutes ces portes. Audit G4 B du 5 octobre 2026 : 50 et 65 portes coupees par l'echeance. Plancher : 80 % du compte a b319efc84.",
+      "compiler": "g++",
+      "sanitizer": "address,undefined",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_SANITIZE=ON",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-E",
+        "^mhgp11_reference_|scale16000|scale32000|uniform16000|uniform32000|lidar_ng01|lidar_ng02"
+      ],
+      "threads": 6,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 900,
+      "require_labels": [],
+      "env": {
+        "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+      },
+      "min_tests": 30
+    },
+    {
+      "name": "gcc_tsan_scale32000_cli",
+      "description": "TSan u21 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (noms contenant cli_.*(scale32000|uniform32000)), reunion des lots = toutes ces portes. Audit G4 B du 5 octobre 2026 : 50 et 65 portes coupees par l'echeance. Plancher : 80 % du compte a b319efc84.",
+      "compiler": "g++",
+      "sanitizer": "thread",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "cli_.*(scale32000|uniform32000)",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "threads": 6,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 900,
+      "require_labels": [],
+      "min_tests": 3
+    },
+    {
+      "name": "gcc_tsan_scale32000",
+      "description": "TSan u21 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (noms contenant scale32000|uniform32000), reunion des lots = toutes ces portes. Audit G4 B du 5 octobre 2026 : 50 et 65 portes coupees par l'echeance. Plancher : 80 % du compte a b319efc84.",
+      "compiler": "g++",
+      "sanitizer": "thread",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "scale32000|uniform32000",
+        "-E",
+        "^mhgp11_reference_|cli_"
+      ],
+      "threads": 6,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 900,
+      "require_labels": [],
+      "min_tests": 5
+    },
+    {
+      "name": "gcc_tsan_lidar_ng00",
+      "description": "TSan u21 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (noms contenant lidar_ng00), reunion des lots = toutes ces portes. Audit G4 B du 5 octobre 2026 : 50 et 65 portes coupees par l'echeance. Plancher : 80 % du compte a b319efc84.",
+      "compiler": "g++",
+      "sanitizer": "thread",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "lidar_ng00",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "threads": 6,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 900,
+      "require_labels": [],
+      "min_tests": 11
+    },
+    {
+      "name": "gcc_tsan_lidar_ng01",
+      "description": "TSan u21 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (noms contenant lidar_ng01), reunion des lots = toutes ces portes. Audit G4 B du 5 octobre 2026 : 50 et 65 portes coupees par l'echeance. Plancher : 80 % du compte a b319efc84.",
+      "compiler": "g++",
+      "sanitizer": "thread",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "lidar_ng01",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "threads": 6,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 900,
+      "require_labels": [],
+      "min_tests": 9
+    },
+    {
+      "name": "gcc_tsan_lidar_ng02",
+      "description": "TSan u21 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (noms contenant lidar_ng02), reunion des lots = toutes ces portes. Audit G4 B du 5 octobre 2026 : 50 et 65 portes coupees par l'echeance. Plancher : 80 % du compte a b319efc84.",
+      "compiler": "g++",
+      "sanitizer": "thread",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "lidar_ng02",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "threads": 6,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 900,
+      "require_labels": [],
+      "min_tests": 9
+    },
+    {
+      "name": "gcc_tsan_scale_rest",
+      "description": "TSan u21 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (reste des portes), reunion des lots = toutes ces portes. Audit G4 B du 5 octobre 2026 : 50 et 65 portes coupees par l'echeance. Plancher : 80 % du compte a b319efc84.",
+      "compiler": "g++",
+      "sanitizer": "thread",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-E",
+        "^mhgp11_reference_|scale32000|uniform32000|lidar_ng0[012]"
+      ],
+      "threads": 6,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 900,
+      "require_labels": [],
+      "min_tests": 27
+    },
+    {
       "name": "clang_release",
       "description": "Clang Release, si clang++ existe sur la VM ; sinon la configuration est relevee absente, sans echec. Profil explicite 21 bits.",
       "compiler": "clang++",
