@@ -134,7 +134,9 @@ donc jamais, à lui seul, « rien n'est publié ».
      `head_invariant`, `arithmetic_invariant`, `task_exception` (`sched`).
 8. Écriture et publication (§ 9) : `output_unwritable` ; `output_conflict` si $D$ ou `D.pending` est apparu depuis le
    plan. L'API refuse aussi, avant toute création de fichier et toute écriture du rapport, le produit d'une autre
-   `Session` (`parameter_out_of_range` ; le CLI n'a qu'une `Session`).
+   `Session`, puis une provenance incohérente avec le nuage du produit (tailles différentes de $12n$ et $4n$ octets,
+   budget déclaré nul ; § 8) : `parameter_out_of_range`. Le CLI n'a qu'une `Session` et remplit la provenance depuis
+   sa lecture.
 9. Après la publication : fermeture de la `Session` (`api::finish` : `budget_not_released`, code 3), puis écriture de
    la ligne d'état sur la sortie standard (`output_unwritable`, code 2). Un refus de cette étape retire le dossier
    publié (`api::withdraw`, `retract()`, § 9).
@@ -459,6 +461,11 @@ Exemple pour `supports`, présenté ici sur plusieurs lignes pour la lecture :
   - pour `plat`, s'y ajoutent `mcs`, `z` et `selection`.
 - `inputs` : taille et SHA-256 des deux fichiers d'entrée, pris au fil de la lecture. `files` : taille et SHA-256 de
   chaque fichier de données, pris au fil de l'écriture.
+- Cohérence exigée par la publication (audit `abc30ed06`) : pour un produit de $n$ points, `inputs` porte $12n$ et
+  $4n$ octets, et `budget_bytes` est `null` ou strictement positif. L'API refuse toute autre provenance
+  (`parameter_out_of_range`, étape 8 du § 3) ; le CLI la remplit depuis sa lecture. Les empreintes déclarées ne sont pas
+  vérifiables depuis la provenance seule. La porte `mhgp11_api_publish_reader` fait relire par le lecteur officiel un
+  dossier publié par l'API, et refuse sans sortie les provenances incohérentes.
 - `counts` de `supports`, dans cet ordre :
 
   | Clé | Sens |

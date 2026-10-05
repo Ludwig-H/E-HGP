@@ -12,6 +12,13 @@ target_link_libraries(mhgp11_api_session_misuse_probe PRIVATE mhgp11)
 mhgp11_expect_abnormal_stop(mhgp11_api_session_destroyed_live mhgp11_api_session_misuse_probe vivant LABELS unit fast)
 mhgp11_expect_code(mhgp11_api_session_destroyed_released 0 mhgp11_api_session_misuse_probe rendu
                    LINE "session_misuse rendu" LABELS unit fast)
+# Aller-retour publication de l'API -> lecteur officiel (audit abc30ed06) : une provenance coherente est relue sans
+# refus par bench/mhgp11_formats.py ; tailles nulles, rapport faux, compte faux et budget nul sont refuses
+# parameter_out_of_range avant toute creation (ni D ni D.pending).
+add_executable(mhgp11_api_publish_probe ${CMAKE_CURRENT_LIST_DIR}/publish_probe.cpp)
+target_link_libraries(mhgp11_api_publish_probe PRIVATE mhgp11)
+mhgp11_python_gate(mhgp11_api_publish_reader 0 publish_reader.py --probe $<TARGET_FILE:mhgp11_api_publish_probe>
+                   --bits ${MHGP11_COORD_BITS} LINE "api_publish_reader_verdict conforme cas5" LABELS fast)
 # Pannes injectees : operator new et pthread_create remplaces dans cet executable seulement.
 mhgp11_add_unit(mhgp11_api_session_fault SOURCES session_fault.cpp GROUPS session starvation publication LABELS fast)
 target_link_libraries(mhgp11_api_session_fault PRIVATE ${CMAKE_DL_LIBS})

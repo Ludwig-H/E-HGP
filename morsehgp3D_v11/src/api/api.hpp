@@ -160,7 +160,9 @@ inline constexpr std::size_t kMaxDecimal = 64;
 [[nodiscard]] bool valid_origin_coordinate(std::string_view text) noexcept;
 
 // Provenance d'un appel, recopiee dans le manifeste : empreintes et tailles des deux fichiers d'entree (jamais leurs
-// chemins), budget declare et declarations de grille. Aucun temps ni nombre de fils.
+// chemins), budget declare et declarations de grille. Aucun temps ni nombre de fils. publish exige sa coherence avec
+// le nuage du produit de n points : points_bytes = 12n, ids_bytes = 4n, budget declare absent ou strictement positif
+// (le lecteur officiel refuse tout autre manifeste) ; les empreintes ne sont pas verifiables depuis la provenance.
 struct Provenance {
   io::Digest points_sha256{}, ids_sha256{};
   u64 points_bytes = 0, ids_bytes = 0;
@@ -192,8 +194,9 @@ struct Publication {
 
 // Ecrit le produit dans `directory` (planifie par io::OutputDirectory::plan, sans fichier cree), puis le manifeste en
 // dernier, et publie (commit) : conforme, published_complete et l'empreinte du manifeste publie. Refus (etape 8 de
-// docs/SORTIES.md, paragraphe 3) : parameter_out_of_range (produit calcule par une autre Session, puis provenance hors
-// de sa forme : avant toute creation de fichier et toute ecriture du rapport),
+// docs/SORTIES.md, paragraphe 3) : parameter_out_of_range (produit calcule par une autre Session, puis provenance
+// incoherente avec le nuage du produit ou hors de sa forme : avant toute creation de fichier et toute ecriture du
+// rapport),
 // output_unwritable, output_conflict (io), memory_budget, tower_invariant (sphere de naissance absente) ; rien n'est
 // publie (none), le destructeur de `directory` retire D.pending. Seul double echec : le commit refuse alors que D est
 // publie (synchronisation du parent, puis son retour, en echec) ; withdraw le retire alors, ou le declare.

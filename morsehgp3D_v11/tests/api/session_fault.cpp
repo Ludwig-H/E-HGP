@@ -172,7 +172,7 @@ MHGP11_TEST(publication, 14) {
     auto planned = io::OutputDirectory::plan(s.path("M").c_str(), {});
     REQUIRE(planned.ok());
     const unsigned long long before = allocations.load();
-    const api::Publication published = api::publish(session, product.value(), planned.value(), {});
+    const api::Publication published = api::publish(session, product.value(), planned.value(), provenance_of(points));
     count = allocations.load() - before;
     REQUIRE(published.ok());
   }
@@ -184,7 +184,7 @@ MHGP11_TEST(publication, 14) {
       auto planned = io::OutputDirectory::plan(d.c_str(), {});
       REQUIRE(planned.ok());
       allocation_left.store(static_cast<long long>(position));
-      const api::Publication refused = api::publish(session, product.value(), planned.value(), {});
+      const api::Publication refused = api::publish(session, product.value(), planned.value(), provenance_of(points));
       allocation_left.store(-1);
       CHECK_EQ(refused.outcome.reason, Reason::memory_budget);
       CHECK(refused.state == api::PublicationState::none && refused.manifest_sha256 == io::Digest{});
@@ -195,7 +195,7 @@ MHGP11_TEST(publication, 14) {
   {
     auto planned = io::OutputDirectory::plan(s.path("Z").c_str(), {});
     REQUIRE(planned.ok());
-    CHECK(api::publish(session, product.value(), planned.value(), {}).ok());
+    CHECK(api::publish(session, product.value(), planned.value(), provenance_of(points)).ok());
   }
   CHECK(entries(s.path("Z")) == std::vector<std::string>({"full.mhgp11ful1", "manifeste.json"}));
 }

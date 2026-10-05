@@ -36,6 +36,14 @@ struct Points {
   u32 size() const { return static_cast<u32>(x.size()); }
 };
 
+// Provenance coherente d'un nuage (12 et 4 octets par point), sans empreintes : le lecteur n'en controle que la forme.
+inline api::Provenance provenance_of(const Points& p) {
+  api::Provenance provenance;
+  provenance.points_bytes = u64{12} * p.size();
+  provenance.ids_bytes = u64{4} * p.size();
+  return provenance;
+}
+
 inline Points points_of(std::initializer_list<std::array<u32, 3>> list, u32 first_id = 7) {
   Points p;
   u32 id = first_id;

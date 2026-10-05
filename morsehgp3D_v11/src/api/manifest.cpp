@@ -226,7 +226,7 @@ Publication publish(Session& session, const Product& product, io::OutputDirector
   // Produit d'une autre Session (audit general a65903a7b, P1) : ses tampons sont comptes dans un autre budget ; refus
   // avant toute creation de fichier et toute ecriture du rapport. Porte mhgp11_api_session_session_identity.
   if (!product.computed_by(session)) return {fail(Reason::parameter_out_of_range), PublicationState::none, {}};
-  const Outcome checked = api_detail::check_provenance(provenance);
+  const Outcome checked = api_detail::check_provenance(provenance, product.full().domain().index().cloud().weight());
   if (!checked.ok()) return {checked, PublicationState::none, {}};
   MemoryBudget& budget = session.budget();
   RunReport local;
@@ -279,7 +279,13 @@ std::string_view publication_state_name(PublicationState state) noexcept {
 
 namespace api_detail {
 
-Outcome check_provenance(const Provenance& provenance) noexcept {
+Outcome check_provenance(const Provenance& provenance, u64 points) noexcept {
+  // Tailles des deux entrees du nuage du produit (12 et 4 octets par point) et budget declare strictement positif :
+  // le lecteur officiel (bench/mhgp11_formats.py) refuse tout autre manifeste (audit abc30ed06). Porte
+  // mhgp11_api_publish_reader (aller-retour vers le lecteur) et groupe provenance de mhgp11_api_session.
+  if (provenance.points_bytes != 12 * points || provenance.ids_bytes != 4 * points)
+    return fail(Reason::parameter_out_of_range);
+  if (provenance.budget_bytes && *provenance.budget_bytes == 0) return fail(Reason::parameter_out_of_range);
   if (!provenance.grid_step.empty() && !api::valid_grid_step(provenance.grid_step))
     return fail(Reason::parameter_out_of_range);
   const bool declared = !provenance.origin[0].empty();

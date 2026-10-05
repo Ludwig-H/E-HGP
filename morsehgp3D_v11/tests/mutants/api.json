@@ -1,6 +1,6 @@
 {
   "module": "api",
-  "plancher": 20,
+  "plancher": 22,
   "mutants": [
     {
       "id": "session_sans_liberation",
@@ -61,10 +61,10 @@
     {
       "id": "provenance_non_controlee",
       "fichier": "src/api/manifest.cpp",
-      "cherche": "  const Outcome checked = api_detail::check_provenance(provenance);\n  if (!checked.ok()) return {checked, PublicationState::none, {}};\n",
+      "cherche": "  const Outcome checked = api_detail::check_provenance(provenance, product.full().domain().index().cloud().weight());\n  if (!checked.ok()) return {checked, PublicationState::none, {}};\n",
       "remplace": "",
       "porte": "mhgp11_api_session_provenance",
-      "note": "decimaux hors forme recopies dans le manifeste"
+      "note": "provenance non controlee : decimaux hors forme et tailles incoherentes recopies dans le manifeste"
     },
     {
       "id": "pas_nul_admis",
@@ -161,6 +161,22 @@
       "remplace": "",
       "porte": "mhgp11_api_session_destroyed_live",
       "note": "destruction d'une Session dont le budget n'est pas revenu a zero, sans controle (ARCHITECTURE, paragraphe 7.1)"
+    },
+    {
+      "id": "provenance_tailles_ignorees",
+      "fichier": "src/api/manifest.cpp",
+      "cherche": "  if (provenance.points_bytes != 12 * points || provenance.ids_bytes != 4 * points)\n    return fail(Reason::parameter_out_of_range);\n",
+      "remplace": "  static_cast<void>(points);\n",
+      "porte": "mhgp11_api_publish_reader",
+      "note": "provenance incoherente avec le nuage du produit publiee : manifeste refuse par le lecteur officiel (audit abc30ed06)"
+    },
+    {
+      "id": "provenance_budget_nul_admis",
+      "fichier": "src/api/manifest.cpp",
+      "cherche": "  if (provenance.budget_bytes && *provenance.budget_bytes == 0) return fail(Reason::parameter_out_of_range);\n",
+      "remplace": "",
+      "porte": "mhgp11_api_publish_reader",
+      "note": "budget declare nul publie : manifeste refuse par le lecteur officiel (audit abc30ed06)"
     }
   ]
 }

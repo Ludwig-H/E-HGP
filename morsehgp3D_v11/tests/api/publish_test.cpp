@@ -146,7 +146,7 @@ MHGP11_TEST(after_publish, 54) {
     {
       auto product = api::compute(session, points.view(), api::FullRequest{3});
       REQUIRE(product.ok());
-      const api::Publication published = api::publish(session, product.value(), planned.value(), {});
+      const api::Publication published = api::publish(session, product.value(), planned.value(), provenance_of(points));
       CHECK(published.ok());
       CHECK(published.state == api::PublicationState::published_complete);
       CHECK(published.manifest_sha256 == file_digest(d + "/manifeste.json"));
@@ -167,7 +167,7 @@ MHGP11_TEST(after_publish, 54) {
     auto product = api::compute(session, points.view(), api::FullRequest{3});
     REQUIRE(product.ok());
     REQUIRE(::mkdir(d.c_str(), 0700) == 0);
-    const api::Publication refused = api::publish(session, product.value(), planned.value(), {});
+    const api::Publication refused = api::publish(session, product.value(), planned.value(), provenance_of(points));
     CHECK_EQ(refused.outcome.reason, Reason::output_conflict);
     CHECK(refused.state == api::PublicationState::none);
     CHECK(refused.manifest_sha256 == io::Digest{});
@@ -181,7 +181,7 @@ MHGP11_TEST(after_publish, 54) {
     REQUIRE(planned.ok());
     auto product = api::compute(session, points.view(), api::FullRequest{3});
     REQUIRE(product.ok());
-    REQUIRE(api::publish(session, product.value(), planned.value(), {}).ok());
+    REQUIRE(api::publish(session, product.value(), planned.value(), provenance_of(points)).ok());
     CHECK(exists(d));
     const api::Publication finished = api::finish(session, planned.value());
     CHECK_EQ(finished.outcome.reason, Reason::budget_not_released);
@@ -199,7 +199,7 @@ MHGP11_TEST(after_publish, 54) {
     REQUIRE(planned.ok());
     auto product = api::compute(session, points.view(), api::FullRequest{3});
     REQUIRE(product.ok());
-    const api::Publication published = api::publish(session, product.value(), planned.value(), {});
+    const api::Publication published = api::publish(session, product.value(), planned.value(), provenance_of(points));
     REQUIRE(published.ok());
     REQUIRE(::mkdir((d + ".pending").c_str(), 0700) == 0);
     const api::Publication finished = api::finish(session, planned.value());
@@ -247,7 +247,7 @@ MHGP11_TEST(session_identity, 24) {
   api::RunReport report;
   report.at(api::Stage::output) = {11, 22};
   report.at(api::Stage::write) = {33, 44};
-  const api::Publication refused = api::publish(b, *product, planned.value(), {}, &report);
+  const api::Publication refused = api::publish(b, *product, planned.value(), provenance_of(points), &report);
   CHECK_EQ(refused.outcome.reason, Reason::parameter_out_of_range);
   CHECK(refused.state == api::PublicationState::none);
   CHECK(refused.manifest_sha256 == io::Digest{});
@@ -259,7 +259,7 @@ MHGP11_TEST(session_identity, 24) {
   api::Session moved(std::move(a));
   CHECK(product->computed_by(moved));
   CHECK(!product->computed_by(a));
-  const api::Publication published = api::publish(moved, *product, planned.value(), {}, &report);
+  const api::Publication published = api::publish(moved, *product, planned.value(), provenance_of(points), &report);
   CHECK(published.ok());
   CHECK(published.state == api::PublicationState::published_complete);
   CHECK(entries(d) == kPublished);

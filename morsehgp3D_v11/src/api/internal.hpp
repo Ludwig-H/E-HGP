@@ -29,7 +29,8 @@ inline constexpr u64 kEngineMask = 16379;
 // controlee par check_provenance.
 [[nodiscard]] std::string full_manifest(const api::Product& product, const api::Provenance& provenance,
                                         u64 file_bytes, const io::Digest& file_sha256);
-// Provenance dans sa forme : parameter_out_of_range sinon (pas, origine entiere ou absente, decimaux controles).
-[[nodiscard]] Outcome check_provenance(const api::Provenance& provenance) noexcept;
+// Provenance coherente avec le nuage du produit de `points` points (12 et 4 octets par point, budget declare non nul)
+// et dans sa forme (pas, origine entiere ou absente, decimaux controles) : parameter_out_of_range sinon.
+[[nodiscard]] Outcome check_provenance(const api::Provenance& provenance, u64 points) noexcept;
 
 }  // namespace mhgp11::api_detail

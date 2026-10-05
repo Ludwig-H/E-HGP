@@ -180,7 +180,7 @@ MHGP11_TEST(released, 372) {
       REQUIRE(planned.ok());
       api::RunReport report;
       const api::Publication published =
-          api::publish(session, product.value(), planned.value(), api::Provenance{}, &report);
+          api::publish(session, product.value(), planned.value(), provenance_of(fixtures()[0]), &report);
       REQUIRE(published.ok());
       CHECK(planned.value().committed());
       CHECK(published.state == api::PublicationState::published_complete);
@@ -319,7 +319,7 @@ MHGP11_TEST(tree_digest, 314) {
       const std::string d = s.path("T" + std::to_string(published++));
       auto planned = io::OutputDirectory::plan(d.c_str(), {});
       REQUIRE(planned.ok());
-      REQUIRE(api::publish(session, a.value(), planned.value(), api::Provenance{}).ok());
+      REQUIRE(api::publish(session, a.value(), planned.value(), provenance_of(p)).ok());
       CHECK_EQ(published_tree(read_text(d + "/manifeste.json")), hex_of(digest));
     }
     for (std::size_t i = 1; i < per_order.size(); ++i) CHECK(per_order[i] != per_order[i - 1]);
@@ -328,7 +328,7 @@ MHGP11_TEST(tree_digest, 314) {
   CHECK(session.close().ok());
 }
 
-MHGP11_TEST(provenance, 48) {
+MHGP11_TEST(provenance, 64) {
   for (const char* good : {"0.001", "1", "12.5", "0.10", "3"}) CHECK(api::valid_grid_step(good));
   for (const char* bad : {"0", "0.0", "", ".5", "5.", "-1", "+1", "1e-3", "1,5", "1.2.3", " 1", "1 "})
     CHECK(!api::valid_grid_step(bad));
@@ -345,13 +345,20 @@ MHGP11_TEST(provenance, 48) {
   auto product = api::compute(session, fixtures()[1].view(), api::FullRequest{2});
   REQUIRE(product.ok());
   const std::string d = s.path("D");
-  api::Provenance bad_step, partial, good;
+  // Provenances refusees avant tout fichier : decimaux hors de leur forme, puis incoherences avec le nuage du produit
+  // (3 points : 36 et 12 octets) ou un budget declare nul, que le lecteur officiel refuserait (audit abc30ed06).
+  const api::Provenance coherent = provenance_of(fixtures()[1]);
+  api::Provenance bad_step = coherent, partial = coherent, good = coherent, empty, ratio = coherent, count = coherent,
+                  zero_budget = coherent;
   bad_step.grid_step = "1e-3";
   partial.origin = {"1", "", ""};
   good.grid_step = "0.001";
   good.origin = {"-1.5", "2", "0"};
   good.budget_bytes = 123456789;
-  for (const api::Provenance* p : {&bad_step, &partial}) {
+  ratio.points_bytes = 33;                                   // 11 octets par point
+  count.points_bytes = 72, count.ids_bytes = 24;             // rapport 12/4, mais six points
+  zero_budget.budget_bytes = 0;
+  for (const api::Provenance* p : {&bad_step, &partial, &empty, &ratio, &count, &zero_budget}) {
     auto planned = io::OutputDirectory::plan(d.c_str(), {});
     REQUIRE(planned.ok());
     const api::Publication refused = api::publish(session, product.value(), planned.value(), *p);
