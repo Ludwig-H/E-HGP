@@ -54,3 +54,7 @@ MHGP11_REASON(task_exception, invariant_violated, sched)
 // expansion locale des cellules FULL : capacite combinatoire ou incoherence interne count/fill
 MHGP11_REASON(tower_capacity, resource_exhausted, tower)
 MHGP11_REASON(tower_invariant, invariant_violated, tower)
+// supports positifs minimaux Q_b : coquille etendue au-dela du plafond kMaxShell (refus de l'appel entier, aucun
+// prefixe) ; incoherence interne (S* degenere, niveau, premier support, tampons de l'appelant, fermeture)
+MHGP11_REASON(support_shell_capacity, unsupported_degeneracy, supports)
+MHGP11_REASON(supports_invariant, invariant_violated, supports)

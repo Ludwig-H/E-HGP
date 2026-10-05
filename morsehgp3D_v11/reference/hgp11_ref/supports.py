@@ -54,7 +54,11 @@ Les deux ordres qui different du format natif (sites lexicographiques, boules d'
 centre au lieu de S* en SiteIdx) sont geometriques : la sortie ne depend pas de l'ordre des points d'entree.
 
 Domaine : n <= 12 a 14 (cout de l'etage A) ; coquilles quelconques (pas de plafond ici : le plafond natif de 24 et le
-refus support_shell_capacity se constatent sur m, voir shell_ball).
+refus support_shell_capacity se constatent sur m, voir shell_ball). Seule la force brute du lemme F
+(_minimal_nonseparable) a un budget : au plus 2^m - 1 parties candidates (MINIMAL_BUDGET, coquilles de 16 sites au
+plus) ; au-dela, refus explicite BudgetRefusal AVANT tout calcul, jamais un resultat partiel (apport des auditeurs du
+5 octobre 2026). Sur une coquille plus grande (sphere5, m = 24), seules les primitives Q_b (_supports, Gram) et
+N_j pour j petit (closure_upto, par combinaisons) se calculent : elles ne qualifient pas tout S1 a 24 sites.
 """
 from fractions import Fraction
 from itertools import combinations
@@ -66,6 +70,12 @@ from .model import InvariantError, mask_of, members
 ROLE_BIRTH, ROLE_MERGE, ROLE_INTERNAL = 'naissance', 'fusion', 'interne'
 KIND_SITE, KIND_BIRTH, KIND_MERGE = 0, 1, 2
 SHELL_CAPACITY = 24  # plafond natif de coquille etendue (kMaxShell) ; au-dela, refus support_shell_capacity
+MINIMAL_BUDGET = (1 << 16) - 1  # parties candidates de _minimal_nonseparable (au plus 2^m - 1) : m <= 16
+
+
+class BudgetRefusal(Exception):
+    """Refus explicite d'un calcul de l'oracle au-dela de son budget, pris avant tout calcul : jamais une censure
+    silencieuse ni un resultat partiel. Ce n'est pas un lemme viole (InvariantError) : l'oracle est borne."""
 
 
 def _gauss(rows, rhs):
@@ -238,11 +248,17 @@ class Supports(object):
         supports = found
         return tuple(supports)
 
-    def _minimal_nonseparable(self, ball):
+    def _minimal_nonseparable(self, ball, budget=MINIMAL_BUDGET):
         """Lemme F par force brute : parties non separables minimales de U_b, toutes arites. A est separable si et
         seulement si beta(A) < lambda_b (M1 : B(A) = b si et seulement si c_b est dans conv(A), A sur la sphere ; T2).
         Les candidats de taille s prolongent les parties separables de taille s - 1 (la separabilite descend aux
-        sous-parties) : toute partie minimale est examinee."""
+        sous-parties) : toute partie minimale est examinee. Budget : un candidat est une partie non vide de U_b, formee
+        une seule fois (sa base est elle-meme privee de son plus grand site), donc au plus 2^m - 1 candidats et autant
+        de boules minimales ; si cette borne depasse le budget, refus BudgetRefusal avant tout calcul."""
+        if (1 << ball.m) - 1 > budget:
+            raise BudgetRefusal('lemme F : %d parties candidates possibles sur une coquille de %d sites, au-dela du '
+                                'budget %d de _minimal_nonseparable : refus explicite, aucun resultat partiel'
+                                % ((1 << ball.m) - 1, ball.m, budget))
         beta = self.definition.beta
         separable = set([()])
         frontier = [()]
@@ -265,6 +281,21 @@ class Supports(object):
             if not frontier:
                 break
         return minimal
+
+    def closure_upto(self, ball, jmax):
+        """N_0 .. N_jmax par combinaisons : nombre de parties de U_b a j sites qui contiennent un support de Q_b
+        (ball.supports, rempli par ball_of), sans parcourir les 2^m masques de _counts. Primitive des coquilles hors
+        de la force brute (sphere5, m = 24, suite primitives de test_supports.py)."""
+        pos = dict((x, j) for j, x in enumerate(ball.shell))
+        masks = [sum(1 << pos[x] for x in q) for q in ball.supports]
+        closure = []
+        for size in range(jmax + 1):
+            count = 0
+            for part in combinations(range(ball.m), size):
+                mask = sum(1 << i for i in part)
+                count += any(q & mask == q for q in masks)
+            closure.append(count)
+        return closure
 
     # ------------------------------------------------------------ un ordre
 

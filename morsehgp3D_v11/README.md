@@ -127,10 +127,12 @@ Plan :
 - **L3** : `num` et `points`.
 - **L4** : `plat`.
 
-Déjà livrés : en-tête public de la tour (S2, `257aabb92`) et module `io` (S4, `f98aeed67`). La règle qui décide en L2
-entre l'arbre d'ordre K seul et le journal posé dans `build_full` est écrite d'avance (§ 11 du contrat). Un commit
-natif de S3, S5 ou S6, dont les brouillons ont été écrits en parallèle de L0, exige l'intégration des réponses de
-l'auditeur mathématique (faite pour `aef7182b3`) et les portes de la tranche ; la qualification exige la matrice G4.
+Déjà livrés : en-tête public de la tour (S2, `257aabb92`) et module `io` (S4, `f98aeed67`). Intégrées en L1 le
+5 octobre 2026, qualification G4 en attente : les primitives du module `supports` (S6a : $\mathcal{Q}_b$, fermeture et
+comptes du lemme G ; l'assemblage vient avec S6b). La règle qui décide en L2 entre l'arbre d'ordre K seul et le
+journal posé dans `build_full` est écrite d'avance (§ 11 du contrat). Un commit natif de S3, S5 ou S6, dont les
+brouillons ont été écrits en parallèle de L0, exige l'intégration des réponses de l'auditeur mathématique (faite pour
+`aef7182b3`) et les portes de la tranche ; la qualification exige la matrice G4.
 
 **Clause de report de `plat`.** La livraison L4 peut être reportée, par une décision écrite de l'utilisateur,
 consignée ici et dans une note aux auditeurs, tant que le § 3.4 de la [sortie plate](docs/SORTIE_PLATE.md) porte la

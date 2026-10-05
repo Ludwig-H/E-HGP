@@ -135,6 +135,8 @@ copie gravée de `tests/core/status_test.cpp` sont mis à jour au même commit :
 
 Cet ordre suit le plan révisé, où S6 (L1) précède S5 (L2). La spécification, qui livrait S5 d'abord, plaçait
 `environment_selftest` en tête. Le rang d'une raison dans la table ne départage que deux refus au même K.
+L'intégration L1 du 5 octobre 2026 a suivi cet ordre : `support_shell_capacity` et `supports_invariant` (S6a) sont en
+fin de `reasons.def`, avec la copie gravée de `tests/core/status_test.cpp`.
 
 **Codes de sortie** (`exit_code`, `src/core/status.hpp`) :
 - 0 : conforme ;
@@ -296,6 +298,25 @@ de coquille hors de tout support sont interchangeables.
 - La somme des `cofaces` des boules compte des liaisons distinctes, car une liaison n'a qu'une boule minimale ; elle
   se limite aux boules de $W_K$, et n'est pas le nombre de toutes les liaisons de $\Gamma_K$.
 - Les unions effectuées par le constructeur dépendent de l'ordre de traitement : elles ne sont jamais publiées.
+
+**API native des primitives** (tranche S6a, `src/supports/supports.hpp`, intégrée en L1 le 5 octobre 2026 ;
+l'assemblage, postordre et `SupportHierarchy`, vient avec S6b).
+- `ball_supports` rend $\mathcal{Q}_b$ d'une boule du catalogue dans l'ordre publié, $S^*$ en tête, et sa fermeture
+  $N_0..N_m$ (`Closure`, jamais stockée). $\mathcal{Q}_b$ ne dépend pas de $K$.
+- `ball_shape` (ou `make_shape`) donne la forme $(p,m,q_{\min},K)$ ; `ball_counts` rend les comptes de la boule
+  (`BallCounts` : `kparties_reliees`, `compressed_parts`, `strict_traces`, `cofaces`, `gabriel_cofaces`) ;
+  `support_cofaces` et `support_gabriel_cofaces` ceux d'un support, nuls pour une arité hors de 2..4 ou supérieure à
+  $m$.
+- Refus : `parameter_out_of_range` pour un `BallIdx` hors du catalogue ; `support_shell_capacity` par `check_shell`,
+  seul contrôle du plafond ($m>24$), pour la boule comme pour la pré-passe d'un appel entier ; `supports_invariant`
+  pour un brouillon trop court ou plus de `out.size()` supports, une fermeture étrangère à la forme, une forme hors du
+  domaine de `Shape` (dont une boule hors de $\mathrm{Cat}_K$), et les gardes d'invariant du catalogue sans porte
+  possible ([provenance](PROVENANCE.md), section supports). Un tel refus signale un domaine corrompu, jamais une
+  entrée.
+- La coquille régulière ($m=q_{\min}$) rend $\lbrace S^*\rbrace$ sans revalider ses `SiteIdx` : le catalogue fait
+  foi (G2).
+- `SupportLedger` est un registre de mesure, jamais une décision, et il n'est pas protégé : un registre par fil,
+  sommé par `SupportLedger::add` après la jointure.
 
 **Ce que le lecteur contrôle**, sans la coquille :
 - l'arbre est bien formé ;

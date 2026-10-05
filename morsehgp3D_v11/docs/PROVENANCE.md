@@ -233,3 +233,71 @@ bancs et des sondes de la v11 elle-même, et non la v10.
 | `src/num/` : repli exact des sommes de radicaux | `bench/points_radius.py` (`sqrt_bounds`, `radical_classes`, `sign_of_radicals`) et `bench/points_flat.py` (`group_classes`, `RadSum.sign`, `Level.phi_exact`) | `457b997fa7eecea92dd0f27cd29f514655dbd0ff716ce050825fc65aaf5783d1` et `4647de0762b500fb36ca917941a34120d58931f0b0033b570490821860fdd3bc` | S8 (L3) | Mêmes décisions qu'en Python, mais par des encadrements entiers jusqu'à 8 192 bits, puis refus `radical_sign_budget`. Différentiel contre l'`int` de Python |
 | `src/points/` | `bench/points_hierarchy.py` (`qualify` à `first_points`, `Hanging`), `bench/points_radius.py` (`floor_rank_radius`, `ancestor_at_radius`, `hang_margin_radius`), `bench/points_flat.py` (`PointTree`, `tower_point_tree`) | `fa12f16f3ce599a5299737d740bd252454cddcb9c475edf593d7aab3cd426c17`, `457b997f…` et `4647de07…` (ci-dessus) | S9 (L3) | Décisions exactes en entiers, $m(1)=1$ et $\kappa=1$. Les incidences fortes sont tirées du rattachement, au lieu des descentes de `ball_nodes`. Porte `mhgp11_points_vs_python` (identité site par site) |
 | `src/head/` | `bench/points_flat.py` (`condense`, `select`, `labels`) | `4647de07…` (ci-dessus) | S10 (L4, reportable) | Étiquettes dans l'ordre d'entrée, sans `out[pt.ids]`, qui suppose des `PointId` denses. Porte `mhgp11_head_vs_python` |
+
+Ports livrés depuis, chacun épinglé dans sa propre section ci-dessous : `src/supports/enumerate.cpp` (tranche S6a,
+intégrée en L1 le 5 octobre 2026).
+
+## Module supports : Q_b et comptes du lemme G (tranche S6a, 4 octobre 2026)
+
+Port explicite annoncé par la spécification de la sortie paramétrée (§ 3.3). Source : le juge d'Euler de la v11,
+`bench/catalogue_euler.hpp`, inchangé depuis le commit `462dca187` et lu à `f98aeed67` ; il est lui-même un port de
+la v9 (section « Mécanismes repris le 4 octobre 2026 » ci-dessus). Aucune porte ni aucun compte de mutants du juge
+d'Euler n'est hérité. Les comptes (`counts.hpp`, `counts.cpp`) sont écrits à neuf d'après le lemme G ; seule l'idée
+d'une table de Pascal `constexpr` vient du même fichier (`kBinomial`, l. 34–42).
+
+| Fichier v11 | Source | sha256 de la source | Adaptations | Portes v11 |
+| --- | --- | --- | --- | --- |
+| `src/supports/enumerate.cpp` (`ball_supports`, `enumerate`, `zeta_or`, `Filler::counted`, `canonical_sphere`) | `bench/catalogue_euler.hpp` : `mark_supports` (l. 135–165), `closure_counts` (l. 108–128), sphère refaite depuis S* et contrôle du niveau dans `judge_ball` (l. 230–241), premier support égal à S* (l. 273–276) | `f293df6ea1a2cc8d5fef6e78453de66343728a61d3013a5d1613cfdbb374dd18` | Gardé : les trois boucles de positions croissantes et leurs prédicats (`is_midpoint` ; `strictly_acute` puis orientation nulle du centre ; `strictly_inside`), l'ordre (arité, positions) qui place S* en tête, les masques de positions `u32`, la transformée de zêta en OU par mots et le décompte par poids, `Sphere::through` de l'arité qmin et l'égalité exacte au niveau du catalogue. Changé : chaque support est **écrit** au fil de l'énumération, avant la fermeture qui réécrit les mêmes mots (audit `de4ab58a8` : les 6 supports du cube deviennent 177 parties) ; la boule est contrôlée par la fonction et non par l'appelant (`BallIdx`, plafond par `check_shell`, tailles de `out` et du brouillon avant toute écriture) ; un écart est un refus `supports_invariant`, jamais un compte de fautes ; N_j en `u32` ; la coquille régulière (m = qmin) rend {S*} et N_j = [j = qmin] sans sphère ni prédicat ; plafond 24 inchangé, refus `support_shell_capacity` au lieu du refus du juge ; ni sommes d'Euler, ni recensement I/U (le catalogue en fait foi, G2), ni comptes de fautes ; registre `SupportLedger` (tests de prédicats) sur succès seulement, non protégé contre la concurrence : un registre par fil, sommé par `SupportLedger::add` après la jointure (contre-lecture S6a, constat F1). | `mhgp11_supports_unit_*` (17 groupes : fixtures 1, 2, 3, 9, 10, 11, 12 du § 2.9 de la spécification, coquille mixte de l'audit `de4ab58a8`, bornes 24/25, refus ; puis, à l'intégration L1, les témoins des auditeurs `sphere5`, `sphere5_k12`, `square_k10`, `sphere9_refus` et `impossible_arity`), `mhgp11_supports_shell_capacity` (fixture 13), `mhgp11_supports_fraction` (différentiel contre l'oracle S1, intégration L1), `mhgp11_supports_judge_small`, `mhgp11_supports_sample_judge_*`, `mhgp11_supports_registers_*` ; mutants `triangle_droit_accepte`, `drapeau_q4_presentation`, `arret_premier_support`, `fermeture_omise`, `coquille_sans_plafond` (`tests/mutants/supports.json`) |
+| `src/supports/counts.hpp`, `src/supports/counts.cpp` | écrits à neuf (lemme G) ; table de Pascal inspirée de `kBinomial` (même fichier, l. 34–42) | `f293df6ea1a2cc8d5fef6e78453de66343728a61d3013a5d1613cfdbb374dd18` | Table `u64` de C(a, b) pour a ≤ 35, `static_assert` : tout binôme lu (bas ≤ 13, ou haut ≤ 24) tient en `u32` ; `kparties_reliees` (nom de la décision utilisateur du 4 octobre, au lieu de `k_parts`), `compressed_parts`, `strict_traces`, `cofaces`, `gabriel_cofaces` par boule, `support_cofaces` et `support_gabriel_cofaces` par support ; aucun compte stocké ; `Shape` ne se construit que contrôlée, `Closure` est vide (constructeur par défaut, refusée par `ball_counts`) ou construite par `ball_supports` ; `support_cofaces` et `support_gabriel_cofaces` rendent 0 pour une arité hors de 2..4 **ou supérieure à m** (audit général `a65903a7b`, P2, corrigé à l'intégration L1). | mêmes portes, et `mhgp11_supports_unit_impossible_arity` ; mutants `cofaces_ordre_k`, `fermeture_sans_qmin`, `fermeture_sous_qmin`, `arite_impossible_admise` |
+
+**Gardes sans porte possible** (contre-lecture S6a, constat F3). Les contrôles ci-dessous protègent des invariants du
+catalogue (G2) ou les budgets de `num`. Ils ne se déclenchent que sur un domaine corrompu : `FullDomain` ne se
+construit que par `prepare_full_domain`, et la règle 6 d'`ARCHITECTURE.md` interdit tout crochet dans le produit.
+Aucune porte ne peut donc les atteindre. Un mutant qui en retire un est équivalent sur tout domaine préparé et survit
+par construction : la contre-lecture l'a constaté pour `niveau_non_controle` et `premier_support_non_controle`, qui
+survivent à toutes les portes et à son contre-juge. Ces mutants n'entrent pas au manifeste
+`tests/mutants/supports.json`. Ce que ces gardes protègent est jugé en amont par le juge d'Euler du catalogue :
+`well_formed` et les fautes `degenerate`, `level` et `canonical` de `bench/catalogue_euler.hpp`, portes
+`mhgp11_catalogue_euler_*`. Chaque garde est marquée « sans porte » dans le code.
+
+| Fichier, fonction | Gardes sans porte possible |
+| --- | --- |
+| `enumerate.cpp`, `ball_supports` | `qmin` hors de 2..4 ; `m < qmin` |
+| `enumerate.cpp`, `site_point` | `SiteIdx` hors du nuage ; refus de `Point::make` |
+| `enumerate.cpp`, `canonical_sphere` | refus de `Sphere::through` ; S* affinement dépendant ; rang hors de la table des niveaux ; niveau de la sphère de S* différent de celui du catalogue |
+| `enumerate.cpp`, `enumerate` | refus de `orientation` et de `strictly_inside` |
+| `enumerate.cpp`, `extended_supports` | brouillon nul (`closure_words(m) = 0`, exclu par `check_shell` : défense en profondeur du plafond, qui rend le mutant `coquille_sans_plafond` causal) ; coquille de taille différente de m ; premier support absent ou différent de S* |
+| `counts.cpp`, `ball_counts` | $N_m\neq 1$ ; $N_j>\binom{m}{j}$ ; `cofaces` au-delà de $2^{32}-1$ (Vandermonde) |
+
+Tous les autres refus du module ont leur porte. `mhgp11_supports_unit_refusals` juge : `BallIdx` hors du catalogue
+(`parameter_out_of_range`, par `ball_supports` et `ball_shape`) ; `out` et brouillon trop courts ; le domaine de
+`make_shape`, clause par clause ; une boule hors de $\mathrm{Cat}_K$ par `ball_shape` ; une fermeture étrangère à la
+forme (taille, $N_{q_{\min}}=0$, $N_j\neq 0$ sous $q_{\min}$). Le plafond (`check_shell`) est jugé par
+`mhgp11_supports_unit_shell_bound`, `mhgp11_supports_shell_capacity`, `mhgp11_supports_unit_refusals` et
+`mhgp11_supports_unit_sphere9_refus`.
+
+**Intégration L1 (5 octobre 2026) : apports des auditeurs.** Commit d'intégration de S6a sur `238734f1d`. Les attendus
+viennent des reçus des auditeurs (`receipts/audit_supports_contract_20261005/qb`,
+`receipts/audit_native_integration_20261005/qb` et `receipts/audit_geant_20261005/native`), jamais du produit. Le
+produit ne change que par la correction P2 ci-dessous.
+- **P2 de l'audit général `a65903a7b`** (`src/supports/counts.hpp`) : `support_cofaces` admettait une arité
+  supérieure à $m$ (`support_cofaces(make_shape(2, 2, 2, 3), 3)` rendait $\binom{1}{1}=1$ ; 51 des 300 couples (forme,
+  arité $>m$) du domaine de `Shape` étaient non nuls). La garde exige désormais $a\leq m$, dans les deux fonctions ;
+  pour `support_gabriel_cofaces`, la clause est une défense, $\binom{m-a}{t+1-a}$ étant déjà nul, et son retrait est un
+  mutant équivalent. Porte `mhgp11_supports_unit_impossible_arity` (formes $(1,2,2,2)$, $(2,2,2,3)$, $(1,3,3,3)$,
+  arités 3 et 4, puis balayage des 4 401 formes du domaine) ; mutant `arite_impossible_admise` (plancher du
+  manifeste 8 → 9). Aucun support émis par `ball_supports` n'est concerné.
+- `tests/supports/witness_test.cpp` (portes `mhgp11_supports_unit_sphere5`, `_sphere5_k12`, `_square_k10`,
+  `_sphere9_refus`) : la sphère $x^2+y^2+z^2=5$ translatée de $(2,2,2)$, 24 sites admis, 12, 24 et 792 supports,
+  $N_2=12$, $N_3=288$, $N_4=3906$ et les comptes de $K=1$ à $K=3$ ; à $K=12$, la fermeture de la boule centrale de
+  $\mathrm{Cat}_1$ par `ball_supports`, puis `make_shape(0, 24, 2, 12)` et `ball_counts` : 2 704 156, 116, 2 496 144
+  et 149 954 688 incidences ; le petit témoin à $K=10$ (66, 6, 4, 12, 4 ; 20 incidences) ; le refus de la primitive à
+  25 sites (25 des 30 sites de $x^2+y^2+z^2=9$, les six points axiaux gardés). Le refus de l'appel `supports` entier
+  viendra avec l'assemblage (S6b).
+- `tests/supports/fraction_diff.py` (porte `mhgp11_supports_fraction`) : la sonde native contre l'oracle S1
+  (`reference/hgp11_ref/supports.py`), sur les 210 nuages et les 951 ordres de sa suite ; mêmes boules de $W_K$,
+  mêmes $(p,m,q_{\min})$, mêmes comptes, mêmes comptes par support réordonnés ; 15 062 boules. Reprend le
+  différentiel de lecture de la contre-lecture S6a (`verif_s6/l0diff.py`, hors dépôt), sur les nuages de l'oracle.
+- `reference/hgp11_ref/supports.py` et `reference/test_supports.py` : budget explicite de la force brute du lemme F
+  (`BudgetRefusal`, $2^{m}-1$ candidats au plus) et primitives sur sphere5 (porte
+  `mhgp11_reference_supports_primitives`) ; voir `reference/README.md`.

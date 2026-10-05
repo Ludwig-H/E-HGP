@@ -20,6 +20,10 @@
 #                                       exacts, planchers, empreintes ; une trentaine de secondes sur un coeur sous
 #                                       Python 3.10
 #   mhgp11_reference_supports_refusal   usage faux : code 2
+#   mhgp11_reference_supports_primitives primitives de l'oracle des supports sur sphere5 (24 sites, coquille mixte au
+#                                       plafond natif ; apport des auditeurs du 5 octobre 2026) : Q_b par Gram, N_j
+#                                       pour j <= 4 par combinaisons, comptes de K1 a K3, refus explicite (budget) de la
+#                                       force brute du lemme F ; deux secondes : label fast, et non long
 #   mhgp11_reference_supports_mutant_<nom>  mutant de l'oracle des supports (liste : test_supports.py
 #                                       --list-mutants, table SUPPORT_MUTANTS de ref_mutants.py) : code 4, tue par sa
 #                                       cause ; six d'entre eux prouvent la vivacite d'un controle (W.4, H, C.3, regle
@@ -83,6 +87,9 @@ set(mhgp11_reference_supports_line
 mhgp11_python_gate(mhgp11_reference_supports 0 test_supports.py LINE "${mhgp11_reference_supports_line}"
                    LABELS oracle fast)
 mhgp11_python_gate(mhgp11_reference_supports_refusal 2 test_supports.py --inject=absent LABELS oracle fast)
+mhgp11_python_gate(mhgp11_reference_supports_primitives 0 test_supports.py --suite=primitives
+                   LINE "reference_supports_primitives_ok sites=24 supports=828 q2=12 q3=24 q4=792 N2=12 N3=288 N4=3906 refus=2"
+                   LABELS oracle fast)
 mhgp11_reference_mutant_list(mhgp11_reference_supports_mutants test_supports.py)
 foreach(line IN LISTS mhgp11_reference_supports_mutants)
   string(REPLACE " " ";" words "${line}")

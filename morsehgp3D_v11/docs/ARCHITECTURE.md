@@ -52,14 +52,15 @@ Chaque règle est vérifiable ; `tools/check_style.py` contrôle celles qui se l
 `--sortie=full|supports|points|plat` ([contrat des sorties](SORTIES.md)) ; `reference/` l'oracle exact borné en
 Python ; `bench/` les bancs (synthétique, LiDAR, G4) ; `tests/` les portes, par module.
 
-Les modules de la table qui n'ont pas encore de dossier sous `src/` (`supports`, `points`, `head`, `api`) sont
-planifiés : leur place est fixée d'avance, et `tools/check_style.py` ne contrôle que les dossiers présents. Le
-rattachement des boules et l'arbre d'ordre K seul arrivent dans `tower` à la tranche S3 ; le module `supports` à la
-tranche S6 ([sorties](SORTIES.md), § 11). `api` porte à terme les requêtes, les produits, les écrivains des quatre
-formats et le manifeste. Ses dépendances **croissent avec les livraisons**, car `CMakeLists.txt` refuse la
-configuration dès qu'un module de la fermeture d'un module présent manque : de `core` à `tower` pour la façade et
-`--sortie=full` (S5), puis `supports` (S7), `points` (S9) et `head` (S10), chacune ajoutée à la table et à sa copie
-CMake dans le commit de sa tranche.
+Les modules de la table qui n'ont pas encore de dossier sous `src/` (`points`, `head`, `api`) sont planifiés :
+leur place est fixée d'avance, et `tools/check_style.py` ne contrôle que les dossiers présents. Le rattachement des
+boules et l'arbre d'ordre K seul arrivent dans `tower` à la tranche S3. Le module `supports` existe depuis la tranche
+S6a : supports positifs minimaux $\mathcal{Q}_b$ par boule, fermeture et comptes du lemme G ; son assemblage
+(`SupportHierarchy`) vient avec la tranche S6b ([sorties](SORTIES.md), § 11). `api` porte à terme les requêtes, les
+produits, les écrivains des quatre formats et le manifeste. Ses dépendances **croissent avec les livraisons**, car
+`CMakeLists.txt` refuse la configuration dès qu'un module de la fermeture d'un module présent manque : de `core` à
+`tower` pour la façade et `--sortie=full` (S5), puis `supports` (S7), `points` (S9) et `head` (S10), chacune ajoutée à
+la table et à sa copie CMake dans le commit de sa tranche.
 
 La première préparation de `cloud` est séquentielle et ne dépend pas de
 `sched`. Son résultat possède un stockage privé, exposé par des vues constantes ;

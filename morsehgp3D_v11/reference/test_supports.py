@@ -9,6 +9,12 @@
     python3 test_supports.py --inject=NOM     mutant de ref_mutants.SUPPORT_MUTANTS : 4 s'il est tue par sa cause
     python3 test_supports.py --list-mutants
     python3 test_supports.py --dump=NOM       sortie canonique (JSON) d'une fixture, a tous ses ordres
+    python3 test_supports.py --suite=primitives
+                                              suite longue des primitives sur sphere5 (24 sites de x^2 + y^2 + z^2 = 5,
+                                              translates de (2, 2, 2) ; apport des auditeurs du 5 octobre 2026) : Q_b
+                                              par Gram (12, 24 et 792 supports), N_j pour j <= 4 par combinaisons,
+                                              comptes de K1 a K3 par les formules du lemme G, refus explicite de la
+                                              force brute du lemme F (budget) ; ne qualifie pas tout S1 a 24 sites
 
 Codes de sortie (docs/ARCHITECTURE.md, paragraphe 5) : 0 conforme ; 1 ecart (fait grave, lemme viole, empreinte
 d'une fixture, invariance ; une exception levee dans un fait ou dans la contre-epreuve d'invariance est un ecart,
@@ -24,6 +30,7 @@ import json
 import os
 import sys
 from fractions import Fraction
+from math import comb
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -459,7 +466,31 @@ def d2_witness(modules):
     return [] if got == want else ['d2 : %r au lieu de %r' % (got, want)]
 
 
-EXTRA_FACTS = (sphere50, circle_witness, e5_window, d2_witness)
+def minimal_budget(modules):
+    """Budget de la force brute du lemme F (_minimal_nonseparable, au plus 2^m - 1 candidats) : fixture d'egalite sur
+    la boule de la diagonale du carre (m = 4) : refus BudgetRefusal au budget 14, parties minimales egales a Q_b au
+    budget 15 ; refus explicite, avant tout calcul, sur la coquille de sphere50 (m = 84) au budget par defaut."""
+    S = modules['supports']
+    oracle = S.Supports(FIXTURES['carre'][0])
+    ball = oracle.ball_of((0, 2))
+    got = [ball.m]
+    for budget in (14, 15):
+        try:
+            got.append(sorted(oracle._minimal_nonseparable(ball, budget)) == sorted(ball.supports))
+        except S.BudgetRefusal:
+            got.append('refus')
+    wide = S.Supports(SPHERE50)
+    big = wide.shell_ball((SPHERE50.index((15, 15, 10)), SPHERE50.index((5, 5, 10))))
+    try:
+        wide._minimal_nonseparable(big)
+        got.append('calcule')
+    except S.BudgetRefusal:
+        got.append('refus')
+    want = [4, 'refus', True, 'refus']
+    return [] if got == want else ['budget du lemme F : %r au lieu de %r' % (got, want)]
+
+
+EXTRA_FACTS = (sphere50, circle_witness, e5_window, d2_witness, minimal_budget)
 
 
 SHIFT = (5, 11, 17)  # translation entiere de la contre-epreuve d'invariance (MATHEMATIQUES 10.10)
@@ -610,9 +641,69 @@ def usage(message):
     return REFUSAL
 
 
+# Sphere5 (apport des auditeurs du 5 octobre 2026, receipts/audit_supports_contract_20261005/qb) : les 24 points
+# entiers de x^2 + y^2 + z^2 = 5, translates de (2, 2, 2) ; une coquille mixte au plafond natif de 24 sites.
+SPHERE_NORM5 = [(x + 2, y + 2, z + 2) for x in range(-2, 3) for y in range(-2, 3) for z in range(-2, 3)
+                if x * x + y * y + z * z == 5]
+# (K, kparties_reliees, strict_traces, cofaces) de la boule centrale (p = 0, m = 24), d'apres le recu des auditeurs.
+SPHERE_NORM5_COUNTS = ((1, 24, 24, 12), (2, 276, 264, 288), (3, 2024, 1736, 3906))
+
+
+def sphere5_primitives(S):
+    """Primitives de l'oracle sur la boule centrale de sphere5 : rend (ecarts, ligne de couverture)."""
+    errors = []
+    oracle = S.Supports(SPHERE_NORM5)
+    ball = oracle.ball_of((SPHERE_NORM5.index((0, 1, 2)), SPHERE_NORM5.index((4, 3, 2))))
+    arities = [sum(1 for q in ball.supports if len(q) == a) for a in (2, 3, 4)]
+    shape = (len(SPHERE_NORM5), str(ball.level), [str(c) for c in ball.center], ball.p, ball.m, ball.q, arities)
+    if shape != (24, '5', ['2', '2', '2'], 0, 24, 2, [12, 24, 792]):
+        errors.append('sphere5 : boule centrale %r' % (shape,))
+    closure = oracle.closure_upto(ball, 4)
+    if closure != [0, 0, 12, 288, 3906]:
+        errors.append('sphere5 : N_0..N_4 = %r au lieu de [0, 0, 12, 288, 3906]' % (closure,))
+    for k, kparts, strict, cofaces in SPHERE_NORM5_COUNTS:
+        got = (comb(24, k), comb(24, k) - closure[k], closure[k + 1])
+        incidences = sum(comb(24 - len(q), k + 1 - len(q)) for q in ball.supports if k + 1 >= len(q))
+        q4 = sum(comb(20, k - 3) for q in ball.supports if len(q) == 4 and k + 1 >= 4)
+        want = {1: 12, 2: 288, 3: 4068}[k]
+        if got != (kparts, strict, cofaces) or incidences != want or (k == 1 and q4 != 0):
+            errors.append('sphere5 K%d : %r au lieu de %r, incidences %d au lieu de %d, q4 %d'
+                          % (k, got, (kparts, strict, cofaces), incidences, want, q4))
+    refusals = 0
+    for name, call in (('_minimal_nonseparable', lambda: oracle._minimal_nonseparable(ball)),
+                       ('_lemma_f', lambda: oracle._lemma_f(ball))):
+        try:
+            call()
+            errors.append('sphere5 : %s calcule au lieu d\'un refus explicite' % name)
+        except S.BudgetRefusal:
+            refusals += 1
+    line = ('reference_supports_primitives_ok sites=24 supports=%d q2=%d q3=%d q4=%d N2=%d N3=%d N4=%d refus=%d'
+            % (len(ball.supports), arities[0], arities[1], arities[2], closure[2], closure[3], closure[4], refusals))
+    return errors, line
+
+
+def main_primitives():
+    """Suite longue des primitives sur sphere5 : Q_b (Gram), N_j pour j <= 4 (combinaisons), comptes de K1 a K3 par
+    les formules du lemme G (p = 0 : cofaces = N_{K+1}, traces strictes C(24, K) - N_K), incidences par support
+    (4 068 a K3 ; les 792 tetraedres sans coface a K1), et refus explicite de la force brute du lemme F au budget par
+    defaut. Une exception levee est un ecart, jamais une trace Python. Rend le code de la porte."""
+    try:
+        errors, line = sphere5_primitives(STAGE['supports'])
+    except Exception as exc:  # noqa: BLE001 -- un lemme viole ou un refus inattendu est un ecart
+        errors, line = ['sphere5 : %s : %s' % (type(exc).__name__, exc)], ''
+    for error in errors[:10]:
+        print('ECART %s' % error[:400])
+    if errors:
+        return DISAGREEMENT
+    print(line)
+    return OK
+
+
 def main(argv):
     if not argv:
         return main_gate()
+    if argv == ['--suite=primitives']:
+        return main_primitives()
     if argv == ['--list-mutants']:
         for name in sorted(ref_mutants.SUPPORT_MUTANTS):
             print('%s %s' % (name, 'equivalent' if ref_mutants.SUPPORT_MUTANTS[name]['equivalent'] else 'reel'))

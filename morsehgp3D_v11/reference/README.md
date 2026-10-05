@@ -170,6 +170,21 @@ l'oracle ne connaît pas l'ordre de Morton, et les différentiels natifs retrien
 suite s'arrête à $K\leq 5$ et à des coquilles de 12 sites au plus : $K\geq 6$ et les coquilles de 13 à 24 sites,
 jusqu'au plafond natif, n'ont pas de porte bornée ; la fermeture $N_j$ de l'oracle parcourt $2^{m}$ masques.
 
+**Ajouts du 5 octobre 2026** (intégration L1, apports des auditeurs `9cbf805c6` et `238734f1d`) :
+- **Budget de la force brute du lemme F.** `_minimal_nonseparable` examine au plus $2^{m}-1$ parties candidates :
+  chacune est une partie non vide de $U_b$, formée une seule fois. Au-delà du budget `MINIMAL_BUDGET`
+  ($2^{16}-1$, donc $m\leq 16$), elle lève `BudgetRefusal` **avant tout calcul** : refus explicite, jamais un
+  résultat partiel. Le fait gravé `minimal_budget` fixe la borne à l'égalité, sur la diagonale du carré ($m=4$ :
+  refus au budget 14, parties minimales égales à $\mathcal{Q}_b$ au budget 15), et le refus sur `sphere50` ($m=84$) :
+  la porte rapide compte désormais 51 faits.
+- **Primitives sur sphere5** (`test_supports.py --suite=primitives`, porte `mhgp11_reference_supports_primitives`).
+  Les 24 points entiers de $x^2+y^2+z^2=5$, translatés de $(2,2,2)$, forment une coquille mixte au plafond natif.
+  $\mathcal{Q}_b$ est calculé par Gram (12 diamètres, 24 triangles, 792 tétraèdres), puis $N_j$ pour $j\leq 4$ par
+  combinaisons (`closure_upto` : 12, 288 et 3 906), sans les $2^{24}$ masques. Les comptes de $K=1$ à $K=3$ viennent
+  des formules du lemme G, et les incidences par support valent 4 068 à $K=3$. La force brute du lemme F refuse
+  explicitement. Environ deux secondes : label `fast`. Cette porte ne qualifie pas tout S1 à 24 sites ; la porte
+  native correspondante est `mhgp11_supports_unit_sphere5`.
+
 ## Familles gravées (`hgp11_ref/families.py`)
 
 Coordonnées entières dans $[0, 2^{18})$. Générateur écrit dans le fichier (SplitMix64) : les nuages ne dépendent pas
@@ -196,8 +211,9 @@ Codes : 0 conforme, 1 désaccord, 2 refus avant calcul, 3 plancher ou invariant 
 | `mhgp11_reference_full_<i>` (16) | oracle, long | tranche $i$ de la suite complète |
 | `mhgp11_reference_full` | oracle, long | somme des tranches, faits, planchers ; exige les 16 tranches |
 | `mhgp11_reference_diff_v10`, `_large`, `_refusal` et 10 mutants | diff_v10, fast | identité d'octets avec le binaire figé (petits nuages depuis A et B ; 24 à 32 points depuis B) ; absentes sans `MHGP11_V10_FROZEN_DIR` |
-| `mhgp11_reference_supports` | oracle, fast | oracle des supports (tranche S1) : 50 faits, puis 210 nuages, lemmes A à H et W, invariance (permutation effective, réétiquetage, translation), compteurs exacts et planchers de la spec ; ligne `reference_supports_ok nuages=210 ordres=951 boules=15062 supports=16943 noeuds=12441 coupes=48074` ; 20 à 30 s de CPU |
+| `mhgp11_reference_supports` | oracle, fast | oracle des supports (tranche S1) : 51 faits (50 le 4 octobre, plus le budget du lemme F), puis 210 nuages, lemmes A à H et W, invariance (permutation effective, réétiquetage, translation), compteurs exacts et planchers de la spec ; ligne `reference_supports_ok nuages=210 ordres=951 boules=15062 supports=16943 noeuds=12441 coupes=48074` ; 20 à 30 s de CPU |
 | `mhgp11_reference_supports_refusal` | oracle, fast | usage faux : code 2 |
+| `mhgp11_reference_supports_primitives` | oracle, fast | primitives sur sphere5 (24 sites) : $\mathcal{Q}_b$ par Gram, $N_j$ pour $j\leq 4$ par combinaisons, comptes de $K=1$ à $K=3$, refus explicite de la force brute du lemme F ; ligne `reference_supports_primitives_ok sites=24 supports=828 q2=12 q3=24 q4=792 N2=12 N3=288 N4=3906 refus=2` ; deux secondes |
 | `mhgp11_reference_supports_mutant_<nom>` (13) | oracle, fast | `att_coupe_ouverte`, `ant_coupe_fermee`, `fenetre_forte`, `premier_support_seul`, `triangle_droit_admis`, `cofaces_ordre_k`, `populations_naissances_seules` (lemme A, C, périmètre, F, F, G, H), puis les six mutants de vivacité `w4_gabriel_juge`, `h_fortes_etroites`, `c3_une_fusion`, `regle_parent_inversee`, `interne_vie_inversee`, `m1_support_inverse` (W.4, H, C.3, règle du parent, vie d'une interne, M1) : code 4, tué par sa cause |
 
 ## Usage
