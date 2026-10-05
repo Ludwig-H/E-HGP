@@ -302,3 +302,41 @@ Ses portes :
   (16 octets par niveau). Le refus $K=n\geq 2$ est jugé sur la sortie assemblée (`mhgp11_cli_points`).
 
 S9 et L2b seront qualifiées ensemble dans une prochaine session G4, avec S8.
+
+## I. Sanitizers à l'échelle, L2b relancée, questions avant S10 (5 octobre, 18 h 09 UTC)
+
+**Votre demande sur B (« reprendre les 50 et 65 portes manquantes, avec un découpage adapté ») est prise.** Le
+commit `c97776ea8` les avait sorties des configurations sanitizer, en s'appuyant sur la qualification Release ;
+je reviens sur ce choix. TSan à l'échelle est justement ce qui voit les courses du découpage des tâches, et la
+Release ne le remplace pas.
+
+- `a7711b506` ajoute huit configurations. Elles ne jouent que les portes d'échelle et LiDAR (labels `scale8000`,
+  `scale16000`, `scale32000`, `lidar`, hors `long` et `mutant`), en lots disjoints découpés par taille de nuage.
+  - ASan+UBSan u24 : deux lots.
+  - TSan u21 : six lots, dont les portes CLI à 32 000 isolées.
+- Chaque fois, un lot « reste » est défini par exclusion des autres : la réunion couvre toutes ces portes, y compris
+  les futures (points, L2b, plat). Contrôlé sur un arbre CTest local : 100 portes, réunion égale, lots disjoints,
+  pour les deux sanitizers.
+- Planchers : 80 % du compte à `b319efc84`.
+- Coût instrumenté estimé d'après les durées de B et de A2 : environ 2 300 s pour ASan et 6 500 s pour TSan. Les
+  facteurs observés vont de ×1,3 à ×5,6 sous ASan et de ×2 à ×10 sous TSan selon la famille. Si une session ne
+  suffit pas, les lots inachevés passeront dans une seconde session : aucun ne sera déclaré qualifié sans verdict.
+
+**L2b est relancée à neuf** sur `ab0f1ba52`, après la coupure du codespace : le premier essai n'avait rien écrit.
+Le contenu est inchangé (section H).
+
+**Questions avant S10 (`--sortie=plat`, port natif de la tête de `bench/points_flat.py`).**
+1. **Refus pendant EOM.** Quand le signe d'une comparaison de scores dépasse `radical_sign_budget`, je compte
+   refuser **l'appel entier**, sans sortie plate partielle et sans choisir par défaut le parent ou les enfants. La
+   tête Python comptait ces refus et continuait. Voyez-vous une raison de garder une sélection dégradée plutôt
+   qu'un refus ?
+2. **Réciproque des dates.** Le port suit votre reçu `eom_exact_audit` : $1/(\sqrt{t}+\sqrt{m}-\sqrt{q})$ par
+   conjugués, puis signe d'une somme de racines par S8. Faut-il un témoin de plus que les égalités certifiées de
+   F14 ($1/4$, $\sqrt{2}/8$, $7/6$, $7/12$, écart $2^{-70}$) pour $z=2$ et $z=3$ ?
+3. **Indépendance de l'oracle.** Les attendus de la tête native seront gravés une fois depuis
+   `bench/points_flat_oracle.py`, et le recalcul relèvera d'une porte `long`. Cet oracle et la tête Python ont été
+   écrits dans la même session de développement. Si vous jugez qu'il faut un tiers, une contre-épreuve de votre
+   côté sur F14 suffirait.
+
+Cadre : `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`. GCP non utilisé
+pour cette note.
