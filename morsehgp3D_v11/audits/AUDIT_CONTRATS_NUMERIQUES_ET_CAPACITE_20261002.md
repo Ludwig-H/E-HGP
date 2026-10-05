@@ -39,21 +39,34 @@ au-delà de 24 sites doit porter sur **l'appel supports entier**. Budget,
 count/fill, concurrence et absence de publication partielle doivent être
 jugés sur l'assemblage, pas déduits des seuls helpers S6a.
 
-**Défaut à corriger avant S5 : identité du propriétaire à la publication.**
-La façade WIP accepte `compute(A, ...)`, puis `publish(B, produitA, ...)`.
-`Product` ne garde aucun jeton de Session et `publish` ne contrôle pas
-cette identité. Il sérialise les tableaux réservés dans A en rapportant
-le budget de B ; `finish(B)` peut réussir avec le produit de A encore
-vivant. Une B de budget nul suffit dans ce scénario. C'est une rupture
-du contrat public de propriété et de mémoire ; le CLI actuel, à une
-seule Session, n'emprunte pas ce chemin. Lier produit et Session par une
-identité stable au déplacement, puis refuser une autre Session **avant
-toute création et avant toute modification du rapport**. Le reçu conserve
-les sources WIP et une fixture native proposée pour G4, non exécutée ici.
-Le contrôle de fin de vie doit aussi être explicite : `~Session() = default`
-ne réalise pas la vérification à destruction annoncée par l'architecture ;
-le `close()` du chemin CLI la réalise. Aucun comportement indéfini n'est
-déduit, le compte du budget étant partagé.
+**Nouveau défaut S5 : un succès API peut publier un manifeste illisible.**
+`publish` accepte `Provenance{}` pour un produit non vide : les tailles
+publiées valent zéro, alors que `counts.points` est positif. Le lecteur
+livré avec S5 refuse ce manifeste (`points et octets d'entrée`). Les
+portes API actuelles attendent pourtant un succès pour cet appel. Une
+provenance indiquant une autre taille d'entrée, ou un budget déclaré nul,
+franchit également `check_provenance` puis échoue au lecteur. Le CLI
+fournit les tailles issues de sa lecture et refuse un budget nul ; aucun
+défaut de son chemin normal ni du calcul FULL n'est établi ici.
+
+Avant toute création ou modification du rapport, contrôler les tailles
+contre le produit (`points_bytes=12n`, `ids_bytes=4n`) et le domaine du
+budget déclaré. Si une provenance sans fichiers est souhaitée pour l'API,
+elle exige un schéma explicitement accepté par le lecteur. La porte à
+ajouter est un aller-retour **publication API réussie → lecteur officiel**,
+avec refus sans sortie pour les métadonnées incohérentes. Une simple
+vérification d'inventaire ou de SHA ne détecte pas ce défaut.
+[Preuve et sources WIP](../receipts/audit_api_publication_20261005/README.md).
+
+**Identité Session : corrigée dans le brouillon L1, qualification attendue.**
+Le produit garde désormais l'identité du budget alloué sur le tas, stable
+au déplacement de la Session. `publish` refuse une autre Session avant la
+provenance, les fichiers et le rapport. La nouvelle porte déplace la
+Session avec le produit vivant, vérifie la publication par sa propriétaire
+et la libération finale. Le destructeur contrôle aussi le retour du budget
+à zéro ; la violation de durée de vie termine explicitement le processus.
+Cette correction clôt le constat de source de l'audit `a65903a7b`, sans
+valoir exécution native ou qualification G4.
 
 **Priorité performance : mesurer le chemin qui sera livré.** Les temps
 S3 obtenus journal désactivé ne donnent pas le coût des attaches ni de
@@ -67,8 +80,8 @@ Les trois trames de séquence08 ne deviennent pas plusieurs séquences,
 et les comparaisons c40/baseline v11 ne ferment pas le différentiel
 canonique v10/v11 sur LiDAR entier.
 
-Pour poursuivre : intégrer et qualifier L1 ; corriger le propriétaire
-S5 et le hook IO déjà signalé ci-dessous avant L2 ; prendre ensuite la
+Pour poursuivre : intégrer et qualifier L1 ; fermer la cohérence entre
+publication API et lecteur avant L2 ; prendre ensuite la
 décision de chemin sur les mesures complètes. Aucune réserve générale
 nouvelle n'est opposée à l'intégration de S3. **Aucun build/test natif ni
 GCP lancé par cet audit.**
@@ -77,7 +90,7 @@ GCP lancé par cet audit.**
 
 **Raccord L1 relu : avancer vers l'assemblage.** Le développeur a repris
 les demandes de l'audit `a65903a7b` dans sa réponse **4f1e0fb3a**.
-Dans la capture de `build/v11-impl-l1`,
+Dans la capture précédente du suivi `416767435` de `build/v11-impl-l1`,
 S6a contient maintenant le différentiel S1 à 951 ordres u21/u24 et les
 témoins à 24 sites et K10/K12 demandés. Les primitives Python et le refus budgété de
 l'oracle passent en normal et `-O` ; aucune exécution native n'est déduite
@@ -85,12 +98,10 @@ de leur succès. S3/S5 et l'assemblage S6b ne sont pas encore raccordés dans
 cette capture. Aucun nouveau verrou général n'est opposé à cette suite.
 [État exact et preuve](../receipts/audit_l1_followup_20261005/README.md).
 
-Pour la correction de l'identité S5, la porte doit aussi **déplacer la
-Session avec un produit encore vivant**, puis déplacer le Product :
-refus d'une Session étrangère, mais publication acceptée par la propriétaire
-déplacée. Le test existant ne déplace qu'une Session vide. La
-[fixture proposée](../receipts/audit_l1_followup_20261005/api_session_move_identity.cpp)
-vérifie cette distinction et la libération finale ; elle reste non compilée.
+S6a est désormais commitée **localement en ee8a69f1a** ; S5 est en cours
+d'intégration dans le même worktree. Les résultats natifs annoncés par le
+développeur restent distincts des vérifications Python de l'audit et de
+la qualification G4. Le cœur S3 reste identique aux sources déjà relues.
 
 **S5 : anciennes alertes corrigées en WIP.** Le CLI ignore désormais
 SIGXFSZ et la porte rétablit son comportement par défaut avant exec avec
@@ -105,18 +116,13 @@ quinze issues factices et les 60 définitions de mutants ; cela ne prouve
 ni 60 mises à mort ni la qualification native des nouveaux correctifs.
 [Capture et limites](../receipts/audit_native_integration_20261005/api/README.md).
 
-**À corriger avant les deux portes IO injectées.** Le harnais
-`io_fault_preload.cpp:72–93` lit six `va_arg(long)`, alors que
-`directory.cpp:114` fournit cinq arguments de types
-`int,const char*,int,const char*,unsigned` à `SYS_renameat2`.
-Cette lecture ne respecte pas le contrat variadique :
-[N1570 §7.16.1.1](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n1570.pdf),
-repris par [C++20 N4861 §17.13.1](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/n4861.pdf).
-Décoder ces cinq types pour ce syscall ; invalider explicitement la porte
-si un autre numéro est reçu. Ce constat concerne le harnais, sans bug
-produit ni crash observé, et ne réfute pas les succès locaux x86-64.
-Release prépare 64 refus CLI, ASan/TSan 61 : les deux fautes IO et une
-porte FENV préchargées y sont omises. FENV n'est pas concernée par ce hook.
+**Harnais des deux fautes IO : correction typée relue.** La nouvelle
+version de `io_fault_preload.cpp` décode et retransmet exactement les cinq
+arguments de `SYS_renameat2` : `int,const char*,int,const char*,unsigned`.
+Un autre numéro invalide explicitement la porte. Les deux cas injectés
+utilisent W1 ; cette relecture ne qualifie pas le préchargement pour les
+attentes futex de W>1. L'ancien constat variadique est clos au niveau du
+code WIP ; les portes natives restent à jouer sur la source intégrée.
 
 **S3 : raccord final favorable, mesure du journal encore distincte.**
 Naissances enregistrées avant DSU, lots appliqués par ordinal et attribués

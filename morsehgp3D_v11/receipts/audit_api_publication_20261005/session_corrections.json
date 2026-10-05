@@ -1,0 +1,112 @@
+{
+  "frame": {
+    "phase": "exploration_v11_hors_registre",
+    "backend": "cpu_reference",
+    "profile": "quantized_u21_input_only",
+    "public_status": "not_claimed"
+  },
+  "head": "ee8a69f1aae7cd68bb08f28a5eb5a9f5fd0656a9",
+  "worktree": "/workspaces/E-HGP/build/v11-impl-l1",
+  "status": "WIP non commis, lecture seule, aucune execution native/GCP",
+  "coverage": [
+    {
+      "path": "morsehgp3D_v11/src/api/api.hpp",
+      "sha256": "5890b0595b3762bf588771a05e865390ca58030b9fb996f56937c7d70b12a0cd",
+      "read_scope": "45-165 et185-218"
+    },
+    {
+      "path": "morsehgp3D_v11/src/api/compute.cpp",
+      "sha256": "4c94f8add46a90178de0322bc604d5175114d588c7b246d522410e6cf30f7572",
+      "read_scope": "integral"
+    },
+    {
+      "path": "morsehgp3D_v11/src/api/session.cpp",
+      "sha256": "05861ea6787411541d2c0d2f422ed8b8fe490983480a3890e193b5a58682a886",
+      "read_scope": "integral"
+    },
+    {
+      "path": "morsehgp3D_v11/src/api/manifest.cpp",
+      "sha256": "35a30def2843b025bb92d77b784f4e7f2d1cad31c1e4cd18f1a4f989e17f8035",
+      "read_scope": "224-319 etroute signature auparavant revue"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/api/publish_test.cpp",
+      "sha256": "36e053ec30bd3219e96797d5dcea65c3c0c92eb2347469bc1e50cd9c2f2ef18f",
+      "read_scope": "231-272 : session_identity"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/api/session_misuse.cpp",
+      "sha256": "70c06f57997ae28d889f5954108af2b6e97341c7ff2b813e76a1014d61fffbcb",
+      "read_scope": "integral"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/api/tests.cmake",
+      "sha256": "be10aaf79a21fa24750bda47b3ccc873273de4e3a1ee29db8a7137381b2ffe56",
+      "read_scope": "integral"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/cli/io_fault_preload.cpp",
+      "sha256": "04f1c624067513c80ed1352d24f6d28350c63c4d6eefaaba0c229823b609a5c7",
+      "read_scope": "integral"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/cli/cli_contract.py",
+      "sha256": "ab751bb09070adf4c35a1ca471e69847c7f720fc5836e05c158f5b090631f4d1",
+      "read_scope": "394-443, route c.argv68-69"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/cli/cli_support.py",
+      "sha256": "71ffabad16f83d4f2a2e2b7f90c0824de792a17df9184b93e1edf552b5aafda9",
+      "read_scope": "cli_argv40-44"
+    },
+    {
+      "path": "morsehgp3D_v11/cli/mhgp11.cpp",
+      "sha256": "ed45ca33a456b4bd37749e40fefacde9b5e64990334c66049cdcff81fbbe824f",
+      "read_scope": "Options ligne87 et execute224-250 ; liberation des buffers avant finish"
+    },
+    {
+      "path": "morsehgp3D_v11/src/io/directory.cpp",
+      "sha256": "b32fc41863a7163ae00cb74893c67cd6bc4500965669f881fd72334ab54f2aa3",
+      "read_scope": "rename_noreplace112-115, declarationflagsunsigned44"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/ARCHITECTURE.md",
+      "sha256": "7cff48e7eee8c5379450361fc6c0d50f58c5bb0521b4c2fd280ce0080570927c",
+      "read_scope": "regle4 et7.1"
+    }
+  ],
+  "session_identity": {
+    "verdict": "Correction conforme en lecture pour les produits possedes vivants. Jeton budget_.get() stable sous move de Session ; Product retient ce jeton au compute ; publication refuse une autre Session avant provenance, budget.restart_peak(), creation de fichier et diagnostics.",
+    "sources": [
+      "api/api.hpp:69-72",
+      "api/api.hpp:142-152",
+      "api/compute.cpp:95",
+      "api/manifest.cpp:226-228"
+    ],
+    "causal_gate": "tests/api/publish_test.cpp:231-272 construit A, B budget0, produitA ; exige refus dans B, etat none, empreinte vide, rapport intact, aucun D/pending ; deplace A en moved, exige identite conservee, publication dans moved, close budget_not_released puis close conforme apres liberation. Porte et mutant declares seulement, non executes."
+  },
+  "session_destruction": {
+    "verdict": "Correction conforme en lecture au contrat Architecture7.1 et regle4 precisee. Le destructeur ignore le budget nul de la source deplacee ; sinon, released() non conforme appelle terminate. close() garde un refus observable et rejouable.",
+    "sources": [
+      "api/session.cpp:29-39",
+      "api/api.hpp:59-64",
+      "docs/ARCHITECTURE.md:17-22"
+    ],
+    "causal_gate": "session_misuse.cpp garde Product hors du scope de Session en mode vivant : arret anormal ; rendu reset avant destruction : code0. Le juge abnormal exige un reel signal ; aucune execution ici."
+  },
+  "io_harness": {
+    "verdict": "Ancien UB variadique corrige au code : seuls cinq arguments decodes et transmis dans int,const char*,int,const char*,unsigned, exactement comme le producteur. Un numero inconnu signale une porte invalide puis abort, releve par le juge.",
+    "sources": [
+      "tests/cli/io_fault_preload.cpp:97-118",
+      "src/io/directory.cpp:112-115",
+      "tests/cli/cli_contract.py:397-413"
+    ],
+    "scope": "Les deux cas injectes jouent W1 : c.argv appelle cli_argv avec workers=None ; aucune option fils, Options.workers=1. Le pipeline concurrent ne s active pas a W1. Pas de nouveau constat de defaut ici ; aucun transfert au harnais W>1/G4."
+  },
+  "limitations": [
+    "Aucune gate native, sanitizer, mutant ou GCP joue par cette contrelecture.",
+    "Les SHA sont des captures ponctuelles : un developpement ulterieur demande de relire le delta.",
+    "Portee = identite Session, destruction et hook. Provenance API relue separement par un autre auditeur."
+  ],
+  "report_kind": "extrait du rapport de contrelecture, limite aux corrections actives"
+}

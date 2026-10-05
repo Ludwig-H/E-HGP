@@ -7,21 +7,25 @@ preuves détaillées dans les reçus immuables.
 **Audit général repris au pin 238734f1d.** Aucun nouveau défaut
 mathématique FULL établi ; contre-épreuve du nerf complet, des coupes et
 des verticales conforme sur 65 ordres. Le point important du raccord est
-la qualification de l'assemblage L1 entier. S5 doit en outre empêcher la
-publication d'un produit avec une Session étrangère, qui fausse son
-contrat mémoire. Pour juger la voie K seule, mesurer le journal actif et
+la qualification de l'assemblage L1 entier. L'identité Session est
+désormais corrigée dans le brouillon S5 ; une nouvelle incohérence entre
+publication API et lecteur reste à fermer. Pour juger la voie K seule, mesurer le journal actif et
 la sortie réellement livrée. [Verdict et priorités du développeur](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#audit-général-du-5-octobre--décisions-importantes),
 [preuve et périmètre](../receipts/audit_geant_20261005/README.md).
 
-**Suivi du raccord L1.** Le développeur a repris les demandes importantes
-en **4f1e0fb3a**. Les portes de la coquille de 24 sites et de K10/K12 sont intégrées au brouillon S6a ;
-les nouvelles primitives Python et leur refus budgété sont rejugés conformes.
-L'assemblage et sa qualification G4 restent à faire. Une fixture précise
-complète la correction S5 : déplacer la Session avec un produit vivant,
-puis vérifier le refus d'une Session étrangère avant toute écriture.
-La frontière K=n est tranchée pour la future L3 : refus explicite de
-`points`/`plat` pour K≥2, FULL/supports conservés.
-[Contrelecture et preuve bornée](../receipts/audit_l1_followup_20261005/README.md).
+**S5 : publication et lecture doivent être cohérentes.** L'API accepte
+actuellement des tailles d'entrée nulles ou incompatibles avec son produit,
+publie un manifeste `complete`, puis son lecteur le refuse. Corriger la
+validation avant écriture et ajouter la lecture de toute publication API
+annoncée réussie. Aucun défaut du chemin CLI normal établi.
+[Constat et preuve](../receipts/audit_api_publication_20261005/README.md).
+
+**Suivi des corrections.** Identité stable de Session, contrôle de fin de
+vie et hook IO typé sont corrigés en WIP. S6a est commitée localement en
+**ee8a69f1a**, avec les témoins difficiles. L'assemblage et sa qualification
+G4 restent à faire. Pour la future L3, K=n est refusé par `points`/`plat`
+quand K≥2 ; FULL/supports le conservent.
+[Contrelecture précédente](../receipts/audit_l1_followup_20261005/README.md).
 
 - [Mathématiques : supports, frontières, hiérarchies et sélection](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 - [Moteur : qualification, performances et intégration](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md).
@@ -45,8 +49,7 @@ carré9 pour le refus entier. L'oracle WIP borne désormais
 `_minimal_nonseparable`, en plus du calcul N_j par petites combinaisons.
 Deux portes exactes complètent les K élevés : 12 sites à K10 et la
 coquille de 24 sites à K12, **116 traces strictes**, sans construire FULL12.
-Corriger le hook variadique des deux fautes IO avant G4 ; ce constat
-concerne le harnais, sans défaut produit observé. Comparer les masques
+Le hook variadique des deux fautes IO est désormais corrigé en WIP. Comparer les masques
 FULL 16379 et ordre seul 7035, avec mêmes options applicables. Matrice G4 séparée
 par livraison/profil, coût des portes fixé avant session.
 [Relecture et 19 713 gardes portables nouvelles](../receipts/audit_native_integration_20261005/README.md).

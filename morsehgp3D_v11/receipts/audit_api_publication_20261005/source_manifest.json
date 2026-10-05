@@ -1,0 +1,65 @@
+{
+  "changed_during_capture": [],
+  "cloud_calls": 0,
+  "files": [
+    {
+      "bytes": 13946,
+      "path": "morsehgp3D_v11/src/api/api.hpp",
+      "sha256": "5890b0595b3762bf588771a05e865390ca58030b9fb996f56937c7d70b12a0cd"
+    },
+    {
+      "bytes": 13152,
+      "path": "morsehgp3D_v11/src/api/manifest.cpp",
+      "sha256": "35a30def2843b025bb92d77b784f4e7f2d1cad31c1e4cd18f1a4f989e17f8035"
+    },
+    {
+      "bytes": 9840,
+      "path": "morsehgp3D_v11/bench/mhgp11_formats.py",
+      "sha256": "6356191d914d66901faf5d375ad7e38e56645c3843d716200f0e4bc0b78733fd"
+    },
+    {
+      "bytes": 9246,
+      "path": "morsehgp3D_v11/bench/full_semantic.py",
+      "sha256": "1ffda4fb32e58d9cadd6f8c87a4cabe0eb28c0bcc5769ba8370b2738bd4d8d25"
+    },
+    {
+      "bytes": 6320,
+      "path": "morsehgp3D_v11/bench/catalogue_semantic.py",
+      "sha256": "f09d2dff28098ff9c5288a69058b776350a6339034d17397491c073257196f2c"
+    },
+    {
+      "bytes": 12167,
+      "path": "morsehgp3D_v11/bench/catalogue_g4.py",
+      "sha256": "924c39788ab7856b772f999df928e6ce8466f3521768b7fbc831fce083f649cb"
+    },
+    {
+      "bytes": 14764,
+      "path": "morsehgp3D_v11/tests/api/publish_test.cpp",
+      "sha256": "36e053ec30bd3219e96797d5dcea65c3c0c92eb2347469bc1e50cd9c2f2ef18f"
+    },
+    {
+      "bytes": 18152,
+      "path": "morsehgp3D_v11/tests/api/session_test.cpp",
+      "sha256": "626896dbedd376800268af9b075f49c4dba65373b4c5388d821b765168e82cc7"
+    },
+    {
+      "bytes": 45228,
+      "path": "morsehgp3D_v11/docs/SORTIES.md",
+      "sha256": "60d9d61e6889cf1a44163e47ff66014058184c3b9c9a41cc56917546d875df8c"
+    },
+    {
+      "bytes": 7510,
+      "path": "morsehgp3D_v11/tests/mutants/api.json",
+      "sha256": "296aa470dd0683c91308dda77eb5d90a1d44a36dd7b3671e27c4d4590c577442"
+    },
+    {
+      "bytes": 8256,
+      "path": "morsehgp3D_v11/tests/mutants/cli.json",
+      "sha256": "8d17e238eba3537a62d08ae133f59ce64d6102857427a153c7a672b2b9cd0bed"
+    }
+  ],
+  "head": "ee8a69f1aae7cd68bb08f28a5eb5a9f5fd0656a9",
+  "native_runs": 0,
+  "source_kind": "uncommitted_source_snapshot",
+  "source_worktree": "/workspaces/E-HGP/build/v11-impl-l1"
+}

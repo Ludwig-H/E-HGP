@@ -1,0 +1,27 @@
+{
+  "scope": "rejeux du lecteur officiel fige, aucun appel natif publish",
+  "runs": [
+    {
+      "command": "python3 -B -S reproduce.py",
+      "cwd": "/workspaces/E-HGP/build/v11-audit-geant-20261005/morsehgp3D_v11/receipts/audit_api_publication_20261005",
+      "result": {
+        "chunk_id": "77b91d",
+        "wall_time_seconds": 0.008408429,
+        "exit_code": 0,
+        "original_token_count": 445,
+        "output": "{\n  \"cloud_calls\": 0,\n  \"fixture_full_bytes\": 290,\n  \"fixture_full_sha256\": \"5fdeda28360a7630fcace7b7233429029a844c9d6e46203ab452173dc5b58e0c\",\n  \"fixture_kind\": \"python_one_site_full_schema_fixture\",\n  \"frozen_check_provenance_sha256\": \"6c943d1d0e12d2097996a82545b04018d7739b170e015c58569d7650b2f12c40\",\n  \"head\": \"ee8a69f1aae7cd68bb08f28a5eb5a9f5fd0656a9\",\n  \"native_runs\": 0,\n  \"results\": [\n    {\n      \"case\": \"valid_provenance\",\n      \"decoded_sites\": 1,\n      \"manifest_sha256\": \"883b109e0d3cfcfbabf40e0b38c198c04f05076c627e67edfb15701167138b89\",\n      \"official_reader\": \"accepted\"\n    },\n    {\n      \"case\": \"default_provenance_zero_sizes\",\n      \"manifest_sha256\": \"69e4c0bef1b24ea4670c5edabd815aa03ec14c4c5fe3cd584b834c885cbca5c6\",\n      \"official_reader\": \"refused\",\n      \"reason\": \"manifeste : points et octets d'entree\"\n    },\n    {\n      \"case\": \"inconsistent_input_ratio\",\n      \"manifest_sha256\": \"4284eadf6531dc66b01bdd58f8be338c6c2772269b3fde89a15c2754d0ec52b4\",\n      \"official_reader\": \"refused\",\n      \"reason\": \"manifeste : 12 et 4 octets par point\"\n    },\n    {\n      \"case\": \"consistent_ratio_wrong_point_count\",\n      \"manifest_sha256\": \"81a0009597f27aab85367a03d6e5279b1570f0311981a65e91144ec56af3d3a4\",\n      \"official_reader\": \"refused\",\n      \"reason\": \"manifeste : points et octets d'entree\"\n    },\n    {\n      \"case\": \"declared_zero_budget\",\n      \"manifest_sha256\": \"3c3599cf84cfe72cd4490311f1c466d9ae7b1950a2c6bd6c0da5dea2ce4fd6bb\",\n      \"official_reader\": \"refused\",\n      \"reason\": \"manifeste : budget_bytes\"\n    }\n  ],\n  \"schema\": \"ehgp.v11.audit.s5_provenance_reader.v1\",\n  \"source_kind\": \"uncommitted_source_snapshot\",\n  \"source_trace\": \"pre-I/O check validates decimal declarations only; all tested variants reach its success return\"\n}\n"
+      }
+    },
+    {
+      "command": "python3 -B -O -S reproduce.py",
+      "cwd": "/workspaces/E-HGP/build/v11-audit-geant-20261005/morsehgp3D_v11/receipts/audit_api_publication_20261005",
+      "result": {
+        "chunk_id": "d343dd",
+        "wall_time_seconds": 0.000017132,
+        "exit_code": 0,
+        "original_token_count": 445,
+        "output": "{\n  \"cloud_calls\": 0,\n  \"fixture_full_bytes\": 290,\n  \"fixture_full_sha256\": \"5fdeda28360a7630fcace7b7233429029a844c9d6e46203ab452173dc5b58e0c\",\n  \"fixture_kind\": \"python_one_site_full_schema_fixture\",\n  \"frozen_check_provenance_sha256\": \"6c943d1d0e12d2097996a82545b04018d7739b170e015c58569d7650b2f12c40\",\n  \"head\": \"ee8a69f1aae7cd68bb08f28a5eb5a9f5fd0656a9\",\n  \"native_runs\": 0,\n  \"results\": [\n    {\n      \"case\": \"valid_provenance\",\n      \"decoded_sites\": 1,\n      \"manifest_sha256\": \"883b109e0d3cfcfbabf40e0b38c198c04f05076c627e67edfb15701167138b89\",\n      \"official_reader\": \"accepted\"\n    },\n    {\n      \"case\": \"default_provenance_zero_sizes\",\n      \"manifest_sha256\": \"69e4c0bef1b24ea4670c5edabd815aa03ec14c4c5fe3cd584b834c885cbca5c6\",\n      \"official_reader\": \"refused\",\n      \"reason\": \"manifeste : points et octets d'entree\"\n    },\n    {\n      \"case\": \"inconsistent_input_ratio\",\n      \"manifest_sha256\": \"4284eadf6531dc66b01bdd58f8be338c6c2772269b3fde89a15c2754d0ec52b4\",\n      \"official_reader\": \"refused\",\n      \"reason\": \"manifeste : 12 et 4 octets par point\"\n    },\n    {\n      \"case\": \"consistent_ratio_wrong_point_count\",\n      \"manifest_sha256\": \"81a0009597f27aab85367a03d6e5279b1570f0311981a65e91144ec56af3d3a4\",\n      \"official_reader\": \"refused\",\n      \"reason\": \"manifeste : points et octets d'entree\"\n    },\n    {\n      \"case\": \"declared_zero_budget\",\n      \"manifest_sha256\": \"3c3599cf84cfe72cd4490311f1c466d9ae7b1950a2c6bd6c0da5dea2ce4fd6bb\",\n      \"official_reader\": \"refused\",\n      \"reason\": \"manifeste : budget_bytes\"\n    }\n  ],\n  \"schema\": \"ehgp.v11.audit.s5_provenance_reader.v1\",\n  \"source_kind\": \"uncommitted_source_snapshot\",\n  \"source_trace\": \"pre-I/O check validates decimal declarations only; all tested variants reach its success return\"\n}\n"
+      }
+    }
+  ]
+}
