@@ -30,9 +30,6 @@
         "unit",
         "fast"
       ],
-      "require_labels_if_data": [
-        "lidar"
-      ],
       "probes": [
         {
           "name": "sched_probe",
