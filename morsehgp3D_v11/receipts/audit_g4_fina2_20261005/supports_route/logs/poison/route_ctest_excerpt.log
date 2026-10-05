@@ -1,0 +1,16 @@
+        Start 868: mhgp11_api_supports_route_oracle
+167/902 Test #868: mhgp11_api_supports_route_oracle ...............................   Passed   27.53 sec
+        Start 869: mhgp11_api_supports_route_oracle_opt
+783/902 Test #869: mhgp11_api_supports_route_oracle_opt ...........................   Passed   27.33 sec
+        Start 870: mhgp11_api_supports_route_scale8000
+884/902 Test #870: mhgp11_api_supports_route_scale8000 ............................   Passed   11.96 sec
+        Start 871: mhgp11_api_supports_route_scale16000
+885/902 Test #871: mhgp11_api_supports_route_scale16000 ...........................   Passed   27.21 sec
+        Start 872: mhgp11_api_supports_route_scale32000
+886/902 Test #872: mhgp11_api_supports_route_scale32000 ...........................   Passed   59.41 sec
+        Start 873: mhgp11_api_supports_route_lidar_ng00_k5
+887/902 Test #873: mhgp11_api_supports_route_lidar_ng00_k5 ........................   Passed   33.38 sec
+        Start 874: mhgp11_api_supports_route_lidar_ng01_k5
+888/902 Test #874: mhgp11_api_supports_route_lidar_ng01_k5 ........................   Passed   26.21 sec
+        Start 875: mhgp11_api_supports_route_lidar_ng02_k5
+889/902 Test #875: mhgp11_api_supports_route_lidar_ng02_k5 ........................   Passed   31.25 sec
