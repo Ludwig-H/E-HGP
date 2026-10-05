@@ -340,3 +340,33 @@ Le contenu est inchangé (section H).
 
 Cadre : `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`. GCP non utilisé
 pour cette note.
+
+## J. S10 livrée : `--sortie=plat` et module `head` (5 octobre, 19 h 47 UTC)
+
+**Vos trois réponses (`6eba951df`) sont appliquées.**
+- Refus de l'appel entier : un signe non tranché dans le budget rend `radical_sign_budget` depuis `head::flat_sites`,
+  propagé par `api::compute`, sans sortie ni arbitrage. Les feuilles à zéro de K = 1 sont écartées par mcs $\geq 2$ ;
+  une jonction au niveau nul est un `head_invariant` (porte `mhgp11_head_unit_refusals`) ; la positivité de chaque
+  date inversée est certifiée par `num::sqrt_cmp2`.
+- Port de $z=2$ et $z=3$ : réciproque par vos formules, puissances par produit de masques. Témoins
+  (`mhgp11_head_unit_dates`) : égalités certifiées $\varphi(\text{date})=\varphi(\text{niveau})$ à $z=1,2,3$ pour
+  $(4,9,4)$ contre 9 et $(8,2,8)$ contre 2 ($\Delta\neq 0$, la seconde dans la classe de $\sqrt{2}$), $(9,4,1)$ contre 16
+  ($\Delta=0$) ; date à trois racines $\sqrt{2}+\sqrt{3}-1$ encadrée strictement par les niveaux 4,6 et 4,61 aux trois
+  $z$ ; dates non positives refusées. F4b et F4_z3 sont rejouées par l'exécutable (`mhgp11_cli_plat`).
+- F14a–e gardent leurs attendus **manuels de clusters retenus**, comparés à la tête native (`mhgp11_head_unit_fixtures`).
+
+**Ce qui change par rapport à la tête Python.** Aucun flottant : encadrements entiers de $2^{192}\varphi$ par plateau
+depuis $\lfloor 2^{64}\sqrt{l}\rfloor$, sommes de 384 bits. Le repli exact fusionne d'abord les poids entiers par
+plateau (score propre moins scores retenus du sous-arbre), puis développe en radicaux dans un `RadicalSum` de capacité
+explicite (au plus 4 096 termes ; `num` reçoit `RadicalSum::make(budget, capacity)`, le défaut de 16 inchangé).
+Étiquettes rangées par `PointId`, jamais par indice.
+
+**Différentiel.** `mhgp11_head_vs_python` (numpy, `long`, local) passe l'arbre publié dans `MHGP11PT` à
+`points_flat.flat` et compare les partitions : 120 cas (24 nuages en amas, K = 1 à 5), 1 920 appels, 16 474 clusters,
+identiques ; trames ng00, ng01, ng02 à K5, mcs 10 et 20, quatre sélections : identiques. Aucun repli exact n'a servi
+dans ces campagnes ; F5, F6 et F8 l'exercent (une égalité certifiée chacune, côté tour).
+
+**Pour la qualification G4.** Le manifeste `head.json` porte neuf mutants (liste et écarts dans PROVENANCE, section
+S10). Les portes `plat` d'échelle et LiDAR entrent dans les onze lots sanitizer de `8b2ca400e` par leurs labels.
+Les différentiels numpy (`head_vs_python`, comme `points_vs_python`) seront joués sur G4 par
+votre plan à Python épinglé, que j'étends à ces portes.

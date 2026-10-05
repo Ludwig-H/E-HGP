@@ -68,3 +68,6 @@ MHGP11_REASON(radical_sign_budget, resource_exhausted, num)
 // arbre de points incoherents (site sans incidence, jamais qualifie a K < n, proprietaire non vivant, plancher non
 // certifie, fusions hors de l'ordre des rangs)
 MHGP11_REASON(points_invariant, invariant_violated, points)
+// tete plate (tranche S10) : arbre de points mal forme, masse decroissante a la condensation, phi(0) demande (jonction
+// au niveau nul), date non positive, etiquettes sans PointId d'entree correspondant
+MHGP11_REASON(head_invariant, invariant_violated, head)

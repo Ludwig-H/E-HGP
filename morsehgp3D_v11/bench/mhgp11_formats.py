@@ -15,7 +15,11 @@ Specification de la sortie parametree, paragraphes 6.1 a 6.7 (tranche S5), et do
     qui controle la forme, la pendaison (t <= Q < M, proprietaire vivant au plancher) et l'arbre de points, et, en
     lecture exacte (exact=True), le plancher, le drapeau strict et l'ordre des plateaux par sommes de racines exactes
     (radical_sign, ecrit a neuf) ; check_directory recompte les comptes du manifeste. tree_k_sha256 n'en est pas
-    recalculable (S* absent) : les portes le comparent a celui de --sortie=supports.
+    recalculable (S* absent) : les portes le comparent a celui de --sortie=supports ;
+  - etiquettes.mhgp11et, format MHGP11ET version 1 (tranche S10, docs/SORTIES.md, paragraphe 7) : decode par read_flat
+    (en-tete, taille exacte, etiquettes >= -1) ; check_directory recoupe l'en-tete avec la selection du manifeste et
+    le bruit avec ses comptes. Les etiquettes valent le plus petit PointId de leur cluster : seules les portes, qui
+    connaissent les entrees, le controlent.
 
 Toute violation leve ValueError (full_semantic.need). Usage :
 
@@ -52,15 +56,22 @@ FULL_MAGIC = b'MHGP11FUL1'
 SUPPORTS_NAME = 'supports.mhgp11sp'
 SUPPORTS_MAGIC = b'MHGP11SP'
 POINTS_NAME = 'points.mhgp11pt'
+FLAT_NAME = 'etiquettes.mhgp11et'
+FLAT_HEADER = 8 + 6 * 8
 NONE = (1 << 32) - 1
 # Fichier de donnees de chaque sortie : nom, format, taille minimale (en-tete).
 OUTPUT_FILES = {'full': (FULL_NAME, 'MHGP11FUL1', 42), 'supports': (SUPPORTS_NAME, 'MHGP11SP', 136),
-                'points': (POINTS_NAME, 'MHGP11PT', 144)}
+                'points': (POINTS_NAME, 'MHGP11PT', 144), 'plat': (FLAT_NAME, 'MHGP11ET', FLAT_HEADER)}
 MAX_DECIMAL = 64
 
 TOP_KEYS = ('schema', 'output', 'status', 'public_status', 'coord_bits', 'k', 'parameters', 'inputs', 'files',
             'tree_k_sha256', 'counts')
+FLAT_COUNT_KEYS = ('sites', 'nodes', 'clusters', 'selected', 'noise', 'decisions', 'exact', 'equalities',
+                   'unbracketed')
+FLAT_METHODS = ('eom', 'feuilles')
 PARAMETER_KEYS = ('budget_bytes', 'grid_step', 'origin')
+# Sortie plat : mcs, z et selection s'ajoutent aux parametres.
+FLAT_PARAMETER_KEYS = PARAMETER_KEYS + ('mcs', 'z', 'selection')
 INPUT_KEYS = ('name', 'bytes', 'sha256')
 FILE_KEYS = ('name', 'format', 'version', 'bytes', 'sha256')
 FULL_COUNT_KEYS = ('sites', 'points', 'orders')
@@ -110,9 +121,13 @@ def is_decimal(text, signed):
             (dot == '' or (fraction != '' and all(c in digits for c in fraction))))
 
 
-def _parameters(parameters):
-    _keys(parameters, PARAMETER_KEYS, 'parameters')
+def _parameters(parameters, flat=False):
+    _keys(parameters, FLAT_PARAMETER_KEYS if flat else PARAMETER_KEYS, 'parameters')
     budget, step, origin = (parameters[key] for key in PARAMETER_KEYS)
+    if flat:
+        _integer(parameters['mcs'], 'mcs', 2, (1 << 32) - 1)
+        _integer(parameters['z'], 'z', 1, 3)
+        need(parameters['selection'] in FLAT_METHODS, 'manifeste : selection')
     need(budget is None or (type(budget) is int and 0 < budget < 1 << 64), 'manifeste : budget_bytes')
     need(step is None or (is_decimal(step, False) and step.strip('0.') != ''), 'manifeste : grid_step')
     need(origin is None or (type(origin) is list and len(origin) == 3 and all(is_decimal(c, True) for c in origin)),
@@ -177,7 +192,7 @@ def read_manifest(raw):
     output = manifest['output']
     need(manifest['coord_bits'] in (18, 21, 24) and type(manifest['coord_bits']) is int, 'manifeste : coord_bits')
     k = _integer(manifest['k'], 'k', 1, 12)
-    _parameters(manifest['parameters'])
+    _parameters(manifest['parameters'], output == 'plat')
     inputs = manifest['inputs']
     need(type(inputs) is list and len(inputs) == 2, 'manifeste : deux entrees')
     for name, entry in zip(('points', 'ids'), inputs):
@@ -201,6 +216,10 @@ def read_manifest(raw):
     elif output == 'points':
         _points_counts(manifest['counts'], k)
         need(inputs[1]['bytes'] == 4 * manifest['counts']['sites'], 'manifeste : points et octets d\'entree')
+    elif output == 'plat':
+        _flat_counts(manifest['counts'], k)
+        need(inputs[1]['bytes'] == 4 * manifest['counts']['sites'], 'manifeste : points et octets d\'entree')
+        need(files[0]['bytes'] == FLAT_HEADER + 8 * manifest['counts']['sites'], 'manifeste : taille de MHGP11ET')
     else:
         _supports_counts(manifest['counts'], k)
         need(inputs[1]['bytes'] == 4 * manifest['counts']['sites'], 'manifeste : points et octets d\'entree')
@@ -233,6 +252,16 @@ def check_directory(path, bits, exact=True):
     need(os.path.getsize(file_path) == entry['bytes'], 'taille du fichier %s' % manifest['output'])
     need(sha256_file(file_path) == entry['sha256'], 'empreinte du fichier %s' % manifest['output'])
     counts = manifest['counts']
+    if manifest['output'] == 'plat':
+        with open(file_path, 'rb') as handle:
+            et = read_flat(handle.read())
+        parameters = manifest['parameters']
+        need((et['k'], et['mcs'], et['z'], FLAT_METHODS[et['selection']]) ==
+             (manifest['k'], parameters['mcs'], parameters['z'], parameters['selection']),
+             'MHGP11ET : en-tete et parametres du manifeste')
+        need(et['n'] == counts['sites'] and et['labels'].count(-1) == counts['noise'],
+             'MHGP11ET : points ou bruit du manifeste')
+        return dict(manifest=manifest, manifest_sha256=hashlib.sha256(raw).hexdigest(), decoded=et)
     if manifest['output'] == 'points':
         with open(file_path, 'rb') as handle:
             pt = read_points(handle.read(), bits, exact)
@@ -854,6 +883,33 @@ def _points_counts(counts, k):
          'manifeste : blocs racines ou plateaux')
     need(_integer(counts['strict'], 'strict') <= _integer(counts['delayed'], 'delayed') <= sites,
          'manifeste : sites stricts et retardes')
+
+
+def _flat_counts(counts, k):
+    _keys(counts, FLAT_COUNT_KEYS, 'counts')
+    sites = _integer(counts['sites'], 'sites', k if k == 1 else k + 1, (1 << 32) - 2)
+    _integer(counts['nodes'], 'nodes', 1)
+    clusters = _integer(counts['clusters'], 'clusters', 0, 2 * sites)
+    need(_integer(counts['selected'], 'selected') <= clusters and _integer(counts['noise'], 'noise') <= sites,
+         'manifeste : clusters retenus ou bruit')
+    decisions = _integer(counts['decisions'], 'decisions', 0, clusters)
+    need(_integer(counts['equalities'], 'equalities') <= _integer(counts['exact'], 'exact') <= decisions,
+         'manifeste : decisions, replis exacts et egalites')
+    _integer(counts['unbracketed'], 'unbracketed')
+
+
+def read_flat(data):
+    """Decode MHGP11ET version 1 (docs/SORTIES.md, paragraphe 7) : magie, version 1, n >= 1, 1 <= K <= 12, mcs >= 2,
+    z dans 1..3, selection 0 (EOM) ou 1 (feuilles), taille 56 + 8 n exactement, etiquettes >= -1 (PointId u32 ou
+    bruit). Rend dict(n, k, mcs, z, selection, labels) ; leve ValueError a la premiere violation."""
+    need(type(data) in (bytes, bytearray) and len(data) >= FLAT_HEADER and data[:8] == b'MHGP11ET', 'MHGP11ET : signature')
+    version, n, k, mcs, z, selection = struct.unpack_from('<6Q', data, 8)
+    need(version == 1 and 1 <= n < NONE and 1 <= k <= 12 and 2 <= mcs < (1 << 32) and 1 <= z <= 3 and
+         selection in (0, 1), 'MHGP11ET : en-tete')
+    need(len(data) == FLAT_HEADER + 8 * n, 'MHGP11ET : taille')
+    labels = list(struct.unpack_from('<%dq' % n, data, FLAT_HEADER))
+    need(all(-1 <= label <= NONE for label in labels), 'MHGP11ET : etiquette hors de -1..2^32-1')
+    return dict(n=n, k=k, mcs=mcs, z=z, selection=selection, labels=labels)
 
 
 def _sqrt_bounds(value, bits):

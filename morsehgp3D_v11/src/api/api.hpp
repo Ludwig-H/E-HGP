@@ -14,7 +14,9 @@
 // supports.mhgp11sp est le format MHGP11SP version 1 (docs/SORTIES.md, paragraphe 6), relu par le lecteur
 // bench/mhgp11_formats.py (portes mhgp11_cli_supports_*) ; points.mhgp11pt est le format MHGP11PT version 1
 // (docs/SORTIES.md, paragraphe 7 : hierarchie de points H^r_{K+1}), relu par le meme lecteur (porte
-// mhgp11_cli_points). La sortie plat viendra avec sa tranche (S10).
+// mhgp11_cli_points). La sortie plat (tranche S10) publie etiquettes.mhgp11et, format MHGP11ET version 1 : une
+// etiquette i64 par point dans l'ordre du fichier d'entree, tiree de la meme hierarchie de points par la tete plate
+// (module head : condensation, EOM ou feuilles a scores exacts ; porte mhgp11_cli_plat).
 //
 // Moteur : parametres FIXES, ceux du masque qualifie 16379 des sondes (bench/points_export.cpp : feuilles de 16 a 256
 // sites, graphe de paires, tables de populations, ordres concurrents, sans memo) ; aucune option de moteur (regle 6).
@@ -37,6 +39,7 @@
 #include "core/core.hpp"
 #include "io/io.hpp"
 #include "sched/sched.hpp"
+#include "head/head.hpp"
 #include "points/points.hpp"
 #include "supports/supports.hpp"
 #include "tower/tower.hpp"
@@ -47,8 +50,8 @@ namespace mhgp11::api {
 inline constexpr Order kMaxOrder = 12;
 static_assert(kMaxOrder == kMaxMebSites, "api : K borne par la MEB bornee");
 
-// Sorties livrees. --sortie=plat est refuse (parameter_out_of_range) tant que sa tranche manque.
-enum class OutputKind : u8 { full, supports, points };
+// Sorties livrees ; output_name(flat) vaut "plat" (--sortie=plat).
+enum class OutputKind : u8 { full, supports, points, flat };
 [[nodiscard]] std::string_view output_name(OutputKind kind) noexcept;
 
 struct SessionParams {
@@ -112,7 +115,16 @@ struct SupportsRequest {
 struct PointsRequest {
   Order k = 0;
 };
-using Request = std::variant<FullRequest, SupportsRequest, PointsRequest>;
+// Sortie plat : etiquettes plates de la hierarchie de points de la sortie points (meme arbre, meme refus de K >= n a
+// K >= 2), par la tete plate : condensation au critere A (mcs >= 2), selection EOM a phi(r) = r^-z (z dans 1..3) ou
+// feuilles ; decision LiDAR publiee par defaut : EOM, z = 1, mcs = 20 (docs/SORTIE_PLATE.md, paragraphe 3.4).
+struct FlatRequest {
+  Order k = 0;
+  u32 mcs = 20;
+  u32 z = 1;
+  head::Selection selection = head::Selection::eom;
+};
+using Request = std::variant<FullRequest, SupportsRequest, PointsRequest, FlatRequest>;
 [[nodiscard]] OutputKind request_kind(const Request& request) noexcept;
 
 // Etages d'un appel. compute remplit cloud (preparation du nuage ; le CLI y ajoute la lecture), index, domain, tree
@@ -154,7 +166,8 @@ namespace mhgp11::api {
 //     sous un budget trop petit : memory_budget) ;
 //   calcul : memory_budget, tower_capacity, invariants des modules ; pour supports, support_shell_capacity (une
 //     coquille etendue de W_K de plus de 24 sites : l'appel entier est refuse, avant tout calcul de Q_b) et
-//     supports_invariant ; pour points, radical_sign_budget et points_invariant.
+//     supports_invariant ; pour points, radical_sign_budget et points_invariant ; pour plat, ceux de points, puis
+//     parameter_out_of_range (mcs < 2, z hors de 1..3, selection inconnue), radical_sign_budget et head_invariant.
 // Un refus ne laisse aucune reservation dans le budget de la Session ; le rapport n'est ecrit qu'en cas de succes.
 [[nodiscard]] Result<Product> compute(Session& session, const CloudView& cloud, const Request& request,
                                       RunReport* report = nullptr) noexcept;
@@ -177,12 +190,14 @@ class Product {
   const FullDomain& domain() const noexcept { return tower_ ? tower_->domain() : order_->domain(); }
   // Precondition : kind() == full.
   const FullTower& full() const noexcept { return *tower_; }
-  // Precondition : kind() == supports ou points. Arbre d'ordre K (et rattachement).
+  // Precondition : kind() == supports, points ou flat. Arbre d'ordre K (et rattachement).
   const OrderTree& order_tree() const noexcept { return *order_; }
   // Precondition : kind() == supports. Hierarchie des supports.
   const supports::SupportHierarchy& hierarchy() const noexcept { return *hierarchy_; }
   // Precondition : kind() == points. Hierarchie de points H^r_{K+1}.
   const points::PointHierarchy& points() const noexcept { return *points_; }
+  // Precondition : kind() == flat. Etiquettes dans l'ordre d'entree et compteurs de la tete plate.
+  const head::FlatLabels& flat() const noexcept { return *flat_; }
   // Vrai si ce produit a ete calcule par cette Session (meme jeton d'identite, non nul).
   bool computed_by(const Session& session) const noexcept {
     return session_ != nullptr && session_ == session.identity();
@@ -198,11 +213,14 @@ class Product {
       : request_(request), order_(std::move(tree)), hierarchy_(std::move(hierarchy)), session_(session) {}
   Product(const Request& request, OrderTree&& tree, points::PointHierarchy&& points, const void* session) noexcept
       : request_(request), order_(std::move(tree)), points_(std::move(points)), session_(session) {}
+  Product(const Request& request, OrderTree&& tree, head::FlatLabels&& labels, const void* session) noexcept
+      : request_(request), order_(std::move(tree)), flat_(std::move(labels)), session_(session) {}
   Request request_;
   std::optional<FullTower> tower_;
   std::optional<OrderTree> order_;
   std::optional<supports::SupportHierarchy> hierarchy_;
   std::optional<points::PointHierarchy> points_;
+  std::optional<head::FlatLabels> flat_;
   const void* session_ = nullptr;
 };
 
@@ -225,11 +243,12 @@ struct Provenance {
   std::array<std::string_view, 3> origin{};  // --origine ; trois vides : non declaree
 };
 
-// Noms des fichiers des sorties full, supports et points dans le dossier publie, schema du manifeste et version de la signature
+// Noms des fichiers des sorties full, supports, points et plat dans le dossier publie, schema du manifeste et version de la signature
 // tree_k_sha256 que ce schema fixe (docs/SORTIES.md, paragraphe 8).
 inline constexpr std::string_view kFullFileName = "full.mhgp11ful1";
 inline constexpr std::string_view kSupportsFileName = "supports.mhgp11sp";
 inline constexpr std::string_view kPointsFileName = "points.mhgp11pt";
+inline constexpr std::string_view kFlatFileName = "etiquettes.mhgp11et";
 inline constexpr std::string_view kManifestSchema = "ehgp.v11.output.v1";
 inline constexpr u64 kTreeSignatureVersion = 2;
 

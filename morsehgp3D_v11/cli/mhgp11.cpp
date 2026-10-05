@@ -1,9 +1,9 @@
 // Executable mhgp11 : sortie parametree de la v11 (docs/SORTIES.md), au-dessus de la facade api (seul en-tete
-// inclus). Tranches S5 (--sortie=full), S7 (--sortie=supports) et S9 (--sortie=points) ; plat est refuse
-// (parameter_out_of_range) jusqu'a la livraison de sa tranche.
+// inclus). Tranches S5 (--sortie=full), S7 (--sortie=supports), S9 (--sortie=points) et S10 (--sortie=plat).
 //
-//   mhgp11 --sortie=<full|supports|points> --points=<x.u32le> --ids=<ids.u32le> --dossier=<D> --k=<K>
+//   mhgp11 --sortie=<full|supports|points|plat> --points=<x.u32le> --ids=<ids.u32le> --dossier=<D> --k=<K>
 //          [--fils=<W>] [--budget=<octets>] [--pas=<decimal>] [--origine=<x,y,z>]
+//          [--mcs=<M>] [--z=<1|2|3>] [--selection=<eom|feuilles>]          (plat seulement ; defauts 20, 1, eom)
 //
 // Ordre deterministe des refus, les neuf etapes du paragraphe 3 de docs/SORTIES.md ; la cle stage de la ligne de
 // refus nomme l'etape (options, plan, session, read, compute, publish, close, report) :
@@ -20,7 +20,8 @@
 //      coordinate_out_of_domain, memory_budget, duplicate_point_id, memory_budget), positions repetees
 //      (multiplicity_unsupported), K > n (parameter_out_of_range, connu seulement apres la preparation du nuage),
 //      calcul (supports : support_shell_capacity pour l'appel entier si une coquille etendue depasse 24 sites ;
-//      points : K = n refuse a K >= 2, parameter_out_of_range, puis radical_sign_budget, points_invariant) ;
+//      points : K = n refuse a K >= 2, parameter_out_of_range, puis radical_sign_budget, points_invariant ; plat :
+//      ceux de points, puis radical_sign_budget et head_invariant de la tete plate) ;
 //   8. ecriture et publication (stage publish, api::publish) : output_unwritable, output_conflict ;
 //   9. apres la publication : fin de session (stage close, api::finish : budget_not_released, code 3), puis ligne
 //      d'etat sur la sortie standard (stage report : output_unwritable, code 2). Chacun retire le dossier publie
@@ -34,7 +35,8 @@
 // fichier rendent une erreur d'ecriture (EPIPE, ENOSPC, EFBIG) et un refus, jamais un arret par signal qui laisserait
 // un D.pending orphelin. Codes de sortie : 0 conforme, 2 refus, 3 invariant viole.
 // Portes : mhgp11_cli_contract, mhgp11_cli_full_identity, mhgp11_cli_full_determinism, mhgp11_cli_full_relabel,
-// mhgp11_cli_supports_oracle, mhgp11_cli_supports_scale*, mhgp11_cli_supports_lidar_*, mhgp11_cli_points ; mutants
+// mhgp11_cli_supports_oracle, mhgp11_cli_supports_scale*, mhgp11_cli_supports_lidar_*, mhgp11_cli_points,
+// mhgp11_cli_plat ; mutants
 // de tests/mutants/cli.json.
 #include <fcntl.h>
 #include <signal.h>
@@ -62,7 +64,7 @@ constexpr std::string_view step_name(Step step) noexcept {
   return kNames[static_cast<std::size_t>(step)];
 }
 
-// Options connues ; plat_only : propre a la sortie plat, non livree, donc jamais admise ici.
+// Options connues ; plat_only : propre a la sortie plat, refusee pour les autres sorties.
 struct Known {
   std::string_view name;
   bool plat_only;
@@ -79,7 +81,7 @@ constexpr std::array<Known, 12> kKnown = {{{"sortie", false},
                                            {"mcs", true},
                                            {"z", true},
                                            {"selection", true}}};
-enum Slot : std::size_t { kSortie, kPoints, kIds, kDossier, kK, kFils, kBudget, kPas, kOrigine };
+enum Slot : std::size_t { kSortie, kPoints, kIds, kDossier, kK, kFils, kBudget, kPas, kOrigine, kMcs, kZ, kSelection };
 
 struct Options {
   api::OutputKind output = api::OutputKind::full;
@@ -91,6 +93,8 @@ struct Options {
   std::optional<u64> budget;
   std::string_view grid_step;
   std::array<std::string_view, 3> origin{};
+  u32 mcs = 20, z = 1;
+  head::Selection selection = head::Selection::eom;
 };
 
 // Entier decimal sans signe, chiffres ASCII seulement, sans debordement de u64.
@@ -143,12 +147,13 @@ const char* parse(int argc, char** argv, Options& o) noexcept {
   if (const char* why = read_arguments(argc, argv, raw)) return why;
   if (!raw.seen[kSortie]) return "option --sortie absente";
   const std::string_view output = raw.value[kSortie];
-  if (output == "plat") return "sortie non livree dans cette tranche";
   if (output == api::output_name(api::OutputKind::supports)) o.output = api::OutputKind::supports;
   else if (output == api::output_name(api::OutputKind::points)) o.output = api::OutputKind::points;
+  else if (output == api::output_name(api::OutputKind::flat)) o.output = api::OutputKind::flat;
   else if (output != api::output_name(api::OutputKind::full)) return "sortie inconnue";
-  for (std::size_t slot = 0; slot < kKnown.size(); ++slot)
-    if (raw.seen[slot] && kKnown[slot].plat_only) return "option propre a la sortie plat";
+  if (o.output != api::OutputKind::flat)
+    for (std::size_t slot = 0; slot < kKnown.size(); ++slot)
+      if (raw.seen[slot] && kKnown[slot].plat_only) return "option propre a la sortie plat";
   for (const Slot slot : {kPoints, kIds, kDossier, kK})
     if (!raw.seen[slot]) return "option obligatoire absente (--points, --ids, --dossier, --k)";
   for (const Slot slot : {kPoints, kIds, kDossier})
@@ -173,6 +178,19 @@ const char* parse(int argc, char** argv, Options& o) noexcept {
     o.grid_step = raw.value[kPas];
   }
   if (raw.seen[kOrigine] && !parse_origin(raw.value[kOrigine], o.origin)) return "--origine n'est pas x,y,z decimaux";
+  if (raw.seen[kMcs]) {
+    if (!parse_u64(raw.value[kMcs], number) || number < 2 || number > 0xFFFFFFFFull) return "--mcs hors de 2..2^32-1";
+    o.mcs = static_cast<u32>(number);
+  }
+  if (raw.seen[kZ]) {
+    if (!parse_u64(raw.value[kZ], number) || number < 1 || number > 3) return "--z hors de 1..3";
+    o.z = static_cast<u32>(number);
+  }
+  if (raw.seen[kSelection]) {
+    if (raw.value[kSelection] == "eom") o.selection = head::Selection::eom;
+    else if (raw.value[kSelection] == "feuilles") o.selection = head::Selection::leaves;
+    else return "--selection hors de eom, feuilles";
+  }
   return nullptr;
 }
 
@@ -213,11 +231,21 @@ struct Run {
   u64 nodes = 0, births = 0, edges = 0;          // full : totaux des ordres 1 a K
   u64 balls = 0, supports = 0, prior = 0;        // supports : noeuds (nodes), boules, supports, branches
   u64 levels = 0, plateaus = 0, blocks = 0, delayed = 0;  // points : noeuds (nodes), rangs, plateaux, blocs, retards
+  u64 clusters = 0, selected = 0, noise = 0, exact = 0;   // plat : noeuds (nodes), clusters, retenus, bruit, replis
   api::Publication publication;  // issue, etat du dossier et empreinte du manifeste de D publie
 };
 
 void tally(const api::Product& product, Run& run) noexcept {
   run.sites = product.domain().index().cloud().sites();
+  if (product.kind() == api::OutputKind::flat) {
+    const head::FlatStats& stats = product.flat().stats;
+    run.nodes = product.order_tree().forest().nodes().size();
+    run.clusters = stats.clusters;
+    run.selected = stats.selected;
+    run.noise = stats.noise;
+    run.exact = stats.exact;
+    return;
+  }
   if (product.kind() == api::OutputKind::points) {
     const points::PointHierarchy& h = product.points();
     run.nodes = product.order_tree().forest().nodes().size();
@@ -260,9 +288,11 @@ api::Publication execute(const Options& o, io::OutputDirectory& directory, Run& 
     const io::InputFiles& in = input.value();
     run.step = Step::compute;
     const api::CloudView view{in.x.span(), in.y.span(), in.z.span(), in.ids.span()};
-    const api::Request request = o.output == api::OutputKind::supports ? api::Request(api::SupportsRequest{o.k})
-                                 : o.output == api::OutputKind::points ? api::Request(api::PointsRequest{o.k})
-                                                                         : api::Request(api::FullRequest{o.k});
+    const api::Request request =
+        o.output == api::OutputKind::supports ? api::Request(api::SupportsRequest{o.k})
+        : o.output == api::OutputKind::points ? api::Request(api::PointsRequest{o.k})
+        : o.output == api::OutputKind::flat   ? api::Request(api::FlatRequest{o.k, o.mcs, o.z, o.selection})
+                                              : api::Request(api::FullRequest{o.k});
     Result<api::Product> product = api::compute(session, view, request, &run.report);
     if (!product.ok()) return {product.outcome()};
     tally(product.value(), run);
@@ -347,8 +377,12 @@ bool success_line(const Options& o, const Run& run) noexcept {
   const auto manifest = io::to_hex(run.publication.manifest_sha256);
   // counts : full, totaux des ordres 1 a K (noeuds, naissances, aretes) ; supports, arbre d'ordre K et hierarchie
   // (noeuds, boules, supports, branches publiees) ; points, arbre d'ordre K et hierarchie de points (noeuds, rangs
-  // references, plateaux, blocs, sites retardes), egaux au manifeste.
-  if (run.output == api::OutputKind::points)
+  // references, plateaux, blocs, sites retardes) ; plat, arbre d'ordre K et tete plate (noeuds, clusters condenses,
+  // retenus, points de bruit, decisions par repli exact), egaux au manifeste.
+  if (run.output == api::OutputKind::flat)
+    std::printf("},\"counts\":{\"nodes\":%llu,\"clusters\":%llu,\"selected\":%llu,\"noise\":%llu,\"exact\":%llu}",
+                ull(run.nodes), ull(run.clusters), ull(run.selected), ull(run.noise), ull(run.exact));
+  else if (run.output == api::OutputKind::points)
     std::printf("},\"counts\":{\"nodes\":%llu,\"levels\":%llu,\"plateaus\":%llu,\"blocks\":%llu,\"delayed\":%llu}",
                 ull(run.nodes), ull(run.levels), ull(run.plateaus), ull(run.blocks), ull(run.delayed));
   else if (run.output == api::OutputKind::supports)

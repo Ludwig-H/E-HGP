@@ -20,14 +20,14 @@ set(mhgp11_cli $<TARGET_FILE:mhgp11_cli>)
 # attendue le dit.
 if(MHGP11_SANITIZE OR MHGP11_TSAN)
   set(mhgp11_cli_preload)
-  set(mhgp11_cli_contract_line "cli_contract_verdict conforme refus61 temoins3")
+  set(mhgp11_cli_contract_line "cli_contract_verdict conforme refus65 temoins3")
 else()
   add_library(mhgp11_cli_fenv_preload SHARED ${CMAKE_CURRENT_LIST_DIR}/fenv_preload.cpp)
   add_library(mhgp11_cli_io_fault_preload SHARED ${CMAKE_CURRENT_LIST_DIR}/io_fault_preload.cpp)
   target_link_libraries(mhgp11_cli_io_fault_preload PRIVATE ${CMAKE_DL_LIBS})
   set(mhgp11_cli_preload --preload $<TARGET_FILE:mhgp11_cli_fenv_preload>
       --fault-preload $<TARGET_FILE:mhgp11_cli_io_fault_preload>)
-  set(mhgp11_cli_contract_line "cli_contract_verdict conforme refus64 temoins3")
+  set(mhgp11_cli_contract_line "cli_contract_verdict conforme refus68 temoins3")
 endif()
 mhgp11_python_gate(mhgp11_cli_contract 0 cli_contract.py --cli ${mhgp11_cli} --bits ${MHGP11_COORD_BITS}
                    ${mhgp11_cli_preload} LINE "${mhgp11_cli_contract_line}" LABELS fast TIMEOUT 300)
@@ -122,7 +122,15 @@ endforeach()
 # (read_points : plancher et drapeau strict certifies, plateaux strictement croissants, entree de chaque site a un
 # plateau de sa date, comptes du manifeste recomptes) ; tree_k_sha256 egal a --sortie=supports (et full sur les
 # temoins) a meme entree et meme K ; W1 et W4, permutation, reetiquetage ; refus K = n a K >= 2 (n = 2, 5, 8 :
-# parameter_out_of_range a l'etape compute, ni D ni D.pending), K = 1 admis a n = 1 et 2 ; plat reste refuse.
+# parameter_out_of_range a l'etape compute, ni D ni D.pending), K = 1 admis a n = 1 et 2.
 mhgp11_python_gate(mhgp11_cli_points 0 cli_points.py --cli ${mhgp11_cli} --bits ${MHGP11_COORD_BITS}
-                   LINE "cli_points_verdict conforme cas=52 appels=267 refus=4 retardes=105 plateaux=242"
+                   LINE "cli_points_verdict conforme cas=52 appels=266 refus=3 retardes=105 plateaux=242"
+                   LABELS fast TIMEOUT 600)
+
+# ---- Sortie plat (tranche S10) : etiquettes.mhgp11et (MHGP11ET version 1) relu par le lecteur officiel ; temoins de
+# bench/points_flat_gate.py (F1, F4, F4b, F5, F6, F8 : groupes graves, egalites certifiees lues dans le manifeste) ;
+# nuages en amas a PointId non denses, K = 1..4 : etiquette = plus petit PointId, W1 = W4, permutation, tree_k_sha256
+# egal a --sortie=points ; refus K = n a K >= 2, K = 1 admis a n = 1.
+mhgp11_python_gate(mhgp11_cli_plat 0 cli_plat.py --cli ${mhgp11_cli} --bits ${MHGP11_COORD_BITS}
+                   LINE "cli_plat_verdict conforme cas=40 appels=112 refus=2 egalites=3 retenus=318"
                    LABELS fast TIMEOUT 600)

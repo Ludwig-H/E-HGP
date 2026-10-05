@@ -172,3 +172,36 @@ comptes `plat.json` dans chaque dossier.
 - **Lecture de T − A** (préenregistrement synthétique) : un T − A non significatif signifie que la contribution
   supplémentaire de la hiérarchie n'est pas établie ; il ne prouve pas sa nullité. La décomposition et ses
   incertitudes restent publiées telles quelles.
+
+## 5. Tête native et `--sortie=plat` (tranche S10, 5 octobre 2026)
+
+La tête C++ existe désormais : module `src/head/`, sortie `--sortie=plat`, fichier `etiquettes.mhgp11et` (format
+`MHGP11ET` version 1, [contrat](SORTIES.md), § 7). Port explicite de la tête Python de ce document
+([provenance](PROVENANCE.md), section S10). Défauts du CLI : EOM, $z=1$, mcs 20 (ligne LiDAR du § 3.4) ; $z=2$, $z=3$
+et `feuilles` par option.
+
+**Ce qui change par rapport à la tête Python.**
+- Aucun flottant dans une décision. Pour chaque plateau, $2^{192}\varphi$ est encadré en entiers depuis les racines
+  $\lfloor 2^{64}\sqrt{l}\rfloor$ des niveaux ; scores et sommes sont des intervalles entiers de 384 bits.
+- Si l'intervalle de $S(C)-\sum\hat{S}$ contient 0, le repli exact somme d'abord les poids **entiers** par plateau
+  (score propre moins scores retenus du sous-arbre), puis développe chaque plateau en radicaux (réciproque d'une date
+  par conjugués, reçu `eom_exact_audit_20261004`) et tranche par classes de carrés et encadrements (`num`, tranche S8).
+  Le parent l'emporte seulement sur égalité certifiée.
+- Au-delà de 4 096 termes ou du budget de précision : refus `radical_sign_budget` de **l'appel entier**, sans sélection
+  dégradée (réponse de l'auditeur `6eba951df`). Un $\varphi(0)$ demandé ou une date non positive : `head_invariant`.
+- Étiquettes dans l'ordre d'entrée, identifiant = plus petit `PointId` du cluster retenu.
+
+**Portes locales (Release u21, codespace).**
+
+| Porte | Ce qu'elle juge | Résultat |
+| --- | --- | --- |
+| `mhgp11_head_unit_*` | F14a–e (attendus manuels de clusters, écart $2^{-70}$ tranché par le repli), égalités certifiées à $z=1$ (rationnelle et classe de $\sqrt{2}$) et $z=2$, témoins de dates ($\Delta\neq 0$, $\Delta=0$, trois racines encadrées à $z=1,2,3$), ordre d'entrée, refus, budget | 6 groupes conformes |
+| `mhgp11_cli_plat` | F1, F4, F4b ($z=2$ sépare ce que $z=1$ fusionne), F5, F6, F8 rejoués par l'exécutable, égalités certifiées lues dans le manifeste ; amas à `PointId` non denses, K = 1 à 4 : W1 = W4, permutation, `tree_k_sha256` de `points` ; refus $K=n$ | conforme, 330 contrôles, 3 égalités certifiées |
+| `mhgp11_head_vs_python` (`long`, numpy) | partition des points et plus petit `PointId` contre `points_flat.flat` sur l'arbre publié dans `MHGP11PT` ; mcs 3, 5, 10, 20 ; EOM $z=1,2,3$ et feuilles | 120 cas, 1 920 appels, 16 474 clusters : identiques |
+| `mhgp11_head_vs_python_lidar_*` (`long`) | idem sur les trames ng00, ng01, ng02 à K5, mcs 10 et 20 | 8 appels par trame : identiques |
+| `mhgp11_plat_scale*`, `mhgp11_plat_lidar_*` | 8 000 à 32 000 points et trames, EOM $z=1$ mcs 20 : W1 = W4, permutation, plus petit `PointId` | conformes |
+
+Aucune décision des campagnes locales n'a demandé le repli exact (synthétique et trames) : seuls les témoins F5, F6,
+F8 et les arbres abstraits l'exercent, comme la mesure Python du § 4 le laissait prévoir (0 repli sur 272 358
+décisions). Coût local indicatif à K5, W4, sur ng00 : étage `output` (pendaison et tête) d'environ 0,2 à 0,27 s.
+Qualification lourde (sanitizers, TSan, mutants, trois profils) : session G4 de L4.

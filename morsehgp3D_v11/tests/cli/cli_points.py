@@ -14,7 +14,7 @@ riche en cospheriques, K = 1..4 (K < n a K >= 2) :
   - W1 et W4 : fichier et manifeste identiques ; permutation : fichier identique ; reetiquetage non dense
     (0xFFFFFFFF compris) : seule la colonne SITES.point_id change ;
   - refus (code 2, parameter_out_of_range, etape compute, ni D ni D.pending) : K = n a K >= 2 (n = 2, 5, 8) ;
-    admis : K = 1 a n = 1 et 2, K = 2 a n = 3 ; --sortie=plat reste refuse (etape options).
+    admis : K = 1 a n = 1 et 2, K = 2 a n = 3.
 Avec --uniform (uniform_u18 de n points) ou --data (trame du dossier MHGP11_DATA_DIR, jamais copiee) : un appel par W
 de --fils, lecteur structurel sur tout le fichier et lecture exacte de --sample sites et plateaux tires a graine fixe,
 fichiers identiques entre W et sous permutation, tree_k_sha256 egal a --sortie=supports.
@@ -182,7 +182,6 @@ def small(runner):
         runner.refuse('K = n = %d' % n, pts, list(range(n)), n, 'parameter_out_of_range', 'compute')
     for pts, k in (([(0, 0, 0)], 1), ([(0, 0, 0), (4, 0, 0)], 1), ([(0, 0, 0), (4, 0, 0), (9, 1, 0)], 2)):
         cases += runner.call('n=%d K=%d' % (len(pts), k), pts, list(range(len(pts))), k, 1) is not None
-    runner.refuse('sortie plat', FIVE, list(range(5)), 2, 'parameter_out_of_range', 'options', output='plat')
     gate.check(cases >= 40, 'cas admis : %d' % cases)
     return cases
 

@@ -76,6 +76,17 @@ struct SupportsDiagnostics {
 // std::bad_alloc (guarded dans publish). Precondition : provenance controlee.
 [[nodiscard]] std::string points_manifest(const api::Product& product, const api::Provenance& provenance, u64 bytes,
                                           const io::Digest& sha256);
+// Ecrit les etiquettes de la sortie plat au format MHGP11ET version 1 (docs/SORTIES.md, paragraphe 7) : en-tete de 56
+// octets, puis une etiquette i64 par point dans l'ordre d'entree. Refus : output_unwritable (ecriture), head_invariant
+// (taille ecrite incoherente).
+[[nodiscard]] Outcome write_flat(io::FileWriter& out, const api::FlatRequest& request,
+                                 const head::FlatLabels& flat) noexcept;
+// Manifeste de la sortie plat : memes cles d'en-tete, fichier etiquettes.mhgp11et (MHGP11ET, version 1),
+// tree_k_sha256 de l'arbre d'ordre K (mcs, z et selection sont dans les parametres), puis les compteurs de la tete.
+// Peut lever
+// std::bad_alloc (guarded dans publish). Precondition : provenance controlee.
+[[nodiscard]] std::string flat_manifest(const api::Product& product, const api::Provenance& provenance, u64 bytes,
+                                        const io::Digest& sha256);
 // Debut commun des manifestes, jusqu'a la valeur de tree_k_sha256 comprise (schema, sortie, statuts, profil, K,
 // parametres, entrees, fichier) ; le manifeste se termine par les comptes, puis "}\n". Peut lever std::bad_alloc.
 [[nodiscard]] std::string manifest_head(const api::Product& product, const api::Provenance& provenance,

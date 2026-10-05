@@ -171,6 +171,38 @@ Result<PointsParts> points_parts(Session& session, const CloudView& view, Order 
   return PointsParts{std::move(tree).take(), std::move(hanging).take()};
 }
 
+// Produit de la sortie plat : arbre d'ordre K seul (signature tree_k_sha256) et etiquettes ; la hierarchie de points
+// est rendue au budget des que la tete plate a fini.
+struct FlatParts {
+  OrderTree tree;
+  head::FlatLabels labels;
+};
+
+// Etages tree et attach comme points, puis output : points::hang et head::flat (etiquettes dans l'ordre d'entree).
+Result<FlatParts> flat_parts(Session& session, const CloudView& view, const FlatRequest& wanted,
+                             RunReport& report) noexcept {
+  Result<OrderTree> tree = order_tree(session, view, wanted.k, report, true);
+  if (!tree.ok()) return tree.outcome();
+  MemoryBudget& budget = session.budget();
+  Stopwatch output_clock;
+  const auto& cloud = tree.value().domain().index().cloud();
+  Buffer<PointId> site_ids;
+  MHGP11_TRY(site_ids.allocate(cloud.sites(), budget));
+  for (u32 s = 0; s < cloud.sites(); ++s) site_ids[s] = cloud.points(SiteIdx{s})[0];
+  // La hierarchie de points vit le temps de la tete plate seulement.
+  auto labelled = [&]() noexcept -> Result<head::FlatLabels> {
+    Result<points::PointHierarchy> hanging = points::hang(tree.value(), budget, &session.pool());
+    if (!hanging.ok()) return hanging.outcome();
+    return head::flat(hanging.value(), tree.value().domain().catalogue().levels(), site_ids.span(), view.ids,
+                      {wanted.mcs, wanted.z, wanted.selection}, budget);
+  };
+  Result<head::FlatLabels> labels = labelled();
+  if (!labels.ok()) return labels.outcome();
+  site_ids.reset();
+  close_stage(report, Stage::output, output_clock, budget);
+  return FlatParts{std::move(tree).take(), std::move(labels).take()};
+}
+
 }  // namespace
 
 Result<Product> compute(Session& session, const CloudView& cloud, const Request& request,
@@ -187,6 +219,20 @@ Result<Product> compute(Session& session, const CloudView& cloud, const Request&
     }
     PointsParts made = std::move(parts).take();
     return Product(request, std::move(made.tree), std::move(made.points), session.identity());
+  }
+  if (const FlatRequest* wanted = std::get_if<FlatRequest>(&request)) {
+    // Parametres de la tete refuses avant tout calcul (etape 5 de docs/SORTIES.md, paragraphe 3).
+    if (wanted->mcs < 2 || wanted->z < 1 || wanted->z > 3 ||
+        (wanted->selection != head::Selection::eom && wanted->selection != head::Selection::leaves))
+      return fail(Reason::parameter_out_of_range);
+    Result<FlatParts> parts = guarded([&]() { return flat_parts(session, cloud, *wanted, local); });
+    if (!parts.ok()) return parts.outcome();
+    if (report != nullptr) {
+      for (Stage stage : {Stage::cloud, Stage::index, Stage::domain, Stage::tree, Stage::attach, Stage::output})
+        report->at(stage) = local.at(stage);
+    }
+    FlatParts made = std::move(parts).take();
+    return Product(request, std::move(made.tree), std::move(made.labels), session.identity());
   }
   const FullRequest* full = std::get_if<FullRequest>(&request);
   if (full == nullptr) return fail(Reason::parameter_out_of_range);

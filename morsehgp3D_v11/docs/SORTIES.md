@@ -32,8 +32,9 @@ puis la spécification finale du workflow de conception `wf_a7dbdf1a-21c`. Ces t
 (tranche S6b, § 6), puis `--sortie=supports` (tranche S7) : écrivain `MHGP11SP`, manifeste de supports, lecteur
 `bench/mhgp11_formats.py` et préparation de la mesure appariée (`bench/sorties_g4.py`, § 11). Livrée ensuite le
 5 octobre 2026 (livraison L3, commit local, qualification G4 en attente) : `--sortie=points` (tranche S9), format
-`MHGP11PT` version 1 normatif (§ 7), module `points` et décision $K=n$ (§ 3, étape 6). La sortie `plat` reste refusée
-`parameter_out_of_range` jusqu'à sa tranche (§ 11). Existent aussi le module `io` (lecture, empreintes, transaction de dossier, § 9) et l'en-tête public de la
+`MHGP11PT` version 1 normatif (§ 7), module `points` et décision $K=n$ (§ 3, étape 6). Livrée ensuite le
+5 octobre 2026 (livraison L4, qualification G4 en attente) : `--sortie=plat` (tranche S10), format `MHGP11ET`
+version 1 normatif (§ 7), module `head` (tête plate certifiée, [sortie plate](SORTIE_PLATE.md), § 5). Existent aussi le module `io` (lecture, empreintes, transaction de dossier, § 9) et l'en-tête public de la
 tour. Ce qui est fixé par S5 est signalé « fixé par S5 » ci-dessous.
 
 ## 1. L'exécutable
@@ -109,7 +110,7 @@ a plus de $2^{32}-1$ traces strictes, sans qu'aucun plafond de coquille soit imp
 | `full` | tour FULL, ordres $1$ à $K$, avec verticales | `full.mhgp11ful1` | `MHGP11FUL1`, inchangé (§ 5) | S5, L2 |
 | `supports` | arbre d'ordre K, boules de $W_K$ rattachées, tous leurs supports positifs minimaux | `supports.mhgp11sp` | `MHGP11SP` v1 (§ 6) | S7, L2 |
 | `points` | hiérarchie de points $H^{r}_{K+1}$ à l'ordre K | `points.mhgp11pt` | `MHGP11PT` v1, normatif (§ 7) | S9, L3 |
-| `plat` | étiquettes plates tirées de la hiérarchie de points | `etiquettes.mhgp11et` | `MHGP11ET` v1, annoncé (§ 7) | S10, L4, reportable |
+| `plat` | étiquettes plates tirées de la hiérarchie de points | `etiquettes.mhgp11et` | `MHGP11ET` v1, normatif (§ 7) | S10, L4 |
 
 Chaque appel réussi publie un dossier $D$ qui contient ce fichier et `manifeste.json` (§ 8), selon la transaction du
 § 9. Les quatre sorties d'une même entrée et d'un même K portent la même empreinte d'arbre `tree_k_sha256`.
@@ -144,13 +145,15 @@ donc jamais, à lui seul, « rien n'est publié ».
    tour exige des sites de poids un.
 6. $K>n$ : `parameter_out_of_range`. Le nombre de sites n'est connu qu'après la préparation du nuage, dont le
    `memory_budget` précède donc ce refus.
-   **Décision $K=n$ pour `points`** (tranche S9 ; audit général `a65903a7b`, « avant L3 » ; réponse du développeur,
+   **Décision $K=n$ pour `points` et `plat`** (tranche S9, reprise par S10 ; audit général `a65903a7b`, « avant L3 » ; réponse du développeur,
    [REPONSE_CLAUDE_SUPPORTS_20261004](../audits/REPONSE_CLAUDE_SUPPORTS_20261004.md), section G). Pour $K\geq 2$, la
    qualification des points à $m=K+1$ ne peut pas réussir quand $K=n$ : aucune composante n'atteint $K+1$ sites. La
    sortie `points` refuse donc $K\geq n$ dès $K\geq 2$ (`parameter_out_of_range`, à cette même étape, sans dossier ni
    `D.pending`), au lieu d'abaisser $m$ en silence ou de publier des points inactifs. $K=1$ reste admis à tout $n\geq 1$
    avec $m(1)=1$ (liaison simple, entrées à 0). `full` et `supports` gardent $K=n$ : l'unique naissance $B(X)$ y est
-   correcte. Portes : `mhgp11_cli_points` (refus à $n=2$, 5 et 8 ; $K=1$ admis à $n=1$ et 2), `mhgp11_points_unit_refusals`.
+   correcte. `plat`, tirée de la même hiérarchie de points, suit la même règle. Portes : `mhgp11_cli_points` (refus à
+   $n=2$, 5 et 8 ; $K=1$ admis à $n=1$ et 2), `mhgp11_points_unit_refusals`, `mhgp11_cli_plat` (refus à $n=2$ et 5 ;
+   $K=1$ admis à $n=1$, tout bruit).
 7. Calcul, notamment :
    - ressources : `memory_budget`, `node_budget`, `index_overflow_u32` (catalogue), `catalogue_counter_overflow`,
      `tower_capacity`, `radical_sign_budget` (`points` et `plat`) ;
@@ -190,7 +193,8 @@ L'intégration L1 du 5 octobre 2026 a suivi cet ordre : `support_shell_capacity`
 La tranche S8 (L3, 5 octobre 2026) a ajouté ensuite `radical_sign_budget`, au même commit que son émetteur
 (`src/num/radical.cpp`, `src/num/big.cpp`) et ses portes (`mhgp11_num_big`, `mhgp11_num_radical`). La tranche S9 (L3,
 5 octobre 2026) a ajouté `points_invariant`, au même commit que son émetteur (`src/points/`) et la copie gravée de
-`tests/core/status_test.cpp` (30 raisons).
+`tests/core/status_test.cpp` (30 raisons). La tranche S10 (L4, 5 octobre 2026) a ajouté `head_invariant`, au même
+commit que son émetteur (`src/head/`) et la copie gravée (31 raisons).
 
 **Codes de sortie** (`exit_code`, `src/core/status.hpp`) :
 - 0 : conforme ;
@@ -476,7 +480,7 @@ démontre ou les illustre.
 - Elle n'est pas non plus $\mathrm{conv}(U_b)$. Les réalisations de deux branches peuvent se recouvrir, et leurs
   intersections ne donnent pas la connectivité de FULL.
 
-## 7. `points.mhgp11pt` : `MHGP11PT` version 1 (normatif), et format annoncé de `plat`
+## 7. `points.mhgp11pt` : `MHGP11PT` version 1, et `etiquettes.mhgp11et` : `MHGP11ET` version 1 (normatifs)
 
 **`points.mhgp11pt` : `MHGP11PT` version 1** (tranche S9, L3 ; écrivain `src/api/write_points.cpp`, lecteur
 `read_points` de `bench/mhgp11_formats.py`). Conventions du § 4 : petit-boutiste, colonnes alignées sur 8 octets,
@@ -516,13 +520,24 @@ différentiel natif (`mhgp11_points_oracle`, `mhgp11_points_vs_python`).
 `tree_k_sha256` n'est pas recalculable depuis `MHGP11PT`, qui ne porte pas $S^*$ : le manifeste le publie, et
 `mhgp11_cli_points` l'exige égal à celui de `--sortie=supports` à même entrée et même $K$.
 
-**`etiquettes.mhgp11et` : `MHGP11ET` version 1** (tranche S10, L4, reportable).
-- En-tête : magie `MHGP11ET`, `version=1`, `n_points`, `k`, `mcs`, `z`, `selection` (0 pour EOM, 1 pour les
-  feuilles).
-- Puis `labels i64[n_points]`, **dans l'ordre du fichier d'entrée**. Une étiquette vaut le plus petit `PointId` du
-  cluster retenu, ou $-1$ pour le bruit.
+**`etiquettes.mhgp11et` : `MHGP11ET` version 1** (tranche S10, L4 ; écrivain `src/api/write_flat.cpp`, lecteur
+`read_flat` de `bench/mhgp11_formats.py`).
+- En-tête de 56 octets, petit-boutiste : magie `MHGP11ET`, puis six `u64` : `version=1`, `n_points`, `k`, `mcs`, `z`,
+  `selection` (0 pour EOM, 1 pour les feuilles).
+- Puis `labels i64[n_points]` (complément à deux), **dans l'ordre du fichier d'entrée**, sans bourrage : la taille vaut
+  $56+8n$ exactement. Une étiquette vaut le plus petit `PointId` du cluster retenu (de 0 à $2^{32}-1$), ou $-1$ pour le
+  bruit.
 - Les compteurs vont dans le manifeste.
-- Le port n'emploie pas `out[pt.ids]` (`bench/points_flat.py`), qui suppose des `PointId` denses.
+- Le port n'emploie pas `out[pt.ids]` (`bench/points_flat.py`), qui suppose des `PointId` denses : les étiquettes sont
+  rangées par `PointId` (`head::in_input_order`).
+- Sens : condensation au critère A de l'arbre de points de `MHGP11PT` (même calcul, même $K$), sélection EOM N-aire à
+  $\varphi(r)=r^{-z}$ ou feuilles, racine exclue, parent sur égalité **certifiée** ; décisions par encadrements entiers
+  puis repli exact ; au-delà de son budget, refus `radical_sign_budget` de l'appel entier ([sortie plate](SORTIE_PLATE.md),
+  § 5).
+
+Le lecteur contrôle l'en-tête (version, $1\leq K\leq 12$, mcs $\geq 2$, $z$ dans 1..3, sélection), la taille exacte, les
+étiquettes dans $[-1,2^{32}-1]$, et, avec le manifeste, l'égalité de l'en-tête aux paramètres et du nombre de $-1$ au
+compte `noise`. La règle du plus petit `PointId` exige les entrées : `mhgp11_cli_plat` la contrôle.
 
 ## 8. Manifeste `manifeste.json`
 
@@ -584,8 +599,13 @@ Exemple pour `supports`, présenté ici sur plusieurs lignes pour la lecture :
 - `counts` de `points` (fixés par S9), dans cet ordre, tous recomptés par le lecteur depuis `MHGP11PT` : `sites`
   ($n$), `nodes` ($N$), `qualification` ($m$), `kappa` (1), `levels` ($L$), `plateaus` ($P$), `blocks` ($B_k$),
   `root_blocks` (blocs sans parent), `delayed` (sites à rival), `strict` (sites strictement entre deux niveaux). Son
-  fichier est déclaré `{"name":"points.mhgp11pt","format":"MHGP11PT","version":1,…}`. Les `counts` de `plat` seront
-  fixés en S10, selon les mêmes règles.
+  fichier est déclaré `{"name":"points.mhgp11pt","format":"MHGP11PT","version":1,…}`.
+- `counts` de `plat` (fixés par S10), dans cet ordre : `sites` ($n$), `nodes` ($N$), `clusters` (clusters condensés,
+  racine virtuelle comprise), `selected` (clusters retenus), `noise` (points étiquetés $-1$), `decisions` (comparaisons
+  EOM), `exact` (décisions tranchées par le repli exact), `equalities` (égalités certifiées, le parent l'emporte),
+  `unbracketed` (plateaux sans encadrement utile). Son fichier est déclaré
+  `{"name":"etiquettes.mhgp11et","format":"MHGP11ET","version":1,…}` ; ses `parameters` portent en plus `mcs`, `z` et
+  `selection` (`"eom"` ou `"feuilles"`).
 
 **`tree_k_sha256`**, signature de l'arbre d'ordre K, version 2 (réponse D.2 de l'auditeur, `aef7182b3`). C'est le
 SHA-256 de la suite d'octets suivante, sans bourrage, entiers petit-boutistes :
@@ -729,13 +749,14 @@ Limites :
 | L2 | G4 n° 2 | S4 (`io`, avec `retract()`), S5 (`api`, `Session`, manifeste, `--sortie=full`), S7 (`--sortie=supports`, écrivain et lecteur `MHGP11SP`, mesure appariée) | S4 livrée (`f98aeed67`) ; S5 et S7 commitées localement le 5 octobre, qualification G4 et mesure en attente |
 | L2b | conditionnelle, déclenchée | journal des graines posé dans `build_full` | règle évaluée le 5 octobre (`livrer_L2b`) ; L2b commitée localement le 5 octobre, qualification G4 en attente |
 | L3 | G4 n° 3 | S8 (`num`), S9 (`--sortie=points`) | S8 et S9 commitées localement le 5 octobre, qualification G4 en attente |
-| L4 | G4 n° 4, reportable | S10 (`--sortie=plat`) | — |
+| L4 | G4 n° 4, reportable | S10 (`--sortie=plat`) | S10 commitée le 5 octobre, qualification G4 en attente |
 | L5 | facultative | S11 (pipeline à un ordre), chantier 100 ms | — |
 
 - Valeurs de `--sortie` admises : aucune avant L2 ; `full` puis `supports` en L2 ; `points` en L3 ; `plat` en L4.
   Toute autre est refusée `parameter_out_of_range`. `full` est admise par le code depuis l'intégration de S5
   (5 octobre 2026), `supports` depuis S7 (5 octobre 2026) ; leur qualification relève de la session G4 de L2.
-  `points` est admise depuis S9 (5 octobre 2026) ; sa qualification relève de la session G4 de L3.
+  `points` est admise depuis S9 (5 octobre 2026) ; sa qualification relève de la session G4 de L3. `plat` est admise
+  depuis S10 (5 octobre 2026) ; sa qualification relève de la session G4 de L4.
 - Un commit natif des tranches S3, S5 et S6, dont les brouillons ont été écrits en parallèle de L0, exige
   l'intégration des réponses de l'auditeur mathématique (faite pour `aef7182b3`) et les portes de la tranche ; sa
   qualification exige la matrice G4 et un reçu. La relecture du contrat S0 est demandée aux deux auditeurs : leurs
@@ -791,6 +812,9 @@ Limites :
   E1-bis du § 2, point 2 (V1, V2, $\kappa=2$, `first`, `cover`), n'est pas cette condition.
 - Le tokenizer de `Zoltan/FoundationModel/` n'a pas l'usage de cette sortie : sa condensation est à seuil relatif
   (`Zoltan/FoundationModel/SPECIFICATION.md`, § 2.2).
-- D'ici là, `--sortie=plat` est refusé `parameter_out_of_range`. Le banc Python exact (`bench/points_flat.py`, porte
-  `bench/points_flat_gate.py`) sert aux comparaisons avec HDBSCAN.
+- L4 a été engagée le 5 octobre 2026, dans l'ordre choisi par l'utilisateur (supports, points, puis plat) : aucun
+  report n'a été décidé. La sortie publie la ligne LiDAR du § 3.4 de [SORTIE_PLATE.md](SORTIE_PLATE.md) par défaut
+  (EOM, $z=1$, mcs 20), $z=2$ et les feuilles par option ; la mention « Ouvert » de ce paragraphe porte sur la règle de
+  sélection, pas sur la sortie. Le banc Python exact (`bench/points_flat.py`, porte `bench/points_flat_gate.py`) sert
+  toujours aux comparaisons avec HDBSCAN, et de référence au différentiel `mhgp11_head_vs_python`.
 - Le report ne retire aucune exigence : quand L4 sera engagée, ses portes resteront celles de la spécification.

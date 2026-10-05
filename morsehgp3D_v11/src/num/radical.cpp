@@ -64,10 +64,13 @@ std::array<u8, kSignatureCount> class_signature(const Big& n) noexcept {
   return out;
 }
 
-Result<RadicalSum> RadicalSum::make(MemoryBudget& budget) noexcept {
+Result<RadicalSum> RadicalSum::make(MemoryBudget& budget) noexcept { return make(budget, kMaxTerms); }
+
+Result<RadicalSum> RadicalSum::make(MemoryBudget& budget, u32 capacity) noexcept {
+  if (capacity == 0) return fail(Reason::parameter_out_of_range);
   RadicalSum out;
-  MHGP11_TRY(out.terms_.allocate(kMaxTerms, budget));
-  MHGP11_TRY(out.classes_.allocate(kMaxTerms, budget));
+  MHGP11_TRY(out.terms_.allocate(capacity, budget));
+  MHGP11_TRY(out.classes_.allocate(capacity, budget));
   return out;
 }
 
@@ -82,7 +85,7 @@ Outcome RadicalSum::add(const Rational& coef, const Rational& radicand) noexcept
 
 Outcome RadicalSum::add_integer(const Rational& coef, const Big& radicand) noexcept {
   if (radicand.negative()) return fail(Reason::arithmetic_invariant);
-  MHGP11_CHECK(count_ < kMaxTerms && count_ < terms_.size(), radical_sign_budget);
+  MHGP11_CHECK(count_ < terms_.size(), radical_sign_budget);
   terms_[count_].coef.assign(coef);
   terms_[count_].radicand.assign(radicand);
   ++count_;

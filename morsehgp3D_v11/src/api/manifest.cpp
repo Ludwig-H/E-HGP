@@ -88,7 +88,8 @@ void hex(std::string& out, const io::Digest& digest) {
   quoted(out, std::string_view(text.data(), text.size()));
 }
 
-void parameters(std::string& out, const Provenance& provenance) {
+// Parametres de l'appel ; pour plat, s'y ajoutent mcs, z et selection (docs/SORTIES.md, paragraphe 8).
+void parameters(std::string& out, const Provenance& provenance, const api::Product& product) {
   out.append(",\"parameters\":{\"budget_bytes\":");
   if (provenance.budget_bytes) number(out, *provenance.budget_bytes);
   else out.append("null");
@@ -104,6 +105,13 @@ void parameters(std::string& out, const Provenance& provenance) {
       quoted(out, provenance.origin[axis]);
     }
     out.push_back(']');
+  }
+  if (const api::FlatRequest* flat = std::get_if<api::FlatRequest>(&product.request())) {
+    out.append(",\"mcs\":");
+    number(out, flat->mcs);
+    out.append(",\"z\":");
+    number(out, flat->z);
+    out.append(flat->selection == head::Selection::eom ? ",\"selection\":\"eom\"" : ",\"selection\":\"feuilles\"");
   }
   out.push_back('}');
 }
@@ -232,15 +240,17 @@ Publication publish(Session& session, const Product& product, io::OutputDirector
   MemoryBudget& budget = session.budget();
   RunReport local;
   const bool supports = product.kind() == OutputKind::supports, points = product.kind() == OutputKind::points;
+  const bool flat = product.kind() == OutputKind::flat;
   const Outcome written = guarded([&]() -> Outcome {
-    // Sortie full : le produit est la tour elle-meme, l'etage output est vide. Sorties supports et points : l'etage
-    // output est l'assemblage ou la pendaison, mesure par compute. write couvre le fichier, l'empreinte de l'arbre, le
+    // Sortie full : le produit est la tour elle-meme, l'etage output est vide. Sorties supports, points et plat :
+    // l'etage output est l'assemblage, la pendaison, ou la pendaison et la tete plate, mesure par compute. write couvre le fichier, l'empreinte de l'arbre, le
     // manifeste et la publication (synchronisations et renommage compris).
-    if (!supports && !points) local.at(Stage::output) = {0, budget.restart_peak()};
+    if (!supports && !points && !flat) local.at(Stage::output) = {0, budget.restart_peak()};
     else budget.restart_peak();
     Stopwatch write_clock;
     Result<io::FileWriter*> file =
-        directory.create(supports ? kSupportsFileName : (points ? kPointsFileName : kFullFileName));
+        directory.create(supports ? kSupportsFileName
+                                  : (points ? kPointsFileName : (flat ? kFlatFileName : kFullFileName)));
     if (!file.ok()) return file.outcome();
     std::string manifest;
     if (supports) {
@@ -249,6 +259,9 @@ Publication publish(Session& session, const Product& product, io::OutputDirector
     } else if (points) {
       MHGP11_TRY(api_detail::write_points(*file.value(), product.order_tree(), product.points()));
       manifest = api_detail::points_manifest(product, provenance, file.value()->size(), file.value()->digest());
+    } else if (flat) {
+      MHGP11_TRY(api_detail::write_flat(*file.value(), std::get<FlatRequest>(product.request()), product.flat()));
+      manifest = api_detail::flat_manifest(product, provenance, file.value()->size(), file.value()->digest());
     } else {
       MHGP11_TRY(api_detail::write_full(*file.value(), product.full()));
       manifest = api_detail::full_manifest(product, provenance, file.value()->size(), file.value()->digest());
@@ -261,7 +274,7 @@ Publication publish(Session& session, const Product& product, io::OutputDirector
   // withdraw le retire, ou declare published_complete.
   if (!written.ok()) return withdraw(written, directory);
   if (report != nullptr) {
-    if (!supports && !points) report->at(Stage::output) = local.at(Stage::output);
+    if (!supports && !points && !flat) report->at(Stage::output) = local.at(Stage::output);
     report->at(Stage::write) = local.at(Stage::write);
   }
   return state_of(written, directory);
@@ -319,7 +332,7 @@ std::string manifest_head(const api::Product& product, const Provenance& provena
   number(out, static_cast<u64>(kCoordBits));
   out.append(",\"k\":");
   number(out, product.k());
-  parameters(out, provenance);
+  parameters(out, provenance, product);
   inputs(out, provenance);
   out.append(",\"files\":[{\"name\":");
   quoted(out, name);
@@ -349,7 +362,7 @@ std::string full_manifest(const api::Product& product, const Provenance& provena
   number(out, static_cast<u64>(kCoordBits));
   out.append(",\"k\":");
   number(out, product.k());
-  parameters(out, provenance);
+  parameters(out, provenance, product);
   inputs(out, provenance);
   out.append(",\"files\":[{\"name\":");
   quoted(out, api::kFullFileName);
@@ -443,7 +456,7 @@ std::string supports_manifest(const api::Product& product, const Provenance& pro
   number(out, static_cast<u64>(kCoordBits));
   out.append(",\"k\":");
   number(out, product.k());
-  parameters(out, provenance);
+  parameters(out, provenance, product);
   inputs(out, provenance);
   out.append(",\"files\":[{\"name\":");
   quoted(out, api::kSupportsFileName);

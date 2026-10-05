@@ -43,12 +43,14 @@ std::string_view output_name(OutputKind kind) noexcept {
     case OutputKind::full: return "full";
     case OutputKind::supports: return "supports";
     case OutputKind::points: return "points";
+    case OutputKind::flat: return "plat";
   }
   return "unknown";
 }
 
 OutputKind request_kind(const Request& request) noexcept {
   if (std::holds_alternative<PointsRequest>(request)) return OutputKind::points;
+  if (std::holds_alternative<FlatRequest>(request)) return OutputKind::flat;
   return std::holds_alternative<SupportsRequest>(request) ? OutputKind::supports : OutputKind::full;
 }
 

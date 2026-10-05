@@ -113,7 +113,7 @@ refus, formats, manifeste et transaction de dossier.
 | `full` | tour FULL, ordres 1 à K | `MHGP11FUL1`, inchangé | L2 |
 | `supports` | arbre d'ordre K, toutes ses boules d'événement rattachées à leur nœud, tous leurs supports positifs minimaux ; aucune population ; comptes dérivés, dont `kparties_reliees` | `MHGP11SP` v1 | L1 (moteur) et L2 (sortie) |
 | `points` | hiérarchie de points $H^{r}_{K+1}$, native | `MHGP11PT` v1 | L3 |
-| `plat` | étiquettes plates, natives | `MHGP11ET` v1 | L4, reportable |
+| `plat` | étiquettes plates, natives | `MHGP11ET` v1 | L4 |
 
 L'objet `supports` et ses preuves forment la section 10 de [MATHEMATIQUES.md](docs/MATHEMATIQUES.md), « Hiérarchie des
 supports d'ordre K ».
@@ -164,11 +164,14 @@ publie `points.mhgp11pt` (`MHGP11PT` version 1, § 7 du [contrat](docs/SORTIES.m
 est identique site par site à `bench/points_radius.py` sur le même export (porte `long` `mhgp11_points_vs_python`) et
 à l'oracle de la définition (`mhgp11_points_oracle`).
 
-**Clause de report de `plat`.** La livraison L4 peut être reportée, par une décision écrite de l'utilisateur,
-consignée ici et dans une note aux auditeurs, tant que le § 3.4 de la [sortie plate](docs/SORTIE_PLATE.md) porte la
-mention « Ouvert » (règle qui garde les séparations fugaces sans déchiqueter les objets à lignes de balayage). Le
-tokenizer de `Zoltan/` n'en a pas l'usage, car sa condensation est à seuil relatif. D'ici là, `--sortie=plat` reste
-refusé, et le banc Python exact sert aux comparaisons avec HDBSCAN.
+Commitée le 5 octobre 2026 (tranche S10, L4), qualification G4 en attente : `mhgp11 --sortie=plat`. Le module `head`
+porte la tête plate de la [sortie plate](docs/SORTIE_PLATE.md) (§ 5) : condensation au critère A de l'arbre de points,
+sélection EOM N-aire à $\varphi(r)=r^{-z}$ ou feuilles, décisions par encadrements entiers puis repli exact (le parent
+l'emporte seulement sur égalité certifiée ; au-delà du budget, refus de l'appel entier). L'exécutable publie
+`etiquettes.mhgp11et` (`MHGP11ET` version 1 : une étiquette par point dans l'ordre d'entrée, le plus petit `PointId` du
+cluster ou $-1$) ; défauts EOM, $z=1$, mcs 20, options `--mcs`, `--z`, `--selection`. Il est identique, partition par
+partition, à `bench/points_flat.py` sur le même arbre de points (porte `long` `mhgp11_head_vs_python`, synthétique et
+trames). Aucun report de L4 n'a été décidé ; la mention « Ouvert » du § 3.4 porte sur la règle de sélection.
 
 Rien n'est qualifié par ce chantier : `public_status=not_claimed`.
 

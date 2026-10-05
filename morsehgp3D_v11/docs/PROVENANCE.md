@@ -493,3 +493,30 @@ n'est hérité : chaque décision est rejugée par les portes de la tranche.
 Écarts déclarés : la règle générale `qualify_general` ($m>K+1$) et les règles témoins (`core`, `cover`, `first`, marges
 en niveau carré) ne sont pas portées ; seules $m(K)$ (produit) et $m\leq K+1$ (portes) existent. Les fixtures du banc
 écrites pour la marge en niveau carré sont rejouées sous la règle en rayon, attendus recalculés (`points_fixtures.py`).
+
+## Module head : tête plate certifiée (tranche S10, 5 octobre 2026)
+
+Tranche S10 de la sortie paramétrée (livraison L4) : spécification, paragraphes 3.7, 4, 6.5, 7.7, 8.5, 8.7 et
+9.1 S10 ; [sortie plate](SORTIE_PLATE.md), § 3.4 (EOM $z=1$, mcs 20, $z=2$ et feuilles publiés à côté) ; réponse de
+l'auditeur `6eba951df` aux trois questions de la note `d26328fe2` (refus de l'appel entier, témoin de $z=2$, attendus
+manuels de clusters). **Port explicite**, décision par décision, de la tête Python qualifiée, lue au commit `311ef5e3c` :
+`bench/points_flat.py` (sha256 `4647de0762b500fb36ca917941a34120d58931f0b0033b570490821860fdd3bc`), fixtures de
+`bench/points_flat_gate.py` (sha256 `4b8eaf3c50eae27d561a416441759bb72fc5ba3ba6dca6cd05007af4dd3661a1`). La forme
+close de la réciproque d'une date suit le reçu `eom_exact_audit_20261004` de l'auditeur. Aucune porte ni aucun reçu
+de la chaîne Python n'est hérité : chaque décision est rejugée par les portes de la tranche.
+
+| Fichier v11 (fonction) | Source (fonction, lignes) | Gardé | Changé | Portes v11 |
+| --- | --- | --- | --- | --- |
+| `src/head/condense.cpp` (`condense`) | `points_flat.py`, `Condensed` et `condense` (l. 616–743) | critère A : bloc gros dès mcs sites engagés ; un cluster vivant continue, deux ou plus meurent et un parent naît (N-aire) ; aucun : naissance ; attentes des petites parts et entrées rejointes au plateau ; blocs créés puis blocs entrants (ordre du premier site) ; racine virtuelle au niveau infini pour une forêt | listes d'attente chaînées par site (concaténation en $O(1)$) au lieu de listes Python copiées ; jonctions consignées puis rangées en CSR ; forme de l'arbre contrôlée et masse décroissante : `head_invariant` | `mhgp11_head_unit_fixtures` (F14a–e), `mhgp11_head_vs_python` ; mutants `seuil_moins_un`, `jonction_masse_entiere` |
+| `src/head/score.cpp` (`bracket_plateaus`) | `Level.phi` (l. 251–284), `_score_float` (l. 746–762) | $S(C)=\sum c\,\varphi(\text{jonction})-\lvert C\rvert\,\varphi(\text{haut})$, $\varphi(r)=r^{-z}$, haut infini nul | filtre flottant à borne d'erreur remplacé par des **encadrements entiers** : $E=2^{64}e$ encadré par les racines $\lfloor 2^{64}\sqrt{l}\rfloor$ ($[R,R+1]$ pour un niveau, $[R_t+R_m-R_q-1,R_t+R_m-R_q+2]$ pour une date), puis $2^{192}\varphi$ par divisions entières `Big` ; sommes en entiers larges de 384 bits ; $E<2^{40}$ : pas d'encadrement (repli exact forcé) | `mhgp11_head_unit_fixtures` (écart $2^{-70}$ tranché par le repli), `mhgp11_head_vs_python` ; mutant `niveau_carre` |
+| `src/head/score.cpp` (`exact_sign`, `inverse_date`, `mask_mul`) | `Level.phi_exact` (l. 286–306), `_inverse_date` (l. 192–206), `_mask_mul` (l. 208–216), `RadSum.sign` (l. 159–176), `_score_exact` (l. 764–771) | réciproque d'une date par conjugués ($\Delta\neq 0$) ou $2\sqrt{\min(t,m)}$ ($\Delta=0$) ; puissances par produit de masques ; signe par classes de carrés puis encadrements, 0 seulement sur égalité certifiée | date strictement positive exigée (`num::sqrt_cmp2`), sinon `head_invariant` ; signe par `num::RadicalSum` (S8) à capacité explicite, au plus 4 096 termes, refus `radical_sign_budget` de l'appel entier au-delà | `mhgp11_head_unit_dates`, `mhgp11_head_unit_equalities` ; mutant `inverse_terme_mixte` |
+| `src/head/select.cpp` (`Selector`, `flat_sites`) | `select` (l. 774–865), `labels` (l. 868–888) | EOM dans l'ordre de naissance, parent sur égalité certifiée, feuilles, racine exclue, passe descendante ; identifiant = plus petit identifiant du cluster | décision d'abord par l'intervalle de $S(C)-\sum\hat{S}$, puis repli exact sur les **poids entiers fusionnés par plateau** (score propre moins scores retenus du sous-arbre : les plateaux communs se compensent avant tout radical) ; identifiant = plus petit `PointId`, jamais un indice | `mhgp11_head_unit_fixtures`, `mhgp11_head_unit_equalities`, `mhgp11_cli_plat` ; mutants `egalite_enfants`, `encadrement_seul`, `racine_admise`, `plus_grand_pointid` |
+| `src/head/select.cpp` (`in_input_order`, `flat`) | `labels`, `out[pt.ids] = native` (l. 882) | — | écrit à neuf : rangement par `PointId` (tri de clés `(PointId << 32) | site`), sans supposer des `PointId` denses ; `PointId` absent ou répété : `head_invariant` | `mhgp11_head_unit_order`, `mhgp11_cli_plat` ; mutant `ordre_des_sites` |
+| `src/api/write_flat.cpp` (`write_flat`, `flat_manifest`) | spécification, paragraphe 6.5 | — | écrit à neuf : en-tête de 56 octets, étiquettes `i64` dans l'ordre d'entrée ; manifeste à clé `selection` (méthode, mcs, $z$) et compteurs de la tête | `mhgp11_cli_plat`, `mhgp11_plat_scale*`, `mhgp11_plat_lidar_*` |
+| `tests/head/head_vs_python.py` | `points_flat.flat` (l. 891–898) | appel de la tête Python sur l'arbre de points **publié** (`MHGP11PT`) | partitions comparées, pas les étiquettes : la tête Python numérote par indice d'entrée, la native par `PointId` | `mhgp11_head_vs_python` (numpy, `long`) |
+
+Écarts déclarés : les mutants `binarise` et `coupe_ouverte` de la porte Python visent l'arbre de points (tranche S9,
+mutants `points`) ; `masse_finale` et `sorties_brutes` y sont remplacés par `seuil_moins_un` et
+`jonction_masse_entiere`, et `flottant_seul` par `encadrement_seul` (aucun flottant dans la tête native). Le bras
+HDBSCAN de la porte Python (arbre du lien simple de `sklearn`, F9, F13) n'a pas de pendant natif : il reste aux
+campagnes Python.

@@ -46,9 +46,14 @@ class RadicalSum {
   };
 
   RadicalSum() = default;
-  // Octets reserves par make : formule d'admission.
-  static constexpr u64 bytes() noexcept { return kMaxTerms * (sizeof(Term) + sizeof(Class)); }
+  // Octets reserves par make pour `capacity` termes : formule d'admission.
+  static constexpr u64 bytes(u64 capacity = kMaxTerms) noexcept { return capacity * (sizeof(Term) + sizeof(Class)); }
+  // kMaxTerms termes : le budget declare des comparaisons de dates et de la table des racines.
   [[nodiscard]] static Result<RadicalSum> make(MemoryBudget& budget) noexcept;
+  // Capacite explicite (tete plate, tranche S10 : une decision EOM somme les plateaux d'un sous-arbre condense) : au
+  // plus `capacity` termes, refus radical_sign_budget au-dela ; capacite nulle : parameter_out_of_range.
+  [[nodiscard]] static Result<RadicalSum> make(MemoryBudget& budget, u32 capacity) noexcept;
+  u32 capacity() const noexcept { return static_cast<u32>(terms_.size()); }
 
   void clear() noexcept { count_ = 0; }
   u32 size() const noexcept { return count_; }
