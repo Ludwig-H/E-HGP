@@ -226,8 +226,8 @@
       "fichier": "src/api/compute.cpp",
       "cherche": "  params.concurrent_orders = false;        // 8192\n",
       "remplace": "",
-      "porte": "mhgp11_cli_supports_oracle",
-      "note": "arbre d'ordre K au masque de FULL : build_order refuse les ordres concurrents"
+      "porte": "mhgp11_cli_points",
+      "note": "arbre d'ordre K seul au masque de FULL : build_order refuse les ordres concurrents ; depuis L2b, supports passe par FULL et seules points et plat emploient order_params"
     }
   ]
 }

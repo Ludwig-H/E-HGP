@@ -174,7 +174,13 @@ def summarize(calls, k):
 
 
 def decide(ratios, defects, prises, k):
-    """Regle de L2, a W48 sur ng00, ng01, ng02 ; non evaluee hors de ses conditions."""
+    """Regle de L2, a W48 sur ng00, ng01, ng02 ; non evaluee hors de ses conditions. Depuis L2b, supports passe par
+    FULL : les deux bras mesurent la voie FULL (16379) et le banc ne peut plus choisir entre FULL et l'arbre d'ordre K
+    seul (audit ef91a7f46). La decision historique est desactivee ; les rapports restent publies, FULL contre
+    supports/L2b."""
+    if L2B_DELIVERED:
+        return dict(decision='sans_objet_post_l2b',
+                    reason='supports tire l arbre d ordre K de FULL depuis L2b : aucune voie order_tree mesuree')
     if defects:
         return dict(decision='non_evaluee', reason='mesure invalide : %d defaut(s)' % len(defects))
     if k != 5:
@@ -189,6 +195,10 @@ def decide(ratios, defects, prises, k):
     keep = len(held) >= 2
     return dict(decision='build_order_par_defaut' if keep else 'livrer_L2b', frames_within_rule=held,
                 rule='mediane tree(supports) <= 1,1 mediane tree(full) a W48 sur au moins deux des trois trames')
+
+
+# L2b livree (0810962ac) : la regle de L2 a deja tranche (livrer_L2b, recu de qualification du 5 octobre 2026).
+L2B_DELIVERED = True
 
 
 def main():

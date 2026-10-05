@@ -13,7 +13,7 @@
   "configurations": [
     {
       "name": "gcc_release",
-      "description": "GCC Release, profil 18 bits : toutes les portes sauf les mutants (dont la suite complete de la reference, en tranches paralleles).",
+      "description": "GCC Release, profil 18 bits : toutes les portes sauf les mutants (dont la suite complete de la reference, en tranches paralleles) ; sans les portes d'echelle et LiDAR, jouees en deux lots gcc_release_echelle_gros et _reste (qualification du 5 octobre 2026 : coupees par l'echeance).",
       "compiler": "g++",
       "cmake_options": [
         "-DCMAKE_BUILD_TYPE=Release",
@@ -21,7 +21,7 @@
       ],
       "ctest_args": [
         "-LE",
-        "^(mutant|long)$"
+        "^(mutant|long|scale8000|scale16000|scale32000|lidar)$"
       ],
       "threads": 16,
       "timeout_seconds": 2100,
@@ -429,7 +429,7 @@
     },
     {
       "name": "bits21",
-      "description": "Profil de coordonnees a 21 bits (MHGP11_COORD_BITS) : memes sources ; non qualifie tant qu'il n'a pas ses propres portes.",
+      "description": "Profil de coordonnees a 21 bits (MHGP11_COORD_BITS) : memes sources ; non qualifie tant qu'il n'a pas ses propres portes ; sans les portes d'echelle et LiDAR, jouees en deux lots bits21_echelle_gros et _reste (qualification du 5 octobre 2026 : coupees par l'echeance).",
       "compiler": "g++",
       "cmake_options": [
         "-DCMAKE_BUILD_TYPE=Release",
@@ -437,7 +437,7 @@
       ],
       "ctest_args": [
         "-LE",
-        "^(mutant|long)$",
+        "^(mutant|long|scale8000|scale16000|scale32000|lidar)$",
         "-E",
         "^mhgp11_reference_"
       ],
@@ -450,7 +450,7 @@
     },
     {
       "name": "bits24",
-      "description": "Profil de coordonnees a 24 bits (MHGP11_COORD_BITS) : memes sources ; non qualifie tant qu'il n'a pas ses propres portes.",
+      "description": "Profil de coordonnees a 24 bits (MHGP11_COORD_BITS) : memes sources ; non qualifie tant qu'il n'a pas ses propres portes ; sans les portes d'echelle et LiDAR, jouees en deux lots bits24_echelle_gros et _reste (qualification du 5 octobre 2026 : coupees par l'echeance).",
       "compiler": "g++",
       "cmake_options": [
         "-DCMAKE_BUILD_TYPE=Release",
@@ -458,7 +458,7 @@
       ],
       "ctest_args": [
         "-LE",
-        "^(mutant|long)$",
+        "^(mutant|long|scale8000|scale16000|scale32000|lidar)$",
         "-E",
         "^mhgp11_reference_"
       ],
@@ -471,7 +471,7 @@
     },
     {
       "name": "poison",
-      "description": "Tampons empoisonnes (MHGP11_POISON). Profil explicite 21 bits.",
+      "description": "Tampons empoisonnes (MHGP11_POISON). Profil explicite 21 bits ; sans les portes d'echelle et LiDAR, jouees en deux lots poison_echelle_gros et _reste (qualification du 5 octobre 2026 : coupees par l'echeance).",
       "compiler": "g++",
       "cmake_options": [
         "-DCMAKE_BUILD_TYPE=Release",
@@ -480,7 +480,7 @@
       ],
       "ctest_args": [
         "-LE",
-        "^(mutant|long)$",
+        "^(mutant|long|scale8000|scale16000|scale32000|lidar)$",
         "-E",
         "^mhgp11_reference_"
       ],
@@ -492,8 +492,212 @@
       ]
     },
     {
+      "name": "gcc_release_echelle_gros",
+      "description": "Profil de gcc_release : portes d'echelle et LiDAR seules (serie), lot gros (noms contenant scale32000|uniform32000|lidar_ng01|lidar_ng02) ; reunion des deux lots = toutes ces portes. Plancher : 80 % du compte a la livraison de S10.",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=18"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "scale32000|uniform32000|lidar_ng01|lidar_ng02"
+      ],
+      "threads": 4,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 600,
+      "require_labels": [],
+      "require_labels_if_data": [
+        "lidar"
+      ],
+      "probes": [
+        {
+          "name": "sched_probe",
+          "executable": "mhgp11_sched_probe",
+          "timeout_seconds": 180
+        }
+      ],
+      "min_tests": 41
+    },
+    {
+      "name": "gcc_release_echelle_reste",
+      "description": "Profil de gcc_release : portes d'echelle et LiDAR seules (serie), lot reste (toutes les autres) ; reunion des deux lots = toutes ces portes. Plancher : 80 % du compte a la livraison de S10.",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=18"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-E",
+        "scale32000|uniform32000|lidar_ng01|lidar_ng02"
+      ],
+      "threads": 4,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 600,
+      "require_labels": [],
+      "require_labels_if_data": [
+        "lidar"
+      ],
+      "probes": [
+        {
+          "name": "sched_probe",
+          "executable": "mhgp11_sched_probe",
+          "timeout_seconds": 180
+        }
+      ],
+      "min_tests": 52
+    },
+    {
+      "name": "bits21_echelle_gros",
+      "description": "Profil de bits21 : portes d'echelle et LiDAR seules (serie), lot gros (noms contenant scale32000|uniform32000|lidar_ng01|lidar_ng02) ; reunion des deux lots = toutes ces portes. Plancher : 80 % du compte a la livraison de S10.",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "scale32000|uniform32000|lidar_ng01|lidar_ng02",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "threads": 4,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 600,
+      "require_labels": [],
+      "min_tests": 41
+    },
+    {
+      "name": "bits21_echelle_reste",
+      "description": "Profil de bits21 : portes d'echelle et LiDAR seules (serie), lot reste (toutes les autres) ; reunion des deux lots = toutes ces portes. Plancher : 80 % du compte a la livraison de S10.",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-E",
+        "^mhgp11_reference_|scale32000|uniform32000|lidar_ng01|lidar_ng02"
+      ],
+      "threads": 4,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 600,
+      "require_labels": [],
+      "min_tests": 52
+    },
+    {
+      "name": "bits24_echelle_gros",
+      "description": "Profil de bits24 : portes d'echelle et LiDAR seules (serie), lot gros (noms contenant scale32000|uniform32000|lidar_ng01|lidar_ng02) ; reunion des deux lots = toutes ces portes. Plancher : 80 % du compte a la livraison de S10.",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "scale32000|uniform32000|lidar_ng01|lidar_ng02",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "threads": 4,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 600,
+      "require_labels": [],
+      "min_tests": 41
+    },
+    {
+      "name": "bits24_echelle_reste",
+      "description": "Profil de bits24 : portes d'echelle et LiDAR seules (serie), lot reste (toutes les autres) ; reunion des deux lots = toutes ces portes. Plancher : 80 % du compte a la livraison de S10.",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-E",
+        "^mhgp11_reference_|scale32000|uniform32000|lidar_ng01|lidar_ng02"
+      ],
+      "threads": 4,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 600,
+      "require_labels": [],
+      "min_tests": 52
+    },
+    {
+      "name": "poison_echelle_gros",
+      "description": "Profil de poison : portes d'echelle et LiDAR seules (serie), lot gros (noms contenant scale32000|uniform32000|lidar_ng01|lidar_ng02) ; reunion des deux lots = toutes ces portes. Plancher : 80 % du compte a la livraison de S10.",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_POISON=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "scale32000|uniform32000|lidar_ng01|lidar_ng02",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "threads": 4,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 600,
+      "require_labels": [],
+      "min_tests": 41
+    },
+    {
+      "name": "poison_echelle_reste",
+      "description": "Profil de poison : portes d'echelle et LiDAR seules (serie), lot reste (toutes les autres) ; reunion des deux lots = toutes ces portes. Plancher : 80 % du compte a la livraison de S10.",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_POISON=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-E",
+        "^mhgp11_reference_|scale32000|uniform32000|lidar_ng01|lidar_ng02"
+      ],
+      "threads": 4,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 600,
+      "require_labels": [],
+      "min_tests": 52
+    },
+    {
       "name": "release_long",
-      "description": "GCC Release, profil 21 bits : les seules portes de label long (identites K10 a l'echelle et sur trame, juges K10), sorties des autres configurations pour qu'aucune n'en soit coupee par son echeance (qualification de la sortie parametree, 5 octobre 2026) Les differentiels contre la chaine Python (*_vs_python) exigent numpy, absent de la VM : ils sont exclus ici et joues en local.",
+      "description": "GCC Release, profil 21 bits : les seules portes de label long (identites K10 a l'echelle et sur trame, juges K10), sorties des autres configurations pour qu'aucune n'en soit coupee par son echeance (qualification de la sortie parametree, 5 octobre 2026) Les campagnes de mutants (configuration mutants) et les differentiels contre la chaine Python (*_vs_python) exigent numpy, absent de la VM : ils s",
       "compiler": "g++",
       "cmake_options": [
         "-DCMAKE_BUILD_TYPE=Release",
@@ -503,7 +707,7 @@
         "-L",
         "^long$",
         "-E",
-        "_vs_python"
+        "_vs_python|^mhgp11_mutants_"
       ],
       "threads": 16,
       "timeout_seconds": 2100,
