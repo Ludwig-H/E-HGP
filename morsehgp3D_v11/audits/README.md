@@ -11,6 +11,8 @@ et marges tiennent alors en `i128`. Les deux sources correctives sont
 identiques à la capture relue. Le test `huge` exige maintenant exactement
 trois plateaux sans encadrement : il distingue la garde de l'ancien
 filtre. Constat source fermé ; qualification native G4 à poursuivre.
+Le complément **38b76701b** ajoute aussi le témoin exact
+`R=2^127−1`, avec vérification de la racine et de l'égalité EOM.
 [Correction, témoin et portée](../receipts/audit_s10_root_guard_20261005/README.md).
 
 **Qualification S10 : ajouter sa session différentielle.** Les quatre

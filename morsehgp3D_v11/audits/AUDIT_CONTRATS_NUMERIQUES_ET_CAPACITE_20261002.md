@@ -44,6 +44,12 @@ mutant tué localement ; aucun verdict G4 n'en est déduit. Le témoin
 `R=2^127−1` reste la preuve du débordement initial, sans prétendre que
 le nouveau test reproduit cette addition. Constat source fermé,
 qualification native G4 à poursuivre.
+Le complément **38b76701b** ajoute la frontière exacte au même test :
+rayons `A/3,A/2,A`, avec `A=(2^127−1)/2^64`, racine du dernier
+niveau explicitement vérifiée égale à R, groupes et égalité EOM
+contrôlés. Toutes les racines restent dans `u128`. Le développeur
+annonce les sept groupes unitaires conformes en Release u21 et
+ASan/UBSan u24 locaux ; ce résultat annoncé reste distinct de G4.
 [Correction figée et preuve de borne](../receipts/audit_s10_root_guard_20261005/README.md).
 
 Les formules réciproques, la condensation publiée et le raccord relus

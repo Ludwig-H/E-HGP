@@ -30,6 +30,9 @@ capture relue. Le test `huge` exige désormais trois plateaux ouverts,
 contre un avec l'ancien filtre ; sa portée devient causale pour le
 mutant qui retire la garde. Constat source fermé ; qualification native
 G4 à poursuivre. La preuve initiale `R=2^127−1` reste distincte.
+Cette frontière exacte rejoint la porte native en **38b76701b** :
+racine vérifiée, groupes attendus et égalité certifiée aux rayons
+`A/3,A/2,A`. Lecture favorable de ce complément.
 [Correction et preuve de borne](../receipts/audit_s10_root_guard_20261005/README.md).
 [Preuve, source et correction ciblée](../receipts/audit_s10_wip_20261005/math/README.md).
 
