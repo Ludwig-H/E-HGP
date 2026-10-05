@@ -1,0 +1,90 @@
+{
+  "anchors": [
+    {
+      "end": 127,
+      "path": "morsehgp3D_v11/cmake/run_expect.cmake",
+      "sha256": "165d02c686bb71d32fbf9edb3fb3afa80c03ca3c8d6deb40b8444eeb6443646e",
+      "start": 117,
+      "text": "if(NOT \"${rc}\" STREQUAL \"${EXPECTED}\")\n  run_expect_say(\"run_expect_verdict code\")\n  message(FATAL_ERROR \"code de sortie ${rc}, attendu ${EXPECTED}\")\nendif()\nif(DEFINED EXPECT_LINE AND NOT \"${EXPECT_LINE}\" STREQUAL \"\")\n  string(REPLACE \"\\r\\n\" \"\\n\" run_expect_normalized \"${run_stdout}\")\n  string(FIND \"\\n${run_expect_normalized}\\n\" \"\\n${EXPECT_LINE}\\n\" run_expect_pos)\n  if(run_expect_pos EQUAL -1)\n    run_expect_say(\"run_expect_verdict ligne_absente\")\n    message(FATAL_ERROR \"ligne attendue ABSENTE de la sortie standard de la MEME execution : ${EXPECT_LINE}\")\n  endif()"
+    },
+    {
+      "end": 110,
+      "path": "morsehgp3D_v11/cmake/gates.cmake",
+      "sha256": "8abaa4b9a533f0988cd2a4b436665905c3ad1be92a4f33f360da2fce34c1d70a",
+      "start": 106,
+      "text": "  set(defs \"-DCMD=${program}\" \"-DEXPECTED=${expected}\")\n  _mhgp11_word_definitions(defs NARGS ARG gate_args)\n  if(NOT \"${gate_line}\" STREQUAL \"\")\n    string(REPLACE \";\" \"\\;\" line \"${gate_line}\")\n    list(APPEND defs \"-DEXPECT_LINE=${line}\")"
+    }
+  ],
+  "proposed_expected_lines": "Restore common journal in the verdict. For u21 require the adjacent known fingerprints line plus common verdict in one EXPECT_LINE value. Other profiles require only common verdict including fixed journal.",
+  "rows": [
+    {
+      "counts_unchanged": true,
+      "floors_unchanged": true,
+      "former_common_journal": "a6c3b688a7fe1b4a",
+      "former_u21_file": "9b77614618bbdfc9",
+      "former_u21_manifest": "d61003785c2ff158",
+      "n": 8000,
+      "name": "scale8000",
+      "new_expected_line": "supports_route_verdict conforme k=5 n=8000 noeuds=273655 boules=395667 supports=395667 etendues=0 multiples=0 cellules=230825 graines=737362 fils=1,4",
+      "old_expected_line": "supports_route_verdict conforme k=5 n=8000 noeuds=273655 boules=395667 supports=395667 etendues=0 multiples=0 cellules=230825 graines=737362 fichier=9b77614618bbdfc9 manifeste=d61003785c2ff158 journal=a6c3b688a7fe1b4a fils=1,4"
+    },
+    {
+      "counts_unchanged": true,
+      "floors_unchanged": true,
+      "former_common_journal": "436d1354ae183486",
+      "former_u21_file": "dd524ffd991873eb",
+      "former_u21_manifest": "baa658ac05a8eee8",
+      "n": 16000,
+      "name": "scale16000",
+      "new_expected_line": "supports_route_verdict conforme k=5 n=16000 noeuds=565098 boules=819004 supports=819004 etendues=0 multiples=0 cellules=478947 graines=1530768 fils=1,4",
+      "old_expected_line": "supports_route_verdict conforme k=5 n=16000 noeuds=565098 boules=819004 supports=819004 etendues=0 multiples=0 cellules=478947 graines=1530768 fichier=dd524ffd991873eb manifeste=baa658ac05a8eee8 journal=436d1354ae183486 fils=1,4"
+    },
+    {
+      "counts_unchanged": true,
+      "floors_unchanged": true,
+      "former_common_journal": "c371678559b144d7",
+      "former_u21_file": "6543988436d3d582",
+      "former_u21_manifest": "751e5f52d5c1477e",
+      "n": 32000,
+      "name": "scale32000",
+      "new_expected_line": "supports_route_verdict conforme k=5 n=32000 noeuds=1163756 boules=1690045 supports=1690045 etendues=0 multiples=0 cellules=989861 graines=3165977 fils=1,4",
+      "old_expected_line": "supports_route_verdict conforme k=5 n=32000 noeuds=1163756 boules=1690045 supports=1690045 etendues=0 multiples=0 cellules=989861 graines=3165977 fichier=6543988436d3d582 manifeste=751e5f52d5c1477e journal=c371678559b144d7 fils=1,4"
+    },
+    {
+      "counts_unchanged": true,
+      "floors_unchanged": true,
+      "former_common_journal": "c189d5cd3ec3de66",
+      "former_u21_file": "830db973140e720d",
+      "former_u21_manifest": "7c119d733528e2d0",
+      "n": 39885,
+      "name": "data=lidar_ng00",
+      "new_expected_line": "supports_route_verdict conforme k=5 n=39885 noeuds=576371 boules=789886 supports=789889 etendues=141 multiples=3 cellules=448805 graines=1350288 fils=1,4",
+      "old_expected_line": "supports_route_verdict conforme k=5 n=39885 noeuds=576371 boules=789886 supports=789889 etendues=141 multiples=3 cellules=448805 graines=1350288 fichier=830db973140e720d manifeste=7c119d733528e2d0 journal=c189d5cd3ec3de66 fils=1,4"
+    },
+    {
+      "counts_unchanged": true,
+      "floors_unchanged": true,
+      "former_common_journal": "5e36f8ddbd2fb94c",
+      "former_u21_file": "ed899fede2bbe761",
+      "former_u21_manifest": "09d1d8c0070ab73a",
+      "n": 35551,
+      "name": "data=lidar_ng01",
+      "new_expected_line": "supports_route_verdict conforme k=5 n=35551 noeuds=478265 boules=652958 supports=652959 etendues=81 multiples=1 cellules=369751 graines=1102505 fils=1,4",
+      "old_expected_line": "supports_route_verdict conforme k=5 n=35551 noeuds=478265 boules=652958 supports=652959 etendues=81 multiples=1 cellules=369751 graines=1102505 fichier=ed899fede2bbe761 manifeste=09d1d8c0070ab73a journal=5e36f8ddbd2fb94c fils=1,4"
+    },
+    {
+      "counts_unchanged": true,
+      "floors_unchanged": true,
+      "former_common_journal": "ec87f14da7adff77",
+      "former_u21_file": "28532835cc5915f8",
+      "former_u21_manifest": "6b6d1ee970c80839",
+      "n": 45845,
+      "name": "data=lidar_ng02",
+      "new_expected_line": "supports_route_verdict conforme k=5 n=45845 noeuds=609376 boules=832386 supports=832394 etendues=354 multiples=8 cellules=471060 graines=1393952 fils=1,4",
+      "old_expected_line": "supports_route_verdict conforme k=5 n=45845 noeuds=609376 boules=832386 supports=832394 etendues=354 multiples=8 cellules=471060 graines=1393952 fichier=28532835cc5915f8 manifeste=6b6d1ee970c80839 journal=ec87f14da7adff77 fils=1,4"
+    }
+  ],
+  "schema": "mhgp11_expect_line_model_v1",
+  "scope": "Stdlib model only of CRLF normalization and newline-delimited substring matching. It does not execute CMake or prove argv/newline transport into CTest.",
+  "source_base_commit": "ef91a7f467ddb150106f557e083b231155e52414"
+}

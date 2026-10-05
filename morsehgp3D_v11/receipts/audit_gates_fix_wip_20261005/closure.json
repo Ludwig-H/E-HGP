@@ -1,0 +1,12 @@
+{
+  "checked_utc": "2026-10-05T23:13:34.818598+00:00",
+  "current_sha256": {
+    "morsehgp3D_v11/tests/api/supports_route.cpp": "2a7f2f2fd557f77793b64ed73ee537be9a803c5fe1c7f1f4a7b536927ca95e5e",
+    "morsehgp3D_v11/tests/api/tests.cmake": "4338b3f66a19be412b6adb3b0441c8a299997bccc799963c472a7bc8da618d04",
+    "morsehgp3D_v11/tests/mutants/cli.json": "2750485824bceb1d2305e978ac025d49e3e25dfc8eb60b12778fa4de296f0cf7"
+  },
+  "developer_head": "ef91a7f467ddb150106f557e083b231155e52414",
+  "guards_restored_since_capture": false,
+  "matches_stable_capture": true,
+  "native_or_cloud_actions": 0
+}

@@ -1,0 +1,735 @@
+{
+  "schema": "ehgp.v11.g4_matrix.v1",
+  "note": "Matrice des portes v11 sur G4 (48 fils). Hors gcc_release, seule la reference Python independante du binaire est exclue par son nom. Les oracles qui interrogent le binaire, notamment num Fraction, sont rejoues dans chaque configuration. Les mutants ont leur configuration dediee. {threads} est le nombre de fils alloues. Reprise u21/u24 : gcc_release conserve18 pour comparaison ; ASan/UBSan24, TSan/poison21. Chaque capture juge ses profils sans transfert historique.",
+  "source_dir": "morsehgp3D_v11",
+  "budget_seconds": 2200,
+  "thread_budget": 0,
+  "limits": {
+    "log_bytes": 1048576,
+    "excerpt_lines": 40,
+    "excerpt_line_chars": 400,
+    "failures_listed": 100
+  },
+  "configurations": [
+    {
+      "name": "gcc_release",
+      "description": "GCC Release, profil 18 bits : toutes les portes sauf les mutants (dont la suite complete de la reference, en tranches paralleles) ; sans les portes d'echelle et LiDAR, jouees en deux lots gcc_release_echelle_gros et _reste (qualification du 5 octobre 2026 : coupees par l'echeance).",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=18"
+      ],
+      "ctest_args": [
+        "-LE",
+        "^(mutant|long|scale8000|scale16000|scale32000|lidar)$"
+      ],
+      "threads": 16,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 600,
+      "require_labels": [
+        "unit",
+        "fast"
+      ],
+      "require_labels_if_data": [
+        "lidar"
+      ],
+      "probes": [
+        {
+          "name": "sched_probe",
+          "executable": "mhgp11_sched_probe",
+          "timeout_seconds": 180
+        }
+      ]
+    },
+    {
+      "name": "mutants",
+      "description": "Portes de label mutant : manifestes, puis une campagne par manifeste ; le lanceur se parallelise lui-meme (MHGP11_MUTANT_JOBS = fils alloues).",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_MUTANT_JOBS={threads}",
+        "-DMHGP11_COORD_BITS=18"
+      ],
+      "ctest_args": [
+        "-L",
+        "^mutant$"
+      ],
+      "threads": 32,
+      "ctest_parallel": 1,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 1200,
+      "require_labels": [
+        "mutant"
+      ]
+    },
+    {
+      "name": "gcc_asan_ubsan",
+      "description": "GCC, AddressSanitizer + UndefinedBehaviorSanitizer (MHGP11_SANITIZE) ; un rapport UBSan arrete la porte. Profil explicite 24 bits ; sans les portes d'echelle et LiDAR, jouees seules et qualifiees en Release (session claudequalb du 5 octobre 2026 : coupees par l'echeance sous sanitizer).",
+      "compiler": "g++",
+      "sanitizer": "address,undefined",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_SANITIZE=ON",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "ctest_args": [
+        "-LE",
+        "^(mutant|long|scale8000|scale16000|scale32000|lidar)$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "threads": 8,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 900,
+      "require_labels": [
+        "unit"
+      ],
+      "env": {
+        "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+      }
+    },
+    {
+      "name": "gcc_tsan",
+      "description": "GCC, ThreadSanitizer (MHGP11_TSAN) : portes de sched et de core au moins ; ctest tourne sous setarch -R des que cela fonctionne (un binaire TSan echoue aleatoirement sous forte randomisation d'adresses). Profil explicite 21 bits ; sans les portes d'echelle et LiDAR, jouees seules et qualifiees en Release (session claudequalb du 5 octobre 2026 : coupees par l'echeance sous sanitizer).",
+      "compiler": "g++",
+      "sanitizer": "thread",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-LE",
+        "^(mutant|long|scale8000|scale16000|scale32000|lidar)$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "threads": 8,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 900,
+      "require_labels": [
+        "unit"
+      ]
+    },
+    {
+      "name": "gcc_asan_scale32000",
+      "description": "ASan+UBSan u24 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (noms contenant scale32000|uniform32000), reunion des lots = toutes ces portes ; jumelles _opt exclues (meme commande native, seul le juge Python passe sous -O, qualifie en Release). Sessions B et claudequals du 5 octobre 2026.",
+      "compiler": "g++",
+      "sanitizer": "address,undefined",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_SANITIZE=ON",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "scale32000|uniform32000",
+        "-E",
+        "^mhgp11_reference_|_opt$"
+      ],
+      "threads": 4,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 900,
+      "require_labels": [],
+      "env": {
+        "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+      },
+      "min_tests": 8
+    },
+    {
+      "name": "gcc_asan_lidar_ng01_ng02",
+      "description": "ASan+UBSan u24 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (noms contenant lidar_ng01|lidar_ng02), reunion des lots = toutes ces portes ; jumelles _opt exclues (meme commande native, seul le juge Python passe sous -O, qualifie en Release). Sessions B et claudequals du 5 octobre 2026.",
+      "compiler": "g++",
+      "sanitizer": "address,undefined",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_SANITIZE=ON",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "lidar_ng01|lidar_ng02",
+        "-E",
+        "^mhgp11_reference_|_opt$"
+      ],
+      "threads": 4,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 900,
+      "require_labels": [],
+      "env": {
+        "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+      },
+      "min_tests": 18
+    },
+    {
+      "name": "gcc_asan_scale16000",
+      "description": "ASan+UBSan u24 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (noms contenant scale16000|uniform16000), reunion des lots = toutes ces portes ; jumelles _opt exclues (meme commande native, seul le juge Python passe sous -O, qualifie en Release). Sessions B et claudequals du 5 octobre 2026.",
+      "compiler": "g++",
+      "sanitizer": "address,undefined",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_SANITIZE=ON",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "scale16000|uniform16000",
+        "-E",
+        "^mhgp11_reference_|_opt$"
+      ],
+      "threads": 4,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 900,
+      "require_labels": [],
+      "env": {
+        "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+      },
+      "min_tests": 8
+    },
+    {
+      "name": "gcc_asan_scale_rest",
+      "description": "ASan+UBSan u24 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (reste des portes), reunion des lots = toutes ces portes ; jumelles _opt exclues (meme commande native, seul le juge Python passe sous -O, qualifie en Release). Sessions B et claudequals du 5 octobre 2026.",
+      "compiler": "g++",
+      "sanitizer": "address,undefined",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_SANITIZE=ON",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-E",
+        "^mhgp11_reference_|_opt$|scale32000|uniform32000|lidar_ng01|lidar_ng02|scale16000|uniform16000"
+      ],
+      "threads": 4,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 900,
+      "require_labels": [],
+      "env": {
+        "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+      },
+      "min_tests": 24
+    },
+    {
+      "name": "gcc_tsan_scale32000_cli",
+      "description": "TSan u21 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (noms contenant cli_.*(scale32000|uniform32000)), reunion des lots = toutes ces portes ; jumelles _opt exclues (meme commande native, seul le juge Python passe sous -O, qualifie en Release). Sessions B et claudequals du 5 octobre 2026.",
+      "compiler": "g++",
+      "sanitizer": "thread",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "cli_.*(scale32000|uniform32000)",
+        "-E",
+        "^mhgp11_reference_|_opt$"
+      ],
+      "threads": 4,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 900,
+      "require_labels": [],
+      "min_tests": 2
+    },
+    {
+      "name": "gcc_tsan_scale32000",
+      "description": "TSan u21 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (noms contenant scale32000|uniform32000), reunion des lots = toutes ces portes ; jumelles _opt exclues (meme commande native, seul le juge Python passe sous -O, qualifie en Release). Sessions B et claudequals du 5 octobre 2026.",
+      "compiler": "g++",
+      "sanitizer": "thread",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "scale32000|uniform32000",
+        "-E",
+        "^mhgp11_reference_|_opt$|cli_"
+      ],
+      "threads": 4,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 900,
+      "require_labels": [],
+      "min_tests": 6
+    },
+    {
+      "name": "gcc_tsan_lidar_ng00",
+      "description": "TSan u21 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (noms contenant lidar_ng00), reunion des lots = toutes ces portes ; jumelles _opt exclues (meme commande native, seul le juge Python passe sous -O, qualifie en Release). Sessions B et claudequals du 5 octobre 2026.",
+      "compiler": "g++",
+      "sanitizer": "thread",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "lidar_ng00",
+        "-E",
+        "^mhgp11_reference_|_opt$"
+      ],
+      "threads": 4,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 900,
+      "require_labels": [],
+      "min_tests": 9
+    },
+    {
+      "name": "gcc_tsan_lidar_ng01",
+      "description": "TSan u21 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (noms contenant lidar_ng01), reunion des lots = toutes ces portes ; jumelles _opt exclues (meme commande native, seul le juge Python passe sous -O, qualifie en Release). Sessions B et claudequals du 5 octobre 2026.",
+      "compiler": "g++",
+      "sanitizer": "thread",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "lidar_ng01",
+        "-E",
+        "^mhgp11_reference_|_opt$"
+      ],
+      "threads": 4,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 900,
+      "require_labels": [],
+      "min_tests": 8
+    },
+    {
+      "name": "gcc_tsan_lidar_ng02",
+      "description": "TSan u21 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (noms contenant lidar_ng02), reunion des lots = toutes ces portes ; jumelles _opt exclues (meme commande native, seul le juge Python passe sous -O, qualifie en Release). Sessions B et claudequals du 5 octobre 2026.",
+      "compiler": "g++",
+      "sanitizer": "thread",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "lidar_ng02",
+        "-E",
+        "^mhgp11_reference_|_opt$"
+      ],
+      "threads": 4,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 900,
+      "require_labels": [],
+      "min_tests": 8
+    },
+    {
+      "name": "gcc_tsan_scale16000",
+      "description": "TSan u21 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (noms contenant scale16000|uniform16000), reunion des lots = toutes ces portes ; jumelles _opt exclues (meme commande native, seul le juge Python passe sous -O, qualifie en Release). Sessions B et claudequals du 5 octobre 2026.",
+      "compiler": "g++",
+      "sanitizer": "thread",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "scale16000|uniform16000",
+        "-E",
+        "^mhgp11_reference_|_opt$"
+      ],
+      "threads": 4,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 900,
+      "require_labels": [],
+      "min_tests": 7
+    },
+    {
+      "name": "gcc_tsan_scale_rest",
+      "description": "TSan u21 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (reste des portes), reunion des lots = toutes ces portes ; jumelles _opt exclues (meme commande native, seul le juge Python passe sous -O, qualifie en Release). Sessions B et claudequals du 5 octobre 2026.",
+      "compiler": "g++",
+      "sanitizer": "thread",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-E",
+        "^mhgp11_reference_|_opt$|scale32000|uniform32000|scale16000|uniform16000|lidar_ng0[012]"
+      ],
+      "threads": 4,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 900,
+      "require_labels": [],
+      "min_tests": 14
+    },
+    {
+      "name": "clang_release",
+      "description": "Clang Release, si clang++ existe sur la VM ; sinon la configuration est relevee absente, sans echec. Profil explicite 21 bits.",
+      "compiler": "clang++",
+      "optional": true,
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-LE",
+        "^(mutant|long)$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "threads": 6,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 600,
+      "require_labels": [
+        "unit"
+      ]
+    },
+    {
+      "name": "bits21",
+      "description": "Profil de coordonnees a 21 bits (MHGP11_COORD_BITS) : memes sources ; non qualifie tant qu'il n'a pas ses propres portes ; sans les portes d'echelle et LiDAR, jouees en deux lots bits21_echelle_gros et _reste (qualification du 5 octobre 2026 : coupees par l'echeance).",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-LE",
+        "^(mutant|long|scale8000|scale16000|scale32000|lidar)$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "threads": 4,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 600,
+      "require_labels": [
+        "unit"
+      ]
+    },
+    {
+      "name": "bits24",
+      "description": "Profil de coordonnees a 24 bits (MHGP11_COORD_BITS) : memes sources ; non qualifie tant qu'il n'a pas ses propres portes ; sans les portes d'echelle et LiDAR, jouees en deux lots bits24_echelle_gros et _reste (qualification du 5 octobre 2026 : coupees par l'echeance).",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "ctest_args": [
+        "-LE",
+        "^(mutant|long|scale8000|scale16000|scale32000|lidar)$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "threads": 4,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 600,
+      "require_labels": [
+        "unit"
+      ]
+    },
+    {
+      "name": "poison",
+      "description": "Tampons empoisonnes (MHGP11_POISON). Profil explicite 21 bits ; sans les portes d'echelle et LiDAR, jouees en deux lots poison_echelle_gros et _reste (qualification du 5 octobre 2026 : coupees par l'echeance).",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_POISON=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-LE",
+        "^(mutant|long|scale8000|scale16000|scale32000|lidar)$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "threads": 4,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 600,
+      "require_labels": [
+        "unit"
+      ]
+    },
+    {
+      "name": "gcc_release_echelle_gros",
+      "description": "Profil de gcc_release : portes d'echelle et LiDAR seules (serie), lot gros (noms contenant scale32000|uniform32000|lidar_ng01|lidar_ng02) ; reunion des deux lots = toutes ces portes. Plancher : 80 % du compte a la livraison de S10.",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=18"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "scale32000|uniform32000|lidar_ng01|lidar_ng02"
+      ],
+      "threads": 4,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 600,
+      "require_labels": [],
+      "require_labels_if_data": [
+        "lidar"
+      ],
+      "probes": [
+        {
+          "name": "sched_probe",
+          "executable": "mhgp11_sched_probe",
+          "timeout_seconds": 180
+        }
+      ],
+      "min_tests": 41
+    },
+    {
+      "name": "gcc_release_echelle_reste",
+      "description": "Profil de gcc_release : portes d'echelle et LiDAR seules (serie), lot reste (toutes les autres) ; reunion des deux lots = toutes ces portes. Plancher : 80 % du compte a la livraison de S10.",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=18"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-E",
+        "scale32000|uniform32000|lidar_ng01|lidar_ng02"
+      ],
+      "threads": 4,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 600,
+      "require_labels": [],
+      "require_labels_if_data": [
+        "lidar"
+      ],
+      "probes": [
+        {
+          "name": "sched_probe",
+          "executable": "mhgp11_sched_probe",
+          "timeout_seconds": 180
+        }
+      ],
+      "min_tests": 52
+    },
+    {
+      "name": "bits21_echelle_gros",
+      "description": "Profil de bits21 : portes d'echelle et LiDAR seules (serie), lot gros (noms contenant scale32000|uniform32000|lidar_ng01|lidar_ng02) ; reunion des deux lots = toutes ces portes. Plancher : 80 % du compte a la livraison de S10.",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "scale32000|uniform32000|lidar_ng01|lidar_ng02",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "threads": 4,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 600,
+      "require_labels": [],
+      "min_tests": 41
+    },
+    {
+      "name": "bits21_echelle_reste",
+      "description": "Profil de bits21 : portes d'echelle et LiDAR seules (serie), lot reste (toutes les autres) ; reunion des deux lots = toutes ces portes. Plancher : 80 % du compte a la livraison de S10.",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-E",
+        "^mhgp11_reference_|scale32000|uniform32000|lidar_ng01|lidar_ng02"
+      ],
+      "threads": 4,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 600,
+      "require_labels": [],
+      "min_tests": 52
+    },
+    {
+      "name": "bits24_echelle_gros",
+      "description": "Profil de bits24 : portes d'echelle et LiDAR seules (serie), lot gros (noms contenant scale32000|uniform32000|lidar_ng01|lidar_ng02) ; reunion des deux lots = toutes ces portes. Plancher : 80 % du compte a la livraison de S10.",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "scale32000|uniform32000|lidar_ng01|lidar_ng02",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "threads": 4,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 600,
+      "require_labels": [],
+      "min_tests": 41
+    },
+    {
+      "name": "bits24_echelle_reste",
+      "description": "Profil de bits24 : portes d'echelle et LiDAR seules (serie), lot reste (toutes les autres) ; reunion des deux lots = toutes ces portes. Plancher : 80 % du compte a la livraison de S10.",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-E",
+        "^mhgp11_reference_|scale32000|uniform32000|lidar_ng01|lidar_ng02"
+      ],
+      "threads": 4,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 600,
+      "require_labels": [],
+      "min_tests": 52
+    },
+    {
+      "name": "poison_echelle_gros",
+      "description": "Profil de poison : portes d'echelle et LiDAR seules (serie), lot gros (noms contenant scale32000|uniform32000|lidar_ng01|lidar_ng02) ; reunion des deux lots = toutes ces portes. Plancher : 80 % du compte a la livraison de S10.",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_POISON=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "scale32000|uniform32000|lidar_ng01|lidar_ng02",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "threads": 4,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 600,
+      "require_labels": [],
+      "min_tests": 41
+    },
+    {
+      "name": "poison_echelle_reste",
+      "description": "Profil de poison : portes d'echelle et LiDAR seules (serie), lot reste (toutes les autres) ; reunion des deux lots = toutes ces portes. Plancher : 80 % du compte a la livraison de S10.",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_POISON=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-E",
+        "^mhgp11_reference_|scale32000|uniform32000|lidar_ng01|lidar_ng02"
+      ],
+      "threads": 4,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 600,
+      "require_labels": [],
+      "min_tests": 52
+    },
+    {
+      "name": "release_long",
+      "description": "GCC Release, profil 21 bits : les seules portes de label long (identites K10 a l'echelle et sur trame, juges K10), sorties des autres configurations pour qu'aucune n'en soit coupee par son echeance (qualification de la sortie parametree, 5 octobre 2026) Les campagnes de mutants (configuration mutants) et les differentiels contre la chaine Python (*_vs_python) exigent numpy, absent de la VM : ils s",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-L",
+        "^long$",
+        "-E",
+        "_vs_python|^mhgp11_mutants_"
+      ],
+      "threads": 16,
+      "timeout_seconds": 2100,
+      "test_timeout_seconds": 2000
+    },
+    {
+      "name": "style",
+      "description": "Porte mhgp11_style et sa jumelle sous python3 -O, seules (tools/check_style.py) : configuration CMake sans construction.",
+      "compiler": "g++",
+      "build": false,
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-R",
+        "^mhgp11_style"
+      ],
+      "threads": 1,
+      "timeout_seconds": 300,
+      "test_timeout_seconds": 240,
+      "min_tests": 2
+    }
+  ]
+}

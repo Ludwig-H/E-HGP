@@ -10,6 +10,50 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
+## Matrice G4 en cours : exigence LiDAR impossible dans le lot court
+
+Dans le WIP `v11-impl-l3` relu le 5 octobre à 23:15 UTC,
+`tools/g4_matrix.json` exclut désormais le label `lidar` du lot court
+`gcc_release`, mais conserve `require_labels_if_data=["lidar"]`.
+Avec `data_complet`, `judge_tests()` exige donc une réussite LiDAR
+que cette sélection interdit : même tous les tests sélectionnés
+PASS, la configuration reste non conforme.
+
+Retirer cette exigence **du seul lot court**. Les nouveaux lots
+d’échelle gardent les véritables portes et planchers LiDAR. Leur
+union couvre les 41 occurrences ordinaires absentes et les six
+identités supports de chaque profil ; le lot L exclut désormais
+les mutants. Aucun défaut moteur, aucune nouvelle session requise
+pour constater la contradiction du plan. Le juge réel, appelé sur un
+scénario explicitement construit où les 873 tests courts passent, rend
+`floor_violated` avec ce seul label absent ; le retrait ciblé donne `ok`.
+[Capture stable et contre-épreuve](../receipts/audit_g4_matrix_reprise_wip_20261005/README.md).
+
+## Correction API/CLI en cours : conserver les gardes encore valides
+
+Capture WIP stable du 5 octobre à 23:13 UTC, base **ef91a7f46**,
+worktree `v11-impl-l3`. **Avis favorable sur le raccord CLI** : la
+mutation et les 28 individus sont conservés, et la porte points
+atteint bien le paramétrage modifié. Le rejeu reste nécessaire.
+
+**API : les identités entre voies, workers et appel public restent
+contrôlées.** Séparer les SHA dépendant du profil corrige la cause des
+refus. Mais les six attentes suppriment aussi le journal commun aux
+profils et les SHA fichier/manifeste u21 déjà valides : la correction
+perd inutilement ces références contre une dérive commune des voies.
+
+Correction minimale : remettre `journal=<digest>` dans le verdict et
+les six attentes de tous les profils ; conserver en plus les SHA
+connus pour u21. Les journaux observés u18/8k et les six cas u24
+confirment leur identité avec les attendus historiques. Le helper
+accepte une seule valeur `LINE` : deux mots `LINE` ne constituent pas
+deux gardes. Un attendu unique contenant les deux lignes adjacentes,
+avec un vrai saut de ligne, est compatible avec son matcher ; une
+ligne conditionnelle u21 serait également suffisante. Le modèle
+borné rejette hashes, journal et comptes altérés ; le transport réel
+CMake/CTest reste à vérifier par la porte. Aucun défaut moteur déduit.
+[Capture figée et correction proposée](../receipts/audit_gates_fix_wip_20261005/README.md).
+
 ## Banc final après L2b : neutraliser la décision devenue inapplicable
 
 Au pin **38b76701b**, `sorties_g4.py` appelle seulement `full` et
@@ -23,17 +67,39 @@ puisque la voie K seule ne figure plus dans les appels du banc.
 Désactiver ce choix historique pour ce mode ; une nouvelle décision
 sur la voie K seule exigerait une variante explicitement mesurée.
 Les valeurs actuelles restent utilisables comme FULL versus sortie
-supports/L2b, une fois le reçu clos vérifié : aucun nouveau run n’est
-demandé pour ce périmètre. Le modèle source joint démontre la branche
+supports/L2b : le reçu clos est désormais vérifié et aucun nouveau run
+n’est demandé pour ce périmètre. Le modèle source joint démontre la branche
 erronément nommée avec de simples booléens, sans argument statistique.
 
 Le plan de finmesure passe aussi `--commit b319efc84`, que le banc
 copie sans vérification dans `provenance.commit`. Le préflight épingle
 réellement **38b76701b**. Corriger l’étiquette du banc et attribuer
 l’analyse au pin vérifié du reçu, en conservant l’annotation originale
-comme erreur de métadonnée ; ne pas réécrire le reçu brut. Aucun
-résultat de la session encore ouverte n’est promu par cette preuve.
+comme erreur de métadonnée ; ne pas réécrire le reçu brut.
 [Chaînes d’appels, plan et modèle borné](../receipts/audit_finmesure_scope_20261005/README.md).
+
+## Mesure finale close : l’étage tree dépasse toujours 100 ms
+
+La session `v11.20261005.claudefinmesure` termine avec succès au pin
+**38b76701b**, avec arrêt ciblé certifié. Les 52 appels mesurés sont
+complets et concordants : 48 K5 sur les trois trames sans sol, W1/W48,
+FULL/supports ; quatre K10 descriptifs sur ng00 à W48. Les empreintes
+enregistrées concordent entre prises et workers, et l’arbre K est
+commun aux deux sorties. Les fichiers temporaires étant supprimés
+par le banc, cette relecture porte sur les empreintes conservées.
+
+Les deux contrôles supports supplémentaires ng00/ng02, W1/W4/W48,
+rendent directement `conforme`, chacun avec 14 appels et 52 contrôles.
+En revanche, **les 18 prises chaudes K5/W48 dépassent toutes 100 ms
+pour l’étage `tree`**, donc aussi pour le total. Cet étage construit
+les forêts 1..5 et les verticales, hors catalogue (`domain`), rattachement
+et sorties ; son mur inclut les préparations/allocation du constructeur
+et se distingue du compteur interne `forest_ns`. Le réduire reste
+nécessaire pour atteindre le contrat. L’arbre de points et la tête plate
+relèvent de `output` et ne sont pas mesurés ici. Les deux annotations
+obsolètes du banc sont bien présentes dans le reçu et sont écartées,
+sans altérer ses données brutes ni ses mesures utiles.
+[Reçu clos, valeurs individuelles et relecture](../receipts/audit_g4_finmesure_20261005/README.md).
 
 ## P9 : comparaison complète de l’arbre de points conforme
 

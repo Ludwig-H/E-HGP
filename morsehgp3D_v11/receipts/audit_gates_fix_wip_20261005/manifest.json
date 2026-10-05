@@ -1,0 +1,76 @@
+{
+  "files": [
+    {
+      "bytes": 1978,
+      "path": "README.md",
+      "sha256": "781f8420120ccd9869f3e027c04165d4b4d113cd1ded5a86d51e8d539cb01c9b"
+    },
+    {
+      "bytes": 798,
+      "path": "capture_initial.json",
+      "sha256": "54f13113aa2e729f5f5a2549cbe0414c3a453e9ad9ec115f8060271a92e0bde7"
+    },
+    {
+      "bytes": 6393,
+      "path": "changes.diff",
+      "sha256": "f2b87b04f4eed2a0cda0ff4e1f89943da606ca6c8c2be94067e1ad5c01f98b2b"
+    },
+    {
+      "bytes": 598,
+      "path": "closure.json",
+      "sha256": "0cb5b09cabf8806a7148ba53bf8ef4c961c937df9e40aecfaba6bbb5d9ccad21"
+    },
+    {
+      "bytes": 6112,
+      "path": "expect_line_model.json",
+      "sha256": "8539fa943ba94ea1dc39864ed9866515e16aecf7fc1e0f40c4fab04949681649"
+    },
+    {
+      "bytes": 3388,
+      "path": "replay.py",
+      "sha256": "13e97c591fdf7b460965a3e3b0b72a2c6b52557c694244e8b6e63c650d0b8242"
+    },
+    {
+      "bytes": 8656,
+      "path": "review.json",
+      "sha256": "246e8bfc7272a492502befb7e73750fc6cc241808b73bfa6462180ac0b939860"
+    },
+    {
+      "bytes": 19662,
+      "path": "source/morsehgp3D_v11/tests/api/supports_route.cpp",
+      "sha256": "2a7f2f2fd557f77793b64ed73ee537be9a803c5fe1c7f1f4a7b536927ca95e5e"
+    },
+    {
+      "bytes": 7414,
+      "path": "source/morsehgp3D_v11/tests/api/tests.cmake",
+      "sha256": "4338b3f66a19be412b6adb3b0441c8a299997bccc799963c472a7bc8da618d04"
+    },
+    {
+      "bytes": 11632,
+      "path": "source/morsehgp3D_v11/tests/mutants/cli.json",
+      "sha256": "2750485824bceb1d2305e978ac025d49e3e25dfc8eb60b12778fa4de296f0cf7"
+    }
+  ],
+  "native_or_cloud_actions": 0,
+  "normal_opt_identical": true,
+  "replay_checks": [
+    {
+      "checks": 84,
+      "command": [
+        "python3",
+        "replay.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "checks": 84,
+      "command": [
+        "python3",
+        "-O",
+        "replay.py"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "schema": "mhgp11_audit_capsule_manifest_v1"
+}

@@ -1,0 +1,58 @@
+{
+  "fina2_archive_sha256": "42425a0969d728688672785f34f3302b698cf2daea83ca6c62891d6ff9b28631",
+  "fina2_inventory_member": "results/cmd/000_matrice/files/matrix/gcc_release/tests.json",
+  "fina2_inventory_sha256": "cc30ac0434ed2b10c78a3bd4ca5c9e64e36c621e7753e45e494d29de78e33353",
+  "fixture_assumes_all_selected_pass": true,
+  "judge_source_path": "morsehgp3D_v11/tools/g4_matrix.py",
+  "judge_source_sha256": "2c41d275732618539fc483962139c8a844c10636628b827dfd74cb2705dd9c21",
+  "matrix_sha256_after_capture": "da0735542a1f806160eeb8cdb853703ca0e9f288626d521c88ff3c2f0fc9747d",
+  "matrix_sha256_before": "da0735542a1f806160eeb8cdb853703ca0e9f288626d521c88ff3c2f0fc9747d",
+  "native_or_cloud_runs": 0,
+  "product_wip_uncommitted": true,
+  "proposed_correction": "Retirer require_labels_if_data=[lidar] de gcc_release court seulement ; garder les portes LiDAR des lots echelle.",
+  "result": {
+    "actual_judge_after_removing_only_conditional_label": {
+      "reason": "",
+      "status": "ok"
+    },
+    "actual_judge_before": {
+      "reason": "aucune porte passee pour le(s) label(s) : lidar",
+      "status": "floor_violated",
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 873,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 873,
+        "selected": 873
+      }
+    },
+    "conditional_required": [
+      "lidar"
+    ],
+    "data_given": true,
+    "fixture_assumes_all_selected_pass": true,
+    "native_or_cloud_runs": 0,
+    "selected_count": 873,
+    "selected_labels": [
+      "fast",
+      "oracle",
+      "unit"
+    ]
+  },
+  "schema": "ehgp.v11.audit.g4_matrix_floor_wip.v1",
+  "source_anchors": {
+    "judge_floor_refusal_lines": [
+      478,
+      479
+    ],
+    "judge_missing_labels_lines": [
+      460,
+      461
+    ],
+    "matrix_conditional_required_lidar_line": 33,
+    "matrix_excluded_labels_line": 24
+  },
+  "source_matrix_path": "morsehgp3D_v11/tools/g4_matrix.json",
+  "source_worktree_head": "ef91a7f467ddb150106f557e083b231155e52414"
+}

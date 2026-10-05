@@ -4,21 +4,30 @@
 quantized_u21_input_only / not_claimed`. Six notes actives maintenues en
 place ; preuves détaillées dans les reçus immuables.
 
-**Deux corrections de qualification à livrer.**
+**Matrice G4 : corriger une exigence impossible avant lancement.**
+Le WIP exclut les tests LiDAR du lot court `gcc_release` mais exige
+encore un PASS LiDAR via `require_labels_if_data`. Retirer cette
+exigence de ce lot ; les lots d’échelle gardent leurs portes LiDAR.
+[Cause et correction](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#matrice-g4-en-cours--exigence-lidar-impossible-dans-le-lot-court).
+
+**Deux corrections de qualification en cours.**
 
 - **Attendus supports multiprofil.** Les six portes `api_supports_route`
   d’échelle/LiDAR imposent des hashes u21 aux profils u18/u24. Finm
   confirme ce défaut sur le témoin u18 à 8k ; fins le confirme sur les
   six cas u24 : les voies et l’appel public concordent, puis le juge
   refuse seulement les deux hashes. Conserver ces comparaisons exactes
-  et adapter les attendus au profil. Aucun défaut moteur établi.
+  et adapter les attendus au profil. Le WIP corrige le conflit mais
+  retire aussi les gardes valides : **rétablir le journal commun et
+  les références u21**, puis rejouer. Aucun défaut moteur établi.
+  [Relecture du correctif](../receipts/audit_gates_fix_wip_20261005/README.md).
   [Constat et correction proposée](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#fina2--attendu-de-qualification-l2b-à-corriger-par-profil),
   [six preuves u24](../receipts/audit_g4_fins_20261005/supports_route/README.md).
 - **Mutant CLI devenu inactif pour sa porte.** `sp_masque_16379`
   modifie `order_params`, que supports n’appelle plus depuis L2b.
   Conserver la mutation et la raccorder à `mhgp11_cli_points`, qui
-  atteint cette fonction ; adapter son nom et sa note. Le moteur et
-  l’oracle supports restent inchangés. Le nouveau raccord reste à juger.
+  atteint cette fonction. **Raccord présent dans le WIP et favorable
+  en lecture** ; son rejeu reste nécessaire.
   [Preuve et raccord proposé](../receipts/audit_g4_finm_20261005/cli_mutant/README.md).
 
 **Qualification G4 finale, source 38b76701b.** Les sessions closes
@@ -33,6 +42,7 @@ ci-dessous ont des sources vérifiées et un arrêt ciblé certifié.
 | [Finl](../receipts/audit_g4_finl_20261005/README.md) | 28/28 portes longues hors mutants : onze K10 et dix-sept références FULL | Bilan brut 35/41 : six campagnes mutants u21 sans résultat après échéance ; aucune identité longue manquante |
 | [P10](../receipts/audit_g4_finp10_20261005/README.md) | 4/4 différentiels de la sortie plate : synthétiques et trois trames entières | Sur le même arbre de points natif ; son contrôle propre est dans P9 |
 | [P9](../receipts/audit_g4_finp9_20261005/README.md) | 4/4 différentiels de l’arbre de points : sites, dates, plateaux et parents | Sur le même catalogue et la même tour FULL exportés |
+| [Mesure finale](../receipts/audit_g4_finmesure_20261005/README.md) | 52 appels concordants ; deux contrôles supports W48 conformes | Les 18 prises chaudes K5/W48 dépassent toutes 100 ms pour l’étage `tree` ; points/plat non mesurés |
 
 **Reprise ciblée préparée.** Les 41 absences ordinaires sont onze
 noms CLI −O, répartis 8/11/11/11 entre les quatre profils. La matrice
@@ -80,15 +90,12 @@ périmètre réel et rectifier leur attribution. Points et plat ne sont
 pas mesurés par ce banc.
 [Preuve de source et correction ciblée](../receipts/audit_finmesure_scope_20261005/README.md).
 
-**Le contrat de 100 ms reste ouvert.** La référence FULL qualifiée
-K5/u21/W48 est à 352–412 ms sur trois trames sans sol de la séquence08.
-La qualification de la nouvelle chaîne native complète reste à
-terminer. Les acquis GPU gardent leur périmètre propre. Les reçus
-[A2 antérieur](../receipts/audit_g4_a2_20261005/README.md),
-[W48](../receipts/audit_s7_20261005/README.md),
-[B antérieur](../receipts/audit_g4_b_20261005/README.md) et
-[S antérieur](../receipts/audit_g4_s_20261005/README.md) conservent
-leurs sources et limites ; ils ne sont pas transférés au pin final.
+**Le contrat de 100 ms reste ouvert au pin final.** Les 18 prises
+chaudes K5/W48 dépassent toutes 100 ms pour l’étage `tree` : forêts
+1..5 et verticales, hors catalogue, rattachement et sorties. Réduire
+cet étage reste nécessaire. La qualification attend les reprises
+ciblées ci-dessus. Les reçus antérieurs et les acquis GPU conservent
+leurs sources et leur périmètre ; aucun transfert au pin final.
 
 **Notes de travail et dialogue.**
 

@@ -1,0 +1,2069 @@
+{
+  "archive_sha256": "46fe01d6391bf59a9babf57fec09f60cee02d178da1b2a03541664c81159f62e",
+  "audit_native_or_cloud_runs": 0,
+  "backend": "cpu_reference",
+  "calls": [
+    {
+      "counts": {
+        "births": 897776,
+        "edges": 1541745,
+        "nodes": 1541750
+      },
+      "frame": "ng00",
+      "k": 5,
+      "output": "full",
+      "peaks_bytes": {
+        "cloud": 2393108,
+        "domain": 345352100,
+        "index": 2410268,
+        "output": 243538564,
+        "tree": 362777720,
+        "write": 243538564
+      },
+      "phase": "froid",
+      "prise": 0,
+      "sites": 39885,
+      "stages_ns": {
+        "attach": 0,
+        "cloud": 3128392,
+        "domain": 5331859392,
+        "index": 409391,
+        "output": 0,
+        "total": 11308637862,
+        "tree": 3810945497,
+        "write": 2157055186
+      },
+      "wall_ns": 11315598678,
+      "workers": 1
+    },
+    {
+      "counts": {
+        "balls": 789886,
+        "nodes": 576371,
+        "prior": 576483,
+        "supports": 789889
+      },
+      "frame": "ng00",
+      "k": 5,
+      "output": "supports",
+      "peaks_bytes": {
+        "cloud": 2393108,
+        "domain": 345352100,
+        "index": 2410268,
+        "output": 289592818,
+        "tree": 373564764,
+        "write": 286432702
+      },
+      "phase": "froid",
+      "prise": 0,
+      "sites": 39885,
+      "stages_ns": {
+        "attach": 74197588,
+        "cloud": 3181273,
+        "domain": 5379826150,
+        "index": 405640,
+        "output": 196493795,
+        "total": 9743649522,
+        "tree": 3865308180,
+        "write": 218388242
+      },
+      "wall_ns": 9752035699,
+      "workers": 1
+    },
+    {
+      "counts": {
+        "births": 897776,
+        "edges": 1541745,
+        "nodes": 1541750
+      },
+      "frame": "ng00",
+      "k": 5,
+      "output": "full",
+      "peaks_bytes": {
+        "cloud": 2393108,
+        "domain": 345352100,
+        "index": 2410268,
+        "output": 243538564,
+        "tree": 362777720,
+        "write": 243538564
+      },
+      "phase": "chaud",
+      "prise": 1,
+      "sites": 39885,
+      "stages_ns": {
+        "attach": 0,
+        "cloud": 3253713,
+        "domain": 5320678306,
+        "index": 403920,
+        "output": 0,
+        "total": 11393859688,
+        "tree": 3774336390,
+        "write": 2290423382
+      },
+      "wall_ns": 11401026981,
+      "workers": 1
+    },
+    {
+      "counts": {
+        "balls": 789886,
+        "nodes": 576371,
+        "prior": 576483,
+        "supports": 789889
+      },
+      "frame": "ng00",
+      "k": 5,
+      "output": "supports",
+      "peaks_bytes": {
+        "cloud": 2393108,
+        "domain": 345352100,
+        "index": 2410268,
+        "output": 289592818,
+        "tree": 373564764,
+        "write": 286432702
+      },
+      "phase": "chaud",
+      "prise": 1,
+      "sites": 39885,
+      "stages_ns": {
+        "attach": 72488279,
+        "cloud": 3207681,
+        "domain": 5351822060,
+        "index": 412548,
+        "output": 189886404,
+        "total": 9616109595,
+        "tree": 3776354593,
+        "write": 216996778
+      },
+      "wall_ns": 9624029576,
+      "workers": 1
+    },
+    {
+      "counts": {
+        "births": 897776,
+        "edges": 1541745,
+        "nodes": 1541750
+      },
+      "frame": "ng00",
+      "k": 5,
+      "output": "full",
+      "peaks_bytes": {
+        "cloud": 2393108,
+        "domain": 345352100,
+        "index": 2410268,
+        "output": 243538564,
+        "tree": 362777720,
+        "write": 243538564
+      },
+      "phase": "chaud",
+      "prise": 2,
+      "sites": 39885,
+      "stages_ns": {
+        "attach": 0,
+        "cloud": 3181772,
+        "domain": 5328541785,
+        "index": 408140,
+        "output": 0,
+        "total": 11256078186,
+        "tree": 3764915545,
+        "write": 2154114871
+      },
+      "wall_ns": 11263569249,
+      "workers": 1
+    },
+    {
+      "counts": {
+        "balls": 789886,
+        "nodes": 576371,
+        "prior": 576483,
+        "supports": 789889
+      },
+      "frame": "ng00",
+      "k": 5,
+      "output": "supports",
+      "peaks_bytes": {
+        "cloud": 2393108,
+        "domain": 345352100,
+        "index": 2410268,
+        "output": 289592818,
+        "tree": 373564764,
+        "write": 286432702
+      },
+      "phase": "chaud",
+      "prise": 2,
+      "sites": 39885,
+      "stages_ns": {
+        "attach": 72718160,
+        "cloud": 3175372,
+        "domain": 5354698809,
+        "index": 405190,
+        "output": 184912830,
+        "total": 9641957529,
+        "tree": 3802618616,
+        "write": 218060459
+      },
+      "wall_ns": 9650509463,
+      "workers": 1
+    },
+    {
+      "counts": {
+        "births": 897776,
+        "edges": 1541745,
+        "nodes": 1541750
+      },
+      "frame": "ng00",
+      "k": 5,
+      "output": "full",
+      "peaks_bytes": {
+        "cloud": 2393108,
+        "domain": 345352100,
+        "index": 2410268,
+        "output": 243538564,
+        "tree": 362777720,
+        "write": 243538564
+      },
+      "phase": "chaud",
+      "prise": 3,
+      "sites": 39885,
+      "stages_ns": {
+        "attach": 0,
+        "cloud": 3325922,
+        "domain": 5326602544,
+        "index": 410420,
+        "output": 0,
+        "total": 11244076319,
+        "tree": 3757087831,
+        "write": 2152122139
+      },
+      "wall_ns": 11251523522,
+      "workers": 1
+    },
+    {
+      "counts": {
+        "balls": 789886,
+        "nodes": 576371,
+        "prior": 576483,
+        "supports": 789889
+      },
+      "frame": "ng00",
+      "k": 5,
+      "output": "supports",
+      "peaks_bytes": {
+        "cloud": 2393108,
+        "domain": 345352100,
+        "index": 2410268,
+        "output": 289592818,
+        "tree": 373564764,
+        "write": 286432702
+      },
+      "phase": "chaud",
+      "prise": 3,
+      "sites": 39885,
+      "stages_ns": {
+        "attach": 72533479,
+        "cloud": 3169011,
+        "domain": 5338597000,
+        "index": 405241,
+        "output": 190889074,
+        "total": 9607962830,
+        "tree": 3777244092,
+        "write": 220186430
+      },
+      "wall_ns": 9616537474,
+      "workers": 1
+    },
+    {
+      "counts": {
+        "births": 897776,
+        "edges": 1541745,
+        "nodes": 1541750
+      },
+      "frame": "ng00",
+      "k": 5,
+      "output": "full",
+      "peaks_bytes": {
+        "cloud": 2393108,
+        "domain": 346607940,
+        "index": 2410268,
+        "output": 243538564,
+        "tree": 372019614,
+        "write": 243538564
+      },
+      "phase": "froid",
+      "prise": 0,
+      "sites": 39885,
+      "stages_ns": {
+        "attach": 0,
+        "cloud": 3199332,
+        "domain": 217600658,
+        "index": 409930,
+        "output": 0,
+        "total": 2574718330,
+        "tree": 185886641,
+        "write": 2157304203
+      },
+      "wall_ns": 2585378535,
+      "workers": 48
+    },
+    {
+      "counts": {
+        "balls": 789886,
+        "nodes": 576371,
+        "prior": 576483,
+        "supports": 789889
+      },
+      "frame": "ng00",
+      "k": 5,
+      "output": "supports",
+      "peaks_bytes": {
+        "cloud": 2393108,
+        "domain": 346607940,
+        "index": 2410268,
+        "output": 289619702,
+        "tree": 382806502,
+        "write": 286432702
+      },
+      "phase": "froid",
+      "prise": 0,
+      "sites": 39885,
+      "stages_ns": {
+        "attach": 75120721,
+        "cloud": 3193622,
+        "domain": 213830326,
+        "index": 409970,
+        "output": 44479334,
+        "total": 738093701,
+        "tree": 168106381,
+        "write": 219978950
+      },
+      "wall_ns": 746959546,
+      "workers": 48
+    },
+    {
+      "counts": {
+        "births": 897776,
+        "edges": 1541745,
+        "nodes": 1541750
+      },
+      "frame": "ng00",
+      "k": 5,
+      "output": "full",
+      "peaks_bytes": {
+        "cloud": 2393108,
+        "domain": 346607940,
+        "index": 2410268,
+        "output": 243538564,
+        "tree": 372019458,
+        "write": 243538564
+      },
+      "phase": "chaud",
+      "prise": 1,
+      "sites": 39885,
+      "stages_ns": {
+        "attach": 0,
+        "cloud": 3172862,
+        "domain": 211134045,
+        "index": 409500,
+        "output": 0,
+        "total": 2560433519,
+        "tree": 172929094,
+        "write": 2162616220
+      },
+      "wall_ns": 2568592670,
+      "workers": 48
+    },
+    {
+      "counts": {
+        "balls": 789886,
+        "nodes": 576371,
+        "prior": 576483,
+        "supports": 789889
+      },
+      "frame": "ng00",
+      "k": 5,
+      "output": "supports",
+      "peaks_bytes": {
+        "cloud": 2393108,
+        "domain": 346607940,
+        "index": 2410268,
+        "output": 289619702,
+        "tree": 382806658,
+        "write": 286432702
+      },
+      "phase": "chaud",
+      "prise": 1,
+      "sites": 39885,
+      "stages_ns": {
+        "attach": 76370960,
+        "cloud": 3205315,
+        "domain": 209303936,
+        "index": 408880,
+        "output": 40397197,
+        "total": 733779221,
+        "tree": 170875677,
+        "write": 219735713
+      },
+      "wall_ns": 742333759,
+      "workers": 48
+    },
+    {
+      "counts": {
+        "births": 897776,
+        "edges": 1541745,
+        "nodes": 1541750
+      },
+      "frame": "ng00",
+      "k": 5,
+      "output": "full",
+      "peaks_bytes": {
+        "cloud": 2393108,
+        "domain": 346607940,
+        "index": 2410268,
+        "output": 243538564,
+        "tree": 372019458,
+        "write": 243538564
+      },
+      "phase": "chaud",
+      "prise": 2,
+      "sites": 39885,
+      "stages_ns": {
+        "attach": 0,
+        "cloud": 3168256,
+        "domain": 251394232,
+        "index": 404599,
+        "output": 0,
+        "total": 2584176564,
+        "tree": 163586126,
+        "write": 2155550634
+      },
+      "wall_ns": 2592787093,
+      "workers": 48
+    },
+    {
+      "counts": {
+        "balls": 789886,
+        "nodes": 576371,
+        "prior": 576483,
+        "supports": 789889
+      },
+      "frame": "ng00",
+      "k": 5,
+      "output": "supports",
+      "peaks_bytes": {
+        "cloud": 2393108,
+        "domain": 346607940,
+        "index": 2410268,
+        "output": 289619702,
+        "tree": 382806658,
+        "write": 286432702
+      },
+      "phase": "chaud",
+      "prise": 2,
+      "sites": 39885,
+      "stages_ns": {
+        "attach": 73922413,
+        "cloud": 3292465,
+        "domain": 211333214,
+        "index": 406710,
+        "output": 45282321,
+        "total": 735758238,
+        "tree": 169730958,
+        "write": 218549314
+      },
+      "wall_ns": 744876386,
+      "workers": 48
+    },
+    {
+      "counts": {
+        "births": 897776,
+        "edges": 1541745,
+        "nodes": 1541750
+      },
+      "frame": "ng00",
+      "k": 5,
+      "output": "full",
+      "peaks_bytes": {
+        "cloud": 2393108,
+        "domain": 346607940,
+        "index": 2410268,
+        "output": 243538564,
+        "tree": 372019614,
+        "write": 243538564
+      },
+      "phase": "chaud",
+      "prise": 3,
+      "sites": 39885,
+      "stages_ns": {
+        "attach": 0,
+        "cloud": 3192816,
+        "domain": 221623760,
+        "index": 407870,
+        "output": 0,
+        "total": 2560361102,
+        "tree": 161792149,
+        "write": 2162708801
+      },
+      "wall_ns": 2569456209,
+      "workers": 48
+    },
+    {
+      "counts": {
+        "balls": 789886,
+        "nodes": 576371,
+        "prior": 576483,
+        "supports": 789889
+      },
+      "frame": "ng00",
+      "k": 5,
+      "output": "supports",
+      "peaks_bytes": {
+        "cloud": 2393108,
+        "domain": 346607940,
+        "index": 2410268,
+        "output": 289619702,
+        "tree": 382806502,
+        "write": 286432702
+      },
+      "phase": "chaud",
+      "prise": 3,
+      "sites": 39885,
+      "stages_ns": {
+        "attach": 75414322,
+        "cloud": 3175056,
+        "domain": 241759044,
+        "index": 414950,
+        "output": 48614796,
+        "total": 774946828,
+        "tree": 173168223,
+        "write": 218076005
+      },
+      "wall_ns": 784320136,
+      "workers": 48
+    },
+    {
+      "counts": {
+        "births": 761726,
+        "edges": 1306716,
+        "nodes": 1306721
+      },
+      "frame": "ng01",
+      "k": 5,
+      "output": "full",
+      "peaks_bytes": {
+        "cloud": 2133068,
+        "domain": 293046256,
+        "index": 2114532,
+        "output": 209452316,
+        "tree": 312874754,
+        "write": 209452316
+      },
+      "phase": "froid",
+      "prise": 0,
+      "sites": 35551,
+      "stages_ns": {
+        "attach": 0,
+        "cloud": 2915156,
+        "domain": 4275281003,
+        "index": 348649,
+        "output": 0,
+        "total": 8888825173,
+        "tree": 2769358521,
+        "write": 1837178999
+      },
+      "wall_ns": 8895415205,
+      "workers": 1
+    },
+    {
+      "counts": {
+        "balls": 652958,
+        "nodes": 478265,
+        "prior": 478385,
+        "supports": 652959
+      },
+      "frame": "ng01",
+      "k": 5,
+      "output": "supports",
+      "peaks_bytes": {
+        "cloud": 2133068,
+        "domain": 293046256,
+        "index": 2114532,
+        "output": 246204770,
+        "tree": 321721894,
+        "write": 243592646
+      },
+      "phase": "froid",
+      "prise": 0,
+      "sites": 35551,
+      "stages_ns": {
+        "attach": 58818153,
+        "cloud": 2891007,
+        "domain": 4256977127,
+        "index": 340789,
+        "output": 152857540,
+        "total": 7441451055,
+        "tree": 2791841902,
+        "write": 173910353
+      },
+      "wall_ns": 7448875655,
+      "workers": 1
+    },
+    {
+      "counts": {
+        "births": 761726,
+        "edges": 1306716,
+        "nodes": 1306721
+      },
+      "frame": "ng01",
+      "k": 5,
+      "output": "full",
+      "peaks_bytes": {
+        "cloud": 2133068,
+        "domain": 293046256,
+        "index": 2114532,
+        "output": 209452316,
+        "tree": 312874754,
+        "write": 209452316
+      },
+      "phase": "chaud",
+      "prise": 1,
+      "sites": 35551,
+      "stages_ns": {
+        "attach": 0,
+        "cloud": 2886276,
+        "domain": 4269882835,
+        "index": 346240,
+        "output": 0,
+        "total": 8914213423,
+        "tree": 2800549782,
+        "write": 1837072691
+      },
+      "wall_ns": 8920696022,
+      "workers": 1
+    },
+    {
+      "counts": {
+        "balls": 652958,
+        "nodes": 478265,
+        "prior": 478385,
+        "supports": 652959
+      },
+      "frame": "ng01",
+      "k": 5,
+      "output": "supports",
+      "peaks_bytes": {
+        "cloud": 2133068,
+        "domain": 293046256,
+        "index": 2114532,
+        "output": 246204770,
+        "tree": 321721894,
+        "write": 243592646
+      },
+      "phase": "chaud",
+      "prise": 1,
+      "sites": 35551,
+      "stages_ns": {
+        "attach": 58402368,
+        "cloud": 2884730,
+        "domain": 4255848375,
+        "index": 339460,
+        "output": 151873635,
+        "total": 7432246405,
+        "tree": 2784691622,
+        "write": 174587305
+      },
+      "wall_ns": 7440099545,
+      "workers": 1
+    },
+    {
+      "counts": {
+        "births": 761726,
+        "edges": 1306716,
+        "nodes": 1306721
+      },
+      "frame": "ng01",
+      "k": 5,
+      "output": "full",
+      "peaks_bytes": {
+        "cloud": 2133068,
+        "domain": 293046256,
+        "index": 2114532,
+        "output": 209452316,
+        "tree": 312874754,
+        "write": 209452316
+      },
+      "phase": "chaud",
+      "prise": 2,
+      "sites": 35551,
+      "stages_ns": {
+        "attach": 0,
+        "cloud": 2850920,
+        "domain": 4275602275,
+        "index": 339880,
+        "output": 0,
+        "total": 8883330719,
+        "tree": 2765540802,
+        "write": 1835499912
+      },
+      "wall_ns": 8889699329,
+      "workers": 1
+    },
+    {
+      "counts": {
+        "balls": 652958,
+        "nodes": 478265,
+        "prior": 478385,
+        "supports": 652959
+      },
+      "frame": "ng01",
+      "k": 5,
+      "output": "supports",
+      "peaks_bytes": {
+        "cloud": 2133068,
+        "domain": 293046256,
+        "index": 2114532,
+        "output": 246204770,
+        "tree": 321721894,
+        "write": 243592646
+      },
+      "phase": "chaud",
+      "prise": 2,
+      "sites": 35551,
+      "stages_ns": {
+        "attach": 58771438,
+        "cloud": 2799880,
+        "domain": 4260337976,
+        "index": 340180,
+        "output": 153256706,
+        "total": 7448652585,
+        "tree": 2795827681,
+        "write": 173965794
+      },
+      "wall_ns": 7455984015,
+      "workers": 1
+    },
+    {
+      "counts": {
+        "births": 761726,
+        "edges": 1306716,
+        "nodes": 1306721
+      },
+      "frame": "ng01",
+      "k": 5,
+      "output": "full",
+      "peaks_bytes": {
+        "cloud": 2133068,
+        "domain": 293046256,
+        "index": 2114532,
+        "output": 209452316,
+        "tree": 312874754,
+        "write": 209452316
+      },
+      "phase": "chaud",
+      "prise": 3,
+      "sites": 35551,
+      "stages_ns": {
+        "attach": 0,
+        "cloud": 2822950,
+        "domain": 4302153644,
+        "index": 341000,
+        "output": 0,
+        "total": 8940128162,
+        "tree": 2796834421,
+        "write": 1835109898
+      },
+      "wall_ns": 8946125292,
+      "workers": 1
+    },
+    {
+      "counts": {
+        "balls": 652958,
+        "nodes": 478265,
+        "prior": 478385,
+        "supports": 652959
+      },
+      "frame": "ng01",
+      "k": 5,
+      "output": "supports",
+      "peaks_bytes": {
+        "cloud": 2133068,
+        "domain": 293046256,
+        "index": 2114532,
+        "output": 246204770,
+        "tree": 321721894,
+        "write": 243592646
+      },
+      "phase": "chaud",
+      "prise": 3,
+      "sites": 35551,
+      "stages_ns": {
+        "attach": 58631854,
+        "cloud": 2828930,
+        "domain": 4267687123,
+        "index": 339090,
+        "output": 152086934,
+        "total": 7449227510,
+        "tree": 2790287248,
+        "write": 173851291
+      },
+      "wall_ns": 7456958869,
+      "workers": 1
+    },
+    {
+      "counts": {
+        "births": 761726,
+        "edges": 1306716,
+        "nodes": 1306721
+      },
+      "frame": "ng01",
+      "k": 5,
+      "output": "full",
+      "peaks_bytes": {
+        "cloud": 2133068,
+        "domain": 294302096,
+        "index": 2114532,
+        "output": 209452316,
+        "tree": 321082450,
+        "write": 209452316
+      },
+      "phase": "froid",
+      "prise": 0,
+      "sites": 35551,
+      "stages_ns": {
+        "attach": 0,
+        "cloud": 2855840,
+        "domain": 206427998,
+        "index": 353880,
+        "output": 0,
+        "total": 2160617725,
+        "tree": 125396637,
+        "write": 1816847590
+      },
+      "wall_ns": 2170029223,
+      "workers": 48
+    },
+    {
+      "counts": {
+        "balls": 652958,
+        "nodes": 478265,
+        "prior": 478385,
+        "supports": 652959
+      },
+      "frame": "ng01",
+      "k": 5,
+      "output": "supports",
+      "peaks_bytes": {
+        "cloud": 2133068,
+        "domain": 294302096,
+        "index": 2114532,
+        "output": 246218494,
+        "tree": 329929642,
+        "write": 243592646
+      },
+      "phase": "froid",
+      "prise": 0,
+      "sites": 35551,
+      "stages_ns": {
+        "attach": 61179724,
+        "cloud": 2847889,
+        "domain": 185950691,
+        "index": 342970,
+        "output": 33829226,
+        "total": 604943866,
+        "tree": 138631315,
+        "write": 169768753
+      },
+      "wall_ns": 613153716,
+      "workers": 48
+    },
+    {
+      "counts": {
+        "births": 761726,
+        "edges": 1306716,
+        "nodes": 1306721
+      },
+      "frame": "ng01",
+      "k": 5,
+      "output": "full",
+      "peaks_bytes": {
+        "cloud": 2133068,
+        "domain": 294302096,
+        "index": 2114532,
+        "output": 209452316,
+        "tree": 321082398,
+        "write": 209452316
+      },
+      "phase": "chaud",
+      "prise": 1,
+      "sites": 35551,
+      "stages_ns": {
+        "attach": 0,
+        "cloud": 2845259,
+        "domain": 179856661,
+        "index": 350560,
+        "output": 0,
+        "total": 2152368104,
+        "tree": 141417746,
+        "write": 1818651319
+      },
+      "wall_ns": 2160527443,
+      "workers": 48
+    },
+    {
+      "counts": {
+        "balls": 652958,
+        "nodes": 478265,
+        "prior": 478385,
+        "supports": 652959
+      },
+      "frame": "ng01",
+      "k": 5,
+      "output": "supports",
+      "peaks_bytes": {
+        "cloud": 2133068,
+        "domain": 294302096,
+        "index": 2114532,
+        "output": 246218494,
+        "tree": 329929590,
+        "write": 243592646
+      },
+      "phase": "chaud",
+      "prise": 1,
+      "sites": 35551,
+      "stages_ns": {
+        "attach": 60741873,
+        "cloud": 2951950,
+        "domain": 197632969,
+        "index": 341830,
+        "output": 39404076,
+        "total": 626344834,
+        "tree": 142210346,
+        "write": 170298762
+      },
+      "wall_ns": 635128033,
+      "workers": 48
+    },
+    {
+      "counts": {
+        "births": 761726,
+        "edges": 1306716,
+        "nodes": 1306721
+      },
+      "frame": "ng01",
+      "k": 5,
+      "output": "full",
+      "peaks_bytes": {
+        "cloud": 2133068,
+        "domain": 294302096,
+        "index": 2114532,
+        "output": 209452316,
+        "tree": 321082450,
+        "write": 209452316
+      },
+      "phase": "chaud",
+      "prise": 2,
+      "sites": 35551,
+      "stages_ns": {
+        "attach": 0,
+        "cloud": 2834660,
+        "domain": 174500401,
+        "index": 340930,
+        "output": 0,
+        "total": 2126030767,
+        "tree": 118400858,
+        "write": 1820411819
+      },
+      "wall_ns": 2134893706,
+      "workers": 48
+    },
+    {
+      "counts": {
+        "balls": 652958,
+        "nodes": 478265,
+        "prior": 478385,
+        "supports": 652959
+      },
+      "frame": "ng01",
+      "k": 5,
+      "output": "supports",
+      "peaks_bytes": {
+        "cloud": 2133068,
+        "domain": 294302096,
+        "index": 2114532,
+        "output": 246218494,
+        "tree": 329929590,
+        "write": 243592646
+      },
+      "phase": "chaud",
+      "prise": 2,
+      "sites": 35551,
+      "stages_ns": {
+        "attach": 61488004,
+        "cloud": 2830999,
+        "domain": 176721782,
+        "index": 351260,
+        "output": 35405166,
+        "total": 600646987,
+        "tree": 139025005,
+        "write": 171297552
+      },
+      "wall_ns": 609303176,
+      "workers": 48
+    },
+    {
+      "counts": {
+        "births": 761726,
+        "edges": 1306716,
+        "nodes": 1306721
+      },
+      "frame": "ng01",
+      "k": 5,
+      "output": "full",
+      "peaks_bytes": {
+        "cloud": 2133068,
+        "domain": 294302096,
+        "index": 2114532,
+        "output": 209452316,
+        "tree": 321082450,
+        "write": 209452316
+      },
+      "phase": "chaud",
+      "prise": 3,
+      "sites": 35551,
+      "stages_ns": {
+        "attach": 0,
+        "cloud": 2871200,
+        "domain": 185431370,
+        "index": 351680,
+        "output": 0,
+        "total": 2160264275,
+        "tree": 139189856,
+        "write": 1822937300
+      },
+      "wall_ns": 2168908004,
+      "workers": 48
+    },
+    {
+      "counts": {
+        "balls": 652958,
+        "nodes": 478265,
+        "prior": 478385,
+        "supports": 652959
+      },
+      "frame": "ng01",
+      "k": 5,
+      "output": "supports",
+      "peaks_bytes": {
+        "cloud": 2133068,
+        "domain": 294302096,
+        "index": 2114532,
+        "output": 246218494,
+        "tree": 329929590,
+        "write": 243592646
+      },
+      "phase": "chaud",
+      "prise": 3,
+      "sites": 35551,
+      "stages_ns": {
+        "attach": 61358304,
+        "cloud": 2859460,
+        "domain": 188240340,
+        "index": 341390,
+        "output": 37700736,
+        "total": 593893398,
+        "tree": 119295227,
+        "write": 170354722
+      },
+      "wall_ns": 602892567,
+      "workers": 48
+    },
+    {
+      "counts": {
+        "births": 982670,
+        "edges": 1683083,
+        "nodes": 1683088
+      },
+      "frame": "ng02",
+      "k": 5,
+      "output": "full",
+      "peaks_bytes": {
+        "cloud": 2750708,
+        "domain": 369841748,
+        "index": 2672508,
+        "output": 257430652,
+        "tree": 385837217,
+        "write": 257430652
+      },
+      "phase": "froid",
+      "prise": 0,
+      "sites": 45845,
+      "stages_ns": {
+        "attach": 0,
+        "cloud": 3768370,
+        "domain": 5127605473,
+        "index": 407230,
+        "output": 0,
+        "total": 10748485295,
+        "tree": 3251230559,
+        "write": 2362346834
+      },
+      "wall_ns": 10757321074,
+      "workers": 1
+    },
+    {
+      "counts": {
+        "balls": 832386,
+        "nodes": 609376,
+        "prior": 610022,
+        "supports": 832394
+      },
+      "frame": "ng02",
+      "k": 5,
+      "output": "supports",
+      "peaks_bytes": {
+        "cloud": 2750708,
+        "domain": 369841748,
+        "index": 2672508,
+        "output": 303423994,
+        "tree": 397066253,
+        "write": 300093878
+      },
+      "phase": "froid",
+      "prise": 0,
+      "sites": 45845,
+      "stages_ns": {
+        "attach": 76646982,
+        "cloud": 3657129,
+        "domain": 5143636932,
+        "index": 408070,
+        "output": 184832660,
+        "total": 8906439197,
+        "tree": 3257986919,
+        "write": 234702696
+      },
+      "wall_ns": 8915079686,
+      "workers": 1
+    },
+    {
+      "counts": {
+        "births": 982670,
+        "edges": 1683083,
+        "nodes": 1683088
+      },
+      "frame": "ng02",
+      "k": 5,
+      "output": "full",
+      "peaks_bytes": {
+        "cloud": 2750708,
+        "domain": 369841748,
+        "index": 2672508,
+        "output": 257430652,
+        "tree": 385837217,
+        "write": 257430652
+      },
+      "phase": "chaud",
+      "prise": 1,
+      "sites": 45845,
+      "stages_ns": {
+        "attach": 0,
+        "cloud": 3624159,
+        "domain": 5110199595,
+        "index": 413760,
+        "output": 0,
+        "total": 10719457208,
+        "tree": 3239218861,
+        "write": 2360210303
+      },
+      "wall_ns": 10731971276,
+      "workers": 1
+    },
+    {
+      "counts": {
+        "balls": 832386,
+        "nodes": 609376,
+        "prior": 610022,
+        "supports": 832394
+      },
+      "frame": "ng02",
+      "k": 5,
+      "output": "supports",
+      "peaks_bytes": {
+        "cloud": 2750708,
+        "domain": 369841748,
+        "index": 2672508,
+        "output": 303423994,
+        "tree": 397066253,
+        "write": 300093878
+      },
+      "phase": "chaud",
+      "prise": 1,
+      "sites": 45845,
+      "stages_ns": {
+        "attach": 77886942,
+        "cloud": 3652260,
+        "domain": 5141051332,
+        "index": 410010,
+        "output": 186001881,
+        "total": 8909149647,
+        "tree": 3260218508,
+        "write": 234980495
+      },
+      "wall_ns": 8918149306,
+      "workers": 1
+    },
+    {
+      "counts": {
+        "births": 982670,
+        "edges": 1683083,
+        "nodes": 1683088
+      },
+      "frame": "ng02",
+      "k": 5,
+      "output": "full",
+      "peaks_bytes": {
+        "cloud": 2750708,
+        "domain": 369841748,
+        "index": 2672508,
+        "output": 257430652,
+        "tree": 385837217,
+        "write": 257430652
+      },
+      "phase": "chaud",
+      "prise": 2,
+      "sites": 45845,
+      "stages_ns": {
+        "attach": 0,
+        "cloud": 3639690,
+        "domain": 5092854847,
+        "index": 407930,
+        "output": 0,
+        "total": 10684269001,
+        "tree": 3220594731,
+        "write": 2363554114
+      },
+      "wall_ns": 10693378140,
+      "workers": 1
+    },
+    {
+      "counts": {
+        "balls": 832386,
+        "nodes": 609376,
+        "prior": 610022,
+        "supports": 832394
+      },
+      "frame": "ng02",
+      "k": 5,
+      "output": "supports",
+      "peaks_bytes": {
+        "cloud": 2750708,
+        "domain": 369841748,
+        "index": 2672508,
+        "output": 303423994,
+        "tree": 397066253,
+        "write": 300093878
+      },
+      "phase": "chaud",
+      "prise": 2,
+      "sites": 45845,
+      "stages_ns": {
+        "attach": 76869866,
+        "cloud": 3659799,
+        "domain": 5128775927,
+        "index": 413830,
+        "output": 190614305,
+        "total": 8889367270,
+        "tree": 3249984576,
+        "write": 234583848
+      },
+      "wall_ns": 8897882139,
+      "workers": 1
+    },
+    {
+      "counts": {
+        "births": 982670,
+        "edges": 1683083,
+        "nodes": 1683088
+      },
+      "frame": "ng02",
+      "k": 5,
+      "output": "full",
+      "peaks_bytes": {
+        "cloud": 2750708,
+        "domain": 369841748,
+        "index": 2672508,
+        "output": 257430652,
+        "tree": 385837217,
+        "write": 257430652
+      },
+      "phase": "chaud",
+      "prise": 3,
+      "sites": 45845,
+      "stages_ns": {
+        "attach": 0,
+        "cloud": 3771549,
+        "domain": 5124752038,
+        "index": 409890,
+        "output": 0,
+        "total": 10769088662,
+        "tree": 3275343880,
+        "write": 2361868355
+      },
+      "wall_ns": 10777499590,
+      "workers": 1
+    },
+    {
+      "counts": {
+        "balls": 832386,
+        "nodes": 609376,
+        "prior": 610022,
+        "supports": 832394
+      },
+      "frame": "ng02",
+      "k": 5,
+      "output": "supports",
+      "peaks_bytes": {
+        "cloud": 2750708,
+        "domain": 369841748,
+        "index": 2672508,
+        "output": 303423994,
+        "tree": 397066253,
+        "write": 300093878
+      },
+      "phase": "chaud",
+      "prise": 3,
+      "sites": 45845,
+      "stages_ns": {
+        "attach": 76059036,
+        "cloud": 3649060,
+        "domain": 5129326656,
+        "index": 411800,
+        "output": 191615306,
+        "total": 8884256021,
+        "tree": 3243399857,
+        "write": 235320277
+      },
+      "wall_ns": 8892739730,
+      "workers": 1
+    },
+    {
+      "counts": {
+        "births": 982670,
+        "edges": 1683083,
+        "nodes": 1683088
+      },
+      "frame": "ng02",
+      "k": 5,
+      "output": "full",
+      "peaks_bytes": {
+        "cloud": 2750708,
+        "domain": 371097588,
+        "index": 2672508,
+        "output": 257430652,
+        "tree": 396441613,
+        "write": 257430652
+      },
+      "phase": "froid",
+      "prise": 0,
+      "sites": 45845,
+      "stages_ns": {
+        "attach": 0,
+        "cloud": 4101809,
+        "domain": 214938291,
+        "index": 416050,
+        "output": 0,
+        "total": 2752793475,
+        "tree": 164799861,
+        "write": 2357439995
+      },
+      "wall_ns": 2761805303,
+      "workers": 48
+    },
+    {
+      "counts": {
+        "balls": 832386,
+        "nodes": 609376,
+        "prior": 610022,
+        "supports": 832394
+      },
+      "frame": "ng02",
+      "k": 5,
+      "output": "supports",
+      "peaks_bytes": {
+        "cloud": 2750708,
+        "domain": 371097588,
+        "index": 2672508,
+        "output": 303450878,
+        "tree": 407670753,
+        "write": 300093878
+      },
+      "phase": "froid",
+      "prise": 0,
+      "sites": 45845,
+      "stages_ns": {
+        "attach": 79453376,
+        "cloud": 3675879,
+        "domain": 222239120,
+        "index": 409040,
+        "output": 47546521,
+        "total": 758950643,
+        "tree": 156395132,
+        "write": 234373648
+      },
+      "wall_ns": 769093022,
+      "workers": 48
+    },
+    {
+      "counts": {
+        "births": 982670,
+        "edges": 1683083,
+        "nodes": 1683088
+      },
+      "frame": "ng02",
+      "k": 5,
+      "output": "full",
+      "peaks_bytes": {
+        "cloud": 2750708,
+        "domain": 371097588,
+        "index": 2672508,
+        "output": 257430652,
+        "tree": 396441561,
+        "write": 257430652
+      },
+      "phase": "chaud",
+      "prise": 1,
+      "sites": 45845,
+      "stages_ns": {
+        "attach": 0,
+        "cloud": 3838649,
+        "domain": 244803646,
+        "index": 421830,
+        "output": 0,
+        "total": 2768900011,
+        "tree": 150360223,
+        "write": 2358244464
+      },
+      "wall_ns": 2778906539,
+      "workers": 48
+    },
+    {
+      "counts": {
+        "balls": 832386,
+        "nodes": 609376,
+        "prior": 610022,
+        "supports": 832394
+      },
+      "frame": "ng02",
+      "k": 5,
+      "output": "supports",
+      "peaks_bytes": {
+        "cloud": 2750708,
+        "domain": 371097588,
+        "index": 2672508,
+        "output": 303450878,
+        "tree": 407670649,
+        "write": 300093878
+      },
+      "phase": "chaud",
+      "prise": 1,
+      "sites": 45845,
+      "stages_ns": {
+        "attach": 80227326,
+        "cloud": 3783370,
+        "domain": 218824290,
+        "index": 408290,
+        "output": 50956241,
+        "total": 753017555,
+        "tree": 149718213,
+        "write": 234750597
+      },
+      "wall_ns": 763773512,
+      "workers": 48
+    },
+    {
+      "counts": {
+        "births": 982670,
+        "edges": 1683083,
+        "nodes": 1683088
+      },
+      "frame": "ng02",
+      "k": 5,
+      "output": "full",
+      "peaks_bytes": {
+        "cloud": 2750708,
+        "domain": 371097588,
+        "index": 2672508,
+        "output": 257430652,
+        "tree": 396441769,
+        "write": 257430652
+      },
+      "phase": "chaud",
+      "prise": 2,
+      "sites": 45845,
+      "stages_ns": {
+        "attach": 0,
+        "cloud": 3789149,
+        "domain": 219159061,
+        "index": 415930,
+        "output": 0,
+        "total": 2763522283,
+        "tree": 165583320,
+        "write": 2364178435
+      },
+      "wall_ns": 2773750232,
+      "workers": 48
+    },
+    {
+      "counts": {
+        "balls": 832386,
+        "nodes": 609376,
+        "prior": 610022,
+        "supports": 832394
+      },
+      "frame": "ng02",
+      "k": 5,
+      "output": "supports",
+      "peaks_bytes": {
+        "cloud": 2750708,
+        "domain": 371097588,
+        "index": 2672508,
+        "output": 303450878,
+        "tree": 407670649,
+        "write": 300093878
+      },
+      "phase": "chaud",
+      "prise": 2,
+      "sites": 45845,
+      "stages_ns": {
+        "attach": 81066816,
+        "cloud": 3826829,
+        "domain": 251756215,
+        "index": 424080,
+        "output": 48857831,
+        "total": 795324327,
+        "tree": 158924001,
+        "write": 234943198
+      },
+      "wall_ns": 805225884,
+      "workers": 48
+    },
+    {
+      "counts": {
+        "births": 982670,
+        "edges": 1683083,
+        "nodes": 1683088
+      },
+      "frame": "ng02",
+      "k": 5,
+      "output": "full",
+      "peaks_bytes": {
+        "cloud": 2750708,
+        "domain": 371097588,
+        "index": 2672508,
+        "output": 257430652,
+        "tree": 396441457,
+        "write": 257430652
+      },
+      "phase": "chaud",
+      "prise": 3,
+      "sites": 45845,
+      "stages_ns": {
+        "attach": 0,
+        "cloud": 3649679,
+        "domain": 230472979,
+        "index": 413230,
+        "output": 0,
+        "total": 2759220405,
+        "tree": 150692372,
+        "write": 2362660577
+      },
+      "wall_ns": 2769463774,
+      "workers": 48
+    },
+    {
+      "counts": {
+        "balls": 832386,
+        "nodes": 609376,
+        "prior": 610022,
+        "supports": 832394
+      },
+      "frame": "ng02",
+      "k": 5,
+      "output": "supports",
+      "peaks_bytes": {
+        "cloud": 2750708,
+        "domain": 371097588,
+        "index": 2672508,
+        "output": 303450878,
+        "tree": 407670649,
+        "write": 300093878
+      },
+      "phase": "chaud",
+      "prise": 3,
+      "sites": 45845,
+      "stages_ns": {
+        "attach": 80441406,
+        "cloud": 3757839,
+        "domain": 218694301,
+        "index": 412950,
+        "output": 46081482,
+        "total": 774137151,
+        "tree": 174149118,
+        "write": 235007547
+      },
+      "wall_ns": 783899549,
+      "workers": 48
+    },
+    {
+      "counts": {
+        "births": 4414230,
+        "edges": 7426205,
+        "nodes": 7426215
+      },
+      "frame": "ng00",
+      "k": 10,
+      "output": "full",
+      "peaks_bytes": {
+        "cloud": 2393108,
+        "domain": 1538132528,
+        "index": 2410268,
+        "output": 1277870140,
+        "tree": 2041053321,
+        "write": 1277870140
+      },
+      "phase": "froid",
+      "prise": 0,
+      "sites": 39885,
+      "stages_ns": {
+        "attach": 0,
+        "cloud": 3267979,
+        "domain": 1740848707,
+        "index": 404060,
+        "output": 0,
+        "total": 14330852089,
+        "tree": 1623119638,
+        "write": 10910959831
+      },
+      "wall_ns": 14361809746,
+      "workers": 48
+    },
+    {
+      "counts": {
+        "balls": 2117675,
+        "nodes": 1638573,
+        "prior": 1638612,
+        "supports": 2117676
+      },
+      "frame": "ng00",
+      "k": 10,
+      "output": "supports",
+      "peaks_bytes": {
+        "cloud": 2393108,
+        "domain": 1538132528,
+        "index": 2410268,
+        "output": 1144137595,
+        "tree": 2070039497,
+        "write": 1135639439
+      },
+      "phase": "froid",
+      "prise": 0,
+      "sites": 39885,
+      "stages_ns": {
+        "attach": 246516175,
+        "cloud": 3173920,
+        "domain": 1734846453,
+        "index": 410480,
+        "output": 189365701,
+        "total": 4637219908,
+        "tree": 1664618540,
+        "write": 748688224
+      },
+      "wall_ns": 4666829615,
+      "workers": 48
+    },
+    {
+      "counts": {
+        "births": 4414230,
+        "edges": 7426205,
+        "nodes": 7426215
+      },
+      "frame": "ng00",
+      "k": 10,
+      "output": "full",
+      "peaks_bytes": {
+        "cloud": 2393108,
+        "domain": 1538132528,
+        "index": 2410268,
+        "output": 1277870140,
+        "tree": 2041053633,
+        "write": 1277870140
+      },
+      "phase": "chaud",
+      "prise": 1,
+      "sites": 39885,
+      "stages_ns": {
+        "attach": 0,
+        "cloud": 3243440,
+        "domain": 1739377402,
+        "index": 405330,
+        "output": 0,
+        "total": 14309944942,
+        "tree": 1654481171,
+        "write": 10863675954
+      },
+      "wall_ns": 14339057100,
+      "workers": 48
+    },
+    {
+      "counts": {
+        "balls": 2117675,
+        "nodes": 1638573,
+        "prior": 1638612,
+        "supports": 2117676
+      },
+      "frame": "ng00",
+      "k": 10,
+      "output": "supports",
+      "peaks_bytes": {
+        "cloud": 2393108,
+        "domain": 1538132528,
+        "index": 2410268,
+        "output": 1144137595,
+        "tree": 2070039497,
+        "write": 1135639439
+      },
+      "phase": "chaud",
+      "prise": 1,
+      "sites": 39885,
+      "stages_ns": {
+        "attach": 241091795,
+        "cloud": 3170220,
+        "domain": 1717877265,
+        "index": 408530,
+        "output": 188978911,
+        "total": 4589037283,
+        "tree": 1654966421,
+        "write": 745494984
+      },
+      "wall_ns": 4612547210,
+      "workers": 48
+    }
+  ],
+  "commands": [
+    {
+      "exit_code": 0,
+      "name": "mesure_l2",
+      "status": "ok",
+      "stderr_sha256": "68fe400e79de56acff192d0f68c847d418215934fafd4b7d8d5f0594edd0192c",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "exit_code": 0,
+      "name": "supports_w48_ng02",
+      "status": "ok",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "a3cedb38cc5d2d821e6ef99d8bd0542b9b17bd2f2084543974b143c27c6dfc8f"
+    },
+    {
+      "exit_code": 0,
+      "name": "supports_w48_ng00",
+      "status": "ok",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "3a60ca57bfc9f9d3c2b579ffd9e7c6fe3a3bc56c2fd2f5e0518b03b23bce76ee"
+    }
+  ],
+  "data_manifest_sha256": "826643041e3336c1f0582e687a6c47595a3926e7a8f0541232282a9f7b9a6095",
+  "data_verified_remote": true,
+  "delivered_data_names": [
+    "lidar_ng00.ids.u32le",
+    "lidar_ng00.u32le",
+    "lidar_ng01.ids.u32le",
+    "lidar_ng01.u32le",
+    "lidar_ng02.ids.u32le",
+    "lidar_ng02.u32le",
+    "manifest.json",
+    "uniform_u18_n16000.ids.u32le",
+    "uniform_u18_n16000.u32le",
+    "uniform_u18_n32000.ids.u32le",
+    "uniform_u18_n32000.u32le",
+    "uniform_u18_n8000.ids.u32le",
+    "uniform_u18_n8000.u32le"
+  ],
+  "done": "0",
+  "global_qualification_complete": false,
+  "identity_groups": [
+    {
+      "calls": 8,
+      "file_bytes": 300883482,
+      "file_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+      "frame": "ng00",
+      "k": 5,
+      "manifest_sha256": "aabd6491db9904bca6c4a6fed47a6b6a10e4a5376a8a88861ed1e63818c3dda5",
+      "output": "full",
+      "tree_k_sha256": "a4425cb5cedd255d86c90e706ef3ce66a72ce4a3ee227b06e5e85698859b7348",
+      "workers": [
+        1,
+        48
+      ]
+    },
+    {
+      "calls": 8,
+      "file_bytes": 30837304,
+      "file_sha256": "830db973140e720d501ae49e8ccfb1cd86aa7df0f4ca5d39c1a9e3c533ce3921",
+      "frame": "ng00",
+      "k": 5,
+      "manifest_sha256": "d7c3107b71b3fdac8655806d5928b868cb552991127bfd32bf9fd9cda123ccdc",
+      "output": "supports",
+      "tree_k_sha256": "a4425cb5cedd255d86c90e706ef3ce66a72ce4a3ee227b06e5e85698859b7348",
+      "workers": [
+        1,
+        48
+      ]
+    },
+    {
+      "calls": 2,
+      "file_bytes": 1457125554,
+      "file_sha256": "61a4245b91d9a4fdad012f0a2e26a63c3e48db1d46a180db756f2c4e4aa77295",
+      "frame": "ng00",
+      "k": 10,
+      "manifest_sha256": "41cf379c59d99aabec0112cc1347c77e63cc554a11aa6f4bd575f14e8286d220",
+      "output": "full",
+      "tree_k_sha256": "c46e51afcf27042f353b7a6a678517db9a14924309905cf63bdcbe3221cd7fd9",
+      "workers": [
+        48
+      ]
+    },
+    {
+      "calls": 2,
+      "file_bytes": 86459568,
+      "file_sha256": "96dfafc70c2f3da4bb929d22efdf18590232000b72cb362fbfb36bc564eefec6",
+      "frame": "ng00",
+      "k": 10,
+      "manifest_sha256": "70140611a38161c09a57d3b3cb88b9f584f377441a5e5ab5c1abe9401752e2ec",
+      "output": "supports",
+      "tree_k_sha256": "c46e51afcf27042f353b7a6a678517db9a14924309905cf63bdcbe3221cd7fd9",
+      "workers": [
+        48
+      ]
+    },
+    {
+      "calls": 8,
+      "file_bytes": 255161594,
+      "file_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+      "frame": "ng01",
+      "k": 5,
+      "manifest_sha256": "f1421a7121ad110f5dde1bc805943a6e5ab4bc4b36007e5df30f27cd544aa699",
+      "output": "full",
+      "tree_k_sha256": "cb91a83cde409fccf4d179240c2df386ab5e340b01815e908256a30ca31c3f2e",
+      "workers": [
+        1,
+        48
+      ]
+    },
+    {
+      "calls": 8,
+      "file_bytes": 25503976,
+      "file_sha256": "ed899fede2bbe76128d98b4aa334d61c642ef836c9f13d54941fd38e89a9233f",
+      "frame": "ng01",
+      "k": 5,
+      "manifest_sha256": "e2a2bda5deae94bf5cabad0f0aaf7536b12478aa12672fee568d90eb3a755d85",
+      "output": "supports",
+      "tree_k_sha256": "cb91a83cde409fccf4d179240c2df386ab5e340b01815e908256a30ca31c3f2e",
+      "workers": [
+        1,
+        48
+      ]
+    },
+    {
+      "calls": 8,
+      "file_bytes": 328855058,
+      "file_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+      "frame": "ng02",
+      "k": 5,
+      "manifest_sha256": "78fd1636271ffe790096251dfdb05cb41faeadd7a322ccd0172c9433ab9f9d3d",
+      "output": "full",
+      "tree_k_sha256": "40b01e8514109ab8e0b3b717161f1f05698193eadc4f097d3aa832a607832229",
+      "workers": [
+        1,
+        48
+      ]
+    },
+    {
+      "calls": 8,
+      "file_bytes": 32463880,
+      "file_sha256": "28532835cc5915f81f94eec3eed367479ed1312addae86740da5eefbd43363bb",
+      "frame": "ng02",
+      "k": 5,
+      "manifest_sha256": "dd37ab7a382bd1eeef96f6d0345b68860b52cc3e74787f8c59382361cb065b2b",
+      "output": "supports",
+      "tree_k_sha256": "40b01e8514109ab8e0b3b717161f1f05698193eadc4f097d3aa832a607832229",
+      "workers": [
+        1,
+        48
+      ]
+    }
+  ],
+  "limits": [
+    "Valeurs conservees attribuees au commit du recu 38b76701b ; annotation b319efc84 et decision build_order_par_defaut obsoletees, non utilisees comme conclusions.",
+    "Mesure FULL versus supports/L2b : les deux voies construisent FULL/16379, pas order_tree/7035, points ou plat.",
+    "52 appels observes : 48 K5 sur trois trames a W1/W48, puis 4 K10 descriptifs sur ng00 W48 seulement.",
+    "Identite du fichier et manifeste entre prises et W pour une meme sortie ; seule tree_k_sha256 est commune entre FULL et supports.",
+    "Premier appel dit froid : entree fraichement ouverte, cache non vide ; aucune purge de cache certifiee.",
+    "18 prises chaudes K5/W48 au-dessus de 100ms pour tree et total ; aucun contrat100ms acquis ni comparaison HDBSCAN/GPU.",
+    "Qualification globale ouverte : 41 occurrences ordinaires manquantes, attentes supports_route u18/u24 et campagnes mutants API/CLI restent distinctes.",
+    "Rejeu dependant des archives locales et du commit Git ; aucun journal brut, binaire natif ou octet LiDAR copie."
+  ],
+  "measure": {
+    "all_calls_ok": true,
+    "binary_sha256": "206ea77a81c7c4201b37a5322743ab25bb0cf3a80b9c2a1e5e56010bd6eaa929",
+    "configuration": {
+      "cold": "premier appel de la configuration, cache non vide",
+      "frames": [
+        "ng00",
+        "ng01",
+        "ng02"
+      ],
+      "k": 5,
+      "k10": "ng00",
+      "prises": 3,
+      "workers": [
+        1,
+        48
+      ]
+    },
+    "defects": [],
+    "descriptive_k10_calls": 4,
+    "json_member": "results/cmd/000_mesure_l2/files/sorties_g4.json",
+    "json_sha256": "510e9d33449b686974c9b2df27e4ca9b057ae9fea64de5b5783b1a3dc809d5c8",
+    "k5_calls": 48,
+    "masks_confirmed_by_pinned_route": {
+      "full": 16379,
+      "supports": 16379
+    },
+    "official_identity_check": "conforme",
+    "total_calls": 52
+  },
+  "observed_measurement_scope_valid": true,
+  "obsolete_annotations": {
+    "authoritative_source_commit": "38b76701b9b0198fc1c37afe16e1480e638e513c",
+    "decision_applicable": false,
+    "declared_commit": "b319efc84",
+    "declared_commit_is_execution_source": false,
+    "declared_decision": "build_order_par_defaut",
+    "reason": "Les deux voies mesurees construisent FULL/16379 ; aucun build_order/7035 mesure."
+  },
+  "package_sha256": "cca3c3105a654426127fca54362c1c6954701224c4a0c3bd3db9ae05752a2354",
+  "phase": "exploration_v11_hors_registre",
+  "plan_sha256": "6810edeb451e85f69d58200f105d480270654ac4a78ae7f960232c7c7d367e8d",
+  "profile": "quantized_u21_input_only",
+  "public_status": "not_claimed",
+  "receipt_sha256": "46061521da1ebc1069ba74e897d1dae8fb4ca88faec8ef18fc9cda89b33e7027",
+  "receipt_status": "completed",
+  "schema": "ehgp.v11.audit.finmesure_observed_read.v1",
+  "session": "v11.20261005.claudefinmesure",
+  "source_commit": "38b76701b9b0198fc1c37afe16e1480e638e513c",
+  "source_contracts": {
+    "morsehgp3D_v11/CMakeLists.txt": {
+      "sha256": "82fa1054e14a2bf16e28195cac32a4d81dec56bb81d6481d9d9214d5c87f555d"
+    },
+    "morsehgp3D_v11/bench/sorties_g4.py": {
+      "sha256": "1a94d049b06379bbd7a067f2723a6f159240fb7c635cf8ce5be625057f0c1da6"
+    },
+    "morsehgp3D_v11/cli/mhgp11.cpp": {
+      "sha256": "e2a42977381f0be50ec2c5f9f5a10a07117a444fb6d556013ebf24e575a216aa"
+    },
+    "morsehgp3D_v11/src/api/compute.cpp": {
+      "sha256": "dca6aa8f4627241087552237372b808d780a4dbd8c6e50c3495bc9d9146b7298"
+    },
+    "morsehgp3D_v11/src/api/internal.hpp": {
+      "sha256": "e87b55c33a37b811435f5efc1b151ef31a7cf79c8e26b8108569024816c4d8b6"
+    },
+    "morsehgp3D_v11/tests/cli/cli_supports_scale.py": {
+      "sha256": "c16d55cd5d660e18a5603fb604a1f093ca711893aeb9c92fcf18d1f9f972cdfd"
+    }
+  },
+  "source_tree_verification": {
+    "extra_or_missing_files": false,
+    "files_verified": 635,
+    "includes_docs_or_receipts": false,
+    "manifest_sha256": "b2be29128bacb5c3b63e0c6807e52e973ef937629fcf0a529592176636acd423",
+    "method": "git_archive_selectif_egalite_exacte",
+    "paths": [
+      "gcp-migration/v11_worker.sh",
+      "morsehgp3D_v11/CMakeLists.txt",
+      "morsehgp3D_v11/src",
+      "morsehgp3D_v11/tests",
+      "morsehgp3D_v11/cmake",
+      "morsehgp3D_v11/bench",
+      "morsehgp3D_v11/reference",
+      "morsehgp3D_v11/tools",
+      "morsehgp3D_v11/cli"
+    ],
+    "source_commit": "38b76701b9b0198fc1c37afe16e1480e638e513c"
+  },
+  "state": "closed",
+  "supports_w48_checks": [
+    {
+      "controls": 52,
+      "covers_full_frame_and_cospherical_fixture": true,
+      "frame": "ng02",
+      "observed_counters": {
+        "appels": 14,
+        "boules": 832386,
+        "branches": 610022,
+        "cofaces": 471577,
+        "etendues": 354,
+        "k": 5,
+        "kparties": 3189636,
+        "multiples": 8,
+        "noeuds": 609376,
+        "sites": 45845,
+        "supports": 832394
+      },
+      "official_reader": true,
+      "profile": "u21",
+      "repetitions_permutation_relabeling_and_FULL_tree_signature": true,
+      "verdict": "conforme",
+      "workers": [
+        1,
+        4,
+        48
+      ]
+    },
+    {
+      "controls": 52,
+      "covers_full_frame_and_cospherical_fixture": true,
+      "frame": "ng00",
+      "observed_counters": {
+        "appels": 14,
+        "boules": 789886,
+        "branches": 576483,
+        "cofaces": 449011,
+        "etendues": 141,
+        "k": 5,
+        "kparties": 3034691,
+        "multiples": 3,
+        "noeuds": 576371,
+        "sites": 39885,
+        "supports": 789889
+      },
+      "official_reader": true,
+      "profile": "u21",
+      "repetitions_permutation_relabeling_and_FULL_tree_signature": true,
+      "verdict": "conforme",
+      "workers": [
+        1,
+        4,
+        48
+      ]
+    }
+  ],
+  "targeted_closure_verified": true,
+  "time_contract": {
+    "full_100ms_contract_acquired": false,
+    "k10_multi_frame_contract_acquired": false,
+    "k5_w48_hot_calls": 18,
+    "scope": "Temps observes par appel sur trois trames de la sequence08 ; aucune inference depuis medianes/ratios.",
+    "threshold_ns": 100000000,
+    "total_exceeds_threshold_on_every_observed_call": true,
+    "tree_exceeds_threshold_on_every_observed_call": true
+  },
+  "worker_exit_code": 0
+}

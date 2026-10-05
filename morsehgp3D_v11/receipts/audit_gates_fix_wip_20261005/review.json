@@ -1,0 +1,136 @@
+{
+  "baseline_sha256": {
+    "morsehgp3D_v11/tests/api/supports_route.cpp": "2db41f412d4894ffb8688b86e6cc16b5e3a1a9e7329a6cce13a4330dc692fb42",
+    "morsehgp3D_v11/tests/api/tests.cmake": "f962a6912f995bc9de78c79f9b8fd8445f6fca90a22a57ee6da19a90a1c3afdb",
+    "morsehgp3D_v11/tests/mutants/cli.json": "704228ec2ab115eaf70cb418a2daf6d78cc9e647325eb551e8ec8b12ff28c92a"
+  },
+  "capture_after": {
+    "morsehgp3D_v11/tests/api/supports_route.cpp": "2a7f2f2fd557f77793b64ed73ee537be9a803c5fe1c7f1f4a7b536927ca95e5e",
+    "morsehgp3D_v11/tests/api/tests.cmake": "4338b3f66a19be412b6adb3b0441c8a299997bccc799963c472a7bc8da618d04",
+    "morsehgp3D_v11/tests/mutants/cli.json": "2750485824bceb1d2305e978ac025d49e3e25dfc8eb60b12778fa4de296f0cf7"
+  },
+  "capture_before": {
+    "morsehgp3D_v11/tests/api/supports_route.cpp": "2a7f2f2fd557f77793b64ed73ee537be9a803c5fe1c7f1f4a7b536927ca95e5e",
+    "morsehgp3D_v11/tests/api/tests.cmake": "4338b3f66a19be412b6adb3b0441c8a299997bccc799963c472a7bc8da618d04",
+    "morsehgp3D_v11/tests/mutants/cli.json": "2750485824bceb1d2305e978ac025d49e3e25dfc8eb60b12778fa4de296f0cf7"
+  },
+  "capture_stable_at_initial_read": true,
+  "captured_sha256": {
+    "morsehgp3D_v11/tests/api/supports_route.cpp": "2a7f2f2fd557f77793b64ed73ee537be9a803c5fe1c7f1f4a7b536927ca95e5e",
+    "morsehgp3D_v11/tests/api/tests.cmake": "4338b3f66a19be412b6adb3b0441c8a299997bccc799963c472a7bc8da618d04",
+    "morsehgp3D_v11/tests/mutants/cli.json": "2750485824bceb1d2305e978ac025d49e3e25dfc8eb60b12778fa4de296f0cf7"
+  },
+  "closure_current_sha256": {
+    "morsehgp3D_v11/tests/api/supports_route.cpp": "2a7f2f2fd557f77793b64ed73ee537be9a803c5fe1c7f1f4a7b536927ca95e5e",
+    "morsehgp3D_v11/tests/api/tests.cmake": "4338b3f66a19be412b6adb3b0441c8a299997bccc799963c472a7bc8da618d04",
+    "morsehgp3D_v11/tests/mutants/cli.json": "2750485824bceb1d2305e978ac025d49e3e25dfc8eb60b12778fa4de296f0cf7"
+  },
+  "mutant_cli": {
+    "call_path": [
+      "mhgp11_cli_points -> Runner.call(output=points) requires code0/statusok",
+      "api::compute PointsRequest -> points_parts",
+      "points_parts -> order_tree default SupportsRoute::order_tree",
+      "build_order(...order_params())",
+      "mutant deletes concurrent_orders=false; inherited true causes parameter_out_of_range",
+      "cli_points native refusal violates successful-case gate; no natural refused fixture is used to kill it"
+    ],
+    "construction_preserved": true,
+    "floor": 28,
+    "mutants": 28,
+    "mutation_unchanged": {
+      "cherche": true,
+      "fichier": true,
+      "id": true,
+      "remplace": true
+    },
+    "new_target": "mhgp11_cli_points",
+    "old_floor": 28,
+    "old_mutants": 28,
+    "old_target": "mhgp11_cli_supports_oracle"
+  },
+  "native_or_cloud_actions": 0,
+  "recommendation": [
+    "Restore journal=<known digest> in the common verdict and six expected lines; these digests are profile-independent on the observed same-input witnesses.",
+    "Preserve u21 file/manifest goldens additionally. LINE is single-valued; do not pass repeated LINE keywords. The current wrapper can match two adjacent lines via one newline-containing EXPECT_LINE, or use an explicit probe check.",
+    "Keep all route/worker/public compute assertions and numeric floors; do not weaken the supports oracle."
+  ],
+  "schema": "mhgp11_gates_fix_wip_review_v1",
+  "source_base_commit": "ef91a7f467ddb150106f557e083b231155e52414",
+  "still_matches_developer_at_closure": true,
+  "supports_route": {
+    "cpp_signature_line": "all six registered cases now only counts/workers in verdict; file/manifest/journal digests are printed separately, regardless of profile",
+    "fixed_digest_and_u21_hash_expectations_removed": true,
+    "same_function_byte_identical": true,
+    "scale_guard_body_byte_identical": true,
+    "scope": "Actual route/worker/public compute identity and peak guards retained; wrong fixed historical fingerprints no longer make EXPECT_LINE fail in this snapshot.",
+    "six_numeric_goldens_and_floors_preserved": [
+      {
+        "counts_unchanged": true,
+        "floors_unchanged": true,
+        "former_common_journal": "a6c3b688a7fe1b4a",
+        "former_u21_file": "9b77614618bbdfc9",
+        "former_u21_manifest": "d61003785c2ff158",
+        "n": 8000,
+        "name": "scale8000",
+        "new_expected_line": "supports_route_verdict conforme k=5 n=8000 noeuds=273655 boules=395667 supports=395667 etendues=0 multiples=0 cellules=230825 graines=737362 fils=1,4",
+        "old_expected_line": "supports_route_verdict conforme k=5 n=8000 noeuds=273655 boules=395667 supports=395667 etendues=0 multiples=0 cellules=230825 graines=737362 fichier=9b77614618bbdfc9 manifeste=d61003785c2ff158 journal=a6c3b688a7fe1b4a fils=1,4"
+      },
+      {
+        "counts_unchanged": true,
+        "floors_unchanged": true,
+        "former_common_journal": "436d1354ae183486",
+        "former_u21_file": "dd524ffd991873eb",
+        "former_u21_manifest": "baa658ac05a8eee8",
+        "n": 16000,
+        "name": "scale16000",
+        "new_expected_line": "supports_route_verdict conforme k=5 n=16000 noeuds=565098 boules=819004 supports=819004 etendues=0 multiples=0 cellules=478947 graines=1530768 fils=1,4",
+        "old_expected_line": "supports_route_verdict conforme k=5 n=16000 noeuds=565098 boules=819004 supports=819004 etendues=0 multiples=0 cellules=478947 graines=1530768 fichier=dd524ffd991873eb manifeste=baa658ac05a8eee8 journal=436d1354ae183486 fils=1,4"
+      },
+      {
+        "counts_unchanged": true,
+        "floors_unchanged": true,
+        "former_common_journal": "c371678559b144d7",
+        "former_u21_file": "6543988436d3d582",
+        "former_u21_manifest": "751e5f52d5c1477e",
+        "n": 32000,
+        "name": "scale32000",
+        "new_expected_line": "supports_route_verdict conforme k=5 n=32000 noeuds=1163756 boules=1690045 supports=1690045 etendues=0 multiples=0 cellules=989861 graines=3165977 fils=1,4",
+        "old_expected_line": "supports_route_verdict conforme k=5 n=32000 noeuds=1163756 boules=1690045 supports=1690045 etendues=0 multiples=0 cellules=989861 graines=3165977 fichier=6543988436d3d582 manifeste=751e5f52d5c1477e journal=c371678559b144d7 fils=1,4"
+      },
+      {
+        "counts_unchanged": true,
+        "floors_unchanged": true,
+        "former_common_journal": "c189d5cd3ec3de66",
+        "former_u21_file": "830db973140e720d",
+        "former_u21_manifest": "7c119d733528e2d0",
+        "n": 39885,
+        "name": "data=lidar_ng00",
+        "new_expected_line": "supports_route_verdict conforme k=5 n=39885 noeuds=576371 boules=789886 supports=789889 etendues=141 multiples=3 cellules=448805 graines=1350288 fils=1,4",
+        "old_expected_line": "supports_route_verdict conforme k=5 n=39885 noeuds=576371 boules=789886 supports=789889 etendues=141 multiples=3 cellules=448805 graines=1350288 fichier=830db973140e720d manifeste=7c119d733528e2d0 journal=c189d5cd3ec3de66 fils=1,4"
+      },
+      {
+        "counts_unchanged": true,
+        "floors_unchanged": true,
+        "former_common_journal": "5e36f8ddbd2fb94c",
+        "former_u21_file": "ed899fede2bbe761",
+        "former_u21_manifest": "09d1d8c0070ab73a",
+        "n": 35551,
+        "name": "data=lidar_ng01",
+        "new_expected_line": "supports_route_verdict conforme k=5 n=35551 noeuds=478265 boules=652958 supports=652959 etendues=81 multiples=1 cellules=369751 graines=1102505 fils=1,4",
+        "old_expected_line": "supports_route_verdict conforme k=5 n=35551 noeuds=478265 boules=652958 supports=652959 etendues=81 multiples=1 cellules=369751 graines=1102505 fichier=ed899fede2bbe761 manifeste=09d1d8c0070ab73a journal=5e36f8ddbd2fb94c fils=1,4"
+      },
+      {
+        "counts_unchanged": true,
+        "floors_unchanged": true,
+        "former_common_journal": "ec87f14da7adff77",
+        "former_u21_file": "28532835cc5915f8",
+        "former_u21_manifest": "6b6d1ee970c80839",
+        "n": 45845,
+        "name": "data=lidar_ng02",
+        "new_expected_line": "supports_route_verdict conforme k=5 n=45845 noeuds=609376 boules=832386 supports=832394 etendues=354 multiples=8 cellules=471060 graines=1393952 fils=1,4",
+        "old_expected_line": "supports_route_verdict conforme k=5 n=45845 noeuds=609376 boules=832386 supports=832394 etendues=354 multiples=8 cellules=471060 graines=1393952 fichier=28532835cc5915f8 manifeste=6b6d1ee970c80839 journal=ec87f14da7adff77 fils=1,4"
+      }
+    ]
+  },
+  "verdict": "CLI retarget favorable by source. Supports correction resolves profile-dependent fingerprints but weakens historical journal/u21 golden checks in this stable WIP capture; restoration requested, no motor defect claimed."
+}

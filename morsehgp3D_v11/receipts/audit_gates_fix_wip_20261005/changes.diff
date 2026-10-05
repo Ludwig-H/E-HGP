@@ -1,0 +1,70 @@
+--- a/morsehgp3D_v11/tests/api/supports_route.cpp
++++ b/morsehgp3D_v11/tests/api/supports_route.cpp
+@@ -17,9 +17,9 @@
+ //   trame <nom> du dossier MHGP11_DATA_DIR (jamais recopiee). Les deux voies a chaque W ; fichiers et manifestes
+ //   identiques aussi entre les W. Une ligne JSON de mesure par (W, voie) : etages tree, attach, output et write en
+ //   nanosecondes et pics (diagnostic, aucune decision), puis la ligne de verdict, sans duree :
++//     supports_route_empreintes fichier=<sha256, 16 premiers chiffres> manifeste=<idem> journal=<fnv1a64>
+ //     supports_route_verdict conforme k=<K> n=<n> noeuds=<N> boules=<B> supports=<S> etendues=<e> multiples=<m>
+-//       cellules=<c> graines=<g> fichier=<sha256, 16 premiers chiffres> manifeste=<idem> journal=<fnv1a64>
+-//       fils=<W,...>
++//       cellules=<c> graines=<g> fils=<W,...>
+ // A W1 (si W1 est demande), un troisieme calcul par l'appel public api::compute, sans diagnostic : memes fichier et
+ //   manifeste que full_tower, et pic comptable de l'etage tree egal a celui de full_tower et different de celui
+ //   d'order_tree (ligne JSON "route":"compute") ; observe la voie de production (relecture de L2b).
+@@ -388,15 +388,17 @@
+                 static_cast<unsigned long long>(p.diagnostics.log.cells));
+     return kFloor;
+   }
++  // Empreintes a part : MHGP11SP et son manifeste portent coord_bits, elles changent avec le profil ; la ligne de
++  // verdict ne grave que des comptes, communs aux trois profils (qualification G4 du 5 octobre 2026).
++  std::printf("supports_route_empreintes fichier=%s manifeste=%s journal=%s\n", sha_hex(p.file).substr(0, 16).c_str(),
++              sha_hex(p.manifest).substr(0, 16).c_str(), hex64(p.diagnostics.log.digest).c_str());
+   std::printf("supports_route_verdict conforme k=%llu n=%zu noeuds=%llu boules=%llu supports=%llu etendues=%llu "
+-              "multiples=%llu cellules=%llu graines=%llu fichier=%s manifeste=%s journal=%s fils=%s\n",
++              "multiples=%llu cellules=%llu graines=%llu fils=%s\n",
+               static_cast<unsigned long long>(o.k), view.x.size(), static_cast<unsigned long long>(p.nodes),
+               static_cast<unsigned long long>(p.balls), static_cast<unsigned long long>(p.supports),
+               static_cast<unsigned long long>(p.extended), static_cast<unsigned long long>(p.multiple),
+               static_cast<unsigned long long>(p.diagnostics.log.cells),
+-              static_cast<unsigned long long>(p.diagnostics.log.seeds), sha_hex(p.file).substr(0, 16).c_str(),
+-              sha_hex(p.manifest).substr(0, 16).c_str(), hex64(p.diagnostics.log.digest).c_str(),
+-              workers_text.c_str());
++              static_cast<unsigned long long>(p.diagnostics.log.seeds), workers_text.c_str());
+   return kConform;
+ }
+ 
+--- a/morsehgp3D_v11/tests/api/tests.cmake
++++ b/morsehgp3D_v11/tests/api/tests.cmake
+@@ -63,12 +63,12 @@
+ # sans sol a K5 (MHGP11_DATA_DIR, jamais recopiees) : les deux voies a W1 puis W4, memes octets entre les voies et
+ # entre les W ; fichier egal a celui des portes de la sortie supports. Ligne gravee (comptes du produit, registres du
+ # journal, empreintes) ; planchers de boules et de cellules. Une ligne JSON de mesure par (W, voie), descriptive.
+-foreach(case "scale8000;8000;uniform18=8000,20261002;noeuds=273655 boules=395667 supports=395667 etendues=0 multiples=0 cellules=230825 graines=737362 fichier=9b77614618bbdfc9 manifeste=d61003785c2ff158 journal=a6c3b688a7fe1b4a;395667;230825"
+-             "scale16000;16000;uniform18=16000,20261002;noeuds=565098 boules=819004 supports=819004 etendues=0 multiples=0 cellules=478947 graines=1530768 fichier=dd524ffd991873eb manifeste=baa658ac05a8eee8 journal=436d1354ae183486;819004;478947"
+-             "scale32000;32000;uniform18=32000,20261002;noeuds=1163756 boules=1690045 supports=1690045 etendues=0 multiples=0 cellules=989861 graines=3165977 fichier=6543988436d3d582 manifeste=751e5f52d5c1477e journal=c371678559b144d7;1690045;989861"
+-             "lidar;39885;data=lidar_ng00;noeuds=576371 boules=789886 supports=789889 etendues=141 multiples=3 cellules=448805 graines=1350288 fichier=830db973140e720d manifeste=7c119d733528e2d0 journal=c189d5cd3ec3de66;789886;448805"
+-             "lidar;35551;data=lidar_ng01;noeuds=478265 boules=652958 supports=652959 etendues=81 multiples=1 cellules=369751 graines=1102505 fichier=ed899fede2bbe761 manifeste=09d1d8c0070ab73a journal=5e36f8ddbd2fb94c;652958;369751"
+-             "lidar;45845;data=lidar_ng02;noeuds=609376 boules=832386 supports=832394 etendues=354 multiples=8 cellules=471060 graines=1393952 fichier=28532835cc5915f8 manifeste=6b6d1ee970c80839 journal=ec87f14da7adff77;832386;471060")
++foreach(case "scale8000;8000;uniform18=8000,20261002;noeuds=273655 boules=395667 supports=395667 etendues=0 multiples=0 cellules=230825 graines=737362;395667;230825"
++             "scale16000;16000;uniform18=16000,20261002;noeuds=565098 boules=819004 supports=819004 etendues=0 multiples=0 cellules=478947 graines=1530768;819004;478947"
++             "scale32000;32000;uniform18=32000,20261002;noeuds=1163756 boules=1690045 supports=1690045 etendues=0 multiples=0 cellules=989861 graines=3165977;1690045;989861"
++             "lidar;39885;data=lidar_ng00;noeuds=576371 boules=789886 supports=789889 etendues=141 multiples=3 cellules=448805 graines=1350288;789886;448805"
++             "lidar;35551;data=lidar_ng01;noeuds=478265 boules=652958 supports=652959 etendues=81 multiples=1 cellules=369751 graines=1102505;652958;369751"
++             "lidar;45845;data=lidar_ng02;noeuds=609376 boules=832386 supports=832394 etendues=354 multiples=8 cellules=471060 graines=1393952;832386;471060")
+   list(GET case 0 label)
+   list(GET case 1 n)
+   list(GET case 2 input)
+--- a/morsehgp3D_v11/tests/mutants/cli.json
++++ b/morsehgp3D_v11/tests/mutants/cli.json
+@@ -226,8 +226,8 @@
+       "fichier": "src/api/compute.cpp",
+       "cherche": "  params.concurrent_orders = false;        // 8192\n",
+       "remplace": "",
+-      "porte": "mhgp11_cli_supports_oracle",
+-      "note": "arbre d'ordre K au masque de FULL : build_order refuse les ordres concurrents"
++      "porte": "mhgp11_cli_points",
++      "note": "arbre d'ordre K seul au masque de FULL : build_order refuse les ordres concurrents ; depuis L2b, supports passe par FULL et seules points et plat emploient order_params"
+     }
+   ]
+ }
