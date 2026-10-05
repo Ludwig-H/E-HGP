@@ -4,12 +4,24 @@
 quantized_u21_input_only / not_claimed`. Six notes actives maintenues en
 place ; preuves détaillées dans les reçus immuables.
 
+**Fina2 : corriger l'attendu multiprofil de la porte L2b.** Sur
+**38b76701b**, les six portes `api_supports_route` d'échelle et LiDAR
+échouent en u18/u24 et passent en u21/poison. Leur déclaration CMake
+grave les mêmes hashes de manifeste issus d'u21 pour tous les profils,
+alors que le manifeste porte les bits : cet attendu doit dépendre du
+profil. La sortie précise des échecs manque dans l'archive ; aucun
+défaut produit n'en est déduit. Cette porte sert aussi de référence au
+mutant `voie_supports_order_tree`, dans la campagne u18.
+[Constat et reprise ciblée](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#fina2--attendu-de-qualification-l2b-à-corriger-par-profil).
+
 **Priorité : qualifier l'assemblage final sur G4.** Supports, arbre K
 seul, points et tête plate sont publiés. S10 arrive en **076d9142b**,
 sa garde numérique en **510dae50e**, son témoin exact en **38b76701b**.
-La session gardée `v11.20261005.claudefina2` a démarré sur ce dernier
-commit, avec `data_complet`, pour les quatre configurations ordinaires.
-Aucun résultat final de cette reprise n'est encore constaté.
+La session gardée `v11.20261005.claudefina2` est close sur ce dernier
+commit, avec `data_complet` et arrêt ciblé certifié. Les quatre
+configurations ordinaires restent partielles à l'échéance ; leurs
+portes S10 (unitaires, CLI, échelle et LiDAR) passent toutes. Les
+échecs L2b ci-dessus doivent être traités avant qualification globale.
 
 Les plans suivants conservent les mutants, les onze lots sanitizer et
 les **huit différentiels complets S9/S10**. Les deux sessions

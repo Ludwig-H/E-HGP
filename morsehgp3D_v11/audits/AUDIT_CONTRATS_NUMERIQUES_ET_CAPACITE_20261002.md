@@ -10,6 +10,44 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
+## Fina2 : attendu de qualification L2b à corriger par profil
+
+Session `v11.20261005.claudefina2`, source **38b76701b**, arrêt ciblé
+certifié le 5 octobre à 20:43:51 UTC. Les six portes
+`mhgp11_api_supports_route_scale{8000,16000,32000}` et
+`mhgp11_api_supports_route_lidar_ng{00,01,02}_k5` échouent dans les
+configurations u18 et u24, mais passent en u21 et poison u21.
+
+**Défaut certain de l'attendu.** `tests/api/tests.cmake:66–87` grave les
+mêmes lignes `LINE`, dont les hashes de manifeste capturés en u21,
+pour les trois profils. La sonde hache le manifeste brut, lequel
+contient la précision du profil. La référence u21 ne peut donc servir
+de référence multiprofil. Corriger l'attendu par profil en conservant
+les comparaisons exactes entre voies, workers et publication publique.
+
+Les journaux conservés donnent les verdicts Failed, mais pas leur
+sortie détaillée ; les `LastTest.log` ne contiennent que leur en-tête.
+Cette anomalie de porte ne démontre donc pas à elle seule la cause
+exclusive des douze échecs. Aucun défaut de résultats du moteur n'est
+établi. La garde sur les pics mémoire ne doit être incriminée que si
+une sortie réelle l'établit.
+
+**Reprise ciblée utile.** Capturer les stdout/stderr de ces six portes
+en u18/u24 après correction de l'attendu. La campagne mutants est en
+u18 ; `voie_supports_order_tree` utilise
+`mhgp11_api_supports_route_scale8000` comme porte. Sa référence non
+mutée doit passer pour que la détection du mutant soit qualifiée.
+Les autres portes de la session gardent leurs verdicts individuels.
+
+Les quatre configurations ont aussi atteint le budget matriciel de
+2 100 s. Bilan brut relu : u18 **977/991** (6 échecs, 8 manquants),
+u21 **890/901** (0 échec, 11 manquants), u24 **884/901** (6 échecs,
+11 manquants), poison **891/902** (0 échec, 11 manquants). Les portes
+S10 unitaires, CLI et échelle/LiDAR, le refus du tri S9 et `num_roots`
+passent dans les quatre profils. Les différentiels complets S9/S10
+restent dans leurs sessions dédiées. La capsule de lecture de cette
+capture est en consolidation ; aucune qualification globale déduite.
+
 ## S10 publiée : garde numérique corrigée en 510dae50e
 
 S10 publiée en **076d9142b**. Les trois sources causales sont identiques
