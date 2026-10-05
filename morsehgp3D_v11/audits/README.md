@@ -34,8 +34,14 @@ le juge refuse leurs hashes u24 contre ses attendus u21. Aucun diagnostic saniti
 dans les journaux examinés. Aucune porte manquante ni coupure.
 Points, sortie plate et `roots_cost` passent
 sur les trois tailles et trois trames dans les deux configurations.
-Les contrôles sanitizer courts sont dans la session B suivante.
+Le complément sanitizer court passe dans finb ci-dessous.
 [Reçu vérifié et périmètre](../receipts/audit_g4_fins_20261005/README.md).
+
+**Finb : contrôles sanitizer courts complets.** **783/783** sous
+ASan/UBSan u24 et **783/783** sous TSan u21, au même pin final.
+La frontière S10 `2^127−1`, le refus du tri S9, `num_roots` et les
+CLI points/plat normal et −O passent. Aucun échec ni résultat manquant.
+[Reçu vérifié et portée](../receipts/audit_g4_finb_20261005/README.md).
 
 **Priorité : qualifier l'assemblage final sur G4.** Supports, arbre K
 seul, points et tête plate sont publiés. S10 arrive en **076d9142b**,
@@ -67,7 +73,8 @@ exacte `R=2^127−1`, ses groupes et l'égalité EOM. La condensation,
 les réciproques z=1/2/3 et la propagation des refus sont relues sans
 nouveau défaut important établi. Les portes ordinaires passent dans
 fina2 ; les portes d’échelle et LiDAR passent aussi sous sanitizers
-dans fins. Le complément court et le différentiel complet restent à qualifier.
+dans fins. La frontière extrême passe sous les deux sanitizers dans
+finb ; le différentiel complet reste à qualifier.
 [Correction et portée](../receipts/audit_s10_root_guard_20261005/README.md),
 [preuve initiale](../receipts/audit_s10_wip_20261005/math/README.md).
 
@@ -75,8 +82,8 @@ dans fins. Le complément court et le différentiel complet restent à qualifier
 premier refus, sans changement de relation d'ordre. Les sources
 correspondent à la capture favorable ; le modèle vérifie arrêt, bornes
 et permutation. La porte native du refus passe dans les quatre profils
-ordinaires de fina2 ; le refus sous sanitizers et le différentiel
-complet restent leurs propres portes.
+ordinaires de fina2, puis sous ASan/UBSan u24 et TSan u21 dans finb.
+Le différentiel complet reste à qualifier.
 [Correction et preuve](../receipts/audit_s9_sort_fix_20261005/README.md).
 
 **L2b : raccord livré, qualification à terminer.** La mesure G4 appariée

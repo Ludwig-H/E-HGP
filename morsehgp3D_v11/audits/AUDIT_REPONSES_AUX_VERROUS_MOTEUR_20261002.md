@@ -28,8 +28,11 @@ porte supports après L2b. Aucun nouveau défaut mathématique établi.
 `roots_cost` passent sur les trois tailles et trois trames sous
 ASan/UBSan u24 et TSan u21. TSan termine 80/80 portes ; ASan/UBSan
 74/80, avec les six échecs de la porte supports multiprofil.
-Aucune porte manquante. Les unitaires courts de B et les différentiels
-complets S9/S10 restent leurs propres qualifications.
+Aucune porte manquante. Le complément finb termine ensuite 783/783
+portes courtes dans chacun des deux profils sanitizer : la frontière
+S10 exacte et le refus S9 passent, ainsi que les CLI points/plat et
+`num_roots`. Les différentiels complets S9/S10 restent à qualifier.
+[Reçu finb](../receipts/audit_g4_finb_20261005/README.md).
 [Reçu fins](../receipts/audit_g4_fins_20261005/README.md).
 
 ## S10 native publiée : encadrement entier et frontière de capacité
@@ -52,8 +55,8 @@ marges sont sûres. Les grandes valeurs passent au repli exact : avis
 favorable sur la correction, dont les deux sources correspondent à la
 capture relue. Le test `huge` exige désormais trois plateaux ouverts,
 contre un avec l'ancien filtre ; sa portée devient causale pour le
-mutant qui retire la garde. Constat source fermé ; qualification native
-G4 à poursuivre. La preuve initiale `R=2^127−1` reste distincte.
+mutant qui retire la garde. Constat source fermé ; la porte frontière
+native passe en G4 dans fina2 puis sous les deux sanitizers de finb. La preuve initiale `R=2^127−1` reste distincte.
 Cette frontière exacte rejoint la porte native en **38b76701b** :
 racine vérifiée, groupes attendus et égalité certifiée aux rayons
 `A/3,A/2,A`. Lecture favorable de ce complément.

@@ -1,0 +1,324 @@
+{
+  "archive_sha256": "9e8d05347029f2adac32b998cbdb01d019bb69d9353cc05f390c43822cf295e8",
+  "archive_size": 287822,
+  "limitations": [
+    "This report does not qualify tests excluded from finb (long, scale, LiDAR, mutants, reference).",
+    "Absence of the listed runtime markers in preserved logs is not a proof of absence of every runtime defect.",
+    "The _opt test is registered through PYTHONOPTIMIZE=1 at the pinned source; detailed runtime log commands do not print that environment."
+  ],
+  "profiles": {
+    "gcc_asan_ubsan": {
+      "build_provenance_sha256": "7bb897264228ae26c10988c70926e4f664a9aec464b32fe4a14377292dddebf9",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_SANITIZE=ON",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "flags": [
+        {
+          "defines": "CXX_DEFINES = -DMHGP11_COORD_BITS=24",
+          "flags": "CXX_FLAGS = -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=all -std=c++20",
+          "path": "CMakeFiles/mhgp11.dir/flags.make",
+          "sha256": "e236f434b932580128c43e93da263a45e1cb1306050797c617a18c4767a7d68f",
+          "size": 419
+        },
+        {
+          "defines": "CXX_DEFINES = -DMHGP11_COORD_BITS=24",
+          "flags": "CXX_FLAGS = -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=all -std=c++20",
+          "path": "CMakeFiles/mhgp11_head_unit.dir/flags.make",
+          "sha256": "23eec960a24401bed657a8bb12eaaf1356f8f27ad5f5796f79ad71c626842d23",
+          "size": 513
+        },
+        {
+          "path": "CMakeFiles/mhgp11_head_unit.dir/link.txt",
+          "sanitizer_flags": [
+            "-fsanitize=address,undefined"
+          ],
+          "sha256": "1a77976985093116648c1f1cb5514e6add9bc432820056310d67e08f9ccc13f1",
+          "size": 148
+        },
+        {
+          "defines": "CXX_DEFINES = -DMHGP11_COORD_BITS=24",
+          "flags": "CXX_FLAGS = -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=all -std=c++20",
+          "path": "CMakeFiles/mhgp11_num_roots_probe.dir/flags.make",
+          "sha256": "e236f434b932580128c43e93da263a45e1cb1306050797c617a18c4767a7d68f",
+          "size": 419
+        },
+        {
+          "path": "CMakeFiles/mhgp11_num_roots_probe.dir/link.txt",
+          "sanitizer_flags": [
+            "-fsanitize=address,undefined"
+          ],
+          "sha256": "58af9c88e8d734572673896b24373e1c72333b3480be4a41fea790603e2f948d",
+          "size": 161
+        },
+        {
+          "defines": "CXX_DEFINES = -DMHGP11_COORD_BITS=24",
+          "flags": "CXX_FLAGS = -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=all -std=c++20",
+          "path": "CMakeFiles/mhgp11_points_unit.dir/flags.make",
+          "sha256": "60820292229ba05097a544cc4af04822dfaa40d867b87ebd9c978d5de58104c9",
+          "size": 608
+        },
+        {
+          "path": "CMakeFiles/mhgp11_points_unit.dir/link.txt",
+          "sanitizer_flags": [
+            "-fsanitize=address,undefined"
+          ],
+          "sha256": "22b8b824a0c25e1343a618a9829e773fcb44abc9a5600321ea7a5406ce2df111",
+          "size": 156
+        }
+      ],
+      "provenance_complete": true,
+      "provenance_errors": [],
+      "result_sha256": "0cce324382bb8112204c52ab6468e53316b419f9b4e025bf6073fb204605984b",
+      "status": "ok",
+      "target_results": [
+        {
+          "ctest_verdict_line": "735/783 Test #818: mhgp11_head_unit_huge ..........................................   Passed    0.02 sec",
+          "junit_output": "test huge controles=6 echecs=0 plancher=6\nmhgp11_test_ok tests=1 controles=6\nrun_expect_verdict conforme",
+          "junit_status": "run",
+          "lasttest_passed": true,
+          "name": "mhgp11_head_unit_huge",
+          "seconds": "0.0186053"
+        },
+        {
+          "ctest_verdict_line": "727/783 Test #792: mhgp11_points_unit_sort_refusal ................................   Passed    0.02 sec",
+          "junit_output": "test sort_refusal controles=528 echecs=0 plancher=528\nmhgp11_test_ok tests=1 controles=528\nrun_expect_verdict conforme",
+          "junit_status": "run",
+          "lasttest_passed": true,
+          "name": "mhgp11_points_unit_sort_refusal",
+          "seconds": "0.0212887"
+        },
+        {
+          "ctest_verdict_line": "27/783 Test #185: mhgp11_num_roots ...............................................   Passed    0.29 sec",
+          "junit_output": "num_roots_verdict conforme bits=24 racines=3314 sommes=4073 replis=724 egalites=544 raffinees=180\nrun_expect_verdict conforme",
+          "junit_status": "run",
+          "lasttest_passed": true,
+          "name": "mhgp11_num_roots",
+          "seconds": "0.291898"
+        },
+        {
+          "ctest_verdict_line": "296/783 Test #186: mhgp11_num_roots_opt ...........................................   Passed    0.38 sec",
+          "junit_output": "num_roots_verdict conforme bits=24 racines=3314 sommes=4073 replis=724 egalites=544 raffinees=180\nrun_expect_verdict conforme",
+          "junit_status": "run",
+          "lasttest_passed": true,
+          "name": "mhgp11_num_roots_opt",
+          "seconds": "0.375531"
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 783,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 783,
+        "selected": 783
+      }
+    },
+    "gcc_tsan": {
+      "build_provenance_sha256": "cb730bb9db400de12f841b4e1a778e7b26b4c7021720aadf610ace4d0ba217fc",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "flags": [
+        {
+          "defines": "CXX_DEFINES = -DMHGP11_COORD_BITS=21",
+          "flags": "CXX_FLAGS = -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -fsanitize=thread -std=c++20",
+          "path": "CMakeFiles/mhgp11.dir/flags.make",
+          "sha256": "1bdf18baa8b5a86e5d7f0df924475ac6f64c6e783c50a9ae290f154c39c1f329",
+          "size": 358
+        },
+        {
+          "defines": "CXX_DEFINES = -DMHGP11_COORD_BITS=21",
+          "flags": "CXX_FLAGS = -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -fsanitize=thread -std=c++20",
+          "path": "CMakeFiles/mhgp11_head_unit.dir/flags.make",
+          "sha256": "9237d5b24f8c598abfb7f62195ceabc7b5a58204a17f51decded75d1490239d0",
+          "size": 452
+        },
+        {
+          "path": "CMakeFiles/mhgp11_head_unit.dir/link.txt",
+          "sanitizer_flags": [
+            "-fsanitize=thread"
+          ],
+          "sha256": "0a26acd2949eb0418bde9c9ce0868891ce60f33322d013598d50b3530446a110",
+          "size": 137
+        },
+        {
+          "defines": "CXX_DEFINES = -DMHGP11_COORD_BITS=21",
+          "flags": "CXX_FLAGS = -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -fsanitize=thread -std=c++20",
+          "path": "CMakeFiles/mhgp11_num_roots_probe.dir/flags.make",
+          "sha256": "1bdf18baa8b5a86e5d7f0df924475ac6f64c6e783c50a9ae290f154c39c1f329",
+          "size": 358
+        },
+        {
+          "path": "CMakeFiles/mhgp11_num_roots_probe.dir/link.txt",
+          "sanitizer_flags": [
+            "-fsanitize=thread"
+          ],
+          "sha256": "bc583d4562cdd72e24b3e643cfc48b547f55f00c9095c4772b24c9d4caf1f892",
+          "size": 150
+        },
+        {
+          "defines": "CXX_DEFINES = -DMHGP11_COORD_BITS=21",
+          "flags": "CXX_FLAGS = -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -fsanitize=thread -std=c++20",
+          "path": "CMakeFiles/mhgp11_points_unit.dir/flags.make",
+          "sha256": "203b7e2aec8b1441b90ee0326f39a511bc0bd2c8bdc84ea5c65c4248541622be",
+          "size": 547
+        },
+        {
+          "path": "CMakeFiles/mhgp11_points_unit.dir/link.txt",
+          "sanitizer_flags": [
+            "-fsanitize=thread"
+          ],
+          "sha256": "04259319a9557a9eff32e7e5149e8ce3db240642ad31824f9704370c7dd206ff",
+          "size": 145
+        }
+      ],
+      "provenance_complete": true,
+      "provenance_errors": [],
+      "result_sha256": "48c25a9c522758dc5372c1934af44833b7b3844b8584e241898a2284a3882f05",
+      "status": "ok",
+      "target_results": [
+        {
+          "ctest_verdict_line": "735/783 Test #818: mhgp11_head_unit_huge ..........................................   Passed    0.02 sec",
+          "junit_output": "test huge controles=6 echecs=0 plancher=6\nmhgp11_test_ok tests=1 controles=6\nrun_expect_verdict conforme",
+          "junit_status": "run",
+          "lasttest_passed": true,
+          "name": "mhgp11_head_unit_huge",
+          "seconds": "0.0168566"
+        },
+        {
+          "ctest_verdict_line": "727/783 Test #792: mhgp11_points_unit_sort_refusal ................................   Passed    0.02 sec",
+          "junit_output": "test sort_refusal controles=528 echecs=0 plancher=528\nmhgp11_test_ok tests=1 controles=528\nrun_expect_verdict conforme",
+          "junit_status": "run",
+          "lasttest_passed": true,
+          "name": "mhgp11_points_unit_sort_refusal",
+          "seconds": "0.0172392"
+        },
+        {
+          "ctest_verdict_line": "27/783 Test #185: mhgp11_num_roots ...............................................   Passed    0.33 sec",
+          "junit_output": "num_roots_verdict conforme bits=21 racines=3314 sommes=4062 replis=692 egalites=512 raffinees=180\nrun_expect_verdict conforme",
+          "junit_status": "run",
+          "lasttest_passed": true,
+          "name": "mhgp11_num_roots",
+          "seconds": "0.334796"
+        },
+        {
+          "ctest_verdict_line": "277/783 Test #186: mhgp11_num_roots_opt ...........................................   Passed    0.39 sec",
+          "junit_output": "num_roots_verdict conforme bits=21 racines=3314 sommes=4062 replis=692 egalites=512 raffinees=180\nrun_expect_verdict conforme",
+          "junit_status": "run",
+          "lasttest_passed": true,
+          "name": "mhgp11_num_roots_opt",
+          "seconds": "0.386818"
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 783,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 783,
+        "selected": 783
+      }
+    }
+  },
+  "runtime_scan": {
+    "files": [
+      {
+        "marker_hits": {},
+        "member": "results/cmd/000_matrice/files/matrix/gcc_asan_ubsan/LastTest.log",
+        "sha256": "3dfc89f2289a8affafae6b8e2ec660c21fd5fca190a922e3747c08007fb9f265",
+        "size": 929343
+      },
+      {
+        "marker_hits": {},
+        "member": "results/cmd/000_matrice/files/matrix/gcc_asan_ubsan/ctest.log",
+        "sha256": "87613704eadb2b2179b895909aeeae5bbda534453029d3f287f6c85a2b06003e",
+        "size": 123771
+      },
+      {
+        "marker_hits": {},
+        "member": "results/cmd/000_matrice/files/matrix/gcc_asan_ubsan/sanitizer.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "size": 0
+      },
+      {
+        "marker_hits": {},
+        "member": "results/cmd/000_matrice/files/matrix/gcc_asan_ubsan/junit.xml",
+        "sha256": "753bbcaa86f591f551046dddcf4e8d0af6037947fa94829bff47bc45306bbd2a",
+        "size": 247271
+      },
+      {
+        "marker_hits": {},
+        "member": "results/cmd/000_matrice/files/matrix/gcc_tsan/LastTest.log",
+        "sha256": "82ac4be0736823412c78603043b7cec4afb784cbb0f83eda2eeb1cd7239ee337",
+        "size": 920389
+      },
+      {
+        "marker_hits": {},
+        "member": "results/cmd/000_matrice/files/matrix/gcc_tsan/ctest.log",
+        "sha256": "ab276507e263b13f014b6573d843ccda666865e24624871416e396cdef935bbd",
+        "size": 123765
+      },
+      {
+        "marker_hits": {},
+        "member": "results/cmd/000_matrice/files/matrix/gcc_tsan/sanitizer.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "size": 0
+      },
+      {
+        "marker_hits": {},
+        "member": "results/cmd/000_matrice/files/matrix/gcc_tsan/junit.xml",
+        "sha256": "93dde9be47a7a2a10ba67409e2256e85e19268c672b1a387a15206252cb65a5b",
+        "size": 246821
+      },
+      {
+        "marker_hits": {},
+        "member": "results/cmd/000_matrice/stdout",
+        "sha256": "fbb107d3644a8a9801e96372354d20696d9538303424d1490d4d588ae8815478",
+        "size": 538
+      },
+      {
+        "marker_hits": {},
+        "member": "results/cmd/000_matrice/stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "size": 0
+      }
+    ],
+    "marker_hits_total": 0,
+    "markers": [
+      "ERROR: AddressSanitizer",
+      "SUMMARY: AddressSanitizer",
+      "AddressSanitizer:DEADLYSIGNAL",
+      "runtime error:",
+      "UndefinedBehaviorSanitizer",
+      "WARNING: ThreadSanitizer",
+      "SUMMARY: ThreadSanitizer",
+      "FATAL: ThreadSanitizer",
+      "ERROR: LeakSanitizer",
+      "SUMMARY: LeakSanitizer"
+    ]
+  },
+  "schema": "mhgp11_finb_native_review_v1",
+  "scope": "Read archived results only; no native execution, build, or cloud action by auditor. Targeted flags, four actual test verdicts per sanitizer profile, and marker scan only.",
+  "source_anchors": [
+    {
+      "end_line": 112,
+      "path": "morsehgp3D_v11/tests/num/tests.cmake",
+      "sha256": "16f0d827f3a1f29c102424b1568574cfab8d9f12caa134e14f5b8c03a21e20e0",
+      "start_line": 104,
+      "text": "add_executable(mhgp11_num_roots_probe ${CMAKE_CURRENT_LIST_DIR}/roots_probe.cpp)\ntarget_link_libraries(mhgp11_num_roots_probe PRIVATE mhgp11)\n# Ligne gravee au profil 21 ; aux profils 18 et 24 les planchers seuls s'appliquent (lignes a graver sur G4).\nset(num_roots_line)\nif(MHGP11_COORD_BITS EQUAL 21)\n  set(num_roots_line LINE \"num_roots_verdict conforme bits=21 racines=3314 sommes=4062 replis=692 egalites=512 raffinees=180\")\nendif()\nmhgp11_python_gate(mhgp11_num_roots 0 roots_gate.py $<TARGET_FILE:mhgp11_num_roots_probe>\n                    ${PROJECT_SOURCE_DIR}/bench/points_radius.py LABELS oracle fast TIMEOUT 300 ${num_roots_line})"
+    },
+    {
+      "end_line": 214,
+      "path": "morsehgp3D_v11/cmake/gates.cmake",
+      "sha256": "8abaa4b9a533f0988cd2a4b436665905c3ad1be92a4f33f360da2fce34c1d70a",
+      "start_line": 203,
+      "text": "  endif()\n  set(gate_labels \"${P_LABELS}\")\n  set(gate_env \"${P_ENV}\")\n  set(gate_line \"${P_LINE}\")\n  set(gate_timeout \"${P_TIMEOUT}\")\n  _mhgp11_register(${name} ${expected} \"${Python3_EXECUTABLE}\")\n  if(NOT \"long\" IN_LIST gate_labels)\n    list(APPEND gate_env PYTHONOPTIMIZE=1)\n    _mhgp11_register(${name}_opt ${expected} \"${Python3_EXECUTABLE}\")\n    # La jumelle recoit les memes arguments, donc les memes dossiers de travail : elle attend la fin de la porte.\n    set_property(TEST ${name}_opt PROPERTY DEPENDS ${name})\n  endif()"
+    }
+  ],
+  "source_commit": "38b76701b9b0198fc1c37afe16e1480e638e513c",
+  "verdict": "Favorable within the stated scope: sanitizer compile/link flags confirmed, four targeted tests explicitly Passed in both profiles, no listed runtime diagnostics in ten preserved runtime logs."
+}

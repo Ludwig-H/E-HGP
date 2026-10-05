@@ -10,6 +10,23 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
+## Finb : contrôles sanitizer courts intégralement conformes
+
+Session `v11.20261005.claudefinb`, source **38b76701b**, terminée avec
+succès et arrêt ciblé certifié. Les deux inventaires courts sont
+terminés : **783/783** ASan/UBSan u24, **783/783** TSan u21. Aucun
+échec ni résultat manquant.
+
+`head_unit_huge` vérifie la frontière exacte `2^127−1` avec la garde
+S10 corrigée ; `points_unit_sort_refusal` vérifie le refus du tri S9.
+Ces deux portes passent sous les deux configurations, ainsi que
+`num_roots`, `cli_points` et `cli_plat`, normales et −O lorsqu’elles
+sont dédoublées. Les onze lots d’échelle/LiDAR restent dans fins ;
+les quatre comparaisons exactes S9 et les quatre S10 gardent leurs
+sessions dédiées. La qualification globale attend aussi la réparation
+des deux portes de qualification signalées en fina2/finm.
+[Reçu vérifié, noms et portée](../receipts/audit_g4_finb_20261005/README.md).
+
 ## Fins : lots d’échelle et LiDAR terminés au pin final
 
 Session `v11.20261005.claudefins`, source **38b76701b**, arrêt ciblé
@@ -32,8 +49,8 @@ Les portes `points`, `plat` et `num_roots_cost` passent sur les six
 entrées dans les deux configurations. Les six identités entre voies
 supports et appel public passent sous TSan u21, au pin qui comprend
 L2b et S10. Le lot S ne contient pas les unitaires courts : la session
-B suivante couvre notamment la racine frontière S10 et le refus de
-tri S9. Les différentiels Python complets S9/S10 restent distincts.
+B suivante les qualifie : la racine frontière S10 et le refus de
+tri S9 passent dans finb, décrit ci-dessus. Les différentiels Python complets S9/S10 restent distincts.
 [Reçu vérifié, inventaires et périmètre](../receipts/audit_g4_fins_20261005/README.md).
 
 ## Finm : deux réparations de qualification, sans nouveau défaut moteur établi
