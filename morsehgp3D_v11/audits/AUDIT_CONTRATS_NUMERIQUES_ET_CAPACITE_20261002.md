@@ -3,7 +3,8 @@
 5 octobre 2026. Contrat S0/S1 **5adf6a59f**, demande **9290cf3bf** et
 tranches natives S3/S5/S6/S7 relues ; S6a publiée en **19b2fb218**, S3 en
 **165def5ab**, S5/S6b/S7 publiées jusqu'à **966a351be**, qualification G4
-partielle au pin **00bd979ac**, nouvelle matrice **b319efc84**.
+ordinaire conforme au pin **b319efc84**. S8 relue en **53c027fe8**,
+sans transfert de cette qualification antérieure.
 Le socle qualifié et chaque capture CPU/GPU gardent leur
 source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
@@ -11,37 +12,64 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 
 ## Qualification G4 du 5 octobre : acquis et limites
 
-Les reçus fermés **claudequalmatrice** et **claudequalA**, sources
-**00bd979ac**, sont intègres ; l'arrêt ciblé des deux sessions est certifié.
-Ils portent `failed_remote` et `conforming=false` : les tests interrompus
-ou non joués restent manquants. `complete=true` dans le résumé indique
-la fin du traitement du runner, pas la conformité de la qualification.
-Aucun échec de test terminé n'est enregistré dans ces deux captures.
+**A2 ferme la sélection ordinaire sur b319efc84.** Reçu `completed`,
+`DONE=0`, matrice `complete=true` et `conforming=true`, arrêt ciblé
+certifié ; SHA du paquet, du plan et des résultats rapprochés du reçu.
 
-La campagne u18 a tué **459 mutants**, dont 15 supports, 22 API et 28 CLI :
-457 par code et deux par refus de construction intentionnel, aucun par
-signal ou délai. Sur la session A, les **27 portes API**, le contrat CLI
-normal/`-O`, l'oracle CLI supports normal/`-O`, les coquilles 24/25 et les sorties supports K5
-aux trois tailles et trois trames en mode normal sont conformes dans
-les profils u18/u21/u24 et l'empoisonnement u21. Les six jumelles `-O`
-d'échelle/LiDAR supports font partie des douze tests sans résultat communs
-à ces quatre configurations. Ces succès partiels ne ferment pas L1/L2.
+| Configuration | Tests conformes / sélectionnés | Échecs / sans résultat |
+| --- | ---: | ---: |
+| GCC Release u18 | 914 / 914 | 0 / 0 |
+| GCC Release u21 | 824 / 824 | 0 / 0 |
+| GCC Release u24 | 824 / 824 | 0 / 0 |
+| Poison u21 | 825 / 825 | 0 / 0 |
 
-Les coupures viennent de l'échéance globale du runner ; le test
-FULL 32k/K10 apparaît comme commencé sans résultat, sans durée complète
-mesurée dans ces journaux. La nouvelle matrice **b319efc84** retire `long`
-des configurations ordinaires et le joue séparément en Release u21.
-Ce découpage est cohérent ; les tests longs ne sont pas doublés sous `-O`.
-Ni leur réussite ni leur tenue dans le nouveau délai ne sont encore
-établies, et leur futur succès u21 ne qualifiera pas ce lot en u18/u24
-ou sous sanitizers. Les sources produit et portes sont inchangées entre
-00bd979ac et b319efc84.
+Chaque profil passe les 27 portes API, les 24 portes IO, le contrat CLI
+normal/`-O`, les deux oracles CLI supports et les coquilles 24/25.
+Les dix portes CLI auparavant sans résultat et retenues dans A2 passent,
+y compris les six jumelles supports `-O`. Les tests `long` et mutants sont
+exclus ; les portes `reference_*` ne sont sélectionnées qu'en u18.
+La conformité porte exactement sur ces sélections.
 
-Le plan de mesure reprend le complément demandé en **4acbae533** :
-W48, permutation et réétiquetage sur ng02 et ng00, avec 14 appels par
-porte. La mesure L2 et ce complément sont encore des commandes prévues,
-sans résultat acquis dans les deux reçus clos.
-[Preuves, inventaire des résultats et portée](../receipts/audit_g4_sorties_20261005/README.md).
+**Restent à clore :** les sanitizers/TSan, les identités FULL K10
+32k/ng00 classées `long`, puis les mesures L2 et les permutations et
+réétiquetages supports **W48 sur ng02 et ng00**. Les portes supports de
+cette matrice utilisent W1/W4. Le succès du déterminisme FULL W48 ne
+qualifie pas ce complément supports. La session B n'avait ni `DONE` ni
+reçu final lors de la capture et reste exclue. Aucun chrono de contrat
+n'est acquis par cette matrice. Les tests longs prévus en Release u21
+ne sont pas doublés sous `-O` ; leur futur succès ne qualifiera pas leur
+exécution en u18/u24 ou sous sanitizers.
+[Preuve A2, noms exacts et rejeu](../receipts/audit_g4_a2_20261005/README.md).
+
+Les premières captures **claudequalmatrice/claudequalA**, au pin
+**00bd979ac**, restent conservées : coupure globale sans échec de test
+terminé et **459 mutants u18 détectés**, dont 15 supports, 22 API et
+28 CLI. Leurs tests interrompus ne sont pas réécrits en succès : les
+résultats A2 ont leur propre source et reçu. Le produit et ses portes
+sont inchangés entre 00bd979ac et b319efc84.
+[Preuve antérieure](../receipts/audit_g4_sorties_20261005/README.md).
+
+## S8 : socle numérique de la sortie points
+
+Tranche **53c027fe8**, relecture de `Big`, `Rational`, `RootTable` et
+`RadicalSum` : **aucun défaut important nouveau établi**. Les limites
+d'entiers et d'indices précèdent les écritures ; les allocations refusées
+libèrent le brouillon. Les classes de racines sont fusionnées après test
+de carré parfait ; leur signature ne décide jamais l'égalité. Une somme
+indécidable dans le budget rend `radical_sign_budget`, jamais zéro.
+
+La contre-épreuve indépendante Python contrôle signes, égalités,
+collision de signature, bornes de table et refus. Elle ne teste pas le
+C++ : les rapports locaux S8 restent distincts, et A2 sur b319efc84
+précède cette tranche. Qualification S8 u18/u24, sanitizers, mutants
+numériques complets et coût W48 restent à jouer sur G4.
+
+Pour le raccord S9, conserver l'admission de tous les temporaires par
+worker et payer la table entière même quand seuls certains rangs sont
+remplis. Les égalités de dates et le refus K=n≥2 doivent être jugés sur
+la sortie points assemblée. S8 fournit les primitives ; S9, encore en
+développement, n'est pas une livraison qualifiée.
+[Sources, contre-épreuve et limites](../receipts/audit_s8_20261005/README.md).
 
 ## Audit général du 5 octobre : décisions importantes
 
@@ -90,7 +118,8 @@ Les portes d'admission et du plafond portent maintenant sur l'appel
 entier. Aucun nouveau défaut important établi. Les résultats natifs
 annoncés dans les rapports locaux restent distincts des résultats G4 :
 les acquis partiels ci-dessus comprennent la campagne de mutants u18 ;
-les configurations entières, sanitizers/TSan et K10 restent à clore.
+les configurations ordinaires sont depuis conformes dans A2 ;
+sanitizers/TSan, tests longs K10 et complément supports W48 restent à clore.
 S7 livre depuis **966a351be** l'écriture et la lecture du fichier,
 la comparaison des signatures FULL/supports et le pilote de mesure.
 La qualification de toute la chaîne reste à clore sur G4.

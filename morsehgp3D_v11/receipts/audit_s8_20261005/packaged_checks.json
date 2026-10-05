@@ -1,0 +1,48 @@
+[
+  {
+    "command": [
+      "/home/codespace/.python/current/bin/python3",
+      "morsehgp3D_v11/receipts/audit_s8_20261005/replay.py"
+    ],
+    "optimized": false,
+    "receipt": "s8",
+    "returncode": 0,
+    "stderr": "",
+    "stdout": "audit_s8: capsule_sha=ok native_sources=12 mathematical_replay=ok native_runs=0 gcp_calls=0\n"
+  },
+  {
+    "command": [
+      "/home/codespace/.python/current/bin/python3",
+      "-O",
+      "morsehgp3D_v11/receipts/audit_s8_20261005/replay.py"
+    ],
+    "optimized": true,
+    "receipt": "s8",
+    "returncode": 0,
+    "stderr": "",
+    "stdout": "audit_s8: capsule_sha=ok native_sources=12 mathematical_replay=ok native_runs=0 gcp_calls=0\n"
+  },
+  {
+    "command": [
+      "/home/codespace/.python/current/bin/python3",
+      "morsehgp3D_v11/receipts/audit_g4_a2_20261005/replay.py"
+    ],
+    "optimized": false,
+    "receipt": "a2",
+    "returncode": 0,
+    "stderr": "",
+    "stdout": "v11.20261005.claudequala2: archive_sha=ok plan_sha=ok targeted_closure=ok qualification=selection_sans_long\ngcc_release: Passed=914 selected=914 missing=0\nbits21: Passed=824 selected=824 missing=0\nbits24: Passed=824 selected=824 missing=0\npoison: Passed=825 selected=825 missing=0\naudit_g4_a2_verdict conforme archive1 sourceb319 selection_sans_long hors_natif hors_cloud\n"
+  },
+  {
+    "command": [
+      "/home/codespace/.python/current/bin/python3",
+      "-O",
+      "morsehgp3D_v11/receipts/audit_g4_a2_20261005/replay.py"
+    ],
+    "optimized": true,
+    "receipt": "a2",
+    "returncode": 0,
+    "stderr": "",
+    "stdout": "v11.20261005.claudequala2: archive_sha=ok plan_sha=ok targeted_closure=ok qualification=selection_sans_long\ngcc_release: Passed=914 selected=914 missing=0\nbits21: Passed=824 selected=824 missing=0\nbits24: Passed=824 selected=824 missing=0\npoison: Passed=825 selected=825 missing=0\naudit_g4_a2_verdict conforme archive1 sourceb319 selection_sans_long hors_natif hors_cloud\n"
+  }
+]

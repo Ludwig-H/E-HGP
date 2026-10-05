@@ -1,0 +1,92 @@
+{
+  "schema": "ehgp.audit.source_read_manifest.v1",
+  "pin": "53c027fe848b0d890f164eb87ebf347338c58d55",
+  "files": {
+    "morsehgp3D_v11/src/num/big.hpp": {
+      "sha256": "162bea8d8bfd950f6e2fd039d8045d0a9211855daea10695e0e603c0217584e9",
+      "bytes": 5214,
+      "lines": 103,
+      "coverage": "lecture_complete"
+    },
+    "morsehgp3D_v11/src/num/big.cpp": {
+      "sha256": "35a0fc3979ff8ec42fa97cf9ddfc4c1373082c5b5279381c5a06cdf3998dfc56",
+      "bytes": 14113,
+      "lines": 434,
+      "coverage": "lecture_complete"
+    },
+    "morsehgp3D_v11/src/num/rational.hpp": {
+      "sha256": "76a82aad8842a6f39c247aa9224d1f7e6dca16f5115de8a9ee36e829e9c721c6",
+      "bytes": 2441,
+      "lines": 58,
+      "coverage": "lecture_complete"
+    },
+    "morsehgp3D_v11/src/num/rational.cpp": {
+      "sha256": "67864a76f58a3633f556050acf3299113396be2054d5f67447a0cf631e962d23",
+      "bytes": 2512,
+      "lines": 78,
+      "coverage": "lecture_complete"
+    },
+    "morsehgp3D_v11/src/num/radical.hpp": {
+      "sha256": "a6c5123011a10bf30fe59e3254782cc0142aca34aeb386803e891fca1a5cb498",
+      "bytes": 4460,
+      "lines": 87,
+      "coverage": "lecture_complete"
+    },
+    "morsehgp3D_v11/src/num/radical.cpp": {
+      "sha256": "b9b4d9e2c68c462a6f7fe0795cfde58b3604c00cd401017e7213b938404a5832",
+      "bytes": 9784,
+      "lines": 252,
+      "coverage": "lecture_complete"
+    },
+    "morsehgp3D_v11/src/num/roots.hpp": {
+      "sha256": "50c600c679470aeebd67aac00889aa5bf2a2aaf224901b1829d640abe535b4e5",
+      "bytes": 3552,
+      "lines": 68,
+      "coverage": "lecture_complete"
+    },
+    "morsehgp3D_v11/src/num/roots.cpp": {
+      "sha256": "40aaffb8b4f395d402e70175d12670e35d434bbba285df7f2d8a7b8282fe9221",
+      "bytes": 4159,
+      "lines": 115,
+      "coverage": "lecture_complete"
+    },
+    "morsehgp3D_v11/src/core/buffer.hpp": {
+      "sha256": "3f520dd045226ff115ea67b26859b43ec7415e855ef1c8f4542e8217414c7940",
+      "bytes": 11306,
+      "lines": 231,
+      "coverage": "lecture_complete"
+    },
+    "morsehgp3D_v11/src/num/level.hpp": {
+      "sha256": "c769f20addcc11ef9e249031baee3ce79d538c7aff61d0035e069237d73193e9",
+      "bytes": 1443,
+      "lines": 38,
+      "coverage": "lecture_complete"
+    },
+    "morsehgp3D_v11/tests/num/big_test.cpp": {
+      "sha256": "cff9e7f86d59e6d514b7285cc26eb8c3be171facffb23a376e3ceeff67086cb8",
+      "bytes": 7611,
+      "lines": 175,
+      "coverage": "lecture_complete"
+    },
+    "morsehgp3D_v11/bench/roots_cost.cpp": {
+      "sha256": "1ae3c1a7fa310f7aefb28df36b111b82e1d226c2fe1b21e869a27408fb36530d",
+      "bytes": 7157,
+      "lines": 156,
+      "coverage": "lecture_complete"
+    },
+    "build/v11-persist/sortie_supports/impl_s8.md": {
+      "sha256": "91a9e025ce2ca77dab78bc7adb19e1c8c12d6366d77b46f1fe41e3e64bbf2001",
+      "bytes": 13343,
+      "lines": 137,
+      "coverage": "lecture_complete",
+      "authority": "rapport_local_non_versionne_adfcdc692"
+    },
+    "build/v11-persist/sortie_supports/verif_s8.md": {
+      "sha256": "5fcfcfc72155f860200a9c72d3043453142dfc44ab9ed0bdbbaad12bf57f501e",
+      "bytes": 9663,
+      "lines": 102,
+      "coverage": "lecture_complete",
+      "authority": "rapport_local_non_versionne_adfcdc692"
+    }
+  }
+}

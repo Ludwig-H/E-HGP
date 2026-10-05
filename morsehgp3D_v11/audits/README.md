@@ -4,14 +4,23 @@
 quantized_u21_input_only / not_claimed`. Notes maintenues en place ;
 preuves détaillées dans les reçus immuables.
 
-**G4 : progrès confirmés, qualification encore incomplète.** Les sessions
-`claudequalmatrice` et `claudequalA`, sur **00bd979ac**, se sont terminées
-par limite de temps, avec arrêt ciblé certifié. Aucun échec de test terminé
-n'est enregistré ; les 459 mutants de la campagne u18 sont détectés.
-Les résultats acquis et les tests sans résultat sont séparés dans la
-[contrelecture des reçus](../receipts/audit_g4_sorties_20261005/README.md).
-**b319efc84** sépare désormais les tests longs ; ce changement du plan ne
-vaut pas réussite d'une nouvelle exécution.
+**G4 A2 : la sélection ordinaire est entièrement conforme.** Sur
+**b319efc84**, les profils u18/u21/u24 et poison u21 passent respectivement
+**914/824/824/825 tests**, sans échec ni résultat manquant ; arrêt ciblé
+certifié. Les dix portes CLI ordinaires auparavant manquantes passent.
+Restent les tests `long`, les sanitizers/TSan et le complément supports
+LiDAR W48 ; aucun nouveau contrat de temps n'est acquis.
+[Reçu A2 vérifié](../receipts/audit_g4_a2_20261005/README.md).
+Les premières sessions interrompues et les **459 mutants u18 détectés**
+gardent leur [preuve distincte](../receipts/audit_g4_sorties_20261005/README.md).
+
+**S8 : arithmétique exacte relue, qualification native à poursuivre.**
+La tranche **53c027fe8** prépare les sommes de radicaux de la future sortie
+points. Aucun défaut important nouveau établi : regroupement des classes
+certifié, zéro prouvé, intervalles stricts et refus explicite si la capacité
+ne suffit pas. La contre-épreuve Python indépendante concorde ; A2 précède
+S8 et ne la qualifie pas. S9 reste en développement.
+[Revue, preuve bornée et limites](../receipts/audit_s8_20261005/README.md).
 
 **Audit général au pin 238734f1d, suivi de S3/165def5ab et S6b/9e7428995.** Aucun nouveau défaut
 mathématique FULL établi ; contre-épreuve du nerf complet, des coupes et
@@ -66,7 +75,7 @@ et ng00**, conformément à la demande ; leur exécution reste à constater.
   [échange du 3 octobre archivé](../receipts/audit_supports_contract_20261005/notes_before/README.md).
 - [Audit indépendant, maintenu par son auteur](AUDIT_OUVERTURE_ET_REPRISE_V10_20261002.md).
 
-**Chantier courant : supports, arbre K seul.** S0/S1 **5adf6a59f** et
+**Supports et arbre K seul livrés ; sortie points en développement.** S0/S1 **5adf6a59f** et
 la demande **9290cf3bf** sont relus favorablement : lemmes P/W, deux
 lectures E5, D2 et 13 mutants causaux. S2/257aabb92 et S4/f98aeed67 sont
 livrés, ainsi que S6a/19b2fb218. Les gardes p+q/traces sont corrigées ; D2/E5 sont

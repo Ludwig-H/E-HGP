@@ -1,0 +1,1504 @@
+{
+  "excluded_active_session": "v11.20261005.claudequalb",
+  "gcp_calls_by_auditor": 0,
+  "mutants": null,
+  "native_runs_by_auditor": 0,
+  "qualification_complete": false,
+  "schema": "ehgp.v11.audit.g4_a2_summary.v1",
+  "selected_matrix_complete": true,
+  "sessions": [
+    {
+      "archive_bytes": 652020,
+      "archive_sha256": "9069b9a396fe25beaf3f4dfe931abb9d77afdf0a06a75d8d13d860371e9030e1",
+      "budget_seconds": 2100,
+      "configurations": [
+        {
+          "completed_passed_count": 914,
+          "conforming": true,
+          "critical_verdicts": [
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_sha256"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_hex"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_input"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_input_sizes"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_input_unreadable"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_input_budget"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_inventaire"
+            },
+            {
+              "seconds": "0.03",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_plan_syntax"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_plan_parent"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_plan_conflicts"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_plan_inputs"
+            },
+            {
+              "seconds": "0.03",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_create_names"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_parent_unwritable"
+            },
+            {
+              "seconds": "0.03",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_commit"
+            },
+            {
+              "seconds": "0.03",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_noreplace"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_orphan"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_discard"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_retract"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_write_failure"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_inventaire"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_fault_starvation"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_fault_inventaire"
+            },
+            {
+              "seconds": "0.32",
+              "state": "Passed",
+              "test": "mhgp11_io_sha256"
+            },
+            {
+              "seconds": "0.39",
+              "state": "Passed",
+              "test": "mhgp11_io_sha256_opt"
+            },
+            {
+              "seconds": "0.04",
+              "state": "Passed",
+              "test": "mhgp11_api_session_released"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_session_product_alive"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_session_refusals"
+            },
+            {
+              "seconds": "0.37",
+              "state": "Passed",
+              "test": "mhgp11_api_session_equivalence"
+            },
+            {
+              "seconds": "0.29",
+              "state": "Passed",
+              "test": "mhgp11_api_session_tree_digest"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_session_provenance"
+            },
+            {
+              "seconds": "0.04",
+              "state": "Passed",
+              "test": "mhgp11_api_session_after_publish"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_session_session_identity"
+            },
+            {
+              "seconds": "0.33",
+              "state": "Passed",
+              "test": "mhgp11_api_session_engine"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_session_inventaire"
+            },
+            {
+              "seconds": "0.14",
+              "state": "Passed",
+              "test": "mhgp11_api_session_destroyed_live"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_session_destroyed_released"
+            },
+            {
+              "seconds": "0.09",
+              "state": "Passed",
+              "test": "mhgp11_api_publish_reader"
+            },
+            {
+              "seconds": "0.22",
+              "state": "Passed",
+              "test": "mhgp11_api_publish_reader_opt"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_session_fault_session"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_session_fault_starvation"
+            },
+            {
+              "seconds": "0.03",
+              "state": "Passed",
+              "test": "mhgp11_api_session_fault_publication"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_session_fault_inventaire"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_modes"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_judge"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_inventaire"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_none"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_upward"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_ftz_daz"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_inexact"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_underflow"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_denormal"
+            },
+            {
+              "seconds": "0.19",
+              "state": "Passed",
+              "test": "mhgp11_cli_contract"
+            },
+            {
+              "seconds": "0.30",
+              "state": "Passed",
+              "test": "mhgp11_cli_contract_opt"
+            }
+          ],
+          "ctest_log_sha256": "008eef35497dba79c7714c40cfcc7b4b21afa2ec77baa30b4789beae12eccdcc",
+          "failed_tests": [],
+          "important_verdicts": [
+            {
+              "seconds": null,
+              "state": "not_selected",
+              "test": "mhgp11_cli_full_identity_scale32000_k10"
+            },
+            {
+              "seconds": "65.33",
+              "state": "Passed",
+              "test": "mhgp11_cli_full_determinism_scale8000_opt"
+            },
+            {
+              "seconds": "62.56",
+              "state": "Passed",
+              "test": "mhgp11_cli_full_identity_lidar_ng00_k5_opt"
+            },
+            {
+              "seconds": "51.46",
+              "state": "Passed",
+              "test": "mhgp11_cli_full_identity_lidar_ng01_k5_opt"
+            },
+            {
+              "seconds": "66.38",
+              "state": "Passed",
+              "test": "mhgp11_cli_full_identity_lidar_ng02_k5_opt"
+            },
+            {
+              "seconds": null,
+              "state": "not_selected",
+              "test": "mhgp11_cli_full_identity_lidar_ng00_k10"
+            },
+            {
+              "seconds": "17.04",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_scale8000_opt"
+            },
+            {
+              "seconds": "34.28",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_scale16000_opt"
+            },
+            {
+              "seconds": "72.70",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_scale32000_opt"
+            },
+            {
+              "seconds": "37.46",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_lidar_ng00_k5_opt"
+            },
+            {
+              "seconds": "29.13",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_lidar_ng01_k5_opt"
+            },
+            {
+              "seconds": "36.06",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_lidar_ng02_k5_opt"
+            },
+            {
+              "seconds": "30.85",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_oracle"
+            },
+            {
+              "seconds": "25.46",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_oracle_opt"
+            },
+            {
+              "seconds": "0.06",
+              "state": "Passed",
+              "test": "mhgp11_supports_hierarchy_sphere5"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_supports_hierarchy_sphere9"
+            }
+          ],
+          "inventory_sha256": "61978c2d6e232c1c20605c0ae02b93a25a90d1a9cc190fd90973516b63d4c75a",
+          "missing_tests": [],
+          "name": "gcc_release",
+          "reason": "",
+          "seconds": 1822.85,
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 914,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 914,
+            "selected": 914
+          }
+        },
+        {
+          "completed_passed_count": 824,
+          "conforming": true,
+          "critical_verdicts": [
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_sha256"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_hex"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_input"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_input_sizes"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_input_unreadable"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_input_budget"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_inventaire"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_plan_syntax"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_plan_parent"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_plan_conflicts"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_plan_inputs"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_create_names"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_parent_unwritable"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_commit"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_noreplace"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_orphan"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_discard"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_retract"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_write_failure"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_inventaire"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_fault_starvation"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_fault_inventaire"
+            },
+            {
+              "seconds": "0.30",
+              "state": "Passed",
+              "test": "mhgp11_io_sha256"
+            },
+            {
+              "seconds": "0.37",
+              "state": "Passed",
+              "test": "mhgp11_io_sha256_opt"
+            },
+            {
+              "seconds": "0.03",
+              "state": "Passed",
+              "test": "mhgp11_api_session_released"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_session_product_alive"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_session_refusals"
+            },
+            {
+              "seconds": "0.32",
+              "state": "Passed",
+              "test": "mhgp11_api_session_equivalence"
+            },
+            {
+              "seconds": "0.20",
+              "state": "Passed",
+              "test": "mhgp11_api_session_tree_digest"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_session_provenance"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_session_after_publish"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_session_session_identity"
+            },
+            {
+              "seconds": "0.28",
+              "state": "Passed",
+              "test": "mhgp11_api_session_engine"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_session_inventaire"
+            },
+            {
+              "seconds": "0.08",
+              "state": "Passed",
+              "test": "mhgp11_api_session_destroyed_live"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_session_destroyed_released"
+            },
+            {
+              "seconds": "0.06",
+              "state": "Passed",
+              "test": "mhgp11_api_publish_reader"
+            },
+            {
+              "seconds": "0.14",
+              "state": "Passed",
+              "test": "mhgp11_api_publish_reader_opt"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_session_fault_session"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_session_fault_starvation"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_session_fault_publication"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_session_fault_inventaire"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_modes"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_judge"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_inventaire"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_none"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_upward"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_ftz_daz"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_inexact"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_underflow"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_denormal"
+            },
+            {
+              "seconds": "0.14",
+              "state": "Passed",
+              "test": "mhgp11_cli_contract"
+            },
+            {
+              "seconds": "0.23",
+              "state": "Passed",
+              "test": "mhgp11_cli_contract_opt"
+            }
+          ],
+          "ctest_log_sha256": "c87027fa518f672392850a46c82987362aa75f3e291de60b0c8b2b7ddf975a63",
+          "failed_tests": [],
+          "important_verdicts": [
+            {
+              "seconds": null,
+              "state": "not_selected",
+              "test": "mhgp11_cli_full_identity_scale32000_k10"
+            },
+            {
+              "seconds": "63.75",
+              "state": "Passed",
+              "test": "mhgp11_cli_full_determinism_scale8000_opt"
+            },
+            {
+              "seconds": "63.08",
+              "state": "Passed",
+              "test": "mhgp11_cli_full_identity_lidar_ng00_k5_opt"
+            },
+            {
+              "seconds": "52.74",
+              "state": "Passed",
+              "test": "mhgp11_cli_full_identity_lidar_ng01_k5_opt"
+            },
+            {
+              "seconds": "67.06",
+              "state": "Passed",
+              "test": "mhgp11_cli_full_identity_lidar_ng02_k5_opt"
+            },
+            {
+              "seconds": null,
+              "state": "not_selected",
+              "test": "mhgp11_cli_full_identity_lidar_ng00_k10"
+            },
+            {
+              "seconds": "16.83",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_scale8000_opt"
+            },
+            {
+              "seconds": "34.13",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_scale16000_opt"
+            },
+            {
+              "seconds": "73.31",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_scale32000_opt"
+            },
+            {
+              "seconds": "37.28",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_lidar_ng00_k5_opt"
+            },
+            {
+              "seconds": "30.29",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_lidar_ng01_k5_opt"
+            },
+            {
+              "seconds": "37.51",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_lidar_ng02_k5_opt"
+            },
+            {
+              "seconds": "28.03",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_oracle"
+            },
+            {
+              "seconds": "26.29",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_oracle_opt"
+            },
+            {
+              "seconds": "0.05",
+              "state": "Passed",
+              "test": "mhgp11_supports_hierarchy_sphere5"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_supports_hierarchy_sphere9"
+            }
+          ],
+          "inventory_sha256": "334572d8b5edb68c278ee3f785348a4a557a8d197cc14b7566ecfac99b795e18",
+          "missing_tests": [],
+          "name": "bits21",
+          "reason": "",
+          "seconds": 1971.794,
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 824,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 824,
+            "selected": 824
+          }
+        },
+        {
+          "completed_passed_count": 824,
+          "conforming": true,
+          "critical_verdicts": [
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_sha256"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_hex"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_input"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_input_sizes"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_input_unreadable"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_input_budget"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_inventaire"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_plan_syntax"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_plan_parent"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_plan_conflicts"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_plan_inputs"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_create_names"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_parent_unwritable"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_commit"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_noreplace"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_orphan"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_discard"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_retract"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_write_failure"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_inventaire"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_fault_starvation"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_fault_inventaire"
+            },
+            {
+              "seconds": "0.31",
+              "state": "Passed",
+              "test": "mhgp11_io_sha256"
+            },
+            {
+              "seconds": "0.36",
+              "state": "Passed",
+              "test": "mhgp11_io_sha256_opt"
+            },
+            {
+              "seconds": "0.03",
+              "state": "Passed",
+              "test": "mhgp11_api_session_released"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_session_product_alive"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_session_refusals"
+            },
+            {
+              "seconds": "0.36",
+              "state": "Passed",
+              "test": "mhgp11_api_session_equivalence"
+            },
+            {
+              "seconds": "0.17",
+              "state": "Passed",
+              "test": "mhgp11_api_session_tree_digest"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_session_provenance"
+            },
+            {
+              "seconds": "0.03",
+              "state": "Passed",
+              "test": "mhgp11_api_session_after_publish"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_session_session_identity"
+            },
+            {
+              "seconds": "0.27",
+              "state": "Passed",
+              "test": "mhgp11_api_session_engine"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_session_inventaire"
+            },
+            {
+              "seconds": "0.08",
+              "state": "Passed",
+              "test": "mhgp11_api_session_destroyed_live"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_session_destroyed_released"
+            },
+            {
+              "seconds": "0.06",
+              "state": "Passed",
+              "test": "mhgp11_api_publish_reader"
+            },
+            {
+              "seconds": "0.14",
+              "state": "Passed",
+              "test": "mhgp11_api_publish_reader_opt"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_session_fault_session"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_session_fault_starvation"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_session_fault_publication"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_session_fault_inventaire"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_modes"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_judge"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_inventaire"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_none"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_upward"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_ftz_daz"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_inexact"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_underflow"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_denormal"
+            },
+            {
+              "seconds": "0.17",
+              "state": "Passed",
+              "test": "mhgp11_cli_contract"
+            },
+            {
+              "seconds": "0.25",
+              "state": "Passed",
+              "test": "mhgp11_cli_contract_opt"
+            }
+          ],
+          "ctest_log_sha256": "9c8088f9197d04543b22f7986b9c74a9c324bb582af662a457c6707088f63fee",
+          "failed_tests": [],
+          "important_verdicts": [
+            {
+              "seconds": null,
+              "state": "not_selected",
+              "test": "mhgp11_cli_full_identity_scale32000_k10"
+            },
+            {
+              "seconds": "64.34",
+              "state": "Passed",
+              "test": "mhgp11_cli_full_determinism_scale8000_opt"
+            },
+            {
+              "seconds": "63.49",
+              "state": "Passed",
+              "test": "mhgp11_cli_full_identity_lidar_ng00_k5_opt"
+            },
+            {
+              "seconds": "53.07",
+              "state": "Passed",
+              "test": "mhgp11_cli_full_identity_lidar_ng01_k5_opt"
+            },
+            {
+              "seconds": "68.05",
+              "state": "Passed",
+              "test": "mhgp11_cli_full_identity_lidar_ng02_k5_opt"
+            },
+            {
+              "seconds": null,
+              "state": "not_selected",
+              "test": "mhgp11_cli_full_identity_lidar_ng00_k10"
+            },
+            {
+              "seconds": "16.46",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_scale8000_opt"
+            },
+            {
+              "seconds": "34.89",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_scale16000_opt"
+            },
+            {
+              "seconds": "73.59",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_scale32000_opt"
+            },
+            {
+              "seconds": "37.88",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_lidar_ng00_k5_opt"
+            },
+            {
+              "seconds": "30.60",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_lidar_ng01_k5_opt"
+            },
+            {
+              "seconds": "36.98",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_lidar_ng02_k5_opt"
+            },
+            {
+              "seconds": "27.96",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_oracle"
+            },
+            {
+              "seconds": "26.73",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_oracle_opt"
+            },
+            {
+              "seconds": "0.05",
+              "state": "Passed",
+              "test": "mhgp11_supports_hierarchy_sphere5"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_supports_hierarchy_sphere9"
+            }
+          ],
+          "inventory_sha256": "334572d8b5edb68c278ee3f785348a4a557a8d197cc14b7566ecfac99b795e18",
+          "missing_tests": [],
+          "name": "bits24",
+          "reason": "",
+          "seconds": 1988.528,
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 824,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 824,
+            "selected": 824
+          }
+        },
+        {
+          "completed_passed_count": 825,
+          "conforming": true,
+          "critical_verdicts": [
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_sha256"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_hex"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_input"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_input_sizes"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_input_unreadable"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_input_budget"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_inventaire"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_plan_syntax"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_plan_parent"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_plan_conflicts"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_plan_inputs"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_create_names"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_parent_unwritable"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_commit"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_noreplace"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_orphan"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_discard"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_retract"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_write_failure"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_inventaire"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_fault_starvation"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_fault_inventaire"
+            },
+            {
+              "seconds": "0.31",
+              "state": "Passed",
+              "test": "mhgp11_io_sha256"
+            },
+            {
+              "seconds": "0.35",
+              "state": "Passed",
+              "test": "mhgp11_io_sha256_opt"
+            },
+            {
+              "seconds": "0.03",
+              "state": "Passed",
+              "test": "mhgp11_api_session_released"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_session_product_alive"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_session_refusals"
+            },
+            {
+              "seconds": "0.31",
+              "state": "Passed",
+              "test": "mhgp11_api_session_equivalence"
+            },
+            {
+              "seconds": "0.22",
+              "state": "Passed",
+              "test": "mhgp11_api_session_tree_digest"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_session_provenance"
+            },
+            {
+              "seconds": "0.03",
+              "state": "Passed",
+              "test": "mhgp11_api_session_after_publish"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_session_session_identity"
+            },
+            {
+              "seconds": "0.28",
+              "state": "Passed",
+              "test": "mhgp11_api_session_engine"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_session_inventaire"
+            },
+            {
+              "seconds": "0.09",
+              "state": "Passed",
+              "test": "mhgp11_api_session_destroyed_live"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_session_destroyed_released"
+            },
+            {
+              "seconds": "0.06",
+              "state": "Passed",
+              "test": "mhgp11_api_publish_reader"
+            },
+            {
+              "seconds": "0.15",
+              "state": "Passed",
+              "test": "mhgp11_api_publish_reader_opt"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_session_fault_session"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_session_fault_starvation"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_session_fault_publication"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_session_fault_inventaire"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_modes"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_judge"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_inventaire"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_none"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_upward"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_ftz_daz"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_inexact"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_underflow"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_denormal"
+            },
+            {
+              "seconds": "0.17",
+              "state": "Passed",
+              "test": "mhgp11_cli_contract"
+            },
+            {
+              "seconds": "0.25",
+              "state": "Passed",
+              "test": "mhgp11_cli_contract_opt"
+            }
+          ],
+          "ctest_log_sha256": "8da05692da79e7d649596a323ea08fd8e4c27f95c1ef4b6f92c1d1f7fecaacc8",
+          "failed_tests": [],
+          "important_verdicts": [
+            {
+              "seconds": null,
+              "state": "not_selected",
+              "test": "mhgp11_cli_full_identity_scale32000_k10"
+            },
+            {
+              "seconds": "64.90",
+              "state": "Passed",
+              "test": "mhgp11_cli_full_determinism_scale8000_opt"
+            },
+            {
+              "seconds": "63.16",
+              "state": "Passed",
+              "test": "mhgp11_cli_full_identity_lidar_ng00_k5_opt"
+            },
+            {
+              "seconds": "52.39",
+              "state": "Passed",
+              "test": "mhgp11_cli_full_identity_lidar_ng01_k5_opt"
+            },
+            {
+              "seconds": "67.51",
+              "state": "Passed",
+              "test": "mhgp11_cli_full_identity_lidar_ng02_k5_opt"
+            },
+            {
+              "seconds": null,
+              "state": "not_selected",
+              "test": "mhgp11_cli_full_identity_lidar_ng00_k10"
+            },
+            {
+              "seconds": "16.66",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_scale8000_opt"
+            },
+            {
+              "seconds": "34.82",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_scale16000_opt"
+            },
+            {
+              "seconds": "74.22",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_scale32000_opt"
+            },
+            {
+              "seconds": "37.71",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_lidar_ng00_k5_opt"
+            },
+            {
+              "seconds": "30.68",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_lidar_ng01_k5_opt"
+            },
+            {
+              "seconds": "36.99",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_lidar_ng02_k5_opt"
+            },
+            {
+              "seconds": "27.93",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_oracle"
+            },
+            {
+              "seconds": "26.71",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_oracle_opt"
+            },
+            {
+              "seconds": "0.05",
+              "state": "Passed",
+              "test": "mhgp11_supports_hierarchy_sphere5"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_supports_hierarchy_sphere9"
+            }
+          ],
+          "inventory_sha256": "5b1b97db525392e051ae0a79021638fa7b7231d380a7a8fc4cc05fab87ae4b4f",
+          "missing_tests": [],
+          "name": "poison",
+          "reason": "",
+          "seconds": 1980.623,
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 825,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 825,
+            "selected": 825
+          }
+        }
+      ],
+      "matrix_complete": true,
+      "matrix_conforming": true,
+      "package_sha256": "9531ff2a108981bea0999ed6c3f13cde7b5a3f13f5b667a1df9e31e23f7ffac2",
+      "plan_sha256": "2ddaf88ef6d0d5c454b8484bf688fcf06746416a7733de1505245eed5096c782",
+      "receipt_status": "completed",
+      "session": "v11.20261005.claudequala2",
+      "source_commit": "b319efc8477fec234afc0b31e86f8a43e3023641",
+      "targeted_closure_verified": true,
+      "worker_exit_code": 0
+    }
+  ],
+  "source_commit": "b319efc8477fec234afc0b31e86f8a43e3023641"
+}

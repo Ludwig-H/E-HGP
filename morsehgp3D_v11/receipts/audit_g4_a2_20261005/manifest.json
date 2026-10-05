@@ -1,0 +1,416 @@
+{
+  "excluded_active_session": "v11.20261005.claudequalb",
+  "gcp_calls": 0,
+  "important_tests": [
+    "mhgp11_cli_full_identity_scale32000_k10",
+    "mhgp11_cli_full_determinism_scale8000_opt",
+    "mhgp11_cli_full_identity_lidar_ng00_k5_opt",
+    "mhgp11_cli_full_identity_lidar_ng01_k5_opt",
+    "mhgp11_cli_full_identity_lidar_ng02_k5_opt",
+    "mhgp11_cli_full_identity_lidar_ng00_k10",
+    "mhgp11_cli_supports_scale8000_opt",
+    "mhgp11_cli_supports_scale16000_opt",
+    "mhgp11_cli_supports_scale32000_opt",
+    "mhgp11_cli_supports_lidar_ng00_k5_opt",
+    "mhgp11_cli_supports_lidar_ng01_k5_opt",
+    "mhgp11_cli_supports_lidar_ng02_k5_opt",
+    "mhgp11_cli_supports_oracle",
+    "mhgp11_cli_supports_oracle_opt",
+    "mhgp11_supports_hierarchy_sphere5",
+    "mhgp11_supports_hierarchy_sphere9"
+  ],
+  "main_observed_not_qualified": "53c027fe848b0d890f164eb87ebf347338c58d55",
+  "native_runs": 0,
+  "observed_utc": "2026-10-05T15:48:35.005490+00:00",
+  "plans": [
+    {
+      "bytes": 837,
+      "exact_text": "{\n  \"schema\": \"ehgp.v11.session_plan.v1\",\n  \"note\": \"Qualification L1 + L2 de la sortie parametree (Claude, 5 octobre 2026), commit b319efc84 : configurations Release u18, u21, u24 et empoisonnement, sans les portes long (sessions precedentes : aucun echec, coupees par l'echeance derriere la porte long K10).\",\n  \"python_packages\": \"none\",\n  \"default_build\": false,\n  \"results_cap_bytes\": 134217728,\n  \"commands\": [\n    {\n      \"name\": \"matrice\",\n      \"timeout_seconds\": 2200,\n      \"argv\": [\n        \"python3\",\n        \"{src}/morsehgp3D_v11/tools/g4_matrix.py\",\n        \"--src\",\n        \"{src}\",\n        \"--out\",\n        \"{out}\",\n        \"--data\",\n        \"{data}\",\n        \"--work\",\n        \"{build}/matrix\",\n        \"--budget-seconds\",\n        \"2100\",\n        \"--only\",\n        \"gcc_release,bits21,bits24,poison\"\n      ]\n    }\n  ]\n}",
+      "name": "A2_consumed_plan",
+      "path": "/workspaces/.ehgp-sessions/v11.20261005.claudequala2/package/plan.json",
+      "sha256": "2ddaf88ef6d0d5c454b8484bf688fcf06746416a7733de1505245eed5096c782"
+    }
+  ],
+  "schema": "ehgp.v11.audit.g4_a2_snapshot.v1",
+  "sessions": [
+    {
+      "hash_verification": {
+        "archive_original_path": "/workspaces/.ehgp-sessions/v11.20261005.claudequala2/results/results.tar.gz",
+        "archive_original_sha256": "9069b9a396fe25beaf3f4dfe931abb9d77afdf0a06a75d8d13d860371e9030e1",
+        "archive_sha_matches_receipt": true,
+        "package_original_path": "/workspaces/.ehgp-sessions/v11.20261005.claudequala2/package/package.tar.gz",
+        "package_original_sha256": "9531ff2a108981bea0999ed6c3f13cde7b5a3f13f5b667a1df9e31e23f7ffac2",
+        "package_sha_matches_receipt": true,
+        "plan_sha_matches_receipt": true,
+        "receipt_original_path": "/workspaces/.ehgp-sessions/v11.20261005.claudequala2/receipt.json",
+        "receipt_original_sha256": "d1bbfec6b584005580187dccf3cf7b3e23848cdec80f45af2ad15c11b5402029",
+        "summary_archive_member": "results/cmd/000_matrice/files/matrix/summary.json",
+        "summary_sha256": "b9dc0b87fe77c371b537905a32085e39da89b783de338aaf38bde1bf189f657f"
+      },
+      "matrix_summary_fields": {
+        "budget_seconds": 2100,
+        "complete": true,
+        "configurations": [
+          {
+            "cmake_options": [
+              "-DCMAKE_BUILD_TYPE=Release",
+              "-DMHGP11_COORD_BITS=18"
+            ],
+            "conforming": true,
+            "ctest_args": [
+              "-LE",
+              "^(mutant|long)$"
+            ],
+            "failed_tests": [],
+            "missing_tests": [],
+            "name": "gcc_release",
+            "optional": false,
+            "passed_labels": {
+              "fast": 833,
+              "lidar": 39,
+              "oracle": 236,
+              "scale16000": 10,
+              "scale32000": 11,
+              "scale8000": 22,
+              "unit": 508
+            },
+            "reason": "",
+            "seconds": 1822.85,
+            "started_utc": "2026-10-05T14:45:16Z",
+            "status": "ok",
+            "steps": [
+              {
+                "exit_code": 0,
+                "name": "configure",
+                "seconds": 0.714,
+                "status": "ok",
+                "timeout_seconds": 2100.0
+              },
+              {
+                "exit_code": 0,
+                "name": "build",
+                "seconds": 20.22,
+                "status": "ok",
+                "timeout_seconds": 2099.3
+              },
+              {
+                "exit_code": 0,
+                "name": "list",
+                "seconds": 0.064,
+                "status": "ok",
+                "timeout_seconds": 120
+              },
+              {
+                "exit_code": 0,
+                "name": "test",
+                "seconds": 1801.825,
+                "status": "ok",
+                "timeout_seconds": 2079.0
+              }
+            ],
+            "tests": {
+              "ctest_failed": 0,
+              "ctest_total": 914,
+              "failed": 0,
+              "not_run": 0,
+              "passed": 914,
+              "selected": 914
+            },
+            "threads": 16
+          },
+          {
+            "cmake_options": [
+              "-DCMAKE_BUILD_TYPE=Release",
+              "-DMHGP11_COORD_BITS=21"
+            ],
+            "conforming": true,
+            "ctest_args": [
+              "-LE",
+              "^(mutant|long)$",
+              "-E",
+              "^mhgp11_reference_"
+            ],
+            "failed_tests": [],
+            "missing_tests": [],
+            "name": "bits21",
+            "optional": false,
+            "passed_labels": {
+              "fast": 743,
+              "lidar": 39,
+              "oracle": 146,
+              "scale16000": 10,
+              "scale32000": 11,
+              "scale8000": 22,
+              "unit": 508
+            },
+            "reason": "",
+            "seconds": 1971.794,
+            "started_utc": "2026-10-05T14:45:16Z",
+            "status": "ok",
+            "steps": [
+              {
+                "exit_code": 0,
+                "name": "configure",
+                "seconds": 0.714,
+                "status": "ok",
+                "timeout_seconds": 2100.0
+              },
+              {
+                "exit_code": 0,
+                "name": "build",
+                "seconds": 70.682,
+                "status": "ok",
+                "timeout_seconds": 2099.3
+              },
+              {
+                "exit_code": 0,
+                "name": "list",
+                "seconds": 0.064,
+                "status": "ok",
+                "timeout_seconds": 120
+              },
+              {
+                "exit_code": 0,
+                "name": "test",
+                "seconds": 1900.316,
+                "status": "ok",
+                "timeout_seconds": 2028.5
+              }
+            ],
+            "tests": {
+              "ctest_failed": 0,
+              "ctest_total": 824,
+              "failed": 0,
+              "not_run": 0,
+              "passed": 824,
+              "selected": 824
+            },
+            "threads": 4
+          },
+          {
+            "cmake_options": [
+              "-DCMAKE_BUILD_TYPE=Release",
+              "-DMHGP11_COORD_BITS=24"
+            ],
+            "conforming": true,
+            "ctest_args": [
+              "-LE",
+              "^(mutant|long)$",
+              "-E",
+              "^mhgp11_reference_"
+            ],
+            "failed_tests": [],
+            "missing_tests": [],
+            "name": "bits24",
+            "optional": false,
+            "passed_labels": {
+              "fast": 743,
+              "lidar": 39,
+              "oracle": 146,
+              "scale16000": 10,
+              "scale32000": 11,
+              "scale8000": 22,
+              "unit": 508
+            },
+            "reason": "",
+            "seconds": 1988.528,
+            "started_utc": "2026-10-05T14:45:16Z",
+            "status": "ok",
+            "steps": [
+              {
+                "exit_code": 0,
+                "name": "configure",
+                "seconds": 0.716,
+                "status": "ok",
+                "timeout_seconds": 2100.0
+              },
+              {
+                "exit_code": 0,
+                "name": "build",
+                "seconds": 70.782,
+                "status": "ok",
+                "timeout_seconds": 2099.3
+              },
+              {
+                "exit_code": 0,
+                "name": "list",
+                "seconds": 0.064,
+                "status": "ok",
+                "timeout_seconds": 120
+              },
+              {
+                "exit_code": 0,
+                "name": "test",
+                "seconds": 1916.95,
+                "status": "ok",
+                "timeout_seconds": 2028.4
+              }
+            ],
+            "tests": {
+              "ctest_failed": 0,
+              "ctest_total": 824,
+              "failed": 0,
+              "not_run": 0,
+              "passed": 824,
+              "selected": 824
+            },
+            "threads": 4
+          },
+          {
+            "cmake_options": [
+              "-DCMAKE_BUILD_TYPE=Release",
+              "-DMHGP11_POISON=ON",
+              "-DMHGP11_COORD_BITS=21"
+            ],
+            "conforming": true,
+            "ctest_args": [
+              "-LE",
+              "^(mutant|long)$",
+              "-E",
+              "^mhgp11_reference_"
+            ],
+            "failed_tests": [],
+            "missing_tests": [],
+            "name": "poison",
+            "optional": false,
+            "passed_labels": {
+              "fast": 744,
+              "lidar": 39,
+              "oracle": 146,
+              "scale16000": 10,
+              "scale32000": 11,
+              "scale8000": 22,
+              "unit": 509
+            },
+            "reason": "",
+            "seconds": 1980.623,
+            "started_utc": "2026-10-05T14:45:16Z",
+            "status": "ok",
+            "steps": [
+              {
+                "exit_code": 0,
+                "name": "configure",
+                "seconds": 0.714,
+                "status": "ok",
+                "timeout_seconds": 2100.0
+              },
+              {
+                "exit_code": 0,
+                "name": "build",
+                "seconds": 71.082,
+                "status": "ok",
+                "timeout_seconds": 2099.3
+              },
+              {
+                "exit_code": 0,
+                "name": "list",
+                "seconds": 0.064,
+                "status": "ok",
+                "timeout_seconds": 120
+              },
+              {
+                "exit_code": 0,
+                "name": "test",
+                "seconds": 1908.744,
+                "status": "ok",
+                "timeout_seconds": 2028.1
+              }
+            ],
+            "tests": {
+              "ctest_failed": 0,
+              "ctest_total": 825,
+              "failed": 0,
+              "not_run": 0,
+              "passed": 825,
+              "selected": 825
+            },
+            "threads": 4
+          }
+        ],
+        "conforming": true,
+        "ended_utc": "2026-10-05T15:18:25Z",
+        "exit_code": 0,
+        "requested": [
+          "gcc_release",
+          "bits21",
+          "bits24",
+          "poison"
+        ],
+        "schema": "ehgp.v11.g4_matrix_summary.v1",
+        "signals": [],
+        "started_utc": "2026-10-05T14:45:16Z",
+        "statuses": {
+          "bits21": "ok",
+          "bits24": "ok",
+          "gcc_release": "ok",
+          "poison": "ok"
+        },
+        "thread_budget": 48
+      },
+      "package_sha256": "9531ff2a108981bea0999ed6c3f13cde7b5a3f13f5b667a1df9e31e23f7ffac2",
+      "receipt_fields": {
+        "backend": "reference_cpu",
+        "closing_generation": "2026-10-05T07:43:22.921-07:00",
+        "closure": "stopped",
+        "commands": [
+          {
+            "exit_code": "0",
+            "index": "0",
+            "max_rss_kb": "2458048",
+            "name": "matrice",
+            "status": "ok",
+            "timeout_seconds": "2200",
+            "wall_seconds": "1988.626"
+          }
+        ],
+        "commit": "b319efc8477fec234afc0b31e86f8a43e3023641",
+        "errors": [],
+        "evidence_grade": "pushed_commit",
+        "generation": "2026-10-05T07:43:22.921-07:00",
+        "observed_after": {
+          "lastStartTimestamp": "2026-10-05T07:43:22.921-07:00",
+          "lastStopTimestamp": "2026-10-05T08:20:09.975-07:00",
+          "name": "ehgp-v7-3b1d496aed430749ea7e049f",
+          "status": "TERMINATED"
+        },
+        "oslogin_key_removed": true,
+        "overflow": {
+          "evicted": [],
+          "truncated_streams": []
+        },
+        "package_sha256": "9531ff2a108981bea0999ed6c3f13cde7b5a3f13f5b667a1df9e31e23f7ffac2",
+        "plan_sha256": "2ddaf88ef6d0d5c454b8484bf688fcf06746416a7733de1505245eed5096c782",
+        "pre_start_generation": "2026-10-05T07:02:03.151-07:00",
+        "private_key_deleted": true,
+        "public_status": "not_claimed",
+        "reserve_released": true,
+        "results_bytes": 652020,
+        "results_expanded_bytes": 7104862,
+        "results_sha256": "9069b9a396fe25beaf3f4dfe931abb9d77afdf0a06a75d8d13d860371e9030e1",
+        "results_skipped_members": [],
+        "results_verified": true,
+        "schema": "ehgp.v11.session_receipt.v1",
+        "source": null,
+        "source_kind": "commit",
+        "start_certified": true,
+        "status": "completed",
+        "target": {
+          "instance": "ehgp-v7-3b1d496aed430749ea7e049f",
+          "project": "devpod-gpu-exploration",
+          "zone": "us-central1-c"
+        },
+        "targeted_shutdown_certified": true,
+        "warnings": [],
+        "worker_exit_code": 0,
+        "worker_outcome": "exited",
+        "worker_plan_sha256": "54b1d23f434cf1b3c67df627b81f4616295d038fba936b70378e3d7b2e3e8d98"
+      },
+      "receipt_sha256": "d1bbfec6b584005580187dccf3cf7b3e23848cdec80f45af2ad15c11b5402029",
+      "results_archive_sha256": "9069b9a396fe25beaf3f4dfe931abb9d77afdf0a06a75d8d13d860371e9030e1",
+      "session": "v11.20261005.claudequala2",
+      "session_plan_text": "{\n  \"schema\": \"ehgp.v11.session_plan.v1\",\n  \"note\": \"Qualification L1 + L2 de la sortie parametree (Claude, 5 octobre 2026), commit b319efc84 : configurations Release u18, u21, u24 et empoisonnement, sans les portes long (sessions precedentes : aucun echec, coupees par l'echeance derriere la porte long K10).\",\n  \"python_packages\": \"none\",\n  \"default_build\": false,\n  \"results_cap_bytes\": 134217728,\n  \"commands\": [\n    {\n      \"name\": \"matrice\",\n      \"timeout_seconds\": 2200,\n      \"argv\": [\n        \"python3\",\n        \"{src}/morsehgp3D_v11/tools/g4_matrix.py\",\n        \"--src\",\n        \"{src}\",\n        \"--out\",\n        \"{out}\",\n        \"--data\",\n        \"{data}\",\n        \"--work\",\n        \"{build}/matrix\",\n        \"--budget-seconds\",\n        \"2100\",\n        \"--only\",\n        \"gcc_release,bits21,bits24,poison\"\n      ]\n    }\n  ]\n}",
+      "source_commit": "b319efc8477fec234afc0b31e86f8a43e3023641"
+    }
+  ],
+  "source_commit": "b319efc8477fec234afc0b31e86f8a43e3023641"
+}

@@ -1,0 +1,44 @@
+[
+  {
+    "command": [
+      "python3",
+      "/workspaces/E-HGP/build/v11-audit-math-s8-20261005/check_radicals.py"
+    ],
+    "code": 0,
+    "script_sha256": "e0924f585f1160529086c1dfd2d8b6134ed7f907da4f8c995f3a56867dbc8605",
+    "stdout": "normal.json",
+    "stderr": "normal.stderr"
+  },
+  {
+    "command": [
+      "python3",
+      "-O",
+      "/workspaces/E-HGP/build/v11-audit-math-s8-20261005/check_radicals.py"
+    ],
+    "code": 0,
+    "script_sha256": "e0924f585f1160529086c1dfd2d8b6134ed7f907da4f8c995f3a56867dbc8605",
+    "stdout": "optimized.json",
+    "stderr": "optimized.json.stderr"
+  },
+  {
+    "command": [
+      "python3",
+      "/workspaces/E-HGP/build/v11-audit-math-s8-20261005/replay.py"
+    ],
+    "code": 0,
+    "script_sha256": "535cf92a1f87e78a9a1a9ee04cd4f9791b6838ed4d525bde1ddb1a4b831222fd",
+    "stdout": "replay_normal.json",
+    "stderr": "replay_normal.json.stderr"
+  },
+  {
+    "command": [
+      "python3",
+      "-O",
+      "/workspaces/E-HGP/build/v11-audit-math-s8-20261005/replay.py"
+    ],
+    "code": 0,
+    "script_sha256": "535cf92a1f87e78a9a1a9ee04cd4f9791b6838ed4d525bde1ddb1a4b831222fd",
+    "stdout": "replay_optimized.json",
+    "stderr": "replay_optimized.json.stderr"
+  }
+]

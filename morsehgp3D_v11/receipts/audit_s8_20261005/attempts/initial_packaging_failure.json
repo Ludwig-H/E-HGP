@@ -1,0 +1,10 @@
+{
+  "command": [
+    "/home/codespace/.python/current/bin/python3",
+    "morsehgp3D_v11/receipts/audit_s8_20261005/replay.py"
+  ],
+  "returncode": 1,
+  "stdout": "",
+  "stderr": "fatal: path 'build/v11-persist/sortie_supports/impl_s8.md' exists on disk, but not in '53c027fe848b0d890f164eb87ebf347338c58d55'\nTraceback (most recent call last):\n  File \"/workspaces/E-HGP/build/v11-audit-geant-20261005/morsehgp3D_v11/receipts/audit_s8_20261005/replay.py\", line 43, in <module>\n    main()\n  File \"/workspaces/E-HGP/build/v11-audit-geant-20261005/morsehgp3D_v11/receipts/audit_s8_20261005/replay.py\", line 31, in main\n    raw = subprocess.check_output(['git', '-C', str(repository), 'show', source['pin'] + ':' + name])\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/codespace/.python/current/lib/python3.12/subprocess.py\", line 466, in check_output\n    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/codespace/.python/current/lib/python3.12/subprocess.py\", line 571, in run\n    raise CalledProcessError(retcode, process.args,\nsubprocess.CalledProcessError: Command '['git', '-C', '/workspaces/E-HGP', 'show', '53c027fe848b0d890f164eb87ebf347338c58d55:build/v11-persist/sortie_supports/impl_s8.md']' returned non-zero exit status 128.\n",
+  "cause": "Le rejeu initial traite deux rapports locaux comme des sources Git ; corriger le dispatch vers les copies épinglées. Aucun test produit exécuté."
+}

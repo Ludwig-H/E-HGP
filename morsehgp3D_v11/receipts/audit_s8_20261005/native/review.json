@@ -1,0 +1,75 @@
+{
+  "pin": "53c027fe848b0d890f164eb87ebf347338c58d55",
+  "scope": "S8 native : overflow, allocations, ownership, refusal paths. Aucun build/test natif ni GCP.",
+  "new_active_findings": [],
+  "verdict": "aucun_defaut_important_nouveau_etabli_en_lecture",
+  "read_conclusions": [
+    {
+      "paths": [
+        "src/num/big.cpp:236",
+        "src/num/big.cpp:265",
+        "src/num/big.cpp:304"
+      ],
+      "fact": "multiply, shift_left et divide gardent les domaines avant leurs ecritures ; alias autorises lus avant modification ou servis par locaux."
+    },
+    {
+      "paths": [
+        "src/num/roots.cpp:29",
+        "src/num/roots.cpp:41"
+      ],
+      "fact": "UINT32_MAX garde avant bytes/admit ; admission explicite ; echec fill dans build detruit la table temporaire et rend le Buffer."
+    },
+    {
+      "paths": [
+        "src/num/radical.cpp:67",
+        "src/num/radical.cpp:83"
+      ],
+      "fact": "make acquiert deux Buffer du budget et rend le premier si le second refuse ; add_integer protege count et taille reelle, y compris objet par defaut."
+    },
+    {
+      "paths": [
+        "src/num/roots.hpp:12",
+        "src/num/roots.cpp:48",
+        "bench/roots_cost.cpp:57"
+      ],
+      "fact": "Niveaux empruntes avec duree de vie declaree ; fill parallele autorise seulement sur positions disjointes ; banc serie/parallele paie deux tables coexistantes."
+    },
+    {
+      "paths": [
+        "src/num/radical.cpp:139",
+        "src/num/radical.cpp:163"
+      ],
+      "fact": "epuisement des bornes ou capacite intermediaire rend radical_sign_budget ; la valeur de sortie ne vaut pas decision quand Outcome refuse."
+    }
+  ],
+  "arithmetic_read_bounds": {
+    "roots_rank_bytes_max_u64": 68719476720,
+    "bracket_reason": "j<=16, R<2^89 : |lo| et |hi| <=16(R+1)<=2^93<2^127 ; large marge signed i128.",
+    "multiply_acc_words_max": 273,
+    "multiply_acc_reason": "la+lb<=273 car bit_length(a)+bit_length(b)<=17409 et chaque bit_length>=64*(len-1)+1.",
+    "multiply_u128_max": "340282366920938463463374607431768211455",
+    "multiply_u128_reason": "(2^64-1)^2 + 2*(2^64-1)=2^128-1.",
+    "refinement_bits": [
+      96,
+      192,
+      384,
+      768,
+      1536,
+      3072,
+      6144
+    ],
+    "qualification": "bornes derivees en lecture ; ni sizeof execute, ni preuve native, ni chrono qualifie.",
+    "bracket_absolute_bound_inclusive_i128": "9903520314283042199192993792"
+  },
+  "already_known_limits": [
+    "RadicalSum::make ne fait pas admission globale W ; pilote S9 doit admettre W*RadicalSum::bytes avant parallelisme, conforme contrat MemoryBudget.",
+    "Table reserve 16*L octets meme avec fill_ranks partiel ; il faut payer L entier, note explicite rapport leger.",
+    "Copies Big de mots indetermines : portabilite formelle deja signalee par verif_s8. Big non-union, copie implicite membre par membre ; aucune causalite crash ou signe faux etablie, aucune nouvelle alerte active.",
+    "Qualification G4/sanitizer/u18/u24 et mutants complets reste distincte de cette lecture."
+  ],
+  "standard_references": [
+    "https://timsong-cpp.github.io/cppwp/n4861/class.copy.ctor#14",
+    "https://timsong-cpp.github.io/cppwp/n4861/basic.indet#2"
+  ],
+  "replay_sources": "git show 53c027fe848b0d890f164eb87ebf347338c58d55:<chemin> puis comparer sha256 au source_manifest.json. Rapports locaux identifies separement."
+}

@@ -2,10 +2,35 @@
 
 5 octobre 2026. Relecture du contrat S0 et de l'oracle S1 au commit
 **5adf6a59f**, puis de la demande du développeur **9290cf3bf** et des WIP
-S3/S5/S6 et de S7, publiées jusqu'à **966a351be**. Le socle FULL et les travaux sur les points/tête restent épinglés
+S3/S5/S6 et de S7, publiées jusqu'à **966a351be**, puis des primitives
+numériques S8 en **53c027fe8**. Le socle FULL et les travaux sur les points/tête restent épinglés
 aux reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 Note maintenue en place ; détails et échanges clos dans les reçus.
+
+## S8 : signes et égalités exacts pour la future sortie points
+
+Relecture favorable au pin **53c027fe8**, sans nouveau défaut important
+établi. La conversion `c√(n/d) = (c/d)√(nd)` est exacte. La signature
+arithmétique n'est qu'un filtre nécessaire ; deux termes ne sont réunis
+qu'après preuve que leur rapport est un carré rationnel. Les classes
+distinctes sont linéairement indépendantes sur les rationnels : une somme
+nulle est donc certifiée par l'annulation de ses coefficients de classes.
+Un intervalle contenant zéro ne suffit jamais à déclarer une égalité.
+
+Une contre-épreuve dans `Q(√2,√3,√5)`, par calcul algébrique indépendant,
+recoupe **80 signes dont 20 égalités**. Une collision construite de la
+signature à 229 bits conserve bien deux classes. Les décisions certifiées
+de `RootTable` et sa borne i128 sont contrôlées pour u18/u21/u24.
+Le témoin quasi nul à l'échelle 2^40 demande 192 bits et reste négatif ;
+celui à l'échelle 2^2050 épuise le raffinement et refuse explicitement.
+La capacité finie reste une limite déclarée, pas une décision approchée.
+
+Le rejeu Python porte sur ces formules et sur les sources figées ; il
+ne qualifie pas l'implémentation C++. A2 sur **b319efc84** précède S8.
+Les portes natives de la sortie points S9, notamment les égalités de
+dates et le refus K=n≥2, restent à constater sur le produit assemblé.
+[Preuve bornée et périmètre](../receipts/audit_s8_20261005/math/REPORT.md).
 
 ## Contre-épreuve générale du 5 octobre
 
