@@ -1,0 +1,77 @@
+{
+  "module": "supports",
+  "plancher": 8,
+  "mutants": [
+    {
+      "id": "triangle_droit_accepte",
+      "fichier": "src/supports/enumerate.cpp",
+      "cherche": "        if (!num::strictly_acute(u[i], u[j], u[k])) continue;",
+      "remplace": "        if (num::classify_triangle(u[i], u[j], u[k]) == num::TriangleKind::degenerate) continue;",
+      "porte": "mhgp11_supports_unit_right_triangle",
+      "note": "triangle droit (et obtus) coplanaire au centre admis comme support : fixture 2, l'hypotenuse doit rester seule"
+    },
+    {
+      "id": "drapeau_q4_presentation",
+      "fichier": "src/supports/enumerate.cpp",
+      "cherche": "          if (inside.value()) MHGP11_TRY(found.mark({i, j, k, l}, 4));",
+      "remplace": "          if (sphere.q4_presentation_strictly_inside()) MHGP11_TRY(found.mark({i, j, k, l}, 4));",
+      "porte": "mhgp11_supports_unit_cube",
+      "note": "drapeau du tetraedre generateur lu pour tout quadruplet : la sphere du cube vient d'un diametre, les deux tetraedres disparaissent (fixture 9)"
+    },
+    {
+      "id": "arret_premier_support",
+      "fichier": "src/supports/enumerate.cpp",
+      "cherche": "    if (count == out.size()) return fail(Reason::supports_invariant);",
+      "remplace": "    if (count == 1) return {};",
+      "porte": "mhgp11_supports_unit_square",
+      "note": "Q_b reduit a S* : la seconde diagonale du carre est perdue (fixture 1)"
+    },
+    {
+      "id": "fermeture_omise",
+      "fichier": "src/supports/enumerate.cpp",
+      "cherche": "void zeta_or(std::span<u64> words, u32 m) noexcept {\n",
+      "remplace": "void zeta_or(std::span<u64> words, u32 m) noexcept {\n  if (m != 0) return;\n",
+      "porte": "mhgp11_supports_unit_square",
+      "note": "fermeture zeta omise : N_j ne compte que les supports eux-memes (carre a K2 : N_3 = 0 au lieu de 4)"
+    },
+    {
+      "id": "cofaces_ordre_k",
+      "fichier": "src/supports/counts.cpp",
+      "cherche": "    cofaces += u64{supports_detail::binomial(p, k + 1 - j)} * closure.parts(static_cast<u32>(j));",
+      "remplace": "    cofaces += u64{supports_detail::binomial(p, k - j)} * closure.parts(static_cast<u32>(j));",
+      "aussi": [
+        {
+          "fichier": "src/supports/counts.hpp",
+          "cherche": "  return supports_detail::binomial(static_cast<i32>(s.interior() + s.shell()) - a, i32{s.order()} + 1 - a);",
+          "remplace": "  return supports_detail::binomial(static_cast<i32>(s.interior() + s.shell()) - a, i32{s.order()} - a);"
+        }
+      ],
+      "porte": "mhgp11_supports_unit_square",
+      "note": "cofaces comptees a K au lieu de K + 1, par boule et par support (carre a K2 : 2 au lieu de 4)"
+    },
+    {
+      "id": "coquille_sans_plafond",
+      "fichier": "src/supports/enumerate.cpp",
+      "cherche": "  if (m > kMaxShell) return fail(Reason::support_shell_capacity);\n",
+      "remplace": "  static_cast<void>(m);\n",
+      "porte": "mhgp11_supports_shell_capacity",
+      "note": "plafond kMaxShell retire : sphere50 (84 sites) n'est plus refusee support_shell_capacity (fixture 13)"
+    },
+    {
+      "id": "fermeture_sans_qmin",
+      "fichier": "src/supports/counts.cpp",
+      "cherche": "  if (closure.shell() != shape.shell() || closure.parts(shape.qmin()) == 0 || closure.parts(shape.shell()) != 1)",
+      "remplace": "  if (closure.shell() != shape.shell() || closure.parts(shape.shell()) != 1)",
+      "porte": "mhgp11_supports_unit_refusals",
+      "note": "fermeture d'une boule de qmin plus grand admise (N_qmin = 0) : triangle aigu regulier lu avec une forme qmin = 2 de meme coquille"
+    },
+    {
+      "id": "fermeture_sous_qmin",
+      "fichier": "src/supports/counts.cpp",
+      "cherche": "    if (parts > supports_detail::binomial(m, j) || (j < q && parts != 0)) return fail(Reason::supports_invariant);",
+      "remplace": "    if (parts > supports_detail::binomial(m, j)) return fail(Reason::supports_invariant);",
+      "porte": "mhgp11_supports_unit_refusals",
+      "note": "fermeture d'une boule de qmin plus petit admise (N_j non nul sous qmin) : diagonale du carre lue avec une forme qmin = 3 de meme coquille"
+    }
+  ]
+}

@@ -28,8 +28,13 @@ avant `p+q`, avec refus UINT32_MAX et frontière `(11,24,2,12)`.
 La nouvelle capture S3, `attachment.cpp` SHA **77f84f0050…**, appelle
 `published_traces(end−begin)` avant conversion : au-delà de UINT32_MAX,
 refus `tower_capacity`. Le plafond 24 de `supports` reste distinct de FULL.
-Les fixtures D2/E5 sont maintenant présentes en S3. Ces corrections sont
-relues, sans nouvelle qualification native.
+Les fixtures D2/E5 sont maintenant présentes en S3. Le raccord final du
+journal est favorable : graines enregistrées avant le DSU, publication
+par ordinal, puis attribution après fermeture du plateau. Le compactage
+en place conserve `prior_total≤begin` et `prior_total+branches≤end`.
+Le refus conserve domaine et diagnostics ; journal, sweep et copie finale
+ont leurs coexistences budgétées. **15 283 gardes scalaires nouvelles**
+recoupent ce raccord, sans nouvelle qualification native/TSan.
 
 **D.1–D.4 sont adoptés par le contrat.** Les agrégats `kparties_reliees`
 comptent des incidences `(b,F)` ; les cofaces sont distinctes par boule.
@@ -40,10 +45,12 @@ manifeste fermé distinguent publication, transport et durabilité. La
 stricte descente du sélecteur comprimé faible ne se transfère pas à toute
 K-partie. [Contrat courant](../docs/SORTIES.md),
 [réponse du développeur](REPONSE_CLAUDE_SUPPORTS_20261004.md).
-Ces engagements V2/publication sont encore à intégrer dans la capture S5.
+Ces engagements V2/publication sont désormais présents dans la capture S5,
+avec portes du champ publié, SIGXFSZ et refus après publication.
 
-[Relecture actuelle et témoins](../receipts/audit_supports_contract_20261005/README.md).
+[Relecture actuelle et témoins](../receipts/audit_native_integration_20261005/README.md).
 Les constats et réponses précédents restent figés dans les reçus
+[contrat S0/S1 et coquille mixte](../receipts/audit_supports_contract_20261005/README.md),
 [1 119 gardes](../receipts/audit_supports_implementation_20261004/README.md),
 [6 456 gardes](../receipts/audit_supports_followup_20261004/README.md) et
 [première revue supports](../receipts/audit_supports_20261004/README.md).
@@ -84,6 +91,25 @@ Le plafond ne s'applique pas à FULL. La boule canonique de ce témoin
 vient d'un diamètre : il exerce Q3/Q4 sur une présentation q2 et ne
 remplace pas les portes numériques des centres de présentation q3/q4.
 [Énumération indépendante et mutations](../receipts/audit_supports_contract_20261005/qb/README.md).
+
+**Compléter les portes aux K élevés, sans construire FULL12.** Sur cette
+même coquille, toute partie de taille≥13 contient une paire antipodale,
+donc `N_j=C(24,j)`. À taille 12, 116 des 4096 choix sans paire sont séparables ;
+un calcul indépendant des chambres de douze plans centraux retrouve 116.
+Ainsi **N12=2 704 040** et **N13=2 496 144**. La primitive à K12 doit donner
+**2 704 156 parties reliées/comprimées, 116 traces strictes et
+2 496 144 cofaces distinctes/Gabriel** ; les 149 954 688 incidences par Q
+ne remplacent pas ce dernier compte. Récupérer la fermeture centrale dans
+Cat1, puis appeler `make_shape`/`ball_counts` : cela ne qualifie ni un arbre
+FULL12, ni `ball_shape` à K12 sur un domaine préparé à K1.
+
+Un deuxième témoin, seulement 12 sites, exerce p=8,m=4,qmin2 à K10 :
+**66 parties reliées, 6 comprimées, 4 traces strictes, 12 cofaces et
+4 Gabriel**, contre 20 incidences par Q. Il complète la porte LiDAR longue
+et les petits cas S3 actuellement K≤5. S6 compare déjà N2/N3/N24 à 24 sites ;
+ces témoins ajoutent un attendu indépendant aux indices intermédiaires hauts.
+Ce sont des lacunes de couverture, sans échec natif observé.
+[Coordonnées, preuve et 4 135 gardes exactes](../receipts/audit_native_integration_20261005/qb/README.md).
 
 **Décisions courantes : Q_b seul, puis points, puis plat.** La réponse primaire
 du 4 octobre à 20:25 UTC retient le squelette des supports ; la proposition

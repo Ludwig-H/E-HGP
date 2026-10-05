@@ -1,0 +1,144 @@
+"""Portable stdlib review of captured S5 judges and mutation declarations.
+No native invocation, build, product import, cloud or old audit replay.
+AST executes only Contract.refuse/completed/json_lines/Completed from copied files.
+"""
+import ast
+import hashlib
+import json
+import re
+from pathlib import Path
+from types import SimpleNamespace
+
+ROOT = Path(__file__).resolve().parent
+SRC = ROOT / 'sources' / 's5'
+checks = 0
+
+def check(ok, label):
+    global checks
+    checks += 1
+    if not ok:
+        raise RuntimeError(label)
+
+def selected(path, names):
+    tree = ast.parse(path.read_text())
+    found = [n for n in tree.body if isinstance(n, (ast.FunctionDef, ast.ClassDef)) and n.name in names]
+    check({n.name for n in found} == set(names), 'AST selection ' + str(path.relative_to(ROOT)))
+    return found
+
+class FakeGate:
+    def __init__(self):
+        self.checks = 0
+        self.failures = []
+    def check(self, ok, label):
+        self.checks += 1
+        if not ok:
+            self.failures.append(label)
+        return bool(ok)
+
+ns = {'json': json}
+exec(compile(ast.Module(body=selected(SRC / 'tests/cli/cli_support.py', {'json_lines'}), type_ignores=[]),
+             'copied cli_support.py AST', 'exec'), ns)
+gate_ns = {}
+exec(compile(ast.Module(body=selected(SRC / 'tests/support/mhgp11_gate.py', {'Completed'}), type_ignores=[]),
+             'copied mhgp11_gate.py AST', 'exec'), gate_ns)
+Completed = gate_ns['Completed']
+contract_ast = ast.parse((SRC / 'tests/cli/cli_contract.py').read_text())
+body = []
+for node in contract_ast.body:
+    if isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id in {'STATUS', 'REFUSAL_KEYS'}
+                                          for t in node.targets):
+        body.append(node)
+    elif isinstance(node, ast.FunctionDef) and node.name == 'completed':
+        body.append(node)
+    elif isinstance(node, ast.ClassDef) and node.name == 'Contract':
+        node.body = [m for m in node.body if isinstance(m, ast.FunctionDef) and m.name == 'refuse']
+        body.append(node)
+check(len(body) == 4, 'four copied judge declarations')
+ns.update({'cs': SimpleNamespace(json_lines=ns['json_lines'], file_sha=lambda p: 'unchanged'),
+           'os': SimpleNamespace(path=SimpleNamespace(lexists=lambda p: p in {'present'})),
+           'mhgp11_gate': SimpleNamespace(Completed=Completed)})
+exec(compile(ast.Module(body=body, type_ignores=[]), 'copied cli_contract.py AST', 'exec'), ns)
+
+digest = 'ab' * 32
+key_order = ['phase', 'output', 'status', 'reason', 'stage', 'coord_bits', 'publication', 'manifest_sha256']
+check(ns['REFUSAL_KEYS'] == key_order, 'new publication keys')
+results = []
+
+def judge(name, *, row_change=None, expected_state='published_complete', expected_hash=digest,
+          returncode=2, rows=1, on_stderr=False, stage='publish', absent=('absent',), present=('present',),
+          expect=True):
+    row = dict(phase='mhgp11', output=None if stage == 'options' else 'full', status='resource_exhausted',
+               reason='output_unwritable', stage=stage, coord_bits=21,
+               publication=expected_state, manifest_sha256=expected_hash)
+    if row_change:
+        row_change(row)
+    payload = '\n'.join(json.dumps(row) for _ in range(rows))
+    stdout, stderr = (b'', ('diagnostic en francais\n' + payload).encode()) if on_stderr else (payload.encode(), b'')
+    result = ns['completed'](returncode, stdout, stderr)
+    gate = FakeGate()
+    contract = ns['Contract'].__new__(ns['Contract'])
+    contract.args = SimpleNamespace(bits=21)
+    contract.gate = gate
+    contract.refusals = 0
+    contract.refuse(name, ['not_launched'], 'output_unwritable', stage, absent=absent, present=present,
+                    inputs=('input',), run=lambda argv: result, publication=expected_state,
+                    manifest=expected_hash, on_stderr=on_stderr)
+    check((not gate.failures) == expect, 'judge ' + name)
+    check(contract.refusals == 1, 'one case counted ' + name)
+    results.append({'case': name, 'expected_acceptance': expect, 'accepted': not gate.failures,
+                    'judge_checks': gate.checks, 'failed_checks': gate.failures,
+                    'process_code': result.code, 'signal': result.signal})
+
+judge('published complete, exact hash')
+judge('published complete on stderr', on_stderr=True)
+judge('none, no hash', expected_state='none', expected_hash=None, present=())
+judge('options output null', expected_state='none', expected_hash=None, stage='options', present=())
+judge('lost published state', row_change=lambda r: r.update(publication='none', manifest_sha256=None), expect=False)
+judge('missing expected digest', expected_hash=None, expect=False)
+judge('wrong digest', row_change=lambda r: r.update(manifest_sha256='00' * 32), expect=False)
+judge('digest omitted', row_change=lambda r: r.pop('manifest_sha256'), expect=False)
+judge('extra key', row_change=lambda r: r.update(extra=0), expect=False)
+judge('two JSON lines', rows=2, expect=False)
+judge('signal SIGXFSZ is not refusal', returncode=-25, expect=False)
+judge('wrong refusal code', returncode=3, expect=False)
+judge('published path absent', present=('absent',), expect=False)
+judge('pending path present', absent=('present',), expect=False)
+judge('incorrect stage', row_change=lambda r: r.update(stage='plan'), expect=False)
+
+mutations = []
+for name in ('api', 'cli', 'io'):
+    data = json.loads((SRC / ('tests/mutants/' + name + '.json')).read_text())
+    check(data['plancher'] == len(data['mutants']), 'exact mutation floor ' + name)
+    check(len({m['id'] for m in data['mutants']}) == len(data['mutants']), 'unique mutation IDs ' + name)
+    for mutation in data['mutants']:
+        source = (SRC / mutation['fichier']).read_text()
+        count = source.count(mutation['cherche'])
+        check(count == 1, 'unique mutation target ' + name + '/' + mutation['id'])
+        check(mutation['cherche'] != mutation['remplace'], 'nonempty mutation ' + mutation['id'])
+        mutations.append({'module': name, 'id': mutation['id'], 'gate': mutation['porte'],
+                          'source_occurrences': count})
+
+# Scalar declaration/arity proof only. Not an execution of C++ va_arg or its ABI.
+directory = (SRC / 'src/io/directory.cpp').read_text()
+preload = (SRC / 'tests/cli/io_fault_preload.cpp').read_text()
+call = re.search(r'::syscall\(SYS_renameat2,([^)]*)\)', directory)
+check(call is not None, 'rename syscall call')
+arguments = [x.strip() for x in call.group(1).split(',')]
+check(arguments == ['directory_fd', 'from', 'directory_fd', 'to', 'kRenameNoReplace'], 'five typed arguments')
+check('long words[6];' in preload and 'for (long& word : words) word = va_arg(list, long);' in preload,
+      'six va_arg long reads')
+check('inline constexpr unsigned kRenameNoReplace = 1u;' in directory, 'unsigned flag declaration')
+check('rename_noreplace(int directory_fd, const char* from, const char* to)' in directory, 'remaining types')
+abi = {'source': 'sources/s5/src/io/directory.cpp:114',
+       'hook': 'sources/s5/tests/cli/io_fault_preload.cpp:72-93',
+       'supplied': ['int', 'const char*', 'int', 'const char*', 'unsigned'],
+       'read': ['long'] * 6, 'sixth_argument_exists': False,
+       'scope': 'static C++20 variadic-contract mismatch; no native runtime or result attribution'}
+cmake = (SRC / 'tests/cli/tests.cmake').read_text()
+check('cli_contract_verdict conforme refus61 temoins3' in cmake, 'sanitizer excludes preload trio')
+check('cli_contract_verdict conforme refus64 temoins3' in cmake, 'Release includes preload trio')
+check(len(mutations) == 60, 'captured mutation declaration total')
+print(json.dumps({'schema': 'audit.s5.source_judge_review.v1', 'status': 'ok', 'checks': checks,
+                  'scope': 'stdlib copied judge fake outcomes + source declarations; no native qualification',
+                  'judge_cases': results, 'mutation_declarations': mutations, 'variadic_contract': abi,
+                  'native_tests_run': 0, 'old_audit_checks_replayed': 0}, sort_keys=True, indent=2))

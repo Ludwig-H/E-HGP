@@ -1,0 +1,174 @@
+{
+  "all_sources_equal_before": true,
+  "native_executed": false,
+  "published_pin": "9cbf805c6e4c4f4893cb3549d5ab89a5d57e321c",
+  "sources": [
+    {
+      "bytes": 6037,
+      "equals_before": true,
+      "owned": "s6/src/supports/supports.hpp",
+      "sha256": "cd0c4dd4aee1868b2eb266e9bcba7340247dc3e2fc36d8706c44c14de358993b"
+    },
+    {
+      "bytes": 6901,
+      "equals_before": true,
+      "owned": "s6/src/supports/counts.hpp",
+      "sha256": "c3e91e1de8bc7f72f5dc7b7067e1d72d6e9e82f924dd713cfc5287231092883e"
+    },
+    {
+      "bytes": 3204,
+      "equals_before": true,
+      "owned": "s6/src/supports/counts.cpp",
+      "sha256": "23e01a8784e54d0dbe8d60ce3a2ec7ad9f4cae53f8668f39a5f2d4e728e8989a"
+    },
+    {
+      "bytes": 11558,
+      "equals_before": true,
+      "owned": "s6/src/supports/enumerate.cpp",
+      "sha256": "3a8fcd0d7af148e4d7748234c8c02bec5f75158bfef41c5e7c5299177dbe7c86"
+    },
+    {
+      "bytes": 625,
+      "equals_before": true,
+      "owned": "s6/src/supports/source_pins.json",
+      "sha256": "08ac193093184ff7e99b9ef8d8d91c0c41963a39a304b13d705dc871f52bd1b1"
+    },
+    {
+      "bytes": 268,
+      "equals_before": true,
+      "owned": "s6/src/supports/module.cmake",
+      "sha256": "95342e4228ddb1f92d2ccdf487f2b4fc2e08c7c7804ffecb6db2e91fdac8535e"
+    },
+    {
+      "bytes": 27365,
+      "equals_before": true,
+      "owned": "s6/tests/supports/supports_test.cpp",
+      "sha256": "4f2c84098c25811f3a3457f772f3d1d756d46d8fabe723e22f8c2873d743960f"
+    },
+    {
+      "bytes": 3928,
+      "equals_before": true,
+      "owned": "s6/tests/supports/supports_support.hpp",
+      "sha256": "4863cdf0456418c18be60d3937bd643857652d19134ff3c68b22f4570673cd11"
+    },
+    {
+      "bytes": 21655,
+      "equals_before": true,
+      "owned": "s6/tests/supports/supports_probe.cpp",
+      "sha256": "2e1dd632478c568b7383d5a8ced8afb1447a85318b893c93bcfd98ff88fcbbab"
+    },
+    {
+      "bytes": 21368,
+      "equals_before": true,
+      "owned": "s6/tests/supports/sample_judge.py",
+      "sha256": "1c8285c81213411c3f9e0ed28b45c912e447232be5e246043ec5a4141ca5caad"
+    },
+    {
+      "bytes": 7388,
+      "equals_before": true,
+      "owned": "s6/tests/supports/tests.cmake",
+      "sha256": "324cd2d8cb21d376eb72d337f4a582ec2408c4e56ba3da982ab366f33e3e5781"
+    },
+    {
+      "bytes": 4139,
+      "equals_before": true,
+      "owned": "s6/tests/mutants/supports.json",
+      "sha256": "461c031de0c5f1cbb67e6acb0377915a5484360329b801f589e48cd7292e6ebe"
+    },
+    {
+      "bytes": 10010,
+      "equals_before": true,
+      "owned": "s3/tests/tower/order_tree_test.cpp",
+      "sha256": "11e889f83546ec3a0e0cccb71dcfcc5049e6b908d8be5a19219f503f671bf29b"
+    },
+    {
+      "bytes": 7960,
+      "equals_before": true,
+      "owned": "s3/tests/tower/order_tree_support.hpp",
+      "sha256": "5dec9c016130007ea89b04d85d28666fd5428f84f3637886a7671c5c8fde335d"
+    },
+    {
+      "bytes": 4461,
+      "equals_before": true,
+      "owned": "s3/tests/tower/order_tree_fault.cpp",
+      "sha256": "4650a63380bba6ada6c47b0b5bd75ae7e1de9c5930022bdfc2b2569a25d2f7cf"
+    },
+    {
+      "bytes": 18384,
+      "equals_before": true,
+      "owned": "s3/tests/tower/attach_test.cpp",
+      "sha256": "1bc3720b6693338a800ed7fd7e3b69583b2f6aae25a2126a1bd311a77d3f5d0e"
+    },
+    {
+      "bytes": 22516,
+      "equals_before": true,
+      "owned": "s3/tests/tower/attach_judge.cpp",
+      "sha256": "c013667bf5e16099c5c83d5bc5446c36f3dba66971022af7846c4e0ea45c45f2"
+    },
+    {
+      "bytes": 9134,
+      "equals_before": true,
+      "owned": "s3/tests/tower/attach_export_gate.py",
+      "sha256": "0015acf28a5a6f141f045aa69d1652907b483c392372395e30fd7cedabb8d7bf"
+    },
+    {
+      "bytes": 21002,
+      "equals_before": true,
+      "owned": "s3/tests/tower/attach_probe.cpp",
+      "sha256": "ae0534485dd04457c3fed6b9cc0b3ea8f4ad626963ca7b382adab520d6ab3919"
+    },
+    {
+      "bytes": 26904,
+      "equals_before": true,
+      "owned": "s3/tests/tower/tests.cmake",
+      "sha256": "018de39d2359b01bae785f7257792a95c5f53d962aac2f84a31da17ee2f1bbc6"
+    },
+    {
+      "bytes": 5597,
+      "equals_before": true,
+      "owned": "s3/src/tower/order_tree.hpp",
+      "sha256": "e4e0996973e1157eddc203512913eb501aea982f55ada01435b7c62242361f4b"
+    },
+    {
+      "bytes": 10684,
+      "equals_before": true,
+      "owned": "s3/src/tower/attachment.cpp",
+      "sha256": "77f84f00506729b253c22216860ec8c0c9bcd579dcac1c9ed3ac8c54dadb01cd"
+    },
+    {
+      "bytes": 43418,
+      "equals_before": true,
+      "owned": "published/docs/SORTIES.md",
+      "sha256": "2cfb849d388542f198ad413ad2f9f77999ab738d5eff921fbcf3288804df8c1a"
+    },
+    {
+      "bytes": 72776,
+      "equals_before": true,
+      "owned": "published/docs/MATHEMATIQUES.md",
+      "sha256": "f1873c10b669922a3c41ce5f03b57d91fd8bd6b9e53c7459699be4d66bd1bb44"
+    },
+    {
+      "bytes": 20419,
+      "equals_before": true,
+      "owned": "published/audits/REPONSE_CLAUDE_SUPPORTS_20261004.md",
+      "sha256": "88205062ad968085db007d6bbbc589fdbc8650ae9053abeb0dc7f582adb6352f"
+    },
+    {
+      "bytes": 5082,
+      "equals_before": true,
+      "owned": "reports/APPORTS_AUDIT_9cbf805c6.md",
+      "sha256": "521184748a538cba1488a657331808c6c45c3c109d1c00504ce559ee98b2964a"
+    }
+  ],
+  "states": {
+    "s3": {
+      "head": "f98aeed67d4030dd78e11d5faf7d8556c4d17aaf",
+      "status": "M morsehgp3D_v11/docs/FULL_FORESTS.md\n M morsehgp3D_v11/docs/PROVENANCE.md\n M morsehgp3D_v11/src/tower/forest_internal.hpp\n M morsehgp3D_v11/src/tower/forest_plateau.cpp\n M morsehgp3D_v11/src/tower/module.cmake\n M morsehgp3D_v11/src/tower/tower.hpp\n M morsehgp3D_v11/tests/mutants/tower.json\n M morsehgp3D_v11/tests/tower/public_header_test.cpp\n M morsehgp3D_v11/tests/tower/tests.cmake\n?? morsehgp3D_v11/src/tower/attachment.cpp\n?? morsehgp3D_v11/src/tower/order_tree.cpp\n?? morsehgp3D_v11/src/tower/order_tree.hpp\n?? morsehgp3D_v11/src/tower/seed_log.hpp\n?? morsehgp3D_v11/tests/tower/attach_export_gate.py\n?? morsehgp3D_v11/tests/tower/attach_judge.cpp\n?? morsehgp3D_v11/tests/tower/attach_probe.cpp\n?? morsehgp3D_v11/tests/tower/attach_test.cpp\n?? morsehgp3D_v11/tests/tower/order_tree_fault.cpp\n?? morsehgp3D_v11/tests/tower/order_tree_support.hpp\n?? morsehgp3D_v11/tests/tower/order_tree_test.cpp"
+    },
+    "s6": {
+      "head": "f98aeed67d4030dd78e11d5faf7d8556c4d17aaf",
+      "status": "M morsehgp3D_v11/cmake/modules.cmake\n M morsehgp3D_v11/docs/ARCHITECTURE.md\n M morsehgp3D_v11/docs/PROVENANCE.md\n M morsehgp3D_v11/src/core/reasons.def\n M morsehgp3D_v11/tests/core/status_test.cpp\n?? morsehgp3D_v11/src/supports/\n?? morsehgp3D_v11/tests/mutants/supports.json\n?? morsehgp3D_v11/tests/supports/"
+    }
+  },
+  "utc": "2026-10-05T07:43:41.457212+00:00"
+}

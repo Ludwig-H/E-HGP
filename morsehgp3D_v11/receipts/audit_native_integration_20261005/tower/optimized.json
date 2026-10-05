@@ -1,0 +1,110 @@
+{
+  "abstract_plateaus": 2,
+  "capacity_cases": 3896,
+  "cells": 8,
+  "checks": 15283,
+  "completion_orders": 120,
+  "entries": [
+    {
+      "branches": [
+        0,
+        1
+      ],
+      "node": 6,
+      "rank": "4",
+      "role": "merge",
+      "traces": 2
+    },
+    {
+      "branches": [
+        1,
+        2
+      ],
+      "node": 6,
+      "rank": "4",
+      "role": "merge",
+      "traces": 2
+    },
+    {
+      "branches": [
+        3,
+        4
+      ],
+      "node": 7,
+      "rank": "4",
+      "role": "merge",
+      "traces": 2
+    },
+    {
+      "branches": [
+        0,
+        2
+      ],
+      "node": 6,
+      "rank": "4",
+      "role": "merge",
+      "traces": 2
+    },
+    {
+      "branches": [
+        5
+      ],
+      "node": 5,
+      "rank": "4",
+      "role": "internal",
+      "traces": 2
+    },
+    {
+      "branches": [
+        6,
+        7
+      ],
+      "node": 8,
+      "rank": "7",
+      "role": "merge",
+      "traces": 2
+    },
+    {
+      "branches": [
+        5,
+        7
+      ],
+      "node": 8,
+      "rank": "7",
+      "role": "merge",
+      "traces": 2
+    },
+    {
+      "branches": [
+        5,
+        6
+      ],
+      "node": 8,
+      "rank": "7",
+      "role": "merge",
+      "traces": 3
+    }
+  ],
+  "memory_additional_bytes": {
+    "journal": 172,
+    "prior_phase": 436,
+    "result_phase": 264,
+    "sweep_phase": 524
+  },
+  "original_traces": 17,
+  "prior_offsets": [
+    0,
+    2,
+    4,
+    6,
+    8,
+    8,
+    10,
+    12,
+    14
+  ],
+  "retained_branches": 14,
+  "scope": "scalaire/foret abstraite, aucun moteur exécuté",
+  "script_sha256": "fae4c22a59fd44d8d78f3e7e56b42af90f2cd714b8f80b1dd9edd5b0d31a54c8",
+  "status": "conforme"
+}

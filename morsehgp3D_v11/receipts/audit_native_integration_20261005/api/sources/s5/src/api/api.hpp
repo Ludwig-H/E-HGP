@@ -1,0 +1,208 @@
+// En-tete public du module api : facade de la v11 pour l'executable mhgp11 et tout programme client (seul en-tete que
+// cli/ inclut). Tranche S5 de la sortie parametree : Session, compute, publish, finish, sortie full.
+//
+// Une Session porte l'unique MemoryBudget et l'unique Pool (docs/ARCHITECTURE.md, regle 3 et paragraphe 7.1) et joue
+// l'auto-test F5 de l'environnement flottant a sa creation. compute rend un produit ENTIER, compte dans le budget de la
+// Session, ou un refus ; publish ecrit ce produit dans un dossier transactionnel (io::OutputDirectory), manifeste
+// deterministe en dernier, puis le publie par un seul renommage, ou refuse sans rien publier ; finish ferme la
+// Session et retire le dossier si elle refuse. Tout refus constate apres le commit retire le dossier publie
+// (withdraw) ; si ce retrait echoue, le resultat le declare : etat published_complete et empreinte du manifeste
+// (docs/SORTIES.md, paragraphes 3 et 9). Aucune fonction ne leve.
+//
+// Seule la sortie full est livree : full.mhgp11ful1 est octet pour octet le dump MHGP11FUL1 de la sonde
+// bench/full_probe.cpp sur les memes entrees (porte mhgp11_cli_full_identity). Les sorties supports, points et plat
+// viendront avec leurs tranches (S7, S9, S10).
+//
+// Moteur : parametres FIXES, ceux du masque qualifie 16379 des sondes (bench/points_export.cpp : feuilles de 16 a 256
+// sites, graphe de paires, tables de populations, ordres concurrents, sans memo) ; aucune option de moteur (regle 6).
+// Le nombre de fils ne change aucun octet publie (portes mhgp11_cli_full_determinism).
+#pragma once
+
+#include <array>
+#include <memory>
+#include <optional>
+#include <span>
+#include <string_view>
+#include <variant>
+
+#include "core/core.hpp"
+#include "io/io.hpp"
+#include "sched/sched.hpp"
+#include "tower/tower.hpp"
+
+namespace mhgp11::api {
+
+// Plus grand ordre K admis par une requete : celui du catalogue et de la MEB bornee.
+inline constexpr Order kMaxOrder = 12;
+static_assert(kMaxOrder == kMaxMebSites, "api : K borne par la MEB bornee");
+
+// Sorties livrees. --sortie=supports|points|plat est refuse (parameter_out_of_range) tant que sa tranche manque.
+enum class OutputKind : u8 { full };
+[[nodiscard]] std::string_view output_name(OutputKind kind) noexcept;
+
+struct SessionParams {
+  u64 budget_bytes = MemoryBudget::kUnlimited;  // limite de l'unique budget de la Session
+  u32 workers = 1;                              // fils du Pool, appelant compris : 1..sched::kMaxWorkers
+};
+
+// Session : budget et Pool uniques, passes explicitement a chaque etage ; elle survit a tout Product qu'elle sert.
+// Une Session deplacee est vide : seul close() y reste permis (succes).
+class Session {
+ public:
+  // Ordre des refus : parameter_out_of_range (workers hors de 1..256), session_overhead (Pool), memory_budget
+  // (compte du budget), environment_selftest (auto-test F5 : invariant viole, code 3).
+  [[nodiscard]] static Result<Session> make(const SessionParams& params) noexcept;
+  Session(Session&&) noexcept = default;
+  Session(const Session&) = delete;
+  Session& operator=(const Session&) = delete;
+  Session& operator=(Session&&) = delete;
+  ~Session() = default;
+
+  MemoryBudget& budget() noexcept { return *budget_; }
+  sched::Pool& pool() noexcept { return *pool_; }
+  u32 workers() const noexcept { return pool_ == nullptr ? 0 : pool_->size(); }
+  // Fin de vie : budget_not_released (invariant viole) si un Product ou un tampon de cette Session vit encore. Un
+  // appel en echec peut etre rejoue apres la liberation.
+  [[nodiscard]] Outcome close() noexcept;
+
+ private:
+  Session(std::unique_ptr<sched::Pool> pool, std::unique_ptr<MemoryBudget> budget) noexcept
+      : pool_(std::move(pool)), budget_(std::move(budget)) {}
+  std::unique_ptr<sched::Pool> pool_;
+  std::unique_ptr<MemoryBudget> budget_;
+};
+
+// Nuage emprunte : quatre tableaux de meme longueur, dans l'ordre du fichier d'entree.
+struct CloudView {
+  std::span<const u32> x, y, z;
+  std::span<const PointId> ids;
+};
+
+// Sortie full : la tour FULL entiere, ordres 1..k (k est l'ordre maximal).
+struct FullRequest {
+  Order k = 0;
+};
+using Request = std::variant<FullRequest>;
+
+// Etages d'un appel. compute remplit cloud (preparation du nuage ; le CLI y ajoute la lecture), index, domain, tree ;
+// publish remplit output (produit propre a la sortie : vide pour full, dont le produit est la tour) et write
+// (fichiers, empreinte de l'arbre, manifeste, synchronisations et renommage) ; attach reste nul pour full ; total
+// revient a l'appelant. Pic : octets reserves les plus hauts pendant l'etage (MemoryBudget::restart_peak), mesure.
+enum class Stage : u8 { cloud, index, domain, tree, attach, output, write, total };
+inline constexpr std::size_t kStageCount = 8;
+[[nodiscard]] std::string_view stage_name(Stage stage) noexcept;
+struct StageReport {
+  u64 nanoseconds = 0, peak_bytes = 0;
+};
+struct RunReport {
+  std::array<StageReport, kStageCount> stages{};
+  StageReport& at(Stage stage) noexcept { return stages[static_cast<std::size_t>(stage)]; }
+  const StageReport& at(Stage stage) const noexcept { return stages[static_cast<std::size_t>(stage)]; }
+};
+
+class Product;
+
+// Calcule le produit d'une requete. Ordre des refus (docs/SORTIES.md, paragraphe 3, etapes 5 a 7) :
+//   parameter_out_of_range (k hors de 1..12) ;
+//   preparation du nuage (prepare_cloud) : empty_input, size_mismatch, index_overflow_u32, coordinate_out_of_domain,
+//     memory_budget (tri), duplicate_point_id, memory_budget (tableaux du nuage) ;
+//   multiplicity_unsupported (positions repetees : la tour exige des sites de poids un) ;
+//   parameter_out_of_range (k superieur au nombre de sites) : le nombre de sites n'est connu qu'apres la preparation
+//     du nuage, dont le memory_budget precede donc ce refus (K = n + 1 sous un budget trop petit : memory_budget) ;
+//   calcul : memory_budget, tower_capacity, invariants des modules.
+// Un refus ne laisse aucune reservation dans le budget de la Session ; le rapport n'est ecrit qu'en cas de succes.
+[[nodiscard]] Result<Product> compute(Session& session, const CloudView& cloud, const Request& request,
+                                      RunReport* report = nullptr) noexcept;
+
+// Resultat entier d'une requete, possede ; ses tampons sont comptes dans le budget de la Session qui l'a calcule et
+// doivent etre rendus avant Session::close.
+class Product {
+ public:
+  Product(Product&&) noexcept = default;
+  Product(const Product&) = delete;
+  Product& operator=(const Product&) = delete;
+  Product& operator=(Product&&) = delete;
+  ~Product() = default;
+
+  OutputKind kind() const noexcept { return OutputKind::full; }
+  const Request& request() const noexcept { return request_; }
+  Order k() const noexcept { return tower_->kmax(); }
+  const FullTower& full() const noexcept { return *tower_; }
+
+ private:
+  friend Result<Product> compute(Session&, const CloudView&, const Request&, RunReport*) noexcept;
+  Product(const Request& request, FullTower&& tower) noexcept : request_(request), tower_(std::move(tower)) {}
+  Request request_;
+  std::optional<FullTower> tower_;
+};
+
+// Decimaux exacts recopies dans le manifeste (--pas, --origine) : chiffres ASCII, au plus un point suivi d'au moins
+// un chiffre, au plus kMaxDecimal octets ; le pas est strictement positif et sans signe, une coordonnee d'origine peut
+// porter un '-' initial. Aucun exposant, aucune normalisation : le texte est recopie tel quel.
+inline constexpr std::size_t kMaxDecimal = 64;
+[[nodiscard]] bool valid_grid_step(std::string_view text) noexcept;
+[[nodiscard]] bool valid_origin_coordinate(std::string_view text) noexcept;
+
+// Provenance d'un appel, recopiee dans le manifeste : empreintes et tailles des deux fichiers d'entree (jamais leurs
+// chemins), budget declare et declarations de grille. Aucun temps ni nombre de fils.
+struct Provenance {
+  io::Digest points_sha256{}, ids_sha256{};
+  u64 points_bytes = 0, ids_bytes = 0;
+  std::optional<u64> budget_bytes;           // --budget ; vide : illimite
+  std::string_view grid_step;                // --pas ; vide : non declare
+  std::array<std::string_view, 3> origin{};  // --origine ; trois vides : non declaree
+};
+
+// Nom du fichier de la sortie full dans le dossier publie, schema du manifeste et version de la signature
+// tree_k_sha256 que ce schema fixe (docs/SORTIES.md, paragraphe 8).
+inline constexpr std::string_view kFullFileName = "full.mhgp11ful1";
+inline constexpr std::string_view kManifestSchema = "ehgp.v11.output.v1";
+inline constexpr u64 kTreeSignatureVersion = 2;
+
+// Etat du dossier de sortie d'un appel (docs/SORTIES.md, paragraphes 3 et 9) : none, rien n'est publie ;
+// published_complete, D est publie et complet, et son manifeste en fait foi. Apres un refus, published_complete ne
+// vient que d'un double echec (retrait refuse) : ce n'est ni un succes de durabilite ni une sortie partielle.
+enum class PublicationState : u8 { none, published_complete };
+[[nodiscard]] std::string_view publication_state_name(PublicationState state) noexcept;
+
+// Issue d'une publication ou d'une fin d'appel : conforme ou refus, etat du dossier, empreinte du manifeste de D publie
+// (zeros si l'etat est none). Le code de sortie est celui de `outcome`, quel que soit l'etat.
+struct Publication {
+  Outcome outcome{};
+  PublicationState state = PublicationState::none;
+  io::Digest manifest_sha256{};
+  bool ok() const noexcept { return outcome.ok(); }
+};
+
+// Ecrit le produit dans `directory` (planifie par io::OutputDirectory::plan, sans fichier cree), puis le manifeste en
+// dernier, et publie (commit) : conforme, published_complete et l'empreinte du manifeste publie. Refus (etape 8 de
+// docs/SORTIES.md, paragraphe 3) : parameter_out_of_range (provenance hors de sa forme, avant toute creation),
+// output_unwritable, output_conflict (io), memory_budget, tower_invariant (sphere de naissance absente) ; rien n'est
+// publie (none), le destructeur de `directory` retire D.pending. Seul double echec : le commit refuse alors que D est
+// publie (synchronisation du parent, puis son retour, en echec) ; withdraw le retire alors, ou le declare.
+[[nodiscard]] Publication publish(Session& session, const Product& product, io::OutputDirectory& directory,
+                                  const Provenance& provenance, RunReport* report = nullptr) noexcept;
+
+// Refus constate quand `directory` a peut-etre publie D (docs/SORTIES.md, paragraphe 3 : commit en double echec a
+// l'etape 8, fin de session ou ligne d'etat a l'etape 9). Si D est publie, il est retire (io::OutputDirectory::retract).
+// Rend `refusal` inchange et l'etat : none si plus rien n'est publie (retrait reussi, ou rien ne l'etait),
+// published_complete et l'empreinte du manifeste si D reste publie (retrait refuse). Precondition : refus.
+[[nodiscard]] Publication withdraw(const Outcome& refusal, io::OutputDirectory& directory) noexcept;
+
+// Fin d'un appel publie (etape 9, premiere moitie) : Session::close ; sur refus (budget_not_released, invariant viole,
+// code 3 : un Product ou un tampon de la Session vit encore), withdraw. Conforme : l'etat de `directory`
+// (published_complete et l'empreinte apres un publish conforme). La ligne d'etat de l'appelant vient ensuite ; si elle
+// echoue, l'appelant rend withdraw(output_unwritable, directory).
+[[nodiscard]] Publication finish(Session& session, io::OutputDirectory& directory) noexcept;
+
+// Signature tree_k_sha256 de l'arbre d'ordre K, version 2 (docs/SORTIES.md, paragraphe 8 ; reponse D.2 de
+// l'auditeur) : SHA-256 de "MHGP11TK", des u64 2 (version), coord_bits, K, n et N, des 32 octets bruts du SHA-256 de
+// la geometrie ("MHGP11GX", u64 coord_bits et n, puis u32 x, y, z de chaque site dans l'ordre des SiteIdx), puis, par
+// noeud en numerotation canonique : u32 parent (kNone a la racine) et rang, u8 kind (0 feuille de site a K = 1,
+// 1 naissance de boule, 2 fusion) et arite a de la naissance, les a SiteIdx de la naissance en u32 (le site a K = 1,
+// S* de la boule de naissance sinon, rien pour une fusion), u32 nombre d'enfants, puis les enfants croissants en u32 ;
+// petit-boutiste, sans bourrage. Ni PointId ni BallIdx : elle ne depend ni des etiquettes, ni de l'ordre d'entree,
+// ni du nombre de fils. Precondition : `forest` est construite sur `domain` (FullTower::order sur FullTower::domain).
+[[nodiscard]] io::Digest tree_k_sha256(const FullDomain& domain, const OrderForest& forest) noexcept;
+
+}  // namespace mhgp11::api

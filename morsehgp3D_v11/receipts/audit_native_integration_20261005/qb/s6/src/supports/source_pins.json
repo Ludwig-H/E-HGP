@@ -1,0 +1,11 @@
+{
+  "status": "Tranche S6a de la sortie parametree (Q_b et comptes) ; assemblage (hierarchy.cpp) en attente du rattachement S3 ; qualification native G4 non acquise",
+  "sources": [
+    {
+      "commit": "462dca187bc2c38ae774f600f2975874d50733ee",
+      "path": "morsehgp3D_v11/bench/catalogue_euler.hpp",
+      "sha256": "f293df6ea1a2cc8d5fef6e78453de66343728a61d3013a5d1613cfdbb374dd18",
+      "role": "mark_supports (l. 135-165), closure_counts (l. 108-128), sphere de S* et niveau (l. 230-241), premier support = S* (l. 273-276) : portes dans enumerate.cpp ; table kBinomial (l. 34-42) : idee de counts.hpp."
+    }
+  ]
+}

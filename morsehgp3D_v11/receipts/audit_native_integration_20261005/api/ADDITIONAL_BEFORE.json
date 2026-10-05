@@ -1,0 +1,46 @@
+{
+  "utc": "2026-10-05T07:30:28.304624+00:00",
+  "scope": "current mutation manifests and full-reader support, copied before further read",
+  "sources": [
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/mutants/api.json",
+      "copy": "sources/s5/tests/mutants/api.json",
+      "sha256": "baae535f458b9a6d3eabc87a3c289c5c834a32b8312a4b65dbf4397317ac78be",
+      "bytes": 6675,
+      "mtime_ns": 1791185312701434432
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/mutants/cli.json",
+      "copy": "sources/s5/tests/mutants/cli.json",
+      "sha256": "8d17e238eba3537a62d08ae133f59ce64d6102857427a153c7a672b2b9cd0bed",
+      "bytes": 8256,
+      "mtime_ns": 1791185404405438683
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/mutants/io.json",
+      "copy": "sources/s5/tests/mutants/io.json",
+      "sha256": "e65db98361afb0fbb25a6013a6315288ac8ebe3ac67d5699e44d33f512a8d2dd",
+      "bytes": 7253,
+      "mtime_ns": 1791181895961276040
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/bench/mhgp11_formats.py",
+      "copy": "sources/s5/bench/mhgp11_formats.py",
+      "sha256": "6356191d914d66901faf5d375ad7e38e56645c3843d716200f0e4bc0b78733fd",
+      "bytes": 9840,
+      "mtime_ns": 1791182578157307665
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/support/mhgp11_gate.py",
+      "copy": "sources/s5/tests/support/mhgp11_gate.py",
+      "sha256": "8812cb11d632534ed372a8ca7c88c7b3ad138920f1b46eeb5fd60222a2a2c4f0",
+      "bytes": 7769,
+      "mtime_ns": 1791146602907542091
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "scope": "primary standards consulted for the preload harness; paraphrases only; no quotation",
+  "sources": [
+    {
+      "title": "WG14 N1570",
+      "url": "https://www.open-std.org/jtc1/sc22/wg14/www/docs/n1570.pdf",
+      "clause": "7.16.1.1 paragraph 2",
+      "pdf_page_1_based": 288,
+      "printed_page": 270,
+      "claim": "va_arg beyond actual arguments, or with incompatible promoted type outside named exceptions, has undefined behavior."
+    },
+    {
+      "title": "WG21 N4861 C++20 draft",
+      "url": "https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/n4861.pdf",
+      "clause": "17.13.1 paragraph 1 [cstdarg.syn]",
+      "pdf_page_1_based": 540,
+      "printed_page": 532,
+      "claim": "cstdarg inherits the C stdarg contents; altered va_start rules do not permit reading an absent sixth argument."
+    }
+  ]
+}

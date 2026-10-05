@@ -1,0 +1,25 @@
+[
+  {
+    "command": [
+      "python3",
+      "-B",
+      "-S",
+      "check_s5_contract.py"
+    ],
+    "exit_code": 1,
+    "stderr": "Traceback at check_s5_contract.py:127: RuntimeError: five typed arguments",
+    "cause": "Audit regex was greedy and consumed the parenthesized if condition beyond the syscall closing parenthesis; no product or judge failure."
+  },
+  {
+    "command": [
+      "python3",
+      "-B",
+      "-O",
+      "-S",
+      "check_s5_contract.py"
+    ],
+    "exit_code": 1,
+    "stderr": "Traceback at check_s5_contract.py:127: RuntimeError: five typed arguments",
+    "cause": "Audit regex was greedy and consumed the parenthesized if condition beyond the syscall closing parenthesis; no product or judge failure."
+  }
+]

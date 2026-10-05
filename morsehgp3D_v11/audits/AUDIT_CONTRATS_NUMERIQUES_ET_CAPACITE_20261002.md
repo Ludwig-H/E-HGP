@@ -9,23 +9,42 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 
 ## Sorties paramétrées : avant intégration et G4
 
-**S5 : fermer le chemin SIGXFSZ et les portes de publication.** Le CLI
-capturé ignore SIGPIPE seulement. Sous RLIMIT_FSIZE, SIGXFSZ peut tuer
-l'appel et laisser D.pending orphelin (C2 du contrelecteur S5). Ignorer
-également SIGXFSZ permet à l'erreur EFBIG de passer par le refus contrôlé ;
-ajouter la porte native code2/output_unwritable, sans D ni D.pending,
-et son mutant. Le mécanisme Linux est recoupé sur un enfant Python borné
-à 64 octets ; le CLI natif n'a pas été exécuté par cet audit.
+**S5 : anciennes alertes corrigées en WIP.** Le CLI ignore désormais
+SIGXFSZ et la porte rétablit son comportement par défaut avant exec avec
+RLIMIT_FSIZE. Signature V2 à l'ordre demandé, SHA du manifeste fermé et
+`published_complete` sont intégrés. Les portes jugent le champ réellement
+publié à K1..4, les doubles échecs après publication, stdout/inode, liens
+symboliques, O_RDONLY et priorité des refus. Les cinq signatures gravées
+comprennent trois fixtures indépendantes et deux régressions issues de
+structures natives. Les anciens survivants du rapport S5 portent sur une
+capture antérieure. **168 gardes nouvelles** recoupent les juges sur
+quinze issues factices et les 60 définitions de mutants ; cela ne prouve
+ni 60 mises à mort ni la qualification native des nouveaux correctifs.
+[Capture et limites](../receipts/audit_native_integration_20261005/api/README.md).
 
-S0 adopte `published_complete` et le SHA du manifeste dès sa fermeture.
-La capture S5/io les attend encore : couvrir fsync parent + retour
-impossibles, stdout + retrait impossibles et Session.close + retrait
-impossibles. Conserver le code de refus et l'empreinte du dossier complet.
-Juger aussi **le champ publié** `tree_k_sha256` contre la sérialisation
-indépendante V2 aux K distincts : égalité entre appels ou fonction isolée
-ne tue pas un manifeste constant/à l'ordre1. Les gardes stdout/inode,
-liens symboliques et O_RDONLY sont correctes par lecture ; ajouter leurs
-portes causales. [Source, portée et preuve bornée](../receipts/audit_supports_contract_20261005/api/README.md).
+**À corriger avant les deux portes IO injectées.** Le harnais
+`io_fault_preload.cpp:72–93` lit six `va_arg(long)`, alors que
+`directory.cpp:114` fournit cinq arguments de types
+`int,const char*,int,const char*,unsigned` à `SYS_renameat2`.
+Cette lecture ne respecte pas le contrat variadique :
+[N1570 §7.16.1.1](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n1570.pdf),
+repris par [C++20 N4861 §17.13.1](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/n4861.pdf).
+Décoder ces cinq types pour ce syscall ; invalider explicitement la porte
+si un autre numéro est reçu. Ce constat concerne le harnais, sans bug
+produit ni crash observé, et ne réfute pas les succès locaux x86-64.
+Release prépare 64 refus CLI, ASan/TSan 61 : les deux fautes IO et une
+porte FENV préchargées y sont omises. FENV n'est pas concernée par ce hook.
+
+**S3 : raccord final favorable, mesure du journal encore distincte.**
+Naissances enregistrées avant DSU, lots appliqués par ordinal et attribués
+après tout le plateau ; capacités admises avant allocation, diagnostics
+inchangés sur refus. Le nouveau modèle abstrait recoupe le compactage et
+120 ordres de terminaison, sans devenir un TSan. Le rapport local annonce
+951 cas différentiels contre Fraction et 58 identités FULL avant/après ;
+le prototype oracle doit encore rejoindre les portes permanentes. Ses
+temps avant/après concernent **journal désactivé** : ils ne mesurent pas
+le coût du journal actif et des attaches. G4 et suite complète restent
+attendus. [Raccord, coexistences et portée](../receipts/audit_native_integration_20261005/tower/README.md).
 
 **Matrice proposée : favorable, à découper par livraison.** L1 qualifie
 S3/S6 intégrés sur la même source figée ; io/api/cli et leurs fautes sont
@@ -35,15 +54,27 @@ modifiés, identité build_order/build_full, plateau E1/E2 et déterminisme
 W1/W4/W48. Inclure coquille 24 admise, 25 refusée pour l'appel supports
 entier et q4 à K1 malgré zéro coface. S6a juge les primitives ; ajouter
 budget/refus et count/fill parallèles lorsque l’assemblage est livré.
-Garder u18 explicite si livré, sans transfert de qualification.
+Garder u18 explicite si livré, sans transfert de qualification. Ajouter
+les attendus indépendants K10/K12 de la note mathématique ; la porte K12
+proposée vise les primitives, pas FULL12. Pour le futur raccord S6b, admettre
+domaine/arbre, métadonnées, sorties et, par worker actif, **scratch de
+fermeture plus liste temporaire de supports**. Les 2 Mio par worker à 24
+sites (96 Mio à W48) ne sont que le scratch ; la liste a au plus 12 926
+entrées, avec `sizeof(Support)` du build. Sommes d'offsets u64 vérifiées
+et même ordinal BallIdx entre count/fill.
 
 Les tailles 8k/16k/32k et LiDAR K5 restent des portes d'échelle, avec
 l'oracle exact sur petits cas. Fixer le coût des jumelles Python/−O,
 des mutants et sanitizers avant la session : la matrice existante a
 un budget global 1380s et des configurations à1200/1300s, sans réserve
 prouvée pour ces ajouts. Séparer un lot `long` plutôt que laisser un délai
-censurer des portes. La mesure L2 apparie FULL/arbre K seul, même masque,
-même entrée et K ; `output` et `write` sont publiés séparément.
+censurer des portes. La mesure L2 apparie FULL/arbre K seul, même entrée,
+profil, K et options applicables. Garder **FULL au masque 16379** ; l'ordre seul
+prend **7035**, retirant uniquement verticales parallèles 128, réemploi
+vertical 1024 et ordres concurrents 8192, refusés par `build_order`.
+Le juge S3 le fait déjà correctement. Éteindre ces options aussi dans
+FULL changerait la référence qualifiée. Publier cette différence ;
+`output` et `write` sont mesurés séparément.
 Une seule session gardée, arrêt ciblé certifié, reçu rejugé normal/−O.
 Aucun GCP ni build/test natif lancé pour cet audit.
 

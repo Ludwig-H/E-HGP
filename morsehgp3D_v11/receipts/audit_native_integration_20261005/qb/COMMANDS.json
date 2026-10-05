@@ -1,0 +1,39 @@
+{
+  "exploratory_read_note": "One source-reading shell ended code 1 on a mistyped header path s3/tests/tower/order_tree.hpp; correct captured path is s3/src/tower/order_tree.hpp. No native command was run.",
+  "native_executed": false,
+  "normal_optimized_equal": true,
+  "platform": "Linux-6.8.0-1064-azure-x86_64-with-glibc2.39",
+  "python": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "records": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-S",
+        "check_high_k.py"
+      ],
+      "code": 0,
+      "cwd": ".",
+      "label": "normal",
+      "seconds": 0.2273361899997326,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "fd40e72da330742b23cf1675a0824df663eb4cc69dd682c5b50676a5bbbf95cd"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-S",
+        "-O",
+        "check_high_k.py"
+      ],
+      "code": 0,
+      "cwd": ".",
+      "label": "optimized",
+      "seconds": 0.23009648700008256,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "fd40e72da330742b23cf1675a0824df663eb4cc69dd682c5b50676a5bbbf95cd"
+    }
+  ],
+  "utc": "2026-10-05T07:43:41.447850+00:00"
+}

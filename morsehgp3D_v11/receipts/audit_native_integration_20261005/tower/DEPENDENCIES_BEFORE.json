@@ -1,0 +1,36 @@
+{
+  "files": [
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_parallel.hpp",
+      "sha256": "013697c9cb12f47eb41091ca939421c574bcbc38ee076bf100cac5a657269732",
+      "size": 5535,
+      "source_sha256_after_copy": "013697c9cb12f47eb41091ca939421c574bcbc38ee076bf100cac5a657269732"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/census_slots.hpp",
+      "sha256": "1e5263315aec24482c63059b9ddbc938601c29c69e31c99c0c3cdf31324f867a",
+      "size": 2437,
+      "source_sha256_after_copy": "1e5263315aec24482c63059b9ddbc938601c29c69e31c99c0c3cdf31324f867a"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_vertical.cpp",
+      "sha256": "805722ce6da873bd4f17cc94ee20877073439bcb1af75c2b7fb8f6f3d220f5e4",
+      "size": 18885,
+      "source_sha256_after_copy": "805722ce6da873bd4f17cc94ee20877073439bcb1af75c2b7fb8f6f3d220f5e4"
+    },
+    {
+      "missing": true,
+      "path": "morsehgp3D_v11/src/tower/forest_lookup.cpp"
+    },
+    {
+      "missing": true,
+      "path": "morsehgp3D_v11/src/common/buffer.hpp"
+    },
+    {
+      "missing": true,
+      "path": "morsehgp3D_v11/src/common/memory_budget.hpp"
+    }
+  ],
+  "head": "f98aeed67d4030dd78e11d5faf7d8556c4d17aaf",
+  "utc": "2026-10-05T07:35:17.184640+00:00"
+}

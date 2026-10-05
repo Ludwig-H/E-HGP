@@ -1,0 +1,367 @@
+{
+  "utc": "2026-10-05T07:28:52.982687+00:00",
+  "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+  "actor_head": "f98aeed67d4030dd78e11d5faf7d8556c4d17aaf",
+  "actor_status": " M morsehgp3D_v11/cmake/modules.cmake\n M morsehgp3D_v11/docs/ARCHITECTURE.md\n M morsehgp3D_v11/docs/PROVENANCE.md\n M morsehgp3D_v11/src/core/reasons.def\n M morsehgp3D_v11/src/io/directory.cpp\n M morsehgp3D_v11/src/io/io.hpp\n M morsehgp3D_v11/tests/core/status_test.cpp\n M morsehgp3D_v11/tests/io/transaction_test.cpp\n M morsehgp3D_v11/tests/mutants/io.json\n?? morsehgp3D_v11/bench/mhgp11_formats.py\n?? morsehgp3D_v11/cli/\n?? morsehgp3D_v11/src/api/\n?? morsehgp3D_v11/tests/api/\n?? morsehgp3D_v11/tests/cli/\n?? morsehgp3D_v11/tests/mutants/api.json\n?? morsehgp3D_v11/tests/mutants/cli.json\n",
+  "source_norm_pin": "9cbf805c6e4c4f4893cb3549d5ab89a5d57e321c",
+  "scope": "WIP snapshot before read; no build/native/GCP/fit; prior audit checks not rerun",
+  "sources": [
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/src/api/api.hpp",
+      "copy": "sources/s5/src/api/api.hpp",
+      "sha256": "6f2017bb51d69b861d247930d8636901151949cb7bfd714f9c75597759807481",
+      "bytes": 12449,
+      "mtime_ns": 1791182079041284527
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/src/api/compute.cpp",
+      "copy": "sources/s5/src/api/compute.cpp",
+      "sha256": "aa72035c79192a812e41bd4e162c9e0467965b09864c4c1a2a4f19e5d1d9b27c",
+      "bytes": 4221,
+      "mtime_ns": 1791151852524615556
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/src/api/internal.hpp",
+      "copy": "sources/s5/src/api/internal.hpp",
+      "sha256": "8ff52cdbb2b1aef7c32a74caa5cd5b78422182f2b876eafce210b0b3abafaa64",
+      "bytes": 2251,
+      "mtime_ns": 1791147873401559870
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/src/api/manifest.cpp",
+      "copy": "sources/s5/src/api/manifest.cpp",
+      "sha256": "3eec59ae0c4033bef9ac2c47c9bc023f163efe80694a8cf4b2da62af9d05b3e4",
+      "bytes": 12811,
+      "mtime_ns": 1791182079040284527
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/src/api/module.cmake",
+      "copy": "sources/s5/src/api/module.cmake",
+      "sha256": "c30b487bbccb030d554e6a04da84dc379fd83d884613c380bf663097e28aa888",
+      "bytes": 170,
+      "mtime_ns": 1791147873409559871
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/src/api/selftest.cpp",
+      "copy": "sources/s5/src/api/selftest.cpp",
+      "sha256": "340188732e0bfc369c39d123822796b9b6a58eb9e36d3bec2a86e317954a4342",
+      "bytes": 5795,
+      "mtime_ns": 1791151846450615471
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/src/api/selftest.hpp",
+      "copy": "sources/s5/src/api/selftest.hpp",
+      "sha256": "c8a330b8bcf3c2bb144cc4f2400c6103ec4a8125ddefebd3ba9418a46f8fc8c0",
+      "bytes": 1749,
+      "mtime_ns": 1791147718972557709
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/src/api/session.cpp",
+      "copy": "sources/s5/src/api/session.cpp",
+      "sha256": "266526e1728d016378070148a6ebf13b30516a7ddaacc7b8dbff416831163439",
+      "bytes": 2185,
+      "mtime_ns": 1791151832963615282
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/src/api/write_full.cpp",
+      "copy": "sources/s5/src/api/write_full.cpp",
+      "sha256": "b6cf88730e7574142d47ce9df237eaf707e577e3058f0ae70c66fb7501f29d66",
+      "bytes": 6050,
+      "mtime_ns": 1791151967928617171
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/src/io/directory.cpp",
+      "copy": "sources/s5/src/io/directory.cpp",
+      "sha256": "b32fc41863a7163ae00cb74893c67cd6bc4500965669f881fd72334ab54f2aa3",
+      "bytes": 12434,
+      "mtime_ns": 1791181857780274270
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/src/io/input.cpp",
+      "copy": "sources/s5/src/io/input.cpp",
+      "sha256": "4b37b9da83433b82140501f547ec569bebdbc983f390c6e595215ec86b80142c",
+      "bytes": 5943,
+      "mtime_ns": 1791146602872542090
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/src/io/io.hpp",
+      "copy": "sources/s5/src/io/io.hpp",
+      "sha256": "3843beac6d28a4430a1335098c13f9c908bf7e5a58ede8696b8884d544971f27",
+      "bytes": 11314,
+      "mtime_ns": 1791181857804274271
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/src/io/module.cmake",
+      "copy": "sources/s5/src/io/module.cmake",
+      "sha256": "91c3aaee8104c4f95093582ef1ff2cb7aa99d6e1f6c4fedfba76491dd2c71cc5",
+      "bytes": 150,
+      "mtime_ns": 1791146602872542090
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/src/io/sha256.cpp",
+      "copy": "sources/s5/src/io/sha256.cpp",
+      "sha256": "549f088a604a297535bf7b75dbae3f0f337a214d90c4c1d59b08c70a40c4987b",
+      "bytes": 6323,
+      "mtime_ns": 1791146602872542090
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/src/io/writer.cpp",
+      "copy": "sources/s5/src/io/writer.cpp",
+      "sha256": "0afabcb1485a5b074dc101ab48e5c52a40923cac6b06fd3660ce972d61f2f395",
+      "bytes": 5535,
+      "mtime_ns": 1791146602872542090
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/cli/cli.cmake",
+      "copy": "sources/s5/cli/cli.cmake",
+      "sha256": "cc15e61af47feb94da5880bf53a741bab2f0b5dc5d6d74b3f831cdbbdebf799b",
+      "bytes": 465,
+      "mtime_ns": 1791147962685561120
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/cli/mhgp11.cpp",
+      "copy": "sources/s5/cli/mhgp11.cpp",
+      "sha256": "ed45ca33a456b4bd37749e40fefacde9b5e64990334c66049cdcff81fbbe824f",
+      "bytes": 18829,
+      "mtime_ns": 1791183126521333086
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/api/api_support.hpp",
+      "copy": "sources/s5/tests/api/api_support.hpp",
+      "sha256": "66afe97c3e6cfe9dfc5161c8beaada00a45a3718c49d1ea46728c38e33e186d0",
+      "bytes": 6313,
+      "mtime_ns": 1791182283494294005
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/api/publish_test.cpp",
+      "copy": "sources/s5/tests/api/publish_test.cpp",
+      "sha256": "c55a3373a33763a73a7b62e76fa821d3feeaceee4c6e256f6eb93e49a64cd24a",
+      "bytes": 12421,
+      "mtime_ns": 1791182388391298868
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/api/selftest_fault.cpp",
+      "copy": "sources/s5/tests/api/selftest_fault.cpp",
+      "sha256": "d297aa844b86d27a0380b87b840c3a936c5eb3944170132e3a75732b86251228",
+      "bytes": 2618,
+      "mtime_ns": 1791148199606564435
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/api/selftest_test.cpp",
+      "copy": "sources/s5/tests/api/selftest_test.cpp",
+      "sha256": "e5c960a6aa414dc13c9bef1fe63e014ead999d04bf15f522530b4a5073ab9c7b",
+      "bytes": 3117,
+      "mtime_ns": 1791148185546564239
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/api/session_fault.cpp",
+      "copy": "sources/s5/tests/api/session_fault.cpp",
+      "sha256": "dee11564f40929da743b3d3b968e6d47143747e487e306fbd8b4fea06f5b9ec1",
+      "bytes": 9105,
+      "mtime_ns": 1791183025965328424
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/api/session_test.cpp",
+      "copy": "sources/s5/tests/api/session_test.cpp",
+      "sha256": "626896dbedd376800268af9b075f49c4dba65373b4c5388d821b765168e82cc7",
+      "bytes": 18152,
+      "mtime_ns": 1791183562830353312
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/api/tests.cmake",
+      "copy": "sources/s5/tests/api/tests.cmake",
+      "sha256": "25d4a4f85a9967a27615a4959a13a20d6e61b49285b50c8c53cab81c16febc64",
+      "bytes": 1676,
+      "mtime_ns": 1791183010544327709
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/cli/cli_contract.py",
+      "copy": "sources/s5/tests/cli/cli_contract.py",
+      "sha256": "2b674e297aabd1426fc355aec8931624bdd188510ed85bab7cc399ae6edac97d",
+      "bytes": 26189,
+      "mtime_ns": 1791183631539356497
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/cli/cli_full_identity.py",
+      "copy": "sources/s5/tests/cli/cli_full_identity.py",
+      "sha256": "0b5b7db984beaec04b8ea1fb97788d64e17b00efe1150561a16da40ef0566dae",
+      "bytes": 9789,
+      "mtime_ns": 1791182587246308086
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/cli/cli_full_invariance.py",
+      "copy": "sources/s5/tests/cli/cli_full_invariance.py",
+      "sha256": "a5427170e4e98b9aa6915d4ae5e72a5e8cbd39ca0faa76ae1ac8aee0a07824eb",
+      "bytes": 7695,
+      "mtime_ns": 1791148780340572562
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/cli/cli_support.py",
+      "copy": "sources/s5/tests/cli/cli_support.py",
+      "sha256": "71ffabad16f83d4f2a2e2b7f90c0824de792a17df9184b93e1edf552b5aafda9",
+      "bytes": 4067,
+      "mtime_ns": 1791182578157307665
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/cli/fenv_preload.cpp",
+      "copy": "sources/s5/tests/cli/fenv_preload.cpp",
+      "sha256": "a8d2dc0cde9fa63985626ecbab7873ad8ff7d83fee249873d9e6b40ba3b729d7",
+      "bytes": 603,
+      "mtime_ns": 1791150148498591709
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/cli/io_fault_preload.cpp",
+      "copy": "sources/s5/tests/cli/io_fault_preload.cpp",
+      "sha256": "15b7e3e90294fa1a9e16683a8e3e8c91fd4ea49c7cceb09d3d61e01508f86dd0",
+      "bytes": 3602,
+      "mtime_ns": 1791182439453301235
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/cli/tests.cmake",
+      "copy": "sources/s5/tests/cli/tests.cmake",
+      "sha256": "f12520fb45f2c14e11f197d7c08ad128e9d17829271529a35b314d610d77237a",
+      "bytes": 4973,
+      "mtime_ns": 1791183604602355248
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/io/fault.cpp",
+      "copy": "sources/s5/tests/io/fault.cpp",
+      "sha256": "ed0579a48d703636e31dd6fb0c06b4893fc69aefc54befccabaa2d2c345c2965",
+      "bytes": 4377,
+      "mtime_ns": 1791146602894542091
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/io/transaction_test.cpp",
+      "copy": "sources/s5/tests/io/transaction_test.cpp",
+      "sha256": "acf4be997010ae2ac85cd68d4a10c241ba182a3e83d4698b1be6e7bf3e772a1e",
+      "bytes": 10093,
+      "mtime_ns": 1791181888691275703
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/tests/io/tests.cmake",
+      "copy": "sources/s5/tests/io/tests.cmake",
+      "sha256": "c292723be747741fd11c45cbcd57b0db02629dc81f2baea57b3a4c1c78dfe50f",
+      "bytes": 1125,
+      "mtime_ns": 1791146602896542091
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/CMakeLists.txt",
+      "copy": "sources/s5/CMakeLists.txt",
+      "sha256": "82fa1054e14a2bf16e28195cac32a4d81dec56bb81d6481d9d9214d5c87f555d",
+      "bytes": 17654,
+      "mtime_ns": 1791146602817542089
+    },
+    {
+      "kind": "live_snapshot",
+      "actor": "/workspaces/E-HGP/build/v11-impl-s5",
+      "path": "/workspaces/E-HGP/build/v11-impl-s5/morsehgp3D_v11/cmake/modules.cmake",
+      "copy": "sources/s5/cmake/modules.cmake",
+      "sha256": "721f324430ba1323faeb723c04ee6d74a9840377c7c85819b184d48589c6e448",
+      "bytes": 1692,
+      "mtime_ns": 1791147535977555148
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/verif_s5.md",
+      "copy": "sources/reports/verif_s5.md",
+      "sha256": "9dcf467983367db8521d04d949f48e2a5bd1ed29c5bce7c929e46b9fe7fbb22d",
+      "bytes": 46240,
+      "mtime_ns": 1791181388713252525
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/impl_s5.md",
+      "copy": "sources/reports/impl_s5.md",
+      "sha256": "e984fe47099cc61a48d6ceac1d758d91578eacd03199cfdd25a732bf9bcd215a",
+      "bytes": 29370,
+      "mtime_ns": 1791152636696626530
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/APPORTS_AUDIT_9cbf805c6.md",
+      "copy": "sources/reports/APPORTS_AUDIT_9cbf805c6.md",
+      "sha256": "521184748a538cba1488a657331808c6c45c3c109d1c00504ce559ee98b2964a",
+      "bytes": 5082,
+      "mtime_ns": 1791181269787247012
+    },
+    {
+      "kind": "git_blob",
+      "repo": "/workspaces/E-HGP/build/v11-auditor-20261003",
+      "pin": "9cbf805c6e4c4f4893cb3549d5ab89a5d57e321c",
+      "path": "morsehgp3D_v11/docs/SORTIES.md",
+      "copy": "sources/git9cbf/morsehgp3D_v11/docs/SORTIES.md",
+      "sha256": "2cfb849d388542f198ad413ad2f9f77999ab738d5eff921fbcf3288804df8c1a",
+      "bytes": 43418
+    }
+  ]
+}

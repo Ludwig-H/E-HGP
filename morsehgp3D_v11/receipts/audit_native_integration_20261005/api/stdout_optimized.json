@@ -1,0 +1,552 @@
+{
+  "checks": 168,
+  "judge_cases": [
+    {
+      "accepted": true,
+      "case": "published complete, exact hash",
+      "expected_acceptance": true,
+      "failed_checks": [],
+      "judge_checks": 7,
+      "process_code": 2,
+      "signal": 0
+    },
+    {
+      "accepted": true,
+      "case": "published complete on stderr",
+      "expected_acceptance": true,
+      "failed_checks": [],
+      "judge_checks": 7,
+      "process_code": 2,
+      "signal": 0
+    },
+    {
+      "accepted": true,
+      "case": "none, no hash",
+      "expected_acceptance": true,
+      "failed_checks": [],
+      "judge_checks": 6,
+      "process_code": 2,
+      "signal": 0
+    },
+    {
+      "accepted": true,
+      "case": "options output null",
+      "expected_acceptance": true,
+      "failed_checks": [],
+      "judge_checks": 6,
+      "process_code": 2,
+      "signal": 0
+    },
+    {
+      "accepted": false,
+      "case": "lost published state",
+      "expected_acceptance": false,
+      "failed_checks": [
+        "lost published state : lignes [{'phase': 'mhgp11', 'output': 'full', 'status': 'resource_exhausted', 'reason': 'output_unwritable', 'stage': 'publish', 'coord_bits': 21, 'publication': 'none', 'manifest_sha256': None}], attendu {'phase': 'mhgp11', 'output': 'full', 'status': 'resource_exhausted', 'reason': 'output_unwritable', 'stage': 'publish', 'coord_bits': 21, 'publication': 'published_complete', 'manifest_sha256': 'abababababababababababababababababababababababababababababababab'}"
+      ],
+      "judge_checks": 7,
+      "process_code": 2,
+      "signal": 0
+    },
+    {
+      "accepted": false,
+      "case": "missing expected digest",
+      "expected_acceptance": false,
+      "failed_checks": [
+        "missing expected digest : empreinte attendue absente"
+      ],
+      "judge_checks": 7,
+      "process_code": 2,
+      "signal": 0
+    },
+    {
+      "accepted": false,
+      "case": "wrong digest",
+      "expected_acceptance": false,
+      "failed_checks": [
+        "wrong digest : lignes [{'phase': 'mhgp11', 'output': 'full', 'status': 'resource_exhausted', 'reason': 'output_unwritable', 'stage': 'publish', 'coord_bits': 21, 'publication': 'published_complete', 'manifest_sha256': '0000000000000000000000000000000000000000000000000000000000000000'}], attendu {'phase': 'mhgp11', 'output': 'full', 'status': 'resource_exhausted', 'reason': 'output_unwritable', 'stage': 'publish', 'coord_bits': 21, 'publication': 'published_complete', 'manifest_sha256': 'abababababababababababababababababababababababababababababababab'}"
+      ],
+      "judge_checks": 7,
+      "process_code": 2,
+      "signal": 0
+    },
+    {
+      "accepted": false,
+      "case": "digest omitted",
+      "expected_acceptance": false,
+      "failed_checks": [
+        "digest omitted : lignes [{'phase': 'mhgp11', 'output': 'full', 'status': 'resource_exhausted', 'reason': 'output_unwritable', 'stage': 'publish', 'coord_bits': 21, 'publication': 'published_complete'}], attendu {'phase': 'mhgp11', 'output': 'full', 'status': 'resource_exhausted', 'reason': 'output_unwritable', 'stage': 'publish', 'coord_bits': 21, 'publication': 'published_complete', 'manifest_sha256': 'abababababababababababababababababababababababababababababababab'}",
+        "digest omitted : cles de la ligne de refus ['phase', 'output', 'status', 'reason', 'stage', 'coord_bits', 'publication']"
+      ],
+      "judge_checks": 7,
+      "process_code": 2,
+      "signal": 0
+    },
+    {
+      "accepted": false,
+      "case": "extra key",
+      "expected_acceptance": false,
+      "failed_checks": [
+        "extra key : cles de la ligne de refus ['phase', 'output', 'status', 'reason', 'stage', 'coord_bits', 'publication', 'manifest_sha256', 'extra']"
+      ],
+      "judge_checks": 7,
+      "process_code": 2,
+      "signal": 0
+    },
+    {
+      "accepted": false,
+      "case": "two JSON lines",
+      "expected_acceptance": false,
+      "failed_checks": [
+        "two JSON lines : lignes [{'phase': 'mhgp11', 'output': 'full', 'status': 'resource_exhausted', 'reason': 'output_unwritable', 'stage': 'publish', 'coord_bits': 21, 'publication': 'published_complete', 'manifest_sha256': 'abababababababababababababababababababababababababababababababab'}, {'phase': 'mhgp11', 'output': 'full', 'status': 'resource_exhausted', 'reason': 'output_unwritable', 'stage': 'publish', 'coord_bits': 21, 'publication': 'published_complete', 'manifest_sha256': 'abababababababababababababababababababababababababababababababab'}], attendu {'phase': 'mhgp11', 'output': 'full', 'status': 'resource_exhausted', 'reason': 'output_unwritable', 'stage': 'publish', 'coord_bits': 21, 'publication': 'published_complete', 'manifest_sha256': 'abababababababababababababababababababababababababababababababab'}",
+        "two JSON lines : cles de la ligne de refus []"
+      ],
+      "judge_checks": 7,
+      "process_code": 2,
+      "signal": 0
+    },
+    {
+      "accepted": false,
+      "case": "signal SIGXFSZ is not refusal",
+      "expected_acceptance": false,
+      "failed_checks": [
+        "signal SIGXFSZ is not refusal : signal 25, attendu code 2"
+      ],
+      "judge_checks": 7,
+      "process_code": null,
+      "signal": 25
+    },
+    {
+      "accepted": false,
+      "case": "wrong refusal code",
+      "expected_acceptance": false,
+      "failed_checks": [
+        "wrong refusal code : code 3, attendu code 2"
+      ],
+      "judge_checks": 7,
+      "process_code": 3,
+      "signal": 0
+    },
+    {
+      "accepted": false,
+      "case": "published path absent",
+      "expected_acceptance": false,
+      "failed_checks": [
+        "published path absent : absent retire par le refus"
+      ],
+      "judge_checks": 7,
+      "process_code": 2,
+      "signal": 0
+    },
+    {
+      "accepted": false,
+      "case": "pending path present",
+      "expected_acceptance": false,
+      "failed_checks": [
+        "pending path present : present present apres le refus"
+      ],
+      "judge_checks": 7,
+      "process_code": 2,
+      "signal": 0
+    },
+    {
+      "accepted": false,
+      "case": "incorrect stage",
+      "expected_acceptance": false,
+      "failed_checks": [
+        "incorrect stage : lignes [{'phase': 'mhgp11', 'output': 'full', 'status': 'resource_exhausted', 'reason': 'output_unwritable', 'stage': 'plan', 'coord_bits': 21, 'publication': 'published_complete', 'manifest_sha256': 'abababababababababababababababababababababababababababababababab'}], attendu {'phase': 'mhgp11', 'output': 'full', 'status': 'resource_exhausted', 'reason': 'output_unwritable', 'stage': 'publish', 'coord_bits': 21, 'publication': 'published_complete', 'manifest_sha256': 'abababababababababababababababababababababababababababababababab'}"
+      ],
+      "judge_checks": 7,
+      "process_code": 2,
+      "signal": 0
+    }
+  ],
+  "mutation_declarations": [
+    {
+      "gate": "mhgp11_api_session_product_alive",
+      "id": "session_sans_liberation",
+      "module": "api",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_api_selftest_fault_inexact",
+      "id": "selftest_omis",
+      "module": "api",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_api_selftest_judge",
+      "id": "selftest_pieges_ignores",
+      "module": "api",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_api_selftest_judge",
+      "id": "selftest_noyaux_entiers_omis",
+      "module": "api",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_api_selftest_judge",
+      "id": "selftest_precision_etendue_admise",
+      "module": "api",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_api_session_refusals",
+      "id": "multiplicite_apres_k",
+      "module": "api",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_api_session_tree_digest",
+      "id": "tree_k_sans_enfants",
+      "module": "api",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_api_session_provenance",
+      "id": "provenance_non_controlee",
+      "module": "api",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_api_session_provenance",
+      "id": "pas_nul_admis",
+      "module": "api",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_api_session_tree_digest",
+      "id": "tree_k_version_un",
+      "module": "api",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_api_session_tree_digest",
+      "id": "tree_k_sans_geometrie",
+      "module": "api",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_api_session_tree_digest",
+      "id": "tree_k_naissance_omise",
+      "module": "api",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_api_session_tree_digest",
+      "id": "tree_k_ordre_un",
+      "module": "api",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_api_session_tree_digest",
+      "id": "tree_k_constante",
+      "module": "api",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_api_session_after_publish",
+      "id": "retrait_omis_fin_de_session",
+      "module": "api",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_api_session_after_publish",
+      "id": "etat_api_toujours_none",
+      "module": "api",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_api_session_engine",
+      "id": "parametres_moteur_par_defaut",
+      "module": "api",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_api_session_engine",
+      "id": "parametres_catalogue_feuilles",
+      "module": "api",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_cli_contract",
+      "id": "option_hors_sortie_admise",
+      "module": "cli",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_cli_contract",
+      "id": "k_treize_admis",
+      "module": "cli",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_cli_contract",
+      "id": "budget_nul_admis",
+      "module": "cli",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_cli_contract",
+      "id": "budget_ignore",
+      "module": "cli",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_cli_full_identity",
+      "id": "fils_ignores",
+      "module": "cli",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_cli_contract",
+      "id": "entree_sur_sortie_standard_admise",
+      "module": "cli",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_cli_contract",
+      "id": "sortie_standard_non_controlee",
+      "module": "cli",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_cli_contract",
+      "id": "retrait_omis",
+      "module": "cli",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_cli_contract",
+      "id": "pas_non_recopie",
+      "module": "cli",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_cli_full_identity",
+      "id": "ecriture_full_permutee",
+      "module": "cli",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_cli_full_identity",
+      "id": "manifeste_taille_fausse",
+      "module": "cli",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_cli_contract",
+      "id": "plan_avant_sortie_standard",
+      "module": "cli",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_cli_contract",
+      "id": "sortie_standard_entree_ids_seulement",
+      "module": "cli",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_cli_contract",
+      "id": "stdout_lstat",
+      "module": "cli",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_cli_contract",
+      "id": "stdout_lecture_seule_admise",
+      "module": "cli",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_cli_contract",
+      "id": "ligne_refus_sortie_toujours_full",
+      "module": "cli",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_cli_contract",
+      "id": "sigxfsz_non_ignore",
+      "module": "cli",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_cli_contract",
+      "id": "etat_publie_omis",
+      "module": "cli",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_cli_contract",
+      "id": "refus_perdu_sortie_pleine",
+      "module": "cli",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_cli_contract",
+      "id": "retrait_omis_double_echec",
+      "module": "cli",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_io_unit_sha256",
+      "id": "sha_tronque",
+      "module": "io",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_io_unit_sha256",
+      "id": "sha_longueur_en_octets",
+      "module": "io",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_io_unit_input_unreadable",
+      "id": "lecture_tronquee_acceptee",
+      "module": "io",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_io_unit_input_unreadable",
+      "id": "fin_non_controlee",
+      "module": "io",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_io_unit_input_unreadable",
+      "id": "type_non_regulier_admis",
+      "module": "io",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_io_unit_input_sizes",
+      "id": "controle_apres_allocation",
+      "module": "io",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_io_unit_input_budget",
+      "id": "admission_omise",
+      "module": "io",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_io_unit_input",
+      "id": "lecture_gros_boutiste",
+      "module": "io",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_io_transaction_plan_conflicts",
+      "id": "conflit_ignore",
+      "module": "io",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_io_transaction_plan_conflicts",
+      "id": "orphelin_ignore",
+      "module": "io",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_io_transaction_noreplace",
+      "id": "renommage_ecrasant",
+      "module": "io",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_io_transaction_discard",
+      "id": "pending_non_retire",
+      "module": "io",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_io_transaction_commit",
+      "id": "publication_defaite_au_destructeur",
+      "module": "io",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_io_transaction_write_failure",
+      "id": "manifeste_avant_donnees",
+      "module": "io",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_io_transaction_create_names",
+      "id": "nom_reserve_admis",
+      "module": "io",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_io_transaction_create_names",
+      "id": "nom_double_admis",
+      "module": "io",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_io_transaction_write_failure",
+      "id": "ecriture_non_controlee",
+      "module": "io",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_io_transaction_commit",
+      "id": "empreinte_ecriture_omise",
+      "module": "io",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_io_transaction_commit",
+      "id": "bourrage_toujours",
+      "module": "io",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_io_transaction_commit",
+      "id": "mots_gros_boutistes",
+      "module": "io",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_io_transaction_retract",
+      "id": "retrait_sans_renommage",
+      "module": "io",
+      "source_occurrences": 1
+    },
+    {
+      "gate": "mhgp11_io_transaction_noreplace",
+      "id": "empreinte_manifeste_apres_publication",
+      "module": "io",
+      "source_occurrences": 1
+    }
+  ],
+  "native_tests_run": 0,
+  "old_audit_checks_replayed": 0,
+  "schema": "audit.s5.source_judge_review.v1",
+  "scope": "stdlib copied judge fake outcomes + source declarations; no native qualification",
+  "status": "ok",
+  "variadic_contract": {
+    "hook": "sources/s5/tests/cli/io_fault_preload.cpp:72-93",
+    "read": [
+      "long",
+      "long",
+      "long",
+      "long",
+      "long",
+      "long"
+    ],
+    "scope": "static C++20 variadic-contract mismatch; no native runtime or result attribution",
+    "sixth_argument_exists": false,
+    "source": "sources/s5/src/io/directory.cpp:114",
+    "supplied": [
+      "int",
+      "const char*",
+      "int",
+      "const char*",
+      "unsigned"
+    ]
+  }
+}

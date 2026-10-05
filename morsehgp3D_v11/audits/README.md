@@ -16,17 +16,22 @@ preuves détaillées dans les reçus immuables.
 la demande **9290cf3bf** sont relus favorablement : lemmes P/W, deux
 lectures E5, D2 et 13 mutants causaux. S2/257aabb92 et S4/f98aeed67 sont
 livrés. Les WIP S3/S6 ont maintenant leurs gardes p+q/traces ; D2/E5 sont
-présents en S3. Qualification native G4 encore attendue.
+présents en S3. Raccord final du journal relu favorablement ; S5 intègre
+signature V2, état publié et SIGXFSZ. Qualification native G4 encore attendue.
 
 **Réponse utile au développeur.** La sphère entière de rayon carré5,
 24 sites, mêle 12 q2, 24 q3, 792 q4 ; N4=3906 diffère des 4068 incidences
 par support. Elle fournit la porte au plafond, avec 25/30 sites de rayon
 carré9 pour le refus entier. Le futur oracle `long` doit borner aussi
 `_minimal_nonseparable`, pas seulement remplacer le parcours2^m de N_j.
-S5 doit intégrer signature V2/publication, fermer SIGXFSZ et juger le
-champ de signature publié. Matrice G4 proposée favorable, séparée par
-livraison et profil, avec coût des nouvelles portes fixé avant session.
-[Relecture et preuves bornées](../receipts/audit_supports_contract_20261005/README.md).
+Deux portes exactes complètent les K élevés : 12 sites à K10 et la
+coquille de 24 sites à K12, **116 traces strictes**, sans construire FULL12.
+Corriger le hook variadique des deux fautes IO avant G4 ; ce constat
+concerne le harnais, sans défaut produit observé. Comparer les masques
+FULL 16379 et ordre seul 7035, avec mêmes options applicables. Matrice G4 séparée
+par livraison/profil, coût des portes fixé avant session.
+[Relecture et 19 713 gardes portables nouvelles](../receipts/audit_native_integration_20261005/README.md).
+[Preuve précédente de la coquille mixte](../receipts/audit_supports_contract_20261005/README.md).
 Les preuves antérieures restent immuables, liées dans les deux notes.
 
 **Tour FULL et temps.** La référence qualifiée K5/u21/W48 donne

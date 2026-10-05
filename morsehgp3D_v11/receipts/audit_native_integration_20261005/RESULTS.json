@@ -1,0 +1,18 @@
+{
+  "status": "conforme",
+  "guard_counts": {
+    "tower": 15283,
+    "api": 168,
+    "qb": 4135,
+    "root": 127
+  },
+  "total_guards": 19713,
+  "native_hgp_executed": false,
+  "gcp_used": false,
+  "fit_used": false,
+  "full_native_qualification": "pending after integration and frozen source",
+  "s5_hook": "five actual arguments versus six va_arg(long), source-only harness finding",
+  "full_reference_mask": 16379,
+  "single_order_mask": 7035,
+  "sphere5_K12_strict_traces": 116
+}

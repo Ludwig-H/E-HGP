@@ -1,0 +1,155 @@
+{
+  "checks": 4135,
+  "native_executed": false,
+  "recommended_small_K10": {
+    "N": {
+      "0": 0,
+      "1": 0,
+      "2": 2,
+      "3": 4,
+      "4": 1
+    },
+    "center": [
+      10,
+      10,
+      10
+    ],
+    "counts": {
+      "cofaces": 12,
+      "compressed_parts": 6,
+      "gabriel_cofaces": 4,
+      "kparties_reliees": 66,
+      "strict_traces": 4
+    },
+    "incidences": 20,
+    "m": 4,
+    "p": 8,
+    "points": [
+      [
+        0,
+        0,
+        10
+      ],
+      [
+        0,
+        20,
+        10
+      ],
+      [
+        20,
+        0,
+        10
+      ],
+      [
+        20,
+        20,
+        10
+      ],
+      [
+        9,
+        9,
+        10
+      ],
+      [
+        9,
+        10,
+        10
+      ],
+      [
+        9,
+        11,
+        10
+      ],
+      [
+        10,
+        9,
+        10
+      ],
+      [
+        10,
+        10,
+        10
+      ],
+      [
+        10,
+        11,
+        10
+      ],
+      [
+        11,
+        9,
+        10
+      ],
+      [
+        11,
+        10,
+        10
+      ]
+    ],
+    "qmin": 2,
+    "squared_radius": 200
+  },
+  "s6_unchanged_files": 12,
+  "scope": [
+    "Exact scalar/geometry oracle; no C++/GPU execution or FULL reconstruction.",
+    "Existing Sphere5 proof independently checked all Q presentations with Gram; this follow-up adds only high-K closure and counts.",
+    "Sphere5 uses a canonical q2 sphere; this does not replace native q3/q4 factory and overflow gates.",
+    "N_j above twelve follows the pigeonhole diameter proof; no enumeration of 2**24 subsets.",
+    "S3 low-size fixture coverage is K<=5; a separate source gate targets LiDAR K10. No failure or new native qualification is inferred."
+  ],
+  "source_pin": "9cbf805c6e4c4f4893cb3549d5ab89a5d57e321c",
+  "sphere5": {
+    "K12_counts": {
+      "cofaces": 2496144,
+      "compressed_parts": 2704156,
+      "gabriel_cofaces": 2496144,
+      "kparties_reliees": 2704156,
+      "strict_traces": 116
+    },
+    "N12": 2704040,
+    "N13_to_N24": {
+      "13": 2496144,
+      "14": 1961256,
+      "15": 1307504,
+      "16": 735471,
+      "17": 346104,
+      "18": 134596,
+      "19": 42504,
+      "20": 10626,
+      "21": 2024,
+      "22": 276,
+      "23": 24,
+      "24": 1
+    },
+    "Q_by_arity": {
+      "2": 12,
+      "3": 24,
+      "4": 792
+    },
+    "antipodal_choices_tested": 4096,
+    "arrangement_increments": [
+      1,
+      1,
+      2,
+      3,
+      3,
+      4,
+      4,
+      5,
+      8,
+      9,
+      9,
+      9
+    ],
+    "incidences_K12": 149954688,
+    "independent_arrangement_chambers": 116,
+    "separable12": 116,
+    "sites": 24,
+    "support_cofaces_by_arity_K12": {
+      "2": 705432,
+      "3": 352716,
+      "4": 167960
+    }
+  },
+  "status": "PASS"
+}

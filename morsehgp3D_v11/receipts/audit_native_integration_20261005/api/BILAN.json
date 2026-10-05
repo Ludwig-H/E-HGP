@@ -1,0 +1,100 @@
+{
+  "schema": "audit.native_s5_followup.v1",
+  "captured_utc_before": "2026-10-05T07:28:52.982687+00:00",
+  "captured_utc_after": "2026-10-05T07:41:18.164324+00:00",
+  "normative_pin": "9cbf805c6e4c4f4893cb3549d5ab89a5d57e321c",
+  "implementation_actor_head": "f98aeed67d4030dd78e11d5faf7d8556c4d17aaf",
+  "implementation_status": "unpublished evolving WIP snapshot; 45 captured sources unchanged before/after",
+  "corrections_in_source": [
+    {
+      "item": "D.2 signature V2 and published K",
+      "implementation": "sources/s5/src/api/manifest.cpp:186-221,309-310",
+      "gate": "sources/s5/tests/api/session_test.cpp:292-328",
+      "scope": "geometry SHA, version/profile/K, parent/rank/kind/birth SiteIdxs/children; published manifest field checked for K1..4; three independent engraved fixtures plus two native-derived regressions"
+    },
+    {
+      "item": "D.3 retained publication state and manifest SHA",
+      "implementation": "sources/s5/src/io/directory.cpp:217-243; sources/s5/src/api/manifest.cpp:167-170,224-265",
+      "gate": "sources/s5/tests/api/publish_test.cpp:132-225; sources/s5/tests/cli/cli_contract.py:362-421",
+      "scope": "SHA retained before publish; failed finalization/stdout withdraws or reports published_complete with exact manifest hash"
+    },
+    {
+      "item": "SIGXFSZ",
+      "implementation": "sources/s5/cli/mhgp11.cpp:328-329",
+      "gate": "sources/s5/tests/cli/cli_contract.py:245-257,362-394",
+      "scope": "child resets signal to default and applies RLIMIT_FSIZE before CLI; signal must not masquerade as refusal"
+    },
+    {
+      "item": "refusal order and stdout identity",
+      "implementation": "sources/s5/cli/mhgp11.cpp:182-198,326-343",
+      "gate": "sources/s5/tests/cli/cli_contract.py:155-221",
+      "scope": "options before plan; stdout before destination; followed symlink input alias and read-only stdout; plan before read"
+    }
+  ],
+  "remaining_relevant_finding": {
+    "kind": "test_harness_contract",
+    "source": "sources/s5/tests/cli/io_fault_preload.cpp:72-93",
+    "caller": "sources/s5/src/io/directory.cpp:114",
+    "finding": "five typed variadic arguments are supplied; hook consumes six long va_arg values. C++20/C stdarg contract undefined behavior, independently of apparent x86-64 ABI success.",
+    "affected_cases": [
+      "double echec du commit, retrait reussi",
+      "double echec du commit, retrait refuse"
+    ],
+    "not_claimed": [
+      "product bug",
+      "observed runtime crash",
+      "refutation of reported local successful executions",
+      "native causal qualification"
+    ],
+    "recommendation": "For SYS_renameat2 read exactly int,const char*,int,const char*,unsigned, forward the same five typed arguments; unexpected syscall must emit a dedicated invalid-gate marker and fail the harness explicitly. An explicit ABI trampoline is another option."
+  },
+  "qualification_limits": {
+    "new_native_tests_run": 0,
+    "G4_qualified": false,
+    "mutants_api_cli_io_declared": [
+      18,
+      20,
+      22
+    ],
+    "mutation_targets_unique": true,
+    "mutation_kills_observed_by_this_audit": 0,
+    "cli_contract_expected_release_refusals": 64,
+    "cli_contract_expected_sanitizer_refusals": 61,
+    "sanitizer_excluded_preload_cases": [
+      "environment_selftest via fenv preload",
+      "double commit failure withdrawn",
+      "double commit failure kept published"
+    ],
+    "new_judge_cases": 15,
+    "new_stdlib_checks": 168,
+    "old_audit_checks_replayed": 0
+  },
+  "reader_runs": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-S",
+        "check_s5_contract.py"
+      ],
+      "exit_code": 0,
+      "stdout": "stdout_normal.json",
+      "stderr": "stderr_normal.txt"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "-S",
+        "check_s5_contract.py"
+      ],
+      "exit_code": 0,
+      "stdout": "stdout_optimized.json",
+      "stderr": "stderr_optimized.txt"
+    }
+  ],
+  "stdout_identical": true,
+  "stdout_sha256": "d09e7587d3e0ec63b4b8f0e632fdbb01135ef27ffafa67e08fea351f2fdf0f3f",
+  "preflight_failure": "reader_preflight/: first audit regex greedily consumed the closing if condition; two exits1 preserved, corrected in this audit script only."
+}

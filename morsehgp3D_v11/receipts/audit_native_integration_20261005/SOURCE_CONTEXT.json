@@ -1,0 +1,8 @@
+{
+  "source_base": "9cbf805c6e4c4f4893cb3549d5ab89a5d57e321c",
+  "developer_reply_commit": "1c43d41ef963326f83c0169ab1cc9da9d44f9b0f",
+  "developer_reply_path": "morsehgp3D_v11/audits/REPONSE_CLAUDE_SUPPORTS_20261004.md",
+  "developer_reply_sha256": "f02d479f126d754d625e549787bc9e025da99c0b543f37d83b5c1c6249492b0f",
+  "actors_base": "f98aeed67d4030dd78e11d5faf7d8556c4d17aaf",
+  "qualification": "WIP source reading and bounded portable checks only"
+}

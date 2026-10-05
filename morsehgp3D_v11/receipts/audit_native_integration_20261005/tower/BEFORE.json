@@ -1,0 +1,103 @@
+{
+  "time": "2026-10-05T07:28:24.366288+00:00",
+  "actor": "/workspaces/E-HGP/build/v11-impl-s3",
+  "head": "f98aeed67d4030dd78e11d5faf7d8556c4d17aaf",
+  "status": " M morsehgp3D_v11/docs/FULL_FORESTS.md\n M morsehgp3D_v11/docs/PROVENANCE.md\n M morsehgp3D_v11/src/tower/forest_internal.hpp\n M morsehgp3D_v11/src/tower/forest_plateau.cpp\n M morsehgp3D_v11/src/tower/module.cmake\n M morsehgp3D_v11/src/tower/tower.hpp\n M morsehgp3D_v11/tests/mutants/tower.json\n M morsehgp3D_v11/tests/tower/public_header_test.cpp\n M morsehgp3D_v11/tests/tower/tests.cmake\n?? morsehgp3D_v11/src/tower/attachment.cpp\n?? morsehgp3D_v11/src/tower/order_tree.cpp\n?? morsehgp3D_v11/src/tower/order_tree.hpp\n?? morsehgp3D_v11/src/tower/seed_log.hpp\n?? morsehgp3D_v11/tests/tower/attach_export_gate.py\n?? morsehgp3D_v11/tests/tower/attach_judge.cpp\n?? morsehgp3D_v11/tests/tower/attach_probe.cpp\n?? morsehgp3D_v11/tests/tower/attach_test.cpp\n?? morsehgp3D_v11/tests/tower/order_tree_fault.cpp\n?? morsehgp3D_v11/tests/tower/order_tree_support.hpp\n?? morsehgp3D_v11/tests/tower/order_tree_test.cpp\n",
+  "sources": [
+    {
+      "path": "morsehgp3D_v11/src/tower/order_tree.cpp",
+      "sha256": "90cd183e46431940262bc6393e72f2f118e7319274bf12c277c5c32e7d5a92b0",
+      "bytes": 5007
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/order_tree.hpp",
+      "sha256": "e4e0996973e1157eddc203512913eb501aea982f55ada01435b7c62242361f4b",
+      "bytes": 5597
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/attachment.cpp",
+      "sha256": "77f84f00506729b253c22216860ec8c0c9bcd579dcac1c9ed3ac8c54dadb01cd",
+      "bytes": 10684
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/seed_log.hpp",
+      "sha256": "40a275794f7124f45da98bca5ad5aaab5335f6ae6aa0e7c60f2867e3fa2ba54d",
+      "bytes": 4479
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_internal.hpp",
+      "sha256": "2a3d6483f4a08d268b4582bb2a820949d53b4a110336e3d06d0850aeeb65280a",
+      "bytes": 13836
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_plateau.cpp",
+      "sha256": "0494d978fdc2188f288cf5a55dbf6bbe18bbb9436bde8c2756da070d16bc0300",
+      "bytes": 7060
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_build.cpp",
+      "sha256": "061c79b751446b0dbb2583dc71cc4fa3b31b60e77b50bff26a85c0b5a63cf1a7",
+      "bytes": 20495
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_parallel.cpp",
+      "sha256": "c2441ee6411f9ae91ea603dda1a9c83b622fc61c25d4a4701db1048e62e49078",
+      "bytes": 16578
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest.hpp",
+      "sha256": "f1014b0332eed89d36866eabb4eb659a5f5fdf66b4f96d4703c3ef596d910e28",
+      "bytes": 9926
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_ancestor_sweep.hpp",
+      "sha256": "bbc83b0f6c23378946a09040a367cf6482add385813b5622b4ba98686410913b",
+      "bytes": 5037
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/order_tree_support.hpp",
+      "sha256": "5dec9c016130007ea89b04d85d28666fd5428f84f3637886a7671c5c8fde335d",
+      "bytes": 7960
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/order_tree_test.cpp",
+      "sha256": "11e889f83546ec3a0e0cccb71dcfcc5049e6b908d8be5a19219f503f671bf29b",
+      "bytes": 10010
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/order_tree_fault.cpp",
+      "sha256": "4650a63380bba6ada6c47b0b5bd75ae7e1de9c5930022bdfc2b2569a25d2f7cf",
+      "bytes": 4461
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/attach_test.cpp",
+      "sha256": "1bc3720b6693338a800ed7fd7e3b69583b2f6aae25a2126a1bd311a77d3f5d0e",
+      "bytes": 18384
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/attach_judge.cpp",
+      "sha256": "c013667bf5e16099c5c83d5bc5446c36f3dba66971022af7846c4e0ea45c45f2",
+      "bytes": 22516
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/attach_export_gate.py",
+      "sha256": "0015acf28a5a6f141f045aa69d1652907b483c392372395e30fd7cedabb8d7bf",
+      "bytes": 9134
+    },
+    {
+      "path": "morsehgp3D_v11/tests/mutants/tower.json",
+      "sha256": "0c4bab7d728d81ea6d7cc3a610dfb8ec8ed38063d57bb1a05dff72a7934c80de",
+      "bytes": 58753
+    },
+    {
+      "path": "morsehgp3D_v11/docs/FULL_FORESTS.md",
+      "sha256": "6ebf137020b384d4feb3ce7e08f37d20e831a129e21f6093c0ac1fb19091f359",
+      "bytes": 19368
+    },
+    {
+      "path": "morsehgp3D_v11/docs/PROVENANCE.md",
+      "sha256": "d89520f5f1d024f271bd00d406c6aa2f7f8bb1bfa66126aecc8d069977d8fa13",
+      "bytes": 45437
+    }
+  ]
+}
