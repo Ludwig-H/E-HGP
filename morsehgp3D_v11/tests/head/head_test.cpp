@@ -6,7 +6,8 @@
 //              irrationnelle a z = 1 (1/sqrt 2 + 1/sqrt 8 = 2 / sqrt(32/9), classe de sqrt 2), a z = 2
 //              (1 + 1/49 = 2 / (7/5)^2) ; la meme geometrie a l'autre z n'est pas une egalite (une egalite a z = 1 ne
 //              prouve rien a z = 2) ; compteurs exact et equalities ;
-//   huge       racines hors de 2^100 (source abstraite) : plateaux sans encadrement, repli exact (audit 100fcc12b) ;
+//   huge       racines hors de 2^100 (source abstraite), dont R = 2^127 - 1 exactement : plateaux sans encadrement,
+//              repli exact, egalites certifiees (audits 100fcc12b et 8a89493b2) ;
 //   dates      repli exact des dates (port de _inverse_date et _mask_mul, recu eom_exact_audit_20261004) : egalites
 //              certifiees phi(date) = phi(niveau) a z = 1, 2, 3 pour (4, 9, 4) contre 9, (8, 2, 8) contre 2
 //              (classe de sqrt 2), tous deux a Delta != 0, et (9, 4, 1) contre 16 (Delta = 0) ; date a trois racines sqrt 2 + sqrt 3 - 1
@@ -275,7 +276,7 @@ MHGP11_TEST(equalities, 8) {
 
 // Egalite rationnelle a l'echelle 2^62 : racines R = floor(2^64 sqrt(l)) jusqu'a 3 2^126, hors de i128 une fois
 // sommees (audit 100fcc12b) : plateaux sans encadrement, repli exact, egalite certifiee.
-MHGP11_TEST(huge, 3) {
+MHGP11_TEST(huge, 6) {
   auto scaled = [](i64 a, i64 b) {
     Big n, d;
     static_cast<void>(num::shift_left(Big::from_i64(a), 124, n));
@@ -291,6 +292,26 @@ MHGP11_TEST(huge, 3) {
   // Racines 2^126, 1,5 2^126 et 3 2^126 : les trois plateaux depassent 2^100 ; sans la garde, seul le dernier (converti
   // en i128 negatif) serait ecarte, les deux autres encadres hors du domaine prouve.
   CHECK(got.ok() && got.value().stats.unbracketed == 3);
+  // Temoin de l'auditeur : racine exactement 2^127 - 1 (l = (2^127 - 1)^2 / 2^128), ou R + 1 deborderait i128 ;
+  // joue sous UBSan par la configuration ASan+UBSan de la matrice.
+  auto edge = [](i64 a, i64 b) {
+    Big r, r2, n, d;
+    static_cast<void>(num::shift_left(Big::from_u64(1), 127, r));
+    static_cast<void>(num::subtract(r, Big::from_u64(1), r));
+    static_cast<void>(num::multiply(r, r, r2));
+    static_cast<void>(num::multiply(r2, Big::from_i64(a), n));
+    static_cast<void>(num::shift_left(Big::from_i64(b), 128, d));
+    Rational out;
+    static_cast<void>(Rational::make(n, d, out));
+    return out;
+  };
+  // Rayons A/3, A/2 et A (A = (2^127 - 1) / 2^64) : 3/A + 1/A = 2 / (A/2), egalite certifiee.
+  const Tree e = tie(edge(1, 9), edge(1, 4), edge(1, 1));
+  u128 root = 0;
+  CHECK(e.levels.root(2, root).ok() && root == (u128{1} << 127) - 1);
+  const auto at_edge = run(e, 2, 1, head::Selection::eom);
+  CHECK(same_groups(at_edge, Groups{{0, 1, 2, 3}, {4, 5}}));
+  CHECK(at_edge.ok() && at_edge.value().stats.equalities == 1 && at_edge.value().stats.unbracketed == 3);
 }
 
 MHGP11_TEST(dates, 25) {
