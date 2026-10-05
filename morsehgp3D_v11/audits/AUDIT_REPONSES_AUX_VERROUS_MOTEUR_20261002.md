@@ -7,6 +7,35 @@ aux reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 Note maintenue en place ; détails et échanges clos dans les reçus.
 
+## Contre-épreuve générale du 5 octobre
+
+Au pin **238734f1d**, aucun nouveau défaut mathématique FULL n'est établi.
+La [nouvelle preuve bornée](../receipts/audit_geant_20261005/math/REPORT.md)
+compare les composantes du nerf complet des régions témoins au graphe de
+la définition : pour deux K-parties quelconques, le seuil de leur union
+est testé, sans se limiter aux unions de K+1 sites. Les composantes sont
+comparées comme **ensembles de K-parties**, pas seulement par leurs sites.
+Les MEB restent celles de l'étage A : indépendance de l'adjacence et de
+la DSU, pas de la géométrie numérique.
+
+Dix nuages nouveaux, tous les ordres jusqu'à K=n : **65 ordres, 17 276
+unions arbitraires, 1 453 coupes strictes/fermées et 15 925 contrôles de
+faces verticales**. S1 recoupe 563 boules et 635 supports. Sur les huit
+nuages u21, A=B à tous les ordres, et les 304 dates et propriétaires de
+points comparés sont exacts. Les deux nuages aux extrêmes u24 n'exercent
+que A/S1 : aucun transfert au moteur ou à la référence constructive u24.
+Sorties normal/`-O` identiques ; fixtures, commandes, limites et tentatives
+initiales du harnais sont conservées dans le reçu.
+
+**Décision à fixer avant L3, sans bloquer FULL/supports.** Pour K=n≥2,
+la qualification des points à m=K+1 ne peut réussir. Le contrat général
+de `--k` admet pourtant K=n ; le banc de points refuse alors
+`jamais_qualifie`. Garder K=n pour FULL et supports, où l'unique naissance
+B(X) est correcte. Pour `points`/`plat`, écrire soit un refus précis,
+soit la représentation des points inactifs ; ne pas abaisser m
+silencieusement. Graver aussi K=1 avec m(1)=1. Cette frontière concerne
+la future livraison L3, pas un défaut d'une sortie native déjà livrée.
+
 ## Sortie supports : revue du contrat et du raccord
 
 **Contrat S0/S1 relu : favorable sur les points difficiles.** Les lemmes

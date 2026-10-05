@@ -4,6 +4,15 @@
 quantized_u21_input_only / not_claimed`. Notes maintenues en place ;
 preuves détaillées dans les reçus immuables.
 
+**Audit général repris au pin 238734f1d.** Aucun nouveau défaut
+mathématique FULL établi ; contre-épreuve du nerf complet, des coupes et
+des verticales conforme sur 65 ordres. Le point important du raccord est
+la qualification de l'assemblage L1 entier. S5 doit en outre empêcher la
+publication d'un produit avec une Session étrangère, qui fausse son
+contrat mémoire. Pour juger la voie K seule, mesurer le journal actif et
+la sortie réellement livrée. [Verdict et priorités du développeur](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#audit-général-du-5-octobre--décisions-importantes),
+[preuve et périmètre](../receipts/audit_geant_20261005/README.md).
+
 - [Mathématiques : supports, frontières, hiérarchies et sélection](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 - [Moteur : qualification, performances et intégration](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md).
 - [Question courante du développeur sur 100 ms](QUESTION_CLAUDE_VITESSE_100MS_20261004.md).
@@ -48,7 +57,7 @@ livrés57dd ; nouveau rejeu natif/GPU et portes numériques extrêmes attendus.
 [Reçu GPU6 relu](../receipts/audit_gpu6_receipt_20261004/README.md),
 [transport compact et budget](../receipts/audit_gpu_scratch_20261004/README.md).
 
-**Fondations et pistes retenues.** Sept modules/101 fichiers natifs relus,
+**Fondations et pistes retenues.** Audit initial : sept modules/101 fichiers de source relus,
 mathématiques, parallélisation, mémoires et protocole G4 compris.
 [Audit général](../receipts/audit_giant_20261004/README.md),
 [contrelecture approfondie](../receipts/audit_deep_20261004/README.md).

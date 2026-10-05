@@ -1,0 +1,26 @@
+{
+  "artifacts": {
+    "REPORT.md": "e8bd1f1983ec6c12ae23f1b3a8b8f8a09d96e13e5ecac153b046d599a2773a9d",
+    "attempts.json": "9aacaddd694f76bf07960350c30d6d0ea977b478d9e0a7faf3e6b902032c8e10",
+    "check_math.py": "997e79311f14c20bf2abb25a63f3c9d99ec120eeb1322813d9d69ec91638a10e",
+    "normal.json": "3559a3a5664ca2f86214e598ef91801174575a6b81cfb4b959ef3f8ada8f453e",
+    "optimized.json": "3559a3a5664ca2f86214e598ef91801174575a6b81cfb4b959ef3f8ada8f453e"
+  },
+  "normal_optimized_identical": true,
+  "numpy": "2.5.3",
+  "pin": "238734f1d03ab32e2a722bf036eb8fc5626dfd44",
+  "platform": "Linux-6.8.0-1064-azure-x86_64-with-glibc2.39",
+  "python": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "sources": {
+    "bench/points_hierarchy.py": "fa12f16f3ce599a5299737d740bd252454cddcb9c475edf593d7aab3cd426c17",
+    "bench/points_radius.py": "457b997fa7eecea92dd0f27cd29f514655dbd0ff716ce050825fc65aaf5783d1",
+    "bench/points_reference.py": "2f05ceb420913e2bb42569c5da193609395b3812ea253d22a1d7d2d1281e9ccb",
+    "reference/hgp11_ref/__init__.py": "5309faf36a56bfb719d9fff4fb5872045aad87b1b35b2fc3992fd2c37791ad3e",
+    "reference/hgp11_ref/constructive.py": "7e97f89789cafb4f241903e6d0f0e636425cdf3d526697e4e891d483f868fedc",
+    "reference/hgp11_ref/definition.py": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43",
+    "reference/hgp11_ref/intgeom.py": "d0f7b1cecbbb1b25c3091bc1e3d3d062b9ee0f16b1d81c7117bf60b0d13a3f4b",
+    "reference/hgp11_ref/judge.py": "09e65a40f7ff33400c04eb91c442a430579bf020b115589b69ad8384529d6507",
+    "reference/hgp11_ref/model.py": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c",
+    "reference/hgp11_ref/supports.py": "826f3f94ce9eeb66e6ed04edce8266dd70b52498fd929c2ec7f7dbc01538a541"
+  }
+}

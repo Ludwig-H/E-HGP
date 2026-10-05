@@ -1,0 +1,66 @@
+{
+  "boundary_refusal": {
+    "exception": "ExportError",
+    "fixture": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        2,
+        0,
+        0
+      ]
+    ],
+    "k": 2,
+    "m": 3,
+    "reason": "jamais_qualifie",
+    "treated_as": "Frontière connue du futur contrat L3, enregistrée par le script final ; aucun échec produit allégué."
+  },
+  "evidence_source": "Sorties exactes des deux appels exec_command de cette conversation ; transcription conservée après coup.",
+  "failed_attempts": [
+    {
+      "captured_exec_output": "Traceback (most recent call last):\n  File \"/workspaces/E-HGP/build/v11-audit-geant-math-evidence-20261005/check_math.py\", line 84, in <module>\n    raise RuntimeError((name, 'terminal order', len(result.nodes)))\nRuntimeError: ('cube_minus_opposite', 'terminal order', 1)\n",
+      "command": "python3 -B /workspaces/E-HGP/build/v11-audit-geant-math-evidence-20261005/check_math.py > /workspaces/E-HGP/build/v11-audit-geant-math-evidence-20261005/normal.json",
+      "exec_chunk_id": "7d155e",
+      "exit_code": 1,
+      "initial_source_sha256": null,
+      "interpretation": "Le harnais attendait un rôle numérique alors que S1 publie la chaîne naissance. Ce résultat ne prouve aucun défaut produit.",
+      "observed_harness_predicate": "sp.balls[0].role != 0",
+      "ordinal": 1,
+      "stdout_file_preserved": false
+    },
+    {
+      "captured_exec_output": "Traceback (most recent call last):\n  File \"/workspaces/E-HGP/build/v11-audit-geant-math-evidence-20261005/check_math.py\", line 84, in <module>\n    raise RuntimeError((name, 'terminal order', len(result.nodes)))\nRuntimeError: ('cube_minus_opposite', 'terminal order', 1)\n",
+      "command": "python3 -B /workspaces/E-HGP/build/v11-audit-geant-math-evidence-20261005/check_math.py > /workspaces/E-HGP/build/v11-audit-geant-math-evidence-20261005/normal.json",
+      "exec_chunk_id": "060764",
+      "exit_code": 1,
+      "initial_source_sha256": null,
+      "interpretation": "La première correction du harnais conservait à tort un rôle numérique ; même erreur avant correction vers la chaîne naissance.",
+      "observed_harness_predicate": "sp.balls[0].role != 1",
+      "ordinal": 2,
+      "preceding_source_edit_command": "sed -i 's/sp.balls\\[0\\].role != 0/sp.balls[0].role != 1/' /workspaces/E-HGP/build/v11-audit-geant-math-evidence-20261005/check_math.py",
+      "stdout_file_preserved": false
+    }
+  ],
+  "final_successful_runs": [
+    {
+      "artifact": "normal.json",
+      "command": "python3 -B /workspaces/E-HGP/build/v11-audit-geant-math-evidence-20261005/check_math.py > /workspaces/E-HGP/build/v11-audit-geant-math-evidence-20261005/normal.json",
+      "exec_chunk_id": "6d51ff",
+      "exit_code": 0
+    },
+    {
+      "artifact": "optimized.json",
+      "command": "python3 -O -B /workspaces/E-HGP/build/v11-audit-geant-math-evidence-20261005/check_math.py > /workspaces/E-HGP/build/v11-audit-geant-math-evidence-20261005/optimized.json",
+      "exec_chunk_id": "d00f47",
+      "exit_code": 0
+    }
+  ],
+  "initial_source_snapshots": {
+    "preserved": false,
+    "reason": "Les deux versions initiales du script ont été modifiées en place avant la conservation des artefacts. Leur contenu complet et leur empreinte ne sont plus disponibles. Aucun snapshot ni hash initial n’est reconstruit."
+  },
+  "pin": "238734f1d03ab32e2a722bf036eb8fc5626dfd44"
+}

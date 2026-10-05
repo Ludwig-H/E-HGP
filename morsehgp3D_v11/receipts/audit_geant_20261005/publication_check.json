@@ -1,0 +1,34 @@
+{
+  "active_markdown_files": 6,
+  "broken_local_links": 0,
+  "gcp_used": false,
+  "local_links_checked": 155,
+  "math_artifacts_and_sources": "sha256_verified",
+  "native_execution": false,
+  "paired_outputs": [
+    {
+      "identical": [
+        "math/normal.json",
+        "math/optimized.json"
+      ],
+      "sha256": "3559a3a5664ca2f86214e598ef91801174575a6b81cfb4b959ef3f8ada8f453e"
+    },
+    {
+      "identical": [
+        "native/result.json",
+        "native/result_opt.json"
+      ],
+      "sha256": "7feb6de5f6d1244276195c427cb5720e1131e6955fab0e404c573164049bf5b6"
+    },
+    {
+      "identical": [
+        "qualification/full.normal.json",
+        "qualification/full.opt.json"
+      ],
+      "sha256": "52b8efb1c67d111e0d7836124cad60fa1f14c1714b063f4eb18d8aad3aafa3a9"
+    }
+  ],
+  "published_source_manifest": "sha256_verified",
+  "source_pin": "238734f1d03ab32e2a722bf036eb8fc5626dfd44",
+  "wip_captures_and_current_sources": "sha256_equal_at_closure"
+}

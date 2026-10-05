@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "python3",
+    "-O",
+    "morsehgp3D_v11/tools/check_style.py"
+  ],
+  "exit_code": 0,
+  "source_commit": "238734f1d03ab32e2a722bf036eb8fc5626dfd44",
+  "stderr": "",
+  "stdout": "style_ok fichiers=424\n"
+}

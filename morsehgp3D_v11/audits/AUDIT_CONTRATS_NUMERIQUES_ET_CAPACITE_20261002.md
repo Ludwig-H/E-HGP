@@ -7,6 +7,72 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
+## Audit général du 5 octobre : décisions importantes
+
+Base publiée **238734f1d** ; brouillons S3/S5/S6 identifiés séparément par
+empreinte. [Dossier de preuve et périmètre](../receipts/audit_geant_20261005/README.md).
+La revue couvre les fondations numériques, les propriétaires et mémoires,
+le catalogue, FULL, les supports, la projection sur les points et la portée
+des qualifications. L'inventaire comprend **104 fichiers natifs dans huit
+modules** ; un inventaire n'est pas une qualification ni une promesse de
+preuve exhaustive. Les lectures nouvelles et celles des audits antérieurs
+sont distinguées dans le reçu.
+
+**Correction de FULL.** Aucun nouveau résultat FULL faux n'est établi.
+Une nouvelle contre-épreuve compare le graphe complet des intersections
+des régions témoins à la définition par K-parties : **65 ordres, 1 453
+coupes ouvertes/fermées et 15 925 contrôles de faces verticales**, conformes
+en Python normal et `-O`. Elle partage les MEB exactes de l'étage A ; elle
+n'est donc pas un nouvel oracle numérique indépendant de A. L'accord A/B,
+les supports et les pendaisons de points sont également recoupés sur ces
+petits nuages. Aucun transfert de ces succès Python au binaire courant.
+
+**Priorité de livraison : fermer L1 sur le vrai produit assemblé.**
+`build_order`, l'attachement et les primitives de supports restent des
+brouillons au pin audité. Les preuves mathématiques autorisent leur
+intégration ; elles ne remplacent pas les portes natives de l'assemblage.
+La porte décisive doit comparer l'ordre K de FULL, l'arbre K seul et les
+attaches à la coupe fermée, sur la même source figée, avec les plateaux
+E5/D2 et les coquilles étendues. Conserver toutes les boules faibles et
+tous les supports, y compris les q4 du cube à K1 sans coface. Le refus
+au-delà de 24 sites doit porter sur **l'appel supports entier**. Budget,
+count/fill, concurrence et absence de publication partielle doivent être
+jugés sur l'assemblage, pas déduits des seuls helpers S6a.
+
+**Défaut à corriger avant S5 : identité du propriétaire à la publication.**
+La façade WIP accepte `compute(A, ...)`, puis `publish(B, produitA, ...)`.
+`Product` ne garde aucun jeton de Session et `publish` ne contrôle pas
+cette identité. Il sérialise les tableaux réservés dans A en rapportant
+le budget de B ; `finish(B)` peut réussir avec le produit de A encore
+vivant. Une B de budget nul suffit dans ce scénario. C'est une rupture
+du contrat public de propriété et de mémoire ; le CLI actuel, à une
+seule Session, n'emprunte pas ce chemin. Lier produit et Session par une
+identité stable au déplacement, puis refuser une autre Session **avant
+toute création et avant toute modification du rapport**. Le reçu conserve
+les sources WIP et une fixture native proposée pour G4, non exécutée ici.
+Le contrôle de fin de vie doit aussi être explicite : `~Session() = default`
+ne réalise pas la vérification à destruction annoncée par l'architecture ;
+le `close()` du chemin CLI la réalise. Aucun comportement indéfini n'est
+déduit, le compte du budget étant partagé.
+
+**Priorité performance : mesurer le chemin qui sera livré.** Les temps
+S3 obtenus journal désactivé ne donnent pas le coût des attaches ni de
+`supports`. Apparier FULL/16379 et ordre seul/7035, journal actif, mêmes
+entrées entières, puis payer l'énumération, l'assemblage et l'écriture
+séparément. La voie K seule reste un candidat à mesurer. Les **100 ms**,
+la projection native et une qualification récente de la chaîne entière
+restent ouverts. Le rejeu des reçus c40 retrouve leur qualification et
+leurs 81 prises conformes ; il ne qualifie ni HEAD ni les brouillons.
+Les trois trames de séquence08 ne deviennent pas plusieurs séquences,
+et les comparaisons c40/baseline v11 ne ferment pas le différentiel
+canonique v10/v11 sur LiDAR entier.
+
+Pour poursuivre : intégrer et qualifier L1 ; corriger le propriétaire
+S5 et le hook IO déjà signalé ci-dessous avant L2 ; prendre ensuite la
+décision de chemin sur les mesures complètes. Aucune réserve générale
+nouvelle n'est opposée à l'intégration de S3. **Aucun build/test natif ni
+GCP lancé par cet audit.**
+
 ## Sorties paramétrées : avant intégration et G4
 
 **S5 : anciennes alertes corrigées en WIP.** Le CLI ignore désormais
@@ -80,7 +146,7 @@ Aucun GCP ni build/test natif lancé pour cet audit.
 
 ## Socle relu et correctifs P1/P2
 
-Les **101 fichiers des sept modules natifs** ont une relecture de leurs
+Les **101 fichiers de source des sept modules alors présents** ont une relecture de leurs
 implémentations/interfaces : statuts, propriété, budgets/IDs, arithmétique,
 index/census, catalogue, descentes, plateaux, parents, verticales et concurrence.
 Oracles, bancs, contrats de points/tête et protocole G4 sont examinés séparément.

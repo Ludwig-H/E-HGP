@@ -1,0 +1,169 @@
+{
+  "certificates": [
+    {
+      "bits": 18,
+      "orientation_bound_bits": 127,
+      "q3_power_bound_bits": 127,
+      "q4_power_bound_bits": 97
+    },
+    {
+      "bits": 21,
+      "orientation_bound_bits": 127,
+      "q3_power_bound_bits": 127,
+      "q4_power_bound_bits": 112
+    },
+    {
+      "bits": 24,
+      "orientation_bound_bits": 127,
+      "q3_power_bound_bits": 127,
+      "q4_power_bound_bits": 127
+    }
+  ],
+  "checks": 263848,
+  "gcp": false,
+  "native_run": false,
+  "pin": "238734f1d03ab32e2a722bf036eb8fc5626dfd44",
+  "source_manifest": {
+    "harness_sha256": "15b7e3e90294fa1a9e16683a8e3e8c91fd4ea49c7cceb09d3d61e01508f86dd0",
+    "pin": "238734f1d03ab32e2a722bf036eb8fc5626dfd44",
+    "published_sources": {
+      "catalogue/adaptive_prepare.cpp": "1bc9a5efa6da87a4840948bc7ab63135515de00c7c3bf57e6fc44d9695c17560",
+      "catalogue/adaptive_replay.cpp": "4166dd408fdb49ae1971bc037d0099d4541c9aaa816ad2f20cb5c41b69f517d5",
+      "catalogue/catalogue.hpp": "b30ccf094af665dd20ec7b2f87ca53919039bf1ecaedb68fde5b25d4d386e9ff",
+      "catalogue/leaf.cpp": "ceb3782295e6bf77957e962136efba5240291f5d15ed3f5b26ba29ee28488a26",
+      "catalogue/single_pass_storage.hpp": "0bf2d416b6bf0cb47c976dc77881738380a8dc0670a9d017ed17c7e1c0e3296c",
+      "catalogue/sort_level_key.hpp": "09de86ef2006bf3dc466f2865123cb201ddbe616e5d3d0a20237205db8dc09cd",
+      "catalogue/support.cpp": "ee0f495a21e229dd25671c6b29d0e0fe7f92d4e8f090d5955a7a1783d6db02e9",
+      "cloud/cloud.cpp": "64c5a3d29e1fe0cd05adc5f1d04c4d957731fa1f1eb9e583330675b65751afe9",
+      "cloud/cloud.hpp": "dd04b4f051cf356a0a12639d29c037594cacc4f9d9913a1238d94faafbbcfc68",
+      "core/buffer.cpp": "0654a7849aac687f9c8213784ee22e76033427582779de0d26adf297b307116e",
+      "core/buffer.hpp": "3f520dd045226ff115ea67b26859b43ec7415e855ef1c8f4542e8217414c7940",
+      "core/status.hpp": "e6004beb5ec4e78fb2b582004f4122611602809d360ff9f1b3bf4679348f6594",
+      "index/build.cpp": "45f63a79e7b2bd8989de1a3e10e4a21502d2482f5f1cf9586076db93066d16af",
+      "index/census.cpp": "d6e3aad8b2180c9f837bc32380d7142e56113e098c0210df3e26c1aff9d4eae9",
+      "index/census_workspace.cpp": "ba921a4e3bccc823e23e4668941ebafb9a14cf510b318e86d3d6cec270ca8f6c",
+      "index/index.hpp": "e9669ee18520bebd309713eeb142f4936219e50d0969c56b28305710162940c1",
+      "num/budgets.hpp": "b86c7918573e473a9492b3c26c463f9cb340cec5e97d092e774a5c0af44c062e",
+      "num/centers.cpp": "36fbb5b188189c05c6187906326943347f2e1fab2da52961a83826eb9a2590c0",
+      "num/geometry_internal.hpp": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97",
+      "num/integer.hpp": "8ccf2b24f49681cc8bba1494c982c64578c73337c228015e62de50696d5d529e",
+      "num/level.hpp": "c769f20addcc11ef9e249031baee3ce79d538c7aff61d0035e069237d73193e9",
+      "num/orientation_certificate.hpp": "f8571e6274677a3af1f93948a544b9091ee0e2b1d910cba26bf01b7a8cdc4ec0",
+      "num/power_certificate.hpp": "ba545b4f5d5bb7cd2d2b6198162241bbd4b89b3e6b725485f54f0387d6a804c0",
+      "num/power_checked.hpp": "e38083a1cb0d1f4b90df711ecd47496ddd3d7998306b5ba713062107a610228b",
+      "num/predicates.cpp": "4bfa98717529baffb9072a3c014078a64c8d96f23d69856b4136a210f3ae6d6a",
+      "num/q4_weights.hpp": "5da0994be48f50b0571e5d097a17da005a7dad4b86368c0448ae664cbde66c09",
+      "num/sphere.cpp": "4da1b9bf57afdc068e91afe9616491a70787ed934add72e0d25cf1a8b81a9dc3",
+      "num/wide.hpp": "58478d10a1e2b526652e5f5b1aeb87f23325bfb515997808a65eae380a531fb1",
+      "sched/pool.cpp": "fd72a1abe07dbb9700821cd0c636344c12e3a7a8ae968bdf3a086f514c270fde",
+      "sched/sched.hpp": "104e1a3c75e8adfe6a2f897ffcbfa4d06fc7f534fe3d6f788ce516c7e66ba07f",
+      "tower/descent_memo.cpp": "5232987ee9e823f05e67953e57a3fd9c5fd4735630ea74b0ecfb58d523bcbb35",
+      "tower/forest.hpp": "f1014b0332eed89d36866eabb4eb659a5f5fdf66b4f96d4703c3ef596d910e28",
+      "tower/forest_ancestor_sweep.hpp": "bbc83b0f6c23378946a09040a367cf6482add385813b5622b4ba98686410913b",
+      "tower/forest_build.cpp": "061c79b751446b0dbb2583dc71cc4fa3b31b60e77b50bff26a85c0b5a63cf1a7",
+      "tower/forest_concurrent.cpp": "1c7c58627e2dd952b42355276d0c3f87b3dea6c80252b3795e96786281de702a",
+      "tower/forest_pipeline.cpp": "ea7fdfebb46e9ff273e48b2478cb42d564008aaed1ff0efd5d96aa6b41e972e4",
+      "tower/forest_vertical.cpp": "805722ce6da873bd4f17cc94ee20877073439bcb1af75c2b7fb8f6f3d220f5e4",
+      "tower/full_domain.cpp": "3b7c1aab96cf1236b37011979e51687c592f974e35ef9c13e5bbcdc0f064ec41",
+      "tower/full_domain.hpp": "662074316fe5d424141ab9400320bf3af85debd7c34f02945af449772164e604",
+      "tower/population_lookup.cpp": "ccb6c4a3c902410f4e9550e4ceb073b3cc0d74257ea13fac31602308afa22197",
+      "tower/population_lookup.hpp": "82b786f69add53b9a6d1373eb0a71e5cbab59bfcf295f98bc368b0f6ef12ff16"
+    },
+    "wip_sources": {
+      "s3": {
+        "tower/attachment.cpp": "77f84f00506729b253c22216860ec8c0c9bcd579dcac1c9ed3ac8c54dadb01cd",
+        "tower/order_tree.cpp": "90cd183e46431940262bc6393e72f2f118e7319274bf12c277c5c32e7d5a92b0",
+        "tower/order_tree.hpp": "e4e0996973e1157eddc203512913eb501aea982f55ada01435b7c62242361f4b",
+        "tower/seed_log.hpp": "40a275794f7124f45da98bca5ad5aaab5335f6ae6aa0e7c60f2867e3fa2ba54d"
+      },
+      "s5": {
+        "api/api.hpp": "6f2017bb51d69b861d247930d8636901151949cb7bfd714f9c75597759807481",
+        "api/compute.cpp": "aa72035c79192a812e41bd4e162c9e0467965b09864c4c1a2a4f19e5d1d9b27c",
+        "api/internal.hpp": "8ff52cdbb2b1aef7c32a74caa5cd5b78422182f2b876eafce210b0b3abafaa64",
+        "api/manifest.cpp": "3eec59ae0c4033bef9ac2c47c9bc023f163efe80694a8cf4b2da62af9d05b3e4",
+        "api/session.cpp": "266526e1728d016378070148a6ebf13b30516a7ddaacc7b8dbff416831163439"
+      },
+      "s6": {
+        "supports/counts.cpp": "23e01a8784e54d0dbe8d60ce3a2ec7ad9f4cae53f8668f39a5f2d4e728e8989a",
+        "supports/counts.hpp": "c3e91e1de8bc7f72f5dc7b7067e1d72d6e9e82f924dd713cfc5287231092883e",
+        "supports/enumerate.cpp": "3a8fcd0d7af148e4d7748234c8c02bec5f75158bfef41c5e7c5299177dbe7c86",
+        "supports/supports.hpp": "cd0c4dd4aee1868b2eb266e9bcba7340247dc3e2fc36d8706c44c14de358993b"
+      }
+    }
+  },
+  "support_cofaces_invalid_arity_cases": 51,
+  "support_cofaces_invalid_arity_first": [
+    {
+      "arity": 3,
+      "expected": 0,
+      "got": 1,
+      "k": 2,
+      "m": 2,
+      "p": 1,
+      "qmin": 2
+    },
+    {
+      "arity": 4,
+      "expected": 0,
+      "got": 1,
+      "k": 3,
+      "m": 3,
+      "p": 1,
+      "qmin": 2
+    },
+    {
+      "arity": 4,
+      "expected": 0,
+      "got": 1,
+      "k": 3,
+      "m": 3,
+      "p": 1,
+      "qmin": 3
+    },
+    {
+      "arity": 3,
+      "expected": 0,
+      "got": 1,
+      "k": 3,
+      "m": 2,
+      "p": 2,
+      "qmin": 2
+    },
+    {
+      "arity": 4,
+      "expected": 0,
+      "got": 1,
+      "k": 3,
+      "m": 2,
+      "p": 2,
+      "qmin": 2
+    },
+    {
+      "arity": 4,
+      "expected": 0,
+      "got": 1,
+      "k": 3,
+      "m": 3,
+      "p": 2,
+      "qmin": 2
+    },
+    {
+      "arity": 4,
+      "expected": 0,
+      "got": 1,
+      "k": 4,
+      "m": 3,
+      "p": 2,
+      "qmin": 2
+    },
+    {
+      "arity": 4,
+      "expected": 0,
+      "got": 1,
+      "k": 4,
+      "m": 3,
+      "p": 2,
+      "qmin": 3
+    }
+  ]
+}

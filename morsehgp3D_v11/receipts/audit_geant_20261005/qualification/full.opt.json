@@ -1,0 +1,684 @@
+{
+  "conforming": true,
+  "integrity_verified": true,
+  "limits": [
+    "CPU on G4 host; no GPU or points/head qualification",
+    "build hashes are worker provenance; binaries absent from results cannot be rehashed offline",
+    "source Git comment records a commit assertion; package SHA protects the exact captured bytes",
+    "fresh native processes/owners; OS caches are not dropped",
+    "three whole nonground frames from one sequence; K5/u21, unit site weights, same1mm coordinates",
+    "byte comparisons occurred before worker cleanup; missing dumps cannot be decoded again offline",
+    "first session qualifies its own binaries; second session rebuilds and plays targeted gates on its binaries",
+    "baseline cache has recorded hash; comparator flags are recouped from recorded commands and producer checks, not an archived cache text",
+    "native FULL excludes ground/grid preparation, IO/Cloud/Pool, Python decoder, head and projection"
+  ],
+  "paired": {
+    "baseline": 27,
+    "closure": "targeted_stopped",
+    "current": 54,
+    "generation": "2026-10-03T09:18:25.458-07:00",
+    "manifest_sha256": "1b60cd316b4ad5ef2303031509e4ec157ae6ebe7cdf258b80ed29fc39dabf657",
+    "new_targeted_configs": [
+      {
+        "configuration": "bits21",
+        "coord_bits": "21",
+        "executable_pins": 92,
+        "failed": 0,
+        "failed_tests": [],
+        "missing_required_labels": [],
+        "passed": 94,
+        "passed_labels": {
+          "fast": 94,
+          "oracle": 18,
+          "unit": 72
+        },
+        "required_guards_played": [
+          "mhgp11_catalogue_sort_fault_allocations",
+          "mhgp11_catalogue_sort_fenv_key_modes",
+          "mhgp11_catalogue_sort_fenv_permutations",
+          "mhgp11_tower_full_bench_io",
+          "mhgp11_tower_population_concurrent_equivalence",
+          "mhgp11_tower_population_concurrent_lemma",
+          "mhgp11_tower_population_concurrent_refusals",
+          "mhgp11_tower_population_contract_contexts",
+          "mhgp11_tower_population_contract_each_step",
+          "mhgp11_tower_population_contract_ledger",
+          "mhgp11_tower_population_contract_owned_admission"
+        ],
+        "seconds": 23.181,
+        "selected": 94,
+        "status": "ok"
+      }
+    ],
+    "requested": 81,
+    "results_sha256": "a78816ef714a4d8f54fba1c1a1946a11d31e85e1c0e628a242cb0e416b5fc606",
+    "runtime_matrix_sha256": null,
+    "successful": 81,
+    "timings": [
+      {
+        "build_variant": "baseline",
+        "case": "lidar_ng00",
+        "full_ms": [
+          14532.34251,
+          14445.467143,
+          14436.342172
+        ],
+        "median_full_ms": 14445.467143,
+        "workers": 1
+      },
+      {
+        "build_variant": "baseline",
+        "case": "lidar_ng00",
+        "full_ms": [
+          2366.14531,
+          2363.439422,
+          2361.847965
+        ],
+        "median_full_ms": 2363.439422,
+        "workers": 8
+      },
+      {
+        "build_variant": "baseline",
+        "case": "lidar_ng00",
+        "full_ms": [
+          1304.925774,
+          1309.856935,
+          1371.808288
+        ],
+        "median_full_ms": 1309.856935,
+        "workers": 48
+      },
+      {
+        "build_variant": "current16379",
+        "case": "lidar_ng00",
+        "full_ms": [
+          10242.865117,
+          10317.421047,
+          10317.559973
+        ],
+        "median_full_ms": 10317.421047,
+        "workers": 1
+      },
+      {
+        "build_variant": "current16379",
+        "case": "lidar_ng00",
+        "full_ms": [
+          1416.149924,
+          1404.169127,
+          1425.676727
+        ],
+        "median_full_ms": 1416.149924,
+        "workers": 8
+      },
+      {
+        "build_variant": "current16379",
+        "case": "lidar_ng00",
+        "full_ms": [
+          468.729926,
+          493.123681,
+          489.099209
+        ],
+        "median_full_ms": 489.099209,
+        "workers": 48
+      },
+      {
+        "build_variant": "current2047",
+        "case": "lidar_ng00",
+        "full_ms": [
+          11815.380605,
+          11851.06961,
+          11844.960756
+        ],
+        "median_full_ms": 11844.960756,
+        "workers": 1
+      },
+      {
+        "build_variant": "current2047",
+        "case": "lidar_ng00",
+        "full_ms": [
+          1983.931062,
+          2007.307156,
+          1996.939184
+        ],
+        "median_full_ms": 1996.939184,
+        "workers": 8
+      },
+      {
+        "build_variant": "current2047",
+        "case": "lidar_ng00",
+        "full_ms": [
+          843.962053,
+          846.330425,
+          813.134131
+        ],
+        "median_full_ms": 843.962053,
+        "workers": 48
+      },
+      {
+        "build_variant": "baseline",
+        "case": "lidar_ng01",
+        "full_ms": [
+          11389.850283,
+          11362.581437,
+          11343.271008
+        ],
+        "median_full_ms": 11362.581437,
+        "workers": 1
+      },
+      {
+        "build_variant": "baseline",
+        "case": "lidar_ng01",
+        "full_ms": [
+          1980.769345,
+          1987.376263,
+          1988.577164
+        ],
+        "median_full_ms": 1987.376263,
+        "workers": 8
+      },
+      {
+        "build_variant": "baseline",
+        "case": "lidar_ng01",
+        "full_ms": [
+          1106.618085,
+          1068.30452,
+          1070.931563
+        ],
+        "median_full_ms": 1070.931563,
+        "workers": 48
+      },
+      {
+        "build_variant": "current16379",
+        "case": "lidar_ng01",
+        "full_ms": [
+          8032.575426,
+          8081.231039,
+          8032.006605
+        ],
+        "median_full_ms": 8032.575426,
+        "workers": 1
+      },
+      {
+        "build_variant": "current16379",
+        "case": "lidar_ng01",
+        "full_ms": [
+          1112.692474,
+          1098.989679,
+          1104.446035
+        ],
+        "median_full_ms": 1104.446035,
+        "workers": 8
+      },
+      {
+        "build_variant": "current16379",
+        "case": "lidar_ng01",
+        "full_ms": [
+          354.941532,
+          345.065573,
+          333.572978
+        ],
+        "median_full_ms": 345.065573,
+        "workers": 48
+      },
+      {
+        "build_variant": "current2047",
+        "case": "lidar_ng01",
+        "full_ms": [
+          9292.495198,
+          9233.705787,
+          9316.816185
+        ],
+        "median_full_ms": 9292.495198,
+        "workers": 1
+      },
+      {
+        "build_variant": "current2047",
+        "case": "lidar_ng01",
+        "full_ms": [
+          1581.153534,
+          1576.880241,
+          1578.943961
+        ],
+        "median_full_ms": 1578.943961,
+        "workers": 8
+      },
+      {
+        "build_variant": "current2047",
+        "case": "lidar_ng01",
+        "full_ms": [
+          679.205968,
+          678.701568,
+          655.655406
+        ],
+        "median_full_ms": 678.701568,
+        "workers": 48
+      },
+      {
+        "build_variant": "baseline",
+        "case": "lidar_ng02",
+        "full_ms": [
+          13744.488689,
+          13785.358277,
+          13775.329954
+        ],
+        "median_full_ms": 13775.329954,
+        "workers": 1
+      },
+      {
+        "build_variant": "baseline",
+        "case": "lidar_ng02",
+        "full_ms": [
+          2361.427662,
+          2372.988137,
+          2374.694195
+        ],
+        "median_full_ms": 2372.988137,
+        "workers": 8
+      },
+      {
+        "build_variant": "baseline",
+        "case": "lidar_ng02",
+        "full_ms": [
+          1414.173987,
+          1419.80236,
+          1436.338961
+        ],
+        "median_full_ms": 1419.80236,
+        "workers": 48
+      },
+      {
+        "build_variant": "current16379",
+        "case": "lidar_ng02",
+        "full_ms": [
+          9687.964594,
+          9608.277184,
+          9699.40402
+        ],
+        "median_full_ms": 9687.964594,
+        "workers": 1
+      },
+      {
+        "build_variant": "current16379",
+        "case": "lidar_ng02",
+        "full_ms": [
+          1344.27767,
+          1325.836043,
+          1335.852782
+        ],
+        "median_full_ms": 1335.852782,
+        "workers": 8
+      },
+      {
+        "build_variant": "current16379",
+        "case": "lidar_ng02",
+        "full_ms": [
+          432.397054,
+          444.126911,
+          415.678158
+        ],
+        "median_full_ms": 432.397054,
+        "workers": 48
+      },
+      {
+        "build_variant": "current2047",
+        "case": "lidar_ng02",
+        "full_ms": [
+          11168.530009,
+          11298.902579,
+          11210.89559
+        ],
+        "median_full_ms": 11210.89559,
+        "workers": 1
+      },
+      {
+        "build_variant": "current2047",
+        "case": "lidar_ng02",
+        "full_ms": [
+          1964.109887,
+          1964.073718,
+          1976.771708
+        ],
+        "median_full_ms": 1964.109887,
+        "workers": 8
+      },
+      {
+        "build_variant": "current2047",
+        "case": "lidar_ng02",
+        "full_ms": [
+          901.446977,
+          894.236663,
+          890.856585
+        ],
+        "median_full_ms": 894.236663,
+        "workers": 48
+      }
+    ]
+  },
+  "qualification": {
+    "asan18": [
+      {
+        "configuration": "gcc_asan_ubsan18",
+        "coord_bits": "18",
+        "executable_pins": 62,
+        "failed": 0,
+        "failed_tests": [],
+        "missing_required_labels": [],
+        "passed": 344,
+        "passed_labels": {
+          "fast": 344,
+          "oracle": 98,
+          "unit": 208
+        },
+        "required_guards_played": [
+          "mhgp11_tower_full_bench_io",
+          "mhgp11_tower_population_concurrent_equivalence",
+          "mhgp11_tower_population_concurrent_lemma",
+          "mhgp11_tower_population_concurrent_refusals",
+          "mhgp11_tower_population_contract_contexts",
+          "mhgp11_tower_population_contract_each_step",
+          "mhgp11_tower_population_contract_ledger",
+          "mhgp11_tower_population_contract_owned_admission"
+        ],
+        "seconds": 109.526,
+        "selected": 344,
+        "status": "ok"
+      }
+    ],
+    "closure": "targeted_stopped",
+    "configurations": [
+      {
+        "configuration": "gcc_release",
+        "coord_bits": "18",
+        "executable_pins": 92,
+        "failed": 0,
+        "failed_tests": [],
+        "missing_required_labels": [],
+        "passed": 680,
+        "passed_labels": {
+          "fast": 663,
+          "lidar": 1,
+          "long": 17,
+          "oracle": 205,
+          "unit": 414
+        },
+        "required_guards_played": [
+          "mhgp11_catalogue_sort_fault_allocations",
+          "mhgp11_catalogue_sort_fenv_key_modes",
+          "mhgp11_catalogue_sort_fenv_permutations",
+          "mhgp11_tower_full_bench_io",
+          "mhgp11_tower_population_concurrent_equivalence",
+          "mhgp11_tower_population_concurrent_lemma",
+          "mhgp11_tower_population_concurrent_refusals",
+          "mhgp11_tower_population_contract_contexts",
+          "mhgp11_tower_population_contract_each_step",
+          "mhgp11_tower_population_contract_ledger",
+          "mhgp11_tower_population_contract_owned_admission"
+        ],
+        "seconds": 135.567,
+        "selected": 680,
+        "status": "ok"
+      },
+      {
+        "configuration": "mutants",
+        "coord_bits": "18",
+        "executable_pins": 92,
+        "failed": 0,
+        "failed_tests": [],
+        "missing_required_labels": [],
+        "passed": 21,
+        "passed_labels": {
+          "fast": 14,
+          "long": 7,
+          "mutant": 21
+        },
+        "required_guards_played": [],
+        "seconds": 841.762,
+        "selected": 21,
+        "status": "ok"
+      },
+      {
+        "configuration": "gcc_asan_ubsan",
+        "coord_bits": "24",
+        "executable_pins": 92,
+        "failed": 0,
+        "failed_tests": [],
+        "missing_required_labels": [],
+        "passed": 605,
+        "passed_labels": {
+          "fast": 605,
+          "lidar": 1,
+          "oracle": 130,
+          "unit": 414
+        },
+        "required_guards_played": [
+          "mhgp11_catalogue_sort_fault_allocations",
+          "mhgp11_catalogue_sort_fenv_key_modes",
+          "mhgp11_catalogue_sort_fenv_permutations",
+          "mhgp11_tower_full_bench_io",
+          "mhgp11_tower_population_concurrent_equivalence",
+          "mhgp11_tower_population_concurrent_lemma",
+          "mhgp11_tower_population_concurrent_refusals",
+          "mhgp11_tower_population_contract_contexts",
+          "mhgp11_tower_population_contract_each_step",
+          "mhgp11_tower_population_contract_ledger",
+          "mhgp11_tower_population_contract_owned_admission"
+        ],
+        "seconds": 196.23,
+        "selected": 605,
+        "status": "ok"
+      },
+      {
+        "configuration": "gcc_tsan",
+        "coord_bits": "21",
+        "executable_pins": 92,
+        "failed": 0,
+        "failed_tests": [],
+        "missing_required_labels": [],
+        "passed": 605,
+        "passed_labels": {
+          "fast": 605,
+          "lidar": 1,
+          "oracle": 130,
+          "unit": 414
+        },
+        "required_guards_played": [
+          "mhgp11_catalogue_sort_fault_allocations",
+          "mhgp11_catalogue_sort_fenv_key_modes",
+          "mhgp11_catalogue_sort_fenv_permutations",
+          "mhgp11_tower_full_bench_io",
+          "mhgp11_tower_population_concurrent_equivalence",
+          "mhgp11_tower_population_concurrent_lemma",
+          "mhgp11_tower_population_concurrent_refusals",
+          "mhgp11_tower_population_contract_contexts",
+          "mhgp11_tower_population_contract_each_step",
+          "mhgp11_tower_population_contract_ledger",
+          "mhgp11_tower_population_contract_owned_admission"
+        ],
+        "seconds": 175.605,
+        "selected": 605,
+        "status": "ok"
+      },
+      {
+        "configuration": "clang_release",
+        "qualified": false,
+        "status": "absent_optional"
+      },
+      {
+        "configuration": "bits21",
+        "coord_bits": "21",
+        "executable_pins": 92,
+        "failed": 0,
+        "failed_tests": [],
+        "missing_required_labels": [],
+        "passed": 605,
+        "passed_labels": {
+          "fast": 605,
+          "lidar": 1,
+          "oracle": 130,
+          "unit": 414
+        },
+        "required_guards_played": [
+          "mhgp11_catalogue_sort_fault_allocations",
+          "mhgp11_catalogue_sort_fenv_key_modes",
+          "mhgp11_catalogue_sort_fenv_permutations",
+          "mhgp11_tower_full_bench_io",
+          "mhgp11_tower_population_concurrent_equivalence",
+          "mhgp11_tower_population_concurrent_lemma",
+          "mhgp11_tower_population_concurrent_refusals",
+          "mhgp11_tower_population_contract_contexts",
+          "mhgp11_tower_population_contract_each_step",
+          "mhgp11_tower_population_contract_ledger",
+          "mhgp11_tower_population_contract_owned_admission"
+        ],
+        "seconds": 213.249,
+        "selected": 605,
+        "status": "ok"
+      },
+      {
+        "configuration": "bits24",
+        "coord_bits": "24",
+        "executable_pins": 92,
+        "failed": 0,
+        "failed_tests": [],
+        "missing_required_labels": [],
+        "passed": 605,
+        "passed_labels": {
+          "fast": 605,
+          "lidar": 1,
+          "oracle": 130,
+          "unit": 414
+        },
+        "required_guards_played": [
+          "mhgp11_catalogue_sort_fault_allocations",
+          "mhgp11_catalogue_sort_fenv_key_modes",
+          "mhgp11_catalogue_sort_fenv_permutations",
+          "mhgp11_tower_full_bench_io",
+          "mhgp11_tower_population_concurrent_equivalence",
+          "mhgp11_tower_population_concurrent_lemma",
+          "mhgp11_tower_population_concurrent_refusals",
+          "mhgp11_tower_population_contract_contexts",
+          "mhgp11_tower_population_contract_each_step",
+          "mhgp11_tower_population_contract_ledger",
+          "mhgp11_tower_population_contract_owned_admission"
+        ],
+        "seconds": 211.963,
+        "selected": 605,
+        "status": "ok"
+      },
+      {
+        "configuration": "poison",
+        "coord_bits": "21",
+        "executable_pins": 92,
+        "failed": 0,
+        "failed_tests": [],
+        "missing_required_labels": [],
+        "passed": 606,
+        "passed_labels": {
+          "fast": 606,
+          "lidar": 1,
+          "oracle": 130,
+          "unit": 415
+        },
+        "required_guards_played": [
+          "mhgp11_catalogue_sort_fault_allocations",
+          "mhgp11_catalogue_sort_fenv_key_modes",
+          "mhgp11_catalogue_sort_fenv_permutations",
+          "mhgp11_tower_full_bench_io",
+          "mhgp11_tower_population_concurrent_equivalence",
+          "mhgp11_tower_population_concurrent_lemma",
+          "mhgp11_tower_population_concurrent_refusals",
+          "mhgp11_tower_population_contract_contexts",
+          "mhgp11_tower_population_contract_each_step",
+          "mhgp11_tower_population_contract_ledger",
+          "mhgp11_tower_population_contract_owned_admission"
+        ],
+        "seconds": 213.167,
+        "selected": 606,
+        "status": "ok"
+      },
+      {
+        "configuration": "style",
+        "coord_bits": "21",
+        "executable_pins": 0,
+        "failed": 0,
+        "failed_tests": [],
+        "missing_required_labels": [],
+        "passed": 2,
+        "passed_labels": {
+          "fast": 2
+        },
+        "required_guards_played": [],
+        "seconds": 2.036,
+        "selected": 2,
+        "status": "ok"
+      }
+    ],
+    "controller_status": "completed",
+    "generation": "2026-10-03T08:57:18.161-07:00",
+    "manifest_sha256": "ff8e779663c01b3089dc9d4d4639b7fbd7cf32ee77a96f9c973cb6c164ea276c",
+    "matrix_conforming": true,
+    "mutants": [
+      {
+        "expected_compile_refusals": 2,
+        "judge_kills": 76,
+        "module": "core",
+        "mutants": 78,
+        "signal_kills": 0,
+        "timeout_kills": 0
+      },
+      {
+        "expected_compile_refusals": 0,
+        "judge_kills": 51,
+        "module": "num",
+        "mutants": 51,
+        "signal_kills": 0,
+        "timeout_kills": 0
+      },
+      {
+        "expected_compile_refusals": 0,
+        "judge_kills": 8,
+        "module": "sched",
+        "mutants": 8,
+        "signal_kills": 0,
+        "timeout_kills": 0
+      },
+      {
+        "expected_compile_refusals": 0,
+        "judge_kills": 16,
+        "module": "cloud",
+        "mutants": 16,
+        "signal_kills": 0,
+        "timeout_kills": 0
+      },
+      {
+        "expected_compile_refusals": 0,
+        "judge_kills": 11,
+        "module": "index",
+        "mutants": 11,
+        "signal_kills": 0,
+        "timeout_kills": 0
+      },
+      {
+        "expected_compile_refusals": 0,
+        "judge_kills": 49,
+        "module": "catalogue",
+        "mutants": 49,
+        "signal_kills": 0,
+        "timeout_kills": 0
+      },
+      {
+        "expected_compile_refusals": 0,
+        "judge_kills": 113,
+        "module": "tower",
+        "mutants": 113,
+        "signal_kills": 0,
+        "timeout_kills": 0
+      }
+    ],
+    "results_sha256": "dd41dd607e502133155ebae8ae0cea0dab9ee6420c59be2435e1536ac2c8b136"
+  },
+  "schema": "ehgp.v11.full_captures_review.v1",
+  "scope": "offline receipt/protocol recoupe; native tests were executed by the captured worker only",
+  "source_commit": "c40f40798375a0fc37917499401f16876cccbd2a",
+  "source_package_sha256": "9f0d998b60ca9e16eeb8a7c9eceaf03f24e165ff8543cdd41069c99814a66170"
+}
