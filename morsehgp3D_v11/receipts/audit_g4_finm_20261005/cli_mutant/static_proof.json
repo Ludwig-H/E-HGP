@@ -1,0 +1,63 @@
+{
+  "archived_survivor": "sp_masque_16379                          SURVIT   la porte mhgp11_cli_supports_oracle passe sur la copie mutee",
+  "bounded_route_model": {
+    "full": {
+      "mutation_reached": false,
+      "parameters": "full_params"
+    },
+    "plat": {
+      "mutated_outcome": "parameter_out_of_range",
+      "mutation_reached": true,
+      "parameters": "order_params"
+    },
+    "points": {
+      "mutated_outcome": "parameter_out_of_range",
+      "mutation_reached": true,
+      "parameters": "order_params"
+    },
+    "supports": {
+      "mutation_reached": false,
+      "parameters": "full_params"
+    }
+  },
+  "checks": {
+    "build_order_refuses_concurrent": true,
+    "construction_includes_cli": true,
+    "default_order_route_is_order_tree": true,
+    "full_route_uses_full_params": true,
+    "order_route_uses_order_params": true,
+    "plat_uses_default_order_route": true,
+    "points_gate_demands_success": true,
+    "points_gate_has_admitted_floor": true,
+    "points_gate_registered": true,
+    "points_use_default_order_route": true,
+    "public_supports_uses_fixed_route": true,
+    "supports_oracle_only_publishes_full_and_supports": true,
+    "supports_route_is_full": true
+  },
+  "engine_defect_established": false,
+  "existing_points_gate": "mhgp11_cli_points",
+  "existing_separate_supports_route_mutant": {
+    "cherche": "inline constexpr SupportsRoute kSupportsRoute = SupportsRoute::full_tower;",
+    "fichier": "src/api/internal.hpp",
+    "id": "voie_supports_order_tree",
+    "note": "compute(supports) reprend l'arbre d'ordre K seul alors que la regle de L2 a decide la voie FULL",
+    "porte": "mhgp11_api_supports_route_scale8000",
+    "remplace": "inline constexpr SupportsRoute kSupportsRoute = SupportsRoute::order_tree;"
+  },
+  "mutation": {
+    "cherche": "  params.concurrent_orders = false;        // 8192\n",
+    "fichier": "src/api/compute.cpp",
+    "id": "sp_masque_16379",
+    "note": "arbre d'ordre K au masque de FULL : build_order refuse les ordres concurrents",
+    "porte": "mhgp11_cli_supports_oracle",
+    "remplace": ""
+  },
+  "pin": "38b76701b9b0198fc1c37afe16e1480e638e513c",
+  "proposed_gate_retarget_executed": false,
+  "selected_gate_reaches": [
+    "full",
+    "supports"
+  ],
+  "verdict": "mutant_equivalent_for_current_supports_gate_but_not_for_points_or_plat"
+}

@@ -1,0 +1,66 @@
+{
+  "pin": "38b76701b9b0198fc1c37afe16e1480e638e513c",
+  "normal_optimized_identical": true,
+  "files": {
+    "README.md": {
+      "sha256": "a7fe070ef7803223ae3fd38110d78811d0b529956c5d895b7cebae33f38561f3",
+      "bytes": 3601
+    },
+    "cli_failure_excerpt.txt": {
+      "sha256": "d24587d4560b481841bfc306c0813db5fad2398680332280ed6639073ad1b571",
+      "bytes": 1814
+    },
+    "log_facts.json": {
+      "sha256": "defd98a909d51839d74ba29e93bd44f957fa552997c4626fd534bc0c1318e8a7",
+      "bytes": 2601
+    },
+    "replay.py": {
+      "sha256": "efdb8dacfdb26a36d032b01915b1ca5fbf681269cf4925daa4193459fcabebda",
+      "bytes": 4684
+    },
+    "source_anchors.json": {
+      "sha256": "e32a8cd7c214c8eaf63dfc0945ebbb177d9b9c2a56a5f822a740df1190f57631",
+      "bytes": 3857
+    },
+    "source_manifest.json": {
+      "sha256": "d74802aa03c9157a08bc33d3876d3604c710a100815eaba43493add14a0b052b",
+      "bytes": 1845
+    },
+    "sources/morsehgp3D_v11/src/api/compute.cpp": {
+      "sha256": "dca6aa8f4627241087552237372b808d780a4dbd8c6e50c3495bc9d9146b7298",
+      "bytes": 14026
+    },
+    "sources/morsehgp3D_v11/src/api/internal.hpp": {
+      "sha256": "e87b55c33a37b811435f5efc1b151ef31a7cf79c8e26b8108569024816c4d8b6",
+      "bytes": 7917
+    },
+    "sources/morsehgp3D_v11/src/tower/order_tree.cpp": {
+      "sha256": "c5fd5c3859a525932cdfb9f4d7d420efec01ba95661a0b587689fa8d0159e5ab",
+      "bytes": 7927
+    },
+    "sources/morsehgp3D_v11/tests/cli/cli_points.py": {
+      "sha256": "6415454e626565f61ef81af0f67b0fd89b59f7a294495c7a89119ec02b184f89",
+      "bytes": 12765
+    },
+    "sources/morsehgp3D_v11/tests/cli/cli_supports_oracle.py": {
+      "sha256": "e019802ad85545ed0824c66bc520d9df3ebe487e9b1ccd868ef00a5fda0112b9",
+      "bytes": 14473
+    },
+    "sources/morsehgp3D_v11/tests/cli/tests.cmake": {
+      "sha256": "d594a1d5969150de35909d5f27ba9a2500bc20ec4acd4de9d9abd8b892bfa717",
+      "bytes": 10999
+    },
+    "sources/morsehgp3D_v11/tests/mutants/api.json": {
+      "sha256": "19c4202f458a58ec7491382fd75c0bfdf6c8a6166d0383371a7577bae66cb7cf",
+      "bytes": 8934
+    },
+    "sources/morsehgp3D_v11/tests/mutants/cli.json": {
+      "sha256": "704228ec2ab115eaf70cb418a2daf6d78cc9e647325eb551e8ec8b12ff28c92a",
+      "bytes": 11550
+    },
+    "static_proof.json": {
+      "sha256": "0772ed7dc41cbf094c8ee3a09d35c859cb693542cb5b034a5b801b3bbcd0300a",
+      "bytes": 2337
+    }
+  }
+}

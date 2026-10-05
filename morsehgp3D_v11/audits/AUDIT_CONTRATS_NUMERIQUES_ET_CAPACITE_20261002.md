@@ -10,6 +10,46 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
+## Finm : deux réparations de qualification, sans nouveau défaut moteur établi
+
+Session `v11.20261005.claudefinm`, source **38b76701b**, arrêt ciblé
+certifié à 21:15:46 UTC. Les 39 portes CTest ont toutes un résultat :
+37 passent, les campagnes API et CLI échouent. Leurs causes sont distinctes.
+
+**API : la référence non mutée est refusée.** Sur le témoin u18 à
+8 000 points, les voies, leurs fichiers/manifeste et l'appel public
+concordent ; les pics distinguent aussi `compute=full_tower` de la
+voie K seule. La sonde rend son verdict conforme. Le juge rejette
+ensuite la ligne, dont les SHA attendus sont ceux d'u21 : fichier
+`09a1101bc512394e` et manifeste `e10e6c8d117429e3` observés,
+contre `9b77614618bbdfc9` et `d61003785c2ff158` attendus. Ce reçu
+confirme donc le défaut de référence sur ce témoin ; il ne donne pas
+rétrospectivement les sorties absentes de fina2. Aucun des 23 mutants
+API n'est jugé après ce refus, et aucun n'est déclaré survivant.
+
+**CLI : un mutant désormais inactif pour sa porte.**
+`sp_masque_16379` supprime `params.concurrent_orders=false` dans
+`order_params()`, mais `mhgp11_cli_supports_oracle` appelle supports
+et FULL. Depuis L2b, ces deux voies utilisent `full_params()` : la
+mutation n'est plus atteinte. Son succès ne démontre pas une faiblesse
+de l'oracle supports ni une erreur du moteur.
+
+Conserver cette mutation en la raccordant à **`mhgp11_cli_points`**, et
+adapter son nom/note à la sortie points. Cette porte existante exige
+des succès admis ; points et plat passent encore par `order_params`,
+dont le paramétrage muté est refusé par `build_order`. La construction
+CLI et le plancher de 28 mutants sont conservés. Le nouveau raccord
+reste à juger avec son témoin dans le harnais existant.
+[Chaînes d'appels, sources et preuve bornée](../receipts/audit_g4_finm_20261005/cli_mutant/README.md).
+
+Les lignes individuelles archivées établissent **462 mutants jugés** :
+461 détectés (455 par code, 4 par ligne, 2 par construction),
+1 survivant. Aucun résultat `INVALIDE`, signal ou délai n'est compté
+comme détection dans ce bilan. Les 10 de head, 6 de points et 57 de
+num sont détectés. Les rapports individuels JSON ne sont pas conservés
+dans l'archive ; le reçu utilise les verdicts explicites des journaux.
+[Reçu, comptes et limites](../receipts/audit_g4_finm_20261005/README.md).
+
 ## Fina2 : attendu de qualification L2b à corriger par profil
 
 Session `v11.20261005.claudefina2`, source **38b76701b**, arrêt ciblé

@@ -15,6 +15,12 @@ passent également. La campagne reste partielle à l'échéance ; ses
 échecs `supports_route` u18/u24 révèlent un attendu de hashes commun
 inadapté aux profils, sans défaut mathématique du moteur établi.
 Sanitizers et différentiels complets S9/S10 restent distincts.
+La session finm au même pin détecte effectivement les 10 mutants de
+head, 6 de points et 57 de num. Ses deux campagnes API/CLI non
+conformes sont traitées comme des problèmes de qualification : témoin
+API aux SHA du mauvais profil, et mutant CLI devenu inactif pour sa
+porte supports après L2b. Aucun nouveau défaut mathématique établi.
+[Mutants et périmètre](../receipts/audit_g4_finm_20261005/README.md).
 [Résultats et portée](../receipts/audit_g4_fina2_20261005/README.md),
 [constat de qualification](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#fina2--attendu-de-qualification-l2b-à-corriger-par-profil).
 

@@ -1,0 +1,126 @@
+{
+  "morsehgp3D_v11/src/api/compute.cpp": [
+    {
+      "line": 50,
+      "text": "FullParams order_params() noexcept {"
+    },
+    {
+      "line": 54,
+      "text": "params.concurrent_orders = false;        // 8192"
+    },
+    {
+      "line": 119,
+      "text": "api_detail::SupportsRoute route = api_detail::SupportsRoute::order_tree,"
+    },
+    {
+      "line": 129,
+      "text": "? build_order_full(std::move(domain.value()), k, budget, api_detail::full_params(), &session.pool(),"
+    },
+    {
+      "line": 131,
+      "text": ": build_order(std::move(domain.value()), k, budget, api_detail::order_params(), &session.pool(), nullptr,"
+    },
+    {
+      "line": 145,
+      "text": "Result<OrderTree> tree = order_tree(session, view, k, report, false, route, diagnostics);"
+    },
+    {
+      "line": 163,
+      "text": "Result<PointsParts> points_parts(Session& session, const CloudView& view, Order k, RunReport& report) noexcept {"
+    },
+    {
+      "line": 164,
+      "text": "Result<OrderTree> tree = order_tree(session, view, k, report, true);"
+    },
+    {
+      "line": 182,
+      "text": "Result<FlatParts> flat_parts(Session& session, const CloudView& view, const FlatRequest& wanted,"
+    },
+    {
+      "line": 184,
+      "text": "Result<OrderTree> tree = order_tree(session, view, wanted.k, report, true);"
+    },
+    {
+      "line": 212,
+      "text": "return api_detail::compute_supports(session, cloud, wanted->k, api_detail::kSupportsRoute, report);"
+    }
+  ],
+  "morsehgp3D_v11/src/api/internal.hpp": [
+    {
+      "line": 26,
+      "text": "[[nodiscard]] FullParams order_params() noexcept;"
+    },
+    {
+      "line": 37,
+      "text": "inline constexpr SupportsRoute kSupportsRoute = SupportsRoute::full_tower;"
+    }
+  ],
+  "morsehgp3D_v11/src/tower/order_tree.cpp": [
+    {
+      "line": 100,
+      "text": "if (params.concurrent_orders || params.parallel_verticals || params.reuse_regular_verticals)"
+    }
+  ],
+  "morsehgp3D_v11/tests/cli/cli_points.py": [
+    {
+      "line": 58,
+      "text": "if not self.gate.check(result.code == 0 and line.get('status') == 'ok' and line.get('output') == output,"
+    },
+    {
+      "line": 185,
+      "text": "gate.check(cases >= 40, 'cas admis : %d' % cases)"
+    }
+  ],
+  "morsehgp3D_v11/tests/cli/cli_supports_oracle.py": [
+    {
+      "line": 139,
+      "text": "if not self.gate.check(result.code == 0 and line.get('status') == 'ok' and line.get('output') == output,"
+    },
+    {
+      "line": 210,
+      "text": "report, _line = runner.publish('sphere9 K%d' % k, points, ids, k, 1, 'full')"
+    },
+    {
+      "line": 212,
+      "text": "report, _line = runner.publish('sphere5 K1', sphere(5, 2), list(range(24)), 1, 4, 'supports')"
+    },
+    {
+      "line": 236,
+      "text": "report, line = runner.publish(where, points, ids, k, workers, 'supports', reverse=reverse)"
+    },
+    {
+      "line": 248,
+      "text": "full, _ = runner.publish(where, points, ids, k, workers, 'full', reverse=not reverse)"
+    }
+  ],
+  "morsehgp3D_v11/tests/cli/tests.cmake": [
+    {
+      "line": 126,
+      "text": "mhgp11_python_gate(mhgp11_cli_points 0 cli_points.py --cli ${mhgp11_cli} --bits ${MHGP11_COORD_BITS}"
+    }
+  ],
+  "morsehgp3D_v11/tests/mutants/api.json": [
+    {
+      "line": 182,
+      "text": "\"id\": \"voie_supports_order_tree\","
+    },
+    {
+      "line": 184,
+      "text": "\"cherche\": \"inline constexpr SupportsRoute kSupportsRoute = SupportsRoute::full_tower;\","
+    },
+    {
+      "line": 185,
+      "text": "\"remplace\": \"inline constexpr SupportsRoute kSupportsRoute = SupportsRoute::order_tree;\","
+    }
+  ],
+  "morsehgp3D_v11/tests/mutants/cli.json": [
+    {
+      "line": 225,
+      "text": "\"id\": \"sp_masque_16379\","
+    },
+    {
+      "line": 227,
+      "text": "\"cherche\": \"  params.concurrent_orders = false;        // 8192\\n\","
+    }
+  ]
+}

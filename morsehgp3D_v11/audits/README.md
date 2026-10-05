@@ -4,6 +4,16 @@
 quantized_u21_input_only / not_claimed`. Six notes actives maintenues en
 place ; preuves détaillées dans les reçus immuables.
 
+**Finm : raccorder le mutant CLI à une porte qui l'atteint.**
+`sp_masque_16379` modifie `order_params`, devenu inactif pour
+`supports` depuis L2b. Conserver la mutation et la jouer sur
+`mhgp11_cli_points`, qui utilise encore ce paramétrage ; le moteur
+et l'oracle supports restent inchangés. La campagne détecte
+461 mutants ; celui-ci survit, et les 23 API ne sont pas jugés après
+le refus de leur témoin u18 sur les hashes ci-dessous.
+[Reçu et périmètre](../receipts/audit_g4_finm_20261005/README.md),
+[raccord proposé](../receipts/audit_g4_finm_20261005/cli_mutant/README.md).
+
 **Fina2 : corriger l'attendu multiprofil de la porte L2b.** Sur
 **38b76701b**, les six portes `api_supports_route` d'échelle et LiDAR
 échouent en u18/u24 et passent en u21/poison. Leur déclaration CMake
@@ -12,6 +22,8 @@ les profils, alors que ces deux objets portent les bits : cet attendu doit dépe
 profil. La sortie précise des échecs manque dans l'archive ; aucun
 défaut produit n'en est déduit. Cette porte sert aussi de référence au
 mutant `voie_supports_order_tree`, dans la campagne u18.
+Finm confirme ce mécanisme sur le témoin u18 à 8 000 points : les
+voies et l'appel public concordent, mais la ligne aux SHA u21 est refusée.
 [Constat et reprise ciblée](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#fina2--attendu-de-qualification-l2b-à-corriger-par-profil).
 
 **Priorité : qualifier l'assemblage final sur G4.** Supports, arbre K
@@ -32,6 +44,8 @@ commit final : l'une qualifie l'arbre de points, l'autre toutes les
 de fichiers seul ne remplace pas ces comparaisons.
 [Plan S9](../receipts/audit_s9_qualification_scope_20261005/README.md),
 [plan S10](../receipts/audit_s10_differential_plan_20261005/README.md).
+Le plan B de la chaîne finale complète explicitement les onze lots S
+avec les portes sanitizer courtes, dont la frontière S10 et le refus S9.
 
 **S10 : constat numérique fermé dans les sources.** La garde `2^100`
 précède les conversions signées et renvoie les grandes racines de l'API

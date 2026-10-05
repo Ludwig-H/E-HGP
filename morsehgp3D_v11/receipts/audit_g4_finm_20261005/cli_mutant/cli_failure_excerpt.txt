@@ -1,0 +1,32 @@
+option_hors_sortie_admise                TUE      code
+k_treize_admis                           TUE      code
+budget_nul_admis                         TUE      code
+budget_ignore                            TUE      code
+fils_ignores                             TUE      code
+entree_sur_sortie_standard_admise        TUE      code
+sortie_standard_non_controlee            TUE      code
+retrait_omis                             TUE      code
+pas_non_recopie                          TUE      code
+ecriture_full_permutee                   TUE      code
+manifeste_taille_fausse                  TUE      code
+plan_avant_sortie_standard               TUE      code
+sortie_standard_entree_ids_seulement     TUE      code
+stdout_lstat                             TUE      code
+stdout_lecture_seule_admise              TUE      code
+ligne_refus_sortie_toujours_full         TUE      code
+sigxfsz_non_ignore                       TUE      code
+etat_publie_omis                         TUE      code
+refus_perdu_sortie_pleine                TUE      code
+retrait_omis_double_echec                TUE      code
+sp_colonnes_echangees                    TUE      code
+sp_ordre_supports                        TUE      code
+sp_branches_omises                       TUE      code
+sp_signature_v1                          TUE      code
+sp_manifeste_constant                    TUE      code
+sp_signature_fichier                     TUE      code
+sp_sortie_supports_comme_full            TUE      code
+sp_masque_16379                          SURVIT   la porte mhgp11_cli_supports_oracle passe sur la copie mutee
+SURVIVANTS module=cli : 1 sur 28
+run_expect_verdict code
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.lWstmGXCKs/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):
+  code de sortie 1, attendu 0
