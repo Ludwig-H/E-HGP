@@ -248,3 +248,57 @@ voie K seule reste un candidat jusqu'à cette mesure.
 sorties refuseront donc $K\geq n$ pour $K\geq 2$ par `parameter_out_of_range`, sans dossier, avec ce motif dans la
 ligne de refus. Elles n'abaisseront jamais $m$ en silence. `full` et `supports` gardent $K=n$. $K=1$ reste admis, avec
 $m(1)=1$, gravé par une fixture. Ce sera écrit dans SORTIES § 3 à la livraison L3.
+
+## H. Qualification G4 de la sortie `supports`, décision L2b, S8 et S9
+
+17 h 20 UTC, le 5 octobre. Réponse à vos notes `4acbae533` (S7), `ac5fc58d5` (A2 et S8) et `d448b3d03` (S9).
+
+**Qualification close.** Six sessions gardées, arrêt `TERMINATED` certifié après chacune, reçu
+[qualification_sorties](../receipts/developpement_20261005/qualification_sorties/README.md), commit `484fb98ee`.
+
+| Volet | Résultat |
+| --- | --- |
+| Mutants (459) | conformes |
+| Release u18, u21, u24, empoisonnement | 914/914, 824/824, 824/824, 825/825 |
+| Portes `long` (configuration `release_long`) | conformes |
+| ASan+UBSan, TSan | aucun échec ; 774/824 et 759/824 |
+
+Les portes d'échelle et LiDAR non jouées sous sanitizer ont été coupées par l'échéance, et le reçu le déclare : elles
+ne sont qualifiées qu'en Release.
+
+**Votre complément W48 (`4acbae533`).** Il a été joué dans la session de mesure, sur ng02 et ng00 : 14 appels
+chacun, conformes.
+
+**Règle de L2 appliquée telle qu'écrite.** Rapports `tree` supports/full à W48 :
+
+| ng00 | ng01 | ng02 |
+| ---: | ---: | ---: |
+| 1,21 | 1,18 | 1,09 |
+
+Une seule trame respecte la borne de 1,10 : **L2b sera livrée**. Le journal des graines sera posé sur le
+constructeur d'ordre K de `build_full` et de la voie concurrente, et `supports` prendra l'arbre d'ordre K de FULL.
+Ses portes :
+- `MHGP11SP` identique à l'octet par les deux voies ;
+- TSan sur `mhgp11_tower_pipeline` ;
+- rejeu des manifestes de mutants.
+
+À W1, l'arbre d'ordre K seul reste deux fois plus rapide. C'est publié à titre descriptif, sans effet sur la décision.
+
+**S8** est poussée en `53c027fe8`. Seule correction après relecture : la table refuse plus de `UINT32_MAX` niveaux
+(`arithmetic_invariant`) au lieu de tronquer les rangs.
+
+**S9 : votre constat `d448b3d03` est corrigé avant le commit.**
+- Le tri des groupes stricts n'utilise plus `std::sort`. Il passe par
+  `points_detail::heap_sort_until_refusal`, un tri par tas qui s'arrête au premier `Outcome` refusé et le rend tel
+  quel, sans réponse de substitution. L'ordre (date exacte, puis `SiteIdx`) étant total, le résultat réussi est
+  inchangé.
+- Porte unitaire `mhgp11_points_unit_sort_refusal`, sur 17 à 64 entrées : refus injecté après 4, 9 et 30
+  comparaisons ; propagation exacte, indices toujours dans les bornes, tableau resté une permutation, ordre total
+  sans refus.
+- L'injection se fait au niveau du tri : le produit n'admet aucun crochet (règle 6). La restitution du budget et
+  l'absence de publication après ce refus suivent les chemins de refus existants ; elles ne sont pas rejouées de bout
+  en bout avec cette injection.
+- Vos deux consignes de raccord sont tenues. Tous les temporaires par fil sont admis, et la table entière est payée
+  (16 octets par niveau). Le refus $K=n\geq 2$ est jugé sur la sortie assemblée (`mhgp11_cli_points`).
+
+S9 et L2b seront qualifiées ensemble dans une prochaine session G4, avec S8.
