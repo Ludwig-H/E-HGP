@@ -1,0 +1,73 @@
+{
+  "schema": "ehgp.v11.session_plan.v1",
+  "python_packages": "pinned",
+  "default_build": true,
+  "build_targets": [
+    "mhgp11_cli"
+  ],
+  "build_timeout_seconds": 1800,
+  "results_cap_bytes": 67108864,
+  "note": "Proposition auditeur S10, non executee : quatre differentiels exacts head deja declares, Release u21. Plan S9 points adopte inchange : executer les deux plans dans des sessions gardees successives, une seule VM, au meme commit final S10 integre et pousse (--commit). Fournir les six fichiers lidar_ng00/ng01/ng02.u32le et .ids.u32le du protocole, hors depot. Chaque CTest est une commande distincte sans filtre de matrice. Ne remplace pas les portes courtes (fixtures F14, cli_plat), sanitizers, mutants ni la qualification L2b. Dimensionner chaque session apres preflight selon les gardes du controleur ; aucune execution garantie.",
+  "commands": [
+    {
+      "name": "head_python_synthetique",
+      "timeout_seconds": 4200,
+      "argv": [
+        "ctest",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-j",
+        "1",
+        "-R",
+        "^mhgp11_head_vs_python$",
+        "--timeout",
+        "3600"
+      ]
+    },
+    {
+      "name": "head_python_ng00",
+      "timeout_seconds": 4200,
+      "argv": [
+        "ctest",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-j",
+        "1",
+        "-R",
+        "^mhgp11_head_vs_python_lidar_ng00_k5$",
+        "--timeout",
+        "3600"
+      ]
+    },
+    {
+      "name": "head_python_ng01",
+      "timeout_seconds": 4200,
+      "argv": [
+        "ctest",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-j",
+        "1",
+        "-R",
+        "^mhgp11_head_vs_python_lidar_ng01_k5$",
+        "--timeout",
+        "3600"
+      ]
+    },
+    {
+      "name": "head_python_ng02",
+      "timeout_seconds": 4200,
+      "argv": [
+        "ctest",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-j",
+        "1",
+        "-R",
+        "^mhgp11_head_vs_python_lidar_ng02_k5$",
+        "--timeout",
+        "3600"
+      ]
+    }
+  ]
+}

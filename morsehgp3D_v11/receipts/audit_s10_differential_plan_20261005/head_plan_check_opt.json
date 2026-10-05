@@ -1,0 +1,22 @@
+{
+  "build_targets": [
+    "mhgp11_cli"
+  ],
+  "commands": [
+    "^mhgp11_head_vs_python$",
+    "^mhgp11_head_vs_python_lidar_ng00_k5$",
+    "^mhgp11_head_vs_python_lidar_ng01_k5$",
+    "^mhgp11_head_vs_python_lidar_ng02_k5$"
+  ],
+  "controller_pin": "311ef5e3cdd37967471d0148794ad12f81349b0f",
+  "controller_sha256": "b86e5ff85d8cad6c7bd9da4e0dfbe4febc6fb980a1048a26a5478bcfbd92461d",
+  "head_ctest_declaration_sha256": "c672fbd06749fc0365316311ee4691eb00e2c19955cc47fb63591c121d51dde5",
+  "head_plan_sha256": "21daa0bc35357579af2c6126704ee17b27b1d6be6cec0b7479d633a05a94cde5",
+  "native_cloud_runs": 0,
+  "original_points_plan_sha256": "90fa6f042c3135ce8e25c8e2fcb8d575586599325d1fd10cc441b5f5ac4e53de",
+  "schema": "ehgp.v11.audit.s10_differential_plan.v1",
+  "source_final_commit_fixed": false,
+  "source_kind": "WIP_S10_base311ef5e3c",
+  "sum_command_timeout_seconds": 16800,
+  "validation": "forme_locale_validate_plan"
+}

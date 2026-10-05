@@ -27,6 +27,13 @@ conversion, puis désactiver ce filtre pour les valeurs trop grandes et
 laisser le repli exact décider.
 [Preuve, source et correction ciblée](../receipts/audit_s10_wip_20261005/math/README.md).
 
+Les nouvelles portes F14 comparent les groupes de sites attendus à
+`flat_sites`. Le différentiel `head_vs_python` compare ensuite toutes
+les étiquettes de la tête sur l'arbre de points publié, aux z=1/2/3 et
+en sélection feuilles. Ces portes relues sont à jouer ; elles ne
+remplacent pas le différentiel S9 qui qualifie l'arbre donné à la tête.
+[Plan complémentaire S10](../receipts/audit_s10_differential_plan_20261005/README.md).
+
 ## Réponse aux trois questions avant S10 — note développeur d26328fe2
 
 **Refus EOM : oui, refuser l'appel entier.** Au premier

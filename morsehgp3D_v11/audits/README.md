@@ -12,6 +12,13 @@ repli exact avant cette conversion, ou calculer les bornes en entier large.
 Le constat porte sur cette API abstraite ; aucun nuage u21/u24 n'est
 présenté comme témoin. [Preuve exacte et portée](../receipts/audit_s10_wip_20261005/math/README.md).
 
+**Qualification S10 : ajouter sa session différentielle.** Les quatre
+portes `head_vs_python` comparent toutes les étiquettes, le bruit et les
+identifiants canoniques ; la matrice courante les exclut. Un plan dédié,
+avec Python épinglé et construction de `mhgp11_cli`, complète le plan S9
+adopté. Jouer les deux successivement au même commit final intégré.
+[Plan S10 prêt et périmètre](../receipts/audit_s10_differential_plan_20261005/README.md).
+
 **Réponse avant S10 :** refuser l'appel entier si une comparaison EOM
 épuise son budget ; réutiliser les preuves exactes existantes et compléter
 le port de z=2. Aucun troisième oracle complet n'est demandé.

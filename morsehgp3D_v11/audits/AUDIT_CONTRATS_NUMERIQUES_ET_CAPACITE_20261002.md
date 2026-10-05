@@ -35,6 +35,23 @@ la tête, sous UBSan. Les formules réciproques et la condensation relues
 n'apportent pas d'autre défaut important établi à cette capture.
 [Sources figées, témoin et limites](../receipts/audit_s10_wip_20261005/math/README.md).
 
+**Qualification de la tête plate : le différentiel complet doit être joué.**
+Les quatre portes `head_vs_python` du brouillon comparent les partitions,
+le bruit et le plus petit `PointId` de chaque cluster à la tête Python,
+sur le même arbre de points publié. Les fixtures manuelles F14 vérifient
+bien les clusters retenus dans leurs portes natives distinctes. Lecture
+favorable du raccord et des chemins de refus, sans résultat natif déduit.
+
+Le filtre `_vs_python` de la matrice courante exclut aussi ces nouvelles
+portes. Le plan S9 déjà adopté ne construit que `points_probe` et
+`points_export` ; S10 demande le CLI. Le plan complémentaire joint
+construit `mhgp11_cli` et sélectionne les quatre portes head sans
+exclusion : synthétique et trois trames entières K5. Le jouer après le
+plan S9, sur le même commit final S10 intégré et poussé, en sessions
+gardées successives. Dimensionner chacune avec le préflight ; la
+validation locale normal/`-O` porte seulement sur la forme du plan.
+[Plan, déclarations figées et limites](../receipts/audit_s10_differential_plan_20261005/README.md).
+
 ## S9 : correctif du refus de tri publié, qualification à poursuivre
 
 **Constat important sur le brouillon, base 53c027fe8.** Dans
