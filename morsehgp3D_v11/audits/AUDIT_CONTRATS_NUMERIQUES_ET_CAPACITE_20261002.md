@@ -10,6 +10,33 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
+## S9 en développement : refus du tri à corriger avant livraison
+
+**Constat important sur le brouillon, base 53c027fe8.** Dans
+`src/points/point_tree.cpp`, `entry_order` trie les dates strictes avec
+`std::sort`. Dès qu'une comparaison renvoie un refus, le comparateur
+utilise `SiteIdx` à la place de la date, pour cet appel et les suivants.
+La relation d'ordre change pendant le tri ; tester `failure` après
+`std::sort` ne protège pas ses opérations internes.
+
+Une contre-épreuve bornée reproduit le choix du pivot et le scan non
+gardé de GCC : **17 entrées**, pivot de SiteIdx 16 choisi selon les dates,
+refus injecté à la quatrième comparaison, puis scan jusqu'à l'index 17.
+Le modèle sans refus reste dans ses bornes ; la variante qui propage
+immédiatement le refus s'arrête proprement. C'est une preuve du danger
+du chemin de refus, pas un crash natif ni la construction d'un nuage u21
+épuisant réellement les 6 144 bits de raffinement.
+
+**Correction attendue :** arrêter le tri au premier `Outcome` refusé,
+sans produire une réponse de comparaison de remplacement. Utiliser un
+tri qui propage `Outcome`, ou une exception interne interceptée **dans**
+la fonction `noexcept` qui contient le tri. Ne pas laisser cette exception
+remonter à travers `entry_order noexcept`. Une porte G4 doit injecter le
+refus après plusieurs comparaisons réussies, vérifier sa propagation et
+la restitution du budget, sans publication. Les égalités exactes restent
+départagées par SiteIdx dans le chemin réussi.
+[Sources figées, modèle et limites](../receipts/audit_s9_wip_20261005/README.md).
+
 ## Qualification G4 du 5 octobre : acquis et limites
 
 **A2 ferme la sélection ordinaire sur b319efc84.** Reçu `completed`,
@@ -30,13 +57,30 @@ y compris les six jumelles supports `-O`. Les tests `long` et mutants sont
 exclus ; les portes `reference_*` ne sont sélectionnées qu'en u18.
 La conformité porte exactement sur ces sélections.
 
-**Restent à clore :** les sanitizers/TSan, les identités FULL K10
+**B apporte les premiers résultats sanitizers au même pin b319efc84.**
+ASan/UBSan u24 : **774/824** tests conformes, 50 sans résultat ; TSan
+u21 : **759/824**, 65 sans résultat. Aucun échec individuel terminé,
+mais les deux CTests sont coupés par l'échéance globale de 2 100 s :
+la matrice demeure non conforme. Fermeture ciblée et SHA vérifiés.
+Les 53 portes API/IO/contrat CLI et les oracles supports normal/`-O`
+passent dans chaque profil. Sous sanitizer, le contrat CLI omet les
+préchargements : ce succès ne rejoue pas le crochet variadique.
+
+Les 50 absents ASan sont inclus dans les 65 absents TSan. Pour terminer,
+reprendre ces ensembles exacts avec un découpage qui leur laisse le temps
+de finir ; relancer les 824 tests avec la même échéance ne traite pas la
+cause observée. Garder source, options et inventaire des tests rapprochés
+des résultats ; une source plus récente exige sa propre requalification.
+[Preuve B et noms des portes manquantes](../receipts/audit_g4_b_20261005/README.md).
+[Ensembles de reprise exacts par module](../receipts/audit_g4_b_restart_20261005/README.md).
+
+**Restent à clore :** la fin des sanitizers/TSan, les identités FULL K10
 32k/ng00 classées `long`, puis les mesures L2 et les permutations et
 réétiquetages supports **W48 sur ng02 et ng00**. Les portes supports de
 cette matrice utilisent W1/W4. Le succès du déterminisme FULL W48 ne
-qualifie pas ce complément supports. La session B n'avait ni `DONE` ni
-reçu final lors de la capture et reste exclue. Aucun chrono de contrat
-n'est acquis par cette matrice. Les tests longs prévus en Release u21
+qualifie pas ce complément supports. La session dédiée `claudequall`
+est encore ouverte à la capture ; aucun résultat ne lui est attribué.
+Aucun chrono de contrat n'est acquis par ces matrices. Les tests longs prévus en Release u21
 ne sont pas doublés sous `-O` ; leur futur succès ne qualifiera pas leur
 exécution en u18/u24 ou sous sanitizers.
 [Preuve A2, noms exacts et rejeu](../receipts/audit_g4_a2_20261005/README.md).

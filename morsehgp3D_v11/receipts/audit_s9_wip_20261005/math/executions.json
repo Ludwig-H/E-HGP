@@ -1,0 +1,44 @@
+[
+  {
+    "command": [
+      "python3",
+      "/workspaces/E-HGP/build/v11-audit-math-s9-20261005/check_points.py"
+    ],
+    "code": 0,
+    "script_sha256": "4c72d7e22c861a210aed595c2a86f7c64fbd1634c806663e36b4a0644eb6c97e",
+    "stdout": "normal.json",
+    "stderr": "normal.stderr"
+  },
+  {
+    "command": [
+      "python3",
+      "-O",
+      "/workspaces/E-HGP/build/v11-audit-math-s9-20261005/check_points.py"
+    ],
+    "code": 0,
+    "script_sha256": "4c72d7e22c861a210aed595c2a86f7c64fbd1634c806663e36b4a0644eb6c97e",
+    "stdout": "optimized.json",
+    "stderr": "optimized.json.stderr"
+  },
+  {
+    "command": [
+      "python3",
+      "/workspaces/E-HGP/build/v11-audit-math-s9-20261005/replay.py"
+    ],
+    "code": 0,
+    "script_sha256": "1af21318ebea6ba7c7960dedc36dceddaf9e47e369eb205c07692cca6be4d4ac",
+    "stdout": "replay_normal.json",
+    "stderr": "replay_normal.json.stderr"
+  },
+  {
+    "command": [
+      "python3",
+      "-O",
+      "/workspaces/E-HGP/build/v11-audit-math-s9-20261005/replay.py"
+    ],
+    "code": 0,
+    "script_sha256": "1af21318ebea6ba7c7960dedc36dceddaf9e47e369eb205c07692cca6be4d4ac",
+    "stdout": "replay_optimized.json",
+    "stderr": "replay_optimized.json.stderr"
+  }
+]

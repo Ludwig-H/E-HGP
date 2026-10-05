@@ -1,0 +1,663 @@
+{
+  "capture_attempt": 1,
+  "developer_reports": {},
+  "files": {
+    "morsehgp3D_v11/bench/catalogue_semantic.py": {
+      "origin": "git_pin",
+      "sha256_after": "f09d2dff28098ff9c5288a69058b776350a6339034d17397491c073257196f2c",
+      "sha256_before": "f09d2dff28098ff9c5288a69058b776350a6339034d17397491c073257196f2c"
+    },
+    "morsehgp3D_v11/bench/full_semantic.py": {
+      "origin": "git_pin",
+      "sha256_after": "1ffda4fb32e58d9cadd6f8c87a4cabe0eb28c0bcc5769ba8370b2738bd4d8d25",
+      "sha256_before": "1ffda4fb32e58d9cadd6f8c87a4cabe0eb28c0bcc5769ba8370b2738bd4d8d25"
+    },
+    "morsehgp3D_v11/bench/mhgp11_formats.py": {
+      "origin": "overlay",
+      "sha256_after": "c0030e3767c4675147497a1f1f72abab5289a77429906b4391733d9ad145b466",
+      "sha256_before": "c0030e3767c4675147497a1f1f72abab5289a77429906b4391733d9ad145b466"
+    },
+    "morsehgp3D_v11/bench/points_campaign.py": {
+      "origin": "overlay",
+      "sha256_after": "0b9ecaba2f61e675e6fab6bf3ea6b8d0cf34909f595dfc6f5433ce95125cc068",
+      "sha256_before": "0b9ecaba2f61e675e6fab6bf3ea6b8d0cf34909f595dfc6f5433ce95125cc068"
+    },
+    "morsehgp3D_v11/bench/points_export_width_gate.py": {
+      "origin": "git_pin",
+      "sha256_after": "b4f778afc40531c9550707aa70a42f87d7545d5c5aeb3dea9ca3a45d2b3fe18b",
+      "sha256_before": "b4f778afc40531c9550707aa70a42f87d7545d5c5aeb3dea9ca3a45d2b3fe18b"
+    },
+    "morsehgp3D_v11/bench/points_flat.py": {
+      "origin": "git_pin",
+      "sha256_after": "4647de0762b500fb36ca917941a34120d58931f0b0033b570490821860fdd3bc",
+      "sha256_before": "4647de0762b500fb36ca917941a34120d58931f0b0033b570490821860fdd3bc"
+    },
+    "morsehgp3D_v11/bench/points_flat_campaign.py": {
+      "origin": "overlay",
+      "sha256_after": "5c154e39a97d2411298ff4672fbea6beedab4ac2a4e76152ee5a25bdc65f30b7",
+      "sha256_before": "5c154e39a97d2411298ff4672fbea6beedab4ac2a4e76152ee5a25bdc65f30b7"
+    },
+    "morsehgp3D_v11/bench/points_flat_claims.py": {
+      "origin": "git_pin",
+      "sha256_after": "0db23e82f26ab99ebf1140be973318362c09d423dad636da75cca8f4aea0b8de",
+      "sha256_before": "0db23e82f26ab99ebf1140be973318362c09d423dad636da75cca8f4aea0b8de"
+    },
+    "morsehgp3D_v11/bench/points_flat_dump.py": {
+      "origin": "overlay",
+      "sha256_after": "387ef62e382015d1ebc8c467dd6779b85c99439c6db8186199f79903efae9f08",
+      "sha256_before": "387ef62e382015d1ebc8c467dd6779b85c99439c6db8186199f79903efae9f08"
+    },
+    "morsehgp3D_v11/bench/points_flat_gate.py": {
+      "origin": "overlay",
+      "sha256_after": "4b8eaf3c50eae27d561a416441759bb72fc5ba3ba6dca6cd05007af4dd3661a1",
+      "sha256_before": "4b8eaf3c50eae27d561a416441759bb72fc5ba3ba6dca6cd05007af4dd3661a1"
+    },
+    "morsehgp3D_v11/bench/points_flat_metrics.py": {
+      "origin": "git_pin",
+      "sha256_after": "91a84a2fc1419e22cb152ed736ad9691b0f618efb9061c6e84305575b640f7c8",
+      "sha256_before": "91a84a2fc1419e22cb152ed736ad9691b0f618efb9061c6e84305575b640f7c8"
+    },
+    "morsehgp3D_v11/bench/points_flat_oracle.py": {
+      "origin": "git_pin",
+      "sha256_after": "781854add8410cf76104e7b9d144215a794a2fd5734739c13a3cfede08c7f483",
+      "sha256_before": "781854add8410cf76104e7b9d144215a794a2fd5734739c13a3cfede08c7f483"
+    },
+    "morsehgp3D_v11/bench/points_flat_study.py": {
+      "origin": "git_pin",
+      "sha256_after": "abd4a1f9161dbb22362f7fd354e702481874da780ed11b400489f9e6a7c0dd6f",
+      "sha256_before": "abd4a1f9161dbb22362f7fd354e702481874da780ed11b400489f9e6a7c0dd6f"
+    },
+    "morsehgp3D_v11/bench/points_flat_summary.py": {
+      "origin": "git_pin",
+      "sha256_after": "73aeba81930a25fd21d542c1760a9c7ef6f28ef7c56e3ab3c0e027798bda991e",
+      "sha256_before": "73aeba81930a25fd21d542c1760a9c7ef6f28ef7c56e3ab3c0e027798bda991e"
+    },
+    "morsehgp3D_v11/bench/points_gate.py": {
+      "origin": "git_pin",
+      "sha256_after": "8044fcdee7e37c7de1d0d163f7623b731f38e1bd900f6c05281cf85c3feba27c",
+      "sha256_before": "8044fcdee7e37c7de1d0d163f7623b731f38e1bd900f6c05281cf85c3feba27c"
+    },
+    "morsehgp3D_v11/bench/points_hierarchy.py": {
+      "origin": "git_pin",
+      "sha256_after": "fa12f16f3ce599a5299737d740bd252454cddcb9c475edf593d7aab3cd426c17",
+      "sha256_before": "fa12f16f3ce599a5299737d740bd252454cddcb9c475edf593d7aab3cd426c17"
+    },
+    "morsehgp3D_v11/bench/points_lidar_prepare.py": {
+      "origin": "git_pin",
+      "sha256_after": "916e907b4ca9232ce6ecf563dfa4f1b5d7877518e7c72337adc959d8d6cae3ed",
+      "sha256_before": "916e907b4ca9232ce6ecf563dfa4f1b5d7877518e7c72337adc959d8d6cae3ed"
+    },
+    "morsehgp3D_v11/bench/points_map.py": {
+      "origin": "git_pin",
+      "sha256_after": "a8e10b814a63fd38829c9b1fbd8b4bd90b634a7b15b1c18c94271b44fdda4ac4",
+      "sha256_before": "a8e10b814a63fd38829c9b1fbd8b4bd90b634a7b15b1c18c94271b44fdda4ac4"
+    },
+    "morsehgp3D_v11/bench/points_radius.py": {
+      "origin": "overlay",
+      "sha256_after": "8b8f8783f3111e84fbf045d50e483565e127350cc05e1c5b5bf5ef760448d93e",
+      "sha256_before": "8b8f8783f3111e84fbf045d50e483565e127350cc05e1c5b5bf5ef760448d93e"
+    },
+    "morsehgp3D_v11/bench/points_reference.py": {
+      "origin": "git_pin",
+      "sha256_after": "2f05ceb420913e2bb42569c5da193609395b3812ea253d22a1d7d2d1281e9ccb",
+      "sha256_before": "2f05ceb420913e2bb42569c5da193609395b3812ea253d22a1d7d2d1281e9ccb"
+    },
+    "morsehgp3D_v11/bench/points_render.py": {
+      "origin": "git_pin",
+      "sha256_after": "aa7957d43d66ee1a9656248661955b9aab5dcaca43e53496da5df6b086fcff2d",
+      "sha256_before": "aa7957d43d66ee1a9656248661955b9aab5dcaca43e53496da5df6b086fcff2d"
+    },
+    "morsehgp3D_v11/bench/points_scenes_freeze.py": {
+      "origin": "git_pin",
+      "sha256_after": "6f1d5dbb32ee6cab2e11da44f90f9482263821dd947f647d9ae464d9836626f5",
+      "sha256_before": "6f1d5dbb32ee6cab2e11da44f90f9482263821dd947f647d9ae464d9836626f5"
+    },
+    "morsehgp3D_v11/bench/points_summary.py": {
+      "origin": "git_pin",
+      "sha256_after": "097da157cb92357bad8c708a4c99a8021af5edf3efe46c012efc3818b30e6d5d",
+      "sha256_before": "097da157cb92357bad8c708a4c99a8021af5edf3efe46c012efc3818b30e6d5d"
+    },
+    "morsehgp3D_v11/bench/points_unpack.py": {
+      "origin": "git_pin",
+      "sha256_after": "4bc26261723d176dec53c6e04ca0851eda752aa444f08821bcc6d80ac722918f",
+      "sha256_before": "4bc26261723d176dec53c6e04ca0851eda752aa444f08821bcc6d80ac722918f"
+    },
+    "morsehgp3D_v11/cli/mhgp11.cpp": {
+      "origin": "overlay",
+      "sha256_after": "b7d664aa98d982ba4bea8fd713731fc082b60f92a87f74bb88206333fd1f6e14",
+      "sha256_before": "b7d664aa98d982ba4bea8fd713731fc082b60f92a87f74bb88206333fd1f6e14"
+    },
+    "morsehgp3D_v11/cmake/modules.cmake": {
+      "origin": "overlay",
+      "sha256_after": "f3407338fe2529f34ec96f87384e56b82229670da96942f50e38dde63963b66d",
+      "sha256_before": "f3407338fe2529f34ec96f87384e56b82229670da96942f50e38dde63963b66d"
+    },
+    "morsehgp3D_v11/docs/ARCHITECTURE.md": {
+      "origin": "overlay",
+      "sha256_after": "a613deb1b826533e1b6a778eab96c6afc2c12bd5ecd70357cf2004d4f53d0431",
+      "sha256_before": "a613deb1b826533e1b6a778eab96c6afc2c12bd5ecd70357cf2004d4f53d0431"
+    },
+    "morsehgp3D_v11/docs/HIERARCHIE_POINTS.md": {
+      "origin": "git_pin",
+      "sha256_after": "035af984a31d870ea3b56f08abf13f087015437d02297c9072b3e0aff689ce94",
+      "sha256_before": "035af984a31d870ea3b56f08abf13f087015437d02297c9072b3e0aff689ce94"
+    },
+    "morsehgp3D_v11/docs/PROVENANCE.md": {
+      "origin": "git_pin",
+      "sha256_after": "3d88f49592d63b5b0b04352fa15d7f0fb1b6c9735d9ad2d8fa53b62076351180",
+      "sha256_before": "3d88f49592d63b5b0b04352fa15d7f0fb1b6c9735d9ad2d8fa53b62076351180"
+    },
+    "morsehgp3D_v11/docs/SORTIES.md": {
+      "origin": "git_pin",
+      "sha256_after": "c110217f2534a17e439af702ffae788fc5b04ee0bf7bda88388a4d310840c95b",
+      "sha256_before": "c110217f2534a17e439af702ffae788fc5b04ee0bf7bda88388a4d310840c95b"
+    },
+    "morsehgp3D_v11/reference/hgp11_ref/__init__.py": {
+      "origin": "git_pin",
+      "sha256_after": "5309faf36a56bfb719d9fff4fb5872045aad87b1b35b2fc3992fd2c37791ad3e",
+      "sha256_before": "5309faf36a56bfb719d9fff4fb5872045aad87b1b35b2fc3992fd2c37791ad3e"
+    },
+    "morsehgp3D_v11/reference/hgp11_ref/constructive.py": {
+      "origin": "git_pin",
+      "sha256_after": "7e97f89789cafb4f241903e6d0f0e636425cdf3d526697e4e891d483f868fedc",
+      "sha256_before": "7e97f89789cafb4f241903e6d0f0e636425cdf3d526697e4e891d483f868fedc"
+    },
+    "morsehgp3D_v11/reference/hgp11_ref/definition.py": {
+      "origin": "git_pin",
+      "sha256_after": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43",
+      "sha256_before": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43"
+    },
+    "morsehgp3D_v11/reference/hgp11_ref/dumps.py": {
+      "origin": "git_pin",
+      "sha256_after": "2ece0b491430e314091de7b40a72233e299c543f236bcc00bbd5f84b38338373",
+      "sha256_before": "2ece0b491430e314091de7b40a72233e299c543f236bcc00bbd5f84b38338373"
+    },
+    "morsehgp3D_v11/reference/hgp11_ref/families.py": {
+      "origin": "git_pin",
+      "sha256_after": "244b9b325a7c9f43c7086cc7e9674bdc04ec2307a01bf69e2b12d5f02e75d73a",
+      "sha256_before": "244b9b325a7c9f43c7086cc7e9674bdc04ec2307a01bf69e2b12d5f02e75d73a"
+    },
+    "morsehgp3D_v11/reference/hgp11_ref/intgeom.py": {
+      "origin": "git_pin",
+      "sha256_after": "d0f7b1cecbbb1b25c3091bc1e3d3d062b9ee0f16b1d81c7117bf60b0d13a3f4b",
+      "sha256_before": "d0f7b1cecbbb1b25c3091bc1e3d3d062b9ee0f16b1d81c7117bf60b0d13a3f4b"
+    },
+    "morsehgp3D_v11/reference/hgp11_ref/judge.py": {
+      "origin": "git_pin",
+      "sha256_after": "09e65a40f7ff33400c04eb91c442a430579bf020b115589b69ad8384529d6507",
+      "sha256_before": "09e65a40f7ff33400c04eb91c442a430579bf020b115589b69ad8384529d6507"
+    },
+    "morsehgp3D_v11/reference/hgp11_ref/model.py": {
+      "origin": "git_pin",
+      "sha256_after": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c",
+      "sha256_before": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c"
+    },
+    "morsehgp3D_v11/reference/hgp11_ref/supports.py": {
+      "origin": "git_pin",
+      "sha256_after": "970f645462a019639cead958cf8f45b1324cf3083bb61fc9a0891ddc523254ee",
+      "sha256_before": "970f645462a019639cead958cf8f45b1324cf3083bb61fc9a0891ddc523254ee"
+    },
+    "morsehgp3D_v11/src/api/api.hpp": {
+      "origin": "overlay",
+      "sha256_after": "47847efcab6e811b101cdcdce6bf6060755f743d58355d2aa36827c567df20a3",
+      "sha256_before": "47847efcab6e811b101cdcdce6bf6060755f743d58355d2aa36827c567df20a3"
+    },
+    "morsehgp3D_v11/src/api/compute.cpp": {
+      "origin": "overlay",
+      "sha256_after": "cb8125869d3dac396ef4f000b53afacc315fc615f5839eea716ab96b48cf241e",
+      "sha256_before": "cb8125869d3dac396ef4f000b53afacc315fc615f5839eea716ab96b48cf241e"
+    },
+    "morsehgp3D_v11/src/api/internal.hpp": {
+      "origin": "overlay",
+      "sha256_after": "3553830f6a175348068b3fd262215ccd03ab2f61584d419e0573412a1b1aa195",
+      "sha256_before": "3553830f6a175348068b3fd262215ccd03ab2f61584d419e0573412a1b1aa195"
+    },
+    "morsehgp3D_v11/src/api/manifest.cpp": {
+      "origin": "overlay",
+      "sha256_after": "93e25f57fa66f4142693ebc3a63c2a56bda74766cc422a33ec90354aa16cb0bc",
+      "sha256_before": "93e25f57fa66f4142693ebc3a63c2a56bda74766cc422a33ec90354aa16cb0bc"
+    },
+    "morsehgp3D_v11/src/api/module.cmake": {
+      "origin": "overlay",
+      "sha256_after": "be7b28567f41f297f4b84d0722ac63fec18afafa9e5db61d5ce813494cf9bbf1",
+      "sha256_before": "be7b28567f41f297f4b84d0722ac63fec18afafa9e5db61d5ce813494cf9bbf1"
+    },
+    "morsehgp3D_v11/src/api/selftest.cpp": {
+      "origin": "git_pin",
+      "sha256_after": "340188732e0bfc369c39d123822796b9b6a58eb9e36d3bec2a86e317954a4342",
+      "sha256_before": "340188732e0bfc369c39d123822796b9b6a58eb9e36d3bec2a86e317954a4342"
+    },
+    "morsehgp3D_v11/src/api/selftest.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "c8a330b8bcf3c2bb144cc4f2400c6103ec4a8125ddefebd3ba9418a46f8fc8c0",
+      "sha256_before": "c8a330b8bcf3c2bb144cc4f2400c6103ec4a8125ddefebd3ba9418a46f8fc8c0"
+    },
+    "morsehgp3D_v11/src/api/session.cpp": {
+      "origin": "overlay",
+      "sha256_after": "be5a338ecdf9948a47b7f7d3460b5bfae23203c9060c4c94ecdbece3a32d6bcf",
+      "sha256_before": "be5a338ecdf9948a47b7f7d3460b5bfae23203c9060c4c94ecdbece3a32d6bcf"
+    },
+    "morsehgp3D_v11/src/api/write_full.cpp": {
+      "origin": "git_pin",
+      "sha256_after": "b6cf88730e7574142d47ce9df237eaf707e577e3058f0ae70c66fb7501f29d66",
+      "sha256_before": "b6cf88730e7574142d47ce9df237eaf707e577e3058f0ae70c66fb7501f29d66"
+    },
+    "morsehgp3D_v11/src/api/write_points.cpp": {
+      "origin": "overlay",
+      "sha256_after": "5cbdcf387c00eb8bb2ef2de82f742325758c785d6866f23c677488cfa9d224b7",
+      "sha256_before": "5cbdcf387c00eb8bb2ef2de82f742325758c785d6866f23c677488cfa9d224b7"
+    },
+    "morsehgp3D_v11/src/api/write_supports.cpp": {
+      "origin": "git_pin",
+      "sha256_after": "958190caf962931018134077e560200d9ac256428eb37d3de78daefe452c6898",
+      "sha256_before": "958190caf962931018134077e560200d9ac256428eb37d3de78daefe452c6898"
+    },
+    "morsehgp3D_v11/src/num/big.cpp": {
+      "origin": "git_pin",
+      "sha256_after": "35a0fc3979ff8ec42fa97cf9ddfc4c1373082c5b5279381c5a06cdf3998dfc56",
+      "sha256_before": "35a0fc3979ff8ec42fa97cf9ddfc4c1373082c5b5279381c5a06cdf3998dfc56"
+    },
+    "morsehgp3D_v11/src/num/big.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "162bea8d8bfd950f6e2fd039d8045d0a9211855daea10695e0e603c0217584e9",
+      "sha256_before": "162bea8d8bfd950f6e2fd039d8045d0a9211855daea10695e0e603c0217584e9"
+    },
+    "morsehgp3D_v11/src/num/budgets.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "b86c7918573e473a9492b3c26c463f9cb340cec5e97d092e774a5c0af44c062e",
+      "sha256_before": "b86c7918573e473a9492b3c26c463f9cb340cec5e97d092e774a5c0af44c062e"
+    },
+    "morsehgp3D_v11/src/num/center_region.cpp": {
+      "origin": "git_pin",
+      "sha256_after": "67f412f16e24fc575630f60e5f8929f0899e4714f145a2a2490639e29fc14783",
+      "sha256_before": "67f412f16e24fc575630f60e5f8929f0899e4714f145a2a2490639e29fc14783"
+    },
+    "morsehgp3D_v11/src/num/center_region.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "22c06de8423871a5660db145683b67cb188c000c00c4deb1a5a10ddfcf199417",
+      "sha256_before": "22c06de8423871a5660db145683b67cb188c000c00c4deb1a5a10ddfcf199417"
+    },
+    "morsehgp3D_v11/src/num/center_region.provenance.json": {
+      "origin": "git_pin",
+      "sha256_after": "0e887b3701176bc7e025dc38aecf842f37b869ab61a2a700b4c0e781861a5498",
+      "sha256_before": "0e887b3701176bc7e025dc38aecf842f37b869ab61a2a700b4c0e781861a5498"
+    },
+    "morsehgp3D_v11/src/num/centers.cpp": {
+      "origin": "git_pin",
+      "sha256_after": "36fbb5b188189c05c6187906326943347f2e1fab2da52961a83826eb9a2590c0",
+      "sha256_before": "36fbb5b188189c05c6187906326943347f2e1fab2da52961a83826eb9a2590c0"
+    },
+    "morsehgp3D_v11/src/num/geometry.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "3f1baafbd9cbd8d7640cf49c19fe227d3a3a0d14fe642f3dd4531a42f8724c11",
+      "sha256_before": "3f1baafbd9cbd8d7640cf49c19fe227d3a3a0d14fe642f3dd4531a42f8724c11"
+    },
+    "morsehgp3D_v11/src/num/geometry_internal.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97",
+      "sha256_before": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97"
+    },
+    "morsehgp3D_v11/src/num/integer.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "8ccf2b24f49681cc8bba1494c982c64578c73337c228015e62de50696d5d529e",
+      "sha256_before": "8ccf2b24f49681cc8bba1494c982c64578c73337c228015e62de50696d5d529e"
+    },
+    "morsehgp3D_v11/src/num/level.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "c769f20addcc11ef9e249031baee3ce79d538c7aff61d0035e069237d73193e9",
+      "sha256_before": "c769f20addcc11ef9e249031baee3ce79d538c7aff61d0035e069237d73193e9"
+    },
+    "morsehgp3D_v11/src/num/module.cmake": {
+      "origin": "git_pin",
+      "sha256_after": "78038edc1637b9a78a8925a93642c8c6a9948e74ad39ae17bb14b7040734518d",
+      "sha256_before": "78038edc1637b9a78a8925a93642c8c6a9948e74ad39ae17bb14b7040734518d"
+    },
+    "morsehgp3D_v11/src/num/num.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "bde9c4a076a8f7c3d82940252e1c132804a65f56360acd510922274255df82f2",
+      "sha256_before": "bde9c4a076a8f7c3d82940252e1c132804a65f56360acd510922274255df82f2"
+    },
+    "morsehgp3D_v11/src/num/orientation_certificate.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "f8571e6274677a3af1f93948a544b9091ee0e2b1d910cba26bf01b7a8cdc4ec0",
+      "sha256_before": "f8571e6274677a3af1f93948a544b9091ee0e2b1d910cba26bf01b7a8cdc4ec0"
+    },
+    "morsehgp3D_v11/src/num/power_certificate.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "ba545b4f5d5bb7cd2d2b6198162241bbd4b89b3e6b725485f54f0387d6a804c0",
+      "sha256_before": "ba545b4f5d5bb7cd2d2b6198162241bbd4b89b3e6b725485f54f0387d6a804c0"
+    },
+    "morsehgp3D_v11/src/num/power_checked.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "e38083a1cb0d1f4b90df711ecd47496ddd3d7998306b5ba713062107a610228b",
+      "sha256_before": "e38083a1cb0d1f4b90df711ecd47496ddd3d7998306b5ba713062107a610228b"
+    },
+    "morsehgp3D_v11/src/num/predicates.cpp": {
+      "origin": "git_pin",
+      "sha256_after": "4bfa98717529baffb9072a3c014078a64c8d96f23d69856b4136a210f3ae6d6a",
+      "sha256_before": "4bfa98717529baffb9072a3c014078a64c8d96f23d69856b4136a210f3ae6d6a"
+    },
+    "morsehgp3D_v11/src/num/q4_weights.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "5da0994be48f50b0571e5d097a17da005a7dad4b86368c0448ae664cbde66c09",
+      "sha256_before": "5da0994be48f50b0571e5d097a17da005a7dad4b86368c0448ae664cbde66c09"
+    },
+    "morsehgp3D_v11/src/num/radical.cpp": {
+      "origin": "git_pin",
+      "sha256_after": "b9b4d9e2c68c462a6f7fe0795cfde58b3604c00cd401017e7213b938404a5832",
+      "sha256_before": "b9b4d9e2c68c462a6f7fe0795cfde58b3604c00cd401017e7213b938404a5832"
+    },
+    "morsehgp3D_v11/src/num/radical.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "a6c5123011a10bf30fe59e3254782cc0142aca34aeb386803e891fca1a5cb498",
+      "sha256_before": "a6c5123011a10bf30fe59e3254782cc0142aca34aeb386803e891fca1a5cb498"
+    },
+    "morsehgp3D_v11/src/num/rational.cpp": {
+      "origin": "git_pin",
+      "sha256_after": "67864a76f58a3633f556050acf3299113396be2054d5f67447a0cf631e962d23",
+      "sha256_before": "67864a76f58a3633f556050acf3299113396be2054d5f67447a0cf631e962d23"
+    },
+    "morsehgp3D_v11/src/num/rational.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "76a82aad8842a6f39c247aa9224d1f7e6dca16f5115de8a9ee36e829e9c721c6",
+      "sha256_before": "76a82aad8842a6f39c247aa9224d1f7e6dca16f5115de8a9ee36e829e9c721c6"
+    },
+    "morsehgp3D_v11/src/num/roots.cpp": {
+      "origin": "git_pin",
+      "sha256_after": "40aaffb8b4f395d402e70175d12670e35d434bbba285df7f2d8a7b8282fe9221",
+      "sha256_before": "40aaffb8b4f395d402e70175d12670e35d434bbba285df7f2d8a7b8282fe9221"
+    },
+    "morsehgp3D_v11/src/num/roots.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "50c600c679470aeebd67aac00889aa5bf2a2aaf224901b1829d640abe535b4e5",
+      "sha256_before": "50c600c679470aeebd67aac00889aa5bf2a2aaf224901b1829d640abe535b4e5"
+    },
+    "morsehgp3D_v11/src/num/sphere.cpp": {
+      "origin": "git_pin",
+      "sha256_after": "4da1b9bf57afdc068e91afe9616491a70787ed934add72e0d25cf1a8b81a9dc3",
+      "sha256_before": "4da1b9bf57afdc068e91afe9616491a70787ed934add72e0d25cf1a8b81a9dc3"
+    },
+    "morsehgp3D_v11/src/num/wide.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "58478d10a1e2b526652e5f5b1aeb87f23325bfb515997808a65eae380a531fb1",
+      "sha256_before": "58478d10a1e2b526652e5f5b1aeb87f23325bfb515997808a65eae380a531fb1"
+    },
+    "morsehgp3D_v11/src/points/exact.cpp": {
+      "origin": "overlay",
+      "sha256_after": "f6003bdf7196ad4686c70f10e415c80361c343c46f3b96c35fe9bb6196c34327",
+      "sha256_before": "f6003bdf7196ad4686c70f10e415c80361c343c46f3b96c35fe9bb6196c34327"
+    },
+    "morsehgp3D_v11/src/points/hang.cpp": {
+      "origin": "overlay",
+      "sha256_after": "1e4fcb1407a41df09906c6b3dddbf37be28dccc169d9416d41e8f99eea2385eb",
+      "sha256_before": "1e4fcb1407a41df09906c6b3dddbf37be28dccc169d9416d41e8f99eea2385eb"
+    },
+    "morsehgp3D_v11/src/points/incidences.cpp": {
+      "origin": "overlay",
+      "sha256_after": "f2c7443b1df91310766a773ec43201fcff4d1639ea91587eaf13576eb783809f",
+      "sha256_before": "f2c7443b1df91310766a773ec43201fcff4d1639ea91587eaf13576eb783809f"
+    },
+    "morsehgp3D_v11/src/points/internal.hpp": {
+      "origin": "overlay",
+      "sha256_after": "fe7ad7a67635bcb2141f2b9c3384f24afcff6ca4b9c161c10bc686dbdbf604b8",
+      "sha256_before": "fe7ad7a67635bcb2141f2b9c3384f24afcff6ca4b9c161c10bc686dbdbf604b8"
+    },
+    "morsehgp3D_v11/src/points/module.cmake": {
+      "origin": "overlay",
+      "sha256_after": "1ba5233a497676be3b47c269b35fd39e73c26b753ee8ce4c0f69b87265ae3fe2",
+      "sha256_before": "1ba5233a497676be3b47c269b35fd39e73c26b753ee8ce4c0f69b87265ae3fe2"
+    },
+    "morsehgp3D_v11/src/points/point_tree.cpp": {
+      "origin": "overlay",
+      "sha256_after": "760f4a46b0f027c2769f695faac98f231b87d31156a4a549b94cb193b649c06d",
+      "sha256_before": "760f4a46b0f027c2769f695faac98f231b87d31156a4a549b94cb193b649c06d"
+    },
+    "morsehgp3D_v11/src/points/points.hpp": {
+      "origin": "overlay",
+      "sha256_after": "1ffb2d8587746f6ed05354caaa0194359727af700658d7e6587482ab8e043737",
+      "sha256_before": "1ffb2d8587746f6ed05354caaa0194359727af700658d7e6587482ab8e043737"
+    },
+    "morsehgp3D_v11/src/points/qualify.cpp": {
+      "origin": "overlay",
+      "sha256_after": "41b323547e342be86f4eecc88901172645617b844e055bb05a1f312d43e0e593",
+      "sha256_before": "41b323547e342be86f4eecc88901172645617b844e055bb05a1f312d43e0e593"
+    },
+    "morsehgp3D_v11/src/points/settle.cpp": {
+      "origin": "overlay",
+      "sha256_after": "a7d7c6c32f9ca369d9b1f515a4add1dcb73ae8abc3a06efa7a1da0ba3ea9617d",
+      "sha256_before": "a7d7c6c32f9ca369d9b1f515a4add1dcb73ae8abc3a06efa7a1da0ba3ea9617d"
+    },
+    "morsehgp3D_v11/src/tower/ancestor_index.cpp": {
+      "origin": "overlay",
+      "sha256_after": "2b99e3843ef9ad5210b68393018a77299764441419527bf0acab09358ef14781",
+      "sha256_before": "2b99e3843ef9ad5210b68393018a77299764441419527bf0acab09358ef14781"
+    },
+    "morsehgp3D_v11/src/tower/ancestor_index.hpp": {
+      "origin": "overlay",
+      "sha256_after": "5fea0482c879d708482cb14dddb910f52e1d5c1896e4c6d3dab3f11244986cfd",
+      "sha256_before": "5fea0482c879d708482cb14dddb910f52e1d5c1896e4c6d3dab3f11244986cfd"
+    },
+    "morsehgp3D_v11/src/tower/attachment.cpp": {
+      "origin": "git_pin",
+      "sha256_after": "77f84f00506729b253c22216860ec8c0c9bcd579dcac1c9ed3ac8c54dadb01cd",
+      "sha256_before": "77f84f00506729b253c22216860ec8c0c9bcd579dcac1c9ed3ac8c54dadb01cd"
+    },
+    "morsehgp3D_v11/src/tower/canonical.cpp": {
+      "origin": "git_pin",
+      "sha256_after": "d2c0c371c62dc003f447d0f13ab55a2ba87c18fb4e307471dd1fa8cbdfdeba97",
+      "sha256_before": "d2c0c371c62dc003f447d0f13ab55a2ba87c18fb4e307471dd1fa8cbdfdeba97"
+    },
+    "morsehgp3D_v11/src/tower/cells.cpp": {
+      "origin": "git_pin",
+      "sha256_after": "58c912dd1115c6c4d12d1a394e45f335bc08d7f2006f4db78fe31d6635aa3e4b",
+      "sha256_before": "58c912dd1115c6c4d12d1a394e45f335bc08d7f2006f4db78fe31d6635aa3e4b"
+    },
+    "morsehgp3D_v11/src/tower/cells.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "052a0ae35ac61fc0b017fcb24e55b88964cbe6ce79e169432cba95414b2d3660",
+      "sha256_before": "052a0ae35ac61fc0b017fcb24e55b88964cbe6ce79e169432cba95414b2d3660"
+    },
+    "morsehgp3D_v11/src/tower/cells_classify.cpp": {
+      "origin": "git_pin",
+      "sha256_after": "e0fd9b4e075c3250504c94df542a13041fa4b5ede75318e5bf10749eb9ef25a5",
+      "sha256_before": "e0fd9b4e075c3250504c94df542a13041fa4b5ede75318e5bf10749eb9ef25a5"
+    },
+    "morsehgp3D_v11/src/tower/census_slots.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "1e5263315aec24482c63059b9ddbc938601c29c69e31c99c0c3cdf31324f867a",
+      "sha256_before": "1e5263315aec24482c63059b9ddbc938601c29c69e31c99c0c3cdf31324f867a"
+    },
+    "morsehgp3D_v11/src/tower/descent.cpp": {
+      "origin": "git_pin",
+      "sha256_after": "ceb170bcbd8067e16bf62f03fe0e3cdbf59dce48af8615a027a70b8602b5338a",
+      "sha256_before": "ceb170bcbd8067e16bf62f03fe0e3cdbf59dce48af8615a027a70b8602b5338a"
+    },
+    "morsehgp3D_v11/src/tower/descent.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "09aa58a7e0ab6eb711b1ef796f705d9f7f68c27416aada491254e1113427c540",
+      "sha256_before": "09aa58a7e0ab6eb711b1ef796f705d9f7f68c27416aada491254e1113427c540"
+    },
+    "morsehgp3D_v11/src/tower/descent_memo.cpp": {
+      "origin": "git_pin",
+      "sha256_after": "5232987ee9e823f05e67953e57a3fd9c5fd4735630ea74b0ecfb58d523bcbb35",
+      "sha256_before": "5232987ee9e823f05e67953e57a3fd9c5fd4735630ea74b0ecfb58d523bcbb35"
+    },
+    "morsehgp3D_v11/src/tower/descent_memo.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "664c1a15cbec656816c382c841896269da60ae57abbfee7d12514038151207c3",
+      "sha256_before": "664c1a15cbec656816c382c841896269da60ae57abbfee7d12514038151207c3"
+    },
+    "morsehgp3D_v11/src/tower/forest.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "f1014b0332eed89d36866eabb4eb659a5f5fdf66b4f96d4703c3ef596d910e28",
+      "sha256_before": "f1014b0332eed89d36866eabb4eb659a5f5fdf66b4f96d4703c3ef596d910e28"
+    },
+    "morsehgp3D_v11/src/tower/forest_ancestor_sweep.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "bbc83b0f6c23378946a09040a367cf6482add385813b5622b4ba98686410913b",
+      "sha256_before": "bbc83b0f6c23378946a09040a367cf6482add385813b5622b4ba98686410913b"
+    },
+    "morsehgp3D_v11/src/tower/forest_build.cpp": {
+      "origin": "git_pin",
+      "sha256_after": "061c79b751446b0dbb2583dc71cc4fa3b31b60e77b50bff26a85c0b5a63cf1a7",
+      "sha256_before": "061c79b751446b0dbb2583dc71cc4fa3b31b60e77b50bff26a85c0b5a63cf1a7"
+    },
+    "morsehgp3D_v11/src/tower/forest_concurrent.cpp": {
+      "origin": "git_pin",
+      "sha256_after": "1c7c58627e2dd952b42355276d0c3f87b3dea6c80252b3795e96786281de702a",
+      "sha256_before": "1c7c58627e2dd952b42355276d0c3f87b3dea6c80252b3795e96786281de702a"
+    },
+    "morsehgp3D_v11/src/tower/forest_internal.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "2a3d6483f4a08d268b4582bb2a820949d53b4a110336e3d06d0850aeeb65280a",
+      "sha256_before": "2a3d6483f4a08d268b4582bb2a820949d53b4a110336e3d06d0850aeeb65280a"
+    },
+    "morsehgp3D_v11/src/tower/forest_parallel.cpp": {
+      "origin": "git_pin",
+      "sha256_after": "c2441ee6411f9ae91ea603dda1a9c83b622fc61c25d4a4701db1048e62e49078",
+      "sha256_before": "c2441ee6411f9ae91ea603dda1a9c83b622fc61c25d4a4701db1048e62e49078"
+    },
+    "morsehgp3D_v11/src/tower/forest_parallel.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "013697c9cb12f47eb41091ca939421c574bcbc38ee076bf100cac5a657269732",
+      "sha256_before": "013697c9cb12f47eb41091ca939421c574bcbc38ee076bf100cac5a657269732"
+    },
+    "morsehgp3D_v11/src/tower/forest_pipeline.cpp": {
+      "origin": "git_pin",
+      "sha256_after": "ea7fdfebb46e9ff273e48b2478cb42d564008aaed1ff0efd5d96aa6b41e972e4",
+      "sha256_before": "ea7fdfebb46e9ff273e48b2478cb42d564008aaed1ff0efd5d96aa6b41e972e4"
+    },
+    "morsehgp3D_v11/src/tower/forest_plateau.cpp": {
+      "origin": "git_pin",
+      "sha256_after": "0494d978fdc2188f288cf5a55dbf6bbe18bbb9436bde8c2756da070d16bc0300",
+      "sha256_before": "0494d978fdc2188f288cf5a55dbf6bbe18bbb9436bde8c2756da070d16bc0300"
+    },
+    "morsehgp3D_v11/src/tower/forest_vertical.cpp": {
+      "origin": "git_pin",
+      "sha256_after": "805722ce6da873bd4f17cc94ee20877073439bcb1af75c2b7fb8f6f3d220f5e4",
+      "sha256_before": "805722ce6da873bd4f17cc94ee20877073439bcb1af75c2b7fb8f6f3d220f5e4"
+    },
+    "morsehgp3D_v11/src/tower/forest_vertical_parallel.cpp": {
+      "origin": "git_pin",
+      "sha256_after": "9a3f74434b4ef1b39a71601ce80373cee9b6af83eb570ac5c365b5ad5058f230",
+      "sha256_before": "9a3f74434b4ef1b39a71601ce80373cee9b6af83eb570ac5c365b5ad5058f230"
+    },
+    "morsehgp3D_v11/src/tower/forest_vertical_seed.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "4c76459655d98f98b4fd7c5324cdce8e1d60492dd74c4cca830169fa3b7a2705",
+      "sha256_before": "4c76459655d98f98b4fd7c5324cdce8e1d60492dd74c4cca830169fa3b7a2705"
+    },
+    "morsehgp3D_v11/src/tower/full_domain.cpp": {
+      "origin": "git_pin",
+      "sha256_after": "3b7c1aab96cf1236b37011979e51687c592f974e35ef9c13e5bbcdc0f064ec41",
+      "sha256_before": "3b7c1aab96cf1236b37011979e51687c592f974e35ef9c13e5bbcdc0f064ec41"
+    },
+    "morsehgp3D_v11/src/tower/full_domain.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "662074316fe5d424141ab9400320bf3af85debd7c34f02945af449772164e604",
+      "sha256_before": "662074316fe5d424141ab9400320bf3af85debd7c34f02945af449772164e604"
+    },
+    "morsehgp3D_v11/src/tower/locate.cpp": {
+      "origin": "git_pin",
+      "sha256_after": "50fc8119fdecf473891c250e4b2c6b30d9e0c84df20d2b5c47dd166e3f57114a",
+      "sha256_before": "50fc8119fdecf473891c250e4b2c6b30d9e0c84df20d2b5c47dd166e3f57114a"
+    },
+    "morsehgp3D_v11/src/tower/locate.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "d9e4f826b80839a18cdb48f7f29f05c643694f28b03b5922fbf58ad4e4060e34",
+      "sha256_before": "d9e4f826b80839a18cdb48f7f29f05c643694f28b03b5922fbf58ad4e4060e34"
+    },
+    "morsehgp3D_v11/src/tower/meb.cpp": {
+      "origin": "git_pin",
+      "sha256_after": "a7b828ec6922554e6142fb38b9d7a359db22b59beee5e7250525b077cedd3d00",
+      "sha256_before": "a7b828ec6922554e6142fb38b9d7a359db22b59beee5e7250525b077cedd3d00"
+    },
+    "morsehgp3D_v11/src/tower/meb.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "fd307ad49e3f0aa807d080e2467a577697db01501732bdfd7b6502dec9760380",
+      "sha256_before": "fd307ad49e3f0aa807d080e2467a577697db01501732bdfd7b6502dec9760380"
+    },
+    "morsehgp3D_v11/src/tower/module.cmake": {
+      "origin": "overlay",
+      "sha256_after": "a47ccaa643c56e88d66699b3d2445810fb378f59f58e6974f6fad3e69fdf4a7b",
+      "sha256_before": "a47ccaa643c56e88d66699b3d2445810fb378f59f58e6974f6fad3e69fdf4a7b"
+    },
+    "morsehgp3D_v11/src/tower/order_tree.cpp": {
+      "origin": "git_pin",
+      "sha256_after": "90cd183e46431940262bc6393e72f2f118e7319274bf12c277c5c32e7d5a92b0",
+      "sha256_before": "90cd183e46431940262bc6393e72f2f118e7319274bf12c277c5c32e7d5a92b0"
+    },
+    "morsehgp3D_v11/src/tower/order_tree.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "e4e0996973e1157eddc203512913eb501aea982f55ada01435b7c62242361f4b",
+      "sha256_before": "e4e0996973e1157eddc203512913eb501aea982f55ada01435b7c62242361f4b"
+    },
+    "morsehgp3D_v11/src/tower/population_lookup.cpp": {
+      "origin": "git_pin",
+      "sha256_after": "ccb6c4a3c902410f4e9550e4ceb073b3cc0d74257ea13fac31602308afa22197",
+      "sha256_before": "ccb6c4a3c902410f4e9550e4ceb073b3cc0d74257ea13fac31602308afa22197"
+    },
+    "morsehgp3D_v11/src/tower/population_lookup.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "82b786f69add53b9a6d1373eb0a71e5cbab59bfcf295f98bc368b0f6ef12ff16",
+      "sha256_before": "82b786f69add53b9a6d1373eb0a71e5cbab59bfcf295f98bc368b0f6ef12ff16"
+    },
+    "morsehgp3D_v11/src/tower/regular_vertical_seeds.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "b13930aabee324be7a09f2342403a5724332435bf5b5ddcf6b6e564b77f859dc",
+      "sha256_before": "b13930aabee324be7a09f2342403a5724332435bf5b5ddcf6b6e564b77f859dc"
+    },
+    "morsehgp3D_v11/src/tower/seed_log.hpp": {
+      "origin": "git_pin",
+      "sha256_after": "40a275794f7124f45da98bca5ad5aaab5335f6ae6aa0e7c60f2867e3fa2ba54d",
+      "sha256_before": "40a275794f7124f45da98bca5ad5aaab5335f6ae6aa0e7c60f2867e3fa2ba54d"
+    },
+    "morsehgp3D_v11/src/tower/source_pins.json": {
+      "origin": "git_pin",
+      "sha256_after": "5ac26489054ec52979018b762e030beac462708d908f2a92cfa379bdf5829981",
+      "sha256_before": "5ac26489054ec52979018b762e030beac462708d908f2a92cfa379bdf5829981"
+    },
+    "morsehgp3D_v11/src/tower/tower.hpp": {
+      "origin": "overlay",
+      "sha256_after": "82744b15963d8ce66518d737db782c747d3015a38ebd70e2a9ffdad1aa430a4b",
+      "sha256_before": "82744b15963d8ce66518d737db782c747d3015a38ebd70e2a9ffdad1aa430a4b"
+    },
+    "morsehgp3D_v11/tests/cli/cli_points.py": {
+      "origin": "overlay",
+      "sha256_after": "bccedb130a91759fb76f4127ae744ab471234120dd9df6c3476a780d5e183995",
+      "sha256_before": "bccedb130a91759fb76f4127ae744ab471234120dd9df6c3476a780d5e183995"
+    },
+    "morsehgp3D_v11/tests/cli/cli_support.py": {
+      "origin": "git_pin",
+      "sha256_after": "dd0e51308d06de8b34118ef542dfb90656bd40b23e2879b1ff09b03f845aae06",
+      "sha256_before": "dd0e51308d06de8b34118ef542dfb90656bd40b23e2879b1ff09b03f845aae06"
+    },
+    "morsehgp3D_v11/tests/points/points_oracle_stdlib.py": {
+      "origin": "overlay",
+      "sha256_after": "95e188b14cbc3358caf4992d1be557a5c24513f3861c50b5f978ff96130116fa",
+      "sha256_before": "95e188b14cbc3358caf4992d1be557a5c24513f3861c50b5f978ff96130116fa"
+    },
+    "morsehgp3D_v11/tests/points/points_probe.cpp": {
+      "origin": "overlay",
+      "sha256_after": "0bd54d7c182be7c51df9a4cf3ca246a95d8f034ddd5395f4f924435c95052fb0",
+      "sha256_before": "0bd54d7c182be7c51df9a4cf3ca246a95d8f034ddd5395f4f924435c95052fb0"
+    },
+    "morsehgp3D_v11/tests/points/points_vs_python.py": {
+      "origin": "overlay",
+      "sha256_after": "469314b16f28f1c7197619f281012043d033bc065cdbcce1b51250f6a52028dc",
+      "sha256_before": "469314b16f28f1c7197619f281012043d033bc065cdbcce1b51250f6a52028dc"
+    },
+    "morsehgp3D_v11/tests/points/tests.cmake": {
+      "origin": "overlay",
+      "sha256_after": "70c1a3404d07a8e8e8666c1ccdb012a57fbe17c97fe0bc341372fe389098a370",
+      "sha256_before": "70c1a3404d07a8e8e8666c1ccdb012a57fbe17c97fe0bc341372fe389098a370"
+    },
+    "morsehgp3D_v11/tests/support/mhgp11_gate.py": {
+      "origin": "git_pin",
+      "sha256_after": "8812cb11d632534ed372a8ca7c88c7b3ad138920f1b46eeb5fd60222a2a2c4f0",
+      "sha256_before": "8812cb11d632534ed372a8ca7c88c7b3ad138920f1b46eeb5fd60222a2a2c4f0"
+    }
+  },
+  "pin": "53c027fe848b0d890f164eb87ebf347338c58d55",
+  "scope": "S9 WIP, byte-stable two full source reads; no native execution"
+}

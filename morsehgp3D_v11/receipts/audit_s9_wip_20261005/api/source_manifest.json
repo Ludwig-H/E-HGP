@@ -1,0 +1,25 @@
+{
+  "base_commit": "53c027fe848b0d890f164eb87ebf347338c58d55",
+  "kind": "WIP_non_commis",
+  "captured_utc": "2026-10-05T16:03:18.501641+00:00",
+  "source_worktree": "/workspaces/E-HGP/build/v11-impl-l3",
+  "files": {
+    "morsehgp3D_v11/bench/mhgp11_formats.py": "c0030e3767c4675147497a1f1f72abab5289a77429906b4391733d9ad145b466",
+    "morsehgp3D_v11/cli/mhgp11.cpp": "b7d664aa98d982ba4bea8fd713731fc082b60f92a87f74bb88206333fd1f6e14",
+    "morsehgp3D_v11/docs/HIERARCHIE_POINTS.md": "035af984a31d870ea3b56f08abf13f087015437d02297c9072b3e0aff689ce94",
+    "morsehgp3D_v11/docs/SORTIES.md": "c110217f2534a17e439af702ffae788fc5b04ee0bf7bda88388a4d310840c95b",
+    "morsehgp3D_v11/src/api/api.hpp": "47847efcab6e811b101cdcdce6bf6060755f743d58355d2aa36827c567df20a3",
+    "morsehgp3D_v11/src/api/compute.cpp": "cb8125869d3dac396ef4f000b53afacc315fc615f5839eea716ab96b48cf241e",
+    "morsehgp3D_v11/src/api/internal.hpp": "3553830f6a175348068b3fd262215ccd03ab2f61584d419e0573412a1b1aa195",
+    "morsehgp3D_v11/src/api/manifest.cpp": "93e25f57fa66f4142693ebc3a63c2a56bda74766cc422a33ec90354aa16cb0bc",
+    "morsehgp3D_v11/src/api/module.cmake": "be7b28567f41f297f4b84d0722ac63fec18afafa9e5db61d5ce813494cf9bbf1",
+    "morsehgp3D_v11/src/api/selftest.cpp": "340188732e0bfc369c39d123822796b9b6a58eb9e36d3bec2a86e317954a4342",
+    "morsehgp3D_v11/src/api/selftest.hpp": "c8a330b8bcf3c2bb144cc4f2400c6103ec4a8125ddefebd3ba9418a46f8fc8c0",
+    "morsehgp3D_v11/src/api/session.cpp": "be5a338ecdf9948a47b7f7d3460b5bfae23203c9060c4c94ecdbece3a32d6bcf",
+    "morsehgp3D_v11/src/api/write_full.cpp": "b6cf88730e7574142d47ce9df237eaf707e577e3058f0ae70c66fb7501f29d66",
+    "morsehgp3D_v11/src/api/write_points.cpp": "5cbdcf387c00eb8bb2ef2de82f742325758c785d6866f23c677488cfa9d224b7",
+    "morsehgp3D_v11/src/api/write_supports.cpp": "958190caf962931018134077e560200d9ac256428eb37d3de78daefe452c6898",
+    "morsehgp3D_v11/src/points/points.hpp": "1ffb2d8587746f6ed05354caaa0194359727af700658d7e6587482ab8e043737",
+    "morsehgp3D_v11/tests/cli/cli_points.py": "bccedb130a91759fb76f4127ae744ab471234120dd9df6c3476a780d5e183995"
+  }
+}

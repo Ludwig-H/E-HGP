@@ -1,0 +1,63 @@
+{
+  "snapshot_utc": "20261005T160314Z",
+  "developer_worktree": "/workspaces/E-HGP/build/v11-impl-l3",
+  "base_head": "53c027fe848b0d890f164eb87ebf347338c58d55",
+  "status": "WIP_untracked_non_qualifie",
+  "files": {
+    "morsehgp3D_v11/src/points/exact.cpp": {
+      "sha256": "f6003bdf7196ad4686c70f10e415c80361c343c46f3b96c35fe9bb6196c34327",
+      "bytes": 2903,
+      "same_after_capture": true
+    },
+    "morsehgp3D_v11/src/points/hang.cpp": {
+      "sha256": "1e4fcb1407a41df09906c6b3dddbf37be28dccc169d9416d41e8f99eea2385eb",
+      "bytes": 6701,
+      "same_after_capture": true
+    },
+    "morsehgp3D_v11/src/points/incidences.cpp": {
+      "sha256": "f2c7443b1df91310766a773ec43201fcff4d1639ea91587eaf13576eb783809f",
+      "bytes": 4366,
+      "same_after_capture": true
+    },
+    "morsehgp3D_v11/src/points/internal.hpp": {
+      "sha256": "fe7ad7a67635bcb2141f2b9c3384f24afcff6ca4b9c161c10bc686dbdbf604b8",
+      "bytes": 7912,
+      "same_after_capture": true
+    },
+    "morsehgp3D_v11/src/points/module.cmake": {
+      "sha256": "1ba5233a497676be3b47c269b35fd39e73c26b753ee8ce4c0f69b87265ae3fe2",
+      "bytes": 369,
+      "same_after_capture": true
+    },
+    "morsehgp3D_v11/src/points/point_tree.cpp": {
+      "sha256": "760f4a46b0f027c2769f695faac98f231b87d31156a4a549b94cb193b649c06d",
+      "bytes": 8450,
+      "same_after_capture": true
+    },
+    "morsehgp3D_v11/src/points/points.hpp": {
+      "sha256": "1ffb2d8587746f6ed05354caaa0194359727af700658d7e6587482ab8e043737",
+      "bytes": 6190,
+      "same_after_capture": true
+    },
+    "morsehgp3D_v11/src/points/qualify.cpp": {
+      "sha256": "41b323547e342be86f4eecc88901172645617b844e055bb05a1f312d43e0e593",
+      "bytes": 6151,
+      "same_after_capture": true
+    },
+    "morsehgp3D_v11/src/points/settle.cpp": {
+      "sha256": "a7d7c6c32f9ca369d9b1f515a4add1dcb73ae8abc3a06efa7a1da0ba3ea9617d",
+      "bytes": 8758,
+      "same_after_capture": true
+    },
+    "morsehgp3D_v11/src/tower/ancestor_index.hpp": {
+      "sha256": "5fea0482c879d708482cb14dddb910f52e1d5c1896e4c6d3dab3f11244986cfd",
+      "bytes": 2949,
+      "same_after_capture": true
+    },
+    "morsehgp3D_v11/src/tower/ancestor_index.cpp": {
+      "sha256": "2b99e3843ef9ad5210b68393018a77299764441419527bf0acab09358ef14781",
+      "bytes": 2129,
+      "same_after_capture": true
+    }
+  }
+}

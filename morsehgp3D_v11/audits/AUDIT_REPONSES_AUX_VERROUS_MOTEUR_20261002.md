@@ -8,6 +8,24 @@ aux reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 Note maintenue en place ; détails et échanges clos dans les reçus.
 
+## S9 en développement : raccord des points
+
+Sur la capture du brouillon au-dessus de **53c027fe8**, les chemins
+mathématiques relus concordent : qualification aux coupes fermées,
+LCA, pendaison, propriétaire vivant, rang plancher maximal et plateaux
+atomiques. Six petits témoins recoupent **43 qualifications, 387 LCA et
+29 propositions de plancher**, ainsi que les blocs à chaque plateau et
+les entrées dans un bloc vivant. Les propositions flottantes sont
+corrigées par les deux certificats exacts du plancher et de son successeur.
+
+Cette contre-épreuve exclut le chemin de refus du tri :
+**le changement de comparateur après refus dans `entry_order` doit être
+corrigé**, selon le constat moteur. Aucun succès de ce modèle Python ne
+qualifie la sortie native S9. Le lecteur du fichier contrôle des
+conditions nécessaires ; le plancher maximal et l'arbre complet sont
+recoupés par les portes différentielles du moteur.
+[Périmètre, contre-épreuve et alerte de tri](../receipts/audit_s9_wip_20261005/README.md).
+
 ## S8 : signes et égalités exacts pour la future sortie points
 
 Relecture favorable au pin **53c027fe8**, sans nouveau défaut important

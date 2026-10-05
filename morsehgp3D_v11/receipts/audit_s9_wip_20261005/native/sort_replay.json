@@ -1,0 +1,33 @@
+{
+  "script_sha256": "5d4a10a24cf4e522e2f718a9b043b63cfd0f62c0d2af7ae1013e4e1d1a2cd8ad",
+  "runs": [
+    {
+      "argv": [
+        "python3",
+        "-S",
+        "-B",
+        "/workspaces/E-HGP/build/v11-audit-geant-native-20261005/build/native_evidence/s9_wip_20261005T160314Z/sort_refusal_model.py"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "seconds": 0.058901,
+      "output": "sort_refusal.json",
+      "sha256": "c5aeb531b1a5a0d1431943d48feb47bea4f4f48974ab975ab35f035ced591131"
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "-S",
+        "-B",
+        "/workspaces/E-HGP/build/v11-audit-geant-native-20261005/build/native_evidence/s9_wip_20261005T160314Z/sort_refusal_model.py"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "seconds": 0.105944,
+      "output": "sort_refusal_opt.json",
+      "sha256": "c5aeb531b1a5a0d1431943d48feb47bea4f4f48974ab975ab35f035ced591131"
+    }
+  ],
+  "normal_O_identical": true
+}

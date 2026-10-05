@@ -4,15 +4,32 @@
 quantized_u21_input_only / not_claimed`. Notes maintenues en place ;
 preuves détaillées dans les reçus immuables.
 
+**S9 en développement : corriger le refus pendant le tri des dates.**
+Dans la capture du brouillon, `entry_order` remplace l'ordre exact par
+l'ordre des sites après un refus, puis laisse `std::sort` continuer.
+Le contrôle du refus arrive trop tard : un modèle du partitionnement
+GCC montre une lecture hors tableau avec 17 entrées et un refus injecté.
+Arrêter le tri dès le refus, puis rendre son `Outcome`. Aucun crash natif
+ni nuage u21 déclenchant naturellement ce refus n'est revendiqué.
+[Constat, preuve et correction attendue](../receipts/audit_s9_wip_20261005/README.md).
+
 **G4 A2 : la sélection ordinaire est entièrement conforme.** Sur
 **b319efc84**, les profils u18/u21/u24 et poison u21 passent respectivement
 **914/824/824/825 tests**, sans échec ni résultat manquant ; arrêt ciblé
 certifié. Les dix portes CLI ordinaires auparavant manquantes passent.
-Restent les tests `long`, les sanitizers/TSan et le complément supports
-LiDAR W48 ; aucun nouveau contrat de temps n'est acquis.
+Restent les tests `long`, la fin des sanitizers/TSan et le complément
+supports LiDAR W48 ; aucun nouveau contrat de temps n'est acquis.
 [Reçu A2 vérifié](../receipts/audit_g4_a2_20261005/README.md).
 Les premières sessions interrompues et les **459 mutants u18 détectés**
 gardent leur [preuve distincte](../receipts/audit_g4_sorties_20261005/README.md).
+
+**G4 B : résultats partiels sous sanitizers, à compléter.** ASan/UBSan
+u24 passe 774/824 tests, TSan u21 759/824 ; les autres n'ont pas de résultat
+après l'échéance globale. Aucun échec individuel terminé ; arrêt ciblé
+certifié. Les portes API/IO et oracles supports passent dans les deux
+configurations. Reprendre les **50 et 65 portes manquantes** identifiées
+dans le reçu, avec un découpage adapté ; A2 ne les remplace pas.
+[Reçu B vérifié](../receipts/audit_g4_b_20261005/README.md).
 
 **S8 : arithmétique exacte relue, qualification native à poursuivre.**
 La tranche **53c027fe8** prépare les sommes de radicaux de la future sortie

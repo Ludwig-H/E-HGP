@@ -1,0 +1,683 @@
+{
+  "date_identity": "sqrt(1)+sqrt((date+1)^2)-sqrt(4)=date; toutes 1<date<2",
+  "date_rank": [
+    0,
+    1,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    16,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    2
+  ],
+  "initial_SiteIdx": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16
+  ],
+  "levels": [
+    [
+      0,
+      1
+    ],
+    [
+      1,
+      1
+    ],
+    [
+      4,
+      1
+    ],
+    [
+      1681,
+      400
+    ],
+    [
+      441,
+      100
+    ],
+    [
+      25,
+      4
+    ],
+    [
+      3969,
+      625
+    ],
+    [
+      16129,
+      2500
+    ],
+    [
+      4096,
+      625
+    ],
+    [
+      16641,
+      2500
+    ],
+    [
+      169,
+      25
+    ],
+    [
+      17161,
+      2500
+    ],
+    [
+      4356,
+      625
+    ],
+    [
+      17689,
+      2500
+    ],
+    [
+      4489,
+      625
+    ],
+    [
+      729,
+      100
+    ],
+    [
+      4624,
+      625
+    ],
+    [
+      18769,
+      2500
+    ],
+    [
+      4761,
+      625
+    ],
+    [
+      841,
+      100
+    ]
+  ],
+  "rational_blueprint": [
+    {
+      "M_rank": 3,
+      "Q_rank": 2,
+      "date": [
+        21,
+        20
+      ],
+      "floor_rank": 1,
+      "site": 0,
+      "strict": 1,
+      "t_rank": 1
+    },
+    {
+      "M_rank": 4,
+      "Q_rank": 2,
+      "date": [
+        11,
+        10
+      ],
+      "floor_rank": 1,
+      "site": 1,
+      "strict": 1,
+      "t_rank": 1
+    },
+    {
+      "M_rank": 6,
+      "Q_rank": 2,
+      "date": [
+        38,
+        25
+      ],
+      "floor_rank": 1,
+      "site": 2,
+      "strict": 1,
+      "t_rank": 1
+    },
+    {
+      "M_rank": 7,
+      "Q_rank": 2,
+      "date": [
+        77,
+        50
+      ],
+      "floor_rank": 1,
+      "site": 3,
+      "strict": 1,
+      "t_rank": 1
+    },
+    {
+      "M_rank": 8,
+      "Q_rank": 2,
+      "date": [
+        39,
+        25
+      ],
+      "floor_rank": 1,
+      "site": 4,
+      "strict": 1,
+      "t_rank": 1
+    },
+    {
+      "M_rank": 9,
+      "Q_rank": 2,
+      "date": [
+        79,
+        50
+      ],
+      "floor_rank": 1,
+      "site": 5,
+      "strict": 1,
+      "t_rank": 1
+    },
+    {
+      "M_rank": 10,
+      "Q_rank": 2,
+      "date": [
+        8,
+        5
+      ],
+      "floor_rank": 1,
+      "site": 6,
+      "strict": 1,
+      "t_rank": 1
+    },
+    {
+      "M_rank": 11,
+      "Q_rank": 2,
+      "date": [
+        81,
+        50
+      ],
+      "floor_rank": 1,
+      "site": 7,
+      "strict": 1,
+      "t_rank": 1
+    },
+    {
+      "M_rank": 19,
+      "Q_rank": 2,
+      "date": [
+        19,
+        10
+      ],
+      "floor_rank": 1,
+      "site": 8,
+      "strict": 1,
+      "t_rank": 1
+    },
+    {
+      "M_rank": 12,
+      "Q_rank": 2,
+      "date": [
+        41,
+        25
+      ],
+      "floor_rank": 1,
+      "site": 9,
+      "strict": 1,
+      "t_rank": 1
+    },
+    {
+      "M_rank": 13,
+      "Q_rank": 2,
+      "date": [
+        83,
+        50
+      ],
+      "floor_rank": 1,
+      "site": 10,
+      "strict": 1,
+      "t_rank": 1
+    },
+    {
+      "M_rank": 14,
+      "Q_rank": 2,
+      "date": [
+        42,
+        25
+      ],
+      "floor_rank": 1,
+      "site": 11,
+      "strict": 1,
+      "t_rank": 1
+    },
+    {
+      "M_rank": 15,
+      "Q_rank": 2,
+      "date": [
+        17,
+        10
+      ],
+      "floor_rank": 1,
+      "site": 12,
+      "strict": 1,
+      "t_rank": 1
+    },
+    {
+      "M_rank": 16,
+      "Q_rank": 2,
+      "date": [
+        43,
+        25
+      ],
+      "floor_rank": 1,
+      "site": 13,
+      "strict": 1,
+      "t_rank": 1
+    },
+    {
+      "M_rank": 17,
+      "Q_rank": 2,
+      "date": [
+        87,
+        50
+      ],
+      "floor_rank": 1,
+      "site": 14,
+      "strict": 1,
+      "t_rank": 1
+    },
+    {
+      "M_rank": 18,
+      "Q_rank": 2,
+      "date": [
+        44,
+        25
+      ],
+      "floor_rank": 1,
+      "site": 15,
+      "strict": 1,
+      "t_rank": 1
+    },
+    {
+      "M_rank": 5,
+      "Q_rank": 2,
+      "date": [
+        3,
+        2
+      ],
+      "floor_rank": 1,
+      "site": 16,
+      "strict": 1,
+      "t_rank": 1
+    }
+  ],
+  "results": [
+    {
+      "calls": 21,
+      "comparisons": [
+        {
+          "call": 1,
+          "left": 1,
+          "relation": "date_exacte",
+          "result": true,
+          "right": 8
+        },
+        {
+          "call": 2,
+          "left": 8,
+          "relation": "date_exacte",
+          "result": false,
+          "right": 16
+        },
+        {
+          "call": 3,
+          "left": 1,
+          "relation": "date_exacte",
+          "result": true,
+          "right": 16
+        },
+        {
+          "call": 4,
+          "left": 1,
+          "relation": "date_exacte",
+          "result": true,
+          "right": 16
+        },
+        {
+          "call": 5,
+          "left": 2,
+          "relation": "date_exacte",
+          "result": false,
+          "right": 16
+        },
+        {
+          "call": 6,
+          "left": 16,
+          "relation": "date_exacte",
+          "result": false,
+          "right": 0
+        },
+        {
+          "call": 7,
+          "left": 3,
+          "relation": "date_exacte",
+          "result": false,
+          "right": 16
+        },
+        {
+          "call": 8,
+          "left": 16,
+          "relation": "date_exacte",
+          "result": true,
+          "right": 15
+        },
+        {
+          "call": 9,
+          "left": 16,
+          "relation": "date_exacte",
+          "result": true,
+          "right": 14
+        },
+        {
+          "call": 10,
+          "left": 16,
+          "relation": "date_exacte",
+          "result": true,
+          "right": 13
+        },
+        {
+          "call": 11,
+          "left": 16,
+          "relation": "date_exacte",
+          "result": true,
+          "right": 12
+        },
+        {
+          "call": 12,
+          "left": 16,
+          "relation": "date_exacte",
+          "result": true,
+          "right": 11
+        },
+        {
+          "call": 13,
+          "left": 16,
+          "relation": "date_exacte",
+          "result": true,
+          "right": 10
+        },
+        {
+          "call": 14,
+          "left": 16,
+          "relation": "date_exacte",
+          "result": true,
+          "right": 9
+        },
+        {
+          "call": 15,
+          "left": 16,
+          "relation": "date_exacte",
+          "result": true,
+          "right": 8
+        },
+        {
+          "call": 16,
+          "left": 16,
+          "relation": "date_exacte",
+          "result": true,
+          "right": 7
+        },
+        {
+          "call": 17,
+          "left": 16,
+          "relation": "date_exacte",
+          "result": true,
+          "right": 6
+        },
+        {
+          "call": 18,
+          "left": 16,
+          "relation": "date_exacte",
+          "result": true,
+          "right": 5
+        },
+        {
+          "call": 19,
+          "left": 16,
+          "relation": "date_exacte",
+          "result": true,
+          "right": 4
+        },
+        {
+          "call": 20,
+          "left": 16,
+          "relation": "date_exacte",
+          "result": true,
+          "right": 3
+        },
+        {
+          "call": 21,
+          "left": 16,
+          "relation": "date_exacte",
+          "result": false,
+          "right": 0
+        }
+      ],
+      "injected_refusal": false,
+      "mode": "no_refusal",
+      "phase": "unguarded_partition",
+      "pivot_SiteIdx": 16,
+      "result": {
+        "cut": 3,
+        "status": "partition_complete"
+      }
+    },
+    {
+      "calls": 19,
+      "comparisons": [
+        {
+          "call": 1,
+          "left": 1,
+          "relation": "date_exacte",
+          "result": true,
+          "right": 8
+        },
+        {
+          "call": 2,
+          "left": 8,
+          "relation": "date_exacte",
+          "result": false,
+          "right": 16
+        },
+        {
+          "call": 3,
+          "left": 1,
+          "relation": "date_exacte",
+          "result": true,
+          "right": 16
+        },
+        {
+          "call": 4,
+          "left": 1,
+          "relation": "SiteIdx",
+          "result": true,
+          "right": 16
+        },
+        {
+          "call": 5,
+          "left": 2,
+          "relation": "SiteIdx",
+          "result": true,
+          "right": 16
+        },
+        {
+          "call": 6,
+          "left": 3,
+          "relation": "SiteIdx",
+          "result": true,
+          "right": 16
+        },
+        {
+          "call": 7,
+          "left": 4,
+          "relation": "SiteIdx",
+          "result": true,
+          "right": 16
+        },
+        {
+          "call": 8,
+          "left": 5,
+          "relation": "SiteIdx",
+          "result": true,
+          "right": 16
+        },
+        {
+          "call": 9,
+          "left": 6,
+          "relation": "SiteIdx",
+          "result": true,
+          "right": 16
+        },
+        {
+          "call": 10,
+          "left": 7,
+          "relation": "SiteIdx",
+          "result": true,
+          "right": 16
+        },
+        {
+          "call": 11,
+          "left": 8,
+          "relation": "SiteIdx",
+          "result": true,
+          "right": 16
+        },
+        {
+          "call": 12,
+          "left": 9,
+          "relation": "SiteIdx",
+          "result": true,
+          "right": 16
+        },
+        {
+          "call": 13,
+          "left": 10,
+          "relation": "SiteIdx",
+          "result": true,
+          "right": 16
+        },
+        {
+          "call": 14,
+          "left": 11,
+          "relation": "SiteIdx",
+          "result": true,
+          "right": 16
+        },
+        {
+          "call": 15,
+          "left": 12,
+          "relation": "SiteIdx",
+          "result": true,
+          "right": 16
+        },
+        {
+          "call": 16,
+          "left": 13,
+          "relation": "SiteIdx",
+          "result": true,
+          "right": 16
+        },
+        {
+          "call": 17,
+          "left": 14,
+          "relation": "SiteIdx",
+          "result": true,
+          "right": 16
+        },
+        {
+          "call": 18,
+          "left": 15,
+          "relation": "SiteIdx",
+          "result": true,
+          "right": 16
+        },
+        {
+          "call": 19,
+          "left": 0,
+          "relation": "SiteIdx",
+          "result": true,
+          "right": 16
+        }
+      ],
+      "injected_refusal": true,
+      "mode": "fallback_SiteIdx",
+      "phase": "unguarded_partition",
+      "pivot_SiteIdx": 16,
+      "result": {
+        "index": 17,
+        "status": "read_out_of_range",
+        "valid_indices": [
+          0,
+          16
+        ]
+      }
+    },
+    {
+      "calls": 4,
+      "comparisons": [
+        {
+          "call": 1,
+          "left": 1,
+          "relation": "date_exacte",
+          "result": true,
+          "right": 8
+        },
+        {
+          "call": 2,
+          "left": 8,
+          "relation": "date_exacte",
+          "result": false,
+          "right": 16
+        },
+        {
+          "call": 3,
+          "left": 1,
+          "relation": "date_exacte",
+          "result": true,
+          "right": 16
+        },
+        {
+          "call": 4,
+          "left": 1,
+          "relation": "Outcome_refused_immediatement",
+          "right": 16
+        }
+      ],
+      "injected_refusal": true,
+      "mode": "immediate_refusal",
+      "phase": "unguarded_partition",
+      "pivot_SiteIdx": 16,
+      "result": {
+        "status": "refusal_propagated_before_read_out_of_range"
+      }
+    }
+  ],
+  "schema": "ehgp.audit.checked_sort_model.v1",
+  "scope": "Refus injecte du comparateur ; blueprint rationnel, pas catalogue geometrique, nuage u21 ni execution C++",
+  "sites": 17
+}

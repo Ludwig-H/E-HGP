@@ -1,0 +1,883 @@
+{
+  "excluded_active_session": "v11.20261005.claudequall",
+  "gcp_calls_by_auditor": 0,
+  "mutants": null,
+  "native_runs_by_auditor": 0,
+  "qualification_complete": false,
+  "schema": "ehgp.v11.audit.g4_b_summary.v1",
+  "selected_matrix_complete": false,
+  "sessions": [
+    {
+      "archive_bytes": 107612,
+      "archive_sha256": "8faaacf3c58cf1b6ebf5ff96e2d454de5b4c684f881fb28ce7015a6bdafae3c7",
+      "budget_seconds": 2100,
+      "configurations": [
+        {
+          "completed_passed_count": 774,
+          "conforming": false,
+          "critical_verdicts": [
+            {
+              "seconds": "0.03",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_sha256"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_hex"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_input"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_input_sizes"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_input_unreadable"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_input_budget"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_inventaire"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_plan_syntax"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_plan_parent"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_plan_conflicts"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_plan_inputs"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_create_names"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_parent_unwritable"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_commit"
+            },
+            {
+              "seconds": "0.03",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_noreplace"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_orphan"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_discard"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_retract"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_write_failure"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_inventaire"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_fault_starvation"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_fault_inventaire"
+            },
+            {
+              "seconds": "0.43",
+              "state": "Passed",
+              "test": "mhgp11_io_sha256"
+            },
+            {
+              "seconds": "0.45",
+              "state": "Passed",
+              "test": "mhgp11_io_sha256_opt"
+            },
+            {
+              "seconds": "0.06",
+              "state": "Passed",
+              "test": "mhgp11_api_session_released"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_session_product_alive"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_session_refusals"
+            },
+            {
+              "seconds": "1.49",
+              "state": "Passed",
+              "test": "mhgp11_api_session_equivalence"
+            },
+            {
+              "seconds": "0.32",
+              "state": "Passed",
+              "test": "mhgp11_api_session_tree_digest"
+            },
+            {
+              "seconds": "0.03",
+              "state": "Passed",
+              "test": "mhgp11_api_session_provenance"
+            },
+            {
+              "seconds": "0.04",
+              "state": "Passed",
+              "test": "mhgp11_api_session_after_publish"
+            },
+            {
+              "seconds": "0.03",
+              "state": "Passed",
+              "test": "mhgp11_api_session_session_identity"
+            },
+            {
+              "seconds": "1.18",
+              "state": "Passed",
+              "test": "mhgp11_api_session_engine"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_session_inventaire"
+            },
+            {
+              "seconds": "0.09",
+              "state": "Passed",
+              "test": "mhgp11_api_session_destroyed_live"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_session_destroyed_released"
+            },
+            {
+              "seconds": "0.13",
+              "state": "Passed",
+              "test": "mhgp11_api_publish_reader"
+            },
+            {
+              "seconds": "0.21",
+              "state": "Passed",
+              "test": "mhgp11_api_publish_reader_opt"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_session_fault_session"
+            },
+            {
+              "seconds": "0.04",
+              "state": "Passed",
+              "test": "mhgp11_api_session_fault_starvation"
+            },
+            {
+              "seconds": "0.03",
+              "state": "Passed",
+              "test": "mhgp11_api_session_fault_publication"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_session_fault_inventaire"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_modes"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_judge"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_inventaire"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_none"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_upward"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_ftz_daz"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_inexact"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_underflow"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_denormal"
+            },
+            {
+              "seconds": "0.86",
+              "state": "Passed",
+              "test": "mhgp11_cli_contract"
+            },
+            {
+              "seconds": "0.89",
+              "state": "Passed",
+              "test": "mhgp11_cli_contract_opt"
+            }
+          ],
+          "ctest_log_sha256": "8f1199f46f95399190a2674e64c385c617384541e1ba300e44b390ed4dbf54b3",
+          "failed_tests": [],
+          "important_verdicts": [
+            {
+              "seconds": null,
+              "state": "not_selected",
+              "test": "mhgp11_cli_full_identity_scale32000_k10"
+            },
+            {
+              "seconds": null,
+              "state": "no_result",
+              "test": "mhgp11_cli_full_determinism_scale8000_opt"
+            },
+            {
+              "seconds": null,
+              "state": "no_result",
+              "test": "mhgp11_cli_full_identity_lidar_ng00_k5_opt"
+            },
+            {
+              "seconds": null,
+              "state": "no_result",
+              "test": "mhgp11_cli_full_identity_lidar_ng01_k5_opt"
+            },
+            {
+              "seconds": null,
+              "state": "no_result",
+              "test": "mhgp11_cli_full_identity_lidar_ng02_k5_opt"
+            },
+            {
+              "seconds": null,
+              "state": "not_selected",
+              "test": "mhgp11_cli_full_identity_lidar_ng00_k10"
+            },
+            {
+              "seconds": null,
+              "state": "no_result",
+              "test": "mhgp11_cli_supports_scale8000_opt"
+            },
+            {
+              "seconds": null,
+              "state": "no_result",
+              "test": "mhgp11_cli_supports_scale16000_opt"
+            },
+            {
+              "seconds": null,
+              "state": "no_result",
+              "test": "mhgp11_cli_supports_scale32000_opt"
+            },
+            {
+              "seconds": null,
+              "state": "no_result",
+              "test": "mhgp11_cli_supports_lidar_ng00_k5_opt"
+            },
+            {
+              "seconds": null,
+              "state": "no_result",
+              "test": "mhgp11_cli_supports_lidar_ng01_k5_opt"
+            },
+            {
+              "seconds": null,
+              "state": "no_result",
+              "test": "mhgp11_cli_supports_lidar_ng02_k5_opt"
+            },
+            {
+              "seconds": "48.50",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_oracle"
+            },
+            {
+              "seconds": "45.04",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_oracle_opt"
+            },
+            {
+              "seconds": "0.15",
+              "state": "Passed",
+              "test": "mhgp11_supports_hierarchy_sphere5"
+            },
+            {
+              "seconds": "0.04",
+              "state": "Passed",
+              "test": "mhgp11_supports_hierarchy_sphere9"
+            }
+          ],
+          "inventory_sha256": "334572d8b5edb68c278ee3f785348a4a557a8d197cc14b7566ecfac99b795e18",
+          "missing_tests": [
+            "mhgp11_catalogue_euler_lidar_ng02_k5",
+            "mhgp11_tower_order_identity_scale8000",
+            "mhgp11_tower_attach_scale8000",
+            "mhgp11_tower_order_identity_scale16000",
+            "mhgp11_tower_attach_scale16000",
+            "mhgp11_tower_order_identity_scale32000",
+            "mhgp11_tower_attach_scale32000",
+            "mhgp11_tower_attach_e1e2_scale8000",
+            "mhgp11_tower_attach_e1e2_scale32000",
+            "mhgp11_tower_order_identity_lidar_ng00_k5",
+            "mhgp11_tower_attach_e1e2_lidar_ng00_k5",
+            "mhgp11_tower_attach_export_lidar_ng00_k5_opt",
+            "mhgp11_tower_order_identity_lidar_ng01_k5",
+            "mhgp11_tower_attach_e1e2_lidar_ng01_k5",
+            "mhgp11_tower_attach_export_lidar_ng01_k5_opt",
+            "mhgp11_tower_order_identity_lidar_ng02_k5",
+            "mhgp11_tower_attach_e1e2_lidar_ng02_k5",
+            "mhgp11_tower_attach_export_lidar_ng02_k5_opt",
+            "mhgp11_supports_sample_judge_scale8000_opt",
+            "mhgp11_supports_sample_judge_grid8000_opt",
+            "mhgp11_supports_sample_judge_lidar_ng00_k5_opt",
+            "mhgp11_supports_registers_uniform8000_k5_opt",
+            "mhgp11_supports_registers_grid8000_k5_opt",
+            "mhgp11_supports_registers_uniform16000_k5_opt",
+            "mhgp11_supports_registers_uniform32000_k5_opt",
+            "mhgp11_supports_registers_lidar_ng00_k5_opt",
+            "mhgp11_supports_registers_lidar_ng01_k5_opt",
+            "mhgp11_supports_registers_lidar_ng02_k5_opt",
+            "mhgp11_supports_hierarchy_scale8000",
+            "mhgp11_supports_hierarchy_scale16000",
+            "mhgp11_supports_hierarchy_scale32000",
+            "mhgp11_supports_hierarchy_permutation_scale8000",
+            "mhgp11_supports_hierarchy_grid8000",
+            "mhgp11_supports_hierarchy_permutation_grid8000",
+            "mhgp11_supports_hierarchy_lidar_ng00_k5",
+            "mhgp11_supports_hierarchy_lidar_ng01_k5",
+            "mhgp11_supports_hierarchy_lidar_ng02_k5",
+            "mhgp11_cli_full_identity_scale8000_opt",
+            "mhgp11_cli_full_identity_scale16000_opt",
+            "mhgp11_cli_full_identity_scale32000_opt",
+            "mhgp11_cli_full_determinism_scale8000_opt",
+            "mhgp11_cli_full_identity_lidar_ng00_k5_opt",
+            "mhgp11_cli_full_identity_lidar_ng01_k5_opt",
+            "mhgp11_cli_full_identity_lidar_ng02_k5_opt",
+            "mhgp11_cli_supports_scale8000_opt",
+            "mhgp11_cli_supports_scale16000_opt",
+            "mhgp11_cli_supports_scale32000_opt",
+            "mhgp11_cli_supports_lidar_ng00_k5_opt",
+            "mhgp11_cli_supports_lidar_ng01_k5_opt",
+            "mhgp11_cli_supports_lidar_ng02_k5_opt"
+          ],
+          "name": "gcc_asan_ubsan",
+          "reason": "ctest : timeout",
+          "seconds": 2100.369,
+          "status": "timeout",
+          "tests": {
+            "ctest_failed": null,
+            "ctest_total": null,
+            "failed": 0,
+            "not_run": 50,
+            "passed": 774,
+            "selected": 824
+          }
+        },
+        {
+          "completed_passed_count": 759,
+          "conforming": false,
+          "critical_verdicts": [
+            {
+              "seconds": "0.04",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_sha256"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_hex"
+            },
+            {
+              "seconds": "0.05",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_input"
+            },
+            {
+              "seconds": "0.05",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_input_sizes"
+            },
+            {
+              "seconds": "0.04",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_input_unreadable"
+            },
+            {
+              "seconds": "0.05",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_input_budget"
+            },
+            {
+              "seconds": "0.05",
+              "state": "Passed",
+              "test": "mhgp11_io_unit_inventaire"
+            },
+            {
+              "seconds": "0.05",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_plan_syntax"
+            },
+            {
+              "seconds": "0.04",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_plan_parent"
+            },
+            {
+              "seconds": "0.03",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_plan_conflicts"
+            },
+            {
+              "seconds": "0.03",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_plan_inputs"
+            },
+            {
+              "seconds": "0.03",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_create_names"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_parent_unwritable"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_commit"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_noreplace"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_orphan"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_discard"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_retract"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_write_failure"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_transaction_inventaire"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_io_fault_starvation"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_io_fault_inventaire"
+            },
+            {
+              "seconds": "0.73",
+              "state": "Passed",
+              "test": "mhgp11_io_sha256"
+            },
+            {
+              "seconds": "0.79",
+              "state": "Passed",
+              "test": "mhgp11_io_sha256_opt"
+            },
+            {
+              "seconds": "0.27",
+              "state": "Passed",
+              "test": "mhgp11_api_session_released"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_session_product_alive"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_session_refusals"
+            },
+            {
+              "seconds": "3.58",
+              "state": "Passed",
+              "test": "mhgp11_api_session_equivalence"
+            },
+            {
+              "seconds": "0.68",
+              "state": "Passed",
+              "test": "mhgp11_api_session_tree_digest"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_session_provenance"
+            },
+            {
+              "seconds": "0.04",
+              "state": "Passed",
+              "test": "mhgp11_api_session_after_publish"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_session_session_identity"
+            },
+            {
+              "seconds": "2.95",
+              "state": "Passed",
+              "test": "mhgp11_api_session_engine"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_session_inventaire"
+            },
+            {
+              "seconds": "0.09",
+              "state": "Passed",
+              "test": "mhgp11_api_session_destroyed_live"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_session_destroyed_released"
+            },
+            {
+              "seconds": "0.11",
+              "state": "Passed",
+              "test": "mhgp11_api_publish_reader"
+            },
+            {
+              "seconds": "0.19",
+              "state": "Passed",
+              "test": "mhgp11_api_publish_reader_opt"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_session_fault_session"
+            },
+            {
+              "seconds": "0.14",
+              "state": "Passed",
+              "test": "mhgp11_api_session_fault_starvation"
+            },
+            {
+              "seconds": "0.03",
+              "state": "Passed",
+              "test": "mhgp11_api_session_fault_publication"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_session_fault_inventaire"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_modes"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_judge"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_inventaire"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_none"
+            },
+            {
+              "seconds": "0.01",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_upward"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_ftz_daz"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_inexact"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_underflow"
+            },
+            {
+              "seconds": "0.02",
+              "state": "Passed",
+              "test": "mhgp11_api_selftest_fault_denormal"
+            },
+            {
+              "seconds": "0.49",
+              "state": "Passed",
+              "test": "mhgp11_cli_contract"
+            },
+            {
+              "seconds": "0.55",
+              "state": "Passed",
+              "test": "mhgp11_cli_contract_opt"
+            }
+          ],
+          "ctest_log_sha256": "b11d52f8665c8b0ca3a10f98327e1426debcee8d312d3cc90c3d5219f70e132c",
+          "failed_tests": [],
+          "important_verdicts": [
+            {
+              "seconds": null,
+              "state": "not_selected",
+              "test": "mhgp11_cli_full_identity_scale32000_k10"
+            },
+            {
+              "seconds": null,
+              "state": "no_result",
+              "test": "mhgp11_cli_full_determinism_scale8000_opt"
+            },
+            {
+              "seconds": null,
+              "state": "no_result",
+              "test": "mhgp11_cli_full_identity_lidar_ng00_k5_opt"
+            },
+            {
+              "seconds": null,
+              "state": "no_result",
+              "test": "mhgp11_cli_full_identity_lidar_ng01_k5_opt"
+            },
+            {
+              "seconds": null,
+              "state": "no_result",
+              "test": "mhgp11_cli_full_identity_lidar_ng02_k5_opt"
+            },
+            {
+              "seconds": null,
+              "state": "not_selected",
+              "test": "mhgp11_cli_full_identity_lidar_ng00_k10"
+            },
+            {
+              "seconds": null,
+              "state": "no_result",
+              "test": "mhgp11_cli_supports_scale8000_opt"
+            },
+            {
+              "seconds": null,
+              "state": "no_result",
+              "test": "mhgp11_cli_supports_scale16000_opt"
+            },
+            {
+              "seconds": null,
+              "state": "no_result",
+              "test": "mhgp11_cli_supports_scale32000_opt"
+            },
+            {
+              "seconds": null,
+              "state": "no_result",
+              "test": "mhgp11_cli_supports_lidar_ng00_k5_opt"
+            },
+            {
+              "seconds": null,
+              "state": "no_result",
+              "test": "mhgp11_cli_supports_lidar_ng01_k5_opt"
+            },
+            {
+              "seconds": null,
+              "state": "no_result",
+              "test": "mhgp11_cli_supports_lidar_ng02_k5_opt"
+            },
+            {
+              "seconds": "48.53",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_oracle"
+            },
+            {
+              "seconds": "44.55",
+              "state": "Passed",
+              "test": "mhgp11_cli_supports_oracle_opt"
+            },
+            {
+              "seconds": "0.38",
+              "state": "Passed",
+              "test": "mhgp11_supports_hierarchy_sphere5"
+            },
+            {
+              "seconds": "0.06",
+              "state": "Passed",
+              "test": "mhgp11_supports_hierarchy_sphere9"
+            }
+          ],
+          "inventory_sha256": "334572d8b5edb68c278ee3f785348a4a557a8d197cc14b7566ecfac99b795e18",
+          "missing_tests": [
+            "mhgp11_support_lidar_sentinel",
+            "mhgp11_catalogue_euler_scale8000",
+            "mhgp11_catalogue_euler_scale16000",
+            "mhgp11_catalogue_euler_scale32000",
+            "mhgp11_catalogue_euler_lidar_ng00_k5",
+            "mhgp11_catalogue_euler_lidar_ng01_k5",
+            "mhgp11_catalogue_euler_lidar_ng02_k5",
+            "mhgp11_tower_order_identity_scale8000",
+            "mhgp11_tower_attach_scale8000",
+            "mhgp11_tower_order_identity_scale16000",
+            "mhgp11_tower_attach_scale16000",
+            "mhgp11_tower_order_identity_scale32000",
+            "mhgp11_tower_attach_scale32000",
+            "mhgp11_tower_attach_e1e2_scale8000",
+            "mhgp11_tower_attach_e1e2_scale32000",
+            "mhgp11_tower_order_identity_lidar_ng00_k5",
+            "mhgp11_tower_attach_e1e2_lidar_ng00_k5",
+            "mhgp11_tower_attach_export_lidar_ng00_k5_opt",
+            "mhgp11_tower_order_identity_lidar_ng01_k5",
+            "mhgp11_tower_attach_e1e2_lidar_ng01_k5",
+            "mhgp11_tower_attach_export_lidar_ng01_k5_opt",
+            "mhgp11_tower_order_identity_lidar_ng02_k5",
+            "mhgp11_tower_attach_e1e2_lidar_ng02_k5",
+            "mhgp11_tower_attach_export_lidar_ng02_k5_opt",
+            "mhgp11_supports_sample_judge_scale8000_opt",
+            "mhgp11_supports_sample_judge_grid8000_opt",
+            "mhgp11_supports_sample_judge_lidar_ng00_k5_opt",
+            "mhgp11_supports_registers_uniform8000_k5_opt",
+            "mhgp11_supports_registers_grid8000_k5_opt",
+            "mhgp11_supports_registers_uniform16000_k5_opt",
+            "mhgp11_supports_registers_uniform32000_k5_opt",
+            "mhgp11_supports_registers_lidar_ng00_k5_opt",
+            "mhgp11_supports_registers_lidar_ng01_k5_opt",
+            "mhgp11_supports_registers_lidar_ng02_k5_opt",
+            "mhgp11_supports_hierarchy_scale8000",
+            "mhgp11_supports_hierarchy_scale16000",
+            "mhgp11_supports_hierarchy_scale32000",
+            "mhgp11_supports_hierarchy_permutation_scale8000",
+            "mhgp11_supports_hierarchy_grid8000",
+            "mhgp11_supports_hierarchy_permutation_grid8000",
+            "mhgp11_supports_hierarchy_lidar_ng00_k5",
+            "mhgp11_supports_hierarchy_lidar_ng01_k5",
+            "mhgp11_supports_hierarchy_lidar_ng02_k5",
+            "mhgp11_cli_full_identity_scale8000_opt",
+            "mhgp11_cli_full_identity_scale16000_opt",
+            "mhgp11_cli_full_identity_scale32000_opt",
+            "mhgp11_cli_full_determinism_scale8000_opt",
+            "mhgp11_cli_full_identity_lidar_ng00_k5",
+            "mhgp11_cli_full_identity_lidar_ng00_k5_opt",
+            "mhgp11_cli_full_identity_lidar_ng01_k5",
+            "mhgp11_cli_full_identity_lidar_ng01_k5_opt",
+            "mhgp11_cli_full_identity_lidar_ng02_k5",
+            "mhgp11_cli_full_identity_lidar_ng02_k5_opt",
+            "mhgp11_cli_supports_scale8000",
+            "mhgp11_cli_supports_scale8000_opt",
+            "mhgp11_cli_supports_scale16000",
+            "mhgp11_cli_supports_scale16000_opt",
+            "mhgp11_cli_supports_scale32000",
+            "mhgp11_cli_supports_scale32000_opt",
+            "mhgp11_cli_supports_lidar_ng00_k5",
+            "mhgp11_cli_supports_lidar_ng00_k5_opt",
+            "mhgp11_cli_supports_lidar_ng01_k5",
+            "mhgp11_cli_supports_lidar_ng01_k5_opt",
+            "mhgp11_cli_supports_lidar_ng02_k5",
+            "mhgp11_cli_supports_lidar_ng02_k5_opt"
+          ],
+          "name": "gcc_tsan",
+          "reason": "ctest : timeout",
+          "seconds": 2100.449,
+          "status": "timeout",
+          "tests": {
+            "ctest_failed": null,
+            "ctest_total": null,
+            "failed": 0,
+            "not_run": 65,
+            "passed": 759,
+            "selected": 824
+          }
+        }
+      ],
+      "matrix_complete": true,
+      "matrix_conforming": false,
+      "package_sha256": "9531ff2a108981bea0999ed6c3f13cde7b5a3f13f5b667a1df9e31e23f7ffac2",
+      "plan_sha256": "903cce8e52c33a8974c74fbcad6253ecf49899c46cc28c7a8cb92bb025ae89dc",
+      "receipt_status": "failed_remote",
+      "session": "v11.20261005.claudequalb",
+      "source_commit": "b319efc8477fec234afc0b31e86f8a43e3023641",
+      "targeted_closure_verified": true,
+      "worker_exit_code": 1
+    }
+  ],
+  "source_commit": "b319efc8477fec234afc0b31e86f8a43e3023641"
+}

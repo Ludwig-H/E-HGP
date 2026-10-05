@@ -1,0 +1,41 @@
+{
+  "scope": "S9 WIP points et AncestorIndex ; API/CLI/ecrivain/lecteur exclus, audites par root. Lecture seule dev ; aucun build/native/GCP.",
+  "base_head": "53c027fe848b0d890f164eb87ebf347338c58d55",
+  "source_status": "11 sources WIP captures stables, fermeture inchangee ; dependances core/num/sched/tower identiques au HEAD de base",
+  "finding": {
+    "priority": "P1_chemin_refus_a_corriger_avant_publication_S9",
+    "source": "morsehgp3D_v11/src/points/point_tree.cpp:80-90",
+    "source_sha256": "760f4a46b0f027c2769f695faac98f231b87d31156a4a549b94cb193b649c06d",
+    "fact": "std::sort compare d abord dates exactes, puis change globalement de relation vers SiteIdx au premier Outcome refuse. Refus controle seulement apres std::sort.",
+    "causal_model": "Groupe de17 SiteIdx croissants ; dates d1<d16<d8 placent pivot16 apres3 comparaisons median-of-three. Refus injecte a comparaison4 bascule vers SiteIdx. Pivot16 devient maximum unique : scan gauche non garde atteint indice17 hors tableau0..16.",
+    "controls": "Sans refus : partition terminee cut3. Refus propage immediatement : sortie a comparaison4 sans acces hors borne. Basculement :19 comparaisons, tentative lecture indice17.",
+    "domain_blueprint": "17 dates rationnelles dans(1,2), d1=1.1,d16=1.5,d8=1.9. Triples sqrt(1)+sqrt((d+1)^2)-sqrt(4)=d, tous floor_rank1/strict1 dans catalogue de niveaux blueprint[0,1,4]+M>4.",
+    "inference": "Le chemin de refus perd la precondition de relation d ordre constante de std::sort ; le modele de partition GCC11.4 montre le risque memoire de la sentinelle brisee.",
+    "not_claimed": [
+      "aucun crash C++ natif execute",
+      "aucun nuage u18/u21/u24 naturel demonstrant radical_sign_budget",
+      "blueprint rationnel non prouve comme catalogue geometrique HGP",
+      "aucune qualification de sortie points"
+    ],
+    "recommendation": "Propager Outcome immediatement dans un tri qui l accepte ; ou quitter std::sort par une exception de controle interceptee dans entry_order, avant de sortir du noexcept. Ne jamais changer la relation et reprendre le tri.",
+    "future_gate": "Sur G4, exercer la primitive de tri corrigee avec ces17 elements et refus injecte a comparaison4 : meme raison refusee, aucun acces hors borne sous ASan, aucun resultat partiel. Injection dans le harnais, aucun crochet dans le produit.",
+    "references": [
+      "https://raw.githubusercontent.com/gcc-mirror/gcc/releases/gcc-11.4.0/libstdc%2B%2B-v3/include/bits/stl_algo.h",
+      "https://timsong-cpp.github.io/cppwp/n4861/alg.sorting#3"
+    ]
+  },
+  "other_read_conclusions": [
+    "AncestorIndex construit en parents avant enfants, n<kNone et parent>enfant gardes avant acces ; profondeurs<=n-1, deux Buffer du budget, forest empruntee explicitement. Requetes exigent noeuds valides.",
+    "Qualification : deux passes site aux positions fixes, scratch prive par worker ; comptage de naissances sequentiel puis selection par tranches disjointes.",
+    "fill_roots : rangs voulus dedoublonnes par drapeau puis liste croissante ; fill_ranks parallelise sur tranches sans doublon, donc pas course d ecriture.",
+    "Pendaison : sorties et scratch prives par worker/site ; RootTable et niveaux lus seuls, racines a la demande sans ecriture ; Pool attend tous ouvriers avant retour et liberation.",
+    "RootTable reserve tous les L rangs, scratch 2*widest par worker, PointTree paie brouillons+colonnes pendant coexistence. S9 doit continuer a publier ces couts reels ; pas de qualification temps/memoire transferee."
+  ],
+  "big_known_note": {
+    "mandatory_assignment": "morsehgp3D_v11/src/num/rational.hpp:17 out.num_ = Big::from_i64(value)",
+    "optional_copy_sites": "return out dans factories Big/Rational : NRVO facultative ; const Big x=factory() ne cree pas une copie supplementaire de prvalue.",
+    "coverage": "MHGP11_POISON initialise seulement allocations Buffer(core/buffer.cpp:39), jamais Big locaux pile ; CMake SANITIZE=address,undefined ou TSAN=thread, aucune configuration MSan. Pas une porte pour lectures indeterminees de pile.",
+    "targeted_recommendation": "Remplacer affectation obligatoire par out.num_.assign(Big::from_i64(value)); ne pas definir customcopy nontriviale sans revoir contrainte Buffer<Term/Class>. Cette correction seule ne traite pas retours NRVO facultatifs.",
+    "status": "nuance formelle deja documentee par verif_s8, sans nouvelle alerte active ni consequence geometrie/crash demontree"
+  }
+}
