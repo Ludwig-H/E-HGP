@@ -1,0 +1,75 @@
+{
+  "corrected_matrix_sha256": "26b8ce49043ad7bb7d3faea9afb76b64df7d39a168f0273a36f3bddf9867b574",
+  "fina2_archive_sha256": "42425a0969d728688672785f34f3302b698cf2daea83ca6c62891d6ff9b28631",
+  "future_measurement_marking": {
+    "already_available_environment": "V11_SOURCE_PIN",
+    "closed_receipts_modified": false,
+    "controller": {
+      "repo_path": "gcp-migration/v11_session.py",
+      "sha256": "b86e5ff85d8cad6c7bd9da4e0dfbe4febc6fb980a1048a26a5478bcfbd92461d",
+      "source_kind_choice_anchor_lines": [
+        992,
+        995
+      ],
+      "worker_source_argument_anchor_line": 1732
+    },
+    "example_shape": "commit:<SHA complet du paquet>",
+    "minimal_bench_change": "worker_source = os.environ.get('V11_SOURCE_PIN', '')\ncommit = worker_source[len('commit:'):] if worker_source.startswith('commit:') else args.commit or None\n# provenance=dict(commit=commit, ...)\n",
+    "new_native_qualification_claimed": false,
+    "plan_correction": "Supprimer --commit b319efc84 du prochain plan ou le remplacer par le commit final choisi ; ne pas utiliser $V11_SOURCE_PIN comme argv litteral.",
+    "preference": "Commit complet de V11_SOURCE_PIN sous le worker ; --commit reste une annotation locale explicite hors source commit du worker.",
+    "worker": {
+      "command_token_substitution_anchor_lines": [
+        296,
+        304
+      ],
+      "export_anchor_lines": [
+        568,
+        569
+      ],
+      "repo_path": "gcp-migration/v11_worker.sh",
+      "sha256": "d625f5866fa7f5b644d1ab3dfb0e52e5dd806a44f08d045b29cff0af5c049c66",
+      "validated_source_anchor_lines": [
+        75,
+        85
+      ]
+    }
+  },
+  "inventory_member": "results/cmd/000_matrice/files/matrix/gcc_release/tests.json",
+  "inventory_sha256": "cc30ac0434ed2b10c78a3bd4ca5c9e64e36c621e7753e45e494d29de78e33353",
+  "judge_path": "morsehgp3D_v11/tools/g4_matrix.py",
+  "judge_sha256": "2c41d275732618539fc483962139c8a844c10636628b827dfd74cb2705dd9c21",
+  "matrix_path": "morsehgp3D_v11/tools/g4_matrix.json",
+  "native_or_cloud_runs": 0,
+  "old_evidence_commit": "8fa57f901eb0c9c518c5d012f0f4288a7d56ccce",
+  "old_matrix_sha256": "da0735542a1f806160eeb8cdb853703ca0e9f288626d521c88ff3c2f0fc9747d",
+  "old_snapshot_path": "morsehgp3D_v11/receipts/audit_g4_matrix_reprise_wip_20261005/matrix_snapshot.json",
+  "qualification_status": "source_corrected_not_native_requalified",
+  "result": {
+    "actual_judge_after": {
+      "reason": "",
+      "status": "ok"
+    },
+    "actual_judge_before": {
+      "reason": "aucune porte passee pour le(s) label(s) : lidar",
+      "status": "floor_violated"
+    },
+    "bench_environment_read_change_not_claimed_implemented": true,
+    "closed_receipts_modified": false,
+    "data_given": true,
+    "fixture_assumes_all_selected_pass": true,
+    "native_or_cloud_runs": 0,
+    "native_requalified": false,
+    "packaged_commit_already_exported_by_worker": true,
+    "selected_count": 873,
+    "selected_labels": [
+      "fast",
+      "oracle",
+      "unit"
+    ],
+    "sole_matrix_delta": "remove gcc_release.require_labels_if_data",
+    "source_corrected": true
+  },
+  "schema": "ehgp.v11.audit.g4_matrix_correction.v1",
+  "source_commit": "98a00955083d483306c4f92b9031e382e81b0e59"
+}

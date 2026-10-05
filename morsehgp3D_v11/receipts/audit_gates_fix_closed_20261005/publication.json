@@ -1,0 +1,15 @@
+{
+  "checked_utc": "2026-10-05T23:43:53.965981+00:00",
+  "four_source_sha256": {
+    "bench": "f893cd7c9afc074e3af808c90ca9095fd3a1779044842d1f221e9f059a40ab00",
+    "cli": "2750485824bceb1d2305e978ac025d49e3e25dfc8eb60b12778fa4de296f0cf7",
+    "cmake": "f58d8bb1033c9ae0df9ccd98a16c135bbea61fb2c28851820f16d9ec8c22e29d",
+    "probe": "2db41f412d4894ffb8688b86e6cc16b5e3a1a9e7329a6cce13a4330dc692fb42"
+  },
+  "four_sources_byte_identical_between_commits": true,
+  "historical_wip_capsule_unchanged": true,
+  "native_or_cloud_actions": 0,
+  "publication_confirmed_by": "Root message: commits98a/be05 published; notes reconciled, R1 open.",
+  "repair_commit": "be05bfad872d1cce15004ad82d165744534a69be",
+  "source_commit": "98a00955083d483306c4f92b9031e382e81b0e59"
+}

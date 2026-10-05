@@ -1,0 +1,91 @@
+{
+  "files": [
+    {
+      "bytes": 2697,
+      "path": "README.md",
+      "sha256": "4cb51904d87af7d0275f4891c28cf1024744118968d3be29b05b4007824721ed"
+    },
+    {
+      "bytes": 1354,
+      "path": "bench.diff",
+      "sha256": "593c4c2b17dc4dc7fa2959f7f2458b7ec07e795b5dda1c1fd63cdc156e6d3adf"
+    },
+    {
+      "bytes": 625,
+      "path": "cli.diff",
+      "sha256": "3e902fd5d906701b44e3bf7926e3f35a9b8ff4b47a000dd6c53168d9a607aa55"
+    },
+    {
+      "bytes": 3225,
+      "path": "matrix/matrix_correction.json",
+      "sha256": "deb05c6cc799e1c91daf10be7ff86b582cec6f8c4d45255f79402c4db415fd09"
+    },
+    {
+      "bytes": 4923,
+      "path": "matrix/replay_matrix_correction.py",
+      "sha256": "1545152a2a27757dae40c4bba856d9126a95dd7b0e141cfe6235cc5ec2595ac7"
+    },
+    {
+      "bytes": 23061,
+      "path": "proof.json",
+      "sha256": "a2448c157f8c084dad45de03d9ceb422f6ad36e1b713b95f94c5f87d8e4326ef"
+    },
+    {
+      "bytes": 766,
+      "path": "publication.json",
+      "sha256": "a6ed5bd223e5c1ba50aa7424e04b08e643a1966ede06046f1902508e5f650777"
+    },
+    {
+      "bytes": 4192,
+      "path": "replay.py",
+      "sha256": "fa0891a6f98b1909a1a97ddc155881da190d37abb3efd31d441679d4aa3ba48c"
+    },
+    {
+      "bytes": 10234,
+      "path": "tests.cmake",
+      "sha256": "f58d8bb1033c9ae0df9ccd98a16c135bbea61fb2c28851820f16d9ec8c22e29d"
+    }
+  ],
+  "native_or_cloud_actions": 0,
+  "normal_opt_identical_each_model": true,
+  "replay_checks": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "replay.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "python3",
+        "-O",
+        "-B",
+        "replay.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "replay_matrix_correction.py"
+      ],
+      "cwd": "matrix",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "python3",
+        "-O",
+        "-B",
+        "replay_matrix_correction.py"
+      ],
+      "cwd": "matrix",
+      "exit_code": 0
+    }
+  ],
+  "schema": "mhgp11_audit_capsule_manifest_v1",
+  "source_commit": "98a00955083d483306c4f92b9031e382e81b0e59"
+}

@@ -10,61 +10,59 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
-## Matrice G4 en cours : exigence LiDAR impossible dans le lot court
+## Matrice G4 : exigence LiDAR impossible corrigée en 98a009550
 
-Dans le WIP `v11-impl-l3` relu le 5 octobre à 23:15 UTC,
-`tools/g4_matrix.json` exclut désormais le label `lidar` du lot court
-`gcc_release`, mais conserve `require_labels_if_data=["lidar"]`.
-Avec `data_complet`, `judge_tests()` exige donc une réussite LiDAR
-que cette sélection interdit : même tous les tests sélectionnés
-PASS, la configuration reste non conforme.
+La correction publiée retire `require_labels_if_data=["lidar"]`
+du seul lot court `gcc_release`, qui exclut ces tests. Les deux lots
+d’échelle conservent leurs véritables portes et planchers LiDAR.
+Le refus artificiel signalé dans le WIP est donc corrigé en source,
+sans affaiblir les contrôles des lots qui traitent effectivement LiDAR.
 
-Retirer cette exigence **du seul lot court**. Les nouveaux lots
-d’échelle gardent les véritables portes et planchers LiDAR. Leur
-union couvre les 41 occurrences ordinaires absentes et les six
-identités supports de chaque profil ; le lot L exclut désormais
-les mutants. Aucun défaut moteur, aucune nouvelle session requise
-pour constater la contradiction du plan. Le juge réel, appelé sur un
-scénario explicitement construit où les 873 tests courts passent, rend
-`floor_violated` avec ce seul label absent ; le retrait ciblé donne `ok`.
-[Capture stable et contre-épreuve](../receipts/audit_g4_matrix_reprise_wip_20261005/README.md).
+L’union des lots d’échelle couvre les 41 occurrences ordinaires
+absentes et les six identités supports de chaque profil ; le lot L
+exclut désormais les mutants. Cela valide la sélection, pas l’exécution
+future ni son délai. Le témoin construit à 873 PASS, qui faisait
+échouer le juge sur ce seul label, reste archivé avec sa contre-épreuve.
+[Constat initial et correction minimale](../receipts/audit_g4_matrix_reprise_wip_20261005/README.md).
 
-## Correction API/CLI en cours : conserver les gardes encore valides
+## Correction API/CLI : gardes restaurées en be05bfad8
 
-Capture WIP stable du 5 octobre à 23:13 UTC, base **ef91a7f46**,
-worktree `v11-impl-l3`. **Avis favorable sur le raccord CLI** : la
-mutation et les 28 individus sont conservés, et la porte points
-atteint bien le paramétrage modifié. Le rejeu reste nécessaire.
+Relecture du correctif publié **be05bfad8**, conservé en **98a009550**.
+**La perte de gardes du premier WIP est réparée.**
+`supports_route.cpp` revient exactement à la source
+publiée **38b76701b** : verdict avec journal, fichiers et manifestes,
+identités entre voies, workers et appel public conservés.
 
-**API : les identités entre voies, workers et appel public restent
-contrôlées.** Séparer les SHA dépendant du profil corrige la cause des
-refus. Mais les six attentes suppriment aussi le journal commun aux
-profils et les SHA fichier/manifeste u21 déjà valides : la correction
-perd inutilement ces références contre une dérive commune des voies.
+`tests.cmake` choisit désormais les empreintes fichier/manifeste
+pour chacun des profils u18/u21/u24. Les six références u21 et tous
+les journaux sont conservés ; les six paires u24 correspondent aux
+sorties G4 de fins et la paire u18/8k à finm. Les autres nouvelles
+références u18 restent à qualifier au commit corrigé. Cette solution
+sur une seule ligne rend inutile le montage multiligne proposé à
+l’étape précédente. La capture initiale reste une preuve historique,
+pas un défaut imputé à la version publiée.
 
-Correction minimale : remettre `journal=<digest>` dans le verdict et
-les six attentes de tous les profils ; conserver en plus les SHA
-connus pour u21. Les journaux observés u18/8k et les six cas u24
-confirment leur identité avec les attendus historiques. Le helper
-accepte une seule valeur `LINE` : deux mots `LINE` ne constituent pas
-deux gardes. Un attendu unique contenant les deux lignes adjacentes,
-avec un vrai saut de ligne, est compatible avec son matcher ; une
-ligne conditionnelle u21 serait également suffisante. Le modèle
-borné rejette hashes, journal et comptes altérés ; le transport réel
-CMake/CTest reste à vérifier par la porte. Aucun défaut moteur déduit.
-[Capture figée et correction proposée](../receipts/audit_gates_fix_wip_20261005/README.md).
+**Raccord CLI toujours favorable** : mutation et plancher de 28
+conservés, porte points atteignant le paramétrage modifié. Le rejeu
+des campagnes API/CLI au commit corrigé reste nécessaire.
+[Correction publiée, treize sorties historiques recoupées et modèles rejoués](../receipts/audit_gates_fix_closed_20261005/README.md).
+La [capture initiale](../receipts/audit_gates_fix_wip_20261005/README.md)
+reste figée pour retracer le défaut de la première proposition.
 
-## Banc final après L2b : neutraliser la décision devenue inapplicable
+## Banc final après L2b : décision historique désactivée en be05bfad8
 
 Au pin **38b76701b**, `sorties_g4.py` appelle seulement `full` et
 `supports`, tous deux au masque 16379. Le chemin public supports
 construit désormais les forêts FULL avec son journal puis en extrait
 K. Aucune variante `order_tree`/7035, points ou plat n’est mesurée.
-Pourtant `decide()` peut encore émettre `build_order_par_defaut` ou
+Pourtant `decide()` pouvait encore émettre `build_order_par_defaut` ou
 `livrer_L2b`. Ce verdict ne peut plus décider entre deux algorithmes,
 puisque la voie K seule ne figure plus dans les appels du banc.
 
-Désactiver ce choix historique pour ce mode ; une nouvelle décision
+Le correctif publié **be05bfad8** désactive ce choix : `decide()` rend
+`sans_objet_post_l2b`, avec absence de voie `order_tree` mesurée. Les
+contrôles d’identité et le retour non nul en cas de défaut sont
+conservés. Avis favorable sur cette correction ; une nouvelle décision
 sur la voie K seule exigerait une variante explicitement mesurée.
 Les valeurs actuelles restent utilisables comme FULL versus sortie
 supports/L2b : le reçu clos est désormais vérifié et aucun nouveau run
@@ -76,6 +74,13 @@ copie sans vérification dans `provenance.commit`. Le préflight épingle
 réellement **38b76701b**. Corriger l’étiquette du banc et attribuer
 l’analyse au pin vérifié du reçu, en conservant l’annotation originale
 comme erreur de métadonnée ; ne pas réécrire le reçu brut.
+Pour les prochaines captures, le worker fournit déjà le commit complet
+réel dans `V11_SOURCE_PIN=commit:<SHA>`. Le banc peut lire cette variable
+et en tirer `provenance.commit`, avec `--commit` comme déclaration locale
+hors session. Le plan ne substitue pas les variables shell dans ses
+arguments : retirer son ancien `--commit b319efc84`, ou y passer le même
+SHA final qu’au contrôleur. Aucune nouvelle infrastructure nécessaire.
+[Sources du worker et correction proposée](../receipts/audit_gates_fix_closed_20261005/matrix/matrix_correction.json).
 [Chaînes d’appels, plan et modèle borné](../receipts/audit_finmesure_scope_20261005/README.md).
 
 ## Mesure finale close : l’étage tree dépasse toujours 100 ms
@@ -137,23 +142,29 @@ juge épinglé ; ce ne sont pas des compteurs JSON directement lus.
 Le différentiel S9 de l’arbre lui-même est passé séparément dans P9.
 [Reçu, contrat jugé et limites de conservation](../receipts/audit_g4_finp10_20261005/README.md).
 
-## Reprise ciblée après correction des portes
+## Reprise G4 après correction : quatre sessions au pin 98a009550
 
-Les 41 occurrences ordinaires sans résultat de fina2 ne figurent pas
-dans L/P10/P9/mesure. La proposition jointe conserve les quatre
-configurations et sélectionne exactement leurs 8/11/11/11 noms, sans
-rejouer la matrice entière. Les deux validateurs et une contrelecture
-indépendante confirment profils, poison, délais et sélection. Le JSON
-ciblé doit être intégré sous `tools/` au commit corrigé poussé avant
-exécution : le paquet exclut `receipts/` et le contrôleur refuse
-`python3 -c`. Aucun contournement, aucune session lancée par l’audit.
+La chaîne `clauderepriser1` à `clauderepriser4` utilise le commit
+corrigé **98a009550** et `data_complet`. Le préflight R1 est lu et la
+session est ouverte ; aucun nouveau PASS n’est acquis à ce stade.
+Les plans adoptés se répartissent ainsi :
 
-Les reprises des six portes supports_route en u18/u24 et ASan u24,
-puis des seules campagnes API/CLI u18, restent distinctes après leurs
-corrections. Les 28 identités/références longues terminées dans finl
-ne sont pas ajoutées à cette reprise. Les profils des campagnes
-mutants u18 et u21 restent séparés.
-[Plan concret, noms exacts et intégration requise](../receipts/proposition_reprise_41_20261005/README.md).
+- R1 : lots courts u18/u21/u24/poison, dont l’exigence impossible est corrigée ;
+- R2 : huit lots d’échelle, couvrant les 41 absences et les six supports_route de chaque profil ;
+- R3 : campagnes mutants u18, y compris API et CLI après correction ;
+- R4 : quatre lots ASan/UBSan u24, y compris les six supports_route.
+
+Chaque commande admet 2 200 secondes et la matrice 2 100 ; R2/R3/R4
+allouent respectivement 32/32/16 fils. La chaîne exige l’arrêt ciblé
+certifié avant la session suivante. Aucun nouveau calcul n’est lancé
+par l’audit. L’absence de contradiction de sélection ou de budget
+structurel ne garantit pas que tous les tests finiront dans le délai.
+
+Les 28 portes longues fonctionnelles déjà terminées ne sont pas
+rejouées. Le plan adopté est plus large que la proposition initiale
+limitée aux 41 absences, conservée comme alternative historique :
+il utilise la matrice publiée et ne nécessite plus son JSON séparé.
+[Proposition initiale et contrôles des noms](../receipts/proposition_reprise_41_20261005/README.md).
 
 ## Finl : portes longues fonctionnelles terminées, mutants séparés
 

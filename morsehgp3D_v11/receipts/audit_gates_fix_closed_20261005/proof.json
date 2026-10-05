@@ -1,0 +1,372 @@
+{
+  "archived_observations": [
+    {
+      "archive_sha256": "b7421fe2176310847f3ae6ba250a5b6815c4ca81acec09d4e740508a9c62100a",
+      "bits": 21,
+      "line": "supports_route_verdict conforme k=5 n=8000 noeuds=273655 boules=395667 supports=395667 etendues=0 multiples=0 cellules=230825 graines=737362 fichier=9b77614618bbdfc9 manifeste=d61003785c2ff158 journal=a6c3b688a7fe1b4a fils=1,4",
+      "member": "results/cmd/000_matrice/files/matrix/gcc_tsan_scale_rest/LastTest.log",
+      "member_sha256": "6a81efda4a9c07717be07ee1e80de5f168a90edb8777dabeb296da772ab86778",
+      "n": 8000
+    },
+    {
+      "archive_sha256": "b7421fe2176310847f3ae6ba250a5b6815c4ca81acec09d4e740508a9c62100a",
+      "bits": 24,
+      "line": "supports_route_verdict conforme k=5 n=8000 noeuds=273655 boules=395667 supports=395667 etendues=0 multiples=0 cellules=230825 graines=737362 fichier=8346120e7c4d1d69 manifeste=1079d104c5e64543 journal=a6c3b688a7fe1b4a fils=1,4",
+      "member": "results/cmd/000_matrice/files/matrix/gcc_asan_scale_rest/LastTest.log",
+      "member_sha256": "94e5961e7682cb58a70a0a76fb2ef77f3e21c54533bb327958d4fb367117c7d2",
+      "n": 8000
+    },
+    {
+      "archive_sha256": "b7421fe2176310847f3ae6ba250a5b6815c4ca81acec09d4e740508a9c62100a",
+      "bits": 24,
+      "line": "supports_route_verdict conforme k=5 n=39885 noeuds=576371 boules=789886 supports=789889 etendues=141 multiples=3 cellules=448805 graines=1350288 fichier=4b781f21b6e9fd84 manifeste=0e13ef92eda96e3e journal=c189d5cd3ec3de66 fils=1,4",
+      "member": "results/cmd/000_matrice/files/matrix/gcc_asan_scale_rest/LastTest.log",
+      "member_sha256": "94e5961e7682cb58a70a0a76fb2ef77f3e21c54533bb327958d4fb367117c7d2",
+      "n": 39885
+    },
+    {
+      "archive_sha256": "b7421fe2176310847f3ae6ba250a5b6815c4ca81acec09d4e740508a9c62100a",
+      "bits": 24,
+      "line": "supports_route_verdict conforme k=5 n=35551 noeuds=478265 boules=652958 supports=652959 etendues=81 multiples=1 cellules=369751 graines=1102505 fichier=ac1fd4da1b693572 manifeste=12882c6a35b51bd3 journal=5e36f8ddbd2fb94c fils=1,4",
+      "member": "results/cmd/000_matrice/files/matrix/gcc_asan_lidar_ng01_ng02/LastTest.log",
+      "member_sha256": "e95c1a1c507e17091dc8e2897236e2d0de957f2a7c05031845107b4a6a19d57e",
+      "n": 35551
+    },
+    {
+      "archive_sha256": "b7421fe2176310847f3ae6ba250a5b6815c4ca81acec09d4e740508a9c62100a",
+      "bits": 24,
+      "line": "supports_route_verdict conforme k=5 n=45845 noeuds=609376 boules=832386 supports=832394 etendues=354 multiples=8 cellules=471060 graines=1393952 fichier=b66e1a9e116e56c7 manifeste=4963819ee6bcd867 journal=ec87f14da7adff77 fils=1,4",
+      "member": "results/cmd/000_matrice/files/matrix/gcc_asan_lidar_ng01_ng02/LastTest.log",
+      "member_sha256": "e95c1a1c507e17091dc8e2897236e2d0de957f2a7c05031845107b4a6a19d57e",
+      "n": 45845
+    },
+    {
+      "archive_sha256": "b7421fe2176310847f3ae6ba250a5b6815c4ca81acec09d4e740508a9c62100a",
+      "bits": 21,
+      "line": "supports_route_verdict conforme k=5 n=32000 noeuds=1163756 boules=1690045 supports=1690045 etendues=0 multiples=0 cellules=989861 graines=3165977 fichier=6543988436d3d582 manifeste=751e5f52d5c1477e journal=c371678559b144d7 fils=1,4",
+      "member": "results/cmd/000_matrice/files/matrix/gcc_tsan_scale32000/LastTest.log",
+      "member_sha256": "3dc486c4ef62264f77f182fac9b4f31a154f81cbd466f451cd4ccf203e554dc1",
+      "n": 32000
+    },
+    {
+      "archive_sha256": "b7421fe2176310847f3ae6ba250a5b6815c4ca81acec09d4e740508a9c62100a",
+      "bits": 21,
+      "line": "supports_route_verdict conforme k=5 n=45845 noeuds=609376 boules=832386 supports=832394 etendues=354 multiples=8 cellules=471060 graines=1393952 fichier=28532835cc5915f8 manifeste=6b6d1ee970c80839 journal=ec87f14da7adff77 fils=1,4",
+      "member": "results/cmd/000_matrice/files/matrix/gcc_tsan_lidar_ng02/LastTest.log",
+      "member_sha256": "10e0e44dbcac5a531eeddc592f1b533687450c7969973de831f6cf3e2bb9001c",
+      "n": 45845
+    },
+    {
+      "archive_sha256": "b7421fe2176310847f3ae6ba250a5b6815c4ca81acec09d4e740508a9c62100a",
+      "bits": 21,
+      "line": "supports_route_verdict conforme k=5 n=35551 noeuds=478265 boules=652958 supports=652959 etendues=81 multiples=1 cellules=369751 graines=1102505 fichier=ed899fede2bbe761 manifeste=09d1d8c0070ab73a journal=5e36f8ddbd2fb94c fils=1,4",
+      "member": "results/cmd/000_matrice/files/matrix/gcc_tsan_lidar_ng01/LastTest.log",
+      "member_sha256": "aee188d2e3d8d2144b7aa37630b8c634fa8189af3da62adbb692abc0dabf3752",
+      "n": 35551
+    },
+    {
+      "archive_sha256": "b7421fe2176310847f3ae6ba250a5b6815c4ca81acec09d4e740508a9c62100a",
+      "bits": 21,
+      "line": "supports_route_verdict conforme k=5 n=39885 noeuds=576371 boules=789886 supports=789889 etendues=141 multiples=3 cellules=448805 graines=1350288 fichier=830db973140e720d manifeste=7c119d733528e2d0 journal=c189d5cd3ec3de66 fils=1,4",
+      "member": "results/cmd/000_matrice/files/matrix/gcc_tsan_lidar_ng00/LastTest.log",
+      "member_sha256": "cb019243a73afa67952f1a4ed9e195b927dc3b7e3200733636728463c4577586",
+      "n": 39885
+    },
+    {
+      "archive_sha256": "b7421fe2176310847f3ae6ba250a5b6815c4ca81acec09d4e740508a9c62100a",
+      "bits": 24,
+      "line": "supports_route_verdict conforme k=5 n=16000 noeuds=565098 boules=819004 supports=819004 etendues=0 multiples=0 cellules=478947 graines=1530768 fichier=1716d15eb3a5afa4 manifeste=39af11215297416d journal=436d1354ae183486 fils=1,4",
+      "member": "results/cmd/000_matrice/files/matrix/gcc_asan_scale16000/LastTest.log",
+      "member_sha256": "5f1fefe1ec3dd8935d84b11f0f01d8b6c2397a377681777ff4f38905837e1bfd",
+      "n": 16000
+    },
+    {
+      "archive_sha256": "b7421fe2176310847f3ae6ba250a5b6815c4ca81acec09d4e740508a9c62100a",
+      "bits": 21,
+      "line": "supports_route_verdict conforme k=5 n=16000 noeuds=565098 boules=819004 supports=819004 etendues=0 multiples=0 cellules=478947 graines=1530768 fichier=dd524ffd991873eb manifeste=baa658ac05a8eee8 journal=436d1354ae183486 fils=1,4",
+      "member": "results/cmd/000_matrice/files/matrix/gcc_tsan_scale16000/LastTest.log",
+      "member_sha256": "86b1497b078b5114668431b3c76844e7184b8fd0a410940e80d87417cac48a9c",
+      "n": 16000
+    },
+    {
+      "archive_sha256": "b7421fe2176310847f3ae6ba250a5b6815c4ca81acec09d4e740508a9c62100a",
+      "bits": 24,
+      "line": "supports_route_verdict conforme k=5 n=32000 noeuds=1163756 boules=1690045 supports=1690045 etendues=0 multiples=0 cellules=989861 graines=3165977 fichier=1a68904408bcae5f manifeste=54f75f49aceae6b7 journal=c371678559b144d7 fils=1,4",
+      "member": "results/cmd/000_matrice/files/matrix/gcc_asan_scale32000/LastTest.log",
+      "member_sha256": "ecac495ff45af4c17f4647ca717655ac38fd519788cc643ca65477d45bad85d0",
+      "n": 32000
+    },
+    {
+      "archive_sha256": "3be572c878600e88c27410269a75aef068e6b702651f85ef50db6ed08c7639cb",
+      "bits": 18,
+      "line": "supports_route_verdict conforme k=5 n=8000 noeuds=273655 boules=395667 supports=395667 etendues=0 multiples=0 cellules=230825 graines=737362 fichier=09a1101bc512394e manifeste=e10e6c8d117429e3 journal=a6c3b688a7fe1b4a fils=1,4",
+      "member": "results/cmd/000_matrice/files/matrix/mutants/LastTest.log",
+      "member_sha256": "1b1610f7a191be8f566a3457c89248d64525b17053a512092fd993d742ecb926",
+      "n": 8000
+    }
+  ],
+  "archived_unique_witnesses": 13,
+  "archives": [
+    {
+      "archive_sha256": "b7421fe2176310847f3ae6ba250a5b6815c4ca81acec09d4e740508a9c62100a",
+      "session": "claudefins",
+      "source_commit": "38b76701b9b0198fc1c37afe16e1480e638e513c"
+    },
+    {
+      "archive_sha256": "3be572c878600e88c27410269a75aef068e6b702651f85ef50db6ed08c7639cb",
+      "session": "claudefinm",
+      "source_commit": "38b76701b9b0198fc1c37afe16e1480e638e513c"
+    }
+  ],
+  "baseline_commit": "38b76701b9b0198fc1c37afe16e1480e638e513c",
+  "bench": {
+    "constants": {
+      "L2B_DELIVERED": true,
+      "OUTPUTS": [
+        [
+          "full",
+          "full.mhgp11ful1",
+          16379
+        ],
+        [
+          "supports",
+          "supports.mhgp11sp",
+          16379
+        ]
+      ],
+      "RULE_FRAMES": [
+        "ng00",
+        "ng01",
+        "ng02"
+      ],
+      "RULE_WORKERS": 48
+    },
+    "function_sha256": "231b6c1fbdbaca455e639516652f784e8e49b1332eda9f083d5257054cd4fd1c",
+    "function_source": "def decide(ratios, defects, prises, k):\n    \"\"\"Regle de L2, a W48 sur ng00, ng01, ng02 ; non evaluee hors de ses conditions. Depuis L2b, supports passe par\n    FULL : les deux bras mesurent la voie FULL (16379) et le banc ne peut plus choisir entre FULL et l'arbre d'ordre K\n    seul (audit ef91a7f46). La decision historique est desactivee ; les rapports restent publies, FULL contre\n    supports/L2b.\"\"\"\n    if L2B_DELIVERED:\n        return dict(decision='sans_objet_post_l2b',\n                    reason='supports tire l arbre d ordre K de FULL depuis L2b : aucune voie order_tree mesuree')\n    if defects:\n        return dict(decision='non_evaluee', reason='mesure invalide : %d defaut(s)' % len(defects))\n    if k != 5:\n        return dict(decision='non_evaluee', reason='la regle porte sur K = 5')\n    at48 = dict((r['frame'], r) for r in ratios if r['workers'] == RULE_WORKERS)\n    missing = [f for f in RULE_FRAMES if f not in at48]\n    if missing:\n        return dict(decision='non_evaluee', reason='W48 absent pour %s' % ','.join(missing))\n    if prises < 3:\n        return dict(decision='non_evaluee', reason='moins de trois prises (%d)' % prises)\n    held = [f for f in RULE_FRAMES if at48[f]['within_rule']]\n    keep = len(held) >= 2\n    return dict(decision='build_order_par_defaut' if keep else 'livrer_L2b', frames_within_rule=held,\n                rule='mediane tree(supports) <= 1,1 mediane tree(full) a W48 sur au moins deux des trois trames')",
+    "old_annotation_note": "Past finmesure raw argument b319efc84 remains historical incorrect metadata; actual receipt source38b is authoritative. This source change does not rewrite past records.",
+    "scope": "Both measured outputs use full_tower; no order_tree, points or plat measured. Historical decision disabled in source."
+  },
+  "capture_utc": "2026-10-05T23:40:53.805847+00:00",
+  "cli_mutant": {
+    "construction": [
+      "cli"
+    ],
+    "count": 28,
+    "floor": 28,
+    "mutation_preserved": true,
+    "old_count": 28,
+    "old_floor": 28,
+    "old_gate": "mhgp11_cli_supports_oracle",
+    "target": {
+      "cherche": "  params.concurrent_orders = false;        // 8192\n",
+      "fichier": "src/api/compute.cpp",
+      "id": "sp_masque_16379",
+      "note": "arbre d'ordre K seul au masque de FULL : build_order refuse les ordres concurrents ; depuis L2b, supports passe par FULL et seules points et plat emploient order_params",
+      "porte": "mhgp11_cli_points",
+      "remplace": ""
+    }
+  },
+  "expanded_cases": {
+    "18": {
+      "16000": {
+        "case": "scale16000",
+        "line": "supports_route_verdict conforme k=5 n=16000 noeuds=565098 boules=819004 supports=819004 etendues=0 multiples=0 cellules=478947 graines=1530768 fichier=62e74f1f5df26634 manifeste=dc3a1b98925c658a journal=436d1354ae183486 fils=1,4",
+        "min_balls": 819004,
+        "min_cells": 478947
+      },
+      "32000": {
+        "case": "scale32000",
+        "line": "supports_route_verdict conforme k=5 n=32000 noeuds=1163756 boules=1690045 supports=1690045 etendues=0 multiples=0 cellules=989861 graines=3165977 fichier=a91f226656b6cbd3 manifeste=3e29e3f5d1403abd journal=c371678559b144d7 fils=1,4",
+        "min_balls": 1690045,
+        "min_cells": 989861
+      },
+      "35551": {
+        "case": "ng01",
+        "line": "supports_route_verdict conforme k=5 n=35551 noeuds=478265 boules=652958 supports=652959 etendues=81 multiples=1 cellules=369751 graines=1102505 fichier=b8449cfbc212f782 manifeste=f6b275a818df1d39 journal=5e36f8ddbd2fb94c fils=1,4",
+        "min_balls": 652958,
+        "min_cells": 369751
+      },
+      "39885": {
+        "case": "ng00",
+        "line": "supports_route_verdict conforme k=5 n=39885 noeuds=576371 boules=789886 supports=789889 etendues=141 multiples=3 cellules=448805 graines=1350288 fichier=51b941795a2361c7 manifeste=bc8d49e588415eed journal=c189d5cd3ec3de66 fils=1,4",
+        "min_balls": 789886,
+        "min_cells": 448805
+      },
+      "45845": {
+        "case": "ng02",
+        "line": "supports_route_verdict conforme k=5 n=45845 noeuds=609376 boules=832386 supports=832394 etendues=354 multiples=8 cellules=471060 graines=1393952 fichier=a4642008f9145a97 manifeste=247ffdc9a96d2891 journal=ec87f14da7adff77 fils=1,4",
+        "min_balls": 832386,
+        "min_cells": 471060
+      },
+      "8000": {
+        "case": "scale8000",
+        "line": "supports_route_verdict conforme k=5 n=8000 noeuds=273655 boules=395667 supports=395667 etendues=0 multiples=0 cellules=230825 graines=737362 fichier=09a1101bc512394e manifeste=e10e6c8d117429e3 journal=a6c3b688a7fe1b4a fils=1,4",
+        "min_balls": 395667,
+        "min_cells": 230825
+      }
+    },
+    "21": {
+      "16000": {
+        "case": "scale16000",
+        "line": "supports_route_verdict conforme k=5 n=16000 noeuds=565098 boules=819004 supports=819004 etendues=0 multiples=0 cellules=478947 graines=1530768 fichier=dd524ffd991873eb manifeste=baa658ac05a8eee8 journal=436d1354ae183486 fils=1,4",
+        "min_balls": 819004,
+        "min_cells": 478947
+      },
+      "32000": {
+        "case": "scale32000",
+        "line": "supports_route_verdict conforme k=5 n=32000 noeuds=1163756 boules=1690045 supports=1690045 etendues=0 multiples=0 cellules=989861 graines=3165977 fichier=6543988436d3d582 manifeste=751e5f52d5c1477e journal=c371678559b144d7 fils=1,4",
+        "min_balls": 1690045,
+        "min_cells": 989861
+      },
+      "35551": {
+        "case": "ng01",
+        "line": "supports_route_verdict conforme k=5 n=35551 noeuds=478265 boules=652958 supports=652959 etendues=81 multiples=1 cellules=369751 graines=1102505 fichier=ed899fede2bbe761 manifeste=09d1d8c0070ab73a journal=5e36f8ddbd2fb94c fils=1,4",
+        "min_balls": 652958,
+        "min_cells": 369751
+      },
+      "39885": {
+        "case": "ng00",
+        "line": "supports_route_verdict conforme k=5 n=39885 noeuds=576371 boules=789886 supports=789889 etendues=141 multiples=3 cellules=448805 graines=1350288 fichier=830db973140e720d manifeste=7c119d733528e2d0 journal=c189d5cd3ec3de66 fils=1,4",
+        "min_balls": 789886,
+        "min_cells": 448805
+      },
+      "45845": {
+        "case": "ng02",
+        "line": "supports_route_verdict conforme k=5 n=45845 noeuds=609376 boules=832386 supports=832394 etendues=354 multiples=8 cellules=471060 graines=1393952 fichier=28532835cc5915f8 manifeste=6b6d1ee970c80839 journal=ec87f14da7adff77 fils=1,4",
+        "min_balls": 832386,
+        "min_cells": 471060
+      },
+      "8000": {
+        "case": "scale8000",
+        "line": "supports_route_verdict conforme k=5 n=8000 noeuds=273655 boules=395667 supports=395667 etendues=0 multiples=0 cellules=230825 graines=737362 fichier=9b77614618bbdfc9 manifeste=d61003785c2ff158 journal=a6c3b688a7fe1b4a fils=1,4",
+        "min_balls": 395667,
+        "min_cells": 230825
+      }
+    },
+    "24": {
+      "16000": {
+        "case": "scale16000",
+        "line": "supports_route_verdict conforme k=5 n=16000 noeuds=565098 boules=819004 supports=819004 etendues=0 multiples=0 cellules=478947 graines=1530768 fichier=1716d15eb3a5afa4 manifeste=39af11215297416d journal=436d1354ae183486 fils=1,4",
+        "min_balls": 819004,
+        "min_cells": 478947
+      },
+      "32000": {
+        "case": "scale32000",
+        "line": "supports_route_verdict conforme k=5 n=32000 noeuds=1163756 boules=1690045 supports=1690045 etendues=0 multiples=0 cellules=989861 graines=3165977 fichier=1a68904408bcae5f manifeste=54f75f49aceae6b7 journal=c371678559b144d7 fils=1,4",
+        "min_balls": 1690045,
+        "min_cells": 989861
+      },
+      "35551": {
+        "case": "ng01",
+        "line": "supports_route_verdict conforme k=5 n=35551 noeuds=478265 boules=652958 supports=652959 etendues=81 multiples=1 cellules=369751 graines=1102505 fichier=ac1fd4da1b693572 manifeste=12882c6a35b51bd3 journal=5e36f8ddbd2fb94c fils=1,4",
+        "min_balls": 652958,
+        "min_cells": 369751
+      },
+      "39885": {
+        "case": "ng00",
+        "line": "supports_route_verdict conforme k=5 n=39885 noeuds=576371 boules=789886 supports=789889 etendues=141 multiples=3 cellules=448805 graines=1350288 fichier=4b781f21b6e9fd84 manifeste=0e13ef92eda96e3e journal=c189d5cd3ec3de66 fils=1,4",
+        "min_balls": 789886,
+        "min_cells": 448805
+      },
+      "45845": {
+        "case": "ng02",
+        "line": "supports_route_verdict conforme k=5 n=45845 noeuds=609376 boules=832386 supports=832394 etendues=354 multiples=8 cellules=471060 graines=1393952 fichier=b66e1a9e116e56c7 manifeste=4963819ee6bcd867 journal=ec87f14da7adff77 fils=1,4",
+        "min_balls": 832386,
+        "min_cells": 471060
+      },
+      "8000": {
+        "case": "scale8000",
+        "line": "supports_route_verdict conforme k=5 n=8000 noeuds=273655 boules=395667 supports=395667 etendues=0 multiples=0 cellules=230825 graines=737362 fichier=8346120e7c4d1d69 manifeste=1079d104c5e64543 journal=a6c3b688a7fe1b4a fils=1,4",
+        "min_balls": 395667,
+        "min_cells": 230825
+      }
+    }
+  },
+  "legacy_u21_lines": {
+    "16000": "supports_route_verdict conforme k=5 n=16000 noeuds=565098 boules=819004 supports=819004 etendues=0 multiples=0 cellules=478947 graines=1530768 fichier=dd524ffd991873eb manifeste=baa658ac05a8eee8 journal=436d1354ae183486 fils=1,4",
+    "32000": "supports_route_verdict conforme k=5 n=32000 noeuds=1163756 boules=1690045 supports=1690045 etendues=0 multiples=0 cellules=989861 graines=3165977 fichier=6543988436d3d582 manifeste=751e5f52d5c1477e journal=c371678559b144d7 fils=1,4",
+    "35551": "supports_route_verdict conforme k=5 n=35551 noeuds=478265 boules=652958 supports=652959 etendues=81 multiples=1 cellules=369751 graines=1102505 fichier=ed899fede2bbe761 manifeste=09d1d8c0070ab73a journal=5e36f8ddbd2fb94c fils=1,4",
+    "39885": "supports_route_verdict conforme k=5 n=39885 noeuds=576371 boules=789886 supports=789889 etendues=141 multiples=3 cellules=448805 graines=1350288 fichier=830db973140e720d manifeste=7c119d733528e2d0 journal=c189d5cd3ec3de66 fils=1,4",
+    "45845": "supports_route_verdict conforme k=5 n=45845 noeuds=609376 boules=832386 supports=832394 etendues=354 multiples=8 cellules=471060 graines=1393952 fichier=28532835cc5915f8 manifeste=6b6d1ee970c80839 journal=ec87f14da7adff77 fils=1,4",
+    "8000": "supports_route_verdict conforme k=5 n=8000 noeuds=273655 boules=395667 supports=395667 etendues=0 multiples=0 cellules=230825 graines=737362 fichier=9b77614618bbdfc9 manifeste=d61003785c2ff158 journal=a6c3b688a7fe1b4a fils=1,4"
+  },
+  "native_or_cloud_actions": 0,
+  "prefix_count": 36,
+  "probe_exactly_published_baseline": true,
+  "profiles": {
+    "18": {
+      "mhgp11_route_ng00_file": "51b941795a2361c7",
+      "mhgp11_route_ng00_manifest": "bc8d49e588415eed",
+      "mhgp11_route_ng01_file": "b8449cfbc212f782",
+      "mhgp11_route_ng01_manifest": "f6b275a818df1d39",
+      "mhgp11_route_ng02_file": "a4642008f9145a97",
+      "mhgp11_route_ng02_manifest": "247ffdc9a96d2891",
+      "mhgp11_route_scale16000_file": "62e74f1f5df26634",
+      "mhgp11_route_scale16000_manifest": "dc3a1b98925c658a",
+      "mhgp11_route_scale32000_file": "a91f226656b6cbd3",
+      "mhgp11_route_scale32000_manifest": "3e29e3f5d1403abd",
+      "mhgp11_route_scale8000_file": "09a1101bc512394e",
+      "mhgp11_route_scale8000_manifest": "e10e6c8d117429e3"
+    },
+    "21": {
+      "mhgp11_route_ng00_file": "830db973140e720d",
+      "mhgp11_route_ng00_manifest": "7c119d733528e2d0",
+      "mhgp11_route_ng01_file": "ed899fede2bbe761",
+      "mhgp11_route_ng01_manifest": "09d1d8c0070ab73a",
+      "mhgp11_route_ng02_file": "28532835cc5915f8",
+      "mhgp11_route_ng02_manifest": "6b6d1ee970c80839",
+      "mhgp11_route_scale16000_file": "dd524ffd991873eb",
+      "mhgp11_route_scale16000_manifest": "baa658ac05a8eee8",
+      "mhgp11_route_scale32000_file": "6543988436d3d582",
+      "mhgp11_route_scale32000_manifest": "751e5f52d5c1477e",
+      "mhgp11_route_scale8000_file": "9b77614618bbdfc9",
+      "mhgp11_route_scale8000_manifest": "d61003785c2ff158"
+    },
+    "24": {
+      "mhgp11_route_ng00_file": "4b781f21b6e9fd84",
+      "mhgp11_route_ng00_manifest": "0e13ef92eda96e3e",
+      "mhgp11_route_ng01_file": "ac1fd4da1b693572",
+      "mhgp11_route_ng01_manifest": "12882c6a35b51bd3",
+      "mhgp11_route_ng02_file": "b66e1a9e116e56c7",
+      "mhgp11_route_ng02_manifest": "4963819ee6bcd867",
+      "mhgp11_route_scale16000_file": "1716d15eb3a5afa4",
+      "mhgp11_route_scale16000_manifest": "39af11215297416d",
+      "mhgp11_route_scale32000_file": "1a68904408bcae5f",
+      "mhgp11_route_scale32000_manifest": "54f75f49aceae6b7",
+      "mhgp11_route_scale8000_file": "8346120e7c4d1d69",
+      "mhgp11_route_scale8000_manifest": "1079d104c5e64543"
+    }
+  },
+  "qualification_limits": [
+    "The substitution model validates 36 distinct 16-hex prefixes (12 per profile); this is not 36 new runtime verdicts.",
+    "Archived G4 matching lines: six u21, six u24, and u18 scale8000. Other five u18 golden pairs need corrected-source G4 replay.",
+    "Original archived Failed verdicts remain Failed; matching new expectations is a source/metadata replay, not a re-executed CTest.",
+    "No native tests, build, cloud action or local-test receipt publication by auditor.",
+    "The separate matrix regression was still present at 23:35. Its historical capsule is unchanged; current source98 removes that requirement, as reviewed in the matrix addendum."
+  ],
+  "schema": "mhgp11_gates_fixed_closure_v1",
+  "source_commit": "98a00955083d483306c4f92b9031e382e81b0e59",
+  "source_files": {
+    "bench": {
+      "baseline_sha256": "1a94d049b06379bbd7a067f2723a6f159240fb7c635cf8ce5be625057f0c1da6",
+      "path": "morsehgp3D_v11/bench/sorties_g4.py",
+      "sha256": "f893cd7c9afc074e3af808c90ca9095fd3a1779044842d1f221e9f059a40ab00"
+    },
+    "cli": {
+      "baseline_sha256": "704228ec2ab115eaf70cb418a2daf6d78cc9e647325eb551e8ec8b12ff28c92a",
+      "path": "morsehgp3D_v11/tests/mutants/cli.json",
+      "sha256": "2750485824bceb1d2305e978ac025d49e3e25dfc8eb60b12778fa4de296f0cf7"
+    },
+    "cmake": {
+      "baseline_sha256": "f962a6912f995bc9de78c79f9b8fd8445f6fca90a22a57ee6da19a90a1c3afdb",
+      "path": "morsehgp3D_v11/tests/api/tests.cmake",
+      "sha256": "f58d8bb1033c9ae0df9ccd98a16c135bbea61fb2c28851820f16d9ec8c22e29d"
+    },
+    "probe": {
+      "baseline_sha256": "2db41f412d4894ffb8688b86e6cc16b5e3a1a9e7329a6cce13a4330dc692fb42",
+      "path": "morsehgp3D_v11/tests/api/supports_route.cpp",
+      "sha256": "2db41f412d4894ffb8688b86e6cc16b5e3a1a9e7329a6cce13a4330dc692fb42"
+    }
+  },
+  "u21_expected_lines_identical": true
+}
