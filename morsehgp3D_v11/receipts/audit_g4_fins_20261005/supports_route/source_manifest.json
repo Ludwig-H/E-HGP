@@ -1,0 +1,20 @@
+{
+  "pin": "38b76701b9b0198fc1c37afe16e1480e638e513c",
+  "files": {
+    "morsehgp3D_v11/tests/api/supports_route.cpp": {
+      "sha256": "2db41f412d4894ffb8688b86e6cc16b5e3a1a9e7329a6cce13a4330dc692fb42",
+      "bytes": 19388,
+      "git_blob": "d04a34cec8d59ec7f1387b29991d13df49adbe3d"
+    },
+    "morsehgp3D_v11/tests/api/tests.cmake": {
+      "sha256": "f962a6912f995bc9de78c79f9b8fd8445f6fca90a22a57ee6da19a90a1c3afdb",
+      "bytes": 7876,
+      "git_blob": "35ef41d76e406872675a5c07b04b511603e8c491"
+    },
+    "morsehgp3D_v11/cmake/run_expect.cmake": {
+      "sha256": "165d02c686bb71d32fbf9edb3fb3afa80c03ca3c8d6deb40b8444eeb6443646e",
+      "bytes": 7181,
+      "git_blob": "1648dc93540271689bf0db8272d1584347f714dc"
+    }
+  }
+}

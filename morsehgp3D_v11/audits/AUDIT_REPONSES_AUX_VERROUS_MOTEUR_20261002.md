@@ -24,6 +24,14 @@ porte supports après L2b. Aucun nouveau défaut mathématique établi.
 [Résultats et portée](../receipts/audit_g4_fina2_20261005/README.md),
 [constat de qualification](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#fina2--attendu-de-qualification-l2b-à-corriger-par-profil).
 
+**Suivi sanitizer fins au même pin.** Les portes points, plates et
+`roots_cost` passent sur les trois tailles et trois trames sous
+ASan/UBSan u24 et TSan u21. TSan termine 80/80 portes ; ASan/UBSan
+74/80, avec les six échecs de la porte supports multiprofil.
+Aucune porte manquante. Les unitaires courts de B et les différentiels
+complets S9/S10 restent leurs propres qualifications.
+[Reçu fins](../receipts/audit_g4_fins_20261005/README.md).
+
 ## S10 native publiée : encadrement entier et frontière de capacité
 
 La tranche **076d9142b** remplace le filtre flottant par

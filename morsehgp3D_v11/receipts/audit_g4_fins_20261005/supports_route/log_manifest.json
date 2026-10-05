@@ -1,0 +1,243 @@
+{
+  "archive_sha256": "b7421fe2176310847f3ae6ba250a5b6815c4ca81acec09d4e740508a9c62100a",
+  "cases": [
+    {
+      "profile": "gcc_asan_scale_rest",
+      "test": "mhgp11_api_supports_route_lidar_ng00_k5",
+      "seconds": 138.42,
+      "member": "results/cmd/000_matrice/files/matrix/gcc_asan_scale_rest/LastTest.log",
+      "LastTest_sha256": "94e5961e7682cb58a70a0a76fb2ef77f3e21c54533bb327958d4fb367117c7d2",
+      "start_line": 592,
+      "excerpt": "excerpts/mhgp11_api_supports_route_lidar_ng00_k5.txt",
+      "excerpt_sha256": "90c408e311bb8a53d8b949bb916e5dfd41b17e39ce4d75e4530dbfe087addf2b"
+    },
+    {
+      "profile": "gcc_asan_lidar_ng01_ng02",
+      "test": "mhgp11_api_supports_route_lidar_ng01_k5",
+      "seconds": 105.3,
+      "member": "results/cmd/000_matrice/files/matrix/gcc_asan_lidar_ng01_ng02/LastTest.log",
+      "LastTest_sha256": "e95c1a1c507e17091dc8e2897236e2d0de957f2a7c05031845107b4a6a19d57e",
+      "start_line": 373,
+      "excerpt": "excerpts/mhgp11_api_supports_route_lidar_ng01_k5.txt",
+      "excerpt_sha256": "de17f498ae527935500551cf1adce29c878711c6259f179f5d46e755f043bc4c"
+    },
+    {
+      "profile": "gcc_asan_lidar_ng01_ng02",
+      "test": "mhgp11_api_supports_route_lidar_ng02_k5",
+      "seconds": 126.1,
+      "member": "results/cmd/000_matrice/files/matrix/gcc_asan_lidar_ng01_ng02/LastTest.log",
+      "LastTest_sha256": "e95c1a1c507e17091dc8e2897236e2d0de957f2a7c05031845107b4a6a19d57e",
+      "start_line": 404,
+      "excerpt": "excerpts/mhgp11_api_supports_route_lidar_ng02_k5.txt",
+      "excerpt_sha256": "12dd93e7739121e893140b227981832ac26cca72eddd4ca1adb3d341b292a68c"
+    },
+    {
+      "profile": "gcc_asan_scale16000",
+      "test": "mhgp11_api_supports_route_scale16000",
+      "seconds": 102.58,
+      "member": "results/cmd/000_matrice/files/matrix/gcc_asan_scale16000/LastTest.log",
+      "LastTest_sha256": "5f1fefe1ec3dd8935d84b11f0f01d8b6c2397a377681777ff4f38905837e1bfd",
+      "start_line": 144,
+      "excerpt": "excerpts/mhgp11_api_supports_route_scale16000.txt",
+      "excerpt_sha256": "b8e54e924bca54ad4b0a320f500430a757a35816525ef0cb98b8d364048049d6"
+    },
+    {
+      "profile": "gcc_asan_scale32000",
+      "test": "mhgp11_api_supports_route_scale32000",
+      "seconds": 214.67,
+      "member": "results/cmd/000_matrice/files/matrix/gcc_asan_scale32000/LastTest.log",
+      "LastTest_sha256": "ecac495ff45af4c17f4647ca717655ac38fd519788cc643ca65477d45bad85d0",
+      "start_line": 163,
+      "excerpt": "excerpts/mhgp11_api_supports_route_scale32000.txt",
+      "excerpt_sha256": "a41f8514fb46f1a063a5230a4f3ac52e1d47a5bcbc0ce285c43296a8d1f8112f"
+    },
+    {
+      "profile": "gcc_asan_scale_rest",
+      "test": "mhgp11_api_supports_route_scale8000",
+      "seconds": 46.32,
+      "member": "results/cmd/000_matrice/files/matrix/gcc_asan_scale_rest/LastTest.log",
+      "LastTest_sha256": "94e5961e7682cb58a70a0a76fb2ef77f3e21c54533bb327958d4fb367117c7d2",
+      "start_line": 562,
+      "excerpt": "excerpts/mhgp11_api_supports_route_scale8000.txt",
+      "excerpt_sha256": "5b00e59ff2451af9e0e40ea25e50db0fc129c58177355ab63084aaa371f68886"
+    }
+  ],
+  "profile_results": {
+    "gcc_asan_lidar_ng01_ng02": {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_SANITIZE=ON",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "tests": {
+        "ctest_failed": 2,
+        "ctest_total": 24,
+        "failed": 2,
+        "not_run": 0,
+        "passed": 22,
+        "selected": 24
+      },
+      "status": "failed"
+    },
+    "gcc_asan_scale16000": {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_SANITIZE=ON",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "tests": {
+        "ctest_failed": 1,
+        "ctest_total": 10,
+        "failed": 1,
+        "not_run": 0,
+        "passed": 9,
+        "selected": 10
+      },
+      "status": "failed"
+    },
+    "gcc_asan_scale32000": {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_SANITIZE=ON",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "tests": {
+        "ctest_failed": 1,
+        "ctest_total": 11,
+        "failed": 1,
+        "not_run": 0,
+        "passed": 10,
+        "selected": 11
+      },
+      "status": "failed"
+    },
+    "gcc_asan_scale_rest": {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_SANITIZE=ON",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "tests": {
+        "ctest_failed": 2,
+        "ctest_total": 35,
+        "failed": 2,
+        "not_run": 0,
+        "passed": 33,
+        "selected": 35
+      },
+      "status": "failed"
+    },
+    "gcc_tsan_lidar_ng00": {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 13,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 13,
+        "selected": 13
+      },
+      "status": "ok"
+    },
+    "gcc_tsan_lidar_ng01": {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 12,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 12,
+        "selected": 12
+      },
+      "status": "ok"
+    },
+    "gcc_tsan_lidar_ng02": {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 12,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 12,
+        "selected": 12
+      },
+      "status": "ok"
+    },
+    "gcc_tsan_scale16000": {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 10,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 10,
+        "selected": 10
+      },
+      "status": "ok"
+    },
+    "gcc_tsan_scale32000": {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 9,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 9,
+        "selected": 9
+      },
+      "status": "ok"
+    },
+    "gcc_tsan_scale32000_cli": {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 2,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 2,
+        "selected": 2
+      },
+      "status": "ok"
+    },
+    "gcc_tsan_scale_rest": {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 22,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 22,
+        "selected": 22
+      },
+      "status": "ok"
+    }
+  }
+}

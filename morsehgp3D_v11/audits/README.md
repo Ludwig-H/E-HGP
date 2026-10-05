@@ -26,6 +26,17 @@ Finm confirme ce mécanisme sur le témoin u18 à 8 000 points : les
 voies et l'appel public concordent, mais la ligne aux SHA u21 est refusée.
 [Constat et reprise ciblée](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#fina2--attendu-de-qualification-l2b-à-corriger-par-profil).
 
+**Fins : les lots sanitizer d’échelle et LiDAR sont terminés.** Au
+même pin **38b76701b**, **80/80** portes TSan u21 passent, dont les
+six identités L2b. ASan/UBSan u24 termine **74/80** portes avec succès.
+Pour les six échecs, les sondes déclarent les voies conformes, puis
+le juge refuse leurs hashes u24 contre ses attendus u21. Aucun diagnostic sanitizer
+dans les journaux examinés. Aucune porte manquante ni coupure.
+Points, sortie plate et `roots_cost` passent
+sur les trois tailles et trois trames dans les deux configurations.
+Les contrôles sanitizer courts sont dans la session B suivante.
+[Reçu vérifié et périmètre](../receipts/audit_g4_fins_20261005/README.md).
+
 **Priorité : qualifier l'assemblage final sur G4.** Supports, arbre K
 seul, points et tête plate sont publiés. S10 arrive en **076d9142b**,
 sa garde numérique en **510dae50e**, son témoin exact en **38b76701b**.
@@ -55,7 +66,8 @@ renforcé détecte la suppression de la garde et vérifie aussi la racine
 exacte `R=2^127−1`, ses groupes et l'égalité EOM. La condensation,
 les réciproques z=1/2/3 et la propagation des refus sont relues sans
 nouveau défaut important établi. Les portes ordinaires passent dans
-fina2 ; sanitizers et différentiel complet restent à qualifier.
+fina2 ; les portes d’échelle et LiDAR passent aussi sous sanitizers
+dans fins. Le complément court et le différentiel complet restent à qualifier.
 [Correction et portée](../receipts/audit_s10_root_guard_20261005/README.md),
 [preuve initiale](../receipts/audit_s10_wip_20261005/math/README.md).
 
@@ -63,8 +75,8 @@ fina2 ; sanitizers et différentiel complet restent à qualifier.
 premier refus, sans changement de relation d'ordre. Les sources
 correspondent à la capture favorable ; le modèle vérifie arrêt, bornes
 et permutation. La porte native du refus passe dans les quatre profils
-ordinaires de fina2 ; sanitizers et différentiel complet restent leurs
-propres portes.
+ordinaires de fina2 ; le refus sous sanitizers et le différentiel
+complet restent leurs propres portes.
 [Correction et preuve](../receipts/audit_s9_sort_fix_20261005/README.md).
 
 **L2b : raccord livré, qualification à terminer.** La mesure G4 appariée
@@ -73,7 +85,8 @@ FULL pour `supports`. L2b est publiée en **0810962ac**. Le correctif
 **311ef5e3c** supprime le hachage diagnostic de tout le journal quand il
 n'est pas demandé ; les trois fichiers correspondent à la capture
 relue. L'identité des voies à W1/W4 passe en u21/poison dans fina2.
-Les attendus u18/u24 ci-dessus et la qualification TSan restent ouverts.
+Les six identités passent aussi sous TSan u21 dans fins ; les attendus
+u18/u24 ci-dessus restent à corriger.
 [Décision mesurée](../receipts/audit_l2_decision_20261005/README.md),
 [correction et limites](../receipts/audit_l2b_followup_20261005/README.md).
 

@@ -1,0 +1,23 @@
+{
+  "member": "results/cmd/000_matrice/files/matrix/gcc_asan_scale_rest/build_provenance.json",
+  "complete": true,
+  "errors": [],
+  "selected_flags": [
+    {
+      "path": "CMakeFiles/mhgp11.dir/flags.make",
+      "sha256": "d8257c3c63dd5275d7c48e65874803c151e419788b5991d1eed1f2a59ad7d51c",
+      "definitions_and_flags": [
+        "CXX_DEFINES = -DMHGP11_COORD_BITS=24",
+        "CXX_FLAGS = -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=all -std=c++20"
+      ]
+    },
+    {
+      "path": "CMakeFiles/mhgp11_api_supports_route_probe.dir/flags.make",
+      "sha256": "d8257c3c63dd5275d7c48e65874803c151e419788b5991d1eed1f2a59ad7d51c",
+      "definitions_and_flags": [
+        "CXX_DEFINES = -DMHGP11_COORD_BITS=24",
+        "CXX_FLAGS = -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=all -std=c++20"
+      ]
+    }
+  ]
+}

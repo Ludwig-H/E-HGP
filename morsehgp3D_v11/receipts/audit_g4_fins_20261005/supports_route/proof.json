@@ -1,0 +1,169 @@
+{
+  "CTest_failures_reclassified_as_passed": false,
+  "CTest_scope": {
+    "gcc_asan_": {
+      "failed": 6,
+      "not_run": 0,
+      "passed": 74,
+      "selected": 80
+    },
+    "gcc_tsan_": {
+      "failed": 0,
+      "not_run": 0,
+      "passed": 80,
+      "selected": 80
+    }
+  },
+  "archived_runtime_logs_scanned": 45,
+  "cases": [
+    {
+      "W1_tree_peaks": {
+        "compute": 381612812,
+        "full_tower": 381612812,
+        "order_tree": 263839124
+      },
+      "expected_u21_hashes": {
+        "fichier": "830db973140e720d",
+        "manifeste": "7c119d733528e2d0"
+      },
+      "native_code": 0,
+      "native_routes_and_public_api_conform": true,
+      "observed_u24_hashes": {
+        "fichier": "4b781f21b6e9fd84",
+        "manifeste": "0e13ef92eda96e3e"
+      },
+      "only_differences": [
+        "fichier",
+        "manifeste"
+      ],
+      "profile": "gcc_asan_scale_rest",
+      "test": "mhgp11_api_supports_route_lidar_ng00_k5",
+      "wrapper_verdict": "ligne_absente"
+    },
+    {
+      "W1_tree_peaks": {
+        "compute": 328682814,
+        "full_tower": 328682814,
+        "order_tree": 228640202
+      },
+      "expected_u21_hashes": {
+        "fichier": "ed899fede2bbe761",
+        "manifeste": "09d1d8c0070ab73a"
+      },
+      "native_code": 0,
+      "native_routes_and_public_api_conform": true,
+      "observed_u24_hashes": {
+        "fichier": "ac1fd4da1b693572",
+        "manifeste": "12882c6a35b51bd3"
+      },
+      "only_differences": [
+        "fichier",
+        "manifeste"
+      ],
+      "profile": "gcc_asan_lidar_ng01_ng02",
+      "test": "mhgp11_api_supports_route_lidar_ng01_k5",
+      "wrapper_verdict": "ligne_absente"
+    },
+    {
+      "W1_tree_peaks": {
+        "compute": 405129389,
+        "full_tower": 405129389,
+        "order_tree": 275916113
+      },
+      "expected_u21_hashes": {
+        "fichier": "28532835cc5915f8",
+        "manifeste": "6b6d1ee970c80839"
+      },
+      "native_code": 0,
+      "native_routes_and_public_api_conform": true,
+      "observed_u24_hashes": {
+        "fichier": "b66e1a9e116e56c7",
+        "manifeste": "4963819ee6bcd867"
+      },
+      "only_differences": [
+        "fichier",
+        "manifeste"
+      ],
+      "profile": "gcc_asan_lidar_ng01_ng02",
+      "test": "mhgp11_api_supports_route_lidar_ng02_k5",
+      "wrapper_verdict": "ligne_absente"
+    },
+    {
+      "W1_tree_peaks": {
+        "compute": 367566854,
+        "full_tower": 367566854,
+        "order_tree": 267067294
+      },
+      "expected_u21_hashes": {
+        "fichier": "dd524ffd991873eb",
+        "manifeste": "baa658ac05a8eee8"
+      },
+      "native_code": 0,
+      "native_routes_and_public_api_conform": true,
+      "observed_u24_hashes": {
+        "fichier": "1716d15eb3a5afa4",
+        "manifeste": "39af11215297416d"
+      },
+      "only_differences": [
+        "fichier",
+        "manifeste"
+      ],
+      "profile": "gcc_asan_scale16000",
+      "test": "mhgp11_api_supports_route_scale16000",
+      "wrapper_verdict": "ligne_absente"
+    },
+    {
+      "W1_tree_peaks": {
+        "compute": 753508284,
+        "full_tower": 753508284,
+        "order_tree": 547424048
+      },
+      "expected_u21_hashes": {
+        "fichier": "6543988436d3d582",
+        "manifeste": "751e5f52d5c1477e"
+      },
+      "native_code": 0,
+      "native_routes_and_public_api_conform": true,
+      "observed_u24_hashes": {
+        "fichier": "1a68904408bcae5f",
+        "manifeste": "54f75f49aceae6b7"
+      },
+      "only_differences": [
+        "fichier",
+        "manifeste"
+      ],
+      "profile": "gcc_asan_scale32000",
+      "test": "mhgp11_api_supports_route_scale32000",
+      "wrapper_verdict": "ligne_absente"
+    },
+    {
+      "W1_tree_peaks": {
+        "compute": 179009778,
+        "full_tower": 179009778,
+        "order_tree": 130072730
+      },
+      "expected_u21_hashes": {
+        "fichier": "9b77614618bbdfc9",
+        "manifeste": "d61003785c2ff158"
+      },
+      "native_code": 0,
+      "native_routes_and_public_api_conform": true,
+      "observed_u24_hashes": {
+        "fichier": "8346120e7c4d1d69",
+        "manifeste": "1079d104c5e64543"
+      },
+      "only_differences": [
+        "fichier",
+        "manifeste"
+      ],
+      "profile": "gcc_asan_scale_rest",
+      "test": "mhgp11_api_supports_route_scale8000",
+      "wrapper_verdict": "ligne_absente"
+    }
+  ],
+  "engine_defect_established": false,
+  "full_archive_scan_replayed": false,
+  "pin": "38b76701b9b0198fc1c37afe16e1480e638e513c",
+  "sanitizer_markers_observed": 0,
+  "verdict": "all_six_ASan_u24_failures_are_expected_LINE_hash_mismatches_after_native_route_conformance"
+}

@@ -1,0 +1,31 @@
+874/1053 Testing: mhgp11_api_supports_route_lidar_ng02_k5
+874/1053 Test: mhgp11_api_supports_route_lidar_ng02_k5
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_asan_lidar_ng01_ng02/build/mhgp11_api_supports_route_probe" "-DEXPECTED=0" "-DARG0=--work=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_asan_lidar_ng01_ng02/build/mhgp11_api_supports_route_lidar_ng02_k5" "-DARG1=--k=5" "-DARG2=--workers=1,4" "-DARG3=--data=lidar_ng02" "-DARG4=--min-balls=832386" "-DARG5=--min-cells=471060" "-DNARGS=6" "-DEXPECT_LINE=supports_route_verdict conforme k=5 n=45845 noeuds=609376 boules=832386 supports=832394 etendues=354 multiples=8 cellules=471060 graines=1393952 fichier=28532835cc5915f8 manifeste=6b6d1ee970c80839 journal=ec87f14da7adff77 fils=1,4" "-DREQUIRE_DIR_ENV=MHGP11_DATA_DIR" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_asan_lidar_ng01_ng02/build
+"mhgp11_api_supports_route_lidar_ng02_k5" start time: Oct 05 21:35 UTC
+Output:
+----------------------------------------------------------
+{"route":"order_tree","workers":1,"tree_ns":4331854796,"tree_peak":275916113,"attach_ns":303579495,"attach_peak":0,"output_ns":474986532,"output_peak":311487130,"write_ns":498647491,"write_peak":308157014}
+{"route":"full_tower","workers":1,"tree_ns":7939019374,"tree_peak":405129389,"attach_ns":305892105,"attach_peak":0,"output_ns":471764192,"output_peak":311487130,"write_ns":497564021,"write_peak":308157014}
+{"route":"compute","tree_peak":405129389,"order_tree_peak":275916113,"full_tower_peak":405129389}
+{"route":"order_tree","workers":4,"tree_ns":2008739915,"tree_peak":276466253,"attach_ns":418019483,"attach_peak":0,"output_ns":235298136,"output_peak":311488846,"write_ns":515715001,"write_peak":308157014}
+{"route":"full_tower","workers":4,"tree_ns":2464586028,"tree_peak":405679529,"attach_ns":326445255,"attach_peak":0,"output_ns":204068436,"output_peak":311488846,"write_ns":501375582,"write_peak":308157014}
+supports_route_verdict conforme k=5 n=45845 noeuds=609376 boules=832386 supports=832394 etendues=354 multiples=8 cellules=471060 graines=1393952 fichier=b66e1a9e116e56c7 manifeste=4963819ee6bcd867 journal=ec87f14da7adff77 fils=1,4
+
+run_expect_verdict ligne_absente
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/src/morsehgp3D_v11/cmake/run_expect.cmake:126 (message):
+  ligne attendue ABSENTE de la sortie standard de la MEME execution :
+  supports_route_verdict conforme k=5 n=45845 noeuds=609376 boules=832386
+  supports=832394 etendues=354 multiples=8 cellules=471060 graines=1393952
+  fichier=28532835cc5915f8 manifeste=6b6d1ee970c80839
+  journal=ec87f14da7adff77 fils=1,4
+
+
+<end of output>
+Test time = 126.10 sec
+----------------------------------------------------------
+Test Failed.
+"mhgp11_api_supports_route_lidar_ng02_k5" end time: Oct 05 21:37 UTC
+"mhgp11_api_supports_route_lidar_ng02_k5" time elapsed: 00:02:06
+----------------------------------------------------------
+

@@ -1,0 +1,79 @@
+{
+  "pin": "38b76701b9b0198fc1c37afe16e1480e638e513c",
+  "normal_optimized_identical": true,
+  "archive_normal_optimized_identical": true,
+  "files": {
+    "README.md": {
+      "sha256": "4356bbe32e067c211135a6abe5d1699b48d0c1539ca75798b501f95219111e76",
+      "bytes": 4379
+    },
+    "archive_replay_proof.json": {
+      "sha256": "c0dd89ef3bb4d5f10a19594358bf89915555867b9014939e087f2e91c54f0413",
+      "bytes": 4635
+    },
+    "compile_flags.json": {
+      "sha256": "2b05445465e6b26620a98937482a0801e65c4ec8c262c321766350010ccde2f6",
+      "bytes": 972
+    },
+    "excerpts/mhgp11_api_supports_route_lidar_ng00_k5.txt": {
+      "sha256": "90c408e311bb8a53d8b949bb916e5dfd41b17e39ce4d75e4530dbfe087addf2b",
+      "bytes": 3149
+    },
+    "excerpts/mhgp11_api_supports_route_lidar_ng01_k5.txt": {
+      "sha256": "de17f498ae527935500551cf1adce29c878711c6259f179f5d46e755f043bc4c",
+      "bytes": 3163
+    },
+    "excerpts/mhgp11_api_supports_route_lidar_ng02_k5.txt": {
+      "sha256": "12dd93e7739121e893140b227981832ac26cca72eddd4ca1adb3d341b292a68c",
+      "bytes": 3166
+    },
+    "excerpts/mhgp11_api_supports_route_scale16000.txt": {
+      "sha256": "b8e54e924bca54ad4b0a320f500430a757a35816525ef0cb98b8d364048049d6",
+      "bytes": 3100
+    },
+    "excerpts/mhgp11_api_supports_route_scale32000.txt": {
+      "sha256": "a41f8514fb46f1a063a5230a4f3ac52e1d47a5bcbc0ce285c43296a8d1f8112f",
+      "bytes": 3115
+    },
+    "excerpts/mhgp11_api_supports_route_scale8000.txt": {
+      "sha256": "5b00e59ff2451af9e0e40ea25e50db0fc129c58177355ab63084aaa371f68886",
+      "bytes": 3081
+    },
+    "log_manifest.json": {
+      "sha256": "9fa807b5377d99a2b41d7e8783e24a22598609e8e0540b51e25e6f9ade378664",
+      "bytes": 7140
+    },
+    "proof.json": {
+      "sha256": "12b24c8b203abc6d8524ed6c26d9994073046b8498536e52051c59963207e182",
+      "bytes": 4636
+    },
+    "receipt_facts.json": {
+      "sha256": "c5a1145b1ed9cfa7ed387f1f504f12c50f55e7360e4519e78ba8bfe2796dc79f",
+      "bytes": 335
+    },
+    "replay.py": {
+      "sha256": "6107681cabff4ee88752a71332cd182ac60ab35ef2671e168345327432a6379f",
+      "bytes": 5541
+    },
+    "sanitizer_scan.json": {
+      "sha256": "fd4853fac7cda93188976ca13e7d443a424f2a1f863a2b21aa7b8e75222bed8d",
+      "bytes": 10446
+    },
+    "source_manifest.json": {
+      "sha256": "5b8a3cccfdbcdcae3b14b1e0d6d25b76679ac1c1e88a9d52bd1059837ca84e55",
+      "bytes": 739
+    },
+    "sources/morsehgp3D_v11/cmake/run_expect.cmake": {
+      "sha256": "165d02c686bb71d32fbf9edb3fb3afa80c03ca3c8d6deb40b8444eeb6443646e",
+      "bytes": 7181
+    },
+    "sources/morsehgp3D_v11/tests/api/supports_route.cpp": {
+      "sha256": "2db41f412d4894ffb8688b86e6cc16b5e3a1a9e7329a6cce13a4330dc692fb42",
+      "bytes": 19388
+    },
+    "sources/morsehgp3D_v11/tests/api/tests.cmake": {
+      "sha256": "f962a6912f995bc9de78c79f9b8fd8445f6fca90a22a57ee6da19a90a1c3afdb",
+      "bytes": 7876
+    }
+  }
+}

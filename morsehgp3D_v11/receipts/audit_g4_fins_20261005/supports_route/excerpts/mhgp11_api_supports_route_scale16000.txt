@@ -1,0 +1,30 @@
+870/1053 Testing: mhgp11_api_supports_route_scale16000
+870/1053 Test: mhgp11_api_supports_route_scale16000
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_asan_scale16000/build/mhgp11_api_supports_route_probe" "-DEXPECTED=0" "-DARG0=--work=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_asan_scale16000/build/mhgp11_api_supports_route_scale16000" "-DARG1=--k=5" "-DARG2=--workers=1,4" "-DARG3=--uniform18=16000,20261002" "-DARG4=--min-balls=819004" "-DARG5=--min-cells=478947" "-DNARGS=6" "-DEXPECT_LINE=supports_route_verdict conforme k=5 n=16000 noeuds=565098 boules=819004 supports=819004 etendues=0 multiples=0 cellules=478947 graines=1530768 fichier=dd524ffd991873eb manifeste=baa658ac05a8eee8 journal=436d1354ae183486 fils=1,4" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_asan_scale16000/build
+"mhgp11_api_supports_route_scale16000" start time: Oct 05 21:27 UTC
+Output:
+----------------------------------------------------------
+{"route":"order_tree","workers":1,"tree_ns":7261098083,"tree_peak":267067294,"attach_ns":344474546,"attach_peak":0,"output_ns":381398265,"output_peak":306207208,"write_ns":479404704,"write_peak":302931108}
+{"route":"full_tower","workers":1,"tree_ns":10108720509,"tree_peak":367566854,"attach_ns":326431126,"attach_peak":0,"output_ns":371370526,"output_peak":306207208,"write_ns":490874484,"write_peak":302931108}
+{"route":"compute","tree_peak":367566854,"order_tree_peak":267067294,"full_tower_peak":367566854}
+{"route":"order_tree","workers":4,"tree_ns":2180173311,"tree_peak":267259294,"attach_ns":313677208,"attach_peak":0,"output_ns":209668848,"output_peak":306207460,"write_ns":478214586,"write_peak":302931108}
+{"route":"full_tower","workers":4,"tree_ns":2740072977,"tree_peak":367758854,"attach_ns":322927078,"attach_peak":0,"output_ns":207935298,"output_peak":306207460,"write_ns":476146316,"write_peak":302931108}
+supports_route_verdict conforme k=5 n=16000 noeuds=565098 boules=819004 supports=819004 etendues=0 multiples=0 cellules=478947 graines=1530768 fichier=1716d15eb3a5afa4 manifeste=39af11215297416d journal=436d1354ae183486 fils=1,4
+run_expect_verdict ligne_absente
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/src/morsehgp3D_v11/cmake/run_expect.cmake:126 (message):
+  ligne attendue ABSENTE de la sortie standard de la MEME execution :
+  supports_route_verdict conforme k=5 n=16000 noeuds=565098 boules=819004
+  supports=819004 etendues=0 multiples=0 cellules=478947 graines=1530768
+  fichier=dd524ffd991873eb manifeste=baa658ac05a8eee8
+  journal=436d1354ae183486 fils=1,4
+
+
+<end of output>
+Test time = 102.58 sec
+----------------------------------------------------------
+Test Failed.
+"mhgp11_api_supports_route_scale16000" end time: Oct 05 21:29 UTC
+"mhgp11_api_supports_route_scale16000" time elapsed: 00:01:42
+----------------------------------------------------------
+

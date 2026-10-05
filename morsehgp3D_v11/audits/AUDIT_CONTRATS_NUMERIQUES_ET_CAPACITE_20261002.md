@@ -10,6 +10,32 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
+## Fins : lots d’échelle et LiDAR terminés au pin final
+
+Session `v11.20261005.claudefins`, source **38b76701b**, arrêt ciblé
+certifié. Les onze lots terminent tous leurs inventaires : **80/80**
+portes TSan u21 passent ; **74/80** ASan/UBSan u24 passent, avec six
+échecs limités à `api_supports_route` (trois tailles et trois trames).
+Aucune porte manquante ni interruption à l’échéance.
+
+Les six journaux d’échec conservés confirment cette fois la cause,
+cas par cas : sonde `supports_route_verdict conforme`, comptes et
+journal attendus, puis refus `ligne_absente` sur les deux hashes u24
+comparés aux attendus u21. Les identités entre voies et appel public
+passent dans les six cas ; le pic public égale celui de FULL et se
+distingue de celui de l’arbre K seul. Aucun diagnostic ASan/UBSan
+n’est trouvé dans les journaux runtime examinés. Les six portes CTest
+restent néanmoins Failed jusqu’à correction et rejeu de leur juge.
+[Extraits conservés et contrôle des attendus](../receipts/audit_g4_fins_20261005/supports_route/README.md).
+
+Les portes `points`, `plat` et `num_roots_cost` passent sur les six
+entrées dans les deux configurations. Les six identités entre voies
+supports et appel public passent sous TSan u21, au pin qui comprend
+L2b et S10. Le lot S ne contient pas les unitaires courts : la session
+B suivante couvre notamment la racine frontière S10 et le refus de
+tri S9. Les différentiels Python complets S9/S10 restent distincts.
+[Reçu vérifié, inventaires et périmètre](../receipts/audit_g4_fins_20261005/README.md).
+
 ## Finm : deux réparations de qualification, sans nouveau défaut moteur établi
 
 Session `v11.20261005.claudefinm`, source **38b76701b**, arrêt ciblé

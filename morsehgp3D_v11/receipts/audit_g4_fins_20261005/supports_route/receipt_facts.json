@@ -1,0 +1,9 @@
+{
+  "commit": "38b76701b9b0198fc1c37afe16e1480e638e513c",
+  "source_kind": "commit",
+  "worker_source": "commit:38b76701b9b0198fc1c37afe16e1480e638e513c",
+  "results_sha256": "b7421fe2176310847f3ae6ba250a5b6815c4ca81acec09d4e740508a9c62100a",
+  "results_verified": true,
+  "closure": "stopped",
+  "targeted_shutdown_certified": true
+}
