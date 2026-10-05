@@ -1,6 +1,6 @@
 {
   "module": "num",
-  "plancher": 53,
+  "plancher": 57,
   "mutants": [
     {
       "id": "checked_first_overflow_ignored_u24",
@@ -518,6 +518,38 @@
       "remplace": "auto level = detail::checked_level(multiply(numerator, to_wide(i128{3})), multiply(to_wide(2 * denominator_), to_wide(i128{3})));",
       "porte": "mhgp11_num_unit_q3_candidate",
       "note": "meme valeur rationnelle, forme brute changee : le niveau q3 differe doit garder la formule de degre six non reduite"
+    },
+    {
+      "id": "carre_parfait_hors_classe",
+      "fichier": "src/num/radical.cpp",
+      "cherche": "const u32 parity = valuation & 1u;",
+      "remplace": "const u32 parity = valuation;",
+      "porte": "mhgp11_num_radical",
+      "note": "defaut b4632db51 transpose : la signature garde la valuation au lieu de sa parite, un radicande carre parfait (36, 64, 144 de F5) ne rejoint plus la classe rationnelle ; trois classes de somme nulle, refus au lieu de l'egalite certifiee 1/4"
+    },
+    {
+      "id": "egalite_non_certifiee",
+      "fichier": "src/num/radical.cpp",
+      "cherche": "    if (high.sign() < 0) return set_sign(-1, out);\n",
+      "remplace": "    if (high.sign() < 0) return set_sign(-1, out);\n    return set_sign(0, out);\n",
+      "porte": "mhgp11_num_radical",
+      "note": "un encadrement qui contient 0 conclut a l'egalite au lieu de raffiner : le temoin du second ordre (ecart -2^-122, trois classes) rend 0 au lieu de -1 a 192 bits"
+    },
+    {
+      "id": "budget_ignore",
+      "fichier": "src/num/radical.cpp",
+      "cherche": "return fail(Reason::radical_sign_budget);  // `raise Refusal`",
+      "remplace": "return set_sign(0, out);  // `raise Refusal`",
+      "porte": "mhgp11_num_radical",
+      "note": "au-dela de 2^-8192 la somme non separee est declaree nulle au lieu du refus radical_sign_budget : temoin du second ordre a n = 2^2050 + 1 (ecart -2^-6152)"
+    },
+    {
+      "id": "encadrement_decale",
+      "fichier": "src/num/roots.cpp",
+      "cherche": "      high += r + 1;",
+      "remplace": "      high += r;",
+      "porte": "mhgp11_num_roots",
+      "note": "borne haute d'une racine positive prise a R au lieu de R + 1 : l'encadrement ne contient plus la valeur vraie ; bornes lo, hi comparees a Python et decisions de la table fausses"
     }
   ]
 }

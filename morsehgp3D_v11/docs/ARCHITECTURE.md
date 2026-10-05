@@ -38,7 +38,7 @@ Chaque règle est vérifiable ; `tools/check_style.py` contrôle celles qui se l
 | Module | Rôle | Dépend de |
 | --- | --- | --- |
 | `core` | entiers, identifiants forts, statuts et raisons, `Result`, budget mémoire, `Buffer`, `Csr`, compteurs | — |
-| `num` | entiers à budget de bits, entiers larges, niveaux rationnels, prédicats géométriques exacts, clés approchées à borne prouvée | `core` |
+| `num` | entiers à budget de bits, entiers larges, niveaux rationnels, prédicats géométriques exacts, clés approchées à borne prouvée ; entiers à longueur utile (`Big`), rationnels réduits, table des racines de niveaux et sommes de radicaux (tranche S8) | `core` |
 | `sched` | `Pool`, `parallel_for`, tri parallèle, sommes préfixes | `core` |
 | `cloud` | contrôle du domaine, sites en ordre de Morton, multiplicités, table site → `PointId` | `core` |
 | `io` | lecture `u32le` des nuages, empreintes SHA-256, écrivains petit-boutistes, transaction de dossier | `core`, `cloud` |
@@ -88,6 +88,11 @@ la v10 durcis par son raccord R2 ; voir `PROVENANCE.md`.
 - Les différences de coordonnées sont de valeur absolue $< 2^{B}$ (et non $2^{B+1}$).
 - Un niveau est un rationnel exact `num / den`, `den > 0`, jamais réduit ; l'ordre des niveaux se décide par produits
   croisés exacts.
+- Une expression de longueur variable (somme de radicaux) a un budget déclaré avec refus explicite, en plus des
+  `static_assert` de degré : `num::RadicalSum` admet au plus 16 termes, sépare une somme non nulle par encadrements
+  entiers jusqu'à 2^-8192 et calcule sur des entiers `num::Big` d'au plus 16 384 + 1 024 bits (longueur utile, la
+  capacité n'est qu'un plafond) ; au-delà, refus `radical_sign_budget` (`resource_exhausted`), jamais une égalité
+  supposée (tranche S8, `src/num/radical.hpp`).
 
 ## 4. Doctrine flottante
 

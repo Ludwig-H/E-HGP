@@ -166,6 +166,8 @@ Cet ordre suit le plan révisé, où S6 (L1) précède S5 (L2). La spécificatio
 `environment_selftest` en tête. Le rang d'une raison dans la table ne départage que deux refus au même K.
 L'intégration L1 du 5 octobre 2026 a suivi cet ordre : `support_shell_capacity` et `supports_invariant` (S6a), puis
 `environment_selftest` (S5), sont en fin de `reasons.def`, avec la copie gravée de `tests/core/status_test.cpp`.
+La tranche S8 (L3, 5 octobre 2026) a ajouté ensuite `radical_sign_budget`, au même commit que son émetteur
+(`src/num/radical.cpp`, `src/num/big.cpp`) et ses portes (`mhgp11_num_big`, `mhgp11_num_radical`).
 
 **Codes de sortie** (`exit_code`, `src/core/status.hpp`) :
 - 0 : conforme ;

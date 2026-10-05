@@ -194,3 +194,15 @@ aux profils 18/21/24 ; chaque oracle normal/−O joue 6 164 contrôles. Les neuf
 mutants num meurent par code du juge au profil 18. Release, ASan/UBSan, TSan et
 poison passent ; Clang était absent. Les échecs antérieurs du banc restent
 conservés dans [`DEVELOPPEMENT.md`](../../docs/DEVELOPPEMENT.md).
+
+## Entiers à longueur utile, table des racines, sommes de radicaux (tranche S8)
+
+`big.hpp` (`Big`, signe-magnitude, capacité 16 384 + 1 024 bits comme plafond de refus), `rational.hpp`,
+`roots.hpp` (`RootTable`) et `radical.hpp` (`RadicalSum`, `sqrt_cmp2`, `sqrt_diff_cmp`, `compare_dates`) ; port
+explicite épinglé dans `docs/PROVENANCE.md` (section S8). Portes, toutes `fast` et en bibliothèque standard :
+`mhgp11_num_big` (`big_gate.py`, 23 445 opérations contre l'`int` de Python), `mhgp11_num_roots` (`roots_gate.py`),
+`mhgp11_num_radical` (`radical_gate.py`, témoins F5, F6, F8, F14a, 5√2 et différentiel décision par décision contre
+`radical_port.py`, copie à la lettre de `bench/points_radius.py` vérifiée par l'arbre syntaxique),
+`mhgp11_num_s8_unit_*` (`big_test.cpp`). Mutants `carre_parfait_hors_classe`, `egalite_non_certifiee`,
+`budget_ignore`, `encadrement_decale` (`tests/mutants/num.json`). Mesure du coût de la table : `bench/roots_cost.cpp`
+(`mhgp11_num_roots_cost_*`, label `lidar`, construit avec le catalogue).

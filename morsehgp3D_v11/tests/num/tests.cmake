@@ -88,3 +88,42 @@ mhgp11_python_gate(mhgp11_num_triangle_kind_fraction 0 triangle_kind_oracle.py
 mhgp11_python_gate(mhgp11_num_triangle_kind_model 0 triangle_kind_oracle.py --selftest
                     LABELS oracle fast TIMEOUT 30
                     LINE "triangle_kind_model_verdict conforme requests852 checks1717 corruptions72 processes5 native0")
+
+# Tranche S8 : entiers a longueur utile, table des racines, sommes de radicaux (specification paragraphes 7.8 et 8.7).
+mhgp11_add_unit(mhgp11_num_s8_unit SOURCES big_test.cpp
+                GROUPS capacity aliasing division rational_form square_signature radical_budget roots_limits LABELS fast)
+add_executable(mhgp11_num_big_probe ${CMAKE_CURRENT_LIST_DIR}/big_probe.cpp)
+target_link_libraries(mhgp11_num_big_probe PRIVATE mhgp11)
+mhgp11_python_gate(mhgp11_num_big 0 big_gate.py $<TARGET_FILE:mhgp11_num_big_probe> LABELS oracle fast TIMEOUT 300
+                    LINE "num_big_verdict conforme operations=23445 refus_capacite=1516 knuth=2500")
+add_executable(mhgp11_num_radical_probe ${CMAKE_CURRENT_LIST_DIR}/radical_probe.cpp)
+target_link_libraries(mhgp11_num_radical_probe PRIVATE mhgp11)
+mhgp11_python_gate(mhgp11_num_radical 0 radical_gate.py $<TARGET_FILE:mhgp11_num_radical_probe>
+                    ${PROJECT_SOURCE_DIR}/bench/points_radius.py LABELS oracle fast TIMEOUT 300
+                    LINE "num_radical_verdict conforme temoins=19 decisions=5900 egalites=1981 raffinees=1526 refus=0")
+add_executable(mhgp11_num_roots_probe ${CMAKE_CURRENT_LIST_DIR}/roots_probe.cpp)
+target_link_libraries(mhgp11_num_roots_probe PRIVATE mhgp11)
+# Ligne gravee au profil 21 ; aux profils 18 et 24 les planchers seuls s'appliquent (lignes a graver sur G4).
+set(num_roots_line)
+if(MHGP11_COORD_BITS EQUAL 21)
+  set(num_roots_line LINE "num_roots_verdict conforme bits=21 racines=3314 sommes=4062 replis=692 egalites=512 raffinees=180")
+endif()
+mhgp11_python_gate(mhgp11_num_roots 0 roots_gate.py $<TARGET_FILE:mhgp11_num_roots_probe>
+                    ${PROJECT_SOURCE_DIR}/bench/points_radius.py LABELS oracle fast TIMEOUT 300 ${num_roots_line})
+# Cout de la table des racines sur le catalogue d'ordre K (mesure, hors produit) : construit si le catalogue l'est.
+# Portes lidar (MHGP11_DATA_DIR : familles uniformes 8000, 16000, 32000 et trames sans sol), juge d'echantillon et
+# identite des voies sequentielle et parallele ; temps et octets lus dans la sortie JSON (recu G4).
+if("catalogue" IN_LIST MHGP11_LIBRARY_MODULES AND "sched" IN_LIST MHGP11_LIBRARY_MODULES)
+  add_executable(mhgp11_num_roots_cost ${PROJECT_SOURCE_DIR}/bench/roots_cost.cpp)
+  target_include_directories(mhgp11_num_roots_cost PRIVATE ${PROJECT_SOURCE_DIR}/bench)
+  target_link_libraries(mhgp11_num_roots_cost PRIVATE mhgp11)
+  foreach(case "uniform_u18_n8000;5;scale8000" "uniform_u18_n16000;5;scale16000" "uniform_u18_n32000;5;scale32000"
+               "lidar_ng00;5;lidar" "lidar_ng01;5;lidar" "lidar_ng02;5;lidar" "lidar_ng00;10;long")
+    list(GET case 0 data)
+    list(GET case 1 k)
+    list(GET case 2 extra)
+    mhgp11_expect_code(mhgp11_num_roots_cost_${data}_k${k} 0 mhgp11_num_roots_cost --data=${data} --k=${k}
+                       --workers=4 --min-levels=100000 LINE "roots_cost_verdict conforme k=${k}"
+                       LABELS lidar ${extra} TIMEOUT 1800)
+  endforeach()
+endif()

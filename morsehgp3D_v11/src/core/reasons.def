@@ -61,3 +61,6 @@ MHGP11_REASON(supports_invariant, invariant_violated, supports)
 // auto-test F5 de l'environnement flottant au demarrage d'une Session (docs/ARCHITECTURE.md, paragraphe 4) : exception
 // flottante demasquee, mode d'arrondi inconnu, binaire64 inexact sur un noyau entier ou arrondi non fidele
 MHGP11_REASON(environment_selftest, invariant_violated, api)
+// somme de radicaux (num::RadicalSum, num::Big) : signe non separe par les encadrements jusqu'a 2^-8192, entier au-dela
+// de la capacite de Big (16384 + 1024 bits), ou plus de termes que le budget declare ; jamais une egalite supposee
+MHGP11_REASON(radical_sign_budget, resource_exhausted, num)
