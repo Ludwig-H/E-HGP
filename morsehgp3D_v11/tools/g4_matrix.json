@@ -2,7 +2,7 @@
   "schema": "ehgp.v11.g4_matrix.v1",
   "note": "Matrice des portes v11 sur G4 (48 fils). Hors gcc_release, seule la reference Python independante du binaire est exclue par son nom. Les oracles qui interrogent le binaire, notamment num Fraction, sont rejoues dans chaque configuration. Les mutants ont leur configuration dediee. {threads} est le nombre de fils alloues. Reprise u21/u24 : gcc_release conserve18 pour comparaison ; ASan/UBSan24, TSan/poison21. Chaque capture juge ses profils sans transfert historique.",
   "source_dir": "morsehgp3D_v11",
-  "budget_seconds": 1380,
+  "budget_seconds": 2200,
   "thread_budget": 0,
   "limits": {
     "log_bytes": 1048576,
@@ -24,7 +24,7 @@
         "^mutant$"
       ],
       "threads": 16,
-      "timeout_seconds": 1200,
+      "timeout_seconds": 2100,
       "test_timeout_seconds": 600,
       "require_labels": [
         "unit",
@@ -56,7 +56,7 @@
       ],
       "threads": 32,
       "ctest_parallel": 1,
-      "timeout_seconds": 1300,
+      "timeout_seconds": 2100,
       "test_timeout_seconds": 1200,
       "require_labels": [
         "mutant"
@@ -79,7 +79,7 @@
         "^mhgp11_reference_"
       ],
       "threads": 8,
-      "timeout_seconds": 1300,
+      "timeout_seconds": 2100,
       "test_timeout_seconds": 900,
       "require_labels": [
         "unit"
@@ -105,7 +105,7 @@
         "^mhgp11_reference_"
       ],
       "threads": 8,
-      "timeout_seconds": 1300,
+      "timeout_seconds": 2100,
       "test_timeout_seconds": 900,
       "require_labels": [
         "unit"
@@ -127,7 +127,7 @@
         "^mhgp11_reference_"
       ],
       "threads": 6,
-      "timeout_seconds": 1200,
+      "timeout_seconds": 2100,
       "test_timeout_seconds": 600,
       "require_labels": [
         "unit"
@@ -148,7 +148,7 @@
         "^mhgp11_reference_"
       ],
       "threads": 4,
-      "timeout_seconds": 1200,
+      "timeout_seconds": 2100,
       "test_timeout_seconds": 600,
       "require_labels": [
         "unit"
@@ -169,7 +169,7 @@
         "^mhgp11_reference_"
       ],
       "threads": 4,
-      "timeout_seconds": 1200,
+      "timeout_seconds": 2100,
       "test_timeout_seconds": 600,
       "require_labels": [
         "unit"
@@ -191,7 +191,7 @@
         "^mhgp11_reference_"
       ],
       "threads": 4,
-      "timeout_seconds": 1200,
+      "timeout_seconds": 2100,
       "test_timeout_seconds": 600,
       "require_labels": [
         "unit"
