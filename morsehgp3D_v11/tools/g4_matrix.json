@@ -64,7 +64,7 @@
     },
     {
       "name": "gcc_asan_ubsan",
-      "description": "GCC, AddressSanitizer + UndefinedBehaviorSanitizer (MHGP11_SANITIZE) ; un rapport UBSan arrete la porte. Profil explicite 24 bits.",
+      "description": "GCC, AddressSanitizer + UndefinedBehaviorSanitizer (MHGP11_SANITIZE) ; un rapport UBSan arrete la porte. Profil explicite 24 bits ; sans les portes d'echelle et LiDAR, jouees seules et qualifiees en Release (session claudequalb du 5 octobre 2026 : coupees par l'echeance sous sanitizer).",
       "compiler": "g++",
       "sanitizer": "address,undefined",
       "cmake_options": [
@@ -74,7 +74,7 @@
       ],
       "ctest_args": [
         "-LE",
-        "^(mutant|long)$",
+        "^(mutant|long|scale8000|scale16000|scale32000|lidar)$",
         "-E",
         "^mhgp11_reference_"
       ],
@@ -90,7 +90,7 @@
     },
     {
       "name": "gcc_tsan",
-      "description": "GCC, ThreadSanitizer (MHGP11_TSAN) : portes de sched et de core au moins ; ctest tourne sous setarch -R des que cela fonctionne (un binaire TSan echoue aleatoirement sous forte randomisation d'adresses). Profil explicite 21 bits.",
+      "description": "GCC, ThreadSanitizer (MHGP11_TSAN) : portes de sched et de core au moins ; ctest tourne sous setarch -R des que cela fonctionne (un binaire TSan echoue aleatoirement sous forte randomisation d'adresses). Profil explicite 21 bits ; sans les portes d'echelle et LiDAR, jouees seules et qualifiees en Release (session claudequalb du 5 octobre 2026 : coupees par l'echeance sous sanitizer).",
       "compiler": "g++",
       "sanitizer": "thread",
       "cmake_options": [
@@ -100,7 +100,7 @@
       ],
       "ctest_args": [
         "-LE",
-        "^(mutant|long)$",
+        "^(mutant|long|scale8000|scale16000|scale32000|lidar)$",
         "-E",
         "^mhgp11_reference_"
       ],
@@ -199,7 +199,7 @@
     },
     {
       "name": "release_long",
-      "description": "GCC Release, profil 21 bits : les seules portes de label long (identites K10 a l'echelle et sur trame, juges K10), sorties des autres configurations pour qu'aucune n'en soit coupee par son echeance (qualification de la sortie parametree, 5 octobre 2026).",
+      "description": "GCC Release, profil 21 bits : les seules portes de label long (identites K10 a l'echelle et sur trame, juges K10), sorties des autres configurations pour qu'aucune n'en soit coupee par son echeance (qualification de la sortie parametree, 5 octobre 2026) Les differentiels contre la chaine Python (*_vs_python) exigent numpy, absent de la VM : ils sont exclus ici et joues en local.",
       "compiler": "g++",
       "cmake_options": [
         "-DCMAKE_BUILD_TYPE=Release",
@@ -207,7 +207,9 @@
       ],
       "ctest_args": [
         "-L",
-        "^long$"
+        "^long$",
+        "-E",
+        "_vs_python"
       ],
       "threads": 16,
       "timeout_seconds": 2100,
