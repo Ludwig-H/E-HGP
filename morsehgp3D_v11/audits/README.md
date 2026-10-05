@@ -17,12 +17,12 @@ présents et conformes dans `data_complet`, à utiliser pour la reprise.
 La matrice **8b2ca400e** prépare onze lots ; elle n'est pas encore exécutée.
 [Résultats, causes et reprise](../receipts/audit_g4_s_20261005/README.md).
 
-**L2b : diagnostic inutile corrigé dans le commit local 311ef5e3c.**
+**L2b publiée en 0810962ac, diagnostic corrigé en 311ef5e3c.**
 Les trois fichiers sont identiques à la capture relue. Le correctif
 transmet un pointeur nul quand aucun diagnostic
 n'est demandé : le hachage de tout le journal disparaît alors du chemin
-public. Lecture favorable ; publication, identité native et qualification
-G4 du nouveau chemin restent à constater.
+public. Lecture favorable ; identité native et qualification G4 du
+nouveau chemin restent à constater sur la source publiée.
 [Correction et limites](../receipts/audit_l2b_followup_20261005/README.md).
 
 **S9 : correctif du refus de tri publié en 3d47eaa93.** Les quatre fichiers

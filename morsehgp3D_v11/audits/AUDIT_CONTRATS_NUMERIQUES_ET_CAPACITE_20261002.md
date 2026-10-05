@@ -183,16 +183,17 @@ de FULL, comme prévu dans `SORTIES.md` § 11. Conserver tous les supports,
 le rattachement après fermeture des plateaux et les admissions mémoire
 avec le journal vivant. Les portes décisives restent **MHGP11SP identique
 octet pour octet par les deux voies**, TSan sur le pipeline et les mutants.
-L2b n'est pas encore une nouvelle voie qualifiée.
+L2b est publiée en **0810962ac** : ses vingt fichiers de livraison sont
+identiques au commit local cc73784f0 relu. Sa qualification G4 reste à faire.
 [Contrelecture de la décision et de ses entrées](../receipts/audit_l2_decision_20261005/README.md).
 
-**Diagnostic du chemin normal : correction locale favorable.** La
+**Diagnostic du chemin normal : correction publiée, lecture favorable.** La
 capture initiale puis le commit local **cc73784f0** passent toujours
 `&seen` à `supports_parts`, même sans diagnostic demandé. Le hachage
 FNV du journal coûte alors exactement **2C+G mots**, soit **16C+8G
 itérations** par octet, dans `Stage::tree`.
 
-Le correctif, commité localement en **311ef5e3c**, est identique aux
+Le correctif publié en **311ef5e3c** est identique aux
 trois fichiers capturés. Il prépare désormais
 `wanted = diagnostics == nullptr ? nullptr : &seen`, puis transmet
 `wanted`. Le pointeur nul parvient à `build_order_full` :
@@ -201,11 +202,11 @@ La porte ajoutée compare aussi les fichiers et manifestes de l'appel
 public sans diagnostic à ceux de la voie FULL, et observe cette voie
 à W1. Le mutant `voie_supports_order_tree` cible le retour involontaire
 à l'ancienne voie. Ces ajouts sont relus dans les sources ; leur présence
-ne constitue pas un résultat d'exécution. Publier puis qualifier cette
-version et mesurer l'appel public sans diagnostic. Aucun gain chiffré
+ne constitue pas un résultat d'exécution. Qualifier cette version sur G4
+et mesurer l'appel public sans diagnostic. Aucun gain chiffré
 n'est déduit de la correction.
 [Capture initiale](../receipts/audit_l2b_wip_20261005/README.md).
-[Correction locale, source figée et limites](../receipts/audit_l2b_followup_20261005/README.md).
+[Correction relue, source figée et limites](../receipts/audit_l2b_followup_20261005/README.md).
 
 ## S8 : socle numérique de la sortie points
 
