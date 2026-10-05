@@ -84,7 +84,15 @@ Outcome bracket_plateaus(const TreeView& tree, const LevelSource& levels, u32 z,
     out.zero[p] = out.open[p] = 0;
     i128 e_lo = 0, e_hi = 0;
     const u128 rt = cache.at(tree.plateau_t[p]);
-    if (tree.plateau_m[p] == tree.plateau_q[p]) {
+    const bool sq = tree.plateau_m[p] == tree.plateau_q[p];
+    // Racines au-dela de 2^kMaxRootBits (source abstraite : le catalogue les borne a 2^89) : aucune conversion signee,
+    // aucun encadrement, le repli exact decide (audit 100fcc12b).
+    if (rt > kMaxRoot || (!sq && (cache.at(tree.plateau_m[p]) > kMaxRoot || cache.at(tree.plateau_q[p]) > kMaxRoot))) {
+      out.open[p] = 1;
+      ++out.unbracketed;
+      continue;
+    }
+    if (sq) {
       if (rt == 0) {
         num::Rational value;
         MHGP11_TRY(levels.value(tree.plateau_t[p], value));

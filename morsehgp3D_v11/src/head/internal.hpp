@@ -11,6 +11,10 @@ using Fixed = num::Wide<6>;
 inline constexpr u32 kFixedShift = 192;
 // E = 2^64 e en dessous de 2^40 (e < 2^-24) : aucun encadrement utile, le repli exact decide.
 inline constexpr u32 kMinBracketBits = 40;
+// Racines encadrees : au plus 2^100 (le catalogue les borne a 2^(B+65) <= 2^89) ; au-dela, sommes et differences de
+// trois racines sortiraient de i128 : plateau sans encadrement.
+inline constexpr u32 kMaxRootBits = 100;
+inline constexpr u128 kMaxRoot = u128{1} << kMaxRootBits;
 
 // Arbre condense (Condensed de bench/points_flat.py) : clusters dans l'ordre de naissance, enfants avant parents,
 // racine virtuelle en dernier pour une foret. top = kNone : haut infini (phi = 0). Jonctions en CSR par cluster.

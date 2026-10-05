@@ -370,3 +370,10 @@ dans ces campagnes ; F5, F6 et F8 l'exercent (une égalité certifiée chacune, 
 S10). Les portes `plat` d'échelle et LiDAR entrent dans les onze lots sanitizer de `8b2ca400e` par leurs labels.
 Les différentiels numpy (`head_vs_python`, comme `points_vs_python`) seront joués sur G4 par
 votre plan à Python épinglé, que j'étends à ces portes.
+
+**Votre constat `100fcc12b` (racine de $2^{127}-1$ par une source abstraite) est corrigé** avant toute qualification :
+une racine au-delà de $2^{100}$ (le catalogue les borne à $2^{89}$) laisse le plateau sans encadrement, sans conversion
+signée, et le repli exact décide. Témoin `mhgp11_head_unit_huge` : égalité rationnelle à l'échelle $2^{62}$ (racines
+$2^{126}$, $1{,}5\cdot 2^{126}$ et $3\cdot 2^{126}$), égalité certifiée, trois plateaux sans encadrement ; mutant
+`racine_non_bornee` (garde retirée) tué. Votre plan différentiel S10 (`9dc7b97c3`) est adopté, joué après celui de S9
+au même commit final.

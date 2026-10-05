@@ -6,6 +6,7 @@
 //              irrationnelle a z = 1 (1/sqrt 2 + 1/sqrt 8 = 2 / sqrt(32/9), classe de sqrt 2), a z = 2
 //              (1 + 1/49 = 2 / (7/5)^2) ; la meme geometrie a l'autre z n'est pas une egalite (une egalite a z = 1 ne
 //              prouve rien a z = 2) ; compteurs exact et equalities ;
+//   huge       racines hors de 2^100 (source abstraite) : plateaux sans encadrement, repli exact (audit 100fcc12b) ;
 //   dates      repli exact des dates (port de _inverse_date et _mask_mul, recu eom_exact_audit_20261004) : egalites
 //              certifiees phi(date) = phi(niveau) a z = 1, 2, 3 pour (4, 9, 4) contre 9, (8, 2, 8) contre 2
 //              (classe de sqrt 2), tous deux a Delta != 0, et (9, 4, 1) contre 16 (Delta = 0) ; date a trois racines sqrt 2 + sqrt 3 - 1
@@ -270,6 +271,26 @@ MHGP11_TEST(equalities, 8) {
   // enfants l'emportent.
   const auto r2 = run(rational, 2, 2, head::Selection::eom);
   CHECK(same_groups(r2, Groups{{0, 1}, {2, 3}, {4, 5}}) && r2.value().stats.equalities == 0);
+}
+
+// Egalite rationnelle a l'echelle 2^62 : racines R = floor(2^64 sqrt(l)) jusqu'a 3 2^126, hors de i128 une fois
+// sommees (audit 100fcc12b) : plateaux sans encadrement, repli exact, egalite certifiee.
+MHGP11_TEST(huge, 3) {
+  auto scaled = [](i64 a, i64 b) {
+    Big n, d;
+    static_cast<void>(num::shift_left(Big::from_i64(a), 124, n));
+    d = Big::from_i64(b);
+    Rational out;
+    static_cast<void>(Rational::make(n, d, out));
+    return out;
+  };
+  const Tree t = tie(scaled(1, 1), scaled(9, 4), scaled(9, 1));
+  const auto got = run(t, 2, 1, head::Selection::eom);
+  CHECK(same_groups(got, Groups{{0, 1, 2, 3}, {4, 5}}));
+  CHECK(got.ok() && got.value().stats.equalities == 1);
+  // Racines 2^126, 1,5 2^126 et 3 2^126 : les trois plateaux depassent 2^100 ; sans la garde, seul le dernier (converti
+  // en i128 negatif) serait ecarte, les deux autres encadres hors du domaine prouve.
+  CHECK(got.ok() && got.value().stats.unbracketed == 3);
 }
 
 MHGP11_TEST(dates, 25) {

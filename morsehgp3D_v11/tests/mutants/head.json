@@ -1,6 +1,6 @@
 {
   "module": "head",
-  "plancher": 9,
+  "plancher": 10,
   "construction": [
     "head",
     "cli"
@@ -77,6 +77,14 @@
       "remplace": "    if (idx(canon[o]) == kNone || idx(tree.site_ids[s]) > idx(canon[o])) canon[o] = tree.site_ids[s];\n",
       "porte": "mhgp11_head_unit_order",
       "note": "identifiant canonique autre que le plus petit PointId"
+    },
+    {
+      "id": "racine_non_bornee",
+      "fichier": "src/head/score.cpp",
+      "cherche": "    if (rt > kMaxRoot || (!sq && (cache.at(tree.plateau_m[p]) > kMaxRoot || cache.at(tree.plateau_q[p]) > kMaxRoot))) {\n",
+      "remplace": "    if (false) {\n",
+      "porte": "mhgp11_head_unit_huge",
+      "note": "racines hors de 2^100 converties en i128 sans garde (audit 100fcc12b)"
     }
   ]
 }

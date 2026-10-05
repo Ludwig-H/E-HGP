@@ -3,7 +3,7 @@
 # Unitaires sur arbres abstraits : F14a a F14e (attendus manuels de clusters), egalites EOM certifiees (z = 1
 # rationnelle et irrationnelle, z = 2), repli exact des dates (Delta != 0 et Delta = 0, trois racines), ordre d'entree,
 # refus, budget rendu.
-mhgp11_add_unit(mhgp11_head_unit SOURCES head_test.cpp GROUPS fixtures equalities dates order refusals budget
+mhgp11_add_unit(mhgp11_head_unit SOURCES head_test.cpp GROUPS fixtures equalities huge dates order refusals budget
                 LABELS fast)
 
 if(TARGET mhgp11_cli)
