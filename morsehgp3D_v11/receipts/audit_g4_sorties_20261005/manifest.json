@@ -1,0 +1,1602 @@
+{
+  "changed_during_capture": [],
+  "excluded_active_session": "v11.20261005.claudequala2",
+  "gcp_calls": 0,
+  "native_runs": 0,
+  "observed_utc": "2026-10-05T14:46:50.539265+00:00",
+  "plans": [
+    {
+      "bytes": 1248,
+      "exact_text": "{\n  \"schema\": \"ehgp.v11.session_plan.v1\",\n  \"note\": \"Qualification L1 + L2 de la sortie parametree (Claude, 5 octobre 2026), commit 00bd979ac : S3 (arbre d'ordre K, rattachement), S5 (api, --sortie=full, provenance), S6a/S6b (supports, assemblage), S7 (--sortie=supports, MHGP11SP). D'abord la mesure appariee de la regle de L2 sur machine au repos (FULL 16379 contre supports 7035, trames ng00-02, W1 et W48, trois prises, ng00 a K10 descriptif), puis la matrice complete (budget 2200 s).\",\n  \"python_packages\": \"none\",\n  \"default_build\": true,\n  \"results_cap_bytes\": 134217728,\n  \"commands\": [\n    {\n      \"name\": \"mesure_l2\",\n      \"timeout_seconds\": 1200,\n      \"argv\": [\"python3\", \"{src}/morsehgp3D_v11/bench/sorties_g4.py\", \"--cli\", \"{build}/mhgp11\", \"--data-dir\", \"{data}\",\n               \"--fils\", \"1,48\", \"--prises\", \"3\", \"--k10\", \"ng00\", \"--commit\", \"00bd979ac\", \"--work\", \"{build}/mesure\",\n               \"--out\", \"{out}/sorties_g4.json\", \"--timeout\", \"1100\"]\n    },\n    {\n      \"name\": \"matrice\",\n      \"timeout_seconds\": 2300,\n      \"argv\": [\"python3\", \"{src}/morsehgp3D_v11/tools/g4_matrix.py\", \"--src\", \"{src}\", \"--out\", \"{out}\", \"--data\", \"{data}\",\n               \"--work\", \"{build}/matrix\", \"--budget-seconds\", \"2200\"]\n    }\n  ]\n}\n",
+      "name": "plan.json",
+      "path": "/workspaces/E-HGP/build/v11-persist/qual_sorties/plan.json",
+      "sha256": "750c6894ee977a6bb3fcd23903334af80e15ea3163ccc9d36d067858e290e2e3"
+    },
+    {
+      "bytes": 837,
+      "exact_text": "{\n  \"schema\": \"ehgp.v11.session_plan.v1\",\n  \"note\": \"Qualification L1 + L2 de la sortie parametree (Claude, 5 octobre 2026), commit b319efc84 : configurations Release u18, u21, u24 et empoisonnement, sans les portes long (sessions precedentes : aucun echec, coupees par l'echeance derriere la porte long K10).\",\n  \"python_packages\": \"none\",\n  \"default_build\": false,\n  \"results_cap_bytes\": 134217728,\n  \"commands\": [\n    {\n      \"name\": \"matrice\",\n      \"timeout_seconds\": 2200,\n      \"argv\": [\n        \"python3\",\n        \"{src}/morsehgp3D_v11/tools/g4_matrix.py\",\n        \"--src\",\n        \"{src}\",\n        \"--out\",\n        \"{out}\",\n        \"--data\",\n        \"{data}\",\n        \"--work\",\n        \"{build}/matrix\",\n        \"--budget-seconds\",\n        \"2100\",\n        \"--only\",\n        \"gcc_release,bits21,bits24,poison\"\n      ]\n    }\n  ]\n}",
+      "name": "plan_a2.json",
+      "path": "/workspaces/E-HGP/build/v11-persist/qual_sorties/plan_a2.json",
+      "sha256": "2ddaf88ef6d0d5c454b8484bf688fcf06746416a7733de1505245eed5096c782"
+    },
+    {
+      "bytes": 716,
+      "exact_text": "{\n  \"schema\": \"ehgp.v11.session_plan.v1\",\n  \"note\": \"Qualification L1 + L2 de la sortie parametree (Claude, 5 octobre 2026), commit b319efc84 : ASan+UBSan (u24) et TSan (u21), sans les portes long.\",\n  \"python_packages\": \"none\",\n  \"default_build\": false,\n  \"results_cap_bytes\": 134217728,\n  \"commands\": [\n    {\n      \"name\": \"matrice\",\n      \"timeout_seconds\": 2200,\n      \"argv\": [\n        \"python3\",\n        \"{src}/morsehgp3D_v11/tools/g4_matrix.py\",\n        \"--src\",\n        \"{src}\",\n        \"--out\",\n        \"{out}\",\n        \"--data\",\n        \"{data}\",\n        \"--work\",\n        \"{build}/matrix\",\n        \"--budget-seconds\",\n        \"2100\",\n        \"--only\",\n        \"gcc_asan_ubsan,gcc_tsan\"\n      ]\n    }\n  ]\n}",
+      "name": "plan_b.json",
+      "path": "/workspaces/E-HGP/build/v11-persist/qual_sorties/plan_b.json",
+      "sha256": "903cce8e52c33a8974c74fbcad6253ecf49899c46cc28c7a8cb92bb025ae89dc"
+    },
+    {
+      "bytes": 734,
+      "exact_text": "{\n  \"schema\": \"ehgp.v11.session_plan.v1\",\n  \"note\": \"Qualification L1 + L2 de la sortie parametree (Claude, 5 octobre 2026), commit b319efc84 : portes de label long seules, Release u21 (identites K10 a l'echelle et sur trame).\",\n  \"python_packages\": \"none\",\n  \"default_build\": false,\n  \"results_cap_bytes\": 134217728,\n  \"commands\": [\n    {\n      \"name\": \"matrice\",\n      \"timeout_seconds\": 2200,\n      \"argv\": [\n        \"python3\",\n        \"{src}/morsehgp3D_v11/tools/g4_matrix.py\",\n        \"--src\",\n        \"{src}\",\n        \"--out\",\n        \"{out}\",\n        \"--data\",\n        \"{data}\",\n        \"--work\",\n        \"{build}/matrix\",\n        \"--budget-seconds\",\n        \"2100\",\n        \"--only\",\n        \"release_long\"\n      ]\n    }\n  ]\n}",
+      "name": "plan_l.json",
+      "path": "/workspaces/E-HGP/build/v11-persist/qual_sorties/plan_l.json",
+      "sha256": "5f886435ca435f8a3a04be5ed0cc9c6d75b62a4ad4ad444f7d33717c71242b01"
+    },
+    {
+      "bytes": 739,
+      "exact_text": "{\n  \"schema\": \"ehgp.v11.session_plan.v1\",\n  \"note\": \"Qualification L1 + L2 de la sortie parametree (Claude, 5 octobre 2026), commit 00bd979ac : S3, S5, S6a, S6b, S7. Matrice complete g4_matrix.py (budget 2200 s). La mesure appariee de L2 fait l'objet d'une seconde session.\",\n  \"python_packages\": \"none\",\n  \"default_build\": false,\n  \"results_cap_bytes\": 134217728,\n  \"commands\": [\n    {\n      \"name\": \"matrice\",\n      \"timeout_seconds\": 2200,\n      \"argv\": [\n        \"python3\",\n        \"{src}/morsehgp3D_v11/tools/g4_matrix.py\",\n        \"--src\",\n        \"{src}\",\n        \"--out\",\n        \"{out}\",\n        \"--data\",\n        \"{data}\",\n        \"--work\",\n        \"{build}/matrix\",\n        \"--budget-seconds\",\n        \"2100\"\n      ]\n    }\n  ]\n}",
+      "name": "plan_matrice.json",
+      "path": "/workspaces/E-HGP/build/v11-persist/qual_sorties/plan_matrice.json",
+      "sha256": "741f96b43031c66487b362257160af3a5931b89511bfe365a8dd2add3170b82f"
+    },
+    {
+      "bytes": 902,
+      "exact_text": "{\n  \"schema\": \"ehgp.v11.session_plan.v1\",\n  \"note\": \"Qualification L1 + L2 de la sortie parametree (Claude, 5 octobre 2026), commit 00bd979ac, suite de la session claudequalmatrice (mutants et style conformes, gcc_release 929/941 sans echec, le reste coupe par l'echeance) : configurations Release (u18, u21, u24, empoisonnement), sans la campagne de mutants, budget 2100 s.\",\n  \"python_packages\": \"none\",\n  \"default_build\": false,\n  \"results_cap_bytes\": 134217728,\n  \"commands\": [\n    {\n      \"name\": \"matrice\",\n      \"timeout_seconds\": 2200,\n      \"argv\": [\n        \"python3\",\n        \"{src}/morsehgp3D_v11/tools/g4_matrix.py\",\n        \"--src\",\n        \"{src}\",\n        \"--out\",\n        \"{out}\",\n        \"--data\",\n        \"{data}\",\n        \"--work\",\n        \"{build}/matrix\",\n        \"--budget-seconds\",\n        \"2100\",\n        \"--only\",\n        \"gcc_release,bits21,bits24,poison\"\n      ]\n    }\n  ]\n}",
+      "name": "plan_matrice_a.json",
+      "path": "/workspaces/E-HGP/build/v11-persist/qual_sorties/plan_matrice_a.json",
+      "sha256": "7c59760fc376ed099c1af6d5a120abadd1aec68277d7096655dc5f49f56d2382"
+    },
+    {
+      "bytes": 884,
+      "exact_text": "{\n  \"schema\": \"ehgp.v11.session_plan.v1\",\n  \"note\": \"Qualification L1 + L2 de la sortie parametree (Claude, 5 octobre 2026), commit 00bd979ac, suite de la session claudequalmatrice (mutants et style conformes, gcc_release 929/941 sans echec, le reste coupe par l'echeance) : configurations ASan+UBSan (u24) et TSan (u21), sans la campagne de mutants, budget 2100 s.\",\n  \"python_packages\": \"none\",\n  \"default_build\": false,\n  \"results_cap_bytes\": 134217728,\n  \"commands\": [\n    {\n      \"name\": \"matrice\",\n      \"timeout_seconds\": 2200,\n      \"argv\": [\n        \"python3\",\n        \"{src}/morsehgp3D_v11/tools/g4_matrix.py\",\n        \"--src\",\n        \"{src}\",\n        \"--out\",\n        \"{out}\",\n        \"--data\",\n        \"{data}\",\n        \"--work\",\n        \"{build}/matrix\",\n        \"--budget-seconds\",\n        \"2100\",\n        \"--only\",\n        \"gcc_asan_ubsan,gcc_tsan\"\n      ]\n    }\n  ]\n}",
+      "name": "plan_matrice_b.json",
+      "path": "/workspaces/E-HGP/build/v11-persist/qual_sorties/plan_matrice_b.json",
+      "sha256": "34744ce002db399d8450bdb6ef07f1767a71903936855946fccb2b3072edc3e0"
+    },
+    {
+      "bytes": 1759,
+      "exact_text": "{\n  \"schema\": \"ehgp.v11.session_plan.v1\",\n  \"note\": \"Mesure appariee de la regle de L2 (Claude, 5 octobre 2026), commit b319efc84 : FULL 16379 contre --sortie=supports 7035, trames ng00-02, W1 et W48, trois prises, ng00 a K10 descriptif ; puis le complement W48 de l'audit 4acbae533 (fragment w48_plan_fragment.json : ng02 puis ng00, 14 appels chacun).\",\n  \"python_packages\": \"none\",\n  \"default_build\": true,\n  \"results_cap_bytes\": 134217728,\n  \"commands\": [\n    {\n      \"name\": \"mesure_l2\",\n      \"timeout_seconds\": 900,\n      \"argv\": [\n        \"python3\",\n        \"{src}/morsehgp3D_v11/bench/sorties_g4.py\",\n        \"--cli\",\n        \"{build}/mhgp11\",\n        \"--data-dir\",\n        \"{data}\",\n        \"--fils\",\n        \"1,48\",\n        \"--prises\",\n        \"3\",\n        \"--k10\",\n        \"ng00\",\n        \"--commit\",\n        \"b319efc84\",\n        \"--work\",\n        \"{build}/mesure\",\n        \"--out\",\n        \"{out}/sorties_g4.json\",\n        \"--timeout\",\n        \"850\"\n      ]\n    },\n    {\n      \"name\": \"supports_w48_ng02\",\n      \"timeout_seconds\": 300,\n      \"argv\": [\n        \"python3\",\n        \"{src}/morsehgp3D_v11/tests/cli/cli_supports_scale.py\",\n        \"--cli\",\n        \"{build}/mhgp11\",\n        \"--bits\",\n        \"21\",\n        \"--data=lidar_ng02\",\n        \"--k=5\",\n        \"--fils=1,4,48\",\n        \"--min-balls=500000\",\n        \"--min-extended=50\"\n      ]\n    },\n    {\n      \"name\": \"supports_w48_ng00\",\n      \"timeout_seconds\": 300,\n      \"argv\": [\n        \"python3\",\n        \"{src}/morsehgp3D_v11/tests/cli/cli_supports_scale.py\",\n        \"--cli\",\n        \"{build}/mhgp11\",\n        \"--bits\",\n        \"21\",\n        \"--data=lidar_ng00\",\n        \"--k=5\",\n        \"--fils=1,4,48\",\n        \"--min-balls=500000\",\n        \"--min-extended=50\"\n      ]\n    }\n  ]\n}",
+      "name": "plan_mesure.json",
+      "path": "/workspaces/E-HGP/build/v11-persist/qual_sorties/plan_mesure.json",
+      "sha256": "6810edeb451e85f69d58200f105d480270654ac4a78ae7f960232c7c7d367e8d"
+    }
+  ],
+  "schema": "ehgp.v11.audit.g4_partial_snapshot.v1",
+  "sessions": [
+    {
+      "hash_verification": {
+        "archive_original_path": "/workspaces/.ehgp-sessions/v11.20261005.claudequalmatrice/results/results.tar.gz",
+        "archive_original_sha256": "67d8ceb694fd8ca0241a21cdfbba1cd5a9123691ea242590fbecdb563d839d29",
+        "archive_sha_matches_receipt": true,
+        "mutants_lines_archive_member": "results/cmd/000_matrice/files/matrix/mutants/LastTest.log",
+        "mutants_lines_selection_regex": "mutants_ok module=[^\\n<]*",
+        "package_original_path": "/workspaces/.ehgp-sessions/v11.20261005.claudequalmatrice/package/package.tar.gz",
+        "package_original_sha256": "3b1f838180c352b708303fba69320d5fb604607ca5b2ea416a6a3b6c012f5afd",
+        "package_sha_matches_receipt": true,
+        "plan_sha_matches_receipt": true,
+        "receipt_original_path": "/workspaces/.ehgp-sessions/v11.20261005.claudequalmatrice/receipt.json",
+        "receipt_original_sha256": "d7bf18ef82086bc2594ac44cc52b023e9ebf39ba2e393e09ce38a7b5e5b5c017",
+        "summary_archive_member": "results/cmd/000_matrice/files/matrix/summary.json",
+        "summary_sha256": "94e4076fba6c4b5f49d43760a8f359303fd900b9f97f7e736e2b124d89544ab7"
+      },
+      "matrix_summary_fields": {
+        "budget_seconds": 2100,
+        "complete": true,
+        "configurations": [
+          {
+            "cmake_options": [
+              "-DCMAKE_BUILD_TYPE=Release",
+              "-DMHGP11_COORD_BITS=18"
+            ],
+            "conforming": false,
+            "ctest_args": [
+              "-LE",
+              "^mutant$"
+            ],
+            "failed_tests": [],
+            "missing_tests": [
+              "mhgp11_cli_full_identity_scale32000_k10",
+              "mhgp11_cli_full_determinism_scale8000_opt",
+              "mhgp11_cli_full_identity_lidar_ng00_k5_opt",
+              "mhgp11_cli_full_identity_lidar_ng01_k5_opt",
+              "mhgp11_cli_full_identity_lidar_ng02_k5_opt",
+              "mhgp11_cli_full_identity_lidar_ng00_k10",
+              "mhgp11_cli_supports_scale8000_opt",
+              "mhgp11_cli_supports_scale16000_opt",
+              "mhgp11_cli_supports_scale32000_opt",
+              "mhgp11_cli_supports_lidar_ng00_k5_opt",
+              "mhgp11_cli_supports_lidar_ng01_k5_opt",
+              "mhgp11_cli_supports_lidar_ng02_k5_opt"
+            ],
+            "name": "gcc_release",
+            "optional": false,
+            "passed_labels": {
+              "fast": 833,
+              "lidar": 41,
+              "long": 25,
+              "oracle": 253,
+              "scale16000": 9,
+              "scale32000": 10,
+              "scale8000": 20,
+              "unit": 508
+            },
+            "reason": "ctest : timeout",
+            "seconds": 2100.015,
+            "started_utc": "2026-10-05T13:23:39Z",
+            "status": "timeout",
+            "steps": [
+              {
+                "exit_code": 0,
+                "name": "configure",
+                "seconds": 0.714,
+                "status": "ok",
+                "timeout_seconds": 2100.0
+              },
+              {
+                "exit_code": 0,
+                "name": "build",
+                "seconds": 21.622,
+                "status": "ok",
+                "timeout_seconds": 2099.3
+              },
+              {
+                "exit_code": 0,
+                "name": "list",
+                "seconds": 0.064,
+                "status": "ok",
+                "timeout_seconds": 120
+              },
+              {
+                "exit_code": -9,
+                "name": "test",
+                "seconds": 2077.602,
+                "status": "timeout",
+                "timed_out": true,
+                "timeout_seconds": 2077.6
+              }
+            ],
+            "tests": {
+              "ctest_failed": null,
+              "ctest_total": null,
+              "failed": 0,
+              "not_run": 12,
+              "passed": 929,
+              "selected": 941
+            },
+            "threads": 16
+          },
+          {
+            "cmake_options": [
+              "-DCMAKE_BUILD_TYPE=Release",
+              "-DMHGP11_MUTANT_JOBS={threads}",
+              "-DMHGP11_COORD_BITS=18"
+            ],
+            "conforming": true,
+            "ctest_args": [
+              "-L",
+              "^mutant$"
+            ],
+            "failed_tests": [],
+            "missing_tests": [],
+            "name": "mutants",
+            "optional": false,
+            "passed_labels": {
+              "fast": 22,
+              "long": 11,
+              "mutant": 33
+            },
+            "reason": "",
+            "seconds": 1508.521,
+            "started_utc": "2026-10-05T13:23:39Z",
+            "status": "ok",
+            "steps": [
+              {
+                "exit_code": 0,
+                "name": "configure",
+                "seconds": 0.714,
+                "status": "ok",
+                "timeout_seconds": 2100.0
+              },
+              {
+                "exit_code": 0,
+                "name": "build",
+                "seconds": 15.505,
+                "status": "ok",
+                "timeout_seconds": 2099.3
+              },
+              {
+                "exit_code": 0,
+                "name": "list",
+                "seconds": 0.032,
+                "status": "ok",
+                "timeout_seconds": 120
+              },
+              {
+                "exit_code": 0,
+                "name": "test",
+                "seconds": 1492.266,
+                "status": "ok",
+                "timeout_seconds": 2083.7
+              }
+            ],
+            "tests": {
+              "ctest_failed": 0,
+              "ctest_total": 33,
+              "failed": 0,
+              "not_run": 0,
+              "passed": 33,
+              "selected": 33
+            },
+            "threads": 32
+          },
+          {
+            "cmake_options": [
+              "-DCMAKE_BUILD_TYPE=Release",
+              "-DMHGP11_SANITIZE=ON",
+              "-DMHGP11_COORD_BITS=24"
+            ],
+            "conforming": false,
+            "ctest_args": [
+              "-LE",
+              "^mutant$",
+              "-E",
+              "^mhgp11_reference_"
+            ],
+            "failed_tests": [],
+            "missing_tests": [
+              "mhgp11_support_lidar_sentinel",
+              "mhgp11_catalogue_euler_scale8000",
+              "mhgp11_catalogue_euler_scale16000",
+              "mhgp11_catalogue_euler_scale32000",
+              "mhgp11_catalogue_euler_lidar_ng00_k5",
+              "mhgp11_catalogue_euler_lidar_ng01_k5",
+              "mhgp11_catalogue_euler_lidar_ng02_k5",
+              "mhgp11_catalogue_euler_lidar_ng00_k10",
+              "mhgp11_catalogue_euler_lidar_ng01_k10",
+              "mhgp11_catalogue_euler_lidar_ng02_k10",
+              "mhgp11_tower_order_identity_scale8000",
+              "mhgp11_tower_attach_scale8000",
+              "mhgp11_tower_order_identity_scale16000",
+              "mhgp11_tower_attach_scale16000",
+              "mhgp11_tower_order_identity_scale32000",
+              "mhgp11_tower_attach_scale32000",
+              "mhgp11_tower_attach_e1e2_scale8000",
+              "mhgp11_tower_attach_e1e2_scale32000",
+              "mhgp11_tower_order_identity_lidar_ng00_k5",
+              "mhgp11_tower_attach_e1e2_lidar_ng00_k5",
+              "mhgp11_tower_attach_export_lidar_ng00_k5_opt",
+              "mhgp11_tower_order_identity_lidar_ng01_k5",
+              "mhgp11_tower_attach_e1e2_lidar_ng01_k5",
+              "mhgp11_tower_attach_export_lidar_ng01_k5_opt",
+              "mhgp11_tower_order_identity_lidar_ng02_k5",
+              "mhgp11_tower_attach_e1e2_lidar_ng02_k5",
+              "mhgp11_tower_attach_export_lidar_ng02_k5_opt",
+              "mhgp11_tower_order_identity_lidar_ng00_k10",
+              "mhgp11_supports_sample_judge_scale8000_opt",
+              "mhgp11_supports_sample_judge_grid8000_opt",
+              "mhgp11_supports_sample_judge_lidar_ng00_k5_opt",
+              "mhgp11_supports_registers_uniform8000_k5_opt",
+              "mhgp11_supports_registers_grid8000_k5_opt",
+              "mhgp11_supports_registers_uniform16000_k5_opt",
+              "mhgp11_supports_registers_uniform32000_k5",
+              "mhgp11_supports_registers_uniform32000_k5_opt",
+              "mhgp11_supports_registers_lidar_ng00_k5",
+              "mhgp11_supports_registers_lidar_ng00_k5_opt",
+              "mhgp11_supports_registers_lidar_ng01_k5",
+              "mhgp11_supports_registers_lidar_ng01_k5_opt",
+              "mhgp11_supports_registers_lidar_ng02_k5",
+              "mhgp11_supports_registers_lidar_ng02_k5_opt",
+              "mhgp11_supports_registers_lidar_ng00_k10",
+              "mhgp11_supports_registers_lidar_ng01_k10",
+              "mhgp11_supports_registers_lidar_ng02_k10",
+              "mhgp11_supports_hierarchy_scale8000",
+              "mhgp11_supports_hierarchy_scale16000",
+              "mhgp11_supports_hierarchy_scale32000",
+              "mhgp11_supports_hierarchy_permutation_scale8000",
+              "mhgp11_supports_hierarchy_grid8000",
+              "mhgp11_supports_hierarchy_permutation_grid8000",
+              "mhgp11_supports_hierarchy_lidar_ng00_k5",
+              "mhgp11_supports_hierarchy_lidar_ng01_k5",
+              "mhgp11_supports_hierarchy_lidar_ng02_k5",
+              "mhgp11_supports_hierarchy_lidar_ng00_k10",
+              "mhgp11_cli_full_identity_scale8000",
+              "mhgp11_cli_full_identity_scale8000_opt",
+              "mhgp11_cli_full_identity_scale16000",
+              "mhgp11_cli_full_identity_scale16000_opt",
+              "mhgp11_cli_full_identity_scale32000",
+              "mhgp11_cli_full_identity_scale32000_opt",
+              "mhgp11_cli_full_identity_scale32000_k10",
+              "mhgp11_cli_full_determinism_scale8000",
+              "mhgp11_cli_full_determinism_scale8000_opt",
+              "mhgp11_cli_full_identity_lidar_ng00_k5",
+              "mhgp11_cli_full_identity_lidar_ng00_k5_opt",
+              "mhgp11_cli_full_identity_lidar_ng01_k5",
+              "mhgp11_cli_full_identity_lidar_ng01_k5_opt",
+              "mhgp11_cli_full_identity_lidar_ng02_k5",
+              "mhgp11_cli_full_identity_lidar_ng02_k5_opt",
+              "mhgp11_cli_full_identity_lidar_ng00_k10",
+              "mhgp11_cli_supports_scale8000",
+              "mhgp11_cli_supports_scale8000_opt",
+              "mhgp11_cli_supports_scale16000",
+              "mhgp11_cli_supports_scale16000_opt",
+              "mhgp11_cli_supports_scale32000",
+              "mhgp11_cli_supports_scale32000_opt",
+              "mhgp11_cli_supports_lidar_ng00_k5",
+              "mhgp11_cli_supports_lidar_ng00_k5_opt",
+              "mhgp11_cli_supports_lidar_ng01_k5",
+              "mhgp11_cli_supports_lidar_ng01_k5_opt",
+              "mhgp11_cli_supports_lidar_ng02_k5",
+              "mhgp11_cli_supports_lidar_ng02_k5_opt"
+            ],
+            "name": "gcc_asan_ubsan",
+            "optional": false,
+            "passed_labels": {
+              "fast": 742,
+              "lidar": 4,
+              "oracle": 146,
+              "scale16000": 1,
+              "scale8000": 4,
+              "unit": 508
+            },
+            "reason": "ctest : timeout",
+            "seconds": 591.81,
+            "started_utc": "2026-10-05T13:48:48Z",
+            "status": "timeout",
+            "steps": [
+              {
+                "exit_code": 0,
+                "name": "configure",
+                "seconds": 0.664,
+                "status": "ok",
+                "timeout_seconds": 591.3
+              },
+              {
+                "exit_code": 0,
+                "name": "build",
+                "seconds": 124.303,
+                "status": "ok",
+                "timeout_seconds": 590.7
+              },
+              {
+                "exit_code": 0,
+                "name": "list",
+                "seconds": 0.064,
+                "status": "ok",
+                "timeout_seconds": 120
+              },
+              {
+                "exit_code": -9,
+                "name": "test",
+                "seconds": 466.667,
+                "status": "timeout",
+                "timed_out": true,
+                "timeout_seconds": 466.3
+              }
+            ],
+            "tests": {
+              "ctest_failed": null,
+              "ctest_total": null,
+              "failed": 0,
+              "not_run": 83,
+              "passed": 751,
+              "selected": 834
+            },
+            "threads": 8
+          },
+          {
+            "cmake_options": [
+              "-DCMAKE_BUILD_TYPE=Release",
+              "-DMHGP11_TSAN=ON",
+              "-DMHGP11_COORD_BITS=21"
+            ],
+            "conforming": false,
+            "ctest_args": [
+              "-LE",
+              "^mutant$",
+              "-E",
+              "^mhgp11_reference_"
+            ],
+            "failed_tests": [],
+            "missing_tests": [
+              "mhgp11_support_lidar_sentinel",
+              "mhgp11_catalogue_euler_scale8000",
+              "mhgp11_catalogue_euler_scale16000",
+              "mhgp11_catalogue_euler_scale32000",
+              "mhgp11_catalogue_euler_lidar_ng00_k5",
+              "mhgp11_catalogue_euler_lidar_ng01_k5",
+              "mhgp11_catalogue_euler_lidar_ng02_k5",
+              "mhgp11_catalogue_euler_lidar_ng00_k10",
+              "mhgp11_catalogue_euler_lidar_ng01_k10",
+              "mhgp11_catalogue_euler_lidar_ng02_k10",
+              "mhgp11_tower_order_identity_scale8000",
+              "mhgp11_tower_attach_scale8000",
+              "mhgp11_tower_order_identity_scale16000",
+              "mhgp11_tower_attach_scale16000",
+              "mhgp11_tower_order_identity_scale32000",
+              "mhgp11_tower_attach_scale32000",
+              "mhgp11_tower_attach_e1e2_scale8000",
+              "mhgp11_tower_attach_e1e2_scale32000",
+              "mhgp11_tower_order_identity_lidar_ng00_k5",
+              "mhgp11_tower_attach_e1e2_lidar_ng00_k5",
+              "mhgp11_tower_attach_export_lidar_ng00_k5_opt",
+              "mhgp11_tower_order_identity_lidar_ng01_k5",
+              "mhgp11_tower_attach_e1e2_lidar_ng01_k5",
+              "mhgp11_tower_attach_export_lidar_ng01_k5_opt",
+              "mhgp11_tower_order_identity_lidar_ng02_k5",
+              "mhgp11_tower_attach_e1e2_lidar_ng02_k5",
+              "mhgp11_tower_attach_export_lidar_ng02_k5_opt",
+              "mhgp11_tower_order_identity_lidar_ng00_k10",
+              "mhgp11_supports_sample_judge_scale8000_opt",
+              "mhgp11_supports_sample_judge_grid8000_opt",
+              "mhgp11_supports_sample_judge_lidar_ng00_k5",
+              "mhgp11_supports_sample_judge_lidar_ng00_k5_opt",
+              "mhgp11_supports_registers_uniform8000_k5",
+              "mhgp11_supports_registers_uniform8000_k5_opt",
+              "mhgp11_supports_registers_grid8000_k5",
+              "mhgp11_supports_registers_grid8000_k5_opt",
+              "mhgp11_supports_registers_uniform16000_k5",
+              "mhgp11_supports_registers_uniform16000_k5_opt",
+              "mhgp11_supports_registers_uniform32000_k5",
+              "mhgp11_supports_registers_uniform32000_k5_opt",
+              "mhgp11_supports_registers_lidar_ng00_k5",
+              "mhgp11_supports_registers_lidar_ng00_k5_opt",
+              "mhgp11_supports_registers_lidar_ng01_k5",
+              "mhgp11_supports_registers_lidar_ng01_k5_opt",
+              "mhgp11_supports_registers_lidar_ng02_k5",
+              "mhgp11_supports_registers_lidar_ng02_k5_opt",
+              "mhgp11_supports_registers_lidar_ng00_k10",
+              "mhgp11_supports_registers_lidar_ng01_k10",
+              "mhgp11_supports_registers_lidar_ng02_k10",
+              "mhgp11_supports_hierarchy_scale8000",
+              "mhgp11_supports_hierarchy_scale16000",
+              "mhgp11_supports_hierarchy_scale32000",
+              "mhgp11_supports_hierarchy_permutation_scale8000",
+              "mhgp11_supports_hierarchy_grid8000",
+              "mhgp11_supports_hierarchy_permutation_grid8000",
+              "mhgp11_supports_hierarchy_lidar_ng00_k5",
+              "mhgp11_supports_hierarchy_lidar_ng01_k5",
+              "mhgp11_supports_hierarchy_lidar_ng02_k5",
+              "mhgp11_supports_hierarchy_lidar_ng00_k10",
+              "mhgp11_cli_full_identity_scale8000",
+              "mhgp11_cli_full_identity_scale8000_opt",
+              "mhgp11_cli_full_identity_scale16000",
+              "mhgp11_cli_full_identity_scale16000_opt",
+              "mhgp11_cli_full_identity_scale32000",
+              "mhgp11_cli_full_identity_scale32000_opt",
+              "mhgp11_cli_full_identity_scale32000_k10",
+              "mhgp11_cli_full_determinism_scale8000",
+              "mhgp11_cli_full_determinism_scale8000_opt",
+              "mhgp11_cli_full_identity_lidar_ng00_k5",
+              "mhgp11_cli_full_identity_lidar_ng00_k5_opt",
+              "mhgp11_cli_full_identity_lidar_ng01_k5",
+              "mhgp11_cli_full_identity_lidar_ng01_k5_opt",
+              "mhgp11_cli_full_identity_lidar_ng02_k5",
+              "mhgp11_cli_full_identity_lidar_ng02_k5_opt",
+              "mhgp11_cli_full_identity_lidar_ng00_k10",
+              "mhgp11_cli_supports_scale8000",
+              "mhgp11_cli_supports_scale8000_opt",
+              "mhgp11_cli_supports_scale16000",
+              "mhgp11_cli_supports_scale16000_opt",
+              "mhgp11_cli_supports_scale32000",
+              "mhgp11_cli_supports_scale32000_opt",
+              "mhgp11_cli_supports_lidar_ng00_k5",
+              "mhgp11_cli_supports_lidar_ng00_k5_opt",
+              "mhgp11_cli_supports_lidar_ng01_k5",
+              "mhgp11_cli_supports_lidar_ng01_k5_opt",
+              "mhgp11_cli_supports_lidar_ng02_k5",
+              "mhgp11_cli_supports_lidar_ng02_k5_opt"
+            ],
+            "name": "gcc_tsan",
+            "optional": false,
+            "passed_labels": {
+              "fast": 742,
+              "lidar": 3,
+              "oracle": 146,
+              "scale8000": 2,
+              "unit": 508
+            },
+            "reason": "ctest : timeout",
+            "seconds": 591.91,
+            "started_utc": "2026-10-05T13:48:48Z",
+            "status": "timeout",
+            "steps": [
+              {
+                "exit_code": 0,
+                "name": "configure",
+                "seconds": 0.664,
+                "status": "ok",
+                "timeout_seconds": 591.3
+              },
+              {
+                "exit_code": 0,
+                "name": "build",
+                "seconds": 41.928,
+                "status": "ok",
+                "timeout_seconds": 590.7
+              },
+              {
+                "exit_code": 0,
+                "name": "list",
+                "seconds": 0.064,
+                "status": "ok",
+                "timeout_seconds": 120
+              },
+              {
+                "exit_code": -9,
+                "name": "test",
+                "seconds": 549.16,
+                "status": "timeout",
+                "timed_out": true,
+                "timeout_seconds": 548.7
+              }
+            ],
+            "tests": {
+              "ctest_failed": null,
+              "ctest_total": null,
+              "failed": 0,
+              "not_run": 87,
+              "passed": 747,
+              "selected": 834
+            },
+            "threads": 8
+          },
+          {
+            "cmake_options": [
+              "-DCMAKE_BUILD_TYPE=Release",
+              "-DMHGP11_COORD_BITS=21"
+            ],
+            "conforming": false,
+            "ctest_args": [
+              "-LE",
+              "^mutant$",
+              "-E",
+              "^mhgp11_reference_"
+            ],
+            "failed_tests": [],
+            "missing_tests": [],
+            "name": "clang_release",
+            "optional": true,
+            "reason": "outil absent du PATH : clang++",
+            "seconds": 0.0,
+            "started_utc": "2026-10-05T13:48:48Z",
+            "status": "absent",
+            "steps": [],
+            "threads": 6
+          },
+          {
+            "cmake_options": [
+              "-DCMAKE_BUILD_TYPE=Release",
+              "-DMHGP11_COORD_BITS=21"
+            ],
+            "conforming": false,
+            "ctest_args": [
+              "-LE",
+              "^mutant$",
+              "-E",
+              "^mhgp11_reference_"
+            ],
+            "failed_tests": [],
+            "missing_tests": [
+              "mhgp11_support_lidar_sentinel",
+              "mhgp11_catalogue_euler_scale8000",
+              "mhgp11_catalogue_euler_scale16000",
+              "mhgp11_catalogue_euler_scale32000",
+              "mhgp11_catalogue_euler_lidar_ng00_k5",
+              "mhgp11_catalogue_euler_lidar_ng01_k5",
+              "mhgp11_catalogue_euler_lidar_ng02_k5",
+              "mhgp11_catalogue_euler_lidar_ng00_k10",
+              "mhgp11_catalogue_euler_lidar_ng01_k10",
+              "mhgp11_catalogue_euler_lidar_ng02_k10",
+              "mhgp11_tower_order_identity_scale8000",
+              "mhgp11_tower_attach_scale8000",
+              "mhgp11_tower_order_identity_scale16000",
+              "mhgp11_tower_attach_scale16000",
+              "mhgp11_tower_order_identity_scale32000",
+              "mhgp11_tower_attach_scale32000",
+              "mhgp11_tower_attach_e1e2_scale8000",
+              "mhgp11_tower_attach_e1e2_scale32000",
+              "mhgp11_tower_order_identity_lidar_ng00_k5",
+              "mhgp11_tower_attach_e1e2_lidar_ng00_k5",
+              "mhgp11_tower_attach_export_lidar_ng00_k5_opt",
+              "mhgp11_tower_order_identity_lidar_ng01_k5",
+              "mhgp11_tower_attach_e1e2_lidar_ng01_k5",
+              "mhgp11_tower_attach_export_lidar_ng01_k5_opt",
+              "mhgp11_tower_order_identity_lidar_ng02_k5",
+              "mhgp11_tower_attach_e1e2_lidar_ng02_k5",
+              "mhgp11_tower_attach_export_lidar_ng02_k5_opt",
+              "mhgp11_tower_order_identity_lidar_ng00_k10",
+              "mhgp11_supports_sample_judge_scale8000_opt",
+              "mhgp11_supports_sample_judge_grid8000_opt",
+              "mhgp11_supports_sample_judge_lidar_ng00_k5_opt",
+              "mhgp11_supports_registers_uniform8000_k5_opt",
+              "mhgp11_supports_registers_grid8000_k5_opt",
+              "mhgp11_supports_registers_uniform16000_k5_opt",
+              "mhgp11_supports_registers_uniform32000_k5_opt",
+              "mhgp11_supports_registers_lidar_ng00_k5_opt",
+              "mhgp11_supports_registers_lidar_ng01_k5_opt",
+              "mhgp11_supports_registers_lidar_ng02_k5_opt",
+              "mhgp11_supports_registers_lidar_ng00_k10",
+              "mhgp11_supports_registers_lidar_ng01_k10",
+              "mhgp11_supports_registers_lidar_ng02_k10",
+              "mhgp11_supports_hierarchy_scale8000",
+              "mhgp11_supports_hierarchy_scale16000",
+              "mhgp11_supports_hierarchy_scale32000",
+              "mhgp11_supports_hierarchy_permutation_scale8000",
+              "mhgp11_supports_hierarchy_grid8000",
+              "mhgp11_supports_hierarchy_permutation_grid8000",
+              "mhgp11_supports_hierarchy_lidar_ng00_k5",
+              "mhgp11_supports_hierarchy_lidar_ng01_k5",
+              "mhgp11_supports_hierarchy_lidar_ng02_k5",
+              "mhgp11_supports_hierarchy_lidar_ng00_k10",
+              "mhgp11_cli_full_identity_scale8000_opt",
+              "mhgp11_cli_full_identity_scale16000_opt",
+              "mhgp11_cli_full_identity_scale32000",
+              "mhgp11_cli_full_identity_scale32000_opt",
+              "mhgp11_cli_full_identity_scale32000_k10",
+              "mhgp11_cli_full_determinism_scale8000",
+              "mhgp11_cli_full_determinism_scale8000_opt",
+              "mhgp11_cli_full_identity_lidar_ng00_k5",
+              "mhgp11_cli_full_identity_lidar_ng00_k5_opt",
+              "mhgp11_cli_full_identity_lidar_ng01_k5",
+              "mhgp11_cli_full_identity_lidar_ng01_k5_opt",
+              "mhgp11_cli_full_identity_lidar_ng02_k5",
+              "mhgp11_cli_full_identity_lidar_ng02_k5_opt",
+              "mhgp11_cli_full_identity_lidar_ng00_k10",
+              "mhgp11_cli_supports_scale8000",
+              "mhgp11_cli_supports_scale8000_opt",
+              "mhgp11_cli_supports_scale16000",
+              "mhgp11_cli_supports_scale16000_opt",
+              "mhgp11_cli_supports_scale32000",
+              "mhgp11_cli_supports_scale32000_opt",
+              "mhgp11_cli_supports_lidar_ng00_k5",
+              "mhgp11_cli_supports_lidar_ng00_k5_opt",
+              "mhgp11_cli_supports_lidar_ng01_k5",
+              "mhgp11_cli_supports_lidar_ng01_k5_opt",
+              "mhgp11_cli_supports_lidar_ng02_k5",
+              "mhgp11_cli_supports_lidar_ng02_k5_opt"
+            ],
+            "name": "bits21",
+            "optional": false,
+            "passed_labels": {
+              "fast": 742,
+              "lidar": 7,
+              "oracle": 146,
+              "scale16000": 2,
+              "scale32000": 1,
+              "scale8000": 5,
+              "unit": 508
+            },
+            "reason": "ctest : timeout",
+            "seconds": 591.719,
+            "started_utc": "2026-10-05T13:48:48Z",
+            "status": "timeout",
+            "steps": [
+              {
+                "exit_code": 0,
+                "name": "configure",
+                "seconds": 0.614,
+                "status": "ok",
+                "timeout_seconds": 591.4
+              },
+              {
+                "exit_code": 0,
+                "name": "build",
+                "seconds": 73.836,
+                "status": "ok",
+                "timeout_seconds": 590.8
+              },
+              {
+                "exit_code": 0,
+                "name": "list",
+                "seconds": 0.075,
+                "status": "ok",
+                "timeout_seconds": 120
+              },
+              {
+                "exit_code": -9,
+                "name": "test",
+                "seconds": 517.171,
+                "status": "timeout",
+                "timed_out": true,
+                "timeout_seconds": 516.9
+              }
+            ],
+            "tests": {
+              "ctest_failed": null,
+              "ctest_total": null,
+              "failed": 0,
+              "not_run": 77,
+              "passed": 757,
+              "selected": 834
+            },
+            "threads": 4
+          },
+          {
+            "cmake_options": [
+              "-DCMAKE_BUILD_TYPE=Release",
+              "-DMHGP11_COORD_BITS=24"
+            ],
+            "conforming": false,
+            "ctest_args": [
+              "-LE",
+              "^mutant$",
+              "-E",
+              "^mhgp11_reference_"
+            ],
+            "failed_tests": [],
+            "missing_tests": [
+              "mhgp11_support_lidar_sentinel",
+              "mhgp11_catalogue_euler_scale8000",
+              "mhgp11_catalogue_euler_scale16000",
+              "mhgp11_catalogue_euler_scale32000",
+              "mhgp11_catalogue_euler_lidar_ng00_k5",
+              "mhgp11_catalogue_euler_lidar_ng01_k5",
+              "mhgp11_catalogue_euler_lidar_ng02_k5",
+              "mhgp11_catalogue_euler_lidar_ng00_k10",
+              "mhgp11_catalogue_euler_lidar_ng01_k10",
+              "mhgp11_catalogue_euler_lidar_ng02_k10",
+              "mhgp11_tower_order_identity_scale8000",
+              "mhgp11_tower_attach_scale8000",
+              "mhgp11_tower_order_identity_scale16000",
+              "mhgp11_tower_attach_scale16000",
+              "mhgp11_tower_order_identity_scale32000",
+              "mhgp11_tower_attach_scale32000",
+              "mhgp11_tower_attach_e1e2_scale8000",
+              "mhgp11_tower_attach_e1e2_scale32000",
+              "mhgp11_tower_order_identity_lidar_ng00_k5",
+              "mhgp11_tower_attach_e1e2_lidar_ng00_k5",
+              "mhgp11_tower_attach_export_lidar_ng00_k5_opt",
+              "mhgp11_tower_order_identity_lidar_ng01_k5",
+              "mhgp11_tower_attach_e1e2_lidar_ng01_k5",
+              "mhgp11_tower_attach_export_lidar_ng01_k5_opt",
+              "mhgp11_tower_order_identity_lidar_ng02_k5",
+              "mhgp11_tower_attach_e1e2_lidar_ng02_k5",
+              "mhgp11_tower_attach_export_lidar_ng02_k5_opt",
+              "mhgp11_tower_order_identity_lidar_ng00_k10",
+              "mhgp11_supports_sample_judge_scale8000_opt",
+              "mhgp11_supports_sample_judge_grid8000_opt",
+              "mhgp11_supports_sample_judge_lidar_ng00_k5_opt",
+              "mhgp11_supports_registers_uniform8000_k5_opt",
+              "mhgp11_supports_registers_grid8000_k5_opt",
+              "mhgp11_supports_registers_uniform16000_k5_opt",
+              "mhgp11_supports_registers_uniform32000_k5_opt",
+              "mhgp11_supports_registers_lidar_ng00_k5_opt",
+              "mhgp11_supports_registers_lidar_ng01_k5_opt",
+              "mhgp11_supports_registers_lidar_ng02_k5_opt",
+              "mhgp11_supports_registers_lidar_ng00_k10",
+              "mhgp11_supports_registers_lidar_ng01_k10",
+              "mhgp11_supports_registers_lidar_ng02_k10",
+              "mhgp11_supports_hierarchy_scale8000",
+              "mhgp11_supports_hierarchy_scale16000",
+              "mhgp11_supports_hierarchy_scale32000",
+              "mhgp11_supports_hierarchy_permutation_scale8000",
+              "mhgp11_supports_hierarchy_grid8000",
+              "mhgp11_supports_hierarchy_permutation_grid8000",
+              "mhgp11_supports_hierarchy_lidar_ng00_k5",
+              "mhgp11_supports_hierarchy_lidar_ng01_k5",
+              "mhgp11_supports_hierarchy_lidar_ng02_k5",
+              "mhgp11_supports_hierarchy_lidar_ng00_k10",
+              "mhgp11_cli_full_identity_scale8000_opt",
+              "mhgp11_cli_full_identity_scale16000_opt",
+              "mhgp11_cli_full_identity_scale32000",
+              "mhgp11_cli_full_identity_scale32000_opt",
+              "mhgp11_cli_full_identity_scale32000_k10",
+              "mhgp11_cli_full_determinism_scale8000",
+              "mhgp11_cli_full_determinism_scale8000_opt",
+              "mhgp11_cli_full_identity_lidar_ng00_k5",
+              "mhgp11_cli_full_identity_lidar_ng00_k5_opt",
+              "mhgp11_cli_full_identity_lidar_ng01_k5",
+              "mhgp11_cli_full_identity_lidar_ng01_k5_opt",
+              "mhgp11_cli_full_identity_lidar_ng02_k5",
+              "mhgp11_cli_full_identity_lidar_ng02_k5_opt",
+              "mhgp11_cli_full_identity_lidar_ng00_k10",
+              "mhgp11_cli_supports_scale8000",
+              "mhgp11_cli_supports_scale8000_opt",
+              "mhgp11_cli_supports_scale16000",
+              "mhgp11_cli_supports_scale16000_opt",
+              "mhgp11_cli_supports_scale32000",
+              "mhgp11_cli_supports_scale32000_opt",
+              "mhgp11_cli_supports_lidar_ng00_k5",
+              "mhgp11_cli_supports_lidar_ng00_k5_opt",
+              "mhgp11_cli_supports_lidar_ng01_k5",
+              "mhgp11_cli_supports_lidar_ng01_k5_opt",
+              "mhgp11_cli_supports_lidar_ng02_k5",
+              "mhgp11_cli_supports_lidar_ng02_k5_opt"
+            ],
+            "name": "bits24",
+            "optional": false,
+            "passed_labels": {
+              "fast": 742,
+              "lidar": 7,
+              "oracle": 146,
+              "scale16000": 2,
+              "scale32000": 1,
+              "scale8000": 5,
+              "unit": 508
+            },
+            "reason": "ctest : timeout",
+            "seconds": 591.626,
+            "started_utc": "2026-10-05T13:48:48Z",
+            "status": "timeout",
+            "steps": [
+              {
+                "exit_code": 0,
+                "name": "configure",
+                "seconds": 0.614,
+                "status": "ok",
+                "timeout_seconds": 591.4
+              },
+              {
+                "exit_code": 0,
+                "name": "build",
+                "seconds": 73.785,
+                "status": "ok",
+                "timeout_seconds": 590.8
+              },
+              {
+                "exit_code": 0,
+                "name": "list",
+                "seconds": 0.064,
+                "status": "ok",
+                "timeout_seconds": 120
+              },
+              {
+                "exit_code": -9,
+                "name": "test",
+                "seconds": 517.141,
+                "status": "timeout",
+                "timed_out": true,
+                "timeout_seconds": 516.9
+              }
+            ],
+            "tests": {
+              "ctest_failed": null,
+              "ctest_total": null,
+              "failed": 0,
+              "not_run": 77,
+              "passed": 757,
+              "selected": 834
+            },
+            "threads": 4
+          },
+          {
+            "cmake_options": [
+              "-DCMAKE_BUILD_TYPE=Release",
+              "-DMHGP11_POISON=ON",
+              "-DMHGP11_COORD_BITS=21"
+            ],
+            "conforming": false,
+            "ctest_args": [
+              "-LE",
+              "^mutant$",
+              "-E",
+              "^mhgp11_reference_"
+            ],
+            "failed_tests": [],
+            "missing_tests": [
+              "mhgp11_support_lidar_sentinel",
+              "mhgp11_catalogue_euler_scale8000",
+              "mhgp11_catalogue_euler_scale16000",
+              "mhgp11_catalogue_euler_scale32000",
+              "mhgp11_catalogue_euler_lidar_ng00_k5",
+              "mhgp11_catalogue_euler_lidar_ng01_k5",
+              "mhgp11_catalogue_euler_lidar_ng02_k5",
+              "mhgp11_catalogue_euler_lidar_ng00_k10",
+              "mhgp11_catalogue_euler_lidar_ng01_k10",
+              "mhgp11_catalogue_euler_lidar_ng02_k10",
+              "mhgp11_tower_order_identity_scale8000",
+              "mhgp11_tower_attach_scale8000",
+              "mhgp11_tower_order_identity_scale16000",
+              "mhgp11_tower_attach_scale16000",
+              "mhgp11_tower_order_identity_scale32000",
+              "mhgp11_tower_attach_scale32000",
+              "mhgp11_tower_attach_e1e2_scale8000",
+              "mhgp11_tower_attach_e1e2_scale32000",
+              "mhgp11_tower_order_identity_lidar_ng00_k5",
+              "mhgp11_tower_attach_e1e2_lidar_ng00_k5",
+              "mhgp11_tower_attach_export_lidar_ng00_k5_opt",
+              "mhgp11_tower_order_identity_lidar_ng01_k5",
+              "mhgp11_tower_attach_e1e2_lidar_ng01_k5",
+              "mhgp11_tower_attach_export_lidar_ng01_k5_opt",
+              "mhgp11_tower_order_identity_lidar_ng02_k5",
+              "mhgp11_tower_attach_e1e2_lidar_ng02_k5",
+              "mhgp11_tower_attach_export_lidar_ng02_k5_opt",
+              "mhgp11_tower_order_identity_lidar_ng00_k10",
+              "mhgp11_supports_sample_judge_scale8000_opt",
+              "mhgp11_supports_sample_judge_grid8000_opt",
+              "mhgp11_supports_sample_judge_lidar_ng00_k5_opt",
+              "mhgp11_supports_registers_uniform8000_k5_opt",
+              "mhgp11_supports_registers_grid8000_k5_opt",
+              "mhgp11_supports_registers_uniform16000_k5_opt",
+              "mhgp11_supports_registers_uniform32000_k5_opt",
+              "mhgp11_supports_registers_lidar_ng00_k5_opt",
+              "mhgp11_supports_registers_lidar_ng01_k5_opt",
+              "mhgp11_supports_registers_lidar_ng02_k5_opt",
+              "mhgp11_supports_registers_lidar_ng00_k10",
+              "mhgp11_supports_registers_lidar_ng01_k10",
+              "mhgp11_supports_registers_lidar_ng02_k10",
+              "mhgp11_supports_hierarchy_scale8000",
+              "mhgp11_supports_hierarchy_scale16000",
+              "mhgp11_supports_hierarchy_scale32000",
+              "mhgp11_supports_hierarchy_permutation_scale8000",
+              "mhgp11_supports_hierarchy_grid8000",
+              "mhgp11_supports_hierarchy_permutation_grid8000",
+              "mhgp11_supports_hierarchy_lidar_ng00_k5",
+              "mhgp11_supports_hierarchy_lidar_ng01_k5",
+              "mhgp11_supports_hierarchy_lidar_ng02_k5",
+              "mhgp11_supports_hierarchy_lidar_ng00_k10",
+              "mhgp11_cli_full_identity_scale8000_opt",
+              "mhgp11_cli_full_identity_scale16000_opt",
+              "mhgp11_cli_full_identity_scale32000",
+              "mhgp11_cli_full_identity_scale32000_opt",
+              "mhgp11_cli_full_identity_scale32000_k10",
+              "mhgp11_cli_full_determinism_scale8000",
+              "mhgp11_cli_full_determinism_scale8000_opt",
+              "mhgp11_cli_full_identity_lidar_ng00_k5",
+              "mhgp11_cli_full_identity_lidar_ng00_k5_opt",
+              "mhgp11_cli_full_identity_lidar_ng01_k5",
+              "mhgp11_cli_full_identity_lidar_ng01_k5_opt",
+              "mhgp11_cli_full_identity_lidar_ng02_k5",
+              "mhgp11_cli_full_identity_lidar_ng02_k5_opt",
+              "mhgp11_cli_full_identity_lidar_ng00_k10",
+              "mhgp11_cli_supports_scale8000",
+              "mhgp11_cli_supports_scale8000_opt",
+              "mhgp11_cli_supports_scale16000",
+              "mhgp11_cli_supports_scale16000_opt",
+              "mhgp11_cli_supports_scale32000",
+              "mhgp11_cli_supports_scale32000_opt",
+              "mhgp11_cli_supports_lidar_ng00_k5",
+              "mhgp11_cli_supports_lidar_ng00_k5_opt",
+              "mhgp11_cli_supports_lidar_ng01_k5",
+              "mhgp11_cli_supports_lidar_ng01_k5_opt",
+              "mhgp11_cli_supports_lidar_ng02_k5",
+              "mhgp11_cli_supports_lidar_ng02_k5_opt"
+            ],
+            "name": "poison",
+            "optional": false,
+            "passed_labels": {
+              "fast": 743,
+              "lidar": 7,
+              "oracle": 146,
+              "scale16000": 2,
+              "scale32000": 1,
+              "scale8000": 5,
+              "unit": 509
+            },
+            "reason": "ctest : timeout",
+            "seconds": 591.801,
+            "started_utc": "2026-10-05T13:48:48Z",
+            "status": "timeout",
+            "steps": [
+              {
+                "exit_code": 0,
+                "name": "configure",
+                "seconds": 0.614,
+                "status": "ok",
+                "timeout_seconds": 591.4
+              },
+              {
+                "exit_code": 0,
+                "name": "build",
+                "seconds": 74.884,
+                "status": "ok",
+                "timeout_seconds": 590.8
+              },
+              {
+                "exit_code": 0,
+                "name": "list",
+                "seconds": 0.114,
+                "status": "ok",
+                "timeout_seconds": 120
+              },
+              {
+                "exit_code": -9,
+                "name": "test",
+                "seconds": 516.171,
+                "status": "timeout",
+                "timed_out": true,
+                "timeout_seconds": 515.8
+              }
+            ],
+            "tests": {
+              "ctest_failed": null,
+              "ctest_total": null,
+              "failed": 0,
+              "not_run": 77,
+              "passed": 758,
+              "selected": 835
+            },
+            "threads": 4
+          },
+          {
+            "cmake_options": [
+              "-DCMAKE_BUILD_TYPE=Release",
+              "-DMHGP11_COORD_BITS=21"
+            ],
+            "conforming": true,
+            "ctest_args": [
+              "-R",
+              "^mhgp11_style"
+            ],
+            "failed_tests": [],
+            "missing_tests": [],
+            "name": "style",
+            "optional": false,
+            "passed_labels": {
+              "fast": 2
+            },
+            "reason": "",
+            "seconds": 3.695,
+            "started_utc": "2026-10-05T13:48:48Z",
+            "status": "ok",
+            "steps": [
+              {
+                "exit_code": 0,
+                "name": "configure",
+                "seconds": 0.615,
+                "status": "ok",
+                "timeout_seconds": 300.0
+              },
+              {
+                "exit_code": 0,
+                "name": "list",
+                "seconds": 0.032,
+                "status": "ok",
+                "timeout_seconds": 120
+              },
+              {
+                "exit_code": 0,
+                "name": "test",
+                "seconds": 3.017,
+                "status": "ok",
+                "timeout_seconds": 299.3
+              }
+            ],
+            "tests": {
+              "ctest_failed": 0,
+              "ctest_total": 2,
+              "failed": 0,
+              "not_run": 0,
+              "passed": 2,
+              "selected": 2
+            },
+            "threads": 1
+          }
+        ],
+        "conforming": false,
+        "ended_utc": "2026-10-05T13:58:40Z",
+        "exit_code": 1,
+        "requested": [
+          "gcc_release",
+          "mutants",
+          "gcc_asan_ubsan",
+          "gcc_tsan",
+          "clang_release",
+          "bits21",
+          "bits24",
+          "poison",
+          "style"
+        ],
+        "schema": "ehgp.v11.g4_matrix_summary.v1",
+        "signals": [],
+        "started_utc": "2026-10-05T13:23:39Z",
+        "statuses": {
+          "bits21": "timeout",
+          "bits24": "timeout",
+          "clang_release": "absent",
+          "gcc_asan_ubsan": "timeout",
+          "gcc_release": "timeout",
+          "gcc_tsan": "timeout",
+          "mutants": "ok",
+          "poison": "timeout",
+          "style": "ok"
+        },
+        "thread_budget": 48
+      },
+      "mutants_exact_lines": "mutants_ok module=core mutants=78 tues=78 dont_signal=0 dont_delai=0 dont_construction=2 plancher=78\nmutants_ok module=num mutants=53 tues=53 dont_signal=0 dont_delai=0 dont_construction=0 plancher=53\nmutants_ok module=sched mutants=8 tues=8 dont_signal=0 dont_delai=0 dont_construction=0 plancher=8\nmutants_ok module=cloud mutants=16 tues=16 dont_signal=0 dont_delai=0 dont_construction=0 plancher=16\nmutants_ok module=io mutants=22 tues=22 dont_signal=0 dont_delai=0 dont_construction=0 plancher=22\nmutants_ok module=index mutants=11 tues=11 dont_signal=0 dont_delai=0 dont_construction=0 plancher=11\nmutants_ok module=catalogue mutants=68 tues=68 dont_signal=0 dont_delai=0 dont_construction=0 plancher=68\nmutants_ok module=tower mutants=138 tues=138 dont_signal=0 dont_delai=0 dont_construction=0 plancher=136\nmutants_ok module=supports mutants=15 tues=15 dont_signal=0 dont_delai=0 dont_construction=0 plancher=15\nmutants_ok module=api mutants=22 tues=22 dont_signal=0 dont_delai=0 dont_construction=0 plancher=22\nmutants_ok module=cli mutants=28 tues=28 dont_signal=0 dont_delai=0 dont_construction=0 plancher=28\n",
+      "package_sha256": "3b1f838180c352b708303fba69320d5fb604607ca5b2ea416a6a3b6c012f5afd",
+      "receipt_fields": {
+        "backend": "reference_cpu",
+        "closing_generation": "2026-10-05T06:21:52.599-07:00",
+        "closure": "stopped",
+        "commands": [
+          {
+            "exit_code": "1",
+            "index": "0",
+            "max_rss_kb": "3763936",
+            "name": "matrice",
+            "status": "failed",
+            "timeout_seconds": "2200",
+            "wall_seconds": "2101.144"
+          }
+        ],
+        "commit": "00bd979ac2c24aff422421525d484488dff0c993",
+        "errors": [],
+        "evidence_grade": "pushed_commit",
+        "generation": "2026-10-05T06:21:52.599-07:00",
+        "observed_after": {
+          "lastStartTimestamp": "2026-10-05T06:21:52.599-07:00",
+          "lastStopTimestamp": "2026-10-05T07:00:14.648-07:00",
+          "name": "ehgp-v7-3b1d496aed430749ea7e049f",
+          "status": "TERMINATED"
+        },
+        "oslogin_key_removed": true,
+        "overflow": {
+          "evicted": [],
+          "truncated_streams": []
+        },
+        "package_sha256": "3b1f838180c352b708303fba69320d5fb604607ca5b2ea416a6a3b6c012f5afd",
+        "plan_sha256": "741f96b43031c66487b362257160af3a5931b89511bfe365a8dd2add3170b82f",
+        "pre_start_generation": "2026-10-04T09:39:39.361-07:00",
+        "private_key_deleted": true,
+        "public_status": "not_claimed",
+        "reserve_released": true,
+        "results_bytes": 366188,
+        "results_expanded_bytes": 3237757,
+        "results_sha256": "67d8ceb694fd8ca0241a21cdfbba1cd5a9123691ea242590fbecdb563d839d29",
+        "results_skipped_members": [],
+        "results_verified": true,
+        "schema": "ehgp.v11.session_receipt.v1",
+        "source": null,
+        "source_kind": "commit",
+        "start_certified": true,
+        "status": "failed_remote",
+        "target": {
+          "instance": "ehgp-v7-3b1d496aed430749ea7e049f",
+          "project": "devpod-gpu-exploration",
+          "zone": "us-central1-c"
+        },
+        "targeted_shutdown_certified": true,
+        "warnings": [],
+        "worker_exit_code": 1,
+        "worker_outcome": "exited",
+        "worker_plan_sha256": "b37ab92e5752d2b7639bdeec250db949da647979644ee04108ebcc9e8c052291"
+      },
+      "receipt_sha256": "d7bf18ef82086bc2594ac44cc52b023e9ebf39ba2e393e09ce38a7b5e5b5c017",
+      "results_archive_sha256": "67d8ceb694fd8ca0241a21cdfbba1cd5a9123691ea242590fbecdb563d839d29",
+      "session": "v11.20261005.claudequalmatrice",
+      "session_plan_text": "{\n  \"schema\": \"ehgp.v11.session_plan.v1\",\n  \"note\": \"Qualification L1 + L2 de la sortie parametree (Claude, 5 octobre 2026), commit 00bd979ac : S3, S5, S6a, S6b, S7. Matrice complete g4_matrix.py (budget 2200 s). La mesure appariee de L2 fait l'objet d'une seconde session.\",\n  \"python_packages\": \"none\",\n  \"default_build\": false,\n  \"results_cap_bytes\": 134217728,\n  \"commands\": [\n    {\n      \"name\": \"matrice\",\n      \"timeout_seconds\": 2200,\n      \"argv\": [\n        \"python3\",\n        \"{src}/morsehgp3D_v11/tools/g4_matrix.py\",\n        \"--src\",\n        \"{src}\",\n        \"--out\",\n        \"{out}\",\n        \"--data\",\n        \"{data}\",\n        \"--work\",\n        \"{build}/matrix\",\n        \"--budget-seconds\",\n        \"2100\"\n      ]\n    }\n  ]\n}",
+      "source_commit": "00bd979ac2c24aff422421525d484488dff0c993"
+    },
+    {
+      "hash_verification": {
+        "archive_original_path": "/workspaces/.ehgp-sessions/v11.20261005.claudequalA/results/results.tar.gz",
+        "archive_original_sha256": "c95f99d92fdffa5f2ca8716bcdafd7dc18f365088dbb2cb97e0c9452632056e0",
+        "archive_sha_matches_receipt": true,
+        "package_original_path": "/workspaces/.ehgp-sessions/v11.20261005.claudequalA/package/package.tar.gz",
+        "package_original_sha256": "3b1f838180c352b708303fba69320d5fb604607ca5b2ea416a6a3b6c012f5afd",
+        "package_sha_matches_receipt": true,
+        "plan_sha_matches_receipt": true,
+        "receipt_original_path": "/workspaces/.ehgp-sessions/v11.20261005.claudequalA/receipt.json",
+        "receipt_original_sha256": "56e9c3882e32a87d77e023cd6e46237ad7b4f08c4c80ccb0c08f65ccf2bfc35e",
+        "summary_archive_member": "results/cmd/000_matrice/files/matrix/summary.json",
+        "summary_sha256": "383980f7ed2692cc9ebdc72c383f6bfa340fea8b44a1eadfcf20f4c278a486ae"
+      },
+      "matrix_summary_fields": {
+        "budget_seconds": 2100,
+        "complete": true,
+        "configurations": [
+          {
+            "cmake_options": [
+              "-DCMAKE_BUILD_TYPE=Release",
+              "-DMHGP11_COORD_BITS=18"
+            ],
+            "conforming": false,
+            "ctest_args": [
+              "-LE",
+              "^mutant$"
+            ],
+            "failed_tests": [],
+            "missing_tests": [
+              "mhgp11_cli_full_identity_scale32000_k10",
+              "mhgp11_cli_full_determinism_scale8000_opt",
+              "mhgp11_cli_full_identity_lidar_ng00_k5_opt",
+              "mhgp11_cli_full_identity_lidar_ng01_k5_opt",
+              "mhgp11_cli_full_identity_lidar_ng02_k5_opt",
+              "mhgp11_cli_full_identity_lidar_ng00_k10",
+              "mhgp11_cli_supports_scale8000_opt",
+              "mhgp11_cli_supports_scale16000_opt",
+              "mhgp11_cli_supports_scale32000_opt",
+              "mhgp11_cli_supports_lidar_ng00_k5_opt",
+              "mhgp11_cli_supports_lidar_ng01_k5_opt",
+              "mhgp11_cli_supports_lidar_ng02_k5_opt"
+            ],
+            "name": "gcc_release",
+            "optional": false,
+            "passed_labels": {
+              "fast": 833,
+              "lidar": 41,
+              "long": 25,
+              "oracle": 253,
+              "scale16000": 9,
+              "scale32000": 10,
+              "scale8000": 20,
+              "unit": 508
+            },
+            "reason": "ctest : timeout",
+            "seconds": 2100.116,
+            "started_utc": "2026-10-05T14:03:48Z",
+            "status": "timeout",
+            "steps": [
+              {
+                "exit_code": 0,
+                "name": "configure",
+                "seconds": 0.714,
+                "status": "ok",
+                "timeout_seconds": 2100.0
+              },
+              {
+                "exit_code": 0,
+                "name": "build",
+                "seconds": 19.92,
+                "status": "ok",
+                "timeout_seconds": 2099.3
+              },
+              {
+                "exit_code": 0,
+                "name": "list",
+                "seconds": 0.064,
+                "status": "ok",
+                "timeout_seconds": 120
+              },
+              {
+                "exit_code": -9,
+                "name": "test",
+                "seconds": 2079.4,
+                "status": "timeout",
+                "timed_out": true,
+                "timeout_seconds": 2079.3
+              }
+            ],
+            "tests": {
+              "ctest_failed": null,
+              "ctest_total": null,
+              "failed": 0,
+              "not_run": 12,
+              "passed": 929,
+              "selected": 941
+            },
+            "threads": 16
+          },
+          {
+            "cmake_options": [
+              "-DCMAKE_BUILD_TYPE=Release",
+              "-DMHGP11_COORD_BITS=21"
+            ],
+            "conforming": false,
+            "ctest_args": [
+              "-LE",
+              "^mutant$",
+              "-E",
+              "^mhgp11_reference_"
+            ],
+            "failed_tests": [],
+            "missing_tests": [
+              "mhgp11_cli_full_identity_scale32000_k10",
+              "mhgp11_cli_full_determinism_scale8000_opt",
+              "mhgp11_cli_full_identity_lidar_ng00_k5_opt",
+              "mhgp11_cli_full_identity_lidar_ng01_k5_opt",
+              "mhgp11_cli_full_identity_lidar_ng02_k5_opt",
+              "mhgp11_cli_full_identity_lidar_ng00_k10",
+              "mhgp11_cli_supports_scale8000_opt",
+              "mhgp11_cli_supports_scale16000_opt",
+              "mhgp11_cli_supports_scale32000_opt",
+              "mhgp11_cli_supports_lidar_ng00_k5_opt",
+              "mhgp11_cli_supports_lidar_ng01_k5_opt",
+              "mhgp11_cli_supports_lidar_ng02_k5_opt"
+            ],
+            "name": "bits21",
+            "optional": false,
+            "passed_labels": {
+              "fast": 743,
+              "lidar": 41,
+              "long": 8,
+              "oracle": 146,
+              "scale16000": 9,
+              "scale32000": 10,
+              "scale8000": 20,
+              "unit": 508
+            },
+            "reason": "ctest : timeout",
+            "seconds": 2100.449,
+            "started_utc": "2026-10-05T14:03:48Z",
+            "status": "timeout",
+            "steps": [
+              {
+                "exit_code": 0,
+                "name": "configure",
+                "seconds": 0.664,
+                "status": "ok",
+                "timeout_seconds": 2100.0
+              },
+              {
+                "exit_code": 0,
+                "name": "build",
+                "seconds": 68.282,
+                "status": "ok",
+                "timeout_seconds": 2099.3
+              },
+              {
+                "exit_code": 0,
+                "name": "list",
+                "seconds": 0.114,
+                "status": "ok",
+                "timeout_seconds": 120
+              },
+              {
+                "exit_code": -9,
+                "name": "test",
+                "seconds": 2031.37,
+                "status": "timeout",
+                "timed_out": true,
+                "timeout_seconds": 2030.9
+              }
+            ],
+            "tests": {
+              "ctest_failed": null,
+              "ctest_total": null,
+              "failed": 0,
+              "not_run": 12,
+              "passed": 822,
+              "selected": 834
+            },
+            "threads": 4
+          },
+          {
+            "cmake_options": [
+              "-DCMAKE_BUILD_TYPE=Release",
+              "-DMHGP11_COORD_BITS=24"
+            ],
+            "conforming": false,
+            "ctest_args": [
+              "-LE",
+              "^mutant$",
+              "-E",
+              "^mhgp11_reference_"
+            ],
+            "failed_tests": [],
+            "missing_tests": [
+              "mhgp11_cli_full_identity_scale32000_k10",
+              "mhgp11_cli_full_determinism_scale8000_opt",
+              "mhgp11_cli_full_identity_lidar_ng00_k5_opt",
+              "mhgp11_cli_full_identity_lidar_ng01_k5_opt",
+              "mhgp11_cli_full_identity_lidar_ng02_k5_opt",
+              "mhgp11_cli_full_identity_lidar_ng00_k10",
+              "mhgp11_cli_supports_scale8000_opt",
+              "mhgp11_cli_supports_scale16000_opt",
+              "mhgp11_cli_supports_scale32000_opt",
+              "mhgp11_cli_supports_lidar_ng00_k5_opt",
+              "mhgp11_cli_supports_lidar_ng01_k5_opt",
+              "mhgp11_cli_supports_lidar_ng02_k5_opt"
+            ],
+            "name": "bits24",
+            "optional": false,
+            "passed_labels": {
+              "fast": 743,
+              "lidar": 41,
+              "long": 8,
+              "oracle": 146,
+              "scale16000": 9,
+              "scale32000": 10,
+              "scale8000": 20,
+              "unit": 508
+            },
+            "reason": "ctest : timeout",
+            "seconds": 2100.112,
+            "started_utc": "2026-10-05T14:03:48Z",
+            "status": "timeout",
+            "steps": [
+              {
+                "exit_code": 0,
+                "name": "configure",
+                "seconds": 0.715,
+                "status": "ok",
+                "timeout_seconds": 2100.0
+              },
+              {
+                "exit_code": 0,
+                "name": "build",
+                "seconds": 70.432,
+                "status": "ok",
+                "timeout_seconds": 2099.3
+              },
+              {
+                "exit_code": 0,
+                "name": "list",
+                "seconds": 0.064,
+                "status": "ok",
+                "timeout_seconds": 120
+              },
+              {
+                "exit_code": -9,
+                "name": "test",
+                "seconds": 2028.884,
+                "status": "timeout",
+                "timed_out": true,
+                "timeout_seconds": 2028.8
+              }
+            ],
+            "tests": {
+              "ctest_failed": null,
+              "ctest_total": null,
+              "failed": 0,
+              "not_run": 12,
+              "passed": 822,
+              "selected": 834
+            },
+            "threads": 4
+          },
+          {
+            "cmake_options": [
+              "-DCMAKE_BUILD_TYPE=Release",
+              "-DMHGP11_POISON=ON",
+              "-DMHGP11_COORD_BITS=21"
+            ],
+            "conforming": false,
+            "ctest_args": [
+              "-LE",
+              "^mutant$",
+              "-E",
+              "^mhgp11_reference_"
+            ],
+            "failed_tests": [],
+            "missing_tests": [
+              "mhgp11_cli_full_identity_scale32000_k10",
+              "mhgp11_cli_full_determinism_scale8000_opt",
+              "mhgp11_cli_full_identity_lidar_ng00_k5_opt",
+              "mhgp11_cli_full_identity_lidar_ng01_k5_opt",
+              "mhgp11_cli_full_identity_lidar_ng02_k5_opt",
+              "mhgp11_cli_full_identity_lidar_ng00_k10",
+              "mhgp11_cli_supports_scale8000_opt",
+              "mhgp11_cli_supports_scale16000_opt",
+              "mhgp11_cli_supports_scale32000_opt",
+              "mhgp11_cli_supports_lidar_ng00_k5_opt",
+              "mhgp11_cli_supports_lidar_ng01_k5_opt",
+              "mhgp11_cli_supports_lidar_ng02_k5_opt"
+            ],
+            "name": "poison",
+            "optional": false,
+            "passed_labels": {
+              "fast": 744,
+              "lidar": 41,
+              "long": 8,
+              "oracle": 146,
+              "scale16000": 9,
+              "scale32000": 10,
+              "scale8000": 20,
+              "unit": 509
+            },
+            "reason": "ctest : timeout",
+            "seconds": 2100.148,
+            "started_utc": "2026-10-05T14:03:48Z",
+            "status": "timeout",
+            "steps": [
+              {
+                "exit_code": 0,
+                "name": "configure",
+                "seconds": 0.714,
+                "status": "ok",
+                "timeout_seconds": 2100.0
+              },
+              {
+                "exit_code": 0,
+                "name": "build",
+                "seconds": 71.481,
+                "status": "ok",
+                "timeout_seconds": 2099.3
+              },
+              {
+                "exit_code": 0,
+                "name": "list",
+                "seconds": 0.064,
+                "status": "ok",
+                "timeout_seconds": 120
+              },
+              {
+                "exit_code": -9,
+                "name": "test",
+                "seconds": 2027.869,
+                "status": "timeout",
+                "timed_out": true,
+                "timeout_seconds": 2027.7
+              }
+            ],
+            "tests": {
+              "ctest_failed": null,
+              "ctest_total": null,
+              "failed": 0,
+              "not_run": 12,
+              "passed": 823,
+              "selected": 835
+            },
+            "threads": 4
+          }
+        ],
+        "conforming": false,
+        "ended_utc": "2026-10-05T14:38:49Z",
+        "exit_code": 1,
+        "requested": [
+          "gcc_release",
+          "bits21",
+          "bits24",
+          "poison"
+        ],
+        "schema": "ehgp.v11.g4_matrix_summary.v1",
+        "signals": [],
+        "started_utc": "2026-10-05T14:03:48Z",
+        "statuses": {
+          "bits21": "timeout",
+          "bits24": "timeout",
+          "gcc_release": "timeout",
+          "poison": "timeout"
+        },
+        "thread_budget": 48
+      },
+      "package_sha256": "3b1f838180c352b708303fba69320d5fb604607ca5b2ea416a6a3b6c012f5afd",
+      "receipt_fields": {
+        "backend": "reference_cpu",
+        "closing_generation": "2026-10-05T07:02:03.151-07:00",
+        "closure": "stopped",
+        "commands": [
+          {
+            "exit_code": "1",
+            "index": "0",
+            "max_rss_kb": "4313016",
+            "name": "matrice",
+            "status": "failed",
+            "timeout_seconds": "2200",
+            "wall_seconds": "2100.546"
+          }
+        ],
+        "commit": "00bd979ac2c24aff422421525d484488dff0c993",
+        "errors": [],
+        "evidence_grade": "pushed_commit",
+        "generation": "2026-10-05T07:02:03.151-07:00",
+        "observed_after": {
+          "lastStartTimestamp": "2026-10-05T07:02:03.151-07:00",
+          "lastStopTimestamp": "2026-10-05T07:40:26.288-07:00",
+          "name": "ehgp-v7-3b1d496aed430749ea7e049f",
+          "status": "TERMINATED"
+        },
+        "oslogin_key_removed": true,
+        "overflow": {
+          "evicted": [],
+          "truncated_streams": []
+        },
+        "package_sha256": "3b1f838180c352b708303fba69320d5fb604607ca5b2ea416a6a3b6c012f5afd",
+        "plan_sha256": "7c59760fc376ed099c1af6d5a120abadd1aec68277d7096655dc5f49f56d2382",
+        "pre_start_generation": "2026-10-05T06:21:52.599-07:00",
+        "private_key_deleted": true,
+        "public_status": "not_claimed",
+        "reserve_released": true,
+        "results_bytes": 210818,
+        "results_expanded_bytes": 1767579,
+        "results_sha256": "c95f99d92fdffa5f2ca8716bcdafd7dc18f365088dbb2cb97e0c9452632056e0",
+        "results_skipped_members": [],
+        "results_verified": true,
+        "schema": "ehgp.v11.session_receipt.v1",
+        "source": null,
+        "source_kind": "commit",
+        "start_certified": true,
+        "status": "failed_remote",
+        "target": {
+          "instance": "ehgp-v7-3b1d496aed430749ea7e049f",
+          "project": "devpod-gpu-exploration",
+          "zone": "us-central1-c"
+        },
+        "targeted_shutdown_certified": true,
+        "warnings": [],
+        "worker_exit_code": 1,
+        "worker_outcome": "exited",
+        "worker_plan_sha256": "54b1d23f434cf1b3c67df627b81f4616295d038fba936b70378e3d7b2e3e8d98"
+      },
+      "receipt_sha256": "56e9c3882e32a87d77e023cd6e46237ad7b4f08c4c80ccb0c08f65ccf2bfc35e",
+      "results_archive_sha256": "c95f99d92fdffa5f2ca8716bcdafd7dc18f365088dbb2cb97e0c9452632056e0",
+      "session": "v11.20261005.claudequalA",
+      "session_plan_text": "{\n  \"schema\": \"ehgp.v11.session_plan.v1\",\n  \"note\": \"Qualification L1 + L2 de la sortie parametree (Claude, 5 octobre 2026), commit 00bd979ac, suite de la session claudequalmatrice (mutants et style conformes, gcc_release 929/941 sans echec, le reste coupe par l'echeance) : configurations Release (u18, u21, u24, empoisonnement), sans la campagne de mutants, budget 2100 s.\",\n  \"python_packages\": \"none\",\n  \"default_build\": false,\n  \"results_cap_bytes\": 134217728,\n  \"commands\": [\n    {\n      \"name\": \"matrice\",\n      \"timeout_seconds\": 2200,\n      \"argv\": [\n        \"python3\",\n        \"{src}/morsehgp3D_v11/tools/g4_matrix.py\",\n        \"--src\",\n        \"{src}\",\n        \"--out\",\n        \"{out}\",\n        \"--data\",\n        \"{data}\",\n        \"--work\",\n        \"{build}/matrix\",\n        \"--budget-seconds\",\n        \"2100\",\n        \"--only\",\n        \"gcc_release,bits21,bits24,poison\"\n      ]\n    }\n  ]\n}",
+      "source_commit": "00bd979ac2c24aff422421525d484488dff0c993"
+    }
+  ],
+  "source_commit": "00bd979ac2c24aff422421525d484488dff0c993"
+}

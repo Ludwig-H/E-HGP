@@ -1,0 +1,15 @@
+{
+  "baseline": "00bd979ac2c24aff422421525d484488dff0c993",
+  "compared": "b319efc8477fec234afc0b31e86f8a43e3023641",
+  "paths": [
+    "morsehgp3D_v11/src",
+    "morsehgp3D_v11/tests",
+    "morsehgp3D_v11/bench",
+    "morsehgp3D_v11/cli",
+    "morsehgp3D_v11/reference",
+    "morsehgp3D_v11/cmake",
+    "morsehgp3D_v11/CMakeLists.txt"
+  ],
+  "diff_bytes": 0,
+  "scope": "Identite des sources produit/portes et CMake seulement ; aucune nouvelle execution ni qualification transferee."
+}

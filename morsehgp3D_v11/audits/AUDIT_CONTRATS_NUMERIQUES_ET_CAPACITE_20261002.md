@@ -2,11 +2,46 @@
 
 5 octobre 2026. Contrat S0/S1 **5adf6a59f**, demande **9290cf3bf** et
 tranches natives S3/S5/S6/S7 relues ; S6a publiée en **19b2fb218**, S3 en
-**165def5ab**, S5/S6b/S7 publiées jusqu'à **966a351be**, qualification G4 encore
-attendue. Le socle qualifié et chaque capture CPU/GPU gardent leur
+**165def5ab**, S5/S6b/S7 publiées jusqu'à **966a351be**, qualification G4
+partielle au pin **00bd979ac**, nouvelle matrice **b319efc84**.
+Le socle qualifié et chaque capture CPU/GPU gardent leur
 source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
+
+## Qualification G4 du 5 octobre : acquis et limites
+
+Les reçus fermés **claudequalmatrice** et **claudequalA**, sources
+**00bd979ac**, sont intègres ; l'arrêt ciblé des deux sessions est certifié.
+Ils portent `failed_remote` et `conforming=false` : les tests interrompus
+ou non joués restent manquants. `complete=true` dans le résumé indique
+la fin du traitement du runner, pas la conformité de la qualification.
+Aucun échec de test terminé n'est enregistré dans ces deux captures.
+
+La campagne u18 a tué **459 mutants**, dont 15 supports, 22 API et 28 CLI :
+457 par code et deux par refus de construction intentionnel, aucun par
+signal ou délai. Sur la session A, les **27 portes API**, le contrat CLI
+normal/`-O`, l'oracle CLI supports normal/`-O`, les coquilles 24/25 et les sorties supports K5
+aux trois tailles et trois trames en mode normal sont conformes dans
+les profils u18/u21/u24 et l'empoisonnement u21. Les six jumelles `-O`
+d'échelle/LiDAR supports font partie des douze tests sans résultat communs
+à ces quatre configurations. Ces succès partiels ne ferment pas L1/L2.
+
+Les coupures viennent de l'échéance globale du runner ; le test
+FULL 32k/K10 apparaît comme commencé sans résultat, sans durée complète
+mesurée dans ces journaux. La nouvelle matrice **b319efc84** retire `long`
+des configurations ordinaires et le joue séparément en Release u21.
+Ce découpage est cohérent ; les tests longs ne sont pas doublés sous `-O`.
+Ni leur réussite ni leur tenue dans le nouveau délai ne sont encore
+établies, et leur futur succès u21 ne qualifiera pas ce lot en u18/u24
+ou sous sanitizers. Les sources produit et portes sont inchangées entre
+00bd979ac et b319efc84.
+
+Le plan de mesure reprend le complément demandé en **4acbae533** :
+W48, permutation et réétiquetage sur ng02 et ng00, avec 14 appels par
+porte. La mesure L2 et ce complément sont encore des commandes prévues,
+sans résultat acquis dans les deux reçus clos.
+[Preuves, inventaire des résultats et portée](../receipts/audit_g4_sorties_20261005/README.md).
 
 ## Audit général du 5 octobre : décisions importantes
 
@@ -53,14 +88,15 @@ Le différentiel complet compare aussi les supports, les comptes par
 boule et par support, le rattachement et les tailles de sous-arbre.
 Les portes d'admission et du plafond portent maintenant sur l'appel
 entier. Aucun nouveau défaut important établi. Les résultats natifs
-annoncés dans les rapports locaux restent distincts d'une réception G4 ;
-u18/u24, sanitizers, TSan, mutants complets et K10 restent à qualifier.
+annoncés dans les rapports locaux restent distincts des résultats G4 :
+les acquis partiels ci-dessus comprennent la campagne de mutants u18 ;
+les configurations entières, sanitizers/TSan et K10 restent à clore.
 S7 livre depuis **966a351be** l'écriture et la lecture du fichier,
 la comparaison des signatures FULL/supports et le pilote de mesure.
 La qualification de toute la chaîne reste à clore sur G4.
 [Sources, contre-épreuves et limites](../receipts/audit_s6b_20261005/README.md).
 
-**S7 : revue favorable ; compléter explicitement W48 dans la session.**
+**S7 : revue favorable ; complément W48 inscrit au plan.**
 Le produit possède ensemble l'arbre et sa hiérarchie ; la publication garde
 les contrôles de Session et de provenance avant toute écriture. L'écrivain
 conserve les colonnes canoniques ; le lecteur recalcule les comptes et la
@@ -70,15 +106,15 @@ Aucun défaut important établi par cette relecture ; aucun test natif lancé.
 
 Les portes d'échelle et LiDAR CTest fixent **W1/W4**. Le pilote de mesure
 W1/W48 garde les mêmes entrées : il ne joue pas les permutations et
-réétiquetages à W48. Ajouter au plan gardé existant les commandes
-`cli_supports_scale.py --fils=1,4,48` proposées pour ng00/ng01/ng02,
-au minimum ng02 et sa boîte cosphérique. Hors CTest, le script exige
+réétiquetages à W48. Le développeur a ajouté au plan de mesure
+`cli_supports_scale.py --fils=1,4,48` pour ng02 et ng00,
+avec leur boîte cosphérique. Hors CTest, le script exige
 **14 appels**, y compris répétition, permutation et nouveaux IDs à W48,
 contre 12 dans les lignes CTest actuelles. Ce complément ferme une
-couverture de qualification, pas un défaut produit observé.
+couverture de qualification lorsqu'il sera joué, pas un défaut produit observé.
 [Relecture, limites et fragment de plan validé](../receipts/audit_s7_20261005/README.md).
 
-**Manifeste S5 : constat corrigé en source, qualification attendue.**
+**Manifeste S5 : correctif confirmé par sa porte native G4.**
 Dans le correctif publié **a5e4019b4**, identique au WIP relu au contexte
 **59743c210**, `publish`
 exige désormais `points_bytes=12n`, `ids_bytes=4n` et un budget déclaré
@@ -89,21 +125,24 @@ provenance cohérente.
 
 La nouvelle porte **publication API → lecteur officiel** est câblée ;
 elle contrôle aussi les quatre provenances incohérentes, sans `D` ni
-`D.pending`. Le constat de source est clos. Les portes et mutants natifs
-ne sont pas qualifiés par cette relecture ; la protection du rapport est
-établie par l'ordre des contrôles dans le code.
+`D.pending`. Le constat de source est clos. La porte est maintenant
+conforme sur G4 en normal et `-O`, en u18/u21/u24 et empoisonnement u21 ;
+les 22 mutants API sont détectés dans la campagne u18. La protection du
+rapport reste établie par l'ordre des contrôles dans le code.
 [Correctif et contrelecture](../receipts/audit_corrections_s3_s5_20261005/README.md),
 [défaut initial conservé](../receipts/audit_api_publication_20261005/README.md).
 
-**Identité Session : corrigée dans S5 publiée, qualification attendue.**
+**Identité Session : correctif confirmé par ses portes natives G4.**
 Le produit garde désormais l'identité du budget alloué sur le tas, stable
 au déplacement de la Session. `publish` refuse une autre Session avant la
 provenance, les fichiers et le rapport. La nouvelle porte déplace la
 Session avec le produit vivant, vérifie la publication par sa propriétaire
 et la libération finale. Le destructeur contrôle aussi le retour du budget
 à zéro ; la violation de durée de vie termine explicitement le processus.
-Cette correction clôt le constat de source de l'audit `a65903a7b`, sans
-valoir exécution native ou qualification G4.
+Les portes `session_product_alive`, `session_session_identity` et les
+autres portes API ont maintenant un résultat `Passed` dans les quatre
+configurations de la session A. Le constat initial `a65903a7b` est clos
+sur ce périmètre natif ; cela ne clôt pas les suites interrompues.
 
 **Priorité performance : mesurer le chemin qui sera livré.** Les temps
 S3 obtenus journal désactivé ne donnent pas le coût des attaches ni de
@@ -201,9 +240,9 @@ et même ordinal BallIdx entre count/fill.
 Les tailles 8k/16k/32k et LiDAR K5 restent des portes d'échelle, avec
 l'oracle exact sur petits cas. Fixer le coût des jumelles Python/−O,
 des mutants et sanitizers avant la session : **00bd979ac** porte le
-budget global à 2200s et les configurations à 2100s. Cela n'ajoute aucune
-commande W48 et ne prouve pas encore la durée du lot. Séparer un lot `long` plutôt que laisser un délai
-censurer des portes. La mesure L2 apparie FULL/arbre K seul, même entrée,
+budget global à 2200s et les configurations à 2100s ; les deux premières
+sessions ont pourtant été coupées. **b319efc84** sépare maintenant le lot
+`long`. La mesure L2 apparie FULL/arbre K seul, même entrée,
 profil, K et options applicables. Garder **FULL au masque 16379** ; l'ordre seul
 prend **7035**, retirant uniquement verticales parallèles 128, réemploi
 vertical 1024 et ordres concurrents 8192, refusés par `build_order`.

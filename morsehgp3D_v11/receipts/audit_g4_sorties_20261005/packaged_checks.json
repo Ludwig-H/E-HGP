@@ -1,0 +1,22 @@
+{
+  "scope": "Copie et fermeture de la capsule auditeur ; aucune execution native ou GCP.",
+  "attempts": [
+    {
+      "command": "python3 replay.py",
+      "exit_code": 1,
+      "error": "RuntimeError: capsule SHA README.md",
+      "cause": "Ajout du cadre et de la preuve identite source dans README apres copie, avant regeneration de SHA256SUMS. Aucune divergence des archives."
+    },
+    {
+      "command": "python3 replay.py",
+      "exit_code": 0,
+      "after": "Regeneration des empreintes de la capsule",
+      "stdout": [
+        "v11.20261005.claudequalmatrice: archive_sha=ok plan_sha=ok targeted_closure=ok qualification=partial",
+        "v11.20261005.claudequalA: archive_sha=ok plan_sha=ok targeted_closure=ok qualification=partial",
+        "mutants: tues=459 code=457 construction=2 signal=0 delai=0",
+        "audit_g4_partial_verdict conforme archives2 source00bd hors_natif hors_cloud"
+      ]
+    }
+  ]
+}

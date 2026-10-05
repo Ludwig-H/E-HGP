@@ -4,6 +4,15 @@
 quantized_u21_input_only / not_claimed`. Notes maintenues en place ;
 preuves détaillées dans les reçus immuables.
 
+**G4 : progrès confirmés, qualification encore incomplète.** Les sessions
+`claudequalmatrice` et `claudequalA`, sur **00bd979ac**, se sont terminées
+par limite de temps, avec arrêt ciblé certifié. Aucun échec de test terminé
+n'est enregistré ; les 459 mutants de la campagne u18 sont détectés.
+Les résultats acquis et les tests sans résultat sont séparés dans la
+[contrelecture des reçus](../receipts/audit_g4_sorties_20261005/README.md).
+**b319efc84** sépare désormais les tests longs ; ce changement du plan ne
+vaut pas réussite d'une nouvelle exécution.
+
 **Audit général au pin 238734f1d, suivi de S3/165def5ab et S6b/9e7428995.** Aucun nouveau défaut
 mathématique FULL établi ; contre-épreuve du nerf complet, des coupes et
 des verticales conforme sur 65 ordres. Le point important du raccord est
@@ -13,12 +22,14 @@ Pour juger la voie K seule, mesurer le journal actif et
 la sortie réellement livrée. [Verdict et priorités du développeur](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#audit-général-du-5-octobre--décisions-importantes),
 [preuve et périmètre](../receipts/audit_geant_20261005/README.md).
 
-**S5 : manifeste corrigé en source, porte ajoutée.** La provenance est
+**S5 : manifeste corrigé, aller-retour natif conforme sur G4.** La provenance est
 contrôlée contre le nombre de points avant toute écriture ; les tailles
 incohérentes et le budget déclaré nul sont refusés. La nouvelle porte
 fait relire une publication API par le lecteur officiel et vérifie les
-quatre refus sans dossier créé. Constats de source clos ; exécution native
-de ces portes encore attendue.
+quatre refus sans dossier créé. La porte publication/lecteur passe en
+normal et `-O` dans les quatre configurations de la session A ; la
+qualification globale reste incomplète. Les 27 portes API, y compris
+l'identité Session avec produit vivant, y sont toutes conformes.
 [Correction et portée](../receipts/audit_corrections_s3_s5_20261005/README.md).
 
 **Suivi des corrections.** Identité stable de Session, contrôle de fin de
@@ -29,7 +40,7 @@ relues en ee8a69f1a. S3 est publiée en **165def5ab**, avec E1/E2 sur le
 catalogue étroit et D2 ; le différentiel contre l'oracle exact et le témoin
 K10 sont maintenant inscrits dans ses portes. L'assemblage S6b est publié
 en **9e7428995** et relu favorablement ; S7 est publiée en **966a351be**,
-qualification G4 encore attendue. Pour la future L3, K=n est refusé par `points`/`plat`
+qualification G4 partielle. Pour la future L3, K=n est refusé par `points`/`plat`
 quand K≥2 ; FULL/supports le conservent.
 [Contrelecture précédente](../receipts/audit_l1_followup_20261005/README.md).
 
@@ -37,15 +48,15 @@ quand K≥2 ; FULL/supports le conservent.
 ceux sans coface. Le plafond de 24 sites est contrôlé sur l'appel entier
 avant allocation ; count/fill gardent les mêmes positions et des tampons
 privés par worker. Comptes et admission mémoire restent dans leurs bornes.
-S7 livre désormais le fichier et prépare les mesures ; aucun reçu G4 nouveau.
+S7 livre désormais le fichier ; premiers résultats G4 partiels ci-dessus.
 [Périmètre et contre-épreuves](../receipts/audit_s6b_20261005/README.md).
 
 **S7 : sortie complète livrée, qualification à terminer.** L'API, l'écrivain
 MHGP11SP et le lecteur sont relus sans défaut important établi. Les portes
-comparent le fichier à S1 et la signature d'arbre à FULL. Avant clôture G4,
-ajouter les permutations et réétiquetages à W48 : les portes CTest actuelles
-restent à W1/W4, même après l'élargissement des délais en **00bd979ac**.
-[Preuves et commandes prêtes à intégrer à la session prévue](../receipts/audit_s7_20261005/README.md).
+comparent le fichier à S1 et la signature d'arbre à FULL. Le développeur a
+ajouté au plan de mesure les permutations et réétiquetages **W48 sur ng02
+et ng00**, conformément à la demande ; leur exécution reste à constater.
+[Revue et complément W48](../receipts/audit_s7_20261005/README.md).
 
 - [Mathématiques : supports, frontières, hiérarchies et sélection](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 - [Moteur : qualification, performances et intégration](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md).
@@ -60,7 +71,7 @@ la demande **9290cf3bf** sont relus favorablement : lemmes P/W, deux
 lectures E5, D2 et 13 mutants causaux. S2/257aabb92 et S4/f98aeed67 sont
 livrés, ainsi que S6a/19b2fb218. Les gardes p+q/traces sont corrigées ; D2/E5 sont
 présents en S3. Raccord final du journal relu favorablement ; S5 intègre
-signature V2, état publié et SIGXFSZ. Qualification native G4 encore attendue.
+signature V2, état publié et SIGXFSZ. Qualification native G4 à compléter.
 
 **Réponse utile au développeur.** La sphère entière de rayon carré5,
 24 sites, mêle 12 q2, 24 q3, 792 q4 ; N4=3906 diffère des 4068 incidences
