@@ -2,7 +2,7 @@
 
 5 octobre 2026. Relecture du contrat S0 et de l'oracle S1 au commit
 **5adf6a59f**, puis de la demande du développeur **9290cf3bf** et des WIP
-S3/S5/S6, publiées jusqu'à **9e7428995**. Le socle FULL et les travaux sur les points/tête restent épinglés
+S3/S5/S6 et de S7, publiées jusqu'à **966a351be**. Le socle FULL et les travaux sur les points/tête restent épinglés
 aux reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 Note maintenue en place ; détails et échanges clos dans les reçus.
@@ -67,9 +67,19 @@ des traces strictes et le journal est contrôlée avant publication.
 L'ordre `BallIdx` à niveau égal coïncide avec l'ordre lexicographique de
 S* : deux supports positifs minimaux distincts de même rayon ne peuvent
 être préfixes l'un de l'autre. Le rembourrage par `kNone` ne change donc
-pas cet ordre. Aucun nouveau défaut mathématique établi ; fichier S7 et
-qualification native restent ouverts.
+pas cet ordre. Aucun nouveau défaut mathématique établi ; S7 est désormais
+publiée, qualification native encore ouverte.
 [Contre-épreuves et périmètre](../receipts/audit_s6b_20261005/README.md).
+
+**S7 : fichier et signature relus au pin 966a351be.** Huit fichiers
+construits depuis S1 sont relus conformément, jusqu'à K10/K12 sur petits
+cas ; la signature V2 recoupe une sérialisation indépendante. Les
+prédicats entiers du lecteur concordent avec le Gram exact, y compris
+aux bornes u24, en Python normal et `-O`. Aucun défaut important établi.
+Retirer les tétraèdres du cube à K1 confirme la limite déclarée du lecteur
+(coquille absente) ; le différentiel complet contre S1 détecte bien cette
+omission. Les preuves bornées ne qualifient pas le produit C++ courant.
+[Sources, rejeu et limites](../receipts/audit_s7_20261005/math/REPORT.md).
 
 **Contrat S0/S1 relu : favorable sur les points difficiles.** Les lemmes
 P/W, les deux lectures du retrait E5 et le témoin D2 concordent avec les
@@ -184,7 +194,7 @@ qu'aucune K-partie ne contient son Q de taille3 : ce dernier compteur ne
 répondrait pas au choix utilisateur. **S2/257aabb92 et S4/f98aeed67 sont livrés en
 source** : en-tête public et io. L'attribution S3 et l'assemblage Q_b/S6
 sont désormais publiés jusqu'à **9e7428995** ; leurs rapports locaux ne
-constituent pas une qualification G4 du futur export S7.
+constituent pas une qualification G4 de l'export S7 désormais publié.
 
 **D2 : correction de preuve reprise dans le contrat mathématique L0.**
 L'ancienne justification `β(F)≤niveau critique précédent` est fausse. À K2, prendre

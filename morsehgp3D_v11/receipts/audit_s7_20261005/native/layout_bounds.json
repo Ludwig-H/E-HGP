@@ -1,0 +1,50 @@
+{
+  "conditions": [
+    "prepared immutable S6b hierarchy; all published shells m<=24 and 1<=K<=12",
+    "0<=p<=11; 2<=qmin<=4; qmin<=m; p+qmin-1<=K<=p+m",
+    "N<UINT32_MAX; n<UINT32_MAX; B<=UINT32_MAX",
+    "each ant branch has at least one strict trace (I1-I4); prior stored only for merges",
+    "all support arities are 2..4; each Q_b has at most C(24,2)+C(24,3)+C(24,4) supports",
+    "format column widths are normative bytes; no native sizeof evaluated"
+  ],
+  "forms_enumerated": 3896,
+  "per_ball_maxima": {
+    "kparties": 834451800,
+    "cofaces": 1476337800,
+    "strict_traces_bound": 2704156
+  },
+  "upper_dimensions": {
+    "n": 4294967294,
+    "N": 4294967294,
+    "B": 4294967295,
+    "S": 55516747255170,
+    "Z": 222066989020680,
+    "A": 11614261580578020,
+    "support_count_per_ball": 12926,
+    "prior_count_per_ball": 2704156,
+    "ball_count_per_node": 4294967295
+  },
+  "layout_upper_bytes": {
+    "SITES": 136,
+    "NODES": 68719476840,
+    "BALLS": 124554051664,
+    "SUPPORTS": 180388626512,
+    "PRIOR": 943965091964408,
+    "total": 47401011414276488
+  },
+  "manifest_aggregate_upper_values": {
+    "kparties_sum": 3583943190253881000,
+    "cofaces_sum": 6340822567372251000,
+    "roles_sum": 4294967295,
+    "arities_sum": 55516747255170
+  },
+  "checks": {
+    "forms_3896": true,
+    "support_count_fits_u16": true,
+    "prior_and_ball_counts_fit_u32": true,
+    "pad8_arguments_plus7_fit_u64": true,
+    "all_layout_offsets_and_total_fit_u64": true,
+    "all_manifest_aggregate_sums_fit_u64": true
+  },
+  "qualification": "pure integer bounds only; no native, sanitizer, GPU, dataset or performance execution"
+}

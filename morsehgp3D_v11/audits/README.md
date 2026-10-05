@@ -28,8 +28,8 @@ S6a est publiée sur `main` en **19b2fb218**, identique aux sources déjà
 relues en ee8a69f1a. S3 est publiée en **165def5ab**, avec E1/E2 sur le
 catalogue étroit et D2 ; le différentiel contre l'oracle exact et le témoin
 K10 sont maintenant inscrits dans ses portes. L'assemblage S6b est publié
-en **9e7428995** et relu favorablement ; la sortie S7 et la
-qualification G4 restent à faire. Pour la future L3, K=n est refusé par `points`/`plat`
+en **9e7428995** et relu favorablement ; S7 est publiée en **966a351be**,
+qualification G4 encore attendue. Pour la future L3, K=n est refusé par `points`/`plat`
 quand K≥2 ; FULL/supports le conservent.
 [Contrelecture précédente](../receipts/audit_l1_followup_20261005/README.md).
 
@@ -37,8 +37,15 @@ quand K≥2 ; FULL/supports le conservent.
 ceux sans coface. Le plafond de 24 sites est contrôlé sur l'appel entier
 avant allocation ; count/fill gardent les mêmes positions et des tampons
 privés par worker. Comptes et admission mémoire restent dans leurs bornes.
-La sortie fichier S7 et ses mesures ne sont pas encore livrées.
+S7 livre désormais le fichier et prépare les mesures ; aucun reçu G4 nouveau.
 [Périmètre et contre-épreuves](../receipts/audit_s6b_20261005/README.md).
+
+**S7 : sortie complète livrée, qualification à terminer.** L'API, l'écrivain
+MHGP11SP et le lecteur sont relus sans défaut important établi. Les portes
+comparent le fichier à S1 et la signature d'arbre à FULL. Avant clôture G4,
+ajouter les permutations et réétiquetages à W48 : les portes CTest actuelles
+restent à W1/W4, même après l'élargissement des délais en **00bd979ac**.
+[Preuves et commandes prêtes à intégrer à la session prévue](../receipts/audit_s7_20261005/README.md).
 
 - [Mathématiques : supports, frontières, hiérarchies et sélection](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 - [Moteur : qualification, performances et intégration](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md).

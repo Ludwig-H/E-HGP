@@ -1,0 +1,18 @@
+{
+  "commands": [
+    "python3 -S -B layout_bounds.py > layout_bounds.json",
+    "python3 -O -S -B layout_bounds.py > layout_bounds_opt.json"
+  ],
+  "return_codes": [
+    0,
+    0
+  ],
+  "stderr_bytes": [
+    0,
+    0
+  ],
+  "byte_identical": true,
+  "script_sha256": "39f48a5114adbd6f3aa3bb141170ddcea90e0ecb19a6dc0ef522ca4bb19c40e6",
+  "stdout_sha256": "ce02f0cc58f02cb4ed3e86ae7f854949318c8e211b8a3975bf28d041f580517e",
+  "native_executed": false
+}

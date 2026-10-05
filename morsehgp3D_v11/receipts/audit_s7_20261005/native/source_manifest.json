@@ -1,0 +1,87 @@
+{
+  "observed_utc": "2026-10-05T13:18:58.526343+00:00",
+  "worktree": "/workspaces/E-HGP/build/v11-impl-l2",
+  "sources": [
+    {
+      "path": "morsehgp3D_v11/src/api/api.hpp",
+      "bytes": 16521,
+      "sha256": "76f4977256db91fd20d6961f7175fc947150a3dd43758d7d4fd071ac613a77fb"
+    },
+    {
+      "path": "morsehgp3D_v11/src/api/compute.cpp",
+      "bytes": 7262,
+      "sha256": "863bb6df90afa37b49b0bd857d43db9c4a2360031b86ffea8a4b7f7f4a7471f2"
+    },
+    {
+      "path": "morsehgp3D_v11/src/api/internal.hpp",
+      "bytes": 4002,
+      "sha256": "b8aa32b8845e277845481fe3be65850f505ef9247d4b50ad5295fc7fe30e4724"
+    },
+    {
+      "path": "morsehgp3D_v11/src/api/manifest.cpp",
+      "bytes": 17738,
+      "sha256": "ff088706722600d4d5cc02798b5cbb37fb634cb3282c2e7fd1d67af86253da90"
+    },
+    {
+      "path": "morsehgp3D_v11/src/api/session.cpp",
+      "bytes": 2875,
+      "sha256": "0b719f69c6794703ed431419d5e9b24585096227d47e6e1f193e48649f945e23"
+    },
+    {
+      "path": "morsehgp3D_v11/src/api/write_supports.cpp",
+      "bytes": 10598,
+      "sha256": "958190caf962931018134077e560200d9ac256428eb37d3de78daefe452c6898"
+    },
+    {
+      "path": "morsehgp3D_v11/cli/mhgp11.cpp",
+      "bytes": 20673,
+      "sha256": "b42651eb375e58fbc703862f0162a773c34c75e7201f077f64a880dc016a72d8"
+    },
+    {
+      "path": "morsehgp3D_v11/bench/mhgp11_formats.py",
+      "bytes": 41087,
+      "sha256": "13654f8f6e76edb26f1a8069666415a6a876a358abf6a1b5dff234ef809f56bb"
+    },
+    {
+      "path": "morsehgp3D_v11/bench/sorties_g4.py",
+      "bytes": 13891,
+      "sha256": "9355371ec56e908edbd73428a5e4f36b2c083fb67da042e464e39d9159c4fbf8"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/SORTIES.md",
+      "bytes": 58242,
+      "sha256": "7b2043d2900c5418b4485835441d6e8a0e955f7d3aadf59bc61e8b3f7e7a1823"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/cli/cli_supports_oracle.py",
+      "bytes": 14473,
+      "sha256": "e019802ad85545ed0824c66bc520d9df3ebe487e9b1ccd868ef00a5fda0112b9"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/cli/cli_supports_scale.py",
+      "bytes": 10786,
+      "sha256": "c16d55cd5d660e18a5603fb604a1f093ca711893aeb9c92fcf18d1f9f972cdfd"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/cli/tests.cmake",
+      "bytes": 9533,
+      "sha256": "bf1c49bb23fd30d610c661842d97817c657fc044f4c3b4017b48741361378887"
+    },
+    {
+      "path": "morsehgp3D_v11/src/io/directory.cpp",
+      "bytes": 12434,
+      "sha256": "b32fc41863a7163ae00cb74893c67cd6bc4500965669f881fd72334ab54f2aa3"
+    },
+    {
+      "path": "morsehgp3D_v11/src/io/io.hpp",
+      "bytes": 11314,
+      "sha256": "3843beac6d28a4430a1335098c13f9c908bf7e5a58ede8696b8884d544971f27"
+    }
+  ],
+  "pin": "966a351be1b58089fd13bc44a8dbafc56d87999a",
+  "observed_head_at_capture": "00bd979ac2c24aff422421525d484488dff0c993",
+  "closure_utc": "2026-10-05T13:23:32.857829+00:00",
+  "observed_head_at_close": "00bd979ac2c24aff422421525d484488dff0c993",
+  "all_hashed_sources_equal_pin": true,
+  "source_changes_during_review": []
+}

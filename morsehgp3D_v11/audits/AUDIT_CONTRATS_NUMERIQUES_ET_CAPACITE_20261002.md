@@ -1,8 +1,8 @@
 # Audit courant v11 — contrats, performance et intégration
 
 5 octobre 2026. Contrat S0/S1 **5adf6a59f**, demande **9290cf3bf** et
-tranches natives S3/S5/S6 relues ; S6a publiée en **19b2fb218**, S3 en
-**165def5ab**, S5 et S6b publiées jusqu'à **9e7428995**, qualification G4 encore
+tranches natives S3/S5/S6/S7 relues ; S6a publiée en **19b2fb218**, S3 en
+**165def5ab**, S5/S6b/S7 publiées jusqu'à **966a351be**, qualification G4 encore
 attendue. Le socle qualifié et chaque capture CPU/GPU gardent leur
 source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
@@ -30,8 +30,8 @@ petits nuages. Aucun transfert de ces succès Python au binaire courant.
 
 **Priorité de livraison : fermer L1 sur le vrai produit assemblé.**
 Au pin de l'audit général, `build_order`, l'attachement et les primitives
-de supports étaient des brouillons. S3/S6a sont depuis publiées, S5 et
-S6b sont publiées ; S7 reste à raccorder. Les preuves mathématiques autorisent leur
+de supports étaient des brouillons. S3/S6a/S5/S6b/S7 sont depuis publiées.
+Les preuves mathématiques autorisent leur
 intégration ; elles ne remplacent pas les portes natives de l'assemblage.
 La porte décisive doit comparer l'ordre K de FULL, l'arbre K seul et les
 attaches à la coupe fermée, sur la même source figée, avec les plateaux
@@ -55,10 +55,28 @@ Les portes d'admission et du plafond portent maintenant sur l'appel
 entier. Aucun nouveau défaut important établi. Les résultats natifs
 annoncés dans les rapports locaux restent distincts d'une réception G4 ;
 u18/u24, sanitizers, TSan, mutants complets et K10 restent à qualifier.
-**S7 n'est pas encore livrée** : conserver la comparaison des signatures
-d'arbre FULL/supports, la lecture du fichier publié et la mesure de toute
-la chaîne comme portes de livraison.
+S7 livre depuis **966a351be** l'écriture et la lecture du fichier,
+la comparaison des signatures FULL/supports et le pilote de mesure.
+La qualification de toute la chaîne reste à clore sur G4.
 [Sources, contre-épreuves et limites](../receipts/audit_s6b_20261005/README.md).
+
+**S7 : revue favorable ; compléter explicitement W48 dans la session.**
+Le produit possède ensemble l'arbre et sa hiérarchie ; la publication garde
+les contrôles de Session et de provenance avant toute écriture. L'écrivain
+conserve les colonnes canoniques ; le lecteur recalcule les comptes et la
+signature depuis MHGP11SP. Les portes comparent la sortie complète à S1,
+ses signatures à FULL et les octets sous changements de workers et d'IDs.
+Aucun défaut important établi par cette relecture ; aucun test natif lancé.
+
+Les portes d'échelle et LiDAR CTest fixent **W1/W4**. Le pilote de mesure
+W1/W48 garde les mêmes entrées : il ne joue pas les permutations et
+réétiquetages à W48. Ajouter au plan gardé existant les commandes
+`cli_supports_scale.py --fils=1,4,48` proposées pour ng00/ng01/ng02,
+au minimum ng02 et sa boîte cosphérique. Hors CTest, le script exige
+**14 appels**, y compris répétition, permutation et nouveaux IDs à W48,
+contre 12 dans les lignes CTest actuelles. Ce complément ferme une
+couverture de qualification, pas un défaut produit observé.
+[Relecture, limites et fragment de plan validé](../receipts/audit_s7_20261005/README.md).
 
 **Manifeste S5 : constat corrigé en source, qualification attendue.**
 Dans le correctif publié **a5e4019b4**, identique au WIP relu au contexte
@@ -99,7 +117,7 @@ Les trois trames de séquence08 ne deviennent pas plusieurs séquences,
 et les comparaisons c40/baseline v11 ne ferment pas le différentiel
 canonique v10/v11 sur LiDAR entier.
 
-Pour poursuivre : intégrer les correctifs et qualifier L1/L2 ; prendre ensuite la
+Pour poursuivre : qualifier L1/L2 intégrés ; prendre ensuite la
 décision de chemin sur les mesures complètes. Aucune réserve générale
 nouvelle n'est opposée à l'intégration de S3. **Aucun build/test natif ni
 GCP lancé par cet audit.**
@@ -126,7 +144,7 @@ dans les portes permanentes de S3 : domaine étroit, comparaison des
 attaches fermées et des antécédents ouverts, voies W1/W3 et permutation
 d'entrée. Le témoin de 12 sites couvre K1..12. La qualification native
 reste à jouer sur la source assemblée ; S6b est désormais présente en
-**9e7428995**, S7 restant à livrer.
+**9e7428995**, puis S7 en **966a351be**.
 [Contrelecture de ces nouvelles portes](../receipts/audit_corrections_s3_s5_20261005/README.md).
 Les résultats natifs annoncés par le développeur restent
 distincts des vérifications Python de l'audit et de la qualification G4.
@@ -165,7 +183,7 @@ attendus. [Raccord, coexistences et portée](../receipts/audit_native_integratio
 
 **Matrice proposée : favorable, à découper par livraison.** L1 qualifie
 S3/S6 intégrés sur la même source figée ; io/api/cli et leurs fautes sont
-la qualification L2 dès S5/S7 intégrés. GCC Release u21 et u24 séparés,
+la qualification L2 de S5/S7 maintenant intégrés. GCC Release u21 et u24 séparés,
 ASan/UBSan et TSan selon les profils réellement joués, mutants des modules
 modifiés, identité build_order/build_full, plateau E1/E2 et déterminisme
 W1/W4/W48. Inclure coquille 24 admise, 25 refusée pour l'appel supports
@@ -182,9 +200,9 @@ et même ordinal BallIdx entre count/fill.
 
 Les tailles 8k/16k/32k et LiDAR K5 restent des portes d'échelle, avec
 l'oracle exact sur petits cas. Fixer le coût des jumelles Python/−O,
-des mutants et sanitizers avant la session : la matrice existante a
-un budget global 1380s et des configurations à1200/1300s, sans réserve
-prouvée pour ces ajouts. Séparer un lot `long` plutôt que laisser un délai
+des mutants et sanitizers avant la session : **00bd979ac** porte le
+budget global à 2200s et les configurations à 2100s. Cela n'ajoute aucune
+commande W48 et ne prouve pas encore la durée du lot. Séparer un lot `long` plutôt que laisser un délai
 censurer des portes. La mesure L2 apparie FULL/arbre K seul, même entrée,
 profil, K et options applicables. Garder **FULL au masque 16379** ; l'ordre seul
 prend **7035**, retirant uniquement verticales parallèles 128, réemploi

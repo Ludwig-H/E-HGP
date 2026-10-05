@@ -1,0 +1,59 @@
+{
+  "schema": "ehgp.v11.session_plan.v1",
+  "default_build": true,
+  "python_packages": "none",
+  "note": "Complement a fusionner dans la session G4 L1/L2 deja prevue : invariance supports W48. Ne lance pas une session supplementaire. Build par defaut u21, MHGP11_DATA_DIR fourni par le worker. Delais par commande de 600 s : plafonds, aucune duree mesuree par cet audit.",
+  "commands": [
+    {
+      "name": "supports_w48_ng00",
+      "timeout_seconds": 600,
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/tests/cli/cli_supports_scale.py",
+        "--cli",
+        "{build}/mhgp11",
+        "--bits",
+        "21",
+        "--data=lidar_ng00",
+        "--k=5",
+        "--fils=1,4,48",
+        "--min-balls=500000",
+        "--min-extended=50"
+      ]
+    },
+    {
+      "name": "supports_w48_ng01",
+      "timeout_seconds": 600,
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/tests/cli/cli_supports_scale.py",
+        "--cli",
+        "{build}/mhgp11",
+        "--bits",
+        "21",
+        "--data=lidar_ng01",
+        "--k=5",
+        "--fils=1,4,48",
+        "--min-balls=500000",
+        "--min-extended=50"
+      ]
+    },
+    {
+      "name": "supports_w48_ng02",
+      "timeout_seconds": 600,
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/tests/cli/cli_supports_scale.py",
+        "--cli",
+        "{build}/mhgp11",
+        "--bits",
+        "21",
+        "--data=lidar_ng02",
+        "--k=5",
+        "--fils=1,4,48",
+        "--min-balls=500000",
+        "--min-extended=50"
+      ]
+    }
+  ]
+}

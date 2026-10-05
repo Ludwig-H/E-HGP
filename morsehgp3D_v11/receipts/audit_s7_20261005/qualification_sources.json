@@ -1,0 +1,12 @@
+{
+  "pin": "00bd979ac2c24aff422421525d484488dff0c993",
+  "files": {
+    "morsehgp3D_v11/tests/cli/tests.cmake": "bf1c49bb23fd30d610c661842d97817c657fc044f4c3b4017b48741361378887",
+    "morsehgp3D_v11/tests/cli/cli_supports_scale.py": "c16d55cd5d660e18a5603fb604a1f093ca711893aeb9c92fcf18d1f9f972cdfd",
+    "morsehgp3D_v11/bench/sorties_g4.py": "9355371ec56e908edbd73428a5e4f36b2c083fb67da042e464e39d9159c4fbf8",
+    "morsehgp3D_v11/tools/g4_matrix.json": "424ccf7942b8c9c90b62730db56d9f8d31ff7ca91c9e67ff04c8630a07942c25",
+    "gcp-migration/v11_session.py": "b86e5ff85d8cad6c7bd9da4e0dfbe4febc6fb980a1048a26a5478bcfbd92461d",
+    "gcp-migration/v11_worker.sh": "d625f5866fa7f5b644d1ab3dfb0e52e5dd806a44f08d045b29cff0af5c049c66"
+  },
+  "scope": "Lecture du plan, des portes et du pilote. Aucun GCP ni test natif."
+}

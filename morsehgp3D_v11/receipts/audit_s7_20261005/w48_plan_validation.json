@@ -1,0 +1,12 @@
+{
+  "source_pin": "00bd979ac2c24aff422421525d484488dff0c993",
+  "validator": "gcp-migration/v11_session.py:validate_plan",
+  "validator_sha256": "b86e5ff85d8cad6c7bd9da4e0dfbe4febc6fb980a1048a26a5478bcfbd92461d",
+  "result": "accepted",
+  "commands": [
+    "supports_w48_ng00",
+    "supports_w48_ng01",
+    "supports_w48_ng02"
+  ],
+  "scope": "Validation de structure seulement ; aucune commande du plan ni aucun appel GCP execute."
+}

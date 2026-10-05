@@ -1,0 +1,48 @@
+{
+  "verdict": "favorable source review; no new important product or delivery defect established",
+  "pin": "966a351be1b58089fd13bc44a8dbafc56d87999a",
+  "scope": {
+    "integral_new_native": [
+      "src/api/write_supports.cpp (242 lines)",
+      "src/api/compute.cpp (156 lines)",
+      "src/api/manifest.cpp (430 lines)"
+    ],
+    "native_delta_and_lifecycle": [
+      "src/api/api.hpp (new Request/Product and publish contracts)",
+      "src/api/session.cpp (OutputKind/request_kind dispatch)",
+      "src/api/internal.hpp (S7 declarations and masks)",
+      "cli/mhgp11.cpp (S7 diff and lifecycle/report path 205-378)",
+      "src/io/directory.cpp and io.hpp (ce66efc4a->pin manifest digest timing correction)"
+    ],
+    "new_reader": [
+      "bench/mhgp11_formats.py:264-813 (SP decoding/derived structure/invariants)",
+      "bench/mhgp11_formats.py:125-240 (manifest counts, supports branch and check_directory)"
+    ],
+    "selected_gates": [
+      "tests/cli/cli_supports_oracle.py:45-267",
+      "tests/cli/cli_supports_scale.py:50-188",
+      "tests/cli/tests.cmake S7 block"
+    ],
+    "prior_reports": [
+      "build/v11-persist/sortie_supports/impl_s7.md",
+      "build/v11-persist/sortie_supports/verif_s7.md"
+    ]
+  },
+  "causal_checks": [
+    "Supports Product stores OrderTree and SupportHierarchy in owning optionals; member destruction order destroys hierarchy before tree. No raw address of an intermediate moved tree is stored in SupportHierarchy. Session identity guard stays before provenance validation, stage/report mutation and directory creation.",
+    "compute prepares all common stages, builds the single-order tree with fixed order_params (7035), then hierarchy using the same Session budget and pool. Source variants match their constructed payloads; Full remains separate and unchanged.",
+    "Writer performs layout checks before first byte, writes 136-byte header and aligned little-endian field columns explicitly. Stack Column storage is bounded 8192 bytes; no array depending on the cloud/output is allocated during serialization. Error outcome survives flush/end and reaches publish/withdraw.",
+    "Header and column layout formulas match read_supports. Support count <=12926 fits u16; per-ball prior count <= strict traces <= C(24,12) fits u32. S6b prepared-domain upper dimensions keep arity totals, pad/add/multiply layout expressions and sum counts within u64. These conclusions require the declared prepared-domain invariants, not arbitrary corrupted objects.",
+    "Published supports aggregate counts come from hierarchy/forest; tree signature uses the same domain/forest V2 definition as FULL. Reader check_directory validates exact inventory/size/hash, full decoding, recomputed aggregate counts and V2 signature.",
+    "CLI releases Product and input before finish(Session); stdout failure uses the unchanged withdrawal path. The directory digest is captured after manifest closure before publish, covering double publication/rollback failure accurately.",
+    "Oracle gate requires CLI code 0 and requested output, strict directory reading and projected full oracle document. Disagreements/refusals stay recorded in Gate.failures; floors/LINE enforce cases. 25-site refusals require code2, exact reason/stage/none and absence of D/pending; FULL on the same input is separately required. Scale gates compare exact data/manifest across workers/repeats and transported IDs, not timing-only success."
+  ],
+  "findings": [],
+  "limits": [
+    "No native compilation/execution, no GCP, no sanitizer/TSan/mutation campaign. Source inspection is not profile or performance qualification.",
+    "The l2 head advanced from bd7c8e130 to 966a351be (known review fixes), then 00bd979ac (only tools/g4_matrix.json). All hashed product/gate/document sources equal fixed pin 966a351be.",
+    "Already-declared S7 gaps (u18/u24 heavy gates, W48, API gate replaced by CLI coverage, dedicated K10 scale gate) are not asserted as new defects.",
+    "Reader cannot independently prove all shell/support completeness because shell populations are not serialized; this is an explicit format limit carried by bounded independent oracles upstream.",
+    "No shared audit note, developer worktree, commit or branch edited."
+  ]
+}
