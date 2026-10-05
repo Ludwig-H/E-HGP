@@ -177,3 +177,108 @@ Le plan ajoute un différentiel natif v10 figé sur quatorze petites fixtures :
 les dumps différents sont convertis indépendamment dans un format canonique
 commun, puis comparés octet pour octet. Cette première porte ne qualifie pas
 encore le différentiel sur les trames LiDAR entières exigé pour la conformité.
+
+## Ordre K seul et rattachement de W_K (`build_order`, tranche S3)
+
+Tranche S3 de la sortie paramétrée : spécification de l'arbitrage du 4 octobre 2026 (§§ 2.1–2.4, 3.2, 4, 7.1–7.2),
+contrat L0 (`MATHEMATIQUES.md` § 10 : lemmes A, P, W, B à E ; témoins D2 et E5) et gardes de l'auditeur
+(`aef7182b3`). `build_order(domaine, K, budget, params, pool, timings, attach_ns)` (`src/tower/order_tree.hpp`, exposé
+par `tower/tower.hpp`) construit la **seule** forêt d'ordre K, sans les ordres 1..K−1 ni verticales, par la mise en
+place de la boucle non concurrente de `build_full` : table de populations non liée, espaces census, mémo,
+`ForestParallel`. `build_full` n'est pas modifié. `concurrent_orders` (voie pipeline à un ordre, tranche S11 non
+livrée), `parallel_verticals` et `reuse_regular_verticals` (sans objet pour un ordre seul) sont refusés
+(`parameter_out_of_range`). La forêt est identique à `build_full(...).order(K)` sur le même domaine : nœuds, enfants,
+rangs, `birth_key` et champs logiques du registre (porte I10). Refus : `parameter_out_of_range`, `memory_budget`,
+`tower_capacity`, `tower_invariant`, domaine intact et réservations rendues ; diagnostics publiés au succès seulement
+(`attach_ns` : balayage et contrôles du rattachement, en plus de la spécification).
+
+**Journal des graines** (`src/tower/seed_log.hpp`). `ForestBuilder::seed_log` est nul partout sauf dans
+`build_order`. `cell` et `regular_cell` y consignent, derrière `if (seed_log != nullptr)`, chaque graine de
+naissance rendue pour une trace stricte, jamais une racine du DSU ni un `top`. Le seul fil qui applique les cellules
+l'écrit, en `BallIdx` croissant, dans la voie sérielle comme dans la voie par lots. Les traces consignées sont
+strictes : leur niveau initial est `< λ_b` (contrôle existant de `cell` et de `resolve_job`). Capacités majorées sur
+la fenêtre et admises avant le parcours : une cellule par boule de W_K hors naissance régulière, q graines par
+jonction régulière, C(m,t) par coquille étendue (naissances étendues comprises, d'où un majorant). Sans journal,
+`ForestBuilder` ne gagne qu'un pointeur nul et des tests toujours faux : les sorties ne doivent pas changer.
+L'avant/après à l'octet (dumps `MHGP11FUL1` et `MHGP11PH`, sorties JSON hors durées, trames ng00 à ng02 à K5
+comprises) n'est à ce jour qu'un **diagnostic local, non reçu** ; il se rejoue sur G4 avec la qualification de L1.
+
+**Balayage du lemme D** (`src/tower/attachment.cpp`), après `finish()`, sans aucune descente.
+W_K est recalculée depuis le catalogue par la fenêtre p+q−1 ≤ K ≤ p+m, événements faibles compris (ce n'est pas le
+prédicat fort des témoins P3). Chaque naissance (K ≥ 2) est rattachée à son nœud, de même rang ; elle est forte
+(p+q ≤ K), si bien qu'une boule faible n'est jamais une naissance. Les cellules du journal sont groupées par rang r ;
+un seul `advance(r−1)` par plateau (monotone), puis pour chaque graine g le nœud u de la coupe ouverte. La règle du
+parent donne a(u) : le parent de u s'il a le rang r, u sinon. Toutes les traces doivent donner le même a(u) (contrôle
+de T3), qui est att(b), lu à la coupe **fermée** après tout le plateau. Le rôle vient des rangs : fusion si att(b) a
+le rang r, interne sinon. Les branches ant(b) sont les u dédupliqués, publiées pour le rôle fusion seulement.
+`strict_traces` est le nombre de graines, borné par `UINT32_MAX` avant sa conversion (refus `tower_capacity` ; une
+coquille de 150 sites à K8 donnerait au moins C(69,8) traces) ; `components` vaut |ant(b)|. Les unions DSU effectuées
+dépendent de l'ordre de traitement : elles ne sont jamais publiées.
+
+Deux erreurs sont exclues par construction et par fixture :
+- aucune garde β(F) ≤ ℓ(r_b−1) : seuls les **ensembles de nœuds** de la coupe ouverte et de la coupe fermée de rang
+  r_b−1 coïncident. Sur le témoin D2, la trace stricte AB de la boule faible ABC (niveau 1681/25) naît au niveau 64,
+  après le niveau 41 de rang r_b−1 ; sa graine ZW, née au niveau 1, mène au bon nœud. Le balayage ne lit que des
+  nœuds et leurs ancêtres ;
+- aucune résolution filtrée à W_K : les descentes et le journal lisent le vrai Γ_K. Sur le témoin E5, la boule de AC
+  (niveau 33/2) est hors fenêtre, mais ses liaisons rattachent AC à la composante de DE : la fusion de niveau
+  83886/3563 a trois enfants, {AB}, {AC, AD, AE, CD, CE, DE} et {BC}.
+
+**Contrôles dans le produit**, tout écart rend `tower_invariant` sans résultat :
+- I1 : chaque boule de W_K une fois ; naissances = `births()` à K ≥ 2, aucune à K = 1 ; une naissance est forte.
+- I2 : rangs et rôles (lemme B) ; une boule interne n'a qu'une branche, vivante à la coupe fermée (lemme C).
+- I3 : les branches distinctes des boules de rôle fusion couvrent tous les enfants (leur nombre égale celui des arêtes).
+- I4 : registres de la forêt calculés par une autre voie. On exige : somme des traces = `trace_resolutions`,
+  somme des C(m,t) = `cells.combinations`, cellules = `replayed_cells`, rangs distincts = `plateaus`, nœuds touchés
+  par plateau = `touched_components`, continuations distinctes par plateau = `continuations`.
+
+**Mémoire.** Journal 4C + 8(C+1) + 4G octets ; balayage 12N et marques 4N ; résultat 17W + 8(W+1) + 4A (A branches
+publiées). Les contextes de la forêt (table, census, mémo, lots) et le constructeur sont rendus avant le balayage ; le
+journal l'est avant le transfert du domaine.
+
+**Juges de test, jamais dans le produit.**
+- E2 (`tests/tower/order_tree_support.hpp`, `tests/tower/attach_judge.cpp`) : port de `ball_nodes`
+  (`bench/points_export.cpp`) avec la fenêtre au lieu du prédicat fort. On descend une K-partie quelconque de P_b
+  (niveau initial ≤ λ_b : la paire extrême de la ligne 0, 1, 2 a le niveau de sa boule faible) puis on prend
+  l'ancêtre **fermé** au rang de b (lemme E). Une seconde K-partie (T3, I7) et les branches recomptées par descentes
+  neuves des traces strictes de `build_cell` complètent le juge, qui recompte aussi I1 à I4 et la règle
+  « naissance forte ». Sur les petits nuages (`mhgp11_tower_attach_e1e2`), il juge deux domaines : Cat_kmax du nuage
+  et Cat_K, le domaine étroit que prépare la façade. Le contre-cas D2 n'existe que sur le second : dès kmax ≥ 3, la
+  boule de AB entre au catalogue et ℓ(r_b−1) vaut 64 au lieu de 41. Le juge y compte les traces nées après
+  ℓ(r_b−1). Les portes d'échelle préparent déjà leur domaine à l'ordre K.
+- `attach_probe` : sortie JSON au format du vidage canonique de l'oracle borné S1 (`Supports.canonical`, clés
+  triées : sites lexicographiques, niveaux et centres en fractions réduites, boules par (postordre, niveau, centre)),
+  restreinte aux champs de S3 (plus `s_star`, propre à la sonde). Le différentiel `mhgp11_tower_attach_fraction`
+  (`tests/tower/attach_fraction.py`, câblé à l'intégration L1 du 5 octobre 2026, apport des auditeurs) la compare à
+  la projection de l'oracle sur les champs de S3 : les 210 nuages de la suite de l'oracle à ses ordres (951), plus le
+  petit témoin à K élevé de l'auditeur à K1..K12 ; voie sérielle W1 et voie par lots W3 sur l'entrée permutée ; S\* de
+  la sonde est un support de l'oracle d'arité qmin. Conforme en local (u21 et u24) : c'est un **diagnostic local, non
+  reçu**, qualifié sur G4. Mode `--incidences` : bloc d'incidences fortes comparé à l'octet à `MHGP11PH`.
+
+**Portes.**
+- Petits nuages :
+  - `mhgp11_tower_order_identity`, `_same_params`, `_refusals`. `_same_params` exige aussi que les paramètres de
+    coût demandés soient honorés : table de populations consultée, mémo interrogé pour chaque trace résolue sans
+    table, lookup dense construit. Sans cela, les sorties seraient les mêmes à un autre coût, et la mesure appariée de
+    L2 comparerait une autre configuration à FULL ;
+  - `mhgp11_tower_attach_fixtures` (fixtures 1, 4, 7 et 8 de la spécification, témoins D2 et E5) ;
+  - `mhgp11_tower_attach_capacity` (garde des traces publiées, valeurs synthétiques) ;
+  - `mhgp11_tower_attach_square_k10` (intégration L1) : petit témoin à K élevé de l'auditeur, 12 sites, K9 à K12 sur
+    le domaine étroit, attendus de l'oracle S1. La boule de centre (10, 10, 10) et de niveau 200 y est interne à K9,
+    fusion des quatre naissances de niveau 101 à K10 (quatre traces strictes), naissance à K11 et K12 ;
+  - `mhgp11_tower_attach_fraction` (intégration L1) : différentiel contre l'oracle S1, ci-dessus ;
+  - `mhgp11_tower_attach_e1e2`, sur Cat_kmax et sur Cat_K : traces nées après ℓ(r_b−1) gravées, dont D2 à K = 2 ;
+  - `mhgp11_tower_order_fault`.
+- Export : `mhgp11_tower_attach_export` et `_lidar_ng0{0,1,2}_k5`.
+- Échelle (I1 à I4 recomptés à chaque exécution du juge) : `mhgp11_tower_order_identity_scale{8000,16000,32000}` et
+  `_lidar_ng0{0,1,2}_k5` (I10, voie par lots W3), plus `_lidar_ng00_k10` (`long`) ;
+  `mhgp11_tower_attach_scale{8000,16000,32000}` (I10 par la voie sérielle sans Pool, même empreinte `attache=` que
+  la voie par lots) ; `mhgp11_tower_attach_e1e2_scale{8000,32000}` et `_lidar_ng0{0,1,2}_k5` (E1 = E2).
+- Mutants `tower` : rattachement à la coupe ouverte, branches à la coupe fermée, racine DSU ou première graine
+  seule au journal, fenêtre forte, rôle au rang égal interne (§ 8.5 de la spécification), garde de capacité omise,
+  inégalité β(F) ≤ ℓ(r_b−1) devenue garde (D2), graine résolue dans le seul W_K (D2, E5) ; table de populations, mémo
+  ou lookup dense demandés mais ignorés par `build_order` ; `strict_traces` publié égal au nombre de branches
+  (intégration L1, tué par `mhgp11_tower_attach_fraction`).
+
+Aucun temps de `build_order` n'est revendiqué ici : la comparaison à la voie pipeline de `full` se mesure sur G4
+(livraison L2, règle écrite d'avance).

@@ -1,5 +1,6 @@
-// Parapluie public de tower : "tower/tower.hpp" seul suffit a atteindre la tour FULL et la MEB bornee, sans nommer
-// tower_detail ; les noms publics de mhgp11 designent les memes entites que tower_detail (aucun code deplace).
+// Parapluie public de tower : "tower/tower.hpp" seul suffit a atteindre la tour FULL, la MEB bornee et l'arbre
+// d'ordre K seul, sans nommer tower_detail ; les noms publics de mhgp11 designent les memes entites que tower_detail
+// (aucun code deplace).
 #include <type_traits>
 #include <vector>
 
@@ -15,6 +16,9 @@ static_assert(std::is_same_v<FullTower, tower_detail::FullTower>);
 static_assert(std::is_same_v<FullParams, tower_detail::FullParams>);
 static_assert(std::is_same_v<FullTimings, tower_detail::FullTimings>);
 static_assert(std::is_same_v<OrderTimings, tower_detail::OrderTimings>);
+static_assert(std::is_same_v<OrderTree, tower_detail::OrderTree>);
+static_assert(std::is_same_v<WindowAttachment, tower_detail::WindowAttachment>);
+static_assert(std::is_same_v<BallRole, tower_detail::BallRole>);
 
 Result<FullDomain> square(MemoryBudget& budget) {
   const std::vector<u32> x{0, 2, 2, 0}, y{0, 0, 2, 2}, z{0, 0, 0, 0};
@@ -50,6 +54,23 @@ MHGP11_TEST(umbrella, 19) {
   const std::vector<SiteIdx> part{SiteIdx{0}, SiteIdx{1}, SiteIdx{2}, SiteIdx{3}};
   auto meb = bounded_meb(full.domain().index().cloud(), part); REQUIRE(meb.ok());
   CHECK_EQ(meb.value().support().size(), std::size_t{2});
+}
+
+// Arbre d'ordre K seul par les noms publics (tranche S3) : carre a K=2, quatre naissances et la diagonale en fusion.
+MHGP11_TEST(order_tree, 9) {
+  CHECK(&mhgp11::build_order == &mhgp11::tower_detail::build_order);
+  MemoryBudget owner(MemoryBudget::kUnlimited), work(MemoryBudget::kUnlimited);
+  auto domain = square(owner); REQUIRE(domain.ok());
+  auto tree = build_order(std::move(domain.value()), 2, work); REQUIRE(tree.ok());
+  const OrderTree& order = tree.value();
+  const WindowAttachment& attachment = order.attachment();
+  CHECK_EQ(order.order(), Order{2});
+  CHECK_EQ(order.forest().births(), 4u);
+  CHECK_EQ(attachment.size(), 5u);
+  u32 births = 0, merges = 0;
+  for (BallRole role : attachment.role()) { births += role == BallRole::birth; merges += role == BallRole::merge; }
+  CHECK_EQ(births, 4u); CHECK_EQ(merges, 1u);
+  CHECK_EQ(attachment.prior().size(), std::size_t{4});
 }
 
 MHGP11_TEST_MAIN()

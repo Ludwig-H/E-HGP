@@ -301,3 +301,37 @@ produit ne change que par la correction P2 ci-dessous.
 - `reference/hgp11_ref/supports.py` et `reference/test_supports.py` : budget explicite de la force brute du lemme F
   (`BudgetRefusal`, $2^{m}-1$ candidats au plus) et primitives sur sphere5 (porte
   `mhgp11_reference_supports_primitives`) ; voir `reference/README.md`.
+
+## Arbre d'ordre K seul et rattachement (tranche S3, 4 et 5 octobre 2026)
+
+Sources lues dans la v11 elle-même, au commit `f98aeed67` ; aucune source de la v10 n'est portée. Le juge E2 est un
+port **de test** : il ne figure jamais dans le produit (spécification de l'arbitrage, lemme E ; contrat L0,
+`MATHEMATIQUES.md` § 10.5). Les attendus des fixtures sont ceux de l'oracle borné S1
+(`reference/hgp11_ref/supports.py`, `5adf6a59f`), recalculés en `Fraction`.
+
+| Fichier v11 | Source | sha256 de la source | Adaptations | Portes v11 |
+| --- | --- | --- | --- | --- |
+| `src/tower/order_tree.cpp` (`build_order`, `order_forest`) | `src/tower/forest_vertical.cpp`, `build_full` (l. 281–356), boucle non concurrente et mise en place des contextes | `805722ce6da873bd4f17cc94ee20877073439bcb1af75c2b7fb8f6f3d220f5e4` | Un seul ordre, aucune `RegularVerticalSeeds` ni verticale ; `concurrent_orders`, `parallel_verticals` et `reuse_regular_verticals` refusés ; journal des graines admis avant le parcours et branché sur le constructeur ; rattachement après `finish()` ; contextes et constructeur rendus avant le balayage ; diagnostic `attach_ns` ; `build_full` inchangé. | `mhgp11_tower_order_identity` (et `_scale*`, `_lidar_*`), `_same_params` (paramètres de coût honorés), `_refusals`, `mhgp11_tower_order_fault` ; mutants `table_population_ignoree`, `memo_ordre_ignore`, `lookup_dense_ignore` |
+| `src/tower/seed_log.hpp`, `src/tower/attachment.cpp` (journal, balayage du lemme D) | conception « produit » de l'arbitrage (journal des graines, antécédents) ; balayage fermé `src/tower/forest_ancestor_sweep.hpp` réutilisé tel quel | — (écrit à neuf) | Graines consignées dans `ForestBuilder::cell` et `regular_cell` (`src/tower/forest_plateau.cpp`, sha256 avant tranche `528e0656750830287bf507c6326fc39cd1541356a9e3ea21338c0b4734962109`), lignes gardées par `seed_log != nullptr` ; fenêtre de `classify_range` ; contrôles I1 à I4 et « naissance forte » contre le registre de la forêt ; garde `UINT32_MAX` des traces publiées (auditeur, `aef7182b3`) ; aucune garde β(F) ≤ ℓ(r_b−1) (témoin D2). | `mhgp11_tower_attach_fixtures`, `_capacity`, `_e1e2`, `mhgp11_tower_attach_scale*` ; mutants `rattachement_coupe_ouverte`, `branches_coupe_fermee`, `journal_racine_dsu`, `fenetre_forte`, `journal_premiere_graine`, `role_rang_egal_interne`, `traces_u32_sans_garde`, `garde_beta_coupe_ouverte`, `graine_resolue_dans_w_k` |
+| `tests/tower/order_tree_support.hpp` (`judge_e2`), `tests/tower/attach_judge.cpp` (`lemma_e`) : juge E2 | `bench/points_export.cpp`, `ball_nodes` (l. 178–214), `descend` (l. 145–152) et `strong` (l. 131–133) | `f77ca2c22d0abc359cc202257d44e89ec32a782ebf8dc84f4b1de79e8f730a4d` | Fenêtre p+q−1 ≤ K ≤ p+m au lieu du prédicat fort, donc jonctions faibles jugées ; naissances aussi descendues ; niveau initial ≤ λ_b (juge général) ; seconde K-partie (fin de la coquille puis de l'intérieur) pour T3 et I7 ; tirage à graine fixe à l'échelle ; comparaison au rattachement publié au lieu d'une écriture ; sur les petits nuages, domaines Cat_kmax et Cat_K, traces nées après ℓ(r_b−1) comptées (contre-cas D2, présent sur Cat_K seulement). | `mhgp11_tower_attach_e1e2` (et `_scale*`, `_lidar_*`) |
+| `tests/tower/attach_probe.cpp` (`write_blocks`) | `bench/points_export.cpp`, `write_incidences` (l. 222–280) et `write_order` (l. 282–289) | `f77ca2c22d0abc359cc202257d44e89ec32a782ebf8dc84f4b1de79e8f730a4d` | Bloc de forêt et bloc d'incidences fortes aux mêmes conventions, tirés de `WindowAttachment` au lieu de `ball_nodes` ; bloc core omis. | `mhgp11_tower_attach_export`, `_lidar_ng0{0,1,2}_k5` |
+| `tests/tower/attach_probe.cpp` (sortie JSON) | `reference/hgp11_ref/supports.py`, `Supports.canonical` (contrat L0, `5adf6a59f`) : schéma du vidage canonique | — (format, aucun code porté) | Mêmes clés, ordres et écritures de fractions (`str(Fraction)`) pour les champs de S3, plus `s_star` ; réduction exacte par entiers naturels à mots de 32 bits propres à la sonde. | différentiel `mhgp11_tower_attach_fraction` (`tests/tower/attach_fraction.py`, câblé à l'intégration L1 ; son prototype hors CTest, `impl_s3/attach_vs_oracle.py`, n'est pas versé) |
+| `tests/tower/attach_judge.cpp` (`PythonRandom`, `uniform18`, `fnv1a`, `hex64`) | `bench/catalogue_euler.cpp` (l. 119–208) | `ad4651e6613d0e62b87ae7b0125fb1920760250bd8907946ca163cf6ed6966ce` | Copie de test, mêmes nuages et mêmes empreintes d'entrée que les portes `catalogue_euler_scale*`. | `mhgp11_tower_order_identity_scale*`, `mhgp11_tower_attach_scale*`, `mhgp11_tower_attach_e1e2_scale*` |
+
+**Intégration L1 (5 octobre 2026).** Commit d'intégration de S3 sur `19b2fb218` (S6a intégrée). Ce commit livre le
+port annoncé en L0 du juge E2 (section des ports annoncés ci-dessus, `tests/tower/attach_judge.cpp` et
+`tests/tower/order_tree_support.hpp`). Le témoin D2 y est jugé sur le domaine étroit $\mathrm{Cat}_2$ ($k_{\max}=K=2$),
+seul où il est un contre-cas : dès $k_{\max}\geq 3$, la boule de $AB$ entre au catalogue et $\ell(r_b-1)$ vaut 64
+(correction S3 après contre-lecture). Le produit ne change pas. Apports des auditeurs (`238734f1d`, `a65903a7b`), avec
+des attendus tirés de l'oracle borné S1 et du reçu `receipts/audit_native_integration_20261005/qb`, jamais du produit :
+- `tests/tower/attach_fraction.py` (porte `mhgp11_tower_attach_fraction`, labels `oracle fast`) : différentiel
+  permanent de la sonde contre `Supports.canonical(k, ids)`, projeté sur les champs de S3, et S\* parmi les supports
+  d'arité qmin de l'oracle. Il couvre les 210 nuages et les 951 ordres de la suite de l'oracle, plus le petit témoin à
+  K élevé de l'auditeur (12 sites) à K1..K12, soit 963 ordres et 15 270 boules en u21 et u24. En u18, les deux cercles
+  n = 1023 sont exclus et comptés. Voie sérielle W1, puis voie par lots W3 sur l'entrée permutée. PointId non denses.
+  Le prototype de 951 cas du rapport S3 en est la base ;
+- groupe `square_k10` de `tests/tower/attach_test.cpp` (porte `mhgp11_tower_attach_square_k10`) : ce même témoin à
+  K9..K12 sur le domaine étroit, arbre et rattachement de chacune des 18 boules gravés d'après l'oracle (quatre traces
+  strictes à K10, comme le reçu) ;
+- mutant `traces_publiees_en_branches` (`tests/mutants/tower.json`, plancher 135 → 136) : `strict_traces` publié égal
+  au nombre de branches, que les contrôles I1 à I4 du produit ne voient pas ; tué par `mhgp11_tower_attach_fraction`.

@@ -684,7 +684,11 @@ séparable. Le journal E1 ne consigne que des traces strictes, de niveau $<\lamb
 
 *Réalisation (E2).* C'est la descente suivie de l'ancêtre fermé de `ball_nodes` (`bench/points_export.cpp`), avec la
 fenêtre de $W_K$ au lieu du prédicat fort. Elle sert de juge de test et ne figure jamais dans le produit. Ses fixtures
-comprennent le témoin D2.
+comprennent le témoin D2, sur le domaine étroit $\mathrm{Cat}_K$ ($k_{\max}=K=2$) : dès $k_{\max}\geq 3$, la boule de
+$AB$ entre au catalogue, $\ell(r_b-1)$ vaut 64 et D2 n'est plus un contre-cas. La porte `mhgp11_tower_attach_e1e2` juge
+donc les deux domaines, $\mathrm{Cat}_{k_{\max}}$ et $\mathrm{Cat}_K$, et compte les traces nées après $\ell(r_b-1)$ ; le
+différentiel `mhgp11_tower_attach_fraction` compare le rattachement natif à l'oracle borné sur le domaine étroit
+(intégration L1 de S3).
 
 ### 10.6 Supports positifs minimaux
 

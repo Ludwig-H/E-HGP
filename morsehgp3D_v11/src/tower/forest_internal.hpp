@@ -10,6 +10,7 @@ class Pool;
 namespace mhgp11::tower_detail {
 class RegularVerticalSeeds;
 class PopulationLookup;
+class SeedLog;
 
 template<class T, class Less>
 void forest_sort(std::span<T> values, Less less) noexcept {
@@ -157,6 +158,9 @@ struct ForestBuilder {
   u64* wait_ns = nullptr;  // diagnostic : attente bloquee cumulee des blocs, mur, si non nul
   u32 unannounced = 0;
   bool abandoned = false;
+  // Journal des graines (build_order, seed_log.hpp), nul partout ailleurs : cell et regular_cell y consignent chaque
+  // graine de naissance, jamais une racine ni un top. Aucune decision du DSU n'en depend.
+  SeedLog* seed_log = nullptr;
 
   ForestBuilder(const FullDomain& d, u32 order, MemoryBudget& b, OrderTimings* t = nullptr,
                 DescentMemo* m = nullptr, ForestParallel* p = nullptr, bool dense = false,

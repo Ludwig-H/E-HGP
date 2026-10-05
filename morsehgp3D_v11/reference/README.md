@@ -184,6 +184,14 @@ jusqu'au plafond natif, n'ont pas de porte bornée ; la fermeture $N_j$ de l'ora
   des formules du lemme G, et les incidences par support valent 4 068 à $K=3$. La force brute du lemme F refuse
   explicitement. Environ deux secondes : label `fast`. Cette porte ne qualifie pas tout S1 à 24 sites ; la porte
   native correspondante est `mhgp11_supports_unit_sphere5`.
+- **Différentiels natifs contre cet oracle.** `mhgp11_supports_fraction` (tranche S6a, `tests/supports/`) et
+  `mhgp11_tower_attach_fraction` (tranche S3, `tests/tower/attach_fraction.py`). Le second confronte l'arbre d'ordre K
+  seul et le rattachement natifs (sonde `mhgp11_tower_attach_probe`, domaine préparé à l'ordre K) à
+  `canonical(k, ids)`, projeté sur les champs de S3, sur les nuages de la suite et à ses ordres. Il y ajoute le petit
+  témoin à $K$ élevé de l'auditeur (`receipts/audit_native_integration_20261005/qb/normal.json` : quatre coins d'un
+  carré de côté 20 et huit sites intérieurs) à $K=1..12$ ; l'oracle le traite en moins d'une seconde, lemmes A à H
+  contrôlés. C'est le seul cas borné de l'arbre et du rattachement à $K\geq 6$, mais il ne lève pas la limite
+  ci-dessus pour les coquilles de 13 à 24 sites.
 
 ## Familles gravées (`hgp11_ref/families.py`)
 

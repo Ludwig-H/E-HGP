@@ -66,6 +66,16 @@ ceux, qualifiés, des sondes de banc : masque 16 379 de `bench/full_probe.cpp`, 
 (`build_order`, tranche S3) avec les mêmes paramètres, à deux exceptions près : les ordres concurrents, que
 `build_order` refuse jusqu'à la tranche S11, et les verticales, sans objet pour un seul ordre.
 
+**Arbre d'ordre K seul** (tranche S3, intégrée en L1 le 5 octobre 2026, qualification G4 en attente). `build_order`
+refuse (`parameter_out_of_range`) les trois options sans objet pour un ordre seul, au lieu de les ignorer : ordres
+concurrents (bit 8 192 du masque), verticales parallèles (128) et réemploi des verticales régulières (1 024). La façade
+(S7) les retirera du masque 16 379 : l'arbre d'ordre K seul prend le masque 7 035, et FULL garde 16 379 (mesure
+appariée du § 11, audit `238734f1d`). Les autres paramètres sont honorés, ce que la porte
+`mhgp11_tower_order_same_params` exige (table de populations consultée, mémo interrogé, lookup dense construit ;
+mutants `table_population_ignoree`, `memo_ordre_ignore`, `lookup_dense_ignore`) : sans elle, la règle de L2
+comparerait à FULL une autre configuration que celle annoncée. La tour peut refuser `tower_capacity` quand une cellule
+a plus de $2^{32}-1$ traces strictes, sans qu'aucun plafond de coquille soit imposé à FULL.
+
 ## 2. Les quatre sorties
 
 | `--sortie` | Objet | Fichier de données | Format | Tranche, livraison |
@@ -158,7 +168,8 @@ Un arrêt par signal est toujours un échec. Les codes 1 et 4 appartiennent aux 
   - `index` ;
   - `domain` : catalogue $\mathrm{Cat}_K$ ;
   - `tree` : forêts $1$ à $K$ de FULL pour `full`, arbre d'ordre K seul pour les trois autres sorties ;
-  - `attach` : rattachement des boules (nul pour `full`) ;
+  - `attach` : rattachement des boules, diagnostic `attach_ns` de `build_order` (balayage du lemme D et contrôles du
+    produit, tranche S3) ; nul pour `full` ;
   - `output` : produit (supports et assemblage, hiérarchie de points ou tête plate) ;
   - `write` : écriture et publication.
 - En refus, la ligne porte le statut et la raison et, si un dossier reste publié (§ 9), l'état `published_complete`

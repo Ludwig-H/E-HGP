@@ -134,6 +134,10 @@ journal posé dans `build_full` est écrite d'avance (§ 11 du contrat). Un comm
 brouillons ont été écrits en parallèle de L0, exige l'intégration des réponses de l'auditeur mathématique (faite pour
 `aef7182b3`) et les portes de la tranche ; la qualification exige la matrice G4.
 
+Intégrés aussi en L1 le 5 octobre 2026, qualification G4 en attente : l'arbre d'ordre K seul et le rattachement des
+boules de $W_K$ (S3 : `build_order`, journal des graines, `WindowAttachment`, juge E2 de test, différentiel
+`mhgp11_tower_attach_fraction` contre l'oracle S1 ; [forêts FULL](docs/FULL_FORESTS.md), dernière section).
+
 **Clause de report de `plat`.** La livraison L4 peut être reportée, par une décision écrite de l'utilisateur,
 consignée ici et dans une note aux auditeurs, tant que le § 3.4 de la [sortie plate](docs/SORTIE_PLATE.md) porte la
 mention « Ouvert » (règle qui garde les séparations fugaces sans déchiqueter les objets à lignes de balayage). Le

@@ -2,6 +2,7 @@
 #include "tower/forest_internal.hpp"
 #include "tower/forest_parallel.hpp"
 #include "tower/regular_vertical_seeds.hpp"
+#include "tower/seed_log.hpp"
 
 namespace mhgp11::tower_detail {
 
@@ -46,6 +47,7 @@ Outcome ForestBuilder::cell(BallIdx ball) noexcept {
   const auto& level = domain.catalogue().levels()[idx(data.rank)];
   std::optional<u32> first;
   std::optional<NodeIdx> representative;
+  if (seed_log != nullptr) MHGP11_TRY(seed_log->open(ball));
   for (const auto& trace : made.value().traces()) {
     auto down = resolve_descent(domain, trace.part(), k, budget, memo, extended_scratch, population);
     if (!down.ok()) return down.outcome();
@@ -55,6 +57,7 @@ Outcome ForestBuilder::cell(BallIdx ball) noexcept {
     MHGP11_TRY(add_descent(result.ledger_.descent, down.value().ledger()));
     const auto seed = result.birth_node(down.value().seed());
     if (!seed || idx(result.nodes_[idx(*seed)].rank) >= idx(data.rank)) return fail(Reason::tower_invariant);
+    if (seed_log != nullptr) MHGP11_TRY(seed_log->add(*seed));  // la naissance rendue, jamais sa racine
     if (vertical_seeds != nullptr && !representative) representative = *seed;
     const u32 root = find(idx(*seed));
     MHGP11_TRY(touch(root));
@@ -104,10 +107,12 @@ Outcome ForestBuilder::regular_cell(BallIdx ball, std::span<const NodeIdx> seeds
   MHGP11_TRY(cell_add(result.ledger_.replayed_cells, 1));
   MHGP11_TRY(cell_add(result.ledger_.cells.combinations, data.qmin));
   MHGP11_TRY(cell_add(result.ledger_.trace_resolutions, data.qmin));
+  if (seed_log != nullptr) MHGP11_TRY(seed_log->open(ball));
   std::optional<u32> first;
   for (NodeIdx seed : seeds) {
     if (idx(seed) >= result.births_ || idx(result.nodes_[idx(seed)].rank) >= idx(data.rank))
       return fail(Reason::tower_invariant);
+    if (seed_log != nullptr) MHGP11_TRY(seed_log->add(seed));  // graine reguliere, jamais sa racine
     const u32 root = find(idx(seed));
     MHGP11_TRY(touch(root));
     if (first) MHGP11_TRY(unite_roots(*first, root)); else first = root;  // racine courante, deja touchee

@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 123,
+  "plancher": 136,
   "mutants": [
     {
       "id": "population_memo_owner_omis",
@@ -1002,6 +1002,124 @@
       "remplace": "states[s] = {static_cast<u32>(s), 0, kNone, kNone, kNone, false};",
       "porte": "mhgp11_tower_pipeline_equivalence",
       "note": "Chaque naissance commence comme sa propre composante, sommet compris."
+    },
+    {
+      "id": "rattachement_coupe_ouverte",
+      "fichier": "src/tower/attachment.cpp",
+      "cherche": "const NodeIdx a = parent != NodeIdx{kNone} && nodes[idx(parent)].rank == rank ? parent : u;",
+      "remplace": "const NodeIdx a = parent != NodeIdx{kNone} && nodes[idx(parent)].rank == rank ? u : u;",
+      "porte": "mhgp11_tower_attach_fixtures",
+      "note": "att(b) := u, le noeud de coupe ouverte : deux branches donnent deux noeuds (T3), la passagere devient interne sous une fusion de son rang ; refus tower_invariant."
+    },
+    {
+      "id": "branches_coupe_fermee",
+      "fichier": "src/tower/attachment.cpp",
+      "cherche": "MHGP11_TRY(sweep.value().advance(LevelRank{idx(rank) - 1}, work));",
+      "remplace": "MHGP11_TRY(sweep.value().advance(rank, work));",
+      "porte": "mhgp11_tower_attach_e1e2",
+      "note": "Graines relevees a la coupe fermee r_b : toutes les branches d'une fusion se confondent avec la fusion, ses enfants ne sont plus couverts (I3, I4)."
+    },
+    {
+      "id": "journal_racine_dsu",
+      "fichier": "src/tower/forest_plateau.cpp",
+      "cherche": "    if (seed_log != nullptr) MHGP11_TRY(seed_log->add(*seed));  // la naissance rendue, jamais sa racine",
+      "remplace": "    if (seed_log != nullptr) MHGP11_TRY(seed_log->add(NodeIdx{find(idx(*seed))}));  // la naissance rendue, jamais sa racine",
+      "porte": "mhgp11_tower_attach_fixtures",
+      "note": "La racine DSU courante du plateau n'est pas la composante ouverte de la trace : faces du tetraedre K5 (fixture 8) a deux branches au lieu de trois, unions dependantes de l'ordre.",
+      "aussi": [
+        {
+          "fichier": "src/tower/forest_plateau.cpp",
+          "cherche": "    if (seed_log != nullptr) MHGP11_TRY(seed_log->add(seed));  // graine reguliere, jamais sa racine",
+          "remplace": "    if (seed_log != nullptr) MHGP11_TRY(seed_log->add(NodeIdx{find(idx(seed))}));  // graine reguliere, jamais sa racine"
+        }
+      ]
+    },
+    {
+      "id": "fenetre_forte",
+      "fichier": "src/tower/seed_log.hpp",
+      "cherche": "return u64{ball.p} + ball.qmin - 1 <= k && k <= u64{ball.p} + ball.m;",
+      "remplace": "return u64{ball.p} + ball.qmin <= k && k <= u64{ball.p} + ball.m;",
+      "porte": "mhgp11_tower_attach_fixtures",
+      "note": "Predicat fort p+q <= K au lieu de la fenetre : les evenements faibles (jonctions, triangle equilateral K2, fixture 7) sortent de W_K ; journal et I1 refusent."
+    },
+    {
+      "id": "journal_premiere_graine",
+      "fichier": "src/tower/forest_plateau.cpp",
+      "cherche": "    if (seed_log != nullptr) MHGP11_TRY(seed_log->add(*seed));  // la naissance rendue, jamais sa racine",
+      "remplace": "    if (seed_log != nullptr && !first) MHGP11_TRY(seed_log->add(*seed));  // la naissance rendue, jamais sa racine",
+      "porte": "mhgp11_tower_order_identity",
+      "note": "Une seule graine par cellule : somme des traces differente de trace_resolutions (I4), refus tower_invariant.",
+      "aussi": [
+        {
+          "fichier": "src/tower/forest_plateau.cpp",
+          "cherche": "    if (seed_log != nullptr) MHGP11_TRY(seed_log->add(seed));  // graine reguliere, jamais sa racine",
+          "remplace": "    if (seed_log != nullptr && !first) MHGP11_TRY(seed_log->add(seed));  // graine reguliere, jamais sa racine"
+        }
+      ]
+    },
+    {
+      "id": "role_rang_egal_interne",
+      "fichier": "src/tower/attachment.cpp",
+      "cherche": "const BallRole role = nodes[idx(att)].rank == rank ? BallRole::merge : BallRole::internal;",
+      "remplace": "const BallRole role = nodes[idx(att)].rank == rank ? BallRole::internal : BallRole::merge;",
+      "porte": "mhgp11_tower_attach_fixtures",
+      "note": "Rang egal declare interne : une fusion du plateau n'est pas une continuation (lemme B), controle des roles en refus."
+    },
+    {
+      "id": "traces_u32_sans_garde",
+      "fichier": "src/tower/seed_log.hpp",
+      "cherche": "  if (count > u64{0xFFFFFFFFu}) return fail(Reason::tower_capacity);\n",
+      "remplace": "",
+      "porte": "mhgp11_tower_attach_capacity",
+      "note": "Garde de l'audit aef7182b3 omise : un nombre de traces strictes au-dela de UINT32_MAX (C(69,8) d'une coquille de 150 sites a K8) serait tronque par la conversion en u32 au lieu d'un refus tower_capacity."
+    },
+    {
+      "id": "garde_beta_coupe_ouverte",
+      "fichier": "src/tower/forest_plateau.cpp",
+      "cherche": "    if (seed_log != nullptr) MHGP11_TRY(seed_log->add(*seed));  // la naissance rendue, jamais sa racine",
+      "remplace": "    if (seed_log != nullptr && num::compare(down.value().initial_level(), domain.catalogue().levels()[idx(data.rank) - 1]) > 0)\n      return fail(Reason::tower_invariant);\n    if (seed_log != nullptr) MHGP11_TRY(seed_log->add(*seed));  // la naissance rendue, jamais sa racine",
+      "porte": "mhgp11_tower_attach_fixtures",
+      "note": "L'inegalite fausse beta(F) <= l(r_b - 1) devenue garde d'admission du journal (MATHEMATIQUES 10.2 et 10.5) : la trace stricte AB du temoin D2 nait au niveau 64, apres le niveau 41 de rang r_b - 1, et build_order refuse a tort."
+    },
+    {
+      "id": "graine_resolue_dans_w_k",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "      ledger.interior_steps = 1;\n",
+      "remplace": "      if (!located.ball()) return fail(Reason::tower_invariant);\n      ledger.interior_steps = 1;\n",
+      "porte": "mhgp11_tower_attach_fixtures",
+      "note": "Graine resolue dans le seul W_K : la descente refuse le pas interieur par une boule hors de Cat_K (pour une K-partie, hors de W_K). Les traces AB de D2 (niveau 64, p = 2) et AC de E5 (niveau 33/2, p = 2) n'ont plus de graine (lemme W.2 : le calcul lit le vrai Gamma_K)."
+    },
+    {
+      "id": "table_population_ignoree",
+      "fichier": "src/tower/order_tree.cpp",
+      "cherche": "builder.population = population ? &*population : nullptr;",
+      "remplace": "builder.population = nullptr;",
+      "porte": "mhgp11_tower_order_same_params",
+      "note": "Contre-lecture S3 : build_order alloue la table de populations demandee sans la brancher ; memes sorties, autre cout (la mesure appariee de L2 serait faussee). Somme des population_hits nulle sur les variantes qui la demandent."
+    },
+    {
+      "id": "memo_ordre_ignore",
+      "fichier": "src/tower/order_tree.cpp",
+      "cherche": "auto memo = DescentMemo::make(domain, params.memo_capacity, budget, scratch.value().get(0));",
+      "remplace": "auto memo = DescentMemo::make(domain, 0, budget, scratch.value().get(0));",
+      "porte": "mhgp11_tower_order_same_params",
+      "note": "Memo de l'ordre demande mais cree a capacite nulle (delegation directe) ; memes sorties, autre cout. Les traces des cellules etendues ne sont plus des requetes du memo : memo.queries < trace_resolutions."
+    },
+    {
+      "id": "lookup_dense_ignore",
+      "fichier": "src/tower/order_tree.cpp",
+      "cherche": "params.dense_birth_lookup);",
+      "remplace": "false);",
+      "porte": "mhgp11_tower_order_same_params",
+      "note": "Lookup dense des naissances demande mais non construit (table eparse) ; memes sorties, autre cout."
+    },
+    {
+      "id": "traces_publiees_en_branches",
+      "fichier": "src/tower/attachment.cpp",
+      "cherche": "result.strict_[position] = strict.value();",
+      "remplace": "result.strict_[position] = static_cast<u32>(branches);",
+      "porte": "mhgp11_tower_attach_fraction",
+      "note": "Integration L1 (differentiel contre l'oracle S1) : strict_traces publie egal au nombre de branches |ant(b)| ; les controles I1 a I4 recomptent les traces du journal et ne le voient pas. Ecart des la diagonale du carre a K1 (boule interne : quatre traces strictes, une branche)."
     }
   ]
 }
