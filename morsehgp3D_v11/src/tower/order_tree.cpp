@@ -1,5 +1,7 @@
 // Ordre K seul : mise en place de la boucle non concurrente de build_full (forest_vertical.cpp) pour le seul ordre K,
-// sans verticales, plus le journal des graines ; le rattachement est dans attachment.cpp. build_full n'est pas modifie.
+// sans verticales, plus le journal des graines (build_order) ; ou ordre K tire de FULL, journal pose sur son
+// constructeur (build_order_full, L2b : build_forests avec OrderLog, sans journal FULL est inchange). Le rattachement
+// est dans attachment.cpp.
 #include "tower/order_tree.hpp"
 #include "tower/census_slots.hpp"
 #include "tower/forest_internal.hpp"
@@ -38,6 +40,21 @@ Result<SeedLog> SeedLog::make(const Catalogue& catalogue, u32 k, MemoryBudget& b
 }
 
 namespace {
+// Registres du journal ferme (diagnostic de porte) : FNV-1a 64 de (BallIdx, graines de la cellule, graines).
+SeedLogRegisters registers_of(SeedLog& log) noexcept {
+  SeedLogRegisters out{log.cells(), log.seeds(), 0xcbf29ce484222325ull};
+  auto feed = [&out](u64 word) {
+    for (int b = 0; b < 8; ++b) out.digest = (out.digest ^ ((word >> (8 * b)) & 255)) * 0x100000001b3ull;
+  };
+  const auto seeds = log.storage();
+  for (u32 c = 0; c < log.cells(); ++c) {
+    feed(idx(log.ball(c)));
+    feed(log.end(c) - log.begin(c));
+    for (u64 j = log.begin(c); j < log.end(c); ++j) feed(idx(seeds[j]));
+  }
+  return out;
+}
+
 // Foret d'un ordre et son journal ; contextes de la boucle non concurrente de build_full, rendus au retour (avant le
 // balayage du rattachement), constructeur compris.
 Result<OrderForest> order_forest(const FullDomain& domain, Order k, MemoryBudget& budget, const FullParams& params,
@@ -75,7 +92,8 @@ Result<OrderForest> order_forest(const FullDomain& domain, Order k, MemoryBudget
 }  // namespace
 
 Result<OrderTree> build_order(FullDomain&& domain, Order k, MemoryBudget& budget, FullParams params,
-                              sched::Pool* pool, OrderTimings* timings, u64* attach_ns) noexcept {
+                              sched::Pool* pool, OrderTimings* timings, u64* attach_ns,
+                              SeedLogRegisters* registers) noexcept {
   if (k == 0 || k > domain.catalogue().kmax() || k > domain.index().cloud().sites())
     return fail(Reason::parameter_out_of_range);
   // Ordres concurrents : voie pipeline a un ordre (tranche S11), pas encore livree. Verticales : sans objet.
@@ -86,6 +104,7 @@ Result<OrderTree> build_order(FullDomain&& domain, Order k, MemoryBudget& budget
   SeedLog log;
   auto forest = order_forest(domain, k, budget, params, pool, timings == nullptr ? nullptr : &draft, log);
   if (!forest.ok()) return forest.outcome();
+  const SeedLogRegisters logged = registers == nullptr ? SeedLogRegisters{} : registers_of(log);
   const Stopwatch clock;
   auto attachment = attach_window(domain, forest.value(), log, budget);
   if (!attachment.ok()) return attachment.outcome();
@@ -93,7 +112,41 @@ Result<OrderTree> build_order(FullDomain&& domain, Order k, MemoryBudget& budget
   log = SeedLog{};  // journal rendu avant le transfert du domaine
   if (timings != nullptr) *timings = draft;
   if (attach_ns != nullptr) *attach_ns = attached;
+  if (registers != nullptr) *registers = logged;
   return OrderTree(std::move(domain), std::move(forest.value()), std::move(attachment.value()));
+}
+
+Result<OrderTree> build_order_full(FullDomain&& domain, Order k, MemoryBudget& budget, FullParams params,
+                                   sched::Pool* pool, FullTimings* timings, u64* attach_ns,
+                                   SeedLogRegisters* registers) noexcept {
+  // Refus de parametres de build_full d'abord, puis l'ordre demande ; aucun effet avant.
+  const Order kmax = domain.catalogue().kmax();
+  if (kmax == 0 || kmax > domain.index().cloud().sites()) return fail(Reason::parameter_out_of_range);
+  if (k == 0 || k > kmax) return fail(Reason::parameter_out_of_range);
+  MHGP11_TRY(ForestParallel::validate(params, pool));
+  FullTimings draft;
+  // Journal admis avant toute allocation de FULL, par le majorant de build_order ; vit jusqu'au balayage.
+  auto made = SeedLog::make(domain.catalogue(), k, budget);
+  if (!made.ok()) return made.outcome();
+  SeedLog log = std::move(made.value());
+  std::array<std::optional<OrderForest>, kMaxMebSites> orders;
+  MHGP11_TRY(build_forests(domain, kmax, budget, timings == nullptr ? nullptr : &draft, params, pool,
+                           OrderLog{&log, k}, orders));
+  log.close();
+  const SeedLogRegisters logged = registers == nullptr ? SeedLogRegisters{} : registers_of(log);
+  // Extraction : la seule foret d'ordre k, sans ses verticales ; les autres ordres rendus avant le balayage.
+  OrderForest forest(std::move(*orders[k - 1]));
+  for (auto& order : orders) order.reset();
+  drop_verticals(forest);
+  const Stopwatch clock;
+  auto attachment = attach_window(domain, forest, log, budget);
+  if (!attachment.ok()) return attachment.outcome();
+  const u64 attached = clock.nanoseconds();
+  log = SeedLog{};  // journal rendu avant le transfert du domaine
+  if (timings != nullptr) *timings = draft;
+  if (attach_ns != nullptr) *attach_ns = attached;
+  if (registers != nullptr) *registers = logged;
+  return OrderTree(std::move(domain), std::move(forest), std::move(attachment.value()));
 }
 
 }  // namespace mhgp11::tower_detail

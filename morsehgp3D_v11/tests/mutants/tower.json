@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 136,
+  "plancher": 141,
   "mutants": [
     {
       "id": "population_memo_owner_omis",
@@ -952,7 +952,9 @@
       "cherche": "for (u64 j = kLevelWords; j < wide.words.size(); ++j)",
       "remplace": "for (u64 j = 3; j < wide.words.size(); ++j)",
       "porte": "mhgp11_tower_points_export_width",
-      "options": ["-DMHGP11_COORD_BITS=24"],
+      "options": [
+        "-DMHGP11_COORD_BITS=24"
+      ],
       "note": "Audit P2 : en u24, le tetraedre regulier a un niveau non reduit de 196 bits ; trois mots le refusent."
     },
     {
@@ -1120,6 +1122,46 @@
       "remplace": "result.strict_[position] = static_cast<u32>(branches);",
       "porte": "mhgp11_tower_attach_fraction",
       "note": "Integration L1 (differentiel contre l'oracle S1) : strict_traces publie egal au nombre de branches |ant(b)| ; les controles I1 a I4 recomptent les traces du journal et ne le voient pas. Ecart des la diagonale du carre a K1 (boule interne : quatre traces strictes, une branche)."
+    },
+    {
+      "id": "journal_non_pose_concurrent",
+      "fichier": "src/tower/forest_concurrent.cpp",
+      "cherche": "    builder.seed_log = order_log(log, k);\n",
+      "remplace": "    static_cast<void>(log);\n    builder.seed_log = nullptr;\n",
+      "porte": "mhgp11_tower_order_full_identity",
+      "note": "L2b : journal non pose sur le constructeur de l'ordre K dans la voie concurrente (par etages et pipeline) ; le journal reste vide et les controles I1 a I4 du balayage refusent (tower_invariant)."
+    },
+    {
+      "id": "journal_non_pose_par_ordres",
+      "fichier": "src/tower/forest_vertical.cpp",
+      "cherche": "      builder.seed_log = order_log(log, k);  // journal de l'ordre demande, ecrit par ce pilote seul\n",
+      "remplace": "      builder.seed_log = nullptr;\n",
+      "porte": "mhgp11_tower_order_full_identity",
+      "note": "L2b : journal non pose dans la voie non concurrente de build_full (serielle et lots) ; journal vide, refus du balayage."
+    },
+    {
+      "id": "journal_autre_ordre",
+      "fichier": "src/tower/forest_internal.hpp",
+      "cherche": "return k == wanted.order ? wanted.log : nullptr;",
+      "remplace": "return k + 1 == wanted.order ? wanted.log : nullptr;",
+      "porte": "mhgp11_tower_order_full_identity",
+      "note": "L2b : journal ecrit par le constructeur de l'ordre K - 1 (aucun a K = 1) dans les deux voies ; capacite ou registres faux, refus."
+    },
+    {
+      "id": "extraction_mauvaise_foret",
+      "fichier": "src/tower/order_tree.cpp",
+      "cherche": "OrderForest forest(std::move(*orders[k - 1]));",
+      "remplace": "OrderForest forest(std::move(*orders[k == 1 ? 0 : k - 2]));",
+      "porte": "mhgp11_tower_order_full_identity",
+      "note": "L2b : extraction de la foret d'ordre K - 1 au lieu de K ; le balayage la confronte au journal de l'ordre K et refuse, ou l'arbre differe."
+    },
+    {
+      "id": "verticales_gardees",
+      "fichier": "src/tower/order_tree.cpp",
+      "cherche": "  drop_verticals(forest);\n",
+      "remplace": "",
+      "porte": "mhgp11_tower_order_full_identity",
+      "note": "L2b : les images basses (verticales) de l'ordre K restent dans l'arbre extrait et dans le budget ; forest.lower() non vide."
     }
   ]
 }

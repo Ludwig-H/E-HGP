@@ -151,6 +151,11 @@ entrée et même K. L'arbre d'ordre K seul y est construit au masque 7 035 (16 3
 contrôle tout le fichier ; la porte `mhgp11_cli_supports_oracle` exige qu'il égale le vidage canonique de l'oracle S1
 sur 963 ordres. `bench/sorties_g4.py` prépare la mesure appariée de la règle de L2 (§ 11 du contrat).
 
+Commitée localement le 5 octobre 2026 (livraison L2b, décidée par la règle de L2), qualification G4 en attente :
+`--sortie=supports` tire l'arbre d'ordre K de FULL au masque 16 379 (`build_order_full` : journal des graines posé sur
+le constructeur de l'ordre K, voie non concurrente et voie concurrente). Le fichier et le manifeste sont identiques à
+l'octet à ceux de l'arbre d'ordre K seul (portes `mhgp11_api_supports_route*`, `mhgp11_tower_order_full`).
+
 Commitée localement le 5 octobre 2026 (tranche S9, L3), qualification G4 en attente : `mhgp11 --sortie=points`. Le
 module `points` porte, décision par décision, la chaîne Python qualifiée de la [hiérarchie de points](docs/HIERARCHIE_POINTS.md)
 ($H^{r}_{K+1}$, $m(1)=1$, $\kappa=1$) : incidences fortes tirées du rattachement, qualification, rival maximal, propriétaire

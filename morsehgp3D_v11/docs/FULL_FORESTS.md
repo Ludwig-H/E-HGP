@@ -282,3 +282,37 @@ journal l'est avant le transfert du domaine.
 
 Aucun temps de `build_order` n'est revendiqué ici : la comparaison à la voie pipeline de `full` se mesure sur G4
 (livraison L2, règle écrite d'avance).
+
+## Ordre K tiré de FULL avec le journal (`build_order_full`, livraison L2b)
+
+La règle de L2 ([SORTIES.md](SORTIES.md), § 11) a décidé `livrer_L2b` le 5 octobre 2026. `build_order_full(domaine, K,
+budget, params, pool, timings, attach_ns, registres)` (`src/tower/order_tree.hpp`) construit FULL entier sur le
+domaine, par le corps commun `build_forests` (`forest_vertical.cpp`), que `build_full` appelle aussi. Il pose le
+journal des graines sur le seul constructeur de l'ordre K (`OrderLog`, `order_log`), avec n'importe quels
+`FullParams`, ordres concurrents compris. Sans journal, `build_full` est inchangé : les dumps `MHGP11FUL1` de la sonde
+et du CLI ont été comparés octet pour octet avant et après la livraison.
+
+Un seul fil écrit le journal, dans chaque voie, parce que seules `cell` et `regular_cell` y écrivent :
+- **voie non concurrente** : le pilote, qui appelle `ForestBuilder::run` ; `ForestParallel::flush` applique les lots
+  sur ce même pilote après le join des descentes ;
+- **voie concurrente par étages** : la tâche `PublishTasks` de l'ordre K, une tâche par ordre ;
+- **voie concurrente en pipeline** : `Pipeline::publish(K)`, une tâche par ordre ; `pipeline_orders` refuse
+  (`tower_invariant`) plus d'un ordre journalisé.
+
+Ni la classification, ni les naissances, ni les résolutions régulières, ni les balayages verticaux n'y touchent. Le
+balayage du lemme D lit le journal après le retour, donc après le join du Pool.
+
+Les capacités du journal sont admises avant toute allocation de FULL, par le majorant de `build_order`
+(`SeedLog::make`), et après les refus de paramètres. Après FULL, la forêt d'ordre K est extraite ; les autres ordres
+et ses verticales sont rendus au budget avant le balayage et les contrôles I1 à I4. Le domaine reste intact sur refus.
+
+Portes :
+- `mhgp11_tower_order_full` : sept voies de FULL (sérielle, lots, verticales parallèles et réemploi, mémo, ordres
+  concurrents par étages à W3, masque 16 379 à W3 et en pipeline à W12), contre `build_order` sur Cat_kmax et Cat_K.
+  Forêt, champs logiques du registre, `WindowAttachment` et registres du journal sont identiques ; aucune verticale
+  n'est gardée ; refus et budgets courts sont couverts.
+- `mhgp11_api_supports_route*` : `MHGP11SP`, manifeste et journal identiques à l'octet par les deux voies de la
+  sortie `supports`.
+- Mutants `tower` : journal non posé dans la voie concurrente, puis dans la voie non concurrente ; journal écrit sur
+  l'ordre K − 1 ; extraction de la forêt K − 1 ; verticales gardées.
+- TSan (`mhgp11_tower_pipeline`, `mhgp11_tower_order_full`) et la campagne de mutants tournent sur G4.

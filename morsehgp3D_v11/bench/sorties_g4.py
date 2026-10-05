@@ -5,8 +5,10 @@
             [--prises=3] [--k10=ng00] [--work=<dossier>] [--out=<fichier.json>] [--commit=<sha>]
 
 Memes entree, profil et K pour les deux sorties : --sortie=full (forets 1 a K de build_full, masque 16379) contre
---sortie=supports (arbre d'ordre K seul par build_order, masque 7035 = 16379 sans verticales paralleles 128, reemploi
-vertical 1024 ni ordres concurrents 8192, que build_order refuse ; difference publiee). Pour chaque trame
+--sortie=supports. Jusqu'a L2b, supports construisait l'arbre d'ordre K seul par build_order, au masque 7035 = 16379
+sans verticales paralleles 128, reemploi vertical 1024 ni ordres concurrents 8192, que build_order refuse. La regle a
+decide livrer_L2b : depuis, supports tire l'ordre K de FULL au masque 16379 (build_order_full, journal des graines sur
+l'ordre K), et la mesure, refaite sur G4, decrit le cout de cette voie. Pour chaque trame
 (lidar_<trame>.u32le et lidar_<trame>.ids.u32le du dossier de donnees, variable MHGP11_DATA_DIR par defaut) et chaque
 W de --fils : une passe a froid (premier appel de la configuration, entree fraichement ouverte ; ce n'est pas un cache
 vide, faute de privilege pour le vider), puis --prises passes a chaud, en alternant full et supports. Chaque appel
@@ -43,7 +45,7 @@ import time
 
 SCHEMA = 'ehgp.v11.sorties_g4.v1'
 STAGES = ('cloud', 'index', 'domain', 'tree', 'attach', 'output', 'write', 'total')
-OUTPUTS = (('full', 'full.mhgp11ful1', 16379), ('supports', 'supports.mhgp11sp', 7035))
+OUTPUTS = (('full', 'full.mhgp11ful1', 16379), ('supports', 'supports.mhgp11sp', 16379))  # supports : L2b
 RULE_FRAMES = ('ng00', 'ng01', 'ng02')
 RULE_WORKERS = 48
 RULE_RATIO = (11, 10)  # T_supports <= 1,1 T_full, en entiers
@@ -190,7 +192,7 @@ def decide(ratios, defects, prises, k):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Mesure appariee FULL (16379) contre supports (7035), regle de L2.')
+    parser = argparse.ArgumentParser(description='Mesure appariee FULL contre supports (L2b : 16379), regle de L2.')
     parser.add_argument('--cli', required=True)
     parser.add_argument('--data-dir', default=os.environ.get('MHGP11_DATA_DIR', ''))
     parser.add_argument('--frames', default='ng00,ng01,ng02')

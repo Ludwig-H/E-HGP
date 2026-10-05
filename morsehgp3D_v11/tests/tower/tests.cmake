@@ -238,6 +238,14 @@ mhgp11_add_unit(mhgp11_tower_order SOURCES order_tree_test.cpp GROUPS identity s
 mhgp11_add_unit(mhgp11_tower_attach SOURCES attach_test.cpp GROUPS fixtures capacity square_k10 e1e2
                 LABELS fast TIMEOUT 900)
 mhgp11_add_unit(mhgp11_tower_order_fault SOURCES order_tree_fault.cpp LABELS fast TIMEOUT 300)
+# Arbre d'ordre K tire de FULL (livraison L2b, build_order_full) : journal des graines pose sur le constructeur de
+# l'ordre K, voie non concurrente (serielle, lots, verticales paralleles et reemploi, memo) et voie concurrente (par
+# etages a W3, pipeline a W12, masque 16379 de la facade), puis extraction de la seule foret d'ordre K ; foret,
+# rattachement et registres du journal identiques a build_order, sur Cat_kmax et Cat_K ; aucune verticale gardee ;
+# refus avant tout effet et budgets trop courts sans reservation restante. TSan sur G4 (mhgp11_tower_pipeline et
+# cette porte).
+mhgp11_add_unit(mhgp11_tower_order_full SOURCES order_full_test.cpp GROUPS identity refusals
+                LABELS fast TIMEOUT 900)
 add_executable(mhgp11_tower_attach_probe ${CMAKE_CURRENT_LIST_DIR}/attach_probe.cpp)
 target_link_libraries(mhgp11_tower_attach_probe PRIVATE mhgp11)
 target_include_directories(mhgp11_tower_attach_probe PRIVATE ${PROJECT_SOURCE_DIR}/bench)

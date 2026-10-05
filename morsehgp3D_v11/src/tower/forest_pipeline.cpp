@@ -4,7 +4,7 @@
 // suivis (ordre haut h=2..K). Le Pool reclame les taches par indice croissant et seules publications et balayages
 // attendent, toujours des taches d'indice inferieur : aucun interblocage, quel que soit W. Memes graines, forets,
 // verticales et compteurs que la voie par etages ; un refus de resolution est rendu par sa tache, les attentes
-// abandonnent sans resultat.
+// abandonnent sans resultat. Journal des graines (L2b) : ecrit par la seule tache de publication de son ordre.
 #include <algorithm>
 #include <ctime>
 
@@ -178,6 +178,12 @@ Outcome pipeline_orders(const FullDomain& domain, MemoryBudget& budget, ForestPa
   if (kmax < 2 || kmax > kMaxMebSites || jobs.size() != kmax || seeds.size() != kmax || lanes == 0)
     return fail(Reason::parameter_out_of_range);
   const u32 tasks = lanes + 2 * kmax - 1;
+  // Journal des graines (L2b) : au plus un ordre le porte ; seule sa tache de publication (Pipeline::publish) appelle
+  // cell et regular_cell, les resolutions n'ecrivent que des graines par ordinal et les balayages ne lisent que les
+  // forets. Un second journal violerait le contrat d'un seul ordre journalise.
+  u32 logged = 0;
+  for (const ForestBuilder* builder : builders) logged += builder->seed_log != nullptr ? 1 : 0;
+  if (logged > 1) return fail(Reason::tower_invariant);
   // Blocs de chaque ordre, puis ordre global par premiere boule : les publications avancent ensemble par rang.
   u64 count = 0;
   for (u32 i = 0; i < kmax; ++i) MHGP11_TRY(cell_add(count, (jobs[i].size() + kBlockJobs - 1) / kBlockJobs));

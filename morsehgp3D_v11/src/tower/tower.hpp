@@ -24,6 +24,8 @@ using tower_detail::OrderTree;
 using tower_detail::WindowAttachment;
 using tower_detail::BallRole;
 using tower_detail::build_order;
+using tower_detail::build_order_full;
+using tower_detail::SeedLogRegisters;
 using tower_detail::AncestorIndex;
 
 }  // namespace mhgp11

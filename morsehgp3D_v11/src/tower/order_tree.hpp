@@ -1,5 +1,6 @@
 // Arbre d'ordre K seul et rattachement des boules d'evenement (tranche S3 de la sortie parametree) : la foret
-// d'ordre K de FULL, construite seule par la voie non concurrente de build_full, sans autre ordre ni verticale, et le
+// d'ordre K de FULL, construite seule par la voie non concurrente de build_full, sans autre ordre ni verticale
+// (build_order), ou tiree de FULL avec le journal (build_order_full, livraison L2b), et le
 // rattachement exact de W_K = {b dans Cat_K : p+q-1 <= K <= p+m} sur ses noeuds (lemmes A a E de la specification,
 // MATHEMATIQUES.md T1 a T5). Expose par le parapluie tower/tower.hpp.
 #pragma once
@@ -55,6 +56,14 @@ class WindowAttachment {
   Buffer<NodeIdx> prior_;
 };
 
+// Registres du journal des graines, diagnostic de porte (L2b : egaux par les deux voies) : cellules, graines et
+// empreinte FNV-1a 64 de la suite (BallIdx, nombre de graines, graines) de chaque cellule, prise a la fermeture du
+// journal, avant le balayage qui reecrit les graines en place.
+struct SeedLogRegisters {
+  u64 cells = 0, seeds = 0, digest = 0;
+  friend bool operator==(const SeedLogRegisters&, const SeedLogRegisters&) = default;
+};
+
 // Possede le domaine, la foret d'ordre k et son rattachement ; deplacement seulement.
 class OrderTree {
  public:
@@ -71,7 +80,9 @@ class OrderTree {
 
  private:
   friend Result<OrderTree> build_order(FullDomain&&, Order, MemoryBudget&, FullParams, sched::Pool*, OrderTimings*,
-                                       u64*) noexcept;
+                                       u64*, SeedLogRegisters*) noexcept;
+  friend Result<OrderTree> build_order_full(FullDomain&&, Order, MemoryBudget&, FullParams, sched::Pool*,
+                                            FullTimings*, u64*, SeedLogRegisters*) noexcept;
   OrderTree(FullDomain&& domain, OrderForest&& forest, WindowAttachment&& attachment) noexcept
       : domain_(std::move(domain)), forest_(std::move(forest)), attachment_(std::move(attachment)) {}
   FullDomain domain_;
@@ -86,9 +97,25 @@ class OrderTree {
 // Journal des graines admis avant le parcours, puis balayage du lemme D et controles I1 a I4 apres finish().
 // Refus : parameter_out_of_range, memory_budget, tower_capacity, tower_invariant ; domaine intact et reservations de
 // l'appel rendues sur refus. Diagnostics publies au succes seulement : timings (classification, naissances,
-// plateaux, lots) et attach_ns (balayage et controles du rattachement).
+// plateaux, lots), attach_ns (balayage et controles du rattachement) et registres du journal.
 [[nodiscard]] Result<OrderTree> build_order(FullDomain&&, Order k, MemoryBudget&, FullParams = {},
                                            sched::Pool* = nullptr, OrderTimings* = nullptr,
-                                           u64* attach_ns = nullptr) noexcept;
+                                           u64* attach_ns = nullptr, SeedLogRegisters* registers = nullptr) noexcept;
+
+// Ordre k tire de FULL (livraison L2b, docs/SORTIES.md paragraphe 11) : build_full sur le domaine (ordres 1..kmax,
+// verticales comprises, FullParams quelconques, ordres concurrents compris), avec le journal des graines pose sur le
+// seul constructeur de l'ordre k (voie non concurrente : le pilote ; voie concurrente : la tache de publication de
+// l'ordre k, par etages ou en pipeline). Apres la fin : les autres forets et les verticales de l'ordre k sont rendues
+// au budget, puis le balayage du lemme D et les controles I1 a I4 (attach_window, comme build_order). Meme foret
+// (porte I10), meme rattachement et memes registres du journal que build_order sur le meme domaine ; le registre de
+// la foret garde en plus le travail vertical de FULL (diagnostic). 1 <= k <= kmax <= n. Capacites du journal admises
+// avant toute allocation par le majorant de build_order (SeedLog::make), apres les refus de parametres de build_full.
+// Refus : parameter_out_of_range, memory_budget, tower_capacity, tower_invariant ; domaine intact et reservations de
+// l'appel rendues sur refus. Diagnostics publies au succes seulement : timings (ceux de build_full), attach_ns et
+// registres du journal.
+[[nodiscard]] Result<OrderTree> build_order_full(FullDomain&&, Order k, MemoryBudget&, FullParams = {},
+                                                sched::Pool* = nullptr, FullTimings* = nullptr,
+                                                u64* attach_ns = nullptr,
+                                                SeedLogRegisters* registers = nullptr) noexcept;
 
 }  // namespace mhgp11::tower_detail

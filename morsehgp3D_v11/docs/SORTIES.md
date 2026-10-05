@@ -74,9 +74,21 @@ normalisation : `0.0010` et `0.001` donnent deux manifestes différents.
 
 **Moteur.** Il n'existe aucune option de moteur (règle 6 d'[ARCHITECTURE.md](ARCHITECTURE.md)). Les paramètres sont
 ceux, qualifiés, des sondes de banc : masque 16 379 de `bench/full_probe.cpp`, `leaf_size` 16 et `max_leaf` 256 comme
-`bench/points_export.cpp`. Les sorties `supports`, `points` et `plat` construisent l'arbre d'ordre K seul
-(`build_order`, tranche S3) avec les mêmes paramètres, à deux exceptions près : les ordres concurrents, que
-`build_order` refuse jusqu'à la tranche S11, et les verticales, sans objet pour un seul ordre.
+`bench/points_export.cpp`. Les sorties `points` et `plat` construisent l'arbre d'ordre K seul (`build_order`, tranche
+S3) avec les mêmes paramètres, à deux exceptions près : les ordres concurrents, que `build_order` refuse jusqu'à la
+tranche S11, et les verticales, sans objet pour un seul ordre. Depuis la livraison L2b (§ 11), la sortie `supports`
+tire l'arbre d'ordre K de FULL (`build_order_full`, masque 16 379) : voir ci-dessous.
+
+**Voie de `supports` depuis L2b** (5 octobre 2026, commit local, qualification G4 en attente). La règle de L2 a décidé
+`livrer_L2b` (§ 11). `compute(supports)` construit FULL au masque 16 379, ordres $1$ à $K$ et verticales, avec le
+journal des graines posé sur le seul constructeur de l'ordre $K$ : le pilote dans la voie non concurrente, la tâche de
+publication unique de l'ordre $K$ dans la voie concurrente, par étages ou en pipeline. Les capacités du journal sont
+admises avant toute allocation, par le majorant de `build_order`. Après la fin, les autres ordres et les verticales de
+l'ordre $K$ sont rendus au budget. Viennent ensuite le balayage du lemme D et les contrôles I1 à I4. L'objet, le
+fichier `MHGP11SP` et le manifeste ne changent pas d'un octet, et le manifeste ne nomme pas la voie : les portes
+`mhgp11_api_supports_route*` l'exigent par les deux voies, avec des registres du journal égaux. `build_order` reste
+disponible et jugé (portes I10, S3 et `points`). La ligne d'état garde `tree` (FULL et extraction), `attach`
+(balayage), `output` et `write` séparés ; le pic de `tree` est celui de FULL.
 
 **Arbre d'ordre K seul** (tranche S3, intégrée en L1 le 5 octobre 2026, qualification G4 en attente). `build_order`
 refuse (`parameter_out_of_range`) les trois options sans objet pour un ordre seul, au lieu de les ignorer : ordres
@@ -219,10 +231,11 @@ Un arrêt par signal est toujours un échec. Les codes 1 et 4 appartiennent aux 
   - `cloud` : lecture et préparation du nuage ;
   - `index` ;
   - `domain` : catalogue $\mathrm{Cat}_K$ ;
-  - `tree` : forêts $1$ à $K$ de FULL pour `full`, arbre d'ordre K seul pour les trois autres sorties ; pour ces
-    dernières, `build_order` sans son balayage du rattachement (durée de `build_order` moins `attach_ns`) ;
-  - `attach` : rattachement des boules, diagnostic `attach_ns` de `build_order` (balayage du lemme D et contrôles du
-    produit, tranche S3) ; nul pour `full` ; son pic est compté dans celui de `tree` ;
+  - `tree` : forêts $1$ à $K$ de FULL pour `full` ; pour `supports` (L2b), FULL avec le journal sur l'ordre $K$ et
+    l'extraction de l'ordre $K$ (`build_order_full`) ; arbre d'ordre K seul pour `points` et `plat` (`build_order`) ;
+    pour ces trois sorties, sans le balayage du rattachement (durée moins `attach_ns`) ;
+  - `attach` : rattachement des boules, diagnostic `attach_ns` de `build_order_full` ou de `build_order` (balayage du
+    lemme D et contrôles du produit, tranche S3) ; nul pour `full` ; son pic est compté dans celui de `tree` ;
   - `output` : produit (supports et assemblage, hiérarchie de points ou tête plate) ; pour `supports`,
     `build_support_hierarchy` (pré-passe du plafond, postordre, passes count et fill) ; vide pour `full` ;
   - `write` : écriture et publication.
@@ -714,7 +727,7 @@ Limites :
 | L0 | aucune | S0 (ce document, MATHEMATIQUES section 10, registre des preuves), S1 (oracle borné des supports) | en cours |
 | L1 | G4 n° 1 | S2 (en-tête public de la tour), S3 (`build_order`, journal des graines, `WindowAttachment`, juge E2), S6 (module `supports`) | S2 livrée (`257aabb92`) |
 | L2 | G4 n° 2 | S4 (`io`, avec `retract()`), S5 (`api`, `Session`, manifeste, `--sortie=full`), S7 (`--sortie=supports`, écrivain et lecteur `MHGP11SP`, mesure appariée) | S4 livrée (`f98aeed67`) ; S5 et S7 commitées localement le 5 octobre, qualification G4 et mesure en attente |
-| L2b | conditionnelle | journal des graines posé dans `build_full` | selon la règle ci-dessous |
+| L2b | conditionnelle, déclenchée | journal des graines posé dans `build_full` | règle évaluée le 5 octobre (`livrer_L2b`) ; L2b commitée localement le 5 octobre, qualification G4 en attente |
 | L3 | G4 n° 3 | S8 (`num`), S9 (`--sortie=points`) | S8 et S9 commitées localement le 5 octobre, qualification G4 en attente |
 | L4 | G4 n° 4, reportable | S10 (`--sortie=plat`) | — |
 | L5 | facultative | S11 (pipeline à un ordre), chantier 100 ms | — |
@@ -750,6 +763,19 @@ Limites :
   - Porte : `MHGP11SP` identique à l'octet par les deux voies.
   - Qualification : TSan sur `mhgp11_tower_pipeline` et rejeu du manifeste des mutants.
   - Ni l'objet ni les octets de sortie ne changent.
+- *Décision* (reçu `receipts/developpement_20261005/qualification_sorties`) : rapports supports/full de l'étage `tree`
+  à W48 de 1,21, 1,18 et 1,09 ; une seule trame sous 1,10, donc **L2b est livrée**.
+- *Livraison L2b* (5 octobre 2026, commit local) :
+  - `build_order_full` (`src/tower/order_tree.cpp`) ;
+  - journal posé par `OrderLog` dans `build_forests` et `build_concurrent` ; la voie pipeline n'en tolère qu'un ;
+  - voie `full_tower` de `api_detail::compute_supports`.
+  - Portes :
+    - `mhgp11_tower_order_full` : identité avec `build_order` sur sept voies de FULL, dont le pipeline à W12 ;
+    - `mhgp11_api_supports_route_oracle` : nuages de l'oracle, W1 et W3 ;
+    - `mhgp11_api_supports_route_scale*` et `mhgp11_api_supports_route_lidar_*_k5` : W1 et W4 ;
+    - cinq mutants du manifeste `tower`.
+  - Restent sur G4 : TSan sur `mhgp11_tower_pipeline` et `mhgp11_tower_order_full`, campagne des mutants `tower`,
+    mesure `bench/sorties_g4.py` refaite.
 - La voie pipeline à un ordre (S11, L5) ne devient la voie par défaut que sur reçu.
 - *Outil* (S7) : `bench/sorties_g4.py` joue cette mesure (trames, W, passes à froid puis prises à chaud, `full` et
   `supports` alternés, étages `tree`, `attach`, `output`, `write` relevés à part, identité des fichiers et des

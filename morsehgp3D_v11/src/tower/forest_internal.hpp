@@ -158,8 +158,9 @@ struct ForestBuilder {
   u64* wait_ns = nullptr;  // diagnostic : attente bloquee cumulee des blocs, mur, si non nul
   u32 unannounced = 0;
   bool abandoned = false;
-  // Journal des graines (build_order, seed_log.hpp), nul partout ailleurs : cell et regular_cell y consignent chaque
-  // graine de naissance, jamais une racine ni un top. Aucune decision du DSU n'en depend.
+  // Journal des graines (build_order, ou build_order_full sur l'ordre K de FULL : OrderLog ; seed_log.hpp), nul partout
+  // ailleurs : cell et regular_cell y consignent chaque graine de naissance, jamais une racine ni un top. Aucune
+  // decision du DSU n'en depend.
   SeedLog* seed_log = nullptr;
 
   ForestBuilder(const FullDomain& d, u32 order, MemoryBudget& b, OrderTimings* t = nullptr,
@@ -198,10 +199,31 @@ struct ForestBuilder {
 };
 
 [[nodiscard]] Outcome add_cell_work(CellLedger&, const CellLedger&) noexcept;
-// Voie des ordres concurrents (forest_concurrent.cpp), Pool obligatoire : forets de 1..kmax dans orders.
+// Journal des graines demande a FULL (livraison L2b, docs/SORTIES.md paragraphe 11) : pose sur le seul constructeur de
+// l'ordre `order` (log nul : aucun journal, FULL inchange). Le journal n'est ecrit que par cell et regular_cell, que
+// seul le fil qui applique les cellules de cet ordre appelle : le pilote dans la voie non concurrente
+// (forest_vertical.cpp ; ForestParallel::flush applique les lots sur le pilote apres le join des descentes), la tache
+// de publication unique de l'ordre dans la voie concurrente (PublishTasks, forest_concurrent.cpp, ou Pipeline::publish,
+// forest_pipeline.cpp). Jamais lu pendant la construction : le balayage le lit apres le retour (join du Pool).
+struct OrderLog {
+  SeedLog* log = nullptr;
+  Order order = 0;
+};
+inline SeedLog* order_log(const OrderLog& wanted, u32 k) noexcept { return k == wanted.order ? wanted.log : nullptr; }
+// Corps de build_full sur un domaine EMPRUNTE (forest_vertical.cpp) : forets et verticales 1..kmax dans orders,
+// contextes rendus au retour, diagnostics publies au succes seulement ; build_full et build_order_full le partagent.
+// Precondition : 1 <= kmax <= n et ForestParallel::validate(params, pool) deja verifies par l'appelant.
+[[nodiscard]] Outcome build_forests(const FullDomain&, Order kmax, MemoryBudget&, FullTimings*, const FullParams&,
+                                    sched::Pool*, OrderLog,
+                                    std::array<std::optional<OrderForest>, kMaxMebSites>& orders) noexcept;
+// Verticales d'une foret (images basses) rendues a leur budget : l'arbre d'ordre K tire de FULL n'en garde aucune.
+void drop_verticals(OrderForest&) noexcept;
+// Voie des ordres concurrents (forest_concurrent.cpp), Pool obligatoire : forets de 1..kmax dans orders ; journal
+// des graines sur l'ordre demande (OrderLog), ecrit par sa seule tache de publication.
 [[nodiscard]] Outcome build_concurrent(const FullDomain&, Order kmax, MemoryBudget&, FullTimings*, ForestParallel&,
                                        sched::Pool&, RegularVerticalSeeds*, PopulationLookup*, bool dense,
-                                       std::array<std::optional<OrderForest>, kMaxMebSites>& orders) noexcept;
+                                       std::array<std::optional<OrderForest>, kMaxMebSites>& orders,
+                                       OrderLog log = {}) noexcept;
 // Images basses de chaque ordre (Pool, ordre apres ordre) puis K-1 balayages fermes concurrents.
 [[nodiscard]] Outcome concurrent_verticals(const FullDomain&, std::span<OrderForest* const> forests, MemoryBudget&,
                                            ForestParallel&, sched::Pool&, std::span<OrderTimings> times,
