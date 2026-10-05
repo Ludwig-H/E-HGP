@@ -26,9 +26,11 @@ puis la spécification finale du workflow de conception `wf_a7dbdf1a-21c`. Ces t
 (`de4ab58a8`, `aef7182b3`, questions D.1 à D.4, [reçu audit_supports_implementation_20261004](../receipts/audit_supports_implementation_20261004/README.md)) ;
 [réponse du développeur](../audits/REPONSE_CLAUDE_SUPPORTS_20261004.md).
 
-**État.** Rien de ce qui est décrit ici n'est encore exécutable. L'exécutable, la façade `api` et les écrivains de
-formats arrivent en L2 (§ 11). Existent seulement le module `io` (lecture, empreintes, transaction de dossier, § 9) et
-l'en-tête public de la tour.
+**État.** Intégrés le 5 octobre 2026 (commits locaux de l'intégration L1, qualification G4 en attente) : l'exécutable
+`mhgp11` et la façade `api` pour `--sortie=full` (tranche S5), et les primitives du module `supports` (tranche S6a,
+§ 6). Les sorties `supports`, `points` et `plat` restent refusées `parameter_out_of_range` jusqu'à leur tranche
+(§ 11). Existent aussi le module `io` (lecture, empreintes, transaction de dossier, § 9) et l'en-tête public de la
+tour. Ce qui est fixé par S5 est signalé « fixé par S5 » ci-dessous.
 
 ## 1. L'exécutable
 
@@ -59,6 +61,12 @@ mhgp11 --sortie=<full|supports|points|plat> --points=<x.u32le> --ids=<ids.u32le>
 | `--mcs` | entier $\geq 2$ (`plat` seulement) | 20 |
 | `--z` | 1, 2 ou 3 (`plat` seulement) | 1 |
 | `--selection` | `eom` ou `feuilles` (`plat` seulement) | `eom` |
+
+**Forme des valeurs** (fixée par S5). Entiers (`--k`, `--fils`, `--budget`) : chiffres décimaux ASCII seulement, sans
+signe, zéros de tête admis, jeton entier, borne vérifiée avant la conversion. Décimaux (`--pas`, `--origine`) :
+`[0-9]+(\.[0-9]+)?`, au plus 64 octets ; `--pas` est strictement positif ; chaque coordonnée de `--origine` peut porter
+un `-` initial, et `--origine` donne trois décimaux séparés par des virgules. Ils sont recopiés tels quels, sans
+normalisation : `0.0010` et `0.001` donnent deux manifestes différents.
 
 **Moteur.** Il n'existe aucune option de moteur (règle 6 d'[ARCHITECTURE.md](ARCHITECTURE.md)). Les paramètres sont
 ceux, qualifiés, des sondes de banc : masque 16 379 de `bench/full_probe.cpp`, `leaf_size` 16 et `max_leaf` 256 comme
@@ -98,8 +106,10 @@ donc jamais, à lui seul, « rien n'est publié ».
 1. Options : inconnue, répétée, absente, hors domaine ou propre à une autre sortie ; valeur de `--sortie` inconnue ou
    non livrée. Raison : `parameter_out_of_range`, avant tout effet.
 2. Sortie standard, puis plan du dossier, **avant toute lecture** (§ 9) :
-   - sortie standard fermée ou non inscriptible : `output_unwritable` ; sortie standard désignant l'un des fichiers
-     d'entrée : `output_conflict`. Ce contrôle est prévu en S5 ; toute ligne de refus va alors sur la sortie d'erreur ;
+   - sortie standard fermée ou ouverte en lecture seule : `output_unwritable` ; sortie standard désignant l'un des
+     fichiers d'entrée (même périphérique et même inode, liens symboliques suivis) : `output_conflict`. Ce contrôle
+     est livré par S5 : l'état de la sortie standard est lu avant même les options, sans rien ouvrir, et toute ligne
+     de refus va alors sur la sortie d'erreur, à l'étape 1 comprise ;
    - `parameter_out_of_range` : forme du chemin ;
    - `output_unwritable` : parent absent ou qui n'est pas un dossier ;
    - `output_conflict` : une entrée résolue est $D$, `D.pending` ou se trouve dessous, ou bien $D$ ou `D.pending`
@@ -111,9 +121,11 @@ donc jamais, à lui seul, « rien n'est publié ».
    - `index_overflow_u32` : au moins $2^{32}-1$ points ;
    - `memory_budget` : 16 octets par point, admis avant l'allocation ;
    - `input_unreadable` : lecture incomplète, octet de trop.
-5. Nuage : `empty_input`, `coordinate_out_of_domain`, `duplicate_point_id`. Positions répétées :
-   `multiplicity_unsupported`, car la tour exige des sites de poids un.
-6. $K>n$ : `parameter_out_of_range`.
+5. Nuage, dans l'ordre de `prepare_cloud` : `empty_input`, `coordinate_out_of_domain`, `memory_budget` (tri),
+   `duplicate_point_id`, `memory_budget` (tableaux du nuage). Positions répétées : `multiplicity_unsupported`, car la
+   tour exige des sites de poids un.
+6. $K>n$ : `parameter_out_of_range`. Le nombre de sites n'est connu qu'après la préparation du nuage, dont le
+   `memory_budget` précède donc ce refus.
 7. Calcul, notamment :
    - ressources : `memory_budget`, `node_budget`, `index_overflow_u32` (catalogue), `catalogue_counter_overflow`,
      `tower_capacity`, `radical_sign_budget` (`points` et `plat`) ;
@@ -121,10 +133,11 @@ donc jamais, à lui seul, « rien n'est publié ».
    - invariants : `catalogue_invariant`, `tower_invariant`, `supports_invariant`, `points_invariant`,
      `head_invariant`, `arithmetic_invariant`, `task_exception` (`sched`).
 8. Écriture et publication (§ 9) : `output_unwritable` ; `output_conflict` si $D$ ou `D.pending` est apparu depuis le
-   plan.
-9. Après la publication : fermeture de la `Session` (`budget_not_released`, code 3), puis écriture de la ligne d'état
-   sur la sortie standard (`output_unwritable`, code 2). Un refus de cette étape retire le dossier publié
-   (`retract()`, § 9).
+   plan. L'API refuse aussi, avant toute création de fichier et toute écriture du rapport, le produit d'une autre
+   `Session` (`parameter_out_of_range` ; le CLI n'a qu'une `Session`).
+9. Après la publication : fermeture de la `Session` (`api::finish` : `budget_not_released`, code 3), puis écriture de
+   la ligne d'état sur la sortie standard (`output_unwritable`, code 2). Un refus de cette étape retire le dossier
+   publié (`api::withdraw`, `retract()`, § 9).
 
 Entre deux refus d'un même étage, la fusion `merge` de `src/core/status.hpp` retient le plus petit K, puis la raison
 placée la première dans `src/core/reasons.def`. Le refus ne dépend donc pas du nombre de fils.
@@ -145,8 +158,8 @@ copie gravée de `tests/core/status_test.cpp` sont mis à jour au même commit :
 
 Cet ordre suit le plan révisé, où S6 (L1) précède S5 (L2). La spécification, qui livrait S5 d'abord, plaçait
 `environment_selftest` en tête. Le rang d'une raison dans la table ne départage que deux refus au même K.
-L'intégration L1 du 5 octobre 2026 a suivi cet ordre : `support_shell_capacity` et `supports_invariant` (S6a) sont en
-fin de `reasons.def`, avec la copie gravée de `tests/core/status_test.cpp`.
+L'intégration L1 du 5 octobre 2026 a suivi cet ordre : `support_shell_capacity` et `supports_invariant` (S6a), puis
+`environment_selftest` (S5), sont en fin de `reasons.def`, avec la copie gravée de `tests/core/status_test.cpp`.
 
 **Codes de sortie** (`exit_code`, `src/core/status.hpp`) :
 - 0 : conforme ;
@@ -156,11 +169,27 @@ fin de `reasons.def`, avec la copie gravée de `tests/core/status_test.cpp`.
 
 Un arrêt par signal est toujours un échec. Les codes 1 et 4 appartiennent aux portes, jamais à l'exécutable.
 
-**Sortie standard.** Exactement une ligne JSON, en succès comme en refus :
+**Sortie standard.** Exactement une ligne JSON, en succès comme en refus. Forme fixée par S5 (porte
+`mhgp11_cli_contract`), ici pour `full` :
 
 ```json
-{"phase":"mhgp11","output":"supports","status":"ok","reason":"none","coord_bits":21,"k":5,"workers":48,"sites":39885,"stages_ns":{"cloud":0,"index":0,"domain":0,"tree":0,"attach":0,"output":0,"write":0},"peaks_bytes":{"domain":0,"tree":0,"output":0},"counts":{"nodes":0,"balls":0,"supports":0}}
+{"phase":"mhgp11","output":"full","status":"ok","reason":"none","coord_bits":21,"k":5,"workers":48,"sites":39885,"stages_ns":{"cloud":0,"index":0,"domain":0,"tree":0,"attach":0,"output":0,"write":0,"total":0},"peaks_bytes":{"cloud":0,"index":0,"domain":0,"tree":0,"output":0,"write":0},"counts":{"nodes":0,"births":0,"edges":0},"publication":"published_complete","manifest_sha256":"…"}
+{"phase":"mhgp11","output":"full","status":"invalid_input","reason":"output_conflict","stage":"plan","coord_bits":21,"publication":"none","manifest_sha256":null}
 ```
+
+- Succès : clés `phase`, `output`, `status` (`ok`), `reason` (`none`), `coord_bits`, `k`, `workers`, `sites`,
+  `stages_ns` (`cloud`, `index`, `domain`, `tree`, `attach`, `output`, `write`, `total`), `peaks_bytes` (`cloud`,
+  `index`, `domain`, `tree`, `output`, `write`), `counts`, `publication` (`published_complete`), `manifest_sha256`,
+  dans cet ordre. Les `counts` de `full` sont les totaux des ordres 1 à K : `nodes`, `births`, `edges`.
+- Refus : clés `phase`, `output` (`null` à l'étape des options, le nom de la sortie ensuite), `status`, `reason`,
+  `stage` (`options`, `plan`, `session`, `read`, `compute`, `publish`, `close`, `report`), `coord_bits`,
+  `publication` (`none` ou `published_complete`), `manifest_sha256` (`null` ou l'empreinte du manifeste publié),
+  toujours présentes, dans cet ordre. La ligne va sur la sortie standard si celle-ci est utilisable et l'accepte
+  entière, sinon sur la sortie d'erreur (sortie fermée, en lecture seule, égale à une entrée, ou en échec, `/dev/full`
+  compris).
+- `SIGPIPE` et `SIGXFSZ` sont ignorés : un tube sans lecteur, une sortie pleine ou une limite de taille de fichier
+  rendent une erreur d'écriture et un refus (`output_unwritable`), jamais un arrêt par signal qui laisserait un
+  `D.pending` orphelin.
 
 - Temps et nombre de fils vont dans cette ligne, **jamais dans le manifeste**.
 - Étages de `stages_ns` :
@@ -173,7 +202,7 @@ Un arrêt par signal est toujours un échec. Les codes 1 et 4 appartiennent aux 
   - `output` : produit (supports et assemblage, hiérarchie de points ou tête plate) ;
   - `write` : écriture et publication.
 - En refus, la ligne porte le statut et la raison et, si un dossier reste publié (§ 9), l'état `published_complete`
-  avec l'empreinte du manifeste publié. Sa forme exacte est fixée en S5, avec la porte `mhgp11_cli_contract`.
+  avec l'empreinte du manifeste publié (forme ci-dessus).
 - La ligne est écrite **après** la publication et la fermeture de la `Session`. Si son écriture ou la vidange de la
   sortie standard échoue, le dossier publié est retiré (`retract()`, § 9) et l'appel rend `output_unwritable`
   (code 2), avec la ligne de refus sur la sortie d'erreur. Il n'y a donc jamais de code 0 sans ligne d'état. Un
@@ -405,7 +434,9 @@ seul témoin d'achèvement.
 Règles de forme :
 - un objet JSON, clés dans l'ordre fixe ci-dessous, entiers en décimal, aucun flottant ;
 - aucun temps ni nombre de fils : le manifeste est identique à l'octet quel que soit W ;
-- sa forme exacte en octets est fixée en S5, par sa porte de déterminisme ;
+- sa forme exacte en octets est fixée par S5 : clés dans l'ordre ci-dessous, sans espace, entiers en décimal, saut de
+  ligne final ; c'est la forme canonique de `json.dumps(objet, separators=(',', ':'))`, contrôlée à l'octet par le
+  lecteur `bench/mhgp11_formats.py` ;
 - l'écrivain JSON appartient à `api` (`manifest.cpp`), et non à `io`.
 
 Exemple pour `supports`, présenté ici sur plusieurs lignes pour la lecture :
@@ -423,7 +454,8 @@ Exemple pour `supports`, présenté ici sur plusieurs lignes pour la lecture :
 
 - `parameters` :
   - `budget_bytes` : l'entier donné à `--budget`, ou `null` sans plafond ;
-  - `grid_step`, `origin` : les chaînes de `--pas` et `--origine` recopiées, ou `null` ;
+  - `grid_step` : la chaîne de `--pas` recopiée, ou `null` ; `origin` : le tableau des trois chaînes de `--origine`,
+    ou `null` ;
   - pour `plat`, s'y ajoutent `mcs`, `z` et `selection`.
 - `inputs` : taille et SHA-256 des deux fichiers d'entrée, pris au fil de la lecture. `files` : taille et SHA-256 de
   chaque fichier de données, pris au fil de l'écriture.
@@ -443,7 +475,10 @@ Exemple pour `supports`, présenté ici sur plusieurs lignes pour la lecture :
   | `cofaces` | somme et maximum sur les boules des cofaces **par boule** : liaisons distinctes, limitées aux boules de $W_K$ ; l'agrégat des incidences par support, calculable, n'est pas publié |
 
   Un maximum sur un ensemble vide vaut 0.
-- Les `counts` de `full`, `points` et `plat` sont fixés en S5, S9 et S10, selon les mêmes règles.
+- `counts` de `full` (fixés par S5) : `sites`, `points`, puis `orders`, une entrée par ordre $k=1..K$ :
+  `{"k","births","nodes","edges","root"}`, les en-têtes d'ordre de `MHGP11FUL1`. Son fichier est déclaré
+  `{"name":"full.mhgp11ful1","format":"MHGP11FUL1","version":1,…}`. Les `counts` de `points` et `plat` seront fixés en
+  S9 et S10, selon les mêmes règles.
 
 **`tree_k_sha256`**, signature de l'arbre d'ordre K, version 2 (réponse D.2 de l'auditeur, `aef7182b3`). C'est le
 SHA-256 de la suite d'octets suivante, sans bourrage, entiers petit-boutistes :
@@ -467,6 +502,10 @@ Propriétés :
   preuve d'absence de collision. Le SHA-256 du fichier, dans `files`, reste une autre clé.
 - Le schéma `ehgp.v11.output.v1` du manifeste fixe la version 2 de la signature. La version 1 de la spécification,
   qui reposait sur le `BallIdx` des naissances, absent du format, n'est jamais publiée.
+- Implémentée par S5 (`api::tree_k_sha256`). Le champ publié est jugé par `mhgp11_api_session_tree_digest`
+  (sérialisation indépendante, $K=1$ à 4, et valeurs gravées de l'auditeur par profil) et par
+  `mhgp11_cli_tree_signature` (champ publié par l'exécutable contre une sérialisation en bibliothèque standard des
+  trois fixtures de l'auditeur, à $K=1$ et $K=2$).
 
 ## 9. Transaction de dossier, telle qu'implémentée dans `src/io/`
 
@@ -504,8 +543,10 @@ du raccord R2 de la v10 ([provenance](PROVENANCE.md), section io), adapté à un
      - renommage sans remplacement indisponible (noyau ou système de fichiers), ou autre erreur :
        `output_unwritable`. Il n'y a **jamais** de `rename` POSIX, qui remplacerait un dossier vide.
    - Un commit refusé est définitif. `manifest_sha256()` rend l'empreinte du manifeste dès que celui-ci est fermé,
-     même si une étape ultérieure échoue (D.3 de l'auditeur). À `f98aeed67`, `commit_steps` ne l'affecte qu'après une
-     publication réussie : la correction est attendue en S5.
+     même si une étape ultérieure échoue (D.3 de l'auditeur). Corrigé par S5 : `commit_steps` l'affecte juste après
+     la fermeture du manifeste, avant le renommage (porte `mhgp11_io_transaction_noreplace`, mutant
+     `empreinte_manifeste_apres_publication`) ; elle ne dit pas à elle seule que $D$ est publié, `committed()` le
+     dit.
 5. **Sans commit réussi**, le destructeur ferme les fichiers. Il retire ceux que l'objet a créés, puis `D.pending`
    s'il l'a créé. Il ne touche jamais $D$. Il ne retire jamais un `D.pending` qu'il n'a pas créé.
    - Un `D.pending` orphelin, laissé par un arrêt brutal, fait refuser l'appel suivant (`output_conflict`). Il n'est
@@ -531,8 +572,16 @@ manifeste en fait foi.
 refus, mais l'appel déclare l'état `published_complete`, distinct d'un refus sans publication : dans le résultat de
 l'API, et dans la ligne de refus, sur la sortie standard si elle peut être écrite, sinon sur la sortie d'erreur. Il y
 joint l'empreinte du manifeste publié, que `manifest_sha256()` conserve (étape 4). Ce n'est ni un succès de
-durabilité ni une sortie partielle. La forme exacte est fixée en S5 avec `mhgp11_cli_contract` ; les portes de faute
-de la synchronisation et du retrait tournent sur G4.
+durabilité ni une sortie partielle. Forme fixée par S5 : l'API rend `api::Publication` (issue, état, empreinte) par
+`publish`, `withdraw` et `finish`, et la ligne de refus finit par `publication` et `manifest_sha256` (§ 3). Les trois
+doubles échecs sont joués, localement et sur G4 :
+- synchronisation du parent puis retour arrière en échec, retrait de l'API refusé : bibliothèque préchargée de test
+  `tests/cli/io_fault_preload.cpp`, hors sanitizers, dans `mhgp11_cli_contract` ; elle ne décode que
+  `SYS_renameat2`, avec ses cinq arguments typés, et tout autre appel `syscall` invalide explicitement la porte ;
+- ligne d'état en échec puis retrait refusé : tube plein, puis `D.pending` créé dès que $D$ apparaît, sans crochet,
+  dans `mhgp11_cli_contract` ;
+- fermeture de la `Session` en échec puis retrait refusé : `mhgp11_api_session_after_publish`, au niveau de l'API,
+  car le CLI ne peut pas la provoquer.
 
 Limites :
 - la durabilité est celle que donnent les `fsync` ;
@@ -542,7 +591,7 @@ Limites :
 ## 10. Invariance et déterminisme
 
 - Les fichiers de données et le manifeste sont identiques à l'octet quel que soit le nombre de fils (portes de
-  déterminisme à W1, W4 et W48).
+  déterminisme à W1, W2, W4 et W48 : `mhgp11_cli_full_determinism` ; W1, W8 et W48 à 8 000 points sur G4).
 - Une **permutation** de l'entrée donne des fichiers `full`, `supports` et `points` identiques ; les étiquettes de
   `plat`, rangées dans l'ordre d'entrée, sont permutées de même. Le manifeste ne change que par les empreintes des
   entrées et, pour `plat`, celle du fichier d'étiquettes.
@@ -573,7 +622,8 @@ Limites :
 | L5 | facultative | S11 (pipeline à un ordre), chantier 100 ms | — |
 
 - Valeurs de `--sortie` admises : aucune avant L2 ; `full` puis `supports` en L2 ; `points` en L3 ; `plat` en L4.
-  Toute autre est refusée `parameter_out_of_range`.
+  Toute autre est refusée `parameter_out_of_range`. `full` est admise par le code depuis l'intégration de S5
+  (5 octobre 2026) ; sa qualification relève de la session G4 de L2.
 - Un commit natif des tranches S3, S5 et S6, dont les brouillons ont été écrits en parallèle de L0, exige
   l'intégration des réponses de l'auditeur mathématique (faite pour `aef7182b3`) et les portes de la tranche ; sa
   qualification exige la matrice G4 et un reçu. La relecture du contrat S0 est demandée aux deux auditeurs : leurs

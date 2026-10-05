@@ -169,7 +169,9 @@ class OutputDirectory {
   // destructeur le retire comme un dossier jamais publie ; l'objet ne publie plus rien ensuite. Refus
   // output_unwritable si rien n'est publie ou si le renommage echoue (D reste alors publie et complet).
   [[nodiscard]] Outcome retract() noexcept;
-  // Empreinte du manifeste publie (zeros avant un commit reussi).
+  // Empreinte du manifeste, gardee des sa fermeture par commit, meme si la publication echoue ensuite : apres un
+  // double echec (committed() vrai, commit refuse), c'est celle du manifeste de D publie. Zeros tant qu'aucun
+  // manifeste n'est ferme. Elle ne dit pas a elle seule que D est publie : committed() le dit.
   const Digest& manifest_sha256() const noexcept { return manifest_sha256_; }
 
  private:

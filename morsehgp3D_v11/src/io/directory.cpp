@@ -20,7 +20,8 @@
 // l'existence se recouvrent dans une transaction de dossier ; le premier est garde parce qu'il est la regle ecrite
 // du CLI (paragraphe 5, etape 2).
 // Portes : mhgp11_io_transaction_* ; mutants conflit_ignore, orphelin_ignore, renommage_ecrasant,
-// pending_non_retire, manifeste_avant_donnees, nom_reserve_admis, nom_double_admis.
+// pending_non_retire, manifeste_avant_donnees, nom_reserve_admis, nom_double_admis,
+// empreinte_manifeste_apres_publication.
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/syscall.h>
@@ -222,13 +223,15 @@ Outcome OutputDirectory::publish() noexcept {
   return fail(Reason::output_unwritable);
 }
 
+// L'empreinte du manifeste est gardee des sa fermeture, avant le renommage : si la publication echoue ensuite et que
+// son retour echoue aussi (double echec), D reste publie et son manifeste en fait foi (docs/SORTIES.md, paragraphe 9,
+// etape 4 ; reponse D.3 de l'auditeur).
 Outcome OutputDirectory::commit_steps(std::string_view manifest_json) noexcept {
   MHGP11_TRY(open_pending());
   MHGP11_TRY(close_data());
   MHGP11_TRY(write_manifest(manifest_json));
-  MHGP11_TRY(publish());
   manifest_sha256_ = writers_[kMaxOutputFiles].digest();
-  return {};
+  return publish();
 }
 
 Outcome OutputDirectory::retract() noexcept {

@@ -1,0 +1,166 @@
+{
+  "module": "api",
+  "plancher": 20,
+  "mutants": [
+    {
+      "id": "session_sans_liberation",
+      "fichier": "src/api/session.cpp",
+      "cherche": "  return budget_->released();",
+      "remplace": "  return {};",
+      "porte": "mhgp11_api_session_product_alive",
+      "note": "close conforme alors qu'un produit vit encore dans le budget de la Session"
+    },
+    {
+      "id": "selftest_omis",
+      "fichier": "src/api/session.cpp",
+      "cherche": "  MHGP11_TRY(api_detail::environment_selftest());\n",
+      "remplace": "",
+      "porte": "mhgp11_api_selftest_fault_inexact",
+      "note": "Session creee sous une exception flottante demasquee"
+    },
+    {
+      "id": "selftest_pieges_ignores",
+      "fichier": "src/api/selftest.cpp",
+      "cherche": "  if (!probe.traps_masked) return fail(Reason::environment_selftest);\n",
+      "remplace": "",
+      "porte": "mhgp11_api_selftest_judge",
+      "note": "exception demasquee admise par le juge"
+    },
+    {
+      "id": "selftest_noyaux_entiers_omis",
+      "fichier": "src/api/selftest.cpp",
+      "cherche": "  for (std::size_t i = 0; i < kWitnessCount; ++i) {",
+      "remplace": "  for (std::size_t i = 7; i < kWitnessCount; ++i) {",
+      "porte": "mhgp11_api_selftest_judge",
+      "note": "temoins F2 et de precision non juges"
+    },
+    {
+      "id": "selftest_precision_etendue_admise",
+      "fichier": "src/api/selftest.cpp",
+      "cherche": "    {Op::excess, 0x1p53, 1.0, 0, 0.0, 2.0},",
+      "remplace": "    {Op::excess, 0x1p53, 1.0, 0, 0.0, 1.0},",
+      "porte": "mhgp11_api_selftest_judge",
+      "note": "((2^53 + 1) - 2^53) = 1 admis : precision etendue non detectee"
+    },
+    {
+      "id": "multiplicite_apres_k",
+      "fichier": "src/api/compute.cpp",
+      "cherche": "  if (cloud.value().weight() != cloud.value().sites()) return fail(Reason::multiplicity_unsupported);\n  if (k > cloud.value().sites()) return fail(Reason::parameter_out_of_range);",
+      "remplace": "  if (k > cloud.value().sites()) return fail(Reason::parameter_out_of_range);\n  if (cloud.value().weight() != cloud.value().sites()) return fail(Reason::multiplicity_unsupported);",
+      "porte": "mhgp11_api_session_refusals",
+      "note": "K > sites juge avant les positions repetees (ordre du paragraphe 5)"
+    },
+    {
+      "id": "tree_k_sans_enfants",
+      "fichier": "src/api/manifest.cpp",
+      "cherche": "    for (const NodeIdx child : children) out.u32le(idx(child));\n",
+      "remplace": "",
+      "porte": "mhgp11_api_session_tree_digest",
+      "note": "signature de l'arbre sans la liste des enfants"
+    },
+    {
+      "id": "provenance_non_controlee",
+      "fichier": "src/api/manifest.cpp",
+      "cherche": "  const Outcome checked = api_detail::check_provenance(provenance);\n  if (!checked.ok()) return {checked, PublicationState::none, {}};\n",
+      "remplace": "",
+      "porte": "mhgp11_api_session_provenance",
+      "note": "decimaux hors forme recopies dans le manifeste"
+    },
+    {
+      "id": "pas_nul_admis",
+      "fichier": "src/api/manifest.cpp",
+      "cherche": "  return unsigned_decimal(text) && text.find_first_not_of(\"0.\") != std::string_view::npos;",
+      "remplace": "  return unsigned_decimal(text);",
+      "porte": "mhgp11_api_session_provenance",
+      "note": "pas de grille nul admis"
+    },
+    {
+      "id": "tree_k_version_un",
+      "fichier": "src/api/manifest.cpp",
+      "cherche": "  out.u64le(kTreeSignatureVersion);",
+      "remplace": "  out.u64le(1);",
+      "porte": "mhgp11_api_session_tree_digest",
+      "note": "mot de version 1 dans la signature version 2 (SORTIES, paragraphe 8)"
+    },
+    {
+      "id": "tree_k_sans_geometrie",
+      "fichier": "src/api/manifest.cpp",
+      "cherche": "  out.digest(geometry);\n",
+      "remplace": "  static_cast<void>(geometry);\n",
+      "porte": "mhgp11_api_session_tree_digest",
+      "note": "signature sans l'empreinte MHGP11GX de la geometrie des sites"
+    },
+    {
+      "id": "tree_k_naissance_omise",
+      "fichier": "src/api/manifest.cpp",
+      "cherche": "      out.u8le(ball.qmin);\n      for (u32 j = 0; j < ball.qmin; ++j) out.u32le(idx(ball.support[j]));",
+      "remplace": "      out.u8le(0);\n      static_cast<void>(ball);",
+      "porte": "mhgp11_api_session_tree_digest",
+      "note": "naissance de boule d'arite 0 : S* absent de la signature"
+    },
+    {
+      "id": "tree_k_ordre_un",
+      "fichier": "src/api/manifest.cpp",
+      "cherche": "api::tree_k_sha256(tower.domain(), tower.order(product.k()))",
+      "remplace": "api::tree_k_sha256(tower.domain(), tower.order(1))",
+      "porte": "mhgp11_api_session_tree_digest",
+      "note": "manifeste qui signe l'ordre 1 au lieu de l'ordre maximal K"
+    },
+    {
+      "id": "tree_k_constante",
+      "fichier": "src/api/manifest.cpp",
+      "cherche": "  hex(out, api::tree_k_sha256(tower.domain(), tower.order(product.k())));",
+      "remplace": "  hex(out, io::Digest{});",
+      "porte": "mhgp11_api_session_tree_digest",
+      "note": "signature constante dans le manifeste"
+    },
+    {
+      "id": "retrait_omis_fin_de_session",
+      "fichier": "src/api/manifest.cpp",
+      "cherche": "  if (!closed.ok()) return withdraw(closed, directory);",
+      "remplace": "  if (!closed.ok()) return state_of(closed, directory);",
+      "porte": "mhgp11_api_session_after_publish",
+      "note": "fin de session en echec (produit vivant) sans retrait du dossier publie"
+    },
+    {
+      "id": "etat_api_toujours_none",
+      "fichier": "src/api/manifest.cpp",
+      "cherche": "  if (!directory.committed()) return {outcome, api::PublicationState::none, {}};",
+      "remplace": "  if (directory.committed() || !directory.committed()) return {outcome, api::PublicationState::none, {}};",
+      "porte": "mhgp11_api_session_after_publish",
+      "note": "etat none et empreinte nulle alors que D est publie"
+    },
+    {
+      "id": "parametres_moteur_par_defaut",
+      "fichier": "src/api/compute.cpp",
+      "cherche": "build_full(std::move(domain.value()), budget, nullptr, api_detail::full_params(), &session.pool());",
+      "remplace": "build_full(std::move(domain.value()), budget, nullptr, FullParams{}, &session.pool());",
+      "porte": "mhgp11_api_session_engine",
+      "note": "forets aux parametres par defaut au lieu du masque 16379 : meme objet, autres pics"
+    },
+    {
+      "id": "parametres_catalogue_feuilles",
+      "fichier": "src/api/compute.cpp",
+      "cherche": "  params.leaf_size = 16;",
+      "remplace": "  params.leaf_size = 32;",
+      "porte": "mhgp11_api_session_engine",
+      "note": "feuilles du catalogue de 32 sites au lieu de 16 (masque des sondes)"
+    },
+    {
+      "id": "produit_session_non_controlee",
+      "fichier": "src/api/manifest.cpp",
+      "cherche": "  if (!product.computed_by(session)) return {fail(Reason::parameter_out_of_range), PublicationState::none, {}};\n",
+      "remplace": "",
+      "porte": "mhgp11_api_session_session_identity",
+      "note": "audit general a65903a7b, P1 : le produit d'une Session A se publie par une Session B de budget nul, pics de B nuls"
+    },
+    {
+      "id": "session_detruite_sans_controle",
+      "fichier": "src/api/session.cpp",
+      "cherche": "  if (budget_ != nullptr && !budget_->released().ok()) std::terminate();\n",
+      "remplace": "",
+      "porte": "mhgp11_api_session_destroyed_live",
+      "note": "destruction d'une Session dont le budget n'est pas revenu a zero, sans controle (ARCHITECTURE, paragraphe 7.1)"
+    }
+  ]
+}

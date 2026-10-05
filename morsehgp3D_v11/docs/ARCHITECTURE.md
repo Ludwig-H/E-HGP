@@ -16,7 +16,9 @@ Chaque règle est vérifiable ; `tools/check_style.py` contrôle celles qui se l
    passés explicitement.
 4. **Erreurs** : `Outcome` et `Result<T>` ; aucune exception ne traverse une frontière de module ; jamais `assert`
    (une précondition interne violée rend `invariant_violated`). Seule exception : lire la valeur d'un `Result` qui
-   porte un refus est un accès vérifié qui termine le processus ; un refus ne construit jamais de `T`.
+   porte un refus est un accès vérifié qui termine le processus ; un refus ne construit jamais de `T`. De même,
+   détruire une `Session` dont le budget n'est pas revenu à zéro termine le processus (§ 7.1) : un destructeur n'a
+   aucune issue à rendre (intégration de S5, audit général `a65903a7b`).
 5. **Transactions** : une opération rend son résultat entier ou un refus ; jamais un préfixe publié.
 6. **Aucun mutant, crochet de test ni option morte dans le produit.** Les mutants sont des correctifs appliqués à une
    copie des sources (`tests/mutants/`). Une option n'existe que si une porte l'exerce et qu'une ablation la justifie.
@@ -52,15 +54,16 @@ Chaque règle est vérifiable ; `tools/check_style.py` contrôle celles qui se l
 `--sortie=full|supports|points|plat` ([contrat des sorties](SORTIES.md)) ; `reference/` l'oracle exact borné en
 Python ; `bench/` les bancs (synthétique, LiDAR, G4) ; `tests/` les portes, par module.
 
-Les modules de la table qui n'ont pas encore de dossier sous `src/` (`points`, `head`, `api`) sont planifiés :
-leur place est fixée d'avance, et `tools/check_style.py` ne contrôle que les dossiers présents. Le rattachement des
-boules et l'arbre d'ordre K seul arrivent dans `tower` à la tranche S3. Le module `supports` existe depuis la tranche
-S6a : supports positifs minimaux $\mathcal{Q}_b$ par boule, fermeture et comptes du lemme G ; son assemblage
-(`SupportHierarchy`) vient avec la tranche S6b ([sorties](SORTIES.md), § 11). `api` porte à terme les requêtes, les
-produits, les écrivains des quatre formats et le manifeste. Ses dépendances **croissent avec les livraisons**, car
-`CMakeLists.txt` refuse la configuration dès qu'un module de la fermeture d'un module présent manque : de `core` à
-`tower` pour la façade et `--sortie=full` (S5), puis `supports` (S7), `points` (S9) et `head` (S10), chacune ajoutée à
-la table et à sa copie CMake dans le commit de sa tranche.
+Les modules de la table qui n'ont pas encore de dossier sous `src/` (`points`, `head`) sont planifiés : leur place
+est fixée d'avance, et `tools/check_style.py` ne contrôle que les dossiers présents. Le rattachement des boules et
+l'arbre d'ordre K seul arrivent dans `tower` à la tranche S3. Le module `supports` existe depuis la tranche S6a :
+supports positifs minimaux $\mathcal{Q}_b$ par boule, fermeture et comptes du lemme G ; son assemblage
+(`SupportHierarchy`) vient avec la tranche S6b ([sorties](SORTIES.md), § 11). Le module `api` et l'exécutable
+`mhgp11` existent depuis la tranche S5 (`Session`, `compute`, `publish`, `finish`, `withdraw`, `--sortie=full`) ;
+`api` porte à terme les requêtes, les produits, les écrivains des quatre formats et le manifeste. Ses dépendances
+**croissent avec les livraisons**, car `CMakeLists.txt` refuse la configuration dès qu'un module de la fermeture d'un
+module présent manque : de `core` à `tower` pour la façade et `--sortie=full` (S5), puis `supports` (S7), `points`
+(S9) et `head` (S10), chacune ajoutée à la table et à sa copie CMake dans le commit de sa tranche.
 
 La première préparation de `cloud` est séquentielle et ne dépend pas de
 `sched`. Son résultat possède un stockage privé, exposé par des vues constantes ;
@@ -117,7 +120,12 @@ justes sous tout mode d'arrondi, avec ou sans contraction, et sous les ordres d'
   arrondi) ; $c = 1 - 2^{-40}$ convient tant que $E_x + E_y + 1 \leq 4096$, ce que garde un `static_assert`. Sinon la
   comparaison est rejouée en exact.
 - **F5.** Défense en profondeur, sans rôle dans les preuves : refus de `__FAST_MATH__` à la compilation, et auto-test
-  des hypothèses F2 et F3 au démarrage d'une `Session`. L'auto-test ne remplace aucune preuve.
+  des hypothèses F2 et F3 au démarrage d'une `Session`. L'auto-test ne remplace aucune preuve. Il est livré par la
+  tranche S5 (`src/api/selftest.cpp`, raison `environment_selftest`, code 3) et refuse, sur quinze témoins calculés
+  sur des opérandes `volatile` : une exception flottante démasquée, contrôlée avant toute opération ; un mode
+  d'arrondi hors des quatre modes IEEE ; un noyau entier inexact (six noyaux) ou une précision étendue
+  ($(2^{53}+1)-2^{53}$ doit valoir 0 ou 2) ; un résultat qui n'est pas l'un des deux voisins binaire64 du résultat
+  exact (huit témoins, F3). FTZ et DAZ sont admis.
 - **F6.** Filtres de signe à borne statique, pour les prédicats polynomiaux qui soustraient (orientation, côté d'une
   sphère, centre dans une boîte), quand la valeur exacte sort de F2. Entrées et coefficients sont des entiers exacts,
   **chacun certifié** dans son domaine (une largeur mesurée sur une feuille ne se transmet pas à un site extérieur à
@@ -179,7 +187,10 @@ Décisions demandées par les audits du 2 octobre 2026 ; elles valent pour toute
 - Un brouillon par fil a une capacité bornée par une quantité démontrée (taille de feuille, ordre) ; il ne garde pas
   la capacité d'une requête passée.
 - La `Session` possède le budget et le `Pool` ; elle survit à tous les résultats qu'elle a servis. À sa destruction,
-  un budget non revenu à zéro est une violation d'invariant (porte de test).
+  un budget non revenu à zéro est une violation d'invariant : `~Session` termine le processus (règle 4 ; porte
+  `mhgp11_api_session_destroyed_live`, mutant `session_detruite_sans_controle`). `Session::close` constate la même
+  violation sans arrêt (`budget_not_released`, code 3). Un `Product` garde le jeton d'identité de sa `Session`, et
+  `publish` refuse le produit d'une autre `Session` (`parameter_out_of_range`, avant toute création).
 - Chaque étage publie son pic d'octets réservés ; le pic d'une opération publique est mesuré, pas estimé. Le CLI
   accepte un plafond ; au-delà, refus `resource_exhausted`, avant tout résultat partiel.
 

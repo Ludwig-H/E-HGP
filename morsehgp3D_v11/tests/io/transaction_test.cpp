@@ -3,13 +3,15 @@
 //                  manifeste ecrit en dernier, D.pending disparu, aucun commit ni create apres publication, le
 //                  destructeur ne retire jamais un dossier publie ;
 //   noreplace      D apparu entre le plan et le commit (dossier vide, fichier) : output_conflict, D intact,
-//                  D.pending retire a la destruction (jamais un renommage qui ecrase) ;
+//                  D.pending retire a la destruction (jamais un renommage qui ecrase) ; l'empreinte du manifeste,
+//                  ferme avant le renommage refuse, est gardee, et committed() reste faux ;
 //   orphan         D.pending apparu entre le plan et la creation : output_conflict, jamais retire ;
 //   discard        destruction sans commit : ni D ni D.pending ;
 //   retract        retrait apres publication : D rendu a D.pending puis retire, refus ensuite ;
 //   write_failure  ecriture refusee par le systeme (RLIMIT_FSIZE, SIGXFSZ ignore, a la place de /dev/full qui ne
 //                  peut pas etre un fichier de D) au vidage final, pendant l'ecriture, ou sur le manifeste :
-//                  output_unwritable, aucun manifeste dans D.pending, rien de publie.
+//                  output_unwritable, aucun manifeste dans D.pending, rien de publie, aucune empreinte de
+//                  manifeste.
 #include <signal.h>
 #include <sys/resource.h>
 #include <sys/stat.h>
@@ -100,14 +102,19 @@ MHGP11_TEST(commit, 27) {
   CHECK(entries(s.path("M")) == std::vector<std::string>({"manifeste.json"}));
 }
 
-MHGP11_TEST(noreplace, 17) {
+// Le renommage est refuse apres la fermeture du manifeste : l'empreinte du manifeste est gardee quand meme (elle ne
+// dit pas que D est publie : committed() reste faux).
+MHGP11_TEST(noreplace, 23) {
   Scratch s;
   REQUIRE(s.ok());
+  const Digest closed = digest_of(std::string_view("{}"));
   {
     io::OutputDirectory out = planned(s, "D");
     REQUIRE(out.create("a.bin").ok());
     REQUIRE(::mkdir(s.path("D").c_str(), 0700) == 0);  // D apparait vide apres le plan
     CHECK_EQ(out.commit("{}").reason, Reason::output_conflict);
+    CHECK(!out.committed());
+    CHECK(out.manifest_sha256() == closed);
     CHECK(entries(s.path("D")).empty());
     CHECK(exists(s.path("D.pending")));
     CHECK_EQ(out.commit("{}").reason, Reason::output_unwritable);  // un commit refuse est definitif
@@ -119,6 +126,8 @@ MHGP11_TEST(noreplace, 17) {
     REQUIRE(out.create("a.bin").ok());
     REQUIRE(write_file(s.path("E"), {5}));  // E apparait comme fichier
     CHECK_EQ(out.commit("{}").reason, Reason::output_conflict);
+    CHECK(!out.committed());
+    CHECK(out.manifest_sha256() == closed);
   }
   CHECK(read_file(s.path("E")) == std::vector<u8>({5}));
   CHECK(!exists(s.path("E.pending")));
@@ -126,6 +135,8 @@ MHGP11_TEST(noreplace, 17) {
     io::OutputDirectory out = planned(s, "F");  // sans fichier : D.pending est cree au commit
     REQUIRE(::mkdir(s.path("F").c_str(), 0700) == 0);
     CHECK_EQ(out.commit("{}").reason, Reason::output_conflict);
+    CHECK(!out.committed());
+    CHECK(out.manifest_sha256() == closed);
   }
   CHECK(!exists(s.path("F.pending")));
 }
@@ -181,7 +192,7 @@ MHGP11_TEST(retract, 12) {
   CHECK(entries(s.root()).empty());
 }
 
-MHGP11_TEST(write_failure, 19) {
+MHGP11_TEST(write_failure, 21) {
   Scratch s;
   REQUIRE(s.ok());
   {  // echec au vidage final : 1000 octets dans le tampon, 512 permis
@@ -198,6 +209,7 @@ MHGP11_TEST(write_failure, 19) {
     CHECK_EQ(done.reason, Reason::output_unwritable);
     CHECK(!exists(s.path("D.pending/manifeste.json")));  // jamais de temoin d'achevement sur des donnees en echec
     CHECK(!exists(s.path("D")));
+    CHECK(out.manifest_sha256() == Digest{});  // aucun manifeste ferme : aucune empreinte
   }
   CHECK(!exists(s.path("D.pending")));
   {  // echec pendant l'ecriture : erreur definitive
@@ -228,6 +240,7 @@ MHGP11_TEST(write_failure, 19) {
       done = out.commit(std::string(1000, ' '));
     }
     CHECK_EQ(done.reason, Reason::output_unwritable);
+    CHECK(out.manifest_sha256() == Digest{});  // manifeste en echec, jamais ferme : aucune empreinte
   }
   CHECK(entries(s.root()).empty());
 }

@@ -234,8 +234,8 @@ bancs et des sondes de la v11 elle-même, et non la v10.
 | `src/points/` | `bench/points_hierarchy.py` (`qualify` à `first_points`, `Hanging`), `bench/points_radius.py` (`floor_rank_radius`, `ancestor_at_radius`, `hang_margin_radius`), `bench/points_flat.py` (`PointTree`, `tower_point_tree`) | `fa12f16f3ce599a5299737d740bd252454cddcb9c475edf593d7aab3cd426c17`, `457b997f…` et `4647de07…` (ci-dessus) | S9 (L3) | Décisions exactes en entiers, $m(1)=1$ et $\kappa=1$. Les incidences fortes sont tirées du rattachement, au lieu des descentes de `ball_nodes`. Porte `mhgp11_points_vs_python` (identité site par site) |
 | `src/head/` | `bench/points_flat.py` (`condense`, `select`, `labels`) | `4647de07…` (ci-dessus) | S10 (L4, reportable) | Étiquettes dans l'ordre d'entrée, sans `out[pt.ids]`, qui suppose des `PointId` denses. Porte `mhgp11_head_vs_python` |
 
-Ports livrés depuis, chacun épinglé dans sa propre section ci-dessous : `src/supports/enumerate.cpp` (tranche S6a,
-intégrée en L1 le 5 octobre 2026).
+Ports livrés depuis, chacun épinglé dans sa propre section ci-dessous : `src/supports/enumerate.cpp` (tranche S6a)
+et `src/api/write_full.cpp` (tranche S5), intégrées en L1 le 5 octobre 2026.
 
 ## Module supports : Q_b et comptes du lemme G (tranche S6a, 4 octobre 2026)
 
@@ -335,3 +335,58 @@ des attendus tirés de l'oracle borné S1 et du reçu `receipts/audit_native_int
   strictes à K10, comme le reçu) ;
 - mutant `traces_publiees_en_branches` (`tests/mutants/tower.json`, plancher 135 → 136) : `strict_traces` publié égal
   au nombre de branches, que les contrôles I1 à I4 du produit ne voient pas ; tué par `mhgp11_tower_attach_fraction`.
+
+## Façade api et exécutable mhgp11 (tranche S5, 4 octobre 2026, corrigée le 5 octobre 2026)
+
+Tranche S5 de la sortie paramétrée : `Session`, `compute`, `publish`, fin d'appel (`finish`, `withdraw`), manifeste
+déterministe et `mhgp11 --sortie=full`. Correction du 5 octobre, après la contre-lecture et le contrat L0 commité
+(`5adf6a59f`) : signature `tree_k_sha256` version 2, état `published_complete` dans l'api et la ligne de refus,
+empreinte du manifeste gardée par `io` dès sa fermeture, `SIGXFSZ` ignoré.
+Un seul port d'octets : l'écrivain `MHGP11FUL1` ; le reste est écrit à neuf, avec les inspirations ci-dessous. Sources
+lues au commit `f98aeed67` (v11) et au raccord R2 de la v10 (`build/v10-integration-r2/src`, commit
+`865f5e64ddd08bedf6ab8f94e8bb94812e380e79`). Aucune porte ni aucun compte de mutants n'est hérité.
+
+| Fichier v11 | Source | sha256 de la source | Adaptations | Portes v11 |
+| --- | --- | --- | --- | --- |
+| `src/api/write_full.cpp` (`write_full`, `birth_sphere`) | `bench/full_probe.cpp`, `serialize` et `birth_sphere` (lignes 14 à 75) ; aides `word` et `integer` de `bench/whole_input.hpp` | `2d3a37ccf93a0b917800550a3e285ceb8b28dda0365494c31ebd7c39dba8629c` (`full_probe.cpp`) ; `95ee29ceda8d47d18c92fda9b83409e3da80ddd5dfc8ae0c2137ad532cd963c2` (`whole_input.hpp`) | Port **octet pour octet** : même magie de 10 octets sans bourrage, mêmes mots u64 petit-boutistes, mêmes entiers signe-magnitude au nombre de mots du type du profil (`num::to_wide`, jamais réduit), même ordre des champs, même refus `tower_invariant` sur une sphère de naissance absente. Changé : `io::FileWriter` (taille et empreinte au fil de l'écriture, erreurs contrôlées, aucune exception) au lieu d'un `std::ofstream` ; mots groupés par paquets de 512 sur la pile, première erreur gardée. La sonde reste inchangée et sert de référence. | `mhgp11_cli_full_identity` (sha256 brut égal au dump de la sonde, 503 tentatives) et ses variantes `_scale*`, `_lidar_*` ; mutant `ecriture_full_permutee` |
+| `src/api/compute.cpp` (`compute`, paramètres du moteur) | enchaînement de `bench/full_probe.cpp` (`run`, `full_pass`) et paramètres de `bench/points_export.cpp` (`run`) | `2d3a37ccf93a0b917800550a3e285ceb8b28dda0365494c31ebd7c39dba8629c` ; `f77ca2c22d0abc359cc202257d44e89ec32a782ebf8dc84f4b1de79e8f730a4d` | Même enchaînement (`prepare_cloud`, `build_index`, `prepare_full_domain` sur le Pool, `build_full`) et mêmes paramètres fixes, ceux du masque 16379 (feuilles de 16 à 256 sites, aucun mémo). Changé : ordre des refus du paragraphe 3 de `docs/SORTIES.md` (préparation du nuage et son `memory_budget`, positions répétées, puis K supérieur au nombre de sites, avant tout calcul), rapport d'étages (durée et pic réservé, par `MemoryBudget::restart_peak`), aucune ligne JSON. | `mhgp11_api_session_equivalence` (mêmes forêts que `build_full` aux paramètres par défaut, W1/W2/W4), `_refusals`, `_engine` (paramètres égaux, champ par champ, au masque 16379 décodé comme la sonde, et pics de chaque étage égaux à ceux du même enchaînement aux paramètres décodés) ; mutants `multiplicite_apres_k`, `parametres_moteur_par_defaut`, `parametres_catalogue_feuilles` |
+| `cli/mhgp11.cpp` et `src/api/manifest.cpp` (retrait après la publication) | R2:`src/core/cli_output.hpp`, `finish` (lignes 433 à 446) | `ff7d96a52f5c60ceb77e78d644c80b4338e0ffb37c2cc3444eef092bb2f972c7` | Principe repris : la sortie standard est vidée et contrôlée **après** la publication ; en échec, la publication est défaite et le code devient 2. Changé : `io::OutputDirectory::retract` (renommage sans remplacement de `D` en `D.pending`, puis retrait) au lieu de `rollback`, appelé par `api::withdraw` sur tout refus constaté quand `D` est publié : commit en double échec (`publish`), fin de session en échec (`finish`, `budget_not_released`, code 3), ligne d'état en échec (CLI) ; si le retrait échoue, l'état `published_complete` et l'empreinte du manifeste sont rendus par l'api et écrits dans la ligne de refus (`docs/SORTIES.md`, paragraphes 3 et 9) ; `SIGPIPE` et `SIGXFSZ` ignorés pour qu'un tube sans lecteur ou une limite de taille de fichier rendent une erreur d'écriture et non un arrêt par signal ; la ligne de refus va sur la sortie d'erreur quand la sortie standard est inutilisable ou échoue. Ajouté : refus avant tout effet d'une sortie standard fermée ou en lecture seule (`output_unwritable`) ou désignant une entrée, liens symboliques suivis (`output_conflict`, constat R2 de la contre-lecture de S4) ; l'état de la sortie standard est lu avant les options, si bien qu'aucune ligne de refus n'est jamais écrite dans une entrée. | `mhgp11_cli_contract` (cas `sortie standard pleine`, `tube sans lecteur`, `tube plein puis D.pending`, `limite de taille de fichier`, `sortie standard sur une entree`, `sortie standard sur l'entree points`, `entree par lien symbolique vers la sortie standard`, `sortie standard fermee`, `sortie standard fermee et D existant`, `sortie standard en lecture seule`, `option fausse, sortie standard pleine`, `double echec du commit` par bibliothèque préchargée), `mhgp11_api_session_after_publish`, `mhgp11_api_session_fault_publication` ; mutants `retrait_omis`, `retrait_omis_double_echec`, `retrait_omis_fin_de_session`, `etat_publie_omis`, `etat_api_toujours_none`, `sortie_standard_non_controlee`, `entree_sur_sortie_standard_admise`, `sortie_standard_entree_ids_seulement`, `stdout_lstat`, `stdout_lecture_seule_admise`, `plan_avant_sortie_standard`, `sigxfsz_non_ignore`, `refus_perdu_sortie_pleine`, `ligne_refus_sortie_toujours_full` |
+| `cli/mhgp11.cpp` (options) | inspiration seulement : R2:`src/core/cli_options.hpp` | `931dd43764d8c0dee7ffa45c10ad0827a795d120cf5c9329c5e7e79316dbb917` | Aucun code porté. Règles reprises : jeton consommé en entier, chiffres décimaux ASCII seulement, borne vérifiée avant la conversion, argument positionnel et option répétée refusés, aucune option sans effet admise en silence. Changé : options nommées en français (`--sortie`, `--points`, `--ids`, `--dossier`, `--k`, `--fils`, `--budget`, `--pas`, `--origine`), aucune détection implicite des fils (1 par défaut), options propres à la sortie `plat` refusées avec toute autre sortie, sorties non livrées refusées. | `mhgp11_cli_contract` (30 refus d'options) ; mutants `option_hors_sortie_admise`, `k_treize_admis`, `budget_nul_admis`, `budget_ignore`, `fils_ignores` |
+| `bench/mhgp11_formats.py` | réutilise `bench/full_semantic.py` (décodeur strict de `MHGP11FUL1`), sans le modifier | `1ffda4fb32e58d9cadd6f8c87a4cabe0eb28c0bcc5769ba8370b2738bd4d8d25` | Lecteur du manifeste (ordre des clés, types, forme canonique à l'octet) et du dossier publié (inventaire exact, tailles, sha256, décodage, comptes par ordre recoupés) ; positions des `PointId` d'un `MHGP11FUL1` pour la porte de réétiquetage. | `mhgp11_cli_full_identity`, `_determinism`, `_relabel`, `mhgp11_cli_contract` |
+
+Écrits à neuf, sans source : `src/api/session.cpp` (budget et `Pool` uniques, `close` par `MemoryBudget::released`),
+`src/api/selftest.cpp` (auto-test F5 : exceptions flottantes masquées, mode d'arrondi, noyaux entiers exacts, précision
+du binaire64, arrondi fidèle sur quinze témoins ; raison `environment_selftest`), `src/api/manifest.cpp` (manifeste
+`ehgp.v11.output.v1`, `publish`, `withdraw`, `finish`, état de publication). La signature `tree_k_sha256` version 2
+est écrite à neuf d'après `docs/SORTIES.md`, paragraphe 8, et la réponse D.2 de l'auditeur (`aef7182b3`) ; son modèle
+Python (`receipts/audit_supports_implementation_20261004/evidence/check_d2_signature.py`) n'est pas porté : il sert
+de juge. Les trois valeurs gravées de `mhgp11_api_session_tree_digest` sont celles qu'il publie pour 21 et 24 bits ;
+celles du profil 18 bits sont calculées par sa fonction `signature` avec `bits = 18`. La version 1 (`BallIdx` des
+naissances) n'est plus calculée. `src/io/directory.cpp` : l'empreinte du manifeste est affectée dès sa fermeture, avant
+le renommage (réponse D.3), porte `mhgp11_io_transaction_noreplace`, mutant `empreinte_manifeste_apres_publication`.
+Bibliothèques de test sans source : `tests/cli/fenv_preload.cpp`, `tests/cli/io_fault_preload.cpp` (synchronisation
+du parent de `D` et renommages de `D` refusés). Portes : `mhgp11_api_session_*`, `mhgp11_api_session_fault_*`,
+`mhgp11_api_selftest_*` ; mutants de `tests/mutants/api.json`.
+
+**Intégration L1 (5 octobre 2026) : apports des auditeurs.** Commit d'intégration de S5 sur le commit de S6a, lui-même
+sur `238734f1d`. Les quatre points S5 de `9cbf805c6` sont présents dans la tranche corrigée (`SIGXFSZ` ignoré ;
+`published_complete` et empreinte du manifeste sur les trois doubles échecs ; champ `tree_k_sha256` jugé à plusieurs
+K ; portes causales de la sortie standard, des liens symboliques et d'`O_RDONLY`). Ajouts :
+- **Harnais variadique** (`238734f1d`, `a65903a7b`) : `tests/cli/io_fault_preload.cpp` ne lisait six `va_arg(long)`
+  pour tout syscall. Il décode désormais pour `SYS_renameat2` exactement les cinq arguments que passe
+  `src/io/directory.cpp` (`int`, `const char*`, `int`, `const char*`, `unsigned`) et les transmet dans ces types ;
+  tout autre numéro de syscall invalide la porte (jeton `mhgp11_io_fault_preload_invalide` sur la sortie d'erreur,
+  puis `abort`), et `cli_contract.py` nomme cette cause. Défaut de harnais seulement : aucun octet du produit ne change.
+- **P1 de l'audit général `a65903a7b`** : un `Product` garde le jeton d'identité de sa `Session` (l'adresse de son
+  budget, sur le tas, stable au déplacement), et `publish` refuse le produit d'une autre `Session`
+  (`parameter_out_of_range`) avant toute création de fichier et toute écriture du rapport. Porte
+  `mhgp11_api_session_session_identity`, sur le modèle de la fixture `api_session_identity.cpp` du reçu
+  `receipts/audit_geant_20261005/native/` ; mutant `produit_session_non_controlee`. `~Session` fait le contrôle de ARCHITECTURE § 7.1 : un budget non revenu à
+  zéro termine le processus (règle 4). Portes `mhgp11_api_session_destroyed_live` (arrêt anormal) et
+  `mhgp11_api_session_destroyed_released` (témoin) ; mutant `session_detruite_sans_controle`. Plancher du manifeste
+  `api` : 18 → 20.
+- **Point 3 de `9cbf805c6`, au niveau de l'exécutable** : `tests/cli/cli_tree_signature.py` (porte
+  `mhgp11_cli_tree_signature`) compare le champ `tree_k_sha256` publié par `mhgp11` à une sérialisation de la
+  signature version 2 écrite en bibliothèque standard d'après le modèle de l'auditeur
+  (`receipts/audit_supports_implementation_20261004/evidence/check_d2_signature.py`), sur ses trois fixtures, à $K=1$
+  et $K=2$, entrée permutée et réétiquetée ; la sérialisation doit aussi égaler les valeurs publiées par l'auditeur.

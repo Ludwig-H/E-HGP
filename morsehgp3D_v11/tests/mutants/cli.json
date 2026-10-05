@@ -1,0 +1,169 @@
+{
+  "module": "cli",
+  "plancher": 20,
+  "construction": [
+    "cli"
+  ],
+  "mutants": [
+    {
+      "id": "option_hors_sortie_admise",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "    if (raw.seen[slot] && kKnown[slot].plat_only) return \"option propre a la sortie plat\";",
+      "remplace": "    if (raw.seen[slot] && kKnown[slot].plat_only && slot == kKnown.size()) return \"option propre a la sortie plat\";",
+      "porte": "mhgp11_cli_contract",
+      "note": "--mcs, --z, --selection admis avec --sortie=full"
+    },
+    {
+      "id": "k_treize_admis",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "number < 1 || number > api::kMaxOrder) return \"--k hors de 1..12\";",
+      "remplace": "number < 1 || number > api::kMaxOrder + 1) return \"--k hors de 1..12\";",
+      "porte": "mhgp11_cli_contract",
+      "note": "--k=13 passe les options et n'est refuse qu'au calcul"
+    },
+    {
+      "id": "budget_nul_admis",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "    if (!parse_u64(raw.value[kBudget], number) || number == 0) return",
+      "remplace": "    if (!parse_u64(raw.value[kBudget], number) || number == 1) return",
+      "porte": "mhgp11_cli_contract",
+      "note": "--budget=0 admis par les options"
+    },
+    {
+      "id": "budget_ignore",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "api::Session::make({o.budget.value_or(MemoryBudget::kUnlimited), o.workers});",
+      "remplace": "api::Session::make({MemoryBudget::kUnlimited, o.workers});",
+      "porte": "mhgp11_cli_contract",
+      "note": "--budget sans effet"
+    },
+    {
+      "id": "fils_ignores",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "api::Session::make({o.budget.value_or(MemoryBudget::kUnlimited), o.workers});",
+      "remplace": "api::Session::make({o.budget.value_or(MemoryBudget::kUnlimited), 1});",
+      "porte": "mhgp11_cli_full_identity",
+      "note": "--fils sans effet : la ligne standard rapporte un seul fil"
+    },
+    {
+      "id": "entree_sur_sortie_standard_admise",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "        standard.input = true;",
+      "remplace": "        standard.input = false;",
+      "porte": "mhgp11_cli_contract",
+      "note": "la ligne JSON est ajoutee a une entree"
+    },
+    {
+      "id": "sortie_standard_non_controlee",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "  const bool flushed = std::fflush(stdout) == 0;\n  return flushed && std::ferror(stdout) == 0;",
+      "remplace": "  std::fflush(stdout);\n  return true;",
+      "porte": "mhgp11_cli_contract",
+      "note": "code 0 et dossier publie alors que la ligne standard est perdue"
+    },
+    {
+      "id": "retrait_omis",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "    run.publication = api::withdraw(fail(Reason::output_unwritable), directory);",
+      "remplace": "    run.publication = {fail(Reason::output_unwritable), run.publication.state, run.publication.manifest_sha256};",
+      "porte": "mhgp11_cli_contract",
+      "note": "ligne standard en echec apres la publication, dossier publie non retire"
+    },
+    {
+      "id": "pas_non_recopie",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "                                     o.budget,         o.grid_step,   o.origin};",
+      "remplace": "                                     o.budget,         {},            o.origin};",
+      "porte": "mhgp11_cli_contract",
+      "note": "--pas absent du manifeste"
+    },
+    {
+      "id": "ecriture_full_permutee",
+      "fichier": "src/api/write_full.cpp",
+      "cherche": "    out.word(node.child_begin);\n    out.word(node.child_count);",
+      "remplace": "    out.word(node.child_count);\n    out.word(node.child_begin);",
+      "porte": "mhgp11_cli_full_identity",
+      "note": "champs d'un noeud permutes : octets differents du dump de la sonde"
+    },
+    {
+      "id": "manifeste_taille_fausse",
+      "fichier": "src/api/manifest.cpp",
+      "cherche": "  number(out, file_bytes);",
+      "remplace": "  number(out, file_bytes + 1);",
+      "porte": "mhgp11_cli_full_identity",
+      "note": "taille du fichier full fausse dans le manifeste"
+    },
+    {
+      "id": "plan_avant_sortie_standard",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "  if (!standard.writable) return refuse(fail(Reason::output_unwritable), run, \"sortie standard fermee ou en lecture\");\n  if (standard.input) return refuse(fail(Reason::output_conflict), run, \"sortie standard egale a une entree\");\n  const std::array<const char*, 2> inputs{o.points, o.ids};\n  Result<io::OutputDirectory> planned = io::OutputDirectory::plan(o.directory, inputs);\n  if (!planned.ok()) return refuse(planned.outcome(), run, \"dossier de sortie\");\n",
+      "remplace": "  const std::array<const char*, 2> inputs{o.points, o.ids};\n  Result<io::OutputDirectory> planned = io::OutputDirectory::plan(o.directory, inputs);\n  if (!planned.ok()) return refuse(planned.outcome(), run, \"dossier de sortie\");\n  if (!standard.writable) return refuse(fail(Reason::output_unwritable), run, \"sortie standard fermee ou en lecture\");\n  if (standard.input) return refuse(fail(Reason::output_conflict), run, \"sortie standard egale a une entree\");\n",
+      "porte": "mhgp11_cli_contract",
+      "note": "dossier juge avant la sortie standard (etape 2 de SORTIES, paragraphe 3)"
+    },
+    {
+      "id": "sortie_standard_entree_ids_seulement",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "{std::string_view(\"--points=\"), std::string_view(\"--ids=\")}",
+      "remplace": "{std::string_view(\"--ids=\")}",
+      "porte": "mhgp11_cli_contract",
+      "note": "sortie standard sur le fichier de --points admise : la ligne s'y ajoute"
+    },
+    {
+      "id": "stdout_lstat",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "::stat(argv[i] + prefix.size(), &in) == 0",
+      "remplace": "::lstat(argv[i] + prefix.size(), &in) == 0",
+      "porte": "mhgp11_cli_contract",
+      "note": "entree designee par un lien symbolique vers la sortie standard non reconnue"
+    },
+    {
+      "id": "stdout_lecture_seule_admise",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "standard.writable = flags >= 0 && (flags & O_ACCMODE) != O_RDONLY && ::fstat(STDOUT_FILENO, &out) == 0;",
+      "remplace": "standard.writable = flags >= 0 && ::fstat(STDOUT_FILENO, &out) == 0;",
+      "porte": "mhgp11_cli_contract",
+      "note": "sortie standard en lecture seule admise : refus seulement apres calcul et publication"
+    },
+    {
+      "id": "ligne_refus_sortie_toujours_full",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "run.step != Step::options ? \"\\\"full\\\"\" : \"null\"",
+      "remplace": "\"\\\"full\\\"\"",
+      "porte": "mhgp11_cli_contract",
+      "note": "cle output de la ligne de refus jamais null a l'etape des options"
+    },
+    {
+      "id": "sigxfsz_non_ignore",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "  ::signal(SIGXFSZ, SIG_IGN);\n",
+      "remplace": "",
+      "porte": "mhgp11_cli_contract",
+      "note": "limite de taille de fichier : arret par SIGXFSZ et D.pending orphelin au lieu d'un refus"
+    },
+    {
+      "id": "etat_publie_omis",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "  const api::PublicationState state = run.publication.state;",
+      "remplace": "  const api::PublicationState state = api::PublicationState::none;",
+      "porte": "mhgp11_cli_contract",
+      "note": "ligne de refus publication none alors que D reste publie et complet"
+    },
+    {
+      "id": "refus_perdu_sortie_pleine",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "  if (!written) refusal_line(stderr, outcome, run);",
+      "remplace": "  if (!run.stdout_usable && !written) refusal_line(stderr, outcome, run);",
+      "porte": "mhgp11_cli_contract",
+      "note": "ligne de refus perdue quand la sortie standard utilisable echoue (aucun repli)"
+    },
+    {
+      "id": "retrait_omis_double_echec",
+      "fichier": "src/api/manifest.cpp",
+      "cherche": "  if (!written.ok()) return withdraw(written, directory);",
+      "remplace": "  if (!written.ok()) return state_of(written, directory);",
+      "porte": "mhgp11_cli_contract",
+      "note": "commit en double echec sans tentative de retrait par l'api (bibliotheque prechargee)"
+    }
+  ]
+}

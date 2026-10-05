@@ -58,3 +58,6 @@ MHGP11_REASON(tower_invariant, invariant_violated, tower)
 // prefixe) ; incoherence interne (S* degenere, niveau, premier support, tampons de l'appelant, fermeture)
 MHGP11_REASON(support_shell_capacity, unsupported_degeneracy, supports)
 MHGP11_REASON(supports_invariant, invariant_violated, supports)
+// auto-test F5 de l'environnement flottant au demarrage d'une Session (docs/ARCHITECTURE.md, paragraphe 4) : exception
+// flottante demasquee, mode d'arrondi inconnu, binaire64 inexact sur un noyau entier ou arrondi non fidele
+MHGP11_REASON(environment_selftest, invariant_violated, api)

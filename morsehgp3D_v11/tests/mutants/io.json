@@ -1,6 +1,6 @@
 {
   "module": "io",
-  "plancher": 21,
+  "plancher": 22,
   "mutants": [
     {
       "id": "sha_tronque",
@@ -169,6 +169,14 @@
       "remplace": "  committed_ = false;\n  failed_ = true;",
       "porte": "mhgp11_io_transaction_retract",
       "note": "retrait sans renommer D : le dossier publie reste, vide, sous son nom"
+    },
+    {
+      "id": "empreinte_manifeste_apres_publication",
+      "fichier": "src/io/directory.cpp",
+      "cherche": "  manifest_sha256_ = writers_[kMaxOutputFiles].digest();\n  return publish();",
+      "remplace": "  MHGP11_TRY(publish());\n  manifest_sha256_ = writers_[kMaxOutputFiles].digest();\n  return {};",
+      "porte": "mhgp11_io_transaction_noreplace",
+      "note": "empreinte du manifeste ferme perdue quand la publication echoue ensuite (double echec : D publie sans empreinte)"
     }
   ]
 }
