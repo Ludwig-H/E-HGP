@@ -1,0 +1,111 @@
+{
+  "snapshot_utc": "20261005T180324Z",
+  "base_head": "ab0f1ba520657fbc1b08f5f9359203558b1c2472",
+  "head_after_capture": "ab0f1ba520657fbc1b08f5f9359203558b1c2472",
+  "source_status": "WIP_not_qualified",
+  "developer_worktree": "/workspaces/E-HGP/build/v11-impl-l2",
+  "files": {
+    "morsehgp3D_v11/src/api/api.hpp": {
+      "snapshot_sha256": "38d6141d77e4a7c0f2a2a45658ea0984505720f7019c712168b50cd2d304af4b",
+      "after_capture_sha256": "38d6141d77e4a7c0f2a2a45658ea0984505720f7019c712168b50cd2d304af4b",
+      "base_sha256": "47847efcab6e811b101cdcdce6bf6060755f743d58355d2aa36827c567df20a3",
+      "stable_during_capture": true,
+      "bytes": 18391,
+      "lines": 286
+    },
+    "morsehgp3D_v11/src/api/compute.cpp": {
+      "snapshot_sha256": "46e3c3ea46189b5558665bd545627b2821ccb91f2917ab2147f4c62d5c113a28",
+      "after_capture_sha256": "46e3c3ea46189b5558665bd545627b2821ccb91f2917ab2147f4c62d5c113a28",
+      "base_sha256": "cb8125869d3dac396ef4f000b53afacc315fc615f5839eea716ab96b48cf241e",
+      "stable_during_capture": true,
+      "bytes": 11328,
+      "lines": 231
+    },
+    "morsehgp3D_v11/src/api/internal.hpp": {
+      "snapshot_sha256": "356816a110e8bda38150f07543390198b358585c8065107544846294f9635e0a",
+      "after_capture_sha256": "356816a110e8bda38150f07543390198b358585c8065107544846294f9635e0a",
+      "base_sha256": "3553830f6a175348068b3fd262215ccd03ab2f61584d419e0573412a1b1aa195",
+      "stable_during_capture": true,
+      "bytes": 6988,
+      "lines": 91
+    },
+    "morsehgp3D_v11/src/tower/forest_concurrent.cpp": {
+      "snapshot_sha256": "cf81987d8d05fd4ce5f87bb12be647bcf5f9d54583b18f3bf744f1b9358588b7",
+      "after_capture_sha256": "cf81987d8d05fd4ce5f87bb12be647bcf5f9d54583b18f3bf744f1b9358588b7",
+      "base_sha256": "1c7c58627e2dd952b42355276d0c3f87b3dea6c80252b3795e96786281de702a",
+      "stable_during_capture": true,
+      "bytes": 14535,
+      "lines": 300
+    },
+    "morsehgp3D_v11/src/tower/forest_internal.hpp": {
+      "snapshot_sha256": "ec1aa3414f152ba26c2eaac72d0fe3b9af343a53bc042b6029584e3e1b81a2ac",
+      "after_capture_sha256": "ec1aa3414f152ba26c2eaac72d0fe3b9af343a53bc042b6029584e3e1b81a2ac",
+      "base_sha256": "2a3d6483f4a08d268b4582bb2a820949d53b4a110336e3d06d0850aeeb65280a",
+      "stable_during_capture": true,
+      "bytes": 15708,
+      "lines": 257
+    },
+    "morsehgp3D_v11/src/tower/forest_pipeline.cpp": {
+      "snapshot_sha256": "9c73886cf708ed585d3e20fc6aa6cbb61ccb095659f2c2032a6134d1244d4f1e",
+      "after_capture_sha256": "9c73886cf708ed585d3e20fc6aa6cbb61ccb095659f2c2032a6134d1244d4f1e",
+      "base_sha256": "ea7fdfebb46e9ff273e48b2478cb42d564008aaed1ff0efd5d96aa6b41e972e4",
+      "stable_during_capture": true,
+      "bytes": 13709,
+      "lines": 256
+    },
+    "morsehgp3D_v11/src/tower/forest_vertical.cpp": {
+      "snapshot_sha256": "b6ce9c57ae49805926ebb92ecdbffa3b34ba16482005db0042a4b4fe0ea099ba",
+      "after_capture_sha256": "b6ce9c57ae49805926ebb92ecdbffa3b34ba16482005db0042a4b4fe0ea099ba",
+      "base_sha256": "805722ce6da873bd4f17cc94ee20877073439bcb1af75c2b7fb8f6f3d220f5e4",
+      "stable_during_capture": true,
+      "bytes": 19640,
+      "lines": 371
+    },
+    "morsehgp3D_v11/src/tower/order_tree.cpp": {
+      "snapshot_sha256": "c5fd5c3859a525932cdfb9f4d7d420efec01ba95661a0b587689fa8d0159e5ab",
+      "after_capture_sha256": "c5fd5c3859a525932cdfb9f4d7d420efec01ba95661a0b587689fa8d0159e5ab",
+      "base_sha256": "90cd183e46431940262bc6393e72f2f118e7319274bf12c277c5c32e7d5a92b0",
+      "stable_during_capture": true,
+      "bytes": 7927,
+      "lines": 152
+    },
+    "morsehgp3D_v11/src/tower/order_tree.hpp": {
+      "snapshot_sha256": "b71b4f2a711cc04c0dc7388d660ada4097ef9629b05cabbd0b86b1d6e34e617c",
+      "after_capture_sha256": "b71b4f2a711cc04c0dc7388d660ada4097ef9629b05cabbd0b86b1d6e34e617c",
+      "base_sha256": "e4e0996973e1157eddc203512913eb501aea982f55ada01435b7c62242361f4b",
+      "stable_during_capture": true,
+      "bytes": 7977,
+      "lines": 121
+    },
+    "morsehgp3D_v11/src/tower/tower.hpp": {
+      "snapshot_sha256": "73fb5bc7a5000f97ef680a0fc02648f4916f0b705a1d22bd92aa401ed2c2a0f2",
+      "after_capture_sha256": "73fb5bc7a5000f97ef680a0fc02648f4916f0b705a1d22bd92aa401ed2c2a0f2",
+      "base_sha256": "82744b15963d8ce66518d737db782c747d3015a38ebd70e2a9ffdad1aa430a4b",
+      "stable_during_capture": true,
+      "bytes": 1121,
+      "lines": 31
+    }
+  },
+  "dependencies_from_base_pin": {
+    "morsehgp3D_v11/src/tower/seed_log.hpp": {
+      "base_sha256": "40a275794f7124f45da98bca5ad5aaab5335f6ae6aa0e7c60f2867e3fa2ba54d",
+      "bytes": 4479,
+      "working_copy_matches_base_at_closure": true
+    },
+    "morsehgp3D_v11/src/tower/forest_plateau.cpp": {
+      "base_sha256": "0494d978fdc2188f288cf5a55dbf6bbe18bbb9436bde8c2756da070d16bc0300",
+      "bytes": 7060,
+      "working_copy_matches_base_at_closure": true
+    },
+    "morsehgp3D_v11/src/tower/forest.hpp": {
+      "base_sha256": "f1014b0332eed89d36866eabb4eb659a5f5fdf66b4f96d4703c3ef596d910e28",
+      "bytes": 9926,
+      "working_copy_matches_base_at_closure": true
+    },
+    "morsehgp3D_v11/src/sched/pool.cpp": {
+      "base_sha256": "fd72a1abe07dbb9700821cd0c636344c12e3a7a8ae968bdf3a086f514c270fde",
+      "bytes": 3711,
+      "working_copy_matches_base_at_closure": true
+    }
+  }
+}

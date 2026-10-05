@@ -1,0 +1,11 @@
+--- ab0f1ba520657fbc1b08f5f9359203558b1c2472:morsehgp3D_v11/src/tower/tower.hpp
++++ WIP:morsehgp3D_v11/src/tower/tower.hpp
+@@ -24,6 +24,8 @@
+ using tower_detail::WindowAttachment;
+ using tower_detail::BallRole;
+ using tower_detail::build_order;
++using tower_detail::build_order_full;
++using tower_detail::SeedLogRegisters;
+ using tower_detail::AncestorIndex;
+ 
+ }  // namespace mhgp11

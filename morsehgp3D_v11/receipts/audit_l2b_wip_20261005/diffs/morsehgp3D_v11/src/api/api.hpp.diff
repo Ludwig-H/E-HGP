@@ -1,0 +1,79 @@
+--- ab0f1ba520657fbc1b08f5f9359203558b1c2472:morsehgp3D_v11/src/api/api.hpp
++++ WIP:morsehgp3D_v11/src/api/api.hpp
+@@ -18,10 +18,12 @@
+ //
+ // Moteur : parametres FIXES, ceux du masque qualifie 16379 des sondes (bench/points_export.cpp : feuilles de 16 a 256
+ // sites, graphe de paires, tables de populations, ordres concurrents, sans memo) ; aucune option de moteur (regle 6).
+-// Les sorties supports et points construisent l'arbre d'ordre K seul (build_order) au masque 7035 : 16379 sans les trois options
+-// que build_order refuse, sans objet pour un ordre seul (verticales paralleles 128, reemploi des verticales regulieres
+-// 1024, ordres concurrents 8192) ; FULL garde 16379 (audit 238734f1d, mesure appariee de docs/SORTIES.md,
+-// paragraphe 11).
++// La sortie supports tire l'arbre d'ordre K de FULL au masque 16379, journal des graines pose sur l'ordre K
++// (build_order_full, livraison L2b decidee par la regle de L2 de docs/SORTIES.md, paragraphe 11). La sortie points
++// construit l'arbre d'ordre K seul (build_order) au masque 7035 : 16379 sans les trois options que build_order refuse,
++// sans objet pour un ordre seul (verticales paralleles 128, reemploi des verticales regulieres 1024, ordres
++// concurrents 8192 ; audit 238734f1d). Les deux voies donnent la meme foret et le meme rattachement (porte I10 ;
++// MHGP11SP identique a l'octet par les deux voies : mhgp11_api_supports_route*).
+ // Le nombre de fils ne change aucun octet publie (portes mhgp11_cli_full_determinism, mhgp11_cli_supports_*).
+ #pragma once
+ 
+@@ -100,7 +102,8 @@
+ struct FullRequest {
+   Order k = 0;
+ };
+-// Sortie supports : arbre d'ordre K seul, boules de W_K rattachees, tous leurs supports positifs minimaux.
++// Sortie supports : arbre d'ordre K (tire de FULL, L2b), boules de W_K rattachees, tous leurs supports positifs
++// minimaux.
+ struct SupportsRequest {
+   Order k = 0;
+ };
+@@ -113,11 +116,12 @@
+ [[nodiscard]] OutputKind request_kind(const Request& request) noexcept;
+ 
+ // Etages d'un appel. compute remplit cloud (preparation du nuage ; le CLI y ajoute la lecture), index, domain, tree
+-// (forets 1 a K de FULL ; arbre d'ordre K seul pour supports, balayage du rattachement exclu), attach (supports :
+-// diagnostic attach_ns de build_order ; nul pour full) et, pour supports, output (assemblage de la hierarchie des
+-// supports, build_support_hierarchy) ; publish remplit output pour full (vide : le produit est la tour) et write
+-// (fichiers, empreinte de l'arbre, manifeste, synchronisations et renommage) ; total revient a l'appelant. Pic :
+-// octets reserves les plus hauts pendant l'etage (MemoryBudget::restart_peak), mesure.
++// (forets 1 a K de FULL ; pour supports, FULL avec le journal sur l'ordre K puis extraction de l'ordre K, balayage du
++// rattachement exclu ; pour points, arbre d'ordre K seul, balayage exclu), attach (supports et points : diagnostic
++// attach_ns, balayage du lemme D et controles I1 a I4 ; nul pour full) et, pour supports, output (assemblage de la
++// hierarchie des supports, build_support_hierarchy) ; publish remplit output pour full (vide : le produit est la tour)
++// et write (fichiers, empreinte de l'arbre, manifeste, synchronisations et renommage) ; total revient a l'appelant.
++// Pic : octets reserves les plus hauts pendant l'etage (MemoryBudget::restart_peak), mesure.
+ enum class Stage : u8 { cloud, index, domain, tree, attach, output, write, total };
+ inline constexpr std::size_t kStageCount = 8;
+ [[nodiscard]] std::string_view stage_name(Stage stage) noexcept;
+@@ -131,6 +135,14 @@
+ };
+ 
+ class Product;
++}  // namespace mhgp11::api
++
++namespace mhgp11::api_detail {
++// Fabrique interne des produits (api/internal.hpp) : voie de la sortie supports choisie par les portes (L2b).
++struct ProductAccess;
++}  // namespace mhgp11::api_detail
++
++namespace mhgp11::api {
+ 
+ // Calcule le produit d'une requete. Ordre des refus (docs/SORTIES.md, paragraphe 3, etapes 5 a 7) :
+ //   parameter_out_of_range (k hors de 1..12, requete inconnue) ;
+@@ -165,7 +177,7 @@
+   const FullDomain& domain() const noexcept { return tower_ ? tower_->domain() : order_->domain(); }
+   // Precondition : kind() == full.
+   const FullTower& full() const noexcept { return *tower_; }
+-  // Precondition : kind() == supports ou points. Arbre d'ordre K seul (et rattachement).
++  // Precondition : kind() == supports ou points. Arbre d'ordre K (et rattachement).
+   const OrderTree& order_tree() const noexcept { return *order_; }
+   // Precondition : kind() == supports. Hierarchie des supports.
+   const supports::SupportHierarchy& hierarchy() const noexcept { return *hierarchy_; }
+@@ -178,6 +190,7 @@
+ 
+  private:
+   friend Result<Product> compute(Session&, const CloudView&, const Request&, RunReport*) noexcept;
++  friend struct api_detail::ProductAccess;
+   Product(const Request& request, FullTower&& tower, const void* session) noexcept
+       : request_(request), tower_(std::move(tower)), session_(session) {}
+   Product(const Request& request, OrderTree&& tree, supports::SupportHierarchy&& hierarchy,

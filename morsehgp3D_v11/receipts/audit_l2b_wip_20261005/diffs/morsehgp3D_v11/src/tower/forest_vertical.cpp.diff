@@ -1,0 +1,66 @@
+--- ab0f1ba520657fbc1b08f5f9359203558b1c2472:morsehgp3D_v11/src/tower/forest_vertical.cpp
++++ WIP:morsehgp3D_v11/src/tower/forest_vertical.cpp
+@@ -151,6 +151,9 @@
+     MHGP11_TRY(budget.admit(up.nodes_.size() * sizeof(NodeIdx)));
+     return up.lower_.allocate(up.nodes_.size(), budget);
+   }
++
++  // Arbre d'ordre K tire de FULL (build_order_full) : images basses rendues a leur budget.
++  static void drop(OrderForest& up) noexcept { up.lower_ = Buffer<NodeIdx>{}; }
+ 
+   // Travail des images et du balayage suivi, ajoute apres le join : memes totaux que images puis sweep_all.
+   static Outcome add_work(OrderForest& up, const ForestLedger& work) noexcept {
+@@ -278,14 +281,13 @@
+   return pool.parallel_for(forests.size() - 1, 1, &tasks, SweepTasks::body);
+ }
+ 
+-Result<FullTower> build_full(FullDomain&& domain, MemoryBudget& budget, FullTimings* timings,
+-                            FullParams params, sched::Pool* pool) noexcept {
+-  const Order kmax = domain.catalogue().kmax();
+-  if (kmax == 0 || kmax > domain.index().cloud().sites()) return fail(Reason::parameter_out_of_range);
+-  MHGP11_TRY(ForestParallel::validate(params, pool));
++void drop_verticals(OrderForest& forest) noexcept { VerticalBuilder::drop(forest); }
++
++Outcome build_forests(const FullDomain& domain, Order kmax, MemoryBudget& budget, FullTimings* timings,
++                      const FullParams& params, sched::Pool* pool, OrderLog log,
++                      std::array<std::optional<OrderForest>, kMaxMebSites>& orders) noexcept {
+   FullTimings draft;
+   draft.memo_slot_bytes = DescentMemo::slot_bytes();
+-  std::array<std::optional<OrderForest>, kMaxMebSites> orders;
+   {
+     std::optional<RegularVerticalSeeds> vertical_seeds;
+     draft.reuse_regular_verticals = params.reuse_regular_verticals;
+@@ -329,7 +331,7 @@
+     if (params.concurrent_orders) {
+       MHGP11_TRY(build_concurrent(domain, kmax, budget, timings == nullptr ? nullptr : &draft, *parallel, *pool,
+                                   vertical_seeds ? &*vertical_seeds : nullptr, population ? &*population : nullptr,
+-                                  params.dense_birth_lookup, orders));
++                                  params.dense_birth_lookup, orders, log));
+     }
+     for (u32 k = 1; k <= kmax && !params.concurrent_orders; ++k) {
+       // Parametres bornes par K et contextes construits ici dans le meme domaine ; cache prive a cet appel FULL.
+@@ -337,6 +339,7 @@
+                             parallel ? &*parallel : nullptr, params.dense_birth_lookup,
+                             vertical_seeds ? &*vertical_seeds : nullptr);
+       builder.population = population ? &*population : nullptr;
++      builder.seed_log = order_log(log, k);  // journal de l'ordre demande, ecrit par ce pilote seul
+       auto made = builder.run();
+       if (!made.ok()) return made.outcome();
+       orders[k - 1].emplace(std::move(made.value()));
+@@ -352,6 +355,16 @@
+     }
+   }  // Rend les memos, le contexte Pool et les workspaces AVANT le deplacement du domaine.
+   if (timings != nullptr) *timings = draft;
++  return {};
++}
++
++Result<FullTower> build_full(FullDomain&& domain, MemoryBudget& budget, FullTimings* timings,
++                            FullParams params, sched::Pool* pool) noexcept {
++  const Order kmax = domain.catalogue().kmax();
++  if (kmax == 0 || kmax > domain.index().cloud().sites()) return fail(Reason::parameter_out_of_range);
++  MHGP11_TRY(ForestParallel::validate(params, pool));
++  std::array<std::optional<OrderForest>, kMaxMebSites> orders;
++  MHGP11_TRY(build_forests(domain, kmax, budget, timings, params, pool, OrderLog{}, orders));
+   return FullTower(std::move(domain), std::move(orders), kmax);
+ }
+ 

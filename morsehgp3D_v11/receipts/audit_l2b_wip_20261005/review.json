@@ -1,0 +1,79 @@
+{
+  "frame": {
+    "phase": "exploration_v11_hors_registre",
+    "backend": "cpu_reference",
+    "profile": "quantized_u21_input_only",
+    "public_status": "not_claimed"
+  },
+  "status": "WIP_non_qualifie",
+  "base_head": "ab0f1ba520657fbc1b08f5f9359203558b1c2472",
+  "snapshot_utc": "20261005T180324Z",
+  "important_finding": {
+    "kind": "cout_public_inutile_du_diagnostic_de_porte",
+    "source": "src/api/compute.cpp:215-225",
+    "cause": "compute_supports passe toujours &seen alors que diagnostics peut etre nullptr; la destination finale nullable ne rend pas le calcul facultatif.",
+    "public_call": "src/api/compute.cpp:180-182 appelle compute_supports sans SupportsDiagnostics (valeur par defaut nullptr dans api/internal.hpp).",
+    "chain": [
+      {
+        "source": "src/api/compute.cpp:125-136",
+        "fact": "diagnostics recu non nul via &seen => registers = &diagnostics->log; build_order_full recoit ce pointeur."
+      },
+      {
+        "source": "src/tower/order_tree.cpp:135-136",
+        "fact": "journal ferme, registers non nul => appel registers_of(log), avant extraction et rattachement."
+      },
+      {
+        "source": "src/tower/order_tree.cpp:44-54",
+        "fact": "deux feed par cellule et un feed par graine; huit iterations FNV-1a par feed."
+      }
+    ],
+    "exact_work": {
+      "words": "2*C + G",
+      "fnv_byte_iterations": "16*C + 8*G",
+      "variables": "C=log.cells(), G=log.seeds() apres close()",
+      "duration_or_speedup_measured": false,
+      "lidar_counts_inferred": false
+    },
+    "accounting": "src/api/compute.cpp:138-140 : tree_clock englobe ce parcours; il entre dans Stage::tree, hors attach_ns. Les chronos restent le temps reel paye. Aucun defaut du produit geometrique ni du budget memoire deduit.",
+    "targeted_fix": "transmettre diagnostics != nullptr ? &seen : nullptr a supports_parts; copie finale *diagnostics=seen deja conditionnelle.",
+    "scope": "Constat sur cette capture WIP; pas un blocage de la publication courante ni une garantie de gain."
+  },
+  "ownership_concurrency_reading": [
+    {
+      "sources": [
+        "src/tower/forest_internal.hpp:205-215",
+        "src/tower/forest_concurrent.cpp:244-251"
+      ],
+      "fact": "OrderLog choisit uniquement le constructeur k demande; un seul seed_log pointe sur le journal appartenant au cadre build_order_full."
+    },
+    {
+      "sources": [
+        "src/tower/forest_concurrent.cpp:155-170,284-285",
+        "src/tower/forest_pipeline.cpp:82-118,184-186,247",
+        "src/tower/forest_plateau.cpp:40-68,103-123"
+      ],
+      "fact": "Publication unique par ordre; seules cell/regular_cell ouvrent/ajoutent dans le journal. Resolutions/verticales ne manipulent pas ce journal. Pool reclame chaque indice une fois."
+    },
+    {
+      "sources": [
+        "src/sched/pool.cpp:55-65,105-113",
+        "src/tower/order_tree.cpp:129-145"
+      ],
+      "fact": "parallel_for attend tous les workers et fusionne les refus avant retour; log.close/registers/attach lisent ensuite. Journal et domaine demeurent vivants; domaine deplace seulement au succes."
+    },
+    {
+      "sources": [
+        "src/tower/order_tree.cpp:14-39,129-145",
+        "src/tower/forest.hpp:83-88",
+        "src/tower/forest_vertical.cpp:155-157,283"
+      ],
+      "fact": "Capacites journal admises avant trois allocations, majorant conservateur; RAII sur refus. Ordre k extrait par move, autres ordres reset, lower libere avant attach; journal rendu avant transfert domaine."
+    }
+  ],
+  "conclusion": "Aucun autre nouveau defaut important trouve dans le delta lu; avis favorable en lecture pour ownership/concurrence, sans qualification native.",
+  "limits": [
+    "Brouillon en evolution: verdict lie aux 10 SHA captures, pas aux modifications ulterieures.",
+    "Aucun build/test natif ni GCP; aucune qualification precedente transferee.",
+    "Identite FULL/MHGP11SP/journal et TSan demeurent a etablir par les portes propres a L2b; absence de portes WIP pas classee comme defaut."
+  ]
+}

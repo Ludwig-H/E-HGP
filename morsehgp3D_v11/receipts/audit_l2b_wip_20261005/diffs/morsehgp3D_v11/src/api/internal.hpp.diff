@@ -1,0 +1,29 @@
+--- ab0f1ba520657fbc1b08f5f9359203558b1c2472:morsehgp3D_v11/src/api/internal.hpp
++++ WIP:morsehgp3D_v11/src/api/internal.hpp
+@@ -26,6 +26,26 @@
+ [[nodiscard]] FullParams order_params() noexcept;
+ inline constexpr u64 kOrderMask = 7035;
+ static_assert(kOrderMask == (kEngineMask & ~(u64{128} | u64{1024} | u64{8192})), "api : masque 7035 = 16379 - 9344");
++
++// Voie de l'arbre d'ordre K de la sortie supports (livraison L2b, docs/SORTIES.md paragraphe 11) : full_tower,
++// build_order_full au masque 16379 de FULL (journal des graines sur l'ordre K, extraction de l'ordre K) ; order_tree,
++// build_order au masque 7035. La regle de L2, ecrite d'avance, a decide livrer_L2b (mesure appariee G4 du 5 octobre
++// 2026, rapports supports/full de l'etage tree a W48 de 1,21, 1,18 et 1,09) : full_tower est la voie de compute.
++// order_tree reste disponible et jugee : les portes mhgp11_api_supports_route* exigent MHGP11SP et manifeste
++// identiques a l'octet par les deux voies, et les registres du journal egaux.
++enum class SupportsRoute : u8 { full_tower, order_tree };
++inline constexpr SupportsRoute kSupportsRoute = SupportsRoute::full_tower;
++// Registres d'un calcul supports par une voie (diagnostic de porte).
++struct SupportsDiagnostics {
++  SeedLogRegisters log;
++  u64 attach_ns = 0;
++};
++
++// Produit de la sortie supports par la voie demandee : memes etages, memes refus et meme rapport que compute (qui
++// l'appelle avec kSupportsRoute). Aucune exception ne sort (guarded).
++[[nodiscard]] Result<api::Product> compute_supports(api::Session& session, const api::CloudView& cloud, Order k,
++                                                    SupportsRoute route, api::RunReport* report = nullptr,
++                                                    SupportsDiagnostics* diagnostics = nullptr) noexcept;
+ 
+ // Ecrit la tour au format MHGP11FUL1 (paragraphe 6.2) : port octet pour octet de serialize, bench/full_probe.cpp.
+ // Refus : output_unwritable (ecriture), tower_invariant (sphere de naissance absente), arithmetic_invariant (num).

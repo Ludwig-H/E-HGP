@@ -1,0 +1,25 @@
+{
+  "files": {
+    "morsehgp3D_v11/bench/catalogue_semantic.py": "f09d2dff28098ff9c5288a69058b776350a6339034d17397491c073257196f2c",
+    "morsehgp3D_v11/bench/full_semantic.py": "1ffda4fb32e58d9cadd6f8c87a4cabe0eb28c0bcc5769ba8370b2738bd4d8d25",
+    "morsehgp3D_v11/bench/mhgp11_formats.py": "38300ed3d1fe5f36a0024808fcf0f3fb164e9c76842ecc8d3bbad9252faf7073",
+    "morsehgp3D_v11/reference/hgp11_ref/__init__.py": "5309faf36a56bfb719d9fff4fb5872045aad87b1b35b2fc3992fd2c37791ad3e",
+    "morsehgp3D_v11/reference/hgp11_ref/constructive.py": "7e97f89789cafb4f241903e6d0f0e636425cdf3d526697e4e891d483f868fedc",
+    "morsehgp3D_v11/reference/hgp11_ref/definition.py": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43",
+    "morsehgp3D_v11/reference/hgp11_ref/dumps.py": "2ece0b491430e314091de7b40a72233e299c543f236bcc00bbd5f84b38338373",
+    "morsehgp3D_v11/reference/hgp11_ref/families.py": "244b9b325a7c9f43c7086cc7e9674bdc04ec2307a01bf69e2b12d5f02e75d73a",
+    "morsehgp3D_v11/reference/hgp11_ref/intgeom.py": "d0f7b1cecbbb1b25c3091bc1e3d3d062b9ee0f16b1d81c7117bf60b0d13a3f4b",
+    "morsehgp3D_v11/reference/hgp11_ref/judge.py": "09e65a40f7ff33400c04eb91c442a430579bf020b115589b69ad8384529d6507",
+    "morsehgp3D_v11/reference/hgp11_ref/model.py": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c",
+    "morsehgp3D_v11/reference/hgp11_ref/supports.py": "970f645462a019639cead958cf8f45b1324cf3083bb61fc9a0891ddc523254ee",
+    "morsehgp3D_v11/src/points/settle.cpp": "a7d7c6c32f9ca369d9b1f515a4add1dcb73ae8abc3a06efa7a1da0ba3ea9617d",
+    "morsehgp3D_v11/tests/points/points_fixtures.py": "2f3f2cad015d2f3ae36e5682031d2574354c06b4dc602931ef730efe450262b5",
+    "morsehgp3D_v11/tests/points/points_oracle_stdlib.py": "9911ac0764740688482ad5129742527d0a65cf104db6865d160cf80129467ade",
+    "morsehgp3D_v11/tests/points/points_vs_python.py": "469314b16f28f1c7197619f281012043d033bc065cdbcce1b51250f6a52028dc",
+    "morsehgp3D_v11/tests/points/tests.cmake": "fab2d65223c63c72f62dd9f2bffe631e83a6a84607f8c6ee17d02c6ce296175a",
+    "morsehgp3D_v11/tools/g4_matrix.json": "b2f54743f518393666271520179d212213d449e01db4fd81c1eef214930bf0a7"
+  },
+  "pin": "c97776ea8b8730bc41c8da4b137879cb8b544c2c",
+  "points_commit": "3d47eaa9313164f878e39dd7d59ee3a08032659e",
+  "scope": "G4 qualification coverage of FloorRank, no native execution"
+}

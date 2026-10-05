@@ -1,0 +1,31 @@
+{
+  "schema": "ehgp.v11.session_plan.v1",
+  "python_packages": "pinned",
+  "default_build": true,
+  "build_targets": ["mhgp11_points_probe", "mhgp11_points_export"],
+  "build_timeout_seconds": 1800,
+  "results_cap_bytes": 67108864,
+  "note": "Proposition auditeur, non executee : quatre differentiels exacts S9 deja declares, Release u21. Source integree poussee a choisir avec --commit. Fournir les six fichiers lidar_ng00/ng01/ng02.u32le et .ids.u32le du protocole, hors depot. Commandes sequentielles et delais distincts ; ne remplace pas les portes sanitizers, mutants ni la qualification de L2b/S10.",
+  "commands": [
+    {
+      "name": "points_python_synthetique",
+      "timeout_seconds": 4200,
+      "argv": ["ctest", "--no-tests=error", "--output-on-failure", "-j", "1", "-R", "^mhgp11_points_vs_python$", "--timeout", "3600"]
+    },
+    {
+      "name": "points_python_ng00",
+      "timeout_seconds": 4200,
+      "argv": ["ctest", "--no-tests=error", "--output-on-failure", "-j", "1", "-R", "^mhgp11_points_vs_python_lidar_ng00_k5$", "--timeout", "3600"]
+    },
+    {
+      "name": "points_python_ng01",
+      "timeout_seconds": 4200,
+      "argv": ["ctest", "--no-tests=error", "--output-on-failure", "-j", "1", "-R", "^mhgp11_points_vs_python_lidar_ng01_k5$", "--timeout", "3600"]
+    },
+    {
+      "name": "points_python_ng02",
+      "timeout_seconds": 4200,
+      "argv": ["ctest", "--no-tests=error", "--output-on-failure", "-j", "1", "-R", "^mhgp11_points_vs_python_lidar_ng02_k5$", "--timeout", "3600"]
+    }
+  ]
+}

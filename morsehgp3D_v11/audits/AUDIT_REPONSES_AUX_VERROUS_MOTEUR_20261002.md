@@ -8,7 +8,37 @@ aux reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 Note maintenue en place ; détails et échanges clos dans les reçus.
 
-## S9 en développement : raccord des points
+## Réponse aux trois questions avant S10 — note développeur d26328fe2
+
+**Refus EOM : oui, refuser l'appel entier.** Au premier
+`radical_sign_budget`, propager le refus, sans arbitrage parent/enfants
+ni sortie plate partielle. Une comparaison indécidable ne constitue pas
+une égalité ; le parent reste choisi seulement sur égalité certifiée.
+Les feuilles à zéro de K1 ne justifient pas un refus : `mcs≥2` les écarte
+avant le calcul du score. Les dates effectivement inversées doivent être
+positives ; la borne haute infinie garde sa contribution nulle.
+
+**Réciproques et z=2/3 : réutiliser les témoins existants.** Le
+[reçu exact](../receipts/eom_exact_audit_20261004/README.md) contrôle déjà
+292 dates positives, dont 13 cas `Δ=0`, les identités de la réciproque et
+de son cube, et le facteur 2 du terme mixte. Pour le port de z=2, ajouter
+l'identité `e²·(1/e)²=1` sur ces mêmes cas, y compris une date à trois
+racines et le cas singulier positif. Les classes du carré sont
+`{1,tM,tq,Mq}`, celles du cube `{t,M,q,tMq}` : au plus quatre **par date**,
+pas par score entier. Garder F4b pour distinguer z=1/z=2, ainsi que F4_z3 ;
+une égalité à z=1 ne prouve pas une égalité à z=2 ou z=3.
+
+**Oracle : aucun troisième oracle complet demandé.** La même session
+d'écriture n'annule pas l'indépendance algorithmique : l'oracle énumère
+les antichaînes, la tête utilise une programmation dynamique. La
+contre-épreuve indépendante ci-dessus couvre l'algèbre et l'égalité `√2/8`, sans prétendre avoir
+rejoué tous les F14. Conserver les attendus manuels F14a–e sur la
+condensation, les plateaux, `mcs` et la forêt, puis les comparer à la tête
+native par la porte exacte. Des constantes de scores gravées seules ne
+qualifient pas les clusters effectivement sélectionnés. Cette réponse
+ne nécessite pas une nouvelle campagne avant d'implémenter S10.
+
+## S9 publiée : raccord des points
 
 Sur la capture du brouillon au-dessus de **53c027fe8**, les chemins
 mathématiques relus concordent : qualification aux coupes fermées,
@@ -18,17 +48,26 @@ atomiques. Six petits témoins recoupent **43 qualifications, 387 LCA et
 les entrées dans un bloc vivant. Les propositions flottantes sont
 corrigées par les deux certificats exacts du plancher et de son successeur.
 
-Cette contre-épreuve exclut le chemin de refus du tri. Le correctif local
-remplace depuis le tri défaillant par un tri qui propage immédiatement
-le refus ; relecture favorable, publication et qualification G4 à confirmer.
+Cette contre-épreuve exclut le chemin de refus du tri. Le correctif publié
+en **3d47eaa93**, identique à la capture relue,
+remplace le tri défaillant par un tri qui propage immédiatement
+le refus ; relecture favorable, qualification G4 à confirmer.
 [Correctif et portée](../receipts/audit_s9_sort_fix_20261005/README.md).
 Aucun succès de ce modèle Python ne
 qualifie la sortie native S9. Le lecteur du fichier contrôle des
 conditions nécessaires ; le plancher maximal et l'arbre complet sont
 recoupés par les portes différentielles du moteur.
+
+**Qualification S9 :** la matrice c97776ea8 exclut désormais les quatre
+différentiels `points_vs_python`. Garder leur exécution dédiée sur G4,
+notamment sur les trois trames entières : l'oracle borné et le lecteur ne
+certifient pas seuls l'identité complète des champs à K5, dont le plancher
+maximal. Le moteur conserve sa certification exacte de ce plancher ;
+aucun défaut produit n'est déduit de cette limite des portes.
+[Contre-épreuve ciblée et plan Python épinglé](../receipts/audit_s9_qualification_scope_20261005/README.md).
 [Périmètre, contre-épreuve et alerte de tri](../receipts/audit_s9_wip_20261005/README.md).
 
-## S8 : signes et égalités exacts pour la future sortie points
+## S8 : signes et égalités exacts pour la sortie points
 
 Relecture favorable au pin **53c027fe8**, sans nouveau défaut important
 établi. La conversion `c√(n/d) = (c/d)√(nd)` est exacte. La signature

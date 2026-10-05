@@ -10,7 +10,7 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
-## S9 : correctif du refus de tri relu, qualification à poursuivre
+## S9 : correctif du refus de tri publié, qualification à poursuivre
 
 **Constat important sur le brouillon, base 53c027fe8.** Dans
 `src/points/point_tree.cpp`, `entry_order` trie les dates strictes avec
@@ -27,7 +27,8 @@ immédiatement le refus s'arrête proprement. C'est une preuve du danger
 du chemin de refus, pas un crash natif ni la construction d'un nuage u21
 épuisant réellement les 6 144 bits de raffinement.
 
-**Correction locale relue au-dessus de 451301787 : favorable.**
+**Correction publiée en 3d47eaa93 : favorable.** Les quatre fichiers sont
+identiques à la capture précédemment relue au-dessus de 451301787.
 `heap_sort_until_refusal` arrête chaque étape au premier `Outcome`
 refusé, avant d'utiliser la réponse de comparaison. Il n'alloue aucun
 tampon. `date_less` conserve le départage SiteIdx des égalités exactes ;
@@ -39,7 +40,8 @@ et bornes conservés. Le raccord `PointTreeBuilder` → `HangBuilder` → API
 → CLI retourne avant publication ; les brouillons possédés sont détruits
 au retour. Ce dernier constat est une lecture de source, pas une injection
 native de bout en bout. La nouvelle porte `sort_refusal` exerce le helper ;
-son exécution G4 et la publication du correctif restent à confirmer.
+son exécution G4 reste à confirmer. Le sixième mutant de `points`,
+`tri_refus_ignore`, cible la propagation du refus dans le tas.
 [Correctif, preuves bornées et limites](../receipts/audit_s9_sort_fix_20261005/README.md).
 [Sources figées, modèle et limites](../receipts/audit_s9_wip_20261005/README.md).
 
@@ -72,11 +74,13 @@ Les 53 portes API/IO/contrat CLI et les oracles supports normal/`-O`
 passent dans chaque profil. Sous sanitizer, le contrat CLI omet les
 préchargements : ce succès ne rejoue pas le crochet variadique.
 
-Les 50 absents ASan sont inclus dans les 65 absents TSan. Pour terminer,
-reprendre ces ensembles exacts avec un découpage qui leur laisse le temps
-de finir ; relancer les 824 tests avec la même échéance ne traite pas la
-cause observée. Garder source, options et inventaire des tests rapprochés
-des résultats ; une source plus récente exige sa propre requalification.
+Les 50 absents ASan sont inclus dans les 65 absents TSan. La matrice
+c97776ea8 avait retiré 82 portes d'échelle/LiDAR de chacune de ces
+anciennes sélections, dont tous les absents. **a7711b506 revient sur ce
+choix et les répartit en huit lots dédiés**, deux ASan/UBSan u24 et six
+TSan u21. C'est le découpage demandé ; il reste à constater les résultats
+sur la source intégrée. Ni le nouveau plan ni A2 ne complètent à eux seuls
+les captures B. Les inventaires de reprise gardent les noms exacts.
 [Preuve B et noms des portes manquantes](../receipts/audit_g4_b_20261005/README.md).
 [Ensembles de reprise exacts par module](../receipts/audit_g4_b_restart_20261005/README.md).
 
@@ -91,8 +95,8 @@ sous `-O` et ne sont pas qualifiés en u18/u24 ou sous sanitizers.
 **Mesure et complément W48 désormais joués.** La session
 `claudequalmesure`, sur b319efc84, ferme la mesure appariée et les
 permutations/réétiquetages supports W48 sur ng02 et ng00 : 14 appels par
-porte, verdicts conformes. Restent les 50/65 portes sanitizers de B,
-la qualification de S8/S9 et celle de la future voie L2b. Aucun contrat
+porte, verdicts conformes. La couverture des 50/65 portes sanitizers de B
+reste absente ; S8/S9 et la future voie L2b restent à qualifier. Aucun contrat
 100 ms n'est acquis. Les fermetures ciblées et les empreintes sont relues.
 [Reçus L/mesure et portée](../receipts/audit_l2_decision_20261005/README.md).
 [Preuve A2, noms exacts et rejeu](../receipts/audit_g4_a2_20261005/README.md).
@@ -104,6 +108,31 @@ terminé et **459 mutants u18 détectés**, dont 15 supports, 22 API et
 résultats A2 ont leur propre source et reçu. Le produit et ses portes
 sont inchangés entre 00bd979ac et b319efc84.
 [Preuve antérieure](../receipts/audit_g4_sorties_20261005/README.md).
+
+## Qualification de S9 : garder le différentiel exact sur trames entières
+
+**Le filtre `_vs_python` de c97776ea8 retire les quatre différentiels S9
+de la configuration `release_long`.** Ils ne sont joués dans aucune autre
+configuration de cette matrice. Le rapport local décrit des succès au pin
+antérieur au correctif de tri ; aucune nouvelle session G4 ne les qualifie.
+
+L'oracle indépendant en bibliothèque standard reste sélectionné : dates,
+propriétaires et partitions sur petits nuages jusqu'à K4. Les portes CLI
+à K5 vérifient la structure, les empreintes entre exécutions et des dates
+échantillonnées. Elles ne prouvent pas l'identité de tous les champs avec
+la chaîne Python sur les trames, notamment le **plancher maximal** : le
+lecteur ne possède pas tous les rangs du catalogue. Ce constat porte sur
+la qualification ; le moteur conserve son certificat exact au rang suivant.
+
+**Suite concrète :** intégrer les quatre CTests existants dans la session
+de la source finale avec `python_packages="pinned"`, disponible dans le
+contrôleur gardé. Le plan joint les sélectionne séparément, sans filtre
+d'exclusion, avec refus d'une sélection vide. Il construit seulement les
+cibles nécessaires. Sa forme est validée normal/`-O` ; aucun préflight
+cloud ni test natif n'a été lancé par l'auditeur. Les portes courtes de
+S9, dont `sort_refusal`, restent sélectionnées sous sanitizers ; le pipeline
+TSan et l'identité MHGP11SP de L2b restent leurs propres portes.
+[Preuve du périmètre et plan proposé](../receipts/audit_s9_qualification_scope_20261005/README.md).
 
 ## Décision utile au développeur : passer à L2b
 
@@ -121,6 +150,22 @@ avec le journal vivant. Les portes décisives restent **MHGP11SP identique
 octet pour octet par les deux voies**, TSan sur le pipeline et les mutants.
 L2b n'est pas encore une nouvelle voie qualifiée.
 [Contrelecture de la décision et de ses entrées](../receipts/audit_l2_decision_20261005/README.md).
+
+**Brouillon L2b, capture du 5 octobre à 18:03:24 UTC : diagnostic activé
+sur le chemin normal.** `api_detail::compute_supports` passe toujours
+`&seen` à `supports_parts`, même lorsque son argument `diagnostics` est
+nul. Ce pointeur descend jusqu'à `registers_of(log)` dans
+`build_order_full`. Le calcul public de `supports` balaie donc tout le
+journal et calcule son empreinte FNV destinée aux portes.
+
+Pour C cellules et G graines, ce diagnostic traite exactement **2C+G
+mots**, soit **16C+8G itérations** de hachage par octet. Ce travail est
+compté dans `Stage::tree`, avant le rattachement. Il pénalise le chemin
+que L2b doit accélérer ; aucun gain chiffré n'est déduit de cette lecture.
+**Correction ciblée :** passer `diagnostics ? &seen : nullptr`, en gardant
+les registres disponibles aux portes qui les demandent. Vérifier ensuite
+l'identité MHGP11SP et mesurer le chemin public avec diagnostics absents.
+[Capture, chemin d'appel et portée du constat](../receipts/audit_l2b_wip_20261005/README.md).
 
 ## S8 : socle numérique de la sortie points
 
@@ -192,7 +237,7 @@ entier. Aucun nouveau défaut important établi. Les résultats natifs
 annoncés dans les rapports locaux restent distincts des résultats G4 :
 les acquis partiels ci-dessus comprennent la campagne de mutants u18 ;
 les configurations ordinaires sont depuis conformes dans A2 ;
-la fin des sanitizers/TSan reste à clore. L apporte les tests longs
+la couverture sanitizers/TSan reste limitée au périmètre décrit ci-dessus. L apporte les tests longs
 non mutants u21, et le complément supports W48 est désormais conforme.
 S7 livre depuis **966a351be** l'écriture et la lecture du fichier,
 la comparaison des signatures FULL/supports et le pilote de mesure.
@@ -260,8 +305,9 @@ Les trois trames de séquence08 ne deviennent pas plusieurs séquences,
 et les comparaisons c40/baseline v11 ne ferment pas le différentiel
 canonique v10/v11 sur LiDAR entier.
 
-Pour poursuivre : terminer les portes sanitizers manquantes et réaliser
-L2b selon la décision mesurée. Aucune réserve générale
+Pour poursuivre : qualifier S8/S9 sur la source intégrée, conserver les
+différentiels exacts LiDAR et réaliser L2b selon la décision mesurée.
+Aucune réserve générale
 nouvelle n'est opposée à l'intégration de S3. **Aucun build/test natif ni
 GCP lancé par cet audit.**
 

@@ -4,14 +4,35 @@
 quantized_u21_input_only / not_claimed`. Notes maintenues en place ;
 preuves détaillées dans les reçus immuables.
 
-**S9 : correctif local du refus de tri relu favorablement.** Le tri par
+**Réponse avant S10 :** refuser l'appel entier si une comparaison EOM
+épuise son budget ; réutiliser les preuves exactes existantes et compléter
+le port de z=2. Aucun troisième oracle complet n'est demandé.
+[Réponse aux trois questions du développeur](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md#réponse-aux-trois-questions-avant-s10--note-développeur-d26328fe2).
+
+**L2b en cours : retirer le diagnostic du chemin normal.** Dans le
+brouillon capturé, `compute_supports` active le hachage de tout le journal
+des graines même quand aucun diagnostic n'est demandé. Ce parcours
+supplémentaire est payé dans l'étage `tree`. Propager un pointeur nul
+jusqu'à `build_order_full` dans ce cas, avant la mesure de la nouvelle voie.
+[Constat de source et correction ciblée](../receipts/audit_l2b_wip_20261005/README.md).
+
+**S9 : correctif du refus de tri publié en 3d47eaa93.** Les quatre fichiers
+correspondent exactement à la capture relue favorablement. Le tri par
 tas renvoie immédiatement l'`Outcome` refusé ; l'ordre de comparaison ne
 change plus. La contre-épreuve Python contrôle l'arrêt à chaque position
 de refus, les bornes et la permutation. Le refus remonte jusqu'au CLI
-avant publication, en lecture du code. Publication du correctif et
-qualification native G4 restent à confirmer.
+avant publication, en lecture du code. La qualification native G4 reste
+à confirmer ; le mutant `tri_refus_ignore` accompagne la publication.
 [Correction et portée](../receipts/audit_s9_sort_fix_20261005/README.md),
 [défaut initial conservé](../receipts/audit_s9_wip_20261005/README.md).
+
+**Avant de qualifier S9 sur G4 : conserver le différentiel exact sur LiDAR.**
+La matrice c97776ea8 exclut les quatre portes `points_vs_python`, dont les
+trois trames entières. Les succès locaux sont distincts ; le lecteur de
+fichier et l'oracle borné conservés ne remplacent pas cette identité
+complète à K5. Un plan ciblé avec Python épinglé est préparé et validé
+localement, sans exécution G4.
+[Périmètre et plan prêt à intégrer](../receipts/audit_s9_qualification_scope_20261005/README.md).
 
 **Décision L2 : livrer L2b.** La mesure G4 appariée déclenche la règle
 fixée avant la campagne : raccorder le journal des graines à la voie
@@ -25,26 +46,30 @@ chemin devra conserver les octets MHGP11SP et être qualifié sous TSan.
 **914/824/824/825 tests**, sans échec ni résultat manquant ; arrêt ciblé
 certifié. Les dix portes CLI ordinaires auparavant manquantes passent.
 Les tests longs non mutants et le complément supports W48 passent depuis
-dans leurs sessions dédiées ; la fin des sanitizers/TSan reste ouverte.
+dans leurs sessions dédiées. La couverture sanitizer reste partielle :
+c97776ea8 avait retiré les portes d'échelle et LiDAR ; **a7711b506 les
+rétablit en huit lots dédiés**, encore à exécuter.
 Aucun contrat 100 ms n'est acquis.
 [Reçu A2 vérifié](../receipts/audit_g4_a2_20261005/README.md).
 Les premières sessions interrompues et les **459 mutants u18 détectés**
 gardent leur [preuve distincte](../receipts/audit_g4_sorties_20261005/README.md).
 
-**G4 B : résultats partiels sous sanitizers, à compléter.** ASan/UBSan
+**G4 B : couverture partielle sous sanitizers.** ASan/UBSan
 u24 passe 774/824 tests, TSan u21 759/824 ; les autres n'ont pas de résultat
 après l'échéance globale. Aucun échec individuel terminé ; arrêt ciblé
 certifié. Les portes API/IO et oracles supports passent dans les deux
-configurations. Reprendre les **50 et 65 portes manquantes** identifiées
-dans le reçu, avec un découpage adapté ; A2 ne les remplace pas.
+configurations. Les **50 et 65 portes manquantes**, retirées par
+c97776ea8, sont reprises par le découpage a7711b506 : deux lots ASan/UBSan
+et six TSan. Aucune nouvelle exécution n'est encore constatée ; A2 ne
+les qualifie pas sous instrumentation.
 [Reçu B vérifié](../receipts/audit_g4_b_20261005/README.md).
 
 **S8 : arithmétique exacte relue, qualification native à poursuivre.**
-La tranche **53c027fe8** prépare les sommes de radicaux de la future sortie
+La tranche **53c027fe8** prépare les sommes de radicaux de la sortie
 points. Aucun défaut important nouveau établi : regroupement des classes
 certifié, zéro prouvé, intervalles stricts et refus explicite si la capacité
 ne suffit pas. La contre-épreuve Python indépendante concorde ; A2 précède
-S8 et ne la qualifie pas. S9 reste en développement.
+S8 et ne la qualifie pas. S9 est publiée depuis en 3d47eaa93.
 [Revue, preuve bornée et limites](../receipts/audit_s8_20261005/README.md).
 
 **Audit général au pin 238734f1d, suivi de S3/165def5ab et S6b/9e7428995.** Aucun nouveau défaut
@@ -52,8 +77,8 @@ mathématique FULL établi ; contre-épreuve du nerf complet, des coupes et
 des verticales conforme sur 65 ordres. Le point important du raccord est
 la qualification de l'assemblage L1 entier. L'identité Session et la
 cohérence du manifeste sont corrigées dans les sources S5 publiées.
-Pour juger la voie K seule, mesurer le journal actif et
-la sortie réellement livrée. [Verdict et priorités du développeur](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#audit-général-du-5-octobre--décisions-importantes),
+La mesure avec journal actif et sortie complète a depuis retenu L2b.
+[Verdict et priorités du développeur](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#audit-général-du-5-octobre--décisions-importantes),
 [preuve et périmètre](../receipts/audit_geant_20261005/README.md).
 
 **S5 : manifeste corrigé, aller-retour natif conforme sur G4.** La provenance est

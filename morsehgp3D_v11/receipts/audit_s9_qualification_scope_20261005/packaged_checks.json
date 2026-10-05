@@ -1,0 +1,54 @@
+{
+  "scope": "lecture Git, validation de plan et contre-epreuve Python uniquement",
+  "native_runs": 0,
+  "cloud_calls": 0,
+  "checks": [
+    {
+      "command": "matrix/replay.py /workspaces/E-HGP",
+      "modes": [
+        "normal",
+        "-O"
+      ],
+      "returncodes": [
+        0,
+        0
+      ]
+    },
+    {
+      "command": "math/replay.py --repo /workspaces/E-HGP",
+      "modes": [
+        "normal",
+        "-O"
+      ],
+      "returncodes": [
+        0,
+        0
+      ],
+      "outputs_identical": true
+    },
+    {
+      "command": "replay.py /workspaces/E-HGP",
+      "modes": [
+        "normal",
+        "-O"
+      ],
+      "returncodes": [
+        0,
+        0
+      ],
+      "outputs_identical": true
+    },
+    {
+      "command": "shards/replay.py /workspaces/E-HGP",
+      "modes": [
+        "normal",
+        "-O"
+      ],
+      "returncodes": [
+        0,
+        0
+      ],
+      "outputs_identical": true
+    }
+  ]
+}

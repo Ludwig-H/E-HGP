@@ -1,0 +1,30 @@
+--- ab0f1ba520657fbc1b08f5f9359203558b1c2472:morsehgp3D_v11/src/tower/forest_concurrent.cpp
++++ WIP:morsehgp3D_v11/src/tower/forest_concurrent.cpp
+@@ -5,6 +5,7 @@
+ //     (memes lanes, memos et workspaces que les lots historiques ; aucune lecture du DSU) ;
+ //   D publication par plateaux, une tache par ordre, dans l'ordre canonique exact de la voie par lots ;
+ //   E verticales : images basses par ordre (Pool) puis K-1 balayages fermes concurrents.
++// Journal des graines facultatif (L2b, OrderLog) : sur le seul ordre demande, ecrit par sa tache de publication D.
+ // Chaque foret ne lit que ses propres graines et son DSU : forets et verticales sont identiques a la voie
+ // sequentielle. La voie historique cumulait ~600 barrieres et ~330 ms de pilote seul sur G4 W48 (ng00).
+ #include "tower/forest_parallel.hpp"
+@@ -230,7 +231,7 @@
+ Outcome build_concurrent(const FullDomain& domain, Order kmax, MemoryBudget& budget, FullTimings* timings,
+                          ForestParallel& parallel, sched::Pool& pool, RegularVerticalSeeds* vertical_seeds,
+                          PopulationLookup* population, bool dense,
+-                         std::array<std::optional<OrderForest>, kMaxMebSites>& orders) noexcept {
++                         std::array<std::optional<OrderForest>, kMaxMebSites>& orders, OrderLog log) noexcept {
+   if (kmax == 0 || kmax > kMaxMebSites) return fail(Reason::parameter_out_of_range);
+   Staged s;
+   s.kmax = kmax;
+@@ -243,6 +244,10 @@
+     auto& builder = s.builders[k - 1].emplace(domain, k, budget, s.timed ? &timings->orders[k - 1] : nullptr,
+                                               nullptr, &parallel, dense, vertical_seeds);
+     builder.population = population;
++    // Journal (L2b) : pose sur le seul constructeur de l'ordre demande. Ses ecritures (cell, regular_cell) viennent
++    // toutes de publish(), joue par UNE tache par ordre (PublishTasks ci-dessous ou Pipeline::publish) ; ni la
++    // classification, ni les naissances, ni les resolutions regulieres n'y touchent. Lu apres le join du Pool.
++    builder.seed_log = order_log(log, k);
+     MHGP11_TRY(classify_parallel(builder, pool, s.blocks[k - 1]));
+     if (clock) timings->orders[k - 1].classify_ns = clock->nanoseconds();
+   }
