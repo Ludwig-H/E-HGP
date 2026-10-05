@@ -10,7 +10,7 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
-## S10 publiée : garde numérique corrigée dans le brouillon
+## S10 publiée : garde numérique corrigée en 510dae50e
 
 S10 publiée en **076d9142b**. Les trois sources causales sont identiques
 à la capture initiale sur **311ef5e3c**.
@@ -26,7 +26,8 @@ contrat public. Pourtant `e_hi=i128(R)+1` dépasse le maximum signé.
 Le constat est arithmétique, sans exécution native ; il ne démontre pas
 un débordement sur les niveaux issus d'un nuage u21/u24.
 
-**Correction locale relue favorablement, au-dessus de 076d9142b.**
+**Correction publiée en 510dae50e : favorable.** Les fichiers
+`internal.hpp` et `score.cpp` sont identiques à la capture relue.
 Le filtre contrôle chaque racine utile en `u128` contre `L=2^100`
 avant conversion. Sinon, le plateau est marqué sans encadrement et la
 sélection utilise le repli exact. Dans le domaine conservé,
@@ -34,15 +35,15 @@ sélection utilise le repli exact. Dans le domaine conservé,
 `i128`. Le contrat abstrait est conservé et les racines géométriques
 u21/u24 ne sont pas écartées par cette garde.
 
-**Test utile : reprendre la frontière exacte déjà fournie.** Le nouveau
-test `huge` emploie les racines `2^126`, `3·2^125`, `3·2^126` ; les
-deux premières acceptent l'ajout de 1, et la dernière se convertit en
-valeur négative avant le chemin déjà sans encadrement. Le contrôle
-`unbracketed>=1` ne distingue donc pas nécessairement l'ancien code.
-Rejouer `R=2^127−1` à la porte de la tête sous UBSan vérifie le
-débordement initial. Aucun résultat natif du nouveau mutant n'est déduit
-de sa seule déclaration. Correction et qualification G4 restent à
-publier ; ce point de test ne remet pas en cause la preuve de la garde.
+**Test renforcé dans cette publication.** `huge` emploie les racines
+`2^126`, `3·2^125`, `3·2^126`. Il exige désormais
+`unbracketed==3`, contre `>=1` dans la capture : l'ancien filtre ne
+laissait ouvert que le dernier plateau. Cette assertion distingue donc
+la garde supprimée par `racine_non_bornee`. Le développeur rapporte son
+mutant tué localement ; aucun verdict G4 n'en est déduit. Le témoin
+`R=2^127−1` reste la preuve du débordement initial, sans prétendre que
+le nouveau test reproduit cette addition. Constat source fermé,
+qualification native G4 à poursuivre.
 [Correction figée et preuve de borne](../receipts/audit_s10_root_guard_20261005/README.md).
 
 Les formules réciproques, la condensation publiée et le raccord relus
@@ -64,6 +65,8 @@ exclusion : synthétique et trois trames entières K5. Le jouer après le
 plan S9, sur le même commit final S10 intégré et poussé, en sessions
 gardées successives. Dimensionner chacune avec le préflight ; la
 validation locale normal/`-O` porte seulement sur la forme du plan.
+Le développeur adopte ces deux sessions dans sa réponse publiée
+en **510dae50e** ; aucun nouveau reçu G4 constaté à cette mise à jour.
 [Plan, déclarations figées et limites](../receipts/audit_s10_differential_plan_20261005/README.md).
 
 ## S9 : correctif du refus de tri publié, qualification à poursuivre

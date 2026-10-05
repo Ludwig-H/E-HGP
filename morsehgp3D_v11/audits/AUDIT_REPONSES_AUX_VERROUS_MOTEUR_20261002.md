@@ -17,17 +17,19 @@ même plateau sont compensés avant leur expansion en radicaux. Le budget
 de la tête est porté explicitement à 4 096 termes, avec refus de l'appel
 entier à épuisement ; les comparaisons de dates gardent leur défaut de 16.
 
-**Frontière numérique corrigée dans le brouillon suivant.** Le contrat public
+**Frontière numérique corrigée en 510dae50e.** Le contrat public
 `LevelSource` borne la racine fixe à `u128`, mais la borne haute est
 calculée en `i128`. Le niveau rationnel positif
 `((2^127−1)/2^64)^2` donne une racine admissible dont l'ajout de 1
 déborde. Ce témoin est un arbre abstrait, sans qualification ni
-contre-exemple géométrique LiDAR déduits. La garde locale `2^100`
+contre-exemple géométrique LiDAR déduits. La garde publiée `2^100`
 contrôle les trois racines utiles avant conversion ; leurs sommes et
 marges sont sûres. Les grandes valeurs passent au repli exact : avis
-favorable sur la correction, publication et qualification natives à suivre.
-Le témoin initial `R=2^127−1` est à reprendre sous UBSan ; le test
-`huge` ajouté peut passer avec l'ancien filtre.
+favorable sur la correction, dont les deux sources correspondent à la
+capture relue. Le test `huge` exige désormais trois plateaux ouverts,
+contre un avec l'ancien filtre ; sa portée devient causale pour le
+mutant qui retire la garde. Constat source fermé ; qualification native
+G4 à poursuivre. La preuve initiale `R=2^127−1` reste distincte.
 [Correction et preuve de borne](../receipts/audit_s10_root_guard_20261005/README.md).
 [Preuve, source et correction ciblée](../receipts/audit_s10_wip_20261005/math/README.md).
 

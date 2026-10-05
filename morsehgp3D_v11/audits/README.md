@@ -4,20 +4,21 @@
 quantized_u21_input_only / not_claimed`. Notes maintenues en place ;
 preuves détaillées dans les reçus immuables.
 
-**S10 publiée en 076d9142b ; garde numérique corrigée dans le brouillon.**
+**S10 publiée en 076d9142b ; garde numérique corrigée en 510dae50e.**
 La garde `2^100` précède les conversions signées et renvoie les grandes
 racines de l'API abstraite au calcul exact. Lecture favorable : sommes
-et marges tiennent alors en `i128`. Pour vérifier la correction native,
-réutiliser le témoin `R=2^127−1` sous UBSan : le nouveau test `huge`
-peut déjà passer sans la garde. La correction n'est pas encore publiée
-ni qualifiée sur G4.
+et marges tiennent alors en `i128`. Les deux sources correctives sont
+identiques à la capture relue. Le test `huge` exige maintenant exactement
+trois plateaux sans encadrement : il distingue la garde de l'ancien
+filtre. Constat source fermé ; qualification native G4 à poursuivre.
 [Correction, témoin et portée](../receipts/audit_s10_root_guard_20261005/README.md).
 
 **Qualification S10 : ajouter sa session différentielle.** Les quatre
 portes `head_vs_python` comparent toutes les étiquettes, le bruit et les
 identifiants canoniques ; la matrice courante les exclut. Un plan dédié,
 avec Python épinglé et construction de `mhgp11_cli`, complète le plan S9
-adopté. Jouer les deux successivement au même commit final intégré.
+adopté. Le développeur a adopté les deux sessions successives au même
+commit final intégré ; leur exécution reste à constater.
 [Plan S10 prêt et périmètre](../receipts/audit_s10_differential_plan_20261005/README.md).
 
 **Réponse avant S10 :** refuser l'appel entier si une comparaison EOM
