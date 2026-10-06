@@ -734,3 +734,47 @@ Les leviers retenus seront mesurés ensemble dans une seule session G4 : `gpu_ab
    (dominances, paires vivantes) ?
 2. Pour D, le découpage en paires des seules feuilles lourdes, dans des fils différents et non un warp par feuille,
    vous paraît-il couvert par vos preuves de Q1 et Q2, ou faut-il une porte nouvelle ?
+
+## U. Workflow GPU et session wfgpu1 : C adopté, A rejeté par la mesure (6 octobre, 16 h 53 UTC)
+
+Reçu : [wfgpu1](../receipts/developpement_20261006/wfgpu1_leviers/README.md). Il contient aussi les quatre rapports du
+workflow, leurs patches et les verdicts des quatre vérificateurs adverses.
+
+**Mesure.** Une seule session G4 (`gpu_ab.py --variants`) a comparé cinq variantes construites avec CUDA : la base,
+`__syncwarp` seul, A, C et A+C. Exactitude : dumps égaux aux empreintes CPU sur les trois trames, à K5/16, K5/24 et
+K10/24 ; `unresolved` nul partout ; Compute Sanitizer propre sur A+C.
+
+**Critère écrit d'avance.**
+- **C est adopté** : comptage ×0,83 à 0,84 à K5/16 et ×0,85 à 0,86 à K10/24.
+- **A est rejeté** : ×1,11 à 1,12 à K5/16 et ×0,98 à 1,00 à K10, malgré le meilleur SASS statique (10 352
+  instructions, 0 `CALL`).
+- **`__syncwarp` seul est sans effet** (×1,00).
+
+**C (arithmétique étroite), intégré au commit suivant.** Sous la condition d'étendue de la feuille, D ≤ 2^20 (sites et
+fermeture de la boîte) :
+- J2, `center_line_meets`, passe en i32/i64 ;
+- q4 ne calcule plus qu'une fois le produit mixte, et retire le test du cube 2^20 que l'étendue implique ;
+- q3 calcule l'angle aigu et t en i64.
+
+Une feuille plus large rend `kUnresolved` et est refaite par `leaf.cpp`. Le vérificateur a refait les preuves de
+bornes : |p0| ≤ 3D², les deux membres ≤ 6D³ < 2^63, et l'identité cyclique du produit mixte. Portes : la nouvelle porte
+`mhgp11_catalogue_leaf_narrow` (200 000 triplets au bord contre `num::center_line_meets`, refus à l'étendue 2^20 + 1),
+jouée en u18, u21 et u24, plus `full_leaf_lanes`. Sept mutants sont tués.
+
+**Réserve du vérificateur, que je reprends.** Les feuilles larges forment une nouvelle classe de non résolues, et le
+repli (`fallback`) les refait en série sur un fil. Il n'y en a aucune sur nos trames : le vérificateur a mesuré qu'il
+faut descendre le seuil à 2^16 pour voir apparaître les premières. Un nuage épars, ou une grille huit fois plus fine
+en u24, pourrait en revanche en produire. Avant d'élargir l'usage du lot, il faut paralléliser `fallback`.
+
+**État des contrats de temps** (voie GPU avec C, feuilles de 24 à K5) :
+- K5 : `domain` 177, 158 et 182 ms ; mur 352, 285 et 349 ms ;
+- K10 : mur 1,66 à 2,23 s.
+
+Les forêts (CPU) font désormais l'essentiel de l'écart restant au jalon de 200 ms.
+
+**Questions.**
+1. A est plus lent à K5/16 avec moins d'instructions statiques. Mon hypothèse : l'ATOM prédiqué et les deux `YIELD`
+   insérés par ptxas dans la boucle du parcours. Avez-vous une autre lecture, ou un témoin à proposer ?
+2. Pour paralléliser `fallback`, une feuille non résolue par ouvrier du Pool, avec émission dans un bloc fixe par
+   feuille puis concaténation dans l'ordre du lot, vous paraît-il suffisant pour garder le déterminisme exigé par
+   `full_leaf_lanes` ?

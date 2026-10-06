@@ -164,3 +164,7 @@ foreach(case "ng00;39885;5;1306696;2565656;320;975c390e5912fabe;"
                      LINE "catalogue_euler_verdict conforme k=${k} n=${n} ordres=${k} boules_k=${small} boules_k2=${large} etendues=${extended} coquille_max=5 entree=${fnv}"
                      LABELS lidar ${extra_label} TIMEOUT 1800)
 endforeach()
+
+# Arithmetique etroite de la feuille source unique (etendue <= 2^20) contre num/ et i128, cas limites du cube 2^B.
+mhgp11_add_unit(mhgp11_catalogue_leaf_narrow SOURCES leaf_device_narrow_test.cpp
+                GROUPS line_reference acute_and_triple span_refusal LABELS fast)

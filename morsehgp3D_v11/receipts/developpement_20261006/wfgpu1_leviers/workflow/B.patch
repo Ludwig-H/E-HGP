@@ -1,0 +1,586 @@
+diff --git a/morsehgp3D_v11/bench/full_probe.cpp b/morsehgp3D_v11/bench/full_probe.cpp
+index 0997bcf65..764b363df 100644
+--- a/morsehgp3D_v11/bench/full_probe.cpp
++++ b/morsehgp3D_v11/bench/full_probe.cpp
+@@ -175,7 +175,8 @@ void catalogue_execution(const Catalogue& catalogue, const CatalogueTimings& tim
+             << ",\"spare_record_chunks\":" << t.batch_spare_record_chunks
+             << ",\"spare_population_chunks\":" << t.batch_spare_population_chunks
+             << ",\"device_pool_used_high\":" << t.batch_device_pool_used_high
+-            << ",\"device_pool_reserved_high\":" << t.batch_device_pool_reserved_high << '}';
++            << ",\"device_pool_reserved_high\":" << t.batch_device_pool_reserved_high
++            << ",\"hybrid_jobs\":" << t.batch_hybrid_jobs << '}';
+ }
+ 
+ void catalogue_work(const Catalogue& catalogue, bool pair_graph) {
+@@ -259,7 +260,10 @@ Outcome full_pass(Cloud cloud_value, MemoryBudget& budget, sched::Pool& pool_ref
+                                         8192 * unsigned(full_params.concurrent_orders) +
+                                         16384 * unsigned(params.device_leaf) + 32768 * unsigned(params.batch_leaves) +
+                                         65536 * unsigned(params.cuda_leaves) +
+-                                        131072 * unsigned(params.replay_overflow))
++                                        131072 * unsigned(params.replay_overflow) +
++                                        262144 * unsigned(params.hybrid_work != 0) +
++                                        524288 * unsigned(params.order_by_work))
++            << ",\"hybrid_work\":" << params.hybrid_work
+             << ",\"wall_ns\":" << full_ns << ",\"index_ns\":" << index_ns << ",\"domain_ns\":" << domain_ns
+             << ",\"forest_ns\":" << forest_ns << ",\"cpu_seconds\":" << std::setprecision(12) << cpu_seconds
+             << ",\"peak_reserved_bytes\":" << budget.peak() << ",\"reserved_after_bytes\":" << budget.used();
+@@ -350,15 +354,20 @@ Outcome run(char** argv, const CatalogueParams& params, const FullParams& full_p
+ }  // namespace
+ 
+ int main(int argc, char** argv) {
+-  if (argc != 11 && argc != 12 && argc != 13) return 2;
++  if (argc < 11 || argc > 14) return 2;
+   std::array<u64, 7> options{};
+   for (int i = 0; i < 7; ++i) if (!parse(argv[i + 4], options[i])) return 2;
+   if (options[0] > 12 || options[1] > 1024 || options[2] > 1024 ||
+       options[6] < 1 || options[6] > sched::kMaxWorkers) return 2;
+   u64 optimizations = 0;
+-  if (argc >= 12 && (!parse(argv[11], optimizations) || optimizations > 262143)) return 2;
++  if (argc >= 12 && (!parse(argv[11], optimizations) || optimizations > 1048575)) return 2;
+   u64 passes = 1;  // mode a chaud : passes FULL successives dans le meme processus
+-  if (argc == 13 && (!parse(argv[12], passes) || passes < 1 || passes > 64)) return 2;
++  if (argc >= 13 && (!parse(argv[12], passes) || passes < 1 || passes > 64)) return 2;
++  // Voie hybride (262144) : seuil de travail predit, argument 13 ou 100 K par defaut ; ordre par travail (524288).
++  u64 hybrid = 0;
++  if (argc == 14 && (!parse(argv[13], hybrid) || hybrid < 1 || hybrid > 65535 || (optimizations & 262144) == 0))
++    return 2;
++  if ((optimizations & (262144 | 524288)) != 0 && (optimizations & (32768 | 65536)) == 0) return 2;
+   if ((optimizations & 8192) != 0 && (optimizations & 8) == 0) return 2;
+   if ((optimizations & 128) != 0 && (optimizations & 8) == 0) return 2;
+   // Voies de feuille : graphe de paires requis ; lot seulement en passe unique ; un seul executeur de lot.
+@@ -388,6 +397,9 @@ int main(int argc, char** argv) {
+   params.batch_leaves = (optimizations & 32768) != 0;  // feuilles en lot, executeur hote (Pool)
+   params.cuda_leaves = (optimizations & 65536) != 0;   // feuilles en lot sur le GPU (construction CUDA)
+   params.replay_overflow = (optimizations & 131072) != 0;  // lots sans reservoir chaine : debordements rejoues
++  if ((optimizations & 262144) != 0)
++    params.hybrid_work = static_cast<u32>(hybrid != 0 ? hybrid : std::max<u64>(1, 100 * options[0]));
++  params.order_by_work = (optimizations & 524288) != 0;  // fils du lot par travail predit decroissant
+   params.kmax = static_cast<int>(options[0]); params.leaf_size = static_cast<u32>(options[1]);
+   params.max_leaf = static_cast<u32>(options[2]); params.max_nodes = options[3]; params.ball_limit = options[4];
+   const auto result = guarded([&]() {
+diff --git a/morsehgp3D_v11/src/catalogue/catalogue.hpp b/morsehgp3D_v11/src/catalogue/catalogue.hpp
+index ee0dde94f..7bf5d6190 100644
+--- a/morsehgp3D_v11/src/catalogue/catalogue.hpp
++++ b/morsehgp3D_v11/src/catalogue/catalogue.hpp
+@@ -43,6 +43,12 @@ struct CatalogueParams {
+   // Lots de feuilles sans reservoir chaine : toute feuille qui deborde de sa case est rejouee (voie du 5 octobre,
+   // gardee pour les portes qui exercent la seconde passe). Sans effet hors des lots.
+   bool replay_overflow = false;
++  // Lots seulement, ordonnancement sans aucune decision : travail predit d'une feuille a sa mise en file (couples puis
++  // triplets vivants apres la dominance, predicted_work de leaf_batch.hpp). hybrid_work > 0 : une feuille predite au
++  // moins aussi lourde est traitee sur l'hote pendant le parcours par la feuille source unique (comme device_leaf),
++  // les autres vont au lot. order_by_work : les fils du lot prennent les feuilles par travail predit decroissant.
++  u32 hybrid_work = 0;
++  bool order_by_work = false;
+ };
+ 
+ struct CatalogueBall {
+@@ -93,6 +99,7 @@ struct CatalogueTimings {
+   u64 batch_copied_jobs = 0;  // feuilles qui emettent et tiennent dans leurs blocs (case et reservoir)
+   u64 batch_spare_record_chunks = 0, batch_spare_population_chunks = 0;  // blocs du reservoir pris
+   u64 batch_device_pool_used_high = 0, batch_device_pool_reserved_high = 0;  // pics physiques du pool CUDA
++  u64 batch_hybrid_jobs = 0;  // feuilles predites lourdes traitees sur l'hote pendant le parcours (hybrid_work)
+ };
+ 
+ // Travail de stockage distinct de la geometrie ; valeurs de l'option une passe, zero sinon sauf passes=2.
+diff --git a/morsehgp3D_v11/src/catalogue/internal.hpp b/morsehgp3D_v11/src/catalogue/internal.hpp
+index 98c75908b..f246915d6 100644
+--- a/morsehgp3D_v11/src/catalogue/internal.hpp
++++ b/morsehgp3D_v11/src/catalogue/internal.hpp
+@@ -82,9 +82,10 @@ class NodeQuota {
+ };
+ 
+ // File de feuilles differees (voie lot/GPU) : enumerate_leaf y depose les feuilles admissibles au lieu de les traiter.
++// Vrai : la feuille est en file ; faux (voie hybride, feuille predite lourde) : enumerate_leaf la traite sur place.
+ class LeafQueue {
+  public:
+-  virtual Outcome push(std::span<const SiteIdx> sites, const Box& box) noexcept = 0;
++  virtual Result<bool> push(std::span<const SiteIdx> sites, const Box& box) noexcept = 0;
+ 
+  protected:
+   ~LeafQueue() = default;
+diff --git a/morsehgp3D_v11/src/catalogue/leaf.cpp b/morsehgp3D_v11/src/catalogue/leaf.cpp
+index 289b08712..6f6980441 100644
+--- a/morsehgp3D_v11/src/catalogue/leaf.cpp
++++ b/morsehgp3D_v11/src/catalogue/leaf.cpp
+@@ -448,9 +448,15 @@ Result<bool> device_leaf(Run& run, std::span<const SiteIdx> sites, const Box& bo
+ }  // namespace
+ 
+ Outcome enumerate_leaf(Run& run, std::span<const SiteIdx> sites, const Box& box) noexcept {
+-  if (run.deferred != nullptr && run.params.pair_graph && !sites.empty() && sites.size() <= leaf_device::kMaxSites)
+-    return run.deferred->push(sites, box);  // voie lot : compteurs et emissions viendront du lot
+-  if (run.params.device_leaf && run.params.pair_graph && !sites.empty() && sites.size() <= leaf_device::kMaxSites) {
++  const bool device = run.params.pair_graph && !sites.empty() && sites.size() <= leaf_device::kMaxSites;
++  bool kept = false;  // voie hybride : feuille predite lourde gardee sur l'hote, jouee ici comme la voie CPU
++  if (run.deferred != nullptr && device) {
++    const auto queued = run.deferred->push(sites, box);  // voie lot : compteurs et emissions viendront du lot
++    if (!queued.ok()) return queued.outcome();
++    if (queued.value()) return {};
++    kept = true;
++  }
++  if ((kept || run.params.device_leaf) && device) {
+     const auto done = device_leaf(run, sites, box);
+     if (!done.ok()) return done.outcome();
+     if (done.value()) return {};
+diff --git a/morsehgp3D_v11/src/catalogue/leaf_batch.cpp b/morsehgp3D_v11/src/catalogue/leaf_batch.cpp
+index 94d6f8456..afae22910 100644
+--- a/morsehgp3D_v11/src/catalogue/leaf_batch.cpp
++++ b/morsehgp3D_v11/src/catalogue/leaf_batch.cpp
+@@ -37,10 +37,12 @@ struct HostBatch {
+   std::span<LeafRecord> records;
+   std::span<u8> population;
+   std::span<leaf_device::Counts> per_worker;
++  std::span<const u32> order;  // comptage : fil -> feuille (leaf_order) ; vide : ordre du lot
+   u64 total_records = 0, total_population = 0;
+   bool fill = false;
+ 
+-  Outcome one(u64 j, u32 worker) noexcept {
++  Outcome one(u64 t, u32 worker) noexcept {
++    const u64 j = fill || order.empty() ? t : order[t];
+     const auto in = input_of(view, view.jobs[j]);
+     leaf_device::Counts c;
+     if (!fill) {
+@@ -77,6 +79,30 @@ struct HostBatch {
+ 
+ }  // namespace
+ 
++Outcome leaf_order(const LeafBatchView& view, MemoryBudget& budget, Buffer<u32>& order) noexcept {
++  const u64 keys = view.order_by_work ? kWorkKeys : u64{leaf_device::kMaxSites} + 1;
++  u64 bytes = 0;
++  MHGP11_TRY(add_bytes<u32>(bytes, view.count));
++  MHGP11_TRY(add_bytes<u64>(bytes, keys + 1));
++  MHGP11_TRY(budget.admit(bytes));
++  MHGP11_TRY(order.allocate(view.count, budget));
++  Buffer<u64> start;
++  MHGP11_TRY(start.allocate(keys + 1, budget));
++  for (auto& s : start.span()) s = 0;
++  // Cle decroissante : la case (keys - 1 - cle) ; le debut de chaque case est le prefixe des precedentes.
++  const auto slot = [&](const LeafJob& job) {
++    return keys - 1 - (view.order_by_work ? std::min<u64>(job.work, keys - 1) : u64{job.m});
++  };
++  for (u64 j = 0; j < view.count; ++j) {
++    if (view.jobs[j].m > leaf_device::kMaxSites) return fail(Reason::catalogue_invariant);
++    ++start[slot(view.jobs[j]) + 1];
++  }
++  for (u64 b = 1; b <= keys; ++b) start[b] += start[b - 1];
++  for (u64 j = 0; j < view.count; ++j) order[start[slot(view.jobs[j])]++] = static_cast<u32>(j);
++  // Chaque case finit ou la suivante commencait : la derniere au bout du lot, donc une permutation complete.
++  return start[keys - 1] == view.count ? Outcome{} : fail(Reason::catalogue_invariant);
++}
++
+ Outcome run_leaf_batch_host(const LeafBatchView& view, sched::Pool& pool, MemoryBudget& budget,
+                             LeafBatchResult& result) noexcept {
+   const Stopwatch total;
+@@ -108,11 +134,13 @@ Outcome run_leaf_batch_host(const LeafBatchView& view, sched::Pool& pool, Memory
+   MHGP11_TRY(links.allocate(2 * chunks + 2, budget));
+   MHGP11_TRY(per_worker.allocate(pool.size(), budget));
+   for (auto& c : per_worker.span()) c = leaf_device::Counts{};
++  Buffer<u32> order;
++  if (view.order_by_work) MHGP11_TRY(leaf_order(view, budget, order));
+   links[2 * chunks] = links[2 * chunks + 1] = 0;
+   const ScratchArena arena{scratch_records.data(), scratch_population.data(), links.data(), links.data() + chunks,
+                            links.data() + 2 * chunks, static_cast<u32>(view.count), static_cast<u32>(spare)};
+   HostBatch batch{view, result.status.span(), stored.span(), balls.span(), incidences.span(), arena, {}, {},
+-                  per_worker.span()};
++                  per_worker.span(), order.span()};
+   const Stopwatch count;
+   MHGP11_TRY(pool.parallel_for(view.count, 64, &batch, HostBatch::body));
+   result.timings.count_ns = count.nanoseconds();
+diff --git a/morsehgp3D_v11/src/catalogue/leaf_batch.hpp b/morsehgp3D_v11/src/catalogue/leaf_batch.hpp
+index 562104695..3fc86140f 100644
+--- a/morsehgp3D_v11/src/catalogue/leaf_batch.hpp
++++ b/morsehgp3D_v11/src/catalogue/leaf_batch.hpp
+@@ -13,13 +13,33 @@ namespace mhgp11::sched { class Pool; }
+ 
+ namespace mhgp11::catalogue_detail {
+ 
+-// Feuille differee : sites[begin, begin+m) dans la liste du lot, boite T0 demi-ouverte de la feuille.
++// Feuille differee : sites[begin, begin+m) dans la liste du lot, boite T0 demi-ouverte de la feuille ; work : travail
++// predit (predicted_work) si la voie le demande, 0 sinon ; il ne sert qu'a l'ordre des fils.
+ struct LeafJob {
+   u64 begin = 0;
+-  u32 m = 0, pad = 0;
++  u32 m = 0, work = 0;
+   i64 lo[3] = {0, 0, 0}, hi[3] = {0, 0, 0};
+ };
+ 
++// Travail predit d'une feuille : couples vivants (live[0], i < j) plus triplets vivants (i < j < k, k dans live[1] de
++// i et de j) apres prepare et live_rows de la feuille source unique. Heuristique d'ordonnancement (voie hybride, ordre
++// des fils) : aucune decision du catalogue n'en depend. Sur lidar_ng00 K = 5, feuilles de 16 : rang de Spearman 0,93
++// contre les prefixes et tests de recensement reels (m seul : 0,67). Au plus C(32,2) + C(32,3) < 2^13.
++inline u32 predicted_work(const leaf_device::Input& in) noexcept {
++  leaf_device::Counts counts;
++  leaf_device::CountSink sink;
++  leaf_device::Leaf<leaf_device::CountSink> leaf(in, counts, sink);
++  leaf.prepare();
++  leaf.live_rows();
++  u32 work = 0;
++  for (u32 i = 0; i < leaf.m; ++i)
++    for (u64 pairs = leaf.live[0][i] & (~u64(0) << i << 1); pairs != 0; pairs &= pairs - 1) {
++      const u32 j = leaf_device::ctz(pairs);
++      work += 1 + leaf_device::popc(leaf.live[1][i] & leaf.live[1][j] & (~u64(0) << j << 1));
++    }
++  return work;
++}
++
+ // Emission d'une feuille resolue, sans Level, en rangs locaux (indices dans la liste des sites de la feuille ; une
+ // feuille du lot a au plus 32 sites) : 8 octets. Sa population (p + m rangs, I puis U, un octet chacun) suit celle
+ // de l'emission precedente de la meme feuille ; les debuts par feuille viennent des prefixes. L'hote convertit en
+@@ -203,6 +223,7 @@ struct LeafBatchView {
+   int kmax = 0;
+   bool cache = false;
+   bool reservoir = true;  // cases chainees au comptage (faux : voie du 5 octobre, toute feuille qui deborde est rejouee)
++  bool order_by_work = false;  // fils par travail predit decroissant (LeafJob::work) au lieu de m decroissant
+ };
+ 
+ // Chronos et volumes d'un lot (diagnostic, hors ledger). Les champs device_* ne sont remplis que par CUDA.
+@@ -227,7 +248,14 @@ struct LeafBatchResult {
+   LeafBatchTimings timings;
+ };
+ 
+-// Executeur hote : meme code que l'appareil, feuilles reparties sur le Pool. Toujours construit.
++// Ordre des fils du comptage (fil -> feuille), tri par comptage stable et decroissant : par m, ou par travail predit
++// borne a kWorkKeys - 1 si view.order_by_work. Permutation des feuilles du lot ; seule l'affectation change, statuts,
++// prefixes et ecritures restent indexes par feuille. Tampon admis au budget avant allocation.
++inline constexpr u32 kWorkKeys = 4096;
++[[nodiscard]] Outcome leaf_order(const LeafBatchView& view, MemoryBudget& budget, Buffer<u32>& order) noexcept;
++
++// Executeur hote : meme code que l'appareil, feuilles reparties sur le Pool. Toujours construit. Avec order_by_work,
++// le comptage suit leaf_order (porte de la permutation ; sorties inchangees).
+ [[nodiscard]] Outcome run_leaf_batch_host(const LeafBatchView& view, sched::Pool& pool, MemoryBudget& budget,
+                                           LeafBatchResult& result) noexcept;
+ // Executeur CUDA ; sans MHGP11_HAVE_CUDA il refuse (parameter_out_of_range) avant tout calcul.
+diff --git a/morsehgp3D_v11/src/catalogue/leaf_batch_cuda.cu b/morsehgp3D_v11/src/catalogue/leaf_batch_cuda.cu
+index 4008f7d07..662f20242 100644
+--- a/morsehgp3D_v11/src/catalogue/leaf_batch_cuda.cu
++++ b/morsehgp3D_v11/src/catalogue/leaf_batch_cuda.cu
+@@ -24,7 +24,7 @@ struct DeviceView {
+   const u32* y;
+   const u32* z;
+   const LeafJob* jobs;
+-  const u32* order;  // fil -> feuille : feuilles par m decroissant (warps de feuilles de meme taille)
++  const u32* order;  // fil -> feuille (leaf_order) : m decroissant, ou travail predit decroissant
+   u64 count;
+   const u32* sites;
+   int kmax;
+@@ -150,21 +150,6 @@ u64 now_ns() {
+ 
+ bool ok(cudaError_t e) { return e == cudaSuccess; }
+ 
+-// Feuilles par m decroissant, stable (tri par comptage sur 1..kMaxSites) : chaque warp recoit des feuilles de meme
+-// taille. Seule l'affectation des fils change ; statuts, prefixes et ecritures restent indexes par feuille du lot.
+-Outcome size_order(const LeafBatchView& view, MemoryBudget& budget, Buffer<u32>& order) noexcept {
+-  MHGP11_TRY(budget.admit(view.count * sizeof(u32)));
+-  MHGP11_TRY(order.allocate(view.count, budget));
+-  u64 start[leaf_device::kMaxSites + 2] = {};
+-  for (u64 j = 0; j < view.count; ++j) {
+-    if (view.jobs[j].m > leaf_device::kMaxSites) return fail(Reason::catalogue_invariant);
+-    ++start[leaf_device::kMaxSites - view.jobs[j].m + 1];
+-  }
+-  for (u32 b = 1; b <= leaf_device::kMaxSites + 1; ++b) start[b] += start[b - 1];
+-  for (u64 j = 0; j < view.count; ++j) order[start[leaf_device::kMaxSites - view.jobs[j].m]++] = static_cast<u32>(j);
+-  return {};
+-}
+-
+ // Prefixes exclusifs (CUB) des boules et incidences par feuille ; totaux = dernier debut + dernier compte (< 2^54).
+ Outcome scan(u64 count, const u64* balls, const u64* incidences, u64* record_begin, u64* population_begin,
+              DeviceArray<unsigned char>& temp, MemoryBudget& budget, u64& device_bytes, u64& total_records,
+@@ -363,7 +348,7 @@ Outcome run_leaf_batch_cuda(const LeafBatchView& view, sched::Pool& pool, Memory
+   MHGP11_TRY(keep_pool_memory());
+   t.device_init_ns = now_ns() - start;
+   Buffer<u32> order;
+-  MHGP11_TRY(size_order(view, budget, order));
++  MHGP11_TRY(leaf_order(view, budget, order));  // m decroissant, ou travail predit (order_by_work)
+   // Sorties hote d'abord (budget), puis tableaux device.
+   u64 host_bytes = 0;
+   MHGP11_TRY(add_bytes<u8>(host_bytes, view.count));
+diff --git a/morsehgp3D_v11/src/catalogue/leaf_queue.hpp b/morsehgp3D_v11/src/catalogue/leaf_queue.hpp
+index d10c0309b..9e784b68d 100644
+--- a/morsehgp3D_v11/src/catalogue/leaf_queue.hpp
++++ b/morsehgp3D_v11/src/catalogue/leaf_queue.hpp
+@@ -8,11 +8,15 @@ namespace mhgp11::sched { class Pool; }
+ 
+ namespace mhgp11::catalogue_detail {
+ 
+-// Pages budgetees, sans agrandissement : une feuille = une entree LeafJob et ses m SiteIdx (m <= 32).
++// Pages budgetees, sans agrandissement : une feuille = une entree LeafJob et ses m SiteIdx (m <= 32). Avec
++// hybrid_work ou order_by_work, le travail predit est calcule ici (predicted_work, pendant le parcours) ; une feuille
++// predite au moins hybrid_work n'entre pas en file (push rend faux) et est comptee dans kept().
+ class TaskLeafQueue final : public LeafQueue {
+  public:
+-  void bind(MemoryBudget& budget) noexcept { budget_ = &budget; }
+-  Outcome push(std::span<const SiteIdx> sites, const Box& box) noexcept override {
++  void bind(MemoryBudget& budget, const Cloud& cloud, const CatalogueParams& params) noexcept {
++    budget_ = &budget; cloud_ = &cloud; params_ = &params;
++  }
++  Result<bool> push(std::span<const SiteIdx> sites, const Box& box) noexcept override {
+     if (budget_ == nullptr || sites.empty() || sites.size() > leaf_device::kMaxSites)
+       return fail(Reason::catalogue_invariant);
+     LeafJob job;
+@@ -21,15 +25,31 @@ class TaskLeafQueue final : public LeafQueue {
+     for (int j = 0; j < 3; ++j) { job.lo[j] = box.lo[j]; job.hi[j] = box.hi[j]; }
+     std::array<u32, leaf_device::kMaxSites> ids{};
+     for (u32 i = 0; i < job.m; ++i) ids[i] = idx(sites[i]);
++    // Majorant du travail predit : C(m,2) + C(m,3) = C(m+1,3). Sans ordre par travail, une feuille qui ne peut
++    // atteindre le seuil entre en file sans prediction (la dominance coute 2 a 3 us par feuille de 16 sur l'hote).
++    const u32 bound = (job.m + 1) * job.m * (job.m - 1) / 6;
++    if (params_->order_by_work || (params_->hybrid_work != 0 && bound >= params_->hybrid_work)) {
++      leaf_device::Input in;
++      in.x = cloud_->x().data(); in.y = cloud_->y().data(); in.z = cloud_->z().data();
++      in.sites = ids.data(); in.m = job.m;
++      for (int j = 0; j < 3; ++j) { in.lo[j] = box.lo[j]; in.hi[j] = box.hi[j]; }
++      in.kmax = params_->kmax; in.cache = params_->cache_center_lines;
++      job.work = predicted_work(in);
++      if (params_->hybrid_work != 0 && job.work >= params_->hybrid_work) {
++        ++kept_;
++        return false;
++      }
++    }
+     auto entry = jobs_.prepare(1, *budget_);
+     if (!entry.ok()) return entry.outcome();
+     auto values = sites_.prepare(job.m, *budget_);
+     if (!values.ok()) return values.outcome();
+     jobs_.commit(std::move(entry.value()), {&job, 1});
+     sites_.commit(std::move(values.value()), std::span<const u32>(ids.data(), job.m));
+-    return {};
++    return true;
+   }
+   u64 jobs() const noexcept { return jobs_.size(); }
++  u64 kept() const noexcept { return kept_; }
+   u64 sites() const noexcept { return sites_.size(); }
+   // Copie dans le lot contigu ; les debuts sont decales de la place des sites de cette tache dans le lot.
+   Outcome copy_to(std::span<LeafJob> jobs, std::span<u32> sites, u64 site_offset) const noexcept {
+@@ -43,6 +63,9 @@ class TaskLeafQueue final : public LeafQueue {
+   FixedPages<LeafJob, 256> jobs_;
+   FixedPages<u32, 4096> sites_;
+   MemoryBudget* budget_ = nullptr;
++  const Cloud* cloud_ = nullptr;
++  const CatalogueParams* params_ = nullptr;
++  u64 kept_ = 0;
+ };
+ 
+ // Emissions du lot avec leurs Level (ordre du lot), feuilles non resolues refaites par leaf.cpp, et compteurs de
+diff --git a/morsehgp3D_v11/src/catalogue/single_pass.cpp b/morsehgp3D_v11/src/catalogue/single_pass.cpp
+index 9b4404f91..63d85d782 100644
+--- a/morsehgp3D_v11/src/catalogue/single_pass.cpp
++++ b/morsehgp3D_v11/src/catalogue/single_pass.cpp
+@@ -58,7 +58,7 @@ struct SingleRun {
+     collector.stream = &out.data; collector.stream_budget = &budget;
+     Run run{cloud, params, budget, workspaces[slot], collector, {}, &quota};
+     if (params.batch_leaves || params.cuda_leaves) {
+-      out.queue.bind(budget);
++      out.queue.bind(budget, cloud, params);
+       run.deferred = &out.queue;
+     }
+     std::optional<Stopwatch> clock;
+@@ -117,8 +117,13 @@ Outcome batch_stage(const Cloud& cloud, const CatalogueParams& params, MemoryBud
+                     std::span<Output> active, BatchBlock& batch, CatalogueLedger& ledger, CatalogueExecution& execution,
+                     u64& balls, u64& incidences, CatalogueTimings* timings) noexcept {
+   std::array<const TaskLeafQueue*, Capacity> queues{};
+-  for (u64 i = 0; i < active.size(); ++i) queues[i] = &active[i].queue;
++  u64 kept = 0;  // feuilles gardees sur l'hote par la voie hybride (diagnostic)
++  for (u64 i = 0; i < active.size(); ++i) {
++    queues[i] = &active[i].queue;
++    MHGP11_TRY(checked_add(kept, active[i].queue.kept()));
++  }
+   MHGP11_TRY(process_leaf_batch(cloud, params, budget, pool, std::span(queues).first(active.size()), batch, timings));
++  if (timings != nullptr) timings->batch_hybrid_jobs = kept;
+   MHGP11_TRY(add_catalogue_ledger(ledger, batch.ledger));
+   MHGP11_TRY(batch.fallback.account(execution));
+   for (const u64 count : {u64(batch.records.size()), batch.fallback.balls()}) {
+diff --git a/morsehgp3D_v11/src/catalogue/single_pass_batch.cpp b/morsehgp3D_v11/src/catalogue/single_pass_batch.cpp
+index 75ab78093..4ef7a5f1b 100644
+--- a/morsehgp3D_v11/src/catalogue/single_pass_batch.cpp
++++ b/morsehgp3D_v11/src/catalogue/single_pass_batch.cpp
+@@ -179,6 +179,7 @@ Outcome process_leaf_batch(const Cloud& cloud, const CatalogueParams& params, Me
+   view.x = cloud.x().data(); view.y = cloud.y().data(); view.z = cloud.z().data(); view.cloud_sites = cloud.sites();
+   view.jobs = jobs.data(); view.count = jobs.size(); view.sites = sites.data(); view.site_count = sites.size();
+   view.kmax = params.kmax; view.cache = params.cache_center_lines; view.reservoir = !params.replay_overflow;
++  view.order_by_work = params.order_by_work;
+   LeafBatchResult result;
+   stage.emplace();
+   if (params.cuda_leaves) MHGP11_TRY(run_leaf_batch_cuda(view, pool, budget, result));
+diff --git a/morsehgp3D_v11/tests/mutants/tower.json b/morsehgp3D_v11/tests/mutants/tower.json
+index 35efd3331..32376f65a 100644
+--- a/morsehgp3D_v11/tests/mutants/tower.json
++++ b/morsehgp3D_v11/tests/mutants/tower.json
+@@ -1,6 +1,6 @@
+ {
+   "module": "tower",
+-  "plancher": 148,
++  "plancher": 155,
+   "mutants": [
+     {
+       "id": "population_memo_owner_omis",
+@@ -1202,6 +1202,62 @@
+       "remplace": "      *population_at++ = static_cast<u8>(i < ball.p ? interior_local[i] : shell_local[0]);\n",
+       "porte": "mhgp11_tower_full_leaf_lanes",
+       "note": "chemin lent du puits (population a cheval sur deux blocs) : rangs de coquille faux"
++    },
++    {
++      "id": "hybride_feuille_perdue",
++      "fichier": "src/catalogue/leaf.cpp",
++      "cherche": "    kept = true;\n",
++      "remplace": "    return {};\n",
++      "porte": "mhgp11_tower_full_leaf_lanes",
++      "note": "voie hybride : la feuille gardee sur l'hote n'est jamais traitee (boules perdues)"
++    },
++    {
++      "id": "hybride_double_traitement",
++      "fichier": "src/catalogue/leaf.cpp",
++      "cherche": "    if (queued.value()) return {};\n",
++      "remplace": "    if (queued.value() && false) return {};\n",
++      "porte": "mhgp11_tower_full_leaf_lanes",
++      "note": "feuille mise en file ET traitee sur l'hote : emissions et compteurs en double"
++    },
++    {
++      "id": "hybride_seuil_inverse",
++      "fichier": "src/catalogue/leaf_queue.hpp",
++      "cherche": "      if (params_->hybrid_work != 0 && job.work >= params_->hybrid_work) {\n",
++      "remplace": "      if (params_->hybrid_work != 0 && job.work < params_->hybrid_work) {\n",
++      "porte": "mhgp11_tower_full_leaf_lanes",
++      "note": "routage inverse : les feuilles legeres restent sur l'hote (gardees gravees dans LINE)"
++    },
++    {
++      "id": "hybride_gardee_aussi_en_file",
++      "fichier": "src/catalogue/leaf_queue.hpp",
++      "cherche": "        ++kept_;\n        return false;\n",
++      "remplace": "        ++kept_;\n",
++      "porte": "mhgp11_tower_full_leaf_lanes",
++      "note": "feuille comptee gardee mais mise en file : gardees + lot != lot complet"
++    },
++    {
++      "id": "hybride_majorant_faux",
++      "fichier": "src/catalogue/leaf_queue.hpp",
++      "cherche": "    const u32 bound = (job.m + 1) * job.m * (job.m - 1) / 6;\n",
++      "remplace": "    const u32 bound = job.m * (job.m - 1) / 2;\n",
++      "porte": "mhgp11_tower_full_leaf_lanes",
++      "note": "majorant C(m,2) au lieu de C(m+1,3) : feuilles lourdes jamais predites, aucune gardee"
++    },
++    {
++      "id": "predicteur_triplets_faux",
++      "fichier": "src/catalogue/leaf_batch.hpp",
++      "cherche": "      work += 1 + leaf_device::popc(leaf.live[1][i] & leaf.live[1][j] & (~u64(0) << j << 1));\n",
++      "remplace": "      work += 1 + leaf_device::popc(leaf.live[1][i] & (~u64(0) << j << 1));\n",
++      "porte": "mhgp11_tower_full_leaf_lanes",
++      "note": "triplets vivants comptes sans le masque de j : travail predit faux, routage different (gardees gravees)"
++    },
++    {
++      "id": "ordre_travail_incomplet",
++      "fichier": "src/catalogue/leaf_batch.cpp",
++      "cherche": "  for (u64 j = 0; j < view.count; ++j) order[start[slot(view.jobs[j])]++] = static_cast<u32>(j);\n",
++      "remplace": "  for (u64 j = 0; j < view.count; ++j) order[start[slot(view.jobs[j])]] = static_cast<u32>(j);\n",
++      "porte": "mhgp11_tower_full_leaf_lanes",
++      "note": "ordre des fils qui n'est pas une permutation : refus catalogue_invariant de leaf_order"
+     }
+   ]
+ }
+diff --git a/morsehgp3D_v11/tests/tower/full_bench_io.py b/morsehgp3D_v11/tests/tower/full_bench_io.py
+index f75ce1b4d..68330a0b1 100644
+--- a/morsehgp3D_v11/tests/tower/full_bench_io.py
++++ b/morsehgp3D_v11/tests/tower/full_bench_io.py
+@@ -107,7 +107,7 @@ def main():
+             result, rows = child(kmax=4 if mode == 'kmax_above_n' else 3,
+                                  budget=0 if mode == 'budget' else 1 << 28,
+                                  workers=0 if mode == 'workers' else 1, destination=root if mode == 'output' else None,
+-                                 optimizations={'opt_negative':'-1','opt_large':'131072','opt_text':'x','opt_requires_lanes':'128',
++                                 optimizations={'opt_negative':'-1','opt_large':'1048576','opt_text':'x','opt_requires_lanes':'128',
+                                                 'opt_concurrent_requires_lanes':'8192'}.get(mode))
+             semantic.need(result.returncode == 2 and not output.exists(), 'refus publie un payload : '+mode)
+             if reason is None:
+diff --git a/morsehgp3D_v11/tests/tower/full_leaf_lanes.py b/morsehgp3D_v11/tests/tower/full_leaf_lanes.py
+index d1ca51658..5b219259e 100644
+--- a/morsehgp3D_v11/tests/tower/full_leaf_lanes.py
++++ b/morsehgp3D_v11/tests/tower/full_leaf_lanes.py
+@@ -1,18 +1,21 @@
+ #!/usr/bin/env python3
+ """Voies de feuille de la sonde FULL sur un nuage moyen : CPU (16379), feuille source unique sur l'hote (32763), lot
+-de feuilles sur le Pool avec reservoir chaine (49147) et sans (180219 = 49147 + 131072, voie du 5 octobre) rendent le
+-meme dump et le meme registre du catalogue.
++de feuilles sur le Pool avec reservoir chaine (49147) et sans (180219 = 49147 + 131072, voie du 5 octobre), voie
++hybride (311291 = 49147 + 262144 : feuilles predites lourdes gardees sur l'hote pendant le parcours) et voie hybride
++avec ordre des fils par travail predit (835579 = 311291 + 524288) rendent le meme dump et le meme registre du
++catalogue.
+ 
+     python3 full_leaf_lanes.py MHGP11_FULL_BENCH BITS
+ 
+ Nuage uniforme de 3 000 sites (random.Random(20261004), cube de cote 2^16, PointId = rang), quatre fils : K = 5 avec
+-des feuilles de 16 (trois voies), puis K = 10 avec des feuilles de 24 (CPU et lot). Les feuilles se recouvrent : la
++des feuilles de 16 (quatre voies), puis K = 10 avec des feuilles de 24 (quatre voies). Les feuilles se recouvrent : la
+ porte exige un lot plus nombreux que les sites (le regime qu'une garde fausse « feuilles <= sites » refusait le
+ 4 octobre 2026), au moins une boule par voie de lot et aucune feuille du lot hors des voies 49147 ; a K = 10, des
+ feuilles debordent de leur case : avec le reservoir, elles continuent dans ses blocs (blocs pris > 0, aucune feuille
+ rejouee) ; sans lui, elles sont rejouees par la seconde passe (0 < rejouees < lot). Les trois chemins d'ecriture
+-(copie des cases, copie des chaines, rejeu) servent donc. Bibliotheque standard seule ; aucune assertion Python. Code 0 :
+-conforme.
++(copie des cases, copie des chaines, rejeu) servent donc. Voies hybrides (seuil de travail predit en argument) : des
++feuilles sont gardees sur l'hote (0 < gardees < lot) et gardees + lot = lot de la voie 49147 (chaque feuille va a un
++seul executeur). Bibliotheque standard seule ; aucune assertion Python. Code 0 : conforme.
+ """
+ import hashlib
+ import json
+@@ -24,8 +27,11 @@ import sys
+ import tempfile
+ 
+ SITES = 3000
+-CONFIGS = (('5', '16', {'cpu': 16379, 'feuille_hote': 32763, 'lot_hote': 49147}),
+-           ('10', '24', {'cpu': 16379, 'lot_hote': 49147, 'lot_rejoue': 180219}))
++HYBRID5, HYBRID10 = 300, 900
++# Voie : masque, ou (masque, seuil de travail predit de la voie hybride).
++CONFIGS = (('5', '16', {'cpu': 16379, 'feuille_hote': 32763, 'lot_hote': 49147, 'lot_hybride': (311291, HYBRID5)}),
++           ('10', '24', {'cpu': 16379, 'lot_hote': 49147, 'lot_rejoue': 180219,
++                         'lot_hybride_ordre': (835579, HYBRID10)}))
+ 
+ 
+ def need(value, reason):
+@@ -62,8 +68,9 @@ def main():
+             seen = {}
+             for name, mode in modes.items():
+                 dump.unlink(missing_ok=True)
++                mask, extra = (mode[0], ['1', str(mode[1])]) if isinstance(mode, tuple) else (mode, [])
+                 argv = [str(executable), str(xyz), str(ids), str(dump), kmax, leaf, '256', '0', str(2**32 - 1),
+-                        str(1 << 32), '4', str(mode)]
++                        str(1 << 32), '4', str(mask)] + extra
+                 run = subprocess.run(argv, stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=300)
+                 got = phases(run.stdout)
+                 need(run.returncode == 0 and got.get('exit', {}).get('status') == 'ok', name + ' K' + kmax +
+@@ -78,12 +85,18 @@ def main():
+                 need(seen[name]['work'] == reference['work'], name + ' K' + kmax + ' : registre different')
+                 need(name.startswith('lot_') or seen[name]['batch']['jobs'] == 0, 'lot hors voie de lot')
+             batch = seen['lot_hote']['batch']
++            hybrid = [seen[name]['batch'] for name in modes if name.startswith('lot_hybride')]
++            need(len(hybrid) == 1, 'une voie hybride par configuration')
++            kept, sent = hybrid[0]['hybrid_jobs'], hybrid[0]['jobs']
++            need(0 < kept < sent and kept + sent == batch['jobs'] and batch['hybrid_jobs'] == 0,
++                 'voie hybride K%s : gardees %d, lot %d, lot complet %d' % (kmax, kept, sent, batch['jobs']))
+             need(batch['jobs'] > SITES, 'lot de feuilles pas plus nombreux que les sites (%d)' % batch['jobs'])
+             need(batch['records'] > 0 and batch['population'] > 0 and batch['unresolved'] <= batch['jobs'], 'lot vide')
+             # Branche copiee observable (audit du 4 octobre, ee2b48b4c) : des feuilles emettrices tiennent dans leur case.
+             need(batch['copied_jobs'] > 0, 'aucune case copiee')
+-            line.append('k%s boules%d lot%d non_resolues%d rejouees%d copiees%d' % (
+-                kmax, reference['balls'], batch['jobs'], batch['unresolved'], batch['fill_jobs'], batch['copied_jobs']))
++            line.append('k%s boules%d lot%d non_resolues%d rejouees%d copiees%d gardees%d' % (
++                kmax, reference['balls'], batch['jobs'], batch['unresolved'], batch['fill_jobs'], batch['copied_jobs'],
++                kept))
+             last = batch
+         # A K = 10 : chaines du reservoir avec lui, seconde passe sans lui (memes dump et registre, controles plus haut).
+         need(last['fill_jobs'] == 0 and last['spare_record_chunks'] > 0 and last['spare_population_chunks'] > 0,
+diff --git a/morsehgp3D_v11/tests/tower/tests.cmake b/morsehgp3D_v11/tests/tower/tests.cmake
+index 74eff9370..880cc51b1 100644
+--- a/morsehgp3D_v11/tests/tower/tests.cmake
++++ b/morsehgp3D_v11/tests/tower/tests.cmake
+@@ -76,10 +76,11 @@ mhgp11_python_gate(mhgp11_tower_points_export_width 0 ${PROJECT_SOURCE_DIR}/benc
+                    LINE "points_export_width_verdict conforme" LABELS fast TIMEOUT 120)
+ mhgp11_python_gate(mhgp11_tower_full_bench_io 0 full_bench_io.py $<TARGET_FILE:mhgp11_full_bench> ${MHGP11_COORD_BITS}
+                     LINE "full_io_verdict conforme attempts427 successes413 refusals14" LABELS fast TIMEOUT 120)
+-# Voies de feuille (CPU, feuille source unique sur l'hote, lot sur le Pool) sur 3 000 sites uniformes : meme dump,
+-# meme registre, lot plus nombreux que les sites (les feuilles se recouvrent ; garde fausse du 4 octobre 2026).
++# Voies de feuille (CPU, feuille source unique sur l'hote, lot sur le Pool, voies hybrides) sur 3 000 sites uniformes :
++# meme dump, meme registre, lot plus nombreux que les sites (les feuilles se recouvrent ; garde fausse du 4 octobre
++# 2026), feuilles gardees sur l'hote par les voies hybrides.
+ mhgp11_python_gate(mhgp11_tower_full_leaf_lanes 0 full_leaf_lanes.py $<TARGET_FILE:mhgp11_full_bench> ${MHGP11_COORD_BITS}
+-                    LINE "full_leaf_lanes_verdict conforme sites3000 k5 boules212695 lot27048 non_resolues0 rejouees0 copiees23766 k10 boules1075008 lot35957 non_resolues0 rejouees0 copiees35131 rejouees_sans_reservoir555"
++                    LINE "full_leaf_lanes_verdict conforme sites3000 k5 boules212695 lot27048 non_resolues0 rejouees0 copiees23766 gardees2990 k10 boules1075008 lot35957 non_resolues0 rejouees0 copiees35131 gardees1834 rejouees_sans_reservoir555"
+                     LABELS fast TIMEOUT 300)
+ mhgp11_python_gate(mhgp11_tower_full_bench_semantic 0 full_bench_semantic_test.py
+                     LINE "full_semantic_verdict conforme positives21 corruptions48 checks168 native0"

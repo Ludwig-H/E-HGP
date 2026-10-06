@@ -1,0 +1,111 @@
+{
+ "schema": "ehgp.v11.session_plan.v1",
+ "note": "Workflow GPU wf_d7937a06-901 (Claude, 6 octobre 2026) : variantes new (05db6f5b7, code de 905fad2e1), sync (__syncwarp seul), A (reservoir sans appel), C (arithmetique etroite), AC. Critere ecrit d'avance, medianes a chaud par trame : exactitude = trois bancs conformes, dumps egaux aux empreintes CPU de reservoir3, unresolved = 0, gpu_sanitizer sur AC conforme ; A adopte si comptage A <= 0,90 x new a K5/16 et K10/24 sur les trois trames ; C adopte si comptage C <= 0,95 x new aux memes points ; AC adopte si A et C le sont et comptage AC <= 1,02 x min(A, C) ; sync remplace A si comptage sync <= 1,02 x A partout. K5/24 descriptif.",
+ "python_packages": "none",
+ "default_build": false,
+ "results_cap_bytes": 134217728,
+ "commands": [
+  {
+   "name": "k5_16",
+   "timeout_seconds": 1200,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/gpu_ab.py",
+    "--src",
+    "{src}",
+    "--work",
+    "{build}/gpu",
+    "--data",
+    "{data}",
+    "--out",
+    "{out}/k5_16",
+    "--modes",
+    "gpu=81915",
+    "--variants",
+    "new,sync,A,C,AC",
+    "--reps",
+    "3",
+    "--workers",
+    "48",
+    "--warm-passes",
+    "10",
+    "--kmax",
+    "5",
+    "--leaf",
+    "16"
+   ]
+  },
+  {
+   "name": "k10_24",
+   "timeout_seconds": 1200,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/gpu_ab.py",
+    "--src",
+    "{src}",
+    "--work",
+    "{build}/gpu",
+    "--data",
+    "{data}",
+    "--out",
+    "{out}/k10_24",
+    "--modes",
+    "gpu=81915",
+    "--variants",
+    "new,sync,A,C,AC",
+    "--reps",
+    "2",
+    "--workers",
+    "48",
+    "--warm-passes",
+    "6",
+    "--kmax",
+    "10",
+    "--leaf",
+    "24"
+   ]
+  },
+  {
+   "name": "k5_24",
+   "timeout_seconds": 1200,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/gpu_ab.py",
+    "--src",
+    "{src}",
+    "--work",
+    "{build}/gpu",
+    "--data",
+    "{data}",
+    "--out",
+    "{out}/k5_24",
+    "--modes",
+    "gpu=81915",
+    "--variants",
+    "new,sync,A,C,AC",
+    "--reps",
+    "3",
+    "--workers",
+    "48",
+    "--warm-passes",
+    "10",
+    "--kmax",
+    "5",
+    "--leaf",
+    "24"
+   ]
+  },
+  {
+   "name": "sanitizer_ac",
+   "timeout_seconds": 900,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/gpu_sanitizer.py",
+    "--bench",
+    "{build}/gpu/b_cuda_AC/mhgp11_full_bench",
+    "--out",
+    "{out}/sanitizer_ac"
+   ]
+  }
+ ]
+}

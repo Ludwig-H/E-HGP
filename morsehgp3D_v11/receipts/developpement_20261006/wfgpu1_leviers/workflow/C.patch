@@ -1,0 +1,570 @@
+diff --git a/morsehgp3D_v11/src/catalogue/leaf_device.hpp b/morsehgp3D_v11/src/catalogue/leaf_device.hpp
+index 377c7b46d..4428a60af 100644
+--- a/morsehgp3D_v11/src/catalogue/leaf_device.hpp
++++ b/morsehgp3D_v11/src/catalogue/leaf_device.hpp
+@@ -4,7 +4,8 @@
+ // emissions (S*, p, m, qmin, listes I et U en SiteIdx globaux croissants). Le Level n'est pas calcule ici : l'hote le
+ // tire du support par Sphere::through de meme arite, exactement emission_level.
+ // Seuls les chemins i128 dont la v11 a prouve la borne sont joues (puissance native q2/q4 et q3 certifiee,
+-// orientation certifiee, poids q4 dans un cube de cote 2^20, droites J2, proprietaire). Tout autre cas, et tout
++// orientation certifiee, poids q4 dans un cube de cote 2^20, droites J2, proprietaire), et seulement sur une feuille
++// d'etendue <= 2^20 (kNarrowSpan : J2, orientation q4 et q3 en i64). Tout autre cas, et tout
+ // invariant que leaf.cpp refuserait, rend kUnresolved : l'hote rejoue alors la feuille entiere par leaf.cpp, qui
+ // prend la voie checked/Wide ou rend le meme refus ; rien de la feuille non resolue n'est publie (contrat R7 des
+ // auditeurs : jamais un debordement ni un refus transforme en rejet geometrique).
+@@ -29,17 +30,29 @@ struct Leaf {
+   u32 seen[kSeenWords], meets[kSeenWords];  // cache J2 : face deja jugee, et son issue (droite qui rencontre la boite)
+   u32 interior[kMaxSites], shell[kMaxSites], interior_local[kMaxSites], shell_local[kMaxSites];
+   bool unresolved = false;
++  bool wide = false;  // etendue > kNarrowSpan (prepare) : aucun prefixe, feuille non resolue
+ 
+   MHGP11_LEAF_HD Leaf(const Input& input, Counts& counts, Sink& out) : in(input), c(counts), sink(out) {}
+ 
+   MHGP11_LEAF_HD void prepare() {
+     m = in.m;
++    // Etendue de la feuille (kNarrowSpan, leaf_device_predicates.hpp), dans la boucle de chargement : enveloppe des
++    // sites et de la fermeture [lo, hi] par axe ; au-dela de 2^20 sur un axe, la feuille est non resolue avant tout
++    // prefixe (run_leaf). Automatique aux profils B <= 20 (le test est alors elimine a la compilation).
++    i64 low[3] = {in.lo[0], in.lo[1], in.lo[2]}, high[3] = {in.hi[0], in.hi[1], in.hi[2]};
+     for (u32 i = 0; i < m; ++i) {
+       const u32 s = in.sites[i];
+-      P[i][0] = in.x[s]; P[i][1] = in.y[s]; P[i][2] = in.z[s];
++      const u32 xyz[3] = {in.x[s], in.y[s], in.z[s]};
++      for (int axis = 0; axis < 3; ++axis) {
++        P[i][axis] = xyz[axis];
++        low[axis] = i64(xyz[axis]) < low[axis] ? i64(xyz[axis]) : low[axis];
++        high[axis] = i64(xyz[axis]) > high[axis] ? i64(xyz[axis]) : high[axis];
++      }
+       dom[i] = domby[i] = nbr[i] = 0;
+       live[0][i] = live[1][i] = live[2][i] = 0;
+     }
++    if constexpr (kBits > 20)
++      wide = high[0] - low[0] > kNarrowSpan || high[1] - low[1] > kNarrowSpan || high[2] - low[2] > kNarrowSpan;
+     for (int q = 0; q < 5; ++q) masks[q] = 0;
+     for (u32 w = 0; w < kSeenWords; ++w) seen[w] = meets[w] = 0;
+     c.dominance_tests += u64(m) * (m - 1) / 2;
+@@ -121,22 +134,25 @@ struct Leaf {
+     const u32* a = P[prefix[0]];
+     const u32* b = P[prefix[1]];
+     const u32* cc = P[prefix[2]];
+-    if (!strictly_acute(a, b, cc)) return;
++    // strictly_acute(a, b, cc) par acute_dots : uu et vv resservent plus bas.
++    const Vec u = diff(b, a), v = diff(cc, a);
++    const i64 uu = dot(u, u), vv = dot(v, v);
++    if (!acute_dots(uu, vv, dot(u, v))) return;
+     const i64 mid[3][3] = {{i64(a[0]) + b[0], i64(a[1]) + b[1], i64(a[2]) + b[2]},
+                            {i64(b[0]) + cc[0], i64(b[1]) + cc[1], i64(b[2]) + cc[2]},
+                            {i64(a[0]) + cc[0], i64(a[1]) + cc[1], i64(a[2]) + cc[2]}};
+     if (!doubled_envelope_meets(mid, in.lo, in.hi)) return;  // lemme M3
+-    const Vec u = diff(b, a), v = diff(cc, a), w = cross(u, v);
++    const Vec w = cross(u, v);
+     const i128 g = i128(w.v[0]) * w.v[0] + i128(w.v[1]) * w.v[1] + i128(w.v[2]) * w.v[2];
+     if (g == 0) return;  // impossible pour un triangle strictement aigu ; meme issue que la fabrique
+-    const i64 uu = dot(u, u), vv = dot(v, v);
+-    i128 t[3];
+-    for (int j = 0; j < 3; ++j) t[j] = i128(uu) * v.v[j] - i128(vv) * u.v[j];
++    // Etendue D <= 2^20 : uu, vv <= 3 D^2 et |u_j|, |v_j| <= D, donc |t_j| <= 6 D^3 = 6*2^60 < 2^63 (i64 exact).
++    i64 t[3];
++    for (int j = 0; j < 3; ++j) t[j] = uu * v.v[j] - vv * u.v[j];
+     Center s;
+     for (int j = 0; j < 3; ++j) s.anchor[j] = a[j];
+-    s.n[0] = t[1] * w.v[2] - t[2] * w.v[1];
+-    s.n[1] = t[2] * w.v[0] - t[0] * w.v[2];
+-    s.n[2] = t[0] * w.v[1] - t[1] * w.v[0];
++    s.n[0] = i128(t[1]) * w.v[2] - i128(t[2]) * w.v[1];
++    s.n[1] = i128(t[2]) * w.v[0] - i128(t[0]) * w.v[2];
++    s.n[2] = i128(t[0]) * w.v[1] - i128(t[1]) * w.v[0];
+     s.d = 2 * g; s.arity = 3;
+     s.q3_power = q3_global_power(s.d, s.n);
+     s.orient = global_orientation(s.d, s.n);
+@@ -145,31 +161,27 @@ struct Leaf {
+ 
+   MHGP11_LEAF_HD void q4() {
+     const u32* p[4] = {P[prefix[0]], P[prefix[1]], P[prefix[2]], P[prefix[3]]};
+-    if (orientation4(p[0], p[1], p[2], p[3]) == 0) return;
++    // orientation4(p0, p1, p2, p3) = sign((u x v).sv) et le det de la fabrique u.(v x sv) sont le meme produit mixte
++    // (identite exacte) : calcule une fois. Etendue D <= 2^20 : |uv_j| <= 2 D^2, |det| <= 6 D^3 < 2^63 (i64 exact).
++    const Vec u = diff(p[1], p[0]), v = diff(p[2], p[0]), sv = diff(p[3], p[0]);
++    const Vec uv = cross(u, v);
++    const i64 det = dot(uv, sv);
++    if (det == 0) return;  // orientation nulle ; l'invariant det == 0 de leaf.cpp ne peut donc plus survenir ensuite
+     ++c.q4_candidates;
+     const i64 twice[4][3] = {{2 * i64(p[0][0]), 2 * i64(p[0][1]), 2 * i64(p[0][2])},
+                              {2 * i64(p[1][0]), 2 * i64(p[1][1]), 2 * i64(p[1][2])},
+                              {2 * i64(p[2][0]), 2 * i64(p[2][1]), 2 * i64(p[2][2])},
+                              {2 * i64(p[3][0]), 2 * i64(p[3][1]), 2 * i64(p[3][2])}};
+     if (!doubled_envelope_meets(twice, in.lo, in.hi)) return;  // lemme E4
+-    const Vec u = diff(p[1], p[0]), v = diff(p[2], p[0]), sv = diff(p[3], p[0]);
+-    const Vec vs = cross(v, sv), su = cross(sv, u), uv = cross(u, v);
+-    const i128 det = i128(u.v[0]) * vs.v[0] + i128(u.v[1]) * vs.v[1] + i128(u.v[2]) * vs.v[2];
+-    if (det == 0) { unresolved = true; return; }  // leaf.cpp : catalogue_invariant
++    const Vec vs = cross(v, sv), su = cross(sv, u);
+     const i64 uu = dot(u, u), vv = dot(v, v), ss = dot(sv, sv);
+     i128 n[3];
+     for (int j = 0; j < 3; ++j) n[j] = i128(uu) * vs.v[j] + i128(vv) * su.v[j] + i128(ss) * uv.v[j];
+-    // Positivite de la presentation (q4_weights.hpp), numerateur BRUT, voie native du cube de cote 2^20.
+-    for (int j = 0; j < 3; ++j) {
+-      u32 low = p[0][j], high = p[0][j];
+-      for (int i = 1; i < 4; ++i) {
+-        low = p[i][j] < low ? p[i][j] : low;
+-        high = p[i][j] > high ? p[i][j] : high;
+-      }
+-      if (high - low > (u32(1) << 20)) { unresolved = true; return; }  // voie Wide de leaf.cpp
+-    }
++    // Positivite de la presentation (q4_weights.hpp), numerateur BRUT, voie native du cube de cote 2^20 : les quatre
++    // sites sont dans l'etendue D <= 2^20 de la feuille, donc high - low <= 2^20 sur chaque axe et la voie Wide de
++    // leaf.cpp (high - low > 2^20, autrefois teste ici) n'est jamais prise.
+     const Vec face{{vs.v[0] + su.v[0] + uv.v[0], vs.v[1] + su.v[1] + uv.v[1], vs.v[2] + su.v[2] + uv.v[2]}};
+-    const i128 h = 2 * (det * det);
++    const i128 h = 2 * (i128(det) * det);
+     const auto scalar = [&](const Vec& normal) { return n[0] * normal.v[0] + n[1] * normal.v[1] + n[2] * normal.v[2]; };
+     bool strict = false;
+     const i128 w0 = h - scalar(face);
+@@ -182,7 +194,7 @@ struct Leaf {
+     }
+     Center s;
+     for (int j = 0; j < 3; ++j) s.anchor[j] = p[0][j];
+-    i128 d = 2 * det;
++    i128 d = 2 * i128(det);
+     if (d < 0) {
+       d = -d;
+       for (int j = 0; j < 3; ++j) n[j] = -n[j];
+@@ -329,9 +341,10 @@ MHGP11_LEAF_HD u32 run_leaf(const Input& in, Counts& counts, Sink& sink) {
+   Leaf<Sink> leaf(in, counts, sink);
+   leaf.prepare();
+   leaf.live_rows();
+-  const u64 initial = in.m >= 64 ? ~u64(0) : (u64(1) << in.m) - 1;
++  // Feuille d'etendue > 2^20 (prepare) : aucun prefixe, sans branche nouvelle ; elle est rendue non resolue.
++  const u64 initial = (in.m >= 64 ? ~u64(0) : (u64(1) << in.m) - 1) & (u64(leaf.wide) - 1);
+   leaf.template extend<0>(initial, initial);
+-  return leaf.unresolved ? kUnresolved : kOk;
++  return leaf.unresolved || leaf.wide ? kUnresolved : kOk;
+ }
+ 
+ // Puits de comptage : nombre de boules et d'incidences d'une feuille (premiere passe compter-puis-ecrire).
+diff --git a/morsehgp3D_v11/src/catalogue/leaf_device_predicates.hpp b/morsehgp3D_v11/src/catalogue/leaf_device_predicates.hpp
+index c4cecfaab..9d111027c 100644
+--- a/morsehgp3D_v11/src/catalogue/leaf_device_predicates.hpp
++++ b/morsehgp3D_v11/src/catalogue/leaf_device_predicates.hpp
+@@ -20,6 +20,7 @@ namespace mhgp11::leaf_device {
+ using u8 = std::uint8_t;
+ using u32 = std::uint32_t;
+ using u64 = std::uint64_t;
++using i32 = std::int32_t;
+ using i64 = std::int64_t;
+ __extension__ using i128 = __int128;  // extension GNU, aussi admise par nvcc ; meme type que core/types.hpp
+ 
+@@ -176,39 +177,56 @@ MHGP11_LEAF_HD bool midpoint(const Center& s, const u32* a, const u32* b) {
+   return true;
+ }
+ 
++// Triangle strictement aigu par trois produits scalaires en a : avec u = b - a et v = c - a, les produits aux sommets
++// b et c sont (a - b).(c - b) = uu - uv et (a - c).(b - c) = vv - uv exactement (dot < 3*2^(2B), i64).
++MHGP11_LEAF_HD bool acute_dots(i64 uu, i64 vv, i64 uv) { return uv > 0 && uu > uv && vv > uv; }
+ MHGP11_LEAF_HD bool strictly_acute(const u32* a, const u32* b, const u32* c) {
+-  return dot(diff(b, a), diff(c, a)) > 0 && dot(diff(a, b), diff(c, b)) > 0 && dot(diff(a, c), diff(b, c)) > 0;
++  const Vec u = diff(b, a), v = diff(c, a);
++  return acute_dots(dot(u, u), dot(v, v), dot(u, v));
+ }
+ 
+-// Lemme Z de num/center_region.cpp : 0 degenere, 1 disjoint, 2 rencontre la fermeture.
++// Issues du lemme Z (center_line_meets ci-dessous).
+ inline constexpr int kDegenerate = 0, kDisjoint = 1, kIntersects = 2;
++
++// Etendue de feuille (levier C, 6 octobre 2026). Leaf::prepare mesure, axe par axe, la longueur de l'enveloppe des
++// sites de la feuille et de la fermeture [lo, hi] de sa boite ; une feuille d'etendue > kNarrowSpan = 2^20 est rendue
++// kUnresolved (rejouee par leaf.cpp, memes decisions) avant tout prefixe. Aux profils B <= 20 la condition est
++// automatique (coordonnees < 2^B, hi <= 2^B) ; a 21 et 24 bits elle est testee. Sous elle, les predicats J2 et
++// l'orientation q4 tiennent en i32/i64 (bornes ci-dessous), au lieu de produits i128.
++inline constexpr i64 kNarrowSpan = i64(1) << 20;
++
++// Lemme Z de num/center_region.cpp : 0 degenere, 1 disjoint, 2 rencontre la fermeture. Memes tests, dans le meme
++// ordre, que num::center_line_meets ; seule l'arithmetique change. Precondition : etendue D <= 2^20 (ci-dessus).
++// Bornes, avec L = lo + hi : |f_k|, |g_k| <= D tiennent en i32 ; a_k + b_k - L_k est somme d'entiers < 2^26 en i32.
++// p0 = fc - sum L_k f_k (forme historique) = sum f_k (a_k + b_k - L_k) exactement, et 4 p0 = |2a - L|^2 - |2b - L|^2
++// avec |2a_k - L_k| <= |a_k - lo_k| + |a_k - hi_k| <= 2D, donc |p0|, |p1| <= 3 D^2 <= 3*2^40 (i64).
++// |cr| = |g_i f_j - f_i g_j| <= 2 D^2 = 2^41 ; |g_k p0|, |f_k p1| <= 3 D^3 = 3*2^60, left <= 6*2^60 < 2^63 ;
++// right = sum_{j != k} (hi_j - lo_j) |cr_kj| <= 2 D * 2 D^2 = 2^62 (cr_kk = 0). Tout est exact en i64.
+ MHGP11_LEAF_HD int center_line_meets(const u32* a, const u32* b, const u32* c, const i64* lo, const i64* hi) {
+-  i64 fu[3], gu[3], fc = 0, gc = 0;
++  i32 fu[3], gu[3];
++  i64 p0 = 0, p1 = 0;
+   for (int k = 0; k < 3; ++k) {
+-    fu[k] = i64(a[k]) - i64(b[k]);
+-    gu[k] = i64(a[k]) - i64(c[k]);
+-    fc += i64(a[k]) * i64(a[k]) - i64(b[k]) * i64(b[k]);
+-    gc += i64(a[k]) * i64(a[k]) - i64(c[k]) * i64(c[k]);
++    const i32 ak = i32(a[k]), bk = i32(b[k]), ck = i32(c[k]), box = i32(lo[k] + hi[k]);
++    fu[k] = ak - bk;
++    gu[k] = ak - ck;
++    p0 += i64(fu[k]) * (ak + bk - box);
++    p1 += i64(gu[k]) * (ak + ck - box);
+   }
+   i64 cr[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+   bool rank_two = false;
+   for (int i = 0; i < 3; ++i)
+     for (int j = i + 1; j < 3; ++j) {
+-      const i64 value = gu[i] * fu[j] - fu[i] * gu[j];
++      const i64 value = i64(gu[i]) * fu[j] - i64(fu[i]) * gu[j];
+       cr[i][j] = cr[j][i] = value < 0 ? -value : value;
+       rank_two = rank_two || value != 0;
+     }
+   if (!rank_two) return kDegenerate;
+-  i64 p0 = fc, p1 = gc;
+-  for (int k = 0; k < 3; ++k) {
+-    p0 -= (lo[k] + hi[k]) * fu[k];
+-    p1 -= (lo[k] + hi[k]) * gu[k];
+-  }
+   for (int k = 0; k < 3; ++k) {
+     if (fu[k] == 0 && gu[k] == 0) continue;
+-    const i128 left = magnitude(i128(gu[k]) * p0 - i128(fu[k]) * p1);
+-    i128 right = 0;
+-    for (int j = 0; j < 3; ++j) right += i128(hi[j] - lo[j]) * cr[k][j];
++    const i64 signed_left = i64(gu[k]) * p0 - i64(fu[k]) * p1;
++    const i64 left = signed_left < 0 ? -signed_left : signed_left;
++    i64 right = 0;
++    for (int j = 0; j < 3; ++j) right += (hi[j] - lo[j]) * cr[k][j];
+     if (left > right) return kDisjoint;
+   }
+   return kIntersects;
+diff --git a/morsehgp3D_v11/tests/catalogue/leaf_device_narrow_test.cpp b/morsehgp3D_v11/tests/catalogue/leaf_device_narrow_test.cpp
+new file mode 100644
+index 000000000..a06670b8a
+--- /dev/null
++++ b/morsehgp3D_v11/tests/catalogue/leaf_device_narrow_test.cpp
+@@ -0,0 +1,229 @@
++// Arithmetique etroite de la feuille source unique (levier C, 6 octobre 2026) : etendue de feuille <= 2^20, droites
++// J2 en i64, produit mixte q4 en i64, triangle aigu par trois produits scalaires. Chaque forme etroite est confrontee
++// a sa reference i128 ou a num/ sur des cas limites (etendue exactement 2^20 posee au sommet du cube 2^B, boite
++// fermee jusqu'a hi = 2^B) et sur des tirages ; une feuille d'etendue 2^20 + 1 est non resolue (profils > 20 bits),
++// une feuille d'etendue maximale rend les memes compteurs que leaf.cpp.
++#include <random>
++#include <vector>
++
++#include "catalogue/internal.hpp"
++#include "catalogue/leaf_device.hpp"
++#include "num/center_region.hpp"
++#include "test.hpp"
++
++using namespace mhgp11;
++using namespace mhgp11::catalogue_detail;
++
++namespace {
++namespace ld = mhgp11::leaf_device;
++constexpr i64 kTop = i64{1} << kCoordBits;   // hi maximal de la fermeture
++constexpr i64 kSpan = ld::kNarrowSpan < kTop ? ld::kNarrowSpan : kTop - 1;  // etendue admise et realisable
++
++int reference_line(const std::array<u32, 3>& a, const std::array<u32, 3>& b, const std::array<u32, 3>& c,
++                   const std::array<i64, 3>& lo, const std::array<i64, 3>& hi) {
++  const auto region = num::CenterRegion::make(lo, hi);
++  const auto pa = num::Point::make(a[0], a[1], a[2]), pb = num::Point::make(b[0], b[1], b[2]);
++  const auto pc = num::Point::make(c[0], c[1], c[2]);
++  if (!region.ok() || !pa.ok() || !pb.ok() || !pc.ok()) return -1;
++  switch (num::center_line_meets(pa.value(), pb.value(), pc.value(), region.value())) {
++    case num::CenterLineRelation::degenerate: return ld::kDegenerate;
++    case num::CenterLineRelation::disjoint: return ld::kDisjoint;
++    default: return ld::kIntersects;
++  }
++}
++
++// Un point de la fenetre [base, base + span] par axe : coin (0 ou span), ou tirage.
++std::array<u32, 3> in_window(std::mt19937_64& rng, i64 base, bool corner, i64 span = kSpan) {
++  std::array<u32, 3> p{};
++  for (auto& v : p) {
++    const i64 offset = corner ? (rng() & 1u ? span : 0) : static_cast<i64>(rng() % static_cast<u64>(span + 1));
++    v = static_cast<u32>(base + offset);
++  }
++  return p;
++}
++
++i64 clamp(i64 v, i64 low, i64 high) { return v < low ? low : v > high ? high : v; }
++
++// Centre du cercle circonscrit de (a, b, c), arrondi vers zero (a si les points sont alignes) : en i128, independant
++// de la feuille (t = uu v - vv u, n = t x w, d = 2 |w|^2).
++std::array<i64, 3> circumcenter(const std::array<u32, 3>& a, const std::array<u32, 3>& b, const std::array<u32, 3>& c) {
++  i128 u[3], v[3], t[3], w[3], n[3], uu = 0, vv = 0, g = 0;
++  for (int k = 0; k < 3; ++k) {
++    u[k] = i128(b[k]) - a[k]; v[k] = i128(c[k]) - a[k];
++    uu += u[k] * u[k]; vv += v[k] * v[k];
++  }
++  for (int k = 0; k < 3; ++k) w[k] = u[(k + 1) % 3] * v[(k + 2) % 3] - u[(k + 2) % 3] * v[(k + 1) % 3];
++  for (int k = 0; k < 3; ++k) { t[k] = uu * v[k] - vv * u[k]; g += w[k] * w[k]; }
++  for (int k = 0; k < 3; ++k) n[k] = t[(k + 1) % 3] * w[(k + 2) % 3] - t[(k + 2) % 3] * w[(k + 1) % 3];
++  std::array<i64, 3> out{};
++  for (int k = 0; k < 3; ++k) out[k] = g == 0 ? i64(a[k]) : static_cast<i64>(i128(a[k]) + n[k] / (2 * g));
++  return out;
++}
++
++// Boite T0 dans la fenetre [base, base + kSpan] (0 <= lo < hi, hi pouvant atteindre 2^B) : la fenetre entiere
++// (bornes extremes), ou une boite de demi-cote 2^r (r <= 19) placee pres de la droite des centres de (a, b, c),
++// decalee d'au plus deux demi-cotes : les issues disjointe et rencontree s'y partagent pres de la frontiere.
++void box_in_window(std::mt19937_64& rng, i64 base, bool extreme, const std::array<i64, 3>& center,
++                   std::array<i64, 3>& lo, std::array<i64, 3>& hi) {
++  const i64 half = i64{1} << (rng() % 20), top = base + kSpan;
++  for (int k = 0; k < 3; ++k) {
++    if (extreme) {
++      lo[k] = base; hi[k] = top;
++      continue;
++    }
++    const i64 shift = static_cast<i64>(rng() % static_cast<u64>(4 * half + 1)) - 2 * half;
++    lo[k] = clamp(center[k] + shift - half, base, top - 1);
++    hi[k] = clamp(center[k] + shift + half + 1, lo[k] + 1, top);
++  }
++}
++
++ld::Vec as_vec(const std::array<u32, 3>& a, const std::array<u32, 3>& b) { return ld::diff(b.data(), a.data()); }
++}  // namespace
++
++MHGP11_TEST(line_reference, 200000) {
++  std::mt19937_64 rng(20261006);
++  int differences = 0;
++  std::array<int, 4> outcomes{};
++  for (int trial = 0; trial < 200000; ++trial) {
++    // Fenetre d'etendue kSpan au sommet du cube (sites jusqu'a 2^B - 1, fermeture jusqu'a hi = 2^B), a l'origine, ou
++    // quelconque ; sites et boite dans la fenetre, donc etendue de feuille <= kSpan.
++    const int place = trial % 3;
++    const i64 base = place == 0 ? kTop - kSpan : place == 1 ? 0 : static_cast<i64>(rng() % (kTop - kSpan));
++    const i64 sites = place == 0 ? kSpan - 1 : kSpan;
++    const bool corner = trial % 4 == 0, extreme = trial % 5 == 0;
++    const auto a = in_window(rng, base, corner, sites), b = in_window(rng, base, corner, sites);
++    const auto c = in_window(rng, base, corner, sites);
++    std::array<i64, 3> lo{}, hi{};
++    box_in_window(rng, base, extreme, circumcenter(a, b, c), lo, hi);
++    const int got = ld::center_line_meets(a.data(), b.data(), c.data(), lo.data(), hi.data());
++    const int want = reference_line(a, b, c, lo, hi);
++    differences += got != want;
++    outcomes[want < 0 ? 3 : want] += 1;
++    CHECK_EQ(got, want);
++  }
++  CHECK_EQ(differences, 0);
++  // Contre le vert par vacuite : chaque issue du lemme Z est jouee souvent (et aucune reference refusee).
++  CHECK(outcomes[ld::kDegenerate] >= 2000 && outcomes[ld::kDisjoint] >= 20000 && outcomes[ld::kIntersects] >= 20000);
++  CHECK_EQ(outcomes[3], 0);
++}
++
++MHGP11_TEST(acute_and_triple, 120000) {
++  std::mt19937_64 rng(4061020);
++  for (int trial = 0; trial < 40000; ++trial) {
++    const i64 base = trial % 2 == 0 ? kTop - 1 - kSpan : 0;
++    const bool corner = trial % 3 == 0;
++    const auto a = in_window(rng, base, corner), b = in_window(rng, base, corner), c = in_window(rng, base, corner);
++    const auto d = in_window(rng, base, corner);
++    // Definition par trois produits scalaires aux trois sommets, contre la forme partagee uu, vv, uv.
++    const bool explicit_acute = ld::dot(as_vec(a, b), as_vec(a, c)) > 0 && ld::dot(as_vec(b, a), as_vec(b, c)) > 0 &&
++                                ld::dot(as_vec(c, a), as_vec(c, b)) > 0;
++    CHECK_EQ(ld::strictly_acute(a.data(), b.data(), c.data()), explicit_acute);
++    // Produit mixte : i64 (u x v).sv contre u.(v x sv) en i128, et contre orientation4.
++    const ld::Vec u = as_vec(a, b), v = as_vec(a, c), sv = as_vec(a, d);
++    const i64 narrow = ld::dot(ld::cross(u, v), sv);
++    const ld::Vec vs = ld::cross(v, sv);
++    const i128 wide = i128(u.v[0]) * vs.v[0] + i128(u.v[1]) * vs.v[1] + i128(u.v[2]) * vs.v[2];
++    CHECK(i128(narrow) == wide);
++    CHECK_EQ(ld::sign(narrow), ld::orientation4(a.data(), b.data(), c.data(), d.data()));
++  }
++}
++
++namespace {
++struct LeafRun {
++  u32 status = ld::kUnresolved;
++  ld::Counts counts;
++  Result<CatalogueLedger> reference = fail(Reason::catalogue_invariant);
++};
++
++// Feuille de tous les sites : leaf_device::run_leaf (comptage) et leaf.cpp (voie graphe, J2 memorise).
++LeafRun run_both(const std::vector<std::array<u32, 3>>& points, const Box& box, MemoryBudget& budget) {
++  LeafRun out;
++  std::vector<u32> x, y, z;
++  std::vector<PointId> ids;
++  std::vector<SiteIdx> sites;
++  std::vector<u32> local;
++  for (auto p : points) {
++    x.push_back(p[0]); y.push_back(p[1]); z.push_back(p[2]);
++    ids.push_back(make_id<PointId>(static_cast<u32>(ids.size())));
++    sites.push_back(make_id<SiteIdx>(static_cast<u32>(sites.size())));
++    local.push_back(static_cast<u32>(local.size()));
++  }
++  auto cloud = prepare_cloud(x, y, z, ids, CoordWidth(), budget);
++  if (!cloud.ok()) return out;
++  ld::Input in;
++  in.x = cloud.value().x().data(); in.y = cloud.value().y().data(); in.z = cloud.value().z().data();
++  in.sites = local.data(); in.m = static_cast<u32>(local.size());
++  for (int j = 0; j < 3; ++j) { in.lo[j] = box.lo[j]; in.hi[j] = box.hi[j]; }
++  in.kmax = 5; in.cache = true;
++  ld::CountSink sink;
++  out.status = ld::run_leaf(in, out.counts, sink);
++  Workspace workspace;
++  if (!workspace.allocate(cloud.value().sites(), budget, true, true).ok()) return out;
++  CatalogueParams params;
++  params.pair_graph = true; params.cache_center_lines = true;
++  Collector collector;
++  Run run{cloud.value(), params, budget, workspace, collector, {}};
++  const Outcome done = enumerate_leaf(run, sites, box);
++  out.reference = done.ok() ? Result<CatalogueLedger>(run.ledger) : Result<CatalogueLedger>(done);
++  return out;
++}
++
++// Onze sites groupes sous le sommet du cube (dont le sommet 2^B - 1, les autres de 2^B - 4097 a 2^B - 1) et un site
++// lointain sur la diagonale, a far : l'etendue de la feuille vaut max(2^B - 1, hi) - far. Les triangles du groupe
++// gardent les certificats natifs (q3 et orientation) : la feuille device est resolue tant que l'etendue est admise.
++std::vector<std::array<u32, 3>> cluster_and_far(i64 far) {
++  std::mt19937_64 rng(61020261);
++  std::vector<std::array<u32, 3>> out;
++  out.push_back({static_cast<u32>(kTop - 1), static_cast<u32>(kTop - 1), static_cast<u32>(kTop - 1)});
++  for (int i = 0; i < 10; ++i)
++    out.push_back({static_cast<u32>(kTop - 1 - static_cast<i64>(rng() % 4097)),
++                   static_cast<u32>(kTop - 1 - static_cast<i64>(rng() % 4097)),
++                   static_cast<u32>(kTop - 1 - static_cast<i64>(rng() % 4097))});
++  out.push_back({static_cast<u32>(far), static_cast<u32>(far), static_cast<u32>(far)});
++  return out;
++}
++
++void same_counts(const LeafRun& run) {
++  CHECK_EQ(run.status, ld::kOk);
++  REQUIRE(run.reference.ok());
++  const CatalogueLedger& l = run.reference.value();
++  const ld::Counts& c = run.counts;
++  CHECK_EQ(c.dominance_tests, l.dominance_tests); CHECK_EQ(c.prefixes, l.prefixes); CHECK_EQ(c.judged, l.judged);
++  CHECK_EQ(c.census_tests, l.census_tests); CHECK_EQ(c.emitted, l.emitted); CHECK_EQ(c.incidences, l.incidences);
++  CHECK_EQ(c.q4_candidates, l.q4_candidates); CHECK_EQ(c.q4_levels, l.q4_levels);
++  CHECK_EQ(c.region_line_tests, l.region_line_tests); CHECK_EQ(c.region_line_rejects, l.region_line_rejects);
++  CHECK_EQ(c.region_line_evaluations, l.region_line_evaluations);
++  CHECK_EQ(c.region_line_cache_hits, l.region_line_cache_hits);
++}
++}  // namespace
++
++MHGP11_TEST(span_refusal, 30) {
++  MemoryBudget budget(MemoryBudget::kUnlimited);
++  // Etendue admise maximale (site lointain a 2^B - 1 - kSpan), boite dans le groupe : memes compteurs que leaf.cpp,
++  // prefixes, droites J2 et candidats q4 exerces.
++  const Box inner{{kTop - 3000, kTop - 3000, kTop - 3000}, {kTop - 1000, kTop - 1000, kTop - 1000}};
++  const auto admitted = run_both(cluster_and_far(kTop - 1 - kSpan), inner, budget);
++  same_counts(admitted);
++  CHECK(admitted.counts.prefixes > 0 && admitted.counts.region_line_evaluations > 0);
++  CHECK(admitted.counts.q4_candidates > 0 && admitted.counts.emitted > 0);
++  // Etendue exactement kSpan portee par la fermeture : boite jusqu'a hi = 2^B, site lointain a 2^B - kSpan.
++  const Box closure{{kTop - 3000, kTop - 3000, kTop - 3000}, {kTop, kTop, kTop}};
++  same_counts(run_both(cluster_and_far(kTop - kSpan), closure, budget));
++  // Profils > 20 bits : une unite de plus (2^20 + 1), feuille non resolue avant tout prefixe ; leaf.cpp la traite.
++  if constexpr (kCoordBits > 20) {
++    const auto wide = run_both(cluster_and_far(kTop - 2 - kSpan), inner, budget);
++    CHECK_EQ(wide.status, ld::kUnresolved);
++    CHECK_EQ(wide.counts.prefixes, 0u);
++    CHECK(wide.reference.ok() && wide.reference.value().prefixes > 0);
++    // Sites d'etendue kSpan, mais la fermeture hi = 2^B porte l'enveloppe a 2^20 + 1 : non resolue aussi.
++    const auto by_closure = run_both(cluster_and_far(kTop - 1 - kSpan), closure, budget);
++    CHECK_EQ(by_closure.status, ld::kUnresolved);
++  } else {
++    CHECK(kSpan == kTop - 1);  // etendue maximale realisable : admise sans test
++    CHECK(kTop <= ld::kNarrowSpan);
++    CHECK(admitted.reference.ok());
++  }
++  CHECK(budget.released().ok());
++}
++
++MHGP11_TEST_MAIN()
+diff --git a/morsehgp3D_v11/tests/catalogue/tests.cmake b/morsehgp3D_v11/tests/catalogue/tests.cmake
+index f1db1cb71..4ad4a4124 100644
+--- a/morsehgp3D_v11/tests/catalogue/tests.cmake
++++ b/morsehgp3D_v11/tests/catalogue/tests.cmake
+@@ -164,3 +164,7 @@ foreach(case "ng00;39885;5;1306696;2565656;320;975c390e5912fabe;"
+                      LINE "catalogue_euler_verdict conforme k=${k} n=${n} ordres=${k} boules_k=${small} boules_k2=${large} etendues=${extended} coquille_max=5 entree=${fnv}"
+                      LABELS lidar ${extra_label} TIMEOUT 1800)
+ endforeach()
++
++# Arithmetique etroite de la feuille source unique (etendue <= 2^20) contre num/ et i128, cas limites du cube 2^B.
++mhgp11_add_unit(mhgp11_catalogue_leaf_narrow SOURCES leaf_device_narrow_test.cpp
++                GROUPS line_reference acute_and_triple span_refusal LABELS fast)
+diff --git a/morsehgp3D_v11/tests/mutants/catalogue.json b/morsehgp3D_v11/tests/mutants/catalogue.json
+index adb910836..e93baad1d 100644
+--- a/morsehgp3D_v11/tests/mutants/catalogue.json
++++ b/morsehgp3D_v11/tests/mutants/catalogue.json
+@@ -1,6 +1,6 @@
+ {
+   "module": "catalogue",
+-  "plancher": 68,
++  "plancher": 72,
+   "mutants": [
+     {
+       "id": "support_tetra_strict_ignore",
+@@ -545,6 +545,38 @@
+       "remplace": ": t.regular[k] + t.extended[k] + (k == 0 ? i128(n) : i128(0));",
+       "porte": "mhgp11_catalogue_euler_limits",
+       "note": "terme n [k = 1] des minima de niveau zero jamais ajoute (k == 0 n'arrive pas ; n reste lu, -Werror) : E_1 vaut 1 - n"
++    },
++    {
++      "id": "j2_etroit_second_plan_faux",
++      "fichier": "src/catalogue/leaf_device_predicates.hpp",
++      "cherche": "    p1 += i64(gu[k]) * (ak + ck - box);\n",
++      "remplace": "    p1 += i64(gu[k]) * (ak + bk - box);\n",
++      "porte": "mhgp11_catalogue_leaf_narrow_line_reference",
++      "note": "levier C : p1 de la droite J2 etroite pris sur le plan de (a, b) ; desaccord avec num::center_line_meets"
++    },
++    {
++      "id": "aigu_sommet_c_oublie",
++      "fichier": "src/catalogue/leaf_device_predicates.hpp",
++      "cherche": "return uv > 0 && uu > uv && vv > uv;",
++      "remplace": "return uv > 0 && uu > uv && vv > 0;",
++      "porte": "mhgp11_catalogue_leaf_narrow_acute_and_triple",
++      "note": "levier C : triangle aigu sans le produit scalaire au sommet c (vv - uv > 0 devient vv > 0) ; obtus en c admis"
++    },
++    {
++      "id": "etendue_seuil_double",
++      "fichier": "src/catalogue/leaf_device.hpp",
++      "cherche": "      wide = high[0] - low[0] > kNarrowSpan || high[1] - low[1] > kNarrowSpan || high[2] - low[2] > kNarrowSpan;",
++      "remplace": "      wide = high[0] - low[0] > 2 * kNarrowSpan || high[1] - low[1] > 2 * kNarrowSpan || high[2] - low[2] > 2 * kNarrowSpan;",
++      "porte": "mhgp11_catalogue_leaf_narrow_span_refusal",
++      "note": "levier C : feuille d'etendue 2^20 + 1 admise dans l'arithmetique etroite (bornes i64 non prouvees)"
++    },
++    {
++      "id": "etendue_sans_fermeture",
++      "fichier": "src/catalogue/leaf_device.hpp",
++      "cherche": "high[3] = {in.hi[0], in.hi[1], in.hi[2]};",
++      "remplace": "high[3] = {in.lo[0], in.lo[1], in.lo[2]};",
++      "porte": "mhgp11_catalogue_leaf_narrow_span_refusal",
++      "note": "levier C : la borne hi de la fermeture hors de l'etendue ; une boite jusqu'a 2^B qui la porte a 2^20 + 1 passe"
+     }
+   ]
+ }
+diff --git a/morsehgp3D_v11/tests/mutants/tower.json b/morsehgp3D_v11/tests/mutants/tower.json
+index 35efd3331..195854d34 100644
+--- a/morsehgp3D_v11/tests/mutants/tower.json
++++ b/morsehgp3D_v11/tests/mutants/tower.json
+@@ -1,6 +1,6 @@
+ {
+   "module": "tower",
+-  "plancher": 148,
++  "plancher": 151,
+   "mutants": [
+     {
+       "id": "population_memo_owner_omis",
+@@ -1202,6 +1202,30 @@
+       "remplace": "      *population_at++ = static_cast<u8>(i < ball.p ? interior_local[i] : shell_local[0]);\n",
+       "porte": "mhgp11_tower_full_leaf_lanes",
+       "note": "chemin lent du puits (population a cheval sur deux blocs) : rangs de coquille faux"
++    },
++    {
++      "id": "q4_produit_mixte_positif",
++      "fichier": "src/catalogue/leaf_device.hpp",
++      "cherche": "    if (det == 0) return;  // orientation nulle",
++      "remplace": "    if (det <= 0) return;  // orientation nulle",
++      "porte": "mhgp11_tower_full_leaf_lanes",
++      "note": "levier C : produit mixte q4 partage ; les tetraedres d'orientation negative ne sont plus candidats"
++    },
++    {
++      "id": "q3_numerateur_etroit_faux",
++      "fichier": "src/catalogue/leaf_device.hpp",
++      "cherche": "    for (int j = 0; j < 3; ++j) t[j] = uu * v.v[j] - vv * u.v[j];",
++      "remplace": "    for (int j = 0; j < 3; ++j) t[j] = uu * v.v[j] - uu * u.v[j];",
++      "porte": "mhgp11_tower_full_leaf_lanes",
++      "note": "levier C : t = uu v - vv u en i64 ; vv remplace par uu, centre q3 faux"
++    },
++    {
++      "id": "j2_etroit_largeur_fausse",
++      "fichier": "src/catalogue/leaf_device_predicates.hpp",
++      "cherche": "    for (int j = 0; j < 3; ++j) right += (hi[j] - lo[j]) * cr[k][j];",
++      "remplace": "    for (int j = 0; j < 3; ++j) right += (hi[k] - lo[k]) * cr[k][j];",
++      "porte": "mhgp11_tower_full_leaf_lanes",
++      "note": "levier C : rayon du zonogone J2 etroit pris sur l'axe k au lieu de j"
+     }
+   ]
+ }

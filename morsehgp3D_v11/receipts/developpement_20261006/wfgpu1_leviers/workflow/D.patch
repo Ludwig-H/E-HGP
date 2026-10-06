@@ -1,0 +1,577 @@
+diff --git a/morsehgp3D_v11/bench/full_probe.cpp b/morsehgp3D_v11/bench/full_probe.cpp
+index 0997bcf65..2d168400e 100644
+--- a/morsehgp3D_v11/bench/full_probe.cpp
++++ b/morsehgp3D_v11/bench/full_probe.cpp
+@@ -171,6 +171,7 @@ void catalogue_execution(const Catalogue& catalogue, const CatalogueTimings& tim
+             << ",\"upload_ns\":" << t.batch_upload_ns << ",\"download_ns\":" << t.batch_download_ns
+             << ",\"device_bytes\":" << t.batch_device_bytes << ",\"levels_ns\":" << t.batch_levels_ns
+             << ",\"fallback_ns\":" << t.batch_fallback_ns << ",\"prefetch_ns\":" << t.batch_prefetch_ns
++            << ",\"order_ns\":" << t.batch_order_ns
+             << ",\"fill_jobs\":" << t.batch_fill_jobs << ",\"copied_jobs\":" << t.batch_copied_jobs
+             << ",\"spare_record_chunks\":" << t.batch_spare_record_chunks
+             << ",\"spare_population_chunks\":" << t.batch_spare_population_chunks
+@@ -259,7 +260,9 @@ Outcome full_pass(Cloud cloud_value, MemoryBudget& budget, sched::Pool& pool_ref
+                                         8192 * unsigned(full_params.concurrent_orders) +
+                                         16384 * unsigned(params.device_leaf) + 32768 * unsigned(params.batch_leaves) +
+                                         65536 * unsigned(params.cuda_leaves) +
+-                                        131072 * unsigned(params.replay_overflow))
++                                        131072 * unsigned(params.replay_overflow) +
++                                        262144 * unsigned(params.thread_order == 1) +
++                                        524288 * unsigned(params.thread_order == 2))
+             << ",\"wall_ns\":" << full_ns << ",\"index_ns\":" << index_ns << ",\"domain_ns\":" << domain_ns
+             << ",\"forest_ns\":" << forest_ns << ",\"cpu_seconds\":" << std::setprecision(12) << cpu_seconds
+             << ",\"peak_reserved_bytes\":" << budget.peak() << ",\"reserved_after_bytes\":" << budget.used();
+@@ -356,7 +359,7 @@ int main(int argc, char** argv) {
+   if (options[0] > 12 || options[1] > 1024 || options[2] > 1024 ||
+       options[6] < 1 || options[6] > sched::kMaxWorkers) return 2;
+   u64 optimizations = 0;
+-  if (argc >= 12 && (!parse(argv[11], optimizations) || optimizations > 262143)) return 2;
++  if (argc >= 12 && (!parse(argv[11], optimizations) || optimizations > 1048575)) return 2;
+   u64 passes = 1;  // mode a chaud : passes FULL successives dans le meme processus
+   if (argc == 13 && (!parse(argv[12], passes) || passes < 1 || passes > 64)) return 2;
+   if ((optimizations & 8192) != 0 && (optimizations & 8) == 0) return 2;
+@@ -365,6 +368,9 @@ int main(int argc, char** argv) {
+   if ((optimizations & 16384) != 0 && (optimizations & 2048) == 0) return 2;
+   if ((optimizations & (32768 | 65536)) != 0 && (optimizations & (64 | 2048)) != (64 | 2048)) return 2;
+   if ((optimizations & 32768) != 0 && (optimizations & 65536) != 0) return 2;
++  // Ordres diagnostiques des fils (levier D) : executeur CUDA seulement, un seul a la fois.
++  if ((optimizations & (262144 | 524288)) != 0 && (optimizations & 65536) == 0) return 2;
++  if ((optimizations & 262144) != 0 && (optimizations & 524288) != 0) return 2;
+   CatalogueParams params;
+   FullParams full_params{(optimizations & 4) != 0 ? u64{65536} : u64{0}};
+   if ((optimizations & 8) != 0) {
+@@ -388,6 +394,8 @@ int main(int argc, char** argv) {
+   params.batch_leaves = (optimizations & 32768) != 0;  // feuilles en lot, executeur hote (Pool)
+   params.cuda_leaves = (optimizations & 65536) != 0;   // feuilles en lot sur le GPU (construction CUDA)
+   params.replay_overflow = (optimizations & 131072) != 0;  // lots sans reservoir chaine : debordements rejoues
++  // Fils du lot GPU par poids estime (262144) ou warps par poids (524288) ; diagnostic du levier D.
++  params.thread_order = (optimizations & 262144) != 0 ? 1 : (optimizations & 524288) != 0 ? 2 : 0;
+   params.kmax = static_cast<int>(options[0]); params.leaf_size = static_cast<u32>(options[1]);
+   params.max_leaf = static_cast<u32>(options[2]); params.max_nodes = options[3]; params.ball_limit = options[4];
+   const auto result = guarded([&]() {
+diff --git a/morsehgp3D_v11/src/catalogue/catalogue.hpp b/morsehgp3D_v11/src/catalogue/catalogue.hpp
+index ee0dde94f..51724e3d8 100644
+--- a/morsehgp3D_v11/src/catalogue/catalogue.hpp
++++ b/morsehgp3D_v11/src/catalogue/catalogue.hpp
+@@ -43,6 +43,9 @@ struct CatalogueParams {
+   // Lots de feuilles sans reservoir chaine : toute feuille qui deborde de sa case est rejouee (voie du 5 octobre,
+   // gardee pour les portes qui exercent la seconde passe). Sans effet hors des lots.
+   bool replay_overflow = false;
++  // Ordre des fils de l'executeur CUDA (leaf_batch.hpp) : 0 par m decroissant ; 1 et 2, ordres diagnostiques du
++  // levier D (poids estime, warps par poids). Seule l'affectation des feuilles aux fils change. Sans effet ailleurs.
++  u8 thread_order = 0;
+ };
+ 
+ struct CatalogueBall {
+@@ -89,6 +92,7 @@ struct CatalogueTimings {
+   u64 batch_device_init_ns = 0, batch_upload_ns = 0, batch_download_ns = 0, batch_device_bytes = 0;
+   u64 batch_levels_ns = 0, batch_fallback_ns = 0;
+   u64 batch_prefetch_ns = 0;  // ouverture du contexte GPU en arriere-plan (prefetch_device_context), recouverte
++  u64 batch_order_ns = 0;     // ordre des fils de l'executeur CUDA (poids sur le Pool pour les ordres diagnostiques)
+   u64 batch_fill_jobs = 0;    // feuilles rejouees par la seconde passe (celles qui emettent et debordent)
+   u64 batch_copied_jobs = 0;  // feuilles qui emettent et tiennent dans leurs blocs (case et reservoir)
+   u64 batch_spare_record_chunks = 0, batch_spare_population_chunks = 0;  // blocs du reservoir pris
+diff --git a/morsehgp3D_v11/src/catalogue/leaf_batch.cpp b/morsehgp3D_v11/src/catalogue/leaf_batch.cpp
+index 94d6f8456..764733940 100644
+--- a/morsehgp3D_v11/src/catalogue/leaf_batch.cpp
++++ b/morsehgp3D_v11/src/catalogue/leaf_batch.cpp
+@@ -75,8 +75,125 @@ struct HostBatch {
+   }
+ };
+ 
++// Puits sans effet : leaf_weight ne parcourt pas la feuille, seules ses tables servent.
++struct NoSink {
++  void emit(const leaf_device::Ball&, const u32*, const u32*, const u32*, const u32*) noexcept {}
++};
++
++struct Weigh {
++  const LeafBatchView& view;
++  std::span<u64> weights;
++  static Outcome body(void* context, u64 begin, u64 end, u32) noexcept {
++    const auto& self = *static_cast<const Weigh*>(context);
++    for (u64 j = begin; j < end; ++j) self.weights[j] = leaf_weight(input_of(self.view, self.view.jobs[j]));
++    return {};
++  }
++};
++
++// Feuilles par m decroissant, stable (tri par comptage sur 1..kMaxSites) : chaque warp recoit des feuilles de meme
++// taille. count < 2^32 (garde de thread_order).
++Outcome size_order(const LeafBatchView& view, std::span<u32> order) noexcept {
++  u64 start[leaf_device::kMaxSites + 2] = {};
++  for (u64 j = 0; j < view.count; ++j) {
++    if (view.jobs[j].m > leaf_device::kMaxSites) return fail(Reason::catalogue_invariant);
++    ++start[leaf_device::kMaxSites - view.jobs[j].m + 1];
++  }
++  for (u32 b = 1; b <= leaf_device::kMaxSites + 1; ++b) start[b] += start[b - 1];
++  for (u64 j = 0; j < view.count; ++j) order[start[leaf_device::kMaxSites - view.jobs[j].m]++] = static_cast<u32>(j);
++  return {};
++}
++
++// Warps complets de l'ordre par m, ranges par somme des poids decroissante (puis rang du warp) ; le dernier warp,
++// incomplet, reste en queue pour que la composition des autres ne glisse pas. out recoit l'ordre range.
++void warp_weight_order(std::span<const u32> order, std::span<const u64> weights, std::span<u64> sums,
++                       std::span<u32> ranks, std::span<u32> out) noexcept {
++  const u64 full = order.size() / kOrderWarp;
++  for (u64 w = 0; w < full; ++w) {
++    sums[w] = 0;
++    for (u64 p = w * kOrderWarp; p < (w + 1) * kOrderWarp; ++p) sums[w] += weights[order[p]];  // <= 32 * C(32, 3)
++    ranks[w] = static_cast<u32>(w);
++  }
++  std::sort(ranks.begin(), ranks.begin() + static_cast<std::ptrdiff_t>(full),
++            [&](u32 a, u32 b) { return sums[a] != sums[b] ? sums[a] > sums[b] : a < b; });
++  u64 at = 0;
++  for (u64 r = 0; r < full; ++r)
++    for (u64 p = ranks[r] * kOrderWarp; p < (ranks[r] + 1) * kOrderWarp; ++p) out[at++] = order[p];
++  for (u64 p = full * kOrderWarp; p < order.size(); ++p) out[at++] = order[p];
++}
++
++// Ordre diagnostique : poids sur le Pool, puis tri par poids ou par warps ; resultat controle (permutation).
++Outcome weighted_order(const LeafBatchView& view, sched::Pool& pool, MemoryBudget& budget, Buffer<u32>& order) noexcept {
++  const u64 warps = view.count / kOrderWarp;
++  Buffer<u64> weights, sums;
++  Buffer<u32> ranks, arranged;
++  Buffer<u8> seen;
++  MHGP11_TRY(weights.allocate(view.count, budget));
++  MHGP11_TRY(sums.allocate(warps, budget));
++  MHGP11_TRY(ranks.allocate(warps, budget));
++  MHGP11_TRY(arranged.allocate(view.count, budget));
++  MHGP11_TRY(seen.allocate(view.count, budget));
++  Weigh weigh{view, weights.span()};
++  if (view.count != 0) MHGP11_TRY(pool.parallel_for(view.count, 256, &weigh, Weigh::body));
++  if (view.order == kOrderWeight) {
++    std::sort(order.begin(), order.end(),
++              [&](u32 a, u32 b) { return weights[a] != weights[b] ? weights[a] > weights[b] : a < b; });
++  } else {
++    warp_weight_order(order.span(), weights.span(), sums.span(), ranks.span(), arranged.span());
++    order.swap(arranged);
++  }
++  for (auto& flag : seen.span()) flag = 0;
++  for (const u32 j : order.span()) {
++    if (j >= view.count || seen[j] != 0) return fail(Reason::catalogue_invariant);
++    seen[j] = 1;
++  }
++  return {};
++}
++
+ }  // namespace
+ 
++u64 leaf_weight(const leaf_device::Input& in) noexcept {
++  using leaf_device::ctz;
++  using leaf_device::popc;
++  if (in.m == 0 || in.m > leaf_device::kMaxSites || in.kmax < 2) return 0;  // kmax < 2 : aucune profondeur 2
++  leaf_device::Counts counts;
++  NoSink none;
++  leaf_device::Leaf<NoSink> leaf(in, counts, none);
++  leaf.prepare();
++  leaf.live_rows();
++  const u32 first = static_cast<u32>(in.kmax - 1), second = static_cast<u32>(in.kmax - 2);
++  const u64 all = (u64(1) << in.m) - 1;  // m <= 32
++  u64 weight = 0;
++  for (u64 rest = all; rest != 0; rest &= rest - 1) {
++    const u32 i = ctz(rest);
++    if (popc(leaf.dom[i]) > first) continue;  // G3 de la profondeur 0, ou arret avant la profondeur 1
++    for (u64 next = (rest & (rest - 1)) & leaf.live[0][i]; next != 0; next &= next - 1) {
++      const u32 j = ctz(next);
++      if (popc(leaf.dom[i] | leaf.dom[j]) > second) continue;  // G3 de la profondeur 1, ou arret avant la 2
++      weight += popc((next & (next - 1)) & leaf.live[1][i] & leaf.live[1][j]);
++    }
++  }
++  return weight;
++}
++
++Outcome thread_order(const LeafBatchView& view, sched::Pool& pool, MemoryBudget& budget, Buffer<u32>& order) noexcept {
++  if (view.order > kOrderWarpWeight) return fail(Reason::parameter_out_of_range);
++  if (view.count >= kNoChunk) return fail(Reason::index_overflow_u32);  // rangs des feuilles en u32
++  u64 bytes = 0;
++  MHGP11_TRY(add_bytes<u32>(bytes, view.count));
++  if (view.order != kOrderSize) {
++    MHGP11_TRY(add_bytes<u64>(bytes, view.count));               // poids
++    MHGP11_TRY(add_bytes<u64>(bytes, view.count / kOrderWarp));  // sommes par warp
++    MHGP11_TRY(add_bytes<u32>(bytes, view.count / kOrderWarp));  // rangs des warps
++    MHGP11_TRY(add_bytes<u32>(bytes, view.count));               // ordre range
++    MHGP11_TRY(add_bytes<u8>(bytes, view.count));                // controle de permutation
++  }
++  MHGP11_TRY(budget.admit(bytes));
++  MHGP11_TRY(order.allocate(view.count, budget));
++  MHGP11_TRY(size_order(view, order.span()));
++  if (view.order == kOrderSize) return {};
++  return weighted_order(view, pool, budget, order);
++}
++
+ Outcome run_leaf_batch_host(const LeafBatchView& view, sched::Pool& pool, MemoryBudget& budget,
+                             LeafBatchResult& result) noexcept {
+   const Stopwatch total;
+diff --git a/morsehgp3D_v11/src/catalogue/leaf_batch.hpp b/morsehgp3D_v11/src/catalogue/leaf_batch.hpp
+index 562104695..c995c9aeb 100644
+--- a/morsehgp3D_v11/src/catalogue/leaf_batch.hpp
++++ b/morsehgp3D_v11/src/catalogue/leaf_batch.hpp
+@@ -203,14 +203,34 @@ struct LeafBatchView {
+   int kmax = 0;
+   bool cache = false;
+   bool reservoir = true;  // cases chainees au comptage (faux : voie du 5 octobre, toute feuille qui deborde est rejouee)
++  u8 order = 0;           // ordre des fils de l'executeur CUDA (kOrderSize, kOrderWeight ou kOrderWarpWeight)
+ };
+ 
++// Ordre des fils du lot (executeur CUDA). kOrderSize, defaut : feuilles par m decroissant, stable. Diagnostic du
++// levier D (6 octobre 2026, rapport D du workflow GPU) : kOrderWeight, feuilles par poids decroissant (leaf_weight,
++// puis rang dans le lot) ; kOrderWarpWeight, warps de 32 feuilles consecutives de l'ordre par m, lances par somme des
++// poids decroissante (puis rang du warp). Seule l'affectation des feuilles aux fils change : statuts, prefixes et
++// ecritures restent indexes par feuille du lot, donc les sorties ne dependent pas de l'ordre.
++inline constexpr u8 kOrderSize = 0, kOrderWeight = 1, kOrderWarpWeight = 2;
++inline constexpr u64 kOrderWarp = 32;  // fils par warp (blocs d'un warp de leaf_batch_cuda.cu)
++
++// Poids d'une feuille : triplets candidats de la profondeur 2 (memes coupes G3 et lignes vivantes qu'extend<0> et
++// extend<1>), predicteur du travail mesure sur ng00 (rang de Spearman 0,90 a 0,96, contre 0,45 a 0,55 pour m). Une
++// entree hors domaine pese 0.
++u64 leaf_weight(const leaf_device::Input& in) noexcept;
++
++// Ordre des fils du lot dans order (count feuilles, budgete) ; les poids sont calcules sur le Pool. Refus explicite
++// (catalogue_invariant) si le resultat n'est pas une permutation des feuilles, ou si l'ordre demande est inconnu.
++[[nodiscard]] Outcome thread_order(const LeafBatchView& view, sched::Pool& pool, MemoryBudget& budget,
++                                   Buffer<u32>& order) noexcept;
++
+ // Chronos et volumes d'un lot (diagnostic, hors ledger). Les champs device_* ne sont remplis que par CUDA.
+ struct LeafBatchTimings {
+   u64 jobs = 0, unresolved = 0, records = 0, population = 0;
+   u64 count_ns = 0, scan_ns = 0, fill_ns = 0, total_ns = 0;
+   u64 device_init_ns = 0, upload_ns = 0, download_ns = 0, device_bytes = 0;
+   u64 prefetch_ns = 0;  // duree de l'ouverture anticipee du contexte (fil d'arriere-plan), 0 sans elle
++  u64 order_ns = 0;     // ordre des fils (executeur CUDA ; poids sur le Pool pour les ordres diagnostiques)
+   u64 fill_jobs = 0;    // feuilles rejouees par la seconde passe : celles qui emettent et debordent de leur case
+   u64 copied_jobs = 0;  // feuilles qui emettent et tiennent dans leurs blocs (case et reservoir) : copiees sans rejeu
+   u64 spare_record_chunks = 0, spare_population_chunks = 0;  // blocs du reservoir pris (au plus spare) ; 0 sans lui
+diff --git a/morsehgp3D_v11/src/catalogue/leaf_batch_cuda.cu b/morsehgp3D_v11/src/catalogue/leaf_batch_cuda.cu
+index 4008f7d07..f7e660db8 100644
+--- a/morsehgp3D_v11/src/catalogue/leaf_batch_cuda.cu
++++ b/morsehgp3D_v11/src/catalogue/leaf_batch_cuda.cu
+@@ -24,7 +24,7 @@ struct DeviceView {
+   const u32* y;
+   const u32* z;
+   const LeafJob* jobs;
+-  const u32* order;  // fil -> feuille : feuilles par m decroissant (warps de feuilles de meme taille)
++  const u32* order;  // fil -> feuille (thread_order : par m decroissant, ou ordre diagnostique)
+   u64 count;
+   const u32* sites;
+   int kmax;
+@@ -150,18 +150,12 @@ u64 now_ns() {
+ 
+ bool ok(cudaError_t e) { return e == cudaSuccess; }
+ 
+-// Feuilles par m decroissant, stable (tri par comptage sur 1..kMaxSites) : chaque warp recoit des feuilles de meme
+-// taille. Seule l'affectation des fils change ; statuts, prefixes et ecritures restent indexes par feuille du lot.
+-Outcome size_order(const LeafBatchView& view, MemoryBudget& budget, Buffer<u32>& order) noexcept {
+-  MHGP11_TRY(budget.admit(view.count * sizeof(u32)));
+-  MHGP11_TRY(order.allocate(view.count, budget));
+-  u64 start[leaf_device::kMaxSites + 2] = {};
+-  for (u64 j = 0; j < view.count; ++j) {
+-    if (view.jobs[j].m > leaf_device::kMaxSites) return fail(Reason::catalogue_invariant);
+-    ++start[leaf_device::kMaxSites - view.jobs[j].m + 1];
+-  }
+-  for (u32 b = 1; b <= leaf_device::kMaxSites + 1; ++b) start[b] += start[b - 1];
+-  for (u64 j = 0; j < view.count; ++j) order[start[leaf_device::kMaxSites - view.jobs[j].m]++] = static_cast<u32>(j);
++// Ordre des fils (par m ; ordres diagnostiques du levier D : poids sur le Pool), chronometre hors du comptage.
++Outcome timed_order(const LeafBatchView& view, sched::Pool& pool, MemoryBudget& budget, Buffer<u32>& order,
++                    LeafBatchTimings& t) noexcept {
++  const u64 start = now_ns();
++  MHGP11_TRY(thread_order(view, pool, budget, order));
++  t.order_ns = now_ns() - start;
+   return {};
+ }
+ 
+@@ -363,7 +357,7 @@ Outcome run_leaf_batch_cuda(const LeafBatchView& view, sched::Pool& pool, Memory
+   MHGP11_TRY(keep_pool_memory());
+   t.device_init_ns = now_ns() - start;
+   Buffer<u32> order;
+-  MHGP11_TRY(size_order(view, budget, order));
++  MHGP11_TRY(timed_order(view, pool, budget, order, t));
+   // Sorties hote d'abord (budget), puis tableaux device.
+   u64 host_bytes = 0;
+   MHGP11_TRY(add_bytes<u8>(host_bytes, view.count));
+diff --git a/morsehgp3D_v11/src/catalogue/single_pass_batch.cpp b/morsehgp3D_v11/src/catalogue/single_pass_batch.cpp
+index 75ab78093..4ed8114e5 100644
+--- a/morsehgp3D_v11/src/catalogue/single_pass_batch.cpp
++++ b/morsehgp3D_v11/src/catalogue/single_pass_batch.cpp
+@@ -179,6 +179,7 @@ Outcome process_leaf_batch(const Cloud& cloud, const CatalogueParams& params, Me
+   view.x = cloud.x().data(); view.y = cloud.y().data(); view.z = cloud.z().data(); view.cloud_sites = cloud.sites();
+   view.jobs = jobs.data(); view.count = jobs.size(); view.sites = sites.data(); view.site_count = sites.size();
+   view.kmax = params.kmax; view.cache = params.cache_center_lines; view.reservoir = !params.replay_overflow;
++  view.order = params.thread_order;
+   LeafBatchResult result;
+   stage.emplace();
+   if (params.cuda_leaves) MHGP11_TRY(run_leaf_batch_cuda(view, pool, budget, result));
+@@ -212,6 +213,7 @@ Outcome process_leaf_batch(const Cloud& cloud, const CatalogueParams& params, Me
+     timings->batch_download_ns = t.download_ns; timings->batch_device_bytes = t.device_bytes;
+     timings->batch_levels_ns = levels_ns; timings->batch_fallback_ns = fallback_ns;
+     timings->batch_prefetch_ns = t.prefetch_ns; timings->batch_fill_jobs = t.fill_jobs;
++    timings->batch_order_ns = t.order_ns;
+     timings->batch_copied_jobs = t.copied_jobs;
+     timings->batch_spare_record_chunks = t.spare_record_chunks;
+     timings->batch_spare_population_chunks = t.spare_population_chunks;
+diff --git a/morsehgp3D_v11/tests/catalogue/leaf_order_test.cpp b/morsehgp3D_v11/tests/catalogue/leaf_order_test.cpp
+new file mode 100644
+index 000000000..946d73fd5
+--- /dev/null
++++ b/morsehgp3D_v11/tests/catalogue/leaf_order_test.cpp
+@@ -0,0 +1,173 @@
++// Ordre des fils du lot de feuilles (leaf_batch.hpp, thread_order ; diagnostic du levier D du 6 octobre 2026) : poids
++// d'une feuille contre un decompte direct des triplets, puis les trois ordres (par m, par poids, warps par poids)
++// juges par leurs proprietes (permutation, cle monotone, departage par rang, warps entiers gardes), et les refus.
++#include <algorithm>
++#include <array>
++#include <random>
++#include <vector>
++
++#include "catalogue/leaf_batch.hpp"
++#include "sched/sched.hpp"
++#include "test.hpp"
++
++using namespace mhgp11;
++using namespace mhgp11::catalogue_detail;
++
++namespace {
++// Lot synthetique : 400 sites du cube 2^12, 1 000 feuilles (31 warps entiers et un warp de 8) de 1 a 32 sites
++// croissants, boite T0 tiree dans le cube ; graine fixe.
++struct Batch {
++  std::vector<u32> x, y, z, sites;
++  std::vector<LeafJob> jobs;
++  LeafBatchView view(int kmax, u8 order) const {
++    LeafBatchView v;
++    v.x = x.data(); v.y = y.data(); v.z = z.data(); v.cloud_sites = static_cast<u32>(x.size());
++    v.jobs = jobs.data(); v.count = jobs.size(); v.sites = sites.data(); v.site_count = sites.size();
++    v.kmax = kmax; v.cache = true; v.order = order;
++    return v;
++  }
++};
++
++Batch make_batch() {
++  std::mt19937 rng(20261006);
++  Batch b;
++  for (int i = 0; i < 400; ++i) {
++    b.x.push_back(rng() % 4096); b.y.push_back(rng() % 4096); b.z.push_back(rng() % 4096);
++  }
++  for (int j = 0; j < 1000; ++j) {
++    const u32 m = 1 + rng() % 32;
++    std::vector<u32> chosen;
++    while (chosen.size() < m) {
++      const u32 s = rng() % 400;
++      if (std::find(chosen.begin(), chosen.end(), s) == chosen.end()) chosen.push_back(s);
++    }
++    std::sort(chosen.begin(), chosen.end());
++    LeafJob job;
++    job.begin = b.sites.size(); job.m = m;
++    for (int a = 0; a < 3; ++a) {
++      job.lo[a] = rng() % 3072;
++      job.hi[a] = job.lo[a] + 1 + rng() % 1024;
++    }
++    b.sites.insert(b.sites.end(), chosen.begin(), chosen.end());
++    b.jobs.push_back(job);
++  }
++  return b;
++}
++
++leaf_device::Input input(const LeafBatchView& v, u64 j) {
++  leaf_device::Input in;
++  in.x = v.x; in.y = v.y; in.z = v.z; in.sites = v.sites + v.jobs[j].begin; in.m = v.jobs[j].m;
++  for (int a = 0; a < 3; ++a) { in.lo[a] = v.jobs[j].lo[a]; in.hi[a] = v.jobs[j].hi[a]; }
++  in.kmax = v.kmax; in.cache = v.cache;
++  return in;
++}
++
++// Decompte direct : triplets i < j < k ou i passe la profondeur 0 (popc dom <= kmax - 1), j est vivant pour i a la
++// profondeur 1, (i, j) passe la profondeur 1 (popc(dom i | dom j) <= kmax - 2), et k est vivant pour i a la profondeur 1
++// et pour i et j a la profondeur 2.
++struct Silent {
++  void emit(const leaf_device::Ball&, const u32*, const u32*, const u32*, const u32*) {}
++};
++u64 direct_weight(const leaf_device::Input& in) {
++  if (in.kmax < 2) return 0;
++  leaf_device::Counts counts;
++  Silent sink;
++  leaf_device::Leaf<Silent> leaf(in, counts, sink);
++  leaf.prepare();
++  leaf.live_rows();
++  const auto bit = [](u64 row, u32 k) { return ((row >> k) & 1u) != 0; };
++  u64 total = 0;
++  for (u32 i = 0; i < in.m; ++i)
++    for (u32 j = i + 1; j < in.m; ++j)
++      for (u32 k = j + 1; k < in.m; ++k) {
++        if (__builtin_popcountll(leaf.dom[i]) > in.kmax - 1 || !bit(leaf.live[0][i], j)) continue;
++        if (__builtin_popcountll(leaf.dom[i] | leaf.dom[j]) > in.kmax - 2) continue;
++        if (bit(leaf.live[0][i], k) && bit(leaf.live[1][i], k) && bit(leaf.live[1][j], k)) ++total;
++      }
++  return total;
++}
++}  // namespace
++
++MHGP11_TEST(weight_direct, 4000) {
++  const Batch b = make_batch();
++  u64 heavy = 0;
++  for (const int kmax : {1, 2, 5, 10}) {
++    const LeafBatchView v = b.view(kmax, kOrderSize);
++    for (u64 j = 0; j < v.count; ++j) {
++      const auto in = input(v, j);
++      const u64 w = leaf_weight(in);
++      CHECK_EQ(w, direct_weight(in));
++      heavy += w > 100;
++    }
++  }
++  CHECK(heavy >= 50);  // plancher : des feuilles lourdes, pas un vert par poids nuls
++}
++
++MHGP11_TEST(orders, 6000) {
++  const Batch b = make_batch();
++  auto made = sched::make_pool({4});
++  REQUIRE(made.ok());
++  MemoryBudget budget(MemoryBudget::kUnlimited);
++  for (const int kmax : {5, 10}) {
++    std::array<Buffer<u32>, 3> got;
++    for (u8 mode = 0; mode < 3; ++mode) {
++      const LeafBatchView v = b.view(kmax, mode);
++      REQUIRE(thread_order(v, *made.value(), budget, got[mode]).ok());
++      REQUIRE(got[mode].size() == v.count);
++      std::vector<u8> seen(v.count, 0);
++      for (const u32 j : got[mode].span()) {
++        REQUIRE(j < v.count && seen[j] == 0);
++        seen[j] = 1;
++      }
++    }
++    const LeafBatchView v = b.view(kmax, kOrderSize);
++    std::vector<u64> weight(v.count);
++    for (u64 j = 0; j < v.count; ++j) weight[j] = leaf_weight(input(v, j));
++    for (u64 p = 1; p < v.count; ++p) {
++      const u32 a = got[0][p - 1], c = got[0][p];  // par m decroissant, stable
++      CHECK(b.jobs[a].m > b.jobs[c].m || (b.jobs[a].m == b.jobs[c].m && a < c));
++      const u32 e = got[1][p - 1], f = got[1][p];  // par poids decroissant, puis rang
++      CHECK(weight[e] > weight[f] || (weight[e] == weight[f] && e < f));
++    }
++    // Warps entiers de l'ordre par m, par somme decroissante puis rang ; le warp incomplet reste en queue.
++    const u64 full = v.count / kOrderWarp;
++    u64 previous_sum = ~u64(0), previous_warp = 0;
++    std::vector<u8> used(full, 0);
++    for (u64 r = 0; r < full; ++r) {
++      const u32 first = got[2][r * kOrderWarp];
++      const auto at = std::find(got[0].begin(), got[0].end(), first) - got[0].begin();
++      REQUIRE(at % kOrderWarp == 0 && static_cast<u64>(at) / kOrderWarp < full);
++      const u64 w = static_cast<u64>(at) / kOrderWarp;
++      CHECK(used[w] == 0);
++      used[w] = 1;
++      u64 sum = 0;
++      for (u64 p = 0; p < kOrderWarp; ++p) {
++        CHECK_EQ(got[2][r * kOrderWarp + p], got[0][w * kOrderWarp + p]);
++        sum += weight[got[0][w * kOrderWarp + p]];
++      }
++      CHECK(r == 0 || sum < previous_sum || (sum == previous_sum && w > previous_warp));
++      previous_sum = sum; previous_warp = w;
++    }
++    for (u64 p = full * kOrderWarp; p < v.count; ++p) CHECK_EQ(got[2][p], got[0][p]);
++  }
++  CHECK(budget.released().ok());
++}
++
++MHGP11_TEST(refusals, 4) {
++  const Batch b = make_batch();
++  auto made = sched::make_pool({2});
++  REQUIRE(made.ok());
++  MemoryBudget budget(MemoryBudget::kUnlimited);
++  Buffer<u32> order;
++  const auto unknown = thread_order(b.view(5, 3), *made.value(), budget, order);
++  CHECK(!unknown.ok() && unknown.reason == Reason::parameter_out_of_range);
++  // Budget juste suffisant pour l'ordre par m, pas pour les tampons de l'ordre par poids : refus avant allocation.
++  MemoryBudget tight(4 * b.jobs.size());
++  CHECK(thread_order(b.view(5, kOrderSize), *made.value(), tight, order).ok());
++  order.reset();
++  const auto refused = thread_order(b.view(5, kOrderWeight), *made.value(), tight, order);
++  CHECK(!refused.ok() && refused.reason == Reason::memory_budget);
++  CHECK_EQ(tight.used(), 0u);
++}
++
++MHGP11_TEST_MAIN()
+diff --git a/morsehgp3D_v11/tests/catalogue/tests.cmake b/morsehgp3D_v11/tests/catalogue/tests.cmake
+index f1db1cb71..3720c0d24 100644
+--- a/morsehgp3D_v11/tests/catalogue/tests.cmake
++++ b/morsehgp3D_v11/tests/catalogue/tests.cmake
+@@ -34,6 +34,9 @@ mhgp11_add_unit(mhgp11_catalogue_region SOURCES center_region.cpp
+ # Compteurs locaux de feuille (R1) : vidage controle et grandes feuilles.
+ mhgp11_add_unit(mhgp11_catalogue_leaf_counts SOURCES leaf_counts_test.cpp
+                 GROUPS flush_overflow large_leaves engraved LABELS fast)
++# Ordre des fils du lot GPU (thread_order, diagnostic du levier D) : poids contre decompte direct, trois ordres, refus.
++mhgp11_add_unit(mhgp11_catalogue_leaf_order SOURCES leaf_order_test.cpp
++                GROUPS weight_direct orders refusals LABELS fast)
+ 
+ mhgp11_add_unit(mhgp11_catalogue_parallel SOURCES parallel.cpp
+                 GROUPS equivalence frontier_overlap frontier_edges frontier_deep global_limits memory_and_refusals timings LABELS fast)
+diff --git a/morsehgp3D_v11/tests/mutants/catalogue.json b/morsehgp3D_v11/tests/mutants/catalogue.json
+index adb910836..91bb55f45 100644
+--- a/morsehgp3D_v11/tests/mutants/catalogue.json
++++ b/morsehgp3D_v11/tests/mutants/catalogue.json
+@@ -1,6 +1,6 @@
+ {
+   "module": "catalogue",
+-  "plancher": 68,
++  "plancher": 75,
+   "mutants": [
+     {
+       "id": "support_tetra_strict_ignore",
+@@ -545,6 +545,62 @@
+       "remplace": ": t.regular[k] + t.extended[k] + (k == 0 ? i128(n) : i128(0));",
+       "porte": "mhgp11_catalogue_euler_limits",
+       "note": "terme n [k = 1] des minima de niveau zero jamais ajoute (k == 0 n'arrive pas ; n reste lu, -Werror) : E_1 vaut 1 - n"
++    },
++    {
++      "id": "ordre_poids_croissant",
++      "fichier": "src/catalogue/leaf_batch.cpp",
++      "cherche": "weights[a] != weights[b] ? weights[a] > weights[b] : a < b",
++      "remplace": "weights[a] != weights[b] ? weights[a] < weights[b] : a < b",
++      "porte": "mhgp11_catalogue_leaf_order_orders",
++      "note": "ordre diagnostique du levier D : feuilles legeres d'abord"
++    },
++    {
++      "id": "ordre_poids_departage_inverse",
++      "fichier": "src/catalogue/leaf_batch.cpp",
++      "cherche": "weights[a] != weights[b] ? weights[a] > weights[b] : a < b",
++      "remplace": "weights[a] != weights[b] ? weights[a] > weights[b] : a > b",
++      "porte": "mhgp11_catalogue_leaf_order_orders",
++      "note": "poids egaux departages par rang decroissant (ordre non canonique)"
++    },
++    {
++      "id": "ordre_warps_somme_croissante",
++      "fichier": "src/catalogue/leaf_batch.cpp",
++      "cherche": "sums[a] != sums[b] ? sums[a] > sums[b] : a < b",
++      "remplace": "sums[a] != sums[b] ? sums[a] < sums[b] : a < b",
++      "porte": "mhgp11_catalogue_leaf_order_orders",
++      "note": "warps les plus legers lances d'abord"
++    },
++    {
++      "id": "ordre_warps_rangs_confondus",
++      "fichier": "src/catalogue/leaf_batch.cpp",
++      "cherche": "    ranks[w] = static_cast<u32>(w);\n",
++      "remplace": "    ranks[w] = 0;\n",
++      "porte": "mhgp11_catalogue_leaf_order_orders",
++      "note": "rangs des warps tous nuls : le premier warp est repete, la permutation est refusee"
++    },
++    {
++      "id": "ordre_warps_non_applique",
++      "fichier": "src/catalogue/leaf_batch.cpp",
++      "cherche": "    order.swap(arranged);\n",
++      "remplace": "    arranged.swap(arranged);\n",
++      "porte": "mhgp11_catalogue_leaf_order_orders",
++      "note": "ordre par warps calcule mais jamais rendu : l'ordre par m reste"
++    },
++    {
++      "id": "poids_sans_vivant_j",
++      "fichier": "src/catalogue/leaf_batch.cpp",
++      "cherche": "weight += popc((next & (next - 1)) & leaf.live[1][i] & leaf.live[1][j]);",
++      "remplace": "weight += popc((next & (next - 1)) & leaf.live[1][i]);",
++      "porte": "mhgp11_catalogue_leaf_order_weight_direct",
++      "note": "poids : troisieme site non filtre par la ligne vivante de j"
++    },
++    {
++      "id": "poids_seuil_profondeur_un",
++      "fichier": "src/catalogue/leaf_batch.cpp",
++      "cherche": "if (popc(leaf.dom[i] | leaf.dom[j]) > second) continue;",
++      "remplace": "if (popc(leaf.dom[i] | leaf.dom[j]) > second + 1) continue;",
++      "porte": "mhgp11_catalogue_leaf_order_weight_direct",
++      "note": "poids : coupe G3 de la profondeur 1 au seuil de la profondeur 0 (second + 1 = kmax - 1)"
+     }
+   ]
+ }

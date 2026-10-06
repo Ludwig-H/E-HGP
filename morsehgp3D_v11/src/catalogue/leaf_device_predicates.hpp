@@ -20,6 +20,7 @@ namespace mhgp11::leaf_device {
 using u8 = std::uint8_t;
 using u32 = std::uint32_t;
 using u64 = std::uint64_t;
+using i32 = std::int32_t;
 using i64 = std::int64_t;
 __extension__ using i128 = __int128;  // extension GNU, aussi admise par nvcc ; meme type que core/types.hpp
 
@@ -176,39 +177,56 @@ MHGP11_LEAF_HD bool midpoint(const Center& s, const u32* a, const u32* b) {
   return true;
 }
 
+// Triangle strictement aigu par trois produits scalaires en a : avec u = b - a et v = c - a, les produits aux sommets
+// b et c sont (a - b).(c - b) = uu - uv et (a - c).(b - c) = vv - uv exactement (dot < 3*2^(2B), i64).
+MHGP11_LEAF_HD bool acute_dots(i64 uu, i64 vv, i64 uv) { return uv > 0 && uu > uv && vv > uv; }
 MHGP11_LEAF_HD bool strictly_acute(const u32* a, const u32* b, const u32* c) {
-  return dot(diff(b, a), diff(c, a)) > 0 && dot(diff(a, b), diff(c, b)) > 0 && dot(diff(a, c), diff(b, c)) > 0;
+  const Vec u = diff(b, a), v = diff(c, a);
+  return acute_dots(dot(u, u), dot(v, v), dot(u, v));
 }
 
-// Lemme Z de num/center_region.cpp : 0 degenere, 1 disjoint, 2 rencontre la fermeture.
+// Issues du lemme Z (center_line_meets ci-dessous).
 inline constexpr int kDegenerate = 0, kDisjoint = 1, kIntersects = 2;
+
+// Etendue de feuille (levier C, 6 octobre 2026). Leaf::prepare mesure, axe par axe, la longueur de l'enveloppe des
+// sites de la feuille et de la fermeture [lo, hi] de sa boite ; une feuille d'etendue > kNarrowSpan = 2^20 est rendue
+// kUnresolved (rejouee par leaf.cpp, memes decisions) avant tout prefixe. Aux profils B <= 20 la condition est
+// automatique (coordonnees < 2^B, hi <= 2^B) ; a 21 et 24 bits elle est testee. Sous elle, les predicats J2 et
+// l'orientation q4 tiennent en i32/i64 (bornes ci-dessous), au lieu de produits i128.
+inline constexpr i64 kNarrowSpan = i64(1) << 20;
+
+// Lemme Z de num/center_region.cpp : 0 degenere, 1 disjoint, 2 rencontre la fermeture. Memes tests, dans le meme
+// ordre, que num::center_line_meets ; seule l'arithmetique change. Precondition : etendue D <= 2^20 (ci-dessus).
+// Bornes, avec L = lo + hi : |f_k|, |g_k| <= D tiennent en i32 ; a_k + b_k - L_k est somme d'entiers < 2^26 en i32.
+// p0 = fc - sum L_k f_k (forme historique) = sum f_k (a_k + b_k - L_k) exactement, et 4 p0 = |2a - L|^2 - |2b - L|^2
+// avec |2a_k - L_k| <= |a_k - lo_k| + |a_k - hi_k| <= 2D, donc |p0|, |p1| <= 3 D^2 <= 3*2^40 (i64).
+// |cr| = |g_i f_j - f_i g_j| <= 2 D^2 = 2^41 ; |g_k p0|, |f_k p1| <= 3 D^3 = 3*2^60, left <= 6*2^60 < 2^63 ;
+// right = sum_{j != k} (hi_j - lo_j) |cr_kj| <= 2 D * 2 D^2 = 2^62 (cr_kk = 0). Tout est exact en i64.
 MHGP11_LEAF_HD int center_line_meets(const u32* a, const u32* b, const u32* c, const i64* lo, const i64* hi) {
-  i64 fu[3], gu[3], fc = 0, gc = 0;
+  i32 fu[3], gu[3];
+  i64 p0 = 0, p1 = 0;
   for (int k = 0; k < 3; ++k) {
-    fu[k] = i64(a[k]) - i64(b[k]);
-    gu[k] = i64(a[k]) - i64(c[k]);
-    fc += i64(a[k]) * i64(a[k]) - i64(b[k]) * i64(b[k]);
-    gc += i64(a[k]) * i64(a[k]) - i64(c[k]) * i64(c[k]);
+    const i32 ak = i32(a[k]), bk = i32(b[k]), ck = i32(c[k]), box = i32(lo[k] + hi[k]);
+    fu[k] = ak - bk;
+    gu[k] = ak - ck;
+    p0 += i64(fu[k]) * (ak + bk - box);
+    p1 += i64(gu[k]) * (ak + ck - box);
   }
   i64 cr[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
   bool rank_two = false;
   for (int i = 0; i < 3; ++i)
     for (int j = i + 1; j < 3; ++j) {
-      const i64 value = gu[i] * fu[j] - fu[i] * gu[j];
+      const i64 value = i64(gu[i]) * fu[j] - i64(fu[i]) * gu[j];
       cr[i][j] = cr[j][i] = value < 0 ? -value : value;
       rank_two = rank_two || value != 0;
     }
   if (!rank_two) return kDegenerate;
-  i64 p0 = fc, p1 = gc;
-  for (int k = 0; k < 3; ++k) {
-    p0 -= (lo[k] + hi[k]) * fu[k];
-    p1 -= (lo[k] + hi[k]) * gu[k];
-  }
   for (int k = 0; k < 3; ++k) {
     if (fu[k] == 0 && gu[k] == 0) continue;
-    const i128 left = magnitude(i128(gu[k]) * p0 - i128(fu[k]) * p1);
-    i128 right = 0;
-    for (int j = 0; j < 3; ++j) right += i128(hi[j] - lo[j]) * cr[k][j];
+    const i64 signed_left = i64(gu[k]) * p0 - i64(fu[k]) * p1;
+    const i64 left = signed_left < 0 ? -signed_left : signed_left;
+    i64 right = 0;
+    for (int j = 0; j < 3; ++j) right += (hi[j] - lo[j]) * cr[k][j];
     if (left > right) return kDisjoint;
   }
   return kIntersects;

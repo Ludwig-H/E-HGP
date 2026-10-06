@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 148,
+  "plancher": 151,
   "mutants": [
     {
       "id": "population_memo_owner_omis",
@@ -1202,6 +1202,30 @@
       "remplace": "      *population_at++ = static_cast<u8>(i < ball.p ? interior_local[i] : shell_local[0]);\n",
       "porte": "mhgp11_tower_full_leaf_lanes",
       "note": "chemin lent du puits (population a cheval sur deux blocs) : rangs de coquille faux"
+    },
+    {
+      "id": "q4_produit_mixte_positif",
+      "fichier": "src/catalogue/leaf_device.hpp",
+      "cherche": "    if (det == 0) return;  // orientation nulle",
+      "remplace": "    if (det <= 0) return;  // orientation nulle",
+      "porte": "mhgp11_tower_full_leaf_lanes",
+      "note": "levier C : produit mixte q4 partage ; les tetraedres d'orientation negative ne sont plus candidats"
+    },
+    {
+      "id": "q3_numerateur_etroit_faux",
+      "fichier": "src/catalogue/leaf_device.hpp",
+      "cherche": "    for (int j = 0; j < 3; ++j) t[j] = uu * v.v[j] - vv * u.v[j];",
+      "remplace": "    for (int j = 0; j < 3; ++j) t[j] = uu * v.v[j] - uu * u.v[j];",
+      "porte": "mhgp11_tower_full_leaf_lanes",
+      "note": "levier C : t = uu v - vv u en i64 ; vv remplace par uu, centre q3 faux"
+    },
+    {
+      "id": "j2_etroit_largeur_fausse",
+      "fichier": "src/catalogue/leaf_device_predicates.hpp",
+      "cherche": "    for (int j = 0; j < 3; ++j) right += (hi[j] - lo[j]) * cr[k][j];",
+      "remplace": "    for (int j = 0; j < 3; ++j) right += (hi[k] - lo[k]) * cr[k][j];",
+      "porte": "mhgp11_tower_full_leaf_lanes",
+      "note": "levier C : rayon du zonogone J2 etroit pris sur l'axe k au lieu de j"
     }
   ]
 }

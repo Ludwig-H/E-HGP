@@ -1,6 +1,6 @@
 {
   "module": "catalogue",
-  "plancher": 68,
+  "plancher": 72,
   "mutants": [
     {
       "id": "support_tetra_strict_ignore",
@@ -545,6 +545,38 @@
       "remplace": ": t.regular[k] + t.extended[k] + (k == 0 ? i128(n) : i128(0));",
       "porte": "mhgp11_catalogue_euler_limits",
       "note": "terme n [k = 1] des minima de niveau zero jamais ajoute (k == 0 n'arrive pas ; n reste lu, -Werror) : E_1 vaut 1 - n"
+    },
+    {
+      "id": "j2_etroit_second_plan_faux",
+      "fichier": "src/catalogue/leaf_device_predicates.hpp",
+      "cherche": "    p1 += i64(gu[k]) * (ak + ck - box);\n",
+      "remplace": "    p1 += i64(gu[k]) * (ak + bk - box);\n",
+      "porte": "mhgp11_catalogue_leaf_narrow_line_reference",
+      "note": "levier C : p1 de la droite J2 etroite pris sur le plan de (a, b) ; desaccord avec num::center_line_meets"
+    },
+    {
+      "id": "aigu_sommet_c_oublie",
+      "fichier": "src/catalogue/leaf_device_predicates.hpp",
+      "cherche": "return uv > 0 && uu > uv && vv > uv;",
+      "remplace": "return uv > 0 && uu > uv && vv > 0;",
+      "porte": "mhgp11_catalogue_leaf_narrow_acute_and_triple",
+      "note": "levier C : triangle aigu sans le produit scalaire au sommet c (vv - uv > 0 devient vv > 0) ; obtus en c admis"
+    },
+    {
+      "id": "etendue_seuil_double",
+      "fichier": "src/catalogue/leaf_device.hpp",
+      "cherche": "      wide = high[0] - low[0] > kNarrowSpan || high[1] - low[1] > kNarrowSpan || high[2] - low[2] > kNarrowSpan;",
+      "remplace": "      wide = high[0] - low[0] > 2 * kNarrowSpan || high[1] - low[1] > 2 * kNarrowSpan || high[2] - low[2] > 2 * kNarrowSpan;",
+      "porte": "mhgp11_catalogue_leaf_narrow_span_refusal",
+      "note": "levier C : feuille d'etendue 2^20 + 1 admise dans l'arithmetique etroite (bornes i64 non prouvees)"
+    },
+    {
+      "id": "etendue_sans_fermeture",
+      "fichier": "src/catalogue/leaf_device.hpp",
+      "cherche": "high[3] = {in.hi[0], in.hi[1], in.hi[2]};",
+      "remplace": "high[3] = {in.lo[0], in.lo[1], in.lo[2]};",
+      "porte": "mhgp11_catalogue_leaf_narrow_span_refusal",
+      "note": "levier C : la borne hi de la fermeture hors de l'etendue ; une boite jusqu'a 2^B qui la porte a 2^20 + 1 passe"
     }
   ]
 }

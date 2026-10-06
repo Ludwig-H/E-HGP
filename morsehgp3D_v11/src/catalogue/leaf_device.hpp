@@ -4,7 +4,8 @@
 // emissions (S*, p, m, qmin, listes I et U en SiteIdx globaux croissants). Le Level n'est pas calcule ici : l'hote le
 // tire du support par Sphere::through de meme arite, exactement emission_level.
 // Seuls les chemins i128 dont la v11 a prouve la borne sont joues (puissance native q2/q4 et q3 certifiee,
-// orientation certifiee, poids q4 dans un cube de cote 2^20, droites J2, proprietaire). Tout autre cas, et tout
+// orientation certifiee, poids q4 dans un cube de cote 2^20, droites J2, proprietaire), et seulement sur une feuille
+// d'etendue <= 2^20 (kNarrowSpan : J2, orientation q4 et q3 en i64). Tout autre cas, et tout
 // invariant que leaf.cpp refuserait, rend kUnresolved : l'hote rejoue alors la feuille entiere par leaf.cpp, qui
 // prend la voie checked/Wide ou rend le meme refus ; rien de la feuille non resolue n'est publie (contrat R7 des
 // auditeurs : jamais un debordement ni un refus transforme en rejet geometrique).
@@ -29,17 +30,29 @@ struct Leaf {
   u32 seen[kSeenWords], meets[kSeenWords];  // cache J2 : face deja jugee, et son issue (droite qui rencontre la boite)
   u32 interior[kMaxSites], shell[kMaxSites], interior_local[kMaxSites], shell_local[kMaxSites];
   bool unresolved = false;
+  bool wide = false;  // etendue > kNarrowSpan (prepare) : aucun prefixe, feuille non resolue
 
   MHGP11_LEAF_HD Leaf(const Input& input, Counts& counts, Sink& out) : in(input), c(counts), sink(out) {}
 
   MHGP11_LEAF_HD void prepare() {
     m = in.m;
+    // Etendue de la feuille (kNarrowSpan, leaf_device_predicates.hpp), dans la boucle de chargement : enveloppe des
+    // sites et de la fermeture [lo, hi] par axe ; au-dela de 2^20 sur un axe, la feuille est non resolue avant tout
+    // prefixe (run_leaf). Automatique aux profils B <= 20 (le test est alors elimine a la compilation).
+    i64 low[3] = {in.lo[0], in.lo[1], in.lo[2]}, high[3] = {in.hi[0], in.hi[1], in.hi[2]};
     for (u32 i = 0; i < m; ++i) {
       const u32 s = in.sites[i];
-      P[i][0] = in.x[s]; P[i][1] = in.y[s]; P[i][2] = in.z[s];
+      const u32 xyz[3] = {in.x[s], in.y[s], in.z[s]};
+      for (int axis = 0; axis < 3; ++axis) {
+        P[i][axis] = xyz[axis];
+        low[axis] = i64(xyz[axis]) < low[axis] ? i64(xyz[axis]) : low[axis];
+        high[axis] = i64(xyz[axis]) > high[axis] ? i64(xyz[axis]) : high[axis];
+      }
       dom[i] = domby[i] = nbr[i] = 0;
       live[0][i] = live[1][i] = live[2][i] = 0;
     }
+    if constexpr (kBits > 20)
+      wide = high[0] - low[0] > kNarrowSpan || high[1] - low[1] > kNarrowSpan || high[2] - low[2] > kNarrowSpan;
     for (int q = 0; q < 5; ++q) masks[q] = 0;
     for (u32 w = 0; w < kSeenWords; ++w) seen[w] = meets[w] = 0;
     c.dominance_tests += u64(m) * (m - 1) / 2;
@@ -121,22 +134,25 @@ struct Leaf {
     const u32* a = P[prefix[0]];
     const u32* b = P[prefix[1]];
     const u32* cc = P[prefix[2]];
-    if (!strictly_acute(a, b, cc)) return;
+    // strictly_acute(a, b, cc) par acute_dots : uu et vv resservent plus bas.
+    const Vec u = diff(b, a), v = diff(cc, a);
+    const i64 uu = dot(u, u), vv = dot(v, v);
+    if (!acute_dots(uu, vv, dot(u, v))) return;
     const i64 mid[3][3] = {{i64(a[0]) + b[0], i64(a[1]) + b[1], i64(a[2]) + b[2]},
                            {i64(b[0]) + cc[0], i64(b[1]) + cc[1], i64(b[2]) + cc[2]},
                            {i64(a[0]) + cc[0], i64(a[1]) + cc[1], i64(a[2]) + cc[2]}};
     if (!doubled_envelope_meets(mid, in.lo, in.hi)) return;  // lemme M3
-    const Vec u = diff(b, a), v = diff(cc, a), w = cross(u, v);
+    const Vec w = cross(u, v);
     const i128 g = i128(w.v[0]) * w.v[0] + i128(w.v[1]) * w.v[1] + i128(w.v[2]) * w.v[2];
     if (g == 0) return;  // impossible pour un triangle strictement aigu ; meme issue que la fabrique
-    const i64 uu = dot(u, u), vv = dot(v, v);
-    i128 t[3];
-    for (int j = 0; j < 3; ++j) t[j] = i128(uu) * v.v[j] - i128(vv) * u.v[j];
+    // Etendue D <= 2^20 : uu, vv <= 3 D^2 et |u_j|, |v_j| <= D, donc |t_j| <= 6 D^3 = 6*2^60 < 2^63 (i64 exact).
+    i64 t[3];
+    for (int j = 0; j < 3; ++j) t[j] = uu * v.v[j] - vv * u.v[j];
     Center s;
     for (int j = 0; j < 3; ++j) s.anchor[j] = a[j];
-    s.n[0] = t[1] * w.v[2] - t[2] * w.v[1];
-    s.n[1] = t[2] * w.v[0] - t[0] * w.v[2];
-    s.n[2] = t[0] * w.v[1] - t[1] * w.v[0];
+    s.n[0] = i128(t[1]) * w.v[2] - i128(t[2]) * w.v[1];
+    s.n[1] = i128(t[2]) * w.v[0] - i128(t[0]) * w.v[2];
+    s.n[2] = i128(t[0]) * w.v[1] - i128(t[1]) * w.v[0];
     s.d = 2 * g; s.arity = 3;
     s.q3_power = q3_global_power(s.d, s.n);
     s.orient = global_orientation(s.d, s.n);
@@ -145,31 +161,27 @@ struct Leaf {
 
   MHGP11_LEAF_HD void q4() {
     const u32* p[4] = {P[prefix[0]], P[prefix[1]], P[prefix[2]], P[prefix[3]]};
-    if (orientation4(p[0], p[1], p[2], p[3]) == 0) return;
+    // orientation4(p0, p1, p2, p3) = sign((u x v).sv) et le det de la fabrique u.(v x sv) sont le meme produit mixte
+    // (identite exacte) : calcule une fois. Etendue D <= 2^20 : |uv_j| <= 2 D^2, |det| <= 6 D^3 < 2^63 (i64 exact).
+    const Vec u = diff(p[1], p[0]), v = diff(p[2], p[0]), sv = diff(p[3], p[0]);
+    const Vec uv = cross(u, v);
+    const i64 det = dot(uv, sv);
+    if (det == 0) return;  // orientation nulle ; l'invariant det == 0 de leaf.cpp ne peut donc plus survenir ensuite
     ++c.q4_candidates;
     const i64 twice[4][3] = {{2 * i64(p[0][0]), 2 * i64(p[0][1]), 2 * i64(p[0][2])},
                              {2 * i64(p[1][0]), 2 * i64(p[1][1]), 2 * i64(p[1][2])},
                              {2 * i64(p[2][0]), 2 * i64(p[2][1]), 2 * i64(p[2][2])},
                              {2 * i64(p[3][0]), 2 * i64(p[3][1]), 2 * i64(p[3][2])}};
     if (!doubled_envelope_meets(twice, in.lo, in.hi)) return;  // lemme E4
-    const Vec u = diff(p[1], p[0]), v = diff(p[2], p[0]), sv = diff(p[3], p[0]);
-    const Vec vs = cross(v, sv), su = cross(sv, u), uv = cross(u, v);
-    const i128 det = i128(u.v[0]) * vs.v[0] + i128(u.v[1]) * vs.v[1] + i128(u.v[2]) * vs.v[2];
-    if (det == 0) { unresolved = true; return; }  // leaf.cpp : catalogue_invariant
+    const Vec vs = cross(v, sv), su = cross(sv, u);
     const i64 uu = dot(u, u), vv = dot(v, v), ss = dot(sv, sv);
     i128 n[3];
     for (int j = 0; j < 3; ++j) n[j] = i128(uu) * vs.v[j] + i128(vv) * su.v[j] + i128(ss) * uv.v[j];
-    // Positivite de la presentation (q4_weights.hpp), numerateur BRUT, voie native du cube de cote 2^20.
-    for (int j = 0; j < 3; ++j) {
-      u32 low = p[0][j], high = p[0][j];
-      for (int i = 1; i < 4; ++i) {
-        low = p[i][j] < low ? p[i][j] : low;
-        high = p[i][j] > high ? p[i][j] : high;
-      }
-      if (high - low > (u32(1) << 20)) { unresolved = true; return; }  // voie Wide de leaf.cpp
-    }
+    // Positivite de la presentation (q4_weights.hpp), numerateur BRUT, voie native du cube de cote 2^20 : les quatre
+    // sites sont dans l'etendue D <= 2^20 de la feuille, donc high - low <= 2^20 sur chaque axe et la voie Wide de
+    // leaf.cpp (high - low > 2^20, autrefois teste ici) n'est jamais prise.
     const Vec face{{vs.v[0] + su.v[0] + uv.v[0], vs.v[1] + su.v[1] + uv.v[1], vs.v[2] + su.v[2] + uv.v[2]}};
-    const i128 h = 2 * (det * det);
+    const i128 h = 2 * (i128(det) * det);
     const auto scalar = [&](const Vec& normal) { return n[0] * normal.v[0] + n[1] * normal.v[1] + n[2] * normal.v[2]; };
     bool strict = false;
     const i128 w0 = h - scalar(face);
@@ -182,7 +194,7 @@ struct Leaf {
     }
     Center s;
     for (int j = 0; j < 3; ++j) s.anchor[j] = p[0][j];
-    i128 d = 2 * det;
+    i128 d = 2 * i128(det);
     if (d < 0) {
       d = -d;
       for (int j = 0; j < 3; ++j) n[j] = -n[j];
@@ -329,9 +341,10 @@ MHGP11_LEAF_HD u32 run_leaf(const Input& in, Counts& counts, Sink& sink) {
   Leaf<Sink> leaf(in, counts, sink);
   leaf.prepare();
   leaf.live_rows();
-  const u64 initial = in.m >= 64 ? ~u64(0) : (u64(1) << in.m) - 1;
+  // Feuille d'etendue > 2^20 (prepare) : aucun prefixe, sans branche nouvelle ; elle est rendue non resolue.
+  const u64 initial = (in.m >= 64 ? ~u64(0) : (u64(1) << in.m) - 1) & (u64(leaf.wide) - 1);
   leaf.template extend<0>(initial, initial);
-  return leaf.unresolved ? kUnresolved : kOk;
+  return leaf.unresolved || leaf.wide ? kUnresolved : kOk;
 }
 
 // Puits de comptage : nombre de boules et d'incidences d'une feuille (premiere passe compter-puis-ecrire).

@@ -1,0 +1,488 @@
+diff --git a/morsehgp3D_v11/src/catalogue/leaf_batch.cpp b/morsehgp3D_v11/src/catalogue/leaf_batch.cpp
+index 94d6f8456..5062bd24a 100644
+--- a/morsehgp3D_v11/src/catalogue/leaf_batch.cpp
++++ b/morsehgp3D_v11/src/catalogue/leaf_batch.cpp
+@@ -49,7 +49,7 @@ struct HostBatch {
+       const bool resolved = status[j] == leaf_device::kOk;
+       balls[j] = resolved ? sink.balls : 0;
+       incidences[j] = resolved ? sink.incidences : 0;
+-      stored[j] = resolved && sink.fits;
++      stored[j] = resolved && sink.fits();
+       if (resolved) add_counts(per_worker[worker], c);
+       return {};
+     }
+@@ -59,8 +59,9 @@ struct HostBatch {
+     const u64 population_end = j + 1 < incidences.size() ? incidences[j + 1] : total_population;
+     if (record_end == balls[j]) return {};  // aucune emission
+     if (stored[j]) {
+-      copy_scratch(arena, static_cast<u32>(j), record_end - balls[j], population_end - incidences[j], balls[j],
+-                   incidences[j], records.data(), population.data());
++      if (!copy_scratch(arena, static_cast<u32>(j), record_end - balls[j], population_end - incidences[j], balls[j],
++                        incidences[j], records.data(), population.data()))
++        return fail(Reason::catalogue_invariant);
+       return {};
+     }
+     FillSink sink{records.data(), population.data(), balls[j], incidences[j], in.sites, in.m};
+@@ -88,36 +89,33 @@ Outcome run_leaf_batch_host(const LeafBatchView& view, sched::Pool& pool, Memory
+   u64 bytes = 0;
+   MHGP11_TRY(add_bytes<u8>(bytes, 2 * view.count));
+   MHGP11_TRY(add_bytes<u64>(bytes, 2 * view.count));
+-  MHGP11_TRY(add_bytes<LeafRecord>(bytes, chunks * kScratchRecords));  // chunks < 2^32
+-  MHGP11_TRY(add_bytes<u8>(bytes, chunks * kScratchPopulation));
+-  MHGP11_TRY(add_bytes<u32>(bytes, 2 * chunks + 2));
++  MHGP11_TRY(add_bytes<u8>(bytes, chunks * kBlockBytes));  // chunks < 2^32
++  MHGP11_TRY(add_bytes<u32>(bytes, chunks + 1));
+   MHGP11_TRY(add_bytes<leaf_device::Counts>(bytes, pool.size()));
+   MHGP11_TRY(budget.admit(bytes));
+   MHGP11_TRY(result.status.allocate(view.count, budget));
+   Buffer<u8> stored;
+   Buffer<u64> balls, incidences;
+-  Buffer<LeafRecord> scratch_records;
+-  Buffer<u8> scratch_population;
+-  Buffer<u32> links;  // next_record, next_population, puis les deux curseurs
++  Buffer<u8> blocks;
++  Buffer<u32> links;  // next, puis le curseur du reservoir
+   Buffer<leaf_device::Counts> per_worker;
+   MHGP11_TRY(stored.allocate(view.count, budget));
+   MHGP11_TRY(balls.allocate(view.count, budget));
+   MHGP11_TRY(incidences.allocate(view.count, budget));
+-  MHGP11_TRY(scratch_records.allocate(chunks * kScratchRecords, budget));
+-  MHGP11_TRY(scratch_population.allocate(chunks * kScratchPopulation, budget));
+-  MHGP11_TRY(links.allocate(2 * chunks + 2, budget));
++  MHGP11_TRY(blocks.allocate(chunks * kBlockBytes, budget));
++  MHGP11_TRY(links.allocate(chunks + 1, budget));
+   MHGP11_TRY(per_worker.allocate(pool.size(), budget));
+   for (auto& c : per_worker.span()) c = leaf_device::Counts{};
+-  links[2 * chunks] = links[2 * chunks + 1] = 0;
+-  const ScratchArena arena{scratch_records.data(), scratch_population.data(), links.data(), links.data() + chunks,
+-                           links.data() + 2 * chunks, static_cast<u32>(view.count), static_cast<u32>(spare)};
++  links[chunks] = 0;
++  const ScratchArena arena{blocks.data(), links.data(), links.data() + chunks, static_cast<u32>(view.count),
++                           static_cast<u32>(spare)};
+   HostBatch batch{view, result.status.span(), stored.span(), balls.span(), incidences.span(), arena, {}, {},
+                   per_worker.span()};
+   const Stopwatch count;
+   MHGP11_TRY(pool.parallel_for(view.count, 64, &batch, HostBatch::body));
+   result.timings.count_ns = count.nanoseconds();
+-  result.timings.spare_record_chunks = std::min<u64>(arena.cursor[0], spare);
+-  result.timings.spare_population_chunks = std::min<u64>(arena.cursor[1], spare);
++  // Un seul genre de bloc (enregistrements et population entrelaces) : les deux champs portent le meme compte.
++  result.timings.spare_record_chunks = result.timings.spare_population_chunks = std::min<u64>(arena.cursor[0], spare);
+   // Prefixes exclusifs dans l'ordre du lot : chaque feuille ecrit a une place fixe.
+   const Stopwatch scan;
+   u64 records = 0, population = 0;
+diff --git a/morsehgp3D_v11/src/catalogue/leaf_batch.hpp b/morsehgp3D_v11/src/catalogue/leaf_batch.hpp
+index 562104695..35604b367 100644
+--- a/morsehgp3D_v11/src/catalogue/leaf_batch.hpp
++++ b/morsehgp3D_v11/src/catalogue/leaf_batch.hpp
+@@ -64,65 +64,63 @@ struct FillSink {
+ // feuilles n'emet rien), puis copiees a leur place par copy_scratch. 2 Kio par feuille. Memes cases sur les deux
+ // executeurs : l'hote valide la logique du GPU.
+ //
+-// Reservoir chaine (6 octobre 2026) : une feuille qui deborde de sa case continue dans des blocs du reservoir, de la
+-// taille d'une case, pris par un curseur atomique et chaines bloc a bloc (next_*) ; enregistrements et population ont
+-// chacun leur chaine. Seules les feuilles qui debordent aussi du reservoir (curseur au-dela de spare) sont rejouees
+-// par la seconde passe. Sans reservoir (spare = 0, voie du 5 octobre), toute feuille qui deborde est rejouee. L'ordre
+-// des blocs pris depend des fils, jamais les sorties : la copie suit la chaine de chaque feuille et ecrit aux places
+-// fixees par les prefixes. Session G4 j2memo : la seconde passe (14 feuilles rejouees a K5, 4 196 a K10) valait 13 et
+-// 77 ms, latence de feuilles lourdes sur un fil.
+-inline constexpr u32 kScratchRecords = 128, kScratchPopulation = 1024;
++// Blocs entrelaces (levier A, 6 octobre 2026) : une case est un bloc de kBlockBytes octets ou chaque emission range
++// son enregistrement (8 octets, encode_bytes) suivi de sa population (p + m rangs, un octet chacun). Une emission
++// commence dans le bloc courant si used <= kBlockLimit : elle y tient alors entiere (8 + 2 * kMaxSites octets de
++// marge), sans jamais chevaucher deux blocs. Sinon la feuille continue dans un bloc du reservoir, pris par un curseur
++// atomique et chaine (next) ; si le reservoir est epuise (ou absent : spare = 0, voie du 5 octobre), la feuille ne
++// range plus rien et sera rejouee par la seconde passe. Un seul genre de bloc, un seul test au chemin chaud et un
++// changement de bloc court integre (ni appel ni boucle) : la base 905fad2e1 (deux chaines, chemin froid hors ligne,
++// 3 CALL et 134 BSSY au SASS du comptage) comptait 28 a 32 % plus lentement que j2memo sur G4. L'ordre des blocs pris
++// depend des fils, jamais les sorties : la copie suit la chaine de chaque feuille par la meme regle de changement de
++// bloc et ecrit aux places fixees par les prefixes.
++inline constexpr u32 kBlockBytes = 2048;
++inline constexpr u32 kRecordBytes = 8;
++inline constexpr u32 kBlockLimit = kBlockBytes - kRecordBytes - 2 * leaf_device::kMaxSites;
+ inline constexpr u32 kNoChunk = 0xFFFFFFFFu;
++static_assert(sizeof(LeafRecord) == kRecordBytes && kBlockLimit < kBlockBytes, "blocs de la case");
+ 
+ // Blocs des cases : le bloc j (j < count) est la case de la feuille j ; les blocs count .. count + spare - 1 forment
+-// le reservoir. cursor[0] et cursor[1] comptent les blocs pris (enregistrements, population), au-dela de spare un
+-// bloc est refuse. count + spare < 2^32 (garde des executeurs).
++// le reservoir. cursor[0] compte les blocs pris, au-dela de spare un bloc est refuse. count + spare < 2^32 (garde des
++// executeurs).
+ struct ScratchArena {
+-  LeafRecord* records = nullptr;  // (count + spare) * kScratchRecords
+-  u8* population = nullptr;       // (count + spare) * kScratchPopulation
+-  u32* next_record = nullptr;     // count + spare : bloc suivant de la chaine d'enregistrements
+-  u32* next_population = nullptr;
+-  u32* cursor = nullptr;          // 2 compteurs, nuls au depart
++  u8* blocks = nullptr;  // (count + spare) * kBlockBytes
++  u32* next = nullptr;   // count + spare : bloc suivant de la chaine
++  u32* cursor = nullptr; // 1 compteur, nul au depart
+   u32 count = 0, spare = 0;
+ };
+ 
+-// Bloc suivant du reservoir pour le genre kind (0 : enregistrements, 1 : population) ; kNoChunk s'il est epuise.
+-// Atomique : les fils de l'appareil et les ouvriers de l'hote prennent des blocs distincts.
+-MHGP11_LEAF_HD u32 claim_chunk(const ScratchArena& arena, u32 kind) {
+-  if (arena.spare == 0) return kNoChunk;
++// Bloc suivant du reservoir ; kNoChunk s'il est epuise (toujours sans reservoir, spare = 0). Atomique : les fils de
++// l'appareil et les ouvriers de l'hote prennent des blocs distincts. Sans branche (spare = 0 compris) : le changement
++// de bloc du puits est une courte suite predicable, un seul point de reconvergence par site d'emission au SASS.
++MHGP11_LEAF_HD u32 claim_chunk(const ScratchArena& arena) {
+ #if defined(__CUDA_ARCH__)
+-  const u32 taken = atomicAdd(&arena.cursor[kind], 1u);
++  const u32 taken = atomicAdd(arena.cursor, 1u);
+ #else
+-  const u32 taken = __atomic_fetch_add(&arena.cursor[kind], 1u, __ATOMIC_RELAXED);
++  const u32 taken = __atomic_fetch_add(arena.cursor, 1u, __ATOMIC_RELAXED);
+ #endif
+   return taken < arena.spare ? arena.count + taken : kNoChunk;
+ }
+ 
+-#if defined(__CUDA_ARCH__)
+-#define MHGP11_LEAF_COLD __noinline__
+-#else
+-#define MHGP11_LEAF_COLD __attribute__((noinline))
+-#endif
++// Enregistrement d'une emission en octets : S* en rangs locaux, p, m, qmin, 0 (disposition de LeafRecord).
++MHGP11_LEAF_HD void encode_bytes(const leaf_device::Ball& ball, const u32* sites, u32 m, u8* out) {
++  for (int i = 0; i < 4; ++i) out[i] = local_rank(sites, m, ball.support[i]);
++  out[4] = static_cast<u8>(ball.p); out[5] = static_cast<u8>(ball.m); out[6] = static_cast<u8>(ball.qmin); out[7] = 0;
++}
+ 
+ // Puits du comptage : compte tout et range les emissions dans la case, puis dans les blocs du reservoir tant qu'il en
+-// reste, dans l'ordre d'emission (celui de FillSink). fits faux : la feuille sera rejouee. Chemin chaud : la boule
+-// tient dans les blocs courants, ecriture directe comme la case du 5 octobre. Chemin froid (changement de bloc, rare)
+-// hors ligne : integre, il ajoutait des points de reconvergence au parcours et ralentissait le comptage GPU de 30 a
+-// 43 ms a K5 (session G4 reservoir2).
++// reste, dans l'ordre d'emission (celui de FillSink). fits() faux : la feuille sera rejouee.
+ struct ScratchSink {
+-  const ScratchArena* arena = nullptr;
++  const ScratchArena& arena;
+   const u32* sites = nullptr;
+   u32 m = 0;
+-  LeafRecord* record_at = nullptr;  // prochaine place d'enregistrement dans le bloc courant
+-  u8* population_at = nullptr;      // prochaine place de population dans le bloc courant
+-  u32 record_room = kScratchRecords, population_room = kScratchPopulation;  // places restantes des blocs courants
+-  u32 record_chunk = 0, population_chunk = 0;                               // blocs courants
++  u32 block = 0, used = 0;  // bloc courant (kNoChunk : plus rien n'est range) et octets pris
+   u64 balls = 0, incidences = 0;
+-  bool fits = true;
+ 
+   MHGP11_LEAF_HD ScratchSink(const ScratchArena& a, u32 leaf, const u32* leaf_sites, u32 leaf_m)
+-      : arena(&a), sites(leaf_sites), m(leaf_m), record_at(a.records + u64(leaf) * kScratchRecords),
+-        population_at(a.population + u64(leaf) * kScratchPopulation), record_chunk(leaf), population_chunk(leaf) {}
++      : arena(a), sites(leaf_sites), m(leaf_m), block(leaf) {}
++
++  MHGP11_LEAF_HD bool fits() const { return block != kNoChunk; }
+ 
+   // interior_local, shell_local : rangs locaux deja connus de la feuille (aucune recherche). Les rangs sont < 32 : u8.
+   MHGP11_LEAF_HD void emit(const leaf_device::Ball& ball, const u32*, const u32*, const u32* interior_local,
+@@ -130,60 +128,47 @@ struct ScratchSink {
+     const u32 need = ball.p + ball.m;  // <= 2 * kMaxSites
+     ++balls;
+     incidences += need;
+-    if (fits && record_room != 0 && need <= population_room) {  // chemin chaud
+-      encode(ball, sites, m, *record_at++);
+-      --record_room;
+-      for (u32 i = 0; i < ball.p; ++i) population_at[i] = static_cast<u8>(interior_local[i]);
+-      for (u32 i = 0; i < ball.m; ++i) population_at[ball.p + i] = static_cast<u8>(shell_local[i]);
+-      population_at += need;
+-      population_room -= need;
+-    } else if (fits) {
+-      fits = cold(ball, interior_local, shell_local);
++    // Bloc courant plein : bloc chaine du reservoir, ou fin du rangement (block = kNoChunk, used reste nul : on ne
++    // repasse jamais ici). Le lien du bloc plein recoit kNoChunk dans ce cas : jamais suivi, la feuille est rejouee.
++    if (used > kBlockLimit) {
++      const u32 taken = claim_chunk(arena);
++      arena.next[block] = taken;
++      block = taken;
++      used = 0;
+     }
+-  }
+-
+-  // Chemin froid : blocs chaines du reservoir pour l'enregistrement et pour la population ; faux s'il est epuise.
+-  MHGP11_LEAF_HD MHGP11_LEAF_COLD bool cold(const leaf_device::Ball& ball, const u32* interior_local,
+-                                            const u32* shell_local) {
+-    if (record_room == 0) {
+-      const u32 taken = claim_chunk(*arena, 0);
+-      if (taken == kNoChunk) return false;
+-      arena->next_record[record_chunk] = taken;
+-      record_chunk = taken;
+-      record_at = arena->records + u64(taken) * kScratchRecords;
+-      record_room = kScratchRecords;
+-    }
+-    encode(ball, sites, m, *record_at++);
+-    --record_room;
+-    for (u32 i = 0; i < u32(ball.p) + ball.m; ++i) {
+-      if (population_room == 0) {
+-        const u32 taken = claim_chunk(*arena, 1);
+-        if (taken == kNoChunk) return false;
+-        arena->next_population[population_chunk] = taken;
+-        population_chunk = taken;
+-        population_at = arena->population + u64(taken) * kScratchPopulation;
+-        population_room = kScratchPopulation;
+-      }
+-      *population_at++ = static_cast<u8>(i < ball.p ? interior_local[i] : shell_local[i - ball.p]);
+-      --population_room;
+-    }
+-    return true;
++    if (block == kNoChunk) return;
++    u8* at = arena.blocks + u64(block) * kBlockBytes + used;
++    encode_bytes(ball, sites, m, at);
++    at += kRecordBytes;
++    for (u32 i = 0; i < ball.p; ++i) at[i] = static_cast<u8>(interior_local[i]);
++    for (u32 i = 0; i < ball.m; ++i) at[ball.p + i] = static_cast<u8>(shell_local[i]);
++    used += kRecordBytes + need;
+   }
+ };
+ 
+-// Copie la chaine de la feuille j (n enregistrements, k rangs) a ses places.
+-MHGP11_LEAF_HD void copy_scratch(const ScratchArena& arena, u32 j, u64 n, u64 k, u64 record_begin,
++// Copie la chaine de la feuille j (n enregistrements, k rangs) a ses places, par la regle de changement de bloc du
++// puits. Faux (invariant viole, rien n'est publie) si un bloc sort de l'arene ou si les comptes ne concordent pas.
++MHGP11_LEAF_HD bool copy_scratch(const ScratchArena& arena, u32 j, u64 n, u64 k, u64 record_begin,
+                                  u64 population_begin, LeafRecord* records, u8* population) {
+-  u32 chunk = j;
++  u32 block = j, used = 0;
++  u64 copied = 0;
+   for (u64 i = 0; i < n; ++i) {
+-    if (i != 0 && i % kScratchRecords == 0) chunk = arena.next_record[chunk];
+-    records[record_begin + i] = arena.records[u64(chunk) * kScratchRecords + i % kScratchRecords];
+-  }
+-  chunk = j;
+-  for (u64 i = 0; i < k; ++i) {
+-    if (i != 0 && i % kScratchPopulation == 0) chunk = arena.next_population[chunk];
+-    population[population_begin + i] = arena.population[u64(chunk) * kScratchPopulation + i % kScratchPopulation];
++    if (used > kBlockLimit) {
++      block = arena.next[block];
++      used = 0;
++      if (block >= arena.count + arena.spare) return false;
++    }
++    const u8* at = arena.blocks + u64(block) * kBlockBytes + used;
++    LeafRecord& r = records[record_begin + i];
++    for (int b = 0; b < 4; ++b) r.support[b] = at[b];
++    r.p = at[4]; r.m = at[5]; r.qmin = at[6]; r.pad = at[7];
++    const u32 need = u32(at[4]) + at[5];
++    if (need > 2 * leaf_device::kMaxSites || copied + need > k) return false;
++    for (u32 t = 0; t < need; ++t) population[population_begin + copied + t] = at[kRecordBytes + t];
++    copied += need;
++    used += kRecordBytes + need;
+   }
++  return copied == k;
+ }
+ 
+ // Blocs du reservoir pour un lot de count feuilles : un huitieme des feuilles, au moins 64 (aucun sans reservoir).
+@@ -213,7 +198,9 @@ struct LeafBatchTimings {
+   u64 prefetch_ns = 0;  // duree de l'ouverture anticipee du contexte (fil d'arriere-plan), 0 sans elle
+   u64 fill_jobs = 0;    // feuilles rejouees par la seconde passe : celles qui emettent et debordent de leur case
+   u64 copied_jobs = 0;  // feuilles qui emettent et tiennent dans leurs blocs (case et reservoir) : copiees sans rejeu
+-  u64 spare_record_chunks = 0, spare_population_chunks = 0;  // blocs du reservoir pris (au plus spare) ; 0 sans lui
++  // Blocs du reservoir pris (au plus spare) ; 0 sans lui. Blocs entrelaces : les deux champs portent le meme compte
++  // (noms gardes pour la sonde et les recus).
++  u64 spare_record_chunks = 0, spare_population_chunks = 0;
+   u64 device_pool_used_high = 0, device_pool_reserved_high = 0;  // pics physiques du pool CUDA pendant le lot
+ };
+ 
+diff --git a/morsehgp3D_v11/src/catalogue/leaf_batch_cuda.cu b/morsehgp3D_v11/src/catalogue/leaf_batch_cuda.cu
+index 4008f7d07..32767c08d 100644
+--- a/morsehgp3D_v11/src/catalogue/leaf_batch_cuda.cu
++++ b/morsehgp3D_v11/src/catalogue/leaf_batch_cuda.cu
+@@ -62,11 +62,15 @@ __global__ void count_kernel(DeviceView v, u8* status, u64* balls, u64* incidenc
+     status[j] = static_cast<u8>(s);
+     balls[j] = s == leaf_device::kOk ? sink.balls : 0;
+     incidences[j] = s == leaf_device::kOk ? sink.incidences : 0;
+-    stored[j] = s == leaf_device::kOk && sink.fits;
++    stored[j] = s == leaf_device::kOk && sink.fits();
+     if (s == leaf_device::kOk) counts_to_array(c, local);
+   }
+   // Reduction du warp par echanges de registres, puis une addition atomique par champ non nul. Sommes de warp et
+   // totales < 2^62 (leaf_device::kCountBound, lot <= kMaxBatchJobs) : exactes. Les 32 fils du bloc arrivent ici.
++  // __syncwarp : la reconvergence explicite dispense ptxas du repli collectif de chaque echange, qu'il genere des que
++  // le parcours contient une operation atomique (bloc du reservoir) : 150 WARPSYNC.COLLECTIVE, ~1000 instructions
++  // statiques mortes a l'execution, que le SASS de la base 905fad2e1 portait aussi.
++  __syncwarp();
+   for (int f = 0; f < kCountFields; ++f) {
+     unsigned long long value = local[f];
+     for (int offset = 16; offset > 0; offset >>= 1) value += __shfl_down_sync(0xffffffffu, value, offset);
+@@ -75,13 +79,15 @@ __global__ void count_kernel(DeviceView v, u8* status, u64* balls, u64* incidenc
+ }
+ 
+ // Copie des chaines rangees au comptage (case, puis blocs du reservoir) vers leurs places (prefixes).
++// Une chaine incoherente compte une erreur (refus au retour).
+ __global__ void copy_kernel(u64 count, const u8* stored, const u64* balls, const u64* incidences,
+                             const u64* record_begin, const u64* population_begin, ScratchArena arena,
+-                            LeafRecord* records, u8* population) {
++                            LeafRecord* records, u8* population, unsigned* errors) {
+   const u64 j = u64(blockIdx.x) * blockDim.x + threadIdx.x;
+   if (j >= count || !stored[j] || balls[j] == 0) return;
+-  copy_scratch(arena, static_cast<u32>(j), balls[j], incidences[j], record_begin[j], population_begin[j], records,
+-               population);
++  if (!copy_scratch(arena, static_cast<u32>(j), balls[j], incidences[j], record_begin[j], population_begin[j],
++                    records, population))
++    atomicAdd(errors, 1u);
+ }
+ 
+ // Seconde passe sur la seule liste des feuilles resolues qui emettent et ont deborde de leur case (selection stable
+@@ -234,7 +240,7 @@ struct WritePhase {
+     if (dv.count == 0) return {};
+     const unsigned grid = static_cast<unsigned>((dv.count + kThreads - 1) / kThreads);
+     copy_kernel<<<grid, kThreads>>>(dv.count, stored, balls, incidences, record_begin, population_begin, arena,
+-                                    records, population);
++                                    records, population, errors);
+     if (!ok(cudaGetLastError())) return fail(Reason::parameter_out_of_range);
+     DeviceArray<u32> list;
+     DeviceArray<unsigned long long> selected;
+@@ -336,11 +342,11 @@ Outcome count_pass(const DeviceView& dv, u8* status, u64* balls, u64* incidences
+   const unsigned grid = static_cast<unsigned>((dv.count + kThreads - 1) / kThreads);
+   if (dv.count != 0) count_kernel<<<grid, kThreads>>>(dv, status, balls, incidences, totals, arena, stored);
+   if (!ok(cudaGetLastError()) || !ok(cudaDeviceSynchronize())) return fail(Reason::parameter_out_of_range);
+-  u32 taken[2] = {0, 0};
+-  if (!ok(cudaMemcpy(taken, arena.cursor, sizeof(taken), cudaMemcpyDeviceToHost)))
++  u32 taken = 0;
++  if (!ok(cudaMemcpy(&taken, arena.cursor, sizeof(taken), cudaMemcpyDeviceToHost)))
+     return fail(Reason::parameter_out_of_range);
+-  t.spare_record_chunks = taken[0] < arena.spare ? taken[0] : arena.spare;
+-  t.spare_population_chunks = taken[1] < arena.spare ? taken[1] : arena.spare;
++  // Un seul genre de bloc (enregistrements et population entrelaces) : les deux champs portent le meme compte.
++  t.spare_record_chunks = t.spare_population_chunks = taken < arena.spare ? taken : arena.spare;
+   return {};
+ }
+ 
+@@ -373,12 +379,11 @@ Outcome run_leaf_batch_cuda(const LeafBatchView& view, sched::Pool& pool, Memory
+   DeviceArray<u32> x, y, z, sites;
+   DeviceArray<LeafJob> jobs;
+   DeviceArray<u32> threads;
+-  DeviceArray<u8> status, scratch_population, stored;
++  DeviceArray<u8> status, blocks, stored;
+   DeviceArray<u64> balls, incidences;
+   DeviceArray<unsigned long long> totals;
+   DeviceArray<unsigned> errors;
+-  DeviceArray<LeafRecord> scratch_records;
+-  DeviceArray<u32> links;  // next_record, next_population, puis les deux curseurs du reservoir
++  DeviceArray<u32> links;  // next, puis le curseur du reservoir
+   MHGP11_TRY(x.allocate(view.cloud_sites, budget, device_bytes));
+   MHGP11_TRY(y.allocate(view.cloud_sites, budget, device_bytes));
+   MHGP11_TRY(z.allocate(view.cloud_sites, budget, device_bytes));
+@@ -390,9 +395,8 @@ Outcome run_leaf_batch_cuda(const LeafBatchView& view, sched::Pool& pool, Memory
+   MHGP11_TRY(incidences.allocate(view.count, budget, device_bytes));
+   MHGP11_TRY(totals.allocate(kCountFields, budget, device_bytes));
+   MHGP11_TRY(errors.allocate(1, budget, device_bytes));
+-  MHGP11_TRY(scratch_records.allocate(chunks * kScratchRecords, budget, device_bytes));  // chunks < 2^32
+-  MHGP11_TRY(scratch_population.allocate(chunks * kScratchPopulation, budget, device_bytes));
+-  MHGP11_TRY(links.allocate(2 * chunks + 2, budget, device_bytes));
++  MHGP11_TRY(blocks.allocate(chunks * kBlockBytes, budget, device_bytes));  // chunks < 2^32
++  MHGP11_TRY(links.allocate(chunks + 1, budget, device_bytes));
+   MHGP11_TRY(stored.allocate(view.count, budget, device_bytes));
+   const u64 upload = now_ns();
+   if (!ok(cudaMemcpy(x.data, view.x, view.cloud_sites * sizeof(u32), cudaMemcpyHostToDevice)) ||
+@@ -404,11 +408,11 @@ Outcome run_leaf_batch_cuda(const LeafBatchView& view, sched::Pool& pool, Memory
+       (view.count != 0 && !ok(cudaMemcpy(threads.data, order.data(), view.count * sizeof(u32), cudaMemcpyHostToDevice))) ||
+       !ok(cudaMemset(totals.data, 0, kCountFields * sizeof(unsigned long long))) ||
+       !ok(cudaMemset(errors.data, 0, sizeof(unsigned))) ||
+-      !ok(cudaMemset(links.data + 2 * chunks, 0, 2 * sizeof(u32))))
++      !ok(cudaMemset(links.data + chunks, 0, sizeof(u32))))
+     return fail(Reason::parameter_out_of_range);
+   t.upload_ns = now_ns() - upload;
+-  const ScratchArena arena{scratch_records.data, scratch_population.data, links.data, links.data + chunks,
+-                           links.data + 2 * chunks, static_cast<u32>(view.count), static_cast<u32>(spare)};
++  const ScratchArena arena{blocks.data, links.data, links.data + chunks, static_cast<u32>(view.count),
++                           static_cast<u32>(spare)};
+   const DeviceView dv{x.data, y.data, z.data, jobs.data, threads.data, view.count, sites.data, view.kmax, view.cache};
+   const u64 count = now_ns();
+   MHGP11_TRY(count_pass(dv, status.data, balls.data, incidences.data, totals.data, arena, stored.data, t));
+diff --git a/morsehgp3D_v11/tests/mutants/tower.json b/morsehgp3D_v11/tests/mutants/tower.json
+index 35efd3331..4546da993 100644
+--- a/morsehgp3D_v11/tests/mutants/tower.json
++++ b/morsehgp3D_v11/tests/mutants/tower.json
+@@ -1,6 +1,6 @@
+ {
+   "module": "tower",
+-  "plancher": 148,
++  "plancher": 151,
+   "mutants": [
+     {
+       "id": "population_memo_owner_omis",
+@@ -1174,34 +1174,58 @@
+     {
+       "id": "rang_local_interieur_faux",
+       "fichier": "src/catalogue/leaf_batch.hpp",
+-      "cherche": "      for (u32 i = 0; i < ball.p; ++i) population_at[i] = static_cast<u8>(interior_local[i]);\n",
+-      "remplace": "      for (u32 i = 0; i < ball.p; ++i) population_at[i] = static_cast<u8>(interior_local[0]);\n",
++      "cherche": "    for (u32 i = 0; i < ball.p; ++i) at[i] = static_cast<u8>(interior_local[i]);\n",
++      "remplace": "    for (u32 i = 0; i < ball.p; ++i) at[i] = static_cast<u8>(interior_local[0]);\n",
+       "porte": "mhgp11_tower_full_leaf_lanes",
+       "note": "case du comptage : rangs locaux de l'interieur faux"
+     },
++    {
++      "id": "rang_local_coquille_faux",
++      "fichier": "src/catalogue/leaf_batch.hpp",
++      "cherche": "    for (u32 i = 0; i < ball.m; ++i) at[ball.p + i] = static_cast<u8>(shell_local[i]);\n",
++      "remplace": "    for (u32 i = 0; i < ball.m; ++i) at[ball.p + i] = static_cast<u8>(shell_local[0]);\n",
++      "porte": "mhgp11_tower_full_leaf_lanes",
++      "note": "case du comptage : rangs locaux de la coquille faux"
++    },
++    {
++      "id": "bloc_entrelace_sans_entete",
++      "fichier": "src/catalogue/leaf_batch.hpp",
++      "cherche": "    used += kRecordBytes + need;\n  }\n};",
++      "remplace": "    used += need;\n  }\n};",
++      "porte": "mhgp11_tower_full_leaf_lanes",
++      "note": "blocs entrelaces : la place suivante oublie l'enregistrement, la population l'ecrase"
++    },
++    {
++      "id": "bloc_entrelace_marge_debordee",
++      "fichier": "src/catalogue/leaf_batch.hpp",
++      "cherche": "    if (used > kBlockLimit) {\n      const u32 taken = claim_chunk(arena);\n",
++      "remplace": "    if (used > kBlockLimit + 64) {\n      const u32 taken = claim_chunk(arena);\n",
++      "porte": "mhgp11_tower_full_leaf_lanes",
++      "note": "puits : une emission commence au-dela de la marge, deborde dans le bloc voisin ; la copie change de bloc plus tot"
++    },
+     {
+       "id": "reservoir_chaine_perdue",
+       "fichier": "src/catalogue/leaf_batch.hpp",
+-      "cherche": "      arena->next_record[record_chunk] = taken;\n",
+-      "remplace": "      arena->next_record[record_chunk] = record_chunk;\n",
++      "cherche": "      arena.next[block] = taken;\n",
++      "remplace": "      arena.next[block] = block;\n",
+       "porte": "mhgp11_tower_full_leaf_lanes",
+-      "note": "reservoir : le bloc pris n'est pas chaine, la copie relit la case"
++      "note": "reservoir : le bloc pris n'est pas chaine, la copie relit le bloc plein"
+     },
+     {
+       "id": "reservoir_pas_de_chaine",
+       "fichier": "src/catalogue/leaf_batch.hpp",
+-      "cherche": "    if (i != 0 && i % kScratchRecords == 0) chunk = arena.next_record[chunk];\n",
+-      "remplace": "    if (i != 0 && i % kScratchRecords == 1) chunk = arena.next_record[chunk];\n",
++      "cherche": "    if (used > kBlockLimit) {\n      block = arena.next[block];\n",
++      "remplace": "    if (used > kBlockLimit + 8) {\n      block = arena.next[block];\n",
+       "porte": "mhgp11_tower_full_leaf_lanes",
+-      "note": "copie des chaines : changement de bloc decale d'un enregistrement"
++      "note": "copie des chaines : regle de changement de bloc differente de celle du puits"
+     },
+     {
+-      "id": "reservoir_population_lente",
++      "id": "reservoir_epuisement_ignore",
+       "fichier": "src/catalogue/leaf_batch.hpp",
+-      "cherche": "      *population_at++ = static_cast<u8>(i < ball.p ? interior_local[i] : shell_local[i - ball.p]);\n",
+-      "remplace": "      *population_at++ = static_cast<u8>(i < ball.p ? interior_local[i] : shell_local[0]);\n",
++      "cherche": "  return taken < arena.spare ? arena.count + taken : kNoChunk;\n",
++      "remplace": "  return taken < arena.spare + 1 ? arena.count + taken : kNoChunk;\n",
+       "porte": "mhgp11_tower_full_leaf_lanes",
+-      "note": "chemin lent du puits (population a cheval sur deux blocs) : rangs de coquille faux"
++      "note": "reservoir : un bloc de plus que spare (sans reservoir : hors de l'arene) ; la voie sans reservoir ne rejoue plus"
+     }
+   ]
+ }
+diff --git a/morsehgp3D_v11/tests/tower/tests.cmake b/morsehgp3D_v11/tests/tower/tests.cmake
+index 74eff9370..61817de39 100644
+--- a/morsehgp3D_v11/tests/tower/tests.cmake
++++ b/morsehgp3D_v11/tests/tower/tests.cmake
+@@ -79,7 +79,7 @@ mhgp11_python_gate(mhgp11_tower_full_bench_io 0 full_bench_io.py $<TARGET_FILE:m
+ # Voies de feuille (CPU, feuille source unique sur l'hote, lot sur le Pool) sur 3 000 sites uniformes : meme dump,
+ # meme registre, lot plus nombreux que les sites (les feuilles se recouvrent ; garde fausse du 4 octobre 2026).
+ mhgp11_python_gate(mhgp11_tower_full_leaf_lanes 0 full_leaf_lanes.py $<TARGET_FILE:mhgp11_full_bench> ${MHGP11_COORD_BITS}
+-                    LINE "full_leaf_lanes_verdict conforme sites3000 k5 boules212695 lot27048 non_resolues0 rejouees0 copiees23766 k10 boules1075008 lot35957 non_resolues0 rejouees0 copiees35131 rejouees_sans_reservoir555"
++                    LINE "full_leaf_lanes_verdict conforme sites3000 k5 boules212695 lot27048 non_resolues0 rejouees0 copiees23766 k10 boules1075008 lot35957 non_resolues0 rejouees0 copiees35131 rejouees_sans_reservoir532"
+                     LABELS fast TIMEOUT 300)
+ mhgp11_python_gate(mhgp11_tower_full_bench_semantic 0 full_bench_semantic_test.py
+                     LINE "full_semantic_verdict conforme positives21 corruptions48 checks168 native0"

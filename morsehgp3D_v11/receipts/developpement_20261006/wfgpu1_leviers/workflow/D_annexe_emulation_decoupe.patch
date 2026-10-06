@@ -1,0 +1,351 @@
+diff --git a/morsehgp3D_v11/src/catalogue/leaf_batch.cpp b/morsehgp3D_v11/src/catalogue/leaf_batch.cpp
+index 94d6f8456..2515c96ad 100644
+--- a/morsehgp3D_v11/src/catalogue/leaf_batch.cpp
++++ b/morsehgp3D_v11/src/catalogue/leaf_batch.cpp
+@@ -5,6 +5,10 @@
+ #include <utility>
+ 
+ #include "sched/sched.hpp"
++#include "catalogue/leaf_device_split.hpp"
++#include <cstdio>
++#include <cstdlib>
++#include <x86intrin.h>
+ 
+ namespace mhgp11::catalogue_detail {
+ namespace {
+@@ -18,17 +22,6 @@ leaf_device::Input input_of(const LeafBatchView& view, const LeafJob& job) noexc
+   return in;
+ }
+ 
+-void add_counts(leaf_device::Counts& total, const leaf_device::Counts& c) noexcept {
+-  total.dominance_tests += c.dominance_tests; total.prefixes += c.prefixes; total.judged += c.judged;
+-  total.census_tests += c.census_tests; total.emitted += c.emitted; total.incidences += c.incidences;
+-  total.q4_candidates += c.q4_candidates; total.q4_levels += c.q4_levels;
+-  total.region_pair_tests += c.region_pair_tests; total.region_pair_rejects += c.region_pair_rejects;
+-  total.region_line_tests += c.region_line_tests; total.region_line_rejects += c.region_line_rejects;
+-  total.region_line_evaluations += c.region_line_evaluations;
+-  total.region_line_cache_hits += c.region_line_cache_hits;
+-  total.region_line_fallbacks += c.region_line_fallbacks;
+-}
+-
+ struct HostBatch {
+   const LeafBatchView& view;
+   std::span<u8> status, stored;
+@@ -50,7 +43,7 @@ struct HostBatch {
+       balls[j] = resolved ? sink.balls : 0;
+       incidences[j] = resolved ? sink.incidences : 0;
+       stored[j] = resolved && sink.fits;
+-      if (resolved) add_counts(per_worker[worker], c);
++      if (resolved) leaf_device::add_counts(per_worker[worker], c);
+       return {};
+     }
+     if (status[j] != leaf_device::kOk) return {};
+@@ -75,6 +68,75 @@ struct HostBatch {
+   }
+ };
+ 
++
++void leaf_stats_dump(const LeafBatchView& view) {
++  const char* path = std::getenv("MHGP11_LEAF_STATS");
++  if (path == nullptr) return;
++  FILE* f = std::fopen(path, "w");
++  static leaf_device::SplitTables t;
++  u64 split_checked = 0, split_bad = 0;
++  std::fprintf(f, "j,m,prefixes,census,evals,q4c,judged,emitted,cycles,pairs,triples,task_max,task_sum\n");
++  for (u64 j = 0; j < view.count; ++j) {
++    const auto in = input_of(view, view.jobs[j]);
++    leaf_device::Counts c;
++    leaf_device::CountSink sink;
++    u64 best = ~u64(0);
++    for (int r = 0; r < 3; ++r) {
++      c = leaf_device::Counts{};
++      const u64 t0 = __rdtsc();
++      leaf_device::run_leaf(in, c, sink);
++      const u64 t1 = __rdtsc();
++      if (t1 - t0 < best) best = t1 - t0;
++    }
++    leaf_device::Counts pc;
++    leaf_device::split_prepare(in, pc, t);
++    // triples : somme sur les paires des candidats de la profondeur 2
++    u64 triples = 0;
++    for (u32 k = 0; k < t.pairs; ++k) {
++      const u32 i = t.pair[k] >> 8, jj = t.pair[k] & 0xFF;
++      const u64 rem = t.next[i] & (~u64(0) << (jj + 1));
++      if (__builtin_popcountll(t.dom[i] | t.dom[jj]) > u32(view.kmax - 2)) continue;
++      triples += __builtin_popcountll(rem & t.live[1][i] & t.live[1][jj]);
++    }
++    u64 tmax = 0, tsum = 0;
++    if (t.pairs >= 24) {
++      for (u32 k = 0; k < t.pairs; ++k) {
++        u64 b = ~u64(0);
++        for (int r = 0; r < 2; ++r) {
++          leaf_device::Counts tc;
++          leaf_device::CountSink s2;
++          leaf_device::Leaf<leaf_device::CountSink> lane(in, tc, s2);
++          const u64 t0 = __rdtsc();
++          leaf_device::run_pair(lane, t, k);
++          const u64 t1 = __rdtsc();
++          if (t1 - t0 < b) b = t1 - t0;
++        }
++        tsum += b; if (b > tmax) tmax = b;
++      }
++    }
++    {
++      leaf_device::Counts a, b;
++      leaf_device::CountSink sa, sb;
++      const u32 ra = leaf_device::run_leaf(in, a, sa);
++      const u32 rb = leaf_device::run_leaf_split(in, b, sb, t, 7);
++      const bool same = ra == rb && (ra != leaf_device::kOk || (sa.balls == sb.balls && sa.incidences == sb.incidences &&
++        a.dominance_tests == b.dominance_tests && a.prefixes == b.prefixes && a.judged == b.judged &&
++        a.census_tests == b.census_tests && a.emitted == b.emitted && a.incidences == b.incidences &&
++        a.q4_candidates == b.q4_candidates && a.q4_levels == b.q4_levels && a.region_line_tests == b.region_line_tests &&
++        a.region_line_rejects == b.region_line_rejects && a.region_line_evaluations == b.region_line_evaluations &&
++        a.region_line_cache_hits == b.region_line_cache_hits));
++      if (!same) std::fprintf(stderr, "SPLIT_MISMATCH %llu\n", (unsigned long long)j);
++      split_checked += 1; split_bad += !same;
++    }
++    std::fprintf(f, "%llu,%u,%llu,%llu,%llu,%llu,%llu,%llu,%llu,%u,%llu,%llu,%llu\n", (unsigned long long)j, in.m,
++                 (unsigned long long)c.prefixes, (unsigned long long)c.census_tests,
++                 (unsigned long long)c.region_line_evaluations, (unsigned long long)c.q4_candidates,
++                 (unsigned long long)c.judged, (unsigned long long)c.emitted, (unsigned long long)best, t.pairs,
++                 (unsigned long long)triples, (unsigned long long)tmax, (unsigned long long)tsum);
++  }
++  std::fclose(f);
++  std::fprintf(stderr, "SPLIT_CHECK %llu bad %llu\n", (unsigned long long)split_checked, (unsigned long long)split_bad);
++}
+ }  // namespace
+ 
+ Outcome run_leaf_batch_host(const LeafBatchView& view, sched::Pool& pool, MemoryBudget& budget,
+@@ -113,6 +175,7 @@ Outcome run_leaf_batch_host(const LeafBatchView& view, sched::Pool& pool, Memory
+                            links.data() + 2 * chunks, static_cast<u32>(view.count), static_cast<u32>(spare)};
+   HostBatch batch{view, result.status.span(), stored.span(), balls.span(), incidences.span(), arena, {}, {},
+                   per_worker.span()};
++  leaf_stats_dump(view);
+   const Stopwatch count;
+   MHGP11_TRY(pool.parallel_for(view.count, 64, &batch, HostBatch::body));
+   result.timings.count_ns = count.nanoseconds();
+@@ -143,7 +206,7 @@ Outcome run_leaf_batch_host(const LeafBatchView& view, sched::Pool& pool, Memory
+   MHGP11_TRY(pool.parallel_for(view.count, 64, &batch, HostBatch::body));
+   result.timings.fill_ns = fill.nanoseconds();
+   result.counts = leaf_device::Counts{};
+-  for (const auto& c : per_worker.span()) add_counts(result.counts, c);
++  for (const auto& c : per_worker.span()) leaf_device::add_counts(result.counts, c);
+   result.record_begin = std::move(balls);  // debuts par feuille apres le prefixe
+   result.population_begin = std::move(incidences);
+   result.timings.jobs = view.count; result.timings.records = records; result.timings.population = population;
+diff --git a/morsehgp3D_v11/src/catalogue/leaf_device.hpp b/morsehgp3D_v11/src/catalogue/leaf_device.hpp
+index 377c7b46d..9caa825f4 100644
+--- a/morsehgp3D_v11/src/catalogue/leaf_device.hpp
++++ b/morsehgp3D_v11/src/catalogue/leaf_device.hpp
+@@ -282,14 +282,19 @@ struct Leaf {
+     c.incidences += u64(p) + count;
+   }
+ 
+-  template <int Depth>
++  // One (tache de paire, leaf_device_split.hpp) : seul le premier candidat est joue, les suivants servant de candidats
++  // restants a la profondeur suivante ; stop vaut alors ces restants et la boucle s'arrete. Sans One, stop reste nul :
++  // la boucle est celle de 830473218 (reconvergence des warps : aucun appel ni restructuration ici).
++  template <int Depth, bool One = false>
+   MHGP11_LEAF_HD void extend(u64 candidates, u64 logical) {
+     constexpr int q = Depth + 1;
+     const int threshold = in.kmax + 1 - q;
+     if (threshold < 0) return;
+-    while (candidates != 0) {
++    u64 stop = 0;
++    while (candidates != stop) {
+       const u32 i = ctz(candidates);
+       candidates &= candidates - 1;
++      if constexpr (One) stop = candidates;
+       ++c.prefixes;
+       prefix[Depth] = i;
+       const u64 mask = masks[Depth] | dom[i];
+diff --git a/morsehgp3D_v11/src/catalogue/leaf_device_split.hpp b/morsehgp3D_v11/src/catalogue/leaf_device_split.hpp
+new file mode 100644
+index 000000000..9c384229c
+--- /dev/null
++++ b/morsehgp3D_v11/src/catalogue/leaf_device_split.hpp
+@@ -0,0 +1,184 @@
++// Feuilles lourdes decoupees en taches de paires (voie GPU, levier D, 6 octobre 2026). Une feuille par fil laisse une
++// queue au noyau de comptage : la feuille la plus lourde de ng00 a K = 5 coute environ 13 fois la moyenne, sur un
++// seul fil. Ici, seules les feuilles dont le poids (paires de la profondeur 1) depasse un seuil sont differees
++// (kDeferred, rien publie) ; la profondeur 0 est jouee une fois par la preparation, qui range les tables de la feuille
++// et la liste de ses paires (i, j) dans l'ordre du parcours ; chaque paire est ensuite une tache independante, jouee par
++// un fil quelconque (corps d'extend<1> pour j seul, puis extend<2> et extend<3>, la boucle en ligne de leaf_device.hpp).
++// Preuve d'egalite (note aux auditeurs, section O, et run_leaf_split ci-dessous, juge par la porte leaf_split) :
++// - aucune emission a la profondeur 0 (q = 1) ; les emissions du sous-arbre d'une paire sont contigues dans l'ordre du
++//   parcours, donc la suite des emissions de la feuille est la concatenation de celles des paires dans l'ordre des
++//   paires, et des comptes par tache suivis d'un prefixe placent chaque emission a sa place exacte ;
++// - tous les compteurs sont des sommes sur les prefixes, sauf le cache J2 simule : evaluations = rangs distincts testes
++//   dans la feuille (union des memoires de toutes ses taches), succes = tests - evaluations, quel que soit l'ordre ;
++//   sans l'option cache, evaluations = tests ; dominance_tests est compte une fois, par la preparation ;
++// - un refus (kUnresolved) d'une tache rend toute la feuille non resolue : compteurs et emissions jetes, repli CPU.
++// La memoire J2 d'une tache (decisions) est la sienne : le predicat ne depend que du triplet et de la boite.
++#pragma once
++
++#include "catalogue/leaf_device.hpp"
++
++namespace mhgp11::leaf_device {
++
++using u16 = std::uint16_t;
++inline constexpr u32 kDeferred = 2;  // statut de comptage d'une feuille differee (jamais un statut final)
++inline constexpr u32 kMaxPairs = kMaxSites * (kMaxSites - 1) / 2;
++
++// Tables d'une feuille decoupee : ecrites par split_prepare, lues seulement par ses taches.
++struct SplitTables {
++  u32 m = 0, pairs = 0;
++  u32 P[kMaxSites][3];
++  u64 dom[kMaxSites], domby[kMaxSites], nbr[kMaxSites];
++  u64 live[3][kMaxSites];
++  u64 next[kMaxSites], logical[kMaxSites];  // candidats et ensemble logique de la profondeur 1 sous i
++  u16 pair[kMaxPairs];                      // (i << 8) | j, dans l'ordre du parcours
++};
++
++// Poids de la feuille : nombre de paires que la profondeur 0 rendrait (memes coupes qu'extend<0>, sans compteur).
++template <class Sink>
++MHGP11_LEAF_HD u32 pair_weight(const Leaf<Sink>& leaf) {
++  const u64 initial = leaf.m >= 64 ? ~u64(0) : (u64(1) << leaf.m) - 1;
++  u32 weight = 0;
++  for (u64 rest = initial; rest != 0; rest &= rest - 1) {
++    const u32 i = ctz(rest);
++    if (popc(leaf.dom[i]) > static_cast<u32>(leaf.in.kmax - 1)) continue;  // G3 ou arret avant la profondeur 1
++    weight += popc((rest & (rest - 1)) & leaf.live[0][i]);
++  }
++  return weight;
++}
++
++// run_leaf du comptage, avec report : une feuille de poids > split (split != 0) rend kDeferred avant tout parcours,
++// sans emission ni compteur publie. split = 0 : exactement run_leaf.
++template <class Sink>
++MHGP11_LEAF_HD u32 run_leaf_or_defer(const Input& in, Counts& counts, Sink& sink, u32 split) {
++  if (in.m == 0 || in.m > kMaxSites || in.kmax < 1) return kUnresolved;
++  Leaf<Sink> leaf(in, counts, sink);
++  leaf.prepare();
++  leaf.live_rows();
++  if (split != 0 && pair_weight(leaf) > split) return kDeferred;
++  const u64 initial = in.m >= 64 ? ~u64(0) : (u64(1) << in.m) - 1;
++  leaf.template extend<0>(initial, initial);
++  return leaf.unresolved ? kUnresolved : kOk;
++}
++
++struct NullSink {
++  MHGP11_LEAF_HD void emit(const Ball&, const u32*, const u32*, const u32*, const u32*) {}
++};
++
++// Preparation d'une feuille differee : tables (prepare, live_rows), puis profondeur 0 avec les memes coupes et les
++// memes compteurs qu'extend<0>, qui range les paires au lieu de descendre. counts recoit dominance_tests et les
++// prefixes de la profondeur 0. Faux si l'entree est hors domaine (la feuille est alors non resolue).
++MHGP11_LEAF_HD bool split_prepare(const Input& in, Counts& counts, SplitTables& t) {
++  if (in.m == 0 || in.m > kMaxSites || in.kmax < 1) return false;
++  NullSink none;
++  Leaf<NullSink> leaf(in, counts, none);
++  leaf.prepare();
++  leaf.live_rows();
++  t.m = leaf.m;
++  for (u32 i = 0; i < leaf.m; ++i) {
++    for (int a = 0; a < 3; ++a) t.P[i][a] = leaf.P[i][a];
++    t.dom[i] = leaf.dom[i]; t.domby[i] = leaf.domby[i]; t.nbr[i] = leaf.nbr[i];
++    for (int q = 0; q < 3; ++q) t.live[q][i] = leaf.live[q][i];
++    t.next[i] = t.logical[i] = 0;
++  }
++  const u64 initial = in.m >= 64 ? ~u64(0) : (u64(1) << in.m) - 1;
++  u32 n = 0;
++  u64 candidates = initial;
++  while (candidates != 0) {  // extend<0> : q = 1, seuil kmax >= 1, aucun appel q, profondeur 1 toujours admise
++    const u32 i = ctz(candidates);
++    candidates &= candidates - 1;
++    ++counts.prefixes;
++    const u32 count = popc(leaf.dom[i]);
++    if (count > static_cast<u32>(in.kmax)) continue;  // G3
++    const u64 next_logical = initial & (~u64(0) << (i + 1)) & leaf.nbr[i];
++    if (count > static_cast<u32>(in.kmax - 1)) {
++      counts.prefixes += popc(next_logical);
++      continue;
++    }
++    const u64 next = candidates & leaf.live[0][i];
++    counts.prefixes += popc(next_logical) - popc(next);
++    t.next[i] = next; t.logical[i] = next_logical;
++    for (u64 rest = next; rest != 0; rest &= rest - 1) t.pair[n++] = static_cast<u16>((i << 8) | ctz(rest));
++  }
++  t.pairs = n;
++  return true;
++}
++
++// Tache k de la feuille decoupee : tables relues (memoire J2 vierge), prefixe (i), puis le corps d'extend<1> pour j
++// seul avec les candidats restants apres j, et sa recursion. Rend kOk ou kUnresolved ; leaf.seen porte ensuite les
++// rangs J2 testes par la tache (option cache).
++template <class Sink>
++MHGP11_LEAF_HD void run_pair(Leaf<Sink>& leaf, const SplitTables& t, u32 k) {
++  leaf.m = t.m;
++  for (u32 i = 0; i < t.m; ++i) {
++    for (int a = 0; a < 3; ++a) leaf.P[i][a] = t.P[i][a];
++    leaf.dom[i] = t.dom[i]; leaf.domby[i] = t.domby[i]; leaf.nbr[i] = t.nbr[i];
++    for (int q = 0; q < 3; ++q) leaf.live[q][i] = t.live[q][i];
++  }
++  for (u32 w = 0; w < kSeenWords; ++w) leaf.seen[w] = leaf.meets[w] = 0;
++  const u32 i = t.pair[k] >> 8, j = t.pair[k] & 0xFFu;
++  leaf.prefix[0] = i;
++  leaf.masks[0] = 0;
++  leaf.masks[1] = leaf.dom[i];
++  const u64 remaining = t.next[i] & (~u64(0) << (j + 1));
++  leaf.template extend<1, true>((u64(1) << j) | remaining, t.logical[i]);
++}
++
++MHGP11_LEAF_HD void add_counts(Counts& total, const Counts& c) {
++  total.dominance_tests += c.dominance_tests; total.prefixes += c.prefixes; total.judged += c.judged;
++  total.census_tests += c.census_tests; total.emitted += c.emitted; total.incidences += c.incidences;
++  total.q4_candidates += c.q4_candidates; total.q4_levels += c.q4_levels;
++  total.region_pair_tests += c.region_pair_tests; total.region_pair_rejects += c.region_pair_rejects;
++  total.region_line_tests += c.region_line_tests; total.region_line_rejects += c.region_line_rejects;
++  total.region_line_evaluations += c.region_line_evaluations;
++  total.region_line_cache_hits += c.region_line_cache_hits;
++  total.region_line_fallbacks += c.region_line_fallbacks;
++}
++
++// Compteurs J2 de la feuille decoupee : rangs distincts de l'union des memoires des taches (option cache), ou tous les
++// tests sans elle. distinct = popc de l'union.
++MHGP11_LEAF_HD void split_line_counts(Counts& c, bool cache, u64 distinct) {
++  c.region_line_evaluations = cache ? distinct : c.region_line_tests;
++  c.region_line_cache_hits = c.region_line_tests - c.region_line_evaluations;
++}
++
++// Emulation hote complete d'une feuille decoupee (porte leaf_split) : preparation, taches comptees dans un ordre
++// permute (order premier avec le nombre de paires, sinon l'ordre inverse), union J2, puis emissions des taches dans
++// l'ordre des paires (compteurs de cette seconde passe jetes). Memes statut, compteurs et emissions que run_leaf.
++MHGP11_LEAF_HD u32 gcd(u32 a, u32 b) {
++  while (b != 0) {
++    const u32 r = a % b;
++    a = b; b = r;
++  }
++  return a;
++}
++template <class Sink>
++MHGP11_LEAF_HD u32 run_leaf_split(const Input& in, Counts& counts, Sink& sink, SplitTables& t, u32 order) {
++  Counts leaf_counts;
++  if (!split_prepare(in, leaf_counts, t)) return kUnresolved;
++  const u32 n = t.pairs;
++  if (order != 0 && gcd(order, n) != 1) order = 0;
++  u32 seen[kSeenWords] = {};
++  for (u32 step = 0; step < n; ++step) {
++    const u32 k = order == 0 ? n - 1 - step : static_cast<u32>((u64(order) * step + order) % n);
++    Counts task;
++    NullSink none;
++    Leaf<NullSink> lane(in, task, none);
++    run_pair(lane, t, k);
++    if (lane.unresolved) return kUnresolved;
++    add_counts(leaf_counts, task);
++    for (u32 w = 0; w < kSeenWords; ++w) seen[w] |= lane.seen[w];
++  }
++  u64 distinct = 0;
++  for (u32 w = 0; w < kSeenWords; ++w) distinct += popc(seen[w]);
++  split_line_counts(leaf_counts, in.cache, distinct);
++  for (u32 k = 0; k < n; ++k) {
++    Counts discarded;
++    Leaf<Sink> lane(in, discarded, sink);
++    run_pair(lane, t, k);
++    if (lane.unresolved) return kUnresolved;
++  }
++  add_counts(counts, leaf_counts);
++  return kOk;
++}
++
++}  // namespace mhgp11::leaf_device
