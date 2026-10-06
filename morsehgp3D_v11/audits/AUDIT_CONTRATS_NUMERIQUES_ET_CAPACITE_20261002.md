@@ -10,6 +10,33 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
+## R2 clos : les 41 absences et les références multiprofil passent
+
+La session `v11.20261005.clauderepriser2`, source **98a009550**,
+est close le 6 octobre à 00:14 UTC avec arrêt ciblé certifié. Les
+huit lots d’échelle terminent tous leurs inventaires : **472/472
+PASS**, zéro échec, résultat manquant ou coupure. Les deux lots de
+chaque profil sont disjoints et couvrent 52 + 66 noms ; sources,
+profils, journaux et JUnit concordent.
+
+La comparaison avec l’archive fina2 vérifie nom par nom que ses
+**41 anciennes absences** (8/11/11/11) ont toutes un PASS explicite.
+Les **24 supports_route** passent également, dont les douze portes
+u18/u24 précédemment refusées sur des attendus u21. Les nouvelles
+références par profil sont donc qualifiées dans cette reprise Release ;
+aucun échec historique n’est transformé rétroactivement. Les 24 lignes
+natives concordent exactement avec les attendus, journaux et workers.
+Dans chaque cas, le pic de l’appel public `compute` égale celui de FULL
+et diffère de l’arbre K seul ; les identités complètes restent imposées
+par la sonde, au-delà des seuls préfixes de SHA publiés.
+[Contrelecture ciblée et rejeu indépendant](../receipts/audit_g4_repriser2_20261005/NATIVE_REPLAY.md).
+
+R2 clôt le volet ordinaire d’échelle et LiDAR. Les campagnes mutants
+API/CLI sont jugées séparément dans R3, désormais en cours ; les six
+routes ASan/UBSan u24 restent dans R4. Aucun chrono de contrat n’est
+inféré de ces portes de correction.
+[Reçu R2 et correspondance des 41 noms](../receipts/audit_g4_repriser2_20261005/README.md).
+
 ## R1 clos : les quatre profils courts passent au pin corrigé
 
 La session `v11.20261005.clauderepriser1`, source **98a009550**,
@@ -26,7 +53,7 @@ de l’exigence LiDAR impossible : la preuve source est complétée par R1.
 
 Cette sélection exclut les échelles, LiDAR, longs et mutants. Elle ne
 ferme ni les 41 absences antérieures ni les six supports_route par
-profil : R2 les reprend, R3 juge les mutants et R4 les routes sous
+profil : R2 les ferme séparément, R3 juge les mutants et R4 les routes sous
 ASan/UBSan u24. Aucun contrat de temps ne découle de ces portes courtes.
 [Reçu R1, inventaires et portée](../receipts/audit_g4_repriser1_20261005/README.md),
 [contrelecture indépendante des flags et portes prioritaires](../receipts/audit_g4_repriser1_20261005/native_review.json).
@@ -58,7 +85,7 @@ identités entre voies, workers et appel public conservés.
 pour chacun des profils u18/u21/u24. Les six références u21 et tous
 les journaux sont conservés ; les six paires u24 correspondent aux
 sorties G4 de fins et la paire u18/8k à finm. Les autres nouvelles
-références u18 restent à qualifier au commit corrigé. Cette solution
+références u18 passent désormais dans R2 au commit corrigé. Cette solution
 sur une seule ligne rend inutile le montage multiligne proposé à
 l’étape précédente. La capture initiale reste une preuve historique,
 pas un défaut imputé à la version publiée.
@@ -167,11 +194,12 @@ Le différentiel S9 de l’arbre lui-même est passé séparément dans P9.
 
 La chaîne `clauderepriser1` à `clauderepriser4` utilise le commit
 corrigé **98a009550** et `data_complet`. R1 est clos et entièrement
-conforme, avec reçu lié ci-dessus. R2 est en cours ; R3/R4 restent à juger.
+conforme, avec reçu lié ci-dessus. R2 est également clos et conforme ;
+R3 est en cours, R4 reste à juger.
 Les plans adoptés se répartissent ainsi :
 
 - R1 clos : lots courts u18/u21/u24/poison, tous conformes ;
-- R2 : huit lots d’échelle, couvrant les 41 absences et les six supports_route de chaque profil ;
+- R2 clos : huit lots d’échelle, les 41 absences et les six supports_route de chaque profil passent ;
 - R3 : campagnes mutants u18, y compris API et CLI après correction ;
 - R4 : quatre lots ASan/UBSan u24, y compris les six supports_route.
 

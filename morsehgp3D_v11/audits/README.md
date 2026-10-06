@@ -4,11 +4,12 @@
 quantized_u21_input_only / not_claimed`. Six notes actives maintenues en
 place ; preuves détaillées dans les reçus immuables.
 
-**Corrections publiées en be05bfad8 et 98a009550, à qualifier sur G4.**
+**Corrections publiées en be05bfad8 et 98a009550 : Release conforme, mutants et ASan en reprise.**
 
 - **API multiprofil :** références fichier/manifeste par profil,
   journal conservé, six références u21 inchangées et six références
-  u24 concordantes avec les reçus G4. La sonde reste identique à 38b76701b.
+  u24 concordantes avec les reçus G4. **Les 24 portes des quatre profils
+  passent dans R2.** La sonde reste identique à 38b76701b.
 - **Mutant CLI :** mutation de `order_params` raccordée à la porte
   points qui l’atteint ; 28 individus conservés.
 - **Matrice :** exigence LiDAR retirée du seul lot court ; portes et
@@ -16,13 +17,14 @@ place ; preuves détaillées dans les reçus immuables.
   est corrigé, les sélections couvrent les reprises nécessaires.
 
 [Relecture indépendante des corrections publiées](../receipts/audit_gates_fix_closed_20261005/README.md).
-Les campagnes corrigées et les occurrences auparavant manquantes
-restent à exécuter ; aucun PASS historique n’est changé rétroactivement.
+Les 41 occurrences auparavant manquantes passent toutes dans R2.
+Les campagnes mutants et le complément ASan restent à juger ; les
+reçus historiques conservent leurs verdicts.
 
 **Chaîne G4 close, source 38b76701b.** Les sessions closes
 ci-dessous ont des sources vérifiées et un arrêt ciblé certifié.
 
-| Lot | Résultat vérifié | Portée encore ouverte |
+| Lot | Résultat vérifié | Limites de cette capture |
 | --- | --- | --- |
 | [Fina2](../receipts/audit_g4_fina2_20261005/README.md) | Portes S9/S10 prioritaires PASS en u18/u21/u24/poison | Six échecs supports par profil u18/u24 ; 41 occurrences sans résultat à l’échéance |
 | [Finm](../receipts/audit_g4_finm_20261005/README.md) | 461 mutants détectés sur 462 jugés, dont tous les head/points/num | Un survivant CLI expliqué ci-dessus ; 23 API non jugés après refus du témoin |
@@ -40,7 +42,9 @@ supports ; R3 mutants, dont API/CLI ; R4 quatre lots ASan/UBSan u24.
 **R1 est clos et entièrement conforme** : 873/873 u18, 783/783 u21,
 783/783 u24, 784/784 poison u21. Aucun échec ni résultat manquant.
 [Reçu R1 vérifié](../receipts/audit_g4_repriser1_20261005/README.md).
-R2 est en cours ; R3/R4 restent à juger.
+**R2 est également clos : 472/472 PASS**, dont les 41 absences et les
+24 identités supports. [Reçu R2 vérifié](../receipts/audit_g4_repriser2_20261005/README.md).
+R3 est en cours ; R4 reste à juger.
 L’arrêt ciblé certifié est exigé entre sessions. Les 28 portes longues
 fonctionnelles déjà terminées ne sont pas rejouées. La
 [proposition antérieure limitée aux 41 absences](../receipts/proposition_reprise_41_20261005/README.md)

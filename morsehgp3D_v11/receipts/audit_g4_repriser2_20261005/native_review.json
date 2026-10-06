@@ -1,0 +1,1004 @@
+{
+  "schema": "ehgp.v11.audit.r2_supports_route_review.v1",
+  "source_pin": "98a00955083d483306c4f92b9031e382e81b0e59",
+  "archive": {
+    "session": "v11.20261005.clauderepriser2",
+    "sha256": "0d122a7fa1e9a1536197a5003456c105abfb5bd977d53bc4be2376379ab69347",
+    "bytes": 392148
+  },
+  "closure_status": "closed_certified",
+  "method": "Read-only Git/stdlib archive comparison, no native/build/cloud execution by auditor.",
+  "sources": {
+    "morsehgp3D_v11/tests/api/tests.cmake": {
+      "sha256": "f58d8bb1033c9ae0df9ccd98a16c135bbea61fb2c28851820f16d9ec8c22e29d",
+      "anchors": [
+        [
+          68,
+          107
+        ],
+        [
+          108,
+          129
+        ]
+      ]
+    },
+    "morsehgp3D_v11/tests/api/supports_route.cpp": {
+      "sha256": "2db41f412d4894ffb8688b86e6cc16b5e3a1a9e7329a6cce13a4330dc692fb42",
+      "anchors": [
+        [
+          235,
+          253
+        ],
+        [
+          261,
+          265
+        ],
+        [
+          343,
+          384
+        ],
+        [
+          386,
+          400
+        ]
+      ]
+    }
+  },
+  "fingerprint_definitions": {
+    "18": {
+      "mhgp11_route_scale8000_file": "09a1101bc512394e",
+      "mhgp11_route_scale8000_manifest": "e10e6c8d117429e3",
+      "mhgp11_route_scale16000_file": "62e74f1f5df26634",
+      "mhgp11_route_scale16000_manifest": "dc3a1b98925c658a",
+      "mhgp11_route_scale32000_file": "a91f226656b6cbd3",
+      "mhgp11_route_scale32000_manifest": "3e29e3f5d1403abd",
+      "mhgp11_route_ng00_file": "51b941795a2361c7",
+      "mhgp11_route_ng00_manifest": "bc8d49e588415eed",
+      "mhgp11_route_ng01_file": "b8449cfbc212f782",
+      "mhgp11_route_ng01_manifest": "f6b275a818df1d39",
+      "mhgp11_route_ng02_file": "a4642008f9145a97",
+      "mhgp11_route_ng02_manifest": "247ffdc9a96d2891"
+    },
+    "21": {
+      "mhgp11_route_scale8000_file": "9b77614618bbdfc9",
+      "mhgp11_route_scale8000_manifest": "d61003785c2ff158",
+      "mhgp11_route_scale16000_file": "dd524ffd991873eb",
+      "mhgp11_route_scale16000_manifest": "baa658ac05a8eee8",
+      "mhgp11_route_scale32000_file": "6543988436d3d582",
+      "mhgp11_route_scale32000_manifest": "751e5f52d5c1477e",
+      "mhgp11_route_ng00_file": "830db973140e720d",
+      "mhgp11_route_ng00_manifest": "7c119d733528e2d0",
+      "mhgp11_route_ng01_file": "ed899fede2bbe761",
+      "mhgp11_route_ng01_manifest": "09d1d8c0070ab73a",
+      "mhgp11_route_ng02_file": "28532835cc5915f8",
+      "mhgp11_route_ng02_manifest": "6b6d1ee970c80839"
+    },
+    "24": {
+      "mhgp11_route_scale8000_file": "8346120e7c4d1d69",
+      "mhgp11_route_scale8000_manifest": "1079d104c5e64543",
+      "mhgp11_route_scale16000_file": "1716d15eb3a5afa4",
+      "mhgp11_route_scale16000_manifest": "39af11215297416d",
+      "mhgp11_route_scale32000_file": "1a68904408bcae5f",
+      "mhgp11_route_scale32000_manifest": "54f75f49aceae6b7",
+      "mhgp11_route_ng00_file": "4b781f21b6e9fd84",
+      "mhgp11_route_ng00_manifest": "0e13ef92eda96e3e",
+      "mhgp11_route_ng01_file": "ac1fd4da1b693572",
+      "mhgp11_route_ng01_manifest": "12882c6a35b51bd3",
+      "mhgp11_route_ng02_file": "b66e1a9e116e56c7",
+      "mhgp11_route_ng02_manifest": "4963819ee6bcd867"
+    }
+  },
+  "source_contract": [
+    "Both routes publish and finish a fresh Session; same() requires byte-identical nonempty support file and manifest, equal complete journal register and equal node/ball/support counts.",
+    "At W1 and W4, routes must agree; FULL output/register must also agree between workers.",
+    "Public compute at W1 must succeed, publish the same file and manifest as FULL, and have tree peak equal to FULL and distinct from order_tree.",
+    "Expected code zero, six full golden verdicts per coordinate domain, common counts/journal and W1,W4, profile-specific file/manifest prefixes, and unchanged ball/cell floors."
+  ],
+  "configurations": {
+    "bits21_echelle_gros": {
+      "domain": "u21",
+      "counts": {
+        "ctest_failed": 0,
+        "ctest_total": 52,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 52,
+        "selected": 52
+      },
+      "actual_compile_flags": {
+        "CMakeFiles/mhgp11.dir/flags.make": {
+          "sha256": "4d6c0a4401365ab4e855722e2d380041e28894404907cde888f72e476387d24c",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=21",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+        },
+        "CMakeFiles/mhgp11_api_supports_route_probe.dir/flags.make": {
+          "sha256": "4d6c0a4401365ab4e855722e2d380041e28894404907cde888f72e476387d24c",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=21",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+        }
+      },
+      "route_names": [
+        "mhgp11_api_supports_route_lidar_ng01_k5",
+        "mhgp11_api_supports_route_lidar_ng02_k5",
+        "mhgp11_api_supports_route_scale32000"
+      ],
+      "inventory_junit_ctest_sets_equal": true,
+      "lasttest_sha256": "756766f91c372eacf0b118fe58482c7cbb58603b4434b392265d93e63ebe9028",
+      "lasttest_bytes": 99244,
+      "runtime_diagnostic_marker_hits": {}
+    },
+    "bits21_echelle_reste": {
+      "domain": "u21",
+      "counts": {
+        "ctest_failed": 0,
+        "ctest_total": 66,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 66,
+        "selected": 66
+      },
+      "actual_compile_flags": {
+        "CMakeFiles/mhgp11.dir/flags.make": {
+          "sha256": "4d6c0a4401365ab4e855722e2d380041e28894404907cde888f72e476387d24c",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=21",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+        },
+        "CMakeFiles/mhgp11_api_supports_route_probe.dir/flags.make": {
+          "sha256": "4d6c0a4401365ab4e855722e2d380041e28894404907cde888f72e476387d24c",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=21",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+        }
+      },
+      "route_names": [
+        "mhgp11_api_supports_route_lidar_ng00_k5",
+        "mhgp11_api_supports_route_scale16000",
+        "mhgp11_api_supports_route_scale8000"
+      ],
+      "inventory_junit_ctest_sets_equal": true,
+      "lasttest_sha256": "f2f650c02c10c52fe59c3ddbed129f273181ff3c1d81012030fd371237141774",
+      "lasttest_bytes": 124481,
+      "runtime_diagnostic_marker_hits": {}
+    },
+    "bits24_echelle_gros": {
+      "domain": "u24",
+      "counts": {
+        "ctest_failed": 0,
+        "ctest_total": 52,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 52,
+        "selected": 52
+      },
+      "actual_compile_flags": {
+        "CMakeFiles/mhgp11.dir/flags.make": {
+          "sha256": "0a10c9ff4bd4548351d9a6d972a7c81225fe2009324442d5f0f79170d39685c1",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=24",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+        },
+        "CMakeFiles/mhgp11_api_supports_route_probe.dir/flags.make": {
+          "sha256": "0a10c9ff4bd4548351d9a6d972a7c81225fe2009324442d5f0f79170d39685c1",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=24",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+        }
+      },
+      "route_names": [
+        "mhgp11_api_supports_route_lidar_ng01_k5",
+        "mhgp11_api_supports_route_lidar_ng02_k5",
+        "mhgp11_api_supports_route_scale32000"
+      ],
+      "inventory_junit_ctest_sets_equal": true,
+      "lasttest_sha256": "7611c8454b2cdc7a4e5087d5ad05252779feee5d220c3bec9ad488440162bbe2",
+      "lasttest_bytes": 99243,
+      "runtime_diagnostic_marker_hits": {}
+    },
+    "bits24_echelle_reste": {
+      "domain": "u24",
+      "counts": {
+        "ctest_failed": 0,
+        "ctest_total": 66,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 66,
+        "selected": 66
+      },
+      "actual_compile_flags": {
+        "CMakeFiles/mhgp11.dir/flags.make": {
+          "sha256": "0a10c9ff4bd4548351d9a6d972a7c81225fe2009324442d5f0f79170d39685c1",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=24",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+        },
+        "CMakeFiles/mhgp11_api_supports_route_probe.dir/flags.make": {
+          "sha256": "0a10c9ff4bd4548351d9a6d972a7c81225fe2009324442d5f0f79170d39685c1",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=24",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+        }
+      },
+      "route_names": [
+        "mhgp11_api_supports_route_lidar_ng00_k5",
+        "mhgp11_api_supports_route_scale16000",
+        "mhgp11_api_supports_route_scale8000"
+      ],
+      "inventory_junit_ctest_sets_equal": true,
+      "lasttest_sha256": "4a3db6083afe88fde832f5cab8b813b432173f69baa8afca349065fe50c8edb9",
+      "lasttest_bytes": 124486,
+      "runtime_diagnostic_marker_hits": {}
+    },
+    "gcc_release_echelle_gros": {
+      "domain": "u18",
+      "counts": {
+        "ctest_failed": 0,
+        "ctest_total": 52,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 52,
+        "selected": 52
+      },
+      "actual_compile_flags": {
+        "CMakeFiles/mhgp11.dir/flags.make": {
+          "sha256": "47b12b80bbf73b4623c59ca49d59115fa68d7ca5e36ec494c9c9a3f796e6be26",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=18",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+        },
+        "CMakeFiles/mhgp11_api_supports_route_probe.dir/flags.make": {
+          "sha256": "47b12b80bbf73b4623c59ca49d59115fa68d7ca5e36ec494c9c9a3f796e6be26",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=18",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+        }
+      },
+      "route_names": [
+        "mhgp11_api_supports_route_lidar_ng01_k5",
+        "mhgp11_api_supports_route_lidar_ng02_k5",
+        "mhgp11_api_supports_route_scale32000"
+      ],
+      "inventory_junit_ctest_sets_equal": true,
+      "lasttest_sha256": "7752288c0d601dc834d1098fc8e9b9e329453f8a0b34a827fe13db15ff034b2b",
+      "lasttest_bytes": 99876,
+      "runtime_diagnostic_marker_hits": {}
+    },
+    "gcc_release_echelle_reste": {
+      "domain": "u18",
+      "counts": {
+        "ctest_failed": 0,
+        "ctest_total": 66,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 66,
+        "selected": 66
+      },
+      "actual_compile_flags": {
+        "CMakeFiles/mhgp11.dir/flags.make": {
+          "sha256": "47b12b80bbf73b4623c59ca49d59115fa68d7ca5e36ec494c9c9a3f796e6be26",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=18",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+        },
+        "CMakeFiles/mhgp11_api_supports_route_probe.dir/flags.make": {
+          "sha256": "47b12b80bbf73b4623c59ca49d59115fa68d7ca5e36ec494c9c9a3f796e6be26",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=18",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+        }
+      },
+      "route_names": [
+        "mhgp11_api_supports_route_lidar_ng00_k5",
+        "mhgp11_api_supports_route_scale16000",
+        "mhgp11_api_supports_route_scale8000"
+      ],
+      "inventory_junit_ctest_sets_equal": true,
+      "lasttest_sha256": "f44ad1d8d509202fc72d7359b10905e2eac26af8beb0968aaff314d044351e62",
+      "lasttest_bytes": 125409,
+      "runtime_diagnostic_marker_hits": {}
+    },
+    "poison_echelle_gros": {
+      "domain": "u21_poison",
+      "counts": {
+        "ctest_failed": 0,
+        "ctest_total": 52,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 52,
+        "selected": 52
+      },
+      "actual_compile_flags": {
+        "CMakeFiles/mhgp11.dir/flags.make": {
+          "sha256": "20adebc5960b00ed11df9dcd059c31d70a671a9970b58a250f07d12abd3278c7",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=21 -DMHGP11_POISON",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+        },
+        "CMakeFiles/mhgp11_api_supports_route_probe.dir/flags.make": {
+          "sha256": "4d6c0a4401365ab4e855722e2d380041e28894404907cde888f72e476387d24c",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=21",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+        }
+      },
+      "route_names": [
+        "mhgp11_api_supports_route_lidar_ng01_k5",
+        "mhgp11_api_supports_route_lidar_ng02_k5",
+        "mhgp11_api_supports_route_scale32000"
+      ],
+      "inventory_junit_ctest_sets_equal": true,
+      "lasttest_sha256": "4d2f57f4e28cb64fded05b6a2a5d459cf791ed7320b90b82335328f7c2df9a2b",
+      "lasttest_bytes": 99247,
+      "runtime_diagnostic_marker_hits": {}
+    },
+    "poison_echelle_reste": {
+      "domain": "u21_poison",
+      "counts": {
+        "ctest_failed": 0,
+        "ctest_total": 66,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 66,
+        "selected": 66
+      },
+      "actual_compile_flags": {
+        "CMakeFiles/mhgp11.dir/flags.make": {
+          "sha256": "20adebc5960b00ed11df9dcd059c31d70a671a9970b58a250f07d12abd3278c7",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=21 -DMHGP11_POISON",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+        },
+        "CMakeFiles/mhgp11_api_supports_route_probe.dir/flags.make": {
+          "sha256": "4d6c0a4401365ab4e855722e2d380041e28894404907cde888f72e476387d24c",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=21",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+        }
+      },
+      "route_names": [
+        "mhgp11_api_supports_route_lidar_ng00_k5",
+        "mhgp11_api_supports_route_scale16000",
+        "mhgp11_api_supports_route_scale8000"
+      ],
+      "inventory_junit_ctest_sets_equal": true,
+      "lasttest_sha256": "a7e91290e4b376008323a0874a76d8469353ad640aa844a46adac7c39b5e5e36",
+      "lasttest_bytes": 124489,
+      "runtime_diagnostic_marker_hits": {}
+    }
+  },
+  "route_occurrences": [
+    {
+      "configuration": "bits21_echelle_gros",
+      "domain": "u21",
+      "name": "mhgp11_api_supports_route_lidar_ng01_k5",
+      "status": "PASS",
+      "actual_complete_verdict": "supports_route_verdict conforme k=5 n=35551 noeuds=478265 boules=652958 supports=652959 etendues=81 multiples=1 cellules=369751 graines=1102505 fichier=ed899fede2bbe761 manifeste=09d1d8c0070ab73a journal=5e36f8ddbd2fb94c fils=1,4",
+      "golden_matches_profile_counts_journal_workers": true,
+      "floors": {
+        "balls": 652958,
+        "cells": 369751
+      },
+      "compute_peak_witness": {
+        "route": "compute",
+        "tree_peak": 321153078,
+        "order_tree_peak": 221110466,
+        "full_tower_peak": 321153078
+      },
+      "route_tree_peaks": {
+        "order_tree_W1": 221110466,
+        "full_tower_W1": 321153078,
+        "order_tree_W4": 221537078,
+        "full_tower_W4": 321579690
+      },
+      "identities_required_by_source_and_successful_gate": true,
+      "lasttest_block_sha256": "b6f4858aa8896714af216fc13e17bb9b0f71e1fdbd78a108623b3bf5baf0ed9f"
+    },
+    {
+      "configuration": "bits21_echelle_gros",
+      "domain": "u21",
+      "name": "mhgp11_api_supports_route_lidar_ng02_k5",
+      "status": "PASS",
+      "actual_complete_verdict": "supports_route_verdict conforme k=5 n=45845 noeuds=609376 boules=832386 supports=832394 etendues=354 multiples=8 cellules=471060 graines=1393952 fichier=28532835cc5915f8 manifeste=6b6d1ee970c80839 journal=ec87f14da7adff77 fils=1,4",
+      "golden_matches_profile_counts_journal_workers": true,
+      "floors": {
+        "balls": 832386,
+        "cells": 471060
+      },
+      "compute_peak_witness": {
+        "route": "compute",
+        "tree_peak": 396332733,
+        "order_tree_peak": 267119457,
+        "full_tower_peak": 396332733
+      },
+      "route_tree_peaks": {
+        "order_tree_W1": 267119457,
+        "full_tower_W1": 396332733,
+        "order_tree_W4": 267669597,
+        "full_tower_W4": 396882873
+      },
+      "identities_required_by_source_and_successful_gate": true,
+      "lasttest_block_sha256": "774f1e3e68406d8a5d390021d0cf223588be0070362e017c50409c503a348eee"
+    },
+    {
+      "configuration": "bits21_echelle_gros",
+      "domain": "u21",
+      "name": "mhgp11_api_supports_route_scale32000",
+      "status": "PASS",
+      "actual_complete_verdict": "supports_route_verdict conforme k=5 n=32000 noeuds=1163756 boules=1690045 supports=1690045 etendues=0 multiples=0 cellules=989861 graines=3165977 fichier=6543988436d3d582 manifeste=751e5f52d5c1477e journal=c371678559b144d7 fils=1,4",
+      "golden_matches_profile_counts_journal_workers": true,
+      "floors": {
+        "balls": 1690045,
+        "cells": 989861
+      },
+      "compute_peak_witness": {
+        "route": "compute",
+        "tree_peak": 733220420,
+        "order_tree_peak": 527136184,
+        "full_tower_peak": 733220420
+      },
+      "route_tree_peaks": {
+        "order_tree_W1": 527136184,
+        "full_tower_W1": 733220420,
+        "order_tree_W4": 527520184,
+        "full_tower_W4": 733604420
+      },
+      "identities_required_by_source_and_successful_gate": true,
+      "lasttest_block_sha256": "57ecd21e443192e9dd04560fd16555e0d09bbb8d37f714378f31eb79540c603c"
+    },
+    {
+      "configuration": "bits21_echelle_reste",
+      "domain": "u21",
+      "name": "mhgp11_api_supports_route_lidar_ng00_k5",
+      "status": "PASS",
+      "actual_complete_verdict": "supports_route_verdict conforme k=5 n=39885 noeuds=576371 boules=789886 supports=789889 etendues=141 multiples=3 cellules=448805 graines=1350288 fichier=830db973140e720d manifeste=7c119d733528e2d0 journal=c189d5cd3ec3de66 fils=1,4",
+      "golden_matches_profile_counts_journal_workers": true,
+      "floors": {
+        "balls": 789886,
+        "cells": 448805
+      },
+      "compute_peak_witness": {
+        "route": "compute",
+        "tree_peak": 372926604,
+        "order_tree_peak": 255152916,
+        "full_tower_peak": 372926604
+      },
+      "route_tree_peaks": {
+        "order_tree_W1": 255152916,
+        "full_tower_W1": 372926604,
+        "order_tree_W4": 255631536,
+        "full_tower_W4": 373405224
+      },
+      "identities_required_by_source_and_successful_gate": true,
+      "lasttest_block_sha256": "7fb85605b54402d259eddaf28eb04153ef3338ecb2aa3fdd9bc436cefaba98b5"
+    },
+    {
+      "configuration": "bits21_echelle_reste",
+      "domain": "u21",
+      "name": "mhgp11_api_supports_route_scale16000",
+      "status": "PASS",
+      "actual_complete_verdict": "supports_route_verdict conforme k=5 n=16000 noeuds=565098 boules=819004 supports=819004 etendues=0 multiples=0 cellules=478947 graines=1530768 fichier=dd524ffd991873eb manifeste=baa658ac05a8eee8 journal=436d1354ae183486 fils=1,4",
+      "golden_matches_profile_counts_journal_workers": true,
+      "floors": {
+        "balls": 819004,
+        "cells": 478947
+      },
+      "compute_peak_witness": {
+        "route": "compute",
+        "tree_peak": 357703470,
+        "order_tree_peak": 257203910,
+        "full_tower_peak": 357703470
+      },
+      "route_tree_peaks": {
+        "order_tree_W1": 257203910,
+        "full_tower_W1": 357703470,
+        "order_tree_W4": 257395910,
+        "full_tower_W4": 357895470
+      },
+      "identities_required_by_source_and_successful_gate": true,
+      "lasttest_block_sha256": "b1feeb35fd8b70abada9e218f3aec35eb816b63fedad820af36d7f165b2e0eb4"
+    },
+    {
+      "configuration": "bits21_echelle_reste",
+      "domain": "u21",
+      "name": "mhgp11_api_supports_route_scale8000",
+      "status": "PASS",
+      "actual_complete_verdict": "supports_route_verdict conforme k=5 n=8000 noeuds=273655 boules=395667 supports=395667 etendues=0 multiples=0 cellules=230825 graines=737362 fichier=9b77614618bbdfc9 manifeste=d61003785c2ff158 journal=a6c3b688a7fe1b4a fils=1,4",
+      "golden_matches_profile_counts_journal_workers": true,
+      "floors": {
+        "balls": 395667,
+        "cells": 230825
+      },
+      "compute_peak_witness": {
+        "route": "compute",
+        "tree_peak": 174225882,
+        "order_tree_peak": 125288834,
+        "full_tower_peak": 174225882
+      },
+      "route_tree_peaks": {
+        "order_tree_W1": 125288834,
+        "full_tower_W1": 174225882,
+        "order_tree_W4": 125384834,
+        "full_tower_W4": 174321882
+      },
+      "identities_required_by_source_and_successful_gate": true,
+      "lasttest_block_sha256": "f7290c59904476279eb5f65f141b1f71c3772b7b4d9328df468676f1bf5501dc"
+    },
+    {
+      "configuration": "bits24_echelle_gros",
+      "domain": "u24",
+      "name": "mhgp11_api_supports_route_lidar_ng01_k5",
+      "status": "PASS",
+      "actual_complete_verdict": "supports_route_verdict conforme k=5 n=35551 noeuds=478265 boules=652958 supports=652959 etendues=81 multiples=1 cellules=369751 graines=1102505 fichier=ac1fd4da1b693572 manifeste=12882c6a35b51bd3 journal=5e36f8ddbd2fb94c fils=1,4",
+      "golden_matches_profile_counts_journal_workers": true,
+      "floors": {
+        "balls": 652958,
+        "cells": 369751
+      },
+      "compute_peak_witness": {
+        "route": "compute",
+        "tree_peak": 328682814,
+        "order_tree_peak": 228640202,
+        "full_tower_peak": 328682814
+      },
+      "route_tree_peaks": {
+        "order_tree_W1": 228640202,
+        "full_tower_W1": 328682814,
+        "order_tree_W4": 229066814,
+        "full_tower_W4": 329109426
+      },
+      "identities_required_by_source_and_successful_gate": true,
+      "lasttest_block_sha256": "91e7d01e0091f58fe379135dfb59b038786f4374efa55d5a4edc6318db0fb9f9"
+    },
+    {
+      "configuration": "bits24_echelle_gros",
+      "domain": "u24",
+      "name": "mhgp11_api_supports_route_lidar_ng02_k5",
+      "status": "PASS",
+      "actual_complete_verdict": "supports_route_verdict conforme k=5 n=45845 noeuds=609376 boules=832386 supports=832394 etendues=354 multiples=8 cellules=471060 graines=1393952 fichier=b66e1a9e116e56c7 manifeste=4963819ee6bcd867 journal=ec87f14da7adff77 fils=1,4",
+      "golden_matches_profile_counts_journal_workers": true,
+      "floors": {
+        "balls": 832386,
+        "cells": 471060
+      },
+      "compute_peak_witness": {
+        "route": "compute",
+        "tree_peak": 405129389,
+        "order_tree_peak": 275916113,
+        "full_tower_peak": 405129389
+      },
+      "route_tree_peaks": {
+        "order_tree_W1": 275916113,
+        "full_tower_W1": 405129389,
+        "order_tree_W4": 276466253,
+        "full_tower_W4": 405679529
+      },
+      "identities_required_by_source_and_successful_gate": true,
+      "lasttest_block_sha256": "fa95d47031942b3cfc557da010d7520ebef0f24949d5d52ec13d5ac393bbfc6d"
+    },
+    {
+      "configuration": "bits24_echelle_gros",
+      "domain": "u24",
+      "name": "mhgp11_api_supports_route_scale32000",
+      "status": "PASS",
+      "actual_complete_verdict": "supports_route_verdict conforme k=5 n=32000 noeuds=1163756 boules=1690045 supports=1690045 etendues=0 multiples=0 cellules=989861 graines=3165977 fichier=1a68904408bcae5f manifeste=54f75f49aceae6b7 journal=c371678559b144d7 fils=1,4",
+      "golden_matches_profile_counts_journal_workers": true,
+      "floors": {
+        "balls": 1690045,
+        "cells": 989861
+      },
+      "compute_peak_witness": {
+        "route": "compute",
+        "tree_peak": 753508284,
+        "order_tree_peak": 547424048,
+        "full_tower_peak": 753508284
+      },
+      "route_tree_peaks": {
+        "order_tree_W1": 547424048,
+        "full_tower_W1": 753508284,
+        "order_tree_W4": 547808048,
+        "full_tower_W4": 753892284
+      },
+      "identities_required_by_source_and_successful_gate": true,
+      "lasttest_block_sha256": "2bc6d40fba3f1fe75918280ebf8c8e3dfd082a9f81cac98ac9bd76630e1bdc15"
+    },
+    {
+      "configuration": "bits24_echelle_reste",
+      "domain": "u24",
+      "name": "mhgp11_api_supports_route_lidar_ng00_k5",
+      "status": "PASS",
+      "actual_complete_verdict": "supports_route_verdict conforme k=5 n=39885 noeuds=576371 boules=789886 supports=789889 etendues=141 multiples=3 cellules=448805 graines=1350288 fichier=4b781f21b6e9fd84 manifeste=0e13ef92eda96e3e journal=c189d5cd3ec3de66 fils=1,4",
+      "golden_matches_profile_counts_journal_workers": true,
+      "floors": {
+        "balls": 789886,
+        "cells": 448805
+      },
+      "compute_peak_witness": {
+        "route": "compute",
+        "tree_peak": 381612812,
+        "order_tree_peak": 263839124,
+        "full_tower_peak": 381612812
+      },
+      "route_tree_peaks": {
+        "order_tree_W1": 263839124,
+        "full_tower_W1": 381612812,
+        "order_tree_W4": 264317744,
+        "full_tower_W4": 382091432
+      },
+      "identities_required_by_source_and_successful_gate": true,
+      "lasttest_block_sha256": "03c79f8cefa0a1fc52aa3779d4363112018b002b3338877606257b0d25be89fa"
+    },
+    {
+      "configuration": "bits24_echelle_reste",
+      "domain": "u24",
+      "name": "mhgp11_api_supports_route_scale16000",
+      "status": "PASS",
+      "actual_complete_verdict": "supports_route_verdict conforme k=5 n=16000 noeuds=565098 boules=819004 supports=819004 etendues=0 multiples=0 cellules=478947 graines=1530768 fichier=1716d15eb3a5afa4 manifeste=39af11215297416d journal=436d1354ae183486 fils=1,4",
+      "golden_matches_profile_counts_journal_workers": true,
+      "floors": {
+        "balls": 819004,
+        "cells": 478947
+      },
+      "compute_peak_witness": {
+        "route": "compute",
+        "tree_peak": 367566854,
+        "order_tree_peak": 267067294,
+        "full_tower_peak": 367566854
+      },
+      "route_tree_peaks": {
+        "order_tree_W1": 267067294,
+        "full_tower_W1": 367566854,
+        "order_tree_W4": 267259294,
+        "full_tower_W4": 367758854
+      },
+      "identities_required_by_source_and_successful_gate": true,
+      "lasttest_block_sha256": "e69f97a55175ae36925ab087e58d8fb604640e35b89eb84d9c69fcc254ac2fce"
+    },
+    {
+      "configuration": "bits24_echelle_reste",
+      "domain": "u24",
+      "name": "mhgp11_api_supports_route_scale8000",
+      "status": "PASS",
+      "actual_complete_verdict": "supports_route_verdict conforme k=5 n=8000 noeuds=273655 boules=395667 supports=395667 etendues=0 multiples=0 cellules=230825 graines=737362 fichier=8346120e7c4d1d69 manifeste=1079d104c5e64543 journal=a6c3b688a7fe1b4a fils=1,4",
+      "golden_matches_profile_counts_journal_workers": true,
+      "floors": {
+        "balls": 395667,
+        "cells": 230825
+      },
+      "compute_peak_witness": {
+        "route": "compute",
+        "tree_peak": 179009778,
+        "order_tree_peak": 130072730,
+        "full_tower_peak": 179009778
+      },
+      "route_tree_peaks": {
+        "order_tree_W1": 130072730,
+        "full_tower_W1": 179009778,
+        "order_tree_W4": 130168730,
+        "full_tower_W4": 179105778
+      },
+      "identities_required_by_source_and_successful_gate": true,
+      "lasttest_block_sha256": "db85296b147204ca3a177ce6e4e72af8ba4574c3aaef0f46b99087fc1759a5a3"
+    },
+    {
+      "configuration": "gcc_release_echelle_gros",
+      "domain": "u18",
+      "name": "mhgp11_api_supports_route_lidar_ng01_k5",
+      "status": "PASS",
+      "actual_complete_verdict": "supports_route_verdict conforme k=5 n=35551 noeuds=478265 boules=652958 supports=652959 etendues=81 multiples=1 cellules=369751 graines=1102505 fichier=b8449cfbc212f782 manifeste=f6b275a818df1d39 journal=5e36f8ddbd2fb94c fils=1,4",
+      "golden_matches_profile_counts_journal_workers": true,
+      "floors": {
+        "balls": 652958,
+        "cells": 369751
+      },
+      "compute_peak_witness": {
+        "route": "compute",
+        "tree_peak": 306093606,
+        "order_tree_peak": 206050994,
+        "full_tower_peak": 306093606
+      },
+      "route_tree_peaks": {
+        "order_tree_W1": 206050994,
+        "full_tower_W1": 306093606,
+        "order_tree_W4": 206477606,
+        "full_tower_W4": 306520218
+      },
+      "identities_required_by_source_and_successful_gate": true,
+      "lasttest_block_sha256": "03f7fdfc15a8f2b6ae308e9c97ad6810b17c3a109e82fdbee286fff93a01d282"
+    },
+    {
+      "configuration": "gcc_release_echelle_gros",
+      "domain": "u18",
+      "name": "mhgp11_api_supports_route_lidar_ng02_k5",
+      "status": "PASS",
+      "actual_complete_verdict": "supports_route_verdict conforme k=5 n=45845 noeuds=609376 boules=832386 supports=832394 etendues=354 multiples=8 cellules=471060 graines=1393952 fichier=a4642008f9145a97 manifeste=247ffdc9a96d2891 journal=ec87f14da7adff77 fils=1,4",
+      "golden_matches_profile_counts_journal_workers": true,
+      "floors": {
+        "balls": 832386,
+        "cells": 471060
+      },
+      "compute_peak_witness": {
+        "route": "compute",
+        "tree_peak": 378739421,
+        "order_tree_peak": 249526145,
+        "full_tower_peak": 378739421
+      },
+      "route_tree_peaks": {
+        "order_tree_W1": 249526145,
+        "full_tower_W1": 378739421,
+        "order_tree_W4": 250076285,
+        "full_tower_W4": 379289561
+      },
+      "identities_required_by_source_and_successful_gate": true,
+      "lasttest_block_sha256": "da04e78be9e078eb46d8070085d24f9307214913ebae58a30ca374579465c816"
+    },
+    {
+      "configuration": "gcc_release_echelle_gros",
+      "domain": "u18",
+      "name": "mhgp11_api_supports_route_scale32000",
+      "status": "PASS",
+      "actual_complete_verdict": "supports_route_verdict conforme k=5 n=32000 noeuds=1163756 boules=1690045 supports=1690045 etendues=0 multiples=0 cellules=989861 graines=3165977 fichier=a91f226656b6cbd3 manifeste=3e29e3f5d1403abd journal=c371678559b144d7 fils=1,4",
+      "golden_matches_profile_counts_journal_workers": true,
+      "floors": {
+        "balls": 1690045,
+        "cells": 989861
+      },
+      "compute_peak_witness": {
+        "route": "compute",
+        "tree_peak": 692644692,
+        "order_tree_peak": 486560456,
+        "full_tower_peak": 692644692
+      },
+      "route_tree_peaks": {
+        "order_tree_W1": 486560456,
+        "full_tower_W1": 692644692,
+        "order_tree_W4": 486944456,
+        "full_tower_W4": 693028692
+      },
+      "identities_required_by_source_and_successful_gate": true,
+      "lasttest_block_sha256": "3be0ea1e08f67a887bac8142ecc83002f568c07eacd877a5acb24c247ec0d6b9"
+    },
+    {
+      "configuration": "gcc_release_echelle_reste",
+      "domain": "u18",
+      "name": "mhgp11_api_supports_route_lidar_ng00_k5",
+      "status": "PASS",
+      "actual_complete_verdict": "supports_route_verdict conforme k=5 n=39885 noeuds=576371 boules=789886 supports=789889 etendues=141 multiples=3 cellules=448805 graines=1350288 fichier=51b941795a2361c7 manifeste=bc8d49e588415eed journal=c189d5cd3ec3de66 fils=1,4",
+      "golden_matches_profile_counts_journal_workers": true,
+      "floors": {
+        "balls": 789886,
+        "cells": 448805
+      },
+      "compute_peak_witness": {
+        "route": "compute",
+        "tree_peak": 355554188,
+        "order_tree_peak": 237780500,
+        "full_tower_peak": 355554188
+      },
+      "route_tree_peaks": {
+        "order_tree_W1": 237780500,
+        "full_tower_W1": 355554188,
+        "order_tree_W4": 238259120,
+        "full_tower_W4": 356032808
+      },
+      "identities_required_by_source_and_successful_gate": true,
+      "lasttest_block_sha256": "d063dbe86bbac9226dc31fa4d9c82b7538a5b2518d477e5b0e8be7a2070f7b65"
+    },
+    {
+      "configuration": "gcc_release_echelle_reste",
+      "domain": "u18",
+      "name": "mhgp11_api_supports_route_scale16000",
+      "status": "PASS",
+      "actual_complete_verdict": "supports_route_verdict conforme k=5 n=16000 noeuds=565098 boules=819004 supports=819004 etendues=0 multiples=0 cellules=478947 graines=1530768 fichier=62e74f1f5df26634 manifeste=dc3a1b98925c658a journal=436d1354ae183486 fils=1,4",
+      "golden_matches_profile_counts_journal_workers": true,
+      "floors": {
+        "balls": 819004,
+        "cells": 478947
+      },
+      "compute_peak_witness": {
+        "route": "compute",
+        "tree_peak": 337976702,
+        "order_tree_peak": 237477142,
+        "full_tower_peak": 337976702
+      },
+      "route_tree_peaks": {
+        "order_tree_W1": 237477142,
+        "full_tower_W1": 337976702,
+        "order_tree_W4": 237669142,
+        "full_tower_W4": 338168702
+      },
+      "identities_required_by_source_and_successful_gate": true,
+      "lasttest_block_sha256": "fca30de6e13e94cd757a0a2751aa33b6bb1493aa3625aa08f1f8da41bb475f54"
+    },
+    {
+      "configuration": "gcc_release_echelle_reste",
+      "domain": "u18",
+      "name": "mhgp11_api_supports_route_scale8000",
+      "status": "PASS",
+      "actual_complete_verdict": "supports_route_verdict conforme k=5 n=8000 noeuds=273655 boules=395667 supports=395667 etendues=0 multiples=0 cellules=230825 graines=737362 fichier=09a1101bc512394e manifeste=e10e6c8d117429e3 journal=a6c3b688a7fe1b4a fils=1,4",
+      "golden_matches_profile_counts_journal_workers": true,
+      "floors": {
+        "balls": 395667,
+        "cells": 230825
+      },
+      "compute_peak_witness": {
+        "route": "compute",
+        "tree_peak": 164658090,
+        "order_tree_peak": 115721042,
+        "full_tower_peak": 164658090
+      },
+      "route_tree_peaks": {
+        "order_tree_W1": 115721042,
+        "full_tower_W1": 164658090,
+        "order_tree_W4": 115817042,
+        "full_tower_W4": 164754090
+      },
+      "identities_required_by_source_and_successful_gate": true,
+      "lasttest_block_sha256": "2a1e6841b3d78a7e48035799bdb69be361919bc302ddd9ddc70739a98f6225c8"
+    },
+    {
+      "configuration": "poison_echelle_gros",
+      "domain": "u21_poison",
+      "name": "mhgp11_api_supports_route_lidar_ng01_k5",
+      "status": "PASS",
+      "actual_complete_verdict": "supports_route_verdict conforme k=5 n=35551 noeuds=478265 boules=652958 supports=652959 etendues=81 multiples=1 cellules=369751 graines=1102505 fichier=ed899fede2bbe761 manifeste=09d1d8c0070ab73a journal=5e36f8ddbd2fb94c fils=1,4",
+      "golden_matches_profile_counts_journal_workers": true,
+      "floors": {
+        "balls": 652958,
+        "cells": 369751
+      },
+      "compute_peak_witness": {
+        "route": "compute",
+        "tree_peak": 321153078,
+        "order_tree_peak": 221110466,
+        "full_tower_peak": 321153078
+      },
+      "route_tree_peaks": {
+        "order_tree_W1": 221110466,
+        "full_tower_W1": 321153078,
+        "order_tree_W4": 221537078,
+        "full_tower_W4": 321579690
+      },
+      "identities_required_by_source_and_successful_gate": true,
+      "lasttest_block_sha256": "21380a3c02bb020ff58ba8f4bb30871af637a2fdd981d064e3e560f9c09a6d40"
+    },
+    {
+      "configuration": "poison_echelle_gros",
+      "domain": "u21_poison",
+      "name": "mhgp11_api_supports_route_lidar_ng02_k5",
+      "status": "PASS",
+      "actual_complete_verdict": "supports_route_verdict conforme k=5 n=45845 noeuds=609376 boules=832386 supports=832394 etendues=354 multiples=8 cellules=471060 graines=1393952 fichier=28532835cc5915f8 manifeste=6b6d1ee970c80839 journal=ec87f14da7adff77 fils=1,4",
+      "golden_matches_profile_counts_journal_workers": true,
+      "floors": {
+        "balls": 832386,
+        "cells": 471060
+      },
+      "compute_peak_witness": {
+        "route": "compute",
+        "tree_peak": 396332733,
+        "order_tree_peak": 267119457,
+        "full_tower_peak": 396332733
+      },
+      "route_tree_peaks": {
+        "order_tree_W1": 267119457,
+        "full_tower_W1": 396332733,
+        "order_tree_W4": 267669597,
+        "full_tower_W4": 396882873
+      },
+      "identities_required_by_source_and_successful_gate": true,
+      "lasttest_block_sha256": "0558a60f8bf6190ee4b12c4aba62e5e821b17cf230f3a12f263616303cf1662d"
+    },
+    {
+      "configuration": "poison_echelle_gros",
+      "domain": "u21_poison",
+      "name": "mhgp11_api_supports_route_scale32000",
+      "status": "PASS",
+      "actual_complete_verdict": "supports_route_verdict conforme k=5 n=32000 noeuds=1163756 boules=1690045 supports=1690045 etendues=0 multiples=0 cellules=989861 graines=3165977 fichier=6543988436d3d582 manifeste=751e5f52d5c1477e journal=c371678559b144d7 fils=1,4",
+      "golden_matches_profile_counts_journal_workers": true,
+      "floors": {
+        "balls": 1690045,
+        "cells": 989861
+      },
+      "compute_peak_witness": {
+        "route": "compute",
+        "tree_peak": 733220420,
+        "order_tree_peak": 527136184,
+        "full_tower_peak": 733220420
+      },
+      "route_tree_peaks": {
+        "order_tree_W1": 527136184,
+        "full_tower_W1": 733220420,
+        "order_tree_W4": 527520184,
+        "full_tower_W4": 733604420
+      },
+      "identities_required_by_source_and_successful_gate": true,
+      "lasttest_block_sha256": "db4938ecb927c7b92fd3e50f59f5a166b8adb568e80e3936c5a91cffa82295f6"
+    },
+    {
+      "configuration": "poison_echelle_reste",
+      "domain": "u21_poison",
+      "name": "mhgp11_api_supports_route_lidar_ng00_k5",
+      "status": "PASS",
+      "actual_complete_verdict": "supports_route_verdict conforme k=5 n=39885 noeuds=576371 boules=789886 supports=789889 etendues=141 multiples=3 cellules=448805 graines=1350288 fichier=830db973140e720d manifeste=7c119d733528e2d0 journal=c189d5cd3ec3de66 fils=1,4",
+      "golden_matches_profile_counts_journal_workers": true,
+      "floors": {
+        "balls": 789886,
+        "cells": 448805
+      },
+      "compute_peak_witness": {
+        "route": "compute",
+        "tree_peak": 372926604,
+        "order_tree_peak": 255152916,
+        "full_tower_peak": 372926604
+      },
+      "route_tree_peaks": {
+        "order_tree_W1": 255152916,
+        "full_tower_W1": 372926604,
+        "order_tree_W4": 255631536,
+        "full_tower_W4": 373405224
+      },
+      "identities_required_by_source_and_successful_gate": true,
+      "lasttest_block_sha256": "e6e3a3efbc84b429e211c243785825e14a4deacf9f7baa21113a2c75b4293042"
+    },
+    {
+      "configuration": "poison_echelle_reste",
+      "domain": "u21_poison",
+      "name": "mhgp11_api_supports_route_scale16000",
+      "status": "PASS",
+      "actual_complete_verdict": "supports_route_verdict conforme k=5 n=16000 noeuds=565098 boules=819004 supports=819004 etendues=0 multiples=0 cellules=478947 graines=1530768 fichier=dd524ffd991873eb manifeste=baa658ac05a8eee8 journal=436d1354ae183486 fils=1,4",
+      "golden_matches_profile_counts_journal_workers": true,
+      "floors": {
+        "balls": 819004,
+        "cells": 478947
+      },
+      "compute_peak_witness": {
+        "route": "compute",
+        "tree_peak": 357703470,
+        "order_tree_peak": 257203910,
+        "full_tower_peak": 357703470
+      },
+      "route_tree_peaks": {
+        "order_tree_W1": 257203910,
+        "full_tower_W1": 357703470,
+        "order_tree_W4": 257395910,
+        "full_tower_W4": 357895470
+      },
+      "identities_required_by_source_and_successful_gate": true,
+      "lasttest_block_sha256": "7acc89ff76577fa1457a2803149ff41a654173494efab658fdc3d5537fb899a5"
+    },
+    {
+      "configuration": "poison_echelle_reste",
+      "domain": "u21_poison",
+      "name": "mhgp11_api_supports_route_scale8000",
+      "status": "PASS",
+      "actual_complete_verdict": "supports_route_verdict conforme k=5 n=8000 noeuds=273655 boules=395667 supports=395667 etendues=0 multiples=0 cellules=230825 graines=737362 fichier=9b77614618bbdfc9 manifeste=d61003785c2ff158 journal=a6c3b688a7fe1b4a fils=1,4",
+      "golden_matches_profile_counts_journal_workers": true,
+      "floors": {
+        "balls": 395667,
+        "cells": 230825
+      },
+      "compute_peak_witness": {
+        "route": "compute",
+        "tree_peak": 174225882,
+        "order_tree_peak": 125288834,
+        "full_tower_peak": 174225882
+      },
+      "route_tree_peaks": {
+        "order_tree_W1": 125288834,
+        "full_tower_W1": 174225882,
+        "order_tree_W4": 125384834,
+        "full_tower_W4": 174321882
+      },
+      "identities_required_by_source_and_successful_gate": true,
+      "lasttest_block_sha256": "3eb3d3269a80c5dcb68f15224df61b2a0c586059cae30c1987e435ee138d9377"
+    }
+  ],
+  "important_findings": [],
+  "verdict": "favorable_24_routes_closed",
+  "scope": {
+    "route_occurrences": 24,
+    "domains": {
+      "u21": 6,
+      "u24": 6,
+      "u18": 6,
+      "u21_poison": 6
+    },
+    "golden_file_manifest_prefixes": 36,
+    "u18_first_G4_pairs_since_prior_capsule": 5,
+    "u24_replayed_pairs": 6,
+    "public_compute_FULL_peak_witnesses": 24,
+    "native_or_cloud_actions_by_auditor": false
+  },
+  "limitations": [
+    "Scope is the 24 supports_route cases, K5, W1/W4, three exact uniform18 sizes and three complete fixed LiDAR inputs; no native input bytes copied.",
+    "File/manifest byte identity and full journal-register identity are enforced by the pinned source and successful code-zero gate, not exposed as separate per-route hashes in measurement JSON.",
+    "Only rounded-prefix golden file/manifest hashes (16 hexadecimal digits) are printed. The gate separately compares complete file/manifest bytes.",
+    "Release and library poison are ordinary domains, not sanitizer qualification; no time-contract conclusion or statistical claim.",
+    "Source correction and these new actual G4 verdicts are kept distinct from historical failed verdicts and from independent mutant/long/points/plat lots."
+  ]
+}

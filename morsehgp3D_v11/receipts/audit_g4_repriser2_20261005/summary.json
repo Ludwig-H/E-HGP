@@ -1,0 +1,951 @@
+{
+  "archive_sha256": "0d122a7fa1e9a1536197a5003456c105abfb5bd977d53bc4be2376379ab69347",
+  "audit_native_or_cloud_runs": 0,
+  "backend": "cpu_reference",
+  "baseline": {
+    "archive_sha256": "42425a0969d728688672785f34f3302b698cf2daea83ca6c62891d6ff9b28631",
+    "configurations": [
+      {
+        "ctest_log_sha256": "47ed3957161e44bef1e0125704c699232f15bce41cfef6d36dabff7e4c02409f",
+        "inventory_sha256": "cc30ac0434ed2b10c78a3bd4ca5c9e64e36c621e7753e45e494d29de78e33353",
+        "missing_tests": [
+          "mhgp11_cli_full_identity_lidar_ng01_k5_opt",
+          "mhgp11_cli_full_identity_lidar_ng02_k5_opt",
+          "mhgp11_cli_supports_lidar_ng00_k5_opt",
+          "mhgp11_cli_supports_lidar_ng01_k5_opt",
+          "mhgp11_cli_supports_lidar_ng02_k5_opt",
+          "mhgp11_cli_supports_scale16000_opt",
+          "mhgp11_cli_supports_scale32000_opt",
+          "mhgp11_cli_supports_scale8000_opt"
+        ],
+        "name": "gcc_release",
+        "result_sha256": "e3b34b4883fc46f64dc5b4f391864cf0787c12c5fd195e89a04189cd6e1d9287"
+      },
+      {
+        "ctest_log_sha256": "dfd7084ba409733eab49e633294fd23a69bdd489228ed693c118805ef3faec4d",
+        "inventory_sha256": "6c36910a3e789c41f8ff5352b5735e978bcb41771576086bf2d7afb2d59df8b7",
+        "missing_tests": [
+          "mhgp11_cli_full_determinism_scale8000_opt",
+          "mhgp11_cli_full_identity_lidar_ng00_k5_opt",
+          "mhgp11_cli_full_identity_lidar_ng01_k5_opt",
+          "mhgp11_cli_full_identity_lidar_ng02_k5_opt",
+          "mhgp11_cli_full_identity_scale32000_opt",
+          "mhgp11_cli_supports_lidar_ng00_k5_opt",
+          "mhgp11_cli_supports_lidar_ng01_k5_opt",
+          "mhgp11_cli_supports_lidar_ng02_k5_opt",
+          "mhgp11_cli_supports_scale16000_opt",
+          "mhgp11_cli_supports_scale32000_opt",
+          "mhgp11_cli_supports_scale8000_opt"
+        ],
+        "name": "bits21",
+        "result_sha256": "93bc19f209df6a6f65173e4025e2e89e319be0de06f5a7586fdd8cd9134281de"
+      },
+      {
+        "ctest_log_sha256": "845ba2f94b113c75efea6de62c9d78173f8e4213f9bf85697345cd4f8f77aede",
+        "inventory_sha256": "6c36910a3e789c41f8ff5352b5735e978bcb41771576086bf2d7afb2d59df8b7",
+        "missing_tests": [
+          "mhgp11_cli_full_determinism_scale8000_opt",
+          "mhgp11_cli_full_identity_lidar_ng00_k5_opt",
+          "mhgp11_cli_full_identity_lidar_ng01_k5_opt",
+          "mhgp11_cli_full_identity_lidar_ng02_k5_opt",
+          "mhgp11_cli_full_identity_scale32000_opt",
+          "mhgp11_cli_supports_lidar_ng00_k5_opt",
+          "mhgp11_cli_supports_lidar_ng01_k5_opt",
+          "mhgp11_cli_supports_lidar_ng02_k5_opt",
+          "mhgp11_cli_supports_scale16000_opt",
+          "mhgp11_cli_supports_scale32000_opt",
+          "mhgp11_cli_supports_scale8000_opt"
+        ],
+        "name": "bits24",
+        "result_sha256": "74ff3f4a05de82fd98553c0e203ce31aee16169499954d4ee4ba0dc872637864"
+      },
+      {
+        "ctest_log_sha256": "7a867fcacf456924fc17628517fb3c3cf73544c465f25dc3d63821f9d61ec53f",
+        "inventory_sha256": "970a70880ab08627a682a17eb9e037630cda83259e84c7944e40ae4b7146d2f7",
+        "missing_tests": [
+          "mhgp11_cli_full_determinism_scale8000_opt",
+          "mhgp11_cli_full_identity_lidar_ng00_k5_opt",
+          "mhgp11_cli_full_identity_lidar_ng01_k5_opt",
+          "mhgp11_cli_full_identity_lidar_ng02_k5_opt",
+          "mhgp11_cli_full_identity_scale32000_opt",
+          "mhgp11_cli_supports_lidar_ng00_k5_opt",
+          "mhgp11_cli_supports_lidar_ng01_k5_opt",
+          "mhgp11_cli_supports_lidar_ng02_k5_opt",
+          "mhgp11_cli_supports_scale16000_opt",
+          "mhgp11_cli_supports_scale32000_opt",
+          "mhgp11_cli_supports_scale8000_opt"
+        ],
+        "name": "poison",
+        "result_sha256": "1e9c3f36ab6747736fcae3bce7ee7aae40b5014e38c1609f36d4be8f383ac825"
+      }
+    ],
+    "receipt_sha256": "2d716c0f0c27d2fe7d56f7c2f38bad4b4d08b00be78a3a20177477698ae49436",
+    "session": "v11.20261005.claudefina2",
+    "source_commit": "38b76701b9b0198fc1c37afe16e1480e638e513c"
+  },
+  "configurations": [
+    {
+      "all_selected_passed": true,
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=18"
+      ],
+      "conforming": true,
+      "coord_bits": 18,
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "scale32000|uniform32000|lidar_ng01|lidar_ng02"
+      ],
+      "ctest_log_sha256": "cbfe5fcdca8b013ff547d5564c23a741018c27949760292bf8a8703c1ca9a1aa",
+      "failed_tests": [],
+      "inventory_count": 52,
+      "inventory_sha256": "b7e578ecc9c2652406c35649c4b9ca774837534b6195e69937049ba7801b20f6",
+      "inventory_unique": true,
+      "junit_counts": {
+        "passed": 52
+      },
+      "junit_sha256": "fe94fe8307f6a7c02cd2d76c37fad88a16fdd0e01c672b148817c7315b529fcb",
+      "junit_state": "concordant",
+      "labels_selected": [
+        "lidar",
+        "scale32000"
+      ],
+      "missing_tests": [],
+      "name": "gcc_release_echelle_gros",
+      "ordinary_profile": "gcc_release",
+      "result_sha256": "563b1fe396e3fa0a3a7969330d02d782509cf8c201e4bf09c3f2b7620028caf9",
+      "status": "ok",
+      "steps": [
+        {
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.765,
+          "status": "ok",
+          "timeout_seconds": 2100.0
+        },
+        {
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 86.14,
+          "status": "ok",
+          "timeout_seconds": 2099.2
+        },
+        {
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 1315.924,
+          "status": "ok",
+          "timeout_seconds": 2013.0
+        }
+      ],
+      "terminal_verdicts_count": 52,
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 52,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 52,
+        "selected": 52
+      }
+    },
+    {
+      "all_selected_passed": true,
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=18"
+      ],
+      "conforming": true,
+      "coord_bits": 18,
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-E",
+        "scale32000|uniform32000|lidar_ng01|lidar_ng02"
+      ],
+      "ctest_log_sha256": "9efd101fa5e5bf6850285acd3f7ce9ca8e55a2700076f4315f7ff1027e758675",
+      "failed_tests": [],
+      "inventory_count": 66,
+      "inventory_sha256": "7fffbd22787c72ee7c76e0b489cd09b3e57992dba434f867d844e94ba2af03e8",
+      "inventory_unique": true,
+      "junit_counts": {
+        "passed": 66
+      },
+      "junit_sha256": "45eb423834944b8910b73db5faf28c56d500953d30a10e4b33fe850c147167ba",
+      "junit_state": "concordant",
+      "labels_selected": [
+        "fast",
+        "lidar",
+        "scale16000",
+        "scale32000",
+        "scale8000"
+      ],
+      "missing_tests": [],
+      "name": "gcc_release_echelle_reste",
+      "ordinary_profile": "gcc_release",
+      "result_sha256": "88942783e5944e0805901bed3c39ef9780faed4b9583c66eaf7ad98d6339cd03",
+      "status": "ok",
+      "steps": [
+        {
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.766,
+          "status": "ok",
+          "timeout_seconds": 2100.0
+        },
+        {
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 84.84,
+          "status": "ok",
+          "timeout_seconds": 2099.2
+        },
+        {
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 1033.614,
+          "status": "ok",
+          "timeout_seconds": 2014.3
+        }
+      ],
+      "terminal_verdicts_count": 66,
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 66,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 66,
+        "selected": 66
+      }
+    },
+    {
+      "all_selected_passed": true,
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "conforming": true,
+      "coord_bits": 21,
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "scale32000|uniform32000|lidar_ng01|lidar_ng02",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "ctest_log_sha256": "80bb82ec32af271d2d1beff2bedff9889fed4a21dc396a9be4be0d574a8f662f",
+      "failed_tests": [],
+      "inventory_count": 52,
+      "inventory_sha256": "b7e578ecc9c2652406c35649c4b9ca774837534b6195e69937049ba7801b20f6",
+      "inventory_unique": true,
+      "junit_counts": {
+        "passed": 52
+      },
+      "junit_sha256": "17a21b5c0b0cdaf4f5dd0a7da8e0d49b491fa74cb2c02f57581f663eb9718607",
+      "junit_state": "concordant",
+      "labels_selected": [
+        "lidar",
+        "scale32000"
+      ],
+      "missing_tests": [],
+      "name": "bits21_echelle_gros",
+      "ordinary_profile": "bits21",
+      "result_sha256": "675271180e8c014c9ac8df8e0910dab7eb05da2cfae38c754505641b6b456943",
+      "status": "ok",
+      "steps": [
+        {
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.765,
+          "status": "ok",
+          "timeout_seconds": 2100.0
+        },
+        {
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 84.988,
+          "status": "ok",
+          "timeout_seconds": 2099.2
+        },
+        {
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 1351.923,
+          "status": "ok",
+          "timeout_seconds": 2014.2
+        }
+      ],
+      "terminal_verdicts_count": 52,
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 52,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 52,
+        "selected": 52
+      }
+    },
+    {
+      "all_selected_passed": true,
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "conforming": true,
+      "coord_bits": 21,
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-E",
+        "^mhgp11_reference_|scale32000|uniform32000|lidar_ng01|lidar_ng02"
+      ],
+      "ctest_log_sha256": "3a715ffa3abdd1236e48f5ccb4f4c6bb3ea330b1e8e1066a9f6e9735bed91415",
+      "failed_tests": [],
+      "inventory_count": 66,
+      "inventory_sha256": "7fffbd22787c72ee7c76e0b489cd09b3e57992dba434f867d844e94ba2af03e8",
+      "inventory_unique": true,
+      "junit_counts": {
+        "passed": 66
+      },
+      "junit_sha256": "a75da9ff13d637476b6dfe35c4eda7620f5fc9b01c37032b48a5e33171e7a39b",
+      "junit_state": "concordant",
+      "labels_selected": [
+        "fast",
+        "lidar",
+        "scale16000",
+        "scale32000",
+        "scale8000"
+      ],
+      "missing_tests": [],
+      "name": "bits21_echelle_reste",
+      "ordinary_profile": "bits21",
+      "result_sha256": "fa43e1e67988432b258a072bedea8b2ed62565d7ff80d9b2ce3bc8672138db56",
+      "status": "ok",
+      "steps": [
+        {
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.765,
+          "status": "ok",
+          "timeout_seconds": 2100.0
+        },
+        {
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 84.137,
+          "status": "ok",
+          "timeout_seconds": 2099.2
+        },
+        {
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 1060.277,
+          "status": "ok",
+          "timeout_seconds": 2015.0
+        }
+      ],
+      "terminal_verdicts_count": 66,
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 66,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 66,
+        "selected": 66
+      }
+    },
+    {
+      "all_selected_passed": true,
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "conforming": true,
+      "coord_bits": 24,
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "scale32000|uniform32000|lidar_ng01|lidar_ng02",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "ctest_log_sha256": "fd8061b64919272a7a01312bb3fa5ddcc9d41156b8e526e42bcdc75945a0510b",
+      "failed_tests": [],
+      "inventory_count": 52,
+      "inventory_sha256": "b7e578ecc9c2652406c35649c4b9ca774837534b6195e69937049ba7801b20f6",
+      "inventory_unique": true,
+      "junit_counts": {
+        "passed": 52
+      },
+      "junit_sha256": "8313640609897e8775694943820fd53e6723bc06eebbd2c663fe30d9b1148cdd",
+      "junit_state": "concordant",
+      "labels_selected": [
+        "lidar",
+        "scale32000"
+      ],
+      "missing_tests": [],
+      "name": "bits24_echelle_gros",
+      "ordinary_profile": "bits24",
+      "result_sha256": "90c04936450c22924a33c0ee5d66bd49458575d9e7df96de658831b4000bc4c1",
+      "status": "ok",
+      "steps": [
+        {
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.764,
+          "status": "ok",
+          "timeout_seconds": 2100.0
+        },
+        {
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 84.739,
+          "status": "ok",
+          "timeout_seconds": 2099.2
+        },
+        {
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 1369.142,
+          "status": "ok",
+          "timeout_seconds": 2014.4
+        }
+      ],
+      "terminal_verdicts_count": 52,
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 52,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 52,
+        "selected": 52
+      }
+    },
+    {
+      "all_selected_passed": true,
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "conforming": true,
+      "coord_bits": 24,
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-E",
+        "^mhgp11_reference_|scale32000|uniform32000|lidar_ng01|lidar_ng02"
+      ],
+      "ctest_log_sha256": "e81d5d47f4b71799fb8943cb425c64ee245283478fc5609c06d3b4dfbe67517a",
+      "failed_tests": [],
+      "inventory_count": 66,
+      "inventory_sha256": "7fffbd22787c72ee7c76e0b489cd09b3e57992dba434f867d844e94ba2af03e8",
+      "inventory_unique": true,
+      "junit_counts": {
+        "passed": 66
+      },
+      "junit_sha256": "7aa0d6e4686d7b34d2b847276427bfad044cb51bfb2a97c58bb63428d0f728aa",
+      "junit_state": "concordant",
+      "labels_selected": [
+        "fast",
+        "lidar",
+        "scale16000",
+        "scale32000",
+        "scale8000"
+      ],
+      "missing_tests": [],
+      "name": "bits24_echelle_reste",
+      "ordinary_profile": "bits24",
+      "result_sha256": "1990e5a9e7321ab058e54967d56ca2aa063e116c09a0514e1a0499c4b12fa0e5",
+      "status": "ok",
+      "steps": [
+        {
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.765,
+          "status": "ok",
+          "timeout_seconds": 2100.0
+        },
+        {
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 85.437,
+          "status": "ok",
+          "timeout_seconds": 2099.2
+        },
+        {
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.032,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 1075.818,
+          "status": "ok",
+          "timeout_seconds": 2013.7
+        }
+      ],
+      "terminal_verdicts_count": 66,
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 66,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 66,
+        "selected": 66
+      }
+    },
+    {
+      "all_selected_passed": true,
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_POISON=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "conforming": true,
+      "coord_bits": 21,
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "scale32000|uniform32000|lidar_ng01|lidar_ng02",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "ctest_log_sha256": "1ce7467d931dd57d75f28d2993e2b1f5f1cfe6bf0d75234d37c1499991ec6d5f",
+      "failed_tests": [],
+      "inventory_count": 52,
+      "inventory_sha256": "b7e578ecc9c2652406c35649c4b9ca774837534b6195e69937049ba7801b20f6",
+      "inventory_unique": true,
+      "junit_counts": {
+        "passed": 52
+      },
+      "junit_sha256": "71d665e92ce0b11361e9062b08b326a6ab05fe25bcd0ced5ddd4e04d4565b327",
+      "junit_state": "concordant",
+      "labels_selected": [
+        "lidar",
+        "scale32000"
+      ],
+      "missing_tests": [],
+      "name": "poison_echelle_gros",
+      "ordinary_profile": "poison",
+      "result_sha256": "9e71e6994f59fa858dca9f74e52ddb770a8acf4b437da1f604fbc34aa961d4ae",
+      "status": "ok",
+      "steps": [
+        {
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.764,
+          "status": "ok",
+          "timeout_seconds": 2100.0
+        },
+        {
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 84.836,
+          "status": "ok",
+          "timeout_seconds": 2099.2
+        },
+        {
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.032,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 1369.681,
+          "status": "ok",
+          "timeout_seconds": 2014.3
+        }
+      ],
+      "terminal_verdicts_count": 52,
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 52,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 52,
+        "selected": 52
+      }
+    },
+    {
+      "all_selected_passed": true,
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_POISON=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "conforming": true,
+      "coord_bits": 21,
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-E",
+        "^mhgp11_reference_|scale32000|uniform32000|lidar_ng01|lidar_ng02"
+      ],
+      "ctest_log_sha256": "eaa5ca92ef2667f9dce4273958307c3e9fafbc092926d5ec36613ffe4ac0f404",
+      "failed_tests": [],
+      "inventory_count": 66,
+      "inventory_sha256": "7fffbd22787c72ee7c76e0b489cd09b3e57992dba434f867d844e94ba2af03e8",
+      "inventory_unique": true,
+      "junit_counts": {
+        "passed": 66
+      },
+      "junit_sha256": "2044e216af24452ae08a5504db4b0d1cbc95de4a89dfd824a7bce587b3e6dfe4",
+      "junit_state": "concordant",
+      "labels_selected": [
+        "fast",
+        "lidar",
+        "scale16000",
+        "scale32000",
+        "scale8000"
+      ],
+      "missing_tests": [],
+      "name": "poison_echelle_reste",
+      "ordinary_profile": "poison",
+      "result_sha256": "4a6012c806422519de1d237cf086f4e9756c0841559daaf17676b3d44a386602",
+      "status": "ok",
+      "steps": [
+        {
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.764,
+          "status": "ok",
+          "timeout_seconds": 2100.0
+        },
+        {
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 84.521,
+          "status": "ok",
+          "timeout_seconds": 2099.2
+        },
+        {
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 1076.702,
+          "status": "ok",
+          "timeout_seconds": 2014.6
+        }
+      ],
+      "terminal_verdicts_count": 66,
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 66,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 66,
+        "selected": 66
+      }
+    }
+  ],
+  "coverage": {
+    "all_selected_have_terminal_pass": true,
+    "historical_missing_all_passed": true,
+    "historical_missing_completed_passed": 41,
+    "historical_missing_occurrences": 41,
+    "inventories_unique": true,
+    "profile_lots_disjoint": true,
+    "profile_union_inventories_identical": true,
+    "profiles": [
+      {
+        "coord_bits": 18,
+        "disjoint_lots": true,
+        "lots": [
+          "gcc_release_echelle_gros",
+          "gcc_release_echelle_reste"
+        ],
+        "old_missing_all_passed": true,
+        "old_missing_count": 8,
+        "old_missing_verdicts": {
+          "mhgp11_cli_full_identity_lidar_ng01_k5_opt": "Passed",
+          "mhgp11_cli_full_identity_lidar_ng02_k5_opt": "Passed",
+          "mhgp11_cli_supports_lidar_ng00_k5_opt": "Passed",
+          "mhgp11_cli_supports_lidar_ng01_k5_opt": "Passed",
+          "mhgp11_cli_supports_lidar_ng02_k5_opt": "Passed",
+          "mhgp11_cli_supports_scale16000_opt": "Passed",
+          "mhgp11_cli_supports_scale32000_opt": "Passed",
+          "mhgp11_cli_supports_scale8000_opt": "Passed"
+        },
+        "profile": "gcc_release",
+        "supports_route_verdicts": {
+          "mhgp11_api_supports_route_lidar_ng00_k5": "Passed",
+          "mhgp11_api_supports_route_lidar_ng01_k5": "Passed",
+          "mhgp11_api_supports_route_lidar_ng02_k5": "Passed",
+          "mhgp11_api_supports_route_scale16000": "Passed",
+          "mhgp11_api_supports_route_scale32000": "Passed",
+          "mhgp11_api_supports_route_scale8000": "Passed"
+        },
+        "supports_routes_all_passed": true,
+        "union_inventory_count": 118,
+        "union_names_sha256": "8f004e08b7daeacc692e7ac28440f2e4e82a27b621b9dbb8913b3f0eeca403b9"
+      },
+      {
+        "coord_bits": 21,
+        "disjoint_lots": true,
+        "lots": [
+          "bits21_echelle_gros",
+          "bits21_echelle_reste"
+        ],
+        "old_missing_all_passed": true,
+        "old_missing_count": 11,
+        "old_missing_verdicts": {
+          "mhgp11_cli_full_determinism_scale8000_opt": "Passed",
+          "mhgp11_cli_full_identity_lidar_ng00_k5_opt": "Passed",
+          "mhgp11_cli_full_identity_lidar_ng01_k5_opt": "Passed",
+          "mhgp11_cli_full_identity_lidar_ng02_k5_opt": "Passed",
+          "mhgp11_cli_full_identity_scale32000_opt": "Passed",
+          "mhgp11_cli_supports_lidar_ng00_k5_opt": "Passed",
+          "mhgp11_cli_supports_lidar_ng01_k5_opt": "Passed",
+          "mhgp11_cli_supports_lidar_ng02_k5_opt": "Passed",
+          "mhgp11_cli_supports_scale16000_opt": "Passed",
+          "mhgp11_cli_supports_scale32000_opt": "Passed",
+          "mhgp11_cli_supports_scale8000_opt": "Passed"
+        },
+        "profile": "bits21",
+        "supports_route_verdicts": {
+          "mhgp11_api_supports_route_lidar_ng00_k5": "Passed",
+          "mhgp11_api_supports_route_lidar_ng01_k5": "Passed",
+          "mhgp11_api_supports_route_lidar_ng02_k5": "Passed",
+          "mhgp11_api_supports_route_scale16000": "Passed",
+          "mhgp11_api_supports_route_scale32000": "Passed",
+          "mhgp11_api_supports_route_scale8000": "Passed"
+        },
+        "supports_routes_all_passed": true,
+        "union_inventory_count": 118,
+        "union_names_sha256": "8f004e08b7daeacc692e7ac28440f2e4e82a27b621b9dbb8913b3f0eeca403b9"
+      },
+      {
+        "coord_bits": 24,
+        "disjoint_lots": true,
+        "lots": [
+          "bits24_echelle_gros",
+          "bits24_echelle_reste"
+        ],
+        "old_missing_all_passed": true,
+        "old_missing_count": 11,
+        "old_missing_verdicts": {
+          "mhgp11_cli_full_determinism_scale8000_opt": "Passed",
+          "mhgp11_cli_full_identity_lidar_ng00_k5_opt": "Passed",
+          "mhgp11_cli_full_identity_lidar_ng01_k5_opt": "Passed",
+          "mhgp11_cli_full_identity_lidar_ng02_k5_opt": "Passed",
+          "mhgp11_cli_full_identity_scale32000_opt": "Passed",
+          "mhgp11_cli_supports_lidar_ng00_k5_opt": "Passed",
+          "mhgp11_cli_supports_lidar_ng01_k5_opt": "Passed",
+          "mhgp11_cli_supports_lidar_ng02_k5_opt": "Passed",
+          "mhgp11_cli_supports_scale16000_opt": "Passed",
+          "mhgp11_cli_supports_scale32000_opt": "Passed",
+          "mhgp11_cli_supports_scale8000_opt": "Passed"
+        },
+        "profile": "bits24",
+        "supports_route_verdicts": {
+          "mhgp11_api_supports_route_lidar_ng00_k5": "Passed",
+          "mhgp11_api_supports_route_lidar_ng01_k5": "Passed",
+          "mhgp11_api_supports_route_lidar_ng02_k5": "Passed",
+          "mhgp11_api_supports_route_scale16000": "Passed",
+          "mhgp11_api_supports_route_scale32000": "Passed",
+          "mhgp11_api_supports_route_scale8000": "Passed"
+        },
+        "supports_routes_all_passed": true,
+        "union_inventory_count": 118,
+        "union_names_sha256": "8f004e08b7daeacc692e7ac28440f2e4e82a27b621b9dbb8913b3f0eeca403b9"
+      },
+      {
+        "coord_bits": 21,
+        "disjoint_lots": true,
+        "lots": [
+          "poison_echelle_gros",
+          "poison_echelle_reste"
+        ],
+        "old_missing_all_passed": true,
+        "old_missing_count": 11,
+        "old_missing_verdicts": {
+          "mhgp11_cli_full_determinism_scale8000_opt": "Passed",
+          "mhgp11_cli_full_identity_lidar_ng00_k5_opt": "Passed",
+          "mhgp11_cli_full_identity_lidar_ng01_k5_opt": "Passed",
+          "mhgp11_cli_full_identity_lidar_ng02_k5_opt": "Passed",
+          "mhgp11_cli_full_identity_scale32000_opt": "Passed",
+          "mhgp11_cli_supports_lidar_ng00_k5_opt": "Passed",
+          "mhgp11_cli_supports_lidar_ng01_k5_opt": "Passed",
+          "mhgp11_cli_supports_lidar_ng02_k5_opt": "Passed",
+          "mhgp11_cli_supports_scale16000_opt": "Passed",
+          "mhgp11_cli_supports_scale32000_opt": "Passed",
+          "mhgp11_cli_supports_scale8000_opt": "Passed"
+        },
+        "profile": "poison",
+        "supports_route_verdicts": {
+          "mhgp11_api_supports_route_lidar_ng00_k5": "Passed",
+          "mhgp11_api_supports_route_lidar_ng01_k5": "Passed",
+          "mhgp11_api_supports_route_lidar_ng02_k5": "Passed",
+          "mhgp11_api_supports_route_scale16000": "Passed",
+          "mhgp11_api_supports_route_scale32000": "Passed",
+          "mhgp11_api_supports_route_scale8000": "Passed"
+        },
+        "supports_routes_all_passed": true,
+        "union_inventory_count": 118,
+        "union_names_sha256": "8f004e08b7daeacc692e7ac28440f2e4e82a27b621b9dbb8913b3f0eeca403b9"
+      }
+    ],
+    "selected_total": 472,
+    "supports_route_completed_passed": 24,
+    "supports_route_occurrences": 24,
+    "supports_routes_all_passed": true,
+    "u18_u24_repaired_routes_passed": 12
+  },
+  "data_manifest_sha256": "826643041e3336c1f0582e687a6c47595a3926e7a8f0541232282a9f7b9a6095",
+  "data_verified_remote": true,
+  "delivered_data_names": [
+    "lidar_ng00.ids.u32le",
+    "lidar_ng00.u32le",
+    "lidar_ng01.ids.u32le",
+    "lidar_ng01.u32le",
+    "lidar_ng02.ids.u32le",
+    "lidar_ng02.u32le",
+    "manifest.json",
+    "uniform_u18_n16000.ids.u32le",
+    "uniform_u18_n16000.u32le",
+    "uniform_u18_n32000.ids.u32le",
+    "uniform_u18_n32000.u32le",
+    "uniform_u18_n8000.ids.u32le",
+    "uniform_u18_n8000.u32le"
+  ],
+  "done": "0",
+  "global_qualification_complete": false,
+  "limits": [
+    "Reprise ordinaire echelle/LiDAR des profils u18, u21, u24 et poison au pin 98a009550 ; les profils restent distincts.",
+    "Les 41 absences historiques sont comparees nominativement aux inventaires et journaux de fina2 puis aux verdicts R2, sans transfert des sanitizers.",
+    "Les 24 routes API comptent six noms dans chacun des quatre profils ordinaires ; les douze anciennement rouges u18/u24 sont identifiees separement par profil.",
+    "R3 mutants et R4 ASan/UBSan gardent leurs propres resultats ; aucun transfert ni anticipation.",
+    "Rejeu dependant des archives locales R2 et fina2 et des commits Git ; aucun journal brut, binaire natif ou octet LiDAR copie."
+  ],
+  "matrix": {
+    "budget_seconds": 2100,
+    "complete": true,
+    "conforming": true,
+    "ended_utc": "2026-10-06T00:12:33Z",
+    "exit_code": 0,
+    "requested": [
+      "gcc_release_echelle_gros",
+      "gcc_release_echelle_reste",
+      "bits21_echelle_gros",
+      "bits21_echelle_reste",
+      "bits24_echelle_gros",
+      "bits24_echelle_reste",
+      "poison_echelle_gros",
+      "poison_echelle_reste"
+    ],
+    "started_utc": "2026-10-05T23:48:18Z",
+    "statuses": {
+      "bits21_echelle_gros": "ok",
+      "bits21_echelle_reste": "ok",
+      "bits24_echelle_gros": "ok",
+      "bits24_echelle_reste": "ok",
+      "gcc_release_echelle_gros": "ok",
+      "gcc_release_echelle_reste": "ok",
+      "poison_echelle_gros": "ok",
+      "poison_echelle_reste": "ok"
+    },
+    "summary_sha256": "f3bcda36ea487ec8131c70983bddf9c55a6739845a69363b128c2d8dab5ad01f",
+    "thread_budget": 48
+  },
+  "ordinary_scale_scope_conforming": true,
+  "package_sha256": "59b08d707c47914c62b52fd810506491fdfdad11572ca0568916ecd760738023",
+  "phase": "exploration_v11_hors_registre",
+  "plan_sha256": "d9360f328013d05c2c36afb94f36a98f9a6c20d6b1a85123d8d80cec77fa1655",
+  "profile": "quantized_u21_input_only",
+  "public_status": "not_claimed",
+  "receipt_sha256": "621bca3ab0281e6f745fb993c7c33445c5d77e9744d2aa67b6ddf38f1a3c714f",
+  "receipt_status": "completed",
+  "schema": "ehgp.v11.audit.repriser2_scale_inventory_read.v1",
+  "session": "v11.20261005.clauderepriser2",
+  "source_commit": "98a00955083d483306c4f92b9031e382e81b0e59",
+  "source_matrix_sha256": "26b8ce49043ad7bb7d3faea9afb76b64df7d39a168f0273a36f3bddf9867b574",
+  "source_tree_verification": {
+    "extra_or_missing_files": false,
+    "files_verified": 635,
+    "includes_docs_or_receipts": false,
+    "manifest_sha256": "1e16b170fb29452473a90311b08bd4d2631bf7be196378e9dd89278695df3019",
+    "method": "git_archive_selectif_egalite_exacte",
+    "paths": [
+      "gcp-migration/v11_worker.sh",
+      "morsehgp3D_v11/CMakeLists.txt",
+      "morsehgp3D_v11/src",
+      "morsehgp3D_v11/tests",
+      "morsehgp3D_v11/cmake",
+      "morsehgp3D_v11/bench",
+      "morsehgp3D_v11/reference",
+      "morsehgp3D_v11/tools",
+      "morsehgp3D_v11/cli"
+    ],
+    "source_commit": "98a00955083d483306c4f92b9031e382e81b0e59"
+  },
+  "state": "closed",
+  "targeted_closure_verified": true,
+  "worker_exit_code": 0
+}
