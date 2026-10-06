@@ -1,0 +1,33 @@
+{
+  "cli_function_ast_equal": {
+    "compare": true,
+    "spanning": true
+  },
+  "cli_proposal_sha256": "3869ac56e66f8998c6438e42ff34151076e72f357779f5b243372b77813f9655",
+  "cli_sha256": "0556d64418531baba3d34701fc12e8a5886e761950147adda6dfb5fe7bf003cf",
+  "cloud_actions": 0,
+  "j2_sources_unchanged_since_34a8": {
+    "src/catalogue/leaf.cpp": true,
+    "src/catalogue/leaf_batch.hpp": true,
+    "src/catalogue/leaf_device.hpp": true
+  },
+  "native_runs": 0,
+  "pin": "d8c015dbd5059fc06d18c0991923b51c26b18561",
+  "population_sha256": "abd4a1f9161dbb22362f7fd354e702481874da780ed11b400489f9e6a7c0dd6f",
+  "population_source_unchanged_since_audit": true,
+  "u18_all_twelve_references_replaced": true,
+  "u18_values": {
+    "ng00_file": "896f1f6525a1eb93",
+    "ng00_manifest": "04d492bcef0feff3",
+    "ng01_file": "38d871338e96d5d0",
+    "ng01_manifest": "3efef42a08403f82",
+    "ng02_file": "1f4d757a5583a3a8",
+    "ng02_manifest": "60db021494aecaa5",
+    "scale16000_file": "55e40ba88d9a77b3",
+    "scale16000_manifest": "5dbefcf354307401",
+    "scale32000_file": "dfb71794f37cd458",
+    "scale32000_manifest": "b96f933eb1f81e7f",
+    "scale8000_file": "07c0568b144b275b",
+    "scale8000_manifest": "3a78e021d630b1e6"
+  }
+}

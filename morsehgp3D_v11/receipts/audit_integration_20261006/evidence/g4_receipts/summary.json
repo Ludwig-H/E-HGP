@@ -1,0 +1,272 @@
+{
+  "cloud_actions": 0,
+  "j2memo_totals": {
+    "constructed_full_passes": 168,
+    "intermediate_passes_without_dump_or_ledger": 108,
+    "lidar_processes": 60,
+    "retained_canonical_hashes": 60
+  },
+  "limits": [
+    "Canonical hashes, no raw FULL artifacts retained or reread.",
+    "Complete catalog work equality is the pinned judge result, not individual native work lines archived.",
+    "Final Kruskal15 applies only to074/u21/normal Python; J2memo14 was the earlier role filter.",
+    "No100ms FULL or points/flat output contract acquired; executor gain is scoped to the declared LiDAR calls.",
+    "Receipt qualification is not transferred to later chrono instrumentation or current origin/main source changes."
+  ],
+  "native_runs": 0,
+  "publication_commit": "d8c015dbd5059fc06d18c0991923b51c26b18561",
+  "schema": "audit_g4_kruskal_j2memo_metadata_v1",
+  "sessions": [
+    {
+      "archive_sha256": "7a75217d2b7105c26a5f2e8626a36f4110c7287e06c4801f76d7208d05e9c47f",
+      "closing_generation": "2026-10-06T05:46:32.748-07:00",
+      "commands": [
+        {
+          "exit_code": 0,
+          "failed": 0,
+          "metadata_sha256": "77d56d17393ce865178c7d6ade08514bc1a65f46ad2342583be9f0c4df035bf0",
+          "missing": 0,
+          "name": "supports_kruskal",
+          "passed": 15,
+          "published_excerpt_sha256": "c8cbc6954db4d9db87980ddc44f45f01a7347961f86e28ee9fb89a26d1aa6a86",
+          "selected": 15,
+          "status": "ok",
+          "stdout_sha256": "4cfaca28231865185c0a23deca0f24bd1099706d50eb48636e593e374666bb0f",
+          "tests": [
+            "mhgp11_api_supports_route_lidar_ng00_k5",
+            "mhgp11_api_supports_route_lidar_ng01_k5",
+            "mhgp11_api_supports_route_lidar_ng02_k5",
+            "mhgp11_api_supports_route_oracle",
+            "mhgp11_api_supports_route_scale16000",
+            "mhgp11_api_supports_route_scale32000",
+            "mhgp11_api_supports_route_scale8000",
+            "mhgp11_cli_supports_lidar_ng00_k5",
+            "mhgp11_cli_supports_lidar_ng01_k5",
+            "mhgp11_cli_supports_lidar_ng02_k5",
+            "mhgp11_cli_supports_oracle",
+            "mhgp11_cli_supports_scale16000",
+            "mhgp11_cli_supports_scale32000",
+            "mhgp11_cli_supports_scale8000",
+            "mhgp11_cli_supports_spanning_reader"
+          ]
+        }
+      ],
+      "configure_options": [
+        "-DCMAKE_BUILD_TYPE=Release"
+      ],
+      "done": 0,
+      "exclusions": [
+        "Python _opt",
+        "mutants",
+        "product ASan/UBSan",
+        "product TSan",
+        "profiles u18/u24"
+      ],
+      "gpu_reports": [],
+      "label": "kruskal",
+      "numeric_profile_evidence": "Pinned CMake default21, no configure override; normal support oracle/reader gates passed.",
+      "package_sha256": "b44311ef5caee57318576a5de15913a1d3cdf6160938e5b1a7af09397be5caee",
+      "plan_sha256": "061a673585cd38c07e73ee7f95470a72e4b2773edfdc15ec804b25eed4f2e8fa",
+      "profile": "Release u21",
+      "published_files_verified": 5,
+      "receipt_sha256": "5b4b08b1471164ba7ee6d62945dcce2984ab61823bf01dcbb1d2ee3924143557",
+      "result_manifest": {
+        "exact_inventory": true,
+        "files": 46,
+        "sha256": "9ce5fefe0bde022670c93a4c23f702123d934e87284a2c242a43ddab2346cc2e"
+      },
+      "session": "v11.20261006.claudesupkr",
+      "source_compare": {},
+      "source_equality": {
+        "extra_or_missing_files": false,
+        "files_verified": 636,
+        "includes_docs_or_receipts": false,
+        "manifest_sha256": "0d46711a9449301b2ff379109a8b19743e8da02f5054beddc5e37854ea471493",
+        "method": "git_archive_selectif_egalite_exacte",
+        "paths": [
+          "gcp-migration/v11_worker.sh",
+          "morsehgp3D_v11/CMakeLists.txt",
+          "morsehgp3D_v11/src",
+          "morsehgp3D_v11/tests",
+          "morsehgp3D_v11/cmake",
+          "morsehgp3D_v11/bench",
+          "morsehgp3D_v11/reference",
+          "morsehgp3D_v11/tools",
+          "morsehgp3D_v11/cli"
+        ],
+        "source_commit": "07428324eaa5cbf26446362bceadd77722c1a5b7"
+      },
+      "source_pin": "07428324eaa5cbf26446362bceadd77722c1a5b7",
+      "status": "completed",
+      "stop_utc": "2026-10-06T12:57:30.806000+00:00",
+      "supports_scope": "Kruskal SPv2 final source",
+      "targeted_stop_certified": true,
+      "worker_exit_code": 0
+    },
+    {
+      "archive_sha256": "104ecc3791add53276ffa918f16c7fef98fda8f5cf2f49e9f7a003e0dd4401f2",
+      "closing_generation": "2026-10-06T04:59:27.912-07:00",
+      "commands": [
+        {
+          "exit_code": 0,
+          "kind": "gpu_ab",
+          "metadata_sha256": "d36ddd6da47cd604de84cdc46eb7a9277d60d57ec82ebca9a457e7f826a00c36",
+          "name": "gpu_k5",
+          "report_sha256": "d217c03bfa43c7df8655dfc298634dd7ea6d25cd2276333b2436e549a35ceb05",
+          "status": "ok"
+        },
+        {
+          "exit_code": 0,
+          "kind": "gpu_ab",
+          "metadata_sha256": "dee60c35ba5be28fee04b932ae775f01fb27c0c2c64e2ae7f23b6327d051f4da",
+          "name": "gpu_k10",
+          "report_sha256": "07d2e25a7eac011eca24eed8600629c83bbce2a5b44deaf92965a0abd24e7d01",
+          "status": "ok"
+        },
+        {
+          "exit_code": 0,
+          "failed": 0,
+          "metadata_sha256": "cb24129b957db42b71badf03ee6b162eed22ec280541ab57f33c523f48177ef3",
+          "missing": 0,
+          "name": "supports_v2",
+          "passed": 14,
+          "published_excerpt_sha256": "a26e7d0b0ff1a0921e7f8a034ba7ce4c556dbcbdf9305a6176f63e6307884314",
+          "selected": 14,
+          "status": "ok",
+          "stdout_sha256": "51928017f7b6ca3b02a4a74d8e00f84e32e2e0147a1fbcace89c0d3ad945aed3",
+          "tests": [
+            "mhgp11_api_supports_route_lidar_ng00_k5",
+            "mhgp11_api_supports_route_lidar_ng01_k5",
+            "mhgp11_api_supports_route_lidar_ng02_k5",
+            "mhgp11_api_supports_route_oracle",
+            "mhgp11_api_supports_route_scale16000",
+            "mhgp11_api_supports_route_scale32000",
+            "mhgp11_api_supports_route_scale8000",
+            "mhgp11_cli_supports_lidar_ng00_k5",
+            "mhgp11_cli_supports_lidar_ng01_k5",
+            "mhgp11_cli_supports_lidar_ng02_k5",
+            "mhgp11_cli_supports_oracle",
+            "mhgp11_cli_supports_scale16000",
+            "mhgp11_cli_supports_scale32000",
+            "mhgp11_cli_supports_scale8000"
+          ]
+        }
+      ],
+      "configure_options": [
+        "-DCMAKE_BUILD_TYPE=Release"
+      ],
+      "done": 0,
+      "exclusions": [
+        "Python _opt",
+        "mutants",
+        "product ASan/UBSan",
+        "product TSan",
+        "profiles u18/u24"
+      ],
+      "gpu_reports": [
+        {
+          "bench_sha256": "cf7cb61750ca12340bc84d0356ba63ea7c01a780be608817fe3b9f220dae4a1d",
+          "canonical": {
+            "lidar_ng00": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+            "lidar_ng01": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+            "lidar_ng02": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207"
+          },
+          "cold_processes": 30,
+          "constructed_full_passes": 102,
+          "intermediate_passes_without_dump_or_ledger": 66,
+          "k": 5,
+          "leaf": 16,
+          "ledger_equality": "Compared by pinned gpu_ab judge; refusals empty. Individual native work lines not retained.",
+          "ledger_reference_sha256": "ca8e300d645c29c27e2c6131744829789e94c50141b2d6a1f4ceb282e9e34a65",
+          "modes": {
+            "cpu": "16379",
+            "gpu": "81915"
+          },
+          "refusals": 0,
+          "report_sha256": "d217c03bfa43c7df8655dfc298634dd7ea6d25cd2276333b2436e549a35ceb05",
+          "retained_canonical_hashes": 36,
+          "scope": "a froid : dump et registre de chaque prise ; a chaud : passes 1..P toutes reussies, dump et registre de la derniere passe P seulement (les passes 1..P-1 ne serialisent rien)",
+          "verdict": "conforme",
+          "warm_processes": 6,
+          "workers": 48
+        },
+        {
+          "bench_sha256": "cf7cb61750ca12340bc84d0356ba63ea7c01a780be608817fe3b9f220dae4a1d",
+          "canonical": {
+            "lidar_ng00": "61a4245b91d9a4fdad012f0a2e26a63c3e48db1d46a180db756f2c4e4aa77295",
+            "lidar_ng01": "838a447e0b92e13e42f7f69a84fd536d5d46d26463d3f4cc7c688475878fe0de",
+            "lidar_ng02": "81f89995eaccb497cfe92abb81213bebd0d4ce5076210570d86aa9456cf7ff2e"
+          },
+          "cold_processes": 18,
+          "constructed_full_passes": 66,
+          "intermediate_passes_without_dump_or_ledger": 42,
+          "k": 10,
+          "leaf": 24,
+          "ledger_equality": "Compared by pinned gpu_ab judge; refusals empty. Individual native work lines not retained.",
+          "ledger_reference_sha256": "2339619ffb78f35ff89da34d3b9e960e21dfbaf91d35d6df6c49857fe6e57c9b",
+          "modes": {
+            "cpu": "16379",
+            "gpu": "81915"
+          },
+          "refusals": 0,
+          "report_sha256": "07d2e25a7eac011eca24eed8600629c83bbce2a5b44deaf92965a0abd24e7d01",
+          "retained_canonical_hashes": 24,
+          "scope": "a froid : dump et registre de chaque prise ; a chaud : passes 1..P toutes reussies, dump et registre de la derniere passe P seulement (les passes 1..P-1 ne serialisent rien)",
+          "verdict": "conforme",
+          "warm_processes": 6,
+          "workers": 48
+        }
+      ],
+      "label": "j2memo",
+      "numeric_profile_evidence": "Pinned CMake default21, no configure override; normal support oracle/reader gates passed.",
+      "package_sha256": "cb6379c636dbb2bc9f25c97e76eaf6a3fee7de3619829b28a688c029af9c3eda",
+      "plan_sha256": "75764a463a8feafd5653be1d430f580b39675542dbc6c0c93ebbfa959a4c53f0",
+      "profile": "Release u21",
+      "published_files_verified": 7,
+      "receipt_sha256": "142a3b0650266f7c1a9e201da9005208307d7becc34cbe409962f8facdf179a4",
+      "result_manifest": {
+        "exact_inventory": true,
+        "files": 60,
+        "sha256": "7dfc772e7885f2877ce7a20eac4192bf3bafb76817c56c6eaf58e58a1f28c8af"
+      },
+      "session": "v11.20261006.claudej2memo",
+      "source_compare": {
+        "evidence_lines": {
+          "canonical_dump_equality": 174,
+          "catalogue_work_equality": 175,
+          "catalogue_work_extraction": 162,
+          "dump_removed_after_hash": 165,
+          "last_warm_scope": 219,
+          "warm_pass_count": 177
+        },
+        "judge_path": "morsehgp3D_v11/bench/gpu_ab.py",
+        "judge_sha256": "108203630334697578b829a549973824c9daa7cd90439dd18a35759e51e381dd"
+      },
+      "source_equality": {
+        "extra_or_missing_files": false,
+        "files_verified": 635,
+        "includes_docs_or_receipts": false,
+        "manifest_sha256": "15f169d57b5888922b240b567ea64a420265ce69e47755d76dc5a44a30c9e27b",
+        "method": "git_archive_selectif_egalite_exacte",
+        "paths": [
+          "gcp-migration/v11_worker.sh",
+          "morsehgp3D_v11/CMakeLists.txt",
+          "morsehgp3D_v11/src",
+          "morsehgp3D_v11/tests",
+          "morsehgp3D_v11/cmake",
+          "morsehgp3D_v11/bench",
+          "morsehgp3D_v11/reference",
+          "morsehgp3D_v11/tools",
+          "morsehgp3D_v11/cli"
+        ],
+        "source_commit": "34a8a561d0c6c7f346608c49ac9113e3830b216f"
+      },
+      "source_pin": "34a8a561d0c6c7f346608c49ac9113e3830b216f",
+      "status": "completed",
+      "stop_utc": "2026-10-06T12:16:35.723000+00:00",
+      "supports_scope": "SPv2 role filter only; not final Kruskal selection",
+      "targeted_stop_certified": true,
+      "worker_exit_code": 0
+    }
+  ]
+}

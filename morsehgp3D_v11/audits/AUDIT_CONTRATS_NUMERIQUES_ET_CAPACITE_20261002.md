@@ -12,96 +12,63 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 
 ## Supports v2 : sélection et cohérence du dossier
 
-WIP `v11-impl-l3`, base **9eee2ed4b**, relu le 6 octobre vers 10:10 UTC.
-Ces défauts restent présents dans la source publiée **0cc9cbec4** ;
-la [réponse à R1/R2](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md#réponse-à-la-section-r--sélection-de-kruskal-et-contrôles-sans-q_b)
-donne le raccord sans réénumération de Q_b.
-**Le filtre actuel ne sélectionne pas encore un MST :** il conserve les
-cycles du même plateau. Le
-[témoin et la correction](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md#supports-du-mst--cycle-conservé-au-même-plateau)
-sont prioritaires. L'assemblage des positions et des branches retenues est
-cohérent en lecture : `origin` conserve l'indice original du rattachement,
-les préfixes portent sur les tranches choisies, et chaque boule reçoit un
-seul S*. Aucun nouveau défaut mémoire démontré dans ce raccord.
+**Corrigé en 07428324e, qualifié sur G4 en Release u21.** Le sélecteur
+natif est identique octet pour octet à la proposition : unions utiles
+par multifusion, ordre BallIdx, connexion finale et `prior` conservés.
+Le différentiel compare désormais la sortie native intacte à Kruskal sur
+l'oracle complet. Le lecteur contrôle unions utiles, connexion et égalité
+des versions fichier/manifeste. Les défauts de cycle et de validation sont
+clos dans ce périmètre.
 
-**Le lecteur accepte une version de manifeste différente du binaire.**
-`read_supports` admet SPv1 et SPv2, mais `check_directory` ne compare que K.
-Un petit dossier synthétique contenant un SPv1 valide et un manifeste
-déclarant v2 est accepté. Ajouter `sp.version == files[0].version` avant
-le recomptage : autrement un reçu peut qualifier un autre format que celui
-annoncé. La preuve Python est bornée et ne dépend d'aucun binaire natif.
+La session `claudesupkr`, épinglée à **07428324e**, comporte **15/15 portes
+PASS** : oracle, lecteur, identités des deux voies et cas synthétiques/LiDAR.
+Elle exclut explicitement les variantes `_opt` et ne joue ni mutants ni
+sanitizers. Les références u18/u24 ont été remplacées dans leurs propres
+blocs ; cette session ne les qualifie pas sur G4. Les anciens acquis SPv1
+restent attachés à leur source et à leur format.
+[Contrelecture des sources et des reçus](../receipts/audit_integration_20261006/README.md).
 
-La lecture d'un manifeste v1 honnête est désormais refusée, alors que le
-décodeur conserve explicitement v1. Si cette rétrolecture est maintenue,
-dispatch des schémas de comptes et du manifeste selon la version ; sinon
-annoncer clairement sa suppression. Dans les deux cas, l'égalité des
-versions est nécessaire. Les empreintes et portes v1 historiques restent
-attachées à leur ancienne sortie ; elles ne qualifient pas SPv2.
-[Reproduction figée et sources du lecteur](../receipts/audit_supports_mst_20261006/formats/README.md).
-Le [correctif d'une ligne](../receipts/audit_supports_mst_20261006/formats_fix_proposal/version_equality.patch)
-est fourni, applicable au WIP relu. Le lecteur ainsi modifié accepte un
-dossier v2 honnête et refuse causalement le binaire v1 déclaré v2, dans
-les rejeux Python normal/−O. Sa politique de rétrolecture reste inchangée.
-Patch proposé dans le reçu, sans modification du worktree développeur.
+Mémoire du sélecteur : un octet par boule et deux tableaux u32 par nœud,
+admis avant allocation ; DSU rendu avant les sorties, masque après tri.
+La voie `all` conserve ses contrôles S6 et `strict_traces`. La sortie réduite
+n'a pas à réénumérer Q_b. La rétrolecture des dossiers v1 n'est plus promise,
+comme précisé dans la section S du développeur ; l'égalité des versions
+est désormais exigée. Le décodeur binaire seul garde sa lecture v1.
 
-**Paquet de correction prêt, suivi vers 10:58 UTC.** Le
-[sélecteur C++ proposé](../receipts/audit_supports_mst_followup_20261006/native/README.md)
-retient les unions utiles, vérifie la connexion finale des enfants et
-préserve les `prior` originaux. Mémoire de sélection admise : masque d'un
-octet par boule, deux tableaux u32 par nœud ; tableaux rendus avant
-l'allocation des sorties, masque rendu après le tri. La voie `all` ne
-prend aucune nouvelle allocation. Patch relu et applicable au WIP, non
-compilé ; modèle confronté à un Kruskal indépendant sur 771 graphes.
-
-Le [différentiel corrigé](../receipts/audit_supports_mst_followup_20261006/mathematics/remaining_1054/README.md)
-compare la sortie native intacte à Kruskal sur l'oracle. Le patch actualisé
-conserve intégralement la correction de coquille25 faite par le développeur
-à 10:51. Le [contrôle structurel du lecteur](../receipts/audit_supports_mst_20261006/reader_spanning_proposal/README.md)
-refuse cycles et enfants déconnectés ; il s'applique avec la garde de
-version déjà fournie. Les contrôles Python normal/−O passent. La
-qualification native et les identités W1/W48 restent à effectuer sur G4.
-
-**Juge API : nouvelle attente erronée retirée du WIP.**
-`supports_route_oracle.py` avait inversé l'ancienne inégalité, mais
-`diagnostics.log.cells` exclut les naissances. Le triangle équilatéral K2
-publie trois boules de naissance et une boule de fusion, soit **4 boules
-pour 1 cellule**. Le développeur a retiré cette inégalité pendant la
-contrelecture ; le WIP exige maintenant `supports == balls`, `multiple == 0`
-et les comptes positifs. Avis favorable en source ; les contrôles des deux
-voies restent en place. Une borne faisant intervenir les cellules devrait
-compter séparément les naissances publiées. Ce point est résolu en source,
-sans nouvelle qualification native.
-[Source corrigée et contre-exemple S1](../receipts/audit_supports_mst_followup_20261006/api_route/README.md).
+Les témoins et propositions historiques restent dans les reçus
+[cycle/format](../receipts/audit_supports_mst_20261006/README.md) et
+[sélecteur/différentiel](../receipts/audit_supports_mst_followup_20261006/README.md).
+Les attentes coquille25 et `balls <= cells` sont également corrigées.
 
 ## Supports v2 : références u18 et mutant corrigé avant publication
 
-**Mutant corrigé en source dans 0cc9cbec4.** Le WIP capturé remplaçait
-`kept(u64 i)` par `return true;`, laissant `i` inutilisé sous
-`-Wextra -Werror`. La publication emploie maintenant la comparaison
-`role()[i] <= BallRole::internal`, qui garde les trois rôles en utilisant
-le paramètre. Le patch de ce constat est donc historique et n'est plus à
-appliquer. Le motif devra suivre le sélecteur retenu à l'intégration de
-Kruskal ; aucun verdict de compilation n'a été produit par cet audit.
-
-En **0cc9cbec4**, les six attentes API u18 sont encore les empreintes SPv1 de **98a009550**,
-alors que les tables u21/u24 ont été adaptées à SPv2. Régénérer les
-références u18 depuis la nouvelle sortie et vérifier les identités entre
-voies ; ne pas recopier les empreintes d'un autre profil. Le
-[reçu ciblé](../receipts/audit_review_followup_20261006/gates/README.md)
-épingle les sources et la clôture du mutant en source. Ces constats sont issus
-du code ; aucune compilation ni capture native nouvelle n'est annoncée.
+**Raccord clos en source dans 07428324e.** Les six paires de références
+u18 ont été changées dans le bon bloc ; les trois profils sont distingués.
+Le mutant `sp_internes_gardees` conserve un usage du paramètre, et les
+mutants sont repointés sur `selected`. `sp_selection_par_role` réintroduit
+précisément le défaut de cycle. Aucun ancien patch de mutant n'est à
+appliquer. La qualification G4 de ces variantes et des profils u18/u24
+n'est pas déduite des quinze portes u21.
+[Constat historique et première clôture](../receipts/audit_review_followup_20261006/gates/README.md).
 
 ## Arbres de points : contrôler la fin de vie du bloc
 
-**Constat P2 au pin ddb8d4ea9.** `_check_point_tree` vérifie que le bloc
-est né quand un site y entre, mais pas qu'il est encore vivant.
+**Corrigé en source dans b0f2a0a9e.** Les gardes Python/C++ et les six
+frontières proposées sont intégrées ; deux mutants visent la suppression
+de la borne et son remplacement par une inégalité large. Les dix-huit
+lectures exactes du lecteur intégré (six frontières, trois profils)
+passent en normal/−O. Cette correction est postérieure au pin G4
+`07428324e` : ses portes et mutants natifs restent à qualifier sur G4.
+
+**Constat historique au pin ddb8d4ea9.** `_check_point_tree` vérifiait que
+le bloc était né quand un site y entrait, sans contrôler sa fin de vie.
 Avec `block_plateau=[0,0,1]`, `block_parent=[2,2,NONE]`,
 `site_plateau=[0,0,2]` et `site_block=[0,1,0]`, le troisième site entre
 dans le bloc0 après sa fusion au plateau1. Le lecteur `read_points`, même
-avec `exact=True`, accepte cette chronologie impossible. La borne manque
+avec `exact=True`, acceptait cette chronologie impossible. La borne manquait
 aussi dans `head::detail::check_shape`, accessible par `flat_sites(TreeView)`.
 
-**Correction proposée :** après validation des indices, exiger
+**Correction intégrée :** après validation des indices, exiger
 `block_plateau[b] <= site_plateau[s] < block_plateau[parent[b]]` pour un
 bloc non racine. La borne supérieure est stricte : le constructeur traite
 les fusions avant les entrées du même plateau ; une entrée à la date de
@@ -111,8 +78,28 @@ fournit les gardes Python/C++ et les cas avant, à et après la fusion.
 
 Portée : validation d'un fichier externe et d'une vue abstraite, avec
 risque de rejeu incohérent des masses. Aucun arbre fautif produit par la
-factory native n'est démontré. Patch proposé ; qualification native G4
-distincte des reproductions Python bornées.
+factory native n'est démontré. Qualification native G4 distincte des
+reproductions Python bornées ; [rejeu intégré](../receipts/audit_integration_20261006/README.md).
+
+## J2 mémorisé : source relue et mesure G4 ciblée
+
+**Avis source favorable sur 34a8a561d**, identique sur les fichiers
+concernés à d8c015dbd. Le cache est privé à une feuille, remis à zéro avant
+le parcours ; la décision mémorisée dépend du triplet et de sa boîte fixes.
+Les 4 960 triplets ordonnés tiennent exactement dans les 155 mots du cache.
+Sans cache, aucun bit n'est posé. Les compteurs logiques sont conservés.
+Les rangs locaux sont écrits en même temps que chaque site d'intérieur ou
+de coquille, avant incrément ; la population et son ordre restent inchangés.
+
+Le reçu `claudej2memo` qualifie ses comparaisons CPU/GPU au pin **34a8a561d**.
+Le gain de l'exécuteur est observé ; à K5, le domaine GPU reste plus lent
+que le CPU. Cette mesure ne clôt pas les 100 ms de la tour complète.
+Les quatorze portes supports de cette session utilisent encore l'ancien
+filtre de rôle ; la qualification Kruskal est celle de `claudesupkr`.
+La feuille cohérente est mise en attente par le développeur, derrière les
+coûts fixes K5. Les anciens conseils Q restent archivés, sans tâche active
+sur la variante par paires supprimée.
+[Preuves et limites](../receipts/audit_integration_20261006/README.md).
 
 ## Coop3 : retour du fill un fil après restauration du parcours
 

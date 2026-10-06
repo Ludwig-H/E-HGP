@@ -8,9 +8,26 @@ aux reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 Note maintenue en place ; détails et échanges clos dans les reçus.
 
+## Suivi de la section S : sélection intégrée
+
+**Constats MST clos au pin 07428324e.** Le sélecteur C++ est identique à
+la proposition figée ; le différentiel garde la sortie native intacte,
+et les gardes de structure/version sont intégrées. Les quinze portes G4
+Release u21 passent au même pin. Les hyper-arêtes utiles conservent leurs
+`prior` originaux ; S* est publié une fois sans réénumération de Q_b.
+Le contrat §10.10 distingue maintenant suffisance et sélection de Kruskal.
+
+La borne stricte de vie des blocs est intégrée en **b0f2a0a9e** ; le
+lecteur corrigé est rejoué sur les dix-huit cas de frontière. Ce commit
+est postérieur à la qualification supports : ses contrôles natifs restent
+distincts. L'arrondi préalable des IoU du comparatif est toujours présent.
+[Contrelecture d'intégration](../receipts/audit_integration_20261006/README.md).
+Les réponses et preuves ci-dessous conservent le raisonnement des défauts
+corrigés ; les anciens patches correspondants ne sont plus à appliquer.
+
 ## Réponse à la section R : sélection de Kruskal et contrôles sans Q_b
 
-**Réponse à 0cc9cbec4, section R du 6 octobre à 11:43 UTC.**
+**Réponse historique à 0cc9cbec4, appliquée en 07428324e.**
 
 **R1. Une boule peut porter plusieurs unions ; garder la première boule
 du plateau ne suffit pas.** Le triangle équilatéral K1 détaillé ci-dessous
@@ -30,7 +47,7 @@ pour T_K ; il ne dispense pas de cette sélection au sein du plateau.
 les contre-épreuves S6 et `strict_traces` sur la voie `all`, avec leur
 périmètre borné. La nouvelle voie doit en plus avoir son propre oracle de
 sélection : appliquer Kruskal à l'oracle complet et comparer la sortie
-native intacte à cet attendu. La projection actuelle de `mine` et `want`
+native intacte à cet attendu. La projection de `mine` et `want` dans 0cc9cbec4
 par le même filtre ne fournit pas cette preuve. Le
 [différentiel proposé](../receipts/audit_supports_mst_followup_20261006/mathematics/remaining_1054/README.md)
 et les [gardes du lecteur](../receipts/audit_supports_mst_20261006/reader_spanning_proposal/README.md)
@@ -43,13 +60,14 @@ et évite de réintroduire son ancien plafond par un contrôle auxiliaire.
 **Raccord de qualification :** malgré la mention des trois profils en R,
 les douze préfixes fichier/manifeste des six cas API u18 de 0cc9cbec4 sont
 encore ceux de SPv1. Les [références u18](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#supports-v2--références-u18-et-mutant-corrigé-avant-publication)
-restent à établir sur la sélection corrigée. Le mutant signalé pendant
-le WIP est, lui, corrigé dans la publication.
+ont depuis été remplacées en 07428324e ; leur qualification G4 u18 reste
+distincte de la session u21. Le mutant signalé pendant le WIP était déjà
+corrigé dans 0cc9cbec4.
 
 ## Supports du MST : le nouveau différentiel doit détecter le cycle
 
-**Suivi du WIP CLI du 6 octobre, 10:38 UTC.** `cli_supports_oracle.py`
-projette maintenant l'oracle avec le même filtre de rôle que le moteur.
+**Historique du WIP CLI à 10:38 UTC, corrigé en 07428324e.**
+`cli_supports_oracle.py` projetait l'oracle avec le même filtre de rôle que le moteur.
 Il validerait donc les trois arêtes du triangle au lieu d'en exiger deux.
 Remplacer cette projection attendue par Kruskal, dans l'ordre du catalogue
 `(niveau exact, S* en SiteIdx Morton)`, et conserver ensuite l'ordre de
@@ -74,17 +92,18 @@ ci-dessous garde le WIP antérieur qui motivait cette correction.
 [Preuve exacte et patch du différentiel](../receipts/audit_supports_mst_followup_20261006/mathematics/README.md) :
 quatre petits documents S1, contrôle de l'ordre canonique et preuve bornée
 sur les 25 sites, sans oracle exhaustif des supports sur cette grande
-coquille. Rejeux normal/−O identiques ; patch proposé, sans exécution native.
+coquille. Rejeux normal/−O identiques dans ce reçu historique ; la
+qualification native de l'intégration est maintenant distinctement close en u21.
 
 ## Supports du MST : cycle conservé au même plateau
 
-**Sélection à corriger.** Constat initial dans le WIP `v11-impl-l3`,
+**Corrigé en 07428324e.** Constat initial dans le WIP `v11-impl-l3`,
 base **9eee2ed4b**, relu le 6 octobre vers 10:10 UTC. Le choix de S* seul
 suit la demande ; la sélection des boules reste incorrecte.
 `Selection::spanning` filtre seulement `role != internal` : ce rôle
 décrit le rattachement au plateau fermé, pas l'acceptation d'une arête
 par Kruskal.
-**Le défaut est confirmé dans la source publiée 0cc9cbec4.**
+**Le défaut était encore présent dans 0cc9cbec4.**
 
 Témoin K1 : **A=(0,0,0), B=(1,1,0), C=(1,0,1)**. Les trois paires ont
 une distance au carré de 2 ; leurs boules diamétrales ont rayon carré 1/2
@@ -125,8 +144,9 @@ constructeur. Elle ne publie pas les arêtes d'un MST explicite sur toutes
 les K-parties de Γ_K : les sommets ajoutés sans fusion et les liaisons hors
 fenêtre restent traités par FULL.
 
-Porte minimale G4 : ce triangle doit publier deux supports, avec identité
-W1/W48 et le même arbre canonique. Ajouter une permutation d'entrée et une
+Porte minimale initialement proposée : ce triangle devait publier deux
+supports, avec identité W1/W48 et le même arbre canonique. La porte
+intégrée et qualifiée en u21 le vérifie à W1/W4 ; elle ne couvre pas W48. Ajouter une permutation d'entrée et une
 cellule à plus de deux branches. Un mutant revenant au seul filtre de rôle
 doit échouer sur le triangle. Le témoin est établi par géométrie rationnelle
 et lecture du WIP, sans prétendre avoir exécuté ce nouveau binaire.

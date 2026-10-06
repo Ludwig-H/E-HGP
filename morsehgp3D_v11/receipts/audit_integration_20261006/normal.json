@@ -1,0 +1,117 @@
+{
+  "chronology": [
+    {
+      "accepted": true,
+      "bits": 18,
+      "case": "before_parent",
+      "refusal": null
+    },
+    {
+      "accepted": true,
+      "bits": 21,
+      "case": "before_parent",
+      "refusal": null
+    },
+    {
+      "accepted": true,
+      "bits": 24,
+      "case": "before_parent",
+      "refusal": null
+    },
+    {
+      "accepted": false,
+      "bits": 18,
+      "case": "at_parent",
+      "refusal": "MHGP11PT : site 2 entre dans un bloc retire"
+    },
+    {
+      "accepted": false,
+      "bits": 21,
+      "case": "at_parent",
+      "refusal": "MHGP11PT : site 2 entre dans un bloc retire"
+    },
+    {
+      "accepted": false,
+      "bits": 24,
+      "case": "at_parent",
+      "refusal": "MHGP11PT : site 2 entre dans un bloc retire"
+    },
+    {
+      "accepted": false,
+      "bits": 18,
+      "case": "after_parent",
+      "refusal": "MHGP11PT : site 2 entre dans un bloc retire"
+    },
+    {
+      "accepted": false,
+      "bits": 21,
+      "case": "after_parent",
+      "refusal": "MHGP11PT : site 2 entre dans un bloc retire"
+    },
+    {
+      "accepted": false,
+      "bits": 24,
+      "case": "after_parent",
+      "refusal": "MHGP11PT : site 2 entre dans un bloc retire"
+    },
+    {
+      "accepted": true,
+      "bits": 18,
+      "case": "root_at_birth",
+      "refusal": null
+    },
+    {
+      "accepted": true,
+      "bits": 21,
+      "case": "root_at_birth",
+      "refusal": null
+    },
+    {
+      "accepted": true,
+      "bits": 24,
+      "case": "root_at_birth",
+      "refusal": null
+    },
+    {
+      "accepted": true,
+      "bits": 18,
+      "case": "root_later",
+      "refusal": null
+    },
+    {
+      "accepted": true,
+      "bits": 21,
+      "case": "root_later",
+      "refusal": null
+    },
+    {
+      "accepted": true,
+      "bits": 24,
+      "case": "root_later",
+      "refusal": null
+    },
+    {
+      "accepted": false,
+      "bits": 18,
+      "case": "before_block_birth",
+      "refusal": "MHGP11PT : entree du site 2"
+    },
+    {
+      "accepted": false,
+      "bits": 21,
+      "case": "before_block_birth",
+      "refusal": "MHGP11PT : entree du site 2"
+    },
+    {
+      "accepted": false,
+      "bits": 24,
+      "case": "before_block_birth",
+      "refusal": "MHGP11PT : entree du site 2"
+    }
+  ],
+  "cloud_actions": 0,
+  "native_runs": 0,
+  "official_spanning_gate": "[\n  {\n    \"accepted\": true,\n    \"case\": \"triangle_mst_two_supports\",\n    \"decoded_balls\": 2,\n    \"expected_accept\": true,\n    \"file_bytes\": 336,\n    \"file_sha256\": \"1bb15159f28f63aa29d383b71d1d4c017ac8249e10ecd945d9f8ff324de044b6\",\n    \"prior\": [\n      0,\n      2,\n      0,\n      1\n    ]\n  },\n  {\n    \"accepted\": false,\n    \"case\": \"triangle_cycle_three_supports\",\n    \"expected_accept\": false,\n    \"file_bytes\": 368,\n    \"file_sha256\": \"dea48b3be4e26459fccc236a483ee216063c50c9cc60401b5d12c6542bda93c7\",\n    \"reason\": \"MHGP11SP 2 : fusion 2 redondante dans le noeud 3\"\n  },\n  {\n    \"accepted\": false,\n    \"case\": \"square_disconnected_children\",\n    \"expected_accept\": false,\n    \"file_bytes\": 360,\n    \"file_sha256\": \"baacb3bd19d297ccd8d69e0a8007069f9a8edcb672f4e15d5a191a16d2edb530\",\n    \"reason\": \"MHGP11SP 2 : enfants du noeud 4 non connexes\"\n  }\n]\nsupports_spanning_reader_verdict conforme cas3",
+  "pin": "d8c015dbd5059fc06d18c0991923b51c26b18561",
+  "selector_matches_frozen_proposal": true
+}

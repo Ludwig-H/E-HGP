@@ -1,0 +1,18 @@
+# Intégration des corrections et reçus G4 — 6 octobre 2026
+
+Cadre : `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
+Source relue : `d8c015dbd5059fc06d18c0991923b51c26b18561`. Les changements vidéo postérieurs aux corrections ne sont pas une qualification supplémentaire du moteur.
+
+**Supports MST, intégration 07428324e.** `hierarchy.cpp` est identique octet pour octet à la proposition figée. Les AST de `spanning` et `compare` sont ceux du différentiel proposé : Kruskal sur l'oracle complet, sortie native intacte. Les contrôles du lecteur de structure et de version sont intégrés. Les douze références fichier/manifeste u18 ont toutes été remplacées depuis le constat historique. Les sources et comparaisons sont consignées dans `sources.json` et `source_review.json`.
+
+**Chronologie, intégration b0f2a0a9e.** Le lecteur et `head::detail::check_shape` imposent entrée < naissance du parent, après validation des indices ; racine sans borne supérieure. Les six frontières proposées et les deux mutations de cette borne sont présentes. Le rejeu appelle le lecteur réel intégré en mode exact sur les six cas, aux profils u18/u21/u24. Il accepte les entrées avant fusion et dans la racine, refuse l'égalité, l'après-fusion et l'entrée avant naissance. La porte officielle du lecteur supports est également jouée : triangle à deux supports accepté, cycle et enfants déconnectés refusés. Rejeux normal/−O identiques, stderr vide. Aucun C++ exécuté.
+
+**J2, source 34a8a561d.** Lecture favorable de la mémorisation de l'issue et des rangs locaux directs. Le cache appartient à une feuille, est réinitialisé par `prepare`, et sa décision ne dépend que du triplet et de la boîte fixes. Le rang combinatoire C(k,3)+C(j,2)+i couvre exactement 0..4959 pour 0 <= i < j < k < 32 : les 155 mots sont suffisants. Sans cache aucun bit n'est posé. Les populations locales sont remplies avec le même curseur et dans le même ordre que les sites globaux ; la canonisation ne les permute pas. Ces trois fichiers produit sont identiques entre 34a8a561d et le pin relu. Les mutations ciblent la perte d'une issue positive et la corruption d'un rang local ; leur porte hôte n'est pas une preuve de concurrence CUDA.
+
+Les [pièces G4 vérifiées](evidence/g4_receipts/README.md) distinguent les deux sessions : Kruskal, quinze portes u21 au pin 07428324e ; J2, comparaisons CPU/GPU au pin 34a8a561d et anciennes portes supports par rôle. Le premier lot ne couvre ni `_opt`, ni nouveaux mutants/sanitizers, ni les gardes de chronologie ajoutées ensuite. Les profils u18/u24 ne sont pas qualifiés par ces quinze portes u21. Aucun transfert aux 100 ms de la tour complète.
+
+Les deux sessions sont terminées avec arrêt ciblé certifié. Les paquets correspondent aux sources Git : 636 fichiers pour Kruskal, 635 pour J2. Les 60 empreintes canoniques conservées du banc J2 concordent ; les 108 passes intermédiaires des 168 constructions FULL n'ont pas de dump/registre archivé propre. Les anciens 14 tests supports de J2 ne qualifient pas la sélection Kruskal.
+
+**Reste ouvert :** l'arrondi des IoU avant choix de population dans `points_flat_study.py`. Le fichier est inchangé depuis 0272bd447 ; le [correctif de deux lignes](../audit_review_followup_20261006/population/README.md) reste applicable. Aucun effet sur les scènes réelles déjà publiées n'est déduit de ce constat.
+
+Rejeu borné : `python3 -B replay.py --repo /workspaces/E-HGP`, puis `python3 -O -B replay.py --repo /workspaces/E-HGP`. Les objets Git et les capsules antérieures référencées sont nécessaires. `SHA256SUMS` couvre les fichiers et manifestes de cette capsule. Aucune compilation, exécution native, mesure ni action GCP de l'auditeur.

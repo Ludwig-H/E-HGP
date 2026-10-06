@@ -4,39 +4,32 @@
 quantized_u21_input_only / not_claimed`. Six notes actives maintenues en
 place ; preuves et propositions détaillées dans les reçus immuables.
 
-**Supports MST : correction prioritaire encore ouverte en 0cc9cbec4.**
-Garder toutes les boules `merge` conserve les cycles d'un plateau : trois
-arêtes au lieu de deux sur le triangle équilatéral. Le différentiel CLI
-reproduit ce filtre et ne doit jamais épurer la sortie native à contrôler.
-Le lecteur doit vérifier les versions fichier/manifeste, les unions utiles
-et la connexion des branches. Le [paquet proposé](../receipts/audit_supports_mst_followup_20261006/README.md)
-contient le sélecteur C++, le différentiel indépendant et les gardes du
-lecteur. Modèles Python conformes ; intégration et qualification native G4
-restent à effectuer. La [réponse aux questions R1/R2 du développeur](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md#réponse-à-la-section-r--sélection-de-kruskal-et-contrôles-sans-q_b)
-précise pourquoi il faut parfois plusieurs boules au même plateau et
-quels contrôles conservent le format réduit sans réénumérer Q_b.
-Les attentes erronées coquille25 et `balls <= cells` sont corrigées.
+**Supports MST : correction intégrée en 07428324e et qualifiée sur G4 u21.**
+Le sélecteur garde les unions utiles au même plateau ; le différentiel
+compare la sortie native intacte et le lecteur contrôle connexion et
+versions. **15/15 portes PASS**, au même pin, sur oracle, synthétiques et
+trames LiDAR. Les références des trois profils sont corrigées ; les
+sessions u18/u24, mutants et sanitizers ne sont pas incluses dans ces
+quinze portes. [Contrelecture](../receipts/audit_integration_20261006/README.md).
 
-**Arbres de points : refuser l'entrée dans un bloc déjà fusionné.**
-Le lecteur admet une chronologie impossible, même avec `exact=True` ; la
-même borne de durée de vie manque dans `head::detail::check_shape`.
-La [note moteur](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#arbres-de-points--contrôler-la-fin-de-vie-du-bloc)
-précise le témoin, la correction proposée et sa portée. Ce constat ne
-démontre pas que le constructeur natif produit un tel arbre.
+**Arbres de points : garde intégrée en b0f2a0a9e.** Une entrée doit précéder
+strictement la fusion de son bloc. Les dix-huit cas du lecteur intégré
+passent en normal/−O ; les nouvelles portes et mutants C++ restent à
+qualifier sur G4, ce commit étant postérieur à la session supports.
+[État précis](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#arbres-de-points--contrôler-la-fin-de-vie-du-bloc).
 
-**Comparatif : conserver les IoU avant arrondi pour choisir la population.**
+**Comparatif : l'arrondi qui peut fausser la population reste à corriger.**
 Un objet avec IoU `10001/20001 > 1/2` devient `0,5000` et peut faire
-exclure sa scène. La [note mathématique](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md#comparatif--ne-pas-arrondir-avant-la-décision-de-population)
-fournit le correctif du banc et les cas au seuil. L'effet sur les résultats
-réels déjà publiés reste à déterminer ; aucun classement révisé annoncé.
+exclure sa scène. Le [correctif de deux lignes](../receipts/audit_review_followup_20261006/population/README.md)
+conserve les valeurs avant la décision. L'effet sur les résultats réels
+publiés n'est pas établi ; aucun classement révisé annoncé.
 
-**GPU : variante par paires retirée en d4228f5e5.** La suppression clôt
-ses défauts propres de concurrence et de qualification ; leurs anciens
-patches ne sont plus à appliquer. Coop3 confirme le recul de la régression
-de la voie un fil sur sa source `9eee2ed4b` :
-[preuve et limites des pièces conservées](../receipts/audit_g4_coop3_20261006/complement/README.md).
-La [réponse à la proposition de feuille cohérente](../receipts/audit_coherent_leaf_design_20261006/README.md)
-reste disponible. Aucun gain de ce futur noyau n'est acquis.
+**GPU : cache J2 et rangs locaux intégrés, source relue.** La session
+`claudej2memo` mesure le gain de l'exécuteur au pin **34a8a561d**. À K5,
+le domaine GPU reste plus lent que le CPU. Le développeur met la feuille
+cohérente en attente pour traiter les coûts fixes. Les défauts de la
+variante par paires supprimée restent clos ; aucun ancien patch n'est à
+appliquer. [Portée des mesures](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#j2-mémorisé--source-relue-et-mesure-g4-ciblée).
 
 **Contrat global de 100 ms toujours ouvert.** Les captures d'un noyau ou
 d'un étage ne le remplacent pas. La reprise de qualification R1–R4 est

@@ -1,0 +1,13 @@
+{
+  "chronology_cases": 18,
+  "cloud_actions": 0,
+  "g4_evidence": "evidence/g4_receipts/README.md",
+  "native_runs": 0,
+  "normal_exit": 0,
+  "optimized_exit": 0,
+  "source_review": "source_review.json",
+  "spanning_reader_cases": 3,
+  "stderr_empty": true,
+  "stdout_equal": true,
+  "stdout_sha256": "465f788b91f48fae440cb446b6d2d326f482042c8294622bcc497ed98ea45f27"
+}
