@@ -1,0 +1,13 @@
+python3 -B replay.py --check proof.json
+exit_code=0
+chronology reader PASS:18 cases,36 real exact reads baseline+guard; before/at/after parent, root/birth; native0 cloud0
+
+python3 -O -B replay.py --check proof.json
+exit_code=0
+chronology reader PASS:18 cases,36 real exact reads baseline+guard; before/at/after parent, root/birth; native0 cloud0
+
+git apply --check guard.patch
+exit_code=0
+git apply --check native_test.patch
+exit_code=0
+Both checked in ephemeral copies of exact pinned source blobs. No developer file changed. No native build/run or cloud action.

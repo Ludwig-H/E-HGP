@@ -1,0 +1,18 @@
+{
+  "base_pin": "d4228f5e5c21d6268499a781b422ec3b48fed181",
+  "captured_utc": "2026-10-06T11:42:18.807295+00:00",
+  "double_capture_equal": true,
+  "files": {
+    "morsehgp3D_v11/docs/MATHEMATIQUES.md": {
+      "base_sha256": "ef11f025f11068f7179dbad7b7268ffd2aafd479851ec895e4a847203c61714d",
+      "proposed_sha256": "8212e296861ad72a2f6736d769f6574b0cd3063448120eefc6d34b8aab6bf1a2",
+      "wip_sha256": "17e9b0cb28c2b89803b355cfc127809278202dafc907b1d94abb6260391b0500"
+    },
+    "morsehgp3D_v11/docs/SORTIES.md": {
+      "base_sha256": "9c4f0c66bd2f153a9a45d738e89279ed9bff3b1decbe75b8c91605fd758f184f",
+      "proposed_sha256": "333d72b7c9d147733e6940ae1c07f7eedea3c4733bce167d4124f2480d95ed46",
+      "wip_sha256": "dd1215ad1193fe955c564cefd75c31949d5fd6595d1bb120f198d147327373af"
+    }
+  },
+  "observed_developer_head": "09f20aca1455c0a288d1701a9a4d2c798fb666e6"
+}

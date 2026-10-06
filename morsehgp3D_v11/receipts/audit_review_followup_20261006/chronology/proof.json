@@ -1,0 +1,694 @@
+{
+  "cases": {
+    "after_parent": {
+      "18": {
+        "baseline": {
+          "accepted": true,
+          "block_parent": [
+            2,
+            2,
+            4294967295
+          ],
+          "block_plateau": [
+            0,
+            0,
+            1
+          ],
+          "site_block": [
+            0,
+            1,
+            0
+          ],
+          "site_plateau": [
+            0,
+            0,
+            2
+          ]
+        },
+        "file_bytes": 600,
+        "file_sha256": "de87c9b715fbeda619fde8cbd631fdc2edde01408fc6d227dd15218699862a54",
+        "proposed_guard": {
+          "accepted": false,
+          "reason": "MHGP11PT : site 2 entre dans un bloc retire"
+        }
+      },
+      "21": {
+        "baseline": {
+          "accepted": true,
+          "block_parent": [
+            2,
+            2,
+            4294967295
+          ],
+          "block_plateau": [
+            0,
+            0,
+            1
+          ],
+          "site_block": [
+            0,
+            1,
+            0
+          ],
+          "site_plateau": [
+            0,
+            0,
+            2
+          ]
+        },
+        "file_bytes": 600,
+        "file_sha256": "23a3f4ab8b013b849435a50a11684d83115f232300b5f26708da2bea6ff81e77",
+        "proposed_guard": {
+          "accepted": false,
+          "reason": "MHGP11PT : site 2 entre dans un bloc retire"
+        }
+      },
+      "24": {
+        "baseline": {
+          "accepted": true,
+          "block_parent": [
+            2,
+            2,
+            4294967295
+          ],
+          "block_plateau": [
+            0,
+            0,
+            1
+          ],
+          "site_block": [
+            0,
+            1,
+            0
+          ],
+          "site_plateau": [
+            0,
+            0,
+            2
+          ]
+        },
+        "file_bytes": 648,
+        "file_sha256": "df631818bd5dc5dc9ee3b9a0f7ef0086edbb580fd3b4c89a1fff9bef4292f493",
+        "proposed_guard": {
+          "accepted": false,
+          "reason": "MHGP11PT : site 2 entre dans un bloc retire"
+        }
+      }
+    },
+    "at_parent": {
+      "18": {
+        "baseline": {
+          "accepted": true,
+          "block_parent": [
+            2,
+            2,
+            4294967295
+          ],
+          "block_plateau": [
+            0,
+            0,
+            1
+          ],
+          "site_block": [
+            0,
+            1,
+            0
+          ],
+          "site_plateau": [
+            0,
+            0,
+            1
+          ]
+        },
+        "file_bytes": 600,
+        "file_sha256": "2d259c00c74fd163f271c53dea2b99856b9df399dc8a43c155314b91fd6158bd",
+        "proposed_guard": {
+          "accepted": false,
+          "reason": "MHGP11PT : site 2 entre dans un bloc retire"
+        }
+      },
+      "21": {
+        "baseline": {
+          "accepted": true,
+          "block_parent": [
+            2,
+            2,
+            4294967295
+          ],
+          "block_plateau": [
+            0,
+            0,
+            1
+          ],
+          "site_block": [
+            0,
+            1,
+            0
+          ],
+          "site_plateau": [
+            0,
+            0,
+            1
+          ]
+        },
+        "file_bytes": 600,
+        "file_sha256": "c1008bd700acbd57572e3904d074f8b2dbdd27ed35c6e86ffb3c97869875f964",
+        "proposed_guard": {
+          "accepted": false,
+          "reason": "MHGP11PT : site 2 entre dans un bloc retire"
+        }
+      },
+      "24": {
+        "baseline": {
+          "accepted": true,
+          "block_parent": [
+            2,
+            2,
+            4294967295
+          ],
+          "block_plateau": [
+            0,
+            0,
+            1
+          ],
+          "site_block": [
+            0,
+            1,
+            0
+          ],
+          "site_plateau": [
+            0,
+            0,
+            1
+          ]
+        },
+        "file_bytes": 648,
+        "file_sha256": "eeaf51b3ccb8a5c8932945258f1fbb1b0cc3da0906abc4286d305e2e467ab1ca",
+        "proposed_guard": {
+          "accepted": false,
+          "reason": "MHGP11PT : site 2 entre dans un bloc retire"
+        }
+      }
+    },
+    "before_block_birth": {
+      "18": {
+        "baseline": {
+          "accepted": false,
+          "reason": "MHGP11PT : entree du site 2"
+        },
+        "file_bytes": 600,
+        "file_sha256": "8ee79b01f976e248bf0119cb35c83ee93bf7f2e54af5f4a24fe51c0b0cafc2fd",
+        "proposed_guard": {
+          "accepted": false,
+          "reason": "MHGP11PT : entree du site 2"
+        }
+      },
+      "21": {
+        "baseline": {
+          "accepted": false,
+          "reason": "MHGP11PT : entree du site 2"
+        },
+        "file_bytes": 600,
+        "file_sha256": "590357457aa02b769f2a33d8eb3c9939df8b85869d5608faf1ebd20e15f0dd9a",
+        "proposed_guard": {
+          "accepted": false,
+          "reason": "MHGP11PT : entree du site 2"
+        }
+      },
+      "24": {
+        "baseline": {
+          "accepted": false,
+          "reason": "MHGP11PT : entree du site 2"
+        },
+        "file_bytes": 648,
+        "file_sha256": "9c3459afd91f37f4decd90124c0f1f765d33af7740622737980c0bf35ba7b8db",
+        "proposed_guard": {
+          "accepted": false,
+          "reason": "MHGP11PT : entree du site 2"
+        }
+      }
+    },
+    "before_parent": {
+      "18": {
+        "baseline": {
+          "accepted": true,
+          "block_parent": [
+            2,
+            2,
+            4294967295
+          ],
+          "block_plateau": [
+            0,
+            0,
+            1
+          ],
+          "site_block": [
+            0,
+            1,
+            0
+          ],
+          "site_plateau": [
+            0,
+            0,
+            0
+          ]
+        },
+        "file_bytes": 600,
+        "file_sha256": "3beb0e2ac26e3489c68500c60ee490538e476600e2420f2cbfdcccc07914f310",
+        "proposed_guard": {
+          "accepted": true,
+          "block_parent": [
+            2,
+            2,
+            4294967295
+          ],
+          "block_plateau": [
+            0,
+            0,
+            1
+          ],
+          "site_block": [
+            0,
+            1,
+            0
+          ],
+          "site_plateau": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "21": {
+        "baseline": {
+          "accepted": true,
+          "block_parent": [
+            2,
+            2,
+            4294967295
+          ],
+          "block_plateau": [
+            0,
+            0,
+            1
+          ],
+          "site_block": [
+            0,
+            1,
+            0
+          ],
+          "site_plateau": [
+            0,
+            0,
+            0
+          ]
+        },
+        "file_bytes": 600,
+        "file_sha256": "14f1d86018ef2e685e80ccdcb2fcbf4f79551673b0ce6ab6646fa4881f7afaee",
+        "proposed_guard": {
+          "accepted": true,
+          "block_parent": [
+            2,
+            2,
+            4294967295
+          ],
+          "block_plateau": [
+            0,
+            0,
+            1
+          ],
+          "site_block": [
+            0,
+            1,
+            0
+          ],
+          "site_plateau": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "24": {
+        "baseline": {
+          "accepted": true,
+          "block_parent": [
+            2,
+            2,
+            4294967295
+          ],
+          "block_plateau": [
+            0,
+            0,
+            1
+          ],
+          "site_block": [
+            0,
+            1,
+            0
+          ],
+          "site_plateau": [
+            0,
+            0,
+            0
+          ]
+        },
+        "file_bytes": 648,
+        "file_sha256": "a7cb52f204592f34ded3fa00d76ba470c300749bb861c10791f55e0f87947e68",
+        "proposed_guard": {
+          "accepted": true,
+          "block_parent": [
+            2,
+            2,
+            4294967295
+          ],
+          "block_plateau": [
+            0,
+            0,
+            1
+          ],
+          "site_block": [
+            0,
+            1,
+            0
+          ],
+          "site_plateau": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    },
+    "root_at_birth": {
+      "18": {
+        "baseline": {
+          "accepted": true,
+          "block_parent": [
+            2,
+            2,
+            4294967295
+          ],
+          "block_plateau": [
+            0,
+            0,
+            1
+          ],
+          "site_block": [
+            0,
+            1,
+            2
+          ],
+          "site_plateau": [
+            0,
+            0,
+            1
+          ]
+        },
+        "file_bytes": 600,
+        "file_sha256": "582cd8affc549f1016da98d256c713d9e717f35c9cf3cfe29d30e1675ec6937b",
+        "proposed_guard": {
+          "accepted": true,
+          "block_parent": [
+            2,
+            2,
+            4294967295
+          ],
+          "block_plateau": [
+            0,
+            0,
+            1
+          ],
+          "site_block": [
+            0,
+            1,
+            2
+          ],
+          "site_plateau": [
+            0,
+            0,
+            1
+          ]
+        }
+      },
+      "21": {
+        "baseline": {
+          "accepted": true,
+          "block_parent": [
+            2,
+            2,
+            4294967295
+          ],
+          "block_plateau": [
+            0,
+            0,
+            1
+          ],
+          "site_block": [
+            0,
+            1,
+            2
+          ],
+          "site_plateau": [
+            0,
+            0,
+            1
+          ]
+        },
+        "file_bytes": 600,
+        "file_sha256": "2e6090037336992159630fe4659f0a858e93d7472f3b5abb4cbac235b0168af4",
+        "proposed_guard": {
+          "accepted": true,
+          "block_parent": [
+            2,
+            2,
+            4294967295
+          ],
+          "block_plateau": [
+            0,
+            0,
+            1
+          ],
+          "site_block": [
+            0,
+            1,
+            2
+          ],
+          "site_plateau": [
+            0,
+            0,
+            1
+          ]
+        }
+      },
+      "24": {
+        "baseline": {
+          "accepted": true,
+          "block_parent": [
+            2,
+            2,
+            4294967295
+          ],
+          "block_plateau": [
+            0,
+            0,
+            1
+          ],
+          "site_block": [
+            0,
+            1,
+            2
+          ],
+          "site_plateau": [
+            0,
+            0,
+            1
+          ]
+        },
+        "file_bytes": 648,
+        "file_sha256": "fcc10b6a77cd7e379e5a657f0fc33044e5a2b749fd3f8eb738dea9bb35c12838",
+        "proposed_guard": {
+          "accepted": true,
+          "block_parent": [
+            2,
+            2,
+            4294967295
+          ],
+          "block_plateau": [
+            0,
+            0,
+            1
+          ],
+          "site_block": [
+            0,
+            1,
+            2
+          ],
+          "site_plateau": [
+            0,
+            0,
+            1
+          ]
+        }
+      }
+    },
+    "root_later": {
+      "18": {
+        "baseline": {
+          "accepted": true,
+          "block_parent": [
+            2,
+            2,
+            4294967295
+          ],
+          "block_plateau": [
+            0,
+            0,
+            1
+          ],
+          "site_block": [
+            0,
+            1,
+            2
+          ],
+          "site_plateau": [
+            0,
+            0,
+            2
+          ]
+        },
+        "file_bytes": 600,
+        "file_sha256": "5b27a98de817381ade0831a4ea7f6e5a3d76173221d1c92a22754fb5f7a63d5d",
+        "proposed_guard": {
+          "accepted": true,
+          "block_parent": [
+            2,
+            2,
+            4294967295
+          ],
+          "block_plateau": [
+            0,
+            0,
+            1
+          ],
+          "site_block": [
+            0,
+            1,
+            2
+          ],
+          "site_plateau": [
+            0,
+            0,
+            2
+          ]
+        }
+      },
+      "21": {
+        "baseline": {
+          "accepted": true,
+          "block_parent": [
+            2,
+            2,
+            4294967295
+          ],
+          "block_plateau": [
+            0,
+            0,
+            1
+          ],
+          "site_block": [
+            0,
+            1,
+            2
+          ],
+          "site_plateau": [
+            0,
+            0,
+            2
+          ]
+        },
+        "file_bytes": 600,
+        "file_sha256": "9761a6df69daa320c474f5560c0b3fedf7af77fc0a899409b7462c452f181e59",
+        "proposed_guard": {
+          "accepted": true,
+          "block_parent": [
+            2,
+            2,
+            4294967295
+          ],
+          "block_plateau": [
+            0,
+            0,
+            1
+          ],
+          "site_block": [
+            0,
+            1,
+            2
+          ],
+          "site_plateau": [
+            0,
+            0,
+            2
+          ]
+        }
+      },
+      "24": {
+        "baseline": {
+          "accepted": true,
+          "block_parent": [
+            2,
+            2,
+            4294967295
+          ],
+          "block_plateau": [
+            0,
+            0,
+            1
+          ],
+          "site_block": [
+            0,
+            1,
+            2
+          ],
+          "site_plateau": [
+            0,
+            0,
+            2
+          ]
+        },
+        "file_bytes": 648,
+        "file_sha256": "e86befab6e72bb28382563ee1e314501d1cfe2b2954860595349453d693c9452",
+        "proposed_guard": {
+          "accepted": true,
+          "block_parent": [
+            2,
+            2,
+            4294967295
+          ],
+          "block_plateau": [
+            0,
+            0,
+            1
+          ],
+          "site_block": [
+            0,
+            1,
+            2
+          ],
+          "site_plateau": [
+            0,
+            0,
+            2
+          ]
+        }
+      }
+    }
+  },
+  "cloud_runs": 0,
+  "limits": "Hand-serialized external metadata; no cloud realizing this tree and no native factory defect demonstrated",
+  "math_boundary": "block_birth <= site_entry < parent_birth; root has no upper bound",
+  "native_runs": 0,
+  "reader": "real read_points(..., exact=True) from verified Git blobs",
+  "source_pin": "ddb8d4ea9d485e6c0936f4f1101759e8afa13fb4"
+}

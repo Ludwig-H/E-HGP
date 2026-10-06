@@ -1,0 +1,75 @@
+{
+  "base_pin": "09f20aca1455c0a288d1701a9a4d2c798fb666e6",
+  "dependency_pin": "d4228f5e5c21d6268499a781b422ec3b48fed181",
+  "double_capture_equal": true,
+  "git_dependencies": [
+    {
+      "pin": "d4228f5e5c21d6268499a781b422ec3b48fed181",
+      "repo_path": "morsehgp3D_v11/CMakeLists.txt",
+      "sha256": "82fa1054e14a2bf16e28195cac32a4d81dec56bb81d6481d9d9214d5c87f555d"
+    },
+    {
+      "pin": "d4228f5e5c21d6268499a781b422ec3b48fed181",
+      "repo_path": "morsehgp3D_v11/tests/mutants/run_mutants.py",
+      "sha256": "866dd057ae01f9a2628565d16f91accc33ae0bba4b9deb3f2cf9fcf05ff3b038"
+    },
+    {
+      "pin": "d4228f5e5c21d6268499a781b422ec3b48fed181",
+      "repo_path": "morsehgp3D_v11/tests/api/supports_route.cpp",
+      "sha256": "2db41f412d4894ffb8688b86e6cc16b5e3a1a9e7329a6cce13a4330dc692fb42"
+    },
+    {
+      "pin": "98a00955083d483306c4f92b9031e382e81b0e59",
+      "repo_path": "morsehgp3D_v11/tests/api/tests.cmake",
+      "sha256": "f58d8bb1033c9ae0df9ccd98a16c135bbea61fb2c28851820f16d9ec8c22e29d"
+    },
+    {
+      "pin": "98a00955083d483306c4f92b9031e382e81b0e59",
+      "repo_path": "morsehgp3D_v11/src/api/write_supports.cpp",
+      "sha256": "958190caf962931018134077e560200d9ac256428eb37d3de78daefe452c6898"
+    },
+    {
+      "pin": "98a00955083d483306c4f92b9031e382e81b0e59",
+      "repo_path": "morsehgp3D_v11/src/api/manifest.cpp",
+      "sha256": "1839c63b76c405a88f226f4cef1b88cce8428939d6da17ac7e36d5e0899a1263"
+    }
+  ],
+  "old_goldens_pin": "98a00955083d483306c4f92b9031e382e81b0e59",
+  "patch_needle": "      \"remplace\": \"    return true;\",",
+  "patch_replacement": "      \"remplace\": \"    static_cast<void>(i); return true;\",",
+  "patch_sha256": "158c253ddffa563a21c0a8209f8f010a2c066e40333cce3e3408220f8abec5c2",
+  "proposed_manifest_sha256": "0fbf104e1e1f8be41eccae0be77f898be54e6f533896f33244f45c81c6e6b719",
+  "schema": "audit_sp_v2_gate_followup_sources_v1",
+  "wip_captures": [
+    {
+      "capture_path": "sources/tests.cmake",
+      "repo_path": "morsehgp3D_v11/tests/api/tests.cmake",
+      "second_capture_sha256": "724df20cd89a4b58ca67d1f09cacee5616ad76e3f1ee708a50fbb5f21dd698a5",
+      "sha256": "724df20cd89a4b58ca67d1f09cacee5616ad76e3f1ee708a50fbb5f21dd698a5"
+    },
+    {
+      "capture_path": "sources/cli.json",
+      "repo_path": "morsehgp3D_v11/tests/mutants/cli.json",
+      "second_capture_sha256": "565286d662825c11abf3f88d21f159546138e0c590b63b7d92d08aa4725b5209",
+      "sha256": "565286d662825c11abf3f88d21f159546138e0c590b63b7d92d08aa4725b5209"
+    },
+    {
+      "capture_path": "sources/hierarchy.cpp",
+      "repo_path": "morsehgp3D_v11/src/supports/hierarchy.cpp",
+      "second_capture_sha256": "bab4244ca1c3404de7a3e2a1731673bad131499be217d7eabfe3f2b0d26899fc",
+      "sha256": "bab4244ca1c3404de7a3e2a1731673bad131499be217d7eabfe3f2b0d26899fc"
+    },
+    {
+      "capture_path": "sources/write_supports.cpp",
+      "repo_path": "morsehgp3D_v11/src/api/write_supports.cpp",
+      "second_capture_sha256": "d402fdd246f52c4afe862db69943cb8dd0dc978646dcab9b77f7bc7796e0825d",
+      "sha256": "d402fdd246f52c4afe862db69943cb8dd0dc978646dcab9b77f7bc7796e0825d"
+    },
+    {
+      "capture_path": "sources/manifest.cpp",
+      "repo_path": "morsehgp3D_v11/src/api/manifest.cpp",
+      "second_capture_sha256": "2435b1ada36653e5866da8026f05b91f743c34703d79c820a21a61a656223a7a",
+      "sha256": "2435b1ada36653e5866da8026f05b91f743c34703d79c820a21a61a656223a7a"
+    }
+  ]
+}

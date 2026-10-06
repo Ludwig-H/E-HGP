@@ -1,0 +1,19 @@
+{
+  "files": {
+    "morsehgp3D_v11/tests/api/tests.cmake": "724df20cd89a4b58ca67d1f09cacee5616ad76e3f1ee708a50fbb5f21dd698a5",
+    "morsehgp3D_v11/tests/mutants/cli.json": "11c1454488c8f930eadc2fc7e1a2c1cff2305db8c620825a94255b9e01aa047f"
+  },
+  "mutant": {
+    "native_tested": false,
+    "replacement": "    return selection == Selection::all || tree.attachment().role()[i] <= BallRole::internal;",
+    "status": "resolved_in_source"
+  },
+  "obsolete_patch": "mutant_parameter_use.patch must not be applied to published source",
+  "pin": "0cc9cbec426207b1310b91cace257298d3843aa6",
+  "scope": "Source and pinned values only; no native gate verdict",
+  "u18": {
+    "equal_to_frozen_v1": true,
+    "fields_compared": 12,
+    "status": "still_historical"
+  }
+}

@@ -1,0 +1,11 @@
+--- a/morsehgp3D_v11/tests/mutants/cli.json
++++ b/morsehgp3D_v11/tests/mutants/cli.json
+@@ -233,7 +233,7 @@
+       "id": "sp_internes_gardees",
+       "fichier": "src/supports/hierarchy.cpp",
+       "cherche": "    return selection == Selection::all || tree.attachment().role()[i] != BallRole::internal;",
+-      "remplace": "    return true;",
++      "remplace": "    static_cast<void>(i); return true;",
+       "porte": "mhgp11_cli_supports_oracle",
+       "note": "arbre couvrant : liaisons internes gardees (selection ignoree)"
+     },

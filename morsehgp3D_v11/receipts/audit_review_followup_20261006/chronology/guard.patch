@@ -1,0 +1,22 @@
+--- a/morsehgp3D_v11/bench/mhgp11_formats.py
++++ b/morsehgp3D_v11/bench/mhgp11_formats.py
+@@ -1119,6 +1119,8 @@
+     for s in range(f.n):
+         b, p = f.site_block[s], f.site_plateau[s]
+         need(b < f.Bk and p < f.P and f.block_plateau[b] <= p, 'MHGP11PT : entree du site %d' % s)
++        up = f.block_parent[b]
++        need(up == NONE or p < f.block_plateau[up], 'MHGP11PT : site %d entre dans un bloc retire' % s)
+         created[b] = created[b] or f.block_plateau[b] == p
+         if f.strict[s] == 0:
+             need(plateau_of[p] == (f.floor[s], 0, 0), 'MHGP11PT : plateau du site non strict %d' % s)
+--- a/morsehgp3D_v11/src/head/condense.cpp
++++ b/morsehgp3D_v11/src/head/condense.cpp
+@@ -50,6 +50,8 @@
+   for (u64 s = 0; s < n; ++s) {
+     MHGP11_CHECK(t.site_block[s] < blocks && t.site_plateau[s] < plateaus, head_invariant);
+     MHGP11_CHECK(t.site_plateau[s] >= t.block_plateau[t.site_block[s]], head_invariant);
++    const u32 up = t.block_parent[t.site_block[s]];
++    MHGP11_CHECK(up == kNone || t.site_plateau[s] < t.block_plateau[up], head_invariant);
+   }
+   return {};
+ }

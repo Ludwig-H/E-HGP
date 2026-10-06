@@ -8,6 +8,44 @@ aux reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 Note maintenue en place ; détails et échanges clos dans les reçus.
 
+## Réponse à la section R : sélection de Kruskal et contrôles sans Q_b
+
+**Réponse à 0cc9cbec4, section R du 6 octobre à 11:43 UTC.**
+
+**R1. Une boule peut porter plusieurs unions ; garder la première boule
+du plateau ne suffit pas.** Le triangle équilatéral K1 détaillé ci-dessous
+est précisément un plateau portant plusieurs boules de fusion. Ses trois
+boules ont le rôle `merge` ; Kruskal en garde deux. Garder toutes les
+boules ferme un cycle, garder seulement la première laisse un site isolé.
+Le critère correct est donc : parcourir les boules dans l'ordre BallIdx,
+garder chaque S* qui provoque au moins une union réussie sur les branches
+encore distinctes. Une boule à c branches peut être conservée une seule
+fois avec ses `prior` originaux, même si certaines liaisons sont déjà
+redondantes. Les unions doivent finalement relier tous les enfants du nœud.
+Le [sélecteur proposé](../receipts/audit_supports_mst_followup_20261006/native/README.md)
+implémente ce critère. Le §10.10 prouve la suffisance de toute la famille
+pour T_K ; il ne dispense pas de cette sélection au sein du plateau.
+
+**R2. Pas besoin de réénumérer Q_b dans la sortie `spanning`.** Conserver
+les contre-épreuves S6 et `strict_traces` sur la voie `all`, avec leur
+périmètre borné. La nouvelle voie doit en plus avoir son propre oracle de
+sélection : appliquer Kruskal à l'oracle complet et comparer la sortie
+native intacte à cet attendu. La projection actuelle de `mine` et `want`
+par le même filtre ne fournit pas cette preuve. Le
+[différentiel proposé](../receipts/audit_supports_mst_followup_20261006/mathematics/remaining_1054/README.md)
+et les [gardes du lecteur](../receipts/audit_supports_mst_20261006/reader_spanning_proposal/README.md)
+sont fournis. Les contrôles du lecteur sur S*, rangs, rôles, unions utiles,
+connexion finale et version ne demandent pas l'énumération de Q_b.
+Ils n'établissent pas seuls le choix canonique parmi les boules omises :
+c'est le rôle du différentiel. Cette séparation conserve le format réduit
+et évite de réintroduire son ancien plafond par un contrôle auxiliaire.
+
+**Raccord de qualification :** malgré la mention des trois profils en R,
+les douze préfixes fichier/manifeste des six cas API u18 de 0cc9cbec4 sont
+encore ceux de SPv1. Les [références u18](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#supports-v2--références-u18-et-mutant-corrigé-avant-publication)
+restent à établir sur la sélection corrigée. Le mutant signalé pendant
+le WIP est, lui, corrigé dans la publication.
+
 ## Supports du MST : le nouveau différentiel doit détecter le cycle
 
 **Suivi du WIP CLI du 6 octobre, 10:38 UTC.** `cli_supports_oracle.py`
@@ -40,12 +78,13 @@ coquille. Rejeux normal/−O identiques ; patch proposé, sans exécution native
 
 ## Supports du MST : cycle conservé au même plateau
 
-**À corriger avant publication de la sortie v2.** WIP `v11-impl-l3`,
-base **9eee2ed4b**, relu le 6 octobre vers 10:10 UTC. La décision utilisateur
-de ne publier que les supports associés au MST, S* seul, est respectée.
-Mais `Selection::spanning` filtre seulement `role != internal` : ce rôle
+**Sélection à corriger.** Constat initial dans le WIP `v11-impl-l3`,
+base **9eee2ed4b**, relu le 6 octobre vers 10:10 UTC. Le choix de S* seul
+suit la demande ; la sélection des boules reste incorrecte.
+`Selection::spanning` filtre seulement `role != internal` : ce rôle
 décrit le rattachement au plateau fermé, pas l'acceptation d'une arête
 par Kruskal.
+**Le défaut est confirmé dans la source publiée 0cc9cbec4.**
 
 Témoin K1 : **A=(0,0,0), B=(1,1,0), C=(1,0,1)**. Les trois paires ont
 une distance au carré de 2 ; leurs boules diamétrales ont rayon carré 1/2
@@ -55,6 +94,15 @@ Dans `attachment.cpp`, chaque boule reçoit `merge`, car le rang de son
 nœud de rattachement égale celui de la boule. Le filtre garde donc AB,
 AC et BC : **trois supports formant un cycle**, contre deux pour un MST.
 L'arbre FULL n'est pas en défaut ; c'est la nouvelle sélection qui l'est.
+
+**Suivi du nouveau §10.10 du WIP `MATHEMATIQUES.md`, vers 11:35 UTC.**
+La proposition de suffisance permet bien de reconstituer T_K avec toutes
+les naissances et fusions. Elle ne prouve pas que chacune de ces boules
+est retenue par Kruskal : les unions précédentes du même plateau peuvent
+déjà avoir relié ses branches. Le triangle ci-dessus satisfait cette
+proposition tout en gardant son cycle. Le
+[correctif rédactionnel proposé](../receipts/audit_review_followup_20261006/contract/README.md)
+distingue explicitement suffisance pour T_K et sélection des unions utiles.
 
 **Correction proposée sans reconstruire FULL :** à chaque nœud de
 multifusion, initialiser une DSU sur ses enfants (composantes à la coupe
@@ -96,6 +144,26 @@ refusent son cycle à trois supports et une fusion de quatre enfants
 restant séparés en deux groupes. Les trois fichiers passent dans le lecteur
 WIP initial. Contrôles normal/−O conformes ; la nouvelle garde admet aussi
 les hyper-arêtes comportant une liaison redondante mais une union utile.
+
+## Comparatif : ne pas arrondir avant la décision de population
+
+**Constat P2 au pin ddb8d4ea9.** `points_flat_study.one()` arrondit les
+IoU du niveau B à quatre décimales avant que `summarize()` décide si chaque
+objet dépasse strictement 1/2. Le témoin `10001/20001 > 1/2` devient
+`0,5000` : l'objet est exclu du groupe secondaire et peut exclure sa scène
+entière de la population principale. Cela peut changer le comparatif
+servant à choisir la sélection plate.
+
+**Correction proposée :** conserver les valeurs non arrondies renvoyées
+par `best_blocks`, pour la tour et pour HDBSCAN ; réserver les arrondis
+aux agrégats affichés. Le seuil reste strictement supérieur à 1/2. Le
+[reçu ciblé](../receipts/audit_review_followup_20261006/population/README.md)
+fournit le patch et le témoin discriminant au seuil.
+
+Les valeurs déjà arrondies d'un ancien JSON ne permettent pas de réparer
+sa population : recalculer le niveau B depuis les arbres exportés pour
+réviser une étude concernée. Aucun effet sur un résultat réel publié ni
+changement de classement n'est établi par le seul contre-exemple.
 
 ## Feuille coherente : reponse a la section Q du 6 octobre
 

@@ -1,0 +1,22 @@
+{
+  "pin": "ddb8d4ea9d485e6c0936f4f1101759e8afa13fb4",
+  "files": {
+    "morsehgp3D_v11/bench/points_flat_study.py": {
+      "sha256": "abd4a1f9161dbb22362f7fd354e702481874da780ed11b400489f9e6a7c0dd6f",
+      "bytes": 14606
+    },
+    "morsehgp3D_v11/bench/points_hierarchy.py": {
+      "sha256": "fa12f16f3ce599a5299737d740bd252454cddcb9c475edf593d7aab3cd426c17",
+      "bytes": 27273
+    }
+  },
+  "anchors": {
+    "morsehgp3D_v11/bench/points_flat_study.py": [
+      "one:182-183 hierarchy IoU rounding",
+      "summarize:217-220 strict population and secondary-object thresholds"
+    ],
+    "morsehgp3D_v11/bench/points_hierarchy.py": [
+      "Evaluator.close: iou=c/(size+total-c)"
+    ]
+  }
+}

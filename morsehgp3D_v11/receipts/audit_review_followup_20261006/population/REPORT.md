@@ -1,0 +1,17 @@
+# Constat et correction minimale
+
+Source Git : `ddb8d4ea9d485e6c0936f4f1101759e8afa13fb4`. Les empreintes et tailles de `bench/points_flat_study.py` et `bench/points_hierarchy.py` sont conservées dans `sources.json` et vérifiées à chaque rejeu. Aucune capture WIP n'est utilisée.
+
+Le critère écrit dans l'en-tête de `points_flat_study.py` définit la population comme les couples (scène, k) dont tous les objets ont un meilleur bloc d'IoU strictement supérieur à 1/2, et une population secondaire composée des objets satisfaisant ce même seuil. Or `one()` lignes 182–183 enregistre ces IoU après `round(x, 4)`. `summarize()` lignes 217–220 décide ensuite sur ces valeurs arrondies. Ce n'est donc pas un simple arrondi d'affichage : il peut retirer un couple entier dès qu'un objet passe de >1/2 à 0.5, et retirer séparément cet objet de la population secondaire.
+
+La reproduction utilise les nœuds AST du code réel : `points_hierarchy.Evaluator`, `points_flat_study.best_blocks`, les deux affectations de `one()`, puis `summarize`. Les entrées sont des arbres abstraits à un bloc et un plateau, sans recalcul de hiérarchie géométrique. Un objet de 10001 sites contenu dans un bloc de 20001 sites donne un IoU exact de `10001/20001`, dont le flottant produit par l'évaluateur vaut `0.5000249987500625`. Le stockage actuel le transforme en `0.5` ; le résumé le refuse. Ces effectifs sont compatibles avec une taille de trame ordinaire : le phénomène ne demande pas d'effectifs démesurés. Ce reçu n'affirme pas qu'une telle valeur apparaît dans les scènes déjà mesurées.
+
+`proposed.patch` change exactement deux lignes : les listes renvoyées par `best_blocks()` sont conservées sans arrondi, pour T et A. `summarize`, le seuil strict, les métriques plates, les autres arrondis de lecture et la sélection EOM restent identiques. Le patch ne fait pas passer l'égalité IoU=1/2. Il retire cette quantification décimale précise ; il ne transforme pas l'évaluateur flottant existant en nouvel oracle rationnel.
+
+# Contre-épreuve bornée
+
+Quatre cas passent avant/après : `10001/20001`, `1/2`, `10000/20001` et `10002/20001`. Les trois cas hors de la bande affectée gardent la bonne décision ; seul le premier est exclu par le code actuel puis admis par le patch. Une sérialisation JSON suivie du résumé conserve les décisions corrigées.
+
+Un jeu synthétique de deux couples montre un effet matériel sur la mesure : le code actuel conserve un seul couple où tous les objets sont retrouvés, donnant `all_found=1.0`. Avec le couple frontière correctement inclus, il y a deux couples et `all_found=0.5`. Une autre entrée synthétique à deux objets montre une exclusion primaire inchangée, mais une population secondaire passant de un à deux objets. Ces nombres démontrent une possibilité causale de modifier les dénominateurs et scores du choix de règle ; ils ne décrivent aucun résultat LiDAR publié et ne prouvent aucun changement de règle sur données réelles.
+
+Le rejeu n'exécute ni `one()` complet ni imports NumPy/SciPy/sklearn : les parties pertinentes sont compilées sans modification depuis leurs AST, avec adaptateurs `tolist()` et moyenne scalaire sur les petites listes du résumé. Aucun benchmark, test natif, build, cloud ou dépendance ajoutée. Les deux exécutions normal/−O passent 39 contrôles, code 0, stdout identique et stderr vide. `git apply --check` et l'application isolée passent dans chaque exécution. Aucun essai échoué dans cette capsule ; `attempts.json` est vide.

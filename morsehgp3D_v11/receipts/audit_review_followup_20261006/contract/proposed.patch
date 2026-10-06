@@ -1,0 +1,46 @@
+--- a/morsehgp3D_v11/docs/MATHEMATIQUES.md
++++ b/morsehgp3D_v11/docs/MATHEMATIQUES.md
+@@ -918,8 +918,9 @@
+ ### 10.10 Sortie publiée : l'arbre couvrant d'ordre K (6 octobre 2026)
+ 
+ Décision de l'utilisateur du 6 octobre 2026 : ne publier que les supports de l'arbre couvrant minimal d'ordre K, sous
+-la forme des arêtes de Kruskal avec $S^*$ seul. La sortie publiée (`MHGP11SP` version 2) garde donc les boules de
+-$W_K$ de rôle naissance ou fusion, chacune avec son seul support $S^*$.
++la forme des arêtes de Kruskal avec $S^*$ seul. La sortie publiée (`MHGP11SP` version 2) garde les naissances et,
++parmi les boules de fusion de $W_K$, celles qui produisent au moins une union réussie dans la sélection ci-dessous.
++Chaque boule retenue porte son seul support $S^*$.
+ 
+ **Proposition (suffisance).** Les boules de rôle naissance et fusion, avec leurs rangs, leur rattachement et leurs
+ branches, déterminent $T_K$. Les boules de rôle interne n'y ajoutent aucun nœud ni aucune arête.
+@@ -929,7 +930,13 @@
+ $\mathrm{enfants}(v)$. Lemme C, point 2 : une boule interne a $\mathrm{ant}(b)=\lbrace\mathrm{att}(b)\rbrace$, et
+ ne relie que des $K$-parties d'un nœud déjà formé. ∎
+ 
+-C'est l'analogue, sur l'hypergraphe des boules, de Kruskal : une boule est retenue si et seulement si elle crée une
+-composante (naissance) ou en réunit au moins deux (fusion). Une fusion qui réunit $c\geq 3$ composantes est une seule
+-hyperarête ; plusieurs boules de fusion peuvent être rattachées au même nœud au même rang (plateau). Les comptes du
+-§ 10.7 restent définis pour toute boule, mais ils ne sont plus publiés.
++Cette suffisance ne sélectionne pas les boules de Kruskal : au même plateau, le rôle fusion reste attaché à une
++boule même si les unions précédentes ont déjà relié toutes ses branches. Pour chaque multifusion, initialiser une
++partition de ses enfants à la coupe ouverte, puis parcourir les boules dans l'ordre canonique des BallIdx (niveau
++exact, puis $S^*$). Réunir les branches `prior` de chaque boule et ne la retenir que si au moins une union réussit.
++À la fin, vérifier que tous les enfants sont reliés. Les naissances sont conservées.
++
++Cette sélection décrit les supports associés au Kruskal compressé du constructeur HGP. Une boule peut porter
++plusieurs unions ; son $S^*$ n'est publié qu'une fois. Des liaisons déjà redondantes à l'intérieur d'une boule
++n'interdisent pas de la retenir si une autre union est utile. Les branches `prior` originales restent publiées.
++Les comptes du § 10.7 restent définis pour toute boule, mais ils ne sont plus publiés.
+--- a/morsehgp3D_v11/docs/SORTIES.md
++++ b/morsehgp3D_v11/docs/SORTIES.md
+@@ -292,8 +292,9 @@
+ 
+ **Décision de l'utilisateur du 6 octobre 2026.** Il ne faut surtout pas représenter tous les supports du niveau K, mais
+ seulement ceux de l'arbre couvrant minimal d'ordre K. Choix retenu : les arêtes de Kruskal, avec S\* seul.
+-- Seules les boules qui changent l'arbre d'ordre K sont publiées : **naissances et fusions**.
+-- Une liaison interne relie des K-parties déjà dans un même nœud ; elle fermerait un cycle, et elle est retirée.
++- Les **naissances** sont publiées, ainsi que les boules de fusion qui produisent au moins une union réussie entre
++  branches encore distinctes, dans l'ordre canonique de Kruskal au sein du plateau (MATHEMATIQUES.md, § 10.10).
++- Une liaison interne est retirée ; une boule de fusion dont toutes les branches ont déjà été réunies l'est aussi.
+ - Chaque boule publiée porte **un seul support**, $S^*$, d'arité $q_{\min}$, lu dans le catalogue.
+ - $\mathcal{Q}_b$ n'est plus énuméré. Il n'y a donc plus de plafond de coquille à 24 sites, plus de brouillon de
+   fermeture, et plus de comptes du lemme G dans la sortie.

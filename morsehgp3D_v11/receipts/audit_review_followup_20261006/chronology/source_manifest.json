@@ -1,0 +1,20 @@
+{
+  "source_pin": "ddb8d4ea9d485e6c0936f4f1101759e8afa13fb4",
+  "sources_sha256": {
+    "morsehgp3D_v11/bench/catalogue_semantic.py": "f09d2dff28098ff9c5288a69058b776350a6339034d17397491c073257196f2c",
+    "morsehgp3D_v11/bench/full_semantic.py": "1ffda4fb32e58d9cadd6f8c87a4cabe0eb28c0bcc5769ba8370b2738bd4d8d25",
+    "morsehgp3D_v11/bench/mhgp11_formats.py": "2b5d8147d7c8b5d267a6ebaa1bde1326066b108dfb8c0f91d034386e96cfd40f",
+    "morsehgp3D_v11/src/head/condense.cpp": "1279d2cdaa9b197fa84b4d2db742d63b3189601b013d737088e2ec8bf667088e",
+    "morsehgp3D_v11/src/head/head.hpp": "494c8f4a165dde1b4e0c82db26f31d1d5877f8ef0aa0621c78789109b99ac601",
+    "morsehgp3D_v11/src/points/point_tree.cpp": "f85d5dad50b3353c50207047cb02e2f48dc5fda801aaecd3fbbe9dc776e8c60c",
+    "morsehgp3D_v11/src/points/hang.cpp": "5776a6ef5d621adb4f177b1094a5271eff4a087b6bfabe5cd618c2a23067599c",
+    "morsehgp3D_v11/docs/HIERARCHIE_POINTS.md": "0868879cfdbf5b828f318e3df56b03ab3d7fc7261fa41c7a467952072a0b6e03",
+    "morsehgp3D_v11/docs/SORTIES.md": "9c4f0c66bd2f153a9a45d738e89279ed9bff3b1decbe75b8c91605fd758f184f",
+    "morsehgp3D_v11/tests/head/head_test.cpp": "9f5153919e6f4935476b129116af288c0a7b9993e5699286c1bf89625426388b",
+    "morsehgp3D_v11/tests/head/tests.cmake": "5b396f4aae9beed3ba67c56ba6f84cf871ff63e74a786b8285117f259a85b3c5"
+  },
+  "reader_guard_before": "        need(b < f.Bk and p < f.P and f.block_plateau[b] <= p, 'MHGP11PT : entree du site %d' % s)\n",
+  "reader_guard_after": "        need(b < f.Bk and p < f.P and f.block_plateau[b] <= p, 'MHGP11PT : entree du site %d' % s)\n        up = f.block_parent[b]\n        need(up == NONE or p < f.block_plateau[up], 'MHGP11PT : site %d entre dans un bloc retire' % s)\n",
+  "native_runs": 0,
+  "cloud_runs": 0
+}

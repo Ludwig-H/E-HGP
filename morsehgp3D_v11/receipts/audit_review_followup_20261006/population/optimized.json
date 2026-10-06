@@ -1,0 +1,57 @@
+{
+  "cases": [
+    {
+      "exact_eligible": true,
+      "exact_iou": "10001/20001",
+      "name": "just_above_half",
+      "original_in_population": false,
+      "original_stored": 0.5,
+      "patched_in_population": true,
+      "patched_stored": 0.5000249987500625
+    },
+    {
+      "exact_eligible": false,
+      "exact_iou": "1/2",
+      "name": "equal_half",
+      "original_in_population": false,
+      "original_stored": 0.5,
+      "patched_in_population": false,
+      "patched_stored": 0.5
+    },
+    {
+      "exact_eligible": false,
+      "exact_iou": "10000/20001",
+      "name": "just_below_half",
+      "original_in_population": false,
+      "original_stored": 0.5,
+      "patched_in_population": false,
+      "patched_stored": 0.4999750012499375
+    },
+    {
+      "exact_eligible": true,
+      "exact_iou": "3334/6667",
+      "name": "above_decimal_rounding_band",
+      "original_in_population": true,
+      "original_stored": 0.5001,
+      "patched_in_population": true,
+      "patched_stored": 0.5000749962501875
+    }
+  ],
+  "checks": 39,
+  "native_executed": false,
+  "patch_apply_check": "PASS",
+  "real_data_impact": "not measured or established",
+  "scope": "Real Evaluator, best_blocks, hierarchy-IoU assignments and summarize AST; stdlib tolist/scalar mean adapters. Abstract one-plateau inputs and synthetic result records only. No complete one(), numpy/scipy, native, benchmarks or cloud.",
+  "source_pin": "ddb8d4ea9d485e6c0936f4f1101759e8afa13fb4",
+  "status": "PASS_portable_reproduction__rounding_changes_population",
+  "synthetic_primary": {
+    "original_all_found": 1.0,
+    "original_scenes": 1,
+    "patched_all_found": 0.5,
+    "patched_scenes": 2
+  },
+  "synthetic_secondary": {
+    "original_objects": 1,
+    "patched_objects": 2
+  }
+}

@@ -1,0 +1,129 @@
+{
+  "base_pin": "09f20aca1455c0a288d1701a9a4d2c798fb666e6",
+  "cloud_actions": 0,
+  "diagnostic_commands": [
+    {
+      "argv": [
+        "{build}/mhgp11_api_supports_route_probe",
+        "--work={out}/u18_spv2_scale8000",
+        "--k=5",
+        "--workers=1,4",
+        "--uniform18=8000,20261002",
+        "--min-balls=1",
+        "--min-cells=1"
+      ],
+      "case": "scale8000",
+      "scope": "Diagnostic collection after guarded G4 build of final corrected pushed source; not an execution or qualification in this audit.",
+      "sites": 8000
+    },
+    {
+      "argv": [
+        "{build}/mhgp11_api_supports_route_probe",
+        "--work={out}/u18_spv2_scale16000",
+        "--k=5",
+        "--workers=1,4",
+        "--uniform18=16000,20261002",
+        "--min-balls=1",
+        "--min-cells=1"
+      ],
+      "case": "scale16000",
+      "scope": "Diagnostic collection after guarded G4 build of final corrected pushed source; not an execution or qualification in this audit.",
+      "sites": 16000
+    },
+    {
+      "argv": [
+        "{build}/mhgp11_api_supports_route_probe",
+        "--work={out}/u18_spv2_scale32000",
+        "--k=5",
+        "--workers=1,4",
+        "--uniform18=32000,20261002",
+        "--min-balls=1",
+        "--min-cells=1"
+      ],
+      "case": "scale32000",
+      "scope": "Diagnostic collection after guarded G4 build of final corrected pushed source; not an execution or qualification in this audit.",
+      "sites": 32000
+    },
+    {
+      "argv": [
+        "{build}/mhgp11_api_supports_route_probe",
+        "--work={out}/u18_spv2_ng00",
+        "--k=5",
+        "--workers=1,4",
+        "--data=lidar_ng00",
+        "--min-balls=1",
+        "--min-cells=1"
+      ],
+      "case": "ng00",
+      "scope": "Diagnostic collection after guarded G4 build of final corrected pushed source; not an execution or qualification in this audit.",
+      "sites": 39885
+    },
+    {
+      "argv": [
+        "{build}/mhgp11_api_supports_route_probe",
+        "--work={out}/u18_spv2_ng01",
+        "--k=5",
+        "--workers=1,4",
+        "--data=lidar_ng01",
+        "--min-balls=1",
+        "--min-cells=1"
+      ],
+      "case": "ng01",
+      "scope": "Diagnostic collection after guarded G4 build of final corrected pushed source; not an execution or qualification in this audit.",
+      "sites": 35551
+    },
+    {
+      "argv": [
+        "{build}/mhgp11_api_supports_route_probe",
+        "--work={out}/u18_spv2_ng02",
+        "--k=5",
+        "--workers=1,4",
+        "--data=lidar_ng02",
+        "--min-balls=1",
+        "--min-cells=1"
+      ],
+      "case": "ng02",
+      "scope": "Diagnostic collection after guarded G4 build of final corrected pushed source; not an execution or qualification in this audit.",
+      "sites": 45845
+    }
+  ],
+  "double_capture_equal": true,
+  "mutant": {
+    "compiler_outcome": "Expected -Wunused-parameter under -Wextra/-Werror; not compiled by auditor.",
+    "corrected_mutated_body": "static_cast<void>(i); return true;",
+    "gate": "mhgp11_cli_supports_oracle",
+    "id": "sp_internes_gardees",
+    "manifest_floor": 31,
+    "manifest_mutants": 31,
+    "original_mutated_body": "return true;",
+    "rebase_condition": "Applies only while kept(u64 i) and its current search needle exist. Rebase after actual Kruskal selector integration if it changes.",
+    "runner_build_refusal": "INVALIDE, never a semantic oracle kill",
+    "unused_parameter": "i"
+  },
+  "native_runs": 0,
+  "schema": "audit_sp_v2_gate_followup_replay_v1",
+  "u18": {
+    "binary_version_now": 2,
+    "current_exactly_historical": true,
+    "fields": 12,
+    "historical_pin": "98a00955083d483306c4f92b9031e382e81b0e59",
+    "manifest_version_now": 2,
+    "outcome": "References still historical SPv1; six SPv2 references require guarded native regeneration. No SPv2 digest predicted or native failure observed.",
+    "pairs": 6,
+    "profile": 18,
+    "values": {
+      "ng00_file": "51b941795a2361c7",
+      "ng00_manifest": "bc8d49e588415eed",
+      "ng01_file": "b8449cfbc212f782",
+      "ng01_manifest": "f6b275a818df1d39",
+      "ng02_file": "a4642008f9145a97",
+      "ng02_manifest": "247ffdc9a96d2891",
+      "scale16000_file": "62e74f1f5df26634",
+      "scale16000_manifest": "dc3a1b98925c658a",
+      "scale32000_file": "a91f226656b6cbd3",
+      "scale32000_manifest": "3e29e3f5d1403abd",
+      "scale8000_file": "09a1101bc512394e",
+      "scale8000_manifest": "e10e6c8d117429e3"
+    }
+  }
+}

@@ -1,0 +1,13 @@
+--- a/morsehgp3D_v11/bench/points_flat_study.py
++++ b/morsehgp3D_v11/bench/points_flat_study.py
+@@ -179,8 +179,8 @@
+     tree = np.stack([sk['left'], sk['right'], sk['value']], 1)
+     apt = pf.linkage_point_tree(tree, len(xyz))
+     nobj, nvoid = obj[pt.ids], void[pt.ids]
+-    out['level_b_tower'] = [round(x, 4) for x in best_blocks(pt, nobj, nvoid, objects)]
+-    out['level_b_hdbscan'] = [round(x, 4) for x in best_blocks(apt, obj, void, objects)]
++    out['level_b_tower'] = best_blocks(pt, nobj, nvoid, objects)
++    out['level_b_hdbscan'] = best_blocks(apt, obj, void, objects)
+     out['exact'] = isinstance(pt.levels[0], pf.Level)
+     for mcs in mcs_list:
+         for side, tree_ in (('T', pt), ('A', apt)):

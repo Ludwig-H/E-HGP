@@ -13,6 +13,9 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 ## Supports v2 : sélection et cohérence du dossier
 
 WIP `v11-impl-l3`, base **9eee2ed4b**, relu le 6 octobre vers 10:10 UTC.
+Ces défauts restent présents dans la source publiée **0cc9cbec4** ;
+la [réponse à R1/R2](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md#réponse-à-la-section-r--sélection-de-kruskal-et-contrôles-sans-q_b)
+donne le raccord sans réénumération de Q_b.
 **Le filtre actuel ne sélectionne pas encore un MST :** il conserve les
 cycles du même plateau. Le
 [témoin et la correction](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md#supports-du-mst--cycle-conservé-au-même-plateau)
@@ -69,6 +72,47 @@ voies restent en place. Une borne faisant intervenir les cellules devrait
 compter séparément les naissances publiées. Ce point est résolu en source,
 sans nouvelle qualification native.
 [Source corrigée et contre-exemple S1](../receipts/audit_supports_mst_followup_20261006/api_route/README.md).
+
+## Supports v2 : références u18 et mutant corrigé avant publication
+
+**Mutant corrigé en source dans 0cc9cbec4.** Le WIP capturé remplaçait
+`kept(u64 i)` par `return true;`, laissant `i` inutilisé sous
+`-Wextra -Werror`. La publication emploie maintenant la comparaison
+`role()[i] <= BallRole::internal`, qui garde les trois rôles en utilisant
+le paramètre. Le patch de ce constat est donc historique et n'est plus à
+appliquer. Le motif devra suivre le sélecteur retenu à l'intégration de
+Kruskal ; aucun verdict de compilation n'a été produit par cet audit.
+
+En **0cc9cbec4**, les six attentes API u18 sont encore les empreintes SPv1 de **98a009550**,
+alors que les tables u21/u24 ont été adaptées à SPv2. Régénérer les
+références u18 depuis la nouvelle sortie et vérifier les identités entre
+voies ; ne pas recopier les empreintes d'un autre profil. Le
+[reçu ciblé](../receipts/audit_review_followup_20261006/gates/README.md)
+épingle les sources et la clôture du mutant en source. Ces constats sont issus
+du code ; aucune compilation ni capture native nouvelle n'est annoncée.
+
+## Arbres de points : contrôler la fin de vie du bloc
+
+**Constat P2 au pin ddb8d4ea9.** `_check_point_tree` vérifie que le bloc
+est né quand un site y entre, mais pas qu'il est encore vivant.
+Avec `block_plateau=[0,0,1]`, `block_parent=[2,2,NONE]`,
+`site_plateau=[0,0,2]` et `site_block=[0,1,0]`, le troisième site entre
+dans le bloc0 après sa fusion au plateau1. Le lecteur `read_points`, même
+avec `exact=True`, accepte cette chronologie impossible. La borne manque
+aussi dans `head::detail::check_shape`, accessible par `flat_sites(TreeView)`.
+
+**Correction proposée :** après validation des indices, exiger
+`block_plateau[b] <= site_plateau[s] < block_plateau[parent[b]]` pour un
+bloc non racine. La borne supérieure est stricte : le constructeur traite
+les fusions avant les entrées du même plateau ; une entrée à la date de
+fusion doit viser le bloc parent. Une racine n'a pas de borne supérieure.
+Le [reçu ciblé](../receipts/audit_review_followup_20261006/chronology/README.md)
+fournit les gardes Python/C++ et les cas avant, à et après la fusion.
+
+Portée : validation d'un fichier externe et d'une vue abstraite, avec
+risque de rejeu incohérent des masses. Aucun arbre fautif produit par la
+factory native n'est démontré. Patch proposé ; qualification native G4
+distincte des reproductions Python bornées.
 
 ## Coop3 : retour du fill un fil après restauration du parcours
 

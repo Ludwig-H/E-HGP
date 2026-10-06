@@ -1,0 +1,257 @@
+{
+  "module": "cli",
+  "plancher": 31,
+  "construction": [
+    "cli"
+  ],
+  "mutants": [
+    {
+      "id": "option_hors_sortie_admise",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "    if (raw.seen[slot] && kKnown[slot].plat_only) return \"option propre a la sortie plat\";",
+      "remplace": "    if (raw.seen[slot] && kKnown[slot].plat_only && slot == kKnown.size()) return \"option propre a la sortie plat\";",
+      "porte": "mhgp11_cli_contract",
+      "note": "--mcs, --z, --selection admis avec --sortie=full"
+    },
+    {
+      "id": "k_treize_admis",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "number < 1 || number > api::kMaxOrder) return \"--k hors de 1..12\";",
+      "remplace": "number < 1 || number > api::kMaxOrder + 1) return \"--k hors de 1..12\";",
+      "porte": "mhgp11_cli_contract",
+      "note": "--k=13 passe les options et n'est refuse qu'au calcul"
+    },
+    {
+      "id": "budget_nul_admis",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "    if (!parse_u64(raw.value[kBudget], number) || number == 0) return",
+      "remplace": "    if (!parse_u64(raw.value[kBudget], number) || number == 1) return",
+      "porte": "mhgp11_cli_contract",
+      "note": "--budget=0 admis par les options"
+    },
+    {
+      "id": "budget_ignore",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "api::Session::make({o.budget.value_or(MemoryBudget::kUnlimited), o.workers});",
+      "remplace": "api::Session::make({MemoryBudget::kUnlimited, o.workers});",
+      "porte": "mhgp11_cli_contract",
+      "note": "--budget sans effet"
+    },
+    {
+      "id": "fils_ignores",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "api::Session::make({o.budget.value_or(MemoryBudget::kUnlimited), o.workers});",
+      "remplace": "api::Session::make({o.budget.value_or(MemoryBudget::kUnlimited), 1});",
+      "porte": "mhgp11_cli_full_identity",
+      "note": "--fils sans effet : la ligne standard rapporte un seul fil"
+    },
+    {
+      "id": "entree_sur_sortie_standard_admise",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "        standard.input = true;",
+      "remplace": "        standard.input = false;",
+      "porte": "mhgp11_cli_contract",
+      "note": "la ligne JSON est ajoutee a une entree"
+    },
+    {
+      "id": "sortie_standard_non_controlee",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "  const bool flushed = std::fflush(stdout) == 0;\n  return flushed && std::ferror(stdout) == 0;",
+      "remplace": "  std::fflush(stdout);\n  return true;",
+      "porte": "mhgp11_cli_contract",
+      "note": "code 0 et dossier publie alors que la ligne standard est perdue"
+    },
+    {
+      "id": "retrait_omis",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "    run.publication = api::withdraw(fail(Reason::output_unwritable), directory);",
+      "remplace": "    run.publication = {fail(Reason::output_unwritable), run.publication.state, run.publication.manifest_sha256};",
+      "porte": "mhgp11_cli_contract",
+      "note": "ligne standard en echec apres la publication, dossier publie non retire"
+    },
+    {
+      "id": "pas_non_recopie",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "                                     o.budget,         o.grid_step,   o.origin};",
+      "remplace": "                                     o.budget,         {},            o.origin};",
+      "porte": "mhgp11_cli_contract",
+      "note": "--pas absent du manifeste"
+    },
+    {
+      "id": "ecriture_full_permutee",
+      "fichier": "src/api/write_full.cpp",
+      "cherche": "    out.word(node.child_begin);\n    out.word(node.child_count);",
+      "remplace": "    out.word(node.child_count);\n    out.word(node.child_begin);",
+      "porte": "mhgp11_cli_full_identity",
+      "note": "champs d'un noeud permutes : octets differents du dump de la sonde"
+    },
+    {
+      "id": "manifeste_taille_fausse",
+      "fichier": "src/api/manifest.cpp",
+      "cherche": "  number(out, file_bytes);",
+      "remplace": "  number(out, file_bytes + 1);",
+      "porte": "mhgp11_cli_full_identity",
+      "note": "taille du fichier full fausse dans le manifeste"
+    },
+    {
+      "id": "plan_avant_sortie_standard",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "  if (!standard.writable) return refuse(fail(Reason::output_unwritable), run, \"sortie standard fermee ou en lecture\");\n  if (standard.input) return refuse(fail(Reason::output_conflict), run, \"sortie standard egale a une entree\");\n  const std::array<const char*, 2> inputs{o.points, o.ids};\n  Result<io::OutputDirectory> planned = io::OutputDirectory::plan(o.directory, inputs);\n  if (!planned.ok()) return refuse(planned.outcome(), run, \"dossier de sortie\");\n",
+      "remplace": "  const std::array<const char*, 2> inputs{o.points, o.ids};\n  Result<io::OutputDirectory> planned = io::OutputDirectory::plan(o.directory, inputs);\n  if (!planned.ok()) return refuse(planned.outcome(), run, \"dossier de sortie\");\n  if (!standard.writable) return refuse(fail(Reason::output_unwritable), run, \"sortie standard fermee ou en lecture\");\n  if (standard.input) return refuse(fail(Reason::output_conflict), run, \"sortie standard egale a une entree\");\n",
+      "porte": "mhgp11_cli_contract",
+      "note": "dossier juge avant la sortie standard (etape 2 de SORTIES, paragraphe 3)"
+    },
+    {
+      "id": "sortie_standard_entree_ids_seulement",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "{std::string_view(\"--points=\"), std::string_view(\"--ids=\")}",
+      "remplace": "{std::string_view(\"--ids=\")}",
+      "porte": "mhgp11_cli_contract",
+      "note": "sortie standard sur le fichier de --points admise : la ligne s'y ajoute"
+    },
+    {
+      "id": "stdout_lstat",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "::stat(argv[i] + prefix.size(), &in) == 0",
+      "remplace": "::lstat(argv[i] + prefix.size(), &in) == 0",
+      "porte": "mhgp11_cli_contract",
+      "note": "entree designee par un lien symbolique vers la sortie standard non reconnue"
+    },
+    {
+      "id": "stdout_lecture_seule_admise",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "standard.writable = flags >= 0 && (flags & O_ACCMODE) != O_RDONLY && ::fstat(STDOUT_FILENO, &out) == 0;",
+      "remplace": "standard.writable = flags >= 0 && ::fstat(STDOUT_FILENO, &out) == 0;",
+      "porte": "mhgp11_cli_contract",
+      "note": "sortie standard en lecture seule admise : refus seulement apres calcul et publication"
+    },
+    {
+      "id": "ligne_refus_sortie_toujours_full",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "  const bool named = run.step != Step::options;",
+      "remplace": "  const bool named = true;",
+      "porte": "mhgp11_cli_contract",
+      "note": "cle output de la ligne de refus jamais null a l'etape des options"
+    },
+    {
+      "id": "sigxfsz_non_ignore",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "  ::signal(SIGXFSZ, SIG_IGN);\n",
+      "remplace": "",
+      "porte": "mhgp11_cli_contract",
+      "note": "limite de taille de fichier : arret par SIGXFSZ et D.pending orphelin au lieu d'un refus"
+    },
+    {
+      "id": "etat_publie_omis",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "  const api::PublicationState state = run.publication.state;",
+      "remplace": "  const api::PublicationState state = api::PublicationState::none;",
+      "porte": "mhgp11_cli_contract",
+      "note": "ligne de refus publication none alors que D reste publie et complet"
+    },
+    {
+      "id": "refus_perdu_sortie_pleine",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "  if (!written) refusal_line(stderr, outcome, run);",
+      "remplace": "  if (!run.stdout_usable && !written) refusal_line(stderr, outcome, run);",
+      "porte": "mhgp11_cli_contract",
+      "note": "ligne de refus perdue quand la sortie standard utilisable echoue (aucun repli)"
+    },
+    {
+      "id": "retrait_omis_double_echec",
+      "fichier": "src/api/manifest.cpp",
+      "cherche": "  if (!written.ok()) return withdraw(written, directory);",
+      "remplace": "  if (!written.ok()) return state_of(written, directory);",
+      "porte": "mhgp11_cli_contract",
+      "note": "commit en double echec sans tentative de retrait par l'api (bibliotheque prechargee)"
+    },
+    {
+      "id": "sp_colonnes_echangees",
+      "fichier": "src/api/write_supports.cpp",
+      "cherche": "  for (const supports::Ball& ball : balls) out.u32v(idx(ball.rank));\n  MHGP11_TRY(out.end());\n  for (u64 b = 0; b < at.balls; ++b) out.u32v(static_cast<u32>(prior_offsets[b + 1] - prior_offsets[b]));\n",
+      "remplace": "  for (u64 b = 0; b < at.balls; ++b) out.u32v(static_cast<u32>(prior_offsets[b + 1] - prior_offsets[b]));\n  MHGP11_TRY(out.end());\n  for (const supports::Ball& ball : balls) out.u32v(idx(ball.rank));\n",
+      "porte": "mhgp11_cli_supports_oracle",
+      "note": "colonnes BALLS.rank et BALLS.prior_count echangees dans MHGP11SP"
+    },
+    {
+      "id": "sp_ordre_supports",
+      "fichier": "src/api/write_supports.cpp",
+      "cherche": "    return h.supports()[support_offsets[b] + j];",
+      "remplace": "    return h.supports()[support_offsets[b + 1] - 1 - j];",
+      "porte": "mhgp11_cli_supports_oracle",
+      "note": "supports d'une boule ecrits dans l'ordre inverse : S* n'est plus en tete"
+    },
+    {
+      "id": "sp_branches_omises",
+      "fichier": "src/api/write_supports.cpp",
+      "cherche": "  for (const NodeIdx node : h.prior()) out.u32v(idx(node));\n",
+      "remplace": "  for (const NodeIdx node : h.prior()) out.u32v(idx(node) == 0 ? 0 : 0);\n",
+      "porte": "mhgp11_cli_supports_oracle",
+      "note": "branches ant(b) de la section PRIOR remplacees par le noeud 0"
+    },
+    {
+      "id": "sp_signature_v1",
+      "fichier": "src/api/manifest.cpp",
+      "cherche": "      for (u32 j = 0; j < ball.qmin; ++j) out.u32le(idx(ball.support[j]));\n",
+      "remplace": "      for (u32 j = 0; j < ball.qmin; ++j) out.u32le(node.birth_key);\n",
+      "porte": "mhgp11_cli_supports_oracle",
+      "note": "signature version 1 : naissance par BallIdx au lieu de S* en SiteIdx (egale entre full et supports, refusee par le lecteur)"
+    },
+    {
+      "id": "sp_manifeste_constant",
+      "fichier": "src/api/manifest.cpp",
+      "cherche": "  number(out, extended);",
+      "remplace": "  number(out, 4096);",
+      "porte": "mhgp11_cli_supports_oracle",
+      "note": "nombre de coquilles etendues constant dans le manifeste de supports (version 2)"
+    },
+    {
+      "id": "sp_signature_fichier",
+      "fichier": "src/api/manifest.cpp",
+      "cherche": "  hex(out, api::tree_k_sha256(tree.domain(), tree.forest()));",
+      "remplace": "  hex(out, sha256);",
+      "porte": "mhgp11_cli_supports_oracle",
+      "note": "tree_k_sha256 de supports remplace par l'empreinte du fichier"
+    },
+    {
+      "id": "sp_sortie_supports_comme_full",
+      "fichier": "cli/mhgp11.cpp",
+      "cherche": "  if (output == api::output_name(api::OutputKind::supports)) o.output = api::OutputKind::supports;",
+      "remplace": "  if (output == api::output_name(api::OutputKind::supports)) o.output = api::OutputKind::full;",
+      "porte": "mhgp11_cli_supports_oracle",
+      "note": "--sortie=supports publie la sortie full"
+    },
+    {
+      "id": "sp_masque_16379",
+      "fichier": "src/api/compute.cpp",
+      "cherche": "  params.concurrent_orders = false;        // 8192\n",
+      "remplace": "",
+      "porte": "mhgp11_cli_points",
+      "note": "arbre d'ordre K seul au masque de FULL : build_order refuse les ordres concurrents ; depuis L2b, supports passe par FULL et seules points et plat emploient order_params"
+    },
+    {
+      "id": "sp_internes_gardees",
+      "fichier": "src/supports/hierarchy.cpp",
+      "cherche": "    return selection == Selection::all || tree.attachment().role()[i] != BallRole::internal;",
+      "remplace": "    return true;",
+      "porte": "mhgp11_cli_supports_oracle",
+      "note": "arbre couvrant : liaisons internes gardees (selection ignoree)"
+    },
+    {
+      "id": "sp_naissances_retirees",
+      "fichier": "src/supports/hierarchy.cpp",
+      "cherche": "    return selection == Selection::all || tree.attachment().role()[i] != BallRole::internal;",
+      "remplace": "    return selection == Selection::all || tree.attachment().role()[i] == BallRole::merge;",
+      "porte": "mhgp11_cli_supports_oracle",
+      "note": "arbre couvrant : naissances retirees, fusions seules"
+    },
+    {
+      "id": "sp_etoile_permutee",
+      "fichier": "src/supports/hierarchy.cpp",
+      "cherche": "      star.sites = data.support;",
+      "remplace": "      star.sites = {data.support[1], data.support[0], data.support[2], data.support[3]};",
+      "porte": "mhgp11_cli_supports_oracle",
+      "note": "arbre couvrant : S* publie dans un autre ordre que les SiteIdx croissants"
+    }
+  ]
+}
