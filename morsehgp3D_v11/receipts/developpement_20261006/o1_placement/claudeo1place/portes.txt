@@ -1,0 +1,26 @@
+685: test decisions controles=423817 echecs=0 plancher=20000
+685: mhgp11_test_ok tests=1 controles=423817
+1/9 Test #685: mhgp11_tower_pipeline_decisions .....   Passed    0.01 sec
+686: pipeline_equivalence orders=960 pipelines=192 placements=0
+686: test equivalence controles=4519 echecs=0 plancher=2000
+686: mhgp11_test_ok tests=1 controles=4519
+2/9 Test #686: mhgp11_tower_pipeline_equivalence ...   Passed   12.20 sec
+687: test abandon controles=782 echecs=0 plancher=700
+687: mhgp11_test_ok tests=1 controles=782
+3/9 Test #687: mhgp11_tower_pipeline_abandon .......   Passed    0.07 sec
+4/9 Test #688: mhgp11_tower_pipeline_inventaire ....   Passed    0.01 sec
+689: test parse controles=12 echecs=0 plancher=12
+689: mhgp11_test_ok tests=1 controles=12
+5/9 Test #689: mhgp11_tower_placement_parse ........   Passed    0.01 sec
+690: test cores controles=9 echecs=0 plancher=9
+690: mhgp11_test_ok tests=1 controles=9
+6/9 Test #690: mhgp11_tower_placement_cores ........   Passed    0.01 sec
+691: test plan controles=32 echecs=0 plancher=32
+691: mhgp11_test_ok tests=1 controles=32
+7/9 Test #691: mhgp11_tower_placement_plan .........   Passed    0.01 sec
+692: test affinity controles=10 echecs=0 plancher=6
+692: mhgp11_test_ok tests=1 controles=10
+8/9 Test #692: mhgp11_tower_placement_affinity .....   Passed    0.01 sec
+9/9 Test #693: mhgp11_tower_placement_inventaire ...   Passed    0.01 sec
+The following tests passed:
+100% tests passed, 0 tests failed out of 9

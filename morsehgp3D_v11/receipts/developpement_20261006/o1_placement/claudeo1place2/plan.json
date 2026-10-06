@@ -1,0 +1,81 @@
+{
+ "schema": "ehgp.v11.session_plan.v1",
+ "note": "Levier O1 de la carte de l'etage tree (Claude, 6 octobre 2026) : placement des taches lourdes du pipeline (P5, P4, V5, V4) sur des coeurs physiques dedies, taches legeres sur leurs freres SMT, resolutions sur les autres coeurs (bit 262144). Critere ecrit d'avance : dumps et registres identiques ; adopte si forets (forest_ns, mediane a chaud) <= 0,92 x base sur au moins deux des trois trames a K5/16 en voie CPU (16379 contre 278523), aucune trame > 1,03 x ; portes natives tower_placement et tower_pipeline conformes, pipeline_equivalence avec placements > 0. K5/24 GPU+C (81915 contre 344059) descriptif.",
+ "python_packages": "none",
+ "default_build": true,
+ "build_targets": [
+  "mhgp11_tower_placement",
+  "mhgp11_tower_pipeline"
+ ],
+ "results_cap_bytes": 67108864,
+ "commands": [
+  {
+   "name": "portes",
+   "timeout_seconds": 900,
+   "argv": [
+    "ctest",
+    "--no-tests=error",
+    "-R",
+    "^mhgp11_tower_(placement|pipeline)_",
+    "--output-on-failure",
+    "-V"
+   ]
+  },
+  {
+   "name": "k5_16_cpu",
+   "timeout_seconds": 900,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/gpu_ab.py",
+    "--src",
+    "{src}",
+    "--work",
+    "{build}/gpu",
+    "--data",
+    "{data}",
+    "--out",
+    "{out}/k5_16_cpu",
+    "--modes",
+    "cpu=16379,cpu_place=278523",
+    "--reps",
+    "5",
+    "--workers",
+    "48",
+    "--warm-passes",
+    "10",
+    "--kmax",
+    "5",
+    "--leaf",
+    "16"
+   ]
+  },
+  {
+   "name": "k5_24_gpu",
+   "timeout_seconds": 900,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/gpu_ab.py",
+    "--src",
+    "{src}",
+    "--work",
+    "{build}/gpu",
+    "--data",
+    "{data}",
+    "--out",
+    "{out}/k5_24_gpu",
+    "--modes",
+    "gpu=81915,gpu_place=344059",
+    "--reps",
+    "5",
+    "--workers",
+    "48",
+    "--warm-passes",
+    "10",
+    "--kmax",
+    "5",
+    "--leaf",
+    "24"
+   ]
+  }
+ ]
+}

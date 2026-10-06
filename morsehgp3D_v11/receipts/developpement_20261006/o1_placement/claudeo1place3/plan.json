@@ -1,0 +1,68 @@
+{
+ "schema": "ehgp.v11.session_plan.v1",
+ "note": "Confirmation du levier O1 (Claude, 6 octobre 2026, ecrite avant toute donnee de cette session). Les sessions claudeo1place (placement perdu au deplacement : temoin A/A involontaire, bruit par comparaison jusqu'a +-9 a 12 %) et claudeo1place2 (critere ecrit non atteint : ng02 chaud 1,038 > 1,03 ; 11 comparaisons favorables sur 12) sont exclues de la decision. Statistique primaire : forest_ms a froid, mediane de 6 processus neufs par trame et par mode (carre de Williams a 3 modes), K5, W48, deux bras : CPU feuille 16 (cpu=16379, cpu_aa=16379, cpu_place=278523) et GPU+C feuille 24 (gpu=81915, gpu_aa=81915, gpu_place=344059). Validite : moyenne geometrique des 6 rapports A/A (aa/base, 3 trames x 2 bras) dans [0,97 ; 1,03], sinon session non concluante et rien n'est adopte. Adoption si : dumps et registres identiques a chaque prise ; moyenne geometrique des 6 rapports place/base <= 0,93 ; aucun rapport place/base > 1,00. Medianes a chaud (une prise de 10 passes par mode) descriptives.",
+ "python_packages": "none",
+ "default_build": true,
+ "build_targets": [
+  "mhgp11_full_bench"
+ ],
+ "results_cap_bytes": 67108864,
+ "commands": [
+  {
+   "name": "k5_16_cpu",
+   "timeout_seconds": 1500,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/gpu_ab.py",
+    "--src",
+    "{src}",
+    "--work",
+    "{build}/gpu",
+    "--data",
+    "{data}",
+    "--out",
+    "{out}/k5_16_cpu",
+    "--modes",
+    "cpu=16379,cpu_aa=16379,cpu_place=278523",
+    "--reps",
+    "6",
+    "--workers",
+    "48",
+    "--warm-passes",
+    "10",
+    "--kmax",
+    "5",
+    "--leaf",
+    "16"
+   ]
+  },
+  {
+   "name": "k5_24_gpu",
+   "timeout_seconds": 1500,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/gpu_ab.py",
+    "--src",
+    "{src}",
+    "--work",
+    "{build}/gpu",
+    "--data",
+    "{data}",
+    "--out",
+    "{out}/k5_24_gpu",
+    "--modes",
+    "gpu=81915,gpu_aa=81915,gpu_place=344059",
+    "--reps",
+    "6",
+    "--workers",
+    "48",
+    "--warm-passes",
+    "10",
+    "--kmax",
+    "5",
+    "--leaf",
+    "24"
+   ]
+  }
+ ]
+}
