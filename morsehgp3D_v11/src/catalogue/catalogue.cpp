@@ -36,10 +36,9 @@ Result<num::Point> point(const Cloud& cloud, SiteIdx site) noexcept {
 }
 
 Outcome workspace_memory_bound(u32 capacity, u32 workers, bool cache_center_lines, u64& bytes,
-                               bool pair_graph, u64 arena_sites) noexcept {
+                               bool pair_graph) noexcept {
   bytes = 0;
   const u64 words = (u64(capacity) + 63) / 64;
-  MHGP11_TRY(add_bytes<SiteIdx>(bytes, arena_sites * workers));
   MHGP11_TRY(add_bytes<num::Point>(bytes, u64(capacity) * workers));
   MHGP11_TRY(add_bytes<u64>(bytes, 2 * u64(capacity) * words * workers));
   MHGP11_TRY(add_bytes<SiteIdx>(bytes, 2 * u64(capacity) * workers));
@@ -47,11 +46,9 @@ Outcome workspace_memory_bound(u32 capacity, u32 workers, bool cache_center_line
   return add_bytes<u8>(bytes, cache_center_lines ? u64(CenterLineCache::entries(capacity)) * workers : 0);
 }
 
-Outcome Workspace::allocate(u32 capacity, MemoryBudget& budget, bool cache_center_lines, bool pair_graph,
-                            u64 arena_sites) noexcept {
+Outcome Workspace::allocate(u32 capacity, MemoryBudget& budget, bool cache_center_lines, bool pair_graph) noexcept {
   const u64 words = (u64(capacity) + 63) / 64;
   u64 bytes = 0;
-  MHGP11_TRY(add_bytes<SiteIdx>(bytes, arena_sites));
   MHGP11_TRY(add_bytes<num::Point>(bytes, capacity));
   MHGP11_TRY(add_bytes<u64>(bytes, 2 * u64(capacity) * words));
   MHGP11_TRY(add_bytes<SiteIdx>(bytes, 2 * u64(capacity)));
@@ -66,11 +63,7 @@ Outcome Workspace::allocate(u32 capacity, MemoryBudget& budget, bool cache_cente
   MHGP11_TRY(interior.allocate(capacity, budget));
   MHGP11_TRY(shell.allocate(capacity, budget));
   MHGP11_TRY(center_lines.allocate(cache_entries, budget));
-  MHGP11_TRY(pair_rows.allocate(pair_entries, budget));
-  // Arene de pile du parcours, allouee en dernier (l'ordre des allocations precedentes est inchange).
-  walk_top = 0;
-  walk_fallbacks = 0;
-  return walk_arena.allocate(arena_sites, budget);
+  return pair_rows.allocate(pair_entries, budget);
 }
 
 Outcome Collector::accept(const CatalogueBall& ball, const num::Level& level, std::span<const SiteIdx> interior,

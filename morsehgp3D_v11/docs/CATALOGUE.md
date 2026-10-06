@@ -164,15 +164,6 @@ Le workspace est rendu avant l'assemblage ; émissions et sortie coexistent pend
 Une borne des réservations propres est donc $\max(W+D+E,E+F)$. Ajouter les réservations préexistantes,
 dont le Cloud s'il utilise ce budget. Le pilote mesure `peak()` ; ce compteur ne représente pas la RSS.
 
-**Arène de pile du parcours (levier N1 du plan GPU, 6 octobre 2026).** Chaque `Workspace` porte un bloc fixe de
-$2^{18}$ `SiteIdx` (1 Mio), admis une seule fois avec lui. La récursion `process` y empile la liste filtrée de chaque
-nœud, en ordre LIFO : la liste vit jusqu'à la fin de ses deux enfants, puis le sommet revient à sa marque. Aucun
-`new`, aucun `delete` ni aucune opération atomique du budget par nœud. Une liste qui n'y tient plus reprend
-l'allocation par nœud, avec les mêmes décisions, et elle est comptée (`CatalogueTimings::walk_fallbacks`, 0 sur
-ng00 à K5). Les nœuds préparés de la frontière gardent leur tampon possédé. Invariant de fin de tâche : sommet
-revenu à zéro, sinon `catalogue_invariant`. Mutants `arene_sommet_non_avance` et `arene_non_rembobinee`, tués par
-`mhgp11_catalogue_fraction`. Le registre, l'ordre des listes et les sorties sont inchangés.
-
 ## Compteurs et portes
 
 Le ledger décrit une passe logique : nœuds, feuilles, filtres, dominances locales, préfixes, candidats jugés,

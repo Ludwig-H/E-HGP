@@ -42,7 +42,6 @@ Outcome generate(const Cloud& cloud, const CatalogueParams& params, MemoryBudget
   Collector counter;
   Run first{cloud, params, budget, workspace, counter, {}};
   MHGP11_TRY(walk(first));
-  if (workspace.walk_top != 0) return fail(Reason::catalogue_invariant);  // arene de pile rembobinee
   u64 bytes = 0;
   MHGP11_TRY(add_bytes<Emission>(bytes, counter.balls));
   MHGP11_TRY(add_bytes<SiteIdx>(bytes, counter.incidences));
@@ -52,7 +51,6 @@ Outcome generate(const Cloud& cloud, const CatalogueParams& params, MemoryBudget
   Collector writer{true, records.span(), population.span(), 0, 0};
   Run second{cloud, params, budget, workspace, writer, {}};
   MHGP11_TRY(walk(second));
-  if (workspace.walk_top != 0) return fail(Reason::catalogue_invariant);  // arene de pile rembobinee
   if (writer.balls != counter.balls || writer.incidences != counter.incidences || first.ledger != second.ledger)
     return fail(Reason::catalogue_invariant);
   ledger = first.ledger;

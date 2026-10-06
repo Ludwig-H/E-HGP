@@ -1,0 +1,36 @@
+{
+ "schema": "ehgp.v11.session_plan.v1",
+ "note": "Levier N1 du plan GPU (Claude, 6 octobre 2026) : A/B apparie de l'arene de pile du parcours des boites (c72c5a576) contre sa base 8ee28873f, trames entieres sans sol ng00-02, K = 5, u21, mode CPU 16379, W48 x12 (ordre tourne et inverse) et W1, dumps identiques exiges ; portes du catalogue et deux mutants de l'arene. Critere ecrit d'avance (note aux auditeurs, section L) : difference appariee mediane de domain <= -15 ms et au moins 10 paires negatives sur 12.",
+ "python_packages": "none",
+ "default_build": false,
+ "results_cap_bytes": 268435456,
+ "commands": [
+  {
+   "name": "ab",
+   "timeout_seconds": 2200,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/ab_g4.py",
+    "--src",
+    "{src}",
+    "--out",
+    "{out}/ab",
+    "--data",
+    "{data}",
+    "--work",
+    "{build}/ab",
+    "--variants",
+    "base",
+    "--reps",
+    "12",
+    "--tests",
+    "^mhgp11_catalogue_",
+    "--min-tests",
+    "150",
+    "--mutants",
+    "catalogue:arene_sommet_non_avance,arene_non_rembobinee",
+    "--w1"
+   ]
+  }
+ ]
+}

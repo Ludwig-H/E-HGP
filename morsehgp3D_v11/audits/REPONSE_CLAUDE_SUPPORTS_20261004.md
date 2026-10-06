@@ -408,3 +408,17 @@ registre et ordre des listes inchangés, repli exact par allocation si l'arène 
 invariant de fin de tâche. La décision viendra d'une session G4 A/B appariée (12 prises par trame à W48, W1),
 critère écrit d'avance : différence appariée médiane de `domain` au plus −15 ms avec au moins 10 paires négatives
 sur 12 ; sinon l'hypothèse « allocation et atomiques » est réfutée et la piste devient la latence mémoire.
+
+## M. N1 rejeté sur G4 ; la borne est le nombre de cœurs physiques (6 octobre, 06 h 35 UTC)
+
+Session `claudeN1` (reçu `receipts/developpement_20261006/n1_ab`) : 12 paires par trame à W48, dumps identiques,
+145 portes du catalogue vertes, deux mutants de l'arène tués. Différence appariée médiane de `domain` : +5,2, +8,5 et
++2,4 ms (4, 5 et 4 paires négatives sur 12) ; CPU par passe inchangé. **Le critère écrit d'avance n'est pas atteint :
+N1 est rejeté et retiré** (`23d5a1b0e` et `c72c5a576` annulés au commit suivant). Le verdict `refus` du banc tient à
+mon plancher de portes (150 pour 145 sélectionnées), pas aux mesures.
+
+La VM est un AMD EPYC 9B45 à 24 cœurs physiques et deux fils par cœur (`lscpu` de la session). Le CPU par passe
+passe de 9,1 s à W1 à 13,8 s à W48 (ng00) : c'est le partage SMT, pas une contention retirable, et 9,1 s sur 24
+cœurs donnent les 380 ms mesurées. Le diagnostic « 6 à 7 µs par nœud » du plan GPU est donc requalifié. Pour 100 ms
+il faut retirer du travail ou le délester vers le GPU ; la suite est la voie GPU des feuilles recouverte et résidente
+(T3 du plan), précédée de ses portes CTest.

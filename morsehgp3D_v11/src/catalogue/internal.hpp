@@ -41,35 +41,18 @@ struct Emission {
   u64 population_begin = 0;
 };
 
-// Arene de pile du parcours des boites, par ouvrier (levier N1 du plan GPU du 6 octobre 2026) : les listes filtrees
-// de la recursion process sont empilees ici, en ordre LIFO, au lieu d'un Buffer alloue et rendu par noeud (new,
-// delete et atomiques du budget partages par tous les fils). Bloc admis une fois avec le Workspace, de capacite
-// min(kWalkArenaSites, plus grand suffixe d'une tache) (audit 8ee28873f), nulle quand aucun parcours ne descend ; une
-// liste qui n'y tient plus reprend l'allocation par noeud (repli exact, compte dans walk_fallbacks).
-inline constexpr u64 kWalkArenaSites = u64{1} << 18;
-
 struct Workspace {
-  Buffer<SiteIdx> walk_arena;
-  u64 walk_top = 0, walk_fallbacks = 0;
   Buffer<num::Point> points;
   // dominance[i] : sites qui dominent i sur la fermeture de la boite ; dominated[i] : sites que i domine (transposee).
   Buffer<u64> dominance, dominated;
   Buffer<SiteIdx> interior, shell;
   Buffer<u8> center_lines;
   Buffer<u64> pair_rows;
-  Outcome allocate(u32 capacity, MemoryBudget& budget, bool cache_center_lines = false, bool pair_graph = false,
-                   u64 arena_sites = kWalkArenaSites) noexcept;
+  Outcome allocate(u32 capacity, MemoryBudget& budget, bool cache_center_lines = false,
+                   bool pair_graph = false) noexcept;
 };
 Outcome workspace_memory_bound(u32 capacity, u32 workers, bool cache_center_lines, u64& bytes,
-                               bool pair_graph = false, u64 arena_sites = kWalkArenaSites) noexcept;
-// Capacite de l'arene d'une frontiere : min(kWalkArenaSites, plus grand suffixe d'une tache en SiteIdx).
-template <class Front>
-Outcome walk_arena_sites(const Front& frontier, u64& sites) noexcept {
-  u64 largest = 0;
-  MHGP11_TRY(frontier.suffix_memory_bound(1, largest));
-  sites = std::min<u64>(kWalkArenaSites, largest / sizeof(SiteIdx));
-  return {};
-}
+                               bool pair_graph = false) noexcept;
 
 // Mode comptage : spans vides, filling=false. Mode remplissage : capacites EXACTES de la premiere passe.
 // Les sommes sont controlees avant toute ecriture. Pas de publication depuis accept().
@@ -132,8 +115,6 @@ Outcome prepare_node(Run& run, std::span<const SiteIdx> parent, const Box& box, 
                      ReadyNode& ready) noexcept;
 bool split_ready(const ReadyNode& ready, const CatalogueParams& params, Box& left, Box& right) noexcept;
 Outcome run_ready(Run& run, const ReadyNode& ready) noexcept;
-// Meme suite que run_ready sur une liste empruntee (arene de pile) : coupe et recursion, ou feuille.
-Outcome run_sites(Run& run, std::span<const SiteIdx> sites, u32 depth, const Box& box) noexcept;
 
 // G1 : retire seulement les sites possedant K dominateurs STRICTS distincts sur la fermeture de box.
 Outcome walk(Run& run) noexcept;

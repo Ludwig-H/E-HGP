@@ -146,8 +146,7 @@ Outcome fallback(const Cloud& cloud, const CatalogueParams& params, MemoryBudget
   CatalogueParams plain = params;
   plain.batch_leaves = plain.cuda_leaves = false;
   Workspace scratch;
-  // Repli des feuilles seulement (enumerate_leaf), sans parcours descendant : aucune arene (audit 8ee28873f).
-  MHGP11_TRY(scratch.allocate(leaf_device::kMaxSites, budget, plain.cache_center_lines, plain.pair_graph, 0));
+  MHGP11_TRY(scratch.allocate(leaf_device::kMaxSites, budget, plain.cache_center_lines, plain.pair_graph));
   Collector collector;
   collector.stream = &out.fallback; collector.stream_budget = &budget;
   Run run{cloud, plain, budget, scratch, collector, {}, nullptr};

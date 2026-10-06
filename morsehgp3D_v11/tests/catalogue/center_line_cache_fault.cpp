@@ -41,7 +41,7 @@ MHGP11_TEST(allocation, 13) {
   {
     catalogue_detail::Workspace work;
     REQUIRE(work.allocate(32, budget, true).ok());
-    CHECK_EQ(calls.load() - before, 7u);  // dont l'arene de pile du parcours, allouee en dernier
+    CHECK_EQ(calls.load() - before, 6u);
     CHECK_EQ(work.center_lines.size(), 4960u);
   }
   const auto triggered = injections.load();
