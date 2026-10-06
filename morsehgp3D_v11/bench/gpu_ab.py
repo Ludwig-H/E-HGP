@@ -75,7 +75,23 @@ def take_summary(got):
                 single_pass_ms=ms(domain.get('single_pass_ns')), prefix_ms=ms(domain.get('prefix_ns')),
                 sort_ms=ms(domain.get('sort_ns')), cpu_seconds=full.get('cpu_seconds'),
                 pipeline_placement_cores=(full.get('pipeline_tasks') or {}).get('placement_cores'),
-                batch=dict(batch))
+                pipeline=pipeline_summary(full), batch=dict(batch))
+
+
+def pipeline_summary(full):
+    """Chronologie descriptive de l'etage des forets (ms depuis son debut) : phases, voies de resolution, publieurs et
+    suiveurs verticaux par ordre. Absente (None) si la sonde ne l'emet pas ; aucune decision ne la lit."""
+    tasks, phases = full.get('pipeline_tasks'), full.get('phases')
+    if not isinstance(tasks, dict) or not isinstance(phases, dict):
+        return None
+    ms = lambda v: None if not isinstance(v, int) else round(v / 1e6, 3)  # noqa: E731
+    keys = ('publish_start_ns', 'publish_end_ns', 'publish_cpu_ns', 'publish_wait_ns', 'vertical_start_ns',
+            'vertical_end_ns', 'vertical_cpu_ns', 'vertical_wait_ns')
+    return dict(phases={k: ms(v) for k, v in phases.items()},
+                lanes={k: ms(tasks.get(k)) for k in ('lanes_last_start_ns', 'lanes_first_finish_ns',
+                                                     'lanes_last_finish_ns', 'lanes_cpu_ns')},
+                orders=[dict(k=o.get('k'), **{key[:-3] + '_ms': ms(o.get(key)) for key in keys})
+                        for o in tasks.get('orders', []) if isinstance(o, dict)])
 
 
 def find_nvcc():
