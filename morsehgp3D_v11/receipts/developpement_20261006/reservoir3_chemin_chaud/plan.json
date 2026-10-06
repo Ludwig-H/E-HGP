@@ -1,0 +1,93 @@
+{
+ "schema": "ehgp.v11.session_plan.v1",
+ "note": "Reservoir, chemin chaud du puits retabli (Claude, 6 octobre 2026). Critere ecrit d'avance : dumps et registres identiques ; comptage gpu a chaud <= 1,05 x session j2memo (K5 30,2/24,9/28,4 ms ; K10 171,6/139,1/159,4 ms) et executeur gpu <= 0,85 x j2memo (K5 48,8/44,5/42,9 ; K10 261,5/229,2/244,1) sur les trois trames. Descriptif : feuilles de 24 a K5 en modes cpu et gpu.",
+ "python_packages": "none",
+ "default_build": false,
+ "results_cap_bytes": 134217728,
+ "commands": [
+  {
+   "name": "gpu_k5",
+   "timeout_seconds": 900,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/gpu_ab.py",
+    "--src",
+    "{src}",
+    "--work",
+    "{build}/gpu",
+    "--data",
+    "{data}",
+    "--out",
+    "{out}/gpu_k5",
+    "--modes",
+    "cpu=16379,gpu=81915,gpu_rejoue=212987",
+    "--reps",
+    "5",
+    "--workers",
+    "48",
+    "--warm-passes",
+    "12",
+    "--kmax",
+    "5",
+    "--leaf",
+    "16"
+   ]
+  },
+  {
+   "name": "gpu_k10",
+   "timeout_seconds": 900,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/gpu_ab.py",
+    "--src",
+    "{src}",
+    "--work",
+    "{build}/gpu",
+    "--data",
+    "{data}",
+    "--out",
+    "{out}/gpu_k10",
+    "--modes",
+    "cpu=16379,gpu=81915,gpu_rejoue=212987",
+    "--reps",
+    "3",
+    "--workers",
+    "48",
+    "--warm-passes",
+    "8",
+    "--kmax",
+    "10",
+    "--leaf",
+    "24"
+   ]
+  },
+  {
+   "name": "k5_feuilles24",
+   "timeout_seconds": 900,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/gpu_ab.py",
+    "--src",
+    "{src}",
+    "--work",
+    "{build}/gpu",
+    "--data",
+    "{data}",
+    "--out",
+    "{out}/k5_feuilles24",
+    "--modes",
+    "cpu=16379,gpu=81915",
+    "--reps",
+    "3",
+    "--workers",
+    "48",
+    "--warm-passes",
+    "8",
+    "--kmax",
+    "5",
+    "--leaf",
+    "24"
+   ]
+  }
+ ]
+}
