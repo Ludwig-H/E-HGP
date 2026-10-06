@@ -1,0 +1,23 @@
+{
+  "code": 0,
+  "manifeste_sha256": "e055b49ef13a6f28de9b31a7a4cb181655272e885ecf5d8a7c38eb9ea1522d62",
+  "module": "catalogue",
+  "mutants": [
+    {
+      "detail": "code",
+      "id": "etendue_seuil_double",
+      "juge": "mhgp11_catalogue_leaf_narrow_span_refusal",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "etendue_sans_fermeture",
+      "juge": "mhgp11_catalogue_leaf_narrow_span_refusal",
+      "verdict": "TUE"
+    }
+  ],
+  "plancher": 2,
+  "schema": "mhgp11.mutants.v1",
+  "sources_sha256": "39fcc05398d9a9aa9d289412e7304394a57500a6230bd84b8bfc7f50a35841ac",
+  "temoin": "vert"
+}

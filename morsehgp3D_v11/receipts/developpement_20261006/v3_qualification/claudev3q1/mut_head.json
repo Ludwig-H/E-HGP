@@ -1,0 +1,23 @@
+{
+  "code": 0,
+  "manifeste_sha256": "e6817b4dacc5420d495f6e37381911da6f746904d7135703eeb80578aa0e51cb",
+  "module": "head",
+  "mutants": [
+    {
+      "detail": "code",
+      "id": "vie_du_bloc_sans_borne",
+      "juge": "mhgp11_head_unit_refusals",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "vie_du_bloc_egalite",
+      "juge": "mhgp11_head_unit_refusals",
+      "verdict": "TUE"
+    }
+  ],
+  "plancher": 2,
+  "schema": "mhgp11.mutants.v1",
+  "sources_sha256": "39fcc05398d9a9aa9d289412e7304394a57500a6230bd84b8bfc7f50a35841ac",
+  "temoin": "vert"
+}

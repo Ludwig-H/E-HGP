@@ -1,0 +1,3 @@
+etendue_seuil_double                     TUE      code
+etendue_sans_fermeture                   TUE      code
+mutants_ok module=catalogue mutants=2 tues=2 dont_signal=0 dont_delai=0 dont_construction=0 plancher=2

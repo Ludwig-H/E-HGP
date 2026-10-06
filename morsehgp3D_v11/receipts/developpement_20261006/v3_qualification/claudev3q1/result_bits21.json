@@ -1,0 +1,163 @@
+{
+  "build_provenance": "matrix/bits21/build_provenance.json",
+  "cmake_options": [
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DMHGP11_COORD_BITS=21"
+  ],
+  "compiler": "g++",
+  "compiler_path": "/usr/bin/g++",
+  "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+  "conforming": true,
+  "ctest_args": [
+    "-LE",
+    "^(mutant|long|scale8000|scale16000|scale32000|lidar)$",
+    "-E",
+    "^mhgp11_reference_"
+  ],
+  "description": "Profil de coordonnees a 21 bits (MHGP11_COORD_BITS) : memes sources ; non qualifie tant qu'il n'a pas ses propres portes ; sans les portes d'echelle et LiDAR, jouees en deux lots bits21_echelle_gros et _reste (qualification du 5 octobre 2026 : coupees par l'echeance).",
+  "failures": [],
+  "logs": [
+    "matrix/bits21/LastTest.log",
+    "matrix/bits21/build.log",
+    "matrix/bits21/build_provenance.json",
+    "matrix/bits21/configure.log",
+    "matrix/bits21/ctest.log",
+    "matrix/bits21/junit.xml",
+    "matrix/bits21/tests.json"
+  ],
+  "name": "bits21",
+  "not_run": [],
+  "optional": false,
+  "passed_labels": {
+    "fast": 800,
+    "oracle": 158,
+    "unit": 548
+  },
+  "reason": "",
+  "seconds": 276.99,
+  "slowest": [
+    {
+      "seconds": 42.07,
+      "test": "mhgp11_tower_full_campaign_opt"
+    },
+    {
+      "seconds": 41.76,
+      "test": "mhgp11_tower_full_campaign"
+    },
+    {
+      "seconds": 30.9,
+      "test": "mhgp11_cli_supports_oracle"
+    },
+    {
+      "seconds": 29.3,
+      "test": "mhgp11_api_supports_route_oracle"
+    },
+    {
+      "seconds": 28.21,
+      "test": "mhgp11_cli_supports_oracle_opt"
+    },
+    {
+      "seconds": 27.25,
+      "test": "mhgp11_api_supports_route_oracle_opt"
+    },
+    {
+      "seconds": 16.09,
+      "test": "mhgp11_cli_full_determinism"
+    },
+    {
+      "seconds": 15.7,
+      "test": "mhgp11_cli_full_determinism_opt"
+    },
+    {
+      "seconds": 13.54,
+      "test": "mhgp11_tower_pipeline_equivalence"
+    },
+    {
+      "seconds": 12.92,
+      "test": "mhgp11_supports_hierarchy_fraction_opt"
+    }
+  ],
+  "started_epoch": 1791323415.421,
+  "started_utc": "2026-10-06T21:50:15Z",
+  "status": "ok",
+  "steps": [
+    {
+      "argv": [
+        "cmake",
+        "-S",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Td6RPwxS8k/src/morsehgp3D_v11",
+        "-B",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Td6RPwxS8k/build/matrix/bits21/build",
+        "-DCMAKE_CXX_COMPILER=g++",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "exit_code": 0,
+      "name": "configure",
+      "seconds": 0.664,
+      "status": "ok",
+      "timeout_seconds": 2100.0
+    },
+    {
+      "argv": [
+        "cmake",
+        "--build",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Td6RPwxS8k/build/matrix/bits21/build",
+        "-j",
+        "4",
+        "--",
+        "-k"
+      ],
+      "exit_code": 0,
+      "name": "build",
+      "seconds": 84.439,
+      "status": "ok",
+      "timeout_seconds": 2099.3
+    },
+    {
+      "argv": [
+        "ctest",
+        "--show-only=json-v1",
+        "-LE",
+        "^(mutant|long|scale8000|scale16000|scale32000|lidar)$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "exit_code": 0,
+      "name": "list",
+      "seconds": 0.064,
+      "status": "ok",
+      "timeout_seconds": 120
+    },
+    {
+      "argv": [
+        "ctest",
+        "--no-tests=error",
+        "--timeout",
+        "600",
+        "-j",
+        "4",
+        "-LE",
+        "^(mutant|long|scale8000|scale16000|scale32000|lidar)$",
+        "-E",
+        "^mhgp11_reference_",
+        "--output-junit",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Td6RPwxS8k/build/matrix/bits21/junit.xml"
+      ],
+      "exit_code": 0,
+      "name": "test",
+      "seconds": 191.807,
+      "status": "ok",
+      "timeout_seconds": 2014.8
+    }
+  ],
+  "tests": {
+    "ctest_failed": 0,
+    "ctest_total": 800,
+    "failed": 0,
+    "not_run": 0,
+    "passed": 800,
+    "selected": 800
+  },
+  "threads": 4
+}

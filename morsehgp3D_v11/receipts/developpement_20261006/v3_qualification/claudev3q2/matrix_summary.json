@@ -1,0 +1,1084 @@
+{
+  "budget_seconds": 3300,
+  "complete": true,
+  "configurations": [
+    {
+      "build_provenance": "matrix/gcc_release_echelle_gros/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=18"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": true,
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "scale32000|uniform32000|lidar_ng01|lidar_ng02"
+      ],
+      "description": "Profil de gcc_release : portes d'echelle et LiDAR seules (serie), lot gros (noms contenant scale32000|uniform32000|lidar_ng01|lidar_ng02) ; reunion des deux lots = toutes ces portes. Plancher : 80 % du compte a la livraison de S10.",
+      "failures": [],
+      "logs": [
+        "matrix/gcc_release_echelle_gros/LastTest.log",
+        "matrix/gcc_release_echelle_gros/build.log",
+        "matrix/gcc_release_echelle_gros/build_provenance.json",
+        "matrix/gcc_release_echelle_gros/configure.log",
+        "matrix/gcc_release_echelle_gros/ctest.log",
+        "matrix/gcc_release_echelle_gros/junit.xml",
+        "matrix/gcc_release_echelle_gros/tests.json"
+      ],
+      "name": "gcc_release_echelle_gros",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "lidar": 36,
+        "scale32000": 16
+      },
+      "probes": [
+        {
+          "executable": "mhgp11_sched_probe",
+          "isolation": "not_certified",
+          "name": "sched_probe",
+          "status": "absent"
+        }
+      ],
+      "reason": "",
+      "seconds": 1286.874,
+      "slowest": [
+        {
+          "seconds": 110.58,
+          "test": "mhgp11_cli_full_identity_scale32000_opt"
+        },
+        {
+          "seconds": 108.37,
+          "test": "mhgp11_cli_full_identity_scale32000"
+        },
+        {
+          "seconds": 65.87,
+          "test": "mhgp11_cli_full_identity_lidar_ng02_k5_opt"
+        },
+        {
+          "seconds": 64.82,
+          "test": "mhgp11_cli_full_identity_lidar_ng02_k5"
+        },
+        {
+          "seconds": 64.41,
+          "test": "mhgp11_cli_supports_scale32000"
+        },
+        {
+          "seconds": 62.22,
+          "test": "mhgp11_cli_supports_scale32000_opt"
+        },
+        {
+          "seconds": 52.2,
+          "test": "mhgp11_cli_full_identity_lidar_ng01_k5"
+        },
+        {
+          "seconds": 50.4,
+          "test": "mhgp11_cli_full_identity_lidar_ng01_k5_opt"
+        },
+        {
+          "seconds": 49.29,
+          "test": "mhgp11_api_supports_route_scale32000"
+        },
+        {
+          "seconds": 36.25,
+          "test": "mhgp11_points_scale32000"
+        }
+      ],
+      "started_epoch": 1791324055.521,
+      "started_utc": "2026-10-06T22:00:55Z",
+      "status": "ok",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.7u73MSWGbU/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.7u73MSWGbU/build/matrix/gcc_release_echelle_gros/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_COORD_BITS=18"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.766,
+          "status": "ok",
+          "timeout_seconds": 2100.0
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.7u73MSWGbU/build/matrix/gcc_release_echelle_gros/build",
+            "-j",
+            "4",
+            "--",
+            "-k"
+          ],
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 71.834,
+          "status": "ok",
+          "timeout_seconds": 2099.2
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-R",
+            "scale32000|uniform32000|lidar_ng01|lidar_ng02"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "600",
+            "-j",
+            "4",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-R",
+            "scale32000|uniform32000|lidar_ng01|lidar_ng02",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.7u73MSWGbU/build/matrix/gcc_release_echelle_gros/junit.xml"
+          ],
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 1214.203,
+          "status": "ok",
+          "timeout_seconds": 2027.3
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 52,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 52,
+        "selected": 52
+      },
+      "threads": 4
+    },
+    {
+      "build_provenance": "matrix/gcc_release_echelle_reste/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=18"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": true,
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-E",
+        "scale32000|uniform32000|lidar_ng01|lidar_ng02"
+      ],
+      "description": "Profil de gcc_release : portes d'echelle et LiDAR seules (serie), lot reste (toutes les autres) ; reunion des deux lots = toutes ces portes. Plancher : 80 % du compte a la livraison de S10.",
+      "failures": [],
+      "logs": [
+        "matrix/gcc_release_echelle_reste/LastTest.log",
+        "matrix/gcc_release_echelle_reste/build.log",
+        "matrix/gcc_release_echelle_reste/build_provenance.json",
+        "matrix/gcc_release_echelle_reste/configure.log",
+        "matrix/gcc_release_echelle_reste/ctest.log",
+        "matrix/gcc_release_echelle_reste/junit.xml",
+        "matrix/gcc_release_echelle_reste/tests.json"
+      ],
+      "name": "gcc_release_echelle_reste",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "fast": 1,
+        "lidar": 24,
+        "scale16000": 16,
+        "scale32000": 1,
+        "scale8000": 28
+      },
+      "probes": [
+        {
+          "executable": "mhgp11_sched_probe",
+          "isolation": "not_certified",
+          "name": "sched_probe",
+          "status": "absent"
+        }
+      ],
+      "reason": "",
+      "seconds": 1022.828,
+      "slowest": [
+        {
+          "seconds": 64.94,
+          "test": "mhgp11_cli_full_determinism_scale8000"
+        },
+        {
+          "seconds": 63.92,
+          "test": "mhgp11_cli_full_determinism_scale8000_opt"
+        },
+        {
+          "seconds": 60.67,
+          "test": "mhgp11_cli_full_identity_lidar_ng00_k5_opt"
+        },
+        {
+          "seconds": 60.0,
+          "test": "mhgp11_cli_full_identity_lidar_ng00_k5"
+        },
+        {
+          "seconds": 52.32,
+          "test": "mhgp11_cli_full_identity_scale16000"
+        },
+        {
+          "seconds": 52.11,
+          "test": "mhgp11_cli_full_identity_scale16000_opt"
+        },
+        {
+          "seconds": 36.44,
+          "test": "mhgp11_cli_supports_lidar_ng00_k5_opt"
+        },
+        {
+          "seconds": 35.36,
+          "test": "mhgp11_cli_supports_lidar_ng00_k5"
+        },
+        {
+          "seconds": 33.01,
+          "test": "mhgp11_cli_supports_scale16000"
+        },
+        {
+          "seconds": 30.96,
+          "test": "mhgp11_cli_supports_scale16000_opt"
+        }
+      ],
+      "started_epoch": 1791324055.521,
+      "started_utc": "2026-10-06T22:00:55Z",
+      "status": "ok",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.7u73MSWGbU/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.7u73MSWGbU/build/matrix/gcc_release_echelle_reste/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_COORD_BITS=18"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.765,
+          "status": "ok",
+          "timeout_seconds": 2100.0
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.7u73MSWGbU/build/matrix/gcc_release_echelle_reste/build",
+            "-j",
+            "4",
+            "--",
+            "-k"
+          ],
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 71.584,
+          "status": "ok",
+          "timeout_seconds": 2099.2
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-E",
+            "scale32000|uniform32000|lidar_ng01|lidar_ng02"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "600",
+            "-j",
+            "4",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-E",
+            "scale32000|uniform32000|lidar_ng01|lidar_ng02",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.7u73MSWGbU/build/matrix/gcc_release_echelle_reste/junit.xml"
+          ],
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 950.408,
+          "status": "ok",
+          "timeout_seconds": 2027.6
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 66,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 66,
+        "selected": 66
+      },
+      "threads": 4
+    },
+    {
+      "build_provenance": "matrix/bits21_echelle_gros/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": true,
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "scale32000|uniform32000|lidar_ng01|lidar_ng02",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "description": "Profil de bits21 : portes d'echelle et LiDAR seules (serie), lot gros (noms contenant scale32000|uniform32000|lidar_ng01|lidar_ng02) ; reunion des deux lots = toutes ces portes. Plancher : 80 % du compte a la livraison de S10.",
+      "failures": [],
+      "logs": [
+        "matrix/bits21_echelle_gros/LastTest.log",
+        "matrix/bits21_echelle_gros/build.log",
+        "matrix/bits21_echelle_gros/build_provenance.json",
+        "matrix/bits21_echelle_gros/configure.log",
+        "matrix/bits21_echelle_gros/ctest.log",
+        "matrix/bits21_echelle_gros/junit.xml",
+        "matrix/bits21_echelle_gros/tests.json"
+      ],
+      "name": "bits21_echelle_gros",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "lidar": 36,
+        "scale32000": 16
+      },
+      "reason": "",
+      "seconds": 1303.479,
+      "slowest": [
+        {
+          "seconds": 110.09,
+          "test": "mhgp11_cli_full_identity_scale32000"
+        },
+        {
+          "seconds": 109.04,
+          "test": "mhgp11_cli_full_identity_scale32000_opt"
+        },
+        {
+          "seconds": 67.13,
+          "test": "mhgp11_cli_full_identity_lidar_ng02_k5"
+        },
+        {
+          "seconds": 65.93,
+          "test": "mhgp11_cli_full_identity_lidar_ng02_k5_opt"
+        },
+        {
+          "seconds": 64.34,
+          "test": "mhgp11_cli_supports_scale32000"
+        },
+        {
+          "seconds": 64.19,
+          "test": "mhgp11_cli_supports_scale32000_opt"
+        },
+        {
+          "seconds": 51.06,
+          "test": "mhgp11_cli_full_identity_lidar_ng01_k5_opt"
+        },
+        {
+          "seconds": 50.99,
+          "test": "mhgp11_cli_full_identity_lidar_ng01_k5"
+        },
+        {
+          "seconds": 49.82,
+          "test": "mhgp11_api_supports_route_scale32000"
+        },
+        {
+          "seconds": 37.06,
+          "test": "mhgp11_points_scale32000_opt"
+        }
+      ],
+      "started_epoch": 1791324055.521,
+      "started_utc": "2026-10-06T22:00:55Z",
+      "status": "ok",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.7u73MSWGbU/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.7u73MSWGbU/build/matrix/bits21_echelle_gros/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_COORD_BITS=21"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.765,
+          "status": "ok",
+          "timeout_seconds": 2100.0
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.7u73MSWGbU/build/matrix/bits21_echelle_gros/build",
+            "-j",
+            "4",
+            "--",
+            "-k"
+          ],
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 71.937,
+          "status": "ok",
+          "timeout_seconds": 2099.2
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-R",
+            "scale32000|uniform32000|lidar_ng01|lidar_ng02",
+            "-E",
+            "^mhgp11_reference_"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.032,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "600",
+            "-j",
+            "4",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-R",
+            "scale32000|uniform32000|lidar_ng01|lidar_ng02",
+            "-E",
+            "^mhgp11_reference_",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.7u73MSWGbU/build/matrix/bits21_echelle_gros/junit.xml"
+          ],
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 1230.741,
+          "status": "ok",
+          "timeout_seconds": 2027.3
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 52,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 52,
+        "selected": 52
+      },
+      "threads": 4
+    },
+    {
+      "build_provenance": "matrix/bits21_echelle_reste/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": true,
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-E",
+        "^mhgp11_reference_|scale32000|uniform32000|lidar_ng01|lidar_ng02"
+      ],
+      "description": "Profil de bits21 : portes d'echelle et LiDAR seules (serie), lot reste (toutes les autres) ; reunion des deux lots = toutes ces portes. Plancher : 80 % du compte a la livraison de S10.",
+      "failures": [],
+      "logs": [
+        "matrix/bits21_echelle_reste/LastTest.log",
+        "matrix/bits21_echelle_reste/build.log",
+        "matrix/bits21_echelle_reste/build_provenance.json",
+        "matrix/bits21_echelle_reste/configure.log",
+        "matrix/bits21_echelle_reste/ctest.log",
+        "matrix/bits21_echelle_reste/junit.xml",
+        "matrix/bits21_echelle_reste/tests.json"
+      ],
+      "name": "bits21_echelle_reste",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "fast": 1,
+        "lidar": 24,
+        "scale16000": 16,
+        "scale32000": 1,
+        "scale8000": 28
+      },
+      "reason": "",
+      "seconds": 1036.582,
+      "slowest": [
+        {
+          "seconds": 64.45,
+          "test": "mhgp11_cli_full_determinism_scale8000"
+        },
+        {
+          "seconds": 64.21,
+          "test": "mhgp11_cli_full_determinism_scale8000_opt"
+        },
+        {
+          "seconds": 61.92,
+          "test": "mhgp11_cli_full_identity_lidar_ng00_k5"
+        },
+        {
+          "seconds": 61.23,
+          "test": "mhgp11_cli_full_identity_lidar_ng00_k5_opt"
+        },
+        {
+          "seconds": 53.64,
+          "test": "mhgp11_cli_full_identity_scale16000"
+        },
+        {
+          "seconds": 52.87,
+          "test": "mhgp11_cli_full_identity_scale16000_opt"
+        },
+        {
+          "seconds": 36.14,
+          "test": "mhgp11_cli_supports_lidar_ng00_k5_opt"
+        },
+        {
+          "seconds": 35.02,
+          "test": "mhgp11_cli_supports_lidar_ng00_k5"
+        },
+        {
+          "seconds": 32.66,
+          "test": "mhgp11_cli_supports_scale16000_opt"
+        },
+        {
+          "seconds": 31.36,
+          "test": "mhgp11_cli_supports_scale16000"
+        }
+      ],
+      "started_epoch": 1791324055.521,
+      "started_utc": "2026-10-06T22:00:55Z",
+      "status": "ok",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.7u73MSWGbU/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.7u73MSWGbU/build/matrix/bits21_echelle_reste/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_COORD_BITS=21"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.765,
+          "status": "ok",
+          "timeout_seconds": 2100.0
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.7u73MSWGbU/build/matrix/bits21_echelle_reste/build",
+            "-j",
+            "4",
+            "--",
+            "-k"
+          ],
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 71.736,
+          "status": "ok",
+          "timeout_seconds": 2099.2
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-E",
+            "^mhgp11_reference_|scale32000|uniform32000|lidar_ng01|lidar_ng02"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.032,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "600",
+            "-j",
+            "4",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-E",
+            "^mhgp11_reference_|scale32000|uniform32000|lidar_ng01|lidar_ng02",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.7u73MSWGbU/build/matrix/bits21_echelle_reste/junit.xml"
+          ],
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 964.044,
+          "status": "ok",
+          "timeout_seconds": 2027.5
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 66,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 66,
+        "selected": 66
+      },
+      "threads": 4
+    },
+    {
+      "build_provenance": "matrix/bits24_echelle_gros/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": true,
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "scale32000|uniform32000|lidar_ng01|lidar_ng02",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "description": "Profil de bits24 : portes d'echelle et LiDAR seules (serie), lot gros (noms contenant scale32000|uniform32000|lidar_ng01|lidar_ng02) ; reunion des deux lots = toutes ces portes. Plancher : 80 % du compte a la livraison de S10.",
+      "failures": [],
+      "logs": [
+        "matrix/bits24_echelle_gros/LastTest.log",
+        "matrix/bits24_echelle_gros/build.log",
+        "matrix/bits24_echelle_gros/build_provenance.json",
+        "matrix/bits24_echelle_gros/configure.log",
+        "matrix/bits24_echelle_gros/ctest.log",
+        "matrix/bits24_echelle_gros/junit.xml",
+        "matrix/bits24_echelle_gros/tests.json"
+      ],
+      "name": "bits24_echelle_gros",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "lidar": 36,
+        "scale32000": 16
+      },
+      "reason": "",
+      "seconds": 1322.422,
+      "slowest": [
+        {
+          "seconds": 112.82,
+          "test": "mhgp11_cli_full_identity_scale32000"
+        },
+        {
+          "seconds": 112.68,
+          "test": "mhgp11_cli_full_identity_scale32000_opt"
+        },
+        {
+          "seconds": 67.67,
+          "test": "mhgp11_cli_full_identity_lidar_ng02_k5"
+        },
+        {
+          "seconds": 67.02,
+          "test": "mhgp11_cli_full_identity_lidar_ng02_k5_opt"
+        },
+        {
+          "seconds": 65.55,
+          "test": "mhgp11_cli_supports_scale32000"
+        },
+        {
+          "seconds": 64.22,
+          "test": "mhgp11_cli_supports_scale32000_opt"
+        },
+        {
+          "seconds": 52.09,
+          "test": "mhgp11_cli_full_identity_lidar_ng01_k5"
+        },
+        {
+          "seconds": 51.44,
+          "test": "mhgp11_cli_full_identity_lidar_ng01_k5_opt"
+        },
+        {
+          "seconds": 50.35,
+          "test": "mhgp11_api_supports_route_scale32000"
+        },
+        {
+          "seconds": 37.72,
+          "test": "mhgp11_points_scale32000"
+        }
+      ],
+      "started_epoch": 1791324055.522,
+      "started_utc": "2026-10-06T22:00:55Z",
+      "status": "ok",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.7u73MSWGbU/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.7u73MSWGbU/build/matrix/bits24_echelle_gros/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_COORD_BITS=24"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.764,
+          "status": "ok",
+          "timeout_seconds": 2100.0
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.7u73MSWGbU/build/matrix/bits24_echelle_gros/build",
+            "-j",
+            "4",
+            "--",
+            "-k"
+          ],
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 71.884,
+          "status": "ok",
+          "timeout_seconds": 2099.2
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-R",
+            "scale32000|uniform32000|lidar_ng01|lidar_ng02",
+            "-E",
+            "^mhgp11_reference_"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "600",
+            "-j",
+            "4",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-R",
+            "scale32000|uniform32000|lidar_ng01|lidar_ng02",
+            "-E",
+            "^mhgp11_reference_",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.7u73MSWGbU/build/matrix/bits24_echelle_gros/junit.xml"
+          ],
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 1249.702,
+          "status": "ok",
+          "timeout_seconds": 2027.3
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 52,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 52,
+        "selected": 52
+      },
+      "threads": 4
+    },
+    {
+      "build_provenance": "matrix/bits24_echelle_reste/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": true,
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-E",
+        "^mhgp11_reference_|scale32000|uniform32000|lidar_ng01|lidar_ng02"
+      ],
+      "description": "Profil de bits24 : portes d'echelle et LiDAR seules (serie), lot reste (toutes les autres) ; reunion des deux lots = toutes ces portes. Plancher : 80 % du compte a la livraison de S10.",
+      "failures": [],
+      "logs": [
+        "matrix/bits24_echelle_reste/LastTest.log",
+        "matrix/bits24_echelle_reste/build.log",
+        "matrix/bits24_echelle_reste/build_provenance.json",
+        "matrix/bits24_echelle_reste/configure.log",
+        "matrix/bits24_echelle_reste/ctest.log",
+        "matrix/bits24_echelle_reste/junit.xml",
+        "matrix/bits24_echelle_reste/tests.json"
+      ],
+      "name": "bits24_echelle_reste",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "fast": 1,
+        "lidar": 24,
+        "scale16000": 16,
+        "scale32000": 1,
+        "scale8000": 28
+      },
+      "reason": "",
+      "seconds": 1046.592,
+      "slowest": [
+        {
+          "seconds": 64.1,
+          "test": "mhgp11_cli_full_determinism_scale8000_opt"
+        },
+        {
+          "seconds": 63.53,
+          "test": "mhgp11_cli_full_determinism_scale8000"
+        },
+        {
+          "seconds": 62.51,
+          "test": "mhgp11_cli_full_identity_lidar_ng00_k5"
+        },
+        {
+          "seconds": 61.46,
+          "test": "mhgp11_cli_full_identity_lidar_ng00_k5_opt"
+        },
+        {
+          "seconds": 53.44,
+          "test": "mhgp11_cli_full_identity_scale16000"
+        },
+        {
+          "seconds": 53.38,
+          "test": "mhgp11_cli_full_identity_scale16000_opt"
+        },
+        {
+          "seconds": 36.58,
+          "test": "mhgp11_cli_supports_lidar_ng00_k5_opt"
+        },
+        {
+          "seconds": 35.81,
+          "test": "mhgp11_cli_supports_lidar_ng00_k5"
+        },
+        {
+          "seconds": 33.51,
+          "test": "mhgp11_cli_supports_scale16000"
+        },
+        {
+          "seconds": 32.91,
+          "test": "mhgp11_cli_supports_scale16000_opt"
+        }
+      ],
+      "started_epoch": 1791324055.522,
+      "started_utc": "2026-10-06T22:00:55Z",
+      "status": "ok",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.7u73MSWGbU/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.7u73MSWGbU/build/matrix/bits24_echelle_reste/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_COORD_BITS=24"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.765,
+          "status": "ok",
+          "timeout_seconds": 2100.0
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.7u73MSWGbU/build/matrix/bits24_echelle_reste/build",
+            "-j",
+            "4",
+            "--",
+            "-k"
+          ],
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 71.935,
+          "status": "ok",
+          "timeout_seconds": 2099.2
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-E",
+            "^mhgp11_reference_|scale32000|uniform32000|lidar_ng01|lidar_ng02"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.032,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "600",
+            "-j",
+            "4",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-E",
+            "^mhgp11_reference_|scale32000|uniform32000|lidar_ng01|lidar_ng02",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.7u73MSWGbU/build/matrix/bits24_echelle_reste/junit.xml"
+          ],
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 973.854,
+          "status": "ok",
+          "timeout_seconds": 2027.3
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 66,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 66,
+        "selected": 66
+      },
+      "threads": 4
+    }
+  ],
+  "conforming": true,
+  "data_dir": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.7u73MSWGbU/data",
+  "ended_utc": "2026-10-06T22:22:58Z",
+  "exit_code": 0,
+  "host": {
+    "clangxx": "absent",
+    "cmake": "cmake version 3.22.1",
+    "ctest": "ctest version 3.22.1",
+    "gxx": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+    "junit": true,
+    "nproc": 48,
+    "python": "3.10.12"
+  },
+  "requested": [
+    "gcc_release_echelle_gros",
+    "gcc_release_echelle_reste",
+    "bits21_echelle_gros",
+    "bits21_echelle_reste",
+    "bits24_echelle_gros",
+    "bits24_echelle_reste"
+  ],
+  "schema": "ehgp.v11.g4_matrix_summary.v1",
+  "signals": [],
+  "started_utc": "2026-10-06T22:00:55Z",
+  "statuses": {
+    "bits21_echelle_gros": "ok",
+    "bits21_echelle_reste": "ok",
+    "bits24_echelle_gros": "ok",
+    "bits24_echelle_reste": "ok",
+    "gcc_release_echelle_gros": "ok",
+    "gcc_release_echelle_reste": "ok"
+  },
+  "thread_budget": 48
+}

@@ -1,0 +1,3 @@
+vie_du_bloc_sans_borne                   TUE      code
+vie_du_bloc_egalite                      TUE      code
+mutants_ok module=head mutants=2 tues=2 dont_signal=0 dont_delai=0 dont_construction=0 plancher=2

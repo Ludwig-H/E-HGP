@@ -1,0 +1,81 @@
+{
+ "schema": "ehgp.v11.session_plan.v1",
+ "note": "Qualification du levier V3 et des leviers de constante (Claude, 6 octobre 2026), lot 1 : portes ordinaires Release u18 (gcc_release), u21 (bits21), u24 (bits24) et ASan+UBSan u24 (gcc_asan_ubsan). Critere : toutes les configurations conformes, planchers tenus. Avant la matrice : mutants de la garde des arbres de points (b0f2a0a9e) et mutants d'etendue du levier C, desormais au profil u21 (correctif de l'auditeur) ; critere : tous tues.",
+ "python_packages": "none",
+ "default_build": false,
+ "results_cap_bytes": 134217728,
+ "commands": [
+  {
+   "name": "mut_head",
+   "timeout_seconds": 1800,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/tests/mutants/run_mutants.py",
+    "--manifest",
+    "{src}/morsehgp3D_v11/tests/mutants/head.json",
+    "--source",
+    "{src}/morsehgp3D_v11",
+    "--work",
+    "{build}/mut_head",
+    "--only",
+    "vie_du_bloc_sans_borne,vie_du_bloc_egalite",
+    "--floor",
+    "2",
+    "--jobs",
+    "2",
+    "--build-jobs",
+    "24",
+    "--cmake-arg=-DCMAKE_BUILD_TYPE=Release",
+    "--cmake-arg=-DMHGP11_COORD_BITS=21",
+    "--report",
+    "{out}/mut_head.json"
+   ]
+  },
+  {
+   "name": "mut_catalogue",
+   "timeout_seconds": 1800,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/tests/mutants/run_mutants.py",
+    "--manifest",
+    "{src}/morsehgp3D_v11/tests/mutants/catalogue.json",
+    "--source",
+    "{src}/morsehgp3D_v11",
+    "--work",
+    "{build}/mut_catalogue",
+    "--only",
+    "etendue_seuil_double,etendue_sans_fermeture",
+    "--floor",
+    "2",
+    "--jobs",
+    "2",
+    "--build-jobs",
+    "24",
+    "--cmake-arg=-DCMAKE_BUILD_TYPE=Release",
+    "--cmake-arg=-DMHGP11_COORD_BITS=21",
+    "--report",
+    "{out}/mut_catalogue.json"
+   ]
+  },
+  {
+   "name": "matrice",
+   "timeout_seconds": 3600,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/tools/g4_matrix.py",
+    "--src",
+    "{src}",
+    "--out",
+    "{out}",
+    "--data",
+    "{data}",
+    "--work",
+    "{build}/matrix",
+    "--budget-seconds",
+    "3300",
+    "--only",
+    "gcc_release,bits21,bits24,gcc_asan_ubsan"
+   ]
+  }
+ ]
+}
