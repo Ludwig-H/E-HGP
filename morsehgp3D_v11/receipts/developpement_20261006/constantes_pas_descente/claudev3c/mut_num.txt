@@ -1,0 +1,2 @@
+lattice_puissance_sans_ancre_z           TUE      code
+mutants_ok module=num mutants=1 tues=1 dont_signal=0 dont_delai=0 dont_construction=0 plancher=1

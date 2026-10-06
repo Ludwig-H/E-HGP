@@ -1,0 +1,6 @@
+descent_cumul_non_transactionnel         TUE      code
+diametre_cumul_descente_omis             TUE      code
+memo_cumul_queries_omis                  TUE      code
+descent_singleton_sum_missing            TUE      code
+registres_debordement_ignore             TUE      code
+mutants_ok module=tower mutants=5 tues=5 dont_signal=0 dont_delai=0 dont_construction=0 plancher=5

@@ -1,0 +1,17 @@
+{
+  "code": 0,
+  "manifeste_sha256": "f684f481aecc26bfbd0df1f59ace863bad93318e62aae0a315119e1cf17c1f9d",
+  "module": "num",
+  "mutants": [
+    {
+      "detail": "code",
+      "id": "lattice_puissance_sans_ancre_z",
+      "juge": "mhgp11_num_lattice_lattice_random",
+      "verdict": "TUE"
+    }
+  ],
+  "plancher": 1,
+  "schema": "mhgp11.mutants.v1",
+  "sources_sha256": "b338c363ac56218d7feebe7bba819e8fb17f8a4c03fb119e192b351b412a7700",
+  "temoin": "vert"
+}

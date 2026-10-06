@@ -1,0 +1,41 @@
+{
+  "code": 0,
+  "manifeste_sha256": "1175eb049c351960020531ce26ef50e6dca438c9e9a3de1d33866c6ca0ed4637",
+  "module": "tower",
+  "mutants": [
+    {
+      "detail": "code",
+      "id": "descent_cumul_non_transactionnel",
+      "juge": "mhgp11_tower_descent_capacity",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "diametre_cumul_descente_omis",
+      "juge": "mhgp11_tower_descent_capacity",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "memo_cumul_queries_omis",
+      "juge": "mhgp11_tower_memo_capacity",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "descent_singleton_sum_missing",
+      "juge": "mhgp11_tower_descent_capacity",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "registres_debordement_ignore",
+      "juge": "mhgp11_tower_descent_capacity",
+      "verdict": "TUE"
+    }
+  ],
+  "plancher": 5,
+  "schema": "mhgp11.mutants.v1",
+  "sources_sha256": "b338c363ac56218d7feebe7bba819e8fb17f8a4c03fb119e192b351b412a7700",
+  "temoin": "vert"
+}
