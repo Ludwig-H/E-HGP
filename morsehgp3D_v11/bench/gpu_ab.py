@@ -3,6 +3,7 @@
 
     python3 bench/gpu_ab.py (--bench BUILD/mhgp11_full_bench | --src SRC --work DIR) --data DIR --out DIR
         [--modes cpu=16379,gpu=81915] [--reps 5] [--workers 48] [--warm-passes 5] [--kmax 5] [--leaf 16]
+        [--variants new,base,...]  (archives <nom>_src.tar.gz du dossier de donnees, voir --variants)
 
 Un seul binaire (construit avec MHGP11_ENABLE_CUDA) joue chaque mode : 16379 est la voie CPU de reference, 81915
 ajoute le bit 65536 (feuilles en lot sur le GPU), 49147 le bit 32768 (meme lot sur le Pool de l'hote). Avec --src, le binaire est construit (ou repris s'il existe) dans
@@ -22,6 +23,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
+import tarfile
 import time
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -88,9 +90,9 @@ def find_nvcc():
     return None
 
 
-def build(src, work, out, log):
+def build(src, work, out, log, suffix=''):
     """Construit (ou reprend) le banc CUDA ; journaux dans out/build_*.log ; rend le chemin ou None."""
-    bdir = work / 'b_cuda'
+    bdir = work / ('b_cuda' + suffix)
     exe = bdir / 'mhgp11_full_bench'
     if exe.is_file():
         log.append(dict(step='reuse', sha256=sha256(exe)))
@@ -109,7 +111,7 @@ def build(src, work, out, log):
               1800)]
     for name, cmd, timeout in steps:
         code, stdout, stderr, seconds = run(cmd, timeout)
-        (out / ('build_%s.log' % name)).write_text(stdout[-200000:] + '\n--- stderr ---\n' + stderr)
+        (out / ('build%s_%s.log' % (suffix, name))).write_text(stdout[-200000:] + '\n--- stderr ---\n' + stderr)
         log.append(dict(step=name, code=code, seconds=seconds))
         if code != 0:
             return None
@@ -130,21 +132,49 @@ def main():
     ap.add_argument('--warm-passes', type=int, default=5)
     ap.add_argument('--kmax', type=int, default=5)
     ap.add_argument('--leaf', type=int, default=16)
+    # Variantes de source (6 octobre 2026, workflow GPU) : archives <nom>_src.tar.gz du dossier de donnees (arbre
+    # morsehgp3D_v11/ a la racine), chacune construite avec CUDA ; "new" designe --src. Chaque mode est joue par chaque
+    # variante (nom variante:mode), dans l'ordre equilibre du carre de Williams ; tous les dumps d'une trame doivent
+    # egaler la premiere prise.
+    ap.add_argument('--variants', default='new')
     args = ap.parse_args()
-    modes = [tuple(m.split('=')) for m in args.modes.split(',')]
+    raw_modes = [tuple(m.split('=')) for m in args.modes.split(',')]
+    variants = [v for v in args.variants.split(',') if v]
     args.out.mkdir(parents=True, exist_ok=True)
     build_log = []
-    if args.bench is None and args.src is not None and args.work is not None:
-        args.bench = build(args.src, args.work, args.out, build_log)
-    if args.bench is None or not args.bench.is_file() or any(len(m) != 2 for m in modes):
-        print('refus : banc absent ou --modes invalide', file=sys.stderr)
+    benches = {}
+    if any(len(m) != 2 for m in raw_modes) or not variants or len(set(variants)) != len(variants):
+        print('refus : --modes ou --variants invalide', file=sys.stderr)
         return 1
+    for variant in variants:
+        if variant == 'new':
+            if args.bench is None and args.src is not None and args.work is not None:
+                args.bench = build(args.src, args.work, args.out, build_log)
+            benches[variant] = args.bench
+            continue
+        archive = args.data / (variant + '_src.tar.gz')
+        if args.work is None or not archive.is_file():
+            print('refus : archive de variante absente : ' + str(archive), file=sys.stderr)
+            return 1
+        root = args.work / ('src_' + variant)
+        if not (root / 'morsehgp3D_v11').is_dir():
+            root.mkdir(parents=True, exist_ok=True)
+            with tarfile.open(archive) as tar:
+                tar.extractall(root)
+        build_log.append(dict(step='variant', name=variant, archive_sha256=sha256(archive)))
+        benches[variant] = build(root, args.work, args.out, build_log, suffix='_' + variant)
+    if any(b is None or not Path(b).is_file() for b in benches.values()):
+        print('refus : banc absent', file=sys.stderr)
+        return 1
+    # Une seule variante "new" : noms de modes inchanges (compatibilite des rapports precedents).
+    modes = [(n if variants == ['new'] else v + ':' + n, m, benches[v]) for v in variants for n, m in raw_modes]
     # Non-vacuite des deux regimes (audit du 4 octobre) : au moins une prise a froid, au moins deux passes a chaud.
     if args.reps < 1 or args.warm_passes < 2:
         print('refus : --reps >= 1 et --warm-passes >= 2 exiges', file=sys.stderr)
         return 1
-    report = dict(schema='ehgp.v11.gpu_ab.v1', build=build_log, modes=dict(modes), reps=args.reps, workers=args.workers,
-                  warm_passes=args.warm_passes, kmax=args.kmax, leaf=args.leaf, bench_sha256=sha256(args.bench),
+    report = dict(schema='ehgp.v11.gpu_ab.v1', build=build_log, modes={n: m for n, m, _ in modes}, reps=args.reps,
+                  workers=args.workers, warm_passes=args.warm_passes, kmax=args.kmax, leaf=args.leaf,
+                  bench_sha256={v: sha256(b) for v, b in benches.items()}, variants=variants,
                   cold=[], warm=[], identity={}, ledger={}, refusals=[])
     tail = [str(args.kmax), str(args.leaf), '256', '0', '4294967295', '8589934592']
     dump = args.out / 'dump.tmp'
@@ -152,8 +182,8 @@ def main():
     def save():
         (args.out / 'gpu_ab_report.json').write_text(json.dumps(report, indent=1) + '\n')
 
-    def one(frame, name, mode, workers, passes):
-        cmd = [str(args.bench), str(args.data / (frame + '.u32le')), str(args.data / (frame + '.ids.u32le')), str(dump)]
+    def one(frame, name, mode, bench, workers, passes):
+        cmd = [str(bench), str(args.data / (frame + '.u32le')), str(args.data / (frame + '.ids.u32le')), str(dump)]
         cmd += tail + [workers, mode] + ([str(passes)] if passes > 1 else [])
         if dump.exists():
             dump.unlink()
@@ -187,14 +217,14 @@ def main():
         for rep in range(args.reps):
             for frame in FRAMES:
                 order = [modes[i] for i in orders[rep % len(orders)]]
-                for name, mode in order:
-                    row = one(frame, name, mode, workers, 1)
+                for name, mode, bench in order:
+                    row = one(frame, name, mode, bench, workers, 1)
                     row['rep'] = rep
                     report['cold'].append(row)
                     save()
         for frame in FRAMES:
-            for name, mode in modes:
-                report['warm'].append(one(frame, name, mode, workers, args.warm_passes))
+            for name, mode, bench in modes:
+                report['warm'].append(one(frame, name, mode, bench, workers, args.warm_passes))
                 save()
     # Medianes : a froid par prise ; a chaud sur les passes 2..P (la premiere ouvre contexte et memoire).
     table = {}
