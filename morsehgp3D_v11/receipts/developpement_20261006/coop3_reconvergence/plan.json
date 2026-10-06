@@ -1,0 +1,65 @@
+{
+ "schema": "ehgp.v11.session_plan.v1",
+ "note": "Coop3 (Claude, 6 octobre 2026) : voie un fil revenue a la boucle extend en ligne de 830473218 (reconvergence). Critere ecrit d'avance : dumps et registres identiques ; executeur GPU un fil a chaud <= 1,10 x session L4 (K5 : 59/54/52 ms ; K10 : 340/301/318 ms).",
+ "python_packages": "none",
+ "default_build": false,
+ "results_cap_bytes": 134217728,
+ "commands": [
+  {
+   "name": "gpu_k5",
+   "timeout_seconds": 1100,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/gpu_ab.py",
+    "--src",
+    "{src}",
+    "--work",
+    "{build}/gpu",
+    "--data",
+    "{data}",
+    "--out",
+    "{out}/gpu_k5",
+    "--modes",
+    "cpu=16379,gpu=81915,gpu_coop=212987",
+    "--reps",
+    "5",
+    "--workers",
+    "48",
+    "--warm-passes",
+    "12",
+    "--kmax",
+    "5",
+    "--leaf",
+    "16"
+   ]
+  },
+  {
+   "name": "gpu_k10",
+   "timeout_seconds": 1100,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/gpu_ab.py",
+    "--src",
+    "{src}",
+    "--work",
+    "{build}/gpu",
+    "--data",
+    "{data}",
+    "--out",
+    "{out}/gpu_k10",
+    "--modes",
+    "cpu=16379,gpu=81915,gpu_coop=212987",
+    "--reps",
+    "3",
+    "--workers",
+    "48",
+    "--warm-passes",
+    "8",
+    "--kmax",
+    "10",
+    "--leaf",
+    "24"
+   ]
+  }
+ ]
+}

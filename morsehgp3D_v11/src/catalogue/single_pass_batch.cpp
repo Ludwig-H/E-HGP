@@ -178,7 +178,7 @@ Outcome process_leaf_batch(const Cloud& cloud, const CatalogueParams& params, Me
   LeafBatchView view;
   view.x = cloud.x().data(); view.y = cloud.y().data(); view.z = cloud.z().data(); view.cloud_sites = cloud.sites();
   view.jobs = jobs.data(); view.count = jobs.size(); view.sites = sites.data(); view.site_count = sites.size();
-  view.kmax = params.kmax; view.cache = params.cache_center_lines; view.coop = params.coop_leaves;
+  view.kmax = params.kmax; view.cache = params.cache_center_lines;
   LeafBatchResult result;
   stage.emplace();
   if (params.cuda_leaves) MHGP11_TRY(run_leaf_batch_cuda(view, pool, budget, result));

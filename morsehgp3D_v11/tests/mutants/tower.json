@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 143,
+  "plancher": 141,
   "mutants": [
     {
       "id": "population_memo_owner_omis",

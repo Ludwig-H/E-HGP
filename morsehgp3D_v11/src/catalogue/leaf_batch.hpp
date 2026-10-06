@@ -7,7 +7,7 @@
 #pragma once
 
 #include "catalogue/internal.hpp"
-#include "catalogue/leaf_device_coop.hpp"
+#include "catalogue/leaf_device.hpp"
 
 namespace mhgp11::sched { class Pool; }
 
@@ -106,7 +106,6 @@ struct LeafBatchView {
   u64 site_count = 0;
   int kmax = 0;
   bool cache = false;
-  bool coop = false;  // feuille cooperative (un warp par feuille sur CUDA ; emulation sur l'hote)
 };
 
 // Chronos et volumes d'un lot (diagnostic, hors ledger). Les champs device_* ne sont remplis que par CUDA.

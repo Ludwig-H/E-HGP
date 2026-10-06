@@ -59,7 +59,6 @@ struct Input {
   i64 lo[3] = {0, 0, 0}, hi[3] = {0, 0, 0};  // boite T0 demi-ouverte, 0 <= lo < hi <= 2^B
   int kmax = 0;
   bool cache = false;  // option cache_center_lines : seulement les compteurs evaluations/hits
-  bool coop = false;   // feuille cooperative (run_leaf_any) : memes statut, compteurs et emissions
 };
 
 struct Ball {

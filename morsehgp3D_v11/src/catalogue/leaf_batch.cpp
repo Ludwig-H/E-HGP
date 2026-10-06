@@ -13,7 +13,7 @@ leaf_device::Input input_of(const LeafBatchView& view, const LeafJob& job) noexc
   in.x = view.x; in.y = view.y; in.z = view.z;
   in.sites = view.sites + job.begin; in.m = job.m;
   for (int j = 0; j < 3; ++j) { in.lo[j] = job.lo[j]; in.hi[j] = job.hi[j]; }
-  in.kmax = view.kmax; in.cache = view.cache; in.coop = view.coop;
+  in.kmax = view.kmax; in.cache = view.cache;
   return in;
 }
 
@@ -44,7 +44,7 @@ struct HostBatch {
     if (!fill) {
       ScratchSink sink{scratch_records.data() + j * kScratchRecords, scratch_population.data() + j * kScratchPopulation,
                        in.sites, in.m};
-      status[j] = static_cast<u8>(leaf_device::run_leaf_any(in, c, sink));
+      status[j] = static_cast<u8>(leaf_device::run_leaf(in, c, sink));
       const bool resolved = status[j] == leaf_device::kOk;
       balls[j] = resolved ? sink.balls : 0;
       incidences[j] = resolved ? sink.incidences : 0;
@@ -63,7 +63,7 @@ struct HostBatch {
       return {};
     }
     FillSink sink{records.data(), population.data(), balls[j], incidences[j], in.sites, in.m};
-    if (leaf_device::run_leaf_any(in, c, sink) != leaf_device::kOk) return fail(Reason::catalogue_invariant);
+    if (leaf_device::run_leaf(in, c, sink) != leaf_device::kOk) return fail(Reason::catalogue_invariant);
     if (sink.record_at != record_end || sink.population_at != population_end) return fail(Reason::catalogue_invariant);
     return {};
   }

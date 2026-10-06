@@ -11,132 +11,70 @@
 // Aucun conteneur, exception, allocation ni flottant ; aucune dependance au reste du depot hors <cstdint>.
 #pragma once
 
-#include <type_traits>
-
 #include "catalogue/leaf_device_predicates.hpp"
 
 namespace mhgp11::leaf_device {
 
-// Tables d'une feuille, partageables par les fils qui la calculent ensemble (feuille cooperative, 6 octobre 2026) :
-// sites, lignes de dominance et de voisinage, lignes vivantes, cache J2 simule. Remplies par fill_tables (ou par
-// lignes, fill_row), lues ensuite seulement, sauf le cache J2 (bit pose par seen_test_set).
-struct Tables {
-  u32 m = 0;
-  u32 P[kMaxSites][3];
-  u64 dom[kMaxSites], domby[kMaxSites], nbr[kMaxSites];
-  u64 live[3][kMaxSites];
-  u32 seen[kSeenWords];
-};
-
-// Relation du couple (i, j) sur la fermeture de la boite : -1 si j domine i, +1 si i domine j, 0 sinon (voisins).
-// Forme affine de la difference des distances ; sommes < 12*2^(2B) en i64.
-MHGP11_LEAF_HD int pair_relation(const Tables& t, const Input& in, u32 i, u32 j) {
-  i64 base = 0, cmin = 0, cmax = 0;
-  for (int axis = 0; axis < 3; ++axis) {
-    const i64 delta = i64(t.P[j][axis]) - i64(t.P[i][axis]);
-    base += i64(t.P[j][axis]) * t.P[j][axis] - i64(t.P[i][axis]) * t.P[i][axis];
-    cmin += (delta > 0 ? in.lo[axis] : in.hi[axis]) * delta;
-    cmax += (delta > 0 ? in.hi[axis] : in.lo[axis]) * delta;
-  }
-  if (base - 2 * cmin < 0) return -1;
-  if (base - 2 * cmax > 0) return 1;
-  return 0;
-}
-
-// Ligne i des tables (dom, domby, nbr), tous les j : chaque fil peut remplir ses lignes seul. Meme relation que le
-// parcours des paires i < j de fill_tables (pair_relation(j, i) = -pair_relation(i, j)).
-MHGP11_LEAF_HD void fill_row(Tables& t, const Input& in, u32 i) {
-  u64 dom = 0, domby = 0, nbr = 0;
-  for (u32 j = 0; j < t.m; ++j) {
-    if (j == i) continue;
-    const int r = j > i ? pair_relation(t, in, i, j) : -pair_relation(t, in, j, i);
-    if (r < 0) dom |= u64(1) << j;
-    else if (r > 0) domby |= u64(1) << j;
-    else nbr |= u64(1) << j;
-  }
-  t.dom[i] = dom; t.domby[i] = domby; t.nbr[i] = nbr;
-}
-
-// Ligne vivante x (apres toutes les lignes dom et nbr).
-MHGP11_LEAF_HD void fill_live(Tables& t, const Input& in, u32 x) {
-  u64 live0 = 0, live1 = 0, live2 = 0;
-  for (u64 rest = t.nbr[x]; rest != 0; rest &= rest - 1) {
-    const u32 y = ctz(rest);
-    const int weight = static_cast<int>(popc(t.dom[x] | t.dom[y]));
-    if (weight <= in.kmax - 1) live0 |= u64(1) << y;
-    if (weight <= in.kmax - 2) live1 |= u64(1) << y;
-    if (weight <= in.kmax - 3) live2 |= u64(1) << y;
-  }
-  t.live[0][x] = live0; t.live[1][x] = live1; t.live[2][x] = live2;
-}
-
-MHGP11_LEAF_HD void load_sites(Tables& t, const Input& in, u32 i) {
-  const u32 s = in.sites[i];
-  t.P[i][0] = in.x[s]; t.P[i][1] = in.y[s]; t.P[i][2] = in.z[s];
-}
-
-// Tables completes, sur un seul fil : chaque couple i < j est calcule une seule fois (fill_row, qui recalcule chaque
-// couple pour sa ligne, est reserve aux fils d'un warp ; audit d117de397).
-MHGP11_LEAF_HD void fill_tables(Tables& t, const Input& in) {
-  t.m = in.m;
-  for (u32 i = 0; i < t.m; ++i) {
-    load_sites(t, in, i);
-    t.dom[i] = t.domby[i] = t.nbr[i] = 0;
-  }
-  for (u32 w = 0; w < kSeenWords; ++w) t.seen[w] = 0;
-  for (u32 i = 0; i < t.m; ++i)
-    for (u32 j = i + 1; j < t.m; ++j) {
-      const int r = pair_relation(t, in, i, j);
-      if (r < 0) {  // j domine i
-        t.dom[i] |= u64(1) << j;
-        t.domby[j] |= u64(1) << i;
-      } else if (r > 0) {  // i domine j
-        t.dom[j] |= u64(1) << i;
-        t.domby[i] |= u64(1) << j;
-      } else {
-        t.nbr[i] |= u64(1) << j;
-        t.nbr[j] |= u64(1) << i;
-      }
-    }
-  for (u32 x = 0; x < t.m; ++x) fill_live(t, in, x);
-}
-
-// Bit r du cache J2 simule : vrai s'il etait deja pose. Atomique sur l'appareil pour des tables partagees (fils d'une
-// meme feuille, memoire partagee) ; le nombre de succes vaut les tests moins les rangs distincts, independant de
-// l'ordre de visite. Tables d'un seul fil (memoire locale, ou un atomique n'a pas de sens : avertissement de ptxas) :
-// lecture puis ecriture ordinaires.
-template <bool Atomic>
-MHGP11_LEAF_HD bool seen_test_set(u32* seen, u32 r) {
-  const u32 bit = 1u << (r & 31);
-#if defined(__CUDA_ARCH__)
-  if constexpr (Atomic) return (atomicOr(&seen[r >> 5], bit) & bit) != 0;
-#endif
-  const bool hit = (seen[r >> 5] & bit) != 0;
-  seen[r >> 5] |= bit;
-  return hit;
-}
-
-// Shared : tables partagees par reference (feuille cooperative) ; sinon possedees par la feuille. Une feuille d'un fil
-// garde ses tables par valeur : en memoire locale, une reference ajoute un chargement de pointeur devant chaque acces,
-// et la seconde passe d'ecriture, limitee par la latence de quelques feuilles lourdes, doublait (session G4 coop1,
-// 6 octobre 2026 : 17 -> 39 ms a K5, 111 -> 244 ms a K10).
-template <class Sink, bool Shared = true>
+template <class Sink>
 struct Leaf {
   const Input& in;
   Counts& c;
   Sink& sink;
-  std::conditional_t<Shared, Tables&, Tables> t;
-  u64 masks[5] = {0, 0, 0, 0, 0};
-  u32 prefix[4] = {0, 0, 0, 0};
+  u32 m = 0;
+  u32 P[kMaxSites][3];
+  u64 dom[kMaxSites], domby[kMaxSites], nbr[kMaxSites];
+  u64 live[3][kMaxSites];
+  u64 masks[5];
+  u32 prefix[4];
+  u32 seen[kSeenWords];
   u32 interior[kMaxSites], shell[kMaxSites], shell_local[kMaxSites];
   bool unresolved = false;
 
-  MHGP11_LEAF_HD Leaf(const Input& input, Counts& counts, Sink& out, Tables& tables)
-    requires Shared
-      : in(input), c(counts), sink(out), t(tables) {}
-  MHGP11_LEAF_HD Leaf(const Input& input, Counts& counts, Sink& out)
-    requires(!Shared)
-      : in(input), c(counts), sink(out) {}
+  MHGP11_LEAF_HD Leaf(const Input& input, Counts& counts, Sink& out) : in(input), c(counts), sink(out) {}
+
+  MHGP11_LEAF_HD void prepare() {
+    m = in.m;
+    for (u32 i = 0; i < m; ++i) {
+      const u32 s = in.sites[i];
+      P[i][0] = in.x[s]; P[i][1] = in.y[s]; P[i][2] = in.z[s];
+      dom[i] = domby[i] = nbr[i] = 0;
+      live[0][i] = live[1][i] = live[2][i] = 0;
+    }
+    for (int q = 0; q < 5; ++q) masks[q] = 0;
+    for (u32 w = 0; w < kSeenWords; ++w) seen[w] = 0;
+    c.dominance_tests += u64(m) * (m - 1) / 2;
+    // Forme affine de la difference des distances sur la fermeture ; sommes < 12*2^(2B) en i64.
+    for (u32 i = 0; i < m; ++i)
+      for (u32 j = i + 1; j < m; ++j) {
+        i64 base = 0, cmin = 0, cmax = 0;
+        for (int axis = 0; axis < 3; ++axis) {
+          const i64 delta = i64(P[j][axis]) - i64(P[i][axis]);
+          base += i64(P[j][axis]) * P[j][axis] - i64(P[i][axis]) * P[i][axis];
+          cmin += (delta > 0 ? in.lo[axis] : in.hi[axis]) * delta;
+          cmax += (delta > 0 ? in.hi[axis] : in.lo[axis]) * delta;
+        }
+        if (base - 2 * cmin < 0) {  // j domine i
+          dom[i] |= u64(1) << j;
+          domby[j] |= u64(1) << i;
+        } else if (base - 2 * cmax > 0) {  // i domine j
+          dom[j] |= u64(1) << i;
+          domby[i] |= u64(1) << j;
+        } else {
+          nbr[i] |= u64(1) << j;
+          nbr[j] |= u64(1) << i;
+        }
+      }
+  }
+
+  MHGP11_LEAF_HD void live_rows() {
+    for (u32 x = 0; x < m; ++x)
+      for (u64 rest = nbr[x]; rest != 0; rest &= rest - 1) {
+        const u32 y = ctz(rest);
+        const int weight = static_cast<int>(popc(dom[x] | dom[y]));
+        for (int q = 2; q <= 4; ++q)
+          if (weight <= in.kmax + 1 - q) live[q - 2][x] |= u64(1) << y;
+      }
+  }
 
   MHGP11_LEAF_HD static u32 rank(u32 i, u32 j, u32 k) { return k * (k - 1) * (k - 2) / 6 + j * (j - 1) / 2 + i; }
 
@@ -148,9 +86,13 @@ struct Leaf {
         ++c.region_line_tests;
         const u32 a = prefix[j], b = prefix[k];
         bool hit = false;
-        if (in.cache) hit = seen_test_set<Shared>(t.seen, rank(a, b, last));
+        if (in.cache) {
+          const u32 r = rank(a, b, last);
+          hit = ((seen[r >> 5] >> (r & 31)) & 1u) != 0;
+          seen[r >> 5] |= 1u << (r & 31);
+        }
         if (hit) ++c.region_line_cache_hits; else ++c.region_line_evaluations;
-        if (center_line_meets(t.P[a], t.P[b], t.P[last], in.lo, in.hi) != kIntersects) {
+        if (center_line_meets(P[a], P[b], P[last], in.lo, in.hi) != kIntersects) {
           ++c.region_line_rejects;
           return false;
         }
@@ -159,8 +101,8 @@ struct Leaf {
   }
 
   MHGP11_LEAF_HD void q2() {
-    const u32* a = t.P[prefix[0]];
-    const u32* b = t.P[prefix[1]];
+    const u32* a = P[prefix[0]];
+    const u32* b = P[prefix[1]];
     Center s;
     for (int j = 0; j < 3; ++j) { s.anchor[j] = a[j]; s.n[j] = i128(i64(b[j]) - i64(a[j])); }
     s.d = 2; s.arity = 2; s.q3_power = false; s.orient = global_orientation(s.d, s.n);
@@ -168,9 +110,9 @@ struct Leaf {
   }
 
   MHGP11_LEAF_HD void q3() {
-    const u32* a = t.P[prefix[0]];
-    const u32* b = t.P[prefix[1]];
-    const u32* cc = t.P[prefix[2]];
+    const u32* a = P[prefix[0]];
+    const u32* b = P[prefix[1]];
+    const u32* cc = P[prefix[2]];
     if (!strictly_acute(a, b, cc)) return;
     const i64 mid[3][3] = {{i64(a[0]) + b[0], i64(a[1]) + b[1], i64(a[2]) + b[2]},
                            {i64(b[0]) + cc[0], i64(b[1]) + cc[1], i64(b[2]) + cc[2]},
@@ -194,7 +136,7 @@ struct Leaf {
   }
 
   MHGP11_LEAF_HD void q4() {
-    const u32* p[4] = {t.P[prefix[0]], t.P[prefix[1]], t.P[prefix[2]], t.P[prefix[3]]};
+    const u32* p[4] = {P[prefix[0]], P[prefix[1]], P[prefix[2]], P[prefix[3]]};
     if (orientation4(p[0], p[1], p[2], p[3]) == 0) return;
     ++c.q4_candidates;
     const i64 twice[4][3] = {{2 * i64(p[0][0]), 2 * i64(p[0][1]), 2 * i64(p[0][2])},
@@ -247,7 +189,7 @@ struct Leaf {
   MHGP11_LEAF_HD bool canonical(const Center& s, u32 count, u32* support, u32& qmin) {
     for (u32 i = 0; i < count; ++i)
       for (u32 j = i + 1; j < count; ++j)
-        if (midpoint(s, t.P[shell_local[i]], t.P[shell_local[j]])) {
+        if (midpoint(s, P[shell_local[i]], P[shell_local[j]])) {
           support[0] = shell[i]; support[1] = shell[j]; support[2] = support[3] = kNoSite;
           qmin = 2;
           return true;
@@ -255,9 +197,9 @@ struct Leaf {
     for (u32 i = 0; i < count; ++i)
       for (u32 j = i + 1; j < count; ++j)
         for (u32 k = j + 1; k < count; ++k) {
-          const u32* a = t.P[shell_local[i]];
-          const u32* b = t.P[shell_local[j]];
-          const u32* cc = t.P[shell_local[k]];
+          const u32* a = P[shell_local[i]];
+          const u32* b = P[shell_local[j]];
+          const u32* cc = P[shell_local[k]];
           if (!strictly_acute(a, b, cc)) continue;
           int plane = 0;
           if (!center_orientation(a, b, cc, s, plane)) { unresolved = true; return false; }
@@ -271,7 +213,7 @@ struct Leaf {
       for (u32 j = i + 1; j < count; ++j)
         for (u32 k = j + 1; k < count; ++k)
           for (u32 l = k + 1; l < count; ++l) {
-            const u32* p[4] = {t.P[shell_local[i]], t.P[shell_local[j]], t.P[shell_local[k]], t.P[shell_local[l]]};
+            const u32* p[4] = {P[shell_local[i]], P[shell_local[j]], P[shell_local[k]], P[shell_local[l]]};
             bool inside = false;
             if (!center_inside(s, p, inside)) { unresolved = true; return false; }
             if (inside) {
@@ -289,12 +231,12 @@ struct Leaf {
     const u32 threshold = static_cast<u32>(in.kmax + 1) - q;
     u64 inside = 0, outside = 0;
     for (u32 j = 0; j < q; ++j) {
-      inside |= t.dom[prefix[j]];
-      outside |= t.domby[prefix[j]];
+      inside |= dom[prefix[j]];
+      outside |= domby[prefix[j]];
     }
     if ((inside & outside) != 0) { unresolved = true; return; }  // leaf.cpp : catalogue_invariant
     u32 p = 0, count = 0, cursor = 0;
-    for (u32 i = 0; i < t.m; ++i) {
+    for (u32 i = 0; i < m; ++i) {
       ++c.census_tests;
       int relation = 0;
       if (cursor < q && i == prefix[cursor]) {
@@ -303,7 +245,7 @@ struct Leaf {
         relation = -1;
       } else if ((outside >> i) & 1u) {
         relation = 1;
-      } else if (!side(s, t.P[i], relation)) {
+      } else if (!side(s, P[i], relation)) {
         unresolved = true;
         return;
       }
@@ -331,55 +273,6 @@ struct Leaf {
     c.incidences += u64(p) + count;
   }
 
-  // Corps de la boucle d'extend pour le site i a la profondeur Depth (feuille cooperative seulement ; recursion par
-  // extend) ; candidates : candidats restants apres i.
-  // Sans recursion (Recurse = false), rend les candidats et l'ensemble logique de la profondeur suivante au lieu de
-  // les parcourir : la profondeur 0 de la feuille cooperative les distribue en paires. Rend faux si la boucle
-  // appelante doit continuer sans descendre.
-  template <int Depth, bool Recurse = true>
-  MHGP11_LEAF_HD bool extend_one(u32 i, u64 candidates, u64 logical, u64* out_next = nullptr,
-                                 u64* out_logical = nullptr) {
-    constexpr int q = Depth + 1;
-    ++c.prefixes;
-    prefix[Depth] = i;
-    const u64 mask = masks[Depth] | t.dom[i];
-    masks[q] = mask;
-    const u32 count = popc(mask);
-    if (count > static_cast<u32>(in.kmax + 1 - q)) return false;  // G3
-    if constexpr (q >= 3) {
-      if (!lines_possible(q)) return false;
-    }
-    if constexpr (q == 4) q4();
-    else if constexpr (q == 3) q3();
-    else if constexpr (q == 2) q2();
-    if (unresolved) return false;
-    if constexpr (q < 4) {
-      u64 next = 0, next_logical = 0;
-      if (in.kmax + 1 - (q + 1) >= 0) {
-        next_logical = logical & (~u64(0) << (i + 1)) & t.nbr[i];
-        if (count > static_cast<u32>(in.kmax - q)) {
-          c.prefixes += popc(next_logical);
-          return false;
-        }
-        next = candidates;
-        for (int j = 0; j < q; ++j) next &= t.live[q - 1][prefix[j]];
-        c.prefixes += popc(next_logical) - popc(next);
-      }
-      if constexpr (Recurse) {
-        extend<Depth + 1>(next, next_logical);
-      } else {
-        *out_next = next;
-        *out_logical = next_logical;
-      }
-      return true;
-    }
-    return false;
-  }
-
-  // Parcours d'une feuille d'un fil : meme corps qu'extend_one, ecrit en ligne. La forme en appel (extend_one dans la
-  // boucle) rend les memes sorties mais change la reconvergence des warps sur CUDA : seconde passe d'ecriture x2,1,
-  // instructions executees x2,7, 1,39 fil actif par warp au lieu de 3,47 (Nsight, sessions G4 coop1 et coop2,
-  // 6 octobre 2026), alors que l'hote fait le meme travail. Cette boucle reste celle de 830473218.
   template <int Depth>
   MHGP11_LEAF_HD void extend(u64 candidates, u64 logical) {
     constexpr int q = Depth + 1;
@@ -390,7 +283,7 @@ struct Leaf {
       candidates &= candidates - 1;
       ++c.prefixes;
       prefix[Depth] = i;
-      const u64 mask = masks[Depth] | t.dom[i];
+      const u64 mask = masks[Depth] | dom[i];
       masks[q] = mask;
       const u32 count = popc(mask);
       if (count > static_cast<u32>(threshold)) continue;  // G3
@@ -404,13 +297,13 @@ struct Leaf {
       if constexpr (q < 4) {
         u64 next = 0, next_logical = 0;
         if (in.kmax + 1 - (q + 1) >= 0) {
-          next_logical = logical & (~u64(0) << (i + 1)) & t.nbr[i];
+          next_logical = logical & (~u64(0) << (i + 1)) & nbr[i];
           if (count > static_cast<u32>(in.kmax - q)) {
             c.prefixes += popc(next_logical);
             continue;
           }
           next = candidates;
-          for (int j = 0; j < q; ++j) next &= t.live[q - 1][prefix[j]];
+          for (int j = 0; j < q; ++j) next &= live[q - 1][prefix[j]];
           c.prefixes += popc(next_logical) - popc(next);
         }
         extend<Depth + 1>(next, next_logical);
@@ -424,9 +317,9 @@ struct Leaf {
 template <class Sink>
 MHGP11_LEAF_HD u32 run_leaf(const Input& in, Counts& counts, Sink& sink) {
   if (in.m == 0 || in.m > kMaxSites || in.kmax < 1) return kUnresolved;
-  Leaf<Sink, false> leaf(in, counts, sink);
-  fill_tables(leaf.t, in);
-  counts.dominance_tests += u64(in.m) * (in.m - 1) / 2;
+  Leaf<Sink> leaf(in, counts, sink);
+  leaf.prepare();
+  leaf.live_rows();
   const u64 initial = in.m >= 64 ? ~u64(0) : (u64(1) << in.m) - 1;
   leaf.template extend<0>(initial, initial);
   return leaf.unresolved ? kUnresolved : kOk;
