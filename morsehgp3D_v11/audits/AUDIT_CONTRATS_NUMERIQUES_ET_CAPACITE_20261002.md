@@ -41,6 +41,16 @@ Ces métriques vérifiées contre le CSV justifient l'essai de travail commun
 sur les sites d'un préfixe ; elles ne démontrent aucune cause exclusive ni
 gain futur. Les durées instrumentées ne remplacent pas celles du banc.
 
+**Restauration suivante du parcours : avis source favorable.** Le WIP l3
+lu vers 10:03 UTC rétablit `extend` en ligne ; son corps est identique à
+**830473218** après les seules substitutions `t.dom→dom`, `t.nbr→nbr`,
+`t.live→live`, sans autre normalisation. Empreinte du fichier relu :
+`9a88631fe900818f97491b9240edb9bfe4311de71081a2bc1a85cf9f384279d9`.
+Les motifs des mutants restent uniques. La voie par paires utilise encore
+`extend_one<1>`, puis ces boucles aux profondeurs2/3 ; les invariants de
+tables et cache sont conservés. Cette lecture ne restaure pas à elle seule
+le temps d'exécution : mesurer cette nouvelle source sur G4.
+
 **Réponse à la conception Q publiée : poursuivre avec un premier événement
 ordonné**, selon la [note mathématique](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md#feuille-coherente--reponse-a-la-section-q-du-6-octobre).
 Points qui changent le résultat : seuil+1, refus antérieur au succès,
