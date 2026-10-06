@@ -4,6 +4,13 @@
 quantized_u21_input_only / not_claimed`. Six notes actives maintenues en
 place ; preuves et propositions détaillées dans les reçus immuables.
 
+**Placement : perte de l'option corrigée en 9d10de213.** La porte G4
+corrigée observe des plans non nuls ; le premier essai à zéro plan reste
+exclu. Les rapports LiDAR omettent ce témoin : une proposition ciblée le
+conserve pour les prochains bancs. La lecture du WIP API et des bornes
+entières est favorable, sans transfert de qualification.
+[Activation, portée des reçus et proposition](../receipts/audit_placement_activation_20261006/README.md).
+
 **Levier C intégré en 5861c223f : lecture numérique favorable.** Deux
 raccords importants restent à corriger : les mutants d'étendue héritent
 d'u18, où leur garde est désactivée, et la reprise du banc multi-source

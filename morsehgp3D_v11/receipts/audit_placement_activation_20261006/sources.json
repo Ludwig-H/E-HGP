@@ -1,0 +1,26 @@
+{
+  "published_commit": "9d10de21341fee138c15c3caf9cb30925e030cb9",
+  "published_files": {
+    "src/tower/forest_parallel.hpp": "da784a061230032c33748bbd8bc41be403ea792deec14f8756070f7aa50588e1",
+    "src/tower/forest_pipeline.cpp": "f29c28e5950f6699f15a2b7af1a9bf2e0674e7e462ca74184372901e69245d0e",
+    "tests/tower/forest_pipeline_test.cpp": "3644a014b123c568fe988449b7e17fd9411fca734590402ada1e174422940925",
+    "tests/mutants/tower.json": "2b522b07b3465ef05bdc1e0479b042b8b7f59ab8cab284db72896207fcdbf01d"
+  },
+  "wip_base_commit": "9d10de21341fee138c15c3caf9cb30925e030cb9",
+  "wip_worktree": "/workspaces/E-HGP/build/v11-impl-l3",
+  "wip_math_files": {
+    "src/num/lattice_bounds.hpp": "84695ac5df6a4626640f7354b8e903528c039381b12d7ae68718bbc48f14aaa0",
+    "src/num/predicates.cpp": "f4b32ed1116d7ca2026da00d9cd285c983c6db27735b533f6cddc442bf05ee1a",
+    "src/num/num.hpp": "b99a7e6d5b198105982dc7a0b3e05ac7ebf813e0b0639e12c213122e597d165f",
+    "src/index/census.cpp": "a4ee4a1f6dc04469432541a159266f27771d5dedf9761d76e90de93710efcac5",
+    "src/index/census_workspace.cpp": "778d7b59ca07e2da64028a474d64a23835de5c3e6d427108a9fbd4a38c72e546"
+  },
+  "wip_api_files": {
+    "src/api/api.hpp": "fbec0103b8dec90b8280e2999d0aa7dd509533bfd6494386300bd6f6cca1ef74",
+    "src/api/compute.cpp": "4f3ce28d9ff875f6e3dc276a4ffc4e89f286c56eb0ca680460bef8ae8a038962",
+    "src/api/internal.hpp": "48ce1950c204fa4501940eb44ff5e2c2c8143514186cd63fb5a7e519d19882c0",
+    "bench/points_export.cpp": "f9bf78a0742d440f7f019a31003636a6b78b1f90eaf076571391de015a140db9",
+    "src/tower/forest_parallel.cpp": "b16068ce37fb783aaffe1c2970ad87bb73e39996ca2a38c2a134438ac8f502db"
+  },
+  "method": "Source reading only. WIP hashes identify a mutable snapshot, not a published or qualified implementation."
+}

@@ -1,0 +1,664 @@
+{
+  "cloud_actions": 0,
+  "limits": [
+    "No timing statistics or performance adoption derived.",
+    "First session has zero activated plans and is explicitly excluded by the third plan.",
+    "Nonzero placement_cores is observed on the place2 unit gate only, not on each LiDAR take.",
+    "The requested option is checked by source and PASS of the place2 unit gate; report does not preserve it per LiDAR take.",
+    "No new sanitizer/mutant result or API-default qualification is transferred from these probe sessions.",
+    "Only cold and last warm outputs/registers are judged; intermediate pass success is preserved separately.",
+    "No LiDAR data, native dump or account identifiers copied."
+  ],
+  "native_executions": 0,
+  "schema": "audit_placement_activation_v1",
+  "sessions": [
+    {
+      "archive_sha256": "a84ba2fa74036169b7cf23aa562b0139d6fdca64b9a0ea5ead4112bd097be62e",
+      "capture_kind": "local_closed_session_not_developer_published_receipt",
+      "commands": [
+        {
+          "exit_code": 0,
+          "name": "000_portes",
+          "status": "ok"
+        },
+        {
+          "exit_code": 0,
+          "name": "001_k5_16_cpu",
+          "status": "ok"
+        },
+        {
+          "exit_code": 0,
+          "name": "002_k5_24_gpu",
+          "status": "ok"
+        }
+      ],
+      "done_code": 0,
+      "manifest": {
+        "exact_inventory": true,
+        "files": 60,
+        "sha256": "3972b3dc3cdcc7c380329d2e88537c20c1a0976877fee9a38392177986c88f93"
+      },
+      "new_sanitizer_or_mutant_execution": false,
+      "package_sha256": "b0ed494e4503c6b371bf55e10c254e717d3bbaed839ff8985f85ce3475bdfc22",
+      "plan_sha256": "c259385765b93f960c827c04b835ef6fdc82f1aeb7e8dc1351fd0cab0466a76f",
+      "receipt_sha256": "57f9272f7c52ffebeb5ebf292dc42090e43aa3868fd1153ddbc5efe2abc6ced8",
+      "reports": [
+        {
+          "arm": "cpu",
+          "bench_sha256": {
+            "new": "8ea2e797232d3079acaecaa9ed73c928ecd2c118274a6bc9035003f42e946f4e"
+          },
+          "build_steps": [
+            {
+              "step": "nvcc"
+            },
+            {
+              "code": 0,
+              "step": "versions_nvcc"
+            },
+            {
+              "code": 0,
+              "step": "versions_cmake"
+            },
+            {
+              "code": 0,
+              "step": "configure"
+            },
+            {
+              "code": 0,
+              "step": "build"
+            },
+            {
+              "sha256": "8ea2e797232d3079acaecaa9ed73c928ecd2c118274a6bc9035003f42e946f4e",
+              "step": "built"
+            }
+          ],
+          "canonical": {
+            "lidar_ng00": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+            "lidar_ng01": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+            "lidar_ng02": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207"
+          },
+          "cold_processes": 30,
+          "full_passes": 90,
+          "k": 5,
+          "leaf": 16,
+          "modes": {
+            "cpu": "16379",
+            "cpu_place": "278523"
+          },
+          "path": "results/cmd/001_k5_16_cpu/files/k5_16_cpu/gpu_ab_report.json",
+          "placement_cores_observed_per_lidar_take": false,
+          "reference_ledger_sha256": "0647f272fbc417ea6df67e1337bb0723ca9900a4f0a03d907036e663e55043b3",
+          "refusals": 0,
+          "requested_boolean_observed_per_lidar_take": false,
+          "retained_hashes": 36,
+          "sha256": "979e47fd79645928a4f6a2a1efa3227b0f4d09e4537b72c1a359fb3152035b4e",
+          "verdict": "conforme",
+          "warm_processes": 6
+        },
+        {
+          "arm": "gpu",
+          "bench_sha256": {
+            "new": "8ea2e797232d3079acaecaa9ed73c928ecd2c118274a6bc9035003f42e946f4e"
+          },
+          "build_steps": [
+            {
+              "sha256": "8ea2e797232d3079acaecaa9ed73c928ecd2c118274a6bc9035003f42e946f4e",
+              "step": "reuse"
+            }
+          ],
+          "canonical": {
+            "lidar_ng00": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+            "lidar_ng01": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+            "lidar_ng02": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207"
+          },
+          "cold_processes": 30,
+          "full_passes": 90,
+          "k": 5,
+          "leaf": 24,
+          "modes": {
+            "gpu": "81915",
+            "gpu_place": "344059"
+          },
+          "path": "results/cmd/002_k5_24_gpu/files/k5_24_gpu/gpu_ab_report.json",
+          "placement_cores_observed_per_lidar_take": false,
+          "reference_ledger_sha256": "1fe34816c1cb5ceff7b40946d7982c39b87e9468fcddcfbba5f7aaf65ede13de",
+          "refusals": 0,
+          "requested_boolean_observed_per_lidar_take": false,
+          "retained_hashes": 36,
+          "sha256": "a46281fd70a6f13c3cf6c328d8213d1fc500455702f6bef10b0eefe9804fb262",
+          "verdict": "conforme",
+          "warm_processes": 6
+        }
+      ],
+      "session": "v11.20261006.claudeo1place",
+      "source_equality": {
+        "extra_or_missing_files": false,
+        "files_verified": 641,
+        "includes_docs_or_receipts": false,
+        "manifest_sha256": "7ee21a07944e5d86b971d1680813154d9e5791779ab73237307b4566f2491b0b",
+        "method": "git_archive_selectif_egalite_exacte",
+        "paths": [
+          "gcp-migration/v11_worker.sh",
+          "morsehgp3D_v11/CMakeLists.txt",
+          "morsehgp3D_v11/src",
+          "morsehgp3D_v11/tests",
+          "morsehgp3D_v11/cmake",
+          "morsehgp3D_v11/bench",
+          "morsehgp3D_v11/reference",
+          "morsehgp3D_v11/tools",
+          "morsehgp3D_v11/cli"
+        ],
+        "source_commit": "86b3cbf14247f2cff523757ceb38168d365df82e"
+      },
+      "source_pin": "86b3cbf14247f2cff523757ceb38168d365df82e",
+      "status": "completed",
+      "stop_utc": "2026-10-06T19:42:41.310000+00:00",
+      "targeted_stop_certified": true,
+      "unit_gate": {
+        "failed": [],
+        "missing": [],
+        "passed": [
+          "mhgp11_tower_pipeline_abandon",
+          "mhgp11_tower_pipeline_decisions",
+          "mhgp11_tower_pipeline_equivalence",
+          "mhgp11_tower_pipeline_inventaire",
+          "mhgp11_tower_placement_affinity",
+          "mhgp11_tower_placement_cores",
+          "mhgp11_tower_placement_inventaire",
+          "mhgp11_tower_placement_parse",
+          "mhgp11_tower_placement_plan"
+        ],
+        "stdout_sha256": "b92ad7bf8b7703696f4fdf38de71b5e165ab12cd81f0012a945cccbfb87ad043",
+        "witness": {
+          "calls_with_nonzero_placement_cores": 0,
+          "orders": 960,
+          "pipelines": 192
+        }
+      },
+      "worker_exit_code": 0
+    },
+    {
+      "archive_sha256": "b28fab7682b150cb62bd7b16226334bf832f203e6348576d1b3cae2a504d2c11",
+      "capture_kind": "local_closed_session_not_developer_published_receipt",
+      "commands": [
+        {
+          "exit_code": 0,
+          "name": "000_portes",
+          "status": "ok"
+        },
+        {
+          "exit_code": 0,
+          "name": "001_k5_16_cpu",
+          "status": "ok"
+        },
+        {
+          "exit_code": 0,
+          "name": "002_k5_24_gpu",
+          "status": "ok"
+        }
+      ],
+      "done_code": 0,
+      "manifest": {
+        "exact_inventory": true,
+        "files": 60,
+        "sha256": "6db89de2966c48cf3d4a20cffcad13bf4c0ba7826eb504b13195f0f4acc35706"
+      },
+      "new_sanitizer_or_mutant_execution": false,
+      "package_sha256": "ec5d0ebc99921eb8b268bd71ed45783a21f535e73c177196b694a9013e48b166",
+      "plan_sha256": "c259385765b93f960c827c04b835ef6fdc82f1aeb7e8dc1351fd0cab0466a76f",
+      "receipt_sha256": "c8bae7a5c7df8e91f3e312583adece1410fb2cb9e73dc0e7cfd74c568e248c1d",
+      "reports": [
+        {
+          "arm": "cpu",
+          "bench_sha256": {
+            "new": "33523894d9c0ad4da4d06f03d7d2d88c8542ffa900ece787e7c686884e6b330b"
+          },
+          "build_steps": [
+            {
+              "step": "nvcc"
+            },
+            {
+              "code": 0,
+              "step": "versions_nvcc"
+            },
+            {
+              "code": 0,
+              "step": "versions_cmake"
+            },
+            {
+              "code": 0,
+              "step": "configure"
+            },
+            {
+              "code": 0,
+              "step": "build"
+            },
+            {
+              "sha256": "33523894d9c0ad4da4d06f03d7d2d88c8542ffa900ece787e7c686884e6b330b",
+              "step": "built"
+            }
+          ],
+          "canonical": {
+            "lidar_ng00": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+            "lidar_ng01": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+            "lidar_ng02": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207"
+          },
+          "cold_processes": 30,
+          "full_passes": 90,
+          "k": 5,
+          "leaf": 16,
+          "modes": {
+            "cpu": "16379",
+            "cpu_place": "278523"
+          },
+          "path": "results/cmd/001_k5_16_cpu/files/k5_16_cpu/gpu_ab_report.json",
+          "placement_cores_observed_per_lidar_take": false,
+          "reference_ledger_sha256": "0647f272fbc417ea6df67e1337bb0723ca9900a4f0a03d907036e663e55043b3",
+          "refusals": 0,
+          "requested_boolean_observed_per_lidar_take": false,
+          "retained_hashes": 36,
+          "sha256": "973fb5216d800f9e5f67b24f32788bc98fa0631d3c7fb8606a3cfd9fcba6c5ad",
+          "verdict": "conforme",
+          "warm_processes": 6
+        },
+        {
+          "arm": "gpu",
+          "bench_sha256": {
+            "new": "33523894d9c0ad4da4d06f03d7d2d88c8542ffa900ece787e7c686884e6b330b"
+          },
+          "build_steps": [
+            {
+              "sha256": "33523894d9c0ad4da4d06f03d7d2d88c8542ffa900ece787e7c686884e6b330b",
+              "step": "reuse"
+            }
+          ],
+          "canonical": {
+            "lidar_ng00": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+            "lidar_ng01": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+            "lidar_ng02": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207"
+          },
+          "cold_processes": 30,
+          "full_passes": 90,
+          "k": 5,
+          "leaf": 24,
+          "modes": {
+            "gpu": "81915",
+            "gpu_place": "344059"
+          },
+          "path": "results/cmd/002_k5_24_gpu/files/k5_24_gpu/gpu_ab_report.json",
+          "placement_cores_observed_per_lidar_take": false,
+          "reference_ledger_sha256": "1fe34816c1cb5ceff7b40946d7982c39b87e9468fcddcfbba5f7aaf65ede13de",
+          "refusals": 0,
+          "requested_boolean_observed_per_lidar_take": false,
+          "retained_hashes": 36,
+          "sha256": "cce8223af97c50e8c9e6e13eb761fd4f5911c3a8cc61235bbdf643a267f5a205",
+          "verdict": "conforme",
+          "warm_processes": 6
+        }
+      ],
+      "session": "v11.20261006.claudeo1place2",
+      "source_equality": {
+        "extra_or_missing_files": false,
+        "files_verified": 641,
+        "includes_docs_or_receipts": false,
+        "manifest_sha256": "a072e7806b7c31ce8c39053d30ca5bacfd4aefee21dac904762129c5e478bf96",
+        "method": "git_archive_selectif_egalite_exacte",
+        "paths": [
+          "gcp-migration/v11_worker.sh",
+          "morsehgp3D_v11/CMakeLists.txt",
+          "morsehgp3D_v11/src",
+          "morsehgp3D_v11/tests",
+          "morsehgp3D_v11/cmake",
+          "morsehgp3D_v11/bench",
+          "morsehgp3D_v11/reference",
+          "morsehgp3D_v11/tools",
+          "morsehgp3D_v11/cli"
+        ],
+        "source_commit": "9d10de21341fee138c15c3caf9cb30925e030cb9"
+      },
+      "source_pin": "9d10de21341fee138c15c3caf9cb30925e030cb9",
+      "status": "completed",
+      "stop_utc": "2026-10-06T19:58:51.810000+00:00",
+      "targeted_stop_certified": true,
+      "unit_gate": {
+        "failed": [],
+        "missing": [],
+        "passed": [
+          "mhgp11_tower_pipeline_abandon",
+          "mhgp11_tower_pipeline_decisions",
+          "mhgp11_tower_pipeline_equivalence",
+          "mhgp11_tower_pipeline_inventaire",
+          "mhgp11_tower_placement_affinity",
+          "mhgp11_tower_placement_cores",
+          "mhgp11_tower_placement_inventaire",
+          "mhgp11_tower_placement_parse",
+          "mhgp11_tower_placement_plan"
+        ],
+        "stdout_sha256": "507326dff78d52cee6b16b2efdf1f1ab0893da199239ab3f2a4002ef4e99f25d",
+        "witness": {
+          "calls_with_nonzero_placement_cores": 72,
+          "orders": 960,
+          "pipelines": 192
+        }
+      },
+      "worker_exit_code": 0
+    },
+    {
+      "archive_sha256": "18d664cd1982b822389ef468a2fd798490060c6650acb8946fb151ab308516ec",
+      "capture_kind": "local_closed_session_not_developer_published_receipt",
+      "commands": [
+        {
+          "exit_code": 0,
+          "name": "000_k5_16_cpu",
+          "status": "ok"
+        },
+        {
+          "exit_code": 0,
+          "name": "001_k5_24_gpu",
+          "status": "ok"
+        }
+      ],
+      "done_code": 0,
+      "manifest": {
+        "exact_inventory": true,
+        "files": 55,
+        "sha256": "06160abaadcd6c90ee9848d11edf7918019969382d70e03a138333ad219d329d"
+      },
+      "new_sanitizer_or_mutant_execution": false,
+      "package_sha256": "ec5d0ebc99921eb8b268bd71ed45783a21f535e73c177196b694a9013e48b166",
+      "plan_sha256": "ed7bbddec1fb1cdeb88a37c66bc305e0d4ec0c87f43fb7d1fb1fdb8622cd4706",
+      "receipt_sha256": "d7d40f6b1fb7afaf8ab6e2c6323d0d6b179c9f935a9b433a1a268e206b43e8c6",
+      "reports": [
+        {
+          "arm": "cpu",
+          "bench_sha256": {
+            "new": "845f6763332776bf2ede6e36db3f5e3f64a8d3a8d01f311c46f9fe6bdf8101a5"
+          },
+          "build_steps": [
+            {
+              "step": "nvcc"
+            },
+            {
+              "code": 0,
+              "step": "versions_nvcc"
+            },
+            {
+              "code": 0,
+              "step": "versions_cmake"
+            },
+            {
+              "code": 0,
+              "step": "configure"
+            },
+            {
+              "code": 0,
+              "step": "build"
+            },
+            {
+              "sha256": "845f6763332776bf2ede6e36db3f5e3f64a8d3a8d01f311c46f9fe6bdf8101a5",
+              "step": "built"
+            }
+          ],
+          "canonical": {
+            "lidar_ng00": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+            "lidar_ng01": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+            "lidar_ng02": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207"
+          },
+          "cold_processes": 54,
+          "full_passes": 144,
+          "k": 5,
+          "leaf": 16,
+          "modes": {
+            "cpu": "16379",
+            "cpu_aa": "16379",
+            "cpu_place": "278523"
+          },
+          "path": "results/cmd/000_k5_16_cpu/files/k5_16_cpu/gpu_ab_report.json",
+          "placement_cores_observed_per_lidar_take": false,
+          "reference_ledger_sha256": "0647f272fbc417ea6df67e1337bb0723ca9900a4f0a03d907036e663e55043b3",
+          "refusals": 0,
+          "requested_boolean_observed_per_lidar_take": false,
+          "retained_hashes": 63,
+          "sha256": "0c0eb0b1f6a3833437f4bfde491e946af65b297cf5a652e6d2f328d9f5692492",
+          "verdict": "conforme",
+          "warm_processes": 9
+        },
+        {
+          "arm": "gpu",
+          "bench_sha256": {
+            "new": "845f6763332776bf2ede6e36db3f5e3f64a8d3a8d01f311c46f9fe6bdf8101a5"
+          },
+          "build_steps": [
+            {
+              "sha256": "845f6763332776bf2ede6e36db3f5e3f64a8d3a8d01f311c46f9fe6bdf8101a5",
+              "step": "reuse"
+            }
+          ],
+          "canonical": {
+            "lidar_ng00": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+            "lidar_ng01": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+            "lidar_ng02": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207"
+          },
+          "cold_processes": 54,
+          "full_passes": 144,
+          "k": 5,
+          "leaf": 24,
+          "modes": {
+            "gpu": "81915",
+            "gpu_aa": "81915",
+            "gpu_place": "344059"
+          },
+          "path": "results/cmd/001_k5_24_gpu/files/k5_24_gpu/gpu_ab_report.json",
+          "placement_cores_observed_per_lidar_take": false,
+          "reference_ledger_sha256": "1fe34816c1cb5ceff7b40946d7982c39b87e9468fcddcfbba5f7aaf65ede13de",
+          "refusals": 0,
+          "requested_boolean_observed_per_lidar_take": false,
+          "retained_hashes": 63,
+          "sha256": "5853a5fe523659b52318deff2b3f1622365a3142b15b9fd5b9b621563d9f582e",
+          "verdict": "conforme",
+          "warm_processes": 9
+        }
+      ],
+      "session": "v11.20261006.claudeo1place3",
+      "source_equality": {
+        "extra_or_missing_files": false,
+        "files_verified": 641,
+        "includes_docs_or_receipts": false,
+        "manifest_sha256": "a072e7806b7c31ce8c39053d30ca5bacfd4aefee21dac904762129c5e478bf96",
+        "method": "git_archive_selectif_egalite_exacte",
+        "paths": [
+          "gcp-migration/v11_worker.sh",
+          "morsehgp3D_v11/CMakeLists.txt",
+          "morsehgp3D_v11/src",
+          "morsehgp3D_v11/tests",
+          "morsehgp3D_v11/cmake",
+          "morsehgp3D_v11/bench",
+          "morsehgp3D_v11/reference",
+          "morsehgp3D_v11/tools",
+          "morsehgp3D_v11/cli"
+        ],
+        "source_commit": "9d10de21341fee138c15c3caf9cb30925e030cb9"
+      },
+      "source_pin": "9d10de21341fee138c15c3caf9cb30925e030cb9",
+      "status": "completed",
+      "stop_utc": "2026-10-06T20:08:53.245000+00:00",
+      "targeted_stop_certified": true,
+      "unit_gate": null,
+      "worker_exit_code": 0
+    }
+  ],
+  "source_anchors": {
+    "86b3cbf14247f2cff523757ceb38168d365df82e": {
+      "bench/full_probe.cpp": {
+        "anchors": [
+          {
+            "line": 298,
+            "text": "    std::cout << \",\\\"pipeline_tasks\\\":{\\\"placement_cores\\\":\" << forest_timings.pipeline_placement_cores"
+          },
+          {
+            "line": 387,
+            "text": "  full_params.place_pipeline = (optimizations & 262144) != 0;  // coeurs dedies aux taches lourdes du pipeline"
+          }
+        ],
+        "sha256": "36a58e5d947cff3b71895cf72ec1a61ad8d5ac169d1371f8166089cb4709c911"
+      },
+      "bench/gpu_ab.py": {
+        "anchors": [
+          {
+            "line": 69,
+            "text": "def take_summary(got):"
+          },
+          {
+            "line": 151,
+            "text": "            if args.bench is None and args.src is not None and args.work is not None:"
+          },
+          {
+            "line": 197,
+            "text": "                   summary=take_summary(got), passes=[{k: v for k, v in p.items() if k != 'phase'} for p in passes_seen],"
+          },
+          {
+            "line": 205,
+            "text": "              work is not None and work == report['ledger'].get(frame))"
+          }
+        ],
+        "sha256": "96cd5495490444f78218f3aa4a347e4e6e889e39f7824605c7a6b95e44349d6b"
+      },
+      "src/tower/forest_parallel.hpp": {
+        "anchors": [],
+        "sha256": "d946bdfc03eec194108b5858551b2cc06572a35d47f13f5bb75a295e4d105436"
+      },
+      "src/tower/forest_pipeline.cpp": {
+        "anchors": [
+          {
+            "line": 251,
+            "text": "  if (parallel.place_pipeline()) {"
+          },
+          {
+            "line": 256,
+            "text": "  if (timings != nullptr) timings->pipeline_placement_cores = plan.cores;"
+          }
+        ],
+        "sha256": "297fd7861344853ad5980a005d27150d613f62f896638dfcca6e75fad6b3463e"
+      },
+      "tests/tower/forest_pipeline_test.cpp": {
+        "anchors": [
+          {
+            "line": 157,
+            "text": "        placements += times.pipeline_placement_cores != 0;"
+          },
+          {
+            "line": 172,
+            "text": "  std::printf(\"pipeline_equivalence orders=%llu pipelines=%llu placements=%llu\\n\", (unsigned long long)compared,"
+          }
+        ],
+        "sha256": "06f1eaafc819821641a5570148fe2674236f63c2ccf04e3ce22d86a52d823ae0"
+      },
+      "tests/tower/tests.cmake": {
+        "anchors": [
+          {
+            "line": 224,
+            "text": "mhgp11_add_unit(mhgp11_tower_pipeline SOURCES forest_pipeline_test.cpp GROUPS decisions equivalence abandon"
+          },
+          {
+            "line": 228,
+            "text": "mhgp11_add_unit(mhgp11_tower_placement SOURCES forest_placement_test.cpp GROUPS parse cores plan affinity"
+          }
+        ],
+        "sha256": "064fde7b62a49615c9c4e55f91508905d4186ecb526ef3789f4225eb103e8a8e"
+      }
+    },
+    "9d10de21341fee138c15c3caf9cb30925e030cb9": {
+      "bench/full_probe.cpp": {
+        "anchors": [
+          {
+            "line": 298,
+            "text": "    std::cout << \",\\\"pipeline_tasks\\\":{\\\"placement_cores\\\":\" << forest_timings.pipeline_placement_cores"
+          },
+          {
+            "line": 387,
+            "text": "  full_params.place_pipeline = (optimizations & 262144) != 0;  // coeurs dedies aux taches lourdes du pipeline"
+          }
+        ],
+        "sha256": "36a58e5d947cff3b71895cf72ec1a61ad8d5ac169d1371f8166089cb4709c911"
+      },
+      "bench/gpu_ab.py": {
+        "anchors": [
+          {
+            "line": 69,
+            "text": "def take_summary(got):"
+          },
+          {
+            "line": 151,
+            "text": "            if args.bench is None and args.src is not None and args.work is not None:"
+          },
+          {
+            "line": 197,
+            "text": "                   summary=take_summary(got), passes=[{k: v for k, v in p.items() if k != 'phase'} for p in passes_seen],"
+          },
+          {
+            "line": 205,
+            "text": "              work is not None and work == report['ledger'].get(frame))"
+          }
+        ],
+        "sha256": "96cd5495490444f78218f3aa4a347e4e6e889e39f7824605c7a6b95e44349d6b"
+      },
+      "src/tower/forest_parallel.hpp": {
+        "anchors": [
+          {
+            "line": 30,
+            "text": "        memo_bytes_(std::exchange(other.memo_bytes_, 0)), place_pipeline_(std::exchange(other.place_pipeline_, false)),"
+          }
+        ],
+        "sha256": "da784a061230032c33748bbd8bc41be403ea792deec14f8756070f7aa50588e1"
+      },
+      "src/tower/forest_pipeline.cpp": {
+        "anchors": [
+          {
+            "line": 251,
+            "text": "  if (parallel.place_pipeline()) {"
+          },
+          {
+            "line": 257,
+            "text": "    timings->pipeline_placement_cores = plan.cores;"
+          },
+          {
+            "line": 258,
+            "text": "    timings->pipeline_placement_requested = parallel.place_pipeline();"
+          }
+        ],
+        "sha256": "f29c28e5950f6699f15a2b7af1a9bf2e0674e7e462ca74184372901e69245d0e"
+      },
+      "tests/tower/forest_pipeline_test.cpp": {
+        "anchors": [
+          {
+            "line": 157,
+            "text": "        placements += times.pipeline_placement_cores != 0;"
+          },
+          {
+            "line": 159,
+            "text": "        CHECK_EQ(times.pipeline_placement_requested, placed.place_pipeline);"
+          },
+          {
+            "line": 175,
+            "text": "  std::printf(\"pipeline_equivalence orders=%llu pipelines=%llu placements=%llu\\n\", (unsigned long long)compared,"
+          }
+        ],
+        "sha256": "3644a014b123c568fe988449b7e17fd9411fca734590402ada1e174422940925"
+      },
+      "tests/tower/tests.cmake": {
+        "anchors": [
+          {
+            "line": 224,
+            "text": "mhgp11_add_unit(mhgp11_tower_pipeline SOURCES forest_pipeline_test.cpp GROUPS decisions equivalence abandon"
+          },
+          {
+            "line": 228,
+            "text": "mhgp11_add_unit(mhgp11_tower_placement SOURCES forest_placement_test.cpp GROUPS parse cores plan affinity"
+          }
+        ],
+        "sha256": "064fde7b62a49615c9c4e55f91508905d4186ecb526ef3789f4225eb103e8a8e"
+      }
+    }
+  }
+}

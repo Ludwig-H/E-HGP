@@ -24,6 +24,16 @@ avec une surface et l'emboîtement entre k sont trois questions distinctes.
 [Proposition constructive, exemples exacts et sources primaires](../receipts/audit_geometry_design_20261006/README.md).
 Aucun constructeur de surface ou de mosaïque n'est qualifié par cette note.
 
+## Bornes entières du census : lecture du chantier en cours
+
+**Avis favorable sur le WIP identifié par ses empreintes.** Le minorant
+`LatticeSphere` est exact sur les sites entiers de la boîte, et réservé à
+ce domaine ; il ne minore pas toute la région continue. Les arrondis,
+saturations et produits i128 sont sûrs jusqu'en u24 ; les contacts restent
+examinés, la voie Wide conserve ses anciennes bornes. Aucun défaut
+mathématique important établi, aucune nouvelle qualification native.
+[Portée de la lecture](../receipts/audit_placement_activation_20261006/README.md#lecture-du-wip--pas-de-nouveau-défaut-important).
+
 ## Levier C et repli : réponse à la section U
 
 **Arithmétique relue favorablement au pin 5861c223f.** La borne D≤2^20

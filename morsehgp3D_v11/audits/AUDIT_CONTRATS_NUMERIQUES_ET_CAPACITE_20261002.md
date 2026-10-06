@@ -10,6 +10,35 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
+## Placement : activation corrigée et témoin à conserver
+
+**9d10de213 corrige la perte de `place_pipeline_` au déplacement de
+`ForestParallel`.** Le nouveau contrôle vérifie la valeur reçue par le
+pipeline indépendamment de la topologie. La lecture favorable précédente
+du placement n'avait pas établi cette activation.
+
+Les trois captures G4 sont fermées, leurs pins et identités vérifiés.
+Le premier essai à zéro plan est exclu comme A/A involontaire. Au pin
+corrigé, `claudeo1place2` conserve neuf portes PASS et 72 appels avec plan
+non nul ; aucune qualification supplémentaire de mutants ou sanitizer.
+[Reçu de contrelecture](../receipts/audit_placement_activation_20261006/README.md).
+
+**Les rapports LiDAR ne gardent pas le témoin par prise.** `full_probe`
+émet `pipeline_tasks.placement_cores`, puis `gpu_ab.take_summary` l'omet.
+Une [proposition d'une ligne](../receipts/audit_placement_activation_20261006/observation/README.md)
+le conserve, en distinguant zéro et inconnu. Cela permet de constater un
+bras inactif avant de conclure sur le placement. Le champ compte les cœurs
+du plan, pas les appels d'affinité acceptés par le noyau. Aucun résultat
+historique n'est complété ni nouveau gain annoncé par cette proposition.
+
+Le WIP d'adoption API/export retire correctement le placement pour l'ordre
+seul et le garde pour FULL ; la validation hors pipeline est raccordée.
+Les bornes entières nouvelles sont également relues favorablement dans leur
+domaine. [Empreintes et limites du WIP](../receipts/audit_placement_activation_20261006/sources.json).
+Le lecteur `full_campaign` doit encore recevoir le correctif déjà proposé
+pour accepter les nouveaux masques ; les autres constats ouverts restent
+inchangés.
+
 ## Levier C : qualification et repli parallèle — réponse à U
 
 **5861c223f : avis source favorable sur l'arithmétique étroite.** La garde
