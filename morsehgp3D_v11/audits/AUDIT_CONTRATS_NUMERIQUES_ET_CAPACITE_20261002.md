@@ -45,6 +45,15 @@ atomiques ; observation uniforme après barrière. Aucun retour kernel
 divergent avant une barrière commune. L'émulation C++ hôte est elle aussi
 un test natif : elle s'exécute sur G4, conformément à la consigne machine.
 
+**Publication et refus : préserver les deux comportements existants.**
+Au comptage, une feuille `unresolved` publie des volumes boules/populations
+nuls, `stored=false` et aucun compteur avant le scan CUB ; le CPU la rejoue
+entièrement. Si une feuille comptée résolue devient incertaine au fill, ou
+si ses fins diffèrent des préfixes réservés, l'exécuteur actuel rend
+`catalogue_invariant` et refuse **tout le lot avant matérialisation**.
+Conserver cette garde ; un simple repli tardif ne répare pas des plages
+d'écriture calculées sur un comptage contradictoire.
+
 Mutants ciblés : paire sautée ; suffixe repris avant j ; préfixe boules ou
 populations décalé ; arrêt des descendants après q3 non émis ; état/cache
 réinitialisé par paire ; compteur de fill ajouté ; feuille partiellement

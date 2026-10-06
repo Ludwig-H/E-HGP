@@ -31,8 +31,10 @@ une seule fois par passe, `evaluations` compte les rangs distincts réellement
 interrogés et `hits=tests−evaluations`. Le premier fil gagnant change, la somme
 reste identique. Cache désactivé : `evaluations=tests`, `hits=0`. Un futur cache
 qui publierait un résultat géométrique demanderait un autre protocole.
-Tout `unresolved` annule **toute** la feuille, émissions et compteurs compris,
-avant le repli CPU ; aucune égalité des comptes partiels n'est attendue.
+Au comptage, `unresolved` annule **toute** la feuille, émissions et compteurs
+compris, avant le repli CPU ; aucune égalité des comptes partiels n'est
+attendue. Un refus inattendu au remplissage d'une feuille comptée résolue
+fait refuser le lot avant matérialisation, comme dans l'exécuteur actuel.
 
 **Q2 — L'ordre lexicographique des paires, puis le DFS interne de chaque
 paire, est l'ordre complet des émissions.** La profondeur un site n'émet
