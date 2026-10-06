@@ -111,13 +111,16 @@ Outcome generate_parallel(const Cloud& cloud, const CatalogueParams& params, Mem
   const u32 capacity = std::min(cloud.sites(), params.max_leaf);
   u64 suffix_bytes = 0;
   MHGP11_TRY(frontier.suffix_memory_bound(pool.size(), suffix_bytes));
-  MHGP11_TRY(workspace_memory_bound(capacity, workers, params.cache_center_lines, bytes, params.pair_graph));
+  u64 arena_sites = 0;
+  MHGP11_TRY(walk_arena_sites(frontier, arena_sites));
+  MHGP11_TRY(workspace_memory_bound(capacity, workers, params.cache_center_lines, bytes, params.pair_graph, arena_sites));
   MHGP11_TRY(checked_add(bytes, suffix_bytes));
   if (diagnostics != nullptr) MHGP11_TRY(add_bytes<CatalogueTaskDiagnostic>(bytes, frontier.size()));
   MHGP11_TRY(budget.admit(bytes));
   MHGP11_TRY(DiagnosticAccess::prepare(diagnostics, frontier, budget));
   std::array<Workspace, sched::kMaxWorkers> workspaces;
-  for (u32 i = 0; i < workers; ++i) MHGP11_TRY(workspaces[i].allocate(capacity, budget, params.cache_center_lines, params.pair_graph));
+  for (u32 i = 0; i < workers; ++i)
+    MHGP11_TRY(workspaces[i].allocate(capacity, budget, params.cache_center_lines, params.pair_graph, arena_sites));
   if (timings != nullptr) timings->allocation_ns = stage->nanoseconds();
   std::array<TaskCounts, Capacity> counts{};
   std::array<u32, Capacity> order;

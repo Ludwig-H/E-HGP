@@ -43,8 +43,9 @@ struct Emission {
 
 // Arene de pile du parcours des boites, par ouvrier (levier N1 du plan GPU du 6 octobre 2026) : les listes filtrees
 // de la recursion process sont empilees ici, en ordre LIFO, au lieu d'un Buffer alloue et rendu par noeud (new,
-// delete et atomiques du budget partages par tous les fils). Bloc fixe admis une fois avec le Workspace ; une liste
-// qui n'y tient plus reprend l'allocation par noeud (repli exact, compte dans walk_fallbacks).
+// delete et atomiques du budget partages par tous les fils). Bloc admis une fois avec le Workspace, de capacite
+// min(kWalkArenaSites, plus grand suffixe d'une tache) (audit 8ee28873f), nulle quand aucun parcours ne descend ; une
+// liste qui n'y tient plus reprend l'allocation par noeud (repli exact, compte dans walk_fallbacks).
 inline constexpr u64 kWalkArenaSites = u64{1} << 18;
 
 struct Workspace {
@@ -56,11 +57,19 @@ struct Workspace {
   Buffer<SiteIdx> interior, shell;
   Buffer<u8> center_lines;
   Buffer<u64> pair_rows;
-  Outcome allocate(u32 capacity, MemoryBudget& budget, bool cache_center_lines = false,
-                   bool pair_graph = false) noexcept;
+  Outcome allocate(u32 capacity, MemoryBudget& budget, bool cache_center_lines = false, bool pair_graph = false,
+                   u64 arena_sites = kWalkArenaSites) noexcept;
 };
 Outcome workspace_memory_bound(u32 capacity, u32 workers, bool cache_center_lines, u64& bytes,
-                               bool pair_graph = false) noexcept;
+                               bool pair_graph = false, u64 arena_sites = kWalkArenaSites) noexcept;
+// Capacite de l'arene d'une frontiere : min(kWalkArenaSites, plus grand suffixe d'une tache en SiteIdx).
+template <class Front>
+Outcome walk_arena_sites(const Front& frontier, u64& sites) noexcept {
+  u64 largest = 0;
+  MHGP11_TRY(frontier.suffix_memory_bound(1, largest));
+  sites = std::min<u64>(kWalkArenaSites, largest / sizeof(SiteIdx));
+  return {};
+}
 
 // Mode comptage : spans vides, filling=false. Mode remplissage : capacites EXACTES de la premiere passe.
 // Les sommes sont controlees avant toute ecriture. Pas de publication depuis accept().

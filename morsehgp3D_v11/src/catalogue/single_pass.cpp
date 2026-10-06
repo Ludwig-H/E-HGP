@@ -197,13 +197,16 @@ Outcome generate_single(const Cloud& cloud, const CatalogueParams& params, Memor
   const u32 workers = std::min(pool.size(), frontier.size()), capacity = std::min(cloud.sites(), params.max_leaf);
   u64 bytes = 0, suffix_bytes = 0;
   MHGP11_TRY(frontier.suffix_memory_bound(pool.size(), suffix_bytes));
-  MHGP11_TRY(workspace_memory_bound(capacity, workers, params.cache_center_lines, bytes, params.pair_graph));
+  u64 arena_sites = 0;
+  MHGP11_TRY(walk_arena_sites(frontier, arena_sites));
+  MHGP11_TRY(workspace_memory_bound(capacity, workers, params.cache_center_lines, bytes, params.pair_graph, arena_sites));
   MHGP11_TRY(checked_add(bytes, suffix_bytes));
   if (diagnostics != nullptr) MHGP11_TRY(add_bytes<CatalogueTaskDiagnostic>(bytes, frontier.size()));
   MHGP11_TRY(budget.admit(bytes));  // Scratchs seulement. La sortie inconnue peut refuser plus tard dans un worker.
   MHGP11_TRY(DiagnosticAccess::prepare(diagnostics, frontier, budget, false));
   std::array<Workspace, sched::kMaxWorkers> workspaces;
-  for (u32 i = 0; i < workers; ++i) MHGP11_TRY(workspaces[i].allocate(capacity, budget, params.cache_center_lines, params.pair_graph));
+  for (u32 i = 0; i < workers; ++i)
+    MHGP11_TRY(workspaces[i].allocate(capacity, budget, params.cache_center_lines, params.pair_graph, arena_sites));
   if (timings != nullptr) timings->allocation_ns = stage->nanoseconds();
   std::array<Output, Capacity> outputs;
   auto active = std::span(outputs).first(frontier.size());
