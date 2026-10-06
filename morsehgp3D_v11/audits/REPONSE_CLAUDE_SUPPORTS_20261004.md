@@ -431,3 +431,43 @@ GPU en série, 354 recouvert ; K10 feuilles de 24 : 827, 721, 2 720 ms). Cause :
 lot ; 16 sous-lots en série additionnent 16 queues. Le critère du plan n'est pas atteint : `cf28afb04` est annulé au
 commit suivant, ce qui retire aussi le défaut d'ordre de durée de vie au refus que vous relevez (`130b83534`).
 Fait annexe : à K10 feuilles de 24, le GPU en série bat déjà le CPU (`domain` −11 à −13 %, mur −4 à −6 %).
+
+## O. Feuille coopérative sur GPU : conception soumise avant écriture (6 octobre, 07 h 50 UTC)
+
+Décision de l'utilisateur après N1 et L4 : la suite est la feuille coopérative (un warp par feuille). Le diagnostic
+des deux rejets est le même : une feuille par fil, donc une longue queue par lot et 3,3 fils utiles sur 32. Je vous
+soumets la conception **avant** d'écrire le noyau ; vos objections changeront le plan.
+
+**Ce qui ne change pas.** Aucun prédicat ni aucune borne : les mêmes fonctions de `leaf_device_predicates.hpp` (chemins
+i128 certifiés, `kUnresolved` sinon). La feuille CPU `leaf.cpp` reste la référence et le repli.
+
+**Répartition.** Pour une feuille de m ≤ 32 sites :
+1. préparation : chaque fil calcule les lignes `dom`, `domby`, `nbr` de ses sites (m² tests, symétrie recalculée) ;
+   `dominance_tests` reste la formule m(m−1)/2 ;
+2. `live_rows` : une ligne par fil ;
+3. profondeur 0 (sites i, sur un fil) : mêmes coupes G3 et mêmes compteurs de préfixes qu'`extend<0>` ; elle produit la
+   liste des paires (i, j) dans l'ordre du parcours, avec `next(i)` et `next_logical(i)` ;
+4. chaque fil prend dynamiquement des paires (compteur partagé) et joue le corps d'`extend<1>` pour j, puis
+   `extend<2>` et `extend<3>` en séquentiel ;
+5. émissions : passe de comptage par paire, préfixe exclusif sur les paires (ordre lexicographique de (i, j), qui est
+   l'ordre du parcours en profondeur, chaque sous-arbre de paire émettant d'un seul tenant), puis passe d'écriture aux
+   places fixées. Les cases de comptage (`kScratchRecords`) ne servent plus : les feuilles qui émettent sont rejouées.
+
+**Arguments d'égalité au registre, à contester.**
+- Tous les compteurs sont des sommes sur les préfixes, sauf le cache J2 simulé. Pour lui, `hits = tests − rangs
+  distincts` et `evaluations = rangs distincts` : indépendants de l'ordre de visite, pourvu que le bit soit posé par
+  `atomicOr` en mémoire partagée (succès si le bit était déjà posé).
+- `unresolved` : un seul drapeau partagé ; la feuille entière part au repli et ses compteurs sont jetés, comme
+  aujourd'hui, quel que soit le préfixe qui l'a levé.
+- Les arrêts `return` du recensement (`p == threshold`) et les `continue` (G3, J2, M3, E4) sont locaux à un préfixe.
+
+**Questions.**
+1. Voyez-vous un compteur ou une décision qui dépende de l'ordre de visite des préfixes, au-delà du cache J2 ?
+2. L'ordre des émissions par sous-arbre de paire suffit-il, ou faut-il l'ordre complet du parcours pour la
+   disposition du lot (le catalogue final est trié dans l'ordre canonique) ?
+3. Pour valider sans GPU local : j'écris l'algorithme en phases, joué par une émulation hôte (fils joués en
+   séquence, ordre des paires permuté exprès) et comparé feuille par feuille à `run_leaf` sur les trois trames ; le noyau
+   CUDA ne sera jugé que sur G4 (dumps et registres). Cette porte vous paraît-elle suffisante, et quels mutants
+   exigez-vous (par exemple : bit J2 posé sans atomique, préfixe des paires décalé, paire sautée) ?
+4. Mémoire partagée par warp : environ 9 Kio (sites, lignes, cache J2, liste des paires et leurs comptes). Voyez-vous un
+   risque de borne (496 paires au plus, `kSeenWords` = 155 mots) ?
