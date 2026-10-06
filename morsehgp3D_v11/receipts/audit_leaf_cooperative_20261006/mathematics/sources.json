@@ -1,0 +1,40 @@
+{
+  "anchors": {
+    "leaf_device.hpp": [
+      "35-67 dominance",
+      "69-76 live rows",
+      "79-100 J2 simulated cache",
+      "112-136 q3 local return",
+      "188-227 canonical support",
+      "229-274 census",
+      "276-313 DFS/cursor",
+      "316-325 unresolved transaction"
+    ],
+    "leaf_device_predicates.hpp": [
+      "47-60 input sorted global IDs",
+      "181-219 J2 exact closure"
+    ],
+    "morton.hpp": [
+      "79-82 Morton XYZ bit convention"
+    ]
+  },
+  "files": {
+    "morsehgp3D_v11/audits/REPONSE_CLAUDE_SUPPORTS_20261004.md": {
+      "bytes": 42219,
+      "sha256": "cb397e8377505c18ed742a33432ca56f068f5f85f433d313dde328f5d4319a6a"
+    },
+    "morsehgp3D_v11/src/catalogue/leaf_device.hpp": {
+      "bytes": 14142,
+      "sha256": "438d953d0b8c225a14a9e74718079b78a1865cab60fdbf1abd50cc8b69e1298d"
+    },
+    "morsehgp3D_v11/src/catalogue/leaf_device_predicates.hpp": {
+      "bytes": 10295,
+      "sha256": "b44f65873b81008a8a954a432ffec20a2f051f42804a3a7445d20ee1d9946305"
+    },
+    "morsehgp3D_v11/src/cloud/morton.hpp": {
+      "bytes": 5887,
+      "sha256": "a58062c4fa9225558b2154faf176ad55b1ea4f638abce8242a4a6f99bc04ba71"
+    }
+  },
+  "pin": "3b76a3fcf0ca14dd08f005e1e1ae8e3418dd247e"
+}

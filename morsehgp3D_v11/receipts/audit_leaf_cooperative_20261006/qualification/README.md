@@ -1,0 +1,27 @@
+# Q3 — qualification ciblée de la feuille coopérative
+
+Relecture du design de la section O au commit `3b76a3fcf0ca14dd08f005e1e1ae8e3418dd247e`, avant qualification de la nouvelle voie. Cadre : `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`. Aucun test natif ni appel GCP exécuté par cet audit.
+
+L'émulation C++ hôte sur les trois trames est une expérience native : la lancer sur le CPU de la VM G4 gardée, conformément à la décision utilisateur « Fais les tests sur G4 ». Préparer le code et un modèle Python standard local reste possible. Une session ciblée suffit ; cette modification ne justifie pas une nouvelle campagne de tout le dépôt.
+
+## Ce que les portes actuelles apportent
+
+`mhgp11_tower_full_leaf_lanes`, déclarée dans `tests/tower/tests.cmake:81–83`, compare le dump FULL et le registre du catalogue des voies CPU, feuille hôte et lot hôte. Son entrée de 3 000 sites utilise `getrandbits(16)` et ses tailles de feuille sont 16 et 24 (`full_leaf_lanes.py:36–45`). Sa ligne imposée donne zéro `unresolved`. Elle n'exécute pas CUDA et n'exerce ni la largeur maximale du profil ni l'annulation d'une feuille non résolue. Garder ce filet ; l'étendre à la voie coopérative, avec des attentes d'exécution adaptées à sa seconde passe systématique plutôt qu'aux anciennes cases copiées.
+
+Réutiliser les fixtures de `tests/catalogue/center_line_cache.cpp:180–220` : tétraèdre dont une face est obtuse, cube cosphérique, tétraèdre au bord du profil. Le juge CPU grave 7 tests J2, 4 évaluations et 3 hits pour les deux tétraèdres. Dans la nouvelle voie, une feuille non résolue doit rendre ces attentes après son repli CPU entier, sans conserver son registre GPU partiel. `mhgp11_catalogue_cache_ranks` couvre déjà tous les 4 960 rangs de triplets à m=32 (`center_line_cache.cpp:74–95`). Ces fixtures et attentes sont réutilisables, leurs PASS actuels ne qualifient pas le nouveau cache partagé.
+
+## Complément minimal à construire et jouer sur G4
+
+1. **Petite porte hôte de la nouvelle voie**, confrontée à `run_leaf` et à `leaf.cpp` : records dans leur ordre exact, populations et les quinze champs du registre ; paires en ordre normal, inverse et permuté. Faire varier indépendamment l'ordre de prise des paires entre comptage et écriture. Exiger au moins une feuille avec hits J2 et une non résolue ; comparer aussi cache désactivé.
+2. **Frontières et profils** : m=1,2,3,4,31,32 ; triplets autour des frontières de mot 31/32 et au dernier rang 4 959 ; voisinages comprenant des paires vides entre paires émettrices, premier et dernier sous-arbre, bornes exactes records/populations et sentinelles intactes hors plage. Vérifier que les deux passes rendent les mêmes comptes et plages, même si leur ordonnancement diffère. Jouer u21 et u24 séparément avec des coordonnées près de `kCoordMax` ; des trames dont les valeurs sont plus petites ne couvrent pas ce bord.
+3. **Repli transactionnel** : une fixture qui émet puis rencontre une limite non certifiée, par exemple la largeur q4 >2^20 (`leaf_device.hpp:154–161`), doit annuler toute émission et tout compteur de cette feuille avant le repli CPU. Comparer le résultat final au CPU, y compris le refus si le CPU refuse. Ne pas traiter `unresolved` comme rejet géométrique ni comme succès partiel.
+4. **Vrai noyau CUDA** : petites fixtures de collision du même rang et de rangs distincts du même mot du cache partagé ; contrôles `compute-sanitizer --tool synccheck` et `--tool racecheck`, avec code de sortie de diagnostic non nul et zéro diagnostic exigé. L'émulation par phases séquentielles reste un juge algorithmique ; elle ne prouve pas la synchronisation CUDA et ne garantit pas de tuer le mutant « bit non atomique ». Un entrelacement contrôlé peut illustrer la perte d'un bit ; le noyau réel doit aussi passer les deux outils.
+5. **Intégration à l'échelle** : sur G4, toutes les feuilles des trois trames entières, K5/feuille16 puis K10/feuille24, comparées à la référence CPU ; dumps canoniques et registres complets égaux. Conserver séparément la couverture des petites fixtures et celle des trames. Les mesures de gain viennent après ces portes ; aucune durée ou taille de VM n'est promise ici.
+
+## Mutants prioritaires
+
+Nouveaux mutants ciblés proposés : cache partagé non atomique ; décalage d'un préfixe d'écriture ; paire omise ; publication des records/compteurs d'une feuille devenue non résolue. Calibrer chaque mutant sur une porte témoin qui passe, puis garder un verdict individuel causal. Pour le mutant de race, une permutation séquentielle des paires ne suffit pas.
+
+Les mutants existants de `tests/mutants/catalogue.json` permettent de reprendre des attentes pertinentes : `cache_reset_omis`, `cache_rang_collision`, `pair_graph_last_neighbor_missing`, `lignes_vivantes_seuil_strict`, `lignes_vivantes_compte_logique_omis`, `prefixe_seuil_suivant_strict`, `admission_egalite_refusee`, `coquille_limitee_au_support`. Ils mutent actuellement la source CPU/cache de référence : adapter la mutation au nouveau chemin coopératif et s'assurer que la porte l'emprunte avant d'en revendiquer la détection. Ne pas relancer les campagnes de modules inchangés.
+
+`proof.json` conserve les empreintes et les ancres des sources, sans donnée LiDAR. `python3 -B replay.py` et `python3 -O -B replay.py` contrôlent ces métadonnées contre les objets Git disponibles ; ils ne relancent aucun calcul HGP ni outil GPU.

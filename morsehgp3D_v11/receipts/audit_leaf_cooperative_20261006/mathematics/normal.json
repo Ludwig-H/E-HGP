@@ -1,0 +1,101 @@
+{
+  "cache_witness": {
+    "evaluations": 4,
+    "hits": 3,
+    "k": 3,
+    "prefixes": 15,
+    "rejects": 0,
+    "sites": 4,
+    "tests": 7
+  },
+  "checks": 213,
+  "limits": "Control-flow events are q-attempt labels, not geometric emitted balls; no GPU concurrency simulation or 15-counter oracle.",
+  "native_executed": false,
+  "pair_order_comparisons": 96,
+  "pin": "3b76a3fcf0ca14dd08f005e1e1ae8e3418dd247e",
+  "refused_provisional": [
+    {
+      "counts": {
+        "evaluations": 1,
+        "hits": 0,
+        "prefixes": 6,
+        "rejects": 0,
+        "tests": 1
+      },
+      "events": 1
+    },
+    {
+      "counts": {
+        "evaluations": 3,
+        "hits": 0,
+        "prefixes": 13,
+        "rejects": 0,
+        "tests": 3
+      },
+      "events": 8
+    }
+  ],
+  "refused_publishable": null,
+  "status": "PASS_portable_model_only",
+  "tetra": {
+    "box_hi": [
+      16,
+      16,
+      16
+    ],
+    "box_lo": [
+      0,
+      0,
+      0
+    ],
+    "canonical_qmin": 4,
+    "center": [
+      5,
+      5,
+      5
+    ],
+    "first_triangle_dot_products": [
+      54,
+      -4,
+      14
+    ],
+    "k": 3,
+    "morton_keys": [
+      85,
+      910,
+      1797,
+      2179
+    ],
+    "radius_squared": 25,
+    "shell": 4,
+    "sites_morton": [
+      [
+        5,
+        2,
+        1
+      ],
+      [
+        10,
+        5,
+        5
+      ],
+      [
+        9,
+        8,
+        5
+      ],
+      [
+        1,
+        5,
+        8
+      ]
+    ],
+    "strict_interior": 0,
+    "weights": [
+      "5/18",
+      "2/27",
+      "5/18",
+      "10/27"
+    ]
+  }
+}

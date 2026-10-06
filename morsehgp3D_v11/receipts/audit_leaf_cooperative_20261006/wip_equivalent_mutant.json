@@ -1,0 +1,24 @@
+{
+  "kind": "uncommitted_WIP_read_only",
+  "base_commit": "3b76a3fcf0ca14dd08f005e1e1ae8e3418dd247e",
+  "files": [
+    {
+      "path": "morsehgp3D_v11/src/catalogue/leaf_device.hpp",
+      "sha256": "d3175f517028788ad0180bb4b6c642f8b9f71a99b9a671c9f3a993db7d293b8d"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/mutants/tower.json",
+      "sha256": "8ff49637d72f4e8665b091f59e339b55dd0423d53fbc27ce4552854cb5aa98b3"
+    }
+  ],
+  "mutant": {
+    "id": "coop_candidats_restants",
+    "fichier": "src/catalogue/leaf_device.hpp",
+    "cherche": "  leaf.template extend_one<1>(pair.j, pair.remaining, pair.logical);\n",
+    "remplace": "  leaf.template extend_one<1>(pair.j, pair.remaining | (u64(1) << pair.j), pair.logical);\n",
+    "porte": "mhgp11_tower_full_leaf_lanes",
+    "note": "feuille cooperative : j reste candidat de son propre sous-arbre"
+  },
+  "reason": "At q=2, candidates is only consumed by next &= live[1][i] & live[1][j]. live[1][j] excludes j because nbr[j] excludes j. Adding bit j to candidates cannot change next, emissions or any counter.",
+  "replacement": "Replace pair.remaining by u64{0}; exercise with obtuse q3 / valid q4 fixture, comparing full records before sorting."
+}

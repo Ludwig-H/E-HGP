@@ -1,0 +1,57 @@
+{
+  "abi_assumptions": "u32=4/align4,u64=8/align8,align struct8 ; aucun sizeof execute",
+  "cache_atomic_model": {
+    "distinct": 4,
+    "evaluations": 4,
+    "hits": 2,
+    "requests": 6
+  },
+  "compact_design_example": {
+    "counts_or_prefixes_two_u32": 3968,
+    "masks_per_site_two_u64": 512,
+    "pairs_u32": 1984,
+    "tables": 2552,
+    "total_before_metadata": 9016
+  },
+  "count_bound": 3979008,
+  "current_wip_layout": {
+    "counts_per_pair": 7936,
+    "pair_task": 24,
+    "pair_tasks": 11904,
+    "tables": 2552,
+    "total_before_metadata": 22392
+  },
+  "kind": "preuve stdlib combinatoire/ABI conditionnelle ; native0 cuda0",
+  "pair_bound": 496,
+  "prefix_bound": 41448,
+  "preparation_call_counts": [
+    {
+      "m": 1,
+      "reference_pair_relation": 0,
+      "reported_dominance_tests": 0,
+      "wip_fill_row_pair_relation": 0
+    },
+    {
+      "m": 2,
+      "reference_pair_relation": 1,
+      "reported_dominance_tests": 1,
+      "wip_fill_row_pair_relation": 2
+    },
+    {
+      "m": 31,
+      "reference_pair_relation": 465,
+      "reported_dominance_tests": 465,
+      "wip_fill_row_pair_relation": 930
+    },
+    {
+      "m": 32,
+      "reference_pair_relation": 496,
+      "reported_dominance_tests": 496,
+      "wip_fill_row_pair_relation": 992
+    }
+  ],
+  "rank_max": 4959,
+  "scope": "nombres/rangs et tailles sous hypotheses seulement ; synchronization, allocation shared et exactitude native non qualifiees",
+  "seen_words32": 155,
+  "triple_bound": 4960
+}

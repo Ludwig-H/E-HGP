@@ -1,0 +1,21 @@
+{
+  "doc": "morsehgp3D_v11/audits/REPONSE_CLAUDE_SUPPORTS_20261004.md:435-473",
+  "limits": "WIP defini en cours ; aucune qualification ni sizeof transfere",
+  "proposal_doc_commit": "3b76a3fcf0ca14dd08f005e1e1ae8e3418dd247e",
+  "source_anchors": [
+    "leaf_device.hpp:21-27,85-95,112-128,390-394",
+    "leaf_device_predicates.hpp:29-43",
+    "leaf_device.hpp:46-56,77-83,364-369 versus 830473218e1b35fa725209df14b7855667f4c6d4:35-67,318-325"
+  ],
+  "wip_sources": [
+    {
+      "path": "src/catalogue/leaf_device.hpp",
+      "wip_sha256": "d3175f517028788ad0180bb4b6c642f8b9f71a99b9a671c9f3a993db7d293b8d"
+    },
+    {
+      "path": "src/catalogue/leaf_device_predicates.hpp",
+      "wip_sha256": "106a07d64648510f59c6e8eefda2e70433748a8e2cdabcbf59fb0eaef4870610"
+    }
+  ],
+  "sequential_reference_commit": "830473218e1b35fa725209df14b7855667f4c6d4"
+}

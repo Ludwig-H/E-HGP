@@ -4,12 +4,16 @@
 quantized_u21_input_only / not_claimed`. Six notes actives maintenues en
 place ; preuves détaillées dans les reçus immuables.
 
-**Priorité active : essayer une répartition plus large du fill GPU.**
-Un [patch borné, prêt à examiner](../receipts/proposition_fill_cta_20261006/README.md)
-propose un seul fil actif par bloc pour les feuilles à rejouer, avec grille
-vérifiée et parcours sans omission. Il conserve le calcul géométrique,
-les préfixes et les noyaux count/copy. Modèle d’indexation et applicabilité
-vérifiés ; construction et qualification CUDA restent à faire sur G4.
+**Priorité active : feuille GPU coopérative, suivant la décision utilisateur
+rapportée en section O du développeur.** Avis favorable sur la décomposition
+par paires, avec état de branche privé, cache J2 atomique et placement des
+émissions par préfixes exclusifs. L'ordre des paires suivi du DFS interne
+reproduit déjà l'ordre complet des émissions. Deux points à fermer : le
+layout partagé réel et la concurrence CUDA sur G4. Voir la
+[réponse aux quatre questions](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md#feuille-cooperative--reponse-a-la-section-o-du-6-octobre)
+et les [portes ciblées](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#feuille-cooperative--qualification-ciblee-sur-g4).
+Le [patch de placement du fill](../receipts/proposition_fill_cta_20261006/README.md)
+reste une proposition facultative archivée, sans constituer un préalable.
 
 **L4 clos et retiré en 830473218.** Les 90 processus, 252 passes et
 90 dumps conservés sont conformes au périmètre du banc ; les 162 passes

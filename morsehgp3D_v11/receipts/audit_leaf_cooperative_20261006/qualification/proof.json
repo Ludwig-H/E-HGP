@@ -1,0 +1,256 @@
+{
+  "existing_gate": {
+    "cuda_executed": false,
+    "input_coordinate_bits": 16,
+    "kmax": [
+      5,
+      10
+    ],
+    "leaf_sizes": [
+      16,
+      24
+    ],
+    "modes": [
+      16379,
+      32763,
+      49147
+    ],
+    "name": "mhgp11_tower_full_leaf_lanes",
+    "required_unresolved": 0,
+    "sites": 3000,
+    "tests_direct_leaf_device_absent": true
+  },
+  "fixtures": {
+    "cpu_cache_tetra_expected": {
+      "region_line_cache_hits": 3,
+      "region_line_evaluations": 4,
+      "region_line_tests": 7
+    },
+    "full_coverage_sizes": [
+      1,
+      2,
+      3,
+      4,
+      31,
+      32
+    ],
+    "possible_pairs_at_m32": 496,
+    "profiles_to_qualify_separately": [
+      21,
+      24
+    ],
+    "seen_words": 155,
+    "triples_at_m32": 4960
+  },
+  "limitations": [
+    "Sequential host phases cannot establish CUDA synchronization/race freedom or guarantee killing a non-atomic mutation.",
+    "Current mutants target CPU leaf/cache source; transplant the analogous mutation into the new cooperative path before attributing its rejection to that path.",
+    "Existing 3000-site host gate has unresolved=0 and 16-bit input values, including when compiled at 21/24 bits.",
+    "No native/cloud test executed; proposed names of new gates/mutants are suggestions, not registered or passing tests."
+  ],
+  "new_priority_mutants": [
+    "coop_cache_non_atomic",
+    "coop_prefix_offset_shift",
+    "coop_pair_skipped",
+    "coop_unresolved_partial_publication"
+  ],
+  "required_scope": [
+    "host_phase_emulation_on_guarded_G4_CPU",
+    "same_records_populations_fifteen_ledger_fields_on_schedules",
+    "cache_on_off_hits_positive_shared_word_reuse",
+    "count_fill_different_schedules_with_exact_ranges",
+    "unresolved_after_earlier_emission_whole_leaf_discard_and_CPU_replay",
+    "actual_CUDA_small_fixtures_synccheck_racecheck_then_full_frame_canonical"
+  ],
+  "reuse_mutants": [
+    {
+      "gate": "mhgp11_catalogue_fraction",
+      "id": "admission_egalite_refusee",
+      "source": "src/catalogue/leaf.cpp"
+    },
+    {
+      "gate": "mhgp11_catalogue_fraction",
+      "id": "coquille_limitee_au_support",
+      "source": "src/catalogue/leaf.cpp"
+    },
+    {
+      "gate": "mhgp11_catalogue_cache_relations_reset",
+      "id": "cache_reset_omis",
+      "source": "src/catalogue/center_line_cache.hpp"
+    },
+    {
+      "gate": "mhgp11_catalogue_cache_ranks",
+      "id": "cache_rang_collision",
+      "source": "src/catalogue/center_line_cache.hpp"
+    },
+    {
+      "gate": "mhgp11_catalogue_pair_graph_masks",
+      "id": "pair_graph_last_neighbor_missing",
+      "source": "src/catalogue/small_pair_graph.hpp"
+    },
+    {
+      "gate": "mhgp11_catalogue_pair_graph_live_rows",
+      "id": "lignes_vivantes_seuil_strict",
+      "source": "src/catalogue/leaf.cpp"
+    },
+    {
+      "gate": "mhgp11_catalogue_pair_graph_live_rows",
+      "id": "lignes_vivantes_compte_logique_omis",
+      "source": "src/catalogue/leaf.cpp"
+    },
+    {
+      "gate": "mhgp11_catalogue_pair_graph_live_rows",
+      "id": "prefixe_seuil_suivant_strict",
+      "source": "src/catalogue/leaf.cpp"
+    }
+  ],
+  "schema": "mhgp11.audit_gpu_cooperative_q3_scope.v1",
+  "scope": {
+    "backend": "cpu_reference",
+    "phase": "exploration_v11_hors_registre",
+    "profile": "quantized_u21_input_only",
+    "public_status": "not_claimed"
+  },
+  "source_commit": "3b76a3fcf0ca14dd08f005e1e1ae8e3418dd247e",
+  "sources": [
+    {
+      "anchors": [
+        {
+          "first": 77,
+          "last": 83,
+          "sha256": "0c1cc2ec633e4e36194dc883f73701137bbc02d79803f2964330c049dff51024"
+        }
+      ],
+      "path": "morsehgp3D_v11/tests/tower/tests.cmake",
+      "sha256": "a8092798c4e60b56b47c4e7bdeb4383b5789eb31bd990ca92aed548adea5f98f"
+    },
+    {
+      "anchors": [
+        {
+          "first": 3,
+          "last": 13,
+          "sha256": "e092529ecd1019cba1cb42ae9f7c7e3346d13b5b15520d835783f4ecf6cb853e"
+        },
+        {
+          "first": 36,
+          "last": 45,
+          "sha256": "8002437fda7fed59371ef26b684af4b77b1fe8979611e3138052e0b70e97ab7c"
+        },
+        {
+          "first": 76,
+          "last": 91,
+          "sha256": "e3114e7513f85ad2abece9edf2cba96649bd4d3561b088af7ac38357e554b0f3"
+        }
+      ],
+      "path": "morsehgp3D_v11/tests/tower/full_leaf_lanes.py",
+      "sha256": "4214cb85656892728ce825fed67ed8482bc289de4c70e1a10ffb478c2213776a"
+    },
+    {
+      "anchors": [
+        {
+          "first": 74,
+          "last": 95,
+          "sha256": "e1e8184e1742f1a0d2d766aa951e989215f1b67ddb1157a23f1ab392e13213d7"
+        },
+        {
+          "first": 180,
+          "last": 220,
+          "sha256": "3bfc656330850ca9273eee79a7d80fafef380199d1b156091af16123ca698900"
+        }
+      ],
+      "path": "morsehgp3D_v11/tests/catalogue/center_line_cache.cpp",
+      "sha256": "5ea577ba33ac7ccda0da031aff1da32b374c1d6e40c06dca0889ea46381af4db"
+    },
+    {
+      "anchors": [
+        {
+          "first": 49,
+          "last": 62,
+          "sha256": "df7e605d41a55ed29ebd9f36a22db95cb3a185d7902f09bee9502343a6c87785"
+        },
+        {
+          "first": 127,
+          "last": 134,
+          "sha256": "21a74376ff99fde5df505f9835ad33a137ac63c38c2837fe4e6295f2dfbeb1c7"
+        }
+      ],
+      "path": "morsehgp3D_v11/tests/catalogue/tests.cmake",
+      "sha256": "16961b01fe899e6b9dfc3d7b049977dec35b61a33ddac7b1681ec4fa178feff2"
+    },
+    {
+      "anchors": [
+        {
+          "first": 81,
+          "last": 107,
+          "sha256": "98637a1ef4f30e3f4d8e176a39f94a82daaf82ae6b5c4a918b8573813a346585"
+        },
+        {
+          "first": 154,
+          "last": 161,
+          "sha256": "9c5ec51ae3f2c6ed32cd7a20fef5decae6e89c6f68dd23f91ebd7e31ac9aad3d"
+        },
+        {
+          "first": 316,
+          "last": 325,
+          "sha256": "b79afd214deea8341a035f0fc9b835c58f90529acad986fbbc7df23be4a42036"
+        }
+      ],
+      "path": "morsehgp3D_v11/src/catalogue/leaf_device.hpp",
+      "sha256": "438d953d0b8c225a14a9e74718079b78a1865cab60fdbf1abd50cc8b69e1298d"
+    },
+    {
+      "anchors": [
+        {
+          "first": 27,
+          "last": 43,
+          "sha256": "662a65ed8c8109f5f95587facaa487d54144461fd3417b7b5a27afe54d0ab287"
+        },
+        {
+          "first": 106,
+          "last": 122,
+          "sha256": "ab8668a283f87f2a1fe364b7984b5840c0857553a9d197b47fbfbe32f7196609"
+        }
+      ],
+      "path": "morsehgp3D_v11/src/catalogue/leaf_device_predicates.hpp",
+      "sha256": "b44f65873b81008a8a954a432ffec20a2f051f42804a3a7445d20ee1d9946305"
+    },
+    {
+      "anchors": [
+        {
+          "first": 51,
+          "last": 77,
+          "sha256": "df22154e04a458d97b06d17cbd046ac9404f64734cd4ee037b7fea9dc3557061"
+        },
+        {
+          "first": 116,
+          "last": 141,
+          "sha256": "7a0aca49a5cc3ddee628ba3076336ec3897a02c3a2588e33bf6c77aea796588f"
+        }
+      ],
+      "path": "morsehgp3D_v11/src/catalogue/leaf_batch.cpp",
+      "sha256": "3a6f92c02046cf2b97f26f79de1425782f474c0a9c26671643cd8b0a2d93f0d5"
+    },
+    {
+      "anchors": [
+        {
+          "first": 142,
+          "last": 166,
+          "sha256": "fb154481e5c475dd21f863229465eadae02f98dc36baffd680185b8f8f493191"
+        }
+      ],
+      "path": "morsehgp3D_v11/src/catalogue/single_pass_batch.cpp",
+      "sha256": "9fd2306efd6072a620410af73c4a71917d8c2508a22457bc8ab0081525209ef4"
+    },
+    {
+      "anchors": [],
+      "path": "morsehgp3D_v11/tests/mutants/catalogue.json",
+      "sha256": "517e596ee2ad505aed65d98505fa3bb8d9b1813821f28534479a5047f4bd61ea"
+    },
+    {
+      "anchors": [],
+      "path": "AGENTS.md",
+      "sha256": "6c903c0afee18e274130184c535891f51a1e75a7b4a89d1deee9d8c4cc0d3420"
+    }
+  ],
+  "status": "read_only_design_review_no_native_no_cloud"
+}

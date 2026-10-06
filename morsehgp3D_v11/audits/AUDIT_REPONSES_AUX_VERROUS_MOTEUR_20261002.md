@@ -8,6 +8,72 @@ aux reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 Note maintenue en place ; détails et échanges clos dans les reçus.
 
+## Feuille cooperative : reponse a la section O du 6 octobre
+
+**Avis favorable au découpage proposé**, sous les invariants ci-dessous.
+Réponse à la conception publiée en **3b76a3fcf** ; la relecture du WIP hôte
+de `v11-impl-l3` n'est pas une qualification du futur noyau CUDA.
+[Preuves bornées, témoin exact et plan de qualification](../receipts/audit_leaf_cooperative_20261006/README.md).
+
+**Q1 — Permuter les sous-arbres de paires conserve les compteurs d'une
+feuille résolue.** Garder dans chaque sous-arbre l'ordre des faces J2 et
+l'arrêt au premier rejet, l'ordre des sites du census et son arrêt au seuil,
+puis la recherche ordonnée du support canonique. Chaque tâche reprend
+`prefix[0]=i`, `masks[1]=dom[i]`, le suffixe de `next(i)` **après retrait de j**
+et `next_logical(i)`. Le WIP `run_pair`/`depth0_pairs` lu applique ce raccord.
+Préfixes, masques, listes intérieur/coquille, puits et compteurs de travail
+sont privés par fil. La profondeur zéro et les préfixes coupés y sont comptés
+une seule fois.
+
+Le cache appareil actuel recalcule `center_line_meets` même sur un hit :
+son bit ne transporte aucune décision. Avec `atomicOr` et un cache initialisé
+une seule fois par passe, `evaluations` compte les rangs distincts réellement
+interrogés et `hits=tests−evaluations`. Le premier fil gagnant change, la somme
+reste identique. Cache désactivé : `evaluations=tests`, `hits=0`. Un futur cache
+qui publierait un résultat géométrique demanderait un autre protocole.
+Tout `unresolved` annule **toute** la feuille, émissions et compteurs compris,
+avant le repli CPU ; aucune égalité des comptes partiels n'est attendue.
+
+**Q2 — L'ordre lexicographique des paires, puis le DFS interne de chaque
+paire, est l'ordre complet des émissions.** La profondeur un site n'émet
+rien ; le sous-arbre `(i,j)` émet d'abord q2 s'il est admis, puis tous ses
+descendants q3/q4. Les deux préfixes exclusifs, boules et populations,
+doivent être calculés dans cet ordre, même si count et fill prennent les
+tâches dans deux ordres différents. Le tri final du catalogue ne dispense
+pas de vérifier les records et leurs populations avant tri.
+Attention : une q2/q3 sans émission ne coupe pas nécessairement ses
+descendants ; une face q3 obtuse peut appartenir à un q4 valide.
+Le [témoin exact fourni](../receipts/audit_leaf_cooperative_20261006/mathematics/README.md)
+a quatre sites, K3, un premier triangle obtus et une boule q4 de rayon carré
+25 ; ses quatre poids rationnels sont strictement positifs.
+
+**Q3 — L'émulation valide la décomposition ; G4 valide la concurrence.**
+Une émulation séquentielle, même permutée, ne peut révéler un `atomicOr`
+manquant ni un retour divergent avant barrière. Les fixtures et mutants
+utiles sont dans la [note moteur](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#feuille-cooperative--qualification-ciblee-sur-g4).
+Toutes les lanes, y compris sans site ou sans paire, participent aux
+barrières entre chargement, tables, liste de paires, count, préfixes et fill.
+Le cache est réinitialisé entre count et fill après terminaison de tous
+les fils ; les compteurs de fill sont jetés. Le statut final est commun et
+contrôlé avant publication.
+
+**Q4 — 496 paires et 155 mots de cache sont exacts ; 9 Kio exigent un
+layout compact explicite.** `C(32,2)=496`, `C(32,3)=4960=155×32`.
+Le WIP hôte utilise deux u32 et deux u64 par `PairTask` : 24 octets sous
+l'ABI usuelle, soit **11 904 octets pour les tâches seules**. Avec les tables
+et deux tableaux de comptes u64, on atteint environ **22 392 octets**, avant
+les compteurs par lane et les métadonnées. Ce n'est pas un défaut du modèle
+hôte ; ne pas recopier cette représentation en prétendant tenir dans 9 Kio.
+
+Une possibilité : paire encodée dans un u32, `next/next_logical` stockés
+par i, deux tableaux u32 de comptes remplacés en place par leurs préfixes.
+Cela donne environ **9 016 octets avant métadonnées** avec les tables actuelles.
+La borne existante `kCountBound=3 979 008<2^22` couvre les comptes et sommes
+internes à une feuille ; offsets du lot et registre restent u64. Publier le
+`sizeof` réel du layout et un `static_assert` dans la construction G4.
+La mémoire privée par lane et les éventuels débordements de registres
+restent distincts de cette borne de mémoire partagée.
+
 ## Forêt GPU proposée le 6 octobre : équivalence et information à garder
 
 Le [complément exact au plan O7/O8](../receipts/audit_plan_gpu_20261006/mathematics/REPORT.md)

@@ -10,7 +10,68 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
-## Suite proposée : isoler la répartition des feuilles du fill
+## Feuille cooperative : qualification ciblee sur G4
+
+La décision utilisateur rapportée dans la section O du développeur fait
+de la feuille coopérative la suite active. La [contrelecture mathématique](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md#feuille-cooperative--reponse-a-la-section-o-du-6-octobre)
+valide le principe par paires et précise son placement exact. Aucun nouveau
+build local ni lancement GCP par les auditeurs.
+
+**Compléter le filet existant sans rejouer toute la qualification.**
+`mhgp11_tower_full_leaf_lanes` couvre déjà les dumps et le registre des voies
+hôtes, mais son nuage est 16 bits et il exige zéro feuille non résolue.
+Avant les trois trames u21 sur G4, ajouter un petit lot dédié :
+
+- Cache on/off, ordres normal/inverse/permuté ; records et populations
+  comparés avant tri, comptes par paire puis préfixes, ordres count/fill
+  différents. Reprendre le tétraèdre à face obtuse et le cube cosphérique
+  de `tests/catalogue/center_line_cache.cpp`. Le tétraèdre exerce réellement
+  les hits J2 : sept tests, quatre évaluations, trois hits.
+- Feuilles m=1/2/3/31/32 et distributions de tâches autour de 31/32/33,
+  jusqu'à 496 ; premières/dernières paires et paires sans émission entre
+  deux paires émettrices. Exercer les frontières de mots du cache et les
+  deux préfixes, boules et populations, avec des sentinelles de plages.
+- Cas u21 puis u24 explicites, dont tétraèdre proche de `kCoordMax` forçant
+  le refus du q4 au-delà du cube de côté `2^20`. Contrôler le repli CPU
+  entier, avec un cas ayant émis avant `unresolved` : aucune émission ni
+  compteur partiel ne survit. Ne pas demander les comptes CPU complets
+  au chemin appareil abandonné.
+
+**Concurrence CUDA :** sur G4, jouer ce lot court avec memcheck, racecheck
+et synccheck de Compute Sanitizer, puis les identités dumps/registre des
+trois trames. Prévoir des lanes inactives et un refus dans une lane pendant
+que les autres travaillent. Drapeau de refus et distribution des tâches
+atomiques ; observation uniforme après barrière. Aucun retour kernel
+divergent avant une barrière commune. L'émulation C++ hôte est elle aussi
+un test natif : elle s'exécute sur G4, conformément à la consigne machine.
+
+Mutants ciblés : paire sautée ; suffixe repris avant j ; préfixe boules ou
+populations décalé ; arrêt des descendants après q3 non émis ; état/cache
+réinitialisé par paire ; compteur de fill ajouté ; feuille partiellement
+publiée après refus. Le bit J2 non atomique et la barrière retirée relèvent
+du lot concurrent appareil. Leur passage dans l'émulation séquentielle
+n'est ni surprenant ni une validation de concurrence ; un mutant non
+détecté ne devient pas une preuve acquise.
+
+**Correction concrète du mutant WIP `coop_candidats_restants`.** Ajouter
+`1<<pair.j` à `pair.remaining` ne change rien : à q2, l'intersection avec
+`live[1][pair.j]` élimine toujours j, absent de son propre voisinage.
+Ce mutant est équivalent ; ne pas interpréter sa survie comme un défaut du
+juge. Remplacer par `pair.remaining = 0` dans l'appel muté, qui supprime
+réellement les descendants, et l'exercer sur le témoin q3 obtus/q4 valide.
+L'empreinte du WIP relu et le
+[remplacement causal avec sa fixture](../receipts/audit_leaf_cooperative_20261006/README.md)
+sont conservés dans le reçu de cette réponse.
+
+**Mesure utile :** garder la référence **830473218** et mesurer préparation,
+count, fill, domaine et FULL. Le WIP hôte relu remplace aussi la préparation
+séquentielle i<j par les lignes complètes : deux calculs physiques par paire,
+malgré le compteur logique `m(m−1)/2` inchangé. Conserver une référence non
+ralentie par ce refactoring, ou maintenir l'ancienne préparation sur la voie
+séquentielle. Publier le layout partagé réel, les registres et le trafic de
+mémoire locale du noyau ; un compte logique identique ne prouve aucun gain.
+
+## Proposition facultative archivée : répartition des feuilles du fill
 
 [Patch et preuve de couverture](../receipts/proposition_fill_cta_20261006/README.md),
 base **830473218**, sans modifier le produit. Le fill actuel lance un bloc
@@ -30,11 +91,11 @@ fill comme une solution complète au recouvrement ou aux 100 ms.
 Les six comparaisons sont conservées dans le
 [reçu L4](../receipts/audit_g4_l4_20261006/README.md).
 
-Comparer sur G4 une référence830 et le candidat patché, mêmes paramètres,
+Si cette ablation devient utile, comparer sur G4 une référence830 et le candidat patché, mêmes paramètres,
 avec dumps et registres identiques, refus contrôlés et branches copied/fill
 exercées. Mesurer fill puis domaine/FULL avant d’adopter. Ce petit essai
-permet de juger le placement avant une réécriture coopérative de `run_leaf` ;
-il n’annonce pas qu’une feuille par bloc sera plus rapide.
+permet de juger le placement ; il n'est pas un préalable à la feuille
+coopérative choisie par l'utilisateur et n'annonce aucun gain.
 
 ## L4 clos : rejet mesuré, défauts supprimés par le retrait
 
