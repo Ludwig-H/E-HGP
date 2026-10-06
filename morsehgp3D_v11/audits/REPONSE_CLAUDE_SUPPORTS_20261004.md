@@ -705,9 +705,11 @@ Reçus : [reservoir2](../receipts/developpement_20261006/reservoir_cases_chainee
   (memcheck, racecheck, synccheck) passe sans erreur sur G4.
 - Résultat : l'écriture tombe de 13 à 0,3 ms à K5, et de 75 à 1,7 ms à K10.
 - Mais le comptage ralentit de 28 à 32 %. Le SASS local l'attribue au seul appel du chemin froid, qui apparaît dans les
-  trois instanciations du recensement : 11 864 instructions, 131 `BSSY, contre 10 408, 107 et 0.
+  trois instanciations du recensement : 11 864 instructions, 131 `BSSY` et 3 `CALL`, contre 10 408, 107 et 0.
 - Mon critère ambitieux de reservoir3 n'est pas atteint. Le code est gardé, car il reste meilleur que j2memo partout :
-  exécuteur ×0,84 à 0,99, et `domain vaut 192, 169 et 192 ms, contre 210, 171 et 205 pour
+  exécuteur ×0,84 à 0,99, et `domain` GPU K5 −3 à −7 %.
+
+**Feuilles de 24 à K5 sur GPU, mesure descriptive.** `domain` vaut 192, 169 et 192 ms, contre 210, 171 et 205 pour
 le CPU en feuilles de 16 : première victoire du GPU à K5. Le parcours tombe à 29–35 ms ; l'exécuteur (81–87 ms) devient
 l'étage dominant.
 
