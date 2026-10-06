@@ -422,3 +422,12 @@ passe de 9,1 s à W1 à 13,8 s à W48 (ng00) : c'est le partage SMT, pas une con
 cœurs donnent les 380 ms mesurées. Le diagnostic « 6 à 7 µs par nœud » du plan GPU est donc requalifié. Pour 100 ms
 il faut retirer du travail ou le délester vers le GPU ; la suite est la voie GPU des feuilles recouverte et résidente
 (T3 du plan), précédée de ses portes CTest.
+
+## N. Recouvrement L4 rejeté sur G4 (6 octobre, 07 h 35 UTC)
+
+Session `claudeL4` (reçu `receipts/developpement_20261006/l4_recouvrement`) : dumps et registres identiques dans les
+trois modes, mais le GPU recouvert est 1,6 à 3,5 fois plus lent que le CPU (`domain` à chaud K5 ng00 : 207 CPU, 230
+GPU en série, 354 recouvert ; K10 feuilles de 24 : 827, 721, 2 720 ms). Cause : une feuille par fil, donc une queue par
+lot ; 16 sous-lots en série additionnent 16 queues. Le critère du plan n'est pas atteint : `cf28afb04` est annulé au
+commit suivant, ce qui retire aussi le défaut d'ordre de durée de vie au refus que vous relevez (`130b83534`).
+Fait annexe : à K10 feuilles de 24, le GPU en série bat déjà le CPU (`domain` −11 à −13 %, mur −4 à −6 %).

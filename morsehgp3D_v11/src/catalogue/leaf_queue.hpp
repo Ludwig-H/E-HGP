@@ -54,47 +54,6 @@ struct BatchBlock {
   CatalogueLedger ledger;
 };
 
-// Vue d'un lot rassemble ; rassemblement des files a places fixes (sur le Pool, ou sequentiel sans Pool).
-LeafBatchView batch_view(const Cloud& cloud, const CatalogueParams& params, const Buffer<LeafJob>& jobs,
-                         const Buffer<u32>& sites) noexcept;
-[[nodiscard]] Outcome gather_leaves(MemoryBudget& budget, sched::Pool* pool,
-                                    std::span<const TaskLeafQueue* const> queues, Buffer<LeafJob>& jobs,
-                                    Buffer<u32>& sites) noexcept;
-// Level, population et repli exact d'un lot deja execute, sur le Pool ; chronos du lot.
-[[nodiscard]] Outcome finalize_leaf_batch(const Cloud& cloud, const CatalogueParams& params, MemoryBudget& budget,
-                                          sched::Pool& pool, const LeafBatchView& view, const LeafBatchResult& result,
-                                          u64 gather_ns, u64 executor_ns, BatchBlock& out,
-                                          CatalogueTimings* timings) noexcept;
-
-// Recouvrement (overlap_leaves, levier L4 du plan GPU du 6 octobre 2026) : un fil dedie execute les feuilles par
-// sous-lots PENDANT la passe des taches. Les taches sont rangees dans leur ordre de reclamation (heaviest_first,
-// deterministe) et coupees en au plus kOverlapChunks sous-lots fixes ; un sous-lot part des que ses taches sont
-// finies. L'executeur (hote ou CUDA) tourne sur un Pool prive d'un fil : le Pool de la Session est occupe par la
-// passe. Apres la passe, les sous-lots sont concatenes DANS L'ORDRE DES SOUS-LOTS (jamais dans l'ordre d'achevement),
-// puis finalises comme un lot unique (Level, repli exact) sur le Pool. Le catalogue final est trie dans l'ordre
-// canonique : memes octets que le lot unique.
-inline constexpr u32 kOverlapChunks = 16;
-class OverlapLane {
- public:
-  OverlapLane() = default;
-  OverlapLane(const OverlapLane&) = delete;
-  OverlapLane& operator=(const OverlapLane&) = delete;
-  ~OverlapLane();
-  // queues : files des taches dans l'ordre de reclamation (position -> file). Lance le fil.
-  [[nodiscard]] Outcome start(const Cloud& cloud, const CatalogueParams& params, MemoryBudget& budget,
-                              std::span<const TaskLeafQueue* const> queues) noexcept;
-  // La tache de position `position` (ordre de reclamation) a fini sa generation, avec succes.
-  void task_done(u64 position) noexcept;
-  // Arret sans attendre les taches (refus de la passe) ; finish rend alors le refus.
-  void abort() noexcept;
-  // Joint le fil, concatene les sous-lots et finalise sur le Pool.
-  [[nodiscard]] Outcome finish(sched::Pool& pool, BatchBlock& out, CatalogueTimings* timings) noexcept;
-
- private:
-  struct State;
-  State* state_ = nullptr;
-};
-
 // Traite toutes les feuilles des files, dans l'ordre des taches puis des feuilles. Les sorties rejoignent la
 // compaction de la passe unique ; le catalogue final reste trie dans l'ordre canonique.
 [[nodiscard]] Outcome process_leaf_batch(const Cloud& cloud, const CatalogueParams& params, MemoryBudget& budget,

@@ -166,44 +166,24 @@ Outcome fallback(const Cloud& cloud, const CatalogueParams& params, MemoryBudget
 
 }  // namespace
 
-LeafBatchView batch_view(const Cloud& cloud, const CatalogueParams& params, const Buffer<LeafJob>& jobs,
-                         const Buffer<u32>& sites) noexcept {
+Outcome process_leaf_batch(const Cloud& cloud, const CatalogueParams& params, MemoryBudget& budget, sched::Pool& pool,
+                           std::span<const TaskLeafQueue* const> queues, BatchBlock& out,
+                           CatalogueTimings* timings) noexcept {
+  std::optional<Stopwatch> stage;
+  stage.emplace();
+  Buffer<LeafJob> jobs;
+  Buffer<u32> sites;
+  MHGP11_TRY(gather(budget, pool, queues, jobs, sites));
+  const u64 gather_ns = stage->nanoseconds();
   LeafBatchView view;
   view.x = cloud.x().data(); view.y = cloud.y().data(); view.z = cloud.z().data(); view.cloud_sites = cloud.sites();
   view.jobs = jobs.data(); view.count = jobs.size(); view.sites = sites.data(); view.site_count = sites.size();
   view.kmax = params.kmax; view.cache = params.cache_center_lines;
-  return view;
-}
-
-Outcome gather_leaves(MemoryBudget& budget, sched::Pool* pool, std::span<const TaskLeafQueue* const> queues,
-                      Buffer<LeafJob>& jobs, Buffer<u32>& sites) noexcept {
-  if (pool != nullptr) return gather(budget, *pool, queues, jobs, sites);
-  // Sans Pool (fil de recouvrement) : memes places, copie sequentielle.
-  if (queues.size() > kMaxGatherQueues) return fail(Reason::catalogue_invariant);
-  u64 job_count = 0, site_count = 0;
-  for (const auto* q : queues) {
-    MHGP11_TRY(checked_add(job_count, q->jobs()));
-    MHGP11_TRY(checked_add(site_count, q->sites()));
-  }
-  u64 bytes = 0;
-  MHGP11_TRY(add_bytes<LeafJob>(bytes, job_count));
-  MHGP11_TRY(add_bytes<u32>(bytes, site_count));
-  MHGP11_TRY(budget.admit(bytes));
-  MHGP11_TRY(jobs.allocate(job_count, budget));
-  MHGP11_TRY(sites.allocate(site_count, budget));
-  u64 job_at = 0, site_at = 0;
-  for (const auto* q : queues) {
-    MHGP11_TRY(q->copy_to(jobs.span().subspan(job_at, q->jobs()), sites.span().subspan(site_at, q->sites()), site_at));
-    job_at += q->jobs();
-    site_at += q->sites();
-  }
-  return {};
-}
-
-Outcome finalize_leaf_batch(const Cloud& cloud, const CatalogueParams& params, MemoryBudget& budget, sched::Pool& pool,
-                            const LeafBatchView& view, const LeafBatchResult& result, u64 gather_ns, u64 executor_ns,
-                            BatchBlock& out, CatalogueTimings* timings) noexcept {
-  std::optional<Stopwatch> stage;
+  LeafBatchResult result;
+  stage.emplace();
+  if (params.cuda_leaves) MHGP11_TRY(run_leaf_batch_cuda(view, pool, budget, result));
+  else MHGP11_TRY(run_leaf_batch_host(view, pool, budget, result));
+  const u64 executor_ns = stage->nanoseconds();
   // Level et population du lot, puis repli des non resolues.
   stage.emplace();
   const u64 records = result.records.size(), population = result.population.size();
@@ -237,24 +217,6 @@ Outcome finalize_leaf_batch(const Cloud& cloud, const CatalogueParams& params, M
     timings->batch_device_pool_reserved_high = t.device_pool_reserved_high;
   }
   return {};
-}
-
-Outcome process_leaf_batch(const Cloud& cloud, const CatalogueParams& params, MemoryBudget& budget, sched::Pool& pool,
-                           std::span<const TaskLeafQueue* const> queues, BatchBlock& out,
-                           CatalogueTimings* timings) noexcept {
-  std::optional<Stopwatch> stage;
-  stage.emplace();
-  Buffer<LeafJob> jobs;
-  Buffer<u32> sites;
-  MHGP11_TRY(gather_leaves(budget, &pool, queues, jobs, sites));
-  const u64 gather_ns = stage->nanoseconds();
-  const LeafBatchView view = batch_view(cloud, params, jobs, sites);
-  LeafBatchResult result;
-  stage.emplace();
-  if (params.cuda_leaves) MHGP11_TRY(run_leaf_batch_cuda(view, pool, budget, result));
-  else MHGP11_TRY(run_leaf_batch_host(view, pool, budget, result));
-  const u64 executor_ns = stage->nanoseconds();
-  return finalize_leaf_batch(cloud, params, budget, pool, view, result, gather_ns, executor_ns, out, timings);
 }
 
 }  // namespace mhgp11::catalogue_detail

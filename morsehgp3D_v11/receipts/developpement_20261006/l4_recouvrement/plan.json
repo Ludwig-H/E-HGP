@@ -1,0 +1,65 @@
+{
+ "schema": "ehgp.v11.session_plan.v1",
+ "note": "Recouvrement L4 du plan GPU (Claude, 6 octobre 2026, cf28afb04) : CPU 16379, GPU en serie 81915 et GPU recouvert 212987 (sous-lots pendant la passe des taches), meme binaire CUDA sm_120 ; K5 feuilles 16 et K10 feuilles 24, trames ng00-02, a froid (carre de Williams) et a chaud (passes residentes), dumps et registres du catalogue identiques exiges. Critere ecrit d'avance (plan T3) : K10 recouvert <= 0,85 x CPU resident sur les trois trames ; K5 recouvert <= CPU resident.",
+ "python_packages": "none",
+ "default_build": false,
+ "results_cap_bytes": 134217728,
+ "commands": [
+  {
+   "name": "gpu_k5",
+   "timeout_seconds": 1100,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/gpu_ab.py",
+    "--src",
+    "{src}",
+    "--work",
+    "{build}/gpu",
+    "--data",
+    "{data}",
+    "--out",
+    "{out}/gpu_k5",
+    "--modes",
+    "cpu=16379,gpu=81915,gpu_recouvert=212987",
+    "--reps",
+    "5",
+    "--workers",
+    "48",
+    "--warm-passes",
+    "12",
+    "--kmax",
+    "5",
+    "--leaf",
+    "16"
+   ]
+  },
+  {
+   "name": "gpu_k10",
+   "timeout_seconds": 1100,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/gpu_ab.py",
+    "--src",
+    "{src}",
+    "--work",
+    "{build}/gpu",
+    "--data",
+    "{data}",
+    "--out",
+    "{out}/gpu_k10",
+    "--modes",
+    "cpu=16379,gpu=81915,gpu_recouvert=212987",
+    "--reps",
+    "3",
+    "--workers",
+    "48",
+    "--warm-passes",
+    "8",
+    "--kmax",
+    "10",
+    "--leaf",
+    "24"
+   ]
+  }
+ ]
+}
