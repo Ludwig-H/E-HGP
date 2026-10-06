@@ -1,0 +1,104 @@
+{
+  "evidence_pin": "cf5da0e91fb8740c1d748577fefb129c37b02d3d",
+  "historical_archive_sha256": "85d37c4828b07135de486580016434ca68d7ec7186218dcd6ff7ab5e322ddb22",
+  "historical_session": "v11.20261004.claudegpu4",
+  "historical_source_pin": "b74f9ea3a0b986f659d388b8140067b0b35be0c2",
+  "interpretation": "Le quotient CPU/nœud entre feuilles 16 et 24 est une différence normalisée de deux travaux. Il ne mesure pas isolément allocations ou atomiques.",
+  "limits": "Lecture de métadonnées et sources ; aucun test natif, GCP, réseau, donnée ou calcul HGP exécuté.",
+  "necessary_T1_clarifications": [
+    "Comparer A/B N1 à feuille 16 fixe, avec registre et tests G1 identiques.",
+    "Lire CLOCK_THREAD_CPUTIME_ID au début et à la fin de chaque tâche de génération, plus aux bornes de feuilles ; walk_thread_ns = CPU tâche moins CPU feuilles.",
+    "Activer ces microhorloges par un interrupteur de diagnostic distinct de timings, car la sonde demande toujours timings ; les éteindre dans les bras de mur."
+  ],
+  "observations": [
+    {
+      "cpu_seconds_scope": "index_domain_forests_entire_pass",
+      "filter_tests": 379366675,
+      "last_pass_cpu_seconds": 13.356668,
+      "leaf": 16,
+      "leaves": 353456,
+      "nodes": 783071
+    },
+    {
+      "cpu_seconds_scope": "index_domain_forests_entire_pass",
+      "filter_tests": 248216364,
+      "last_pass_cpu_seconds": 9.5998,
+      "leaf": 24,
+      "leaves": 123581,
+      "nodes": 272249
+    }
+  ],
+  "reports": [
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu4/gpu_k5_report.json",
+      "sha256": "ceb94c62519e82c1bf03a0dd49d0381bb1de40de4b14d68e2b12b360a94258dc"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu4/gpu_k5_leaf24_report.json",
+      "sha256": "906aa2b9883eac2a936932f793249b92683ee4c34e194381e66aa4036918fd0a"
+    }
+  ],
+  "schema": "audit_gpu_t1_attribution_metadata_v1",
+  "session_budget": "Non validé : build, qualifications, mutants et contrôles A/A non intégralement chiffrés. Aucun dépassement démontré.",
+  "simultaneous_work_change": {
+    "removed_filter_tests": 131150311,
+    "removed_nodes": 510822
+  },
+  "source_scope": {
+    "anchors": [
+      {
+        "line": 201,
+        "text": "const auto cpu_start = std::clock();"
+      },
+      {
+        "line": 204,
+        "text": "auto index = build_index(std::move(cloud.value()), {}, budget);"
+      },
+      {
+        "line": 209,
+        "text": "auto domain = prepare_full_domain(std::move(index.value()), params, budget, pool_ref, &timings);"
+      },
+      {
+        "line": 230,
+        "text": "auto tower = build_full(std::move(domain.value()), budget, &forest_timings, full_params, &pool_ref);"
+      },
+      {
+        "line": 232,
+        "text": "const double cpu_seconds = double(std::clock() - cpu_start) / CLOCKS_PER_SEC;"
+      }
+    ],
+    "path": "morsehgp3D_v11/bench/full_probe.cpp",
+    "pin": "b74f9ea3a0b986f659d388b8140067b0b35be0c2",
+    "sha256": "8367fa6b2cccdf25b6b347b9d1fd76b9e1cfa2a84a13b900bc39c8b042b60fad"
+  },
+  "task_boundary_source": {
+    "anchors": [
+      {
+        "line": 53,
+        "text": "Outcome generate(u32 ordinal, u32 worker) noexcept {"
+      },
+      {
+        "line": 66,
+        "text": "MHGP11_TRY(frontier.execute_task(ordinal, run));"
+      },
+      {
+        "line": 67,
+        "text": "if (clock) out.generation_ns = clock->nanoseconds();"
+      }
+    ],
+    "path": "morsehgp3D_v11/src/catalogue/single_pass.cpp",
+    "pin": "cf5da0e91fb8740c1d748577fefb129c37b02d3d",
+    "sha256": "06809b210879e91352643c69518841e5cd1f295b39e306e7da164c2717abeb16"
+  },
+  "timings_always_requested": {
+    "anchors": [
+      {
+        "line": 211,
+        "text": "auto domain = prepare_full_domain(std::move(index.value()), params, budget, pool_ref, &timings);"
+      }
+    ],
+    "path": "morsehgp3D_v11/bench/full_probe.cpp",
+    "pin": "cf5da0e91fb8740c1d748577fefb129c37b02d3d",
+    "sha256": "2d3a37ccf93a0b917800550a3e285ceb8b28dda0365494c31ebd7c39dba8629c"
+  }
+}

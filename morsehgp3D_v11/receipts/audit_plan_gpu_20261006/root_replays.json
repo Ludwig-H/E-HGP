@@ -1,0 +1,44 @@
+[
+  {
+    "folder": "measurement",
+    "optimized": false,
+    "returncode": 0,
+    "stdout_sha256": "62656614fdbf1b1a31d7adfa12e439fcc01f375a50db814eb051f08ea71150ce",
+    "stderr_bytes": 0
+  },
+  {
+    "folder": "measurement",
+    "optimized": true,
+    "returncode": 0,
+    "stdout_sha256": "62656614fdbf1b1a31d7adfa12e439fcc01f375a50db814eb051f08ea71150ce",
+    "stderr_bytes": 0
+  },
+  {
+    "folder": "mathematics",
+    "optimized": false,
+    "returncode": 0,
+    "stdout_sha256": "19e9ffacf11428e6dab564f1460941211b4ed9a4119355e071dabc43f6e749c1",
+    "stderr_bytes": 0
+  },
+  {
+    "folder": "mathematics",
+    "optimized": true,
+    "returncode": 0,
+    "stdout_sha256": "19e9ffacf11428e6dab564f1460941211b4ed9a4119355e071dabc43f6e749c1",
+    "stderr_bytes": 0
+  },
+  {
+    "folder": "arena",
+    "optimized": false,
+    "returncode": 0,
+    "stdout_sha256": "8c6ee83f1788c805ac2768c3e0ffbb8e3572b892c013823e50b40c667e929d05",
+    "stderr_bytes": 0
+  },
+  {
+    "folder": "arena",
+    "optimized": true,
+    "returncode": 0,
+    "stdout_sha256": "8c6ee83f1788c805ac2768c3e0ffbb8e3572b892c013823e50b40c667e929d05",
+    "stderr_bytes": 0
+  }
+]

@@ -1,0 +1,19 @@
+{
+  "source_commit": "cf5da0e91fb8740c1d748577fefb129c37b02d3d",
+  "plan_sha256": "397348c2dc3a37250cb19fd4658a24f380dd4b11c080e3733bdfd19596f7ede9",
+  "files": {
+    "morsehgp3D_v11/src/catalogue/internal.hpp": "ed015ca9881eb23ac3ffe96526d008267f23859efd49c34b65126c83612675a1",
+    "morsehgp3D_v11/src/catalogue/boxes.cpp": "2fc06e5e781ef51891ceecb324ecc460b023ea8e15079a32d22eb7d159ecc5a2",
+    "morsehgp3D_v11/src/catalogue/frontier.cpp": "b6bc99030b4a660832e71f61f02592418b599cf4504ef6c19237baeb13b86b5a",
+    "morsehgp3D_v11/src/catalogue/adaptive_frontier.cpp": "ddfdd300e2229871c9b0b4ee5d8bf6746c5ba7066ce3a95c5c4b42ddc4936e78",
+    "morsehgp3D_v11/src/catalogue/adaptive_prepare.cpp": "1bc9a5efa6da87a4840948bc7ab63135515de00c7c3bf57e6fc44d9695c17560",
+    "morsehgp3D_v11/src/catalogue/adaptive_replay.cpp": "4166dd408fdb49ae1971bc037d0099d4541c9aaa816ad2f20cb5c41b69f517d5",
+    "morsehgp3D_v11/src/catalogue/single_pass.cpp": "06809b210879e91352643c69518841e5cd1f295b39e306e7da164c2717abeb16",
+    "morsehgp3D_v11/src/catalogue/leaf_queue.hpp": "ed2bbfb72c50901dfcb763c598f06af0bebae6c53cd7ee9a0103a8d4dcd95a43",
+    "morsehgp3D_v11/src/catalogue/leaf_batch_cuda.cu": "295e81f58c6227d7801f52e40dc1e2509706d533d85d700dbddaaa02f0346eec",
+    "morsehgp3D_v11/bench/full_probe.cpp": "2d3a37ccf93a0b917800550a3e285ceb8b28dda0365494c31ebd7c39dba8629c",
+    "morsehgp3D_v11/bench/gpu_ab.py": "108203630334697578b829a549973824c9daa7cd90439dd18a35759e51e381dd",
+    "morsehgp3D_v11/CMakeLists.txt": "82fa1054e14a2bf16e28195cac32a4d81dec56bb81d6481d9d9214d5c87f555d",
+    "morsehgp3D_v11/src/core/types.hpp": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954"
+  }
+}

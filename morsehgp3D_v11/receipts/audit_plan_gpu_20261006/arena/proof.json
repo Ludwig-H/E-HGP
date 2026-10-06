@@ -1,0 +1,86 @@
+{
+  "abi": "SiteIdx mot u32, 4 octets comme contrat source ; aucun sizeof exécuté",
+  "advice": [
+    "3B+1 au lieu de 3B+2 ne peut pas être désigné mutant fautif pour cette arène",
+    "no_rewind: contrôler retour au mark/top=0 et fallback/allocations, pas seulement dump/ledger",
+    "budget: admettre et allouer réellement active_lanes*capacity, à côté des frontières et sorties",
+    "A/B: capacité 0 référence et 2^18 candidat permettent une ablation du même binaire"
+  ],
+  "budget_witness": {
+    "arena_reservation_bytes": 16777216,
+    "conclusion": "arene seule = budget ; autres scratchs/frontiere positifs, admission impossible",
+    "current_gate_budget": "unlimited",
+    "current_gate_workers": 4,
+    "fixture": "ghost: neuf sites, K1/leaf4",
+    "proposed_budget_bytes": 16777216,
+    "proposed_workers": 16,
+    "scope": "extension du temoin source ; aucune porte existante W16/16MiB ni execution native",
+    "source_contract_nodes": 75,
+    "source_contract_tasks": 37
+  },
+  "kind": "preuve borne et modèle de stockage abstrait, native0/cloud0",
+  "no_rewind_model": {
+    "capacity_sites": 20,
+    "limits": "filtre abstrait tout conservé ; aucune entrée naturelle, erreur ou qualification native",
+    "no_rewind": {
+      "fallback_nodes": 25,
+      "high_sites": 18,
+      "leaf_count": 16,
+      "nodes": 31,
+      "top_after": 18
+    },
+    "normal": {
+      "fallback_nodes": 0,
+      "high_sites": 15,
+      "leaf_count": 16,
+      "nodes": 31,
+      "top_after": 0
+    },
+    "parent_sites": 3,
+    "tree_depth": 4
+  },
+  "profiles": [
+    {
+      "bits": 18,
+      "depth_bound": 54,
+      "frontier_root_owned": true,
+      "plan_factor": 56,
+      "root_buffer_outside_arena": true,
+      "sufficient_arena_factor_serial": 55,
+      "suffix_factor_at_depth_d": "3B-d"
+    },
+    {
+      "bits": 21,
+      "depth_bound": 63,
+      "frontier_root_owned": true,
+      "plan_factor": 65,
+      "root_buffer_outside_arena": true,
+      "sufficient_arena_factor_serial": 64,
+      "suffix_factor_at_depth_d": "3B-d"
+    },
+    {
+      "bits": 24,
+      "depth_bound": 72,
+      "frontier_root_owned": true,
+      "plan_factor": 74,
+      "root_buffer_outside_arena": true,
+      "sufficient_arena_factor_serial": 73,
+      "suffix_factor_at_depth_d": "3B-d"
+    }
+  ],
+  "wip": {
+    "activation_switch_in_snapshot": false,
+    "active_lanes": "min(pool.size(), frontier.size())",
+    "capacity_bytes_per_lane": 1048576,
+    "capacity_sites_per_lane": 262144,
+    "fallback": "Buffer exact par noeud quand parent.size() > capacity-top",
+    "old_suffix_bound_still_admitted": true,
+    "reserved_bytes_by_active_lanes": {
+      "1": 1048576,
+      "24": 25165824,
+      "4": 4194304,
+      "48": 50331648,
+      "8": 8388608
+    }
+  }
+}

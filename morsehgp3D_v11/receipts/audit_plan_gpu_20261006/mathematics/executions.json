@@ -1,0 +1,37 @@
+[
+  {
+    "name": "normal",
+    "argv": [
+      "python3",
+      "-S",
+      "-B",
+      "/workspaces/E-HGP/build/v11-audit-math-plan-gpu-20261006/replay.py",
+      "--repo",
+      "/workspaces/E-HGP"
+    ],
+    "returncode": 0,
+    "stdout": "normal.json",
+    "stderr": "normal.stderr",
+    "stdout_sha256": "19e9ffacf11428e6dab564f1460941211b4ed9a4119355e071dabc43f6e749c1",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "script_sha256": "62a5995d33cf8b0c81c1cb16423eb44159b96987cb0f6884fdc1a0f0a23529b4"
+  },
+  {
+    "name": "optimized",
+    "argv": [
+      "python3",
+      "-O",
+      "-S",
+      "-B",
+      "/workspaces/E-HGP/build/v11-audit-math-plan-gpu-20261006/replay.py",
+      "--repo",
+      "/workspaces/E-HGP"
+    ],
+    "returncode": 0,
+    "stdout": "optimized.json",
+    "stderr": "optimized.stderr",
+    "stdout_sha256": "19e9ffacf11428e6dab564f1460941211b4ed9a4119355e071dabc43f6e749c1",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "script_sha256": "62a5995d33cf8b0c81c1cb16423eb44159b96987cb0f6884fdc1a0f0a23529b4"
+  }
+]

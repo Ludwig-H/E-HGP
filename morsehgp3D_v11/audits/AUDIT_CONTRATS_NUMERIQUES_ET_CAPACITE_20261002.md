@@ -10,6 +10,35 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
+## Aide au plan du 6 octobre : rendre N1 et T3 décisifs
+
+[Contrelecture détaillée et témoins](../receipts/audit_plan_gpu_20261006/README.md),
+base **cf5da0e91**, plan local épinglé et WIP N1 distingué. Le WIP garde
+correctement les frontières possédées et réserve une arène fixe de 1 Mio
+par Workspace avec repli Buffer. Pour l’A/B G4, garder une voie désactivée,
+la même taille de feuille et les mêmes sorties/compteurs logiques ; mesurer
+les replis et le pic utile séparément de la mémoire réservée. La qualification
+historique ne se transfère pas automatiquement à cette modification.
+Le témoin de neuf sites `ghost()` produit 37 tâches finales : avec W16 et
+16 Mio, les seules arènes satureraient le budget alors que ces tâches sont
+déjà des feuilles. Adapter leur capacité au suffixe, zéro si celui-ci est
+nul. Ce refus est déduit de l’admission, sans prétendre avoir exécuté une
+nouvelle porte ni observé l’échec d’une porte existante.
+
+Le quotient CPU/nœud du plan mélange aussi 131 millions de tests G1 et
+d’autres étages. Mesurer le CPU aux deux bornes de chaque tâche puis
+soustraire celui des feuilles. Une option propre doit activer les
+microhorloges : `full_probe` demande déjà `timings` dans tous ses bras.
+Les mutants « 3B+1 » et « sans rewind » ne garantissent pas un échec ; les
+remplacer par un contrôle du curseur, du pic exact et du repli forcé.
+
+Pour T3, la grille fill vaut déjà `ceil(n/32)` ; distribuer les feuilles
+sélectionnées dans des blocs distincts est une première ablation bornée.
+Garder le noyau count mono-warp inchangé. Le contrôle de chaque passe
+résidente demandé par le plan reste à ajouter : la sonde actuelle ne
+sérialise que la dernière. Builds, sanitizers et chronos se font sur G4.
+Le `tree` reste incontournable pour les 100 ms, toujours non acquis.
+
 ## Synthèse finale df904711a : trois portées à rectifier, sans nouveau calcul
 
 Le [reçu final du développeur](../receipts/developpement_20261005/qualification_finale/README.md)

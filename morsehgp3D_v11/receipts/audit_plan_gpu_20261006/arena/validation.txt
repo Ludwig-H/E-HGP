@@ -1,0 +1,4 @@
+normal exit0
+N1 borne/modèle conforme : 3 profils, arène fixe/repli, no_rewind causal par top ; native0 cloud0
+-O exit0
+N1 borne/modèle conforme : 3 profils, arène fixe/repli, no_rewind causal par top ; native0 cloud0

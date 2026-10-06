@@ -1,0 +1,61 @@
+{
+  "base_commit": "cf5da0e91fb8740c1d748577fefb129c37b02d3d",
+  "captured_utc": "2026-10-06T06:00:51.528504+00:00",
+  "developer_worktree": "/workspaces/E-HGP/build/v11-impl-l3",
+  "earlier_catalogue_wip_sha256": "a73e4af99dd9c6777fb7b893e2b1252d418ca19e84393933c098352d024af35e",
+  "plan": {
+    "anchors": [
+      271,
+      274,
+      278,
+      280,
+      282,
+      298,
+      306,
+      308,
+      311,
+      323
+    ],
+    "path": "/workspaces/E-HGP/build/v11-persist/gpu_optim/PLAN_GPU_FINAL.md",
+    "sha256": "397348c2dc3a37250cb19fd4658a24f380dd4b11c080e3733bdfd19596f7ede9"
+  },
+  "scope": "cinq fichiers WIP figés ; revue ownership des trois sources ; deltas des deux portes de faute conservés, aucun résultat natif",
+  "sources": [
+    {
+      "base_sha256": "2fc06e5e781ef51891ceecb324ecc460b023ea8e15079a32d22eb7d159ecc5a2",
+      "bytes": 9329,
+      "path": "morsehgp3D_v11/src/catalogue/boxes.cpp",
+      "wip_sha256": "debf98c2bc04468d89c4399dacd63aa5151767bf2a756c12be3f2819fb4d3dd6"
+    },
+    {
+      "base_sha256": "5182608b52102b42a86ac5438c56767afeef277be8fab870ef8bf4b37cbd6663",
+      "bytes": 5819,
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.cpp",
+      "wip_sha256": "a73e4af99dd9c6777fb7b893e2b1252d418ca19e84393933c098352d024af35e"
+    },
+    {
+      "base_sha256": "ed015ca9881eb23ac3ffe96526d008267f23859efd49c34b65126c83612675a1",
+      "bytes": 7175,
+      "path": "morsehgp3D_v11/src/catalogue/internal.hpp",
+      "wip_sha256": "db43f323adc1597084341455be79e7cc9783c85f64ee044e9635532614499866"
+    },
+    {
+      "base_sha256": "ff20e2df1978eb9bca50e7fb5c7b2bba432b5f1f7b6aa60a7de70ac2d298944b",
+      "bytes": 2260,
+      "path": "morsehgp3D_v11/tests/catalogue/center_line_cache_fault.cpp",
+      "wip_sha256": "2ff31664bdfede89a586a49e9276cc7cf4eaef645f3047b36c378e1ab7a3b9b2"
+    },
+    {
+      "base_sha256": "10b8732a1691f09c87032065cf91ab03dce9e631b9413b49c82c7c488dbfff71",
+      "bytes": 6152,
+      "path": "morsehgp3D_v11/tests/catalogue/small_pair_graph_fault.cpp",
+      "wip_sha256": "1b0c890b503f396f30906f8695460307fc67202f46b52a3b7c7e03b260e4bece"
+    }
+  ],
+  "unchanged_dependencies": [
+    "src/catalogue/single_pass.cpp:54,196-205",
+    "src/catalogue/parallel.cpp:109-119",
+    "src/catalogue/adaptive_frontier.cpp:172-186",
+    "src/catalogue/frontier.cpp:107-125"
+  ]
+}

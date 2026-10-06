@@ -8,6 +8,23 @@ aux reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 Note maintenue en place ; détails et échanges clos dans les reçus.
 
+## Forêt GPU proposée le 6 octobre : équivalence et information à garder
+
+Le [complément exact au plan O7/O8](../receipts/audit_plan_gpu_20261006/mathematics/REPORT.md)
+donne le lemme utilisable : un MST conserve les composantes à chaque
+niveau ; contracter les fusions Kruskal de même rang rend les plateaux
+atomiques, en gardant les naissances et la numérotation canonique.
+Le triangle `(0,0), (3,0), (1,2)` démontre la limite : sa dernière arête
+Gabriel disparaît du MST alors qu’elle porte une continuation et un
+plateau comptés par le moteur. Conserver les cellules ou une métadonnée
+suffisante pour reproduire ces comptes.
+
+`ancestor_activations` et `ancestor_unions` restent reconstructibles depuis
+les fusions basses et leurs arités jusqu’au dernier rang demandé ; seul
+`ancestor_find_steps` dépend du parcours DSU. Ne pas remplacer silencieusement
+ces définitions. Les 47 contrôles bornés passent normal/−O, avec six sources
+Git épinglées ; cela prépare le port et ne le qualifie pas.
+
 **Qualification finale au pin 38b76701b.** Les portes prioritaires S9/S10
 passent dans les quatre profils ordinaires de
 [fina2](../receipts/audit_g4_fina2_20261005/README.md). Les mutants head,

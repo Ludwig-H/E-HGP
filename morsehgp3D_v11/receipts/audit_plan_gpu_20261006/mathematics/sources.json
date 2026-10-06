@@ -1,0 +1,185 @@
+{
+  "pin": "cf5da0e91fb8740c1d748577fefb129c37b02d3d",
+  "sources": [
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_plateau.cpp",
+      "sha256": "0494d978fdc2188f288cf5a55dbf6bbe18bbb9436bde8c2756da070d16bc0300",
+      "bytes": 7060,
+      "anchors": [
+        {
+          "term": "ForestBuilder::cell",
+          "lines": [
+            40
+          ]
+        },
+        {
+          "term": "down.value().initial_level()",
+          "lines": [
+            55
+          ]
+        },
+        {
+          "term": "ForestBuilder::close",
+          "lines": [
+            72
+          ]
+        },
+        {
+          "term": "ForestBuilder::regular_cell",
+          "lines": [
+            103
+          ]
+        },
+        {
+          "term": "idx(result.nodes_[idx(seed)].rank) >= idx(data.rank)",
+          "lines": [
+            113
+          ]
+        }
+      ]
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_parallel.cpp",
+      "sha256": "c2441ee6411f9ae91ea603dda1a9c83b622fc61c25d4a4701db1048e62e49078",
+      "bytes": 16578,
+      "anchors": [
+        {
+          "term": "ForestParallel::resolve_job",
+          "lines": [
+            48
+          ]
+        },
+        {
+          "term": "idx(fast->rank) >= idx(data.rank)",
+          "lines": [
+            73
+          ]
+        },
+        {
+          "term": "num::compare(initial, level) >= 0",
+          "lines": [
+            100
+          ]
+        }
+      ]
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_ancestor_sweep.hpp",
+      "sha256": "bbc83b0f6c23378946a09040a367cf6482add385813b5622b4ba98686410913b",
+      "bytes": 5037,
+      "anchors": [
+        {
+          "term": "Outcome advance",
+          "lines": [
+            35,
+            40
+          ]
+        },
+        {
+          "term": "ancestor_activations",
+          "lines": [
+            54
+          ]
+        },
+        {
+          "term": "ancestor_unions",
+          "lines": [
+            90
+          ]
+        },
+        {
+          "term": "ancestor_find_steps",
+          "lines": [
+            79
+          ]
+        },
+        {
+          "term": "Result<NodeIdx> query",
+          "lines": [
+            60
+          ]
+        }
+      ]
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_vertical.cpp",
+      "sha256": "b6ce9c57ae49805926ebb92ecdbffa3b34ba16482005db0042a4b4fe0ea099ba",
+      "bytes": 19640,
+      "anchors": [
+        {
+          "term": "Outcome build_forests",
+          "lines": [
+            286
+          ]
+        },
+        {
+          "term": "Result<FullTower> build_full",
+          "lines": [
+            361
+          ]
+        },
+        {
+          "term": "query",
+          "lines": [
+            58,
+            65,
+            93,
+            102
+          ]
+        },
+        {
+          "term": "vertical_checks",
+          "lines": [
+            104,
+            163
+          ]
+        }
+      ]
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/frontier.cpp",
+      "sha256": "b6bc99030b4a660832e71f61f02592418b599cf4504ef6c19237baeb13b86b5a",
+      "bytes": 5179,
+      "anchors": [
+        {
+          "term": "Outcome Frontier::suffix_memory_bound",
+          "lines": [
+            107
+          ]
+        },
+        {
+          "term": "kMaxDepth - node.depth",
+          "lines": [
+            119
+          ]
+        }
+      ]
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/descent.cpp",
+      "sha256": "ceb170bcbd8067e16bf62f03fe0e3cdbf59dce48af8615a027a70b8602b5338a",
+      "bytes": 9116,
+      "anchors": [
+        {
+          "term": "initial",
+          "lines": [
+            187,
+            192
+          ]
+        }
+      ]
+    }
+  ],
+  "plans_read": [
+    {
+      "path": "build/v11-persist/gpu_optim/PLAN_GPU_FINAL.md",
+      "sha256": "397348c2dc3a37250cb19fd4658a24f380dd4b11c080e3733bdfd19596f7ede9",
+      "bytes": 35330
+    },
+    {
+      "path": "build/v11-persist/gpu_optim/carte_forets.md",
+      "sha256": "e1fdd1f190c48353c9cd422102fc313bf1c55f5689515e35b9171e5f4b03660b",
+      "bytes": 35481
+    }
+  ]
+}

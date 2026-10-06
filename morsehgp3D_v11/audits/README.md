@@ -4,6 +4,26 @@
 quantized_u21_input_only / not_claimed`. Six notes actives maintenues en
 place ; preuves détaillées dans les reçus immuables.
 
+**Priorité active : aider N1 puis le pipeline GPU à réduire le temps FULL.**
+La [réponse au plan du 6 octobre](../receipts/audit_plan_gpu_20261006/README.md)
+apporte trois décisions directement utilisables :
+
+- **Arène N1 :** conserver les listes de frontière possédées ; le WIP le
+  fait déjà. Qualifier son arène fixe avec repli exact, à feuille constante,
+  face à une voie sans arène ; compter réservation, pic et replis. Une
+  réservation fixe impose déjà 16 Mio à W16 sur un témoin de neuf sites
+  dont les tâches sont des feuilles : adapter la capacité au suffixe utile.
+- **Feuilles GPU :** isoler le lancement fill, une feuille par bloc, avant
+  un port coopératif. Ne pas modifier la réduction mono-warp du comptage.
+  Le futur anneau doit contrôler les identités à chaque passe réutilisée.
+- **Forêt parallèle :** le lemme Kruskal/plateaux est établi sur le graphe
+  complet. Un triangle exact démontre toutefois que les seules arêtes MST
+  perdent des continuations et leurs compteurs ; garder les métadonnées
+  des cellules. Les témoins bornés et la lecture de source passent normal/−O.
+
+Le plan et le WIP sont distingués dans la preuve. Aucun nouveau build ni
+calcul natif local ; les portes et chronos de cette tranche restent sur G4.
+
 **Reprise ciblée terminée : Release, mutants et ASan conformes.**
 
 **Synthèse du développeur df904711a à rectifier sur trois portées :**
