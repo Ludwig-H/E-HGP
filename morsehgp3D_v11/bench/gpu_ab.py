@@ -173,13 +173,14 @@ def main():
         if args.work is None or not archive.is_file():
             print('refus : archive de variante absente : ' + str(archive), file=sys.stderr)
             return 1
-        root = args.work / ('src_' + variant)
+        archive_hash = sha256(archive)
+        root = args.work / ('src_' + variant + '_' + archive_hash)
         if not (root / 'morsehgp3D_v11').is_dir():
             root.mkdir(parents=True, exist_ok=True)
             with tarfile.open(archive) as tar:
                 tar.extractall(root)
-        build_log.append(dict(step='variant', name=variant, archive_sha256=sha256(archive)))
-        benches[variant] = build(root, args.work, args.out, build_log, suffix='_' + variant)
+        build_log.append(dict(step='variant', name=variant, archive_sha256=archive_hash))
+        benches[variant] = build(root, args.work, args.out, build_log, suffix='_' + variant + '_' + archive_hash)
     if any(b is None or not Path(b).is_file() for b in benches.values()):
         print('refus : banc absent', file=sys.stderr)
         return 1

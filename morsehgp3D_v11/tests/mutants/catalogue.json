@@ -564,6 +564,7 @@
     },
     {
       "id": "etendue_seuil_double",
+      "options": ["-DMHGP11_COORD_BITS=21"],
       "fichier": "src/catalogue/leaf_device.hpp",
       "cherche": "      wide = high[0] - low[0] > kNarrowSpan || high[1] - low[1] > kNarrowSpan || high[2] - low[2] > kNarrowSpan;",
       "remplace": "      wide = high[0] - low[0] > 2 * kNarrowSpan || high[1] - low[1] > 2 * kNarrowSpan || high[2] - low[2] > 2 * kNarrowSpan;",
@@ -572,6 +573,7 @@
     },
     {
       "id": "etendue_sans_fermeture",
+      "options": ["-DMHGP11_COORD_BITS=21"],
       "fichier": "src/catalogue/leaf_device.hpp",
       "cherche": "high[3] = {in.hi[0], in.hi[1], in.hi[2]};",
       "remplace": "high[3] = {in.lo[0], in.lo[1], in.lo[2]};",

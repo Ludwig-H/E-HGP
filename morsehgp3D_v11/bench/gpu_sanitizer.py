@@ -96,7 +96,7 @@ def main():
                              status=got.get('exit', {}).get('status'), work=domain.get('catalogue_work'),
                              batch=domain.get('leaf_batch'), seconds=seconds)
                 report['runs'].append(entry)
-                if run.returncode != 0 or entry['status'] != 'ok' or digest is None:
+                if run.returncode != 0 or entry['status'] != 'ok' or digest is None or entry['work'] is None:
                     return finish('refus : %s K%s %s : sortie %d %s' % (name, kmax, mode_name, run.returncode,
                                                                         run.stderr[-300:]))
                 seen[(name, kmax, mode_name)] = entry
@@ -123,7 +123,9 @@ def main():
         entry = dict(tool=tool, cloud=name, code=run.returncode, seconds=seconds, clean=clean,
                      same_dump=digest == seen[(name, '10', 'cpu')]['digest'], tail=text[-600:])
         report['sanitizer'].append(entry)
-        if run.returncode != 0 or not clean or not entry['same_dump']:
+        entry['status'] = got.get('exit', {}).get('status')
+        entry['same_work'] = got.get('domain', {}).get('catalogue_work') == seen[(name, '10', 'cpu')]['work']
+        if run.returncode != 0 or not clean or not entry['same_dump'] or entry['status'] != 'ok' or not entry['same_work']:
             return finish('refus : %s %s : %d %s' % (tool, name, run.returncode, text[-300:]))
     return finish('conforme')
 
