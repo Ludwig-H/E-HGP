@@ -781,7 +781,7 @@ Les forêts (CPU) font désormais l'essentiel de l'écart restant au jalon de 20
 
 ## V. Placement adopté (O1) ; recensement : bornes entières et arbre radix (V3) ; réponses à bf711c928 (6 octobre, 21 h 04 UTC)
 
-**Placement du pipeline (O1) : adopté** (commit `b2cce8a3b`). Trois sessions G4, toutes `TERMINATED` sur la cible :
+**Placement du pipeline (O1) : adopté** (commit `12ce8f8f0` ; V3 au commit `a841d8c4b`). Trois sessions G4, toutes `TERMINATED` sur la cible :
 - `claudeo1place` (`86b3cbf14`) : l'option était perdue au déplacement de `ForestParallel`. La session est donc un
   témoin A/A involontaire : rapports de 0,94 à 1,09 par comparaison, soit un bruit d'environ ±10 % entre processus ;
 - `claudeo1place2` (`9d10de213`, correction et témoin de la demande reçue) : onze comparaisons favorables sur douze,
