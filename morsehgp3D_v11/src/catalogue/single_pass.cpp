@@ -64,6 +64,7 @@ struct SingleRun {
     std::optional<Stopwatch> clock;
     if (timing) clock.emplace();
     MHGP11_TRY(frontier.execute_task(ordinal, run));
+    if (workspaces[slot].walk_top != 0) return fail(Reason::catalogue_invariant);  // arene de pile rembobinee
     if (clock) out.generation_ns = clock->nanoseconds();
     if (collector.balls != out.data.balls() || collector.incidences != out.data.incidences())
       return fail(Reason::catalogue_invariant);
@@ -213,7 +214,10 @@ Outcome generate_single(const Cloud& cloud, const CatalogueParams& params, Memor
                        std::span(order).first(frontier.size())};
   if (timings != nullptr) stage.emplace();
   MHGP11_TRY(pool.parallel_for(frontier.size(), 1, &run, SingleRun<Front>::generate_body));
-  if (timings != nullptr) timings->single_pass_ns = stage->nanoseconds();
+  if (timings != nullptr) {
+    timings->single_pass_ns = stage->nanoseconds();
+    for (u32 i = 0; i < workers; ++i) MHGP11_TRY(checked_add(timings->walk_fallbacks, workspaces[i].walk_fallbacks));
+  }
   ledger = frontier.ledger();
   u64 balls = 0, incidences = 0;
   MHGP11_TRY(prefix(active, params, ledger, execution, balls, incidences));

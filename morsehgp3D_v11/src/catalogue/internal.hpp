@@ -41,7 +41,15 @@ struct Emission {
   u64 population_begin = 0;
 };
 
+// Arene de pile du parcours des boites, par ouvrier (levier N1 du plan GPU du 6 octobre 2026) : les listes filtrees
+// de la recursion process sont empilees ici, en ordre LIFO, au lieu d'un Buffer alloue et rendu par noeud (new,
+// delete et atomiques du budget partages par tous les fils). Bloc fixe admis une fois avec le Workspace ; une liste
+// qui n'y tient plus reprend l'allocation par noeud (repli exact, compte dans walk_fallbacks).
+inline constexpr u64 kWalkArenaSites = u64{1} << 18;
+
 struct Workspace {
+  Buffer<SiteIdx> walk_arena;
+  u64 walk_top = 0, walk_fallbacks = 0;
   Buffer<num::Point> points;
   // dominance[i] : sites qui dominent i sur la fermeture de la boite ; dominated[i] : sites que i domine (transposee).
   Buffer<u64> dominance, dominated;
@@ -115,6 +123,8 @@ Outcome prepare_node(Run& run, std::span<const SiteIdx> parent, const Box& box, 
                      ReadyNode& ready) noexcept;
 bool split_ready(const ReadyNode& ready, const CatalogueParams& params, Box& left, Box& right) noexcept;
 Outcome run_ready(Run& run, const ReadyNode& ready) noexcept;
+// Meme suite que run_ready sur une liste empruntee (arene de pile) : coupe et recursion, ou feuille.
+Outcome run_sites(Run& run, std::span<const SiteIdx> sites, u32 depth, const Box& box) noexcept;
 
 // G1 : retire seulement les sites possedant K dominateurs STRICTS distincts sur la fermeture de box.
 Outcome walk(Run& run) noexcept;

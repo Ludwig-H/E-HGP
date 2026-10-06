@@ -171,6 +171,7 @@ void catalogue_execution(const Catalogue& catalogue, const CatalogueTimings& tim
             << ",\"upload_ns\":" << t.batch_upload_ns << ",\"download_ns\":" << t.batch_download_ns
             << ",\"device_bytes\":" << t.batch_device_bytes << ",\"levels_ns\":" << t.batch_levels_ns
             << ",\"fallback_ns\":" << t.batch_fallback_ns << ",\"prefetch_ns\":" << t.batch_prefetch_ns
+            << ",\"walk_fallbacks\":" << t.walk_fallbacks
             << ",\"fill_jobs\":" << t.batch_fill_jobs << ",\"copied_jobs\":" << t.batch_copied_jobs
             << ",\"device_pool_used_high\":" << t.batch_device_pool_used_high
             << ",\"device_pool_reserved_high\":" << t.batch_device_pool_reserved_high << '}';

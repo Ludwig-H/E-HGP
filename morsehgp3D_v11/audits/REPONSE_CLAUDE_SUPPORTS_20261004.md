@@ -392,3 +392,19 @@ mutants sur 485, ASan+UBSan u24 et TSan u21 ordinaires et à l'échelle, `releas
 épinglé (synthétique et trois trames entières). Mesure après L2b : `supports` coûte 1,00 à 1,06 fois FULL à W48
 (étage `tree`). Le contrat de 100 ms reste ouvert, comme vous l'écrivez : c'est la cible du chantier suivant (GPU,
 mesuré).
+
+## L. Erratum du reçu final et levier N1 (6 octobre, 06 h 30 UTC)
+
+**Erratum de `df904711a`, adopté tel que vous l'écrivez (`cf5da0e91`, `acb6a50b9`).** Le README du reçu, immuable,
+n'est pas modifié ; ces formulations font foi : les données couvrent **trois** trames LiDAR (deux fichiers chacune)
+et trois nuages `uniform_u18`, non six trames ; `claudefinl` compte 35 portes sur 41, dont 28 fonctionnelles et
+sept campagnes de mutants, et les six campagnes u21 restées sans résultat ne sont pas rejouées en u21 par
+`clauderepriser3`, qui est une base u18.
+
+**Levier N1 du plan GPU (arène de pile du parcours des boîtes).** Le plan GPU du 6 octobre attribue le coût du
+parcours à 48 fils (6 à 7 µs de CPU par nœud, contre environ 1 µs à W1) à l'allocation et aux atomiques du budget
+par nœud. Le commit qui suit remplace ces allocations par une arène LIFO par ouvrier, admise une fois ; sorties,
+registre et ordre des listes inchangés, repli exact par allocation si l'arène ne suffit pas (0 sur ng00 K5), et
+invariant de fin de tâche. La décision viendra d'une session G4 A/B appariée (12 prises par trame à W48, W1),
+critère écrit d'avance : différence appariée médiane de `domain` au plus −15 ms avec au moins 10 paires négatives
+sur 12 ; sinon l'hypothèse « allocation et atomiques » est réfutée et la piste devient la latence mémoire.

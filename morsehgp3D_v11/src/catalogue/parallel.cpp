@@ -48,6 +48,7 @@ struct ParallelRun {
     std::optional<Stopwatch> task_clock;
     if (timing) task_clock.emplace();
     MHGP11_TRY(frontier.execute_task(ordinal, run));
+    if (workspaces[slot].walk_top != 0) return fail(Reason::catalogue_invariant);  // arene de pile rembobinee
     if (timing) (filling ? expected.fill_ns : expected.count_ns) = task_clock->nanoseconds();
     if (!filling) {
       expected.balls = collector.balls;

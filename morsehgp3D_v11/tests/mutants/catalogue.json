@@ -1,6 +1,6 @@
 {
   "module": "catalogue",
-  "plancher": 68,
+  "plancher": 70,
   "mutants": [
     {
       "id": "support_tetra_strict_ignore",
@@ -545,6 +545,22 @@
       "remplace": ": t.regular[k] + t.extended[k] + (k == 0 ? i128(n) : i128(0));",
       "porte": "mhgp11_catalogue_euler_limits",
       "note": "terme n [k = 1] des minima de niveau zero jamais ajoute (k == 0 n'arrive pas ; n reste lu, -Werror) : E_1 vaut 1 - n"
+    },
+    {
+      "id": "arene_sommet_non_avance",
+      "fichier": "src/catalogue/boxes.cpp",
+      "cherche": "    space.walk_top = mark + count;  // la liste vit jusqu'a la fin des deux enfants\n",
+      "remplace": "",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "la liste filtree d'un noeud n'est pas reservee : les enfants l'ecrasent (arene de pile, levier N1)"
+    },
+    {
+      "id": "arene_non_rembobinee",
+      "fichier": "src/catalogue/boxes.cpp",
+      "cherche": "  }\n  space.walk_top = mark;\n  return done;\n",
+      "remplace": "  }\n  return done;\n",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "arene jamais rembobinee : l'invariant de fin de tache (walk_top = 0) doit refuser"
     }
   ]
 }

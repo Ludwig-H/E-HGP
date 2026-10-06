@@ -55,9 +55,8 @@ Terms terms(const std::array<i64, 3>& site, const Box& box) noexcept {
   return t;
 }
 
-Outcome filter(Run& run, std::span<const SiteIdx> parent, const Box& box, Buffer<SiteIdx>& storage,
-               u32& count) noexcept {
-  MHGP11_TRY(storage.allocate(parent.size(), run.budget));
+// Ecrit dans out (au moins parent.size() places) les sites qui n'ont pas K dominateurs stricts.
+Outcome filter(Run& run, std::span<const SiteIdx> parent, const Box& box, SiteIdx* storage, u32& count) noexcept {
   std::array<SiteIdx, 3 * kMaxOrder> witnesses{};
   const u32 selected = reservoir(run.cloud, parent, box, run.params.kmax, witnesses);
   // Temoins pretraites une fois par noeud ; le compte de tests (meme arret a K dominateurs) est ajoute en fin.
@@ -95,10 +94,57 @@ Box envelope(const Cloud& cloud, std::span<const SiteIdx> sites) noexcept {
   return box;
 }
 
+// Visite d'un noeud, avant toute allocation : profondeur, puis quota partage (ordre des refus inchange).
+Outcome visit(Run& run, u32 depth) noexcept {
+  if (depth > kMaxDepth) return fail(Reason::catalogue_invariant);
+  if (run.quota != nullptr) {
+    if (run.quota->limit() != run.params.max_nodes) return fail(Reason::catalogue_invariant);
+    MHGP11_TRY(run.quota->claim());
+  }
+  return {};
+}
+
+// Noeud prepare dans out (apres visit) : compte, filtre et ajustement ; count = 0 si le noeud est vide.
+Outcome prepare_into(Run& run, std::span<const SiteIdx> parent, const Box& box, u32 depth, SiteIdx* out, u32& count,
+                     Box& adjusted) noexcept {
+  count = 0;
+  MHGP11_TRY(checked_add(run.ledger.nodes, 1));  // profondeur et quota : visit, deja joue par l'appelant
+  if (run.quota == nullptr && run.params.max_nodes != 0 && run.ledger.nodes > run.params.max_nodes)
+    return fail(Reason::node_budget);
+  run.ledger.max_depth = std::max<u64>(run.ledger.max_depth, depth);
+  u32 kept = 0;
+  MHGP11_TRY(filter(run, parent, box, out, kept));
+  if (kept == 0) return {};
+  adjusted = envelope(run.cloud, std::span<const SiteIdx>(out, kept));
+  for (int i = 0; i < 3; ++i) {
+    adjusted.lo[i] = std::max(adjusted.lo[i], box.lo[i]);
+    adjusted.hi[i] = std::min(adjusted.hi[i], box.hi[i]);
+    if (adjusted.lo[i] >= adjusted.hi[i]) return {};
+  }
+  count = kept;
+  return {};
+}
+
 Outcome process(Run& run, std::span<const SiteIdx> parent, const Box& box, u32 depth) noexcept {
-  ReadyNode ready;
-  MHGP11_TRY(prepare_node(run, parent, box, depth, ready));
-  return ready.count == 0 ? Outcome{} : run_ready(run, ready);
+  Workspace& space = run.workspace;
+  if (space.walk_arena.size() - space.walk_top < parent.size()) {
+    ++space.walk_fallbacks;  // arene pleine : allocation par noeud, memes decisions
+    ReadyNode ready;
+    MHGP11_TRY(prepare_node(run, parent, box, depth, ready));
+    return ready.count == 0 ? Outcome{} : run_ready(run, ready);
+  }
+  MHGP11_TRY(visit(run, depth));
+  const u64 mark = space.walk_top;
+  SiteIdx* out = space.walk_arena.data() + mark;
+  u32 count = 0;
+  Box adjusted;
+  Outcome done = prepare_into(run, parent, box, depth, out, count, adjusted);
+  if (done.ok() && count != 0) {
+    space.walk_top = mark + count;  // la liste vit jusqu'a la fin des deux enfants
+    done = run_sites(run, std::span<const SiteIdx>(out, count), depth, adjusted);
+  }
+  space.walk_top = mark;
+  return done;
 }
 
 }  // namespace
@@ -115,30 +161,18 @@ Outcome NodeQuota::claim() noexcept {
 Outcome prepare_node(Run& run, std::span<const SiteIdx> parent, const Box& box, u32 depth,
                      ReadyNode& ready) noexcept {
   ready = ReadyNode{};
-  if (depth > kMaxDepth) return fail(Reason::catalogue_invariant);
-  if (run.quota != nullptr) {
-    if (run.quota->limit() != run.params.max_nodes) return fail(Reason::catalogue_invariant);
-    MHGP11_TRY(run.quota->claim());
-  }
-  MHGP11_TRY(checked_add(run.ledger.nodes, 1));
-  if (run.quota == nullptr && run.params.max_nodes != 0 && run.ledger.nodes > run.params.max_nodes)
-    return fail(Reason::node_budget);
-  run.ledger.max_depth = std::max<u64>(run.ledger.max_depth, depth);
+  MHGP11_TRY(visit(run, depth));
+  MHGP11_TRY(ready.storage.allocate(parent.size(), run.budget));
   u32 count = 0;
-  MHGP11_TRY(filter(run, parent, box, ready.storage, count));
+  Box adjusted;
+  MHGP11_TRY(prepare_into(run, parent, box, depth, ready.storage.data(), count, adjusted));
   if (count == 0) return {};
-  const auto sites = ready.storage.span().first(count);
-  Box adjusted = envelope(run.cloud, sites);
-  for (int i = 0; i < 3; ++i) {
-    adjusted.lo[i] = std::max(adjusted.lo[i], box.lo[i]);
-    adjusted.hi[i] = std::min(adjusted.hi[i], box.hi[i]);
-    if (adjusted.lo[i] >= adjusted.hi[i]) return {};
-  }
   ready.count = count;
   ready.depth = depth;
   ready.box = adjusted;
   return {};
 }
+
 
 bool split_ready(const ReadyNode& ready, const CatalogueParams& params, Box& left, Box& right) noexcept {
   int axis = 0;
@@ -157,15 +191,24 @@ bool split_ready(const ReadyNode& ready, const CatalogueParams& params, Box& lef
 Outcome run_ready(Run& run, const ReadyNode& ready) noexcept {
   if (ready.count == 0 || ready.count > ready.storage.size() || ready.depth > kMaxDepth)
     return fail(Reason::catalogue_invariant);
+  return run_sites(run, ready.sites(), ready.depth, ready.box);
+}
+
+Outcome run_sites(Run& run, std::span<const SiteIdx> sites, u32 depth, const Box& box) noexcept {
+  if (sites.empty() || depth > kMaxDepth) return fail(Reason::catalogue_invariant);
+  ReadyNode view;  // sans stockage : seuls count, depth et box servent au choix de la coupe
+  view.count = static_cast<u32>(sites.size());
+  view.depth = depth;
+  view.box = box;
   Box left, right;
-  if (split_ready(ready, run.params, left, right)) {
-    MHGP11_TRY(process(run, ready.sites(), left, ready.depth + 1));
-    return process(run, ready.sites(), right, ready.depth + 1);
+  if (split_ready(view, run.params, left, right)) {
+    MHGP11_TRY(process(run, sites, left, depth + 1));
+    return process(run, sites, right, depth + 1);
   }
   MHGP11_TRY(checked_add(run.ledger.leaves, 1));
-  run.ledger.max_leaf = std::max<u64>(run.ledger.max_leaf, ready.count);
-  if (ready.count > run.params.max_leaf) return fail(Reason::wide_leaf);
-  return enumerate_leaf(run, ready.sites(), ready.box);
+  run.ledger.max_leaf = std::max<u64>(run.ledger.max_leaf, sites.size());
+  if (sites.size() > run.params.max_leaf) return fail(Reason::wide_leaf);
+  return enumerate_leaf(run, sites, box);
 }
 
 Outcome make_root(Run& run, Buffer<SiteIdx>& root, Box& box) noexcept {

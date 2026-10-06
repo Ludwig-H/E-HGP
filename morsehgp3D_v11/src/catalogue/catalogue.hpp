@@ -89,6 +89,8 @@ struct CatalogueTimings {
   u64 batch_fill_jobs = 0;    // feuilles rejouees par la seconde passe (celles qui emettent et debordent)
   u64 batch_copied_jobs = 0;  // feuilles qui emettent et tiennent dans leur case
   u64 batch_device_pool_used_high = 0, batch_device_pool_reserved_high = 0;  // pics physiques du pool CUDA
+  // Arene de pile du parcours (levier N1) : noeuds dont la liste n'y tenait plus, prepares par allocation.
+  u64 walk_fallbacks = 0;
 };
 
 // Travail de stockage distinct de la geometrie ; valeurs de l'option une passe, zero sinon sauf passes=2.

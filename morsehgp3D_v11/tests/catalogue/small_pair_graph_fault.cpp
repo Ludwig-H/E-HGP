@@ -81,7 +81,7 @@ MHGP11_TEST(pair_allocation, 14) {
   CHECK_EQ(budget.used(),17u);
   {
     Workspace scratch; const u64 before=calls.load();
-    REQUIRE(scratch.allocate(32,budget,true,true).ok()); CHECK_EQ(calls.load()-before,7u);
+    REQUIRE(scratch.allocate(32,budget,true,true).ok()); CHECK_EQ(calls.load()-before,8u);  // dont l arene de pile
     CHECK_EQ(scratch.pair_rows.size(),32u);
     auto graph=SmallPairGraph::make(scratch.pair_rows.span(),32,true); REQUIRE(graph.ok());
     graph.value().connect(0,31); CHECK_EQ(graph.value().neighbors(0),u64{1}<<31);
