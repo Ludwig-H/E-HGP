@@ -25,6 +25,25 @@ déjà des feuilles. Adapter leur capacité au suffixe, zéro si celui-ci est
 nul. Ce refus est déduit de l’admission, sans prétendre avoir exécuté une
 nouvelle porte ni observé l’échec d’une porte existante.
 
+**Raccord simple proposé au développeur.** Sur les deux types de frontière,
+`suffix_memory_bound(1, max_suffix_bytes)` donne déjà le plus grand suffixe.
+Utiliser `C = min(kWalkArenaSites, max_suffix_bytes / sizeof(SiteIdx))`
+mots par Workspace actif ; passer explicitement C à l’admission et à
+l’allocation. Cela met C à zéro pour une frontière terminale, sans changer
+le dispatch. Quand `J>=W`, tout worker peut recevoir toute tâche : cette
+borne commune évite de supposer une affectation des plus grosses tâches
+à des espaces particuliers. Si `J<W`, le slot est l’ordinal et une future
+capacité par tâche est possible, mais inutile pour ce premier correctif.
+
+Conserver le majorant des buffers de repli en plus des blocs réservés :
+l’arène reste vivante pendant un repli. Les passes count/fill réutilisent
+les espaces après retour du curseur à zéro ; leur capacité ne double pas.
+Enfin, passer C=0 au Workspace du repli host/CUDA dans
+[`single_pass_batch.cpp`](../src/catalogue/single_pass_batch.cpp) :
+`fallback` appelle seulement `enumerate_leaf`, sans parcours descendant.
+Ces trois raccords sont proposés sur le code au pin cf5da0e91 et le WIP
+capturé ; ils restent à implémenter et à qualifier sur G4.
+
 Le quotient CPU/nœud du plan mélange aussi 131 millions de tests G1 et
 d’autres étages. Mesurer le CPU aux deux bornes de chaque tâche puis
 soustraire celui des feuilles. Une option propre doit activer les
