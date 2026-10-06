@@ -4,6 +4,12 @@
 quantized_u21_input_only / not_claimed`. Six notes actives maintenues en
 place ; preuves et propositions détaillées dans les reçus immuables.
 
+**Géométrie pour le modèle de fondation : proposition déposée.** La cible
+est la surface observée, avec ses trous. Construire des éléments de surface
+communs, regroupés par HGP ; la vraie mosaïque d'ordre k est une charpente
+complémentaire à compléter et à qualifier. Les supports actuels ne sont pas
+cette mosaïque. [Construction et exemples](../receipts/audit_geometry_design_20261006/README.md).
+
 **Réservoir de feuilles 59509bbc8 : deux raccords de qualification à corriger.**
 La lecture du moteur est favorable. La porte IO et le lecteur de campagne
 gardent l'ancienne borne des masques ; le juge GPU peut accepter un registre

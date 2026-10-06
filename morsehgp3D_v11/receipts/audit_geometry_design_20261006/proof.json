@@ -1,0 +1,66 @@
+{
+  "cloud_actions": 0,
+  "degenerate_square": {
+    "distinct_barycenters": 5,
+    "extreme_vertices": 4,
+    "two_subsets": 6
+  },
+  "distance_filter": {
+    "kth_squared": "4",
+    "mean_squared": "2",
+    "threshold_squared": 3
+  },
+  "native_runs": 0,
+  "obtuse_face": {
+    "center_barycentric": [
+      "5/4",
+      "3/4",
+      "-1"
+    ],
+    "fourth_site_distance_squared": 105,
+    "meb_radius_squared": 4,
+    "sphere_radius_squared": 5
+  },
+  "pin": "87f1621053635e76f21908146e53b790feda0af1",
+  "scope": "Exact examples and pinned source identities; no mosaic constructor or surface validation.",
+  "sources_verified": 11,
+  "tetrahedron": {
+    "admitted_Cat1": false,
+    "admitted_Cat2": false,
+    "admitted_Cat3": true,
+    "order_2_vertices": [
+      [
+        "0",
+        "1",
+        "1"
+      ],
+      [
+        "1",
+        "0",
+        "1"
+      ],
+      [
+        "1",
+        "1",
+        "0"
+      ],
+      [
+        "1",
+        "1",
+        "2"
+      ],
+      [
+        "1",
+        "2",
+        "1"
+      ],
+      [
+        "2",
+        "1",
+        "1"
+      ]
+    ],
+    "q_min": 4,
+    "radius_squared": 3
+  }
+}

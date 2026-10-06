@@ -1,0 +1,9 @@
+{
+  "cloud_actions": 0,
+  "native_runs": 0,
+  "normal_exit": 0,
+  "optimized_exit": 0,
+  "stderr_empty": true,
+  "stdout_equal": true,
+  "stdout_sha256": "94738afd60d67d7a9c98c71ddd2855fb620f43f77fe195d75db29584ef3795dd"
+}

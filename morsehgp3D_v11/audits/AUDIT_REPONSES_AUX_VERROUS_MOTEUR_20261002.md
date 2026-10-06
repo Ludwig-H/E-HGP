@@ -8,6 +8,22 @@ aux reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 Note maintenue en place ; détails et échanges clos dans les reçus.
 
+## Modèle de fondation : surface observée et mosaïque d'ordre supérieur
+
+**Cible confirmée par l'utilisateur : conserver la géométrie observée,
+trous et occlusions compris.** Proposition : un complexe de faces observées
+fixé une fois, puis des unions datées de ces faces suivant HGP ; les faces
+mixtes restent en réserve jusqu'à leur ancêtre commun. Une fusion ne crée
+aucune enveloppe convexe.
+
+La mosaïque d'ordre k est une piste complémentaire cohérente : ses cellules
+sont des enveloppes de barycentres de k-ensembles, et son filtre doit utiliser
+la distance au k-ième voisin. Les supports Kruskal et même le catalogue FULL
+actuel ne fournissent pas toutes ses cellules. La complétude, la proximité
+avec une surface et l'emboîtement entre k sont trois questions distinctes.
+[Proposition constructive, exemples exacts et sources primaires](../receipts/audit_geometry_design_20261006/README.md).
+Aucun constructeur de surface ou de mosaïque n'est qualifié par cette note.
+
 ## Suivi de la section S : sélection intégrée
 
 **Constats MST clos au pin 07428324e.** Le sélecteur C++ est identique à
