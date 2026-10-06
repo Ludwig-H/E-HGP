@@ -1,0 +1,6 @@
+temoin [] : porte mhgp11_tower_full_leaf_lanes absente sans mutation (executee et passee attendue)
+    | Internal ctest changing into directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.uNqnzL5Aj4/build/mut_catalogue/temoin_0/build
+    | Test project /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.uNqnzL5Aj4/build/mut_catalogue/temoin_0/build
+    | No tests were found!!!
+    | Errors while running CTest
+TEMOIN ROUGE module=catalogue : aucun mutant juge

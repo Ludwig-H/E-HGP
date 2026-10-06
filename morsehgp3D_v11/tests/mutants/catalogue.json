@@ -1,6 +1,6 @@
 {
   "module": "catalogue",
-  "plancher": 76,
+  "plancher": 74,
   "mutants": [
     {
       "id": "support_tetra_strict_ignore",
@@ -583,22 +583,6 @@
       "remplace": "high[3] = {in.lo[0], in.lo[1], in.lo[2]};",
       "porte": "mhgp11_catalogue_leaf_narrow_span_refusal",
       "note": "levier C : la borne hi de la fermeture hors de l'etendue ; une boite jusqu'a 2^B qui la porte a 2^20 + 1 passe"
-    },
-    {
-      "id": "partage_debut_local",
-      "fichier": "src/catalogue/leaf_batch_split.cpp",
-      "cherche": "    result.record_begin[j] = records;",
-      "remplace": "    result.record_begin[j] = side.record_begin[l];",
-      "porte": "mhgp11_tower_full_leaf_lanes",
-      "note": "executeur partage : debut local du cote au lieu du debut global dans l'ordre du lot, emissions mal placees"
-    },
-    {
-      "id": "partage_compteurs_appareil_omis",
-      "fichier": "src/catalogue/leaf_batch_split.cpp",
-      "cherche": "  add_counts(result.counts, device_result.counts);",
-      "remplace": "",
-      "porte": "mhgp11_tower_full_leaf_lanes",
-      "note": "executeur partage : registre du catalogue sans les feuilles de l'appareil"
     },
     {
       "id": "partage_selection_inverse",

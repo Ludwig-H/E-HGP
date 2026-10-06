@@ -1,0 +1,91 @@
+{
+ "schema": "ehgp.v11.session_plan.v1",
+ "note": "Executeur partage du lot de feuilles (Claude, 6 octobre 2026, 2045ec27c), trames LiDAR reelles. Regle ecrite avant toute donnee : exactitude = quatre mutants tues, bancs conformes, dumps identiques entre tous les modes et egaux aux empreintes des trames. Statistique : domain_ms a froid, mediane des prises par trame et mode, K5 feuilles de 24. Une part s (300, 400, 500 pour mille) est admise si la moyenne geometrique des rapports domain(s)/domain(gpu sans partage) sur les trois trames est <= 0,90 et aucun rapport > 1,00 ; la part retenue pour la voie GPU est l'admise de plus petite moyenne (a egalite, la plus petite part). Aucune admise : le partage reste une option a 0. K10 (parts 250 et 350) et la voie CPU sont descriptifs.",
+ "python_packages": "none",
+ "default_build": false,
+ "results_cap_bytes": 33554432,
+ "commands": [
+  {
+   "name": "mut_catalogue",
+   "timeout_seconds": 1800,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/tests/mutants/run_mutants.py",
+    "--manifest",
+    "{src}/morsehgp3D_v11/tests/mutants/catalogue.json",
+    "--source",
+    "{src}/morsehgp3D_v11",
+    "--work",
+    "{build}/mut_catalogue",
+    "--only",
+    "partage_debut_local,partage_compteurs_appareil_omis,partage_selection_inverse,partage_cible_ignoree",
+    "--floor",
+    "4",
+    "--jobs",
+    "4",
+    "--build-jobs",
+    "12",
+    "--cmake-arg=-DCMAKE_BUILD_TYPE=Release",
+    "--cmake-arg=-DMHGP11_COORD_BITS=21",
+    "--report",
+    "{out}/mut_catalogue.json"
+   ]
+  },
+  {
+   "name": "k5_24",
+   "timeout_seconds": 2400,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/gpu_ab.py",
+    "--src",
+    "{src}",
+    "--work",
+    "{build}/gpu",
+    "--data",
+    "{data}",
+    "--out",
+    "{out}/k5_24",
+    "--modes",
+    "cpu=278523,gpu=344059,gpu300=344059:300,gpu400=344059:400,gpu500=344059:500",
+    "--reps",
+    "6",
+    "--workers",
+    "48",
+    "--warm-passes",
+    "8",
+    "--kmax",
+    "5",
+    "--leaf",
+    "24"
+   ]
+  },
+  {
+   "name": "k10_24",
+   "timeout_seconds": 2400,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/gpu_ab.py",
+    "--src",
+    "{src}",
+    "--work",
+    "{build}/gpu",
+    "--data",
+    "{data}",
+    "--out",
+    "{out}/k10_24",
+    "--modes",
+    "gpu=344059,gpu250=344059:250,gpu350=344059:350",
+    "--reps",
+    "3",
+    "--workers",
+    "48",
+    "--warm-passes",
+    "8",
+    "--kmax",
+    "10",
+    "--leaf",
+    "24"
+   ]
+  }
+ ]
+}

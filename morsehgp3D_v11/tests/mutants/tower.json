@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 158,
+  "plancher": 160,
   "mutants": [
     {
       "id": "population_memo_owner_omis",
@@ -1282,6 +1282,22 @@
       "remplace": "parents[s] = 0;",
       "porte": "mhgp11_tower_pipeline_equivalence",
       "note": "tableau parent separe : chaque naissance d'un bloc doit commencer comme sa propre racine"
+    },
+    {
+      "id": "partage_debut_local",
+      "fichier": "src/catalogue/leaf_batch_split.cpp",
+      "cherche": "    result.record_begin[j] = records;",
+      "remplace": "    result.record_begin[j] = side.record_begin[l];",
+      "porte": "mhgp11_tower_full_leaf_lanes",
+      "note": "executeur partage : debut local du cote au lieu du debut global dans l'ordre du lot, emissions mal placees"
+    },
+    {
+      "id": "partage_compteurs_appareil_omis",
+      "fichier": "src/catalogue/leaf_batch_split.cpp",
+      "cherche": "  add_counts(result.counts, device_result.counts);",
+      "remplace": "",
+      "porte": "mhgp11_tower_full_leaf_lanes",
+      "note": "executeur partage : registre du catalogue sans les feuilles de l'appareil"
     }
   ]
 }
