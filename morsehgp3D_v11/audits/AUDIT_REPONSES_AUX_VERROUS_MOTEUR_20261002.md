@@ -8,6 +8,78 @@ aux reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 Note maintenue en place ; détails et échanges clos dans les reçus.
 
+## Feuille coherente : reponse a la section Q du 6 octobre
+
+**Avis favorable au principe**, avec un parcours de préfixes commun au warp
+et une réduction ordonnée des résultats. Pin examiné : **ee3eabe5e**.
+[Preuves, helpers et traces discriminantes](../receipts/audit_coherent_leaf_design_20261006/README.md).
+
+**Q1 — Le rejet arrive au (θ+1)-ième intérieur, avec θ=K+1−q.**
+Le site qui fait dépasser le seuil est compté dans `census_tests`, puis
+le préfixe est rejeté. Atteindre seulement θ intérieurs ne termine pas
+la boucle. Respecter d'abord la priorité locale : site du générateur
+(contact), masque intérieur, masque extérieur, puis `side` certifié.
+Un refus spéculatif sur un site déjà protégé n'est pas un refus atteint.
+
+Après ces gardes, noter I le masque des intérieurs connus et U celui des
+sites non résolus, en excluant les lanes i≥m. Poser `t=select(θ+1,I)` et
+`u=first(U)`, ou m en l'absence de bit correspondant. Le premier arrêt est
+`e=min(t,u,m)` :
+
+| Cas | Décision | `census_tests` ajouté |
+| --- | --- | --- |
+| u<t | Feuille non résolue | u+1 |
+| t<u | Préfixe rejeté | t+1 |
+| t=u=m | Census complet ; poursuivre | m |
+
+On ignore donc les refus **après** l'arrêt, jamais ceux qui le précèdent.
+`judged` vaut **1 dès l'entrée**, sans dépendre du premier succès. Le conflit
+`inside & outside` reste un refus préalable, avec zéro test de site ajouté.
+Après census complet, compacter intérieur et coquille par popcount des bits
+de rang inférieur, pour conserver l'ordre des sites. Les émissions et
+incidences attendent support canonique, identité au générateur et admission.
+
+**Q2 — Choisir le premier événement, succès ou refus, dans l'ordre du code.**
+L'ordre est : toutes les paires, puis tous les triplets, puis tous les
+quadruplets ; ordre lexicographique dans chaque phase. Un succès n'efface
+pas un refus antérieur. Un refus après le succès est ignoré. Des tranches
+consécutives de 32 candidats, arrêtées à la première contenant un événement,
+permettent de conserver cet ordre sans parcourir nécessairement toute la
+coquille.
+
+Ne pas réutiliser le rang combinatoire du cache J2 comme priorité canonique :
+`(0,1,4)` précède `(0,2,3)` dans les boucles, mais leurs rangs J2 valent4 et2.
+Conserver aussi les gardes internes : triangle non aigu écarté avant son
+orientation ; faces du tétraèdre dans leur ordre, avec arrêt dès dégénérescence
+ou signe incompatible. Un OR de tous les refus spéculatifs serait faux.
+Il n'existe actuellement aucun compteur propre à la boucle canonique.
+
+**J2 est une étape scalaire avec effets.** La géométrie pure peut être
+recalculée par toutes les lanes ; le test-set du cache et les compteurs
+logiques sont exécutés **une seule fois**, puis diffusés. Si les 32 lanes
+consultent le bit, la première visite logique peut devenir un hit pour la
+lane0. Même règle pour `prefixes`, `judged`, q4 et émissions : ne pas
+additionner 32 copies du même événement.
+
+**Q3 — Mutants utiles et limite d'atteignabilité.** Tester le seuil décalé,
+le dernier succès choisi, l'ordre canonique lex remplacé par le rang J2,
+le bit31 omis, les listes dans l'ordre d'arrivée et le cache consulté par
+toutes les lanes. Les refus avant/après arrêt se testent aussi dans un petit
+helper de contrôle à statuts injectés. **Ne pas exiger un nuage impossible :**
+dans le moteur actuel, le certificat `side` est global au centre et G3 borne
+les intérieurs déjà certifiés par les masques à θ. Obtenir θ+1 intérieurs
+requiert donc un `side` certifié, qui certifie tous les autres ; un refus
+`side` réel après ce dépassement est inaccessible avec ces invariants.
+Les traces injectées prouvent le contrôle, pas une détection native causale.
+
+Toutes les opérations spéculatives restent certifiées **avant** leur
+arithmétique i128 ; masquer un résultat ne répare aucun débordement déjà
+exécuté. Garder les 32 lanes aux votes, les lanes sans site neutres et les
+barrières mémoire nécessaires aux listes partagées. Le
+[complément CUDA](../receipts/audit_coherent_leaf_design_20261006/cuda_contract/README.md)
+détaille ces gardes. Modèles normal/−O conformes ; aucun nouveau noyau
+cohérent, test natif ou gain qualifié par cette réponse.
+
 ## Noyau compact et deux témoins de qualification — suivi du 6 octobre
 
 Le WIP CUDA relu vers 08:30 conserve le raccord démontré ci-dessous : paire

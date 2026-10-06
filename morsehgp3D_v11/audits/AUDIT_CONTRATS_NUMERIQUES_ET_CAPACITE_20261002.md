@@ -10,7 +10,61 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
-## Premier noyau coopératif : corrections avant G4
+## Coop1 relu ; suite proposée : feuille cohérente
+
+**La session coop1 est close et conforme sur son périmètre fonctionnel.**
+Source **c3df81805**, arrêt ciblé certifié à **09:26:34.814 UTC**, paquet
+de 638 fichiers concordant avec Git. Six portes hôte PASS, seize prises
+synthétiques, 45 feuilles non résolues sur B/K10, six passages Compute
+Sanitizer sans diagnostic et avec dump CPU identique. Sur les trois trames
+entières K5/K10 : 90 processus, 252 passes, 90 dumps conservés conformes ;
+les 162 passes intermédiaires n'ont pas de dump/registre individuel.
+[Reçu indépendant et périmètre exact](../receipts/audit_g4_coop1_20261006/README.md).
+
+Les critères de gain échouent sur toutes les observations résidentes
+post-première : leurs intervalles suffisent à le constater. La régression
+de la voie un fil est traitée en **ee3eabe5e**, après la capture : tables
+possédées par la feuille et `atomicOr` réservé aux tables partagées.
+Lecture favorable du correctif ; coop1 ne qualifie pas ce nouveau pin.
+
+**Coop2 est maintenant clos au pin ee3**, arrêt certifié à **09:53:45.016 UTC**,
+639 sources exactes, 90 processus/252 passes/90 dumps conformes sur les mêmes
+trois trames K5/K10. Aucun nouveau CTest, mutant ou sanitizer dans ce plan.
+Les critères initiaux restent hors d'atteinte des observations conservées.
+Le dernier fill K10 un fil coûte encore **201–239 ms** selon la trame ; le
+retour au coût historique n'est pas démontré.
+[Reçu indépendant coop2](../receipts/audit_g4_coop2_20261006/README.md).
+
+Le profil séparé ng00/K10 concerne **le noyau un fil**, pas le coopératif :
+fill à **1,39 thread actif par warp**, **2,08 % d'occupation** et 132 blocs.
+Ces métriques vérifiées contre le CSV justifient l'essai de travail commun
+sur les sites d'un préfixe ; elles ne démontrent aucune cause exclusive ni
+gain futur. Les durées instrumentées ne remplacent pas celles du banc.
+
+**Réponse à la conception Q publiée : poursuivre avec un premier événement
+ordonné**, selon la [note mathématique](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md#feuille-coherente--reponse-a-la-section-q-du-6-octobre).
+Points qui changent le résultat : seuil+1, refus antérieur au succès,
+ordre arité puis lexicographique, et une seule consultation logique du
+cache J2 par warp. Les tests de refus injectés restent distincts des
+témoins géométriques atteignables ; ne pas fabriquer une campagne de
+mutants impossibles.
+
+**Deux corrections f030 restent ouvertes au pin ee3.** La garde ordinaire
+`s.unresolved` avant les `atomicExch` est inchangée ; les six succès
+sanitizer ne prouvent pas l'absence de cet entrelacement. `near_max` exige
+encore `partial>0` en u18, bien que ses fixtures y soient certifiées.
+Le mutant de publication doit utiliser u21 pour exercer le refus dans
+une campagne de base u18. Le
+[patch actualisé aux chemins publiés](../receipts/audit_coherent_leaf_design_20261006/remaining_fixes_ee3.patch)
+ferme ces trois lignes de raccord, sans reprendre les corrections déjà
+intégrées. Applicabilité vérifiée, aucun build local.
+
+Les cibles des six mutants sont désormais correctement rattachées au
+manifeste `catalogue`, et `sizes` exerce une boîte stricte : ces anciens
+blocages sont clos en source. Les six mutants annoncés par le développeur
+ne sont pas rejoués par le plan coop1 ; leurs preuves restent distinctes.
+
+## Premier noyau coopératif : constat antérieur et corrections proposées
 
 WIP `v11-impl-l3` relu le 6 octobre vers **08:30 UTC**, base **3b76a3fcf**,
 octets épinglés dans le [reçu de suivi](../receipts/audit_coop_wip_followup_20261006/README.md).

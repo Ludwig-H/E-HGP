@@ -1,0 +1,311 @@
+{
+  "ballot_compaction": [
+    {
+      "compact": [],
+      "m": 1,
+      "participants": 4294967295,
+      "shell": 0,
+      "valid_sites_mask": 1
+    },
+    {
+      "compact": [
+        {
+          "lane": 1,
+          "slot": 0
+        }
+      ],
+      "m": 2,
+      "participants": 4294967295,
+      "shell": 2,
+      "valid_sites_mask": 3
+    },
+    {
+      "compact": [
+        {
+          "lane": 1,
+          "slot": 0
+        }
+      ],
+      "m": 3,
+      "participants": 4294967295,
+      "shell": 2,
+      "valid_sites_mask": 7
+    },
+    {
+      "compact": [
+        {
+          "lane": 1,
+          "slot": 0
+        },
+        {
+          "lane": 3,
+          "slot": 1
+        }
+      ],
+      "m": 31,
+      "participants": 4294967295,
+      "shell": 10,
+      "valid_sites_mask": 2147483647
+    },
+    {
+      "compact": [
+        {
+          "lane": 1,
+          "slot": 0
+        },
+        {
+          "lane": 3,
+          "slot": 1
+        },
+        {
+          "lane": 31,
+          "slot": 2
+        }
+      ],
+      "m": 32,
+      "participants": 4294967295,
+      "shell": 2147483658,
+      "valid_sites_mask": 4294967295
+    }
+  ],
+  "correction": "one lane test-and-set/accounting per logical face, broadcast result; count logical visits once",
+  "cuda_runs": 0,
+  "expected_logical": {
+    "evaluations": 1,
+    "hits": 1,
+    "tests": 2
+  },
+  "native_runs": 0,
+  "physical_reduction_wrong": {
+    "evaluations": 1,
+    "hits": 63,
+    "tests": 64
+  },
+  "redundant_atomic_cache": [
+    {
+      "leader_evaluations": 1,
+      "leader_hits": 1,
+      "leader_position": 0,
+      "logical_tests": 2,
+      "physical_hits": 63
+    },
+    {
+      "leader_evaluations": 0,
+      "leader_hits": 2,
+      "leader_position": 1,
+      "logical_tests": 2,
+      "physical_hits": 63
+    },
+    {
+      "leader_evaluations": 0,
+      "leader_hits": 2,
+      "leader_position": 2,
+      "logical_tests": 2,
+      "physical_hits": 63
+    },
+    {
+      "leader_evaluations": 0,
+      "leader_hits": 2,
+      "leader_position": 3,
+      "logical_tests": 2,
+      "physical_hits": 63
+    },
+    {
+      "leader_evaluations": 0,
+      "leader_hits": 2,
+      "leader_position": 4,
+      "logical_tests": 2,
+      "physical_hits": 63
+    },
+    {
+      "leader_evaluations": 0,
+      "leader_hits": 2,
+      "leader_position": 5,
+      "logical_tests": 2,
+      "physical_hits": 63
+    },
+    {
+      "leader_evaluations": 0,
+      "leader_hits": 2,
+      "leader_position": 6,
+      "logical_tests": 2,
+      "physical_hits": 63
+    },
+    {
+      "leader_evaluations": 0,
+      "leader_hits": 2,
+      "leader_position": 7,
+      "logical_tests": 2,
+      "physical_hits": 63
+    },
+    {
+      "leader_evaluations": 0,
+      "leader_hits": 2,
+      "leader_position": 8,
+      "logical_tests": 2,
+      "physical_hits": 63
+    },
+    {
+      "leader_evaluations": 0,
+      "leader_hits": 2,
+      "leader_position": 9,
+      "logical_tests": 2,
+      "physical_hits": 63
+    },
+    {
+      "leader_evaluations": 0,
+      "leader_hits": 2,
+      "leader_position": 10,
+      "logical_tests": 2,
+      "physical_hits": 63
+    },
+    {
+      "leader_evaluations": 0,
+      "leader_hits": 2,
+      "leader_position": 11,
+      "logical_tests": 2,
+      "physical_hits": 63
+    },
+    {
+      "leader_evaluations": 0,
+      "leader_hits": 2,
+      "leader_position": 12,
+      "logical_tests": 2,
+      "physical_hits": 63
+    },
+    {
+      "leader_evaluations": 0,
+      "leader_hits": 2,
+      "leader_position": 13,
+      "logical_tests": 2,
+      "physical_hits": 63
+    },
+    {
+      "leader_evaluations": 0,
+      "leader_hits": 2,
+      "leader_position": 14,
+      "logical_tests": 2,
+      "physical_hits": 63
+    },
+    {
+      "leader_evaluations": 0,
+      "leader_hits": 2,
+      "leader_position": 15,
+      "logical_tests": 2,
+      "physical_hits": 63
+    },
+    {
+      "leader_evaluations": 0,
+      "leader_hits": 2,
+      "leader_position": 16,
+      "logical_tests": 2,
+      "physical_hits": 63
+    },
+    {
+      "leader_evaluations": 0,
+      "leader_hits": 2,
+      "leader_position": 17,
+      "logical_tests": 2,
+      "physical_hits": 63
+    },
+    {
+      "leader_evaluations": 0,
+      "leader_hits": 2,
+      "leader_position": 18,
+      "logical_tests": 2,
+      "physical_hits": 63
+    },
+    {
+      "leader_evaluations": 0,
+      "leader_hits": 2,
+      "leader_position": 19,
+      "logical_tests": 2,
+      "physical_hits": 63
+    },
+    {
+      "leader_evaluations": 0,
+      "leader_hits": 2,
+      "leader_position": 20,
+      "logical_tests": 2,
+      "physical_hits": 63
+    },
+    {
+      "leader_evaluations": 0,
+      "leader_hits": 2,
+      "leader_position": 21,
+      "logical_tests": 2,
+      "physical_hits": 63
+    },
+    {
+      "leader_evaluations": 0,
+      "leader_hits": 2,
+      "leader_position": 22,
+      "logical_tests": 2,
+      "physical_hits": 63
+    },
+    {
+      "leader_evaluations": 0,
+      "leader_hits": 2,
+      "leader_position": 23,
+      "logical_tests": 2,
+      "physical_hits": 63
+    },
+    {
+      "leader_evaluations": 0,
+      "leader_hits": 2,
+      "leader_position": 24,
+      "logical_tests": 2,
+      "physical_hits": 63
+    },
+    {
+      "leader_evaluations": 0,
+      "leader_hits": 2,
+      "leader_position": 25,
+      "logical_tests": 2,
+      "physical_hits": 63
+    },
+    {
+      "leader_evaluations": 0,
+      "leader_hits": 2,
+      "leader_position": 26,
+      "logical_tests": 2,
+      "physical_hits": 63
+    },
+    {
+      "leader_evaluations": 0,
+      "leader_hits": 2,
+      "leader_position": 27,
+      "logical_tests": 2,
+      "physical_hits": 63
+    },
+    {
+      "leader_evaluations": 0,
+      "leader_hits": 2,
+      "leader_position": 28,
+      "logical_tests": 2,
+      "physical_hits": 63
+    },
+    {
+      "leader_evaluations": 0,
+      "leader_hits": 2,
+      "leader_position": 29,
+      "logical_tests": 2,
+      "physical_hits": 63
+    },
+    {
+      "leader_evaluations": 0,
+      "leader_hits": 2,
+      "leader_position": 30,
+      "logical_tests": 2,
+      "physical_hits": 63
+    },
+    {
+      "leader_evaluations": 0,
+      "leader_hits": 2,
+      "leader_position": 31,
+      "logical_tests": 2,
+      "physical_hits": 63
+    }
+  ],
+  "scope": "Q3 bounded ideal model, no scheduler, native or CUDA execution"
+}

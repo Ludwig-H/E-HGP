@@ -1,0 +1,517 @@
+{
+  "archive_sha256": "eb097ba6cce0e30e7c6909e8ca013f362b9d2c9fc7e3bc10b46e3ff6e43206f3",
+  "closed_certified": true,
+  "commands": [
+    {
+      "exit_code": 0,
+      "metadata_sha256": "76f12f93c16861b0bd6f97f2c8db623df71fd2c2a51b273fa825862d3157c11e",
+      "name": "gpu_k5",
+      "status": "ok"
+    },
+    {
+      "exit_code": 0,
+      "metadata_sha256": "21299152454984c3ebeba217341ae310d6f806d37970d2b42b68dd9a71223f43",
+      "name": "gpu_k10",
+      "status": "ok"
+    },
+    {
+      "exit_code": 0,
+      "metadata_sha256": "ed428b66e2144e5ca96caaa6f04126e7696cfd775474edfaf468b7ce30ca436a",
+      "name": "profil_k10",
+      "status": "ok"
+    }
+  ],
+  "developer_publication_compared": false,
+  "judge_sha256": "108203630334697578b829a549973824c9daa7cd90439dd18a35759e51e381dd",
+  "last_stop_timestamp": "2026-10-06T02:53:45.016-07:00",
+  "last_warm_stages": [
+    {
+      "copied_jobs": 138476,
+      "count_ns": 35062321,
+      "executor_ns": 75571756,
+      "fill_jobs": 14,
+      "fill_ns": 34657111,
+      "frame": "lidar_ng00",
+      "jobs": 353456,
+      "k": 5,
+      "mode": "gpu",
+      "scope": "last warm call only"
+    },
+    {
+      "copied_jobs": 138476,
+      "count_ns": 75849616,
+      "executor_ns": 84374261,
+      "fill_jobs": 14,
+      "fill_ns": 2504132,
+      "frame": "lidar_ng00",
+      "jobs": 353456,
+      "k": 5,
+      "mode": "gpu_coop",
+      "scope": "last warm call only"
+    },
+    {
+      "copied_jobs": 105806,
+      "count_ns": 28702498,
+      "executor_ns": 74668565,
+      "fill_jobs": 15,
+      "fill_ns": 40968365,
+      "frame": "lidar_ng01",
+      "jobs": 284835,
+      "k": 5,
+      "mode": "gpu",
+      "scope": "last warm call only"
+    },
+    {
+      "copied_jobs": 105806,
+      "count_ns": 59693595,
+      "executor_ns": 67385377,
+      "fill_jobs": 15,
+      "fill_ns": 2570707,
+      "frame": "lidar_ng01",
+      "jobs": 284835,
+      "k": 5,
+      "mode": "gpu_coop",
+      "scope": "last warm call only"
+    },
+    {
+      "copied_jobs": 121047,
+      "count_ns": 32667650,
+      "executor_ns": 55928628,
+      "fill_jobs": 7,
+      "fill_ns": 17646023,
+      "frame": "lidar_ng02",
+      "jobs": 323879,
+      "k": 5,
+      "mode": "gpu",
+      "scope": "last warm call only"
+    },
+    {
+      "copied_jobs": 121047,
+      "count_ns": 68861346,
+      "executor_ns": 77132228,
+      "fill_jobs": 7,
+      "fill_ns": 2652868,
+      "frame": "lidar_ng02",
+      "jobs": 323879,
+      "k": 5,
+      "mode": "gpu_coop",
+      "scope": "last warm call only"
+    },
+    {
+      "copied_jobs": 224563,
+      "count_ns": 211114365,
+      "executor_ns": 455811914,
+      "fill_jobs": 4196,
+      "fill_ns": 232101797,
+      "frame": "lidar_ng00",
+      "jobs": 530259,
+      "k": 10,
+      "mode": "gpu",
+      "scope": "last warm call only"
+    },
+    {
+      "copied_jobs": 224563,
+      "count_ns": 367958607,
+      "executor_ns": 404002709,
+      "fill_jobs": 4196,
+      "fill_ns": 22415832,
+      "frame": "lidar_ng00",
+      "jobs": 530259,
+      "k": 10,
+      "mode": "gpu_coop",
+      "scope": "last warm call only"
+    },
+    {
+      "copied_jobs": 165529,
+      "count_ns": 170072905,
+      "executor_ns": 419183381,
+      "fill_jobs": 3724,
+      "fill_ns": 238811066,
+      "frame": "lidar_ng01",
+      "jobs": 430579,
+      "k": 10,
+      "mode": "gpu",
+      "scope": "last warm call only"
+    },
+    {
+      "copied_jobs": 165529,
+      "count_ns": 281980028,
+      "executor_ns": 316725408,
+      "fill_jobs": 3724,
+      "fill_ns": 23829080,
+      "frame": "lidar_ng01",
+      "jobs": 430579,
+      "k": 10,
+      "mode": "gpu_coop",
+      "scope": "last warm call only"
+    },
+    {
+      "copied_jobs": 178542,
+      "count_ns": 194048361,
+      "executor_ns": 407937703,
+      "fill_jobs": 4934,
+      "fill_ns": 201160652,
+      "frame": "lidar_ng02",
+      "jobs": 486530,
+      "k": 10,
+      "mode": "gpu",
+      "scope": "last warm call only"
+    },
+    {
+      "copied_jobs": 178542,
+      "count_ns": 318657892,
+      "executor_ns": 356748082,
+      "fill_jobs": 4934,
+      "fill_ns": 25494710,
+      "frame": "lidar_ng02",
+      "jobs": 486530,
+      "k": 10,
+      "mode": "gpu_coop",
+      "scope": "last warm call only"
+    }
+  ],
+  "limits": [
+    "Receipt qualifies executed ee3 source only; any subsequent WIP is excluded.",
+    "No mutants run in this session.",
+    "No local native/cloud action by auditor.",
+    "No host CTests, mutants, Compute Sanitizer, u24 or profiling of cooperative kernel in this session."
+  ],
+  "native_or_cloud_runs_by_auditor": 0,
+  "package_sha256": "07b2f331798045d57afa0956deff53a619f27cda58ca0647eef40887379c6be7",
+  "performance_criteria": [
+    {
+      "cooperative_range_ns": [
+        84246731,
+        84488522
+      ],
+      "criterion_failed_on_all_observed_postfirst_warm_passes": true,
+      "frame": "lidar_ng00",
+      "k": 5,
+      "metric": "batch_executor_ns",
+      "ratio_lower_bound_permille": 1113,
+      "reference_mode": "gpu",
+      "reference_range_ns": [
+        75271044,
+        75685686
+      ],
+      "target_permille": 500
+    },
+    {
+      "cooperative_range_ns": [
+        67302861,
+        67619941
+      ],
+      "criterion_failed_on_all_observed_postfirst_warm_passes": true,
+      "frame": "lidar_ng01",
+      "k": 5,
+      "metric": "batch_executor_ns",
+      "ratio_lower_bound_permille": 897,
+      "reference_mode": "gpu",
+      "reference_range_ns": [
+        74382486,
+        74991926
+      ],
+      "target_permille": 500
+    },
+    {
+      "cooperative_range_ns": [
+        76547359,
+        77658118
+      ],
+      "criterion_failed_on_all_observed_postfirst_warm_passes": true,
+      "frame": "lidar_ng02",
+      "k": 5,
+      "metric": "batch_executor_ns",
+      "ratio_lower_bound_permille": 1363,
+      "reference_mode": "gpu",
+      "reference_range_ns": [
+        55139899,
+        56142008
+      ],
+      "target_permille": 500
+    },
+    {
+      "cooperative_range_ns": [
+        756038526,
+        771285097
+      ],
+      "criterion_failed_on_all_observed_postfirst_warm_passes": true,
+      "frame": "lidar_ng00",
+      "k": 10,
+      "metric": "domain_ns",
+      "ratio_lower_bound_permille": 908,
+      "reference_mode": "cpu",
+      "reference_range_ns": [
+        818832951,
+        832605202
+      ],
+      "target_permille": 850
+    },
+    {
+      "cooperative_range_ns": [
+        599134796,
+        607356656
+      ],
+      "criterion_failed_on_all_observed_postfirst_warm_passes": true,
+      "frame": "lidar_ng01",
+      "k": 10,
+      "metric": "domain_ns",
+      "ratio_lower_bound_permille": 906,
+      "reference_mode": "cpu",
+      "reference_range_ns": [
+        648777347,
+        661171148
+      ],
+      "target_permille": 850
+    },
+    {
+      "cooperative_range_ns": [
+        704188676,
+        722220255
+      ],
+      "criterion_failed_on_all_observed_postfirst_warm_passes": true,
+      "frame": "lidar_ng02",
+      "k": 10,
+      "metric": "domain_ns",
+      "ratio_lower_bound_permille": 898,
+      "reference_mode": "cpu",
+      "reference_range_ns": [
+        766176461,
+        783361866
+      ],
+      "target_permille": 850
+    }
+  ],
+  "plan_sha256": "e7b81874696220e5c5314259cdcd08226945cb5a548b1c3fe6f804b3b679d43b",
+  "profile": {
+    "archive_member_hashes": [
+      {
+        "bytes": 88217,
+        "name": "gpu_full.nsys-rep",
+        "sha256": "28fdb5830e993060a90b688195fc3198b73e5099dc5b57b877c78d6397d29ed3"
+      },
+      {
+        "bytes": 25859,
+        "name": "nsys_stats.csv",
+        "sha256": "d69b0c77719d75681a7e95327ea4462b18d4fe79ee836527f9cd11f7312610b5"
+      },
+      {
+        "bytes": 17756154,
+        "name": "leaf_kernels.ncu-rep",
+        "sha256": "cc7198070274d7b0afec4ab54e75ee63662e7877977ebe391f47fda70dadc047"
+      },
+      {
+        "bytes": 80606,
+        "name": "ncu_details.csv",
+        "sha256": "630128ea1926fbd978924db517029419cee6899d76303a0c34ee20319b077b08"
+      },
+      {
+        "bytes": 17812915,
+        "name": "ncu_source.csv",
+        "sha256": "9940c420a0c17ade22e530b79612a90b9297286086886f36d87f7c4477ff07e9"
+      }
+    ],
+    "command_verdicts": [
+      {
+        "code": 0,
+        "name": "gpu_inventory"
+      },
+      {
+        "code": 0,
+        "name": "sudo_n"
+      },
+      {
+        "code": 0,
+        "name": "download_nsight-systems-cli.deb"
+      },
+      {
+        "code": 0,
+        "name": "nsys_extract"
+      },
+      {
+        "code": 0,
+        "name": "nsys_profile"
+      },
+      {
+        "code": 0,
+        "name": "nsys_stats"
+      },
+      {
+        "code": 0,
+        "name": "download_nsight_compute.tar.xz"
+      },
+      {
+        "code": 1,
+        "name": "ncu_profile"
+      },
+      {
+        "code": 0,
+        "name": "ncu_profile_sudo"
+      },
+      {
+        "code": 0,
+        "name": "ncu_details"
+      },
+      {
+        "code": 0,
+        "name": "ncu_source"
+      }
+    ],
+    "first_attempt_refused_counter_permission_then_sudo_retry_passed": true,
+    "frame": "lidar_ng00",
+    "metrics": {
+      "count_kernel": {
+        "Achieved Active Warps Per SM": "10.11 warp",
+        "Achieved Occupancy": "21.06 %",
+        "Avg. Active Threads Per Warp": "3.14 ",
+        "Avg. Divergent Branches": "241090.48 ",
+        "Avg. Not Predicated Off Threads Per Warp": "3.00 ",
+        "Block Limit Registers": "12 block",
+        "Block Size": "32 ",
+        "Branch Efficiency": "96.35 %",
+        "Branch Instructions Ratio": "0.06 %",
+        "Compute (SM) Throughput": "41.88 %",
+        "DRAM Throughput": "0.74 %",
+        "Duration": "270.83 ms",
+        "Elapsed Cycles": "501710358 cycle",
+        "Executed Ipc Active": "1.27 inst/cycle",
+        "Grid Size": "16571 ",
+        "Issue Slots Busy": "31.75 %",
+        "L1/TEX Hit Rate": "68.75 %",
+        "L2 Hit Rate": "99.47 %",
+        "Memory Throughput": "11.81 Gbyte/s",
+        "Registers Per Thread": "146 register/thread",
+        "SM Frequency": "1.85 Ghz",
+        "Stack Size": "3296 ",
+        "Theoretical Occupancy": "25 %",
+        "Threads": "530272 thread",
+        "Warp Cycles Per Issued Instruction": "7.96 cycle",
+        "Waves Per SM": "7.35 "
+      },
+      "fill_kernel": {
+        "Achieved Active Warps Per SM": "1.00 warp",
+        "Achieved Occupancy": "2.08 %",
+        "Avg. Active Threads Per Warp": "1.39 ",
+        "Avg. Divergent Branches": "7771.17 ",
+        "Avg. Not Predicated Off Threads Per Warp": "1.33 ",
+        "Block Limit Registers": "12 block",
+        "Block Size": "32 ",
+        "Branch Efficiency": "98.92 %",
+        "Branch Instructions Ratio": "0.07 %",
+        "Compute (SM) Throughput": "3.91 %",
+        "DRAM Throughput": "0.00 %",
+        "Duration": "290.61 ms",
+        "Elapsed Cycles": "538363052 cycle",
+        "Executed Ipc Active": "0.23 inst/cycle",
+        "Grid Size": "132 ",
+        "Issue Slots Busy": "5.87 %",
+        "L1/TEX Hit Rate": "99.93 %",
+        "L2 Hit Rate": "99.79 %",
+        "Memory Throughput": "8.35 Mbyte/s",
+        "Registers Per Thread": "154 register/thread",
+        "SM Frequency": "1.85 Ghz",
+        "Stack Size": "3296 ",
+        "Theoretical Occupancy": "25 %",
+        "Threads": "4224 thread",
+        "Warp Cycles Per Issued Instruction": "4.26 cycle",
+        "Waves Per SM": "0.06 "
+      }
+    },
+    "metrics_equal_to_details_csv": true,
+    "mode": "81915",
+    "passes": 3,
+    "problems": [],
+    "raw_report_hashes": {
+      "gpu_full.nsys-rep": {
+        "bytes": 88217,
+        "kept": true,
+        "sha256": "28fdb5830e993060a90b688195fc3198b73e5099dc5b57b877c78d6397d29ed3"
+      },
+      "leaf_kernels.ncu-rep": {
+        "bytes": 17756154,
+        "kept": true,
+        "sha256": "cc7198070274d7b0afec4ab54e75ee63662e7877977ebe391f47fda70dadc047"
+      }
+    },
+    "report_sha256": "fa747efc78dd773b04b85948ff10a9e0fbed1070985ac6bed6afc0b84b46fa79",
+    "scope": "Separate profiled execution of mono-thread GPU path; instrumentation overhead excluded from performance criterion; not a cooperative profile.",
+    "source_sha256": "499c86b8a275f25f9a067133e379d6478dfa662aaf4883764297d8a0b7d465cd",
+    "workers": "48"
+  },
+  "publication_pin": null,
+  "receipt_sha256": "8c314d24a5ace988b8d19e51cb3fb556f1d8de57fc737e4d24008b20d063401c",
+  "receipt_status": "completed",
+  "results": [
+    {
+      "bench_sha256": "bf52d8dfc60de3bb93d779602136814263ceef9aacba7fcf7be57d2282e43fdb",
+      "canonical": {
+        "lidar_ng00": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+        "lidar_ng01": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+        "lidar_ng02": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207"
+      },
+      "cold_processes": 45,
+      "k": 5,
+      "leaf": 16,
+      "ledger_equality_evidence": "Pinned gpu_ab judge checks complete work per retained dump; refusal list empty. Individual native work lines are not retained in report.",
+      "ledger_reference_sha256": "0647f272fbc417ea6df67e1337bb0723ca9900a4f0a03d907036e663e55043b3",
+      "report_sha256": "f4e3a21f388bbc4ed54814b8d20322b1ac891d662feee602fefa3738f348a411",
+      "scope": "a froid : dump et registre de chaque prise ; a chaud : passes 1..P toutes reussies, dump et registre de la derniere passe P seulement (les passes 1..P-1 ne serialisent rien)",
+      "verdict": "conforme",
+      "warm_passes_per_process": 12,
+      "warm_processes": 9
+    },
+    {
+      "bench_sha256": "bf52d8dfc60de3bb93d779602136814263ceef9aacba7fcf7be57d2282e43fdb",
+      "canonical": {
+        "lidar_ng00": "61a4245b91d9a4fdad012f0a2e26a63c3e48db1d46a180db756f2c4e4aa77295",
+        "lidar_ng01": "838a447e0b92e13e42f7f69a84fd536d5d46d26463d3f4cc7c688475878fe0de",
+        "lidar_ng02": "81f89995eaccb497cfe92abb81213bebd0d4ce5076210570d86aa9456cf7ff2e"
+      },
+      "cold_processes": 27,
+      "k": 10,
+      "leaf": 24,
+      "ledger_equality_evidence": "Pinned gpu_ab judge checks complete work per retained dump; refusal list empty. Individual native work lines are not retained in report.",
+      "ledger_reference_sha256": "765c389ab029f5ca64ed198695edc8f79f9dae54901db65960747ec960acb404",
+      "report_sha256": "dda73bdb4c4dbe98c1800f41f94bdfd6fc13c801f8143bb6a7c4a1ac45aa7f7d",
+      "scope": "a froid : dump et registre de chaque prise ; a chaud : passes 1..P toutes reussies, dump et registre de la derniere passe P seulement (les passes 1..P-1 ne serialisent rien)",
+      "verdict": "conforme",
+      "warm_passes_per_process": 8,
+      "warm_processes": 9
+    }
+  ],
+  "schema": "audit_g4_coop2_metadata_v1",
+  "session": "v11.20261006.claudecoop2",
+  "source_equality": {
+    "equal_to_git": true,
+    "files": 639,
+    "manifest_sha256": "7a57b4c706cbc9841bd7a259c3b6c6400383f242600447b4a4c39ff8d206a871"
+  },
+  "source_pin": "ee3eabe5e7aae4d95515f63935e8f9a84adbd468",
+  "totals": {
+    "canonical_dumps_checked": 90,
+    "constructed_lidar_passes": 252,
+    "intermediate_passes_without_dump_or_ledger": 162,
+    "lidar_processes": 90
+  },
+  "whole_frames_metadata": [
+    {
+      "frame": "lidar_ng00",
+      "ids_sha256": "c73a41965f6f2e1042b5f3ba876d12ae0811b7f24aa73c886aa07830974e33c6",
+      "sites": 39885,
+      "xyz_sha256": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf"
+    },
+    {
+      "frame": "lidar_ng01",
+      "ids_sha256": "bb699c2511a87618813a32657399539fe90e8f1e4f1187656ac88c03f2fee6a4",
+      "sites": 35551,
+      "xyz_sha256": "ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f"
+    },
+    {
+      "frame": "lidar_ng02",
+      "ids_sha256": "121e76f3ef1fcedb05cb65da9a95bfb84fe4b8305076a7485483fff113d128cc",
+      "sites": 45845,
+      "xyz_sha256": "a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af"
+    }
+  ],
+  "worker_exit_code": 0
+}

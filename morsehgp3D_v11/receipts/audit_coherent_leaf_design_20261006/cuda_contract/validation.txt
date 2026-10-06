@@ -1,0 +1,2 @@
+normal exit0; optimized exit0
+Q3 design model PASS: 32 cache schedules, 31 wrong leader counters for redundant calls; 5 ordered full-mask compactions; native0 CUDA0

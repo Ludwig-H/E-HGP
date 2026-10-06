@@ -1,0 +1,17 @@
+# Section Q — règles CUDA et mutants utiles (Q3)
+
+Pin lu ee3eabe5e ; proposition de feuille cohérente, aucun noyau de cette conception qualifié ici. Les corrections Tables possédées par run_leaf et atomicOr réservé à Shared sont favorables en lecture.
+
+J2 est un effet partagé, pas une étape scalaire pure : lines_possible consulte seen et compte chaque visite. Si32 lanes consultent le même bit puis lane0 compte, une autre lane peut poser le premier bit avant elle ; lane0 compte alors hit à la première visite logique. Réduire les32 compteurs multiplie également les visites. Une seule lane consulte/compte le cache une fois par face logique, puis diffuse le résultat ; la géométrie pure peut rester redondante. Le modèle montre ce témoin avec deux visites du même rang, sans simulation CUDA.
+
+Les32 lanes du bloc doivent exécuter les votes avec un masque de participation explicite commun. Lane>=m, tuple inactif ou prédicat non certifié rendent un état neutre/refus, sans return divergent avant les collectives. __ballot_sync/shuffle synchronisent les participants mais ne publient pas les écritures shared : conserver __syncwarp entre écriture des listes et leur consommation. [Règles NVIDIA des votes](https://docs.nvidia.com/cuda/archive/12.6.0/cuda-c-programming-guide/index.html#warp-vote-functions), [shuffle](https://docs.nvidia.com/cuda/archive/12.6.0/cuda-c-programming-guide/index.html#warp-shuffle-functions) et [synchronisation](https://docs.nvidia.com/cuda/archive/12.6.0/cuda-c-programming-guide/index.html#synchronization-functions).
+
+Préfixes : compactage par popcount des bits de rang inférieur, pas atomicAdd des places dans l'ordre d'arrivée ; supports/populations restent dans l'ordre des sites et du parcours. Les opérations spéculatives restent gardées par le certificat avant leur arithmétique i128 (side:127 et center_orientation:145 dans predicates). Ignorer un refus au-delà de l'arrêt séquentiel peut préserver la sémantique ; ignorer un dépassement signé déjà exécuté ne la répare pas. Les choix du premier événement logique et du seuil relèvent du complément mathématique Q1/Q2.
+
+Mutants/gates minimaux : visite J2 par toutes lanes (compteurs exacts), perte du bit31 ou lane>=m retirée des collectives (m31/32), listes compactées dans l'ordre d'arrivée, refus avant l'arrêt ignoré, refus après l'arrêt propagé, arithmétique appelée avant certificat. Couvrir aussi les quatre mutants proposés par le développeur. Une référence non mutée doit d'abord passer. Les invariants dump/ledger et absence de publication partielle sont les verdicts ; délai/crash ne prouvent pas une faute géométrique détectée.
+
+G4 ciblé : memcheck/racecheck/synccheck sur m1/2/3/31/32, coquille avec dernier rang31, cache initial vide puis rang répété, et injection de refus avant/après l'arrêt. [Compute Sanitizer](https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html). Pas de nouveau blocage produit déduit de ce conseil de conception.
+
+La garde ordinaire unresolved55/atomicExch63 de l'ancienne feuille par paires reste inchangée au même SHA f7d2f7b... : preuve/patch f030 existants toujours ouverts ; aucun nouveau dossier de cette ancienne preuve. Six contrôles sanitizer sans erreur ne démontrent pas que son entrelacement a été atteint.
+
+Rejeu : `python3 -B replay.py --check proof.json`, puis `python3 -O -B replay.py --check proof.json` ; stdlib seulement et JSON figé non écrasé.

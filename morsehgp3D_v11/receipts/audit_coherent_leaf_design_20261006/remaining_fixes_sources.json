@@ -1,0 +1,18 @@
+{
+  "pin": "ee3eabe5e7aae4d95515f63935e8f9a84adbd468",
+  "source_files": [
+    {
+      "path": "morsehgp3D_v11/src/catalogue/leaf_batch_coop_cuda.cuh",
+      "sha256": "f7d2f7b08c6ac09b7556bf58e9d1c94823138caec5044e1bcac5db30e986df00"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/leaf_coop_test.cpp",
+      "sha256": "19247b99852f1bb9d06442289234365684613acb98165ab6b35357bde6764b91"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/mutants/catalogue.json",
+      "sha256": "bb9e4bb65133fd93814b0cf5088dfc2911a1c170f21ac340f46cd6eef672ead6"
+    }
+  ],
+  "scope": "Rebased proposals from f030; no new runtime result"
+}

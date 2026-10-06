@@ -1,0 +1,46 @@
+{
+  "pin": "ee3eabe5e7aae4d95515f63935e8f9a84adbd468",
+  "mode": "proposal Q3; source read-only, no CUDA implementation or qualification",
+  "native_runs": 0,
+  "cuda_runs": 0,
+  "sources": [
+    {
+      "path": "morsehgp3D_v11/audits/REPONSE_CLAUDE_SUPPORTS_20261004.md",
+      "sha256": "334ea999643f2f8b47007daedecdba6dd6f0b3ad89ac96b77239255d9e751a86",
+      "anchors": [
+        [
+          580,
+          600
+        ]
+      ]
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/leaf_device.hpp",
+      "sha256": "619a9e78f91e263d30e39a8a71b8c62f7ab6f12c77dc489adbb2f58055f9a9e8",
+      "anchors": [
+        [
+          104,
+          156
+        ],
+        [
+          287,
+          318
+        ]
+      ]
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/leaf_device_predicates.hpp",
+      "sha256": "106a07d64648510f59c6e8eefda2e70433748a8e2cdabcbf59fb0eaef4870610",
+      "anchors": [
+        [
+          114,
+          134
+        ],
+        [
+          143,
+          169
+        ]
+      ]
+    }
+  ]
+}

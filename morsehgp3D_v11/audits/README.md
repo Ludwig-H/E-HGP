@@ -4,20 +4,24 @@
 quantized_u21_input_only / not_claimed`. Six notes actives maintenues en
 place ; preuves détaillées dans les reçus immuables.
 
-**Priorité active : corriger le premier noyau coopératif avant G4.**
-Le WIP CUDA et ses nouvelles portes sont relus. Deux patches applicables
-sont fournis : synchroniser la lecture du drapeau de refus avant les
-écritures concurrentes ; rendre les six mutants exécutables avec les bons
-noms et modules, une fixture de dominance réelle et une attente de refus
-adaptée au profil. [Constats, preuves et patches](../receipts/audit_coop_wip_followup_20261006/README.md).
+**Priorité active : réponse à la feuille cohérente proposée en section Q.**
+Le warp peut partager le parcours en conservant le premier événement dans
+l'ordre séquentiel : dépassement au seuil+1, refus ou succès canonique.
+Le cache J2 doit être consulté une seule fois par test logique. Les
+[règles et modèles fournis](../receipts/audit_coherent_leaf_design_20261006/README.md)
+précisent aussi les mutants atteignables et les refus à tester par injection.
 
-La représentation compacte tient dans **8 040 octets sous l'ABI déclarée**
-(à confirmer au build) ; la préparation séquentielle i<j et le mutant qui
-supprime réellement les descendants sont intégrés. Ces anciens points sont
-clos en source. La décomposition par paires et son ordre d'émission restent
-favorables en lecture ; aucune qualification CUDA n'est encore déduite. Voir la
-[réponse aux quatre questions](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md#feuille-cooperative--reponse-a-la-section-o-du-6-octobre)
-et les [portes ciblées](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#feuille-cooperative--qualification-ciblee-sur-g4).
+**Coop1 vérifié : exactitude ciblée conforme, gain insuffisant.** Six portes
+hôte, seize prises synthétiques, six contrôles sanitizer et 90 dumps sur
+trois trames K5/K10 conformes au pin c3df ; aucun transfert au correctif ee3.
+[Reçu indépendant](../receipts/audit_g4_coop1_20261006/README.md).
+**Coop2 vérifié au pin ee3 :** mêmes 90 dumps conformes, gain toujours
+insuffisant, sans nouveaux sanitizers. Le profil du fill un fil montre
+1,39 lane active sur32 ; la correction n'a pas rétabli son ancien coût.
+[Reçu et profil](../receipts/audit_g4_coop2_20261006/README.md).
+Les cibles des mutants et la fixture de dominance sont réparées. La garde
+concurrente de refus et l'attente impossible en u18 restent à corriger :
+[patch actualisé](../receipts/audit_coherent_leaf_design_20261006/remaining_fixes_ee3.patch).
 Le [patch de placement du fill](../receipts/proposition_fill_cta_20261006/README.md)
 reste une proposition facultative archivée, sans constituer un préalable.
 

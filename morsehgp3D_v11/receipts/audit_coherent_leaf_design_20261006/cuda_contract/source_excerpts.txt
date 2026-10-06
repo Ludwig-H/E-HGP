@@ -1,0 +1,157 @@
+morsehgp3D_v11/audits/REPONSE_CLAUDE_SUPPORTS_20261004.md
+580: **Proposition, à contester avant écriture : la feuille cohérente.** Le warp entier parcourt le même préfixe, avec un
+581: contrôle de flux uniforme.
+582: - Les étapes scalaires (centre, faces J2, `lines_possible`) sont calculées de façon redondante par toutes les lanes :
+583:   même instruction, aucune divergence.
+584: - Recensement : la lane i juge le site i (`side` en i128), puis `__ballot_sync` donne les masques intérieur et
+585:   coquille.
+586: - Support canonique : les triplets et quadruplets de la coquille sont répartis sur les lanes, et le premier succès, dans
+587:   l'ordre, est le plus petit indice gagnant (ballot puis `ffs`).
+588: - Émission par la lane 0, ou listes écrites en parallèle.
+589: 
+590: **Questions.**
+591: 1. Le recensement séquentiel s'arrête au seuil (`p == threshold`), et `census_tests` compte les sites visités
+592:    jusque-là. Je propose de calculer tous les sites, puis de déduire le compteur du rang du seuil-ième intérieur dans
+593:    l'ordre (popc d'un préfixe de masque). De même, `judged` et les compteurs du support canonique se déduiraient de
+594:    l'indice du premier succès. Voyez-vous un compteur dont la valeur dépendrait d'un calcul fait **après** l'arrêt
+595:    séquentiel, en particulier un refus `kUnresolved` qu'un site au-delà du seuil lèverait dans la version parallèle
+596:    mais jamais dans la séquentielle ? Je propose d'ignorer les refus des sites au-delà du point d'arrêt séquentiel.
+597: 2. Même question pour la recherche du support canonique : un refus non certifié au-delà du premier succès doit-il être
+598:    ignoré ?
+599: 3. Quels mutants exigez-vous ? Je propose : seuil décalé d'un site, refus au-delà de l'arrêt non ignoré, premier
+600:    succès pris au plus grand indice, ballot partiel (masque de lanes incomplet).
+morsehgp3D_v11/src/catalogue/leaf_device.hpp
+104: // Bit r du cache J2 simule : vrai s'il etait deja pose. Atomique sur l'appareil pour des tables partagees (fils d'une
+105: // meme feuille, memoire partagee) ; le nombre de succes vaut les tests moins les rangs distincts, independant de
+106: // l'ordre de visite. Tables d'un seul fil (memoire locale, ou un atomique n'a pas de sens : avertissement de ptxas) :
+107: // lecture puis ecriture ordinaires.
+108: template <bool Atomic>
+109: MHGP11_LEAF_HD bool seen_test_set(u32* seen, u32 r) {
+110:   const u32 bit = 1u << (r & 31);
+111: #if defined(__CUDA_ARCH__)
+112:   if constexpr (Atomic) return (atomicOr(&seen[r >> 5], bit) & bit) != 0;
+113: #endif
+114:   const bool hit = (seen[r >> 5] & bit) != 0;
+115:   seen[r >> 5] |= bit;
+116:   return hit;
+117: }
+118: 
+119: // Shared : tables partagees par reference (feuille cooperative) ; sinon possedees par la feuille. Une feuille d'un fil
+120: // garde ses tables par valeur : en memoire locale, une reference ajoute un chargement de pointeur devant chaque acces,
+121: // et la seconde passe d'ecriture, limitee par la latence de quelques feuilles lourdes, doublait (session G4 coop1,
+122: // 6 octobre 2026 : 17 -> 39 ms a K5, 111 -> 244 ms a K10).
+123: template <class Sink, bool Shared = true>
+124: struct Leaf {
+125:   const Input& in;
+126:   Counts& c;
+127:   Sink& sink;
+128:   std::conditional_t<Shared, Tables&, Tables> t;
+129:   u64 masks[5] = {0, 0, 0, 0, 0};
+130:   u32 prefix[4] = {0, 0, 0, 0};
+131:   u32 interior[kMaxSites], shell[kMaxSites], shell_local[kMaxSites];
+132:   bool unresolved = false;
+133: 
+134:   MHGP11_LEAF_HD Leaf(const Input& input, Counts& counts, Sink& out, Tables& tables)
+135:     requires Shared
+136:       : in(input), c(counts), sink(out), t(tables) {}
+137:   MHGP11_LEAF_HD Leaf(const Input& input, Counts& counts, Sink& out)
+138:     requires(!Shared)
+139:       : in(input), c(counts), sink(out) {}
+140: 
+141:   MHGP11_LEAF_HD static u32 rank(u32 i, u32 j, u32 k) { return k * (k - 1) * (k - 2) / 6 + j * (j - 1) / 2 + i; }
+142: 
+143:   // J2, droites des faces contenant le dernier site ; cache simule pour les seuls compteurs.
+144:   MHGP11_LEAF_HD bool lines_possible(int q) {
+145:     const u32 last = prefix[q - 1];
+146:     for (int j = 0; j + 2 < q; ++j)
+147:       for (int k = j + 1; k + 1 < q; ++k) {
+148:         ++c.region_line_tests;
+149:         const u32 a = prefix[j], b = prefix[k];
+150:         bool hit = false;
+151:         if (in.cache) hit = seen_test_set<Shared>(t.seen, rank(a, b, last));
+152:         if (hit) ++c.region_line_cache_hits; else ++c.region_line_evaluations;
+153:         if (center_line_meets(t.P[a], t.P[b], t.P[last], in.lo, in.hi) != kIntersects) {
+154:           ++c.region_line_rejects;
+155:           return false;
+156:         }
+287:   MHGP11_LEAF_HD void census_and_emit(u32 q, const Center& s) {
+288:     ++c.judged;
+289:     const u32 threshold = static_cast<u32>(in.kmax + 1) - q;
+290:     u64 inside = 0, outside = 0;
+291:     for (u32 j = 0; j < q; ++j) {
+292:       inside |= t.dom[prefix[j]];
+293:       outside |= t.domby[prefix[j]];
+294:     }
+295:     if ((inside & outside) != 0) { unresolved = true; return; }  // leaf.cpp : catalogue_invariant
+296:     u32 p = 0, count = 0, cursor = 0;
+297:     for (u32 i = 0; i < t.m; ++i) {
+298:       ++c.census_tests;
+299:       int relation = 0;
+300:       if (cursor < q && i == prefix[cursor]) {
+301:         ++cursor;
+302:       } else if ((inside >> i) & 1u) {
+303:         relation = -1;
+304:       } else if ((outside >> i) & 1u) {
+305:         relation = 1;
+306:       } else if (!side(s, t.P[i], relation)) {
+307:         unresolved = true;
+308:         return;
+309:       }
+310:       if (relation < 0) {
+311:         if (p == threshold) return;
+312:         interior[p++] = in.sites[i];
+313:       } else if (relation == 0) {
+314:         shell_local[count] = i;
+315:         shell[count++] = in.sites[i];
+316:       }
+317:     }
+318:     if (count < q || cursor != q) { unresolved = true; return; }
+morsehgp3D_v11/src/catalogue/leaf_device_predicates.hpp
+114: MHGP11_LEAF_HD bool q3_global_power(i128 d, const i128* n) {
+115:   const i128 d_limit = i128(1) << (123 - 2 * kBits), n_limit = i128(1) << (124 - kBits);
+116:   if (d <= 0 || d >= d_limit) return false;
+117:   for (int j = 0; j < 3; ++j)
+118:     if (n[j] <= -n_limit || n[j] >= n_limit) return false;
+119:   return true;
+120: }
+121: 
+122: // use_native_power de predicates.cpp : Budget::side = 6B+8 <= 127 (u18), ou arite != 3, ou certificat q3.
+123: MHGP11_LEAF_HD bool native_power_ok(const Center& c) { return 6 * kBits + 8 <= 127 || c.arity != 3 || c.q3_power; }
+124: 
+125: // Signe de D|z-a|^2 - 2N.(z-a) ; faux si la voie native n'est pas certifiee (leaf.cpp prendrait checked/Wide).
+126: MHGP11_LEAF_HD bool side(const Center& c, const u32* z, int& out) {
+127:   if (!native_power_ok(c)) return false;
+128:   const i64 v0 = i64(z[0]) - c.anchor[0], v1 = i64(z[1]) - c.anchor[1], v2 = i64(z[2]) - c.anchor[2];
+129:   i128 total = c.d * i128(v0 * v0 + v1 * v1 + v2 * v2);
+130:   total += c.n[0] * (-2 * i128(v0));
+131:   total += c.n[1] * (-2 * i128(v1));
+132:   total += c.n[2] * (-2 * i128(v2));
+133:   out = sign(total);
+134:   return true;
+143: // center_orientation, voie native certifiee seulement.
+144: MHGP11_LEAF_HD bool center_orientation(const u32* a, const u32* b, const u32* c, const Center& s, int& out) {
+145:   if (!s.orient) return false;
+146:   const Vec normal = cross(diff(b, a), diff(c, a));
+147:   i128 total = 0;
+148:   for (int j = 0; j < 3; ++j) {
+149:     const i128 coordinate = s.n[j] + s.d * i128(s.anchor[j] - i64(a[j]));
+150:     total += coordinate * normal.v[j];
+151:   }
+152:   out = sign(total);
+153:   return true;
+154: }
+155: 
+156: // center_inside : orientations des quatre faces, sommet oppose contre centre.
+157: MHGP11_LEAF_HD bool center_inside(const Center& s, const u32* const* p, bool& out) {
+158:   for (int opposite = 0; opposite < 4; ++opposite) {
+159:     const u32* face[3];
+160:     int j = 0;
+161:     for (int i = 0; i < 4; ++i)
+162:       if (i != opposite) face[j++] = p[i];
+163:     const int vertex = orientation4(face[0], face[1], face[2], p[opposite]);
+164:     if (vertex == 0) { out = false; return true; }
+165:     int center = 0;
+166:     if (!center_orientation(face[0], face[1], face[2], s, center)) return false;
+167:     if (center != vertex) { out = false; return true; }
+168:   }
+169:   out = true;

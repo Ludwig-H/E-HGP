@@ -1,0 +1,35 @@
+--- a/morsehgp3D_v11/src/catalogue/leaf_batch_coop_cuda.cuh
++++ b/morsehgp3D_v11/src/catalogue/leaf_batch_coop_cuda.cuh
+@@ -52,7 +52,9 @@
+   }
+   __syncwarp();
+   const u32 n = s.n;
+-  if (s.unresolved == 0)
++  const bool root_resolved = s.unresolved == 0;
++  __syncwarp();  // toutes les lectures du garde precedent les atomicExch de la boucle
++  if (root_resolved)
+     for (;;) {
+       const u32 k = atomicAdd(&s.cursor, 1u);
+       if (k >= n) break;
+--- a/morsehgp3D_v11/tests/catalogue/leaf_coop_test.cpp
++++ b/morsehgp3D_v11/tests/catalogue/leaf_coop_test.cpp
+@@ -162,7 +162,8 @@
+   std::printf("leaf_coop_near_max feuilles=%llu non_resolues=%llu emises_avant_refus=%llu\n",
+               static_cast<unsigned long long>(tally.leaves), static_cast<unsigned long long>(tally.unresolved),
+               static_cast<unsigned long long>(tally.partial));
+-  CHECK(tally.partial > 0);
++  if constexpr (ld::kBits > 20) CHECK(tally.partial > 0);
++  else CHECK_EQ(tally.unresolved, 0u);
+ }
+ 
+ MHGP11_TEST_MAIN()
+--- a/morsehgp3D_v11/tests/mutants/catalogue.json
++++ b/morsehgp3D_v11/tests/mutants/catalogue.json
+@@ -584,6 +584,7 @@
+       "cherche": "  if (root.unresolved) return kUnresolved;\n  CountSink tally_sink;\n",
+       "remplace": "  if (root.unresolved) return kUnresolved;\n  for (u32 k = 0; k < n; ++k) {\n    Leaf<Sink> early(in, counts, sink, tables);\n    run_pair(early, pairs[k]);\n    if (early.unresolved) return kUnresolved;\n  }\n  for (u32 w = 0; w < kSeenWords; ++w) tables.seen[w] = 0;\n  counts = Counts{};\n  counts.dominance_tests += u64(in.m) * (in.m - 1) / 2;\n  return kOk;\n  CountSink tally_sink;\n",
+       "porte": "mhgp11_catalogue_leaf_coop_near_max",
++      "options": ["-DMHGP11_COORD_BITS=21"],
+       "note": "feuille cooperative : emissions publiees au fil de l'eau, une feuille refusee laisse un prefixe publie"
+     },
+     {

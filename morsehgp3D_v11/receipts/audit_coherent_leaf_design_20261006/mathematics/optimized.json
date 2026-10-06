@@ -1,0 +1,188 @@
+{
+  "canonical_formula": "first event in phase/lex order among success or refusal; miss creates no event",
+  "canonical_traces": [
+    {
+      "expected": {
+        "candidate": [
+          0,
+          1,
+          2
+        ],
+        "event": "U"
+      },
+      "label": "unknown_before_success"
+    },
+    {
+      "expected": {
+        "candidate": [
+          0,
+          1,
+          2
+        ],
+        "event": "S"
+      },
+      "label": "unknown_after_success"
+    },
+    {
+      "expected": {
+        "candidate": [
+          3,
+          4
+        ],
+        "event": "S"
+      },
+      "label": "pair_phase_before_triangle"
+    },
+    {
+      "expected": {
+        "candidate": [
+          1,
+          2,
+          3
+        ],
+        "event": "U"
+      },
+      "label": "triangle_phase_before_tetra"
+    },
+    {
+      "expected": {
+        "candidate": [
+          0,
+          1,
+          4
+        ],
+        "event": "S"
+      },
+      "label": "lex_not_colex"
+    },
+    {
+      "expected": {
+        "candidate": null,
+        "event": "U"
+      },
+      "label": "all_candidates_miss"
+    }
+  ],
+  "census_formula": "theta=K+1-q; t=select(theta+1,I); u=first(U); e=min(t,u,m); visited=min(e+1,m)",
+  "census_traces": [
+    {
+      "expected": {
+        "census_tests": 2,
+        "status": "rejected_prefix",
+        "stop": 1
+      },
+      "label": "threshold_zero",
+      "states": "OICU",
+      "threshold": 0
+    },
+    {
+      "expected": {
+        "census_tests": 2,
+        "status": "unresolved",
+        "stop": 1
+      },
+      "label": "unknown_before_extra_inside",
+      "states": "CUIOI",
+      "threshold": 1
+    },
+    {
+      "expected": {
+        "census_tests": 4,
+        "status": "rejected_prefix",
+        "stop": 3
+      },
+      "label": "unknown_after_extra_inside",
+      "states": "CIOIU",
+      "threshold": 1
+    },
+    {
+      "expected": {
+        "census_tests": 4,
+        "status": "unresolved",
+        "stop": 3
+      },
+      "label": "exactly_threshold_then_unknown",
+      "states": "CIOU",
+      "threshold": 1
+    },
+    {
+      "expected": {
+        "census_tests": 5,
+        "interior": [
+          1
+        ],
+        "shell": [
+          0,
+          3
+        ],
+        "status": "complete",
+        "stop": null
+      },
+      "label": "exactly_threshold_full",
+      "states": "CIOCO",
+      "threshold": 1
+    },
+    {
+      "expected": {
+        "census_tests": 6,
+        "status": "rejected_prefix",
+        "stop": 5
+      },
+      "label": "not_first_contact",
+      "states": "OCICOI",
+      "threshold": 1
+    },
+    {
+      "expected": {
+        "census_tests": 1,
+        "status": "unresolved",
+        "stop": 0
+      },
+      "label": "first_unknown",
+      "states": "UICI",
+      "threshold": 1
+    },
+    {
+      "expected": {
+        "census_tests": 4,
+        "interior": [],
+        "shell": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "status": "complete",
+        "stop": null
+      },
+      "label": "all_shell",
+      "states": "CCCC",
+      "threshold": 0
+    },
+    {
+      "expected": {
+        "census_tests": 17,
+        "status": "rejected_prefix",
+        "stop": 16
+      },
+      "label": "full_warp_last_unknown_ignored",
+      "states": "IIIIIIIIIIIIIIIIICCCCCCCCCCCCCCU",
+      "threshold": 16
+    },
+    {
+      "expected": {
+        "census_tests": 17,
+        "status": "unresolved",
+        "stop": 16
+      },
+      "label": "full_warp_unknown_before_limit",
+      "states": "IIIIIIIIIIIIIIIIUIIIIIIIIIIIIIII",
+      "threshold": 16
+    }
+  ],
+  "checks": 33,
+  "limits": "Symbolic predicate-event traces, including injected uncertainty, not geometric fixtures, native tests, or CUDA concurrency simulation. Speculative evaluation is admissible only for guarded, numerically safe paths.",
+  "native_executed": false,
+  "pin": "ee3eabe5e7aae4d95515f63935e8f9a84adbd468",
+  "status": "PASS_portable_event_model_only"
+}
