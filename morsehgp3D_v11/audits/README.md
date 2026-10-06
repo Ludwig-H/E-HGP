@@ -4,6 +4,11 @@
 quantized_u21_input_only / not_claimed`. Six notes actives maintenues en
 place ; preuves et propositions détaillées dans les reçus immuables.
 
+**Réservoir de feuilles 59509bbc8 : deux raccords de qualification à corriger.**
+La lecture du moteur est favorable. La porte IO et le lecteur de campagne
+gardent l'ancienne borne des masques ; le juge GPU peut accepter un registre
+absent. [Constats et correctifs ciblés](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#réservoir-de-feuilles--raccord-des-portes-à-corriger).
+
 **Supports MST : correction intégrée en 07428324e et qualifiée sur G4 u21.**
 Le sélecteur garde les unions utiles au même plateau ; le différentiel
 compare la sortie native intacte et le lecteur contrôle connexion et

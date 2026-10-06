@@ -1,0 +1,7 @@
+59509bbc816646f7bda0c77a3b948f57c79a8b9c:morsehgp3D_v11/bench/full_campaign.py:46:    need(type(value) is int and 0 <= value <= 131071, 'optimization mode outside 0..131071')
+59509bbc816646f7bda0c77a3b948f57c79a8b9c:morsehgp3D_v11/bench/full_probe.cpp:262:                                        131072 * unsigned(params.replay_overflow))
+59509bbc816646f7bda0c77a3b948f57c79a8b9c:morsehgp3D_v11/bench/full_probe.cpp:359:  if (argc >= 12 && (!parse(argv[11], optimizations) || optimizations > 262143)) return 2;
+59509bbc816646f7bda0c77a3b948f57c79a8b9c:morsehgp3D_v11/bench/full_probe.cpp:390:  params.replay_overflow = (optimizations & 131072) != 0;  // lots sans reservoir chaine : debordements rejoues
+59509bbc816646f7bda0c77a3b948f57c79a8b9c:morsehgp3D_v11/bench/gpu_sanitizer.py:10:GPU avec reservoir chaine (81915) et sans (212987 = 81915 + 131072, debordements rejoues) doit rendre le meme dump et
+59509bbc816646f7bda0c77a3b948f57c79a8b9c:morsehgp3D_v11/tests/tower/full_bench_io.py:110:                                 optimizations={'opt_negative':'-1','opt_large':'131072','opt_text':'x','opt_requires_lanes':'128',
+59509bbc816646f7bda0c77a3b948f57c79a8b9c:morsehgp3D_v11/tests/tower/full_leaf_lanes.py:3:de feuilles sur le Pool avec reservoir chaine (49147) et sans (180219 = 49147 + 131072, voie du 5 octobre) rendent le

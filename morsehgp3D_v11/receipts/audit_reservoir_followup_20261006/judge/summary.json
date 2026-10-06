@@ -1,0 +1,367 @@
+{
+  "cloud_actions": 0,
+  "limits": [
+    "Synthetic protocol stub dumps are not native outputs or geometric evidence.",
+    "The original judge function main is executed; subprocess.run is always mocked.",
+    "No GPU/Sanitizer execution, no deployed source or historical receipt changed."
+  ],
+  "native_executions": 0,
+  "original": {
+    "changed_dump": {
+      "exit_code": 1,
+      "instrumented_pairs": [],
+      "instrumented_runs": 0,
+      "mock_process_calls": 3,
+      "ordinary_runs": 3,
+      "ordinary_work_absent": 0,
+      "verdict": "refus : A K5 gpu : dump ou registre different du CPU"
+    },
+    "instrumented_bad_status": {
+      "exit_code": 0,
+      "instrumented_pairs": [
+        [
+          "memcheck",
+          "A"
+        ],
+        [
+          "memcheck",
+          "B"
+        ],
+        [
+          "racecheck",
+          "A"
+        ],
+        [
+          "racecheck",
+          "B"
+        ],
+        [
+          "synccheck",
+          "A"
+        ]
+      ],
+      "instrumented_runs": 5,
+      "mock_process_calls": 17,
+      "ordinary_runs": 12,
+      "ordinary_work_absent": 0,
+      "verdict": "conforme"
+    },
+    "instrumented_different_work": {
+      "exit_code": 0,
+      "instrumented_pairs": [
+        [
+          "memcheck",
+          "A"
+        ],
+        [
+          "memcheck",
+          "B"
+        ],
+        [
+          "racecheck",
+          "A"
+        ],
+        [
+          "racecheck",
+          "B"
+        ],
+        [
+          "synccheck",
+          "A"
+        ]
+      ],
+      "instrumented_runs": 5,
+      "mock_process_calls": 17,
+      "ordinary_runs": 12,
+      "ordinary_work_absent": 0,
+      "verdict": "conforme"
+    },
+    "instrumented_missing_work": {
+      "exit_code": 0,
+      "instrumented_pairs": [
+        [
+          "memcheck",
+          "A"
+        ],
+        [
+          "memcheck",
+          "B"
+        ],
+        [
+          "racecheck",
+          "A"
+        ],
+        [
+          "racecheck",
+          "B"
+        ],
+        [
+          "synccheck",
+          "A"
+        ]
+      ],
+      "instrumented_runs": 5,
+      "mock_process_calls": 17,
+      "ordinary_runs": 12,
+      "ordinary_work_absent": 0,
+      "verdict": "conforme"
+    },
+    "instrumented_nonzero": {
+      "exit_code": 1,
+      "instrumented_pairs": [
+        [
+          "memcheck",
+          "A"
+        ]
+      ],
+      "instrumented_runs": 1,
+      "mock_process_calls": 13,
+      "ordinary_runs": 12,
+      "ordinary_work_absent": 0,
+      "verdict": "refus : memcheck A : 9 {\"phase\": \"domain\", \"leaf_batch\": {\"fill_jobs\": 0, \"spare_record_chunks\": 1, \"spare_population_chunks\": 1, \"unresolved\": 0}, \"catalogue_work\": {\"prefixes\": 17, \"emitted\": 3}}\n{\"phase\": \"exit\", \"status\": \"ok\"}\nERROR SUMMARY: 0 errors\n"
+    },
+    "missing_clean_marker": {
+      "exit_code": 1,
+      "instrumented_pairs": [
+        [
+          "memcheck",
+          "A"
+        ]
+      ],
+      "instrumented_runs": 1,
+      "mock_process_calls": 13,
+      "ordinary_runs": 12,
+      "ordinary_work_absent": 0,
+      "verdict": "refus : memcheck A : 0 {\"phase\": \"domain\", \"leaf_batch\": {\"fill_jobs\": 0, \"spare_record_chunks\": 1, \"spare_population_chunks\": 1, \"unresolved\": 0}, \"catalogue_work\": {\"prefixes\": 17, \"emitted\": 3}}\n{\"phase\": \"exit\", \"status\": \"ok\"}\n"
+    },
+    "missing_work": {
+      "exit_code": 0,
+      "instrumented_pairs": [
+        [
+          "memcheck",
+          "A"
+        ],
+        [
+          "memcheck",
+          "B"
+        ],
+        [
+          "racecheck",
+          "A"
+        ],
+        [
+          "racecheck",
+          "B"
+        ],
+        [
+          "synccheck",
+          "A"
+        ]
+      ],
+      "instrumented_runs": 5,
+      "mock_process_calls": 17,
+      "ordinary_runs": 12,
+      "ordinary_work_absent": 12,
+      "verdict": "conforme"
+    },
+    "process_nonzero": {
+      "exit_code": 1,
+      "instrumented_pairs": [],
+      "instrumented_runs": 0,
+      "mock_process_calls": 1,
+      "ordinary_runs": 1,
+      "ordinary_work_absent": 0,
+      "verdict": "refus : A K5 cpu : sortie 9 "
+    },
+    "valid": {
+      "exit_code": 0,
+      "instrumented_pairs": [
+        [
+          "memcheck",
+          "A"
+        ],
+        [
+          "memcheck",
+          "B"
+        ],
+        [
+          "racecheck",
+          "A"
+        ],
+        [
+          "racecheck",
+          "B"
+        ],
+        [
+          "synccheck",
+          "A"
+        ]
+      ],
+      "instrumented_runs": 5,
+      "mock_process_calls": 17,
+      "ordinary_runs": 12,
+      "ordinary_work_absent": 0,
+      "verdict": "conforme"
+    }
+  },
+  "processes_fully_mocked": true,
+  "proposal": {
+    "changed_dump": {
+      "exit_code": 1,
+      "instrumented_pairs": [],
+      "instrumented_runs": 0,
+      "mock_process_calls": 3,
+      "ordinary_runs": 3,
+      "ordinary_work_absent": 0,
+      "verdict": "refus : A K5 gpu : dump ou registre different du CPU"
+    },
+    "instrumented_bad_status": {
+      "exit_code": 1,
+      "instrumented_pairs": [
+        [
+          "memcheck",
+          "A"
+        ]
+      ],
+      "instrumented_runs": 1,
+      "mock_process_calls": 13,
+      "ordinary_runs": 12,
+      "ordinary_work_absent": 0,
+      "verdict": "refus : memcheck A : 0 {\"phase\": \"domain\", \"leaf_batch\": {\"fill_jobs\": 0, \"spare_record_chunks\": 1, \"spare_population_chunks\": 1, \"unresolved\": 0}, \"catalogue_work\": {\"prefixes\": 17, \"emitted\": 3}}\n{\"phase\": \"exit\", \"status\": \"refused\"}\nERROR SUMMARY: 0 errors\n"
+    },
+    "instrumented_different_work": {
+      "exit_code": 1,
+      "instrumented_pairs": [
+        [
+          "memcheck",
+          "A"
+        ]
+      ],
+      "instrumented_runs": 1,
+      "mock_process_calls": 13,
+      "ordinary_runs": 12,
+      "ordinary_work_absent": 0,
+      "verdict": "refus : memcheck A : 0 {\"phase\": \"domain\", \"leaf_batch\": {\"fill_jobs\": 0, \"spare_record_chunks\": 1, \"spare_population_chunks\": 1, \"unresolved\": 0}, \"catalogue_work\": {\"prefixes\": 18, \"emitted\": 3}}\n{\"phase\": \"exit\", \"status\": \"ok\"}\nERROR SUMMARY: 0 errors\n"
+    },
+    "instrumented_missing_work": {
+      "exit_code": 1,
+      "instrumented_pairs": [
+        [
+          "memcheck",
+          "A"
+        ]
+      ],
+      "instrumented_runs": 1,
+      "mock_process_calls": 13,
+      "ordinary_runs": 12,
+      "ordinary_work_absent": 0,
+      "verdict": "refus : memcheck A : 0 {\"phase\": \"domain\", \"leaf_batch\": {\"fill_jobs\": 0, \"spare_record_chunks\": 1, \"spare_population_chunks\": 1, \"unresolved\": 0}}\n{\"phase\": \"exit\", \"status\": \"ok\"}\nERROR SUMMARY: 0 errors\n"
+    },
+    "instrumented_nonzero": {
+      "exit_code": 1,
+      "instrumented_pairs": [
+        [
+          "memcheck",
+          "A"
+        ]
+      ],
+      "instrumented_runs": 1,
+      "mock_process_calls": 13,
+      "ordinary_runs": 12,
+      "ordinary_work_absent": 0,
+      "verdict": "refus : memcheck A : 9 {\"phase\": \"domain\", \"leaf_batch\": {\"fill_jobs\": 0, \"spare_record_chunks\": 1, \"spare_population_chunks\": 1, \"unresolved\": 0}, \"catalogue_work\": {\"prefixes\": 17, \"emitted\": 3}}\n{\"phase\": \"exit\", \"status\": \"ok\"}\nERROR SUMMARY: 0 errors\n"
+    },
+    "missing_clean_marker": {
+      "exit_code": 1,
+      "instrumented_pairs": [
+        [
+          "memcheck",
+          "A"
+        ]
+      ],
+      "instrumented_runs": 1,
+      "mock_process_calls": 13,
+      "ordinary_runs": 12,
+      "ordinary_work_absent": 0,
+      "verdict": "refus : memcheck A : 0 {\"phase\": \"domain\", \"leaf_batch\": {\"fill_jobs\": 0, \"spare_record_chunks\": 1, \"spare_population_chunks\": 1, \"unresolved\": 0}, \"catalogue_work\": {\"prefixes\": 17, \"emitted\": 3}}\n{\"phase\": \"exit\", \"status\": \"ok\"}\n"
+    },
+    "missing_work": {
+      "exit_code": 1,
+      "instrumented_pairs": [],
+      "instrumented_runs": 0,
+      "mock_process_calls": 1,
+      "ordinary_runs": 1,
+      "ordinary_work_absent": 1,
+      "verdict": "refus : A K5 cpu : sortie 0 "
+    },
+    "process_nonzero": {
+      "exit_code": 1,
+      "instrumented_pairs": [],
+      "instrumented_runs": 0,
+      "mock_process_calls": 1,
+      "ordinary_runs": 1,
+      "ordinary_work_absent": 0,
+      "verdict": "refus : A K5 cpu : sortie 9 "
+    },
+    "valid": {
+      "exit_code": 0,
+      "instrumented_pairs": [
+        [
+          "memcheck",
+          "A"
+        ],
+        [
+          "memcheck",
+          "B"
+        ],
+        [
+          "racecheck",
+          "A"
+        ],
+        [
+          "racecheck",
+          "B"
+        ],
+        [
+          "synccheck",
+          "A"
+        ]
+      ],
+      "instrumented_runs": 5,
+      "mock_process_calls": 17,
+      "ordinary_runs": 12,
+      "ordinary_work_absent": 0,
+      "verdict": "conforme"
+    }
+  },
+  "proposal_sha256": "8d8792049f64d8843b4c507132d411810fa42d6a0b9a2cb50012c29c6d21f205",
+  "schema": "audit_gpu_sanitizer_missing_ledger_v1",
+  "scope": {
+    "instrumented_pairs": [
+      [
+        "memcheck",
+        "A"
+      ],
+      [
+        "memcheck",
+        "B"
+      ],
+      [
+        "racecheck",
+        "A"
+      ],
+      [
+        "racecheck",
+        "B"
+      ],
+      [
+        "synccheck",
+        "A"
+      ]
+    ],
+    "profiles": "The judge assumes an externally supplied CUDA/u21 bench; this mock qualifies no binary/tool/profile."
+  },
+  "source_path": "morsehgp3D_v11/bench/gpu_sanitizer.py",
+  "source_pin": "59509bbc816646f7bda0c77a3b948f57c79a8b9c",
+  "source_sha256": "2b234283e02e511cec595d9ad864a57e5ed9e1c9a61b7360fac820bff9d0d369"
+}

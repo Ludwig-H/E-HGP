@@ -1,0 +1,120 @@
+morsehgp3D_v11/bench/full_probe.cpp sha256=4c75d94841b2a29165083f385158ae0af9ca994ee5a09faeb65c7b0f5c911e29
+352: int main(int argc, char** argv) {
+353:   if (argc != 11 && argc != 12 && argc != 13) return 2;
+354:   std::array<u64, 7> options{};
+355:   for (int i = 0; i < 7; ++i) if (!parse(argv[i + 4], options[i])) return 2;
+356:   if (options[0] > 12 || options[1] > 1024 || options[2] > 1024 ||
+357:       options[6] < 1 || options[6] > sched::kMaxWorkers) return 2;
+358:   u64 optimizations = 0;
+359:   if (argc >= 12 && (!parse(argv[11], optimizations) || optimizations > 262143)) return 2;
+360:   u64 passes = 1;  // mode a chaud : passes FULL successives dans le meme processus
+361:   if (argc == 13 && (!parse(argv[12], passes) || passes < 1 || passes > 64)) return 2;
+362:   if ((optimizations & 8192) != 0 && (optimizations & 8) == 0) return 2;
+363:   if ((optimizations & 128) != 0 && (optimizations & 8) == 0) return 2;
+364:   // Voies de feuille : graphe de paires requis ; lot seulement en passe unique ; un seul executeur de lot.
+365:   if ((optimizations & 16384) != 0 && (optimizations & 2048) == 0) return 2;
+366:   if ((optimizations & (32768 | 65536)) != 0 && (optimizations & (64 | 2048)) != (64 | 2048)) return 2;
+367:   if ((optimizations & 32768) != 0 && (optimizations & 65536) != 0) return 2;
+368:   CatalogueParams params;
+369:   FullParams full_params{(optimizations & 4) != 0 ? u64{65536} : u64{0}};
+370:   if ((optimizations & 8) != 0) {
+371:     full_params.regular_batch_capacity = 4096;
+372:     full_params.descent_lanes = 48;
+373:     full_params.lane_memo_capacity = (optimizations & 4) != 0 ? u64{4096} : u64{0};
+374:   }
+375:   full_params.parallel_verticals = (optimizations & 128) != 0;
+376:   full_params.reuse_census_workspace = (optimizations & 256) != 0;
+377:   full_params.dense_birth_lookup = (optimizations & 512) != 0;
+378:   full_params.reuse_regular_verticals = (optimizations & 1024) != 0;
+379:   full_params.population_lookup = (optimizations & 4096) != 0;
+380:   full_params.concurrent_orders = (optimizations & 8192) != 0;
+381:   params.cache_center_lines = (optimizations & 1) != 0;
+382:   params.indirect_sort = (optimizations & 2) != 0;
+383:   params.adaptive_frontier = (optimizations & 16) != 0;
+384:   params.parallel_assembly = (optimizations & 32) != 0;
+385:   params.single_pass = (optimizations & 64) != 0;
+386:   params.pair_graph = (optimizations & 2048) != 0;
+387:   params.device_leaf = (optimizations & 16384) != 0;  // feuille source unique (voie GPU) jouee sur l'hote
+388:   params.batch_leaves = (optimizations & 32768) != 0;  // feuilles en lot, executeur hote (Pool)
+389:   params.cuda_leaves = (optimizations & 65536) != 0;   // feuilles en lot sur le GPU (construction CUDA)
+390:   params.replay_overflow = (optimizations & 131072) != 0;  // lots sans reservoir chaine : debordements rejoues
+391:   params.kmax = static_cast<int>(options[0]); params.leaf_size = static_cast<u32>(options[1]);
+392:   params.max_leaf = static_cast<u32>(options[2]); params.max_nodes = options[3]; params.ball_limit = options[4];
+393:   const auto result = guarded([&]() {
+394:     return run(argv, params, full_params, options[5], static_cast<u32>(options[6]), static_cast<u32>(passes));
+395:   });
+396:   std::cout << "{\"phase\":\"exit\","; status(result); std::cout << "}\n";
+397:   return exit_code(result);
+
+morsehgp3D_v11/bench/full_campaign.py sha256=60b177d0109fdd7f3e4057ccb8cd47bd79071b422967429ed21aabd0f789bf6c
+20: base, need = profiles.base, semantic.need
+21: SCHEMA = 'ehgp.v11.full_campaign.v12'
+22: WORK_SCHEMA = 'ehgp.v11.full_work.v7'
+23: TIMEOUT = 60
+45: def optimization(value):
+46:     need(type(value) is int and 0 <= value <= 131071, 'optimization mode outside 0..131071')
+47:     need(not value & 128 or value & 8, 'parallel verticals require regular lanes')
+48:     need(not value & 8192 or value & 8, 'concurrent orders require regular lanes')
+49:     # 16384 : feuille source unique jouee sur l'hote ; 32768 / 65536 : feuilles en lot (Pool / GPU). Ces voies
+50:     # n'existent que sur le graphe de paires, et le lot que dans la passe unique ; un seul executeur de lot.
+51:     need(not value & 16384 or value & 2048, 'device leaf requires the pair graph')
+52:     need(not value & (32768 | 65536) or (value & 64 and value & 2048), 'leaf batches require single pass and pair graph')
+53:     need(not (value & 32768 and value & 65536), 'one leaf batch executor')
+54:     return value
+
+morsehgp3D_v11/bench/catalogue_semantic.py sha256=f09d2dff28098ff9c5288a69058b776350a6339034d17397491c073257196f2c
+20: def need(value, message):
+21:     if not value:
+22:         raise ValueError(message)
+
+morsehgp3D_v11/tests/tower/full_bench_io.py sha256=2a9063f281c1dcea73092ca79f8e69cdd36281236a9b114c77c23ecaa4bf9894
+25:     points = [(0,0,0),(2,0,0),(4,0,0)]
+26:     names = [2**32-1,7,99]
+35:         def child(kmax=3, budget=1 << 28, workers=1, destination=None, optimizations=None):
+36:             nonlocal attempts
+37:             attempts += 1
+38:             output.unlink(missing_ok=True)
+39:             argv = [str(executable),str(xyz),str(ids),str(destination or output),str(kmax),
+40:                     '16','256','0',str(2**32-1),str(budget),str(workers)]
+41:             if optimizations is not None: argv.append(str(optimizations))
+42:             result = subprocess.run(argv, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+43:                                     stderr=subprocess.PIPE, timeout=30, check=False)
+44:             semantic.need(not result.stderr, 'stderr natif : '+result.stderr.decode('utf-8','backslashreplace'))
+45:             rows = [events.event_json(line) for line in result.stdout.decode().splitlines() if line.strip()]
+46:             return result, rows
+94:         cases = [('truncated_xyz','input_unreadable'),('truncated_ids','input_unreadable'),
+95:                  ('duplicate_id','duplicate_point_id'),('out_of_domain','coordinate_out_of_domain'),
+96:                  ('budget','memory_budget'),('kmax_above_n','parameter_out_of_range'),
+97:                  ('weight','multiplicity_unsupported'),('output','output_unwritable'),('workers',None),
+98:                  ('opt_negative',None),('opt_large',None),('opt_text',None),('opt_requires_lanes',None),
+99:                  ('opt_concurrent_requires_lanes',None)]
+100:         for mode, reason in cases:
+101:             write(range(3))
+102:             if mode == 'truncated_xyz': xyz.write_bytes(xyz.read_bytes()[:-1])
+103:             elif mode == 'truncated_ids': ids.write_bytes(ids.read_bytes()[:-1])
+104:             elif mode == 'duplicate_id': ids.write_bytes(struct.pack('<III',7,7,99))
+105:             elif mode == 'out_of_domain': xyz.write_bytes(struct.pack('<I',2**bits)+xyz.read_bytes()[4:])
+106:             elif mode == 'weight': xyz.write_bytes(xyz.read_bytes()[:12]+xyz.read_bytes()[:12]+xyz.read_bytes()[24:])
+107:             result, rows = child(kmax=4 if mode == 'kmax_above_n' else 3,
+108:                                  budget=0 if mode == 'budget' else 1 << 28,
+109:                                  workers=0 if mode == 'workers' else 1, destination=root if mode == 'output' else None,
+110:                                  optimizations={'opt_negative':'-1','opt_large':'131072','opt_text':'x','opt_requires_lanes':'128',
+111:                                                 'opt_concurrent_requires_lanes':'8192'}.get(mode))
+112:             semantic.need(result.returncode == 2 and not output.exists(), 'refus publie un payload : '+mode)
+113:             if reason is None:
+114:                 semantic.need(not rows, 'usage refuse avant execution')
+115:             else:
+116:                 semantic.need(rows and rows[-1]['phase'] == 'exit' and rows[-1]['reason'] == reason and
+117:                               rows[-1]['status'] != 'ok', 'raison de refus : '+mode)
+
+morsehgp3D_v11/tests/tower/tests.cmake sha256=29f9668639c1f8fb0361d08e2517c9ca0157ffeaf797840ac0c772a805c64814
+77: mhgp11_python_gate(mhgp11_tower_full_bench_io 0 full_bench_io.py $<TARGET_FILE:mhgp11_full_bench> ${MHGP11_COORD_BITS}
+78:                     LINE "full_io_verdict conforme attempts427 successes413 refusals14" LABELS fast TIMEOUT 120)
+
+morsehgp3D_v11/src/catalogue/catalogue.hpp sha256=f920afde1e40be0dc95f8d38b16fa66dfe673cd17d267c03ba7eb22ad5025051
+40:   // Passe unique seulement : feuilles admissibles mises en file puis traitees en lot par leaf_device.hpp, sur le
+41:   // Pool (batch_leaves) ou sur le GPU (cuda_leaves, implique batch_leaves) ; non resolues refaites par leaf.cpp.
+42:   bool batch_leaves = false, cuda_leaves = false;
+43:   // Lots de feuilles sans reservoir chaine : toute feuille qui deborde de sa case est rejouee (voie du 5 octobre,
+44:   // gardee pour les portes qui exercent la seconde passe). Sans effet hors des lots.
+45:   bool replay_overflow = false;

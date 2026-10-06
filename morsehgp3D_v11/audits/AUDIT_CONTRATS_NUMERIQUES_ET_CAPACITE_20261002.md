@@ -81,6 +81,36 @@ risque de rejeu incohérent des masses. Aucun arbre fautif produit par la
 factory native n'est démontré. Qualification native G4 distincte des
 reproductions Python bornées ; [rejeu intégré](../receipts/audit_integration_20261006/README.md).
 
+## Réservoir de feuilles : raccord des portes à corriger
+
+**Source 59509bbc8 : lecture favorable du réservoir, deux raccords de
+qualification ouverts.** Les chaînes des enregistrements et de la
+population sont distinctes ; chaque feuille garde son ordre d'émission
+et ses emplacements finaux fixés par les préfixes. Dès l'épuisement,
+`fits` reste faux : les compteurs continuent, les fragments ne sont pas
+copiés et la feuille est rejouée entièrement. Les curseurs sont remis à
+zéro. Par genre, au plus `spare` prises réussissent et chaque feuille ne
+peut ajouter qu'un échec ; la garde `count + spare < kNoChunk` exclut donc
+le débordement du curseur u32. Aucun défaut moteur établi par cette lecture,
+aucune exécution native ou CUDA de l'auditeur.
+
+**Porte IO et lecteur de campagne désynchronisés.** La sonde accepte
+maintenant les masques jusqu'à `262143`, mais `full_bench_io.py` exige
+encore que `131072` échoue avant calcul. Ce bit valide seul suit la voie CPU.
+Le témoin hors domaine doit être `262144`. En parallèle,
+`full_campaign.optimization` refuse encore les modes valides `180219`
+et `212987` à cause de sa borne `131071`.
+[Correction des deux bornes](../receipts/audit_reservoir_followup_20261006/gates/README.md).
+Le refus Python est reproduit ; l'échec du CTest natif n'a pas été exécuté.
+
+**Juge GPU : ne pas accepter l'absence de registre.** Dans
+`gpu_sanitizer.py`, deux `catalogue_work` absents deviennent `None` et
+leur égalité suffit. Les passes instrumentées ne comparent pas non plus
+leur registre à la référence CPU. Le [rejeu simulé et correctif ciblé](../receipts/audit_reservoir_followup_20261006/judge/README.md)
+portent sur cette fausse conformité du juge, pas sur un résultat natif
+fautif démontré. Aucune nouvelle qualification G4 du réservoir n'est
+attribuée ici.
+
 ## J2 mémorisé : source relue et mesure G4 ciblée
 
 **Avis source favorable sur 34a8a561d**, identique sur les fichiers

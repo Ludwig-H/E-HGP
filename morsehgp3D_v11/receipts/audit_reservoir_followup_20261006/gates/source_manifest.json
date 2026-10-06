@@ -1,0 +1,29 @@
+{
+  "pin": "59509bbc816646f7bda0c77a3b948f57c79a8b9c",
+  "sources": {
+    "morsehgp3D_v11/bench/catalogue_semantic.py": {
+      "git_blob": "5a22e4af500f75eb43009fa2ecb37eb4ee211741",
+      "sha256": "f09d2dff28098ff9c5288a69058b776350a6339034d17397491c073257196f2c"
+    },
+    "morsehgp3D_v11/bench/full_campaign.py": {
+      "git_blob": "6e2d086d36efb98aa6aa1cb4781222704a411b5f",
+      "sha256": "60b177d0109fdd7f3e4057ccb8cd47bd79071b422967429ed21aabd0f789bf6c"
+    },
+    "morsehgp3D_v11/bench/full_probe.cpp": {
+      "git_blob": "0997bcf653cb95f8ed7c9bb701a2225517209d93",
+      "sha256": "4c75d94841b2a29165083f385158ae0af9ca994ee5a09faeb65c7b0f5c911e29"
+    },
+    "morsehgp3D_v11/src/catalogue/catalogue.hpp": {
+      "git_blob": "ee0dde94fd15794651e04f45cf1490a886658afd",
+      "sha256": "f920afde1e40be0dc95f8d38b16fa66dfe673cd17d267c03ba7eb22ad5025051"
+    },
+    "morsehgp3D_v11/tests/tower/full_bench_io.py": {
+      "git_blob": "f75ce1b4d8de2fd9fc45f37cd86530251f03f1fa",
+      "sha256": "2a9063f281c1dcea73092ca79f8e69cdd36281236a9b114c77c23ecaa4bf9894"
+    },
+    "morsehgp3D_v11/tests/tower/tests.cmake": {
+      "git_blob": "74eff937093ebe09252b361dd0c7d5bc30f6cd1c",
+      "sha256": "29f9668639c1f8fb0361d08e2517c9ca0157ffeaf797840ac0c772a805c64814"
+    }
+  }
+}

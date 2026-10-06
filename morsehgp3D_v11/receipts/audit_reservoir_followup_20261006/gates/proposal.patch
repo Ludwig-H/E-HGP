@@ -1,0 +1,22 @@
+--- a/morsehgp3D_v11/bench/full_campaign.py
++++ b/morsehgp3D_v11/bench/full_campaign.py
+@@ -43,7 +43,7 @@
+ 
+ 
+ def optimization(value):
+-    need(type(value) is int and 0 <= value <= 131071, 'optimization mode outside 0..131071')
++    need(type(value) is int and 0 <= value <= 262143, 'optimization mode outside 0..262143')
+     need(not value & 128 or value & 8, 'parallel verticals require regular lanes')
+     need(not value & 8192 or value & 8, 'concurrent orders require regular lanes')
+     # 16384 : feuille source unique jouee sur l'hote ; 32768 / 65536 : feuilles en lot (Pool / GPU). Ces voies
+--- a/morsehgp3D_v11/tests/tower/full_bench_io.py
++++ b/morsehgp3D_v11/tests/tower/full_bench_io.py
+@@ -107,7 +107,7 @@
+             result, rows = child(kmax=4 if mode == 'kmax_above_n' else 3,
+                                  budget=0 if mode == 'budget' else 1 << 28,
+                                  workers=0 if mode == 'workers' else 1, destination=root if mode == 'output' else None,
+-                                 optimizations={'opt_negative':'-1','opt_large':'131072','opt_text':'x','opt_requires_lanes':'128',
++                                 optimizations={'opt_negative':'-1','opt_large':'262144','opt_text':'x','opt_requires_lanes':'128',
+                                                 'opt_concurrent_requires_lanes':'8192'}.get(mode))
+             semantic.need(result.returncode == 2 and not output.exists(), 'refus publie un payload : '+mode)
+             if reason is None:

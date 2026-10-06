@@ -1,0 +1,55 @@
+{
+  "argument_checks": {
+    "131072": {
+      "cpp_argument_model_accepts": true,
+      "python_exact_after_proposal": {
+        "accepted": true
+      },
+      "python_exact_before": {
+        "accepted": false,
+        "error": "optimization mode outside 0..131071"
+      }
+    },
+    "180219": {
+      "cpp_argument_model_accepts": true,
+      "python_exact_after_proposal": {
+        "accepted": true
+      },
+      "python_exact_before": {
+        "accepted": false,
+        "error": "optimization mode outside 0..131071"
+      }
+    },
+    "212987": {
+      "cpp_argument_model_accepts": true,
+      "python_exact_after_proposal": {
+        "accepted": true
+      },
+      "python_exact_before": {
+        "accepted": false,
+        "error": "optimization mode outside 0..131071"
+      }
+    },
+    "262144": {
+      "cpp_argument_model_accepts": false,
+      "python_exact_after_proposal": {
+        "accepted": false,
+        "error": "optimization mode outside 0..262143"
+      },
+      "python_exact_before": {
+        "accepted": false,
+        "error": "optimization mode outside 0..131071"
+      }
+    }
+  },
+  "cloud_actions": 0,
+  "gate_requires_usage_refusal_without_events": true,
+  "kind": "source contradiction and exact Python function replay, not CTest execution",
+  "maximum": 262143,
+  "native_runs": 0,
+  "old_refusal_sentinel": 131072,
+  "old_sentinel_reaches_run_and_exit_event": true,
+  "pin": "59509bbc816646f7bda0c77a3b948f57c79a8b9c",
+  "proposal_changed_lines": 2,
+  "proposed_refusal_sentinel": 262144
+}

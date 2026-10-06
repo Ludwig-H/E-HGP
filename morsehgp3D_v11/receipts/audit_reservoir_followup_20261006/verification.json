@@ -1,0 +1,29 @@
+{
+  "cloud_actions": 0,
+  "native_runs": 0,
+  "proposal_application": {
+    "files": {
+      "morsehgp3D_v11/bench/full_campaign.py": "a7d1709a5556bfd6387b368313b00e67354f1700c6845d43eda97a06741ae703",
+      "morsehgp3D_v11/bench/gpu_sanitizer.py": "8d8792049f64d8843b4c507132d411810fa42d6a0b9a2cb50012c29c6d21f205",
+      "morsehgp3D_v11/tests/tower/full_bench_io.py": "c2c1601f4685fff196095e13018118fd0afc60c5bef09f40b40074580b148a22"
+    },
+    "pin": "59509bbc816646f7bda0c77a3b948f57c79a8b9c"
+  },
+  "source_pin": "59509bbc816646f7bda0c77a3b948f57c79a8b9c",
+  "subcapsules": {
+    "gates": {
+      "normal_exit": 0,
+      "optimized_exit": 0,
+      "stderr_empty": true,
+      "stdout_equal": true,
+      "stdout_sha256": "b5e530b99750ee7bc0769596646be23c0f57dc8b0a0d9065802501481de89857"
+    },
+    "judge": {
+      "normal_exit": 0,
+      "optimized_exit": 0,
+      "stderr_empty": true,
+      "stdout_equal": true,
+      "stdout_sha256": "b825e6909b3ef512baf8d58aa872c24df68904ea5c646fc01c7b9cdf6a26c4d3"
+    }
+  }
+}

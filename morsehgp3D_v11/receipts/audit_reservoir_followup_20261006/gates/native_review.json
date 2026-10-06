@@ -1,0 +1,32 @@
+{
+  "cloud_actions": 0,
+  "conclusion": "favorable source review within changed reservoir paths; no native/GPU qualification",
+  "invariants": [
+    "Each accepted atomic claim identifies a unique chunk of its kind.",
+    "At most spare successful claims and one failed claim per leaf: each u32 cursor is at most spare+count < kNoChunk.",
+    "An exhausted sink stops writing but continues counting; only fully stored resolved leaves are copied.",
+    "Copy follows a next link only before an actual element beyond a chunk boundary; each such link was written.",
+    "The host count phase joins and the CUDA count phase synchronizes before copy and cursor reads.",
+    "Only resolved count-pass predicates enter the ledger; replay counters are discarded as before."
+  ],
+  "native_runs": 0,
+  "pin": "59509bbc816646f7bda0c77a3b948f57c79a8b9c",
+  "sources": {
+    "morsehgp3D_v11/src/catalogue/leaf_batch.cpp": {
+      "coverage": "full source read, no native execution",
+      "sha256": "9961e34fa809235b3e4b76eb09098c4a4eeccba47aad05ef2341652020498f12"
+    },
+    "morsehgp3D_v11/src/catalogue/leaf_batch.hpp": {
+      "coverage": "full source read, no native execution",
+      "sha256": "5b2b077f7c608a18881ee951cc8987680de2934160b1d668c2ff5f17f16c5645"
+    },
+    "morsehgp3D_v11/src/catalogue/leaf_batch_cuda.cu": {
+      "coverage": "full source read, no native execution",
+      "sha256": "f23655d3eb8d8f6aaf45572a3a16bb1fe8347a925dfd4c8fccbf7e3fb8701b97"
+    },
+    "morsehgp3D_v11/src/catalogue/single_pass_batch.cpp": {
+      "coverage": "full source read, no native execution",
+      "sha256": "a06483c5e8b53853a88ce9f14cf8f066f653a13dd1156c3d318db02688b49f42"
+    }
+  }
+}
