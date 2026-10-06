@@ -6,10 +6,12 @@ place ; preuves détaillées dans les reçus immuables.
 
 **Reprise ciblée terminée : Release, mutants et ASan conformes.**
 
-**Synthèse du développeur df904711a à rectifier sur deux portées :**
+**Synthèse du développeur df904711a à rectifier sur trois portées :**
 L reste 35/41, dont 28 portes fonctionnelles et sept campagnes mutants
 PASS ; les six campagnes u21 sans résultat ne sont pas rejouées en u21
 par R3. R3 est une base u18 avec options locales u21/u24/poison.
+Les données couvrent trois trames LiDAR, pas six : XYZ et IDs sont
+deux fichiers par trame.
 La note moteur donne les formulations exactes ; aucun nouveau calcul requis.
 
 - **API multiprofil :** références fichier/manifeste par profil,

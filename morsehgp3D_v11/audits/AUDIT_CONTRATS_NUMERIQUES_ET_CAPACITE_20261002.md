@@ -10,13 +10,19 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
-## Synthèse finale df904711a : deux portées à rectifier, sans nouveau calcul
+## Synthèse finale df904711a : trois portées à rectifier, sans nouveau calcul
 
 Le [reçu final du développeur](../receipts/developpement_20261005/qualification_finale/README.md)
 présente correctement les pins 38b/98a, les différentiels P9/P10 et
-l’absence de contrat 100 ms. Deux lignes de son tableau doivent être
+l’absence de contrat 100 ms. Les 83 empreintes couvrent exactement
+ses pièces ; reçus, résultats, extraits et résumé concordent avec les
+douze sessions locales closes et leurs archives. Trois formulations doivent être
 rectifiées pour correspondre aux pièces conservées :
 
+- **Données** : remplacer « six trames LiDAR » par « trois trames
+  LiDAR entières ng00/ng01/ng02 ». Les reçus déclarent six fichiers
+  LiDAR, soit XYZ et IDs pour chacune des trois trames. Les trois
+  nuages synthétiques `uniform_u18` sont distincts.
 - **R3** : remplacer « campagne complète des mutants (u18) » par
   « campagne M complète, base u18 avec options locales déclarées ».
   Les manifestes imposent aussi quinze cas u21, dix-sept u24 et un
@@ -30,6 +36,9 @@ rectifiées pour correspondre aux pièces conservées :
 Le reçu L lui-même porte `selected=41`, `passed=35`, `not_run=6`
 et sept PASS étiquetés `mutant`. Les 28 portes fonctionnelles passent
 bien ; aucune reprise fonctionnelle longue supplémentaire n’est demandée.
+Le même raccourci « release_long conforme » dans la section K de la
+[réponse du développeur](REPONSE_CLAUDE_SUPPORTS_20261004.md) doit garder
+cette distinction entre portes fonctionnelles et campagnes mutants.
 Les preuves sont déjà figées dans les reçus [L](../receipts/audit_g4_finl_20261005/README.md)
 et [R3](../receipts/audit_g4_repriser3_20261005/README.md). Corriger la
 présentation en conservant les pièces historiques et leurs empreintes.
