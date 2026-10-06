@@ -35,6 +35,7 @@ struct Assembly {
   sched::Pool* pool;
   Selection selection;
   SupportHierarchy out;
+  Buffer<u8> selected;            // choix Kruskal en positions originales ; vide pour all
   Buffer<u32> origin;              // position -> indice dans le rattachement (temporaire)
   Buffer<SupportLedger> ledgers;   // un par fil
   Buffer<u64> scratch;             // brouillons de fermeture, words par fil
@@ -44,8 +45,9 @@ struct Assembly {
 
   // Boule i du rattachement gardee : toutes (all), ou seulement les aretes de l'arbre couvrant (spanning).
   bool kept(u64 i) const noexcept {
-    return selection == Selection::all || tree.attachment().role()[i] != BallRole::internal;
+    return selection == Selection::all || selected[i] != 0;
   }
+  Outcome select(u64 balls, u64 nodes) noexcept;
   Outcome prepass() noexcept;
   Outcome allocate_first() noexcept;
   Outcome postorder() noexcept;
@@ -66,8 +68,91 @@ struct Assembly {
   }
 };
 
+// Racines privees, unions par taille ; les NodeIdx des sorties ne sont jamais modifies.
+static u32 root(std::span<u32> parent, u32 v) noexcept {
+  while (parent[v] != v) {
+    parent[v] = parent[parent[v]];
+    v = parent[v];
+  }
+  return v;
+}
+
+static bool unite(std::span<u32> parent, std::span<u32> size, u32 a, u32 b) noexcept {
+  a = root(parent, a); b = root(parent, b);
+  if (a == b) return false;
+  if (size[a] < size[b] || (size[a] == size[b] && b < a)) std::swap(a, b);
+  parent[b] = a;
+  size[a] += size[b];  // somme au plus N < kNone
+  return true;
+}
+
+// Un DSU par ensemble d'enfants d'une multifusion, dans deux tableaux globaux : chaque noeud n'a qu'un parent,
+// donc les ensembles d'enfants de deux multifusions (y compris de rangs differents) sont disjoints. Une naissance
+// est gardee ; une cellule est gardee si elle realise au moins une union. Le masque suit l'ordre BallIdx stable.
+// Admission avant toute allocation ; parent/size rendus au retour, masque jusqu'au tri. Aucun effet sur FULL.
+Outcome Assembly::select(u64 b, u64 n) noexcept {
+  if (selection == Selection::all) return {};
+  if (selection != Selection::spanning) return fail(Reason::parameter_out_of_range);
+  MHGP11_TRY(budget.admit(b * sizeof(u8) + 2 * n * sizeof(u32)));  // b,n < kNone, somme sure en u64
+  MHGP11_TRY(selected.allocate(b, budget));
+  Buffer<u32> parent, size;
+  MHGP11_TRY(parent.allocate(n, budget));
+  MHGP11_TRY(size.allocate(n, budget));
+  for (u32 v = 0; v < n; ++v) { parent[v] = v; size[v] = 1; }
+  std::fill(selected.begin(), selected.end(), u8{0});
+  const auto& a = tree.attachment();
+  const auto data = tree.domain().catalogue().balls_data();
+  const auto nodes = tree.forest().nodes();
+  u32 last_rank = 0;
+  for (u64 i = 0; i < b; ++i) {
+    const u32 key = idx(a.balls()[i]), att = idx(a.node()[i]);
+    const u64 begin = a.prior_offsets()[i], end = a.prior_offsets()[i + 1];
+    if (key >= data.size() || att >= n || begin > end || end > a.prior().size() ||
+        (i > 0 && (idx(a.balls()[i - 1]) >= key || idx(data[key].rank) < last_rank)))
+      return fail(Reason::supports_invariant);
+    last_rank = idx(data[key].rank);
+    if (a.role()[i] == BallRole::birth) {
+      if (begin != end || a.components()[i] != 0) return fail(Reason::supports_invariant);
+      selected[i] = 1;
+      continue;
+    }
+    if (a.role()[i] == BallRole::internal) continue;
+    if (a.role()[i] != BallRole::merge || nodes[att].rank != data[key].rank ||
+        end - begin != a.components()[i] || begin == end)
+      return fail(Reason::supports_invariant);
+    bool changed = false;
+    u32 first = kNone;
+    for (u64 j = begin; j < end; ++j) {
+      const u32 child = idx(a.prior()[j]);
+      if (child >= n || nodes[child].parent != a.node()[i] || idx(nodes[child].rank) >= last_rank ||
+          (j > begin && idx(a.prior()[j - 1]) >= child)) return fail(Reason::supports_invariant);
+      if (first == kNone) first = child;
+      else changed = unite(parent.span(), size.span(), first, child) || changed;
+    }
+    selected[i] = changed ? 1 : 0;
+  }
+  // Chaque multifusion doit rester connectee par les seules cellules retenues ; jamais unionner son propre ID.
+  const auto edges = tree.forest().edges();
+  for (u32 v = 0; v < n; ++v) {
+    if (nodes[v].birth_key != kNone) continue;
+    const u64 begin = nodes[v].child_begin, count = nodes[v].child_count;
+    if (count < 2 || begin > edges.size() || count > edges.size() - begin)
+      return fail(Reason::supports_invariant);
+    u32 representative = kNone;
+    for (u64 j = 0; j < count; ++j) {
+      const u32 child = idx(edges[begin + j]);
+      if (child >= n || nodes[child].parent != NodeIdx{v} || nodes[child].rank >= nodes[v].rank ||
+          (j > 0 && idx(edges[begin + j - 1]) >= child)) return fail(Reason::supports_invariant);
+      const u32 r = root(parent.span(), child);
+      if (j == 0) representative = r;
+      else if (r != representative) return fail(Reason::supports_invariant);
+    }
+  }
+  return {};
+}
+
 // Rattachement coherent (tailles, BallIdx strictement croissants, noeuds de l'arbre, branches) et forme de chaque
-// boule ; plafond de toutes les coquilles etendues. Aucune allocation.
+// boule ; plafond des coquilles choisies. En spanning, select admet et alloue son masque/DSU apres les tailles.
 Outcome Assembly::prepass() noexcept {
   const WindowAttachment& a = tree.attachment();
   const Catalogue& cat = tree.domain().catalogue();
@@ -75,6 +160,7 @@ Outcome Assembly::prepass() noexcept {
   if (a.node().size() != b || a.role().size() != b || a.strict_traces().size() != b || a.components().size() != b ||
       a.prior_offsets().size() != b + 1 || a.prior_offsets()[b] != a.prior().size() || n == 0 || n >= kNone)
     return fail(Reason::supports_invariant);
+  MHGP11_TRY(select(b, n));
   u64 widest = 0, chosen = 0, prior = 0;
   for (u64 i = 0; i < b; ++i) {
     const u32 key = idx(a.balls()[i]);
@@ -183,6 +269,7 @@ Outcome Assembly::sort_balls() noexcept {
     prior[slot + 1] = prior[slot] + (a.prior_offsets()[at + 1] - a.prior_offsets()[at]);
   }
   if (prior[b] != sizes.prior) return fail(Reason::supports_invariant);
+  selected.reset();  // origin suffit desormais ; rendu avant count/fill
   return {};
 }
 

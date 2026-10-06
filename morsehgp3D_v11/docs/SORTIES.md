@@ -292,7 +292,11 @@ exige le sha256 brut du dump de `mhgp11_full_bench` sur les mêmes entrées.
 
 **Décision de l'utilisateur du 6 octobre 2026.** Il ne faut surtout pas représenter tous les supports du niveau K, mais
 seulement ceux de l'arbre couvrant minimal d'ordre K. Choix retenu : les arêtes de Kruskal, avec S\* seul.
-- Seules les boules qui changent l'arbre d'ordre K sont publiées : **naissances et fusions**.
+- Seules les boules qui changent l'arbre d'ordre K sont publiées. Toutes les **naissances** sont gardées. Pour les
+  boules de rôle **fusion** d'un nœud, Kruskal tranche : parcourues dans l'ordre des `BallIdx` (rang, puis $S^*$),
+  chacune unit ses branches $\mathrm{ant}(b)$ dans un DSU des enfants du nœud. Elle est gardée si elle réalise au
+  moins une union. Les enfants doivent finir reliés, sinon `supports_invariant`. Une fusion qui n'unit rien fermerait un
+  cycle au même plateau (témoin : trois sites équidistants à $K=1$, deux supports et non trois ; audit `be8085ec1`).
 - Une liaison interne relie des K-parties déjà dans un même nœud ; elle fermerait un cycle, et elle est retirée.
 - Chaque boule publiée porte **un seul support**, $S^*$, d'arité $q_{\min}$, lu dans le catalogue.
 - $\mathcal{Q}_b$ n'est plus énuméré. Il n'y a donc plus de plafond de coquille à 24 sites, plus de brouillon de
@@ -304,7 +308,9 @@ seulement ceux de l'arbre couvrant minimal d'ordre K. Choix retenu : les arêtes
 
 **Version 2 : différences avec la version 1.**
 - En-tête : `version` = 2, et `S` = `B`.
-- `BALLS` : plus de colonne `support_count` ; `role` vaut 0 (naissance) ou 1 (fusion).
+- `BALLS` : plus de colonne `support_count` ; `role` vaut 0 (naissance) ou 1 (fusion). Le lecteur vérifie la
+  structure couvrante : chaque fusion publiée réussit au moins une union sur les enfants de son nœud, et ceux-ci finissent
+  reliés. Il exige aussi la même version dans le manifeste et dans le fichier.
 - `SUPPORTS` : `arity u8[B]` ($q_{\min}$), puis `sites`, soit $S^*$ de chaque boule dans l'ordre des boules.
 - Manifeste : fichier en `version` 2. Le bloc `counts` vaut `sites`, `nodes`, `births`, `merges`, `balls`, `roles`
   (`birth`, `merge`), `supports`, `arities`, `extended_shells` et `prior`. Les agrégats de $\mathcal{Q}_b$ et des

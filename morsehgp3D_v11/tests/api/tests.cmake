@@ -45,15 +45,15 @@ add_executable(mhgp11_api_supports_route_probe ${CMAKE_CURRENT_LIST_DIR}/support
 target_link_libraries(mhgp11_api_supports_route_probe PRIVATE mhgp11)
 # Nuages et ordres de l'oracle borne S1 (ceux de mhgp11_supports_hierarchy_fraction), W1 dans l'ordre de l'oracle et
 # W3 dans l'ordre inverse ; memes octets entre les W. Couverture gravee par profil (u18 : les deux cercles n = 1023
-# exclus, 6 ordres, 20 boules publiees, 14 cellules et 36 graines de moins qu'en u21 et u24). 22 s en local (Release u21).
+# exclus, 6 ordres, 19 boules publiees, 14 cellules et 36 graines de moins qu'en u21 et u24). 22 s en local (Release u21).
 if(MHGP11_COORD_BITS EQUAL 18)
-  set(mhgp11_supports_route_line "supports_route_couverture bits=18 nuages=209 exclus=2 ordres=957 boules=12489 noeuds=12552 supports=12489 etendues=1610 multiples=0 cellules=8605 graines=26471 ordres_6plus=7 fils=1,3")
-  set(mhgp11_supports_route_floors --min-clouds=209 --min-orders=957 --min-balls=12489 --min-cells=8605
-      --min-extended=1610 --min-multiple=0 --min-high=7)
+  set(mhgp11_supports_route_line "supports_route_couverture bits=18 nuages=209 exclus=2 ordres=957 boules=11898 noeuds=12552 supports=11898 etendues=1336 multiples=0 cellules=8605 graines=26471 ordres_6plus=7 fils=1,3")
+  set(mhgp11_supports_route_floors --min-clouds=209 --min-orders=957 --min-balls=11898 --min-cells=8605
+      --min-extended=1336 --min-multiple=0 --min-high=7)
 else()
-  set(mhgp11_supports_route_line "supports_route_couverture bits=${MHGP11_COORD_BITS} nuages=211 exclus=0 ordres=963 boules=12509 noeuds=12576 supports=12509 etendues=1613 multiples=0 cellules=8619 graines=26507 ordres_6plus=7 fils=1,3")
-  set(mhgp11_supports_route_floors --min-clouds=211 --min-orders=963 --min-balls=12509 --min-cells=8619
-      --min-extended=1613 --min-multiple=0 --min-high=7)
+  set(mhgp11_supports_route_line "supports_route_couverture bits=${MHGP11_COORD_BITS} nuages=211 exclus=0 ordres=963 boules=11917 noeuds=12576 supports=11917 etendues=1339 multiples=0 cellules=8619 graines=26507 ordres_6plus=7 fils=1,3")
+  set(mhgp11_supports_route_floors --min-clouds=211 --min-orders=963 --min-balls=11917 --min-cells=8619
+      --min-extended=1339 --min-multiple=0 --min-high=7)
 endif()
 mhgp11_python_gate(mhgp11_api_supports_route_oracle 0 supports_route_oracle.py
                    $<TARGET_FILE:mhgp11_api_supports_route_probe> --bits=${MHGP11_COORD_BITS}
@@ -66,51 +66,51 @@ mhgp11_python_gate(mhgp11_api_supports_route_oracle 0 supports_route_oracle.py
 # Empreintes de MHGP11SP et de son manifeste par profil : ils portent coord_bits (qualification G4 du 5 octobre 2026,
 # audits a40e9cc6d et 8682f4082) ; comptes et registres du journal sont communs aux trois profils.
 if(MHGP11_COORD_BITS EQUAL 18)
-  set(mhgp11_route_scale8000_file 09a1101bc512394e)
-  set(mhgp11_route_scale8000_manifest e10e6c8d117429e3)
-  set(mhgp11_route_scale16000_file 62e74f1f5df26634)
-  set(mhgp11_route_scale16000_manifest dc3a1b98925c658a)
-  set(mhgp11_route_scale32000_file a91f226656b6cbd3)
-  set(mhgp11_route_scale32000_manifest 3e29e3f5d1403abd)
-  set(mhgp11_route_ng00_file 51b941795a2361c7)
-  set(mhgp11_route_ng00_manifest bc8d49e588415eed)
-  set(mhgp11_route_ng01_file b8449cfbc212f782)
-  set(mhgp11_route_ng01_manifest f6b275a818df1d39)
-  set(mhgp11_route_ng02_file a4642008f9145a97)
-  set(mhgp11_route_ng02_manifest 247ffdc9a96d2891)
+  set(mhgp11_route_scale8000_file 07c0568b144b275b)
+  set(mhgp11_route_scale8000_manifest 3a78e021d630b1e6)
+  set(mhgp11_route_scale16000_file 55e40ba88d9a77b3)
+  set(mhgp11_route_scale16000_manifest 5dbefcf354307401)
+  set(mhgp11_route_scale32000_file dfb71794f37cd458)
+  set(mhgp11_route_scale32000_manifest b96f933eb1f81e7f)
+  set(mhgp11_route_ng00_file 896f1f6525a1eb93)
+  set(mhgp11_route_ng00_manifest 04d492bcef0feff3)
+  set(mhgp11_route_ng01_file 38d871338e96d5d0)
+  set(mhgp11_route_ng01_manifest 3efef42a08403f82)
+  set(mhgp11_route_ng02_file 1f4d757a5583a3a8)
+  set(mhgp11_route_ng02_manifest 60db021494aecaa5)
 elseif(MHGP11_COORD_BITS EQUAL 21)
   set(mhgp11_route_scale8000_file 042faefbdb28cdde)
   set(mhgp11_route_scale8000_manifest 893caa565df996ca)
   set(mhgp11_route_scale16000_file c14680fc7204a04b)
   set(mhgp11_route_scale16000_manifest cbc698ae8ac232f9)
-  set(mhgp11_route_scale32000_file 2b8486fb37005a7a)
-  set(mhgp11_route_scale32000_manifest 7fa9ea6a785d263b)
-  set(mhgp11_route_ng00_file 921e19d469b6acfa)
-  set(mhgp11_route_ng00_manifest 71676fdf16b2b2df)
-  set(mhgp11_route_ng01_file 74e30730244bc28e)
-  set(mhgp11_route_ng01_manifest c3914090b40d7c04)
-  set(mhgp11_route_ng02_file 5b4ad69eb41a6742)
-  set(mhgp11_route_ng02_manifest 5cbe0264b7df31fb)
+  set(mhgp11_route_scale32000_file 4b806c934307b4df)
+  set(mhgp11_route_scale32000_manifest 731c457ba2767b0c)
+  set(mhgp11_route_ng00_file 6a3f8372b6114c04)
+  set(mhgp11_route_ng00_manifest 3f17c4b55d31424e)
+  set(mhgp11_route_ng01_file 788eefd939fa5bb1)
+  set(mhgp11_route_ng01_manifest 2d886b2ef28f9104)
+  set(mhgp11_route_ng02_file 6201e28ccc138e5b)
+  set(mhgp11_route_ng02_manifest a9a26b77501f7c5d)
 elseif(MHGP11_COORD_BITS EQUAL 24)
   set(mhgp11_route_scale8000_file 35583fa59294790a)
   set(mhgp11_route_scale8000_manifest 0cde764601503047)
   set(mhgp11_route_scale16000_file 9a5e6fbc0e8041d3)
   set(mhgp11_route_scale16000_manifest a1e38d5f5af7d348)
-  set(mhgp11_route_scale32000_file 0a32bf4343a14b5b)
-  set(mhgp11_route_scale32000_manifest 782c22ad18e48558)
-  set(mhgp11_route_ng00_file 4f574587dd6678e2)
-  set(mhgp11_route_ng00_manifest d0a948b58b58ec7d)
-  set(mhgp11_route_ng01_file 08ae13d1e28c660a)
-  set(mhgp11_route_ng01_manifest 3158caeb8e86d7b4)
-  set(mhgp11_route_ng02_file a60e5078a9cc81f4)
-  set(mhgp11_route_ng02_manifest 0a89af314e99fe49)
+  set(mhgp11_route_scale32000_file 2847359eae273dd7)
+  set(mhgp11_route_scale32000_manifest e42a8ba623573bdc)
+  set(mhgp11_route_ng00_file c94f3baae4094412)
+  set(mhgp11_route_ng00_manifest 8617e43aeef94f54)
+  set(mhgp11_route_ng01_file 4691f2d16098caf0)
+  set(mhgp11_route_ng01_manifest 154ec5390446d3ff)
+  set(mhgp11_route_ng02_file c33a3a0600761178)
+  set(mhgp11_route_ng02_manifest 779e116005341a42)
 endif()
 foreach(case "scale8000;8000;uniform18=8000,20261002;noeuds=273655 boules=273655 supports=273655 etendues=0 multiples=0 cellules=230825 graines=737362 fichier=${mhgp11_route_scale8000_file} manifeste=${mhgp11_route_scale8000_manifest} journal=a6c3b688a7fe1b4a;273655;230825"
              "scale16000;16000;uniform18=16000,20261002;noeuds=565098 boules=565098 supports=565098 etendues=0 multiples=0 cellules=478947 graines=1530768 fichier=${mhgp11_route_scale16000_file} manifeste=${mhgp11_route_scale16000_manifest} journal=436d1354ae183486;565098;478947"
-             "scale32000;32000;uniform18=32000,20261002;noeuds=1163756 boules=1163761 supports=1163761 etendues=0 multiples=0 cellules=989861 graines=3165977 fichier=${mhgp11_route_scale32000_file} manifeste=${mhgp11_route_scale32000_manifest} journal=c371678559b144d7;1163761;989861"
-             "lidar;39885;data=lidar_ng00;noeuds=576371 boules=576482 supports=576482 etendues=62 multiples=0 cellules=448805 graines=1350288 fichier=${mhgp11_route_ng00_file} manifeste=${mhgp11_route_ng00_manifest} journal=c189d5cd3ec3de66;576482;448805"
-             "lidar;35551;data=lidar_ng01;noeuds=478265 boules=478380 supports=478380 etendues=38 multiples=0 cellules=369751 graines=1102505 fichier=${mhgp11_route_ng01_file} manifeste=${mhgp11_route_ng01_manifest} journal=5e36f8ddbd2fb94c;478380;369751"
-             "lidar;45845;data=lidar_ng02;noeuds=609376 boules=610002 supports=610002 etendues=171 multiples=0 cellules=471060 graines=1393952 fichier=${mhgp11_route_ng02_file} manifeste=${mhgp11_route_ng02_manifest} journal=ec87f14da7adff77;610002;471060")
+             "scale32000;32000;uniform18=32000,20261002;noeuds=1163756 boules=1163756 supports=1163756 etendues=0 multiples=0 cellules=989861 graines=3165977 fichier=${mhgp11_route_scale32000_file} manifeste=${mhgp11_route_scale32000_manifest} journal=c371678559b144d7;1163756;989861"
+             "lidar;39885;data=lidar_ng00;noeuds=576371 boules=576388 supports=576388 etendues=62 multiples=0 cellules=448805 graines=1350288 fichier=${mhgp11_route_ng00_file} manifeste=${mhgp11_route_ng00_manifest} journal=c189d5cd3ec3de66;576388;448805"
+             "lidar;35551;data=lidar_ng01;noeuds=478265 boules=478290 supports=478290 etendues=38 multiples=0 cellules=369751 graines=1102505 fichier=${mhgp11_route_ng01_file} manifeste=${mhgp11_route_ng01_manifest} journal=5e36f8ddbd2fb94c;478290;369751"
+             "lidar;45845;data=lidar_ng02;noeuds=609376 boules=609479 supports=609479 etendues=166 multiples=0 cellules=471060 graines=1393952 fichier=${mhgp11_route_ng02_file} manifeste=${mhgp11_route_ng02_manifest} journal=ec87f14da7adff77;609479;471060")
   list(GET case 0 label)
   list(GET case 1 n)
   list(GET case 2 input)

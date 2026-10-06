@@ -267,6 +267,7 @@ def check_directory(path, bits, exact=True):
     if manifest['output'] == 'supports':
         with open(file_path, 'rb') as handle:
             sp = read_supports(handle.read(), bits)
+        need(sp.version == entry['version'], 'MHGP11SP : version du fichier et du manifeste')
         need(sp.k == manifest['k'], 'MHGP11SP : K du fichier et du manifeste')
         recount = sp.manifest_counts()
         need(recount == counts, 'manifeste : comptes publies %r, recomptes depuis MHGP11SP %r' % (counts, recount))
@@ -656,6 +657,8 @@ def read_supports(data, bits):
     _check_tree(f)
     _check_balls(f)
     _check_roles(f)
+    if f.version == 2:
+        _check_spanning(f)
     _check_canonical(f)
     return f
 
@@ -829,6 +832,40 @@ def _check_roles(f):
         need(kind != KIND_BIRTH or births == 1, 'MHGP11SP : naissance %d sans boule de naissance' % v)
         need(kind != KIND_MERGE or (merges >= 1 and union == set(f.children[v])),
              'MHGP11SP : fusion %d : reunion des branches differente des enfants' % v)
+
+
+def _check_spanning(f):
+    """SPv2 : chaque boule merge realise une union ; les enfants finissent connexes.
+
+    Une boule peut relier plusieurs branches et contenir des liens redondants :
+    une seule union utile suffit. Q_b et les candidats omis ne sont pas publies.
+    """
+    for v in range(f.N):
+        if f.kind[v] != KIND_MERGE:
+            continue
+        children = f.children[v]
+        local = {child: i for i, child in enumerate(children)}
+        parents = list(range(len(children)))
+        components = len(children)
+
+        def find(i):
+            while parents[i] != i:
+                parents[i] = parents[parents[i]]
+                i = parents[i]
+            return i
+
+        for b in range(f.first_ball[v], f.first_ball[v] + f.ball_count[v]):
+            at = f.prior_at[b]
+            branches = f.prior[at:at + f.prior_count[b]]
+            before = components
+            a = local[branches[0]]  # _check_roles a deja controle les branches.
+            for branch in branches[1:]:
+                x, y = find(a), find(local[branch])
+                if x != y:
+                    parents[y] = x
+                    components -= 1
+            need(components < before, 'MHGP11SP 2 : fusion %d redondante dans le noeud %d' % (b, v))
+        need(components == 1, 'MHGP11SP 2 : enfants du noeud %d non connexes' % v)
 
 
 def _check_canonical(f):

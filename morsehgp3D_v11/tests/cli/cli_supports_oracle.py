@@ -20,7 +20,7 @@ Pour chaque (nuage, K) : un appel --sortie=supports, sur un fil (points dans l'o
   - le fichier decode (MHGP11SP version 2), ramene aux conventions de l'oracle (sites et ids en ordre
     lexicographique, niveaux et centres exacts tires de S*, boules d'un noeud par (niveau, centre)), egale la
     projection de canonical(k, ids) sur l'arbre couvrant d'ordre K (decision de l'utilisateur du 6 octobre 2026) :
-    boules de role naissance ou fusion seulement, renumerotees, S* seul (plus petite arite, puis SiteIdx de Morton),
+    naissances et boules ayant au moins une union reussie du Kruskal compresse, renumerotees, S* seul (plus petite arite, puis SiteIdx de Morton),
     sur k, n, sites, ids, noeuds (level, parent, children, kind, post, balls, birth_center) et boules (node, level,
     center, role, p, m, qmin, components, prior, supports). Les comptes de Q_b ne sont plus publies.
 Pour chaque (nuage, K) avec K <= 4 : un appel --sortie=full sur la meme entree ; son tree_k_sha256 egale celui de la
@@ -41,6 +41,7 @@ import os
 import shutil
 import sys
 import tempfile
+from fractions import Fraction
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, '..', 'supports'))
@@ -67,21 +68,86 @@ def star(supports):
 
 
 def spanning(doc):
-    """Projection d'un document de l'oracle (W_K entiere, Q_b) sur l'arbre couvrant d'ordre K : boules de role
-    naissance ou fusion seulement, renumerotees dans le meme ordre, S* seul, sans les comptes de Q_b."""
-    kept = [b for b, ball in enumerate(doc['balls']) if ball['role'] != 'interne']
-    new = dict((old, j) for j, old in enumerate(kept))
-    out = dict((key, doc.get(key)) for key in ('k', 'n', 'sites', 'ids'))
-    out['nodes'] = []
-    for node in doc['nodes']:
-        node = dict((key, node.get(key)) for key in SPANNING_NODE)
-        node['balls'] = [new[b] for b in node['balls'] if b in new]
-        out['nodes'].append(node)
-    out['balls'] = []
-    for b in kept:
-        ball = dict((key, doc['balls'][b].get(key)) for key in SPANNING_BALL)
-        ball['supports'] = [star(ball['supports'])]
-        out['balls'].append(ball)
+    """Select from the complete oracle document only; never reselect a native result."""
+    nodes, balls = doc['nodes'], doc['balls']
+    coords = [tuple(p) for p in doc['sites']]
+    if len(coords) != doc['n'] or len(set(coords)) != len(coords):
+        raise ValueError('spanning: inconsistent sites')
+    ranks = {p:i for i,p in enumerate(sorted(coords,key=formats.morton))}
+    stars = []
+    for ball in balls:
+        qs = ball['supports']
+        if not qs or any(not 2<=len(q)<=4 or len(set(map(tuple,q)))!=len(q) or
+                         any(tuple(p) not in ranks for p in q) for q in qs):
+            raise ValueError('spanning: invalid support arity/sites')
+        qmin = min(map(len,qs))
+        if ball['qmin'] != qmin:
+            raise ValueError('spanning: inconsistent qmin')
+        stars.append(min((q for q in qs if len(q)==qmin),
+                         key=lambda q: tuple(sorted(ranks[tuple(p)] for p in q))))
+    def ball_key(b):
+        s = tuple(sorted(ranks[tuple(p)] for p in stars[b]))
+        return (Fraction(balls[b]['level']), s+(doc['n'],)*(4-len(s)))
+    kept, groups, births = set(), {}, {}
+    for b,ball in enumerate(balls):
+        v = ball['node']
+        if not isinstance(v,int) or not 0<=v<len(nodes):
+            raise ValueError('spanning: invalid node')
+        role = ball['role']
+        if role == 'naissance':
+            if doc['k']==1 or nodes[v]['kind']!=1 or v in births or ball['prior'] or ball['components']!=0 or \
+                    Fraction(ball['level'])!=Fraction(nodes[v]['level']):
+                raise ValueError('spanning: inconsistent birth')
+            births[v]=b
+            kept.add(b)
+        elif role == 'fusion':
+            prior = ball['prior']
+            if nodes[v]['kind']!=2 or Fraction(ball['level'])!=Fraction(nodes[v]['level']) or \
+                    not prior or prior!=sorted(set(prior)) or len(prior)!=ball['components'] or \
+                    not set(prior)<=set(nodes[v]['children']):
+                raise ValueError('spanning: inconsistent fusion/prior')
+            groups.setdefault(v,[]).append(b)
+        elif role != 'interne':
+            raise ValueError('spanning: invalid role')
+    if {v for v,node in enumerate(nodes) if node['kind']==1} != set(births):
+        raise ValueError('spanning: missing birth')
+    for v,node in enumerate(nodes):
+        if node['kind']!=2:
+            continue
+        children=node['children']
+        if len(children)<2 or children!=sorted(set(children)):
+            raise ValueError('spanning: invalid multifusion children')
+        parent={c:c for c in children}
+        def find(c):
+            while parent[c]!=c:
+                parent[c]=parent[parent[c]]
+                c=parent[c]
+            return c
+        for b in sorted(groups.get(v,[]),key=ball_key):
+            prior=balls[b]['prior']
+            changed=False
+            for c in prior[1:]:
+                a,z=find(prior[0]),find(c)
+                if a!=z:
+                    parent[max(a,z)]=min(a,z)
+                    changed=True
+            if changed:
+                kept.add(b)
+        if len({find(c) for c in children})!=1:
+            raise ValueError('spanning: incomplete multifusion')
+    ordered=sorted(kept)  # output keeps the oracle's postorder/level/center convention
+    new={old:j for j,old in enumerate(ordered)}
+    out={key:doc.get(key) for key in ('k','n','sites','ids')}
+    out['nodes']=[]
+    for node in nodes:
+        row={key:node.get(key) for key in SPANNING_NODE}
+        row['balls']=[new[b] for b in node['balls'] if b in new]
+        out['nodes'].append(row)
+    out['balls']=[]
+    for b in ordered:
+        row={key:balls[b].get(key) for key in SPANNING_BALL}
+        row['supports']=[stars[b]]
+        out['balls'].append(row)
     return out
 
 
@@ -187,7 +253,12 @@ def compare(gate, where, report, line, case):
         gate.check(False, '%s : conversion aux conventions de l\'oracle : %s' % (where, error))
         return
     gate.check_eq(sp.version, 2, '%s : MHGP11SP version 2 (arbre couvrant)' % where)
-    found = attach_fraction.first_difference(spanning(mine), spanning(want), 'doc')
+    try:
+        expected = spanning(want)
+    except (ValueError, KeyError, IndexError) as error:
+        gate.check(False, '%s : projection Kruskal de l\'oracle : %s' % (where, error))
+        return
+    found = attach_fraction.first_difference(mine, expected, 'doc')
     gate.check(found is None, '%s : fichier contre oracle : %s' % (where, found))
 
 
@@ -228,6 +299,13 @@ def shell_cases(gate, runner):
                 gate.check(counts['supports'] == counts['balls'] and counts['roles']['merge'] >= 1,
                            'sphere9 K%d W%d : un S* par boule, au moins une fusion' % (k, workers))
                 admitted += 1
+    # Temoin de l'audit be8085ec1 : trois sites equidistants, trois boules de fusion au meme plateau a K1 ; Kruskal en
+    # garde deux (le filtre de role en gardait trois, un cycle).
+    for workers in (1, 4):
+        report, _line = runner.publish('triangle K1 W%d' % workers, [(0, 0, 0), (1, 1, 0), (1, 0, 1)], [7, 3, 11], 1,
+                                       workers, 'supports')
+        if gate.check(report is not None, 'triangle K1 W%d : supports refuse' % workers):
+            gate.check_eq(report['manifest']['counts']['balls'], 2, 'triangle K1 W%d : deux supports' % workers)
     report, _line = runner.publish('sphere5 K1', sphere(5, 2), list(range(24)), 1, 4, 'supports')
     if gate.check(report is not None, 'sphere5 K1 : supports refuse'):
         counts = report['manifest']['counts']

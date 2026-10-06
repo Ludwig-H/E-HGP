@@ -646,3 +646,48 @@ Mutants : 3 nouveaux, `sp_internes_gardees`, `sp_naissances_retirees` et `sp_eto
 2. Les comptes de Q_b disparaissent de la sortie publiée. Faut-il garder une contre-épreuve du journal
    (`strict_traces`) en mode arbre couvrant, au prix de l'énumération de Q_b et du plafond, ou la contre-épreuve de la
    sélection `all`, déjà couverte par les portes S6, suffit-elle ?
+
+## S. Kruskal intégré, versions du lecteur, u18 regravé ; GPU : J2 mémorisé (6 octobre, 12 h 45 UTC)
+
+**Merci : le cycle de plateau (be8085ec1) était un vrai défaut de ma sélection.** C'était ma question R1, que vous
+aviez déjà tranchée. Vos propositions sont intégrées telles quelles, et vos reçus sont cités dans le code et les portes.
+- Sélecteur natif (`native/selector.patch`) : `Assembly::select`. Naissances gardées ; fusions retenues par un DSU sur
+  les enfants de chaque multifusion, dans l'ordre des `BallIdx`, avec contrôle de connexion finale.
+- Différentiel exact (`remaining_1054/proposed.patch`) : `mhgp11_cli_supports_oracle` sélectionne Kruskal sur l'oracle
+  complet, puis compare la sortie native intacte.
+- Lecteur : contrôle de la structure couvrante (`read_supports_spanning.patch`) et égalité des versions entre manifeste
+  et fichier (`version_equality.patch`). Porte `mhgp11_cli_supports_spanning_reader` (cas3).
+- Témoin triangle K1 ajouté à la porte CLI : deux supports, à W1 et W4.
+- Mutants : `sp_selection_par_role` (retour au filtre de rôle), plus les trois `sp_*` repointés. Les 4 sont tués.
+- u18 : vous aviez raison, mon script avait remplacé le mauvais bloc `EQUAL 18`. Les 18 empreintes des trois profils
+  sont regravées depuis la sortie corrigée, chaque bloc contrôlé. Les deux voies concordent dans les trois profils, et
+  comptes et journal sont identiques entre profils.
+- La relecture des dossiers v1 n'est plus garantie : `read_supports` décode encore un binaire v1, mais `check_directory`
+  exige désormais un manifeste v2 et la même version. Les dossiers v1 historiques restent attachés à leurs reçus.
+
+R2 : d'accord, pas de réénumération de Q_b en mode arbre couvrant.
+
+Nouvelles lignes (u21) :
+- oracle de route : 11 917 boules pour 12 576 nœuds, 1 339 coquilles étendues ;
+- ng00 : 576 388 boules pour 576 371 nœuds ; uniforme 32 000 : `boules = noeuds = 1 163 756`, et `branches = noeuds − 1`.
+
+**GPU.** Reçu [j2memo](../receipts/developpement_20261006/j2memo_rangs_locaux/README.md). Le profil source de coop2
+fixe les priorités :
+- J2 ≈ 38 % du comptage, dont `center_line_meets` 23 %, avec 71 % de succès du cache à K10 ;
+- recensement ≈ 15 % ;
+- `local_rank` ≈ 7 %.
+
+Deux leviers ont suivi :
+- J2 mémorisé dans la feuille device : la même face donne la même issue, et les compteurs sont inchangés ;
+- rangs locaux transmis aux puits.
+
+Résultats :
+- exécuteur ×0,82 à K5 et ×0,76 à K10 ;
+- à K10, `domain` GPU inférieur de 16 à 21 % à celui du CPU ;
+- critère écrit d'avance atteint.
+
+La feuille cohérente (votre réponse à Q) ne vise qu'environ 15 % du noyau : je la mets en attente, derrière les étages
+fixes de K5.
+
+Votre constat P2 sur les arbres de points (fin de vie du bloc) est noté. Je l'intègre à la prochaine tranche, avec vos
+gardes Python et C++.

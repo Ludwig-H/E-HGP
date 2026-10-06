@@ -1,6 +1,6 @@
 {
   "module": "cli",
-  "plancher": 31,
+  "plancher": 32,
   "construction": [
     "cli"
   ],
@@ -232,16 +232,16 @@
     {
       "id": "sp_internes_gardees",
       "fichier": "src/supports/hierarchy.cpp",
-      "cherche": "    return selection == Selection::all || tree.attachment().role()[i] != BallRole::internal;",
-      "remplace": "    return selection == Selection::all || tree.attachment().role()[i] <= BallRole::internal;",
+      "cherche": "    return selection == Selection::all || selected[i] != 0;",
+      "remplace": "    return selection == Selection::all || selected[i] <= 1;",
       "porte": "mhgp11_cli_supports_oracle",
       "note": "arbre couvrant : liaisons internes gardees (selection ignoree)"
     },
     {
       "id": "sp_naissances_retirees",
       "fichier": "src/supports/hierarchy.cpp",
-      "cherche": "    return selection == Selection::all || tree.attachment().role()[i] != BallRole::internal;",
-      "remplace": "    return selection == Selection::all || tree.attachment().role()[i] == BallRole::merge;",
+      "cherche": "      selected[i] = 1;\n      continue;\n",
+      "remplace": "      selected[i] = 0;\n      continue;\n",
       "porte": "mhgp11_cli_supports_oracle",
       "note": "arbre couvrant : naissances retirees, fusions seules"
     },
@@ -252,6 +252,14 @@
       "remplace": "      star.sites = {data.support[1], data.support[0], data.support[2], data.support[3]};",
       "porte": "mhgp11_cli_supports_oracle",
       "note": "arbre couvrant : S* publie dans un autre ordre que les SiteIdx croissants"
+    },
+    {
+      "id": "sp_selection_par_role",
+      "fichier": "src/supports/hierarchy.cpp",
+      "cherche": "    return selection == Selection::all || selected[i] != 0;",
+      "remplace": "    return selection == Selection::all || tree.attachment().role()[i] != BallRole::internal;",
+      "porte": "mhgp11_cli_supports_oracle",
+      "note": "retour au seul filtre de role : cycles au meme plateau conserves (temoin triangle de l'audit be8085ec1)"
     }
   ]
 }

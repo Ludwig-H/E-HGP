@@ -929,7 +929,12 @@ point 3 : pour toute fusion $v$, la réunion des $\mathrm{ant}(b)$ des boules de
 $\mathrm{enfants}(v)$. Lemme C, point 2 : une boule interne a $\mathrm{ant}(b)=\lbrace\mathrm{att}(b)\rbrace$, et
 ne relie que des $K$-parties d'un nœud déjà formé. ∎
 
-C'est l'analogue, sur l'hypergraphe des boules, de Kruskal : une boule est retenue si et seulement si elle crée une
-composante (naissance) ou en réunit au moins deux (fusion). Une fusion qui réunit $c\geq 3$ composantes est une seule
-hyperarête ; plusieurs boules de fusion peuvent être rattachées au même nœud au même rang (plateau). Les comptes du
-§ 10.7 restent définis pour toute boule, mais ils ne sont plus publiés.
+**Sélection de Kruskal au plateau** (correction du même jour, audit `be8085ec1`). Le rôle seul ne suffit pas. À
+$K=1$, les trois sites équidistants $(0,0,0)$, $(1,1,0)$, $(1,0,1)$ donnent trois boules diamétrales de même niveau,
+toutes de rôle fusion, rattachées à la même multifusion : les garder toutes ferme un cycle. La sortie garde donc
+chaque naissance. Pour chaque fusion $v$, elle parcourt ses boules de fusion dans l'ordre des `BallIdx` (niveau, puis
+$S^*$) et unit leurs branches dans un DSU des enfants de $v$ ; une boule est gardée si elle réalise au moins une union.
+Par le lemme C, point 3, les unions finissent par relier tous les enfants. La famille gardée est ainsi un arbre
+couvrant de l'hypergraphe : une hyperarête qui réunit $c\geq 3$ composantes est gardée une seule fois, avec ses
+branches d'origine, même si certaines de ses liaisons sont déjà redondantes. Les comptes du § 10.7 restent définis
+pour toute boule, mais ils ne sont plus publiés.

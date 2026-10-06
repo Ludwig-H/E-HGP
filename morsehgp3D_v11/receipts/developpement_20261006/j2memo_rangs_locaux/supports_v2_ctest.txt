@@ -1,0 +1,15 @@
+ 1/14 Test #867: mhgp11_api_supports_route_oracle ..........   Passed   14.40 sec
+ 2/14 Test #901: mhgp11_cli_supports_oracle ................   Passed   22.52 sec
+ 3/14 Test #869: mhgp11_api_supports_route_scale8000 .......   Passed   11.58 sec
+ 4/14 Test #870: mhgp11_api_supports_route_scale16000 ......   Passed   25.79 sec
+ 5/14 Test #871: mhgp11_api_supports_route_scale32000 ......   Passed   56.36 sec
+ 6/14 Test #872: mhgp11_api_supports_route_lidar_ng00_k5 ...   Passed   31.83 sec
+ 7/14 Test #873: mhgp11_api_supports_route_lidar_ng01_k5 ...   Passed   24.76 sec
+ 8/14 Test #874: mhgp11_api_supports_route_lidar_ng02_k5 ...   Passed   29.60 sec
+ 9/14 Test #903: mhgp11_cli_supports_scale8000 .............   Passed   15.13 sec
+10/14 Test #905: mhgp11_cli_supports_scale16000 ............   Passed   31.70 sec
+11/14 Test #907: mhgp11_cli_supports_scale32000 ............   Passed   67.91 sec
+12/14 Test #909: mhgp11_cli_supports_lidar_ng00_k5 .........   Passed   36.46 sec
+13/14 Test #911: mhgp11_cli_supports_lidar_ng01_k5 .........   Passed   29.03 sec
+14/14 Test #913: mhgp11_cli_supports_lidar_ng02_k5 .........   Passed   35.47 sec
+100% tests passed, 0 tests failed out of 14

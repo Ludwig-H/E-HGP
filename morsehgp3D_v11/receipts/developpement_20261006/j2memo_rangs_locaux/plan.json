@@ -1,0 +1,84 @@
+{
+ "schema": "ehgp.v11.session_plan.v1",
+ "note": "34a8a561d (Claude, 6 octobre 2026) : (1) feuille device a cache J2 memorise et rangs locaux directs, bancs GPU K5/16 et K10/24 (cpu 16379, gpu 81915) ; critere ecrit d'avance : dumps et registres identiques, executeur GPU a chaud <= 1,00 x coop3 a K5 (59/54/52 ms) et <= 0,90 x coop3 a K10 (342/302/321 ms) sur les trois trames ; (2) supports = arbre couvrant (MHGP11SP 2) : portes cli_supports* et api_supports_route* conformes.",
+ "python_packages": "none",
+ "default_build": true,
+ "build_targets": [
+  "mhgp11_cli",
+  "mhgp11_api_supports_route_probe"
+ ],
+ "results_cap_bytes": 134217728,
+ "commands": [
+  {
+   "name": "gpu_k5",
+   "timeout_seconds": 900,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/gpu_ab.py",
+    "--src",
+    "{src}",
+    "--work",
+    "{build}/gpu",
+    "--data",
+    "{data}",
+    "--out",
+    "{out}/gpu_k5",
+    "--modes",
+    "cpu=16379,gpu=81915",
+    "--reps",
+    "5",
+    "--workers",
+    "48",
+    "--warm-passes",
+    "12",
+    "--kmax",
+    "5",
+    "--leaf",
+    "16"
+   ]
+  },
+  {
+   "name": "gpu_k10",
+   "timeout_seconds": 900,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/gpu_ab.py",
+    "--src",
+    "{src}",
+    "--work",
+    "{build}/gpu",
+    "--data",
+    "{data}",
+    "--out",
+    "{out}/gpu_k10",
+    "--modes",
+    "cpu=16379,gpu=81915",
+    "--reps",
+    "3",
+    "--workers",
+    "48",
+    "--warm-passes",
+    "8",
+    "--kmax",
+    "10",
+    "--leaf",
+    "24"
+   ]
+  },
+  {
+   "name": "supports_v2",
+   "timeout_seconds": 2400,
+   "argv": [
+    "ctest",
+    "--no-tests=error",
+    "-R",
+    "^mhgp11_(cli_supports|api_supports_route)",
+    "-E",
+    "_opt$",
+    "-j",
+    "6",
+    "--output-on-failure"
+   ]
+  }
+ ]
+}

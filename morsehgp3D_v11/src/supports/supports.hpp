@@ -213,11 +213,18 @@ struct HierarchyAdmission {
 // Selection (decision de l'utilisateur du 6 octobre 2026 : "seulement les supports associes au minimum spanning tree
 // de niveau K" ; aretes de Kruskal, S* seul) :
 //   all      : W_K entiere (naissances, fusions, liaisons internes) et Q_b entier de chaque boule, comme ci-dessus ;
-//   spanning : arbre couvrant d'ordre K. Seules les boules qui changent l'arbre sont gardees, naissances et fusions
-//              (role internal, qui ferme un cycle, retire) ; chacune porte un seul support, S* (arite qmin), lu dans
-//              le catalogue. Aucune enumeration de Q_b, donc ni plafond de 24 sites ni brouillon de fermeture (widest
+//   spanning : arbre couvrant d'ordre K. Naissances conservees, puis cellules de fusion retenues par Kruskal stable
+//              (BallIdx/rang croissants) sur les branches
+//              ouvertes de chaque plateau ; une cellule est retenue s'il reste au moins une union a faire.
+//              La connexion finale des enfants de chaque multifusion est verifiee. Les roles internal et les cycles
+//              entre roles merge du meme plateau sont exclus. Chaque boule
+//              retenue porte S* seul (arite qmin), lu dans le catalogue. Aucune enumeration de Q_b, donc ni plafond de 24 sites ni brouillon de fermeture (widest
 //              = 0) ; comptes du lemme G et incidences par support non calcules (nuls) ; seul plafond : m <= 255
 //              (colonne u8 du fichier), sinon support_shell_capacity. C'est la selection de la sortie publiee.
+//              Selection : admission B_all*sizeof(u8)+2*N*sizeof(u32) puis allocations budgetees du masque et du
+//              DSU ; DSU rendu avant HierarchyAdmission::first, masque rendu apres sort_balls avant count. L'admission
+//              first est supplementaire, le masque vivant etant deja compte dans MemoryBudget ; aucune allocation
+//              supplementaire pour all. prior publie reste ant(b) original, jamais les racines DSU temporaires.
 enum class Selection : u8 { all, spanning };
 [[nodiscard]] Result<SupportHierarchy> build_support_hierarchy(const OrderTree& tree, MemoryBudget& budget,
                                                                sched::Pool* pool = nullptr,
