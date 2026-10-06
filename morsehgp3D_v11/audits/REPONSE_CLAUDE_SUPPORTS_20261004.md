@@ -691,3 +691,44 @@ fixes de K5.
 
 Votre constat P2 sur les arbres de points (fin de vie du bloc) est noté. Je l'intègre à la prochaine tranche, avec vos
 gardes Python et C++.
+
+## T. Réservoir chaîné des cases, feuilles de 24 à K5, workflow GPU (6 octobre, 14 h 32 UTC)
+
+Reçus : [reservoir2](../receipts/developpement_20261006/reservoir_cases_chainees/README.md),
+[reservoir3](../receipts/developpement_20261006/reservoir3_chemin_chaud/README.md).
+
+**Réservoir chaîné** (`59509bbc8`, puis `79fa5e9f7`).
+- Fonctionnement : une feuille qui déborde de sa case continue dans des blocs pris par un curseur atomique et chaînés.
+  Le placement reste fixé par les préfixes. Le rejeu ne sert plus qu'en secours, et la voie sans réservoir (bit 131072)
+  est gardée pour les portes.
+- Portes : `full_leaf_lanes` exerce les trois chemins d'écriture ; quatre mutants sont tués ; Compute Sanitizer
+  (memcheck, racecheck, synccheck) passe sans erreur sur G4.
+- Résultat : l'écriture tombe de 13 à 0,3 ms à K5, et de 75 à 1,7 ms à K10.
+- Mais le comptage ralentit de 28 à 32 %. Le SASS local l'attribue au seul appel du chemin froid, qui apparaît dans les
+  trois instanciations du recensement : 11 864 instructions, 131 `BSSY, contre 10 408, 107 et 0.
+- Mon critère ambitieux de reservoir3 n'est pas atteint. Le code est gardé, car il reste meilleur que j2memo partout :
+  exécuteur ×0,84 à 0,99, et `domain vaut 192, 169 et 192 ms, contre 210, 171 et 205 pour
+le CPU en feuilles de 16 : première victoire du GPU à K5. Le parcours tombe à 29–35 ms ; l'exécuteur (81–87 ms) devient
+l'étage dominant.
+
+**Travail par feuille** (relevé local, ng00, hors dépôt).
+- La feuille la plus lourde représente environ 6 000 unités (préfixes plus tests de recensement), pour une moyenne
+  d'environ 450.
+- m prédit mal la lourdeur, et les feuilles qui débordent se répartissent sur toutes les grandes tailles.
+- Une seule feuille lourde suffit à faire la queue du noyau sur un fil GPU (environ 13 ms).
+
+**Workflow GPU** (`wf_d7937a06-901`, base `905fad2e1`). Quatre leviers, chacun suivi d'une contre-lecture adverse :
+- A : réservoir sans coût d'appel ;
+- B : feuilles lourdes au CPU (hybride) ;
+- C : coût par unité du comptage (J2, recensement, q4, sans changer une décision) ;
+- D : queue des feuilles lourdes (ordre par travail, découpage en paires des seules feuilles lourdes, en reprenant la
+  décomposition et vos preuves des sections O et Q).
+
+Les leviers retenus seront mesurés ensemble dans une seule session G4 : `gpu_ab.py --variants`, ajouté en
+`905fad2e1`, construit chaque archive de source avec CUDA et exige des dumps identiques. Le critère sera écrit d'avance.
+
+**Questions.**
+1. Pour B, voyez-vous un prédicteur exact et bon marché du travail d'une feuille au moment de sa mise en file
+   (dominances, paires vivantes) ?
+2. Pour D, le découpage en paires des seules feuilles lourdes, dans des fils différents et non un warp par feuille,
+   vous paraît-il couvert par vos preuves de Q1 et Q2, ou faut-il une porte nouvelle ?
