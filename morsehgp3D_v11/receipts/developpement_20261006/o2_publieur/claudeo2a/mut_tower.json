@@ -1,0 +1,23 @@
+{
+  "code": 0,
+  "manifeste_sha256": "6be3c69e2f0db9647700c59a703c597828961ae09a1187e41edb792e7ad20f03",
+  "module": "tower",
+  "mutants": [
+    {
+      "detail": "code",
+      "id": "births_blocs_etat_partage",
+      "juge": "mhgp11_tower_pipeline_equivalence",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "births_blocs_parent_partage",
+      "juge": "mhgp11_tower_pipeline_equivalence",
+      "verdict": "TUE"
+    }
+  ],
+  "plancher": 2,
+  "schema": "mhgp11.mutants.v1",
+  "sources_sha256": "a1dfe2541848ba441faf55b7a9ef74985eb86bf6bda64ad57eeca3463119a297",
+  "temoin": "vert"
+}

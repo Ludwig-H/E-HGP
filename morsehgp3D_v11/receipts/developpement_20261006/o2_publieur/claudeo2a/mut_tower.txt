@@ -1,0 +1,3 @@
+births_blocs_etat_partage                TUE      code
+births_blocs_parent_partage              TUE      code
+mutants_ok module=tower mutants=2 tues=2 dont_signal=0 dont_delai=0 dont_construction=0 plancher=2
