@@ -1,6 +1,6 @@
 {
   "module": "catalogue",
-  "plancher": 68,
+  "plancher": 74,
   "mutants": [
     {
       "id": "support_tetra_strict_ignore",
@@ -545,6 +545,54 @@
       "remplace": ": t.regular[k] + t.extended[k] + (k == 0 ? i128(n) : i128(0));",
       "porte": "mhgp11_catalogue_euler_limits",
       "note": "terme n [k = 1] des minima de niveau zero jamais ajoute (k == 0 n'arrive pas ; n reste lu, -Werror) : E_1 vaut 1 - n"
+    },
+    {
+      "id": "coop_paire_sautee",
+      "fichier": "src/catalogue/leaf_device.hpp",
+      "cherche": "    for (u64 rest = next; rest != 0; rest &= rest - 1) out(count++, i, ctz(rest), rest & (rest - 1), next_logical, next);\n",
+      "remplace": "    for (u64 rest = next; rest != 0; rest &= rest - 1)\n      if ((rest & (rest - 1)) != 0) out(count++, i, ctz(rest), rest & (rest - 1), next_logical, next);\n",
+      "porte": "mhgp11_catalogue_leaf_coop_sizes",
+      "note": "feuille cooperative : la derniere paire de chaque site i est perdue"
+    },
+    {
+      "id": "coop_candidats_restants",
+      "fichier": "src/catalogue/leaf_device.hpp",
+      "cherche": "  leaf.template extend_one<1>(pair.j, pair.remaining, pair.logical);\n",
+      "remplace": "  leaf.template extend_one<1>(pair.j, 0, pair.logical);\n",
+      "porte": "mhgp11_catalogue_leaf_coop_witness_q3_obtuse_q4",
+      "note": "feuille cooperative : sous-arbre de la paire sans ses descendants (candidats restants vides ; remplacement de l'audit d117de397)"
+    },
+    {
+      "id": "coop_cache_par_paire",
+      "fichier": "src/catalogue/leaf_device.hpp",
+      "cherche": "  leaf.prefix[0] = pair.i;\n",
+      "remplace": "  for (u32 w = 0; w < kSeenWords; ++w) leaf.t.seen[w] = 0;\n  leaf.prefix[0] = pair.i;\n",
+      "porte": "mhgp11_catalogue_leaf_coop_cache_hits",
+      "note": "feuille cooperative : cache J2 reinitialise par paire (hits perdus)"
+    },
+    {
+      "id": "coop_compteurs_fill",
+      "fichier": "src/catalogue/leaf_device.hpp",
+      "cherche": "    Leaf<Sink> lane(in, discarded, sink, tables);\n",
+      "remplace": "    Leaf<Sink> lane(in, counts, sink, tables);\n",
+      "porte": "mhgp11_catalogue_leaf_coop_sizes",
+      "note": "feuille cooperative : compteurs de la passe d'emission ajoutes (doubles)"
+    },
+    {
+      "id": "coop_publication_partielle",
+      "fichier": "src/catalogue/leaf_device.hpp",
+      "cherche": "  if (root.unresolved) return kUnresolved;\n  CountSink tally_sink;\n",
+      "remplace": "  if (root.unresolved) return kUnresolved;\n  for (u32 k = 0; k < n; ++k) {\n    Leaf<Sink> early(in, counts, sink, tables);\n    run_pair(early, pairs[k]);\n    if (early.unresolved) return kUnresolved;\n  }\n  for (u32 w = 0; w < kSeenWords; ++w) tables.seen[w] = 0;\n  counts = Counts{};\n  counts.dominance_tests += u64(in.m) * (in.m - 1) / 2;\n  return kOk;\n  CountSink tally_sink;\n",
+      "porte": "mhgp11_catalogue_leaf_coop_near_max",
+      "note": "feuille cooperative : emissions publiees au fil de l'eau, une feuille refusee laisse un prefixe publie"
+    },
+    {
+      "id": "coop_profondeur1_masque",
+      "fichier": "src/catalogue/leaf_device.hpp",
+      "cherche": "  leaf.masks[1] = leaf.t.dom[pair.i];\n",
+      "remplace": "  leaf.masks[1] = 0;\n",
+      "porte": "mhgp11_catalogue_leaf_coop_sizes",
+      "note": "feuille cooperative : masque de dominance du prefixe (i) oublie"
     }
   ]
 }

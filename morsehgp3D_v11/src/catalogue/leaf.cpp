@@ -424,13 +424,13 @@ Result<bool> device_leaf(Run& run, std::span<const SiteIdx> sites, const Box& bo
   in.x = run.cloud.x().data(); in.y = run.cloud.y().data(); in.z = run.cloud.z().data();
   in.sites = ids.data(); in.m = static_cast<u32>(sites.size());
   for (int j = 0; j < 3; ++j) { in.lo[j] = box.lo[j]; in.hi[j] = box.hi[j]; }
-  in.kmax = run.params.kmax; in.cache = run.params.cache_center_lines;
+  in.kmax = run.params.kmax; in.cache = run.params.cache_center_lines; in.coop = run.params.coop_leaves;
   leaf_device::Counts probe_counts;
   leaf_device::CountSink probe;
-  if (leaf_device::run_leaf(in, probe_counts, probe) != leaf_device::kOk) return false;
+  if (leaf_device::run_leaf_any(in, probe_counts, probe) != leaf_device::kOk) return false;
   leaf_device::Counts c;
   AcceptSink sink{run};
-  if (leaf_device::run_leaf(in, c, sink) != leaf_device::kOk) return fail(Reason::catalogue_invariant);
+  if (leaf_device::run_leaf_any(in, c, sink) != leaf_device::kOk) return fail(Reason::catalogue_invariant);
   MHGP11_TRY(sink.outcome);
   LeafCounts counts;
   counts.dominance_tests = c.dominance_tests; counts.prefixes = c.prefixes; counts.judged = c.judged;

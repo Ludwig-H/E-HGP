@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Voies de feuille de la sonde FULL sur un nuage moyen : CPU (16379), feuille source unique sur l'hote (32763) et lot
-de feuilles sur le Pool (49147) rendent le meme dump et le meme registre du catalogue.
+"""Voies de feuille de la sonde FULL sur un nuage moyen : CPU (16379), feuille source unique sur l'hote (32763), lot
+de feuilles sur le Pool (49147), et leurs variantes a feuille cooperative (163835, 180219) rendent le meme dump et le
+meme registre du catalogue.
 
     python3 full_leaf_lanes.py MHGP11_FULL_BENCH BITS
 
@@ -22,8 +23,11 @@ import sys
 import tempfile
 
 SITES = 3000
-CONFIGS = (('5', '16', {'cpu': 16379, 'feuille_hote': 32763, 'lot_hote': 49147}),
-           ('10', '24', {'cpu': 16379, 'lot_hote': 49147}))
+# feuille_coop (163835 = 32763 + 131072) et lot_coop (180219 = 49147 + 131072) : feuille cooperative emulee sur
+# l'hote (paires de la profondeur 1 comptees dans l'ordre inverse, puis emises dans l'ordre du parcours).
+CONFIGS = (('5', '16', {'cpu': 16379, 'feuille_hote': 32763, 'lot_hote': 49147, 'feuille_coop': 163835,
+                        'lot_coop': 180219}),
+           ('10', '24', {'cpu': 16379, 'lot_hote': 49147, 'lot_coop': 180219}))
 
 
 def need(value, reason):
@@ -74,8 +78,11 @@ def main():
             for name in modes:
                 need(seen[name]['digest'] == reference['digest'], name + ' K' + kmax + ' : dump different du CPU')
                 need(seen[name]['work'] == reference['work'], name + ' K' + kmax + ' : registre different')
-                need(name == 'lot_hote' or seen[name]['batch']['jobs'] == 0, 'lot hors voie de lot')
+                need(name in ('lot_hote', 'lot_coop') or seen[name]['batch']['jobs'] == 0, 'lot hors voie de lot')
             batch = seen['lot_hote']['batch']
+            coop = seen['lot_coop']['batch']
+            need(all(coop[key] == batch[key] for key in ('jobs', 'records', 'population', 'unresolved')),
+                 'lot cooperatif different du lot sequentiel')
             need(batch['jobs'] > SITES, 'lot de feuilles pas plus nombreux que les sites (%d)' % batch['jobs'])
             need(batch['records'] > 0 and batch['population'] > 0 and batch['unresolved'] <= batch['jobs'], 'lot vide')
             # Branche copiee observable (audit du 4 octobre, ee2b48b4c) : des feuilles emettrices tiennent dans leur case.

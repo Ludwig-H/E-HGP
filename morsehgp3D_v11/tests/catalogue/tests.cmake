@@ -46,6 +46,8 @@ mhgp11_python_gate(mhgp11_catalogue_parallel_collector 0 bench_parallel_collecto
                     LINE "catalogue_parallel_collector_verdict conforme attempts34 comparisons17 schedules11 checkpoints2 native0"
                     LABELS fast TIMEOUT 30)
 
+mhgp11_add_unit(mhgp11_catalogue_leaf_coop SOURCES leaf_coop_test.cpp
+                GROUPS witness_q3_obtuse_q4 cache_hits sizes near_max LABELS fast)
 mhgp11_add_unit(mhgp11_catalogue_cache SOURCES center_line_cache.cpp
                 GROUPS ranks relations_reset capacity_fallback memory equivalence LABELS fast)
 mhgp11_add_unit(mhgp11_catalogue_cache_fault SOURCES center_line_cache_fault.cpp GROUPS allocation LABELS fast)

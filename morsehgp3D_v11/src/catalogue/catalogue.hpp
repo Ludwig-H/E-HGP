@@ -40,6 +40,9 @@ struct CatalogueParams {
   // Passe unique seulement : feuilles admissibles mises en file puis traitees en lot par leaf_device.hpp, sur le
   // Pool (batch_leaves) ou sur le GPU (cuda_leaves, implique batch_leaves) ; non resolues refaites par leaf.cpp.
   bool batch_leaves = false, cuda_leaves = false;
+  // Feuille cooperative (exige device_leaf, batch_leaves ou cuda_leaves) : sous-arbres des paires de la profondeur 1
+  // repartis entre les fils d'un warp sur CUDA, emules dans l'ordre inverse sur l'hote ; memes emissions et compteurs.
+  bool coop_leaves = false;
 };
 
 struct CatalogueBall {
