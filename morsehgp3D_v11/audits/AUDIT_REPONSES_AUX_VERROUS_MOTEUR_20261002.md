@@ -24,6 +24,17 @@ avec une surface et l'emboîtement entre k sont trois questions distinctes.
 [Proposition constructive, exemples exacts et sources primaires](../receipts/audit_geometry_design_20261006/README.md).
 Aucun constructeur de surface ou de mosaïque n'est qualifié par cette note.
 
+## Levier C et repli : réponse à la section U
+
+**Arithmétique relue favorablement au pin 5861c223f.** La borne D≤2^20
+inclut la boîte fermée ; les identités J2/q3/q4 et leurs largeurs entières
+sont conservées. Le repli parallèle peut conserver l'ordre canonique avec
+une sortie privée par feuille et des préfixes ordonnés après join, sous les
+conditions de quotas, population et refus détaillées dans la
+[réponse au développeur](../receipts/audit_narrow_followup_20261006/README.md#réponse-u2--repli-parallèle).
+Deux raccords de qualification/provenance restent à corriger ; aucun défaut
+numérique moteur déduit de cette lecture.
+
 ## Suivi de la section S : sélection intégrée
 
 **Constats MST clos au pin 07428324e.** Le sélecteur C++ est identique à

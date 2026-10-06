@@ -1,0 +1,830 @@
+{
+  "cloud_actions": 0,
+  "judge_sources_identical_at_session_and_publication": {
+    "morsehgp3D_v11/bench/ab_g4.py": "93fe9d58efe580e243bbeb50f740efa0ad349b613b2d765fd2c5a77c34767acf",
+    "morsehgp3D_v11/bench/gpu_ab.py": "96cd5495490444f78218f3aa4a347e4e6e889e39f7824605c7a6b95e44349d6b"
+  },
+  "limits": [
+    "No native binary dump or LiDAR bytes retained/reread; six canonical hash references checked.",
+    "Intermediate warm passes have success status but only cold and last warm hashes/ledger judge results preserved.",
+    "Reservoir2 worker failure is retained separately from three successful commands and its explicit dump eviction.",
+    "No timing statistics derived; no sanitizer/CTest/mutant qualification transferred from AC to integrated C.",
+    "Sanitizer source guard finding remains independent; actual preserved ordinary registers are present and equal."
+  ],
+  "native_executions": 0,
+  "publication_pin": "5861c223f31b5d7d6f621522d0ca84d0064c9904",
+  "schema": "audit_closed_reservoir_wfgpu_metadata_v1",
+  "sessions": [
+    {
+      "archive_sha256": "f82d2c1e2d1c0562cf7c5709f418076e90e3440e6fc06c6207b4bcc12b8615bb",
+      "commands": [
+        {
+          "exit_code": 0,
+          "path": "results/cmd/000_gpu_k5/meta.txt",
+          "status": "ok"
+        },
+        {
+          "exit_code": 0,
+          "path": "results/cmd/001_gpu_k10/meta.txt",
+          "status": "ok"
+        },
+        {
+          "exit_code": 0,
+          "path": "results/cmd/002_sanitizer/meta.txt",
+          "status": "ok"
+        }
+      ],
+      "done_controller_code": 3,
+      "eviction": {
+        "artifact": "sanitizer/work/dump",
+        "bytes": 272195386,
+        "sha256": "238737c5a3a7b8a3a609dceb278edf2935503a318ff2d96e5b19ccdfe21f9b8d"
+      },
+      "gpu_reports": [
+        {
+          "bench_sha256": "e5c4db7ff967a89590c0e58c83ce03e3beb9c0e4571f8d4c1e75cf9e122a98a1",
+          "build_steps": [
+            {
+              "step": "nvcc"
+            },
+            {
+              "code": 0,
+              "step": "versions_nvcc"
+            },
+            {
+              "code": 0,
+              "step": "versions_cmake"
+            },
+            {
+              "code": 0,
+              "step": "configure"
+            },
+            {
+              "code": 0,
+              "step": "build"
+            },
+            {
+              "sha256": "e5c4db7ff967a89590c0e58c83ce03e3beb9c0e4571f8d4c1e75cf9e122a98a1",
+              "step": "built"
+            }
+          ],
+          "canonical": {
+            "lidar_ng00": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+            "lidar_ng01": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+            "lidar_ng02": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207"
+          },
+          "cold_processes": 45,
+          "full_passes": 153,
+          "intermediate_passes_without_dump_or_ledger": 99,
+          "k": 5,
+          "leaf": 16,
+          "modes": {
+            "cpu": "16379",
+            "gpu": "81915",
+            "gpu_rejoue": "212987"
+          },
+          "path": "results/cmd/000_gpu_k5/files/gpu_k5/gpu_ab_report.json",
+          "refusals": 0,
+          "report_sha256": "041630eb56933897ceb90f50fd5aa230dd2ffc1188741bb89698ada7b9432160",
+          "retained_hashes": 54,
+          "variants": null,
+          "warm_processes": 9
+        },
+        {
+          "bench_sha256": "e5c4db7ff967a89590c0e58c83ce03e3beb9c0e4571f8d4c1e75cf9e122a98a1",
+          "build_steps": [
+            {
+              "sha256": "e5c4db7ff967a89590c0e58c83ce03e3beb9c0e4571f8d4c1e75cf9e122a98a1",
+              "step": "reuse"
+            }
+          ],
+          "canonical": {
+            "lidar_ng00": "61a4245b91d9a4fdad012f0a2e26a63c3e48db1d46a180db756f2c4e4aa77295",
+            "lidar_ng01": "838a447e0b92e13e42f7f69a84fd536d5d46d26463d3f4cc7c688475878fe0de",
+            "lidar_ng02": "81f89995eaccb497cfe92abb81213bebd0d4ce5076210570d86aa9456cf7ff2e"
+          },
+          "cold_processes": 27,
+          "full_passes": 99,
+          "intermediate_passes_without_dump_or_ledger": 63,
+          "k": 10,
+          "leaf": 24,
+          "modes": {
+            "cpu": "16379",
+            "gpu": "81915",
+            "gpu_rejoue": "212987"
+          },
+          "path": "results/cmd/001_gpu_k10/files/gpu_k10/gpu_ab_report.json",
+          "refusals": 0,
+          "report_sha256": "f2dbd219b0cc307895ec279ca380021c45e604d42f32a0ffa3499c09fdfd5724",
+          "retained_hashes": 36,
+          "variants": null,
+          "warm_processes": 9
+        }
+      ],
+      "overflow_count": 1,
+      "package_sha256": "0c0c3abf9cf415d0a87f0863c39fdbc0411debb00a617699ec9b6b3e6264b411",
+      "pin": "59509bbc816646f7bda0c77a3b948f57c79a8b9c",
+      "plan_sha256": "66135745588c02ad7f2a9a8c000f58441465aababa3e891e186e9a5a37dd3b68",
+      "published_files_verified": 9,
+      "receipt_sha256": "609995eb0bc43ad5f268d65182ef7b19806363720be1ee2749f5910e3ecddfd6",
+      "result_manifest": {
+        "exact_inventory": true,
+        "files": 52,
+        "sha256": "c8ee62a98cad95996ff399bd708846228104e17c8d6a016c033a0d749835c5cf"
+      },
+      "sanitizer": {
+        "binary_variant": "base595",
+        "instrumented_ledger_and_status_not_preserved": true,
+        "ordinary_runs": 12,
+        "ordinary_work_absent": 0,
+        "pairs": [
+          [
+            "memcheck",
+            "A"
+          ],
+          [
+            "memcheck",
+            "B"
+          ],
+          [
+            "racecheck",
+            "A"
+          ],
+          [
+            "racecheck",
+            "B"
+          ],
+          [
+            "synccheck",
+            "A"
+          ]
+        ],
+        "report_sha256": "643a3d74e39e7c673e4268e54d0ccfc0b4a45a9a2c40c9942ba6a44d79c9b33e",
+        "source_judge_guard_finding_remains_independent": true,
+        "verdict": "conforme"
+      },
+      "session": "v11.20261006.claudereservoir2",
+      "source_equality": {
+        "extra_or_missing_files": false,
+        "files_verified": 637,
+        "includes_docs_or_receipts": false,
+        "manifest_sha256": "47328326b13902d5666ca105d0b19f941d21acb7cc871495065bbbca850ae2f6",
+        "method": "git_archive_selectif_egalite_exacte",
+        "paths": [
+          "gcp-migration/v11_worker.sh",
+          "morsehgp3D_v11/CMakeLists.txt",
+          "morsehgp3D_v11/src",
+          "morsehgp3D_v11/tests",
+          "morsehgp3D_v11/cmake",
+          "morsehgp3D_v11/bench",
+          "morsehgp3D_v11/reference",
+          "morsehgp3D_v11/tools",
+          "morsehgp3D_v11/cli"
+        ],
+        "source_commit": "59509bbc816646f7bda0c77a3b948f57c79a8b9c"
+      },
+      "status": "failed_remote",
+      "stop_utc": "2026-10-06T13:55:00.691000+00:00",
+      "targeted_stop_certified": true,
+      "worker_exit_code": 1
+    },
+    {
+      "archive_sha256": "f829a81c2acc8978c98fda9a84cdce2b8be504dc67c636026366db01a064484a",
+      "commands": [
+        {
+          "exit_code": 0,
+          "path": "results/cmd/000_gpu_k5/meta.txt",
+          "status": "ok"
+        },
+        {
+          "exit_code": 0,
+          "path": "results/cmd/001_gpu_k10/meta.txt",
+          "status": "ok"
+        },
+        {
+          "exit_code": 0,
+          "path": "results/cmd/002_k5_feuilles24/meta.txt",
+          "status": "ok"
+        }
+      ],
+      "done_controller_code": 0,
+      "gpu_reports": [
+        {
+          "bench_sha256": "dada75ad5a653c670f57f72f5d4746a958ea0810c57ac647fe31ab9f511dce9c",
+          "build_steps": [
+            {
+              "step": "nvcc"
+            },
+            {
+              "code": 0,
+              "step": "versions_nvcc"
+            },
+            {
+              "code": 0,
+              "step": "versions_cmake"
+            },
+            {
+              "code": 0,
+              "step": "configure"
+            },
+            {
+              "code": 0,
+              "step": "build"
+            },
+            {
+              "sha256": "dada75ad5a653c670f57f72f5d4746a958ea0810c57ac647fe31ab9f511dce9c",
+              "step": "built"
+            }
+          ],
+          "canonical": {
+            "lidar_ng00": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+            "lidar_ng01": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+            "lidar_ng02": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207"
+          },
+          "cold_processes": 45,
+          "full_passes": 153,
+          "intermediate_passes_without_dump_or_ledger": 99,
+          "k": 5,
+          "leaf": 16,
+          "modes": {
+            "cpu": "16379",
+            "gpu": "81915",
+            "gpu_rejoue": "212987"
+          },
+          "path": "results/cmd/000_gpu_k5/files/gpu_k5/gpu_ab_report.json",
+          "refusals": 0,
+          "report_sha256": "715a825369bb5ea9e42d45743ec50bbb25249eeb08d34317c485acc673621724",
+          "retained_hashes": 54,
+          "variants": null,
+          "warm_processes": 9
+        },
+        {
+          "bench_sha256": "dada75ad5a653c670f57f72f5d4746a958ea0810c57ac647fe31ab9f511dce9c",
+          "build_steps": [
+            {
+              "sha256": "dada75ad5a653c670f57f72f5d4746a958ea0810c57ac647fe31ab9f511dce9c",
+              "step": "reuse"
+            }
+          ],
+          "canonical": {
+            "lidar_ng00": "61a4245b91d9a4fdad012f0a2e26a63c3e48db1d46a180db756f2c4e4aa77295",
+            "lidar_ng01": "838a447e0b92e13e42f7f69a84fd536d5d46d26463d3f4cc7c688475878fe0de",
+            "lidar_ng02": "81f89995eaccb497cfe92abb81213bebd0d4ce5076210570d86aa9456cf7ff2e"
+          },
+          "cold_processes": 27,
+          "full_passes": 99,
+          "intermediate_passes_without_dump_or_ledger": 63,
+          "k": 10,
+          "leaf": 24,
+          "modes": {
+            "cpu": "16379",
+            "gpu": "81915",
+            "gpu_rejoue": "212987"
+          },
+          "path": "results/cmd/001_gpu_k10/files/gpu_k10/gpu_ab_report.json",
+          "refusals": 0,
+          "report_sha256": "e9b3228d5fe270aa7206e3f9ca8d911248af76bfaef8cc7dbe4e3edc1cfc7a9c",
+          "retained_hashes": 36,
+          "variants": null,
+          "warm_processes": 9
+        },
+        {
+          "bench_sha256": "dada75ad5a653c670f57f72f5d4746a958ea0810c57ac647fe31ab9f511dce9c",
+          "build_steps": [
+            {
+              "sha256": "dada75ad5a653c670f57f72f5d4746a958ea0810c57ac647fe31ab9f511dce9c",
+              "step": "reuse"
+            }
+          ],
+          "canonical": {
+            "lidar_ng00": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+            "lidar_ng01": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+            "lidar_ng02": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207"
+          },
+          "cold_processes": 18,
+          "full_passes": 66,
+          "intermediate_passes_without_dump_or_ledger": 42,
+          "k": 5,
+          "leaf": 24,
+          "modes": {
+            "cpu": "16379",
+            "gpu": "81915"
+          },
+          "path": "results/cmd/002_k5_feuilles24/files/k5_feuilles24/gpu_ab_report.json",
+          "refusals": 0,
+          "report_sha256": "72604d95c5e7833ee4e2c4c3342eb2c314a34c7472eb337de9b71b42b36b5040",
+          "retained_hashes": 24,
+          "variants": null,
+          "warm_processes": 6
+        }
+      ],
+      "overflow_count": 0,
+      "package_sha256": "78e18ba42e9e89f801072e10815f96446c151286594b25aac3c8d4219fae3d09",
+      "pin": "79fa5e9f7ceeb90b4b3de31e1d8b4938fc095016",
+      "plan_sha256": "7d47f5a3cf0873998aa6ac08dc490121bf5040c778ff5bed7c6cd0ceb29879f5",
+      "published_files_verified": 7,
+      "receipt_sha256": "3a269b04c4c4272f24a2e2d419ef2d0d7c7df3d17bd336abb65fcdcba4872fd0",
+      "result_manifest": {
+        "exact_inventory": true,
+        "files": 48,
+        "sha256": "5b6de27ed54a8a7796f3cc6a85bf297c03700dc760910e90b035bd2800d8c2cd"
+      },
+      "session": "v11.20261006.claudereservoir3",
+      "source_equality": {
+        "extra_or_missing_files": false,
+        "files_verified": 637,
+        "includes_docs_or_receipts": false,
+        "manifest_sha256": "192147067babdcd49f1af15b097fb474fd5fc8850cc83834c67991b3f1d9f39f",
+        "method": "git_archive_selectif_egalite_exacte",
+        "paths": [
+          "gcp-migration/v11_worker.sh",
+          "morsehgp3D_v11/CMakeLists.txt",
+          "morsehgp3D_v11/src",
+          "morsehgp3D_v11/tests",
+          "morsehgp3D_v11/cmake",
+          "morsehgp3D_v11/bench",
+          "morsehgp3D_v11/reference",
+          "morsehgp3D_v11/tools",
+          "morsehgp3D_v11/cli"
+        ],
+        "source_commit": "79fa5e9f7ceeb90b4b3de31e1d8b4938fc095016"
+      },
+      "status": "completed",
+      "stop_utc": "2026-10-06T14:20:11.813000+00:00",
+      "targeted_stop_certified": true,
+      "worker_exit_code": 0
+    },
+    {
+      "archive_sha256": "d068050017d8c68975af4497827915f07746bb6d35ec0eb7fe3814d9a227a05d",
+      "commands": [
+        {
+          "exit_code": 0,
+          "path": "results/cmd/000_k5_16/meta.txt",
+          "status": "ok"
+        },
+        {
+          "exit_code": 0,
+          "path": "results/cmd/001_k10_24/meta.txt",
+          "status": "ok"
+        },
+        {
+          "exit_code": 0,
+          "path": "results/cmd/002_k5_24/meta.txt",
+          "status": "ok"
+        },
+        {
+          "exit_code": 0,
+          "path": "results/cmd/003_sanitizer_ac/meta.txt",
+          "status": "ok"
+        }
+      ],
+      "done_controller_code": 0,
+      "gpu_reports": [
+        {
+          "bench_sha256": {
+            "A": "383e7f5bfab11f87dddaf8e8e95f881bbe9be3cda418ace613f729433a4d053d",
+            "AC": "c92746314f31719e2be27284257138d348e9ff1675bbae076e18a23699f0446f",
+            "C": "a0a80909fc206be9c0ca4ca372b49170883962a51b1d2e768f98956df436a58e",
+            "new": "2df0a79240c50fa2ae13e71441fdaabc826e8a6e6fff75cd6520b819f81e0337",
+            "sync": "bc871bbe9d72a9941e7938fa1711393d7eb37a4cf3ddf847ef74f4d2003e41d7"
+          },
+          "build_steps": [
+            {
+              "step": "nvcc"
+            },
+            {
+              "code": 0,
+              "step": "versions_nvcc"
+            },
+            {
+              "code": 0,
+              "step": "versions_cmake"
+            },
+            {
+              "code": 0,
+              "step": "configure"
+            },
+            {
+              "code": 0,
+              "step": "build"
+            },
+            {
+              "sha256": "2df0a79240c50fa2ae13e71441fdaabc826e8a6e6fff75cd6520b819f81e0337",
+              "step": "built"
+            },
+            {
+              "archive_sha256": "98d452f01a63fd56201aaa0055f6c04e6d9584ca69ec7f757af3c2f77b20f4a1",
+              "name": "sync",
+              "step": "variant"
+            },
+            {
+              "step": "nvcc"
+            },
+            {
+              "code": 0,
+              "step": "versions_nvcc"
+            },
+            {
+              "code": 0,
+              "step": "versions_cmake"
+            },
+            {
+              "code": 0,
+              "step": "configure"
+            },
+            {
+              "code": 0,
+              "step": "build"
+            },
+            {
+              "sha256": "bc871bbe9d72a9941e7938fa1711393d7eb37a4cf3ddf847ef74f4d2003e41d7",
+              "step": "built"
+            },
+            {
+              "archive_sha256": "0bbe323605aab74c8a7d4eba4ca812aac35e7ca98049c56e62070fce48bcbc9b",
+              "name": "A",
+              "step": "variant"
+            },
+            {
+              "step": "nvcc"
+            },
+            {
+              "code": 0,
+              "step": "versions_nvcc"
+            },
+            {
+              "code": 0,
+              "step": "versions_cmake"
+            },
+            {
+              "code": 0,
+              "step": "configure"
+            },
+            {
+              "code": 0,
+              "step": "build"
+            },
+            {
+              "sha256": "383e7f5bfab11f87dddaf8e8e95f881bbe9be3cda418ace613f729433a4d053d",
+              "step": "built"
+            },
+            {
+              "archive_sha256": "629ea74b710cc04e744966e64792d74a616fd3c3e7f590c2405f5a008444322e",
+              "name": "C",
+              "step": "variant"
+            },
+            {
+              "step": "nvcc"
+            },
+            {
+              "code": 0,
+              "step": "versions_nvcc"
+            },
+            {
+              "code": 0,
+              "step": "versions_cmake"
+            },
+            {
+              "code": 0,
+              "step": "configure"
+            },
+            {
+              "code": 0,
+              "step": "build"
+            },
+            {
+              "sha256": "a0a80909fc206be9c0ca4ca372b49170883962a51b1d2e768f98956df436a58e",
+              "step": "built"
+            },
+            {
+              "archive_sha256": "0fe342dfe96c4d1bc23c2bbc3ab1d56790bae620f3719f46865bf4d26a08e532",
+              "name": "AC",
+              "step": "variant"
+            },
+            {
+              "step": "nvcc"
+            },
+            {
+              "code": 0,
+              "step": "versions_nvcc"
+            },
+            {
+              "code": 0,
+              "step": "versions_cmake"
+            },
+            {
+              "code": 0,
+              "step": "configure"
+            },
+            {
+              "code": 0,
+              "step": "build"
+            },
+            {
+              "sha256": "c92746314f31719e2be27284257138d348e9ff1675bbae076e18a23699f0446f",
+              "step": "built"
+            }
+          ],
+          "canonical": {
+            "lidar_ng00": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+            "lidar_ng01": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+            "lidar_ng02": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207"
+          },
+          "cold_processes": 45,
+          "full_passes": 195,
+          "intermediate_passes_without_dump_or_ledger": 135,
+          "k": 5,
+          "leaf": 16,
+          "modes": {
+            "A:gpu": "81915",
+            "AC:gpu": "81915",
+            "C:gpu": "81915",
+            "new:gpu": "81915",
+            "sync:gpu": "81915"
+          },
+          "path": "results/cmd/000_k5_16/files/k5_16/gpu_ab_report.json",
+          "refusals": 0,
+          "report_sha256": "f7d3c73347e44043eab449f3e0011f2241f695a77150ec0d63e36806678c9fcc",
+          "retained_hashes": 60,
+          "variants": [
+            "new",
+            "sync",
+            "A",
+            "C",
+            "AC"
+          ],
+          "warm_processes": 15
+        },
+        {
+          "bench_sha256": {
+            "A": "383e7f5bfab11f87dddaf8e8e95f881bbe9be3cda418ace613f729433a4d053d",
+            "AC": "c92746314f31719e2be27284257138d348e9ff1675bbae076e18a23699f0446f",
+            "C": "a0a80909fc206be9c0ca4ca372b49170883962a51b1d2e768f98956df436a58e",
+            "new": "2df0a79240c50fa2ae13e71441fdaabc826e8a6e6fff75cd6520b819f81e0337",
+            "sync": "bc871bbe9d72a9941e7938fa1711393d7eb37a4cf3ddf847ef74f4d2003e41d7"
+          },
+          "build_steps": [
+            {
+              "sha256": "2df0a79240c50fa2ae13e71441fdaabc826e8a6e6fff75cd6520b819f81e0337",
+              "step": "reuse"
+            },
+            {
+              "archive_sha256": "98d452f01a63fd56201aaa0055f6c04e6d9584ca69ec7f757af3c2f77b20f4a1",
+              "name": "sync",
+              "step": "variant"
+            },
+            {
+              "sha256": "bc871bbe9d72a9941e7938fa1711393d7eb37a4cf3ddf847ef74f4d2003e41d7",
+              "step": "reuse"
+            },
+            {
+              "archive_sha256": "0bbe323605aab74c8a7d4eba4ca812aac35e7ca98049c56e62070fce48bcbc9b",
+              "name": "A",
+              "step": "variant"
+            },
+            {
+              "sha256": "383e7f5bfab11f87dddaf8e8e95f881bbe9be3cda418ace613f729433a4d053d",
+              "step": "reuse"
+            },
+            {
+              "archive_sha256": "629ea74b710cc04e744966e64792d74a616fd3c3e7f590c2405f5a008444322e",
+              "name": "C",
+              "step": "variant"
+            },
+            {
+              "sha256": "a0a80909fc206be9c0ca4ca372b49170883962a51b1d2e768f98956df436a58e",
+              "step": "reuse"
+            },
+            {
+              "archive_sha256": "0fe342dfe96c4d1bc23c2bbc3ab1d56790bae620f3719f46865bf4d26a08e532",
+              "name": "AC",
+              "step": "variant"
+            },
+            {
+              "sha256": "c92746314f31719e2be27284257138d348e9ff1675bbae076e18a23699f0446f",
+              "step": "reuse"
+            }
+          ],
+          "canonical": {
+            "lidar_ng00": "61a4245b91d9a4fdad012f0a2e26a63c3e48db1d46a180db756f2c4e4aa77295",
+            "lidar_ng01": "838a447e0b92e13e42f7f69a84fd536d5d46d26463d3f4cc7c688475878fe0de",
+            "lidar_ng02": "81f89995eaccb497cfe92abb81213bebd0d4ce5076210570d86aa9456cf7ff2e"
+          },
+          "cold_processes": 30,
+          "full_passes": 120,
+          "intermediate_passes_without_dump_or_ledger": 75,
+          "k": 10,
+          "leaf": 24,
+          "modes": {
+            "A:gpu": "81915",
+            "AC:gpu": "81915",
+            "C:gpu": "81915",
+            "new:gpu": "81915",
+            "sync:gpu": "81915"
+          },
+          "path": "results/cmd/001_k10_24/files/k10_24/gpu_ab_report.json",
+          "refusals": 0,
+          "report_sha256": "5febb40348ca8ea43685bf6b8f8e1e74bc85b81cf5154ccf891eeec8a422969e",
+          "retained_hashes": 45,
+          "variants": [
+            "new",
+            "sync",
+            "A",
+            "C",
+            "AC"
+          ],
+          "warm_processes": 15
+        },
+        {
+          "bench_sha256": {
+            "A": "383e7f5bfab11f87dddaf8e8e95f881bbe9be3cda418ace613f729433a4d053d",
+            "AC": "c92746314f31719e2be27284257138d348e9ff1675bbae076e18a23699f0446f",
+            "C": "a0a80909fc206be9c0ca4ca372b49170883962a51b1d2e768f98956df436a58e",
+            "new": "2df0a79240c50fa2ae13e71441fdaabc826e8a6e6fff75cd6520b819f81e0337",
+            "sync": "bc871bbe9d72a9941e7938fa1711393d7eb37a4cf3ddf847ef74f4d2003e41d7"
+          },
+          "build_steps": [
+            {
+              "sha256": "2df0a79240c50fa2ae13e71441fdaabc826e8a6e6fff75cd6520b819f81e0337",
+              "step": "reuse"
+            },
+            {
+              "archive_sha256": "98d452f01a63fd56201aaa0055f6c04e6d9584ca69ec7f757af3c2f77b20f4a1",
+              "name": "sync",
+              "step": "variant"
+            },
+            {
+              "sha256": "bc871bbe9d72a9941e7938fa1711393d7eb37a4cf3ddf847ef74f4d2003e41d7",
+              "step": "reuse"
+            },
+            {
+              "archive_sha256": "0bbe323605aab74c8a7d4eba4ca812aac35e7ca98049c56e62070fce48bcbc9b",
+              "name": "A",
+              "step": "variant"
+            },
+            {
+              "sha256": "383e7f5bfab11f87dddaf8e8e95f881bbe9be3cda418ace613f729433a4d053d",
+              "step": "reuse"
+            },
+            {
+              "archive_sha256": "629ea74b710cc04e744966e64792d74a616fd3c3e7f590c2405f5a008444322e",
+              "name": "C",
+              "step": "variant"
+            },
+            {
+              "sha256": "a0a80909fc206be9c0ca4ca372b49170883962a51b1d2e768f98956df436a58e",
+              "step": "reuse"
+            },
+            {
+              "archive_sha256": "0fe342dfe96c4d1bc23c2bbc3ab1d56790bae620f3719f46865bf4d26a08e532",
+              "name": "AC",
+              "step": "variant"
+            },
+            {
+              "sha256": "c92746314f31719e2be27284257138d348e9ff1675bbae076e18a23699f0446f",
+              "step": "reuse"
+            }
+          ],
+          "canonical": {
+            "lidar_ng00": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+            "lidar_ng01": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+            "lidar_ng02": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207"
+          },
+          "cold_processes": 45,
+          "full_passes": 195,
+          "intermediate_passes_without_dump_or_ledger": 135,
+          "k": 5,
+          "leaf": 24,
+          "modes": {
+            "A:gpu": "81915",
+            "AC:gpu": "81915",
+            "C:gpu": "81915",
+            "new:gpu": "81915",
+            "sync:gpu": "81915"
+          },
+          "path": "results/cmd/002_k5_24/files/k5_24/gpu_ab_report.json",
+          "refusals": 0,
+          "report_sha256": "ec5c014c77ce796ace8926b7d3c4cb279d02874e0f173c5f7b0d15f70102be90",
+          "retained_hashes": 60,
+          "variants": [
+            "new",
+            "sync",
+            "A",
+            "C",
+            "AC"
+          ],
+          "warm_processes": 15
+        }
+      ],
+      "overflow_count": 0,
+      "package_sha256": "f1f102e6995d49c72cee32c1fe39e39266c9f7ab18bd6a4c386db60c160a2f94",
+      "pin": "05db6f5b78d43a2657e519bc02841738d4dd02c1",
+      "plan_sha256": "222e4d6882ddae1d38a1ea7b8be8b017486a229730bccfc14e12b5067df88ffd",
+      "published_files_verified": 20,
+      "receipt_sha256": "4af9c28360a70826cb8f86ffe51573604797830618aae9d0021f2c1580822446",
+      "result_manifest": {
+        "exact_inventory": true,
+        "files": 62,
+        "sha256": "e2dfe90de4749c8143b1fdc0eb893b3a652a0d223d2eaba3a3263d00a172d545"
+      },
+      "sanitizer": {
+        "binary_variant": "AC",
+        "instrumented_ledger_and_status_not_preserved": true,
+        "ordinary_runs": 12,
+        "ordinary_work_absent": 0,
+        "pairs": [
+          [
+            "memcheck",
+            "A"
+          ],
+          [
+            "memcheck",
+            "B"
+          ],
+          [
+            "racecheck",
+            "A"
+          ],
+          [
+            "racecheck",
+            "B"
+          ],
+          [
+            "synccheck",
+            "A"
+          ]
+        ],
+        "report_sha256": "1f346ac7f4cd440ad75aa607b7791bb8f9a40cca4061dd3df6350cdf8ed83ed0",
+        "source_judge_guard_finding_remains_independent": true,
+        "verdict": "conforme"
+      },
+      "session": "v11.20261006.claudewfgpu1",
+      "source_equality": {
+        "extra_or_missing_files": false,
+        "files_verified": 637,
+        "includes_docs_or_receipts": false,
+        "manifest_sha256": "d5be659b2873a8b20db7f135bf60d1c33f84eef241c3a5cdfd815a2c7cc42bbf",
+        "method": "git_archive_selectif_egalite_exacte",
+        "paths": [
+          "gcp-migration/v11_worker.sh",
+          "morsehgp3D_v11/CMakeLists.txt",
+          "morsehgp3D_v11/src",
+          "morsehgp3D_v11/tests",
+          "morsehgp3D_v11/cmake",
+          "morsehgp3D_v11/bench",
+          "morsehgp3D_v11/reference",
+          "morsehgp3D_v11/tools",
+          "morsehgp3D_v11/cli"
+        ],
+        "source_commit": "05db6f5b78d43a2657e519bc02841738d4dd02c1"
+      },
+      "status": "completed",
+      "stop_utc": "2026-10-06T16:48:28.914000+00:00",
+      "targeted_stop_certified": true,
+      "worker_exit_code": 0
+    }
+  ],
+  "workflow_variants": {
+    "archive_hashes_stable_across_three_reports": true,
+    "archive_sources": [
+      {
+        "bytes": 1738703,
+        "name": "AC_src.tar.gz",
+        "sha256": "0fe342dfe96c4d1bc23c2bbc3ab1d56790bae620f3719f46865bf4d26a08e532"
+      },
+      {
+        "bytes": 1733329,
+        "name": "A_src.tar.gz",
+        "sha256": "0bbe323605aab74c8a7d4eba4ca812aac35e7ca98049c56e62070fce48bcbc9b"
+      },
+      {
+        "bytes": 1738541,
+        "name": "C_src.tar.gz",
+        "sha256": "629ea74b710cc04e744966e64792d74a616fd3c3e7f590c2405f5a008444322e"
+      },
+      {
+        "bytes": 1732884,
+        "name": "sync_src.tar.gz",
+        "sha256": "98d452f01a63fd56201aaa0055f6c04e6d9584ca69ec7f757af3c2f77b20f4a1"
+      }
+    ],
+    "binary_sha256": {
+      "A": "383e7f5bfab11f87dddaf8e8e95f881bbe9be3cda418ace613f729433a4d053d",
+      "AC": "c92746314f31719e2be27284257138d348e9ff1675bbae076e18a23699f0446f",
+      "C": "a0a80909fc206be9c0ca4ca372b49170883962a51b1d2e768f98956df436a58e",
+      "new": "2df0a79240c50fa2ae13e71441fdaabc826e8a6e6fff75cd6520b819f81e0337",
+      "sync": "bc871bbe9d72a9941e7938fa1711393d7eb37a4cf3ddf847ef74f4d2003e41d7"
+    },
+    "first_command_built_all_five": true,
+    "integrated_C_product_source": {
+      "changed_headers_sha256": {
+        "morsehgp3D_v11/src/catalogue/leaf_device.hpp": "e7e3ce1b81cca63161b38dbbc6d4f0ee9c3e984cd3fc3e8c208776423aa0a26a",
+        "morsehgp3D_v11/src/catalogue/leaf_device_predicates.hpp": "c638996b661c6fc690a9dff30d61a0c5294b882001bb806009d72120f6168472"
+      },
+      "equal_to_variant_C": true,
+      "files_verified": 165,
+      "manifest_sha256": "5c2b0d5580d80ca3fd7d53f040af27d19b2991a252fb7a5b38cfcf0d3cafd532"
+    },
+    "qualification_scope": "GPU u21 LiDAR diffs of C; Compute Sanitizer AC only; no integrated C CTest/mutant/u18/u24 execution in this session."
+  }
+}

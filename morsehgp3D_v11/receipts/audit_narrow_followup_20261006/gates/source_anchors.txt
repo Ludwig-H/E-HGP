@@ -1,0 +1,146 @@
+morsehgp3D_v11/src/catalogue/leaf_device.hpp sha256=e7e3ce1b81cca63161b38dbbc6d4f0ee9c3e984cd3fc3e8c208776423aa0a26a
+33:   bool wide = false;  // etendue > kNarrowSpan (prepare) : aucun prefixe, feuille non resolue
+34:
+35:   MHGP11_LEAF_HD Leaf(const Input& input, Counts& counts, Sink& out) : in(input), c(counts), sink(out) {}
+36:
+37:   MHGP11_LEAF_HD void prepare() {
+38:     m = in.m;
+39:     // Etendue de la feuille (kNarrowSpan, leaf_device_predicates.hpp), dans la boucle de chargement : enveloppe des
+40:     // sites et de la fermeture [lo, hi] par axe ; au-dela de 2^20 sur un axe, la feuille est non resolue avant tout
+41:     // prefixe (run_leaf). Automatique aux profils B <= 20 (le test est alors elimine a la compilation).
+42:     i64 low[3] = {in.lo[0], in.lo[1], in.lo[2]}, high[3] = {in.hi[0], in.hi[1], in.hi[2]};
+43:     for (u32 i = 0; i < m; ++i) {
+44:       const u32 s = in.sites[i];
+45:       const u32 xyz[3] = {in.x[s], in.y[s], in.z[s]};
+46:       for (int axis = 0; axis < 3; ++axis) {
+47:         P[i][axis] = xyz[axis];
+48:         low[axis] = i64(xyz[axis]) < low[axis] ? i64(xyz[axis]) : low[axis];
+49:         high[axis] = i64(xyz[axis]) > high[axis] ? i64(xyz[axis]) : high[axis];
+50:       }
+51:       dom[i] = domby[i] = nbr[i] = 0;
+52:       live[0][i] = live[1][i] = live[2][i] = 0;
+53:     }
+54:     if constexpr (kBits > 20)
+55:       wide = high[0] - low[0] > kNarrowSpan || high[1] - low[1] > kNarrowSpan || high[2] - low[2] > kNarrowSpan;
+337: // Une feuille : kOk et ses emissions et compteurs, ou kUnresolved (compteurs et emissions a jeter).
+338: template <class Sink>
+339: MHGP11_LEAF_HD u32 run_leaf(const Input& in, Counts& counts, Sink& sink) {
+340:   if (in.m == 0 || in.m > kMaxSites || in.kmax < 1) return kUnresolved;
+341:   Leaf<Sink> leaf(in, counts, sink);
+342:   leaf.prepare();
+343:   leaf.live_rows();
+344:   // Feuille d'etendue > 2^20 (prepare) : aucun prefixe, sans branche nouvelle ; elle est rendue non resolue.
+345:   const u64 initial = (in.m >= 64 ? ~u64(0) : (u64(1) << in.m) - 1) & (u64(leaf.wide) - 1);
+346:   leaf.template extend<0>(initial, initial);
+347:   return leaf.unresolved || leaf.wide ? kUnresolved : kOk;
+
+morsehgp3D_v11/tests/catalogue/leaf_device_narrow_test.cpp sha256=13b764253b5868ce879a64d3c499583cb3c91fd6e6ce8f645f855b3e61b6b337
+207:   CHECK(admitted.counts.prefixes > 0 && admitted.counts.region_line_evaluations > 0);
+208:   CHECK(admitted.counts.q4_candidates > 0 && admitted.counts.emitted > 0);
+209:   // Etendue exactement kSpan portee par la fermeture : boite jusqu'a hi = 2^B, site lointain a 2^B - kSpan.
+210:   const Box closure{{kTop - 3000, kTop - 3000, kTop - 3000}, {kTop, kTop, kTop}};
+211:   same_counts(run_both(cluster_and_far(kTop - kSpan), closure, budget));
+212:   // Profils > 20 bits : une unite de plus (2^20 + 1), feuille non resolue avant tout prefixe ; leaf.cpp la traite.
+213:   if constexpr (kCoordBits > 20) {
+214:     const auto wide = run_both(cluster_and_far(kTop - 2 - kSpan), inner, budget);
+215:     CHECK_EQ(wide.status, ld::kUnresolved);
+216:     CHECK_EQ(wide.counts.prefixes, 0u);
+217:     CHECK(wide.reference.ok() && wide.reference.value().prefixes > 0);
+218:     // Sites d'etendue kSpan, mais la fermeture hi = 2^B porte l'enveloppe a 2^20 + 1 : non resolue aussi.
+219:     const auto by_closure = run_both(cluster_and_far(kTop - 1 - kSpan), closure, budget);
+220:     CHECK_EQ(by_closure.status, ld::kUnresolved);
+221:   } else {
+222:     CHECK(kSpan == kTop - 1);  // etendue maximale realisable : admise sans test
+223:     CHECK(kTop <= ld::kNarrowSpan);
+224:     CHECK(admitted.reference.ok());
+225:   }
+226:   CHECK(budget.released().ok());
+227: }
+
+morsehgp3D_v11/tests/catalogue/tests.cmake sha256=7ce65d28c386fc4cceadf6c12edadafa1b50d9c3fad0fa73476b903499f4d23c
+168: # Arithmetique etroite de la feuille source unique (etendue <= 2^20) contre num/ et i128, cas limites du cube 2^B.
+169: mhgp11_add_unit(mhgp11_catalogue_leaf_narrow SOURCES leaf_device_narrow_test.cpp
+170:                 GROUPS line_reference acute_and_triple span_refusal LABELS fast)
+
+morsehgp3D_v11/tests/mutants/catalogue.json sha256=e3a8070cfd2ec95dc10277178f5202854a262a6a5d97e359db5d29a3ed613a47
+565:     {
+566:       "id": "etendue_seuil_double",
+567:       "fichier": "src/catalogue/leaf_device.hpp",
+568:       "cherche": "      wide = high[0] - low[0] > kNarrowSpan || high[1] - low[1] > kNarrowSpan || high[2] - low[2] > kNarrowSpan;",
+569:       "remplace": "      wide = high[0] - low[0] > 2 * kNarrowSpan || high[1] - low[1] > 2 * kNarrowSpan || high[2] - low[2] > 2 * kNarrowSpan;",
+570:       "porte": "mhgp11_catalogue_leaf_narrow_span_refusal",
+571:       "note": "levier C : feuille d'etendue 2^20 + 1 admise dans l'arithmetique etroite (bornes i64 non prouvees)"
+572:     },
+573:     {
+574:       "id": "etendue_sans_fermeture",
+575:       "fichier": "src/catalogue/leaf_device.hpp",
+576:       "cherche": "high[3] = {in.hi[0], in.hi[1], in.hi[2]};",
+577:       "remplace": "high[3] = {in.lo[0], in.lo[1], in.lo[2]};",
+578:       "porte": "mhgp11_catalogue_leaf_narrow_span_refusal",
+579:       "note": "levier C : la borne hi de la fermeture hors de l'etendue ; une boite jusqu'a 2^B qui la porte a 2^20 + 1 passe"
+580:     }
+
+morsehgp3D_v11/tests/mutants/run_mutants.py sha256=866dd057ae01f9a2628565d16f91accc33ae0bba4b9deb3f2cf9fcf05ff3b038
+238:     def configure_and_build(self, folder, options, parallel):
+239:         """Rend (etape en echec ou None, sortie)."""
+240:         configure = [self.args.cmake, '-S', os.path.join(folder, 'src'), '-B', os.path.join(folder, 'build')]
+241:         if self.args.generator:
+242:             configure += ['-G', self.args.generator]
+243:         configure += ['-DMHGP11_MODULES=' + ';'.join(self.construction)] + self.args.cmake_arg + list(options)
+244:         code, output = call(configure, CONFIGURE_TIMEOUT)
+245:         if code != 0:
+246:             return 'configuration', output
+247:         code, more = call([self.args.cmake, '--build', os.path.join(folder, 'build'), '--parallel', str(parallel)],
+248:                           BUILD_TIMEOUT)
+249:         if code != 0:
+250:             return 'construction', output + more
+432:         groups = {}
+433:         for mutant in mutants:
+434:             groups.setdefault(tuple(mutant['options']), []).append(mutant)
+435:         for label, (options, members) in enumerate(sorted(groups.items())):
+436:             gates = sorted({mutant['porte'] for mutant in members if mutant['attendu'] == 'porte'})
+437:             problem = witness(builder, source, work, str(label), options, gates)
+
+morsehgp3D_v11/CMakeLists.txt sha256=82fa1054e14a2bf16e28195cac32a4d81dec56bb81d6481d9d9214d5c87f555d
+296:   # Mutants : une porte par manifeste tests/mutants/<unite>.json present. La copie mutee est construite avec le
+297:   # compilateur et le profil de ce build, sans sanitizer : sous MHGP11_SANITIZE ou MHGP11_TSAN les portes de mutants
+298:   # ne sont pas enregistrees (une campagne par jeu de builds suffit). Le compte rendu de la campagne (empreintes du
+299:   # manifeste et des sources, verdict et cause de chaque mutant) est ecrit dans <build>/mutants_<unite>.json.
+300:   set(mhgp11_mutant_profile -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+301:       -DMHGP11_COORD_BITS=${MHGP11_COORD_BITS} -DMHGP11_POISON=${MHGP11_POISON} -DMHGP11_MARCH=${MHGP11_MARCH})
+302:   foreach(unit IN LISTS MHGP11_UNITS)
+303:     set(manifest ${PROJECT_SOURCE_DIR}/tests/mutants/${unit}.json)
+304:     if(EXISTS ${manifest})
+305:       # Manifeste a jour (schema, motifs presents une seule fois) : porte rapide, sans construction.
+306:       mhgp11_python_gate(mhgp11_mutants_${unit}_manifest 0 ${PROJECT_SOURCE_DIR}/tests/mutants/run_mutants.py
+307:                          --manifest ${manifest} --source ${PROJECT_SOURCE_DIR} --check LABELS mutant fast)
+308:       if(NOT MHGP11_SANITIZE AND NOT MHGP11_TSAN)
+309:         set(mutant_args --manifest ${manifest} --source ${PROJECT_SOURCE_DIR}
+310:             --work ${PROJECT_BINARY_DIR}/mutants/${unit} --report ${PROJECT_BINARY_DIR}/mutants_${unit}.json
+311:             --jobs ${MHGP11_MUTANT_JOBS}
+312:             --cmake ${CMAKE_COMMAND} --ctest ${CMAKE_CTEST_COMMAND} --generator ${CMAKE_GENERATOR})
+313:         foreach(definition IN LISTS mhgp11_mutant_profile)
+314:           list(APPEND mutant_args --cmake-arg=${definition})
+315:         endforeach()
+316:         mhgp11_python_gate(mhgp11_mutants_${unit} 0 ${PROJECT_SOURCE_DIR}/tests/mutants/run_mutants.py
+317:                            ${mutant_args} LABELS mutant long TIMEOUT 7200)
+
+morsehgp3D_v11/tools/g4_matrix.json sha256=26b8ce49043ad7bb7d3faea9afb76b64df7d39a168f0273a36f3bddf9867b574
+42:       "name": "mutants",
+43:       "description": "Portes de label mutant : manifestes, puis une campagne par manifeste ; le lanceur se parallelise lui-meme (MHGP11_MUTANT_JOBS = fils alloues).",
+44:       "compiler": "g++",
+45:       "cmake_options": [
+46:         "-DCMAKE_BUILD_TYPE=Release",
+47:         "-DMHGP11_MUTANT_JOBS={threads}",
+48:         "-DMHGP11_COORD_BITS=18"
+49:       ],
+50:       "ctest_args": [
+51:         "-L",
+52:         "^mutant$"
+53:       ],
+54:       "threads": 32,
+55:       "ctest_parallel": 1,
+56:       "timeout_seconds": 2100,
+57:       "test_timeout_seconds": 1200,
+58:       "require_labels": [
+59:         "mutant"

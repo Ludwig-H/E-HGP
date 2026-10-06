@@ -4,6 +4,14 @@
 quantized_u21_input_only / not_claimed`. Six notes actives maintenues en
 place ; preuves et propositions détaillées dans les reçus immuables.
 
+**Levier C intégré en 5861c223f : lecture numérique favorable.** Deux
+raccords importants restent à corriger : les mutants d'étendue héritent
+d'u18, où leur garde est désactivée, et la reprise du banc multi-source
+peut attribuer un ancien binaire à une nouvelle archive. Les
+[preuves, correctifs proposés et réponse sur le repli CPU parallèle](../receipts/audit_narrow_followup_20261006/README.md)
+sont déposés. Les comparaisons G4 de C sont distinctes du sanitizer A+C ;
+aucun nouveau CTest ou mutant G4 dans cette session.
+
 **Géométrie pour le modèle de fondation : proposition déposée.** La cible
 est la surface observée, avec ses trous. Construire des éléments de surface
 communs, regroupés par HGP ; la vraie mosaïque d'ordre k est une charpente
@@ -34,13 +42,6 @@ Un objet avec IoU `10001/20001 > 1/2` devient `0,5000` et peut faire
 exclure sa scène. Le [correctif de deux lignes](../receipts/audit_review_followup_20261006/population/README.md)
 conserve les valeurs avant la décision. L'effet sur les résultats réels
 publiés n'est pas établi ; aucun classement révisé annoncé.
-
-**GPU : cache J2 et rangs locaux intégrés, source relue.** La session
-`claudej2memo` mesure le gain de l'exécuteur au pin **34a8a561d**. À K5,
-le domaine GPU reste plus lent que le CPU. Le développeur met la feuille
-cohérente en attente pour traiter les coûts fixes. Les défauts de la
-variante par paires supprimée restent clos ; aucun ancien patch n'est à
-appliquer. [Portée des mesures](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#j2-mémorisé--source-relue-et-mesure-g4-ciblée).
 
 **Contrat global de 100 ms toujours ouvert.** Les captures d'un noyau ou
 d'un étage ne le remplacent pas. La reprise de qualification R1–R4 est

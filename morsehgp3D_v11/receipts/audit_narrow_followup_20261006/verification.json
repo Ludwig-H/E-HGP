@@ -1,0 +1,60 @@
+{
+  "source_commit": "5861c223f31b5d7d6f621522d0ca84d0064c9904",
+  "native_executions": 0,
+  "cloud_actions": 0,
+  "replays": [
+    {
+      "script": "gates/replay.py",
+      "modes": [
+        "normal",
+        "-O"
+      ],
+      "exit_codes": [
+        0,
+        0
+      ],
+      "verdict": "narrow_gate_source_verdict conforme profiles3 mutants2 anchors223 native0 cmake0 cloud0"
+    },
+    {
+      "script": "evidence/cache/replay.py",
+      "modes": [
+        "normal",
+        "-O"
+      ],
+      "exit_codes": [
+        0,
+        0
+      ],
+      "stdout_sha256": "87fccd1826ba73c2dfc57388f1595bcd045422cee925e0132e5678d00b58f1b9"
+    },
+    {
+      "script": "evidence/receipts/replay.py",
+      "modes": [
+        "normal",
+        "-O"
+      ],
+      "exit_codes": [
+        0,
+        0
+      ],
+      "stdout_sha256": "f8a7a4b6380211778f89236ccc561f2507f51f6515ed18b6498488a501a57b57"
+    }
+  ],
+  "proposal_apply_check": "both new patches applicable to source pin; not applied to product",
+  "previous_proposals_still_applicable": [
+    "audit_reservoir_followup_20261006/gates/proposal.patch",
+    "audit_reservoir_followup_20261006/judge/fix_proposal.patch",
+    "audit_review_followup_20261006/population/proposed.patch"
+  ],
+  "child_manifests_checked": [
+    "gates/SHA256SUMS",
+    "evidence/SHA256SUMS"
+  ],
+  "local_markdown_links_checked": 230,
+  "active_audit_notes": 6,
+  "limits": [
+    "Read-only source and bounded Python/mock checks; no native or GPU execution by auditor.",
+    "Counterexamples concern qualification/provenance, not an incorrect engine output demonstrated.",
+    "Three session replays depend on retained local archives described in evidence/README.md."
+  ]
+}

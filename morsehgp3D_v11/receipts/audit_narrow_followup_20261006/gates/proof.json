@@ -1,0 +1,71 @@
+{
+  "anchors": {
+    "catalogue": {
+      "additional": 0,
+      "all_unique": true,
+      "primary": 72
+    },
+    "tower": {
+      "additional": 2,
+      "all_unique": true,
+      "primary": 151
+    }
+  },
+  "cloud_actions": 0,
+  "cmake_runs": 0,
+  "configurations_after_proposal": {
+    "etendue_sans_fermeture": {
+      "last_definition": 21,
+      "profile_definitions": [
+        "-DMHGP11_COORD_BITS=18",
+        "-DMHGP11_COORD_BITS=21"
+      ]
+    },
+    "etendue_seuil_double": {
+      "last_definition": 21,
+      "profile_definitions": [
+        "-DMHGP11_COORD_BITS=18",
+        "-DMHGP11_COORD_BITS=21"
+      ]
+    }
+  },
+  "floors_unchanged": {
+    "catalogue": 72,
+    "tower": 151
+  },
+  "kind": "source equivalence and intercepted exact Builder, not CTest execution",
+  "mutants": [
+    "etendue_seuil_double",
+    "etendue_sans_fermeture"
+  ],
+  "native_runs": 0,
+  "official_mutant_profile": 18,
+  "pin": "5861c223f31b5d7d6f621522d0ca84d0064c9904",
+  "profile_boundaries": {
+    "18": {
+      "both_mutations_equivalent": true,
+      "guard_compiled": false,
+      "maximum_envelope": 262144,
+      "outside_span_tests_compiled": false
+    },
+    "21": {
+      "both_mutations_equivalent": false,
+      "closure_fixture_span": 1048577,
+      "doubled_threshold_wide": false,
+      "guard_compiled": true,
+      "outside_span_tests_compiled": true,
+      "reference_wide": true,
+      "without_closure_wide": false
+    },
+    "24": {
+      "both_mutations_equivalent": false,
+      "closure_fixture_span": 1048577,
+      "doubled_threshold_wide": false,
+      "guard_compiled": true,
+      "outside_span_tests_compiled": true,
+      "reference_wide": true,
+      "without_closure_wide": false
+    }
+  },
+  "targeted_local_profile": 21
+}

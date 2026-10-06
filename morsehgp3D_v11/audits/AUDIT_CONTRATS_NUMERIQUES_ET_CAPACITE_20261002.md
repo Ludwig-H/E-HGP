@@ -10,6 +10,47 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
+## Levier C : qualification et repli parallèle — réponse à U
+
+**5861c223f : avis source favorable sur l'arithmétique étroite.** La garde
+D≤2^20 couvre les sites et la fermeture de la boîte ; les feuilles plus
+larges passent à la référence CPU. Les deux en-têtes intégrés sont identiques
+à la variante C du reçu `wfgpu1`. Ses comparaisons GPU et son sanitizer
+**A+C** gardent leurs périmètres propres : le plan ne comporte aucun CTest
+ni mutant. [Preuves et réponse détaillée](../receipts/audit_narrow_followup_20261006/README.md).
+
+**Deux mutants ne peuvent pas remplir leur rôle dans la campagne officielle.**
+`etendue_seuil_double` et `etendue_sans_fermeture` héritent d'u18 dans
+`g4_matrix.json`, alors que leurs branches sont éliminées pour B≤20.
+Ajouter `-DMHGP11_COORD_BITS=21` à ces deux entrées du manifeste ; le runner
+applique déjà cette option au contrôle et au mutant. La vérification des
+ancres ne remplace pas cette condition d'activation.
+[Preuve statique et patch](../receipts/audit_narrow_followup_20261006/gates/README.md).
+
+**Le cache de `gpu_ab.py --variants` n'est pas lié à l'archive annoncée.**
+Si une archive est remplacée sous le même nom et `--work` réutilisé, les
+anciens sources et l'ancien binaire sont repris, mais le journal peut
+porter la nouvelle empreinte. Lier la reprise à l'identité de l'archive.
+[Contre-exemple borné et proposition](../receipts/audit_narrow_followup_20261006/evidence/README.md).
+Aucune mauvaise attribution n'est démontrée dans les trois reçus examinés.
+
+**U2 — Repli parallèle : oui, avec sorties privées par feuille et préfixes
+ordonnés après join.** Les compteurs GPU remis à zéro des feuilles non
+résolues ne dimensionnent pas leur sortie CPU : employer des pages privées
+ou un comptage préalable. Conserver un espace de travail par ouvrier,
+les limites globales contrôlées après assemblage, le recalage de
+`population_begin`, le budget des coexistences et l'absence de publication
+en cas de refus. Pas de réentrée dans le Pool. La porte décisive mêle
+feuilles étroites/larges et rejeu après émissions provisoires, compare W1/W48,
+puis vérifie refus tardif et restitution mémoire.
+
+**U1 — A plus lent malgré moins de SASS : cause non établie.** Les instructions
+statiques ne suffisent pas à incriminer ATOM/YIELD. Si cette piste rejetée
+est reprise, comparer l'exécution dynamique avec prédicat actif, les
+registres et les accès mémoire à travail égal, puis isoler une modification.
+Les références et les conditions exactes sont dans le reçu ; aucune
+campagne supplémentaire demandée pour poursuivre C.
+
 ## Supports v2 : sélection et cohérence du dossier
 
 **Corrigé en 07428324e, qualifié sur G4 en Release u21.** Le sélecteur

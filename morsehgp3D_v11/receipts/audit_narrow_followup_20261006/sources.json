@@ -1,0 +1,26 @@
+{
+  "source_commit": "5861c223f31b5d7d6f621522d0ca84d0064c9904",
+  "framework": {
+    "phase": "exploration_v11_hors_registre",
+    "backend": "cpu_reference",
+    "profile": "quantized_u21_input_only",
+    "public_status": "not_claimed"
+  },
+  "files": {
+    "src/catalogue/leaf_device.hpp": "e7e3ce1b81cca63161b38dbbc6d4f0ee9c3e984cd3fc3e8c208776423aa0a26a",
+    "src/catalogue/leaf_device_predicates.hpp": "c638996b661c6fc690a9dff30d61a0c5294b882001bb806009d72120f6168472",
+    "src/catalogue/single_pass_batch.cpp": "a06483c5e8b53853a88ce9f14cf8f066f653a13dd1156c3d318db02688b49f42",
+    "src/catalogue/single_pass_storage.hpp": "0bf2d416b6bf0cb47c976dc77881738380a8dc0670a9d017ed17c7e1c0e3296c",
+    "src/catalogue/single_pass.cpp": "06809b210879e91352643c69518841e5cd1f295b39e306e7da164c2717abeb16",
+    "src/catalogue/catalogue.cpp": "5182608b52102b42a86ac5438c56767afeef277be8fab870ef8bf4b37cbd6663",
+    "src/catalogue/internal.hpp": "ed015ca9881eb23ac3ffe96526d008267f23859efd49c34b65126c83612675a1",
+    "src/core/buffer.hpp": "3f520dd045226ff115ea67b26859b43ec7415e855ef1c8f4542e8217414c7940",
+    "src/sched/sched.hpp": "104e1a3c75e8adfe6a2f897ffcbfa4d06fc7f534fe3d6f788ce516c7e66ba07f",
+    "bench/gpu_ab.py": "96cd5495490444f78218f3aa4a347e4e6e889e39f7824605c7a6b95e44349d6b",
+    "tests/catalogue/leaf_device_narrow_test.cpp": "13b764253b5868ce879a64d3c499583cb3c91fd6e6ce8f645f855b3e61b6b337",
+    "tests/mutants/catalogue.json": "e3a8070cfd2ec95dc10277178f5202854a262a6a5d97e359db5d29a3ed613a47",
+    "tools/g4_matrix.json": "26b8ce49043ad7bb7d3faea9afb76b64df7d39a168f0273a36f3bddf9867b574",
+    "tests/mutants/run_mutants.py": "866dd057ae01f9a2628565d16f91accc33ae0bba4b9deb3f2cf9fcf05ff3b038"
+  },
+  "method": "Source review and bounded Python checks only; no build, native test, CUDA execution or GCP session by auditor."
+}

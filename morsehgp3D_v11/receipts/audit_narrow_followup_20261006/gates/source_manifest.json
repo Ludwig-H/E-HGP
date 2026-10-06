@@ -1,0 +1,41 @@
+{
+  "pin": "5861c223f31b5d7d6f621522d0ca84d0064c9904",
+  "sources": {
+    "morsehgp3D_v11/CMakeLists.txt": {
+      "git_blob": "419a1949d5b62177469c134f5c9c366f14094b22",
+      "sha256": "82fa1054e14a2bf16e28195cac32a4d81dec56bb81d6481d9d9214d5c87f555d"
+    },
+    "morsehgp3D_v11/src/catalogue/leaf_device.hpp": {
+      "git_blob": "4428a60af29dd7b934cc247bfe23384f12a579f5",
+      "sha256": "e7e3ce1b81cca63161b38dbbc6d4f0ee9c3e984cd3fc3e8c208776423aa0a26a"
+    },
+    "morsehgp3D_v11/src/catalogue/leaf_device_predicates.hpp": {
+      "git_blob": "9d111027c41957ff043ceb85f2b56824e6ad26ca",
+      "sha256": "c638996b661c6fc690a9dff30d61a0c5294b882001bb806009d72120f6168472"
+    },
+    "morsehgp3D_v11/tests/catalogue/leaf_device_narrow_test.cpp": {
+      "git_blob": "a06670b8aca2c81044443a8a5ed54cef6514cbd6",
+      "sha256": "13b764253b5868ce879a64d3c499583cb3c91fd6e6ce8f645f855b3e61b6b337"
+    },
+    "morsehgp3D_v11/tests/catalogue/tests.cmake": {
+      "git_blob": "4ad4a4124d70983f4cef5f714bc56bd7288ad076",
+      "sha256": "7ce65d28c386fc4cceadf6c12edadafa1b50d9c3fad0fa73476b903499f4d23c"
+    },
+    "morsehgp3D_v11/tests/mutants/catalogue.json": {
+      "git_blob": "e93baad1d1cce30f14dc9bdc60415b9b7f132859",
+      "sha256": "e3a8070cfd2ec95dc10277178f5202854a262a6a5d97e359db5d29a3ed613a47"
+    },
+    "morsehgp3D_v11/tests/mutants/run_mutants.py": {
+      "git_blob": "b5296bf66805f9bcfb71dc5b19328fd074b72944",
+      "sha256": "866dd057ae01f9a2628565d16f91accc33ae0bba4b9deb3f2cf9fcf05ff3b038"
+    },
+    "morsehgp3D_v11/tests/mutants/tower.json": {
+      "git_blob": "195854d34b86f78b1cf43f85065c87a135bbda7f",
+      "sha256": "d7357db90a0de90fad61d5b29506fb14dc3d2b249844a61cd7a5bb30483493ed"
+    },
+    "morsehgp3D_v11/tools/g4_matrix.json": {
+      "git_blob": "b9c7767cc58c7c688a3497b7eab68d0a5c0c48ba",
+      "sha256": "26b8ce49043ad7bb7d3faea9afb76b64df7d39a168f0273a36f3bddf9867b574"
+    }
+  }
+}

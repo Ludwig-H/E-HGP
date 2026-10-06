@@ -1,0 +1,64 @@
+{
+  "cases": [
+    {
+      "archive_source_sha256": "980da7c540cb09736c2ede66d998337377023a47c1b9cd1a699010927e4b5ade",
+      "build_steps": [
+        {
+          "archive_sha256": "b1a595d7b050b4e1595fb872419dbacf2a502a7aa842be2fad917fe0e38b5896",
+          "name": "C",
+          "step": "variant"
+        },
+        {
+          "sha256": "8a5ec641a20efb90bad93fe62792534975dd40d9787fb3501d68999d0647efaa",
+          "step": "reuse"
+        }
+      ],
+      "cached_binary_sha256": "8a5ec641a20efb90bad93fe62792534975dd40d9787fb3501d68999d0647efaa",
+      "cold_calls": 6,
+      "exit_code": 0,
+      "extracted_source_sha256": "980da7c540cb09736c2ede66d998337377023a47c1b9cd1a699010927e4b5ade",
+      "logged_archive_matches_current_bytes": true,
+      "logged_archive_sha256": "b1a595d7b050b4e1595fb872419dbacf2a502a7aa842be2fad917fe0e38b5896",
+      "reported_source_matches_extracted": true,
+      "verdict": "conforme",
+      "warm_calls": 6
+    },
+    {
+      "archive_source_sha256": "dfec1fe187503b521146dd696084f5de0cefa1aae13672a390a423b4ed17b12e",
+      "build_steps": [
+        {
+          "archive_sha256": "414e15e3c38b14605c771939b7428002c9afb01d251e5b82fcd9fce7eb1e6c11",
+          "name": "C",
+          "step": "variant"
+        },
+        {
+          "sha256": "8a5ec641a20efb90bad93fe62792534975dd40d9787fb3501d68999d0647efaa",
+          "step": "reuse"
+        }
+      ],
+      "cached_binary_sha256": "8a5ec641a20efb90bad93fe62792534975dd40d9787fb3501d68999d0647efaa",
+      "cold_calls": 6,
+      "exit_code": 0,
+      "extracted_source_sha256": "980da7c540cb09736c2ede66d998337377023a47c1b9cd1a699010927e4b5ade",
+      "logged_archive_matches_current_bytes": true,
+      "logged_archive_sha256": "414e15e3c38b14605c771939b7428002c9afb01d251e5b82fcd9fce7eb1e6c11",
+      "reported_source_matches_extracted": false,
+      "verdict": "conforme",
+      "warm_calls": 6
+    }
+  ],
+  "cloud_actions": 0,
+  "dependency_path": "morsehgp3D_v11/bench/ab_g4.py",
+  "dependency_sha256": "93fe9d58efe580e243bbeb50f740efa0ad349b613b2d765fd2c5a77c34767acf",
+  "limits": [
+    "Process output and binary files are protocol stubs, not geometric/native evidence.",
+    "This demonstrates a reusable-cache attribution defect, not a false attribution in closed real sessions.",
+    "No native build/run, cloud action, LiDAR data or developer modification."
+  ],
+  "mock_process_calls": 24,
+  "native_executions": 0,
+  "schema": "audit_gpu_ab_variant_stale_cache_v1",
+  "source_path": "morsehgp3D_v11/bench/gpu_ab.py",
+  "source_pin": "05db6f5b78d43a2657e519bc02841738d4dd02c1",
+  "source_sha256": "96cd5495490444f78218f3aa4a347e4e6e889e39f7824605c7a6b95e44349d6b"
+}
