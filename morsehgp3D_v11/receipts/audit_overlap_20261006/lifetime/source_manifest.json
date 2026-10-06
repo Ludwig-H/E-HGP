@@ -1,0 +1,28 @@
+{
+  "base_commit": "c1675e4c94958ba7e4b5a0d0327d54b3c466ad5c",
+  "captured_utc": "2026-10-06T07:20:16.680072+00:00",
+  "mode": "Git show pin figé ; aucune source WIP ni qualification transférée",
+  "source_commit": "cf28afb04040eacf1eb92080d75e8a0ebb58a4eb",
+  "sources": [
+    {
+      "bytes": 15334,
+      "path": "morsehgp3D_v11/src/catalogue/single_pass.cpp",
+      "sha256": "9e2b247bbd021e309c84b13552a720957ba5acf593ef3857ec3656cb02e76a53"
+    },
+    {
+      "bytes": 9635,
+      "path": "morsehgp3D_v11/src/catalogue/leaf_overlap.cpp",
+      "sha256": "1a7c6b5c872d88fdf817611da501779b42478bf1166bc296c69f6c817dfd1701"
+    },
+    {
+      "bytes": 12996,
+      "path": "morsehgp3D_v11/src/catalogue/single_pass_batch.cpp",
+      "sha256": "d0d533d869210605530eb0b57027531bde4adc553c73171840ff91f8e86a5029"
+    },
+    {
+      "bytes": 8148,
+      "path": "morsehgp3D_v11/src/core/status.hpp",
+      "sha256": "e6004beb5ec4e78fb2b582004f4122611602809d360ff9f1b3bf4679348f6594"
+    }
+  ]
+}

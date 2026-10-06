@@ -1,0 +1,12 @@
+--- a/morsehgp3D_v11/src/catalogue/single_pass.cpp
++++ b/morsehgp3D_v11/src/catalogue/single_pass.cpp
+@@ -223,8 +223,8 @@
+   const bool batched = params.batch_leaves || params.cuda_leaves;
+   // Recouvrement : files dans l'ordre de reclamation, fil dedie lance avant la passe, arrete par son destructeur
+   // sur tout refus.
+-  OverlapLane lane;
+   std::array<const TaskLeafQueue*, Capacity> claimed{};
++  OverlapLane lane;  // Le join precede la fin de vie du tableau prete au fil.
+   if (batched && params.overlap_leaves) {
+     for (u32 i = 0; i < frontier.size(); ++i) {
+       active[order[i]].queue.bind(budget);

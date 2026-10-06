@@ -1,0 +1,14 @@
+[
+  {
+    "optimized": false,
+    "returncode": 0,
+    "stdout_sha256": "2c251e2d03cfb581c129d867bbc0f8102c1f5f706bc4239d7d1f4d6181a2519d",
+    "stderr_bytes": 0
+  },
+  {
+    "optimized": true,
+    "returncode": 0,
+    "stdout_sha256": "2c251e2d03cfb581c129d867bbc0f8102c1f5f706bc4239d7d1f4d6181a2519d",
+    "stderr_bytes": 0
+  }
+]

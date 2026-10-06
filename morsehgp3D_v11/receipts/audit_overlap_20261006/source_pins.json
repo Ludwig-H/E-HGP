@@ -1,0 +1,13 @@
+{
+  "commit": "cf28afb04040eacf1eb92080d75e8a0ebb58a4eb",
+  "files": {
+    "morsehgp3D_v11/src/catalogue/single_pass.cpp": "9e2b247bbd021e309c84b13552a720957ba5acf593ef3857ec3656cb02e76a53",
+    "morsehgp3D_v11/src/catalogue/leaf_overlap.cpp": "1a7c6b5c872d88fdf817611da501779b42478bf1166bc296c69f6c817dfd1701",
+    "morsehgp3D_v11/src/catalogue/single_pass_batch.cpp": "d0d533d869210605530eb0b57027531bde4adc553c73171840ff91f8e86a5029",
+    "morsehgp3D_v11/src/catalogue/leaf_batch.cpp": "3a6f92c02046cf2b97f26f79de1425782f474c0a9c26671643cd8b0a2d93f0d5",
+    "morsehgp3D_v11/src/catalogue/leaf_batch_cuda.cu": "295e81f58c6227d7801f52e40dc1e2509706d533d85d700dbddaaa02f0346eec",
+    "morsehgp3D_v11/src/catalogue/leaf_queue.hpp": "2b78248657674d72ab6f046ead2723df6b2b25de2764f1eab52e96379d6dee1f",
+    "morsehgp3D_v11/tests/tower/full_leaf_lanes.py": "1769e53d5e94c4a9d8300c7bcf5dab5feb32d2d79e13d6c939ee67a1c4880d16",
+    "morsehgp3D_v11/src/catalogue/leaf_device_predicates.hpp": "b44f65873b81008a8a954a432ffec20a2f051f42804a3a7445d20ee1d9946305"
+  }
+}

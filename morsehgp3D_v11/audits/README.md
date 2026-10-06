@@ -4,35 +4,28 @@
 quantized_u21_input_only / not_claimed`. Six notes actives maintenues en
 place ; preuves détaillées dans les reçus immuables.
 
-**Priorité active : aider N1 puis le pipeline GPU à réduire le temps FULL.**
-La [réponse au plan du 6 octobre](../receipts/audit_plan_gpu_20261006/README.md)
-apporte trois décisions directement utilisables :
+**Priorité active : sécuriser le recouvrement des feuilles L4/T3, cf28afb04.**
+La sortie sur refus peut terminer la vie de `claimed` avant de joindre le
+fil qui lit ce tableau. **Déclarer `claimed` avant `lane` corrige cet ordre.**
+[Constat, patch applicable et scénario de refus](../receipts/audit_overlap_20261006/README.md).
+La lecture de l’ordre canonique et des décalages est favorable ; conserver
+aussi la garde globale du nombre de feuilles avant la somme des sous-lots.
+Les résultats CUDA de cette tranche restent à vérifier au pin exécuté.
 
-- **Arène N1 :** conserver les listes de frontière possédées ; le WIP le
-  fait déjà. Qualifier son arène fixe avec repli exact, à feuille constante,
-  face à une voie sans arène ; compter réservation, pic et replis. Une
-  réservation fixe impose déjà 16 Mio à W16 sur un témoin de neuf sites
-  dont les tâches sont des feuilles : adapter la capacité au suffixe utile.
-- **Feuilles GPU :** isoler le lancement fill, une feuille par bloc, avant
-  un port coopératif. Ne pas modifier la réduction mono-warp du comptage.
-  Le futur anneau doit contrôler les identités à chaque passe réutilisée.
-- **Forêt parallèle :** le lemme Kruskal/plateaux est établi sur le graphe
-  complet. Un triangle exact démontre toutefois que les seules arêtes MST
-  perdent des continuations et leurs compteurs ; garder les métadonnées
-  des cellules. Les témoins bornés et la lecture de source passent normal/−O.
-
-Le plan et le WIP sont distingués dans la preuve. Aucun nouveau build ni
-calcul natif local ; les portes et chronos de cette tranche restent sur G4.
+**N1 clos et retiré.** Le dimensionnement proposé a été intégré en
+c72c5a576, puis l’A/B G4 a écarté le gain attendu. Les 78 prises rendent
+les sorties et registres attendus ; les 39 prises N1 n’ont aucun repli.
+145 portes PASS et deux mutants détectés ; le refus global du banc vient
+du plancher 150 mal configuré. Retrait confirmé en c1675e4c9.
+[Reçu indépendant N1](../receipts/audit_g4_n1_20261006/README.md).
+Les anciens conseils d’arène sont clos ; leurs preuves restent archivées
+avec la [contrelecture du plan GPU](../receipts/audit_plan_gpu_20261006/README.md).
 
 **Reprise ciblée terminée : Release, mutants et ASan conformes.**
 
-**Synthèse du développeur df904711a à rectifier sur trois portées :**
-L reste 35/41, dont 28 portes fonctionnelles et sept campagnes mutants
-PASS ; les six campagnes u21 sans résultat ne sont pas rejouées en u21
-par R3. R3 est une base u18 avec options locales u21/u24/poison.
-Les données couvrent trois trames LiDAR, pas six : XYZ et IDs sont
-deux fichiers par trame.
-La note moteur donne les formulations exactes ; aucun nouveau calcul requis.
+**Erratum du reçu final adopté par le développeur**, section L de sa
+[réponse](REPONSE_CLAUDE_SUPPORTS_20261004.md) : trois trames, portée L35/41,
+base R3 u18 avec options locales. Les pièces historiques restent inchangées.
 
 - **API multiprofil :** références fichier/manifeste par profil,
   journal conservé, six références u21 inchangées et six références

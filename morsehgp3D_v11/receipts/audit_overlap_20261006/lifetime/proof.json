@@ -1,0 +1,45 @@
+{
+  "corrected": {
+    "main_events": [
+      "R",
+      "A",
+      "J",
+      "C"
+    ],
+    "schedules": 6,
+    "schedules_reading_after_claimed_lifetime": 0
+  },
+  "event_meanings": {
+    "A": "~OverlapLane appelle abort, pas de cancellation de run_chunk déjà commencé",
+    "C": "fin de vie des objets du tableau claimed",
+    "D": "le fil termine",
+    "J": "join terminé",
+    "Q": "gather_leaves charge un pointeur dans le tableau prêté",
+    "R": "Pool terminé avec Outcome de refus, return par MHGP11_TRY",
+    "ready": "fil sorti de wake.wait pour un sous-lot prêt"
+  },
+  "fix": "déclarer claimed avant OverlapLane lane, donc détruire/join lane avant claimed",
+  "kind": "modèle borné des événements ; native0/cloud0",
+  "limits": "ne reproduit aucun diagnostic sanitizer, crash, nuage ou vitesse ; applique les obligations de durée de vie au chemin source",
+  "original": {
+    "main_events": [
+      "R",
+      "C",
+      "A",
+      "J"
+    ],
+    "schedules": 10,
+    "schedules_reading_after_claimed_lifetime": 3,
+    "witness": [
+      "ready",
+      "R",
+      "C",
+      "A",
+      "Q",
+      "D",
+      "J"
+    ]
+  },
+  "other_owners": "outputs, queues, cloud, params, budget restent vivants pendant la jonction",
+  "source_commit": "cf28afb04040eacf1eb92080d75e8a0ebb58a4eb"
+}

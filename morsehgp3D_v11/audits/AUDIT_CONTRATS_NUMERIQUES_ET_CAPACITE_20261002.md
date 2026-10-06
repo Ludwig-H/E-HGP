@@ -10,86 +10,58 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
-## Aide au plan du 6 octobre : rendre N1 et T3 décisifs
+## L4/T3 cf28afb04 : corriger la durée de vie sur refus
 
-[Contrelecture détaillée et témoins](../receipts/audit_plan_gpu_20261006/README.md),
-base **cf5da0e91**, plan local épinglé et WIP N1 distingué. Le WIP garde
-correctement les frontières possédées et réserve une arène fixe de 1 Mio
-par Workspace avec repli Buffer. Pour l’A/B G4, garder une voie désactivée,
-la même taille de feuille et les mêmes sorties/compteurs logiques ; mesurer
-les replis et le pic utile séparément de la mémoire réservée. La qualification
-historique ne se transfère pas automatiquement à cette modification.
-Le témoin de neuf sites `ghost()` produit 37 tâches finales : avec W16 et
-16 Mio, les seules arènes satureraient le budget alors que ces tâches sont
-déjà des feuilles. Adapter leur capacité au suffixe, zéro si celui-ci est
-nul. Ce refus est déduit de l’admission, sans prétendre avoir exécuté une
-nouvelle porte ni observé l’échec d’une porte existante.
+**À corriger avant adoption : `claimed` doit être déclaré avant `lane`.**
+`OverlapLane::start` emprunte le tableau de pointeurs `claimed`. Sur refus
+de la passe ou de `prefix`, l’ordre actuel détruit ce tableau avant que
+`~OverlapLane` annule et joigne le fil. Un sous-lot déjà commencé peut encore
+le lire dans `gather_leaves`. La jonction doit précéder sa fin de vie.
+[Preuve de source, modèle borné et patch minimal](../receipts/audit_overlap_20261006/README.md).
+Le patch a été vérifié applicable ; aucune modification du code produit
+ni exécution native n’a été faite par l’audit.
 
-**Raccord simple proposé au développeur.** Sur les deux types de frontière,
-`suffix_memory_bound(1, max_suffix_bytes)` donne déjà le plus grand suffixe.
-Utiliser `C = min(kWalkArenaSites, max_suffix_bytes / sizeof(SiteIdx))`
-mots par Workspace actif ; passer explicitement C à l’admission et à
-l’allocation. Cela met C à zéro pour une frontière terminale, sans changer
-le dispatch. Quand `J>=W`, tout worker peut recevoir toute tâche : cette
-borne commune évite de supposer une affectation des plus grosses tâches
-à des espaces particuliers. Si `J<W`, le slot est l’ordinal et une future
-capacité par tâche est possible, mais inutile pour ce premier correctif.
+La lecture de la concaténation, des préfixes et du repli exact est favorable.
+Garder aussi `jobs <= leaf_device::kMaxBatchJobs` sur l’union des sous-lots
+avant leur réduction hôte : l’ancienne preuve des sommes porte sur un lot
+entier, pas seize lots admissibles séparément. Aucun débordement géométrique
+réel n’est prétendu. Une porte de refus pendant consommation d’un sous-lot
+est proposée, avec jonction, restitution mémoire et absence de publication.
+La qualification CUDA et les sanitizers de cette voie restent à vérifier
+sur G4 au pin exécuté ; les différentiels hôtes annoncés sont distincts.
 
-Conserver le majorant des buffers de repli en plus des blocs réservés :
-l’arène reste vivante pendant un repli. Les passes count/fill réutilisent
-les espaces après retour du curseur à zéro ; leur capacité ne double pas.
-Enfin, passer C=0 au Workspace du repli host/CUDA dans
-[`single_pass_batch.cpp`](../src/catalogue/single_pass_batch.cpp) :
-`fallback` appelle seulement `enumerate_leaf`, sans parcours descendant.
-Ces trois raccords sont proposés sur le code au pin cf5da0e91 et le WIP
-capturé ; ils restent à implémenter et à qualifier sur G4.
+Cette première partie traite au plus seize groupes de tâches, conserve leurs
+résultats jusqu’à la concaténation et recharge XYZ à chaque appel CUDA.
+Ce n’est pas encore l’anneau résident borné en feuilles du plan. Mesurer
+le recouvrement obtenu et ses coûts avant d’adopter la suite ; les 100 ms
+restent ouverts. Le banc résident conserve toujours seulement le dernier dump.
 
-Le quotient CPU/nœud du plan mélange aussi 131 millions de tests G1 et
-d’autres étages. Mesurer le CPU aux deux bornes de chaque tâche puis
-soustraire celui des feuilles. Une option propre doit activer les
-microhorloges : `full_probe` demande déjà `timings` dans tous ses bras.
-Les mutants « 3B+1 » et « sans rewind » ne garantissent pas un échec ; les
-remplacer par un contrôle du curseur, du pic exact et du repli forcé.
+## N1 clos : dimensionnement intégré, puis optimisation rejetée sur G4
 
-Pour T3, la grille fill vaut déjà `ceil(n/32)` ; distribuer les feuilles
-sélectionnées dans des blocs distincts est une première ablation bornée.
-Garder le noyau count mono-warp inchangé. Le contrôle de chaque passe
-résidente demandé par le plan reste à ajouter : la sonde actuelle ne
-sérialise que la dernière. Builds, sanitizers et chronos se font sur G4.
-Le `tree` reste incontournable pour les 100 ms, toujours non acquis.
+Le conseil de dimensionnement **8ee28873f** a été intégré en **c72c5a576** :
+arène adaptée au plus gros suffixe, zéro pour le scratch de repli des feuilles.
+La session `v11.20261006.claudeN1` s’est arrêtée avec certification à
+06:32:58 UTC. Sources et archive de base concordent avec Git ; **78 prises**
+CPU FULL/K5/u21, trois trames, rendent les dumps et registres attendus.
+Les **39 prises N1 ont zéro repli** ; **145 portes PASS**, deux mutants détectés.
+Le banc garde son statut `refus` pour son plancher erroné de 150 portes.
+[Relecture indépendante du reçu et rejeu normal/−O](../receipts/audit_g4_n1_20261006/README.md).
 
-## Synthèse finale df904711a : trois portées à rectifier, sans nouveau calcul
+Le critère de gain préalable échoue sur chaque trame ; le rejet et le retrait
+**c1675e4c9** sont étayés. Aucune nouvelle campagne N1 n’est demandée.
+Le diagnostic exclusif SMT n’est pas établi par cette expérience ; les
+horloges par tâche/feuille du plan n’ont pas été capturées. Cette limite
+n’empêche pas de poursuivre le recouvrement GPU. Les anciens témoins et
+conseils restent dans le [reçu du plan](../receipts/audit_plan_gpu_20261006/README.md),
+avec leur source propre, sans demeurer des corrections ouvertes du moteur.
 
-Le [reçu final du développeur](../receipts/developpement_20261005/qualification_finale/README.md)
-présente correctement les pins 38b/98a, les différentiels P9/P10 et
-l’absence de contrat 100 ms. Les 83 empreintes couvrent exactement
-ses pièces ; reçus, résultats, extraits et résumé concordent avec les
-douze sessions locales closes et leurs archives. Trois formulations doivent être
-rectifiées pour correspondre aux pièces conservées :
+## Erratum df904711a adopté
 
-- **Données** : remplacer « six trames LiDAR » par « trois trames
-  LiDAR entières ng00/ng01/ng02 ». Les reçus déclarent six fichiers
-  LiDAR, soit XYZ et IDs pour chacune des trois trames. Les trois
-  nuages synthétiques `uniform_u18` sont distincts.
-- **R3** : remplacer « campagne complète des mutants (u18) » par
-  « campagne M complète, base u18 avec options locales déclarées ».
-  Les manifestes imposent aussi quinze cas u21, dix-sept u24 et un
-  empoisonnement local ; les 485 verdicts restent tous conformes.
-- **L** : remplacer « conforme : 35/35 portes long réelles » par
-  « 35/41 PASS : 28 portes fonctionnelles et sept campagnes mutants ;
-  six campagnes de base u21 sans résultat à l’échéance ». R3 couvre
-  ensuite les treize modules sous sa propre configuration de base u18
-  et ses options locales, sans rejouer les six exécutions u21.
-
-Le reçu L lui-même porte `selected=41`, `passed=35`, `not_run=6`
-et sept PASS étiquetés `mutant`. Les 28 portes fonctionnelles passent
-bien ; aucune reprise fonctionnelle longue supplémentaire n’est demandée.
-Le même raccourci « release_long conforme » dans la section K de la
-[réponse du développeur](REPONSE_CLAUDE_SUPPORTS_20261004.md) doit garder
-cette distinction entre portes fonctionnelles et campagnes mutants.
-Les preuves sont déjà figées dans les reçus [L](../receipts/audit_g4_finl_20261005/README.md)
-et [R3](../receipts/audit_g4_repriser3_20261005/README.md). Corriger la
-présentation en conservant les pièces historiques et leurs empreintes.
+La section L de la [réponse du développeur](REPONSE_CLAUDE_SUPPORTS_20261004.md)
+adopte les trois corrections : trois trames LiDAR, L35/41 dont 28 portes
+fonctionnelles et sept campagnes mutants, R3 base u18 avec options locales.
+Les six campagnes L/u21 non jugées ne sont pas requalifiées implicitement.
+Les pièces historiques et leurs empreintes sont conservées ; ce point est clos.
 
 ## R4 clos : complément ASan/u24 conforme, reprise ciblée terminée
 

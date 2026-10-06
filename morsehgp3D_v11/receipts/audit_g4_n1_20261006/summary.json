@@ -1,0 +1,80 @@
+{
+  "N1_calls": 39,
+  "N1_walk_fallbacks_all_zero": true,
+  "all_calls_status_ok": true,
+  "archive_sha256": "ac1b6b51dd6b98eec452fa6ef6014191f885dd07fa0a17fabd96867084945f02",
+  "baseline_archive_sha256": "daaa768cdeb703594f6bb6db55d7dc477be06eb6118e6c4f7655282eee4432a1",
+  "baseline_pin": "8ee28873f2b9e59166b73a36e7b2302fa2a3a7a4",
+  "benchmark_refusals": [
+    "ctest count 145 < 150"
+  ],
+  "benchmark_verdict": "refus",
+  "calls": 78,
+  "canonical_dumps": {
+    "lidar_ng00": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+    "lidar_ng01": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+    "lidar_ng02": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207"
+  },
+  "causal_limit": "Le rejet du gain N1 est établi. Le reçu ne mesure pas le CPU par tâche/feuille ; une causalité SMT exclusive ne découle pas de cet A/B.",
+  "certified_last_stop_timestamp": "2026-10-05T23:32:58.035-07:00",
+  "closed_certified": true,
+  "ctest": {
+    "failed": 0,
+    "passed": 145,
+    "selection": "^mhgp11_catalogue_, exclusion mutant|long, Release u21",
+    "stdout_sha256": "b7a956c7724916a1c4c7580b598cd1dd1d4ae64eb80728941a952bc26c85452d"
+  },
+  "gain_criterion_rejected_each_frame": true,
+  "ledger_equal_between_calls_and_variants": true,
+  "mutants": [
+    {
+      "detail": "code",
+      "id": "arene_sommet_non_avance",
+      "judge": "mhgp11_catalogue_fraction",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "arene_non_rembobinee",
+      "judge": "mhgp11_catalogue_fraction",
+      "verdict": "TUE"
+    }
+  ],
+  "mutants_report_sha256": "3eb20372e282559f2e0afc151a16f353af5b813d11eb7407994d21dce65b2eb6",
+  "native_or_cloud_runs_by_auditor": 0,
+  "negative_paired_domain_differences_out_of_12": {
+    "lidar_ng00": 4,
+    "lidar_ng01": 5,
+    "lidar_ng02": 4
+  },
+  "package_sha256": "60fe83a254e63f183fc90f7d8283d25915f8f0a1fff9a6865d625680a589b184",
+  "plan_sha256": "66b86013364cfe8f9448cc2cc44ee6bc51f665424c5316390ee09607deb7298a",
+  "publication_pin": "cf28afb04040eacf1eb92080d75e8a0ebb58a4eb",
+  "published_SHA256SUMS_valid": true,
+  "published_pieces_identical": true,
+  "receipt_sha256": "6718e9fc2d1a42c19d561250f275ad37d8755e9b6a05acaaf3eaefbf3e8006ef",
+  "receipt_status": "failed_remote",
+  "report_sha256": "6fa6ee054aa474d19d30cd92f2796ff25e34b6fde407caba2f4d02ac3c6801dc",
+  "schema": "audit_g4_n1_metadata_v1",
+  "scope": "CPU FULL/16379, K5, u21, processus neuf, W48 douze paires et W1 une paire par trame ; aucun GPU, TSan ou ASan joué par ce plan.",
+  "source_equality": [
+    {
+      "files": 635,
+      "manifest_sha256": "109f6a888a43d352db9c0dc34704e628291f141f6e76baacad8887c20553a7a5",
+      "pin": "c72c5a5760cdd70a1246de8ce1768c564a420a85"
+    },
+    {
+      "files": 634,
+      "manifest_sha256": "5ff0b93215674c841e4124b1f56ab1c51706bbb4c690b939b25c142a038bbc98",
+      "pin": "8ee28873f2b9e59166b73a36e7b2302fa2a3a7a4"
+    }
+  ],
+  "source_pin": "c72c5a5760cdd70a1246de8ce1768c564a420a85",
+  "stdout_manifest_sha256": "00b3a7098b4ef9234149be77004d2ba3ffd8198eefdf985757518f2ab4df688c",
+  "whole_frames": [
+    "lidar_ng00",
+    "lidar_ng01",
+    "lidar_ng02"
+  ],
+  "worker_exit_code": 1
+}

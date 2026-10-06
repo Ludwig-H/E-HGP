@@ -1,0 +1,4 @@
+normal exit0
+L4 lifetime conforme : témoin refus hors-vie ; ordre corrigé sans témoin ; native0 cloud0
+-O exit0
+L4 lifetime conforme : témoin refus hors-vie ; ordre corrigé sans témoin ; native0 cloud0
