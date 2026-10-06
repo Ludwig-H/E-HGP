@@ -1,0 +1,696 @@
+{
+  "archive_sha256": "ba2cc65dd7d5b1859fc148139d48a64db2b30c59417ac3eec06655cb23605fe8",
+  "asan_scale_scope_conforming": true,
+  "audit_native_or_cloud_runs": 0,
+  "backend": "cpu_reference",
+  "baseline": {
+    "archive_sha256": "b7421fe2176310847f3ae6ba250a5b6815c4ca81acec09d4e740508a9c62100a",
+    "asan_union_count": 80,
+    "configurations": [
+      {
+        "ctest_log_sha256": "8333873a8760aaf0ee987ec74e18928eb1a179db1b327c9c617aa711a2a8dd46",
+        "failed_tests": [
+          "mhgp11_api_supports_route_scale32000"
+        ],
+        "inventory_sha256": "444947a34227924e03dd2966f37098798eac77945ea0b140895e67063acb9ac0",
+        "name": "gcc_asan_scale32000",
+        "tests": {
+          "ctest_failed": 1,
+          "ctest_total": 11,
+          "failed": 1,
+          "not_run": 0,
+          "passed": 10,
+          "selected": 11
+        }
+      },
+      {
+        "ctest_log_sha256": "00536ed390453765a1634d9ec60c86d69536d9f6ed734b28dca36a5c99a016cd",
+        "failed_tests": [
+          "mhgp11_api_supports_route_lidar_ng01_k5",
+          "mhgp11_api_supports_route_lidar_ng02_k5"
+        ],
+        "inventory_sha256": "57e55da04864eab38a57815ef703f81023cd743ec4d2f776ef1dafc352560a01",
+        "name": "gcc_asan_lidar_ng01_ng02",
+        "tests": {
+          "ctest_failed": 2,
+          "ctest_total": 24,
+          "failed": 2,
+          "not_run": 0,
+          "passed": 22,
+          "selected": 24
+        }
+      },
+      {
+        "ctest_log_sha256": "53b4a2990cf518505c07e970f5881d6481203e7ffdf6aabcd82da4fcf5723e1c",
+        "failed_tests": [
+          "mhgp11_api_supports_route_scale16000"
+        ],
+        "inventory_sha256": "3bfe3e9b6762068436a24a598ec2c2445ddd8c4c530763ff035bdf87c43ab2a2",
+        "name": "gcc_asan_scale16000",
+        "tests": {
+          "ctest_failed": 1,
+          "ctest_total": 10,
+          "failed": 1,
+          "not_run": 0,
+          "passed": 9,
+          "selected": 10
+        }
+      },
+      {
+        "ctest_log_sha256": "d0ab5e1d17bc8160e5c64a3c1167874a238d6481f8dbd03ffac125b926676a78",
+        "failed_tests": [
+          "mhgp11_api_supports_route_lidar_ng00_k5",
+          "mhgp11_api_supports_route_scale8000"
+        ],
+        "inventory_sha256": "b120d7f690e57ade66c5663458a42ab643779335ca9b934a2f748b41a4ff2946",
+        "name": "gcc_asan_scale_rest",
+        "tests": {
+          "ctest_failed": 2,
+          "ctest_total": 35,
+          "failed": 2,
+          "not_run": 0,
+          "passed": 33,
+          "selected": 35
+        }
+      }
+    ],
+    "failed_routes": [
+      "mhgp11_api_supports_route_lidar_ng00_k5",
+      "mhgp11_api_supports_route_lidar_ng01_k5",
+      "mhgp11_api_supports_route_lidar_ng02_k5",
+      "mhgp11_api_supports_route_scale16000",
+      "mhgp11_api_supports_route_scale32000",
+      "mhgp11_api_supports_route_scale8000"
+    ],
+    "receipt_sha256": "83ad0b3439c1a934a8db57e41f584f07e991c00cfb05d438a449fdca577cdb43",
+    "session": "v11.20261005.claudefins",
+    "source_commit": "38b76701b9b0198fc1c37afe16e1480e638e513c"
+  },
+  "configurations": [
+    {
+      "all_selected_passed": true,
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_SANITIZE=ON",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "conforming": true,
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "scale32000|uniform32000",
+        "-E",
+        "^mhgp11_reference_|_opt$"
+      ],
+      "ctest_log_sha256": "f757440ee6b8c3ceeeef4978d0d46b27ddbd6f9b9488cdbde425d6458921d4e2",
+      "failed_tests": [],
+      "inventory_sha256": "444947a34227924e03dd2966f37098798eac77945ea0b140895e67063acb9ac0",
+      "inventory_unique": true,
+      "junit_counts": {
+        "passed": 11
+      },
+      "junit_sha256": "b2074a7235ba9fddb60da4d0fe9fb0d01c5880932c4fde381e0ea45d6301638f",
+      "junit_state": "concordant",
+      "labels_selected": [
+        "scale32000"
+      ],
+      "missing_tests": [],
+      "name": "gcc_asan_scale32000",
+      "reason": "",
+      "result_sha256": "bc85facc69d3cf2380b9b68ab33e782d037f2a064db3aec8639d4bef441d1ca5",
+      "selected_names": [
+        "mhgp11_api_supports_route_scale32000",
+        "mhgp11_catalogue_euler_scale32000",
+        "mhgp11_cli_full_identity_scale32000",
+        "mhgp11_cli_supports_scale32000",
+        "mhgp11_plat_scale32000",
+        "mhgp11_points_scale32000",
+        "mhgp11_supports_hierarchy_scale32000",
+        "mhgp11_supports_registers_uniform32000_k5",
+        "mhgp11_tower_attach_e1e2_scale32000",
+        "mhgp11_tower_attach_scale32000",
+        "mhgp11_tower_order_identity_scale32000"
+      ],
+      "status": "ok",
+      "steps": [
+        {
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.714,
+          "status": "ok",
+          "timeout_seconds": 2099.9
+        },
+        {
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 204.764,
+          "status": "ok",
+          "timeout_seconds": 2099.2
+        },
+        {
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.032,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 1058.186,
+          "status": "ok",
+          "timeout_seconds": 1894.4
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 11,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 11,
+        "selected": 11
+      }
+    },
+    {
+      "all_selected_passed": true,
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_SANITIZE=ON",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "conforming": true,
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "lidar_ng01|lidar_ng02",
+        "-E",
+        "^mhgp11_reference_|_opt$"
+      ],
+      "ctest_log_sha256": "134e232a0a557b84378968ce32a5f262587a42f807aaa09d7a654708456f2c2a",
+      "failed_tests": [],
+      "inventory_sha256": "57e55da04864eab38a57815ef703f81023cd743ec4d2f776ef1dafc352560a01",
+      "inventory_unique": true,
+      "junit_counts": {
+        "passed": 24
+      },
+      "junit_sha256": "c732ee73df30608d71d345cf936f66ab0c0745a56b6e3ff5cf9eda2c8771e807",
+      "junit_state": "concordant",
+      "labels_selected": [
+        "lidar"
+      ],
+      "missing_tests": [],
+      "name": "gcc_asan_lidar_ng01_ng02",
+      "reason": "",
+      "result_sha256": "dbf3d32ea51c5605601ea5478e5c709d00db0a5ca806828efc7b33a74c05c372",
+      "selected_names": [
+        "mhgp11_api_supports_route_lidar_ng01_k5",
+        "mhgp11_api_supports_route_lidar_ng02_k5",
+        "mhgp11_catalogue_euler_lidar_ng01_k5",
+        "mhgp11_catalogue_euler_lidar_ng02_k5",
+        "mhgp11_cli_full_identity_lidar_ng01_k5",
+        "mhgp11_cli_full_identity_lidar_ng02_k5",
+        "mhgp11_cli_supports_lidar_ng01_k5",
+        "mhgp11_cli_supports_lidar_ng02_k5",
+        "mhgp11_num_roots_cost_lidar_ng01_k5",
+        "mhgp11_num_roots_cost_lidar_ng02_k5",
+        "mhgp11_plat_lidar_ng01_k5",
+        "mhgp11_plat_lidar_ng02_k5",
+        "mhgp11_points_lidar_ng01_k5",
+        "mhgp11_points_lidar_ng02_k5",
+        "mhgp11_supports_hierarchy_lidar_ng01_k5",
+        "mhgp11_supports_hierarchy_lidar_ng02_k5",
+        "mhgp11_supports_registers_lidar_ng01_k5",
+        "mhgp11_supports_registers_lidar_ng02_k5",
+        "mhgp11_tower_attach_e1e2_lidar_ng01_k5",
+        "mhgp11_tower_attach_e1e2_lidar_ng02_k5",
+        "mhgp11_tower_attach_export_lidar_ng01_k5",
+        "mhgp11_tower_attach_export_lidar_ng02_k5",
+        "mhgp11_tower_order_identity_lidar_ng01_k5",
+        "mhgp11_tower_order_identity_lidar_ng02_k5"
+      ],
+      "status": "ok",
+      "steps": [
+        {
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.715,
+          "status": "ok",
+          "timeout_seconds": 2099.9
+        },
+        {
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 205.271,
+          "status": "ok",
+          "timeout_seconds": 2099.2
+        },
+        {
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.032,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 1122.554,
+          "status": "ok",
+          "timeout_seconds": 1893.9
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 24,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 24,
+        "selected": 24
+      }
+    },
+    {
+      "all_selected_passed": true,
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_SANITIZE=ON",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "conforming": true,
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "scale16000|uniform16000",
+        "-E",
+        "^mhgp11_reference_|_opt$"
+      ],
+      "ctest_log_sha256": "82bc8fce1f9d44ffefd1160b8f65f5905d642278ed97bad357942ea723a8b3c3",
+      "failed_tests": [],
+      "inventory_sha256": "3bfe3e9b6762068436a24a598ec2c2445ddd8c4c530763ff035bdf87c43ab2a2",
+      "inventory_unique": true,
+      "junit_counts": {
+        "passed": 10
+      },
+      "junit_sha256": "0f981c1c8b720ccf535076965fc063dae4476a1c8817cd7a2f07422a7ce02176",
+      "junit_state": "concordant",
+      "labels_selected": [
+        "scale16000"
+      ],
+      "missing_tests": [],
+      "name": "gcc_asan_scale16000",
+      "reason": "",
+      "result_sha256": "68228b4824162354cb89749d59977033b23ce9a18a5a560c5e81c456535df245",
+      "selected_names": [
+        "mhgp11_api_supports_route_scale16000",
+        "mhgp11_catalogue_euler_scale16000",
+        "mhgp11_cli_full_identity_scale16000",
+        "mhgp11_cli_supports_scale16000",
+        "mhgp11_plat_scale16000",
+        "mhgp11_points_scale16000",
+        "mhgp11_supports_hierarchy_scale16000",
+        "mhgp11_supports_registers_uniform16000_k5",
+        "mhgp11_tower_attach_scale16000",
+        "mhgp11_tower_order_identity_scale16000"
+      ],
+      "status": "ok",
+      "steps": [
+        {
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.715,
+          "status": "ok",
+          "timeout_seconds": 2099.9
+        },
+        {
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 204.171,
+          "status": "ok",
+          "timeout_seconds": 2099.2
+        },
+        {
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 487.895,
+          "status": "ok",
+          "timeout_seconds": 1894.9
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 10,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 10,
+        "selected": 10
+      }
+    },
+    {
+      "all_selected_passed": true,
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_SANITIZE=ON",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "conforming": true,
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-E",
+        "^mhgp11_reference_|_opt$|scale32000|uniform32000|lidar_ng01|lidar_ng02|scale16000|uniform16000"
+      ],
+      "ctest_log_sha256": "e671edaa642ea9f1a031a77a6cfb004a7653baefaeebeb671a55040669133a8f",
+      "failed_tests": [],
+      "inventory_sha256": "b120d7f690e57ade66c5663458a42ab643779335ca9b934a2f748b41a4ff2946",
+      "inventory_unique": true,
+      "junit_counts": {
+        "passed": 35
+      },
+      "junit_sha256": "a9774253ddededf8aac9e561f7958700300fdba595847eaff5cf10ff6d861941",
+      "junit_state": "concordant",
+      "labels_selected": [
+        "fast",
+        "lidar",
+        "scale16000",
+        "scale32000",
+        "scale8000"
+      ],
+      "missing_tests": [],
+      "name": "gcc_asan_scale_rest",
+      "reason": "",
+      "result_sha256": "d7efbc46b74b20bc93112576d717eb2b81ff4d3cdaa9b13437a27d1f6c4c701d",
+      "selected_names": [
+        "mhgp11_api_supports_route_lidar_ng00_k5",
+        "mhgp11_api_supports_route_scale8000",
+        "mhgp11_catalogue_euler_lidar_ng00_k5",
+        "mhgp11_catalogue_euler_scale8000",
+        "mhgp11_cli_full_determinism_scale8000",
+        "mhgp11_cli_full_identity_lidar_ng00_k5",
+        "mhgp11_cli_full_identity_scale8000",
+        "mhgp11_cli_supports_lidar_ng00_k5",
+        "mhgp11_cli_supports_scale8000",
+        "mhgp11_num_roots_cost_lidar_ng00_k5",
+        "mhgp11_num_roots_cost_uniform_u18_n16000_k5",
+        "mhgp11_num_roots_cost_uniform_u18_n32000_k5",
+        "mhgp11_num_roots_cost_uniform_u18_n8000_k5",
+        "mhgp11_plat_lidar_ng00_k5",
+        "mhgp11_plat_scale8000",
+        "mhgp11_points_lidar_ng00_k5",
+        "mhgp11_points_scale8000",
+        "mhgp11_support_lidar_sentinel",
+        "mhgp11_supports_hierarchy_grid8000",
+        "mhgp11_supports_hierarchy_lidar_ng00_k5",
+        "mhgp11_supports_hierarchy_permutation_grid8000",
+        "mhgp11_supports_hierarchy_permutation_scale8000",
+        "mhgp11_supports_hierarchy_scale8000",
+        "mhgp11_supports_registers_grid8000_k5",
+        "mhgp11_supports_registers_lidar_ng00_k5",
+        "mhgp11_supports_registers_uniform8000_k5",
+        "mhgp11_supports_sample_judge_grid8000",
+        "mhgp11_supports_sample_judge_lidar_ng00_k5",
+        "mhgp11_supports_sample_judge_scale8000",
+        "mhgp11_tower_attach_e1e2_lidar_ng00_k5",
+        "mhgp11_tower_attach_e1e2_scale8000",
+        "mhgp11_tower_attach_export_lidar_ng00_k5",
+        "mhgp11_tower_attach_scale8000",
+        "mhgp11_tower_order_identity_lidar_ng00_k5",
+        "mhgp11_tower_order_identity_scale8000"
+      ],
+      "status": "ok",
+      "steps": [
+        {
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.714,
+          "status": "ok",
+          "timeout_seconds": 2099.9
+        },
+        {
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 204.922,
+          "status": "ok",
+          "timeout_seconds": 2099.2
+        },
+        {
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.032,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 1162.408,
+          "status": "ok",
+          "timeout_seconds": 1894.2
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 35,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 35,
+        "selected": 35
+      }
+    }
+  ],
+  "coverage": {
+    "all_selected_have_terminal_pass": true,
+    "exact_old_asan_union": true,
+    "failed_names": [],
+    "inventories_unique": true,
+    "lots_pairwise_disjoint": true,
+    "missing_names": [],
+    "opt_twins_selected": false,
+    "passed_count": 80,
+    "repaired_route_verdicts": {
+      "mhgp11_api_supports_route_lidar_ng00_k5": "Passed",
+      "mhgp11_api_supports_route_lidar_ng01_k5": "Passed",
+      "mhgp11_api_supports_route_lidar_ng02_k5": "Passed",
+      "mhgp11_api_supports_route_scale16000": "Passed",
+      "mhgp11_api_supports_route_scale32000": "Passed",
+      "mhgp11_api_supports_route_scale8000": "Passed"
+    },
+    "repaired_routes_all_passed": true,
+    "selected_count": 80,
+    "selected_names": [
+      "mhgp11_api_supports_route_lidar_ng00_k5",
+      "mhgp11_api_supports_route_lidar_ng01_k5",
+      "mhgp11_api_supports_route_lidar_ng02_k5",
+      "mhgp11_api_supports_route_scale16000",
+      "mhgp11_api_supports_route_scale32000",
+      "mhgp11_api_supports_route_scale8000",
+      "mhgp11_catalogue_euler_lidar_ng00_k5",
+      "mhgp11_catalogue_euler_lidar_ng01_k5",
+      "mhgp11_catalogue_euler_lidar_ng02_k5",
+      "mhgp11_catalogue_euler_scale16000",
+      "mhgp11_catalogue_euler_scale32000",
+      "mhgp11_catalogue_euler_scale8000",
+      "mhgp11_cli_full_determinism_scale8000",
+      "mhgp11_cli_full_identity_lidar_ng00_k5",
+      "mhgp11_cli_full_identity_lidar_ng01_k5",
+      "mhgp11_cli_full_identity_lidar_ng02_k5",
+      "mhgp11_cli_full_identity_scale16000",
+      "mhgp11_cli_full_identity_scale32000",
+      "mhgp11_cli_full_identity_scale8000",
+      "mhgp11_cli_supports_lidar_ng00_k5",
+      "mhgp11_cli_supports_lidar_ng01_k5",
+      "mhgp11_cli_supports_lidar_ng02_k5",
+      "mhgp11_cli_supports_scale16000",
+      "mhgp11_cli_supports_scale32000",
+      "mhgp11_cli_supports_scale8000",
+      "mhgp11_num_roots_cost_lidar_ng00_k5",
+      "mhgp11_num_roots_cost_lidar_ng01_k5",
+      "mhgp11_num_roots_cost_lidar_ng02_k5",
+      "mhgp11_num_roots_cost_uniform_u18_n16000_k5",
+      "mhgp11_num_roots_cost_uniform_u18_n32000_k5",
+      "mhgp11_num_roots_cost_uniform_u18_n8000_k5",
+      "mhgp11_plat_lidar_ng00_k5",
+      "mhgp11_plat_lidar_ng01_k5",
+      "mhgp11_plat_lidar_ng02_k5",
+      "mhgp11_plat_scale16000",
+      "mhgp11_plat_scale32000",
+      "mhgp11_plat_scale8000",
+      "mhgp11_points_lidar_ng00_k5",
+      "mhgp11_points_lidar_ng01_k5",
+      "mhgp11_points_lidar_ng02_k5",
+      "mhgp11_points_scale16000",
+      "mhgp11_points_scale32000",
+      "mhgp11_points_scale8000",
+      "mhgp11_support_lidar_sentinel",
+      "mhgp11_supports_hierarchy_grid8000",
+      "mhgp11_supports_hierarchy_lidar_ng00_k5",
+      "mhgp11_supports_hierarchy_lidar_ng01_k5",
+      "mhgp11_supports_hierarchy_lidar_ng02_k5",
+      "mhgp11_supports_hierarchy_permutation_grid8000",
+      "mhgp11_supports_hierarchy_permutation_scale8000",
+      "mhgp11_supports_hierarchy_scale16000",
+      "mhgp11_supports_hierarchy_scale32000",
+      "mhgp11_supports_hierarchy_scale8000",
+      "mhgp11_supports_registers_grid8000_k5",
+      "mhgp11_supports_registers_lidar_ng00_k5",
+      "mhgp11_supports_registers_lidar_ng01_k5",
+      "mhgp11_supports_registers_lidar_ng02_k5",
+      "mhgp11_supports_registers_uniform16000_k5",
+      "mhgp11_supports_registers_uniform32000_k5",
+      "mhgp11_supports_registers_uniform8000_k5",
+      "mhgp11_supports_sample_judge_grid8000",
+      "mhgp11_supports_sample_judge_lidar_ng00_k5",
+      "mhgp11_supports_sample_judge_scale8000",
+      "mhgp11_tower_attach_e1e2_lidar_ng00_k5",
+      "mhgp11_tower_attach_e1e2_lidar_ng01_k5",
+      "mhgp11_tower_attach_e1e2_lidar_ng02_k5",
+      "mhgp11_tower_attach_e1e2_scale32000",
+      "mhgp11_tower_attach_e1e2_scale8000",
+      "mhgp11_tower_attach_export_lidar_ng00_k5",
+      "mhgp11_tower_attach_export_lidar_ng01_k5",
+      "mhgp11_tower_attach_export_lidar_ng02_k5",
+      "mhgp11_tower_attach_scale16000",
+      "mhgp11_tower_attach_scale32000",
+      "mhgp11_tower_attach_scale8000",
+      "mhgp11_tower_order_identity_lidar_ng00_k5",
+      "mhgp11_tower_order_identity_lidar_ng01_k5",
+      "mhgp11_tower_order_identity_lidar_ng02_k5",
+      "mhgp11_tower_order_identity_scale16000",
+      "mhgp11_tower_order_identity_scale32000",
+      "mhgp11_tower_order_identity_scale8000"
+    ],
+    "short_ports_not_selected": [
+      "mhgp11_head_unit_huge",
+      "mhgp11_points_unit_sort_refusal",
+      "mhgp11_num_roots",
+      "mhgp11_num_roots_opt",
+      "mhgp11_cli_plat",
+      "mhgp11_cli_plat_opt"
+    ],
+    "terminal_verdict_count": 80,
+    "union_names_sha256": "b8c20f01b289a38d5f29186bc6db32b2d6b922ded9a576ce0016e355763649b6"
+  },
+  "data_manifest_sha256": "826643041e3336c1f0582e687a6c47595a3926e7a8f0541232282a9f7b9a6095",
+  "data_verified_remote": true,
+  "delivered_data_names": [
+    "lidar_ng00.ids.u32le",
+    "lidar_ng00.u32le",
+    "lidar_ng01.ids.u32le",
+    "lidar_ng01.u32le",
+    "lidar_ng02.ids.u32le",
+    "lidar_ng02.u32le",
+    "manifest.json",
+    "uniform_u18_n16000.ids.u32le",
+    "uniform_u18_n16000.u32le",
+    "uniform_u18_n32000.ids.u32le",
+    "uniform_u18_n32000.u32le",
+    "uniform_u18_n8000.ids.u32le",
+    "uniform_u18_n8000.u32le"
+  ],
+  "done": "0",
+  "execution_profile": "asan_ubsan_u24",
+  "global_qualification_complete": false,
+  "limits": [
+    "Portee ASan/UBSan u24 normale echelle/LiDAR, union80 exacte de fins, au pin98a009550.",
+    "Aucune jumelle Python -O ici ; les portes courtes huge/sort_refusal/num_roots et les longues ont leurs recus distincts.",
+    "Les six routes auparavant rouges sont comparees nominativement ; aucun transfert aux autres profils ou aux mutants.",
+    "Les causes ou diagnostics runtime sont relus dans un complement natif distinct ; le present resume etablit les inventaires et verdicts.",
+    "Rejeu dependant des archives locales R4/fins et des commits Git ; aucun journal brut, binaire natif ou octet LiDAR copie."
+  ],
+  "matrix": {
+    "budget_seconds": 2100,
+    "complete": true,
+    "conforming": true,
+    "ended_utc": "2026-10-06T01:13:20Z",
+    "exit_code": 0,
+    "requested": [
+      "gcc_asan_scale32000",
+      "gcc_asan_lidar_ng01_ng02",
+      "gcc_asan_scale16000",
+      "gcc_asan_scale_rest"
+    ],
+    "started_utc": "2026-10-06T00:50:31Z",
+    "statuses": {
+      "gcc_asan_lidar_ng01_ng02": "ok",
+      "gcc_asan_scale16000": "ok",
+      "gcc_asan_scale32000": "ok",
+      "gcc_asan_scale_rest": "ok"
+    },
+    "summary_sha256": "816a8aecb16445a1e21b764769bf39b1722f63a996edf6df4c294de9994c141f",
+    "thread_budget": 48
+  },
+  "package_sha256": "59b08d707c47914c62b52fd810506491fdfdad11572ca0568916ecd760738023",
+  "phase": "exploration_v11_hors_registre",
+  "plan_sha256": "9edf6bd210ce9eead5af6fc3db0f01e84cb3f65c55a582f3a57729a0d73ebce4",
+  "priority_groups": {
+    "num_roots_cost": {
+      "mhgp11_num_roots_cost_lidar_ng00_k5": "Passed",
+      "mhgp11_num_roots_cost_lidar_ng01_k5": "Passed",
+      "mhgp11_num_roots_cost_lidar_ng02_k5": "Passed",
+      "mhgp11_num_roots_cost_uniform_u18_n16000_k5": "Passed",
+      "mhgp11_num_roots_cost_uniform_u18_n32000_k5": "Passed",
+      "mhgp11_num_roots_cost_uniform_u18_n8000_k5": "Passed"
+    },
+    "s10_plat": {
+      "mhgp11_plat_lidar_ng00_k5": "Passed",
+      "mhgp11_plat_lidar_ng01_k5": "Passed",
+      "mhgp11_plat_lidar_ng02_k5": "Passed",
+      "mhgp11_plat_scale16000": "Passed",
+      "mhgp11_plat_scale32000": "Passed",
+      "mhgp11_plat_scale8000": "Passed"
+    },
+    "s9_points": {
+      "mhgp11_points_lidar_ng00_k5": "Passed",
+      "mhgp11_points_lidar_ng01_k5": "Passed",
+      "mhgp11_points_lidar_ng02_k5": "Passed",
+      "mhgp11_points_scale16000": "Passed",
+      "mhgp11_points_scale32000": "Passed",
+      "mhgp11_points_scale8000": "Passed"
+    }
+  },
+  "profile": "quantized_u21_input_only",
+  "public_status": "not_claimed",
+  "receipt_sha256": "c798eeef87926e4d828293bf8b94d497eb03061e48922f6d4573da0268596de3",
+  "receipt_status": "completed",
+  "schema": "ehgp.v11.audit.repriser4_asan_inventory_read.v1",
+  "session": "v11.20261005.clauderepriser4",
+  "source_commit": "98a00955083d483306c4f92b9031e382e81b0e59",
+  "source_tree_verification": {
+    "extra_or_missing_files": false,
+    "files_verified": 635,
+    "includes_docs_or_receipts": false,
+    "manifest_sha256": "1e16b170fb29452473a90311b08bd4d2631bf7be196378e9dd89278695df3019",
+    "method": "git_archive_selectif_egalite_exacte",
+    "paths": [
+      "gcp-migration/v11_worker.sh",
+      "morsehgp3D_v11/CMakeLists.txt",
+      "morsehgp3D_v11/src",
+      "morsehgp3D_v11/tests",
+      "morsehgp3D_v11/cmake",
+      "morsehgp3D_v11/bench",
+      "morsehgp3D_v11/reference",
+      "morsehgp3D_v11/tools",
+      "morsehgp3D_v11/cli"
+    ],
+    "source_commit": "98a00955083d483306c4f92b9031e382e81b0e59"
+  },
+  "state": "closed",
+  "targeted_closure_verified": true,
+  "worker_exit_code": 0
+}

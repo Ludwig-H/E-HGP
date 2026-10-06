@@ -4,12 +4,19 @@
 quantized_u21_input_only / not_claimed`. Six notes actives maintenues en
 place ; preuves détaillées dans les reçus immuables.
 
-**Corrections publiées en be05bfad8 et 98a009550 : Release et mutants conformes, ASan en reprise.**
+**Reprise ciblée terminée : Release, mutants et ASan conformes.**
+
+**Synthèse du développeur df904711a à rectifier sur deux portées :**
+L reste 35/41, dont 28 portes fonctionnelles et sept campagnes mutants
+PASS ; les six campagnes u21 sans résultat ne sont pas rejouées en u21
+par R3. R3 est une base u18 avec options locales u21/u24/poison.
+La note moteur donne les formulations exactes ; aucun nouveau calcul requis.
 
 - **API multiprofil :** références fichier/manifeste par profil,
   journal conservé, six références u21 inchangées et six références
   u24 concordantes avec les reçus G4. **Les 24 portes des quatre profils
-  passent dans R2.** La sonde reste identique à 38b76701b.
+  passent dans R2**, puis les six u24 sous ASan/UBSan dans R4.
+  La sonde reste identique à 38b76701b.
 - **Mutant CLI :** mutation de `order_params` raccordée à la porte
   points qui l’atteint ; **28/28 détectés dans R3**, ainsi que les 23 API.
 - **Matrice :** exigence LiDAR retirée du seul lot court ; portes et
@@ -18,8 +25,8 @@ place ; preuves détaillées dans les reçus immuables.
 
 [Relecture indépendante des corrections publiées](../receipts/audit_gates_fix_closed_20261005/README.md).
 Les 41 occurrences auparavant manquantes passent toutes dans R2.
-Les 485 mutants sont désormais détectés dans R3. Le complément ASan
-reste à juger ; les reçus historiques conservent leurs verdicts.
+Les 485 mutants sont détectés dans R3 et les 80 portes ASan/u24
+passent dans R4. Les reçus historiques conservent leurs verdicts.
 
 **Chaîne G4 close, source 38b76701b.** Les sessions closes
 ci-dessous ont des sources vérifiées et un arrêt ciblé certifié.
@@ -35,7 +42,7 @@ ci-dessous ont des sources vérifiées et un arrêt ciblé certifié.
 | [P9](../receipts/audit_g4_finp9_20261005/README.md) | 4/4 différentiels de l’arbre de points : sites, dates, plateaux et parents | Sur le même catalogue et la même tour FULL exportés |
 | [Mesure finale](../receipts/audit_g4_finmesure_20261005/README.md) | 52 appels concordants ; deux contrôles supports W48 conformes | Les 18 prises chaudes K5/W48 dépassent toutes 100 ms pour l’étage `tree` ; points/plat non mesurés |
 
-**Reprise G4 en cours sur 98a009550.** Le plan adopté comprend
+**Reprise G4 close sur 98a009550.** Le plan adopté comprend
 quatre sessions successives : R1 lots courts des quatre profils ;
 R2 huit lots d’échelle couvrant les 41 absences et les identités
 supports ; R3 mutants, dont API/CLI ; R4 quatre lots ASan/UBSan u24.
@@ -49,8 +56,13 @@ survivant ni individu non jugé. La campagne utilise une base u18 et
 les options locales déclarées u21/u24/poison ; les six campagnes u21
 sans résultat de l’ancien lot L gardent leur statut historique.
 [Reçu R3 et verdicts individuels](../receipts/audit_g4_repriser3_20261005/README.md).
-R4 est en cours.
-L’arrêt ciblé certifié est exigé entre sessions. Les 28 portes longues
+**R4 est clos : 80/80 PASS sous ASan/UBSan u24**, sans diagnostic
+sanitizer dans les journaux conservés ; les six routes corrigées passent.
+[Reçu R4](../receipts/audit_g4_repriser4_20261005/README.md).
+L’union R1/R2 couvre exactement les **3 695 portes ordinaires** de
+l’inventaire initial, toutes PASS, sans doublon ni absence.
+[Raccord des inventaires](../receipts/audit_g4_repriser4_20261005/ordinary_union/README.md).
+Chaque session a son arrêt ciblé certifié. Les 28 portes longues
 fonctionnelles déjà terminées ne sont pas rejouées. La
 [proposition antérieure limitée aux 41 absences](../receipts/proposition_reprise_41_20261005/README.md)
 reste archivée ; le plan adopté utilise la matrice corrigée publiée.
@@ -94,8 +106,8 @@ pas mesurés par ce banc.
 **Le contrat de 100 ms reste ouvert au pin final.** Les 18 prises
 chaudes K5/W48 dépassent toutes 100 ms pour l’étage `tree` : forêts
 1..5 et verticales, hors catalogue, rattachement et sorties. Réduire
-cet étage reste nécessaire. La qualification attend les reprises
-ciblées ci-dessus. Les reçus antérieurs et les acquis GPU conservent
+cet étage reste nécessaire. La qualification ciblée ci-dessus est
+terminée dans les pins et profils propres à chaque reçu. Les acquis GPU conservent
 leurs sources et leur périmètre ; aucun transfert au pin final.
 
 **Notes de travail et dialogue.**

@@ -10,6 +10,57 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
+## Synthèse finale df904711a : deux portées à rectifier, sans nouveau calcul
+
+Le [reçu final du développeur](../receipts/developpement_20261005/qualification_finale/README.md)
+présente correctement les pins 38b/98a, les différentiels P9/P10 et
+l’absence de contrat 100 ms. Deux lignes de son tableau doivent être
+rectifiées pour correspondre aux pièces conservées :
+
+- **R3** : remplacer « campagne complète des mutants (u18) » par
+  « campagne M complète, base u18 avec options locales déclarées ».
+  Les manifestes imposent aussi quinze cas u21, dix-sept u24 et un
+  empoisonnement local ; les 485 verdicts restent tous conformes.
+- **L** : remplacer « conforme : 35/35 portes long réelles » par
+  « 35/41 PASS : 28 portes fonctionnelles et sept campagnes mutants ;
+  six campagnes de base u21 sans résultat à l’échéance ». R3 couvre
+  ensuite les treize modules sous sa propre configuration de base u18
+  et ses options locales, sans rejouer les six exécutions u21.
+
+Le reçu L lui-même porte `selected=41`, `passed=35`, `not_run=6`
+et sept PASS étiquetés `mutant`. Les 28 portes fonctionnelles passent
+bien ; aucune reprise fonctionnelle longue supplémentaire n’est demandée.
+Les preuves sont déjà figées dans les reçus [L](../receipts/audit_g4_finl_20261005/README.md)
+et [R3](../receipts/audit_g4_repriser3_20261005/README.md). Corriger la
+présentation en conservant les pièces historiques et leurs empreintes.
+
+## R4 clos : complément ASan/u24 conforme, reprise ciblée terminée
+
+La session `v11.20261005.clauderepriser4`, source **98a009550**,
+est close le 6 octobre à 01:15 UTC avec arrêt ciblé certifié. Les
+quatre lots terminent **80/80 portes PASS**, sans échec, absence ni
+coupure. Leur union est disjointe et exactement égale aux 80 noms
+ASan du reçu fins ; inventaires, verdicts et JUnit concordent.
+
+Les **six supports_route corrigées passent sous ASan/UBSan u24**.
+Leurs lignes natives concordent avec les références par profil,
+journaux et workers ; les pics publics suivent bien la voie FULL.
+Les drapeaux sanitizer sont vérifiés dans la bibliothèque, la sonde
+et son lien. Aucun marqueur sanitizer n’apparaît dans les 16 journaux
+d’exécution conservés ; les quatre journaux sanitizer sont vides.
+Les six portes points, six plat et six racines d’échelle/LiDAR passent
+aussi. [Reçu R4](../receipts/audit_g4_repriser4_20261005/README.md),
+[contrelecture native](../receipts/audit_g4_repriser4_20261005/NATIVE_REPLAY.md).
+
+La qualification ciblée est terminée dans les pins et profils propres
+à chaque reçu. R1/R2 couvrent exactement les **3 695 noms ordinaires**
+de l’inventaire fina2, tous PASS ; R3 ferme les mutants API/CLI et R4
+les anciens refus ASan. Les portes longues, TSan et différentiels
+P9/P10 gardent leur pin 38b76701b ; les reprises gardent 98a009550.
+Les six campagnes L/u21 sans résultat restent historiques, sans
+transfert depuis R3. Le contrat de 100 ms reste ouvert.
+[Rejeu du raccord ordinaire R1/R2](../receipts/audit_g4_repriser4_20261005/ordinary_union/README.md).
+
 ## R3 clos : tous les mutants détectés, API et CLI requalifiés
 
 La session `v11.20261005.clauderepriser3`, source **98a009550**,
@@ -29,8 +80,8 @@ par le runner avant les verdicts, sans inventer de lignes absentes.
 
 Le profil est une base u18 avec options locales déclarées, détaillées
 dans la section reprise. R3 ne qualifie pas en u21 les six campagnes
-interrompues de l’ancien lot L. R4 reste le dernier complément de cette
-reprise : les routes et autres portes d’échelle ASan/UBSan u24.
+interrompues de l’ancien lot L. R4 ferme séparément le complément
+des routes et autres portes d’échelle ASan/UBSan u24.
 [Reçu R3, manifestes et verdicts](../receipts/audit_g4_repriser3_20261005/README.md),
 [contrelecture API/CLI](../receipts/audit_g4_repriser3_20261005/NATIVE_REPLAY.md).
 
@@ -57,7 +108,7 @@ par la sonde, au-delà des seuls préfixes de SHA publiés.
 
 R2 clôt le volet ordinaire d’échelle et LiDAR. Les campagnes mutants
 API/CLI passent séparément dans R3 ; les six
-routes ASan/UBSan u24 restent dans R4. Aucun chrono de contrat n’est
+routes ASan/UBSan u24 passent dans R4. Aucun chrono de contrat n’est
 inféré de ces portes de correction.
 [Reçu R2 et correspondance des 41 noms](../receipts/audit_g4_repriser2_20261005/README.md).
 
@@ -219,13 +270,13 @@ Le différentiel S9 de l’arbre lui-même est passé séparément dans P9.
 La chaîne `clauderepriser1` à `clauderepriser4` utilise le commit
 corrigé **98a009550** et `data_complet`. R1 est clos et entièrement
 conforme, avec reçu lié ci-dessus. R2 et R3 sont également clos et
-conformes ; R4 est en cours.
+conformes ; R4 est clos à son tour avec 80/80 PASS.
 Les plans adoptés se répartissent ainsi :
 
 - R1 clos : lots courts u18/u21/u24/poison, tous conformes ;
 - R2 clos : huit lots d’échelle, les 41 absences et les six supports_route de chaque profil passent ;
 - R3 clos : 485 mutants détectés, base u18 avec profils locaux déclarés, dont API/CLI après correction ;
-- R4 : quatre lots ASan/UBSan u24, y compris les six supports_route.
+- R4 clos : quatre lots ASan/UBSan u24, y compris les six supports_route, tous conformes.
 
 R3 applique les options locales après le profil de base : quinze
 mutants num imposent u21, seize num et `tower/export_points_trois_mots` imposent

@@ -1,0 +1,443 @@
+{
+  "schema": "ehgp.v11.audit.r4_routes_sanitizers_review.v1",
+  "source_pin": "98a00955083d483306c4f92b9031e382e81b0e59",
+  "archive": {
+    "session": "v11.20261005.clauderepriser4",
+    "sha256": "ba2cc65dd7d5b1859fc148139d48a64db2b30c59417ac3eec06655cb23605fe8",
+    "bytes": 158436
+  },
+  "closure_status": "closed_certified",
+  "method": "Read-only Git/archive/stdlib review, no auditor build/native/cloud execution.",
+  "sources": {
+    "morsehgp3D_v11/tests/api/tests.cmake": {
+      "sha256": "f58d8bb1033c9ae0df9ccd98a16c135bbea61fb2c28851820f16d9ec8c22e29d",
+      "anchors": [
+        [
+          94,
+          113
+        ],
+        [
+          126,
+          129
+        ]
+      ]
+    },
+    "morsehgp3D_v11/tests/api/supports_route.cpp": {
+      "sha256": "2db41f412d4894ffb8688b86e6cc16b5e3a1a9e7329a6cce13a4330dc692fb42",
+      "anchors": [
+        [
+          235,
+          253
+        ],
+        [
+          261,
+          265
+        ],
+        [
+          343,
+          384
+        ],
+        [
+          386,
+          400
+        ]
+      ]
+    }
+  },
+  "configurations": {
+    "gcc_asan_lidar_ng01_ng02": {
+      "domain": "u24_ASan_UBSan",
+      "counts": {
+        "ctest_failed": 0,
+        "ctest_total": 24,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 24,
+        "selected": 24
+      },
+      "inventory_junit_ctest_sets_equal": true,
+      "actual_compile_flags": {
+        "CMakeFiles/mhgp11.dir/flags.make": {
+          "sha256": "bd51b42e82fcea6cfde598d156af017f71ce527e9f8a0ed0d6f9e399e7c3e6e9",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=24",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=all -std=c++20"
+        },
+        "CMakeFiles/mhgp11_api_supports_route_probe.dir/flags.make": {
+          "sha256": "bd51b42e82fcea6cfde598d156af017f71ce527e9f8a0ed0d6f9e399e7c3e6e9",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=24",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=all -std=c++20"
+        }
+      },
+      "probe_link": {
+        "sha256": "fe3cf2261331c28465d3ffcc386084b2f52b73385344fffd727e85f66f807020",
+        "options": [
+          "-fsanitize=address,undefined"
+        ]
+      },
+      "route_names": [
+        "mhgp11_api_supports_route_lidar_ng01_k5",
+        "mhgp11_api_supports_route_lidar_ng02_k5"
+      ]
+    },
+    "gcc_asan_scale16000": {
+      "domain": "u24_ASan_UBSan",
+      "counts": {
+        "ctest_failed": 0,
+        "ctest_total": 10,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 10,
+        "selected": 10
+      },
+      "inventory_junit_ctest_sets_equal": true,
+      "actual_compile_flags": {
+        "CMakeFiles/mhgp11.dir/flags.make": {
+          "sha256": "bd51b42e82fcea6cfde598d156af017f71ce527e9f8a0ed0d6f9e399e7c3e6e9",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=24",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=all -std=c++20"
+        },
+        "CMakeFiles/mhgp11_api_supports_route_probe.dir/flags.make": {
+          "sha256": "bd51b42e82fcea6cfde598d156af017f71ce527e9f8a0ed0d6f9e399e7c3e6e9",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=24",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=all -std=c++20"
+        }
+      },
+      "probe_link": {
+        "sha256": "fe3cf2261331c28465d3ffcc386084b2f52b73385344fffd727e85f66f807020",
+        "options": [
+          "-fsanitize=address,undefined"
+        ]
+      },
+      "route_names": [
+        "mhgp11_api_supports_route_scale16000"
+      ]
+    },
+    "gcc_asan_scale32000": {
+      "domain": "u24_ASan_UBSan",
+      "counts": {
+        "ctest_failed": 0,
+        "ctest_total": 11,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 11,
+        "selected": 11
+      },
+      "inventory_junit_ctest_sets_equal": true,
+      "actual_compile_flags": {
+        "CMakeFiles/mhgp11.dir/flags.make": {
+          "sha256": "bd51b42e82fcea6cfde598d156af017f71ce527e9f8a0ed0d6f9e399e7c3e6e9",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=24",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=all -std=c++20"
+        },
+        "CMakeFiles/mhgp11_api_supports_route_probe.dir/flags.make": {
+          "sha256": "bd51b42e82fcea6cfde598d156af017f71ce527e9f8a0ed0d6f9e399e7c3e6e9",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=24",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=all -std=c++20"
+        }
+      },
+      "probe_link": {
+        "sha256": "fe3cf2261331c28465d3ffcc386084b2f52b73385344fffd727e85f66f807020",
+        "options": [
+          "-fsanitize=address,undefined"
+        ]
+      },
+      "route_names": [
+        "mhgp11_api_supports_route_scale32000"
+      ]
+    },
+    "gcc_asan_scale_rest": {
+      "domain": "u24_ASan_UBSan",
+      "counts": {
+        "ctest_failed": 0,
+        "ctest_total": 35,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 35,
+        "selected": 35
+      },
+      "inventory_junit_ctest_sets_equal": true,
+      "actual_compile_flags": {
+        "CMakeFiles/mhgp11.dir/flags.make": {
+          "sha256": "bd51b42e82fcea6cfde598d156af017f71ce527e9f8a0ed0d6f9e399e7c3e6e9",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=24",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=all -std=c++20"
+        },
+        "CMakeFiles/mhgp11_api_supports_route_probe.dir/flags.make": {
+          "sha256": "bd51b42e82fcea6cfde598d156af017f71ce527e9f8a0ed0d6f9e399e7c3e6e9",
+          "CXX_DEFINES": "-DMHGP11_COORD_BITS=24",
+          "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=all -std=c++20"
+        }
+      },
+      "probe_link": {
+        "sha256": "fe3cf2261331c28465d3ffcc386084b2f52b73385344fffd727e85f66f807020",
+        "options": [
+          "-fsanitize=address,undefined"
+        ]
+      },
+      "route_names": [
+        "mhgp11_api_supports_route_lidar_ng00_k5",
+        "mhgp11_api_supports_route_scale8000"
+      ]
+    }
+  },
+  "routes": [
+    {
+      "configuration": "gcc_asan_lidar_ng01_ng02",
+      "name": "mhgp11_api_supports_route_lidar_ng01_k5",
+      "status": "PASS",
+      "actual_complete_verdict": "supports_route_verdict conforme k=5 n=35551 noeuds=478265 boules=652958 supports=652959 etendues=81 multiples=1 cellules=369751 graines=1102505 fichier=ac1fd4da1b693572 manifeste=12882c6a35b51bd3 journal=5e36f8ddbd2fb94c fils=1,4",
+      "golden_profile_counts_journal_workers_match": true,
+      "floors": {
+        "balls": 652958,
+        "cells": 369751
+      },
+      "compute_FULL_peak_witness": {
+        "route": "compute",
+        "tree_peak": 328682814,
+        "order_tree_peak": 228640202,
+        "full_tower_peak": 328682814
+      },
+      "route_tree_peaks": {
+        "order_tree_W1": 228640202,
+        "full_tower_W1": 328682814,
+        "order_tree_W4": 229066814,
+        "full_tower_W4": 329109426
+      },
+      "lasttest_block_sha256": "1b1a3ac89a29d27b086b80d68c2fb0f2858b0cc96c6f0d8f3987f43fd4f5ac44"
+    },
+    {
+      "configuration": "gcc_asan_lidar_ng01_ng02",
+      "name": "mhgp11_api_supports_route_lidar_ng02_k5",
+      "status": "PASS",
+      "actual_complete_verdict": "supports_route_verdict conforme k=5 n=45845 noeuds=609376 boules=832386 supports=832394 etendues=354 multiples=8 cellules=471060 graines=1393952 fichier=b66e1a9e116e56c7 manifeste=4963819ee6bcd867 journal=ec87f14da7adff77 fils=1,4",
+      "golden_profile_counts_journal_workers_match": true,
+      "floors": {
+        "balls": 832386,
+        "cells": 471060
+      },
+      "compute_FULL_peak_witness": {
+        "route": "compute",
+        "tree_peak": 405129389,
+        "order_tree_peak": 275916113,
+        "full_tower_peak": 405129389
+      },
+      "route_tree_peaks": {
+        "order_tree_W1": 275916113,
+        "full_tower_W1": 405129389,
+        "order_tree_W4": 276466253,
+        "full_tower_W4": 405679529
+      },
+      "lasttest_block_sha256": "9772c8b67771fa3b00cc1ea9ac05f0785ca258e8e53fa6a5d0fed627f729b002"
+    },
+    {
+      "configuration": "gcc_asan_scale16000",
+      "name": "mhgp11_api_supports_route_scale16000",
+      "status": "PASS",
+      "actual_complete_verdict": "supports_route_verdict conforme k=5 n=16000 noeuds=565098 boules=819004 supports=819004 etendues=0 multiples=0 cellules=478947 graines=1530768 fichier=1716d15eb3a5afa4 manifeste=39af11215297416d journal=436d1354ae183486 fils=1,4",
+      "golden_profile_counts_journal_workers_match": true,
+      "floors": {
+        "balls": 819004,
+        "cells": 478947
+      },
+      "compute_FULL_peak_witness": {
+        "route": "compute",
+        "tree_peak": 367566854,
+        "order_tree_peak": 267067294,
+        "full_tower_peak": 367566854
+      },
+      "route_tree_peaks": {
+        "order_tree_W1": 267067294,
+        "full_tower_W1": 367566854,
+        "order_tree_W4": 267259294,
+        "full_tower_W4": 367758854
+      },
+      "lasttest_block_sha256": "684b4528f578abd971273c77be413a8c00e56add8e04c661dbd0718a86bc32c1"
+    },
+    {
+      "configuration": "gcc_asan_scale32000",
+      "name": "mhgp11_api_supports_route_scale32000",
+      "status": "PASS",
+      "actual_complete_verdict": "supports_route_verdict conforme k=5 n=32000 noeuds=1163756 boules=1690045 supports=1690045 etendues=0 multiples=0 cellules=989861 graines=3165977 fichier=1a68904408bcae5f manifeste=54f75f49aceae6b7 journal=c371678559b144d7 fils=1,4",
+      "golden_profile_counts_journal_workers_match": true,
+      "floors": {
+        "balls": 1690045,
+        "cells": 989861
+      },
+      "compute_FULL_peak_witness": {
+        "route": "compute",
+        "tree_peak": 753508284,
+        "order_tree_peak": 547424048,
+        "full_tower_peak": 753508284
+      },
+      "route_tree_peaks": {
+        "order_tree_W1": 547424048,
+        "full_tower_W1": 753508284,
+        "order_tree_W4": 547808048,
+        "full_tower_W4": 753892284
+      },
+      "lasttest_block_sha256": "36368beace8e5884a2f37a3904616e107c0d56a1d24624344d82ed0b4fac9c29"
+    },
+    {
+      "configuration": "gcc_asan_scale_rest",
+      "name": "mhgp11_api_supports_route_lidar_ng00_k5",
+      "status": "PASS",
+      "actual_complete_verdict": "supports_route_verdict conforme k=5 n=39885 noeuds=576371 boules=789886 supports=789889 etendues=141 multiples=3 cellules=448805 graines=1350288 fichier=4b781f21b6e9fd84 manifeste=0e13ef92eda96e3e journal=c189d5cd3ec3de66 fils=1,4",
+      "golden_profile_counts_journal_workers_match": true,
+      "floors": {
+        "balls": 789886,
+        "cells": 448805
+      },
+      "compute_FULL_peak_witness": {
+        "route": "compute",
+        "tree_peak": 381612812,
+        "order_tree_peak": 263839124,
+        "full_tower_peak": 381612812
+      },
+      "route_tree_peaks": {
+        "order_tree_W1": 263839124,
+        "full_tower_W1": 381612812,
+        "order_tree_W4": 264317744,
+        "full_tower_W4": 382091432
+      },
+      "lasttest_block_sha256": "6dc0f1f5377f4c7da95b9df9862054069fa1794a80a9367a07340ae90eb9430c"
+    },
+    {
+      "configuration": "gcc_asan_scale_rest",
+      "name": "mhgp11_api_supports_route_scale8000",
+      "status": "PASS",
+      "actual_complete_verdict": "supports_route_verdict conforme k=5 n=8000 noeuds=273655 boules=395667 supports=395667 etendues=0 multiples=0 cellules=230825 graines=737362 fichier=8346120e7c4d1d69 manifeste=1079d104c5e64543 journal=a6c3b688a7fe1b4a fils=1,4",
+      "golden_profile_counts_journal_workers_match": true,
+      "floors": {
+        "balls": 395667,
+        "cells": 230825
+      },
+      "compute_FULL_peak_witness": {
+        "route": "compute",
+        "tree_peak": 179009778,
+        "order_tree_peak": 130072730,
+        "full_tower_peak": 179009778
+      },
+      "route_tree_peaks": {
+        "order_tree_W1": 130072730,
+        "full_tower_W1": 179009778,
+        "order_tree_W4": 130168730,
+        "full_tower_W4": 179105778
+      },
+      "lasttest_block_sha256": "e5828e8947e4447e5669eaf3c34f5e759bcd7bf99cba298ce40dfe43aa07bcbc"
+    }
+  ],
+  "runtime_logs_scan": [
+    {
+      "member": "results/cmd/000_matrice/files/matrix/gcc_asan_scale_rest/LastTest.log",
+      "sha256": "b77d5072eb8d92f1441f6f1eb0af0c06103fc82f58583ff3c9c2b8935ed8c35b",
+      "bytes": 67527,
+      "marker_counts": {}
+    },
+    {
+      "member": "results/cmd/000_matrice/files/matrix/gcc_asan_scale_rest/sanitizer.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "marker_counts": {}
+    },
+    {
+      "member": "results/cmd/000_matrice/files/matrix/gcc_asan_scale_rest/junit.xml",
+      "sha256": "a9774253ddededf8aac9e561f7958700300fdba595847eaff5cf10ff6d861941",
+      "bytes": 24654,
+      "marker_counts": {}
+    },
+    {
+      "member": "results/cmd/000_matrice/files/matrix/gcc_asan_scale_rest/ctest.log",
+      "sha256": "e671edaa642ea9f1a031a77a6cfb004a7653baefaeebeb671a55040669133a8f",
+      "bytes": 5458,
+      "marker_counts": {}
+    },
+    {
+      "member": "results/cmd/000_matrice/files/matrix/gcc_asan_lidar_ng01_ng02/LastTest.log",
+      "sha256": "02618f29b8eb516666075c9bf4fa7dbbb5069576b02c31a630645284799d4cd6",
+      "bytes": 47951,
+      "marker_counts": {}
+    },
+    {
+      "member": "results/cmd/000_matrice/files/matrix/gcc_asan_lidar_ng01_ng02/sanitizer.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "marker_counts": {}
+    },
+    {
+      "member": "results/cmd/000_matrice/files/matrix/gcc_asan_lidar_ng01_ng02/junit.xml",
+      "sha256": "c732ee73df30608d71d345cf936f66ab0c0745a56b6e3ff5cf9eda2c8771e807",
+      "bytes": 17408,
+      "marker_counts": {}
+    },
+    {
+      "member": "results/cmd/000_matrice/files/matrix/gcc_asan_lidar_ng01_ng02/ctest.log",
+      "sha256": "134e232a0a557b84378968ce32a5f262587a42f807aaa09d7a654708456f2c2a",
+      "bytes": 3567,
+      "marker_counts": {}
+    },
+    {
+      "member": "results/cmd/000_matrice/files/matrix/gcc_asan_scale16000/LastTest.log",
+      "sha256": "033d56d858b620d4069b9f43b3f59163eb53389a2a133f006b6ea9e716352de2",
+      "bytes": 20039,
+      "marker_counts": {}
+    },
+    {
+      "member": "results/cmd/000_matrice/files/matrix/gcc_asan_scale16000/sanitizer.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "marker_counts": {}
+    },
+    {
+      "member": "results/cmd/000_matrice/files/matrix/gcc_asan_scale16000/junit.xml",
+      "sha256": "0f981c1c8b720ccf535076965fc063dae4476a1c8817cd7a2f07422a7ce02176",
+      "bytes": 7963,
+      "marker_counts": {}
+    },
+    {
+      "member": "results/cmd/000_matrice/files/matrix/gcc_asan_scale16000/ctest.log",
+      "sha256": "82bc8fce1f9d44ffefd1160b8f65f5905d642278ed97bad357942ea723a8b3c3",
+      "bytes": 1602,
+      "marker_counts": {}
+    },
+    {
+      "member": "results/cmd/000_matrice/files/matrix/gcc_asan_scale32000/LastTest.log",
+      "sha256": "a14d6b1dc4e7504736479b2fe1658e81029021851d8dc3ad513b30c86ec211a7",
+      "bytes": 22009,
+      "marker_counts": {}
+    },
+    {
+      "member": "results/cmd/000_matrice/files/matrix/gcc_asan_scale32000/sanitizer.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "marker_counts": {}
+    },
+    {
+      "member": "results/cmd/000_matrice/files/matrix/gcc_asan_scale32000/junit.xml",
+      "sha256": "b2074a7235ba9fddb60da4d0fe9fb0d01c5880932c4fde381e0ea45d6301638f",
+      "bytes": 8649,
+      "marker_counts": {}
+    },
+    {
+      "member": "results/cmd/000_matrice/files/matrix/gcc_asan_scale32000/ctest.log",
+      "sha256": "f757440ee6b8c3ceeeef4978d0d46b27ddbd6f9b9488cdbde425d6458921d4e2",
+      "bytes": 1741,
+      "marker_counts": {}
+    }
+  ],
+  "important_findings": [],
+  "scope": {
+    "six_routes_u24_asan_ubsan": 6,
+    "compute_FULL_peak_witnesses": 6,
+    "selected_unique_PASS_occurrences_crosschecked": 80,
+    "runtime_logs_scanned": 16,
+    "runtime_diagnostic_marker_hits": 0,
+    "native_cloud_actions_by_auditor": false
+  },
+  "verdict": "favorable_six_u24_routes_and_runtime_closed",
+  "limitations": [
+    "The six route gates require full byte identity between routes/workers, equal complete journal registers and public compute file/manifest/peak equality to FULL. Runtime prints golden prefixes and compute peaks; separate per-route file hashes are not emitted.",
+    "These are new corrected-source G4 verdicts at98a; the six historical failed fins verdicts at38b remain failed records.",
+    "Scope is u24 ASan/UBSan and these four scale/LiDAR lots, not TSan/MSan or a global memory-safety proof, and not a timing contract.",
+    "No source, KITTI bytes or raw native logs were copied. The JSON retains only safe complete verdicts, peaks, flags and source/log fingerprints."
+  ]
+}

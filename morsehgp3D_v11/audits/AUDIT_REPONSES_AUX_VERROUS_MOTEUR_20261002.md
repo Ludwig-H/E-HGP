@@ -24,7 +24,10 @@ ASan/UBSan u24 et TSan u21 dans
 [fins](../receipts/audit_g4_fins_20261005/README.md). Le complément
 [finb](../receipts/audit_g4_finb_20261005/README.md) termine 783/783 portes
 courtes dans chaque profil, dont la racine exacte `2^127−1` et le refus
-du tri S9. Les onze portes K10 et dix-sept références FULL exactes
+du tri S9. La reprise [R4](../receipts/audit_g4_repriser4_20261005/README.md)
+au pin 98a009550 termine ensuite 80/80 portes ASan/UBSan u24, dont
+les six routes corrigées et les portes points/plat/racines.
+Les onze portes K10 et dix-sept références FULL exactes
 passent dans [finl](../receipts/audit_g4_finl_20261005/README.md).
 
 **Les huit différentiels dédiés passent en Release u21.**

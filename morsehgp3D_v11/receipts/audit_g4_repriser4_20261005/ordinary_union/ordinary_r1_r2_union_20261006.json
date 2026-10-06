@@ -1,0 +1,42 @@
+[
+  {
+    "configuration": "gcc_release",
+    "extra": [],
+    "intersection": [],
+    "missing": [],
+    "old_count": 991,
+    "r1_count": 873,
+    "r2_count": 118,
+    "union_sha256": "2a42b5d5cf2b96cd54818fa464fd754e9e901d9ed0d2d746abb21d8ba3250835"
+  },
+  {
+    "configuration": "bits21",
+    "extra": [],
+    "intersection": [],
+    "missing": [],
+    "old_count": 901,
+    "r1_count": 783,
+    "r2_count": 118,
+    "union_sha256": "49f78ec909522262a857b6ae6656842dcb67269c276c12256110c78b67c3645e"
+  },
+  {
+    "configuration": "bits24",
+    "extra": [],
+    "intersection": [],
+    "missing": [],
+    "old_count": 901,
+    "r1_count": 783,
+    "r2_count": 118,
+    "union_sha256": "49f78ec909522262a857b6ae6656842dcb67269c276c12256110c78b67c3645e"
+  },
+  {
+    "configuration": "poison",
+    "extra": [],
+    "intersection": [],
+    "missing": [],
+    "old_count": 902,
+    "r1_count": 784,
+    "r2_count": 118,
+    "union_sha256": "87bb125e3d6b1d947292c3e9224aaa594f45e6365c38216cbd2ea33c087c7df8"
+  }
+]
