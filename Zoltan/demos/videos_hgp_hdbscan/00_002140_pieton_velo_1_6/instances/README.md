@@ -16,7 +16,7 @@ Vidéo de 62 s, k = 10, 1920 × 1080 : [thème sombre](00_002140_pieton_velo_1_6
   <img alt="Hiérarchie des supports, k = 10, r = 17,2 cm : B, IoU maximal : 0,81 ; ✓ A et B retrouvés, encore séparés" src="00_002140_pieton_velo_1_6_instances_k10_supports_clair_instant_cle.png">
 </picture>
 
-Hiérarchie des supports q2, q3, q4 au même ordre, 39 s : [thème sombre](00_002140_pieton_velo_1_6_instances_k10_supports_sombre.mp4) · [thème clair](00_002140_pieton_velo_1_6_instances_k10_supports_clair.mp4) ; image finale : [sombre](00_002140_pieton_velo_1_6_instances_k10_supports_sombre_bilan.png) · [clair](00_002140_pieton_velo_1_6_instances_k10_supports_clair_bilan.png). Arbre d'ordre 10 : 4 402 nœuds, 5 579 boules, 5 579 supports (487 arêtes q2, 2 841 triangles q3, 2 251 tétraèdres q4).
+Hiérarchie des supports q2, q3, q4 au même ordre, 39 s : [thème sombre](00_002140_pieton_velo_1_6_instances_k10_supports_sombre.mp4) · [thème clair](00_002140_pieton_velo_1_6_instances_k10_supports_clair.mp4) ; image finale : [sombre](00_002140_pieton_velo_1_6_instances_k10_supports_sombre_bilan.png) · [clair](00_002140_pieton_velo_1_6_instances_k10_supports_clair_bilan.png). Arbre couvrant d'ordre 10 : 4 402 nœuds, 4 402 naissances et fusions, chacune avec son support S\* (4 402 supports : 299 arêtes q2, 2 047 triangles q3, 2 056 tétraèdres q4).
 
 Points : les seuls points des objets du groupe (vérité terrain SemanticKITTI), 160 points (A 82, B 78) : ni sol, ni fond, ni autre objet.
 

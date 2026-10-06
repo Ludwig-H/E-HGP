@@ -16,7 +16,7 @@ Vidéo de 61 s, k = 5, 1920 × 1080 : [thème sombre](00_001502_deux_velos_28_66
   <img alt="Hiérarchie des supports, k = 5, r = 10,6 cm : B, IoU maximal : 0,60 ; ✓ A et B retrouvés, encore séparés" src="00_001502_deux_velos_28_66_instances_k5_supports_clair_instant_cle.png">
 </picture>
 
-Hiérarchie des supports q2, q3, q4 au même ordre, 39 s : [thème sombre](00_001502_deux_velos_28_66_instances_k5_supports_sombre.mp4) · [thème clair](00_001502_deux_velos_28_66_instances_k5_supports_clair.mp4) ; image finale : [sombre](00_001502_deux_velos_28_66_instances_k5_supports_sombre_bilan.png) · [clair](00_001502_deux_velos_28_66_instances_k5_supports_clair_bilan.png). Arbre d'ordre 5 : 2 534 nœuds, 3 377 boules, 3 377 supports (765 arêtes q2, 1 949 triangles q3, 663 tétraèdres q4).
+Hiérarchie des supports q2, q3, q4 au même ordre, 39 s : [thème sombre](00_001502_deux_velos_28_66_instances_k5_supports_sombre.mp4) · [thème clair](00_001502_deux_velos_28_66_instances_k5_supports_clair.mp4) ; image finale : [sombre](00_001502_deux_velos_28_66_instances_k5_supports_sombre_bilan.png) · [clair](00_001502_deux_velos_28_66_instances_k5_supports_clair_bilan.png). Arbre couvrant d'ordre 5 : 2 534 nœuds, 2 534 naissances et fusions, chacune avec son support S\* (2 534 supports : 460 arêtes q2, 1 451 triangles q3, 623 tétraèdres q4).
 
 **k = 10** (HGP réussit, HDBSCAN échoue) :
 
@@ -32,7 +32,7 @@ Vidéo de 61 s, k = 10, 1920 × 1080 : [thème sombre](00_001502_deux_velos_28_6
   <img alt="Hiérarchie des supports, k = 10, r = 14,9 cm : A, IoU maximal : 0,92 ; ✓ A et B retrouvés, encore séparés" src="00_001502_deux_velos_28_66_instances_k10_supports_clair_instant_cle.png">
 </picture>
 
-Hiérarchie des supports q2, q3, q4 au même ordre, 38 s : [thème sombre](00_001502_deux_velos_28_66_instances_k10_supports_sombre.mp4) · [thème clair](00_001502_deux_velos_28_66_instances_k10_supports_clair.mp4) ; image finale : [sombre](00_001502_deux_velos_28_66_instances_k10_supports_sombre_bilan.png) · [clair](00_001502_deux_velos_28_66_instances_k10_supports_clair_bilan.png). Arbre d'ordre 10 : 5 922 nœuds, 7 493 boules, 7 493 supports (650 arêtes q2, 3 762 triangles q3, 3 081 tétraèdres q4).
+Hiérarchie des supports q2, q3, q4 au même ordre, 38 s : [thème sombre](00_001502_deux_velos_28_66_instances_k10_supports_sombre.mp4) · [thème clair](00_001502_deux_velos_28_66_instances_k10_supports_clair.mp4) ; image finale : [sombre](00_001502_deux_velos_28_66_instances_k10_supports_sombre_bilan.png) · [clair](00_001502_deux_velos_28_66_instances_k10_supports_clair_bilan.png). Arbre couvrant d'ordre 10 : 5 922 nœuds, 5 922 naissances et fusions, chacune avec son support S\* (5 922 supports : 379 arêtes q2, 2 692 triangles q3, 2 851 tétraèdres q4).
 
 Points : les seuls points des objets du groupe (vérité terrain SemanticKITTI), 209 points (A 146, B 63) : ni sol, ni fond, ni autre objet.
 

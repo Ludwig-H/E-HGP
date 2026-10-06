@@ -7,31 +7,34 @@
  "sites": 382,
  "sortie": {
   "commande": "mhgp11 --sortie=supports --k=5",
+  "source": "0cc9cbec4",
+  "format": "MHGP11SP",
+  "version": 2,
   "status": "ok",
   "coord_bits": 21,
-  "manifest_sha256": "1820e16d29f41bb4f85769ea16215b487d4fa02f26912f8fc38d26e3d41da8e2",
-  "supports_sha256": "76272275548347fa21f7726964a5cc37dd3547d340c512b49bbefac987ae16ba",
+  "manifest_sha256": "f3961f2e0a1ee17d502cba18d67b7c2e18cf2abcd5cd7e86f1313950673d2330",
+  "supports_sha256": "f40ba2b8c12d68454879257d5356f60cf7878a3e2a64dc3e086afe68d7701a5b",
   "tree_k_sha256": "4dfc33d163432766cc635b6e22f409c47f9e293491ba109a36c3fdb641793763",
   "stages_ns": {
-   "cloud": 240629,
-   "index": 19677,
-   "domain": 170566126,
-   "tree": 48818642,
-   "attach": 974479,
-   "output": 4255414,
-   "write": 18368033,
-   "total": 243810130
+   "cloud": 217718,
+   "index": 15469,
+   "domain": 144125329,
+   "tree": 50302735,
+   "attach": 933433,
+   "output": 3171201,
+   "write": 52917787,
+   "total": 258049355
   }
  },
  "counts": {
   "nodes": 5013,
-  "balls": 6849,
-  "supports": 6849,
-  "q2": 1511,
-  "q3": 4025,
-  "q4": 1313
+  "balls": 5013,
+  "supports": 5013,
+  "q2": 875,
+  "q3": 2920,
+  "q4": 1218
  },
- "regle": "branche d'un objet : nœud de meilleur IoU des sites de ses supports (points void exclus), ses enfants de meilleur IoU en dessous, ses ancêtres au-dessus",
+ "regle": "arbre couvrant d'ordre k (naissances et fusions, S* seul) ; branche d'un objet : nœud de meilleur IoU des sites de ses supports (points void exclus), ses enfants de meilleur IoU en dessous, ses ancêtres au-dessus",
  "best": [
   0.836735,
   0.705882,

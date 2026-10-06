@@ -16,7 +16,7 @@ Vidéo de 77 s, k = 10, 1920 × 1080 : [thème sombre](06_000774_trois_velos_6_1
   <img alt="Hiérarchie des supports, k = 10, r = 19,1 cm : A, B et C retrouvés, encore séparés" src="06_000774_trois_velos_6_14_15_sans_sol_k10_supports_clair_instant_cle.png">
 </picture>
 
-Hiérarchie des supports q2, q3, q4 au même ordre, 48 s : [thème sombre](06_000774_trois_velos_6_14_15_sans_sol_k10_supports_sombre.mp4) · [thème clair](06_000774_trois_velos_6_14_15_sans_sol_k10_supports_clair.mp4) ; image finale : [sombre](06_000774_trois_velos_6_14_15_sans_sol_k10_supports_sombre_bilan.png) · [clair](06_000774_trois_velos_6_14_15_sans_sol_k10_supports_clair_bilan.png). Arbre d'ordre 10 : 84 106 nœuds, 107 845 boules, 107 845 supports (10 861 arêtes q2, 58 979 triangles q3, 38 005 tétraèdres q4).
+Hiérarchie des supports q2, q3, q4 au même ordre, 48 s : [thème sombre](06_000774_trois_velos_6_14_15_sans_sol_k10_supports_sombre.mp4) · [thème clair](06_000774_trois_velos_6_14_15_sans_sol_k10_supports_clair.mp4) ; image finale : [sombre](06_000774_trois_velos_6_14_15_sans_sol_k10_supports_sombre_bilan.png) · [clair](06_000774_trois_velos_6_14_15_sans_sol_k10_supports_clair_bilan.png). Arbre couvrant d'ordre 10 : 84 106 nœuds, 84 133 naissances et fusions, chacune avec son support S\* (84 133 supports : 6 436 arêtes q2, 42 801 triangles q3, 34 896 tétraèdres q4).
 
 Points : tout ce que Patchwork++ (paramètres de la v8) ne classe pas en sol dans la boîte horizontale des objets élargie de 1 m, à toutes hauteurs : 2 706 points, dont 175 des objets (A 83, B 41, C 51) ; 115 points des objets retirés comme sol. Aucune étiquette ne sert au nettoyage : elles ne servent qu'à mesurer.
 

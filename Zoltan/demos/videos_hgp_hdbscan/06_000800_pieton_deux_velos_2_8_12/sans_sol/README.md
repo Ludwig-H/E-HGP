@@ -16,7 +16,7 @@ Vidéo de 80 s, k = 5, 1920 × 1080 : [thème sombre](06_000800_pieton_deux_velo
   <img alt="Hiérarchie des supports, k = 5, r = 16,8 cm : B, IoU maximal : 0,74 ; ✓ A, B et C retrouvés, encore séparés" src="06_000800_pieton_deux_velos_2_8_12_sans_sol_k5_supports_clair_instant_cle.png">
 </picture>
 
-Hiérarchie des supports q2, q3, q4 au même ordre, 49 s : [thème sombre](06_000800_pieton_deux_velos_2_8_12_sans_sol_k5_supports_sombre.mp4) · [thème clair](06_000800_pieton_deux_velos_2_8_12_sans_sol_k5_supports_clair.mp4) ; image finale : [sombre](06_000800_pieton_deux_velos_2_8_12_sans_sol_k5_supports_sombre_bilan.png) · [clair](06_000800_pieton_deux_velos_2_8_12_sans_sol_k5_supports_clair_bilan.png). Arbre d'ordre 5 : 22 192 nœuds, 30 485 boules, 30 485 supports (7 103 arêtes q2, 18 630 triangles q3, 4 752 tétraèdres q4).
+Hiérarchie des supports q2, q3, q4 au même ordre, 49 s : [thème sombre](06_000800_pieton_deux_velos_2_8_12_sans_sol_k5_supports_sombre.mp4) · [thème clair](06_000800_pieton_deux_velos_2_8_12_sans_sol_k5_supports_clair.mp4) ; image finale : [sombre](06_000800_pieton_deux_velos_2_8_12_sans_sol_k5_supports_sombre_bilan.png) · [clair](06_000800_pieton_deux_velos_2_8_12_sans_sol_k5_supports_clair_bilan.png). Arbre couvrant d'ordre 5 : 22 192 nœuds, 22 199 naissances et fusions, chacune avec son support S\* (22 199 supports : 4 020 arêtes q2, 13 948 triangles q3, 4 231 tétraèdres q4).
 
 **k = 10** (HGP réussit, HDBSCAN échoue) :
 
@@ -32,7 +32,7 @@ Vidéo de 75 s, k = 10, 1920 × 1080 : [thème sombre](06_000800_pieton_deux_vel
   <img alt="Hiérarchie des supports, k = 10, r = 22,6 cm : B, IoU maximal : 0,73 ; ✓ A, B et C retrouvés, encore séparés" src="06_000800_pieton_deux_velos_2_8_12_sans_sol_k10_supports_clair_instant_cle.png">
 </picture>
 
-Hiérarchie des supports q2, q3, q4 au même ordre, 46 s : [thème sombre](06_000800_pieton_deux_velos_2_8_12_sans_sol_k10_supports_sombre.mp4) · [thème clair](06_000800_pieton_deux_velos_2_8_12_sans_sol_k10_supports_clair.mp4) ; image finale : [sombre](06_000800_pieton_deux_velos_2_8_12_sans_sol_k10_supports_sombre_bilan.png) · [clair](06_000800_pieton_deux_velos_2_8_12_sans_sol_k10_supports_clair_bilan.png). Arbre d'ordre 10 : 60 903 nœuds, 78 658 boules, 78 658 supports (7 023 arêtes q2, 41 153 triangles q3, 30 482 tétraèdres q4).
+Hiérarchie des supports q2, q3, q4 au même ordre, 46 s : [thème sombre](06_000800_pieton_deux_velos_2_8_12_sans_sol_k10_supports_sombre.mp4) · [thème clair](06_000800_pieton_deux_velos_2_8_12_sans_sol_k10_supports_clair.mp4) ; image finale : [sombre](06_000800_pieton_deux_velos_2_8_12_sans_sol_k10_supports_sombre_bilan.png) · [clair](06_000800_pieton_deux_velos_2_8_12_sans_sol_k10_supports_clair_bilan.png). Arbre couvrant d'ordre 10 : 60 903 nœuds, 60 910 naissances et fusions, chacune avec son support S\* (60 910 supports : 4 008 arêtes q2, 29 229 triangles q3, 27 673 tétraèdres q4).
 
 Points : tout ce que Patchwork++ (paramètres de la v8) ne classe pas en sol dans la boîte horizontale des objets élargie de 1 m, à toutes hauteurs : 1 674 points, dont 261 des objets (A 117, B 64, C 80) ; 43 points des objets retirés comme sol. Aucune étiquette ne sert au nettoyage : elles ne servent qu'à mesurer.
 

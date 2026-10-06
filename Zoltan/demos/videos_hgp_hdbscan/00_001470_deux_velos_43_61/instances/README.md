@@ -16,7 +16,7 @@ Vidéo de 61 s, k = 5, 1920 × 1080 : [thème sombre](00_001470_deux_velos_43_61
   <img alt="Hiérarchie des supports, k = 5, r = 16,4 cm : A, IoU maximal : 0,96 ; ✓ A et B retrouvés, encore séparés" src="00_001470_deux_velos_43_61_instances_k5_supports_clair_instant_cle.png">
 </picture>
 
-Hiérarchie des supports q2, q3, q4 au même ordre, 39 s : [thème sombre](00_001470_deux_velos_43_61_instances_k5_supports_sombre.mp4) · [thème clair](00_001470_deux_velos_43_61_instances_k5_supports_clair.mp4) ; image finale : [sombre](00_001470_deux_velos_43_61_instances_k5_supports_sombre_bilan.png) · [clair](00_001470_deux_velos_43_61_instances_k5_supports_clair_bilan.png). Arbre d'ordre 5 : 2 555 nœuds, 3 448 boules, 3 448 supports (917 arêtes q2, 2 008 triangles q3, 523 tétraèdres q4).
+Hiérarchie des supports q2, q3, q4 au même ordre, 39 s : [thème sombre](00_001470_deux_velos_43_61_instances_k5_supports_sombre.mp4) · [thème clair](00_001470_deux_velos_43_61_instances_k5_supports_clair.mp4) ; image finale : [sombre](00_001470_deux_velos_43_61_instances_k5_supports_sombre_bilan.png) · [clair](00_001470_deux_velos_43_61_instances_k5_supports_clair_bilan.png). Arbre couvrant d'ordre 5 : 2 555 nœuds, 2 555 naissances et fusions, chacune avec son support S\* (2 555 supports : 578 arêtes q2, 1 495 triangles q3, 482 tétraèdres q4).
 
 Points : les seuls points des objets du groupe (vérité terrain SemanticKITTI), 250 points (A 138, B 112) : ni sol, ni fond, ni autre objet.
 

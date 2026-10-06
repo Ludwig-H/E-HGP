@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
-"""Scène d'une vidéo « hiérarchie des supports » : l'arbre d'ordre k de morsehgp3D_v11 (sortie supports, format
-MHGP11SP), dont chaque boule publie ses supports positifs minimaux : arêtes (q2), triangles (q3), tétraèdres (q4).
+"""Scène d'une vidéo « hiérarchie des supports » : l'arbre couvrant d'ordre k de morsehgp3D_v11 (sortie supports,
+format MHGP11SP version 2) : ses arêtes de Kruskal, naissances et fusions, chacune avec son support S* : arête (q2),
+triangle (q3) ou tétraèdre (q4). Les liaisons internes (boules qui ferment un cycle) n'y sont pas.
 
-    python3 Zoltan/demos/tools/supports_scene.py --mhgp11 BIN [--k 5] [--travail DIR] <variante> [<variante> ...]
+    python3 Zoltan/demos/tools/supports_scene.py --mhgp11 BIN --source SHA [--k 5] [--travail DIR] <variante> ...
 
 <variante> : videos_hgp_hdbscan/<exemple>/{instances,sans_sol}, dont la scène du duel (data/duel_k<k>.js, écrite par
 tools/duel_scene.py) fournit les points, la vérité terrain, la caméra et les objets. Écrit data/supports_k<k>.js (non
 versionné : coordonnées) et resultats_supports_k<k>.json.
 
 - Supports : `mhgp11 --sortie=supports --k=<k>` sur les points de la découpe (PointId = rang dans la découpe), lu et
-  contrôlé par morsehgp3D_v11/bench/mhgp11_formats.py (read_supports). Niveau d'une boule : rayon de la sphère de son
-  premier support S*, en mètres (grille de 1 mm). Un support apparaît au niveau de sa boule.
+  contrôlé par morsehgp3D_v11/bench/mhgp11_formats.py (check_directory, read_supports) ; un fichier d'une autre
+  version que la 2 est refusé. Niveau d'une boule : rayon de la sphère de son support S*, en mètres (grille de 1 mm).
+  Un support apparaît au niveau de sa boule. --source : le commit dont l'exécutable est compilé, recopié dans les
+  résultats.
 - Réalisation d'un nœud v au niveau r : les sites des supports des boules rattachées à son sous-arbre, de niveau au
   plus r (docs/SORTIES.md § 6, « Lectures »). Les sites intérieurs n'y sont pas ; les IoU se comptent sur ces sites,
   points void exclus.
@@ -73,12 +76,25 @@ def run_supports(binary, xyz, workdir, k):
     fm.check_directory(str(out), bits)
     data = (out / 'supports.mhgp11sp').read_bytes()
     manifest = json.loads((out / 'manifeste.json').read_text(encoding='utf-8'))
-    return fm.read_supports(data, bits), manifest, status, hashlib.sha256(data).hexdigest()
+    f = fm.read_supports(data, bits)
+    if getattr(f, 'version', 1) != 2 or manifest['files'][0].get('version') != 2:
+        raise Refus('MHGP11SP version %s : la version 2 (arbre couvrant d\'ordre k) est attendue'
+                    % getattr(f, 'version', 1))
+    if any(role not in (0, 1) for role in f.role) or f.S != f.B:
+        raise Refus('MHGP11SP : boule hors de l\'arbre couvrant (liaison interne, ou plusieurs supports)')
+    return f, manifest, status, hashlib.sha256(data).hexdigest()
 
 
 def analyse(f, gt, void, raw, objects):
-    """Chaînes, lignes de suivi, fusions et effondrements des branches qui suivent les objets."""
-    crop = np.array(f.point_id, dtype=np.int64)
+    """Chaînes, lignes de suivi, fusions et effondrements des branches qui suivent les objets.
+
+    Comptes incrémentaux : un ensemble de sites porte avec lui son nombre de sites non void et, par objet, le nombre
+    de ses sites dans l'objet ; un site n'est compté qu'à sa première insertion. Les IoU complets des nœuds se
+    calculent en versant les petits ensembles dans les grands (postordre) ; la réalisation d'une branche monte de
+    l'enfant au parent en n'ajoutant que les sous-arbres des autres enfants."""
+    crop = [int(x) for x in f.point_id]
+    is_void = [bool(x) for x in np.asarray(void)]
+    label = [int(x) for x in np.asarray(gt)]
     order = sorted(range(f.N), key=lambda v: f.post[v])
     start, at = [0] * f.N, 0
     for v in order:
@@ -88,39 +104,55 @@ def analyse(f, gt, void, raw, objects):
     level = [radius[f.first_ball[v]] if f.ball_count[v] else 0.0 for v in range(f.N)]
     ball_sites = []
     for b in range(f.B):
-        s = set()
+        s = []
         for q in range(f.ball_at[b], f.ball_at[b] + f.support_count[b]):
-            s.update(int(crop[x]) for x in f.points_of(q))
+            s.extend(crop[x] for x in f.points_of(q))
         ball_sites.append(s)
     sizes = [int(np.sum((gt == o) & ~void)) for o in range(objects)]
 
-    def iou_of(sites):
-        arr = np.fromiter(sites, dtype=np.int64, count=len(sites))
-        arr = arr[~void[arr]] if len(arr) else arr
-        out = []
-        for o in range(objects):
-            inter = int(np.sum(gt[arr] == o)) if len(arr) else 0
-            union = len(arr) + sizes[o] - inter
-            out.append(inter / union if union else 0.0)
-        return out
+    class Bag:
+        """Ensemble de sites et ses comptes : taille non void, puis un compte par objet."""
+        __slots__ = ('sites', 'nonvoid', 'inter')
+
+        def __init__(self):
+            self.sites, self.nonvoid, self.inter = set(), 0, [0] * objects
+
+        def add(self, x):
+            if x in self.sites:
+                return False
+            self.sites.add(x)
+            if not is_void[x]:
+                self.nonvoid += 1
+                if label[x] >= 0:
+                    self.inter[label[x]] += 1
+            return True
+
+        def iou(self, o):
+            union = self.nonvoid + sizes[o] - self.inter[o]
+            return self.inter[o] / union if union else 0.0
+
+    def subtree_balls(v):
+        return range(start[order[f.post[v] - f.size[v] + 1]], start[v] + f.ball_count[v])
 
     # réalisation complète de chaque nœud (petits ensembles versés dans les grands, en postordre) et son IoU
-    full_iou, sets = [None] * f.N, {}
+    full_iou, bags = [None] * f.N, {}
     for v in order:
         ch = f.children[v]
         if ch:
-            big = max(ch, key=lambda c: len(sets[c]))
-            s = sets.pop(big)
+            big = max(ch, key=lambda c: len(bags[c].sites))
+            bag = bags.pop(big)
             for c in ch:
                 if c != big:
-                    s |= sets.pop(c)
+                    for x in bags.pop(c).sites:
+                        bag.add(x)
         else:
-            s = set()
+            bag = Bag()
         for b in range(start[v], start[v] + f.ball_count[v]):
-            s |= ball_sites[b]
-        sets[v] = s
-        full_iou[v] = iou_of(s)
-    sets.clear()
+            for x in ball_sites[b]:
+                bag.add(x)
+        bags[v] = bag
+        full_iou[v] = [bag.iou(o) for o in range(objects)]
+    bags.clear()
     chains = []
     for o in range(objects):
         best = max(range(f.N), key=lambda v: (full_iou[v][o], -level[v]))
@@ -134,46 +166,63 @@ def analyse(f, gt, void, raw, objects):
             up.append(v)
         chains.append(list(reversed(down)) + up)
     # moments : boules propres des nœuds des chaînes, par niveau
-    on_chain = {}
-    for o, chain in enumerate(chains):
-        for i, v in enumerate(chain):
-            on_chain.setdefault(v, []).append((o, i))
+    on_chain = set(v for chain in chains for v in chain)
     moments = sorted(set(radius[b] for v in on_chain for b in range(start[v], start[v] + f.ball_count[v])))
 
-    def node_at(o, r):
-        cur = None
-        for v in chains[o]:
+    def node_index(o, r):
+        cur = -1
+        for i, v in enumerate(chains[o]):
             if level[v] <= r:
-                cur = v
+                cur = i
             else:
                 break
         return cur
 
-    def realization(o, v, r):
-        """Sites de la réalisation du nœud v au niveau r, tenue à jour par objet : au changement de nœud, tout le
-        sous-arbre des enfants (leurs boules sont de niveau inférieur à celui de v) ; ensuite, les boules propres de v
-        de niveau au plus r, dans leur ordre (rang croissant)."""
-        st = held[o]
-        if st['node'] != v:
-            first = order[f.post[v] - f.size[v] + 1]
-            s = set()
-            for b in range(start[first], start[v]):
-                s |= ball_sites[b]
-            st.update(node=v, sites=s, next=start[v])
-        end = start[v] + f.ball_count[v]
-        while st['next'] < end and radius[st['next']] <= r:
-            st['sites'] |= ball_sites[st['next']]
-            st['next'] += 1
-        return st['sites']
+    class Held:
+        """Réalisation tenue à jour d'une branche : indice du nœud dans la chaîne, sac de sites, prochaine boule
+        propre à verser, sites ajoutés depuis la dernière lecture."""
+        def __init__(self):
+            self.index, self.bag, self.next, self.added = -1, Bag(), 0, []
+
+        def put(self, b):
+            for x in ball_sites[b]:
+                if self.bag.add(x):
+                    self.added.append(x)
+
+        def advance(self, o, target, r):
+            chain = chains[o]
+            while self.index < target:
+                if self.index >= 0:  # boules propres restantes du nœud quitté, puis les autres enfants du parent
+                    v = chain[self.index]
+                    while self.next < start[v] + f.ball_count[v]:
+                        self.put(self.next)
+                        self.next += 1
+                self.index += 1
+                v = chain[self.index]
+                if self.index == 0:
+                    for b in range(start[order[f.post[v] - f.size[v] + 1]], start[v]):
+                        self.put(b)
+                else:
+                    came = chain[self.index - 1]
+                    for c in f.children[v]:
+                        if c != came:
+                            for b in subtree_balls(c):
+                                self.put(b)
+                self.next = start[v]
+            v = chain[self.index]
+            while self.next < start[v] + f.ball_count[v] and radius[self.next] <= r:
+                self.put(self.next)
+                self.next += 1
 
     sem = np.asarray(raw, dtype=np.int64) & 0xFFFF
+    gt_arr = np.asarray(gt)
     rows = [[] for _ in range(objects)]
-    real = [set() for _ in range(objects)]
-    held = [dict(node=None, sites=set(), next=0) for _ in range(objects)]
+    held = [Held() for _ in range(objects)]
     fusions, seen_groups, found = [], set(), [False] * objects
     chutes = []
     for r in moments:
-        nodes = [node_at(o, r) for o in range(objects)]
+        idx = [node_index(o, r) for o in range(objects)]
+        nodes = [chains[o][i] if i >= 0 else None for o, i in enumerate(idx)]
         groups = {}
         for o, v in enumerate(nodes):
             if v is not None:
@@ -188,27 +237,28 @@ def analyse(f, gt, void, raw, objects):
         for o, v in enumerate(nodes):
             if v is None:
                 continue
-            sites = set(realization(o, v, r))
-            iou = iou_of(sites)[o]
+            h = held[o]
+            h.advance(o, idx[o], r)
+            iou = h.bag.iou(o)
+            added, h.added = h.added, []
             mask = sum(1 << q for q in groups[v])
             state = FUSED if len(groups[v]) > 1 else (MATCHED if iou > 0.5 else FRAGMENT)
             prev = rows[o][-1] if rows[o] else None
-            row = [r, round(iou, 6), state, mask, len(sites)]
+            row = [r, round(iou, 6), state, mask, len(h.bag.sites)]
             if prev and prev[1:4] == row[1:4]:
-                real[o] = sites
                 continue
             if prev and iou <= prev[1] - 0.10 and iou <= prev[1] * 0.75:
-                new = np.fromiter(sites - real[o], dtype=np.int64)
+                new = np.array(added, dtype=np.int64)
                 new = new[~void[new]] if len(new) else new
-                others = {q: int(np.sum(gt[new] == q)) for q in range(objects) if q != o and np.any(gt[new] == q)}
-                back = new[gt[new] < 0] if len(new) else new
+                others = {q: int(np.sum(gt_arr[new] == q)) for q in range(objects)
+                          if q != o and np.any(gt_arr[new] == q)}
+                back = new[gt_arr[new] < 0] if len(new) else new
                 names, counts = np.unique(sem[back], return_counts=True)
                 chutes.append(dict(r=r, objet=o, avant=prev[1], apres=row[1],
                                    fusion=bin(mask).count('1') > bin(prev[3]).count('1'), objets=others,
                                    fond=int(len(back)), classe=ds.class_name(int(names[np.argmax(counts)]))
                                    if len(names) else None))
             rows[o].append(row)
-            real[o] = sites
             if iou > 0.5:
                 found[o] = True
     best = [max((row[1] for row in rows[o]), default=0.0) for o in range(objects)]
@@ -350,7 +400,7 @@ def build(args, folder):
     timing = schedule(m, objects, a['level'])
     meta = dict(duel['meta'])
     detail = meta['subtitle'].split(' · ', 1)[1] if ' · ' in meta['subtitle'] else meta['subtitle']
-    meta['subtitle'] = 'arbre d\'ordre k = %d de Morse HGP 3D v11 (sortie supports) · %s' % (k, detail)
+    meta['subtitle'] = 'arbre couvrant d\'ordre k = %d de Morse HGP 3D v11 (sortie supports) · %s' % (k, detail)
     meta['counts'] = dict(nodes=f.N, balls=f.B, supports=f.S, q2=arity[0], q3=arity[1], q4=arity[2])
     scene = dict(schema='ehgp.zoltan.supports.v1', variante=folder.name, meta=meta, objects=duel['objects'],
                  gt=duel['gt'], void=duel['void'], sensor=duel.get('sensor'), view=duel['view'], points=duel['points'],
@@ -361,12 +411,14 @@ def build(args, folder):
     result = dict(
         schema='ehgp.zoltan.resultats_supports.v1', exemple=folder.parent.name, variante=folder.name,
         bout=entry['name'], k=k, sites=len(xyz),
-        sortie=dict(commande='mhgp11 --sortie=supports --k=%d' % k, status=status.get('status'),
+        sortie=dict(commande='mhgp11 --sortie=supports --k=%d' % k, source=args.source, format='MHGP11SP',
+                    version=manifest['files'][0].get('version'), status=status.get('status'),
                     coord_bits=status.get('coord_bits'), manifest_sha256=status.get('manifest_sha256'),
                     supports_sha256=digest, tree_k_sha256=manifest.get('tree_k_sha256'), stages_ns=status.get('stages_ns')),
         counts=meta['counts'],
-        regle='branche d\'un objet : nœud de meilleur IoU des sites de ses supports (points void exclus), ses enfants '
-              'de meilleur IoU en dessous, ses ancêtres au-dessus',
+        regle='arbre couvrant d\'ordre k (naissances et fusions, S* seul) ; branche d\'un objet : nœud de meilleur IoU '
+              'des sites de ses supports (points void exclus), ses enfants de meilleur IoU en dessous, ses ancêtres '
+              'au-dessus',
         best=a['best'], best_node_iou=[round(x, 6) for x in a['best_node']], chains=chains, fusions=a['fusions'],
         chutes=a['chutes'], tracks=a['tracks'],
         timing={key: timing[key] for key in ('duration', 'pauses', 'rmin', 'rmax', 'key')})
@@ -381,6 +433,7 @@ def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('variantes', nargs='+', type=Path)
     p.add_argument('--mhgp11', type=Path, required=True, help='exécutable mhgp11 de morsehgp3D_v11')
+    p.add_argument('--source', required=True, help='commit dont l\'exécutable est compilé')
     p.add_argument('--k', type=int, default=None)
     p.add_argument('--travail', default=str(ROOT / 'build' / 'v11-persist' / 'videos' / 'supports'))
     args = p.parse_args()

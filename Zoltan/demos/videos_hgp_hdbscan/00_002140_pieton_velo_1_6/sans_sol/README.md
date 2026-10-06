@@ -16,7 +16,7 @@ Vidéo de 69 s, k = 5, 1920 × 1080 : [thème sombre](00_002140_pieton_velo_1_6_
   <img alt="Hiérarchie des supports, k = 5, r = 12,5 cm : A, IoU maximal : 0,97 ; ✓ A et B retrouvés, encore séparés" src="00_002140_pieton_velo_1_6_sans_sol_k5_supports_clair_instant_cle.png">
 </picture>
 
-Hiérarchie des supports q2, q3, q4 au même ordre, 41 s : [thème sombre](00_002140_pieton_velo_1_6_sans_sol_k5_supports_sombre.mp4) · [thème clair](00_002140_pieton_velo_1_6_sans_sol_k5_supports_clair.mp4) ; image finale : [sombre](00_002140_pieton_velo_1_6_sans_sol_k5_supports_sombre_bilan.png) · [clair](00_002140_pieton_velo_1_6_sans_sol_k5_supports_clair_bilan.png). Arbre d'ordre 5 : 13 313 nœuds, 17 863 boules, 17 863 supports (4 712 arêtes q2, 11 122 triangles q3, 2 029 tétraèdres q4).
+Hiérarchie des supports q2, q3, q4 au même ordre, 41 s : [thème sombre](00_002140_pieton_velo_1_6_sans_sol_k5_supports_sombre.mp4) · [thème clair](00_002140_pieton_velo_1_6_sans_sol_k5_supports_clair.mp4) ; image finale : [sombre](00_002140_pieton_velo_1_6_sans_sol_k5_supports_sombre_bilan.png) · [clair](00_002140_pieton_velo_1_6_sans_sol_k5_supports_clair_bilan.png). Arbre couvrant d'ordre 5 : 13 313 nœuds, 13 318 naissances et fusions, chacune avec son support S\* (13 318 supports : 2 754 arêtes q2, 8 684 triangles q3, 1 880 tétraèdres q4).
 
 Points : tout ce que Patchwork++ (paramètres de la v8) ne classe pas en sol dans la boîte horizontale des objets élargie de 1 m, à toutes hauteurs : 1 221 points, dont 147 des objets (A 78, B 69) ; 13 points des objets retirés comme sol. Aucune étiquette ne sert au nettoyage : elles ne servent qu'à mesurer.
 

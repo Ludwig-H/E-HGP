@@ -13,7 +13,7 @@ de les avoir tous retrouvés. Chaque exemple est montré en deux variantes, chac
 Chaque configuration où HGP réussit et HDBSCAN échoue, variante (instances seules, sans sol) × ordre (k = 5, k = 10),
 a sa vidéo, en thème sombre et en thème clair ; une variante sans gain n'est montrée qu'à k = 5. Les mesures des deux
 ordres sont dans chaque README. Chacune de ces vidéos a sa jumelle (suffixe `_supports`) où se dessine la hiérarchie
-des supports q2, q3, q4 au même ordre (section « Hiérarchie des supports »).
+des supports q2, q3, q4 de l'arbre couvrant au même ordre (section « Hiérarchie des supports »).
 
 ```text
 phase=demonstration_hors_registre
@@ -123,13 +123,15 @@ affiches. Lecteur interactif : `../player/duel.html?scene=../videos_hgp_hdbscan/
 
 ## Hiérarchie des supports
 
-Les vidéos `*_supports_*.mp4` montrent l'arbre d'ordre k de Morse HGP 3D v11, tel que le publie
-`mhgp11 --sortie=supports` (format `MHGP11SP`, [docs/SORTIES.md](../../../morsehgp3D_v11/docs/SORTIES.md) § 6) :
-chaque boule de l'arbre y porte ses supports positifs minimaux, arêtes (q2), triangles (q3) et tétraèdres (q4), et un
-nœud est réalisé par les supports des boules de son sous-arbre.
+Les vidéos `*_supports_*.mp4` montrent l'arbre couvrant d'ordre k de Morse HGP 3D v11, tel que le publie
+`mhgp11 --sortie=supports` depuis le 6 octobre 2026 (format `MHGP11SP` version 2,
+[docs/SORTIES.md](../../../morsehgp3D_v11/docs/SORTIES.md) § 6) : ses arêtes de Kruskal, les naissances et les fusions
+de l'arbre d'ordre k, chacune avec son seul support S\*, arête (q2), triangle (q3) ou tétraèdre (q4). Les liaisons
+internes (boules qui relient des parties d'un même nœud) n'y sont plus. Un nœud est réalisé par les supports des boules
+de son sous-arbre.
 
-- **Balayage** : r croît en échelle logarithmique (rayon de la sphère du premier support S* de chaque boule) ; chaque
-  support apparaît au niveau de sa boule, et la hiérarchie se dessine. Compteurs des supports dessinés en haut à droite.
+- **Balayage** : r croît en échelle logarithmique (rayon de la sphère de S\* de chaque boule) ; chaque support
+  apparaît au niveau de sa boule, et la hiérarchie se dessine. Compteurs des supports dessinés en haut à droite.
 - **Couleurs** : supports du nœud qui suit un objet dans la couleur de l'objet (faces translucides, arêtes pleines), en
   rouge le nœud qui réunit deux objets ou plus, en gris tous les autres nœuds ; halos de la vérité terrain sous les
   points, comme dans les vidéos du duel.
@@ -140,10 +142,16 @@ nœud est réalisé par les supports des boules de son sous-arbre.
   absorbe le fond, fusion d'objets).
 - **Accord avec la hiérarchie de points** : sur les 32 configurations, le meilleur IoU par les supports s'écarte d'au plus
   0,11 de celui de la hiérarchie de points Hʳₖ₊₁ (0,001 sur 08/002852 sans sol à k = 5) ; la chronologie des
-  événements est la même à quelques millimètres près.
-- **Taille** : de 3 377 supports (00/001502, instances, k = 5) à 364 400 (08/000656, sans sol, k = 10). Le lecteur
-  (`../player/supports.html`, `supports.js`) peint chaque groupe de couleur dans un calque hors écran, complété au fil du
-  balayage.
+  événements est la même à quelques millimètres près. Retirer les liaisons internes ne change aucun meilleur IoU : leurs
+  sites étaient déjà portés par les naissances et les fusions de leur nœud.
+- **Taille** : de 2 534 supports (00/001502, instances, k = 5) à 281 784 (08/000656, sans sol, k = 10), 76 % des
+  supports de la version 1 (toutes les boules critiques). Le lecteur (`../player/supports.html`, `supports.js`) peint
+  chaque groupe de couleur dans un calque hors écran, complété au fil du balayage.
+- **Plateaux** : la version publiée garde toutes les fusions d'un nœud. Sur un plateau (plusieurs fusions au même
+  niveau), certaines ne réunissent rien de plus et ferment un cycle ; le sélecteur de Kruskal proposé par les auditeurs
+  (union-find sur les enfants de chaque fusion) les retirerait : 447 boules sur 1,18 million dans les 32 scènes, presque
+  toutes dans les variantes sans sol (au plus 104 sur 82 569 pour 08/002776). Les vidéos seront refaites s'il est
+  intégré.
 
 ## Contrôle des calculs
 
@@ -156,10 +164,11 @@ scène refuse un meilleur IoU différent de la mesure ; `tools/test_duel.py` vé
 groupes que Python et les couleurs (contraste, daltonisme). Le masque de sol de Patchwork++ est identique octet pour
 octet à celui de la v8 sur 08/000000.
 
-Vidéos de supports : `mhgp11 --sortie=supports` compilé depuis `main` (c1675e4c9, profil u21) ; chaque dossier publié
-passe `check_directory` et `read_supports` de `morsehgp3D_v11/bench/mhgp11_formats.py` (arbre, rôles, ordre canonique,
-chaque support positif de la sphère de S*, en entiers exacts) avant d'être lu ; empreintes du fichier et du manifeste
-dans `resultats_supports_k<k>.json`. `tools/test_supports.py` : un arbre fait à la main (deux objets et un mur, chaînes,
+Vidéos de supports : `mhgp11 --sortie=supports` compilé depuis `main` (0cc9cbec4, profil u21, format `MHGP11SP`
+version 2) ; chaque dossier publié passe `check_directory` et `read_supports` de `morsehgp3D_v11/bench/mhgp11_formats.py`
+(arbre, rôles, ordre canonique, S\* support positif de sa sphère, en entiers exacts) avant d'être lu, et
+`tools/supports_scene.py` refuse un fichier d'une autre version ou une boule hors de l'arbre couvrant ; commit, version,
+empreintes du fichier et du manifeste dans `resultats_supports_k<k>.json`. `tools/test_supports.py` : un arbre fait à la main (deux objets et un mur, chaînes,
 IoU, fusion et effondrement connus) et le contrat des 32 scènes locales (supports triés, chaînes emboîtées, suivi
 cohérent, écart à la hiérarchie de points sous 0,15).
 
@@ -181,7 +190,7 @@ python3 $T/choisir_exemples.py --bouts LOT/bouts_refaits.json --sans-sol SANS_SO
 python3 $T/duel_scene.py --export BUILD/mhgp11_points_export Zoltan/demos/videos_hgp_hdbscan/*/instances Zoltan/demos/videos_hgp_hdbscan/*/sans_sol
 node $T/render_duel.cjs Zoltan/demos/videos_hgp_hdbscan/00_001502_deux_velos_28_66/sans_sol    # deux thèmes
 cmake --build BUILD --target mhgp11_cli                                                       # supports
-python3 $T/supports_scene.py --mhgp11 BUILD/mhgp11 --k 5 Zoltan/demos/videos_hgp_hdbscan/08_002852_deux_velos_6_51/sans_sol
+python3 $T/supports_scene.py --mhgp11 BUILD/mhgp11 --source SHA --k 5 Zoltan/demos/videos_hgp_hdbscan/08_002852_deux_velos_6_51/sans_sol
 node $T/render_duel.cjs Zoltan/demos/videos_hgp_hdbscan/08_002852_deux_velos_6_51/sans_sol --lecteur supports --k 5
 python3 $T/duel_readme.py                                                                      # README
 python3 -O -m unittest discover -s $T -p 'test_*.py'

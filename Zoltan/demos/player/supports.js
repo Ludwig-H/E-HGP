@@ -1,9 +1,9 @@
 /*
  * Lecteur des vidéos « hiérarchie des supports » des exemples (Zoltan/demos/videos_hgp_hdbscan).
  *
- * L'arbre d'ordre k de Morse HGP 3D v11 (sortie supports, format MHGP11SP) : chaque boule de l'arbre publie ses
- * supports positifs minimaux, arêtes (q2), triangles (q3) et tétraèdres (q4) ; un nœud est réalisé par les supports
- * des boules de son sous-arbre. Le niveau r (rayon de la sphère du premier support S* de chaque boule) croît en
+ * L'arbre couvrant d'ordre k de Morse HGP 3D v11 (sortie supports, format MHGP11SP version 2) : ses arêtes de
+ * Kruskal, naissances et fusions, portent chacune leur support S*, arête (q2), triangle (q3) ou tétraèdre (q4) ; un
+ * nœud est réalisé par les supports des boules de son sous-arbre. Le niveau r (rayon de la sphère de S*) croît en
  * échelle logarithmique : chaque support apparaît au niveau de sa boule, et la hiérarchie se dessine.
  *
  * Lecture :
@@ -497,7 +497,7 @@
     item((xx, yy) => { ctx.fillStyle = rgba(C.fusion, 0.4); ctx.strokeStyle = C.fusion; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(xx, yy + 6); ctx.lineTo(xx + 16, yy + 6); ctx.lineTo(xx + 8, yy - 7); ctx.closePath(); ctx.fill(); ctx.stroke(); }, 'objets réunis');
     item((xx, yy) => { ctx.fillStyle = rgba(C.otherLine, 0.25); ctx.strokeStyle = C.otherLine; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(xx, yy + 6); ctx.lineTo(xx + 16, yy + 6); ctx.lineTo(xx + 8, yy - 7); ctx.closePath(); ctx.fill(); ctx.stroke(); }, 'autre nœud');
     item((xx, yy) => { ctx.strokeStyle = C.dim; ctx.lineWidth = 2.3; ctx.beginPath(); ctx.moveTo(xx, yy + 5); ctx.lineTo(xx + 16, yy - 5); ctx.stroke(); }, 'arête : support q2 ; triangle : q3 ; tétraèdre : q4');
-    text(ctx, 'r : rayon de la boule de chaque support (sphère de S*) ; un nœud de l\'arbre d\'ordre k est réalisé par les supports de son sous-arbre · SemanticKITTI (CC BY-NC-SA)',
+    text(ctx, 'r : rayon de la sphère de S* de chaque naissance ou fusion ; un nœud de l\'arbre couvrant d\'ordre k est réalisé par les supports de son sous-arbre · SemanticKITTI (CC BY-NC-SA)',
       28, y + 26, 15, C.dim);
   }
 

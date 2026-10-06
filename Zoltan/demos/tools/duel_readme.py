@@ -138,8 +138,8 @@ def variant_readme(variant):
             out += picture('', sstem, supports_alt(sres, k)) + ['',
                     'Hiérarchie des supports q2, q3, q4 au même ordre, %d s : [thème sombre](%s_sombre.mp4) · '
                     '[thème clair](%s_clair.mp4) ; image finale : [sombre](%s_sombre_bilan.png) · [clair](%s_clair_bilan.png). '
-                    'Arbre d\'ordre %d : %s nœuds, %s boules, %s supports (%s arêtes q2, %s triangles q3, %s tétraèdres '
-                    'q4).' % (round(sres['timing']['duration']), sstem, sstem, sstem, sstem, k, thousands(c['nodes']),
+                    'Arbre couvrant d\'ordre %d : %s nœuds, %s naissances et fusions, chacune avec son support S\\* (%s '
+                    'supports : %s arêtes q2, %s triangles q3, %s tétraèdres q4).' % (round(sres['timing']['duration']), sstem, sstem, sstem, sstem, k, thousands(c['nodes']),
                               thousands(c['balls']), thousands(c['supports']), thousands(c['q2']), thousands(c['q3']),
                               thousands(c['q4'])), '']
     if v == 'sans_sol':
