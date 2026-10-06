@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 154,
+  "plancher": 155,
   "mutants": [
     {
       "id": "population_memo_owner_omis",
@@ -1250,6 +1250,14 @@
       "remplace": "  if (!active_) sched_setaffinity(0, sizeof(saved_), &saved_);\n",
       "porte": "mhgp11_tower_placement_affinity",
       "note": "placement : l'affinite du fil n'est pas rendue a la fin de la tache"
+    },
+    {
+      "id": "placement_perdu_au_deplacement",
+      "fichier": "src/tower/forest_parallel.hpp",
+      "cherche": "place_pipeline_(std::exchange(other.place_pipeline_, false))",
+      "remplace": "place_pipeline_(false)",
+      "porte": "mhgp11_tower_pipeline_equivalence",
+      "note": "placement : l'option perdue par le constructeur de deplacement de ForestParallel (defaut de 86b3cbf14, vu sur G4)"
     }
   ]
 }

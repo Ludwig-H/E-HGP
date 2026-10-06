@@ -253,7 +253,10 @@ Outcome pipeline_orders(const FullDomain& domain, MemoryBudget& budget, ForestPa
     if (read_cpu_cores(cores)) plan = plan_pipeline(cores, lanes, kmax);
     if (plan.cores != 0) pipeline.placement = &plan;
   }
-  if (timings != nullptr) timings->pipeline_placement_cores = plan.cores;
+  if (timings != nullptr) {
+    timings->pipeline_placement_cores = plan.cores;
+    timings->pipeline_placement_requested = parallel.place_pipeline();
+  }
   if (pipeline.timed) pipeline.origin.emplace();
   MHGP11_TRY(pool.parallel_for(tasks, 1, &pipeline, Pipeline::body));
   // Travail somme dans l'ordre fixe (taches, ordres) : memes totaux que la voie par etages.

@@ -155,6 +155,9 @@ MHGP11_TEST(equivalence, 2000) {
         placed.place_pipeline = repeat % 2 == 1;  // coeurs dedies (actifs sur G4 ; inactifs sans assez de coeurs)
         auto full = build_full(std::move(domain.value()), work, &times, placed, p48.value().get());
         placements += times.pipeline_placement_cores != 0;
+        // L'option parvient au pipeline sur toute machine (le plan, lui, depend de la topologie : actif sur G4).
+        CHECK_EQ(times.pipeline_placement_requested, placed.place_pipeline);
+        CHECK(placed.place_pipeline || times.pipeline_placement_cores == 0);
         REQUIRE(full.ok());
         CHECK(times.pipeline_lanes > 0);
         piped += times.pipeline_lanes > 0;
