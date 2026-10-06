@@ -331,7 +331,8 @@ struct Leaf {
     c.incidences += u64(p) + count;
   }
 
-  // Corps de la boucle d'extend pour le site i a la profondeur Depth ; candidates : candidats restants apres i.
+  // Corps de la boucle d'extend pour le site i a la profondeur Depth (feuille cooperative seulement ; recursion par
+  // extend) ; candidates : candidats restants apres i.
   // Sans recursion (Recurse = false), rend les candidats et l'ensemble logique de la profondeur suivante au lieu de
   // les parcourir : la profondeur 0 de la feuille cooperative les distribue en paires. Rend faux si la boucle
   // appelante doit continuer sans descendre.
@@ -375,15 +376,46 @@ struct Leaf {
     return false;
   }
 
+  // Parcours d'une feuille d'un fil : meme corps qu'extend_one, ecrit en ligne. La forme en appel (extend_one dans la
+  // boucle) rend les memes sorties mais change la reconvergence des warps sur CUDA : seconde passe d'ecriture x2,1,
+  // instructions executees x2,7, 1,39 fil actif par warp au lieu de 3,47 (Nsight, sessions G4 coop1 et coop2,
+  // 6 octobre 2026), alors que l'hote fait le meme travail. Cette boucle reste celle de 830473218.
   template <int Depth>
   MHGP11_LEAF_HD void extend(u64 candidates, u64 logical) {
     constexpr int q = Depth + 1;
-    if (in.kmax + 1 - q < 0) return;
+    const int threshold = in.kmax + 1 - q;
+    if (threshold < 0) return;
     while (candidates != 0) {
       const u32 i = ctz(candidates);
       candidates &= candidates - 1;
-      extend_one<Depth>(i, candidates, logical);
+      ++c.prefixes;
+      prefix[Depth] = i;
+      const u64 mask = masks[Depth] | t.dom[i];
+      masks[q] = mask;
+      const u32 count = popc(mask);
+      if (count > static_cast<u32>(threshold)) continue;  // G3
+      if constexpr (q >= 3) {
+        if (!lines_possible(q)) continue;
+      }
+      if constexpr (q == 4) q4();
+      else if constexpr (q == 3) q3();
+      else if constexpr (q == 2) q2();
       if (unresolved) return;
+      if constexpr (q < 4) {
+        u64 next = 0, next_logical = 0;
+        if (in.kmax + 1 - (q + 1) >= 0) {
+          next_logical = logical & (~u64(0) << (i + 1)) & t.nbr[i];
+          if (count > static_cast<u32>(in.kmax - q)) {
+            c.prefixes += popc(next_logical);
+            continue;
+          }
+          next = candidates;
+          for (int j = 0; j < q; ++j) next &= t.live[q - 1][prefix[j]];
+          c.prefixes += popc(next_logical) - popc(next);
+        }
+        extend<Depth + 1>(next, next_logical);
+        if (unresolved) return;
+      }
     }
   }
 };

@@ -1,0 +1,190 @@
+{
+ "schema": "ehgp.v11.gpu_profile.v1",
+ "frame": "lidar_ng00",
+ "mode": "81915",
+ "workers": "48",
+ "passes": 3,
+ "gpu": "name, driver_version, memory.total [MiB], compute_cap, clocks.max.sm [MHz], clocks.max.memory [MHz], power.limit [W]\nNVIDIA RTX PRO 6000 Blackwell Server Edition, 580.178.04, 97887 MiB, 12.0, 2430 MHz, 12481 MHz, 600.00 W",
+ "profiling_admin_only": [
+  "RmProfilingAdminOnly: 1"
+ ],
+ "sudo_n": 0,
+ "nsys_app_stdout_tail": "ended_ns\":0},\"vertical_parallel\":{\"vertical_batches\":0,\"vertical_resolutions\":0,\"max_vertical_batch\":0,\"vertical_dispatch_ns\":0,\"vertical_task_sum_ns\":0,\"vertical_task_max_ns\":0,\"vertical_sweep_ns\":0},\"work\":{\"cells\":2117675,\"replayed_cells\":1138325,\"plateaus\":1133328,\"traces\":3831491,\"unions\":979349,\"continuations\":478746,\"ancestor_hops\":0,\"descent_steps\":6183796,\"singleton_hits\":0,\"population_hits\":3831548,\"catalogue_hits\":5025429,\"census_calls\":1158367,\"vertical_descents\":57,\"vertical_reuses\":979293,\"vertical_checks\":1638572,\"part_meb_presentations\":174443897,\"part_diameter_pairs\":105850647,\"trace_meb_calls\":225,\"trace_meb_presentations\":225,\"trace_diameter_pairs\":225,\"memo_queries\":0,\"memo_lookups\":0,\"memo_hits\":0,\"memo_misses\":0,\"memo_collisions\":0,\"memo_insertions\":0,\"memo_evictions\":0,\"memo_suffix_hits\":0,\"census_point_tests\":127873193,\"classification_combinations\":4810878,\"classification_examined\":50,\"classification_meb_calls\":50,\"classification_meb_presentations\":50,\"classification_diameter_pairs\":50,\"replay_trace_tests\":402,\"replay_meb_calls\":222,\"replay_meb_presentations\":222,\"replay_diameter_pairs\":222,\"ancestor_queries\":2617922,\"ancestor_activations\":557162,\"ancestor_unions\":1386544,\"ancestor_find_steps\":7604338}}]}\n{\"phase\":\"exit\",\"status\":\"ok\",\"reason\":\"none\"}\nCollecting data...\nGenerating '/tmp/nsys-report-3bc7.qdstrm'\n\n[1/1] [0%                          ] gpu_full.nsys-rep\n[1/1] [0%                          ] gpu_full.nsys-rep\n[1/1] [=16%                        ] gpu_full.nsys-rep\n[1/1] [==20%                       ] gpu_full.nsys-rep\n[1/1] [===24%                      ] gpu_full.nsys-rep\n[1/1] [===========50%              ] gpu_full.nsys-rep\n[1/1] [==================76%       ] gpu_full.nsys-rep\n[1/1] [==================77%       ] gpu_full.nsys-rep\n[1/1] [==================78%       ] gpu_full.nsys-rep\n[1/1] [===================79%      ] gpu_full.nsys-rep\n[1/1] [===================80%      ] gpu_full.nsys-rep\n[1/1] [===================81%      ] gpu_full.nsys-rep\n[1/1] [===================82%      ] gpu_full.nsys-rep\n[1/1] [====================83%     ] gpu_full.nsys-rep\n[1/1] [====================84%     ] gpu_full.nsys-rep\n[1/1] [====================85%     ] gpu_full.nsys-rep\n[1/1] [=====================86%    ] gpu_full.nsys-rep\n[1/1] [=====================87%    ] gpu_full.nsys-rep\n[1/1] [=====================88%    ] gpu_full.nsys-rep\n[1/1] [=====================89%    ] gpu_full.nsys-rep\n[1/1] [======================90%   ] gpu_full.nsys-rep\n[1/1] [======================91%   ] gpu_full.nsys-rep\n[1/1] [======================92%   ] gpu_full.nsys-rep\n[1/1] [=======================93%  ] gpu_full.nsys-rep\n[1/1] [=======================94%  ] gpu_full.nsys-rep\n[1/1] [=======================95%  ] gpu_full.nsys-rep\n[1/1] [========================100%] gpu_full.nsys-rep\n[1/1] [========================100%] gpu_full.nsys-rep\nGenerated:\n\t/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.3B8v6lVsLd/build/profil/gpu_full.nsys-rep\n",
+ "nsys_stats_bytes": 25859,
+ "raw_reports": {
+  "gpu_full.nsys-rep": {
+   "bytes": 88217,
+   "sha256": "28fdb5830e993060a90b688195fc3198b73e5099dc5b57b877c78d6397d29ed3",
+   "kept": true
+  },
+  "leaf_kernels.ncu-rep": {
+   "bytes": 17756154,
+   "sha256": "cc7198070274d7b0afec4ab54e75ee63662e7877977ebe391f47fda70dadc047",
+   "kept": true
+  }
+ },
+ "ncu": {
+  "count_kernel": {
+   "metrics": {
+    "SM Frequency": "1.85 Ghz",
+    "Elapsed Cycles": "501710358 cycle",
+    "Memory Throughput": "11.81 Gbyte/s",
+    "DRAM Throughput": "0.74 %",
+    "Duration": "270.83 ms",
+    "Compute (SM) Throughput": "41.88 %",
+    "Executed Ipc Active": "1.27 inst/cycle",
+    "Issue Slots Busy": "31.75 %",
+    "L1/TEX Hit Rate": "68.75 %",
+    "L2 Hit Rate": "99.47 %",
+    "Warp Cycles Per Issued Instruction": "7.96 cycle",
+    "Avg. Active Threads Per Warp": "3.14 ",
+    "Avg. Not Predicated Off Threads Per Warp": "3.00 ",
+    "Block Size": "32 ",
+    "Grid Size": "16571 ",
+    "Registers Per Thread": "146 register/thread",
+    "Stack Size": "3296 ",
+    "Threads": "530272 thread",
+    "Waves Per SM": "7.35 ",
+    "Block Limit Registers": "12 block",
+    "Theoretical Occupancy": "25 %",
+    "Achieved Occupancy": "21.06 %",
+    "Achieved Active Warps Per SM": "10.11 warp",
+    "Branch Instructions Ratio": "0.06 %",
+    "Branch Efficiency": "96.35 %",
+    "Avg. Divergent Branches": "241090.48 "
+   },
+   "rules": [
+    "This workload exhibits low compute throughput and memory bandwidth utilization relative to the peak performance of this device. Achieved compute throughput and/or memory bandwidth below 60.0% of peak typically indicate latency issues. Look at Scheduler Statistics and Warp State Statistics for potent",
+    "The ratio of peak float (FP32) to double (FP64) performance on this device is 64:1. The workload achieved 0% of this device's FP32 peak performance and 0% of its FP64 peak performance. See the Profiling Guide (https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#roofline) for more detail",
+    "ALU is the highest-utilized pipeline (22.2%) based on active cycles, taking into account the rates of its different instructions. It executes integer and logic operations. It is well-utilized, but should not be a bottleneck.",
+    "The memory access pattern for global loads from L1TEX might not be optimal. On average, only 19.0 of the 32 bytes transmitted per sector are utilized by each thread. This could possibly be caused by a stride between threads. Check the Source Counters section for uncoalesced global loads.",
+    "The memory access pattern for local loads from L1TEX might not be optimal. On average, only 2.6 of the 32 bytes transmitted per sector are utilized by each thread. This could possibly be caused by a stride between threads. Check the Source Counters section for uncoalesced local loads.",
+    "The memory access pattern for local stores to L1TEX might not be optimal. On average, only 2.4 of the 32 bytes transmitted per sector are utilized by each thread. This could possibly be caused by a stride between threads. Check the Source Counters section for uncoalesced local stores.",
+    "Every scheduler is capable of issuing one instruction per cycle, but for this workload each scheduler only issues an instruction every 3.1 cycles. This might leave hardware resources underutilized and may lead to less optimal performance. Out of the maximum of 12 warps per scheduler, this workload a",
+    "On average, each warp of this workload spends 3.4 cycles being stalled waiting for a scoreboard dependency on a L1TEX (local, global, surface, texture) operation. Find the instruction producing the data being waited upon to identify the culprit. To reduce the number of cycles waiting on L1TEX data a",
+    "Check the Warp Stall Sampling (All Samples) table for the top stall locations in your source based on sampling data. The Profiling Guide (https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#metrics-reference) provides more details on each stall reason.",
+    "Instructions are executed in warps, which are groups of 32 threads. Optimal instruction throughput is achieved if all 32 threads of a warp execute the same instruction. The chosen launch configuration, early thread completion, and divergent flow control can significantly lower the number of active t",
+    "The 3.00 theoretical warps per scheduler this kernel can issue according to its occupancy are below the hardware maximum of 12. This kernel's theoretical occupancy (25.0%) is limited by the number of required registers.",
+    "This kernel has uncoalesced global accesses resulting in a total of 123077305 excessive sectors (12% of the total 1035924294 sectors). Check the L2 Theoretical Sectors Global Excessive table for the primary source locations. The CUDA Programming Guide (https://docs.nvidia.com/cuda/cuda-c-programming"
+   ]
+  },
+  "fill_kernel": {
+   "metrics": {
+    "SM Frequency": "1.85 Ghz",
+    "Elapsed Cycles": "538363052 cycle",
+    "Memory Throughput": "8.35 Mbyte/s",
+    "DRAM Throughput": "0.00 %",
+    "Duration": "290.61 ms",
+    "Compute (SM) Throughput": "3.91 %",
+    "Executed Ipc Active": "0.23 inst/cycle",
+    "Issue Slots Busy": "5.87 %",
+    "L1/TEX Hit Rate": "99.93 %",
+    "L2 Hit Rate": "99.79 %",
+    "Warp Cycles Per Issued Instruction": "4.26 cycle",
+    "Avg. Active Threads Per Warp": "1.39 ",
+    "Avg. Not Predicated Off Threads Per Warp": "1.33 ",
+    "Block Size": "32 ",
+    "Grid Size": "132 ",
+    "Registers Per Thread": "154 register/thread",
+    "Stack Size": "3296 ",
+    "Threads": "4224 thread",
+    "Waves Per SM": "0.06 ",
+    "Block Limit Registers": "12 block",
+    "Theoretical Occupancy": "25 %",
+    "Achieved Occupancy": "2.08 %",
+    "Achieved Active Warps Per SM": "1.00 warp",
+    "Branch Instructions Ratio": "0.07 %",
+    "Branch Efficiency": "98.92 %",
+    "Avg. Divergent Branches": "7771.17 "
+   },
+   "rules": [
+    "This kernel grid is too small to fill the available resources on this device, resulting in only 0.1 full waves across all SMs. Look at Launch Statistics for more details.",
+    "The ratio of peak float (FP32) to double (FP64) performance on this device is 64:1. The workload achieved 0% of this device's FP32 peak performance and 0% of its FP64 peak performance. See the Profiling Guide (https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#roofline) for more detail",
+    "All compute pipelines are under-utilized. Either this workload is very small or it doesn't issue enough warps per scheduler. Check the Launch Statistics and Scheduler Statistics sections for further details.",
+    "The memory access pattern for global loads from L1TEX might not be optimal. On average, only 15.0 of the 32 bytes transmitted per sector are utilized by each thread. This could possibly be caused by a stride between threads. Check the Source Counters section for uncoalesced global loads.",
+    "The memory access pattern for local loads from L1TEX might not be optimal. On average, only 3.8 of the 32 bytes transmitted per sector are utilized by each thread. This could possibly be caused by a stride between threads. Check the Source Counters section for uncoalesced local loads.",
+    "The memory access pattern for local stores to L1TEX might not be optimal. On average, only 3.4 of the 32 bytes transmitted per sector are utilized by each thread. This could possibly be caused by a stride between threads. Check the Source Counters section for uncoalesced local stores.",
+    "Every scheduler is capable of issuing one instruction per cycle, but for this workload each scheduler only issues an instruction every 4.3 cycles. This might leave hardware resources underutilized and may lead to less optimal performance. Out of the maximum of 12 warps per scheduler, this workload a",
+    "On average, each warp of this workload spends 1.9 cycles being stalled waiting on a fixed latency execution dependency. Typically, this stall reason should be very low and only shows up as a top contributor in already highly optimized kernels. Try to hide the corresponding instruction latencies by i",
+    "Check the Warp Stall Sampling (All Samples) table for the top stall locations in your source based on sampling data. The Profiling Guide (https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#metrics-reference) provides more details on each stall reason.",
+    "Instructions are executed in warps, which are groups of 32 threads. Optimal instruction throughput is achieved if all 32 threads of a warp execute the same instruction. The chosen launch configuration, early thread completion, and divergent flow control can significantly lower the number of active t",
+    "The grid for this launch is configured to execute only 132 blocks, which is less than the GPU's 188 multiprocessors. This can underutilize some multiprocessors. If you do not intend to execute this kernel concurrently with other workloads, consider reducing the block size to have at least one block ",
+    "The difference between calculated theoretical (25.0%) and measured achieved occupancy (2.1%) can be the result of warp scheduling overheads or workload imbalances during the kernel execution. Load imbalances can occur between warps within a block as well as across blocks of the same kernel. See the ",
+    "The 3.00 theoretical warps per scheduler this kernel can issue according to its occupancy are below the hardware maximum of 12. This kernel's theoretical occupancy (25.0%) is limited by the number of required registers.",
+    "One or more SMs have a much lower number of active cycles than the average number of active cycles. Maximum instance value is 51.86% above the average, while the minimum instance value is 100.00% below the average.",
+    "One or more SMSPs have a much lower number of active cycles than the average number of active cycles. Maximum instance value is 87.97% above the average, while the minimum instance value is 100.00% below the average.",
+    "One or more L1 Slices have a much lower number of active cycles than the average number of active cycles. Maximum instance value is 51.86% above the average, while the minimum instance value is 100.00% below the average.",
+    "This kernel has uncoalesced global accesses resulting in a total of 8537243 excessive sectors (7% of the total 129424443 sectors). Check the L2 Theoretical Sectors Global Excessive table for the primary source locations. The CUDA Programming Guide (https://docs.nvidia.com/cuda/cuda-c-programming-gui"
+   ]
+  }
+ },
+ "problems": [],
+ "log": [
+  {
+   "name": "gpu_inventory",
+   "code": 0,
+   "stdout": "name, driver_version, memory.total [MiB], compute_cap, clocks.max.sm [MHz], clocks.max.memory [MHz], power.limit [W]\nNVIDIA RTX PRO 6000 Blackwell Server Edition, 580.178.04, 97887 MiB, 12.0, 2430 MHz, 12481 MHz, 600.00 W\n",
+   "stderr": ""
+  },
+  {
+   "name": "sudo_n",
+   "code": 0,
+   "stdout": "",
+   "stderr": ""
+  },
+  {
+   "name": "download_nsight-systems-cli.deb",
+   "code": 0,
+   "stdout": "",
+   "stderr": ""
+  },
+  {
+   "name": "nsys_extract",
+   "code": 0,
+   "stdout": "",
+   "stderr": ""
+  },
+  {
+   "name": "nsys_profile",
+   "code": 0,
+   "stdout": "   ] gpu_full.nsys-rep\n[1/1] [==20%                       ] gpu_full.nsys-rep\n[1/1] [===24%                      ] gpu_full.nsys-rep\n[1/1] [===========50%              ] gpu_full.nsys-rep\n[1/1] [==================76%       ] gpu_full.nsys-rep\n[1/1] [==================77%       ] gpu_full.nsys-rep\n[1/1] [==================78%       ] gpu_full.nsys-rep\n[1/1] [===================79%      ] gpu_full.nsys-rep\n[1/1] [===================80%      ] gpu_full.nsys-rep\n[1/1] [===================81%      ] gpu_full.nsys-rep\n[1/1] [===================82%      ] gpu_full.nsys-rep\n[1/1] [====================83%     ] gpu_full.nsys-rep\n[1/1] [====================84%     ] gpu_full.nsys-rep\n[1/1] [====================85%     ] gpu_full.nsys-rep\n[1/1] [=====================86%    ] gpu_full.nsys-rep\n[1/1] [=====================87%    ] gpu_full.nsys-rep\n[1/1] [=====================88%    ] gpu_full.nsys-rep\n[1/1] [=====================89%    ] gpu_full.nsys-rep\n[1/1] [======================90%   ] gpu_full.nsys-rep\n[1/1] [======================91%   ] gpu_full.nsys-rep\n[1/1] [======================92%   ] gpu_full.nsys-rep\n[1/1] [=======================93%  ] gpu_full.nsys-rep\n[1/1] [=======================94%  ] gpu_full.nsys-rep\n[1/1] [=======================95%  ] gpu_full.nsys-rep\n[1/1] [========================100%] gpu_full.nsys-rep\n[1/1] [========================100%] gpu_full.nsys-rep\nGenerated:\n\t/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.3B8v6lVsLd/build/profil/gpu_full.nsys-rep\n",
+   "stderr": ""
+  },
+  {
+   "name": "nsys_stats",
+   "code": 0,
+   "stdout": " Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]\n5433570648,230057109,598,132,1,1,32,1,1,154,0.000,0.000,,,,,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,\"mhgp11::catalogue_detail::<unnamed>::fill_kernel(mhgp11::catalogue_detail::<unnamed>::DeviceView, const unsigned int *, unsigned long, const unsigned char *, const unsigned long *, const unsigned long *, mhgp11::catalogue_detail::LeafRecord *, unsigned char *, unsigned long, unsigned long, unsigned int *)\"\n5664870126,1840002,604,,,,,,,,,,44.101,23947.038,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]\n5668455186,1829059,605,,,,,,,,,,45.384,24779.412,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]\n5670618101,150880,606,,,,,,,,,,4.242,28112.211,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]\n5671080022,149888,607,,,,,,,,,,4.242,28298.862,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]\n5671273686,9984,608,,,,,,,,,,0.530,53110.741,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]\n5671309462,768,609,,,,,,,,,,0.000,156.250,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]\n5671319510,640,610,,,,,,,,,,0.000,6.250,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]\n\n",
+   "stderr": ""
+  },
+  {
+   "name": "download_nsight_compute.tar.xz",
+   "code": 0,
+   "stdout": "",
+   "stderr": ""
+  },
+  {
+   "name": "ncu_profile",
+   "code": 1,
+   "stdout": "s\":0,\"regular_traces\":0,\"extended_cells\":0,\"max_regular_batch\":0,\"regular_dispatch_ns\":0,\"regular_task_sum_ns\":0,\"regular_task_max_ns\":0,\"regular_publish_ns\":0,\"extended_ns\":0},\"vertical_parallel\":{\"vertical_batches\":0,\"vertical_resolutions\":0,\"max_vertical_batch\":0,\"vertical_dispatch_ns\":0,\"vertical_task_sum_ns\":0,\"vertical_task_max_ns\":0,\"vertical_sweep_ns\":0},\"work\":{\"cells\":2117675,\"replayed_cells\":1138325,\"plateaus\":1133328,\"traces\":3831491,\"unions\":979349,\"continuations\":478746,\"ancestor_hops\":0,\"descent_steps\":6183796,\"singleton_hits\":0,\"population_hits\":3831548,\"catalogue_hits\":5025429,\"census_calls\":1158367,\"vertical_descents\":57,\"vertical_reuses\":979293,\"vertical_checks\":1638572,\"part_meb_presentations\":174443897,\"part_diameter_pairs\":105850647,\"trace_meb_calls\":225,\"trace_meb_presentations\":225,\"trace_diameter_pairs\":225,\"memo_queries\":0,\"memo_lookups\":0,\"memo_hits\":0,\"memo_misses\":0,\"memo_collisions\":0,\"memo_insertions\":0,\"memo_evictions\":0,\"memo_suffix_hits\":0,\"census_point_tests\":127873193,\"classification_combinations\":4810878,\"classification_examined\":50,\"classification_meb_calls\":50,\"classification_meb_presentations\":50,\"classification_diameter_pairs\":50,\"replay_trace_tests\":402,\"replay_meb_calls\":222,\"replay_meb_presentations\":222,\"replay_diameter_pairs\":222,\"ancestor_queries\":2617922,\"ancestor_activations\":557162,\"ancestor_unions\":1386544,\"ancestor_find_steps\":7604338}}]}\n{\"phase\":\"exit\",\"status\":\"ok\",\"reason\":\"none\"}\n==PROF== Disconnected from process 8337\n",
+   "stderr": ""
+  },
+  {
+   "name": "ncu_profile_sudo",
+   "code": 0,
+   "stdout": ":0,\"regular_task_max_ns\":0,\"regular_publish_ns\":0,\"extended_ns\":0},\"vertical_parallel\":{\"vertical_batches\":0,\"vertical_resolutions\":0,\"max_vertical_batch\":0,\"vertical_dispatch_ns\":0,\"vertical_task_sum_ns\":0,\"vertical_task_max_ns\":0,\"vertical_sweep_ns\":0},\"work\":{\"cells\":2117675,\"replayed_cells\":1138325,\"plateaus\":1133328,\"traces\":3831491,\"unions\":979349,\"continuations\":478746,\"ancestor_hops\":0,\"descent_steps\":6183796,\"singleton_hits\":0,\"population_hits\":3831548,\"catalogue_hits\":5025429,\"census_calls\":1158367,\"vertical_descents\":57,\"vertical_reuses\":979293,\"vertical_checks\":1638572,\"part_meb_presentations\":174443897,\"part_diameter_pairs\":105850647,\"trace_meb_calls\":225,\"trace_meb_presentations\":225,\"trace_diameter_pairs\":225,\"memo_queries\":0,\"memo_lookups\":0,\"memo_hits\":0,\"memo_misses\":0,\"memo_collisions\":0,\"memo_insertions\":0,\"memo_evictions\":0,\"memo_suffix_hits\":0,\"census_point_tests\":127873193,\"classification_combinations\":4810878,\"classification_examined\":50,\"classification_meb_calls\":50,\"classification_meb_presentations\":50,\"classification_diameter_pairs\":50,\"replay_trace_tests\":402,\"replay_meb_calls\":222,\"replay_meb_presentations\":222,\"replay_diameter_pairs\":222,\"ancestor_queries\":2617922,\"ancestor_activations\":557162,\"ancestor_unions\":1386544,\"ancestor_find_steps\":7604338}}]}\n{\"phase\":\"exit\",\"status\":\"ok\",\"reason\":\"none\"}\n==PROF== Disconnected from process 8423\n==PROF== Report: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.3B8v6lVsLd/build/profil/leaf_kernels.ncu-rep\n",
+   "stderr": ""
+  },
+  {
+   "name": "ncu_details",
+   "code": 0,
+   "stdout": ":fill_kernel(unnamed>::DeviceView, const unsigned int *, unsigned long, const unsigned char *, const unsigned long *, const unsigned long *, LeafRecord *, unsigned char *, unsigned long, unsigned long, unsigned int *)\",\"1\",\"7\",\"(32, 1, 1)\",\"(132, 1, 1)\",\"0\",\"12.0\",\"Source Counters\",\"Branch Efficiency\",\"%\",\"98.92\",\n\"1\",\"8423\",\"mhgp11_full_bench\",\"127.0.0.1\",\"unnamed>::fill_kernel(unnamed>::DeviceView, const unsigned int *, unsigned long, const unsigned char *, const unsigned long *, const unsigned long *, LeafRecord *, unsigned char *, unsigned long, unsigned long, unsigned int *)\",\"1\",\"7\",\"(32, 1, 1)\",\"(132, 1, 1)\",\"0\",\"12.0\",\"Source Counters\",\"Avg. Divergent Branches\",\"\",\"7771.17\",\n\"1\",\"8423\",\"mhgp11_full_bench\",\"127.0.0.1\",\"unnamed>::fill_kernel(unnamed>::DeviceView, const unsigned int *, unsigned long, const unsigned char *, const unsigned long *, const unsigned long *, LeafRecord *, unsigned char *, unsigned long, unsigned long, unsigned int *)\",\"1\",\"7\",\"(32, 1, 1)\",\"(132, 1, 1)\",\"0\",\"12.0\",\"SourceCounters\",\"\",\"\",\"\",\"UncoalescedGlobalAccess\",\"OPT\",\"This kernel has uncoalesced global accesses resulting in a total of 8537243 excessive sectors (7% of the total 129424443 sectors). Check the L2 Theoretical Sectors Global Excessive table for the primary source locations. The CUDA Programming Guide (https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#device-memory-accesses) has additional information on reducing uncoalesced device memory accesses.\",\"global\",\"0.802\"\n",
+   "stderr": ""
+  },
+  {
+   "name": "ncu_source",
+   "code": 0,
+   "stdout": "  LDC.64 R2, c[0x0][0x408]\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"-\",\"-\",\"-\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"-\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\"\n\"\",\"\",\"0x76c84b7b7ed0\",\"      UFLO.U32 UR5, UR4\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"-\",\"-\",\"-\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"-\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\"\n\"\",\"\",\"0x76c84b7b7ee0\",\"      POPC R5, UR4\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"-\",\"-\",\"-\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"-\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\"\n\"\",\"\",\"0x76c84b7b7ef0\",\"      ISETP.EQ.U32.AND P0, PT, R0, UR5, PT\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"-\",\"-\",\"-\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"-\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\"\n\"\",\"\",\"0x76c84b7b7f00\",\"@P0   REDG.E.ADD.STRONG.GPU desc[UR8][R2.64], R5\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"\",\"-\",\"\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\"\n",
+   "stderr": ""
+  }
+ ]
+}
