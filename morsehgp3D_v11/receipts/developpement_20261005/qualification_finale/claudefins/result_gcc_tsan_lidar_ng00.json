@@ -1,0 +1,184 @@
+{
+  "build_provenance": "matrix/gcc_tsan_lidar_ng00/build_provenance.json",
+  "cmake_options": [
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DMHGP11_TSAN=ON",
+    "-DMHGP11_COORD_BITS=21"
+  ],
+  "compiler": "g++",
+  "compiler_path": "/usr/bin/g++",
+  "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+  "conforming": true,
+  "ctest_args": [
+    "-L",
+    "^(scale8000|scale16000|scale32000|lidar)$",
+    "-LE",
+    "^(mutant|long)$",
+    "-R",
+    "lidar_ng00",
+    "-E",
+    "^mhgp11_reference_|_opt$"
+  ],
+  "description": "TSan u21 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (noms contenant lidar_ng00), reunion des lots = toutes ces portes ; jumelles _opt exclues (meme commande native, seul le juge Python passe sous -O, qualifie en Release). Sessions B et claudequals du 5 octobre 2026.",
+  "failures": [],
+  "logs": [
+    "matrix/gcc_tsan_lidar_ng00/LastTest.log",
+    "matrix/gcc_tsan_lidar_ng00/build.log",
+    "matrix/gcc_tsan_lidar_ng00/build_provenance.json",
+    "matrix/gcc_tsan_lidar_ng00/configure.log",
+    "matrix/gcc_tsan_lidar_ng00/ctest.log",
+    "matrix/gcc_tsan_lidar_ng00/junit.xml",
+    "matrix/gcc_tsan_lidar_ng00/sanitizer.log",
+    "matrix/gcc_tsan_lidar_ng00/tests.json"
+  ],
+  "name": "gcc_tsan_lidar_ng00",
+  "not_run": [],
+  "optional": false,
+  "passed_labels": {
+    "lidar": 13
+  },
+  "reason": "",
+  "seconds": 1774.432,
+  "slowest": [
+    {
+      "seconds": 318.32,
+      "test": "mhgp11_api_supports_route_lidar_ng00_k5"
+    },
+    {
+      "seconds": 256.51,
+      "test": "mhgp11_cli_supports_lidar_ng00_k5"
+    },
+    {
+      "seconds": 203.76,
+      "test": "mhgp11_points_lidar_ng00_k5"
+    },
+    {
+      "seconds": 150.24,
+      "test": "mhgp11_cli_full_identity_lidar_ng00_k5"
+    },
+    {
+      "seconds": 137.65,
+      "test": "mhgp11_supports_registers_lidar_ng00_k5"
+    },
+    {
+      "seconds": 121.99,
+      "test": "mhgp11_plat_lidar_ng00_k5"
+    },
+    {
+      "seconds": 113.51,
+      "test": "mhgp11_catalogue_euler_lidar_ng00_k5"
+    },
+    {
+      "seconds": 86.71,
+      "test": "mhgp11_supports_sample_judge_lidar_ng00_k5"
+    },
+    {
+      "seconds": 80.06,
+      "test": "mhgp11_tower_order_identity_lidar_ng00_k5"
+    },
+    {
+      "seconds": 76.0,
+      "test": "mhgp11_tower_attach_export_lidar_ng00_k5"
+    }
+  ],
+  "started_epoch": 1791235116.849,
+  "started_utc": "2026-10-05T21:18:36Z",
+  "status": "ok",
+  "steps": [
+    {
+      "argv": [
+        "cmake",
+        "-S",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/src/morsehgp3D_v11",
+        "-B",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_tsan_lidar_ng00/build",
+        "-DCMAKE_CXX_COMPILER=g++",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "exit_code": 0,
+      "name": "configure",
+      "seconds": 0.764,
+      "status": "ok",
+      "timeout_seconds": 2099.9
+    },
+    {
+      "argv": [
+        "cmake",
+        "--build",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_tsan_lidar_ng00/build",
+        "-j",
+        "4",
+        "--",
+        "-k"
+      ],
+      "exit_code": 0,
+      "name": "build",
+      "seconds": 117.711,
+      "status": "ok",
+      "timeout_seconds": 2099.1
+    },
+    {
+      "argv": [
+        "ctest",
+        "--show-only=json-v1",
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "lidar_ng00",
+        "-E",
+        "^mhgp11_reference_|_opt$"
+      ],
+      "exit_code": 0,
+      "name": "list",
+      "seconds": 0.064,
+      "status": "ok",
+      "timeout_seconds": 120
+    },
+    {
+      "argv": [
+        "setarch",
+        "x86_64",
+        "-R",
+        "ctest",
+        "--no-tests=error",
+        "--timeout",
+        "900",
+        "-j",
+        "4",
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "lidar_ng00",
+        "-E",
+        "^mhgp11_reference_|_opt$",
+        "--output-junit",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_tsan_lidar_ng00/junit.xml"
+      ],
+      "exit_code": 0,
+      "name": "test",
+      "seconds": 1655.814,
+      "status": "ok",
+      "timeout_seconds": 1981.4
+    }
+  ],
+  "tests": {
+    "ctest_failed": 0,
+    "ctest_total": 13,
+    "failed": 0,
+    "not_run": 0,
+    "passed": 13,
+    "selected": 13
+  },
+  "threads": 4,
+  "wrapper": [
+    "setarch",
+    "x86_64",
+    "-R"
+  ]
+}

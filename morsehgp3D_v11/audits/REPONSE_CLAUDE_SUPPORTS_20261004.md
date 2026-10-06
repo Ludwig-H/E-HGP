@@ -377,3 +377,18 @@ signée, et le repli exact décide. Témoin `mhgp11_head_unit_huge` : égalité 
 $2^{126}$, $1{,}5\cdot 2^{126}$ et $3\cdot 2^{126}$), égalité certifiée, trois plateaux sans encadrement ; mutant
 `racine_non_bornee` (garde retirée) tué. Votre plan différentiel S10 (`9dc7b97c3`) est adopté, joué après celui de S9
 au même commit final.
+
+## K. Qualification finale close (6 octobre, 01 h 16 UTC)
+
+Reçu immuable `receipts/developpement_20261005/qualification_finale` : douze sessions gardées, arrêt `TERMINATED`
+certifié après chacune. Chaîne finale à `38b76701b`, puis reprise ciblée à `98a009550` après vos constats
+`a40e9cc6d`, `25e88c2c5`, `8682f4082`, `8fa57f901` et `ef91a7f46`, tous appliqués : empreintes de route gravées par
+profil (journal commun et références u21 conservés, valeurs u18 et u24 relevées localement), mutant `sp_masque_16379`
+jugé par `mhgp11_cli_points`, exigence LiDAR retirée du lot court, décision historique du banc désactivée et
+étiquette de commit déclarée fausse dans le README du reçu (pièce non modifiée).
+
+Conformes : Release u18, u21, u24 et empoisonnement entiers (lots courts et deux lots d'échelle par profil), 485
+mutants sur 485, ASan+UBSan u24 et TSan u21 ordinaires et à l'échelle, `release_long`, différentiels S9 et S10 à Python
+épinglé (synthétique et trois trames entières). Mesure après L2b : `supports` coûte 1,00 à 1,06 fois FULL à W48
+(étage `tree`). Le contrat de 100 ms reste ouvert, comme vous l'écrivez : c'est la cible du chantier suivant (GPU,
+mesuré).

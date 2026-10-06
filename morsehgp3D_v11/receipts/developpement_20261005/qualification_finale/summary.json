@@ -1,0 +1,783 @@
+[
+ {
+  "session": "claudefina2",
+  "commit": "38b76701b",
+  "status": "failed_remote",
+  "closure": "stopped",
+  "terminated": "TERMINATED",
+  "certified": true,
+  "configs": [
+   {
+    "name": "gcc_release",
+    "status": "timeout",
+    "seconds": 2100,
+    "failures": 6,
+    "not_run": 8,
+    "tests": {
+     "ctest_failed": null,
+     "ctest_total": null,
+     "failed": 6,
+     "not_run": 8,
+     "passed": 977,
+     "selected": 991
+    }
+   },
+   {
+    "name": "bits21",
+    "status": "timeout",
+    "seconds": 2100,
+    "failures": 0,
+    "not_run": 11,
+    "tests": {
+     "ctest_failed": null,
+     "ctest_total": null,
+     "failed": 0,
+     "not_run": 11,
+     "passed": 890,
+     "selected": 901
+    }
+   },
+   {
+    "name": "bits24",
+    "status": "timeout",
+    "seconds": 2100,
+    "failures": 6,
+    "not_run": 11,
+    "tests": {
+     "ctest_failed": null,
+     "ctest_total": null,
+     "failed": 6,
+     "not_run": 11,
+     "passed": 884,
+     "selected": 901
+    }
+   },
+   {
+    "name": "poison",
+    "status": "timeout",
+    "seconds": 2100,
+    "failures": 0,
+    "not_run": 11,
+    "tests": {
+     "ctest_failed": null,
+     "ctest_total": null,
+     "failed": 0,
+     "not_run": 11,
+     "passed": 891,
+     "selected": 902
+    }
+   }
+  ],
+  "commands": [
+   [
+    "matrice",
+    "failed",
+    "2100.537"
+   ]
+  ]
+ },
+ {
+  "session": "claudefinm",
+  "commit": "38b76701b",
+  "status": "failed_remote",
+  "closure": "stopped",
+  "terminated": "TERMINATED",
+  "certified": true,
+  "configs": [
+   {
+    "name": "mutants",
+    "status": "failed",
+    "seconds": 1644,
+    "failures": 2,
+    "not_run": 0,
+    "tests": {
+     "ctest_failed": 2,
+     "ctest_total": 39,
+     "failed": 2,
+     "not_run": 0,
+     "passed": 37,
+     "selected": 39
+    }
+   }
+  ],
+  "commands": [
+   [
+    "matrice",
+    "failed",
+    "1644.005"
+   ]
+  ]
+ },
+ {
+  "session": "claudefins",
+  "commit": "38b76701b",
+  "status": "failed_remote",
+  "closure": "stopped",
+  "terminated": "TERMINATED",
+  "certified": true,
+  "configs": [
+   {
+    "name": "gcc_asan_scale32000",
+    "status": "failed",
+    "seconds": 1425,
+    "failures": 1,
+    "not_run": 0,
+    "tests": {
+     "ctest_failed": 1,
+     "ctest_total": 11,
+     "failed": 1,
+     "not_run": 0,
+     "passed": 10,
+     "selected": 11
+    }
+   },
+   {
+    "name": "gcc_asan_lidar_ng01_ng02",
+    "status": "failed",
+    "seconds": 1499,
+    "failures": 2,
+    "not_run": 0,
+    "tests": {
+     "ctest_failed": 2,
+     "ctest_total": 24,
+     "failed": 2,
+     "not_run": 0,
+     "passed": 22,
+     "selected": 24
+    }
+   },
+   {
+    "name": "gcc_asan_scale16000",
+    "status": "failed",
+    "seconds": 836,
+    "failures": 1,
+    "not_run": 0,
+    "tests": {
+     "ctest_failed": 1,
+     "ctest_total": 10,
+     "failed": 1,
+     "not_run": 0,
+     "passed": 9,
+     "selected": 10
+    }
+   },
+   {
+    "name": "gcc_asan_scale_rest",
+    "status": "failed",
+    "seconds": 1519,
+    "failures": 2,
+    "not_run": 0,
+    "tests": {
+     "ctest_failed": 2,
+     "ctest_total": 35,
+     "failed": 2,
+     "not_run": 0,
+     "passed": 33,
+     "selected": 35
+    }
+   },
+   {
+    "name": "gcc_tsan_scale32000_cli",
+    "status": "ok",
+    "seconds": 900,
+    "failures": 0,
+    "not_run": 0,
+    "tests": {
+     "ctest_failed": 0,
+     "ctest_total": 2,
+     "failed": 0,
+     "not_run": 0,
+     "passed": 2,
+     "selected": 2
+    }
+   },
+   {
+    "name": "gcc_tsan_scale32000",
+    "status": "ok",
+    "seconds": 2030,
+    "failures": 0,
+    "not_run": 0,
+    "tests": {
+     "ctest_failed": 0,
+     "ctest_total": 9,
+     "failed": 0,
+     "not_run": 0,
+     "passed": 9,
+     "selected": 9
+    }
+   },
+   {
+    "name": "gcc_tsan_lidar_ng00",
+    "status": "ok",
+    "seconds": 1774,
+    "failures": 0,
+    "not_run": 0,
+    "tests": {
+     "ctest_failed": 0,
+     "ctest_total": 13,
+     "failed": 0,
+     "not_run": 0,
+     "passed": 13,
+     "selected": 13
+    }
+   },
+   {
+    "name": "gcc_tsan_lidar_ng01",
+    "status": "ok",
+    "seconds": 1392,
+    "failures": 0,
+    "not_run": 0,
+    "tests": {
+     "ctest_failed": 0,
+     "ctest_total": 12,
+     "failed": 0,
+     "not_run": 0,
+     "passed": 12,
+     "selected": 12
+    }
+   },
+   {
+    "name": "gcc_tsan_lidar_ng02",
+    "status": "ok",
+    "seconds": 1594,
+    "failures": 0,
+    "not_run": 0,
+    "tests": {
+     "ctest_failed": 0,
+     "ctest_total": 12,
+     "failed": 0,
+     "not_run": 0,
+     "passed": 12,
+     "selected": 12
+    }
+   },
+   {
+    "name": "gcc_tsan_scale16000",
+    "status": "ok",
+    "seconds": 1398,
+    "failures": 0,
+    "not_run": 0,
+    "tests": {
+     "ctest_failed": 0,
+     "ctest_total": 10,
+     "failed": 0,
+     "not_run": 0,
+     "passed": 10,
+     "selected": 10
+    }
+   },
+   {
+    "name": "gcc_tsan_scale_rest",
+    "status": "ok",
+    "seconds": 1413,
+    "failures": 0,
+    "not_run": 0,
+    "tests": {
+     "ctest_failed": 0,
+     "ctest_total": 22,
+     "failed": 0,
+     "not_run": 0,
+     "passed": 22,
+     "selected": 22
+    }
+   }
+  ],
+  "commands": [
+   [
+    "matrice",
+    "failed",
+    "2030.416"
+   ]
+  ]
+ },
+ {
+  "session": "claudefinb",
+  "commit": "38b76701b",
+  "status": "completed",
+  "closure": "stopped",
+  "terminated": "TERMINATED",
+  "certified": true,
+  "configs": [
+   {
+    "name": "gcc_asan_ubsan",
+    "status": "ok",
+    "seconds": 280,
+    "failures": 0,
+    "not_run": 0,
+    "tests": {
+     "ctest_failed": 0,
+     "ctest_total": 783,
+     "failed": 0,
+     "not_run": 0,
+     "passed": 783,
+     "selected": 783
+    }
+   },
+   {
+    "name": "gcc_tsan",
+    "status": "ok",
+    "seconds": 273,
+    "failures": 0,
+    "not_run": 0,
+    "tests": {
+     "ctest_failed": 0,
+     "ctest_total": 783,
+     "failed": 0,
+     "not_run": 0,
+     "passed": 783,
+     "selected": 783
+    }
+   }
+  ],
+  "commands": [
+   [
+    "matrice",
+    "ok",
+    "280.862"
+   ]
+  ]
+ },
+ {
+  "session": "claudefinl",
+  "commit": "38b76701b",
+  "status": "failed_remote",
+  "closure": "stopped",
+  "terminated": "TERMINATED",
+  "certified": true,
+  "configs": [
+   {
+    "name": "release_long",
+    "status": "timeout",
+    "seconds": 2100,
+    "failures": 0,
+    "not_run": 6,
+    "tests": {
+     "ctest_failed": null,
+     "ctest_total": null,
+     "failed": 0,
+     "not_run": 6,
+     "passed": 35,
+     "selected": 41
+    }
+   }
+  ],
+  "commands": [
+   [
+    "matrice",
+    "failed",
+    "2100.186"
+   ]
+  ]
+ },
+ {
+  "session": "claudefinp10",
+  "commit": "38b76701b",
+  "status": "completed",
+  "closure": "stopped",
+  "terminated": "TERMINATED",
+  "certified": true,
+  "configs": [],
+  "commands": [
+   [
+    "head_python_synthetique",
+    "ok",
+    "32.202"
+   ],
+   [
+    "head_python_ng00",
+    "ok",
+    "30.456"
+   ],
+   [
+    "head_python_ng01",
+    "ok",
+    "24.130"
+   ],
+   [
+    "head_python_ng02",
+    "ok",
+    "29.170"
+   ]
+  ]
+ },
+ {
+  "session": "claudefinp9",
+  "commit": "38b76701b",
+  "status": "completed",
+  "closure": "stopped",
+  "terminated": "TERMINATED",
+  "certified": true,
+  "configs": [],
+  "commands": [
+   [
+    "points_python_synthetique",
+    "ok",
+    "50.151"
+   ],
+   [
+    "points_python_ng00",
+    "ok",
+    "11.197"
+   ],
+   [
+    "points_python_ng01",
+    "ok",
+    "9.423"
+   ],
+   [
+    "points_python_ng02",
+    "ok",
+    "11.737"
+   ]
+  ]
+ },
+ {
+  "session": "claudefinmesure",
+  "commit": "38b76701b",
+  "status": "completed",
+  "closure": "stopped",
+  "terminated": "TERMINATED",
+  "certified": true,
+  "configs": [],
+  "commands": [
+   [
+    "mesure_l2",
+    "ok",
+    "311.549"
+   ],
+   [
+    "supports_w48_ng02",
+    "ok",
+    "32.114"
+   ],
+   [
+    "supports_w48_ng00",
+    "ok",
+    "32.258"
+   ]
+  ]
+ },
+ {
+  "session": "clauderepriser1",
+  "commit": "98a009550",
+  "status": "completed",
+  "closure": "stopped",
+  "terminated": "TERMINATED",
+  "certified": true,
+  "configs": [
+   {
+    "name": "gcc_release",
+    "status": "ok",
+    "seconds": 113,
+    "failures": 0,
+    "not_run": 0,
+    "tests": {
+     "ctest_failed": 0,
+     "ctest_total": 873,
+     "failed": 0,
+     "not_run": 0,
+     "passed": 873,
+     "selected": 873
+    }
+   },
+   {
+    "name": "bits21",
+    "status": "ok",
+    "seconds": 257,
+    "failures": 0,
+    "not_run": 0,
+    "tests": {
+     "ctest_failed": 0,
+     "ctest_total": 783,
+     "failed": 0,
+     "not_run": 0,
+     "passed": 783,
+     "selected": 783
+    }
+   },
+   {
+    "name": "bits24",
+    "status": "ok",
+    "seconds": 258,
+    "failures": 0,
+    "not_run": 0,
+    "tests": {
+     "ctest_failed": 0,
+     "ctest_total": 783,
+     "failed": 0,
+     "not_run": 0,
+     "passed": 783,
+     "selected": 783
+    }
+   },
+   {
+    "name": "poison",
+    "status": "ok",
+    "seconds": 257,
+    "failures": 0,
+    "not_run": 0,
+    "tests": {
+     "ctest_failed": 0,
+     "ctest_total": 784,
+     "failed": 0,
+     "not_run": 0,
+     "passed": 784,
+     "selected": 784
+    }
+   }
+  ],
+  "commands": [
+   [
+    "matrice",
+    "ok",
+    "257.725"
+   ]
+  ]
+ },
+ {
+  "session": "clauderepriser2",
+  "commit": "98a009550",
+  "status": "completed",
+  "closure": "stopped",
+  "terminated": "TERMINATED",
+  "certified": true,
+  "configs": [
+   {
+    "name": "gcc_release_echelle_gros",
+    "status": "ok",
+    "seconds": 1403,
+    "failures": 0,
+    "not_run": 0,
+    "tests": {
+     "ctest_failed": 0,
+     "ctest_total": 52,
+     "failed": 0,
+     "not_run": 0,
+     "passed": 52,
+     "selected": 52
+    }
+   },
+   {
+    "name": "gcc_release_echelle_reste",
+    "status": "ok",
+    "seconds": 1119,
+    "failures": 0,
+    "not_run": 0,
+    "tests": {
+     "ctest_failed": 0,
+     "ctest_total": 66,
+     "failed": 0,
+     "not_run": 0,
+     "passed": 66,
+     "selected": 66
+    }
+   },
+   {
+    "name": "bits21_echelle_gros",
+    "status": "ok",
+    "seconds": 1438,
+    "failures": 0,
+    "not_run": 0,
+    "tests": {
+     "ctest_failed": 0,
+     "ctest_total": 52,
+     "failed": 0,
+     "not_run": 0,
+     "passed": 52,
+     "selected": 52
+    }
+   },
+   {
+    "name": "bits21_echelle_reste",
+    "status": "ok",
+    "seconds": 1145,
+    "failures": 0,
+    "not_run": 0,
+    "tests": {
+     "ctest_failed": 0,
+     "ctest_total": 66,
+     "failed": 0,
+     "not_run": 0,
+     "passed": 66,
+     "selected": 66
+    }
+   },
+   {
+    "name": "bits24_echelle_gros",
+    "status": "ok",
+    "seconds": 1455,
+    "failures": 0,
+    "not_run": 0,
+    "tests": {
+     "ctest_failed": 0,
+     "ctest_total": 52,
+     "failed": 0,
+     "not_run": 0,
+     "passed": 52,
+     "selected": 52
+    }
+   },
+   {
+    "name": "bits24_echelle_reste",
+    "status": "ok",
+    "seconds": 1162,
+    "failures": 0,
+    "not_run": 0,
+    "tests": {
+     "ctest_failed": 0,
+     "ctest_total": 66,
+     "failed": 0,
+     "not_run": 0,
+     "passed": 66,
+     "selected": 66
+    }
+   },
+   {
+    "name": "poison_echelle_gros",
+    "status": "ok",
+    "seconds": 1455,
+    "failures": 0,
+    "not_run": 0,
+    "tests": {
+     "ctest_failed": 0,
+     "ctest_total": 52,
+     "failed": 0,
+     "not_run": 0,
+     "passed": 52,
+     "selected": 52
+    }
+   },
+   {
+    "name": "poison_echelle_reste",
+    "status": "ok",
+    "seconds": 1162,
+    "failures": 0,
+    "not_run": 0,
+    "tests": {
+     "ctest_failed": 0,
+     "ctest_total": 66,
+     "failed": 0,
+     "not_run": 0,
+     "passed": 66,
+     "selected": 66
+    }
+   }
+  ],
+  "commands": [
+   [
+    "matrice",
+    "ok",
+    "1455.432"
+   ]
+  ]
+ },
+ {
+  "session": "clauderepriser3",
+  "commit": "98a009550",
+  "status": "completed",
+  "closure": "stopped",
+  "terminated": "TERMINATED",
+  "certified": true,
+  "configs": [
+   {
+    "name": "mutants",
+    "status": "ok",
+    "seconds": 1729,
+    "failures": 0,
+    "not_run": 0,
+    "tests": {
+     "ctest_failed": 0,
+     "ctest_total": 39,
+     "failed": 0,
+     "not_run": 0,
+     "passed": 39,
+     "selected": 39
+    }
+   }
+  ],
+  "commands": [
+   [
+    "matrice",
+    "ok",
+    "1728.930"
+   ]
+  ]
+ },
+ {
+  "session": "clauderepriser4",
+  "commit": "98a009550",
+  "status": "completed",
+  "closure": "stopped",
+  "terminated": "TERMINATED",
+  "certified": true,
+  "configs": [
+   {
+    "name": "gcc_asan_scale32000",
+    "status": "ok",
+    "seconds": 1264,
+    "failures": 0,
+    "not_run": 0,
+    "tests": {
+     "ctest_failed": 0,
+     "ctest_total": 11,
+     "failed": 0,
+     "not_run": 0,
+     "passed": 11,
+     "selected": 11
+    }
+   },
+   {
+    "name": "gcc_asan_lidar_ng01_ng02",
+    "status": "ok",
+    "seconds": 1329,
+    "failures": 0,
+    "not_run": 0,
+    "tests": {
+     "ctest_failed": 0,
+     "ctest_total": 24,
+     "failed": 0,
+     "not_run": 0,
+     "passed": 24,
+     "selected": 24
+    }
+   },
+   {
+    "name": "gcc_asan_scale16000",
+    "status": "ok",
+    "seconds": 693,
+    "failures": 0,
+    "not_run": 0,
+    "tests": {
+     "ctest_failed": 0,
+     "ctest_total": 10,
+     "failed": 0,
+     "not_run": 0,
+     "passed": 10,
+     "selected": 10
+    }
+   },
+   {
+    "name": "gcc_asan_scale_rest",
+    "status": "ok",
+    "seconds": 1368,
+    "failures": 0,
+    "not_run": 0,
+    "tests": {
+     "ctest_failed": 0,
+     "ctest_total": 35,
+     "failed": 0,
+     "not_run": 0,
+     "passed": 35,
+     "selected": 35
+    }
+   }
+  ],
+  "commands": [
+   [
+    "matrice",
+    "ok",
+    "1368.977"
+   ]
+  ]
+ }
+]

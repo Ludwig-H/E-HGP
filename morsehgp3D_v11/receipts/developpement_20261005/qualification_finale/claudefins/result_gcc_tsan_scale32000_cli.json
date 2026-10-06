@@ -1,0 +1,152 @@
+{
+  "build_provenance": "matrix/gcc_tsan_scale32000_cli/build_provenance.json",
+  "cmake_options": [
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DMHGP11_TSAN=ON",
+    "-DMHGP11_COORD_BITS=21"
+  ],
+  "compiler": "g++",
+  "compiler_path": "/usr/bin/g++",
+  "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+  "conforming": true,
+  "ctest_args": [
+    "-L",
+    "^(scale8000|scale16000|scale32000|lidar)$",
+    "-LE",
+    "^(mutant|long)$",
+    "-R",
+    "cli_.*(scale32000|uniform32000)",
+    "-E",
+    "^mhgp11_reference_|_opt$"
+  ],
+  "description": "TSan u21 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (noms contenant cli_.*(scale32000|uniform32000)), reunion des lots = toutes ces portes ; jumelles _opt exclues (meme commande native, seul le juge Python passe sous -O, qualifie en Release). Sessions B et claudequals du 5 octobre 2026.",
+  "failures": [],
+  "logs": [
+    "matrix/gcc_tsan_scale32000_cli/LastTest.log",
+    "matrix/gcc_tsan_scale32000_cli/build.log",
+    "matrix/gcc_tsan_scale32000_cli/build_provenance.json",
+    "matrix/gcc_tsan_scale32000_cli/configure.log",
+    "matrix/gcc_tsan_scale32000_cli/ctest.log",
+    "matrix/gcc_tsan_scale32000_cli/junit.xml",
+    "matrix/gcc_tsan_scale32000_cli/sanitizer.log",
+    "matrix/gcc_tsan_scale32000_cli/tests.json"
+  ],
+  "name": "gcc_tsan_scale32000_cli",
+  "not_run": [],
+  "optional": false,
+  "passed_labels": {
+    "scale32000": 2
+  },
+  "reason": "",
+  "seconds": 900.486,
+  "slowest": [
+    {
+      "seconds": 454.47,
+      "test": "mhgp11_cli_supports_scale32000"
+    },
+    {
+      "seconds": 328.36,
+      "test": "mhgp11_cli_full_identity_scale32000"
+    }
+  ],
+  "started_epoch": 1791235116.847,
+  "started_utc": "2026-10-05T21:18:36Z",
+  "status": "ok",
+  "steps": [
+    {
+      "argv": [
+        "cmake",
+        "-S",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/src/morsehgp3D_v11",
+        "-B",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_tsan_scale32000_cli/build",
+        "-DCMAKE_CXX_COMPILER=g++",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "exit_code": 0,
+      "name": "configure",
+      "seconds": 0.814,
+      "status": "ok",
+      "timeout_seconds": 2099.9
+    },
+    {
+      "argv": [
+        "cmake",
+        "--build",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_tsan_scale32000_cli/build",
+        "-j",
+        "4",
+        "--",
+        "-k"
+      ],
+      "exit_code": 0,
+      "name": "build",
+      "seconds": 116.658,
+      "status": "ok",
+      "timeout_seconds": 2099.1
+    },
+    {
+      "argv": [
+        "ctest",
+        "--show-only=json-v1",
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "cli_.*(scale32000|uniform32000)",
+        "-E",
+        "^mhgp11_reference_|_opt$"
+      ],
+      "exit_code": 0,
+      "name": "list",
+      "seconds": 0.064,
+      "status": "ok",
+      "timeout_seconds": 120
+    },
+    {
+      "argv": [
+        "setarch",
+        "x86_64",
+        "-R",
+        "ctest",
+        "--no-tests=error",
+        "--timeout",
+        "900",
+        "-j",
+        "4",
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "cli_.*(scale32000|uniform32000)",
+        "-E",
+        "^mhgp11_reference_|_opt$",
+        "--output-junit",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_tsan_scale32000_cli/junit.xml"
+      ],
+      "exit_code": 0,
+      "name": "test",
+      "seconds": 782.87,
+      "status": "ok",
+      "timeout_seconds": 1982.4
+    }
+  ],
+  "tests": {
+    "ctest_failed": 0,
+    "ctest_total": 2,
+    "failed": 0,
+    "not_run": 0,
+    "passed": 2,
+    "selected": 2
+  },
+  "threads": 4,
+  "wrapper": [
+    "setarch",
+    "x86_64",
+    "-R"
+  ]
+}

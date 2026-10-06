@@ -1,0 +1,16 @@
+{
+  "pid": 358556,
+  "receipt": "/workspaces/.ehgp-sessions/v11.20261005.claudefinm/receipt.json",
+  "recover": "python3 gcp-migration/v11_session.py --recover --session-dir /workspaces/.ehgp-sessions/v11.20261005.claudefinm",
+  "run_dir": "/tmp/ehgp-v11-runs/v11.20261005.claudefinm-7a863a199d23",
+  "sentinel": "/workspaces/.ehgp-sessions/v11.20261005.claudefinm/DONE",
+  "session": "/workspaces/.ehgp-sessions/v11.20261005.claudefinm",
+  "started_utc": "2026-10-05T20:44:01Z",
+  "status": "launched",
+  "stderr": "/workspaces/.ehgp-sessions/v11.20261005.claudefinm/session.stderr",
+  "target": {
+    "instance": "ehgp-v7-3b1d496aed430749ea7e049f",
+    "project": "devpod-gpu-exploration",
+    "zone": "us-central1-c"
+  }
+}

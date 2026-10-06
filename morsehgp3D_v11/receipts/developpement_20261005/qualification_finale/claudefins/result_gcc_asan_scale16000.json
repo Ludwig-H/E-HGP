@@ -1,0 +1,202 @@
+{
+  "build_provenance": "matrix/gcc_asan_scale16000/build_provenance.json",
+  "cmake_options": [
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DMHGP11_SANITIZE=ON",
+    "-DMHGP11_COORD_BITS=24"
+  ],
+  "compiler": "g++",
+  "compiler_path": "/usr/bin/g++",
+  "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+  "conforming": false,
+  "ctest_args": [
+    "-L",
+    "^(scale8000|scale16000|scale32000|lidar)$",
+    "-LE",
+    "^(mutant|long)$",
+    "-R",
+    "scale16000|uniform16000",
+    "-E",
+    "^mhgp11_reference_|_opt$"
+  ],
+  "description": "ASan+UBSan u24 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (noms contenant scale16000|uniform16000), reunion des lots = toutes ces portes ; jumelles _opt exclues (meme commande native, seul le juge Python passe sous -O, qualifie en Release). Sessions B et claudequals du 5 octobre 2026.",
+  "failures": [
+    {
+      "detail": "Failed",
+      "excerpt": [
+        "{\"route\":\"order_tree\",\"workers\":1,\"tree_ns\":7261098083,\"tree_peak\":267067294,\"attach_ns\":344474546,\"attach_peak\":0,\"output_ns\":381398265,\"output_peak\":306207208,\"write_ns\":479404704,\"write_peak\":302931108}",
+        "{\"route\":\"full_tower\",\"workers\":1,\"tree_ns\":10108720509,\"tree_peak\":367566854,\"attach_ns\":326431126,\"attach_peak\":0,\"output_ns\":371370526,\"output_peak\":306207208,\"write_ns\":490874484,\"write_peak\":302931108}",
+        "{\"route\":\"compute\",\"tree_peak\":367566854,\"order_tree_peak\":267067294,\"full_tower_peak\":367566854}",
+        "{\"route\":\"order_tree\",\"workers\":4,\"tree_ns\":2180173311,\"tree_peak\":267259294,\"attach_ns\":313677208,\"attach_peak\":0,\"output_ns\":209668848,\"output_peak\":306207460,\"write_ns\":478214586,\"write_peak\":302931108}",
+        "{\"route\":\"full_tower\",\"workers\":4,\"tree_ns\":2740072977,\"tree_peak\":367758854,\"attach_ns\":322927078,\"attach_peak\":0,\"output_ns\":207935298,\"output_peak\":306207460,\"write_ns\":476146316,\"write_peak\":302931108}",
+        "supports_route_verdict conforme k=5 n=16000 noeuds=565098 boules=819004 supports=819004 etendues=0 multiples=0 cellules=478947 graines=1530768 fichier=1716d15eb3a5afa4 manifeste=39af11215297416d journal=436d1354ae183486 fils=1,4",
+        "run_expect_verdict ligne_absente",
+        "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/src/morsehgp3D_v11/cmake/run_expect.cmake:126 (message):",
+        "  ligne attendue ABSENTE de la sortie standard de la MEME execution :",
+        "  supports_route_verdict conforme k=5 n=16000 noeuds=565098 boules=819004",
+        "  supports=819004 etendues=0 multiples=0 cellules=478947 graines=1530768",
+        "  fichier=dd524ffd991873eb manifeste=baa658ac05a8eee8",
+        "  journal=436d1354ae183486 fils=1,4"
+      ],
+      "labels": [
+        "scale16000"
+      ],
+      "seconds": 102.58,
+      "state": "failed",
+      "test": "mhgp11_api_supports_route_scale16000"
+    }
+  ],
+  "logs": [
+    "matrix/gcc_asan_scale16000/LastTest.log",
+    "matrix/gcc_asan_scale16000/build.log",
+    "matrix/gcc_asan_scale16000/build_provenance.json",
+    "matrix/gcc_asan_scale16000/configure.log",
+    "matrix/gcc_asan_scale16000/ctest.log",
+    "matrix/gcc_asan_scale16000/junit.xml",
+    "matrix/gcc_asan_scale16000/sanitizer.log",
+    "matrix/gcc_asan_scale16000/tests.json"
+  ],
+  "name": "gcc_asan_scale16000",
+  "not_run": [],
+  "optional": false,
+  "passed_labels": {
+    "scale16000": 9
+  },
+  "reason": "1 porte(s) en echec",
+  "seconds": 835.59,
+  "slowest": [
+    {
+      "seconds": 102.58,
+      "test": "mhgp11_api_supports_route_scale16000"
+    },
+    {
+      "seconds": 96.79,
+      "test": "mhgp11_cli_supports_scale16000"
+    },
+    {
+      "seconds": 76.29,
+      "test": "mhgp11_cli_full_identity_scale16000"
+    },
+    {
+      "seconds": 64.47,
+      "test": "mhgp11_points_scale16000"
+    },
+    {
+      "seconds": 49.97,
+      "test": "mhgp11_supports_registers_uniform16000_k5"
+    },
+    {
+      "seconds": 41.26,
+      "test": "mhgp11_plat_scale16000"
+    },
+    {
+      "seconds": 36.69,
+      "test": "mhgp11_tower_attach_scale16000"
+    },
+    {
+      "seconds": 33.62,
+      "test": "mhgp11_catalogue_euler_scale16000"
+    },
+    {
+      "seconds": 23.35,
+      "test": "mhgp11_tower_order_identity_scale16000"
+    },
+    {
+      "seconds": 9.17,
+      "test": "mhgp11_supports_hierarchy_scale16000"
+    }
+  ],
+  "started_epoch": 1791235116.846,
+  "started_utc": "2026-10-05T21:18:36Z",
+  "status": "failed",
+  "steps": [
+    {
+      "argv": [
+        "cmake",
+        "-S",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/src/morsehgp3D_v11",
+        "-B",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_asan_scale16000/build",
+        "-DCMAKE_CXX_COMPILER=g++",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_SANITIZE=ON",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "exit_code": 0,
+      "name": "configure",
+      "seconds": 0.764,
+      "status": "ok",
+      "timeout_seconds": 2099.9
+    },
+    {
+      "argv": [
+        "cmake",
+        "--build",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_asan_scale16000/build",
+        "-j",
+        "4",
+        "--",
+        "-k"
+      ],
+      "exit_code": 0,
+      "name": "build",
+      "seconds": 300.408,
+      "status": "ok",
+      "timeout_seconds": 2099.1
+    },
+    {
+      "argv": [
+        "ctest",
+        "--show-only=json-v1",
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "scale16000|uniform16000",
+        "-E",
+        "^mhgp11_reference_|_opt$"
+      ],
+      "exit_code": 0,
+      "name": "list",
+      "seconds": 0.064,
+      "status": "ok",
+      "timeout_seconds": 120
+    },
+    {
+      "argv": [
+        "ctest",
+        "--no-tests=error",
+        "--timeout",
+        "900",
+        "-j",
+        "4",
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "scale16000|uniform16000",
+        "-E",
+        "^mhgp11_reference_|_opt$",
+        "--output-junit",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_asan_scale16000/junit.xml"
+      ],
+      "exit_code": 8,
+      "name": "test",
+      "seconds": 534.263,
+      "status": "failed",
+      "timeout_seconds": 1798.7
+    }
+  ],
+  "tests": {
+    "ctest_failed": 1,
+    "ctest_total": 10,
+    "failed": 1,
+    "not_run": 0,
+    "passed": 9,
+    "selected": 10
+  },
+  "threads": 4,
+  "wrapper": []
+}

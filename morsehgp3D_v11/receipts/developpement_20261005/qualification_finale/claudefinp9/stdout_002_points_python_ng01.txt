@@ -1,0 +1,2 @@
+1/1 Test #802: mhgp11_points_vs_python_lidar_ng01_k5 ...   Passed    9.39 sec
+100% tests passed, 0 tests failed out of 1

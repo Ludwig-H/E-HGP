@@ -1,0 +1,2 @@
+cli_supports_scale_verdict conforme sites=45845 k=5 noeuds=609376 boules=832386 supports=832394 etendues=354 multiples=8 branches=610022 kparties=3189636 cofaces=471577 appels=14
+cli_supports_scale_ok controles=52

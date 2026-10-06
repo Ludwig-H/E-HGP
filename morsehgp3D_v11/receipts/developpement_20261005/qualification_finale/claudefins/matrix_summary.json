@@ -1,0 +1,2153 @@
+{
+  "budget_seconds": 2100,
+  "complete": true,
+  "configurations": [
+    {
+      "build_provenance": "matrix/gcc_asan_scale32000/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_SANITIZE=ON",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": false,
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "scale32000|uniform32000",
+        "-E",
+        "^mhgp11_reference_|_opt$"
+      ],
+      "description": "ASan+UBSan u24 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (noms contenant scale32000|uniform32000), reunion des lots = toutes ces portes ; jumelles _opt exclues (meme commande native, seul le juge Python passe sous -O, qualifie en Release). Sessions B et claudequals du 5 octobre 2026.",
+      "failures": [
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "{\"route\":\"order_tree\",\"workers\":1,\"tree_ns\":16048393869,\"tree_peak\":547424048,\"attach_ns\":716736577,\"attach_peak\":0,\"output_ns\":790700524,\"output_peak\":629606297,\"write_ns\":1056826175,\"write_peak\":622846033}",
+            "{\"route\":\"full_tower\",\"workers\":1,\"tree_ns\":21829241162,\"tree_peak\":753508284,\"attach_ns\":691527568,\"attach_peak\":0,\"output_ns\":778203514,\"output_peak\":629606297,\"write_ns\":1067738145,\"write_peak\":622846033}",
+            "{\"route\":\"compute\",\"tree_peak\":753508284,\"order_tree_peak\":547424048,\"full_tower_peak\":753508284}",
+            "{\"route\":\"order_tree\",\"workers\":4,\"tree_ns\":4711096019,\"tree_peak\":547808048,\"attach_ns\":708124578,\"attach_peak\":0,\"output_ns\":439564373,\"output_peak\":629606549,\"write_ns\":1058088442,\"write_peak\":622846033}",
+            "{\"route\":\"full_tower\",\"workers\":4,\"tree_ns\":6786805655,\"tree_peak\":753892284,\"attach_ns\":727906717,\"attach_peak\":0,\"output_ns\":509361142,\"output_peak\":629606549,\"write_ns\":1052299462,\"write_peak\":622846033}",
+            "supports_route_verdict conforme k=5 n=32000 noeuds=1163756 boules=1690045 supports=1690045 etendues=0 multiples=0 cellules=989861 graines=3165977 fichier=1a68904408bcae5f manifeste=54f75f49aceae6b7 journal=c371678559b144d7 fils=1,4",
+            "run_expect_verdict ligne_absente",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/src/morsehgp3D_v11/cmake/run_expect.cmake:126 (message):",
+            "  ligne attendue ABSENTE de la sortie standard de la MEME execution :",
+            "  supports_route_verdict conforme k=5 n=32000 noeuds=1163756 boules=1690045",
+            "  supports=1690045 etendues=0 multiples=0 cellules=989861 graines=3165977",
+            "  fichier=6543988436d3d582 manifeste=751e5f52d5c1477e",
+            "  journal=c371678559b144d7 fils=1,4"
+          ],
+          "labels": [
+            "scale32000"
+          ],
+          "seconds": 214.67,
+          "state": "failed",
+          "test": "mhgp11_api_supports_route_scale32000"
+        }
+      ],
+      "logs": [
+        "matrix/gcc_asan_scale32000/LastTest.log",
+        "matrix/gcc_asan_scale32000/build.log",
+        "matrix/gcc_asan_scale32000/build_provenance.json",
+        "matrix/gcc_asan_scale32000/configure.log",
+        "matrix/gcc_asan_scale32000/ctest.log",
+        "matrix/gcc_asan_scale32000/junit.xml",
+        "matrix/gcc_asan_scale32000/sanitizer.log",
+        "matrix/gcc_asan_scale32000/tests.json"
+      ],
+      "name": "gcc_asan_scale32000",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "scale32000": 10
+      },
+      "reason": "1 porte(s) en echec",
+      "seconds": 1424.942,
+      "slowest": [
+        {
+          "seconds": 214.67,
+          "test": "mhgp11_api_supports_route_scale32000"
+        },
+        {
+          "seconds": 197.03,
+          "test": "mhgp11_cli_supports_scale32000"
+        },
+        {
+          "seconds": 151.39,
+          "test": "mhgp11_cli_full_identity_scale32000"
+        },
+        {
+          "seconds": 137.06,
+          "test": "mhgp11_points_scale32000"
+        },
+        {
+          "seconds": 100.69,
+          "test": "mhgp11_supports_registers_uniform32000_k5"
+        },
+        {
+          "seconds": 87.94,
+          "test": "mhgp11_plat_scale32000"
+        },
+        {
+          "seconds": 72.63,
+          "test": "mhgp11_catalogue_euler_scale32000"
+        },
+        {
+          "seconds": 69.1,
+          "test": "mhgp11_tower_attach_scale32000"
+        },
+        {
+          "seconds": 45.09,
+          "test": "mhgp11_tower_order_identity_scale32000"
+        },
+        {
+          "seconds": 22.18,
+          "test": "mhgp11_supports_hierarchy_scale32000"
+        }
+      ],
+      "started_epoch": 1791235116.846,
+      "started_utc": "2026-10-05T21:18:36Z",
+      "status": "failed",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_asan_scale32000/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_SANITIZE=ON",
+            "-DMHGP11_COORD_BITS=24"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.764,
+          "status": "ok",
+          "timeout_seconds": 2099.9
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_asan_scale32000/build",
+            "-j",
+            "4",
+            "--",
+            "-k"
+          ],
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 304.093,
+          "status": "ok",
+          "timeout_seconds": 2099.1
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-R",
+            "scale32000|uniform32000",
+            "-E",
+            "^mhgp11_reference_|_opt$"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "900",
+            "-j",
+            "4",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-R",
+            "scale32000|uniform32000",
+            "-E",
+            "^mhgp11_reference_|_opt$",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_asan_scale32000/junit.xml"
+          ],
+          "exit_code": 8,
+          "name": "test",
+          "seconds": 1119.928,
+          "status": "failed",
+          "timeout_seconds": 1795.0
+        }
+      ],
+      "tests": {
+        "ctest_failed": 1,
+        "ctest_total": 11,
+        "failed": 1,
+        "not_run": 0,
+        "passed": 10,
+        "selected": 11
+      },
+      "threads": 4,
+      "wrapper": []
+    },
+    {
+      "build_provenance": "matrix/gcc_asan_lidar_ng01_ng02/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_SANITIZE=ON",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": false,
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "lidar_ng01|lidar_ng02",
+        "-E",
+        "^mhgp11_reference_|_opt$"
+      ],
+      "description": "ASan+UBSan u24 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (noms contenant lidar_ng01|lidar_ng02), reunion des lots = toutes ces portes ; jumelles _opt exclues (meme commande native, seul le juge Python passe sous -O, qualifie en Release). Sessions B et claudequals du 5 octobre 2026.",
+      "failures": [
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "{\"route\":\"order_tree\",\"workers\":1,\"tree_ns\":3990196001,\"tree_peak\":228640202,\"attach_ns\":235651972,\"attach_peak\":0,\"output_ns\":390190707,\"output_peak\":253165690,\"write_ns\":376886357,\"write_peak\":250553566}",
+            "{\"route\":\"full_tower\",\"workers\":1,\"tree_ns\":6973536313,\"tree_peak\":328682814,\"attach_ns\":234739763,\"attach_peak\":0,\"output_ns\":366576088,\"output_peak\":253165690,\"write_ns\":384229097,\"write_peak\":250553566}",
+            "{\"route\":\"compute\",\"tree_peak\":328682814,\"order_tree_peak\":228640202,\"full_tower_peak\":328682814}",
+            "{\"route\":\"order_tree\",\"workers\":4,\"tree_ns\":1162404381,\"tree_peak\":229066814,\"attach_ns\":236543293,\"attach_peak\":0,\"output_ns\":154342626,\"output_peak\":253166566,\"write_ns\":376453208,\"write_peak\":250553566}",
+            "{\"route\":\"full_tower\",\"workers\":4,\"tree_ns\":1964206773,\"tree_peak\":329109426,\"attach_ns\":231628786,\"attach_peak\":0,\"output_ns\":145093608,\"output_peak\":253166566,\"write_ns\":384118785,\"write_peak\":250553566}",
+            "supports_route_verdict conforme k=5 n=35551 noeuds=478265 boules=652958 supports=652959 etendues=81 multiples=1 cellules=369751 graines=1102505 fichier=ac1fd4da1b693572 manifeste=12882c6a35b51bd3 journal=5e36f8ddbd2fb94c fils=1,4",
+            "run_expect_verdict ligne_absente",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/src/morsehgp3D_v11/cmake/run_expect.cmake:126 (message):",
+            "  ligne attendue ABSENTE de la sortie standard de la MEME execution :",
+            "  supports_route_verdict conforme k=5 n=35551 noeuds=478265 boules=652958",
+            "  supports=652959 etendues=81 multiples=1 cellules=369751 graines=1102505",
+            "  fichier=ed899fede2bbe761 manifeste=09d1d8c0070ab73a",
+            "  journal=5e36f8ddbd2fb94c fils=1,4"
+          ],
+          "labels": [
+            "lidar"
+          ],
+          "seconds": 105.3,
+          "state": "failed",
+          "test": "mhgp11_api_supports_route_lidar_ng01_k5"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "{\"route\":\"order_tree\",\"workers\":1,\"tree_ns\":4331854796,\"tree_peak\":275916113,\"attach_ns\":303579495,\"attach_peak\":0,\"output_ns\":474986532,\"output_peak\":311487130,\"write_ns\":498647491,\"write_peak\":308157014}",
+            "{\"route\":\"full_tower\",\"workers\":1,\"tree_ns\":7939019374,\"tree_peak\":405129389,\"attach_ns\":305892105,\"attach_peak\":0,\"output_ns\":471764192,\"output_peak\":311487130,\"write_ns\":497564021,\"write_peak\":308157014}",
+            "{\"route\":\"compute\",\"tree_peak\":405129389,\"order_tree_peak\":275916113,\"full_tower_peak\":405129389}",
+            "{\"route\":\"order_tree\",\"workers\":4,\"tree_ns\":2008739915,\"tree_peak\":276466253,\"attach_ns\":418019483,\"attach_peak\":0,\"output_ns\":235298136,\"output_peak\":311488846,\"write_ns\":515715001,\"write_peak\":308157014}",
+            "{\"route\":\"full_tower\",\"workers\":4,\"tree_ns\":2464586028,\"tree_peak\":405679529,\"attach_ns\":326445255,\"attach_peak\":0,\"output_ns\":204068436,\"output_peak\":311488846,\"write_ns\":501375582,\"write_peak\":308157014}",
+            "supports_route_verdict conforme k=5 n=45845 noeuds=609376 boules=832386 supports=832394 etendues=354 multiples=8 cellules=471060 graines=1393952 fichier=b66e1a9e116e56c7 manifeste=4963819ee6bcd867 journal=ec87f14da7adff77 fils=1,4",
+            "run_expect_verdict ligne_absente",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/src/morsehgp3D_v11/cmake/run_expect.cmake:126 (message):",
+            "  ligne attendue ABSENTE de la sortie standard de la MEME execution :",
+            "  supports_route_verdict conforme k=5 n=45845 noeuds=609376 boules=832386",
+            "  supports=832394 etendues=354 multiples=8 cellules=471060 graines=1393952",
+            "  fichier=28532835cc5915f8 manifeste=6b6d1ee970c80839",
+            "  journal=ec87f14da7adff77 fils=1,4"
+          ],
+          "labels": [
+            "lidar"
+          ],
+          "seconds": 126.1,
+          "state": "failed",
+          "test": "mhgp11_api_supports_route_lidar_ng02_k5"
+        }
+      ],
+      "logs": [
+        "matrix/gcc_asan_lidar_ng01_ng02/LastTest.log",
+        "matrix/gcc_asan_lidar_ng01_ng02/build.log",
+        "matrix/gcc_asan_lidar_ng01_ng02/build_provenance.json",
+        "matrix/gcc_asan_lidar_ng01_ng02/configure.log",
+        "matrix/gcc_asan_lidar_ng01_ng02/ctest.log",
+        "matrix/gcc_asan_lidar_ng01_ng02/junit.xml",
+        "matrix/gcc_asan_lidar_ng01_ng02/sanitizer.log",
+        "matrix/gcc_asan_lidar_ng01_ng02/tests.json"
+      ],
+      "name": "gcc_asan_lidar_ng01_ng02",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "lidar": 22
+      },
+      "reason": "2 porte(s) en echec",
+      "seconds": 1498.747,
+      "slowest": [
+        {
+          "seconds": 126.1,
+          "test": "mhgp11_api_supports_route_lidar_ng02_k5"
+        },
+        {
+          "seconds": 109.61,
+          "test": "mhgp11_cli_supports_lidar_ng02_k5"
+        },
+        {
+          "seconds": 105.3,
+          "test": "mhgp11_api_supports_route_lidar_ng01_k5"
+        },
+        {
+          "seconds": 98.03,
+          "test": "mhgp11_cli_full_identity_lidar_ng02_k5"
+        },
+        {
+          "seconds": 96.34,
+          "test": "mhgp11_cli_supports_lidar_ng01_k5"
+        },
+        {
+          "seconds": 80.36,
+          "test": "mhgp11_points_lidar_ng02_k5"
+        },
+        {
+          "seconds": 73.62,
+          "test": "mhgp11_cli_full_identity_lidar_ng01_k5"
+        },
+        {
+          "seconds": 71.5,
+          "test": "mhgp11_points_lidar_ng01_k5"
+        },
+        {
+          "seconds": 53.0,
+          "test": "mhgp11_supports_registers_lidar_ng02_k5"
+        },
+        {
+          "seconds": 51.83,
+          "test": "mhgp11_plat_lidar_ng02_k5"
+        }
+      ],
+      "started_epoch": 1791235116.846,
+      "started_utc": "2026-10-05T21:18:36Z",
+      "status": "failed",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_asan_lidar_ng01_ng02/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_SANITIZE=ON",
+            "-DMHGP11_COORD_BITS=24"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.764,
+          "status": "ok",
+          "timeout_seconds": 2099.9
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_asan_lidar_ng01_ng02/build",
+            "-j",
+            "4",
+            "--",
+            "-k"
+          ],
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 300.244,
+          "status": "ok",
+          "timeout_seconds": 2099.1
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-R",
+            "lidar_ng01|lidar_ng02",
+            "-E",
+            "^mhgp11_reference_|_opt$"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "900",
+            "-j",
+            "4",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-R",
+            "lidar_ng01|lidar_ng02",
+            "-E",
+            "^mhgp11_reference_|_opt$",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_asan_lidar_ng01_ng02/junit.xml"
+          ],
+          "exit_code": 8,
+          "name": "test",
+          "seconds": 1197.582,
+          "status": "failed",
+          "timeout_seconds": 1798.8
+        }
+      ],
+      "tests": {
+        "ctest_failed": 2,
+        "ctest_total": 24,
+        "failed": 2,
+        "not_run": 0,
+        "passed": 22,
+        "selected": 24
+      },
+      "threads": 4,
+      "wrapper": []
+    },
+    {
+      "build_provenance": "matrix/gcc_asan_scale16000/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_SANITIZE=ON",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": false,
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "scale16000|uniform16000",
+        "-E",
+        "^mhgp11_reference_|_opt$"
+      ],
+      "description": "ASan+UBSan u24 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (noms contenant scale16000|uniform16000), reunion des lots = toutes ces portes ; jumelles _opt exclues (meme commande native, seul le juge Python passe sous -O, qualifie en Release). Sessions B et claudequals du 5 octobre 2026.",
+      "failures": [
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "{\"route\":\"order_tree\",\"workers\":1,\"tree_ns\":7261098083,\"tree_peak\":267067294,\"attach_ns\":344474546,\"attach_peak\":0,\"output_ns\":381398265,\"output_peak\":306207208,\"write_ns\":479404704,\"write_peak\":302931108}",
+            "{\"route\":\"full_tower\",\"workers\":1,\"tree_ns\":10108720509,\"tree_peak\":367566854,\"attach_ns\":326431126,\"attach_peak\":0,\"output_ns\":371370526,\"output_peak\":306207208,\"write_ns\":490874484,\"write_peak\":302931108}",
+            "{\"route\":\"compute\",\"tree_peak\":367566854,\"order_tree_peak\":267067294,\"full_tower_peak\":367566854}",
+            "{\"route\":\"order_tree\",\"workers\":4,\"tree_ns\":2180173311,\"tree_peak\":267259294,\"attach_ns\":313677208,\"attach_peak\":0,\"output_ns\":209668848,\"output_peak\":306207460,\"write_ns\":478214586,\"write_peak\":302931108}",
+            "{\"route\":\"full_tower\",\"workers\":4,\"tree_ns\":2740072977,\"tree_peak\":367758854,\"attach_ns\":322927078,\"attach_peak\":0,\"output_ns\":207935298,\"output_peak\":306207460,\"write_ns\":476146316,\"write_peak\":302931108}",
+            "supports_route_verdict conforme k=5 n=16000 noeuds=565098 boules=819004 supports=819004 etendues=0 multiples=0 cellules=478947 graines=1530768 fichier=1716d15eb3a5afa4 manifeste=39af11215297416d journal=436d1354ae183486 fils=1,4",
+            "run_expect_verdict ligne_absente",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/src/morsehgp3D_v11/cmake/run_expect.cmake:126 (message):",
+            "  ligne attendue ABSENTE de la sortie standard de la MEME execution :",
+            "  supports_route_verdict conforme k=5 n=16000 noeuds=565098 boules=819004",
+            "  supports=819004 etendues=0 multiples=0 cellules=478947 graines=1530768",
+            "  fichier=dd524ffd991873eb manifeste=baa658ac05a8eee8",
+            "  journal=436d1354ae183486 fils=1,4"
+          ],
+          "labels": [
+            "scale16000"
+          ],
+          "seconds": 102.58,
+          "state": "failed",
+          "test": "mhgp11_api_supports_route_scale16000"
+        }
+      ],
+      "logs": [
+        "matrix/gcc_asan_scale16000/LastTest.log",
+        "matrix/gcc_asan_scale16000/build.log",
+        "matrix/gcc_asan_scale16000/build_provenance.json",
+        "matrix/gcc_asan_scale16000/configure.log",
+        "matrix/gcc_asan_scale16000/ctest.log",
+        "matrix/gcc_asan_scale16000/junit.xml",
+        "matrix/gcc_asan_scale16000/sanitizer.log",
+        "matrix/gcc_asan_scale16000/tests.json"
+      ],
+      "name": "gcc_asan_scale16000",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "scale16000": 9
+      },
+      "reason": "1 porte(s) en echec",
+      "seconds": 835.59,
+      "slowest": [
+        {
+          "seconds": 102.58,
+          "test": "mhgp11_api_supports_route_scale16000"
+        },
+        {
+          "seconds": 96.79,
+          "test": "mhgp11_cli_supports_scale16000"
+        },
+        {
+          "seconds": 76.29,
+          "test": "mhgp11_cli_full_identity_scale16000"
+        },
+        {
+          "seconds": 64.47,
+          "test": "mhgp11_points_scale16000"
+        },
+        {
+          "seconds": 49.97,
+          "test": "mhgp11_supports_registers_uniform16000_k5"
+        },
+        {
+          "seconds": 41.26,
+          "test": "mhgp11_plat_scale16000"
+        },
+        {
+          "seconds": 36.69,
+          "test": "mhgp11_tower_attach_scale16000"
+        },
+        {
+          "seconds": 33.62,
+          "test": "mhgp11_catalogue_euler_scale16000"
+        },
+        {
+          "seconds": 23.35,
+          "test": "mhgp11_tower_order_identity_scale16000"
+        },
+        {
+          "seconds": 9.17,
+          "test": "mhgp11_supports_hierarchy_scale16000"
+        }
+      ],
+      "started_epoch": 1791235116.846,
+      "started_utc": "2026-10-05T21:18:36Z",
+      "status": "failed",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_asan_scale16000/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_SANITIZE=ON",
+            "-DMHGP11_COORD_BITS=24"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.764,
+          "status": "ok",
+          "timeout_seconds": 2099.9
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_asan_scale16000/build",
+            "-j",
+            "4",
+            "--",
+            "-k"
+          ],
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 300.408,
+          "status": "ok",
+          "timeout_seconds": 2099.1
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-R",
+            "scale16000|uniform16000",
+            "-E",
+            "^mhgp11_reference_|_opt$"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "900",
+            "-j",
+            "4",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-R",
+            "scale16000|uniform16000",
+            "-E",
+            "^mhgp11_reference_|_opt$",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_asan_scale16000/junit.xml"
+          ],
+          "exit_code": 8,
+          "name": "test",
+          "seconds": 534.263,
+          "status": "failed",
+          "timeout_seconds": 1798.7
+        }
+      ],
+      "tests": {
+        "ctest_failed": 1,
+        "ctest_total": 10,
+        "failed": 1,
+        "not_run": 0,
+        "passed": 9,
+        "selected": 10
+      },
+      "threads": 4,
+      "wrapper": []
+    },
+    {
+      "build_provenance": "matrix/gcc_asan_scale_rest/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_SANITIZE=ON",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": false,
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-E",
+        "^mhgp11_reference_|_opt$|scale32000|uniform32000|lidar_ng01|lidar_ng02|scale16000|uniform16000"
+      ],
+      "description": "ASan+UBSan u24 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (reste des portes), reunion des lots = toutes ces portes ; jumelles _opt exclues (meme commande native, seul le juge Python passe sous -O, qualifie en Release). Sessions B et claudequals du 5 octobre 2026.",
+      "failures": [
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "{\"route\":\"order_tree\",\"workers\":1,\"tree_ns\":3024856432,\"tree_peak\":130072730,\"attach_ns\":138311566,\"attach_peak\":0,\"output_ns\":160317814,\"output_peak\":148568675,\"write_ns\":222445603,\"write_peak\":146985923}",
+            "{\"route\":\"full_tower\",\"workers\":1,\"tree_ns\":4409125387,\"tree_peak\":179009778,\"attach_ns\":137334705,\"attach_peak\":0,\"output_ns\":157541835,\"output_peak\":148568675,\"write_ns\":226705704,\"write_peak\":146985923}",
+            "{\"route\":\"compute\",\"tree_peak\":179009778,\"order_tree_peak\":130072730,\"full_tower_peak\":179009778}",
+            "{\"route\":\"order_tree\",\"workers\":4,\"tree_ns\":905242615,\"tree_peak\":130168730,\"attach_ns\":138240997,\"attach_peak\":0,\"output_ns\":93446779,\"output_peak\":148568927,\"write_ns\":226611166,\"write_peak\":146985923}",
+            "{\"route\":\"full_tower\",\"workers\":4,\"tree_ns\":1201875290,\"tree_peak\":179105778,\"attach_ns\":145551807,\"attach_peak\":0,\"output_ns\":70659739,\"output_peak\":148568927,\"write_ns\":228122596,\"write_peak\":146985923}",
+            "supports_route_verdict conforme k=5 n=8000 noeuds=273655 boules=395667 supports=395667 etendues=0 multiples=0 cellules=230825 graines=737362 fichier=8346120e7c4d1d69 manifeste=1079d104c5e64543 journal=a6c3b688a7fe1b4a fils=1,4",
+            "run_expect_verdict ligne_absente",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/src/morsehgp3D_v11/cmake/run_expect.cmake:126 (message):",
+            "  ligne attendue ABSENTE de la sortie standard de la MEME execution :",
+            "  supports_route_verdict conforme k=5 n=8000 noeuds=273655 boules=395667",
+            "  supports=395667 etendues=0 multiples=0 cellules=230825 graines=737362",
+            "  fichier=9b77614618bbdfc9 manifeste=d61003785c2ff158",
+            "  journal=a6c3b688a7fe1b4a fils=1,4"
+          ],
+          "labels": [
+            "scale8000"
+          ],
+          "seconds": 46.32,
+          "state": "failed",
+          "test": "mhgp11_api_supports_route_scale8000"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "{\"route\":\"order_tree\",\"workers\":1,\"tree_ns\":5648651063,\"tree_peak\":263839124,\"attach_ns\":295286615,\"attach_peak\":0,\"output_ns\":501412332,\"output_peak\":297640866,\"write_ns\":474892251,\"write_peak\":294480750}",
+            "{\"route\":\"full_tower\",\"workers\":1,\"tree_ns\":9500445397,\"tree_peak\":381612812,\"attach_ns\":295013145,\"attach_peak\":0,\"output_ns\":471116272,\"output_peak\":297640866,\"write_ns\":465992432,\"write_peak\":294480750}",
+            "{\"route\":\"compute\",\"tree_peak\":381612812,\"order_tree_peak\":263839124,\"full_tower_peak\":381612812}",
+            "{\"route\":\"order_tree\",\"workers\":4,\"tree_ns\":2164641000,\"tree_peak\":264317744,\"attach_ns\":301738193,\"attach_peak\":0,\"output_ns\":212708955,\"output_peak\":297642582,\"write_ns\":476201979,\"write_peak\":294480750}",
+            "{\"route\":\"full_tower\",\"workers\":4,\"tree_ns\":2589500820,\"tree_peak\":382091432,\"attach_ns\":297218833,\"attach_peak\":0,\"output_ns\":174383456,\"output_peak\":297642582,\"write_ns\":850801921,\"write_peak\":294480750}",
+            "supports_route_verdict conforme k=5 n=39885 noeuds=576371 boules=789886 supports=789889 etendues=141 multiples=3 cellules=448805 graines=1350288 fichier=4b781f21b6e9fd84 manifeste=0e13ef92eda96e3e journal=c189d5cd3ec3de66 fils=1,4",
+            "run_expect_verdict ligne_absente",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/src/morsehgp3D_v11/cmake/run_expect.cmake:126 (message):",
+            "  ligne attendue ABSENTE de la sortie standard de la MEME execution :",
+            "  supports_route_verdict conforme k=5 n=39885 noeuds=576371 boules=789886",
+            "  supports=789889 etendues=141 multiples=3 cellules=448805 graines=1350288",
+            "  fichier=830db973140e720d manifeste=7c119d733528e2d0",
+            "  journal=c189d5cd3ec3de66 fils=1,4"
+          ],
+          "labels": [
+            "lidar"
+          ],
+          "seconds": 138.42,
+          "state": "failed",
+          "test": "mhgp11_api_supports_route_lidar_ng00_k5"
+        }
+      ],
+      "logs": [
+        "matrix/gcc_asan_scale_rest/LastTest.log",
+        "matrix/gcc_asan_scale_rest/build.log",
+        "matrix/gcc_asan_scale_rest/build_provenance.json",
+        "matrix/gcc_asan_scale_rest/configure.log",
+        "matrix/gcc_asan_scale_rest/ctest.log",
+        "matrix/gcc_asan_scale_rest/junit.xml",
+        "matrix/gcc_asan_scale_rest/sanitizer.log",
+        "matrix/gcc_asan_scale_rest/tests.json"
+      ],
+      "name": "gcc_asan_scale_rest",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "fast": 1,
+        "lidar": 16,
+        "scale16000": 1,
+        "scale32000": 1,
+        "scale8000": 18
+      },
+      "reason": "2 porte(s) en echec",
+      "seconds": 1518.826,
+      "slowest": [
+        {
+          "seconds": 138.42,
+          "test": "mhgp11_api_supports_route_lidar_ng00_k5"
+        },
+        {
+          "seconds": 112.34,
+          "test": "mhgp11_cli_supports_lidar_ng00_k5"
+        },
+        {
+          "seconds": 88.86,
+          "test": "mhgp11_cli_full_identity_lidar_ng00_k5"
+        },
+        {
+          "seconds": 86.78,
+          "test": "mhgp11_cli_full_determinism_scale8000"
+        },
+        {
+          "seconds": 79.82,
+          "test": "mhgp11_points_lidar_ng00_k5"
+        },
+        {
+          "seconds": 61.63,
+          "test": "mhgp11_supports_registers_lidar_ng00_k5"
+        },
+        {
+          "seconds": 54.12,
+          "test": "mhgp11_plat_lidar_ng00_k5"
+        },
+        {
+          "seconds": 46.32,
+          "test": "mhgp11_api_supports_route_scale8000"
+        },
+        {
+          "seconds": 45.12,
+          "test": "mhgp11_cli_supports_scale8000"
+        },
+        {
+          "seconds": 43.84,
+          "test": "mhgp11_supports_sample_judge_lidar_ng00_k5"
+        }
+      ],
+      "started_epoch": 1791235116.847,
+      "started_utc": "2026-10-05T21:18:36Z",
+      "status": "failed",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_asan_scale_rest/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_SANITIZE=ON",
+            "-DMHGP11_COORD_BITS=24"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.764,
+          "status": "ok",
+          "timeout_seconds": 2099.9
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_asan_scale_rest/build",
+            "-j",
+            "4",
+            "--",
+            "-k"
+          ],
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 302.505,
+          "status": "ok",
+          "timeout_seconds": 2099.1
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-E",
+            "^mhgp11_reference_|_opt$|scale32000|uniform32000|lidar_ng01|lidar_ng02|scale16000|uniform16000"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "900",
+            "-j",
+            "4",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-E",
+            "^mhgp11_reference_|_opt$|scale32000|uniform32000|lidar_ng01|lidar_ng02|scale16000|uniform16000",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_asan_scale_rest/junit.xml"
+          ],
+          "exit_code": 8,
+          "name": "test",
+          "seconds": 1215.398,
+          "status": "failed",
+          "timeout_seconds": 1796.6
+        }
+      ],
+      "tests": {
+        "ctest_failed": 2,
+        "ctest_total": 35,
+        "failed": 2,
+        "not_run": 0,
+        "passed": 33,
+        "selected": 35
+      },
+      "threads": 4,
+      "wrapper": []
+    },
+    {
+      "build_provenance": "matrix/gcc_tsan_scale32000_cli/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": true,
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "cli_.*(scale32000|uniform32000)",
+        "-E",
+        "^mhgp11_reference_|_opt$"
+      ],
+      "description": "TSan u21 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (noms contenant cli_.*(scale32000|uniform32000)), reunion des lots = toutes ces portes ; jumelles _opt exclues (meme commande native, seul le juge Python passe sous -O, qualifie en Release). Sessions B et claudequals du 5 octobre 2026.",
+      "failures": [],
+      "logs": [
+        "matrix/gcc_tsan_scale32000_cli/LastTest.log",
+        "matrix/gcc_tsan_scale32000_cli/build.log",
+        "matrix/gcc_tsan_scale32000_cli/build_provenance.json",
+        "matrix/gcc_tsan_scale32000_cli/configure.log",
+        "matrix/gcc_tsan_scale32000_cli/ctest.log",
+        "matrix/gcc_tsan_scale32000_cli/junit.xml",
+        "matrix/gcc_tsan_scale32000_cli/sanitizer.log",
+        "matrix/gcc_tsan_scale32000_cli/tests.json"
+      ],
+      "name": "gcc_tsan_scale32000_cli",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "scale32000": 2
+      },
+      "reason": "",
+      "seconds": 900.486,
+      "slowest": [
+        {
+          "seconds": 454.47,
+          "test": "mhgp11_cli_supports_scale32000"
+        },
+        {
+          "seconds": 328.36,
+          "test": "mhgp11_cli_full_identity_scale32000"
+        }
+      ],
+      "started_epoch": 1791235116.847,
+      "started_utc": "2026-10-05T21:18:36Z",
+      "status": "ok",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_tsan_scale32000_cli/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_TSAN=ON",
+            "-DMHGP11_COORD_BITS=21"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.814,
+          "status": "ok",
+          "timeout_seconds": 2099.9
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_tsan_scale32000_cli/build",
+            "-j",
+            "4",
+            "--",
+            "-k"
+          ],
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 116.658,
+          "status": "ok",
+          "timeout_seconds": 2099.1
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-R",
+            "cli_.*(scale32000|uniform32000)",
+            "-E",
+            "^mhgp11_reference_|_opt$"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "setarch",
+            "x86_64",
+            "-R",
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "900",
+            "-j",
+            "4",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-R",
+            "cli_.*(scale32000|uniform32000)",
+            "-E",
+            "^mhgp11_reference_|_opt$",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_tsan_scale32000_cli/junit.xml"
+          ],
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 782.87,
+          "status": "ok",
+          "timeout_seconds": 1982.4
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 2,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 2,
+        "selected": 2
+      },
+      "threads": 4,
+      "wrapper": [
+        "setarch",
+        "x86_64",
+        "-R"
+      ]
+    },
+    {
+      "build_provenance": "matrix/gcc_tsan_scale32000/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": true,
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "scale32000|uniform32000",
+        "-E",
+        "^mhgp11_reference_|_opt$|cli_"
+      ],
+      "description": "TSan u21 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (noms contenant scale32000|uniform32000), reunion des lots = toutes ces portes ; jumelles _opt exclues (meme commande native, seul le juge Python passe sous -O, qualifie en Release). Sessions B et claudequals du 5 octobre 2026.",
+      "failures": [],
+      "logs": [
+        "matrix/gcc_tsan_scale32000/LastTest.log",
+        "matrix/gcc_tsan_scale32000/build.log",
+        "matrix/gcc_tsan_scale32000/build_provenance.json",
+        "matrix/gcc_tsan_scale32000/configure.log",
+        "matrix/gcc_tsan_scale32000/ctest.log",
+        "matrix/gcc_tsan_scale32000/junit.xml",
+        "matrix/gcc_tsan_scale32000/sanitizer.log",
+        "matrix/gcc_tsan_scale32000/tests.json"
+      ],
+      "name": "gcc_tsan_scale32000",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "scale32000": 9
+      },
+      "reason": "",
+      "seconds": 2030.291,
+      "slowest": [
+        {
+          "seconds": 492.65,
+          "test": "mhgp11_api_supports_route_scale32000"
+        },
+        {
+          "seconds": 367.95,
+          "test": "mhgp11_points_scale32000"
+        },
+        {
+          "seconds": 238.18,
+          "test": "mhgp11_supports_registers_uniform32000_k5"
+        },
+        {
+          "seconds": 207.92,
+          "test": "mhgp11_plat_scale32000"
+        },
+        {
+          "seconds": 193.11,
+          "test": "mhgp11_tower_attach_scale32000"
+        },
+        {
+          "seconds": 167.66,
+          "test": "mhgp11_catalogue_euler_scale32000"
+        },
+        {
+          "seconds": 135.27,
+          "test": "mhgp11_tower_order_identity_scale32000"
+        },
+        {
+          "seconds": 57.49,
+          "test": "mhgp11_tower_attach_e1e2_scale32000"
+        },
+        {
+          "seconds": 51.48,
+          "test": "mhgp11_supports_hierarchy_scale32000"
+        }
+      ],
+      "started_epoch": 1791235116.848,
+      "started_utc": "2026-10-05T21:18:36Z",
+      "status": "ok",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_tsan_scale32000/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_TSAN=ON",
+            "-DMHGP11_COORD_BITS=21"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.764,
+          "status": "ok",
+          "timeout_seconds": 2099.9
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_tsan_scale32000/build",
+            "-j",
+            "4",
+            "--",
+            "-k"
+          ],
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 117.612,
+          "status": "ok",
+          "timeout_seconds": 2099.1
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-R",
+            "scale32000|uniform32000",
+            "-E",
+            "^mhgp11_reference_|_opt$|cli_"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "setarch",
+            "x86_64",
+            "-R",
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "900",
+            "-j",
+            "4",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-R",
+            "scale32000|uniform32000",
+            "-E",
+            "^mhgp11_reference_|_opt$|cli_",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_tsan_scale32000/junit.xml"
+          ],
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 1911.773,
+          "status": "ok",
+          "timeout_seconds": 1981.5
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 9,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 9,
+        "selected": 9
+      },
+      "threads": 4,
+      "wrapper": [
+        "setarch",
+        "x86_64",
+        "-R"
+      ]
+    },
+    {
+      "build_provenance": "matrix/gcc_tsan_lidar_ng00/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": true,
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "lidar_ng00",
+        "-E",
+        "^mhgp11_reference_|_opt$"
+      ],
+      "description": "TSan u21 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (noms contenant lidar_ng00), reunion des lots = toutes ces portes ; jumelles _opt exclues (meme commande native, seul le juge Python passe sous -O, qualifie en Release). Sessions B et claudequals du 5 octobre 2026.",
+      "failures": [],
+      "logs": [
+        "matrix/gcc_tsan_lidar_ng00/LastTest.log",
+        "matrix/gcc_tsan_lidar_ng00/build.log",
+        "matrix/gcc_tsan_lidar_ng00/build_provenance.json",
+        "matrix/gcc_tsan_lidar_ng00/configure.log",
+        "matrix/gcc_tsan_lidar_ng00/ctest.log",
+        "matrix/gcc_tsan_lidar_ng00/junit.xml",
+        "matrix/gcc_tsan_lidar_ng00/sanitizer.log",
+        "matrix/gcc_tsan_lidar_ng00/tests.json"
+      ],
+      "name": "gcc_tsan_lidar_ng00",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "lidar": 13
+      },
+      "reason": "",
+      "seconds": 1774.432,
+      "slowest": [
+        {
+          "seconds": 318.32,
+          "test": "mhgp11_api_supports_route_lidar_ng00_k5"
+        },
+        {
+          "seconds": 256.51,
+          "test": "mhgp11_cli_supports_lidar_ng00_k5"
+        },
+        {
+          "seconds": 203.76,
+          "test": "mhgp11_points_lidar_ng00_k5"
+        },
+        {
+          "seconds": 150.24,
+          "test": "mhgp11_cli_full_identity_lidar_ng00_k5"
+        },
+        {
+          "seconds": 137.65,
+          "test": "mhgp11_supports_registers_lidar_ng00_k5"
+        },
+        {
+          "seconds": 121.99,
+          "test": "mhgp11_plat_lidar_ng00_k5"
+        },
+        {
+          "seconds": 113.51,
+          "test": "mhgp11_catalogue_euler_lidar_ng00_k5"
+        },
+        {
+          "seconds": 86.71,
+          "test": "mhgp11_supports_sample_judge_lidar_ng00_k5"
+        },
+        {
+          "seconds": 80.06,
+          "test": "mhgp11_tower_order_identity_lidar_ng00_k5"
+        },
+        {
+          "seconds": 76.0,
+          "test": "mhgp11_tower_attach_export_lidar_ng00_k5"
+        }
+      ],
+      "started_epoch": 1791235116.849,
+      "started_utc": "2026-10-05T21:18:36Z",
+      "status": "ok",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_tsan_lidar_ng00/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_TSAN=ON",
+            "-DMHGP11_COORD_BITS=21"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.764,
+          "status": "ok",
+          "timeout_seconds": 2099.9
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_tsan_lidar_ng00/build",
+            "-j",
+            "4",
+            "--",
+            "-k"
+          ],
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 117.711,
+          "status": "ok",
+          "timeout_seconds": 2099.1
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-R",
+            "lidar_ng00",
+            "-E",
+            "^mhgp11_reference_|_opt$"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "setarch",
+            "x86_64",
+            "-R",
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "900",
+            "-j",
+            "4",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-R",
+            "lidar_ng00",
+            "-E",
+            "^mhgp11_reference_|_opt$",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_tsan_lidar_ng00/junit.xml"
+          ],
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 1655.814,
+          "status": "ok",
+          "timeout_seconds": 1981.4
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 13,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 13,
+        "selected": 13
+      },
+      "threads": 4,
+      "wrapper": [
+        "setarch",
+        "x86_64",
+        "-R"
+      ]
+    },
+    {
+      "build_provenance": "matrix/gcc_tsan_lidar_ng01/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": true,
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "lidar_ng01",
+        "-E",
+        "^mhgp11_reference_|_opt$"
+      ],
+      "description": "TSan u21 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (noms contenant lidar_ng01), reunion des lots = toutes ces portes ; jumelles _opt exclues (meme commande native, seul le juge Python passe sous -O, qualifie en Release). Sessions B et claudequals du 5 octobre 2026.",
+      "failures": [],
+      "logs": [
+        "matrix/gcc_tsan_lidar_ng01/LastTest.log",
+        "matrix/gcc_tsan_lidar_ng01/build.log",
+        "matrix/gcc_tsan_lidar_ng01/build_provenance.json",
+        "matrix/gcc_tsan_lidar_ng01/configure.log",
+        "matrix/gcc_tsan_lidar_ng01/ctest.log",
+        "matrix/gcc_tsan_lidar_ng01/junit.xml",
+        "matrix/gcc_tsan_lidar_ng01/sanitizer.log",
+        "matrix/gcc_tsan_lidar_ng01/tests.json"
+      ],
+      "name": "gcc_tsan_lidar_ng01",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "lidar": 12
+      },
+      "reason": "",
+      "seconds": 1392.081,
+      "slowest": [
+        {
+          "seconds": 234.88,
+          "test": "mhgp11_api_supports_route_lidar_ng01_k5"
+        },
+        {
+          "seconds": 222.12,
+          "test": "mhgp11_cli_supports_lidar_ng01_k5"
+        },
+        {
+          "seconds": 165.51,
+          "test": "mhgp11_points_lidar_ng01_k5"
+        },
+        {
+          "seconds": 128.62,
+          "test": "mhgp11_cli_full_identity_lidar_ng01_k5"
+        },
+        {
+          "seconds": 107.41,
+          "test": "mhgp11_plat_lidar_ng01_k5"
+        },
+        {
+          "seconds": 102.52,
+          "test": "mhgp11_supports_registers_lidar_ng01_k5"
+        },
+        {
+          "seconds": 96.03,
+          "test": "mhgp11_catalogue_euler_lidar_ng01_k5"
+        },
+        {
+          "seconds": 64.9,
+          "test": "mhgp11_tower_order_identity_lidar_ng01_k5"
+        },
+        {
+          "seconds": 64.36,
+          "test": "mhgp11_tower_attach_export_lidar_ng01_k5"
+        },
+        {
+          "seconds": 32.7,
+          "test": "mhgp11_num_roots_cost_lidar_ng01_k5"
+        }
+      ],
+      "started_epoch": 1791235116.85,
+      "started_utc": "2026-10-05T21:18:36Z",
+      "status": "ok",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_tsan_lidar_ng01/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_TSAN=ON",
+            "-DMHGP11_COORD_BITS=21"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.764,
+          "status": "ok",
+          "timeout_seconds": 2099.9
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_tsan_lidar_ng01/build",
+            "-j",
+            "4",
+            "--",
+            "-k"
+          ],
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 116.916,
+          "status": "ok",
+          "timeout_seconds": 2099.1
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-R",
+            "lidar_ng01",
+            "-E",
+            "^mhgp11_reference_|_opt$"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "setarch",
+            "x86_64",
+            "-R",
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "900",
+            "-j",
+            "4",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-R",
+            "lidar_ng01",
+            "-E",
+            "^mhgp11_reference_|_opt$",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_tsan_lidar_ng01/junit.xml"
+          ],
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 1274.258,
+          "status": "ok",
+          "timeout_seconds": 1982.2
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 12,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 12,
+        "selected": 12
+      },
+      "threads": 4,
+      "wrapper": [
+        "setarch",
+        "x86_64",
+        "-R"
+      ]
+    },
+    {
+      "build_provenance": "matrix/gcc_tsan_lidar_ng02/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": true,
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "lidar_ng02",
+        "-E",
+        "^mhgp11_reference_|_opt$"
+      ],
+      "description": "TSan u21 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (noms contenant lidar_ng02), reunion des lots = toutes ces portes ; jumelles _opt exclues (meme commande native, seul le juge Python passe sous -O, qualifie en Release). Sessions B et claudequals du 5 octobre 2026.",
+      "failures": [],
+      "logs": [
+        "matrix/gcc_tsan_lidar_ng02/LastTest.log",
+        "matrix/gcc_tsan_lidar_ng02/build.log",
+        "matrix/gcc_tsan_lidar_ng02/build_provenance.json",
+        "matrix/gcc_tsan_lidar_ng02/configure.log",
+        "matrix/gcc_tsan_lidar_ng02/ctest.log",
+        "matrix/gcc_tsan_lidar_ng02/junit.xml",
+        "matrix/gcc_tsan_lidar_ng02/sanitizer.log",
+        "matrix/gcc_tsan_lidar_ng02/tests.json"
+      ],
+      "name": "gcc_tsan_lidar_ng02",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "lidar": 12
+      },
+      "reason": "",
+      "seconds": 1594.317,
+      "slowest": [
+        {
+          "seconds": 282.59,
+          "test": "mhgp11_api_supports_route_lidar_ng02_k5"
+        },
+        {
+          "seconds": 241.92,
+          "test": "mhgp11_cli_supports_lidar_ng02_k5"
+        },
+        {
+          "seconds": 197.98,
+          "test": "mhgp11_points_lidar_ng02_k5"
+        },
+        {
+          "seconds": 161.22,
+          "test": "mhgp11_cli_full_identity_lidar_ng02_k5"
+        },
+        {
+          "seconds": 121.28,
+          "test": "mhgp11_supports_registers_lidar_ng02_k5"
+        },
+        {
+          "seconds": 113.1,
+          "test": "mhgp11_plat_lidar_ng02_k5"
+        },
+        {
+          "seconds": 106.97,
+          "test": "mhgp11_catalogue_euler_lidar_ng02_k5"
+        },
+        {
+          "seconds": 77.45,
+          "test": "mhgp11_tower_order_identity_lidar_ng02_k5"
+        },
+        {
+          "seconds": 69.87,
+          "test": "mhgp11_tower_attach_export_lidar_ng02_k5"
+        },
+        {
+          "seconds": 37.32,
+          "test": "mhgp11_num_roots_cost_lidar_ng02_k5"
+        }
+      ],
+      "started_epoch": 1791235116.852,
+      "started_utc": "2026-10-05T21:18:36Z",
+      "status": "ok",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_tsan_lidar_ng02/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_TSAN=ON",
+            "-DMHGP11_COORD_BITS=21"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.764,
+          "status": "ok",
+          "timeout_seconds": 2099.9
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_tsan_lidar_ng02/build",
+            "-j",
+            "4",
+            "--",
+            "-k"
+          ],
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 115.467,
+          "status": "ok",
+          "timeout_seconds": 2099.1
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-R",
+            "lidar_ng02",
+            "-E",
+            "^mhgp11_reference_|_opt$"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "setarch",
+            "x86_64",
+            "-R",
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "900",
+            "-j",
+            "4",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-R",
+            "lidar_ng02",
+            "-E",
+            "^mhgp11_reference_|_opt$",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_tsan_lidar_ng02/junit.xml"
+          ],
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 1477.946,
+          "status": "ok",
+          "timeout_seconds": 1983.6
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 12,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 12,
+        "selected": 12
+      },
+      "threads": 4,
+      "wrapper": [
+        "setarch",
+        "x86_64",
+        "-R"
+      ]
+    },
+    {
+      "build_provenance": "matrix/gcc_tsan_scale16000/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": true,
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-R",
+        "scale16000|uniform16000",
+        "-E",
+        "^mhgp11_reference_|_opt$"
+      ],
+      "description": "TSan u21 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (noms contenant scale16000|uniform16000), reunion des lots = toutes ces portes ; jumelles _opt exclues (meme commande native, seul le juge Python passe sous -O, qualifie en Release). Sessions B et claudequals du 5 octobre 2026.",
+      "failures": [],
+      "logs": [
+        "matrix/gcc_tsan_scale16000/LastTest.log",
+        "matrix/gcc_tsan_scale16000/build.log",
+        "matrix/gcc_tsan_scale16000/build_provenance.json",
+        "matrix/gcc_tsan_scale16000/configure.log",
+        "matrix/gcc_tsan_scale16000/ctest.log",
+        "matrix/gcc_tsan_scale16000/junit.xml",
+        "matrix/gcc_tsan_scale16000/sanitizer.log",
+        "matrix/gcc_tsan_scale16000/tests.json"
+      ],
+      "name": "gcc_tsan_scale16000",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "scale16000": 10
+      },
+      "reason": "",
+      "seconds": 1397.914,
+      "slowest": [
+        {
+          "seconds": 235.61,
+          "test": "mhgp11_api_supports_route_scale16000"
+        },
+        {
+          "seconds": 227.34,
+          "test": "mhgp11_cli_supports_scale16000"
+        },
+        {
+          "seconds": 173.37,
+          "test": "mhgp11_points_scale16000"
+        },
+        {
+          "seconds": 134.7,
+          "test": "mhgp11_cli_full_identity_scale16000"
+        },
+        {
+          "seconds": 111.7,
+          "test": "mhgp11_supports_registers_uniform16000_k5"
+        },
+        {
+          "seconds": 106.45,
+          "test": "mhgp11_plat_scale16000"
+        },
+        {
+          "seconds": 103.31,
+          "test": "mhgp11_tower_attach_scale16000"
+        },
+        {
+          "seconds": 89.15,
+          "test": "mhgp11_catalogue_euler_scale16000"
+        },
+        {
+          "seconds": 71.26,
+          "test": "mhgp11_tower_order_identity_scale16000"
+        },
+        {
+          "seconds": 25.96,
+          "test": "mhgp11_supports_hierarchy_scale16000"
+        }
+      ],
+      "started_epoch": 1791235116.853,
+      "started_utc": "2026-10-05T21:18:36Z",
+      "status": "ok",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_tsan_scale16000/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_TSAN=ON",
+            "-DMHGP11_COORD_BITS=21"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.764,
+          "status": "ok",
+          "timeout_seconds": 2099.9
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_tsan_scale16000/build",
+            "-j",
+            "4",
+            "--",
+            "-k"
+          ],
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 118.082,
+          "status": "ok",
+          "timeout_seconds": 2099.1
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-R",
+            "scale16000|uniform16000",
+            "-E",
+            "^mhgp11_reference_|_opt$"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.067,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "setarch",
+            "x86_64",
+            "-R",
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "900",
+            "-j",
+            "4",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-R",
+            "scale16000|uniform16000",
+            "-E",
+            "^mhgp11_reference_|_opt$",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_tsan_scale16000/junit.xml"
+          ],
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 1278.924,
+          "status": "ok",
+          "timeout_seconds": 1981.0
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 10,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 10,
+        "selected": 10
+      },
+      "threads": 4,
+      "wrapper": [
+        "setarch",
+        "x86_64",
+        "-R"
+      ]
+    },
+    {
+      "build_provenance": "matrix/gcc_tsan_scale_rest/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": true,
+      "ctest_args": [
+        "-L",
+        "^(scale8000|scale16000|scale32000|lidar)$",
+        "-LE",
+        "^(mutant|long)$",
+        "-E",
+        "^mhgp11_reference_|_opt$|scale32000|uniform32000|scale16000|uniform16000|lidar_ng0[012]"
+      ],
+      "description": "TSan u21 : portes d'echelle et LiDAR seules (serie), lot disjoint par taille de nuage (reste des portes), reunion des lots = toutes ces portes ; jumelles _opt exclues (meme commande native, seul le juge Python passe sous -O, qualifie en Release). Sessions B et claudequals du 5 octobre 2026.",
+      "failures": [],
+      "logs": [
+        "matrix/gcc_tsan_scale_rest/LastTest.log",
+        "matrix/gcc_tsan_scale_rest/build.log",
+        "matrix/gcc_tsan_scale_rest/build_provenance.json",
+        "matrix/gcc_tsan_scale_rest/configure.log",
+        "matrix/gcc_tsan_scale_rest/ctest.log",
+        "matrix/gcc_tsan_scale_rest/junit.xml",
+        "matrix/gcc_tsan_scale_rest/sanitizer.log",
+        "matrix/gcc_tsan_scale_rest/tests.json"
+      ],
+      "name": "gcc_tsan_scale_rest",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "fast": 1,
+        "lidar": 4,
+        "scale16000": 1,
+        "scale32000": 1,
+        "scale8000": 19
+      },
+      "reason": "",
+      "seconds": 1413.247,
+      "slowest": [
+        {
+          "seconds": 181.48,
+          "test": "mhgp11_tower_attach_e1e2_scale8000"
+        },
+        {
+          "seconds": 130.63,
+          "test": "mhgp11_cli_full_determinism_scale8000"
+        },
+        {
+          "seconds": 112.36,
+          "test": "mhgp11_api_supports_route_scale8000"
+        },
+        {
+          "seconds": 110.13,
+          "test": "mhgp11_supports_registers_grid8000_k5"
+        },
+        {
+          "seconds": 109.25,
+          "test": "mhgp11_cli_supports_scale8000"
+        },
+        {
+          "seconds": 77.06,
+          "test": "mhgp11_points_scale8000"
+        },
+        {
+          "seconds": 72.3,
+          "test": "mhgp11_cli_full_identity_scale8000"
+        },
+        {
+          "seconds": 61.49,
+          "test": "mhgp11_supports_hierarchy_grid8000"
+        },
+        {
+          "seconds": 54.64,
+          "test": "mhgp11_num_roots_cost_uniform_u18_n32000_k5"
+        },
+        {
+          "seconds": 54.03,
+          "test": "mhgp11_supports_hierarchy_permutation_grid8000"
+        }
+      ],
+      "started_epoch": 1791235116.853,
+      "started_utc": "2026-10-05T21:18:36Z",
+      "status": "ok",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_tsan_scale_rest/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_TSAN=ON",
+            "-DMHGP11_COORD_BITS=21"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.764,
+          "status": "ok",
+          "timeout_seconds": 2099.9
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_tsan_scale_rest/build",
+            "-j",
+            "4",
+            "--",
+            "-k"
+          ],
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 117.606,
+          "status": "ok",
+          "timeout_seconds": 2099.1
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-E",
+            "^mhgp11_reference_|_opt$|scale32000|uniform32000|scale16000|uniform16000|lidar_ng0[012]"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.032,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "setarch",
+            "x86_64",
+            "-R",
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "900",
+            "-j",
+            "4",
+            "-L",
+            "^(scale8000|scale16000|scale32000|lidar)$",
+            "-LE",
+            "^(mutant|long)$",
+            "-E",
+            "^mhgp11_reference_|_opt$|scale32000|uniform32000|scale16000|uniform16000|lidar_ng0[012]",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/build/matrix/gcc_tsan_scale_rest/junit.xml"
+          ],
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 1294.768,
+          "status": "ok",
+          "timeout_seconds": 1981.5
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 22,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 22,
+        "selected": 22
+      },
+      "threads": 4,
+      "wrapper": [
+        "setarch",
+        "x86_64",
+        "-R"
+      ]
+    }
+  ],
+  "conforming": false,
+  "data_dir": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.zBxVA5V2vW/data",
+  "ended_utc": "2026-10-05T21:52:27Z",
+  "exit_code": 1,
+  "host": {
+    "clangxx": "absent",
+    "cmake": "cmake version 3.22.1",
+    "ctest": "ctest version 3.22.1",
+    "gxx": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+    "junit": true,
+    "nproc": 48,
+    "python": "3.10.12"
+  },
+  "requested": [
+    "gcc_asan_scale32000",
+    "gcc_asan_lidar_ng01_ng02",
+    "gcc_asan_scale16000",
+    "gcc_asan_scale_rest",
+    "gcc_tsan_scale32000_cli",
+    "gcc_tsan_scale32000",
+    "gcc_tsan_lidar_ng00",
+    "gcc_tsan_lidar_ng01",
+    "gcc_tsan_lidar_ng02",
+    "gcc_tsan_scale16000",
+    "gcc_tsan_scale_rest"
+  ],
+  "schema": "ehgp.v11.g4_matrix_summary.v1",
+  "signals": [],
+  "started_utc": "2026-10-05T21:18:36Z",
+  "statuses": {
+    "gcc_asan_lidar_ng01_ng02": "failed",
+    "gcc_asan_scale16000": "failed",
+    "gcc_asan_scale32000": "failed",
+    "gcc_asan_scale_rest": "failed",
+    "gcc_tsan_lidar_ng00": "ok",
+    "gcc_tsan_lidar_ng01": "ok",
+    "gcc_tsan_lidar_ng02": "ok",
+    "gcc_tsan_scale16000": "ok",
+    "gcc_tsan_scale32000": "ok",
+    "gcc_tsan_scale32000_cli": "ok",
+    "gcc_tsan_scale_rest": "ok"
+  },
+  "thread_budget": 48
+}

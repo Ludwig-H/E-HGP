@@ -1,0 +1,275 @@
+{
+  "budget_seconds": 2100,
+  "complete": true,
+  "configurations": [
+    {
+      "build_provenance": "matrix/mutants/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_MUTANT_JOBS={threads}",
+        "-DMHGP11_COORD_BITS=18"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": false,
+      "ctest_args": [
+        "-L",
+        "^mutant$"
+      ],
+      "description": "Portes de label mutant : manifestes, puis une campagne par manifeste ; le lanceur se parallelise lui-meme (MHGP11_MUTANT_JOBS = fils alloues).",
+      "failures": [
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "temoin [] : porte mhgp11_api_supports_route_scale8000 echec sans mutation (executee et passee attendue)",
+            "    | {\"route\":\"compute\",\"tree_peak\":164658090,\"order_tree_peak\":115721042,\"full_tower_peak\":164658090}",
+            "    | {\"route\":\"order_tree\",\"workers\":4,\"tree_ns\":317273941,\"tree_peak\":115817042,\"attach_ns\":32494528,\"attach_peak\":0,\"output_ns\":34173298,\"output_peak\":134217239,\"write_ns\":98752964,\"write_peak\":132634235}",
+            "    | {\"route\":\"full_tower\",\"workers\":4,\"tree_ns\":430464064,\"tree_peak\":164754090,\"attach_ns\":31676309,\"attach_peak\":0,\"output_ns\":35196127,\"output_peak\":134217239,\"write_ns\":97925515,\"write_peak\":132634235}",
+            "    | supports_route_verdict conforme k=5 n=8000 noeuds=273655 boules=395667 supports=395667 etendues=0 multiples=0 cellules=230825 graines=737362 fichier=09a1101bc512394e manifeste=e10e6c8d117429e3 journal=a6c3b688a7fe1b4a fils=1,4",
+            "    | run_expect_verdict ligne_absente",
+            "    | CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.lWstmGXCKs/build/matrix/mutants/build/mutants/api/temoin_0/src/cmake/run_expect.cmake:126 (message):",
+            "    |   ligne attendue ABSENTE de la sortie standard de la MEME execution :",
+            "    |   supports_route_verdict conforme k=5 n=8000 noeuds=273655 boules=395667",
+            "    |   supports=395667 etendues=0 multiples=0 cellules=230825 graines=737362",
+            "    |   fichier=9b77614618bbdfc9 manifeste=d61003785c2ff158",
+            "    |   journal=a6c3b688a7fe1b4a fils=1,4",
+            "    | ",
+            "    | ",
+            "    | ",
+            "    | ",
+            "    | 0% tests passed, 1 tests failed out of 1",
+            "    | ",
+            "    | Label Time Summary:",
+            "    | scale8000    =  11.52 sec*proc (1 test)",
+            "    | ",
+            "    | Total Test time (real) =  11.52 sec",
+            "    | ",
+            "    | The following tests FAILED:",
+            "    | \t 30 - mhgp11_api_supports_route_scale8000 (Failed)",
+            "    | Errors while running CTest",
+            "TEMOIN ROUGE module=api : aucun mutant juge",
+            "run_expect_verdict code",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.lWstmGXCKs/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):",
+            "  code de sortie 1, attendu 0"
+          ],
+          "labels": [
+            "long",
+            "mutant"
+          ],
+          "seconds": 19.26,
+          "state": "failed",
+          "test": "mhgp11_mutants_api"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "option_hors_sortie_admise                TUE      code",
+            "k_treize_admis                           TUE      code",
+            "budget_nul_admis                         TUE      code",
+            "budget_ignore                            TUE      code",
+            "fils_ignores                             TUE      code",
+            "entree_sur_sortie_standard_admise        TUE      code",
+            "sortie_standard_non_controlee            TUE      code",
+            "retrait_omis                             TUE      code",
+            "pas_non_recopie                          TUE      code",
+            "ecriture_full_permutee                   TUE      code",
+            "manifeste_taille_fausse                  TUE      code",
+            "plan_avant_sortie_standard               TUE      code",
+            "sortie_standard_entree_ids_seulement     TUE      code",
+            "stdout_lstat                             TUE      code",
+            "stdout_lecture_seule_admise              TUE      code",
+            "ligne_refus_sortie_toujours_full         TUE      code",
+            "sigxfsz_non_ignore                       TUE      code",
+            "etat_publie_omis                         TUE      code",
+            "refus_perdu_sortie_pleine                TUE      code",
+            "retrait_omis_double_echec                TUE      code",
+            "sp_colonnes_echangees                    TUE      code",
+            "sp_ordre_supports                        TUE      code",
+            "sp_branches_omises                       TUE      code",
+            "sp_signature_v1                          TUE      code",
+            "sp_manifeste_constant                    TUE      code",
+            "sp_signature_fichier                     TUE      code",
+            "sp_sortie_supports_comme_full            TUE      code",
+            "sp_masque_16379                          SURVIT   la porte mhgp11_cli_supports_oracle passe sur la copie mutee",
+            "SURVIVANTS module=cli : 1 sur 28",
+            "run_expect_verdict code",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.lWstmGXCKs/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):",
+            "  code de sortie 1, attendu 0"
+          ],
+          "labels": [
+            "long",
+            "mutant"
+          ],
+          "seconds": 134.67,
+          "state": "failed",
+          "test": "mhgp11_mutants_cli"
+        }
+      ],
+      "logs": [
+        "matrix/mutants/LastTest.log",
+        "matrix/mutants/build.log",
+        "matrix/mutants/build_provenance.json",
+        "matrix/mutants/configure.log",
+        "matrix/mutants/ctest.log",
+        "matrix/mutants/junit.xml",
+        "matrix/mutants/tests.json"
+      ],
+      "name": "mutants",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "fast": 26,
+        "long": 11,
+        "mutant": 37
+      },
+      "reason": "2 porte(s) en echec",
+      "seconds": 1643.91,
+      "slowest": [
+        {
+          "seconds": 873.63,
+          "test": "mhgp11_mutants_tower"
+        },
+        {
+          "seconds": 226.04,
+          "test": "mhgp11_mutants_catalogue"
+        },
+        {
+          "seconds": 134.67,
+          "test": "mhgp11_mutants_cli"
+        },
+        {
+          "seconds": 80.95,
+          "test": "mhgp11_mutants_num"
+        },
+        {
+          "seconds": 70.18,
+          "test": "mhgp11_mutants_head"
+        },
+        {
+          "seconds": 63.25,
+          "test": "mhgp11_mutants_supports"
+        },
+        {
+          "seconds": 62.35,
+          "test": "mhgp11_mutants_points"
+        },
+        {
+          "seconds": 45.97,
+          "test": "mhgp11_mutants_core"
+        },
+        {
+          "seconds": 19.71,
+          "test": "mhgp11_mutants_index"
+        },
+        {
+          "seconds": 19.26,
+          "test": "mhgp11_mutants_api"
+        }
+      ],
+      "started_epoch": 1791233197.991,
+      "started_utc": "2026-10-05T20:46:37Z",
+      "status": "failed",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.lWstmGXCKs/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.lWstmGXCKs/build/matrix/mutants/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_MUTANT_JOBS=32",
+            "-DMHGP11_COORD_BITS=18"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.714,
+          "status": "ok",
+          "timeout_seconds": 2100.0
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.lWstmGXCKs/build/matrix/mutants/build",
+            "-j",
+            "32",
+            "--",
+            "-k"
+          ],
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 13.768,
+          "status": "ok",
+          "timeout_seconds": 2099.3
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-L",
+            "^mutant$"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.032,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "1200",
+            "-j",
+            "1",
+            "-L",
+            "^mutant$",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.lWstmGXCKs/build/matrix/mutants/junit.xml"
+          ],
+          "exit_code": 8,
+          "name": "test",
+          "seconds": 1629.394,
+          "status": "failed",
+          "timeout_seconds": 2085.5
+        }
+      ],
+      "tests": {
+        "ctest_failed": 2,
+        "ctest_total": 39,
+        "failed": 2,
+        "not_run": 0,
+        "passed": 37,
+        "selected": 39
+      },
+      "threads": 32
+    }
+  ],
+  "conforming": false,
+  "data_dir": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.lWstmGXCKs/data",
+  "ended_utc": "2026-10-05T21:14:01Z",
+  "exit_code": 1,
+  "host": {
+    "clangxx": "absent",
+    "cmake": "cmake version 3.22.1",
+    "ctest": "ctest version 3.22.1",
+    "gxx": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+    "junit": true,
+    "nproc": 48,
+    "python": "3.10.12"
+  },
+  "requested": [
+    "mutants"
+  ],
+  "schema": "ehgp.v11.g4_matrix_summary.v1",
+  "signals": [],
+  "started_utc": "2026-10-05T20:46:37Z",
+  "statuses": {
+    "mutants": "failed"
+  },
+  "thread_budget": 48
+}

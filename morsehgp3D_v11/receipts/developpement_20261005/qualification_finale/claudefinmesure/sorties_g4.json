@@ -1,0 +1,2440 @@
+{
+ "schema": "ehgp.v11.sorties_g4.v1",
+ "phase": "exploration_v11_hors_registre",
+ "backend": "cpu_reference",
+ "public_status": "not_claimed",
+ "rule": "docs/SORTIES.md, paragraphe 11",
+ "engine_masks": {
+  "full": 16379,
+  "supports": 16379
+ },
+ "provenance": {
+  "commit": "b319efc84",
+  "cli_sha256": "206ea77a81c7c4201b37a5322743ab25bb0cf3a80b9c2a1e5e56010bd6eaa929",
+  "host": "ehgp-v7-3b1d496aed430749ea7e049f",
+  "machine": "x86_64",
+  "cpu_count": 48,
+  "python": "3.10.12",
+  "begin_utc": "2026-10-05T22:58:14Z",
+  "end_utc": "2026-10-05T23:03:26Z"
+ },
+ "configuration": {
+  "frames": [
+   "ng00",
+   "ng01",
+   "ng02"
+  ],
+  "k": 5,
+  "workers": [
+   1,
+   48
+  ],
+  "prises": 3,
+  "k10": "ng00",
+  "cold": "premier appel de la configuration, cache non vide"
+ },
+ "calls": [
+  {
+   "frame": "ng00",
+   "output": "full",
+   "k": 5,
+   "workers": 1,
+   "phase": "froid",
+   "prise": 0,
+   "ok": true,
+   "wall_ns": 11315598678,
+   "file_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+   "manifest_sha256": "aabd6491db9904bca6c4a6fed47a6b6a10e4a5376a8a88861ed1e63818c3dda5",
+   "file_bytes": 300883482,
+   "tree_k_sha256": "a4425cb5cedd255d86c90e706ef3ce66a72ce4a3ee227b06e5e85698859b7348",
+   "sites": 39885,
+   "stages_ns": {
+    "cloud": 3128392,
+    "index": 409391,
+    "domain": 5331859392,
+    "tree": 3810945497,
+    "attach": 0,
+    "output": 0,
+    "write": 2157055186,
+    "total": 11308637862
+   },
+   "peaks_bytes": {
+    "cloud": 2393108,
+    "index": 2410268,
+    "domain": 345352100,
+    "tree": 362777720,
+    "output": 243538564,
+    "write": 243538564
+   },
+   "counts": {
+    "nodes": 1541750,
+    "births": 897776,
+    "edges": 1541745
+   }
+  },
+  {
+   "frame": "ng00",
+   "output": "supports",
+   "k": 5,
+   "workers": 1,
+   "phase": "froid",
+   "prise": 0,
+   "ok": true,
+   "wall_ns": 9752035699,
+   "file_sha256": "830db973140e720d501ae49e8ccfb1cd86aa7df0f4ca5d39c1a9e3c533ce3921",
+   "manifest_sha256": "d7c3107b71b3fdac8655806d5928b868cb552991127bfd32bf9fd9cda123ccdc",
+   "file_bytes": 30837304,
+   "tree_k_sha256": "a4425cb5cedd255d86c90e706ef3ce66a72ce4a3ee227b06e5e85698859b7348",
+   "sites": 39885,
+   "stages_ns": {
+    "cloud": 3181273,
+    "index": 405640,
+    "domain": 5379826150,
+    "tree": 3865308180,
+    "attach": 74197588,
+    "output": 196493795,
+    "write": 218388242,
+    "total": 9743649522
+   },
+   "peaks_bytes": {
+    "cloud": 2393108,
+    "index": 2410268,
+    "domain": 345352100,
+    "tree": 373564764,
+    "output": 289592818,
+    "write": 286432702
+   },
+   "counts": {
+    "nodes": 576371,
+    "balls": 789886,
+    "supports": 789889,
+    "prior": 576483
+   }
+  },
+  {
+   "frame": "ng00",
+   "output": "full",
+   "k": 5,
+   "workers": 1,
+   "phase": "chaud",
+   "prise": 1,
+   "ok": true,
+   "wall_ns": 11401026981,
+   "file_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+   "manifest_sha256": "aabd6491db9904bca6c4a6fed47a6b6a10e4a5376a8a88861ed1e63818c3dda5",
+   "file_bytes": 300883482,
+   "tree_k_sha256": "a4425cb5cedd255d86c90e706ef3ce66a72ce4a3ee227b06e5e85698859b7348",
+   "sites": 39885,
+   "stages_ns": {
+    "cloud": 3253713,
+    "index": 403920,
+    "domain": 5320678306,
+    "tree": 3774336390,
+    "attach": 0,
+    "output": 0,
+    "write": 2290423382,
+    "total": 11393859688
+   },
+   "peaks_bytes": {
+    "cloud": 2393108,
+    "index": 2410268,
+    "domain": 345352100,
+    "tree": 362777720,
+    "output": 243538564,
+    "write": 243538564
+   },
+   "counts": {
+    "nodes": 1541750,
+    "births": 897776,
+    "edges": 1541745
+   }
+  },
+  {
+   "frame": "ng00",
+   "output": "supports",
+   "k": 5,
+   "workers": 1,
+   "phase": "chaud",
+   "prise": 1,
+   "ok": true,
+   "wall_ns": 9624029576,
+   "file_sha256": "830db973140e720d501ae49e8ccfb1cd86aa7df0f4ca5d39c1a9e3c533ce3921",
+   "manifest_sha256": "d7c3107b71b3fdac8655806d5928b868cb552991127bfd32bf9fd9cda123ccdc",
+   "file_bytes": 30837304,
+   "tree_k_sha256": "a4425cb5cedd255d86c90e706ef3ce66a72ce4a3ee227b06e5e85698859b7348",
+   "sites": 39885,
+   "stages_ns": {
+    "cloud": 3207681,
+    "index": 412548,
+    "domain": 5351822060,
+    "tree": 3776354593,
+    "attach": 72488279,
+    "output": 189886404,
+    "write": 216996778,
+    "total": 9616109595
+   },
+   "peaks_bytes": {
+    "cloud": 2393108,
+    "index": 2410268,
+    "domain": 345352100,
+    "tree": 373564764,
+    "output": 289592818,
+    "write": 286432702
+   },
+   "counts": {
+    "nodes": 576371,
+    "balls": 789886,
+    "supports": 789889,
+    "prior": 576483
+   }
+  },
+  {
+   "frame": "ng00",
+   "output": "full",
+   "k": 5,
+   "workers": 1,
+   "phase": "chaud",
+   "prise": 2,
+   "ok": true,
+   "wall_ns": 11263569249,
+   "file_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+   "manifest_sha256": "aabd6491db9904bca6c4a6fed47a6b6a10e4a5376a8a88861ed1e63818c3dda5",
+   "file_bytes": 300883482,
+   "tree_k_sha256": "a4425cb5cedd255d86c90e706ef3ce66a72ce4a3ee227b06e5e85698859b7348",
+   "sites": 39885,
+   "stages_ns": {
+    "cloud": 3181772,
+    "index": 408140,
+    "domain": 5328541785,
+    "tree": 3764915545,
+    "attach": 0,
+    "output": 0,
+    "write": 2154114871,
+    "total": 11256078186
+   },
+   "peaks_bytes": {
+    "cloud": 2393108,
+    "index": 2410268,
+    "domain": 345352100,
+    "tree": 362777720,
+    "output": 243538564,
+    "write": 243538564
+   },
+   "counts": {
+    "nodes": 1541750,
+    "births": 897776,
+    "edges": 1541745
+   }
+  },
+  {
+   "frame": "ng00",
+   "output": "supports",
+   "k": 5,
+   "workers": 1,
+   "phase": "chaud",
+   "prise": 2,
+   "ok": true,
+   "wall_ns": 9650509463,
+   "file_sha256": "830db973140e720d501ae49e8ccfb1cd86aa7df0f4ca5d39c1a9e3c533ce3921",
+   "manifest_sha256": "d7c3107b71b3fdac8655806d5928b868cb552991127bfd32bf9fd9cda123ccdc",
+   "file_bytes": 30837304,
+   "tree_k_sha256": "a4425cb5cedd255d86c90e706ef3ce66a72ce4a3ee227b06e5e85698859b7348",
+   "sites": 39885,
+   "stages_ns": {
+    "cloud": 3175372,
+    "index": 405190,
+    "domain": 5354698809,
+    "tree": 3802618616,
+    "attach": 72718160,
+    "output": 184912830,
+    "write": 218060459,
+    "total": 9641957529
+   },
+   "peaks_bytes": {
+    "cloud": 2393108,
+    "index": 2410268,
+    "domain": 345352100,
+    "tree": 373564764,
+    "output": 289592818,
+    "write": 286432702
+   },
+   "counts": {
+    "nodes": 576371,
+    "balls": 789886,
+    "supports": 789889,
+    "prior": 576483
+   }
+  },
+  {
+   "frame": "ng00",
+   "output": "full",
+   "k": 5,
+   "workers": 1,
+   "phase": "chaud",
+   "prise": 3,
+   "ok": true,
+   "wall_ns": 11251523522,
+   "file_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+   "manifest_sha256": "aabd6491db9904bca6c4a6fed47a6b6a10e4a5376a8a88861ed1e63818c3dda5",
+   "file_bytes": 300883482,
+   "tree_k_sha256": "a4425cb5cedd255d86c90e706ef3ce66a72ce4a3ee227b06e5e85698859b7348",
+   "sites": 39885,
+   "stages_ns": {
+    "cloud": 3325922,
+    "index": 410420,
+    "domain": 5326602544,
+    "tree": 3757087831,
+    "attach": 0,
+    "output": 0,
+    "write": 2152122139,
+    "total": 11244076319
+   },
+   "peaks_bytes": {
+    "cloud": 2393108,
+    "index": 2410268,
+    "domain": 345352100,
+    "tree": 362777720,
+    "output": 243538564,
+    "write": 243538564
+   },
+   "counts": {
+    "nodes": 1541750,
+    "births": 897776,
+    "edges": 1541745
+   }
+  },
+  {
+   "frame": "ng00",
+   "output": "supports",
+   "k": 5,
+   "workers": 1,
+   "phase": "chaud",
+   "prise": 3,
+   "ok": true,
+   "wall_ns": 9616537474,
+   "file_sha256": "830db973140e720d501ae49e8ccfb1cd86aa7df0f4ca5d39c1a9e3c533ce3921",
+   "manifest_sha256": "d7c3107b71b3fdac8655806d5928b868cb552991127bfd32bf9fd9cda123ccdc",
+   "file_bytes": 30837304,
+   "tree_k_sha256": "a4425cb5cedd255d86c90e706ef3ce66a72ce4a3ee227b06e5e85698859b7348",
+   "sites": 39885,
+   "stages_ns": {
+    "cloud": 3169011,
+    "index": 405241,
+    "domain": 5338597000,
+    "tree": 3777244092,
+    "attach": 72533479,
+    "output": 190889074,
+    "write": 220186430,
+    "total": 9607962830
+   },
+   "peaks_bytes": {
+    "cloud": 2393108,
+    "index": 2410268,
+    "domain": 345352100,
+    "tree": 373564764,
+    "output": 289592818,
+    "write": 286432702
+   },
+   "counts": {
+    "nodes": 576371,
+    "balls": 789886,
+    "supports": 789889,
+    "prior": 576483
+   }
+  },
+  {
+   "frame": "ng00",
+   "output": "full",
+   "k": 5,
+   "workers": 48,
+   "phase": "froid",
+   "prise": 0,
+   "ok": true,
+   "wall_ns": 2585378535,
+   "file_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+   "manifest_sha256": "aabd6491db9904bca6c4a6fed47a6b6a10e4a5376a8a88861ed1e63818c3dda5",
+   "file_bytes": 300883482,
+   "tree_k_sha256": "a4425cb5cedd255d86c90e706ef3ce66a72ce4a3ee227b06e5e85698859b7348",
+   "sites": 39885,
+   "stages_ns": {
+    "cloud": 3199332,
+    "index": 409930,
+    "domain": 217600658,
+    "tree": 185886641,
+    "attach": 0,
+    "output": 0,
+    "write": 2157304203,
+    "total": 2574718330
+   },
+   "peaks_bytes": {
+    "cloud": 2393108,
+    "index": 2410268,
+    "domain": 346607940,
+    "tree": 372019614,
+    "output": 243538564,
+    "write": 243538564
+   },
+   "counts": {
+    "nodes": 1541750,
+    "births": 897776,
+    "edges": 1541745
+   }
+  },
+  {
+   "frame": "ng00",
+   "output": "supports",
+   "k": 5,
+   "workers": 48,
+   "phase": "froid",
+   "prise": 0,
+   "ok": true,
+   "wall_ns": 746959546,
+   "file_sha256": "830db973140e720d501ae49e8ccfb1cd86aa7df0f4ca5d39c1a9e3c533ce3921",
+   "manifest_sha256": "d7c3107b71b3fdac8655806d5928b868cb552991127bfd32bf9fd9cda123ccdc",
+   "file_bytes": 30837304,
+   "tree_k_sha256": "a4425cb5cedd255d86c90e706ef3ce66a72ce4a3ee227b06e5e85698859b7348",
+   "sites": 39885,
+   "stages_ns": {
+    "cloud": 3193622,
+    "index": 409970,
+    "domain": 213830326,
+    "tree": 168106381,
+    "attach": 75120721,
+    "output": 44479334,
+    "write": 219978950,
+    "total": 738093701
+   },
+   "peaks_bytes": {
+    "cloud": 2393108,
+    "index": 2410268,
+    "domain": 346607940,
+    "tree": 382806502,
+    "output": 289619702,
+    "write": 286432702
+   },
+   "counts": {
+    "nodes": 576371,
+    "balls": 789886,
+    "supports": 789889,
+    "prior": 576483
+   }
+  },
+  {
+   "frame": "ng00",
+   "output": "full",
+   "k": 5,
+   "workers": 48,
+   "phase": "chaud",
+   "prise": 1,
+   "ok": true,
+   "wall_ns": 2568592670,
+   "file_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+   "manifest_sha256": "aabd6491db9904bca6c4a6fed47a6b6a10e4a5376a8a88861ed1e63818c3dda5",
+   "file_bytes": 300883482,
+   "tree_k_sha256": "a4425cb5cedd255d86c90e706ef3ce66a72ce4a3ee227b06e5e85698859b7348",
+   "sites": 39885,
+   "stages_ns": {
+    "cloud": 3172862,
+    "index": 409500,
+    "domain": 211134045,
+    "tree": 172929094,
+    "attach": 0,
+    "output": 0,
+    "write": 2162616220,
+    "total": 2560433519
+   },
+   "peaks_bytes": {
+    "cloud": 2393108,
+    "index": 2410268,
+    "domain": 346607940,
+    "tree": 372019458,
+    "output": 243538564,
+    "write": 243538564
+   },
+   "counts": {
+    "nodes": 1541750,
+    "births": 897776,
+    "edges": 1541745
+   }
+  },
+  {
+   "frame": "ng00",
+   "output": "supports",
+   "k": 5,
+   "workers": 48,
+   "phase": "chaud",
+   "prise": 1,
+   "ok": true,
+   "wall_ns": 742333759,
+   "file_sha256": "830db973140e720d501ae49e8ccfb1cd86aa7df0f4ca5d39c1a9e3c533ce3921",
+   "manifest_sha256": "d7c3107b71b3fdac8655806d5928b868cb552991127bfd32bf9fd9cda123ccdc",
+   "file_bytes": 30837304,
+   "tree_k_sha256": "a4425cb5cedd255d86c90e706ef3ce66a72ce4a3ee227b06e5e85698859b7348",
+   "sites": 39885,
+   "stages_ns": {
+    "cloud": 3205315,
+    "index": 408880,
+    "domain": 209303936,
+    "tree": 170875677,
+    "attach": 76370960,
+    "output": 40397197,
+    "write": 219735713,
+    "total": 733779221
+   },
+   "peaks_bytes": {
+    "cloud": 2393108,
+    "index": 2410268,
+    "domain": 346607940,
+    "tree": 382806658,
+    "output": 289619702,
+    "write": 286432702
+   },
+   "counts": {
+    "nodes": 576371,
+    "balls": 789886,
+    "supports": 789889,
+    "prior": 576483
+   }
+  },
+  {
+   "frame": "ng00",
+   "output": "full",
+   "k": 5,
+   "workers": 48,
+   "phase": "chaud",
+   "prise": 2,
+   "ok": true,
+   "wall_ns": 2592787093,
+   "file_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+   "manifest_sha256": "aabd6491db9904bca6c4a6fed47a6b6a10e4a5376a8a88861ed1e63818c3dda5",
+   "file_bytes": 300883482,
+   "tree_k_sha256": "a4425cb5cedd255d86c90e706ef3ce66a72ce4a3ee227b06e5e85698859b7348",
+   "sites": 39885,
+   "stages_ns": {
+    "cloud": 3168256,
+    "index": 404599,
+    "domain": 251394232,
+    "tree": 163586126,
+    "attach": 0,
+    "output": 0,
+    "write": 2155550634,
+    "total": 2584176564
+   },
+   "peaks_bytes": {
+    "cloud": 2393108,
+    "index": 2410268,
+    "domain": 346607940,
+    "tree": 372019458,
+    "output": 243538564,
+    "write": 243538564
+   },
+   "counts": {
+    "nodes": 1541750,
+    "births": 897776,
+    "edges": 1541745
+   }
+  },
+  {
+   "frame": "ng00",
+   "output": "supports",
+   "k": 5,
+   "workers": 48,
+   "phase": "chaud",
+   "prise": 2,
+   "ok": true,
+   "wall_ns": 744876386,
+   "file_sha256": "830db973140e720d501ae49e8ccfb1cd86aa7df0f4ca5d39c1a9e3c533ce3921",
+   "manifest_sha256": "d7c3107b71b3fdac8655806d5928b868cb552991127bfd32bf9fd9cda123ccdc",
+   "file_bytes": 30837304,
+   "tree_k_sha256": "a4425cb5cedd255d86c90e706ef3ce66a72ce4a3ee227b06e5e85698859b7348",
+   "sites": 39885,
+   "stages_ns": {
+    "cloud": 3292465,
+    "index": 406710,
+    "domain": 211333214,
+    "tree": 169730958,
+    "attach": 73922413,
+    "output": 45282321,
+    "write": 218549314,
+    "total": 735758238
+   },
+   "peaks_bytes": {
+    "cloud": 2393108,
+    "index": 2410268,
+    "domain": 346607940,
+    "tree": 382806658,
+    "output": 289619702,
+    "write": 286432702
+   },
+   "counts": {
+    "nodes": 576371,
+    "balls": 789886,
+    "supports": 789889,
+    "prior": 576483
+   }
+  },
+  {
+   "frame": "ng00",
+   "output": "full",
+   "k": 5,
+   "workers": 48,
+   "phase": "chaud",
+   "prise": 3,
+   "ok": true,
+   "wall_ns": 2569456209,
+   "file_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+   "manifest_sha256": "aabd6491db9904bca6c4a6fed47a6b6a10e4a5376a8a88861ed1e63818c3dda5",
+   "file_bytes": 300883482,
+   "tree_k_sha256": "a4425cb5cedd255d86c90e706ef3ce66a72ce4a3ee227b06e5e85698859b7348",
+   "sites": 39885,
+   "stages_ns": {
+    "cloud": 3192816,
+    "index": 407870,
+    "domain": 221623760,
+    "tree": 161792149,
+    "attach": 0,
+    "output": 0,
+    "write": 2162708801,
+    "total": 2560361102
+   },
+   "peaks_bytes": {
+    "cloud": 2393108,
+    "index": 2410268,
+    "domain": 346607940,
+    "tree": 372019614,
+    "output": 243538564,
+    "write": 243538564
+   },
+   "counts": {
+    "nodes": 1541750,
+    "births": 897776,
+    "edges": 1541745
+   }
+  },
+  {
+   "frame": "ng00",
+   "output": "supports",
+   "k": 5,
+   "workers": 48,
+   "phase": "chaud",
+   "prise": 3,
+   "ok": true,
+   "wall_ns": 784320136,
+   "file_sha256": "830db973140e720d501ae49e8ccfb1cd86aa7df0f4ca5d39c1a9e3c533ce3921",
+   "manifest_sha256": "d7c3107b71b3fdac8655806d5928b868cb552991127bfd32bf9fd9cda123ccdc",
+   "file_bytes": 30837304,
+   "tree_k_sha256": "a4425cb5cedd255d86c90e706ef3ce66a72ce4a3ee227b06e5e85698859b7348",
+   "sites": 39885,
+   "stages_ns": {
+    "cloud": 3175056,
+    "index": 414950,
+    "domain": 241759044,
+    "tree": 173168223,
+    "attach": 75414322,
+    "output": 48614796,
+    "write": 218076005,
+    "total": 774946828
+   },
+   "peaks_bytes": {
+    "cloud": 2393108,
+    "index": 2410268,
+    "domain": 346607940,
+    "tree": 382806502,
+    "output": 289619702,
+    "write": 286432702
+   },
+   "counts": {
+    "nodes": 576371,
+    "balls": 789886,
+    "supports": 789889,
+    "prior": 576483
+   }
+  },
+  {
+   "frame": "ng01",
+   "output": "full",
+   "k": 5,
+   "workers": 1,
+   "phase": "froid",
+   "prise": 0,
+   "ok": true,
+   "wall_ns": 8895415205,
+   "file_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+   "manifest_sha256": "f1421a7121ad110f5dde1bc805943a6e5ab4bc4b36007e5df30f27cd544aa699",
+   "file_bytes": 255161594,
+   "tree_k_sha256": "cb91a83cde409fccf4d179240c2df386ab5e340b01815e908256a30ca31c3f2e",
+   "sites": 35551,
+   "stages_ns": {
+    "cloud": 2915156,
+    "index": 348649,
+    "domain": 4275281003,
+    "tree": 2769358521,
+    "attach": 0,
+    "output": 0,
+    "write": 1837178999,
+    "total": 8888825173
+   },
+   "peaks_bytes": {
+    "cloud": 2133068,
+    "index": 2114532,
+    "domain": 293046256,
+    "tree": 312874754,
+    "output": 209452316,
+    "write": 209452316
+   },
+   "counts": {
+    "nodes": 1306721,
+    "births": 761726,
+    "edges": 1306716
+   }
+  },
+  {
+   "frame": "ng01",
+   "output": "supports",
+   "k": 5,
+   "workers": 1,
+   "phase": "froid",
+   "prise": 0,
+   "ok": true,
+   "wall_ns": 7448875655,
+   "file_sha256": "ed899fede2bbe76128d98b4aa334d61c642ef836c9f13d54941fd38e89a9233f",
+   "manifest_sha256": "e2a2bda5deae94bf5cabad0f0aaf7536b12478aa12672fee568d90eb3a755d85",
+   "file_bytes": 25503976,
+   "tree_k_sha256": "cb91a83cde409fccf4d179240c2df386ab5e340b01815e908256a30ca31c3f2e",
+   "sites": 35551,
+   "stages_ns": {
+    "cloud": 2891007,
+    "index": 340789,
+    "domain": 4256977127,
+    "tree": 2791841902,
+    "attach": 58818153,
+    "output": 152857540,
+    "write": 173910353,
+    "total": 7441451055
+   },
+   "peaks_bytes": {
+    "cloud": 2133068,
+    "index": 2114532,
+    "domain": 293046256,
+    "tree": 321721894,
+    "output": 246204770,
+    "write": 243592646
+   },
+   "counts": {
+    "nodes": 478265,
+    "balls": 652958,
+    "supports": 652959,
+    "prior": 478385
+   }
+  },
+  {
+   "frame": "ng01",
+   "output": "full",
+   "k": 5,
+   "workers": 1,
+   "phase": "chaud",
+   "prise": 1,
+   "ok": true,
+   "wall_ns": 8920696022,
+   "file_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+   "manifest_sha256": "f1421a7121ad110f5dde1bc805943a6e5ab4bc4b36007e5df30f27cd544aa699",
+   "file_bytes": 255161594,
+   "tree_k_sha256": "cb91a83cde409fccf4d179240c2df386ab5e340b01815e908256a30ca31c3f2e",
+   "sites": 35551,
+   "stages_ns": {
+    "cloud": 2886276,
+    "index": 346240,
+    "domain": 4269882835,
+    "tree": 2800549782,
+    "attach": 0,
+    "output": 0,
+    "write": 1837072691,
+    "total": 8914213423
+   },
+   "peaks_bytes": {
+    "cloud": 2133068,
+    "index": 2114532,
+    "domain": 293046256,
+    "tree": 312874754,
+    "output": 209452316,
+    "write": 209452316
+   },
+   "counts": {
+    "nodes": 1306721,
+    "births": 761726,
+    "edges": 1306716
+   }
+  },
+  {
+   "frame": "ng01",
+   "output": "supports",
+   "k": 5,
+   "workers": 1,
+   "phase": "chaud",
+   "prise": 1,
+   "ok": true,
+   "wall_ns": 7440099545,
+   "file_sha256": "ed899fede2bbe76128d98b4aa334d61c642ef836c9f13d54941fd38e89a9233f",
+   "manifest_sha256": "e2a2bda5deae94bf5cabad0f0aaf7536b12478aa12672fee568d90eb3a755d85",
+   "file_bytes": 25503976,
+   "tree_k_sha256": "cb91a83cde409fccf4d179240c2df386ab5e340b01815e908256a30ca31c3f2e",
+   "sites": 35551,
+   "stages_ns": {
+    "cloud": 2884730,
+    "index": 339460,
+    "domain": 4255848375,
+    "tree": 2784691622,
+    "attach": 58402368,
+    "output": 151873635,
+    "write": 174587305,
+    "total": 7432246405
+   },
+   "peaks_bytes": {
+    "cloud": 2133068,
+    "index": 2114532,
+    "domain": 293046256,
+    "tree": 321721894,
+    "output": 246204770,
+    "write": 243592646
+   },
+   "counts": {
+    "nodes": 478265,
+    "balls": 652958,
+    "supports": 652959,
+    "prior": 478385
+   }
+  },
+  {
+   "frame": "ng01",
+   "output": "full",
+   "k": 5,
+   "workers": 1,
+   "phase": "chaud",
+   "prise": 2,
+   "ok": true,
+   "wall_ns": 8889699329,
+   "file_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+   "manifest_sha256": "f1421a7121ad110f5dde1bc805943a6e5ab4bc4b36007e5df30f27cd544aa699",
+   "file_bytes": 255161594,
+   "tree_k_sha256": "cb91a83cde409fccf4d179240c2df386ab5e340b01815e908256a30ca31c3f2e",
+   "sites": 35551,
+   "stages_ns": {
+    "cloud": 2850920,
+    "index": 339880,
+    "domain": 4275602275,
+    "tree": 2765540802,
+    "attach": 0,
+    "output": 0,
+    "write": 1835499912,
+    "total": 8883330719
+   },
+   "peaks_bytes": {
+    "cloud": 2133068,
+    "index": 2114532,
+    "domain": 293046256,
+    "tree": 312874754,
+    "output": 209452316,
+    "write": 209452316
+   },
+   "counts": {
+    "nodes": 1306721,
+    "births": 761726,
+    "edges": 1306716
+   }
+  },
+  {
+   "frame": "ng01",
+   "output": "supports",
+   "k": 5,
+   "workers": 1,
+   "phase": "chaud",
+   "prise": 2,
+   "ok": true,
+   "wall_ns": 7455984015,
+   "file_sha256": "ed899fede2bbe76128d98b4aa334d61c642ef836c9f13d54941fd38e89a9233f",
+   "manifest_sha256": "e2a2bda5deae94bf5cabad0f0aaf7536b12478aa12672fee568d90eb3a755d85",
+   "file_bytes": 25503976,
+   "tree_k_sha256": "cb91a83cde409fccf4d179240c2df386ab5e340b01815e908256a30ca31c3f2e",
+   "sites": 35551,
+   "stages_ns": {
+    "cloud": 2799880,
+    "index": 340180,
+    "domain": 4260337976,
+    "tree": 2795827681,
+    "attach": 58771438,
+    "output": 153256706,
+    "write": 173965794,
+    "total": 7448652585
+   },
+   "peaks_bytes": {
+    "cloud": 2133068,
+    "index": 2114532,
+    "domain": 293046256,
+    "tree": 321721894,
+    "output": 246204770,
+    "write": 243592646
+   },
+   "counts": {
+    "nodes": 478265,
+    "balls": 652958,
+    "supports": 652959,
+    "prior": 478385
+   }
+  },
+  {
+   "frame": "ng01",
+   "output": "full",
+   "k": 5,
+   "workers": 1,
+   "phase": "chaud",
+   "prise": 3,
+   "ok": true,
+   "wall_ns": 8946125292,
+   "file_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+   "manifest_sha256": "f1421a7121ad110f5dde1bc805943a6e5ab4bc4b36007e5df30f27cd544aa699",
+   "file_bytes": 255161594,
+   "tree_k_sha256": "cb91a83cde409fccf4d179240c2df386ab5e340b01815e908256a30ca31c3f2e",
+   "sites": 35551,
+   "stages_ns": {
+    "cloud": 2822950,
+    "index": 341000,
+    "domain": 4302153644,
+    "tree": 2796834421,
+    "attach": 0,
+    "output": 0,
+    "write": 1835109898,
+    "total": 8940128162
+   },
+   "peaks_bytes": {
+    "cloud": 2133068,
+    "index": 2114532,
+    "domain": 293046256,
+    "tree": 312874754,
+    "output": 209452316,
+    "write": 209452316
+   },
+   "counts": {
+    "nodes": 1306721,
+    "births": 761726,
+    "edges": 1306716
+   }
+  },
+  {
+   "frame": "ng01",
+   "output": "supports",
+   "k": 5,
+   "workers": 1,
+   "phase": "chaud",
+   "prise": 3,
+   "ok": true,
+   "wall_ns": 7456958869,
+   "file_sha256": "ed899fede2bbe76128d98b4aa334d61c642ef836c9f13d54941fd38e89a9233f",
+   "manifest_sha256": "e2a2bda5deae94bf5cabad0f0aaf7536b12478aa12672fee568d90eb3a755d85",
+   "file_bytes": 25503976,
+   "tree_k_sha256": "cb91a83cde409fccf4d179240c2df386ab5e340b01815e908256a30ca31c3f2e",
+   "sites": 35551,
+   "stages_ns": {
+    "cloud": 2828930,
+    "index": 339090,
+    "domain": 4267687123,
+    "tree": 2790287248,
+    "attach": 58631854,
+    "output": 152086934,
+    "write": 173851291,
+    "total": 7449227510
+   },
+   "peaks_bytes": {
+    "cloud": 2133068,
+    "index": 2114532,
+    "domain": 293046256,
+    "tree": 321721894,
+    "output": 246204770,
+    "write": 243592646
+   },
+   "counts": {
+    "nodes": 478265,
+    "balls": 652958,
+    "supports": 652959,
+    "prior": 478385
+   }
+  },
+  {
+   "frame": "ng01",
+   "output": "full",
+   "k": 5,
+   "workers": 48,
+   "phase": "froid",
+   "prise": 0,
+   "ok": true,
+   "wall_ns": 2170029223,
+   "file_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+   "manifest_sha256": "f1421a7121ad110f5dde1bc805943a6e5ab4bc4b36007e5df30f27cd544aa699",
+   "file_bytes": 255161594,
+   "tree_k_sha256": "cb91a83cde409fccf4d179240c2df386ab5e340b01815e908256a30ca31c3f2e",
+   "sites": 35551,
+   "stages_ns": {
+    "cloud": 2855840,
+    "index": 353880,
+    "domain": 206427998,
+    "tree": 125396637,
+    "attach": 0,
+    "output": 0,
+    "write": 1816847590,
+    "total": 2160617725
+   },
+   "peaks_bytes": {
+    "cloud": 2133068,
+    "index": 2114532,
+    "domain": 294302096,
+    "tree": 321082450,
+    "output": 209452316,
+    "write": 209452316
+   },
+   "counts": {
+    "nodes": 1306721,
+    "births": 761726,
+    "edges": 1306716
+   }
+  },
+  {
+   "frame": "ng01",
+   "output": "supports",
+   "k": 5,
+   "workers": 48,
+   "phase": "froid",
+   "prise": 0,
+   "ok": true,
+   "wall_ns": 613153716,
+   "file_sha256": "ed899fede2bbe76128d98b4aa334d61c642ef836c9f13d54941fd38e89a9233f",
+   "manifest_sha256": "e2a2bda5deae94bf5cabad0f0aaf7536b12478aa12672fee568d90eb3a755d85",
+   "file_bytes": 25503976,
+   "tree_k_sha256": "cb91a83cde409fccf4d179240c2df386ab5e340b01815e908256a30ca31c3f2e",
+   "sites": 35551,
+   "stages_ns": {
+    "cloud": 2847889,
+    "index": 342970,
+    "domain": 185950691,
+    "tree": 138631315,
+    "attach": 61179724,
+    "output": 33829226,
+    "write": 169768753,
+    "total": 604943866
+   },
+   "peaks_bytes": {
+    "cloud": 2133068,
+    "index": 2114532,
+    "domain": 294302096,
+    "tree": 329929642,
+    "output": 246218494,
+    "write": 243592646
+   },
+   "counts": {
+    "nodes": 478265,
+    "balls": 652958,
+    "supports": 652959,
+    "prior": 478385
+   }
+  },
+  {
+   "frame": "ng01",
+   "output": "full",
+   "k": 5,
+   "workers": 48,
+   "phase": "chaud",
+   "prise": 1,
+   "ok": true,
+   "wall_ns": 2160527443,
+   "file_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+   "manifest_sha256": "f1421a7121ad110f5dde1bc805943a6e5ab4bc4b36007e5df30f27cd544aa699",
+   "file_bytes": 255161594,
+   "tree_k_sha256": "cb91a83cde409fccf4d179240c2df386ab5e340b01815e908256a30ca31c3f2e",
+   "sites": 35551,
+   "stages_ns": {
+    "cloud": 2845259,
+    "index": 350560,
+    "domain": 179856661,
+    "tree": 141417746,
+    "attach": 0,
+    "output": 0,
+    "write": 1818651319,
+    "total": 2152368104
+   },
+   "peaks_bytes": {
+    "cloud": 2133068,
+    "index": 2114532,
+    "domain": 294302096,
+    "tree": 321082398,
+    "output": 209452316,
+    "write": 209452316
+   },
+   "counts": {
+    "nodes": 1306721,
+    "births": 761726,
+    "edges": 1306716
+   }
+  },
+  {
+   "frame": "ng01",
+   "output": "supports",
+   "k": 5,
+   "workers": 48,
+   "phase": "chaud",
+   "prise": 1,
+   "ok": true,
+   "wall_ns": 635128033,
+   "file_sha256": "ed899fede2bbe76128d98b4aa334d61c642ef836c9f13d54941fd38e89a9233f",
+   "manifest_sha256": "e2a2bda5deae94bf5cabad0f0aaf7536b12478aa12672fee568d90eb3a755d85",
+   "file_bytes": 25503976,
+   "tree_k_sha256": "cb91a83cde409fccf4d179240c2df386ab5e340b01815e908256a30ca31c3f2e",
+   "sites": 35551,
+   "stages_ns": {
+    "cloud": 2951950,
+    "index": 341830,
+    "domain": 197632969,
+    "tree": 142210346,
+    "attach": 60741873,
+    "output": 39404076,
+    "write": 170298762,
+    "total": 626344834
+   },
+   "peaks_bytes": {
+    "cloud": 2133068,
+    "index": 2114532,
+    "domain": 294302096,
+    "tree": 329929590,
+    "output": 246218494,
+    "write": 243592646
+   },
+   "counts": {
+    "nodes": 478265,
+    "balls": 652958,
+    "supports": 652959,
+    "prior": 478385
+   }
+  },
+  {
+   "frame": "ng01",
+   "output": "full",
+   "k": 5,
+   "workers": 48,
+   "phase": "chaud",
+   "prise": 2,
+   "ok": true,
+   "wall_ns": 2134893706,
+   "file_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+   "manifest_sha256": "f1421a7121ad110f5dde1bc805943a6e5ab4bc4b36007e5df30f27cd544aa699",
+   "file_bytes": 255161594,
+   "tree_k_sha256": "cb91a83cde409fccf4d179240c2df386ab5e340b01815e908256a30ca31c3f2e",
+   "sites": 35551,
+   "stages_ns": {
+    "cloud": 2834660,
+    "index": 340930,
+    "domain": 174500401,
+    "tree": 118400858,
+    "attach": 0,
+    "output": 0,
+    "write": 1820411819,
+    "total": 2126030767
+   },
+   "peaks_bytes": {
+    "cloud": 2133068,
+    "index": 2114532,
+    "domain": 294302096,
+    "tree": 321082450,
+    "output": 209452316,
+    "write": 209452316
+   },
+   "counts": {
+    "nodes": 1306721,
+    "births": 761726,
+    "edges": 1306716
+   }
+  },
+  {
+   "frame": "ng01",
+   "output": "supports",
+   "k": 5,
+   "workers": 48,
+   "phase": "chaud",
+   "prise": 2,
+   "ok": true,
+   "wall_ns": 609303176,
+   "file_sha256": "ed899fede2bbe76128d98b4aa334d61c642ef836c9f13d54941fd38e89a9233f",
+   "manifest_sha256": "e2a2bda5deae94bf5cabad0f0aaf7536b12478aa12672fee568d90eb3a755d85",
+   "file_bytes": 25503976,
+   "tree_k_sha256": "cb91a83cde409fccf4d179240c2df386ab5e340b01815e908256a30ca31c3f2e",
+   "sites": 35551,
+   "stages_ns": {
+    "cloud": 2830999,
+    "index": 351260,
+    "domain": 176721782,
+    "tree": 139025005,
+    "attach": 61488004,
+    "output": 35405166,
+    "write": 171297552,
+    "total": 600646987
+   },
+   "peaks_bytes": {
+    "cloud": 2133068,
+    "index": 2114532,
+    "domain": 294302096,
+    "tree": 329929590,
+    "output": 246218494,
+    "write": 243592646
+   },
+   "counts": {
+    "nodes": 478265,
+    "balls": 652958,
+    "supports": 652959,
+    "prior": 478385
+   }
+  },
+  {
+   "frame": "ng01",
+   "output": "full",
+   "k": 5,
+   "workers": 48,
+   "phase": "chaud",
+   "prise": 3,
+   "ok": true,
+   "wall_ns": 2168908004,
+   "file_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+   "manifest_sha256": "f1421a7121ad110f5dde1bc805943a6e5ab4bc4b36007e5df30f27cd544aa699",
+   "file_bytes": 255161594,
+   "tree_k_sha256": "cb91a83cde409fccf4d179240c2df386ab5e340b01815e908256a30ca31c3f2e",
+   "sites": 35551,
+   "stages_ns": {
+    "cloud": 2871200,
+    "index": 351680,
+    "domain": 185431370,
+    "tree": 139189856,
+    "attach": 0,
+    "output": 0,
+    "write": 1822937300,
+    "total": 2160264275
+   },
+   "peaks_bytes": {
+    "cloud": 2133068,
+    "index": 2114532,
+    "domain": 294302096,
+    "tree": 321082450,
+    "output": 209452316,
+    "write": 209452316
+   },
+   "counts": {
+    "nodes": 1306721,
+    "births": 761726,
+    "edges": 1306716
+   }
+  },
+  {
+   "frame": "ng01",
+   "output": "supports",
+   "k": 5,
+   "workers": 48,
+   "phase": "chaud",
+   "prise": 3,
+   "ok": true,
+   "wall_ns": 602892567,
+   "file_sha256": "ed899fede2bbe76128d98b4aa334d61c642ef836c9f13d54941fd38e89a9233f",
+   "manifest_sha256": "e2a2bda5deae94bf5cabad0f0aaf7536b12478aa12672fee568d90eb3a755d85",
+   "file_bytes": 25503976,
+   "tree_k_sha256": "cb91a83cde409fccf4d179240c2df386ab5e340b01815e908256a30ca31c3f2e",
+   "sites": 35551,
+   "stages_ns": {
+    "cloud": 2859460,
+    "index": 341390,
+    "domain": 188240340,
+    "tree": 119295227,
+    "attach": 61358304,
+    "output": 37700736,
+    "write": 170354722,
+    "total": 593893398
+   },
+   "peaks_bytes": {
+    "cloud": 2133068,
+    "index": 2114532,
+    "domain": 294302096,
+    "tree": 329929590,
+    "output": 246218494,
+    "write": 243592646
+   },
+   "counts": {
+    "nodes": 478265,
+    "balls": 652958,
+    "supports": 652959,
+    "prior": 478385
+   }
+  },
+  {
+   "frame": "ng02",
+   "output": "full",
+   "k": 5,
+   "workers": 1,
+   "phase": "froid",
+   "prise": 0,
+   "ok": true,
+   "wall_ns": 10757321074,
+   "file_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+   "manifest_sha256": "78fd1636271ffe790096251dfdb05cb41faeadd7a322ccd0172c9433ab9f9d3d",
+   "file_bytes": 328855058,
+   "tree_k_sha256": "40b01e8514109ab8e0b3b717161f1f05698193eadc4f097d3aa832a607832229",
+   "sites": 45845,
+   "stages_ns": {
+    "cloud": 3768370,
+    "index": 407230,
+    "domain": 5127605473,
+    "tree": 3251230559,
+    "attach": 0,
+    "output": 0,
+    "write": 2362346834,
+    "total": 10748485295
+   },
+   "peaks_bytes": {
+    "cloud": 2750708,
+    "index": 2672508,
+    "domain": 369841748,
+    "tree": 385837217,
+    "output": 257430652,
+    "write": 257430652
+   },
+   "counts": {
+    "nodes": 1683088,
+    "births": 982670,
+    "edges": 1683083
+   }
+  },
+  {
+   "frame": "ng02",
+   "output": "supports",
+   "k": 5,
+   "workers": 1,
+   "phase": "froid",
+   "prise": 0,
+   "ok": true,
+   "wall_ns": 8915079686,
+   "file_sha256": "28532835cc5915f81f94eec3eed367479ed1312addae86740da5eefbd43363bb",
+   "manifest_sha256": "dd37ab7a382bd1eeef96f6d0345b68860b52cc3e74787f8c59382361cb065b2b",
+   "file_bytes": 32463880,
+   "tree_k_sha256": "40b01e8514109ab8e0b3b717161f1f05698193eadc4f097d3aa832a607832229",
+   "sites": 45845,
+   "stages_ns": {
+    "cloud": 3657129,
+    "index": 408070,
+    "domain": 5143636932,
+    "tree": 3257986919,
+    "attach": 76646982,
+    "output": 184832660,
+    "write": 234702696,
+    "total": 8906439197
+   },
+   "peaks_bytes": {
+    "cloud": 2750708,
+    "index": 2672508,
+    "domain": 369841748,
+    "tree": 397066253,
+    "output": 303423994,
+    "write": 300093878
+   },
+   "counts": {
+    "nodes": 609376,
+    "balls": 832386,
+    "supports": 832394,
+    "prior": 610022
+   }
+  },
+  {
+   "frame": "ng02",
+   "output": "full",
+   "k": 5,
+   "workers": 1,
+   "phase": "chaud",
+   "prise": 1,
+   "ok": true,
+   "wall_ns": 10731971276,
+   "file_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+   "manifest_sha256": "78fd1636271ffe790096251dfdb05cb41faeadd7a322ccd0172c9433ab9f9d3d",
+   "file_bytes": 328855058,
+   "tree_k_sha256": "40b01e8514109ab8e0b3b717161f1f05698193eadc4f097d3aa832a607832229",
+   "sites": 45845,
+   "stages_ns": {
+    "cloud": 3624159,
+    "index": 413760,
+    "domain": 5110199595,
+    "tree": 3239218861,
+    "attach": 0,
+    "output": 0,
+    "write": 2360210303,
+    "total": 10719457208
+   },
+   "peaks_bytes": {
+    "cloud": 2750708,
+    "index": 2672508,
+    "domain": 369841748,
+    "tree": 385837217,
+    "output": 257430652,
+    "write": 257430652
+   },
+   "counts": {
+    "nodes": 1683088,
+    "births": 982670,
+    "edges": 1683083
+   }
+  },
+  {
+   "frame": "ng02",
+   "output": "supports",
+   "k": 5,
+   "workers": 1,
+   "phase": "chaud",
+   "prise": 1,
+   "ok": true,
+   "wall_ns": 8918149306,
+   "file_sha256": "28532835cc5915f81f94eec3eed367479ed1312addae86740da5eefbd43363bb",
+   "manifest_sha256": "dd37ab7a382bd1eeef96f6d0345b68860b52cc3e74787f8c59382361cb065b2b",
+   "file_bytes": 32463880,
+   "tree_k_sha256": "40b01e8514109ab8e0b3b717161f1f05698193eadc4f097d3aa832a607832229",
+   "sites": 45845,
+   "stages_ns": {
+    "cloud": 3652260,
+    "index": 410010,
+    "domain": 5141051332,
+    "tree": 3260218508,
+    "attach": 77886942,
+    "output": 186001881,
+    "write": 234980495,
+    "total": 8909149647
+   },
+   "peaks_bytes": {
+    "cloud": 2750708,
+    "index": 2672508,
+    "domain": 369841748,
+    "tree": 397066253,
+    "output": 303423994,
+    "write": 300093878
+   },
+   "counts": {
+    "nodes": 609376,
+    "balls": 832386,
+    "supports": 832394,
+    "prior": 610022
+   }
+  },
+  {
+   "frame": "ng02",
+   "output": "full",
+   "k": 5,
+   "workers": 1,
+   "phase": "chaud",
+   "prise": 2,
+   "ok": true,
+   "wall_ns": 10693378140,
+   "file_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+   "manifest_sha256": "78fd1636271ffe790096251dfdb05cb41faeadd7a322ccd0172c9433ab9f9d3d",
+   "file_bytes": 328855058,
+   "tree_k_sha256": "40b01e8514109ab8e0b3b717161f1f05698193eadc4f097d3aa832a607832229",
+   "sites": 45845,
+   "stages_ns": {
+    "cloud": 3639690,
+    "index": 407930,
+    "domain": 5092854847,
+    "tree": 3220594731,
+    "attach": 0,
+    "output": 0,
+    "write": 2363554114,
+    "total": 10684269001
+   },
+   "peaks_bytes": {
+    "cloud": 2750708,
+    "index": 2672508,
+    "domain": 369841748,
+    "tree": 385837217,
+    "output": 257430652,
+    "write": 257430652
+   },
+   "counts": {
+    "nodes": 1683088,
+    "births": 982670,
+    "edges": 1683083
+   }
+  },
+  {
+   "frame": "ng02",
+   "output": "supports",
+   "k": 5,
+   "workers": 1,
+   "phase": "chaud",
+   "prise": 2,
+   "ok": true,
+   "wall_ns": 8897882139,
+   "file_sha256": "28532835cc5915f81f94eec3eed367479ed1312addae86740da5eefbd43363bb",
+   "manifest_sha256": "dd37ab7a382bd1eeef96f6d0345b68860b52cc3e74787f8c59382361cb065b2b",
+   "file_bytes": 32463880,
+   "tree_k_sha256": "40b01e8514109ab8e0b3b717161f1f05698193eadc4f097d3aa832a607832229",
+   "sites": 45845,
+   "stages_ns": {
+    "cloud": 3659799,
+    "index": 413830,
+    "domain": 5128775927,
+    "tree": 3249984576,
+    "attach": 76869866,
+    "output": 190614305,
+    "write": 234583848,
+    "total": 8889367270
+   },
+   "peaks_bytes": {
+    "cloud": 2750708,
+    "index": 2672508,
+    "domain": 369841748,
+    "tree": 397066253,
+    "output": 303423994,
+    "write": 300093878
+   },
+   "counts": {
+    "nodes": 609376,
+    "balls": 832386,
+    "supports": 832394,
+    "prior": 610022
+   }
+  },
+  {
+   "frame": "ng02",
+   "output": "full",
+   "k": 5,
+   "workers": 1,
+   "phase": "chaud",
+   "prise": 3,
+   "ok": true,
+   "wall_ns": 10777499590,
+   "file_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+   "manifest_sha256": "78fd1636271ffe790096251dfdb05cb41faeadd7a322ccd0172c9433ab9f9d3d",
+   "file_bytes": 328855058,
+   "tree_k_sha256": "40b01e8514109ab8e0b3b717161f1f05698193eadc4f097d3aa832a607832229",
+   "sites": 45845,
+   "stages_ns": {
+    "cloud": 3771549,
+    "index": 409890,
+    "domain": 5124752038,
+    "tree": 3275343880,
+    "attach": 0,
+    "output": 0,
+    "write": 2361868355,
+    "total": 10769088662
+   },
+   "peaks_bytes": {
+    "cloud": 2750708,
+    "index": 2672508,
+    "domain": 369841748,
+    "tree": 385837217,
+    "output": 257430652,
+    "write": 257430652
+   },
+   "counts": {
+    "nodes": 1683088,
+    "births": 982670,
+    "edges": 1683083
+   }
+  },
+  {
+   "frame": "ng02",
+   "output": "supports",
+   "k": 5,
+   "workers": 1,
+   "phase": "chaud",
+   "prise": 3,
+   "ok": true,
+   "wall_ns": 8892739730,
+   "file_sha256": "28532835cc5915f81f94eec3eed367479ed1312addae86740da5eefbd43363bb",
+   "manifest_sha256": "dd37ab7a382bd1eeef96f6d0345b68860b52cc3e74787f8c59382361cb065b2b",
+   "file_bytes": 32463880,
+   "tree_k_sha256": "40b01e8514109ab8e0b3b717161f1f05698193eadc4f097d3aa832a607832229",
+   "sites": 45845,
+   "stages_ns": {
+    "cloud": 3649060,
+    "index": 411800,
+    "domain": 5129326656,
+    "tree": 3243399857,
+    "attach": 76059036,
+    "output": 191615306,
+    "write": 235320277,
+    "total": 8884256021
+   },
+   "peaks_bytes": {
+    "cloud": 2750708,
+    "index": 2672508,
+    "domain": 369841748,
+    "tree": 397066253,
+    "output": 303423994,
+    "write": 300093878
+   },
+   "counts": {
+    "nodes": 609376,
+    "balls": 832386,
+    "supports": 832394,
+    "prior": 610022
+   }
+  },
+  {
+   "frame": "ng02",
+   "output": "full",
+   "k": 5,
+   "workers": 48,
+   "phase": "froid",
+   "prise": 0,
+   "ok": true,
+   "wall_ns": 2761805303,
+   "file_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+   "manifest_sha256": "78fd1636271ffe790096251dfdb05cb41faeadd7a322ccd0172c9433ab9f9d3d",
+   "file_bytes": 328855058,
+   "tree_k_sha256": "40b01e8514109ab8e0b3b717161f1f05698193eadc4f097d3aa832a607832229",
+   "sites": 45845,
+   "stages_ns": {
+    "cloud": 4101809,
+    "index": 416050,
+    "domain": 214938291,
+    "tree": 164799861,
+    "attach": 0,
+    "output": 0,
+    "write": 2357439995,
+    "total": 2752793475
+   },
+   "peaks_bytes": {
+    "cloud": 2750708,
+    "index": 2672508,
+    "domain": 371097588,
+    "tree": 396441613,
+    "output": 257430652,
+    "write": 257430652
+   },
+   "counts": {
+    "nodes": 1683088,
+    "births": 982670,
+    "edges": 1683083
+   }
+  },
+  {
+   "frame": "ng02",
+   "output": "supports",
+   "k": 5,
+   "workers": 48,
+   "phase": "froid",
+   "prise": 0,
+   "ok": true,
+   "wall_ns": 769093022,
+   "file_sha256": "28532835cc5915f81f94eec3eed367479ed1312addae86740da5eefbd43363bb",
+   "manifest_sha256": "dd37ab7a382bd1eeef96f6d0345b68860b52cc3e74787f8c59382361cb065b2b",
+   "file_bytes": 32463880,
+   "tree_k_sha256": "40b01e8514109ab8e0b3b717161f1f05698193eadc4f097d3aa832a607832229",
+   "sites": 45845,
+   "stages_ns": {
+    "cloud": 3675879,
+    "index": 409040,
+    "domain": 222239120,
+    "tree": 156395132,
+    "attach": 79453376,
+    "output": 47546521,
+    "write": 234373648,
+    "total": 758950643
+   },
+   "peaks_bytes": {
+    "cloud": 2750708,
+    "index": 2672508,
+    "domain": 371097588,
+    "tree": 407670753,
+    "output": 303450878,
+    "write": 300093878
+   },
+   "counts": {
+    "nodes": 609376,
+    "balls": 832386,
+    "supports": 832394,
+    "prior": 610022
+   }
+  },
+  {
+   "frame": "ng02",
+   "output": "full",
+   "k": 5,
+   "workers": 48,
+   "phase": "chaud",
+   "prise": 1,
+   "ok": true,
+   "wall_ns": 2778906539,
+   "file_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+   "manifest_sha256": "78fd1636271ffe790096251dfdb05cb41faeadd7a322ccd0172c9433ab9f9d3d",
+   "file_bytes": 328855058,
+   "tree_k_sha256": "40b01e8514109ab8e0b3b717161f1f05698193eadc4f097d3aa832a607832229",
+   "sites": 45845,
+   "stages_ns": {
+    "cloud": 3838649,
+    "index": 421830,
+    "domain": 244803646,
+    "tree": 150360223,
+    "attach": 0,
+    "output": 0,
+    "write": 2358244464,
+    "total": 2768900011
+   },
+   "peaks_bytes": {
+    "cloud": 2750708,
+    "index": 2672508,
+    "domain": 371097588,
+    "tree": 396441561,
+    "output": 257430652,
+    "write": 257430652
+   },
+   "counts": {
+    "nodes": 1683088,
+    "births": 982670,
+    "edges": 1683083
+   }
+  },
+  {
+   "frame": "ng02",
+   "output": "supports",
+   "k": 5,
+   "workers": 48,
+   "phase": "chaud",
+   "prise": 1,
+   "ok": true,
+   "wall_ns": 763773512,
+   "file_sha256": "28532835cc5915f81f94eec3eed367479ed1312addae86740da5eefbd43363bb",
+   "manifest_sha256": "dd37ab7a382bd1eeef96f6d0345b68860b52cc3e74787f8c59382361cb065b2b",
+   "file_bytes": 32463880,
+   "tree_k_sha256": "40b01e8514109ab8e0b3b717161f1f05698193eadc4f097d3aa832a607832229",
+   "sites": 45845,
+   "stages_ns": {
+    "cloud": 3783370,
+    "index": 408290,
+    "domain": 218824290,
+    "tree": 149718213,
+    "attach": 80227326,
+    "output": 50956241,
+    "write": 234750597,
+    "total": 753017555
+   },
+   "peaks_bytes": {
+    "cloud": 2750708,
+    "index": 2672508,
+    "domain": 371097588,
+    "tree": 407670649,
+    "output": 303450878,
+    "write": 300093878
+   },
+   "counts": {
+    "nodes": 609376,
+    "balls": 832386,
+    "supports": 832394,
+    "prior": 610022
+   }
+  },
+  {
+   "frame": "ng02",
+   "output": "full",
+   "k": 5,
+   "workers": 48,
+   "phase": "chaud",
+   "prise": 2,
+   "ok": true,
+   "wall_ns": 2773750232,
+   "file_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+   "manifest_sha256": "78fd1636271ffe790096251dfdb05cb41faeadd7a322ccd0172c9433ab9f9d3d",
+   "file_bytes": 328855058,
+   "tree_k_sha256": "40b01e8514109ab8e0b3b717161f1f05698193eadc4f097d3aa832a607832229",
+   "sites": 45845,
+   "stages_ns": {
+    "cloud": 3789149,
+    "index": 415930,
+    "domain": 219159061,
+    "tree": 165583320,
+    "attach": 0,
+    "output": 0,
+    "write": 2364178435,
+    "total": 2763522283
+   },
+   "peaks_bytes": {
+    "cloud": 2750708,
+    "index": 2672508,
+    "domain": 371097588,
+    "tree": 396441769,
+    "output": 257430652,
+    "write": 257430652
+   },
+   "counts": {
+    "nodes": 1683088,
+    "births": 982670,
+    "edges": 1683083
+   }
+  },
+  {
+   "frame": "ng02",
+   "output": "supports",
+   "k": 5,
+   "workers": 48,
+   "phase": "chaud",
+   "prise": 2,
+   "ok": true,
+   "wall_ns": 805225884,
+   "file_sha256": "28532835cc5915f81f94eec3eed367479ed1312addae86740da5eefbd43363bb",
+   "manifest_sha256": "dd37ab7a382bd1eeef96f6d0345b68860b52cc3e74787f8c59382361cb065b2b",
+   "file_bytes": 32463880,
+   "tree_k_sha256": "40b01e8514109ab8e0b3b717161f1f05698193eadc4f097d3aa832a607832229",
+   "sites": 45845,
+   "stages_ns": {
+    "cloud": 3826829,
+    "index": 424080,
+    "domain": 251756215,
+    "tree": 158924001,
+    "attach": 81066816,
+    "output": 48857831,
+    "write": 234943198,
+    "total": 795324327
+   },
+   "peaks_bytes": {
+    "cloud": 2750708,
+    "index": 2672508,
+    "domain": 371097588,
+    "tree": 407670649,
+    "output": 303450878,
+    "write": 300093878
+   },
+   "counts": {
+    "nodes": 609376,
+    "balls": 832386,
+    "supports": 832394,
+    "prior": 610022
+   }
+  },
+  {
+   "frame": "ng02",
+   "output": "full",
+   "k": 5,
+   "workers": 48,
+   "phase": "chaud",
+   "prise": 3,
+   "ok": true,
+   "wall_ns": 2769463774,
+   "file_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+   "manifest_sha256": "78fd1636271ffe790096251dfdb05cb41faeadd7a322ccd0172c9433ab9f9d3d",
+   "file_bytes": 328855058,
+   "tree_k_sha256": "40b01e8514109ab8e0b3b717161f1f05698193eadc4f097d3aa832a607832229",
+   "sites": 45845,
+   "stages_ns": {
+    "cloud": 3649679,
+    "index": 413230,
+    "domain": 230472979,
+    "tree": 150692372,
+    "attach": 0,
+    "output": 0,
+    "write": 2362660577,
+    "total": 2759220405
+   },
+   "peaks_bytes": {
+    "cloud": 2750708,
+    "index": 2672508,
+    "domain": 371097588,
+    "tree": 396441457,
+    "output": 257430652,
+    "write": 257430652
+   },
+   "counts": {
+    "nodes": 1683088,
+    "births": 982670,
+    "edges": 1683083
+   }
+  },
+  {
+   "frame": "ng02",
+   "output": "supports",
+   "k": 5,
+   "workers": 48,
+   "phase": "chaud",
+   "prise": 3,
+   "ok": true,
+   "wall_ns": 783899549,
+   "file_sha256": "28532835cc5915f81f94eec3eed367479ed1312addae86740da5eefbd43363bb",
+   "manifest_sha256": "dd37ab7a382bd1eeef96f6d0345b68860b52cc3e74787f8c59382361cb065b2b",
+   "file_bytes": 32463880,
+   "tree_k_sha256": "40b01e8514109ab8e0b3b717161f1f05698193eadc4f097d3aa832a607832229",
+   "sites": 45845,
+   "stages_ns": {
+    "cloud": 3757839,
+    "index": 412950,
+    "domain": 218694301,
+    "tree": 174149118,
+    "attach": 80441406,
+    "output": 46081482,
+    "write": 235007547,
+    "total": 774137151
+   },
+   "peaks_bytes": {
+    "cloud": 2750708,
+    "index": 2672508,
+    "domain": 371097588,
+    "tree": 407670649,
+    "output": 303450878,
+    "write": 300093878
+   },
+   "counts": {
+    "nodes": 609376,
+    "balls": 832386,
+    "supports": 832394,
+    "prior": 610022
+   }
+  },
+  {
+   "frame": "ng00",
+   "output": "full",
+   "k": 10,
+   "workers": 48,
+   "phase": "froid",
+   "prise": 0,
+   "ok": true,
+   "wall_ns": 14361809746,
+   "file_sha256": "61a4245b91d9a4fdad012f0a2e26a63c3e48db1d46a180db756f2c4e4aa77295",
+   "manifest_sha256": "41cf379c59d99aabec0112cc1347c77e63cc554a11aa6f4bd575f14e8286d220",
+   "file_bytes": 1457125554,
+   "tree_k_sha256": "c46e51afcf27042f353b7a6a678517db9a14924309905cf63bdcbe3221cd7fd9",
+   "sites": 39885,
+   "stages_ns": {
+    "cloud": 3267979,
+    "index": 404060,
+    "domain": 1740848707,
+    "tree": 1623119638,
+    "attach": 0,
+    "output": 0,
+    "write": 10910959831,
+    "total": 14330852089
+   },
+   "peaks_bytes": {
+    "cloud": 2393108,
+    "index": 2410268,
+    "domain": 1538132528,
+    "tree": 2041053321,
+    "output": 1277870140,
+    "write": 1277870140
+   },
+   "counts": {
+    "nodes": 7426215,
+    "births": 4414230,
+    "edges": 7426205
+   }
+  },
+  {
+   "frame": "ng00",
+   "output": "supports",
+   "k": 10,
+   "workers": 48,
+   "phase": "froid",
+   "prise": 0,
+   "ok": true,
+   "wall_ns": 4666829615,
+   "file_sha256": "96dfafc70c2f3da4bb929d22efdf18590232000b72cb362fbfb36bc564eefec6",
+   "manifest_sha256": "70140611a38161c09a57d3b3cb88b9f584f377441a5e5ab5c1abe9401752e2ec",
+   "file_bytes": 86459568,
+   "tree_k_sha256": "c46e51afcf27042f353b7a6a678517db9a14924309905cf63bdcbe3221cd7fd9",
+   "sites": 39885,
+   "stages_ns": {
+    "cloud": 3173920,
+    "index": 410480,
+    "domain": 1734846453,
+    "tree": 1664618540,
+    "attach": 246516175,
+    "output": 189365701,
+    "write": 748688224,
+    "total": 4637219908
+   },
+   "peaks_bytes": {
+    "cloud": 2393108,
+    "index": 2410268,
+    "domain": 1538132528,
+    "tree": 2070039497,
+    "output": 1144137595,
+    "write": 1135639439
+   },
+   "counts": {
+    "nodes": 1638573,
+    "balls": 2117675,
+    "supports": 2117676,
+    "prior": 1638612
+   }
+  },
+  {
+   "frame": "ng00",
+   "output": "full",
+   "k": 10,
+   "workers": 48,
+   "phase": "chaud",
+   "prise": 1,
+   "ok": true,
+   "wall_ns": 14339057100,
+   "file_sha256": "61a4245b91d9a4fdad012f0a2e26a63c3e48db1d46a180db756f2c4e4aa77295",
+   "manifest_sha256": "41cf379c59d99aabec0112cc1347c77e63cc554a11aa6f4bd575f14e8286d220",
+   "file_bytes": 1457125554,
+   "tree_k_sha256": "c46e51afcf27042f353b7a6a678517db9a14924309905cf63bdcbe3221cd7fd9",
+   "sites": 39885,
+   "stages_ns": {
+    "cloud": 3243440,
+    "index": 405330,
+    "domain": 1739377402,
+    "tree": 1654481171,
+    "attach": 0,
+    "output": 0,
+    "write": 10863675954,
+    "total": 14309944942
+   },
+   "peaks_bytes": {
+    "cloud": 2393108,
+    "index": 2410268,
+    "domain": 1538132528,
+    "tree": 2041053633,
+    "output": 1277870140,
+    "write": 1277870140
+   },
+   "counts": {
+    "nodes": 7426215,
+    "births": 4414230,
+    "edges": 7426205
+   }
+  },
+  {
+   "frame": "ng00",
+   "output": "supports",
+   "k": 10,
+   "workers": 48,
+   "phase": "chaud",
+   "prise": 1,
+   "ok": true,
+   "wall_ns": 4612547210,
+   "file_sha256": "96dfafc70c2f3da4bb929d22efdf18590232000b72cb362fbfb36bc564eefec6",
+   "manifest_sha256": "70140611a38161c09a57d3b3cb88b9f584f377441a5e5ab5c1abe9401752e2ec",
+   "file_bytes": 86459568,
+   "tree_k_sha256": "c46e51afcf27042f353b7a6a678517db9a14924309905cf63bdcbe3221cd7fd9",
+   "sites": 39885,
+   "stages_ns": {
+    "cloud": 3170220,
+    "index": 408530,
+    "domain": 1717877265,
+    "tree": 1654966421,
+    "attach": 241091795,
+    "output": 188978911,
+    "write": 745494984,
+    "total": 4589037283
+   },
+   "peaks_bytes": {
+    "cloud": 2393108,
+    "index": 2410268,
+    "domain": 1538132528,
+    "tree": 2070039497,
+    "output": 1144137595,
+    "write": 1135639439
+   },
+   "counts": {
+    "nodes": 1638573,
+    "balls": 2117675,
+    "supports": 2117676,
+    "prior": 1638612
+   }
+  }
+ ],
+ "defects": [],
+ "medians": [
+  {
+   "frame": "ng00",
+   "workers": 1,
+   "output": "full",
+   "prises": 3,
+   "median_ns": {
+    "cloud": 3253713,
+    "index": 408140,
+    "domain": 5326602544,
+    "tree": 3764915545,
+    "attach": 0,
+    "output": 0,
+    "write": 2154114871,
+    "total": 11256078186
+   },
+   "peak_bytes_max": {
+    "cloud": 2393108,
+    "index": 2410268,
+    "domain": 345352100,
+    "tree": 362777720,
+    "output": 243538564,
+    "write": 243538564
+   }
+  },
+  {
+   "frame": "ng00",
+   "workers": 1,
+   "output": "supports",
+   "prises": 3,
+   "median_ns": {
+    "cloud": 3175372,
+    "index": 405241,
+    "domain": 5351822060,
+    "tree": 3777244092,
+    "attach": 72533479,
+    "output": 189886404,
+    "write": 218060459,
+    "total": 9616109595
+   },
+   "peak_bytes_max": {
+    "cloud": 2393108,
+    "index": 2410268,
+    "domain": 345352100,
+    "tree": 373564764,
+    "output": 289592818,
+    "write": 286432702
+   }
+  },
+  {
+   "frame": "ng00",
+   "workers": 48,
+   "output": "full",
+   "prises": 3,
+   "median_ns": {
+    "cloud": 3172862,
+    "index": 407870,
+    "domain": 221623760,
+    "tree": 163586126,
+    "attach": 0,
+    "output": 0,
+    "write": 2162616220,
+    "total": 2560433519
+   },
+   "peak_bytes_max": {
+    "cloud": 2393108,
+    "index": 2410268,
+    "domain": 346607940,
+    "tree": 372019614,
+    "output": 243538564,
+    "write": 243538564
+   }
+  },
+  {
+   "frame": "ng00",
+   "workers": 48,
+   "output": "supports",
+   "prises": 3,
+   "median_ns": {
+    "cloud": 3205315,
+    "index": 408880,
+    "domain": 211333214,
+    "tree": 170875677,
+    "attach": 75414322,
+    "output": 45282321,
+    "write": 218549314,
+    "total": 735758238
+   },
+   "peak_bytes_max": {
+    "cloud": 2393108,
+    "index": 2410268,
+    "domain": 346607940,
+    "tree": 382806658,
+    "output": 289619702,
+    "write": 286432702
+   }
+  },
+  {
+   "frame": "ng01",
+   "workers": 1,
+   "output": "full",
+   "prises": 3,
+   "median_ns": {
+    "cloud": 2850920,
+    "index": 341000,
+    "domain": 4275602275,
+    "tree": 2796834421,
+    "attach": 0,
+    "output": 0,
+    "write": 1835499912,
+    "total": 8914213423
+   },
+   "peak_bytes_max": {
+    "cloud": 2133068,
+    "index": 2114532,
+    "domain": 293046256,
+    "tree": 312874754,
+    "output": 209452316,
+    "write": 209452316
+   }
+  },
+  {
+   "frame": "ng01",
+   "workers": 1,
+   "output": "supports",
+   "prises": 3,
+   "median_ns": {
+    "cloud": 2828930,
+    "index": 339460,
+    "domain": 4260337976,
+    "tree": 2790287248,
+    "attach": 58631854,
+    "output": 152086934,
+    "write": 173965794,
+    "total": 7448652585
+   },
+   "peak_bytes_max": {
+    "cloud": 2133068,
+    "index": 2114532,
+    "domain": 293046256,
+    "tree": 321721894,
+    "output": 246204770,
+    "write": 243592646
+   }
+  },
+  {
+   "frame": "ng01",
+   "workers": 48,
+   "output": "full",
+   "prises": 3,
+   "median_ns": {
+    "cloud": 2845259,
+    "index": 350560,
+    "domain": 179856661,
+    "tree": 139189856,
+    "attach": 0,
+    "output": 0,
+    "write": 1820411819,
+    "total": 2152368104
+   },
+   "peak_bytes_max": {
+    "cloud": 2133068,
+    "index": 2114532,
+    "domain": 294302096,
+    "tree": 321082450,
+    "output": 209452316,
+    "write": 209452316
+   }
+  },
+  {
+   "frame": "ng01",
+   "workers": 48,
+   "output": "supports",
+   "prises": 3,
+   "median_ns": {
+    "cloud": 2859460,
+    "index": 341830,
+    "domain": 188240340,
+    "tree": 139025005,
+    "attach": 61358304,
+    "output": 37700736,
+    "write": 170354722,
+    "total": 600646987
+   },
+   "peak_bytes_max": {
+    "cloud": 2133068,
+    "index": 2114532,
+    "domain": 294302096,
+    "tree": 329929590,
+    "output": 246218494,
+    "write": 243592646
+   }
+  },
+  {
+   "frame": "ng02",
+   "workers": 1,
+   "output": "full",
+   "prises": 3,
+   "median_ns": {
+    "cloud": 3639690,
+    "index": 409890,
+    "domain": 5110199595,
+    "tree": 3239218861,
+    "attach": 0,
+    "output": 0,
+    "write": 2361868355,
+    "total": 10719457208
+   },
+   "peak_bytes_max": {
+    "cloud": 2750708,
+    "index": 2672508,
+    "domain": 369841748,
+    "tree": 385837217,
+    "output": 257430652,
+    "write": 257430652
+   }
+  },
+  {
+   "frame": "ng02",
+   "workers": 1,
+   "output": "supports",
+   "prises": 3,
+   "median_ns": {
+    "cloud": 3652260,
+    "index": 411800,
+    "domain": 5129326656,
+    "tree": 3249984576,
+    "attach": 76869866,
+    "output": 190614305,
+    "write": 234980495,
+    "total": 8889367270
+   },
+   "peak_bytes_max": {
+    "cloud": 2750708,
+    "index": 2672508,
+    "domain": 369841748,
+    "tree": 397066253,
+    "output": 303423994,
+    "write": 300093878
+   }
+  },
+  {
+   "frame": "ng02",
+   "workers": 48,
+   "output": "full",
+   "prises": 3,
+   "median_ns": {
+    "cloud": 3789149,
+    "index": 415930,
+    "domain": 230472979,
+    "tree": 150692372,
+    "attach": 0,
+    "output": 0,
+    "write": 2362660577,
+    "total": 2763522283
+   },
+   "peak_bytes_max": {
+    "cloud": 2750708,
+    "index": 2672508,
+    "domain": 371097588,
+    "tree": 396441769,
+    "output": 257430652,
+    "write": 257430652
+   }
+  },
+  {
+   "frame": "ng02",
+   "workers": 48,
+   "output": "supports",
+   "prises": 3,
+   "median_ns": {
+    "cloud": 3783370,
+    "index": 412950,
+    "domain": 218824290,
+    "tree": 158924001,
+    "attach": 80441406,
+    "output": 48857831,
+    "write": 234943198,
+    "total": 774137151
+   },
+   "peak_bytes_max": {
+    "cloud": 2750708,
+    "index": 2672508,
+    "domain": 371097588,
+    "tree": 407670649,
+    "output": 303450878,
+    "write": 300093878
+   }
+  }
+ ],
+ "medians_k10": [
+  {
+   "frame": "ng00",
+   "workers": 48,
+   "output": "full",
+   "prises": 1,
+   "median_ns": {
+    "cloud": 3243440,
+    "index": 405330,
+    "domain": 1739377402,
+    "tree": 1654481171,
+    "attach": 0,
+    "output": 0,
+    "write": 10863675954,
+    "total": 14309944942
+   },
+   "peak_bytes_max": {
+    "cloud": 2393108,
+    "index": 2410268,
+    "domain": 1538132528,
+    "tree": 2041053633,
+    "output": 1277870140,
+    "write": 1277870140
+   }
+  },
+  {
+   "frame": "ng00",
+   "workers": 48,
+   "output": "supports",
+   "prises": 1,
+   "median_ns": {
+    "cloud": 3170220,
+    "index": 408530,
+    "domain": 1717877265,
+    "tree": 1654966421,
+    "attach": 241091795,
+    "output": 188978911,
+    "write": 745494984,
+    "total": 4589037283
+   },
+   "peak_bytes_max": {
+    "cloud": 2393108,
+    "index": 2410268,
+    "domain": 1538132528,
+    "tree": 2070039497,
+    "output": 1144137595,
+    "write": 1135639439
+   }
+  }
+ ],
+ "ratios": [
+  {
+   "frame": "ng00",
+   "workers": 1,
+   "tree_full_ns": 3764915545,
+   "tree_supports_ns": 3777244092,
+   "ratio_permille": 1003,
+   "within_rule": true
+  },
+  {
+   "frame": "ng00",
+   "workers": 48,
+   "tree_full_ns": 163586126,
+   "tree_supports_ns": 170875677,
+   "ratio_permille": 1045,
+   "within_rule": true
+  },
+  {
+   "frame": "ng01",
+   "workers": 1,
+   "tree_full_ns": 2796834421,
+   "tree_supports_ns": 2790287248,
+   "ratio_permille": 998,
+   "within_rule": true
+  },
+  {
+   "frame": "ng01",
+   "workers": 48,
+   "tree_full_ns": 139189856,
+   "tree_supports_ns": 139025005,
+   "ratio_permille": 999,
+   "within_rule": true
+  },
+  {
+   "frame": "ng02",
+   "workers": 1,
+   "tree_full_ns": 3239218861,
+   "tree_supports_ns": 3249984576,
+   "ratio_permille": 1003,
+   "within_rule": true
+  },
+  {
+   "frame": "ng02",
+   "workers": 48,
+   "tree_full_ns": 150692372,
+   "tree_supports_ns": 158924001,
+   "ratio_permille": 1055,
+   "within_rule": true
+  }
+ ],
+ "decision": {
+  "decision": "build_order_par_defaut",
+  "frames_within_rule": [
+   "ng00",
+   "ng01",
+   "ng02"
+  ],
+  "rule": "mediane tree(supports) <= 1,1 mediane tree(full) a W48 sur au moins deux des trois trames"
+ }
+}

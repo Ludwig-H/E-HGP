@@ -747,9 +747,9 @@ Limites :
 | L0 | aucune | S0 (ce document, MATHEMATIQUES section 10, registre des preuves), S1 (oracle borné des supports) | en cours |
 | L1 | G4 n° 1 | S2 (en-tête public de la tour), S3 (`build_order`, journal des graines, `WindowAttachment`, juge E2), S6 (module `supports`) | S2 livrée (`257aabb92`) |
 | L2 | G4 n° 2 | S4 (`io`, avec `retract()`), S5 (`api`, `Session`, manifeste, `--sortie=full`), S7 (`--sortie=supports`, écrivain et lecteur `MHGP11SP`, mesure appariée) | S4 livrée (`f98aeed67`) ; S5 et S7 commitées localement le 5 octobre, qualification G4 et mesure en attente |
-| L2b | conditionnelle, déclenchée | journal des graines posé dans `build_full` | règle évaluée le 5 octobre (`livrer_L2b`) ; L2b commitée localement le 5 octobre, qualification G4 en attente |
-| L3 | G4 n° 3 | S8 (`num`), S9 (`--sortie=points`) | S8 et S9 commitées localement le 5 octobre, qualification G4 en attente |
-| L4 | G4 n° 4, reportable | S10 (`--sortie=plat`) | S10 commitée le 5 octobre, qualification G4 en attente |
+| L2b | conditionnelle, déclenchée | journal des graines posé dans `build_full` | règle évaluée le 5 octobre (`livrer_L2b`) ; L2b livrée (`0810962ac`, `311ef5e3c`), **qualifiée sur G4** le 6 octobre (reçu `developpement_20261005/qualification_finale`) |
+| L3 | G4 n° 3 | S8 (`num`), S9 (`--sortie=points`) | S8 et S9 livrées le 5 octobre, **qualifiées sur G4** le 6 octobre (même reçu) |
+| L4 | G4 n° 4, reportable | S10 (`--sortie=plat`) | S10 livrée le 5 octobre, **qualifiée sur G4** le 6 octobre (même reçu) |
 | L5 | facultative | S11 (pipeline à un ordre), chantier 100 ms | — |
 
 - Valeurs de `--sortie` admises : aucune avant L2 ; `full` puis `supports` en L2 ; `points` en L3 ; `plat` en L4.
