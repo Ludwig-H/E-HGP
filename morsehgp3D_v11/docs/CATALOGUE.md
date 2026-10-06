@@ -315,4 +315,8 @@ statuts, débuts globaux, émissions copiées à leurs places, compteurs sommés
 code source, et ses émissions comme ses compteurs ne dépendent pas de l'exécuteur : le résultat est celui d'un
 exécuteur unique, quelle que soit la part. Portes : `mhgp11_catalogue_leaf_split` (sélection contre une recomputation
 indépendante) et `mhgp11_tower_full_leaf_lanes`, qui demande mêmes dump et registre à des parts de 0,1 %, 30 %, 40 %
-et 100 %, avec un partage observable. Mesure G4 du gain à jouer.
+et 100 %, avec un partage observable. Mesures G4 : à froid, la règle de `claudesplit1` n'admet aucune part (l'ouverture
+de CUDA, environ 75 ms, domine l'étage ; reçu [`lot_partage`](../receipts/developpement_20261006/lot_partage/README.md)).
+À chaud, `claudesplitconf` admet 400 ‰, avec un étage `domain` à 0,873–0,907 fois celui du lot entier sur le GPU (reçu
+[`lot_partage_confirmation`](../receipts/developpement_20261006/lot_partage_confirmation/README.md)). **La voie GPU de
+référence à K = 5 est donc `344059:400`.** Le banc garde 0 par défaut, et aucune part n'est adoptée à K = 10.
