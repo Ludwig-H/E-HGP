@@ -215,7 +215,7 @@ Outcome stage_births(Staged& s, MemoryBudget& budget, sched::Pool& pool) noexcep
     builders[i] = &*s.builders[i]; jobs[i] = s.jobs[i].span();
   }
   MHGP11_TRY(parallel_births(std::span(builders).first(s.kmax), std::span(s.blocks).first(s.kmax),
-                             std::span(jobs).first(s.kmax), pool));
+                             std::span(jobs).first(s.kmax), budget, pool));
   if (clock) for (u32 i = 0; i < s.kmax; ++i) s.nanoseconds[i] = clock->nanoseconds();  // phase commune
   return {};
 }

@@ -36,7 +36,6 @@ Outcome add_classification(ClassificationLedger& sum, const ClassificationLedger
   MHGP11_TRY(cell_add(sum.meb.diameter_pairs, one.meb.diameter_pairs));
   return cell_add(sum.meb.point_tests, one.meb.point_tests);
 }
-struct BirthRecord { num::Sphere sphere; u32 key; LevelRank rank; };
 static_assert(sizeof(BirthRecord) <= 1024 && sizeof(ForestNode) <= 64 && sizeof(ForestState) <= 64);
 Result<num::Sphere> birth_sphere(const FullDomain& domain, BallIdx ball) noexcept {
   const auto& support = domain.catalogue().balls_data()[idx(ball)];
@@ -68,13 +67,15 @@ void point_births(const Cloud& cloud, std::span<ForestNode> nodes, std::span<Bir
     nodes[i] = {LevelRank{0}, NodeIdx{kNone}, 0, 0, lookup[i].key};
 }
 
-// Cohortes de naissances de meme rang (au moins deux) : ordre canonique par centre exact.
-Outcome sort_cohorts(const FullDomain& domain, std::span<ForestNode> nodes, std::span<BirthRecord> scratch,
-                     ForestLedger& work) noexcept {
-  for (u64 begin = 0; begin < nodes.size();) {
+// Cohortes de naissances de meme rang (au moins deux) dans [first, last) : ordre canonique par centre exact. Ne lit
+// et n'ecrit que [first, last) : l'appelant donne des bornes de cohorte (cohort_bounds) et y verifie l'ordre des rangs.
+Outcome sort_cohort_range(const FullDomain& domain, std::span<ForestNode> nodes, u64 first, u64 last,
+                          std::span<BirthRecord> scratch, ForestLedger& work) noexcept {
+  if (first > last || last > nodes.size()) return fail(Reason::tower_invariant);
+  for (u64 begin = first; begin < last;) {
     u64 end = begin + 1;
-    while (end < nodes.size() && nodes[end].rank == nodes[begin].rank) ++end;
-    if (end < nodes.size() && idx(nodes[end].rank) < idx(nodes[begin].rank))
+    while (end < last && nodes[end].rank == nodes[begin].rank) ++end;
+    if (end < last && idx(nodes[end].rank) < idx(nodes[begin].rank))
       return fail(Reason::tower_invariant);
     const u64 count = end - begin;
     if (count > 1) {
@@ -97,6 +98,17 @@ Outcome sort_cohorts(const FullDomain& domain, std::span<ForestNode> nodes, std:
     begin = end;
   }
   return {};
+}
+
+Outcome sort_cohorts(const FullDomain& domain, std::span<ForestNode> nodes, std::span<BirthRecord> scratch,
+                     ForestLedger& work) noexcept {
+  return sort_cohort_range(domain, nodes, 0, nodes.size(), scratch, work);
+}
+
+// Premier debut de cohorte a partir de i (i lui-meme s'il en commence une), ou la fin de la liste.
+u64 cohort_start_at(std::span<const ForestNode> nodes, u64 i) noexcept {
+  while (i > 0 && i < nodes.size() && nodes[i].rank == nodes[i - 1].rank) ++i;
+  return i;
 }
 
 Outcome ranked_births(const FullDomain& domain, std::span<const u8> kinds, std::span<ForestNode> nodes,
@@ -269,7 +281,7 @@ Outcome ForestBuilder::allocate_births() noexcept {
   const u64 b = result.births_, capacity = 2 * b - 1, edge_capacity = 2 * b - 2;
   const u64 dense_capacity = !dense_birth_lookup ? 0 : k == 1 ? domain.index().cloud().sites() : domain.catalogue().balls();
   const u64 sparse_capacity = !dense_birth_lookup || k == 1 ? b : 0;
-  MHGP11_TRY(budget.admit(birth_bytes()));  // cohortes comprises : leur tampon est pris par birth_cohorts
+  MHGP11_TRY(budget.admit(birth_bytes()));  // cohortes comprises ; la voie par blocs admet son tampon dans parallel_births
   MHGP11_TRY(result.nodes_.allocate(capacity, budget));
   MHGP11_TRY(result.children_.allocate(edge_capacity, budget));
   MHGP11_TRY(result.lookup_.allocate(sparse_capacity, budget));
@@ -322,10 +334,33 @@ Outcome ForestBuilder::birth_block(const BirthBlocks& blocks, u64 c, std::span<B
   return {};
 }
 
-Outcome ForestBuilder::birth_cohorts() noexcept {
-  Buffer<BirthRecord> records;
-  MHGP11_TRY(records.allocate(birth_runs, budget));
-  return sort_cohorts(domain, result.nodes_.span().first(result.births_), records.span(), result.ledger_);
+// Bornes des kCohortChunks tranches des naissances de l'ordre, alignees sur des debuts de cohorte (0 et births aux
+// extremites, croissantes) ; l'ordre des rangs y est verifie, les tranches verifient l'interieur. Lecture seule : le
+// pilote les calcule avant les taches qui reecrivent les cohortes.
+Outcome ForestBuilder::cohort_bounds(std::span<u64> bounds) const noexcept {
+  const auto nodes = result.nodes_.span().first(result.births_);
+  const u64 n = nodes.size();
+  if (bounds.size() != kCohortChunks + 1) return fail(Reason::tower_invariant);
+  for (u64 c = 0; c <= kCohortChunks; ++c) {
+    const u64 b = cohort_start_at(nodes, n * c / kCohortChunks);  // n < 2^32 : produit exact
+    if (b > 0 && b < n && idx(nodes[b].rank) < idx(nodes[b - 1].rank)) return fail(Reason::tower_invariant);
+    bounds[c] = b;
+  }
+  return {};
+}
+
+Outcome ForestBuilder::birth_cohort_chunk(u64 first, u64 last, std::span<BirthRecord> scratch,
+                                          ForestLedger& work) noexcept {
+  return sort_cohort_range(domain, result.nodes_.span().first(result.births_), first, last, scratch, work);
+}
+
+// Registres des tranches de cohortes de l'ordre, ajoutes dans l'ordre des tranches : memes totaux qu'en serie.
+Outcome ForestBuilder::add_cohort_ledgers(std::span<const ForestLedger> chunks) noexcept {
+  for (const ForestLedger& part : chunks) {
+    MHGP11_TRY(cell_add(result.ledger_.birth_presentations, part.birth_presentations));
+    MHGP11_TRY(cell_add(result.ledger_.center_comparisons, part.center_comparisons));
+  }
+  return {};
 }
 
 // Apres l'ordre canonique : chaque naissance du bloc a sa case dense (cles distinctes, ecritures disjointes).
@@ -349,10 +384,19 @@ struct ParallelBirths {
   std::span<const BirthBlocks> blocks;
   std::span<const std::span<BallIdx>> jobs;
   std::array<u64, kMaxMebSites + 1> first{};  // premiere tache par blocs de chaque ordre
-  int phase = 1;  // 1 : sites, naissances, listes, etats ; 2 : cohortes ; 3 : table dense
+  int phase = 1;  // 1 : sites, naissances, listes, etats ; 2 : tranches de cohortes ; 3 : table dense
+  // Phase 2 : bornes des tranches par ordre >= 2, un tampon de runs enregistrements par ouvrier, un registre par tranche.
+  std::array<u64, (kMaxMebSites - 1) * (kCohortChunks + 1)> bounds{};
+  std::span<BirthRecord> scratch{};
+  u64 runs = 0;
+  std::span<ForestLedger> ledgers{};
 
-  Outcome task(u64 t) noexcept {
-    if (phase == 2) return builders[t + 1]->birth_cohorts();
+  Outcome task(u64 t, u32 worker) noexcept {
+    if (phase == 2) {
+      const u64 order = t / kCohortChunks, c = t % kCohortChunks, at = order * (kCohortChunks + 1) + c;
+      return builders[1 + order]->birth_cohort_chunk(bounds[at], bounds[at + 1], scratch.subspan(worker * runs, runs),
+                                                     ledgers[t]);
+    }
     if (phase == 1 && t == 0) return builders[0]->site_births();
     const u64 g = phase == 1 ? t - 1 : t;
     u32 i = 0;
@@ -361,16 +405,16 @@ struct ParallelBirths {
     return phase == 1 ? builders[i]->birth_block(blocks[i], g - first[i], jobs[i])
                       : builders[i]->birth_dense(blocks[i], g - first[i]);
   }
-  static Outcome body(void* raw, u64 begin, u64 end, u32) noexcept {
+  static Outcome body(void* raw, u64 begin, u64 end, u32 worker) noexcept {
     auto& self = *static_cast<ParallelBirths*>(raw);
-    for (u64 t = begin; t < end; ++t) MHGP11_TRY(self.task(t));
+    for (u64 t = begin; t < end; ++t) MHGP11_TRY(self.task(t, worker));
     return {};
   }
 };
 }  // namespace
 
 Outcome parallel_births(std::span<ForestBuilder* const> builders, std::span<const BirthBlocks> blocks,
-                        std::span<const std::span<BallIdx>> jobs, sched::Pool& pool) noexcept {
+                        std::span<const std::span<BallIdx>> jobs, MemoryBudget& budget, sched::Pool& pool) noexcept {
   const u32 kmax = static_cast<u32>(builders.size());
   if (kmax == 0 || kmax > kMaxMebSites || blocks.size() != kmax || jobs.size() != kmax || builders[0]->k != 1)
     return fail(Reason::parameter_out_of_range);
@@ -390,7 +434,29 @@ Outcome parallel_births(std::span<ForestBuilder* const> builders, std::span<cons
   run.first[kmax] = tasks;
   MHGP11_TRY(pool.parallel_for(1 + tasks, 1, &run, ParallelBirths::body));
   run.phase = 2;
-  if (kmax > 1) MHGP11_TRY(pool.parallel_for(kmax - 1, 1, &run, ParallelBirths::body));
+  if (kmax > 1) {
+    // Tri des cohortes en (K-1) x kCohortChunks tranches alignees sur les cohortes, au lieu d'une tache par ordre :
+    // l'ordre K bornait la phase. Le pilote lit les bornes avant toute ecriture, puis admet et alloue un tampon de la
+    // plus longue cohorte par ouvrier et un registre par tranche ; les taches n'allouent rien.
+    const u64 chunks = u64{kmax - 1} * kCohortChunks, workers = pool.size();
+    for (u32 i = 1; i < kmax; ++i) {
+      run.runs = std::max(run.runs, builders[i]->birth_runs);
+      MHGP11_TRY(builders[i]->cohort_bounds(std::span(run.bounds).subspan(u64{i - 1} * (kCohortChunks + 1),
+                                                                          kCohortChunks + 1)));
+    }
+    u64 bytes = workers * run.runs * sizeof(BirthRecord);  // runs < 2^32, workers <= 256 : produit < 2^48
+    MHGP11_TRY(cell_add(bytes, chunks * sizeof(ForestLedger)));
+    MHGP11_TRY(budget.admit(bytes));
+    Buffer<BirthRecord> scratch;
+    Buffer<ForestLedger> ledgers;
+    MHGP11_TRY(scratch.allocate(workers * run.runs, budget));
+    MHGP11_TRY(ledgers.allocate(chunks, budget));
+    for (auto& ledger : ledgers.span()) ledger = ForestLedger{};
+    run.scratch = scratch.span(); run.ledgers = ledgers.span();
+    MHGP11_TRY(pool.parallel_for(chunks, 1, &run, ParallelBirths::body));
+    for (u32 i = 1; i < kmax; ++i)
+      MHGP11_TRY(builders[i]->add_cohort_ledgers(ledgers.span().subspan(u64{i - 1} * kCohortChunks, kCohortChunks)));
+  }
   run.phase = 3;
   if (tasks != 0) MHGP11_TRY(pool.parallel_for(tasks, 1, &run, ParallelBirths::body));
   for (u32 i = 0; i < kmax; ++i) builders[i]->births_done();

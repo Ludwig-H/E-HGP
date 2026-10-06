@@ -105,6 +105,11 @@ bool await_lower(View& low, LevelRank level) noexcept {
 
 // Etat de chaine d'une naissance ; son parent DSU est tenu a part (ForestBuilder::parents) : find ne lit que ce
 // tableau dense de u32, sans les champs de chaine. Octets par naissance : kForestStateBytes (etat, parent, touched).
+// Naissance d'une cohorte en cours de tri : sphere exacte, cle et rang.
+struct BirthRecord { num::Sphere sphere; u32 key; LevelRank rank; };
+// Tranches de cohortes par ordre dans les naissances paralleles (phase 2) : les cohortes sont independantes.
+inline constexpr u64 kCohortChunks = 32;
+
 struct ForestState {
   u32 top, head, tail, next;
   bool touched;
@@ -181,7 +186,11 @@ struct ForestBuilder {
   // Etapes des naissances par blocs (parallel_births) ; chacune ecrit des cases disjointes de cet ordre.
   Outcome site_births() noexcept;                                               // ordre 1, une tache
   Outcome birth_block(const BirthBlocks&, u64 block, std::span<BallIdx> jobs) noexcept;
-  Outcome birth_cohorts() noexcept;                                             // ordre >= 2, une tache
+  // Ordre >= 2, tri des cohortes par tranches : bornes alignees sur les cohortes (lecture seule, par le pilote), puis
+  // tranche [first, last) avec le tampon de l'ouvrier et le registre de la tranche, puis registres ajoutes.
+  Outcome cohort_bounds(std::span<u64> bounds) const noexcept;
+  Outcome birth_cohort_chunk(u64 first, u64 last, std::span<BirthRecord> scratch, ForestLedger& work) noexcept;
+  Outcome add_cohort_ledgers(std::span<const ForestLedger> chunks) noexcept;
   Outcome birth_dense(const BirthBlocks&, u64 block) noexcept;
   void births_done() noexcept;
   Outcome prepare_states() noexcept;
@@ -237,9 +246,11 @@ void drop_verticals(OrderForest&) noexcept;
                                            const RegularVerticalSeeds*, const PopulationLookup*) noexcept;
 // Naissances par blocs (ordres concurrents, lookup dense ; forest_build.cpp) : memes noeuds, meme ordre canonique
 // (cohortes de meme rang triees par centre), memes etats DSU, memes listes de cellules regulieres et meme table dense
-// que births(), prepare_states() et collect_jobs(). Allocations faites par allocate_births ; jobs[i] dimensionne.
+// que births(), prepare_states() et collect_jobs(). Allocations faites par allocate_births ; jobs[i] dimensionne. Le
+// tampon du tri des cohortes (un par ouvrier) et les registres de tranche sont admis et alloues ici, dans budget.
 [[nodiscard]] Outcome parallel_births(std::span<ForestBuilder* const> builders, std::span<const BirthBlocks> blocks,
-                                      std::span<const std::span<BallIdx>> jobs, sched::Pool& pool) noexcept;
+                                      std::span<const std::span<BallIdx>> jobs, MemoryBudget& budget,
+                                      sched::Pool& pool) noexcept;
 // Pipeline des ordres concurrents (forest_pipeline.cpp). pipeline_lanes : taches de resolution, 0 si la voie par
 // etages s'impose (memo de lane, K<2, W<2K ou moins de 2K espaces census) ; alors aucun etat n'est touche.
 class ClosedAncestorSweep;

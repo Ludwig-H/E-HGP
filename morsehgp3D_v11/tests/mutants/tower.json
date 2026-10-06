@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 160,
+  "plancher": 163,
   "mutants": [
     {
       "id": "population_memo_owner_omis",
@@ -992,8 +992,8 @@
     {
       "id": "births_blocs_cohortes_omises",
       "fichier": "src/tower/forest_build.cpp",
-      "cherche": "if (kmax > 1) MHGP11_TRY(pool.parallel_for(kmax - 1, 1, &run, ParallelBirths::body));",
-      "remplace": "",
+      "cherche": "  run.phase = 2;\n  if (kmax > 1) {",
+      "remplace": "  run.phase = 2;\n  if (false && kmax > 1) {",
       "porte": "mhgp11_tower_pipeline_equivalence",
       "note": "Les naissances de meme rang suivent l'ordre exact des centres, pas l'ordre des boules."
     },
@@ -1298,6 +1298,30 @@
       "remplace": "",
       "porte": "mhgp11_tower_full_leaf_lanes",
       "note": "executeur partage : registre du catalogue sans les feuilles de l'appareil"
+    },
+    {
+      "id": "cohortes_registre_omis",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "    for (u32 i = 1; i < kmax; ++i)\n      MHGP11_TRY(builders[i]->add_cohort_ledgers(ledgers.span().subspan(u64{i - 1} * kCohortChunks, kCohortChunks)));",
+      "remplace": "",
+      "porte": "mhgp11_tower_pipeline_equivalence",
+      "note": "Naissances par blocs : les registres des tranches de cohortes doivent etre ajoutes a leur ordre."
+    },
+    {
+      "id": "cohortes_bornes_non_alignees",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "    const u64 b = cohort_start_at(nodes, n * c / kCohortChunks);  // n < 2^32 : produit exact",
+      "remplace": "    const u64 b = cohort_start_at(nodes, n * c / kCohortChunks + 1) - 1;",
+      "porte": "mhgp11_tower_pipeline_equivalence",
+      "note": "Tri des cohortes par tranches : une borne doit tomber entre deux cohortes ; decalee sur le dernier membre d'une cohorte, elle la coupe en deux."
+    },
+    {
+      "id": "cohortes_premiere_tranche_omise",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "      const u64 order = t / kCohortChunks, c = t % kCohortChunks, at = order * (kCohortChunks + 1) + c;",
+      "remplace": "      const u64 order = t / kCohortChunks, c = t % kCohortChunks, at = order * (kCohortChunks + 1) + c;\n      if (c == 0) return {};",
+      "porte": "mhgp11_tower_pipeline_equivalence",
+      "note": "Tri des cohortes par tranches : toutes les tranches de chaque ordre doivent etre triees (la premiere porte les petits rangs, ou les cohortes abondent)."
     }
   ]
 }

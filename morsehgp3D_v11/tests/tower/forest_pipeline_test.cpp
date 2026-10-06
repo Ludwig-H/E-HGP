@@ -135,7 +135,7 @@ MHGP11_TEST(equivalence, 2000) {
   const std::vector<std::pair<std::vector<Xyz>, Order>> fixtures{
       {cloud(90, 64, 7, false), 5}, {cloud(140, 256, 11, true), 6}, {cloud(70, 16, 3, false), 4},
       {cloud(160, 1024, 29, true), 5}};
-  u64 compared = 0, piped = 0, placements = 0;
+  u64 compared = 0, piped = 0, placements = 0, cohorts = 0;
   for (const auto& [points, k] : fixtures) {
     MemoryBudget owner(MemoryBudget::kUnlimited), work(MemoryBudget::kUnlimited);
     const Input input(points);
@@ -166,14 +166,20 @@ MHGP11_TEST(equivalence, 2000) {
           const auto& g = staged.value().order(o);
           CHECK(same(f, g)); CHECK(same(f, baseline.value().order(o))); CHECK(structure(f));
           CHECK(without_census(f.ledger()) == without_census(g.ledger()));
+          // Tri des cohortes par tranches (naissances par blocs) : memes presentations et comparaisons qu'en serie.
+          const auto& serial = baseline.value().order(o).ledger();
+          CHECK_EQ(f.ledger().birth_presentations, serial.birth_presentations);
+          CHECK_EQ(f.ledger().center_comparisons, serial.center_comparisons);
+          cohorts += f.ledger().birth_presentations != 0;
           ++compared;
         }
       }
     }
   }
-  CHECK(compared > 900); CHECK(piped > 150);
+  CHECK(compared > 900); CHECK(piped > 150); CHECK(cohorts > 600);
   std::printf("pipeline_equivalence orders=%llu pipelines=%llu placements=%llu\n", (unsigned long long)compared,
               (unsigned long long)piped, (unsigned long long)placements);
+  std::printf("pipeline_equivalence cohort_orders=%llu\n", (unsigned long long)cohorts);
 }
 
 namespace {
