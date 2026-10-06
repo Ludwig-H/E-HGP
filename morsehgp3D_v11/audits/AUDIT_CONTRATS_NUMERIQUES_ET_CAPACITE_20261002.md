@@ -10,7 +10,7 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
-## Placement : activation corrigée et témoin à conserver
+## Placement : activation et témoin corrigés
 
 **9d10de213 corrige la perte de `place_pipeline_` au déplacement de
 `ForestParallel`.** Le nouveau contrôle vérifie la valeur reçue par le
@@ -23,10 +23,10 @@ corrigé, `claudeo1place2` conserve neuf portes PASS et 72 appels avec plan
 non nul ; aucune qualification supplémentaire de mutants ou sanitizer.
 [Reçu de contrelecture](../receipts/audit_placement_activation_20261006/README.md).
 
-**Les rapports LiDAR ne gardent pas le témoin par prise.** `full_probe`
-émet `pipeline_tasks.placement_cores`, puis `gpu_ab.take_summary` l'omet.
-Une [proposition d'une ligne](../receipts/audit_placement_activation_20261006/observation/README.md)
-le conserve, en distinguant zéro et inconnu. Cela permet de constater un
+**Témoin par prise intégré en 12ce8f8f0.** `gpu_ab.take_summary` conserve
+maintenant `pipeline_tasks.placement_cores`, conformément à la
+[proposition d'une ligne](../receipts/audit_placement_activation_20261006/observation/README.md),
+en distinguant zéro et inconnu. Cela permet de constater un
 bras inactif avant de conclure sur le placement. Le champ compte les cœurs
 du plan, pas les appels d'affinité acceptés par le noyau. Aucun résultat
 historique n'est complété ni nouveau gain annoncé par cette proposition.
@@ -35,9 +35,9 @@ Le WIP d'adoption API/export retire correctement le placement pour l'ordre
 seul et le garde pour FULL ; la validation hors pipeline est raccordée.
 Les bornes entières nouvelles sont également relues favorablement dans leur
 domaine. [Empreintes et limites du WIP](../receipts/audit_placement_activation_20261006/sources.json).
-Le lecteur `full_campaign` doit encore recevoir le correctif déjà proposé
-pour accepter les nouveaux masques ; les autres constats ouverts restent
-inchangés.
+Le lecteur `full_campaign` a reçu le correctif proposé dans **12ce8f8f0** :
+borne et dépendances conformes par lecture du diff. Cette clôture de source
+ne requalifie pas les prises antérieures ; les autres constats restent inchangés.
 
 ## Levier C : qualification et repli parallèle — réponse à U
 
@@ -48,18 +48,17 @@ larges passent à la référence CPU. Les deux en-têtes intégrés sont identiq
 **A+C** gardent leurs périmètres propres : le plan ne comporte aucun CTest
 ni mutant. [Preuves et réponse détaillée](../receipts/audit_narrow_followup_20261006/README.md).
 
-**Deux mutants ne peuvent pas remplir leur rôle dans la campagne officielle.**
-`etendue_seuil_double` et `etendue_sans_fermeture` héritent d'u18 dans
-`g4_matrix.json`, alors que leurs branches sont éliminées pour B≤20.
-Ajouter `-DMHGP11_COORD_BITS=21` à ces deux entrées du manifeste ; le runner
-applique déjà cette option au contrôle et au mutant. La vérification des
-ancres ne remplace pas cette condition d'activation.
+**Mutants d'étendue corrigés en source dans 38faaf272.**
+`etendue_seuil_double` et `etendue_sans_fermeture` reçoivent explicitement
+`-DMHGP11_COORD_BITS=21`. Leurs branches étaient éliminées pour B≤20,
+alors que la campagne héritait d'u18. Le runner applique cette option au
+contrôle et au mutant ; aucun nouveau verdict G4 n'est déduit de cette lecture.
 [Preuve statique et patch](../receipts/audit_narrow_followup_20261006/gates/README.md).
 
-**Le cache de `gpu_ab.py --variants` n'est pas lié à l'archive annoncée.**
-Si une archive est remplacée sous le même nom et `--work` réutilisé, les
-anciens sources et l'ancien binaire sont repris, mais le journal peut
-porter la nouvelle empreinte. Lier la reprise à l'identité de l'archive.
+**Cache de `gpu_ab.py --variants` corrigé en 38faaf272.** Les chemins de
+sources et de build de la variante portent maintenant le SHA de l'archive,
+également journalisé. Le remplacement d'une archive sous le même nom ne
+réutilise donc plus le cache d'une identité antérieure.
 [Contre-exemple borné et proposition](../receipts/audit_narrow_followup_20261006/evidence/README.md).
 Aucune mauvaise attribution n'est démontrée dans les trois reçus examinés.
 
@@ -154,7 +153,7 @@ reproductions Python bornées ; [rejeu intégré](../receipts/audit_integration_
 ## Réservoir de feuilles : raccord des portes à corriger
 
 **Réservoir 59509bbc8 : lecture favorable. Porte IO corrigée en 86b3cbf14 ;
-lecteur de campagne et juge GPU encore ouverts.** Les chaînes des enregistrements et de la
+lecteur de campagne corrigé en 12ce8f8f0 ; juge GPU corrigé en 38faaf272.** Les chaînes des enregistrements et de la
 population sont distinctes ; chaque feuille garde son ordre d'émission
 et ses emplacements finaux fixés par les préfixes. Dès l'épuisement,
 `fits` reste faux : les compteurs continuent, les fragments ne sont pas
@@ -170,24 +169,22 @@ témoin hors domaine de `full_bench_io.py` est désormais `524288` ; deux
 refus couvrent le rejeu sans lot et le placement sans ordres concurrents.
 Aucun nouveau PASS natif n'est déduit de cette lecture.
 
-**Lecteur de campagne encore désynchronisé.** `full_campaign.optimization`
-garde `131071` et refuse les modes légaux `180219`, `212987`, `278523`,
-`344059` et `475131`. Le [correctif actualisé](../receipts/audit_placement_followup_20261006/README.md)
-porte seulement sur ce lecteur : borne `524287` et les deux dépendances
-nouvelles. Les 1 024 combinaisons des bits intervenant dans les gardes sont
+**Lecteur de campagne corrigé en 12ce8f8f0.** `full_campaign.optimization`
+reçoit le [correctif proposé](../receipts/audit_placement_followup_20261006/README.md) :
+borne `524287` et les deux dépendances nouvelles. Avant intégration, les
+1 024 combinaisons des bits intervenant dans les gardes ont été
 comparées aux conditions de la CLI C++ par lecture/AST, en normal et −O,
 sans exécuter de binaire. **Ne plus appliquer le patch historique à deux
 fichiers du réservoir** : sa borne et son témoin IO sont périmés. Son
 [reçu historique](../receipts/audit_reservoir_followup_20261006/gates/README.md)
 reste inchangé au pin d'origine.
 
-**Juge GPU : ne pas accepter l'absence de registre.** Dans
-`gpu_sanitizer.py`, deux `catalogue_work` absents deviennent `None` et
-leur égalité suffit. Les passes instrumentées ne comparent pas non plus
-leur registre à la référence CPU. Le [rejeu simulé et correctif ciblé](../receipts/audit_reservoir_followup_20261006/judge/README.md)
-portent sur cette fausse conformité du juge, pas sur un résultat natif
-fautif démontré. Aucune nouvelle qualification G4 du réservoir n'est
-attribuée ici.
+**Juge GPU corrigé en source dans 38faaf272.** `gpu_sanitizer.py` refuse
+un `catalogue_work` absent avant de fixer la référence, puis exige le
+statut `ok` et l'égalité du registre instrumenté à cette référence CPU.
+Le [rejeu simulé et correctif ciblé](../receipts/audit_reservoir_followup_20261006/judge/README.md)
+restent la preuve du défaut initial ; le diff intégré correspond au patch.
+Aucune nouvelle qualification G4 ni rétroqualification des anciens reçus.
 
 ## J2 mémorisé : source relue et mesure G4 ciblée
 

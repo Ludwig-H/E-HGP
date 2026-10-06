@@ -1,0 +1,147 @@
+{
+  "checks": 265,
+  "geometric_probes": [
+    {
+      "nearest_sets": 1,
+      "probes": 1,
+      "radius_squared": "25"
+    },
+    {
+      "nearest_sets": 1,
+      "probes": 1,
+      "radius_squared": "25"
+    },
+    {
+      "nearest_sets": 6,
+      "probes": 21,
+      "radius_squared": "3"
+    },
+    {
+      "nearest_sets": 6,
+      "probes": 21,
+      "radius_squared": "1"
+    }
+  ],
+  "limits": [
+    "independent 1D Voronoi/filtration oracle and bounded variance probes",
+    "axis examples valid in R3, not generic 3D mosaics",
+    "no native product, LiDAR, GCP, scipy or general mesh constructor",
+    "general homotopy/Hausdorff statements require the separate mathematical proof"
+  ],
+  "original": {
+    "edges": [],
+    "k": 3,
+    "omega_axis": [
+      [
+        "5",
+        "5"
+      ]
+    ],
+    "points": [
+      "0",
+      "1",
+      "10"
+    ],
+    "radius": "5",
+    "vertices": [
+      {
+        "alpha": "25",
+        "bary": "11/3",
+        "beta": "182/9",
+        "clipped": [
+          "5",
+          "5"
+        ],
+        "domain": [
+          null,
+          null
+        ],
+        "owner": 0,
+        "q": [
+          "0",
+          "1",
+          "10"
+        ],
+        "witness": "5"
+      }
+    ]
+  },
+  "original_DTM_ball_radius_squared": "43/9",
+  "verdict": "conforme",
+  "wrong_component_and_early_DTM_merge": {
+    "component_counts": {
+      "DTM": 1,
+      "HGP": 2
+    },
+    "edges": [
+      {
+        "alpha": "121/4",
+        "beta": "251/12",
+        "face": "11/2",
+        "i": 0,
+        "j": 1
+      }
+    ],
+    "geometric_owner_of_right_barycentre": 0,
+    "k": 3,
+    "omega_axis": [
+      [
+        "-13/4",
+        "21/4"
+      ],
+      [
+        "23/4",
+        "25/4"
+      ]
+    ],
+    "points": [
+      "0",
+      "1",
+      "2",
+      "11"
+    ],
+    "radius": "21/4",
+    "vertices": [
+      {
+        "alpha": "1",
+        "bary": "1",
+        "beta": "2/3",
+        "clipped": [
+          "-13/4",
+          "21/4"
+        ],
+        "domain": [
+          null,
+          "11/2"
+        ],
+        "owner": 0,
+        "q": [
+          "0",
+          "1",
+          "2"
+        ],
+        "witness": "1"
+      },
+      {
+        "alpha": "25",
+        "bary": "14/3",
+        "beta": "251/12",
+        "clipped": [
+          "23/4",
+          "25/4"
+        ],
+        "domain": [
+          "11/2",
+          null
+        ],
+        "owner": 1,
+        "q": [
+          "1",
+          "2",
+          "11"
+        ],
+        "witness": "6"
+      }
+    ]
+  }
+}

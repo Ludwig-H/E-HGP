@@ -1,0 +1,42 @@
+{
+  "gcp_runs": 0,
+  "general_3d_mesh_qualification": false,
+  "native_runs": 0,
+  "replays": [
+    {
+      "capsule": "proofs",
+      "manifest_ok": true,
+      "manifest_sha256": "74dc2f7c3db7bfa18805f4df2a7b3f969e6e916fc53235719688e367001727b6",
+      "modes": [
+        {
+          "exit_code": 0,
+          "matches_frozen_json": true,
+          "optimization": false
+        },
+        {
+          "exit_code": 0,
+          "matches_frozen_json": true,
+          "optimization": true
+        }
+      ]
+    },
+    {
+      "capsule": "proofs_ball_union",
+      "manifest_ok": true,
+      "manifest_sha256": "c1a7ad0052e1fcdacadc5214c24644186fb7c023cfe745f1073e29824b2e4858",
+      "modes": [
+        {
+          "exit_code": 0,
+          "matches_frozen_json": true,
+          "optimization": false
+        },
+        {
+          "exit_code": 0,
+          "matches_frozen_json": true,
+          "optimization": true
+        }
+      ]
+    }
+  ],
+  "schema": "ehgp.audit.hartigan_delaunay.verification.v1"
+}

@@ -1,0 +1,271 @@
+{
+  "cases": {
+    "H1_not_in_H0_union": {
+      "MEB_center": [
+        "1",
+        "3/4",
+        "0"
+      ],
+      "MEB_radius2": "25/16",
+      "Omega_betti1": 1,
+      "X": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          2,
+          0,
+          0
+        ],
+        [
+          1,
+          2,
+          0
+        ]
+      ],
+      "common_point_distances2": [
+        "9/16",
+        "5/16",
+        "5/16"
+      ],
+      "critical_union": "star-shaped and contractible; any two retained balls also star-shaped",
+      "k": 1,
+      "original_pair_distances2": [
+        "4",
+        "5",
+        "5"
+      ],
+      "original_union_nerve": "3 vertices, 3 edges, no triangle",
+      "r2": "5/4",
+      "scope": "comparison to Omega, not to Omega offset; dilation changes topology itself",
+      "window_balls": [
+        {
+          "center": [
+            "1",
+            "0",
+            "0"
+          ],
+          "m": 2,
+          "p": 0,
+          "qmin": 2,
+          "weight": "1"
+        },
+        {
+          "center": [
+            "1/2",
+            "1",
+            "0"
+          ],
+          "m": 2,
+          "p": 0,
+          "qmin": 2,
+          "weight": "5/4"
+        },
+        {
+          "center": [
+            "3/2",
+            "1",
+            "0"
+          ],
+          "m": 2,
+          "p": 0,
+          "qmin": 2,
+          "weight": "5/4"
+        }
+      ]
+    },
+    "dilation_merges_nodes": {
+      "Omega": [
+        [
+          "1",
+          "0",
+          "0"
+        ],
+        [
+          "3",
+          "0",
+          "0"
+        ]
+      ],
+      "Omega_components": 2,
+      "X": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          2,
+          0,
+          0
+        ],
+        [
+          4,
+          0,
+          0
+        ]
+      ],
+      "contact": [
+        2,
+        0,
+        0
+      ],
+      "dilated_union_components": 1,
+      "k": 2,
+      "r": 1,
+      "scope": "keep original component labels before dilation",
+      "window_balls": [
+        {
+          "center": [
+            "1",
+            "0",
+            "0"
+          ],
+          "m": 2,
+          "p": 0,
+          "qmin": 2,
+          "weight": "1"
+        },
+        {
+          "center": [
+            "3",
+            "0",
+            "0"
+          ],
+          "m": 2,
+          "p": 0,
+          "qmin": 2,
+          "weight": "1"
+        }
+      ]
+    },
+    "minimal_growth": {
+      "X": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          2,
+          0,
+          0
+        ]
+      ],
+      "distance2_to_critical_center": "9",
+      "k": 2,
+      "offset_witness": [
+        4,
+        0,
+        0
+      ],
+      "r": "2",
+      "window_balls": [
+        {
+          "center": [
+            "1",
+            "0",
+            "0"
+          ],
+          "m": 2,
+          "p": 0,
+          "qmin": 2,
+          "weight": "1"
+        }
+      ],
+      "witness_center_in_Omega": [
+        2,
+        0,
+        0
+      ]
+    },
+    "same_birth": {
+      "X_A": [
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          1,
+          1,
+          0
+        ],
+        [
+          2,
+          1,
+          0
+        ]
+      ],
+      "X_B": [
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          1,
+          2,
+          0
+        ],
+        [
+          2,
+          1,
+          0
+        ]
+      ],
+      "distance2_y_to_site_B": "81/4",
+      "k": 3,
+      "offset_B_enclosing_radius2": 16,
+      "q_distances2_A": [
+        "13/4",
+        "9/4",
+        "13/4"
+      ],
+      "q_in_Omega_A": [
+        1,
+        "-1/2",
+        0
+      ],
+      "r": "2",
+      "scope": "same eligible birth ball of order 3, not same whole FULL tower",
+      "window_A": [
+        {
+          "center": [
+            "1",
+            "1",
+            "0"
+          ],
+          "m": 2,
+          "p": 1,
+          "qmin": 2,
+          "weight": "1"
+        }
+      ],
+      "window_B": [
+        {
+          "center": [
+            "1",
+            "1",
+            "0"
+          ],
+          "m": 3,
+          "p": 0,
+          "qmin": 2,
+          "weight": "1"
+        }
+      ],
+      "y_in_offset_A_not_B": [
+        1,
+        "-5/2",
+        0
+      ]
+    }
+  },
+  "cloud_runs": 0,
+  "native_runs": 0,
+  "schema": "ehgp.audit.critical_ball_geometry.v1",
+  "source_pin": "fd85f3bb582616324e9d4034b84ca96d742a439a"
+}

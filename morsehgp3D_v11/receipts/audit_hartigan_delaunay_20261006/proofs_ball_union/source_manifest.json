@@ -1,0 +1,69 @@
+{
+  "cloud_runs": 0,
+  "files": [
+    {
+      "anchor_lines": [
+        104,
+        106
+      ],
+      "git_blob": "c1dbd3c33f92442ecad7d321181622a6f2c6d702",
+      "path": "morsehgp3D_v11/audits/QUESTION_CLAUDE_POLYEDRE_ORDRE_K_20261006.md",
+      "sha256": "9bbda315b322404f8a6799ef4af8932dee5795d03fffe4428183083cca2185c5"
+    },
+    {
+      "anchor_lines": [
+        82,
+        137,
+        147,
+        462,
+        808,
+        924
+      ],
+      "git_blob": "fc76c5840a0186fc32b896d175aceccd779e7e58",
+      "path": "morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "sha256": "9cd42081357b1bb9840040035cbe2b36f1dd6c8688809ba22a984b99bf66a0b6"
+    },
+    {
+      "anchor_lines": [
+        295,
+        299,
+        304
+      ],
+      "git_blob": "34100ec19cdd898344d664a6266c6549de9871d6",
+      "path": "morsehgp3D_v11/docs/SORTIES.md",
+      "sha256": "fdfefdbb1c64eb26a60a9081b9d02581bfc4739cffa7ee2331d853b6dfdb0b72"
+    },
+    {
+      "anchor_lines": [
+        95,
+        99
+      ],
+      "git_blob": "b39e3f232410adde473d8233f1c135c53aeb508c",
+      "path": "morsehgp3D_v11/src/tower/descent.hpp",
+      "sha256": "09aa58a7e0ab6eb711b1ef796f705d9f7f68c27416aada491254e1113427c540"
+    },
+    {
+      "anchor_lines": [
+        34,
+        56
+      ],
+      "git_blob": "7720f58edb3084c55c7537106271f95db7efde5f",
+      "path": "morsehgp3D_v11/src/tower/ancestor_index.hpp",
+      "sha256": "475ce0a30eb02081208126eb57a1d39e3e6d4893dd3b0c6080a7de1b1c0b16a4"
+    }
+  ],
+  "native_runs": 0,
+  "pin": "fd85f3bb582616324e9d4034b84ca96d742a439a",
+  "primary_sources": [
+    {
+      "author_draft_date": "2017-08-17",
+      "section": "6.1.3\u20136.1.4, printed pp.140\u2013141",
+      "url": "https://geometrica.saclay.inria.fr/team/Fred.Chazal/papers/CGLcourseNotes/main.pdf"
+    },
+    {
+      "section": "2.2\u20132.3, good convex cover and restricted order-k Voronoi nerve",
+      "url": "https://link.springer.com/article/10.1007/s00454-022-00476-8"
+    }
+  ],
+  "scope": "independent Fraction proofs; source contracts only, no product qualification"
+}

@@ -1,4 +1,4 @@
-# Audit mathématique courant — supports, hiérarchies et clustering plat
+# Audit mathématique courant — géométrie de Hartigan et hiérarchies
 
 6 octobre 2026. Relecture du contrat S0 et de l'oracle S1 au commit
 **5adf6a59f**, puis de la demande du développeur **9290cf3bf** et des WIP
@@ -8,21 +8,46 @@ aux reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 Note maintenue en place ; détails et échanges clos dans les reçus.
 
-## Modèle de fondation : surface observée et mosaïque d'ordre supérieur
+## Polyèdre de Hartigan : réponse aux cinq questions du développeur
 
-**Cible confirmée par l'utilisateur : conserver la géométrie observée,
-trous et occlusions compris.** Proposition : un complexe de faces observées
-fixé une fois, puis des unions datées de ces faces suivant HGP ; les faces
-mixtes restent en réserve jusqu'à leur ancêtre commun. Une fusion ne crée
-aucune enveloppe convexe.
+**Question fd85f3bb5 : cible recentrée sur la composante de haute densité
+Ω_k(r), éventuellement dilatée.** La bonne généralisation est A_k(r), sur
+la mosaïque de Delaunay d'ordre k, avec les dates min_{F_σ} d_k². Sa
+composante est homotope à celle d'Ω et située à distance de Hausdorff au
+plus r. Elle n'est en général ni cette région, ni son offset.
+[Réponse complète, preuves et suite constructive](../receipts/audit_hartigan_delaunay_20261006/README.md).
 
-La mosaïque d'ordre k est une piste complémentaire cohérente : ses cellules
-sont des enveloppes de barycentres de k-ensembles, et son filtre doit utiliser
-la distance au k-ième voisin. Les supports Kruskal et même le catalogue FULL
-actuel ne fournissent pas toutes ses cellules. La complétude, la proximité
-avec une surface et l'emboîtement entre k sont trois questions distinctes.
-[Proposition constructive, exemples exacts et sources primaires](../receipts/audit_geometry_design_20261006/README.md).
-Aucun constructeur de surface ou de mosaïque n'est qualifié par cette note.
+**Raccord explicite aux parties I–II du manuscrit, demandé par l'utilisateur.**
+La construction part des régions témoins W_Q du §6.3.1 ; leur nerf a pour
+1-squelette Γ_K. La restriction par Voronoï puis le dual polyédrique
+conservent ses composantes, leurs dates et les couvertures du théorème 2.
+Les garanties de connexité du K-MST ne deviennent pas implicitement des
+garanties sur les trous. Voir le §0 de la réponse pour les références
+précises et les obligations de fidélité au modèle.
+
+Les points qui changent réellement l'implantation :
+
+- Les barycentres pondérés donnent la bonne subdivision régulière, mais
+  l'alpha pondéré standard la filtre par la DTM et change les fusions.
+  Le nerf abstrait et la mosaïque plongée ne sont pas littéralement égaux.
+- Attribuer les cellules par leurs k-parties et incidences. Sur
+  `{0,1,2,11}`, k=3, le barycentre du composant droit tombe dans la région
+  dense gauche ; le test géométrique d'appartenance donne le mauvais nœud.
+- Le rayon d'ordre k n'est pas toujours Morse discret généralisé. Un
+  transfert direct de Wrap n'est pas établi. Des effondrements avec paires
+  de même naissance et cible fermée par faces fournissent un certificat
+  suffisant ; préserver la forme exige une borne par composante en plus.
+- La frontière peut servir au rendu, avec les strates de dimensions basses,
+  mais ne remplace pas l'objet topologique. Les boules critiques FULL
+  pondérées représentent leur union ; elles ne reconstruisent pas Ω ni
+  son offset. Les verticales demandent les incidences du modèle bifiltré.
+
+Les contre-épreuves `Fraction` passent en normal/−O : 265 contrôles pour
+les inclusions, dates et attributions, plus quatre témoins sur les boules
+critiques. Aucun constructeur 3D, banc ou moteur natif exécuté ou qualifié.
+La [proposition de surface observée](../receipts/audit_geometry_design_20261006/README.md)
+reste historique et répond à l'autre cible ; elle n'est plus la
+recommandation principale pour ce polyèdre de Hartigan.
 
 ## Bornes entières du census : lecture du chantier en cours
 
@@ -42,8 +67,9 @@ sont conservées. Le repli parallèle peut conserver l'ordre canonique avec
 une sortie privée par feuille et des préfixes ordonnés après join, sous les
 conditions de quotas, population et refus détaillées dans la
 [réponse au développeur](../receipts/audit_narrow_followup_20261006/README.md#réponse-u2--repli-parallèle).
-Deux raccords de qualification/provenance restent à corriger ; aucun défaut
-numérique moteur déduit de cette lecture.
+Les deux raccords de qualification/provenance sont corrigés en **38faaf272**
+(mutants u21 et cache lié à l'archive), par intégration des patches déposés.
+Aucune nouvelle qualification native déduite de cette lecture.
 
 ## Suivi de la section S : sélection intégrée
 
@@ -57,7 +83,7 @@ Le contrat §10.10 distingue maintenant suffisance et sélection de Kruskal.
 La borne stricte de vie des blocs est intégrée en **b0f2a0a9e** ; le
 lecteur corrigé est rejoué sur les dix-huit cas de frontière. Ce commit
 est postérieur à la qualification supports : ses contrôles natifs restent
-distincts. L'arrondi préalable des IoU du comparatif est toujours présent.
+distincts. L'arrondi préalable des IoU du comparatif est corrigé en **38faaf272**.
 [Contrelecture d'intégration](../receipts/audit_integration_20261006/README.md).
 Les réponses et preuves ci-dessous conservent le raisonnement des défauts
 corrigés ; les anciens patches correspondants ne sont plus à appliquer.
@@ -204,14 +230,14 @@ les hyper-arêtes comportant une liaison redondante mais une union utile.
 
 ## Comparatif : ne pas arrondir avant la décision de population
 
-**Constat P2 au pin ddb8d4ea9.** `points_flat_study.one()` arrondit les
+**Constat P2 au pin ddb8d4ea9, corrigé en 38faaf272.** `points_flat_study.one()` arrondissait les
 IoU du niveau B à quatre décimales avant que `summarize()` décide si chaque
 objet dépasse strictement 1/2. Le témoin `10001/20001 > 1/2` devient
 `0,5000` : l'objet est exclu du groupe secondaire et peut exclure sa scène
 entière de la population principale. Cela peut changer le comparatif
 servant à choisir la sélection plate.
 
-**Correction proposée :** conserver les valeurs non arrondies renvoyées
+**Correction intégrée :** conserver les valeurs non arrondies renvoyées
 par `best_blocks`, pour la tour et pour HDBSCAN ; réserver les arrondis
 aux agrégats affichés. Le seuil reste strictement supérieur à 1/2. Le
 [reçu ciblé](../receipts/audit_review_followup_20261006/population/README.md)

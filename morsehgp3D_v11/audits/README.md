@@ -1,35 +1,46 @@
 # Audits courants de la v11
 
 6 octobre 2026. Cadre : `exploration_v11_hors_registre / cpu_reference /
-quantized_u21_input_only / not_claimed`. Six notes actives maintenues en
+quantized_u21_input_only / not_claimed`. Sept notes actives maintenues en
 place ; preuves et propositions détaillées dans les reçus immuables.
+
+**Polyèdre de Hartigan : réponse aux cinq questions mathématiques.**
+Retenir la mosaïque d'ordre k filtrée par le rayon du k-ième voisin.
+Les incidences attribuent les cellules aux nœuds ; leurs barycentres peuvent
+tomber dans une autre composante dense. DTM, union des boules critiques et
+frontière seule ne conservent pas automatiquement la hiérarchie. La
+[réponse détaillée](../receipts/audit_hartigan_delaunay_20261006/README.md)
+donne les preuves, six petits contre-exemples rejoués et un certificat
+d'effondrement compatible avec les dates. Elle part des régions témoins
+du manuscrit et explicite le raccord aux définitions et théorèmes de ses
+deux premières parties, relues à la demande de l'utilisateur. Aucun transfert
+direct de Wrap ni constructeur géométrique qualifié.
 
 **Placement : perte de l'option corrigée en 9d10de213.** La porte G4
 corrigée observe des plans non nuls ; le premier essai à zéro plan reste
-exclu. Les rapports LiDAR omettent ce témoin : une proposition ciblée le
-conserve pour les prochains bancs. La lecture du WIP API et des bornes
+exclu. **12ce8f8f0 intègre le témoin par prise et le correctif du lecteur
+de campagne proposés par l'auditeur.** La lecture du WIP API et des bornes
 entières est favorable, sans transfert de qualification.
 [Activation, portée des reçus et proposition](../receipts/audit_placement_activation_20261006/README.md).
 
-**Levier C intégré en 5861c223f : lecture numérique favorable.** Deux
-raccords importants restent à corriger : les mutants d'étendue héritent
-d'u18, où leur garde est désactivée, et la reprise du banc multi-source
-peut attribuer un ancien binaire à une nouvelle archive. Les
-[preuves, correctifs proposés et réponse sur le repli CPU parallèle](../receipts/audit_narrow_followup_20261006/README.md)
-sont déposés. Les comparaisons G4 de C sont distinctes du sanitizer A+C ;
-aucun nouveau CTest ou mutant G4 dans cette session.
+**Levier C intégré en 5861c223f : lecture numérique favorable.** Les
+deux raccords proposés sont corrigés en **38faaf272** : mutants d'étendue
+explicitement u21, cache des variantes lié au SHA de l'archive. Les
+[preuves et la réponse sur le repli CPU parallèle](../receipts/audit_narrow_followup_20261006/README.md)
+restent épinglées ; cette lecture d'intégration n'ajoute aucun résultat
+de mutant, sanitizer ou CTest G4.
 
-**Géométrie pour le modèle de fondation : proposition déposée.** La cible
-est la surface observée, avec ses trous. Construire des éléments de surface
-communs, regroupés par HGP ; la vraie mosaïque d'ordre k est une charpente
-complémentaire à compléter et à qualifier. Les supports actuels ne sont pas
-cette mosaïque. [Construction et exemples](../receipts/audit_geometry_design_20261006/README.md).
+**Géométrie : changement de cible pris en compte.** La
+[proposition de surface observée](../receipts/audit_geometry_design_20261006/README.md)
+reste historique. La nouvelle demande transmise en fd85f3bb5 porte sur la
+composante de haute densité de Hartigan, traitée dans la réponse ci-dessus.
 
-**Réservoir et placement : porte IO corrigée en 86b3cbf14.** Le lecteur
-de campagne garde cependant l'ancienne borne ; le nouveau
+**Réservoir et placement : porte IO corrigée en 86b3cbf14, lecteur de
+campagne corrigé en 12ce8f8f0.** Le
 [correctif du lecteur](../receipts/audit_placement_followup_20261006/README.md)
-remplace la proposition historique à deux fichiers, devenue périmée.
-Le juge GPU peut toujours accepter un registre absent.
+est intégré ; la proposition historique à deux fichiers reste périmée.
+Le refus du registre absent et sa comparaison à la référence CPU sont
+également intégrés au juge GPU en **38faaf272**, sans rétroqualification.
 [État des raccords](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#réservoir-de-feuilles--raccord-des-portes-à-corriger).
 
 **Supports MST : correction intégrée en 07428324e et qualifiée sur G4 u21.**
@@ -46,10 +57,10 @@ passent en normal/−O ; les nouvelles portes et mutants C++ restent à
 qualifier sur G4, ce commit étant postérieur à la session supports.
 [État précis](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#arbres-de-points--contrôler-la-fin-de-vie-du-bloc).
 
-**Comparatif : l'arrondi qui peut fausser la population reste à corriger.**
-Un objet avec IoU `10001/20001 > 1/2` devient `0,5000` et peut faire
-exclure sa scène. Le [correctif de deux lignes](../receipts/audit_review_followup_20261006/population/README.md)
-conserve les valeurs avant la décision. L'effet sur les résultats réels
+**Comparatif : arrondi préalable corrigé en 38faaf272.** Le
+[correctif de deux lignes](../receipts/audit_review_followup_20261006/population/README.md)
+est intégré : les valeurs restent non arrondies avant la décision stricte
+à 1/2. L'effet du défaut sur les résultats réels
 publiés n'est pas établi ; aucun classement révisé annoncé.
 
 **Contrat global de 100 ms toujours ouvert.** Les captures d'un noyau ou
@@ -66,6 +77,7 @@ ne se transfèrent pas aux modifications en cours.
 - [Moteur : constats actifs, qualification et historique](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md).
 - [Réponse du développeur](REPONSE_CLAUDE_SUPPORTS_20261004.md).
 - [Question du développeur sur les 100 ms](QUESTION_CLAUDE_VITESSE_100MS_20261004.md).
+- [Question du développeur sur le polyèdre d'ordre k](QUESTION_CLAUDE_POLYEDRE_ORDRE_K_20261006.md).
 - [Audit indépendant maintenu par son auteur](AUDIT_OUVERTURE_ET_REPRISE_V10_20261002.md).
 
 L'[audit général](../receipts/audit_geant_20261005/README.md), les notes et

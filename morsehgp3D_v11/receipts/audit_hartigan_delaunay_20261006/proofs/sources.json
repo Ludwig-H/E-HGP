@@ -1,0 +1,18 @@
+{
+  "pin": "fd85f3bb582616324e9d4034b84ca96d742a439a",
+  "scope": "independent bounded mathematical oracle, no native qualification",
+  "sources": [
+    {
+      "bytes": 8587,
+      "path": "morsehgp3D_v11/audits/QUESTION_CLAUDE_POLYEDRE_ORDRE_K_20261006.md",
+      "read_method": "git show pin:path; no product execution",
+      "sha256": "9bbda315b322404f8a6799ef4af8932dee5795d03fffe4428183083cca2185c5"
+    },
+    {
+      "bytes": 12498,
+      "path": "morsehgp3D_v11/receipts/audit_geometry_design_20261006/README.md",
+      "read_method": "git show pin:path; no product execution",
+      "sha256": "8cd49a2e732aedfb5d1804ce1d0e2492920454eddd54dacb399ab7d624609b51"
+    }
+  ]
+}

@@ -1,0 +1,180 @@
+{
+  "audit_note_maintenance": [
+    {
+      "commit": "12ce8f8f025df0785737eaf1aca67cf5a4da02ae",
+      "path": "morsehgp3D_v11/bench/full_campaign.py",
+      "scope": "source-only confirmation of integration of previously proposed audit patches; no native requalification",
+      "sha256": "b8198e8fa01ba89c9fa0bc251d6f482e010d12227a621abc76b46577982b6590"
+    },
+    {
+      "commit": "12ce8f8f025df0785737eaf1aca67cf5a4da02ae",
+      "path": "morsehgp3D_v11/bench/gpu_ab.py",
+      "scope": "source-only confirmation of integration of previously proposed audit patches; no native requalification",
+      "sha256": "486c1a069ba6414d23ed1fee71c2783368c0eafca12deb8e4fa8eb9813f42c65"
+    },
+    {
+      "commit": "38faaf272098f706e675db4d0a0973bfa29eb130",
+      "path": "morsehgp3D_v11/bench/points_flat_study.py",
+      "scope": "source-only confirmation of integration of previously proposed audit patches; no native requalification",
+      "sha256": "0a63385f4d7277adb086cb1e529c6431fdc58eb3ba148ee1d833d9440dbc04d0"
+    },
+    {
+      "commit": "38faaf272098f706e675db4d0a0973bfa29eb130",
+      "path": "morsehgp3D_v11/bench/gpu_ab.py",
+      "scope": "source-only confirmation of integration of previously proposed audit patches; no native requalification",
+      "sha256": "ef5f741416ddb748f088f0e5a10fa25793f66329893983105fe6fc019a4c903b"
+    },
+    {
+      "commit": "38faaf272098f706e675db4d0a0973bfa29eb130",
+      "path": "morsehgp3D_v11/bench/gpu_sanitizer.py",
+      "scope": "source-only confirmation of integration of previously proposed audit patches; no native requalification",
+      "sha256": "5d34712c86d50810d33f1aef7a854d08695fe05ea77e689336eeed0df2cc7077"
+    },
+    {
+      "commit": "38faaf272098f706e675db4d0a0973bfa29eb130",
+      "path": "morsehgp3D_v11/tests/mutants/catalogue.json",
+      "scope": "source-only confirmation of integration of previously proposed audit patches; no native requalification",
+      "sha256": "e055b49ef13a6f28de9b31a7a4cb181655272e885ecf5d8a7c38eb9ea1522d62"
+    }
+  ],
+  "limits": [
+    "mathematical design and exact bounded counterexamples",
+    "no implementation of a general 3D mosaic or certified simplifier",
+    "no native compilation, tests, benchmark or GCP session",
+    "no LiDAR dataset bytes"
+  ],
+  "manuscript_reading": {
+    "extraction": "pdftotext -f FIRST -l LAST -layout docs/references/MANUSCRIT_THESE_HAUSEUX.pdf OUT",
+    "part1_text_sha256": "cd748d03f841784ac086fb47df75d4d72210a4646f9989f42be10038a0b94908",
+    "part2_text_sha256": "bccc2f7fc32e39356cf94897074e20c3eb01a27e9d4dde1876ca9375ee485f96",
+    "pdf_pages": [
+      [
+        35,
+        76
+      ],
+      [
+        77,
+        134
+      ]
+    ],
+    "printed_pages": [
+      [
+        9,
+        50
+      ],
+      [
+        51,
+        108
+      ]
+    ],
+    "references_used": [
+      "definitions 6–8",
+      "definitions 20–22 and theorem 2",
+      "chapter 7",
+      "theorems 4–6 and definition 31",
+      "section 9.1"
+    ],
+    "status": "primary manuscript read directly; no copy of extracts added to git"
+  },
+  "question_pin": "fd85f3bb582616324e9d4034b84ca96d742a439a",
+  "references": [
+    {
+      "local_pdf": "/workspaces/E-HGP/build/v11-persist/references_bcy/bcy_geometric_topological_inference_hal-01615863.pdf",
+      "local_pdf_sha256": "8646a4d9a89c0a92a890cd99567febf487c03e532423bb9ceaf7a6db3f148403",
+      "sections": [
+        "4.4.3, theorems 4.6 and 4.8",
+        "6.1.3–6.1.4, lemma 6.1",
+        "10.3, definition 10.12 and theorem 10.16"
+      ],
+      "title": "Boissonnat, Chazal, Yvinec — Geometric and Topological Inference",
+      "url": "https://inria.hal.science/hal-01615863"
+    },
+    {
+      "title": "Edelsbrunner, Osang — A Simple Algorithm for Higher-order Delaunay Mosaics and Alpha Shapes",
+      "url": "https://pub.ista.ac.at/~edels/Papers/2020-J-07-SimpleAlgorithm.pdf"
+    },
+    {
+      "sections": [
+        "Introduction",
+        "theorem 3.1, corollary 3.2, discussion"
+      ],
+      "title": "Edelsbrunner, Nikitenko, Osang — A step in the Delaunay mosaic of order k",
+      "url": "https://link.springer.com/article/10.1007/s00022-021-00577-4"
+    },
+    {
+      "sections": [
+        "theorem 2.1",
+        "definition 4.2",
+        "theorem 5.10, section 6.1"
+      ],
+      "title": "Bauer, Edelsbrunner — The Morse Theory of Cech and Delaunay Complexes",
+      "url": "https://pub.ista.ac.at/~edels/Papers/2017-J-03-DCech.pdf"
+    },
+    {
+      "title": "Guibas, Merigot, Morozov — Witnessed k-Distance",
+      "url": "https://arxiv.org/abs/1102.4972"
+    },
+    {
+      "sections": [
+        "theorems 4.11 and 4.16"
+      ],
+      "title": "Buchet, Chazal, Oudot, Sheehy — Efficient and Robust Persistent Homology for Measures",
+      "url": "https://donsheehy.net/research/buchet16efficient.pdf"
+    },
+    {
+      "long_version": "https://arxiv.org/pdf/2103.07823",
+      "sections": [
+        "2.3",
+        "S-Rhomb definition p.27:11",
+        "theorems 9 and 11",
+        "long version section 3.2, truncated telescope"
+      ],
+      "title": "Corbet, Kerber, Lesnick, Osang — Computing the Multicover Bifiltration",
+      "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol189-socg2021/LIPIcs.SoCG.2021.27/LIPIcs.SoCG.2021.27.pdf"
+    },
+    {
+      "title": "Edelsbrunner, Osang — The Multi-cover Persistence of Euclidean Balls",
+      "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol099-socg2018/LIPIcs.SoCG.2018.34/LIPIcs.SoCG.2018.34.pdf"
+    },
+    {
+      "sections": [
+        "theorems 1–2, remarks 3–4, figure 2"
+      ],
+      "title": "Reani, Bobrowski — Morse Theory for the k-NN Distance Function",
+      "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol293-socg2024/LIPIcs.SoCG.2024.75/LIPIcs.SoCG.2024.75.pdf"
+    }
+  ],
+  "schema": "ehgp.audit.hartigan_delaunay.sources.v1",
+  "source_context": [
+    {
+      "commit": "fd85f3bb582616324e9d4034b84ca96d742a439a",
+      "path": "morsehgp3D_v11/audits/QUESTION_CLAUDE_POLYEDRE_ORDRE_K_20261006.md",
+      "sha256": "9bbda315b322404f8a6799ef4af8932dee5795d03fffe4428183083cca2185c5"
+    },
+    {
+      "commit": "fd85f3bb582616324e9d4034b84ca96d742a439a",
+      "path": "morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "sha256": "9cd42081357b1bb9840040035cbe2b36f1dd6c8688809ba22a984b99bf66a0b6"
+    },
+    {
+      "commit": "fd85f3bb582616324e9d4034b84ca96d742a439a",
+      "path": "morsehgp3D_v11/docs/HIERARCHIE_POINTS.md",
+      "sha256": "0868879cfdbf5b828f318e3df56b03ab3d7fc7261fa41c7a467952072a0b6e03"
+    },
+    {
+      "commit": "fd85f3bb582616324e9d4034b84ca96d742a439a",
+      "path": "morsehgp3D_v11/src/tower/descent.hpp",
+      "sha256": "09aa58a7e0ab6eb711b1ef796f705d9f7f68c27416aada491254e1113427c540"
+    },
+    {
+      "commit": "fd85f3bb582616324e9d4034b84ca96d742a439a",
+      "path": "morsehgp3D_v11/src/tower/ancestor_index.hpp",
+      "sha256": "475ce0a30eb02081208126eb57a1d39e3e6d4893dd3b0c6080a7de1b1c0b16a4"
+    },
+    {
+      "commit": "fd85f3bb582616324e9d4034b84ca96d742a439a",
+      "path": "docs/references/MANUSCRIT_THESE_HAUSEUX.pdf",
+      "sha256": "579f83671ebca34cd810f350820074eb42672411713160f9c9c2a458ff4f4fef"
+    }
+  ]
+}
