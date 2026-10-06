@@ -1,0 +1,29 @@
+{
+  "code": 0,
+  "manifeste_sha256": "9033070e336c885460257bee1831d2f811ae186d3d24313a9c3e736a9e2cda85",
+  "module": "num",
+  "mutants": [
+    {
+      "detail": "code",
+      "id": "lattice_plancher_au_lieu_du_plus_proche",
+      "juge": "mhgp11_num_lattice_lattice_random",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "lattice_coin_proche",
+      "juge": "mhgp11_num_lattice_lattice_random",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "lattice_seuil_plancher",
+      "juge": "mhgp11_num_lattice_lattice_random",
+      "verdict": "TUE"
+    }
+  ],
+  "plancher": 3,
+  "schema": "mhgp11.mutants.v1",
+  "sources_sha256": "fb20d74d530b8c852de0f0a5f4ac11c89533deff9558b6d2ea97ce2f6c580dd4",
+  "temoin": "vert"
+}

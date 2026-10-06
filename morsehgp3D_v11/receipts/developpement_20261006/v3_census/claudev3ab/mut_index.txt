@@ -1,0 +1,6 @@
+allocation_noeuds_excedentaire           TUE      code
+census_borne_continue                    TUE      code
+census_emprunte_borne_continue           TUE      code
+coupe_mediane                            TUE      code
+coupe_axe_decale                         TUE      code
+mutants_ok module=index mutants=5 tues=5 dont_signal=0 dont_delai=0 dont_construction=0 plancher=5

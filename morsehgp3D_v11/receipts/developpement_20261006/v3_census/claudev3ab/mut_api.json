@@ -1,0 +1,17 @@
+{
+  "code": 0,
+  "manifeste_sha256": "6afcbd72c3679413066311ff9dcd5d623ec5c3f0717da0deadfe3fca4e07674e",
+  "module": "api",
+  "mutants": [
+    {
+      "detail": "code",
+      "id": "placement_api_eteint",
+      "juge": "mhgp11_api_session_engine",
+      "verdict": "TUE"
+    }
+  ],
+  "plancher": 1,
+  "schema": "mhgp11.mutants.v1",
+  "sources_sha256": "fb20d74d530b8c852de0f0a5f4ac11c89533deff9558b6d2ea97ce2f6c580dd4",
+  "temoin": "vert"
+}

@@ -1,0 +1,4 @@
+lattice_plancher_au_lieu_du_plus_proche  TUE      code
+lattice_coin_proche                      TUE      code
+lattice_seuil_plancher                   TUE      code
+mutants_ok module=num mutants=3 tues=3 dont_signal=0 dont_delai=0 dont_construction=0 plancher=3

@@ -846,3 +846,41 @@ sites testés par requête. Le temps se décidera sur G4 : session `v11.20261006
 2. Sur nuage uniforme, l'arbre radix a plus de nœuds que l'arbre médian (8 000 points, feuilles de 8 : 2 855 contre
    2 047, profondeur 14 contre 11), car ses feuilles sont de taille variable. La mémoire reste sous 2n nœuds. Voyez-vous
    un contrat de budget publié qui supposait la forme médiane ?
+
+## W. V3 mesuré et gardé ; deux leviers de constante (6 octobre, 21 h 29 UTC)
+
+**Session `claudev3ab`** (source `b4665642b`, `TERMINATED` certifié ; reçu `receipts/developpement_20261006/v3_census/`).
+
+**Exactitude.** Les onze mutants ciblés sont tués par le code de sortie de leur porte : trois dans num, cinq dans
+l'index, trois pour le placement. Toutes les prises de toutes les variantes rendent les vidages des empreintes des
+trames, à K5 et à K10.
+
+**Règles écrites dans le plan avant la session.** Statistique : forêts à froid, médianes de 6 processus.
+- R1, V3 complet contre `9d10de213` : moyenne géométrique 0,925, pire 0,949 (seuils 0,95 et 1,02). **Gardé.**
+- R2, arbre radix contre la borne seule : 0,958, pire 0,967 (seuils 0,98 et 1,03). **Gardé.**
+- La borne seule donne 0,966 contre la base.
+- À K10, descriptif : forêts ×0,855 / 0,852 / 0,887.
+
+À K5 chaud, le mur reste de 261 à 339 ms et l'étage `domain` de 156 à 209 ms : ni le contrat ni le jalon de 200 ms ne
+sont tenus.
+
+**Instructions contre temps.** V3 retire 44 % des instructions de la résolution régulière (30,71 G → 17,34 G sur
+ng00), mais l'étage des forêts ne baisse que de 7,5 %. Je relève à la prochaine session la chronologie du pipeline :
+fin des résolveurs, fin du publieur de l'ordre 5, attentes. Elle dira si O2 (publieur à flux compact) devient
+prioritaire.
+
+**Deux leviers de constante, prêts et exacts** (commit qui suit cette section) :
+- `add_descent` somme les 37 registres sans branche par champ, cumule les débordements et ne publie la somme qu'à la
+  fin. Même refus `tower_capacity`, somme intacte ; la porte `descent_capacity` vérifie chaque champ.
+- `LatticeSphere` copie une fois l'ancre, N et D, et évalue la puissance aux points de la boîte et aux sites par la
+  même expression que `native_power` (mêmes budgets), sans vue ni `Point` refabriqué.
+- Effet en instructions : 17,34 G → 15,71 G (×0,906), même vidage.
+- Mutants : `registres_debordement_ignore`, `lattice_puissance_sans_ancre_z`, et quatre mutants existants retargetés
+  sur la nouvelle somme. Ils visaient l'ancien code ; l'un d'eux (`diametre_cumul_descente_omis`) n'aurait plus été tué
+  sans ce raccord.
+
+**Prochaines sessions.**
+1. Mesure des leviers de constante, contre la source de cette section. Règle écrite : gardés si la moyenne géométrique
+   ne dépasse pas 1,00 et aucun rapport 1,03 ; ils ne retirent que du travail déterministe. Mêmes données : chronologie
+   du pipeline à W48 et mutants retargetés.
+2. Matrice de qualification de V3 : Release u18, u21 et u24, échelle et LiDAR u21, ASan+UBSan u24.

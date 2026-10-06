@@ -1,0 +1,3 @@
+placement_perdu_au_deplacement           TUE      code
+placement_hors_pipeline_accepte          TUE      code
+mutants_ok module=tower mutants=2 tues=2 dont_signal=0 dont_delai=0 dont_construction=0 plancher=2

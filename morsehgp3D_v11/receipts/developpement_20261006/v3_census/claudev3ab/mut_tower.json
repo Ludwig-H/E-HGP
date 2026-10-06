@@ -1,0 +1,23 @@
+{
+  "code": 0,
+  "manifeste_sha256": "d445f1456f99ba43eddf529edbde3c3ed096d6ca45c6d343adcad6af091c45d7",
+  "module": "tower",
+  "mutants": [
+    {
+      "detail": "code",
+      "id": "placement_perdu_au_deplacement",
+      "juge": "mhgp11_tower_pipeline_equivalence",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "placement_hors_pipeline_accepte",
+      "juge": "mhgp11_tower_placement_validate",
+      "verdict": "TUE"
+    }
+  ],
+  "plancher": 2,
+  "schema": "mhgp11.mutants.v1",
+  "sources_sha256": "fb20d74d530b8c852de0f0a5f4ac11c89533deff9558b6d2ea97ce2f6c580dd4",
+  "temoin": "vert"
+}

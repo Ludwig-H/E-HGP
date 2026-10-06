@@ -1,0 +1,41 @@
+{
+  "code": 0,
+  "manifeste_sha256": "017a3842e9c5665d30d09ade65b1443514c8867913dfa4122f18103224459f89",
+  "module": "index",
+  "mutants": [
+    {
+      "detail": "code",
+      "id": "allocation_noeuds_excedentaire",
+      "juge": "mhgp11_index_unit_structure",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "census_borne_continue",
+      "juge": "mhgp11_index_unit_lattice",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "census_emprunte_borne_continue",
+      "juge": "mhgp11_index_borrowed_lattice",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "coupe_mediane",
+      "juge": "mhgp11_index_unit_structure",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "coupe_axe_decale",
+      "juge": "mhgp11_index_unit_structure",
+      "verdict": "TUE"
+    }
+  ],
+  "plancher": 5,
+  "schema": "mhgp11.mutants.v1",
+  "sources_sha256": "fb20d74d530b8c852de0f0a5f4ac11c89533deff9558b6d2ea97ce2f6c580dd4",
+  "temoin": "vert"
+}

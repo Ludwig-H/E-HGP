@@ -1,0 +1,95 @@
+{
+ "schema": "ehgp.v11.compteurs_census.v1",
+ "note": "Compteurs deterministes, mesures en local (u21, K = 5, feuilles de 16, masque 16379, W4) : tests de points du census par ordre 1..5. origine = 9d10de213 (borne continue, arbre median) ; borne_entiere = LatticeSphere seule ; borne_entiere_radix = source finale (a841d8c4b et leviers de constante). Les autres registres de travail des ordres sont identiques.",
+ "trames": {
+  "ng00": {
+   "origine": [
+    0,
+    94479,
+    668574,
+    3331040,
+    17055923
+   ],
+   "borne_entiere": [
+    0,
+    46338,
+    334280,
+    1705559,
+    8397775
+   ],
+   "borne_entiere_radix": [
+    0,
+    22101,
+    169743,
+    909449,
+    4494584
+   ],
+   "autres_registres_identiques": true
+  },
+  "ng01": {
+   "origine": [
+    0,
+    84138,
+    540281,
+    2489432,
+    12404166
+   ],
+   "borne_entiere": [
+    0,
+    42231,
+    277457,
+    1324283,
+    6349870
+   ],
+   "borne_entiere_radix": [
+    0,
+    17864,
+    129035,
+    655959,
+    3198571
+   ],
+   "autres_registres_identiques": true
+  },
+  "ng02": {
+   "origine": [
+    0,
+    83212,
+    495207,
+    2223615,
+    11956529
+   ],
+   "borne_entiere": [
+    0,
+    39655,
+    247688,
+    1167520,
+    6122399
+   ],
+   "borne_entiere_radix": [
+    0,
+    16619,
+    116487,
+    589739,
+    3089830
+   ],
+   "autres_registres_identiques": true
+  }
+ },
+ "profil_instructions_resolution_ng00": {
+  "note": "callgrind, un fil, collecte sous ForestParallel::resolve_job ; instructions (Ir)",
+  "avant_v3": {
+   "resolve_job": 30710186366,
+   "census": 20641732827,
+   "bornes_boite_appels": 44631702,
+   "tests_points_appels": 24963238,
+   "census_requetes": 291515
+  },
+  "apres_v3": {
+   "resolve_job": 17337242756,
+   "census": 7268789217,
+   "bornes_boite_appels": 14531890,
+   "tests_points_appels": 5595877,
+   "census_requetes": 291515
+  }
+ }
+}

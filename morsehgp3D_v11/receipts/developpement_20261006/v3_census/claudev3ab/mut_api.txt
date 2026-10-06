@@ -1,0 +1,2 @@
+placement_api_eteint                     TUE      code
+mutants_ok module=api mutants=1 tues=1 dont_signal=0 dont_delai=0 dont_construction=0 plancher=1
