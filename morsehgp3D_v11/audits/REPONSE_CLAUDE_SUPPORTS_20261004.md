@@ -884,3 +884,36 @@ prioritaire.
    ne dépasse pas 1,00 et aucun rapport 1,03 ; ils ne retirent que du travail déterministe. Mêmes données : chronologie
    du pipeline à W48 et mutants retargetés.
 2. Matrice de qualification de V3 : Release u18, u21 et u24, échelle et LiDAR u21, ASan+UBSan u24.
+
+## X. Qualification de V3, leviers de constante gardés, publieur (O2, première partie) gardé (6 octobre, 22 h 43 UTC)
+
+Toutes les mesures portent sur les trois trames LiDAR réelles. Consigne de l'utilisateur : toujours tester sur LiDAR
+réel ; les nuages uniformes ne sont qu'un complément, sans valeur de décision.
+
+**Qualification à `38faaf272`.** Elle couvre V3, les leviers de constante et vos quatre correctifs : mutants d'étendue
+en u21, cache des variantes par empreinte d'archive, juge GPU sans registre absent, IoU non arrondie. Reçu
+`receipts/developpement_20261006/v3_qualification/`.
+- `claudev3q1` : mutants de la garde des arbres de points et d'étendue, 4 tués sur 4 ; Release u18 890/890, u21
+  800/800, u24 800/800, ASan+UBSan u24 800/800.
+- `claudev3q2` : échelle et LiDAR aux trois profils, 52/52 et 66/66 dans chacun.
+
+**Leviers de constante (`claudev3c`, reçu `constantes_pas_descente`).** Six mutants tués ; règle écrite, moyenne
+géométrique new/v3 0,966 (seuil 1,00) : gardés.
+
+La même session a relevé la chronologie du pipeline : **après V3, les résolveurs ne sont plus le chemin critique.**
+Les publieurs des ordres 4 et 5 calculaient pendant tout le pipeline et finissaient 20 à 27 ms après eux.
+
+**Publieur, première partie d'O2 (`13a4a0a4c`, `claudeo2a`, reçu `o2_publieur`).** Le profil avec simulation de cache
+mettait 83 à 86 % des défauts de cache de la publication dans `regular_cell` et ses `find`. Le changement :
+- parents DSU dans un tableau dense à part ; état de chaîne de 20 octets, 28 octets par naissance comme avant ;
+- préchargement des parents et des états des graines, 16 jobs en avance, seulement dans les blocs déjà confirmés ;
+- `cell_add` en ligne.
+
+Exactitude : deux mutants tués, **TSan u21 800/800** (garde du préchargement), vidages identiques. Règle écrite :
+moyenne géométrique new/cst **0,904**, pire 0,965 : gardé. Étage des forêts à K5 : 93 à 125 ms à froid. La queue des
+publieurs passe à 10–22 ms ; K10 est neutre.
+
+**Question.** Le lanceur de mutants construit sans sanitizer et sans `setarch -R` : un mutant de la garde du
+préchargement (lecture d'un bloc non confirmé) n'y est pas jouable, d'où la passe TSan à sa place. Voyez-vous un moyen
+de rendre cette garde mutable sans sanitizer ? Par exemple, une porte qui empoisonne les graines d'un bloc non confirmé
+et vérifie qu'aucun préchargement n'en lit l'adresse.
