@@ -98,50 +98,76 @@ MHGP11_LEAF_HD u32 claim_chunk(const ScratchArena& arena, u32 kind) {
   return taken < arena.spare ? arena.count + taken : kNoChunk;
 }
 
+#if defined(__CUDA_ARCH__)
+#define MHGP11_LEAF_COLD __noinline__
+#else
+#define MHGP11_LEAF_COLD __attribute__((noinline))
+#endif
+
 // Puits du comptage : compte tout et range les emissions dans la case, puis dans les blocs du reservoir tant qu'il en
-// reste, dans l'ordre d'emission (celui de FillSink). fits faux : la feuille sera rejouee.
+// reste, dans l'ordre d'emission (celui de FillSink). fits faux : la feuille sera rejouee. Chemin chaud : la boule
+// tient dans les blocs courants, ecriture directe comme la case du 5 octobre. Chemin froid (changement de bloc, rare)
+// hors ligne : integre, il ajoutait des points de reconvergence au parcours et ralentissait le comptage GPU de 30 a
+// 43 ms a K5 (session G4 reservoir2).
 struct ScratchSink {
   const ScratchArena* arena = nullptr;
   const u32* sites = nullptr;
   u32 m = 0;
-  u32 record_chunk = 0, population_chunk = 0;  // blocs courants, la case de la feuille au depart
-  u32 record_used = 0, population_used = 0;    // places prises dans les blocs courants
+  LeafRecord* record_at = nullptr;  // prochaine place d'enregistrement dans le bloc courant
+  u8* population_at = nullptr;      // prochaine place de population dans le bloc courant
+  u32 record_room = kScratchRecords, population_room = kScratchPopulation;  // places restantes des blocs courants
+  u32 record_chunk = 0, population_chunk = 0;                               // blocs courants
   u64 balls = 0, incidences = 0;
   bool fits = true;
 
   MHGP11_LEAF_HD ScratchSink(const ScratchArena& a, u32 leaf, const u32* leaf_sites, u32 leaf_m)
-      : arena(&a), sites(leaf_sites), m(leaf_m), record_chunk(leaf), population_chunk(leaf) {}
-
-  // Place suivante d'un genre : bloc courant, ou nouveau bloc chaine ; faux si le reservoir est epuise.
-  MHGP11_LEAF_HD bool advance(u32& chunk, u32& used, u32 capacity, u32* next, u32 kind) {
-    if (used < capacity) return true;
-    const u32 taken = claim_chunk(*arena, kind);
-    if (taken == kNoChunk) return false;
-    next[chunk] = taken;
-    chunk = taken;
-    used = 0;
-    return true;
-  }
+      : arena(&a), sites(leaf_sites), m(leaf_m), record_at(a.records + u64(leaf) * kScratchRecords),
+        population_at(a.population + u64(leaf) * kScratchPopulation), record_chunk(leaf), population_chunk(leaf) {}
 
   // interior_local, shell_local : rangs locaux deja connus de la feuille (aucune recherche). Les rangs sont < 32 : u8.
   MHGP11_LEAF_HD void emit(const leaf_device::Ball& ball, const u32*, const u32*, const u32* interior_local,
                            const u32* shell_local) {
+    const u32 need = ball.p + ball.m;  // <= 2 * kMaxSites
     ++balls;
-    incidences += u64(ball.p) + ball.m;
-    if (!fits) return;
-    if (!advance(record_chunk, record_used, kScratchRecords, arena->next_record, 0)) {
-      fits = false;
-      return;
+    incidences += need;
+    if (fits && record_room != 0 && need <= population_room) {  // chemin chaud
+      encode(ball, sites, m, *record_at++);
+      --record_room;
+      for (u32 i = 0; i < ball.p; ++i) population_at[i] = static_cast<u8>(interior_local[i]);
+      for (u32 i = 0; i < ball.m; ++i) population_at[ball.p + i] = static_cast<u8>(shell_local[i]);
+      population_at += need;
+      population_room -= need;
+    } else if (fits) {
+      fits = cold(ball, interior_local, shell_local);
     }
-    encode(ball, sites, m, arena->records[u64(record_chunk) * kScratchRecords + record_used++]);
-    for (u32 i = 0; i < ball.p + ball.m; ++i) {
-      if (!advance(population_chunk, population_used, kScratchPopulation, arena->next_population, 1)) {
-        fits = false;
-        return;
+  }
+
+  // Chemin froid : blocs chaines du reservoir pour l'enregistrement et pour la population ; faux s'il est epuise.
+  MHGP11_LEAF_HD MHGP11_LEAF_COLD bool cold(const leaf_device::Ball& ball, const u32* interior_local,
+                                            const u32* shell_local) {
+    if (record_room == 0) {
+      const u32 taken = claim_chunk(*arena, 0);
+      if (taken == kNoChunk) return false;
+      arena->next_record[record_chunk] = taken;
+      record_chunk = taken;
+      record_at = arena->records + u64(taken) * kScratchRecords;
+      record_room = kScratchRecords;
+    }
+    encode(ball, sites, m, *record_at++);
+    --record_room;
+    for (u32 i = 0; i < u32(ball.p) + ball.m; ++i) {
+      if (population_room == 0) {
+        const u32 taken = claim_chunk(*arena, 1);
+        if (taken == kNoChunk) return false;
+        arena->next_population[population_chunk] = taken;
+        population_chunk = taken;
+        population_at = arena->population + u64(taken) * kScratchPopulation;
+        population_room = kScratchPopulation;
       }
-      const u32 rank = i < ball.p ? interior_local[i] : shell_local[i - ball.p];
-      arena->population[u64(population_chunk) * kScratchPopulation + population_used++] = static_cast<u8>(rank);
+      *population_at++ = static_cast<u8>(i < ball.p ? interior_local[i] : shell_local[i - ball.p]);
+      --population_room;
     }
+    return true;
   }
 };
 

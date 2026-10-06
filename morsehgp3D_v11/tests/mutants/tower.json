@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 147,
+  "plancher": 148,
   "mutants": [
     {
       "id": "population_memo_owner_omis",
@@ -1174,16 +1174,16 @@
     {
       "id": "rang_local_interieur_faux",
       "fichier": "src/catalogue/leaf_batch.hpp",
-      "cherche": "      const u32 rank = i < ball.p ? interior_local[i] : shell_local[i - ball.p];\n",
-      "remplace": "      const u32 rank = i < ball.p ? interior_local[0] : shell_local[i - ball.p];\n",
+      "cherche": "      for (u32 i = 0; i < ball.p; ++i) population_at[i] = static_cast<u8>(interior_local[i]);\n",
+      "remplace": "      for (u32 i = 0; i < ball.p; ++i) population_at[i] = static_cast<u8>(interior_local[0]);\n",
       "porte": "mhgp11_tower_full_leaf_lanes",
       "note": "case du comptage : rangs locaux de l'interieur faux"
     },
     {
       "id": "reservoir_chaine_perdue",
       "fichier": "src/catalogue/leaf_batch.hpp",
-      "cherche": "    next[chunk] = taken;\n",
-      "remplace": "    next[chunk] = chunk;\n",
+      "cherche": "      arena->next_record[record_chunk] = taken;\n",
+      "remplace": "      arena->next_record[record_chunk] = record_chunk;\n",
       "porte": "mhgp11_tower_full_leaf_lanes",
       "note": "reservoir : le bloc pris n'est pas chaine, la copie relit la case"
     },
@@ -1194,6 +1194,14 @@
       "remplace": "    if (i != 0 && i % kScratchRecords == 1) chunk = arena.next_record[chunk];\n",
       "porte": "mhgp11_tower_full_leaf_lanes",
       "note": "copie des chaines : changement de bloc decale d'un enregistrement"
+    },
+    {
+      "id": "reservoir_population_lente",
+      "fichier": "src/catalogue/leaf_batch.hpp",
+      "cherche": "      *population_at++ = static_cast<u8>(i < ball.p ? interior_local[i] : shell_local[i - ball.p]);\n",
+      "remplace": "      *population_at++ = static_cast<u8>(i < ball.p ? interior_local[i] : shell_local[0]);\n",
+      "porte": "mhgp11_tower_full_leaf_lanes",
+      "note": "chemin lent du puits (population a cheval sur deux blocs) : rangs de coquille faux"
     }
   ]
 }

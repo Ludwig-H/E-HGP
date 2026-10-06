@@ -22,6 +22,7 @@ import shutil
 import struct
 import subprocess
 import sys
+import tempfile
 import time
 
 MODES = {'cpu': 16379, 'gpu': 81915, 'gpu_rejoue': 212987}
@@ -58,11 +59,13 @@ def main():
     args = ap.parse_args()
     out = args.out
     out.mkdir(parents=True, exist_ok=True)
-    work = out / 'work'
-    work.mkdir(exist_ok=True)
+    # Nuages et dumps hors du dossier de sortie (un dump K10 pese 272 Mo : il depassait le plafond des resultats de
+    # la session G4 reservoir2) ; seul gpu_sanitizer.json est publie.
+    work = Path(tempfile.mkdtemp(prefix='mhgp11-gpu-sanitizer-'))
     report = {'schema': 'ehgp.v11.gpu_sanitizer.v1', 'bench': str(args.bench), 'runs': [], 'sanitizer': []}
 
     def finish(verdict):
+        shutil.rmtree(work, ignore_errors=True)
         report['verdict'] = verdict
         (out / 'gpu_sanitizer.json').write_text(json.dumps(report, indent=1, sort_keys=True) + '\n')
         print('gpu_sanitizer_verdict ' + verdict)
