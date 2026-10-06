@@ -1,0 +1,185 @@
+{
+  "checks": 108,
+  "outlier_birth": {
+    "P": [
+      "0",
+      "6",
+      "12"
+    ],
+    "added": [
+      "1"
+    ],
+    "after": [
+      [
+        "-1",
+        "2"
+      ]
+    ],
+    "before": [],
+    "k": 2,
+    "radius": "2"
+  },
+  "outlier_bridge": {
+    "P": [
+      "0",
+      "2",
+      "5"
+    ],
+    "added": [
+      "3"
+    ],
+    "after": [
+      [
+        "0",
+        "5"
+      ]
+    ],
+    "before": [
+      [
+        "0",
+        "2"
+      ],
+      [
+        "3",
+        "4"
+      ]
+    ],
+    "k": 2,
+    "radius": "2"
+  },
+  "quantification_collision": {
+    "P": [
+      "1/10",
+      "1/5",
+      "10",
+      "20"
+    ],
+    "epsilon": "1/5",
+    "labelled_quantized": [
+      "0",
+      "0",
+      "10",
+      "20"
+    ],
+    "old_component": [
+      [
+        "1/10",
+        "1/5"
+      ]
+    ],
+    "unique_quantized": [
+      "0",
+      "10",
+      "20"
+    ],
+    "unique_region_at_r_plus_epsilon": []
+  },
+  "same_component_alpha_jump": {
+    "P": [
+      [
+        "-4",
+        "0"
+      ],
+      [
+        "4",
+        "0"
+      ],
+      [
+        "1",
+        "2"
+      ]
+    ],
+    "delta": "1/100",
+    "general_formula": "lower bound = (1+delta)*8/sqrt(29), paired displacement = 8*delta; 0<delta<1/10 suffices",
+    "h0_before_after": [
+      1,
+      1
+    ],
+    "h1_before_after": [
+      0,
+      0
+    ],
+    "level_squared": "377/16",
+    "lower_bound_squared_over_displacement_squared": "10201/29",
+    "new_active_edges": [
+      [
+        0,
+        2
+      ],
+      [
+        1,
+        2
+      ]
+    ],
+    "new_face_date": "3845777/160000",
+    "new_scale": "101/100",
+    "old_active_edges": [
+      [
+        0,
+        1
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        1,
+        2
+      ]
+    ],
+    "old_face_date": "3694977/160000",
+    "old_scale": "99/100",
+    "paired_displacement_squared": "4/625",
+    "representative_hausdorff_lower_bound_squared": "40804/18125"
+  },
+  "same_cut_component_loss": {
+    "P": [
+      "0",
+      "2",
+      "100",
+      "101"
+    ],
+    "P_prime": [
+      "-1/10",
+      "21/10",
+      "100",
+      "101"
+    ],
+    "after": [
+      [
+        "100",
+        "101"
+      ]
+    ],
+    "before": [
+      [
+        "1",
+        "1"
+      ],
+      [
+        "100",
+        "101"
+      ]
+    ],
+    "epsilon": "1/10",
+    "free_parameter_L": "100",
+    "region_hausdorff_lower_bound": "99"
+  },
+  "scope": "Independent rational finite cases; no native code, cloud, performance, or general mosaic implementation.",
+  "status": "conforme",
+  "subsampling": {
+    "P": [
+      "1/10",
+      "1/5",
+      "10",
+      "20"
+    ],
+    "sample": [
+      "1/10",
+      "10",
+      "20"
+    ],
+    "sample_region_at_r_plus_net_error": [],
+    "support_hausdorff": "1/10"
+  }
+}

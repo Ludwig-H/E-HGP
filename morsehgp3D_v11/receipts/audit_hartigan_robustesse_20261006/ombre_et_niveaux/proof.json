@@ -1,0 +1,233 @@
+{
+  "source_pin": "ee2df036282cad79dbb233934d5c3880243004cf",
+  "reply_sha256": "221b629413e5d05a57d1358659a4c3842e8e842fcf14a7e29b0a8208ae5ec673",
+  "scope": "exact examples only; no general alpha construction or native execution",
+  "Q4_shadow": {
+    "P": [
+      0,
+      2,
+      4
+    ],
+    "k": 2,
+    "r2": "1",
+    "components": [
+      {
+        "Q": [
+          0,
+          2
+        ],
+        "omega_component": [
+          "1"
+        ],
+        "shadow_interval": [
+          0,
+          2
+        ],
+        "offset_trace_P": [
+          0,
+          2
+        ],
+        "shadow_trace_P": [
+          0,
+          2
+        ]
+      },
+      {
+        "Q": [
+          2,
+          4
+        ],
+        "omega_component": [
+          "3"
+        ],
+        "shadow_interval": [
+          2,
+          4
+        ],
+        "offset_trace_P": [
+          2,
+          4
+        ],
+        "shadow_trace_P": [
+          2,
+          4
+        ]
+      }
+    ],
+    "omega_component_count": 2,
+    "union_shadow_component_count": 1,
+    "common_covered_site": 2,
+    "j0_algebra_only": {
+      "I": [
+        2
+      ],
+      "U": [
+        0,
+        4
+      ],
+      "j": 0,
+      "union_actual_Q": [
+        2
+      ],
+      "I_union_U": [
+        0,
+        2,
+        4
+      ]
+    }
+  },
+  "Q5_fixed_future_cells": {
+    "P": {
+      "A": [
+        0,
+        6
+      ],
+      "B": [
+        4,
+        6
+      ],
+      "C": [
+        2,
+        7
+      ],
+      "D": [
+        2,
+        0
+      ]
+    },
+    "k": 1,
+    "circles": {
+      "ABC": {
+        "center": [
+          "2",
+          "9/2"
+        ],
+        "r2": "25/4",
+        "other_site": "D",
+        "other_distance2": "81/4"
+      },
+      "ABD": {
+        "center": [
+          "2",
+          "10/3"
+        ],
+        "r2": "100/9",
+        "other_site": "C",
+        "other_distance2": "121/9"
+      }
+    },
+    "cell_births_r2": {
+      "A": "0",
+      "B": "0",
+      "C": "0",
+      "D": "0",
+      "AB": "25/4",
+      "AC": "5/4",
+      "AD": "10",
+      "BC": "5/4",
+      "BD": "10",
+      "ABC": "25/4",
+      "ABD": "100/9"
+    },
+    "AB_dual_xy": {
+      "x": "2",
+      "y_interval": [
+        "10/3",
+        "9/2"
+      ]
+    },
+    "locally_removed_same_birth_pair": [
+      "AB",
+      "ABC"
+    ],
+    "initial_AB_triangle_cofaces": [
+      "ABC"
+    ],
+    "future_AB_triangle_cofaces": [
+      "ABC",
+      "ABD"
+    ],
+    "missing_faces_in_proposed_static_L": [
+      [
+        "ABD",
+        "AB"
+      ]
+    ],
+    "ABD_same_birth_mates_in_fixed_cells": []
+  },
+  "Q5_level_examples": {
+    "finite_node": {
+      "P": [
+        0,
+        2,
+        10
+      ],
+      "k": 2,
+      "birth_r": 1,
+      "death_r": 5,
+      "before_death_axial_interval": [
+        "2-r",
+        "r"
+      ],
+      "A_node_left_limit": [
+        [
+          1,
+          0,
+          0
+        ]
+      ],
+      "growth_samples": [
+        {
+          "r": "1",
+          "later_r": "3",
+          "new_axial_point": "3"
+        },
+        {
+          "r": "3/2",
+          "later_r": "13/4",
+          "new_axial_point": "13/4"
+        },
+        {
+          "r": "2",
+          "later_r": "7/2",
+          "new_axial_point": "7/2"
+        },
+        {
+          "r": "4",
+          "later_r": "9/2",
+          "new_axial_point": "9/2"
+        },
+        {
+          "r": "9/2",
+          "later_r": "19/4",
+          "new_axial_point": "19/4"
+        },
+        {
+          "r": "499/100",
+          "later_r": "999/200",
+          "new_axial_point": "999/200"
+        }
+      ]
+    },
+    "root": {
+      "P": [
+        0,
+        2
+      ],
+      "k": 2,
+      "birth_r": 1,
+      "death_r": "infinity",
+      "A_root_all_r_ge_1": [
+        [
+          1,
+          0,
+          0
+        ]
+      ],
+      "Omega_root_axial_interval": [
+        "2-r",
+        "r"
+      ]
+    }
+  }
+}

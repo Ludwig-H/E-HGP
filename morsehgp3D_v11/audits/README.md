@@ -1,20 +1,20 @@
 # Audits courants de la v11
 
 6 octobre 2026. Cadre : `exploration_v11_hors_registre / cpu_reference /
-quantized_u21_input_only / not_claimed`. Sept notes actives maintenues en
+quantized_u21_input_only / not_claimed`. Notes actives maintenues en
 place ; preuves et propositions détaillées dans les reçus immuables.
 
-**Polyèdre de Hartigan : réponse aux cinq questions mathématiques.**
-Retenir la mosaïque d'ordre k filtrée par le rayon du k-ième voisin.
-Les incidences attribuent les cellules aux nœuds ; leurs barycentres peuvent
-tomber dans une autre composante dense. DTM, union des boules critiques et
-frontière seule ne conservent pas automatiquement la hiérarchie. La
-[réponse détaillée](../receipts/audit_hartigan_delaunay_20261006/README.md)
-donne les preuves, six petits contre-exemples rejoués et un certificat
-d'effondrement compatible avec les dates. Elle part des régions témoins
-du manuscrit et explicite le raccord aux définitions et théorèmes de ses
-deux premières parties, relues à la demande de l'utilisateur. Aucun transfert
-direct de Wrap ni constructeur géométrique qualifié.
+**Polyèdre : construction adoptée, réponse sur la robustesse déposée.**
+La [première réponse](../receipts/audit_hartigan_delaunay_20261006/README.md)
+fixe la mosaïque d'ordre k et son raccord au manuscrit. La
+[suite à ee2df0362](../receipts/audit_hartigan_robustesse_20261006/README.md)
+propose des effondrements filtrés à sommets protégés : homotopie,
+couverture exacte et borne de forme par composante. Elle corrige la
+prétendue innocuité de moins de k aberrants, distingue les stabilités
+topologique et géométrique, et montre pourquoi une réduction doit tenir
+compte des cofaces futures. L'ombre est acceptée comme rendu identifié,
+sans utiliser ses contacts pour fusionner les nœuds. Preuves bornées
+normal/−O ; aucun constructeur ni port natif qualifié.
 
 **Placement : perte de l'option corrigée en 9d10de213.** La porte G4
 corrigée observe des plans non nuls ; le premier essai à zéro plan reste
@@ -78,6 +78,7 @@ ne se transfèrent pas aux modifications en cours.
 - [Réponse du développeur](REPONSE_CLAUDE_SUPPORTS_20261004.md).
 - [Question du développeur sur les 100 ms](QUESTION_CLAUDE_VITESSE_100MS_20261004.md).
 - [Question du développeur sur le polyèdre d'ordre k](QUESTION_CLAUDE_POLYEDRE_ORDRE_K_20261006.md).
+- [Adoption et questions sur sa robustesse](REPONSE_CLAUDE_POLYEDRE_ORDRE_K_20261006.md).
 - [Audit indépendant maintenu par son auteur](AUDIT_OUVERTURE_ET_REPRISE_V10_20261002.md).
 
 L'[audit général](../receipts/audit_geant_20261005/README.md), les notes et

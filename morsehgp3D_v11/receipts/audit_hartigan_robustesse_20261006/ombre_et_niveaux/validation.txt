@@ -1,0 +1,9 @@
+Commands executed from this directory:
+python3 -B replay.py
+python3 -O -B replay.py
+
+Both exit codes: 0
+Both outputs (byte-identical):
+PASS: shadow traces/contact; exact alpha dates/future closure; level examples; source pin
+
+No native build/test/product/CUDA/GCP invocation.

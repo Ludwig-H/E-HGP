@@ -1,0 +1,44 @@
+{
+  "pin": "ee2df036282cad79dbb233934d5c3880243004cf",
+  "contexts": [
+    {
+      "path": "morsehgp3D_v11/audits/REPONSE_CLAUDE_POLYEDRE_ORDRE_K_20261006.md",
+      "bytes": 5846,
+      "sha256": "221b629413e5d05a57d1358659a4c3842e8e842fcf14a7e29b0a8208ae5ec673"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/audit_hartigan_delaunay_20261006/README.md",
+      "bytes": 33390,
+      "sha256": "5be485b9c1c50c3b7d0e76c31af9ee9ec477727f65a0094d62f53ba27311fb5c"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "bytes": 75250,
+      "sha256": "9cd42081357b1bb9840040035cbe2b36f1dd6c8688809ba22a984b99bf66a0b6"
+    }
+  ],
+  "thesis_bridge": "The first response above, published at d2be6bdc7efb954e64cde25572217963634a9f58, contains the manuscript reading and the proofs reused here; this response treats the five follow-up questions.",
+  "primary_sources": [
+    {
+      "authors": "Andrew J. Blumberg; Michael Lesnick",
+      "title": "Stability of 2-Parameter Persistent Homology",
+      "url": "https://arxiv.org/abs/2010.09628",
+      "use": "Framework for position/mass perturbations of the multicover; elementary ball-count inequalities proved in the response."
+    },
+    {
+      "author": "Robin Forman",
+      "title": "Morse Theory for Cell Complexes",
+      "url": "https://webhomes.maths.ed.ac.uk/~v1ranick/papers/forman5.pdf",
+      "locations": "Section 1 and Theorem 3.3",
+      "use": "Regular cell complexes and elementary collapses; this response additionally requires filtered compatibility and retained original vertices."
+    },
+    {
+      "author": "Angel Javier Alonso",
+      "title": "A Sparse Multicover Bifiltration of Linear Size",
+      "venue": "SoCG 2025, article 6",
+      "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol332-socg2025/LIPIcs.SoCG.2025.6/LIPIcs.SoCG.2025.6.pdf",
+      "locations": "Theorem 8 (6:7); Theorems 14-15 (6:10); Theorem 18 (6:11)",
+      "use": "Separate approximate model: two radius inclusions, weakly equivalent simplicial bifiltration, linear size at fixed dimension/precision. No native implementation or embedded-rendering guarantee inferred."
+    }
+  ]
+}

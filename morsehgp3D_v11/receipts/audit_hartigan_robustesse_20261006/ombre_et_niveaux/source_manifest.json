@@ -1,0 +1,20 @@
+{
+  "pin": "ee2df036282cad79dbb233934d5c3880243004cf",
+  "files": [
+    {
+      "path": "morsehgp3D_v11/audits/REPONSE_CLAUDE_POLYEDRE_ORDRE_K_20261006.md",
+      "bytes": 5846,
+      "sha256": "221b629413e5d05a57d1358659a4c3842e8e842fcf14a7e29b0a8208ae5ec673"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/audit_hartigan_delaunay_20261006/README.md",
+      "bytes": 33390,
+      "sha256": "5be485b9c1c50c3b7d0e76c31af9ee9ec477727f65a0094d62f53ba27311fb5c"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "bytes": 75250,
+      "sha256": "9cd42081357b1bb9840040035cbe2b36f1dd6c8688809ba22a984b99bf66a0b6"
+    }
+  ]
+}

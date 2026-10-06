@@ -1,0 +1,89 @@
+{
+  "status": "PASS",
+  "source_pin": "ee2df036282cad79dbb233934d5c3880243004cf",
+  "scope": "Bounded independent Python stdlib/Fraction replay, no product import, compilation, native test, LiDAR benchmark or GCP action. General theorems rely on written proofs and cited primary sources.",
+  "python": "3.12.1",
+  "runs": [
+    {
+      "cwd": "robustesse",
+      "argv": [
+        "python3",
+        "-B",
+        "replay.py"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "123d26a5492b85736778a719c96280af5e6828f7020b19544aeeb6ce1292a5f9",
+      "stderr": "",
+      "matches_frozen_proof_bytes": true,
+      "checks": 108
+    },
+    {
+      "cwd": "robustesse",
+      "argv": [
+        "python3",
+        "-O",
+        "-B",
+        "replay.py"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "123d26a5492b85736778a719c96280af5e6828f7020b19544aeeb6ce1292a5f9",
+      "stderr": "",
+      "matches_frozen_proof_bytes": true,
+      "checks": 108
+    },
+    {
+      "cwd": "robustesse",
+      "argv": [
+        "sha256sum",
+        "-c",
+        "SHA256SUMS"
+      ],
+      "exit_code": 0,
+      "stdout": "README.md: OK\nattempts.json: OK\nproof.json: OK\nproof.optimized.json: OK\nreplay.py: OK\nsources.json: OK\n",
+      "stderr": ""
+    },
+    {
+      "cwd": "ombre_et_niveaux",
+      "argv": [
+        "python3",
+        "-B",
+        "replay.py"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "459464c990207a5357edce29850a6a8f5b1290fa1b6c598fdae5ab402d64a696",
+      "stderr": "",
+      "stdout": "PASS: shadow traces/contact; exact alpha dates/future closure; level examples; source pin\n"
+    },
+    {
+      "cwd": "ombre_et_niveaux",
+      "argv": [
+        "python3",
+        "-O",
+        "-B",
+        "replay.py"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "459464c990207a5357edce29850a6a8f5b1290fa1b6c598fdae5ab402d64a696",
+      "stderr": "",
+      "stdout": "PASS: shadow traces/contact; exact alpha dates/future closure; level examples; source pin\n"
+    },
+    {
+      "cwd": "ombre_et_niveaux",
+      "argv": [
+        "sha256sum",
+        "-c",
+        "SHA256SUMS"
+      ],
+      "exit_code": 0,
+      "stdout": "README.md: OK\nproof.json: OK\nreplay.py: OK\nsource_manifest.json: OK\nvalidation.txt: OK\n",
+      "stderr": ""
+    }
+  ],
+  "normal_optimized_outputs_identical": true,
+  "capsules_unchanged_after_replay": true,
+  "independent_read_reviews": {
+    "robustness_and_geometric_bounds": "no material error found",
+    "filtered_polyhedral_collapses_and_Alonso_theorems": "no material error found",
+    "shadow_labels_levels_and_future_cofaces": "no material error found"
+  }
+}

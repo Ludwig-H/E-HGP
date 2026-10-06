@@ -1,0 +1,21 @@
+{
+  "pin": "ee2df036282cad79dbb233934d5c3880243004cf",
+  "contexts": [
+    {
+      "path": "morsehgp3D_v11/audits/REPONSE_CLAUDE_POLYEDRE_ORDRE_K_20261006.md",
+      "commit": "ee2df036282cad79dbb233934d5c3880243004cf",
+      "blob": "245394bcad9f7317dcd8967b756a90bec470afb8",
+      "bytes": 5846,
+      "sha256": "221b629413e5d05a57d1358659a4c3842e8e842fcf14a7e29b0a8208ae5ec673"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/audit_hartigan_delaunay_20261006/README.md",
+      "commit": "ee2df036282cad79dbb233934d5c3880243004cf",
+      "blob": "9cbef3bbbaef417ecc2b0b15ec88ab2c0d9d3974",
+      "bytes": 33390,
+      "sha256": "5be485b9c1c50c3b7d0e76c31af9ee9ec477727f65a0094d62f53ba27311fb5c"
+    }
+  ],
+  "engine_sources_used": false,
+  "script_before_execution_sha256": "a206c621665467cf1a12810750425f50b03ca034dcae146a19ea41f89375fdb3"
+}

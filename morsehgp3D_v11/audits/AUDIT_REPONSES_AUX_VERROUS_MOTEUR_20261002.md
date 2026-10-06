@@ -8,6 +8,32 @@ aux reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 Note maintenue en place ; détails et échanges clos dans les reçus.
 
+## Robustesse et réduction : réponse à l'adoption ee2df0362
+
+Le développeur adopte la construction et pose
+[cinq questions complémentaires](REPONSE_CLAUDE_POLYEDRE_ORDRE_K_20261006.md).
+La [réponse et les preuves](../receipts/audit_hartigan_robustesse_20261006/README.md)
+donnent un premier contrat concret : **effondrements polyédriques filtrés,
+avec tous les sommets étiquetés protégés**. Le représentant réduit conserve
+l'homotopie filtrée, la couverture exacte des sites et la borne de Hausdorff
+r avec la région dense. Son écart à la mosaïque est borné par le diamètre
+maximal de ses cellules, sans cumul des suppressions ; la borne 4r/k
+exige la généricité en dimension trois.
+
+Les corrections importantes : moins de k points ajoutés peuvent créer
+une composante ou fusionner deux composantes en interagissant avec le nuage ;
+la stabilité topologique par déplacement apparié ne donne pas une stabilité
+géométrique du dessin à coupe fixe ; une face libre maintenant peut être
+nécessaire à une cellule future. Les contre-exemples sont rejoués en
+`Fraction`, normal/−O, sans moteur natif.
+
+**Ombre acceptée comme rendu déclaré.** Elle possède la bonne trace sur
+les sites et une borne de distance ≤r à sa composante, mais ses contacts
+ne déterminent pas les fusions. Conserver les dates, les propriétaires et
+le sens ouvert de la coupe pré-mort. Une piste publiée en 2025 propose
+une approximation de la multi-couverture de taille linéaire à précision
+fixée ; elle reste distincte du contrat exact et n'est pas un port qualifié.
+
 ## Polyèdre de Hartigan : réponse aux cinq questions du développeur
 
 **Question fd85f3bb5 : cible recentrée sur la composante de haute densité

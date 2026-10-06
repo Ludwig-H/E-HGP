@@ -1,0 +1,23 @@
+[
+  {
+    "command": [
+      "python3",
+      "-B",
+      "replay.py"
+    ],
+    "exit_code": 0,
+    "stdout_file": "proof.json",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python3",
+      "-O",
+      "-B",
+      "replay.py"
+    ],
+    "exit_code": 0,
+    "stdout_file": "proof.optimized.json",
+    "stderr": ""
+  }
+]
