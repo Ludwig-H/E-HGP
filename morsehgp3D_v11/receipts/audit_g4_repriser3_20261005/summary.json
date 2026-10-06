@@ -1,0 +1,3579 @@
+{
+  "all_declared_mutants_killed": true,
+  "archive_sha256": "e07952ce0ce4154f28d2bd859b2b3774615bce92341d9dc904df4a6107320cbc",
+  "audit_native_or_cloud_runs": 0,
+  "backend": "cpu_reference",
+  "ctest": {
+    "cmake_options": [
+      "-DCMAKE_BUILD_TYPE=Release",
+      "-DMHGP11_MUTANT_JOBS={threads}",
+      "-DMHGP11_COORD_BITS=18"
+    ],
+    "conforming": true,
+    "ctest_args": [
+      "-L",
+      "^mutant$"
+    ],
+    "ctest_log_sha256": "7de13ea5c45ccecf3210398c1938dd4cec3effbbaa33a9f27cc333ca5ad527f2",
+    "failed_tests": [],
+    "individual_campaign_names": [
+      "mhgp11_mutants_api",
+      "mhgp11_mutants_catalogue",
+      "mhgp11_mutants_cli",
+      "mhgp11_mutants_cloud",
+      "mhgp11_mutants_core",
+      "mhgp11_mutants_head",
+      "mhgp11_mutants_index",
+      "mhgp11_mutants_io",
+      "mhgp11_mutants_num",
+      "mhgp11_mutants_points",
+      "mhgp11_mutants_sched",
+      "mhgp11_mutants_supports",
+      "mhgp11_mutants_tower"
+    ],
+    "inventory_sha256": "b4535a8a464a7f0426f5bf37677fd9349d265d072b48746f243893dc7b52b020",
+    "junit_counts": {
+      "passed": 39
+    },
+    "junit_sha256": "864b3d9cc6058780b99a51f5e41fde6a99a73abebd758572f670b8741ce199b9",
+    "junit_state": "concordant",
+    "missing_tests": [],
+    "name": "mutants",
+    "other_selected_names": [
+      "mhgp11_mutants_api_manifest",
+      "mhgp11_mutants_api_manifest_opt",
+      "mhgp11_mutants_catalogue_manifest",
+      "mhgp11_mutants_catalogue_manifest_opt",
+      "mhgp11_mutants_cli_manifest",
+      "mhgp11_mutants_cli_manifest_opt",
+      "mhgp11_mutants_cloud_manifest",
+      "mhgp11_mutants_cloud_manifest_opt",
+      "mhgp11_mutants_core_manifest",
+      "mhgp11_mutants_core_manifest_opt",
+      "mhgp11_mutants_head_manifest",
+      "mhgp11_mutants_head_manifest_opt",
+      "mhgp11_mutants_index_manifest",
+      "mhgp11_mutants_index_manifest_opt",
+      "mhgp11_mutants_io_manifest",
+      "mhgp11_mutants_io_manifest_opt",
+      "mhgp11_mutants_num_manifest",
+      "mhgp11_mutants_num_manifest_opt",
+      "mhgp11_mutants_points_manifest",
+      "mhgp11_mutants_points_manifest_opt",
+      "mhgp11_mutants_sched_manifest",
+      "mhgp11_mutants_sched_manifest_opt",
+      "mhgp11_mutants_supports_manifest",
+      "mhgp11_mutants_supports_manifest_opt",
+      "mhgp11_mutants_tower_manifest",
+      "mhgp11_mutants_tower_manifest_opt"
+    ],
+    "reason": "",
+    "result_sha256": "be3b12b4155c63cebaa49f45bec5ff74188bc2e84baa1ea2d3db2b787c2589cc",
+    "selected_names": [
+      "mhgp11_mutants_api",
+      "mhgp11_mutants_api_manifest",
+      "mhgp11_mutants_api_manifest_opt",
+      "mhgp11_mutants_catalogue",
+      "mhgp11_mutants_catalogue_manifest",
+      "mhgp11_mutants_catalogue_manifest_opt",
+      "mhgp11_mutants_cli",
+      "mhgp11_mutants_cli_manifest",
+      "mhgp11_mutants_cli_manifest_opt",
+      "mhgp11_mutants_cloud",
+      "mhgp11_mutants_cloud_manifest",
+      "mhgp11_mutants_cloud_manifest_opt",
+      "mhgp11_mutants_core",
+      "mhgp11_mutants_core_manifest",
+      "mhgp11_mutants_core_manifest_opt",
+      "mhgp11_mutants_head",
+      "mhgp11_mutants_head_manifest",
+      "mhgp11_mutants_head_manifest_opt",
+      "mhgp11_mutants_index",
+      "mhgp11_mutants_index_manifest",
+      "mhgp11_mutants_index_manifest_opt",
+      "mhgp11_mutants_io",
+      "mhgp11_mutants_io_manifest",
+      "mhgp11_mutants_io_manifest_opt",
+      "mhgp11_mutants_num",
+      "mhgp11_mutants_num_manifest",
+      "mhgp11_mutants_num_manifest_opt",
+      "mhgp11_mutants_points",
+      "mhgp11_mutants_points_manifest",
+      "mhgp11_mutants_points_manifest_opt",
+      "mhgp11_mutants_sched",
+      "mhgp11_mutants_sched_manifest",
+      "mhgp11_mutants_sched_manifest_opt",
+      "mhgp11_mutants_supports",
+      "mhgp11_mutants_supports_manifest",
+      "mhgp11_mutants_supports_manifest_opt",
+      "mhgp11_mutants_tower",
+      "mhgp11_mutants_tower_manifest",
+      "mhgp11_mutants_tower_manifest_opt"
+    ],
+    "status": "ok",
+    "steps": [
+      {
+        "exit_code": 0,
+        "name": "configure",
+        "seconds": 1.0,
+        "status": "ok",
+        "timeout_seconds": 2100.0
+      },
+      {
+        "exit_code": 0,
+        "name": "build",
+        "seconds": 13.618,
+        "status": "ok",
+        "timeout_seconds": 2099.0
+      },
+      {
+        "exit_code": 0,
+        "name": "list",
+        "seconds": 0.032,
+        "status": "ok",
+        "timeout_seconds": 120
+      },
+      {
+        "exit_code": 0,
+        "name": "test",
+        "seconds": 1714.176,
+        "status": "ok",
+        "timeout_seconds": 2085.3
+      }
+    ],
+    "tests": {
+      "ctest_failed": 0,
+      "ctest_total": 39,
+      "failed": 0,
+      "not_run": 0,
+      "passed": 39,
+      "selected": 39
+    }
+  },
+  "data_manifest_sha256": "826643041e3336c1f0582e687a6c47595a3926e7a8f0541232282a9f7b9a6095",
+  "data_verified_remote": true,
+  "delivered_data_names": [
+    "lidar_ng00.ids.u32le",
+    "lidar_ng00.u32le",
+    "lidar_ng01.ids.u32le",
+    "lidar_ng01.u32le",
+    "lidar_ng02.ids.u32le",
+    "lidar_ng02.u32le",
+    "manifest.json",
+    "uniform_u18_n16000.ids.u32le",
+    "uniform_u18_n16000.u32le",
+    "uniform_u18_n32000.ids.u32le",
+    "uniform_u18_n32000.u32le",
+    "uniform_u18_n8000.ids.u32le",
+    "uniform_u18_n8000.u32le"
+  ],
+  "done": "0",
+  "execution_profile": "base_u18_with_declared_local_overrides",
+  "global_qualification_complete": false,
+  "individual_evidence": {
+    "member": "results/cmd/000_matrice/files/matrix/mutants/LastTest.log",
+    "method": "lignes_individuelles_classees_par_section_CTest",
+    "sha256": "b712b5428c320ed075ecc9329a10d2c322ed7d0e9da5faa5d8dbf463f3a04034"
+  },
+  "individual_json_report_members": [],
+  "individual_mutant_scope_conforming": true,
+  "limits": [
+    "Verdicts individuels lus dans LastTest.log et lies aux manifestes livres ; aucune conversion du nombre CTest en nombre de mutants.",
+    "Les refus de construction prevus sont separes des morts par code/ligne/signal/delai ; aucun refus de compilation accidentel ne constitue une mise a mort causale.",
+    "Les references refusees, les survivants, invalides et non juges sont comptabilises separement.",
+    "Les morts par signal ou delai, si observees, ne sont pas assimilees a des ecarts geometriques ; toutes les causes restent explicites.",
+    "Campagne complete, base u18 et profils locaux declares au pin 98a009550 ; aucun transfert vers les six campagnes u21 sans resultat de lancien L ou vers les sanitizers R4.",
+    "Rejeu dependant des archives locales et du commit Git ; aucun journal brut, binaire natif ou octet LiDAR copie."
+  ],
+  "matrix": {
+    "budget_seconds": 2100,
+    "complete": true,
+    "conforming": true,
+    "ended_utc": "2026-10-06T00:45:59Z",
+    "exit_code": 0,
+    "started_utc": "2026-10-06T00:17:10Z",
+    "summary_sha256": "f4e5d30909219b33d7f30282562129fb40e332eef7b728e55be0f6c1968abf85",
+    "thread_budget": 48
+  },
+  "missing_module_sections": [],
+  "modules": [
+    {
+      "ctest_verdict": "Passed",
+      "declared": 78,
+      "declared_effective_coord_bits_counts": {
+        "18": 78
+      },
+      "declared_local_options": [
+        {
+          "id": "poison_efface",
+          "options": [
+            "-DMHGP11_POISON=ON"
+          ]
+        }
+      ],
+      "floor": 78,
+      "individual_records": [
+        [
+          "priorite_plus_petit_k",
+          "TUE",
+          "code"
+        ],
+        [
+          "priorite_rang_de_la_raison",
+          "TUE",
+          "code"
+        ],
+        [
+          "priorite_refus_avant_succes",
+          "TUE",
+          "code"
+        ],
+        [
+          "fusion_garde_la_moins_prioritaire",
+          "TUE",
+          "code"
+        ],
+        [
+          "refus_sans_raison_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "result_depuis_issue_ok",
+          "TUE",
+          "code"
+        ],
+        [
+          "garde_bad_alloc_autre_raison",
+          "TUE",
+          "code"
+        ],
+        [
+          "code_de_sortie_invariant",
+          "TUE",
+          "code"
+        ],
+        [
+          "controle_inverse",
+          "TUE",
+          "code"
+        ],
+        [
+          "propagation_perdue",
+          "TUE",
+          "code"
+        ],
+        [
+          "refus_construit_une_valeur",
+          "TUE",
+          "construction"
+        ],
+        [
+          "acces_non_verifie",
+          "TUE",
+          "code"
+        ],
+        [
+          "statut_d_une_raison",
+          "TUE",
+          "code"
+        ],
+        [
+          "ordre_de_la_table",
+          "TUE",
+          "code"
+        ],
+        [
+          "garde_fast_math_retiree",
+          "TUE",
+          "code"
+        ],
+        [
+          "profil_de_20_bits_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "coordonnee_maximale_decalee",
+          "TUE",
+          "code"
+        ],
+        [
+          "identifiants_confondus",
+          "TUE",
+          "construction"
+        ],
+        [
+          "budget_depasse",
+          "TUE",
+          "code"
+        ],
+        [
+          "pic_non_suivi",
+          "TUE",
+          "code"
+        ],
+        [
+          "reservation_gardee_apres_echec",
+          "TUE",
+          "code"
+        ],
+        [
+          "liberation_non_comptee",
+          "TUE",
+          "code"
+        ],
+        [
+          "poison_efface",
+          "TUE",
+          "code"
+        ],
+        [
+          "garde_de_taille_retiree",
+          "TUE",
+          "code"
+        ],
+        [
+          "liberation_en_elements",
+          "TUE",
+          "code"
+        ],
+        [
+          "reallocation_sans_liberation",
+          "TUE",
+          "code"
+        ],
+        [
+          "admission_toujours_accordee",
+          "TUE",
+          "code"
+        ],
+        [
+          "csr_vide_toujours_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "csr_premier_decalage",
+          "TUE",
+          "code"
+        ],
+        [
+          "csr_decalages_decroissants",
+          "TUE",
+          "code"
+        ],
+        [
+          "csr_derniere_ligne_non_lue",
+          "TUE",
+          "code"
+        ],
+        [
+          "csr_taille_des_valeurs",
+          "TUE",
+          "code"
+        ],
+        [
+          "budget_fin_de_vie_muette",
+          "TUE",
+          "code"
+        ],
+        [
+          "pic_d_etage_non_remis",
+          "TUE",
+          "code"
+        ],
+        [
+          "fusion_avec_prefixe",
+          "TUE",
+          "code"
+        ],
+        [
+          "json_octets_hors_ascii_bruts",
+          "TUE",
+          "code"
+        ],
+        [
+          "registre_ecrase",
+          "TUE",
+          "code"
+        ],
+        [
+          "somme_non_saturee",
+          "TUE",
+          "code"
+        ],
+        [
+          "json_sans_echappement",
+          "TUE",
+          "code"
+        ],
+        [
+          "fusion_sans_durees",
+          "TUE",
+          "code"
+        ],
+        [
+          "cadre_plancher_ignore",
+          "TUE",
+          "code"
+        ],
+        [
+          "cadre_echec_non_compte",
+          "TUE",
+          "code"
+        ],
+        [
+          "cadre_inventaire_muet",
+          "TUE",
+          "code"
+        ],
+        [
+          "signal_admis",
+          "TUE",
+          "ligne"
+        ],
+        [
+          "code_non_compare",
+          "TUE",
+          "ligne"
+        ],
+        [
+          "ligne_non_exigee",
+          "TUE",
+          "code"
+        ],
+        [
+          "donnees_absentes_non_sautees",
+          "TUE",
+          "code"
+        ],
+        [
+          "lancement_non_distingue",
+          "TUE",
+          "ligne"
+        ],
+        [
+          "jeton_de_saut_usurpable",
+          "TUE",
+          "code"
+        ],
+        [
+          "jeton_de_saut_reemis",
+          "TUE",
+          "code"
+        ],
+        [
+          "temoin_du_refus_ignore",
+          "TUE",
+          "code"
+        ],
+        [
+          "jeton_du_refus_ignore",
+          "TUE",
+          "code"
+        ],
+        [
+          "refus_non_exige",
+          "TUE",
+          "code"
+        ],
+        [
+          "sonde_fast_math_retiree",
+          "TUE",
+          "code"
+        ],
+        [
+          "aides_label_inconnu_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "aides_fast_et_long_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "aides_code_hors_plage_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "aides_add_test_direct_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "aides_jumelle_retiree",
+          "TUE",
+          "code"
+        ],
+        [
+          "aides_jumelle_concurrente",
+          "TUE",
+          "code"
+        ],
+        [
+          "aides_arret_anormal_code_du_juge_inverse",
+          "TUE",
+          "code"
+        ],
+        [
+          "aides_bytecode_ecrit",
+          "TUE",
+          "code"
+        ],
+        [
+          "aides_mesure_non_serie",
+          "TUE",
+          "code"
+        ],
+        [
+          "aides_lidar_jamais_sautee",
+          "TUE",
+          "code"
+        ],
+        [
+          "registre_non_recursif",
+          "TUE",
+          "code"
+        ],
+        [
+          "propriete_interdite_admise",
+          "TUE",
+          "code"
+        ],
+        [
+          "saut_etranger_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "style_fonctions_longues_admises",
+          "TUE",
+          "code"
+        ],
+        [
+          "style_assert_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "style_dependances_non_jugees",
+          "TUE",
+          "code"
+        ],
+        [
+          "mutants_survivant_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "mutants_motif_multiple_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "mutants_temoin_saute_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "mutants_echec_sans_juge_tue",
+          "TUE",
+          "code"
+        ],
+        [
+          "arret_normal_accepte_comme_signal",
+          "TUE",
+          "code"
+        ],
+        [
+          "lancement_accepte_comme_signal",
+          "TUE",
+          "code"
+        ],
+        [
+          "signal_reel_refuse",
+          "TUE",
+          "code"
+        ],
+        [
+          "issue_d_une_autre_porte",
+          "TUE",
+          "code"
+        ]
+      ],
+      "killed_causes": {
+        "code": 73,
+        "construction": 2,
+        "ligne": 3
+      },
+      "manifest_sha256": "e8b86d073d9f899cf5428c4c518ee7596141ddb74538e6fe5248d38d0db85aae",
+      "module": "core",
+      "section_observed": true,
+      "states": {
+        "TUE": 78
+      },
+      "summary_line": {
+        "dont_construction": 2,
+        "dont_delai": 0,
+        "dont_signal": 0,
+        "mutants": 78,
+        "plancher": 78,
+        "tues": 78
+      },
+      "unjudged_ids": [],
+      "witness": "accepte_avant_jugements"
+    },
+    {
+      "ctest_verdict": "Passed",
+      "declared": 57,
+      "declared_effective_coord_bits_counts": {
+        "18": 26,
+        "21": 15,
+        "24": 16
+      },
+      "declared_local_options": [
+        {
+          "id": "checked_first_overflow_ignored_u24",
+          "options": [
+            "-DMHGP11_COORD_BITS=24"
+          ]
+        },
+        {
+          "id": "checked_term_overflow_ignored_u21",
+          "options": [
+            "-DMHGP11_COORD_BITS=21"
+          ]
+        },
+        {
+          "id": "checked_sum_overflow_ignored_u24",
+          "options": [
+            "-DMHGP11_COORD_BITS=24"
+          ]
+        },
+        {
+          "id": "checked_fast_power_zero_u21",
+          "options": [
+            "-DMHGP11_COORD_BITS=21"
+          ]
+        },
+        {
+          "id": "checked_fast_side_inverted_u24",
+          "options": [
+            "-DMHGP11_COORD_BITS=24"
+          ]
+        },
+        {
+          "id": "checked_partial_bounds_published_u21",
+          "options": [
+            "-DMHGP11_COORD_BITS=21"
+          ]
+        },
+        {
+          "id": "distance_coordinate_truncated_u24",
+          "options": [
+            "-DMHGP11_COORD_BITS=24"
+          ]
+        },
+        {
+          "id": "distance_difference_is_sum_u21",
+          "options": [
+            "-DMHGP11_COORD_BITS=21"
+          ]
+        },
+        {
+          "id": "region_line_contact_lost_u24",
+          "options": [
+            "-DMHGP11_COORD_BITS=24"
+          ]
+        },
+        {
+          "id": "region_line_axis_omitted_u21",
+          "options": [
+            "-DMHGP11_COORD_BITS=21"
+          ]
+        },
+        {
+          "id": "region_line_determinant_sign_u24",
+          "options": [
+            "-DMHGP11_COORD_BITS=24"
+          ]
+        },
+        {
+          "id": "bounds_linear_upper_inverted_u24",
+          "options": [
+            "-DMHGP11_COORD_BITS=24"
+          ]
+        },
+        {
+          "id": "bounds_wide_upper_omitted_u21",
+          "options": [
+            "-DMHGP11_COORD_BITS=21"
+          ]
+        },
+        {
+          "id": "candidate_side_inverse_u24",
+          "options": [
+            "-DMHGP11_COORD_BITS=24"
+          ]
+        },
+        {
+          "id": "candidate_ancre_perdue_u21",
+          "options": [
+            "-DMHGP11_COORD_BITS=21"
+          ]
+        },
+        {
+          "id": "candidate_niveau_zero_u24",
+          "options": [
+            "-DMHGP11_COORD_BITS=24"
+          ]
+        },
+        {
+          "id": "presentation_q3_taguee_q4_u21",
+          "options": [
+            "-DMHGP11_COORD_BITS=21"
+          ]
+        },
+        {
+          "id": "power_natif_q4_signe_inverse_u24",
+          "options": [
+            "-DMHGP11_COORD_BITS=24"
+          ]
+        },
+        {
+          "id": "power_large_q3_termes_omis_u21",
+          "options": [
+            "-DMHGP11_COORD_BITS=21"
+          ]
+        },
+        {
+          "id": "side_natif_coquille_exterieure_u24",
+          "options": [
+            "-DMHGP11_COORD_BITS=24"
+          ]
+        },
+        {
+          "id": "centers_denominator_swapped_u24",
+          "options": [
+            "-DMHGP11_COORD_BITS=24"
+          ]
+        },
+        {
+          "id": "centers_last_axis_omitted_u21",
+          "options": [
+            "-DMHGP11_COORD_BITS=21"
+          ]
+        },
+        {
+          "id": "certificate_denominator_boundary",
+          "options": [
+            "-DMHGP11_COORD_BITS=21"
+          ]
+        },
+        {
+          "id": "certificate_numerator_boundary",
+          "options": [
+            "-DMHGP11_COORD_BITS=24"
+          ]
+        },
+        {
+          "id": "certificate_factory_flag_absent",
+          "options": [
+            "-DMHGP11_COORD_BITS=21"
+          ]
+        },
+        {
+          "id": "orientation_native_sign_inverted_u21",
+          "options": [
+            "-DMHGP11_COORD_BITS=21"
+          ]
+        },
+        {
+          "id": "orientation_wide_sign_inverted_u24",
+          "options": [
+            "-DMHGP11_COORD_BITS=24"
+          ]
+        },
+        {
+          "id": "orientation_materialized_certificate_lost",
+          "options": [
+            "-DMHGP11_COORD_BITS=21"
+          ]
+        },
+        {
+          "id": "orientation_numerator_boundary",
+          "options": [
+            "-DMHGP11_COORD_BITS=24"
+          ]
+        },
+        {
+          "id": "q4_presentation_zero_wide_u24",
+          "options": [
+            "-DMHGP11_COORD_BITS=24"
+          ]
+        },
+        {
+          "id": "candidat_q3_tague_q4_u21",
+          "options": [
+            "-DMHGP11_COORD_BITS=21"
+          ]
+        }
+      ],
+      "floor": 57,
+      "individual_records": [
+        [
+          "checked_first_overflow_ignored_u24",
+          "TUE",
+          "code"
+        ],
+        [
+          "checked_term_overflow_ignored_u21",
+          "TUE",
+          "code"
+        ],
+        [
+          "checked_sum_overflow_ignored_u24",
+          "TUE",
+          "code"
+        ],
+        [
+          "checked_fast_power_zero_u21",
+          "TUE",
+          "code"
+        ],
+        [
+          "checked_fast_side_inverted_u24",
+          "TUE",
+          "code"
+        ],
+        [
+          "checked_partial_bounds_published_u21",
+          "TUE",
+          "code"
+        ],
+        [
+          "distance_last_axis_omitted",
+          "TUE",
+          "code"
+        ],
+        [
+          "distance_coordinate_truncated_u24",
+          "TUE",
+          "code"
+        ],
+        [
+          "distance_difference_is_sum_u21",
+          "TUE",
+          "code"
+        ],
+        [
+          "region_pair_contact_lost",
+          "TUE",
+          "code"
+        ],
+        [
+          "region_line_contact_lost_u24",
+          "TUE",
+          "code"
+        ],
+        [
+          "region_line_test_omitted",
+          "TUE",
+          "code"
+        ],
+        [
+          "region_line_axis_omitted_u21",
+          "TUE",
+          "code"
+        ],
+        [
+          "region_line_determinant_sign_u24",
+          "TUE",
+          "code"
+        ],
+        [
+          "region_upper_domain_unguarded",
+          "TUE",
+          "code"
+        ],
+        [
+          "bounds_anchor_inside_ignored",
+          "TUE",
+          "code"
+        ],
+        [
+          "bounds_linear_upper_inverted_u24",
+          "TUE",
+          "code"
+        ],
+        [
+          "bounds_wide_upper_omitted_u21",
+          "TUE",
+          "code"
+        ],
+        [
+          "bounds_zero_width_refused",
+          "TUE",
+          "code"
+        ],
+        [
+          "candidate_side_inverse_u24",
+          "TUE",
+          "code"
+        ],
+        [
+          "candidate_ancre_perdue_u21",
+          "TUE",
+          "code"
+        ],
+        [
+          "candidate_niveau_zero_u24",
+          "TUE",
+          "code"
+        ],
+        [
+          "presentation_q3_taguee_q4_u21",
+          "TUE",
+          "code"
+        ],
+        [
+          "power_natif_q4_signe_inverse_u24",
+          "TUE",
+          "code"
+        ],
+        [
+          "power_large_q3_termes_omis_u21",
+          "TUE",
+          "code"
+        ],
+        [
+          "side_natif_coquille_exterieure_u24",
+          "TUE",
+          "code"
+        ],
+        [
+          "retenue_addition_perdue",
+          "TUE",
+          "code"
+        ],
+        [
+          "emprunt_perdu",
+          "TUE",
+          "code"
+        ],
+        [
+          "produit_signe_perdu",
+          "TUE",
+          "code"
+        ],
+        [
+          "conversion_borne_large",
+          "TUE",
+          "code"
+        ],
+        [
+          "denominateur_nul_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "ordre_niveaux_inverse",
+          "TUE",
+          "code"
+        ],
+        [
+          "milieu_denominateur_un",
+          "TUE",
+          "code"
+        ],
+        [
+          "angle_droit_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "convexite_face_admise",
+          "TUE",
+          "code"
+        ],
+        [
+          "centers_anchor_omitted",
+          "TUE",
+          "code"
+        ],
+        [
+          "centers_denominator_swapped_u24",
+          "TUE",
+          "code"
+        ],
+        [
+          "centers_last_axis_omitted_u21",
+          "TUE",
+          "code"
+        ],
+        [
+          "certificate_denominator_boundary",
+          "TUE",
+          "code"
+        ],
+        [
+          "certificate_numerator_boundary",
+          "TUE",
+          "code"
+        ],
+        [
+          "certificate_factory_flag_absent",
+          "TUE",
+          "code"
+        ],
+        [
+          "orientation_native_sign_inverted_u21",
+          "TUE",
+          "code"
+        ],
+        [
+          "orientation_wide_sign_inverted_u24",
+          "TUE",
+          "code"
+        ],
+        [
+          "orientation_materialized_certificate_lost",
+          "TUE",
+          "code"
+        ],
+        [
+          "orientation_numerator_boundary",
+          "TUE",
+          "code"
+        ],
+        [
+          "q4_presentation_zero_native",
+          "TUE",
+          "code"
+        ],
+        [
+          "q4_presentation_zero_wide_u24",
+          "TUE",
+          "code"
+        ],
+        [
+          "q4_presentation_materialize_lost",
+          "TUE",
+          "code"
+        ],
+        [
+          "triangle_collinear_non_strict",
+          "TUE",
+          "code"
+        ],
+        [
+          "triangle_non_strict_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "bound_signs_native_swapped",
+          "TUE",
+          "code"
+        ],
+        [
+          "candidat_q3_tague_q4_u21",
+          "TUE",
+          "code"
+        ],
+        [
+          "candidat_q3_niveau_brut_change",
+          "TUE",
+          "code"
+        ],
+        [
+          "carre_parfait_hors_classe",
+          "TUE",
+          "code"
+        ],
+        [
+          "egalite_non_certifiee",
+          "TUE",
+          "code"
+        ],
+        [
+          "budget_ignore",
+          "TUE",
+          "code"
+        ],
+        [
+          "encadrement_decale",
+          "TUE",
+          "code"
+        ]
+      ],
+      "killed_causes": {
+        "code": 57
+      },
+      "manifest_sha256": "d66e85e3ecf1c2a9548cd9ebfe76939e7ac962b63e1df48464df400232ec60d5",
+      "module": "num",
+      "section_observed": true,
+      "states": {
+        "TUE": 57
+      },
+      "summary_line": {
+        "dont_construction": 0,
+        "dont_delai": 0,
+        "dont_signal": 0,
+        "mutants": 57,
+        "plancher": 57,
+        "tues": 57
+      },
+      "unjudged_ids": [],
+      "witness": "accepte_avant_jugements"
+    },
+    {
+      "ctest_verdict": "Passed",
+      "declared": 8,
+      "declared_effective_coord_bits_counts": {
+        "18": 8
+      },
+      "declared_local_options": [],
+      "floor": 8,
+      "individual_records": [
+        [
+          "grain_zero_normalise",
+          "TUE",
+          "code"
+        ],
+        [
+          "derniere_tranche_omise",
+          "TUE",
+          "code"
+        ],
+        [
+          "grain_ignore",
+          "TUE",
+          "code"
+        ],
+        [
+          "dernier_outcome",
+          "TUE",
+          "code"
+        ],
+        [
+          "arret_apres_refus",
+          "TUE",
+          "code"
+        ],
+        [
+          "bad_alloc_invariant",
+          "TUE",
+          "code"
+        ],
+        [
+          "zero_contourne_busy",
+          "TUE",
+          "code"
+        ],
+        [
+          "thread_refusal_reason",
+          "TUE",
+          "code"
+        ]
+      ],
+      "killed_causes": {
+        "code": 8
+      },
+      "manifest_sha256": "77bef38960dd139ac8895474dd67ab3773dd5ba4a442265bf8deffb57d638d39",
+      "module": "sched",
+      "section_observed": true,
+      "states": {
+        "TUE": 8
+      },
+      "summary_line": {
+        "dont_construction": 0,
+        "dont_delai": 0,
+        "dont_signal": 0,
+        "mutants": 8,
+        "plancher": 8,
+        "tues": 8
+      },
+      "unjudged_ids": [],
+      "witness": "accepte_avant_jugements"
+    },
+    {
+      "ctest_verdict": "Passed",
+      "declared": 16,
+      "declared_effective_coord_bits_counts": {
+        "18": 16
+      },
+      "declared_local_options": [],
+      "floor": 16,
+      "individual_records": [
+        [
+          "largeur_zero_admise",
+          "TUE",
+          "code"
+        ],
+        [
+          "cardinal_sentinelle_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "domaine_z_ignore",
+          "TUE",
+          "code"
+        ],
+        [
+          "borne_maximale_refusee",
+          "TUE",
+          "code"
+        ],
+        [
+          "identifiants_doubles_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "chiffre_haut_identifiant_omis",
+          "TUE",
+          "code"
+        ],
+        [
+          "chiffre_haut_morton_omis",
+          "TUE",
+          "code"
+        ],
+        [
+          "passe_radix_non_stable",
+          "TUE",
+          "code"
+        ],
+        [
+          "multiplicite_unitaire",
+          "TUE",
+          "code"
+        ],
+        [
+          "pointid_remplace_par_rang",
+          "TUE",
+          "code"
+        ],
+        [
+          "dernier_decalage_incomplet",
+          "TUE",
+          "code"
+        ],
+        [
+          "histogrammes_conserves_au_remplissage",
+          "TUE",
+          "code"
+        ],
+        [
+          "tampon_tri_conserve_au_remplissage",
+          "TUE",
+          "code"
+        ],
+        [
+          "poids_deplace_non_vide",
+          "TUE",
+          "code"
+        ],
+        [
+          "construction_publique",
+          "TUE",
+          "code"
+        ],
+        [
+          "vue_x_mutable",
+          "TUE",
+          "code"
+        ]
+      ],
+      "killed_causes": {
+        "code": 16
+      },
+      "manifest_sha256": "a5c652eac13075e49ce61ce1038af603fe859d1f353f338ead8d47024fa77b3b",
+      "module": "cloud",
+      "section_observed": true,
+      "states": {
+        "TUE": 16
+      },
+      "summary_line": {
+        "dont_construction": 0,
+        "dont_delai": 0,
+        "dont_signal": 0,
+        "mutants": 16,
+        "plancher": 16,
+        "tues": 16
+      },
+      "unjudged_ids": [],
+      "witness": "accepte_avant_jugements"
+    },
+    {
+      "ctest_verdict": "Passed",
+      "declared": 22,
+      "declared_effective_coord_bits_counts": {
+        "18": 22
+      },
+      "declared_local_options": [],
+      "floor": 22,
+      "individual_records": [
+        [
+          "sha_tronque",
+          "TUE",
+          "code"
+        ],
+        [
+          "sha_longueur_en_octets",
+          "TUE",
+          "code"
+        ],
+        [
+          "lecture_tronquee_acceptee",
+          "TUE",
+          "code"
+        ],
+        [
+          "fin_non_controlee",
+          "TUE",
+          "code"
+        ],
+        [
+          "type_non_regulier_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "controle_apres_allocation",
+          "TUE",
+          "code"
+        ],
+        [
+          "admission_omise",
+          "TUE",
+          "code"
+        ],
+        [
+          "lecture_gros_boutiste",
+          "TUE",
+          "code"
+        ],
+        [
+          "conflit_ignore",
+          "TUE",
+          "code"
+        ],
+        [
+          "orphelin_ignore",
+          "TUE",
+          "code"
+        ],
+        [
+          "renommage_ecrasant",
+          "TUE",
+          "code"
+        ],
+        [
+          "pending_non_retire",
+          "TUE",
+          "code"
+        ],
+        [
+          "publication_defaite_au_destructeur",
+          "TUE",
+          "code"
+        ],
+        [
+          "manifeste_avant_donnees",
+          "TUE",
+          "code"
+        ],
+        [
+          "nom_reserve_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "nom_double_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "ecriture_non_controlee",
+          "TUE",
+          "code"
+        ],
+        [
+          "empreinte_ecriture_omise",
+          "TUE",
+          "code"
+        ],
+        [
+          "bourrage_toujours",
+          "TUE",
+          "code"
+        ],
+        [
+          "mots_gros_boutistes",
+          "TUE",
+          "code"
+        ],
+        [
+          "retrait_sans_renommage",
+          "TUE",
+          "code"
+        ],
+        [
+          "empreinte_manifeste_apres_publication",
+          "TUE",
+          "code"
+        ]
+      ],
+      "killed_causes": {
+        "code": 22
+      },
+      "manifest_sha256": "e65db98361afb0fbb25a6013a6315288ac8ebe3ac67d5699e44d33f512a8d2dd",
+      "module": "io",
+      "section_observed": true,
+      "states": {
+        "TUE": 22
+      },
+      "summary_line": {
+        "dont_construction": 0,
+        "dont_delai": 0,
+        "dont_signal": 0,
+        "mutants": 22,
+        "plancher": 22,
+        "tues": 22
+      },
+      "unjudged_ids": [],
+      "witness": "accepte_avant_jugements"
+    },
+    {
+      "ctest_verdict": "Passed",
+      "declared": 11,
+      "declared_effective_coord_bits_counts": {
+        "18": 11
+      },
+      "declared_local_options": [],
+      "floor": 11,
+      "individual_records": [
+        [
+          "contact_exterieur",
+          "TUE",
+          "code"
+        ],
+        [
+          "contact_interieur",
+          "TUE",
+          "code"
+        ],
+        [
+          "bloc_temoin_duplique",
+          "TUE",
+          "code"
+        ],
+        [
+          "coquille_limitee_a_k",
+          "TUE",
+          "code"
+        ],
+        [
+          "saturation_egalite_perdue",
+          "TUE",
+          "code"
+        ],
+        [
+          "compte_une_passe_omis",
+          "TUE",
+          "code"
+        ],
+        [
+          "allocation_noeuds_excedentaire",
+          "TUE",
+          "code"
+        ],
+        [
+          "nuage_consomme_sur_refus",
+          "TUE",
+          "code"
+        ],
+        [
+          "borrowed_coquille_inversee",
+          "TUE",
+          "code"
+        ],
+        [
+          "borrowed_coquille_saturee_exposee",
+          "TUE",
+          "code"
+        ],
+        [
+          "borrowed_derniers_interieurs",
+          "TUE",
+          "code"
+        ]
+      ],
+      "killed_causes": {
+        "code": 11
+      },
+      "manifest_sha256": "9d856a60788c15cb3997642e9932151213fa148c0dea2d1f6ddbdb7a7696c5cf",
+      "module": "index",
+      "section_observed": true,
+      "states": {
+        "TUE": 11
+      },
+      "summary_line": {
+        "dont_construction": 0,
+        "dont_delai": 0,
+        "dont_signal": 0,
+        "mutants": 11,
+        "plancher": 11,
+        "tues": 11
+      },
+      "unjudged_ids": [],
+      "witness": "accepte_avant_jugements"
+    },
+    {
+      "ctest_verdict": "Passed",
+      "declared": 68,
+      "declared_effective_coord_bits_counts": {
+        "18": 68
+      },
+      "declared_local_options": [],
+      "floor": 68,
+      "individual_records": [
+        [
+          "support_tetra_strict_ignore",
+          "TUE",
+          "code"
+        ],
+        [
+          "dominance_egalite_retiree",
+          "TUE",
+          "code"
+        ],
+        [
+          "temoin_commun_compte_deux_fois",
+          "TUE",
+          "code"
+        ],
+        [
+          "admission_egalite_refusee",
+          "TUE",
+          "code"
+        ],
+        [
+          "prefixe_q3_obtus_rejete",
+          "TUE",
+          "code"
+        ],
+        [
+          "coquille_limitee_au_support",
+          "TUE",
+          "code"
+        ],
+        [
+          "support_canonique_premiere_paire_omise",
+          "TUE",
+          "code"
+        ],
+        [
+          "proprietaire_face_inferieure_exclue",
+          "TUE",
+          "code"
+        ],
+        [
+          "centre_q4_non_strict_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "region_pair_rejet_omis",
+          "TUE",
+          "code"
+        ],
+        [
+          "region_face_obtuse_coupee",
+          "TUE",
+          "code"
+        ],
+        [
+          "parallel_population_base_omise",
+          "TUE",
+          "code"
+        ],
+        [
+          "parallel_ball_limit_local",
+          "TUE",
+          "code"
+        ],
+        [
+          "parallel_node_quota_local",
+          "TUE",
+          "code"
+        ],
+        [
+          "parallel_preambule_omis",
+          "TUE",
+          "code"
+        ],
+        [
+          "parallel_scratch_worker_hors_jobs",
+          "TUE",
+          "code"
+        ],
+        [
+          "cache_reset_omis",
+          "TUE",
+          "code"
+        ],
+        [
+          "cache_rang_collision",
+          "TUE",
+          "code"
+        ],
+        [
+          "cache_reponse_positive_imposee",
+          "TUE",
+          "code"
+        ],
+        [
+          "cache_repli_non_compte",
+          "TUE",
+          "code"
+        ],
+        [
+          "sort_support_inverse",
+          "TUE",
+          "code"
+        ],
+        [
+          "sort_merge_sens_inverse",
+          "TUE",
+          "code"
+        ],
+        [
+          "sort_derniere_fusion_non_publiee",
+          "TUE",
+          "code"
+        ],
+        [
+          "adaptive_un_seul_enfant_paye",
+          "TUE",
+          "code"
+        ],
+        [
+          "adaptive_fantome_non_compte",
+          "TUE",
+          "code"
+        ],
+        [
+          "adaptive_rejeu_dernier_noeud_omis",
+          "TUE",
+          "code"
+        ],
+        [
+          "adaptive_priorite_borne_fermee",
+          "TUE",
+          "code"
+        ],
+        [
+          "adaptive_diagnostic_publie_sur_refus",
+          "TUE",
+          "code"
+        ],
+        [
+          "assembly_halo_perdu",
+          "TUE",
+          "code"
+        ],
+        [
+          "assembly_continuation_nouveau_niveau",
+          "TUE",
+          "code"
+        ],
+        [
+          "assembly_representant_non_premier",
+          "TUE",
+          "code"
+        ],
+        [
+          "assembly_offset_avant_copie",
+          "TUE",
+          "code"
+        ],
+        [
+          "assembly_incidences_non_verifiees",
+          "TUE",
+          "code"
+        ],
+        [
+          "assembly_intervalle_source_incomplet",
+          "TUE",
+          "code"
+        ],
+        [
+          "single_compact_offset_omis",
+          "TUE",
+          "code"
+        ],
+        [
+          "single_metadonnees_non_comptees",
+          "TUE",
+          "code"
+        ],
+        [
+          "single_limite_globale_inclusive",
+          "TUE",
+          "code"
+        ],
+        [
+          "single_passe_non_declaree",
+          "TUE",
+          "code"
+        ],
+        [
+          "single_copie_page_zero",
+          "TUE",
+          "code"
+        ],
+        [
+          "pair_graph_last_neighbor_missing",
+          "TUE",
+          "code"
+        ],
+        [
+          "pair_graph_intersection_missing",
+          "TUE",
+          "code"
+        ],
+        [
+          "pair_graph_workers_unbudgeted",
+          "TUE",
+          "code"
+        ],
+        [
+          "support_contact_hors_presentation",
+          "TUE",
+          "code"
+        ],
+        [
+          "sort_cle_marge_inversee",
+          "TUE",
+          "code"
+        ],
+        [
+          "sort_cle_produit",
+          "TUE",
+          "code"
+        ],
+        [
+          "lignes_vivantes_seuil_strict",
+          "TUE",
+          "code"
+        ],
+        [
+          "lignes_vivantes_compte_logique_omis",
+          "TUE",
+          "code"
+        ],
+        [
+          "prefixe_seuil_suivant_strict",
+          "TUE",
+          "code"
+        ],
+        [
+          "sort_cle_marge_absente_modes_mixtes",
+          "TUE",
+          "code"
+        ],
+        [
+          "q3_candidat_obtus_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "lemme_r_exterieur_par_dominants",
+          "TUE",
+          "code"
+        ],
+        [
+          "lemme_r_interieur_en_coquille",
+          "TUE",
+          "code"
+        ],
+        [
+          "lemme_r_transposee_inversee",
+          "TUE",
+          "code"
+        ],
+        [
+          "compteurs_vidage_sans_controle",
+          "TUE",
+          "code"
+        ],
+        [
+          "compteurs_census_non_vides",
+          "TUE",
+          "code"
+        ],
+        [
+          "compteurs_dominance_formule",
+          "TUE",
+          "code"
+        ],
+        [
+          "enveloppe_bord_bas_ferme",
+          "TUE",
+          "code"
+        ],
+        [
+          "enveloppe_tetra_trois_sommets",
+          "TUE",
+          "code"
+        ],
+        [
+          "enveloppe_q4_avant_comptage",
+          "TUE",
+          "code"
+        ],
+        [
+          "euler_feuille_q3_omise_commune",
+          "TUE",
+          "code"
+        ],
+        [
+          "euler_admission_q3_bord_selon_k",
+          "TUE",
+          "code"
+        ],
+        [
+          "euler_etendue_comptee_reguliere",
+          "TUE",
+          "code"
+        ],
+        [
+          "euler_signe_terme_superieur",
+          "TUE",
+          "code"
+        ],
+        [
+          "euler_restriction_filtre_strict",
+          "TUE",
+          "code"
+        ],
+        [
+          "euler_fermeture_sans_mots_hauts",
+          "TUE",
+          "code"
+        ],
+        [
+          "euler_supports_sans_tetraedres",
+          "TUE",
+          "code"
+        ],
+        [
+          "euler_ordres_verifiables_k_moins_2",
+          "TUE",
+          "code"
+        ],
+        [
+          "euler_terme_des_sites_omis",
+          "TUE",
+          "code"
+        ]
+      ],
+      "killed_causes": {
+        "code": 68
+      },
+      "manifest_sha256": "517e596ee2ad505aed65d98505fa3bb8d9b1813821f28534479a5047f4bd61ea",
+      "module": "catalogue",
+      "section_observed": true,
+      "states": {
+        "TUE": 68
+      },
+      "summary_line": {
+        "dont_construction": 0,
+        "dont_delai": 0,
+        "dont_signal": 0,
+        "mutants": 68,
+        "plancher": 68,
+        "tues": 68
+      },
+      "unjudged_ids": [],
+      "witness": "accepte_avant_jugements"
+    },
+    {
+      "ctest_verdict": "Passed",
+      "declared": 143,
+      "declared_effective_coord_bits_counts": {
+        "18": 142,
+        "24": 1
+      },
+      "declared_local_options": [
+        {
+          "id": "export_points_trois_mots",
+          "options": [
+            "-DMHGP11_COORD_BITS=24"
+          ]
+        }
+      ],
+      "floor": 141,
+      "individual_records": [
+        [
+          "population_memo_owner_omis",
+          "TUE",
+          "code"
+        ],
+        [
+          "population_workspace_owner_omis",
+          "TUE",
+          "code"
+        ],
+        [
+          "population_each_step_owner_omis",
+          "TUE",
+          "code"
+        ],
+        [
+          "vertical_owned_active_ordinal",
+          "TUE",
+          "code"
+        ],
+        [
+          "q3_non_strict_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "ordre_supports_inverse",
+          "TUE",
+          "code"
+        ],
+        [
+          "dernier_site_non_inclus",
+          "TUE",
+          "code"
+        ],
+        [
+          "q4_prefixe_obtus_coupe",
+          "TUE",
+          "code"
+        ],
+        [
+          "census_sur_point_ancre",
+          "TUE",
+          "code"
+        ],
+        [
+          "support_positions_locales",
+          "TUE",
+          "code"
+        ],
+        [
+          "doublon_partie_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "cardinal_douze_refuse",
+          "TUE",
+          "code"
+        ],
+        [
+          "priorite_seuil_perdue",
+          "TUE",
+          "code"
+        ],
+        [
+          "multiplicites_refusees",
+          "TUE",
+          "code"
+        ],
+        [
+          "domain_hash_decide",
+          "TUE",
+          "code"
+        ],
+        [
+          "domain_padding_omis",
+          "TUE",
+          "code"
+        ],
+        [
+          "domain_collision_arrete",
+          "TUE",
+          "code"
+        ],
+        [
+          "domain_index_consomme_sur_refus",
+          "TUE",
+          "code"
+        ],
+        [
+          "domain_derniere_boule_omise",
+          "TUE",
+          "code"
+        ],
+        [
+          "cells_contact_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "cells_qmin_inclus",
+          "TUE",
+          "code"
+        ],
+        [
+          "cells_interieurs_omis",
+          "TUE",
+          "code"
+        ],
+        [
+          "cells_padding_perdu",
+          "TUE",
+          "code"
+        ],
+        [
+          "cells_ordre_faces_inverse",
+          "TUE",
+          "code"
+        ],
+        [
+          "cells_premiere_trace_seule",
+          "TUE",
+          "code"
+        ],
+        [
+          "cells_une_passe_comptee",
+          "TUE",
+          "code"
+        ],
+        [
+          "cells_produit_binomial_u64",
+          "TUE",
+          "code"
+        ],
+        [
+          "cells_deux_passes_non_comparees",
+          "TUE",
+          "code"
+        ],
+        [
+          "locate_saturation_apres_canonique",
+          "TUE",
+          "code"
+        ],
+        [
+          "canonical_support_paires_omis",
+          "TUE",
+          "code"
+        ],
+        [
+          "locate_absence_hors_catalogue_refusee",
+          "TUE",
+          "code"
+        ],
+        [
+          "arret_combinaisons_omis",
+          "TUE",
+          "code"
+        ],
+        [
+          "arret_arites_omis",
+          "TUE",
+          "code"
+        ],
+        [
+          "descent_hit_complet_ignore",
+          "TUE",
+          "code"
+        ],
+        [
+          "descent_seuil_strict",
+          "TUE",
+          "code"
+        ],
+        [
+          "descent_contact_strict",
+          "TUE",
+          "code"
+        ],
+        [
+          "descent_interieurs_omis",
+          "TUE",
+          "code"
+        ],
+        [
+          "descent_date_initiale_perdue",
+          "TUE",
+          "code"
+        ],
+        [
+          "descent_hors_catalogue_refuse",
+          "TUE",
+          "code"
+        ],
+        [
+          "descent_fin_anticipee",
+          "TUE",
+          "code"
+        ],
+        [
+          "descent_cumul_non_transactionnel",
+          "TUE",
+          "code"
+        ],
+        [
+          "forest_centres_morton",
+          "TUE",
+          "code"
+        ],
+        [
+          "forest_plateau_sequentiel",
+          "TUE",
+          "code"
+        ],
+        [
+          "forest_chaine_perdue",
+          "TUE",
+          "code"
+        ],
+        [
+          "forest_verticale_ouverte",
+          "TUE",
+          "code"
+        ],
+        [
+          "forest_verticale_sans_remontee",
+          "TUE",
+          "code"
+        ],
+        [
+          "forest_verticale_premier_enfant",
+          "TUE",
+          "code"
+        ],
+        [
+          "forest_singleton_refuse",
+          "TUE",
+          "code"
+        ],
+        [
+          "forest_k_superieur_n",
+          "TUE",
+          "code"
+        ],
+        [
+          "forest_lookup_inverse",
+          "TUE",
+          "code"
+        ],
+        [
+          "forest_ancetre_futur",
+          "TUE",
+          "code"
+        ],
+        [
+          "domain_parallel_timings_prematures",
+          "TUE",
+          "code"
+        ],
+        [
+          "classification_contact_strict",
+          "TUE",
+          "code"
+        ],
+        [
+          "classification_arret_trop_tot",
+          "TUE",
+          "code"
+        ],
+        [
+          "classification_coquille_naissance",
+          "TUE",
+          "code"
+        ],
+        [
+          "classification_absence_temoin",
+          "TUE",
+          "code"
+        ],
+        [
+          "sweep_coupe_ouverte",
+          "TUE",
+          "code"
+        ],
+        [
+          "sweep_representant_comme_top",
+          "TUE",
+          "code"
+        ],
+        [
+          "sweep_union_sans_taille",
+          "TUE",
+          "code"
+        ],
+        [
+          "sweep_une_activation_seule",
+          "TUE",
+          "code"
+        ],
+        [
+          "full_timings_prematures",
+          "TUE",
+          "code"
+        ],
+        [
+          "sweep_naissances_avant_toutes_fusions",
+          "TUE",
+          "code"
+        ],
+        [
+          "order_timings_prematures",
+          "TUE",
+          "code"
+        ],
+        [
+          "diametre_dernier_ex_aequo",
+          "TUE",
+          "code"
+        ],
+        [
+          "diametre_premiere_paire",
+          "TUE",
+          "code"
+        ],
+        [
+          "diametre_dernier_partenaire_omis",
+          "TUE",
+          "code"
+        ],
+        [
+          "diametre_inclusion_omise",
+          "TUE",
+          "code"
+        ],
+        [
+          "diametre_distances_non_comptees",
+          "TUE",
+          "code"
+        ],
+        [
+          "diametre_cumul_descente_omis",
+          "TUE",
+          "code"
+        ],
+        [
+          "memo_hash_decide",
+          "TUE",
+          "code"
+        ],
+        [
+          "memo_premier_id_seulement",
+          "TUE",
+          "code"
+        ],
+        [
+          "memo_date_initiale_perdue",
+          "TUE",
+          "code"
+        ],
+        [
+          "memo_niveau_terminal_perdu",
+          "TUE",
+          "code"
+        ],
+        [
+          "memo_hit_travail_fictif",
+          "TUE",
+          "code"
+        ],
+        [
+          "memo_evince_avant_succes",
+          "TUE",
+          "code"
+        ],
+        [
+          "memo_domaine_etranger_cap0",
+          "TUE",
+          "code"
+        ],
+        [
+          "memo_cumul_queries_omis",
+          "TUE",
+          "code"
+        ],
+        [
+          "regular_derniere_face_omise",
+          "TUE",
+          "code"
+        ],
+        [
+          "regular_fermeture_par_lot",
+          "TUE",
+          "code"
+        ],
+        [
+          "regular_work_lane_omis",
+          "TUE",
+          "code"
+        ],
+        [
+          "regular_racine_naissance_figee",
+          "TUE",
+          "code"
+        ],
+        [
+          "regular_etendue_ignoree",
+          "TUE",
+          "code"
+        ],
+        [
+          "vertical_parallel_graine_non_elevee",
+          "TUE",
+          "code"
+        ],
+        [
+          "vertical_parallel_egalite_refusee",
+          "TUE",
+          "code"
+        ],
+        [
+          "vertical_parallel_travail_omis",
+          "TUE",
+          "code"
+        ],
+        [
+          "vertical_parallel_naissance_non_comptee",
+          "TUE",
+          "code"
+        ],
+        [
+          "forest_cohort_centres_key",
+          "TUE",
+          "code"
+        ],
+        [
+          "forest_cohort_capacity_short",
+          "TUE",
+          "code"
+        ],
+        [
+          "forest_cohort_nonbirth_reset",
+          "TUE",
+          "code"
+        ],
+        [
+          "census_reuse_lost_bound_workspace",
+          "TUE",
+          "code"
+        ],
+        [
+          "census_reuse_fake_second_pass",
+          "TUE",
+          "code"
+        ],
+        [
+          "census_reuse_logical_slot_count",
+          "TUE",
+          "code"
+        ],
+        [
+          "dense_birth_key_as_node",
+          "TUE",
+          "code"
+        ],
+        [
+          "dense_absent_as_first",
+          "TUE",
+          "code"
+        ],
+        [
+          "dense_last_birth_missing",
+          "TUE",
+          "code"
+        ],
+        [
+          "regular_vertical_unlifted",
+          "TUE",
+          "code"
+        ],
+        [
+          "regular_vertical_wrong_component",
+          "TUE",
+          "code"
+        ],
+        [
+          "regular_vertical_missing_eligible",
+          "TUE",
+          "code"
+        ],
+        [
+          "regular_vertical_extended_as_regular",
+          "TUE",
+          "code"
+        ],
+        [
+          "forest_regular_kind_inverse",
+          "TUE",
+          "code"
+        ],
+        [
+          "forest_regular_combinations_birth",
+          "TUE",
+          "code"
+        ],
+        [
+          "descent_singleton_unreported",
+          "TUE",
+          "code"
+        ],
+        [
+          "descent_singleton_wrong_site",
+          "TUE",
+          "code"
+        ],
+        [
+          "descent_singleton_foreign_workspace",
+          "TUE",
+          "code"
+        ],
+        [
+          "descent_singleton_sum_missing",
+          "TUE",
+          "code"
+        ],
+        [
+          "meb_q4_non_strict_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "population_boule_decalee",
+          "TUE",
+          "code"
+        ],
+        [
+          "population_site_un_fige",
+          "TUE",
+          "code"
+        ],
+        [
+          "population_eligibilite_stricte",
+          "TUE",
+          "code"
+        ],
+        [
+          "concurrent_plateaux_fusionnes",
+          "TUE",
+          "code"
+        ],
+        [
+          "concurrent_ordinal_ordre_decale",
+          "TUE",
+          "code"
+        ],
+        [
+          "racine_courante_non_suivie",
+          "TUE",
+          "code"
+        ],
+        [
+          "birth_runs_jonction_perdue",
+          "TUE",
+          "code"
+        ],
+        [
+          "population_lien_noeud_fixe",
+          "TUE",
+          "code"
+        ],
+        [
+          "population_lien_catalogue_non_compte",
+          "TUE",
+          "code"
+        ],
+        [
+          "pipeline_naissance_sans_cloture",
+          "TUE",
+          "code"
+        ],
+        [
+          "pipeline_bas_ouvert",
+          "TUE",
+          "code"
+        ],
+        [
+          "pipeline_fin_prematuree",
+          "TUE",
+          "code"
+        ],
+        [
+          "export_points_trois_mots",
+          "TUE",
+          "code"
+        ],
+        [
+          "pipeline_abandon_apres_reveil",
+          "TUE",
+          "code"
+        ],
+        [
+          "pipeline_controles_verticaux_omis",
+          "TUE",
+          "code"
+        ],
+        [
+          "pipeline_graine_reguliere_oubliee",
+          "TUE",
+          "code"
+        ],
+        [
+          "births_blocs_cle_dense",
+          "TUE",
+          "code"
+        ],
+        [
+          "births_blocs_cohortes_omises",
+          "TUE",
+          "code"
+        ],
+        [
+          "births_blocs_etat_partage",
+          "TUE",
+          "code"
+        ],
+        [
+          "rattachement_coupe_ouverte",
+          "TUE",
+          "code"
+        ],
+        [
+          "branches_coupe_fermee",
+          "TUE",
+          "code"
+        ],
+        [
+          "journal_racine_dsu",
+          "TUE",
+          "code"
+        ],
+        [
+          "fenetre_forte",
+          "TUE",
+          "code"
+        ],
+        [
+          "journal_premiere_graine",
+          "TUE",
+          "code"
+        ],
+        [
+          "role_rang_egal_interne",
+          "TUE",
+          "code"
+        ],
+        [
+          "traces_u32_sans_garde",
+          "TUE",
+          "code"
+        ],
+        [
+          "garde_beta_coupe_ouverte",
+          "TUE",
+          "code"
+        ],
+        [
+          "graine_resolue_dans_w_k",
+          "TUE",
+          "code"
+        ],
+        [
+          "table_population_ignoree",
+          "TUE",
+          "code"
+        ],
+        [
+          "memo_ordre_ignore",
+          "TUE",
+          "code"
+        ],
+        [
+          "lookup_dense_ignore",
+          "TUE",
+          "code"
+        ],
+        [
+          "traces_publiees_en_branches",
+          "TUE",
+          "code"
+        ],
+        [
+          "journal_non_pose_concurrent",
+          "TUE",
+          "code"
+        ],
+        [
+          "journal_non_pose_par_ordres",
+          "TUE",
+          "code"
+        ],
+        [
+          "journal_autre_ordre",
+          "TUE",
+          "code"
+        ],
+        [
+          "extraction_mauvaise_foret",
+          "TUE",
+          "code"
+        ],
+        [
+          "verticales_gardees",
+          "TUE",
+          "code"
+        ]
+      ],
+      "killed_causes": {
+        "code": 143
+      },
+      "manifest_sha256": "deb792cd2a92655199b1236d8b01b4c23000f5a70c67138338a96d7b35d6a81b",
+      "module": "tower",
+      "section_observed": true,
+      "states": {
+        "TUE": 143
+      },
+      "summary_line": {
+        "dont_construction": 0,
+        "dont_delai": 0,
+        "dont_signal": 0,
+        "mutants": 143,
+        "plancher": 141,
+        "tues": 143
+      },
+      "unjudged_ids": [],
+      "witness": "accepte_avant_jugements"
+    },
+    {
+      "ctest_verdict": "Passed",
+      "declared": 15,
+      "declared_effective_coord_bits_counts": {
+        "18": 15
+      },
+      "declared_local_options": [],
+      "floor": 15,
+      "individual_records": [
+        [
+          "triangle_droit_accepte",
+          "TUE",
+          "code"
+        ],
+        [
+          "drapeau_q4_presentation",
+          "TUE",
+          "code"
+        ],
+        [
+          "arret_premier_support",
+          "TUE",
+          "code"
+        ],
+        [
+          "fermeture_omise",
+          "TUE",
+          "code"
+        ],
+        [
+          "cofaces_ordre_k",
+          "TUE",
+          "code"
+        ],
+        [
+          "coquille_sans_plafond",
+          "TUE",
+          "code"
+        ],
+        [
+          "fermeture_sans_qmin",
+          "TUE",
+          "code"
+        ],
+        [
+          "fermeture_sous_qmin",
+          "TUE",
+          "code"
+        ],
+        [
+          "arite_impossible_admise",
+          "TUE",
+          "code"
+        ],
+        [
+          "boules_propres_decroissantes",
+          "TUE",
+          "code"
+        ],
+        [
+          "supports_tri_pointid",
+          "TUE",
+          "code"
+        ],
+        [
+          "admission_brouillon_oublie",
+          "TUE",
+          "code"
+        ],
+        [
+          "admission_liste_oubliee",
+          "TUE",
+          "code"
+        ],
+        [
+          "admission_un_seul_fil",
+          "TUE",
+          "code"
+        ],
+        [
+          "prepasse_plafond_omise",
+          "TUE",
+          "code"
+        ]
+      ],
+      "killed_causes": {
+        "code": 15
+      },
+      "manifest_sha256": "988112c2f0037f57ef9079be6fa9fb35491f29825b21f121fc17e0581624cdfc",
+      "module": "supports",
+      "section_observed": true,
+      "states": {
+        "TUE": 15
+      },
+      "summary_line": {
+        "dont_construction": 0,
+        "dont_delai": 0,
+        "dont_signal": 0,
+        "mutants": 15,
+        "plancher": 15,
+        "tues": 15
+      },
+      "unjudged_ids": [],
+      "witness": "accepte_avant_jugements"
+    },
+    {
+      "ctest_verdict": "Passed",
+      "declared": 6,
+      "declared_effective_coord_bits_counts": {
+        "18": 6
+      },
+      "declared_local_options": [],
+      "floor": 6,
+      "individual_records": [
+        [
+          "qualification_decalee",
+          "TUE",
+          "code"
+        ],
+        [
+          "marge_carree",
+          "TUE",
+          "code"
+        ],
+        [
+          "sans_marge",
+          "TUE",
+          "code"
+        ],
+        [
+          "coupe_ouverte",
+          "TUE",
+          "code"
+        ],
+        [
+          "m_k1_deux",
+          "TUE",
+          "code"
+        ],
+        [
+          "tri_refus_ignore",
+          "TUE",
+          "code"
+        ]
+      ],
+      "killed_causes": {
+        "code": 6
+      },
+      "manifest_sha256": "22acd15eec68311c7e3ffc290f2ea790f8e8f2dd36c97475f0678380a48cdfd9",
+      "module": "points",
+      "section_observed": true,
+      "states": {
+        "TUE": 6
+      },
+      "summary_line": {
+        "dont_construction": 0,
+        "dont_delai": 0,
+        "dont_signal": 0,
+        "mutants": 6,
+        "plancher": 6,
+        "tues": 6
+      },
+      "unjudged_ids": [],
+      "witness": "accepte_avant_jugements"
+    },
+    {
+      "ctest_verdict": "Passed",
+      "declared": 10,
+      "declared_effective_coord_bits_counts": {
+        "18": 10
+      },
+      "declared_local_options": [],
+      "floor": 10,
+      "individual_records": [
+        [
+          "seuil_moins_un",
+          "TUE",
+          "code"
+        ],
+        [
+          "jonction_masse_entiere",
+          "TUE",
+          "ligne"
+        ],
+        [
+          "egalite_enfants",
+          "TUE",
+          "code"
+        ],
+        [
+          "encadrement_seul",
+          "TUE",
+          "code"
+        ],
+        [
+          "racine_admise",
+          "TUE",
+          "code"
+        ],
+        [
+          "niveau_carre",
+          "TUE",
+          "code"
+        ],
+        [
+          "inverse_terme_mixte",
+          "TUE",
+          "code"
+        ],
+        [
+          "ordre_des_sites",
+          "TUE",
+          "code"
+        ],
+        [
+          "plus_grand_pointid",
+          "TUE",
+          "code"
+        ],
+        [
+          "racine_non_bornee",
+          "TUE",
+          "code"
+        ]
+      ],
+      "killed_causes": {
+        "code": 9,
+        "ligne": 1
+      },
+      "manifest_sha256": "e019ae3b489c92fd2cebe3d7792a3da370ca13c6bf09c3e54467f1598802efaa",
+      "module": "head",
+      "section_observed": true,
+      "states": {
+        "TUE": 10
+      },
+      "summary_line": {
+        "dont_construction": 0,
+        "dont_delai": 0,
+        "dont_signal": 0,
+        "mutants": 10,
+        "plancher": 10,
+        "tues": 10
+      },
+      "unjudged_ids": [],
+      "witness": "accepte_avant_jugements"
+    },
+    {
+      "ctest_verdict": "Passed",
+      "declared": 23,
+      "declared_effective_coord_bits_counts": {
+        "18": 23
+      },
+      "declared_local_options": [],
+      "floor": 23,
+      "individual_records": [
+        [
+          "session_sans_liberation",
+          "TUE",
+          "code"
+        ],
+        [
+          "selftest_omis",
+          "TUE",
+          "code"
+        ],
+        [
+          "selftest_pieges_ignores",
+          "TUE",
+          "code"
+        ],
+        [
+          "selftest_noyaux_entiers_omis",
+          "TUE",
+          "code"
+        ],
+        [
+          "selftest_precision_etendue_admise",
+          "TUE",
+          "code"
+        ],
+        [
+          "multiplicite_apres_k",
+          "TUE",
+          "code"
+        ],
+        [
+          "tree_k_sans_enfants",
+          "TUE",
+          "code"
+        ],
+        [
+          "provenance_non_controlee",
+          "TUE",
+          "code"
+        ],
+        [
+          "pas_nul_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "tree_k_version_un",
+          "TUE",
+          "code"
+        ],
+        [
+          "tree_k_sans_geometrie",
+          "TUE",
+          "code"
+        ],
+        [
+          "tree_k_naissance_omise",
+          "TUE",
+          "code"
+        ],
+        [
+          "tree_k_ordre_un",
+          "TUE",
+          "code"
+        ],
+        [
+          "tree_k_constante",
+          "TUE",
+          "code"
+        ],
+        [
+          "retrait_omis_fin_de_session",
+          "TUE",
+          "code"
+        ],
+        [
+          "etat_api_toujours_none",
+          "TUE",
+          "code"
+        ],
+        [
+          "parametres_moteur_par_defaut",
+          "TUE",
+          "code"
+        ],
+        [
+          "parametres_catalogue_feuilles",
+          "TUE",
+          "code"
+        ],
+        [
+          "produit_session_non_controlee",
+          "TUE",
+          "code"
+        ],
+        [
+          "session_detruite_sans_controle",
+          "TUE",
+          "code"
+        ],
+        [
+          "provenance_tailles_ignorees",
+          "TUE",
+          "code"
+        ],
+        [
+          "provenance_budget_nul_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "voie_supports_order_tree",
+          "TUE",
+          "code"
+        ]
+      ],
+      "killed_causes": {
+        "code": 23
+      },
+      "manifest_sha256": "19c4202f458a58ec7491382fd75c0bfdf6c8a6166d0383371a7577bae66cb7cf",
+      "module": "api",
+      "section_observed": true,
+      "states": {
+        "TUE": 23
+      },
+      "summary_line": {
+        "dont_construction": 0,
+        "dont_delai": 0,
+        "dont_signal": 0,
+        "mutants": 23,
+        "plancher": 23,
+        "tues": 23
+      },
+      "unjudged_ids": [],
+      "witness": "accepte_avant_jugements"
+    },
+    {
+      "ctest_verdict": "Passed",
+      "declared": 28,
+      "declared_effective_coord_bits_counts": {
+        "18": 28
+      },
+      "declared_local_options": [],
+      "floor": 28,
+      "individual_records": [
+        [
+          "option_hors_sortie_admise",
+          "TUE",
+          "code"
+        ],
+        [
+          "k_treize_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "budget_nul_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "budget_ignore",
+          "TUE",
+          "code"
+        ],
+        [
+          "fils_ignores",
+          "TUE",
+          "code"
+        ],
+        [
+          "entree_sur_sortie_standard_admise",
+          "TUE",
+          "code"
+        ],
+        [
+          "sortie_standard_non_controlee",
+          "TUE",
+          "code"
+        ],
+        [
+          "retrait_omis",
+          "TUE",
+          "code"
+        ],
+        [
+          "pas_non_recopie",
+          "TUE",
+          "code"
+        ],
+        [
+          "ecriture_full_permutee",
+          "TUE",
+          "code"
+        ],
+        [
+          "manifeste_taille_fausse",
+          "TUE",
+          "code"
+        ],
+        [
+          "plan_avant_sortie_standard",
+          "TUE",
+          "code"
+        ],
+        [
+          "sortie_standard_entree_ids_seulement",
+          "TUE",
+          "code"
+        ],
+        [
+          "stdout_lstat",
+          "TUE",
+          "code"
+        ],
+        [
+          "stdout_lecture_seule_admise",
+          "TUE",
+          "code"
+        ],
+        [
+          "ligne_refus_sortie_toujours_full",
+          "TUE",
+          "code"
+        ],
+        [
+          "sigxfsz_non_ignore",
+          "TUE",
+          "code"
+        ],
+        [
+          "etat_publie_omis",
+          "TUE",
+          "code"
+        ],
+        [
+          "refus_perdu_sortie_pleine",
+          "TUE",
+          "code"
+        ],
+        [
+          "retrait_omis_double_echec",
+          "TUE",
+          "code"
+        ],
+        [
+          "sp_colonnes_echangees",
+          "TUE",
+          "code"
+        ],
+        [
+          "sp_ordre_supports",
+          "TUE",
+          "code"
+        ],
+        [
+          "sp_branches_omises",
+          "TUE",
+          "code"
+        ],
+        [
+          "sp_signature_v1",
+          "TUE",
+          "code"
+        ],
+        [
+          "sp_manifeste_constant",
+          "TUE",
+          "code"
+        ],
+        [
+          "sp_signature_fichier",
+          "TUE",
+          "code"
+        ],
+        [
+          "sp_sortie_supports_comme_full",
+          "TUE",
+          "code"
+        ],
+        [
+          "sp_masque_16379",
+          "TUE",
+          "code"
+        ]
+      ],
+      "killed_causes": {
+        "code": 28
+      },
+      "manifest_sha256": "2750485824bceb1d2305e978ac025d49e3e25dfc8eb60b12778fa4de296f0cf7",
+      "module": "cli",
+      "section_observed": true,
+      "states": {
+        "TUE": 28
+      },
+      "summary_line": {
+        "dont_construction": 0,
+        "dont_delai": 0,
+        "dont_signal": 0,
+        "mutants": 28,
+        "plancher": 28,
+        "tues": 28
+      },
+      "unjudged_ids": [],
+      "witness": "accepte_avant_jugements"
+    }
+  ],
+  "package_sha256": "59b08d707c47914c62b52fd810506491fdfdad11572ca0568916ecd760738023",
+  "phase": "exploration_v11_hors_registre",
+  "plan_sha256": "66120e07907da49d3b104b72bd4752ce4930248de1c0706f0b1196ec4987e37c",
+  "priority_campaigns": {
+    "api": {
+      "ctest_verdict": "Passed",
+      "declared": 23,
+      "individual_records": [
+        [
+          "session_sans_liberation",
+          "TUE",
+          "code"
+        ],
+        [
+          "selftest_omis",
+          "TUE",
+          "code"
+        ],
+        [
+          "selftest_pieges_ignores",
+          "TUE",
+          "code"
+        ],
+        [
+          "selftest_noyaux_entiers_omis",
+          "TUE",
+          "code"
+        ],
+        [
+          "selftest_precision_etendue_admise",
+          "TUE",
+          "code"
+        ],
+        [
+          "multiplicite_apres_k",
+          "TUE",
+          "code"
+        ],
+        [
+          "tree_k_sans_enfants",
+          "TUE",
+          "code"
+        ],
+        [
+          "provenance_non_controlee",
+          "TUE",
+          "code"
+        ],
+        [
+          "pas_nul_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "tree_k_version_un",
+          "TUE",
+          "code"
+        ],
+        [
+          "tree_k_sans_geometrie",
+          "TUE",
+          "code"
+        ],
+        [
+          "tree_k_naissance_omise",
+          "TUE",
+          "code"
+        ],
+        [
+          "tree_k_ordre_un",
+          "TUE",
+          "code"
+        ],
+        [
+          "tree_k_constante",
+          "TUE",
+          "code"
+        ],
+        [
+          "retrait_omis_fin_de_session",
+          "TUE",
+          "code"
+        ],
+        [
+          "etat_api_toujours_none",
+          "TUE",
+          "code"
+        ],
+        [
+          "parametres_moteur_par_defaut",
+          "TUE",
+          "code"
+        ],
+        [
+          "parametres_catalogue_feuilles",
+          "TUE",
+          "code"
+        ],
+        [
+          "produit_session_non_controlee",
+          "TUE",
+          "code"
+        ],
+        [
+          "session_detruite_sans_controle",
+          "TUE",
+          "code"
+        ],
+        [
+          "provenance_tailles_ignorees",
+          "TUE",
+          "code"
+        ],
+        [
+          "provenance_budget_nul_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "voie_supports_order_tree",
+          "TUE",
+          "code"
+        ]
+      ],
+      "killed_causes": {
+        "code": 23
+      },
+      "states": {
+        "TUE": 23
+      },
+      "summary_line": {
+        "dont_construction": 0,
+        "dont_delai": 0,
+        "dont_signal": 0,
+        "mutants": 23,
+        "plancher": 23,
+        "tues": 23
+      },
+      "unjudged_ids": [],
+      "witness": "accepte_avant_jugements"
+    },
+    "cli": {
+      "ctest_verdict": "Passed",
+      "declared": 28,
+      "individual_records": [
+        [
+          "option_hors_sortie_admise",
+          "TUE",
+          "code"
+        ],
+        [
+          "k_treize_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "budget_nul_admis",
+          "TUE",
+          "code"
+        ],
+        [
+          "budget_ignore",
+          "TUE",
+          "code"
+        ],
+        [
+          "fils_ignores",
+          "TUE",
+          "code"
+        ],
+        [
+          "entree_sur_sortie_standard_admise",
+          "TUE",
+          "code"
+        ],
+        [
+          "sortie_standard_non_controlee",
+          "TUE",
+          "code"
+        ],
+        [
+          "retrait_omis",
+          "TUE",
+          "code"
+        ],
+        [
+          "pas_non_recopie",
+          "TUE",
+          "code"
+        ],
+        [
+          "ecriture_full_permutee",
+          "TUE",
+          "code"
+        ],
+        [
+          "manifeste_taille_fausse",
+          "TUE",
+          "code"
+        ],
+        [
+          "plan_avant_sortie_standard",
+          "TUE",
+          "code"
+        ],
+        [
+          "sortie_standard_entree_ids_seulement",
+          "TUE",
+          "code"
+        ],
+        [
+          "stdout_lstat",
+          "TUE",
+          "code"
+        ],
+        [
+          "stdout_lecture_seule_admise",
+          "TUE",
+          "code"
+        ],
+        [
+          "ligne_refus_sortie_toujours_full",
+          "TUE",
+          "code"
+        ],
+        [
+          "sigxfsz_non_ignore",
+          "TUE",
+          "code"
+        ],
+        [
+          "etat_publie_omis",
+          "TUE",
+          "code"
+        ],
+        [
+          "refus_perdu_sortie_pleine",
+          "TUE",
+          "code"
+        ],
+        [
+          "retrait_omis_double_echec",
+          "TUE",
+          "code"
+        ],
+        [
+          "sp_colonnes_echangees",
+          "TUE",
+          "code"
+        ],
+        [
+          "sp_ordre_supports",
+          "TUE",
+          "code"
+        ],
+        [
+          "sp_branches_omises",
+          "TUE",
+          "code"
+        ],
+        [
+          "sp_signature_v1",
+          "TUE",
+          "code"
+        ],
+        [
+          "sp_manifeste_constant",
+          "TUE",
+          "code"
+        ],
+        [
+          "sp_signature_fichier",
+          "TUE",
+          "code"
+        ],
+        [
+          "sp_sortie_supports_comme_full",
+          "TUE",
+          "code"
+        ],
+        [
+          "sp_masque_16379",
+          "TUE",
+          "code"
+        ]
+      ],
+      "killed_causes": {
+        "code": 28
+      },
+      "states": {
+        "TUE": 28
+      },
+      "summary_line": {
+        "dont_construction": 0,
+        "dont_delai": 0,
+        "dont_signal": 0,
+        "mutants": 28,
+        "plancher": 28,
+        "tues": 28
+      },
+      "unjudged_ids": [],
+      "witness": "accepte_avant_jugements"
+    }
+  },
+  "profile": "quantized_u21_input_only",
+  "profile_scope": {
+    "base_coord_bits": 18,
+    "declared_effective_coord_bits_counts": {
+      "18": 453,
+      "21": 15,
+      "24": 17
+    },
+    "does_not_qualify_old_release_long_u21_missing_campaigns": true,
+    "interpretation": "Options locales ajoutees apres les options de base au temoin et au mutant par le runner epingle ; pas capture des flags par copie."
+  },
+  "public_status": "not_claimed",
+  "receipt_sha256": "b876d52c07a2e3913a0fa8f95a87b39bf626657642d07398130eea24b42f942a",
+  "receipt_status": "completed",
+  "schema": "ehgp.v11.audit.repriser3_individual_read.v1",
+  "session": "v11.20261005.clauderepriser3",
+  "source_commit": "98a00955083d483306c4f92b9031e382e81b0e59",
+  "source_tree_verification": {
+    "extra_or_missing_files": false,
+    "files_verified": 635,
+    "includes_docs_or_receipts": false,
+    "manifest_sha256": "1e16b170fb29452473a90311b08bd4d2631bf7be196378e9dd89278695df3019",
+    "method": "git_archive_selectif_egalite_exacte",
+    "paths": [
+      "gcp-migration/v11_worker.sh",
+      "morsehgp3D_v11/CMakeLists.txt",
+      "morsehgp3D_v11/src",
+      "morsehgp3D_v11/tests",
+      "morsehgp3D_v11/cmake",
+      "morsehgp3D_v11/bench",
+      "morsehgp3D_v11/reference",
+      "morsehgp3D_v11/tools",
+      "morsehgp3D_v11/cli"
+    ],
+    "source_commit": "98a00955083d483306c4f92b9031e382e81b0e59"
+  },
+  "state": "closed",
+  "targeted_closure_verified": true,
+  "totals": {
+    "declared": 485,
+    "expected_construction_rejections": 2,
+    "invalid": 0,
+    "judged": 485,
+    "killed": 485,
+    "killed_code": 479,
+    "killed_line": 4,
+    "killed_signal": 0,
+    "killed_timeout": 0,
+    "survivors": 0,
+    "unjudged": 0
+  },
+  "worker_exit_code": 0
+}

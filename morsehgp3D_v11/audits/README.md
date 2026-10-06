@@ -4,22 +4,22 @@
 quantized_u21_input_only / not_claimed`. Six notes actives maintenues en
 place ; preuves détaillées dans les reçus immuables.
 
-**Corrections publiées en be05bfad8 et 98a009550 : Release conforme, mutants et ASan en reprise.**
+**Corrections publiées en be05bfad8 et 98a009550 : Release et mutants conformes, ASan en reprise.**
 
 - **API multiprofil :** références fichier/manifeste par profil,
   journal conservé, six références u21 inchangées et six références
   u24 concordantes avec les reçus G4. **Les 24 portes des quatre profils
   passent dans R2.** La sonde reste identique à 38b76701b.
 - **Mutant CLI :** mutation de `order_params` raccordée à la porte
-  points qui l’atteint ; 28 individus conservés.
+  points qui l’atteint ; **28/28 détectés dans R3**, ainsi que les 23 API.
 - **Matrice :** exigence LiDAR retirée du seul lot court ; portes et
   planchers conservés dans les lots d’échelle. Le refus impossible
   est corrigé, les sélections couvrent les reprises nécessaires.
 
 [Relecture indépendante des corrections publiées](../receipts/audit_gates_fix_closed_20261005/README.md).
 Les 41 occurrences auparavant manquantes passent toutes dans R2.
-Les campagnes mutants et le complément ASan restent à juger ; les
-reçus historiques conservent leurs verdicts.
+Les 485 mutants sont désormais détectés dans R3. Le complément ASan
+reste à juger ; les reçus historiques conservent leurs verdicts.
 
 **Chaîne G4 close, source 38b76701b.** Les sessions closes
 ci-dessous ont des sources vérifiées et un arrêt ciblé certifié.
@@ -44,7 +44,12 @@ supports ; R3 mutants, dont API/CLI ; R4 quatre lots ASan/UBSan u24.
 [Reçu R1 vérifié](../receipts/audit_g4_repriser1_20261005/README.md).
 **R2 est également clos : 472/472 PASS**, dont les 41 absences et les
 24 identités supports. [Reçu R2 vérifié](../receipts/audit_g4_repriser2_20261005/README.md).
-R3 est en cours ; R4 reste à juger.
+**R3 est clos : 39/39 portes et 485/485 mutants détectés**, aucun
+survivant ni individu non jugé. La campagne utilise une base u18 et
+les options locales déclarées u21/u24/poison ; les six campagnes u21
+sans résultat de l’ancien lot L gardent leur statut historique.
+[Reçu R3 et verdicts individuels](../receipts/audit_g4_repriser3_20261005/README.md).
+R4 est en cours.
 L’arrêt ciblé certifié est exigé entre sessions. Les 28 portes longues
 fonctionnelles déjà terminées ne sont pas rejouées. La
 [proposition antérieure limitée aux 41 absences](../receipts/proposition_reprise_41_20261005/README.md)

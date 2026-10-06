@@ -10,6 +10,30 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
+## R3 clos : tous les mutants détectés, API et CLI requalifiés
+
+La session `v11.20261005.clauderepriser3`, source **98a009550**,
+est close le 6 octobre à 00:47 UTC avec arrêt ciblé certifié. Les
+**39/39 CTests** passent et les journaux gardent les **485/485 verdicts
+individuels détectés** : 479 par code, quatre par ligne et deux refus
+de construction attendus. Aucun survivant, témoin invalide, signal,
+délai ou individu non jugé n’est compté comme réussite.
+
+Les **23/23 API** auparavant non jugés et les **28/28 CLI** sont
+détectés par code. L’ancien survivant `sp_masque_16379` est désormais
+atteint par la porte points. Les sorties détaillées des variants tués
+ne sont pas conservées : la catégorie `code` est observée, tandis que
+le refus `parameter_out_of_range` attendu sur cette mutation se déduit
+du chemin source épinglé. La validité des témoins non mutés est imposée
+par le runner avant les verdicts, sans inventer de lignes absentes.
+
+Le profil est une base u18 avec options locales déclarées, détaillées
+dans la section reprise. R3 ne qualifie pas en u21 les six campagnes
+interrompues de l’ancien lot L. R4 reste le dernier complément de cette
+reprise : les routes et autres portes d’échelle ASan/UBSan u24.
+[Reçu R3, manifestes et verdicts](../receipts/audit_g4_repriser3_20261005/README.md),
+[contrelecture API/CLI](../receipts/audit_g4_repriser3_20261005/NATIVE_REPLAY.md).
+
 ## R2 clos : les 41 absences et les références multiprofil passent
 
 La session `v11.20261005.clauderepriser2`, source **98a009550**,
@@ -32,7 +56,7 @@ par la sonde, au-delà des seuls préfixes de SHA publiés.
 [Contrelecture ciblée et rejeu indépendant](../receipts/audit_g4_repriser2_20261005/NATIVE_REPLAY.md).
 
 R2 clôt le volet ordinaire d’échelle et LiDAR. Les campagnes mutants
-API/CLI sont jugées séparément dans R3, désormais en cours ; les six
+API/CLI passent séparément dans R3 ; les six
 routes ASan/UBSan u24 restent dans R4. Aucun chrono de contrat n’est
 inféré de ces portes de correction.
 [Reçu R2 et correspondance des 41 noms](../receipts/audit_g4_repriser2_20261005/README.md).
@@ -92,7 +116,7 @@ pas un défaut imputé à la version publiée.
 
 **Raccord CLI toujours favorable** : mutation et plancher de 28
 conservés, porte points atteignant le paramétrage modifié. Le rejeu
-des campagnes API/CLI au commit corrigé reste nécessaire.
+R3 confirme désormais les 23 API et les 28 CLI au commit corrigé.
 [Correction publiée, treize sorties historiques recoupées et modèles rejoués](../receipts/audit_gates_fix_closed_20261005/README.md).
 La [capture initiale](../receipts/audit_gates_fix_wip_20261005/README.md)
 reste figée pour retracer le défaut de la première proposition.
@@ -194,14 +218,20 @@ Le différentiel S9 de l’arbre lui-même est passé séparément dans P9.
 
 La chaîne `clauderepriser1` à `clauderepriser4` utilise le commit
 corrigé **98a009550** et `data_complet`. R1 est clos et entièrement
-conforme, avec reçu lié ci-dessus. R2 est également clos et conforme ;
-R3 est en cours, R4 reste à juger.
+conforme, avec reçu lié ci-dessus. R2 et R3 sont également clos et
+conformes ; R4 est en cours.
 Les plans adoptés se répartissent ainsi :
 
 - R1 clos : lots courts u18/u21/u24/poison, tous conformes ;
 - R2 clos : huit lots d’échelle, les 41 absences et les six supports_route de chaque profil passent ;
-- R3 : campagnes mutants u18, y compris API et CLI après correction ;
+- R3 clos : 485 mutants détectés, base u18 avec profils locaux déclarés, dont API/CLI après correction ;
 - R4 : quatre lots ASan/UBSan u24, y compris les six supports_route.
+
+R3 applique les options locales après le profil de base : quinze
+mutants num imposent u21, seize num et `tower/export_points_trois_mots` imposent
+u24 ; un mutant core active POISON. API et CLI gardent le profil u18.
+Ce sont les domaines déclarés par les manifestes et le runner, pas une
+qualification u21 des six campagnes sans résultat de l’ancien lot L.
 
 Chaque commande admet 2 200 secondes et la matrice 2 100 ; R2/R3/R4
 allouent respectivement 32/32/16 fils. La chaîne exige l’arrêt ciblé

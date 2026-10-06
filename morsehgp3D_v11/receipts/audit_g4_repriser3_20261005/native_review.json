@@ -1,0 +1,710 @@
+{
+  "schema": "ehgp.v11.audit.r3_api_cli_review.v1",
+  "source_pin": "98a00955083d483306c4f92b9031e382e81b0e59",
+  "archive": {
+    "session": "v11.20261005.clauderepriser3",
+    "sha256": "e07952ce0ce4154f28d2bd859b2b3774615bce92341d9dc904df4a6107320cbc",
+    "bytes": 49894
+  },
+  "closure_status": "closed_certified",
+  "method": "Read-only Git/archive/stdlib review, no auditor build/native/cloud execution.",
+  "modules": {
+    "api": {
+      "manifest_sha256": "19c4202f458a58ec7491382fd75c0bfdf6c8a6166d0383371a7577bae66cb7cf",
+      "floor": 23,
+      "mutants": 23,
+      "actual_campaign_base_cmake_args": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DCMAKE_CXX_COMPILER=/usr/bin/g++",
+        "-DMHGP11_COORD_BITS=18",
+        "-DMHGP11_POISON=OFF",
+        "-DMHGP11_MARCH="
+      ],
+      "local_option_groups": [
+        {
+          "options": [],
+          "mutants": 23
+        }
+      ],
+      "effective_domain": "u18_release",
+      "witness": {
+        "status": "passed_by_successful_pinned_runner_control_flow",
+        "gates_required_to_pass": [
+          "mhgp11_api_publish_reader",
+          "mhgp11_api_selftest_fault_inexact",
+          "mhgp11_api_selftest_judge",
+          "mhgp11_api_session_after_publish",
+          "mhgp11_api_session_destroyed_live",
+          "mhgp11_api_session_engine",
+          "mhgp11_api_session_product_alive",
+          "mhgp11_api_session_provenance",
+          "mhgp11_api_session_refusals",
+          "mhgp11_api_session_session_identity",
+          "mhgp11_api_session_tree_digest",
+          "mhgp11_api_supports_route_scale8000"
+        ],
+        "evidence": "The campaign reached individual judgments and successful final output. Pinned runner executes every distinct nonmutated gate in its options group before any mutation judgment, and aborts red on any non-PASS. Separate witness outputs are not retained."
+      },
+      "ctest_gates": [
+        {
+          "name": "mhgp11_mutants_api",
+          "status": "PASS",
+          "lasttest_block_sha256": "0f440ec26d43a2038f95b863962f34d68dfa1ff3879271436a71010283d264cc"
+        },
+        {
+          "name": "mhgp11_mutants_api_manifest",
+          "status": "PASS",
+          "lasttest_block_sha256": "97e2bcc531870f9499eeffb6bdcf209e9ca9a7992cfd4829ef726311363c2370"
+        },
+        {
+          "name": "mhgp11_mutants_api_manifest_opt",
+          "status": "PASS",
+          "lasttest_block_sha256": "f44a95c254382563c4456cd1fa51e6201f6a24219ebb9f297e702adcc91e7ad4"
+        }
+      ],
+      "actual_final_line": "mutants_ok module=api mutants=23 tues=23 dont_signal=0 dont_delai=0 dont_construction=0 plancher=23",
+      "individuals": [
+        {
+          "id": "session_sans_liberation",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_api_session_product_alive",
+          "mutation_source": "morsehgp3D_v11/src/api/session.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "selftest_omis",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_api_selftest_fault_inexact",
+          "mutation_source": "morsehgp3D_v11/src/api/session.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "selftest_pieges_ignores",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_api_selftest_judge",
+          "mutation_source": "morsehgp3D_v11/src/api/selftest.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "selftest_noyaux_entiers_omis",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_api_selftest_judge",
+          "mutation_source": "morsehgp3D_v11/src/api/selftest.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "selftest_precision_etendue_admise",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_api_selftest_judge",
+          "mutation_source": "morsehgp3D_v11/src/api/selftest.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "multiplicite_apres_k",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_api_session_refusals",
+          "mutation_source": "morsehgp3D_v11/src/api/compute.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "tree_k_sans_enfants",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_api_session_tree_digest",
+          "mutation_source": "morsehgp3D_v11/src/api/manifest.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "provenance_non_controlee",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_api_session_provenance",
+          "mutation_source": "morsehgp3D_v11/src/api/manifest.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "pas_nul_admis",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_api_session_provenance",
+          "mutation_source": "morsehgp3D_v11/src/api/manifest.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "tree_k_version_un",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_api_session_tree_digest",
+          "mutation_source": "morsehgp3D_v11/src/api/manifest.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "tree_k_sans_geometrie",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_api_session_tree_digest",
+          "mutation_source": "morsehgp3D_v11/src/api/manifest.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "tree_k_naissance_omise",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_api_session_tree_digest",
+          "mutation_source": "morsehgp3D_v11/src/api/manifest.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "tree_k_ordre_un",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_api_session_tree_digest",
+          "mutation_source": "morsehgp3D_v11/src/api/manifest.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "tree_k_constante",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_api_session_tree_digest",
+          "mutation_source": "morsehgp3D_v11/src/api/manifest.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "retrait_omis_fin_de_session",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_api_session_after_publish",
+          "mutation_source": "morsehgp3D_v11/src/api/manifest.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "etat_api_toujours_none",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_api_session_after_publish",
+          "mutation_source": "morsehgp3D_v11/src/api/manifest.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "parametres_moteur_par_defaut",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_api_session_engine",
+          "mutation_source": "morsehgp3D_v11/src/api/compute.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "parametres_catalogue_feuilles",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_api_session_engine",
+          "mutation_source": "morsehgp3D_v11/src/api/compute.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "produit_session_non_controlee",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_api_session_session_identity",
+          "mutation_source": "morsehgp3D_v11/src/api/manifest.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "session_detruite_sans_controle",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_api_session_destroyed_live",
+          "mutation_source": "morsehgp3D_v11/src/api/session.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "provenance_tailles_ignorees",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_api_publish_reader",
+          "mutation_source": "morsehgp3D_v11/src/api/manifest.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "provenance_budget_nul_admis",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_api_publish_reader",
+          "mutation_source": "morsehgp3D_v11/src/api/manifest.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "voie_supports_order_tree",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_api_supports_route_scale8000",
+          "mutation_source": "morsehgp3D_v11/src/api/internal.hpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        }
+      ],
+      "observed_cause_counts": {
+        "code": 23
+      },
+      "signals": 0,
+      "delays": 0,
+      "expected_construction_rejections": 0
+    },
+    "cli": {
+      "manifest_sha256": "2750485824bceb1d2305e978ac025d49e3e25dfc8eb60b12778fa4de296f0cf7",
+      "floor": 28,
+      "mutants": 28,
+      "actual_campaign_base_cmake_args": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DCMAKE_CXX_COMPILER=/usr/bin/g++",
+        "-DMHGP11_COORD_BITS=18",
+        "-DMHGP11_POISON=OFF",
+        "-DMHGP11_MARCH="
+      ],
+      "local_option_groups": [
+        {
+          "options": [],
+          "mutants": 28
+        }
+      ],
+      "effective_domain": "u18_release",
+      "witness": {
+        "status": "passed_by_successful_pinned_runner_control_flow",
+        "gates_required_to_pass": [
+          "mhgp11_cli_contract",
+          "mhgp11_cli_full_identity",
+          "mhgp11_cli_points",
+          "mhgp11_cli_supports_oracle"
+        ],
+        "evidence": "The campaign reached individual judgments and successful final output. Pinned runner executes every distinct nonmutated gate in its options group before any mutation judgment, and aborts red on any non-PASS. Separate witness outputs are not retained."
+      },
+      "ctest_gates": [
+        {
+          "name": "mhgp11_mutants_cli",
+          "status": "PASS",
+          "lasttest_block_sha256": "1c99e288e85f5fe50e5ca3ec7165604bd18f91e030fc8d8cecccfe54bce8893c"
+        },
+        {
+          "name": "mhgp11_mutants_cli_manifest",
+          "status": "PASS",
+          "lasttest_block_sha256": "b2c00f0612a036ef6b095b574a02b7b256023fd7ec69bf7eda7326747da4a98d"
+        },
+        {
+          "name": "mhgp11_mutants_cli_manifest_opt",
+          "status": "PASS",
+          "lasttest_block_sha256": "3b037d854b4f2349f5b57c7d56f9a5969daf0d51c72ba72946b05fe951ffb3d0"
+        }
+      ],
+      "actual_final_line": "mutants_ok module=cli mutants=28 tues=28 dont_signal=0 dont_delai=0 dont_construction=0 plancher=28",
+      "individuals": [
+        {
+          "id": "option_hors_sortie_admise",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_cli_contract",
+          "mutation_source": "morsehgp3D_v11/cli/mhgp11.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "k_treize_admis",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_cli_contract",
+          "mutation_source": "morsehgp3D_v11/cli/mhgp11.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "budget_nul_admis",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_cli_contract",
+          "mutation_source": "morsehgp3D_v11/cli/mhgp11.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "budget_ignore",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_cli_contract",
+          "mutation_source": "morsehgp3D_v11/cli/mhgp11.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "fils_ignores",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_cli_full_identity",
+          "mutation_source": "morsehgp3D_v11/cli/mhgp11.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "entree_sur_sortie_standard_admise",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_cli_contract",
+          "mutation_source": "morsehgp3D_v11/cli/mhgp11.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "sortie_standard_non_controlee",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_cli_contract",
+          "mutation_source": "morsehgp3D_v11/cli/mhgp11.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "retrait_omis",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_cli_contract",
+          "mutation_source": "morsehgp3D_v11/cli/mhgp11.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "pas_non_recopie",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_cli_contract",
+          "mutation_source": "morsehgp3D_v11/cli/mhgp11.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "ecriture_full_permutee",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_cli_full_identity",
+          "mutation_source": "morsehgp3D_v11/src/api/write_full.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "manifeste_taille_fausse",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_cli_full_identity",
+          "mutation_source": "morsehgp3D_v11/src/api/manifest.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "plan_avant_sortie_standard",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_cli_contract",
+          "mutation_source": "morsehgp3D_v11/cli/mhgp11.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "sortie_standard_entree_ids_seulement",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_cli_contract",
+          "mutation_source": "morsehgp3D_v11/cli/mhgp11.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "stdout_lstat",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_cli_contract",
+          "mutation_source": "morsehgp3D_v11/cli/mhgp11.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "stdout_lecture_seule_admise",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_cli_contract",
+          "mutation_source": "morsehgp3D_v11/cli/mhgp11.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "ligne_refus_sortie_toujours_full",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_cli_contract",
+          "mutation_source": "morsehgp3D_v11/cli/mhgp11.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "sigxfsz_non_ignore",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_cli_contract",
+          "mutation_source": "morsehgp3D_v11/cli/mhgp11.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "etat_publie_omis",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_cli_contract",
+          "mutation_source": "morsehgp3D_v11/cli/mhgp11.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "refus_perdu_sortie_pleine",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_cli_contract",
+          "mutation_source": "morsehgp3D_v11/cli/mhgp11.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "retrait_omis_double_echec",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_cli_contract",
+          "mutation_source": "morsehgp3D_v11/src/api/manifest.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "sp_colonnes_echangees",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_cli_supports_oracle",
+          "mutation_source": "morsehgp3D_v11/src/api/write_supports.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "sp_ordre_supports",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_cli_supports_oracle",
+          "mutation_source": "morsehgp3D_v11/src/api/write_supports.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "sp_branches_omises",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_cli_supports_oracle",
+          "mutation_source": "morsehgp3D_v11/src/api/write_supports.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "sp_signature_v1",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_cli_supports_oracle",
+          "mutation_source": "morsehgp3D_v11/src/api/manifest.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "sp_manifeste_constant",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_cli_supports_oracle",
+          "mutation_source": "morsehgp3D_v11/src/api/manifest.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "sp_signature_fichier",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_cli_supports_oracle",
+          "mutation_source": "morsehgp3D_v11/src/api/manifest.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "sp_sortie_supports_comme_full",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_cli_supports_oracle",
+          "mutation_source": "morsehgp3D_v11/cli/mhgp11.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        },
+        {
+          "id": "sp_masque_16379",
+          "recorded_verdict": "TUE",
+          "recorded_cause": "code",
+          "gate_from_pinned_manifest": "mhgp11_cli_points",
+          "mutation_source": "morsehgp3D_v11/src/api/compute.cpp",
+          "local_cmake_options": [],
+          "effective_domain": "u18_release"
+        }
+      ],
+      "observed_cause_counts": {
+        "code": 28
+      },
+      "signals": 0,
+      "delays": 0,
+      "expected_construction_rejections": 0
+    }
+  },
+  "important_findings": [],
+  "base_library_flags": {
+    "sha256": "3e87bce62502e8e4b9c08eb9617486e05d9b728cc4101d396ab64cf9d3f5442c",
+    "CXX_DEFINES": "-DMHGP11_COORD_BITS=18",
+    "CXX_FLAGS": "-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20"
+  },
+  "lasttest": {
+    "member": "results/cmd/000_matrice/files/matrix/mutants/LastTest.log",
+    "sha256": "b712b5428c320ed075ecc9329a10d2c322ed7d0e9da5faa5d8dbf463f3a04034",
+    "bytes": 83810
+  },
+  "sp_masque_16379": {
+    "recorded_verdict": "TUE",
+    "recorded_cause": "code",
+    "selected_gate": "mhgp11_cli_points",
+    "source_inference": "Removing only order_params.concurrent_orders=false leaves the true value inherited from full_params. PointsRequest invokes points_parts -> order_tree(default order_tree) -> build_order(order_params). build_order refuses concurrent_orders with parameter_out_of_range before order_forest. cli_points checks code0/status=ok for positive calls, so the counterfactual violates that gate.",
+    "runtime_boundary": "Actual archived judgment is a checker-code mismatch. Native variant exit value/stderr is not retained: run_mutants.py returns an empty output for TUE at line308; no claim of a separately archived parameter_out_of_range message."
+  },
+  "source_anchors": [
+    {
+      "path": "morsehgp3D_v11/CMakeLists.txt",
+      "sha256": "82fa1054e14a2bf16e28195cac32a4d81dec56bb81d6481d9d9214d5c87f555d",
+      "ranges": [
+        [
+          300,
+          317
+        ]
+      ]
+    },
+    {
+      "path": "morsehgp3D_v11/tests/mutants/run_mutants.py",
+      "sha256": "866dd057ae01f9a2628565d16f91accc33ae0bba4b9deb3f2cf9fcf05ff3b038",
+      "ranges": [
+        [
+          238,
+          249
+        ],
+        [
+          260,
+          308
+        ],
+        [
+          311,
+          324
+        ],
+        [
+          435,
+          468
+        ]
+      ]
+    },
+    {
+      "path": "morsehgp3D_v11/src/api/compute.cpp",
+      "sha256": "dca6aa8f4627241087552237372b808d780a4dbd8c6e50c3495bc9d9146b7298",
+      "ranges": [
+        [
+          38,
+          55
+        ],
+        [
+          118,
+          133
+        ],
+        [
+          163,
+          171
+        ],
+        [
+          208,
+          221
+        ]
+      ]
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/order_tree.cpp",
+      "sha256": "c5fd5c3859a525932cdfb9f4d7d420efec01ba95661a0b587689fa8d0159e5ab",
+      "ranges": [
+        [
+          94,
+          105
+        ]
+      ]
+    },
+    {
+      "path": "morsehgp3D_v11/tests/cli/tests.cmake",
+      "sha256": "d594a1d5969150de35909d5f27ba9a2500bc20ec4acd4de9d9abd8b892bfa717",
+      "ranges": [
+        [
+          126,
+          128
+        ]
+      ]
+    },
+    {
+      "path": "morsehgp3D_v11/tests/cli/cli_points.py",
+      "sha256": "6415454e626565f61ef81af0f67b0fd89b59f7a294495c7a89119ec02b184f89",
+      "ranges": [
+        [
+          49,
+          62
+        ]
+      ]
+    }
+  ],
+  "scope": {
+    "api_cli_individuals": 51,
+    "recorded_code_detections": 51,
+    "signals": 0,
+    "delays": 0,
+    "construction_kills": 0,
+    "domain": "u18_release_only",
+    "native_cloud_actions_by_auditor": false
+  },
+  "verdict": "favorable_51_individual_code_detections_closed",
+  "limitations": [
+    "This targeted review covers API23 and CLI28 only. Other R3 modules may override base u18 with local u21/u24/poison options and are outside this JSON.",
+    "Cause code is the executed checker verdict recorded by the runner; outputs of successful kills and standalone reports mutants_api.json/mutants_cli.json are not archived. No exact native variant exit status or stderr is invented.",
+    "The nonmutated witnesses passed by the enforced execution path; their individual successful outputs were not separately preserved in the archive.",
+    "No historical long/scale/sanitizer qualification is transferred from this mutation campaign, and no timing contract is claimed."
+  ]
+}

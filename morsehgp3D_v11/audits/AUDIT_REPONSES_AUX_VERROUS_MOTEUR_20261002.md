@@ -12,9 +12,12 @@ Note maintenue en place ; détails et échanges clos dans les reçus.
 passent dans les quatre profils ordinaires de
 [fina2](../receipts/audit_g4_fina2_20261005/README.md). Les mutants head,
 points et num sont tous détectés dans
-[finm](../receipts/audit_g4_finm_20261005/README.md). Les problèmes de
-qualification API/CLI sont détaillés dans la note moteur ; aucun
-nouveau défaut mathématique n’en est déduit.
+[finm](../receipts/audit_g4_finm_20261005/README.md). La reprise
+[R3](../receipts/audit_g4_repriser3_20261005/README.md) au pin corrigé
+98a009550 termine les 485 mutants, dont les 23 API et les 28 CLI.
+Sa base u18 et ses options locales u21/u24/poison restent distinctes
+des six campagnes u21 sans résultat de l’ancien lot L. Aucun nouveau
+défaut mathématique n’est déduit des anciens refus du juge API/CLI.
 
 Les portes points/plat/racines d’échelle et LiDAR passent sous
 ASan/UBSan u24 et TSan u21 dans
