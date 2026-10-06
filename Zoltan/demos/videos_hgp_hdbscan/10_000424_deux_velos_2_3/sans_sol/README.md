@@ -11,6 +11,13 @@
 
 Vidéo de 65 s, k = 5, 1920 × 1080 : [thème sombre](10_000424_deux_velos_2_3_sans_sol_k5_sombre.mp4) · [thème clair](10_000424_deux_velos_2_3_sans_sol_k5_clair.mp4) ; image finale : [sombre](10_000424_deux_velos_2_3_sans_sol_k5_sombre_bilan.png) · [clair](10_000424_deux_velos_2_3_sans_sol_k5_clair_bilan.png).
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="10_000424_deux_velos_2_3_sans_sol_k5_supports_sombre_instant_cle.png">
+  <img alt="Hiérarchie des supports, k = 5, r = 14,0 cm : A, IoU maximal : 0,65" src="10_000424_deux_velos_2_3_sans_sol_k5_supports_clair_instant_cle.png">
+</picture>
+
+Hiérarchie des supports q2, q3, q4 au même ordre, 39 s : [thème sombre](10_000424_deux_velos_2_3_sans_sol_k5_supports_sombre.mp4) · [thème clair](10_000424_deux_velos_2_3_sans_sol_k5_supports_clair.mp4) ; image finale : [sombre](10_000424_deux_velos_2_3_sans_sol_k5_supports_sombre_bilan.png) · [clair](10_000424_deux_velos_2_3_sans_sol_k5_supports_clair_bilan.png). Arbre d'ordre 5 : 20 155 nœuds, 27 613 boules, 27 613 supports (6 617 arêtes q2, 16 781 triangles q3, 4 215 tétraèdres q4).
+
 Points : tout ce que Patchwork++ (paramètres de la v8) ne classe pas en sol dans la boîte horizontale des objets élargie de 1 m, à toutes hauteurs : 1 555 points, dont 207 des objets (A 124, B 83) ; 54 points des objets retirés comme sol. Aucune étiquette ne sert au nettoyage : elles ne servent qu'à mesurer.
 
 Meilleur IoU de chaque objet, même mesure que la campagne G4 (points void exclus) :
@@ -41,6 +48,18 @@ Second balayage, HGP ; HDBSCAN le suit au même r, sans pause propre :
 | 16,2 cm | ✗ A et B réunis : B jamais retrouvé | A et B encore séparés |
 
 Nombres : [`resultats_duel_k5.json`](resultats_duel_k5.json).
+
+## Hiérarchie des supports à k = 5
+
+Meilleur IoU des sites des supports du nœud qui suit chaque objet : 0,65 / 0,25 (hiérarchie de points HGP : 0,59 / 0,24). Événements, mêmes textes que les bandeaux :
+
+| r | supports |
+| --- | --- |
+| 14,0 cm | ✓ A, IoU maximal : 0,65 |
+| 15,7 cm | ✗ B fusionne avec le bâtiment · IoU 0,25 → 0,13 |
+| 16,2 cm | ✗ A et B réunis : B jamais retrouvé |
+
+Nombres : [`resultats_supports_k5.json`](resultats_supports_k5.json).
 
 Lecture, légende et convention de niveau : [README de la liste](../../README.md#lire-une-vidéo).
 

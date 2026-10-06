@@ -11,6 +11,13 @@
 
 Vidéo de 73 s, k = 5, 1920 × 1080 : [thème sombre](06_000800_pieton_deux_velos_2_8_12_instances_k5_sombre.mp4) · [thème clair](06_000800_pieton_deux_velos_2_8_12_instances_k5_clair.mp4) ; image finale : [sombre](06_000800_pieton_deux_velos_2_8_12_instances_k5_sombre_bilan.png) · [clair](06_000800_pieton_deux_velos_2_8_12_instances_k5_clair_bilan.png).
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="06_000800_pieton_deux_velos_2_8_12_instances_k5_supports_sombre_instant_cle.png">
+  <img alt="Hiérarchie des supports, k = 5, r = 18,8 cm : C, IoU maximal : 0,69 ; ✓ A, B et C retrouvés, encore séparés" src="06_000800_pieton_deux_velos_2_8_12_instances_k5_supports_clair_instant_cle.png">
+</picture>
+
+Hiérarchie des supports q2, q3, q4 au même ordre, 43 s : [thème sombre](06_000800_pieton_deux_velos_2_8_12_instances_k5_supports_sombre.mp4) · [thème clair](06_000800_pieton_deux_velos_2_8_12_instances_k5_supports_clair.mp4) ; image finale : [sombre](06_000800_pieton_deux_velos_2_8_12_instances_k5_supports_sombre_bilan.png) · [clair](06_000800_pieton_deux_velos_2_8_12_instances_k5_supports_clair_bilan.png). Arbre d'ordre 5 : 4 254 nœuds, 5 865 boules, 5 865 supports (1 268 arêtes q2, 3 508 triangles q3, 1 089 tétraèdres q4).
+
 **k = 10** (HGP réussit, HDBSCAN échoue) :
 
 <picture>
@@ -19,6 +26,13 @@ Vidéo de 73 s, k = 5, 1920 × 1080 : [thème sombre](06_000800_pieton_deux_velo
 </picture>
 
 Vidéo de 72 s, k = 10, 1920 × 1080 : [thème sombre](06_000800_pieton_deux_velos_2_8_12_instances_k10_sombre.mp4) · [thème clair](06_000800_pieton_deux_velos_2_8_12_instances_k10_clair.mp4) ; image finale : [sombre](06_000800_pieton_deux_velos_2_8_12_instances_k10_sombre_bilan.png) · [clair](06_000800_pieton_deux_velos_2_8_12_instances_k10_clair_bilan.png).
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="06_000800_pieton_deux_velos_2_8_12_instances_k10_supports_sombre_instant_cle.png">
+  <img alt="Hiérarchie des supports, k = 10, r = 23,4 cm : C, IoU maximal : 0,69 ; ✓ A, B et C retrouvés, encore séparés" src="06_000800_pieton_deux_velos_2_8_12_instances_k10_supports_clair_instant_cle.png">
+</picture>
+
+Hiérarchie des supports q2, q3, q4 au même ordre, 43 s : [thème sombre](06_000800_pieton_deux_velos_2_8_12_instances_k10_supports_sombre.mp4) · [thème clair](06_000800_pieton_deux_velos_2_8_12_instances_k10_supports_clair.mp4) ; image finale : [sombre](06_000800_pieton_deux_velos_2_8_12_instances_k10_supports_sombre_bilan.png) · [clair](06_000800_pieton_deux_velos_2_8_12_instances_k10_supports_clair_bilan.png). Arbre d'ordre 10 : 12 008 nœuds, 15 609 boules, 15 609 supports (1 112 arêtes q2, 7 477 triangles q3, 7 020 tétraèdres q4).
 
 Points : les seuls points des objets du groupe (vérité terrain SemanticKITTI), 304 points (A 117, B 86, C 101) : ni sol, ni fond, ni autre objet.
 
@@ -55,6 +69,20 @@ Second balayage, HGP ; HDBSCAN le suit au même r, sans pause propre :
 
 Nombres : [`resultats_duel_k5.json`](resultats_duel_k5.json).
 
+## Hiérarchie des supports à k = 5
+
+Meilleur IoU des sites des supports du nœud qui suit chaque objet : 0,99 / 0,66 / 0,69 (hiérarchie de points HGP : 0,99 / 0,64 / 0,69). Événements, mêmes textes que les bandeaux :
+
+| r | supports |
+| --- | --- |
+| 15,6 cm | ✓ A, IoU maximal : 0,99 |
+| 16,7 cm | ✓ B, IoU maximal : 0,66 |
+| 18,8 cm | ✓ C, IoU maximal : 0,69 ; ✓ A, B et C retrouvés, encore séparés |
+| 18,9 cm | ✓ B et C réunis, chacun retrouvé avant |
+| 24,6 cm | ✓ A, B et C réunis, chacun retrouvé avant |
+
+Nombres : [`resultats_supports_k5.json`](resultats_supports_k5.json).
+
 ## Événements de la vidéo à k = 10
 
 Mêmes textes que les bandeaux. Premier balayage, HDBSCAN seul (HGP attend) :
@@ -77,6 +105,20 @@ Second balayage, HGP ; HDBSCAN le suit au même r, sans pause propre :
 | 29,4 cm | ✓ A, B et C réunis, chacun retrouvé avant |  |
 
 Nombres : [`resultats_duel_k10.json`](resultats_duel_k10.json).
+
+## Hiérarchie des supports à k = 10
+
+Meilleur IoU des sites des supports du nœud qui suit chaque objet : 0,99 / 0,65 / 0,69 (hiérarchie de points HGP : 0,99 / 0,64 / 0,70). Événements, mêmes textes que les bandeaux :
+
+| r | supports |
+| --- | --- |
+| 18,7 cm | ✓ A, IoU maximal : 0,99 |
+| 22,6 cm | ✓ B, IoU maximal : 0,65 |
+| 23,4 cm | ✓ C, IoU maximal : 0,69 ; ✓ A, B et C retrouvés, encore séparés |
+| 23,9 cm | ✓ B et C réunis, chacun retrouvé avant |
+| 29,4 cm | ✓ A, B et C réunis, chacun retrouvé avant |
+
+Nombres : [`resultats_supports_k10.json`](resultats_supports_k10.json).
 
 Lecture, légende et convention de niveau : [README de la liste](../../README.md#lire-une-vidéo).
 

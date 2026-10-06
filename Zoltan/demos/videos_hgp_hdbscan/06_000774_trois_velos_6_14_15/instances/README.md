@@ -11,6 +11,13 @@
 
 Vidéo de 70 s, k = 5, 1920 × 1080 : [thème sombre](06_000774_trois_velos_6_14_15_instances_k5_sombre.mp4) · [thème clair](06_000774_trois_velos_6_14_15_instances_k5_clair.mp4) ; image finale : [sombre](06_000774_trois_velos_6_14_15_instances_k5_sombre_bilan.png) · [clair](06_000774_trois_velos_6_14_15_instances_k5_clair_bilan.png).
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="06_000774_trois_velos_6_14_15_instances_k5_supports_sombre_instant_cle.png">
+  <img alt="Hiérarchie des supports, k = 5, r = 19,8 cm : C, IoU maximal : 0,57" src="06_000774_trois_velos_6_14_15_instances_k5_supports_clair_instant_cle.png">
+</picture>
+
+Hiérarchie des supports q2, q3, q4 au même ordre, 42 s : [thème sombre](06_000774_trois_velos_6_14_15_instances_k5_supports_sombre.mp4) · [thème clair](06_000774_trois_velos_6_14_15_instances_k5_supports_clair.mp4) ; image finale : [sombre](06_000774_trois_velos_6_14_15_instances_k5_supports_sombre_bilan.png) · [clair](06_000774_trois_velos_6_14_15_instances_k5_supports_clair_bilan.png). Arbre d'ordre 5 : 3 864 nœuds, 5 319 boules, 5 319 supports (1 274 arêtes q2, 3 083 triangles q3, 962 tétraèdres q4).
+
 Points : les seuls points des objets du groupe (vérité terrain SemanticKITTI), 290 points (A 141, B 63, C 86) : ni sol, ni fond, ni autre objet.
 
 Meilleur IoU de chaque objet, même mesure que la campagne G4 (points void exclus) :
@@ -43,6 +50,19 @@ Second balayage, HGP ; HDBSCAN le suit au même r, sans pause propre :
 | 21,5 cm | ✗ A, B et C réunis : B jamais retrouvé |  |
 
 Nombres : [`resultats_duel_k5.json`](resultats_duel_k5.json).
+
+## Hiérarchie des supports à k = 5
+
+Meilleur IoU des sites des supports du nœud qui suit chaque objet : 0,81 / 0,47 / 0,57 (hiérarchie de points HGP : 0,80 / 0,47 / 0,58). Événements, mêmes textes que les bandeaux :
+
+| r | supports |
+| --- | --- |
+| 14,6 cm | ✗ B et C réunis : B jamais retrouvé |
+| 19,8 cm | ✓ C, IoU maximal : 0,57 |
+| 19,9 cm | ✓ A, IoU maximal : 0,81 |
+| 21,5 cm | ✗ A, B et C réunis : B jamais retrouvé |
+
+Nombres : [`resultats_supports_k5.json`](resultats_supports_k5.json).
 
 Lecture, légende et convention de niveau : [README de la liste](../../README.md#lire-une-vidéo).
 

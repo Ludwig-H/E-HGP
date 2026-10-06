@@ -11,6 +11,13 @@
 
 Vidéo de 67 s, k = 5, 1920 × 1080 : [thème sombre](08_001170_deux_velos_43_57_sans_sol_k5_sombre.mp4) · [thème clair](08_001170_deux_velos_43_57_sans_sol_k5_clair.mp4) ; image finale : [sombre](08_001170_deux_velos_43_57_sans_sol_k5_sombre_bilan.png) · [clair](08_001170_deux_velos_43_57_sans_sol_k5_clair_bilan.png).
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="08_001170_deux_velos_43_57_sans_sol_k5_supports_sombre_instant_cle.png">
+  <img alt="Hiérarchie des supports, k = 5, r = 16,0 cm : B, IoU maximal : 0,70 ; ✓ A et B retrouvés, encore séparés" src="08_001170_deux_velos_43_57_sans_sol_k5_supports_clair_instant_cle.png">
+</picture>
+
+Hiérarchie des supports q2, q3, q4 au même ordre, 41 s : [thème sombre](08_001170_deux_velos_43_57_sans_sol_k5_supports_sombre.mp4) · [thème clair](08_001170_deux_velos_43_57_sans_sol_k5_supports_clair.mp4) ; image finale : [sombre](08_001170_deux_velos_43_57_sans_sol_k5_supports_sombre_bilan.png) · [clair](08_001170_deux_velos_43_57_sans_sol_k5_supports_clair_bilan.png). Arbre d'ordre 5 : 6 074 nœuds, 8 349 boules, 8 349 supports (1 688 arêtes q2, 4 922 triangles q3, 1 739 tétraèdres q4).
+
 **k = 10** (HGP réussit, HDBSCAN échoue) :
 
 <picture>
@@ -19,6 +26,13 @@ Vidéo de 67 s, k = 5, 1920 × 1080 : [thème sombre](08_001170_deux_velos_43_57
 </picture>
 
 Vidéo de 71 s, k = 10, 1920 × 1080 : [thème sombre](08_001170_deux_velos_43_57_sans_sol_k10_sombre.mp4) · [thème clair](08_001170_deux_velos_43_57_sans_sol_k10_clair.mp4) ; image finale : [sombre](08_001170_deux_velos_43_57_sans_sol_k10_sombre_bilan.png) · [clair](08_001170_deux_velos_43_57_sans_sol_k10_clair_bilan.png).
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="08_001170_deux_velos_43_57_sans_sol_k10_supports_sombre_instant_cle.png">
+  <img alt="Hiérarchie des supports, k = 10, r = 20,5 cm : B, IoU maximal : 0,63 ; ✓ A et B retrouvés, encore séparés" src="08_001170_deux_velos_43_57_sans_sol_k10_supports_clair_instant_cle.png">
+</picture>
+
+Hiérarchie des supports q2, q3, q4 au même ordre, 42 s : [thème sombre](08_001170_deux_velos_43_57_sans_sol_k10_supports_sombre.mp4) · [thème clair](08_001170_deux_velos_43_57_sans_sol_k10_supports_clair.mp4) ; image finale : [sombre](08_001170_deux_velos_43_57_sans_sol_k10_supports_sombre_bilan.png) · [clair](08_001170_deux_velos_43_57_sans_sol_k10_supports_clair_bilan.png). Arbre d'ordre 10 : 16 655 nœuds, 21 499 boules, 21 499 supports (1 588 arêtes q2, 10 082 triangles q3, 9 829 tétraèdres q4).
 
 Points : tout ce que Patchwork++ (paramètres de la v8) ne classe pas en sol dans la boîte horizontale des objets élargie de 1 m, à toutes hauteurs : 392 points, dont 229 des objets (A 135, B 94) ; 12 points des objets retirés comme sol. Aucune étiquette ne sert au nettoyage : elles ne servent qu'à mesurer.
 
@@ -52,6 +66,19 @@ Second balayage, HGP ; HDBSCAN le suit au même r, sans pause propre :
 
 Nombres : [`resultats_duel_k5.json`](resultats_duel_k5.json).
 
+## Hiérarchie des supports à k = 5
+
+Meilleur IoU des sites des supports du nœud qui suit chaque objet : 0,91 / 0,70 (hiérarchie de points HGP : 0,93 / 0,72). Événements, mêmes textes que les bandeaux :
+
+| r | supports |
+| --- | --- |
+| 15,5 cm | ✓ A, IoU maximal : 0,91 |
+| 16,0 cm | ✓ B, IoU maximal : 0,70 ; ✓ A et B retrouvés, encore séparés |
+| 16,2 cm | ✓ A et B réunis, chacun retrouvé avant |
+| 18,7 cm | ✗ A fusionne avec un autre vélo · IoU 0,60 → 0,38 |
+
+Nombres : [`resultats_supports_k5.json`](resultats_supports_k5.json).
+
 ## Événements de la vidéo à k = 10
 
 Mêmes textes que les bandeaux. Premier balayage, HDBSCAN seul (HGP attend) :
@@ -73,6 +100,19 @@ Second balayage, HGP ; HDBSCAN le suit au même r, sans pause propre :
 | 23,6 cm | ✗ A fusionne avec un autre vélo · IoU 0,65 → 0,40 |  |
 
 Nombres : [`resultats_duel_k10.json`](resultats_duel_k10.json).
+
+## Hiérarchie des supports à k = 10
+
+Meilleur IoU des sites des supports du nœud qui suit chaque objet : 0,62 / 0,63 (hiérarchie de points HGP : 0,65 / 0,63). Événements, mêmes textes que les bandeaux :
+
+| r | supports |
+| --- | --- |
+| 20,5 cm | ✓ B, IoU maximal : 0,63 ; ✓ A et B retrouvés, encore séparés |
+| 21,2 cm | ✗ B fusionne avec une partie de A · IoU 0,59 → 0,41 |
+| 22,9 cm | ✓ A, IoU maximal : 0,62 ; ✓ A et B réunis, chacun retrouvé avant |
+| 23,6 cm | ✗ A fusionne avec un autre vélo · IoU 0,62 → 0,39 |
+
+Nombres : [`resultats_supports_k10.json`](resultats_supports_k10.json).
 
 Lecture, légende et convention de niveau : [README de la liste](../../README.md#lire-une-vidéo).
 

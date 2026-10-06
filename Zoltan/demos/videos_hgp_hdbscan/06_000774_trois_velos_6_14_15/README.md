@@ -38,7 +38,7 @@ Les groupes sont nommés par les numéros d'instance SemanticKITTI de leurs obje
 
 | | instances de la vérité terrain seules | sol retiré automatiquement (Patchwork++) |
 | --- | --- | --- |
-| vidéos | [README](instances/README.md) · k = 5 : [sombre](instances/06_000774_trois_velos_6_14_15_instances_k5_sombre.mp4) · [clair](instances/06_000774_trois_velos_6_14_15_instances_k5_clair.mp4) | [README](sans_sol/README.md) · k = 10 : [sombre](sans_sol/06_000774_trois_velos_6_14_15_sans_sol_k10_sombre.mp4) · [clair](sans_sol/06_000774_trois_velos_6_14_15_sans_sol_k10_clair.mp4) |
+| vidéos | [README](instances/README.md) · k = 5 : [sombre](instances/06_000774_trois_velos_6_14_15_instances_k5_sombre.mp4) · [clair](instances/06_000774_trois_velos_6_14_15_instances_k5_clair.mp4) ; supports : [sombre](instances/06_000774_trois_velos_6_14_15_instances_k5_supports_sombre.mp4) · [clair](instances/06_000774_trois_velos_6_14_15_instances_k5_supports_clair.mp4) | [README](sans_sol/README.md) · k = 10 : [sombre](sans_sol/06_000774_trois_velos_6_14_15_sans_sol_k10_sombre.mp4) · [clair](sans_sol/06_000774_trois_velos_6_14_15_sans_sol_k10_clair.mp4) ; supports : [sombre](sans_sol/06_000774_trois_velos_6_14_15_sans_sol_k10_supports_sombre.mp4) · [clair](sans_sol/06_000774_trois_velos_6_14_15_sans_sol_k10_supports_clair.mp4) |
 
 **Instances de la vérité terrain seules**, k = 5 :
 

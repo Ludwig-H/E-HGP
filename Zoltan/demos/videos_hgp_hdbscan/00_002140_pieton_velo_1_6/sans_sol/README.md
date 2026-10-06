@@ -11,6 +11,13 @@
 
 Vidéo de 69 s, k = 5, 1920 × 1080 : [thème sombre](00_002140_pieton_velo_1_6_sans_sol_k5_sombre.mp4) · [thème clair](00_002140_pieton_velo_1_6_sans_sol_k5_clair.mp4) ; image finale : [sombre](00_002140_pieton_velo_1_6_sans_sol_k5_sombre_bilan.png) · [clair](00_002140_pieton_velo_1_6_sans_sol_k5_clair_bilan.png).
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="00_002140_pieton_velo_1_6_sans_sol_k5_supports_sombre_instant_cle.png">
+  <img alt="Hiérarchie des supports, k = 5, r = 12,5 cm : A, IoU maximal : 0,97 ; ✓ A et B retrouvés, encore séparés" src="00_002140_pieton_velo_1_6_sans_sol_k5_supports_clair_instant_cle.png">
+</picture>
+
+Hiérarchie des supports q2, q3, q4 au même ordre, 41 s : [thème sombre](00_002140_pieton_velo_1_6_sans_sol_k5_supports_sombre.mp4) · [thème clair](00_002140_pieton_velo_1_6_sans_sol_k5_supports_clair.mp4) ; image finale : [sombre](00_002140_pieton_velo_1_6_sans_sol_k5_supports_sombre_bilan.png) · [clair](00_002140_pieton_velo_1_6_sans_sol_k5_supports_clair_bilan.png). Arbre d'ordre 5 : 13 313 nœuds, 17 863 boules, 17 863 supports (4 712 arêtes q2, 11 122 triangles q3, 2 029 tétraèdres q4).
+
 Points : tout ce que Patchwork++ (paramètres de la v8) ne classe pas en sol dans la boîte horizontale des objets élargie de 1 m, à toutes hauteurs : 1 221 points, dont 147 des objets (A 78, B 69) ; 13 points des objets retirés comme sol. Aucune étiquette ne sert au nettoyage : elles ne servent qu'à mesurer.
 
 Meilleur IoU de chaque objet, même mesure que la campagne G4 (points void exclus) :
@@ -43,6 +50,19 @@ Second balayage, HGP ; HDBSCAN le suit au même r, sans pause propre :
 | 36,4 cm | ✗ A et B, déjà réunis, fusionnent avec le bâtiment |  |
 
 Nombres : [`resultats_duel_k5.json`](resultats_duel_k5.json).
+
+## Hiérarchie des supports à k = 5
+
+Meilleur IoU des sites des supports du nœud qui suit chaque objet : 0,97 / 0,92 (hiérarchie de points HGP : 0,95 / 0,93). Événements, mêmes textes que les bandeaux :
+
+| r | supports |
+| --- | --- |
+| 12,2 cm | ✓ B, IoU maximal : 0,92 |
+| 12,5 cm | ✓ A, IoU maximal : 0,97 ; ✓ A et B retrouvés, encore séparés |
+| 13,6 cm | ✓ A et B réunis, chacun retrouvé avant |
+| 36,4 cm | ✗ A et B, déjà réunis, fusionnent avec le bâtiment |
+
+Nombres : [`resultats_supports_k5.json`](resultats_supports_k5.json).
 
 Lecture, légende et convention de niveau : [README de la liste](../../README.md#lire-une-vidéo).
 

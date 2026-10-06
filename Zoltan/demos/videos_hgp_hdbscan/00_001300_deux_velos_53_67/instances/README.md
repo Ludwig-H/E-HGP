@@ -11,6 +11,13 @@
 
 Vidéo de 58 s, k = 5, 1920 × 1080 : [thème sombre](00_001300_deux_velos_53_67_instances_k5_sombre.mp4) · [thème clair](00_001300_deux_velos_53_67_instances_k5_clair.mp4) ; image finale : [sombre](00_001300_deux_velos_53_67_instances_k5_sombre_bilan.png) · [clair](00_001300_deux_velos_53_67_instances_k5_clair_bilan.png).
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="00_001300_deux_velos_53_67_instances_k5_supports_sombre_instant_cle.png">
+  <img alt="Hiérarchie des supports, k = 5, r = 18,0 cm : B, IoU maximal : 0,86" src="00_001300_deux_velos_53_67_instances_k5_supports_clair_instant_cle.png">
+</picture>
+
+Hiérarchie des supports q2, q3, q4 au même ordre, 36 s : [thème sombre](00_001300_deux_velos_53_67_instances_k5_supports_sombre.mp4) · [thème clair](00_001300_deux_velos_53_67_instances_k5_supports_clair.mp4) ; image finale : [sombre](00_001300_deux_velos_53_67_instances_k5_supports_sombre_bilan.png) · [clair](00_001300_deux_velos_53_67_instances_k5_supports_clair_bilan.png). Arbre d'ordre 5 : 3 268 nœuds, 4 403 boules, 4 403 supports (1 182 arêtes q2, 2 573 triangles q3, 648 tétraèdres q4).
+
 Points : les seuls points des objets du groupe (vérité terrain SemanticKITTI), 296 points (A 56, B 240) : ni sol, ni fond, ni autre objet.
 
 Meilleur IoU de chaque objet, même mesure que la campagne G4 (points void exclus) :
@@ -39,6 +46,17 @@ Second balayage, HGP ; HDBSCAN le suit au même r, sans pause propre :
 | 18,0 cm | ✓ B, IoU maximal : 0,87 | IoU au même r : B 0,79 |
 
 Nombres : [`resultats_duel_k5.json`](resultats_duel_k5.json).
+
+## Hiérarchie des supports à k = 5
+
+Meilleur IoU des sites des supports du nœud qui suit chaque objet : 0,36 / 0,86 (hiérarchie de points HGP : 0,36 / 0,87). Événements, mêmes textes que les bandeaux :
+
+| r | supports |
+| --- | --- |
+| 15,7 cm | ✗ A et B réunis : A jamais retrouvé |
+| 18,0 cm | ✓ B, IoU maximal : 0,86 |
+
+Nombres : [`resultats_supports_k5.json`](resultats_supports_k5.json).
 
 Lecture, légende et convention de niveau : [README de la liste](../../README.md#lire-une-vidéo).
 

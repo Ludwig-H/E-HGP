@@ -11,6 +11,13 @@
 
 Vidéo de 67 s, k = 5, 1920 × 1080 : [thème sombre](00_001502_deux_velos_28_66_sans_sol_k5_sombre.mp4) · [thème clair](00_001502_deux_velos_28_66_sans_sol_k5_clair.mp4) ; image finale : [sombre](00_001502_deux_velos_28_66_sans_sol_k5_sombre_bilan.png) · [clair](00_001502_deux_velos_28_66_sans_sol_k5_clair_bilan.png).
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="00_001502_deux_velos_28_66_sans_sol_k5_supports_sombre_instant_cle.png">
+  <img alt="Hiérarchie des supports, k = 5, r = 7,4 cm : A, IoU maximal : 0,62 ; ✓ A et B retrouvés, encore séparés" src="00_001502_deux_velos_28_66_sans_sol_k5_supports_clair_instant_cle.png">
+</picture>
+
+Hiérarchie des supports q2, q3, q4 au même ordre, 41 s : [thème sombre](00_001502_deux_velos_28_66_sans_sol_k5_supports_sombre.mp4) · [thème clair](00_001502_deux_velos_28_66_sans_sol_k5_supports_clair.mp4) ; image finale : [sombre](00_001502_deux_velos_28_66_sans_sol_k5_supports_sombre_bilan.png) · [clair](00_001502_deux_velos_28_66_sans_sol_k5_supports_clair_bilan.png). Arbre d'ordre 5 : 42 582 nœuds, 58 188 boules, 58 191 supports (13 559 arêtes q2, 36 642 triangles q3, 7 990 tétraèdres q4).
+
 **k = 10** (HGP réussit, HDBSCAN échoue) :
 
 <picture>
@@ -19,6 +26,13 @@ Vidéo de 67 s, k = 5, 1920 × 1080 : [thème sombre](00_001502_deux_velos_28_66
 </picture>
 
 Vidéo de 64 s, k = 10, 1920 × 1080 : [thème sombre](00_001502_deux_velos_28_66_sans_sol_k10_sombre.mp4) · [thème clair](00_001502_deux_velos_28_66_sans_sol_k10_clair.mp4) ; image finale : [sombre](00_001502_deux_velos_28_66_sans_sol_k10_sombre_bilan.png) · [clair](00_001502_deux_velos_28_66_sans_sol_k10_clair_bilan.png).
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="00_001502_deux_velos_28_66_sans_sol_k10_supports_sombre_instant_cle.png">
+  <img alt="Hiérarchie des supports, k = 10, r = 10,0 cm : A, IoU maximal : 0,64" src="00_001502_deux_velos_28_66_sans_sol_k10_supports_clair_instant_cle.png">
+</picture>
+
+Hiérarchie des supports q2, q3, q4 au même ordre, 40 s : [thème sombre](00_001502_deux_velos_28_66_sans_sol_k10_supports_sombre.mp4) · [thème clair](00_001502_deux_velos_28_66_sans_sol_k10_supports_clair.mp4) ; image finale : [sombre](00_001502_deux_velos_28_66_sans_sol_k10_supports_sombre_bilan.png) · [clair](00_001502_deux_velos_28_66_sans_sol_k10_supports_clair_bilan.png). Arbre d'ordre 10 : 111 719 nœuds, 143 662 boules, 143 666 supports (12 483 arêtes q2, 75 369 triangles q3, 55 814 tétraèdres q4).
 
 Points : tout ce que Patchwork++ (paramètres de la v8) ne classe pas en sol dans la boîte horizontale des objets élargie de 1 m, à toutes hauteurs : 2 964 points, dont 164 des objets (A 113, B 51) ; 45 points des objets retirés comme sol. Aucune étiquette ne sert au nettoyage : elles ne servent qu'à mesurer.
 
@@ -52,6 +66,19 @@ Second balayage, HGP ; HDBSCAN le suit au même r, sans pause propre :
 
 Nombres : [`resultats_duel_k5.json`](resultats_duel_k5.json).
 
+## Hiérarchie des supports à k = 5
+
+Meilleur IoU des sites des supports du nœud qui suit chaque objet : 0,62 / 0,57 (hiérarchie de points HGP : 0,58 / 0,51). Événements, mêmes textes que les bandeaux :
+
+| r | supports |
+| --- | --- |
+| 7,4 cm | ✓ A, IoU maximal : 0,62 ; ✓ A et B retrouvés, encore séparés |
+| 7,9 cm | ✓ B, IoU maximal : 0,57 |
+| 7,9 cm | ✗ B fusionne avec le bâtiment · IoU 0,57 → 0,02 |
+| 8,1 cm | ✓ A et B réunis, chacun retrouvé avant |
+
+Nombres : [`resultats_supports_k5.json`](resultats_supports_k5.json).
+
 ## Événements de la vidéo à k = 10
 
 Mêmes textes que les bandeaux. Premier balayage, HDBSCAN seul (HGP attend) :
@@ -71,6 +98,19 @@ Second balayage, HGP ; HDBSCAN le suit au même r, sans pause propre :
 | 12,7 cm | ✓ A et B réunis, chacun retrouvé avant |  |
 
 Nombres : [`resultats_duel_k10.json`](resultats_duel_k10.json).
+
+## Hiérarchie des supports à k = 10
+
+Meilleur IoU des sites des supports du nœud qui suit chaque objet : 0,64 / 0,64 (hiérarchie de points HGP : 0,62 / 0,53). Événements, mêmes textes que les bandeaux :
+
+| r | supports |
+| --- | --- |
+| 10,0 cm | ✓ A, IoU maximal : 0,64 |
+| 10,1 cm | ✗ A fusionne avec le bâtiment · IoU 0,63 → 0,03 |
+| 12,3 cm | ✓ B, IoU maximal : 0,64 |
+| 12,7 cm | ✓ A et B réunis, chacun retrouvé avant |
+
+Nombres : [`resultats_supports_k10.json`](resultats_supports_k10.json).
 
 Lecture, légende et convention de niveau : [README de la liste](../../README.md#lire-une-vidéo).
 

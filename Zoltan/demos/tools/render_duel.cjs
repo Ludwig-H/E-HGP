@@ -4,9 +4,12 @@
  *
  * Usage : node Zoltan/demos/tools/render_duel.cjs <variante> [--k 5] [--theme clair|sombre] [--fps 30]
  *                                                 [--crf 26] [--stills t1,t2,...|key|end|pauses --out DIR]
+ *                                                 [--lecteur duel|supports]
  *   <variante> : sous-dossier d'exemple (videos_hgp_hdbscan/<exemple>/instances ou sans_sol, avec data/duel_k<k>.js
  *   écrit par tools/duel_scene.py) ; sans --k, le seul data/duel_k*.js présent. Sans --theme, les deux thèmes, comme
  *   Percolia.com. --stills : seulement des images fixes aux instants donnés (secondes), pour relecture.
+ *   --lecteur supports : vidéo de la hiérarchie des supports (player/supports.html, data/supports_k<k>.js écrit par
+ *   tools/supports_scene.py) ; ses sorties portent « _supports » après l'ordre.
  *
  * Sorties (un jeu par thème) : <exemple>_<variante>_k<k>_<thème>.mp4 (H.264 High, yuv420p, 1920 × 1080, 30 i/s,
  * sans son, +faststart), _instant_cle.png (l'instant clé de la scène) et _bilan.png (dernière image).
@@ -33,9 +36,11 @@ async function main() {
   const args = process.argv.slice(2);
   if (!args.length) throw new Error('usage : render_duel.cjs <bout> [--k 5] [--theme clair|sombre] [--fps 30] [--stills t,... --out DIR]');
   const bout = path.resolve(args[0]);
+  const lecteur = opt(args, '--lecteur', 'duel');
+  if (!['duel', 'supports'].includes(lecteur)) throw new Error('--lecteur : duel ou supports');
   let k = opt(args, '--k', null);
   if (k == null) {
-    const found = fs.readdirSync(path.join(bout, 'data')).filter((f) => /^duel_k\d+\.js$/.test(f));
+    const found = fs.readdirSync(path.join(bout, 'data')).filter((f) => new RegExp(`^${lecteur}_k\\d+\\.js$`).test(f));
     if (found.length !== 1) throw new Error('préciser --k : ' + found.join(', '));
     k = found[0].match(/\d+/)[0];
   }
@@ -44,15 +49,15 @@ async function main() {
   if (only && !['clair', 'sombre'].includes(only)) throw new Error('--theme : clair ou sombre');
   const themes = only ? [only] : ['sombre', 'clair'];
   const root = path.resolve(__dirname, '..');
-  const sceneFile = path.join(bout, 'data', `duel_k${k}.js`);
-  if (!fs.existsSync(sceneFile)) throw new Error('scène absente : lancer tools/duel_scene.py');
+  const sceneFile = path.join(bout, 'data', `${lecteur}_k${k}.js`);
+  if (!fs.existsSync(sceneFile)) throw new Error(`scène absente : lancer tools/${lecteur}_scene.py`);
   const sceneRel = path.relative(path.join(root, 'player'), sceneFile).split(path.sep).join('/');
   const stills = opt(args, '--stills', null);
   const { chromium } = requirePlaywright();
   const browser = await chromium.launch({ args: ['--allow-file-access-from-files'] });
   try {
     for (const theme of themes) {
-      await renderTheme(browser, { bout, k, fps, theme, root, sceneRel, stills, out: opt(args, '--out', null),
+      await renderTheme(browser, { bout, k, fps, theme, root, sceneRel, stills, lecteur, out: opt(args, '--out', null),
         crf: opt(args, '--crf', '26') });
     }
   } finally {
@@ -61,7 +66,7 @@ async function main() {
 }
 
 async function renderTheme(browser, o) {
-  const url = 'file://' + path.join(o.root, 'player', 'duel.html') + `?capture=1&theme=${o.theme}&scene=${encodeURIComponent(o.sceneRel)}`;
+  const url = 'file://' + path.join(o.root, 'player', `${o.lecteur}.html`) + `?capture=1&theme=${o.theme}&scene=${encodeURIComponent(o.sceneRel)}`;
   const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
@@ -76,21 +81,22 @@ async function renderTheme(browser, o) {
   if (applied !== (o.theme === 'clair' ? 'light' : 'dark')) throw new Error(`thème ${o.theme} non appliqué (${applied})`);
   // le fond réellement peint doit être celui du thème
   const px = await page.evaluate(() => { window.renderAt(0); return Array.from(document.getElementById('c').getContext('2d').getImageData(2, 2, 1, 1).data).slice(0, 3).join(','); });
-  const want = await page.evaluate((th) => { const h = DuelPlayer.THEMES[th].bg; const v = parseInt(h.slice(1), 16); return [(v >> 16) & 255, (v >> 8) & 255, v & 255].join(','); }, applied);
+  const want = await page.evaluate((th) => { const h = (window.DuelPlayer || window.SupportsPlayer).THEMES[th].bg; const v = parseInt(h.slice(1), 16); return [(v >> 16) & 255, (v >> 8) & 255, v & 255].join(','); }, applied);
   if (px !== want) throw new Error(`fond peint ${px} ≠ fond du thème ${o.theme} (${want})`);
-  const info = await page.evaluate(() => ({ duration: window.sceneDuration, timing: window.DUEL_SCENE.timing }));
+  const info = await page.evaluate(() => ({ duration: window.sceneDuration, timing: (window.DUEL_SCENE || window.SUPPORTS_SCENE).timing }));
   const grab = async (t) => {
     const b64 = await page.evaluate((tt) => { window.renderAt(tt); return document.getElementById('c').toDataURL('image/png').split(',')[1]; }, t);
     return Buffer.from(b64, 'base64');
   };
   const base = `${path.basename(path.dirname(o.bout))}_${path.basename(o.bout)}`;
+  const tag = o.lecteur === 'supports' ? '_supports' : '';
   if (o.stills) {
     const dir = path.resolve(o.out || '.');
     fs.mkdirSync(dir, { recursive: true });
     const list = o.stills.split(',').flatMap((s) => (s === 'pauses' ? info.timing.pauses.map((p) => String((p.t0 + p.t1) / 2)) : [s]));
     for (const s of list) {
       const t = s === 'key' ? info.timing.key : (s === 'end' ? info.duration - 0.05 : Number(s));
-      const file = path.join(dir, `${base}_k${o.k}_${o.theme}_${String(t.toFixed(2)).replace('.', '_')}.png`);
+      const file = path.join(dir, `${base}_k${o.k}${tag}_${o.theme}_${String(t.toFixed(2)).replace('.', '_')}.png`);
       fs.writeFileSync(file, await grab(t));
       console.log(file);
     }
@@ -99,7 +105,7 @@ async function renderTheme(browser, o) {
     return;
   }
   const nframes = Math.ceil(info.duration * o.fps);
-  const stem = path.join(o.bout, `${base}_k${o.k}_${o.theme}`);
+  const stem = path.join(o.bout, `${base}_k${o.k}${tag}_${o.theme}`);
   const outMp4 = `${stem}.mp4`, partMp4 = `${stem}.part.mp4`;
   const ff = spawn(ffmpegPath(), ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-vcodec', 'png', '-framerate', String(o.fps), '-i', '-',
     '-c:v', 'libx264', '-preset', 'veryslow', '-crf', String(o.crf), '-tune', 'animation', '-pix_fmt', 'yuv420p', '-profile:v', 'high', '-level', '4.1',

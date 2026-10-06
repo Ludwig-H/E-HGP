@@ -11,6 +11,13 @@
 
 Vidéo de 77 s, k = 5, 1920 × 1080 : [thème sombre](00_001472_trois_velos_40_42_59_sans_sol_k5_sombre.mp4) · [thème clair](00_001472_trois_velos_40_42_59_sans_sol_k5_clair.mp4) ; image finale : [sombre](00_001472_trois_velos_40_42_59_sans_sol_k5_sombre_bilan.png) · [clair](00_001472_trois_velos_40_42_59_sans_sol_k5_clair_bilan.png).
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="00_001472_trois_velos_40_42_59_sans_sol_k5_supports_sombre_instant_cle.png">
+  <img alt="Hiérarchie des supports, k = 5, r = 9,8 cm : B, IoU maximal : 0,70" src="00_001472_trois_velos_40_42_59_sans_sol_k5_supports_clair_instant_cle.png">
+</picture>
+
+Hiérarchie des supports q2, q3, q4 au même ordre, 47 s : [thème sombre](00_001472_trois_velos_40_42_59_sans_sol_k5_supports_sombre.mp4) · [thème clair](00_001472_trois_velos_40_42_59_sans_sol_k5_supports_clair.mp4) ; image finale : [sombre](00_001472_trois_velos_40_42_59_sans_sol_k5_supports_sombre_bilan.png) · [clair](00_001472_trois_velos_40_42_59_sans_sol_k5_supports_clair_bilan.png). Arbre d'ordre 5 : 73 845 nœuds, 101 977 boules, 101 977 supports (22 979 arêtes q2, 63 243 triangles q3, 15 755 tétraèdres q4).
+
 Points : tout ce que Patchwork++ (paramètres de la v8) ne classe pas en sol dans la boîte horizontale des objets élargie de 1 m, à toutes hauteurs : 4 943 points, dont 361 des objets (A 80, B 126, C 155) ; 21 points des objets retirés comme sol. Aucune étiquette ne sert au nettoyage : elles ne servent qu'à mesurer.
 
 Meilleur IoU de chaque objet, même mesure que la campagne G4 (points void exclus) :
@@ -45,6 +52,21 @@ Second balayage, HGP ; HDBSCAN le suit au même r, sans pause propre :
 | 42,9 cm | ✗ A, B et C réunis : A jamais retrouvé |  |
 
 Nombres : [`resultats_duel_k5.json`](resultats_duel_k5.json).
+
+## Hiérarchie des supports à k = 5
+
+Meilleur IoU des sites des supports du nœud qui suit chaque objet : 0,31 / 0,70 / 0,66 (hiérarchie de points HGP : 0,25 / 0,69 / 0,57). Événements, mêmes textes que les bandeaux :
+
+| r | supports |
+| --- | --- |
+| 9,8 cm | ✓ B, IoU maximal : 0,70 |
+| 9,8 cm | ✗ B fusionne avec le bâtiment · IoU 0,70 → 0,05 |
+| 10,7 cm | ✓ C, IoU maximal : 0,66 |
+| 10,8 cm | ✓ B et C réunis, chacun retrouvé avant |
+| 11,9 cm | ✗ A fusionne avec le bâtiment · IoU 0,31 → 0,03 |
+| 42,9 cm | ✗ A, B et C réunis : A jamais retrouvé |
+
+Nombres : [`resultats_supports_k5.json`](resultats_supports_k5.json).
 
 Lecture, légende et convention de niveau : [README de la liste](../../README.md#lire-une-vidéo).
 

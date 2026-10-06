@@ -11,6 +11,8 @@
 - README des bouts et des catégories de Zoltan/demos : une ligne de renvoi vers l'exemple de la même scène (appelé
   aussi par tools/choisir_bouts.py).
 Une vidéo n'est citée que si ses deux thèmes et ses images fixes existent ; une variante peut en avoir une par ordre.
+Chaque vidéo du duel a sa vidéo de la hiérarchie des supports au même ordre (tools/supports_scene.py, suffixe
+« _supports »), citée à côté d'elle.
 """
 import json
 from pathlib import Path
@@ -59,6 +61,26 @@ def videos(variant):
     return out
 
 
+def supports_videos(variant):
+    """{k: (résultats, préfixe)} des vidéos complètes de la hiérarchie des supports de la variante."""
+    out = {}
+    for res in variant.glob('resultats_supports_k*.json'):
+        k = int(re.search(r'k(\d+)', res.name).group(1))
+        stem = '%s_%s_k%d_supports' % (variant.parent.name, variant.name, k)
+        needed = ['%s_%s%s' % (stem, theme, suffix) for theme in ('sombre', 'clair')
+                  for suffix in ('.mp4', '_instant_cle.png', '_bilan.png')]
+        if all((variant / name).is_file() for name in needed):
+            out[k] = (json.loads(res.read_text(encoding='utf-8')), stem)
+    return out
+
+
+def supports_alt(result, k):
+    p = key_pause(result)
+    if p is None:
+        return 'Hiérarchie des supports, image finale, k = %d' % k
+    return 'Hiérarchie des supports, k = %d, r = %s : %s' % (k, cm(p['r']), ' ; '.join(text(b) for b in p['badges']).lstrip('✓✗ '))
+
+
 def key_pause(result):
     t = result['timing']
     return next((p for p in t['pauses'] if p['t0'] <= t['key'] <= p['t1']), None)
@@ -97,6 +119,7 @@ def variant_readme(variant):
     entry, crop, v = spec['bout'], spec['decoupe'], spec['variante']
     other = [x for x in VARIANTS if x != v][0]
     found = videos(variant)
+    sup = supports_videos(variant)
     head = (variant.parent / 'README.md').read_text(encoding='utf-8').splitlines()[0].lstrip('# ')
     out = ['# %s — %s' % (head, VARIANT_TITLE[v]), '',
            '[Exemple](../README.md) · autre variante : [%s](../%s/README.md) · [liste des exemples](../../README.md)'
@@ -109,6 +132,16 @@ def variant_readme(variant):
                 'Vidéo de %d s, k = %d, 1920 × 1080 : [thème sombre](%s_sombre.mp4) · [thème clair](%s_clair.mp4) ; image '
                 'finale : [sombre](%s_sombre_bilan.png) · [clair](%s_clair_bilan.png).' % (
                     round(res['timing']['duration']), k, stem, stem, stem, stem), '']
+        if k in sup:
+            sres, sstem = sup[k]
+            c = sres['counts']
+            out += picture('', sstem, supports_alt(sres, k)) + ['',
+                    'Hiérarchie des supports q2, q3, q4 au même ordre, %d s : [thème sombre](%s_sombre.mp4) · '
+                    '[thème clair](%s_clair.mp4) ; image finale : [sombre](%s_sombre_bilan.png) · [clair](%s_clair_bilan.png). '
+                    'Arbre d\'ordre %d : %s nœuds, %s boules, %s supports (%s arêtes q2, %s triangles q3, %s tétraèdres '
+                    'q4).' % (round(sres['timing']['duration']), sstem, sstem, sstem, sstem, k, thousands(c['nodes']),
+                              thousands(c['balls']), thousands(c['supports']), thousands(c['q2']), thousands(c['q3']),
+                              thousands(c['q4'])), '']
     if v == 'sans_sol':
         removed = sum(crop['objets_retires_comme_sol'])
         out += ['Points : tout ce que Patchwork++ (paramètres de la v8) ne classe pas en sol dans la boîte horizontale des '
@@ -137,6 +170,15 @@ def variant_readme(variant):
                                       ' ; '.join(text(b) for b in p['badges']['hdbscan']))
                 for p in pauses if p['method'] == 'hgp']
         out += ['', 'Nombres : [`resultats_duel_k%d.json`](resultats_duel_k%d.json).' % (k, k), '']
+        if k in sup:
+            sres, sstem = sup[k]
+            best = ' / '.join(fr(x) for x in sres['best'])
+            out += ['## Hiérarchie des supports à k = %d' % k, '',
+                    'Meilleur IoU des sites des supports du nœud qui suit chaque objet : %s (hiérarchie de points HGP : '
+                    '%s). Événements, mêmes textes que les bandeaux :' % (best, ' / '.join(fr(x) for x in res['methods']['hgp']['best'])),
+                    '', '| r | supports |', '| --- | --- |']
+            out += ['| %s | %s |' % (cm(p['r']), ' ; '.join(text(b) for b in p['badges'])) for p in sres['timing']['pauses']]
+            out += ['', 'Nombres : [`resultats_supports_k%d.json`](resultats_supports_k%d.json).' % (k, k), '']
     if found:
         out += ['Lecture, légende et convention de niveau : [README de la liste](../../README.md#lire-une-vidéo).', '']
     out += ['## Données', '',
@@ -155,7 +197,10 @@ def example_section(example):
            '| --- | --- | --- |']
     cells = []
     for v in VARIANTS:
+        sup = supports_videos(example / v)
         links = ['k = %d : [sombre](%s/%s_sombre.mp4) · [clair](%s/%s_clair.mp4)' % (k, v, stem, v, stem)
+                 + ('' if k not in sup else ' ; supports : [sombre](%s/%s_sombre.mp4) · [clair](%s/%s_clair.mp4)' % (
+                     v, sup[k][1], v, sup[k][1]))
                  for k, res, stem in found[v]]
         cells.append('[README](%s/README.md)%s' % (v, (' · ' + ' ; '.join(links)) if links else ''))
     out.append('| vidéos | %s | %s |' % tuple(cells))
@@ -196,9 +241,12 @@ def list_section(root):
         where = root / VIDEOS / ex['folder']
         links = []
         for v in VARIANTS:
+            sup = supports_videos(where / v)
             for k, res, stem in videos(where / v):
                 links.append('%s k = %d : [sombre](%s/%s/%s_sombre.mp4) · [clair](%s/%s/%s_clair.mp4)' % (
-                    'instances' if v == 'instances' else 'sans sol', k, ex['folder'], v, stem, ex['folder'], v, stem))
+                    'instances' if v == 'instances' else 'sans sol', k, ex['folder'], v, stem, ex['folder'], v, stem)
+                    + ('' if k not in sup else ', supports [sombre](%s/%s/%s_sombre.mp4) · [clair](%s/%s/%s_clair.mp4)' % (
+                        ex['folder'], v, sup[k][1], ex['folder'], v, sup[k][1])))
         objs = ', '.join('%s %s' % (LETTERS[j], {'bicycle': 'vélo', 'person': 'piéton'}.get(c, c))
                          for j, c in enumerate(ex['classes']))
         rows.append('| [%s/%s](%s/README.md) | %s | %s / %s | %s / %s | %s |' % (

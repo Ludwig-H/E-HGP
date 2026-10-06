@@ -11,6 +11,13 @@
 
 Vidéo de 58 s, k = 5, 1920 × 1080 : [thème sombre](08_002776_deux_velos_17_64_instances_k5_sombre.mp4) · [thème clair](08_002776_deux_velos_17_64_instances_k5_clair.mp4) ; image finale : [sombre](08_002776_deux_velos_17_64_instances_k5_sombre_bilan.png) · [clair](08_002776_deux_velos_17_64_instances_k5_clair_bilan.png).
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="08_002776_deux_velos_17_64_instances_k5_supports_sombre_instant_cle.png">
+  <img alt="Hiérarchie des supports, k = 5, r = 16,0 cm : B, IoU maximal : 0,51 ; ✓ A et B retrouvés, encore séparés" src="08_002776_deux_velos_17_64_instances_k5_supports_clair_instant_cle.png">
+</picture>
+
+Hiérarchie des supports q2, q3, q4 au même ordre, 36 s : [thème sombre](08_002776_deux_velos_17_64_instances_k5_supports_sombre.mp4) · [thème clair](08_002776_deux_velos_17_64_instances_k5_supports_clair.mp4) ; image finale : [sombre](08_002776_deux_velos_17_64_instances_k5_supports_sombre_bilan.png) · [clair](08_002776_deux_velos_17_64_instances_k5_supports_clair_bilan.png). Arbre d'ordre 5 : 2 904 nœuds, 3 770 boules, 3 770 supports (995 arêtes q2, 2 226 triangles q3, 549 tétraèdres q4).
+
 Points : les seuls points des objets du groupe (vérité terrain SemanticKITTI), 293 points (A 198, B 95) : ni sol, ni fond, ni autre objet.
 
 Meilleur IoU de chaque objet, même mesure que la campagne G4 (points void exclus) :
@@ -39,6 +46,17 @@ Second balayage, HGP ; HDBSCAN le suit au même r, sans pause propre :
 | 17,7 cm | ✓ A, IoU maximal : 0,70 ; ✓ A et B réunis, chacun retrouvé avant | ✗ A et B déjà réunis |
 
 Nombres : [`resultats_duel_k5.json`](resultats_duel_k5.json).
+
+## Hiérarchie des supports à k = 5
+
+Meilleur IoU des sites des supports du nœud qui suit chaque objet : 0,70 / 0,51 (hiérarchie de points HGP : 0,70 / 0,53). Événements, mêmes textes que les bandeaux :
+
+| r | supports |
+| --- | --- |
+| 16,0 cm | ✓ B, IoU maximal : 0,51 ; ✓ A et B retrouvés, encore séparés |
+| 17,7 cm | ✓ A, IoU maximal : 0,70 ; ✓ A et B réunis, chacun retrouvé avant |
+
+Nombres : [`resultats_supports_k5.json`](resultats_supports_k5.json).
 
 Lecture, légende et convention de niveau : [README de la liste](../../README.md#lire-une-vidéo).
 

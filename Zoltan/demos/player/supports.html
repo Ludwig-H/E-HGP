@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hiérarchie des supports — lecteur des exemples</title>
+<script>
+  // Thème avant le premier affichage, comme Percolia.com : sombre par défaut,
+  // choix mémorisé sous la même clé ; ?theme=clair|sombre l'impose sans le mémoriser.
+  (function () {
+    var q = new URLSearchParams(location.search).get('theme');
+    var t = q === 'clair' || q === 'light' ? 'light' : (q === 'sombre' || q === 'dark' ? 'dark' : null);
+    if (!t) {
+      try {
+        var saved = window.localStorage.getItem('percolia-theme');
+        if (saved === 'light' || saved === 'dark') t = saved;
+      } catch (e) {}
+    }
+    if (t) document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
+<style>
+  /* Variables de Percolia.com (thème sombre par défaut, clair sous data-theme=light).
+     Écarts assumés : en-tête plus bas, pour laisser la hauteur au canevas 16:9 ; glyphe
+     de la pilule foncé au survol (blanc sur turquoise : 2,1:1 seulement) ; curseur bleu en
+     clair (turquoise sur blanc : 2,1:1). */
+  /* Inter hébergée ici comme sur Percolia.com (sous-ensemble latin, variable 100–900,
+     licence SIL OFL 1.1 : fonts/OFL.txt) ; aucune requête vers un tiers. Le canevas garde
+     DejaVu Sans, pour des vidéos identiques d'une machine à l'autre. */
+  @font-face { font-family: Inter; font-style: normal; font-weight: 100 900; font-display: swap;
+               src: url(fonts/Inter-latin.woff2) format("woff2"); }
+  @font-face { font-family: "Inter Fallback"; src: local(Arial); ascent-override: 90.44%;
+               descent-override: 22.52%; line-gap-override: 0%; size-adjust: 107.12%; }
+  :root {
+    --color-bg: #071b2e; --color-surface: #0f2c48; --color-text: #eaf5f7; --color-muted: #9fb4c4;
+    --color-blue: #1c83d4; --color-teal: #20c9c4; --color-border: #eaf5f724; --color-header-tint: #0f2c4899;
+    --font-body: Inter, "Inter Fallback", "Segoe UI", sans-serif;
+    color-scheme: dark;
+  }
+  :root[data-theme=light] {
+    --color-bg: #fff; --color-surface: #eaf5f7; --color-text: #082c4c; --color-muted: #5d7385;
+    --color-border: #082c4c24; --color-header-tint: #eaf5f7b8;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  button { font-family: inherit; }
+  body { display: flex; flex-direction: column; background: var(--color-bg); color: var(--color-text);
+         font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
+  .site-header { display: flex; justify-content: space-between; align-items: center; padding: 0.9rem 2rem;
+                 background: var(--color-header-tint); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+                 border-bottom: 1px solid var(--color-border); }
+  .site-header .brand { font-weight: 600; letter-spacing: 0.02em; }
+  .site-header .brand span { color: var(--color-muted); font-weight: 400; }
+  .theme-toggle { display: inline-flex; justify-content: center; align-items: center; width: 2.25rem; height: 2.25rem;
+                  border: 1px solid var(--color-border); border-radius: 999px; background: none; color: var(--color-text);
+                  font-size: 1.1rem; line-height: 1; cursor: pointer; transition: background 0.2s; }
+  .theme-toggle:hover { background: var(--color-border); }
+  #stage { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0; padding: 12px; }
+  canvas { max-width: 100%; max-height: 100%; aspect-ratio: 16 / 9; background: var(--color-bg);
+           border: 1px solid var(--color-border); border-radius: 8px; }
+  #bar { display: flex; gap: 12px; align-items: center; padding: 10px 2rem; border-top: 1px solid var(--color-border); }
+  #bar input[type=range] { flex: 1; accent-color: var(--color-teal); }
+  /* sur fond blanc, le turquoise n'a que 2:1 ; le bleu de Percolia a 4:1 */
+  :root[data-theme=light] #bar input[type=range] { accent-color: var(--color-blue); }
+  #seek:focus-visible { outline: 2px solid var(--color-teal); outline-offset: 1px; }
+  :root[data-theme=light] #seek:focus-visible { outline-color: var(--color-blue); }
+  .button { background: var(--color-blue); color: #fff; border: none; border-radius: 999px; padding: 0.65rem 1.5rem;
+            font-size: 0.95rem; font-weight: 500; line-height: 1; cursor: pointer; transition: background 0.2s; }
+  .button:hover { background: var(--color-teal); color: #071b2e; }  /* 8,5:1 dans les deux thèmes */
+  #info { color: var(--color-muted); font-size: 13px; min-width: 190px; text-align: right; }
+  body.capture .site-header, body.capture #bar { display: none; }
+  body.capture #stage { padding: 0; }
+  body.capture canvas { max-width: none; max-height: none; border: none; border-radius: 0; }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="brand">Démos Zoltan <span>· hiérarchie des supports q2, q3, q4 (Morse HGP 3D v11)</span></div>
+  <button type="button" id="theme" class="theme-toggle" aria-label="Passer en thème clair" title="Passer en thème clair">☀️</button>
+</header>
+<div id="stage"><canvas id="c" width="1920" height="1080"></canvas></div>
+<div id="bar">
+  <button id="play" class="button" title="espace">▶</button>
+  <input id="seek" type="range" min="0" max="1000" value="0" aria-label="position dans la vidéo">
+  <span id="info"></span>
+</div>
+<script src="supports.js"></script>
+<script>
+(function () {
+  const params = new URLSearchParams(location.search);
+  const src = params.get('scene');
+  if (params.has('capture')) document.body.classList.add('capture');
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+  const toggle = document.getElementById('theme');
+  let redraw = () => {};
+  const note = (msg) => {  // texte brut : rien de l'adresse n'est interprété comme du HTML
+    const p = document.createElement('p'); p.style.padding = '16px'; p.textContent = msg;
+    document.getElementById('stage').prepend(p); window.sceneError = true;
+  };
+  // bouton ☀️ / 🌙 de Percolia.com : il affiche le thème vers lequel il bascule
+  function applyTheme(theme, remember) {
+    theme = window.SupportsPlayer ? SupportsPlayer.setTheme(theme) : (theme === 'light' || theme === 'clair' ? 'light' : 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
+    const label = theme === 'light' ? 'Passer en thème sombre' : 'Passer en thème clair';
+    toggle.textContent = theme === 'light' ? '🌙' : '☀️';
+    toggle.setAttribute('aria-label', label);
+    toggle.title = label;
+    if (remember) { try { window.localStorage.setItem('percolia-theme', theme); } catch (e) {} }
+    redraw();
+  }
+  applyTheme(document.documentElement.getAttribute('data-theme') || 'dark', false);
+  toggle.onclick = () => {
+    applyTheme(document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light', true);
+    // un clic l'emporte sur ?theme= : on le retire de l'adresse pour que le rechargement garde le choix
+    if (params.has('theme') && !params.has('capture')) {
+      const u = new URL(location.href); u.searchParams.delete('theme'); history.replaceState(null, '', u);
+    }
+  };
+  if (!window.SupportsPlayer) { note('supports.js introuvable à côté de supports.html.'); return; }
+  window.setDemoTheme = (theme) => { applyTheme(theme, false); return SupportsPlayer.themeName(theme); };
+  function start() {
+    const S = SupportsPlayer.prepare(window.SUPPORTS_SCENE);
+    let t = 0, playing = !params.has('capture'), last = null;
+    const seek = document.getElementById('seek'), info = document.getElementById('info'), btn = document.getElementById('play');
+    function draw() {
+      const st = SupportsPlayer.renderAt(ctx, S, t);
+      seek.value = Math.round(1000 * t / S.timing.duration);
+      const fr = (v, d) => v.toFixed(d).replace('.', ',');
+      info.textContent = `t = ${fr(t, 1)} s / ${fr(S.timing.duration, 1)} s · r = ${fr(st.r, 3)} m`;
+    }
+    redraw = draw;
+    function tick(now) {
+      if (playing) {
+        if (last != null) t += (now - last) / 1000;
+        if (t >= S.timing.duration) { t = S.timing.duration; playing = false; btn.textContent = '▶'; }
+        draw();
+      }
+      last = now;
+      requestAnimationFrame(tick);
+    }
+    btn.onclick = () => { if (t >= S.timing.duration) t = 0; playing = !playing; btn.textContent = playing ? '❚❚' : '▶'; last = null; };
+    seek.oninput = () => { t = S.timing.duration * seek.value / 1000; draw(); };
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') { e.preventDefault(); btn.click(); }
+      if (e.code === 'ArrowRight') { t = Math.min(S.timing.duration, t + 1); draw(); }
+      if (e.code === 'ArrowLeft') { t = Math.max(0, t - 1); draw(); }
+    });
+    btn.textContent = playing ? '❚❚' : '▶';
+    window.renderAt = (tt) => { t = tt; draw(); return true; };
+    window.sceneDuration = S.timing.duration;
+    window.sceneReady = true;
+    draw();
+    if (!params.has('capture')) requestAnimationFrame(tick);
+  }
+  if (!src) { note('Indiquer la scène : supports.html?scene=../videos_hgp_hdbscan/08_002852_deux_velos_6_51/sans_sol/data/supports_k5.js (et, au choix, &theme=clair).'); return; }
+  // seules les scènes des exemples sont chargées : ?scene= ne doit pas exécuter un script quelconque
+  if (!/^\.\.\/videos_hgp_hdbscan\/[0-9a-z_]+\/(instances|sans_sol)\/data\/supports_k\d+\.js$/.test(src)) {
+    note('Scène refusée : chemin attendu ../videos_hgp_hdbscan/<exemple>/<instances|sans_sol>/data/supports_k<k>.js'); return;
+  }
+  const s = document.createElement('script');
+  // une scène refusée par prepare() : message dans la page (et sceneError), puis l'erreur remonte
+  s.src = src; s.onload = () => { try { start(); } catch (e) { note(e.message); throw e; } };
+  s.onerror = () => note(`Scène introuvable : ${src} — lancer d'abord tools/supports_scene.py.`);
+  document.head.appendChild(s);
+})();
+</script>
+</body>
+</html>

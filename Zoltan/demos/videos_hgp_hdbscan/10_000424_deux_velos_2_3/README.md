@@ -26,7 +26,7 @@ En gras : objet à 0,5 ou moins, qu'aucun groupe de la hiérarchie ne recouvre �
 
 | | instances de la vérité terrain seules | sol retiré automatiquement (Patchwork++) |
 | --- | --- | --- |
-| vidéos | [README](instances/README.md) · k = 5 : [sombre](instances/10_000424_deux_velos_2_3_instances_k5_sombre.mp4) · [clair](instances/10_000424_deux_velos_2_3_instances_k5_clair.mp4) | [README](sans_sol/README.md) · k = 5 : [sombre](sans_sol/10_000424_deux_velos_2_3_sans_sol_k5_sombre.mp4) · [clair](sans_sol/10_000424_deux_velos_2_3_sans_sol_k5_clair.mp4) |
+| vidéos | [README](instances/README.md) · k = 5 : [sombre](instances/10_000424_deux_velos_2_3_instances_k5_sombre.mp4) · [clair](instances/10_000424_deux_velos_2_3_instances_k5_clair.mp4) ; supports : [sombre](instances/10_000424_deux_velos_2_3_instances_k5_supports_sombre.mp4) · [clair](instances/10_000424_deux_velos_2_3_instances_k5_supports_clair.mp4) | [README](sans_sol/README.md) · k = 5 : [sombre](sans_sol/10_000424_deux_velos_2_3_sans_sol_k5_sombre.mp4) · [clair](sans_sol/10_000424_deux_velos_2_3_sans_sol_k5_clair.mp4) ; supports : [sombre](sans_sol/10_000424_deux_velos_2_3_sans_sol_k5_supports_sombre.mp4) · [clair](sans_sol/10_000424_deux_velos_2_3_sans_sol_k5_supports_clair.mp4) |
 
 **Instances de la vérité terrain seules**, k = 5 :
 
