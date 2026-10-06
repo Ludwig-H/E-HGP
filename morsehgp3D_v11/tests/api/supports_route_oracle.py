@@ -107,7 +107,10 @@ def run(gate, o, workers, cases):
         ok = gate.check(isinstance(row, dict) and tuple(sorted(row)) == KEYS, '%s : cles %r' % (where, line[:200]))
         ok = ok and gate.check_eq((row['status'], row['same'], row['k'], row['n']), ('ok', 1, k, len(points)),
                                   '%s : statut, accord des voies, K, n' % where)
-        ok = ok and gate.check(row['cells'] <= row['balls'] and row['bytes'] > 0 and row['nodes'] > 0,
+        # Arbre couvrant (MHGP11SP 2) : un support S* par boule ; les cellules du journal ne sont plus une partie des
+        # boules publiees (liaisons internes retirees).
+        ok = ok and gate.check(row['supports'] == row['balls'] and row['multiple'] == 0 and row['bytes'] > 0 and
+                               row['nodes'] > 0,
                                '%s : comptes incoherents %r' % (where, line[:200]))
         rows.append(row if ok else None)
     return rows

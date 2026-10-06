@@ -17,21 +17,22 @@ Pour chaque (nuage, K) : un appel --sortie=supports, sur un fil (points dans l'o
   - le dossier est conforme au lecteur (check_directory : manifeste canonique, inventaire, taille, sha256, decodage
     strict et tous les controles de read_supports, agregats du manifeste recomptes, tree_k_sha256 egal a la
     signature version 2 recalculee depuis le fichier) ;
-  - le fichier decode, ramene aux conventions de l'oracle (sites et ids en ordre lexicographique, niveaux et centres
-    exacts tires de S*, boules d'un noeud par (niveau, centre), supports par (arite, coordonnees), comptes derives par
-    le lecteur), egale canonical(k, ids) sur k, n, sites, ids, noeuds (level, parent, children, kind, post, balls,
-    birth_center) et boules (node, level, center, role, p, m, qmin, components, prior, supports, kparties_reliees,
-    compressed_parts, strict_traces, cofaces, cofaces_support, gabriel_cofaces, gabriel_cofaces_support).
+  - le fichier decode (MHGP11SP version 2), ramene aux conventions de l'oracle (sites et ids en ordre
+    lexicographique, niveaux et centres exacts tires de S*, boules d'un noeud par (niveau, centre)), egale la
+    projection de canonical(k, ids) sur l'arbre couvrant d'ordre K (decision de l'utilisateur du 6 octobre 2026) :
+    boules de role naissance ou fusion seulement, renumerotees, S* seul (plus petite arite, puis SiteIdx de Morton),
+    sur k, n, sites, ids, noeuds (level, parent, children, kind, post, balls, birth_center) et boules (node, level,
+    center, role, p, m, qmin, components, prior, supports). Les comptes de Q_b ne sont plus publies.
 Pour chaque (nuage, K) avec K <= 4 : un appel --sortie=full sur la meme entree ; son tree_k_sha256 egale celui de la
 sortie supports, lui-meme juge contre la serialisation version 2 du lecteur (signature commune des sorties, docs/
 SORTIES.md, paragraphe 8).
-Plafond de coquille (appel entier) : 25 des 30 sites de x^2 + y^2 + z^2 = 9 (temoin sphere9 de S6b), K1 et K2, un et
-quatre fils : code 2, support_shell_capacity a l'etape compute, ni D ni D.pending ; --sortie=full sur la meme entree
-est conforme (aucun plafond pour FULL). Sphere5 (24 sites) admise : la boule centrale publie ses 828 supports.
+Coquilles larges : 25 des 30 sites de x^2 + y^2 + z^2 = 9 (temoin sphere9 de S6b), K1 et K2, un et quatre fils, puis
+sphere5 (24 sites) : admis par l'arbre couvrant (aucune enumeration de Q_b, aucun plafond de 24 sites), un S* par
+boule.
 
 Codes : 0 conforme ; 1 ecart ; 2 refus d'usage ; 3 plancher. Dernieres lignes :
     cli_supports_oracle_couverture bits=<b> nuages=<c> exclus=<x> ordres=<o> boules=<w> etendues=<e> multiples=<m>
-        tetraedres=<t> ordres_6plus=<h> signatures=<s> refus=<r>
+        tetraedres=<t> ordres_6plus=<h> signatures=<s> larges=<r>
     cli_supports_oracle_ok controles=<n>
 Python 3.10 nu, bibliotheque standard seule, aucun assert ; aucun bytecode cree (PYTHONDONTWRITEBYTECODE).
 """
@@ -53,6 +54,35 @@ import test_supports  # noqa: E402
 formats = cs.formats
 ROLE_NAMES = ('naissance', 'fusion', 'interne')
 FLOORS = ('clouds', 'orders', 'balls', 'extended', 'multiple', 'signatures')
+# Champs compares d'une boule de l'arbre couvrant (MHGP11SP version 2) : sans les comptes de Q_b.
+SPANNING_BALL = ('node', 'level', 'center', 'role', 'p', 'm', 'qmin', 'components', 'prior', 'supports')
+SPANNING_NODE = ('level', 'parent', 'children', 'kind', 'post', 'balls', 'birth_center')
+
+
+def star(supports):
+    """S* parmi les supports (listes de coordonnees) : plus petite arite, puis ordre lexicographique des SiteIdx, ici
+    des cles de Morton croissantes (SiteIdx = rang de Morton), comme le catalogue."""
+    q = min(len(x) for x in supports)
+    return min((x for x in supports if len(x) == q), key=lambda x: sorted(formats.morton(tuple(p)) for p in x))
+
+
+def spanning(doc):
+    """Projection d'un document de l'oracle (W_K entiere, Q_b) sur l'arbre couvrant d'ordre K : boules de role
+    naissance ou fusion seulement, renumerotees dans le meme ordre, S* seul, sans les comptes de Q_b."""
+    kept = [b for b, ball in enumerate(doc['balls']) if ball['role'] != 'interne']
+    new = dict((old, j) for j, old in enumerate(kept))
+    out = dict((key, doc.get(key)) for key in ('k', 'n', 'sites', 'ids'))
+    out['nodes'] = []
+    for node in doc['nodes']:
+        node = dict((key, node.get(key)) for key in SPANNING_NODE)
+        node['balls'] = [new[b] for b in node['balls'] if b in new]
+        out['nodes'].append(node)
+    out['balls'] = []
+    for b in kept:
+        ball = dict((key, doc['balls'][b].get(key)) for key in SPANNING_BALL)
+        ball['supports'] = [star(ball['supports'])]
+        out['balls'].append(ball)
+    return out
 
 
 class Usage(Exception):
@@ -93,18 +123,13 @@ def oracle_document(sp):
     balls = []
     for b in order:
         supports = sp.supports_of(b)
-        counts = sp.counts(b)
         coords = [sorted(list(pts[s]) for s in q) for q in supports]
-        ranked = sorted(range(len(supports)), key=lambda j: (len(coords[j]), coords[j]))
         first = sp.prior_at[b]
+        components = sp.prior_count[b] if sp.role[b] == formats.ROLE_MERGE else int(sp.role[b] == formats.ROLE_INTERNAL)
         balls.append(dict(
             node=sp.node_of[b], level=str(levels[b]), center=[str(c) for c in centers[b]],
-            role=ROLE_NAMES[sp.role[b]], p=sp.p[b], m=sp.m[b], qmin=sp.qmin[b], components=counts['components'],
-            prior=list(sp.prior[first:first + sp.prior_count[b]]), supports=[coords[j] for j in ranked],
-            kparties_reliees=counts['kparties_reliees'], compressed_parts=counts['compressed_parts'],
-            strict_traces=counts['strict_traces'], cofaces=counts['cofaces'],
-            cofaces_support=[counts['cofaces_support'][j] for j in ranked], gabriel_cofaces=counts['gabriel_cofaces'],
-            gabriel_cofaces_support=[counts['gabriel_cofaces_support'][j] for j in ranked]))
+            role=ROLE_NAMES[sp.role[b]], p=sp.p[b], m=sp.m[b], qmin=sp.qmin[b], components=components,
+            prior=list(sp.prior[first:first + sp.prior_count[b]]), supports=coords))
     nodes = []
     for v in range(sp.N):
         own = range(sp.first_ball[v], sp.first_ball[v] + sp.ball_count[v])
@@ -161,7 +186,8 @@ def compare(gate, where, report, line, case):
     except (ValueError, KeyError, IndexError) as error:
         gate.check(False, '%s : conversion aux conventions de l\'oracle : %s' % (where, error))
         return
-    found = attach_fraction.first_difference(hierarchy_fraction.project(mine), hierarchy_fraction.project(want), 'doc')
+    gate.check_eq(sp.version, 2, '%s : MHGP11SP version 2 (arbre couvrant)' % where)
+    found = attach_fraction.first_difference(spanning(mine), spanning(want), 'doc')
     gate.check(found is None, '%s : fichier contre oracle : %s' % (where, found))
 
 
@@ -184,36 +210,29 @@ def sphere9_25():
 
 
 def shell_cases(gate, runner):
-    """Plafond de coquille : refus de l'appel entier a 25 sites, FULL conforme, sphere5 admise. Rend le nombre de
-    refus constates."""
+    """Coquilles larges, admises par l'arbre couvrant (plus d'enumeration de Q_b, plus de plafond de 24 sites) : 25 des
+    30 sites de la sphere de rayon carre 9, K1 et K2, un et quatre fils, puis sphere5 (24 sites, 828 supports en
+    version 1) : chaque boule publie son seul S*. Rend le nombre de cas admis."""
     points = sphere9_25()
     if not gate.check(len(points) == 25, 'sphere9 : %d sites' % len(points)):
         return 0
     ids = [cs.NONE - 3 * i for i in range(len(points))]
-    refusals = 0
+    admitted = 0
     for k in (1, 2):
         for workers in (1, 4):
-            folder = tempfile.mkdtemp(prefix='s', dir=runner.root)
-            xyz, names = cs.write_inputs(folder, points, ids)
-            d = os.path.join(folder, 'D')
-            result, rows = cs.run_cli(cs.cli_argv(runner.args['cli'], xyz, names, d, k, workers=workers,
-                                                  output='supports'), timeout=120)
-            line = rows[0] if len(rows) == 1 and rows[0] else {}
-            want = dict(output='supports', status='unsupported_degeneracy', reason='support_shell_capacity',
-                        stage='compute', publication='none', manifest_sha256=None)
-            gate.check(result.code == 2 and dict((key, line.get(key)) for key in want) == want,
-                       'sphere9 K%d W%d : %s, ligne %r' % (k, workers, result.describe(), rows))
-            gate.check(not os.path.lexists(d) and not os.path.lexists(d + '.pending'),
-                       'sphere9 K%d W%d : D ou D.pending present apres le refus' % (k, workers))
-            refusals += result.code == 2
-            shutil.rmtree(folder, ignore_errors=True)
-        report, _line = runner.publish('sphere9 K%d' % k, points, ids, k, 1, 'full')
-        gate.check(report is not None, 'sphere9 K%d : FULL refuse' % k)
+            report, _line = runner.publish('sphere9 K%d W%d' % (k, workers), points, ids, k, workers, 'supports')
+            if gate.check(report is not None, 'sphere9 K%d W%d : supports refuse' % (k, workers)):
+                counts = report['manifest']['counts']
+                # La boule centrale de 25 sites n'est pas une arete de l'arbre couvrant a K1 et K2 (des boules plus
+                # petites relient deja ses sites) : l'appel est admis, chaque boule publiee porte son seul S*.
+                gate.check(counts['supports'] == counts['balls'] and counts['roles']['merge'] >= 1,
+                           'sphere9 K%d W%d : un S* par boule, au moins une fusion' % (k, workers))
+                admitted += 1
     report, _line = runner.publish('sphere5 K1', sphere(5, 2), list(range(24)), 1, 4, 'supports')
     if gate.check(report is not None, 'sphere5 K1 : supports refuse'):
-        gate.check_eq(report['manifest']['counts']['max_supports_per_ball'], 828, 'sphere5 K1 : supports de la '
-                      'boule centrale')
-    return refusals
+        counts = report['manifest']['counts']
+        gate.check_eq(counts['supports'], counts['balls'], 'sphere5 K1 : un S* par boule')
+    return admitted
 
 
 def main():
@@ -250,15 +269,15 @@ def main():
                     gate.check_eq(full['manifest']['tree_k_sha256'], report['manifest']['tree_k_sha256'],
                                   '%s : tree_k_sha256 de full et de supports' % where)
                     t['signatures'] += 1
-        refusals = shell_cases(gate, runner)
+        admitted = shell_cases(gate, runner)
     print('cli_supports_oracle_couverture bits=%d nuages=%d exclus=%d ordres=%d boules=%d etendues=%d multiples=%d '
-          'tetraedres=%d ordres_6plus=%d signatures=%d refus=%d'
+          'tetraedres=%d ordres_6plus=%d signatures=%d larges=%d'
           % (o['bits'], t['clouds'], excluded, t['orders'], t['balls'], t['extended'], t['multiple'], t['tetra'],
-             t['high'], t['signatures'], refusals))
+             t['high'], t['signatures'], admitted))
     below = [name for name in FLOORS if t[name] < o['floors'].get(name, 0)]
-    if gate.failures == 0 and (below or refusals != 4):
-        print('PLANCHER cli_supports_oracle : %s sous %s, refus %d sur 4'
-              % (', '.join(below), json.dumps(o['floors'], sort_keys=True), refusals))
+    if gate.failures == 0 and (below or admitted != 4):
+        print('PLANCHER cli_supports_oracle : %s sous %s, coquilles larges admises %d sur 4'
+              % (', '.join(below), json.dumps(o['floors'], sort_keys=True), admitted))
         return mhgp11_gate.FLOOR
     return gate.finish(floor=1)
 

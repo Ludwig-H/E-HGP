@@ -379,23 +379,18 @@ std::string full_manifest(const api::Product& product, const Provenance& provena
 
 namespace {
 
-// Comptes de la sortie supports (docs/SORTIES.md, paragraphe 8), dans l'ordre fixe du contrat.
+// Comptes de la sortie supports (docs/SORTIES.md, paragraphe 8), dans l'ordre fixe du contrat. Version 2 (arbre
+// couvrant d'ordre K, 6 octobre 2026) : naissances et fusions, un support S* par boule ; les agregats de Q_b et des
+// liaisons internes de la version 1 (internal, multi_support_balls, max_supports_per_ball, kparties_reliees, cofaces)
+// sont retires.
 void supports_counts(std::string& out, const OrderTree& tree, const supports::SupportHierarchy& h) {
   const OrderForest& forest = tree.forest();
-  std::array<u64, 3> roles{}, arities{};
-  u64 extended = 0, multiple = 0, widest = 0, kparties_sum = 0, kparties_max = 0, cofaces_sum = 0, cofaces_max = 0;
-  const auto offsets = h.support_offsets();
-  for (u64 b = 0; b < h.balls().size(); ++b) {
-    const supports::Ball& ball = h.balls()[b];
-    ++roles[static_cast<std::size_t>(ball.role)];
-    const u64 count = offsets[b + 1] - offsets[b];
+  std::array<u64, 2> roles{};
+  std::array<u64, 3> arities{};
+  u64 extended = 0;
+  for (const supports::Ball& ball : h.balls()) {
+    ++roles[ball.role == BallRole::birth ? 0 : 1];
     extended += ball.m > ball.qmin;
-    multiple += count >= 2;
-    widest = std::max(widest, count);
-    kparties_sum += ball.kparties_reliees;
-    kparties_max = std::max<u64>(kparties_max, ball.kparties_reliees);
-    cofaces_sum += ball.cofaces;
-    cofaces_max = std::max<u64>(cofaces_max, ball.cofaces);
   }
   for (const supports::Support& support : h.supports()) ++arities[support.arity - 2];
   out.append(",\"counts\":{\"sites\":");
@@ -412,8 +407,6 @@ void supports_counts(std::string& out, const OrderTree& tree, const supports::Su
   number(out, roles[0]);
   out.append(",\"merge\":");
   number(out, roles[1]);
-  out.append(",\"internal\":");
-  number(out, roles[2]);
   out.append("},\"supports\":");
   number(out, h.supports().size());
   out.append(",\"arities\":{\"2\":");
@@ -424,21 +417,9 @@ void supports_counts(std::string& out, const OrderTree& tree, const supports::Su
   number(out, arities[2]);
   out.append("},\"extended_shells\":");
   number(out, extended);
-  out.append(",\"multi_support_balls\":");
-  number(out, multiple);
-  out.append(",\"max_supports_per_ball\":");
-  number(out, widest);
   out.append(",\"prior\":");
   number(out, h.prior().size());
-  out.append(",\"kparties_reliees\":{\"sum\":");
-  number(out, kparties_sum);
-  out.append(",\"max\":");
-  number(out, kparties_max);
-  out.append("},\"cofaces\":{\"sum\":");
-  number(out, cofaces_sum);
-  out.append(",\"max\":");
-  number(out, cofaces_max);
-  out.append("}}");
+  out.append("}");
 }
 
 }  // namespace
@@ -460,7 +441,7 @@ std::string supports_manifest(const api::Product& product, const Provenance& pro
   inputs(out, provenance);
   out.append(",\"files\":[{\"name\":");
   quoted(out, api::kSupportsFileName);
-  out.append(",\"format\":\"MHGP11SP\",\"version\":1,\"bytes\":");
+  out.append(",\"format\":\"MHGP11SP\",\"version\":2,\"bytes\":");
   number(out, bytes);
   out.append(",\"sha256\":");
   hex(out, sha256);

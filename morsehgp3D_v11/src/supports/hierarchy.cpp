@@ -28,10 +28,12 @@ namespace supports_detail {
 struct Assembly {
   static constexpr u64 kGrain = 512;  // boules par tranche ; sans effet sur les sorties
 
-  Assembly(const OrderTree& t, MemoryBudget& b, sched::Pool* p) noexcept : tree(t), budget(b), pool(p) {}
+  Assembly(const OrderTree& t, MemoryBudget& b, sched::Pool* p, Selection s) noexcept
+      : tree(t), budget(b), pool(p), selection(s) {}
   const OrderTree& tree;
   MemoryBudget& budget;
   sched::Pool* pool;
+  Selection selection;
   SupportHierarchy out;
   Buffer<u32> origin;              // position -> indice dans le rattachement (temporaire)
   Buffer<SupportLedger> ledgers;   // un par fil
@@ -40,6 +42,10 @@ struct Assembly {
   HierarchyAdmission sizes;
   u64 words = 0, list = 1;
 
+  // Boule i du rattachement gardee : toutes (all), ou seulement les aretes de l'arbre couvrant (spanning).
+  bool kept(u64 i) const noexcept {
+    return selection == Selection::all || tree.attachment().role()[i] != BallRole::internal;
+  }
   Outcome prepass() noexcept;
   Outcome allocate_first() noexcept;
   Outcome postorder() noexcept;
@@ -69,7 +75,7 @@ Outcome Assembly::prepass() noexcept {
   if (a.node().size() != b || a.role().size() != b || a.strict_traces().size() != b || a.components().size() != b ||
       a.prior_offsets().size() != b + 1 || a.prior_offsets()[b] != a.prior().size() || n == 0 || n >= kNone)
     return fail(Reason::supports_invariant);
-  u64 widest = 0;
+  u64 widest = 0, chosen = 0, prior = 0;
   for (u64 i = 0; i < b; ++i) {
     const u32 key = idx(a.balls()[i]);
     if (key >= cat.balls() || (i > 0 && idx(a.balls()[i - 1]) >= key) || idx(a.node()[i]) >= n ||
@@ -78,13 +84,20 @@ Outcome Assembly::prepass() noexcept {
     const CatalogueBall& data = cat.balls_data()[key];
     if (data.p > kMaxInterior || data.qmin < 2 || data.qmin > 4 || data.m < data.qmin)
       return fail(Reason::supports_invariant);
+    if (!kept(i)) continue;
+    ++chosen;
+    prior += a.prior_offsets()[i + 1] - a.prior_offsets()[i];
+    if (selection == Selection::spanning) {
+      if (data.m > 255) return fail(Reason::support_shell_capacity);  // colonne m u8 du fichier
+      continue;
+    }
     if (data.m == data.qmin) continue;
     MHGP11_TRY(check_shell(data.m));
     widest = std::max<u64>(widest, data.m);
   }
   sizes.nodes = n;
-  sizes.balls = b;
-  sizes.prior = a.prior().size();
+  sizes.balls = chosen;
+  sizes.prior = prior;
   sizes.workers = pool == nullptr ? 1 : pool->size();
   sizes.widest = widest;
   words = widest == 0 ? 0 : closure_words(static_cast<u32>(widest));
@@ -151,13 +164,16 @@ Outcome Assembly::postorder() noexcept {
 // des BallIdx (tri stable). Puis decalages des branches ; les metadonnees viennent avec la passe count.
 Outcome Assembly::sort_balls() noexcept {
   const WindowAttachment& a = tree.attachment();
-  const u64 n = sizes.nodes, b = sizes.balls;
+  const u64 n = sizes.nodes, b = sizes.balls, all = a.size();
   u64* off = out.ball_offsets_.data();
   const u32* post = out.post_.data();
   std::fill(off, off + n + 1, u64{0});
-  for (u64 i = 0; i < b; ++i) ++off[u64{post[idx(a.node()[i])]} + 1];
+  for (u64 i = 0; i < all; ++i)
+    if (kept(i)) ++off[u64{post[idx(a.node()[i])]} + 1];
   for (u64 j = 1; j <= n; ++j) off[j] += off[j - 1];
-  for (u64 i = b; i-- > 0;) origin[--off[u64{post[idx(a.node()[i])]} + 1]] = static_cast<u32>(i);
+  if (off[n] != b) return fail(Reason::supports_invariant);
+  for (u64 i = all; i-- > 0;)
+    if (kept(i)) origin[--off[u64{post[idx(a.node()[i])]} + 1]] = static_cast<u32>(i);
   for (u64 j = 0; j < n; ++j) off[j] = off[j + 1];
   off[n] = b;
   u64* prior = out.prior_offsets_.data();
@@ -202,6 +218,10 @@ Outcome Assembly::count_body(void* context, u64 begin, u64 end, u32 worker) noex
   for (u64 slot = begin; slot < end; ++slot) {
     Ball& ball = s.out.balls_[slot];
     ball = s.metadata(slot);
+    if (s.selection == Selection::spanning) {  // S* seul ; comptes non calcules
+      s.out.support_offsets_[slot + 1] = 1;
+      continue;
+    }
     const auto made = ball_supports(domain, ball.key, s.list_of(worker), s.words_of(worker), &s.ledgers[worker]);
     if (!made.ok()) return made.outcome();
     const auto shape = make_shape(ball.p, ball.m, ball.qmin, s.tree.order());
@@ -253,6 +273,21 @@ Outcome Assembly::fill_body(void* context, u64 begin, u64 end, u32 worker) noexc
   const std::span<Support> list = s.list_of(worker);
   for (u64 slot = begin; slot < end; ++slot) {
     const Ball& ball = s.out.balls_[slot];
+    const u32 at = s.origin[slot];
+    std::copy(a.prior().begin() + static_cast<std::ptrdiff_t>(a.prior_offsets()[at]),
+              a.prior().begin() + static_cast<std::ptrdiff_t>(a.prior_offsets()[at + 1]),
+              s.out.prior_.begin() + static_cast<std::ptrdiff_t>(s.out.prior_offsets_[slot]));
+    if (s.selection == Selection::spanning) {
+      const u64 first = s.out.support_offsets_[slot];
+      if (s.out.support_offsets_[slot + 1] - first != 1) return fail(Reason::supports_invariant);
+      const CatalogueBall& data = domain.catalogue().balls_data()[idx(ball.key)];
+      Support star;
+      star.arity = data.qmin;
+      star.sites = data.support;
+      s.out.supports_[first] = star;
+      s.out.support_cofaces_[first] = 0;
+      continue;
+    }
     const auto made = ball_supports(domain, ball.key, list, s.words_of(worker));
     if (!made.ok()) return made.outcome();
     const u64 first = s.out.support_offsets_[slot], count = s.out.support_offsets_[slot + 1] - first;
@@ -264,10 +299,6 @@ Outcome Assembly::fill_body(void* context, u64 begin, u64 end, u32 worker) noexc
       s.out.supports_[first + j] = list[j];
       s.out.support_cofaces_[first + j] = support_cofaces(shape.value(), list[j].arity);
     }
-    const u32 at = s.origin[slot];
-    std::copy(a.prior().begin() + static_cast<std::ptrdiff_t>(a.prior_offsets()[at]),
-              a.prior().begin() + static_cast<std::ptrdiff_t>(a.prior_offsets()[at + 1]),
-              s.out.prior_.begin() + static_cast<std::ptrdiff_t>(s.out.prior_offsets_[slot]));
   }
   return {};
 }
@@ -275,9 +306,9 @@ Outcome Assembly::fill_body(void* context, u64 begin, u64 end, u32 worker) noexc
 }  // namespace supports_detail
 
 Result<SupportHierarchy> build_support_hierarchy(const OrderTree& tree, MemoryBudget& budget, sched::Pool* pool,
-                                                 HierarchyTimings* timings) noexcept {
+                                                 HierarchyTimings* timings, Selection selection) noexcept {
   using supports_detail::Assembly;
-  Assembly s(tree, budget, pool);
+  Assembly s(tree, budget, pool, selection);
   Stopwatch watch;
   MHGP11_TRY(s.prepass());
   HierarchyTimings measured;

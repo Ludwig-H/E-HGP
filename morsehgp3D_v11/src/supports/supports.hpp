@@ -209,8 +209,19 @@ struct HierarchyAdmission {
 // avant les taches, ou allocation) ; supports_invariant (arbre ou rattachement incoherents, contre-epreuve) ; ceux de
 // ball_supports, make_shape, ball_counts ; ceux du Pool (pool_busy...). Aucun resultat partiel : sur refus, rien n'est
 // publie, les reservations de l'appel sont rendues et *timings reste intact.
+//
+// Selection (decision de l'utilisateur du 6 octobre 2026 : "seulement les supports associes au minimum spanning tree
+// de niveau K" ; aretes de Kruskal, S* seul) :
+//   all      : W_K entiere (naissances, fusions, liaisons internes) et Q_b entier de chaque boule, comme ci-dessus ;
+//   spanning : arbre couvrant d'ordre K. Seules les boules qui changent l'arbre sont gardees, naissances et fusions
+//              (role internal, qui ferme un cycle, retire) ; chacune porte un seul support, S* (arite qmin), lu dans
+//              le catalogue. Aucune enumeration de Q_b, donc ni plafond de 24 sites ni brouillon de fermeture (widest
+//              = 0) ; comptes du lemme G et incidences par support non calcules (nuls) ; seul plafond : m <= 255
+//              (colonne u8 du fichier), sinon support_shell_capacity. C'est la selection de la sortie publiee.
+enum class Selection : u8 { all, spanning };
 [[nodiscard]] Result<SupportHierarchy> build_support_hierarchy(const OrderTree& tree, MemoryBudget& budget,
                                                                sched::Pool* pool = nullptr,
-                                                               HierarchyTimings* timings = nullptr) noexcept;
+                                                               HierarchyTimings* timings = nullptr,
+                                                               Selection selection = Selection::all) noexcept;
 
 }  // namespace mhgp11::supports

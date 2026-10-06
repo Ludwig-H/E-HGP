@@ -147,7 +147,7 @@ Result<SupportsParts> supports_parts(Session& session, const CloudView& view, Or
   MemoryBudget& budget = session.budget();
   Stopwatch output_clock;
   Result<supports::SupportHierarchy> hierarchy =
-      supports::build_support_hierarchy(tree.value(), budget, &session.pool());
+      supports::build_support_hierarchy(tree.value(), budget, &session.pool(), nullptr, supports::Selection::spanning);
   if (!hierarchy.ok()) return hierarchy.outcome();
   close_stage(report, Stage::output, output_clock, budget);
   return SupportsParts{std::move(tree).take(), std::move(hierarchy).take()};

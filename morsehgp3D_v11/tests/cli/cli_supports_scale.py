@@ -23,7 +23,8 @@ un petit nuage de boite (400 points dans [0, 12)^3, riche en cospheriques, Point
     paragraphe 8).
 Codes : 0 conforme ; 1 ecart ; 2 refus d'usage (donnees absentes) ; 3 plancher. Dernieres lignes :
     cli_supports_scale_verdict conforme sites=<n> k=<K> noeuds=<N> boules=<B> supports=<S> etendues=<e>
-        multiples=<m> branches=<A> kparties=<s> cofaces=<c> appels=<a>
+        fusions=<f> branches=<A> appels=<a>
+(MHGP11SP 2, arbre couvrant d'ordre K : un S* par boule, naissances et fusions seulement.)
     cli_supports_scale_ok controles=<n>
 Python 3.10 nu, bibliotheque standard seule, aucun assert. Aucune mesure de temps.
 """
@@ -168,7 +169,8 @@ def main():
     if manifest is None or small is None:
         return gate.finish(floor=1)
     c = manifest['counts']
-    gate.check(small['counts']['multi_support_balls'] > 0, 'boite12 : aucune boule a plusieurs supports')
+    gate.check(small['counts']['extended_shells'] > 0 and small['counts']['supports'] == small['counts']['balls'],
+               'boite12 : aucune coquille etendue, ou plusieurs supports par boule')
     expected = 2 * (len(workers) + 4)
     gate.check_eq(runner.calls, expected, 'nombre d\'appels')
     if gate.failures == 0 and (c['balls'] < args.min_balls or c['extended_shells'] < args.min_extended):
@@ -177,10 +179,9 @@ def main():
         return mhgp11_gate.FLOOR
     if gate.failures == 0:
         print('cli_supports_scale_verdict conforme sites=%d k=%d noeuds=%d boules=%d supports=%d etendues=%d '
-              'multiples=%d branches=%d kparties=%d cofaces=%d appels=%d'
+              'fusions=%d branches=%d appels=%d'
               % (c['sites'], manifest['k'], c['nodes'], c['balls'], c['supports'], c['extended_shells'],
-                 c['multi_support_balls'], c['prior'], c['kparties_reliees']['sum'], c['cofaces']['sum'],
-                 runner.calls))
+                 c['roles']['merge'], c['prior'], runner.calls))
     return gate.finish(floor=expected)
 
 

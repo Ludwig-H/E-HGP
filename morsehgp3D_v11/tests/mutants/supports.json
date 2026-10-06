@@ -84,8 +84,8 @@
     {
       "id": "boules_propres_decroissantes",
       "fichier": "src/supports/hierarchy.cpp",
-      "cherche": "  for (u64 i = b; i-- > 0;) origin[--off[u64{post[idx(a.node()[i])]} + 1]] = static_cast<u32>(i);",
-      "remplace": "  for (u64 i = 0; i < b; ++i) origin[--off[u64{post[idx(a.node()[i])]} + 1]] = static_cast<u32>(i);",
+      "cherche": "    if (kept(i)) origin[--off[u64{post[idx(a.node()[i])]} + 1]] = static_cast<u32>(i);",
+      "remplace": "    if (kept(all - 1 - i)) origin[--off[u64{post[idx(a.node()[all - 1 - i])]} + 1]] = static_cast<u32>(all - 1 - i);",
       "porte": "mhgp11_supports_hierarchy_fixtures",
       "note": "seaux remplis dans l'ordre croissant des BallIdx avec la fin decrementee : listes propres en rangs decroissants, premiere boule propre hors du rang du noeud (I11)"
     },

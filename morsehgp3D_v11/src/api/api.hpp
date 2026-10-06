@@ -11,7 +11,7 @@
 //
 // Sorties livrees : full (tranche S5), supports (tranche S7) et points (tranche S9). full.mhgp11ful1 est octet pour
 // octet le dump MHGP11FUL1 de la sonde bench/full_probe.cpp sur les memes entrees (porte mhgp11_cli_full_identity) ;
-// supports.mhgp11sp est le format MHGP11SP version 1 (docs/SORTIES.md, paragraphe 6), relu par le lecteur
+// supports.mhgp11sp est le format MHGP11SP version 2 (docs/SORTIES.md, paragraphe 6), relu par le lecteur
 // bench/mhgp11_formats.py (portes mhgp11_cli_supports_*) ; points.mhgp11pt est le format MHGP11PT version 1
 // (docs/SORTIES.md, paragraphe 7 : hierarchie de points H^r_{K+1}), relu par le meme lecteur (porte
 // mhgp11_cli_points). La sortie plat (tranche S10) publie etiquettes.mhgp11et, format MHGP11ET version 1 : une
@@ -105,8 +105,8 @@ struct CloudView {
 struct FullRequest {
   Order k = 0;
 };
-// Sortie supports : arbre d'ordre K (tire de FULL, L2b), boules de W_K rattachees, tous leurs supports positifs
-// minimaux.
+// Sortie supports : arbre couvrant d'ordre K (tire de FULL, L2b ; decision du 6 octobre 2026) : naissances et
+// fusions rattachees, un support S* par boule.
 struct SupportsRequest {
   Order k = 0;
 };

@@ -51,7 +51,7 @@ struct SupportsDiagnostics {
 // Refus : output_unwritable (ecriture), tower_invariant (sphere de naissance absente), arithmetic_invariant (num).
 [[nodiscard]] Outcome write_full(io::FileWriter& out, const FullTower& tower) noexcept;
 
-// Ecrit la hierarchie des supports au format MHGP11SP version 1 (docs/SORTIES.md, paragraphe 6) : en-tete, colonnes
+// Ecrit la hierarchie des supports au format MHGP11SP version 2 (docs/SORTIES.md, paragraphe 6) : en-tete, colonnes
 // alignees sur 8 octets, bourrage nul, aucun compte. Refus : output_unwritable (ecriture), supports_invariant (arbre
 // et hierarchie incoherents, sans porte possible sur un produit de compute).
 [[nodiscard]] Outcome write_supports(io::FileWriter& out, const OrderTree& tree,

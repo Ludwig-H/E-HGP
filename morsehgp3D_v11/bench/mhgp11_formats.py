@@ -76,9 +76,12 @@ INPUT_KEYS = ('name', 'bytes', 'sha256')
 FILE_KEYS = ('name', 'format', 'version', 'bytes', 'sha256')
 FULL_COUNT_KEYS = ('sites', 'points', 'orders')
 ORDER_KEYS = ('k', 'births', 'nodes', 'edges', 'root')
+# Manifeste de la sortie supports, version 2 (arbre couvrant d'ordre K, 6 octobre 2026) : sans liaison interne ni
+# agregat de Q_b (la version 1 portait aussi multi_support_balls, max_supports_per_ball, kparties_reliees, cofaces).
 SUPPORT_COUNT_KEYS = ('sites', 'nodes', 'births', 'merges', 'balls', 'roles', 'supports', 'arities', 'extended_shells',
-                      'multi_support_balls', 'max_supports_per_ball', 'prior', 'kparties_reliees', 'cofaces')
+                      'prior')
 ROLE_KEYS = ('birth', 'merge', 'internal')
+SPANNING_ROLE_KEYS = ('birth', 'merge')
 ARITY_KEYS = ('2', '3', '4')
 SUM_MAX_KEYS = ('sum', 'max')
 WORD = struct.Struct('<Q')
@@ -151,29 +154,21 @@ def _full_counts(counts, k):
 
 def _supports_counts(counts, k):
     _keys(counts, SUPPORT_COUNT_KEYS, 'counts')
-    _keys(counts['roles'], ROLE_KEYS, 'counts.roles')
+    _keys(counts['roles'], SPANNING_ROLE_KEYS, 'counts.roles')
     _keys(counts['arities'], ARITY_KEYS, 'counts.arities')
-    for key in ('kparties_reliees', 'cofaces'):
-        _keys(counts[key], SUM_MAX_KEYS, 'counts.' + key)
     sites = _integer(counts['sites'], 'sites', max(k, 1), (1 << 32) - 2)
     nodes = _integer(counts['nodes'], 'nodes', 1)
     need(_integer(counts['births'], 'births', 1) + _integer(counts['merges'], 'merges') == nodes,
          'manifeste : naissances et fusions')
     need(k != 1 or counts['births'] == sites, 'manifeste : feuilles de l\'ordre 1')
     balls = _integer(counts['balls'], 'balls')
-    need(sum(_integer(counts['roles'][key], key) for key in ROLE_KEYS) == balls, 'manifeste : roles')
-    supports = _integer(counts['supports'], 'supports', balls)
+    births = _integer(counts['roles']['birth'], 'birth')
+    need(births == (0 if k == 1 else counts['births']) and births + _integer(counts['roles']['merge'], 'merge') == balls,
+         'manifeste : roles (une naissance par noeud de naissance, puis des fusions)')
+    supports = _integer(counts['supports'], 'supports', balls, balls)
     need(sum(_integer(counts['arities'][key], 'arite') for key in ARITY_KEYS) == supports, 'manifeste : arites')
-    need(_integer(counts['extended_shells'], 'extended_shells') <= balls and
-         _integer(counts['multi_support_balls'], 'multi_support_balls') <= counts['extended_shells'],
-         'manifeste : coquilles etendues et boules a plusieurs supports')
-    widest = _integer(counts['max_supports_per_ball'], 'max_supports_per_ball', 0, 12926)
-    need((widest == 0) == (balls == 0) and (widest >= 2) == (counts['multi_support_balls'] > 0),
-         'manifeste : max_supports_per_ball')
+    need(_integer(counts['extended_shells'], 'extended_shells') <= balls, 'manifeste : coquilles etendues')
     _integer(counts['prior'], 'prior')
-    for key in ('kparties_reliees', 'cofaces'):
-        total, top = _integer(counts[key]['sum'], key + '.sum'), _integer(counts[key]['max'], key + '.max')
-        need(top <= total and (balls > 0 or total == 0), 'manifeste : %s' % key)
 
 
 def read_manifest(raw):
@@ -205,7 +200,7 @@ def read_manifest(raw):
     need(type(files) is list and len(files) == 1, 'manifeste : un fichier pour la sortie %s' % output)
     _keys(files[0], FILE_KEYS, 'files')
     name, form, smallest = OUTPUT_FILES[output]
-    need((files[0]['name'], files[0]['format'], files[0]['version']) == (name, form, 1),
+    need((files[0]['name'], files[0]['format'], files[0]['version']) == (name, form, 2 if output == 'supports' else 1),
          'manifeste : fichier %s' % output)
     _integer(files[0]['bytes'], 'bytes', smallest)
     _digest(files[0]['sha256'], 'de fichier')
@@ -541,35 +536,18 @@ class SupportsFile:
         return out
 
     def manifest_counts(self):
-        """Agregats du manifeste (docs/SORTIES.md, paragraphe 8), recomptes depuis le fichier."""
-        roles, arities = [0, 0, 0], [0, 0, 0]
+        """Agregats du manifeste version 2 (docs/SORTIES.md, paragraphe 8), recomptes depuis le fichier."""
+        roles, arities = [0, 0], [0, 0, 0]
         for value in self.role:
+            need(value in (ROLE_BIRTH, ROLE_MERGE), 'MHGP11SP : role %d hors de l\'arbre couvrant' % value)
             roles[value] += 1
         for value in self.arity:
             arities[value - 2] += 1
-        kp_sum = kp_max = cf_sum = cf_max = 0
-        cache = {}
-        for b in range(self.B):
-            if self.support_count[b] == 1 and self.arity[self.ball_at[b]] == self.m[b]:
-                key = (self.p[b], self.m[b])
-                if key not in cache:
-                    got = ball_counts(self.k, self.p[b], self.m[b], [tuple(range(self.m[b]))])
-                    cache[key] = (got['kparties_reliees'], got['cofaces'])
-                kp, cf = cache[key]
-            else:
-                got = ball_counts(self.k, self.p[b], self.m[b], self.supports_of(b))
-                kp, cf = got['kparties_reliees'], got['cofaces']
-            kp_sum += kp
-            cf_sum += cf
-            kp_max = max(kp_max, kp)
-            cf_max = max(cf_max, cf)
         births = sum(1 for value in self.kind if value != KIND_MERGE)
         return dict(sites=self.n, nodes=self.N, births=births, merges=self.N - births, balls=self.B,
-                    roles=dict(zip(ROLE_KEYS, roles)), supports=self.S, arities=dict(zip(ARITY_KEYS, arities)),
-                    extended_shells=sum(1 for b in range(self.B) if self.m[b] > self.qmin[b]),
-                    multi_support_balls=sum(1 for value in self.support_count if value >= 2),
-                    max_supports_per_ball=max(self.support_count) if self.B else 0, prior=self.A,
-                    kparties_reliees=dict(sum=kp_sum, max=kp_max), cofaces=dict(sum=cf_sum, max=cf_max))
+                    roles=dict(zip(SPANNING_ROLE_KEYS, roles)), supports=self.S,
+                    arities=dict(zip(ARITY_KEYS, arities)),
+                    extended_shells=sum(1 for b in range(self.B) if self.m[b] > self.qmin[b]), prior=self.A)
 
     def tree_signature(self):
         """tree_k_sha256, signature version 2 (docs/SORTIES.md, paragraphe 8), depuis le seul fichier : geometrie,
@@ -612,7 +590,10 @@ def morton(point):
 
 
 def read_supports(data, bits):
-    """Decode MHGP11SP version 1 et controle, sans la coquille (docs/SORTIES.md, paragraphe 6) :
+    """Decode MHGP11SP (version 2, arbre couvrant d'ordre K : naissances et fusions, S* seul, sans colonne
+    support_count ; ou version 1, W_K entiere et Q_b, fichiers anterieurs au 6 octobre 2026) et controle, sans la
+    coquille (docs/SORTIES.md, paragraphe 6). En version 2, roles birth et merge seulement, S = B, m <= 255, et pas de
+    contre-epreuve strict_traces (Q_b non publie). Controles communs :
       - en-tete : magie, version 1, profil, 1 <= K <= min(12, n), decalages egaux a la disposition des colonnes, taille
         totale egale a celle du fichier ; bourrage nul ;
       - sites : coordonnees dans le profil, positions distinctes, lignes en ordre de Morton strict ;
@@ -634,19 +615,21 @@ def read_supports(data, bits):
          'MHGP11SP : signature')
     words = struct.unpack_from('<16Q', data, 8)
     version, coord_bits, k, n, nodes, root, balls, supports, arities, prior = words[:10]
-    need(version == 1, 'MHGP11SP : version %d' % version)
+    need(version in (1, 2), 'MHGP11SP : version %d' % version)
     need(coord_bits == bits and bits in (18, 21, 24), 'MHGP11SP : profil %d, attendu %d' % (coord_bits, bits))
     need(1 <= k <= 12 and k <= n < NONE and 1 <= nodes < NONE, 'MHGP11SP : K, n ou N hors domaine')
     layout = [SP_HEADER]
     layout.append(layout[-1] + 4 * _pad8(4 * n))
     layout.append(layout[-1] + 3 * _pad8(4 * nodes) + _pad8(nodes))
-    layout.append(layout[-1] + 2 * _pad8(4 * balls) + _pad8(2 * balls) + 3 * _pad8(balls))
+    layout.append(layout[-1] + 2 * _pad8(4 * balls) + (_pad8(2 * balls) if version == 1 else 0) + 3 * _pad8(balls))
     layout.append(layout[-1] + _pad8(supports) + _pad8(4 * arities))
     layout.append(layout[-1] + _pad8(4 * prior))
     need(list(words[10:16]) == layout, 'MHGP11SP : decalages %r, attendu %r' % (list(words[10:16]), layout))
     need(layout[-1] == len(data), 'MHGP11SP : taille %d, en-tete %d' % (len(data), layout[-1]))
     f = SupportsFile()
     f.bits, f.k, f.n, f.N, f.root, f.B, f.S, f.Z, f.A = bits, k, n, nodes, root, balls, supports, arities, prior
+    f.version = version
+    need(version == 1 or supports == balls, 'MHGP11SP 2 : un support par boule (S = B)')
     at = layout[0]
     f.x, at = _column(data, at, n, 4, 'x')
     f.y, at = _column(data, at, n, 4, 'y')
@@ -658,7 +641,10 @@ def read_supports(data, bits):
     f.ball_count, at = _column(data, at, nodes, 4, 'ball_count')
     f.ball_rank, at = _column(data, at, balls, 4, 'balls.rank')
     f.prior_count, at = _column(data, at, balls, 4, 'prior_count')
-    f.support_count, at = _column(data, at, balls, 2, 'support_count')
+    if version == 1:
+        f.support_count, at = _column(data, at, balls, 2, 'support_count')
+    else:
+        f.support_count = array.array('H', [1]) * balls
     f.role, at = _column(data, at, balls, 1, 'role')
     f.p, at = _column(data, at, balls, 1, 'p')
     f.m, at = _column(data, at, balls, 1, 'm')
@@ -766,9 +752,10 @@ def _check_balls(f):
             previous = key
         q = f.arity[first]
         qmin[b] = q
-        need(f.role[b] in (ROLE_BIRTH, ROLE_MERGE, ROLE_INTERNAL), 'MHGP11SP : role %d' % f.role[b])
-        need(q <= m <= SHELL_CAPACITY and p + q - 1 <= k <= p + m, 'MHGP11SP : boule %d hors de W_K (p=%d, q=%d, '
-             'm=%d, K=%d)' % (b, p, q, m, k))
+        need(f.role[b] in ((ROLE_BIRTH, ROLE_MERGE, ROLE_INTERNAL) if f.version == 1 else (ROLE_BIRTH, ROLE_MERGE)),
+             'MHGP11SP : role %d' % f.role[b])
+        need(q <= m <= (SHELL_CAPACITY if f.version == 1 else 255) and p + q - 1 <= k <= p + m,
+             'MHGP11SP : boule %d hors de W_K (p=%d, q=%d, m=%d, K=%d)' % (b, p, q, m, k))
         need(m > q or count == 1, 'MHGP11SP : coquille reguliere a plusieurs supports (boule %d)' % b)
         star_sites = tuple(f.sites[site_at[first]:site_at[first] + q])
         made = sphere_of([pts[i] for i in star_sites])
@@ -828,6 +815,8 @@ def _check_roles(f):
             else:
                 need(r > rank and (top is None or r < top) and count == 0,
                      'MHGP11SP : boule interne %d hors de la vie du noeud %d' % (b, v))
+            if f.version == 2:
+                continue  # arbre couvrant : Q_b non publie, le role se juge par les rangs seuls
             key = (f.p[b], f.m[b], f.qmin[b])
             if f.support_count[b] == 1 and f.qmin[b] == f.m[b]:
                 if key not in regular:

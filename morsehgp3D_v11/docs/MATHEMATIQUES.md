@@ -914,3 +914,22 @@ les grave. Coordonnées entières, $z=0$ si rien n'est précisé.
 - La Prop. 6 n'est pas réparée : les fusions sont décrites boule par boule.
 - Aucune stabilité de la réalisation par supports n'est revendiquée (§ 10.9).
 - Les entrées pondérées restent hors contrat (§ 9).
+
+### 10.10 Sortie publiée : l'arbre couvrant d'ordre K (6 octobre 2026)
+
+Décision de l'utilisateur du 6 octobre 2026 : ne publier que les supports de l'arbre couvrant minimal d'ordre K, sous
+la forme des arêtes de Kruskal avec $S^*$ seul. La sortie publiée (`MHGP11SP` version 2) garde donc les boules de
+$W_K$ de rôle naissance ou fusion, chacune avec son seul support $S^*$.
+
+**Proposition (suffisance).** Les boules de rôle naissance et fusion, avec leurs rangs, leur rattachement et leurs
+branches, déterminent $T_K$. Les boules de rôle interne n'y ajoutent aucun nœud ni aucune arête.
+
+*Preuve.* Lemme B, point 1 : à $K\geq 2$, les naissances de $W_K$ sont en bijection avec celles de $T_K$. Lemme C,
+point 3 : pour toute fusion $v$, la réunion des $\mathrm{ant}(b)$ des boules de fusion rattachées à $v$ vaut
+$\mathrm{enfants}(v)$. Lemme C, point 2 : une boule interne a $\mathrm{ant}(b)=\lbrace\mathrm{att}(b)\rbrace$, et
+ne relie que des $K$-parties d'un nœud déjà formé. ∎
+
+C'est l'analogue, sur l'hypergraphe des boules, de Kruskal : une boule est retenue si et seulement si elle crée une
+composante (naissance) ou en réunit au moins deux (fusion). Une fusion qui réunit $c\geq 3$ composantes est une seule
+hyperarête ; plusieurs boules de fusion peuvent être rattachées au même nœud au même rang (plateau). Les comptes du
+§ 10.7 restent définis pour toute boule, mais ils ne sont plus publiés.

@@ -1,16 +1,18 @@
-// Ecrivain MHGP11SP version 1 de la sortie supports (docs/SORTIES.md, paragraphe 6 ; tranche S7). Ecrit a neuf, sans
-// source portee : le format est celui du contrat, normatif.
+// Ecrivain MHGP11SP version 2 de la sortie supports (docs/SORTIES.md, paragraphe 6 ; tranche S7, puis arbre couvrant
+// d'ordre K du 6 octobre 2026). Ecrit a neuf, sans source portee : le format est celui du contrat, normatif. La
+// hierarchie ecrite est l'arbre couvrant (supports::Selection::spanning) : naissances et fusions, un support S* par
+// boule ; la version 2 retire donc la colonne support_count de la version 1 (toujours 1) et S = B.
 //
-// Petit-boutiste ; en-tete de 136 octets (magie "MHGP11SP", puis 16 mots u64 : version 1, coord_bits, k, n, N, root,
+// Petit-boutiste ; en-tete de 136 octets (magie "MHGP11SP", puis 16 mots u64 : version 2, coord_bits, k, n, N, root,
 // B, S, Z, A, decalages de SITES, NODES, BALLS, SUPPORTS, PRIOR, taille totale) ; puis les sections dans cet ordre,
 // colonne par colonne, chaque colonne commencant sur une frontiere de 8 octets, bourrage nul, une colonne vide
 // n'occupant aucun octet :
 //   SITES    x, y, z, point_id (u32[n]), lignes = SiteIdx (rang de Morton) ;
 //   NODES    parent (kNone a la racine), rank (u32[N]), kind (u8[N] : 0 feuille de site a K = 1, 1 naissance de boule,
 //            2 fusion), ball_count (u32[N], boules propres), numerotation canonique de la foret d'ordre K ;
-//   BALLS    rank, prior_count (u32[B]), support_count (u16[B]), role, p, m (u8[B]), dans l'ordre de la hierarchie
+//   BALLS    rank, prior_count (u32[B]), role (0 naissance, 1 fusion), p, m (u8[B]), dans l'ordre de la hierarchie
 //            (postordre du noeud de rattachement, rang, puis S* lexicographique, egal a l'ordre des BallIdx) ;
-//   SUPPORTS arity (u8[S]), puis sites (u32[Z]) : par boule, (arite, SiteIdx lexicographiques), S* en tete ;
+//   SUPPORTS arity (u8[B] : qmin), puis sites (u32[Z]) : S* de chaque boule, dans l'ordre des boules ;
 //   PRIOR    node (u32[A]) : ant(b) croissants, role fusion seulement.
 // AUCUN compte n'est stocke (decision 4 de l'utilisateur) ; les tailles de colonnes et les decalages sont calcules
 // avant l'ecriture, et l'ecriture les controle a chaque section (supports_invariant si l'arbre et la hierarchie se
@@ -36,7 +38,6 @@ class Column {
   Column& operator=(const Column&) = delete;
 
   void u8v(u8 value) noexcept { put(value, 1); }
-  void u16v(u16 value) noexcept { put(value, 2); }
   void u32v(u32 value) noexcept { put(value, 4); }
   // Fin de colonne : vidange, puis bourrage nul jusqu'a la frontiere de 8 octets.
   [[nodiscard]] Outcome end() noexcept {
@@ -70,7 +71,7 @@ struct Layout {
     sites_at = kHeaderBytes;
     nodes_at = sites_at + 4 * pad8(4 * n);
     balls_at = nodes_at + 3 * pad8(4 * nodes) + pad8(nodes);
-    supports_at = balls_at + 2 * pad8(4 * balls) + pad8(2 * balls) + 3 * pad8(balls);
+    supports_at = balls_at + 2 * pad8(4 * balls) + 3 * pad8(balls);
     prior_at = supports_at + pad8(supports) + pad8(4 * arities);
     size = prior_at + pad8(4 * prior);
   }
@@ -126,8 +127,11 @@ Outcome SupportsWriter::layout() noexcept {
     if (support.arity < 2 || support.arity > 4) return fail(Reason::supports_invariant);
     at.arities += support.arity;
   }
+  // Arbre couvrant : un support par boule, et aucune liaison interne.
+  if (at.supports != at.balls) return fail(Reason::supports_invariant);
   for (u64 b = 0; b < at.balls; ++b) {
-    if (support_offsets[b + 1] - support_offsets[b] > supports::kMaxSupports) return fail(Reason::supports_invariant);
+    if (support_offsets[b + 1] - support_offsets[b] != 1 || h.balls()[b].role == BallRole::internal)
+      return fail(Reason::supports_invariant);
   }
   at.place();
   return {};
@@ -137,7 +141,7 @@ Outcome SupportsWriter::header() noexcept {
   static constexpr std::string_view kMagic = "MHGP11SP";
   MHGP11_TRY(file.bytes(std::span<const u8>(reinterpret_cast<const u8*>(kMagic.data()), kMagic.size())));
   const OrderForest& forest = tree.forest();
-  const std::array<u64, 16> words = {1,          static_cast<u64>(kCoordBits),
+  const std::array<u64, 16> words = {2,          static_cast<u64>(kCoordBits),
                                      forest.order(), at.n,
                                      at.nodes,   idx(forest.root()),
                                      at.balls,   at.supports,
@@ -178,16 +182,13 @@ Outcome SupportsWriter::nodes() noexcept {
   return reached(at.balls_at);
 }
 
-// BALLS : rank, prior_count, support_count, role, p, m.
+// BALLS : rank, prior_count, role, p, m.
 Outcome SupportsWriter::balls_section() noexcept {
   const auto balls = h.balls();
-  const auto support_offsets = h.support_offsets();
   const auto prior_offsets = h.prior_offsets();
   for (const supports::Ball& ball : balls) out.u32v(idx(ball.rank));
   MHGP11_TRY(out.end());
   for (u64 b = 0; b < at.balls; ++b) out.u32v(static_cast<u32>(prior_offsets[b + 1] - prior_offsets[b]));
-  MHGP11_TRY(out.end());
-  for (u64 b = 0; b < at.balls; ++b) out.u16v(static_cast<u16>(support_offsets[b + 1] - support_offsets[b]));
   MHGP11_TRY(out.end());
   for (const supports::Ball& ball : balls) out.u8v(static_cast<u8>(ball.role));
   MHGP11_TRY(out.end());

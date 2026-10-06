@@ -598,3 +598,51 @@ contrôle de flux uniforme.
    ignoré ?
 3. Quels mutants exigez-vous ? Je propose : seuil décalé d'un site, refus au-delà de l'arrêt non ignoré, premier
    succès pris au plus grand indice, ballot partiel (masque de lanes incomplet).
+
+## R. Coop3, retrait de la feuille par paires ; supports réduits à l'arbre couvrant d'ordre K (6 octobre, 11 h 43 UTC)
+
+**GPU.** Reçus [coop2](../receipts/developpement_20261006/coop2_correction_mesuree/README.md) et
+[coop3](../receipts/developpement_20261006/coop3_reconvergence/README.md).
+- Les tables par valeur ne suffisaient pas. La vraie cause de la régression était la reconvergence des warps : la
+  boucle `extend` appelait `extend_one`, ce qui faisait passer le noyau d'écriture de 85 à 107 `BSSY`, avec 2,7 fois
+  plus d'instructions exécutées et 1,39 fil actif par warp contre 3,47.
+- Une fois la boucle d'origine rétablie, coop3 retrouve les valeurs L4 à 1 % près.
+- La feuille coopérative par paires est alors plus lente partout. Elle est **retirée** (`d4228f5e5`), comme L4.
+- À K10 avec des feuilles de 24, le GPU un fil bat le CPU de 10 à 15 % sur `domain`.
+- La suite reste la question Q, le parallélisme sur les sites, qui sera d'abord jugée sur le profil source de coop2.
+
+**Supports : décision de l'utilisateur** (texte exact) : « il ne faut surtout pas représenter tous les supports (pour
+le niveau K) mais seulement ceux associés au minimum spanning tree de niveau K ». Choix retenu : les arêtes de Kruskal,
+avec S\* seul.
+
+Ce qui change :
+- `build_support_hierarchy(..., Selection::spanning)` ne garde que les boules de rôle `birth` et `merge`. Une liaison
+  interne relie des K-parties d'un même nœud et fermerait un cycle : elle est retirée. Chaque boule gardée porte son
+  seul S\*, lu dans le catalogue.
+- Plus d'énumération de Q_b, donc plus de plafond de 24 sites. Seul reste m ≤ 255 (colonne u8).
+- Format `MHGP11SP` version 2 : sans `support_count`, et S = B.
+- Le manifeste perd `internal`, `multi_support_balls`, `max_supports_per_ball`, `kparties_reliees` et `cofaces`.
+- La sélection `all` reste dans la bibliothèque pour les portes S6 existantes.
+
+Portes :
+- `mhgp11_cli_supports_oracle` projette l'oracle borné S1 sur l'arbre couvrant : boules sans les internes, S\* au sens
+  du catalogue (plus petite arité, puis SiteIdx de Morton).
+- Le témoin sphere9 à 25 sites, refusé en version 1, est désormais admis.
+- Les deux voies de route concordent toujours à l'octet.
+
+Mesures à K5 (u21, relevé local ; empreintes regravées dans les trois profils) :
+- nuages uniformes de 8 000 et 16 000 sites : une boule par nœud (`boules = noeuds`) et `branches = noeuds − 1`.
+- ng00 : 576 482 boules pour 576 371 nœuds, contre 789 886 boules en version 1.
+
+Ajout : § 10.10 de `MATHEMATIQUES.md`, qui montre que naissances et fusions suffisent à reconstruire T_K (lemmes B et C).
+Mutants : 3 nouveaux, `sp_internes_gardees`, `sp_naissances_retirees` et `sp_etoile_permutee`, plus 2 repointés ; les
+5 sont tués.
+
+**Questions.**
+1. Kruskal sur un hypergraphe : une fusion qui réunit c ≥ 3 composantes publie une seule boule, avec ses c branches
+   dans `PRIOR`. Il ne s'agit donc pas d'un arbre couvrant au sens des graphes (c − 1 arêtes). Je considère cette
+   lecture conforme à la demande ; voyez-vous un cas où une fusion porte plusieurs boules au même rang (plateau
+   cosphérique) et où ne garder que la première serait plus juste ?
+2. Les comptes de Q_b disparaissent de la sortie publiée. Faut-il garder une contre-épreuve du journal
+   (`strict_traces`) en mode arbre couvrant, au prix de l'énumération de Q_b et du plafond, ou la contre-épreuve de la
+   sélection `all`, déjà couverte par les portes S6, suffit-elle ?

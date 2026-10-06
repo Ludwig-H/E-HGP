@@ -1,6 +1,6 @@
 {
   "module": "cli",
-  "plancher": 28,
+  "plancher": 31,
   "construction": [
     "cli"
   ],
@@ -200,10 +200,10 @@
     {
       "id": "sp_manifeste_constant",
       "fichier": "src/api/manifest.cpp",
-      "cherche": "  number(out, kparties_sum);",
+      "cherche": "  number(out, extended);",
       "remplace": "  number(out, 4096);",
       "porte": "mhgp11_cli_supports_oracle",
-      "note": "somme de kparties_reliees constante dans le manifeste de supports"
+      "note": "nombre de coquilles etendues constant dans le manifeste de supports (version 2)"
     },
     {
       "id": "sp_signature_fichier",
@@ -228,6 +228,30 @@
       "remplace": "",
       "porte": "mhgp11_cli_points",
       "note": "arbre d'ordre K seul au masque de FULL : build_order refuse les ordres concurrents ; depuis L2b, supports passe par FULL et seules points et plat emploient order_params"
+    },
+    {
+      "id": "sp_internes_gardees",
+      "fichier": "src/supports/hierarchy.cpp",
+      "cherche": "    return selection == Selection::all || tree.attachment().role()[i] != BallRole::internal;",
+      "remplace": "    return selection == Selection::all || tree.attachment().role()[i] <= BallRole::internal;",
+      "porte": "mhgp11_cli_supports_oracle",
+      "note": "arbre couvrant : liaisons internes gardees (selection ignoree)"
+    },
+    {
+      "id": "sp_naissances_retirees",
+      "fichier": "src/supports/hierarchy.cpp",
+      "cherche": "    return selection == Selection::all || tree.attachment().role()[i] != BallRole::internal;",
+      "remplace": "    return selection == Selection::all || tree.attachment().role()[i] == BallRole::merge;",
+      "porte": "mhgp11_cli_supports_oracle",
+      "note": "arbre couvrant : naissances retirees, fusions seules"
+    },
+    {
+      "id": "sp_etoile_permutee",
+      "fichier": "src/supports/hierarchy.cpp",
+      "cherche": "      star.sites = data.support;",
+      "remplace": "      star.sites = {data.support[1], data.support[0], data.support[2], data.support[3]};",
+      "porte": "mhgp11_cli_supports_oracle",
+      "note": "arbre couvrant : S* publie dans un autre ordre que les SiteIdx croissants"
     }
   ]
 }

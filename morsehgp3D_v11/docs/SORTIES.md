@@ -288,9 +288,33 @@ Contenu :
 Les entiers exacts s'écrivent en mots : signe, nombre de mots, puis les mots. La porte `mhgp11_cli_full_identity`
 exige le sha256 brut du dump de `mhgp11_full_bench` sur les mêmes entrées.
 
-## 6. `supports.mhgp11sp` : `MHGP11SP` version 1 (normatif)
+## 6. `supports.mhgp11sp` : `MHGP11SP` version 2 (normatif)
 
-**Objet.** Les définitions et les preuves sont dans [MATHEMATIQUES.md](MATHEMATIQUES.md), section 10.
+**Décision de l'utilisateur du 6 octobre 2026.** Il ne faut surtout pas représenter tous les supports du niveau K, mais
+seulement ceux de l'arbre couvrant minimal d'ordre K. Choix retenu : les arêtes de Kruskal, avec S\* seul.
+- Seules les boules qui changent l'arbre d'ordre K sont publiées : **naissances et fusions**.
+- Une liaison interne relie des K-parties déjà dans un même nœud ; elle fermerait un cycle, et elle est retirée.
+- Chaque boule publiée porte **un seul support**, $S^*$, d'arité $q_{\min}$, lu dans le catalogue.
+- $\mathcal{Q}_b$ n'est plus énuméré. Il n'y a donc plus de plafond de coquille à 24 sites, plus de brouillon de
+  fermeture, et plus de comptes du lemme G dans la sortie.
+- Seul plafond restant : $m\leq 255$ (colonne `u8`), sinon `support_shell_capacity`.
+- La version 1, décrite ci-dessous pour mémoire, publiait $W_K$ entière et $\mathcal{Q}_b$ entier. L'assemblage la
+  garde comme sélection `Selection::all` de `build_support_hierarchy`, pour les portes de la bibliothèque ; la sortie
+  publiée utilise `Selection::spanning`. Le lecteur `bench/mhgp11_formats.py` relit les deux versions.
+
+**Version 2 : différences avec la version 1.**
+- En-tête : `version` = 2, et `S` = `B`.
+- `BALLS` : plus de colonne `support_count` ; `role` vaut 0 (naissance) ou 1 (fusion).
+- `SUPPORTS` : `arity u8[B]` ($q_{\min}$), puis `sites`, soit $S^*$ de chaque boule dans l'ordre des boules.
+- Manifeste : fichier en `version` 2. Le bloc `counts` vaut `sites`, `nodes`, `births`, `merges`, `balls`, `roles`
+  (`birth`, `merge`), `supports`, `arities`, `extended_shells` et `prior`. Les agrégats de $\mathcal{Q}_b$ et des
+  liaisons internes (`internal`, `multi_support_balls`, `max_supports_per_ball`, `kparties_reliees`, `cofaces`) sont
+  retirés.
+- Tout le reste est inchangé : `SITES`, `NODES` (`ball_count` compte les seules boules publiées), `PRIOR`, l'ordre
+  des boules, le rattachement, la signature `tree_k_sha256`.
+
+**Version 1 (pour mémoire). Objet.** Les définitions et les preuves sont dans
+[MATHEMATIQUES.md](MATHEMATIQUES.md), section 10.
 - L'arbre $T_K$ est la forêt d'ordre K de FULL, dans sa numérotation canonique.
 - Toutes les boules de $W_K=\lbrace b\in\mathrm{Cat}_K : p+q_{\min}-1\leq K\leq p+m\rbrace$ sont publiées : naissances,
   fusions et liaisons internes, événements faibles compris.
@@ -558,11 +582,10 @@ Exemple pour `supports`, présenté ici sur plusieurs lignes pour la lecture :
 {"schema":"ehgp.v11.output.v1","output":"supports","status":"complete","public_status":"not_claimed",
  "coord_bits":21,"k":5,"parameters":{"budget_bytes":null,"grid_step":null,"origin":null},
  "inputs":[{"name":"points","bytes":0,"sha256":"…"},{"name":"ids","bytes":0,"sha256":"…"}],
- "files":[{"name":"supports.mhgp11sp","format":"MHGP11SP","version":1,"bytes":0,"sha256":"…"}],
+ "files":[{"name":"supports.mhgp11sp","format":"MHGP11SP","version":2,"bytes":0,"sha256":"…"}],
  "tree_k_sha256":"…",
- "counts":{"sites":0,"nodes":0,"births":0,"merges":0,"balls":0,"roles":{"birth":0,"merge":0,"internal":0},
-           "supports":0,"arities":{"2":0,"3":0,"4":0},"extended_shells":0,"multi_support_balls":0,
-           "max_supports_per_ball":0,"prior":0,"kparties_reliees":{"sum":0,"max":0},"cofaces":{"sum":0,"max":0}}}
+ "counts":{"sites":0,"nodes":0,"births":0,"merges":0,"balls":0,"roles":{"birth":0,"merge":0},
+           "supports":0,"arities":{"2":0,"3":0,"4":0},"extended_shells":0,"prior":0}}
 ```
 
 - `parameters` :
@@ -577,22 +600,19 @@ Exemple pour `supports`, présenté ici sur plusieurs lignes pour la lecture :
   (`parameter_out_of_range`, étape 8 du § 3) ; le CLI la remplit depuis sa lecture. Les empreintes déclarées ne sont pas
   vérifiables depuis la provenance seule. La porte `mhgp11_api_publish_reader` fait relire par le lecteur officiel un
   dossier publié par l'API, et refuse sans sortie les provenances incohérentes.
-- `counts` de `supports`, dans cet ordre :
+- `counts` de `supports` (version 2, arbre couvrant d'ordre K, depuis le 6 octobre 2026), dans cet ordre :
 
   | Clé | Sens |
   | --- | --- |
   | `sites`, `nodes` | $n$ et $N$ |
   | `births`, `merges` | nœuds de `kind` 0 ou 1, puis nœuds de `kind` 2 |
-  | `balls`, `roles` | $B$, puis ses boules par rôle |
-  | `supports`, `arities` | $S$, puis ses supports par arité |
+  | `balls`, `roles` | $B$, puis ses boules par rôle : `birth` (une par nœud de naissance si $K\geq 2$, aucune à $K=1$) et `merge` |
+  | `supports`, `arities` | $S=B$, puis les $S^*$ par arité |
   | `extended_shells` | boules à coquille étendue, $m>q_{\min}$ |
-  | `multi_support_balls` | boules qui ont au moins deux supports |
-  | `max_supports_per_ball` | maximum de `support_count` |
   | `prior` | $A$ |
-  | `kparties_reliees` | somme et maximum sur les boules ; la somme compte des incidences $(b,F)$, pas des $K$-parties distinctes |
-  | `cofaces` | somme et maximum sur les boules des cofaces **par boule** : liaisons distinctes, limitées aux boules de $W_K$ ; l'agrégat des incidences par support, calculable, n'est pas publié |
 
-  Un maximum sur un ensemble vide vaut 0.
+  La version 1 portait aussi `roles.internal`, `multi_support_balls`, `max_supports_per_ball`, `kparties_reliees` et
+  `cofaces`. Ce sont des agrégats de $\mathcal{Q}_b$ et des liaisons internes, qui ne sont plus publiés.
 - `counts` de `full` (fixés par S5) : `sites`, `points`, puis `orders`, une entrée par ordre $k=1..K$ :
   `{"k","births","nodes","edges","root"}`, les en-têtes d'ordre de `MHGP11FUL1`. Son fichier est déclaré
   `{"name":"full.mhgp11ful1","format":"MHGP11FUL1","version":1,…}`.

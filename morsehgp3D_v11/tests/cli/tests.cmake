@@ -84,11 +84,11 @@ endforeach()
 # tree_k_sha256 egal entre --sortie=full et --sortie=supports a K1..4 ; refus de l'appel entier a 25 sites (code 2,
 # support_shell_capacity, ni D ni D.pending ; FULL conforme), sphere5 a 24 sites admise (828 supports).
 if(MHGP11_COORD_BITS EQUAL 18)
-  set(mhgp11_cli_supports_oracle_line "cli_supports_oracle_couverture bits=18 nuages=209 exclus=2 ordres=957 boules=15246 etendues=2639 multiples=570 tetraedres=1145 ordres_6plus=7 signatures=804 refus=4")
+  set(mhgp11_cli_supports_oracle_line "cli_supports_oracle_couverture bits=18 nuages=209 exclus=2 ordres=957 boules=15246 etendues=2639 multiples=570 tetraedres=1145 ordres_6plus=7 signatures=804 larges=4")
   set(mhgp11_cli_supports_oracle_floors --min-clouds=209 --min-orders=957 --min-balls=15246 --min-extended=2639
       --min-multiple=570 --min-signatures=804)
 else()
-  set(mhgp11_cli_supports_oracle_line "cli_supports_oracle_couverture bits=${MHGP11_COORD_BITS} nuages=211 exclus=0 ordres=963 boules=15270 etendues=2645 multiples=576 tetraedres=1145 ordres_6plus=7 signatures=810 refus=4")
+  set(mhgp11_cli_supports_oracle_line "cli_supports_oracle_couverture bits=${MHGP11_COORD_BITS} nuages=211 exclus=0 ordres=963 boules=15270 etendues=2645 multiples=576 tetraedres=1145 ordres_6plus=7 signatures=810 larges=4")
   set(mhgp11_cli_supports_oracle_floors --min-clouds=211 --min-orders=963 --min-balls=15270 --min-extended=2645
       --min-multiple=576 --min-signatures=810)
 endif()
@@ -98,24 +98,24 @@ mhgp11_python_gate(mhgp11_cli_supports_oracle 0 cli_supports_oracle.py --cli ${m
 # Echelle et LiDAR (K5) : lecteur et invariants sur tout le fichier, fichiers et manifeste identiques a W1 et W4 (et
 # a la repetition), permutation (fichier identique), reetiquetage non dense avec 0xFFFFFFFF (seule la colonne
 # SITES.point_id change), tree_k_sha256 egal a celui de --sortie=full ; plus un petit nuage de boite riche en
-# cospheriques. Comptes graves : ceux de mhgp11_supports_hierarchy_* (memes entrees). W48 : sur G4 (--fils=1,4,48).
-set(mhgp11_cli_supports_8000 "sites=8000 k=5 noeuds=273655 boules=395667 supports=395667 etendues=0 multiples=0 branches=273654 kparties=1549792 cofaces=230825 appels=12")
-set(mhgp11_cli_supports_16000 "sites=16000 k=5 noeuds=565098 boules=819004 supports=819004 etendues=0 multiples=0 branches=565097 kparties=3213739 cofaces=478947 appels=12")
-set(mhgp11_cli_supports_32000 "sites=32000 k=5 noeuds=1163756 boules=1690045 supports=1690045 etendues=0 multiples=0 branches=1163760 kparties=6639350 cofaces=989861 appels=12")
+# cospheriques. Comptes graves : MHGP11SP 2, arbre couvrant d'ordre K (6 octobre 2026). W48 : sur G4 (--fils=1,4,48).
+set(mhgp11_cli_supports_8000 "sites=8000 k=5 noeuds=273655 boules=273655 supports=273655 etendues=0 fusions=108813 branches=273654 appels=12")
+set(mhgp11_cli_supports_16000 "sites=16000 k=5 noeuds=565098 boules=565098 supports=565098 etendues=0 fusions=225041 branches=565097 appels=12")
+set(mhgp11_cli_supports_32000 "sites=32000 k=5 noeuds=1163756 boules=1163761 supports=1163761 etendues=0 fusions=463577 branches=1163760 appels=12")
 foreach(n 8000 16000 32000)
   mhgp11_python_gate(mhgp11_cli_supports_scale${n} 0 cli_supports_scale.py --cli ${mhgp11_cli}
                      --bits ${MHGP11_COORD_BITS} --uniform=${n} --k=5 --fils=1,4 --min-balls=100000
                      LINE "cli_supports_scale_verdict conforme ${mhgp11_cli_supports_${n}}" LABELS scale${n}
                      TIMEOUT 3600)
 endforeach()
-foreach(case "ng00;sites=39885 k=5 noeuds=576371 boules=789886 supports=789889 etendues=141 multiples=3 branches=576483 kparties=3034691 cofaces=449011 appels=12"
-             "ng01;sites=35551 k=5 noeuds=478265 boules=652958 supports=652959 etendues=81 multiples=1 branches=478385 kparties=2502103 cofaces=369857 appels=12"
-             "ng02;sites=45845 k=5 noeuds=609376 boules=832386 supports=832394 etendues=354 multiples=8 branches=610022 kparties=3189636 cofaces=471577 appels=12")
+foreach(case "ng00;sites=39885 k=5 noeuds=576371 boules=576482 supports=576482 etendues=62 fusions=235401 branches=576483 appels=12"
+             "ng01;sites=35551 k=5 noeuds=478265 boules=478380 supports=478380 etendues=38 fusions=195173 branches=478385 appels=12"
+             "ng02;sites=45845 k=5 noeuds=609376 boules=610002 supports=610002 etendues=171 fusions=248676 branches=610022 appels=12")
   list(GET case 0 frame)
   list(GET case 1 counts)
   mhgp11_python_gate(mhgp11_cli_supports_lidar_${frame}_k5 0 cli_supports_scale.py --cli ${mhgp11_cli}
-                     --bits ${MHGP11_COORD_BITS} --data=lidar_${frame} --k=5 --fils=1,4 --min-balls=500000
-                     --min-extended=50 LINE "cli_supports_scale_verdict conforme ${counts}" LABELS lidar TIMEOUT 3600)
+                     --bits ${MHGP11_COORD_BITS} --data=lidar_${frame} --k=5 --fils=1,4 --min-balls=400000
+                     --min-extended=30 LINE "cli_supports_scale_verdict conforme ${counts}" LABELS lidar TIMEOUT 3600)
 endforeach()
 
 # ---- Sortie points (tranche S9) : points.mhgp11pt (MHGP11PT version 1) relu par le lecteur officiel en lecture exacte
