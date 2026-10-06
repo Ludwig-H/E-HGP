@@ -1,0 +1,93 @@
+{
+ "schema": "ehgp.v11.session_plan.v1",
+ "note": "Diagnostic de l'etage domain (Claude, 6 octobre 2026), sans regle d'adoption : temps du lot de feuilles execute sur le Pool de l'hote (311291 = 278523 + 32768) contre le GPU (344059) et la voie CPU sans lot (278523), trames LiDAR reelles, pour dimensionner un executeur hybride (feuilles partagees entre GPU et Pool). Sous-temps du domaine gardes par prise. Dumps identiques exiges entre modes.",
+ "python_packages": "none",
+ "default_build": false,
+ "results_cap_bytes": 134217728,
+ "commands": [
+  {
+   "name": "k5_16",
+   "timeout_seconds": 2400,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/gpu_ab.py",
+    "--src",
+    "{src}",
+    "--work",
+    "{build}/gpu",
+    "--data",
+    "{data}",
+    "--out",
+    "{out}/k5_16",
+    "--modes",
+    "cpu=278523,host=311291,gpu=344059",
+    "--reps",
+    "6",
+    "--workers",
+    "48",
+    "--warm-passes",
+    "8",
+    "--kmax",
+    "5",
+    "--leaf",
+    "16"
+   ]
+  },
+  {
+   "name": "k5_24",
+   "timeout_seconds": 2400,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/gpu_ab.py",
+    "--src",
+    "{src}",
+    "--work",
+    "{build}/gpu",
+    "--data",
+    "{data}",
+    "--out",
+    "{out}/k5_24",
+    "--modes",
+    "cpu=278523,host=311291,gpu=344059",
+    "--reps",
+    "6",
+    "--workers",
+    "48",
+    "--warm-passes",
+    "8",
+    "--kmax",
+    "5",
+    "--leaf",
+    "24"
+   ]
+  },
+  {
+   "name": "k10_24",
+   "timeout_seconds": 2400,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/gpu_ab.py",
+    "--src",
+    "{src}",
+    "--work",
+    "{build}/gpu",
+    "--data",
+    "{data}",
+    "--out",
+    "{out}/k10_24",
+    "--modes",
+    "host=311291,gpu=344059",
+    "--reps",
+    "3",
+    "--workers",
+    "48",
+    "--warm-passes",
+    "8",
+    "--kmax",
+    "10",
+    "--leaf",
+    "24"
+   ]
+  }
+ ]
+}
