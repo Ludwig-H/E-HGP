@@ -50,6 +50,9 @@ struct FullParams {
   bool reuse_regular_verticals = false;
   bool population_lookup = false;  // table I union U -> boule consultee avant toute descente (opt-in)
   bool concurrent_orders = false;  // etages sur tous les ordres (forest_concurrent.cpp) ; exige Q>0
+  // Pipeline des ordres concurrents : coeurs physiques dedies aux taches serie lourdes (forest_placement.hpp).
+  // Indication d'ordonnancement seulement, sans effet sur aucune decision ; inactive si la topologie ne s'y prete pas.
+  bool place_pipeline = false;
 };
 struct FullTimings {
   u64 memo_capacity = 0, memo_slot_bytes = 0, memo_reserved_bytes = 0;
@@ -65,6 +68,7 @@ struct FullTimings {
   u64 classify_phase_ns = 0, birth_phase_ns = 0, regular_phase_ns = 0, publish_phase_ns = 0, vertical_phase_ns = 0;
   // Pipeline (ordres concurrents) : taches de resolution, 0 pour la voie par etages ; phases = fins depuis le debut.
   u64 pipeline_lanes = 0;
+  u64 pipeline_placement_cores = 0;  // coeurs du plan de placement du pipeline ; 0 sans placement
   // Voies de resolution (diagnostic) : dernier depart, premiere et derniere fin, somme des temps CPU des fils. Sans
   // barriere de depart, une voie peut finir avant qu'une autre demarre : aucun ordre entre departs et fins.
   u64 lanes_last_start_ns = 0, lanes_first_finish_ns = 0, lanes_last_finish_ns = 0, lanes_cpu_ns = 0;

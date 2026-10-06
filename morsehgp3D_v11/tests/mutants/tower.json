@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 151,
+  "plancher": 154,
   "mutants": [
     {
       "id": "population_memo_owner_omis",
@@ -1226,6 +1226,30 @@
       "remplace": "    for (int j = 0; j < 3; ++j) right += (hi[k] - lo[k]) * cr[k][j];",
       "porte": "mhgp11_tower_full_leaf_lanes",
       "note": "levier C : rayon du zonogone J2 etroit pris sur l'axe k au lieu de j"
+    },
+    {
+      "id": "placement_leger_sur_coeur_lourd",
+      "fichier": "src/tower/forest_placement.cpp",
+      "cherche": "    CPU_SET(cores.second[core], &plan.light);\n",
+      "remplace": "    CPU_SET(cores.first[core], &plan.light);\n",
+      "porte": "mhgp11_tower_placement_plan",
+      "note": "placement : les taches legeres sur le fil meme des taches lourdes"
+    },
+    {
+      "id": "placement_publieur_haut_echange",
+      "fichier": "src/tower/forest_placement.cpp",
+      "cherche": "    if (k == kmax) return &heavy[0];\n",
+      "remplace": "    if (k == kmax) return &heavy[1];\n",
+      "porte": "mhgp11_tower_placement_plan",
+      "note": "placement : le publieur de l'ordre K sur le coeur du publieur K-1"
+    },
+    {
+      "id": "placement_affinite_non_rendue",
+      "fichier": "src/tower/forest_placement.cpp",
+      "cherche": "  if (active_) sched_setaffinity(0, sizeof(saved_), &saved_);\n",
+      "remplace": "  if (!active_) sched_setaffinity(0, sizeof(saved_), &saved_);\n",
+      "porte": "mhgp11_tower_placement_affinity",
+      "note": "placement : l'affinite du fil n'est pas rendue a la fin de la tache"
     }
   ]
 }

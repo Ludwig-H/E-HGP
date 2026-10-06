@@ -61,6 +61,7 @@ class ForestParallel {
     return resolve_job(builder, ball, seeds, nullptr, scratch, work);
   }
   u64 memo_bytes() const noexcept { return memo_bytes_; }
+  bool place_pipeline() const noexcept { return place_pipeline_; }
 
  private:
   struct Job { BallIdx ball{kNone}; std::array<NodeIdx, 4> seeds{}; };
@@ -86,6 +87,7 @@ class ForestParallel {
   CensusSlots* scratch_ = nullptr;
   u32 lanes_, count_ = 0, next_lane_ = 0;
   u64 memo_bytes_ = 0;
+  bool place_pipeline_ = false;  // FullParams::place_pipeline
   Buffer<Job> jobs_;
   Buffer<Lane> work_;
   std::array<std::optional<DescentMemo>, sched::kMaxWorkers> memos_;

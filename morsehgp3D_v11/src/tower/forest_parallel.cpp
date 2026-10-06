@@ -29,6 +29,7 @@ Result<ForestParallel> ForestParallel::make(const FullDomain& domain, FullParams
     return fail(Reason::parameter_out_of_range);
   ForestParallel result(domain, budget, pool, p.descent_lanes);
   result.scratch_ = scratch;
+  result.place_pipeline_ = p.place_pipeline;
   result.memo_bytes_ = p.lane_memo_capacity * width * p.descent_lanes;
   u64 bytes = result.memo_bytes_;
   MHGP11_TRY(cell_add(bytes, u64{p.regular_batch_capacity} * sizeof(Job)));

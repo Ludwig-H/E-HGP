@@ -75,7 +75,7 @@ mhgp11_python_gate(mhgp11_tower_points_export_width 0 ${PROJECT_SOURCE_DIR}/benc
                    --export $<TARGET_FILE:mhgp11_points_export> --work ${CMAKE_BINARY_DIR}/points_export_width
                    LINE "points_export_width_verdict conforme" LABELS fast TIMEOUT 120)
 mhgp11_python_gate(mhgp11_tower_full_bench_io 0 full_bench_io.py $<TARGET_FILE:mhgp11_full_bench> ${MHGP11_COORD_BITS}
-                    LINE "full_io_verdict conforme attempts427 successes413 refusals14" LABELS fast TIMEOUT 120)
+                    LINE "full_io_verdict conforme attempts429 successes413 refusals16" LABELS fast TIMEOUT 120)
 # Voies de feuille (CPU, feuille source unique sur l'hote, lot sur le Pool) sur 3 000 sites uniformes : meme dump,
 # meme registre, lot plus nombreux que les sites (les feuilles se recouvrent ; garde fausse du 4 octobre 2026).
 mhgp11_python_gate(mhgp11_tower_full_leaf_lanes 0 full_leaf_lanes.py $<TARGET_FILE:mhgp11_full_bench> ${MHGP11_COORD_BITS}
@@ -218,11 +218,15 @@ mhgp11_python_gate(mhgp11_tower_full_paired_protocol 0 full_paired_protocol_test
 # Lecteur du diagnostic de pipeline : bornes par le mur des forets, aucun ordre entre departs et fins des voies
 # (audit du 4 octobre 2026, pin 66372e621) ; le temoin d'une voie finie avant le dernier depart est accepte.
 mhgp11_python_gate(mhgp11_tower_full_pipeline_reader 0 full_pipeline_reader_test.py
-                    LINE "full_pipeline_reader_verdict conforme checks17" LABELS fast TIMEOUT 30)
+                    LINE "full_pipeline_reader_verdict conforme checks20" LABELS fast TIMEOUT 30)
 # Pipeline des ordres concurrents : decisions du balayage suivi contre l'ordre sequentiel, puis memes forets,
 # verticales et compteurs que la voie par etages (W48 repete contre W1) ; abandon de l'ordre bas pendant l'attente.
 mhgp11_add_unit(mhgp11_tower_pipeline SOURCES forest_pipeline_test.cpp GROUPS decisions equivalence abandon
                 LABELS fast TIMEOUT 600)
+# Placement des taches du pipeline (forest_placement.hpp, levier O1, 6 octobre 2026) : listes de freres, coeurs,
+# plan sur une topologie de type G4, affectation de chaque tache, refus, affinite appliquee puis rendue.
+mhgp11_add_unit(mhgp11_tower_placement SOURCES forest_placement_test.cpp GROUPS parse cores plan affinity
+                LABELS fast TIMEOUT 60)
 
 # Arbre d'ordre K seul et rattachement de W_K (tranche S3 de la sortie parametree, build_order) : identite I10 avec
 # l'ordre K de build_full, parametres de cout honores (table de populations, memo, lookup dense), fixtures 1, 4, 7 et

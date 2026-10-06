@@ -135,7 +135,7 @@ MHGP11_TEST(equivalence, 2000) {
   const std::vector<std::pair<std::vector<Xyz>, Order>> fixtures{
       {cloud(90, 64, 7, false), 5}, {cloud(140, 256, 11, true), 6}, {cloud(70, 16, 3, false), 4},
       {cloud(160, 1024, 29, true), 5}};
-  u64 compared = 0, piped = 0;
+  u64 compared = 0, piped = 0, placements = 0;
   for (const auto& [points, k] : fixtures) {
     MemoryBudget owner(MemoryBudget::kUnlimited), work(MemoryBudget::kUnlimited);
     const Input input(points);
@@ -151,7 +151,10 @@ MHGP11_TEST(equivalence, 2000) {
       for (int repeat = 0; repeat < 6; ++repeat) {
         auto domain = domain_of(input, owner, k); REQUIRE(domain.ok());
         FullTimings times;
-        auto full = build_full(std::move(domain.value()), work, &times, params, p48.value().get());
+        FullParams placed = params;
+        placed.place_pipeline = repeat % 2 == 1;  // coeurs dedies (actifs sur G4 ; inactifs sans assez de coeurs)
+        auto full = build_full(std::move(domain.value()), work, &times, placed, p48.value().get());
+        placements += times.pipeline_placement_cores != 0;
         REQUIRE(full.ok());
         CHECK(times.pipeline_lanes > 0);
         piped += times.pipeline_lanes > 0;
@@ -166,8 +169,8 @@ MHGP11_TEST(equivalence, 2000) {
     }
   }
   CHECK(compared > 900); CHECK(piped > 150);
-  std::printf("pipeline_equivalence orders=%llu pipelines=%llu\n", (unsigned long long)compared,
-              (unsigned long long)piped);
+  std::printf("pipeline_equivalence orders=%llu pipelines=%llu placements=%llu\n", (unsigned long long)compared,
+              (unsigned long long)piped, (unsigned long long)placements);
 }
 
 namespace {

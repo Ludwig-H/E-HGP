@@ -96,7 +96,8 @@ def main():
                  ('budget','memory_budget'),('kmax_above_n','parameter_out_of_range'),
                  ('weight','multiplicity_unsupported'),('output','output_unwritable'),('workers',None),
                  ('opt_negative',None),('opt_large',None),('opt_text',None),('opt_requires_lanes',None),
-                 ('opt_concurrent_requires_lanes',None)]
+                 ('opt_concurrent_requires_lanes',None),('opt_replay_requires_batch',None),
+                 ('opt_placement_requires_concurrent',None)]
         for mode, reason in cases:
             write(range(3))
             if mode == 'truncated_xyz': xyz.write_bytes(xyz.read_bytes()[:-1])
@@ -107,8 +108,9 @@ def main():
             result, rows = child(kmax=4 if mode == 'kmax_above_n' else 3,
                                  budget=0 if mode == 'budget' else 1 << 28,
                                  workers=0 if mode == 'workers' else 1, destination=root if mode == 'output' else None,
-                                 optimizations={'opt_negative':'-1','opt_large':'131072','opt_text':'x','opt_requires_lanes':'128',
-                                                'opt_concurrent_requires_lanes':'8192'}.get(mode))
+                                 optimizations={'opt_negative':'-1','opt_large':'524288','opt_text':'x','opt_requires_lanes':'128',
+                                                'opt_concurrent_requires_lanes':'8192','opt_replay_requires_batch':'131072',
+                                                'opt_placement_requires_concurrent':'262144'}.get(mode))
             semantic.need(result.returncode == 2 and not output.exists(), 'refus publie un payload : '+mode)
             if reason is None:
                 semantic.need(not rows, 'usage refuse avant execution')
@@ -119,8 +121,8 @@ def main():
                 semantic.need(any(r['phase'] == 'full' and r['status'] == 'ok' for r in rows),
                               'echec de sortie conserve apres calcul reussi')
             refusals += 1
-    semantic.need((attempts,successes,refusals) == (427,413,14), 'plancher IO')
-    print('full_io_verdict conforme attempts427 successes413 refusals14')
+    semantic.need((attempts,successes,refusals) == (429,413,16), 'plancher IO')
+    print('full_io_verdict conforme attempts429 successes413 refusals16')
 
 
 if __name__ == '__main__':

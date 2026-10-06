@@ -35,7 +35,8 @@ def concurrent_full():
     """FULL concurrent minimal a K = 2 : la voie 1 finit (40) avant que la derniere voie demarre (55)."""
     orders = [dict(timings=dict(classify_ns=1, births_ns=1, plateaus_ns=5, verticals_ns=0), work=dict(population_hits=0)),
               dict(timings=dict(classify_ns=1, births_ns=1, plateaus_ns=5, verticals_ns=7), work=dict(population_hits=0))]
-    tasks = dict(lanes_last_start_ns=55, lanes_first_finish_ns=40, lanes_last_finish_ns=90, lanes_cpu_ns=300,
+    tasks = dict(placement_cores=24, lanes_last_start_ns=55, lanes_first_finish_ns=40, lanes_last_finish_ns=90,
+                 lanes_cpu_ns=300,
                  orders=[dict(k=1, publish_start_ns=2, publish_end_ns=95, publish_cpu_ns=30, publish_wait_ns=50,
                               vertical_start_ns=0, vertical_end_ns=0, vertical_cpu_ns=0, vertical_wait_ns=0),
                          dict(k=2, publish_start_ns=3, publish_end_ns=97, publish_cpu_ns=31, publish_wait_ns=52,
@@ -83,6 +84,8 @@ def main():
         'missing_publish_end': lambda f: tasks(f)['orders'][0].pop('publish_end_ns'),
         'missing_vertical_end': lambda f: tasks(f)['orders'][1].pop('vertical_end_ns'),
         'negative_end': lambda f: tasks(f)['orders'][1].update(publish_end_ns=-1),
+        'missing_placement': lambda f: tasks(f).pop('placement_cores'),
+        'negative_placement': lambda f: tasks(f).update(placement_cores=-1),
     }
     for name, change in refusals.items():
         check(not accepted(mutated(change)), 'refus attendu : ' + name)
@@ -90,15 +93,18 @@ def main():
     sequential = concurrent_full()
     sequential.update(optimizations=8, concurrent_orders=False, phases=dict.fromkeys(sequential['phases'], 0))
     sequential['pipeline_tasks'] = copy.deepcopy(sequential['pipeline_tasks'])
-    for key in acceleration.PIPELINE_LANES:
+    for key in acceleration.PIPELINE_LANES | {'placement_cores'}:
         sequential['pipeline_tasks'][key] = 0
     for row in sequential['pipeline_tasks']['orders']:
         for key in acceleration.PIPELINE_ORDER:
             row[key] = 0
     check(accepted(sequential), 'voie sequentielle a zeros refusee')
+    placed = copy.deepcopy(sequential)
+    placed['pipeline_tasks']['placement_cores'] = 24
+    check(not accepted(placed), 'voie sequentielle avec un placement de pipeline acceptee')
     sequential['pipeline_tasks']['orders'][1]['publish_end_ns'] = 1
     check(not accepted(sequential), 'voie sequentielle avec une fin de tache acceptee')
-    if CHECKS != 17:
+    if CHECKS != 20:
         raise ValueError('plancher : %d controles' % CHECKS)
     print('full_pipeline_reader_verdict conforme checks%d' % CHECKS)
 

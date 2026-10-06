@@ -58,8 +58,11 @@ def validate(full, need, unsigned):
                 need(order['timings'][field] <= phases[phase], 'order interval exceeds its shared global phase')
     tasks = full.get('pipeline_tasks')
     if tasks is not None:
-        need(type(tasks) is dict and set(tasks) == PIPELINE_LANES | {'orders'}, 'pipeline task diagnostic fields')
-        unsigned(tasks, PIPELINE_LANES)
+        # placement_cores : coeurs du plan de placement du pipeline (FullParams::place_pipeline), 0 sans placement.
+        need(type(tasks) is dict and set(tasks) == PIPELINE_LANES | {'orders', 'placement_cores'},
+             'pipeline task diagnostic fields')
+        unsigned(tasks, PIPELINE_LANES | {'placement_cores'})
+        need(concurrent or tasks['placement_cores'] == 0, 'sequential orders have a pipeline placement')
         need(type(tasks['orders']) is list and len(tasks['orders']) == full['kmax'], 'pipeline task orders')
         for index, row in enumerate(tasks['orders']):
             need(type(row) is dict and set(row) == PIPELINE_ORDER | {'k'} and row['k'] == index + 1,

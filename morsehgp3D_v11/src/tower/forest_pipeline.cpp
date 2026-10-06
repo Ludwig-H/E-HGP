@@ -10,6 +10,7 @@
 
 #include "tower/forest_ancestor_sweep.hpp"
 #include "tower/forest_parallel.hpp"
+#include "tower/forest_placement.hpp"
 #include "tower/population_lookup.hpp"
 #include "tower/regular_vertical_seeds.hpp"
 #include "sched/sched.hpp"
@@ -46,6 +47,7 @@ struct Pipeline {
   std::span<u64> finished;                // fin de chaque tache depuis le debut du pipeline, ns
   std::span<u64> started, cpu, waited;    // diagnostic : debut, CPU du fil, attente bloquee de chaque tache
   std::atomic<u64> next{0};
+  const PipelinePlacement* placement = nullptr;  // coeurs des taches (forest_placement.hpp), nul sans placement
   u32 lanes = 0, kmax = 0;
   bool timed = false;
   std::optional<Stopwatch> origin{};
@@ -100,6 +102,7 @@ struct Pipeline {
   }
 
   Outcome run(u32 task) noexcept {
+    const ScopedAffinity placed(placement == nullptr ? nullptr : placement->set_of(task));
     u64 cpu0 = 0;
     if (timed) { started[task] = origin->nanoseconds(); cpu0 = thread_cpu_ns(); }
     Outcome outcome = task < lanes ? resolve(task) : task < lanes + kmax ? publish(task - lanes, task)
@@ -243,6 +246,14 @@ Outcome pipeline_orders(const FullDomain& domain, MemoryBudget& budget, ForestPa
                     std::span(gates).first(kmax), std::span(progress).first(kmax), std::span(sweeps).first(kmax),
                     lane_work.span(), vertical_work.span(), times.span(), starts.span(), cpus.span(), waits.span()};
   pipeline.lanes = lanes; pipeline.kmax = kmax; pipeline.timed = timings != nullptr;
+  // Placement (FullParams::place_pipeline) : plan lu une fois par passe ; topologie illisible ou inadaptee : aucun.
+  PipelinePlacement plan;
+  if (parallel.place_pipeline()) {
+    CpuCores cores;
+    if (read_cpu_cores(cores)) plan = plan_pipeline(cores, lanes, kmax);
+    if (plan.cores != 0) pipeline.placement = &plan;
+  }
+  if (timings != nullptr) timings->pipeline_placement_cores = plan.cores;
   if (pipeline.timed) pipeline.origin.emplace();
   MHGP11_TRY(pool.parallel_for(tasks, 1, &pipeline, Pipeline::body));
   // Travail somme dans l'ordre fixe (taches, ordres) : memes totaux que la voie par etages.

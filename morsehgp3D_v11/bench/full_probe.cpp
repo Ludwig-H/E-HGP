@@ -259,7 +259,8 @@ Outcome full_pass(Cloud cloud_value, MemoryBudget& budget, sched::Pool& pool_ref
                                         8192 * unsigned(full_params.concurrent_orders) +
                                         16384 * unsigned(params.device_leaf) + 32768 * unsigned(params.batch_leaves) +
                                         65536 * unsigned(params.cuda_leaves) +
-                                        131072 * unsigned(params.replay_overflow))
+                                        131072 * unsigned(params.replay_overflow) +
+                                        262144 * unsigned(full_params.place_pipeline))
             << ",\"wall_ns\":" << full_ns << ",\"index_ns\":" << index_ns << ",\"domain_ns\":" << domain_ns
             << ",\"forest_ns\":" << forest_ns << ",\"cpu_seconds\":" << std::setprecision(12) << cpu_seconds
             << ",\"peak_reserved_bytes\":" << budget.peak() << ",\"reserved_after_bytes\":" << budget.used();
@@ -294,7 +295,8 @@ Outcome full_pass(Cloud cloud_value, MemoryBudget& budget, sched::Pool& pool_ref
               << ",\"verticals_ns\":" << forest_timings.vertical_phase_ns << '}';
     // Diagnostic T0 du pipeline (hors ledger, hors phases disjointes) : par ordre, debut, CPU du fil et attente
     // bloquee du publieur et du balayage dont il est l'ordre haut ; pour les voies, dernier depart, premiere fin, CPU.
-    std::cout << ",\"pipeline_tasks\":{\"lanes_last_start_ns\":" << forest_timings.lanes_last_start_ns
+    std::cout << ",\"pipeline_tasks\":{\"placement_cores\":" << forest_timings.pipeline_placement_cores
+              << ",\"lanes_last_start_ns\":" << forest_timings.lanes_last_start_ns
               << ",\"lanes_first_finish_ns\":" << forest_timings.lanes_first_finish_ns
               << ",\"lanes_last_finish_ns\":" << forest_timings.lanes_last_finish_ns
               << ",\"lanes_cpu_ns\":" << forest_timings.lanes_cpu_ns << ",\"orders\":[";
@@ -356,7 +358,7 @@ int main(int argc, char** argv) {
   if (options[0] > 12 || options[1] > 1024 || options[2] > 1024 ||
       options[6] < 1 || options[6] > sched::kMaxWorkers) return 2;
   u64 optimizations = 0;
-  if (argc >= 12 && (!parse(argv[11], optimizations) || optimizations > 262143)) return 2;
+  if (argc >= 12 && (!parse(argv[11], optimizations) || optimizations > 524287)) return 2;
   u64 passes = 1;  // mode a chaud : passes FULL successives dans le meme processus
   if (argc == 13 && (!parse(argv[12], passes) || passes < 1 || passes > 64)) return 2;
   if ((optimizations & 8192) != 0 && (optimizations & 8) == 0) return 2;
@@ -365,6 +367,10 @@ int main(int argc, char** argv) {
   if ((optimizations & 16384) != 0 && (optimizations & 2048) == 0) return 2;
   if ((optimizations & (32768 | 65536)) != 0 && (optimizations & (64 | 2048)) != (64 | 2048)) return 2;
   if ((optimizations & 32768) != 0 && (optimizations & 65536) != 0) return 2;
+  // Lots sans reservoir (131072) : seulement avec un lot ; placement du pipeline (262144) : seulement avec les ordres
+  // concurrents (8192), seule voie qui a un pipeline.
+  if ((optimizations & 131072) != 0 && (optimizations & (32768 | 65536)) == 0) return 2;
+  if ((optimizations & 262144) != 0 && (optimizations & 8192) == 0) return 2;
   CatalogueParams params;
   FullParams full_params{(optimizations & 4) != 0 ? u64{65536} : u64{0}};
   if ((optimizations & 8) != 0) {
@@ -378,6 +384,7 @@ int main(int argc, char** argv) {
   full_params.reuse_regular_verticals = (optimizations & 1024) != 0;
   full_params.population_lookup = (optimizations & 4096) != 0;
   full_params.concurrent_orders = (optimizations & 8192) != 0;
+  full_params.place_pipeline = (optimizations & 262144) != 0;  // coeurs dedies aux taches lourdes du pipeline
   params.cache_center_lines = (optimizations & 1) != 0;
   params.indirect_sort = (optimizations & 2) != 0;
   params.adaptive_frontier = (optimizations & 16) != 0;
