@@ -1,0 +1,1705 @@
+{
+  "archive_sha256": "ad2fa6444b63463f255038b647be0e1cde18c5c7b98ef9459de7cadf35dda68a",
+  "closed_certified": true,
+  "closing_generation": "2026-10-06T03:04:11.340-07:00",
+  "commands": [
+    {
+      "exit_code": 0,
+      "metadata_sha256": "1dc97d55d09b85b79dcfedc281417f9a8772310210c65ff906bd3101e58f212c",
+      "name": "gpu_k5",
+      "status": "ok",
+      "wall_seconds": "115.743"
+    },
+    {
+      "exit_code": 0,
+      "metadata_sha256": "63e8b4b88f84c6444f3f16100d5388b4c5c80eb1f2e27596810be703d36bf963",
+      "name": "gpu_k10",
+      "status": "ok",
+      "wall_seconds": "351.099"
+    }
+  ],
+  "comparison_previous_summary_sha256": "36c1ea7046ed38bade2d8b5b091d09d823fb93d75016e458c3d708d5f74467a2",
+  "judge_sha256": "108203630334697578b829a549973824c9daa7cd90439dd18a35759e51e381dd",
+  "last_stop_timestamp": "2026-10-06T03:15:31.478-07:00",
+  "last_warm_gpu_comparison": [
+    {
+      "current_executor_ns": 58684661,
+      "current_fill_ns": 17438332,
+      "current_pin": "9eee2ed4bcef1e960cdf2456012b84416854dc20",
+      "frame": "lidar_ng00",
+      "k": 5,
+      "leaf": 16,
+      "mask": 81915,
+      "mode": "gpu",
+      "previous_executor_ns": 75571756,
+      "previous_fill_ns": 34657111,
+      "previous_pin": "ee3eabe5e7aae4d95515f63935e8f9a84adbd468",
+      "scope": "last warm call only; same data/K/leaf/W48/mask and workload; source extend changed; no FULL gain inferred",
+      "workers": 48
+    },
+    {
+      "current_executor_ns": 53813368,
+      "current_fill_ns": 19665104,
+      "current_pin": "9eee2ed4bcef1e960cdf2456012b84416854dc20",
+      "frame": "lidar_ng01",
+      "k": 5,
+      "leaf": 16,
+      "mask": 81915,
+      "mode": "gpu",
+      "previous_executor_ns": 74668565,
+      "previous_fill_ns": 40968365,
+      "previous_pin": "ee3eabe5e7aae4d95515f63935e8f9a84adbd468",
+      "scope": "last warm call only; same data/K/leaf/W48/mask and workload; source extend changed; no FULL gain inferred",
+      "workers": 48
+    },
+    {
+      "current_executor_ns": 51876710,
+      "current_fill_ns": 12604678,
+      "current_pin": "9eee2ed4bcef1e960cdf2456012b84416854dc20",
+      "frame": "lidar_ng02",
+      "k": 5,
+      "leaf": 16,
+      "mask": 81915,
+      "mode": "gpu",
+      "previous_executor_ns": 55928628,
+      "previous_fill_ns": 17646023,
+      "previous_pin": "ee3eabe5e7aae4d95515f63935e8f9a84adbd468",
+      "scope": "last warm call only; same data/K/leaf/W48/mask and workload; source extend changed; no FULL gain inferred",
+      "workers": 48
+    },
+    {
+      "current_executor_ns": 341822104,
+      "current_fill_ns": 111697193,
+      "current_pin": "9eee2ed4bcef1e960cdf2456012b84416854dc20",
+      "frame": "lidar_ng00",
+      "k": 10,
+      "leaf": 24,
+      "mask": 81915,
+      "mode": "gpu",
+      "previous_executor_ns": 455811914,
+      "previous_fill_ns": 232101797,
+      "previous_pin": "ee3eabe5e7aae4d95515f63935e8f9a84adbd468",
+      "scope": "last warm call only; same data/K/leaf/W48/mask and workload; source extend changed; no FULL gain inferred",
+      "workers": 48
+    },
+    {
+      "current_executor_ns": 301348078,
+      "current_fill_ns": 116204266,
+      "current_pin": "9eee2ed4bcef1e960cdf2456012b84416854dc20",
+      "frame": "lidar_ng01",
+      "k": 10,
+      "leaf": 24,
+      "mask": 81915,
+      "mode": "gpu",
+      "previous_executor_ns": 419183381,
+      "previous_fill_ns": 238811066,
+      "previous_pin": "ee3eabe5e7aae4d95515f63935e8f9a84adbd468",
+      "scope": "last warm call only; same data/K/leaf/W48/mask and workload; source extend changed; no FULL gain inferred",
+      "workers": 48
+    },
+    {
+      "current_executor_ns": 321199171,
+      "current_fill_ns": 105564094,
+      "current_pin": "9eee2ed4bcef1e960cdf2456012b84416854dc20",
+      "frame": "lidar_ng02",
+      "k": 10,
+      "leaf": 24,
+      "mask": 81915,
+      "mode": "gpu",
+      "previous_executor_ns": 407937703,
+      "previous_fill_ns": 201160652,
+      "previous_pin": "ee3eabe5e7aae4d95515f63935e8f9a84adbd468",
+      "scope": "last warm call only; same data/K/leaf/W48/mask and workload; source extend changed; no FULL gain inferred",
+      "workers": 48
+    }
+  ],
+  "last_warm_stages": [
+    {
+      "copied_jobs": 138476,
+      "count_ns": 35420715,
+      "executor_ns": 58684661,
+      "fill_jobs": 14,
+      "fill_ns": 17438332,
+      "frame": "lidar_ng00",
+      "jobs": 353456,
+      "k": 5,
+      "mode": "gpu",
+      "scope": "last warm call only"
+    },
+    {
+      "copied_jobs": 138476,
+      "count_ns": 69168169,
+      "executor_ns": 77367865,
+      "fill_jobs": 14,
+      "fill_ns": 2407092,
+      "frame": "lidar_ng00",
+      "jobs": 353456,
+      "k": 5,
+      "mode": "gpu_coop",
+      "scope": "last warm call only"
+    },
+    {
+      "copied_jobs": 105806,
+      "count_ns": 29298381,
+      "executor_ns": 53813368,
+      "fill_jobs": 15,
+      "fill_ns": 19665104,
+      "frame": "lidar_ng01",
+      "jobs": 284835,
+      "k": 5,
+      "mode": "gpu",
+      "scope": "last warm call only"
+    },
+    {
+      "copied_jobs": 105806,
+      "count_ns": 54490114,
+      "executor_ns": 61600597,
+      "fill_jobs": 15,
+      "fill_ns": 2643759,
+      "frame": "lidar_ng01",
+      "jobs": 284835,
+      "k": 5,
+      "mode": "gpu_coop",
+      "scope": "last warm call only"
+    },
+    {
+      "copied_jobs": 121047,
+      "count_ns": 33708824,
+      "executor_ns": 51876710,
+      "fill_jobs": 7,
+      "fill_ns": 12604678,
+      "frame": "lidar_ng02",
+      "jobs": 323879,
+      "k": 5,
+      "mode": "gpu",
+      "scope": "last warm call only"
+    },
+    {
+      "copied_jobs": 121047,
+      "count_ns": 62815818,
+      "executor_ns": 70611636,
+      "fill_jobs": 7,
+      "fill_ns": 2563000,
+      "frame": "lidar_ng02",
+      "jobs": 323879,
+      "k": 5,
+      "mode": "gpu_coop",
+      "scope": "last warm call only"
+    },
+    {
+      "copied_jobs": 224563,
+      "count_ns": 216927395,
+      "executor_ns": 341822104,
+      "fill_jobs": 4196,
+      "fill_ns": 111697193,
+      "frame": "lidar_ng00",
+      "jobs": 530259,
+      "k": 10,
+      "mode": "gpu",
+      "scope": "last warm call only"
+    },
+    {
+      "copied_jobs": 224563,
+      "count_ns": 362482340,
+      "executor_ns": 399187790,
+      "fill_jobs": 4196,
+      "fill_ns": 23649434,
+      "frame": "lidar_ng00",
+      "jobs": 530259,
+      "k": 10,
+      "mode": "gpu_coop",
+      "scope": "last warm call only"
+    },
+    {
+      "copied_jobs": 165529,
+      "count_ns": 175103644,
+      "executor_ns": 301348078,
+      "fill_jobs": 3724,
+      "fill_ns": 116204266,
+      "frame": "lidar_ng01",
+      "jobs": 430579,
+      "k": 10,
+      "mode": "gpu",
+      "scope": "last warm call only"
+    },
+    {
+      "copied_jobs": 165529,
+      "count_ns": 278005073,
+      "executor_ns": 313711027,
+      "fill_jobs": 3724,
+      "fill_ns": 25244755,
+      "frame": "lidar_ng01",
+      "jobs": 430579,
+      "k": 10,
+      "mode": "gpu_coop",
+      "scope": "last warm call only"
+    },
+    {
+      "copied_jobs": 178542,
+      "count_ns": 202882951,
+      "executor_ns": 321199171,
+      "fill_jobs": 4934,
+      "fill_ns": 105564094,
+      "frame": "lidar_ng02",
+      "jobs": 486530,
+      "k": 10,
+      "mode": "gpu",
+      "scope": "last warm call only"
+    },
+    {
+      "copied_jobs": 178542,
+      "count_ns": 315270333,
+      "executor_ns": 354425064,
+      "fill_jobs": 4934,
+      "fill_ns": 27379894,
+      "frame": "lidar_ng02",
+      "jobs": 486530,
+      "k": 10,
+      "mode": "gpu_coop",
+      "scope": "last warm call only"
+    }
+  ],
+  "limits": [
+    "Only executed pin9eee and u21 Release CUDA, W48 and masks in this plan. Active MST/v2 WIP excluded.",
+    "No sanitizer, unit test, mutant, profile or coherent-warp gate selected. Previous guards are not closed by this measurement.",
+    "90 dump hashes checked; complete catalogue ledger equality delegated to pinned judge. No per-row work lines retained.",
+    "252 FULL constructions reported successful, but162 intermediate warm passes serialize neither dump nor catalogue ledger.",
+    "No median, no gain FULL inferred from a fill time, and no100ms contract obtained."
+  ],
+  "native_or_cloud_runs_by_auditor": 0,
+  "package_sha256": "0f81930cb6df665ca3c8efc6e67e15caad9a4403d3a679a66b1eb76c334a869a",
+  "plan_sha256": "2d529db24ebd1a4749784144affc52c84700e4911045ab77a03fed06bcd7133d",
+  "raw_identity_rows": [
+    {
+      "dump_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+      "frame": "lidar_ng00",
+      "k": 5,
+      "mode": "cpu",
+      "regime": "cold",
+      "rep": 0
+    },
+    {
+      "dump_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+      "frame": "lidar_ng00",
+      "k": 5,
+      "mode": "gpu",
+      "regime": "cold",
+      "rep": 0
+    },
+    {
+      "dump_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+      "frame": "lidar_ng00",
+      "k": 5,
+      "mode": "gpu_coop",
+      "regime": "cold",
+      "rep": 0
+    },
+    {
+      "dump_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+      "frame": "lidar_ng01",
+      "k": 5,
+      "mode": "cpu",
+      "regime": "cold",
+      "rep": 0
+    },
+    {
+      "dump_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+      "frame": "lidar_ng01",
+      "k": 5,
+      "mode": "gpu",
+      "regime": "cold",
+      "rep": 0
+    },
+    {
+      "dump_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+      "frame": "lidar_ng01",
+      "k": 5,
+      "mode": "gpu_coop",
+      "regime": "cold",
+      "rep": 0
+    },
+    {
+      "dump_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+      "frame": "lidar_ng02",
+      "k": 5,
+      "mode": "cpu",
+      "regime": "cold",
+      "rep": 0
+    },
+    {
+      "dump_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+      "frame": "lidar_ng02",
+      "k": 5,
+      "mode": "gpu",
+      "regime": "cold",
+      "rep": 0
+    },
+    {
+      "dump_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+      "frame": "lidar_ng02",
+      "k": 5,
+      "mode": "gpu_coop",
+      "regime": "cold",
+      "rep": 0
+    },
+    {
+      "dump_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+      "frame": "lidar_ng00",
+      "k": 5,
+      "mode": "gpu",
+      "regime": "cold",
+      "rep": 1
+    },
+    {
+      "dump_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+      "frame": "lidar_ng00",
+      "k": 5,
+      "mode": "gpu_coop",
+      "regime": "cold",
+      "rep": 1
+    },
+    {
+      "dump_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+      "frame": "lidar_ng00",
+      "k": 5,
+      "mode": "cpu",
+      "regime": "cold",
+      "rep": 1
+    },
+    {
+      "dump_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+      "frame": "lidar_ng01",
+      "k": 5,
+      "mode": "gpu",
+      "regime": "cold",
+      "rep": 1
+    },
+    {
+      "dump_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+      "frame": "lidar_ng01",
+      "k": 5,
+      "mode": "gpu_coop",
+      "regime": "cold",
+      "rep": 1
+    },
+    {
+      "dump_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+      "frame": "lidar_ng01",
+      "k": 5,
+      "mode": "cpu",
+      "regime": "cold",
+      "rep": 1
+    },
+    {
+      "dump_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+      "frame": "lidar_ng02",
+      "k": 5,
+      "mode": "gpu",
+      "regime": "cold",
+      "rep": 1
+    },
+    {
+      "dump_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+      "frame": "lidar_ng02",
+      "k": 5,
+      "mode": "gpu_coop",
+      "regime": "cold",
+      "rep": 1
+    },
+    {
+      "dump_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+      "frame": "lidar_ng02",
+      "k": 5,
+      "mode": "cpu",
+      "regime": "cold",
+      "rep": 1
+    },
+    {
+      "dump_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+      "frame": "lidar_ng00",
+      "k": 5,
+      "mode": "gpu_coop",
+      "regime": "cold",
+      "rep": 2
+    },
+    {
+      "dump_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+      "frame": "lidar_ng00",
+      "k": 5,
+      "mode": "cpu",
+      "regime": "cold",
+      "rep": 2
+    },
+    {
+      "dump_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+      "frame": "lidar_ng00",
+      "k": 5,
+      "mode": "gpu",
+      "regime": "cold",
+      "rep": 2
+    },
+    {
+      "dump_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+      "frame": "lidar_ng01",
+      "k": 5,
+      "mode": "gpu_coop",
+      "regime": "cold",
+      "rep": 2
+    },
+    {
+      "dump_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+      "frame": "lidar_ng01",
+      "k": 5,
+      "mode": "cpu",
+      "regime": "cold",
+      "rep": 2
+    },
+    {
+      "dump_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+      "frame": "lidar_ng01",
+      "k": 5,
+      "mode": "gpu",
+      "regime": "cold",
+      "rep": 2
+    },
+    {
+      "dump_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+      "frame": "lidar_ng02",
+      "k": 5,
+      "mode": "gpu_coop",
+      "regime": "cold",
+      "rep": 2
+    },
+    {
+      "dump_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+      "frame": "lidar_ng02",
+      "k": 5,
+      "mode": "cpu",
+      "regime": "cold",
+      "rep": 2
+    },
+    {
+      "dump_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+      "frame": "lidar_ng02",
+      "k": 5,
+      "mode": "gpu",
+      "regime": "cold",
+      "rep": 2
+    },
+    {
+      "dump_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+      "frame": "lidar_ng00",
+      "k": 5,
+      "mode": "gpu_coop",
+      "regime": "cold",
+      "rep": 3
+    },
+    {
+      "dump_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+      "frame": "lidar_ng00",
+      "k": 5,
+      "mode": "gpu",
+      "regime": "cold",
+      "rep": 3
+    },
+    {
+      "dump_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+      "frame": "lidar_ng00",
+      "k": 5,
+      "mode": "cpu",
+      "regime": "cold",
+      "rep": 3
+    },
+    {
+      "dump_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+      "frame": "lidar_ng01",
+      "k": 5,
+      "mode": "gpu_coop",
+      "regime": "cold",
+      "rep": 3
+    },
+    {
+      "dump_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+      "frame": "lidar_ng01",
+      "k": 5,
+      "mode": "gpu",
+      "regime": "cold",
+      "rep": 3
+    },
+    {
+      "dump_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+      "frame": "lidar_ng01",
+      "k": 5,
+      "mode": "cpu",
+      "regime": "cold",
+      "rep": 3
+    },
+    {
+      "dump_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+      "frame": "lidar_ng02",
+      "k": 5,
+      "mode": "gpu_coop",
+      "regime": "cold",
+      "rep": 3
+    },
+    {
+      "dump_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+      "frame": "lidar_ng02",
+      "k": 5,
+      "mode": "gpu",
+      "regime": "cold",
+      "rep": 3
+    },
+    {
+      "dump_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+      "frame": "lidar_ng02",
+      "k": 5,
+      "mode": "cpu",
+      "regime": "cold",
+      "rep": 3
+    },
+    {
+      "dump_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+      "frame": "lidar_ng00",
+      "k": 5,
+      "mode": "cpu",
+      "regime": "cold",
+      "rep": 4
+    },
+    {
+      "dump_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+      "frame": "lidar_ng00",
+      "k": 5,
+      "mode": "gpu_coop",
+      "regime": "cold",
+      "rep": 4
+    },
+    {
+      "dump_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+      "frame": "lidar_ng00",
+      "k": 5,
+      "mode": "gpu",
+      "regime": "cold",
+      "rep": 4
+    },
+    {
+      "dump_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+      "frame": "lidar_ng01",
+      "k": 5,
+      "mode": "cpu",
+      "regime": "cold",
+      "rep": 4
+    },
+    {
+      "dump_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+      "frame": "lidar_ng01",
+      "k": 5,
+      "mode": "gpu_coop",
+      "regime": "cold",
+      "rep": 4
+    },
+    {
+      "dump_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+      "frame": "lidar_ng01",
+      "k": 5,
+      "mode": "gpu",
+      "regime": "cold",
+      "rep": 4
+    },
+    {
+      "dump_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+      "frame": "lidar_ng02",
+      "k": 5,
+      "mode": "cpu",
+      "regime": "cold",
+      "rep": 4
+    },
+    {
+      "dump_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+      "frame": "lidar_ng02",
+      "k": 5,
+      "mode": "gpu_coop",
+      "regime": "cold",
+      "rep": 4
+    },
+    {
+      "dump_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+      "frame": "lidar_ng02",
+      "k": 5,
+      "mode": "gpu",
+      "regime": "cold",
+      "rep": 4
+    },
+    {
+      "dump_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+      "frame": "lidar_ng00",
+      "k": 5,
+      "mode": "cpu",
+      "regime": "warm",
+      "rep": null
+    },
+    {
+      "dump_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+      "frame": "lidar_ng00",
+      "k": 5,
+      "mode": "gpu",
+      "regime": "warm",
+      "rep": null
+    },
+    {
+      "dump_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+      "frame": "lidar_ng00",
+      "k": 5,
+      "mode": "gpu_coop",
+      "regime": "warm",
+      "rep": null
+    },
+    {
+      "dump_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+      "frame": "lidar_ng01",
+      "k": 5,
+      "mode": "cpu",
+      "regime": "warm",
+      "rep": null
+    },
+    {
+      "dump_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+      "frame": "lidar_ng01",
+      "k": 5,
+      "mode": "gpu",
+      "regime": "warm",
+      "rep": null
+    },
+    {
+      "dump_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+      "frame": "lidar_ng01",
+      "k": 5,
+      "mode": "gpu_coop",
+      "regime": "warm",
+      "rep": null
+    },
+    {
+      "dump_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+      "frame": "lidar_ng02",
+      "k": 5,
+      "mode": "cpu",
+      "regime": "warm",
+      "rep": null
+    },
+    {
+      "dump_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+      "frame": "lidar_ng02",
+      "k": 5,
+      "mode": "gpu",
+      "regime": "warm",
+      "rep": null
+    },
+    {
+      "dump_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+      "frame": "lidar_ng02",
+      "k": 5,
+      "mode": "gpu_coop",
+      "regime": "warm",
+      "rep": null
+    },
+    {
+      "dump_sha256": "61a4245b91d9a4fdad012f0a2e26a63c3e48db1d46a180db756f2c4e4aa77295",
+      "frame": "lidar_ng00",
+      "k": 10,
+      "mode": "cpu",
+      "regime": "cold",
+      "rep": 0
+    },
+    {
+      "dump_sha256": "61a4245b91d9a4fdad012f0a2e26a63c3e48db1d46a180db756f2c4e4aa77295",
+      "frame": "lidar_ng00",
+      "k": 10,
+      "mode": "gpu",
+      "regime": "cold",
+      "rep": 0
+    },
+    {
+      "dump_sha256": "61a4245b91d9a4fdad012f0a2e26a63c3e48db1d46a180db756f2c4e4aa77295",
+      "frame": "lidar_ng00",
+      "k": 10,
+      "mode": "gpu_coop",
+      "regime": "cold",
+      "rep": 0
+    },
+    {
+      "dump_sha256": "838a447e0b92e13e42f7f69a84fd536d5d46d26463d3f4cc7c688475878fe0de",
+      "frame": "lidar_ng01",
+      "k": 10,
+      "mode": "cpu",
+      "regime": "cold",
+      "rep": 0
+    },
+    {
+      "dump_sha256": "838a447e0b92e13e42f7f69a84fd536d5d46d26463d3f4cc7c688475878fe0de",
+      "frame": "lidar_ng01",
+      "k": 10,
+      "mode": "gpu",
+      "regime": "cold",
+      "rep": 0
+    },
+    {
+      "dump_sha256": "838a447e0b92e13e42f7f69a84fd536d5d46d26463d3f4cc7c688475878fe0de",
+      "frame": "lidar_ng01",
+      "k": 10,
+      "mode": "gpu_coop",
+      "regime": "cold",
+      "rep": 0
+    },
+    {
+      "dump_sha256": "81f89995eaccb497cfe92abb81213bebd0d4ce5076210570d86aa9456cf7ff2e",
+      "frame": "lidar_ng02",
+      "k": 10,
+      "mode": "cpu",
+      "regime": "cold",
+      "rep": 0
+    },
+    {
+      "dump_sha256": "81f89995eaccb497cfe92abb81213bebd0d4ce5076210570d86aa9456cf7ff2e",
+      "frame": "lidar_ng02",
+      "k": 10,
+      "mode": "gpu",
+      "regime": "cold",
+      "rep": 0
+    },
+    {
+      "dump_sha256": "81f89995eaccb497cfe92abb81213bebd0d4ce5076210570d86aa9456cf7ff2e",
+      "frame": "lidar_ng02",
+      "k": 10,
+      "mode": "gpu_coop",
+      "regime": "cold",
+      "rep": 0
+    },
+    {
+      "dump_sha256": "61a4245b91d9a4fdad012f0a2e26a63c3e48db1d46a180db756f2c4e4aa77295",
+      "frame": "lidar_ng00",
+      "k": 10,
+      "mode": "gpu",
+      "regime": "cold",
+      "rep": 1
+    },
+    {
+      "dump_sha256": "61a4245b91d9a4fdad012f0a2e26a63c3e48db1d46a180db756f2c4e4aa77295",
+      "frame": "lidar_ng00",
+      "k": 10,
+      "mode": "gpu_coop",
+      "regime": "cold",
+      "rep": 1
+    },
+    {
+      "dump_sha256": "61a4245b91d9a4fdad012f0a2e26a63c3e48db1d46a180db756f2c4e4aa77295",
+      "frame": "lidar_ng00",
+      "k": 10,
+      "mode": "cpu",
+      "regime": "cold",
+      "rep": 1
+    },
+    {
+      "dump_sha256": "838a447e0b92e13e42f7f69a84fd536d5d46d26463d3f4cc7c688475878fe0de",
+      "frame": "lidar_ng01",
+      "k": 10,
+      "mode": "gpu",
+      "regime": "cold",
+      "rep": 1
+    },
+    {
+      "dump_sha256": "838a447e0b92e13e42f7f69a84fd536d5d46d26463d3f4cc7c688475878fe0de",
+      "frame": "lidar_ng01",
+      "k": 10,
+      "mode": "gpu_coop",
+      "regime": "cold",
+      "rep": 1
+    },
+    {
+      "dump_sha256": "838a447e0b92e13e42f7f69a84fd536d5d46d26463d3f4cc7c688475878fe0de",
+      "frame": "lidar_ng01",
+      "k": 10,
+      "mode": "cpu",
+      "regime": "cold",
+      "rep": 1
+    },
+    {
+      "dump_sha256": "81f89995eaccb497cfe92abb81213bebd0d4ce5076210570d86aa9456cf7ff2e",
+      "frame": "lidar_ng02",
+      "k": 10,
+      "mode": "gpu",
+      "regime": "cold",
+      "rep": 1
+    },
+    {
+      "dump_sha256": "81f89995eaccb497cfe92abb81213bebd0d4ce5076210570d86aa9456cf7ff2e",
+      "frame": "lidar_ng02",
+      "k": 10,
+      "mode": "gpu_coop",
+      "regime": "cold",
+      "rep": 1
+    },
+    {
+      "dump_sha256": "81f89995eaccb497cfe92abb81213bebd0d4ce5076210570d86aa9456cf7ff2e",
+      "frame": "lidar_ng02",
+      "k": 10,
+      "mode": "cpu",
+      "regime": "cold",
+      "rep": 1
+    },
+    {
+      "dump_sha256": "61a4245b91d9a4fdad012f0a2e26a63c3e48db1d46a180db756f2c4e4aa77295",
+      "frame": "lidar_ng00",
+      "k": 10,
+      "mode": "gpu_coop",
+      "regime": "cold",
+      "rep": 2
+    },
+    {
+      "dump_sha256": "61a4245b91d9a4fdad012f0a2e26a63c3e48db1d46a180db756f2c4e4aa77295",
+      "frame": "lidar_ng00",
+      "k": 10,
+      "mode": "cpu",
+      "regime": "cold",
+      "rep": 2
+    },
+    {
+      "dump_sha256": "61a4245b91d9a4fdad012f0a2e26a63c3e48db1d46a180db756f2c4e4aa77295",
+      "frame": "lidar_ng00",
+      "k": 10,
+      "mode": "gpu",
+      "regime": "cold",
+      "rep": 2
+    },
+    {
+      "dump_sha256": "838a447e0b92e13e42f7f69a84fd536d5d46d26463d3f4cc7c688475878fe0de",
+      "frame": "lidar_ng01",
+      "k": 10,
+      "mode": "gpu_coop",
+      "regime": "cold",
+      "rep": 2
+    },
+    {
+      "dump_sha256": "838a447e0b92e13e42f7f69a84fd536d5d46d26463d3f4cc7c688475878fe0de",
+      "frame": "lidar_ng01",
+      "k": 10,
+      "mode": "cpu",
+      "regime": "cold",
+      "rep": 2
+    },
+    {
+      "dump_sha256": "838a447e0b92e13e42f7f69a84fd536d5d46d26463d3f4cc7c688475878fe0de",
+      "frame": "lidar_ng01",
+      "k": 10,
+      "mode": "gpu",
+      "regime": "cold",
+      "rep": 2
+    },
+    {
+      "dump_sha256": "81f89995eaccb497cfe92abb81213bebd0d4ce5076210570d86aa9456cf7ff2e",
+      "frame": "lidar_ng02",
+      "k": 10,
+      "mode": "gpu_coop",
+      "regime": "cold",
+      "rep": 2
+    },
+    {
+      "dump_sha256": "81f89995eaccb497cfe92abb81213bebd0d4ce5076210570d86aa9456cf7ff2e",
+      "frame": "lidar_ng02",
+      "k": 10,
+      "mode": "cpu",
+      "regime": "cold",
+      "rep": 2
+    },
+    {
+      "dump_sha256": "81f89995eaccb497cfe92abb81213bebd0d4ce5076210570d86aa9456cf7ff2e",
+      "frame": "lidar_ng02",
+      "k": 10,
+      "mode": "gpu",
+      "regime": "cold",
+      "rep": 2
+    },
+    {
+      "dump_sha256": "61a4245b91d9a4fdad012f0a2e26a63c3e48db1d46a180db756f2c4e4aa77295",
+      "frame": "lidar_ng00",
+      "k": 10,
+      "mode": "cpu",
+      "regime": "warm",
+      "rep": null
+    },
+    {
+      "dump_sha256": "61a4245b91d9a4fdad012f0a2e26a63c3e48db1d46a180db756f2c4e4aa77295",
+      "frame": "lidar_ng00",
+      "k": 10,
+      "mode": "gpu",
+      "regime": "warm",
+      "rep": null
+    },
+    {
+      "dump_sha256": "61a4245b91d9a4fdad012f0a2e26a63c3e48db1d46a180db756f2c4e4aa77295",
+      "frame": "lidar_ng00",
+      "k": 10,
+      "mode": "gpu_coop",
+      "regime": "warm",
+      "rep": null
+    },
+    {
+      "dump_sha256": "838a447e0b92e13e42f7f69a84fd536d5d46d26463d3f4cc7c688475878fe0de",
+      "frame": "lidar_ng01",
+      "k": 10,
+      "mode": "cpu",
+      "regime": "warm",
+      "rep": null
+    },
+    {
+      "dump_sha256": "838a447e0b92e13e42f7f69a84fd536d5d46d26463d3f4cc7c688475878fe0de",
+      "frame": "lidar_ng01",
+      "k": 10,
+      "mode": "gpu",
+      "regime": "warm",
+      "rep": null
+    },
+    {
+      "dump_sha256": "838a447e0b92e13e42f7f69a84fd536d5d46d26463d3f4cc7c688475878fe0de",
+      "frame": "lidar_ng01",
+      "k": 10,
+      "mode": "gpu_coop",
+      "regime": "warm",
+      "rep": null
+    },
+    {
+      "dump_sha256": "81f89995eaccb497cfe92abb81213bebd0d4ce5076210570d86aa9456cf7ff2e",
+      "frame": "lidar_ng02",
+      "k": 10,
+      "mode": "cpu",
+      "regime": "warm",
+      "rep": null
+    },
+    {
+      "dump_sha256": "81f89995eaccb497cfe92abb81213bebd0d4ce5076210570d86aa9456cf7ff2e",
+      "frame": "lidar_ng02",
+      "k": 10,
+      "mode": "gpu",
+      "regime": "warm",
+      "rep": null
+    },
+    {
+      "dump_sha256": "81f89995eaccb497cfe92abb81213bebd0d4ce5076210570d86aa9456cf7ff2e",
+      "frame": "lidar_ng02",
+      "k": 10,
+      "mode": "gpu_coop",
+      "regime": "warm",
+      "rep": null
+    }
+  ],
+  "receipt_sha256": "e2f2edd0c1d2b6ec609f1b32478799e3e6b587c012d44a79003a0233bca6a8f9",
+  "receipt_status": "completed",
+  "results": [
+    {
+      "bench_sha256": "6cac3eadcc495e42eeb9f3a83bbddab70461c7896c0090538677c6c0979214e5",
+      "canonical": {
+        "lidar_ng00": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+        "lidar_ng01": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+        "lidar_ng02": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207"
+      },
+      "cold_processes": 45,
+      "k": 5,
+      "leaf": 16,
+      "ledger_equality_evidence": "Pinned judge checks complete catalogue_work for every retained dump; refusal list empty. Individual work lines are not retained.",
+      "ledger_reference_sha256": "0647f272fbc417ea6df67e1337bb0723ca9900a4f0a03d907036e663e55043b3",
+      "report_sha256": "7ad30845a759cca2e38c92da698d7115e18afdf072377c6c85b89f58913c7254",
+      "scope": "a froid : dump et registre de chaque prise ; a chaud : passes 1..P toutes reussies, dump et registre de la derniere passe P seulement (les passes 1..P-1 ne serialisent rien)",
+      "verdict": "conforme",
+      "warm_passes_per_process": 12,
+      "warm_processes": 9
+    },
+    {
+      "bench_sha256": "6cac3eadcc495e42eeb9f3a83bbddab70461c7896c0090538677c6c0979214e5",
+      "canonical": {
+        "lidar_ng00": "61a4245b91d9a4fdad012f0a2e26a63c3e48db1d46a180db756f2c4e4aa77295",
+        "lidar_ng01": "838a447e0b92e13e42f7f69a84fd536d5d46d26463d3f4cc7c688475878fe0de",
+        "lidar_ng02": "81f89995eaccb497cfe92abb81213bebd0d4ce5076210570d86aa9456cf7ff2e"
+      },
+      "cold_processes": 27,
+      "k": 10,
+      "leaf": 24,
+      "ledger_equality_evidence": "Pinned judge checks complete catalogue_work for every retained dump; refusal list empty. Individual work lines are not retained.",
+      "ledger_reference_sha256": "765c389ab029f5ca64ed198695edc8f79f9dae54901db65960747ec960acb404",
+      "report_sha256": "28096901a078b46cc639f46e969e84a00b6f75018e0ade8c1bf4bf3b2eb1993e",
+      "scope": "a froid : dump et registre de chaque prise ; a chaud : passes 1..P toutes reussies, dump et registre de la derniere passe P seulement (les passes 1..P-1 ne serialisent rien)",
+      "verdict": "conforme",
+      "warm_passes_per_process": 8,
+      "warm_processes": 9
+    }
+  ],
+  "results_manifest_entries": 42,
+  "results_manifest_sha256": "2ac11517fe911084016594c67984302ed2b3303650c3a563bb9889cbfa8b0356",
+  "schema": "audit_g4_coop3_metadata_v1",
+  "session": "v11.20261006.claudecoop3",
+  "source_change_scope": "Only src/catalogue/leaf_device.hpp changed versus ee3 in product source; explicit extend loop restored",
+  "source_equality": {
+    "equal_to_git": true,
+    "files": 639,
+    "manifest_sha256": "bc5d132fdbaaf93305c529b7169be32c2c52f291442353b6ab3578a3461f1495"
+  },
+  "source_pin": "9eee2ed4bcef1e960cdf2456012b84416854dc20",
+  "totals": {
+    "canonical_dumps_checked": 90,
+    "constructed_lidar_passes": 252,
+    "intermediate_passes_without_dump_or_ledger": 162,
+    "lidar_processes": 90
+  },
+  "warm_raw_ranges": [
+    {
+      "frame": "lidar_ng00",
+      "k": 5,
+      "leaf": 16,
+      "mode": "cpu",
+      "passes": 11,
+      "raw_ranges_ns": {
+        "batch_count_ns": [
+          0,
+          0
+        ],
+        "batch_executor_ns": [
+          0,
+          0
+        ],
+        "batch_fill_ns": [
+          0,
+          0
+        ],
+        "domain_ns": [
+          206487015,
+          210471058
+        ],
+        "forest_ns": [
+          144670252,
+          171928331
+        ],
+        "wall_ns": [
+          352274428,
+          379814898
+        ]
+      },
+      "scope": "retained raw passes 2..P; no median",
+      "workers": 48
+    },
+    {
+      "frame": "lidar_ng00",
+      "k": 5,
+      "leaf": 16,
+      "mode": "gpu",
+      "passes": 11,
+      "raw_ranges_ns": {
+        "batch_count_ns": [
+          35284195,
+          35559505
+        ],
+        "batch_executor_ns": [
+          58477301,
+          58752131
+        ],
+        "batch_fill_ns": [
+          17426083,
+          17451952
+        ],
+        "domain_ns": [
+          218882144,
+          224257908
+        ],
+        "forest_ns": [
+          150026396,
+          175194443
+        ],
+        "wall_ns": [
+          373065203,
+          396683989
+        ]
+      },
+      "scope": "retained raw passes 2..P; no median",
+      "workers": 48
+    },
+    {
+      "frame": "lidar_ng00",
+      "k": 5,
+      "leaf": 16,
+      "mode": "gpu_coop",
+      "passes": 11,
+      "raw_ranges_ns": {
+        "batch_count_ns": [
+          69090038,
+          69275829
+        ],
+        "batch_executor_ns": [
+          77204314,
+          77492114
+        ],
+        "batch_fill_ns": [
+          2404782,
+          2430082
+        ],
+        "domain_ns": [
+          235573196,
+          238108697
+        ],
+        "forest_ns": [
+          139609489,
+          163775436
+        ],
+        "wall_ns": [
+          376914965,
+          401650823
+        ]
+      },
+      "scope": "retained raw passes 2..P; no median",
+      "workers": 48
+    },
+    {
+      "frame": "lidar_ng01",
+      "k": 5,
+      "leaf": 16,
+      "mode": "cpu",
+      "passes": 11,
+      "raw_ranges_ns": {
+        "batch_count_ns": [
+          0,
+          0
+        ],
+        "batch_executor_ns": [
+          0,
+          0
+        ],
+        "batch_fill_ns": [
+          0,
+          0
+        ],
+        "domain_ns": [
+          167897468,
+          170766330
+        ],
+        "forest_ns": [
+          117732563,
+          139773218
+        ],
+        "wall_ns": [
+          285898892,
+          310312668
+        ]
+      },
+      "scope": "retained raw passes 2..P; no median",
+      "workers": 48
+    },
+    {
+      "frame": "lidar_ng01",
+      "k": 5,
+      "leaf": 16,
+      "mode": "gpu",
+      "passes": 11,
+      "raw_ranges_ns": {
+        "batch_count_ns": [
+          28992421,
+          29465990
+        ],
+        "batch_executor_ns": [
+          53559807,
+          54013728
+        ],
+        "batch_fill_ns": [
+          19665104,
+          19706654
+        ],
+        "domain_ns": [
+          186526251,
+          192423236
+        ],
+        "forest_ns": [
+          118577303,
+          140710369
+        ],
+        "wall_ns": [
+          308796378,
+          332190833
+        ]
+      },
+      "scope": "retained raw passes 2..P; no median",
+      "workers": 48
+    },
+    {
+      "frame": "lidar_ng01",
+      "k": 5,
+      "leaf": 16,
+      "mode": "gpu_coop",
+      "passes": 11,
+      "raw_ranges_ns": {
+        "batch_count_ns": [
+          54436514,
+          54568532
+        ],
+        "batch_executor_ns": [
+          61485547,
+          61859495
+        ],
+        "batch_fill_ns": [
+          2628659,
+          2647869
+        ],
+        "domain_ns": [
+          194737329,
+          196852802
+        ],
+        "forest_ns": [
+          115740452,
+          136645565
+        ],
+        "wall_ns": [
+          311229925,
+          333766695
+        ]
+      },
+      "scope": "retained raw passes 2..P; no median",
+      "workers": 48
+    },
+    {
+      "frame": "lidar_ng02",
+      "k": 5,
+      "leaf": 16,
+      "mode": "cpu",
+      "passes": 11,
+      "raw_ranges_ns": {
+        "batch_count_ns": [
+          0,
+          0
+        ],
+        "batch_executor_ns": [
+          0,
+          0
+        ],
+        "batch_fill_ns": [
+          0,
+          0
+        ],
+        "domain_ns": [
+          201214627,
+          204223624
+        ],
+        "forest_ns": [
+          134587551,
+          168099377
+        ],
+        "wall_ns": [
+          337353865,
+          372772088
+        ]
+      },
+      "scope": "retained raw passes 2..P; no median",
+      "workers": 48
+    },
+    {
+      "frame": "lidar_ng02",
+      "k": 5,
+      "leaf": 16,
+      "mode": "gpu",
+      "passes": 11,
+      "raw_ranges_ns": {
+        "batch_count_ns": [
+          33393794,
+          33939644
+        ],
+        "batch_executor_ns": [
+          50811420,
+          52094540
+        ],
+        "batch_fill_ns": [
+          12581837,
+          12632988
+        ],
+        "domain_ns": [
+          205753870,
+          211974179
+        ],
+        "forest_ns": [
+          144401292,
+          162542769
+        ],
+        "wall_ns": [
+          356023651,
+          371813129
+        ]
+      },
+      "scope": "retained raw passes 2..P; no median",
+      "workers": 48
+    },
+    {
+      "frame": "lidar_ng02",
+      "k": 5,
+      "leaf": 16,
+      "mode": "gpu_coop",
+      "passes": 11,
+      "raw_ranges_ns": {
+        "batch_count_ns": [
+          62806677,
+          62944858
+        ],
+        "batch_executor_ns": [
+          70111146,
+          70788786
+        ],
+        "batch_fill_ns": [
+          2563000,
+          2576360
+        ],
+        "domain_ns": [
+          225091336,
+          233583925
+        ],
+        "forest_ns": [
+          136698623,
+          167118358
+        ],
+        "wall_ns": [
+          367920939,
+          398861613
+        ]
+      },
+      "scope": "retained raw passes 2..P; no median",
+      "workers": 48
+    },
+    {
+      "frame": "lidar_ng00",
+      "k": 10,
+      "leaf": 24,
+      "mode": "cpu",
+      "passes": 7,
+      "raw_ranges_ns": {
+        "batch_count_ns": [
+          0,
+          0
+        ],
+        "batch_executor_ns": [
+          0,
+          0
+        ],
+        "batch_fill_ns": [
+          0,
+          0
+        ],
+        "domain_ns": [
+          824316457,
+          828483056
+        ],
+        "forest_ns": [
+          1612290877,
+          1674459665
+        ],
+        "wall_ns": [
+          2437213911,
+          2503282811
+        ]
+      },
+      "scope": "retained raw passes 2..P; no median",
+      "workers": 48
+    },
+    {
+      "frame": "lidar_ng00",
+      "k": 10,
+      "leaf": 24,
+      "mode": "gpu",
+      "passes": 7,
+      "raw_ranges_ns": {
+        "batch_count_ns": [
+          216227797,
+          217954775
+        ],
+        "batch_executor_ns": [
+          340784055,
+          342875674
+        ],
+        "batch_fill_ns": [
+          111345663,
+          111785512
+        ],
+        "domain_ns": [
+          697589455,
+          705841294
+        ],
+        "forest_ns": [
+          1610634838,
+          1694662546
+        ],
+        "wall_ns": [
+          2316202532,
+          2400844220
+        ]
+      },
+      "scope": "retained raw passes 2..P; no median",
+      "workers": 48
+    },
+    {
+      "frame": "lidar_ng00",
+      "k": 10,
+      "leaf": 24,
+      "mode": "gpu_coop",
+      "passes": 7,
+      "raw_ranges_ns": {
+        "batch_count_ns": [
+          362482340,
+          363016369
+        ],
+        "batch_executor_ns": [
+          399187790,
+          400241611
+        ],
+        "batch_fill_ns": [
+          23649434,
+          24361984
+        ],
+        "domain_ns": [
+          755211181,
+          766663259
+        ],
+        "forest_ns": [
+          1605517829,
+          1682696429
+        ],
+        "wall_ns": [
+          2361060880,
+          2449691947
+        ]
+      },
+      "scope": "retained raw passes 2..P; no median",
+      "workers": 48
+    },
+    {
+      "frame": "lidar_ng01",
+      "k": 10,
+      "leaf": 24,
+      "mode": "cpu",
+      "passes": 7,
+      "raw_ranges_ns": {
+        "batch_count_ns": [
+          0,
+          0
+        ],
+        "batch_executor_ns": [
+          0,
+          0
+        ],
+        "batch_fill_ns": [
+          0,
+          0
+        ],
+        "domain_ns": [
+          654127439,
+          660849845
+        ],
+        "forest_ns": [
+          1159574194,
+          1193079737
+        ],
+        "wall_ns": [
+          1818919169,
+          1851276873
+        ]
+      },
+      "scope": "retained raw passes 2..P; no median",
+      "workers": 48
+    },
+    {
+      "frame": "lidar_ng01",
+      "k": 10,
+      "leaf": 24,
+      "mode": "gpu",
+      "passes": 7,
+      "raw_ranges_ns": {
+        "batch_count_ns": [
+          174543245,
+          176802414
+        ],
+        "batch_executor_ns": [
+          300885439,
+          303218949
+        ],
+        "batch_fill_ns": [
+          116174226,
+          116532326
+        ],
+        "domain_ns": [
+          586089580,
+          592438429
+        ],
+        "forest_ns": [
+          1149158776,
+          1189630887
+        ],
+        "wall_ns": [
+          1741281505,
+          1777863697
+        ]
+      },
+      "scope": "retained raw passes 2..P; no median",
+      "workers": 48
+    },
+    {
+      "frame": "lidar_ng01",
+      "k": 10,
+      "leaf": 24,
+      "mode": "gpu_coop",
+      "passes": 7,
+      "raw_ranges_ns": {
+        "batch_count_ns": [
+          278005073,
+          278548583
+        ],
+        "batch_executor_ns": [
+          313660946,
+          314898576
+        ],
+        "batch_fill_ns": [
+          24894745,
+          25845684
+        ],
+        "domain_ns": [
+          599809748,
+          609826486
+        ],
+        "forest_ns": [
+          1170043971,
+          1185857478
+        ],
+        "wall_ns": [
+          1774549658,
+          1793310045
+        ]
+      },
+      "scope": "retained raw passes 2..P; no median",
+      "workers": 48
+    },
+    {
+      "frame": "lidar_ng02",
+      "k": 10,
+      "leaf": 24,
+      "mode": "cpu",
+      "passes": 7,
+      "raw_ranges_ns": {
+        "batch_count_ns": [
+          0,
+          0
+        ],
+        "batch_executor_ns": [
+          0,
+          0
+        ],
+        "batch_fill_ns": [
+          0,
+          0
+        ],
+        "domain_ns": [
+          771671433,
+          783956140
+        ],
+        "forest_ns": [
+          1284490128,
+          1335501585
+        ],
+        "wall_ns": [
+          2062444160,
+          2117076944
+        ]
+      },
+      "scope": "retained raw passes 2..P; no median",
+      "workers": 48
+    },
+    {
+      "frame": "lidar_ng02",
+      "k": 10,
+      "leaf": 24,
+      "mode": "gpu",
+      "passes": 7,
+      "raw_ranges_ns": {
+        "batch_count_ns": [
+          202228601,
+          203826920
+        ],
+        "batch_executor_ns": [
+          320076412,
+          321617112
+        ],
+        "batch_fill_ns": [
+          104635744,
+          105564094
+        ],
+        "domain_ns": [
+          669003277,
+          680108614
+        ],
+        "forest_ns": [
+          1282109567,
+          1311146510
+        ],
+        "wall_ns": [
+          1958132932,
+          1989494085
+        ]
+      },
+      "scope": "retained raw passes 2..P; no median",
+      "workers": 48
+    },
+    {
+      "frame": "lidar_ng02",
+      "k": 10,
+      "leaf": 24,
+      "mode": "gpu_coop",
+      "passes": 7,
+      "raw_ranges_ns": {
+        "batch_count_ns": [
+          314633593,
+          315270333
+        ],
+        "batch_executor_ns": [
+          353322144,
+          354666004
+        ],
+        "batch_fill_ns": [
+          26707903,
+          27379894
+        ],
+        "domain_ns": [
+          693175361,
+          706934027
+        ],
+        "forest_ns": [
+          1271984280,
+          1317864869
+        ],
+        "wall_ns": [
+          1965970200,
+          2024733226
+        ]
+      },
+      "scope": "retained raw passes 2..P; no median",
+      "workers": 48
+    }
+  ],
+  "whole_frames_metadata": [
+    {
+      "frame": "lidar_ng00",
+      "ids_sha256": "c73a41965f6f2e1042b5f3ba876d12ae0811b7f24aa73c886aa07830974e33c6",
+      "sites": 39885,
+      "xyz_sha256": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf"
+    },
+    {
+      "frame": "lidar_ng01",
+      "ids_sha256": "bb699c2511a87618813a32657399539fe90e8f1e4f1187656ac88c03f2fee6a4",
+      "sites": 35551,
+      "xyz_sha256": "ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f"
+    },
+    {
+      "frame": "lidar_ng02",
+      "ids_sha256": "121e76f3ef1fcedb05cb65da9a95bfb84fe4b8305076a7485483fff113d128cc",
+      "sites": 45845,
+      "xyz_sha256": "a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af"
+    }
+  ],
+  "worker_exit_code": 0,
+  "worker_plan_sha256": "ced8868ab46d62482ad9b46dbff0bebc23a146c1b442bdc40e7d9f32dc1d8e79"
+}

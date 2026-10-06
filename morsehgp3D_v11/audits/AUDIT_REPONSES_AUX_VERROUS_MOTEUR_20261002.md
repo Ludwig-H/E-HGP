@@ -37,12 +37,29 @@ remplace pas cette sélection. Pour K>1, une boule peut représenter plusieurs
 arêtes entre branches : dédupliquer son S* dans la sortie ne signifie pas
 qu'une boule équivaut à une seule arête.
 
+Le périmètre précis est le **Kruskal compressé du constructeur HGP**, sur
+les composantes ouvertes. `forest_plateau.cpp` réunit déjà toutes les
+traces de chaque boule ; `prior` les relève et les déduplique. Au moins
+une union réussit exactement lorsque ces branches occupent au moins deux
+racines courantes, quel que soit le choix d'étoile. Par induction dans
+l'ordre BallIdx, la correction retrouve les boules gagnantes de ce
+constructeur. Elle ne publie pas les arêtes d'un MST explicite sur toutes
+les K-parties de Γ_K : les sommets ajoutés sans fusion et les liaisons hors
+fenêtre restent traités par FULL.
+
 Porte minimale G4 : ce triangle doit publier deux supports, avec identité
 W1/W48 et le même arbre canonique. Ajouter une permutation d'entrée et une
 cellule à plus de deux branches. Un mutant revenant au seul filtre de rôle
 doit échouer sur le triangle. Le témoin est établi par géométrie rationnelle
 et lecture du WIP, sans prétendre avoir exécuté ce nouveau binaire.
 [Preuve figée, 30 contrôles et sources](../receipts/audit_supports_mst_20261006/mathematics/REPORT.md).
+
+Dans le lecteur v2, la seule réunion des `prior` égale aux enfants ne
+contrôle pas cette propriété. Contrôler aussi qu'à chaque boule publiée
+au moins deux racines restent distinctes avant ses unions, puis que tous
+les enfants sont connectés à la fin. Ce contrôle détecte le cycle du
+triangle sans réénumérer Q_b. La conformité au choix canonique parmi les
+boules omises reste du ressort du différentiel avec le catalogue complet.
 
 ## Feuille coherente : reponse a la section Q du 6 octobre
 

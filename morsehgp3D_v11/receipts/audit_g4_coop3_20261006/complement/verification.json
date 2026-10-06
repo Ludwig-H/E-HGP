@@ -1,0 +1,14 @@
+{
+  "schema": "audit_coop3_root_review_v1",
+  "normal_and_optimized_exit_code": 0,
+  "normal_and_optimized_stdout_identical": true,
+  "stderr_empty": true,
+  "stdout_sha256": "61c9bb47801e2d96fd8390929b084fd7d56e0bc6b4c2862ba27e78f8faceefd3",
+  "adjacent_manifest_sha256": "912bfc1b7d25677b524f816e9793b9a7e5a419709dfcef6d0b3d3f2a7682a231",
+  "source_pin": "9eee2ed4bcef1e960cdf2456012b84416854dc20",
+  "judge_sha256": "108203630334697578b829a549973824c9daa7cd90439dd18a35759e51e381dd",
+  "retained_dump_sha256_fields": 90,
+  "retained_raw_dumps": 0,
+  "native_runs": 0,
+  "cloud_actions": 0
+}

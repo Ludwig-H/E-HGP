@@ -1,0 +1,60 @@
+{
+  "base_pin": "9eee2ed4bcef1e960cdf2456012b84416854dc20",
+  "captured_reader_sha256": "4d05bf53fb272bc2101bdd8069bab86ce28be6fa2451d852d33a6403a3248896",
+  "cases": [
+    {
+      "actual_version": 2,
+      "before": {
+        "accepted": true,
+        "declared_version": 2,
+        "decoded_version": 2
+      },
+      "case": "honest_v2",
+      "declared_version": 2,
+      "file_bytes": 200,
+      "file_sha256": "ad583fff9a8d0601f95ec26e1cc7d2a13ec2b5bedadf7749b1cb25de5637d2a0",
+      "proposed": {
+        "accepted": true,
+        "declared_version": 2,
+        "decoded_version": 2
+      }
+    },
+    {
+      "actual_version": 1,
+      "before": {
+        "accepted": true,
+        "declared_version": 2,
+        "decoded_version": 1
+      },
+      "case": "v1_binary_false_v2_manifest",
+      "declared_version": 2,
+      "file_bytes": 200,
+      "file_sha256": "51a9d55fe676acd133df067e3d627737a0f5738740376901db9d234f0c7ddd62",
+      "proposed": {
+        "accepted": false,
+        "reason": "MHGP11SP : version du fichier et du manifeste"
+      }
+    },
+    {
+      "actual_version": 2,
+      "before": {
+        "accepted": false,
+        "reason": "manifeste : fichier supports"
+      },
+      "case": "same_v2_binary_false_v1_manifest",
+      "declared_version": 1,
+      "file_bytes": 200,
+      "file_sha256": "ad583fff9a8d0601f95ec26e1cc7d2a13ec2b5bedadf7749b1cb25de5637d2a0",
+      "proposed": {
+        "accepted": false,
+        "reason": "manifeste : fichier supports"
+      }
+    }
+  ],
+  "cloud_actions": 0,
+  "compatibility_policy_changed": false,
+  "limitation": "False v1 declaration for a v2 file remains refused by the existing manifest version policy before the new guard; the new equality guard causally rejects a v1 file falsely declared v2.",
+  "native_runs": 0,
+  "proposed_reader_sha256": "860f8dffcbf22ac7496809a676538dd070c00eb61589f590b0502ca0c6a92409",
+  "schema": "audit_mhgp11sp_version_equality_fix_replay_v1"
+}

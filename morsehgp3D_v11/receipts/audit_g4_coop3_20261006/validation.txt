@@ -1,0 +1,2 @@
+normal exit0; optimized exit0
+coop3 closed metadata PASS: Git source, 2 commands, 90 canonical dumps, 252 passes; 162 intermediate passes unjudged; native0 cloud0

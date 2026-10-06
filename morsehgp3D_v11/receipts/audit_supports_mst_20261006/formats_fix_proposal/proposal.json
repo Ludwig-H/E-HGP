@@ -1,0 +1,12 @@
+{
+  "base_pin": "9eee2ed4bcef1e960cdf2456012b84416854dc20",
+  "captured_reader_sha256": "4d05bf53fb272bc2101bdd8069bab86ce28be6fa2451d852d33a6403a3248896",
+  "dependency": "../formats/sources/",
+  "needle": "        sp = read_supports(handle.read(), bits)\n        need(sp.k == manifest['k'], 'MHGP11SP : K du fichier et du manifeste')\n",
+  "patch_sha256": "8a6303780bcf0630641cc070c6d079c7fedb20957bab203eb733fdaf26a02899",
+  "proposed_reader_sha256": "860f8dffcbf22ac7496809a676538dd070c00eb61589f590b0502ca0c6a92409",
+  "replacement": "        sp = read_supports(handle.read(), bits)\n        need(sp.version == entry['version'], 'MHGP11SP : version du fichier et du manifeste')\n        need(sp.k == manifest['k'], 'MHGP11SP : K du fichier et du manifeste')\n",
+  "schema": "audit_mhgp11sp_version_fix_proposal_v1",
+  "scope": "Only equality of decoded/file-declared versions; read_manifest version acceptance unchanged.",
+  "source_meta_sha256": "e7acecbf3ced56c6978ecde0929902a6c9735d32011ca82972d17beb3e894511"
+}

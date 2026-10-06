@@ -1,0 +1,10 @@
+--- a/morsehgp3D_v11/bench/mhgp11_formats.py
++++ b/morsehgp3D_v11/bench/mhgp11_formats.py
+@@ -267,6 +267,7 @@
+     if manifest['output'] == 'supports':
+         with open(file_path, 'rb') as handle:
+             sp = read_supports(handle.read(), bits)
++        need(sp.version == entry['version'], 'MHGP11SP : version du fichier et du manifeste')
+         need(sp.k == manifest['k'], 'MHGP11SP : K du fichier et du manifeste')
+         recount = sp.manifest_counts()
+         need(recount == counts, 'manifeste : comptes publies %r, recomptes depuis MHGP11SP %r' % (counts, recount))

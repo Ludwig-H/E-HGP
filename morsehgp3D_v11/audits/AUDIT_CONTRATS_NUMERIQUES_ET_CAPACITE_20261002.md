@@ -35,8 +35,42 @@ annoncer clairement sa suppression. Dans les deux cas, l'égalité des
 versions est nécessaire. Les empreintes et portes v1 historiques restent
 attachées à leur ancienne sortie ; elles ne qualifient pas SPv2.
 [Reproduction figée et sources du lecteur](../receipts/audit_supports_mst_20261006/formats/README.md).
+Le [correctif d'une ligne](../receipts/audit_supports_mst_20261006/formats_fix_proposal/version_equality.patch)
+est fourni, applicable au WIP relu. Le lecteur ainsi modifié accepte un
+dossier v2 honnête et refuse causalement le binaire v1 déclaré v2, dans
+les rejeux Python normal/−O. Sa politique de rétrolecture reste inchangée.
+Patch proposé dans le reçu, sans modification du worktree développeur.
 
-## Coop1 relu ; suite proposée : feuille cohérente
+## Coop3 : retour du fill un fil après restauration du parcours
+
+Session close sur **9eee2ed4b**, qui rétablit le parcours `extend` en ligne.
+Le paquet de 639 fichiers correspond à Git ; les 90 empreintes de sorties
+canoniques conservées sont conformes. Les dumps bruts ont été supprimés
+par le banc. Les 252 passes sont terminées, dont 162 intermédiaires sans
+empreinte propre. Le plan
+mesure les voies CPU, GPU un fil et GPU par paires, W48, sur les mêmes trois
+trames sans sol entières K5/16 et K10/24. Aucun nouveau CTest, mutant,
+sanitizer ni profil Nsight dans ce lot.
+[Reçu indépendant et limites](../receipts/audit_g4_coop3_20261006/README.md).
+La [précision de portée](../receipts/audit_g4_coop3_20261006/complement/README.md)
+corrige le terme « dumps conservés » du reçu : les empreintes sont rejugées,
+sans nouvelle lecture des sorties natives complètes.
+
+Dernières passes chaudes GPU un fil ; temps en ms, trames ng00/01/02 :
+
+| K | Fill | Exécuteur du lot |
+| --- | --- | --- |
+| 5 | 17,438 / 19,665 / 12,605 | 58,685 / 53,813 / 51,877 |
+| 10 | 111,697 / 116,204 / 105,564 | 341,822 / 301,348 / 321,199 |
+
+Sur les mêmes dernières passes K10 de coop2, le fill valait
+232,102 / 238,811 / 201,161 ms. La restauration fait donc reculer la
+régression observée après le refactoring. Ce sont des prises individuelles
+comparables, pas une garantie de temps ; les intervalles conservés figurent
+dans le reçu. **Le contrat global de 100 ms reste ouvert.** Cette mesure ne
+qualifie pas le nouvel export MST ni une future feuille cohérente.
+
+## Historique coop1/coop2 ; préparation de la feuille cohérente
 
 **La session coop1 est close et conforme sur son périmètre fonctionnel.**
 Source **c3df81805**, arrêt ciblé certifié à **09:26:34.814 UTC**, paquet

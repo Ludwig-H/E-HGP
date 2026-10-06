@@ -34,6 +34,16 @@ concurrente de refus et l'attente impossible en u18 restent à corriger :
 Le [patch de placement du fill](../receipts/proposition_fill_cta_20261006/README.md)
 reste une proposition facultative archivée, sans constituer un préalable.
 
+**Coop3 : la régression du fill un fil recule après restauration en 9eee.**
+Les dernières passes chaudes des trois trames K10 donnent **106–116 ms**
+pour ce fill, contre 201–239 ms dans coop2, à paramètres identiques.
+Les 90 empreintes de sorties canoniques conservées concordent ; les dumps
+bruts ont été supprimés par le banc. Les 162 passes intermédiaires restent
+sans empreinte individuelle. Aucun nouveau sanitizer ni mutant dans cette session.
+Le contrat global de 100 ms reste ouvert.
+[Reçu indépendant coop3](../receipts/audit_g4_coop3_20261006/README.md),
+[précision sur les pièces conservées](../receipts/audit_g4_coop3_20261006/complement/README.md).
+
 **L4 clos et retiré en 830473218.** Les 90 processus, 252 passes et
 90 dumps conservés sont conformes au périmètre du banc ; les 162 passes
 intermédiaires ne portent pas de dump propre. Le recouvrement en seize
