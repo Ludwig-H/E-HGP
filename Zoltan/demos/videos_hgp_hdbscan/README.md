@@ -127,8 +127,9 @@ Les vidéos `*_supports_*.mp4` montrent l'arbre couvrant d'ordre k de Morse HGP 
 `mhgp11 --sortie=supports` depuis le 6 octobre 2026 (format `MHGP11SP` version 2,
 [docs/SORTIES.md](../../../morsehgp3D_v11/docs/SORTIES.md) § 6) : ses arêtes de Kruskal, les naissances et les fusions
 de l'arbre d'ordre k, chacune avec son seul support S\*, arête (q2), triangle (q3) ou tétraèdre (q4). Les liaisons
-internes (boules qui relient des parties d'un même nœud) n'y sont plus. Un nœud est réalisé par les supports des boules
-de son sous-arbre.
+internes (boules qui relient des parties d'un même nœud) n'y sont plus, et sur un plateau (plusieurs fusions au même
+niveau) une fusion n'est gardée que si elle réunit encore des branches distinctes (union-find sur les enfants du nœud,
+dans l'ordre des boules). Un nœud est réalisé par les supports des boules de son sous-arbre.
 
 - **Balayage** : r croît en échelle logarithmique (rayon de la sphère de S\* de chaque boule) ; chaque support
   apparaît au niveau de sa boule, et la hiérarchie se dessine. Compteurs des supports dessinés en haut à droite.
@@ -144,14 +145,14 @@ de son sous-arbre.
   0,11 de celui de la hiérarchie de points Hʳₖ₊₁ (0,001 sur 08/002852 sans sol à k = 5) ; la chronologie des
   événements est la même à quelques millimètres près. Retirer les liaisons internes ne change aucun meilleur IoU : leurs
   sites étaient déjà portés par les naissances et les fusions de leur nœud.
-- **Taille** : de 2 534 supports (00/001502, instances, k = 5) à 281 784 (08/000656, sans sol, k = 10), 76 % des
+- **Taille** : de 2 534 supports (00/001502, instances, k = 5) à 281 758 (08/000656, sans sol, k = 10), 76 % des
   supports de la version 1 (toutes les boules critiques). Le lecteur (`../player/supports.html`, `supports.js`) peint
   chaque groupe de couleur dans un calque hors écran, complété au fil du balayage.
-- **Plateaux** : la version publiée garde toutes les fusions d'un nœud. Sur un plateau (plusieurs fusions au même
-  niveau), certaines ne réunissent rien de plus et ferment un cycle ; le sélecteur de Kruskal proposé par les auditeurs
-  (union-find sur les enfants de chaque fusion) les retirerait : 447 boules sur 1,18 million dans les 32 scènes, presque
-  toutes dans les variantes sans sol (au plus 104 sur 82 569 pour 08/002776). Les vidéos seront refaites s'il est
-  intégré.
+- **Plateaux** : la première version de l'arbre couvrant (0cc9cbec4) gardait toutes les fusions d'un nœud ; sur un
+  plateau, certaines ne réunissaient rien de plus et fermaient un cycle. Le sélecteur de Kruskal des auditeurs, intégré
+  en 07428324e, en retire 447 sur 1,18 million dans les 32 scènes, presque toutes dans les variantes sans sol (104 sur
+  82 569 pour 08/002776) : 15 vidéos sur 32 ont été refaites, les 17 autres sont identiques. Aucun meilleur IoU ne
+  change.
 
 ## Contrôle des calculs
 
@@ -164,9 +165,11 @@ scène refuse un meilleur IoU différent de la mesure ; `tools/test_duel.py` vé
 groupes que Python et les couleurs (contraste, daltonisme). Le masque de sol de Patchwork++ est identique octet pour
 octet à celui de la v8 sur 08/000000.
 
-Vidéos de supports : `mhgp11 --sortie=supports` compilé depuis `main` (0cc9cbec4, profil u21, format `MHGP11SP`
+Vidéos de supports : `mhgp11 --sortie=supports` compilé depuis `main` (07428324e, profil u21, format `MHGP11SP`
 version 2) ; chaque dossier publié passe `check_directory` et `read_supports` de `morsehgp3D_v11/bench/mhgp11_formats.py`
-(arbre, rôles, ordre canonique, S\* support positif de sa sphère, en entiers exacts) avant d'être lu, et
+(arbre, rôles, ordre canonique, S\* support positif de sa sphère en entiers exacts, structure couvrante : chaque fusion
+gardée réunit au moins deux branches distinctes, enfants finalement connexes ; même version au manifeste et au
+fichier) avant d'être lu, et
 `tools/supports_scene.py` refuse un fichier d'une autre version ou une boule hors de l'arbre couvrant ; commit, version,
 empreintes du fichier et du manifeste dans `resultats_supports_k<k>.json`. `tools/test_supports.py` : un arbre fait à la main (deux objets et un mur, chaînes,
 IoU, fusion et effondrement connus) et le contrat des 32 scènes locales (supports triés, chaînes emboîtées, suivi

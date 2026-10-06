@@ -7,7 +7,7 @@
  "sites": 293,
  "sortie": {
   "commande": "mhgp11 --sortie=supports --k=5",
-  "source": "0cc9cbec4",
+  "source": "07428324e",
   "format": "MHGP11SP",
   "version": 2,
   "status": "ok",
@@ -16,14 +16,14 @@
   "supports_sha256": "748fdffeba58d7ba8606243f405d64153749a66e904e5ef9ae6ae5f6e84b6fea",
   "tree_k_sha256": "9aeddede6d727a4044e59906a67f7ac66d82d0e996ad0729e540331e2117db9c",
   "stages_ns": {
-   "cloud": 160850,
-   "index": 10610,
-   "domain": 40570948,
-   "tree": 13716548,
-   "attach": 539247,
-   "output": 258011,
-   "write": 31076825,
-   "total": 87904936
+   "cloud": 204872,
+   "index": 13235,
+   "domain": 70170604,
+   "tree": 16408535,
+   "attach": 503340,
+   "output": 1469354,
+   "write": 44877669,
+   "total": 134141520
   }
  },
  "counts": {
