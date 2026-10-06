@@ -181,8 +181,14 @@ Outcome process_leaf_batch(const Cloud& cloud, const CatalogueParams& params, Me
   view.kmax = params.kmax; view.cache = params.cache_center_lines; view.reservoir = !params.replay_overflow;
   LeafBatchResult result;
   stage.emplace();
-  if (params.cuda_leaves) MHGP11_TRY(run_leaf_batch_cuda(view, pool, budget, result));
-  else MHGP11_TRY(run_leaf_batch_host(view, pool, budget, result));
+  if (params.split_host_permille != 0) {
+    const LeafBatchRunner device = params.cuda_leaves ? &run_leaf_batch_cuda : &run_leaf_batch_host;
+    MHGP11_TRY(run_leaf_batch_split(view, pool, budget, params.split_host_permille, device, result));
+  } else if (params.cuda_leaves) {
+    MHGP11_TRY(run_leaf_batch_cuda(view, pool, budget, result));
+  } else {
+    MHGP11_TRY(run_leaf_batch_host(view, pool, budget, result));
+  }
   const u64 executor_ns = stage->nanoseconds();
   // Level et population du lot, puis repli des non resolues.
   stage.emplace();
@@ -217,6 +223,8 @@ Outcome process_leaf_batch(const Cloud& cloud, const CatalogueParams& params, Me
     timings->batch_spare_population_chunks = t.spare_population_chunks;
     timings->batch_device_pool_used_high = t.device_pool_used_high;
     timings->batch_device_pool_reserved_high = t.device_pool_reserved_high;
+    timings->batch_split_host_jobs = t.split_host_jobs;
+    timings->batch_split_host_ns = t.split_host_ns; timings->batch_split_device_ns = t.split_device_ns;
   }
   return {};
 }

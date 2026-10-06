@@ -302,3 +302,17 @@ processus à chaud, aucun refus). Elle reste plus lente que la voie CPU à K = 5
 Compute montre pourquoi : un fil par feuille laisse 3,2 à 3,4 fils actifs sur 32 par warp, et la pile locale de
 3,2 Kio par fil est lue à 2,2 octets utiles par secteur ; le pipeline entier n'est qu'à 24 %. La suite est une
 feuille coopérative par warp, de forme J3. Le lot sur l'hôte (`batch_leaves`) reste plus lent que `leaf.cpp`.
+
+**Exécuteur partagé** (6 octobre 2026, [`leaf_batch_split.cpp`](../src/catalogue/leaf_batch_split.cpp)). Le diagnostic G4
+`claudedom1`, sur les trois trames LiDAR réelles à K = 5 avec des feuilles de 24, donne pour le lot entier 71 à 77 ms
+sur le GPU et 102 à 128 ms sur le Pool de l'hôte, qui attend sans rien faire pendant le calcul du GPU. À K = 10, les
+mêmes chiffres sont de 169 à 209 ms et de 364 à 462 ms. L'option `split_host_permille` (argument final de la sonde,
+0 à 1000) confie au Pool les feuilles les plus lourdes, jusqu'à cette part du travail estimé (m³, par paliers de m
+décroissant, les premières feuilles du lot dans le palier de bascule). Les autres vont à l'exécuteur du lot (GPU avec
+`cuda_leaves`, sinon l'hôte sur un Pool auxiliaire), dans un fil à part qui a son propre petit Pool : CUDA y touche
+les pages de ses tampons de retour. Les deux parties tournent en même temps, puis sont fusionnées dans l'ordre du lot :
+statuts, débuts globaux, émissions copiées à leurs places, compteurs sommés. Chaque feuille est traitée par le même
+code source, et ses émissions comme ses compteurs ne dépendent pas de l'exécuteur : le résultat est celui d'un
+exécuteur unique, quelle que soit la part. Portes : `mhgp11_catalogue_leaf_split` (sélection contre une recomputation
+indépendante) et `mhgp11_tower_full_leaf_lanes`, qui demande mêmes dump et registre à des parts de 0,1 %, 30 %, 40 %
+et 100 %, avec un partage observable. Mesure G4 du gain à jouer.

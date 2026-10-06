@@ -215,6 +215,8 @@ struct LeafBatchTimings {
   u64 copied_jobs = 0;  // feuilles qui emettent et tiennent dans leurs blocs (case et reservoir) : copiees sans rejeu
   u64 spare_record_chunks = 0, spare_population_chunks = 0;  // blocs du reservoir pris (au plus spare) ; 0 sans lui
   u64 device_pool_used_high = 0, device_pool_reserved_high = 0;  // pics physiques du pool CUDA pendant le lot
+  // Executeur partage : feuilles confiees au Pool de l'hote, durees des deux cotes (zeros hors partage).
+  u64 split_host_jobs = 0, split_host_ns = 0, split_device_ns = 0;
 };
 
 // Resultat d'un executeur : statut par feuille, compteurs des seules feuilles resolues, emissions.
@@ -236,6 +238,17 @@ struct LeafBatchResult {
 [[nodiscard]] Outcome run_leaf_batch_cuda(const LeafBatchView& view, sched::Pool& pool, MemoryBudget& budget,
                                           LeafBatchResult& result) noexcept;
 bool cuda_leaf_batch_available() noexcept;
+// Executeur d'un sous-lot (run_leaf_batch_host ou run_leaf_batch_cuda).
+using LeafBatchRunner = Outcome (*)(const LeafBatchView&, sched::Pool&, MemoryBudget&, LeafBatchResult&) noexcept;
+// Partage deterministe : to_host[j] vaut 1 pour les feuilles les plus lourdes (travail estime m^3, par paliers de m
+// decroissant, premieres feuilles du lot dans le palier de bascule) jusqu'a host_permille du travail estime total.
+[[nodiscard]] Outcome select_host_leaves(std::span<const LeafJob> jobs, u32 host_permille,
+                                         std::span<u8> to_host) noexcept;
+// Executeur partage (leaf_batch_split.cpp) : feuilles choisies par select_host_leaves sur le Pool de l'hote, les autres
+// sur `device` dans un fil a part (avec un petit Pool a lui), en meme temps ; fusion dans l'ordre du lot. Meme resultat
+// que tout executeur unique : chaque feuille est traitee par le meme code et ses emissions n'en dependent pas.
+[[nodiscard]] Outcome run_leaf_batch_split(const LeafBatchView& view, sched::Pool& pool, MemoryBudget& budget,
+                                           u32 host_permille, LeafBatchRunner device, LeafBatchResult& result) noexcept;
 // Ouverture anticipee du contexte CUDA (fil d'arriere-plan, une fois par processus) ; sans CUDA, rien.
 void prefetch_cuda_context() noexcept;
 

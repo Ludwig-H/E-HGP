@@ -13,6 +13,10 @@ Outcome check_catalogue_params(const CatalogueParams& params) noexcept {
       params.leaf_size < static_cast<u32>(params.kmax) + 3 || params.leaf_size > params.max_leaf ||
       params.ball_limit < 1 || params.ball_limit > kNone)
     return fail(Reason::parameter_out_of_range);
+  // Part de l'hote : pour mille, et seulement avec un lot de feuilles (option sans objet ailleurs : refusee).
+  if (params.split_host_permille > 1000 ||
+      (params.split_host_permille != 0 && !params.batch_leaves && !params.cuda_leaves))
+    return fail(Reason::parameter_out_of_range);
   return {};
 }
 

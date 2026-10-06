@@ -168,3 +168,5 @@ endforeach()
 # Arithmetique etroite de la feuille source unique (etendue <= 2^20) contre num/ et i128, cas limites du cube 2^B.
 mhgp11_add_unit(mhgp11_catalogue_leaf_narrow SOURCES leaf_device_narrow_test.cpp
                 GROUPS line_reference acute_and_triple span_refusal LABELS fast)
+# Executeur partage du lot de feuilles : selection des feuilles de l'hote contre une recomputation independante.
+mhgp11_add_unit(mhgp11_catalogue_leaf_split SOURCES leaf_split_test.cpp GROUPS select refusals LABELS fast)

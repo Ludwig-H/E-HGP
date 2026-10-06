@@ -1,6 +1,6 @@
 {
   "module": "catalogue",
-  "plancher": 72,
+  "plancher": 76,
   "mutants": [
     {
       "id": "support_tetra_strict_ignore",
@@ -564,7 +564,9 @@
     },
     {
       "id": "etendue_seuil_double",
-      "options": ["-DMHGP11_COORD_BITS=21"],
+      "options": [
+        "-DMHGP11_COORD_BITS=21"
+      ],
       "fichier": "src/catalogue/leaf_device.hpp",
       "cherche": "      wide = high[0] - low[0] > kNarrowSpan || high[1] - low[1] > kNarrowSpan || high[2] - low[2] > kNarrowSpan;",
       "remplace": "      wide = high[0] - low[0] > 2 * kNarrowSpan || high[1] - low[1] > 2 * kNarrowSpan || high[2] - low[2] > 2 * kNarrowSpan;",
@@ -573,12 +575,46 @@
     },
     {
       "id": "etendue_sans_fermeture",
-      "options": ["-DMHGP11_COORD_BITS=21"],
+      "options": [
+        "-DMHGP11_COORD_BITS=21"
+      ],
       "fichier": "src/catalogue/leaf_device.hpp",
       "cherche": "high[3] = {in.hi[0], in.hi[1], in.hi[2]};",
       "remplace": "high[3] = {in.lo[0], in.lo[1], in.lo[2]};",
       "porte": "mhgp11_catalogue_leaf_narrow_span_refusal",
       "note": "levier C : la borne hi de la fermeture hors de l'etendue ; une boite jusqu'a 2^B qui la porte a 2^20 + 1 passe"
+    },
+    {
+      "id": "partage_debut_local",
+      "fichier": "src/catalogue/leaf_batch_split.cpp",
+      "cherche": "    result.record_begin[j] = records;",
+      "remplace": "    result.record_begin[j] = side.record_begin[l];",
+      "porte": "mhgp11_tower_full_leaf_lanes",
+      "note": "executeur partage : debut local du cote au lieu du debut global dans l'ordre du lot, emissions mal placees"
+    },
+    {
+      "id": "partage_compteurs_appareil_omis",
+      "fichier": "src/catalogue/leaf_batch_split.cpp",
+      "cherche": "  add_counts(result.counts, device_result.counts);",
+      "remplace": "",
+      "porte": "mhgp11_tower_full_leaf_lanes",
+      "note": "executeur partage : registre du catalogue sans les feuilles de l'appareil"
+    },
+    {
+      "id": "partage_selection_inverse",
+      "fichier": "src/catalogue/leaf_batch_split.cpp",
+      "cherche": "    to_host[j] = taken[m] != 0;",
+      "remplace": "    to_host[j] = taken[m] == 0;",
+      "porte": "mhgp11_catalogue_leaf_split_select",
+      "note": "partage : feuilles legeres a l'hote au lieu des plus lourdes"
+    },
+    {
+      "id": "partage_cible_ignoree",
+      "fichier": "src/catalogue/leaf_batch_split.cpp",
+      "cherche": "u64 target = total / 1000 * host_permille + total % 1000 * host_permille / 1000, acquired = 0;",
+      "remplace": "u64 target = total, acquired = 0;",
+      "porte": "mhgp11_catalogue_leaf_split_select",
+      "note": "partage : part demandee ignoree, tout le lot a l'hote"
     }
   ]
 }

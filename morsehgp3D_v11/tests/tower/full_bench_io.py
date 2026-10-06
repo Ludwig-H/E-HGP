@@ -38,7 +38,7 @@ def main():
             output.unlink(missing_ok=True)
             argv = [str(executable),str(xyz),str(ids),str(destination or output),str(kmax),
                     '16','256','0',str(2**32-1),str(budget),str(workers)]
-            if optimizations is not None: argv.append(str(optimizations))
+            if optimizations is not None: argv.extend(str(optimizations).split())  # masque [passes part]
             result = subprocess.run(argv, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE, timeout=30, check=False)
             semantic.need(not result.stderr, 'stderr natif : '+result.stderr.decode('utf-8','backslashreplace'))
@@ -97,7 +97,7 @@ def main():
                  ('weight','multiplicity_unsupported'),('output','output_unwritable'),('workers',None),
                  ('opt_negative',None),('opt_large',None),('opt_text',None),('opt_requires_lanes',None),
                  ('opt_concurrent_requires_lanes',None),('opt_replay_requires_batch',None),
-                 ('opt_placement_requires_concurrent',None)]
+                 ('opt_placement_requires_concurrent',None),('split_large',None),('split_requires_batch',None)]
         for mode, reason in cases:
             write(range(3))
             if mode == 'truncated_xyz': xyz.write_bytes(xyz.read_bytes()[:-1])
@@ -110,7 +110,8 @@ def main():
                                  workers=0 if mode == 'workers' else 1, destination=root if mode == 'output' else None,
                                  optimizations={'opt_negative':'-1','opt_large':'524288','opt_text':'x','opt_requires_lanes':'128',
                                                 'opt_concurrent_requires_lanes':'8192','opt_replay_requires_batch':'131072',
-                                                'opt_placement_requires_concurrent':'262144'}.get(mode))
+                                                'opt_placement_requires_concurrent':'262144',
+                                                'split_large':'49147 1 1001','split_requires_batch':'16379 1 400'}.get(mode))
             semantic.need(result.returncode == 2 and not output.exists(), 'refus publie un payload : '+mode)
             if reason is None:
                 semantic.need(not rows, 'usage refuse avant execution')
@@ -121,8 +122,8 @@ def main():
                 semantic.need(any(r['phase'] == 'full' and r['status'] == 'ok' for r in rows),
                               'echec de sortie conserve apres calcul reussi')
             refusals += 1
-    semantic.need((attempts,successes,refusals) == (429,413,16), 'plancher IO')
-    print('full_io_verdict conforme attempts429 successes413 refusals16')
+    semantic.need((attempts,successes,refusals) == (431,413,18), 'plancher IO')
+    print('full_io_verdict conforme attempts431 successes413 refusals18')
 
 
 if __name__ == '__main__':

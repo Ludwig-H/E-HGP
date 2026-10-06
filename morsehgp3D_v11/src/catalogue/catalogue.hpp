@@ -43,6 +43,10 @@ struct CatalogueParams {
   // Lots de feuilles sans reservoir chaine : toute feuille qui deborde de sa case est rejouee (voie du 5 octobre,
   // gardee pour les portes qui exercent la seconde passe). Sans effet hors des lots.
   bool replay_overflow = false;
+  // Lots seulement : part (pour mille) du travail estime des feuilles confiee au Pool de l'hote, le reste allant a
+  // l'executeur du lot (GPU si cuda_leaves, sinon l'hote sur un Pool auxiliaire), en meme temps. 0 : lot entier sur
+  // son executeur. Indication d'ordonnancement seule : les sorties ne dependent pas de la part.
+  u32 split_host_permille = 0;
 };
 
 struct CatalogueBall {
@@ -93,6 +97,7 @@ struct CatalogueTimings {
   u64 batch_copied_jobs = 0;  // feuilles qui emettent et tiennent dans leurs blocs (case et reservoir)
   u64 batch_spare_record_chunks = 0, batch_spare_population_chunks = 0;  // blocs du reservoir pris
   u64 batch_device_pool_used_high = 0, batch_device_pool_reserved_high = 0;  // pics physiques du pool CUDA
+  u64 batch_split_host_jobs = 0, batch_split_host_ns = 0, batch_split_device_ns = 0;  // executeur partage
 };
 
 // Travail de stockage distinct de la geometrie ; valeurs de l'option une passe, zero sinon sauf passes=2.

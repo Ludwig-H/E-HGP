@@ -2,7 +2,8 @@
 """Banc G4 de la voie GPU du catalogue : CPU contre GPU, a froid et a chaud, dumps identiques exiges.
 
     python3 bench/gpu_ab.py (--bench BUILD/mhgp11_full_bench | --src SRC --work DIR) --data DIR --out DIR
-        [--modes cpu=16379,gpu=81915] [--reps 5] [--workers 48] [--warm-passes 5] [--kmax 5] [--leaf 16]
+        [--modes cpu=16379,gpu=81915,gpu_partage=344059:400] [--reps 5] [--workers 48] [--warm-passes 5] [--kmax 5]
+        [--leaf 16]
         [--variants new,base,...]  (archives <nom>_src.tar.gz du dossier de donnees, voir --variants)
 
 Un seul binaire (construit avec MHGP11_ENABLE_CUDA) joue chaque mode : 16379 est la voie CPU de reference, 81915
@@ -204,7 +205,9 @@ def main():
 
     def one(frame, name, mode, bench, workers, passes):
         cmd = [str(bench), str(args.data / (frame + '.u32le')), str(args.data / (frame + '.ids.u32le')), str(dump)]
-        cmd += tail + [workers, mode] + ([str(passes)] if passes > 1 else [])
+        # Mode MASQUE ou MASQUE:PART (executeur partage du lot, part de l'hote pour mille : argument final de la sonde).
+        mask, _, split = mode.partition(':')
+        cmd += tail + [workers, mask] + ([str(passes)] if passes > 1 or split else []) + ([split] if split else [])
         if dump.exists():
             dump.unlink()
         code, out, err, seconds = run(cmd, 900)

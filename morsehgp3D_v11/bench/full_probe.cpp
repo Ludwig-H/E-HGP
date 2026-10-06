@@ -175,7 +175,9 @@ void catalogue_execution(const Catalogue& catalogue, const CatalogueTimings& tim
             << ",\"spare_record_chunks\":" << t.batch_spare_record_chunks
             << ",\"spare_population_chunks\":" << t.batch_spare_population_chunks
             << ",\"device_pool_used_high\":" << t.batch_device_pool_used_high
-            << ",\"device_pool_reserved_high\":" << t.batch_device_pool_reserved_high << '}';
+            << ",\"device_pool_reserved_high\":" << t.batch_device_pool_reserved_high
+            << ",\"split_host_jobs\":" << t.batch_split_host_jobs << ",\"split_host_ns\":" << t.batch_split_host_ns
+            << ",\"split_device_ns\":" << t.batch_split_device_ns << '}';
 }
 
 void catalogue_work(const Catalogue& catalogue, bool pair_graph) {
@@ -352,7 +354,9 @@ Outcome run(char** argv, const CatalogueParams& params, const FullParams& full_p
 }  // namespace
 
 int main(int argc, char** argv) {
-  if (argc != 11 && argc != 12 && argc != 13) return 2;
+  // Arguments : xyz ids dump K feuille max_feuille max_noeuds limite_boules budget fils [masque] [passes]
+  // [part_hote_pour_mille] (executeur partage du lot de feuilles, 0..1000, exige un lot : bit 32768 ou 65536).
+  if (argc < 11 || argc > 14) return 2;
   std::array<u64, 7> options{};
   for (int i = 0; i < 7; ++i) if (!parse(argv[i + 4], options[i])) return 2;
   if (options[0] > 12 || options[1] > 1024 || options[2] > 1024 ||
@@ -360,7 +364,10 @@ int main(int argc, char** argv) {
   u64 optimizations = 0;
   if (argc >= 12 && (!parse(argv[11], optimizations) || optimizations > 524287)) return 2;
   u64 passes = 1;  // mode a chaud : passes FULL successives dans le meme processus
-  if (argc == 13 && (!parse(argv[12], passes) || passes < 1 || passes > 64)) return 2;
+  if (argc >= 13 && (!parse(argv[12], passes) || passes < 1 || passes > 64)) return 2;
+  u64 split = 0;  // part (pour mille) du travail estime des feuilles du lot confiee au Pool de l'hote
+  if (argc == 14 && (!parse(argv[13], split) || split > 1000)) return 2;
+  if (split != 0 && (optimizations & (32768 | 65536)) == 0) return 2;
   if ((optimizations & 8192) != 0 && (optimizations & 8) == 0) return 2;
   if ((optimizations & 128) != 0 && (optimizations & 8) == 0) return 2;
   // Voies de feuille : graphe de paires requis ; lot seulement en passe unique ; un seul executeur de lot.
@@ -395,6 +402,7 @@ int main(int argc, char** argv) {
   params.batch_leaves = (optimizations & 32768) != 0;  // feuilles en lot, executeur hote (Pool)
   params.cuda_leaves = (optimizations & 65536) != 0;   // feuilles en lot sur le GPU (construction CUDA)
   params.replay_overflow = (optimizations & 131072) != 0;  // lots sans reservoir chaine : debordements rejoues
+  params.split_host_permille = static_cast<u32>(split);   // executeur partage du lot (0 : lot entier)
   params.kmax = static_cast<int>(options[0]); params.leaf_size = static_cast<u32>(options[1]);
   params.max_leaf = static_cast<u32>(options[2]); params.max_nodes = options[3]; params.ball_limit = options[4];
   const auto result = guarded([&]() {

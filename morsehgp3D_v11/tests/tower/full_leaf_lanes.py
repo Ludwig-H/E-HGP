@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Voies de feuille de la sonde FULL sur un nuage moyen : CPU (16379), feuille source unique sur l'hote (32763), lot
 de feuilles sur le Pool avec reservoir chaine (49147) et sans (180219 = 49147 + 131072, voie du 5 octobre) rendent le
-meme dump et le meme registre du catalogue.
+meme dump et le meme registre du catalogue. L'executeur partage du lot (part de l'hote pour mille, argument final de la
+sonde ; l'appareil est ici l'hote sur un Pool auxiliaire) rend aussi le meme dump et le meme registre, a toute part : la
+porte exige une part intermediaire (0 < feuilles de l'hote < lot), une part totale (toutes) et une part minimale.
 
     python3 full_leaf_lanes.py MHGP11_FULL_BENCH BITS
 
@@ -24,8 +26,9 @@ import sys
 import tempfile
 
 SITES = 3000
-CONFIGS = (('5', '16', {'cpu': 16379, 'feuille_hote': 32763, 'lot_hote': 49147}),
-           ('10', '24', {'cpu': 16379, 'lot_hote': 49147, 'lot_rejoue': 180219}))
+CONFIGS = (('5', '16', {'cpu': 16379, 'feuille_hote': 32763, 'lot_hote': 49147, 'lot_partage': (49147, 400),
+                         'lot_partage_hote': (49147, 1000), 'lot_partage_appareil': (49147, 1)}),
+           ('10', '24', {'cpu': 16379, 'lot_hote': 49147, 'lot_rejoue': 180219, 'lot_partage': (49147, 300)}))
 
 
 def need(value, reason):
@@ -62,8 +65,9 @@ def main():
             seen = {}
             for name, mode in modes.items():
                 dump.unlink(missing_ok=True)
+                mask, split = mode if isinstance(mode, tuple) else (mode, None)
                 argv = [str(executable), str(xyz), str(ids), str(dump), kmax, leaf, '256', '0', str(2**32 - 1),
-                        str(1 << 32), '4', str(mode)]
+                        str(1 << 32), '4', str(mask)] + ([] if split is None else ['1', str(split)])
                 run = subprocess.run(argv, stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=300)
                 got = phases(run.stdout)
                 need(run.returncode == 0 and got.get('exit', {}).get('status') == 'ok', name + ' K' + kmax +
@@ -77,6 +81,16 @@ def main():
                 need(seen[name]['digest'] == reference['digest'], name + ' K' + kmax + ' : dump different du CPU')
                 need(seen[name]['work'] == reference['work'], name + ' K' + kmax + ' : registre different')
                 need(name.startswith('lot_') or seen[name]['batch']['jobs'] == 0, 'lot hors voie de lot')
+            # Executeur partage : memes sorties (controle ci-dessus) et partage observable, borne par la part demandee.
+            shared = seen['lot_partage']['batch']
+            need(0 < shared['split_host_jobs'] < shared['jobs'], 'partage intermediaire non exerce (%d sur %d)' % (
+                shared['split_host_jobs'], shared['jobs']))
+            need(seen['lot_hote']['batch']['split_host_jobs'] == 0, 'partage hors option')
+            if 'lot_partage_hote' in seen:
+                whole, least = seen['lot_partage_hote']['batch'], seen['lot_partage_appareil']['batch']
+                need(whole['split_host_jobs'] == whole['jobs'], 'part totale incomplete')
+                need(0 < least['split_host_jobs'] < shared['split_host_jobs'], 'part minimale non bornee')
+            line.append('partage%d' % shared['split_host_jobs'])
             batch = seen['lot_hote']['batch']
             need(batch['jobs'] > SITES, 'lot de feuilles pas plus nombreux que les sites (%d)' % batch['jobs'])
             need(batch['records'] > 0 and batch['population'] > 0 and batch['unresolved'] <= batch['jobs'], 'lot vide')
