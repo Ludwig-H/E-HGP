@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 156,
+  "plancher": 157,
   "mutants": [
     {
       "id": "population_memo_owner_omis",
@@ -325,8 +325,8 @@
     {
       "id": "descent_cumul_non_transactionnel",
       "fichier": "src/tower/descent.cpp",
-      "cherche": "auto staged = sum;",
-      "remplace": "auto& staged = sum;",
+      "cherche": "DescentLedger staged = sum;",
+      "remplace": "DescentLedger& staged = sum;",
       "porte": "mhgp11_tower_descent_capacity",
       "note": "Un debordement tardif laisse tous les compteurs du cumul initial intacts."
     },
@@ -549,7 +549,7 @@
     {
       "id": "diametre_cumul_descente_omis",
       "fichier": "src/tower/descent.cpp",
-      "cherche": "MHGP11_TRY(cell_add(sum.diameter_pairs, one.diameter_pairs));",
+      "cherche": "add(sum.diameter_pairs, one.diameter_pairs);",
       "remplace": "(void)one.diameter_pairs;",
       "porte": "mhgp11_tower_descent_capacity",
       "note": "Le septieme compteur doit etre cumule avec refus du debordement, comme les autres membres MEB."
@@ -613,7 +613,7 @@
     {
       "id": "memo_cumul_queries_omis",
       "fichier": "src/tower/descent.cpp",
-      "cherche": "MHGP11_TRY(cell_add(sum.memo.queries, one.memo.queries));",
+      "cherche": "s.add(sum.memo.queries, one.memo.queries);",
       "remplace": "(void)one.memo.queries;",
       "porte": "mhgp11_tower_memo_capacity",
       "note": "Tout compteur de cache est cumule avec detection transactionnelle du debordement."
@@ -837,7 +837,7 @@
     {
       "id": "descent_singleton_sum_missing",
       "fichier": "src/tower/descent.cpp",
-      "cherche": "MHGP11_TRY(cell_add(sum.singleton_hits, one.singleton_hits));",
+      "cherche": "s.add(sum.singleton_hits, one.singleton_hits);",
       "remplace": "(void)one.singleton_hits;",
       "porte": "mhgp11_tower_descent_capacity",
       "note": "Le compte singleton est agrege et son overflow refuse sans mutation du total."
@@ -1266,6 +1266,14 @@
       "remplace": "if (p.place_pipeline && !p.concurrent_orders && false) return fail(Reason::parameter_out_of_range);",
       "porte": "mhgp11_tower_placement_validate",
       "note": "placement sans pipeline des ordres concurrents ignore au lieu d'etre refuse (regle : refuser plutot qu'ignorer)"
+    },
+    {
+      "id": "registres_debordement_ignore",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "if (s.overflow) return fail(Reason::tower_capacity);",
+      "remplace": "if (s.overflow && false) return fail(Reason::tower_capacity);",
+      "porte": "mhgp11_tower_descent_capacity",
+      "note": "somme des registres sans branche : un debordement cumule mais ignore publierait une somme enveloppee"
     }
   ]
 }

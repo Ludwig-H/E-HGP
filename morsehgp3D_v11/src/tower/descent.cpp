@@ -15,32 +15,29 @@ Outcome add_meb(MebLedger& sum, const MebLedger& one) noexcept {
   MHGP11_TRY(cell_add(sum.diameter_pairs, one.diameter_pairs));
   return cell_add(sum.point_tests, one.point_tests);
 }
-Outcome add_all(DescentLedger& sum, const DescentLedger& one) noexcept {
-  MHGP11_TRY(cell_add(sum.memo.queries, one.memo.queries));
-  MHGP11_TRY(cell_add(sum.memo.lookups, one.memo.lookups));
-  MHGP11_TRY(cell_add(sum.memo.hits, one.memo.hits));
-  MHGP11_TRY(cell_add(sum.memo.misses, one.memo.misses));
-  MHGP11_TRY(cell_add(sum.memo.collisions, one.memo.collisions));
-  MHGP11_TRY(cell_add(sum.memo.insertions, one.memo.insertions));
-  MHGP11_TRY(cell_add(sum.memo.evictions, one.memo.evictions));
-  MHGP11_TRY(cell_add(sum.memo.suffix_hits, one.memo.suffix_hits));
-  MHGP11_TRY(cell_add(sum.steps, one.steps));
-  MHGP11_TRY(cell_add(sum.interior_steps, one.interior_steps));
-  MHGP11_TRY(cell_add(sum.trace_steps, one.trace_steps));
-  MHGP11_TRY(cell_add(sum.candidate_traces, one.candidate_traces));
-  MHGP11_TRY(cell_add(sum.trace_meb_calls, one.trace_meb_calls));
-  MHGP11_TRY(cell_add(sum.census_calls, one.census_calls));
-  MHGP11_TRY(cell_add(sum.catalogue_hits, one.catalogue_hits));
-  MHGP11_TRY(cell_add(sum.singleton_hits, one.singleton_hits));
-  MHGP11_TRY(cell_add(sum.population_hits, one.population_hits));
-  MHGP11_TRY(add_meb(sum.part_meb, one.part_meb));
-  MHGP11_TRY(add_meb(sum.trace_meb, one.trace_meb));
-  MHGP11_TRY(cell_add(sum.census.nodes, one.census.nodes));
-  MHGP11_TRY(cell_add(sum.census.bounds, one.census.bounds));
-  MHGP11_TRY(cell_add(sum.census.point_tests, one.census.point_tests));
-  MHGP11_TRY(cell_add(sum.census.inside_blocks, one.census.inside_blocks));
-  MHGP11_TRY(cell_add(sum.census.outside_blocks, one.census.outside_blocks));
-  return cell_add(sum.census.passes, one.census.passes);
+// Somme champ a champ sans branche par champ : chaque debordement est cumule, la somme n'est publiee qu'a la fin.
+struct LedgerSum {
+  bool overflow = false;
+  void add(u64& target, u64 value) noexcept { overflow |= __builtin_add_overflow(target, value, &target); }
+  void meb(MebLedger& sum, const MebLedger& one) noexcept {
+    add(sum.presentations, one.presentations); add(sum.nondegenerate, one.nondegenerate);
+    add(sum.positive, one.positive); add(sum.containing, one.containing); add(sum.comparisons, one.comparisons);
+    add(sum.diameter_pairs, one.diameter_pairs); add(sum.point_tests, one.point_tests);
+  }
+};
+void add_all(LedgerSum& s, DescentLedger& sum, const DescentLedger& one) noexcept {
+  s.add(sum.memo.queries, one.memo.queries); s.add(sum.memo.lookups, one.memo.lookups);
+  s.add(sum.memo.hits, one.memo.hits); s.add(sum.memo.misses, one.memo.misses);
+  s.add(sum.memo.collisions, one.memo.collisions); s.add(sum.memo.insertions, one.memo.insertions);
+  s.add(sum.memo.evictions, one.memo.evictions); s.add(sum.memo.suffix_hits, one.memo.suffix_hits);
+  s.add(sum.steps, one.steps); s.add(sum.interior_steps, one.interior_steps); s.add(sum.trace_steps, one.trace_steps);
+  s.add(sum.candidate_traces, one.candidate_traces); s.add(sum.trace_meb_calls, one.trace_meb_calls);
+  s.add(sum.census_calls, one.census_calls); s.add(sum.catalogue_hits, one.catalogue_hits);
+  s.add(sum.singleton_hits, one.singleton_hits); s.add(sum.population_hits, one.population_hits);
+  s.meb(sum.part_meb, one.part_meb); s.meb(sum.trace_meb, one.trace_meb);
+  s.add(sum.census.nodes, one.census.nodes); s.add(sum.census.bounds, one.census.bounds);
+  s.add(sum.census.point_tests, one.census.point_tests); s.add(sum.census.inside_blocks, one.census.inside_blocks);
+  s.add(sum.census.outside_blocks, one.census.outside_blocks); s.add(sum.census.passes, one.census.passes);
 }
 CellTrace combine(std::span<const SiteIdx> inner, std::span<const SiteIdx> selected) noexcept {
   CellTrace trace;
@@ -63,8 +60,10 @@ bool next_tuple(std::array<u32, kMaxMebSites>& tuple, u32 m, u32 t) noexcept {
 }  // namespace
 
 Outcome add_descent(DescentLedger& sum, const DescentLedger& one) noexcept {
-  auto staged = sum;
-  MHGP11_TRY(add_all(staged, one));
+  DescentLedger staged = sum;
+  LedgerSum s;
+  add_all(s, staged, one);
+  if (s.overflow) return fail(Reason::tower_capacity);  // transactionnel : sum intacte, comme cell_add
   sum = staged;
   return {};
 }

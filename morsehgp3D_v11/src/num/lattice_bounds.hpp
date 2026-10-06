@@ -37,6 +37,12 @@ class LatticeSphere {
   std::array<i64, 3> nearest_{};
   // ceil(2 c_j), sature a [0,2M-1] : le coin eloigne est hi_j ssi lo_j+hi_j >= ce seuil, soit 2(Da_j+N_j)<=D(lo_j+hi_j).
   std::array<i64, 3> far_threshold_{};
+  // Voie native : ancre, N et D copies une fois, pour evaluer la puissance aux points de la boite et aux sites comme
+  // native_power (meme expression, memes budgets), sans reconstruire de vue ni refabriquer de Point a chaque appel.
+  std::array<i64, 3> anchor_{};
+  std::array<i128, 3> numerator_{};
+  i128 denominator_ = 0;
+  i128 power_at(const std::array<i64, 3>& point) const noexcept;
 };
 
 }  // namespace mhgp11::num

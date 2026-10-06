@@ -304,6 +304,11 @@ LatticeSphere::LatticeSphere(const Sphere& sphere) noexcept
   static_assert(Budget::global_center_numerator <= 126 && Budget::center_denominator + 1 <= 126);
   constexpr i64 m = i64{1} << kCoordBits;
   const i128 d = sphere.denominator();  // D>0 pour toute Sphere fabriquee
+  denominator_ = d;
+  for (int j = 0; j < 3; ++j) {
+    anchor_[j] = sphere.anchor().coordinates()[j];
+    numerator_[j] = sphere.numerator()[j];
+  }
   for (int j = 0; j < 3; ++j) {
     // Comme compare_centers : |a_j D|<2^(5B+5) et |N_j|<2^(5B+5), donc C_j=a_j D+N_j<2^(5B+6)<=2^126.
     const i128 c = i128{sphere.anchor().coordinates()[j]} * d + sphere.numerator()[j];
@@ -318,9 +323,17 @@ LatticeSphere::LatticeSphere(const Sphere& sphere) noexcept
   }
 }
 
+// Precondition : lattice_. Meme expression et meme ordre que native_power ; les points evalues sont des points du
+// domaine (sommets ou points entiers d'une Box, sites d'un Point), donc ses majorants valent ici a l'identique.
+i128 LatticeSphere::power_at(const std::array<i64, 3>& point) const noexcept {
+  const std::array<i64, 3> v{point[0] - anchor_[0], point[1] - anchor_[1], point[2] - anchor_[2]};
+  i128 power = denominator_ * i128{detail::dot(v, v)};
+  for (int j = 0; j < 3; ++j) power += numerator_[j] * (-2 * i128{v[j]});
+  return power;
+}
+
 Result<PowerBoundSigns> LatticeSphere::bound_signs(const Box& box) const noexcept {
   if (!lattice_) return power_bound_signs(sphere_, box);
-  const CenterView view(sphere_);
   const auto lo = box.lo().coordinates(), hi = box.hi().coordinates();  // copies : lo()/hi() rendent des valeurs
   std::array<i64, 3> near{}, far{};
   for (int j = 0; j < 3; ++j) {
@@ -328,19 +341,17 @@ Result<PowerBoundSigns> LatticeSphere::bound_signs(const Box& box) const noexcep
     far[j] = i64{lo[j]} + hi[j] >= far_threshold_[j] ? hi[j] : lo[j];
   }
   // Deux points de la boite fermee, donc du domaine : la puissance native garde ses budgets, pour tout Point.
-  const auto inner = Point::make(near[0], near[1], near[2]);
-  if (!inner.ok()) return inner.outcome();
-  const i128 lower = native_power(view, inner.value());
+  const i128 lower = power_at(near);
   if (lower > 0) return PowerBoundSigns{.lower = 1, .upper = 1};
-  const auto outer = Point::make(far[0], far[1], far[2]);
-  if (!outer.ok()) return outer.outcome();
-  const i128 upper = native_power(view, outer.value());
+  const i128 upper = power_at(far);
   if (lower > upper) return fail(Reason::arithmetic_invariant);
   return PowerBoundSigns{.lower = detail::sign(lower), .upper = detail::sign(upper)};
 }
 
 Result<int> LatticeSphere::side(Point point) const noexcept {
-  return center_side(CenterView(sphere_), point);
+  if (!lattice_) return center_side(CenterView(sphere_), point);
+  const auto c = point.coordinates();
+  return detail::sign(power_at({i64{c[0]}, i64{c[1]}, i64{c[2]}}));
 }
 
 DeterminantInt orientation(Point a, Point b, Point c, Point d) noexcept {
