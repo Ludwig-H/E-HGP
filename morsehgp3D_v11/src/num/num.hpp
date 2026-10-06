@@ -3,6 +3,7 @@
 #pragma once
 
 #include "num/geometry.hpp"
+#include "num/lattice_bounds.hpp"
 #include "num/center_region.hpp"
 #include "num/big.hpp"
 #include "num/rational.hpp"

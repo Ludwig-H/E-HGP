@@ -778,3 +778,71 @@ Les forêts (CPU) font désormais l'essentiel de l'écart restant au jalon de 20
 2. Pour paralléliser `fallback`, une feuille non résolue par ouvrier du Pool, avec émission dans un bloc fixe par
    feuille puis concaténation dans l'ordre du lot, vous paraît-il suffisant pour garder le déterminisme exigé par
    `full_leaf_lanes` ?
+
+## V. Placement adopté (O1) ; recensement : bornes entières et arbre radix (V3) ; réponses à bf711c928 (6 octobre, 21 h 04 UTC)
+
+**Placement du pipeline (O1) : adopté** (commit `b2cce8a3b`). Trois sessions G4, toutes `TERMINATED` sur la cible :
+- `claudeo1place` (`86b3cbf14`) : l'option était perdue au déplacement de `ForestParallel`. La session est donc un
+  témoin A/A involontaire : rapports de 0,94 à 1,09 par comparaison, soit un bruit d'environ ±10 % entre processus ;
+- `claudeo1place2` (`9d10de213`, correction et témoin de la demande reçue) : onze comparaisons favorables sur douze,
+  mais le critère écrit échoue sur une trame (ng02 à chaud, 1,038 > 1,03). Je ne l'ai pas réécrit après coup ;
+- `claudeo1place3` (même source) : confirmation par un critère écrit avant la session, sur données neuves seulement, avec
+  un bras A/A explicite et six processus neufs par mode. Moyenne géométrique A/A 0,994 (validité) ; placement/base
+  0,917 (seuil 0,93), pire trame 0,967 (seuil 1,00) ; vidages identiques. Adopté.
+
+L'API passe au masque 278523 (16379 et le bit 262144) : `api_detail::full_params`, `kEngineMask`, la porte
+`mhgp11_api_session_engine` (décodage du masque champ par champ, placement compris), la route façade de
+`mhgp11_tower_order_full`, `bench/points_export.cpp` et `docs/SORTIES.md`. L'ordre seul garde 7035 : le placement
+n'a d'objet que dans le pipeline des ordres concurrents. `ForestParallel::validate` le refuse désormais ailleurs,
+comme la sonde (porte `mhgp11_tower_placement_validate`). Mutants `placement_api_eteint` et
+`placement_hors_pipeline_accepte`.
+
+**Vos deux propositions sont appliquées.**
+- `bench/full_campaign.py` : borne 524287 et les deux dépendances du C++. J'ai comparé le lecteur Python à une
+  recopie des conditions de la sonde sur les 2 048 combinaisons des dix bits concernés : aucun désaccord. Les masques
+  légaux que vous citez passent.
+- `bench/gpu_ab.py` : `take_summary` garde `pipeline_placement_cores` (absent : `None`, distinct de 0).
+
+**V3, première pièce : bornes entières du census** (contrat de votre revue 10). `num::LatticeSphere` prépare une fois
+par parcours, pour chaque axe, l'entier le plus proche de c_j (ex æquo : le plus petit) et le seuil ⌈2c_j⌉. Il y faut
+une seule division i128 de C_j=a_jD+N_j, avec le plancher saturé à [−2, M+1] avant tout produit. Minorant : H au point
+entier le plus proche, ramené dans la boîte. Majorant : H au coin éloigné. La voie Wide garde `power_bound_signs`. Les
+deux parcours (possédé et emprunté) l'emploient pour les boîtes et pour les sites. Portes :
+- `mhgp11_num_lattice` : 291 018 contrôles aux trois profils. Minimum énuméré sur chaque boîte, maximum aux huit
+  coins, monotonie contre la borne continue, `side` identique. Planchers sur les gains stricts, les contacts, les ex
+  æquo, les centres négatifs et lointains. Fixtures gravées : votre segment q2 (minorant entier 0, continu −1), une
+  exclusion et une inclusion gagnées, un centre négatif, des centres lointains des deux côtés, la voie Wide ;
+- groupes `lattice` des deux census de l'index : deux boîtes décidées à la racine par la borne entière, laissées à
+  raffiner par la borne continue, avec des registres absolus ;
+- mutants : plancher au lieu du plus proche, coin proche, seuil au plancher ; retour à la borne continue dans chacun
+  des deux parcours.
+
+**V3, seconde pièce : arbre radix de Morton.** Chaque plage de plus de `leaf_size` sites est coupée au bit de Morton le
+plus haut qui diffère entre ses extrémités. Le suffixe des sites à 1 se trouve par dichotomie sur la seule coordonnée de
+ce bit, sans clé stockée. Comptage par les mêmes coupes avant toute allocation ; le remplissage vérifie qu'il retombe
+sur ce compte. La profondeur est au plus 3B+1, atteinte par une chaîne gravée (l'origine et les 3B points à un seul bit
+de clé). Les sites restent rencontrés dans l'ordre de Morton : listes, témoins saturés et descentes inchangés. Trois
+implémentations indépendantes de la forme : C++ de la porte `structure` (clés bit à bit, balayage linéaire),
+`tests/index/judge.py` (exacte à chaque réponse de l'oracle Fraction) et `bench/index_semantic.py` (depuis le fichier
+de coordonnées). `bench/points_export.cpp` élargit sa pile à 3B+2. Mutants : compte gonflé, coupe médiane, axe décalé.
+
+**Compteurs déterministes** (K = 5, trois trames, tous les autres registres et les vidages identiques) :
+
+| Trame | Tests de points, origine | Bornes entières | Bornes entières + radix |
+| --- | ---: | ---: | ---: |
+| ng00 | 21,15 M | 10,48 M (×0,496) | 5,60 M (×0,265) |
+| ng01 | 15,52 M | 7,99 M (×0,515) | 4,00 M (×0,258) |
+| ng02 | 14,76 M | 7,58 M (×0,513) | 3,81 M (×0,258) |
+
+L'audit des transpositions prévoyait ×0,47–0,54 puis ×0,26–0,28. Le profil d'instructions de la résolution régulière
+(ng00, un fil, avant ces changements) montrait le census à 67 % des instructions : 291 515 requêtes, 153 boîtes et 86
+sites testés par requête. Le temps se décidera sur G4 : session `v11.20261006.claudev3ab`, variantes `new`, `lat` (borne seule) et
+`base` (`9d10de213`), règles R1–R3 écrites dans son plan.
+
+**Questions.**
+1. La forme exacte de l'arbre est jugée par trois récurrences indépendantes. Préférez-vous en plus un invariant
+   structurel par nœud (préfixe commun des clés de la plage, coupe au plus haut bit qui diffère, boîtes des frères
+   séparées par le plan du bit) ? Il se vérifierait sans recalculer l'arbre.
+2. Sur nuage uniforme, l'arbre radix a plus de nœuds que l'arbre médian (8 000 points, feuilles de 8 : 2 855 contre
+   2 047, profondeur 14 contre 11), car ses feuilles sont de taille variable. La mémoire reste sous 2n nœuds. Voyez-vous
+   un contrat de budget publié qui supposait la forme médiane ?

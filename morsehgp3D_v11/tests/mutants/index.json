@@ -1,6 +1,6 @@
 {
   "module": "index",
-  "plancher": 11,
+  "plancher": 15,
   "mutants": [
     {
       "id": "contact_exterieur",
@@ -53,10 +53,10 @@
     {
       "id": "allocation_noeuds_excedentaire",
       "fichier": "src/index/build.cpp",
-      "cherche": "return 2 * (width + extra) - 1;",
-      "remplace": "return 2 * (width + extra) + 1;",
+      "cherche": "return 1 + node_count(cloud, begin, split, leaf_size) + node_count(cloud, split, end, leaf_size);",
+      "remplace": "return 3 + node_count(cloud, begin, split, leaf_size) + node_count(cloud, split, end, leaf_size);",
       "porte": "mhgp11_index_unit_structure",
-      "note": "la recurrence independante et le budget exact refusent deux noeuds superflus avant leur lecture"
+      "note": "compte radix gonfle de deux noeuds par noeud interne : la recurrence independante, le budget exact et la garde du remplissage refusent"
     },
     {
       "id": "nuage_consomme_sur_refus",
@@ -89,6 +89,38 @@
       "remplace": "SiteIdx{static_cast<u32>(end - 1 - i)}",
       "porte": "mhgp11_index_borrowed_fixtures",
       "note": "les blocs stricts rendent les premiers SiteIdx croissants, pas les derniers"
+    },
+    {
+      "id": "census_borne_continue",
+      "fichier": "src/index/census.cpp",
+      "cherche": "auto signs = lattice.bound_signs(node.box);",
+      "remplace": "auto signs = num::power_bound_signs(sphere, node.box);",
+      "porte": "mhgp11_index_unit_lattice",
+      "note": "levier V3 retire du census possede : memes listes, mais la racine n'est plus decidee (registres absolus)"
+    },
+    {
+      "id": "census_emprunte_borne_continue",
+      "fichier": "src/index/census_workspace.cpp",
+      "cherche": "auto signs = lattice.bound_signs(node.box);",
+      "remplace": "auto signs = num::power_bound_signs(sphere, node.box);",
+      "porte": "mhgp11_index_borrowed_lattice",
+      "note": "levier V3 retire du census emprunte (chemin des descentes FULL) : registres absolus d'une passe"
+    },
+    {
+      "id": "coupe_mediane",
+      "fichier": "src/index/build.cpp",
+      "cherche": "u32 lo = begin + 1, hi = last;  // bit nul en begin, bit a 1 en last",
+      "remplace": "return begin + (end - begin) / 2;\n  u32 lo = begin + 1, hi = last;",
+      "porte": "mhgp11_index_unit_structure",
+      "note": "retour a la coupe mediane des rangs, comptee et remplie de facon coherente : memes listes, autre arbre (recurrence radix independante)"
+    },
+    {
+      "id": "coupe_axe_decale",
+      "fichier": "src/index/build.cpp",
+      "cherche": "const int axis = bit % 3, level = bit / 3;",
+      "remplace": "const int axis = (bit + 1) % 3, level = bit / 3;",
+      "porte": "mhgp11_index_unit_structure",
+      "note": "bit de Morton lu sur la mauvaise coordonnee (convention x, y, z de morton.hpp) : coupe hors cellule"
     }
   ]
 }

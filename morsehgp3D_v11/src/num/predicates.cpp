@@ -1,6 +1,9 @@
 // Predicats R2 portes avec budgets par expression. Pas de conversion flottante, pas de filtre heuristique.
 #include "num/geometry_internal.hpp"
+#include "num/lattice_bounds.hpp"
 #include "num/power_checked.hpp"
+
+#include <algorithm>
 
 namespace mhgp11::num {
 namespace {
@@ -282,6 +285,62 @@ Result<PowerBoundSigns> power_bound_signs(const Sphere& sphere, const Box& box) 
   auto bounds = center_power_bounds(view, box);
   if (!bounds.ok()) return bounds.outcome();
   return PowerBoundSigns{to_wide(bounds.value().lower).sign(), to_wide(bounds.value().upper).sign()};
+}
+
+namespace {
+// Plancher exact de C/D pour D>0 : C++ tronque vers zero, le reste negatif est ramene dans [0,D).
+struct FloorDivision { i128 quotient, remainder; };
+FloorDivision floor_division(i128 numerator, i128 denominator) noexcept {
+  i128 quotient = numerator / denominator;  // une seule division large ; |quotient*D| <= |numerator|, aucun depassement
+  i128 remainder = numerator - quotient * denominator;
+  if (remainder < 0) { --quotient; remainder += denominator; }
+  return {quotient, remainder};
+}
+}  // namespace
+
+LatticeSphere::LatticeSphere(const Sphere& sphere) noexcept
+    : sphere_(sphere), lattice_(use_native_power(CenterView(sphere))) {
+  if (!lattice_) return;
+  static_assert(Budget::global_center_numerator <= 126 && Budget::center_denominator + 1 <= 126);
+  constexpr i64 m = i64{1} << kCoordBits;
+  const i128 d = sphere.denominator();  // D>0 pour toute Sphere fabriquee
+  for (int j = 0; j < 3; ++j) {
+    // Comme compare_centers : |a_j D|<2^(5B+5) et |N_j|<2^(5B+5), donc C_j=a_j D+N_j<2^(5B+6)<=2^126.
+    const i128 c = i128{sphere.anchor().coordinates()[j]} * d + sphere.numerator()[j];
+    const auto [whole, remainder] = floor_division(c, d);  // c=whole*D+remainder, 0<=remainder<D
+    // Saturer le plancher avant tout produit : au-dela de [-2,M+1], ni le point proche ramene dans une boite de
+    // [0,M-1] ni le coin eloigne ne changent plus. 2*remainder<2D<2^(4B+6) tient dans i128.
+    const i64 q = whole < -2 ? -2 : whole > m + 1 ? m + 1 : static_cast<i64>(whole);
+    const i64 nearest = q + (2 * remainder > d ? 1 : 0);  // ex aequo 2r=D : le plus petit, meme distance
+    const i64 twice = 2 * q + (remainder == 0 ? 0 : 2 * remainder <= d ? 1 : 2);  // ceil(2C/D)
+    nearest_[j] = std::clamp<i64>(nearest, 0, m - 1);
+    far_threshold_[j] = std::clamp<i64>(twice, 0, 2 * m - 1);
+  }
+}
+
+Result<PowerBoundSigns> LatticeSphere::bound_signs(const Box& box) const noexcept {
+  if (!lattice_) return power_bound_signs(sphere_, box);
+  const CenterView view(sphere_);
+  const auto lo = box.lo().coordinates(), hi = box.hi().coordinates();  // copies : lo()/hi() rendent des valeurs
+  std::array<i64, 3> near{}, far{};
+  for (int j = 0; j < 3; ++j) {
+    near[j] = std::clamp<i64>(nearest_[j], lo[j], hi[j]);
+    far[j] = i64{lo[j]} + hi[j] >= far_threshold_[j] ? hi[j] : lo[j];
+  }
+  // Deux points de la boite fermee, donc du domaine : la puissance native garde ses budgets, pour tout Point.
+  const auto inner = Point::make(near[0], near[1], near[2]);
+  if (!inner.ok()) return inner.outcome();
+  const i128 lower = native_power(view, inner.value());
+  if (lower > 0) return PowerBoundSigns{.lower = 1, .upper = 1};
+  const auto outer = Point::make(far[0], far[1], far[2]);
+  if (!outer.ok()) return outer.outcome();
+  const i128 upper = native_power(view, outer.value());
+  if (lower > upper) return fail(Reason::arithmetic_invariant);
+  return PowerBoundSigns{.lower = detail::sign(lower), .upper = detail::sign(upper)};
+}
+
+Result<int> LatticeSphere::side(Point point) const noexcept {
+  return center_side(CenterView(sphere_), point);
 }
 
 DeterminantInt orientation(Point a, Point b, Point c, Point d) noexcept {

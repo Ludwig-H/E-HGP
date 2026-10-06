@@ -29,12 +29,12 @@ struct BorrowedPass {
     p += count;
     return {};
   }
-  Outcome points(const Cloud& cloud, u32 begin, u32 end, const num::Sphere& sphere) noexcept {
+  Outcome points(const Cloud& cloud, u32 begin, u32 end, const num::LatticeSphere& lattice) noexcept {
     for (u32 i = begin; i < end && p < threshold; ++i) {
       ++ledger.point_tests;
       auto point = num::Point::make(cloud.x()[i], cloud.y()[i], cloud.z()[i]);
       if (!point.ok()) return point.outcome();
-      auto side = num::side(sphere, point.value());
+      auto side = lattice.side(point.value());
       if (!side.ok()) return side.outcome();
       if (side.value() < 0) { MHGP11_TRY(inside(i, i + 1)); }
       else if (side.value() == 0) {
@@ -46,11 +46,12 @@ struct BorrowedPass {
   }
   Outcome walk(const GlobalIndex& index, const num::Sphere& sphere) noexcept {
     ++ledger.passes;
+    const num::LatticeSphere lattice(sphere);  // une preparation par parcours ; sites de l'index entiers
     const auto nodes = index_detail::Access::nodes(index);
     for (u64 cursor = 0; cursor < nodes.size() && p < threshold;) {
       const auto& node = nodes[cursor];
       ++ledger.nodes; ++ledger.bounds;
-      auto signs = num::power_bound_signs(sphere, node.box);  // signes seuls : aucune conversion Wide native
+      auto signs = lattice.bound_signs(node.box);  // minorant sur sites entiers, majorant continu
       if (!signs.ok()) return signs.outcome();
       if (signs.value().lower > 0) {
         ++ledger.outside_blocks; cursor = node.escape;
@@ -58,7 +59,7 @@ struct BorrowedPass {
         ++ledger.inside_blocks;
         MHGP11_TRY(inside(node.begin, node.end)); cursor = node.escape;
       } else if (node.end - node.begin <= index.leaf_size()) {
-        MHGP11_TRY(points(index.cloud(), node.begin, node.end, sphere)); cursor = node.escape;
+        MHGP11_TRY(points(index.cloud(), node.begin, node.end, lattice)); cursor = node.escape;
       } else { ++cursor; }
     }
     return {};

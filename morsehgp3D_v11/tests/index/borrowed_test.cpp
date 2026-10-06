@@ -59,6 +59,35 @@ MHGP11_TEST(fixtures, 200) {
   }
 }
 
+// Levier V3, census emprunte : meme decision a la racine que le census possede, en une seule passe.
+MHGP11_TEST(lattice, 40) {
+  const auto beside_ball=num::Sphere::through(point(0,0,0),point(4,0,0));
+  const auto core_ball=num::Sphere::through(point(0,0,0),point(8,0,0));
+  REQUIRE(beside_ball.ok() && beside_ball.value() && core_ball.ok() && core_ball.value());
+  const std::array<Input,2> inputs{Input({{3,2,0},{5,2,0},{4,3,0},{3,3,0},{5,3,0}}),
+                                   Input({{2,0,0},{6,0,0},{2,1,1},{6,1,1},{4,0,1}})};
+  struct Root {
+    CensusLedger ledger; u64 interior=0, shell=0; u32 calls=0;
+    static Outcome call(void* raw,const BorrowedCensus& result) {
+      auto& r=*static_cast<Root*>(raw); ++r.calls; r.ledger=result.ledger();
+      r.interior=result.interior().size(); r.shell=result.shell().size(); return {};
+    }
+  };
+  for (u32 leaf:{1u,16u}) for (int inside=0;inside<2;++inside) {
+    MemoryBudget owner(MemoryBudget::kUnlimited),work(MemoryBudget::kUnlimited);
+    auto cloud=inputs[inside].prepare(owner); REQUIRE(cloud.ok());
+    auto index=build_index(std::move(cloud.value()),{leaf},owner); REQUIRE(index.ok());
+    auto workspace=CensusWorkspace::make(index.value(),work); REQUIRE(workspace.ok());
+    const num::Sphere& sphere=inside ? *core_ball.value() : *beside_ball.value();
+    Root root;
+    REQUIRE(workspace.value()->query(index.value(),sphere,kNone,&root,Root::call).ok());
+    CHECK_EQ(root.calls,1u); CHECK_EQ(root.ledger.passes,1u); CHECK_EQ(root.ledger.nodes,1u);
+    CHECK_EQ(root.ledger.bounds,1u); CHECK_EQ(root.ledger.point_tests,0u);
+    CHECK_EQ(root.ledger.inside_blocks,inside ? 1u : 0u); CHECK_EQ(root.ledger.outside_blocks,inside ? 0u : 1u);
+    CHECK_EQ(root.interior,inside ? 5u : 0u); CHECK_EQ(root.shell,0u);
+  }
+}
+
 MHGP11_TEST(ownership, 22) {
   CHECK(!std::is_copy_constructible_v<CensusWorkspace> && !std::is_move_constructible_v<CensusWorkspace>);
   CHECK(!std::is_copy_constructible_v<BorrowedCensus> && !std::is_move_constructible_v<BorrowedCensus>);

@@ -6,7 +6,7 @@ from math import comb
 import struct
 
 from catalogue_semantic import natural
-from index_semantic import BUDGET, LOGICAL as CENSUS_LOGICAL, integer, need, tree_shape
+from index_semantic import BUDGET, LOGICAL as CENSUS_LOGICAL, coordinates_shape, integer, need  # noqa: F401
 
 MAGIC = b'MHGP11MEB1'
 QUERIES = 48
@@ -23,7 +23,7 @@ def part(ordinal, count):
     return sorted((start + i * step) % count for i in range(size))
 
 
-def validate_events(events, bits, count):
+def validate_events(events, bits, count, shape=None):
     need(count >= 12 and len(events) == QUERIES + 4 and [v['phase'] for v in events] ==
          ['cloud', 'index'] + ['query'] * QUERIES + ['summary', 'exit'], 'phases/inventaire')
     cloud, index, summary, end = events[0], events[1], events[-2], events[-1]
@@ -36,7 +36,9 @@ def validate_events(events, bits, count):
          type(index['leaf_size']) is int and index['leaf_size'] == 8, 'parametres index')
     for key in ('wall_ns', 'peak_reserved_bytes', 'reserved_after_bytes', 'nodes', 'max_depth', 'node_bytes'):
         integer(index[key], 'index ' + key)
-    need((index['nodes'], index['max_depth']) == tree_shape(count) and index['node_bytes'] == 40 and
+    # Arbre radix de Morton (levier V3) : forme exacte quand le pilote la tire des coordonnees, bornes generales sinon.
+    need(0 < index['nodes'] < 2 * count and 0 < index['max_depth'] <= 3 * bits + 1 and
+         (shape is None or (index['nodes'], index['max_depth']) == shape) and index['node_bytes'] == 40 and
          index['reserved_after_bytes'] == index['peak_reserved_bytes'] ==
          cloud['reserved_after_bytes'] + 40 * index['nodes'] <= BUDGET, 'construction index exacte')
     totals = dict(queries=48, complete=0, saturated=0, reserved_after_bytes=index['reserved_after_bytes'])
@@ -85,8 +87,8 @@ def validate_events(events, bits, count):
     return dict(totals, support_sizes=sizes)
 
 
-def inspect(path, bits, count, events):
-    totals = validate_events(events, bits, count)
+def inspect(path, bits, count, events, shape=None):
+    totals = validate_events(events, bits, count, shape)
     semantic = hashlib.sha256(b'ehgp.v11.meb_semantic.v1\0')
     raw, size = hashlib.sha256(), 0
     with path.open('rb') as stream:

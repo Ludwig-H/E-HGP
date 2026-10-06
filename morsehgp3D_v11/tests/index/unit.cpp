@@ -20,8 +20,9 @@ MHGP11_TEST(fixtures, 190) {
     REQUIRE(index.ok());
     CHECK_EQ(cloud.value().sites(), 0u);
     CHECK_EQ(index.value().cloud().sites(), 11u);
-    CHECK_EQ(index.value().nodes(), nodes(11, leaf));
-    CHECK_EQ(index.value().max_depth(), depth(11, leaf));
+    const Shape shape = radix_shape(octa().points, leaf);
+    CHECK_EQ(index.value().nodes(), shape.nodes);
+    CHECK_EQ(index.value().max_depth(), shape.depth);
     for (u32 threshold : {1u, 2u, 3u, 4u, 10u, kNone}) {
       {
         const auto result = census(index.value(), ball(), threshold, query_budget);
@@ -47,15 +48,16 @@ MHGP11_TEST(structure, 200) {
     for (u32 i = 0; i < n; ++i) points.push_back({i, i % 3, i % 7});
     for (u32 leaf : {1u, 8u, 16u, 256u}) {
       MemoryBudget cloud_budget(MemoryBudget::kUnlimited);
-      const u64 bytes = nodes(n, leaf) * sizeof(index_detail::Node);
+      const Shape shape = radix_shape(points, leaf);
+      const u64 bytes = shape.nodes * sizeof(index_detail::Node);
       MemoryBudget index_budget(bytes);
       auto cloud = Input(points).prepare(cloud_budget);
       REQUIRE(cloud.ok());
       {
         const auto index = build_index(std::move(cloud.value()), IndexParams{leaf}, index_budget);
         REQUIRE(index.ok());
-        CHECK_EQ(index.value().nodes(), nodes(n, leaf));
-        CHECK_EQ(index.value().max_depth(), depth(n, leaf));
+        CHECK_EQ(index.value().nodes(), shape.nodes);
+        CHECK_EQ(index.value().max_depth(), shape.depth);
         CHECK_EQ(index_budget.used(), bytes);
         CHECK_EQ(index_budget.peak(), bytes);
         CHECK_EQ(index.value().cloud().sites(), n);
@@ -64,6 +66,29 @@ MHGP11_TEST(structure, 200) {
       CHECK_EQ(cloud_budget.used(), 0u);
     }
   }
+  // Profondeur maximale de l'arbre radix : l'origine et les 3B points dont la cle de Morton n'a qu'un bit forment une
+  // chaine, chaque coupe isolant un site ; feuille 1, profondeur kMortonBits+1 et 2(3B+1)-1 noeuds.
+  std::vector<std::array<u32, 3>> chain{{0, 0, 0}};
+  for (int bit = 0; bit < kCoordBits; ++bit)
+    for (int axis = 0; axis < 3; ++axis) {
+      std::array<u32, 3> p{0, 0, 0};
+      p[axis] = u32{1} << bit;
+      chain.push_back(p);
+    }
+  MemoryBudget budget(MemoryBudget::kUnlimited);
+  auto cloud = Input(chain).prepare(budget);
+  REQUIRE(cloud.ok());
+  auto deep = build_index(std::move(cloud.value()), IndexParams{1}, budget);
+  REQUIRE(deep.ok());
+  CHECK_EQ(deep.value().max_depth(), u64(kMortonBits) + 1);
+  CHECK_EQ(deep.value().nodes(), 2 * u64(chain.size()) - 1);
+  CHECK_EQ(radix_shape(chain, 1).depth, u64(kMortonBits) + 1);
+  // Le parcours sans pile reste exact sur cette chaine : boule ponctuelle a l'origine, coquille = le seul site 0.
+  auto origin = census(deep.value(), num::Sphere::point(point(0, 0, 0)), kNone, budget);
+  REQUIRE(origin.ok());
+  CHECK(origin.value().interior().empty());
+  CHECK_EQ(origin.value().shell().size(), 1u);
+  CHECK(origin.value().shell().size() == 1 && idx(origin.value().shell()[0]) == 0);
 }
 
 MHGP11_TEST(ownership, 35) {
@@ -169,6 +194,40 @@ MHGP11_TEST(blocks, 14) {
   CHECK_EQ(outside.value().ledger().outside_blocks, 2u);
   CHECK_EQ(outside.value().ledger().point_tests, 0u);
   CHECK(outside.value().interior().empty() && outside.value().shell().empty());
+}
+
+// Levier V3 : la borne entiere decide a la racine ce que la borne continue separee laisse raffiner (supports externes
+// au nuage). Registres absolus de deux passes : un retour a power_bound_signs dans le parcours est visible ici.
+MHGP11_TEST(lattice, 64) {
+  MemoryBudget budget(MemoryBudget::kUnlimited);
+  const auto beside_ball = num::Sphere::through(point(0, 0, 0), point(4, 0, 0));  // c=(2,0,0), r=2
+  const auto core_ball = num::Sphere::through(point(0, 0, 0), point(8, 0, 0));    // c=(4,0,0), r=4
+  REQUIRE(beside_ball.ok() && beside_ball.value() && core_ball.ok() && core_ball.value());
+  // [3,5]x[2,3]x{0} : point entier le plus proche (3,2,0) a distance^2 5 > 4. [2,6]x[0,1]x[0,1] : coin eloigne a 6 < 16.
+  const Input beside({{3, 2, 0}, {5, 2, 0}, {4, 3, 0}, {3, 3, 0}, {5, 3, 0}});
+  const Input core({{2, 0, 0}, {6, 0, 0}, {2, 1, 1}, {6, 1, 1}, {4, 0, 1}});
+  for (u32 leaf : {1u, 16u}) {
+    for (const bool inside : {false, true}) {
+      auto cloud = (inside ? core : beside).prepare(budget);
+      REQUIRE(cloud.ok());
+      auto index = build_index(std::move(cloud.value()), IndexParams{leaf}, budget);
+      REQUIRE(index.ok());
+      const num::Sphere& sphere = inside ? *core_ball.value() : *beside_ball.value();
+      for (u32 threshold : {3u, kNone}) {
+        auto query = census(index.value(), sphere, threshold, budget);
+        REQUIRE(query.ok());
+        const auto& ledger = query.value().ledger();
+        CHECK_EQ(ledger.passes, 2u);
+        CHECK_EQ(ledger.nodes, 2u);
+        CHECK_EQ(ledger.bounds, 2u);
+        CHECK_EQ(ledger.point_tests, 0u);
+        CHECK_EQ(ledger.inside_blocks, inside ? 2u : 0u);
+        CHECK_EQ(ledger.outside_blocks, inside ? 0u : 2u);
+        CHECK(query.value().shell().empty());
+        CHECK_EQ(query.value().interior().size(), inside ? std::min<u64>(threshold, 5) : 0u);
+      }
+    }
+  }
 }
 
 MHGP11_TEST(concurrency, 10) {

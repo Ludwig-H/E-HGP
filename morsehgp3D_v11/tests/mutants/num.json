@@ -1,6 +1,6 @@
 {
   "module": "num",
-  "plancher": 57,
+  "plancher": 60,
   "mutants": [
     {
       "id": "checked_first_overflow_ignored_u24",
@@ -550,6 +550,30 @@
       "remplace": "      high += r;",
       "porte": "mhgp11_num_roots",
       "note": "borne haute d'une racine positive prise a R au lieu de R + 1 : l'encadrement ne contient plus la valeur vraie ; bornes lo, hi comparees a Python et decisions de la table fausses"
+    },
+    {
+      "id": "lattice_plancher_au_lieu_du_plus_proche",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "const i64 nearest = q + (2 * remainder > d ? 1 : 0);",
+      "remplace": "const i64 nearest = q;",
+      "porte": "mhgp11_num_lattice_lattice_random",
+      "note": "minorant au plancher de c_j au lieu de l'entier le plus proche : F n'y est plus minimale, exclusion abusive"
+    },
+    {
+      "id": "lattice_coin_proche",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "far[j] = i64{lo[j]} + hi[j] >= far_threshold_[j] ? hi[j] : lo[j];",
+      "remplace": "far[j] = i64{lo[j]} + hi[j] >= far_threshold_[j] ? lo[j] : hi[j];",
+      "porte": "mhgp11_num_lattice_lattice_random",
+      "note": "majorant au coin proche du centre : ce n'est plus le maximum, inclusion abusive"
+    },
+    {
+      "id": "lattice_seuil_plancher",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "const i64 twice = 2 * q + (remainder == 0 ? 0 : 2 * remainder <= d ? 1 : 2);  // ceil(2C/D)",
+      "remplace": "const i64 twice = 2 * q;  // ceil(2C/D)",
+      "porte": "mhgp11_num_lattice_lattice_random",
+      "note": "seuil du coin eloigne au plancher de 2c_j au lieu du plafond : mauvais coin quand c_j passe le milieu"
     }
   ]
 }

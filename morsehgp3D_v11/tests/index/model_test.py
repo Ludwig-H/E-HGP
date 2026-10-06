@@ -4,7 +4,7 @@ import json
 
 from fixtures import fixtures
 from fraction_model import population, require
-from judge import check_response, parse
+from judge import check_response, parse, radix_shape
 from requests import requests
 
 
@@ -16,9 +16,10 @@ def model_answer(req, bits):
                     reason=req.refusal, sites=[], site_ids=[], kind='refused', inner=[], shell=[], ledger={})
     truth = population(req.records, req.support)
     saturated = len(truth['inner']) >= req.threshold
+    nodes, depth = radix_shape(truth['sites'], req.leaf)
     return dict(answer, status='ok', reason='none', kind='saturated' if saturated else 'complete',
                 sites=truth['sites'], site_ids=truth['site_ids'], inner=truth['inner'][:req.threshold],
-                shell=[] if saturated else truth['shell'], index_nodes=1, index_depth=1,
+                shell=[] if saturated else truth['shell'], index_nodes=nodes, index_depth=depth,
                 ledger=dict(nodes=2, bounds=2, point_tests=0, inside_blocks=0, outside_blocks=0, passes=2))
 
 
@@ -63,6 +64,8 @@ def run():
     corrupt(no_shell, 'shell', [0])
     corrupt(full, 'query_memory', dict(before=0, after=4, peak=4))
     corrupt(full, 'ledger', dict(nodes=1, bounds=1, point_tests=0, inside_blocks=0, outside_blocks=0, passes=1))
+    corrupt(full, 'index_nodes', truth['index_nodes'] + 2)  # arbre median ou noeuds superflus
+    corrupt(full, 'index_depth', truth['index_depth'] - 1)
     for req, answer in corruptions:
         try:
             check_response(req, answer, 24)

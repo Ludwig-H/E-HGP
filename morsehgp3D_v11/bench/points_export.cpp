@@ -73,7 +73,7 @@ Outcome nearest(const GlobalIndex& index, u32 site, u32 count, std::span<Neighbo
   std::array<Neighbor, kMaxMebSites> heap{};
   u32 used = 0;
   const auto nodes = index_detail::Access::nodes(index);
-  std::array<u64, 33> stack{};
+  std::array<u64, kMortonBits + 2> stack{};  // arbre radix : profondeur au plus kMortonBits+1 (docs/INDEX.md)
   u32 pending = 1;
   if (nodes.empty() || index.max_depth() == 0 || index.max_depth() > stack.size()) return fail(Reason::tower_invariant);
   while (pending != 0) {

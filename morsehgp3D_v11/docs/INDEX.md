@@ -39,34 +39,60 @@ de couples de sites ; son seul intermédiaire global est cet arbre linéaire.
 
 ## Arbre et parcours
 
-L'arbre divise chaque plage Morton en deux moitiés jusqu'à `leaf_size`
-(défaut 8, domaine 1..256). Il est stocké en préordre ; chaque nœud porte
-une boîte fermée exacte, sa plage et le premier indice après son sous-arbre.
-Les feuilles scannent leurs points une fois à la construction ; les boîtes
-internes réunissent celles des deux enfants. Construction O(n), mémoire
-O(n), profondeur au plus ceil(log2 n)+1. Ces bornes commencent **après** la
-préparation Cloud et ne bornent pas une tour ou le nombre de requêtes FULL.
+L'arbre est l'**arbre radix de Morton** (Karras ; levier V3, 6 octobre 2026) :
+toute plage de plus de `leaf_size` sites (défaut 8, domaine 1..256) est coupée
+au bit de Morton le plus haut qui diffère entre son premier et son dernier
+site. Le Cloud étant trié par clé croissante, sans site répété, les sites dont
+ce bit vaut 1 forment un suffixe non vide de la plage ; une recherche
+dichotomique le trouve en lisant la seule coordonnée de ce bit, sans clé
+stockée. Chaque nœud est donc une cellule de Morton, et deux frères sont séparés
+par un plan de coordonnées, au lieu de se recouvrir comme les deux moitiés de
+l'ancienne coupe médiane des rangs. L'arbre est stocké en préordre ; chaque nœud
+porte une boîte fermée exacte, sa plage et le premier indice après son
+sous-arbre. Les feuilles scannent leurs points une fois à la construction ; les
+boîtes internes réunissent celles des deux enfants. Mémoire O(n). Chaque coupe
+fixe au moins un bit de plus du préfixe commun : la profondeur est au plus
+3B+1 (55, 64 ou 73), atteinte par l'origine et les 3B points dont la clé n'a
+qu'un bit (porte `mhgp11_index_unit_structure`). Ces bornes commencent
+**après** la préparation Cloud et ne bornent pas une tour ou le nombre de
+requêtes FULL.
 
-Avant l'allocation, le nombre de nœuds se calcule en O(log n). Au premier
-niveau de largeur w=2^d où q=floor(n/w)≤leaf_size, les plages ont q ou q+1
-sites. Si q=leaf_size, les r=n mod w plages de taille q+1 se divisent encore ;
-sinon elles sont toutes feuilles. Ainsi L=w+(q=leaf_size ? r : 0) et le
-nombre de nœuds vaut 2L−1. Il reste inférieur à 2n≤2^33.
+Le nombre de nœuds dépend des positions. Un premier passage applique les mêmes
+coupes et le compte avant toute allocation (compter, réserver, remplir) ; le
+remplissage vérifie qu'il retombe exactement sur ce compte. Chaque nœud interne
+a deux enfants non vides : il y a moins de 2n≤2^33 nœuds. Les sites restent
+rencontrés dans l'ordre de Morton, donc les listes, les témoins saturés et les
+descentes FULL sont inchangés. Sur les trois trames LiDAR à K = 5, la borne
+entière et l'arbre radix ramènent les tests de points du census à ×0,258–0,265
+de la borne continue sur l'arbre médian (×0,50–0,52 avec la seule borne).
 
-Le census parcourt ces liens sans pile. Sur la boîte, `num::power_bounds`
-borne H(x)=D‖x−a‖²−2N·(x−a). Un minorant **strictement positif** écarte tout
-le bloc ; un majorant **strictement négatif** accepte ses sites intérieurs.
-Les égalités sont raffinées, puis jugées exactement aux feuilles. Toute
-coquille étendue est donc conservée ; aucune tolérance n'intervient.
+Le census parcourt ces liens sans pile. Sur la boîte, il borne
+H(x)=D‖x−a‖²−2N·(x−a)=D(‖x−c‖²−r²), c=a+N/D. Un minorant **strictement positif**
+écarte tout le bloc ; un majorant **strictement négatif** accepte ses sites
+intérieurs. Les égalités sont raffinées, puis jugées exactement aux feuilles.
+Toute coquille étendue est donc conservée ; aucune tolérance n'intervient.
 Les boîtes sont globales au propriétaire, jamais celles d'une liste locale
 du catalogue réutilisée après déplacement du centre d'une MEB.
 
-Les bornes séparent les extrema quadratiques et linéaires sur chaque axe :
-elles sont sûres mais pas nécessairement atteintes au même point. Aucun N²
-ni degré dix n'est introduit. Les majorants absolus de chaque expression
-restent ceux de la puissance : moins de 72 M^5 pour q4 et 216 M^6 pour q3,
-M=2^B. Q3 emploie Wide en 21/24 ; q1/q2/q4 et q3 en18 restent natifs i128.
-La validité ne suppose aucune positivité barycentrique.
+**Bornes sur sites entiers** (levier V3 de l'audit des transpositions, contrat
+de la revue indépendante 10 ; 6 octobre 2026). `num::LatticeSphere` prépare une
+fois par parcours, pour chaque axe, l'entier le plus proche de c_j (ex æquo :
+le plus petit) et le seuil ⌈2c_j⌉, par une division entière i128 de
+C_j=a_jD+N_j (moins de 2^(5B+6)). Le minorant est H au point entier le plus
+proche de c **ramené dans la boîte** : chaque axe étant une parabole convexe,
+c'est le minimum exact de H sur les points entiers de la boîte, donc sur ses
+sites. Le majorant est H au **coin le plus éloigné** de c : le maximum exact sur
+la boîte continue. Les deux points sont dans la boîte, leurs puissances gardent
+les budgets natifs de `side`. Ce minorant ne vaut que pour des points entiers :
+sur le segment entre (0,0,0) et (1,0,0), le q2 de ces deux points vaut 0 aux
+sites et −D/2 au milieu ; il ne remplace donc pas `num::power_bounds`, qui borne
+la boîte continue. La voie Wide (q3 non certifié en 21/24) garde les bornes
+continues antérieures, qui séparent les extrema quadratiques et linéaires par
+axe (moins de 72 M^5 pour q4 et 216 M^6 pour q3, M=2^B). Les listes rendues
+sont inchangées ; sur les trois trames LiDAR à K = 5, les tests de points du
+census passent de 21,15 / 15,52 / 14,76 M à 10,48 / 7,99 / 7,58 M (×0,50–0,52),
+tous les autres registres et les sorties FULL restant identiques. La validité
+ne suppose aucune positivité barycentrique.
 
 ## Ressources, déterminisme et portée
 
@@ -77,7 +103,7 @@ allouée. Un échec restitue les réservations de cet appel, sans publier de
 préfixe. Le travail des deux parcours est **cumulé** dans CensusLedger.
 L'arbre réserve exactement `nodes()*sizeof(Node)` octets ; aucune allocation
 de taille dépendant de n n'est extérieure aux Buffer. Les appels ont une
-pile bornée à 33 cadres à la construction et constante à la requête.
+pile bornée à 3B+2 cadres à la construction et constante à la requête.
 
 L'ordre gauche/droite suit les plages Morton, y compris lors de l'acceptation
 d'un bloc : les sorties sont déjà croissantes. L'index partagé reste constant ;

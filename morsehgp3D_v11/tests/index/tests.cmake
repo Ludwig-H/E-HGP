@@ -1,6 +1,6 @@
 # Census global : oracle Gram/Fraction, ownership explicite et refus transactionnels.
 mhgp11_add_unit(mhgp11_index_unit SOURCES unit.cpp
-                GROUPS fixtures structure ownership budget blocks concurrency LABELS fast)
+                GROUPS fixtures structure ownership budget blocks lattice concurrency LABELS fast)
 mhgp11_add_unit(mhgp11_index_fault SOURCES fault.cpp GROUPS starvation LABELS fast)
 add_executable(mhgp11_index_probe ${CMAKE_CURRENT_LIST_DIR}/probe.cpp)
 target_link_libraries(mhgp11_index_probe PRIVATE mhgp11)
@@ -19,7 +19,7 @@ mhgp11_python_gate(mhgp11_index_bench_io 0 ${PROJECT_SOURCE_DIR}/bench/index_io_
 
 # Vue empruntee : une passe exacte, capacite fixe n et callbacks synchrones exclusifs.
 mhgp11_add_unit(mhgp11_index_borrowed SOURCES borrowed_test.cpp
-                GROUPS fixtures ownership callbacks concurrency LABELS fast)
+                GROUPS fixtures lattice ownership callbacks concurrency LABELS fast)
 mhgp11_add_unit(mhgp11_index_borrowed_fault SOURCES borrowed_fault.cpp GROUPS starvation LABELS fast)
 add_executable(mhgp11_index_borrowed_probe ${CMAKE_CURRENT_LIST_DIR}/borrowed_probe.cpp)
 target_link_libraries(mhgp11_index_borrowed_probe PRIVATE mhgp11)

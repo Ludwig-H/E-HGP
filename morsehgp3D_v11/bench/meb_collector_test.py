@@ -142,6 +142,8 @@ def decode_controls(root):
 def attempts(root):
     args = argparse.Namespace(work=root, data=root)
     case = dict(name='tiny', count=12, coordinates='xyz', point_ids='ids')
+    # Douze positions coupees 6/6 au bit 3 de x : arbre radix a feuilles de 8 (noeuds 3, profondeur 2), comme la fixture.
+    (root / 'xyz').write_bytes(struct.pack('<36I', *[v for x in list(range(6)) + list(range(8, 14)) for v in (x, 0, 0)]))
     modes = ('ok', 'bad_json', 'bad_events', 'bad_binary', 'missing_binary', 'stderr', 'refused', 'failed', 'signal',
              'timeout', 'launch')
     for mode in modes:
@@ -248,6 +250,7 @@ def builds(root):
 
 def schedules(root):
     manifest = {'cases': [dict(name=n, count=12, coordinates='xyz', point_ids='ids') for n in driver.previous.COUNTS]}
+    (root / 'xyz').write_bytes(struct.pack('<36I', *[v for x in list(range(6)) + list(range(8, 14)) for v in (x, 0, 0)]))  # forme radix (3, 2)
     builds = {bits: {'path': 'fake%d' % bits} for bits in driver.PROFILES}
     for mode in ('ok', 'failed', 'different', 'incomplete_different', 'work_different', 'interrupted'):
         args = argparse.Namespace(out=root / mode, work=root / (mode + '_work'), data=root,
@@ -263,10 +266,10 @@ def schedules(root):
 
         original = sem.inspect
 
-        def decode(path, bits, count, events):
+        def decode(path, bits, count, events, shape=None):
             if mode == 'interrupted':
                 raise KeyboardInterrupt()
-            value = original(path, bits, count, events)
+            value = original(path, bits, count, events, shape)
             if bits == 21 and mode in ('different', 'incomplete_different'):
                 value['sha256'] = 'b' * 64
             if bits == 21 and mode == 'work_different':

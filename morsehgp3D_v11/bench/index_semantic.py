@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Strict decoder of the bounded index query record, independent of native memory layouts."""
 import hashlib
-from functools import lru_cache
 import struct
 
 MAGIC = b'MHGP11IDX1'
@@ -28,17 +27,31 @@ def support(ordinal, count):
     return [(start + i * step) % count if i < q else 2**32 - 1 for i in range(4)]
 
 
-def tree_shape(count):
-    @lru_cache(maxsize=None)
-    def shape(n):
-        if n <= 8:
+def radix_shape(points, leaf=8):
+    """Noeuds et profondeur (racine a 1) de l'arbre radix de Morton des positions distinctes, sans parcours natif.
+
+    Chaque plage de plus de leaf cles est coupee au plus haut bit qui differe entre ses extremites (levier V3)."""
+    keys = sorted({sum(((value >> bit) & 1) << (3 * bit + axis)
+                        for axis, value in enumerate(point) for bit in range(value.bit_length())) for point in points})
+
+    def shape(begin, end):
+        if end - begin <= leaf:
             return 1, 1
-        left, right = shape(n // 2), shape(n - n // 2)
+        top = 1 << ((keys[begin] ^ keys[end - 1]).bit_length() - 1)
+        split = next(i for i in range(begin, end) if keys[i] & top)
+        left, right = shape(begin, split), shape(split, end)
         return 1 + left[0] + right[0], 1 + max(left[1], right[1])
-    return shape(count)
+    return shape(0, len(keys))
 
 
-def validate_events(events, bits, count):
+def coordinates_shape(data, leaf=8):
+    """Forme radix d'un fichier de coordonnees xyz u32 petit-boutistes (12 octets par point)."""
+    need(len(data) % 12 == 0 and data, 'coordonnees xyz u32')
+    values = struct.unpack('<%dI' % (len(data) // 4), data)
+    return radix_shape(zip(values[0::3], values[1::3], values[2::3]), leaf)
+
+
+def validate_events(events, bits, count, shape=None):
     need(len(events) == QUERIES + 4 and [v['phase'] for v in events] ==
          ['cloud', 'index'] + ['query'] * QUERIES + ['summary', 'exit'], 'phases/inventaire')
     cloud, index, summary, end = events[0], events[1], events[-2], events[-1]
@@ -53,8 +66,8 @@ def validate_events(events, bits, count):
     for key in ('wall_ns', 'peak_reserved_bytes', 'reserved_after_bytes', 'nodes', 'max_depth'):
         integer(index[key], 'index ' + key)
     need(0 < index['reserved_after_bytes'] <= index['peak_reserved_bytes'] <= BUDGET and
-         0 < index['nodes'] < 2 * count and 0 < index['max_depth'] <= (count - 1).bit_length() + 1, 'index/memoire')
-    need((index['nodes'], index['max_depth']) == tree_shape(count) and
+         0 < index['nodes'] < 2 * count and 0 < index['max_depth'] <= 3 * bits + 1, 'index/memoire')
+    need((shape is None or (index['nodes'], index['max_depth']) == shape) and
          type(index['node_bytes']) is int and index['node_bytes'] == 40 and
          index['reserved_after_bytes'] == index['peak_reserved_bytes'] ==
          cloud['reserved_after_bytes'] + index['node_bytes'] * index['nodes'], 'construction/plafond exacts')
@@ -98,8 +111,8 @@ def validate_events(events, bits, count):
     return expected
 
 
-def inspect(path, bits, count, events):
-    totals = validate_events(events, bits, count)
+def inspect(path, bits, count, events, shape=None):
+    totals = validate_events(events, bits, count, shape)
     semantic = hashlib.sha256(b'ehgp.v11.index_query_semantic.v1\0')
     raw = hashlib.sha256()
     size = 0

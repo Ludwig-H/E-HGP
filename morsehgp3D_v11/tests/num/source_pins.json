@@ -314,5 +314,32 @@
     ],
     "action": "power_bound_signs rend les signes des deux bornes de power_bounds avec les memes refus ; voie native : memes sommes i128 (native_bounds partage par les deux fonctions) lues sans conversion Wide ni require_fit, comme center_side, ordre des bornes controle ; voie Wide inchangee. Les deux parcours census de l index ne lisent plus que ces signes.",
     "tests": "Sonde Fraction des bornes : tout ecart de signe avec power_bounds rend 3 ; groupe natif bounds 372 controles (fixtures contact, interieur, intervalle a cheval, quatre arites). Mutant bound_signs_native_swapped tue par mhgp11_num_bounds_fraction ; contact_exterieur et contact_interieur reancres et tues. Qualification native G4 encore requise."
+  },
+  "lattice_bounds_revision": {
+    "baseline_commit": "9d10de21341fee138c15c3caf9cb30925e030cb9",
+    "baseline_sources": [
+      {
+        "path": "src/num/predicates.cpp",
+        "sha256": "4bfa98717529baffb9072a3c014078a64c8d96f23d69856b4136a210f3ae6d6a"
+      },
+      {
+        "path": "src/num/num.hpp",
+        "sha256": "bde9c4a076a8f7c3d82940252e1c132804a65f56360acd510922274255df82f2"
+      },
+      {
+        "path": "src/index/census.cpp",
+        "sha256": "d6e3aad8b2180c9f837bc32380d7142e56113e098c0210df3e26c1aff9d4eae9"
+      },
+      {
+        "path": "src/index/census_workspace.cpp",
+        "sha256": "ba921a4e3bccc823e23e4668941ebafb9a14cf510b318e86d3d6cec270ca8f6c"
+      },
+      {
+        "path": "src/index/build.cpp",
+        "sha256": "45f63a79e7b2bd8989de1a3e10e4a21502d2482f5f1cf9586076db93066d16af"
+      }
+    ],
+    "action": "Levier V3 (audit des transpositions ; contrat de la revue independante 10) : LatticeSphere, minorant exact de la puissance sur les points entiers d'une boite (entier le plus proche du centre ramene dans la boite) et majorant exact au coin eloigne, prepares une fois par parcours ; reserve au census des sites de l'index, voie Wide sur power_bound_signs. Arbre de l'index coupe au plus haut bit de Morton qui differe (radix), compte avant allocation.",
+    "tests": "mhgp11_num_lattice (enumeration exacte, monotonie, fixtures, trois profils), groupes lattice des deux census, structure radix (recurrence independante, chaine de profondeur 3B+1), juges Python a forme radix exacte ; mutants num (3) et index (5). Qualification G4 nouvelle requise."
   }
 }

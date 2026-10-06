@@ -83,12 +83,13 @@ def measure(exe, case, bits, args, checkpoint):
         started = time.monotonic()
         try:
             semantic.need(row['stderr'] == '', 'diagnostic stderr natif inattendu')
-            semantic.validate_events(row['events'], bits, case['count'])
-        except (ValueError, KeyError, TypeError, OverflowError) as error:
+            shape = semantic.coordinates_shape((args.data / case['coordinates']).read_bytes())
+            semantic.validate_events(row['events'], bits, case['count'], shape)
+        except (OSError, ValueError, KeyError, TypeError, OverflowError) as error:
             base.attempt_error(row, 'success', error, 'invalid_output')
         if row['status'] == 'exited':
             try:
-                value = semantic.inspect(output, bits, case['count'], row['events'])
+                value = semantic.inspect(output, bits, case['count'], row['events'], shape)
                 row.update(semantic=value, canonical_sha256=value['raw_sha256'], canonical_bytes=value['bytes'],
                            status='ok')
             except (OSError, ValueError, KeyError, TypeError, OverflowError) as error:

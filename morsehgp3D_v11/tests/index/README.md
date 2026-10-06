@@ -23,8 +23,11 @@ six refus de paramètres ou de mémoire. Chaque oracle normal/−O attend
 36 020 contrôles. La suite ne prétend pas qualifier FULL ni un census
 pondéré. Les trois profils 18/21/24 ont joué leurs propres portes.
 
-`model_test.py` joue 107 778 contrôles de réponses modèles, neuf faits fixes
-par profil, seize corruptions et trois JSON invalides, en normal et −O.
+`model_test.py` joue 110 790 contrôles de réponses modèles, neuf faits fixes
+par profil, dix-huit corruptions et trois JSON invalides, en normal et −O.
+Depuis l'arbre radix (levier V3, 6 octobre 2026), le juge exige le nombre de
+nœuds et la profondeur exacts, recalculés en Python à partir des sites ; deux
+corruptions (nœuds superflus, profondeur réduite) le vérifient.
 Ces vérifications légères passent localement ; aucun binaire natif n’a été
 construit ni exécuté localement. Les réponses modèles ne qualifient pas
 le produit. Le protocole batch est documenté en tête de `probe.cpp` ;
@@ -32,10 +35,14 @@ les budgets Cloud, index et résultat sont séparés, les entrées/JSON relèven
 du harnais.
 
 Les groupes natifs contrôlent les fixtures, la structure, la propriété,
-les budgets, les blocs certifiés et la concurrence. L’arbre est comparé
-à une récurrence indépendante pour 13 tailles, dont 8/16/17/24/257, et
+les budgets, les blocs certifiés, les bornes entières et la concurrence.
+L’arbre radix est comparé à une récurrence indépendante (clés recalculées bit
+à bit, coupe par balayage linéaire) pour 13 tailles, dont 8/16/17/24/257, et
 quatre tailles de feuille ; son budget est exactement son nombre de nœuds
-fois `sizeof(Node)`. Les tests déplacent Cloud/index/résultat, préservent
+fois `sizeof(Node)`. Une chaîne de 3B+1 sites atteint la profondeur maximale
+3B+1, et le census y reste exact. Le groupe `lattice` (census possédé et
+emprunté) grave deux boîtes que la borne entière décide à la racine et que la
+borne continue laisse raffiner, avec des registres absolus. Les tests déplacent Cloud/index/résultat, préservent
 les vues valides, interrogent les objets déplacés vides et conservent un
 résultat après destruction de l’index. Quatre fils exécutent chacun seize
 requêtes privées sur le même index immuable. La porte de pénurie refuse

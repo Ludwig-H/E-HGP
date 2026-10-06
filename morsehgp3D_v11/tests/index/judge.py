@@ -2,7 +2,24 @@
 import json
 from dataclasses import dataclass
 
-from fraction_model import population, require
+from fraction_model import morton, population, require
+
+
+def radix_shape(sites, leaf):
+    """Noeuds et profondeur de l'arbre radix de Morton (racine a profondeur 1), recalcules ici sans parcours natif.
+
+    Les sites sont tries par cle et distincts ; chaque plage de plus de leaf sites est coupee au plus haut bit qui
+    differe entre ses cles extremes. La recursion reste bornee par le nombre de bits des cles."""
+    keys = sorted(set(morton(tuple(site)) for site in sites))
+
+    def shape(begin, end):
+        if end - begin <= leaf:
+            return 1, 1
+        top = 1 << ((keys[begin] ^ keys[end - 1]).bit_length() - 1)
+        split = next(i for i in range(begin, end) if keys[i] & top)
+        left, right = shape(begin, split), shape(split, end)
+        return 1 + left[0] + right[0], 1 + max(left[1], right[1])
+    return shape(0, len(keys))
 
 
 @dataclass(frozen=True)
@@ -91,8 +108,10 @@ def check_response(req, answer, bits):
     check(ledger['point_tests'] <= 2 * len(truth['sites']), 'aucun site reteste dans une passe')
     check(type(answer.get('index_nodes')) is int and 1 <= answer['index_nodes'] <= 2 * len(truth['sites']) - 1,
           'nombre de noeuds de l arbre binaire')
-    check(type(answer.get('index_depth')) is int and 0 <= answer['index_depth'] <= (len(truth['sites']) - 1).bit_length() + 1,
-          'profondeur equilibree')
+    expected_nodes, expected_depth = radix_shape(truth['sites'], req.leaf)
+    check(answer['index_nodes'] == expected_nodes, 'noeuds de l arbre radix de Morton')
+    check(type(answer.get('index_depth')) is int and answer['index_depth'] == expected_depth and
+          expected_depth <= 3 * bits + 1, 'profondeur de l arbre radix, au plus 3B+1')
     return checks
 
 
