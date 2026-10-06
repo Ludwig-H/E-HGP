@@ -1,0 +1,762 @@
+{
+  "backend": "reference_cpu",
+  "closing_generation": "2026-10-06T05:46:32.748-07:00",
+  "closure": "stopped",
+  "commands": [
+    {
+      "exit_code": "0",
+      "index": "0",
+      "max_rss_kb": "1550524",
+      "name": "supports_kruskal",
+      "status": "ok",
+      "timeout_seconds": "2400",
+      "wall_seconds": "420.592"
+    }
+  ],
+  "commit": "07428324eaa5cbf26446362bceadd77722c1a5b7",
+  "comparability": "Versions effectives relevees dans env/vm_facts.txt et la provenance des builds ; aucune version de l'ancienne VM n'est supposee sur une nouvelle cible. Python nu sauf plan python_packages = pinned. Temps et versions NON comparables entre VM et codespace.",
+  "console_write_failures": 0,
+  "data_files": [
+    {
+      "name": "lidar_ng00.ids.u32le",
+      "sha256": "c73a41965f6f2e1042b5f3ba876d12ae0811b7f24aa73c886aa07830974e33c6",
+      "size": 159540
+    },
+    {
+      "name": "lidar_ng00.u32le",
+      "sha256": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf",
+      "size": 478620
+    },
+    {
+      "name": "lidar_ng01.ids.u32le",
+      "sha256": "bb699c2511a87618813a32657399539fe90e8f1e4f1187656ac88c03f2fee6a4",
+      "size": 142204
+    },
+    {
+      "name": "lidar_ng01.u32le",
+      "sha256": "ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f",
+      "size": 426612
+    },
+    {
+      "name": "lidar_ng02.ids.u32le",
+      "sha256": "121e76f3ef1fcedb05cb65da9a95bfb84fe4b8305076a7485483fff113d128cc",
+      "size": 183380
+    },
+    {
+      "name": "lidar_ng02.u32le",
+      "sha256": "a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af",
+      "size": 550140
+    },
+    {
+      "name": "manifest.json",
+      "sha256": "acddfeb0306be40160884dbbf6531c30ecb530565fb4da89f9d3497bdca4807e",
+      "size": 10856
+    },
+    {
+      "name": "restoration.json",
+      "sha256": "83bd4bb83288366dad3ec0d4df1b688730c9a2f202b0a240c8fd0b8e0c7c8cd8",
+      "size": 8248
+    },
+    {
+      "name": "restore.py",
+      "sha256": "c91801ea483aaf947005c8de23659e45dc210a1e078c0a87a0aa1f09cad13523",
+      "size": 3220
+    },
+    {
+      "name": "uniform_u18_n16000.ids.u32le",
+      "sha256": "5fd0363db4cb908208a445c1b0c80e0a3a1f427d7153593efbf3b0d5abe5657a",
+      "size": 64000
+    },
+    {
+      "name": "uniform_u18_n16000.u32le",
+      "sha256": "184c9d62e4a7d00dd407a96b5e5d0d76ba5e9680516f5dc75461d23eca26d4db",
+      "size": 192000
+    },
+    {
+      "name": "uniform_u18_n32000.ids.u32le",
+      "sha256": "4e29eabcb1c72af6e4569317cd6b367a5bc506a46ac5ef80275ee22dda19b576",
+      "size": 128000
+    },
+    {
+      "name": "uniform_u18_n32000.u32le",
+      "sha256": "08b66f9c6b7ec4142303b9f86e4da1230d175b5391640069828a3a23c15144e9",
+      "size": 384000
+    },
+    {
+      "name": "uniform_u18_n8000.ids.u32le",
+      "sha256": "564d7ad84a134f7cee7cb2c85c8d0b6c82301bd2abccd203979350c384ec014b",
+      "size": 32000
+    },
+    {
+      "name": "uniform_u18_n8000.u32le",
+      "sha256": "038662b2cb241ce2920705f127acc8d5e2eae73d41d15cb35613467e1642049d",
+      "size": 96000
+    },
+    {
+      "name": "v10_frozen_c764.tar.gz",
+      "sha256": "79fa4c637d796a2b9ff0310842b7fe2e6419cd3d4d0d93b56b1084580028f3b2",
+      "size": 71562
+    }
+  ],
+  "data_manifest_sha256": "639395ca7b2fb1b609b9dc9a4bfe6096e28aa379b627e7fdd6a64bd1ef50f71e",
+  "data_verified_remote": true,
+  "errors": [],
+  "evidence_grade": "pushed_commit",
+  "gcp_mutation_phase_entered": true,
+  "generation": "2026-10-06T05:46:32.748-07:00",
+  "guest_deadline_epoch": 1791294137,
+  "guest_guard_intact": true,
+  "guest_schedule": {
+    "MODE": "poweroff",
+    "USEC": "1791294137842931"
+  },
+  "guest_shutdown_minutes": 55,
+  "host_commands": [
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "os-login",
+        "ssh-keys",
+        "add",
+        "--project=devpod-gpu-exploration",
+        "--key-file=/workspaces/.ehgp-sessions/v11.20261006.claudesupkr/key.pub",
+        "--ttl=75m",
+        "--format=json",
+        "--quiet"
+      ],
+      "elapsed_seconds": 1.418,
+      "exit_code": 0,
+      "name": "oslogin_add",
+      "pid": 1285603,
+      "started_epoch": 1791290758.837,
+      "timeout_seconds": 120
+    },
+    {
+      "argv": [
+        "/workspaces/.ehgp-sessions/v11.20261006.claudesupkr/host/start_and_verify.sh",
+        "--yes",
+        "--guest-shutdown-minutes",
+        "55",
+        "--handoff-file",
+        "/workspaces/.ehgp-sessions/v11.20261006.claudesupkr/host/handoff.json",
+        "--lifecycle-state-file",
+        "/workspaces/.ehgp-sessions/v11.20261006.claudesupkr/host/lifecycle.txt",
+        "--guard-mark-dir",
+        "/workspaces/.ehgp-sessions/v11.20261006.claudesupkr/host/guardmarks"
+      ],
+      "elapsed_seconds": 95.507,
+      "exit_code": 0,
+      "name": "guarded_start",
+      "pid": 1285629,
+      "started_epoch": 1791290760.256,
+      "timeout_seconds": 2400
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "instances",
+        "describe",
+        "ehgp-v7-3b1d496aed430749ea7e049f",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-c",
+        "--format=json"
+      ],
+      "elapsed_seconds": 1.719,
+      "exit_code": 0,
+      "name": "recertify_running_1",
+      "pid": 1296783,
+      "started_epoch": 1791290855.767,
+      "timeout_seconds": 90
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "ssh",
+        "ehgp-v7-3b1d496aed430749ea7e049f",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-c",
+        "--quiet",
+        "--ssh-key-file=/workspaces/.ehgp-sessions/v11.20261006.claudesupkr/key",
+        "--ssh-key-expiration=2026-10-06T14:00:59.309920Z",
+        "--ssh-flag=-n",
+        "--ssh-flag=-o BatchMode=yes",
+        "--ssh-flag=-o ConnectTimeout=15",
+        "--ssh-flag=-o ServerAliveInterval=15",
+        "--ssh-flag=-o ServerAliveCountMax=4",
+        "--command=sudo -n cat /run/systemd/shutdown/scheduled"
+      ],
+      "elapsed_seconds": 4.776,
+      "exit_code": 0,
+      "name": "guest_schedule",
+      "pid": 1296822,
+      "started_epoch": 1791290857.487,
+      "timeout_seconds": 90
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "ssh",
+        "ehgp-v7-3b1d496aed430749ea7e049f",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-c",
+        "--quiet",
+        "--ssh-key-file=/workspaces/.ehgp-sessions/v11.20261006.claudesupkr/key",
+        "--ssh-key-expiration=2026-10-06T14:00:59.309920Z",
+        "--ssh-flag=-n",
+        "--ssh-flag=-o BatchMode=yes",
+        "--ssh-flag=-o ConnectTimeout=15",
+        "--ssh-flag=-o ServerAliveInterval=15",
+        "--ssh-flag=-o ServerAliveCountMax=4",
+        "--command=umask 077; mkdir -p \"$HOME/ehgp-v11\" && chmod 700 \"$HOME/ehgp-v11\" && for o in \"$HOME\"/ehgp-v11/ehgp-v11.*; do if [ -d \"$o\" ] && [ ! -L \"$o\" ]; then rm -rf \"$o/build\" \"$o/src\" \"$o/data\" \"$o/joblib\" \"$o/pyuser\" \"$o/overflow\" \"$o/package.tar.gz\" \"$o/salvage.tar.gz\"; if [ -f \"$o/results.tar.gz\" ]; then rm -rf \"$o/results\"; fi; fi; done; d=$(mktemp -d \"$HOME/ehgp-v11/ehgp-v11.XXXXXXXXXX\") && mkdir \"$d/data\" && printf \"DIR=%s\\n\" \"$d\" && df -Pk \"$d\" | awk 'NR==2 {print \"AVAIL_KB=\" $4}' && du -sk \"$HOME/ehgp-v11\" | awk '{print \"USED_KB=\" $1}'"
+      ],
+      "elapsed_seconds": 6.642,
+      "exit_code": 0,
+      "name": "remote_mkdir",
+      "pid": 1297081,
+      "started_epoch": 1791290862.264,
+      "timeout_seconds": 90
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "scp",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-c",
+        "--quiet",
+        "--ssh-key-file=/workspaces/.ehgp-sessions/v11.20261006.claudesupkr/key",
+        "--ssh-key-expiration=2026-10-06T14:00:59.309920Z",
+        "--scp-flag=-o BatchMode=yes",
+        "--scp-flag=-o ConnectTimeout=15",
+        "--scp-flag=-o ServerAliveInterval=15",
+        "--scp-flag=-o ServerAliveCountMax=4",
+        "/workspaces/.ehgp-sessions/v11.20261006.claudesupkr/package/package.tar.gz",
+        "/workspaces/.ehgp-sessions/v11.20261006.claudesupkr/package/plan.sh",
+        "/workspaces/.ehgp-sessions/v11.20261006.claudesupkr/package/plan.json",
+        "ehgp-v7-3b1d496aed430749ea7e049f:/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.bwWNB4VzdD/"
+      ],
+      "elapsed_seconds": 12.072,
+      "exit_code": 0,
+      "name": "upload_package",
+      "pid": 1297389,
+      "started_epoch": 1791290868.908,
+      "timeout_seconds": 150
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "ssh",
+        "ehgp-v7-3b1d496aed430749ea7e049f",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-c",
+        "--quiet",
+        "--ssh-key-file=/workspaces/.ehgp-sessions/v11.20261006.claudesupkr/key",
+        "--ssh-key-expiration=2026-10-06T14:00:59.309920Z",
+        "--ssh-flag=-n",
+        "--ssh-flag=-o BatchMode=yes",
+        "--ssh-flag=-o ConnectTimeout=15",
+        "--ssh-flag=-o ServerAliveInterval=15",
+        "--ssh-flag=-o ServerAliveCountMax=4",
+        "--command=umask 077; cd /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.bwWNB4VzdD && test \"$(sha256sum package.tar.gz | cut -d \" \" -f 1)\" = b44311ef5caee57318576a5de15913a1d3cdf6160938e5b1a7af09397be5caee && test \"$(sha256sum plan.sh | cut -d \" \" -f 1)\" = 499d43cd9009596d452e6441cd65ef2cc6166d36f69f68dcd4526781721c2a0f && test \"$(sha256sum plan.json | cut -d \" \" -f 1)\" = 061a673585cd38c07e73ee7f95470a72e4b2773edfdc15ec804b25eed4f2e8fa && mkdir -m 700 src && tar --no-same-owner --no-same-permissions -xzf package.tar.gz -C src && test -f src/morsehgp3D_v11/CMakeLists.txt && test -f src/gcp-migration/v11_worker.sh && echo UNPACKED"
+      ],
+      "elapsed_seconds": 6.194,
+      "exit_code": 0,
+      "name": "verify_unpack",
+      "pid": 1297947,
+      "started_epoch": 1791290880.982,
+      "timeout_seconds": 300
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "scp",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-c",
+        "--quiet",
+        "--ssh-key-file=/workspaces/.ehgp-sessions/v11.20261006.claudesupkr/key",
+        "--ssh-key-expiration=2026-10-06T14:00:59.309920Z",
+        "--scp-flag=-o BatchMode=yes",
+        "--scp-flag=-o ConnectTimeout=15",
+        "--scp-flag=-o ServerAliveInterval=15",
+        "--scp-flag=-o ServerAliveCountMax=4",
+        "/workspaces/E-HGP/build/v11-full-data-20261002/lidar_ng00.ids.u32le",
+        "/workspaces/E-HGP/build/v11-full-data-20261002/lidar_ng00.u32le",
+        "/workspaces/E-HGP/build/v11-full-data-20261002/lidar_ng01.ids.u32le",
+        "/workspaces/E-HGP/build/v11-full-data-20261002/lidar_ng01.u32le",
+        "/workspaces/E-HGP/build/v11-full-data-20261002/lidar_ng02.ids.u32le",
+        "/workspaces/E-HGP/build/v11-full-data-20261002/lidar_ng02.u32le",
+        "/workspaces/E-HGP/build/v11-full-data-20261002/manifest.json",
+        "/workspaces/E-HGP/build/v11-full-data-20261002/restoration.json",
+        "/workspaces/E-HGP/build/v11-full-data-20261002/restore.py",
+        "/workspaces/E-HGP/build/v11-full-data-20261002/uniform_u18_n16000.ids.u32le",
+        "/workspaces/E-HGP/build/v11-full-data-20261002/uniform_u18_n16000.u32le",
+        "/workspaces/E-HGP/build/v11-full-data-20261002/uniform_u18_n32000.ids.u32le",
+        "/workspaces/E-HGP/build/v11-full-data-20261002/uniform_u18_n32000.u32le",
+        "/workspaces/E-HGP/build/v11-full-data-20261002/uniform_u18_n8000.ids.u32le",
+        "/workspaces/E-HGP/build/v11-full-data-20261002/uniform_u18_n8000.u32le",
+        "/workspaces/E-HGP/build/v11-full-data-20261002/v10_frozen_c764.tar.gz",
+        "/workspaces/.ehgp-sessions/v11.20261006.claudesupkr/package/data/SHA256SUMS",
+        "ehgp-v7-3b1d496aed430749ea7e049f:/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.bwWNB4VzdD/data/"
+      ],
+      "elapsed_seconds": 16.805,
+      "exit_code": 0,
+      "name": "upload_data",
+      "pid": 1298228,
+      "started_epoch": 1791290887.178,
+      "timeout_seconds": 121
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "ssh",
+        "ehgp-v7-3b1d496aed430749ea7e049f",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-c",
+        "--quiet",
+        "--ssh-key-file=/workspaces/.ehgp-sessions/v11.20261006.claudesupkr/key",
+        "--ssh-key-expiration=2026-10-06T14:00:59.309920Z",
+        "--ssh-flag=-n",
+        "--ssh-flag=-o BatchMode=yes",
+        "--ssh-flag=-o ConnectTimeout=15",
+        "--ssh-flag=-o ServerAliveInterval=15",
+        "--ssh-flag=-o ServerAliveCountMax=4",
+        "--command=cd /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.bwWNB4VzdD/data && test \"$(sha256sum SHA256SUMS | cut -d \" \" -f 1)\" = 639395ca7b2fb1b609b9dc9a4bfe6096e28aa379b627e7fdd6a64bd1ef50f71e && test \"$(ls -A | wc -l)\" = 17 && sha256sum -c --strict --quiet SHA256SUMS && echo DATA_OK"
+      ],
+      "elapsed_seconds": 4.679,
+      "exit_code": 0,
+      "name": "verify_data",
+      "pid": 1298922,
+      "started_epoch": 1791290903.984,
+      "timeout_seconds": 120
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "instances",
+        "describe",
+        "ehgp-v7-3b1d496aed430749ea7e049f",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-c",
+        "--format=json"
+      ],
+      "elapsed_seconds": 1.819,
+      "exit_code": 0,
+      "name": "recertify_before_worker_1",
+      "pid": 1299099,
+      "started_epoch": 1791290908.664,
+      "timeout_seconds": 90
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "ssh",
+        "ehgp-v7-3b1d496aed430749ea7e049f",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-c",
+        "--quiet",
+        "--ssh-key-file=/workspaces/.ehgp-sessions/v11.20261006.claudesupkr/key",
+        "--ssh-key-expiration=2026-10-06T14:00:59.309920Z",
+        "--ssh-flag=-n",
+        "--ssh-flag=-o BatchMode=yes",
+        "--ssh-flag=-o ConnectTimeout=15",
+        "--ssh-flag=-o ServerAliveInterval=15",
+        "--ssh-flag=-o ServerAliveCountMax=4",
+        "--command=umask 077; cd /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.bwWNB4VzdD || exit 1; setsid nohup bash /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.bwWNB4VzdD/src/gcp-migration/v11_worker.sh --src /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.bwWNB4VzdD/src --data /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.bwWNB4VzdD/data --plan /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.bwWNB4VzdD/plan.sh --work /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.bwWNB4VzdD --deadline-epoch 1791293477 --source commit:07428324eaa5cbf26446362bceadd77722c1a5b7 --plan-sha256 499d43cd9009596d452e6441cd65ef2cc6166d36f69f68dcd4526781721c2a0f --package-sha256 b44311ef5caee57318576a5de15913a1d3cdf6160938e5b1a7af09397be5caee --generation 2026-10-06T05:46:32.748-07:00 > /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.bwWNB4VzdD/worker.log 2>&1 < /dev/null & i=0; while [ ! -s /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.bwWNB4VzdD/worker.pid ] && [ \"$i\" -lt 100 ]; do sleep 0.1; i=$((i + 1)); done; printf \"LAUNCHED=%s\\n\" \"$(cat /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.bwWNB4VzdD/worker.pid 2>/dev/null)\""
+      ],
+      "elapsed_seconds": 4.425,
+      "exit_code": 0,
+      "name": "launch_worker",
+      "pid": 1299197,
+      "started_epoch": 1791290910.484,
+      "timeout_seconds": 90
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "instances",
+        "describe",
+        "ehgp-v7-3b1d496aed430749ea7e049f",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-c",
+        "--format=json"
+      ],
+      "elapsed_seconds": 2.641,
+      "exit_code": 0,
+      "name": "recertify_before_retrieve_1",
+      "pid": 1315952,
+      "started_epoch": 1791291344.98,
+      "timeout_seconds": 90
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "ssh",
+        "ehgp-v7-3b1d496aed430749ea7e049f",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-c",
+        "--quiet",
+        "--ssh-key-file=/workspaces/.ehgp-sessions/v11.20261006.claudesupkr/key",
+        "--ssh-key-expiration=2026-10-06T14:00:59.309920Z",
+        "--ssh-flag=-n",
+        "--ssh-flag=-o BatchMode=yes",
+        "--ssh-flag=-o ConnectTimeout=15",
+        "--ssh-flag=-o ServerAliveInterval=15",
+        "--ssh-flag=-o ServerAliveCountMax=4",
+        "--command=sudo -n cat /run/systemd/shutdown/scheduled"
+      ],
+      "elapsed_seconds": 5.99,
+      "exit_code": 0,
+      "name": "guest_schedule_reread",
+      "pid": 1316127,
+      "started_epoch": 1791291347.624,
+      "timeout_seconds": 60
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "scp",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-c",
+        "--quiet",
+        "--ssh-key-file=/workspaces/.ehgp-sessions/v11.20261006.claudesupkr/key",
+        "--ssh-key-expiration=2026-10-06T14:00:59.309920Z",
+        "--scp-flag=-o BatchMode=yes",
+        "--scp-flag=-o ConnectTimeout=15",
+        "--scp-flag=-o ServerAliveInterval=15",
+        "--scp-flag=-o ServerAliveCountMax=4",
+        "ehgp-v7-3b1d496aed430749ea7e049f:/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.bwWNB4VzdD/worker.log",
+        "/workspaces/.ehgp-sessions/v11.20261006.claudesupkr/results/"
+      ],
+      "elapsed_seconds": 6.755,
+      "exit_code": 0,
+      "name": "download_worker_log",
+      "pid": 1316358,
+      "started_epoch": 1791291353.615,
+      "timeout_seconds": 60
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "instances",
+        "describe",
+        "ehgp-v7-3b1d496aed430749ea7e049f",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-c",
+        "--format=json"
+      ],
+      "elapsed_seconds": 2.688,
+      "exit_code": 0,
+      "name": "recertify_before_results_1",
+      "pid": 1316627,
+      "started_epoch": 1791291360.371,
+      "timeout_seconds": 90
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "ssh",
+        "ehgp-v7-3b1d496aed430749ea7e049f",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-c",
+        "--quiet",
+        "--ssh-key-file=/workspaces/.ehgp-sessions/v11.20261006.claudesupkr/key",
+        "--ssh-key-expiration=2026-10-06T14:00:59.309920Z",
+        "--ssh-flag=-n",
+        "--ssh-flag=-o BatchMode=yes",
+        "--ssh-flag=-o ConnectTimeout=15",
+        "--ssh-flag=-o ServerAliveInterval=15",
+        "--ssh-flag=-o ServerAliveCountMax=4",
+        "--command=cd /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.bwWNB4VzdD && cat SHA256SUMS && sha256sum results.tar.gz && stat -c \"SIZE=%s\" results.tar.gz"
+      ],
+      "elapsed_seconds": 5.77,
+      "exit_code": 0,
+      "name": "results_hash",
+      "pid": 1316794,
+      "started_epoch": 1791291363.061,
+      "timeout_seconds": 90
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "instances",
+        "describe",
+        "ehgp-v7-3b1d496aed430749ea7e049f",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-c",
+        "--format=json"
+      ],
+      "elapsed_seconds": 2.557,
+      "exit_code": 0,
+      "name": "recertify_before_download_1",
+      "pid": 1317004,
+      "started_epoch": 1791291368.832,
+      "timeout_seconds": 90
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "scp",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-c",
+        "--quiet",
+        "--ssh-key-file=/workspaces/.ehgp-sessions/v11.20261006.claudesupkr/key",
+        "--ssh-key-expiration=2026-10-06T14:00:59.309920Z",
+        "--scp-flag=-o BatchMode=yes",
+        "--scp-flag=-o ConnectTimeout=15",
+        "--scp-flag=-o ServerAliveInterval=15",
+        "--scp-flag=-o ServerAliveCountMax=4",
+        "ehgp-v7-3b1d496aed430749ea7e049f:/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.bwWNB4VzdD/results.tar.gz",
+        "ehgp-v7-3b1d496aed430749ea7e049f:/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.bwWNB4VzdD/SHA256SUMS",
+        "/workspaces/.ehgp-sessions/v11.20261006.claudesupkr/results/"
+      ],
+      "elapsed_seconds": 8.921,
+      "exit_code": 0,
+      "name": "download",
+      "pid": 1317121,
+      "started_epoch": 1791291371.39,
+      "timeout_seconds": 213.58990688000267
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "instances",
+        "describe",
+        "ehgp-v7-3b1d496aed430749ea7e049f",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-c",
+        "--format=json"
+      ],
+      "elapsed_seconds": 2.442,
+      "exit_code": 0,
+      "name": "describe_before_stop_1",
+      "pid": 1317480,
+      "started_epoch": 1791291380.316,
+      "timeout_seconds": 90
+    },
+    {
+      "argv": [
+        "/workspaces/.ehgp-sessions/v11.20261006.claudesupkr/host/stop_and_verify.sh",
+        "--yes",
+        "--expected-last-start-timestamp",
+        "2026-10-06T05:46:32.748-07:00"
+      ],
+      "elapsed_seconds": 78.111,
+      "exit_code": 0,
+      "name": "guarded_stop",
+      "pid": 1317652,
+      "started_epoch": 1791291382.761,
+      "timeout_seconds": 1200
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "instances",
+        "describe",
+        "ehgp-v7-3b1d496aed430749ea7e049f",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-c",
+        "--format=json"
+      ],
+      "elapsed_seconds": 2.496,
+      "exit_code": 0,
+      "name": "describe_after_stop1_1",
+      "pid": 1321037,
+      "started_epoch": 1791291460.873,
+      "timeout_seconds": 90
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "os-login",
+        "ssh-keys",
+        "remove",
+        "--project=devpod-gpu-exploration",
+        "--key-file=/workspaces/.ehgp-sessions/v11.20261006.claudesupkr/key.pub",
+        "--quiet"
+      ],
+      "elapsed_seconds": 2.039,
+      "exit_code": 0,
+      "name": "oslogin_remove",
+      "pid": 1321174,
+      "started_epoch": 1791291463.37,
+      "timeout_seconds": 120
+    }
+  ],
+  "last_poll": {
+    "exit_code": 0,
+    "output": "EXIT=0"
+  },
+  "max_run_seconds": 4200,
+  "observed_after": {
+    "lastStartTimestamp": "2026-10-06T05:46:32.748-07:00",
+    "lastStopTimestamp": "2026-10-06T05:57:30.806-07:00",
+    "name": "ehgp-v7-3b1d496aed430749ea7e049f",
+    "status": "TERMINATED"
+  },
+  "observed_before_stop": {
+    "lastStartTimestamp": "2026-10-06T05:46:32.748-07:00",
+    "lastStopTimestamp": "2026-10-06T05:16:35.723-07:00",
+    "name": "ehgp-v7-3b1d496aed430749ea7e049f",
+    "status": "RUNNING"
+  },
+  "os_login_ttl_minutes": 75,
+  "oslogin_key_maybe_added": true,
+  "oslogin_key_removed": true,
+  "overflow": {
+    "evicted": [],
+    "truncated_streams": []
+  },
+  "package_sha256": "b44311ef5caee57318576a5de15913a1d3cdf6160938e5b1a7af09397be5caee",
+  "plan_sha256": "061a673585cd38c07e73ee7f95470a72e4b2773edfdc15ec804b25eed4f2e8fa",
+  "polls": 1,
+  "pre_start_generation": "2026-10-06T04:59:27.912-07:00",
+  "private_key_deleted": true,
+  "provenance": {
+    "binaries_sha256": {
+      "mhgp11": "9ea4371ee0b42dceabbaacbdd826e5da5baf5a79b0ac39b10727ce2771233f01",
+      "mhgp11_api_supports_route_probe": "5d3bb326d30d4adc1b5f7f3e939d6287cc9b0b46a2e26de2f3637d0f99de0967"
+    },
+    "cmakecache": [
+      "CMAKE_BUILD_TYPE:STRING=Release",
+      "CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++",
+      "CMAKE_CXX_COMPILER_AR:FILEPATH=/usr/bin/gcc-ar-11",
+      "CMAKE_CXX_COMPILER_RANLIB:FILEPATH=/usr/bin/gcc-ranlib-11",
+      "CMAKE_CXX_FLAGS:STRING=",
+      "CMAKE_CXX_FLAGS_DEBUG:STRING=-g",
+      "CMAKE_CXX_FLAGS_MINSIZEREL:STRING=-Os -DNDEBUG",
+      "CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG",
+      "CMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING=-O2 -g -DNDEBUG",
+      "CMAKE_CXX_COMPILER-ADVANCED:INTERNAL=1",
+      "CMAKE_CXX_COMPILER_AR-ADVANCED:INTERNAL=1",
+      "CMAKE_CXX_COMPILER_RANLIB-ADVANCED:INTERNAL=1",
+      "CMAKE_CXX_FLAGS-ADVANCED:INTERNAL=1",
+      "CMAKE_CXX_FLAGS_DEBUG-ADVANCED:INTERNAL=1",
+      "CMAKE_CXX_FLAGS_MINSIZEREL-ADVANCED:INTERNAL=1",
+      "CMAKE_CXX_FLAGS_RELEASE-ADVANCED:INTERNAL=1",
+      "CMAKE_CXX_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1"
+    ],
+    "compiler": [
+      "set(CMAKE_CXX_COMPILER \"/usr/bin/c++\")",
+      "set(CMAKE_CXX_COMPILER_ID \"GNU\")",
+      "set(CMAKE_CXX_COMPILER_VERSION \"11.4.0\")"
+    ]
+  },
+  "public_status": "not_claimed",
+  "python_pins": null,
+  "receipt_path": "/workspaces/.ehgp-sessions/v11.20261006.claudesupkr/receipt.json",
+  "recovery_command": "CLOUDSDK_CORE_PROJECT=devpod-gpu-exploration CLOUDSDK_CORE_ACCOUNT=louis.hauseux@gmail.com GCP_PROJECT_ID=devpod-gpu-exploration GCP_ZONE=us-central1-c GCP_INSTANCE_NAME=ehgp-v7-3b1d496aed430749ea7e049f /workspaces/.ehgp-sessions/v11.20261006.claudesupkr/host/stop_and_verify.sh --yes --expected-last-start-timestamp 2026-10-06T05:46:32.748-07:00",
+  "remote_directory": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.bwWNB4VzdD",
+  "remote_summary": {
+    "failed_commands": [],
+    "overflow": {
+      "evicted": [],
+      "truncated_streams": []
+    },
+    "overflow_files": "0",
+    "overflow_unresolved": "0",
+    "truncated_streams": "0",
+    "worker_build": "ok",
+    "worker_data": "ok",
+    "worker_fatal": null,
+    "worker_pip": "not_requested",
+    "worker_status": "completed"
+  },
+  "remote_used_kb": "247640",
+  "reserve_released": true,
+  "results_archive": "worker",
+  "results_bytes": 11155,
+  "results_cap_bytes": 67108864,
+  "results_expanded_bytes": 28049,
+  "results_manifest_files": 46,
+  "results_sha256": "7a75217d2b7105c26a5f2e8626a36f4110c7287e06c4801f76d7208d05e9c47f",
+  "results_skipped_members": [],
+  "results_verified": true,
+  "retrieval": "downloaded",
+  "run_dir": "/tmp/ehgp-v11-runs/v11.20261006.claudesupkr-27f34756d43b",
+  "schema": "ehgp.v11.session_receipt.v1",
+  "source": null,
+  "source_kind": "commit",
+  "ssh_cutoff_epoch": 1791293777,
+  "ssh_key_expiration": "2026-10-06T14:00:59.309920Z",
+  "start_certified": true,
+  "start_may_have_been_requested": true,
+  "status": "completed",
+  "stop_attempts": 1,
+  "stop_exit_code": 0,
+  "target": {
+    "instance": "ehgp-v7-3b1d496aed430749ea7e049f",
+    "project": "devpod-gpu-exploration",
+    "zone": "us-central1-c"
+  },
+  "targeted_shutdown_certified": true,
+  "vm_facts": {
+    "clangxx": "absent",
+    "cmake": "cmake version 3.22.1",
+    "cpu_avx2": "1",
+    "cpu_avx512dq": "1",
+    "cpu_avx512f": "1",
+    "cpu_avx512vl": "1",
+    "cpu_bmi2": "1",
+    "ctest": "ctest version 3.22.1",
+    "gxx": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+    "mem_total_kb": "185463724",
+    "nproc": "48",
+    "python3": "Python 3.10.12",
+    "sanitizer_address_undefined": "ok",
+    "sanitizer_thread": "ok_setarch"
+  },
+  "warnings": [],
+  "worker": {
+    "build": "ok",
+    "commands_ok": "1",
+    "commands_total": "1",
+    "data": "ok",
+    "deadline_epoch": "1791293477",
+    "ended_epoch": "1791291343",
+    "fatal": "",
+    "generation": "2026-10-06T05:46:32.748-07:00",
+    "interrupted": "0",
+    "nproc": "48",
+    "overflow_files": "0",
+    "overflow_unresolved": "0",
+    "package_sha256": "b44311ef5caee57318576a5de15913a1d3cdf6160938e5b1a7af09397be5caee",
+    "pip": "not_requested",
+    "plan_sha256": "499d43cd9009596d452e6441cd65ef2cc6166d36f69f68dcd4526781721c2a0f",
+    "python_user_base": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.bwWNB4VzdD/pyuser",
+    "python_versions": "",
+    "results_bytes": "64287",
+    "results_cap_bytes": "67108864",
+    "schema": "ehgp.v11.worker_result.v1",
+    "source": "commit:07428324eaa5cbf26446362bceadd77722c1a5b7",
+    "started_epoch": "1791290914",
+    "status": "completed",
+    "truncated_streams": "0"
+  },
+  "worker_deadline_epoch": 1791293477,
+  "worker_exit_code": 0,
+  "worker_launched": true,
+  "worker_log_retrieved": true,
+  "worker_outcome": "exited",
+  "worker_pid": 2195,
+  "worker_plan_sha256": "499d43cd9009596d452e6441cd65ef2cc6166d36f69f68dcd4526781721c2a0f",
+  "worker_source": "commit:07428324eaa5cbf26446362bceadd77722c1a5b7"
+}

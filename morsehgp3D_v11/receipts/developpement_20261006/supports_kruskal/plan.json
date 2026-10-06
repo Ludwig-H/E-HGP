@@ -1,0 +1,28 @@
+{
+ "schema": "ehgp.v11.session_plan.v1",
+ "note": "Supports = arbre couvrant de Kruskal (Claude, 6 octobre 2026, 07428324e, section S) : portes cli_supports* (oracle Kruskal exact, temoin triangle, lecteur couvrant, 8000/16000/32000, LiDAR ng00-02 a K5) et api_supports_route* (deux voies, empreintes u21), Release u21. Critere : toutes conformes, lignes gravees egales.",
+ "python_packages": "none",
+ "default_build": true,
+ "build_targets": [
+  "mhgp11_cli",
+  "mhgp11_api_supports_route_probe"
+ ],
+ "results_cap_bytes": 67108864,
+ "commands": [
+  {
+   "name": "supports_kruskal",
+   "timeout_seconds": 2400,
+   "argv": [
+    "ctest",
+    "--no-tests=error",
+    "-R",
+    "^mhgp11_(cli_supports|api_supports_route)",
+    "-E",
+    "_opt$",
+    "-j",
+    "6",
+    "--output-on-failure"
+   ]
+  }
+ ]
+}
