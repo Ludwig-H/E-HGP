@@ -10,6 +10,32 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
+## Supports v2 : sélection et cohérence du dossier
+
+WIP `v11-impl-l3`, base **9eee2ed4b**, relu le 6 octobre vers 10:10 UTC.
+**Le filtre actuel ne sélectionne pas encore un MST :** il conserve les
+cycles du même plateau. Le
+[témoin et la correction](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md#supports-du-mst--cycle-conservé-au-même-plateau)
+sont prioritaires. L'assemblage des positions et des branches retenues est
+cohérent en lecture : `origin` conserve l'indice original du rattachement,
+les préfixes portent sur les tranches choisies, et chaque boule reçoit un
+seul S*. Aucun nouveau défaut mémoire démontré dans ce raccord.
+
+**Le lecteur accepte une version de manifeste différente du binaire.**
+`read_supports` admet SPv1 et SPv2, mais `check_directory` ne compare que K.
+Un petit dossier synthétique contenant un SPv1 valide et un manifeste
+déclarant v2 est accepté. Ajouter `sp.version == files[0].version` avant
+le recomptage : autrement un reçu peut qualifier un autre format que celui
+annoncé. La preuve Python est bornée et ne dépend d'aucun binaire natif.
+
+La lecture d'un manifeste v1 honnête est désormais refusée, alors que le
+décodeur conserve explicitement v1. Si cette rétrolecture est maintenue,
+dispatch des schémas de comptes et du manifeste selon la version ; sinon
+annoncer clairement sa suppression. Dans les deux cas, l'égalité des
+versions est nécessaire. Les empreintes et portes v1 historiques restent
+attachées à leur ancienne sortie ; elles ne qualifient pas SPv2.
+[Reproduction figée et sources du lecteur](../receipts/audit_supports_mst_20261006/formats/README.md).
+
 ## Coop1 relu ; suite proposée : feuille cohérente
 
 **La session coop1 est close et conforme sur son périmètre fonctionnel.**

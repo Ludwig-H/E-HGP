@@ -4,7 +4,16 @@
 quantized_u21_input_only / not_claimed`. Six notes actives maintenues en
 place ; preuves détaillées dans les reçus immuables.
 
-**Priorité active : réponse à la feuille cohérente proposée en section Q.**
+**Priorité active : corriger la sélection des supports du MST.** Le WIP
+du 6 octobre garde toutes les boules de rôle `merge`, y compris celles qui
+ferment un cycle au même plateau. Sur trois points équidistants, il garde
+trois arêtes au lieu de deux. La
+[note mathématique](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md#supports-du-mst--cycle-conservé-au-même-plateau)
+donne le témoin entier et une sélection par unions réussies. La réduction
+à S* demandée par l'utilisateur reste acquise. Le lecteur de dossier doit
+aussi vérifier l'égalité des versions du manifeste et du binaire.
+
+**GPU : réponse à la feuille cohérente proposée en section Q disponible.**
 Le warp peut partager le parcours en conservant le premier événement dans
 l'ordre séquentiel : dépassement au seuil+1, refus ou succès canonique.
 Le cache J2 doit être consulté une seule fois par test logique. Les

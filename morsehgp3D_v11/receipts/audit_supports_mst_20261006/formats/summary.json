@@ -1,0 +1,29 @@
+{
+  "base_pin": "9eee2ed4bcef1e960cdf2456012b84416854dc20",
+  "cloud_actions": 0,
+  "limits": [
+    "Only synthetic single-site metadata/file, no C++ publisher executed.",
+    "Whether whole-directory v1 compatibility is required remains a contract decision; version equality is an integrity requirement."
+  ],
+  "native_runs": 0,
+  "old_reader_valid_v1_manifest": {
+    "accepted": true,
+    "result": 1
+  },
+  "schema": "audit_mhgp11sp_v2_reader_coherence_v1",
+  "synthetic_file_bytes": 200,
+  "synthetic_file_sha256": "51a9d55fe676acd133df067e3d627737a0f5738740376901db9d234f0c7ddd62",
+  "wip_directory_declared_v2_actual_v1": {
+    "accepted": true,
+    "result": {
+      "declared_version": 2,
+      "decoded_version": 1
+    }
+  },
+  "wip_read_supports_v1_binary_accepted": true,
+  "wip_reader_sha256": "4d05bf53fb272bc2101bdd8069bab86ce28be6fa2451d852d33a6403a3248896",
+  "wip_reader_valid_v1_manifest": {
+    "accepted": false,
+    "reason": "manifeste : fichier supports"
+  }
+}

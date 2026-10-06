@@ -1,0 +1,31 @@
+[
+  {
+    "command": [
+      "python3",
+      "-S",
+      "-B",
+      "replay.py",
+      "--repo",
+      "/workspaces/E-HGP"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v11-audit-math-supports-mst-20261006",
+    "exit_code": 0,
+    "stdout": "normal.json",
+    "stderr": "normal.stderr"
+  },
+  {
+    "command": [
+      "python3",
+      "-O",
+      "-S",
+      "-B",
+      "replay.py",
+      "--repo",
+      "/workspaces/E-HGP"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v11-audit-math-supports-mst-20261006",
+    "exit_code": 0,
+    "stdout": "optimized.json",
+    "stderr": "optimized.stderr"
+  }
+]

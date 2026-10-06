@@ -1,0 +1,25 @@
+{
+  "base_pin": "9eee2ed4bcef1e960cdf2456012b84416854dc20",
+  "kind": "uncommitted_WIP_snapshot_no_native",
+  "old_reader_sha256": "2b5d8147d7c8b5d267a6ebaa1bde1326066b108dfb8c0f91d034386e96cfd40f",
+  "sources": [
+    {
+      "bytes": 58309,
+      "capture_path": "sources/mhgp11_formats.py",
+      "path": "morsehgp3D_v11/bench/mhgp11_formats.py",
+      "sha256": "4d05bf53fb272bc2101bdd8069bab86ce28be6fa2451d852d33a6403a3248896"
+    },
+    {
+      "bytes": 9246,
+      "capture_path": "sources/full_semantic.py",
+      "path": "morsehgp3D_v11/bench/full_semantic.py",
+      "sha256": "1ffda4fb32e58d9cadd6f8c87a4cabe0eb28c0bcc5769ba8370b2738bd4d8d25"
+    },
+    {
+      "bytes": 6320,
+      "capture_path": "sources/catalogue_semantic.py",
+      "path": "morsehgp3D_v11/bench/catalogue_semantic.py",
+      "sha256": "f09d2dff28098ff9c5288a69058b776350a6339034d17397491c073257196f2c"
+    }
+  ]
+}

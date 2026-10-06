@@ -8,6 +8,42 @@ aux reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 Note maintenue en place ; détails et échanges clos dans les reçus.
 
+## Supports du MST : cycle conservé au même plateau
+
+**À corriger avant publication de la sortie v2.** WIP `v11-impl-l3`,
+base **9eee2ed4b**, relu le 6 octobre vers 10:10 UTC. La décision utilisateur
+de ne publier que les supports associés au MST, S* seul, est respectée.
+Mais `Selection::spanning` filtre seulement `role != internal` : ce rôle
+décrit le rattachement au plateau fermé, pas l'acceptation d'une arête
+par Kruskal.
+
+Témoin K1 : **A=(0,0,0), B=(1,1,0), C=(1,0,1)**. Les trois paires ont
+une distance au carré de 2 ; leurs boules diamétrales ont rayon carré 1/2
+et le troisième site strictement dehors. Les trois boules Gabriel sont
+au même niveau. FULL crée correctement une multifusion de trois sites.
+Dans `attachment.cpp`, chaque boule reçoit `merge`, car le rang de son
+nœud de rattachement égale celui de la boule. Le filtre garde donc AB,
+AC et BC : **trois supports formant un cycle**, contre deux pour un MST.
+L'arbre FULL n'est pas en défaut ; c'est la nouvelle sélection qui l'est.
+
+**Correction proposée sans reconstruire FULL :** à chaque nœud de
+multifusion, initialiser une DSU sur ses enfants (composantes à la coupe
+ouverte), parcourir les boules dans l'ordre canonique, et unir leurs
+branches `prior`. Garder S* seulement si la boule provoque au moins une
+union réussie. Une étoile sur les branches triées fixe les arêtes proposées.
+Vérifier à la fin que tous les enfants sont reliés. Conserver les
+naissances et les plateaux exacts. Le rôle reste une métadonnée ; il ne
+remplace pas cette sélection. Pour K>1, une boule peut représenter plusieurs
+arêtes entre branches : dédupliquer son S* dans la sortie ne signifie pas
+qu'une boule équivaut à une seule arête.
+
+Porte minimale G4 : ce triangle doit publier deux supports, avec identité
+W1/W48 et le même arbre canonique. Ajouter une permutation d'entrée et une
+cellule à plus de deux branches. Un mutant revenant au seul filtre de rôle
+doit échouer sur le triangle. Le témoin est établi par géométrie rationnelle
+et lecture du WIP, sans prétendre avoir exécuté ce nouveau binaire.
+[Preuve figée, 30 contrôles et sources](../receipts/audit_supports_mst_20261006/mathematics/REPORT.md).
+
 ## Feuille coherente : reponse a la section Q du 6 octobre
 
 **Avis favorable au principe**, avec un parcours de préfixes commun au warp

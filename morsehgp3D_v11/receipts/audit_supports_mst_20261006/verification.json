@@ -1,0 +1,21 @@
+{
+  "schema": "audit_supports_mst_root_verification_v1",
+  "checked_at_utc": "2026-10-06 10:18 UTC",
+  "native_runs": 0,
+  "cloud_actions": 0,
+  "mathematics": {
+    "normal_exit": 0,
+    "optimized_exit": 0,
+    "stderr_empty": true,
+    "stdout_identical": true,
+    "stdout_sha256": "a7178061a5eea3ae8394f59e5ab8a227fb253262e1c75ad4c8733974e3b7b7a1"
+  },
+  "formats": {
+    "normal_exit": 0,
+    "optimized_exit": 0,
+    "stderr_empty": true,
+    "stdout_identical": true,
+    "stdout_sha256": "1afe0dc89a3d2a8ec60c6eae34524c4759bb5ced07b1beb3874093ae665ea33f"
+  },
+  "nested_manifests_verified": true
+}

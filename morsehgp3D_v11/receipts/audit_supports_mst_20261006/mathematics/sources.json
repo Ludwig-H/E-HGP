@@ -1,0 +1,33 @@
+{
+  "git": {
+    "morsehgp3D_v11/src/tower/attachment.cpp": {
+      "bytes": 10684,
+      "sha256": "77f84f00506729b253c22216860ec8c0c9bcd579dcac1c9ed3ac8c54dadb01cd"
+    },
+    "morsehgp3D_v11/src/tower/forest_build.cpp": {
+      "bytes": 20495,
+      "sha256": "061c79b751446b0dbb2583dc71cc4fa3b31b60e77b50bff26a85c0b5a63cf1a7"
+    },
+    "morsehgp3D_v11/src/tower/forest_plateau.cpp": {
+      "bytes": 7060,
+      "sha256": "0494d978fdc2188f288cf5a55dbf6bbe18bbb9436bde8c2756da070d16bc0300"
+    },
+    "morsehgp3D_v11/src/tower/order_tree.hpp": {
+      "bytes": 7977,
+      "sha256": "b71b4f2a711cc04c0dc7388d660ada4097ef9629b05cabbd0b86b1d6e34e617c"
+    }
+  },
+  "head": "9eee2ed4bcef1e960cdf2456012b84416854dc20",
+  "pin": "9eee2ed4bcef1e960cdf2456012b84416854dc20",
+  "two_captures_byte_equal": true,
+  "wip": {
+    "src/supports/hierarchy.cpp": {
+      "bytes": 15678,
+      "sha256": "bab4244ca1c3404de7a3e2a1731673bad131499be217d7eabfe3f2b0d26899fc"
+    },
+    "src/supports/supports.hpp": {
+      "bytes": 14662,
+      "sha256": "0fb30d48012c07a157880c466505d71f58841185b9f191f6533a1fd650d81e9a"
+    }
+  }
+}

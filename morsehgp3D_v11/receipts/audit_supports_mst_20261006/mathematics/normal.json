@@ -1,0 +1,116 @@
+{
+  "associated_supports_of_canonical_kruskal": [
+    [
+      0,
+      1
+    ],
+    [
+      0,
+      2
+    ]
+  ],
+  "balls": [
+    {
+      "attached_node": 3,
+      "m": 2,
+      "p": 0,
+      "prior": [
+        0,
+        2
+      ],
+      "qmin": 2,
+      "radius_squared": "1/2",
+      "rank": 1,
+      "role": "merge",
+      "support": [
+        0,
+        1
+      ]
+    },
+    {
+      "attached_node": 3,
+      "m": 2,
+      "p": 0,
+      "prior": [
+        0,
+        1
+      ],
+      "qmin": 2,
+      "radius_squared": "1/2",
+      "rank": 1,
+      "role": "merge",
+      "support": [
+        0,
+        2
+      ]
+    },
+    {
+      "attached_node": 3,
+      "m": 2,
+      "p": 0,
+      "prior": [
+        1,
+        2
+      ],
+      "qmin": 2,
+      "radius_squared": "1/2",
+      "rank": 1,
+      "role": "merge",
+      "support": [
+        1,
+        2
+      ]
+    }
+  ],
+  "birth_node_of_site": [
+    0,
+    2,
+    1
+  ],
+  "checks": 30,
+  "full_atomic_multifusion": {
+    "children": [
+      0,
+      1,
+      2
+    ],
+    "node": 3,
+    "rank": 1
+  },
+  "k": 1,
+  "kept_by_role_filter": [
+    [
+      0,
+      1
+    ],
+    [
+      0,
+      2
+    ],
+    [
+      1,
+      2
+    ]
+  ],
+  "limits": "Exact geometry and abstract DSU/attachment model anchored to source; no product binary, file writer, or native campaign executed.",
+  "native_executed": false,
+  "sites_morton": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      1,
+      0
+    ],
+    [
+      1,
+      0,
+      1
+    ]
+  ],
+  "status": "FAIL_observed_role_filter_contract__PASS_portable_counterexample",
+  "wip_head": "9eee2ed4bcef1e960cdf2456012b84416854dc20"
+}
