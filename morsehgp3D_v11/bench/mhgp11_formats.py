@@ -1145,6 +1145,8 @@ def _check_point_tree(f, exact):
     for s in range(f.n):
         b, p = f.site_block[s], f.site_plateau[s]
         need(b < f.Bk and p < f.P and f.block_plateau[b] <= p, 'MHGP11PT : entree du site %d' % s)
+        up = f.block_parent[b]
+        need(up == NONE or p < f.block_plateau[up], 'MHGP11PT : site %d entre dans un bloc retire' % s)
         created[b] = created[b] or f.block_plateau[b] == p
         if f.strict[s] == 0:
             need(plateau_of[p] == (f.floor[s], 0, 0), 'MHGP11PT : plateau du site non strict %d' % s)

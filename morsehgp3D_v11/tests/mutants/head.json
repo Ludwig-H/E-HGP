@@ -1,6 +1,6 @@
 {
   "module": "head",
-  "plancher": 10,
+  "plancher": 12,
   "construction": [
     "head",
     "cli"
@@ -85,6 +85,22 @@
       "remplace": "    if (false) {\n",
       "porte": "mhgp11_head_unit_huge",
       "note": "racines hors de 2^100 converties en i128 sans garde (audit 100fcc12b)"
+    },
+    {
+      "id": "vie_du_bloc_sans_borne",
+      "fichier": "src/head/condense.cpp",
+      "cherche": "    MHGP11_CHECK(up == kNone || t.site_plateau[s] < t.block_plateau[up], head_invariant);",
+      "remplace": "    MHGP11_CHECK(up == kNone || up != kNone, head_invariant);",
+      "porte": "mhgp11_head_unit_refusals",
+      "note": "entree d'un site dans un bloc deja fusionne acceptee (audit 0272bd447, constat P2)"
+    },
+    {
+      "id": "vie_du_bloc_egalite",
+      "fichier": "src/head/condense.cpp",
+      "cherche": "    MHGP11_CHECK(up == kNone || t.site_plateau[s] < t.block_plateau[up], head_invariant);",
+      "remplace": "    MHGP11_CHECK(up == kNone || t.site_plateau[s] <= t.block_plateau[up], head_invariant);",
+      "porte": "mhgp11_head_unit_refusals",
+      "note": "entree a la date de fusion admise dans l'enfant (elle appartient au parent)"
     }
   ]
 }

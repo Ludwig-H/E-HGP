@@ -50,6 +50,8 @@ Outcome check_shape(const TreeView& t) noexcept {
   for (u64 s = 0; s < n; ++s) {
     MHGP11_CHECK(t.site_block[s] < blocks && t.site_plateau[s] < plateaus, head_invariant);
     MHGP11_CHECK(t.site_plateau[s] >= t.block_plateau[t.site_block[s]], head_invariant);
+    const u32 up = t.block_parent[t.site_block[s]];
+    MHGP11_CHECK(up == kNone || t.site_plateau[s] < t.block_plateau[up], head_invariant);
   }
   return {};
 }

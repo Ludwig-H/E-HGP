@@ -363,7 +363,7 @@ MHGP11_TEST(order, 6) {
   CHECK_EQ(ordered.value().size(), 6u);
 }
 
-MHGP11_TEST(refusals, 8) {
+MHGP11_TEST(refusals, 14) {
   const Tree t = f14c();
   CHECK_EQ(run(t, 1, 1, head::Selection::eom).outcome().reason, Reason::parameter_out_of_range);
   CHECK_EQ(run(t, 3, 0, head::Selection::eom).outcome().reason, Reason::parameter_out_of_range);
@@ -384,6 +384,33 @@ MHGP11_TEST(refusals, 8) {
   Tree bad = f14c();
   bad.block_parent[1] = 0;
   CHECK_EQ(run(bad, 3, 1, head::Selection::eom).outcome().reason, Reason::head_invariant);
+  // Chronologie des entrees : naissance du bloc <= entree < naissance du parent ; racine sans borne haute.
+  // condense seul isole la forme, sans score ni appel de phi(0).
+  auto chronology = [](u32 block, u32 plateau) {
+    Tree tree(3);
+    const u32 p0 = tree.radius(1), p1 = tree.radius(2), p2 = tree.radius(3);
+    static_cast<void>(p2);
+    const u32 b0 = tree.block(p0), b1 = tree.block(p0), b2 = tree.block(p1, {b0, b1});
+    static_cast<void>(b2);
+    tree.enter(0, b0, p0);
+    tree.enter(1, b1, p0);
+    tree.enter(2, block, plateau);
+    MemoryBudget budget(MemoryBudget::kUnlimited);
+    Outcome status;
+    {
+      head::detail::Condensed out;
+      status = head::detail::condense(tree.view(), 2, budget, out);
+    }
+    return std::pair{status, budget.used()};
+  };
+  const auto before = chronology(0, 0), equal = chronology(0, 1), after = chronology(0, 2);
+  const auto root_birth = chronology(2, 1), root_later = chronology(2, 2), not_born = chronology(2, 0);
+  CHECK(before.first.ok() && before.second == 0);
+  CHECK(equal.first.reason == Reason::head_invariant && equal.second == 0);
+  CHECK(after.first.reason == Reason::head_invariant && after.second == 0);
+  CHECK(root_birth.first.ok() && root_birth.second == 0);
+  CHECK(root_later.first.ok() && root_later.second == 0);
+  CHECK(not_born.first.reason == Reason::head_invariant && not_born.second == 0);
   // Budget trop petit : refus, budget rendu.
   MemoryBudget small(256);
   CHECK_EQ(head::flat_sites(t.view(), t.levels, {3, 1, head::Selection::eom}, small).outcome().reason,
