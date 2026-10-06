@@ -1,6 +1,6 @@
 # Audits courants de la v11
 
-5 octobre 2026. Cadre : `exploration_v11_hors_registre / cpu_reference /
+6 octobre 2026. Cadre : `exploration_v11_hors_registre / cpu_reference /
 quantized_u21_input_only / not_claimed`. Six notes actives maintenues en
 place ; preuves détaillées dans les reçus immuables.
 

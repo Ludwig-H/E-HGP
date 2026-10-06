@@ -1,6 +1,6 @@
 # Audit courant v11 — contrats, performance et intégration
 
-5 octobre 2026. Contrat S0/S1 **5adf6a59f**, demande **9290cf3bf** et
+6 octobre 2026. Contrat S0/S1 **5adf6a59f**, demande **9290cf3bf** et
 tranches natives S3/S5/S6/S7 relues ; S6a publiée en **19b2fb218**, S3 en
 **165def5ab**, S5/S6b/S7 publiées jusqu'à **966a351be**, qualification G4
 ordinaire conforme au pin **b319efc84**. S8 relue en **53c027fe8**,
@@ -1360,13 +1360,17 @@ Une coupe commune reste à vérifier. Les lots mesurent des meilleurs blocs
 sur des extraits choisis par annotations, pas le contrat de trame entière.
 [Lecture des sessions et témoin](../receipts/audit_deep_20261004/README.md).
 
-## Contrat natif encore à construire
+## Contrat natif préparatoire — état historique avant S9/S10
+
+Les paragraphes ci-dessous conservent les exigences et les limites des
+pins Python cités. Les modules natifs S9/S10 sont désormais livrés et
+leurs différentiels P9/P10 passent, comme établi en tête de cette note.
 
 **Tête E1 effectivement livrée, portée Python.** Les sessions
 claudeflat1a/1b confrontent export FULL C++ → projection, condensation et
 sélection **Python** à l'oracle indépendant ; leurs neuf mutants sont
 Python. Le reçu développeur dit « sortie plate en natif » : le lieu G4
-et l'export natif ne qualifient pas une tête C++, toujours absente.
+et l'export natif ne qualifiaient pas à eux seuls une tête C++, alors absente.
 Le dev synthétique a fixé **z=2** sur 192 scènes ; le protocole P08 distingue
 z=2 pour les fusions et z=1 pour la non-infériorité IoU. Ces observations
 et choix sont distincts des tests encore à venir.
@@ -1387,7 +1391,8 @@ Le produire depuis FULL et les attaches, sans matrice n² ni liste de membres
 par ancêtre. DP : score/décision par cluster, puis un passage d'émission des
 labels. Compter ensemble arbre, dates, scores, scratch, IDs/labels et FULL.
 Le catalogue et les coquilles n'ont pas de borne linéaire universelle.
-Le modèle compact existe en Python E1 ; sa construction native reste un **plan**.
+À cette étape Python E1, la construction native restait un plan ; les
+implémentations et qualifications S9/S10 décrites en tête le remplacent.
 
 PointRadiusDate : trois rangs, égalité algébrique, ordre commun avec FULL,
 coupes fermées, refus transactionnels. Majorants u18/u21/u24 : niveaux

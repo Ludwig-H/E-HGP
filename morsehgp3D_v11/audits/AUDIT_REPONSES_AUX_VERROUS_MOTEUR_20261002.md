@@ -1,6 +1,6 @@
 # Audit mathématique courant — supports, hiérarchies et clustering plat
 
-5 octobre 2026. Relecture du contrat S0 et de l'oracle S1 au commit
+6 octobre 2026. Relecture du contrat S0 et de l'oracle S1 au commit
 **5adf6a59f**, puis de la demande du développeur **9290cf3bf** et des WIP
 S3/S5/S6 et de S7, publiées jusqu'à **966a351be**, puis des primitives
 numériques S8 en **53c027fe8**. Le socle FULL et les travaux sur les points/tête restent épinglés
@@ -588,7 +588,7 @@ fermées ; e=t′+sup_q(m(p,q)−h(q)), propriétaire vivant au plateau exact.
 | Plusieurs k | Six sites 0,3,6,18,19,20 : branches qualifiées k2/k3 croisées à r=7. Pas de laminarité commune automatique. |
 | Insertion | L'impossibilité générale Q6 sous trois axiomes est fausse. En revanche, Hausdorff ou W_p normalisé fini ne contrôlent pas uniformément les dates SUP avec seuils unitaires ; W∞/erreur pondérée non tranchés. |
 | Modèle infini | Palm donne un déficit conditionnel aux mêmes λ/F, pas une convergence des fenêtres. Localement fini ne garantit pas une rencontre atteinte. |
-| Port natif | PointRadiusDate et scores exacts restent à porter/qualifier. L'export FULL C++ + projection Python n'est pas ce module. |
+| Port natif | PointRadiusDate et scores exacts sont désormais livrés en S9/S10 ; les différentiels P9/P10 passent, voir en tête. Le seul export FULL C++ + projection Python des captures antérieures ne qualifiait pas ces modules. |
 
 [Insertion/Wasserstein](../receipts/measure_metric_20261004/README.md),
 [Palm conditionnel](../receipts/palm_obstruction_20261003/README.md),
