@@ -471,3 +471,80 @@ i128 certifiés, `kUnresolved` sinon). La feuille CPU `leaf.cpp` reste la réfé
    exigez-vous (par exemple : bit J2 posé sans atomique, préfixe des paires décalé, paire sautée) ?
 4. Mémoire partagée par warp : environ 9 Kio (sites, lignes, cache J2, liste des paires et leurs comptes). Voyez-vous un
    risque de borne (496 paires au plus, `kSeenWords` = 155 mots) ?
+
+## P. Feuille coopérative : code livré, réponses à d117de397, session G4 demandée (6 octobre, 09 h 12 UTC ; code c3df81805)
+
+Merci pour la contre-lecture : vos deux corrections sont appliquées.
+- **Mutant équivalent.** `coop_candidats_restants` passe désormais `0` comme candidats restants de la paire. Il tombe
+  sur votre témoin (porte `mhgp11_catalogue_leaf_coop_witness_q3_obtuse_q4`, boule de centre (5, 5, 5), p = 0,
+  coquille 4).
+- **Préparation doublée.** `fill_tables`, sur un fil (voie séquentielle, hôte et un fil par feuille), calcule de
+  nouveau chaque couple i < j une seule fois (`pair_relation`). Seuls les fils d'un warp utilisent `fill_row`, qui
+  recalcule les couples de leur ligne : m − 1 tests par lane en parallèle.
+
+**Disposition partagée réelle (ptxas, sm_120).** `CoopShared` occupe 8 040 octets :
+- tables : 2 544 octets ;
+- `next` et `logical` par site i : 512 octets ;
+- paires en u16 : 992 octets ;
+- comptes u32 de boules et d'incidences, remplacés en place par leurs préfixes : 3 968 octets ;
+- trois mots de contrôle.
+
+Le `static_assert` fixe la borne à 12 Kio. Les deux noyaux coopératifs utilisent 198 registres, une pile de 864 octets
+et aucun débordement. Le noyau à un fil par feuille utilisait 168 registres et une pile de 3 304 octets.
+
+**Protocole du noyau** (`leaf_batch_coop_cuda.cuh`). Un bloc de 32 fils traite une feuille. Toutes les lanes
+franchissent cinq barrières `__syncwarp` : chargement, lignes, lignes vivantes, profondeur 0 (lane 0), comptage.
+
+Comptage des paires :
+- les paires sont réparties par un curseur `atomicAdd` en mémoire partagée ;
+- un refus pose un drapeau par `atomicExch`, puis la lane sort ;
+- le drapeau est lu après la barrière, donc de façon uniforme : la feuille entière est non résolue, ses compteurs sont
+  jetés, et `status`, `balls` et `stored` restent à zéro.
+
+Suite du traitement :
+- les préfixes sont calculés par décalages de warp, dans l'ordre des paires ;
+- l'écriture reprend le curseur après une barrière, et chaque paire vérifie qu'elle finit au début de la suivante
+  (`__all_sync`) ;
+- au comptage, une feuille qui tient dans sa case y écrit tout de suite ; sinon la seconde passe (`fill_coop_kernel`)
+  refait tables, comptage et préfixes, puis écrit à la place fixée par le lot, après contrôle des totaux contre les
+  préfixes du lot ;
+- le cache J2 n'est pas remis à zéro avant l'écriture : ses compteurs y sont jetés, et son bit ne porte aucune décision
+  (votre Q1).
+
+**Portes locales (u21, Release).**
+- `mhgp11_catalogue_leaf_coop` : quatre groupes (témoin q3 obtus → q4 ; cache J2 sur le tétraèdre et le cube ;
+  m = 1, 2, 3, 5, 31, 32 × K = 1 à 10 × trois boîtes × cache activé ou non ; nuages près de `kCoordMax`). Six ordres de
+  comptage des paires (inverse et pas premiers avec n). Exigé : statut, compteurs et suite des émissions identiques à
+  `run_leaf`. Une feuille non résolue n'émet rien, et neuf feuilles qui avaient émis avant leur refus sont couvertes.
+- `mhgp11_tower_full_leaf_lanes` ajoute les voies 163835 et 180219 (émulation hôte).
+- Identité des dumps et du registre sur ng00 à K5/16 et K10/24 (CPU, feuille hôte, coopérative hôte, lot
+  coopératif).
+
+Mutants : six mutants, dans `catalogue.json` parce que la porte appartient au module catalogue. Tous sont tués
+(`mutants_ok module=catalogue mutants=6 tues=6`) :
+- paire sautée ;
+- candidats restants vides (votre remplacement) ;
+- cache réinitialisé par paire ;
+- compteurs de l'écriture ajoutés ;
+- publication au fil de l'eau d'une feuille refusée ;
+- masque du préfixe (i) oublié.
+
+Le dernier survivait d'abord : avec une boîte contenant tous les sites, les dominances sont presque vides. Le groupe
+`sizes` joue donc aussi une sous-boîte centrale, avec des sites hors de la boîte, comme pour une feuille réelle.
+
+**Ce qui n'est pas couvert localement** (pas de GPU sur le codespace) : la concurrence réelle. La porte G4
+`bench/coop_g4_gate.py` la couvre :
+- deux nuages synthétiques, dont un de 400 sites du cube 2^21 qui laisse des feuilles non résolues à K10 (45 en
+  émulation) ;
+- dumps et registres identiques en CPU, GPU un fil, GPU coopératif et émulation, et lots de même taille ;
+- Compute Sanitizer memcheck, racecheck et synccheck sur la voie coopérative.
+
+Les mutants de concurrence que vous citez (bit J2 non atomique, barrière retirée) relèvent de ce lot appareil ; je les
+ajouterai comme variantes construites sur G4 si la première session est conforme.
+
+**Critère écrit d'avance** (plan de session `coop1`) :
+- dumps et registres identiques partout ;
+- exécuteur du lot `gpu_coop` K5 à chaud ≤ 0,5 × exécuteur `gpu` sur les trois trames (59 ms environ le 6 octobre) ;
+- K10 feuilles de 24 : `domain` `gpu_coop` ≤ 0,85 × CPU.
+
+La référence reste 830473218 pour la voie séquentielle : `fill_tables` y retrouve sa préparation par paires.
