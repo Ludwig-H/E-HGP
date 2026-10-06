@@ -18,13 +18,13 @@
 // etiquette i64 par point dans l'ordre du fichier d'entree, tiree de la meme hierarchie de points par la tete plate
 // (module head : condensation, EOM ou feuilles a scores exacts ; porte mhgp11_cli_plat).
 //
-// Moteur : parametres FIXES, ceux du masque qualifie 16379 des sondes (bench/points_export.cpp : feuilles de 16 a 256
-// sites, graphe de paires, tables de populations, ordres concurrents, sans memo) ; aucune option de moteur (regle 6).
-// La sortie supports tire l'arbre d'ordre K de FULL au masque 16379, journal des graines pose sur l'ordre K
+// Moteur : parametres FIXES, ceux du masque 278523 des sondes (bench/points_export.cpp : feuilles de 16 a 256 sites,
+// graphe de paires, tables de populations, ordres concurrents, placement du pipeline, sans memo) ; aucune option de
+// moteur (regle 6). La sortie supports tire l'arbre d'ordre K de FULL au masque 278523, journal des graines sur l'ordre K
 // (build_order_full, livraison L2b decidee par la regle de L2 de docs/SORTIES.md, paragraphe 11). La sortie points
-// construit l'arbre d'ordre K seul (build_order) au masque 7035 : 16379 sans les trois options que build_order refuse,
-// sans objet pour un ordre seul (verticales paralleles 128, reemploi des verticales regulieres 1024, ordres
-// concurrents 8192 ; audit 238734f1d). Les deux voies donnent la meme foret et le meme rattachement (porte I10 ;
+// construit l'arbre d'ordre K seul (build_order) au masque 7035 : 278523 sans les quatre options que build_order
+// refuse, sans objet pour un ordre seul (verticales paralleles 128, reemploi des verticales regulieres 1024, ordres
+// concurrents 8192, placement du pipeline 262144 ; audit 238734f1d). Les deux voies donnent la meme foret et le meme rattachement (porte I10 ;
 // MHGP11SP identique a l'octet par les deux voies : mhgp11_api_supports_route*).
 // Le nombre de fils ne change aucun octet publie (portes mhgp11_cli_full_determinism, mhgp11_cli_supports_*).
 #pragma once

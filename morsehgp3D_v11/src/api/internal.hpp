@@ -9,23 +9,25 @@
 
 namespace mhgp11::api_detail {
 
-// Parametres fixes du moteur pour l'ordre maximal k : ceux du masque qualifie 16379 des sondes, exactement ceux de
+// Parametres fixes du moteur pour l'ordre maximal k : ceux du masque 278523 des sondes (16379 qualifie, plus le
+// placement du pipeline 262144 adopte le 6 octobre 2026, sans effet sur aucune sortie), exactement ceux de
 // bench/points_export.cpp (catalogue : feuilles de 16 a 256 sites, max_nodes 0, ball_limit kNone, lignes de centres
 // en cache, tri indirect, frontiere adaptative, assemblage parallele, passe unique, graphe de paires ; forets : lots
 // reguliers de 4096 sur 48 voies, verticales paralleles, census reutilise, naissances denses, verticales regulieres
-// reutilisees, table de populations, ordres concurrents ; aucun memo). bench/full_probe.cpp les lit sous le masque
-// 16379 avec les arguments 16 256 0 4294967295.
+// reutilisees, table de populations, ordres concurrents, placement du pipeline ; aucun memo). bench/full_probe.cpp
+// les lit sous le masque 278523 avec les arguments 16 256 0 4294967295.
 [[nodiscard]] CatalogueParams catalogue_params(Order k) noexcept;
 [[nodiscard]] FullParams full_params() noexcept;
 // Masque des sondes qui designe ces parametres (bench/full_probe.cpp, champ "optimizations" de sa ligne "full").
-inline constexpr u64 kEngineMask = 16379;
-// Arbre d'ordre K seul de la sortie supports (build_order) : full_params sans les trois options que build_order
+inline constexpr u64 kEngineMask = 278523;
+// Arbre d'ordre K seul de la sortie supports (build_order) : full_params sans les quatre options que build_order
 // refuse, sans objet pour un ordre seul (verticales paralleles 128, reemploi des verticales regulieres 1024, ordres
-// concurrents 8192) ; masque 7035 des sondes. Difference publiee (docs/SORTIES.md, paragraphe 1 ; audit 238734f1d) :
-// FULL garde 16379, la mesure appariee de L2 compare ces deux configurations.
+// concurrents 8192, placement du pipeline 262144) ; masque 7035 des sondes. Difference publiee (docs/SORTIES.md,
+// paragraphe 1 ; audit 238734f1d) : FULL garde 278523, la mesure appariee de L2 compare ces deux configurations.
 [[nodiscard]] FullParams order_params() noexcept;
 inline constexpr u64 kOrderMask = 7035;
-static_assert(kOrderMask == (kEngineMask & ~(u64{128} | u64{1024} | u64{8192})), "api : masque 7035 = 16379 - 9344");
+static_assert(kOrderMask == (kEngineMask & ~(u64{128} | u64{1024} | u64{8192} | u64{262144})),
+              "api : masque 7035 = 278523 - 271488");
 
 // Voie de l'arbre d'ordre K de la sortie supports (livraison L2b, docs/SORTIES.md paragraphe 11) : full_tower,
 // build_order_full au masque 16379 de FULL (journal des graines sur l'ordre K, extraction de l'ordre K) ; order_tree,

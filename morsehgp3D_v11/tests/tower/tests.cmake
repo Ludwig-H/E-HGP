@@ -225,7 +225,7 @@ mhgp11_add_unit(mhgp11_tower_pipeline SOURCES forest_pipeline_test.cpp GROUPS de
                 LABELS fast TIMEOUT 600)
 # Placement des taches du pipeline (forest_placement.hpp, levier O1, 6 octobre 2026) : listes de freres, coeurs,
 # plan sur une topologie de type G4, affectation de chaque tache, refus, affinite appliquee puis rendue.
-mhgp11_add_unit(mhgp11_tower_placement SOURCES forest_placement_test.cpp GROUPS parse cores plan affinity
+mhgp11_add_unit(mhgp11_tower_placement SOURCES forest_placement_test.cpp GROUPS parse cores plan validate affinity
                 LABELS fast TIMEOUT 60)
 
 # Arbre d'ordre K seul et rattachement de W_K (tranche S3 de la sortie parametree, build_order) : identite I10 avec

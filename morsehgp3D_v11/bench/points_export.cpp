@@ -380,7 +380,7 @@ Outcome run(char** argv, u32 kmax, std::span<const u32> orders, u32 workers, u64
   FullParams full;
   full.regular_batch_capacity = 4096; full.descent_lanes = 48; full.parallel_verticals = true;
   full.reuse_census_workspace = true; full.dense_birth_lookup = true; full.reuse_regular_verticals = true;
-  full.population_lookup = true; full.concurrent_orders = true;
+  full.population_lookup = true; full.concurrent_orders = true; full.place_pipeline = true;
   Stopwatch full_clock;
   auto index = build_index(std::move(cloud.value()), {}, budget);
   if (!index.ok()) return index.outcome();

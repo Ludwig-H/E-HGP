@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 155,
+  "plancher": 156,
   "mutants": [
     {
       "id": "population_memo_owner_omis",
@@ -1258,6 +1258,14 @@
       "remplace": "place_pipeline_(false)",
       "porte": "mhgp11_tower_pipeline_equivalence",
       "note": "placement : l'option perdue par le constructeur de deplacement de ForestParallel (defaut de 86b3cbf14, vu sur G4)"
+    },
+    {
+      "id": "placement_hors_pipeline_accepte",
+      "fichier": "src/tower/forest_parallel.cpp",
+      "cherche": "if (p.place_pipeline && !p.concurrent_orders) return fail(Reason::parameter_out_of_range);",
+      "remplace": "if (p.place_pipeline && !p.concurrent_orders && false) return fail(Reason::parameter_out_of_range);",
+      "porte": "mhgp11_tower_placement_validate",
+      "note": "placement sans pipeline des ordres concurrents ignore au lieu d'etre refuse (regle : refuser plutot qu'ignorer)"
     }
   ]
 }

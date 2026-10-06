@@ -7,6 +7,8 @@
 namespace mhgp11::tower_detail {
 
 Outcome ForestParallel::validate(FullParams p, sched::Pool* pool) noexcept {
+  // Placement sans pipeline des ordres concurrents : option sans objet, refusee plutot qu'ignoree (comme la sonde).
+  if (p.place_pipeline && !p.concurrent_orders) return fail(Reason::parameter_out_of_range);
   if (p.regular_batch_capacity == 0)
     return p.descent_lanes == 1 && p.lane_memo_capacity == 0 && !p.parallel_verticals && !p.concurrent_orders ?
            Outcome{} : fail(Reason::parameter_out_of_range);

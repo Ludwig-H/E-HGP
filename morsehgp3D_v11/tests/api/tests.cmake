@@ -38,7 +38,7 @@ foreach(case "none;0;none" "upward;0;none" "ftz_daz;0;none" "inexact;3;environme
 endforeach()
 
 # Deux voies de la sortie supports (livraison L2b, docs/SORTIES.md paragraphe 11) : arbre d'ordre K seul (build_order,
-# masque 7035) et ordre K tire de FULL avec le journal des graines sur l'ordre K (build_order_full, masque 16379 :
+# masque 7035) et ordre K tire de FULL avec le journal des graines sur l'ordre K (build_order_full, masque 278523 :
 # voie de compute). Sonde supports_route.cpp : api_detail::compute_supports par chaque voie dans une Session neuve,
 # publication et fin d'appel, puis supports.mhgp11sp, manifeste et registres du journal identiques a l'octet.
 add_executable(mhgp11_api_supports_route_probe ${CMAKE_CURRENT_LIST_DIR}/supports_route.cpp)

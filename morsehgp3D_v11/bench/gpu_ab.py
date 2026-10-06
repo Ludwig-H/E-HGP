@@ -74,6 +74,7 @@ def take_summary(got):
                 domain_ms=ms(full.get('domain_ns')), forest_ms=ms(full.get('forest_ns')),
                 single_pass_ms=ms(domain.get('single_pass_ns')), prefix_ms=ms(domain.get('prefix_ns')),
                 sort_ms=ms(domain.get('sort_ns')), cpu_seconds=full.get('cpu_seconds'),
+                pipeline_placement_cores=(full.get('pipeline_tasks') or {}).get('placement_cores'),
                 batch=dict(batch))
 
 

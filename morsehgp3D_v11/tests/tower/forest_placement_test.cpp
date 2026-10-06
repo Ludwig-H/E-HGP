@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "test.hpp"
+#include "tower/forest_parallel.hpp"
 #include "tower/forest_placement.hpp"
 
 using namespace mhgp11;
@@ -125,6 +126,19 @@ MHGP11_TEST(plan, 32) {
 #else
   CHECK(true);
 #endif
+}
+
+// Le placement n'a d'objet que dans le pipeline des ordres concurrents : refuse ailleurs, voie serielle comprise.
+MHGP11_TEST(validate, 4) {
+  FullParams p;
+  p.place_pipeline = true;
+  CHECK_EQ(ForestParallel::validate(p, nullptr).reason, Reason::parameter_out_of_range);
+  p.regular_batch_capacity = 4096; p.descent_lanes = 4;
+  auto pool = sched::make_pool({2});
+  REQUIRE(pool.ok());
+  CHECK_EQ(ForestParallel::validate(p, pool.value().get()).reason, Reason::parameter_out_of_range);
+  p.concurrent_orders = true;
+  CHECK(ForestParallel::validate(p, pool.value().get()).ok());
 }
 
 MHGP11_TEST(affinity, 6) {

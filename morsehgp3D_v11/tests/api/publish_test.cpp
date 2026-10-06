@@ -59,6 +59,7 @@ EngineParams decode_mask(u64 mask, Order k) {
   e.full.reuse_regular_verticals = (mask & 1024) != 0;
   e.full.population_lookup = (mask & 4096) != 0;
   e.full.concurrent_orders = (mask & 8192) != 0;
+  e.full.place_pipeline = (mask & 262144) != 0;
   e.catalogue.cache_center_lines = (mask & 1) != 0;
   e.catalogue.indirect_sort = (mask & 2) != 0;
   e.catalogue.adaptive_frontier = (mask & 16) != 0;
@@ -104,6 +105,7 @@ void check_same(const FullParams& got, const FullParams& want) {
   CHECK_EQ(got.reuse_regular_verticals, want.reuse_regular_verticals);
   CHECK_EQ(got.population_lookup, want.population_lookup);
   CHECK_EQ(got.concurrent_orders, want.concurrent_orders);
+  CHECK_EQ(got.place_pipeline, want.place_pipeline);
 }
 
 struct StagePeaks {
@@ -272,7 +274,7 @@ MHGP11_TEST(session_identity, 24) {
 }
 
 MHGP11_TEST(engine, 347) {
-  CHECK_EQ(api_detail::kEngineMask, 16379u);  // masque qualifie des sondes (docs/SORTIES.md, paragraphe 1)
+  CHECK_EQ(api_detail::kEngineMask, 278523u);  // 16379 qualifie + placement 262144 (docs/SORTIES.md, paragraphe 1)
   for (Order k = 1; k <= api::kMaxOrder; ++k) {
     const EngineParams want = decode_mask(api_detail::kEngineMask, k);
     check_same(api_detail::catalogue_params(k), want.catalogue);

@@ -44,6 +44,9 @@ FullParams full_params() noexcept {
   params.reuse_regular_verticals = true;
   params.population_lookup = true;
   params.concurrent_orders = true;
+  // 262144 : taches serie lourdes du pipeline sur des coeurs physiques dedies (levier O1), adopte le 6 octobre 2026
+  // par la session G4 claudeo1place3 ; ordonnancement seul, inactif si la topologie ne s'y prete pas.
+  params.place_pipeline = true;
   return params;
 }
 
@@ -52,6 +55,7 @@ FullParams order_params() noexcept {
   params.parallel_verticals = false;       // 128
   params.reuse_regular_verticals = false;  // 1024
   params.concurrent_orders = false;        // 8192
+  params.place_pipeline = false;           // 262144, sans pipeline des ordres concurrents
   return params;
 }
 

@@ -74,14 +74,17 @@ un `-` initial, et `--origine` donne trois décimaux séparés par des virgules.
 normalisation : `0.0010` et `0.001` donnent deux manifestes différents.
 
 **Moteur.** Il n'existe aucune option de moteur (règle 6 d'[ARCHITECTURE.md](ARCHITECTURE.md)). Les paramètres sont
-ceux, qualifiés, des sondes de banc : masque 16 379 de `bench/full_probe.cpp`, `leaf_size` 16 et `max_leaf` 256 comme
-`bench/points_export.cpp`. Les sorties `points` et `plat` construisent l'arbre d'ordre K seul (`build_order`, tranche
+ceux, qualifiés, des sondes de banc : masque 278 523 de `bench/full_probe.cpp`, `leaf_size` 16 et `max_leaf` 256 comme
+`bench/points_export.cpp`. Le masque 278 523 est le 16 379 qualifié plus le placement du pipeline (bit 262 144,
+levier O1 : tâches série lourdes des ordres concurrents sur des cœurs physiques dédiés), adopté le 6 octobre 2026 par
+la règle écrite avant la session G4 `claudeo1place3`. C'est un ordonnancement seul : aucune sortie ne change d'un
+octet, et il reste inactif quand la topologie ne s'y prête pas. Les sorties `points` et `plat` construisent l'arbre d'ordre K seul (`build_order`, tranche
 S3) avec les mêmes paramètres, à deux exceptions près : les ordres concurrents, que `build_order` refuse jusqu'à la
 tranche S11, et les verticales, sans objet pour un seul ordre. Depuis la livraison L2b (§ 11), la sortie `supports`
-tire l'arbre d'ordre K de FULL (`build_order_full`, masque 16 379) : voir ci-dessous.
+tire l'arbre d'ordre K de FULL (`build_order_full`, masque 278 523) : voir ci-dessous.
 
 **Voie de `supports` depuis L2b** (5 octobre 2026, commit local, qualification G4 en attente). La règle de L2 a décidé
-`livrer_L2b` (§ 11). `compute(supports)` construit FULL au masque 16 379, ordres $1$ à $K$ et verticales, avec le
+`livrer_L2b` (§ 11). `compute(supports)` construit FULL au masque 278 523, ordres $1$ à $K$ et verticales, avec le
 journal des graines posé sur le seul constructeur de l'ordre $K$ : le pilote dans la voie non concurrente, la tâche de
 publication unique de l'ordre $K$ dans la voie concurrente, par étages ou en pipeline. Les capacités du journal sont
 admises avant toute allocation, par le majorant de `build_order`. Après la fin, les autres ordres et les verticales de
@@ -93,9 +96,10 @@ disponible et jugé (portes I10, S3 et `points`). La ligne d'état garde `tree` 
 
 **Arbre d'ordre K seul** (tranche S3, intégrée en L1 le 5 octobre 2026, qualification G4 en attente). `build_order`
 refuse (`parameter_out_of_range`) les trois options sans objet pour un ordre seul, au lieu de les ignorer : ordres
-concurrents (bit 8 192 du masque), verticales parallèles (128) et réemploi des verticales régulières (1 024). La façade
-(S7) les retire du masque 16 379 : l'arbre d'ordre K seul prend le masque 7 035 (`api_detail::order_params`,
-`kOrderMask`, avec une assertion statique de la différence), et FULL garde 16 379 (mesure appariée du § 11, audit
+concurrents (bit 8 192 du masque), verticales parallèles (128) et réemploi des verticales régulières (1 024), ainsi que
+le placement du pipeline (262 144), refusé hors ordres concurrents. La façade (S7) les retire du masque 278 523 :
+l'arbre d'ordre K seul prend le masque 7 035 (`api_detail::order_params`, `kOrderMask`, avec une assertion statique de
+la différence), et FULL garde 278 523 (mesure appariée du § 11, audit
 `238734f1d`). C'est la seule différence entre les moteurs des deux sorties ; éteindre ces options dans FULL changerait
 la référence qualifiée, ce qui n'est pas fait. Les autres paramètres sont honorés, ce que la porte
 `mhgp11_tower_order_same_params` exige (table de populations consultée, mémo interrogé, lookup dense construit ;

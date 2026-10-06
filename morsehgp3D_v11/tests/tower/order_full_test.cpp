@@ -17,7 +17,7 @@ struct Route {
   u32 workers;  // 0 : sans Pool
 };
 
-// Voies de FULL exercees. Le masque 16379 de la facade (api_detail::full_params) est la derniere, sur W3 et W12.
+// Voies de FULL exercees. Le masque 278523 de la facade (api_detail::full_params) est la derniere, sur W3 et W12.
 std::vector<Route> routes() {
   std::vector<Route> out;
   out.push_back({"serielle", FullParams{}, 0});
@@ -37,9 +37,9 @@ std::vector<Route> routes() {
   FullParams facade;
   facade.regular_batch_capacity = 4096; facade.descent_lanes = 48; facade.parallel_verticals = true;
   facade.reuse_census_workspace = true; facade.dense_birth_lookup = true; facade.reuse_regular_verticals = true;
-  facade.population_lookup = true; facade.concurrent_orders = true;
-  out.push_back({"masque16379_w3", facade, 3});
-  out.push_back({"masque16379_w12", facade, 12});
+  facade.population_lookup = true; facade.concurrent_orders = true; facade.place_pipeline = true;
+  out.push_back({"masque278523_w3", facade, 3});
+  out.push_back({"masque278523_w12", facade, 12});
   return out;
 }
 

@@ -43,7 +43,7 @@ def unsigned(event, keys):
 
 
 def optimization(value):
-    need(type(value) is int and 0 <= value <= 131071, 'optimization mode outside 0..131071')
+    need(type(value) is int and 0 <= value <= 524287, 'optimization mode outside 0..524287')
     need(not value & 128 or value & 8, 'parallel verticals require regular lanes')
     need(not value & 8192 or value & 8, 'concurrent orders require regular lanes')
     # 16384 : feuille source unique jouee sur l'hote ; 32768 / 65536 : feuilles en lot (Pool / GPU). Ces voies
@@ -51,6 +51,9 @@ def optimization(value):
     need(not value & 16384 or value & 2048, 'device leaf requires the pair graph')
     need(not value & (32768 | 65536) or (value & 64 and value & 2048), 'leaf batches require single pass and pair graph')
     need(not (value & 32768 and value & 65536), 'one leaf batch executor')
+    # Memes dependances que bench/full_probe.cpp (correctif de l'auditeur, audit_placement_followup_20261006).
+    need(not value & 131072 or value & (32768 | 65536), 'replay overflow requires a leaf batch')
+    need(not value & 262144 or value & 8192, 'pipeline placement requires concurrent orders')
     return value
 
 

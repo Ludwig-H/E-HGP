@@ -1,6 +1,6 @@
 {
   "module": "api",
-  "plancher": 23,
+  "plancher": 24,
   "mutants": [
     {
       "id": "session_sans_liberation",
@@ -136,7 +136,7 @@
       "cherche": "build_full(std::move(domain.value()), budget, nullptr, api_detail::full_params(), &session.pool());",
       "remplace": "build_full(std::move(domain.value()), budget, nullptr, FullParams{}, &session.pool());",
       "porte": "mhgp11_api_session_engine",
-      "note": "forets aux parametres par defaut au lieu du masque 16379 : meme objet, autres pics"
+      "note": "forets aux parametres par defaut au lieu du masque 278523 : meme objet, autres pics"
     },
     {
       "id": "parametres_catalogue_feuilles",
@@ -185,6 +185,14 @@
       "remplace": "inline constexpr SupportsRoute kSupportsRoute = SupportsRoute::order_tree;",
       "porte": "mhgp11_api_supports_route_scale8000",
       "note": "compute(supports) reprend l'arbre d'ordre K seul alors que la regle de L2 a decide la voie FULL"
+    },
+    {
+      "id": "placement_api_eteint",
+      "fichier": "src/api/compute.cpp",
+      "cherche": "  params.place_pipeline = true;\n",
+      "remplace": "",
+      "porte": "mhgp11_api_session_engine",
+      "note": "facade sans le placement adopte (levier O1) : parametres differents du masque 278523 decode"
     }
   ]
 }
