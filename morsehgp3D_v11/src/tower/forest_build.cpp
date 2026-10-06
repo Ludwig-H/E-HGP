@@ -274,7 +274,8 @@ Outcome ForestBuilder::allocate_births() noexcept {
   MHGP11_TRY(result.children_.allocate(edge_capacity, budget));
   MHGP11_TRY(result.lookup_.allocate(sparse_capacity, budget));
   MHGP11_TRY(result.dense_.allocate(dense_capacity, budget));
-  MHGP11_TRY(budget.admit(b * (sizeof(ForestState) + sizeof(u32))));
+  MHGP11_TRY(budget.admit(b * kForestStateBytes));
+  MHGP11_TRY(parents.allocate(b, budget));
   MHGP11_TRY(states.allocate(b, budget));
   return touched.allocate(b, budget);
 }
@@ -291,7 +292,7 @@ Outcome ForestBuilder::site_births() noexcept {
     if (key >= result.dense_.size() || result.dense_[key] != NodeIdx{kNone}) return fail(Reason::tower_invariant);
     result.dense_[key] = NodeIdx{site};
   }
-  for (u32 site = 0; site < b; ++site) states[site] = {site, site, kNone, kNone, kNone, false};
+  for (u32 site = 0; site < b; ++site) { parents[site] = site; states[site] = {site, kNone, kNone, kNone, false}; }
   return {};
 }
 
@@ -314,8 +315,10 @@ Outcome ForestBuilder::birth_block(const BirthBlocks& blocks, u64 c, std::span<B
   }
   if (birth != blocks.births[c + 1] || job != blocks.jobs[c + 1] || (k == 1 && birth != 0))
     return fail(Reason::tower_invariant);
-  for (u64 s = blocks.births[c]; s < blocks.births[c + 1]; ++s)
-    states[s] = {static_cast<u32>(s), static_cast<u32>(s), kNone, kNone, kNone, false};
+  for (u64 s = blocks.births[c]; s < blocks.births[c + 1]; ++s) {
+    parents[s] = static_cast<u32>(s);
+    states[s] = {static_cast<u32>(s), kNone, kNone, kNone, false};
+  }
   return {};
 }
 
@@ -396,9 +399,9 @@ Outcome parallel_births(std::span<ForestBuilder* const> builders, std::span<cons
 
 Outcome ForestBuilder::prepare_states() noexcept {
   const u64 b = result.births_;
-  MHGP11_TRY(budget.admit(b * (sizeof(ForestState) + sizeof(u32))));
-  MHGP11_TRY(states.allocate(b, budget)); MHGP11_TRY(touched.allocate(b, budget));
-  for (u32 i = 0; i < b; ++i) states[i] = {i, i, kNone, kNone, kNone, false};
+  MHGP11_TRY(budget.admit(b * kForestStateBytes));
+  MHGP11_TRY(parents.allocate(b, budget)); MHGP11_TRY(states.allocate(b, budget)); MHGP11_TRY(touched.allocate(b, budget));
+  for (u32 i = 0; i < b; ++i) { parents[i] = i; states[i] = {i, kNone, kNone, kNone, false}; }
   return {};
 }
 

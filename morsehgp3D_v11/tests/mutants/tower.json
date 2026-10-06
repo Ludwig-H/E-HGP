@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 157,
+  "plancher": 158,
   "mutants": [
     {
       "id": "population_memo_owner_omis",
@@ -1000,8 +1000,8 @@
     {
       "id": "births_blocs_etat_partage",
       "fichier": "src/tower/forest_build.cpp",
-      "cherche": "states[s] = {static_cast<u32>(s), static_cast<u32>(s), kNone, kNone, kNone, false};",
-      "remplace": "states[s] = {static_cast<u32>(s), 0, kNone, kNone, kNone, false};",
+      "cherche": "states[s] = {static_cast<u32>(s), kNone, kNone, kNone, false};",
+      "remplace": "states[s] = {0, kNone, kNone, kNone, false};",
       "porte": "mhgp11_tower_pipeline_equivalence",
       "note": "Chaque naissance commence comme sa propre composante, sommet compris."
     },
@@ -1274,6 +1274,14 @@
       "remplace": "if (s.overflow && false) return fail(Reason::tower_capacity);",
       "porte": "mhgp11_tower_descent_capacity",
       "note": "somme des registres sans branche : un debordement cumule mais ignore publierait une somme enveloppee"
+    },
+    {
+      "id": "births_blocs_parent_partage",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "parents[s] = static_cast<u32>(s);",
+      "remplace": "parents[s] = 0;",
+      "porte": "mhgp11_tower_pipeline_equivalence",
+      "note": "tableau parent separe : chaque naissance d'un bloc doit commencer comme sa propre racine"
     }
   ]
 }

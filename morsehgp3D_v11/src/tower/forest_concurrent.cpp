@@ -14,6 +14,10 @@
 
 namespace mhgp11::tower_detail {
 
+// Distance de prechargement des graines, en jobs : avec des blocs de 256 jobs (forest_pipeline.cpp), 16 jobs d'avance
+// restent presque toujours dans le bloc deja confirme.
+constexpr u64 kSeedAhead = 16;
+
 Outcome ForestBuilder::collect_jobs(std::span<BallIdx> jobs) const noexcept {
   const auto balls = domain.catalogue().balls_data();
   u64 count = 0;
@@ -45,6 +49,7 @@ Outcome ForestBuilder::publish(std::span<const BallIdx> jobs, std::span<const No
       if (job >= jobs.size() || jobs[job] != BallIdx{b}) return fail(Reason::tower_invariant);
       // Pipeline : les graines de ce bloc sont lues apres sa publication ; un bloc en refus arrete l'ordre.
       if (gate != nullptr && !await_job(job)) { abandoned = true; return {}; }
+      prefetch_seeds(seeds, job + kSeedAhead);
       MHGP11_TRY(regular_cell(BallIdx{b}, seeds.subspan(4 * job, balls[b].qmin)));
       ++job;
     } else {
@@ -54,6 +59,14 @@ Outcome ForestBuilder::publish(std::span<const BallIdx> jobs, std::span<const No
   if (job != jobs.size()) return fail(Reason::tower_invariant);
   if (active) { MHGP11_TRY(close(*active)); announce(*active, true); }
   return {};
+}
+
+void ForestBuilder::prefetch_seeds(std::span<const NodeIdx> seeds, u64 job) const noexcept {
+  if (job >= seeds.size() / 4 || (gate != nullptr && job / gate->width >= confirmed)) return;
+  for (u32 i = 0; i < 4; ++i) {
+    const u32 seed = idx(seeds[4 * job + i]);  // kNone au-dela de qmin
+    if (seed < parents.size()) { __builtin_prefetch(&parents[seed]); __builtin_prefetch(&states[seed]); }
+  }
 }
 
 // Attente bloquante (futex) : lire epoch, puis l'etat du bloc, puis attendre un changement d'epoch. Une fin de bloc
@@ -178,7 +191,7 @@ Outcome stage_births(Staged& s, MemoryBudget& budget, sched::Pool& pool) noexcep
   for (u32 i = 0; i < s.kmax; ++i) {
     const auto& b = *s.builders[i];
     MHGP11_TRY(cell_add(bytes, b.birth_bytes()));
-    MHGP11_TRY(cell_add(bytes, u64{b.result.births()} * (sizeof(ForestState) + sizeof(u32))));
+    MHGP11_TRY(cell_add(bytes, u64{b.result.births()} * kForestStateBytes));
     MHGP11_TRY(cell_add(bytes, b.regular_jobs * (sizeof(BallIdx) + 4 * sizeof(NodeIdx))));
   }
   MHGP11_TRY(budget.admit(bytes));

@@ -7,12 +7,6 @@
 
 namespace mhgp11::tower_detail {
 
-Outcome cell_add(u64& target, u64 value) noexcept {
-  if (value > std::numeric_limits<u64>::max() - target) return fail(Reason::tower_capacity);
-  target += value;
-  return {};
-}
-
 Result<u64> cell_binomial(u32 m, u32 t) noexcept {
   if (t > m || t > kMaxMebSites) return fail(Reason::parameter_out_of_range);
   t = std::min(t, m - t);

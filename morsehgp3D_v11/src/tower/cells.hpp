@@ -1,6 +1,8 @@
 // Cellules privees : toutes les traces strictes, sans quotient local ni decision de fusion globale.
 #pragma once
 
+#include <limits>
+
 #include "tower/meb.hpp"
 
 namespace mhgp11::tower_detail {
@@ -48,7 +50,12 @@ class CellClassification {
 
 // Helpers de capacite/coherence, aussi exerces aux frontieres scalaires par les tests.
 [[nodiscard]] Result<u64> cell_binomial(u32 m, u32 t) noexcept;
-[[nodiscard]] Outcome cell_add(u64& target, u64 value) noexcept;
+// En ligne : appele a chaque cellule et a chaque union par les publieurs (profil du 6 octobre 2026).
+[[nodiscard]] inline Outcome cell_add(u64& target, u64 value) noexcept {
+  if (value > std::numeric_limits<u64>::max() - target) return fail(Reason::tower_capacity);
+  target += value;
+  return {};
+}
 [[nodiscard]] Outcome cell_same_pass(u64 counted, u64 filled, const CellLedger& first,
                                      const CellLedger& second) noexcept;
 

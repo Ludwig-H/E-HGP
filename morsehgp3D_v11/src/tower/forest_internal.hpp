@@ -103,10 +103,13 @@ bool await_lower(View& low, LevelRank level) noexcept {
   return !low.abandoned;
 }
 
+// Etat de chaine d'une naissance ; son parent DSU est tenu a part (ForestBuilder::parents) : find ne lit que ce
+// tableau dense de u32, sans les champs de chaine. Octets par naissance : kForestStateBytes (etat, parent, touched).
 struct ForestState {
-  u32 parent, top, head, tail, next;
+  u32 top, head, tail, next;
   bool touched;
 };
+inline constexpr u64 kForestStateBytes = sizeof(ForestState) + 2 * sizeof(u32);
 // Series de naissances de meme rang dans une plage de boules (rang croissant avec l'indice) : plus longue serie,
 // series de tete et de queue. Composition associative dans l'ordre des plages : meme resultat qu'un parcours unique.
 struct BirthRuns {
@@ -145,6 +148,7 @@ struct ForestBuilder {
   OrderTimings* parallel_timings = nullptr;
   OrderForest result;
   Buffer<u8> kinds;  // 0 hors fenetre, 1 naissance, 2 traces strictes ; B octets.
+  Buffer<u32> parents;  // DSU des naissances ; racine = plus petite naissance canonique de la composante
   Buffer<ForestState> states;
   Buffer<u32> touched;
   u32 touched_count = 0;
@@ -190,6 +194,9 @@ struct ForestBuilder {
   void announce(LevelRank closed, bool last) noexcept;
   Outcome cell(BallIdx) noexcept;
   Outcome regular_cell(BallIdx, std::span<const NodeIdx>) noexcept;
+  // Prechargement des parents et etats DSU des graines du job donne : aucun effet sur une decision. Seulement dans
+  // un bloc deja confirme (lecture acquise par await_job) ou hors pipeline, ou aucun resolveur n'ecrit en meme temps.
+  void prefetch_seeds(std::span<const NodeIdx> seeds, u64 job) const noexcept;
   Outcome regular_work(const DescentLedger& work) noexcept { return add_descent(result.ledger_.descent, work); }
   Outcome regular_plateau() noexcept { return cell_add(result.ledger_.plateaus, 1); }
   Outcome close(LevelRank) noexcept;

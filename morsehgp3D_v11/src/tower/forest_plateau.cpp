@@ -8,9 +8,9 @@ namespace mhgp11::tower_detail {
 
 u32 ForestBuilder::find(u32 start) noexcept {
   u32 root = start;
-  while (states[root].parent != root) root = states[root].parent;
-  while (states[start].parent != start) {
-    const u32 next = states[start].parent; states[start].parent = root; start = next;
+  while (parents[root] != root) root = parents[root];
+  while (parents[start] != start) {
+    const u32 next = parents[start]; parents[start] = root; start = next;
   }
   return root;
 }
@@ -30,7 +30,7 @@ Outcome ForestBuilder::unite_roots(u32& root, u32 b) noexcept {
   u32 a = root;
   if (a == b) return {};
   if (b < a) std::swap(a, b);  // Racine = plus petite naissance canonique de la composante.
-  states[b].parent = a;
+  parents[b] = a;
   states[states[a].tail].next = states[b].head;
   states[a].tail = states[b].tail;
   root = a;
@@ -73,7 +73,7 @@ Outcome ForestBuilder::close(LevelRank level) noexcept {
   forest_sort(touched.span().first(touched_count), [](u32 a, u32 b) noexcept { return a < b; });
   for (u32 i = 0; i < touched_count; ++i) {
     const u32 root = touched[i];
-    if (states[root].parent != root) continue;
+    if (parents[root] != root) continue;
     u64 count = 0;
     // Une chaine plus longue que les naissances est cyclique : refus par code plutot que boucle sans fin.
     for (u32 r = states[root].head; r != kNone; r = states[r].next)
