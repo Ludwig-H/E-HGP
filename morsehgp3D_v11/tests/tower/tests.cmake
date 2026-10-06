@@ -79,7 +79,7 @@ mhgp11_python_gate(mhgp11_tower_full_bench_io 0 full_bench_io.py $<TARGET_FILE:m
 # Voies de feuille (CPU, feuille source unique sur l'hote, lot sur le Pool) sur 3 000 sites uniformes : meme dump,
 # meme registre, lot plus nombreux que les sites (les feuilles se recouvrent ; garde fausse du 4 octobre 2026).
 mhgp11_python_gate(mhgp11_tower_full_leaf_lanes 0 full_leaf_lanes.py $<TARGET_FILE:mhgp11_full_bench> ${MHGP11_COORD_BITS}
-                    LINE "full_leaf_lanes_verdict conforme sites3000 k5 boules212695 lot27048 non_resolues0 rejouees0 copiees23766 k10 boules1075008 lot35957 non_resolues0 rejouees555 copiees34576"
+                    LINE "full_leaf_lanes_verdict conforme sites3000 k5 boules212695 lot27048 non_resolues0 rejouees0 copiees23766 sous_lots16 k10 boules1075008 lot35957 non_resolues0 rejouees555 copiees34576 sous_lots16"
                     LABELS fast TIMEOUT 300)
 mhgp11_python_gate(mhgp11_tower_full_bench_semantic 0 full_bench_semantic_test.py
                     LINE "full_semantic_verdict conforme positives21 corruptions48 checks168 native0"

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Voies de feuille de la sonde FULL sur un nuage moyen : CPU (16379), feuille source unique sur l'hote (32763) et lot
-de feuilles sur le Pool (49147) rendent le meme dump et le meme registre du catalogue.
+"""Voies de feuille de la sonde FULL sur un nuage moyen : CPU (16379), feuille source unique sur l'hote (32763), lot
+de feuilles sur le Pool (49147) et lot recouvert par sous-lots (180219) rendent le meme dump et le meme registre.
 
     python3 full_leaf_lanes.py MHGP11_FULL_BENCH BITS
 
@@ -22,8 +22,10 @@ import sys
 import tempfile
 
 SITES = 3000
-CONFIGS = (('5', '16', {'cpu': 16379, 'feuille_hote': 32763, 'lot_hote': 49147}),
-           ('10', '24', {'cpu': 16379, 'lot_hote': 49147}))
+# lot_recouvert (180219 = 49147 + 131072) : le meme lot execute par sous-lots pendant la passe des taches, sur un
+# fil dedie (leaf_overlap.cpp, recouvrement L4 du plan GPU du 6 octobre 2026).
+CONFIGS = (('5', '16', {'cpu': 16379, 'feuille_hote': 32763, 'lot_hote': 49147, 'lot_recouvert': 180219}),
+           ('10', '24', {'cpu': 16379, 'lot_hote': 49147, 'lot_recouvert': 180219}))
 
 
 def need(value, reason):
@@ -74,14 +76,19 @@ def main():
             for name in modes:
                 need(seen[name]['digest'] == reference['digest'], name + ' K' + kmax + ' : dump different du CPU')
                 need(seen[name]['work'] == reference['work'], name + ' K' + kmax + ' : registre different')
-                need(name == 'lot_hote' or seen[name]['batch']['jobs'] == 0, 'lot hors voie de lot')
+                need(name in ('lot_hote', 'lot_recouvert') or seen[name]['batch']['jobs'] == 0, 'lot hors voie de lot')
             batch = seen['lot_hote']['batch']
+            covered = seen['lot_recouvert']['batch']
+            need(all(covered[key] == batch[key] for key in ('jobs', 'records', 'population', 'unresolved', 'fill_jobs',
+                                                            'copied_jobs')), 'lot recouvert different du lot unique')
+            need(covered['overlap_chunks'] >= 2 and batch['overlap_chunks'] == 0, 'sous-lots du recouvrement')
             need(batch['jobs'] > SITES, 'lot de feuilles pas plus nombreux que les sites (%d)' % batch['jobs'])
             need(batch['records'] > 0 and batch['population'] > 0 and batch['unresolved'] <= batch['jobs'], 'lot vide')
             # Branche copiee observable (audit du 4 octobre, ee2b48b4c) : des feuilles emettrices tiennent dans leur case.
             need(batch['copied_jobs'] > 0, 'aucune case copiee')
-            line.append('k%s boules%d lot%d non_resolues%d rejouees%d copiees%d' % (
-                kmax, reference['balls'], batch['jobs'], batch['unresolved'], batch['fill_jobs'], batch['copied_jobs']))
+            line.append('k%s boules%d lot%d non_resolues%d rejouees%d copiees%d sous_lots%d' % (
+                kmax, reference['balls'], batch['jobs'], batch['unresolved'], batch['fill_jobs'], batch['copied_jobs'],
+                covered['overlap_chunks']))
             last = batch
         # Les deux chemins d'ecriture servent a K = 10 : copie des cases et seconde passe des feuilles qui debordent.
         need(0 < last['fill_jobs'] < last['jobs'], 'chemins d ecriture non exerces (%d)' % last['fill_jobs'])

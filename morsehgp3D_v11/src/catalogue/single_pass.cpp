@@ -49,6 +49,7 @@ struct SingleRun {
   std::span<Emission> records;
   std::span<SiteIdx> population;
   std::span<const u32> order;  // reclamation par charge decroissante ; sorties toujours par ordinal
+  OverlapLane* lane = nullptr;  // recouvrement : fin de chaque tache signalee par sa position de reclamation
 
   Outcome generate(u32 ordinal, u32 worker) noexcept {
     const u32 slot = frontier.size() < workers ? ordinal : worker;
@@ -86,7 +87,10 @@ struct SingleRun {
   static Outcome generate_body(void* context, u64 begin, u64 end, u32 worker) noexcept {
     auto& run = *static_cast<SingleRun*>(context);
     if (end > run.frontier.size()) return fail(Reason::catalogue_invariant);
-    for (u64 i = begin; i < end; ++i) MHGP11_TRY(run.generate(run.order[i], worker));
+    for (u64 i = begin; i < end; ++i) {
+      MHGP11_TRY(run.generate(run.order[i], worker));
+      if (run.lane != nullptr) run.lane->task_done(i);
+    }
     return {};
   }
   static Outcome compact_body(void* context, u64 begin, u64 end, u32) noexcept {
@@ -115,10 +119,15 @@ Outcome prefix(std::span<Output> output, const CatalogueParams& params, Catalogu
 template <u32 Capacity>
 Outcome batch_stage(const Cloud& cloud, const CatalogueParams& params, MemoryBudget& budget, sched::Pool& pool,
                     std::span<Output> active, BatchBlock& batch, CatalogueLedger& ledger, CatalogueExecution& execution,
-                    u64& balls, u64& incidences, CatalogueTimings* timings) noexcept {
-  std::array<const TaskLeafQueue*, Capacity> queues{};
-  for (u64 i = 0; i < active.size(); ++i) queues[i] = &active[i].queue;
-  MHGP11_TRY(process_leaf_batch(cloud, params, budget, pool, std::span(queues).first(active.size()), batch, timings));
+                    u64& balls, u64& incidences, CatalogueTimings* timings, OverlapLane* lane = nullptr) noexcept {
+  if (lane != nullptr) {
+    MHGP11_TRY(lane->finish(pool, batch, timings));
+  } else {
+    std::array<const TaskLeafQueue*, Capacity> queues{};
+    for (u64 i = 0; i < active.size(); ++i) queues[i] = &active[i].queue;
+    MHGP11_TRY(process_leaf_batch(cloud, params, budget, pool, std::span(queues).first(active.size()), batch,
+                                  timings));
+  }
   MHGP11_TRY(add_catalogue_ledger(ledger, batch.ledger));
   MHGP11_TRY(batch.fallback.account(execution));
   for (const u64 count : {u64(batch.records.size()), batch.fallback.balls()}) {
@@ -211,6 +220,19 @@ Outcome generate_single(const Cloud& cloud, const CatalogueParams& params, Memor
   SingleRun<Front> run{cloud, params, budget, frontier, quota, std::span(workspaces).first(workers), active,
                        pool.size(), timings != nullptr || diagnostics != nullptr, {}, {},
                        std::span(order).first(frontier.size())};
+  const bool batched = params.batch_leaves || params.cuda_leaves;
+  // Recouvrement : files dans l'ordre de reclamation, fil dedie lance avant la passe, arrete par son destructeur
+  // sur tout refus.
+  OverlapLane lane;
+  std::array<const TaskLeafQueue*, Capacity> claimed{};
+  if (batched && params.overlap_leaves) {
+    for (u32 i = 0; i < frontier.size(); ++i) {
+      active[order[i]].queue.bind(budget);
+      claimed[i] = &active[order[i]].queue;
+    }
+    MHGP11_TRY(lane.start(cloud, params, budget, std::span(claimed).first(frontier.size())));
+    run.lane = &lane;
+  }
   if (timings != nullptr) stage.emplace();
   MHGP11_TRY(pool.parallel_for(frontier.size(), 1, &run, SingleRun<Front>::generate_body));
   if (timings != nullptr) timings->single_pass_ns = stage->nanoseconds();
@@ -219,10 +241,9 @@ Outcome generate_single(const Cloud& cloud, const CatalogueParams& params, Memor
   MHGP11_TRY(prefix(active, params, ledger, execution, balls, incidences));
   const u64 task_balls = balls, task_incidences = incidences;
   BatchBlock batch;
-  const bool batched = params.batch_leaves || params.cuda_leaves;
   if (batched)
     MHGP11_TRY(batch_stage<Capacity>(cloud, params, budget, pool, active, batch, ledger, execution, balls, incidences,
-                                     timings));
+                                     timings, run.lane));
   if (timings != nullptr) stage.emplace();
   bytes = 0;
   MHGP11_TRY(add_bytes<Emission>(bytes, balls));

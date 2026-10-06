@@ -40,6 +40,9 @@ struct CatalogueParams {
   // Passe unique seulement : feuilles admissibles mises en file puis traitees en lot par leaf_device.hpp, sur le
   // Pool (batch_leaves) ou sur le GPU (cuda_leaves, implique batch_leaves) ; non resolues refaites par leaf.cpp.
   bool batch_leaves = false, cuda_leaves = false;
+  // Recouvrement (exige batch_leaves ou cuda_leaves) : les feuilles partent par sous-lots pendant la passe des
+  // taches, sur un fil dedie (leaf_overlap.cpp) ; memes octets que le lot unique.
+  bool overlap_leaves = false;
 };
 
 struct CatalogueBall {
@@ -89,6 +92,8 @@ struct CatalogueTimings {
   u64 batch_fill_jobs = 0;    // feuilles rejouees par la seconde passe (celles qui emettent et debordent)
   u64 batch_copied_jobs = 0;  // feuilles qui emettent et tiennent dans leur case
   u64 batch_device_pool_used_high = 0, batch_device_pool_reserved_high = 0;  // pics physiques du pool CUDA
+  // Recouvrement : sous-lots, attente cumulee du fil dedie (taches non finies), attente du pilote a la jonction.
+  u64 batch_overlap_chunks = 0, batch_overlap_wait_ns = 0, batch_overlap_tail_ns = 0;
 };
 
 // Travail de stockage distinct de la geometrie ; valeurs de l'option une passe, zero sinon sauf passes=2.

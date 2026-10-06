@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 141,
+  "plancher": 145,
   "mutants": [
     {
       "id": "population_memo_owner_omis",
@@ -1162,6 +1162,22 @@
       "remplace": "",
       "porte": "mhgp11_tower_order_full_identity",
       "note": "L2b : les images basses (verticales) de l'ordre K restent dans l'arbre extrait et dans le budget ; forest.lower() non vide."
+    },
+    {
+      "id": "recouvrement_sans_attente",
+      "fichier": "src/catalogue/leaf_overlap.cpp",
+      "cherche": "        wake.wait(lock, [&] { return aborted || chunk_ready(c); });\n",
+      "remplace": "        wake.wait(lock, [&] { return true; });\n",
+      "porte": "mhgp11_tower_full_leaf_lanes",
+      "note": "un sous-lot part avant la fin de ses taches (files lues pendant l'ecriture)"
+    },
+    {
+      "id": "recouvrement_sites_non_decales",
+      "fichier": "src/catalogue/leaf_overlap.cpp",
+      "cherche": "      MHGP11_TRY(checked_add(job.begin, site_at));\n",
+      "remplace": "",
+      "porte": "mhgp11_tower_full_leaf_lanes",
+      "note": "concatenation des sous-lots sans decaler les debuts des feuilles"
     }
   ]
 }
