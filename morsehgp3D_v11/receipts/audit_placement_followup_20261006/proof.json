@@ -1,0 +1,22 @@
+{
+  "cloud_actions": 0,
+  "corrected_disagreements": 0,
+  "mask_combinations": 1024,
+  "native_executions": 0,
+  "original_disagreements": 48,
+  "scope": "AST of Python optimization; mask guard expressions read from C++; no native execution",
+  "source_commit": "86b3cbf14247f2cff523757ceb38168d365df82e",
+  "valid_rejected_modes": [
+    180219,
+    212987,
+    278523,
+    344059,
+    475131
+  ],
+  "replays": {
+    "normal": 0,
+    "optimized": 0,
+    "identical": true
+  },
+  "patch_apply_check": 0
+}

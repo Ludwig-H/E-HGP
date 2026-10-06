@@ -18,10 +18,12 @@ communs, regroupés par HGP ; la vraie mosaïque d'ordre k est une charpente
 complémentaire à compléter et à qualifier. Les supports actuels ne sont pas
 cette mosaïque. [Construction et exemples](../receipts/audit_geometry_design_20261006/README.md).
 
-**Réservoir de feuilles 59509bbc8 : deux raccords de qualification à corriger.**
-La lecture du moteur est favorable. La porte IO et le lecteur de campagne
-gardent l'ancienne borne des masques ; le juge GPU peut accepter un registre
-absent. [Constats et correctifs ciblés](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#réservoir-de-feuilles--raccord-des-portes-à-corriger).
+**Réservoir et placement : porte IO corrigée en 86b3cbf14.** Le lecteur
+de campagne garde cependant l'ancienne borne ; le nouveau
+[correctif du lecteur](../receipts/audit_placement_followup_20261006/README.md)
+remplace la proposition historique à deux fichiers, devenue périmée.
+Le juge GPU peut toujours accepter un registre absent.
+[État des raccords](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#réservoir-de-feuilles--raccord-des-portes-à-corriger).
 
 **Supports MST : correction intégrée en 07428324e et qualifiée sur G4 u21.**
 Le sélecteur garde les unions utiles au même plateau ; le différentiel

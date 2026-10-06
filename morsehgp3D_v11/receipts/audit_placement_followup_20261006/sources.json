@@ -1,0 +1,8 @@
+{
+  "source_commit": "86b3cbf14247f2cff523757ceb38168d365df82e",
+  "files": {
+    "bench/full_campaign.py": "60b177d0109fdd7f3e4057ccb8cd47bd79071b422967429ed21aabd0f789bf6c",
+    "bench/full_probe.cpp": "36a58e5d947cff3b71895cf72ec1a61ad8d5ac169d1371f8166089cb4709c911",
+    "tests/tower/full_bench_io.py": "6e1634734ce8ea20678ba0ef05d71a895a97084402a892022c6156fc161223aa"
+  }
+}

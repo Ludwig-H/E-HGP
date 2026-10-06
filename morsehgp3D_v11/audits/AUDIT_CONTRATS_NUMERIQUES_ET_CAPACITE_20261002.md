@@ -124,8 +124,8 @@ reproductions Python bornées ; [rejeu intégré](../receipts/audit_integration_
 
 ## Réservoir de feuilles : raccord des portes à corriger
 
-**Source 59509bbc8 : lecture favorable du réservoir, deux raccords de
-qualification ouverts.** Les chaînes des enregistrements et de la
+**Réservoir 59509bbc8 : lecture favorable. Porte IO corrigée en 86b3cbf14 ;
+lecteur de campagne et juge GPU encore ouverts.** Les chaînes des enregistrements et de la
 population sont distinctes ; chaque feuille garde son ordre d'émission
 et ses emplacements finaux fixés par les préfixes. Dès l'épuisement,
 `fits` reste faux : les compteurs continuent, les fragments ne sont pas
@@ -135,14 +135,22 @@ peut ajouter qu'un échec ; la garde `count + spare < kNoChunk` exclut donc
 le débordement du curseur u32. Aucun défaut moteur établi par cette lecture,
 aucune exécution native ou CUDA de l'auditeur.
 
-**Porte IO et lecteur de campagne désynchronisés.** La sonde accepte
-maintenant les masques jusqu'à `262143`, mais `full_bench_io.py` exige
-encore que `131072` échoue avant calcul. Ce bit valide seul suit la voie CPU.
-Le témoin hors domaine doit être `262144`. En parallèle,
-`full_campaign.optimization` refuse encore les modes valides `180219`
-et `212987` à cause de sa borne `131071`.
-[Correction des deux bornes](../receipts/audit_reservoir_followup_20261006/gates/README.md).
-Le refus Python est reproduit ; l'échec du CTest natif n'a pas été exécuté.
+**Porte IO corrigée en source dans 86b3cbf14.** Avec le placement des tâches,
+la sonde accepte les bits jusqu'à `524287`, sous leurs dépendances. Le
+témoin hors domaine de `full_bench_io.py` est désormais `524288` ; deux
+refus couvrent le rejeu sans lot et le placement sans ordres concurrents.
+Aucun nouveau PASS natif n'est déduit de cette lecture.
+
+**Lecteur de campagne encore désynchronisé.** `full_campaign.optimization`
+garde `131071` et refuse les modes légaux `180219`, `212987`, `278523`,
+`344059` et `475131`. Le [correctif actualisé](../receipts/audit_placement_followup_20261006/README.md)
+porte seulement sur ce lecteur : borne `524287` et les deux dépendances
+nouvelles. Les 1 024 combinaisons des bits intervenant dans les gardes sont
+comparées aux conditions de la CLI C++ par lecture/AST, en normal et −O,
+sans exécuter de binaire. **Ne plus appliquer le patch historique à deux
+fichiers du réservoir** : sa borne et son témoin IO sont périmés. Son
+[reçu historique](../receipts/audit_reservoir_followup_20261006/gates/README.md)
+reste inchangé au pin d'origine.
 
 **Juge GPU : ne pas accepter l'absence de registre.** Dans
 `gpu_sanitizer.py`, deux `catalogue_work` absents deviennent `None` et
