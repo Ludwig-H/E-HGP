@@ -7,7 +7,7 @@
 #pragma once
 
 #include "catalogue/internal.hpp"
-#include "catalogue/leaf_device.hpp"
+#include "catalogue/leaf_device_coop.hpp"
 
 namespace mhgp11::sched { class Pool; }
 

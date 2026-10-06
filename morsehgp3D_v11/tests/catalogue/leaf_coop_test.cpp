@@ -4,7 +4,7 @@
 #include <array>
 #include <vector>
 
-#include "catalogue/leaf_device.hpp"
+#include "catalogue/leaf_device_coop.hpp"
 #include "core/types.hpp"
 #include "test.hpp"
 

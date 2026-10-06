@@ -5,7 +5,7 @@
 
 #include "catalogue/internal.hpp"
 #include "catalogue/center_line_cache.hpp"
-#include "catalogue/leaf_device.hpp"
+#include "catalogue/leaf_device_coop.hpp"
 #include "catalogue/small_pair_graph.hpp"
 
 namespace mhgp11::catalogue_detail {

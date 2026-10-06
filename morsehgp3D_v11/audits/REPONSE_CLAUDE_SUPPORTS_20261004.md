@@ -548,3 +548,53 @@ ajouterai comme variantes construites sur G4 si la première session est conform
 - K10 feuilles de 24 : `domain` `gpu_coop` ≤ 0,85 × CPU.
 
 La référence reste 830473218 pour la voie séquentielle : `fill_tables` y retrouve sa préparation par paires.
+
+## Q. Session G4 coop1 : exacte, lente ; régression corrigée ; feuille cohérente proposée (6 octobre, 09 h 38 UTC)
+
+Reçu : [coop1](../receipts/developpement_20261006/coop1_feuille_cooperative/README.md).
+
+**Exactitude conforme.**
+- Les portes hôte passent nativement sur G4.
+- Dumps et registres sont identiques en CPU, GPU un fil et GPU coopératif sur les trois trames, à K5/16 et à K10/24.
+- La porte `coop_g4_gate` est conforme : 45 feuilles non résolues, rejouées sur le CPU.
+- Compute Sanitizer (memcheck, racecheck, synccheck) : 0 erreur sur 6 prises.
+
+**Vitesse : le critère écrit d'avance n'est pas atteint.**
+- K5 : l'exécuteur coopératif vaut 0,8 à 1,3 × le GPU un fil (critère : ≤ 0,5).
+- K10 : `domain` vaut 0,93 à 0,94 × le CPU (critère : ≤ 0,85). L'exécuteur gagne tout de même 14 à 26 % sur le GPU
+  un fil.
+
+**Ma lecture.** Répartir les sous-arbres des paires laisse la divergence SIMT entière : chaque lane suit son propre
+chemin q2/q3/q4. Le gain de J3 sur la v10 venait au contraire d'un parallélisme de données sur les sites.
+
+**Deux défauts de mon refactoring, découverts par cette session.**
+- La voie GPU un fil a régressé : écriture ×2, limitée par la latence. Cause : une référence aux tables en mémoire
+  locale. Le SASS en témoigne (364 `LD` génériques contre 173). Corrigé : la feuille d'un fil reprend ses tables par
+  valeur.
+- `atomicOr` était appelé sur la mémoire locale (avertissement de ptxas). Il est désormais réservé aux tables
+  partagées.
+
+La session coop2 mesurera la correction (critère : exécuteur GPU un fil à moins de 10 % des valeurs L4) et profilera,
+avec Nsight Compute, le noyau un fil à K10 sur ng00, ligne source par ligne source.
+
+**Proposition, à contester avant écriture : la feuille cohérente.** Le warp entier parcourt le même préfixe, avec un
+contrôle de flux uniforme.
+- Les étapes scalaires (centre, faces J2, `lines_possible`) sont calculées de façon redondante par toutes les lanes :
+  même instruction, aucune divergence.
+- Recensement : la lane i juge le site i (`side` en i128), puis `__ballot_sync` donne les masques intérieur et
+  coquille.
+- Support canonique : les triplets et quadruplets de la coquille sont répartis sur les lanes, et le premier succès, dans
+  l'ordre, est le plus petit indice gagnant (ballot puis `ffs`).
+- Émission par la lane 0, ou listes écrites en parallèle.
+
+**Questions.**
+1. Le recensement séquentiel s'arrête au seuil (`p == threshold`), et `census_tests` compte les sites visités
+   jusque-là. Je propose de calculer tous les sites, puis de déduire le compteur du rang du seuil-ième intérieur dans
+   l'ordre (popc d'un préfixe de masque). De même, `judged` et les compteurs du support canonique se déduiraient de
+   l'indice du premier succès. Voyez-vous un compteur dont la valeur dépendrait d'un calcul fait **après** l'arrêt
+   séquentiel, en particulier un refus `kUnresolved` qu'un site au-delà du seuil lèverait dans la version parallèle
+   mais jamais dans la séquentielle ? Je propose d'ignorer les refus des sites au-delà du point d'arrêt séquentiel.
+2. Même question pour la recherche du support canonique : un refus non certifié au-delà du premier succès doit-il être
+   ignoré ?
+3. Quels mutants exigez-vous ? Je propose : seuil décalé d'un site, refus au-delà de l'arrêt non ignoré, premier
+   succès pris au plus grand indice, ballot partiel (masque de lanes incomplet).

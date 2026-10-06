@@ -1,0 +1,23 @@
+{
+ "schema": "ehgp.v11.session_plan.v1",
+ "note": "Feuille cooperative J3 (Claude, 6 octobre 2026, section P) : portes hote natives (leaf_coop, full_leaf_lanes), banc GPU K5 feuilles 16 (cpu 16379, gpu un fil par feuille 81915, gpu_coop un warp par feuille 212987), porte coop_g4_gate (identites CPU/GPU/coop/emulation sur deux nuages synthetiques, non resolues, Compute Sanitizer memcheck/racecheck/synccheck), banc GPU K10 feuilles 24. Critere ecrit d'avance : dumps et registres identiques partout ; executeur du lot gpu_coop K5 a chaud <= 0,5 x gpu (59 ms le 6 oct.) sur les trois trames ; K10 : domain gpu_coop <= 0,85 x CPU.",
+ "python_packages": "none",
+ "default_build": true,
+ "build_targets": ["mhgp11_catalogue_leaf_coop", "mhgp11_full_bench"],
+ "results_cap_bytes": 134217728,
+ "commands": [
+  {"name": "portes_hote", "timeout_seconds": 600,
+   "argv": ["ctest", "--no-tests=error", "-R", "^mhgp11_(catalogue_leaf_coop_|tower_full_leaf_lanes$)", "--output-on-failure"]},
+  {"name": "gpu_k5", "timeout_seconds": 1100,
+   "argv": ["python3", "{src}/morsehgp3D_v11/bench/gpu_ab.py", "--src", "{src}", "--work", "{build}/gpu", "--data", "{data}",
+            "--out", "{out}/gpu_k5", "--modes", "cpu=16379,gpu=81915,gpu_coop=212987", "--reps", "5", "--workers", "48",
+            "--warm-passes", "12", "--kmax", "5", "--leaf", "16"]},
+  {"name": "coop_gate", "timeout_seconds": 1500,
+   "argv": ["python3", "{src}/morsehgp3D_v11/bench/coop_g4_gate.py", "--bench", "{build}/gpu/b_cuda/mhgp11_full_bench",
+            "--out", "{out}/coop_gate"]},
+  {"name": "gpu_k10", "timeout_seconds": 1100,
+   "argv": ["python3", "{src}/morsehgp3D_v11/bench/gpu_ab.py", "--src", "{src}", "--work", "{build}/gpu", "--data", "{data}",
+            "--out", "{out}/gpu_k10", "--modes", "cpu=16379,gpu=81915,gpu_coop=212987", "--reps", "3", "--workers", "48",
+            "--warm-passes", "8", "--kmax", "10", "--leaf", "24"]}
+ ]
+}

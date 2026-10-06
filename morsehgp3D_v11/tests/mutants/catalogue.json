@@ -548,7 +548,7 @@
     },
     {
       "id": "coop_paire_sautee",
-      "fichier": "src/catalogue/leaf_device.hpp",
+      "fichier": "src/catalogue/leaf_device_coop.hpp",
       "cherche": "    for (u64 rest = next; rest != 0; rest &= rest - 1) out(count++, i, ctz(rest), rest & (rest - 1), next_logical, next);\n",
       "remplace": "    for (u64 rest = next; rest != 0; rest &= rest - 1)\n      if ((rest & (rest - 1)) != 0) out(count++, i, ctz(rest), rest & (rest - 1), next_logical, next);\n",
       "porte": "mhgp11_catalogue_leaf_coop_sizes",
@@ -556,7 +556,7 @@
     },
     {
       "id": "coop_candidats_restants",
-      "fichier": "src/catalogue/leaf_device.hpp",
+      "fichier": "src/catalogue/leaf_device_coop.hpp",
       "cherche": "  leaf.template extend_one<1>(pair.j, pair.remaining, pair.logical);\n",
       "remplace": "  leaf.template extend_one<1>(pair.j, 0, pair.logical);\n",
       "porte": "mhgp11_catalogue_leaf_coop_witness_q3_obtuse_q4",
@@ -564,7 +564,7 @@
     },
     {
       "id": "coop_cache_par_paire",
-      "fichier": "src/catalogue/leaf_device.hpp",
+      "fichier": "src/catalogue/leaf_device_coop.hpp",
       "cherche": "  leaf.prefix[0] = pair.i;\n",
       "remplace": "  for (u32 w = 0; w < kSeenWords; ++w) leaf.t.seen[w] = 0;\n  leaf.prefix[0] = pair.i;\n",
       "porte": "mhgp11_catalogue_leaf_coop_cache_hits",
@@ -572,7 +572,7 @@
     },
     {
       "id": "coop_compteurs_fill",
-      "fichier": "src/catalogue/leaf_device.hpp",
+      "fichier": "src/catalogue/leaf_device_coop.hpp",
       "cherche": "    Leaf<Sink> lane(in, discarded, sink, tables);\n",
       "remplace": "    Leaf<Sink> lane(in, counts, sink, tables);\n",
       "porte": "mhgp11_catalogue_leaf_coop_sizes",
@@ -580,7 +580,7 @@
     },
     {
       "id": "coop_publication_partielle",
-      "fichier": "src/catalogue/leaf_device.hpp",
+      "fichier": "src/catalogue/leaf_device_coop.hpp",
       "cherche": "  if (root.unresolved) return kUnresolved;\n  CountSink tally_sink;\n",
       "remplace": "  if (root.unresolved) return kUnresolved;\n  for (u32 k = 0; k < n; ++k) {\n    Leaf<Sink> early(in, counts, sink, tables);\n    run_pair(early, pairs[k]);\n    if (early.unresolved) return kUnresolved;\n  }\n  for (u32 w = 0; w < kSeenWords; ++w) tables.seen[w] = 0;\n  counts = Counts{};\n  counts.dominance_tests += u64(in.m) * (in.m - 1) / 2;\n  return kOk;\n  CountSink tally_sink;\n",
       "porte": "mhgp11_catalogue_leaf_coop_near_max",
@@ -588,7 +588,7 @@
     },
     {
       "id": "coop_profondeur1_masque",
-      "fichier": "src/catalogue/leaf_device.hpp",
+      "fichier": "src/catalogue/leaf_device_coop.hpp",
       "cherche": "  leaf.masks[1] = leaf.t.dom[pair.i];\n",
       "remplace": "  leaf.masks[1] = 0;\n",
       "porte": "mhgp11_catalogue_leaf_coop_sizes",
