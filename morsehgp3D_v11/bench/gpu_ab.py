@@ -73,7 +73,9 @@ def take_summary(got):
     return dict(status=full.get('status'), exit=got.get('exit', {}).get('status'), wall_ms=ms(full.get('wall_ns')),
                 domain_ms=ms(full.get('domain_ns')), forest_ms=ms(full.get('forest_ns')),
                 single_pass_ms=ms(domain.get('single_pass_ns')), prefix_ms=ms(domain.get('prefix_ns')),
-                sort_ms=ms(domain.get('sort_ns')), cpu_seconds=full.get('cpu_seconds'),
+                sort_ms=ms(domain.get('sort_ns')), level_scan_ms=ms(domain.get('level_scan_ns')),
+                assembly_ms=ms(domain.get('assembly_ns')), compact_ms=ms(domain.get('compact_ns')),
+                allocation_ms=ms(domain.get('allocation_ns')), cpu_seconds=full.get('cpu_seconds'),
                 pipeline_placement_cores=(full.get('pipeline_tasks') or {}).get('placement_cores'),
                 pipeline=pipeline_summary(full), batch=dict(batch))
 
