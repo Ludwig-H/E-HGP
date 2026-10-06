@@ -10,31 +10,52 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
-## L4/T3 cf28afb04 : corriger la durée de vie sur refus
+## Suite proposée : isoler la répartition des feuilles du fill
 
-**À corriger avant adoption : `claimed` doit être déclaré avant `lane`.**
-`OverlapLane::start` emprunte le tableau de pointeurs `claimed`. Sur refus
-de la passe ou de `prefix`, l’ordre actuel détruit ce tableau avant que
-`~OverlapLane` annule et joigne le fil. Un sous-lot déjà commencé peut encore
-le lire dans `gather_leaves`. La jonction doit précéder sa fin de vie.
-[Preuve de source, modèle borné et patch minimal](../receipts/audit_overlap_20261006/README.md).
-Le patch a été vérifié applicable ; aucune modification du code produit
-ni exécution native n’a été faite par l’audit.
+[Patch et preuve de couverture](../receipts/proposition_fill_cta_20261006/README.md),
+base **830473218**, sans modifier le produit. Le fill actuel lance un bloc
+pour 14 feuilles à rejouer, 132 pour 4 196. La proposition lance un bloc par
+feuille, avec un seul fil actif, puis une boucle u64 si la limite de grille
+exige plusieurs feuilles par bloc. Les positions restent disjointes et
+complètes ; les préfixes, `run_leaf`, les vérifications de fin et les noyaux
+count/copy restent conservés. Les 60 cas bornés et douze frontières larges
+passent normal/−O ; le patch est applicable, sans compilation ni gain prétendu.
 
-La lecture de la concaténation, des préfixes et du repli exact est favorable.
-Garder aussi `jobs <= leaf_device::kMaxBatchJobs` sur l’union des sous-lots
-avant leur réduction hôte : l’ancienne preuve des sommes porte sur un lot
-entier, pas seize lots admissibles séparément. Aucun débordement géométrique
-réel n’est prétendu. Une porte de refus pendant consommation d’un sous-lot
-est proposée, avec jonction, restitution mémoire et absence de publication.
-La qualification CUDA et les sanitizers de cette voie restent à vérifier
-sur G4 au pin exécuté ; les différentiels hôtes annoncés sont distincts.
+La mesure motive cet essai limité : dernière passe chaude K10/ng00,
+fill GPU en série **111,4 ms**, recouvert **1 564,4 ms** ; le count passe
+séparément de **215,3 à 770,6 ms**. Le supplément du fill représente environ
+72 % du supplément de l’exécuteur dans chacune des trois dernières prises
+K10. À K5, c’est surtout le count qui augmente : ne pas présenter un meilleur
+fill comme une solution complète au recouvrement ou aux 100 ms.
+Les six comparaisons sont conservées dans le
+[reçu L4](../receipts/audit_g4_l4_20261006/README.md).
 
-Cette première partie traite au plus seize groupes de tâches, conserve leurs
-résultats jusqu’à la concaténation et recharge XYZ à chaque appel CUDA.
-Ce n’est pas encore l’anneau résident borné en feuilles du plan. Mesurer
-le recouvrement obtenu et ses coûts avant d’adopter la suite ; les 100 ms
-restent ouverts. Le banc résident conserve toujours seulement le dernier dump.
+Comparer sur G4 une référence830 et le candidat patché, mêmes paramètres,
+avec dumps et registres identiques, refus contrôlés et branches copied/fill
+exercées. Mesurer fill puis domaine/FULL avant d’adopter. Ce petit essai
+permet de juger le placement avant une réécriture coopérative de `run_leaf` ;
+il n’annonce pas qu’une feuille par bloc sera plus rapide.
+
+## L4 clos : rejet mesuré, défauts supprimés par le retrait
+
+La session `v11.20261006.claudeL4`, source **cf28afb04**, est close avec
+arrêt certifié à **07:29:37 UTC**. Les deux lots K5/K10 donnent `conforme` :
+**90 processus, 252 passes, 90 dumps contrôlés**, trois trames entières.
+Les 162 passes intermédiaires n’ont qu’un statut, sans dump ni registre
+propre conservé. Les registres des sorties conservées sont jugés égaux par
+le banc épinglé ; ses lignes natives complètes ne sont pas archivées.
+Aucun sanitizer n’est qualifié par ce plan.
+[Rejeu indépendant normal/−O](../receipts/audit_g4_l4_20261006/README.md).
+
+Les critères de gain échouent en K5 et K10 sur chaque trame ; les intervalles
+de domaine résident sont entièrement séparés en défaveur du recouvert.
+Le retrait **830473218** est étayé. Il restitue exactement les sources
+précédant N1/L4 et clôt par suppression le défaut de durée de vie sur refus
+ainsi que la garde globale des sous-lots. Les succès G4 n’avaient pas
+qualifié ces chemins de refus. La
+[preuve et le patch historiques](../receipts/audit_overlap_20261006/README.md)
+restent épinglés à cf28 ; ne pas appliquer ce patch au moteur revenu à sa base.
+Aucune nouvelle campagne sur cette version retirée n’est demandée.
 
 ## N1 clos : dimensionnement intégré, puis optimisation rejetée sur G4
 

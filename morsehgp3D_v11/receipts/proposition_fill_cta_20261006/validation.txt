@@ -1,0 +1,5 @@
+normal exit0
+fill CTA mapping conforme :60 cas enumeres,12 bornes larges, kernels count/copy identiques ; native0 cuda0
+-O exit0
+fill CTA mapping conforme :60 cas enumeres,12 bornes larges, kernels count/copy identiques ; native0 cuda0
+git apply --check (lecture seule) exit0 sur l3 propre pin830473218

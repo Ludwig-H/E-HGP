@@ -1,0 +1,19 @@
+{
+  "captured_utc": "2026-10-06T07:36:41.443107+00:00",
+  "observed_main": "130b83534c17d681c095bbaad56d101bec724f6e",
+  "observed_origin_main": "830473218e1b35fa725209df14b7855667f4c6d4",
+  "proposed_sha256": "0605a70161b3e4d841b1c3c4f957b7a28cd03bf173803f57c0813417fb60483c",
+  "source_commit": "830473218e1b35fa725209df14b7855667f4c6d4",
+  "source_path": "morsehgp3D_v11/src/catalogue/leaf_batch_cuda.cu",
+  "source_sha256": "295e81f58c6227d7801f52e40dc1e2509706d533d85d700dbddaaa02f0346eec",
+  "status": "patch helper propose seulement ; aucune source developpeur editee, aucune compilation/native/G4",
+  "unchanged": [
+    "count_kernel",
+    "copy_kernel",
+    "kThreads=32",
+    "select_emitting et ordre stable",
+    "sinks et bornes de fin des feuilles",
+    "check cudaGetLastError/cudaDeviceSynchronize",
+    "buffers et budget existants"
+  ]
+}

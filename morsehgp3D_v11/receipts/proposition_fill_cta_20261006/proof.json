@@ -1,0 +1,480 @@
+{
+  "disjoint_writes": "chaque j selectionne unique ; sinks/prefixes du source gardes, pas prouves par ce modele",
+  "enumerated": [
+    {
+      "grid": 0,
+      "jobs": 0,
+      "max_grid_x": 1,
+      "visited": 0
+    },
+    {
+      "grid": 0,
+      "jobs": 0,
+      "max_grid_x": 8,
+      "visited": 0
+    },
+    {
+      "grid": 0,
+      "jobs": 0,
+      "max_grid_x": 31,
+      "visited": 0
+    },
+    {
+      "grid": 0,
+      "jobs": 0,
+      "max_grid_x": 127,
+      "visited": 0
+    },
+    {
+      "grid": 0,
+      "jobs": 0,
+      "max_grid_x": 65535,
+      "visited": 0
+    },
+    {
+      "grid": 0,
+      "jobs": 0,
+      "max_grid_x": 2147483647,
+      "visited": 0
+    },
+    {
+      "grid": 1,
+      "jobs": 1,
+      "max_grid_x": 1,
+      "visited": 1
+    },
+    {
+      "grid": 1,
+      "jobs": 1,
+      "max_grid_x": 8,
+      "visited": 1
+    },
+    {
+      "grid": 1,
+      "jobs": 1,
+      "max_grid_x": 31,
+      "visited": 1
+    },
+    {
+      "grid": 1,
+      "jobs": 1,
+      "max_grid_x": 127,
+      "visited": 1
+    },
+    {
+      "grid": 1,
+      "jobs": 1,
+      "max_grid_x": 65535,
+      "visited": 1
+    },
+    {
+      "grid": 1,
+      "jobs": 1,
+      "max_grid_x": 2147483647,
+      "visited": 1
+    },
+    {
+      "grid": 1,
+      "jobs": 2,
+      "max_grid_x": 1,
+      "visited": 2
+    },
+    {
+      "grid": 2,
+      "jobs": 2,
+      "max_grid_x": 8,
+      "visited": 2
+    },
+    {
+      "grid": 2,
+      "jobs": 2,
+      "max_grid_x": 31,
+      "visited": 2
+    },
+    {
+      "grid": 2,
+      "jobs": 2,
+      "max_grid_x": 127,
+      "visited": 2
+    },
+    {
+      "grid": 2,
+      "jobs": 2,
+      "max_grid_x": 65535,
+      "visited": 2
+    },
+    {
+      "grid": 2,
+      "jobs": 2,
+      "max_grid_x": 2147483647,
+      "visited": 2
+    },
+    {
+      "grid": 1,
+      "jobs": 14,
+      "max_grid_x": 1,
+      "visited": 14
+    },
+    {
+      "grid": 8,
+      "jobs": 14,
+      "max_grid_x": 8,
+      "visited": 14
+    },
+    {
+      "grid": 14,
+      "jobs": 14,
+      "max_grid_x": 31,
+      "visited": 14
+    },
+    {
+      "grid": 14,
+      "jobs": 14,
+      "max_grid_x": 127,
+      "visited": 14
+    },
+    {
+      "grid": 14,
+      "jobs": 14,
+      "max_grid_x": 65535,
+      "visited": 14
+    },
+    {
+      "grid": 14,
+      "jobs": 14,
+      "max_grid_x": 2147483647,
+      "visited": 14
+    },
+    {
+      "grid": 1,
+      "jobs": 31,
+      "max_grid_x": 1,
+      "visited": 31
+    },
+    {
+      "grid": 8,
+      "jobs": 31,
+      "max_grid_x": 8,
+      "visited": 31
+    },
+    {
+      "grid": 31,
+      "jobs": 31,
+      "max_grid_x": 31,
+      "visited": 31
+    },
+    {
+      "grid": 31,
+      "jobs": 31,
+      "max_grid_x": 127,
+      "visited": 31
+    },
+    {
+      "grid": 31,
+      "jobs": 31,
+      "max_grid_x": 65535,
+      "visited": 31
+    },
+    {
+      "grid": 31,
+      "jobs": 31,
+      "max_grid_x": 2147483647,
+      "visited": 31
+    },
+    {
+      "grid": 1,
+      "jobs": 32,
+      "max_grid_x": 1,
+      "visited": 32
+    },
+    {
+      "grid": 8,
+      "jobs": 32,
+      "max_grid_x": 8,
+      "visited": 32
+    },
+    {
+      "grid": 31,
+      "jobs": 32,
+      "max_grid_x": 31,
+      "visited": 32
+    },
+    {
+      "grid": 32,
+      "jobs": 32,
+      "max_grid_x": 127,
+      "visited": 32
+    },
+    {
+      "grid": 32,
+      "jobs": 32,
+      "max_grid_x": 65535,
+      "visited": 32
+    },
+    {
+      "grid": 32,
+      "jobs": 32,
+      "max_grid_x": 2147483647,
+      "visited": 32
+    },
+    {
+      "grid": 1,
+      "jobs": 33,
+      "max_grid_x": 1,
+      "visited": 33
+    },
+    {
+      "grid": 8,
+      "jobs": 33,
+      "max_grid_x": 8,
+      "visited": 33
+    },
+    {
+      "grid": 31,
+      "jobs": 33,
+      "max_grid_x": 31,
+      "visited": 33
+    },
+    {
+      "grid": 33,
+      "jobs": 33,
+      "max_grid_x": 127,
+      "visited": 33
+    },
+    {
+      "grid": 33,
+      "jobs": 33,
+      "max_grid_x": 65535,
+      "visited": 33
+    },
+    {
+      "grid": 33,
+      "jobs": 33,
+      "max_grid_x": 2147483647,
+      "visited": 33
+    },
+    {
+      "grid": 1,
+      "jobs": 4196,
+      "max_grid_x": 1,
+      "visited": 4196
+    },
+    {
+      "grid": 8,
+      "jobs": 4196,
+      "max_grid_x": 8,
+      "visited": 4196
+    },
+    {
+      "grid": 31,
+      "jobs": 4196,
+      "max_grid_x": 31,
+      "visited": 4196
+    },
+    {
+      "grid": 127,
+      "jobs": 4196,
+      "max_grid_x": 127,
+      "visited": 4196
+    },
+    {
+      "grid": 4196,
+      "jobs": 4196,
+      "max_grid_x": 65535,
+      "visited": 4196
+    },
+    {
+      "grid": 4196,
+      "jobs": 4196,
+      "max_grid_x": 2147483647,
+      "visited": 4196
+    },
+    {
+      "grid": 1,
+      "jobs": 65535,
+      "max_grid_x": 1,
+      "visited": 65535
+    },
+    {
+      "grid": 8,
+      "jobs": 65535,
+      "max_grid_x": 8,
+      "visited": 65535
+    },
+    {
+      "grid": 31,
+      "jobs": 65535,
+      "max_grid_x": 31,
+      "visited": 65535
+    },
+    {
+      "grid": 127,
+      "jobs": 65535,
+      "max_grid_x": 127,
+      "visited": 65535
+    },
+    {
+      "grid": 65535,
+      "jobs": 65535,
+      "max_grid_x": 65535,
+      "visited": 65535
+    },
+    {
+      "grid": 65535,
+      "jobs": 65535,
+      "max_grid_x": 2147483647,
+      "visited": 65535
+    },
+    {
+      "grid": 1,
+      "jobs": 65536,
+      "max_grid_x": 1,
+      "visited": 65536
+    },
+    {
+      "grid": 8,
+      "jobs": 65536,
+      "max_grid_x": 8,
+      "visited": 65536
+    },
+    {
+      "grid": 31,
+      "jobs": 65536,
+      "max_grid_x": 31,
+      "visited": 65536
+    },
+    {
+      "grid": 127,
+      "jobs": 65536,
+      "max_grid_x": 127,
+      "visited": 65536
+    },
+    {
+      "grid": 65535,
+      "jobs": 65536,
+      "max_grid_x": 65535,
+      "visited": 65536
+    },
+    {
+      "grid": 65536,
+      "jobs": 65536,
+      "max_grid_x": 2147483647,
+      "visited": 65536
+    }
+  ],
+  "enumerated_cases": 60,
+  "index_mutant": [
+    {
+      "correct_grid": 14,
+      "jobs": 14,
+      "wrong_index_visited": 1
+    },
+    {
+      "correct_grid": 4196,
+      "jobs": 4196,
+      "wrong_index_visited": 132
+    }
+  ],
+  "invalid_device_limit": "max_grid_x<1 ou query erreur -> refus explicite sans launch fill",
+  "kind": "modele indexation seulement, native0 cuda0 cloud0",
+  "large_cases": [
+    {
+      "grid": 1,
+      "jobs": 2147483647,
+      "last_position": 2147483646,
+      "max_grid_x": 1,
+      "quotient": 2147483647,
+      "remainder": 0
+    },
+    {
+      "grid": 65535,
+      "jobs": 2147483647,
+      "last_position": 2147483646,
+      "max_grid_x": 65535,
+      "quotient": 32768,
+      "remainder": 32767
+    },
+    {
+      "grid": 2147483647,
+      "jobs": 2147483647,
+      "last_position": 2147483646,
+      "max_grid_x": 2147483647,
+      "quotient": 1,
+      "remainder": 0
+    },
+    {
+      "grid": 1,
+      "jobs": 2147483648,
+      "last_position": 2147483647,
+      "max_grid_x": 1,
+      "quotient": 2147483648,
+      "remainder": 0
+    },
+    {
+      "grid": 65535,
+      "jobs": 2147483648,
+      "last_position": 2147483647,
+      "max_grid_x": 65535,
+      "quotient": 32768,
+      "remainder": 32768
+    },
+    {
+      "grid": 2147483647,
+      "jobs": 2147483648,
+      "last_position": 2147483647,
+      "max_grid_x": 2147483647,
+      "quotient": 1,
+      "remainder": 1
+    },
+    {
+      "grid": 1,
+      "jobs": 4294967295,
+      "last_position": 4294967294,
+      "max_grid_x": 1,
+      "quotient": 4294967295,
+      "remainder": 0
+    },
+    {
+      "grid": 65535,
+      "jobs": 4294967295,
+      "last_position": 4294967294,
+      "max_grid_x": 65535,
+      "quotient": 65537,
+      "remainder": 0
+    },
+    {
+      "grid": 2147483647,
+      "jobs": 4294967295,
+      "last_position": 4294967294,
+      "max_grid_x": 2147483647,
+      "quotient": 2,
+      "remainder": 1
+    },
+    {
+      "grid": 1,
+      "jobs": 4294967296,
+      "last_position": 4294967295,
+      "max_grid_x": 1,
+      "quotient": 4294967296,
+      "remainder": 0
+    },
+    {
+      "grid": 65535,
+      "jobs": 4294967296,
+      "last_position": 4294967295,
+      "max_grid_x": 65535,
+      "quotient": 65537,
+      "remainder": 1
+    },
+    {
+      "grid": 2147483647,
+      "jobs": 4294967296,
+      "last_position": 4294967295,
+      "max_grid_x": 2147483647,
+      "quotient": 2,
+      "remainder": 2
+    }
+  ],
+  "limits": "ni compilation, ni exactitude geometrique CUDA, ni allocation device, ni vitesse qualifiees",
+  "source_commit": "830473218e1b35fa725209df14b7855667f4c6d4"
+}

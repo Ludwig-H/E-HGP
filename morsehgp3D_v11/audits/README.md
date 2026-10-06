@@ -4,13 +4,22 @@
 quantized_u21_input_only / not_claimed`. Six notes actives maintenues en
 place ; preuves détaillées dans les reçus immuables.
 
-**Priorité active : sécuriser le recouvrement des feuilles L4/T3, cf28afb04.**
-La sortie sur refus peut terminer la vie de `claimed` avant de joindre le
-fil qui lit ce tableau. **Déclarer `claimed` avant `lane` corrige cet ordre.**
-[Constat, patch applicable et scénario de refus](../receipts/audit_overlap_20261006/README.md).
-La lecture de l’ordre canonique et des décalages est favorable ; conserver
-aussi la garde globale du nombre de feuilles avant la somme des sous-lots.
-Les résultats CUDA de cette tranche restent à vérifier au pin exécuté.
+**Priorité active : essayer une répartition plus large du fill GPU.**
+Un [patch borné, prêt à examiner](../receipts/proposition_fill_cta_20261006/README.md)
+propose un seul fil actif par bloc pour les feuilles à rejouer, avec grille
+vérifiée et parcours sans omission. Il conserve le calcul géométrique,
+les préfixes et les noyaux count/copy. Modèle d’indexation et applicabilité
+vérifiés ; construction et qualification CUDA restent à faire sur G4.
+
+**L4 clos et retiré en 830473218.** Les 90 processus, 252 passes et
+90 dumps conservés sont conformes au périmètre du banc ; les 162 passes
+intermédiaires ne portent pas de dump propre. Le recouvrement en seize
+sous-lots ralentit les trois trames en K5 et K10. À K10, le fill explique
+environ 72 % du surcoût de l’exécuteur sur les dernières prises chaudes.
+[Reçu indépendant L4](../receipts/audit_g4_l4_20261006/README.md).
+Le retrait remet le moteur à sa base et clôt **par suppression** les défauts
+signalés dans [l’audit du recouvrement](../receipts/audit_overlap_20261006/README.md).
+Aucune campagne de correction de ce code retiré n’est demandée.
 
 **N1 clos et retiré.** Le dimensionnement proposé a été intégré en
 c72c5a576, puis l’A/B G4 a écarté le gain attendu. Les 78 prises rendent

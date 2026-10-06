@@ -1,0 +1,60 @@
+--- a/morsehgp3D_v11/src/catalogue/leaf_batch_cuda.cu
++++ b/morsehgp3D_v11/src/catalogue/leaf_batch_cuda.cu
+@@ -90,21 +90,24 @@
+ __global__ void fill_kernel(DeviceView v, const u32* list, u64 list_count, const u8* status, const u64* record_begin,
+                             const u64* population_begin, LeafRecord* records, u8* population, u64 total_records,
+                             u64 total_population, unsigned* errors) {
+-  const u64 thread = u64(blockIdx.x) * blockDim.x + threadIdx.x;
+-  if (thread >= list_count) return;
+-  const u64 j = list[thread];
+-  if (status[j] != leaf_device::kOk) {
+-    atomicAdd(errors, 1u);
+-    return;
+-  }
+-  const leaf_device::Input in = device_input(v, j);
+-  leaf_device::Counts c;
+-  FillSink sink{records, population, record_begin[j], population_begin[j], in.sites, in.m};
+-  const u64 record_end = j + 1 < v.count ? record_begin[j + 1] : total_records;
+-  const u64 population_end = j + 1 < v.count ? population_begin[j + 1] : total_population;
+-  if (leaf_device::run_leaf(in, c, sink) != leaf_device::kOk || sink.record_at != record_end ||
+-      sink.population_at != population_end)
+-    atomicAdd(errors, 1u);
++  // Une feuille par CTA, un seul fil actif : meme execution sequentielle de leaf_device::run_leaf.
++  // Le stride preserve toutes les positions si le nombre de feuilles depasse la grille admissible.
++  if (threadIdx.x != 0) return;
++  for (u64 position = u64(blockIdx.x); position < list_count; position += u64(gridDim.x)) {
++    const u64 j = list[position];
++    if (status[j] != leaf_device::kOk) {
++      atomicAdd(errors, 1u);
++      continue;
++    }
++    const leaf_device::Input in = device_input(v, j);
++    leaf_device::Counts c;
++    FillSink sink{records, population, record_begin[j], population_begin[j], in.sites, in.m};
++    const u64 record_end = j + 1 < v.count ? record_begin[j + 1] : total_records;
++    const u64 population_end = j + 1 < v.count ? population_begin[j + 1] : total_population;
++    if (leaf_device::run_leaf(in, c, sink) != leaf_device::kOk || sink.record_at != record_end ||
++        sink.population_at != population_end)
++      atomicAdd(errors, 1u);
++  }
+ }
+ 
+ // Feuille resolue qui emet au moins une boule : seule a rejouer pour l'ecriture (la moitie des feuilles LiDAR
+@@ -243,10 +246,15 @@
+     DeviceArray<unsigned char> temp;
+     MHGP11_TRY(select_emitting(dv.count, dv.order, status, balls, stored, list, selected, temp, budget, device_bytes,
+                                fill_jobs));
+-    const unsigned fill_grid = static_cast<unsigned>((fill_jobs + kThreads - 1) / kThreads);
+-    if (fill_jobs != 0)
++    if (fill_jobs != 0) {
++      int device = 0, max_grid_x = 0;
++      if (!ok(cudaGetDevice(&device)) ||
++          !ok(cudaDeviceGetAttribute(&max_grid_x, cudaDevAttrMaxGridDimX, device)) || max_grid_x < 1)
++        return fail(Reason::parameter_out_of_range);
++      const unsigned fill_grid = static_cast<unsigned>(std::min<u64>(fill_jobs, u64(max_grid_x)));
+       fill_kernel<<<fill_grid, kThreads>>>(dv, list.data, fill_jobs, status, record_begin, population_begin, records,
+                                            population, total_records, total_population, errors);
++    }
+     if (!ok(cudaGetLastError()) || !ok(cudaDeviceSynchronize())) return fail(Reason::parameter_out_of_range);
+     return {};
+   }

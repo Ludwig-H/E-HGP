@@ -1,0 +1,381 @@
+{
+  "archive_sha256": "0a1e94c0e8188bbd004d2d95d7b99622809a8b19e91d2d1a37fed6bf79501611",
+  "closed_certified": true,
+  "developer_publication_SHA256SUMS_valid": true,
+  "developer_publication_pieces_identical": true,
+  "independent_refusal_lifetime_defect": "Audit130b83534 reste indépendant des succès ; cette source cf28 ne qualifie pas les sorties de refus.",
+  "judge_sha256": "108203630334697578b829a549973824c9daa7cd90439dd18a35759e51e381dd",
+  "last_stop_timestamp": "2026-10-06T00:29:37.611-07:00",
+  "last_warm_fill_count_comparisons": [
+    {
+      "covered": {
+        "count_ns": 164328625,
+        "device_pool_reserved_high": 100663296,
+        "device_pool_used_high": 70907647,
+        "executor_ns": 232105251,
+        "fill_jobs": 14,
+        "fill_ns": 55426637,
+        "overlap_chunks": 16,
+        "overlap_tail_ns": 172047233,
+        "overlap_wait_ns": 23776599
+      },
+      "executor_delta_ns": 173256485,
+      "fill_delta_ns": 37991326,
+      "fill_share_of_executor_delta_permille": 219,
+      "frame": "lidar_ng00",
+      "k": 5,
+      "scope": "dernière passe chaude seulement",
+      "serial": {
+        "count_ns": 35521422,
+        "device_pool_reserved_high": 805306368,
+        "device_pool_used_high": 798089547,
+        "executor_ns": 58848766,
+        "fill_jobs": 14,
+        "fill_ns": 17435311,
+        "overlap_chunks": 0,
+        "overlap_tail_ns": 0,
+        "overlap_wait_ns": 0
+      }
+    },
+    {
+      "covered": {
+        "count_ns": 154083822,
+        "device_pool_reserved_high": 67108864,
+        "device_pool_used_high": 62805183,
+        "executor_ns": 220196528,
+        "fill_jobs": 15,
+        "fill_ns": 50530179,
+        "overlap_chunks": 16,
+        "overlap_tail_ns": 176558537,
+        "overlap_wait_ns": 29917804
+      },
+      "executor_delta_ns": 166484863,
+      "fill_delta_ns": 30829264,
+      "fill_share_of_executor_delta_permille": 185,
+      "frame": "lidar_ng01",
+      "k": 5,
+      "scope": "dernière passe chaude seulement",
+      "serial": {
+        "count_ns": 29276818,
+        "device_pool_reserved_high": 671088640,
+        "device_pool_used_high": 643690371,
+        "executor_ns": 53711665,
+        "fill_jobs": 15,
+        "fill_ns": 19700915,
+        "overlap_chunks": 0,
+        "overlap_tail_ns": 0,
+        "overlap_wait_ns": 0
+      }
+    },
+    {
+      "covered": {
+        "count_ns": 161281325,
+        "device_pool_reserved_high": 100663296,
+        "device_pool_used_high": 89562991,
+        "executor_ns": 196112694,
+        "fill_jobs": 7,
+        "fill_ns": 27202313,
+        "overlap_chunks": 16,
+        "overlap_tail_ns": 157182141,
+        "overlap_wait_ns": 41808352
+      },
+      "executor_delta_ns": 144054304,
+      "fill_delta_ns": 14577786,
+      "fill_share_of_executor_delta_permille": 101,
+      "frame": "lidar_ng02",
+      "k": 5,
+      "scope": "dernière passe chaude seulement",
+      "serial": {
+        "count_ns": 33880884,
+        "device_pool_reserved_high": 738197504,
+        "device_pool_used_high": 734043113,
+        "executor_ns": 52058390,
+        "fill_jobs": 7,
+        "fill_ns": 12624527,
+        "overlap_chunks": 0,
+        "overlap_tail_ns": 0,
+        "overlap_wait_ns": 0
+      }
+    },
+    {
+      "covered": {
+        "count_ns": 770558610,
+        "device_pool_reserved_high": 167772160,
+        "device_pool_used_high": 140213511,
+        "executor_ns": 2360903945,
+        "fill_jobs": 4196,
+        "fill_ns": 1564411926,
+        "overlap_chunks": 16,
+        "overlap_tail_ns": 2302253363,
+        "overlap_wait_ns": 64160923
+      },
+      "executor_delta_ns": 2020916348,
+      "fill_delta_ns": 1452973316,
+      "fill_share_of_executor_delta_permille": 718,
+      "frame": "lidar_ng00",
+      "k": 10,
+      "scope": "dernière passe chaude seulement",
+      "serial": {
+        "count_ns": 215321341,
+        "device_pool_reserved_high": 1308622848,
+        "device_pool_used_high": 1277968142,
+        "executor_ns": 339987597,
+        "fill_jobs": 4196,
+        "fill_ns": 111438610,
+        "overlap_chunks": 0,
+        "overlap_tail_ns": 0,
+        "overlap_wait_ns": 0
+      }
+    },
+    {
+      "covered": {
+        "count_ns": 743060010,
+        "device_pool_reserved_high": 134217728,
+        "device_pool_used_high": 125660261,
+        "executor_ns": 2381068858,
+        "fill_jobs": 3724,
+        "fill_ns": 1616712610,
+        "overlap_chunks": 16,
+        "overlap_tail_ns": 2334631684,
+        "overlap_wait_ns": 55645892
+      },
+      "executor_delta_ns": 2080576051,
+      "fill_delta_ns": 1500821456,
+      "fill_share_of_executor_delta_permille": 721,
+      "frame": "lidar_ng01",
+      "k": 10,
+      "scope": "dernière passe chaude seulement",
+      "serial": {
+        "count_ns": 173796506,
+        "device_pool_reserved_high": 1040187392,
+        "device_pool_used_high": 1035854273,
+        "executor_ns": 300492807,
+        "fill_jobs": 3724,
+        "fill_ns": 115891154,
+        "overlap_chunks": 0,
+        "overlap_tail_ns": 0,
+        "overlap_wait_ns": 0
+      }
+    },
+    {
+      "covered": {
+        "count_ns": 756996795,
+        "device_pool_reserved_high": 201326592,
+        "device_pool_used_high": 196196759,
+        "executor_ns": 2324257376,
+        "fill_jobs": 4934,
+        "fill_ns": 1542321089,
+        "overlap_chunks": 16,
+        "overlap_tail_ns": 2293725701,
+        "overlap_wait_ns": 83387864
+      },
+      "executor_delta_ns": 2006202835,
+      "fill_delta_ns": 1437548678,
+      "fill_share_of_executor_delta_permille": 716,
+      "frame": "lidar_ng02",
+      "k": 10,
+      "scope": "dernière passe chaude seulement",
+      "serial": {
+        "count_ns": 200401343,
+        "device_pool_reserved_high": 1207959552,
+        "device_pool_used_high": 1178829279,
+        "executor_ns": 318054541,
+        "fill_jobs": 4934,
+        "fill_ns": 104772411,
+        "overlap_chunks": 0,
+        "overlap_tail_ns": 0,
+        "overlap_wait_ns": 0
+      }
+    }
+  ],
+  "native_or_cloud_runs_by_auditor": 0,
+  "package_sha256": "12e24c4690e11b00be165aeeb081b2761ab794a3507355aee1ad4c36f509a9db",
+  "performance_criteria": [
+    {
+      "covered_domain_ns": [
+        349117097,
+        357016097
+      ],
+      "cpu_domain_ns": [
+        206157966,
+        210069539
+      ],
+      "frame": "lidar_ng00",
+      "k": 5,
+      "ratio_lower_bound_permille": 1661,
+      "serial_gpu_domain_ns": [
+        227241079,
+        231613381
+      ],
+      "target_failed_on_all_observed_resident_passes": true,
+      "target_permille": 1000
+    },
+    {
+      "covered_domain_ns": [
+        320321680,
+        333407947
+      ],
+      "cpu_domain_ns": [
+        166767274,
+        169847012
+      ],
+      "frame": "lidar_ng01",
+      "k": 5,
+      "ratio_lower_bound_permille": 1885,
+      "serial_gpu_domain_ns": [
+        194795356,
+        197487286
+      ],
+      "target_failed_on_all_observed_resident_passes": true,
+      "target_permille": 1000
+    },
+    {
+      "covered_domain_ns": [
+        319511510,
+        331603458
+      ],
+      "cpu_domain_ns": [
+        200925522,
+        203895231
+      ],
+      "frame": "lidar_ng02",
+      "k": 5,
+      "ratio_lower_bound_permille": 1567,
+      "serial_gpu_domain_ns": [
+        215706120,
+        219481109
+      ],
+      "target_failed_on_all_observed_resident_passes": true,
+      "target_permille": 1000
+    },
+    {
+      "covered_domain_ns": [
+        2717515519,
+        2731054606
+      ],
+      "cpu_domain_ns": [
+        819786176,
+        829213523
+      ],
+      "frame": "lidar_ng00",
+      "k": 10,
+      "ratio_lower_bound_permille": 3277,
+      "serial_gpu_domain_ns": [
+        715408924,
+        724922033
+      ],
+      "target_failed_on_all_observed_resident_passes": true,
+      "target_permille": 850
+    },
+    {
+      "covered_domain_ns": [
+        2659751113,
+        2676024588
+      ],
+      "cpu_domain_ns": [
+        648867754,
+        656985311
+      ],
+      "frame": "lidar_ng01",
+      "k": 10,
+      "ratio_lower_bound_permille": 4048,
+      "serial_gpu_domain_ns": [
+        597743754,
+        608005131
+      ],
+      "target_failed_on_all_observed_resident_passes": true,
+      "target_permille": 850
+    },
+    {
+      "covered_domain_ns": [
+        2684632040,
+        2704513046
+      ],
+      "cpu_domain_ns": [
+        766347442,
+        780986737
+      ],
+      "frame": "lidar_ng02",
+      "k": 10,
+      "ratio_lower_bound_permille": 3437,
+      "serial_gpu_domain_ns": [
+        674286747,
+        682782125
+      ],
+      "target_failed_on_all_observed_resident_passes": true,
+      "target_permille": 850
+    }
+  ],
+  "plan_sha256": "c69086f05284e13c3efc4f42a955b9dde2f21e7a0b98e736cbbf32636107dbb8",
+  "receipt_sha256": "ff9095c57b2c19ca684ff0d7ba175f34d654f25d1b3d0d5491994156b203f4cf",
+  "receipt_status": "completed",
+  "results": [
+    {
+      "bench_sha256": "1611c4b692cf86470214ecf222d660a41e3844ecc4d48ad3445c648feaaaded8",
+      "canonical": {
+        "lidar_ng00": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+        "lidar_ng01": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+        "lidar_ng02": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207"
+      },
+      "cold_processes": 45,
+      "k": 5,
+      "leaf": 16,
+      "ledger_equality_evidence": "inférence du juge épinglé + refusals vide ; lignes natives par prise non conservées",
+      "ledger_reference_sha256": "0647f272fbc417ea6df67e1337bb0723ca9900a4f0a03d907036e663e55043b3",
+      "refusals": [],
+      "report_sha256": "522452ebbc23a2ca18b965eaaaad6b2b8acdf533dcbcc55434367186c7c36b24",
+      "reps_cold_per_mode_and_frame": 5,
+      "resident_passes_per_process": 12,
+      "resident_processes": 9,
+      "scope_declared": "a froid : dump et registre de chaque prise ; a chaud : passes 1..P toutes reussies, dump et registre de la derniere passe P seulement (les passes 1..P-1 ne serialisent rien)",
+      "verdict": "conforme"
+    },
+    {
+      "bench_sha256": "1611c4b692cf86470214ecf222d660a41e3844ecc4d48ad3445c648feaaaded8",
+      "canonical": {
+        "lidar_ng00": "61a4245b91d9a4fdad012f0a2e26a63c3e48db1d46a180db756f2c4e4aa77295",
+        "lidar_ng01": "838a447e0b92e13e42f7f69a84fd536d5d46d26463d3f4cc7c688475878fe0de",
+        "lidar_ng02": "81f89995eaccb497cfe92abb81213bebd0d4ce5076210570d86aa9456cf7ff2e"
+      },
+      "cold_processes": 27,
+      "k": 10,
+      "leaf": 24,
+      "ledger_equality_evidence": "inférence du juge épinglé + refusals vide ; lignes natives par prise non conservées",
+      "ledger_reference_sha256": "765c389ab029f5ca64ed198695edc8f79f9dae54901db65960747ec960acb404",
+      "refusals": [],
+      "report_sha256": "eac9115ef7b28cddcbcde0283b84036f42b574e5d2b8dd86db921724a77e34f8",
+      "reps_cold_per_mode_and_frame": 3,
+      "resident_passes_per_process": 8,
+      "resident_processes": 9,
+      "scope_declared": "a froid : dump et registre de chaque prise ; a chaud : passes 1..P toutes reussies, dump et registre de la derniere passe P seulement (les passes 1..P-1 ne serialisent rien)",
+      "verdict": "conforme"
+    }
+  ],
+  "retirement": {
+    "lifetime_defect_closed_by_removal_not_by_refusal_qualification": true,
+    "product_src_equal_to_baseline_pin": "8ee28873f2b9e59166b73a36e7b2302fa2a3a7a4",
+    "published_pin": "830473218e1b35fa725209df14b7855667f4c6d4",
+    "restored_parent_before_L4": "c1675e4c94958ba7e4b5a0d0327d54b3c466ad5c",
+    "restored_paths": [
+      "morsehgp3D_v11/src",
+      "morsehgp3D_v11/bench/full_probe.cpp",
+      "morsehgp3D_v11/tests",
+      "morsehgp3D_v11/CMakeLists.txt"
+    ]
+  },
+  "schema": "audit_g4_l4_metadata_v1",
+  "scope": "Sonde FULL, u21, K5 feuille16 et K10 feuille24, W48, 3 trames entières, 3 modes. Aucun API/CLI ni sanitizer qualifié.",
+  "source_equality": {
+    "equal_to_git": true,
+    "files": 636,
+    "manifest_sha256": "99e7b7ebb026e7c954ca53ea14b58ffaf9e50355a336123cefaa261a904fe38a"
+  },
+  "source_pin": "cf28afb04040eacf1eb92080d75e8a0ebb58a4eb",
+  "totals": {
+    "canonical_dumps_checked": 90,
+    "constructed_passes": 252,
+    "intermediate_passes_without_dump_or_ledger": 162,
+    "processes": 90
+  },
+  "worker_exit_code": 0
+}
