@@ -49,10 +49,13 @@ struct FillSink {
   u64 record_at = 0, population_at = 0;
   const u32* sites = nullptr;  // sites de la feuille
   u32 m = 0;
-  MHGP11_LEAF_HD void emit(const leaf_device::Ball& ball, const u32* interior, const u32* shell) {
+  // interior_local, shell_local : rangs locaux deja connus de la feuille (aucune recherche ; local_rank faisait 7 % du
+  // comptage GPU, profil coop2). Les rangs sont < 32 : u8 exact.
+  MHGP11_LEAF_HD void emit(const leaf_device::Ball& ball, const u32*, const u32*, const u32* interior_local,
+                           const u32* shell_local) {
     encode(ball, sites, m, records[record_at++]);
-    for (u32 i = 0; i < ball.p; ++i) population[population_at++] = local_rank(sites, m, interior[i]);
-    for (u32 i = 0; i < ball.m; ++i) population[population_at++] = local_rank(sites, m, shell[i]);
+    for (u32 i = 0; i < ball.p; ++i) population[population_at++] = static_cast<u8>(interior_local[i]);
+    for (u32 i = 0; i < ball.m; ++i) population[population_at++] = static_cast<u8>(shell_local[i]);
   }
 };
 
@@ -72,12 +75,13 @@ struct ScratchSink {
   u32 m = 0;
   u64 balls = 0, incidences = 0;
   bool fits = true;
-  MHGP11_LEAF_HD void emit(const leaf_device::Ball& ball, const u32* interior, const u32* shell) {
+  MHGP11_LEAF_HD void emit(const leaf_device::Ball& ball, const u32*, const u32*, const u32* interior_local,
+                           const u32* shell_local) {
     const u64 need = u64(ball.p) + ball.m;
     if (fits && balls < kScratchRecords && incidences + need <= kScratchPopulation) {
       encode(ball, sites, m, records[balls]);
-      for (u32 i = 0; i < ball.p; ++i) population[incidences + i] = local_rank(sites, m, interior[i]);
-      for (u32 i = 0; i < ball.m; ++i) population[incidences + ball.p + i] = local_rank(sites, m, shell[i]);
+      for (u32 i = 0; i < ball.p; ++i) population[incidences + i] = static_cast<u8>(interior_local[i]);
+      for (u32 i = 0; i < ball.m; ++i) population[incidences + ball.p + i] = static_cast<u8>(shell_local[i]);
     } else {
       fits = false;
     }

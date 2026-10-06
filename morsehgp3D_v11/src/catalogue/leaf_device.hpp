@@ -26,8 +26,8 @@ struct Leaf {
   u64 live[3][kMaxSites];
   u64 masks[5];
   u32 prefix[4];
-  u32 seen[kSeenWords];
-  u32 interior[kMaxSites], shell[kMaxSites], shell_local[kMaxSites];
+  u32 seen[kSeenWords], meets[kSeenWords];  // cache J2 : face deja jugee, et son issue (droite qui rencontre la boite)
+  u32 interior[kMaxSites], shell[kMaxSites], interior_local[kMaxSites], shell_local[kMaxSites];
   bool unresolved = false;
 
   MHGP11_LEAF_HD Leaf(const Input& input, Counts& counts, Sink& out) : in(input), c(counts), sink(out) {}
@@ -41,7 +41,7 @@ struct Leaf {
       live[0][i] = live[1][i] = live[2][i] = 0;
     }
     for (int q = 0; q < 5; ++q) masks[q] = 0;
-    for (u32 w = 0; w < kSeenWords; ++w) seen[w] = 0;
+    for (u32 w = 0; w < kSeenWords; ++w) seen[w] = meets[w] = 0;
     c.dominance_tests += u64(m) * (m - 1) / 2;
     // Forme affine de la difference des distances sur la fermeture ; sommes < 12*2^(2B) en i64.
     for (u32 i = 0; i < m; ++i)
@@ -78,21 +78,29 @@ struct Leaf {
 
   MHGP11_LEAF_HD static u32 rank(u32 i, u32 j, u32 k) { return k * (k - 1) * (k - 2) / 6 + j * (j - 1) / 2 + i; }
 
-  // J2, droites des faces contenant le dernier site ; cache simule pour les seuls compteurs.
+  // J2, droites des faces contenant le dernier site. Avec l'option cache, l'issue d'une face deja jugee dans la
+  // feuille est relue (memoire de la feuille, comme center_line_cache.hpp de la feuille CPU) : le predicat ne depend
+  // que du triplet et de la boite, donc la decision est la meme ; les compteurs aussi (hits = tests - rangs distincts).
+  // Profil G4 (coop2, K10/24, ng00) : center_line_meets faisait 23 % du comptage, avec 71 % de succes du cache.
   MHGP11_LEAF_HD bool lines_possible(int q) {
     const u32 last = prefix[q - 1];
     for (int j = 0; j + 2 < q; ++j)
       for (int k = j + 1; k + 1 < q; ++k) {
         ++c.region_line_tests;
         const u32 a = prefix[j], b = prefix[k];
-        bool hit = false;
-        if (in.cache) {
-          const u32 r = rank(a, b, last);
-          hit = ((seen[r >> 5] >> (r & 31)) & 1u) != 0;
-          seen[r >> 5] |= 1u << (r & 31);
+        // Une seule branche (reconvergence des warps : voir extend) ; sans l'option, seen reste vide et rien n'est relu.
+        const u32 r = rank(a, b, last), word = r >> 5, bit = 1u << (r & 31);
+        const bool hit = (seen[word] & bit) != 0;
+        bool meets_box = (meets[word] & bit) != 0;
+        if (!hit) {
+          meets_box = center_line_meets(P[a], P[b], P[last], in.lo, in.hi) == kIntersects;
+          const u32 mark = in.cache ? bit : 0u;
+          seen[word] |= mark;
+          meets[word] |= meets_box ? mark : 0u;
         }
-        if (hit) ++c.region_line_cache_hits; else ++c.region_line_evaluations;
-        if (center_line_meets(P[a], P[b], P[last], in.lo, in.hi) != kIntersects) {
+        c.region_line_cache_hits += hit;
+        c.region_line_evaluations += !hit;
+        if (!meets_box) {
           ++c.region_line_rejects;
           return false;
         }
@@ -251,6 +259,7 @@ struct Leaf {
       }
       if (relation < 0) {
         if (p == threshold) return;
+        interior_local[p] = i;
         interior[p++] = in.sites[i];
       } else if (relation == 0) {
         shell_local[count] = i;
@@ -268,7 +277,7 @@ struct Leaf {
     if (p + qmin > static_cast<u32>(in.kmax) + 1) return;
     if (q == 4) ++c.q4_levels;  // emission_level(Q4Candidate) materialise et compte
     Ball ball{{support[0], support[1], support[2], support[3]}, p, count, qmin};
-    sink.emit(ball, interior, shell);
+    sink.emit(ball, interior, shell, interior_local, shell_local);
     ++c.emitted;
     c.incidences += u64(p) + count;
   }
@@ -328,7 +337,7 @@ MHGP11_LEAF_HD u32 run_leaf(const Input& in, Counts& counts, Sink& sink) {
 // Puits de comptage : nombre de boules et d'incidences d'une feuille (premiere passe compter-puis-ecrire).
 struct CountSink {
   u64 balls = 0, incidences = 0;
-  MHGP11_LEAF_HD void emit(const Ball& ball, const u32*, const u32*) {
+  MHGP11_LEAF_HD void emit(const Ball& ball, const u32*, const u32*, const u32*, const u32*) {
     ++balls;
     incidences += u64(ball.p) + ball.m;
   }

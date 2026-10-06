@@ -387,7 +387,7 @@ void live_rows(Leaf& leaf) noexcept {
 struct AcceptSink {
   Run& run;
   Outcome outcome{};
-  void emit(const leaf_device::Ball& ball, const u32* interior, const u32* shell) noexcept {
+  void emit(const leaf_device::Ball& ball, const u32* interior, const u32* shell, const u32*, const u32*) noexcept {
     if (!outcome.ok()) return;
     outcome = accept(ball, interior, shell);
   }

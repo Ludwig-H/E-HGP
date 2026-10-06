@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 141,
+  "plancher": 145,
   "mutants": [
     {
       "id": "population_memo_owner_omis",
@@ -1162,6 +1162,22 @@
       "remplace": "",
       "porte": "mhgp11_tower_order_full_identity",
       "note": "L2b : les images basses (verticales) de l'ordre K restent dans l'arbre extrait et dans le budget ; forest.lower() non vide."
+    },
+    {
+      "id": "j2_memoire_issue_perdue",
+      "fichier": "src/catalogue/leaf_device.hpp",
+      "cherche": "          meets[word] |= meets_box ? mark : 0u;\n",
+      "remplace": "          meets[word] |= 0u;\n",
+      "porte": "mhgp11_tower_full_leaf_lanes",
+      "note": "cache J2 de la feuille device : issue non memorisee, une face relue est rejetee"
+    },
+    {
+      "id": "rang_local_interieur_faux",
+      "fichier": "src/catalogue/leaf_batch.hpp",
+      "cherche": "      for (u32 i = 0; i < ball.p; ++i) population[incidences + i] = static_cast<u8>(interior_local[i]);\n",
+      "remplace": "      for (u32 i = 0; i < ball.p; ++i) population[incidences + i] = static_cast<u8>(interior_local[0]);\n",
+      "porte": "mhgp11_tower_full_leaf_lanes",
+      "note": "case du comptage : rangs locaux de l'interieur faux"
     }
   ]
 }
