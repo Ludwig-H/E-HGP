@@ -178,7 +178,7 @@ Outcome process_leaf_batch(const Cloud& cloud, const CatalogueParams& params, Me
   LeafBatchView view;
   view.x = cloud.x().data(); view.y = cloud.y().data(); view.z = cloud.z().data(); view.cloud_sites = cloud.sites();
   view.jobs = jobs.data(); view.count = jobs.size(); view.sites = sites.data(); view.site_count = sites.size();
-  view.kmax = params.kmax; view.cache = params.cache_center_lines;
+  view.kmax = params.kmax; view.cache = params.cache_center_lines; view.reservoir = !params.replay_overflow;
   LeafBatchResult result;
   stage.emplace();
   if (params.cuda_leaves) MHGP11_TRY(run_leaf_batch_cuda(view, pool, budget, result));
@@ -213,6 +213,8 @@ Outcome process_leaf_batch(const Cloud& cloud, const CatalogueParams& params, Me
     timings->batch_levels_ns = levels_ns; timings->batch_fallback_ns = fallback_ns;
     timings->batch_prefetch_ns = t.prefetch_ns; timings->batch_fill_jobs = t.fill_jobs;
     timings->batch_copied_jobs = t.copied_jobs;
+    timings->batch_spare_record_chunks = t.spare_record_chunks;
+    timings->batch_spare_population_chunks = t.spare_population_chunks;
     timings->batch_device_pool_used_high = t.device_pool_used_high;
     timings->batch_device_pool_reserved_high = t.device_pool_reserved_high;
   }

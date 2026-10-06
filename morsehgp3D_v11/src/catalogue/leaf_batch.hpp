@@ -61,42 +61,108 @@ struct FillSink {
 
 // Case de chaque feuille au comptage : ses emissions y sont rangees tant qu'elles tiennent (K = 5 : p999 de 72 boules
 // et 318 incidences par feuille ; K = 10, feuilles de 24 : p99 de 115 boules et 913 incidences ; la moitie des
-// feuilles n'emet rien), puis copiees a leur place par copy_scratch ; seules les feuilles qui emettent et debordent
-// rejouent leur feuille a l'ecriture. 2 Kio par feuille. Memes cases sur les deux executeurs : l'hote valide la
-// logique du GPU.
+// feuilles n'emet rien), puis copiees a leur place par copy_scratch. 2 Kio par feuille. Memes cases sur les deux
+// executeurs : l'hote valide la logique du GPU.
+//
+// Reservoir chaine (6 octobre 2026) : une feuille qui deborde de sa case continue dans des blocs du reservoir, de la
+// taille d'une case, pris par un curseur atomique et chaines bloc a bloc (next_*) ; enregistrements et population ont
+// chacun leur chaine. Seules les feuilles qui debordent aussi du reservoir (curseur au-dela de spare) sont rejouees
+// par la seconde passe. Sans reservoir (spare = 0, voie du 5 octobre), toute feuille qui deborde est rejouee. L'ordre
+// des blocs pris depend des fils, jamais les sorties : la copie suit la chaine de chaque feuille et ecrit aux places
+// fixees par les prefixes. Session G4 j2memo : la seconde passe (14 feuilles rejouees a K5, 4 196 a K10) valait 13 et
+// 77 ms, latence de feuilles lourdes sur un fil.
 inline constexpr u32 kScratchRecords = 128, kScratchPopulation = 1024;
+inline constexpr u32 kNoChunk = 0xFFFFFFFFu;
 
-// Puits du comptage : compte tout et range les emissions dans la case tant qu'elles y tiennent, dans l'ordre
-// d'emission (celui de FillSink).
+// Blocs des cases : le bloc j (j < count) est la case de la feuille j ; les blocs count .. count + spare - 1 forment
+// le reservoir. cursor[0] et cursor[1] comptent les blocs pris (enregistrements, population), au-dela de spare un
+// bloc est refuse. count + spare < 2^32 (garde des executeurs).
+struct ScratchArena {
+  LeafRecord* records = nullptr;  // (count + spare) * kScratchRecords
+  u8* population = nullptr;       // (count + spare) * kScratchPopulation
+  u32* next_record = nullptr;     // count + spare : bloc suivant de la chaine d'enregistrements
+  u32* next_population = nullptr;
+  u32* cursor = nullptr;          // 2 compteurs, nuls au depart
+  u32 count = 0, spare = 0;
+};
+
+// Bloc suivant du reservoir pour le genre kind (0 : enregistrements, 1 : population) ; kNoChunk s'il est epuise.
+// Atomique : les fils de l'appareil et les ouvriers de l'hote prennent des blocs distincts.
+MHGP11_LEAF_HD u32 claim_chunk(const ScratchArena& arena, u32 kind) {
+  if (arena.spare == 0) return kNoChunk;
+#if defined(__CUDA_ARCH__)
+  const u32 taken = atomicAdd(&arena.cursor[kind], 1u);
+#else
+  const u32 taken = __atomic_fetch_add(&arena.cursor[kind], 1u, __ATOMIC_RELAXED);
+#endif
+  return taken < arena.spare ? arena.count + taken : kNoChunk;
+}
+
+// Puits du comptage : compte tout et range les emissions dans la case, puis dans les blocs du reservoir tant qu'il en
+// reste, dans l'ordre d'emission (celui de FillSink). fits faux : la feuille sera rejouee.
 struct ScratchSink {
-  LeafRecord* records = nullptr;  // case de la feuille : kScratchRecords enregistrements
-  u8* population = nullptr;       // case de la feuille : kScratchPopulation rangs
+  const ScratchArena* arena = nullptr;
   const u32* sites = nullptr;
   u32 m = 0;
+  u32 record_chunk = 0, population_chunk = 0;  // blocs courants, la case de la feuille au depart
+  u32 record_used = 0, population_used = 0;    // places prises dans les blocs courants
   u64 balls = 0, incidences = 0;
   bool fits = true;
+
+  MHGP11_LEAF_HD ScratchSink(const ScratchArena& a, u32 leaf, const u32* leaf_sites, u32 leaf_m)
+      : arena(&a), sites(leaf_sites), m(leaf_m), record_chunk(leaf), population_chunk(leaf) {}
+
+  // Place suivante d'un genre : bloc courant, ou nouveau bloc chaine ; faux si le reservoir est epuise.
+  MHGP11_LEAF_HD bool advance(u32& chunk, u32& used, u32 capacity, u32* next, u32 kind) {
+    if (used < capacity) return true;
+    const u32 taken = claim_chunk(*arena, kind);
+    if (taken == kNoChunk) return false;
+    next[chunk] = taken;
+    chunk = taken;
+    used = 0;
+    return true;
+  }
+
+  // interior_local, shell_local : rangs locaux deja connus de la feuille (aucune recherche). Les rangs sont < 32 : u8.
   MHGP11_LEAF_HD void emit(const leaf_device::Ball& ball, const u32*, const u32*, const u32* interior_local,
                            const u32* shell_local) {
-    const u64 need = u64(ball.p) + ball.m;
-    if (fits && balls < kScratchRecords && incidences + need <= kScratchPopulation) {
-      encode(ball, sites, m, records[balls]);
-      for (u32 i = 0; i < ball.p; ++i) population[incidences + i] = static_cast<u8>(interior_local[i]);
-      for (u32 i = 0; i < ball.m; ++i) population[incidences + ball.p + i] = static_cast<u8>(shell_local[i]);
-    } else {
-      fits = false;
-    }
     ++balls;
-    incidences += need;
+    incidences += u64(ball.p) + ball.m;
+    if (!fits) return;
+    if (!advance(record_chunk, record_used, kScratchRecords, arena->next_record, 0)) {
+      fits = false;
+      return;
+    }
+    encode(ball, sites, m, arena->records[u64(record_chunk) * kScratchRecords + record_used++]);
+    for (u32 i = 0; i < ball.p + ball.m; ++i) {
+      if (!advance(population_chunk, population_used, kScratchPopulation, arena->next_population, 1)) {
+        fits = false;
+        return;
+      }
+      const u32 rank = i < ball.p ? interior_local[i] : shell_local[i - ball.p];
+      arena->population[u64(population_chunk) * kScratchPopulation + population_used++] = static_cast<u8>(rank);
+    }
   }
 };
 
-// Copie la case de la feuille j (n enregistrements, k rangs) a ses places.
-MHGP11_LEAF_HD void copy_scratch(u64 j, u64 n, u64 k, u64 record_begin, u64 population_begin,
-                                 const LeafRecord* scratch_records, const u8* scratch_population,
-                                 LeafRecord* records, u8* population) {
-  for (u64 i = 0; i < n; ++i) records[record_begin + i] = scratch_records[j * kScratchRecords + i];
-  for (u64 i = 0; i < k; ++i) population[population_begin + i] = scratch_population[j * kScratchPopulation + i];
+// Copie la chaine de la feuille j (n enregistrements, k rangs) a ses places.
+MHGP11_LEAF_HD void copy_scratch(const ScratchArena& arena, u32 j, u64 n, u64 k, u64 record_begin,
+                                 u64 population_begin, LeafRecord* records, u8* population) {
+  u32 chunk = j;
+  for (u64 i = 0; i < n; ++i) {
+    if (i != 0 && i % kScratchRecords == 0) chunk = arena.next_record[chunk];
+    records[record_begin + i] = arena.records[u64(chunk) * kScratchRecords + i % kScratchRecords];
+  }
+  chunk = j;
+  for (u64 i = 0; i < k; ++i) {
+    if (i != 0 && i % kScratchPopulation == 0) chunk = arena.next_population[chunk];
+    population[population_begin + i] = arena.population[u64(chunk) * kScratchPopulation + i % kScratchPopulation];
+  }
 }
+
+// Blocs du reservoir pour un lot de count feuilles : un huitieme des feuilles, au moins 64 (aucun sans reservoir).
+// Majorant des blocs pris, jamais une decision : au-dela, les feuilles sont rejouees.
+inline u64 spare_chunks(u64 count, bool reservoir) noexcept { return reservoir ? count / 8 + 64 : 0; }
 
 // Vue du lot pour un executeur : coordonnees du nuage, feuilles, liste des sites, parametres.
 struct LeafBatchView {
@@ -110,6 +176,7 @@ struct LeafBatchView {
   u64 site_count = 0;
   int kmax = 0;
   bool cache = false;
+  bool reservoir = true;  // cases chainees au comptage (faux : voie du 5 octobre, toute feuille qui deborde est rejouee)
 };
 
 // Chronos et volumes d'un lot (diagnostic, hors ledger). Les champs device_* ne sont remplis que par CUDA.
@@ -119,7 +186,8 @@ struct LeafBatchTimings {
   u64 device_init_ns = 0, upload_ns = 0, download_ns = 0, device_bytes = 0;
   u64 prefetch_ns = 0;  // duree de l'ouverture anticipee du contexte (fil d'arriere-plan), 0 sans elle
   u64 fill_jobs = 0;    // feuilles rejouees par la seconde passe : celles qui emettent et debordent de leur case
-  u64 copied_jobs = 0;  // feuilles qui emettent et tiennent dans leur case : copiees sans rejeu
+  u64 copied_jobs = 0;  // feuilles qui emettent et tiennent dans leurs blocs (case et reservoir) : copiees sans rejeu
+  u64 spare_record_chunks = 0, spare_population_chunks = 0;  // blocs du reservoir pris (au plus spare) ; 0 sans lui
   u64 device_pool_used_high = 0, device_pool_reserved_high = 0;  // pics physiques du pool CUDA pendant le lot
 };
 

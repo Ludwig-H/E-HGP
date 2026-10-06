@@ -50,15 +50,14 @@ __device__ void counts_to_array(const leaf_device::Counts& c, unsigned long long
 }
 
 __global__ void count_kernel(DeviceView v, u8* status, u64* balls, u64* incidences, unsigned long long* totals,
-                             LeafRecord* scratch_records, u8* scratch_population, u8* stored) {
+                             ScratchArena arena, u8* stored) {
   unsigned long long local[kCountFields] = {};
   const u64 thread = u64(blockIdx.x) * blockDim.x + threadIdx.x;
   if (thread < v.count) {
     const u64 j = v.order[thread];
     const leaf_device::Input in = device_input(v, j);
     leaf_device::Counts c;
-    ScratchSink sink{scratch_records + j * kScratchRecords, scratch_population + j * kScratchPopulation, in.sites,
-                     in.m};
+    ScratchSink sink(arena, static_cast<u32>(j), in.sites, in.m);
     const u32 s = leaf_device::run_leaf(in, c, sink);
     status[j] = static_cast<u8>(s);
     balls[j] = s == leaf_device::kOk ? sink.balls : 0;
@@ -75,14 +74,14 @@ __global__ void count_kernel(DeviceView v, u8* status, u64* balls, u64* incidenc
   }
 }
 
-// Copie des cases rangees au comptage vers leurs places (prefixes) ; population_begin recale au debut de la feuille.
+// Copie des chaines rangees au comptage (case, puis blocs du reservoir) vers leurs places (prefixes).
 __global__ void copy_kernel(u64 count, const u8* stored, const u64* balls, const u64* incidences,
-                            const u64* record_begin, const u64* population_begin, const LeafRecord* scratch_records,
-                            const u8* scratch_population, LeafRecord* records, u8* population) {
+                            const u64* record_begin, const u64* population_begin, ScratchArena arena,
+                            LeafRecord* records, u8* population) {
   const u64 j = u64(blockIdx.x) * blockDim.x + threadIdx.x;
   if (j >= count || !stored[j] || balls[j] == 0) return;
-  copy_scratch(j, balls[j], incidences[j], record_begin[j], population_begin[j], scratch_records, scratch_population,
-               records, population);
+  copy_scratch(arena, static_cast<u32>(j), balls[j], incidences[j], record_begin[j], population_begin[j], records,
+               population);
 }
 
 // Seconde passe sur la seule liste des feuilles resolues qui emettent et ont deborde de leur case (selection stable
@@ -224,8 +223,7 @@ struct WritePhase {
   const u64* incidences;
   const u64* record_begin;
   const u64* population_begin;
-  const LeafRecord* scratch_records;
-  const u8* scratch_population;
+  ScratchArena arena;
   LeafRecord* records;
   u8* population;
   u64 total_records, total_population;
@@ -235,8 +233,8 @@ struct WritePhase {
     fill_jobs = 0;
     if (dv.count == 0) return {};
     const unsigned grid = static_cast<unsigned>((dv.count + kThreads - 1) / kThreads);
-    copy_kernel<<<grid, kThreads>>>(dv.count, stored, balls, incidences, record_begin, population_begin,
-                                    scratch_records, scratch_population, records, population);
+    copy_kernel<<<grid, kThreads>>>(dv.count, stored, balls, incidences, record_begin, population_begin, arena,
+                                    records, population);
     if (!ok(cudaGetLastError())) return fail(Reason::parameter_out_of_range);
     DeviceArray<u32> list;
     DeviceArray<unsigned long long> selected;
@@ -332,16 +330,31 @@ Outcome download(u64 count, const Returned& d, u64 total_records, u64 total_popu
   return {};
 }
 
+// Passe de comptage, puis releve des blocs du reservoir pris (au plus spare).
+Outcome count_pass(const DeviceView& dv, u8* status, u64* balls, u64* incidences, unsigned long long* totals,
+                   const ScratchArena& arena, u8* stored, LeafBatchTimings& t) noexcept {
+  const unsigned grid = static_cast<unsigned>((dv.count + kThreads - 1) / kThreads);
+  if (dv.count != 0) count_kernel<<<grid, kThreads>>>(dv, status, balls, incidences, totals, arena, stored);
+  if (!ok(cudaGetLastError()) || !ok(cudaDeviceSynchronize())) return fail(Reason::parameter_out_of_range);
+  u32 taken[2] = {0, 0};
+  if (!ok(cudaMemcpy(taken, arena.cursor, sizeof(taken), cudaMemcpyDeviceToHost)))
+    return fail(Reason::parameter_out_of_range);
+  t.spare_record_chunks = taken[0] < arena.spare ? taken[0] : arena.spare;
+  t.spare_population_chunks = taken[1] < arena.spare ? taken[1] : arena.spare;
+  return {};
+}
+
 }  // namespace
 
 Outcome run_leaf_batch_cuda(const LeafBatchView& view, sched::Pool& pool, MemoryBudget& budget,
                             LeafBatchResult& result) noexcept {
   const u64 start = now_ns();
   auto& t = result.timings;
-  // Hypothese de la borne des sommes (leaf_device::kCountBound) : au plus kMaxBatchJobs feuilles. L'ordre des fils
-  // tient en u32 : au-dela de 2^32 feuilles, refus explicite (jamais atteint : 64 octets par feuille).
+  // Hypothese de la borne des sommes (leaf_device::kCountBound) : au plus kMaxBatchJobs feuilles. L'ordre des fils et
+  // les blocs des cases (feuilles puis reservoir) tiennent en u32 : count + spare < 2^32, sinon refus explicite.
   if (view.count > leaf_device::kMaxBatchJobs) return fail(Reason::catalogue_counter_overflow);
-  if (view.count > (u64{1} << 32)) return fail(Reason::index_overflow_u32);
+  const u64 spare = spare_chunks(view.count, view.reservoir), chunks = view.count + spare;
+  if (chunks >= kNoChunk) return fail(Reason::index_overflow_u32);
   // Contexte : ouvert par l'ouverture anticipee (attendue ici) ou par cudaFree(0) au premier appel du processus ; une
   // passe chaude le trouve deja ouvert. Pile : aucune limite posee, le cadre statique des noyaux (sans recursion) est
   // dimensionne par le pilote au lancement.
@@ -360,13 +373,12 @@ Outcome run_leaf_batch_cuda(const LeafBatchView& view, sched::Pool& pool, Memory
   DeviceArray<u32> x, y, z, sites;
   DeviceArray<LeafJob> jobs;
   DeviceArray<u32> threads;
-  DeviceArray<u8> status;
+  DeviceArray<u8> status, scratch_population, stored;
   DeviceArray<u64> balls, incidences;
   DeviceArray<unsigned long long> totals;
   DeviceArray<unsigned> errors;
   DeviceArray<LeafRecord> scratch_records;
-  DeviceArray<u8> scratch_population;
-  DeviceArray<u8> stored;
+  DeviceArray<u32> links;  // next_record, next_population, puis les deux curseurs du reservoir
   MHGP11_TRY(x.allocate(view.cloud_sites, budget, device_bytes));
   MHGP11_TRY(y.allocate(view.cloud_sites, budget, device_bytes));
   MHGP11_TRY(z.allocate(view.cloud_sites, budget, device_bytes));
@@ -378,8 +390,9 @@ Outcome run_leaf_batch_cuda(const LeafBatchView& view, sched::Pool& pool, Memory
   MHGP11_TRY(incidences.allocate(view.count, budget, device_bytes));
   MHGP11_TRY(totals.allocate(kCountFields, budget, device_bytes));
   MHGP11_TRY(errors.allocate(1, budget, device_bytes));
-  MHGP11_TRY(scratch_records.allocate(view.count * kScratchRecords, budget, device_bytes));  // count <= 2^32
-  MHGP11_TRY(scratch_population.allocate(view.count * kScratchPopulation, budget, device_bytes));
+  MHGP11_TRY(scratch_records.allocate(chunks * kScratchRecords, budget, device_bytes));  // chunks < 2^32
+  MHGP11_TRY(scratch_population.allocate(chunks * kScratchPopulation, budget, device_bytes));
+  MHGP11_TRY(links.allocate(2 * chunks + 2, budget, device_bytes));
   MHGP11_TRY(stored.allocate(view.count, budget, device_bytes));
   const u64 upload = now_ns();
   if (!ok(cudaMemcpy(x.data, view.x, view.cloud_sites * sizeof(u32), cudaMemcpyHostToDevice)) ||
@@ -390,16 +403,15 @@ Outcome run_leaf_batch_cuda(const LeafBatchView& view, sched::Pool& pool, Memory
       (view.count != 0 && !ok(cudaMemcpy(jobs.data, view.jobs, view.count * sizeof(LeafJob), cudaMemcpyHostToDevice))) ||
       (view.count != 0 && !ok(cudaMemcpy(threads.data, order.data(), view.count * sizeof(u32), cudaMemcpyHostToDevice))) ||
       !ok(cudaMemset(totals.data, 0, kCountFields * sizeof(unsigned long long))) ||
-      !ok(cudaMemset(errors.data, 0, sizeof(unsigned))))
+      !ok(cudaMemset(errors.data, 0, sizeof(unsigned))) ||
+      !ok(cudaMemset(links.data + 2 * chunks, 0, 2 * sizeof(u32))))
     return fail(Reason::parameter_out_of_range);
   t.upload_ns = now_ns() - upload;
+  const ScratchArena arena{scratch_records.data, scratch_population.data, links.data, links.data + chunks,
+                           links.data + 2 * chunks, static_cast<u32>(view.count), static_cast<u32>(spare)};
   const DeviceView dv{x.data, y.data, z.data, jobs.data, threads.data, view.count, sites.data, view.kmax, view.cache};
-  const unsigned grid = static_cast<unsigned>((view.count + kThreads - 1) / kThreads);
   const u64 count = now_ns();
-  if (view.count != 0)
-    count_kernel<<<grid, kThreads>>>(dv, status.data, balls.data, incidences.data, totals.data, scratch_records.data,
-                                     scratch_population.data, stored.data);
-  if (!ok(cudaGetLastError()) || !ok(cudaDeviceSynchronize())) return fail(Reason::parameter_out_of_range);
+  MHGP11_TRY(count_pass(dv, status.data, balls.data, incidences.data, totals.data, arena, stored.data, t));
   t.count_ns = now_ns() - count;
   // Prefixes exclusifs (CUB), puis totaux.
   const u64 scan_start = now_ns();
@@ -417,7 +429,7 @@ Outcome run_leaf_batch_cuda(const LeafBatchView& view, sched::Pool& pool, Memory
   MHGP11_TRY(population.allocate(total_population, budget, device_bytes));
   const u64 fill = now_ns();
   const WritePhase write{dv, status.data, stored.data, balls.data, incidences.data, record_begin.data,
-                         population_begin.data, scratch_records.data, scratch_population.data, records.data,
+                         population_begin.data, arena, records.data,
                          population.data, total_records, total_population, errors.data};
   MHGP11_TRY(write.run(budget, device_bytes, t.fill_jobs));
   t.fill_ns = now_ns() - fill;

@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 145,
+  "plancher": 147,
   "mutants": [
     {
       "id": "population_memo_owner_omis",
@@ -1174,10 +1174,26 @@
     {
       "id": "rang_local_interieur_faux",
       "fichier": "src/catalogue/leaf_batch.hpp",
-      "cherche": "      for (u32 i = 0; i < ball.p; ++i) population[incidences + i] = static_cast<u8>(interior_local[i]);\n",
-      "remplace": "      for (u32 i = 0; i < ball.p; ++i) population[incidences + i] = static_cast<u8>(interior_local[0]);\n",
+      "cherche": "      const u32 rank = i < ball.p ? interior_local[i] : shell_local[i - ball.p];\n",
+      "remplace": "      const u32 rank = i < ball.p ? interior_local[0] : shell_local[i - ball.p];\n",
       "porte": "mhgp11_tower_full_leaf_lanes",
       "note": "case du comptage : rangs locaux de l'interieur faux"
+    },
+    {
+      "id": "reservoir_chaine_perdue",
+      "fichier": "src/catalogue/leaf_batch.hpp",
+      "cherche": "    next[chunk] = taken;\n",
+      "remplace": "    next[chunk] = chunk;\n",
+      "porte": "mhgp11_tower_full_leaf_lanes",
+      "note": "reservoir : le bloc pris n'est pas chaine, la copie relit la case"
+    },
+    {
+      "id": "reservoir_pas_de_chaine",
+      "fichier": "src/catalogue/leaf_batch.hpp",
+      "cherche": "    if (i != 0 && i % kScratchRecords == 0) chunk = arena.next_record[chunk];\n",
+      "remplace": "    if (i != 0 && i % kScratchRecords == 1) chunk = arena.next_record[chunk];\n",
+      "porte": "mhgp11_tower_full_leaf_lanes",
+      "note": "copie des chaines : changement de bloc decale d'un enregistrement"
     }
   ]
 }

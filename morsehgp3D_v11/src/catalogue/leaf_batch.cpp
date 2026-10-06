@@ -1,6 +1,7 @@
 // Executeur hote du lot de feuilles : les deux passes de l'appareil, feuille par feuille sur le Pool.
 #include "catalogue/leaf_batch.hpp"
 
+#include <algorithm>
 #include <utility>
 
 #include "sched/sched.hpp"
@@ -32,8 +33,9 @@ struct HostBatch {
   const LeafBatchView& view;
   std::span<u8> status, stored;
   std::span<u64> balls, incidences;  // comptes au comptage, debuts apres le prefixe
-  std::span<LeafRecord> scratch_records, records;
-  std::span<u8> scratch_population, population;
+  const ScratchArena& arena;
+  std::span<LeafRecord> records;
+  std::span<u8> population;
   std::span<leaf_device::Counts> per_worker;
   u64 total_records = 0, total_population = 0;
   bool fill = false;
@@ -42,8 +44,7 @@ struct HostBatch {
     const auto in = input_of(view, view.jobs[j]);
     leaf_device::Counts c;
     if (!fill) {
-      ScratchSink sink{scratch_records.data() + j * kScratchRecords, scratch_population.data() + j * kScratchPopulation,
-                       in.sites, in.m};
+      ScratchSink sink(arena, static_cast<u32>(j), in.sites, in.m);
       status[j] = static_cast<u8>(leaf_device::run_leaf(in, c, sink));
       const bool resolved = status[j] == leaf_device::kOk;
       balls[j] = resolved ? sink.balls : 0;
@@ -58,8 +59,8 @@ struct HostBatch {
     const u64 population_end = j + 1 < incidences.size() ? incidences[j + 1] : total_population;
     if (record_end == balls[j]) return {};  // aucune emission
     if (stored[j]) {
-      copy_scratch(j, record_end - balls[j], population_end - incidences[j], balls[j], incidences[j],
-                   scratch_records.data(), scratch_population.data(), records.data(), population.data());
+      copy_scratch(arena, static_cast<u32>(j), record_end - balls[j], population_end - incidences[j], balls[j],
+                   incidences[j], records.data(), population.data());
       return {};
     }
     FillSink sink{records.data(), population.data(), balls[j], incidences[j], in.sites, in.m};
@@ -81,11 +82,15 @@ Outcome run_leaf_batch_host(const LeafBatchView& view, sched::Pool& pool, Memory
   const Stopwatch total;
   // Hypothese de la borne des sommes (leaf_device::kCountBound) : au plus kMaxBatchJobs feuilles.
   if (view.count > leaf_device::kMaxBatchJobs) return fail(Reason::catalogue_counter_overflow);
+  // Blocs des cases (feuilles puis reservoir) indexes en u32 : count + spare < 2^32.
+  const u64 spare = spare_chunks(view.count, view.reservoir), chunks = view.count + spare;
+  if (chunks >= kNoChunk) return fail(Reason::index_overflow_u32);
   u64 bytes = 0;
   MHGP11_TRY(add_bytes<u8>(bytes, 2 * view.count));
   MHGP11_TRY(add_bytes<u64>(bytes, 2 * view.count));
-  MHGP11_TRY(add_bytes<LeafRecord>(bytes, view.count * kScratchRecords));  // count <= 2^40 (garde ci-dessus)
-  MHGP11_TRY(add_bytes<u8>(bytes, view.count * kScratchPopulation));
+  MHGP11_TRY(add_bytes<LeafRecord>(bytes, chunks * kScratchRecords));  // chunks < 2^32
+  MHGP11_TRY(add_bytes<u8>(bytes, chunks * kScratchPopulation));
+  MHGP11_TRY(add_bytes<u32>(bytes, 2 * chunks + 2));
   MHGP11_TRY(add_bytes<leaf_device::Counts>(bytes, pool.size()));
   MHGP11_TRY(budget.admit(bytes));
   MHGP11_TRY(result.status.allocate(view.count, budget));
@@ -93,19 +98,26 @@ Outcome run_leaf_batch_host(const LeafBatchView& view, sched::Pool& pool, Memory
   Buffer<u64> balls, incidences;
   Buffer<LeafRecord> scratch_records;
   Buffer<u8> scratch_population;
+  Buffer<u32> links;  // next_record, next_population, puis les deux curseurs
   Buffer<leaf_device::Counts> per_worker;
   MHGP11_TRY(stored.allocate(view.count, budget));
   MHGP11_TRY(balls.allocate(view.count, budget));
   MHGP11_TRY(incidences.allocate(view.count, budget));
-  MHGP11_TRY(scratch_records.allocate(view.count * kScratchRecords, budget));
-  MHGP11_TRY(scratch_population.allocate(view.count * kScratchPopulation, budget));
+  MHGP11_TRY(scratch_records.allocate(chunks * kScratchRecords, budget));
+  MHGP11_TRY(scratch_population.allocate(chunks * kScratchPopulation, budget));
+  MHGP11_TRY(links.allocate(2 * chunks + 2, budget));
   MHGP11_TRY(per_worker.allocate(pool.size(), budget));
   for (auto& c : per_worker.span()) c = leaf_device::Counts{};
-  HostBatch batch{view, result.status.span(), stored.span(), balls.span(), incidences.span(), scratch_records.span(),
-                  {}, scratch_population.span(), {}, per_worker.span()};
+  links[2 * chunks] = links[2 * chunks + 1] = 0;
+  const ScratchArena arena{scratch_records.data(), scratch_population.data(), links.data(), links.data() + chunks,
+                           links.data() + 2 * chunks, static_cast<u32>(view.count), static_cast<u32>(spare)};
+  HostBatch batch{view, result.status.span(), stored.span(), balls.span(), incidences.span(), arena, {}, {},
+                  per_worker.span()};
   const Stopwatch count;
   MHGP11_TRY(pool.parallel_for(view.count, 64, &batch, HostBatch::body));
   result.timings.count_ns = count.nanoseconds();
+  result.timings.spare_record_chunks = std::min<u64>(arena.cursor[0], spare);
+  result.timings.spare_population_chunks = std::min<u64>(arena.cursor[1], spare);
   // Prefixes exclusifs dans l'ordre du lot : chaque feuille ecrit a une place fixe.
   const Stopwatch scan;
   u64 records = 0, population = 0;

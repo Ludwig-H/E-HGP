@@ -172,6 +172,8 @@ void catalogue_execution(const Catalogue& catalogue, const CatalogueTimings& tim
             << ",\"device_bytes\":" << t.batch_device_bytes << ",\"levels_ns\":" << t.batch_levels_ns
             << ",\"fallback_ns\":" << t.batch_fallback_ns << ",\"prefetch_ns\":" << t.batch_prefetch_ns
             << ",\"fill_jobs\":" << t.batch_fill_jobs << ",\"copied_jobs\":" << t.batch_copied_jobs
+            << ",\"spare_record_chunks\":" << t.batch_spare_record_chunks
+            << ",\"spare_population_chunks\":" << t.batch_spare_population_chunks
             << ",\"device_pool_used_high\":" << t.batch_device_pool_used_high
             << ",\"device_pool_reserved_high\":" << t.batch_device_pool_reserved_high << '}';
 }
@@ -256,7 +258,8 @@ Outcome full_pass(Cloud cloud_value, MemoryBudget& budget, sched::Pool& pool_ref
                                         4096 * unsigned(full_params.population_lookup) +
                                         8192 * unsigned(full_params.concurrent_orders) +
                                         16384 * unsigned(params.device_leaf) + 32768 * unsigned(params.batch_leaves) +
-                                        65536 * unsigned(params.cuda_leaves))
+                                        65536 * unsigned(params.cuda_leaves) +
+                                        131072 * unsigned(params.replay_overflow))
             << ",\"wall_ns\":" << full_ns << ",\"index_ns\":" << index_ns << ",\"domain_ns\":" << domain_ns
             << ",\"forest_ns\":" << forest_ns << ",\"cpu_seconds\":" << std::setprecision(12) << cpu_seconds
             << ",\"peak_reserved_bytes\":" << budget.peak() << ",\"reserved_after_bytes\":" << budget.used();
@@ -353,7 +356,7 @@ int main(int argc, char** argv) {
   if (options[0] > 12 || options[1] > 1024 || options[2] > 1024 ||
       options[6] < 1 || options[6] > sched::kMaxWorkers) return 2;
   u64 optimizations = 0;
-  if (argc >= 12 && (!parse(argv[11], optimizations) || optimizations > 131071)) return 2;
+  if (argc >= 12 && (!parse(argv[11], optimizations) || optimizations > 262143)) return 2;
   u64 passes = 1;  // mode a chaud : passes FULL successives dans le meme processus
   if (argc == 13 && (!parse(argv[12], passes) || passes < 1 || passes > 64)) return 2;
   if ((optimizations & 8192) != 0 && (optimizations & 8) == 0) return 2;
@@ -384,6 +387,7 @@ int main(int argc, char** argv) {
   params.device_leaf = (optimizations & 16384) != 0;  // feuille source unique (voie GPU) jouee sur l'hote
   params.batch_leaves = (optimizations & 32768) != 0;  // feuilles en lot, executeur hote (Pool)
   params.cuda_leaves = (optimizations & 65536) != 0;   // feuilles en lot sur le GPU (construction CUDA)
+  params.replay_overflow = (optimizations & 131072) != 0;  // lots sans reservoir chaine : debordements rejoues
   params.kmax = static_cast<int>(options[0]); params.leaf_size = static_cast<u32>(options[1]);
   params.max_leaf = static_cast<u32>(options[2]); params.max_nodes = options[3]; params.ball_limit = options[4];
   const auto result = guarded([&]() {

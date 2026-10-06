@@ -40,6 +40,9 @@ struct CatalogueParams {
   // Passe unique seulement : feuilles admissibles mises en file puis traitees en lot par leaf_device.hpp, sur le
   // Pool (batch_leaves) ou sur le GPU (cuda_leaves, implique batch_leaves) ; non resolues refaites par leaf.cpp.
   bool batch_leaves = false, cuda_leaves = false;
+  // Lots de feuilles sans reservoir chaine : toute feuille qui deborde de sa case est rejouee (voie du 5 octobre,
+  // gardee pour les portes qui exercent la seconde passe). Sans effet hors des lots.
+  bool replay_overflow = false;
 };
 
 struct CatalogueBall {
@@ -87,7 +90,8 @@ struct CatalogueTimings {
   u64 batch_levels_ns = 0, batch_fallback_ns = 0;
   u64 batch_prefetch_ns = 0;  // ouverture du contexte GPU en arriere-plan (prefetch_device_context), recouverte
   u64 batch_fill_jobs = 0;    // feuilles rejouees par la seconde passe (celles qui emettent et debordent)
-  u64 batch_copied_jobs = 0;  // feuilles qui emettent et tiennent dans leur case
+  u64 batch_copied_jobs = 0;  // feuilles qui emettent et tiennent dans leurs blocs (case et reservoir)
+  u64 batch_spare_record_chunks = 0, batch_spare_population_chunks = 0;  // blocs du reservoir pris
   u64 batch_device_pool_used_high = 0, batch_device_pool_reserved_high = 0;  // pics physiques du pool CUDA
 };
 
