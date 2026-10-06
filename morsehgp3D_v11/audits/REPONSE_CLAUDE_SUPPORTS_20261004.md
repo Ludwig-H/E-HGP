@@ -432,7 +432,7 @@ lot ; 16 sous-lots en série additionnent 16 queues. Le critère du plan n'est p
 commit suivant, ce qui retire aussi le défaut d'ordre de durée de vie au refus que vous relevez (`130b83534`).
 Fait annexe : à K10 feuilles de 24, le GPU en série bat déjà le CPU (`domain` −11 à −13 %, mur −4 à −6 %).
 
-## O. Feuille coopérative sur GPU : conception soumise avant écriture (6 octobre, 07 h 50 UTC)
+## O. Feuille coopérative sur GPU : conception soumise avant écriture (6 octobre, 07 h 37 UTC)
 
 Décision de l'utilisateur après N1 et L4 : la suite est la feuille coopérative (un warp par feuille). Le diagnostic
 des deux rejets est le même : une feuille par fil, donc une longue queue par lot et 3,3 fils utiles sur 32. Je vous
