@@ -1,0 +1,9 @@
+# État source à 10:54 UTC
+
+Source développeur capturée deux fois à octets identiques : `tests/cli/cli_supports_oracle.py`, HEAD `9eee2ed4bcef1e960cdf2456012b84416854dc20`, 15303 octets, SHA256 `f3bbdd47c41462395d52a27f48cb19ff40ded618bae48bdf52e99e136453193a`.
+
+Le faux attendu `max(m)==25` a disparu de cette source. `shell_cases` exige désormais S=B et `counts['roles']['merge'] >= 1`, avec un commentaire indiquant que les petites boules ont déjà connecté les sites avant la boule centrale. Cette correction est favorable en lecture source ; elle n'est pas qualifiée nativement par ce reçu. La démonstration exacte antérieure demeure dans le reçu parent, sans nouveau calcul étendu.
+
+Les deux défauts de différentiel subsistent : `spanning` conserve les rôles non internes, et `compare` projette la sortie native avant de la comparer. `proposed.patch` est rebâti sur cette capture et corrige uniquement ces points, l'import `Fraction` et le descriptif de la sélection. Les naissances sont conservées ; les multifusions utilisent une DSU sur leurs enfants ouverts, dans l'ordre niveau/S* dense Morton rembourré. Une boule hyperarête est retenue dès qu'elle effectue une union ; ses prior géométriques restent inchangés. La comparaison prend `mine` tel quel contre l'oracle sélectionné.
+
+Le rejeu utilise les mêmes trois sources de référence Git et le même helper que le reçu initial. Quatre petits témoins vérifient cycle K1, ordre des centres distinct de BallIdx, hyperarêtes K2/K3 et gardes d'arité. L'AST vérifie que la sortie native n'est pas projetée et que le corps de `shell_cases` est strictement inchangé. Le patch passe `git apply --check` sur une copie isolée de la nouvelle capture. Normal et −O : 34 contrôles, code 0, stderr vide et sorties identiques. Aucun nouvel essai échoué dans ce complément, aucune exécution native, aucun build/GCP ; les échecs historiques restent conservés dans le reçu parent.

@@ -1,0 +1,52 @@
+{
+  "base_pin": "9eee2ed4bcef1e960cdf2456012b84416854dc20",
+  "double_capture_equal": true,
+  "git_dependencies": [
+    {
+      "repo_path": "morsehgp3D_v11/reference/hgp11_ref/model.py",
+      "sha256": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c"
+    },
+    {
+      "repo_path": "morsehgp3D_v11/reference/hgp11_ref/definition.py",
+      "sha256": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43"
+    },
+    {
+      "repo_path": "morsehgp3D_v11/reference/hgp11_ref/supports.py",
+      "sha256": "970f645462a019639cead958cf8f45b1324cf3083bb61fc9a0891ddc523254ee"
+    },
+    {
+      "repo_path": "morsehgp3D_v11/reference/test_supports.py",
+      "sha256": "1b90fdadfd896fa6b92ea02d34e457d111c80659683ddcc92117e3a07d205b12"
+    },
+    {
+      "repo_path": "morsehgp3D_v11/src/tower/order_tree.cpp",
+      "sha256": "c5fd5c3859a525932cdfb9f4d7d420efec01ba95661a0b587689fa8d0159e5ab"
+    },
+    {
+      "repo_path": "morsehgp3D_v11/src/tower/attachment.cpp",
+      "sha256": "77f84f00506729b253c22216860ec8c0c9bcd579dcac1c9ed3ac8c54dadb01cd"
+    },
+    {
+      "repo_path": "morsehgp3D_v11/tests/api/supports_route.cpp",
+      "sha256": "2db41f412d4894ffb8688b86e6cc16b5e3a1a9e7329a6cce13a4330dc692fb42"
+    }
+  ],
+  "previous_condition": "row['balls'] <= row['cells']",
+  "previous_condition_provenance": "Observed in tool read at review start; the old file is not double-captured by this complement.",
+  "schema": "audit_sp_v2_api_route_count_corrected_sources_v1",
+  "status": "source_corrected_during_review",
+  "wip_captures": [
+    {
+      "capture_path": "sources/supports_route_oracle.py",
+      "repo_path": "morsehgp3D_v11/tests/api/supports_route_oracle.py",
+      "second_capture_sha256": "7ffe41ec98f06b7f6fc06fd5d9d71d59ce4bf93aa6d16818c018573b3c99d879",
+      "sha256": "7ffe41ec98f06b7f6fc06fd5d9d71d59ce4bf93aa6d16818c018573b3c99d879"
+    },
+    {
+      "capture_path": "sources/hierarchy.cpp",
+      "repo_path": "morsehgp3D_v11/src/supports/hierarchy.cpp",
+      "second_capture_sha256": "bab4244ca1c3404de7a3e2a1731673bad131499be217d7eabfe3f2b0d26899fc",
+      "sha256": "bab4244ca1c3404de7a3e2a1731673bad131499be217d7eabfe3f2b0d26899fc"
+    }
+  ]
+}

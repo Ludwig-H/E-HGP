@@ -1,0 +1,27 @@
+{
+  "audit_context": "eaa2ecf63 / be8085ec1",
+  "files": {
+    "morsehgp3D_v11/tests/cli/cli_supports_oracle.py": {
+      "bytes": 15078,
+      "sha256": "839ec1a4dc383c63684b278214f42b1196fc85d442b05ae88a3707a3a6b006a9"
+    }
+  },
+  "git": {
+    "morsehgp3D_v11/reference/hgp11_ref/definition.py": {
+      "bytes": 14676,
+      "sha256": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43"
+    },
+    "morsehgp3D_v11/reference/hgp11_ref/model.py": {
+      "bytes": 3172,
+      "sha256": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c"
+    },
+    "morsehgp3D_v11/reference/hgp11_ref/supports.py": {
+      "bytes": 41795,
+      "sha256": "970f645462a019639cead958cf8f45b1324cf3083bb61fc9a0891ddc523254ee"
+    }
+  },
+  "head": "9eee2ed4bcef1e960cdf2456012b84416854dc20",
+  "pin": "9eee2ed4bcef1e960cdf2456012b84416854dc20",
+  "two_captures_byte_equal": true,
+  "wip": true
+}

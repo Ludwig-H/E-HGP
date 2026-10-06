@@ -1,0 +1,56 @@
+{
+  "all_outputs_model_unchanged": true,
+  "cloud_runs": 0,
+  "disconnected_four_children_refused": true,
+  "graphs_BFS_compared": 771,
+  "hyperedge_selected": [
+    0
+  ],
+  "invalid_different_parent_refused": true,
+  "memory_formula": {
+    "count_and_fill": "old first+second, selector released",
+    "example": {
+      "after_sort": 200,
+      "assumed_first": 200,
+      "assumed_second": 40,
+      "first_peak": 203,
+      "peak": 240,
+      "selector_peak": 35
+    },
+    "first_coexistence": "B_all*sizeof(u8)+HierarchyAdmission.first()",
+    "selector": "B_all*sizeof(u8)+2*N*sizeof(u32)"
+  },
+  "multilevel_selected": [
+    0,
+    1,
+    2,
+    4
+  ],
+  "native_runs": 0,
+  "scope": "Abstract attachments + independent BFS graph oracle; no cloud geometry/native/GCP qualification",
+  "triangle": {
+    "all": [
+      0,
+      1,
+      2
+    ],
+    "prior": [
+      [
+        0,
+        1
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        1,
+        2
+      ]
+    ],
+    "selected": [
+      0,
+      1
+    ]
+  }
+}

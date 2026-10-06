@@ -1,0 +1,238 @@
+{
+  "cases": [
+    {
+      "corrected_selected": 2,
+      "k": 1,
+      "name": "equal_triangle_K1",
+      "observed_selected": 3,
+      "oracle_balls": 3,
+      "selected_stars": [
+        [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            1,
+            0,
+            1
+          ]
+        ],
+        [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            1,
+            1,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "corrected_selected": 2,
+      "k": 1,
+      "name": "center_order_not_BallIdx",
+      "observed_selected": 3,
+      "oracle_balls": 3,
+      "selected_stars": [
+        [
+          [
+            0,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            0
+          ]
+        ],
+        [
+          [
+            0,
+            1,
+            0
+          ],
+          [
+            1,
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "corrected_selected": 4,
+      "k": 2,
+      "name": "triangle_K2_hyperedge",
+      "observed_selected": 4,
+      "oracle_balls": 4,
+      "selected_stars": [
+        [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            2,
+            0,
+            2
+          ]
+        ],
+        [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            2,
+            2,
+            0
+          ]
+        ],
+        [
+          [
+            2,
+            0,
+            2
+          ],
+          [
+            2,
+            2,
+            0
+          ]
+        ],
+        [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            2,
+            0,
+            2
+          ],
+          [
+            2,
+            2,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "corrected_selected": 5,
+      "k": 3,
+      "name": "tetra_K3_hyperedge",
+      "observed_selected": 5,
+      "oracle_balls": 5,
+      "selected_stars": [
+        [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            2,
+            2
+          ],
+          [
+            2,
+            0,
+            2
+          ]
+        ],
+        [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            2,
+            2
+          ],
+          [
+            2,
+            2,
+            0
+          ]
+        ],
+        [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            2,
+            0,
+            2
+          ],
+          [
+            2,
+            2,
+            0
+          ]
+        ],
+        [
+          [
+            0,
+            2,
+            2
+          ],
+          [
+            2,
+            0,
+            2
+          ],
+          [
+            2,
+            2,
+            0
+          ]
+        ],
+        [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            2,
+            2
+          ],
+          [
+            2,
+            0,
+            2
+          ],
+          [
+            2,
+            2,
+            0
+          ]
+        ]
+      ]
+    }
+  ],
+  "checks": 34,
+  "limits": "Four existing small exact oracle cases, AST and patch applicability only. No extended shell replay or native invocation.",
+  "native_executed": false,
+  "patch_apply_check": "PASS",
+  "shell_correction_source": "preserved, not natively qualified",
+  "status": "PASS_portable_remaining_projection",
+  "wip_head": "9eee2ed4bcef1e960cdf2456012b84416854dc20"
+}

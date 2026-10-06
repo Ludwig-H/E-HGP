@@ -8,6 +8,36 @@ aux reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 Note maintenue en place ; détails et échanges clos dans les reçus.
 
+## Supports du MST : le nouveau différentiel doit détecter le cycle
+
+**Suivi du WIP CLI du 6 octobre, 10:38 UTC.** `cli_supports_oracle.py`
+projette maintenant l'oracle avec le même filtre de rôle que le moteur.
+Il validerait donc les trois arêtes du triangle au lieu d'en exiger deux.
+Remplacer cette projection attendue par Kruskal, dans l'ordre du catalogue
+`(niveau exact, S* en SiteIdx Morton)`, et conserver ensuite l'ordre de
+présentation de l'oracle. L'ordre des centres de l'oracle ne départage pas
+les égalités comme le catalogue.
+
+**Ne pas projeter la sortie native avant comparaison.** Même avec une
+projection Kruskal correcte, `spanning(mine) == spanning(want)` peut retirer
+l'arête excédentaire de `mine` et masquer le défaut. Comparer le document
+natif complet, tel que décodé, à la seule projection du document attendu.
+
+**L'attente `max(decoded.m) == 25` est impossible pour `sphere9_25`, K1/K2.**
+La boule centrale est interne : ses composantes strictes sont déjà reliées
+avant son niveau 9, aussi bien sur les sites K1 que sur les paires K2.
+Les six sites axiaux imposent l'unicité de cette sphère de coquille25 ;
+aucune autre boule retenue ne peut satisfaire l'attente. Conserver le
+succès de l'appel et `supports == balls`, sans exiger sa publication.
+**Corrigé en source à 10:51 UTC :** le WIP exige maintenant `S=B` et au
+moins une fusion, et explique l'absence de la centrale. Avis favorable ;
+aucune demande de remettre la boule interne dans la sortie. La preuve
+ci-dessous garde le WIP antérieur qui motivait cette correction.
+[Preuve exacte et patch du différentiel](../receipts/audit_supports_mst_followup_20261006/mathematics/README.md) :
+quatre petits documents S1, contrôle de l'ordre canonique et preuve bornée
+sur les 25 sites, sans oracle exhaustif des supports sur cette grande
+coquille. Rejeux normal/−O identiques ; patch proposé, sans exécution native.
+
 ## Supports du MST : cycle conservé au même plateau
 
 **À corriger avant publication de la sortie v2.** WIP `v11-impl-l3`,
@@ -60,6 +90,12 @@ au moins deux racines restent distinctes avant ses unions, puis que tous
 les enfants sont connectés à la fin. Ce contrôle détecte le cycle du
 triangle sans réénumérer Q_b. La conformité au choix canonique parmi les
 boules omises reste du ressort du différentiel avec le catalogue complet.
+Le [patch du lecteur et sa porte autonome](../receipts/audit_supports_mst_20261006/reader_spanning_proposal/README.md)
+sont maintenant fournis : ils acceptent le triangle à deux supports,
+refusent son cycle à trois supports et une fusion de quatre enfants
+restant séparés en deux groupes. Les trois fichiers passent dans le lecteur
+WIP initial. Contrôles normal/−O conformes ; la nouvelle garde admet aussi
+les hyper-arêtes comportant une liaison redondante mais une union utile.
 
 ## Feuille coherente : reponse a la section Q du 6 octobre
 
@@ -135,12 +171,16 @@ cohérent, test natif ou gain qualifié par cette réponse.
 
 ## Noyau compact et deux témoins de qualification — suivi du 6 octobre
 
+**Historique clos par retrait en d4228f5e5.** La variante par paires et
+ses portes ont été supprimées. Les constats ci-dessous expliquent les
+preuves archivées ; ils n'appellent plus de correction de ce code.
+
 Le WIP CUDA relu vers 08:30 conserve le raccord démontré ci-dessous : paire
 u16 injective, suffixe `next[i]` après j, masque `dom[i]`, préfixes dans
 l'ordre des paires. La représentation partagée est compacte ; l'ancienne
 alerte de 22 Kio concernait la copie directe des structures hôtes, pas ce
 nouveau layout. Le point de synchronisation restant est dans la
-[note moteur](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#premier-noyau-coopératif--corrections-avant-g4).
+[note moteur](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#premier-noyau-coopératif--constat-antérieur-et-corrections-proposées).
 
 **La porte du masque doit avoir une dominance réelle.** Toute boîte
 contenant les deux sites i,j contient deux points où leur différence de

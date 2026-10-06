@@ -1,0 +1,57 @@
+{
+  "schema": "audit_supports_mst_followup_root_review_v1",
+  "native_runs": 0,
+  "cloud_actions": 0,
+  "geometry": {
+    "normal_exit": 0,
+    "optimized_exit": 0,
+    "stdout_identical": true,
+    "stderr_empty": true
+  },
+  "oracle_remaining": {
+    "normal_exit": 0,
+    "optimized_exit": 0,
+    "stdout_identical": true,
+    "stdout_sha256": "020df29b7dc7aeafb01ff7043ddac37144e37aff05693cd43c2d16ba53927440",
+    "patch_applicable_to_wip": true
+  },
+  "native_proposal": {
+    "normal_exit": 0,
+    "optimized_exit": 0,
+    "stdout_identical": true,
+    "stdout_sha256": "a137b9e1d917b19f7ffb6fedb4b09458a358c0031d7058a20beb901352590ada",
+    "patch_applicable_to_wip": true,
+    "compiled": false
+  },
+  "reader": {
+    "normal_exit": 0,
+    "optimized_exit": 0,
+    "stdout_identical": true,
+    "stdout_sha256": "6e96cc8e46e00f6a5c0c0ce3d3211c54fa8e52426d4c3557218e73c6dd493217",
+    "patch_applicable_to_wip": true
+  },
+  "combined_reader": {
+    "normal_exit": 0,
+    "optimized_exit": 0,
+    "stdout_identical": true,
+    "stdout_sha256": "1a05f606e9a628168210f737e48380f3f75b11086bbd1e9d59191df7d8c08b75",
+    "patched_source_sha256": "3189a519dd09a20cc7bc84a4840ec974de33d4e6ddab31522c2e2c10b54dfbb8",
+    "applied_to_temporary_snapshot_only": true
+  },
+  "initial_latest_wip_patch_check": {
+    "command": "git apply --check mathematics/proposed.patch (from developer worktree)",
+    "exit_code": 1,
+    "stderr": [
+      "error: patch failed: morsehgp3D_v11/tests/cli/cli_supports_oracle.py:223",
+      "error: morsehgp3D_v11/tests/cli/cli_supports_oracle.py: patch does not apply"
+    ],
+    "cause": "Developer removed impossible shell25 expectation after initial captured WIP. New remaining_1054 proposal preserves that fix and passes applicability check."
+  },
+  "api_counter_source_closure": {
+    "normal_exit": 0,
+    "optimized_exit": 0,
+    "stdout_identical": true,
+    "stderr_empty": true,
+    "stdout_sha256": "f0d98fdb475414762db5825c62feebcbebc1c3cc27d5f338a3a55f33bd2c61af"
+  }
+}

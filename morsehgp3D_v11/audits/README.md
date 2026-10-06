@@ -12,8 +12,24 @@ trois arêtes au lieu de deux. La
 donne le témoin entier et une sélection par unions réussies. La réduction
 à S* demandée par l'utilisateur reste acquise. Le lecteur de dossier doit
 aussi vérifier l'égalité des versions du manifeste et du binaire.
+**Le nouveau différentiel CLI reprend ce filtre invalide.** La correction
+doit sélectionner uniquement l'attendu et comparer la sortie native sans
+l'épurer. L'attente impossible de coquille25 à K1/K2 a été **retirée du WIP
+à 10:51 UTC** ; cette boule interne doit être absente de la sélection. La
+[note mathématique](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md#supports-du-mst--le-nouveau-différentiel-doit-détecter-le-cycle)
+précise la correction du différentiel et le constat désormais résolu en source.
+Le [paquet de corrections](../receipts/audit_supports_mst_followup_20261006/README.md)
+fournit le sélecteur C++, le différentiel et les gardes du lecteur.
+Le contrôle API erroné `balls <= cells` a lui aussi été retiré du WIP :
+les naissances publiées sont absentes du compteur des cellules.
+Les patches restent proposés ; aucun nouveau test natif lancé par l'auditeur.
 
-**GPU : réponse à la feuille cohérente proposée en section Q disponible.**
+**GPU : variante par paires retirée en d4228f5e5.** Son coût reste supérieur
+à celui de la voie un fil. La suppression clôt les défauts de garde CUDA,
+de témoin `near_max` u18 et de mutant de publication propres à cette
+variante ; leurs anciens patches ne sont plus à appliquer.
+
+**Réponse à la feuille cohérente proposée en section Q disponible.**
 Le warp peut partager le parcours en conservant le premier événement dans
 l'ordre séquentiel : dépassement au seuil+1, refus ou succès canonique.
 Le cache J2 doit être consulté une seule fois par test logique. Les
@@ -28,9 +44,9 @@ trois trames K5/K10 conformes au pin c3df ; aucun transfert au correctif ee3.
 insuffisant, sans nouveaux sanitizers. Le profil du fill un fil montre
 1,39 lane active sur32 ; la correction n'a pas rétabli son ancien coût.
 [Reçu et profil](../receipts/audit_g4_coop2_20261006/README.md).
-Les cibles des mutants et la fixture de dominance sont réparées. La garde
-concurrente de refus et l'attente impossible en u18 restent à corriger :
-[patch actualisé](../receipts/audit_coherent_leaf_design_20261006/remaining_fixes_ee3.patch).
+Les défauts propres à cette variante sont désormais clos par son retrait.
+Le [patch antérieur](../receipts/audit_coherent_leaf_design_20261006/remaining_fixes_ee3.patch)
+reste une pièce historique, sans tâche de correction sur le code supprimé.
 Le [patch de placement du fill](../receipts/proposition_fill_cta_20261006/README.md)
 reste une proposition facultative archivée, sans constituer un préalable.
 

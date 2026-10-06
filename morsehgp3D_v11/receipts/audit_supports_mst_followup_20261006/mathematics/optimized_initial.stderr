@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/build/v11-audit-math-supports-mst-followup-20261006/replay.py", line 121, in <module>
+    if __name__=='__main__':main()
+                            ^^^^^^
+  File "/workspaces/E-HGP/build/v11-audit-math-supports-mst-followup-20261006/replay.py", line 96, in main
+    require(len(strictpairs)==288,'strict pair count')
+  File "/workspaces/E-HGP/build/v11-audit-math-supports-mst-followup-20261006/replay.py", line 19, in require
+    if not ok:raise RuntimeError(message)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: strict pair count

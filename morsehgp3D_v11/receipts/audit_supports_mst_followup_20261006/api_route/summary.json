@@ -1,0 +1,79 @@
+{
+  "actual_condition": "row['supports'] == row['balls'] and row['multiple'] == 0 and (row['bytes'] > 0) and (row['nodes'] > 0)",
+  "actual_condition_on_s1_counts": true,
+  "base_pin": "9eee2ed4bcef1e960cdf2456012b84416854dc20",
+  "captured_judge_sha256": "7ffe41ec98f06b7f6fc06fd5d9d71d59ce4bf93aa6d16818c018573b3c99d879",
+  "cloud_actions": 0,
+  "double_capture_equal": true,
+  "fixture": "triangle_equilateral",
+  "journal_cells_from_pinned_rule": 1,
+  "journal_seeds_from_pinned_rule": 3,
+  "k": 2,
+  "limit": "Source-level closure of the obsolete count check, not native API publication qualification.",
+  "multiple_supports_accepted": false,
+  "native_runs": 0,
+  "points": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      2,
+      2,
+      0
+    ],
+    [
+      2,
+      0,
+      2
+    ]
+  ],
+  "positive_bytes_field": "Sentinel 1 used only for the Python Boolean condition; no native byte size observed.",
+  "previous_comparison_on_s1_counts": false,
+  "previous_condition_provenance": "Observed in tool read at review start; the old file is not double-captured by this complement.",
+  "s1_ball_summary": [
+    {
+      "level": "2",
+      "m": 2,
+      "p": 0,
+      "prior": [],
+      "qmin": 2,
+      "role": "naissance"
+    },
+    {
+      "level": "2",
+      "m": 2,
+      "p": 0,
+      "prior": [],
+      "qmin": 2,
+      "role": "naissance"
+    },
+    {
+      "level": "2",
+      "m": 2,
+      "p": 0,
+      "prior": [],
+      "qmin": 2,
+      "role": "naissance"
+    },
+    {
+      "level": "8/3",
+      "m": 3,
+      "p": 0,
+      "prior": [
+        0,
+        1,
+        2
+      ],
+      "qmin": 3,
+      "role": "fusion"
+    }
+  ],
+  "s1_balls": 4,
+  "s1_birth_balls": 3,
+  "s1_merge_balls": 1,
+  "schema": "audit_api_route_counts_source_corrected_v1",
+  "status": "source_corrected_during_review",
+  "supports_mismatch_accepted": false
+}

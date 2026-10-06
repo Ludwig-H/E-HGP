@@ -1,0 +1,12 @@
+{
+  "base_pin": "9eee2ed4bcef1e960cdf2456012b84416854dc20",
+  "call_needle": "    _check_roles(f)\n    _check_canonical(f)\n",
+  "call_replacement": "    _check_roles(f)\n    if f.version == 2:\n        _check_spanning(f)\n    _check_canonical(f)\n",
+  "captured_reader_sha256": "4d05bf53fb272bc2101bdd8069bab86ce28be6fa2451d852d33a6403a3248896",
+  "dependency": "../formats/sources/",
+  "function_inserted": "def _check_spanning(f):\n    \"\"\"SPv2 : chaque boule merge realise une union ; les enfants finissent connexes.\n\n    Une boule peut relier plusieurs branches et contenir des liens redondants :\n    une seule union utile suffit. Q_b et les candidats omis ne sont pas publies.\n    \"\"\"\n    for v in range(f.N):\n        if f.kind[v] != KIND_MERGE:\n            continue\n        children = f.children[v]\n        local = {child: i for i, child in enumerate(children)}\n        parents = list(range(len(children)))\n        components = len(children)\n\n        def find(i):\n            while parents[i] != i:\n                parents[i] = parents[parents[i]]\n                i = parents[i]\n            return i\n\n        for b in range(f.first_ball[v], f.first_ball[v] + f.ball_count[v]):\n            at = f.prior_at[b]\n            branches = f.prior[at:at + f.prior_count[b]]\n            before = components\n            a = local[branches[0]]  # _check_roles a deja controle les branches.\n            for branch in branches[1:]:\n                x, y = find(a), find(local[branch])\n                if x != y:\n                    parents[y] = x\n                    components -= 1\n            need(components < before, 'MHGP11SP 2 : fusion %d redondante dans le noeud %d' % (b, v))\n        need(components == 1, 'MHGP11SP 2 : enfants du noeud %d non connexes' % v)\n\n\n",
+  "limit": "Structural spanning check only: omitted candidates and global canonical Kruskal choices cannot be reconstructed from SPv2 alone.",
+  "patch_sha256": "fdd80cf97dc77003a536e5c1fa1b8b824f13376cc023172a437a9fbf9ef52b5e",
+  "proposed_reader_sha256": "d63d85102730c639cf089cbc7217bae7af8a6a25f1e2b56f2c32376cdb9cd92f",
+  "schema": "audit_sp_v2_reader_spanning_proposal_v1"
+}

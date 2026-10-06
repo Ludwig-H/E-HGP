@@ -1,0 +1,15 @@
+python3 -B replay.py --check proof.json
+exit_code=0
+MST proposal model PASS:771 connected graphs vs BFS Kruskal, disjoint multi-level families, hyperedge/cycle and memory phases; native0 cloud0
+
+python3 -O -B replay.py --check proof.json
+exit_code=0
+MST proposal model PASS:771 connected graphs vs BFS Kruskal, disjoint multi-level families, hyperedge/cycle and memory phases; native0 cloud0
+
+git apply --check <capsule>/selector.patch
+workdir=/workspaces/E-HGP/build/v11-impl-l3
+exit_code=0
+Textual applicability only, no application/build/native/cloud.
+
+Added function lines: root7, unite8, Assembly::select60.
+Candidate modules: hierarchy.cpp421, supports.hpp234.

@@ -41,7 +41,43 @@ dossier v2 honnête et refuse causalement le binaire v1 déclaré v2, dans
 les rejeux Python normal/−O. Sa politique de rétrolecture reste inchangée.
 Patch proposé dans le reçu, sans modification du worktree développeur.
 
+**Paquet de correction prêt, suivi vers 10:58 UTC.** Le
+[sélecteur C++ proposé](../receipts/audit_supports_mst_followup_20261006/native/README.md)
+retient les unions utiles, vérifie la connexion finale des enfants et
+préserve les `prior` originaux. Mémoire de sélection admise : masque d'un
+octet par boule, deux tableaux u32 par nœud ; tableaux rendus avant
+l'allocation des sorties, masque rendu après le tri. La voie `all` ne
+prend aucune nouvelle allocation. Patch relu et applicable au WIP, non
+compilé ; modèle confronté à un Kruskal indépendant sur 771 graphes.
+
+Le [différentiel corrigé](../receipts/audit_supports_mst_followup_20261006/mathematics/remaining_1054/README.md)
+compare la sortie native intacte à Kruskal sur l'oracle. Le patch actualisé
+conserve intégralement la correction de coquille25 faite par le développeur
+à 10:51. Le [contrôle structurel du lecteur](../receipts/audit_supports_mst_20261006/reader_spanning_proposal/README.md)
+refuse cycles et enfants déconnectés ; il s'applique avec la garde de
+version déjà fournie. Les contrôles Python normal/−O passent. La
+qualification native et les identités W1/W48 restent à effectuer sur G4.
+
+**Juge API : nouvelle attente erronée retirée du WIP.**
+`supports_route_oracle.py` avait inversé l'ancienne inégalité, mais
+`diagnostics.log.cells` exclut les naissances. Le triangle équilatéral K2
+publie trois boules de naissance et une boule de fusion, soit **4 boules
+pour 1 cellule**. Le développeur a retiré cette inégalité pendant la
+contrelecture ; le WIP exige maintenant `supports == balls`, `multiple == 0`
+et les comptes positifs. Avis favorable en source ; les contrôles des deux
+voies restent en place. Une borne faisant intervenir les cellules devrait
+compter séparément les naissances publiées. Ce point est résolu en source,
+sans nouvelle qualification native.
+[Source corrigée et contre-exemple S1](../receipts/audit_supports_mst_followup_20261006/api_route/README.md).
+
 ## Coop3 : retour du fill un fil après restauration du parcours
+
+**Retrait publié en d4228f5e5 :** la variante par paires, ses noyaux,
+portes et six mutants sont supprimés après l'échec du gain attendu.
+La garde concurrente CUDA, l'attente `near_max` impossible en u18 et le
+raccord de son mutant de publication sont donc **clos par suppression**.
+Ne pas appliquer leurs patches historiques. La future feuille cohérente
+reste une proposition distincte à qualifier.
 
 Session close sur **9eee2ed4b**, qui rétablit le parcours `extend` en ligne.
 Le paquet de 639 fichiers correspond à Git ; les 90 empreintes de sorties
@@ -119,15 +155,15 @@ cache J2 par warp. Les tests de refus injectés restent distincts des
 témoins géométriques atteignables ; ne pas fabriquer une campagne de
 mutants impossibles.
 
-**Deux corrections f030 restent ouvertes au pin ee3.** La garde ordinaire
+**Constats historiques f030 au pin ee3, clos par retrait en d4228f5e5.** La garde ordinaire
 `s.unresolved` avant les `atomicExch` est inchangée ; les six succès
 sanitizer ne prouvent pas l'absence de cet entrelacement. `near_max` exige
 encore `partial>0` en u18, bien que ses fixtures y soient certifiées.
 Le mutant de publication doit utiliser u21 pour exercer le refus dans
 une campagne de base u18. Le
 [patch actualisé aux chemins publiés](../receipts/audit_coherent_leaf_design_20261006/remaining_fixes_ee3.patch)
-ferme ces trois lignes de raccord, sans reprendre les corrections déjà
-intégrées. Applicabilité vérifiée, aucun build local.
+visait ces trois lignes de raccord, sans reprendre les corrections déjà
+intégrées. Il n'est plus applicable au code retiré ; aucun build local.
 
 Les cibles des six mutants sont désormais correctement rattachées au
 manifeste `catalogue`, et `sizes` exerce une boîte stricte : ces anciens

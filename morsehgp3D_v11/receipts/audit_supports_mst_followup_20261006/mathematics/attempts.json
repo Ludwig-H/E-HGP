@@ -1,0 +1,33 @@
+[
+  {
+    "command": [
+      "python3",
+      "-S",
+      "-B",
+      "replay.py",
+      "--repo",
+      "/workspaces/E-HGP"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v11-audit-math-supports-mst-followup-20261006",
+    "exit_code": 1,
+    "stdout": "normal_initial.json",
+    "stderr": "normal_initial.stderr",
+    "script_snapshot": "replay_initial.py"
+  },
+  {
+    "command": [
+      "python3",
+      "-O",
+      "-S",
+      "-B",
+      "replay.py",
+      "--repo",
+      "/workspaces/E-HGP"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v11-audit-math-supports-mst-followup-20261006",
+    "exit_code": 1,
+    "stdout": "optimized_initial.json",
+    "stderr": "optimized_initial.stderr",
+    "script_snapshot": "replay_initial.py"
+  }
+]

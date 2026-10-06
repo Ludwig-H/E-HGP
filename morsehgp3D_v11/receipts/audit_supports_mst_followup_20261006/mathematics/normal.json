@@ -1,0 +1,247 @@
+{
+  "cases": [
+    {
+      "corrected_selected": 2,
+      "k": 1,
+      "name": "equal_triangle_K1",
+      "observed_selected": 3,
+      "oracle_balls": 3,
+      "selected_stars": [
+        [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            1,
+            0,
+            1
+          ]
+        ],
+        [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            1,
+            1,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "corrected_selected": 2,
+      "k": 1,
+      "name": "center_order_not_BallIdx",
+      "observed_selected": 3,
+      "oracle_balls": 3,
+      "selected_stars": [
+        [
+          [
+            0,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            0
+          ]
+        ],
+        [
+          [
+            0,
+            1,
+            0
+          ],
+          [
+            1,
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "corrected_selected": 4,
+      "k": 2,
+      "name": "triangle_K2_hyperedge",
+      "observed_selected": 4,
+      "oracle_balls": 4,
+      "selected_stars": [
+        [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            2,
+            0,
+            2
+          ]
+        ],
+        [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            2,
+            2,
+            0
+          ]
+        ],
+        [
+          [
+            2,
+            0,
+            2
+          ],
+          [
+            2,
+            2,
+            0
+          ]
+        ],
+        [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            2,
+            0,
+            2
+          ],
+          [
+            2,
+            2,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "corrected_selected": 5,
+      "k": 3,
+      "name": "tetra_K3_hyperedge",
+      "observed_selected": 5,
+      "oracle_balls": 5,
+      "selected_stars": [
+        [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            2,
+            2
+          ],
+          [
+            2,
+            0,
+            2
+          ]
+        ],
+        [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            2,
+            2
+          ],
+          [
+            2,
+            2,
+            0
+          ]
+        ],
+        [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            2,
+            0,
+            2
+          ],
+          [
+            2,
+            2,
+            0
+          ]
+        ],
+        [
+          [
+            0,
+            2,
+            2
+          ],
+          [
+            2,
+            0,
+            2
+          ],
+          [
+            2,
+            2,
+            0
+          ]
+        ],
+        [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            2,
+            2
+          ],
+          [
+            2,
+            0,
+            2
+          ],
+          [
+            2,
+            2,
+            0
+          ]
+        ]
+      ]
+    }
+  ],
+  "checks": 2336,
+  "limits": "Four small exact definition/supports oracle cases plus bounded K1/K2 strict-graph proof on25sites; no native invocation, file reader test or full supports oracle/closure on25sites.",
+  "native_executed": false,
+  "shell25": {
+    "central_ball_selected": false,
+    "central_level": "9",
+    "central_role": "interne",
+    "max_selected_m_25_required": false,
+    "sites": 25,
+    "strict_components_K1": 1,
+    "strict_components_K2": 1,
+    "strict_pair_vertices": 290,
+    "strict_triple_links": 2048
+  },
+  "status": "PASS_portable_followup__captured_oracle_invalid",
+  "wip_head": "9eee2ed4bcef1e960cdf2456012b84416854dc20"
+}

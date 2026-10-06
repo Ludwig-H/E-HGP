@@ -1,0 +1,119 @@
+{
+  "base_pin": "9eee2ed4bcef1e960cdf2456012b84416854dc20",
+  "captured_reader_sha256": "4d05bf53fb272bc2101bdd8069bab86ce28be6fa2451d852d33a6403a3248896",
+  "cloud_actions": 0,
+  "directory_cases": [
+    {
+      "before": {
+        "accepted": true
+      },
+      "case": "triangle_mst_two_supports",
+      "proposed": {
+        "accepted": true
+      }
+    },
+    {
+      "before": {
+        "accepted": true
+      },
+      "case": "triangle_cycle_three_supports",
+      "proposed": {
+        "accepted": false,
+        "reason": "MHGP11SP 2 : fusion 2 redondante dans le noeud 3"
+      }
+    },
+    {
+      "before": {
+        "accepted": true
+      },
+      "case": "square_disconnected_children",
+      "proposed": {
+        "accepted": false,
+        "reason": "MHGP11SP 2 : enfants du noeud 4 non connexes"
+      }
+    }
+  ],
+  "helper_hyperedge_with_redundant_links": "accepted",
+  "limit": "Structural spanning check only: omitted candidates and global canonical Kruskal choices cannot be reconstructed from SPv2 alone.",
+  "native_runs": 0,
+  "proposed_reader_sha256": "d63d85102730c639cf089cbc7217bae7af8a6a25f1e2b56f2c32376cdb9cd92f",
+  "reader_before": [
+    {
+      "accepted": true,
+      "case": "triangle_mst_two_supports",
+      "decoded_balls": 2,
+      "expected_accept": true,
+      "file_bytes": 336,
+      "file_sha256": "1bb15159f28f63aa29d383b71d1d4c017ac8249e10ecd945d9f8ff324de044b6",
+      "prior": [
+        0,
+        2,
+        0,
+        1
+      ]
+    },
+    {
+      "accepted": true,
+      "case": "triangle_cycle_three_supports",
+      "decoded_balls": 3,
+      "expected_accept": false,
+      "file_bytes": 368,
+      "file_sha256": "dea48b3be4e26459fccc236a483ee216063c50c9cc60401b5d12c6542bda93c7",
+      "prior": [
+        0,
+        2,
+        0,
+        1,
+        1,
+        2
+      ]
+    },
+    {
+      "accepted": true,
+      "case": "square_disconnected_children",
+      "decoded_balls": 2,
+      "expected_accept": false,
+      "file_bytes": 360,
+      "file_sha256": "baacb3bd19d297ccd8d69e0a8007069f9a8edcb672f4e15d5a191a16d2edb530",
+      "prior": [
+        0,
+        2,
+        1,
+        3
+      ]
+    }
+  ],
+  "reader_proposed": [
+    {
+      "accepted": true,
+      "case": "triangle_mst_two_supports",
+      "decoded_balls": 2,
+      "expected_accept": true,
+      "file_bytes": 336,
+      "file_sha256": "1bb15159f28f63aa29d383b71d1d4c017ac8249e10ecd945d9f8ff324de044b6",
+      "prior": [
+        0,
+        2,
+        0,
+        1
+      ]
+    },
+    {
+      "accepted": false,
+      "case": "triangle_cycle_three_supports",
+      "expected_accept": false,
+      "file_bytes": 368,
+      "file_sha256": "dea48b3be4e26459fccc236a483ee216063c50c9cc60401b5d12c6542bda93c7",
+      "reason": "MHGP11SP 2 : fusion 2 redondante dans le noeud 3"
+    },
+    {
+      "accepted": false,
+      "case": "square_disconnected_children",
+      "expected_accept": false,
+      "file_bytes": 360,
+      "file_sha256": "baacb3bd19d297ccd8d69e0a8007069f9a8edcb672f4e15d5a191a16d2edb530",
+      "reason": "MHGP11SP 2 : enfants du noeud 4 non connexes"
+    }
+  ],
+  "schema": "audit_sp_v2_reader_spanning_replay_v1"
+}

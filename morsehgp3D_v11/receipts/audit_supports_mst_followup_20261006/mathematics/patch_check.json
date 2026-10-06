@@ -1,0 +1,12 @@
+{
+  "command": [
+    "git",
+    "apply",
+    "--check",
+    "proposed.patch"
+  ],
+  "base": "source/morsehgp3D_v11/tests/cli/cli_supports_oracle.py",
+  "exit_code": 0,
+  "stderr": "",
+  "proposed_syntax": "ast.parse PASS"
+}
