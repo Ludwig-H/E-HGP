@@ -1,0 +1,232 @@
+{
+  "causes": {
+    "exact_selection": "tests/support/mhgp11_gate.py:152-158",
+    "group_registration": "cmake/gates.cmake:279-289",
+    "witness_precondition": "tests/mutants/run_mutants.py:311-324"
+  },
+  "dominance_coverage": {
+    "consequence": "dom[i]=0 for every site; dropping dom[pair.i] does not change these fixtures",
+    "fixtures_all_sites_in_box": true,
+    "lines": [
+      110,
+      128,
+      141,
+      157
+    ],
+    "proposal": "Add this five-site tight-box fixture to sizes and require nonzero dominance rows; route the mask mutant to that same group."
+  },
+  "gate_statement": "mhgp11_add_unit(mhgp11_catalogue_leaf_coop SOURCES leaf_coop_test.cpp\n                GROUPS witness_q3_obtuse_q4 cache_hits sizes near_max LABELS fast)",
+  "kind": "WIP_source_review_not_native_execution",
+  "limitations": [
+    "No CMake configuration/build/CTest executed. Registry is derived from the captured real mhgp11_add_unit GROUPS declaration and helper semantics; exact names checked by stdlib regex.",
+    "Suggested patch adds construction=[tower,catalogue], changes six gate names, adds the u21 option for partial publication, reserves near_max partial>0 to u21/u24, and adds a tight-box positive-dominance fixture to sizes. It does not qualify any mutant natively."
+  ],
+  "module_selection": {
+    "builder_location": "tests/mutants/run_mutants.py:243",
+    "cmake_location": "CMakeLists.txt:279-284",
+    "current": [
+      "tower"
+    ],
+    "default_location": "tests/mutants/run_mutants.py:126",
+    "proposed": [
+      "tower",
+      "catalogue"
+    ],
+    "reason": "Library dependency closure does not include dependency test directories."
+  },
+  "near_max": {
+    "cause": "source review independently confirmed by audit_math/audit_native; no native execution",
+    "proposed_guard": "if constexpr (ld::kBits > 20) CHECK(tally.partial > 0);\n  else CHECK_EQ(tally.unresolved, 0u);",
+    "publication_mutant_options": [
+      "-DMHGP11_COORD_BITS=21"
+    ],
+    "u18": {
+      "expected_unresolved": 0,
+      "partial_positive_impossible": true,
+      "predicate_bound": "6*18+8=116 <=127",
+      "q4_width": "kCoordMax=2^18-1 <2^20"
+    },
+    "u21_u24": {
+      "require_partial_positive": true
+    }
+  },
+  "old_mutants": [
+    {
+      "gate": "mhgp11_catalogue_leaf_coop",
+      "id": "coop_paire_sautee"
+    },
+    {
+      "gate": "mhgp11_catalogue_leaf_coop",
+      "id": "coop_candidats_restants"
+    },
+    {
+      "gate": "mhgp11_catalogue_leaf_coop",
+      "id": "coop_cache_par_paire"
+    },
+    {
+      "gate": "mhgp11_catalogue_leaf_coop",
+      "id": "coop_compteurs_fill"
+    },
+    {
+      "gate": "mhgp11_catalogue_leaf_coop",
+      "id": "coop_publication_partielle"
+    },
+    {
+      "gate": "mhgp11_catalogue_leaf_coop",
+      "id": "coop_profondeur1_masque"
+    }
+  ],
+  "proposed_mutants": [
+    {
+      "gate": "mhgp11_catalogue_leaf_coop_sizes",
+      "id": "coop_paire_sautee"
+    },
+    {
+      "gate": "mhgp11_catalogue_leaf_coop_witness_q3_obtuse_q4",
+      "id": "coop_candidats_restants"
+    },
+    {
+      "gate": "mhgp11_catalogue_leaf_coop_cache_hits",
+      "id": "coop_cache_par_paire"
+    },
+    {
+      "gate": "mhgp11_catalogue_leaf_coop_witness_q3_obtuse_q4",
+      "id": "coop_compteurs_fill"
+    },
+    {
+      "gate": "mhgp11_catalogue_leaf_coop_near_max",
+      "id": "coop_publication_partielle"
+    },
+    {
+      "gate": "mhgp11_catalogue_leaf_coop_sizes",
+      "id": "coop_profondeur1_masque"
+    }
+  ],
+  "proposed_selected_manifest": [
+    {
+      "cherche": "    for (u64 rest = next; rest != 0; rest &= rest - 1) out(count++, i, ctz(rest), rest & (rest - 1), next_logical, next);\n",
+      "fichier": "src/catalogue/leaf_device.hpp",
+      "id": "coop_paire_sautee",
+      "note": "feuille cooperative : la derniere paire de chaque site i est perdue",
+      "porte": "mhgp11_catalogue_leaf_coop_sizes",
+      "remplace": "    for (u64 rest = next; rest != 0; rest &= rest - 1)\n      if ((rest & (rest - 1)) != 0) out(count++, i, ctz(rest), rest & (rest - 1), next_logical, next);\n"
+    },
+    {
+      "cherche": "  leaf.template extend_one<1>(pair.j, pair.remaining, pair.logical);\n",
+      "fichier": "src/catalogue/leaf_device.hpp",
+      "id": "coop_candidats_restants",
+      "note": "feuille cooperative : sous-arbre de la paire sans ses descendants (candidats restants vides ; remplacement de l'audit d117de397)",
+      "porte": "mhgp11_catalogue_leaf_coop_witness_q3_obtuse_q4",
+      "remplace": "  leaf.template extend_one<1>(pair.j, 0, pair.logical);\n"
+    },
+    {
+      "cherche": "  leaf.prefix[0] = pair.i;\n",
+      "fichier": "src/catalogue/leaf_device.hpp",
+      "id": "coop_cache_par_paire",
+      "note": "feuille cooperative : cache J2 reinitialise par paire (hits perdus)",
+      "porte": "mhgp11_catalogue_leaf_coop_cache_hits",
+      "remplace": "  for (u32 w = 0; w < kSeenWords; ++w) leaf.t.seen[w] = 0;\n  leaf.prefix[0] = pair.i;\n"
+    },
+    {
+      "cherche": "    Leaf<Sink> lane(in, discarded, sink, tables);\n",
+      "fichier": "src/catalogue/leaf_device.hpp",
+      "id": "coop_compteurs_fill",
+      "note": "feuille cooperative : compteurs de la passe d'emission ajoutes (doubles)",
+      "porte": "mhgp11_catalogue_leaf_coop_witness_q3_obtuse_q4",
+      "remplace": "    Leaf<Sink> lane(in, counts, sink, tables);\n"
+    },
+    {
+      "cherche": "  if (root.unresolved) return kUnresolved;\n  CountSink tally_sink;\n",
+      "fichier": "src/catalogue/leaf_device.hpp",
+      "id": "coop_publication_partielle",
+      "note": "feuille cooperative : emissions publiees au fil de l'eau, une feuille refusee laisse un prefixe publie",
+      "options": [
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "porte": "mhgp11_catalogue_leaf_coop_near_max",
+      "remplace": "  if (root.unresolved) return kUnresolved;\n  for (u32 k = 0; k < n; ++k) {\n    Leaf<Sink> early(in, counts, sink, tables);\n    run_pair(early, pairs[k]);\n    if (early.unresolved) return kUnresolved;\n  }\n  for (u32 w = 0; w < kSeenWords; ++w) tables.seen[w] = 0;\n  counts = Counts{};\n  counts.dominance_tests += u64(in.m) * (in.m - 1) / 2;\n  return kOk;\n  CountSink tally_sink;\n"
+    },
+    {
+      "cherche": "  leaf.masks[1] = leaf.t.dom[pair.i];\n",
+      "fichier": "src/catalogue/leaf_device.hpp",
+      "id": "coop_profondeur1_masque",
+      "note": "feuille cooperative : masque de dominance du prefixe (i) oublie",
+      "porte": "mhgp11_catalogue_leaf_coop_sizes",
+      "remplace": "  leaf.masks[1] = 0;\n"
+    }
+  ],
+  "registered_names": [
+    "mhgp11_catalogue_leaf_coop_witness_q3_obtuse_q4",
+    "mhgp11_catalogue_leaf_coop_cache_hits",
+    "mhgp11_catalogue_leaf_coop_sizes",
+    "mhgp11_catalogue_leaf_coop_near_max",
+    "mhgp11_catalogue_leaf_coop_inventaire",
+    "mhgp11_tower_full_leaf_lanes"
+  ],
+  "schema": "mhgp11.audit_coop_mutant_targets.v1",
+  "source_anchors": {
+    "cmake_registration": "  if(NOT U_GROUPS)\n    set(gate_args \"\")\n    _mhgp11_register(${target} 0 \"$<TARGET_FILE:${target}>\")\n    return()\n  endif()\n  foreach(group IN LISTS U_GROUPS)\n    set(gate_args \"${group}\")\n    _mhgp11_register(${target}_${group} 0 \"$<TARGET_FILE:${target}>\")\n  endforeach()\n  set(gate_args --inventaire ${U_GROUPS})\n  _mhgp11_register(${target}_inventaire 0 \"$<TARGET_FILE:${target}>\")",
+    "exact_runner": "def run_ctest_gate(ctest, build, name, timeout=7500, env=None):\n    \"\"\"Joue la porte CTest `name` (nom exact) du build et rend son issue structuree.\"\"\"\n    report = os.path.join(build, 'mhgp11_issue_%s_%d.xml' % (name, os.getpid()))\n    if os.path.exists(report):\n        os.remove(report)\n    done = run([ctest, '--test-dir', build, '-R', '^%s$' % re.escape(name), '--output-on-failure',\n                '--no-tests=error', '--output-junit', report], timeout=timeout, env=env)",
+    "test_unit_selection": "  foreach(unit IN LISTS MHGP11_UNITS)\n    if(unit STREQUAL \"reference\")\n      include(reference/tests.cmake)\n    elseif(EXISTS ${PROJECT_SOURCE_DIR}/tests/${unit}/tests.cmake)\n      include(tests/${unit}/tests.cmake)\n    endif()\n  endforeach()"
+  },
+  "source_base": "3b76a3fcf0ca14dd08f005e1e1ae8e3418dd247e",
+  "source_hashes": {
+    "CMakeLists.txt": "82fa1054e14a2bf16e28195cac32a4d81dec56bb81d6481d9d9214d5c87f555d",
+    "cmake/gates.cmake": "8abaa4b9a533f0988cd2a4b436665905c3ad1be92a4f33f360da2fce34c1d70a",
+    "src/catalogue/leaf_device.hpp": "d357cfd1218fcef4e5b1f0e389323ed067f73f239e9afea11b79287013f8532f",
+    "tests/catalogue/leaf_coop_test.cpp": "33aba0d70fa102bcb2c743b8e0ce921541897db0a7af50eb5040586288ecab08",
+    "tests/catalogue/tests.cmake": "6ad6eb028b9dd1ca83d401e91b7d0a569df5e09a888497e99a0f87d5ee4f1d70",
+    "tests/mutants/run_mutants.py": "866dd057ae01f9a2628565d16f91accc33ae0bba4b9deb3f2cf9fcf05ff3b038",
+    "tests/mutants/tower.json": "9d895542f66080f56b604fee420bd0b0888f0f679fc809da939a0f9e5a26de3b",
+    "tests/support/mhgp11_gate.py": "8812cb11d632534ed372a8ca7c88c7b3ad138920f1b46eeb5fd60222a2a2c4f0",
+    "tests/tower/tests.cmake": "a8092798c4e60b56b47c4e7bdeb4383b5789eb31bd990ca92aed548adea5f98f"
+  },
+  "tight_box_fixture": {
+    "cache": true,
+    "dom_row0": 2,
+    "dom_row3": 4,
+    "hi": [
+      5,
+      5,
+      5
+    ],
+    "kmax": 3,
+    "lo": [
+      2,
+      2,
+      2
+    ],
+    "mutant_observed_in_math_model": {
+      "region_line_tests_mutated": 4,
+      "region_line_tests_reference": 3
+    },
+    "points": [
+      [
+        0,
+        3,
+        0
+      ],
+      [
+        1,
+        3,
+        0
+      ],
+      [
+        3,
+        1,
+        4
+      ],
+      [
+        3,
+        0,
+        6
+      ],
+      [
+        5,
+        6,
+        6
+      ]
+    ],
+    "scope": "Python exact/model review by audit_math, no native execution"
+  }
+}

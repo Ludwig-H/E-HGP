@@ -10,6 +10,55 @@ source et leur domaine propres dans les reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
+## Premier noyau coopératif : corrections avant G4
+
+WIP `v11-impl-l3` relu le 6 octobre vers **08:30 UTC**, base **3b76a3fcf**,
+octets épinglés dans le [reçu de suivi](../receipts/audit_coop_wip_followup_20261006/README.md).
+Deux patches proposés, applicabilité vérifiée sans modifier le développeur.
+
+**Synchronisation CUDA.** `coop_count` lit `s.unresolved` sans atomique
+avant la boucle où d'autres lanes peuvent faire `atomicExch`. La barrière
+précédente ne sépare pas ces lectures des écritures qui suivent. Prendre
+un booléen privé du garde, puis faire `__syncwarp()` avant d'entrer dans la
+boucle. Le modèle expose l'entrelacement permis et sa suppression ; aucun
+diagnostic CUDA, crash ou faux FULL n'est prétendu. La lecture finale après
+la barrière et le refus global du lot au fill restent ordonnés.
+[Patch du garde](../receipts/audit_coop_wip_followup_20261006/fix_cuda_guard.patch).
+
+**Les six nouveaux mutants ne peuvent pas encore être jugés.** Ils ciblent
+`mhgp11_catalogue_leaf_coop`, alors que CMake n'enregistre que ses groupes
+suffixés. De plus, leur manifeste construit uniquement l'unité `tower` :
+la bibliothèque `catalogue` est une dépendance, mais ses tests ne sont pas
+enregistrés. Le patch ajoute `construction: ["tower", "catalogue"]` et
+affecte chaque mutant à son groupe exact.
+
+**Deux attentes des petites portes sont à réparer en même temps.** Les
+boîtes actuelles contiennent tous leurs sites : leurs dominances sont donc
+toutes nulles et le mutant qui supprime `dom[i]` n'y change rien. Une
+fixture exacte de cinq sites, boîte `[2,5)^3`, donne un différentiel J2
+**3→4** pour ce mutant ; elle est ajoutée au groupe `sizes` proposé.
+Par ailleurs, les trois fixtures `near_max` ne peuvent pas refuser en u18.
+Conserver les comparaisons, vérifier zéro refus en u18 et demander des
+émissions avant refus en u21/u24 ; le mutant de publication utilise
+explicitement u21. [Patch des portes et du témoin](../receipts/audit_coop_wip_followup_20261006/gates/suggested_targets.patch),
+[preuves exactes](../receipts/audit_coop_wip_followup_20261006/mathematics/REPORT.md).
+
+**Conseils précédents intégrés.** La préparation séquentielle calcule de
+nouveau chaque paire i<j une seule fois ; l'alerte de comparaison à une
+référence ralentie est close sur cette source. Le mutant des candidats
+remplace désormais le suffixe par zéro. Les paires compactées en u16,
+préfixes u32 et masques par site donnent un layout conditionnel de 8 040
+octets, sous le `static_assert` ajouté ; le `sizeof` natif reste à relever.
+Les suffixes, le scan et l'abandon des comptes non résolus sont favorables
+en lecture. Les voies CUDA sont effectivement raccordées.
+
+Le nouveau `coop_g4_gate.py` prépare 16 comparaisons CPU/GPU/coop/hôte et
+six passages memcheck/racecheck/synccheck sur deux synthétiques u21, dont
+des feuilles non résolues et les deux chemins d'écriture. Aucun résultat
+G4 n'est acquis par cette relecture ; LiDAR/u24 et mesure FULL gardent
+leur périmètre distinct. Les corrections ci-dessus suffisent à préparer
+la campagne ciblée, sans relancer les modules inchangés.
+
 ## Feuille cooperative : qualification ciblee sur G4
 
 La décision utilisateur rapportée dans la section O du développeur fait
@@ -62,7 +111,7 @@ du lot concurrent appareil. Leur passage dans l'émulation séquentielle
 n'est ni surprenant ni une validation de concurrence ; un mutant non
 détecté ne devient pas une preuve acquise.
 
-**Correction concrète du mutant WIP `coop_candidats_restants`.** Ajouter
+**Correction initiale intégrée dans le WIP suivant.** Ajouter
 `1<<pair.j` à `pair.remaining` ne change rien : à q2, l'intersection avec
 `live[1][pair.j]` élimine toujours j, absent de son propre voisinage.
 Ce mutant est équivalent ; ne pas interpréter sa survie comme un défaut du
@@ -70,14 +119,16 @@ juge. Remplacer par `pair.remaining = 0` dans l'appel muté, qui supprime
 réellement les descendants, et l'exercer sur le témoin q3 obtus/q4 valide.
 L'empreinte du WIP relu et le
 [remplacement causal avec sa fixture](../receipts/audit_leaf_cooperative_20261006/README.md)
-sont conservés dans le reçu de cette réponse.
+sont conservés dans le reçu de cette réponse. La source relue à 08:30
+utilise maintenant le suffixe nul proposé ; restent les cibles de portes
+et les fixtures corrigées en tête de note.
 
 **Mesure utile :** garder la référence **830473218** et mesurer préparation,
-count, fill, domaine et FULL. Le WIP hôte relu remplace aussi la préparation
+count, fill, domaine et FULL. Le premier WIP hôte remplaçait aussi la préparation
 séquentielle i<j par les lignes complètes : deux calculs physiques par paire,
 malgré le compteur logique `m(m−1)/2` inchangé. Conserver une référence non
-ralentie par ce refactoring, ou maintenir l'ancienne préparation sur la voie
-séquentielle. Publier le layout partagé réel, les registres et le trafic de
+ralentie par ce refactoring : **la préparation i<j a depuis été rétablie**
+dans le WIP relu à 08:30. Publier le layout partagé réel, les registres et le trafic de
 mémoire locale du noyau ; un compte logique identique ne prouve aucun gain.
 
 ## Proposition facultative archivée : répartition des feuilles du fill

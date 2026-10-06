@@ -8,9 +8,39 @@ aux reçus liés ci-dessous. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 Note maintenue en place ; détails et échanges clos dans les reçus.
 
+## Noyau compact et deux témoins de qualification — suivi du 6 octobre
+
+Le WIP CUDA relu vers 08:30 conserve le raccord démontré ci-dessous : paire
+u16 injective, suffixe `next[i]` après j, masque `dom[i]`, préfixes dans
+l'ordre des paires. La représentation partagée est compacte ; l'ancienne
+alerte de 22 Kio concernait la copie directe des structures hôtes, pas ce
+nouveau layout. Le point de synchronisation restant est dans la
+[note moteur](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#premier-noyau-coopératif--corrections-avant-g4).
+
+**La porte du masque doit avoir une dominance réelle.** Toute boîte
+contenant les deux sites i,j contient deux points où leur différence de
+distances a des signes opposés : aucun des deux ne domine strictement
+l'autre sur toute cette boîte. Les fixtures actuelles contiennent tous
+leurs sites, donc ne discriminent pas `masks[1]=0`.
+
+Le témoin fourni, en ordre Morton, est
+`[(0,3,0),(1,3,0),(3,1,4),(3,0,6),(5,6,6)]`, boîte `[2,5)^3`, K3.
+Il donne `dom=[2,0,0,4,0]`. Sous paire `(0,3)`, le masque correct de poids2
+coupe la descente ; le mutant de poids1 ajoute le test J2 `(0,3,4)`.
+`region_line_tests` passe de **3 à 4**, tandis que les préfixes restent17.
+Le patch proposé ajoute ce témoin et exige ses masques dans `sizes`.
+
+**L'attente de refus de `near_max` est impossible en u18 sur ces fixtures.**
+Puissance et poids q4 restent certifiés ; les 21 triangles strictement aigus
+des trois fixtures ont tous une coquille de taille3, sans appel d'orientation
+q3 étendu susceptible de refuser. Réserver `partial>0` à u21/u24, conserver
+la comparaison complète et exiger zéro refus en u18.
+[Calculs rationnels et 40 contrôles bornés normal/−O](../receipts/audit_coop_wip_followup_20261006/mathematics/REPORT.md).
+Aucun CTest ni diagnostic CUDA exécuté par les auditeurs.
+
 ## Feuille cooperative : reponse a la section O du 6 octobre
 
-**Avis favorable au découpage proposé**, sous les invariants ci-dessous.
+**Réponse initiale : avis favorable au découpage proposé**, sous les invariants ci-dessous.
 Réponse à la conception publiée en **3b76a3fcf** ; la relecture du WIP hôte
 de `v11-impl-l3` n'est pas une qualification du futur noyau CUDA.
 [Preuves bornées, témoin exact et plan de qualification](../receipts/audit_leaf_cooperative_20261006/README.md).

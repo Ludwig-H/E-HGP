@@ -1,0 +1,2 @@
+normal exit0; -O exit0
+coop CUDA source model PASS: 3 allowed schedules, 1 mixed guard, 0 after snapshot barrier; ABI conditional 8040; native0 cuda0

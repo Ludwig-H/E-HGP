@@ -1,0 +1,1215 @@
+{
+  "module": "tower",
+  "plancher": 149,
+  "mutants": [
+    {
+      "id": "population_memo_owner_omis",
+      "fichier": "src/tower/descent_memo.cpp",
+      "cherche": "    if (memo != nullptr && !memo->belongs_to(domain)) return fail(Reason::parameter_out_of_range);",
+      "remplace": "    if (false && memo != nullptr && !memo->belongs_to(domain)) return fail(Reason::parameter_out_of_range);",
+      "porte": "mhgp11_tower_population_contract_contexts",
+      "note": "Un hit de population doit refuser un memo etranger, meme a capacite zero."
+    },
+    {
+      "id": "population_workspace_owner_omis",
+      "fichier": "src/tower/descent_memo.cpp",
+      "cherche": "    if (scratch != nullptr && !scratch->belongs_to(domain.index())) return fail(Reason::parameter_out_of_range);\n    // Sans memo",
+      "remplace": "    if (false && scratch != nullptr && !scratch->belongs_to(domain.index())) return fail(Reason::parameter_out_of_range);\n    // Sans memo",
+      "porte": "mhgp11_tower_population_contract_contexts",
+      "note": "Avec memo, le hit direct ne doit pas contourner le refus du workspace etranger."
+    },
+    {
+      "id": "population_each_step_owner_omis",
+      "fichier": "src/tower/population_lookup.cpp",
+      "cherche": "  if (scratch != nullptr && !scratch->belongs_to(domain_->index())) return fail(Reason::parameter_out_of_range);",
+      "remplace": "  if (false && scratch != nullptr && !scratch->belongs_to(domain_->index())) return fail(Reason::parameter_out_of_range);",
+      "porte": "mhgp11_tower_population_contract_each_step",
+      "note": "L'appel direct descend_each_step doit valider le workspace avant son premier hit."
+    },
+    {
+      "id": "vertical_owned_active_ordinal",
+      "fichier": "src/tower/census_slots.hpp",
+      "cherche": "  return std::min<u64>(tasks, u64{workers} - workspaces);",
+      "remplace": "  const u64 concurrent = std::min<u64>(workers, tasks);\n  return concurrent - std::min<u64>(concurrent, workspaces);",
+      "porte": "mhgp11_tower_population_contract_owned_admission",
+      "note": "W48, S4 et les deux IDs actifs30/31 exigent deux census possedes, pas zero."
+    },
+    {
+      "id": "q3_non_strict_admis",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "if (kind == num::TriangleKind::non_strict) return {};",
+      "remplace": "if (false && kind == num::TriangleKind::non_strict) return {};",
+      "porte": "mhgp11_tower_unit_local_support",
+      "note": "Le premier minimiseur geometrique negatif ne certifie pas le support strict local."
+    },
+    {
+      "id": "ordre_supports_inverse",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "for (u32 i = start; i + (q - depth) <= part.size; ++i) {",
+      "remplace": "for (u32 i = part.size - (q - depth) + 1; i-- > start;) {",
+      "porte": "mhgp11_tower_fraction",
+      "note": "Le premier certificat strict doit garder le support canonique arite/lex, meme quand plusieurs supports portent la meme MEB."
+    },
+    {
+      "id": "dernier_site_non_inclus",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "for (u32 i = 0; i < part.size; ++i) {\n      ++ledger.point_tests;",
+      "remplace": "for (u32 i = 0; i + 1 < part.size; ++i) {\n      ++ledger.point_tests;",
+      "porte": "mhgp11_tower_fraction",
+      "note": "Toute la partie, notamment le dernier site, doit etre contenue."
+    },
+    {
+      "id": "q4_prefixe_obtus_coupe",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "Outcome consider_q4(const std::array<u32, 4>& tuple) noexcept {",
+      "remplace": "Outcome consider_q4(const std::array<u32, 4>& tuple) noexcept {\n    if (!num::strictly_acute(part.points[tuple[0]], part.points[tuple[1]], part.points[tuple[2]])) return {};",
+      "porte": "mhgp11_tower_fraction",
+      "note": "Une face obtuse ne permet pas de supprimer son extension q4 strictement positive."
+    },
+    {
+      "id": "census_sur_point_ancre",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "census(index, meb.value().sphere(), threshold, budget)",
+      "remplace": "census(index, num::Sphere::point(meb.value().sphere().anchor()), threshold, budget)",
+      "porte": "mhgp11_tower_fraction",
+      "note": "Le census global doit interroger la MEB retenue, pas sa seule ancre."
+    },
+    {
+      "id": "support_positions_locales",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "support[i] = part.ids[tuple[i]];",
+      "remplace": "support[i] = SiteIdx{tuple[i]};",
+      "porte": "mhgp11_tower_fraction",
+      "note": "Les positions dans la partie ne sont pas des SiteIdx du Cloud global."
+    },
+    {
+      "id": "doublon_partie_admis",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "if (i != 0 && part.ids[i] == part.ids[i - 1])",
+      "remplace": "if (false && i != 0 && part.ids[i] == part.ids[i - 1])",
+      "porte": "mhgp11_tower_unit_refusals",
+      "note": "La partie est un ensemble de SiteIdx distincts, meme si la geometrie seule ne change pas."
+    },
+    {
+      "id": "cardinal_douze_refuse",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "input.size() > kMaxMebSites",
+      "remplace": "input.size() >= kMaxMebSites",
+      "porte": "mhgp11_tower_fraction",
+      "note": "La borne publique de douze sites est inclusive ; le premier arret ne change pas ce domaine."
+    },
+    {
+      "id": "priorite_seuil_perdue",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "if (threshold == 0) return fail(Reason::parameter_out_of_range);",
+      "remplace": "if (threshold == 0 && !part.empty()) return fail(Reason::parameter_out_of_range);",
+      "porte": "mhgp11_tower_unit_refusals",
+      "note": "Le seuil nul precede le refus de partie vide dans le wrapper."
+    },
+    {
+      "id": "multiplicites_refusees",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "auto prepared = prepare(cloud, part);",
+      "remplace": "if (cloud.weight() != cloud.sites()) return fail(Reason::multiplicity_unsupported);\n  auto prepared = prepare(cloud, part);",
+      "porte": "mhgp11_tower_unit_ownership",
+      "note": "Cette primitive compte la geometrie des sites et accepte leurs poids, sans qualifier FULL pondere."
+    },
+    {
+      "id": "domain_hash_decide",
+      "fichier": "src/tower/full_domain.cpp",
+      "cherche": "if (catalogue_.balls_data()[idx(ball)].support == key) return ball;",
+      "remplace": "if (idx(ball) != kNone) return ball;",
+      "porte": "mhgp11_tower_domain_lookup",
+      "note": "Les paires (1,2) et (2,4) ont la meme case initiale1 modulo64 ; leur support exact decide."
+    },
+    {
+      "id": "domain_padding_omis",
+      "fichier": "src/tower/full_domain.cpp",
+      "cherche": "if (catalogue_.balls_data()[idx(ball)].support == key) return ball;",
+      "remplace": "if (std::equal(key.begin(), key.begin() + 3, catalogue_.balls_data()[idx(ball)].support.begin())) return ball;",
+      "porte": "mhgp11_tower_domain_lookup",
+      "note": "(1,2,None,253) partage la case initiale du vrai support mais doit manquer ; les quatre champs comptent."
+    },
+    {
+      "id": "domain_collision_arrete",
+      "fichier": "src/tower/full_domain.cpp",
+      "cherche": "if (catalogue_.balls_data()[idx(ball)].support == key) return ball;\n    position = (position + 1) & mask;",
+      "remplace": "if (catalogue_.balls_data()[idx(ball)].support == key) return ball;\n    return std::nullopt;",
+      "porte": "mhgp11_tower_domain_lookup",
+      "note": "Une collision avec une autre cle ne termine pas la recherche du support qui suit."
+    },
+    {
+      "id": "domain_index_consomme_sur_refus",
+      "fichier": "src/tower/full_domain.cpp",
+      "cherche": "auto made = build_catalogue(index.cloud(), params, budget);",
+      "remplace": "GlobalIndex premature(std::move(index));\n  auto made = build_catalogue(premature.cloud(), params, budget);",
+      "porte": "mhgp11_tower_domain_refusals",
+      "note": "Un refus de parametres ou de ressources doit laisser l index et ses vues intacts."
+    },
+    {
+      "id": "domain_derniere_boule_omise",
+      "fichier": "src/tower/full_domain.cpp",
+      "cherche": "for (u32 b = 0; b < catalogue.balls(); ++b)\n      MHGP11_TRY(insert(catalogue, slots, make_id<BallIdx>(b)));\n  }\n  return FullDomain",
+      "remplace": "for (u32 b = 0; b + 1 < catalogue.balls(); ++b)\n      MHGP11_TRY(insert(catalogue, slots, make_id<BallIdx>(b)));\n  }\n  return FullDomain",
+      "porte": "mhgp11_tower_domain_lookup",
+      "note": "Tous les supports du catalogue, y compris sa derniere boule, doivent etre localisables."
+    },
+    {
+      "id": "cells_contact_admis",
+      "fichier": "src/tower/cells.cpp",
+      "cherche": "return side < 0;",
+      "remplace": "return side <= 0;",
+      "porte": "mhgp11_tower_cells_extended",
+      "note": "Une trace contenant le centre a beta egale, jamais strictement inferieure."
+    },
+    {
+      "id": "cells_qmin_inclus",
+      "fichier": "src/tower/cells.cpp",
+      "cherche": "if (t < data.qmin) return true;",
+      "remplace": "if (t <= data.qmin) return true;",
+      "porte": "mhgp11_tower_cells_extended",
+      "note": "Le raccourci sans geometrie porte sur t strictement inferieur a qmin."
+    },
+    {
+      "id": "cells_interieurs_omis",
+      "fichier": "src/tower/cells.cpp",
+      "cherche": "std::merge(inner.begin(), inner.end(), shell.begin(), shell.end(), trace.sites.begin(),",
+      "remplace": "std::merge(inner.end(), inner.end(), shell.begin(), shell.end(), trace.sites.begin(),",
+      "porte": "mhgp11_tower_cells_regular",
+      "note": "Chaque representant doit conserver les p interieurs avec tous ses sites triables."
+    },
+    {
+      "id": "cells_padding_perdu",
+      "fichier": "src/tower/cells.cpp",
+      "cherche": "trace.sites.fill(SiteIdx{kNone});",
+      "remplace": "trace.sites.fill(SiteIdx{0});",
+      "porte": "mhgp11_tower_cells_regular",
+      "note": "Les positions au-dela de order doivent porter la sentinelle."
+    },
+    {
+      "id": "cells_ordre_faces_inverse",
+      "fichier": "src/tower/cells.cpp",
+      "cherche": "const u32 omitted = data.m - 1 - r;",
+      "remplace": "const u32 omitted = r;",
+      "porte": "mhgp11_tower_cells_regular",
+      "note": "Les omissions decroissantes donnent les traces regulieres en ordre lexicographique."
+    },
+    {
+      "id": "cells_premiere_trace_seule",
+      "fichier": "src/tower/cells.cpp",
+      "cherche": "} while (next_tuple(tuple, data.m, t));",
+      "remplace": "} while (count == 0 && next_tuple(tuple, data.m, t));",
+      "porte": "mhgp11_tower_cells_extended",
+      "note": "Un raffinement doit etre exhaustif : une seule trace peut perdre des morceaux locaux."
+    },
+    {
+      "id": "cells_une_passe_comptee",
+      "fichier": "src/tower/cells.cpp",
+      "cherche": "MHGP11_TRY(cell_add(ledger.trace_tests, second.trace_tests));",
+      "remplace": "MHGP11_TRY(cell_add(ledger.trace_tests, 0));",
+      "porte": "mhgp11_tower_cells_extended",
+      "note": "Le travail execute par les deux passes est cumule, sans declarer le seul compte logique."
+    },
+    {
+      "id": "cells_produit_binomial_u64",
+      "fichier": "src/tower/cells.cpp",
+      "cherche": "const u128 next = u128{result} * (m - t + i) / i;",
+      "remplace": "const u128 next = result * (m - t + i) / i;",
+      "porte": "mhgp11_tower_cells_capacity",
+      "note": "Le produit intermediaire du coefficient doit etre elargi avant la multiplication."
+    },
+    {
+      "id": "cells_deux_passes_non_comparees",
+      "fichier": "src/tower/cells.cpp",
+      "cherche": "if (counted != filled || first != second) return fail(Reason::tower_invariant);",
+      "remplace": "(void)first; (void)second;\n  if (counted != filled) return fail(Reason::tower_invariant);",
+      "porte": "mhgp11_tower_cells_capacity",
+      "note": "Les compteurs reels autant que les cardinalites doivent concorder entre les deux passes."
+    },
+    {
+      "id": "locate_saturation_apres_canonique",
+      "fichier": "src/tower/locate.cpp",
+      "cherche": "if (population.value().kind() == CensusKind::saturated)",
+      "remplace": "if (population.value().kind() == CensusKind::saturated && !population.value().shell().empty())",
+      "porte": "mhgp11_tower_locate_saturated",
+      "note": "La saturation ne fournit aucune coquille ; elle doit etre rendue avant toute canonicalisation."
+    },
+    {
+      "id": "canonical_support_paires_omis",
+      "fichier": "src/tower/canonical.cpp",
+      "cherche": "for (u8 q = 2; q <= 4; ++q)",
+      "remplace": "for (u8 q = 3; q <= 4; ++q)",
+      "porte": "mhgp11_tower_locate_global_identity",
+      "note": "Le support global peut avoir arite2 alors que le support local strict a arite3."
+    },
+    {
+      "id": "locate_absence_hors_catalogue_refusee",
+      "fichier": "src/tower/locate.cpp",
+      "cherche": "if (!found && support.value().arity > 1 &&\n      population.value().interior().size() + support.value().arity <= u64(domain.catalogue().kmax()) + 1)",
+      "remplace": "if (!found && support.value().arity > 1)",
+      "porte": "mhgp11_tower_locate_outside_catalogue",
+      "note": "Une MEB complete peut manquer hors admission CatK ; ne pas interdire cette entree de la future descente."
+    },
+    {
+      "id": "arret_combinaisons_omis",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "if (best) return {};  // Propager",
+      "remplace": "if (best && q == 1) return {};  // Propager",
+      "porte": "mhgp11_tower_fraction",
+      "note": "Apres le premier support contenant, aucun frere de combinaison ne doit etre examine ; ledger exact et canonique controles."
+    },
+    {
+      "id": "arret_arites_omis",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "q <= prepared.value().size && !search.best",
+      "remplace": "q <= prepared.value().size",
+      "porte": "mhgp11_tower_fraction",
+      "note": "Une arite ulterieure ne doit plus etre examinee apres le certificat ; les compteurs reels restent le prefixe strictement arrete."
+    },
+    {
+      "id": "descent_hit_complet_ignore",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "if (located.interior().size() >= k) {",
+      "remplace": "if (located.kind() == CensusKind::saturated && located.interior().size() >= k) {",
+      "porte": "mhgp11_tower_descent_interiors",
+      "note": "Un hit complet avec p>=k descend par les interieurs comme un census sature."
+    },
+    {
+      "id": "descent_seuil_strict",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "if (located.interior().size() >= k) {",
+      "remplace": "if (located.interior().size() > k) {",
+      "porte": "mhgp11_tower_descent_interiors",
+      "note": "Exactement k temoins interieurs suffisent ; le census sature ne fournit aucune coquille."
+    },
+    {
+      "id": "descent_contact_strict",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "strict = side < 0;",
+      "remplace": "strict = side <= 0;",
+      "porte": "mhgp11_tower_descent_traces",
+      "note": "Un contact de niveau egal ne doit jamais devenir un pas strict."
+    },
+    {
+      "id": "descent_interieurs_omis",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "std::merge(inner.begin(), inner.end(), selected.begin(), selected.end(), trace.sites.begin(),",
+      "remplace": "std::merge(inner.end(), inner.end(), selected.begin(), selected.end(), trace.sites.begin(),",
+      "porte": "mhgp11_tower_descent_outside",
+      "note": "La trace contient tous les interieurs et t sites de coquille, cardinal exactement k."
+    },
+    {
+      "id": "descent_date_initiale_perdue",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "return DescentResult(initial, current.level(), *current.seed(), ledger);",
+      "remplace": "return DescentResult(current.level(), initial, *current.seed(), ledger);",
+      "porte": "mhgp11_tower_descent_interiors",
+      "note": "Permuter date minimale et niveau terminal perd la validite de classe a beta initiale ; les deux niveaux restent calcules."
+    },
+    {
+      "id": "descent_hors_catalogue_refuse",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "return strict_trace(t);  // Fonctionne",
+      "remplace": "if (!located.ball()) return fail(Reason::tower_invariant);\n    return strict_trace(t);  // Fonctionne",
+      "porte": "mhgp11_tower_descent_outside",
+      "note": "Une MEB complete hors CatK avec p<k doit encore descendre."
+    },
+    {
+      "id": "descent_fin_anticipee",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "return strict_trace(t);  // Fonctionne",
+      "remplace": "return terminal();  // Fonctionne",
+      "porte": "mhgp11_tower_descent_traces",
+      "note": "Une trace stricte existante interdit de declarer la boule comme naissance."
+    },
+    {
+      "id": "descent_cumul_non_transactionnel",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "auto staged = sum;",
+      "remplace": "auto& staged = sum;",
+      "porte": "mhgp11_tower_descent_capacity",
+      "note": "Un debordement tardif laisse tous les compteurs du cumul initial intacts."
+    },
+    {
+      "id": "forest_centres_morton",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "if (cloud.x()[a.key] != cloud.x()[b.key]) return cloud.x()[a.key] < cloud.x()[b.key];\n    if (cloud.y()[a.key] != cloud.y()[b.key]) return cloud.y()[a.key] < cloud.y()[b.key];\n    return cloud.z()[a.key] < cloud.z()[b.key];",
+      "remplace": "return a.key < b.key;",
+      "porte": "mhgp11_tower_forest_canonical",
+      "note": "La porte K1 oppose toujours Morton/SiteIdx a XYZ lexicographique, desormais sans Sphere."
+    },
+    {
+      "id": "forest_plateau_sequentiel",
+      "fichier": "src/tower/forest_plateau.cpp",
+      "cherche": "active = true; MHGP11_TRY(cell(BallIdx{b}));",
+      "remplace": "active = true; MHGP11_TRY(cell(BallIdx{b})); MHGP11_TRY(close(level));",
+      "porte": "mhgp11_tower_forest_plateau",
+      "note": "Fermer apres chaque cellule cree des fusions intermediaires au meme niveau au lieu du plateau atomique."
+    },
+    {
+      "id": "forest_chaine_perdue",
+      "fichier": "src/tower/forest_plateau.cpp",
+      "cherche": "states[states[a].tail].next = states[b].head;",
+      "remplace": "states[states[a].tail].next = kNone;",
+      "porte": "mhgp11_tower_forest_plateau",
+      "note": "Chaque ancienne composante distincte doit rester presente dans les enfants de la multifusion."
+    },
+    {
+      "id": "forest_verticale_ouverte",
+      "fichier": "src/tower/forest_vertical.cpp",
+      "cherche": "if (idx(nodes_[idx(parent)].rank) > idx(level)) return start;",
+      "remplace": "if (idx(nodes_[idx(parent)].rank) >= idx(level)) return start;",
+      "porte": "mhgp11_tower_forest_verticals",
+      "note": "La verticale au niveau de naissance inclut la fusion inferieure qui se produit exactement au meme niveau."
+    },
+    {
+      "id": "forest_verticale_sans_remontee",
+      "fichier": "src/tower/forest_vertical.cpp",
+      "cherche": "return sweep.query(seed.value(), upper.ledger_);",
+      "remplace": "return seed.value();",
+      "porte": "mhgp11_tower_forest_verticals",
+      "note": "Le terminal de descente n est pas necessairement vivant a la date de naissance."
+    },
+    {
+      "id": "forest_verticale_premier_enfant",
+      "fichier": "src/tower/forest_vertical.cpp",
+      "cherche": "for (NodeIdx child : upper.children(NodeIdx{i})) {",
+      "remplace": "for (NodeIdx child : upper.children(NodeIdx{i})) {\n          if (common) break;",
+      "porte": "mhgp11_tower_forest_verticals",
+      "note": "Chaque enfant doit etre releve et controle ; le compteur des verifications rend ce travail observable."
+    },
+    {
+      "id": "forest_singleton_refuse",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "if (births == 0) return fail(Reason::tower_invariant);",
+      "remplace": "if (births <= 1) return fail(Reason::tower_invariant);",
+      "porte": "mhgp11_tower_forest_canonical",
+      "note": "Une foret a une seule naissance est valide, sans enfant ni fusion."
+    },
+    {
+      "id": "forest_k_superieur_n",
+      "fichier": "src/tower/forest_vertical.cpp",
+      "cherche": "if (kmax == 0 || kmax > domain.index().cloud().sites())",
+      "remplace": "if (kmax == 0)",
+      "porte": "mhgp11_tower_forest_refusals",
+      "note": "K>n doit etre refuse en parametre avant toute allocation et avant transfert du domaine."
+    },
+    {
+      "id": "forest_lookup_inverse",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "return a.key < c.key;",
+      "remplace": "return a.key > c.key;",
+      "porte": "mhgp11_tower_forest_canonical",
+      "note": "Le lookup binaire est trie par identifiant de naissance, distinct de son ordre canonique."
+    },
+    {
+      "id": "forest_ancetre_futur",
+      "fichier": "src/tower/forest_vertical.cpp",
+      "cherche": "if (idx(nodes_[idx(parent)].rank) > idx(level)) return start;",
+      "remplace": "if (idx(nodes_[idx(parent)].rank) > idx(level)) return parent;",
+      "porte": "mhgp11_tower_forest_verticals",
+      "note": "Une composante encore future ne doit pas etre rendue par la recherche a coupe fermee."
+    },
+    {
+      "id": "domain_parallel_timings_prematures",
+      "fichier": "src/tower/full_domain.cpp",
+      "cherche": "auto made = build_catalogue(index.cloud(), params, budget, pool, timings == nullptr ? nullptr : &draft);\n  if (!made.ok()) return made.outcome();",
+      "remplace": "auto made = build_catalogue(index.cloud(), params, budget, pool, timings == nullptr ? nullptr : &draft);\n  if (!made.ok()) return made.outcome();\n  if (timings != nullptr) *timings = draft;",
+      "porte": "mhgp11_tower_domain_parallel_lookup_refusal",
+      "note": "Le refus du lookup final doit laisser les diagnostics de l appelant intacts meme apres succes du catalogue."
+    },
+    {
+      "id": "classification_contact_strict",
+      "fichier": "src/tower/cells_classify.cpp",
+      "cherche": "if (side < 0) return CellClassification(CellKind::strict_traces, ledger);",
+      "remplace": "if (side <= 0) return CellClassification(CellKind::strict_traces, ledger);",
+      "porte": "mhgp11_tower_classification_prefix",
+      "note": "Le contact exact ne constitue pas une trace stricte."
+    },
+    {
+      "id": "classification_arret_trop_tot",
+      "fichier": "src/tower/cells_classify.cpp",
+      "cherche": "return true;",
+      "remplace": "return false;",
+      "porte": "mhgp11_tower_classification_prefix",
+      "note": "Le premier temoin strict de la fixture qmin globale est le troisieme, pas le premier sous-ensemble."
+    },
+    {
+      "id": "classification_coquille_naissance",
+      "fichier": "src/tower/cells_classify.cpp",
+      "cherche": "if (t == data.m) return CellClassification(CellKind::birth, ledger);",
+      "remplace": "if (t == data.m) return CellClassification(CellKind::strict_traces, ledger);",
+      "porte": "mhgp11_tower_classification_analytic",
+      "note": "La coquille complete porte le centre ; t=m est une naissance analytique."
+    },
+    {
+      "id": "classification_absence_temoin",
+      "fichier": "src/tower/cells_classify.cpp",
+      "cherche": "} while (advance(tuple, data.m, t));\n    return CellClassification(CellKind::birth, ledger);",
+      "remplace": "} while (advance(tuple, data.m, t));\n    return CellClassification(CellKind::strict_traces, ledger);",
+      "porte": "mhgp11_tower_classification_prefix",
+      "note": "Apres absence exhaustive de sous-ensemble strict, le verdict est naissance."
+    },
+    {
+      "id": "sweep_coupe_ouverte",
+      "fichier": "src/tower/forest_ancestor_sweep.hpp",
+      "cherche": "idx(nodes[next_].rank) <= idx(level)",
+      "remplace": "idx(nodes[next_].rank) < idx(level)",
+      "porte": "mhgp11_tower_forest_verticals",
+      "note": "Activer les fusions au niveau exact avant toutes les requetes verticales."
+    },
+    {
+      "id": "sweep_representant_comme_top",
+      "fichier": "src/tower/forest_ancestor_sweep.hpp",
+      "cherche": "return NodeIdx{top_[root.value()]};",
+      "remplace": "return NodeIdx{root.value()};",
+      "porte": "mhgp11_tower_forest_sweep_reference",
+      "note": "Le representant de taille ne donne pas le sommet geometrique de la composante."
+    },
+    {
+      "id": "sweep_union_sans_taille",
+      "fichier": "src/tower/forest_ancestor_sweep.hpp",
+      "cherche": "if (size_[a] < size_[b]) std::swap(a, b);",
+      "remplace": "",
+      "porte": "mhgp11_tower_forest_sweep_depth_and_memory",
+      "note": "La ligne exponentielle forme une chaine de quinze fusions ; sans union ponderee la requete depasse dix pas."
+    },
+    {
+      "id": "sweep_une_activation_seule",
+      "fichier": "src/tower/forest_ancestor_sweep.hpp",
+      "cherche": "while (next_ < nodes.size() && idx(nodes[next_].rank) <= idx(level)) {",
+      "remplace": "if (next_ < nodes.size() && idx(nodes[next_].rank) <= idx(level)) {",
+      "porte": "mhgp11_tower_forest_sweep_depth_and_memory",
+      "note": "Un saut jusqu au niveau final doit activer les quinze fusions, pas la premiere seulement."
+    },
+    {
+      "id": "full_timings_prematures",
+      "fichier": "src/tower/forest_vertical.cpp",
+      "cherche": "FullTimings draft;",
+      "remplace": "FullTimings draft;\n  if (timings != nullptr) *timings = draft;",
+      "porte": "mhgp11_tower_forest_sweep_timings",
+      "note": "Le budget nul refuse la construction sans modifier les diagnostics fournis par appelant."
+    },
+    {
+      "id": "sweep_naissances_avant_toutes_fusions",
+      "fichier": "src/tower/forest_vertical.cpp",
+      "cherche": "const bool take_birth = birth_cursor < upper.births_ && (merge == upper.count_ ||\n          idx(upper.nodes_[birth_cursor].rank) <= idx(upper.nodes_[merge].rank));",
+      "remplace": "const bool take_birth = birth_cursor < upper.births_;",
+      "porte": "mhgp11_tower_forest_fraction",
+      "note": "Les deux suites triees se fusionnent par niveau ; toutes les naissances avant les fusions peuvent faire reculer le balayage."
+    },
+    {
+      "id": "order_timings_prematures",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "MHGP11_TRY(births());",
+      "remplace": "MHGP11_TRY(births());\n  if (timings != nullptr) *timings = draft;",
+      "porte": "mhgp11_tower_forest_fault_direct_timings",
+      "note": "Un appel direct build_forest refuse tardivement apres les naissances sans publier son brouillon OrderTimings."
+    },
+    {
+      "id": "diametre_dernier_ex_aequo",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "if (distance > longest)",
+      "remplace": "if (distance >= longest)",
+      "porte": "mhgp11_tower_diameter_canonical_pairs",
+      "note": "Carre/cube : changer le support ex aequo viole la canonicite locale."
+    },
+    {
+      "id": "diametre_premiere_paire",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "if (distance > longest)",
+      "remplace": "if (distance > longest && ledger.diameter_pairs == 1)",
+      "porte": "mhgp11_tower_diameter_canonical_pairs",
+      "note": "La premiere paire du carre/cube/ligne ne porte pas toujours la MEB ; la distance maximale doit etre cherchee."
+    },
+    {
+      "id": "diametre_dernier_partenaire_omis",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "for (u32 j = i + 1; j < part.size; ++j)",
+      "remplace": "for (u32 j = i + 1; j + 1 < part.size; ++j)",
+      "porte": "mhgp11_tower_diameter_canonical_pairs",
+      "note": "La paire unique et la ligne exigent le dernier site, sans predicat hors domaine."
+    },
+    {
+      "id": "diametre_inclusion_omise",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "if (side.value() > 0) return false;",
+      "remplace": "if (side.value() > 0 && sphere.presentation_arity() != 2) return false;",
+      "porte": "mhgp11_tower_diameter_fallback",
+      "note": "Triangle aigu et tetra : la boule de la paire maximale ne contient pas toujours F."
+    },
+    {
+      "id": "diametre_distances_non_comptees",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "++ledger.diameter_pairs;",
+      "remplace": "(void)ledger.diameter_pairs;",
+      "porte": "mhgp11_tower_diameter_canonical_pairs",
+      "note": "Les puissances q1 auxiliaires sont du vrai travail, distinct des presentations."
+    },
+    {
+      "id": "diametre_cumul_descente_omis",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "MHGP11_TRY(cell_add(sum.diameter_pairs, one.diameter_pairs));",
+      "remplace": "(void)one.diameter_pairs;",
+      "porte": "mhgp11_tower_descent_capacity",
+      "note": "Le septieme compteur doit etre cumule avec refus du debordement, comme les autres membres MEB."
+    },
+    {
+      "id": "memo_hash_decide",
+      "fichier": "src/tower/descent_memo.cpp",
+      "cherche": "if (slot.cardinal == key.arity && slot.ids == key.sites) return &slot;",
+      "remplace": "if (slot.cardinal != 0) return &slot;",
+      "porte": "mhgp11_tower_memo_collisions_refusals",
+      "note": "Capacite1 force les collisions de parties differentes ; hash seul ne prouve aucune identite."
+    },
+    {
+      "id": "memo_premier_id_seulement",
+      "fichier": "src/tower/descent_memo.cpp",
+      "cherche": "slot.ids == key.sites",
+      "remplace": "slot.ids[0] == key.sites[0]",
+      "porte": "mhgp11_tower_memo_collisions_refusals",
+      "note": "Les paires (0,1) et (0,3) ont meme cardinal et premiere ID mais dates distinctes."
+    },
+    {
+      "id": "memo_date_initiale_perdue",
+      "fichier": "src/tower/descent_memo.cpp",
+      "cherche": "slot = Slot{key.sites, initial, terminal,",
+      "remplace": "slot = Slot{key.sites, terminal, terminal,",
+      "porte": "mhgp11_tower_memo_dates",
+      "note": "La date9 du tuple extreme ne devient pas le niveau1 de son terminal."
+    },
+    {
+      "id": "memo_niveau_terminal_perdu",
+      "fichier": "src/tower/descent_memo.cpp",
+      "cherche": "slot = Slot{key.sites, initial, terminal,",
+      "remplace": "slot = Slot{key.sites, initial, initial,",
+      "porte": "mhgp11_tower_memo_dates",
+      "note": "Le niveau terminal reste distinct de la date initiale et possede sa representation propre."
+    },
+    {
+      "id": "memo_hit_travail_fictif",
+      "fichier": "src/tower/descent_memo.cpp",
+      "cherche": "if (!initial) return DescentResult(saved->initial, saved->terminal, seed, work);",
+      "remplace": "if (!initial) { work.steps = 1; return DescentResult(saved->initial, saved->terminal, seed, work); }",
+      "porte": "mhgp11_tower_memo_dates",
+      "note": "Un hit initial ne refait aucune MEB, aucun census et aucun pas."
+    },
+    {
+      "id": "memo_evince_avant_succes",
+      "fichier": "src/tower/descent_memo.cpp",
+      "cherche": "auto step = descent_step(domain, current.part(), k, budget, scratch);",
+      "remplace": "slots_[bucket(origin)].cardinal = 0;\n    auto step = descent_step(domain, current.part(), k, budget, scratch);",
+      "porte": "mhgp11_tower_memo_collisions_refusals",
+      "note": "Un refus du census ne doit pas perdre une entree valide deja retenue."
+    },
+    {
+      "id": "memo_domaine_etranger_cap0",
+      "fichier": "src/tower/descent_memo.cpp",
+      "cherche": "if (!belongs_to(domain)) return fail(Reason::parameter_out_of_range);",
+      "remplace": "if (!slots_.empty() && !belongs_to(domain)) return fail(Reason::parameter_out_of_range);",
+      "porte": "mhgp11_tower_memo_collisions_refusals",
+      "note": "Le cache de capacite0 reste lie au domaine fourni a sa factory."
+    },
+    {
+      "id": "memo_cumul_queries_omis",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "MHGP11_TRY(cell_add(sum.memo.queries, one.memo.queries));",
+      "remplace": "(void)one.memo.queries;",
+      "porte": "mhgp11_tower_memo_capacity",
+      "note": "Tout compteur de cache est cumule avec detection transactionnelle du debordement."
+    },
+    {
+      "id": "regular_derniere_face_omise",
+      "fichier": "src/tower/forest_parallel.cpp",
+      "cherche": "for (u32 trace = 0; trace < data.qmin; ++trace)",
+      "remplace": "for (u32 trace = 0; trace + 1 < data.qmin; ++trace)",
+      "porte": "mhgp11_tower_forest_parallel_plateaus",
+      "note": "La derniere graine reste kNone : refus explicite avant indexation, et le temoin line024 exige le succes de la multifusion."
+    },
+    {
+      "id": "regular_fermeture_par_lot",
+      "fichier": "src/tower/forest_parallel.cpp",
+      "cherche": "  next_lane_ = (next_lane_ + count_) % lanes_;",
+      "remplace": "  if (active) { MHGP11_TRY(builder.close(*active)); active.reset(); }\n  next_lane_ = (next_lane_ + count_) % lanes_;",
+      "porte": "mhgp11_tower_forest_parallel_plateaus",
+      "note": "Q1 coupe deux cellules au meme rang ; fermer chacune fabrique une fusion de date egale au parent et doit etre refuse."
+    },
+    {
+      "id": "regular_work_lane_omis",
+      "fichier": "src/tower/forest_parallel.cpp",
+      "cherche": "MHGP11_TRY(builder.regular_work(work_[i].work));",
+      "remplace": "(void)work_[i].work;",
+      "porte": "mhgp11_tower_forest_parallel_equivalence",
+      "note": "La geometrie peut rester correcte mais les descentes payees de chaque lane doivent etre cumulees exactement."
+    },
+    {
+      "id": "regular_racine_naissance_figee",
+      "fichier": "src/tower/forest_plateau.cpp",
+      "cherche": "const u32 root = find(idx(seed));",
+      "remplace": "const u32 root = idx(seed);",
+      "porte": "mhgp11_tower_forest_parallel_mixed_plateau",
+      "note": "Au niveau16 du plateau mixte, des extremites sont deja sous une autre racine ; touch sur la naissance gonfle le compte exact des anciennes composantes."
+    },
+    {
+      "id": "regular_etendue_ignoree",
+      "fichier": "src/tower/forest_parallel.cpp",
+      "cherche": "MHGP11_TRY(builder.cell(BallIdx{b}));  // Voie etendue complete, aucune troncation ni nouveau curseur combinatoire.",
+      "remplace": "(void)b;  // Mutation : voie etendue omise.",
+      "porte": "mhgp11_tower_forest_parallel_extended_merge",
+      "note": "Diamant K2 : la cellule m4/qmin2 doit fusionner quatre naissances de niveau1/2 au niveau1 ; son omission retire cette fusion necessaire."
+    },
+    {
+      "id": "vertical_parallel_graine_non_elevee",
+      "fichier": "src/tower/forest_vertical.cpp",
+      "cherche": "auto image = parallel == nullptr ? birth(node) : sweep.query(upper.lower_[i], work);",
+      "remplace": "auto image = parallel == nullptr ? birth(node) : Result<NodeIdx>{upper.lower_[i]};",
+      "porte": "mhgp11_tower_vertical_parallel_closed_dates",
+      "note": "La graine basse n est pas encore son image a la date haute ; ligne024 demande la fusion inferieure fermee."
+    },
+    {
+      "id": "vertical_parallel_egalite_refusee",
+      "fichier": "src/tower/forest_vertical_seed.hpp",
+      "cherche": "if (num::compare(down.value().initial_level(), level) > 0)",
+      "remplace": "if (num::compare(down.value().initial_level(), level) >= 0)",
+      "porte": "mhgp11_tower_vertical_parallel_closed_dates",
+      "note": "Le carre k4 contient une partie k3 dont beta est exactement le niveau de naissance haute ; egalite valide."
+    },
+    {
+      "id": "vertical_parallel_travail_omis",
+      "fichier": "src/tower/forest_vertical_parallel.cpp",
+      "cherche": "MHGP11_TRY(add_descent(upper.ledger_.descent, work_[slot].work));",
+      "remplace": "(void)work_[slot].work;",
+      "porte": "mhgp11_tower_vertical_parallel_equivalence",
+      "note": "Les sorties geometriques restent possibles mais le ledger doit inclure le delta des descentes de chaque lane."
+    },
+    {
+      "id": "vertical_parallel_naissance_non_comptee",
+      "fichier": "src/tower/forest_vertical_parallel.cpp",
+      "cherche": "MHGP11_TRY(cell_add(upper.ledger_.vertical_descents, misses));",
+      "remplace": "MHGP11_TRY(cell_add(upper.ledger_.vertical_descents, misses - 1));",
+      "porte": "mhgp11_tower_vertical_parallel_equivalence",
+      "note": "Une fenetre ne retire aucune naissance : exactement une resolution verticale par naissance haute."
+    },
+    {
+      "id": "forest_cohort_centres_key",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "return num::compare_centers(a.sphere, c.sphere) < 0;",
+      "remplace": "return a.key < c.key;",
+      "porte": "mhgp11_tower_birth_runs_cohorts",
+      "note": "A K2, triangle {(0,4),(4,0),(4,4)} : les deux naissances de niveau4 inversent leurs cles catalogue."
+    },
+    {
+      "id": "forest_cohort_capacity_short",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "birth_runs = k == 1 || counts.runs.largest < 2 ? 0 : counts.runs.largest;",
+      "remplace": "birth_runs = k == 1 || counts.runs.largest < 2 ? 0 : counts.runs.largest - 1;",
+      "porte": "mhgp11_tower_birth_runs_cohorts",
+      "note": "Une cohorte de deux exige deux records. Le refus tower_invariant tue le contrat de succes, sans debordement ni fausse sortie geometrique."
+    },
+    {
+      "id": "forest_cohort_nonbirth_reset",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "      out.runs.add(data.rank);\n    }\n",
+      "remplace": "      out.runs.add(data.rank);\n    } else if (out.runs.any) {\n      out.runs.tail = 0;\n    }\n",
+      "porte": "mhgp11_tower_birth_runs_cohorts",
+      "note": "La cohorte de trois naissances au meme rang reste indivise malgre une non-naissance intercalee ; sa capacite ne doit pas etre reduite a deux. Correction apres census1 : interrompre count sans reset de optional rank, pour conserver le meme defaut de cohorte sans le diagnostic GCC maybe-uninitialized. Mort native attendue, non encore acquise. Reancre le 3 octobre 2026 sur BirthRuns : une non-naissance remet la serie courante a zero."
+    },
+    {
+      "id": "census_reuse_lost_bound_workspace",
+      "fichier": "src/tower/descent_memo.cpp",
+      "cherche": "DescentMemo memo(domain, scratch);",
+      "remplace": "DescentMemo memo(domain, nullptr);",
+      "porte": "mhgp11_tower_census_reuse_fault_allocation_free",
+      "note": "Un miss reel doit conserver le workspace lie meme lorsque toute allocation ulterieure est refusee."
+    },
+    {
+      "id": "census_reuse_fake_second_pass",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "ledger.census = *work;",
+      "remplace": "ledger.census = *work; if (work->passes == 1) ++ledger.census.passes;",
+      "porte": "mhgp11_tower_census_reuse_descents",
+      "note": "La voie empruntee compte une seule traversee effectivement payee ; pas de doublement fictif."
+    },
+    {
+      "id": "census_reuse_logical_slot_count",
+      "fichier": "src/tower/forest_parallel.hpp",
+      "cherche": "return std::min({pool->size(), p.descent_lanes, p.regular_batch_capacity});",
+      "remplace": "return p.descent_lanes;",
+      "porte": "mhgp11_tower_census_reuse_full",
+      "note": "Q1/W48/L48 exige un seul espace physique ; confondre lanes et espaces refuse le contrat de succes."
+    },
+    {
+      "id": "dense_birth_key_as_node",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "result.dense_[key] = NodeIdx{i};",
+      "remplace": "result.dense_[key] = NodeIdx{k == 1 ? key : i};",
+      "porte": "mhgp11_tower_dense_lookup_test_lookup",
+      "note": "K1 conserve indice dans les bornes mais confond cle Morton et naissance XYZ ; lookup exhaustif juge le mapping."
+    },
+    {
+      "id": "dense_absent_as_first",
+      "fichier": "src/tower/forest_vertical.cpp",
+      "cherche": "if (key >= dense_.size() || dense_[key] == NodeIdx{kNone}) return std::nullopt;",
+      "remplace": "if (key >= dense_.size()) return std::nullopt;\n    if (dense_[key] == NodeIdx{kNone}) return NodeIdx{0};",
+      "porte": "mhgp11_tower_dense_lookup_test_holes",
+      "note": "Une boule du triangle droit non naissance a K2 doit rester absente ; cle scalaire fabriquee validement."
+    },
+    {
+      "id": "dense_last_birth_missing",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "for (u32 i = 0; i < b; ++i) {\n      const u32 key = result.nodes_[i].birth_key;",
+      "remplace": "for (u32 i = 0; i + 1 < b; ++i) {\n      const u32 key = result.nodes_[i].birth_key;",
+      "porte": "mhgp11_tower_dense_lookup_test_lookup",
+      "note": "Derniere naissance laissee kNone, initialisation conservee ; absence ou refus causal sans lecture indeterminee."
+    },
+    {
+      "id": "regular_vertical_unlifted",
+      "fichier": "src/tower/forest_vertical.cpp",
+      "cherche": "return sweep.query(*cached.value(), upper.ledger_);",
+      "remplace": "return *cached.value();",
+      "porte": "mhgp11_tower_regular_vertical_reuse_closed_dates",
+      "note": "La graine stricte5/4 doit etre remontee a la fusion fermee9/2 ; refus ou mauvaise image, pas un indice hors bornes."
+    },
+    {
+      "id": "regular_vertical_wrong_component",
+      "fichier": "src/tower/regular_vertical_seeds.hpp",
+      "cherche": "seeds_[idx(ball)] = seed;",
+      "remplace": "seeds_[idx(ball)] = NodeIdx{0};",
+      "porte": "mhgp11_tower_regular_vertical_reuse_equivalence",
+      "note": "La ligne0,2,10,12,30,32 conserve un indice valide et un rang strict, mais les trois composantes a lambda1 sont distinctes."
+    },
+    {
+      "id": "regular_vertical_missing_eligible",
+      "fichier": "src/tower/regular_vertical_seeds.hpp",
+      "cherche": "seeds_[idx(ball)] = seed;",
+      "remplace": "if (false) seeds_[idx(ball)] = seed;",
+      "porte": "mhgp11_tower_regular_vertical_reuse_equivalence",
+      "note": "Une case reguliere eligible reste initialisee kNone : refus causal du contrat de succes, pas une lecture indeterminee."
+    },
+    {
+      "id": "regular_vertical_extended_as_regular",
+      "fichier": "src/tower/regular_vertical_seeds.hpp",
+      "cherche": "if (data.m != data.qmin) return std::optional<NodeIdx>{};",
+      "remplace": "(void)data.m;",
+      "porte": "mhgp11_tower_regular_vertical_reuse_extended",
+      "note": "Les naissances etendues du carre a K3/K4 doivent garder leur descente ; la garde d ordre refuse le faux reemploi."
+    },
+    {
+      "id": "forest_regular_kind_inverse",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "kinds[b] = birth ? 1 : 2;",
+      "remplace": "kinds[b] = birth ? 2 : 1;",
+      "porte": "mhgp11_tower_regular_classification_classification",
+      "note": "La classification reguliere doit conserver naissance versus faces strictes, y compris p>0."
+    },
+    {
+      "id": "forest_regular_combinations_birth",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "cell_add(out.classification.combinations, birth ? 1 : data.qmin)",
+      "remplace": "cell_add(out.classification.combinations, birth ? 2 : data.qmin)",
+      "porte": "mhgp11_tower_regular_classification_classification",
+      "note": "Une naissance reguliere contribue exactement une combinaison ; la porte compare les dix compteurs au classificateur general."
+    },
+    {
+      "id": "descent_singleton_unreported",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "work.singleton_hits = 1;",
+      "remplace": "work.singleton_hits = 0;",
+      "porte": "mhgp11_tower_descent_singleton",
+      "note": "Le terminal sans census compte une source singleton et un pas, meme en presence de memo."
+    },
+    {
+      "id": "descent_singleton_wrong_site",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "BirthSeed(meb.support()[0], std::nullopt, 1)",
+      "remplace": "BirthSeed(SiteIdx{0}, std::nullopt, 1)",
+      "porte": "mhgp11_tower_descent_singleton",
+      "note": "Le singleton terminal conserve son identite, pas seulement un indice valide."
+    },
+    {
+      "id": "descent_singleton_foreign_workspace",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "if (scratch != nullptr && !scratch->belongs_to(domain.index())) return fail(Reason::parameter_out_of_range);",
+      "remplace": "(void)scratch;",
+      "porte": "mhgp11_tower_descent_singleton_refusals",
+      "note": "Le raccourci preserve le refus d un espace appartenant a un autre domaine, avant cardinal et geometrie."
+    },
+    {
+      "id": "descent_singleton_sum_missing",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "MHGP11_TRY(cell_add(sum.singleton_hits, one.singleton_hits));",
+      "remplace": "(void)one.singleton_hits;",
+      "porte": "mhgp11_tower_descent_capacity",
+      "note": "Le compte singleton est agrege et son overflow refuse sans mutation du total."
+    },
+    {
+      "id": "meb_q4_non_strict_admis",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "if (!made.value()->q4_presentation_strictly_inside()) return {};",
+      "remplace": "if (false && !made.value()->q4_presentation_strictly_inside()) return {};",
+      "porte": "mhgp11_tower_meb_deferred_eager_parity",
+      "note": "Candidat q4 non strict admis dans MEB ; juge eager generique et sept compteurs exacts."
+    },
+    {
+      "id": "population_boule_decalee",
+      "fichier": "src/tower/population_lookup.cpp",
+      "cherche": "if (same) return BallIdx{row[0]};",
+      "remplace": "if (same) return BallIdx{row[0] == 0 ? 1u : row[0] - 1};",
+      "porte": "mhgp11_tower_population_concurrent_lemma",
+      "note": "Un succes rend une autre boule que celle dont la population est egale ; le lemme compare a la descente de reference."
+    },
+    {
+      "id": "population_site_un_fige",
+      "fichier": "src/tower/population_lookup.cpp",
+      "cherche": "if (k == 1) return std::optional{Hit{BirthSeed(sorted[0], std::nullopt, 1), &cat.levels()[0]}};",
+      "remplace": "if (k == 1) return std::optional{Hit{BirthSeed(SiteIdx{0}, std::nullopt, 1), &cat.levels()[0]}};",
+      "porte": "mhgp11_tower_population_concurrent_equivalence",
+      "note": "Raccourci k=1 : la naissance d'ordre un doit etre le site de la partie, pas un site fixe."
+    },
+    {
+      "id": "population_eligibilite_stricte",
+      "fichier": "src/tower/population_lookup.cpp",
+      "cherche": "bool eligible(const CatalogueBall& data, u64 kmax) noexcept { return u64{data.p} + data.m <= kmax; }",
+      "remplace": "bool eligible(const CatalogueBall& data, u64 kmax) noexcept { return u64{data.p} + data.m < kmax; }",
+      "porte": "mhgp11_tower_population_concurrent_lemma",
+      "note": "Les boules de population K manquent : le lemme exige un succes pour chaque boule eligible."
+    },
+    {
+      "id": "concurrent_plateaux_fusionnes",
+      "fichier": "src/tower/forest_concurrent.cpp",
+      "cherche": "if (active && *active != level) {",
+      "remplace": "if (active && idx(*active) + 1 < idx(level)) {",
+      "porte": "mhgp11_tower_population_concurrent_equivalence",
+      "note": "Deux plateaux de rangs consecutifs publies ensemble ; foret differente de la voie par lots."
+    },
+    {
+      "id": "concurrent_ordinal_ordre_decale",
+      "fichier": "src/tower/forest_parallel.cpp",
+      "cherche": "while (order + 1 < orders.size() && g >= orders[order + 1].first) ++order;  // g croissant",
+      "remplace": "while (order + 1 < orders.size() && g > orders[order + 1].first) ++order;  // g croissant",
+      "porte": "mhgp11_tower_population_concurrent_equivalence",
+      "note": "La premiere cellule d'un ordre est resolue avec l'ordre precedent : refus ou foret fausse."
+    },
+    {
+      "id": "racine_courante_non_suivie",
+      "fichier": "src/tower/forest_plateau.cpp",
+      "cherche": "  root = a;\n  return cell_add(result.ledger_.unions, 1);",
+      "remplace": "  return cell_add(result.ledger_.unions, 1);",
+      "porte": "mhgp11_tower_forest_fraction",
+      "note": "Apres une fusion ou la nouvelle graine porte la plus petite racine, first doit suivre cette racine ; sinon une troisieme graine detache une composante."
+    },
+    {
+      "id": "birth_runs_jonction_perdue",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "largest = std::max({largest, next.largest, joined ? tail + next.head : 0});",
+      "remplace": "largest = std::max({largest, next.largest, joined ? std::max(tail, next.head) : 0});",
+      "porte": "mhgp11_tower_birth_runs_composition",
+      "note": "Une serie a cheval sur deux plages doit additionner queue et tete ; sinon la capacite des cohortes est sous-estimee."
+    },
+    {
+      "id": "population_lien_noeud_fixe",
+      "fichier": "src/tower/population_lookup.cpp",
+      "cherche": "row[2] = idx(*node);",
+      "remplace": "row[2] = 0;",
+      "porte": "mhgp11_tower_population_concurrent_equivalence",
+      "note": "La voie liee doit rendre la naissance de la boule de population exacte, pas une naissance quelconque de rang valide."
+    },
+    {
+      "id": "population_lien_catalogue_non_compte",
+      "fichier": "src/tower/forest_parallel.cpp",
+      "cherche": "MHGP11_TRY(cell_add(work.catalogue_hits, 1));\n        continue;",
+      "remplace": "continue;",
+      "porte": "mhgp11_tower_population_concurrent_equivalence",
+      "note": "Un succes lie est un pas de catalogue : census+catalogue+singleton=steps doit rester vrai."
+    },
+    {
+      "id": "pipeline_naissance_sans_cloture",
+      "fichier": "src/tower/forest_internal.hpp",
+      "cherche": "if (birth_left && (done || idx(birth_rank) <= closed)) return FollowStep::birth;",
+      "remplace": "if (birth_left && (done || idx(birth_rank) <= closed + 13)) return FollowStep::birth;",
+      "porte": "mhgp11_tower_pipeline_decisions",
+      "note": "Une naissance ne precede une fusion non publiee que si son rang est <= closed (rangs modeles <= 12 : le mutant ignore closed)."
+    },
+    {
+      "id": "pipeline_bas_ouvert",
+      "fichier": "src/tower/forest_internal.hpp",
+      "cherche": "return done || idx(level) < closed; }",
+      "remplace": "return done || idx(level) <= closed; }",
+      "porte": "mhgp11_tower_pipeline_decisions",
+      "note": "Au rang closed, une fusion basse peut encore manquer : la coupe fermee l'exige."
+    },
+    {
+      "id": "pipeline_fin_prematuree",
+      "fichier": "src/tower/forest_internal.hpp",
+      "cherche": "if (!birth_left && done) return FollowStep::end;",
+      "remplace": "if (!birth_left) return FollowStep::end;",
+      "porte": "mhgp11_tower_pipeline_decisions",
+      "note": "Sans naissance restante, des fusions peuvent encore etre publiees : finir seulement apres done."
+    },
+    {
+      "id": "export_points_trois_mots",
+      "fichier": "bench/points_export.cpp",
+      "cherche": "for (u64 j = kLevelWords; j < wide.words.size(); ++j)",
+      "remplace": "for (u64 j = 3; j < wide.words.size(); ++j)",
+      "porte": "mhgp11_tower_points_export_width",
+      "options": [
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "note": "Audit P2 : en u24, le tetraedre regulier a un niveau non reduit de 196 bits ; trois mots le refusent."
+    },
+    {
+      "id": "pipeline_abandon_apres_reveil",
+      "fichier": "src/tower/forest_internal.hpp",
+      "cherche": "  return !low.abandoned;\n}",
+      "remplace": "  return true;\n}",
+      "porte": "mhgp11_tower_pipeline_abandon",
+      "note": "Audit P1 : un abandon publie closed = kNone et rend le predicat de pret vrai ; la garde doit suivre la boucle d'attente."
+    },
+    {
+      "id": "pipeline_controles_verticaux_omis",
+      "fichier": "src/tower/forest_vertical.cpp",
+      "cherche": "MHGP11_TRY(cell_add(to.vertical_checks, work.vertical_checks));",
+      "remplace": "",
+      "porte": "mhgp11_tower_pipeline_equivalence",
+      "note": "Le travail du balayage suivi est ajoute apres le join : memes compteurs que la voie par etages."
+    },
+    {
+      "id": "pipeline_graine_reguliere_oubliee",
+      "fichier": "src/tower/forest_pipeline.cpp",
+      "cherche": "if (one.ok() && vertical_seeds != nullptr) one = vertical_seeds->remember(builder.result, list[j], found[0]);",
+      "remplace": "",
+      "porte": "mhgp11_tower_pipeline_equivalence",
+      "note": "La publication ne memorise plus les graines basses : la resolution doit le faire, sinon refus de la verticale."
+    },
+    {
+      "id": "births_blocs_cle_dense",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "result.dense_[key] = NodeIdx{static_cast<u32>(s)};",
+      "remplace": "result.dense_[key] = NodeIdx{key};",
+      "porte": "mhgp11_tower_pipeline_equivalence",
+      "note": "La table dense par blocs doit rendre le rang canonique de la naissance, pas sa cle."
+    },
+    {
+      "id": "births_blocs_cohortes_omises",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "if (kmax > 1) MHGP11_TRY(pool.parallel_for(kmax - 1, 1, &run, ParallelBirths::body));",
+      "remplace": "",
+      "porte": "mhgp11_tower_pipeline_equivalence",
+      "note": "Les naissances de meme rang suivent l'ordre exact des centres, pas l'ordre des boules."
+    },
+    {
+      "id": "births_blocs_etat_partage",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "states[s] = {static_cast<u32>(s), static_cast<u32>(s), kNone, kNone, kNone, false};",
+      "remplace": "states[s] = {static_cast<u32>(s), 0, kNone, kNone, kNone, false};",
+      "porte": "mhgp11_tower_pipeline_equivalence",
+      "note": "Chaque naissance commence comme sa propre composante, sommet compris."
+    },
+    {
+      "id": "rattachement_coupe_ouverte",
+      "fichier": "src/tower/attachment.cpp",
+      "cherche": "const NodeIdx a = parent != NodeIdx{kNone} && nodes[idx(parent)].rank == rank ? parent : u;",
+      "remplace": "const NodeIdx a = parent != NodeIdx{kNone} && nodes[idx(parent)].rank == rank ? u : u;",
+      "porte": "mhgp11_tower_attach_fixtures",
+      "note": "att(b) := u, le noeud de coupe ouverte : deux branches donnent deux noeuds (T3), la passagere devient interne sous une fusion de son rang ; refus tower_invariant."
+    },
+    {
+      "id": "branches_coupe_fermee",
+      "fichier": "src/tower/attachment.cpp",
+      "cherche": "MHGP11_TRY(sweep.value().advance(LevelRank{idx(rank) - 1}, work));",
+      "remplace": "MHGP11_TRY(sweep.value().advance(rank, work));",
+      "porte": "mhgp11_tower_attach_e1e2",
+      "note": "Graines relevees a la coupe fermee r_b : toutes les branches d'une fusion se confondent avec la fusion, ses enfants ne sont plus couverts (I3, I4)."
+    },
+    {
+      "id": "journal_racine_dsu",
+      "fichier": "src/tower/forest_plateau.cpp",
+      "cherche": "    if (seed_log != nullptr) MHGP11_TRY(seed_log->add(*seed));  // la naissance rendue, jamais sa racine",
+      "remplace": "    if (seed_log != nullptr) MHGP11_TRY(seed_log->add(NodeIdx{find(idx(*seed))}));  // la naissance rendue, jamais sa racine",
+      "porte": "mhgp11_tower_attach_fixtures",
+      "note": "La racine DSU courante du plateau n'est pas la composante ouverte de la trace : faces du tetraedre K5 (fixture 8) a deux branches au lieu de trois, unions dependantes de l'ordre.",
+      "aussi": [
+        {
+          "fichier": "src/tower/forest_plateau.cpp",
+          "cherche": "    if (seed_log != nullptr) MHGP11_TRY(seed_log->add(seed));  // graine reguliere, jamais sa racine",
+          "remplace": "    if (seed_log != nullptr) MHGP11_TRY(seed_log->add(NodeIdx{find(idx(seed))}));  // graine reguliere, jamais sa racine"
+        }
+      ]
+    },
+    {
+      "id": "fenetre_forte",
+      "fichier": "src/tower/seed_log.hpp",
+      "cherche": "return u64{ball.p} + ball.qmin - 1 <= k && k <= u64{ball.p} + ball.m;",
+      "remplace": "return u64{ball.p} + ball.qmin <= k && k <= u64{ball.p} + ball.m;",
+      "porte": "mhgp11_tower_attach_fixtures",
+      "note": "Predicat fort p+q <= K au lieu de la fenetre : les evenements faibles (jonctions, triangle equilateral K2, fixture 7) sortent de W_K ; journal et I1 refusent."
+    },
+    {
+      "id": "journal_premiere_graine",
+      "fichier": "src/tower/forest_plateau.cpp",
+      "cherche": "    if (seed_log != nullptr) MHGP11_TRY(seed_log->add(*seed));  // la naissance rendue, jamais sa racine",
+      "remplace": "    if (seed_log != nullptr && !first) MHGP11_TRY(seed_log->add(*seed));  // la naissance rendue, jamais sa racine",
+      "porte": "mhgp11_tower_order_identity",
+      "note": "Une seule graine par cellule : somme des traces differente de trace_resolutions (I4), refus tower_invariant.",
+      "aussi": [
+        {
+          "fichier": "src/tower/forest_plateau.cpp",
+          "cherche": "    if (seed_log != nullptr) MHGP11_TRY(seed_log->add(seed));  // graine reguliere, jamais sa racine",
+          "remplace": "    if (seed_log != nullptr && !first) MHGP11_TRY(seed_log->add(seed));  // graine reguliere, jamais sa racine"
+        }
+      ]
+    },
+    {
+      "id": "role_rang_egal_interne",
+      "fichier": "src/tower/attachment.cpp",
+      "cherche": "const BallRole role = nodes[idx(att)].rank == rank ? BallRole::merge : BallRole::internal;",
+      "remplace": "const BallRole role = nodes[idx(att)].rank == rank ? BallRole::internal : BallRole::merge;",
+      "porte": "mhgp11_tower_attach_fixtures",
+      "note": "Rang egal declare interne : une fusion du plateau n'est pas une continuation (lemme B), controle des roles en refus."
+    },
+    {
+      "id": "traces_u32_sans_garde",
+      "fichier": "src/tower/seed_log.hpp",
+      "cherche": "  if (count > u64{0xFFFFFFFFu}) return fail(Reason::tower_capacity);\n",
+      "remplace": "",
+      "porte": "mhgp11_tower_attach_capacity",
+      "note": "Garde de l'audit aef7182b3 omise : un nombre de traces strictes au-dela de UINT32_MAX (C(69,8) d'une coquille de 150 sites a K8) serait tronque par la conversion en u32 au lieu d'un refus tower_capacity."
+    },
+    {
+      "id": "garde_beta_coupe_ouverte",
+      "fichier": "src/tower/forest_plateau.cpp",
+      "cherche": "    if (seed_log != nullptr) MHGP11_TRY(seed_log->add(*seed));  // la naissance rendue, jamais sa racine",
+      "remplace": "    if (seed_log != nullptr && num::compare(down.value().initial_level(), domain.catalogue().levels()[idx(data.rank) - 1]) > 0)\n      return fail(Reason::tower_invariant);\n    if (seed_log != nullptr) MHGP11_TRY(seed_log->add(*seed));  // la naissance rendue, jamais sa racine",
+      "porte": "mhgp11_tower_attach_fixtures",
+      "note": "L'inegalite fausse beta(F) <= l(r_b - 1) devenue garde d'admission du journal (MATHEMATIQUES 10.2 et 10.5) : la trace stricte AB du temoin D2 nait au niveau 64, apres le niveau 41 de rang r_b - 1, et build_order refuse a tort."
+    },
+    {
+      "id": "graine_resolue_dans_w_k",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "      ledger.interior_steps = 1;\n",
+      "remplace": "      if (!located.ball()) return fail(Reason::tower_invariant);\n      ledger.interior_steps = 1;\n",
+      "porte": "mhgp11_tower_attach_fixtures",
+      "note": "Graine resolue dans le seul W_K : la descente refuse le pas interieur par une boule hors de Cat_K (pour une K-partie, hors de W_K). Les traces AB de D2 (niveau 64, p = 2) et AC de E5 (niveau 33/2, p = 2) n'ont plus de graine (lemme W.2 : le calcul lit le vrai Gamma_K)."
+    },
+    {
+      "id": "table_population_ignoree",
+      "fichier": "src/tower/order_tree.cpp",
+      "cherche": "builder.population = population ? &*population : nullptr;",
+      "remplace": "builder.population = nullptr;",
+      "porte": "mhgp11_tower_order_same_params",
+      "note": "Contre-lecture S3 : build_order alloue la table de populations demandee sans la brancher ; memes sorties, autre cout (la mesure appariee de L2 serait faussee). Somme des population_hits nulle sur les variantes qui la demandent."
+    },
+    {
+      "id": "memo_ordre_ignore",
+      "fichier": "src/tower/order_tree.cpp",
+      "cherche": "auto memo = DescentMemo::make(domain, params.memo_capacity, budget, scratch.value().get(0));",
+      "remplace": "auto memo = DescentMemo::make(domain, 0, budget, scratch.value().get(0));",
+      "porte": "mhgp11_tower_order_same_params",
+      "note": "Memo de l'ordre demande mais cree a capacite nulle (delegation directe) ; memes sorties, autre cout. Les traces des cellules etendues ne sont plus des requetes du memo : memo.queries < trace_resolutions."
+    },
+    {
+      "id": "lookup_dense_ignore",
+      "fichier": "src/tower/order_tree.cpp",
+      "cherche": "params.dense_birth_lookup);",
+      "remplace": "false);",
+      "porte": "mhgp11_tower_order_same_params",
+      "note": "Lookup dense des naissances demande mais non construit (table eparse) ; memes sorties, autre cout."
+    },
+    {
+      "id": "traces_publiees_en_branches",
+      "fichier": "src/tower/attachment.cpp",
+      "cherche": "result.strict_[position] = strict.value();",
+      "remplace": "result.strict_[position] = static_cast<u32>(branches);",
+      "porte": "mhgp11_tower_attach_fraction",
+      "note": "Integration L1 (differentiel contre l'oracle S1) : strict_traces publie egal au nombre de branches |ant(b)| ; les controles I1 a I4 recomptent les traces du journal et ne le voient pas. Ecart des la diagonale du carre a K1 (boule interne : quatre traces strictes, une branche)."
+    },
+    {
+      "id": "journal_non_pose_concurrent",
+      "fichier": "src/tower/forest_concurrent.cpp",
+      "cherche": "    builder.seed_log = order_log(log, k);\n",
+      "remplace": "    static_cast<void>(log);\n    builder.seed_log = nullptr;\n",
+      "porte": "mhgp11_tower_order_full_identity",
+      "note": "L2b : journal non pose sur le constructeur de l'ordre K dans la voie concurrente (par etages et pipeline) ; le journal reste vide et les controles I1 a I4 du balayage refusent (tower_invariant)."
+    },
+    {
+      "id": "journal_non_pose_par_ordres",
+      "fichier": "src/tower/forest_vertical.cpp",
+      "cherche": "      builder.seed_log = order_log(log, k);  // journal de l'ordre demande, ecrit par ce pilote seul\n",
+      "remplace": "      builder.seed_log = nullptr;\n",
+      "porte": "mhgp11_tower_order_full_identity",
+      "note": "L2b : journal non pose dans la voie non concurrente de build_full (serielle et lots) ; journal vide, refus du balayage."
+    },
+    {
+      "id": "journal_autre_ordre",
+      "fichier": "src/tower/forest_internal.hpp",
+      "cherche": "return k == wanted.order ? wanted.log : nullptr;",
+      "remplace": "return k + 1 == wanted.order ? wanted.log : nullptr;",
+      "porte": "mhgp11_tower_order_full_identity",
+      "note": "L2b : journal ecrit par le constructeur de l'ordre K - 1 (aucun a K = 1) dans les deux voies ; capacite ou registres faux, refus."
+    },
+    {
+      "id": "extraction_mauvaise_foret",
+      "fichier": "src/tower/order_tree.cpp",
+      "cherche": "OrderForest forest(std::move(*orders[k - 1]));",
+      "remplace": "OrderForest forest(std::move(*orders[k == 1 ? 0 : k - 2]));",
+      "porte": "mhgp11_tower_order_full_identity",
+      "note": "L2b : extraction de la foret d'ordre K - 1 au lieu de K ; le balayage la confronte au journal de l'ordre K et refuse, ou l'arbre differe."
+    },
+    {
+      "id": "verticales_gardees",
+      "fichier": "src/tower/order_tree.cpp",
+      "cherche": "  drop_verticals(forest);\n",
+      "remplace": "",
+      "porte": "mhgp11_tower_order_full_identity",
+      "note": "L2b : les images basses (verticales) de l'ordre K restent dans l'arbre extrait et dans le budget ; forest.lower() non vide."
+    },
+    {
+      "id": "coop_paire_sautee",
+      "fichier": "src/catalogue/leaf_device.hpp",
+      "cherche": "    for (u64 rest = next; rest != 0; rest &= rest - 1) out(count++, i, ctz(rest), rest & (rest - 1), next_logical, next);\n",
+      "remplace": "    for (u64 rest = next; rest != 0; rest &= rest - 1)\n      if ((rest & (rest - 1)) != 0) out(count++, i, ctz(rest), rest & (rest - 1), next_logical, next);\n",
+      "porte": "mhgp11_catalogue_leaf_coop",
+      "note": "feuille cooperative : la derniere paire de chaque site i est perdue"
+    },
+    {
+      "id": "coop_candidats_restants",
+      "fichier": "src/catalogue/leaf_device.hpp",
+      "cherche": "  leaf.template extend_one<1>(pair.j, pair.remaining, pair.logical);\n",
+      "remplace": "  leaf.template extend_one<1>(pair.j, 0, pair.logical);\n",
+      "porte": "mhgp11_catalogue_leaf_coop",
+      "note": "feuille cooperative : sous-arbre de la paire sans ses descendants (candidats restants vides ; remplacement de l'audit d117de397)"
+    },
+    {
+      "id": "coop_cache_par_paire",
+      "fichier": "src/catalogue/leaf_device.hpp",
+      "cherche": "  leaf.prefix[0] = pair.i;\n",
+      "remplace": "  for (u32 w = 0; w < kSeenWords; ++w) leaf.t.seen[w] = 0;\n  leaf.prefix[0] = pair.i;\n",
+      "porte": "mhgp11_catalogue_leaf_coop",
+      "note": "feuille cooperative : cache J2 reinitialise par paire (hits perdus)"
+    },
+    {
+      "id": "coop_compteurs_fill",
+      "fichier": "src/catalogue/leaf_device.hpp",
+      "cherche": "    Leaf<Sink> lane(in, discarded, sink, tables);\n",
+      "remplace": "    Leaf<Sink> lane(in, counts, sink, tables);\n",
+      "porte": "mhgp11_catalogue_leaf_coop",
+      "note": "feuille cooperative : compteurs de la passe d'emission ajoutes (doubles)"
+    },
+    {
+      "id": "coop_publication_partielle",
+      "fichier": "src/catalogue/leaf_device.hpp",
+      "cherche": "  if (root.unresolved) return kUnresolved;\n  CountSink tally_sink;\n",
+      "remplace": "  if (root.unresolved) return kUnresolved;\n  for (u32 k = 0; k < n; ++k) {\n    Leaf<Sink> early(in, counts, sink, tables);\n    run_pair(early, pairs[k]);\n    if (early.unresolved) return kUnresolved;\n  }\n  for (u32 w = 0; w < kSeenWords; ++w) tables.seen[w] = 0;\n  counts = Counts{};\n  counts.dominance_tests += u64(in.m) * (in.m - 1) / 2;\n  return kOk;\n  CountSink tally_sink;\n",
+      "porte": "mhgp11_catalogue_leaf_coop",
+      "note": "feuille cooperative : emissions publiees au fil de l'eau, une feuille refusee laisse un prefixe publie"
+    },
+    {
+      "id": "coop_profondeur1_masque",
+      "fichier": "src/catalogue/leaf_device.hpp",
+      "cherche": "  leaf.masks[1] = leaf.t.dom[pair.i];\n",
+      "remplace": "  leaf.masks[1] = 0;\n",
+      "porte": "mhgp11_catalogue_leaf_coop",
+      "note": "feuille cooperative : masque de dominance du prefixe (i) oublie"
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+diff --git a/morsehgp3D_v11/src/catalogue/leaf_batch_cuda.cu b/morsehgp3D_v11/src/catalogue/leaf_batch_cuda.cu
+index 21575bfba..8d9327663 100644
+--- a/morsehgp3D_v11/src/catalogue/leaf_batch_cuda.cu
++++ b/morsehgp3D_v11/src/catalogue/leaf_batch_cuda.cu
+@@ -29,6 +29,7 @@ struct DeviceView {
+   const u32* sites;
+   int kmax;
+   bool cache;
++  bool coop;  // feuille cooperative : un bloc de 32 fils par feuille (count_coop_kernel, fill_coop_kernel)
+ };
+ 
+ __device__ leaf_device::Input device_input(const DeviceView& v, u64 j) {
+@@ -37,7 +38,7 @@ __device__ leaf_device::Input device_input(const DeviceView& v, u64 j) {
+   in.x = v.x; in.y = v.y; in.z = v.z;
+   in.sites = v.sites + job.begin; in.m = job.m;
+   for (int a = 0; a < 3; ++a) { in.lo[a] = job.lo[a]; in.hi[a] = job.hi[a]; }
+-  in.kmax = v.kmax; in.cache = v.cache;
++  in.kmax = v.kmax; in.cache = v.cache; in.coop = v.coop;
+   return in;
+ }
+ 
+@@ -107,6 +108,10 @@ __global__ void fill_kernel(DeviceView v, const u32* list, u64 list_count, const
+     atomicAdd(errors, 1u);
+ }
+ 
++// Noyaux de la feuille cooperative (count_coop_kernel, fill_coop_kernel) : meme unite de traduction, apres DeviceView,
++// device_input et counts_to_array.
++#include "catalogue/leaf_batch_coop_cuda.cuh"
++
+ // Feuille resolue qui emet au moins une boule : seule a rejouer pour l'ecriture (la moitie des feuilles LiDAR
+ // n'emet rien a K = 5).
+ struct Emits {
+@@ -244,7 +249,11 @@ struct WritePhase {
+     MHGP11_TRY(select_emitting(dv.count, dv.order, status, balls, stored, list, selected, temp, budget, device_bytes,
+                                fill_jobs));
+     const unsigned fill_grid = static_cast<unsigned>((fill_jobs + kThreads - 1) / kThreads);
+-    if (fill_jobs != 0)
++    if (fill_jobs != 0 && dv.coop)
++      fill_coop_kernel<<<static_cast<unsigned>(fill_jobs), kThreads>>>(dv, list.data, status, record_begin,
++                                                                      population_begin, records, population,
++                                                                      total_records, total_population, errors);
++    else if (fill_jobs != 0)
+       fill_kernel<<<fill_grid, kThreads>>>(dv, list.data, fill_jobs, status, record_begin, population_begin, records,
+                                            population, total_records, total_population, errors);
+     if (!ok(cudaGetLastError()) || !ok(cudaDeviceSynchronize())) return fail(Reason::parameter_out_of_range);
+@@ -332,6 +341,20 @@ Outcome download(u64 count, const Returned& d, u64 total_records, u64 total_popu
+   return {};
+ }
+ 
++// Passe de comptage : un fil par feuille, ou un warp par feuille (feuille cooperative).
++void launch_count(const DeviceView& dv, u8* status, u64* balls, u64* incidences, unsigned long long* totals,
++                  LeafRecord* scratch_records, u8* scratch_population, u8* stored, unsigned* errors) {
++  if (dv.count == 0) return;
++  if (dv.coop) {
++    count_coop_kernel<<<static_cast<unsigned>(dv.count), kThreads>>>(dv, status, balls, incidences, totals,
++                                                                     scratch_records, scratch_population, stored,
++                                                                     errors);
++    return;
++  }
++  const unsigned grid = static_cast<unsigned>((dv.count + kThreads - 1) / kThreads);
++  count_kernel<<<grid, kThreads>>>(dv, status, balls, incidences, totals, scratch_records, scratch_population, stored);
++}
++
+ }  // namespace
+ 
+ Outcome run_leaf_batch_cuda(const LeafBatchView& view, sched::Pool& pool, MemoryBudget& budget,
+@@ -341,7 +364,8 @@ Outcome run_leaf_batch_cuda(const LeafBatchView& view, sched::Pool& pool, Memory
+   // Hypothese de la borne des sommes (leaf_device::kCountBound) : au plus kMaxBatchJobs feuilles. L'ordre des fils
+   // tient en u32 : au-dela de 2^32 feuilles, refus explicite (jamais atteint : 64 octets par feuille).
+   if (view.count > leaf_device::kMaxBatchJobs) return fail(Reason::catalogue_counter_overflow);
+-  if (view.count > (u64{1} << 32)) return fail(Reason::index_overflow_u32);
++  // Feuille cooperative : un bloc par feuille, grille d'au plus 2^31 - 1 blocs.
++  if (view.count > (view.coop ? (u64{1} << 31) - 1 : u64{1} << 32)) return fail(Reason::index_overflow_u32);
+   // Contexte : ouvert par l'ouverture anticipee (attendue ici) ou par cudaFree(0) au premier appel du processus ; une
+   // passe chaude le trouve deja ouvert. Pile : aucune limite posee, le cadre statique des noyaux (sans recursion) est
+   // dimensionne par le pilote au lancement.
+@@ -393,12 +417,11 @@ Outcome run_leaf_batch_cuda(const LeafBatchView& view, sched::Pool& pool, Memory
+       !ok(cudaMemset(errors.data, 0, sizeof(unsigned))))
+     return fail(Reason::parameter_out_of_range);
+   t.upload_ns = now_ns() - upload;
+-  const DeviceView dv{x.data, y.data, z.data, jobs.data, threads.data, view.count, sites.data, view.kmax, view.cache};
+-  const unsigned grid = static_cast<unsigned>((view.count + kThreads - 1) / kThreads);
++  const DeviceView dv{x.data, y.data, z.data, jobs.data, threads.data, view.count, sites.data, view.kmax, view.cache,
++                      view.coop};
+   const u64 count = now_ns();
+-  if (view.count != 0)
+-    count_kernel<<<grid, kThreads>>>(dv, status.data, balls.data, incidences.data, totals.data, scratch_records.data,
+-                                     scratch_population.data, stored.data);
++  launch_count(dv, status.data, balls.data, incidences.data, totals.data, scratch_records.data,
++               scratch_population.data, stored.data, errors.data);
+   if (!ok(cudaGetLastError()) || !ok(cudaDeviceSynchronize())) return fail(Reason::parameter_out_of_range);
+   t.count_ns = now_ns() - count;
+   // Prefixes exclusifs (CUB), puis totaux.

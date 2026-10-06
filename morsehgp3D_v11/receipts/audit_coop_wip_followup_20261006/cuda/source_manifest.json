@@ -1,0 +1,28 @@
+{
+  "capture_utc": "2026-10-06T08:29:52.601771+00:00",
+  "developer_head": "3b76a3fcf0ca14dd08f005e1e1ae8e3418dd247e",
+  "status": "WIP stable in double read; not published CUDA qualification",
+  "sources": [
+    {
+      "path": "morsehgp3D_v11/src/catalogue/leaf_batch_coop_cuda.cuh",
+      "sha256": "f7d2f7b08c6ac09b7556bf58e9d1c94823138caec5044e1bcac5db30e986df00"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/leaf_batch_cuda.cu",
+      "sha256": "59b5254f19bb7f69dfde1b6a88ae339d7f989edc5aa5f821071d7822f50a45f5"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/leaf_device.hpp",
+      "sha256": "d357cfd1218fcef4e5b1f0e389323ed067f73f239e9afea11b79287013f8532f"
+    }
+  ],
+  "anchors": {
+    "read_guard": "leaf_batch_coop_cuda.cuh:53-55",
+    "write_rejection": "leaf_batch_coop_cuda.cuh:61-64",
+    "final_read": "leaf_batch_coop_cuda.cuh:69-70",
+    "discard": "leaf_batch_coop_cuda.cuh:124-140",
+    "fill_error": "leaf_batch_coop_cuda.cuh:169; leaf_batch_cuda.cu:download fill_errors guard"
+  },
+  "native_runs": 0,
+  "cuda_runs": 0
+}

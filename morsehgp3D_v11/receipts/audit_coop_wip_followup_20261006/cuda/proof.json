@@ -1,0 +1,86 @@
+{
+  "CoopShared_bytes": 8040,
+  "conditional_abi": "u32 size/align4, u64 size/align8, u16 size/align2, struct align8; no sizeof executed",
+  "correction": "snapshot shared guard into a private bool, then __syncwarp(), then branch on private bool; alternatively atomic read",
+  "cuda_runs": 0,
+  "final_unresolved_all_schedules": 1,
+  "gate": "G4 racecheck/synccheck with injected early unresolved in one pair and delayed peer guard, plus whole-leaf discard identity",
+  "mixed_guard_witness": {
+    "events": [
+      "read_lane0",
+      "reject_lane0",
+      "read_lane1"
+    ],
+    "final_unresolved": 1,
+    "snapshots": {
+      "read_lane0": 0,
+      "read_lane1": 1
+    }
+  },
+  "native_runs": 0,
+  "scope": "Allowed source-level ITS ordering model; no compiled schedule, sanitizer result or false FULL demonstrated",
+  "snapshot_then_sync_allowed_schedules": [
+    {
+      "events": [
+        "read_lane0",
+        "read_lane1",
+        "reject_lane0"
+      ],
+      "final_unresolved": 1,
+      "snapshots": {
+        "read_lane0": 0,
+        "read_lane1": 0
+      }
+    },
+    {
+      "events": [
+        "read_lane1",
+        "read_lane0",
+        "reject_lane0"
+      ],
+      "final_unresolved": 1,
+      "snapshots": {
+        "read_lane0": 0,
+        "read_lane1": 0
+      }
+    }
+  ],
+  "unfixed_allowed_schedules": [
+    {
+      "events": [
+        "read_lane0",
+        "reject_lane0",
+        "read_lane1"
+      ],
+      "final_unresolved": 1,
+      "snapshots": {
+        "read_lane0": 0,
+        "read_lane1": 1
+      }
+    },
+    {
+      "events": [
+        "read_lane0",
+        "read_lane1",
+        "reject_lane0"
+      ],
+      "final_unresolved": 1,
+      "snapshots": {
+        "read_lane0": 0,
+        "read_lane1": 0
+      }
+    },
+    {
+      "events": [
+        "read_lane1",
+        "read_lane0",
+        "reject_lane0"
+      ],
+      "final_unresolved": 1,
+      "snapshots": {
+        "read_lane0": 0,
+        "read_lane1": 0
+      }
+    }
+  ]
+}

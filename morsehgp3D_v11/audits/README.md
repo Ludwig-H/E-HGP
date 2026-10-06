@@ -4,12 +4,18 @@
 quantized_u21_input_only / not_claimed`. Six notes actives maintenues en
 place ; preuves détaillées dans les reçus immuables.
 
-**Priorité active : feuille GPU coopérative, suivant la décision utilisateur
-rapportée en section O du développeur.** Avis favorable sur la décomposition
-par paires, avec état de branche privé, cache J2 atomique et placement des
-émissions par préfixes exclusifs. L'ordre des paires suivi du DFS interne
-reproduit déjà l'ordre complet des émissions. Deux points à fermer : le
-layout partagé réel et la concurrence CUDA sur G4. Voir la
+**Priorité active : corriger le premier noyau coopératif avant G4.**
+Le WIP CUDA et ses nouvelles portes sont relus. Deux patches applicables
+sont fournis : synchroniser la lecture du drapeau de refus avant les
+écritures concurrentes ; rendre les six mutants exécutables avec les bons
+noms et modules, une fixture de dominance réelle et une attente de refus
+adaptée au profil. [Constats, preuves et patches](../receipts/audit_coop_wip_followup_20261006/README.md).
+
+La représentation compacte tient dans **8 040 octets sous l'ABI déclarée**
+(à confirmer au build) ; la préparation séquentielle i<j et le mutant qui
+supprime réellement les descendants sont intégrés. Ces anciens points sont
+clos en source. La décomposition par paires et son ordre d'émission restent
+favorables en lecture ; aucune qualification CUDA n'est encore déduite. Voir la
 [réponse aux quatre questions](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md#feuille-cooperative--reponse-a-la-section-o-du-6-octobre)
 et les [portes ciblées](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md#feuille-cooperative--qualification-ciblee-sur-g4).
 Le [patch de placement du fill](../receipts/proposition_fill_cta_20261006/README.md)

@@ -1,0 +1,13 @@
+--- a/morsehgp3D_v11/src/catalogue/leaf_batch_coop_cuda.cuh
++++ b/morsehgp3D_v11/src/catalogue/leaf_batch_coop_cuda.cuh
+@@ -52,7 +52,9 @@
+   }
+   __syncwarp();
+   const u32 n = s.n;
+-  if (s.unresolved == 0)
++  const bool root_resolved = s.unresolved == 0;
++  __syncwarp();  // toutes les lectures du garde precedent les atomicExch de la boucle
++  if (root_resolved)
+     for (;;) {
+       const u32 k = atomicAdd(&s.cursor, 1u);
+       if (k >= n) break;
