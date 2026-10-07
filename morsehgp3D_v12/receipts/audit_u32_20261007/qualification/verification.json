@@ -1,0 +1,13 @@
+{
+  "GCP_used": false,
+  "historical_native_logs_verified": false,
+  "native_executions_replayed": 0,
+  "normal_equals_optimized": true,
+  "normal_equals_result": true,
+  "normal_exit_code": 0,
+  "optimized_exit_code": 0,
+  "pin": "c3de9d73d8999f2f1e31a0f592b829efc6e7a4da",
+  "result_sha256": "b3990481d10fdc8782b888d755c88f57b21411390010f28b369c54f56a89cffd",
+  "schema": "audit_u32_qualification_verification.v1",
+  "source_hashes_closed": true
+}

@@ -1,0 +1,1458 @@
+{
+  "audit_hashes": {
+    "check.py": "b8d4eaa11e9592206ab3b0a091f192ddd6dceedd5b29a1a8cd43219f6a010d92",
+    "probe.cpp": "11f113d768d4fe5f2f4ae9f2378f194d1396c0109aa6620087f21bcfc2611d5e"
+  },
+  "binary_sha256": "d0f86a8bb1fc6e76dca92328dab2bf06f811cda91a08f7cd81a55127de57cf9a",
+  "cases": 224,
+  "degenerate": 4,
+  "input_sha256": "12106b20535e588eeb81b258409faddb8b63e258637b14a1d9dfef761702176e",
+  "lane_totals": {
+    "center_compare_certified": 0,
+    "center_compare_checked": 0,
+    "center_compare_native": 6,
+    "center_compare_wide": 55,
+    "construction_certified": 0,
+    "construction_checked": 0,
+    "construction_native": 120,
+    "construction_wide": 74,
+    "level_compare_certified": 0,
+    "level_compare_checked": 0,
+    "level_compare_native": 36,
+    "level_compare_wide": 183,
+    "midpoint_certified": 0,
+    "midpoint_checked": 0,
+    "midpoint_native": 138,
+    "midpoint_wide": 82,
+    "orientation_certified": 48,
+    "orientation_checked": 0,
+    "orientation_native": 50,
+    "orientation_wide": 122,
+    "power_certified": 180,
+    "power_checked": 22,
+    "power_native": 408,
+    "power_wide": 270
+  },
+  "output_sha256": "134b065b9c1409d5d74c0219b4d7b2971ab1f266a968cb6678a24ae6f7201938",
+  "pin": "c3de9d73d8999f2f1e31a0f592b829efc6e7a4da",
+  "power_queries": 880,
+  "profile": 32,
+  "public_status": "not_claimed",
+  "result": "pass",
+  "source_hashes_before_after": {
+    "morsehgp3D_v12/docs/CONTRAT_NUMERIQUE.md": "6edf4f774429f4939e98c3662aa336b2d9865e7ebae8214d50088e51dcc16c97",
+    "morsehgp3D_v12/receipts/developpement_20261007/numerique_socle.md": "e56925b1be665f2e0ea50777c57af7f03bb4c4b956295073b01c457029c3d088",
+    "morsehgp3D_v12/src/core/buffer.cpp": "069a658c0750b99d2c90dff31b9700cd5435cfce7eb7ee495a22a0358811a0ad",
+    "morsehgp3D_v12/src/core/buffer.hpp": "73cac26c57ce59c205943fcb1a484d9efce79f81cfe3851048d7c9fb2732c494",
+    "morsehgp3D_v12/src/core/core.hpp": "5b3703641031c27e7bf907b2a8c05c79007ee1cae47da7d8e5f94ea435c563d3",
+    "morsehgp3D_v12/src/core/ledger.cpp": "54cebe7db58bd4f4155d543150b3870894c90f3b6db1032a07e6267c040838ab",
+    "morsehgp3D_v12/src/core/ledger.hpp": "f6f81e2670ce8f9114d4b31b782b94534963b93439642c4b587ff4a822a44c24",
+    "morsehgp3D_v12/src/core/reasons.def": "43015ae452b06fed099e933f2bbd756e613e83607466f6d38c724494fc2c62e0",
+    "morsehgp3D_v12/src/core/status.hpp": "d81b3e8aab647c97fe97fa7d91081efa28ab88cdac8706cafdd825b17e4046ea",
+    "morsehgp3D_v12/src/core/types.hpp": "c6d91808b0fa82364a48bc049b2097b31db7bd46cae0b4ca7d313b4e3f7d0835",
+    "morsehgp3D_v12/src/num/big.cpp": "cb9b104bc3ad08ad598f9fac16b860b0d2668007faadd44f3d535b036bf19bd5",
+    "morsehgp3D_v12/src/num/big.hpp": "aed95d3897bf2d02fb1941ae62838e7c4668d00e81edb68f7786231728209fb0",
+    "morsehgp3D_v12/src/num/budgets.hpp": "133096e348bcc8790dbd86cc4b5238ad5d8ea7dbac5d24679c7c0bda7fdff104",
+    "morsehgp3D_v12/src/num/center_region.cpp": "aece4f08df9ff2f62d40fecb55863eadc1744b4664e812a0337241d550cc49a6",
+    "morsehgp3D_v12/src/num/center_region.hpp": "234bd15528f20c1dd989d97baa9ec58be30245cefbf24629ccb612011ebccade",
+    "morsehgp3D_v12/src/num/center_view.hpp": "0ff063db13e3378ae015381364d0142f5b0403153af77658cf9917c796cedf10",
+    "morsehgp3D_v12/src/num/centers.cpp": "0e7a1ecc53895cd9c4aa473912988e6dbe1357151ee520bd0a8ac7b9e11273b1",
+    "morsehgp3D_v12/src/num/frame.hpp": "7bff1619ddd88e4d340e92e4bcd975a6721529de63a3d13ef307e01678aad35d",
+    "morsehgp3D_v12/src/num/geometry.hpp": "1d5299a276faf3e56c316148c41bb973a626e2045d79bfdaeae2b0097a0f702c",
+    "morsehgp3D_v12/src/num/geometry_internal.hpp": "2220aa8617710136ba3bc1aabe86d377b2584736af25befeff1a2151d086936f",
+    "morsehgp3D_v12/src/num/guard.cpp": "459b99dfe154f32d8ab468d3a410a1bd74ca4c94363634244f37c8cdf7fc720b",
+    "morsehgp3D_v12/src/num/guard.hpp": "8c2afab759cce1b7fe90336361a5fd7b653862378814c614c95f0b58086a2884",
+    "morsehgp3D_v12/src/num/integer.hpp": "5d7d4a262143d1686b709f2eaac7bb4b09b33e9f3dcaeecd195c0b3fe8b7df44",
+    "morsehgp3D_v12/src/num/lattice.cpp": "fcdca95fe3567c5043f72183985c1d662a4932f290ca3b11af2abbd65b80672e",
+    "morsehgp3D_v12/src/num/lattice_bounds.hpp": "0b13bebe2bd640a630e1f0687df9e8f64d98a77be20046ef077ec8c228cccaf9",
+    "morsehgp3D_v12/src/num/lattice_internal.hpp": "11112d129bcc3d3087ca2267a844d2f952ee750b9780638edc71e69fb9608d41",
+    "morsehgp3D_v12/src/num/level.hpp": "6e851904581ed3b0419e0363bbf538d2ac082877c2268fe4c53e8bfe0af330fd",
+    "morsehgp3D_v12/src/num/local.cpp": "cae94d31761abef3abf4752b6ffbd54143d90d1a3f2b7dde97ef4c02aef3528a",
+    "morsehgp3D_v12/src/num/local.hpp": "c7d0e7105ea2ab433b9fc99203c575c7450982918ba493ddd5dab23ce4ceef81",
+    "morsehgp3D_v12/src/num/num.hpp": "ca15682584a70616cac4ed532baa8f984d9a7aa657788a2aa40a2901c500aa95",
+    "morsehgp3D_v12/src/num/orientation_certificate.hpp": "5a3614fa662eb573c2b19eecdb8098bf964b83ab9df0b21e5d6bfdd650651ebf",
+    "morsehgp3D_v12/src/num/power_certificate.hpp": "36151714489a9b73dbac6645fd08476451f771d167702bfadb86eaec100e55c0",
+    "morsehgp3D_v12/src/num/power_checked.hpp": "23c87061ae8fed16c0a182c7bb72e29feaa830aa04ec7b9cb3f2fbdc3dbee53f",
+    "morsehgp3D_v12/src/num/predicates.cpp": "4ebfbf2029c5addd44c48e13d34212f9f4b080c8be9b437b2d725d47238be394",
+    "morsehgp3D_v12/src/num/q4_weights.hpp": "a19bc38a5c317951df79eab124fcb4af5adb1074124b9e808fdf103637087c4d",
+    "morsehgp3D_v12/src/num/radical.cpp": "b7c9d373a28343c0aa54d1e8f2a639b918f540b0652b604c24e98b20b15f8d77",
+    "morsehgp3D_v12/src/num/radical.hpp": "61b69e40e317b6c4ffa079e355873f485e5e5d5a5da593a57dd941c89e00c703",
+    "morsehgp3D_v12/src/num/rational.cpp": "5dfa93291a9acf7801d9902047e6f1d124a67d27049367ab015743cefa98fdde",
+    "morsehgp3D_v12/src/num/rational.hpp": "35df88e9f0bed2cc19ef80add2897447f2f9d2e3edcb6ac57f2726dd53750acc",
+    "morsehgp3D_v12/src/num/roots.cpp": "0407a51c4c3e68c9358510cbb67c1c439c67ca85cbb1d605fa7d1bf422ebdc0d",
+    "morsehgp3D_v12/src/num/roots.hpp": "1c72d15db79baf9cc98eeb4b83bd53c43db8e2871ab6cf91d5871dd58e569f7a",
+    "morsehgp3D_v12/src/num/sphere.cpp": "26fc17965d0cea73763ee4cc63062c19ec601505355043b821c013c4ac6c1290",
+    "morsehgp3D_v12/src/num/wide.hpp": "357c10fab9a719e2e25bf121549cf49fe6965e8a613aaade5801ce00176fd4d7"
+  },
+  "valid_spheres": 220,
+  "witnesses": {
+    "CST0201_s20_base": {
+      "center": [
+        "349525",
+        "349525",
+        "349525"
+      ],
+      "center_order_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "construction_lanes": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "domains": [
+        20,
+        11
+      ],
+      "level_order_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "midpoint": false,
+      "midpoint_lanes": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "orientation_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "power_lanes": [
+        [
+          0,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ]
+      ],
+      "quadratic_bits": [
+        0,
+        124,
+        124,
+        128
+      ],
+      "radius2": "733006353750",
+      "support_span": 20
+    },
+    "CST0201_s20_high": {
+      "center": [
+        "4292171093",
+        "4292171093",
+        "4292171093"
+      ],
+      "center_order_lanes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "construction_lanes": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "domains": [
+        20,
+        11
+      ],
+      "level_order_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "midpoint": false,
+      "midpoint_lanes": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "orientation_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "power_lanes": [
+        [
+          0,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ]
+      ],
+      "quadratic_bits": [
+        0,
+        124,
+        124,
+        128
+      ],
+      "radius2": "733006353750",
+      "support_span": 20
+    },
+    "midpoint_q3_base": {
+      "center": [
+        "50",
+        "50",
+        "0"
+      ],
+      "center_order_lanes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "construction_lanes": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "domains": [
+        47,
+        32
+      ],
+      "level_order_lanes": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "midpoint": true,
+      "midpoint_lanes": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "orientation_lanes": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "power_lanes": [
+        [
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0
+        ]
+      ],
+      "quadratic_bits": [
+        0,
+        42,
+        41,
+        42
+      ],
+      "radius2": "5000",
+      "support_span": 7
+    },
+    "midpoint_q3_high": {
+      "center": [
+        "4294967245",
+        "4294967245",
+        "4294967295"
+      ],
+      "center_order_lanes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "construction_lanes": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "domains": [
+        47,
+        32
+      ],
+      "level_order_lanes": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "midpoint": true,
+      "midpoint_lanes": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "orientation_lanes": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "power_lanes": [
+        [
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0
+        ]
+      ],
+      "quadratic_bits": [
+        0,
+        42,
+        41,
+        42
+      ],
+      "radius2": "5000",
+      "support_span": 7
+    },
+    "midpoint_q3_s24_base": {
+      "center": [
+        "8388607",
+        "8388607",
+        "0"
+      ],
+      "center_order_lanes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "construction_lanes": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "domains": [
+        4,
+        2
+      ],
+      "level_order_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "midpoint": true,
+      "midpoint_lanes": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "orientation_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "power_lanes": [
+        [
+          0,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ]
+      ],
+      "quadratic_bits": [
+        0,
+        146,
+        145,
+        146
+      ],
+      "radius2": "140737454800898",
+      "support_span": 24
+    },
+    "midpoint_q3_s24_high": {
+      "center": [
+        "4286578688",
+        "4286578688",
+        "4294967295"
+      ],
+      "center_order_lanes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "construction_lanes": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "domains": [
+        4,
+        2
+      ],
+      "level_order_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "midpoint": true,
+      "midpoint_lanes": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "orientation_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "power_lanes": [
+        [
+          0,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ]
+      ],
+      "quadratic_bits": [
+        0,
+        146,
+        145,
+        146
+      ],
+      "radius2": "140737454800898",
+      "support_span": 24
+    },
+    "midpoint_q3_s25_base": {
+      "center": [
+        "16777215",
+        "16777215",
+        "0"
+      ],
+      "center_order_lanes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "construction_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "domains": [
+        -1,
+        -1
+      ],
+      "level_order_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "midpoint": true,
+      "midpoint_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "orientation_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "power_lanes": [
+        [
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ]
+      ],
+      "quadratic_bits": [
+        0,
+        152,
+        151,
+        152
+      ],
+      "radius2": "562949886312450",
+      "support_span": 25
+    },
+    "midpoint_q3_s25_high": {
+      "center": [
+        "4278190080",
+        "4278190080",
+        "4294967295"
+      ],
+      "center_order_lanes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "construction_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "domains": [
+        -1,
+        -1
+      ],
+      "level_order_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "midpoint": true,
+      "midpoint_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "orientation_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "power_lanes": [
+        [
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ]
+      ],
+      "quadratic_bits": [
+        0,
+        152,
+        151,
+        152
+      ],
+      "radius2": "562949886312450",
+      "support_span": 25
+    },
+    "midpoint_q3_s31_base": {
+      "center": [
+        "1073741823",
+        "1073741823",
+        "0"
+      ],
+      "center_order_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "construction_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "domains": [
+        -1,
+        -1
+      ],
+      "level_order_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "midpoint": true,
+      "midpoint_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "orientation_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "power_lanes": [
+        [
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ]
+      ],
+      "quadratic_bits": [
+        0,
+        188,
+        187,
+        188
+      ],
+      "radius2": "2305843004918726658",
+      "support_span": 31
+    },
+    "midpoint_q3_s31_high": {
+      "center": [
+        "3221225472",
+        "3221225472",
+        "4294967295"
+      ],
+      "center_order_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "construction_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "domains": [
+        -1,
+        -1
+      ],
+      "level_order_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "midpoint": true,
+      "midpoint_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "orientation_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "power_lanes": [
+        [
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ]
+      ],
+      "quadratic_bits": [
+        0,
+        188,
+        187,
+        188
+      ],
+      "radius2": "2305843004918726658",
+      "support_span": 31
+    },
+    "near_collinear_u32_base": {
+      "center": [
+        "-36893488104469430283/2",
+        "36893488121649299459/2",
+        "0"
+      ],
+      "center_order_lanes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "construction_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "domains": [
+        59,
+        29
+      ],
+      "level_order_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "midpoint": false,
+      "midpoint_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "orientation_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "power_lanes": [
+        [
+          0,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0
+        ]
+      ],
+      "quadratic_bits": [
+        0,
+        65,
+        65,
+        65
+      ],
+      "radius2": "1361129465148452655167927057260027576385/2",
+      "support_span": 32
+    },
+    "near_collinear_u32_high": {
+      "center": [
+        "-36893488104469430283/2",
+        "36893488121649299459/2",
+        "0"
+      ],
+      "center_order_lanes": [
+        3,
+        0,
+        0,
+        0
+      ],
+      "construction_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "domains": [
+        59,
+        29
+      ],
+      "level_order_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "midpoint": false,
+      "midpoint_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "orientation_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "power_lanes": [
+        [
+          0,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0
+        ]
+      ],
+      "quadratic_bits": [
+        0,
+        65,
+        65,
+        65
+      ],
+      "radius2": "1361129465148452655167927057260027576385/2",
+      "support_span": 32
+    },
+    "q3_s24_base": {
+      "center": [
+        "5592405",
+        "5592405",
+        "5592405"
+      ],
+      "center_order_lanes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "construction_lanes": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "domains": [
+        2,
+        1
+      ],
+      "level_order_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "midpoint": false,
+      "midpoint_lanes": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "orientation_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "power_lanes": [
+        [
+          0,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ]
+      ],
+      "quadratic_bits": [
+        0,
+        148,
+        148,
+        148
+      ],
+      "radius2": "187649962104150",
+      "support_span": 24
+    },
+    "q3_s24_high": {
+      "center": [
+        "4283782485",
+        "4283782485",
+        "4283782485"
+      ],
+      "center_order_lanes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "construction_lanes": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "domains": [
+        2,
+        1
+      ],
+      "level_order_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "midpoint": false,
+      "midpoint_lanes": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "orientation_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "power_lanes": [
+        [
+          0,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ]
+      ],
+      "quadratic_bits": [
+        0,
+        148,
+        148,
+        148
+      ],
+      "radius2": "187649962104150",
+      "support_span": 24
+    },
+    "q3_s25_base": {
+      "center": [
+        "33554431/3",
+        "33554431/3",
+        "33554431/3"
+      ],
+      "center_order_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "construction_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "domains": [
+        -1,
+        -1
+      ],
+      "level_order_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "midpoint": false,
+      "midpoint_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "orientation_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "power_lanes": [
+        [
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ]
+      ],
+      "quadratic_bits": [
+        0,
+        154,
+        154,
+        154
+      ],
+      "radius2": "2251799679467522/3",
+      "support_span": 25
+    },
+    "q3_s25_high": {
+      "center": [
+        "12817793023/3",
+        "12817793023/3",
+        "12817793023/3"
+      ],
+      "center_order_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "construction_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "domains": [
+        -1,
+        -1
+      ],
+      "level_order_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "midpoint": false,
+      "midpoint_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "orientation_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "power_lanes": [
+        [
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ]
+      ],
+      "quadratic_bits": [
+        0,
+        154,
+        154,
+        154
+      ],
+      "radius2": "2251799679467522/3",
+      "support_span": 25
+    },
+    "q4_s32_base": {
+      "center": [
+        "4294967295/2",
+        "4294967295/2",
+        "4294967295/2"
+      ],
+      "center_order_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "construction_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "domains": [
+        -1,
+        -1
+      ],
+      "level_order_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "midpoint": false,
+      "midpoint_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "orientation_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "power_lanes": [
+        [
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ]
+      ],
+      "quadratic_bits": [
+        0,
+        163,
+        163,
+        164
+      ],
+      "radius2": "55340232195358851075/4",
+      "support_span": 32
+    },
+    "q4_s32_high": {
+      "center": [
+        "4294967295/2",
+        "4294967295/2",
+        "4294967295/2"
+      ],
+      "center_order_lanes": [
+        0,
+        0,
+        0,
+        3
+      ],
+      "construction_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "domains": [
+        -1,
+        -1
+      ],
+      "level_order_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "midpoint": false,
+      "midpoint_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "orientation_lanes": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "power_lanes": [
+        [
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ]
+      ],
+      "quadratic_bits": [
+        0,
+        163,
+        163,
+        164
+      ],
+      "radius2": "55340232195358851075/4",
+      "support_span": 32
+    }
+  }
+}

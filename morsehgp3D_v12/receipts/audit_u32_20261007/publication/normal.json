@@ -1,0 +1,118 @@
+{
+  "before_after_unchanged": true,
+  "cases": {
+    "distinct_absent": {
+      "destination_exists": true,
+      "exception": null,
+      "has_manifest": true,
+      "input_unchanged": true,
+      "remaining_files": [
+        "SHA256SUMS",
+        "receipt.json",
+        "resultats/one.json",
+        "resultats/two.json"
+      ],
+      "return_code": 0
+    },
+    "distinct_existing_empty": {
+      "destination_exists": true,
+      "exception": null,
+      "has_manifest": true,
+      "input_unchanged": true,
+      "remaining_files": [
+        "SHA256SUMS",
+        "receipt.json",
+        "resultats/one.json",
+        "resultats/two.json"
+      ],
+      "return_code": 0
+    },
+    "file_directory_collision_absent": {
+      "destination_exists": true,
+      "exception": "FileExistsError",
+      "has_manifest": false,
+      "input_unchanged": true,
+      "remaining_files": [
+        "receipt.json",
+        "resultats/<compte>"
+      ],
+      "return_code": null
+    },
+    "file_directory_collision_existing_empty": {
+      "destination_exists": true,
+      "exception": "FileExistsError",
+      "has_manifest": false,
+      "input_unchanged": true,
+      "remaining_files": [
+        "receipt.json",
+        "resultats/<compte>"
+      ],
+      "return_code": null
+    },
+    "flat_collision_absent": {
+      "destination_exists": false,
+      "exception": null,
+      "has_manifest": false,
+      "input_unchanged": true,
+      "remaining_files": null,
+      "return_code": 3
+    },
+    "flat_collision_existing_empty": {
+      "destination_exists": true,
+      "exception": null,
+      "has_manifest": false,
+      "input_unchanged": true,
+      "remaining_files": [],
+      "return_code": 3
+    },
+    "nested_collision_absent": {
+      "destination_exists": false,
+      "exception": null,
+      "has_manifest": false,
+      "input_unchanged": true,
+      "remaining_files": null,
+      "return_code": 3
+    },
+    "nested_collision_existing_empty": {
+      "destination_exists": true,
+      "exception": null,
+      "has_manifest": false,
+      "input_unchanged": true,
+      "remaining_files": [],
+      "return_code": 3
+    },
+    "redacted_name_absent": {
+      "destination_exists": true,
+      "exception": null,
+      "has_manifest": true,
+      "input_unchanged": true,
+      "remaining_files": [
+        "SHA256SUMS",
+        "receipt.json",
+        "resultats/<compte>.json"
+      ],
+      "return_code": 0
+    },
+    "redacted_name_existing_empty": {
+      "destination_exists": true,
+      "exception": null,
+      "has_manifest": true,
+      "input_unchanged": true,
+      "remaining_files": [
+        "SHA256SUMS",
+        "receipt.json",
+        "resultats/<compte>.json"
+      ],
+      "return_code": 0
+    }
+  },
+  "gcp_used": false,
+  "pin": "c3de9d73d8999f2f1e31a0f592b829efc6e7a4da",
+  "preexisting_nonempty_refusals": 5,
+  "schema": "audit.u32.publication.v1",
+  "scope": "temporary synthetic trees only; no historical partial receipt alleged",
+  "source_sha256": {
+    "morsehgp3D_v12/microbancs/outils/recu_session.py": "f75728b602d234d72e3804421231407e29a823146448196fc65435867cc4d8aa"
+  },
+  "witness_sha256": "a03b74d2a4a9ecd0f5bb7dbac7b32213e4869309f83f61518dfaa13ccdbdd8ef"
+}

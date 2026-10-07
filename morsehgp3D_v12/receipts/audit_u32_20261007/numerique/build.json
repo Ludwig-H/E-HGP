@@ -1,0 +1,12 @@
+{
+  "command": [
+    "sh",
+    "morsehgp3D_v12/receipts/audit_u32_20261007/numerique/build.sh",
+    "<binary>"
+  ],
+  "build_script_sha256": "92d49e24bbb53e5176db192c263e4100b20ce9c34a055d9f077998cb50369e76",
+  "compiler": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "returncode": 0,
+  "stdout": "",
+  "stderr": ""
+}

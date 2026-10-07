@@ -1,0 +1,8 @@
+{
+  "byte_identical": true,
+  "compiler_receipt": "build.json",
+  "normal_sha256": "0a74ede50925f03c8d92509ab3d62feb09144ad71b7208164dd73ca2984dbf21",
+  "optimized_sha256": "0a74ede50925f03c8d92509ab3d62feb09144ad71b7208164dd73ca2984dbf21",
+  "result": "pass",
+  "source_pin": "c3de9d73d8999f2f1e31a0f592b829efc6e7a4da"
+}

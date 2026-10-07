@@ -1,0 +1,48 @@
+{
+  "before_after_unchanged": true,
+  "binary_sha256": "26dec9036c5b745d36a627f69c3fb172f10b046f38deb99e91faf913105e4a67",
+  "cases": {
+    "addition_overflow": {
+      "file_bytes": 88,
+      "probe_exit": 0,
+      "response": "admitted 4611686018427387903"
+    },
+    "empty_valid": {
+      "file_bytes": 88,
+      "probe_exit": 0,
+      "response": "admitted 0"
+    },
+    "multiplication_overflow": {
+      "file_bytes": 88,
+      "probe_exit": 0,
+      "response": "refused"
+    },
+    "one_valid": {
+      "file_bytes": 96,
+      "probe_exit": 0,
+      "response": "admitted 1"
+    },
+    "ordinary_truncation": {
+      "file_bytes": 88,
+      "probe_exit": 0,
+      "response": "refused"
+    }
+  },
+  "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "gcp_used": false,
+  "gpu_used": false,
+  "huge_allocation": false,
+  "payload_read": false,
+  "pin": "c3de9d73d8999f2f1e31a0f592b829efc6e7a4da",
+  "schema": "audit.u32.format.v1",
+  "scope": "generic Reader admission, not full catalogue or M4 adoption",
+  "sources_sha256": {
+    "morsehgp3D_v12/docs/CONTRAT_CATALOGUE.md": "d08bcc608ead3b8f912b5ecb3ddce094a7d8d8eef928bb174523edd3b40f9921",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/common/format.hpp": "b0ce982cf71f4e2f9438612221484c69d5e83d7c899c4aedbd1101d7b6f55a9c",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/vidage/vidage_v11.cpp": "c7e3d17cd658137e8dbc85ab51b915113bf2eb65675f45ff14ef989695285604"
+  },
+  "witness_sha256": {
+    "check.py": "270a895ce50f9e1095a0769b21cb4bdd45511de31375e32b1a124c6ee176cbb1",
+    "reader.cpp": "7f633439996b5a4301d6018ecd4df4967e46b519b3b4d6d228559ad05d891ad9"
+  }
+}

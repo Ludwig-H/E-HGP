@@ -1,0 +1,134 @@
+{
+  "base_26b53648c_equals_3d6c92c1f": {
+    "different": 0,
+    "files": 191
+  },
+  "checker_sha256": "3d15538cff528421f50446023368b219f5361c409cd06f9968d4610be313855e",
+  "cst0024_cause_established": false,
+  "executions_replayed": 0,
+  "hashes_closed": true,
+  "historical_logs_recovered": false,
+  "integrated_numeric_patch": {
+    "added": 3637,
+    "files": 82,
+    "removed": 729
+  },
+  "mutant_manifests": {
+    "cloud": {
+      "construction_expected": 0,
+      "count": 17,
+      "floor": 17
+    },
+    "core": {
+      "construction_expected": 2,
+      "count": 84,
+      "floor": 84
+    },
+    "index": {
+      "construction_expected": 0,
+      "count": 18,
+      "floor": 18
+    },
+    "io": {
+      "construction_expected": 0,
+      "count": 22,
+      "floor": 22
+    },
+    "num": {
+      "construction_expected": 1,
+      "count": 76,
+      "floor": 76
+    },
+    "sched": {
+      "construction_expected": 0,
+      "count": 8,
+      "floor": 8
+    }
+  },
+  "pin": "c3de9d73d8999f2f1e31a0f592b829efc6e7a4da",
+  "ports_current": {
+    "counts": {
+      "adapted": 70,
+      "copies": 28,
+      "renames": 111,
+      "rows": 209,
+      "sha_ok": 209
+    },
+    "differences": [
+      "src/cloud/cloud.hpp",
+      "src/index/census.cpp",
+      "src/index/census_workspace.cpp",
+      "src/index/index.hpp",
+      "src/num/center_region.cpp",
+      "src/num/centers.cpp",
+      "src/num/geometry.hpp",
+      "src/num/geometry_internal.hpp",
+      "src/num/lattice_bounds.hpp",
+      "src/num/level.hpp",
+      "src/num/module.cmake",
+      "src/num/num.hpp",
+      "src/num/orientation_certificate.hpp",
+      "src/num/power_certificate.hpp",
+      "src/num/power_checked.hpp",
+      "src/num/q4_weights.hpp",
+      "src/num/roots.cpp",
+      "src/num/roots.hpp",
+      "src/num/sphere.cpp",
+      "src/num/wide.hpp",
+      "tests/cloud/tests.cmake",
+      "tests/index/probe.cpp",
+      "tests/mutants/cloud.json",
+      "tests/mutants/index.json",
+      "tests/mutants/num.json",
+      "tests/num/candidate_test.cpp",
+      "tests/num/checked_power_support.hpp",
+      "tests/num/distance_probe.cpp",
+      "tests/num/distance_test.cpp",
+      "tests/num/power_reference.hpp"
+    ]
+  },
+  "ports_fixed_95247cf4b": {
+    "counts": {
+      "adapted": 70,
+      "copies": 28,
+      "renames": 111,
+      "rows": 209,
+      "sha_ok": 209
+    },
+    "differences": []
+  },
+  "ports_initial": {
+    "counts": {
+      "adapted": 69,
+      "copies": 28,
+      "renames": 112,
+      "rows": 209,
+      "sha_ok": 209
+    },
+    "differences": [
+      "reference/tests.cmake"
+    ]
+  },
+  "qualification_g4": false,
+  "schema": "audit_u32_qualification.v1",
+  "source_sha256": {
+    "CMakeLists.txt": "9f8121775a75e2c18e7016709d8fea1bf32f392cb8361238d1b76c8cf1dac5ea",
+    "cmake/gates.cmake": "b67f964eb11b74e301fa73c2c741a7bd5040e33182f93ccd3ada1311a047021d",
+    "cmake/run_expect.cmake": "82be01f59abc38b2448cbe6844e02f4b0fa8d981497d57cc01c98bbc5b4e2b8b",
+    "docs/PORTS.md": "ba2a89e9f37965bcfa40eca89c23adfe7c8d076a9378f5ebd684736f3668347e",
+    "docs/PROVENANCE.md": "5ac111b41949e40ebdf2b4af69ea98589266bf62d06835d26684fd25a6b770b8",
+    "receipts/audit_claude_socle_t0_20261007/verifier_ports.py": "aabf256679e67abea911eeb0cbc10fdbcf8c13a09005c372fa3c4731d0edb375",
+    "receipts/developpement_20261007/numerique_socle.md": "e56925b1be665f2e0ea50777c57af7f03bb4c4b956295073b01c457029c3d088",
+    "receipts/developpement_20261007/numerique_socle_CHANGEMENTS.md": "0a78d03f45a79c8805af62fd0565bc7cac3a60c326e04ca69c02ac73b347cbb4",
+    "receipts/developpement_20261007/numerique_socle_RAPPORT.md": "2f32cd427a48a7e2e806937ec0fb2eac86b2db069d97071422b1627aa46409e1",
+    "reference/test_dump_v10.py": "393434560a4a566e0a8497ce7d3e21615eb248b2ad4c50d698fedd591ec53fcf",
+    "reference/tests.cmake": "ce15464c2a2854ae96b194b7d700c29808270858fe4c8925174b26506a25fd3b",
+    "tests/mutants/cloud.json": "f9def36ffe292576cf0609f3bf425b3aac9a7261f92d6385ee60c6781e5fe9ac",
+    "tests/mutants/core.json": "a80037348966fe277a28de710598812bbddc96f2bcfc8b1db6d793aae5b3d973",
+    "tests/mutants/index.json": "e5436dbed65dec67703dc1c4e447a82828f7ada7ef8f9305cde625bca2ae4a48",
+    "tests/mutants/io.json": "089c04ea679702201bf7d55e9018ef822382c3282b7a106ab8a2a5d7f0012d07",
+    "tests/mutants/num.json": "c1801712013839832037d6cc9d490c9cd4eefecd9dcd909a65a6035ee2da3d9e",
+    "tests/mutants/run_mutants.py": "5ffa023440ab8b47e98b1f31186d0ef8e4f3f1fcdcd6a77671fe3f5ba51b3bec",
+    "tests/mutants/sched.json": "42e430f407455571f68eab164b4696227baf4c8b93ace6ab40954a67422e5318"
+  }
+}
