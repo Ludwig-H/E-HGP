@@ -44,7 +44,7 @@ son reçu. **Aucune tranche ne commence avant les décisions D1 à D7** de [`DEC
 | `MES-M4` | noyau union-find sans lots et contraction, sur les graines vidées | noyau ≤ 10 ms à K5 et ≤ 35 ms à K10 à un fil ; contraction ≤ 3 ms ; forêts identiques. **Jugé le 7 octobre : tenue à K5 ; à K10, contraction 3,2 à 4,3 ms, au-dessus du seuil** (sessions B et D, preuves comprises) |
 | `MES-M5` | parcours des boîtes en largeur sur GPU | même ensemble final de feuilles que le CPU. **Jugé le 7 octobre : adopté** (0,10 du temps de la v11 à K5/24, 0,07 à K10/24, transferts compris ; seuil 1/4) |
 | `MES-M6` | coût de Session : contexte, modules, transferts épinglés, attente bloquante ou active | publié ; fixe le budget du régime résident. **Mesuré le 7 octobre** : contexte 116 ms, lancement synchronisé 8 µs, attente `yield` |
-| `MES-M7` | profil par route des descentes, v11 contre v10 R2, même session, à un fil, K5 et K10 | publié ; confirme la part de la plus petite boule, du census et des coûts fixes |
+| `MES-M7` | profil par composante de la résolution (sonde, plus petite boule par route, census saturé et complet, saut, partie suivante), à un fil, compteur de cycles, sur la réplique v12, K5 et K10 ; la comparaison à la v10 R2 est abandonnée (précision du 7 octobre, [contrat de la tour](CONTRAT_TOUR.md) § 11) | publié ; confirme la part de la plus petite boule, du census et des sondes |
 | `MES-S` | étendues locales (feuilles, supports, parties de descente) et part de chaque voie numérique ([`CONTRAT_NUMERIQUE.md`](CONTRAT_NUMERIQUE.md) § 8) | publié ; fixe les paliers |
 | `MES-E` | v11 gelée sur des découpes de 1, 2, 4 et 8 millions de sites d'une scène réelle, K5 puis K10 : volumes par site, pic mémoire, temps, point de rupture | publié ; fixe les objectifs du régime (b) et la taille des lots |
 | `MES-P` | v11 gelée sur 100 à 10 000 sites, voie CPU et voie GPU, à chaud : coût fixe et coût par site | publié ; fixe le seuil de la voie CPU des petits nuages |
@@ -84,10 +84,13 @@ Euler à K+2 (filet), différentiel du catalogue contre la v11 sur trames entiè
 
 ## 3. T2 — tour
 
-**Entrée** : T1 ; `MES-M3`, `MES-M4`, `MES-M7` jugés ; `LEM-T1`, `LEM-T3`–`LEM-T6` contre-lus et inscrits au registre ;
-contrat des compteurs écrit.
+**Entrée** : `MES-M3`, `MES-M4`, `MES-M7` jugés ; `LEM-T1`, `LEM-T3`–`LEM-T6` contre-lus et inscrits au registre ;
+contrat de la tranche et des compteurs écrit et contre-lu ([`CONTRAT_TOUR.md`](CONTRAT_TOUR.md), 7 octobre). Le port
+commence sur le catalogue de la v11, lu par un adaptateur de test de ses vidages `MHGP12DP` (même objet `Catalogue`
+que T1) ; la **sortie** exige le catalogue de T1 dans la chaîne mesurée.
 
-**Travail** : résolution (plus petite boule certifiée, mémo déterministe, census borné, table de populations résidente) ;
+**Travail** : résolution (plus petite boule certifiée, mémo déterministe, census borné, table de populations résidente,
+leviers `G-L3` à `G-L7` jugés par `MES-G1` à `MES-G4`) ;
 noyau union-find recouvert ; contraction ; verticales ; registre d'événements. Portes : oracle borné (forêt entière,
 coupes ouvertes et fermées, verticales), `JUG-EMST` à l'échelle, `pipeline` W1 contre W48, mutants (plateau séquentiel,
 date terminale, contraction d'hyperarête entière).

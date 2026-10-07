@@ -97,6 +97,7 @@ l'inclusion $S\subseteq F$ : elle était fausse (constat `CST-0101`, témoin `WI
 | `LEM-T5` | requêtes d'ancêtre par l'historique d'attache, profondeur au plus $\log_2$ du nombre de naissances ; `component_at` **sous l'hypothèse** $\mathrm{rang}(\ell)\leq r$, listes par survivant dans l'ordre de traitement | verticales et rattachements (`CST-0105`) |
 | `LEM-T6` | image d'une naissance depuis le sommet laissé par la jonction de la même boule à l'ordre $k-1$ | verticales en $O(1)$ |
 | `LEM-T7` | quotient local des coquilles étendues par la famille des fenêtres des plans par le centre, qui contient tous les séparables maximaux **sans s'y réduire** ; $O(m^{3})$ prédicats ; (iv) donne l'union couverte, pas un compte de sites nouveaux | coquilles étendues sans énumération (`CST-0106`) |
+| `LEM-HORS-CAT` | si la plus petite boule d'une $k$-partie n'est pas dans $\mathrm{Cat}_K$, alors $p\geq K-2$ ; un census complet ($p<k$) n'arrive qu'aux ordres $K-1$ et $K$ ($q_{\min}\leq 4$ dans $\mathbb{R}^{3}$) ; ajouté le 7 octobre 2026, prouvé dans le [contrat de la tour](CONTRAT_TOUR.md) § 4.2 | dimensionne le census de l'étage G (leviers `G-L3`, `G-L4`) |
 
 ## 5. Témoins à graver d'abord
 

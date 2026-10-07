@@ -100,6 +100,8 @@ trame $t$ (CPU).
 
 ### 4.2 G — résolution des graines
 
+Contrat, profil mesuré à K5 et leviers à juger : [`CONTRAT_TOUR.md`](CONTRAT_TOUR.md) § 4.
+
 - **Fonction pure** du domaine immuable ; elle ne lit jamais la structure d'union : toute la résolution se calcule en
   parallèle.
 - **Plus petite boule proposée puis certifiée** (`LEV-MEB-CERT`, mécanisme de la v10 et décision D-G3 de la conception
