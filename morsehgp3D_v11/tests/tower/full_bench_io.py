@@ -108,7 +108,7 @@ def main():
             result, rows = child(kmax=4 if mode == 'kmax_above_n' else 3,
                                  budget=0 if mode == 'budget' else 1 << 28,
                                  workers=0 if mode == 'workers' else 1, destination=root if mode == 'output' else None,
-                                 optimizations={'opt_negative':'-1','opt_large':'524288','opt_text':'x','opt_requires_lanes':'128',
+                                 optimizations={'opt_negative':'-1','opt_large':'1048576','opt_text':'x','opt_requires_lanes':'128',
                                                 'opt_concurrent_requires_lanes':'8192','opt_replay_requires_batch':'131072',
                                                 'opt_placement_requires_concurrent':'262144',
                                                 'split_large':'49147 1 1001','split_requires_batch':'16379 1 400'}.get(mode))

@@ -43,7 +43,7 @@ def unsigned(event, keys):
 
 
 def optimization(value):
-    need(type(value) is int and 0 <= value <= 524287, 'optimization mode outside 0..524287')
+    need(type(value) is int and 0 <= value <= 1048575, 'optimization mode outside 0..1048575')
     need(not value & 128 or value & 8, 'parallel verticals require regular lanes')
     need(not value & 8192 or value & 8, 'concurrent orders require regular lanes')
     # 16384 : feuille source unique jouee sur l'hote ; 32768 / 65536 : feuilles en lot (Pool / GPU). Ces voies

@@ -1,6 +1,6 @@
 {
   "module": "core",
-  "plancher": 78,
+  "plancher": 82,
   "mutants": [
     {
       "id": "priorite_plus_petit_k",
@@ -175,8 +175,8 @@
     {
       "id": "liberation_non_comptee",
       "fichier": "src/core/buffer.cpp",
-      "cherche": "  ::operator delete(block);\n  account.used.fetch_sub(bytes, std::memory_order_relaxed);",
-      "remplace": "  ::operator delete(block);\n  (void)account;\n  (void)bytes;",
+      "cherche": "  else ::operator delete(block);\n  account.used.fetch_sub(bytes, std::memory_order_relaxed);",
+      "remplace": "  else ::operator delete(block);\n  (void)account;",
       "porte": "mhgp11_core_unit_budget",
       "note": "un tampon rendu resterait compte"
     },
@@ -630,6 +630,38 @@
       "remplace": "    if len(cases) != 1:",
       "porte": "mhgp11_support_run_mutants",
       "note": "l issue d une porte d un autre nom serait prise pour celle de la porte citee"
+    },
+    {
+      "id": "cache_reprise_sans_retrait",
+      "fichier": "src/core/buffer.cpp",
+      "cherche": "      block = cache.slots[k][--cache.count[k]];",
+      "remplace": "      block = cache.slots[k][cache.count[k] - 1];",
+      "porte": "mhgp11_core_unit_block_cache",
+      "note": "Cache de blocs : un bloc repris quitte le cache ; sinon deux Buffer vivants partagent le meme bloc."
+    },
+    {
+      "id": "cache_capacite_ignoree",
+      "fichier": "src/core/buffer.cpp",
+      "cherche": "    if (cache.count[k] < kCacheSlots && capacity <= cache.capacity - cache.idle) {  // invariant : idle <= capacity",
+      "remplace": "    if (cache.count[k] < kCacheSlots) {",
+      "porte": "mhgp11_core_unit_block_cache",
+      "note": "Cache de blocs : les octets inactifs restent sous la capacite declaree, seconde borne de la memoire."
+    },
+    {
+      "id": "cache_inactif_non_decompte",
+      "fichier": "src/core/buffer.cpp",
+      "cherche": "      cache.idle -= capacity;\n",
+      "remplace": "",
+      "porte": "mhgp11_core_unit_block_cache",
+      "note": "Cache de blocs : un bloc repris ne compte plus parmi les octets inactifs."
+    },
+    {
+      "id": "cache_reprise_jamais",
+      "fichier": "src/core/buffer.cpp",
+      "cherche": "    if (cache.count[k] != 0) {",
+      "remplace": "    if (cache.count[k] > 1) {",
+      "porte": "mhgp11_core_unit_block_cache",
+      "note": "Cache de blocs : un seul bloc inactif de la classe suffit a servir la reservation suivante."
     }
   ]
 }

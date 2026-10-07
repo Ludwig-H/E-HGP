@@ -204,6 +204,15 @@ Décisions demandées par les audits du 2 octobre 2026 ; elles valent pour toute
   `publish` refuse le produit d'une autre `Session` (`parameter_out_of_range`, avant toute création).
 - Chaque étage publie son pic d'octets réservés ; le pic d'une opération publique est mesuré, pas estimé. Le CLI
   accepte un plafond ; au-delà, refus `resource_exhausted`, avant tout résultat partiel.
+- Cache de blocs (7 octobre 2026, [`buffer.cpp`](../src/core/buffer.cpp)) : `MemoryBudget(limite, cache)` garde,
+  jusqu'à `cache` octets inactifs, les blocs d'au moins 256 Kio rendus par ses `Buffer`, et les reprend à la
+  réservation suivante de la même classe de taille (pas de 2^(1/8), au plus 32 blocs par classe). Ils ne sont plus
+  rendus au système (`munmap`, sur un seul fil) puis refaits page par page à la passe suivante. Le compte du budget
+  (`used`, `peak`, `admit`, `released`) est celui des `Buffer` vivants, inchangé. Les blocs inactifs ont leur propre
+  borne explicite, et sont rendus au système avec le compte. Sous ASan, ils sont empoisonnés : un usage après
+  restitution reste détecté. Sans cache (le défaut), le comportement est inchangé. Mesure de l'effet avec le
+  réglage glibc équivalent : reçu [`retention_tas`](../receipts/developpement_20261007/retention_tas/README.md).
+  Porte : `mhgp11_core_unit_block_cache`.
 
 ### 7.2 Opération atomique
 

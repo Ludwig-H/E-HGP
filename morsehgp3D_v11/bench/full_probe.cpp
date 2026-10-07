@@ -264,10 +264,17 @@ Outcome full_pass(Cloud cloud_value, MemoryBudget& budget, sched::Pool& pool_ref
                                         16384 * unsigned(params.device_leaf) + 32768 * unsigned(params.batch_leaves) +
                                         65536 * unsigned(params.cuda_leaves) +
                                         131072 * unsigned(params.replay_overflow) +
-                                        262144 * unsigned(full_params.place_pipeline))
+                                        262144 * unsigned(full_params.place_pipeline) +
+                                        524288 * unsigned(budget.cache_stats().capacity != 0))
             << ",\"wall_ns\":" << full_ns << ",\"index_ns\":" << index_ns << ",\"domain_ns\":" << domain_ns
             << ",\"forest_ns\":" << forest_ns << ",\"cpu_seconds\":" << std::setprecision(12) << cpu_seconds
             << ",\"peak_reserved_bytes\":" << budget.peak() << ",\"reserved_after_bytes\":" << budget.used();
+  {  // cache de blocs du budget (bit 524288) : diagnostic, aucune decision ne le lit
+    const auto cache = budget.cache_stats();
+    std::cout << ",\"block_cache\":{\"capacity\":" << cache.capacity << ",\"idle\":" << cache.idle
+              << ",\"idle_peak\":" << cache.idle_peak << ",\"hits\":" << cache.hits << ",\"misses\":" << cache.misses
+              << ",\"rejected\":" << cache.rejected << '}';
+  }
   if (tower.ok()) {
     u64 lookup_bytes = 0;
     for (u32 k = 1; k <= tower.value().kmax(); ++k)
@@ -325,9 +332,12 @@ Outcome full_pass(Cloud cloud_value, MemoryBudget& budget, sched::Pool& pool_ref
   return serialize(argv[3], tower.value());
 }
 
+// Cache de blocs du budget (bit 524288, recu retention_tas) : 4 Gio de blocs inactifs au plus.
+inline constexpr u64 kProbeBlockCache = u64{4} << 30;
+
 Outcome run(char** argv, const CatalogueParams& params, const FullParams& full_params, u64 bytes, u32 workers,
-            u32 passes) {
-  MemoryBudget budget(bytes);
+            u32 passes, bool block_cache) {
+  MemoryBudget budget(bytes, block_cache ? kProbeBlockCache : 0);
   Stopwatch read_clock;
   auto input = read_input(argv[1], argv[2], budget);
   const u64 read_ns = read_clock.nanoseconds();
@@ -368,7 +378,7 @@ int main(int argc, char** argv) {
   if (options[0] > 12 || options[1] > 1024 || options[2] > 1024 ||
       options[6] < 1 || options[6] > sched::kMaxWorkers) return 2;
   u64 optimizations = 0;
-  if (argc >= 12 && (!parse(argv[11], optimizations) || optimizations > 524287)) return 2;
+  if (argc >= 12 && (!parse(argv[11], optimizations) || optimizations > 1048575)) return 2;
   u64 passes = 1;  // mode a chaud : passes FULL successives dans le meme processus
   if (argc >= 13 && (!parse(argv[12], passes) || passes < 1 || passes > 64)) return 2;
   u64 split = 0;  // part (pour mille) du travail estime des feuilles du lot confiee au Pool de l'hote
@@ -412,7 +422,8 @@ int main(int argc, char** argv) {
   params.kmax = static_cast<int>(options[0]); params.leaf_size = static_cast<u32>(options[1]);
   params.max_leaf = static_cast<u32>(options[2]); params.max_nodes = options[3]; params.ball_limit = options[4];
   const auto result = guarded([&]() {
-    return run(argv, params, full_params, options[5], static_cast<u32>(options[6]), static_cast<u32>(passes));
+    return run(argv, params, full_params, options[5], static_cast<u32>(options[6]), static_cast<u32>(passes),
+               (optimizations & 524288) != 0);  // cache de blocs du budget
   });
   std::cout << "{\"phase\":\"exit\","; status(result); std::cout << "}\n";
   return exit_code(result);

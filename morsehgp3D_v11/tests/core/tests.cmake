@@ -1,6 +1,7 @@
 # Portes du module core.
 mhgp11_add_unit(mhgp11_core_unit SOURCES status_test.cpp buffer_test.cpp ledger_test.cpp
                 GROUPS types reasons outcome macros result guarded budget budget_threads reservation buffer csr ledger
+                       block_cache
                 LABELS fast)
 
 # Penurie de memoire injectee : operator new remplace dans cet executable seulement.

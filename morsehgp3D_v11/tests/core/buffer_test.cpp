@@ -331,3 +331,106 @@ MHGP11_TEST(csr, 25) {
   CHECK(!well_formed({0, u64{1} << 32}, 0, budget));
   CHECK(!well_formed({0, (u64{1} << 32) + 2}, 2, budget));
 }
+
+// Cache de blocs (MemoryBudget(limit, cache_bytes), 7 octobre 2026) : meme bloc repris dans la meme classe de taille,
+// bloc neuf dans une autre, deux blocs vivants jamais confondus, blocs inactifs sous la capacite et au plus 32 par
+// classe, petites tailles hors cache, compte du budget identique avec et sans cache, fils concurrents.
+MHGP11_TEST(block_cache, 40) {
+  constexpr u64 kKib = 1024;
+  {
+    MemoryBudget plain(MemoryBudget::kUnlimited);
+    Buffer<u8> b;
+    REQUIRE(b.allocate(300 * kKib, plain).ok());
+    b.reset();
+    CHECK_EQ(plain.cache_stats().capacity, 0u);
+    CHECK_EQ(plain.cache_stats().misses, 0u);
+  }
+  MemoryBudget budget(MemoryBudget::kUnlimited, 8 * kKib * kKib);
+  Buffer<u8> a;
+  REQUIRE(a.allocate(300 * kKib, budget).ok());
+  const u8* first = a.data();
+  for (u64 i = 0; i < a.size(); i += 4096) a[i] = 7;
+  a.reset();
+  CHECK_EQ(budget.used(), 0u);
+  CHECK_EQ(budget.cache_stats().misses, 1u);
+  CHECK(budget.cache_stats().idle >= 300 * kKib);
+  REQUIRE(a.allocate(300 * kKib, budget).ok());  // meme taille : meme bloc
+  CHECK(a.data() == first);
+  CHECK_EQ(budget.cache_stats().hits, 1u);
+  CHECK_EQ(budget.cache_stats().idle, 0u);
+  CHECK_EQ(budget.used(), 300 * kKib);
+  a.reset();
+  REQUIRE(a.allocate(300 * kKib - 1000, budget).ok());  // meme classe : meme bloc
+  CHECK(a.data() == first);
+  Buffer<u8> b;
+  REQUIRE(b.allocate(300 * kKib - 1000, budget).ok());  // meme classe, cache vide : bloc neuf, distinct du vivant
+  CHECK(b.data() != a.data());
+  a.reset(); b.reset();
+  Buffer<u8> c;
+  REQUIRE(c.allocate(330 * kKib, budget).ok());  // classe superieure : ni l'un ni l'autre
+  CHECK(c.data() != first);
+  c.reset();
+  {
+    Buffer<u8> small;  // sous 256 Kio : hors cache
+    const auto before = budget.cache_stats();
+    REQUIRE(small.allocate(100 * kKib, budget).ok());
+    small.reset();
+    CHECK_EQ(budget.cache_stats().hits + budget.cache_stats().misses, before.hits + before.misses);
+  }
+  CHECK(budget.cache_stats().idle <= budget.cache_stats().capacity);
+  // Capacite : 1 Mio de blocs inactifs au plus ; les autres sont rendus au systeme.
+  MemoryBudget tight(MemoryBudget::kUnlimited, kKib * kKib);
+  {
+    std::array<Buffer<u8>, 4> held;
+    for (auto& h : held) REQUIRE(h.allocate(400 * kKib, tight).ok());
+  }
+  CHECK(tight.cache_stats().idle <= kKib * kKib);
+  CHECK(tight.cache_stats().rejected >= 2);
+  // Au plus 32 blocs inactifs par classe.
+  MemoryBudget roomy(MemoryBudget::kUnlimited, u64{1} << 34);
+  {
+    std::vector<Buffer<u8>> held(33);
+    for (auto& h : held) REQUIRE(h.allocate(260 * kKib, roomy).ok());
+  }
+  CHECK_EQ(roomy.cache_stats().rejected, 1u);
+  // Compte du budget identique avec et sans cache, pas a pas.
+  MemoryBudget with(MemoryBudget::kUnlimited, u64{1} << 30), without(MemoryBudget::kUnlimited);
+  bool same = true;
+  {
+    std::vector<Buffer<u8>> x(6), y(6);
+    for (int step = 0; step < 24; ++step) {
+      const u64 i = static_cast<u64>(step % 6), size = (128 + 97 * static_cast<u64>(step)) * kKib;
+      if (step % 4 == 3) { x[i].reset(); y[i].reset(); continue; }
+      same = same && x[i].allocate(size, with).ok() && y[i].allocate(size, without).ok();
+      same = same && with.used() == without.used() && with.peak() == without.peak();
+    }
+  }
+  CHECK(same);
+  CHECK(with.used() == 0 && without.used() == 0 && with.peak() == without.peak());
+  // Fils concurrents : chaque bloc vivant porte la marque de son fil du premier au dernier octet.
+  MemoryBudget shared(MemoryBudget::kUnlimited, u64{1} << 28);
+  std::atomic<u64> bad{0}, cacheable{0};
+  {
+    std::vector<std::thread> threads;
+    for (u32 t = 0; t < 8; ++t)
+      threads.emplace_back([&shared, &bad, &cacheable, t] {
+        u64 state = 0x9E3779B97F4A7C15ull * (t + 1);
+        for (int it = 0; it < 150; ++it) {
+          state = state * 6364136223846793005ull + 1442695040888963407ull;
+          const u64 size = 200 * kKib + (state >> 33) % (1800 * kKib);
+          Buffer<u8> mine;
+          if (!mine.allocate(size, shared).ok()) { ++bad; continue; }
+          cacheable += size >= 256 * kKib;
+          mine[0] = static_cast<u8>(t); mine[size - 1] = static_cast<u8>(t);
+          std::this_thread::yield();
+          if (mine[0] != t || mine[size - 1] != t) ++bad;
+        }
+      });
+    for (auto& th : threads) th.join();
+  }
+  const auto stats = shared.cache_stats();
+  CHECK_EQ(bad.load(), 0u);
+  CHECK_EQ(stats.hits + stats.misses, cacheable.load());
+  CHECK(stats.hits > 0 && stats.idle <= stats.capacity);
+  CHECK_EQ(shared.used(), 0u);
+}

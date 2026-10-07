@@ -41,15 +41,26 @@ namespace mhgp11 {
 
 namespace detail {
 
+// Cache de blocs d'un compte (buffer.cpp) et ses compteurs, diagnostic seulement.
+struct BlockCache;
+struct BlockCacheStats {
+  u64 capacity = 0, idle = 0, idle_peak = 0, hits = 0, misses = 0, rejected = 0;
+};
+
 // Compte d'un budget. Invariant : used <= limit a tout instant ; peak = plus grande valeur prise par used, donc le
 // maximum des reservations, y compris celle d'une allocation que le systeme refuse ensuite. Ce n'est pas la memoire
-// residente du processus.
+// residente du processus. cache : nul sauf capacite de cache non nulle ; ses blocs inactifs sont rendus avec le compte.
 struct BudgetAccount {
-  explicit BudgetAccount(u64 limit_bytes) noexcept : limit(limit_bytes) {}
+  BudgetAccount(u64 limit_bytes, u64 cache_bytes);
+  ~BudgetAccount();
+  BudgetAccount(const BudgetAccount&) = delete;
+  BudgetAccount& operator=(const BudgetAccount&) = delete;
   const u64 limit;
   std::atomic<u64> used{0};
   std::atomic<u64> peak{0};
+  std::unique_ptr<BlockCache> cache;
 };
+[[nodiscard]] BlockCacheStats cache_stats(const BudgetAccount& account) noexcept;
 
 // Reserve `bytes` octets dans le compte, puis les alloue. nullptr si le compte refuse ou si l'allocation echoue ;
 // rien ne reste alors reserve. bytes > 0.
@@ -64,11 +75,19 @@ void budget_release_only(BudgetAccount& account, u64 bytes) noexcept;
 
 // Budget memoire d'une Session : limite en octets sur la somme des Buffer vivants qui y ont reserve.
 // La construction alloue le compte partage et peut lever std::bad_alloc (frontiere : guarded, status.hpp).
+//
+// Cache de blocs (7 octobre 2026, recu retention_tas) : avec cache_bytes > 0, les blocs d'au moins 256 Kio rendus par
+// les Buffer de ce budget sont gardes, jusqu'a cache_bytes octets inactifs, et repris par la reservation suivante de
+// la meme classe de taille (2^(1/8) par pas). Ils ne sont plus rendus au systeme (munmap, sur un seul fil) puis
+// refaits page par page a la passe suivante. Le compte (used, peak, admit, released) ne change pas : il porte les
+// Buffer vivants. Les blocs inactifs sont bornes par cache_bytes, seconde borne explicite, et rendus au systeme avec
+// le compte. Aucune decision ni aucune sortie n'en depend. Sans cache (defaut), comportement inchange.
 class MemoryBudget {
  public:
   static constexpr u64 kUnlimited = std::numeric_limits<u64>::max();
 
-  explicit MemoryBudget(u64 limit_bytes) : account_(std::make_shared<detail::BudgetAccount>(limit_bytes)) {}
+  explicit MemoryBudget(u64 limit_bytes, u64 cache_bytes = 0)
+      : account_(std::make_shared<detail::BudgetAccount>(limit_bytes, cache_bytes)) {}
   MemoryBudget(const MemoryBudget&) = delete;
   MemoryBudget& operator=(const MemoryBudget&) = delete;
 
@@ -96,6 +115,9 @@ class MemoryBudget {
   [[nodiscard]] Outcome released() const noexcept {
     return used() == 0 ? Outcome{} : fail(Reason::budget_not_released);
   }
+
+  // Compteurs du cache de blocs (capacite nulle sans cache) : diagnostic, aucune decision ne les lit.
+  [[nodiscard]] detail::BlockCacheStats cache_stats() const noexcept { return detail::cache_stats(*account_); }
 
  private:
   template <class T>
