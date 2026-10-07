@@ -200,6 +200,98 @@ jusqu'au plafond natif, n'ont pas de porte bornée ; la fermeture $N_j$ de l'ora
   seconde, lemmes A à H contrôlés. C'est le seul cas borné de l'arbre et du rattachement à $K\geq 6$, mais il ne lève pas la limite
   ci-dessus pour les coquilles de 13 à 24 sites.
 
+## Lecteur de transition du catalogue (`transition_catalogue.py`, tranche T1)
+
+```text
+phase=exploration_v12_hors_registre   backend=cpu_reference   quantification=quantized_u21_input_only   public_status=not_claimed
+```
+
+Juge un vidage `MHGP12DP` de genre catalogue (le **candidat**, la v12) contre un vidage de **référence** (la v11
+gelée) par la règle du § 6.1 de [`CONTRAT_CATALOGUE.md`](../docs/CONTRAT_CATALOGUE.md) (format et lecteur : § 8 bis ;
+format : [`common/format.hpp`](../microbancs/mes_m3_m4_tour/common/format.hpp)). Bibliothèque standard, entiers
+exacts (centres à dénominateur commun réduits par pgcd), aucun flottant dans une décision, aucun `assert`. Il ne
+dépend ni du paquet `hgp12_ref` ni d'un module C++ : ses prédicats (centre circonscrit, coordonnées barycentriques,
+côté d'un site, supports d'une sphère) sont écrits pour lui.
+
+| Règle | Portée | Ce qu'elle exige |
+| --- | --- | --- |
+| format | chaque vidage | en-tête, sections exactes, domaines d'indices, $q\in\lbrace 2,3,4\rbrace$, $S^{*}$ strictement croissant puis bourrage, décalages égaux à $p+m$, $I$ et $U$ strictement croissants, positions de sites distinctes : **refus, code 2** |
+| support | chaque vidage | $S^{*}$ support minimal : centre circonscrit exact, coordonnées barycentriques strictement positives |
+| populations | chaque vidage | sites de $I$ strictement dedans, sites de $U$ sur la sphère, $S^{*}\subseteq U$ (correction seule) |
+| admission | chaque vidage | $p+q\leq K+1$ |
+| rangs, niveaux | chaque vidage | niveaux croissants dans l'ordre publié, rang publié = rang dense recalculé, `NLEVELS` = niveaux + 1 |
+| ordre | chaque vidage | à niveau égal, $S^{*}$ croissant dans la convention (v11 : `SiteIdx` ; v12 : listes triées de positions) |
+| qmin, convention | toute coquille étendue ($m>q$) | aucun support de cardinal $<q$ dans $U$ ; $S^{*}$ = premier support de cardinal $q$ de **sa** convention |
+| sites, bijection | entre vidages | mêmes positions ; boules identifiées par (centre, rayon carré) réduits, jamais par $S^{*}$ ; absente, en trop, doublon |
+| populations | entre vidages | $I$ et $U$ égaux comme ensembles de positions (la complétude se juge ici) |
+| gardes défensives | entre vidages | rangs égaux, même cardinal pour des $S^{*}$ différents : conséquences des règles précédentes (mutants déclarés équivalents) |
+
+La règle de convention vaut pour **toute** coquille étendue, pas seulement pour les $S^{*}$ qui diffèrent : un
+candidat qui garderait le départage de la v11 a le même $S^{*}$ que la référence et ne se voit que là. Comptes
+publiés : boules par $q$, coquilles étendues, coquilles à plusieurs supports de cardinal minimal, coquilles dont le
+premier support change de convention, $S^{*}$ différents, boules renumérotées. Codes : 0 conforme, 1 désaccord
+(catégories et premiers écarts), 2 refus d'entrée, 3 invariant interne (toute exception inattendue aussi, jamais un
+code 1 par accident). La comparaison avance niveau par niveau : la mémoire de travail est celle d'un niveau, plus les
+deux fichiers lus en entier.
+
+**Témoins** (`fixtures/transition_catalogue.json`) : six nuages dont le catalogue est celui de l'oracle borné (étage
+B), écrit en vidages par `transition_temoins.py` dans l'une ou l'autre convention, avec des altérations déclarées ;
+attendus gravés (ordre de Morton des sites, ordre publié dans chaque convention, centres, niveaux, $q$, populations,
+$S^{*}$ qui changent) et contrôlés contre l'oracle à chaque passage, ordre propre de l'oracle compris. Le $S^{*}$ de
+chaque convention est choisi par les prédicats de l'oracle (`intgeom`), pas par ceux du lecteur.
+
+| Témoin | Nuage | Ce qu'il fixe |
+| --- | --- | --- |
+| `WIT-TRANSL` | $(0,1,1),(1,0,1),(1,1,0)$, $K=1$ | trois boules diamétrales de niveau $1/2$ renumérotées : ordre publié BC, AC, AB en v11, AB, AC, BC en v12 |
+| `WIT-T1-CARRE` | carré $(0,0,0),(2,0,0),(2,2,0),(0,2,0)$, $K=2$ | coquille à deux supports minimaux ; $S^{*}=AC$ dans **les deux** conventions (A est premier en Morton comme en positions), $BD$ non canonique |
+| `WIT-CARRE-TOURNE` | $(1,0,0),(2,1,0),(1,2,0),(0,1,0)$ et le centre $(1,1,0)$, $K=2$ | $S^{*}$ du cercle : $AC$ en v11, $BD$ en v12 ; intérieur $E$ ; quatre coquilles étendues à support unique |
+| `WIT-CARDINAUX` | sphère de centre $(5,5,5)$, $r^{2}=25$ : paire $AB$ et triangle aigu $CDE$, $K=2$ | $q_{\min}=2$ malgré un support triangulaire minimal pour l'inclusion |
+| `WIT-CERCLE-Q3` | $(3,4,5),(4,3,5),(4,7,5),(7,4,5)$, $K=2$ | triangle : $S^{*}=BCD$ en v11, $ACD$ en v12 |
+| `WIT-SPHERE-Q4` | $(3,4,5),(3,5,4),(3,5,6),(5,7,4),(7,4,5)$, $K=3$ | tétraèdre : $S^{*}=BCDE$ en v11, $ACDE$ en v12 |
+
+**Cas** (49) : 10 conformes (transitions v11 → v12 des six témoins, auto-différentiels v11 contre v11 et v12 contre
+v12, sites du candidat dans l'ordre inverse) ; 25 désaccords, catégories exactes (boule manquante, niveau manquant,
+boule de trop, boule en double, population changée d'un site dans $I$ puis dans $U$, rang faux, ordre de la v11 sous
+la convention v12, $S^{*}$ non canonique, $S^{*}$ départagé par Morton sous la convention v12 pour $q=2$, $3$ et $4$,
+$S^{*}$ par positions sous la convention v11, $S^{*}$ non minimal, $q_{\min}$ faux, puis les défauts « partout » que
+seule une règle par vidage voit : rangs, `NLEVELS`, niveaux décroissants, support non minimal, $q_{\min}$, site de
+$I$ dehors, site de $U$ hors de la sphère, $S^{*}\not\subseteq U$, boule hors de $\mathrm{Cat}_K$, site en trop) ;
+14 refus d'entrée.
+
+**Mutants** (25, `test_transition_catalogue.py --list-mutants`) : 23 règles désactivées, chacune tuée par **chacun**
+de ses cas avec le code déclaré (0 au lieu de 1 pour une règle de désaccord ; 1 au lieu de 0 pour une identité des
+sites par indice, des boules par $S^{*}$ ou une convention v12 départagée par Morton ; 1 ou 3 au lieu de 2 pour un
+contrôle de format) ; 2 gardes défensives déclarées équivalentes, qui laissent le code des 49 cas inchangé.
+
+**Établi par exécution le 7 octobre 2026** (Python 3.12.1 et 3.10.21, normal et `-O`, sous `-S`) : la suite et les
+152 portes du lecteur (76 et leurs jumelles) en 5 s. Auto-différentiel v11 contre v11 sur les vidages de
+`mhgp12_vidage` (v11 gelée `ac081a06f` construite depuis l'archive épinglée ; ng00 K5 : référence à trois fils contre
+un second vidage à un fil, identiques à l'octet), code 0 partout ; temps et mémoire d'un processus du codespace :
+
+| Cas | Boules | Incidences | Coquilles étendues | Plusieurs supports | $S^{*}$ selon la convention | Temps | Mémoire |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| ng00 K5 | 1 306 696 | 6 097 121 | 227 | 3 | 0 | 46,5 s | 183 Mo |
+| ng01 K5 | 1 095 926 | 5 085 683 | 135 | 1 | 0 | 38,1 s | 157 Mo |
+| ng02 K5 | 1 407 885 | 6 514 697 | 572 | 8 | 2 | 47,6 s | 196 Mo |
+| ng00 K10 | 5 512 670 | 45 383 538 | 444 | 7 | 1 | 3 min 53 s | 818 Mo |
+| u8000 K5 | 597 998 | 2 895 136 | 0 | 0 | 0 | 21,9 s | 88 Mo |
+| u16000 K5 | 1 233 046 | 5 979 160 | 0 | 0 | 0 | 45,5 s | 164 Mo |
+| u32000 K5 | 2 536 732 | 12 316 439 | 0 | 0 | 0 | 1 min 40 s | 325 Mo |
+
+Les $S^{*}$ « selon la convention » sont ceux que le passage à la v12 doit changer : aucun sur ng00 et ng01 à K5, deux
+sur ng02 à K5 (une coquille à deux paires diamétrales, une à deux tétraèdres), un sur ng00 à K10 (deux tétraèdres).
+Les mêmes vidages jugés sous la convention v12 ne montrent que ces règles de convention et l'ordre publié à niveau
+égal (ng00 : 72 940 inversions à K5, 140 227 à K10).
+
+**Ce que le lecteur n'établit pas** : la complétude d'un vidage pris seul (un site oublié dans $I$ ou $U$ ne se voit
+que contre l'autre vidage) ; l'exactitude de la référence (un défaut commun aux deux vidages, hors des règles par
+vidage, passe) ; les sorties `supports` et `cover` (sélection de Kruskal, choix de couverture : point 4 de la
+contre-lecture, lecteur à part). **Échelle** : coût linéaire en boules et en incidences (environ 18 µs par boule et
+par vidage à K5, 21 µs à K10 ; ×2,08 puis ×2,20 de 8 000 à 32 000 sites), utilisable sur tout le différentiel de T1
+(trames et uniformes : quelques minutes par cas), pas sur les scènes de plusieurs millions de sites ; il y faudra un
+juge d'échantillon déclaré (fenêtres de rangs tirées d'avance, jugées entièrement dans les deux vidages, plus des
+invariants globaux), jamais un juge exhaustif.
+
 ## Familles gravées (`hgp12_ref/families.py`)
 
 Coordonnées entières dans $[0, 2^{18})$. Générateur écrit dans le fichier (SplitMix64) : les nuages ne dépendent pas
@@ -233,6 +325,10 @@ Codes : 0 conforme, 1 désaccord, 2 refus avant calcul, 3 plancher ou invariant 
 | `mhgp12_reference_supports_refusal` | oracle, fast | usage faux : code 2 |
 | `mhgp12_reference_supports_primitives` | oracle, fast | primitives sur sphere5 (24 sites) : $\mathcal{Q}_b$ par Gram, $N_j$ pour $j\leq 4$ par combinaisons, comptes de $K=1$ à $K=3$, refus explicite de la force brute du lemme F ; ligne `reference_supports_primitives_ok sites=24 supports=828 q2=12 q3=24 q4=792 N2=12 N3=288 N4=3906 refus=2` ; deux secondes |
 | `mhgp12_reference_supports_mutant_<nom>` (13) | oracle, fast | `att_coupe_ouverte`, `ant_coupe_fermee`, `fenetre_forte`, `premier_support_seul`, `triangle_droit_admis`, `cofaces_ordre_k`, `populations_naissances_seules` (lemme A, C, périmètre, F, F, G, H), puis les six mutants de vivacité `w4_gabriel_juge`, `h_fortes_etroites`, `c3_une_fusion`, `regle_parent_inversee`, `interne_vie_inversee`, `m1_support_inverse` (W.4, H, C.3, règle du parent, vie d'une interne, M1) : code 4, tué par sa cause |
+| `mhgp12_reference_transition` | oracle, fast | lecteur de transition du catalogue : attendus gravés des 6 témoins contre l'oracle, 49 cas dans le processus (codes, catégories exactes, lignes, motifs de refus), 3 par la ligne de commande ; ligne `transition_temoins_ok temoins=6 cas=49 conformes=10 desaccords=25 refus=14 boules=55 sstar_changes=4` ; moins d'une seconde |
+| `mhgp12_reference_transition_refusal` | oracle, fast | usage faux : code 2 |
+| `mhgp12_reference_transition_cas_<nom>` (49) | oracle, fast | un cas par la ligne de commande du lecteur : son code (0, 1 ou 2) avec ses catégories, sa ligne ou son motif |
+| `mhgp12_reference_transition_mutant_<nom>` (25) | oracle, fast, mutant | code 4 pour les 23 mutants réels, tués par chacun de leurs cas ; 0 et `mutant_survives` pour les 2 gardes défensives équivalentes |
 
 ## Usage
 

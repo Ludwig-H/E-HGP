@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "kind": "mhgp12_transition_witnesses",
+  "statement": "Lecteur de transition du catalogue (docs/CONTRAT_CATALOGUE.md, paragraphes 6.1 et 8 bis) : sites identifies par leur position, boules par centre exact et rayon carre, bijection exigee, populations et niveaux compares par valeur, S* minimal et premier de SA convention (v11 : SiteIdx ; v12 : positions), ordre publie et rangs recalcules.",
+  "source": "contre-lecture Codex receipts/audit_session_t1_20261007/contrat/README.md (temoin du triangle, regles 1 a 4) ; reference/test_witness_t1.py (WIT-T1-CARRE) ; catalogues de l'oracle borne hgp12_ref, etage B",
+  "witnesses": {
+    "WIT-TRANSL": {
+      "statement": "Triangle equilateral de la contre-lecture : trois boules diametrales de niveau 1/2, supports uniques, ordre publie different selon la convention (v11 : BC, AC, AB ; v12 : AB, AC, BC) ; la boule du triangle (niveau 2/3, q = 3) n'est pas dans Cat_1.",
+      "points": {"A": [0, 1, 1], "B": [1, 0, 1], "C": [1, 1, 0]},
+      "K": 1,
+      "expected": {
+        "boules": 3, "niveaux": 2, "sites_morton": "CBA",
+        "ordre_v11": ["BC", "AC", "AB"], "ordre_v12": ["AB", "AC", "BC"], "sstar_v12_differents": {},
+        "detail": {
+          "AB": {"niveau": "1/2", "centre": ["1/2", "1/2", "1"], "q": 2, "interieur": "", "coquille": "AB"},
+          "AC": {"niveau": "1/2", "centre": ["1/2", "1", "1/2"], "q": 2, "interieur": "", "coquille": "AC"},
+          "BC": {"niveau": "1/2", "centre": ["1", "1/2", "1/2"], "q": 2, "interieur": "", "coquille": "BC"}
+        }
+      }
+    },
+    "WIT-T1-CARRE": {
+      "statement": "Carre de WIT-T1-CARRE, cote catalogue : quatre boules de cote (niveau 1) et le cercle (niveau 2, coquille ABCD, deux supports minimaux AC et BD). A est le premier site dans les deux ordres (la cle de Morton croit avec chaque coordonnee) : S* = AC dans les deux conventions ; BD est un support minimal non canonique. L'ordre des cotes change avec la convention. Meme catalogue a K = 1 et K = 2.",
+      "points": {"A": [0, 0, 0], "B": [2, 0, 0], "C": [2, 2, 0], "D": [0, 2, 0]},
+      "K": 2,
+      "expected": {
+        "boules": 5, "niveaux": 3, "sites_morton": "ABDC",
+        "ordre_v11": ["AB", "AD", "BC", "CD", "AC"], "ordre_v12": ["AD", "AB", "CD", "BC", "AC"],
+        "sstar_v12_differents": {},
+        "detail": {
+          "AB": {"niveau": "1", "centre": ["1", "0", "0"], "q": 2, "interieur": "", "coquille": "AB"},
+          "AD": {"niveau": "1", "centre": ["0", "1", "0"], "q": 2, "interieur": "", "coquille": "AD"},
+          "BC": {"niveau": "1", "centre": ["2", "1", "0"], "q": 2, "interieur": "", "coquille": "BC"},
+          "CD": {"niveau": "1", "centre": ["1", "2", "0"], "q": 2, "interieur": "", "coquille": "CD"},
+          "AC": {"niveau": "2", "centre": ["1", "1", "0"], "q": 2, "interieur": "", "coquille": "ABCD"}
+        }
+      }
+    },
+    "WIT-CARRE-TOURNE": {
+      "statement": "Carre a deux diagonales tourne de 45 degres, et son centre E : le premier site de Morton (A) et le premier en positions (D) sont sur des diagonales differentes, donc S* du cercle = AC en v11 et BD en v12 (coquille ABCD, interieur E) ; les cotes portent E sur leur sphere (coquilles etendues a support unique).",
+      "points": {"A": [1, 0, 0], "B": [2, 1, 0], "C": [1, 2, 0], "D": [0, 1, 0], "E": [1, 1, 0]},
+      "K": 2,
+      "expected": {
+        "boules": 9, "niveaux": 4, "sites_morton": "ADEBC",
+        "ordre_v11": ["AE", "DE", "BE", "CE", "AD", "AB", "CD", "BC", "AC"],
+        "ordre_v12": ["DE", "AE", "CE", "BE", "AD", "CD", "AB", "BC", "AC"],
+        "sstar_v12_differents": {"AC": "BD"},
+        "detail": {
+          "AC": {"niveau": "1", "centre": ["1", "1", "0"], "q": 2, "interieur": "E", "coquille": "ABCD"},
+          "AB": {"niveau": "1/2", "centre": ["3/2", "1/2", "0"], "q": 2, "interieur": "", "coquille": "ABE"}
+        }
+      }
+    },
+    "WIT-CARDINAUX": {
+      "statement": "Coquille a supports de cardinaux differents : sphere de centre (5,5,5) et de rayon carre 25 portant la paire diametrale AB et le triangle aigu CDE de son plan median x = 5 ; q_min = 2 et S* = AB dans les deux conventions, CDE est un support minimal pour l'inclusion mais pas de cardinal minimal.",
+      "points": {"A": [0, 5, 5], "B": [10, 5, 5], "C": [5, 10, 5], "D": [5, 2, 9], "E": [5, 2, 1]},
+      "K": 2,
+      "expected": {
+        "boules": 16, "niveaux": 7, "sites_morton": "EABCD",
+        "ordre_v11": ["AE", "BE", "AC", "AD", "BC", "BD", "DE", "ADE", "BDE", "CE", "CD", "ACE", "BCE", "ACD", "BCD", "AB"],
+        "ordre_v12": ["AE", "AD", "AC", "BE", "BD", "BC", "DE", "ADE", "BDE", "CE", "CD", "ACE", "ACD", "BCE", "BCD", "AB"],
+        "sstar_v12_differents": {},
+        "detail": {
+          "AB": {"niveau": "25", "centre": ["5", "5", "5"], "q": 2, "interieur": "", "coquille": "ABCDE"}
+        }
+      }
+    },
+    "WIT-CERCLE-Q3": {
+      "statement": "Cercle de rayon carre 5 du plan z = 5 sans paire diametrale : deux triangles aigus contiennent le centre ; S* = BCD en v11 (B est le premier site de Morton), ACD en v12 (A est la premiere position).",
+      "points": {"A": [3, 4, 5], "B": [4, 3, 5], "C": [4, 7, 5], "D": [7, 4, 5]},
+      "K": 2,
+      "expected": {
+        "boules": 7, "niveaux": 6, "sites_morton": "BADC",
+        "ordre_v11": ["AB", "BD", "AC", "BC", "AD", "CD", "BCD"],
+        "ordre_v12": ["AB", "AC", "BD", "AD", "BC", "CD", "BCD"],
+        "sstar_v12_differents": {"BCD": "ACD"},
+        "detail": {
+          "BCD": {"niveau": "5", "centre": ["5", "5", "5"], "q": 3, "interieur": "", "coquille": "ABCD"},
+          "BC": {"niveau": "4", "centre": ["4", "5", "5"], "q": 2, "interieur": "A", "coquille": "BC"}
+        }
+      }
+    },
+    "WIT-SPHERE-Q4": {
+      "statement": "Sphere de rayon carre 5 de centre (5,5,5) portant cinq sites sans paire diametrale ni triangle passant par le centre : deux tetraedres contiennent strictement le centre ; S* = BCDE en v11, ACDE en v12.",
+      "points": {"A": [3, 4, 5], "B": [3, 5, 4], "C": [3, 5, 6], "D": [5, 7, 4], "E": [7, 4, 5]},
+      "K": 3,
+      "expected": {
+        "boules": 15, "niveaux": 13, "sites_morton": "BACED",
+        "ordre_v11": ["AB", "AC", "BC", "BD", "CD", "AD", "DE", "AE", "BE", "CE", "BDE", "BCE", "ADE", "CDE", "BCDE"],
+        "ordre_v12": ["AB", "AC", "BC", "BD", "CD", "AD", "DE", "AE", "BE", "CE", "BDE", "BCE", "ADE", "CDE", "BCDE"],
+        "sstar_v12_differents": {"BCDE": "ACDE"},
+        "detail": {
+          "BCDE": {"niveau": "5", "centre": ["5", "5", "5"], "q": 4, "interieur": "", "coquille": "ABCDE"},
+          "BCE": {"niveau": "81/17", "centre": ["83/17", "77/17", "5"], "q": 3, "interieur": "A", "coquille": "BCE"}
+        }
+      }
+    }
+  },
+  "cases": [
+    {"name": "transl", "witness": "WIT-TRANSL", "code": 0, "line": "transition_catalogue_conforme boules=3 incidences=6 niveaux=2 coquilles_etendues=0 supports_multiples=0 sstar_selon_convention=0 sstar_differents=0 renumerotees=2", "why": "trois boules renumerotees par la convention v12, aucun S* change"},
+    {"name": "transl_v11", "witness": "WIT-TRANSL", "convention_candidat": "v11", "code": 0, "line": "transition_catalogue_conforme boules=3 incidences=6 niveaux=2 coquilles_etendues=0 supports_multiples=0 sstar_selon_convention=0 sstar_differents=0 renumerotees=0", "why": "auto-differentiel v11 contre v11"},
+    {"name": "carre", "witness": "WIT-T1-CARRE", "code": 0, "line": "transition_catalogue_conforme boules=5 incidences=12 niveaux=3 coquilles_etendues=1 supports_multiples=1 sstar_selon_convention=0 sstar_differents=0 renumerotees=4", "why": "coquille a deux supports minimaux, meme S* dans les deux conventions, cotes reordonnes"},
+    {"name": "carre_tourne", "witness": "WIT-CARRE-TOURNE", "code": 0, "line": "transition_catalogue_conforme boules=9 incidences=25 niveaux=4 coquilles_etendues=5 supports_multiples=1 sstar_selon_convention=1 sstar_differents=1 renumerotees=6", "why": "S* du cercle AC devient BD : meme boule, meme cardinal, premier de chaque convention"},
+    {"name": "carre_tourne_v11", "witness": "WIT-CARRE-TOURNE", "convention_candidat": "v11", "code": 0, "line": "transition_catalogue_conforme boules=9 incidences=25 niveaux=4 coquilles_etendues=5 supports_multiples=1 sstar_selon_convention=1 sstar_differents=0 renumerotees=0", "why": "auto-differentiel v11 contre v11"},
+    {"name": "carre_tourne_v12_v12", "witness": "WIT-CARRE-TOURNE", "convention_reference": "v12", "code": 0, "line": "transition_catalogue_conforme boules=9 incidences=25 niveaux=4 coquilles_etendues=5 supports_multiples=1 sstar_selon_convention=1 sstar_differents=0 renumerotees=0", "why": "deux vidages en convention v12"},
+    {"name": "carre_tourne_sites_inverses", "witness": "WIT-CARRE-TOURNE", "candidat": [["sites_inverses"]], "code": 0, "line": "transition_catalogue_conforme boules=9 incidences=25 niveaux=4 coquilles_etendues=5 supports_multiples=1 sstar_selon_convention=1 sstar_differents=1 renumerotees=6", "why": "ordre des sites du candidat renverse : identite par position"},
+    {"name": "cardinaux", "witness": "WIT-CARDINAUX", "code": 0, "line": "transition_catalogue_conforme boules=16 incidences=41 niveaux=7 coquilles_etendues=1 supports_multiples=0 sstar_selon_convention=0 sstar_differents=0 renumerotees=6", "why": "q_min = 2 malgre le support triangulaire de la coquille"},
+    {"name": "cercle_q3", "witness": "WIT-CERCLE-Q3", "code": 0, "line": "transition_catalogue_conforme boules=7 incidences=18 niveaux=6 coquilles_etendues=1 supports_multiples=1 sstar_selon_convention=1 sstar_differents=1 renumerotees=4", "why": "S* triangulaire BCD devient ACD"},
+    {"name": "sphere_q4", "witness": "WIT-SPHERE-Q4", "code": 0, "line": "transition_catalogue_conforme boules=15 incidences=45 niveaux=13 coquilles_etendues=6 supports_multiples=1 sstar_selon_convention=1 sstar_differents=1 renumerotees=0", "why": "S* tetraedrique BCDE devient ACDE"},
+    {"name": "boule_manquante", "witness": "WIT-TRANSL", "candidat": [["retirer", "AB"]], "code": 1, "categories": {"absente": 1}, "why": "bijection : boule absente d'un niveau present"},
+    {"name": "niveau_manquant", "witness": "WIT-T1-CARRE", "candidat": [["retirer", "AC"]], "code": 1, "categories": {"absente": 1}, "why": "bijection : niveau entier absent du candidat (rangs et NLEVELS du candidat coherents)"},
+    {"name": "boule_de_trop", "witness": "WIT-TRANSL", "reference": [["retirer", "AB"]], "code": 1, "categories": {"en_trop": 1}, "why": "bijection : boule candidate sans antecedent"},
+    {"name": "boule_en_double", "witness": "WIT-TRANSL", "candidat": [["dupliquer", "AB"]], "code": 1, "categories": {"doublon": 1}, "why": "bijection : meme boule deux fois"},
+    {"name": "interieur_omis", "witness": "WIT-CARRE-TOURNE", "candidat": [["interieur_retirer", "AC", "E"]], "code": 1, "categories": {"interieur": 1}, "why": "population changee d'un site (I incomplet mais correct)"},
+    {"name": "coquille_omise", "witness": "WIT-CARRE-TOURNE", "candidat": [["coquille_retirer", "AC", "A"]], "code": 1, "categories": {"coquille": 1}, "why": "population changee d'un site (U incomplete mais correcte, S* toujours premier)"},
+    {"name": "rang_faux", "witness": "WIT-T1-CARRE", "candidat": [["rang", "AC", 3]], "code": 1, "categories": {"rangs": 1, "rangs_croises": 1}, "why": "rang faux dans le candidat"},
+    {"name": "rangs_faux_partout", "witness": "WIT-T1-CARRE", "reference": [["rang", "AC", 3]], "candidat": [["rang", "AC", 3]], "code": 1, "categories": {"rangs": 2}, "why": "meme rang faux des deux cotes : seul le rang recalcule le voit"},
+    {"name": "niveaux_faux_partout", "witness": "WIT-T1-CARRE", "reference": [["niveaux", 4]], "candidat": [["niveaux", 4]], "code": 1, "categories": {"niveaux": 2}, "why": "NLEVELS faux des deux cotes"},
+    {"name": "niveaux_decroissants_partout", "witness": "WIT-T1-CARRE", "reference": [["niveaux_inverses"]], "candidat": [["niveaux_inverses"]], "code": 1, "categories": {"rangs": 3}, "why": "niveaux publies decroissants des deux cotes, rangs denses dans l'ordre publie"},
+    {"name": "ordre_v11_sous_v12", "witness": "WIT-TRANSL", "candidat": [["ordre", "v11"]], "code": 1, "categories": {"ordre": 2}, "why": "ordre publie de la v11 sous la convention v12"},
+    {"name": "sstar_non_canonique", "witness": "WIT-T1-CARRE", "candidat": [["support", "AC", ["B", "D"]]], "code": 1, "categories": {"convention": 1}, "why": "BD est un support minimal, pas le premier de la convention"},
+    {"name": "sstar_morton_sous_v12", "witness": "WIT-CARRE-TOURNE", "candidat": [["support", "AC", ["A", "C"]]], "code": 1, "categories": {"convention": 1}, "why": "S* departage par le rang de Morton sous la convention v12, egal a celui de la reference"},
+    {"name": "sstar_morton_sous_v12_q3", "witness": "WIT-CERCLE-Q3", "candidat": [["support", "BCD", ["B", "C", "D"]]], "code": 1, "categories": {"convention": 1}, "why": "idem, support triangulaire"},
+    {"name": "sstar_morton_sous_v12_q4", "witness": "WIT-SPHERE-Q4", "candidat": [["support", "BCDE", ["B", "C", "D", "E"]]], "code": 1, "categories": {"convention": 1}, "why": "idem, support tetraedrique"},
+    {"name": "sstar_v12_sous_v11", "witness": "WIT-CARRE-TOURNE", "convention_candidat": "v11", "candidat": [["support", "AC", ["B", "D"]]], "code": 1, "categories": {"convention": 1}, "why": "S* departage par positions sous la convention v11"},
+    {"name": "sstar_non_minimal", "witness": "WIT-T1-CARRE", "candidat": [["support", "AC", ["A", "B", "C"]]], "code": 1, "categories": {"cardinal_support": 1, "support_non_minimal": 1}, "why": "S* = triangle rectangle, qui contient la diagonale AC"},
+    {"name": "sstar_non_minimal_partout", "witness": "WIT-T1-CARRE", "reference": [["support", "AC", ["A", "B", "C"]], ["coquille_retirer", "AC", "D"]], "candidat": [["support", "AC", ["A", "B", "C"]], ["coquille_retirer", "AC", "D"]], "code": 1, "categories": {"support_non_minimal": 2}, "why": "meme S* non minimal des deux cotes : seule la regle du support minimal le voit"},
+    {"name": "qmin_non_minimal", "witness": "WIT-CARDINAUX", "candidat": [["support", "AB", ["C", "D", "E"]]], "code": 1, "categories": {"cardinal_support": 1, "qmin": 1}, "why": "S* = triangle CDE, support minimal pour l'inclusion mais pas de cardinal minimal"},
+    {"name": "qmin_non_minimal_partout", "witness": "WIT-CARDINAUX", "reference": [["support", "AB", ["C", "D", "E"]]], "candidat": [["support", "AB", ["C", "D", "E"]]], "code": 1, "categories": {"qmin": 2}, "why": "meme q_min faux des deux cotes"},
+    {"name": "interieur_non_strict_partout", "witness": "WIT-T1-CARRE", "reference": [["interieur_ajouter", "AB", "D"]], "candidat": [["interieur_ajouter", "AB", "D"]], "code": 1, "categories": {"interieur_non_strict": 2}, "why": "site exterieur range dans I des deux cotes"},
+    {"name": "coquille_hors_sphere_partout", "witness": "WIT-T1-CARRE", "reference": [["coquille_ajouter", "AB", "D"]], "candidat": [["coquille_ajouter", "AB", "D"]], "code": 1, "categories": {"coquille_hors_sphere": 2}, "why": "site exterieur range dans U des deux cotes"},
+    {"name": "support_hors_coquille_partout", "witness": "WIT-T1-CARRE", "reference": [["coquille_retirer", "AB", "B"]], "candidat": [["coquille_retirer", "AB", "B"]], "code": 1, "categories": {"support_hors_coquille": 2}, "why": "S* hors de U des deux cotes"},
+    {"name": "admission_partout", "witness": "WIT-TRANSL", "reference": [["ajouter", 2, "ABC"]], "candidat": [["ajouter", 2, "ABC"]], "code": 1, "categories": {"admission": 2}, "why": "boule du triangle (p + q = 3 > K + 1 = 2) ajoutee des deux cotes"},
+    {"name": "site_en_trop", "witness": "WIT-TRANSL", "candidat": [["site_en_trop", [5, 5, 5]]], "code": 1, "categories": {"sites": 1}, "why": "site du candidat dans aucune boule et absent de la reference"},
+    {"name": "refus_magie", "witness": "WIT-TRANSL", "candidat": [["magie"]], "code": 2, "refus": "magie inconnue"},
+    {"name": "refus_genre", "witness": "WIT-TRANSL", "candidat": [["genre", 2]], "code": 2, "refus": "genre 2"},
+    {"name": "refus_k_differents", "witness": "WIT-TRANSL", "candidat": [["K", 3]], "code": 2, "refus": "K differents"},
+    {"name": "refus_tronque", "witness": "WIT-TRANSL", "candidat": [["tronquer", 4]], "code": 2, "refus": "tronque"},
+    {"name": "refus_octets_en_trop", "witness": "WIT-TRANSL", "candidat": [["octets_en_trop"]], "code": 2, "refus": "octets en trop"},
+    {"name": "refus_section_absente", "witness": "WIT-TRANSL", "candidat": [["section_absente", "NLEVELS"]], "code": 2, "refus": "sections absentes NLEVELS"},
+    {"name": "refus_section_inattendue", "witness": "WIT-TRANSL", "candidat": [["section_inattendue"]], "code": 2, "refus": "section inattendue"},
+    {"name": "refus_q_hors_domaine", "witness": "WIT-TRANSL", "candidat": [["q_hors_domaine", "AB"]], "code": 2, "refus": "hors de 2..4"},
+    {"name": "refus_bourrage", "witness": "WIT-TRANSL", "candidat": [["bourrage", "AB"]], "code": 2, "refus": "bourrage"},
+    {"name": "refus_sstar_non_croissant", "witness": "WIT-TRANSL", "candidat": [["sstar_non_croissant", "AB"]], "code": 2, "refus": "S* non strictement croissant"},
+    {"name": "refus_index_hors_domaine", "witness": "WIT-TRANSL", "candidat": [["index_hors_domaine", "AB"]], "code": 2, "refus": "hors des sites"},
+    {"name": "refus_positions_en_double", "witness": "WIT-TRANSL", "candidat": [["positions_en_double", "A", "B"]], "code": 2, "refus": "positions de sites en double"},
+    {"name": "refus_decalage", "witness": "WIT-TRANSL", "candidat": [["decalage", "AB"]], "code": 2, "refus": "decalages"},
+    {"name": "refus_coordonnee", "witness": "WIT-TRANSL", "candidat": [["coordonnee_hors_domaine"]], "code": 2, "refus": "coordonnee hors de"}
+  ]
+}

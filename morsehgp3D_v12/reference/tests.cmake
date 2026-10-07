@@ -8,6 +8,18 @@
 #   mhgp12_reference_refusal            usage faux : code 2
 #   mhgp12_reference_witness_t1         temoin WIT-T1-CARRE (LEM-T1 exige S inclus dans F) : 5 faits graves, 8 couples
 #                                       support-partie ; mutant sans_inclusion : code 4 ; option inconnue : code 2
+#   mhgp12_reference_transition         lecteur de transition du catalogue (T1, CONTRAT_CATALOGUE.md paragraphes 6.1
+#                                       et 8 bis) : attendus graves des 6 temoins contre l'oracle (etage B), puis les
+#                                       49 cas juges dans le processus (codes, categories exactes, lignes, motifs de
+#                                       refus), trois d'entre eux par la ligne de commande du lecteur ; moins d'une
+#                                       seconde
+#   mhgp12_reference_transition_refusal usage faux : code 2
+#   mhgp12_reference_transition_cas_<nom>     un cas par la ligne de commande du lecteur : son code (0 conforme, 1
+#                                       desaccord, 2 refus d'entree), avec ses categories, sa ligne ou son motif
+#                                       (liste : test_transition_catalogue.py --list-cases)
+#   mhgp12_reference_transition_mutant_<nom>  mutant du lecteur (copie modifiee) : code 4, tue par chacun de ses cas
+#                                       avec le code declare ; code 0 et ligne mutant_survives pour une garde defensive
+#                                       declaree equivalente (liste : test_transition_catalogue.py --list-mutants)
 #   mhgp12_reference_mutant_<nom>       mutant applique a une copie de hgp12_ref : code 4 (tue) ; code 0 et ligne
 #                                       mutant_survives pour un mutant declare equivalent (liste : ref_mutants.py)
 #   mhgp12_reference_full_<i>           tranche i de la suite complete (5 617 nuages, environ 35 minutes de CPU en
@@ -65,6 +77,44 @@ foreach(mutant inertes_omises element_sans_racine arret_sous_fenetre plateau_cou
 endforeach()
 mhgp12_python_gate(mhgp12_reference_resolution_v12_refusal 2 test_resolution_v12.py --option-inconnue
                    LABELS oracle fast)
+
+# Lecteur de transition du catalogue (tranche T1) : suite, refus d'usage, un cas par porte, mutants du lecteur. Les
+# listes des cas et des mutants sont lues a la configuration (aucun cas ni mutant sans porte).
+mhgp12_python_gate(mhgp12_reference_transition 0 test_transition_catalogue.py
+                   LINE "transition_temoins_ok temoins=6 cas=49 conformes=10 desaccords=25 refus=14 boules=55 sstar_changes=4"
+                   LABELS oracle fast)
+mhgp12_python_gate(mhgp12_reference_transition_refusal 2 test_transition_catalogue.py --option-inconnue
+                   LABELS oracle fast)
+function(mhgp12_reference_transition_list out option)
+  execute_process(COMMAND ${Python3_EXECUTABLE} -B ${mhgp12_reference_dir}/test_transition_catalogue.py ${option}
+                  RESULT_VARIABLE rc OUTPUT_VARIABLE listing OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if(NOT rc STREQUAL "0" OR listing STREQUAL "")
+    message(FATAL_ERROR "liste ${option} du lecteur de transition illisible (code ${rc})")
+  endif()
+  string(REPLACE "\n" ";" lines "${listing}")
+  set(${out} "${lines}" PARENT_SCOPE)
+endfunction()
+mhgp12_reference_transition_list(mhgp12_transition_cases --list-cases)
+foreach(line IN LISTS mhgp12_transition_cases)
+  string(REPLACE " " ";" words "${line}")
+  list(GET words 0 case)
+  list(GET words 1 code)
+  mhgp12_python_gate(mhgp12_reference_transition_cas_${case} ${code} test_transition_catalogue.py --cas=${case}
+                     LABELS oracle fast)
+endforeach()
+mhgp12_reference_transition_list(mhgp12_transition_mutants --list-mutants)
+foreach(line IN LISTS mhgp12_transition_mutants)
+  string(REPLACE " " ";" words "${line}")
+  list(GET words 0 mutant)
+  list(GET words 1 kind)
+  if(kind STREQUAL "equivalent")
+    mhgp12_python_gate(mhgp12_reference_transition_mutant_${mutant} 0 test_transition_catalogue.py
+                       --inject=${mutant} LINE "mutant_survives ${mutant}" LABELS oracle fast mutant)
+  else()
+    mhgp12_python_gate(mhgp12_reference_transition_mutant_${mutant} 4 test_transition_catalogue.py
+                       --inject=${mutant} LINE "mutant_killed ${mutant}" LABELS oracle fast mutant)
+  endif()
+endforeach()
 
 mhgp12_python_gate(mhgp12_reference_fast 0 test_ref.py --suite=fast
                    LINE "reference_fast_ok nuages=342 ordres=1362 coupes=48234 noeuds=13029" LABELS oracle fast)

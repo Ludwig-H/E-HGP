@@ -119,8 +119,9 @@ sa cause ; à K10, objectif publié (le noyau de feuille seul y vaut 37,2 ms sur
 Le catalogue de la v12 s'exporte, hors du chemin chronométré, au format `MHGP12DP` version 1 de genre « catalogue »
 déjà écrit par l'outil de vidage de la v11 des microbancs de la tour
 ([`common/format.hpp`](../microbancs/mes_m3_m4_tour/common/format.hpp)) : en-tête (profil, $K$, nombre de sites),
-section des sites (coordonnées et `PointId`), section des boules (rang de niveau, $p$, $m$, $q_{\min}$, $S^{*}$ en indices
-de sites) dans l'ordre canonique, puis les populations $I$ et $U$ en CSR. Les deux versions partagent ainsi un format et
+section des sites (coordonnées ; la version 1 n'a pas de `PointId`, l'identité d'un site étant sa position), section des
+boules (rang de niveau, $p$, $m$, $q_{\min}$, $S^{*}$ en indices de sites) dans l'ordre canonique, puis les populations
+$I$ et $U$ en CSR. Les deux versions partagent ainsi un format et
 le même ordre des sites (clé de Morton exacte sur coordonnées absolues).
 
 Le lecteur de transition (`reference/transition_catalogue.py`, bibliothèque standard, rationnels exacts) lit deux
@@ -131,6 +132,16 @@ et comparés par valeur ; pour tout $S^{*}$ différent, même boule, même cardi
 (rangs de Morton pour la v11, positions lexicographiques pour la v12). Il est gravé et jugé sur ses témoins (triangle
 `WIT-TRANSL`, carré `WIT-T1-CARRE` et ses deux diagonales, coquille à plusieurs supports, mutants de chaque règle) avant
 de juger le premier catalogue de la v12.
+
+**Gravé le 7 octobre 2026** ([`reference/README.md`](../reference/README.md), « Lecteur de transition du catalogue ») :
+six témoins, 49 cas et 25 mutants en portes CTest (`mhgp12_reference_transition*`). Le carré `WIT-T1-CARRE` garde
+$S^{*}=AC$ dans les deux conventions (son premier site l'est en Morton comme en positions, la clé de Morton croissant
+avec chaque coordonnée) ; le changement de $S^{*}$ se grave sur le même carré tourné de 45 degrés (`WIT-CARRE-TOURNE`),
+puis sur un triangle (`WIT-CERCLE-Q3`) et un tétraèdre (`WIT-SPHERE-Q4`). Deux précisions de lecture : la règle de
+convention s'applique à **toute** coquille étendue, pas seulement aux $S^{*}$ qui diffèrent (un candidat qui garderait
+le départage de la v11 a souvent le même $S^{*}$ que la référence) ; à niveau égal, l'ordre publié de la v12 range les
+boules par listes triées des positions de leur $S^{*}$ (bourrage par un élément plus grand que tout, sans effet : à
+niveau égal, un $S^{*}$ n'est jamais préfixe d'un autre), ordre que l'exportateur de la v12 doit suivre.
 
 ## 8. Questions pour les auditeurs
 
