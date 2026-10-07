@@ -8,6 +8,7 @@
 // Codes : 0 arbre calcule (et vidage identique s'il est donne) ; 1 ecart avec le vidage (premiere difference
 // publiee) ; 2 usage ; 3 entree invalide (nuage ou vidage illisible, doublon, coordonnee hors du profil).
 // Sortie : un objet JSON sur une ligne (comptes, empreintes SHA-256, temps), messages sur la sortie d'erreur.
+#include <algorithm>
 #include <chrono>
 #include <iostream>
 #include <string>
@@ -114,6 +115,13 @@ int main(int argc, char** argv) {
     if (!lire_mots(o.ids, 1, ids, erreur) || ids.size() != sites.taille()) {
       std::cerr << "jug_emst_entree_invalide : identifiants : "
                 << (erreur.empty() ? "nombre different de celui des points" : erreur) << "\n";
+      return 3;
+    }
+    std::vector<u32> tries(ids);
+    std::sort(tries.begin(), tries.end());
+    if (std::adjacent_find(tries.begin(), tries.end()) != tries.end()) {
+      // Une reference d'identites dupliquees ne prouve rien (CST-0232) : refus avant toute comparaison.
+      std::cerr << "jug_emst_entree_invalide : identifiants : PointId en double dans la reference --ids\n";
       return 3;
     }
   }

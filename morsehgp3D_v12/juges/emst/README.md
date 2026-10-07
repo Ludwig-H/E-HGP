@@ -105,7 +105,7 @@ cmake --build <build> -j3 && ctest --test-dir <build> --output-on-failure -j3
 | Porte | Ce qu'elle juge | Code attendu |
 | --- | --- | --- |
 | `mhgp12_jug_emst_autotest` | SHA-256 (vecteurs FIPS 180-4), entiers de précision arbitraire contre `u128`, comparateur de Morton contre la clé formée (200 000 paires), Borůvka contre Kruskal sur toutes les paires puis plateaux contre un lien simple calculé sur toutes les paires (300 petits nuages : grilles, droites, génériques, coins u32, grille $2^{28}$ ; 18 920 arêtes à égalité ; voies `u64` et `u128`), Borůvka contre Prim dense sur trois nuages d'environ 4 000 sites (grilles à égalités, uniforme) | 0 |
-| `mhgp12_jug_emst_temoins` et `_O` | 11 témoins gravés (§ 5), 13 refus, 15 vidages fabriqués à l'ordre un ; 139 contrôles, nombre exact | 0 |
+| `mhgp12_jug_emst_temoins` et `_O` | 11 témoins gravés (§ 5), 13 refus, 17 vidages fabriqués à l'ordre un (dont les deux PointId dupliqués de `CST-0232`) ; 141 contrôles, nombre exact | 0 |
 | `mhgp12_jug_emst_oracle_rapide` et `_O` | suite rapide de l'oracle borné [`reference/`](../../reference/README.md) (`hgp12_ref`, 342 nuages) contre l'ordre un de `Definition` : 34 refus de doublons, 308 arbres identiques, 308 translations de $2^{31}$ (voie `u128`, `sha256_fusions` inchangée), 308 vidages écrits depuis l'oracle déclarés identiques ; compteurs exacts (1 846 naissances, 1 312 fusions dont 158 à au moins trois enfants, arité maximale 8) | 0 |
 | `mhgp12_jug_emst_mutant_binaire` | mutant causal : une fusion binaire par arête au lieu du plateau | 4 (tué) |
 | `mhgp12_jug_emst_mutant_departage` | mutant causal : égalités départagées par les plus grands sites | 4 (tué) |

@@ -14,3 +14,9 @@ l'auditeur. GCP non utilisé.
 
 Le script de l'auditeur `audit_u32_20261007/publication/check.py` est épinglé à la source de son pin et refuse donc,
 comme prévu, toute version corrigée : la porte ci-dessus en reprend les cas sur le vrai point d'entrée.
+
+## Complément : `CST-0232` (7 octobre, après `fff79a403`)
+
+| Constat | Correction | Preuve |
+| --- | --- | --- |
+| `CST-0232` : `JUG-EMST` avec `--ids` remplaçait le contrôle d'unicité des `PointId` du vidage par la seule égalité à la référence | l'unicité des `PointId` du vidage se contrôle toujours (`juges/emst/src/vidage.hpp`) ; une référence `--ids` dupliquée est refusée avant toute comparaison (`jug_emst.cpp`, code 3) | deux témoins ajoutés à `mhgp12_jug_emst_temoins` (vidage aux `PointId` dupliqués avec la même référence ; référence dupliquée seule) : 141 contrôles, 8 portes sur 8 ; **binaire d'origine : les deux témoins échouent** (code 0 puis 1 au lieu du refus 3) |

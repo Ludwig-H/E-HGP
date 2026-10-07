@@ -193,9 +193,9 @@ class ComparaisonVidage {
         if (w[4] != id) {
           ecart("site " + std::to_string(s) + " : PointId " + std::to_string(w[4]) + ", attendu " + std::to_string(id));
         }
-      } else {
-        identites.push_back(static_cast<u32>(w[4]));
       }
+      // L'unicite des PointId du vidage se controle toujours, reference --ids fournie ou non (CST-0232).
+      identites.push_back(static_cast<u32>(w[4]));
     }
     std::sort(identites.begin(), identites.end());
     if (std::adjacent_find(identites.begin(), identites.end()) != identites.end()) {

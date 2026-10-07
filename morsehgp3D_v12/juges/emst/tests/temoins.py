@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import commun as C  # noqa: E402
 
 M = (1 << 32) - 1
-CONTROLES = 139  # nombre exact de controles d'un passage conforme (plancher contre le vert par vacuite)
+CONTROLES = 141  # nombre exact de controles d'un passage conforme (plancher contre le vert par vacuite)
 B21 = (1 << 31) - 1
 B31 = 1 << 31
 
@@ -178,6 +178,12 @@ def vidages(j):
     juger(six, 2, C.vidage_ful1(bouge, six[3], ids6), C.DESACCORD, 'six_site_deplace')
     juger(six, 2, base, C.DESACCORD, 'six_pointid_faux', ids=[ids_entree[1], ids_entree[0]] + ids_entree[2:])
     juger(six, 2, C.vidage_ful1(six[2], six[3], ids6, poids={0: 2}), C.INVARIANT, 'six_poids_2')
+    # CST-0232 : PointId en double dans le vidage, reference --ids dupliquee de la meme facon : refus, jamais identique ;
+    # puis une reference --ids dupliquee seule, vidage correct : refus avant comparaison.
+    double = [ids6[0], ids6[0]] + ids6[2:]
+    juger(six, 2, C.vidage_ful1(six[2], six[3], double), C.INVARIANT, 'six_pointid_double_avec_ids',
+          ids=[double[sorted(six[1]).index(p)] for p in six[1]])
+    juger(six, 2, base, C.INVARIANT, 'six_reference_ids_double', ids=[ids_entree[0]] + ids_entree[:-1])
     juger(six, 2, b'MHGP11FUL0' + base[10:], C.INVARIANT, 'six_signature')
     juger(six, 2, base[:-5], C.INVARIANT, 'six_tronque')
     juger(six, 2, C.vidage_ful1(six[2][:5], [(Fraction(999956), (0, 1, 2)), (Fraction(1000000), (3, 4, 5))], ids6),
