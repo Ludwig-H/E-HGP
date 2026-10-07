@@ -23,6 +23,7 @@ dossier de sortie, jamais dans un dépôt. Seuls des comptes, des empreintes et 
 | `CMakeLists.txt` | construction (CMake ≥ 3.22, C++20 sans extensions, `-Wall -Wextra -Wpedantic -Werror`, GCC 11.4 visé) |
 | `common/format.hpp` | format binaire des vidages (écriture, lecture par projection en mémoire), comparaison exacte de centres ; chaque avancée de la lecture est contrôlée contre la place restante (`CST-0225`) |
 | `tests/format_reader_test.cpp` | `mhgp12_format_test <dossier>` : porte de l'admission du lecteur, neuf fichiers synthétiques dont le témoin de 88 octets de l'auditeur (code 0 conforme, 1 écart) |
+| `profil_m7.py` | `MES-M7` sur G4 : joue `mhgp12_vidage --profil-resolution` dans un processus neuf par cas (`--journal aucun`, vidages effacés), garde les lignes JSON, exige une ligne de profil par ordre et un contrôle du vidage conforme par ordre (code 0, sinon 1) |
 | `vidage/vidage_v11.cpp` | `mhgp12_vidage` : vidage de la tour v11, lié à `libmhgp11.a` ; mesure de résolution à trois bras, et quatrième bras `replique_v12_saut` (`MES-G1`) ; profil par composante (`MES-M7`) |
 | `mes_m3/welzl_proposal.hpp` | port de `DWelzl` de la v10 (proposition flottante, ne décide rien) |
 | `mes_m3/meb_cert.hpp` | cœur de `LEV-MEB-CERT` : `LEM-T1` corrigé, certificat exact, canonisation, repli, juge |
