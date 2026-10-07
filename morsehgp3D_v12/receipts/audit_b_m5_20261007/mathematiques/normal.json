@@ -1,0 +1,3278 @@
+{
+  "before_after_unchanged": true,
+  "binary_sha256": {
+    "predicates": "a6313f092592579d5d294087a8368d178c9e490c297c1db527bacaa17ca0e02a",
+    "traversal_identity": "f32f6dab3f2848ca1e39a222bd6d1350f08d75d52a18e2605d26f8c56e370c03"
+  },
+  "cases": [
+    {
+      "critical_balls_with_unique_owner_and_complete_population": 6,
+      "dump_sha256": "c05d18d2f546ffc5649df54288a68f6b757998277b28d7ace6ae65cd844e622f",
+      "geometric_leaf_sha256": "0b55527a9c91b6a872c1f28f337da33677d93f39790b238448791cd0d6046d61",
+      "independent_ledger": {
+        "filter_tests": 233,
+        "leaves": 8,
+        "max_depth": 4,
+        "max_leaf": 4,
+        "nodes": 15
+      },
+      "name": "morton_absolute",
+      "native": {
+        "coord_bits": 21,
+        "digest": "e4a110f93aec1c0d",
+        "dump": "morton_absolute.bin",
+        "extra": 0,
+        "first": "",
+        "identity": true,
+        "kmax": 1,
+        "leaf_sites": 30,
+        "leaf_size": 4,
+        "leaves": 8,
+        "ledger": {
+          "filter_tests": 233,
+          "leaves": 8,
+          "max_depth": 4,
+          "max_leaf": 4,
+          "nodes": 15
+        },
+        "level_fields": [
+          "depth",
+          "parents",
+          "children",
+          "tasks",
+          "candidates",
+          "tests",
+          "splits",
+          "leaves"
+        ],
+        "level_stats": [
+          [
+            0,
+            1,
+            1,
+            1,
+            6,
+            18,
+            1,
+            0
+          ],
+          [
+            1,
+            1,
+            2,
+            2,
+            12,
+            36,
+            2,
+            0
+          ],
+          [
+            2,
+            2,
+            4,
+            4,
+            24,
+            68,
+            2,
+            2
+          ],
+          [
+            3,
+            2,
+            4,
+            4,
+            24,
+            61,
+            2,
+            2
+          ],
+          [
+            4,
+            2,
+            4,
+            4,
+            20,
+            50,
+            0,
+            4
+          ]
+        ],
+        "levels": 5,
+        "list_mismatch": 0,
+        "list_permuted": 0,
+        "max_children": 4,
+        "max_leaf": 256,
+        "max_tasks": 4,
+        "meta_mismatch": 0,
+        "missing": 0,
+        "mutants": {},
+        "nodes_checked": true,
+        "nodes_equal": true,
+        "phase": "identity",
+        "producer": 2,
+        "reference_digest": "e4a110f93aec1c0d",
+        "reference_leaves": 8,
+        "reference_ledger": {
+          "filter_tests": 233,
+          "leaves": 8,
+          "max_depth": 4,
+          "max_leaf": 4,
+          "nodes": 15
+        },
+        "reference_status": 0,
+        "sites": 6,
+        "status": 0
+      },
+      "points": 6
+    },
+    {
+      "critical_balls_with_unique_owner_and_complete_population": 6,
+      "dump_sha256": "a382235b49a0a46aeb0527e8df36d296694c152d5b78fc32f9fd3690e7356e89",
+      "geometric_leaf_sha256": "b9e2b70bcb2d5fe6d21b4ce87b095e18294b39f39ef5cb5249d4b76069df6923",
+      "independent_ledger": {
+        "filter_tests": 230,
+        "leaves": 8,
+        "max_depth": 4,
+        "max_leaf": 4,
+        "nodes": 15
+      },
+      "name": "morton_normalized",
+      "native": {
+        "coord_bits": 21,
+        "digest": "7318eafe32a0ca78",
+        "dump": "morton_normalized.bin",
+        "extra": 0,
+        "first": "",
+        "identity": true,
+        "kmax": 1,
+        "leaf_sites": 30,
+        "leaf_size": 4,
+        "leaves": 8,
+        "ledger": {
+          "filter_tests": 230,
+          "leaves": 8,
+          "max_depth": 4,
+          "max_leaf": 4,
+          "nodes": 15
+        },
+        "level_fields": [
+          "depth",
+          "parents",
+          "children",
+          "tasks",
+          "candidates",
+          "tests",
+          "splits",
+          "leaves"
+        ],
+        "level_stats": [
+          [
+            0,
+            1,
+            1,
+            1,
+            6,
+            18,
+            1,
+            0
+          ],
+          [
+            1,
+            1,
+            2,
+            2,
+            12,
+            36,
+            2,
+            0
+          ],
+          [
+            2,
+            2,
+            4,
+            4,
+            24,
+            68,
+            2,
+            2
+          ],
+          [
+            3,
+            2,
+            4,
+            4,
+            22,
+            58,
+            2,
+            2
+          ],
+          [
+            4,
+            2,
+            4,
+            4,
+            20,
+            50,
+            0,
+            4
+          ]
+        ],
+        "levels": 5,
+        "list_mismatch": 0,
+        "list_permuted": 0,
+        "max_children": 4,
+        "max_leaf": 256,
+        "max_tasks": 4,
+        "meta_mismatch": 0,
+        "missing": 0,
+        "mutants": {},
+        "nodes_checked": true,
+        "nodes_equal": true,
+        "phase": "identity",
+        "producer": 2,
+        "reference_digest": "7318eafe32a0ca78",
+        "reference_leaves": 8,
+        "reference_ledger": {
+          "filter_tests": 230,
+          "leaves": 8,
+          "max_depth": 4,
+          "max_leaf": 4,
+          "nodes": 15
+        },
+        "reference_status": 0,
+        "sites": 6,
+        "status": 0
+      },
+      "points": 6
+    },
+    {
+      "critical_balls_with_unique_owner_and_complete_population": 19,
+      "dump_sha256": "2370e544f3599d74d88f7c8c94ea2baca7d5a545450b229bfe34a9524a709899",
+      "geometric_leaf_sha256": "58fa68ac8e85572fec39802a2a20b45988ca9a1c79e3193c748b7739e845b2af",
+      "independent_ledger": {
+        "filter_tests": 3240,
+        "leaves": 32,
+        "max_depth": 12,
+        "max_leaf": 8,
+        "nodes": 159
+      },
+      "name": "cube_k1",
+      "native": {
+        "coord_bits": 21,
+        "digest": "d67a728cba76b1f5",
+        "dump": "cube_k1.bin",
+        "extra": 0,
+        "first": "",
+        "identity": true,
+        "kmax": 1,
+        "leaf_sites": 160,
+        "leaf_size": 5,
+        "leaves": 32,
+        "ledger": {
+          "filter_tests": 3240,
+          "leaves": 32,
+          "max_depth": 12,
+          "max_leaf": 8,
+          "nodes": 159
+        },
+        "level_fields": [
+          "depth",
+          "parents",
+          "children",
+          "tasks",
+          "candidates",
+          "tests",
+          "splits",
+          "leaves"
+        ],
+        "level_stats": [
+          [
+            0,
+            1,
+            1,
+            1,
+            8,
+            24,
+            1,
+            0
+          ],
+          [
+            1,
+            1,
+            2,
+            2,
+            16,
+            48,
+            2,
+            0
+          ],
+          [
+            2,
+            2,
+            4,
+            4,
+            32,
+            96,
+            4,
+            0
+          ],
+          [
+            3,
+            4,
+            8,
+            8,
+            64,
+            192,
+            8,
+            0
+          ],
+          [
+            4,
+            8,
+            16,
+            16,
+            128,
+            320,
+            8,
+            8
+          ],
+          [
+            5,
+            8,
+            16,
+            16,
+            128,
+            320,
+            8,
+            8
+          ],
+          [
+            6,
+            8,
+            16,
+            16,
+            128,
+            320,
+            8,
+            8
+          ],
+          [
+            7,
+            8,
+            16,
+            16,
+            128,
+            320,
+            8,
+            0
+          ],
+          [
+            8,
+            8,
+            16,
+            16,
+            128,
+            320,
+            8,
+            0
+          ],
+          [
+            9,
+            8,
+            16,
+            16,
+            128,
+            320,
+            8,
+            0
+          ],
+          [
+            10,
+            8,
+            16,
+            16,
+            128,
+            320,
+            8,
+            0
+          ],
+          [
+            11,
+            8,
+            16,
+            16,
+            128,
+            320,
+            8,
+            0
+          ],
+          [
+            12,
+            8,
+            16,
+            16,
+            128,
+            320,
+            0,
+            8
+          ]
+        ],
+        "levels": 13,
+        "list_mismatch": 0,
+        "list_permuted": 0,
+        "max_children": 16,
+        "max_leaf": 256,
+        "max_tasks": 16,
+        "meta_mismatch": 0,
+        "missing": 0,
+        "mutants": {},
+        "nodes_checked": true,
+        "nodes_equal": true,
+        "phase": "identity",
+        "producer": 2,
+        "reference_digest": "d67a728cba76b1f5",
+        "reference_leaves": 32,
+        "reference_ledger": {
+          "filter_tests": 3240,
+          "leaves": 32,
+          "max_depth": 12,
+          "max_leaf": 8,
+          "nodes": 159
+        },
+        "reference_status": 0,
+        "sites": 8,
+        "status": 0
+      },
+      "points": 8
+    },
+    {
+      "critical_balls_with_unique_owner_and_complete_population": 19,
+      "dump_sha256": "4eb921ddaf99a20bda347dd47b61eee4992ce40f92d6f39c229aaff8fe6bae92",
+      "geometric_leaf_sha256": "5a52c6b44414891c4a8fcf4d1628ed867c6faf60082fa871d1d46a8409806d1f",
+      "independent_ledger": {
+        "filter_tests": 6840,
+        "leaves": 80,
+        "max_depth": 12,
+        "max_leaf": 8,
+        "nodes": 159
+      },
+      "name": "cube_k2",
+      "native": {
+        "coord_bits": 21,
+        "digest": "fe548c02f0c43cc5",
+        "dump": "cube_k2.bin",
+        "extra": 0,
+        "first": "",
+        "identity": true,
+        "kmax": 2,
+        "leaf_sites": 424,
+        "leaf_size": 5,
+        "leaves": 80,
+        "ledger": {
+          "filter_tests": 6840,
+          "leaves": 80,
+          "max_depth": 12,
+          "max_leaf": 8,
+          "nodes": 159
+        },
+        "level_fields": [
+          "depth",
+          "parents",
+          "children",
+          "tasks",
+          "candidates",
+          "tests",
+          "splits",
+          "leaves"
+        ],
+        "level_stats": [
+          [
+            0,
+            1,
+            1,
+            1,
+            8,
+            48,
+            1,
+            0
+          ],
+          [
+            1,
+            1,
+            2,
+            2,
+            16,
+            96,
+            2,
+            0
+          ],
+          [
+            2,
+            2,
+            4,
+            4,
+            32,
+            192,
+            4,
+            0
+          ],
+          [
+            3,
+            4,
+            8,
+            8,
+            64,
+            384,
+            8,
+            0
+          ],
+          [
+            4,
+            8,
+            16,
+            16,
+            128,
+            680,
+            8,
+            8
+          ],
+          [
+            5,
+            8,
+            16,
+            16,
+            128,
+            680,
+            8,
+            8
+          ],
+          [
+            6,
+            8,
+            16,
+            16,
+            128,
+            680,
+            8,
+            8
+          ],
+          [
+            7,
+            8,
+            16,
+            16,
+            128,
+            680,
+            8,
+            8
+          ],
+          [
+            8,
+            8,
+            16,
+            16,
+            128,
+            680,
+            8,
+            8
+          ],
+          [
+            9,
+            8,
+            16,
+            16,
+            128,
+            680,
+            8,
+            8
+          ],
+          [
+            10,
+            8,
+            16,
+            16,
+            128,
+            680,
+            8,
+            8
+          ],
+          [
+            11,
+            8,
+            16,
+            16,
+            128,
+            680,
+            8,
+            8
+          ],
+          [
+            12,
+            8,
+            16,
+            16,
+            128,
+            680,
+            0,
+            16
+          ]
+        ],
+        "levels": 13,
+        "list_mismatch": 0,
+        "list_permuted": 0,
+        "max_children": 16,
+        "max_leaf": 256,
+        "max_tasks": 16,
+        "meta_mismatch": 0,
+        "missing": 0,
+        "mutants": {},
+        "nodes_checked": true,
+        "nodes_equal": true,
+        "phase": "identity",
+        "producer": 2,
+        "reference_digest": "fe548c02f0c43cc5",
+        "reference_leaves": 80,
+        "reference_ledger": {
+          "filter_tests": 6840,
+          "leaves": 80,
+          "max_depth": 12,
+          "max_leaf": 8,
+          "nodes": 159
+        },
+        "reference_status": 0,
+        "sites": 8,
+        "status": 0
+      },
+      "points": 8
+    },
+    {
+      "critical_balls_with_unique_owner_and_complete_population": 27,
+      "dump_sha256": "3bada7afe6df8b26f34d20604c48498b4aee055b627bada5b6b9891d3cec77a5",
+      "geometric_leaf_sha256": "7c26ce8236d382152e74855719ad08c2c4b939bd82182cef87b37587222623e5",
+      "independent_ledger": {
+        "filter_tests": 64,
+        "leaves": 1,
+        "max_depth": 0,
+        "max_leaf": 8,
+        "nodes": 1
+      },
+      "name": "cube_k5",
+      "native": {
+        "coord_bits": 21,
+        "digest": "5074f378eb18607c",
+        "dump": "cube_k5.bin",
+        "extra": 0,
+        "first": "",
+        "identity": true,
+        "kmax": 5,
+        "leaf_sites": 8,
+        "leaf_size": 8,
+        "leaves": 1,
+        "ledger": {
+          "filter_tests": 64,
+          "leaves": 1,
+          "max_depth": 0,
+          "max_leaf": 8,
+          "nodes": 1
+        },
+        "level_fields": [
+          "depth",
+          "parents",
+          "children",
+          "tasks",
+          "candidates",
+          "tests",
+          "splits",
+          "leaves"
+        ],
+        "level_stats": [
+          [
+            0,
+            1,
+            1,
+            1,
+            8,
+            64,
+            0,
+            1
+          ]
+        ],
+        "levels": 1,
+        "list_mismatch": 0,
+        "list_permuted": 0,
+        "max_children": 1,
+        "max_leaf": 256,
+        "max_tasks": 1,
+        "meta_mismatch": 0,
+        "missing": 0,
+        "mutants": {},
+        "nodes_checked": true,
+        "nodes_equal": true,
+        "phase": "identity",
+        "producer": 2,
+        "reference_digest": "5074f378eb18607c",
+        "reference_leaves": 1,
+        "reference_ledger": {
+          "filter_tests": 64,
+          "leaves": 1,
+          "max_depth": 0,
+          "max_leaf": 8,
+          "nodes": 1
+        },
+        "reference_status": 0,
+        "sites": 8,
+        "status": 0
+      },
+      "points": 8
+    },
+    {
+      "critical_balls_with_unique_owner_and_complete_population": null,
+      "dump_sha256": "ef6f078d1d8bd6c599124468589a93494e3a68d45909301d472737ad0302f3dc",
+      "geometric_leaf_sha256": "41f050fc6f2b5258cc7d2c635cb960a9cfef691a0ee88a0482648135025d556b",
+      "independent_ledger": {
+        "filter_tests": 566814,
+        "leaves": 328,
+        "max_depth": 63,
+        "max_leaf": 48,
+        "nodes": 951
+      },
+      "name": "depth_63",
+      "native": {
+        "coord_bits": 21,
+        "digest": "54e8171270928c44",
+        "dump": "depth_63.bin",
+        "extra": 0,
+        "first": "",
+        "identity": true,
+        "kmax": 5,
+        "leaf_sites": 7070,
+        "leaf_size": 24,
+        "leaves": 328,
+        "ledger": {
+          "filter_tests": 566814,
+          "leaves": 328,
+          "max_depth": 63,
+          "max_leaf": 48,
+          "nodes": 951
+        },
+        "level_fields": [
+          "depth",
+          "parents",
+          "children",
+          "tasks",
+          "candidates",
+          "tests",
+          "splits",
+          "leaves"
+        ],
+        "level_stats": [
+          [
+            0,
+            1,
+            1,
+            1,
+            48,
+            720,
+            1,
+            0
+          ],
+          [
+            1,
+            1,
+            2,
+            2,
+            96,
+            1440,
+            2,
+            0
+          ],
+          [
+            2,
+            2,
+            4,
+            4,
+            192,
+            2880,
+            4,
+            0
+          ],
+          [
+            3,
+            4,
+            8,
+            8,
+            384,
+            5760,
+            8,
+            0
+          ],
+          [
+            4,
+            8,
+            16,
+            16,
+            768,
+            9691,
+            8,
+            8
+          ],
+          [
+            5,
+            8,
+            16,
+            16,
+            768,
+            9502,
+            8,
+            8
+          ],
+          [
+            6,
+            8,
+            16,
+            16,
+            768,
+            9325,
+            8,
+            8
+          ],
+          [
+            7,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            8,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            9,
+            8,
+            16,
+            16,
+            768,
+            9333,
+            8,
+            8
+          ],
+          [
+            10,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            11,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            12,
+            8,
+            16,
+            16,
+            768,
+            9333,
+            8,
+            0
+          ],
+          [
+            13,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            14,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            15,
+            8,
+            16,
+            16,
+            768,
+            9333,
+            8,
+            0
+          ],
+          [
+            16,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            17,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            18,
+            8,
+            16,
+            16,
+            768,
+            9333,
+            8,
+            0
+          ],
+          [
+            19,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            20,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            21,
+            8,
+            16,
+            16,
+            768,
+            9333,
+            8,
+            0
+          ],
+          [
+            22,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            23,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            24,
+            8,
+            16,
+            16,
+            768,
+            9333,
+            8,
+            0
+          ],
+          [
+            25,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            26,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            27,
+            8,
+            16,
+            16,
+            768,
+            9333,
+            8,
+            0
+          ],
+          [
+            28,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            29,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            30,
+            8,
+            16,
+            16,
+            768,
+            9333,
+            8,
+            0
+          ],
+          [
+            31,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            32,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            33,
+            8,
+            16,
+            16,
+            768,
+            9333,
+            8,
+            0
+          ],
+          [
+            34,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            35,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            36,
+            8,
+            16,
+            16,
+            768,
+            9333,
+            8,
+            0
+          ],
+          [
+            37,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            38,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            39,
+            8,
+            16,
+            16,
+            768,
+            9333,
+            8,
+            0
+          ],
+          [
+            40,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            41,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            42,
+            8,
+            16,
+            16,
+            768,
+            9333,
+            8,
+            0
+          ],
+          [
+            43,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            44,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            45,
+            8,
+            16,
+            16,
+            768,
+            9333,
+            8,
+            0
+          ],
+          [
+            46,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            47,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            48,
+            8,
+            16,
+            16,
+            768,
+            9333,
+            8,
+            0
+          ],
+          [
+            49,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            50,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            51,
+            8,
+            16,
+            16,
+            768,
+            9333,
+            8,
+            0
+          ],
+          [
+            52,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            53,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            54,
+            8,
+            16,
+            16,
+            768,
+            9333,
+            8,
+            0
+          ],
+          [
+            55,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            56,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            57,
+            8,
+            16,
+            16,
+            768,
+            9333,
+            8,
+            0
+          ],
+          [
+            58,
+            8,
+            16,
+            16,
+            768,
+            9644,
+            8,
+            4
+          ],
+          [
+            59,
+            8,
+            16,
+            16,
+            768,
+            9498,
+            8,
+            4
+          ],
+          [
+            60,
+            8,
+            16,
+            16,
+            768,
+            9338,
+            7,
+            4
+          ],
+          [
+            61,
+            7,
+            14,
+            14,
+            672,
+            8276,
+            4,
+            7
+          ],
+          [
+            62,
+            4,
+            8,
+            8,
+            384,
+            4682,
+            1,
+            4
+          ],
+          [
+            63,
+            1,
+            2,
+            2,
+            96,
+            1167,
+            0,
+            1
+          ]
+        ],
+        "levels": 64,
+        "list_mismatch": 0,
+        "list_permuted": 0,
+        "max_children": 16,
+        "max_leaf": 256,
+        "max_tasks": 16,
+        "meta_mismatch": 0,
+        "missing": 0,
+        "mutants": {},
+        "nodes_checked": true,
+        "nodes_equal": true,
+        "phase": "identity",
+        "producer": 2,
+        "reference_digest": "54e8171270928c44",
+        "reference_leaves": 328,
+        "reference_ledger": {
+          "filter_tests": 566814,
+          "leaves": 328,
+          "max_depth": 63,
+          "max_leaf": 48,
+          "nodes": 951
+        },
+        "reference_status": 0,
+        "sites": 48,
+        "status": 0
+      },
+      "points": 48
+    },
+    {
+      "critical_balls_with_unique_owner_and_complete_population": null,
+      "dump_sha256": "6907580f021798a25563bfcc3871af1afd497f95fede4aed345409b3aff8f350",
+      "geometric_leaf_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "independent_ledger": {
+        "filter_tests": 0,
+        "leaves": 0,
+        "max_depth": 0,
+        "max_leaf": 0,
+        "nodes": 0
+      },
+      "name": "wide_leaf",
+      "native": {
+        "coord_bits": 21,
+        "digest": "cbf29ce484222325",
+        "dump": "wide_leaf.bin",
+        "extra": 0,
+        "first": "",
+        "identity": true,
+        "kmax": 5,
+        "leaf_sites": 0,
+        "leaf_size": 8,
+        "leaves": 0,
+        "ledger": {
+          "filter_tests": 0,
+          "leaves": 0,
+          "max_depth": 0,
+          "max_leaf": 0,
+          "nodes": 0
+        },
+        "level_fields": [
+          "depth",
+          "parents",
+          "children",
+          "tasks",
+          "candidates",
+          "tests",
+          "splits",
+          "leaves"
+        ],
+        "level_stats": [
+          [
+            0,
+            1,
+            1,
+            1,
+            48,
+            720,
+            1,
+            0
+          ],
+          [
+            1,
+            1,
+            2,
+            2,
+            96,
+            1440,
+            2,
+            0
+          ],
+          [
+            2,
+            2,
+            4,
+            4,
+            192,
+            2880,
+            4,
+            0
+          ],
+          [
+            3,
+            4,
+            8,
+            8,
+            384,
+            5760,
+            8,
+            0
+          ],
+          [
+            4,
+            8,
+            16,
+            16,
+            768,
+            9691,
+            16,
+            0
+          ],
+          [
+            5,
+            16,
+            32,
+            32,
+            1120,
+            14121,
+            32,
+            0
+          ],
+          [
+            6,
+            32,
+            64,
+            64,
+            1632,
+            20380,
+            64,
+            0
+          ],
+          [
+            7,
+            64,
+            128,
+            128,
+            2400,
+            30788,
+            128,
+            0
+          ],
+          [
+            8,
+            128,
+            256,
+            256,
+            4072,
+            49665,
+            240,
+            16
+          ],
+          [
+            9,
+            240,
+            480,
+            480,
+            6516,
+            73655,
+            376,
+            104
+          ],
+          [
+            10,
+            376,
+            752,
+            752,
+            8928,
+            95808,
+            616,
+            136
+          ],
+          [
+            11,
+            616,
+            1232,
+            1232,
+            13552,
+            136187,
+            752,
+            432
+          ],
+          [
+            12,
+            752,
+            1504,
+            1504,
+            15376,
+            145077,
+            592,
+            748
+          ],
+          [
+            13,
+            592,
+            1184,
+            1184,
+            11824,
+            109586,
+            528,
+            528
+          ],
+          [
+            14,
+            528,
+            1056,
+            1056,
+            10448,
+            93558,
+            184,
+            584
+          ],
+          [
+            15,
+            184,
+            368,
+            368,
+            4368,
+            43801,
+            136,
+            120
+          ],
+          [
+            16,
+            136,
+            272,
+            272,
+            3264,
+            32768,
+            32,
+            96
+          ],
+          [
+            17,
+            32,
+            64,
+            64,
+            1440,
+            17118,
+            32,
+            0
+          ],
+          [
+            18,
+            32,
+            64,
+            64,
+            1632,
+            20409,
+            40,
+            0
+          ],
+          [
+            19,
+            40,
+            80,
+            80,
+            1536,
+            18320,
+            32,
+            0
+          ],
+          [
+            20,
+            32,
+            64,
+            64,
+            1440,
+            17118,
+            32,
+            0
+          ],
+          [
+            21,
+            32,
+            64,
+            64,
+            1632,
+            20409,
+            40,
+            0
+          ],
+          [
+            22,
+            40,
+            80,
+            80,
+            1536,
+            18320,
+            32,
+            0
+          ],
+          [
+            23,
+            32,
+            64,
+            64,
+            1440,
+            17118,
+            32,
+            0
+          ],
+          [
+            24,
+            32,
+            64,
+            64,
+            1632,
+            20409,
+            40,
+            0
+          ],
+          [
+            25,
+            40,
+            80,
+            80,
+            1536,
+            18320,
+            32,
+            0
+          ],
+          [
+            26,
+            32,
+            64,
+            64,
+            1440,
+            17118,
+            32,
+            0
+          ],
+          [
+            27,
+            32,
+            64,
+            64,
+            1632,
+            20409,
+            40,
+            0
+          ],
+          [
+            28,
+            40,
+            80,
+            80,
+            1536,
+            18320,
+            32,
+            0
+          ],
+          [
+            29,
+            32,
+            64,
+            64,
+            1440,
+            17118,
+            32,
+            0
+          ],
+          [
+            30,
+            32,
+            64,
+            64,
+            1632,
+            20409,
+            40,
+            0
+          ],
+          [
+            31,
+            40,
+            80,
+            80,
+            1536,
+            18320,
+            32,
+            0
+          ],
+          [
+            32,
+            32,
+            64,
+            64,
+            1440,
+            17118,
+            32,
+            0
+          ],
+          [
+            33,
+            32,
+            64,
+            64,
+            1632,
+            20409,
+            40,
+            0
+          ],
+          [
+            34,
+            40,
+            80,
+            80,
+            1536,
+            18320,
+            32,
+            0
+          ],
+          [
+            35,
+            32,
+            64,
+            64,
+            1440,
+            17118,
+            32,
+            0
+          ],
+          [
+            36,
+            32,
+            64,
+            64,
+            1632,
+            20409,
+            40,
+            0
+          ],
+          [
+            37,
+            40,
+            80,
+            80,
+            1536,
+            18320,
+            32,
+            0
+          ],
+          [
+            38,
+            32,
+            64,
+            64,
+            1440,
+            17118,
+            32,
+            0
+          ],
+          [
+            39,
+            32,
+            64,
+            64,
+            1632,
+            20409,
+            40,
+            0
+          ],
+          [
+            40,
+            40,
+            80,
+            80,
+            1536,
+            18320,
+            32,
+            0
+          ],
+          [
+            41,
+            32,
+            64,
+            64,
+            1440,
+            17118,
+            32,
+            0
+          ],
+          [
+            42,
+            32,
+            64,
+            64,
+            1632,
+            20409,
+            40,
+            0
+          ],
+          [
+            43,
+            40,
+            80,
+            80,
+            1536,
+            18320,
+            32,
+            0
+          ],
+          [
+            44,
+            32,
+            64,
+            64,
+            1440,
+            17118,
+            32,
+            0
+          ],
+          [
+            45,
+            32,
+            64,
+            64,
+            1632,
+            20409,
+            40,
+            0
+          ],
+          [
+            46,
+            40,
+            80,
+            80,
+            1536,
+            18320,
+            32,
+            0
+          ],
+          [
+            47,
+            32,
+            64,
+            64,
+            1440,
+            17118,
+            32,
+            0
+          ],
+          [
+            48,
+            32,
+            64,
+            64,
+            1632,
+            20409,
+            40,
+            0
+          ],
+          [
+            49,
+            40,
+            80,
+            80,
+            1536,
+            18320,
+            32,
+            0
+          ],
+          [
+            50,
+            32,
+            64,
+            64,
+            1440,
+            17118,
+            32,
+            0
+          ],
+          [
+            51,
+            32,
+            64,
+            64,
+            1632,
+            20409,
+            40,
+            0
+          ],
+          [
+            52,
+            40,
+            80,
+            80,
+            1536,
+            18320,
+            32,
+            0
+          ],
+          [
+            53,
+            32,
+            64,
+            64,
+            1440,
+            17118,
+            32,
+            0
+          ],
+          [
+            54,
+            32,
+            64,
+            64,
+            1632,
+            20409,
+            40,
+            0
+          ],
+          [
+            55,
+            40,
+            80,
+            80,
+            1536,
+            18320,
+            32,
+            0
+          ],
+          [
+            56,
+            32,
+            64,
+            64,
+            1440,
+            17118,
+            32,
+            0
+          ],
+          [
+            57,
+            32,
+            64,
+            64,
+            1632,
+            20409,
+            40,
+            0
+          ],
+          [
+            58,
+            40,
+            80,
+            80,
+            1536,
+            18244,
+            32,
+            0
+          ],
+          [
+            59,
+            32,
+            64,
+            64,
+            1376,
+            16113,
+            18,
+            0
+          ],
+          [
+            60,
+            18,
+            36,
+            36,
+            1190,
+            14819,
+            23,
+            1
+          ]
+        ],
+        "levels": 61,
+        "list_mismatch": 0,
+        "list_permuted": 0,
+        "max_children": 1504,
+        "max_leaf": 8,
+        "max_tasks": 1504,
+        "meta_mismatch": 0,
+        "missing": 0,
+        "mutants": {},
+        "nodes_checked": false,
+        "nodes_equal": false,
+        "phase": "identity",
+        "producer": 2,
+        "reference_digest": "cbf29ce484222325",
+        "reference_leaves": 0,
+        "reference_ledger": {
+          "filter_tests": 0,
+          "leaves": 0,
+          "max_depth": 0,
+          "max_leaf": 0,
+          "nodes": 0
+        },
+        "reference_status": 1,
+        "sites": 48,
+        "status": 1
+      },
+      "points": 48
+    },
+    {
+      "critical_balls_with_unique_owner_and_complete_population": null,
+      "dump_sha256": "179892071f76d2fbf5c393ffdaee9c4b99b942eb2d6c2f3ad0d36ba5b35144f3",
+      "geometric_leaf_sha256": "797ebe447ecd9f901d3eb28fb2133b7afc4303638f414e91fa571e9655873782",
+      "independent_ledger": {
+        "filter_tests": 880393,
+        "leaves": 504,
+        "max_depth": 96,
+        "max_leaf": 48,
+        "nodes": 1479
+      },
+      "name": "depth_96",
+      "native": {
+        "coord_bits": 32,
+        "digest": "c689132afda0789a",
+        "dump": "depth_96.bin",
+        "extra": 0,
+        "first": "",
+        "identity": true,
+        "kmax": 5,
+        "leaf_sites": 10766,
+        "leaf_size": 24,
+        "leaves": 504,
+        "ledger": {
+          "filter_tests": 880393,
+          "leaves": 504,
+          "max_depth": 96,
+          "max_leaf": 48,
+          "nodes": 1479
+        },
+        "level_fields": [
+          "depth",
+          "parents",
+          "children",
+          "tasks",
+          "candidates",
+          "tests",
+          "splits",
+          "leaves"
+        ],
+        "level_stats": [
+          [
+            0,
+            1,
+            1,
+            1,
+            48,
+            720,
+            1,
+            0
+          ],
+          [
+            1,
+            1,
+            2,
+            2,
+            96,
+            1440,
+            2,
+            0
+          ],
+          [
+            2,
+            2,
+            4,
+            4,
+            192,
+            2880,
+            4,
+            0
+          ],
+          [
+            3,
+            4,
+            8,
+            8,
+            384,
+            5760,
+            8,
+            0
+          ],
+          [
+            4,
+            8,
+            16,
+            16,
+            768,
+            9691,
+            8,
+            8
+          ],
+          [
+            5,
+            8,
+            16,
+            16,
+            768,
+            9502,
+            8,
+            8
+          ],
+          [
+            6,
+            8,
+            16,
+            16,
+            768,
+            9322,
+            8,
+            8
+          ],
+          [
+            7,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            8,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            9,
+            8,
+            16,
+            16,
+            768,
+            9327,
+            8,
+            8
+          ],
+          [
+            10,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            11,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            12,
+            8,
+            16,
+            16,
+            768,
+            9327,
+            8,
+            0
+          ],
+          [
+            13,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            14,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            15,
+            8,
+            16,
+            16,
+            768,
+            9327,
+            8,
+            0
+          ],
+          [
+            16,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            17,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            18,
+            8,
+            16,
+            16,
+            768,
+            9327,
+            8,
+            0
+          ],
+          [
+            19,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            20,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            21,
+            8,
+            16,
+            16,
+            768,
+            9327,
+            8,
+            0
+          ],
+          [
+            22,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            23,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            24,
+            8,
+            16,
+            16,
+            768,
+            9327,
+            8,
+            0
+          ],
+          [
+            25,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            26,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            27,
+            8,
+            16,
+            16,
+            768,
+            9327,
+            8,
+            0
+          ],
+          [
+            28,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            29,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            30,
+            8,
+            16,
+            16,
+            768,
+            9327,
+            8,
+            0
+          ],
+          [
+            31,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            32,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            33,
+            8,
+            16,
+            16,
+            768,
+            9327,
+            8,
+            0
+          ],
+          [
+            34,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            35,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            36,
+            8,
+            16,
+            16,
+            768,
+            9327,
+            8,
+            0
+          ],
+          [
+            37,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            38,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            39,
+            8,
+            16,
+            16,
+            768,
+            9327,
+            8,
+            0
+          ],
+          [
+            40,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            41,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            42,
+            8,
+            16,
+            16,
+            768,
+            9327,
+            8,
+            0
+          ],
+          [
+            43,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            44,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            45,
+            8,
+            16,
+            16,
+            768,
+            9327,
+            8,
+            0
+          ],
+          [
+            46,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            47,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            48,
+            8,
+            16,
+            16,
+            768,
+            9327,
+            8,
+            0
+          ],
+          [
+            49,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            50,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            51,
+            8,
+            16,
+            16,
+            768,
+            9327,
+            8,
+            0
+          ],
+          [
+            52,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            53,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            54,
+            8,
+            16,
+            16,
+            768,
+            9327,
+            8,
+            0
+          ],
+          [
+            55,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            56,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            57,
+            8,
+            16,
+            16,
+            768,
+            9327,
+            8,
+            0
+          ],
+          [
+            58,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            59,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            60,
+            8,
+            16,
+            16,
+            768,
+            9327,
+            8,
+            0
+          ],
+          [
+            61,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            62,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            63,
+            8,
+            16,
+            16,
+            768,
+            9327,
+            8,
+            0
+          ],
+          [
+            64,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            65,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            66,
+            8,
+            16,
+            16,
+            768,
+            9327,
+            8,
+            0
+          ],
+          [
+            67,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            68,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            69,
+            8,
+            16,
+            16,
+            768,
+            9327,
+            8,
+            0
+          ],
+          [
+            70,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            71,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            72,
+            8,
+            16,
+            16,
+            768,
+            9327,
+            8,
+            0
+          ],
+          [
+            73,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            74,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            75,
+            8,
+            16,
+            16,
+            768,
+            9327,
+            8,
+            0
+          ],
+          [
+            76,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            77,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            78,
+            8,
+            16,
+            16,
+            768,
+            9327,
+            8,
+            0
+          ],
+          [
+            79,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            80,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            81,
+            8,
+            16,
+            16,
+            768,
+            9327,
+            8,
+            0
+          ],
+          [
+            82,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            83,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            84,
+            8,
+            16,
+            16,
+            768,
+            9327,
+            8,
+            0
+          ],
+          [
+            85,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            86,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            87,
+            8,
+            16,
+            16,
+            768,
+            9327,
+            8,
+            0
+          ],
+          [
+            88,
+            8,
+            16,
+            16,
+            768,
+            9696,
+            8,
+            8
+          ],
+          [
+            89,
+            8,
+            16,
+            16,
+            768,
+            9494,
+            8,
+            8
+          ],
+          [
+            90,
+            8,
+            16,
+            16,
+            768,
+            9327,
+            8,
+            0
+          ],
+          [
+            91,
+            8,
+            16,
+            16,
+            768,
+            9644,
+            8,
+            4
+          ],
+          [
+            92,
+            8,
+            16,
+            16,
+            768,
+            9498,
+            8,
+            4
+          ],
+          [
+            93,
+            8,
+            16,
+            16,
+            768,
+            9338,
+            7,
+            4
+          ],
+          [
+            94,
+            7,
+            14,
+            14,
+            672,
+            8276,
+            4,
+            7
+          ],
+          [
+            95,
+            4,
+            8,
+            8,
+            384,
+            4681,
+            1,
+            4
+          ],
+          [
+            96,
+            1,
+            2,
+            2,
+            96,
+            1165,
+            0,
+            1
+          ]
+        ],
+        "levels": 97,
+        "list_mismatch": 0,
+        "list_permuted": 0,
+        "max_children": 16,
+        "max_leaf": 256,
+        "max_tasks": 16,
+        "meta_mismatch": 0,
+        "missing": 0,
+        "mutants": {},
+        "nodes_checked": true,
+        "nodes_equal": true,
+        "phase": "identity",
+        "producer": 2,
+        "reference_digest": "c689132afda0789a",
+        "reference_leaves": 504,
+        "reference_ledger": {
+          "filter_tests": 880393,
+          "leaves": 504,
+          "max_depth": 96,
+          "max_leaf": 48,
+          "nodes": 1479
+        },
+        "reference_status": 0,
+        "sites": 48,
+        "status": 0
+      },
+      "points": 48
+    },
+    {
+      "critical_balls_with_unique_owner_and_complete_population": null,
+      "dump_sha256": "b93ccdec365bfadb6585ff90a75f6f1996e2f1c42b8a153627b2ba1ea5c3e304",
+      "geometric_leaf_sha256": "b62328cb53b1e8221a00c78d42561214636b2718a2cf83fed3e18de2cfcc1542",
+      "independent_ledger": {
+        "filter_tests": 4,
+        "leaves": 1,
+        "max_depth": 0,
+        "max_leaf": 2,
+        "nodes": 1
+      },
+      "name": "closed_box33",
+      "native": {
+        "coord_bits": 32,
+        "digest": "f23881e93d0b1de7",
+        "dump": "closed_box33.bin",
+        "extra": 0,
+        "first": "",
+        "identity": true,
+        "kmax": 1,
+        "leaf_sites": 2,
+        "leaf_size": 4,
+        "leaves": 1,
+        "ledger": {
+          "filter_tests": 4,
+          "leaves": 1,
+          "max_depth": 0,
+          "max_leaf": 2,
+          "nodes": 1
+        },
+        "level_fields": [
+          "depth",
+          "parents",
+          "children",
+          "tasks",
+          "candidates",
+          "tests",
+          "splits",
+          "leaves"
+        ],
+        "level_stats": [
+          [
+            0,
+            1,
+            1,
+            1,
+            2,
+            4,
+            0,
+            1
+          ]
+        ],
+        "levels": 1,
+        "list_mismatch": 0,
+        "list_permuted": 0,
+        "max_children": 1,
+        "max_leaf": 256,
+        "max_tasks": 1,
+        "meta_mismatch": 0,
+        "missing": 0,
+        "mutants": {},
+        "nodes_checked": true,
+        "nodes_equal": true,
+        "phase": "identity",
+        "producer": 2,
+        "reference_digest": "f23881e93d0b1de7",
+        "reference_leaves": 1,
+        "reference_ledger": {
+          "filter_tests": 4,
+          "leaves": 1,
+          "max_depth": 0,
+          "max_leaf": 2,
+          "nodes": 1
+        },
+        "reference_status": 0,
+        "sites": 2,
+        "status": 0
+      },
+      "points": 2
+    }
+  ],
+  "gcp_used": false,
+  "native_host_simulation": true,
+  "primitives": {
+    "all_equal": true,
+    "predicates": 110,
+    "s30_key_beyond_i64": "13835058016627458075",
+    "spans": {
+      "1": 2,
+      "2": 14,
+      "3": 8,
+      "16": 12,
+      "28": 12,
+      "29": 12,
+      "30": 12,
+      "31": 12,
+      "32": 12,
+      "33": 12
+    },
+    "stdin_sha256": "42debba2860397e09a34c63e640f62aa586d59664a1a088b82bb27aa80c5b71f",
+    "stdout_sha256": "3024325e6d17623f3755b0526a2c74a62ca5a40976a835901f29aab35f718ad6",
+    "strict_contact_preserved": true,
+    "top_reservoirs": 50
+  },
+  "schema": "ehgp.v12.m5.math_audit.v1",
+  "source_closure": {
+    "head": "e30000dec1027c5f0ade3093a94563ee412409d3",
+    "manifest_sha256": "4e9adcfd7f03d856e3460f6217ddc0c04bd318b6dd925676436e8e27c1c0a054",
+    "pin": "e30000dec1027c5f0ade3093a94563ee412409d3",
+    "probe_source_sha256": "2b1976cf87dc43bb6bb1a1a49eb85076561d864850e7f209d80d3a2dced31b1f",
+    "script_sha256": "1a5b3980f280caf1ccb38135810a24604eb5c6cc6b78de98716a641df7de2c5c",
+    "sources": 16
+  },
+  "verdicts": {
+    "all_native_traversals_equal_independent_dfs": true,
+    "closed_box33_and_depth96": true,
+    "g1_and_reservoir_exact": true,
+    "morton_order_convention_observed_natively": true,
+    "wide_leaf_transactional_refusal": true
+  }
+}

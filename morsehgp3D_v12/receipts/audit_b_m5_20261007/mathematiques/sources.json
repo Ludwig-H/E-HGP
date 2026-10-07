@@ -1,0 +1,85 @@
+{
+  "pin": "e30000dec1027c5f0ade3093a94563ee412409d3",
+  "files": [
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m5_parcours/README.md",
+      "sha256": "e04f8e21cc41533931e5d6f6c5e565ad9eb4e20f19d153c79e0e631da5839ebf",
+      "blob": "99388d5bd68fd9c381ad6b4a270a5db2f2218787"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/bfs.hpp",
+      "sha256": "baa5cb5f99f168a31765394b6adfe7c836c006a00ff1bcd5d923c23835bc23d1",
+      "blob": "b55e18f7609e60bec4f5f979c876729ac437e0bb"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/warp.hpp",
+      "sha256": "919ba0a2f3c54e99919df7e9bb90e8be8528b2f8c0e2b581124c041f85de930a",
+      "blob": "a0a262b1d46b9e17a812a9b8f41e651ea1ec0b03"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/driver.hpp",
+      "sha256": "7fe2d808c0675f3423a29c0ba4699c2a826c154162b1025627eafd009cd5daa1",
+      "blob": "139450a113d6263886ea43d536fffb7261c8a96f"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/format.hpp",
+      "sha256": "62a93cd7eaecac8a73a81421f22a2ad9a132ea31a43206abd8575fecf48cafaf",
+      "blob": "dd25f6bc7d44d65cdbd3bb4853b2dee33959d977"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/compare.hpp",
+      "sha256": "587fb54dd0158a7155b96d660acbb8d0a7fe74301d3ab16f2f0f62614ec99889",
+      "blob": "ecb1e6fa1d57855ea95053c511aefe4b7a3c57ee"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m5_parcours/host/traversal_identity.cpp",
+      "sha256": "63e0b866e403fb79f275041f9773e0b07b7a51fd05344c48005081270c076645",
+      "blob": "2bc521dde272431ee6fbf59d59588745d905b574"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m5_parcours/oracle/oracle_parcours.py",
+      "sha256": "89818cc365e83285f32043f5c2c6431c413d7e0a3ef8674e013be68d15bee253",
+      "blob": "c062629420c425438f9f07d5d70402769480b34b"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m5_parcours/fixtures/fixtures.py",
+      "sha256": "1178353338c9f9af62bb3d6d2a9580162fce958bb2e50eeaaf05cba26af7c046",
+      "blob": "76fea85d894595ddd006b9d41ce35263235ee7c8"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/simt.hpp",
+      "sha256": "c7276ddb0aba9b196e1b3c8ad138f778afda04614a3d57e285b94f3cb6f07691",
+      "blob": "32e62dee5f23e801560bf2b13e8d66aea620a89c"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/dump_format.hpp",
+      "sha256": "e01f8d3146d09bfcb05e96b06a33cfad27c27370b1d1aade7800a4a315b913a3",
+      "blob": "d790de864ccd0137a54594d20c2f4459718a120b"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/boxes.cpp",
+      "sha256": "2fc06e5e781ef51891ceecb324ecc460b023ea8e15079a32d22eb7d159ecc5a2",
+      "blob": "8439634bbf6f80e6508593e72cf3e08597dbe896"
+    },
+    {
+      "path": "morsehgp3D_v12/docs/CONTRAT_NUMERIQUE.md",
+      "sha256": "703d9d90c83426adf78b2352cabdd0e6440be284a42806ee27ee79dcaae79f37",
+      "blob": "fe5c00607b01fd5a65f8185501b5df579381a6cc"
+    },
+    {
+      "path": "morsehgp3D_v12/reference/hgp12_ref/constructive.py",
+      "sha256": "7e97f89789cafb4f241903e6d0f0e636425cdf3d526697e4e891d483f868fedc",
+      "blob": "e8760e3724003c0ca6b19575aacd63fe78a2e228"
+    },
+    {
+      "path": "morsehgp3D_v12/reference/hgp12_ref/intgeom.py",
+      "sha256": "d0f7b1cecbbb1b25c3091bc1e3d3d062b9ee0f16b1d81c7117bf60b0d13a3f4b",
+      "blob": "0600a7e7e88e1a19c4652a470690d1f5771d1de2"
+    },
+    {
+      "path": "morsehgp3D_v12/reference/hgp12_ref/model.py",
+      "sha256": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c",
+      "blob": "b89df5d88d90cfb5a416fd277d48e0858ee944bc"
+    }
+  ]
+}

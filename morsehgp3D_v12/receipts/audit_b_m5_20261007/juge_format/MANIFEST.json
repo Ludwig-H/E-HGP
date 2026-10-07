@@ -1,0 +1,34 @@
+{
+  "artifacts_sha256": {
+    "README.md": "90a27a6321f1a9258338312e71a736a3904a80e3eefebbb2f60b878883c738a9",
+    "RESULT_O.json": "e1234c6b2c69697df136fd7685717575576044a1212a3daee399d2ced5d839f5",
+    "RESULT_normal.json": "0bc25a6d840397103d02280d7f0006b6fd34fb70f641e8f232f7c2fab7dfb4c0"
+  },
+  "audited_commit": "e30000dec1027c5f0ade3093a94563ee412409d3",
+  "schema": "audit.b_m5.judge_format.manifest.v1",
+  "sources_sha256": {
+    "morsehgp3D_v11/src/catalogue/adaptive_frontier.cpp": "ddfdd300e2229871c9b0b4ee5d8bf6746c5ba7066ce3a95c5c4b42ddc4936e78",
+    "morsehgp3D_v11/src/catalogue/boxes.cpp": "2fc06e5e781ef51891ceecb324ecc460b023ea8e15079a32d22eb7d159ecc5a2",
+    "morsehgp3D_v11/src/catalogue/frontier_dispatch.hpp": "f506d099ce05bbf3b98d484d1e5a31e1df0249dbe9e702cd810a751162ad35f1",
+    "morsehgp3D_v11/src/catalogue/internal.hpp": "ed015ca9881eb23ac3ffe96526d008267f23859efd49c34b65126c83612675a1",
+    "morsehgp3D_v11/src/catalogue/single_pass.cpp": "7e53bd87d8d3fc4adb84421a49b07a5678268d1768580495166ed0cc766c1d2e",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/dump_format.hpp": "e01f8d3146d09bfcb05e96b06a33cfad27c27370b1d1aade7800a4a315b913a3",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/simt.hpp": "c7276ddb0aba9b196e1b3c8ad138f778afda04614a3d57e285b94f3cb6f07691",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/scripts/g4_leaf_bench.py": "84e4c192d9dd8a42e1b45aa096440129e749c5e3f957f4d4ee8dc83b4ee6cd88",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/README.md": "e04f8e21cc41533931e5d6f6c5e565ad9eb4e20f19d153c79e0e631da5839ebf",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/fixtures/fixtures.py": "1178353338c9f9af62bb3d6d2a9580162fce958bb2e50eeaaf05cba26af7c046",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/bfs.hpp": "baa5cb5f99f168a31765394b6adfe7c836c006a00ff1bcd5d923c23835bc23d1",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/compare.hpp": "587fb54dd0158a7155b96d660acbb8d0a7fe74301d3ab16f2f0f62614ec99889",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/driver.hpp": "7fe2d808c0675f3423a29c0ba4699c2a826c154162b1025627eafd009cd5daa1",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/format.hpp": "62a93cd7eaecac8a73a81421f22a2ad9a132ea31a43206abd8575fecf48cafaf",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/warp.hpp": "919ba0a2f3c54e99919df7e9bb90e8be8528b2f8c0e2b581124c041f85de930a",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/oracle/oracle_parcours.py": "89818cc365e83285f32043f5c2c6431c413d7e0a3ef8674e013be68d15bee253",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/scripts/g4_traversal_bench.py": "8499cd641f35f147f995ac465a4dd23ad234403b68ec5a4c8392cb6c3667c685",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/vidage/v11_timing.cpp": "5f543ac1ae326a17a1d5537db737b0ba93a79572c710723989a5dde4c022aa0e"
+  },
+  "witness_sha256": {
+    "format_probe.cpp": "a0b9a77b8e12313d7541fe74400c842620b699521e7c7faa56b4f6aace1b0e96",
+    "run.py": "040e298dfe018bca23156681495218dea69e5e1469d7eada6403c943960497c0",
+    "runner_probe.py": "4e41c9aa904178ddc53ba88daa1a686df077a30dce2b0b0d192a53359ec5d87b"
+  }
+}

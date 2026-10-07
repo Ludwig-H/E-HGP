@@ -1,0 +1,45 @@
+{
+  "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "workdir": "/tmp/ehgp-v12-audit-b-m5-math-20261007",
+  "builds": [
+    {
+      "name": "traversal_identity",
+      "command": [
+        "g++",
+        "-std=c++20",
+        "-O1",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-Imorsehgp3D_v12/microbancs/mes_m5_parcours/include",
+        "-Imorsehgp3D_v12/microbancs/mes_m2_feuille/include",
+        "morsehgp3D_v12/microbancs/mes_m5_parcours/host/traversal_identity.cpp",
+        "-o",
+        "/tmp/ehgp-v12-audit-b-m5-math-bin-20261007/traversal_identity"
+      ],
+      "exit_code": 0,
+      "binary_sha256": "f32f6dab3f2848ca1e39a222bd6d1350f08d75d52a18e2605d26f8c56e370c03"
+    },
+    {
+      "name": "predicates",
+      "command": [
+        "g++",
+        "-std=c++20",
+        "-O1",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-Imorsehgp3D_v12/microbancs/mes_m5_parcours/include",
+        "-Imorsehgp3D_v12/microbancs/mes_m2_feuille/include",
+        "morsehgp3D_v12/receipts/audit_b_m5_20261007/mathematiques/predicates.cpp",
+        "-o",
+        "/tmp/ehgp-v12-audit-b-m5-math-bin-20261007/predicates"
+      ],
+      "exit_code": 0,
+      "binary_sha256": "a6313f092592579d5d294087a8368d178c9e490c297c1db527bacaa17ca0e02a"
+    }
+  ]
+}

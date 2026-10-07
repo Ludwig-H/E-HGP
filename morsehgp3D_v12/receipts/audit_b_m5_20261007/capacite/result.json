@@ -1,0 +1,75 @@
+{
+  "binary_sha256": "c8c2911392c9a8e54e717a7791b9839d90876196f4a00afe803bd5185b9f88f4",
+  "cases": [
+    {
+      "correct": true,
+      "count": 1,
+      "emitted_tasks": 1,
+      "exact_tasks": 1,
+      "scan_child_tasks": 2
+    },
+    {
+      "correct": true,
+      "count": 256,
+      "emitted_tasks": 1,
+      "exact_tasks": 1,
+      "scan_child_tasks": 2
+    },
+    {
+      "correct": true,
+      "count": 257,
+      "emitted_tasks": 2,
+      "exact_tasks": 2,
+      "scan_child_tasks": 4
+    },
+    {
+      "correct": true,
+      "count": 4294967039,
+      "emitted_tasks": 16777215,
+      "exact_tasks": 16777215,
+      "scan_child_tasks": 33554430
+    },
+    {
+      "correct": true,
+      "count": 4294967040,
+      "emitted_tasks": 16777215,
+      "exact_tasks": 16777215,
+      "scan_child_tasks": 33554430
+    },
+    {
+      "correct": false,
+      "count": 4294967041,
+      "emitted_tasks": 0,
+      "exact_tasks": 16777216,
+      "scan_child_tasks": 33554432
+    },
+    {
+      "correct": false,
+      "count": 4294967294,
+      "emitted_tasks": 0,
+      "exact_tasks": 16777216,
+      "scan_child_tasks": 33554432
+    }
+  ],
+  "compile_exit": 0,
+  "compiler": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "cuda_executed": false,
+  "pin": "e30000dec1027c5f0ade3093a94563ee412409d3",
+  "probe_exit": 0,
+  "schema": "ehgp.v12.m5.capacity.audit.v1",
+  "scope": "seven tiny EmitKernel records; no large input, allocation or whole-traversal crash",
+  "source_hashes_before_after_equal": true,
+  "sources_sha256": {
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/simt.hpp": "c7276ddb0aba9b196e1b3c8ad138f778afda04614a3d57e285b94f3cb6f07691",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/README.md": "e04f8e21cc41533931e5d6f6c5e565ad9eb4e20f19d153c79e0e631da5839ebf",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/cuda/traversal_bench.cu": "63053e9e9b99926c137075f4169594c5c344faf00a3c5cce613316e0d120155c",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/bfs.hpp": "baa5cb5f99f168a31765394b6adfe7c836c006a00ff1bcd5d923c23835bc23d1",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/driver.hpp": "7fe2d808c0675f3423a29c0ba4699c2a826c154162b1025627eafd009cd5daa1",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/format.hpp": "62a93cd7eaecac8a73a81421f22a2ad9a132ea31a43206abd8575fecf48cafaf",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/warp.hpp": "919ba0a2f3c54e99919df7e9bb90e8be8528b2f8c0e2b581124c041f85de930a"
+  },
+  "witnesses_sha256": {
+    "check.py": "1e04a03026082d6dc6a339c4323fd3e442b4db5b51149feddade8e73c7363c4e",
+    "probe.cpp": "bb06dce7f2ba4746aecb80e0a1974c8a4bf293a567c17c6d8b2ef909fe4a0997"
+  }
+}
