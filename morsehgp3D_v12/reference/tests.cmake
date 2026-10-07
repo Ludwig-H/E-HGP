@@ -53,6 +53,19 @@ mhgp12_python_gate(mhgp12_reference_witness_t1_mutant_sans_inclusion 4 test_witn
                    LABELS oracle fast mutant)
 mhgp12_python_gate(mhgp12_reference_witness_t1_refusal 2 test_witness_t1.py --option-inconnue LABELS oracle fast)
 
+# Regle de resolution de la v12 (CONTRAT_TOUR.md, paragraphe 4.1) : arret sur la premiere cellule de fenetre, cibles
+# << cellule >> lues sur la cellule deja traitee, trois politiques de saut, contre l'etage B sur la suite rapide ;
+# fait grave du repli de G-L3 ; mutants de la regle ; refus d'usage.
+mhgp12_python_gate(mhgp12_reference_resolution_v12 0 test_resolution_v12.py
+                   LINE "resolution_v12_ok nuages=342 ordres=1362 politiques=3 cibles=18392 cellules=8448 inertes=1113 faits=1"
+                   LABELS oracle fast)
+foreach(mutant inertes_omises element_sans_racine arret_sous_fenetre plateau_coupe)
+  mhgp12_python_gate(mhgp12_reference_resolution_v12_mutant_${mutant} 4 test_resolution_v12.py --inject=${mutant}
+                     LABELS oracle fast mutant)
+endforeach()
+mhgp12_python_gate(mhgp12_reference_resolution_v12_refusal 2 test_resolution_v12.py --option-inconnue
+                   LABELS oracle fast)
+
 mhgp12_python_gate(mhgp12_reference_fast 0 test_ref.py --suite=fast
                    LINE "reference_fast_ok nuages=342 ordres=1362 coupes=48234 noeuds=13029" LABELS oracle fast)
 mhgp12_python_gate(mhgp12_reference_fast_split 0 test_ref.py --suite=fast --jobs=3

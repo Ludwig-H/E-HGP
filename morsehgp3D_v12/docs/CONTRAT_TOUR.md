@@ -194,6 +194,11 @@ est un défaut (porte W1 contre W48).
    exact). L'invariance par translation reste un **contrat distinct**, jugé par translation explicite des sites et des
    centres, jamais par cette empreinte (note de mesure de l'auditeur, `CST-0207`).
 2. **Oracle borné** (`reference/`, $n\leq 14$) : forêt, coupes ouvertes et fermées, verticales, sur la suite rapide.
+   La règle du § 4.1 y est gravée depuis le 7 octobre (porte `mhgp12_reference_resolution_v12`) : arrêt sur la
+   première cellule, cibles « cellule » lues sur la cellule déjà traitée, cellules inertes comprises, trois
+   politiques de saut ; résultat identique à l'étage B (donc à la définition) sur les 342 nuages et 1 362 ordres de
+   la suite rapide, 168 cibles sur des cellules inertes ; quatre mutants de la règle tués ; repli de `G-L3` sur un
+   fait gravé.
 3. **Témoins** : `WIT-D2` et `WIT-MEMO` (`LEM-T3`, `CST-0104`) ; `WIT-T1-CARRE` côté tour (route exacte) ; `WIT-SIX`
    (fusion ternaire simultanée) ; `WIT-TRI-EQ` (plateau) ; carré K1..4 (verticales, `CST-0214`) ; `WIT-E5` (fenêtre) ;
    refus hors domaine de `LEM-T5` (`CST-0105`) ; `WIT-T7-CERCLE25` si les coquilles étendues passent par `LEM-T7`

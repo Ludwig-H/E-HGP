@@ -1,5 +1,7 @@
 # Ports du socle de la v12 depuis la v11 gelée
 
+Cette table décrit **le port** (commit `a0091e2b7`, complété par `95247cf4b`) : les fichiers évoluent ensuite avec la v12 (contrat numérique `6a38f7e4b`, règle de résolution de la v12 dans l'oracle borné, etc.), sans mise à jour de leur ligne ici ; leur histoire est celle de Git.
+
 Source : moteur gelé de la v11, commit `ac081a06f` (dossier `morsehgp3D_v11/`, identique à `HEAD` pour tous les
 chemins portés). Pour chaque fichier, le SHA-256 est celui de la source : `git show ac081a06f:morsehgp3D_v11/<chemin>
 | sha256sum`.

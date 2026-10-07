@@ -34,6 +34,12 @@ from itertools import combinations
 from . import intgeom as G
 from .model import Cut, Entry, InvariantError, Node, OrderResult
 
+# Regles de resolution des representants : 'descente' (etage B historique : descente jusqu'a une naissance, saut aux
+# k plus proches du centre) ; 'v12_*' : regle de la v12 (morsehgp3D_v12/docs/CONTRAT_TOUR.md, paragraphe 4.1), arret
+# sur la premiere cellule de fenetre, saut aux k plus proches du centre ('v12_proches'), aux k plus petits
+# identifiants de I ('v12_indices', regle de la v11) ou par candidats voisins ('v12_voisins', levier G-L3).
+RESOLUTIONS = ('descente', 'v12_proches', 'v12_indices', 'v12_voisins')
+
 
 class Ball(object):
     """Sphere critique recensee. inner et shell : les points de l'interieur strict I et de la coquille U
@@ -46,10 +52,17 @@ class Ball(object):
 class Reference(object):
     """Reference constructive d'un nuage pour les ordres 1 .. min(kmax, n). order(k) rend l'OrderResult."""
 
-    def __init__(self, points, kmax, admission='v10'):
+    def __init__(self, points, kmax, admission='v10', resolution='descente'):
         if admission not in ('v10', 'single'):
             raise ValueError('regle d\'admission %r inconnue' % (admission,))
+        if resolution not in RESOLUTIONS:
+            raise ValueError('regle de resolution %r inconnue' % (resolution,))
         self.admission = admission
+        self.resolution = resolution
+        # compteurs de la regle de resolution de la v12 (resolve_v12), a part des compteurs juges de l'etage B
+        self.v12_stats = dict(targets=0, steps=0, jumps=0, neighbour_jumps=0, census_jumps=0, inert_steps=0,
+                              cell_stops=0, birth_stops=0, cells=0, inert_cells=0, inert_targets=0)
+        self._knn = {}
         self.input = [tuple(int(c) for c in p) for p in points]
         if not self.input or any(len(p) != 3 for p in points):
             raise ValueError('nuage vide ou point mal forme')
@@ -309,6 +322,8 @@ class Reference(object):
 
     def _forest(self, k):
         """Naissances et jonctions de l'ordre k dans l'ordre du catalogue, puis Kruskal par plateaux."""
+        if self.resolution != 'descente':
+            return self._forest_v12(k)
         births, joins = [], []
         for ball in self.balls:
             if ball.lo <= k <= ball.hi:
@@ -351,6 +366,12 @@ class Reference(object):
             i = j
         if len(set(find(x) for x in range(nb))) != 1:
             raise InvariantError('ordre %d : %d racines' % (k, len(set(find(x) for x in range(nb)))))
+        return self._number(k, births, merges)
+
+    def _number(self, k, births, merges):
+        """Numerotation canonique d'une foret construite (naissances de l'ordre du catalogue, fusions dans l'ordre de
+        leur creation) ; enregistre les correspondances boule -> noeud de naissance et rend l'arbre."""
+        nb = len(births)
         # numerotation canonique : naissances par (niveau, centre), fusions par (niveau, plus petite naissance)
         remap = [None] * (nb + len(merges))
         for new, old in enumerate(sorted(range(nb), key=lambda i: (births[i].level, births[i].center))):
@@ -368,6 +389,142 @@ class Reference(object):
         self._birth_node[k] = dict((b.index, remap[i]) for i, b in enumerate(births))
         self._birth_ball[k] = dict((remap[i], b) for i, b in enumerate(births))
         return _Tree(nodes)
+
+    # ------------------------------------------------------------ regle de resolution de la v12
+
+    def resolve_v12(self, part, k):
+        """Cible d'une k-partie par la regle de la v12 (CONTRAT_TOUR.md, paragraphe 4.1), fonction pure de (part, k) :
+        pas valides du theoreme D jusqu'a la premiere cellule de fenetre (boule, k) ; rend ('naissance', indice de
+        boule) si cette cellule est une naissance, sinon ('cellule', indice de boule) : arret de LEM-T3, sans suivre la
+        cellule. Le niveau decroit strictement a chaque pas (controle)."""
+        st = self.v12_stats
+        st['targets'] += 1
+        previous = None
+        while True:
+            st['steps'] += 1
+            anchor, ctr, key = self._meb(part)
+            if previous is not None and not key[1] < previous:
+                raise InvariantError('resolution v12 sans decroissance stricte du niveau (ordre %d)' % k)
+            previous = key[1]
+            ball = self._by_key.get(key)
+            if ball is None:
+                ball = self._adhoc.get(key)
+                if ball is None:
+                    inner, shell = self._census(anchor, ctr)
+                    ball = self._adhoc[key] = self._ball(anchor, ctr, key, inner, shell)
+            if ball.p >= k:  # au moins k points strictement interieurs : saut
+                st['jumps'] += 1
+                part = self._jump_v12(ball, anchor, ctr, part, k)
+                continue
+            if ball.index is not None and ball.lo <= k <= ball.hi:  # premiere cellule de fenetre : arret
+                if self.cell(ball, k)[0] == 'birth':
+                    st['birth_stops'] += 1
+                    return 'naissance', ball.index
+                st['cell_stops'] += 1
+                return 'cellule', ball.index
+            t = k - ball.p  # sous la fenetre (LEM-HORS-CAT pour une sphere hors du catalogue) : pas inerte
+            if t > ball.qmin - 2:
+                raise InvariantError('ordre %d : boule de fenetre absente du catalogue, (H2) violee' % k)
+            st['inert_steps'] += 1
+            part = tuple(sorted(ball.inner + ball.shell[:t]))
+
+    def _jump_v12(self, ball, anchor, ctr, part, k):
+        """Saut d'une partie dont la boule a au moins k points strictement interieurs : une k-partie de I (pas valide
+        du theoreme D), choisie par la politique de self.resolution."""
+        policy = self.resolution
+        if policy == 'v12_voisins':
+            pool = set(part)
+            for x in part:
+                pool.update(self._neighbours(x))
+            strict = sorted(x for x in pool if G.side_key(anchor, ctr, self.sites[self.site_of[x]]) < 0)
+            if len(strict) >= k:  # k sites strictement interieurs exhibes : p >= k sans census (G-L3)
+                self.v12_stats['neighbour_jumps'] += 1
+                return tuple(strict[:k])
+            self.v12_stats['census_jumps'] += 1
+            policy = 'v12_indices'
+        if policy == 'v12_indices':
+            return tuple(ball.inner[:k])
+        ranked = sorted((G.side_key(anchor, ctr, self.sites[self.site_of[y]]), y) for y in ball.inner)
+        return tuple(sorted(y for _key, y in ranked[:k]))
+
+    def _neighbours(self, x):
+        """Les K plus proches autres points de x (distance carree exacte, puis identifiant), K = kmax."""
+        if x not in self._knn:
+            here = self.sites[self.site_of[x]]
+            ranked = []
+            for y in range(self.n):
+                if y != x:
+                    d = G.sub(here, self.sites[self.site_of[y]])
+                    ranked.append((G.dot(d, d), y))
+            ranked.sort()
+            self._knn[x] = tuple(y for _d, y in ranked[:self.kmax])
+        return self._knn[x]
+
+    def _forest_v12(self, k):
+        """Foret de l'ordre k par la regle de la v12 : naissances ; puis TOUTES les cellules de fenetre non naissance
+        (jonctions et cellules inertes, pont de LEM-T4) par niveaux croissants ; chaque representant est resolu par
+        resolve_v12 ; une cible << cellule b' >> se lit comme l'element de la cellule b', deja traitee puisque son
+        niveau est strictement inferieur (LEM-T3) ; Kruskal par plateaux (racines lues avant les unions du plateau).
+        Meme numerotation canonique que l'etage B."""
+        births, cells, inert = [], [], set()
+        for ball in self.balls:
+            if ball.lo <= k <= ball.hi:
+                kind, reps = self.cell(ball, k)
+                if kind == 'birth':
+                    births.append(ball)
+                    continue
+                cells.append((ball, [tuple(sorted(ball.inner + rep)) for rep in reps]))
+                self.v12_stats['cells'] += 1
+                if kind == 'inert':
+                    self.v12_stats['inert_cells'] += 1
+                    inert.add(ball.index)
+        leaf_of = dict((b.index, i) for i, b in enumerate(births))
+        nb = len(births)
+        up, head = list(range(nb)), list(range(nb))
+
+        def root(x):
+            while up[x] != x:
+                up[x] = up[up[x]]
+                x = up[x]
+            return x
+        element, made, first = {}, [], 0
+        while first < len(cells):
+            lam, last = cells[first][0].level, first
+            while last < len(cells) and cells[last][0].level == lam:
+                last += 1
+            plateau = []
+            for ball, parts in cells[first:last]:
+                roots = []
+                for part in parts:
+                    kind, index = self.resolve_v12(part, k)
+                    if kind == 'naissance':
+                        roots.append(root(leaf_of[index]))
+                    elif index in element:
+                        self.v12_stats['inert_targets'] += index in inert
+                        roots.append(root(element[index]))
+                    else:
+                        raise InvariantError('ordre %d : cible sur la cellule %d, pas encore traitee' % (k, index))
+                plateau.append((ball, roots))
+            for _ball, roots in plateau:
+                for other in roots[1:]:
+                    a, b = root(roots[0]), root(other)
+                    if a != b:
+                        up[max(a, b)] = min(a, b)
+            grouped = {}
+            for _ball, roots in plateau:
+                for r in roots:
+                    grouped.setdefault(root(r), set()).add(r)
+            for r in sorted(grouped):
+                if len(grouped[r]) >= 2:
+                    children = sorted(head[x] for x in grouped[r])
+                    head[r] = nb + len(made)
+                    made.append((lam, children))
+            for ball, roots in plateau:
+                element[ball.index] = roots[0]
+            first = last
+        if len(set(root(x) for x in range(nb))) != 1:
+            raise InvariantError('ordre %d : %d racines (regle v12)' % (k, len(set(root(x) for x in range(nb)))))
+        return self._number(k, births, made)
 
     def _build(self, k):
         tree = self._trees[k] = self._forest(k)
