@@ -170,3 +170,7 @@ mhgp11_add_unit(mhgp11_catalogue_leaf_narrow SOURCES leaf_device_narrow_test.cpp
                 GROUPS line_reference acute_and_triple span_refusal LABELS fast)
 # Executeur partage du lot de feuilles : selection des feuilles de l'hote contre une recomputation independante.
 mhgp11_add_unit(mhgp11_catalogue_leaf_split SOURCES leaf_split_test.cpp GROUPS select refusals LABELS fast)
+
+# Preparation des noeuds par tranches (rondes de la frontiere adaptative) contre prepare_node, noeud par noeud.
+mhgp11_add_unit(mhgp11_catalogue_prepare_chunked SOURCES prepare_chunked_test.cpp GROUPS equivalence refusals
+                LABELS fast)

@@ -142,3 +142,32 @@ les mesures et fixe la collecte à 64 MiB ; les gardes de ressources restent
 applicables. Les sauvegardes complètes sont payées dans le budget de
 campagne de 700 s, sans réduction implicite du calendrier. Les omissions
 éventuelles restent explicitement budgétaires.
+
+## Rondes préparées par tranches (7 octobre 2026)
+
+Sur une trame LiDAR, les premières rondes n'ont qu'un à quelques parents de
+dizaines de milliers de sites, soit deux à quelques dizaines de tâches pour un
+Pool de 48 ouvriers ; la préparation de la frontière y coûtait 17 à 21 ms sur
+G4. Dès qu'un parent de la ronde dépasse `kPrepareChunk` = 2048 sites,
+`run_round` prépare chaque enfant par tranches de sites de son parent
+(`prepare_nodes_chunked`, [`boxes.cpp`](../src/catalogue/boxes.cpp)). Le
+pilote valide les nœuds, prend les quotas et alloue les listes, dans l'ordre
+des nœuds. Le Pool calcule ensuite le réservoir de témoins de chaque tranche.
+Le pilote fusionne ces réservoirs selon l'ordre (distance au centre, rang dans
+le parent), qui est exactement le choix du réservoir de `prepare_node`. Le Pool
+filtre ensuite chaque tranche ; ses sites gardés sont écrits au début de sa
+place dans la liste. Le pilote les rend enfin contigus dans l'ordre des
+tranches, et calcule l'enveloppe puis la boîte ajustée.
+
+Le réservoir et le test G1 n'ont qu'une écriture, partagée avec
+`prepare_node`. Mêmes sites dans le même ordre, même boîte, même capacité de
+liste et même registre : la porte `mhgp11_catalogue_prepare_chunked` le
+vérifie nœud par nœud sur trois nuages, pour des tranches de 1 à 4096 sites
+et pour K de 1 à 10. La grille symétrique y met des témoins ex aequo au bord
+du réservoir ; des boîtes loin du nuage couvrent la voie « boîte ajustée
+vide ». Quatre mutants sont joués : rangs inversés à la fusion, égalité
+gardée par le réservoir plein, compaction omise, enveloppe sans incrément. Une
+ronde dont aucun parent ne dépasse une tranche garde exactement la voie
+d'origine, une tâche par enfant, et ses allocations. Une ronde par tranches
+admet son brouillon dans `round_bytes`, pour la construction comme pour le
+rejeu.

@@ -7,6 +7,10 @@
 
 #include "catalogue/catalogue.hpp"
 
+namespace mhgp11::sched {
+class Pool;
+}
+
 namespace mhgp11::catalogue_detail {
 
 inline constexpr u32 kMaxLeaf = 1024;
@@ -113,6 +117,24 @@ struct ReadyNode {
 Outcome make_root(Run& run, Buffer<SiteIdx>& root, Box& box) noexcept;
 Outcome prepare_node(Run& run, std::span<const SiteIdx> parent, const Box& box, u32 depth,
                      ReadyNode& ready) noexcept;
+
+// Preparation de plusieurs noeuds par tranches de sites, sur le Pool (rondes de la frontiere adaptative, 7 octobre
+// 2026). Chaque noeud donne exactement ce que donnerait prepare_node sur un Run neuf qui partage run.quota : memes
+// sites dans le meme ordre, meme boite ajustee, meme capacite de liste, registre (noeuds, profondeur, tests du filtre)
+// dans *ledger. Le pilote valide, prend les quotas et alloue les listes dans l'ordre des noeuds, puis alloue un
+// brouillon de prepare_scratch_bytes octets. chunk > 0 : taille de tranche (kPrepareChunk hors des portes).
+inline constexpr u64 kPrepareChunk = 2048;
+struct NodeJob {
+  std::span<const SiteIdx> parent;
+  Box box;
+  u32 depth = 0;
+  ReadyNode* ready = nullptr;
+  CatalogueLedger* ledger = nullptr;
+};
+u64 prepare_chunks(u64 sites, u64 chunk = kPrepareChunk) noexcept;  // ceil(sites/chunk)
+Outcome prepare_scratch_bytes(u64 chunks, u64 jobs, u64& bytes) noexcept;
+Outcome prepare_nodes_chunked(Run& run, sched::Pool& pool, std::span<const NodeJob> jobs,
+                              u64 chunk = kPrepareChunk) noexcept;
 bool split_ready(const ReadyNode& ready, const CatalogueParams& params, Box& left, Box& right) noexcept;
 Outcome run_ready(Run& run, const ReadyNode& ready) noexcept;
 
