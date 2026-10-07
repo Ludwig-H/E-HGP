@@ -6,7 +6,10 @@
 // de dix noyaux contre dix lancements, et allocation asynchrone a chaud depuis le pool. Rien ne decide : banc publie,
 // qui fixe le budget du regime residant (decision D1).
 //
-// Sortie : une ligne JSON par mesure sur stdout (cle "mes":"M6"), quantiles en microsecondes.
+// Sortie : une ligne JSON par mesure sur stdout (cle "mes":"M6"), quantiles en microsecondes, interpoles lineairement
+// entre rangs (la mediane d'un effectif pair est la moyenne des deux rangs centraux, CST-0209). Toute mesure repetee
+// separe son premier usage (ligne "<nom>_first", preparation et chargement compris) des repetitions chaudes, seules
+// comptees dans les quantiles (CST-0210).
 // Codes : 0 conforme ; 2 usage faux ; 3 echec CUDA (message sur stderr).
 // Usage : mes_m6_session_cost [--sync=spin|yield|blocking] [--reps=N]   (N de 10 a 100000, 2000 par defaut)
 #include <cuda_runtime.h>
@@ -38,17 +41,45 @@ struct Quantiles {
   double p05, p50, p95, max;
 };
 
-Quantiles quantiles(std::vector<double> v) {
-  std::sort(v.begin(), v.end());
-  auto at = [&](double q) { return v[static_cast<size_t>(q * static_cast<double>(v.size() - 1))]; };
-  return {at(0.05), at(0.50), at(0.95), v.back()};
-}
-
 void emit(const char* name, const std::string& extra, const Quantiles& q, size_t n) {
   std::printf("{\"mes\":\"M6\",\"name\":\"%s\"%s,\"n\":%zu,\"p05_us\":%.3f,\"p50_us\":%.3f,\"p95_us\":%.3f,"
               "\"max_us\":%.3f}\n",
               name, extra.c_str(), n, q.p05, q.p50, q.p95, q.max);
 }
+
+// Quantile par interpolation lineaire entre les rangs floor(h) et floor(h)+1, h = q (n - 1) ; v non vide.
+double interpolated(const std::vector<double>& sorted, double q) {
+  const double h = q * static_cast<double>(sorted.size() - 1);
+  const size_t low = static_cast<size_t>(h);
+  if (low + 1 >= sorted.size()) return sorted.back();
+  return sorted[low] + (h - static_cast<double>(low)) * (sorted[low + 1] - sorted[low]);
+}
+
+Quantiles quantiles(std::vector<double> v) {
+  std::sort(v.begin(), v.end());
+  return {interpolated(v, 0.05), interpolated(v, 0.50), interpolated(v, 0.95), v.back()};
+}
+
+// Auto-test de la regle des quantiles, joue avant tout appel CUDA : 1..10 donne une mediane de 5,5.
+bool quantiles_selftest() {
+  std::vector<double> v;
+  for (int i = 10; i >= 1; --i) v.push_back(i);
+  const Quantiles q = quantiles(v);
+  std::vector<double> odd = {3.0, 1.0, 2.0};
+  return q.p50 == 5.5 && q.max == 10.0 && quantiles(odd).p50 == 2.0;
+}
+
+// Premier usage puis repetitions chaudes : body() mesure une repetition en microsecondes.
+template <class Body>
+void first_then_warm(const char* name, const std::string& extra, int reps, Body body) {
+  const double first = body();
+  std::printf("{\"mes\":\"M6\",\"name\":\"%s_first\"%s,\"n\":1,\"us\":%.3f}\n", name, extra.c_str(), first);
+  std::vector<double> v;
+  v.reserve(static_cast<size_t>(reps));
+  for (int r = 0; r < reps; ++r) v.push_back(body());
+  emit(name, extra, quantiles(v), v.size());
+}
+
 
 void emit_once(const char* name, double us) {
   std::printf("{\"mes\":\"M6\",\"name\":\"%s\",\"n\":1,\"us\":%.3f}\n", name, us);
@@ -107,59 +138,47 @@ int run(unsigned sync_flag, const char* sync_name, int reps) {
   emit_once("pool_alloc_cold_256mib", micros(Clock::now() - t));
   check(cudaFreeAsync(device, stream), "cudaFreeAsync");
   check(cudaStreamSynchronize(stream), "sync free");
-  {
-    std::vector<double> v;
-    for (int r = 0; r < std::min(reps, 1000); ++r) {
-      const auto s = Clock::now();
-      check(cudaMallocAsync(&device, kBig, stream), "cudaMallocAsync warm");
-      check(cudaFreeAsync(device, stream), "cudaFreeAsync warm");
-      check(cudaStreamSynchronize(stream), "sync warm alloc");
-      v.push_back(micros(Clock::now() - s));
-    }
-    emit("pool_alloc_free_warm_256mib", "", quantiles(v), v.size());
-  }
+  first_then_warm("pool_alloc_free_256mib", "", std::min(reps, 1000), [&] {
+    const auto s = Clock::now();
+    check(cudaMallocAsync(&device, kBig, stream), "cudaMallocAsync warm");
+    check(cudaFreeAsync(device, stream), "cudaFreeAsync warm");
+    check(cudaStreamSynchronize(stream), "sync warm alloc");
+    return micros(Clock::now() - s);
+  });
   check(cudaMallocAsync(&device, kBig, stream), "cudaMallocAsync resident");
   check(cudaStreamSynchronize(stream), "sync resident");
 
   // 4. Latence d'un noyau vide, lancement et synchronisation.
-  {
-    std::vector<double> v;
-    for (int r = 0; r < reps; ++r) {
-      const auto s = Clock::now();
-      empty_kernel<<<1, 1, 0, stream>>>();
-      check(cudaStreamSynchronize(stream), "sync empty");
-      v.push_back(micros(Clock::now() - s));
-    }
-    emit("empty_kernel_launch_sync", "", quantiles(v), v.size());
-  }
+  first_then_warm("empty_kernel_launch_sync", "", reps, [&] {
+    const auto s = Clock::now();
+    empty_kernel<<<1, 1, 0, stream>>>();
+    check(cudaStreamSynchronize(stream), "sync empty");
+    return micros(Clock::now() - s);
+  });
 
   // 5. Dix noyaux : lancements successifs contre un graphe capture.
   constexpr int kChain = 10;
-  {
-    std::vector<double> v;
-    for (int r = 0; r < reps; ++r) {
-      const auto s = Clock::now();
-      for (int i = 0; i < kChain; ++i) empty_kernel<<<1, 1, 0, stream>>>();
-      check(cudaStreamSynchronize(stream), "sync chain");
-      v.push_back(micros(Clock::now() - s));
-    }
-    emit("ten_launches_sync", "", quantiles(v), v.size());
-  }
+  first_then_warm("ten_launches_sync", "", reps, [&] {
+    const auto s = Clock::now();
+    for (int i = 0; i < kChain; ++i) empty_kernel<<<1, 1, 0, stream>>>();
+    check(cudaStreamSynchronize(stream), "sync chain");
+    return micros(Clock::now() - s);
+  });
   {
     cudaGraph_t graph{};
     cudaGraphExec_t exec{};
+    const auto prepare = Clock::now();
     check(cudaStreamBeginCapture(stream, cudaStreamCaptureModeThreadLocal), "capture begin");
     for (int i = 0; i < kChain; ++i) empty_kernel<<<1, 1, 0, stream>>>();
     check(cudaStreamEndCapture(stream, &graph), "capture end");
     check(cudaGraphInstantiate(&exec, graph, 0), "graph instantiate");
-    std::vector<double> v;
-    for (int r = 0; r < reps; ++r) {
+    emit_once("graph_of_ten_prepare", micros(Clock::now() - prepare));
+    first_then_warm("graph_of_ten_sync", "", reps, [&] {
       const auto s = Clock::now();
       check(cudaGraphLaunch(exec, stream), "graph launch");
       check(cudaStreamSynchronize(stream), "sync graph");
-      v.push_back(micros(Clock::now() - s));
-    }
-    emit("graph_of_ten_sync", "", quantiles(v), v.size());
+      return micros(Clock::now() - s);
+    });
     check(cudaGraphExecDestroy(exec), "graph exec destroy");
     check(cudaGraphDestroy(graph), "graph destroy");
   }
@@ -172,22 +191,18 @@ int run(unsigned sync_flag, const char* sync_name, int reps) {
     for (int pinned_side = 1; pinned_side >= 0; --pinned_side) {
       void* host = pinned_side ? pinned : static_cast<void*>(pageable.data());
       for (int direction = 0; direction < 2; ++direction) {
-        std::vector<double> v;
-        for (int r = 0; r < n; ++r) {
+        char extra[128];
+        std::snprintf(extra, sizeof extra, ",\"bytes\":%zu,\"host\":\"%s\",\"dir\":\"%s\"", bytes,
+                      pinned_side ? "pinned" : "pageable", direction == 0 ? "h2d" : "d2h");
+        first_then_warm("copy", extra, n, [&] {
           const auto s = Clock::now();
           if (direction == 0)
             check(cudaMemcpyAsync(device, host, bytes, cudaMemcpyHostToDevice, copy), "h2d");
           else
             check(cudaMemcpyAsync(host, device, bytes, cudaMemcpyDeviceToHost, copy), "d2h");
           check(cudaStreamSynchronize(copy), "sync copy");
-          v.push_back(micros(Clock::now() - s));
-        }
-        const Quantiles q = quantiles(v);
-        char extra[160];
-        std::snprintf(extra, sizeof extra, ",\"bytes\":%zu,\"host\":\"%s\",\"dir\":\"%s\",\"p50_gbps\":%.3f", bytes,
-                      pinned_side ? "pinned" : "pageable", direction == 0 ? "h2d" : "d2h",
-                      static_cast<double>(bytes) / (q.p50 * 1e3));
-        emit("copy", extra, q, v.size());
+          return micros(Clock::now() - s);
+        });
       }
     }
   }
@@ -197,17 +212,14 @@ int run(unsigned sync_flag, const char* sync_name, int reps) {
     const size_t words = kBig / sizeof(unsigned);
     const unsigned threads = 256;
     const unsigned blocks = static_cast<unsigned>((words + threads - 1) / threads);
-    std::vector<double> v;
-    for (int r = 0; r < std::max(10, reps / 100); ++r) {
+    char extra[64];
+    std::snprintf(extra, sizeof extra, ",\"bytes_rw\":%zu", 2 * kBig);
+    first_then_warm("touch_256mib", extra, std::max(10, reps / 100), [&] {
       const auto s = Clock::now();
       touch_kernel<<<blocks, threads, 0, stream>>>(static_cast<unsigned*>(device), words);
       check(cudaStreamSynchronize(stream), "sync touch");
-      v.push_back(micros(Clock::now() - s));
-    }
-    const Quantiles q = quantiles(v);
-    char extra[64];
-    std::snprintf(extra, sizeof extra, ",\"p50_gbps_rw\":%.1f", 2.0 * static_cast<double>(kBig) / (q.p50 * 1e3));
-    emit("touch_256mib", extra, q, v.size());
+      return micros(Clock::now() - s);
+    });
   }
 
   check(cudaFreeAsync(device, stream), "free resident");
@@ -247,6 +259,10 @@ int main(int argc, char** argv) {
       std::fprintf(stderr, "usage : %s [--sync=spin|yield|blocking] [--reps=N]\n", argv[0]);
       return 2;
     }
+  }
+  if (!quantiles_selftest()) {
+    std::fprintf(stderr, "mes_m6 : auto-test des quantiles en echec\n");
+    return 3;
   }
   try {
     return run(flag, name, reps);

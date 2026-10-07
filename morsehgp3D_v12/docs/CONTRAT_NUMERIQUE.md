@@ -10,7 +10,11 @@ Historique : première rédaction `e264de6f2`, en réponse au point 6 de l'audit
 ([`AUDIT_CODEX_20261007.md`](../audits/AUDIT_CODEX_20261007.md)) ; **révision** du même jour après la relecture de
 l'auditeur Claude ([`AUDIT_CONTRAT_NUMERIQUE_20261007.md`](../receipts/audit_canal_20261007/archives/AUDIT_CONTRAT_NUMERIQUE_20261007.md), `2a7a5f346`,
 constats `CST-0108` à `CST-0113`, tous acceptés) : domaine de la garde, recensement et requêtes à centre entier hors
-garde, budgets mixtes, filtrage par le parent, et la clé de Morton, qui décidait $S^{*}$ dans la v11.
+garde, budgets mixtes, filtrage par le parent, et la clé de Morton, qui décidait $S^{*}$ dans la v11. Seconde révision
+après le contre-audit de l'auditeur Codex
+([`numerique/REPORT.md`](../receipts/audit_contrats_20261007/numerique/REPORT.md), constats `CST-0201` à `CST-0212`,
+tous acceptés) : certificats liés à leur domaine, clé de Morton exacte (identité des sites), boîtes fermées à 33 bits,
+réservoir du filtre G1, garde des boîtes partielles, mesure de D6.
 
 ## 1. Le constat
 
@@ -36,13 +40,19 @@ support de boule critique tient presque toujours sous $2^{17}$ (131 m).
 ## 2. Repères, garde et requêtes
 
 - **Entrée.** Coordonnées entières $0\leq x_i<2^{B}$, $B\leq 32$, stockées en `u32` ; pas de grille déclaré (1 mm par
-  défaut) ; positions distinctes (décision D8). Le binaire compile **un seul profil** ($B_{\max}=32$) ; le $B$ effectif de
-  l'entrée et son étendue globale sont lus et publiés.
+  défaut) ; positions distinctes (décision D8). **Profils de compilation** : u21, base de mesure de la décision D6 ;
+  u24 puis u32, candidats. $B_{\max}=32$ est le candidat de conception, retenu comme profil unique du produit
+  seulement s'il est qualifié selon D6 (§ 8, `CST-0207`) ; aucun profil n'est un second chemin produit. Le $B$ effectif
+  de l'entrée et son étendue globale sont lus et publiés.
 - **`NUM-REPERE` (repère local certifié).** Pour un ensemble fini $E$ de points entiers (sites, coins de boîtes), le
   coin minimal est $m=\min E$ par axe et l'étendue en bits est le plus petit $s$ tel que
   $\max_{i}\max_{x\in E}(x_i-m_i)<2^{s}$. Alors $\lvert x_i-y_i\rvert<2^{s}$ pour tous $x,y\in E$ : c'est l'hypothèse des
   budgets de la v11 avec $M=2^{s}$, quelle que soit l'**origine** $o\in E$ des formules (pour une boule, un site de son
-  support, comme dans la v11). Calcul entier exact (un maximum, un comptage de zéros de tête).
+  support, comme dans la v11). Calcul entier exact (un maximum, un comptage de zéros de tête) ; étendue nulle : $s=0$.
+  **Boîtes fermées** (`CST-0204`) : la v11 représente une boîte de centres par $[lo,hi)$ avec $hi=\max(\text{site})+1$
+  (`boxes.cpp`), qui vaut $2^{32}$ à l'extrémité du domaine u32 ; le repère d'une feuille peut donc exiger $s=33$ ($s=22$
+  et $s=25$ aux profils 21 et 24). Les bornes de boîtes vivent dans un type de 64 bits, aucune n'est calculée en `u32`,
+  et les paliers couvrent $s\leq 33$.
 - **`NUM-COUVERTURE` (règle de couverture).** Un prédicat n'est évalué dans un repère que si **tous** ses arguments
   appartiennent à l'ensemble $E$ qui a défini ce repère :
   - repère d'une **feuille** du catalogue : la fermeture $[lo,hi]$ de sa boîte de centres **et tous les sites de sa
@@ -60,18 +70,28 @@ support de boule critique tient presque toujours sous $2^{17}$ (131 m).
   confrontés à une boule avant le **certificat exact** de son support. La garde repose sur $c\in\mathrm{conv}(S)$, qui
   est faux pour une proposition flottante non certifiée (centre circonscrit d'un triangle obtus hors du triangle ;
   d'un triangle presque aligné, arbitrairement loin). Tenu par le type : une boule confrontable ne sort que du
-  catalogue ou du certificat exact (signes barycentriques) ; mutant « recensement avant certificat ».
+  catalogue ou du certificat exact (signes barycentriques) ; mutant « recensement avant certificat ». Une sphère qui
+  passe seulement par trois ou quatre sites, sans certificat de positivité, n'en bénéficie pas non plus : pour
+  $S=\lbrace(419,0,0),(435,15,0),(434,14,0)\rbrace$ ($s=5$, centre $(419/2,479/2,0)$), le point entier $(0,479,0)$ est
+  sur la sphère mais hors du pavé (témoin de l'auditeur Codex). Ces candidates restent dans une voie générique exacte,
+  sans la garde.
 - **`NUM-GARDE` (garde entière d'une boule certifiée).** Soit $b$ une boule certifiée de support $S$, de coin minimal
   $m$ et d'étendue $s$. Son centre $c$ est dans l'enveloppe convexe de $S$, donc $m_i\leq c_i\leq m_i+2^{s}-1$, et
   $R\leq\mathrm{diam}(S)<\sqrt{3}\cdot 2^{s}<2^{s+1}$. Tout point $x$ de la boule fermée vérifie donc
   $m_i-2^{s+1}<x_i<m_i+3\cdot 2^{s}$ pour chaque axe (le **pavé** de $b$). Conséquences :
   - un **site** hors du pavé est extérieur à la boule fermée, sans arithmétique ; un site dans le pavé est à moins de
-    $3\cdot 2^{s}$ de chaque site de $S$ par axe ;
-  - une **boîte** de l'index qui ne touche pas le pavé est extérieure ; son minorant (`LEM-LATTICE`) se calcule sur le
-    point entier le plus proche du centre, obtenu **en local** (plancher et plafond de $N_j/D$, puis $+o_j$), jamais
-    sur le centre absolu ;
+    $3\cdot 2^{s}$ de chaque site de $S$ par axe. Le repère d'une requête gardée est celui du support (ancre conservée)
+    et la preuve se fait **par requête** : deux requêtes gardées peuvent différer de près de $5\cdot 2^{s}$, et le pavé
+    entier a une étendue de $s+3$ bits ; aucun repère commun à toutes les requêtes n'est construit ;
+  - une **boîte** de l'index **disjointe** du pavé est extérieure ; pour une boîte qui touche le pavé, le minorant
+    (`LEM-LATTICE`) se calcule sur le point **entier** de la boîte le plus proche du centre : plancher et plafond de
+    $N_j/D$ (en local), puis $+o_j$, puis saturation à la boîte ; ce point est dans le pavé, jamais calculé depuis le
+    centre absolu. Une projection rationnelle du centre n'est pas un minimum sur les points entiers (segment de 0 à 1 :
+    minimum continu $-1/2$, minimum entier 0) ;
   - une boîte **non contenue** dans le pavé n'est pas contenue dans la boule : son majorant (coin lointain) est positif
     sans arithmétique ; le coin lointain n'est évalué que pour une boîte contenue dans le pavé, au budget mixte du § 3.
+    Une boîte partiellement dans le pavé peut contenir tout le support et le centre (support
+    $\lbrace(100,100,100),(102,100,100)\rbrace$, boîte $[0,200]^{3}$) : elle n'est jamais rejetée, elle est raffinée.
 
   Preuve des deux faits : $c=\sum\lambda_j s_j$ avec $\lambda_j\geq 0$ et $\sum\lambda_j=1$, d'où $c$ dans le pavé de
   $S$ et $\lvert c-s_k\rvert\leq\sum\lambda_j\lvert s_j-s_k\rvert\leq\mathrm{diam}(S)$ ; et $R=\lvert c-s_k\rvert$ pour
@@ -101,6 +121,7 @@ a au plus 63 bits, `i128` si elle en a au plus 127.
 | produit vectoriel | $2s+1$ | $s\leq 31$ | toujours | q3, q4 |
 | déterminant | $3s+3$ | $s\leq 20$ | toujours | q4, orientations |
 | dominance G1 sur une boîte | $2s+3$ | $s\leq 30$ | toujours | feuille |
+| distance du réservoir avant G1, $\sum_j(2x_j-lo_j-hi_j)^{2}$ | $2s+4$ | $s\leq 29$ | toujours | feuille (`CST-0208`) |
 | numérateur du centre q3 | $5s+5$ | $s\leq 11$ | $s\leq 24$ | plus petite boule |
 | dénominateur du centre q3 | $4s+5$ | $s\leq 14$ | $s\leq 30$ | idem |
 | numérateur du centre q4 | $4s+5$ | $s\leq 14$ | $s\leq 30$ | idem |
@@ -141,12 +162,20 @@ Conséquences :
 
 - **Trois voies par expression**, comme en v11 : native quand l'étendue du repère la garantit (aucun contrôle) ; sinon
   contrôlée (`__builtin_*_overflow`, tout drapeau abandonne la valeur sans résultat partiel) ; sinon entiers larges à
-  largeur fixe, recalculés depuis les coefficients d'origine. Les certificats de puissance q3 et d'orientation de la
-  v11 sont calculés sur les coefficients réels : ils ne lisent ni $B$ ni $s$ et restent valides ; ils élargissent la voie
-  native au-delà de la table (à relire au port, ce que la relecture n'a pas fait).
+  largeur fixe, recalculés depuis les coefficients d'origine.
+- **Certificats liés à leur domaine** (`CST-0201`). Les certificats de puissance q3 et d'orientation de la v11 ont des
+  seuils qui lisent $B$ (`power_certificate.hpp` : $D<2^{123-2B}$ et $\lvert N_j\rvert<2^{124-B}$ ;
+  `orientation_certificate.hpp` : $D<2^{124-3B}$ et $\lvert N_j\rvert<2^{124-2B}$). Un certificat de la v12 porte son
+  domaine : l'exposant $t$ qui borne toutes les différences qu'il couvre ; le recensement gardé exige $t=s+2$, jamais
+  $s$. Témoin : support aigu d'étendue $s=20$ et requête au coin du pavé, dont le premier produit $D\lvert q\rvert^{2}$
+  dépasse $2^{127}$ alors que le résultat tient ; le certificat construit pour $s$ l'accepte, celui pour $s+2$ le refuse.
+- **Types reconstruits.** Chaque intermédiaire du code porté reçoit le type de son budget en $s$ (la v11 fixait par
+  exemple `DotInt` à `i64` et les centres à `i128` d'après $B$) ; aucune conversion rétrécissante avant un
+  `__builtin_*_overflow`, qui ne certifierait rien ; un refus recalcule depuis les coefficients d'origine.
 - **La voie est uniforme par repère** (une feuille, une boule). Sur le GPU, quand un warp traite une seule feuille, la
   voie est uniforme sur le warp.
-- **Les niveaux ne sont jamais natifs au-delà de $s=14$**, et leurs comparaisons ne le sont jamais au-delà de $s=7$ :
+- **Les niveaux ne sont plus garantis natifs au-delà de $s=14$**, ni leurs comparaisons au-delà de $s=7$ (les seuils
+  de la table sont des garanties suffisantes, pas des impossibilités) :
   comme en v11, le tri des événements passe par les clés F3/F4 à repli exact. Un numérateur de niveau tient dans 192
   bits jusqu'à $s=22$ et dans 320 bits jusqu'à $s=32$ ; une comparaison exacte de repli tient dans 320 bits jusqu'à
   $s=21$ et dans 512 bits jusqu'à $s=32$. La largeur des entiers larges est donc fixée par le palier, jamais par $B$.
@@ -160,7 +189,7 @@ Conséquences :
 | Usage | Bits | Traitement |
 | --- | --- | --- |
 | lecture et contrôle de l'entrée | $B\leq 32$ | refus explicite au-delà |
-| clé de tri interne | 63 | ci-dessous ; ne décide rien de publié |
+| clé de Morton exacte | $3B_{\mathrm{eff}}\leq 96$ (`u64` si $B_{\mathrm{eff}}\leq 21$, `u128` sinon) | identité des sites et ordre interne ; ci-dessous |
 | centre absolu $o+N/D$ (export des naissances) | $B+4s+6$ (v11 : $5B+6$ à $s=B$) | entiers larges, à l'export seulement |
 | comparaison de deux centres absolus (`compare_centers`, naissances de même rang, seul appelant de la v11) | $9B+11$ en v11 ; en v12, parties entières sur 64 bits (dividende $N_j$ de $5s+5$ bits) puis parties fractionnaires sur $8s+10$ bits | en deux temps, sans entier de la taille de $B$ ; même ordre que la v11 |
 | test du milieu de la canonisation (v11 : $2(Do_j+N_j)=D(a_j+b_j)$) | $5B+7$ en v11 ; $5s+8$ en forme locale | § 3 (`CST-0114`) |
@@ -189,14 +218,20 @@ proches, les représentants et les propositions ne changent que des compteurs, p
   positions de ses sites dans l'ordre lexicographique des coordonnées. Cet ordre est invariant par translation et
   équivariant par permutation ; il ne diffère de celui de la v11 que sur les coquilles à plusieurs supports minimaux
   (0,02 à 0,04 % des boules selon la contre-lecture des lemmes T).
-- **La clé de tri interne ordonne sans rien décider** : 63 bits, les 21 bits de poids fort de chaque axe pris sur
-  l'étendue globale de l'entrée (coordonnées moins le minimum, décalées de $\max(0,B_{\mathrm{eff}}-21)$ bits), égalités
-  départagées par le `PointId` ; une plage de clés toutes égales est coupée en son milieu ; les boîtes de l'index
-  restent exactes, réunies de bas en haut. La localité dépend de la clé (deux amas denses aux extrémités du domaine) :
-  une porte de temps la surveille.
+- **Clé de Morton exacte, identité des sites** (`CST-0202`). La clé entrelace les coordonnées moins le minimum global
+  sur $3B_{\mathrm{eff}}$ bits, sans troncature : `u64` si $B_{\mathrm{eff}}\leq 21$ (toutes les trames SemanticKITTI),
+  `u128` sinon, type choisi une fois par entrée. Égalité de clé et égalité de position sont alors équivalentes : la clé
+  reste l'identité des sites, comme dans la v11 (`cloud.cpp` regroupe les clés égales en un site), donc la détection
+  des multiplicités (refus D8 ou option « sites distincts »). La clé tronquée de la première rédaction est abandonnée :
+  elle fusionnait des positions distinctes, et un départage par `PointId` pouvait séparer deux vrais doublons par un
+  troisième site de même clé. La coupe de l'index lit les coordonnées **normalisées** (moins le minimum), dont la clé
+  est faite ; les clés étant distinctes, aucune branche « clés égales » n'existe. Les boîtes de l'index restent
+  exactes, réunies de bas en haut. La clé n'entre dans aucun ordre publié.
 - **Exports** : la sortie FULL au schéma de la v11, qui ne contient pas $S^{*}$, écrit ses sites dans l'ordre de
   Morton absolu sur `bits` bits, par un tri à l'export (clé absolue de 96 bits si $B>21$), hors du chemin chronométré :
-  l'empreinte sémantique de la v11 se reproduit à l'octet. Les sorties qui publient $S^{*}$ (`supports`, `cover`)
+  sur les **mêmes coordonnées absolues**, l'empreinte sémantique de la v11 se reproduit à l'octet. Cette empreinte hache
+  des coordonnées et des centres absolus : elle juge la conformité v11/v12, jamais l'invariance par translation, qui a
+  sa propre porte (§ 7). Les sorties qui publient $S^{*}$ (`supports`, `cover`)
   changent de schéma ; la comparaison à la v11 passe par un lecteur qui retrie, et chaque écart de $S^{*}$ doit être une
   coquille à plusieurs supports minimaux, vérifiée en exact.
 
@@ -220,9 +255,17 @@ avant admission, **en parallèle**, et comptée. Les paliers, les budgets et la 
 - **Bornes de palier** : pour chaque expression de la table, un témoin à l'étendue limite $s^{*}$ et un à $s^{*}+1$
   (par exemple côté q3 à $s=19$ et $s=20$, orientation à $s=16$ et $s=17$, côté gardé à $s=19$ et $s=20$), joués sur
   l'hôte et sur l'appareil ; le repli doit être effectivement emprunté (compteur).
-- **Garde** : site exactement sur la sphère à la limite du pavé, site juste hors du pavé, boîte de l'index qui touche le
-  pavé par un coin, boîte à cheval sur le pavé à $B=32$ (`CST-0109`) ; mutants « garde d'un bit trop étroite » et
-  « recensement avant certificat » sur un triangle presque aligné (`CST-0108`), tués.
+- **Garde** (la sphère est strictement dans le pavé : contact à la sphère et contact au pavé sont deux témoins
+  distincts) : site sur la sphère, site au bord intérieur du pavé hors de la sphère, site juste hors du pavé ; boîte
+  disjointe du pavé, boîte qui le touche par un coin, boîte partielle qui contient tout le support (support
+  $\lbrace(100,100,100),(102,100,100)\rbrace$, boîte $[0,200]^{3}$, à raffiner et jamais rejeter), boîte à cheval sur
+  le pavé à $B=32$ (`CST-0109`) ; minimum entier contre minimum continu (segment de 0 à 1) ; candidate non certifiée
+  $\lbrace(419,0,0),(435,15,0),(434,14,0)\rbrace$ gardée dans la voie générique ; mutants « garde d'un bit trop
+  étroite » et « recensement avant certificat » sur un triangle presque aligné (`CST-0108`), tués.
+- **Certificats** : support aigu d'étendue 20 et requête au coin du pavé, premier produit au-delà de $2^{127}$ ; mutant
+  « certificat du support seul » tué ; les intermédiaires sont vérifiés, pas seulement le signe final (`CST-0201`).
+- **Repère des boîtes** : sites $(0,0,0)$ et $(2^{32}-1,0,0)$, fermeture de boîte à $2^{32}$, $s=33$ (`CST-0204`) ;
+  réservoir à $s=30$, boîte $[0,1]^{3}$ et site $(2^{30}-1)^{3}$, au-delà de `i64` (`CST-0208`).
 - **Couverture** : une feuille dont un site de la liste est loin hors de la boîte ; un témoin présent dans la liste du
   parent et absent de celle de l'enfant (`CST-0112`) ; mutant « repère pris sur la seule boîte » tué.
 - **Requêtes** : deux sites aux coins opposés de $[0,2^{32})^{3}$, dont la distance carrée $3(2^{32}-1)^{2}$ déborde
@@ -236,7 +279,9 @@ avant admission, **en parallèle**, et comptée. Les paliers, les budgets et la 
   $[0,2^{32})$ laisse inchangés les niveaux, les forêts, les verticales et $S^{*}$ ; les centres et les coordonnées sont
   ramenés par la translation inverse, et les sites rangés par `PointId`. Le lecteur strict de la v11, qui hache des
   coordonnées absolues et l'ordre de Morton absolu, ne sert pas à cette porte.
-- **Clé** : deux amas denses aux extrémités de $[0,2^{32})$ (égalités de clé massives) ; résultat identique au nuage
+- **Clé et identité** (`CST-0202`) : trois positions dont deux auraient la même clé tronquée ; deux vrais doublons
+  séparés dans l'entrée par un troisième site ; permutations à `PointId` stables ; refus D8 et option « sites
+  distincts » ; deux amas denses aux extrémités de $[0,2^{32})$ (clés de 96 bits), résultat identique au nuage
   translaté, temps publié.
 
 ## 8. Mesures
@@ -244,8 +289,12 @@ avant admission, **en parallèle**, et comptée. Les paliers, les budgets et la 
 - `MES-S` : histogramme des étendues locales (feuilles, supports, parties de descente) sur les trames sans sol de
   plusieurs séquences, au millimètre et au dixième de millimètre, et sur les scènes de plusieurs millions de points ;
   part de chaque voie (native, contrôlée, large) ; part des feuilles dont l'étendue vient d'une minorité de sites.
-- Coût du profil : la même trame u21 translatée en u24 et en u32 doit coûter moins de 3 % de plus que l'original
-  (décision D6) ; la même trame quantifiée au dixième de millimètre est mesurée et publiée, sans objectif.
+- **Coût du profil, au sens de D6** (`CST-0207`) : binaire u21 de référence contre binaires candidats u24 et u32,
+  mêmes trames, régime D1–D3, sources et constructions épinglées, règle statistique écrite avant les prises ; le
+  candidat le plus large dont le surcoût reste sous 3 % devient le profil unique du produit.
+- **Translation**, banc distinct qui ne décide pas D6 : dans le candidat, la même trame et ses translations jusqu'aux
+  deux bords de $[0,2^{32})$, pour la correction (porte à translation près) et le coût.
+- La même trame quantifiée au dixième de millimètre est mesurée et publiée, sans objectif.
 
 ## 9. Questions ouvertes
 

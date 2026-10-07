@@ -11,7 +11,9 @@ confirmé ou révisé par un microbanc sur G4 avant le port de l'étage ([`PLAN.
 2. **Une seule implantation par noyau.** La feuille du catalogue est écrite une fois, en source unique, compilée en
    SIMD sur l'hôte et en CUDA sur l'appareil ; le DFS scalaire exact reste la référence de test et le chemin des
    feuilles larges, pas un second produit.
-3. **Un seul profil de quantification dans le produit** (u21) ; u24 en matrice.
+3. **Un seul profil de quantification dans le produit**, choisi selon la décision D6 (le plus large qualifié dont le
+   surcoût sur LiDAR reste sous 3 % de u21) ; pendant le développement, u21 est la base de mesure, u24 et u32 des
+   candidats, jamais un second chemin produit.
 4. **Des compteurs logiques indépendants de l'ordre de visite**, définis avant la forêt parallèle ; des diagnostics
    physiques séparés, jamais dans une empreinte de sortie. Pas de registre transactionnel recopié à chaque pas : des
    accumulateurs locaux par voie, une garde de débordement unique en fin de voie.
@@ -51,9 +53,12 @@ trame $t$ (CPU).
 
 ### 4.1 C — catalogue résident sur le GPU
 
-- **Parcours des boîtes en largeur sur l'appareil** (au plus 38 niveaux) : réservoir des $3K$ témoins les plus proches
-  par nœud (clé : distance puis rang dans la liste parente), filtre G1 par couple nœud–site en `i64` natif
-  ($2B+5\leq 63$), compactage stable par préfixes, enveloppe par réduction segmentée, bissection.
+- **Parcours des boîtes en largeur sur l'appareil** (profondeur au plus $3B$, soit 63, 72 et 96 aux profils 21, 24 et
+  32, par le potentiel $\sum_i\lceil\log_2\text{largeur}_i\rceil$ de `boxes.cpp` ; la borne de 38 niveaux écrite
+  ici d'abord était fausse : deux témoins u21 atteignent 60 et 63, `CST-0205` ; le nombre de nœuds a son propre budget) : réservoir des $3K$ témoins les plus proches
+  par nœud (clé : distance puis rang dans la liste parente), filtre G1 par couple nœud–site dans le repère du parent,
+  natif `i64` tant que $2s+4\leq 63$ (réservoir compris, $s\leq 29$ ; [contrat numérique](CONTRAT_NUMERIQUE.md) § 3),
+  voie contrôlée au-delà ; compactage stable par préfixes, enveloppe par réduction segmentée, bissection.
 - **Feuilles consommées en flux** pendant le parcours, par un noyau **data-parallèle** : phases de la feuille J3
   (paires, puis triplets avec termes de paire et table H, puis quadruplets par ET de trois lignes de H, census par vote
   du warp) ou forme « cohérente » (tout le warp sur un même préfixe). Le choix se fait par microbanc. **Jamais un fil par
@@ -95,7 +100,8 @@ trame $t$ (CPU).
   par ordre, recouvert par G ; les propriétaires résolvent quand ils attendent (D-F1, D-F2). Prototype de la conception :
   ×2,6 plus rapide que le Kruskal par lots de la v10, forêts identiques.
 - **M** : contraction parallèle des plateaux (`LEM-T4`), numérotation canonique par tri parallèle (rang, plus petite
-  naissance). Les plateaux sont presque singletons (1,02 cellule par plateau à l'ordre 5) : une barrière par plateau est
+  naissance). Les plateaux sont presque singletons sur le LiDAR (1,02 cellule par plateau à l'ordre 5, observation et non borne :
+  la famille alignée $\lbrace(i,0,0)\rbrace$ met $b_k-1$ événements dans un seul plateau) : une barrière par plateau est
   exclue.
 - **V** : image d'une naissance en $O(1)$ depuis la jonction de la même boule à l'ordre $k-1$ (`LEM-T6`) ; image d'une
   fusion par une requête d'ancêtre sur l'historique d'attache (`LEM-T5`) ; naturalité contrôlée dans les portes.
@@ -138,8 +144,12 @@ v11, contre 96 Go sur la carte de G4 (hôte : 180 Gio, 48 fils).
 
 **Règles** :
 
-- **Types** : identifiants sur 32 bits (sites, boules, nœuds, feuilles), avec refus explicite au-delà de
-  $2^{32}-1$ ; **décalages et compteurs sur 64 bits** partout (CSR d'incidences, volumes, budgets).
+- **Types** (`CST-0212`) : chaque espace d'indices déclare son domaine exact (naissance, événement brut, nœud final,
+  rang, feuille, boule, décalage), sa sentinelle exclue des indices valides, et un refus explicite à sa vraie limite ;
+  un codage qui réserve un bit de genre n'a que 31 bits utiles et le dit. Le nombre d'objets, le dernier indice et le
+  `PointId` externe (qui peut valoir `0xffffffff`) ne se confondent pas. **Décalages et compteurs sur 64 bits**
+  partout, prototypes de forêt compris (CSR d'incidences, listes de représentants, volumes, budgets) : 5 millions de
+  sites à 1 137 incidences par site font 5 685 000 000 incidences.
 - **Catalogue en flux par lots de feuilles** : le parcours des boîtes produit les feuilles dans l'ordre de Morton ; un
   lot tient dans un budget d'appareil fixé par la Session ; ses boules et incidences sont rapatriées dans des CSR de
   l'hôte, puis l'appareil est réutilisé. Un nuage de 60 000 sites tient en un seul lot : le contrat principal ne paie
@@ -147,9 +157,12 @@ v11, contre 96 Go sur la carte de G4 (hôte : 180 Gio, 48 fils).
 - **Tour** : les événements de chaque ordre sont triés par rang (tri par base, parallèle) ; le noyau union-find
   (`LEM-T4`) est le seul passage séquentiel par ordre, et les $K$ ordres sont indépendants jusqu'aux verticales, donc
   traités en parallèle.
-- **Pré-vol mémoire** : avant tout calcul, une borne de la mémoire hôte et appareil est tirée de $n$, de $K$ et des
-  lois par site mesurées ; au-delà du budget, refus explicite (`resource_exhausted`) plutôt qu'un échec en cours de
-  route. Pas de stockage sur disque dans la v12 : la v5 l'avait conçu (`morsehgp3D_v5/docs/ECHELLE.md`), il n'est
+- **Mémoire en trois temps** (`CST-0211`) : une **prévision** tirée des lois par site mesurées dimensionne les lots,
+  sans rien garantir ; une **admission certifiée** vient d'une passe de comptage exacte par lot avant toute
+  matérialisation (ou d'une borne combinatoire démontrée, souvent trop pessimiste : $C\leq\sum_{q=2}^{4}\binom{n}{q}$
+  boules, $I\leq nC$ incidences, $b_k\leq C$ naissances, $N_k\leq 2b_k-1$ nœuds, ces entiers étant eux-mêmes bornés
+  avant tout produit) ; une **réservation effective** contrôlée rend un refus transactionnel (`resource_exhausted`),
+  jamais un préfixe publié. Pas de stockage sur disque dans la v12 : la v5 l'avait conçu (`morsehgp3D_v5/docs/ECHELLE.md`), il n'est
   repris que si une scène réelle utile dépasse l'hôte.
 - **Multiplicités** : les nuages agrégés contiennent des doublons au millimètre ; refus par défaut, option « sites
   distincts » déclarée (décision D8).

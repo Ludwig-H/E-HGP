@@ -48,7 +48,7 @@ la v11 gelée sur ces données, `MES-E` et `MES-P` de [`PLAN.md`](PLAN.md)) :
 
 | Mesure | K5 | K10 |
 | --- | --- | --- |
-| v11 voie GPU (`868347:400`, feuilles 24) : mur | 251 / 212 / 255 ms | 1 782 / 1 336 / 1 536 ms |
+| v11 voie GPU (`868347:400` à K5, `868347` à K10, feuilles 24) : mur | 251 / 212 / 255 ms | 1 782 / 1 336 / 1 536 ms |
 | v11 voie GPU : `domain` / forêts | 138 / 114, 120 / 91, 141 / 114 ms | 489 / 1 293, 398 / 939, 471 / 1 065 ms |
 | v11 voie CPU (`802811`, feuilles 16) : mur | 314 / 255 / 313 ms | — |
 | v11 voie CPU : `domain` / forêts | 200 / 113, 163 / 92, 195 / 116 ms | — |
