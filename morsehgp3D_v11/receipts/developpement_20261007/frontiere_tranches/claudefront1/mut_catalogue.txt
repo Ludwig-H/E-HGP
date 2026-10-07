@@ -1,0 +1,7 @@
+dominance_egalite_retiree                TUE      code
+adaptive_un_seul_enfant_paye             TUE      code
+prepare_tranches_fusion_rang_inverse     TUE      code
+reservoir_egalite_gardee                 TUE      code
+prepare_tranches_compaction_omise        TUE      code
+prepare_tranches_enveloppe_sans_increment TUE      code
+mutants_ok module=catalogue mutants=6 tues=6 dont_signal=0 dont_delai=0 dont_construction=0 plancher=6
