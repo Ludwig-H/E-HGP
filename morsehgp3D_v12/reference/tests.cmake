@@ -8,6 +8,9 @@
 #   mhgp12_reference_refusal            usage faux : code 2
 #   mhgp12_reference_witness_t1         temoin WIT-T1-CARRE (LEM-T1 exige S inclus dans F) : 5 faits graves, 8 couples
 #                                       support-partie ; mutant sans_inclusion : code 4 ; option inconnue : code 2
+#   mhgp12_reference_witness_forme      temoin WIT-FORME-NIVEAU (les octets du vidage FUL1 de la v11 suivent le departage de
+#                                       S*, pas son empreinte semantique) : 5 faits graves ; mutant ordre_unique : code 4 ;
+#                                       option inconnue : code 2
 #   mhgp12_reference_transition         lecteur de transition du catalogue (T1, CONTRAT_CATALOGUE.md paragraphes 6.1
 #                                       et 8 bis) : attendus graves des 6 temoins contre l'oracle (etage B), puis les
 #                                       49 cas juges dans le processus (codes, categories exactes, lignes, motifs de
@@ -64,6 +67,15 @@ mhgp12_python_gate(mhgp12_reference_witness_t1 0 test_witness_t1.py
 mhgp12_python_gate(mhgp12_reference_witness_t1_mutant_sans_inclusion 4 test_witness_t1.py --mutant=sans_inclusion
                    LABELS oracle fast mutant)
 mhgp12_python_gate(mhgp12_reference_witness_t1_refusal 2 test_witness_t1.py --option-inconnue LABELS oracle fast)
+
+# Temoin WIT-FORME-NIVEAU (agent de T2-b, 7 octobre 2026) : a niveau egal, la premiere boule du rang suit le departage
+# de S*, et le vidage FUL1 ecrit sa forme non reduite ; MES-M0 se juge par l'empreinte semantique (CONTRAT_TOUR.md
+# paragraphe 1).
+mhgp12_python_gate(mhgp12_reference_witness_forme 0 test_witness_forme.py
+                   LINE "wit_forme_niveau_ok faits=5 forme_v11=409600/16384 forme_v12=100/4" LABELS oracle fast)
+mhgp12_python_gate(mhgp12_reference_witness_forme_mutant_ordre_unique 4 test_witness_forme.py --mutant=ordre_unique
+                   LABELS oracle fast mutant)
+mhgp12_python_gate(mhgp12_reference_witness_forme_refusal 2 test_witness_forme.py --option-inconnue LABELS oracle fast)
 
 # Regle de resolution de la v12 (CONTRAT_TOUR.md, paragraphe 4.1) : arret sur la premiere cellule de fenetre, cibles
 # << cellule >> lues sur la cellule deja traitee, trois politiques de saut, contre l'etage B sur la suite rapide ;

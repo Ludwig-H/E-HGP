@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "kind": "mhgp12_exact_witness",
+  "witness_id": "WIT-FORME-NIVEAU",
+  "statement": "le vidage MHGP11FUL1 ecrit chaque niveau sous la forme non reduite de la premiere boule de son rang ; a niveau egal, cette premiere boule suit le departage de S* (rangs de Morton en v11, positions triees en v12) : les octets du vidage en dependent, pas son empreinte semantique",
+  "refuted_reading": "le departage de S* par positions ne touche pas le vidage MHGP11FUL1 (CONTRAT_TOUR.md paragraphe 1, commit 5f797660d)",
+  "source": "agent de la tranche T2-b (noyau, verticales, export FULL), 7 octobre 2026 ; contrat corrige au commit 58d384721",
+  "k": 2,
+  "point_labels": ["A", "B", "C", "D", "E"],
+  "points": [[0, 100, 100], [10, 100, 100], [35, 10, 3], [27, 14, 3], [27, 6, 3]],
+  "level": "25",
+  "balls": [
+    {
+      "name": "paire",
+      "support": [0, 1],
+      "center": ["5", "100", "100"],
+      "form": [100, 4]
+    },
+    {
+      "name": "triangle",
+      "support": [2, 3, 4],
+      "center": ["30", "10", "3"],
+      "form": [409600, 16384]
+    }
+  ],
+  "morton_ranks": [3, 4, 2, 1, 0],
+  "first_in_rank": {"morton": "triangle", "positions": "paire"}
+}

@@ -24,7 +24,8 @@ plus petite naissance), les verticales. Aucun indice de boule n'y figure, mais c
 **non réduite** de la première boule de son rang, et le centre d'une naissance sous le dénominateur de son support :
 le départage de $S^{*}$ par positions ([`CONTRAT_CATALOGUE.md`](CONTRAT_CATALOGUE.md) § 1) peut donc changer ces
 formes sans changer leurs valeurs (correction du 7 octobre, témoin de l'agent de T2-b : niveau 25 porté par une paire,
-forme 100/4, et par un triangle aigu, forme 409600/16384 ; même empreinte sémantique, octets différents). **`MES-M0` se
+forme 100/4, et par un triangle aigu, forme 409600/16384 ; même empreinte sémantique, octets différents ; témoin gravé
+`WIT-FORME-NIVEAU`, [`reference/test_witness_forme.py`](../reference/test_witness_forme.py)). **`MES-M0` se
 juge donc par l'empreinte sémantique** du lecteur strict (rationnels réduits) à tous les profils ; l'identité **à
 l'octet** avec les empreintes de [`MESURE.md`](MESURE.md) § 4 n'est exigée que pour une tour nourrie par le catalogue
 de la v11 (adaptateur de test, § 2), où elle juge l'exportateur (§ 9).
