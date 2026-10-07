@@ -67,6 +67,25 @@ def median(values):
     return v[len(v) // 2] if v else None
 
 
+def host_memory():
+    """Politique des pages de 2 Mio (THP) et pages enormes anonymes de l'hote, pour lire les mesures (7 octobre)."""
+    out = {}
+    for key, path in (('thp_enabled', '/sys/kernel/mm/transparent_hugepage/enabled'),
+                      ('thp_defrag', '/sys/kernel/mm/transparent_hugepage/defrag'),
+                      ('kernel', '/proc/sys/kernel/osrelease')):
+        try:
+            out[key] = Path(path).read_text().strip()
+        except OSError:
+            out[key] = None
+    try:
+        for line in Path('/proc/meminfo').read_text().splitlines():
+            if line.startswith(('AnonHugePages:', 'MemTotal:', 'MemAvailable:')):
+                out[line.split(':')[0]] = line.split(':')[1].strip()
+    except OSError:
+        pass
+    return out
+
+
 def take_summary(got):
     full, domain = got.get('full', {}), got.get('domain', {})
     batch = domain.get('leaf_batch') or {}
@@ -196,7 +215,7 @@ def main():
     report = dict(schema='ehgp.v11.gpu_ab.v1', build=build_log, modes={n: m for n, m, _ in modes}, reps=args.reps,
                   workers=args.workers, warm_passes=args.warm_passes, kmax=args.kmax, leaf=args.leaf,
                   bench_sha256={v: sha256(b) for v, b in benches.items()}, variants=variants,
-                  cold=[], warm=[], identity={}, ledger={}, refusals=[])
+                  host=host_memory(), cold=[], warm=[], identity={}, ledger={}, refusals=[])
     tail = [str(args.kmax), str(args.leaf), '256', '0', '4294967295', '8589934592']
     dump = args.out / 'dump.tmp'
 
