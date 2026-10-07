@@ -37,27 +37,13 @@ Outcome state_bytes(const State& state, u64& bytes) noexcept {
   return {};
 }
 
-// Ronde par tranches (prepare_nodes_chunked) des qu'un parent depasse une tranche ; sinon une tache par enfant. Les
-// petits nuages gardent ainsi exactement leurs allocations, leur budget et leurs portes.
-bool chunked_round(const State& state, std::span<const u32> parents) noexcept {
-  for (u32 node : parents)
-    if (node < kAdaptiveNodes && state.slots[node] < state.count &&
-        state.live[state.slots[node]].ready.count > kPrepareChunk) return true;
-  return false;
-}
-
 Outcome round_bytes(const State& state, std::span<const u32> parents, u64& bytes) noexcept {
   bytes = 0;
-  u64 chunks = 0;
   for (u32 node : parents) {
     if (node >= kAdaptiveNodes || state.slots[node] >= state.count)
       return fail(Reason::catalogue_invariant);
-    const u64 count = state.live[state.slots[node]].ready.count;
-    MHGP11_TRY(add_bytes<SiteIdx>(bytes, 2 * count));
-    MHGP11_TRY(checked_add(chunks, 2 * prepare_chunks(count)));
+    MHGP11_TRY(add_bytes<SiteIdx>(bytes, 2 * u64(state.live[state.slots[node]].ready.count)));
   }
-  // Brouillon de la ronde par tranches, alloue par le pilote apres les listes des enfants.
-  if (chunked_round(state, parents)) MHGP11_TRY(prepare_scratch_bytes(chunks, 2 * u64(parents.size()), bytes));
   return {};
 }
 
@@ -92,24 +78,8 @@ Outcome run_round(Run& run, sched::Pool& pool, const State& state,
                   std::span<const u32> parents, Children& children) noexcept {
   if (parents.empty() || parents.size() > kAdaptiveTasks / 2) return fail(Reason::catalogue_invariant);
   for (u64 i = 0; i < 2 * parents.size(); ++i) children[i] = ChildResult{};
-  if (chunked_round(state, parents)) {
-    // Premieres rondes : un a quelques parents de dizaines de milliers de sites, donc peu de taches pour le Pool.
-    // Chaque enfant est prepare par tranches de sites ; memes enfants et memes registres que RoundRun.
-    std::array<NodeJob, kAdaptiveTasks> jobs;
-    for (u64 i = 0; i < 2 * parents.size(); ++i) {
-      const u32 node = parents[i / 2];
-      if (node >= kAdaptiveNodes || state.slots[node] >= state.count) return fail(Reason::catalogue_invariant);
-      const auto& parent = state.live[state.slots[node]].ready;
-      Box left, right;
-      if (!split_ready(parent, run.params, left, right)) return fail(Reason::catalogue_invariant);
-      jobs[i] = NodeJob{parent.sites(), i % 2 == 0 ? left : right, parent.depth + 1, &children[i].ready,
-                        &children[i].ledger};
-    }
-    MHGP11_TRY(prepare_nodes_chunked(run, pool, std::span(jobs).first(2 * parents.size())));
-  } else {
-    RoundRun context{run, state, parents, children};
-    MHGP11_TRY(pool.parallel_for(2 * parents.size(), 1, &context, RoundRun::body));
-  }
+  RoundRun context{run, state, parents, children};
+  MHGP11_TRY(pool.parallel_for(2 * parents.size(), 1, &context, RoundRun::body));
   for (u64 i = 0; i < 2 * parents.size(); ++i)
     MHGP11_TRY(add_catalogue_ledger(run.ledger, children[i].ledger));
   return {};

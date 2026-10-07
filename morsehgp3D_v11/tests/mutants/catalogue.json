@@ -1,6 +1,6 @@
 {
   "module": "catalogue",
-  "plancher": 78,
+  "plancher": 74,
   "mutants": [
     {
       "id": "support_tetra_strict_ignore",
@@ -189,8 +189,8 @@
     {
       "id": "adaptive_un_seul_enfant_paye",
       "fichier": "src/catalogue/adaptive_frontier.cpp",
-      "cherche": "    MHGP11_TRY(add_bytes<SiteIdx>(bytes, 2 * count));",
-      "remplace": "    MHGP11_TRY(add_bytes<SiteIdx>(bytes, count));",
+      "cherche": "MHGP11_TRY(add_bytes<SiteIdx>(bytes, 2 * u64(state.live[state.slots[node]].ready.count)));",
+      "remplace": "MHGP11_TRY(add_bytes<SiteIdx>(bytes, u64(state.live[state.slots[node]].ready.count)));",
       "porte": "mhgp11_catalogue_adaptive_round_memory",
       "note": "La limite40 doit abandonner la ronde avant Pool : deux listes filles sont simultanees avec la parente."
     },
@@ -599,38 +599,6 @@
       "remplace": "u64 target = total, acquired = 0;",
       "porte": "mhgp11_catalogue_leaf_split_select",
       "note": "partage : part demandee ignoree, tout le lot a l'hote"
-    },
-    {
-      "id": "prepare_tranches_fusion_rang_inverse",
-      "fichier": "src/catalogue/boxes.cpp",
-      "cherche": "bool before(i64 d, u32 p, i64 e, u32 q) noexcept { return d < e || (d == e && p < q); }",
-      "remplace": "bool before(i64 d, u32 p, i64 e, u32 q) noexcept { return d < e || (d == e && p > q); }",
-      "porte": "mhgp11_catalogue_prepare_chunked_equivalence",
-      "note": "Preparation par tranches : a distance egale, le temoin de plus petit rang dans le parent passe en premier."
-    },
-    {
-      "id": "reservoir_egalite_gardee",
-      "fichier": "src/catalogue/boxes.cpp",
-      "cherche": "    if (count == cap && distance >= distances[count - 1]) continue;",
-      "remplace": "    if (count == cap && distance > distances[count - 1]) continue;",
-      "porte": "mhgp11_catalogue_prepare_chunked_equivalence",
-      "note": "Reservoir de temoins (prepare_node et tranches) : plein, une distance egale a la derniere est ecartee ; sinon les tranches et le parent entier ne choisissent plus les memes temoins."
-    },
-    {
-      "id": "prepare_tranches_compaction_omise",
-      "fichier": "src/catalogue/boxes.cpp",
-      "cherche": "      if (c.begin != count) std::memmove(storage + count, storage + c.begin, c.kept * sizeof(SiteIdx));\n",
-      "remplace": "      static_cast<void>(storage);\n",
-      "porte": "mhgp11_catalogue_prepare_chunked_equivalence",
-      "note": "Preparation par tranches : les sites gardes de chaque tranche sont rendus contigus dans l'ordre des tranches."
-    },
-    {
-      "id": "prepare_tranches_enveloppe_sans_increment",
-      "fichier": "src/catalogue/boxes.cpp",
-      "cherche": "      ++adjusted.hi[i];  // comme envelope : 2^B representable\n",
-      "remplace": "",
-      "porte": "mhgp11_catalogue_prepare_chunked_equivalence",
-      "note": "Preparation par tranches : la boite ajustee est l'enveloppe demi-ouverte des sites gardes, comme envelope()."
     }
   ]
 }
