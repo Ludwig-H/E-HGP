@@ -218,6 +218,8 @@ est un défaut (porte W1 contre W48).
    (`CST-0106`) ; `WIT-SPHERE50` (refus) ; un témoin de `G-L3` où les candidats ne suffisent pas (repli sur le census).
 4. **`JUG-EMST`** à l'échelle : la forêt d'ordre 1 est l'arbre de fusion du lien simple sur l'arbre couvrant euclidien
    minimal exact (niveaux $d^{2}/4$), indépendant du catalogue, sur 8 000, 16 000 et 32 000 sites et sur les trames.
+   **Livré le 7 octobre** ([`juges/emst/`](../juges/emst/README.md)) : ordre 1 identique à celui de la v11 gelée sur
+   ses 9 vidages réels et à l'oracle sur 308 nuages ; 1 million de sites en 5 s à un fil.
 5. **Invariants globaux et juge d'échantillon** à l'échelle : une racine par ordre, événements égaux aux naissances
    moins un, verticales vivantes et naturelles, comptes par ordre égaux à ceux des cellules du catalogue ; échantillon
    de représentants résolus par la descente exacte de la v11 et comparés à la coupe de leur jonction. Jamais un juge

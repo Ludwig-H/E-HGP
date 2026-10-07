@@ -110,6 +110,8 @@ Codes des portes : 0 conforme, 1 désaccord du juge, 2 refus avant calcul, 3 inv
 | `docs/LECONS_ET_PIEGES.md` | leçons de la lignée, pistes fermées, pièges d'exploitation |
 | `docs/OUVERTURE_PROPOSEE.md` | texte proposé pour `AGENTS.md` et `CLAUDE.md` |
 | `audits/README.md` | règles du canal d'audit, constats et questions reportés |
+| `microbancs/README.md` | mesures hors produit (`MES-*`), chacune avec sa règle d'adoption écrite d'avance |
+| `juges/emst/README.md` | `JUG-EMST`, juge d'échelle hors produit : ordre un = lien simple sur l'EMST exact, avec plateaux |
 
 Ces documents sont des **propositions** tirées de l'audit du 7 octobre : leurs chiffres d'objectif sont des hypothèses à
 confirmer par mesure, et rien ici ne qualifie un code ni ne revendique un statut public.
