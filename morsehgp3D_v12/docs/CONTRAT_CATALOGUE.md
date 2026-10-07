@@ -172,3 +172,71 @@ latitude du contrat, **à contre-lire** :
 
 Coût local indicatif (machine chargée, aucune décision) : 1,1 à 1,3 fois la voie CPU de la v11 à un fil. La règle de
 `MES-P` et le budget de l'étage C se jugent sur G4, avec la voie appareil (T1-b), qui doit rendre les mêmes octets.
+
+## 10. Voie appareil (tranche T1-b) et fin d'étage partagée (7 octobre 2026), décisions à contre-lire
+
+Travail d'agent pour le développeur, à relire ; **rien n'a encore tourné sur un GPU** : tout ce qui suit est construit et
+joué sur l'hôte (même code), la session G4 est préparée (plan, pilote et juge ci-dessous). Cadre : `backend=cuda_g4`
+pour le catalogue, `cpu_reference` pour l'identité, `public_status=not_claimed`.
+
+1. **Une implantation, deux exécuteurs.** Le pilote du parcours (`traversal_driver.hpp`, port de `Driver<B>` de
+   `MES-M5`), la fin d'étage (`finish_*.hpp`) et les lots de feuilles de la voie appareil (`device_*.hpp`) sont écrits
+   une fois : l'exécuteur Pool (`exec_host.hpp`, warps simulés) les joue pour la voie CPU et pour les portes locales de
+   la voie appareil ; l'exécuteur CUDA (`device_cuda.cu`, `device_leaf.cu`, option `MHGP12_ENABLE_CUDA`, `sm_120`) les
+   joue sur l'appareil. La voie CPU garde ses feuilles (`LeafStage`) ; sa fin d'étage devient la fin d'étage
+   partagée, parallèle (demande du coordinateur après la session F2, `receipts/g4_t1f_20261007`).
+2. **Fin d'étage.** Niveau exact de chaque boule en entiers à mots, mêmes formules que `num::Sphere::through`
+   (numérateurs et dénominateurs non réduits identiques, porte `level_words`) ; clé F3 et marge F4 de la v11 ; clé des
+   positions de $S^{*}$ par les rangs lexicographiques des sites ; tri par base stable (positions, puis clé F3) ; toute
+   paire de voisins non certainement ordonnée par F4 est comparée en exact ; une chaîne de voisins incertains mal
+   ordonnée (niveaux égaux de représentations différentes dont les clés s'inversent) est retriée en exact sur l'hôte
+   (repli compté, `chains_repaired`), puis tout est revérifié ; rangs, CSR $I$ puis $U$ et niveaux des rangs par sommes
+   préfixes par tuiles ; table $S^{*}\to$ boule par tri par base des `SiteIdx` et dichotomie. Mêmes sorties qu'avant :
+   empreinte de ng00 à K5 égale à celle de F2 en local, portes du catalogue vertes (§ 6), toutes à rejouer sur G4.
+3. **Voie appareil, hybride.** L'appareil joue les feuilles d'au plus 32 sites et d'étendue locale d'au plus 16 bits ;
+   les autres sont reprises sur le CPU, exactement (compactées, rapatriées, rejouées par `LeafStage`, puis remontées) ;
+   les plafonds de 256 candidats et de 64 sites de coquille restent ceux de la voie CPU. Une construction aux profils
+   24 ou 32 ne signifie donc pas un traitement intégral sur l'appareil. Feuilles gardées d'un niveau à l'autre jusqu'à
+   un lot de $2^{17}$ (une trame de 60 000 sites à K5 tient en un lot) ; par lot : repère et cause de chaque feuille,
+   ordre par taille décroissante (`MES-M2`), feuille J3 étroite (`j3_r168`, un warp par feuille, cases de 64 émissions
+   comme la voie CPU), décalages exacts par sommes préfixes ; feuilles non résolues comptées par cause, reprises sur le
+   CPU **avant** l'admission du lot ; admission (arène des boules agrandie dans le budget) seulement après ces comptes ;
+   copie des cases, puis réécriture par la même source des seules feuilles qui débordent leur case, aux places du
+   comptage. Comptes publiés : reprises par cause (`replayed_wide`, `replayed_span`), réécritures par lieu
+   (`rewritten_device`, `rewritten_host`), dont la somme est `leaves_rewritten`, égal à celui de la voie CPU (porte
+   `pipeline_witnesses`). Première faute : la plus petite profondeur, puis la fusion des refus.
+4. **Capacité et Session.** Tout tableau de l'appareil et la mémoire épinglée de transit sont réservés dans le budget
+   (`BudgetReservation`) avant `cudaMalloc` ou `cudaMallocHost` ; un refus rend `memory_budget` sans rien publier. Le
+   contexte `CatalogueDevice` garde ses tableaux d'un appel à l'autre (décision D1) ; diagnostics : réservations faites
+   pendant l'appel, octets de l'appareil et épinglés, lots, feuilles et boules rejouées. Raisons nouvelles :
+   `device_unavailable` (`resource_exhausted`) et `device_fault` (`invariant_violated`, contexte inutilisable ensuite).
+5. **Mutants.** Trois de plus dans `tests/mutants/catalogue.json`, tués sur l'hôte par le même code (feuille non
+   résolue admise sans rejeu, palier étroit dépassé sur l'appareil, fin d'étage sans départage exact) ;
+   `ordre_par_rang_de_morton` visé sur la nouvelle clé des positions. « Un fil par feuille » (§ 6.6) n'a de sens que
+   sur l'appareil : `bench/g4_catalogue_mutants.json`, joué par le pilote G4, via le mode série de `simt.hpp`
+   (`MHGP12_SIMT_SERIAL`, un fil joue tout le warp ; dormant dans le produit).
+6. **Session G4 préparée.** Pilote `bench/g4_catalogue_device.py` et juge `bench/g4_catalogue_judge.py` (règle écrite
+   d'avance dans le pilote, portes `mhgp12_catalogue_g4_judge` et `mhgp12_catalogue_g4_mutants`) : construction CUDA,
+   portes rapides (dont `device_open`, vraie voie appareil contre voie CPU sur neuf témoins), identité à l'octet sur
+   ng00–02 à K5 et K10 et sur les uniformes, déterminisme d'un appel à l'autre, voie CPU après correction sur les douze
+   cas de F2 (comparée à F2), temps de l'étage C à chaud (5 processus × 10 passes par trame), mutants ; « adopté »
+   seulement si l'identité tient partout et si médiane et maximum des médianes par processus restent sous 45 ms.
+7. **Constats de l'audit de performance (`f601b36ac`).** CST-0233 : la fin d'étage partagée suit le schéma de la
+   preuve de l'auditeur (`receipts/audit_performance_20261007/assemblage/`, balayage par blocs avec halo, 3 537
+   confrontations) ; ses quatre mutants ont leurs analogues, tués sur l'hôte (`finition_sans_halo` par
+   `finish_plateau`, `finition_formes_au_lieu_des_valeurs` et `finition_dernier_representant` par `finish_ties`,
+   `finition_prefixe_inclusif` par `finish_random`) ; la table $S^{*}\to$ boule est sa proposition B (tri des quatre
+   `SiteIdx`, ici par base). CST-0234 : correctif séparé, empilé sur celui-ci (sur l'hôte, chaque couple évalué une
+   fois, census arrêté au rejet ; émissions et registres inchangés, noyau de l'appareil inchangé). CST-0235 : le
+   pilote publie séparément parcours, feuilles, émission, fin d'étage, transferts du raccord complet (toute copie hôte
+   ↔ appareil de l'appel, chronométrée après l'attente des noyaux en file, avec ses octets par sens), publication et
+   total à chaud (médiane et maximum) contre le budget ; les étapes sont nettes des transferts, et le juge refuse une
+   passe dont les étapes dépassent le total.
+
+Décisions à contre-lire : (a) le mode série dormant de `simt.hpp` ; (b) les cases de 64 émissions par feuille et les
+lots de $2^{17}$ feuilles (192 Mio de cases sur l'appareil) au lieu de l'arène à curseurs atomiques du microbanc, pour
+compter avant de réserver ; (c) le repli des chaînes mal ordonnées sur l'hôte (une seule sur les cas joués en local :
+ng02 à K5, retriée en exact, sortie identique) ; (d) la clé des positions par rangs lexicographiques ; (e) deux refus
+de natures différentes à la même profondeur dans deux lots de la voie CPU peuvent se départager autrement (profondeur
+puis fusion ici, premier lot de 16 384 feuilles là-bas) ; (f) l'ancien tri par blocs de la voie CPU (`sort.cpp`)
+retiré au profit du tri par base partagé.

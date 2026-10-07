@@ -1,6 +1,6 @@
 {
   "module": "core",
-  "plancher": 95,
+  "plancher": 96,
   "mutants": [
     {
       "id": "priorite_plus_petit_k",
@@ -766,6 +766,14 @@
       "remplace": "    return false;",
       "porte": "mhgp12_core_fault_eviction_admise",
       "note": "CST-0007 (course d'eviction, contre-lecture du 7 octobre) : un fil refuserait sur une lecture de held anterieure a la fin d'une eviction, cache vide, alors que son etage a ete admis"
+    },
+    {
+      "id": "echange_sans_les_octets",
+      "fichier": "src/core/buffer.hpp",
+      "cherche": "    std::swap(bytes_, other.bytes_);",
+      "remplace": "    static_cast<void>(other.bytes_);",
+      "porte": "mhgp12_core_unit_block_cache_limit",
+      "note": "T1-b : BudgetReservation::swap echangerait les comptes sans les octets ; une reservation rendrait ensuite les octets de l'autre (held et used faux sous cache)"
     }
   ]
 }

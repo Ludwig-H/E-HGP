@@ -1,164 +1,139 @@
-// Fin d'etage sur l'hote : boules des lots mises a plat, niveaux exacts (num::Sphere::through du support, meme arite
-// que la presentation emettrice, donc le niveau d'emission de la v11), cles F3, ordre canonique, rangs de niveau, CSR
-// des populations (I puis U), table S* -> boule. Toutes les reservations sont controlees dans le budget ; un refus ne
-// publie rien (le Catalogue n'est rendu qu'entier).
-#include "catalogue/sort.hpp"
+// Fin d'etage de la voie CPU : lots de la LeafStage rassembles en tableaux contigus (copie parallele, un lot par
+// tache), fin d'etage partagee avec la voie appareil (finish_driver.hpp : cles, tri par base, verification exacte des
+// voisins, rangs et CSR par sommes prefixes, table S* -> boule) jouee par l'executeur Pool, puis publication
+// (Assembly::adopt, commune aux deux voies) : niveaux exacts materialises pour les rangs distincts, en parallele. Les
+// sorties ne dependent pas du nombre de fils ; un refus ne publie rien.
+#include <cstring>
+
+#include "catalogue/exec_host.hpp"
+#include "catalogue/finish_driver.hpp"
 #include "sched/sched.hpp"
 
 namespace mhgp12::catalogue_detail {
 namespace {
 
-constexpr u64 kGrain = 4096;
-
-Result<num::Point> point_of(const Cloud& cloud, u32 site) noexcept {
-  auto made = num::Point::make(cloud.x()[site], cloud.y()[site], cloud.z()[site]);
-  if (!made.ok()) return fail(Reason::catalogue_invariant);
-  return made.value();
-}
-
-// Niveau exact d'une boule emise : la sphere de son S* (2 a 4 sites), fabriquee par num.
-Result<num::Level> level_of(const Cloud& cloud, const BallRecord& r) noexcept {
-  std::array<num::Point, 4> p{};
-  for (u32 k = 0; k < r.qmin; ++k) {
-    auto made = point_of(cloud, r.support[k]);
-    if (!made.ok()) return made.outcome();
-    p[k] = made.value();
-  }
-  auto sphere = r.qmin == 2 ? num::Sphere::through(p[0], p[1])
-                : r.qmin == 3 ? num::Sphere::through(p[0], p[1], p[2])
-                              : num::Sphere::through(p[0], p[1], p[2], p[3]);
-  if (!sphere.ok()) return sphere.outcome();
-  if (!sphere.value()) return fail(Reason::catalogue_invariant);
-  return sphere.value()->level();
-}
-
+// Lot c -> enregistrements a record_at[c], populations a population_at[c] (decalages rendus absolus).
 struct Gather {
-  const Cloud& cloud;
-  std::span<const BallRecord> records;
-  num::Level* levels;
-  double* keys;
-  static Outcome levels_body(void* context, u64 begin, u64 end, u32) noexcept {
-    auto& g = *static_cast<Gather*>(context);
-    for (u64 i = begin; i < end; ++i) {
-      auto level = level_of(g.cloud, g.records[i]);
-      if (!level.ok()) return level.outcome();
-      g.levels[i] = level.value();
-      g.keys[i] = level_key(level.value());
-    }
-    return {};
-  }
-};
-
-// Rangs denses des niveaux dans l'ordre canonique ; nombre de niveaux distincts, niveau nul compris. Deux boules de
-// meme niveau et de meme S* sont un doublon d'emission : invariant.
-Result<u64> rank_levels(const Cloud& cloud, std::span<const BallRecord> records, std::span<const num::Level> levels,
-                        std::span<const double> keys, std::span<const u32> order, Buffer<u32>& ranks) noexcept {
-  u64 count = 1;
-  const num::Level zero;
-  for (u64 i = 0; i < order.size(); ++i) {
-    const u32 b = order[i];
-    bool distinct = true;  // niveau strictement superieur au precedent
-    if (i == 0) {
-      if (num::compare(levels[b], zero) <= 0) return fail(Reason::catalogue_invariant);
-    } else {
-      const u32 a = order[i - 1];
-      int before = level_key_order(keys[a], keys[b]);
-      if (before == 0) before = num::compare(levels[a], levels[b]);
-      if (before > 0) return fail(Reason::catalogue_invariant);  // ordre non trie
-      distinct = before < 0;
-      if (!distinct && compare_support_positions(cloud, records[a].support, records[b].support) >= 0)
-        return fail(Reason::catalogue_invariant);  // meme niveau : S* strictement croissants, jamais un doublon
-    }
-    count += distinct ? 1 : 0;
-    ranks[b] = static_cast<u32>(count - 1);
-  }
-  if (count > kNone) return fail(Reason::index_overflow_u32);
-  return count;
-}
-
-struct Fill {
-  std::span<const BallRecord> records;
-  std::span<const u32> order, ranks;
-  const std::vector<Chunk>* chunks;
-  CatalogueBall* balls;
-  const u64* offsets;
-  SiteIdx* values;
+  std::vector<Chunk>* chunks;
+  const u64* record_at;
+  const u64* population_at;
+  BallRecord* records;
+  SiteIdx* population;
   static Outcome body(void* context, u64 begin, u64 end, u32) noexcept {
-    auto& f = *static_cast<Fill*>(context);
-    for (u64 i = begin; i < end; ++i) {
-      const BallRecord& r = f.records[f.order[i]];
-      CatalogueBall& ball = f.balls[i];
-      for (u32 k = 0; k < 4; ++k) ball.support[k] = make_id<SiteIdx>(r.support[k]);
-      ball.rank = make_id<LevelRank>(f.ranks[f.order[i]]);
-      ball.p = r.p;
-      ball.m = r.m;
-      ball.qmin = r.qmin;
-      const SiteIdx* source = (*f.chunks)[r.chunk].population.data() + r.population;
-      const u64 length = u64{r.p} + r.m;
-      if (f.offsets[i + 1] - f.offsets[i] != length) return fail(Reason::catalogue_invariant);
-      for (u64 j = 0; j < length; ++j) f.values[f.offsets[i] + j] = source[j];
+    auto& g = *static_cast<Gather*>(context);
+    for (u64 c = begin; c < end; ++c) {
+      const Chunk& chunk = (*g.chunks)[c];
+      for (u64 i = 0; i < chunk.records.size(); ++i) {
+        BallRecord r = chunk.records[i];
+        r.population += g.population_at[c];
+        r.chunk = 0;
+        g.records[g.record_at[c] + i] = r;
+      }
+      if (!chunk.population.empty())
+        std::memcpy(g.population + g.population_at[c], chunk.population.data(),
+                    chunk.population.size() * sizeof(SiteIdx));
     }
     return {};
   }
 };
+
+// Niveaux exacts des rangs 1..L-1 depuis leurs mots : num::Level::make, memes numerateur et denominateur non reduits
+// que num::Sphere::through (finish_level.hpp).
+struct Materialize {
+  const fin::LevelWords* words;
+  num::Level* levels;
+  static Outcome body(void* context, u64 begin, u64 end, u32) noexcept {
+    auto& m = *static_cast<Materialize*>(context);
+    for (u64 r = begin; r < end; ++r) {
+      num::Wide<fin::kNumWords> n{};
+      num::Wide<fin::kDenWords> d{};
+      for (int i = 0; i < fin::kNumWords; ++i) n.words[i] = m.words[r].n[i];
+      for (int i = 0; i < fin::kDenWords; ++i) d.words[i] = m.words[r].d[i];
+      const auto level = num::Level::make(n, d);
+      if (!level.ok()) return fail(Reason::catalogue_invariant);
+      m.levels[r + 1] = level.value();
+    }
+    return {};
+  }
+};
+
+// Decalages des lots ; sommes controlees.
+Outcome chunk_offsets(const std::vector<Chunk>& chunks, Buffer<u64>& record_at, Buffer<u64>& population_at,
+                      u64 balls, u64& incidences, MemoryBudget& budget) noexcept {
+  MHGP12_TRY(record_at.allocate(chunks.size(), budget));
+  MHGP12_TRY(population_at.allocate(chunks.size(), budget));
+  u64 at = 0;
+  incidences = 0;
+  for (u64 c = 0; c < chunks.size(); ++c) {
+    record_at[c] = at;
+    population_at[c] = incidences;
+    if (chunks[c].records.size() > balls - at) return fail(Reason::catalogue_invariant);
+    at += chunks[c].records.size();
+    if (__builtin_add_overflow(incidences, chunks[c].population.size(), &incidences))
+      return fail(Reason::catalogue_invariant);
+  }
+  return at == balls ? Outcome{} : fail(Reason::catalogue_invariant);
+}
 
 }  // namespace
+
+Result<Catalogue> Assembly::adopt(fin::FinishOutput& out, Order kmax, const CatalogueLedger& ledger,
+                                  MemoryBudget& budget, sched::Pool& pool) noexcept {
+  Catalogue result;
+  const u64 distinct = out.levels.size();
+  if (distinct + 1 > kNone) return fail(Reason::index_overflow_u32);
+  MHGP12_TRY(result.levels_.allocate(distinct + 1, budget));
+  result.levels_[0] = num::Level{};
+  Materialize materialize{out.levels.data(), result.levels_.data()};
+  MHGP12_TRY(pool.parallel_for(distinct, 4096, &materialize, &Materialize::body));
+  out.levels.reset();
+  result.balls_.swap(out.balls);
+  result.population_.off.swap(out.offsets);
+  result.population_.val.swap(out.values);
+  result.table_.off.swap(out.table_offsets);
+  result.table_.val.swap(out.table_values);
+  result.kmax_ = kmax;
+  result.ledger_ = ledger;
+  return result;
+}
 
 Result<Catalogue> Assembly::finish(const Cloud& cloud, const CatalogueParams& params, std::vector<Chunk>& chunks,
                                    u64 balls, const CatalogueLedger& ledger, MemoryBudget& budget, sched::Pool& pool,
                                    CatalogueDiagnostics& diagnostics) noexcept {
   if (balls >= kNone) return fail(Reason::index_overflow_u32);
-  Buffer<BallRecord> records;
-  MHGP12_TRY(records.allocate(balls, budget));
-  u64 at = 0, incidences = 0;
+  Stopwatch gather_watch;
+  Buffer<u64> record_at, population_at;
+  u64 incidences = 0;
+  MHGP12_TRY(chunk_offsets(chunks, record_at, population_at, balls, incidences, budget));
+  PoolExecutor executor{pool, budget};
+  FrontArray<BallRecord> records;
+  FrontArray<SiteIdx> population;
+  MHGP12_TRY(executor.ensure(records, balls));
+  MHGP12_TRY(executor.ensure(population, incidences));
+  Gather gather{&chunks, record_at.data(), population_at.data(), records.data(), population.data()};
+  MHGP12_TRY(pool.parallel_for(chunks.size(), 1, &gather, &Gather::body));
   for (Chunk& chunk : chunks) {
-    if (chunk.records.size() > balls - at) return fail(Reason::catalogue_invariant);
-    for (u64 i = 0; i < chunk.records.size(); ++i) records[at + i] = chunk.records[i];
-    at += chunk.records.size();
-    incidences += chunk.population.size();
-    chunk.records.reset();  // les populations restent jusqu'a la copie finale
+    chunk.records.reset();
+    chunk.population.reset();
   }
-  if (at != balls) return fail(Reason::catalogue_invariant);
-  Buffer<num::Level> levels;
-  Buffer<double> keys;
-  MHGP12_TRY(levels.allocate(balls, budget));
-  MHGP12_TRY(keys.allocate(balls, budget));
-  Stopwatch level_watch;
-  Gather gather{cloud, records.span(), levels.data(), keys.data()};
-  MHGP12_TRY(pool.parallel_for(balls, kGrain, &gather, &Gather::levels_body));
-  diagnostics.levels_ns = level_watch.nanoseconds();
-  Stopwatch sort_watch;
-  auto order = sort_balls(cloud, records.span(), levels.span(), keys.span(), budget, pool);
-  if (!order.ok()) return order.outcome();
-  diagnostics.sort_ns = sort_watch.nanoseconds();
-  Stopwatch assemble_watch;
-  Buffer<u32> ranks;
-  MHGP12_TRY(ranks.allocate(balls, budget));
-  const auto distinct = rank_levels(cloud, records.span(), levels.span(), keys.span(), order.value().span(), ranks);
-  if (!distinct.ok()) return distinct.outcome();
-  Catalogue result;
-  MHGP12_TRY(result.balls_.allocate(balls, budget));
-  MHGP12_TRY(result.levels_.allocate(distinct.value(), budget));
-  MHGP12_TRY(result.population_.off.allocate(balls + 1, budget));
-  MHGP12_TRY(result.population_.val.allocate(incidences, budget));
-  result.levels_[0] = num::Level{};
-  result.population_.off[0] = 0;
-  for (u64 i = 0; i < balls; ++i) {
-    const u32 b = order.value()[i];
-    // Niveau d'un rang : celui de sa premiere boule dans l'ordre canonique (ecriture non reduite de la v11).
-    if (i == 0 || ranks[order.value()[i - 1]] != ranks[b]) result.levels_[ranks[b]] = levels[b];
-    result.population_.off[i + 1] = result.population_.off[i] + records[b].p + records[b].m;
-  }
-  if (result.population_.off[balls] != incidences) return fail(Reason::catalogue_invariant);
-  Fill fill{records.span(), order.value().span(), ranks.span(), &chunks, result.balls_.data(),
-            result.population_.off.data(), result.population_.val.data()};
-  MHGP12_TRY(pool.parallel_for(balls, kGrain, &fill, &Fill::body));
-  diagnostics.assemble_ns = assemble_watch.nanoseconds();
-  Stopwatch table_watch;
-  MHGP12_TRY(build_table(result.table_, result.balls_.span(), cloud.sites(), budget));
-  diagnostics.table_ns = table_watch.nanoseconds();
-  result.kmax_ = static_cast<Order>(params.kmax);
-  result.ledger_ = ledger;
+  const u64 gather_ns = gather_watch.nanoseconds();
+  fin::FinishArrays<PoolExecutor> arrays;
+  const fin::FinishInput in{cloud.x().data(), cloud.y().data(), cloud.z().data(), cloud.sites(),
+                            records.data(),   population.data(), balls,           incidences};
+  fin::FinishStats stats;
+  auto out = fin::finish_stage(executor, arrays, in, budget, stats);
+  if (!out.ok()) return out.outcome();
+  Stopwatch adopt_watch;
+  auto result = adopt(out.value(), static_cast<Order>(params.kmax), ledger, budget, pool);
+  if (!result.ok()) return result.outcome();
+  diagnostics.levels_ns = stats.keys_ns;
+  diagnostics.sort_ns = stats.sort_ns;
+  // voie CPU : les copies de l'executeur Pool (sorties prises, lectures) restent dans l'assemblage (transfer_ns nul)
+  diagnostics.assemble_ns =
+      gather_ns + stats.check_ns + stats.emit_ns + stats.take_ns + executor.meter.ns + adopt_watch.nanoseconds();
+  diagnostics.table_ns = stats.table_ns;
+  diagnostics.chains_repaired = stats.chains_repaired;
+  diagnostics.chain_elements = stats.chain_elements;
   return result;
 }
 

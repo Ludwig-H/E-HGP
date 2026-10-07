@@ -18,6 +18,7 @@
 //   - une ecriture partagee lue par une autre voie est suivie de sync() (__syncwarp sur l'appareil).
 #pragma once
 
+#include <atomic>
 #include <cstring>
 
 #include "core/core.hpp"
@@ -30,7 +31,17 @@
 #define MHGP12_HD_COLD inline __attribute__((noinline))
 #endif
 
-#if defined(__CUDA_ARCH__)
+// Mode du warp : MHGP12_SIMT_WARP vaut 1 quand le code d'appareil joue un vrai warp de 32 voies ; 0 sur l'hote, et sur
+// l'appareil quand l'unite de traduction definit MHGP12_SIMT_SERIAL avant cet en-tete : un fil joue alors seul le warp
+// entier, voies en serie (mutant << un fil par feuille >> de CONTRAT_CATALOGUE.md, paragraphe 6.6 ; le produit ne le
+// definit jamais). Les intrinseques materielles (popc, ctz, atomiques globaux) restent celles de l'appareil.
+#if defined(__CUDA_ARCH__) && !defined(MHGP12_SIMT_SERIAL)
+#define MHGP12_SIMT_WARP 1
+#else
+#define MHGP12_SIMT_WARP 0
+#endif
+
+#if MHGP12_SIMT_WARP
 #define MHGP12_LANES(width, lane) \
   for (::mhgp12::u32 lane = (threadIdx.x & 31u), lane##_once_ = 1u; lane##_once_ != 0u; lane##_once_ = 0u)
 #else
@@ -43,7 +54,7 @@ inline constexpr u32 kWarp = 32;
 inline constexpr u32 kFull = 0xFFFFFFFFu;
 
 // Nombre de cases d'une valeur par voie : une sur l'appareil (warp de 32 voies seulement), N sur l'hote.
-#if defined(__CUDA_ARCH__)
+#if MHGP12_SIMT_WARP
 template <u32 N>
 inline constexpr u32 kSlots = 1;
 #else
@@ -52,7 +63,7 @@ inline constexpr u32 kSlots = N;
 #endif
 
 MHGP12_HD u32 slot(u32 lane) {
-#if defined(__CUDA_ARCH__)
+#if MHGP12_SIMT_WARP
   (void)lane;
   return 0;
 #else
@@ -186,7 +197,7 @@ MHGP12_HD u32 select_nth(M mask, u32 n) {
 // ------------------------------------------------------------------------------------------------- collectives
 // Vrai pour la voie 0 en code uniforme (ecritures partagees uniques) ; toujours vrai sur l'hote.
 MHGP12_HD bool leader() {
-#if defined(__CUDA_ARCH__)
+#if MHGP12_SIMT_WARP
   return (threadIdx.x & 31u) == 0u;
 #else
   return true;
@@ -194,14 +205,14 @@ MHGP12_HD bool leader() {
 }
 
 MHGP12_HD void sync() {
-#if defined(__CUDA_ARCH__)
+#if MHGP12_SIMT_WARP
   __syncwarp(kFull);
 #endif
 }
 
 template <u32 N>
 MHGP12_HD typename Width<N>::Mask ballot(const Lanes<bool, N>& p) {
-#if defined(__CUDA_ARCH__)
+#if MHGP12_SIMT_WARP
   return __ballot_sync(kFull, p.v[0]);
 #else
   auto m = Width<N>::empty();
@@ -214,7 +225,7 @@ MHGP12_HD typename Width<N>::Mask ballot(const Lanes<bool, N>& p) {
 // Valeur de la voie src (types trivialement copiables de taille multiple de 4 octets).
 template <class T, u32 N>
 MHGP12_HD T shfl(const Lanes<T, N>& v, u32 src) {
-#if defined(__CUDA_ARCH__)
+#if MHGP12_SIMT_WARP
   static_assert(sizeof(T) % 4 == 0, "shfl : taille multiple de 4");
   constexpr unsigned kWords = sizeof(T) / 4;
   u32 words[kWords];
@@ -232,7 +243,7 @@ MHGP12_HD T shfl(const Lanes<T, N>& v, u32 src) {
 // Somme sur les voies, en u64.
 template <u32 N>
 MHGP12_HD u64 sum(const Lanes<u32, N>& v) {
-#if defined(__CUDA_ARCH__)
+#if MHGP12_SIMT_WARP
   return __reduce_add_sync(kFull, v.v[0]);
 #else
   u64 s = 0;
@@ -245,7 +256,7 @@ MHGP12_HD u64 sum(const Lanes<u32, N>& v) {
 template <u32 N>
 MHGP12_HD Lanes<u32, N> exclusive_scan(const Lanes<u32, N>& v, u32& total) {
   Lanes<u32, N> out;
-#if defined(__CUDA_ARCH__)
+#if MHGP12_SIMT_WARP
   const u32 lane = threadIdx.x & 31u;
   u32 x = v.v[0];
 #pragma unroll
@@ -268,7 +279,7 @@ MHGP12_HD Lanes<u32, N> exclusive_scan(const Lanes<u32, N>& v, u32& total) {
 
 // OU atomique en memoire partagee (plusieurs voies peuvent viser le meme mot dans un meme super-pas).
 MHGP12_HD void atomic_or(u32* word, u32 bits) {
-#if defined(__CUDA_ARCH__)
+#if MHGP12_SIMT_WARP
   atomicOr(word, bits);
 #else
   *word |= bits;
@@ -279,12 +290,53 @@ inline void atomic_or(Bits<W>* word, const Bits<W>& bits) {
   *word |= bits;
 }
 
+// Addition atomique en memoire partagee d'UN warp (histogrammes du tri par base) : plusieurs voies peuvent viser le
+// meme mot dans un meme super-pas ; l'hote joue le warp sur un seul fil.
+MHGP12_HD void atomic_add(u32* word, u32 value) {
+#if MHGP12_SIMT_WARP
+  atomicAdd(word, value);
+#else
+  *word += value;
+#endif
+}
+
+// OU atomique en memoire GLOBALE (drapeaux de faute partages par tous les warps d'un lancement) : sur l'hote, les warps
+// d'un noyau sont repartis sur les fils du Pool, d'ou l'atomique de la bibliotheque standard. Le resultat ne depend
+// pas de l'ordre (OU).
+MHGP12_HD void global_or(u32* word, u32 bits) {
+#if defined(__CUDA_ARCH__)
+  atomicOr(word, bits);
+#else
+  std::atomic_ref<u32>(*word).fetch_or(bits, std::memory_order_relaxed);
+#endif
+}
+
+// Places stables dans des files par valeur (tri par base) : la voie l de valeur b = v[l] recoit next[b] plus le nombre
+// de voies k < l de meme valeur, puis next[b] augmente du nombre de voies de valeur b. next est en memoire partagee du
+// warp. Sur l'appareil : groupes de voies egales (__match_any_sync), rang dans le groupe, mise a jour par la premiere
+// voie du groupe ; sur l'hote : les voies dans l'ordre, une place chacune. Meme resultat.
+MHGP12_HD Lanes<u32> claim(u32* next, const Lanes<u32>& v) {
+  Lanes<u32> out;
+#if MHGP12_SIMT_WARP
+  const u32 lane = threadIdx.x & 31u;
+  const u32 peers = __match_any_sync(kFull, v.v[0]);
+  const u32 below = peers & ((1u << lane) - 1u);
+  out.v[0] = next[v.v[0]] + static_cast<u32>(__popc(below));
+  __syncwarp(kFull);
+  if (below == 0) next[v.v[0]] += static_cast<u32>(__popc(peers));
+  __syncwarp(kFull);
+#else
+  for (u32 l = 0; l < kWarp; ++l) out.v[l] = next[v.v[l]]++;
+#endif
+  return out;
+}
+
 // --------------------------------------------- collectives du parcours (warp de 32 voies, port de warp.hpp de MES-M5)
 // Valeur de la voie l ^ mask (mask uniforme).
 template <class T>
 MHGP12_HD Lanes<T> shfl_xor(const Lanes<T>& v, u32 mask) {
   Lanes<T> out;
-#if defined(__CUDA_ARCH__)
+#if MHGP12_SIMT_WARP
   static_assert(sizeof(T) % 4 == 0, "shfl_xor : taille multiple de 4");
   constexpr unsigned kWords = sizeof(T) / 4;
   u32 words[kWords];
@@ -299,7 +351,7 @@ MHGP12_HD Lanes<T> shfl_xor(const Lanes<T>& v, u32 mask) {
 }
 
 MHGP12_HD u32 reduce_min(const Lanes<u32>& v) {
-#if defined(__CUDA_ARCH__)
+#if MHGP12_SIMT_WARP
   return __reduce_min_sync(kFull, v.v[0]);
 #else
   u32 m = v.v[0];
@@ -309,7 +361,7 @@ MHGP12_HD u32 reduce_min(const Lanes<u32>& v) {
 }
 
 MHGP12_HD u32 reduce_max(const Lanes<u32>& v) {
-#if defined(__CUDA_ARCH__)
+#if MHGP12_SIMT_WARP
   return __reduce_max_sync(kFull, v.v[0]);
 #else
   u32 m = v.v[0];
@@ -320,7 +372,7 @@ MHGP12_HD u32 reduce_max(const Lanes<u32>& v) {
 
 // Somme 64 bits sur les 32 voies (meme resultat sur toutes les voies).
 MHGP12_HD u64 sum64(const Lanes<u64>& v) {
-#if defined(__CUDA_ARCH__)
+#if MHGP12_SIMT_WARP
   u64 x = v.v[0];
 #pragma unroll
   for (u32 d = 16; d > 0; d >>= 1) x += __shfl_xor_sync(kFull, x, static_cast<int>(d));
@@ -335,7 +387,7 @@ MHGP12_HD u64 sum64(const Lanes<u64>& v) {
 // Prefixe exclusif 64 bits sur les voies ; total rendu dans total.
 MHGP12_HD Lanes<u64> exclusive_scan64(const Lanes<u64>& v, u64& total) {
   Lanes<u64> out;
-#if defined(__CUDA_ARCH__)
+#if MHGP12_SIMT_WARP
   const u32 lane = threadIdx.x & 31u;
   u64 x = v.v[0];
 #pragma unroll

@@ -111,6 +111,7 @@ struct Level {
   u32* next_task_begin;
   Leaf* leaves;
   u32* leaf_sites;
+  u64 leaf_base, leaf_site_base;  // feuilles du niveau ecrites apres celles deja gardees (lot de la voie appareil)
   Params params;
 };
 

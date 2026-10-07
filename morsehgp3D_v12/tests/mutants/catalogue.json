@@ -1,6 +1,6 @@
 {
   "module": "catalogue",
-  "plancher": 6,
+  "plancher": 15,
   "mutants": [
     {
       "id": "temoin_perdu_du_reservoir",
@@ -31,11 +31,11 @@
     },
     {
       "id": "ordre_par_rang_de_morton",
-      "fichier": "src/catalogue/sort.cpp",
-      "cherche": "const int support = compare_support_positions(*cloud, records[a].support, records[b].support);",
-      "remplace": "const int support = records[a].support[0] != records[b].support[0] ? (records[a].support[0] < records[b].support[0] ? -1 : 1) : (records[a].support[1] < records[b].support[1] ? -1 : records[a].support[1] > records[b].support[1] ? 1 : 0);",
+      "fichier": "src/catalogue/finish_kernels.hpp",
+      "cherche": "      ranks[k] = lexrank[s];",
+      "remplace": "      ranks[k] = s + 1;",
       "porte": "mhgp12_catalogue_unit_witness_transl",
-      "note": "boules de meme niveau rangees par SiteIdx de S* (ordre de la v11) au lieu des positions (ARCHITECTURE.md, regle 5)"
+      "note": "boules de meme niveau rangees par SiteIdx de S* (ordre de la v11) au lieu des positions (ARCHITECTURE.md, regle 5) : la cle des positions de S* de la fin d'etage partagee lit le rang de Morton au lieu du rang lexicographique"
     },
     {
       "id": "feuille_large_sans_elargir",
@@ -52,6 +52,78 @@
       "remplace": "if (w.status == kLeafOk && !(add_leaf_counts(tally.counts, counts) && add_leaf_counts(tally.counts, counts))) tally.overflow = true;",
       "porte": "mhgp12_catalogue_unit_witness_leaves",
       "note": "les compteurs logiques d'une feuille ajoutes deux fois (une feuille ne compte qu'une fois, apres succes)"
+    },
+    {
+      "id": "feuille_non_resolue_admise_sans_rejeu",
+      "fichier": "src/catalogue/device_pipeline.hpp",
+      "cherche": "    if (c.unresolved > 0) {",
+      "remplace": "    if (c.unresolved > kNone) {",
+      "porte": "mhgp12_catalogue_device_unit_pipeline_witnesses",
+      "note": "voie appareil : le lot est admis sans rejouer sur l'hote ses feuilles non resolues (CONTRAT_CATALOGUE.md, paragraphe 6.6 ; contrat R7) ; le triangle long (etendue B + 1) et la coquille de 48 sites perdent des boules"
+    },
+    {
+      "id": "palier_etroit_depasse_sur_l_appareil",
+      "fichier": "src/catalogue/device_leaves.hpp",
+      "cherche": "(out.span > static_cast<u32>(kLeafNarrowSpan) ? kCauseSpan : 0u)",
+      "remplace": "(out.span > 64u ? kCauseSpan : 0u)",
+      "porte": "mhgp12_catalogue_device_unit_pipeline_witnesses",
+      "note": "voie appareil : une feuille d'etendue > 16 est jouee en arithmetique etroite au lieu d'etre non resolue (contrat R7 : seules decident les voies garanties par le palier) ; le triangle long fait deborder t = 2 M^3"
+    },
+    {
+      "id": "fin_sans_departage_exact",
+      "fichier": "src/catalogue/finish_kernels.hpp",
+      "cherche": "    const int c = certain ? -1 : compare_levels(levels[a], levels[b]);",
+      "remplace": "    const int c = certain ? -1 : (ka < kb ? -1 : ka > kb ? 1 : 0);",
+      "porte": "mhgp12_catalogue_device_unit_finish_ties",
+      "note": "fin d'etage (voies CPU et appareil) : les voisins non certainement ordonnes sont departages par la cle flottante au lieu de l'exact (CONTRAT_CATALOGUE.md, paragraphe 2 ; doctrine F1) ; le triangle rectangle et son hypotenuse, de meme niveau et de cles inversees, recoivent deux rangs"
+    },
+    {
+      "id": "finition_sans_halo",
+      "fichier": "src/catalogue/finish_kernels.hpp",
+      "cherche": "    if (i == 0) {\n      flag[0] = 1;\n      verdict[0] = kPairOk;",
+      "remplace": "    if (i % kTileItems == 0) {\n      flag[i] = 1;\n      verdict[i] = kPairOk;",
+      "porte": "mhgp12_catalogue_device_unit_finish_plateau",
+      "note": "analogue du mutant << sans halo >> de la preuve de l'auditeur (CST-0233, receipts/audit_performance_20261007/assemblage) : le premier element de chaque tuile ouvre un rang sans etre compare a son voisin de la tuile precedente ; un plateau traversant les tuiles se coupe"
+    },
+    {
+      "id": "finition_formes_au_lieu_des_valeurs",
+      "fichier": "src/catalogue/finish_kernels.hpp",
+      "cherche": "    const int c = certain ? -1 : compare_levels(levels[a], levels[b]);",
+      "remplace": "    const int c = certain ? -1 : (memcmp(&levels[a], &levels[b], sizeof(LevelWords)) == 0 ? 0 : -1);",
+      "porte": "mhgp12_catalogue_device_unit_finish_ties",
+      "note": "analogue du mutant << formes au lieu des valeurs >> (CST-0233) : deux niveaux egaux de representations non reduites differentes recoivent deux rangs"
+    },
+    {
+      "id": "finition_prefixe_inclusif",
+      "fichier": "src/catalogue/finish_sort.hpp",
+      "cherche": "        v.out[i] = at;\n        at += x;",
+      "remplace": "        at += x;\n        v.out[i] = at;",
+      "porte": "mhgp12_catalogue_device_unit_finish_random",
+      "note": "analogue du mutant << prefixe inclusif >> (CST-0233) : decalages CSR et rangs pris apres l'element au lieu d'avant"
+    },
+    {
+      "id": "finition_dernier_representant",
+      "fichier": "src/catalogue/finish_kernels.hpp",
+      "cherche": "    if (flag[i] != 0) level_of_rank[rank - 1] = levels[b];",
+      "remplace": "    if (i + 1 == n || flag[i + 1] != 0) level_of_rank[rank - 1] = levels[b];",
+      "porte": "mhgp12_catalogue_device_unit_finish_ties",
+      "note": "analogue du mutant << dernier representant >> (CST-0233) : le niveau d'un rang prend la forme rationnelle de sa derniere boule au lieu de la premiere ; l'identite binaire du catalogue change quand les formes different"
+    },
+    {
+      "id": "reecritures_appareil_non_comptees",
+      "fichier": "src/catalogue/device_pipeline.hpp",
+      "cherche": "    totals.rewritten_device += c.stats.rewritten;",
+      "remplace": "    totals.rewritten_device += 0;",
+      "porte": "mhgp12_catalogue_device_unit_pipeline_witnesses",
+      "note": "voie appareil : les feuilles de plus de 64 emissions rejouees par Replay ne seraient pas comptees (leaves_rewritten nul alors que des feuilles sont reecrites, constat de l'auditeur du 7 octobre)"
+    },
+    {
+      "id": "reecritures_reprise_hote_non_comptees",
+      "fichier": "src/catalogue/device_pipeline.hpp",
+      "cherche": "    totals.rewritten_host += stage.totals().rewritten;",
+      "remplace": "    totals.rewritten_host += 0;",
+      "porte": "mhgp12_catalogue_device_unit_pipeline_witnesses",
+      "note": "voie appareil : les reecritures de la reprise exacte sur l'hote (LeafStage) ne seraient pas agregees"
     }
   ]
 }

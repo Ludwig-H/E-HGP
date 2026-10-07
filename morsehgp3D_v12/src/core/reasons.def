@@ -65,3 +65,7 @@ MHGP12_REASON(census_mismatch, invariant_violated, tower)
 MHGP12_REASON(tower_capacity, resource_exhausted, tower)
 MHGP12_REASON(tower_invariant, invariant_violated, tower)
 MHGP12_REASON(cell_capacity, unsupported_degeneracy, tower)
+// voie appareil du catalogue (tranche T1-b) : construction sans CUDA, aucun appareil ou contexte impossible a ouvrir ;
+// erreur du pilote CUDA pendant le calcul (lancement, acces, synchronisation)
+MHGP12_REASON(device_unavailable, resource_exhausted, catalogue)
+MHGP12_REASON(device_fault, invariant_violated, catalogue)

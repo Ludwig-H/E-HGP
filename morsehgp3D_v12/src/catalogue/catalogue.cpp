@@ -5,12 +5,8 @@
 #include "sched/sched.hpp"
 
 namespace mhgp12 {
-namespace {
 
-using catalogue_detail::LeafCounts;
-
-CatalogueLedger ledger_of(const catalogue_detail::TraversalLedger& t, const LeafCounts& c) noexcept {
-  using namespace catalogue_detail;
+CatalogueLedger catalogue_detail::make_ledger(const TraversalLedger& t, const LeafCounts& c) noexcept {
   CatalogueLedger l;
   l.nodes = t.nodes;
   l.leaves = t.leaves;
@@ -35,6 +31,8 @@ CatalogueLedger ledger_of(const catalogue_detail::TraversalLedger& t, const Leaf
   return l;
 }
 
+namespace {
+
 Result<Catalogue> build(const Cloud& cloud, const CatalogueParams& params, MemoryBudget& budget, sched::Pool& pool,
                         CatalogueDiagnostics* diagnostics) noexcept {
   using namespace catalogue_detail;
@@ -48,7 +46,7 @@ Result<Catalogue> build(const Cloud& cloud, const CatalogueParams& params, Memor
   MHGP12_TRY(traverse(cloud, traversal, budget, pool, stage, walked, front));
   const u64 elapsed = watch.nanoseconds();
   const LeafTotals& leaves = stage.totals();
-  const CatalogueLedger ledger = ledger_of(walked, leaves.counts);
+  const CatalogueLedger ledger = make_ledger(walked, leaves.counts);
   if (ledger.emitted != stage.balls()) return fail(Reason::catalogue_invariant);
   diag.levels = front.levels;
   diag.tasks = front.tasks;

@@ -1,5 +1,5 @@
 {
-  "note": "Ports explicites du module catalogue (tranche T1), empreintes SHA-256 des sources lues au HEAD df9140b5d (microbancs de la v12) et au moteur gele ac081a06f de la v11 ; chaque port est requalifie par les portes de tests/catalogue, aucune qualification n'est heritee.",
+  "note": "Ports explicites du module catalogue (tranche T1), empreintes SHA-256 des sources lues au HEAD df9140b5d (microbancs de la v12) et au moteur gele ac081a06f de la v11 ; chaque port est requalifie par les portes de tests/catalogue, aucune qualification n'est heritee. Tranche T1-b (7 octobre 2026) : executeurs et formules des niveaux ajoutes, tri par blocs de la v11 retire.",
   "sources": [
     {
       "path": "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/bfs.hpp",
@@ -17,9 +17,10 @@
       "commit": "e30000dec",
       "sha256": "7fe2d808c0675f3423a29c0ba4699c2a826c154162b1025627eafd009cd5daa1",
       "port": [
+        "src/catalogue/traversal_driver.hpp",
         "src/catalogue/traversal.cpp"
       ],
-      "changes": "tableaux du front en Buffer du budget, noyaux repartis sur le Pool, feuilles remises au consommateur niveau par niveau, refus en Outcome"
+      "changes": "pilote des niveaux ecrit une fois pour deux executeurs (Pool de la voie CPU, CUDA de la voie appareil), tableaux du front en Buffer du budget ou en memoire de l'appareil comptee, feuilles remises a un crochet (consommateur de la voie CPU, lots de la voie appareil), refus en Outcome"
     },
     {
       "path": "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/warp.hpp",
@@ -105,9 +106,11 @@
       "commit": "ac081a06f",
       "sha256": "3690de6d856e05e72ce4cebbe1eda14152d609a262bb45efb4c2e7f45a1f13a5",
       "port": [
+        "src/catalogue/finish_kernels.hpp",
+        "src/catalogue/finish_driver.hpp",
         "src/catalogue/assemble.cpp"
       ],
-      "changes": "rangs, niveau de la premiere boule d'un rang, CSR ; departage par positions"
+      "changes": "rangs (niveau de la premiere boule d'un rang) et CSR, par sommes prefixes en source unique hote et appareil ; departage par positions"
     },
     {
       "path": "morsehgp3D_v11/src/catalogue/catalogue.cpp",
@@ -122,19 +125,17 @@
       "path": "morsehgp3D_v11/src/catalogue/sort_indices.cpp",
       "commit": "ac081a06f",
       "sha256": "1a29095f472a98ae5a44108a4dd3352f1c9be0cbc48d107dd81130fa57aff0c0",
-      "port": [
-        "src/catalogue/sort.cpp"
-      ],
-      "changes": "comparateur v12 (S* par positions), Pool obligatoire"
+      "port": [],
+      "changes": "tri par blocs et fusions remplace par le tri par base stable de la fin d'etage partagee (finish_sort.hpp, tranche T1-b) ; plus porte"
     },
     {
       "path": "morsehgp3D_v11/src/catalogue/sort_level_key.hpp",
       "commit": "ac081a06f",
       "sha256": "09de86ef2006bf3dc466f2865123cb201ddbe616e5d3d0a20237205db8dc09cd",
       "port": [
-        "src/catalogue/sort.cpp"
+        "src/catalogue/finish_level.hpp"
       ],
-      "changes": "cles F3 et decision F4 reprises telles quelles"
+      "changes": "cles F3 et decision F4 reprises telles quelles, en source unique hote et appareil, sur les mots du niveau exact"
     },
     {
       "path": "morsehgp3D_v12/microbancs/mes_m3_m4_tour/common/format.hpp",
@@ -153,6 +154,40 @@
         "tests/catalogue/euler.py"
       ],
       "changes": "regles du juge d'Euler a K+2 et de la restriction J1 reecrites en Python exact"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m5_parcours/cuda/traversal_bench.cu",
+      "commit": "1b40c0411",
+      "sha256": "03f1416c1c243853c4fb35f40838dcc8cdb4912ea1fe333401fc2692426b2b37",
+      "port": [
+        "src/catalogue/device_cuda.cu"
+      ],
+      "changes": "executeur CUDA du pilote (tableaux a capacite croissante, noyau de warps generique a quatre warps par bloc, un flux, lectures en memoire epinglee) ; reservations dans le budget, regime resident, refus en Outcome (device_fault, memory_budget)"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m2_feuille/cuda/leaf_bench.cu",
+      "commit": "320db4a12",
+      "sha256": "98bff9867c5049202c7ad00fd4c22ec18caee9df92fab6fbb06034f47d3cfad4",
+      "port": [
+        "src/catalogue/device_leaf.cu"
+      ],
+      "changes": "noyau j3_r168 (__launch_bounds__(128, 3), un warp par feuille) ; arene a curseurs atomiques remplacee par les cases de la voie CPU et le rejeu exact aux places du comptage"
+    },
+    {
+      "path": "morsehgp3D_v12/src/num/sphere.cpp",
+      "commit": "6a38f7e4b",
+      "sha256": "26fc17965d0cea73763ee4cc63062c19ec601505355043b821c013c4ac6c1290",
+      "port": [
+        "src/catalogue/finish_level.hpp"
+      ],
+      "changes": "formules des niveaux q2, q3, q4 (numerateur et denominateur non reduits) en entiers a mots, source unique hote et appareil ; egalite des mots a ceux de num verifiee par la porte level_words"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/CATALOGUE_ASSEMBLY.md",
+      "commit": "b367051a9",
+      "sha256": "5c8846c8343ff7ad945f0584037989d9e6b4235f1c60881d1e738331aab0b406",
+      "port": [],
+      "changes": "idee de l'assemblage par blocs et prefixes (rang local, prefixe des groupes, tranches de populations) reprise par la fin d'etage partagee en tuiles de 1 024 elements ; aucun code porte"
     }
   ]
 }

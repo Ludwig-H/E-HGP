@@ -2,7 +2,7 @@
 # Port du CMakeLists.txt de la v11 (commit ac081a06f), lui-meme port de celui de la v10 du raccord R2 (commit 865f5e6) :
 # options, sanitizers, runtime partage de Clang, portes a code exact ; les modules s'ajoutent par leurs seuls fichiers,
 # sans editer celui-ci. Ce que la v12 change : prefixes mhgp12 et MHGP12_, profils 21 (defaut), 24 et 32 (18
-# abandonne, decision D6 ; 32 depuis le repere local), option CUDA retiree tant qu'aucun module ne compile pour le GPU.
+# abandonne, decision D6 ; 32 depuis le repere local), option CUDA MHGP12_ENABLE_CUDA (voie appareil du catalogue).
 #
 # ---------------------------------------------------------------------------------------------------------------
 # MODE D'EMPLOI POUR L'AUTEUR D'UN MODULE (table des modules : cmake/modules.cmake, copie du paragraphe 5 de
@@ -68,6 +68,7 @@ option(MHGP12_TSAN "ThreadSanitizer" OFF)
 option(MHGP12_POISON "Empoisonne les tampons non initialises (0xA5)" OFF)
 set(MHGP12_MARCH "" CACHE STRING "Jeu d'instructions cible (-march), par exemple x86-64-v3 ; vide : aucun")
 set(MHGP12_MUTANT_JOBS 0 CACHE STRING "Mutants traites en parallele par une porte de mutants ; 0 : d'apres la machine")
+option(MHGP12_ENABLE_CUDA "Voie appareil du catalogue (tranche T1-b, sm_120) ; desactivee par defaut" OFF)
 
 # Profil de coordonnees (decision D6 de la v12) : 21 bits (defaut), 24 ou 32. Le profil 18 bits est abandonne ; 32
 # bits est admis depuis l'arithmetique en repere local (docs/CONTRAT_NUMERIQUE.md) : chaque predicat lit l'etendue de
@@ -83,11 +84,37 @@ if(MHGP12_SANITIZE AND MHGP12_TSAN)
   message(FATAL_ERROR "MHGP12_SANITIZE et MHGP12_TSAN s'excluent (ASan et TSan ne se combinent pas)")
 endif()
 
-# Option CUDA de la v11 non reprise : aucun module du socle ne compile pour le GPU, et une option n'existe que si une
-# porte l'exerce. Le module catalogue la ramenera, avec le dialecte CUDA20 declare a la main pour CMake 3.22 (VM G4),
-# qui ne le connait pas (CMakeLists.txt de la v11, commit ac081a06f).
+# Option CUDA (tranche T1-b) : voie appareil du catalogue (src/catalogue/device_cuda.cu), sm_120 par defaut, dialecte
+# CUDA20 declare a la main pour CMake 3.22 (VM G4), qui ne le connait pas (CMakeLists.txt de la v11, commit
+# ac081a06f). Sans elle, la voie appareil rend device_unavailable (souche). Avertissements : ceux du projet pour le
+# C++ ; pour CUDA, -Wall -Wextra -Werror du compilateur hote (-Wpedantic exclu : nvcc ecrit des directives de ligne
+# GNU) et tout avertissement de nvcc en erreur ; jamais --use_fast_math, contraction des produits interdite (-fmad=false,
+# doctrine F2 : les cles F3 sont des quotients de binaire64).
 set(MHGP12_WARNING_OPTIONS -Wall -Wextra -Wpedantic -Werror)
-add_compile_options(${MHGP12_WARNING_OPTIONS})
+if(MHGP12_ENABLE_CUDA)
+  if(MHGP12_SANITIZE OR MHGP12_TSAN)
+    message(FATAL_ERROR "mhgp12 : MHGP12_ENABLE_CUDA exclut les sanitizers")
+  endif()
+  if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+    set(CMAKE_CUDA_ARCHITECTURES 120)
+  endif()
+  enable_language(CUDA)
+  find_package(CUDAToolkit REQUIRED)
+  if(NOT CMAKE_CUDA20_STANDARD_COMPILE_OPTION)
+    set(CMAKE_CUDA20_STANDARD_COMPILE_OPTION "-std=c++20")
+    set(CMAKE_CUDA20_EXTENSION_COMPILE_OPTION "-std=c++20")
+  endif()
+  set(CMAKE_CUDA_STANDARD 20)
+  set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+  set(CMAKE_CUDA_EXTENSIONS OFF)
+  add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:${MHGP12_WARNING_OPTIONS}>"
+                      "$<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-Wall,-Wextra,-Werror>"
+                      "$<$<COMPILE_LANGUAGE:CUDA>:-Werror=all-warnings>"
+                      "$<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>"
+                      "$<$<COMPILE_LANGUAGE:CUDA>:-fmad=false>")
+else()
+  add_compile_options(${MHGP12_WARNING_OPTIONS})
+endif()
 
 # Garde simple contre -ffast-math (doctrine flottante, ARCHITECTURE.md de la v11, paragraphe 4).
 # La v10 s'appuyait sur un contrat de compilation (IEEE-754 strict, ni contraction, ni reassociation) et a du refuser

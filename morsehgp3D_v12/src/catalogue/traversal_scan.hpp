@@ -1,8 +1,9 @@
 // Parcours en largeur : prefixes d'un niveau (ScanA/B/C), ecriture stable des listes (Scatter), enregistrements des
 // parents et des feuilles (Emit), liste de la racine (Iota). Port explicite de
 // microbancs/mes_m5_parcours/include/mhgp12/traversal/bfs.hpp (MES-M5), sans mutants. Les feuilles d'un niveau sont
-// ecrites dans l'arene du NIVEAU (debuts relatifs a ce niveau) : le catalogue les consomme avant le niveau suivant
-// (feuilles en flux, CONTRAT_CATALOGUE.md, paragraphe 2).
+// ecrites dans l'arene des feuilles a partir de leaf_base (debuts relatifs a leaf_site_base) : la voie CPU les
+// consomme avant le niveau suivant (bases nulles) ; la voie appareil les garde d'un niveau a l'autre jusqu'a remplir
+// un lot (feuilles en flux, CONTRAT_CATALOGUE.md, paragraphe 2).
 #pragma once
 
 #include "catalogue/traversal_records.hpp"
@@ -149,7 +150,8 @@ struct ScatterKernel {
     if (o.kind == kKindEmpty) return;
     const Parent& p = lv.parents[r.parent];
     const ChildScan& s = lv.child_scan[r.child];
-    u32* out = (o.kind == kKindSplit ? lv.next_list + s.f[1] : lv.leaf_sites + s.f[4]) + lv.task_out[t].out_offset;
+    u32* out = (o.kind == kKindSplit ? lv.next_list + s.f[1] : lv.leaf_sites + lv.leaf_site_base + s.f[4]) +
+               lv.task_out[t].out_offset;
     const u32* keep = lv.keep + t * kChunkWords;
     u32 running = 0;
     for (u64 base = r.begin, g = 0; base < r.end; base += kWarp, ++g) {
@@ -193,7 +195,7 @@ struct EmitKernel {
       lv.next_task_begin[s.f[0]] = static_cast<u32>(s.f[2]);
     } else {
       Leaf f;
-      f.begin = s.f[4];
+      f.begin = lv.leaf_site_base + s.f[4];
       f.m = o.count;
       f.depth = lv.depth;
       for (int a = 0; a < 3; ++a) {
@@ -202,7 +204,7 @@ struct EmitKernel {
       }
       f.path[0] = path[0];
       f.path[1] = path[1];
-      lv.leaves[s.f[3]] = f;
+      lv.leaves[lv.leaf_base + s.f[3]] = f;
     }
   }
 };

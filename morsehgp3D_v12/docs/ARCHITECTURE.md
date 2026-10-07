@@ -208,7 +208,7 @@ les deux. Une tranche qui livre un module ajoute sa ligne ici et dans `cmake/mod
 | `cloud` | domaine, sites en ordre de Morton, multiplicités, table site → `PointId` ; port v11 | `core` |
 | `io` | lecture `u32le`, SHA-256, écrivains, dossier transactionnel ; port v11 | `core`, `cloud` |
 | `index` | arbre radix de Morton, bornes et census exacts sur sites ; port v11 | `num`, `cloud` |
-| `catalogue` | parcours des boîtes en largeur (source de `MES-M5`), feuille J3 en source unique (source de `MES-M2`) jouée en flux sur le warp simulé, repli exact plus large, fin d'étage, table $S^{*}$ → boule, export `MHGP12DP` ; réécrit (§ 4.1), voie CPU de référence | `num`, `sched`, `cloud`, `io` |
+| `catalogue` | parcours des boîtes en largeur (source de `MES-M5`), feuille J3 en source unique (source de `MES-M2`) jouée en flux sur le warp simulé, repli exact plus large, fin d'étage partagée (tri par base, sommes préfixes), table $S^{*}$ → boule, export `MHGP12DP` ; réécrit (§ 4.1) ; voie CPU de référence et voie appareil (T1-b, même code, exécuteurs Pool et CUDA) | `num`, `sched`, `cloud`, `io` |
 | `tower` | étage G (résolution) : cellules de fenêtre (naissance, jonction, inerte) et leurs traces strictes, table de populations (`LEM-POP`), résolution des représentants (`LEM-T1`, certificat exact, census gardé, arrêt `LEM-T3`), cibles de 4 octets ; réécrit (§ 4.2), voie CPU de référence | `core`, `num`, `sched`, `cloud`, `index`, `catalogue` |
 
 Modules prévus, ajoutés à la table ci-dessus par leur tranche :
@@ -247,4 +247,5 @@ F1–F6 (§ 4), construction et portes (§ 5), contrats du budget mémoire, de l
   l'oracle), `MHGP12_V11_CATALOGUE_DIR` (vidages `cat.bin` de la v11 gelée par cas, portes `diff_v11` du catalogue),
   `MHGP12_V11_TOWER_DIR` (vidages `cat.bin`, `ordre_<k>.bin`, `foret_<k>.bin` de la v11 gelée par cas, portes
   `diff_v11` de la tour) ;
-- l'option CUDA de la v11 n'est pas reprise : elle reviendra avec le catalogue.
+- l'option CUDA revient avec la voie appareil du catalogue (tranche T1-b) : `MHGP12_ENABLE_CUDA` (désactivée par
+  défaut, `sm_120`), exclusive des sanitizers ; sans elle, la voie appareil rend `device_unavailable`.

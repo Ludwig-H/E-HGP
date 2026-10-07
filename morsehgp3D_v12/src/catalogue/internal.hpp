@@ -10,6 +10,10 @@
 
 namespace mhgp12::catalogue_detail {
 
+namespace fin {
+struct FinishOutput;
+}
+
 // Boule emise par une feuille, en SiteIdx globaux : S* croissant (kNone au-dela de qmin), debut de sa population
 // (I puis U) dans la population de son lot.
 struct BallRecord {
@@ -58,19 +62,21 @@ class LeafStage final : public LeafConsumer {
   u64 balls_ = 0;
 };
 
+// Grand livre logique du catalogue : parcours et sommes des quinze compteurs de feuille (voies CPU et appareil).
+[[nodiscard]] CatalogueLedger make_ledger(const TraversalLedger& walked, const LeafCounts& counts) noexcept;
+
 // Somme controlee des quinze compteurs d'une feuille : faux sur depassement de 2^64 - 1 (refus
 // catalogue_counter_overflow). Bornes : chaque champ d'une feuille de m <= 256 sites est < m * sum_{q<=4} C(m,q) < 2^42.
 [[nodiscard]] bool add_leaf_counts(LeafCounts& into, const LeafCounts& c) noexcept;
 
-// Table S* -> boule : CSR par premier site de S* (voir table.cpp).
-[[nodiscard]] Outcome build_table(Csr<BallIdx>& table, std::span<const CatalogueBall> balls, u32 sites,
-                                  MemoryBudget& budget) noexcept;
-
 struct Assembly {
-  // Fin d'etage : niveaux exacts, ordre canonique, rangs, CSR des populations, table S* -> boule.
+  // Fin d'etage de la voie CPU : lots rassembles, fin d'etage partagee (finish_driver.hpp) jouee par le Pool.
   static Result<Catalogue> finish(const Cloud& cloud, const CatalogueParams& params, std::vector<Chunk>& chunks,
                                   u64 balls, const CatalogueLedger& ledger, MemoryBudget& budget, sched::Pool& pool,
                                   CatalogueDiagnostics& diagnostics) noexcept;
+  // Publication commune aux deux voies : sorties de la fin d'etage (videes), niveaux exacts materialises.
+  static Result<Catalogue> adopt(fin::FinishOutput& out, Order kmax, const CatalogueLedger& ledger,
+                                 MemoryBudget& budget, sched::Pool& pool) noexcept;
 };
 
 }  // namespace mhgp12::catalogue_detail

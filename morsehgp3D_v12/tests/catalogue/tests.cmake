@@ -16,6 +16,24 @@ mhgp12_add_unit(mhgp12_catalogue_unit SOURCES unit.cpp
                        counter_overflow tiers wide_traversal determinism
                 LABELS fast TIMEOUT 300)
 
+# Fin d'etage partagee et voie appareil (tranche T1-b), jouees sur l'hote par l'executeur Pool, meme code que
+# l'appareil : niveaux a mots contre num, tri par base et sommes prefixes, fin d'etage sur enregistrements construits
+# (egalites et quasi-egalites de niveaux, repli exact) contre une reference independante, voie appareil complete contre
+# la voie CPU (temoins, feuilles non resolues rejouees sur l'hote, refus, etat resident) ; device_open : sans GPU,
+# device_unavailable ; avec GPU (G4), la voie appareil reelle contre la voie CPU. Raisons : device_unavailable,
+# device_fault.
+mhgp12_add_unit(mhgp12_catalogue_device_unit SOURCES device_unit.cpp device_finish_test.cpp device_pipeline_test.cpp
+                GROUPS level_words radix_and_scan device_reasons finish_random finish_ties finish_plateau
+                       pipeline_witnesses pipeline_resident device_open
+                LABELS fast TIMEOUT 300)
+
+# Session G4 de la tranche T1-b (bench/g4_catalogue_device.py) : juge a regle ecrite d'avance, auto-test par injections
+# (adopte, rejete, refuse) ; motifs des mutants appareil (bench/g4_catalogue_mutants.json) presents une seule fois.
+mhgp12_python_gate(mhgp12_catalogue_g4_judge 0 ${PROJECT_SOURCE_DIR}/bench/g4_catalogue_device.py --selftest-judge
+                   LINE "juge_g4_t1b_ok injections=18" LABELS fast)
+mhgp12_python_gate(mhgp12_catalogue_g4_mutants 0 ${PROJECT_SOURCE_DIR}/bench/g4_catalogue_device.py --check-mutants
+                   ${PROJECT_SOURCE_DIR} LINE "mutants_appareil_ok mutants=3" LABELS fast)
+
 # Oracle borne : egalite avec l'etage B de reference/hgp12_ref sur la suite rapide (n <= 14) ; doublons refuses (D8).
 mhgp12_python_gate(mhgp12_catalogue_oracle 0 oracle.py ${catalogue_probe}
                    LINE "catalogue_oracle_ok nuages=342 boules=6988 doublons_refuses=34" LABELS oracle fast TIMEOUT 300)

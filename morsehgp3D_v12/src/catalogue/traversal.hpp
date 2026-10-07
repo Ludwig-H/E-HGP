@@ -1,6 +1,7 @@
-// Parcours des boites de centres en largeur, joue sur l'hote : pilote des niveaux et executeur hote (warp simule,
-// warps repartis sur le Pool). Port explicite du pilote de microbancs/mes_m5_parcours/include/mhgp12/traversal/
-// driver.hpp (MES-M5) ; l'executeur CUDA du microbanc reviendra avec la voie GPU de la tranche T1, sur le meme pilote.
+// Parcours des boites de centres en largeur, joue sur l'hote : enregistrements du grand livre, consommateur des
+// feuilles, tableaux du front et entree de la voie CPU. Le pilote des niveaux (traversal_driver.hpp, port de
+// microbancs/mes_m5_parcours/include/mhgp12/traversal/driver.hpp, MES-M5) est commun a l'executeur hote (warps
+// simules repartis sur le Pool, traversal.cpp) et a l'executeur CUDA de la voie appareil (device_cuda.cu).
 //
 // Un niveau : Select, Merge, Filter, Close, ScanA, ScanB, ScanC, lecture des totaux, Scatter, Emit, puis les feuilles du
 // niveau sont remises au consommateur (feuilles en flux) avant le niveau suivant ; l'arene des feuilles est reutilisee
@@ -47,6 +48,17 @@ struct FrontArray {
     const u64 grown = n < 2 * buffer.size() ? 2 * buffer.size() : n;
     buffer.reset();  // contenu non conserve : l'ancien tableau est rendu avant la nouvelle reservation
     return buffer.allocate(grown, budget);
+  }
+  // Comme ensure, en gardant les `keep` premiers elements (keep <= taille courante) ; keep = 0 : ensure.
+  [[nodiscard]] Outcome ensure_keep(u64 n, u64 keep, MemoryBudget& budget) noexcept {
+    if (keep == 0) return ensure(n, budget);
+    if (buffer.size() >= n) return {};
+    const u64 grown = n < 2 * buffer.size() ? 2 * buffer.size() : n;
+    Buffer<T> fresh;
+    MHGP12_TRY(fresh.allocate(grown, budget));
+    for (u64 i = 0; i < keep && i < buffer.size(); ++i) fresh[i] = buffer[i];
+    buffer.swap(fresh);
+    return {};
   }
 };
 

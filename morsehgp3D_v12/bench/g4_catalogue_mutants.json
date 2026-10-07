@@ -1,0 +1,38 @@
+{
+  "schema": "mhgp12_g4_catalogue_mutants_v1",
+  "note": "Mutants causaux de la voie appareil du catalogue (CONTRAT_CATALOGUE.md, paragraphe 6.6), joues par bench/g4_catalogue_device.py sur G4 avec CUDA ; meme format de correctif que tests/mutants/run_mutants.py (texte cherche present une seule fois, remplacements dans l'ordre). Les deux premiers sont aussi dans tests/mutants/catalogue.json (tues sur l'hote par l'executeur Pool) ; ici leur porte est la vraie voie appareil. Le troisieme n'existe que sur l'appareil.",
+  "mutants": [
+    {
+      "id": "feuille_non_resolue_admise_sans_rejeu",
+      "fichier": "src/catalogue/device_pipeline.hpp",
+      "cherche": "    if (c.unresolved > 0) {",
+      "remplace": "    if (c.unresolved > kNone) {",
+      "critere": "identite",
+      "note": "lot admis sans rejouer sur l'hote ses feuilles non resolues : la porte device_open (vraie voie appareil contre voie CPU sur les temoins, dont le triangle long et la coquille de 48 sites) doit echouer, ou l'identite de ng00 a K5"
+    },
+    {
+      "id": "fin_sans_departage_exact",
+      "fichier": "src/catalogue/finish_kernels.hpp",
+      "cherche": "    const int c = certain ? -1 : compare_levels(levels[a], levels[b]);",
+      "remplace": "    const int c = certain ? -1 : (ka < kb ? -1 : ka > kb ? 1 : 0);",
+      "critere": "identite",
+      "note": "voisins non certainement ordonnes departages par la cle flottante : la porte finish_ties (fin d'etage partagee, egalites de representations differentes) doit echouer"
+    },
+    {
+      "id": "un_fil_par_feuille",
+      "fichier": "src/catalogue/device_leaf.cu",
+      "cherche": "#include <cuda_runtime.h>",
+      "remplace": "#define MHGP12_SIMT_SERIAL\n#include <cuda_runtime.h>",
+      "aussi": [
+        {"cherche": "inline constexpr u32 kLeafLanes = 32;     // voies par feuille : un warp",
+         "remplace": "inline constexpr u32 kLeafLanes = 1;      // un fil par feuille (mutant)"},
+        {"cherche": "  __shared__ LeafShared<32> shared[kLeafThreads / kLeafLanes];",
+         "remplace": "  LeafShared<32> shared[1];"},
+        {"cherche": "  k(leaf, shared[threadIdx.x / kLeafLanes]);",
+         "remplace": "  k(leaf, shared[0]);"}
+      ],
+      "critere": "temps",
+      "note": "la feuille J3 jouee par un seul fil (warp simule en serie sur l'appareil, comme le temoin un-fil-par-feuille de la v11 que MES-M2 a mesure six fois plus lent) : l'etage C a chaud de ng00 a K5 doit depasser le budget de 45 ms (CONTRAT_CATALOGUE.md, paragraphe 6.6 : il doit perdre son budget de temps)"
+    }
+  ]
+}

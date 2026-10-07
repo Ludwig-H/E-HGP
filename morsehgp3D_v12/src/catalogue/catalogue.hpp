@@ -6,8 +6,10 @@
 // consommees en flux, niveau par niveau, par lots repartis sur les fils ; une feuille d'etendue s <= 16 est jouee en
 // arithmetique native, une feuille plus etendue par la MEME source en arithmetique exacte plus large (repli exact) ;
 // une feuille de plus de 32 sites (au plus max_leaf = 256) par la meme source sur un warp virtuel de 256 voies ; fin
-// d'etage sur l'hote : ordre canonique (niveau exact, puis S*), rangs de niveau, CSR des populations (I puis U), table
-// S* -> boule (LEM-T1). Le catalogue est le meme ensemble que celui de la v11 gelee (ac081a06f), a un ecart declare
+// d'etage commune aux voies CPU et appareil (une source, deux executeurs : Pool et CUDA) : ordre canonique (niveau
+// exact, puis S*) par tri par base des cles F3 et des positions de S* avec verification exacte des voisins non
+// certainement ordonnes, rangs de niveau et CSR des populations (I puis U) par sommes prefixes, table S* -> boule
+// (LEM-T1) par tri par base. Le catalogue est le meme ensemble que celui de la v11 gelee (ac081a06f), a un ecart declare
 // pres : S* se departage par la liste triee des POSITIONS de ses sites (ordre lexicographique des coordonnees), non par
 // les rangs de Morton (CST-0113) ; l'ordre canonique des boules de meme niveau suit la meme regle (ARCHITECTURE.md,
 // paragraphe 1, regle 5).
@@ -21,6 +23,7 @@
 #pragma once
 
 #include <array>
+#include <memory>
 #include <optional>
 #include <span>
 #include <string_view>
@@ -69,13 +72,29 @@ struct CatalogueLedger {
 };
 
 // Diagnostics PHYSIQUES (jamais dans une empreinte) : niveaux et taches du parcours, feuilles par palier d'etendue de
-// leur repere (etroit s <= 16, moyen s <= 24, large) et par voie, feuilles rejouees a l'ecriture, durees par etape.
+// leur repere (etroit s <= 16, moyen s <= 24, large) et par voie, feuilles rejouees a l'ecriture, durees par etape ;
+// fin d'etage : chaines de voisins incertains retriees en exact (repli) et leurs elements.
 struct CatalogueDiagnostics {
   u64 levels = 0, tasks = 0, candidates = 0;
   u64 leaves_narrow = 0, leaves_medium = 0, leaves_wide = 0, leaves_exact = 0, leaves_virtual_warp = 0;
   u64 leaves_rewritten = 0, max_leaf_span = 0;
   u64 traversal_ns = 0, count_ns = 0, fill_ns = 0, levels_ns = 0, sort_ns = 0, assemble_ns = 0, table_ns = 0;
   u64 peak_bytes = 0;
+  u64 chains_repaired = 0, chain_elements = 0;
+  // Voie appareil seulement (nuls sur la voie CPU), voie HYBRIDE : l'appareil joue les feuilles d'au plus 32 sites et
+  // d'etendue locale d'au plus 16 bits ; les autres (non resolues) sont rapatriees et rejouees EXACTEMENT sur l'hote
+  // (LeafStage), puis remontees. Lots de feuilles ; reprises sur l'hote (feuilles, boules, par cause : plus de 32
+  // sites, etendue au-dela de 16 ; une feuille peut avoir les deux) ; reecritures (feuille de plus de 64 emissions
+  // rejouee par la meme source) sur l'appareil et dans la reprise de l'hote, dont la somme est leaves_rewritten (meme
+  // sens que la voie CPU) ; octets de l'appareil et de la memoire epinglee reserves, reservations de l'appel, octets
+  // de l'arene ; transferts du raccord complet (TOUTE copie hote <-> appareil de l'appel : duree, octets par sens,
+  // operations) ; publication (niveaux materialises sur l'hote). Durees disjointes et nettes des transferts
+  // (CST-0235) : count_ns porte les feuilles (classement, comptage J3, decalages), fill_ns l'emission (reprise des
+  // non resolues, admission, ecriture).
+  u64 batches = 0, replayed_leaves = 0, replayed_balls = 0, replayed_wide = 0, replayed_span = 0;
+  u64 rewritten_device = 0, rewritten_host = 0, device_bytes = 0, pinned_bytes = 0, allocations = 0;
+  u64 arena_bytes = 0, transfer_ns = 0, transfer_h2d_bytes = 0, transfer_d2h_bytes = 0, transfer_ops = 0;
+  u64 publish_ns = 0;
 };
 
 // Proprietaire immuable des tableaux du catalogue ; ses SiteIdx se rapportent au Cloud source. Construction
@@ -126,6 +145,36 @@ class Catalogue {
 [[nodiscard]] Result<Catalogue> build_catalogue(const Cloud& cloud, const CatalogueParams& params,
                                                MemoryBudget& budget, sched::Pool& pool,
                                                CatalogueDiagnostics* diagnostics = nullptr) noexcept;
+
+// Voie appareil du catalogue (tranche T1-b) : contexte resident de l'appareil (flux CUDA, tableaux de l'appareil,
+// memoire epinglee), ouvert une fois et reutilise d'un appel a l'autre (decision D1, regime a chaud). Toutes ses
+// reservations, appareil et memoire epinglee, sont comptees dans le budget donne a l'ouverture, qui doit lui
+// survivre ; il les garde jusqu'a sa destruction. Construction sans MHGP12_ENABLE_CUDA, ou aucun appareil utilisable :
+// open rend device_unavailable.
+class CatalogueDevice {
+ public:
+  struct Impl;
+  [[nodiscard]] static Result<CatalogueDevice> open(MemoryBudget& budget) noexcept;
+  CatalogueDevice(CatalogueDevice&& other) noexcept;
+  CatalogueDevice(const CatalogueDevice&) = delete;
+  CatalogueDevice& operator=(const CatalogueDevice&) = delete;
+  CatalogueDevice& operator=(CatalogueDevice&&) = delete;
+  ~CatalogueDevice();
+  Impl& impl() noexcept { return *impl_; }
+
+ private:
+  explicit CatalogueDevice(std::unique_ptr<Impl> impl) noexcept;
+  std::unique_ptr<Impl> impl_;
+};
+
+// Cat_K par la voie appareil : parcours en largeur et feuilles J3 sur l'appareil, feuilles non resolues (plus de 32
+// sites ou etendue au-dela de 16) rejouees en exact sur l'hote avant admission, fin d'etage sur l'appareil. Meme
+// Catalogue que build_catalogue, a l'octet pres (export MHGP12DP). Memes refus, dans le meme ordre, plus
+// device_fault (erreur du pilote CUDA pendant le calcul) ; un refus ne publie rien et le contexte reste utilisable,
+// sauf apres device_fault. Budget : celui du contexte ; le Pool sert le rejeu exact et la materialisation des niveaux.
+[[nodiscard]] Result<Catalogue> build_catalogue_device(const Cloud& cloud, const CatalogueParams& params,
+                                                      CatalogueDevice& device, sched::Pool& pool,
+                                                      CatalogueDiagnostics* diagnostics = nullptr) noexcept;
 
 // Export, hors du chemin chronometre, au format MHGP12DP version 1 de genre << catalogue >>
 // (microbancs/mes_m3_m4_tour/common/format.hpp, CONTRAT_CATALOGUE.md, paragraphe 8 bis) : en-tete de 64 octets,

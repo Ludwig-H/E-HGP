@@ -165,6 +165,11 @@ class BudgetReservation {
     account_.reset();
   }
   u64 bytes() const noexcept { return bytes_; }
+  // Echange deux reservations (remplacement d'un tableau de l'appareil sans perte du compte).
+  void swap(BudgetReservation& other) noexcept {
+    account_.swap(other.account_);
+    std::swap(bytes_, other.bytes_);
+  }
 
  private:
   std::shared_ptr<detail::BudgetAccount> account_;

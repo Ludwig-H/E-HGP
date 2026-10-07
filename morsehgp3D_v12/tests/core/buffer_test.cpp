@@ -443,7 +443,7 @@ MHGP12_TEST(block_cache, 40) {
 
 // Cache compte comme une reserve sous une limite finie (CST-0007, CST-0019) : blocs vivants a leur taille physique,
 // blocs inactifs sous la meme limite, restitution des inactifs avant un refus, repli a la taille exacte.
-MHGP12_TEST(block_cache_limit, 40) {
+MHGP12_TEST(block_cache_limit, 48) {
   constexpr u64 kKib = 1024, kClass256 = 262144, kClass257 = 286720, kClass300 = 315392;  // capacites de classe
   {
     // Temoin de l'auditeur : limite 256 Kio + 1, bloc de 256 Kio + 1. La classe (280 Kio) ne tient pas : bloc exact,
@@ -499,6 +499,19 @@ MHGP12_TEST(block_cache_limit, 40) {
     CHECK_EQ(budget.cache_stats().evicted, 2u);
     CHECK_EQ(budget.used(), 400000u);
     CHECK_EQ(budget.cache_stats().held, 400000u);
+    // Echange de deux reservations (voie appareil du catalogue : tableau remplace sans perte du compte) : used et
+    // held inchanges, puis chaque reservation rend les octets qu'elle porte apres l'echange.
+    BudgetReservation s;
+    REQUIRE(s.reserve(100000, budget).ok());
+    CHECK_EQ(budget.cache_stats().held, 500000u);
+    r.swap(s);
+    CHECK_EQ(r.bytes(), 100000u);
+    CHECK_EQ(s.bytes(), 400000u);
+    CHECK_EQ(budget.used(), 500000u);
+    CHECK_EQ(budget.cache_stats().held, 500000u);
+    s.reset();
+    CHECK_EQ(budget.used(), 100000u);
+    CHECK_EQ(budget.cache_stats().held, 100000u);
     r.reset();
     CHECK_EQ(budget.cache_stats().held, 0u);
     CHECK(budget.released().ok());
