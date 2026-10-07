@@ -1,0 +1,15 @@
+{
+  "baseline_archive_sha256": "eaac2e539ab93d5e9e3e62f9ebf9f6eaef2128793cb853b11b997b71bfdf0a55",
+  "observed_main": "0377684ec",
+  "planned_passes": 10,
+  "planned_rounds": 8,
+  "scope": "source_and_plan_observation_not_runtime",
+  "sha256": {
+    "plan_t2c_g.json": "5a566d96c9189be8a53df737b97cf213fc0f48cdcb67f6963d2e44f42860f3d1",
+    "repo2/morsehgp3D_v12/bench/tower_probe.cpp": "5c68d7225ac22d06dbb5a40bb45357c045ab0e7e48f530cfb4dbb87e425b3241",
+    "repo2/morsehgp3D_v12/microbancs/mes_t2c_g/pilote_t2c.py": "fa1b7cd6aa23609879d56594332aaf1eb91b4f8b5b61ab9bb4a4b31e79f6feac",
+    "repo2/morsehgp3D_v12/src/catalogue/catalogue.hpp": "ab88330b73d22d3a8116445c2fcfabd7d33d4c277571ba1327e4e0adfc3a16cd",
+    "repo2/morsehgp3D_v12/src/catalogue/table.cpp": "26bb9d205d5065a9352e847a0da86fb73b5a3bd8f8cf3a7463eeba7417233a7c"
+  },
+  "source_moving": true
+}

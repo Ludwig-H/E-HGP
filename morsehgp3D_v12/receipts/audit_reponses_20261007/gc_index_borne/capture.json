@@ -1,0 +1,30 @@
+{
+  "active_build": "build_r2",
+  "build_home_line_sha256": "9b95a1bdab1f23196e392e0bcc41739351b233a28a835d994eb6f0f991cd25c1",
+  "build_home_relative": "scratchpad/v12_tour_Gc/repo2/morsehgp3D_v12",
+  "closing_source_changes": [
+    "microbancs/mes_t2c_g/pilote_t2c.py"
+  ],
+  "files": {
+    "bench/tower_export.hpp": "9e903f724c54f3aad9462d3fd700d5227073a30bb90999b388a817f511cf739d",
+    "bench/tower_probe.cpp": "5c68d7225ac22d06dbb5a40bb45357c045ab0e7e48f530cfb4dbb87e425b3241",
+    "microbancs/mes_t2c_g/pilote_t2c.py": "1240698a5f71b516e7a12a4a5c414e6da2d290882f414aa857bad56a4f5856dc",
+    "src/tower/first_probes.cpp": "c683a6e27a41b83be63f97d036cc3eacb3cffc8dad8c34cbfcba5958b53cc379",
+    "src/tower/internal.hpp": "da31aac66bbeb940b239e1d739f4fd8f7bdf95ce05e59293de413a99543fbc6b",
+    "src/tower/passes.cpp": "5cfc62c5d4685746a57c32d75b82caea357ee473e56074f93c270a89dca1d215",
+    "src/tower/populations.cpp": "0c002ae82ff48a0640a4e856632cc2fed665d6218c6567e3400b47bc4bcfdef6",
+    "src/tower/radix.cpp": "9ede393f277678d11d13a13feaffcd56649bb91b7ae04632e3e25fd2dc994848",
+    "src/tower/resolve.cpp": "583d9778d5b8f6c3f8972c7f19f62c3b8174d897f996461392bc6103be28740d",
+    "src/tower/stage.cpp": "35295ecedaf485eb414b8621e0c78f6264882aa3a86299d4ba287c3db068f009",
+    "src/tower/tower.hpp": "c8d1d749440a465661e27b4d25ddf4ae1f6007a66c27de395ce818ff955582e6",
+    "tests/tower/index_unit.cpp": "b9309ee7611687ae66eaf539ce5f2a3510382dc9dfb11451c101f0e0cd943171"
+  },
+  "main_after": "0377684ec10e8bd06210abb236f1b79d6be56c21",
+  "main_observed": "0377684ec10e8bd06210abb236f1b79d6be56c21",
+  "native_executed": false,
+  "normal_optimized_equal": true,
+  "pilot_in_construction_not_qualified": true,
+  "pilot_observation_after": "fa1b7cd6aa23609879d56594332aaf1eb91b4f8b5b61ab9bb4a4b31e79f6feac",
+  "private_prefix_omitted": true,
+  "source": "scratchpad/v12_tour_Gc/repo2/morsehgp3D_v12"
+}

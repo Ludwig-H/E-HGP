@@ -1,0 +1,27 @@
+{
+  "files": {
+    "gc": {
+      "bench/tower_probe.cpp": "5c68d7225ac22d06dbb5a40bb45357c045ab0e7e48f530cfb4dbb87e425b3241",
+      "src/catalogue/assemble.cpp": "16fd23f366d0431c50876e8b82a530d5d5a4670e09496b7d6014dcb607e464cb",
+      "src/catalogue/catalogue.hpp": "ab88330b73d22d3a8116445c2fcfabd7d33d4c277571ba1327e4e0adfc3a16cd",
+      "src/catalogue/internal.hpp": "b5ec65347a8f9942acd3b97acf478a2e7984788341c44a38b44c5ec445e4b31b",
+      "src/catalogue/table.cpp": "26bb9d205d5065a9352e847a0da86fb73b5a3bd8f8cf3a7463eeba7417233a7c",
+      "src/core/buffer.cpp": "5c885dbf0e4813f1a8ee653115092536348877e6b93aa5b831d7490fe0d6e756",
+      "src/core/buffer.hpp": "3c7fffc6ed97b6456f666ef849ddd6f4f3a1b3f2427c0fc875b7d5edcd14130b",
+      "src/core/types.hpp": "c6d91808b0fa82364a48bc049b2097b31db7bd46cae0b4ca7d313b4e3f7d0835"
+    },
+    "gpu": {
+      "src/catalogue/assemble.cpp": "7c00cc574fc194cfa49dd23942cfa657b91e69163d71ff1a574ef350a7a3e4cd",
+      "src/catalogue/catalogue.hpp": "59c7370a1e6e3b90cf403e266343fdbfb1ae53244f7240f33298fbeba87bfc64",
+      "src/catalogue/device_cuda.cu": "7a8cfe35d67afb5b181d4e2be7a4980db9940fc7efd1d4152dca60198e4dfe62",
+      "src/catalogue/device_pipeline.hpp": "4a752fb766263363b1e6dcd24eed85a797c96e561ee97e725066e73afa12622b",
+      "src/catalogue/exec_host.hpp": "93985cfe09c271d8e709b019ca9e2c8c1a3208c35961a78f26718cb9c2e6d1c4",
+      "src/catalogue/finish_driver.hpp": "4d15554c30d8db4332fafc3d62c4a90996e421e579326960c681693db149e59f",
+      "src/catalogue/finish_kernels.hpp": "96b1afe896fcbd65afce3cc119a3db4d9149c059e5e8251f53605c2f3f059426",
+      "src/catalogue/table.cpp": "cb76b465e6453f09684efb747ca8bf2de55f3d1788a15df3181e6f38723f0396"
+    }
+  },
+  "gpu_pin": "3b445b763057adc405141a6650efa14bfd4e276a",
+  "main_observed": "0377684ec10e8bd06210abb236f1b79d6be56c21",
+  "native_executed": false
+}

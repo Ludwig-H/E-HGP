@@ -1,0 +1,195 @@
+{
+ "aggregate": [
+  {
+   "arm": "base",
+   "numeric_excerpt": "min 1119.4 med 1653.8 ms (resolve min 1039.3) digest 231d826bb0d4fe57"
+  },
+  {
+   "arm": "index_GL5",
+   "numeric_excerpt": "min 1166.4 med 1505.0 ms (resolve min 1126.2) digest 231d826bb0d4fe57 ratio med 0.965"
+  },
+  {
+   "arm": "index_GL7",
+   "numeric_excerpt": "min 910.7 med 1295.2 ms (resolve min 873.0) digest 231d826bb0d4fe57 ratio med 0.914"
+  }
+ ],
+ "build_sources": [
+  {
+   "build": "build_base",
+   "profile_define_present": false,
+   "source": "base/morsehgp3D_v12"
+  },
+  {
+   "build": "build_new",
+   "profile_define_present": false,
+   "source": "repo/morsehgp3D_v12"
+  },
+  {
+   "build": "build_p",
+   "profile_define_present": false,
+   "source": "repo_p/morsehgp3D_v12"
+  }
+ ],
+ "excerpts": [
+  {
+   "first_line": 10,
+   "last_line": 36,
+   "path": "ab_local.py",
+   "text": "res = {b: [] for b in bins}\ndigests = {b: set() for b in bins}\nfor r in range(rounds):\n    order = bins if r % 2 == 0 else list(reversed(bins))\n    for b in order:\n        cmd = ['taskset', '-c', cpus, b] + src + ['--k=' + k, '--threads=%d' % threads, '--passes=%d' % passes, '--digest']\n        out = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, check=True).stdout.decode()\n        walls = []\n        for line in out.splitlines():\n            rec = json.loads(line)\n            if rec.get('phase') == 'tour_g':\n                walls.append((rec['wall_ns'], rec['diagnostics']))\n            elif rec.get('phase') == 'digest':\n                digests[b].add(rec['resolution_sha256'][:16])\n        res[b].append(min(walls, key=lambda w: w[0]))\nbase = None\nfor b in bins:\n    w = [x[0] / 1e6 for x in res[b]]\n    rv = [x[1]['resolve_ns'] / 1e6 for x in res[b]]\n    line = '%-60s min %.1f med %.1f ms (resolve min %.1f) digest %s' % (b[-60:], min(w), statistics.median(w), min(rv), ','.join(sorted(digests[b])))\n    if base is None:\n        base = w\n    else:\n        ratios = [a / c for a, c in zip(w, base)]\n        line += ' ratio med %.3f' % statistics.median(ratios)\n    print(line)\nbest = {b: min(res[b], key=lambda x: x[0]) for b in bins}"
+  },
+  {
+   "first_line": 142,
+   "last_line": 150,
+   "path": "RAPPORT.md",
+   "text": "## G-L5 (jointure triee) contre G-L7 (file de sondes prechargees), local, trois fils\n\n22:50 UTC, ng00 K5, taskset 5-7, 4 tours x 3 passes, minimum par processus, charge 8 a 9,5 (indicatif) :\n\n| bras | G min (ms) | mediane | resolve min | rapport median au base |\n| --- | ---: | ---: | ---: | ---: |\n| base (99fa83246) | 1 119 | 1 654 | 1 039 | 1 |\n| index + G-L5 (jointure triee, 4 ordres : 12 + 16 + 19 + 33 ms de jointure) | 1 166 | 1 505 | 1 126 | 0,965 |\n| index + G-L7 (file de 16 representants : case du repertoire prechargee a l'entree, fiches a mi-file) | **911** | 1 295 | 873 | **0,914** |"
+  },
+  {
+   "first_line": 193,
+   "last_line": 198,
+   "path": "base/morsehgp3D_v12/bench/tower_probe.cpp",
+   "text": "  for (u64 pass = 0; pass < o.passes; ++pass) {\n    ResolutionDiagnostics diag;\n    const Stopwatch watch;\n    auto r = resolve_tower(index.value(), catalogue.value(), budget, *pool.value(), &diag);\n    stage_json(pass, o, index.value().cloud().sites(), r.ok() ? Outcome{} : r.outcome(), watch.nanoseconds(), diag);\n    if (!r.ok()) return r.outcome();"
+  },
+  {
+   "first_line": 264,
+   "last_line": 266,
+   "path": "base/morsehgp3D_v12/src/tower/stage.cpp",
+   "text": "  const Stopwatch resolving;\n  MHGP12_TRY(resolve_orders(d, out, tables, team, pool, diag));\n  diag.resolve_ns = resolving.nanoseconds();"
+  },
+  {
+   "first_line": 240,
+   "last_line": 256,
+   "path": "base/morsehgp3D_v12/src/tower/stage.cpp",
+   "text": "  const Stopwatch tabling;\n  struct Tables {\n    const Catalogue& catalogue;\n    const Resolution& out;\n    std::array<PopulationTable, kMaxPart>& tables;\n    MemoryBudget& budget;\n    static Outcome body(void* raw, u64 begin, u64 end, u32) noexcept {\n      auto& self = *static_cast<Tables*>(raw);\n      for (u64 i = begin; i < end; ++i) {\n        const Order k = static_cast<Order>(i + 2);\n        MHGP12_TRY(self.tables[k - 1].build(self.catalogue, self.out.order(k).birth_keys(), k, self.budget));\n      }\n      return {};\n    }\n  } build{catalogue, out, tables, budget};\n  if (out.orders() >= 2) MHGP12_TRY(pool.parallel_for(out.orders() - 1u, 1, &build, &Tables::body));\n  diag.tables_ns = tabling.nanoseconds();"
+  },
+  {
+   "first_line": 262,
+   "last_line": 269,
+   "path": "repo/morsehgp3D_v12/bench/tower_probe.cpp",
+   "text": "  for (u64 pass = 0; pass < o.passes; ++pass) {\n    ResolutionDiagnostics diag;\n    const Stopwatch watch;\n    const u64 tsc0 = tsc_now();\n    auto r = resolve_tower(index.value(), catalogue.value(), budget, *pool.value(), &diag);\n    const u64 tsc1 = tsc_now(), wall = watch.nanoseconds();\n    stage_json(pass, o, index.value().cloud().sites(), r.ok() ? Outcome{} : r.outcome(), wall, diag);\n    if (!r.ok()) return r.outcome();"
+  },
+  {
+   "first_line": 344,
+   "last_line": 346,
+   "path": "repo/morsehgp3D_v12/src/tower/stage.cpp",
+   "text": "  const Stopwatch resolving;\n  MHGP12_TRY(resolve_orders(d, out, team, budget, pool, diag));\n  diag.resolve_ns = resolving.nanoseconds();"
+  },
+  {
+   "first_line": 191,
+   "last_line": 193,
+   "path": "repo/morsehgp3D_v12/src/tower/stage.cpp",
+   "text": "  const Stopwatch tabling;\n  MHGP12_TRY(table.build(d.catalogue, order.birth_keys(), order.birth_ranks(), k, budget, pool));\n  diag.table_ns[k] = tabling.nanoseconds();"
+  },
+  {
+   "first_line": 218,
+   "last_line": 230,
+   "path": "repo/morsehgp3D_v12/src/tower/stage.cpp",
+   "text": "Outcome resolve_orders(const Domain& d, Resolution& out, Workers& workers, MemoryBudget& budget, sched::Pool& pool,\n                       ResolutionDiagnostics& diag) noexcept {\n  for (Order k = 1; k <= out.orders(); ++k) {\n    const Stopwatch watch;\n    ResolvedOrder& order = StageAccess::order(out, k);\n    if (k == 1) {\n      FirstOrder first{d.catalogue, order};\n      MHGP12_TRY(pool.parallel_for(order.cells(), kCellGrain, &first, &FirstOrder::body));\n    } else {\n      MHGP12_TRY(resolve_order(d, out, k, workers, budget, pool, diag));\n    }\n    diag.order_ns[k] = watch.nanoseconds();\n    diag.tables_ns += diag.table_ns[k];"
+  },
+  {
+   "first_line": 262,
+   "last_line": 269,
+   "path": "repo_p/morsehgp3D_v12/bench/tower_probe.cpp",
+   "text": "  for (u64 pass = 0; pass < o.passes; ++pass) {\n    ResolutionDiagnostics diag;\n    const Stopwatch watch;\n    const u64 tsc0 = tsc_now();\n    auto r = resolve_tower(index.value(), catalogue.value(), budget, *pool.value(), &diag);\n    const u64 tsc1 = tsc_now(), wall = watch.nanoseconds();\n    stage_json(pass, o, index.value().cloud().sites(), r.ok() ? Outcome{} : r.outcome(), wall, diag);\n    if (!r.ok()) return r.outcome();"
+  },
+  {
+   "first_line": 342,
+   "last_line": 344,
+   "path": "repo_p/morsehgp3D_v12/src/tower/stage.cpp",
+   "text": "  const Stopwatch resolving;\n  MHGP12_TRY(resolve_orders(d, out, team, budget, pool, diag));\n  diag.resolve_ns = resolving.nanoseconds();"
+  },
+  {
+   "first_line": 191,
+   "last_line": 193,
+   "path": "repo_p/morsehgp3D_v12/src/tower/stage.cpp",
+   "text": "  const Stopwatch tabling;\n  MHGP12_TRY(table.build(d.catalogue, order.birth_keys(), order.birth_ranks(), k, budget, pool));\n  diag.table_ns[k] = tabling.nanoseconds();"
+  },
+  {
+   "first_line": 216,
+   "last_line": 228,
+   "path": "repo_p/morsehgp3D_v12/src/tower/stage.cpp",
+   "text": "Outcome resolve_orders(const Domain& d, Resolution& out, Workers& workers, MemoryBudget& budget, sched::Pool& pool,\n                       ResolutionDiagnostics& diag) noexcept {\n  for (Order k = 1; k <= out.orders(); ++k) {\n    const Stopwatch watch;\n    ResolvedOrder& order = StageAccess::order(out, k);\n    if (k == 1) {\n      FirstOrder first{d.catalogue, order};\n      MHGP12_TRY(pool.parallel_for(order.cells(), kCellGrain, &first, &FirstOrder::body));\n    } else {\n      MHGP12_TRY(resolve_order(d, out, k, workers, budget, pool, diag));\n    }\n    diag.order_ns[k] = watch.nanoseconds();\n    diag.tables_ns += diag.table_ns[k];"
+  }
+ ],
+ "individual_passes_archived": false,
+ "individual_process_minima_archived": false,
+ "inputs": [
+  {
+   "bytes": 13255,
+   "path": "RAPPORT.md",
+   "sha256": "6941b8f0dba7a211a79141d0aae20e958dad554097dbfeee60dc674dc0ced3a0"
+  },
+  {
+   "bytes": 2278,
+   "path": "ab_local.py",
+   "sha256": "9d44c58d0e4729d6402cb62eae21f10795ee8067417fe572fe539415d1ea83cf"
+  },
+  {
+   "bytes": 887,
+   "path": "runs/ab_3fils_gl5_gl7.txt",
+   "sha256": "544c4eda86e08f11264a621f867f0a2911d00d8ce2a8c083e4b0175e74de9dcf"
+  },
+  {
+   "bytes": 16674,
+   "path": "build_base/CMakeCache.txt",
+   "sha256": "ea14da65d1b4c47148dc3fd80c555b643dc2d20dfd2b16d4868f58e5eb8dba91"
+  },
+  {
+   "bytes": 500,
+   "path": "build_base/CMakeFiles/mhgp12_tower_probe.dir/flags.make",
+   "sha256": "7ef124a867743cb628d82c948f6559255dc14a0dd3ca339cb4e6935df4736898"
+  },
+  {
+   "bytes": 11232,
+   "path": "base/morsehgp3D_v12/bench/tower_probe.cpp",
+   "sha256": "4a98efd16e70e8f05afcbb181bdfbf994387fd708a9161eef9585dca2c166643"
+  },
+  {
+   "bytes": 13556,
+   "path": "base/morsehgp3D_v12/src/tower/stage.cpp",
+   "sha256": "2682f23922ad97464d2e4e40fb30ce0358510128cc0edcdcf695caf832b42721"
+  },
+  {
+   "bytes": 16670,
+   "path": "build_new/CMakeCache.txt",
+   "sha256": "d2db6caabf5e5f4eac7f3223269653f3debf503f64c9aa4cf7764d327c87b1a3"
+  },
+  {
+   "bytes": 500,
+   "path": "build_new/CMakeFiles/mhgp12_tower_probe.dir/flags.make",
+   "sha256": "c0dc2ca1ebd4b250e34e44e7e51e6157e023b0dd821294596380c084e2329c29"
+  },
+  {
+   "bytes": 14437,
+   "path": "repo/morsehgp3D_v12/bench/tower_probe.cpp",
+   "sha256": "66cc91d5437e700371177f4e43ec1f157503ca361abd7eb458686df6795db9cb"
+  },
+  {
+   "bytes": 17164,
+   "path": "repo/morsehgp3D_v12/src/tower/stage.cpp",
+   "sha256": "ac184501bbdc53121add29a6990018d66df4269b18dcbe266355d4371d1bb273"
+  },
+  {
+   "bytes": 16666,
+   "path": "build_p/CMakeCache.txt",
+   "sha256": "94a37f308c5e9d8110cebe044ffadc2dad8498c9f875d70963f7ec9c70a3d2b7"
+  },
+  {
+   "bytes": 504,
+   "path": "build_p/CMakeFiles/mhgp12_tower_probe.dir/flags.make",
+   "sha256": "d87a325d2f26e242fd047e33dbc8b9466c5dc6a5b56790701a8672fbfcc6a38f"
+  },
+  {
+   "bytes": 14437,
+   "path": "repo_p/morsehgp3D_v12/bench/tower_probe.cpp",
+   "sha256": "66cc91d5437e700371177f4e43ec1f157503ca361abd7eb458686df6795db9cb"
+  },
+  {
+   "bytes": 17059,
+   "path": "repo_p/morsehgp3D_v12/src/tower/stage.cpp",
+   "sha256": "f0d454672cc52bd0d2abcfd98c403835230b0c51e0ee05c7983da800f1a1aec9"
+  }
+ ],
+ "main_pin": "0377684ec10e8bd06210abb236f1b79d6be56c21",
+ "scope": "unpublished_local_prototype_snapshot",
+ "stable_read_before_after": true
+}

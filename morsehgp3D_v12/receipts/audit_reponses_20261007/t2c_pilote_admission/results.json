@@ -1,0 +1,195 @@
+{
+ "empreinte_ng00": {
+  "nouvelle_empreinte_acceptee_par_prefixe": false,
+  "pilote": "231d826bb0d4fe57",
+  "producteur_patch_objet": "e5a81154fb1b15f1"
+ },
+ "juger": {
+  "bootstrap": 10000,
+  "journaux": 120,
+  "journaux_inchanges": true,
+  "murs_ns_inchanges": true,
+  "nominal_verdicts": {
+   "G-L5_au_lieu_de_G-L7": "rejete",
+   "G-L7": "rejete",
+   "index_et_corrections": "rejete",
+   "lot_t2c": "rejete"
+  },
+  "ratios_lot_apres_alteration": {
+   "ng00": {
+    "ic95": [
+     0.5,
+     0.5
+    ],
+    "moyenne_geometrique": 0.5,
+    "rapports": [
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5
+    ]
+   },
+   "ng01": {
+    "ic95": [
+     0.5,
+     0.5
+    ],
+    "moyenne_geometrique": 0.5,
+    "rapports": [
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5
+    ]
+   },
+   "ng02": {
+    "ic95": [
+     0.5,
+     0.5
+    ],
+    "moyenne_geometrique": 0.5,
+    "rapports": [
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5
+    ]
+   }
+  },
+  "refus_apres_alteration": [],
+  "seul_g_ns_apres_divise_par_deux": {
+   "G-L5_au_lieu_de_G-L7": "rejete",
+   "G-L7": "adopte",
+   "index_et_corrections": "rejete",
+   "lot_t2c": "adopte"
+  },
+  "verifier_journaux": true
+ },
+ "pilot_sha256": "fa1b7cd6aa23609879d56594332aaf1eb91b4f8b5b61ab9bb4a4b31e79f6feac",
+ "prise": [
+  {
+   "case": "nominal_forme_complete",
+   "code": 0,
+   "g_ns": 60000000,
+   "murs": [
+    60000000,
+    60000000,
+    60000000,
+    60000000,
+    60000000,
+    60000000
+   ],
+   "valide": true
+  },
+  {
+   "case": "code_nonzero",
+   "code": 2,
+   "g_ns": null,
+   "murs": [
+    60000000,
+    60000000,
+    60000000,
+    60000000,
+    60000000,
+    60000000
+   ],
+   "valide": false
+  },
+  {
+   "case": "cinq_passes_pour_six",
+   "code": 0,
+   "g_ns": null,
+   "murs": [
+    60000000,
+    60000000,
+    60000000,
+    60000000,
+    60000000
+   ],
+   "valide": false
+  },
+  {
+   "case": "wall_booleen",
+   "code": 0,
+   "g_ns": true,
+   "murs": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "valide": true
+  },
+  {
+   "case": "wall_negatif",
+   "code": 0,
+   "g_ns": -1,
+   "murs": [
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1
+   ],
+   "valide": true
+  },
+  {
+   "case": "six_indices_zero",
+   "code": 0,
+   "g_ns": 60000000,
+   "murs": [
+    60000000,
+    60000000,
+    60000000,
+    60000000,
+    60000000,
+    60000000
+   ],
+   "valide": true
+  },
+  {
+   "case": "configuration_autre",
+   "code": 0,
+   "g_ns": 60000000,
+   "murs": [
+    60000000,
+    60000000,
+    60000000,
+    60000000,
+    60000000,
+    60000000
+   ],
+   "valide": true
+  },
+  {
+   "case": "ordres_absents",
+   "code": 0,
+   "g_ns": 60000000,
+   "murs": [
+    60000000,
+    60000000,
+    60000000,
+    60000000,
+    60000000,
+    60000000
+   ],
+   "valide": true
+  }
+ ],
+ "scope": "prototype_unpublished_python_only_synthetic_values"
+}

@@ -1,0 +1,97 @@
+{
+  "eight": {
+    "positions": {
+      "apres": [
+        0,
+        2,
+        2,
+        2,
+        2
+      ],
+      "avant": [
+        2,
+        2,
+        1,
+        1,
+        2
+      ],
+      "avant_bis": [
+        2,
+        2,
+        1,
+        1,
+        2
+      ],
+      "gl5": [
+        2,
+        1,
+        2,
+        2,
+        1
+      ],
+      "sans_gl7": [
+        2,
+        1,
+        2,
+        2,
+        1
+      ]
+    },
+    "rounds": 8,
+    "synthetic_unitless_gm": {
+      "apres": 0.9764540896763105,
+      "avant": 1.0,
+      "avant_bis": 1.0,
+      "gl5": 1.0,
+      "sans_gl7": 1.0
+    }
+  },
+  "scope": "position_model_not_benchmark_or_false_adoption",
+  "ten": {
+    "positions": {
+      "apres": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "avant": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "avant_bis": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "gl5": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "sans_gl7": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "rounds": 10,
+    "synthetic_unitless_gm": {
+      "apres": 1.0,
+      "avant": 1.0,
+      "avant_bis": 1.0,
+      "gl5": 1.0,
+      "sans_gl7": 1.0
+    }
+  }
+}

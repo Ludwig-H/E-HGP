@@ -1,0 +1,91 @@
+{
+ "inputs": [
+  {
+   "bytes": 26385,
+   "path": "microbancs/mes_t2c_g/pilote_t2c.py",
+   "sha256": "fa1b7cd6aa23609879d56594332aaf1eb91b4f8b5b61ab9bb4a4b31e79f6feac"
+  },
+  {
+   "bytes": 15326,
+   "path": "bench/tower_probe.cpp",
+   "sha256": "5c68d7225ac22d06dbb5a40bb45357c045ab0e7e48f530cfb4dbb87e425b3241"
+  },
+  {
+   "bytes": 7561,
+   "path": "bench/tower_export.hpp",
+   "sha256": "9e903f724c54f3aad9462d3fd700d5227073a30bb90999b388a817f511cf739d"
+  },
+  {
+   "bytes": 7883,
+   "path": "tests/tower/tests.cmake",
+   "sha256": "0360af4d6f717d2f8d38b81a75b9aadbc2594f7ec55811b7900b71093b0974ee"
+  }
+ ],
+ "main_pin": "0377684ec10e8bd06210abb236f1b79d6be56c21",
+ "new_object_digest_prefixes": {
+  "ng00": "e5a81154fb1b15f1",
+  "uniforms": {
+   "16000": "cf7c7745fcb4ae6e",
+   "32000": "d1f08fd0dbdf48eb",
+   "8000": "a40f1b2ef8547269"
+  }
+ },
+ "producer_fields": {
+  "diagnostic_arrays": [
+   "order_ns",
+   "table_ns",
+   "join_ns",
+   "pass_ns"
+  ],
+  "diagnostic_scalar": [
+   "prepare_ns",
+   "count_ns",
+   "setup_ns",
+   "fill_ns",
+   "workspace_ns",
+   "tables_ns",
+   "joins_ns",
+   "resolve_ns",
+   "orders_ns",
+   "reste_ns",
+   "workspace_bytes",
+   "table_bytes",
+   "peak_bytes"
+  ],
+  "object_counts": [
+   "births",
+   "cells",
+   "inert_cells",
+   "extended_cells",
+   "representatives"
+  ],
+  "work_counts": [
+   "probes",
+   "first_probe_hits",
+   "probe_hits_after_steps",
+   "route_t1",
+   "route_cert_table",
+   "route_cert_census",
+   "route_fallback_table",
+   "route_fallback_census",
+   "fallback_no_proposal",
+   "fallback_not_in_part",
+   "fallback_certificate",
+   "census_saturated",
+   "census_complete",
+   "census_sites",
+   "census_sites_max",
+   "census_nodes",
+   "jumps_catalogue",
+   "jumps_census",
+   "inert_steps",
+   "cell_stops",
+   "birth_stops",
+   "controls",
+   "max_chain"
+  ]
+ },
+ "scope": "prototype_unpublished_repo2",
+ "stable_capture": true,
+ "stage_excerpt": "u64 pass, const Options& o, u32 sites, const Outcome& outcome, u64 wall,\n                const ResolutionDiagnostics& d) {\n  std::printf(\"{\\\"phase\\\":\\\"tour_g\\\",\\\"pass\\\":%llu,\\\"status\\\":\\\"%s\\\",\\\"reason\\\":\\\"%s\\\",\\\"order\\\":%u,\\\"coord_bits\\\":%d,\"\n              \"\\\"kmax\\\":%d,\\\"threads\\\":%llu,\\\"sites\\\":%u,\\\"wall_ns\\\":%llu\",\n              (unsigned long long)pass, std::string(status_name(outcome.status())).c_str(),\n              std::string(reason_name(outcome.reason)).c_str(), unsigned{outcome.order}, kCoordBits, o.params.kmax,\n              (unsigned long long)o.threads, sites, (unsigned long long)wall);\n  if (outcome.ok()) {\n    const u64 inside = d.prepare_ns + d.count_ns + d.setup_ns + d.fill_ns + d.workspace_ns + d.orders_ns;\n    std::printf(\",\\\"diagnostics\\\":{\\\"prepare_ns\\\":%llu,\\\"count_ns\\\":%llu,\\\"setup_ns\\\":%llu,\\\"fill_ns\\\":%llu,\"\n                \"\\\"workspace_ns\\\":%llu,\\\"tables_ns\\\":%llu,\\\"joins_ns\\\":%llu,\\\"resolve_ns\\\":%llu,\\\"orders_ns\\\":%llu,\"\n                \"\\\"reste_ns\\\":%llu,\\\"workspace_bytes\\\":%llu,\\\"table_bytes\\\":%llu,\\\"peak_bytes\\\":%llu\",\n                (unsigned long long)d.prepare_ns, (unsigned long long)d.count_ns, (unsigned long long)d.setup_ns,\n                (unsigned long long)d.fill_ns, (unsigned long long)d.workspace_ns, (unsigned long long)d.tables_ns,\n                (unsigned long long)d.joins_ns, (unsigned long long)d.resolve_ns, (unsigned long long)d.orders_ns,\n                (unsigned long long)(wall > inside ? wall - inside : 0), (unsigned long long)d.workspace_bytes,\n                (unsigned long long)d.table_bytes, (unsigned long long)d.peak_bytes);\n    ns_array(\"order_ns\", d.order_ns, 1, o.params.kmax);\n    ns_array(\"table_ns\", d.table_ns, 2, o.params.kmax);\n    ns_array(\"join_ns\", d.join_ns, 2, o.params.kmax);\n    ns_array(\"pass_ns\", d.pass_ns, 1, o.params.kmax);\n    std::printf(\"}\");\n  }\n  std::printf(\"}\\n\");\n  std::fflush(stdout);\n}\n\n"
+}

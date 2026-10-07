@@ -1,0 +1,200 @@
+{
+  "duplicate_refusals": 3,
+  "fifo_sizes": [
+    0,
+    1,
+    7,
+    8,
+    15,
+    16,
+    17,
+    31,
+    32,
+    33,
+    257
+  ],
+  "index_runs": [
+    {
+      "entries": 0,
+      "mask": "0",
+      "max_binary_steps": {
+        "candidate": 0,
+        "find": 0,
+        "verify": 0
+      },
+      "queries": 3
+    },
+    {
+      "entries": 0,
+      "mask": "3",
+      "max_binary_steps": {
+        "candidate": 0,
+        "find": 0,
+        "verify": 0
+      },
+      "queries": 3
+    },
+    {
+      "entries": 0,
+      "mask": "18446744073709551615",
+      "max_binary_steps": {
+        "candidate": 0,
+        "find": 0,
+        "verify": 0
+      },
+      "queries": 3
+    },
+    {
+      "entries": 1,
+      "mask": "0",
+      "max_binary_steps": {
+        "candidate": 1,
+        "find": 1,
+        "verify": 0
+      },
+      "queries": 6
+    },
+    {
+      "entries": 1,
+      "mask": "3",
+      "max_binary_steps": {
+        "candidate": 1,
+        "find": 1,
+        "verify": 0
+      },
+      "queries": 6
+    },
+    {
+      "entries": 1,
+      "mask": "18446744073709551615",
+      "max_binary_steps": {
+        "candidate": 1,
+        "find": 1,
+        "verify": 0
+      },
+      "queries": 6
+    },
+    {
+      "entries": 2,
+      "mask": "0",
+      "max_binary_steps": {
+        "candidate": 2,
+        "find": 2,
+        "verify": 1
+      },
+      "queries": 9
+    },
+    {
+      "entries": 2,
+      "mask": "3",
+      "max_binary_steps": {
+        "candidate": 2,
+        "find": 2,
+        "verify": 0
+      },
+      "queries": 9
+    },
+    {
+      "entries": 2,
+      "mask": "18446744073709551615",
+      "max_binary_steps": {
+        "candidate": 2,
+        "find": 2,
+        "verify": 0
+      },
+      "queries": 9
+    },
+    {
+      "entries": 17,
+      "mask": "0",
+      "max_binary_steps": {
+        "candidate": 5,
+        "find": 5,
+        "verify": 5
+      },
+      "queries": 54
+    },
+    {
+      "entries": 17,
+      "mask": "3",
+      "max_binary_steps": {
+        "candidate": 5,
+        "find": 5,
+        "verify": 5
+      },
+      "queries": 54
+    },
+    {
+      "entries": 17,
+      "mask": "18446744073709551615",
+      "max_binary_steps": {
+        "candidate": 1,
+        "find": 1,
+        "verify": 0
+      },
+      "queries": 54
+    },
+    {
+      "entries": 64,
+      "mask": "0",
+      "max_binary_steps": {
+        "candidate": 7,
+        "find": 7,
+        "verify": 6
+      },
+      "queries": 195
+    },
+    {
+      "entries": 64,
+      "mask": "3",
+      "max_binary_steps": {
+        "candidate": 7,
+        "find": 7,
+        "verify": 6
+      },
+      "queries": 195
+    },
+    {
+      "entries": 64,
+      "mask": "18446744073709551615",
+      "max_binary_steps": {
+        "candidate": 2,
+        "find": 2,
+        "verify": 0
+      },
+      "queries": 195
+    },
+    {
+      "entries": 257,
+      "mask": "0",
+      "max_binary_steps": {
+        "candidate": 9,
+        "find": 9,
+        "verify": 9
+      },
+      "queries": 774
+    },
+    {
+      "entries": 257,
+      "mask": "3",
+      "max_binary_steps": {
+        "candidate": 9,
+        "find": 9,
+        "verify": 9
+      },
+      "queries": 774
+    },
+    {
+      "entries": 257,
+      "mask": "18446744073709551615",
+      "max_binary_steps": {
+        "candidate": 1,
+        "find": 1,
+        "verify": 0
+      },
+      "queries": 774
+    }
+  ],
+  "native_executed": false,
+  "queries": 3123
+}
