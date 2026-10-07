@@ -1,0 +1,12 @@
+{
+  "byte_identical": true,
+  "full_reference_suite_run": false,
+  "initial_harness_correction": "accepted the normal timing-only stderr; product unchanged",
+  "native_qualified": false,
+  "normal_sha256": "a33d3fc814d23cd468812b1ad4a49bf3c2e8143aab49748cd1d990a0d6e05809",
+  "optimized_sha256": "a33d3fc814d23cd468812b1ad4a49bf3c2e8143aab49748cd1d990a0d6e05809",
+  "parent_tranche_pin": "1f7642e105aebd76632c58c63fdfd5b5c0824779",
+  "pin": "76adb8fa9eb10894b6a363672e7f28cc3f12e75a",
+  "source_files_rechecked": 17,
+  "witness_rechecked": true
+}

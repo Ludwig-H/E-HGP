@@ -1,0 +1,331 @@
+{
+ "pin": "1f7642e105aebd76632c58c63fdfd5b5c0824779",
+ "results": {
+  "m2": [
+   {
+    "case": "baseline",
+    "injected": 0,
+    "main_code": 0,
+    "refusals": 0,
+    "verdict": "adopte"
+   },
+   {
+    "case": "sanitizer_empty",
+    "injected": 3,
+    "main_code": 0,
+    "refusals": 3,
+    "verdict": "refuse"
+   },
+   {
+    "case": "discarded_code_1",
+    "injected": 0,
+    "main_code": 0,
+    "refusals": 1,
+    "verdict": "refuse"
+   },
+   {
+    "case": "contradictory_counts",
+    "injected": 49,
+    "main_code": 0,
+    "refusals": 19,
+    "verdict": "refuse"
+   }
+  ],
+  "m4": [
+   {
+    "avant_correction": "tue et complet",
+    "cas": "mutant_m4_incomplet_autre_trame",
+    "code": 3,
+    "partie": "B",
+    "refus": 7,
+    "sortie_complete": false,
+    "tue": false
+   },
+   {
+    "avant_correction": null,
+    "cas": "mutant_m4_complet_autre_trame",
+    "code": 3,
+    "partie": "B",
+    "refus": 1,
+    "sortie_complete": false,
+    "tue": false
+   },
+   {
+    "avant_correction": null,
+    "cas": "mutant_m4_tronque_carre",
+    "code": 3,
+    "partie": "B",
+    "refus": 1,
+    "sortie_complete": false,
+    "tue": false
+   },
+   {
+    "avant_correction": null,
+    "cas": "mutant_m4_comptes_faux",
+    "code": 3,
+    "partie": "B",
+    "refus": 1,
+    "sortie_complete": false,
+    "tue": false
+   },
+   {
+    "avant_correction": null,
+    "cas": "mutant_m4_complet_carre",
+    "code": 0,
+    "partie": "B",
+    "refus": 0,
+    "sortie_complete": true,
+    "tue": true
+   },
+   {
+    "avant_correction": null,
+    "cas": "mutant_m4_complet_sans_ecart",
+    "code": 1,
+    "partie": "B",
+    "refus": 0,
+    "sortie_complete": true,
+    "tue": false
+   }
+  ],
+  "m5": [
+   {
+    "case": "temoin_complet",
+    "example": [],
+    "injected": 0,
+    "main_code": 0,
+    "refusals": 0,
+    "rejections": 0,
+    "retained_rounds": 45,
+    "verdict": "adopte"
+   },
+   {
+    "case": "auditeur_grille_reduite_un_processus",
+    "example": [],
+    "injected": 0,
+    "main_code": 0,
+    "refusals": 6,
+    "rejections": 0,
+    "retained_rounds": 1,
+    "verdict": "refuse"
+   },
+   {
+    "case": "auditeur_cinq_fixtures_manquantes",
+    "example": [],
+    "injected": 0,
+    "main_code": 0,
+    "refusals": 23,
+    "rejections": 0,
+    "retained_rounds": 45,
+    "verdict": "refuse"
+   },
+   {
+    "case": "auditeur_identite_hote_code_2",
+    "example": [],
+    "injected": 0,
+    "main_code": 0,
+    "refusals": 1,
+    "rejections": 0,
+    "retained_rounds": 45,
+    "verdict": "refuse"
+   },
+   {
+    "case": "auditeur_fixtures_appareil_code_7",
+    "example": [],
+    "injected": 0,
+    "main_code": 0,
+    "refusals": 1,
+    "rejections": 0,
+    "retained_rounds": 45,
+    "verdict": "refuse"
+   },
+   {
+    "case": "auditeur_une_passe_v11",
+    "example": [],
+    "injected": 0,
+    "main_code": 0,
+    "refusals": 54,
+    "rejections": 0,
+    "retained_rounds": 45,
+    "verdict": "refuse"
+   },
+   {
+    "case": "auditeur_mediane_gpu_contraire",
+    "example": [],
+    "injected": 0,
+    "main_code": 0,
+    "refusals": 54,
+    "rejections": 0,
+    "retained_rounds": 45,
+    "verdict": "refuse"
+   },
+   {
+    "case": "auditeur_controle_lent_et_honnete",
+    "example": [],
+    "injected": 0,
+    "main_code": 0,
+    "refusals": 0,
+    "rejections": 6,
+    "retained_rounds": 45,
+    "verdict": "rejete"
+   },
+   {
+    "case": "auditeur_controle_vidage_errone",
+    "example": [],
+    "injected": 0,
+    "main_code": 0,
+    "refusals": 63,
+    "rejections": 0,
+    "retained_rounds": 0,
+    "verdict": "refuse"
+   },
+   {
+    "case": "gpu_missing_but_identical",
+    "example": [
+     {
+      "identity": true,
+      "missing": 1,
+      "stage": "gpu_ng00_k5_l24_p0"
+     }
+    ],
+    "injected": 6,
+    "main_code": 0,
+    "refusals": 0,
+    "rejections": 0,
+    "retained_rounds": 45,
+    "verdict": "adopte"
+   },
+   {
+    "case": "gpu_wrong_digest_but_identical",
+    "example": [
+     {
+      "digest": "5678",
+      "identity": true,
+      "reference_digest": "1234",
+      "stage": "gpu_ng00_k5_l24_p0"
+     }
+    ],
+    "injected": 6,
+    "main_code": 0,
+    "refusals": 0,
+    "rejections": 0,
+    "retained_rounds": 45,
+    "verdict": "adopte"
+   },
+   {
+    "case": "host_no_ledgers",
+    "example": [
+     {
+      "identity": true,
+      "ledger_present": false,
+      "reference_ledger_present": false,
+      "stage": "identity_host"
+     }
+    ],
+    "injected": 16,
+    "main_code": 0,
+    "refusals": 0,
+    "rejections": 0,
+    "retained_rounds": 45,
+    "verdict": "adopte"
+   },
+   {
+    "case": "sanitizer_no_measurements",
+    "example": [
+     {
+      "command_reps": 1,
+      "resident_samples": 0,
+      "stage": "sanitizer_memcheck",
+      "total_samples": 0
+     }
+    ],
+    "injected": 9,
+    "main_code": 0,
+    "refusals": 0,
+    "rejections": 0,
+    "retained_rounds": 45,
+    "verdict": "adopte"
+   }
+  ],
+  "m6": [
+   {
+    "avant_correction": "mes_m6_ok, code 0, neuf fichiers vides",
+    "cas": "auditeur_prises_vides_code_0",
+    "code": 3,
+    "prises": 0,
+    "verdict": "mes_m6_echec"
+   },
+   {
+    "cas": "rejuge_dossier_de_l_auditeur",
+    "code": 3,
+    "verdict": "mes_m6_echec"
+   },
+   {
+    "cas": "auditeur_prises_vides_binaire_present",
+    "code": 3,
+    "prises_vides_refusees": 9,
+    "verdict": "mes_m6_echec"
+   },
+   {
+    "case": "baseline_rejudge",
+    "code": 0,
+    "takes": 9,
+    "verdict": "mes_m6_ok"
+   },
+   {
+    "case": "bad_take_hash",
+    "code": 3,
+    "not_replayable": [],
+    "refusals": 2,
+    "takes": 8,
+    "verdict": "mes_m6_echec"
+   },
+   {
+    "case": "empty_provenance",
+    "code": 0,
+    "not_replayable": [],
+    "refusals": 0,
+    "takes": 9,
+    "verdict": "mes_m6_ok"
+   },
+   {
+    "case": "isolation_contradiction",
+    "code": 0,
+    "not_replayable": [],
+    "refusals": 0,
+    "takes": 9,
+    "verdict": "mes_m6_ok"
+   },
+   {
+    "case": "explicit_refusal",
+    "code": 0,
+    "not_replayable": [],
+    "refusals": 0,
+    "takes": 9,
+    "verdict": "mes_m6_ok"
+   }
+  ]
+ },
+ "scope": "synthetic judge evidence only; no GCP/native benchmarks/real data",
+ "script_sha256": "f08b174bddc167fe3e57da13b1c3268d168d32ed0e654da799d4c8c1720e758a",
+ "source_sha256": {
+  "morsehgp3D_v12/microbancs/mes_m2_feuille/README.md": "8d4a856841e222aa5c75e4233b3419ac68b48f19e3c1776279f0cb5e62d42837",
+  "morsehgp3D_v12/microbancs/mes_m2_feuille/scripts/g4_leaf_bench.py": "bce808ed126c302a4b3508b5b9d6ca496a5211cda540cf5e708fcf1e9848375b",
+  "morsehgp3D_v12/microbancs/mes_m2_feuille/tests/test_admission_m2.py": "527dac8d96c76ee6cf11e45def13c89734bbbd6d620d430dde1b9bb9046dd464",
+  "morsehgp3D_v12/microbancs/mes_m2_feuille/tests/test_juge_m2.py": "1e81f09d473231c1961ea8acf84573a5c6edf9f52a21f04ee09ddd627b763a86",
+  "morsehgp3D_v12/microbancs/mes_m3_m4_tour/README.md": "b837e4637d6be85aa86bd52b85c0321be0ecc59ce44972763a32325ee53996d3",
+  "morsehgp3D_v12/microbancs/mes_m3_m4_tour/pilote.py": "eebfbdfbcca98943d309381cc892b523ad710d3c9def92a68ea63c19d3cc8921",
+  "morsehgp3D_v12/microbancs/mes_m3_m4_tour/tests/carre.py": "e42ea91b9790fadbbab260f95c8a9efa1c4394cf20cd96cfdfc06634eac2ff52",
+  "morsehgp3D_v12/microbancs/mes_m3_m4_tour/tests/test_m4_preuves.py": "a5d0127bcf5cd0dc0a438e031488e6e8410673b15f12ce1391ee80c07928f70d",
+  "morsehgp3D_v12/microbancs/mes_m3_m4_tour/tests/test_pilote.py": "1fbbeb8dac911f44ce7c4c8e69714325d2067f5e6b8837bccf5a8076a005ba1a",
+  "morsehgp3D_v12/microbancs/mes_m5_parcours/README.md": "ac7cc943e3307cfe24bf904ca1c7f4cd8ecb19cd223ecad9233d4a579320d9a6",
+  "morsehgp3D_v12/microbancs/mes_m5_parcours/cuda/traversal_bench.cu": "03f1416c1c243853c4fb35f40838dcc8cdb4912ea1fe333401fc2692426b2b37",
+  "morsehgp3D_v12/microbancs/mes_m5_parcours/fixtures/fixtures.py": "940207b052f459f463f65ce811f6f72b900ee638bf5f8bdb4b6f71885c052d9e",
+  "morsehgp3D_v12/microbancs/mes_m5_parcours/oracle/oracle_parcours.py": "89818cc365e83285f32043f5c2c6431c413d7e0a3ef8674e013be68d15bee253",
+  "morsehgp3D_v12/microbancs/mes_m5_parcours/scripts/g4_traversal_bench.py": "10dcdb99c627522866789614f8da71c15db63b1b32fff171ce603c95c80a26a5",
+  "morsehgp3D_v12/microbancs/mes_m5_parcours/tests/test_juge_m5.py": "7766f7714aed9abcf9303c812ccbbab21194a7893b27fec46231bfd168d0af4a",
+  "morsehgp3D_v12/microbancs/mes_m6_session/mes_m6_session_cost.cu": "49c6afc51d48e124c866e509700764a59150410d7664fabdadf14ee41887dff1",
+  "morsehgp3D_v12/microbancs/mes_m6_session/run_m6.py": "36e93da3d39a9b81f028e653c3227b99e44cba8d3fc497cc333667153353bb3e",
+  "morsehgp3D_v12/microbancs/mes_m6_session/tests/test_juge_m6.py": "a9f1e954012c29f067e04899b269ca1cf60d06992e845f524672d4613655cbb9"
+ },
+ "sources_git_pin_and_before_after_equal": true
+}

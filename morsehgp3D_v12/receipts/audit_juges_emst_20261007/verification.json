@@ -1,0 +1,52 @@
+{
+  "email_candidates": [],
+  "gcp_used": false,
+  "historical_source_files_checked": 6,
+  "licensed_payloads_retained": false,
+  "normal_optimized_hashes_and_witnesses_verified": true,
+  "primary_pin": "1f7642e105aebd76632c58c63fdfd5b5c0824779",
+  "product_modified": false,
+  "relative_markdown_links_verified": 18,
+  "scope": "Integration, source pins and hashes only; no new semantic qualification or historical campaign attestation.",
+  "source_closure_method": "Each source matches its Git pin and the unchanged worktree of that pin; the T2 supplement is checked in its separate detached worktree.",
+  "subreceipts": {
+    "donnees": {
+      "manifest_sha256": "1f6f417c0eafefd81f77f31925998aa51935b5758ad43037512e18cb87499ef2",
+      "pin": "1f7642e105aebd76632c58c63fdfd5b5c0824779",
+      "result_sha256": "2d94b88bad9bf7752253b6b6a6b20370048c41c34f80dc83593f0cab4f8dd234",
+      "retained_files": 5,
+      "sources_verified": 30
+    },
+    "emst": {
+      "manifest_sha256": "6d0f7254c5836fe1a9ecbdfd423b7f31bbfb8e0e92b98493b67ad111bda13114",
+      "pin": "1f7642e105aebd76632c58c63fdfd5b5c0824779",
+      "result_sha256": "4fbb8e2cce82ec71f855db90cc6d079e5354625c88824e09fcdd6ae1b159468f",
+      "retained_files": 5,
+      "sources_verified": 18
+    },
+    "juges": {
+      "manifest_sha256": "80fce5bd101972cd123db681cda62fe1a333189e9d0df9db349840908f2cf7c4",
+      "pin": "1f7642e105aebd76632c58c63fdfd5b5c0824779",
+      "result_sha256": "91a8a03eda27fcf063fb60be1fa432a429d0feff53e0ed4f01288fd0d7f15043",
+      "retained_files": 5,
+      "sources_verified": 18
+    },
+    "m5": {
+      "manifest_sha256": "84ad47072589dafcf4c80a8cdb7c1e50d392e368ffc7df6d3c3f785f7fd44b52",
+      "pin": "1f7642e105aebd76632c58c63fdfd5b5c0824779",
+      "result_sha256": "41e84c32776b3a3fffc22670fd3074bfcea59c4b290c00facbd8acbdb24f30dd",
+      "retained_files": 6,
+      "sources_verified": 18
+    },
+    "t2_corrections": {
+      "manifest_sha256": "4873925e904c5db3f08162c755bd5e7eaebc3bc2c612287a4950bbb1e7d37ba1",
+      "pin": "76adb8fa9eb10894b6a363672e7f28cc3f12e75a",
+      "result_sha256": "a33d3fc814d23cd468812b1ad4a49bf3c2e8143aab49748cd1d990a0d6e05809",
+      "retained_files": 5,
+      "sources_verified": 17
+    }
+  },
+  "supplemental_pin": "76adb8fa9eb10894b6a363672e7f28cc3f12e75a",
+  "unique_source_pin_pairs_checked": 100,
+  "utf8_no_binary_no_symlink": true
+}

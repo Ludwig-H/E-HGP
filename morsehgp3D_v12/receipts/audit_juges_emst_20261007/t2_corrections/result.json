@@ -1,0 +1,139 @@
+{
+  "before_after_unchanged": true,
+  "full_reference_suite_run": false,
+  "gcp_used": false,
+  "header_cases": [
+    {
+      "case": "ascii_valid",
+      "exit": 0,
+      "input_bytes": [
+        728,
+        728
+      ],
+      "input_sha256": [
+        "7808093ce8b6eec1369d84076e9ed3660b9f533ea92c42b178d8b88ca19e8dca",
+        "b54000f4e8e99e2262142e81a7cda868bdeace367c34ebbfbcdfd58a1966301e"
+      ]
+    },
+    {
+      "case": "ascii_printable_edges",
+      "exit": 0,
+      "input_bytes": [
+        728,
+        728
+      ],
+      "input_sha256": [
+        "ba6bfe189ec47319b7a3350ba23cc5b1fe6b939c126dbbc467f0a06136184904",
+        "cb209fac625e5673ef23f644e2dd27fc359492a8a500a1fc5319f295cebe6169"
+      ]
+    },
+    {
+      "case": "ascii_full_header",
+      "exit": 0,
+      "input_bytes": [
+        728,
+        728
+      ],
+      "input_sha256": [
+        "db50b1add95357d48c6d395ff8d2c6cd5986d0a532b1dc9594ced4568ec0d605",
+        "9265ad72a37bb9ebf1308ac0152a5fabe39f81510af9ae18f2a3490c5c2e5e1b"
+      ]
+    },
+    {
+      "case": "ascii_distinct",
+      "exit": 2,
+      "input_bytes": [
+        728,
+        728
+      ],
+      "input_sha256": [
+        "07ecd9534333296755ec335e1cd5d1d94b57b5da1aa880090338554a07ec77f5",
+        "d67b7d2da1e5fe28cd874cc06b251c7ddfcfb446fe6244fe13ae6fd749872cd0"
+      ]
+    },
+    {
+      "case": "historical_ff_fe",
+      "exit": 2,
+      "input_bytes": [
+        728,
+        728
+      ],
+      "input_sha256": [
+        "5c31d55018b86ed05d4ebd7d3c67b602d771f7d9b79dbebf637605afb832d1fb",
+        "c387fb9cbc2194076b183aa20cded878446d0a8593a52e3b700f14056d39d365"
+      ]
+    },
+    {
+      "case": "same_invalid_ff",
+      "exit": 2,
+      "input_bytes": [
+        728,
+        728
+      ],
+      "input_sha256": [
+        "5c31d55018b86ed05d4ebd7d3c67b602d771f7d9b79dbebf637605afb832d1fb",
+        "4bdc8bd99da7b252b4dccffee88ea2321fdc3b71fd6a377d7a36f020872fb307"
+      ]
+    },
+    {
+      "case": "ascii_control",
+      "exit": 2,
+      "input_bytes": [
+        728,
+        728
+      ],
+      "input_sha256": [
+        "9b1cf7def755d16db83fceebe1d185f8b601c81a1560ae116749b5022c0a9303",
+        "fe5b7b7e9cc57e0e700c11a228e7a6d138d383d0c855bde92a064152c54ebecf"
+      ]
+    },
+    {
+      "case": "ascii_del",
+      "exit": 2,
+      "input_bytes": [
+        728,
+        728
+      ],
+      "input_sha256": [
+        "11c6194d6c56b0cbe27ffbfdeb87216a3d8f67d0c8d24a8da5f515e3cd1dd145",
+        "98dea75f1ce279995b25262641aa39368d3a4fc9885efb4f7abdc49417761041"
+      ]
+    }
+  ],
+  "historical_payloads_byte_identical": true,
+  "native_qualified": false,
+  "parent_tranche_pin": "1f7642e105aebd76632c58c63fdfd5b5c0824779",
+  "pin": "76adb8fa9eb10894b6a363672e7f28cc3f12e75a",
+  "real_data_used": false,
+  "schema": "audit.juges.t2fix.v1",
+  "source_sha256": {
+    "docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md": "876b07b71ae4545d5ca9bd6554f075d733a76995aa34470737364fe435bed8f0",
+    "morsehgp3D_v12/docs/CONTRAT_NUMERIQUE.md": "85e7a65ad1078c38be68af0cb90a26ba20cba35ab0959f83b3ebbe4105fbd168",
+    "morsehgp3D_v12/docs/CONTRAT_TOUR.md": "e104028790ff79af2adf084d58fc21e43e16c001dd308f3e0feded3eb89c99c2",
+    "morsehgp3D_v12/docs/OBJET_ET_CONTRAT_MATHEMATIQUE.md": "dd8f45c55a70ab50393ec91607d64f4d9048c81e5824977175ce415d49bcca04",
+    "morsehgp3D_v12/receipts/audit_t2_20261007/transition/check.py": "7f1fa460dd3e9bdde8e3f40a3e8d3173e73fc3944d0490f4b04ff35ae8e7942e",
+    "morsehgp3D_v12/receipts/audit_t2_20261007/transition/normal.json": "5cf61061a9e67cabb9357c8769f58bc665ecfa8fabcec5360cb9387b7ce3b6ca",
+    "morsehgp3D_v12/reference/hgp12_ref/__init__.py": "e11719426ab6963caddaedf5e38b7f14f772ad06086a0b5aaacffdf080626ace",
+    "morsehgp3D_v12/reference/hgp12_ref/constructive.py": "14050f931660901282e74844f500f030ac11dab4dda867ead7d030d7b9a2fc0a",
+    "morsehgp3D_v12/reference/hgp12_ref/definition.py": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43",
+    "morsehgp3D_v12/reference/hgp12_ref/dumps.py": "2ece0b491430e314091de7b40a72233e299c543f236bcc00bbd5f84b38338373",
+    "morsehgp3D_v12/reference/hgp12_ref/families.py": "244b9b325a7c9f43c7086cc7e9674bdc04ec2307a01bf69e2b12d5f02e75d73a",
+    "morsehgp3D_v12/reference/hgp12_ref/intgeom.py": "d0f7b1cecbbb1b25c3091bc1e3d3d062b9ee0f16b1d81c7117bf60b0d13a3f4b",
+    "morsehgp3D_v12/reference/hgp12_ref/judge.py": "09e65a40f7ff33400c04eb91c442a430579bf020b115589b69ad8384529d6507",
+    "morsehgp3D_v12/reference/hgp12_ref/model.py": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c",
+    "morsehgp3D_v12/reference/hgp12_ref/supports.py": "970f645462a019639cead958cf8f45b1324cf3083bb61fc9a0891ddc523254ee",
+    "morsehgp3D_v12/reference/test_resolution_v12.py": "a5e2c9e429bffa55d3c3a3f1188863dfef8d219bd7268c0bb34fdf00df26088e",
+    "morsehgp3D_v12/reference/transition_catalogue.py": "09ead04bd24a60733b56dbfc344e369df70ef149b677bfad158981807488e4f8"
+  },
+  "targeted_facts": {
+    "fact_lemma_needs_two_sites": {
+      "gaps": [],
+      "passed": true
+    },
+    "fact_saturated_in_catalogue": {
+      "gaps": [],
+      "passed": true
+    }
+  },
+  "witness_sha256": "12358f6c43c834b50c62c19d1896de50d495483f16f6b066609e61c3a092f12a"
+}

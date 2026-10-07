@@ -1,0 +1,16 @@
+{
+  "compiled_dependencies_verified": true,
+  "files_sha256": {
+    "README.md": "134570382bc1bc56df0a721c27c784db997dc983f51282560e987ca1db456c0d",
+    "check.py": "0fdf408bd8dc5af28bdecd9e0ef55acac94105864e5a4563f0847340c1859be7",
+    "normal.json": "4fbb8e2cce82ec71f855db90cc6d079e5354625c88824e09fcdd6ae1b159468f"
+  },
+  "normal_optimized_byte_equal": true,
+  "normal_returncode": 0,
+  "normal_sha256": "4fbb8e2cce82ec71f855db90cc6d079e5354625c88824e09fcdd6ae1b159468f",
+  "optimized_capture_deduplicated": true,
+  "optimized_returncode": 0,
+  "optimized_sha256": "4fbb8e2cce82ec71f855db90cc6d079e5354625c88824e09fcdd6ae1b159468f",
+  "pin": "1f7642e105aebd76632c58c63fdfd5b5c0824779",
+  "sources_equal_pin_and_stable": true
+}

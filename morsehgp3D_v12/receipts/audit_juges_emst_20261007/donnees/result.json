@@ -1,0 +1,378 @@
+{
+  "before_after_unchanged": true,
+  "gcp_used": false,
+  "historical_pin": "4147c546000b198b5239646063bfb1e3ed6d28fc",
+  "historical_source_sha256": {
+    "morsehgp3D_v12/bench/data/crop_scenes.py": "a2b56597f8c6ad08074994fca4c45fb4dc604b5e6d24ef0a7e21fd46f2772b0a",
+    "morsehgp3D_v12/bench/data/replay_all.sh": "d9eaa9d406493ea15cdea1f94ea08728b0d7604fc6b635ba641c36485c84b67c",
+    "morsehgp3D_v12/bench/data/v12data/__init__.py": "166f500b08a37b3336cd50a7af8cd6ea69ebf15543358c9806a927763e25d9bd",
+    "morsehgp3D_v12/bench/data/v12data/common.py": "a1502097838f5b3e8a87f073dd605ed6185d14f96dba4a42a7928b666f9fa914",
+    "morsehgp3D_v12/bench/data/verify_inputs.py": "870a0bbeafbb12a33e2743cd04391e129a2a05425e941c56a175798c7e5fce43",
+    "morsehgp3D_v12/bench/data_cache.py": "a1f8a07f2465f40e6336f50004964c5006f1cdd3a296f72ee5d5aa7c9404bf03"
+  },
+  "native_builds": false,
+  "network_used": false,
+  "pin": "1f7642e105aebd76632c58c63fdfd5b5c0824779",
+  "real_data_used": false,
+  "results": {
+    "cache": {
+      "actual_disk_space_not_claimed": true,
+      "historical_and_corrected_hardlink": {
+        "new": {
+          "build_bytes_preserved": true,
+          "cache_object_preserved": true,
+          "eviction_count": 0,
+          "refused": true
+        },
+        "old": {
+          "build_bytes_preserved": true,
+          "cache_object_preserved": false,
+          "eviction_count": 1,
+          "refused": true
+        }
+      },
+      "independent_additional_cases": {
+        "cap_then_floor": {
+          "eviction_count": 1,
+          "linked_object_preserved": true,
+          "refused": false
+        },
+        "protected_floor": {
+          "eviction_count": 0,
+          "linked_object_preserved": true,
+          "refused": true
+        },
+        "protected_partial": {
+          "eviction_count": 0,
+          "linked_object_preserved": true,
+          "refused": true
+        }
+      },
+      "network_called": false
+    },
+    "crop": {
+      "all_written_coordinates_ids_and_nesting_exact": true,
+      "current_column_crops": 0,
+      "historical_column_count": 2,
+      "independent_closed_square_clouds": 7,
+      "real_crops_regenerated": false,
+      "selections": [
+        {
+          "actual": 4,
+          "cloud": 0,
+          "radius": 0,
+          "target": 1
+        },
+        {
+          "actual": 4,
+          "cloud": 0,
+          "radius": 0,
+          "target": 2
+        },
+        {
+          "actual": 4,
+          "cloud": 0,
+          "radius": 0,
+          "target": 3
+        },
+        {
+          "actual": 5,
+          "cloud": 0,
+          "radius": 1,
+          "target": 5
+        },
+        {
+          "actual": 2,
+          "cloud": 1,
+          "radius": 0,
+          "target": 1
+        },
+        {
+          "actual": 2,
+          "cloud": 1,
+          "radius": 0,
+          "target": 2
+        },
+        {
+          "actual": 3,
+          "cloud": 1,
+          "radius": 1,
+          "target": 3
+        },
+        {
+          "actual": 1,
+          "cloud": 2,
+          "radius": 1,
+          "target": 1
+        },
+        {
+          "actual": 3,
+          "cloud": 2,
+          "radius": 3,
+          "target": 2
+        },
+        {
+          "actual": 3,
+          "cloud": 2,
+          "radius": 3,
+          "target": 3
+        },
+        {
+          "actual": 6,
+          "cloud": 2,
+          "radius": 5,
+          "target": 5
+        },
+        {
+          "actual": 10,
+          "cloud": 2,
+          "radius": 8,
+          "target": 8
+        },
+        {
+          "actual": 1,
+          "cloud": 3,
+          "radius": 3,
+          "target": 1
+        },
+        {
+          "actual": 3,
+          "cloud": 3,
+          "radius": 5,
+          "target": 2
+        },
+        {
+          "actual": 3,
+          "cloud": 3,
+          "radius": 5,
+          "target": 3
+        },
+        {
+          "actual": 5,
+          "cloud": 3,
+          "radius": 6,
+          "target": 5
+        },
+        {
+          "actual": 10,
+          "cloud": 3,
+          "radius": 7,
+          "target": 8
+        },
+        {
+          "actual": 1,
+          "cloud": 4,
+          "radius": 1,
+          "target": 1
+        },
+        {
+          "actual": 5,
+          "cloud": 4,
+          "radius": 6,
+          "target": 2
+        },
+        {
+          "actual": 5,
+          "cloud": 4,
+          "radius": 6,
+          "target": 3
+        },
+        {
+          "actual": 5,
+          "cloud": 4,
+          "radius": 6,
+          "target": 5
+        },
+        {
+          "actual": 8,
+          "cloud": 4,
+          "radius": 7,
+          "target": 8
+        },
+        {
+          "actual": 1,
+          "cloud": 5,
+          "radius": 3,
+          "target": 1
+        },
+        {
+          "actual": 2,
+          "cloud": 5,
+          "radius": 6,
+          "target": 2
+        },
+        {
+          "actual": 4,
+          "cloud": 5,
+          "radius": 7,
+          "target": 3
+        },
+        {
+          "actual": 6,
+          "cloud": 5,
+          "radius": 8,
+          "target": 5
+        },
+        {
+          "actual": 8,
+          "cloud": 5,
+          "radius": 9,
+          "target": 8
+        },
+        {
+          "actual": 1,
+          "cloud": 6,
+          "radius": 4,
+          "target": 1
+        },
+        {
+          "actual": 2,
+          "cloud": 6,
+          "radius": 6,
+          "target": 2
+        },
+        {
+          "actual": 3,
+          "cloud": 6,
+          "radius": 7,
+          "target": 3
+        },
+        {
+          "actual": 6,
+          "cloud": 6,
+          "radius": 8,
+          "target": 5
+        },
+        {
+          "actual": 12,
+          "cloud": 6,
+          "radius": 10,
+          "target": 8
+        }
+      ]
+    },
+    "developer_gates": {
+      "data_cache_test.py": {
+        "cases": 8,
+        "exit": 0,
+        "normalized_output_sha256": "1f147f7240410745befa005e984f9df0ba75b1fd8bf91bff22566c1e2f1a62a5"
+      },
+      "donnees_test.py": {
+        "cases": 37,
+        "exit": 0,
+        "normalized_output_sha256": "8d8121f508bd8a7ffd8ff1cb61939ba7b0dff2d803a0d6ab9a38ba3107a0156f"
+      }
+    },
+    "replay": {
+      "current_verify_exit": 0,
+      "empty_root_exit": 2,
+      "historical_verify_exit": 2,
+      "outils_without_root_exit": 0,
+      "synthetic_manifests_verified": 2,
+      "unknown_stage_exit": 2
+    },
+    "verification": {
+      "admission_before_any_payload_probe": true,
+      "distinct_mult_mutation_refused": true,
+      "historical": {
+        "empty_manifest": 0,
+        "null_hash": 0,
+        "valid": 0,
+        "wrong_hash": 1
+      },
+      "measurement_valid_and_bad_extent_checked": true,
+      "new": {
+        "bool_count": {
+          "exit": 2,
+          "refused_before_payload_reads": true
+        },
+        "crops_not_list": {
+          "exit": 2,
+          "refused_before_payload_reads": true
+        },
+        "distinct_missing_mult": {
+          "exit": 2,
+          "refused_before_payload_reads": true
+        },
+        "empty_manifest": {
+          "exit": 2,
+          "refused_before_payload_reads": true
+        },
+        "identical_file_reused": {
+          "exit": 0,
+          "refused_before_payload_reads": false
+        },
+        "late_invalid_crop": {
+          "exit": 2,
+          "refused_before_payload_reads": true
+        },
+        "mult_without_digest": {
+          "exit": 2,
+          "refused_before_payload_reads": true
+        },
+        "null_hash": {
+          "exit": 2,
+          "refused_before_payload_reads": true
+        },
+        "path_name": {
+          "exit": 2,
+          "refused_before_payload_reads": true
+        },
+        "same_name_different_hash": {
+          "exit": 2,
+          "refused_before_payload_reads": true
+        },
+        "upper_hash": {
+          "exit": 2,
+          "refused_before_payload_reads": true
+        },
+        "valid": {
+          "exit": 0,
+          "refused_before_payload_reads": false
+        },
+        "wrong_hash": {
+          "exit": 1,
+          "refused_before_payload_reads": false
+        },
+        "zero_count": {
+          "exit": 2,
+          "refused_before_payload_reads": true
+        }
+      }
+    }
+  },
+  "schema": "audit.juges.data.v1",
+  "source_sha256": {
+    "morsehgp3D_v12/bench/data/SHA256SUMS.txt": "57025d123e48e93fe46646606e2267f16bc3ae5378d60df3950200a27ce919f0",
+    "morsehgp3D_v12/bench/data/crop_scenes.py": "99e2146c7d5dc4d674f5120736ee1d34c95081f1388fd83e89f313405ba695fa",
+    "morsehgp3D_v12/bench/data/make_g4_bundle.py": "16afa8ea19efa594599021ef8a7807a010d10ca775340dfe66b6d27f5c415cdc",
+    "morsehgp3D_v12/bench/data/prepare_boreas.py": "e402a3034dbe80c406aa11439439cf76e412e4728f3d0dfe88290710447a3460",
+    "morsehgp3D_v12/bench/data/prepare_eth3d.py": "2cfefc249334d33d33318c1e1510424771f55dbea60981b0dbedbe51947e0743",
+    "morsehgp3D_v12/bench/data/prepare_forinstance.py": "96bbff9d1351ad84f5f47a2dfb09c7d929efb40673874865a71866f56151d675",
+    "morsehgp3D_v12/bench/data/prepare_ign_lidarhd.py": "d5cb2eff1f0000df8d5fd91900772a5c7a4e8b35b8045ffda960af6f4b01b727",
+    "morsehgp3D_v12/bench/data/prepare_semantickitti.py": "6725d8e381e67cf30f61557d3f419e72c338f5f1b2767798fd3bbe319317adc8",
+    "morsehgp3D_v12/bench/data/prepare_small.py": "bae06a7a09f67c65934d5df96d0618fe81e7fee482220c4589f169ae27e72f3d",
+    "morsehgp3D_v12/bench/data/replay_all.sh": "c3431b1b1bc27ea48e96b9eed50d0c7185cb53042584175df6a54988312972ab",
+    "morsehgp3D_v12/bench/data/summarize.py": "6cafe4b4621d72f78a2dde4e51814ff09b3a0674edd3d6197bf22cf1882eee82",
+    "morsehgp3D_v12/bench/data/v12data/__init__.py": "166f500b08a37b3336cd50a7af8cd6ea69ebf15543358c9806a927763e25d9bd",
+    "morsehgp3D_v12/bench/data/v12data/common.py": "a1502097838f5b3e8a87f073dd605ed6185d14f96dba4a42a7928b666f9fa914",
+    "morsehgp3D_v12/bench/data/v12data/dettrig.py": "4e908612bff039fb9dda8e0c9203bdeebe2cdf0633388a55d77e75a88b7cab96",
+    "morsehgp3D_v12/bench/data/v12data/formats/__init__.py": "64e9829be73cd357871d1016dd3a150264271e5911d8d101bdd06536c4021706",
+    "morsehgp3D_v12/bench/data/v12data/formats/kitti_bin.py": "24ac50fe1ff4d3c75d6dce5a2a1dc75464b392e153bf31e0aae9a5eb75ad32a9",
+    "morsehgp3D_v12/bench/data/v12data/formats/las.py": "c635fd947b1b905dedad4f3d4ea3090e07913099efcd044af3d46f7e526863f8",
+    "morsehgp3D_v12/bench/data/v12data/formats/laz.py": "1cd5549b6f8d0874be12d3dd153f8b3b49c8db1dd2bdf585b67b9f0482b54abb",
+    "morsehgp3D_v12/bench/data/v12data/formats/ply.py": "d735815598fb81f0c8879773eda285743287d5743c8359e7a8d65cc94074b636",
+    "morsehgp3D_v12/bench/data/v12data/formats/sevenzip.py": "d129ac9742ace351d5e55b7d952c2d53a574e55d16cb8bbf327eefa71c4a346c",
+    "morsehgp3D_v12/bench/data/v12data/formats/text_xyz.py": "3d463ff09b093c1faf46986725b90092e9d7296717606fd0300f1792c912d82c",
+    "morsehgp3D_v12/bench/data/v12data/httprange.py": "4a7c54a2f6177b51388b5ee1d5dff9235e6a2554062064d3253e9efef453d5a3",
+    "morsehgp3D_v12/bench/data/v12data/lasconv.py": "8754f12a016b20646bd3f99213ce6dd3b3a5c5b4f60b96467afb08b5d030d1fd",
+    "morsehgp3D_v12/bench/data/v12data/patchwork.py": "aae1f481ecc20e916c023fe35474fa0cdcc1f63361c46743d3a48cf44f60ef96",
+    "morsehgp3D_v12/bench/data/v12data/splitmix.py": "79739ecfc6b0965d24d0afd9d0797b94345b8d859e1617248b3784d96460dbe9",
+    "morsehgp3D_v12/bench/data/verify_inputs.py": "49e14641bf8688837dde02a7d00a09766f8d4b579f32a32bbf20d696d70c3850",
+    "morsehgp3D_v12/bench/data_cache.py": "18d369d3f61fb72d9138f6d72572572611d86ed0d073c11c9f0ab7303bcc27d9",
+    "morsehgp3D_v12/bench/data_cache_test.py": "6da9e23ec51af31c9eb8086e0ff06b55759c2fe694d6f5a89b2452c4fa4dd9f1",
+    "morsehgp3D_v12/bench/donnees_test.py": "c8ce8f50afe44948ce8c1bd5ebee20f4e166416523c16fc31036d88cb892aa9b",
+    "morsehgp3D_v12/docs/DONNEES.md": "0d1331ddd8274b19e6638fdf7b596523a5a22edf861c5230e6c63448e4e6ae64"
+  },
+  "witness_sha256": "455399be9cdaf8335363572a10cd61669c2b848782a8451cdb246e1e9ccd669f"
+}

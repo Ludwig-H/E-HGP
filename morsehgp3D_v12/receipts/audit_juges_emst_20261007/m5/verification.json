@@ -1,0 +1,10 @@
+{
+  "gcp_used": false,
+  "large_allocations": false,
+  "normal_exit_code": 0,
+  "normal_optimized_byte_equal": true,
+  "optimized_exit_code": 0,
+  "pin": "1f7642e105aebd76632c58c63fdfd5b5c0824779",
+  "result_sha256": "41e84c32776b3a3fffc22670fd3074bfcea59c4b290c00facbd8acbdb24f30dd",
+  "source_and_witness_hashes_closed": true
+}

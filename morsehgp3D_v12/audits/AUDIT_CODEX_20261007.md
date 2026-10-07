@@ -1,44 +1,35 @@
 # Audit Codex — état courant v12
 
-7 octobre 2026. Dernier pin éprouvé : **`274592a30`**.
+7 octobre 2026. Pin principal éprouvé : **`1f7642e10`** ; complément T2 : **`76adb8fa9`**.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Auditeur du développeur v12.
+[Rapport et témoins](../receipts/audit_juges_emst_20261007/README.md) ; états au [registre unique](CONSTATS.md).
 
-**Dernière relecture : contrat T2, lecteur de transition, corrections et microbancs G1/M7.**
-[Rapport et témoins](../receipts/audit_t2_20261007/README.md) ; états au [registre unique](CONSTATS.md).
+- **Huit clôtures** : outils de données (`0216/0217`), cache (`0220`), capacité et lecteur M5
+  (`0222/0223`), identité de trame et énoncés T2 (`0227/0228/0229`). Anciens défauts reproduits,
+  refus corrigés et témoins positifs préservés. Les clôtures T2 ne qualifient pas la tour native.
+- **Découpes (`0218`)** : 32 sélections exactes sur sept nuages confirment les carrés horizontaux,
+  colonnes entières et IDs ; les **69 anciennes découpes restent à régénérer**, avec leurs paquets
+  et manifestes. Le résultat historique n’est pas corrigé par la seule modification du préparateur.
+- **M5** : 520 comptes confrontés au vrai scan/Emit ; six totaux injectés vérifient les refus
+  avant réservation des tampons et émission. Le diagnostic peut encore allouer avant cette garde ;
+  le budget Session et la voie appareil restent à qualifier. Anciens témoins du lecteur et porte livrée conformes.
+- **JUG-EMST (`0013`)** : livraison et preuve d’ordre 1 confirmées ; 24 petits nuages, 64 appels CLI
+  par mode, graphe complet indépendant et arithmétique u32. Les campagnes historiques annoncées
+  ne sont pas contre-certifiées ici. **Nouveau `0232`** : `--ids` peut faire accepter des PointId
+  répétés dans un FULL ; l’arbre géométrique du témoin reste correct.
+- **Juges (`0018`)** : anciens témoins M2/M4/M5/M6 corrigés, mais M5 adopte encore certaines
+  preuves contradictoires ou incomplètes ; la relecture M6 accepte provenance vide, isolation
+  contradictoire ou refus enregistré ignoré. Témoins causaux conservés, sans accusation des prises réelles.
 
-- **Corrections confirmées** : débordement du lecteur, collision fichier/dossier et provenance
-  (`0224`–`0226` clos). Huit fichiers binaires synthétiques, 21 publications avec six pannes injectées.
-  Les clôtures développeur `0003/0004/0014` sont contre-vérifiées. Les traces existantes corroborent
-  `0024` : course du pool v10 gelé, porte désormais mono-fil ; 45 prises corrigées conformes.
-- **T2 : mécanismes recevables sous conditions.** Lecture des racines de cellules déjà traitées,
-  saut vers k sites strictement intérieurs et adaptateur de test : arguments favorables.
-  Dix nuages, 35 ordres × trois politiques concordent avec l’oracle de définition ; six cibles inertes
-  sont exercées. Les portes du mémo, de l’historique d’attache et des verticales natives restent à livrer.
-- **Trois réserves nouvelles** : le lecteur fusionne deux identités de trame non ASCII (`0227`) ;
-  profondeur d’attache et sites examinés ne sont pas invariants par changement de parcours (`0228`) ;
-  le lemme hors catalogue exige k≥2 ou un rayon positif (`0229`). Aucun échec géométrique de T2
-  n’est déduit de ces témoins.
-- **Transition catalogue livrée (`0113`)** : 40 catalogues Fraction indépendants, 660 boules,
-  coordonnées jusqu’à u32, indices permutés ; omissions et doublons unilatéraux détectés.
-  Le contrôle catalogue ne qualifie pas les sorties `supports/cover`, Kruskal ni FULL.
-- **G1/M7 relus sur six journaux** : 83,02 % des anciens census saturés K5 sont certifiables par
-  les voisins, mais 28,7–30,4 % des cibles changent. Gain réel et coût de préparation restent à mesurer.
-  M7 local attribue 41,60 % des cycles aux sondes ; ce n’est pas une mesure G4.
-  G-L3 reste non adopté.
-- **Juge G1 encore incomplet (`0018`)** : changer un octet de route masque un census saturé,
-  code 0 et zéro écart ; sélectionner un ordre absent rend également un bilan vide de code 0.
-  Ces témoins ne démontrent pas un défaut dans les prises historiques.
+**T2 après correction** : lemme hors catalogue limité à k≥2, saturation distinguée de l’absence
+du catalogue, décroissance avant chaque saut, NUM-GARDE avant prédicat mixte, codage des cibles et
+trois classes de compteurs précisés. Mémo, attache, verticales, capacités et FULL natifs restent à juger.
 
-**Avant le natif T2** : traiter les cellules inertes et relire leur racine courante ; contrôler la
-décroissance avant chaque `continuer` ; appliquer NUM-GARDE avant les prédicats mixtes de G-L3 ;
-ne pas confondre census saturé et absence du catalogue ; spécifier le codage naissance/cellule
-dans les cibles de quatre octets. Fixer l’ordre des opérations ou reclasser les compteurs concernés.
+**Suite** : fermer les résidus des juges et contrôler la régénération des données ; relire le nouveau
+bras G1 (`151d4b6ec`), son admission durcie tout juste livrée (`8049bcc39`) et le pilote MES-E
+(`ae5f4482a`), puis les raccords catalogue/tour. Ces livraisons ultérieures ne sont pas qualifiées ici.
 
-**Livraison ultérieure `1b40c0411`** : corrections des outils de données, du cache et des juges M2/M4/M5/M6
-signalées au registre comme livrées, à contre-vérifier. Les 69 anciennes découpes restent à régénérer.
-
-**Suite** : contre-vérifier ces corrections, puis les premiers raccords catalogue/tour et le juge EMST.
-Tests synthétiques bornés et lecture de journaux seulement ; aucun GCP, LiDAR recalculé, matrice native
-ou nouveau contrat D6/catalogue/FULL/100 ms acquis. Quatre fichiers courants ; détails sous `receipts/`.
+Tests synthétiques bornés seulement ; aucun GCP, LiDAR recalculé, sanitizer, matrice native ou nouveau
+contrat FULL/100 ms acquis. Quatre fichiers courants ; détails reproductibles sous `receipts/`.
 Contrôle : `python morsehgp3D_v12/tools/check_constats.py` (structure, tailles et liens).

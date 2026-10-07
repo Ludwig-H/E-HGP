@@ -1,0 +1,12 @@
+{
+  "byte_identical": true,
+  "current_sources_rechecked": 30,
+  "gcp_used": false,
+  "historical_sources_pinned": 6,
+  "normal_sha256": "2d94b88bad9bf7752253b6b6a6b20370048c41c34f80dc83593f0cab4f8dd234",
+  "optimized_sha256": "2d94b88bad9bf7752253b6b6a6b20370048c41c34f80dc83593f0cab4f8dd234",
+  "pin": "1f7642e105aebd76632c58c63fdfd5b5c0824779",
+  "python": "3.12.1",
+  "real_payloads_retained": false,
+  "witness_hash_rechecked": true
+}

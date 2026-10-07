@@ -1,0 +1,288 @@
+{
+  "binary_sha256": {
+    "capacity_guard": "b5cad4d5a56c5ab9cbb814c3b15581f9d70df1101c1cc2127d485ab496e44c87",
+    "delivered_format": "ac1f8bada7c7dd7a104bda70d46d48efc685e028b9735eef48ed29962b400be6",
+    "old_format": "a60a0c12e7004d304fdefae189902284388f60766cda2b300c265cd73ec02a61"
+  },
+  "compiler": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "compiler_dependencies_sha256": {
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/dump_format.hpp": "4327b6788f2e7723995c1b20b820576ea762c31c864f2c042c59dc0d161117a0",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/simt.hpp": "c7276ddb0aba9b196e1b3c8ad138f778afda04614a3d57e285b94f3cb6f07691",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/host/format_selftest.cpp": "d86983b901c4a183772dab84bff09b3e566b72df10320912dc5b3f79229fe731",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/bfs.hpp": "5eaff1305f7d9c4fca78803eae7165fba10d89758342ed4e0337353634da2e8f",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/compare.hpp": "587fb54dd0158a7155b96d660acbb8d0a7fe74301d3ab16f2f0f62614ec99889",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/driver.hpp": "80cbef89f1f43917bb4e2afc40629d00ea71529fded8697f3a8c248526508d7a",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/format.hpp": "a1259bf79734926c800186459d56d29c81cf97b81c7cd7e42ca3cfaf1a989725",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/warp.hpp": "919ba0a2f3c54e99919df7e9bb90e8be8528b2f8c0e2b581124c041f85de930a",
+    "morsehgp3D_v12/receipts/audit_juges_emst_20261007/m5/probe.cpp": "d92ac0884621c6d90034123b512fc74be2a5b2c5f624866835ea77e3cdd53772"
+  },
+  "cuda_executed": false,
+  "flags": [
+    "-std=c++20",
+    "-O2",
+    "-DNDEBUG",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-DMHGP12_COORD_BITS=21"
+  ],
+  "gcp_used": false,
+  "large_allocations": false,
+  "old_witness_transformation": "Only the four expected admissions change to refusals.",
+  "pin": "1f7642e105aebd76632c58c63fdfd5b5c0824779",
+  "results": {
+    "capacity_guard": [
+      {
+        "all_exact": true,
+        "emit_records": 520,
+        "helper_u64_max": true,
+        "kind": "capacity"
+      },
+      {
+        "capacity_refused": false,
+        "case": "small",
+        "kernels_after_totals": 0,
+        "kind": "guard",
+        "reservations_after_totals": 1
+      },
+      {
+        "capacity_refused": false,
+        "case": "parent_limit",
+        "kernels_after_totals": 0,
+        "kind": "guard",
+        "reservations_after_totals": 1
+      },
+      {
+        "capacity_refused": true,
+        "case": "parent_over",
+        "kernels_after_totals": 0,
+        "kind": "guard",
+        "reservations_after_totals": 0
+      },
+      {
+        "capacity_refused": false,
+        "case": "task_limit",
+        "kernels_after_totals": 0,
+        "kind": "guard",
+        "reservations_after_totals": 1
+      },
+      {
+        "capacity_refused": true,
+        "case": "task_over",
+        "kernels_after_totals": 0,
+        "kind": "guard",
+        "reservations_after_totals": 0
+      },
+      {
+        "capacity_refused": true,
+        "case": "both_over",
+        "kernels_after_totals": 0,
+        "kind": "guard",
+        "reservations_after_totals": 0
+      }
+    ],
+    "delivered_format": [
+      {
+        "admis": true,
+        "attendu": true,
+        "cas": "valide_un_site",
+        "origine": "temoin valide de l'auditeur",
+        "raison": ""
+      },
+      {
+        "admis": true,
+        "attendu": true,
+        "cas": "valide_coupe",
+        "origine": "topologie de l'auditeur, rendue valide",
+        "raison": ""
+      },
+      {
+        "admis": true,
+        "attendu": true,
+        "cas": "valide_largeur_unite",
+        "origine": "feuille de largeur 1 au-dela de la taille de feuille",
+        "raison": ""
+      },
+      {
+        "admis": true,
+        "attendu": true,
+        "cas": "valide_tests_borne_haute",
+        "origine": "tests a la borne haute c min(c, 3K)",
+        "raison": ""
+      },
+      {
+        "admis": false,
+        "attendu": false,
+        "cas": "impossible_test_count",
+        "origine": "auditeur",
+        "raison": "noeud : tests G1 hors de [c min(c, K), c min(c, 3K)]"
+      },
+      {
+        "admis": false,
+        "attendu": false,
+        "cas": "wrapped_test_sum",
+        "origine": "auditeur",
+        "raison": "noeud : tests G1 hors de [c min(c, K), c min(c, 3K)]"
+      },
+      {
+        "admis": false,
+        "attendu": false,
+        "cas": "nonterminal_leaf",
+        "origine": "auditeur",
+        "raison": "feuille qui devrait etre coupee (m et largeur)"
+      },
+      {
+        "admis": false,
+        "attendu": false,
+        "cas": "wrong_root_envelope",
+        "origine": "auditeur",
+        "raison": "racine : boite d'entree differente de l'enveloppe exacte du nuage"
+      },
+      {
+        "admis": false,
+        "attendu": false,
+        "cas": "site_oob",
+        "origine": "auditeur",
+        "raison": "feuille : sites hors du nuage ou non croissants"
+      },
+      {
+        "admis": false,
+        "attendu": false,
+        "cas": "k_zero",
+        "origine": "auditeur",
+        "raison": "K hors de [1, 12]"
+      },
+      {
+        "admis": false,
+        "attendu": false,
+        "cas": "coordinate_oob",
+        "origine": "auditeur",
+        "raison": "coordonnee hors du profil"
+      },
+      {
+        "admis": false,
+        "attendu": false,
+        "cas": "begin_wrap",
+        "origine": "auditeur",
+        "raison": "feuille invalide"
+      },
+      {
+        "admis": false,
+        "attendu": false,
+        "cas": "ledger_mismatch",
+        "origine": "auditeur",
+        "raison": "grand livre different des sections"
+      },
+      {
+        "admis": false,
+        "attendu": false,
+        "cas": "refusal_with_prefix",
+        "origine": "auditeur",
+        "raison": "refus avec un prefixe publie"
+      },
+      {
+        "admis": false,
+        "attendu": false,
+        "cas": "tests_sous_la_borne_basse",
+        "origine": "c min(c, K) = 5 > 4",
+        "raison": "noeud : tests G1 hors de [c min(c, K), c min(c, 3K)]"
+      },
+      {
+        "admis": false,
+        "attendu": false,
+        "cas": "tests_au_dela_de_la_borne_haute",
+        "origine": "c min(c, 3K) = 15 < 16",
+        "raison": "noeud : tests G1 hors de [c min(c, K), c min(c, 3K)]"
+      },
+      {
+        "admis": false,
+        "attendu": false,
+        "cas": "boite_de_feuille_hors_enveloppe",
+        "origine": "boite ajustee exacte",
+        "raison": "feuille : boite differente de l'enveloppe de ses sites inter boite du noeud"
+      },
+      {
+        "admis": false,
+        "attendu": false,
+        "cas": "racine_trop_large_en_y",
+        "origine": "enveloppe exacte de la racine",
+        "raison": "racine : boite d'entree differente de l'enveloppe exacte du nuage"
+      },
+      {
+        "admis": false,
+        "attendu": false,
+        "cas": "largeur_unite_au_dela_de_max_leaf",
+        "origine": "refus wide_leaf attendu, pas une feuille",
+        "raison": "feuille plus large que max_leaf sans refus"
+      },
+      {
+        "admis": false,
+        "attendu": false,
+        "cas": "short_count",
+        "origine": "auditeur",
+        "raison": "taille annoncee avant allocation"
+      },
+      {
+        "admis": true,
+        "attendu": true,
+        "cas": "somme_controlee_borne_u64",
+        "origine": "checked_add",
+        "raison": ""
+      },
+      {
+        "cas": 21,
+        "ecarts": 0,
+        "porte": "format_m5"
+      }
+    ],
+    "old_format": [
+      "read valid_one 1",
+      "read site_oob 0",
+      "read k_zero 0",
+      "read coordinate_oob 0",
+      "read begin_wrap 0",
+      "read ledger_mismatch 0",
+      "read refusal_with_prefix 0",
+      "read impossible_test_count 0",
+      "read nonterminal_leaf 0",
+      "read wrong_root_envelope 0",
+      "read wrapped_test_sum 0",
+      "read short_count 0",
+      "compare valid 1",
+      "compare list 0",
+      "compare range 0",
+      "compare metadata 0",
+      "compare duplicate_box 0",
+      "compare ledger 0"
+    ]
+  },
+  "schema": "audit.v12.juges_emst.m5.v1",
+  "scope": "Reader and shared host arithmetic; driver reservations/kernels mocked after fabricated totals. No GPU or product catalogue qualification.",
+  "source_sha256": {
+    "morsehgp3D_v11/src/catalogue/boxes.cpp": "2fc06e5e781ef51891ceecb324ecc460b023ea8e15079a32d22eb7d159ecc5a2",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/arena.hpp": "ca4b821b69c4724b8d4d9076802ba5efff1e040cf60bd7eef51b9eb1991cb78a",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/compare.hpp": "aa31b79d417452bc575246b506a45ca3fb0021f96fd349fabd851bfd31ceeae4",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/dump_format.hpp": "4327b6788f2e7723995c1b20b820576ea762c31c864f2c042c59dc0d161117a0",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_coherent.hpp": "a928efb5092780f407284d7eff49a443ad2079162d00f52254ba7a86d2eddd7d",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_common.hpp": "db205b77a9b04180e6a74597b876744641b4e5220665851f492875fa9b540afb",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_j3.hpp": "8235004c799097815bbd48c15c806c9e4d4a7cb6d99934491617c29d7d28a5b5",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/predicates.hpp": "36144eff2d5ddf57bee5453d2e72b758a72b88dabf037d2323b0a10ad55f4be1",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/simt.hpp": "c7276ddb0aba9b196e1b3c8ad138f778afda04614a3d57e285b94f3cb6f07691",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/CMakeLists.txt": "21bcc0965ee47ef17bcee5d0516b5eb0a9712e6ed4341b777fc0823d4a876713",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/README.md": "ac7cc943e3307cfe24bf904ca1c7f4cd8ecb19cd223ecad9233d4a579320d9a6",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/host/format_selftest.cpp": "d86983b901c4a183772dab84bff09b3e566b72df10320912dc5b3f79229fe731",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/bfs.hpp": "5eaff1305f7d9c4fca78803eae7165fba10d89758342ed4e0337353634da2e8f",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/compare.hpp": "587fb54dd0158a7155b96d660acbb8d0a7fe74301d3ab16f2f0f62614ec99889",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/driver.hpp": "80cbef89f1f43917bb4e2afc40629d00ea71529fded8697f3a8c248526508d7a",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/format.hpp": "a1259bf79734926c800186459d56d29c81cf97b81c7cd7e42ca3cfaf1a989725",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/warp.hpp": "919ba0a2f3c54e99919df7e9bb90e8be8528b2f8c0e2b581124c041f85de930a",
+    "morsehgp3D_v12/receipts/audit_b_m5_20261007/juge_format/format_probe.cpp": "a0b9a77b8e12313d7541fe74400c842620b699521e7c7faa56b4f6aace1b0e96"
+  },
+  "sources_before_after_equal": true,
+  "transformed_old_witness_sha256": "6c3bd26064475c2289cd16f0b1069ab69ebec77069735dcbc65c04a302f21707",
+  "witness_sha256": {
+    "check.py": "74a60fc9b4b49d0919c612e3730133a8c12caf7beaae88886b6d0b46ea45c915",
+    "probe.cpp": "d92ac0884621c6d90034123b512fc74be2a5b2c5f624866835ea77e3cdd53772"
+  }
+}
