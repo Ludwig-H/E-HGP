@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-7 octobre 2026. Base publiée **`28cf75cd1`** ; prototypes et correctifs non publiés épinglés par
+7 octobre 2026. Base publiée **`b24c25654`** ; prototypes et correctifs non publiés épinglés par
 hashes séparés. Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. États au [registre unique](CONSTATS.md).
 
@@ -18,11 +18,11 @@ hashes séparés. Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda
 - **Catalogue CUDA** : [nettoyage des erreurs corrigé dans le prototype](../receipts/audit_reponses_20261007/cuda_integration/README.md),
   corps `5e215fe2…`, lecture statique seulement. Le compteur des feuilles réécrites reste
   nul malgré leur rejeu. Voie hybride : GPU ≤32 sites/16 bits locaux, sinon reprise CPU exacte.
-- **Tour T/M/V et R** : la première forme du registre perd les branches ouvertes des
-  hyperarêtes. [Collecte dans T/M proposée](../receipts/audit_t1b_tour_prepublication_20261007/branches/README.md), sans barrière
-  par plateau ni nouvelle descente G ; 69 modèles abstraits conformes. Six événements
-  peuvent demander 27 branches : budgéter la vraie sortie. Report à T3 possible s’il est
-  déclaré ; aucun défaut de pi0 établi. Rebaser les copies du socle avant qualification.
+- **Tour T/M/V et R** : [branches ouvertes désormais matérialisées dans le prototype](../receipts/audit_registre_branches_20261007/README.md).
+  Lecture mathématique/concurrence favorable ; admission à compléter des offsets CSR (patch prêt).
+  Temporaire `4 P_R` et sortie `4 A` coexistent ; aucune borne `A≤naissances−1`.
+  Qualification du nouveau R en cours chez le développeur ; préserver le juge G durci au merge.
+
 **Clôtures vérifiées au registre.**
 
 - **Livraison `28cf75cd1` confirmée** : [M6, G et MES-P](../receipts/audit_reponses_20261007/livraison_28cf75/README.md).

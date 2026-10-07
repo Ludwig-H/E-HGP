@@ -1,0 +1,18 @@
+--- a/morsehgp3D_v12/src/tower/registry_branches.cpp
++++ b/morsehgp3D_v12/src/tower/registry_branches.cpp
+@@ -154,10 +154,12 @@
+   for (u64 k = 0; k < tasks_count; ++k) counters[k] = ForestWork{};
+   BranchRun run{s, tasks.span(), counters.span(), false};
+   MHGP12_TRY(pool.parallel_for(tasks_count, 1, &run, branch_body));
+-  u64 output = 0;
+-  for (u64 i = 0; i < s.inputs.size(); ++i)
++  u64 output = 0, output_offsets = 0;
++  for (u64 i = 0; i < s.inputs.size(); ++i) {
++    output_offsets += 8 * (s.forests.orders[i].retained_cell.size() + 1);
+     for (u64 j = 0; j < s.forests.orders[i].retained_cell.size(); ++j) output += s.work[i].branch_count[j];
+-  MHGP12_TRY(s.budget.admit(4 * output));  // sortie exacte : 4 octets par branche
++  }
++  MHGP12_TRY(s.budget.admit(4 * output + output_offsets));  // branches et decalages CSR de sortie
+   for (u64 i = 0; i < s.inputs.size(); ++i) MHGP12_TRY(place_rows(s, i));
+   run.fill = true;
+   MHGP12_TRY(pool.parallel_for(tasks_count, 1, &run, branch_body));

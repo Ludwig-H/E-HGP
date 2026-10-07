@@ -1,0 +1,31 @@
+{
+  "capture_stable_double_read": true,
+  "main_observed": "b24c256541ffdbe8327f894cd9efebdd7476b51c",
+  "native_tests_rerun": false,
+  "patch_application_in_temporary_directory": true,
+  "patch_scope": "admission des decalages de la CSR finale uniquement",
+  "phase": "exploration_v12_hors_registre",
+  "proposed_registry_sha256": "0d616e69a3878b238bcfd0f0beb90ed3b161c77ebbfa740abd663b8b650009d5",
+  "prototype_declared_base": "9c5809919",
+  "public_status": "not_claimed",
+  "source_sha256": {
+    "morsehgp3D_v12/src/core/buffer.cpp": "5c885dbf0e4813f1a8ee653115092536348877e6b93aa5b831d7490fe0d6e756",
+    "morsehgp3D_v12/src/core/buffer.hpp": "3c7fffc6ed97b6456f666ef849ddd6f4f3a1b3f2427c0fc875b7d5edcd14130b",
+    "morsehgp3D_v12/src/tower/forest.hpp": "eb14f804a7fe55d16e11b96c39ccbac037f887c998e68f6464495cb21938dd19",
+    "morsehgp3D_v12/src/tower/forest_build.cpp": "651b9f65c37e6c99ccbf64d83a182c7503750691554c92b4cd82eb5065c6a2c6",
+    "morsehgp3D_v12/src/tower/forest_internal.hpp": "8fe29f166613de5e4bdcf213f0bf03ee9a31cbd2c562fe45f754e18edcf12c02",
+    "morsehgp3D_v12/src/tower/forest_kernel.cpp": "9633c2b4e07ffb3f47c2f3b6f49f493b01cf75bbccd6dbf70b4bc86278f119b9",
+    "morsehgp3D_v12/src/tower/forest_stages.cpp": "aa85a7ccd91197830a7775014b4acc4c14cad435bb314be543b70651a99035c8",
+    "morsehgp3D_v12/src/tower/forest_validate.cpp": "4a70f7dd9d50770c8d14646f3cd34076519b76ca27c20ca1c265f2c182dd386f",
+    "morsehgp3D_v12/src/tower/registry_branches.cpp": "9cc388d6afbed55f98e58ca84eb7948ee30762dbf4aca918a63a3814c2a6aa0b",
+    "morsehgp3D_v12/src/tower/vertical_images.cpp": "b0543caf0adb031cf58f59d7eb337aa79c41ad226f28da527456e22f6b0df8eb",
+    "morsehgp3D_v12/tests/mutants/tower.json": "32c67e2b4eb1e21d61d751795c51bc1d26e2b1d937d2c8e6d7e9760e0d9fd8f0",
+    "morsehgp3D_v12/tests/tower/forest_support.hpp": "4b9c4bf0976a07230e4c971d20ff031516a604c2da3a7d5f8c855d9f0a269485",
+    "morsehgp3D_v12/tests/tower/forest_unit.cpp": "1c308e53b8d37fa78438676208afcf0f06d47bb62d4052c0a0e832acb7aad42a",
+    "morsehgp3D_v12/tests/tower/g_determinism.py": "beb8c3a1c873ebb14aaf81ee94d746ea0d6517ad8d6521f5c0131fd5f6ad977f",
+    "morsehgp3D_v12/tests/tower/tests.cmake": "07f2fb677c39d4b0e547c22a7e6c65808b3818322402f997c0406ef4aec448e1",
+    "prototype/INTERFACE_TMV.md": "3bb3656964df466144129459fcdffaa2ff935b7e099bfdc2775bb4705eba6721",
+    "prototype/RAPPORT.md": "1d0c82e014b7098bf73e1a9a605a60dbd44d081f26e04cdd082c7288023ce6f1"
+  },
+  "status": "prototype_non_publie"
+}
