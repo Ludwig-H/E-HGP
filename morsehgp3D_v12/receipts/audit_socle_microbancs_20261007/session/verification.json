@@ -1,0 +1,11 @@
+{
+  "pin": "95247cf4b",
+  "contract_sources_sha256": {
+    "morsehgp3D_v12/docs/CONTRAT_NUMERIQUE.md": "703d9d90c83426adf78b2352cabdd0e6440be284a42806ee27ee79dcaae79f37",
+    "morsehgp3D_v12/docs/ARCHITECTURE.md": "1c1db265c648241d5831e60198a9266a3ca62a55bc2e5e9907b842ad2b4a2f33",
+    "morsehgp3D_v12/docs/PROVENANCE.md": "7759e1b4971b7a2da52a2f24898e3e3575deee7c73cffa2428a77e8738d60cbd",
+    "morsehgp3D_v12/receipts/developpement_20261007/reponse_constats_0201_0212.md": "64950e13d95bf2de29e475056f34e82618267e0a992b2184ee388f0d51812675"
+  },
+  "host_check_normal_optimized_equal": true,
+  "optimized_scope": "host probe only; full CUDA compile/invalid CLI in result.json"
+}

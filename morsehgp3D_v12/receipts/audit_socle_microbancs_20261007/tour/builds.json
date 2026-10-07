@@ -1,0 +1,89 @@
+{
+  "library_sha256": "050532a95c322cc2d064eef5bfcba74b3920227f98dc21d157a0d675732cf7ca",
+  "commands": [
+    {
+      "name": "mes_m4",
+      "command": [
+        "g++",
+        "-std=c++20",
+        "-O1",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "/tmp/ehgp-v12-audit-socle-math-20261007/morsehgp3D_v12/microbancs/mes_m3_m4_tour/mes_m4/mes_m4.cpp",
+        "-o",
+        "/tmp/ehgp-v12-audit-socle-math-bin-20261007/mes_m4"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "mes_m3",
+      "command": [
+        "g++",
+        "-std=c++20",
+        "-O1",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "/tmp/ehgp-v12-audit-socle-math-20261007/morsehgp3D_v12/microbancs/mes_m3_m4_tour/mes_m3/mes_m3.cpp",
+        "-DMHGP11_COORD_BITS=21",
+        "-I/tmp/ehgp-v12-audit-socle-math-20261007/morsehgp3D_v11/src",
+        "/tmp/claude-1000/-workspaces-E-HGP/6acaaf62-b44a-41e7-b5d6-81e4c7b6b7f1/scratchpad/agent_G/build-v11/libmhgp11.a",
+        "-o",
+        "/tmp/ehgp-v12-audit-socle-math-bin-20261007/mes_m3"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "mes_m3_mutant",
+      "command": [
+        "g++",
+        "-std=c++20",
+        "-O1",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "/tmp/ehgp-v12-audit-socle-math-20261007/morsehgp3D_v12/microbancs/mes_m3_m4_tour/mes_m3/mes_m3.cpp",
+        "-DMHGP11_COORD_BITS=21",
+        "-I/tmp/ehgp-v12-audit-socle-math-20261007/morsehgp3D_v11/src",
+        "/tmp/claude-1000/-workspaces-E-HGP/6acaaf62-b44a-41e7-b5d6-81e4c7b6b7f1/scratchpad/agent_G/build-v11/libmhgp11.a",
+        "-DMHGP12_MUTANT_T1_SANS_S_DANS_F",
+        "-o",
+        "/tmp/ehgp-v12-audit-socle-math-bin-20261007/mes_m3_mutant"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "mes_m4_mutant",
+      "command": [
+        "g++",
+        "-std=c++20",
+        "-O1",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "/tmp/ehgp-v12-audit-socle-math-20261007/morsehgp3D_v12/microbancs/mes_m3_m4_tour/mes_m4/mes_m4.cpp",
+        "-DMHGP12_MUTANT_SANS_CONTRACTION",
+        "-o",
+        "/tmp/ehgp-v12-audit-socle-math-bin-20261007/mes_m4_mutant"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ]
+}

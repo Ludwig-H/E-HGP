@@ -1,0 +1,16 @@
+{
+  "gcp_used": false,
+  "m2_source_fingerprints_verified": 19,
+  "no_email_or_home_path": true,
+  "outputs_byte_identical": true,
+  "pin": "95247cf4baf2ebd0856c1ac75670f643d24daa6e",
+  "probe_exit_normal": 0,
+  "probe_exit_optimized": 0,
+  "product_modified": false,
+  "receipt_files_missing": 4,
+  "receipt_files_verified": 17,
+  "receipt_recomputation_exit": 0,
+  "schema": "ehgp.v12.audit_microbench_proof_closure.v1",
+  "source_and_result_checks_use_assert": false,
+  "source_pin_guard": "worktree bytes equal pinned Git blob before use"
+}

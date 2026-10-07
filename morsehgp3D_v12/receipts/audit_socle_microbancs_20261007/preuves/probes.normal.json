@@ -1,0 +1,285 @@
+{
+  "m2": [
+    {
+      "bench_process_calls": 5,
+      "choice": "j3",
+      "cli_deciding_configs": "5:24,10:24",
+      "configured_case": "synthetic_k5_l24",
+      "driver_exit_code": 0,
+      "fresh_bench_json_writes": 5,
+      "host_identity_code": 0,
+      "probe": "baseline_control",
+      "refusals": [],
+      "stale_payload_metadata": null,
+      "verdict": {
+        "cases": {
+          "synthetic_k5_l24": {
+            "ci95": [
+              0.10000000000000002,
+              0.10000000000000002
+            ],
+            "deciding": true,
+            "identity": true,
+            "processes": 5,
+            "ratio_gm": 0.10000000000000002,
+            "ratios": [
+              0.10000000000000002,
+              0.10000000000000002,
+              0.10000000000000002,
+              0.10000000000000002,
+              0.10000000000000002
+            ],
+            "unresolved": 0
+          }
+        },
+        "informative_cases": null,
+        "ratio_gm_all_cases": 0.10000000000000002,
+        "refused": [],
+        "rejected": [],
+        "verdict": "adopte"
+      }
+    },
+    {
+      "bench_process_calls": 5,
+      "choice": "j3",
+      "cli_deciding_configs": "5:24,10:24",
+      "configured_case": "synthetic_k5_l24",
+      "driver_exit_code": 0,
+      "fresh_bench_json_writes": 5,
+      "host_identity_code": 1,
+      "probe": "host_identity_failure",
+      "refusals": [],
+      "stale_payload_metadata": null,
+      "verdict": {
+        "cases": {
+          "synthetic_k5_l24": {
+            "ci95": [
+              0.10000000000000002,
+              0.10000000000000002
+            ],
+            "deciding": true,
+            "identity": true,
+            "processes": 5,
+            "ratio_gm": 0.10000000000000002,
+            "ratios": [
+              0.10000000000000002,
+              0.10000000000000002,
+              0.10000000000000002,
+              0.10000000000000002,
+              0.10000000000000002
+            ],
+            "unresolved": 0
+          }
+        },
+        "informative_cases": null,
+        "ratio_gm_all_cases": 0.10000000000000002,
+        "refused": [],
+        "rejected": [],
+        "verdict": "adopte"
+      }
+    },
+    {
+      "bench_process_calls": 5,
+      "choice": "j3",
+      "cli_deciding_configs": "5:24,10:24",
+      "configured_case": "synthetic_k5_l24",
+      "driver_exit_code": 0,
+      "fresh_bench_json_writes": 0,
+      "host_identity_code": 0,
+      "probe": "stale_unrelated_json",
+      "refusals": [],
+      "stale_payload_metadata": {
+        "dump": "unrelated.bin",
+        "kmax": 10,
+        "leaf_size": 16
+      },
+      "verdict": {
+        "cases": {
+          "synthetic_k5_l24": {
+            "ci95": [
+              0.10000000000000002,
+              0.10000000000000002
+            ],
+            "deciding": true,
+            "identity": true,
+            "processes": 5,
+            "ratio_gm": 0.10000000000000002,
+            "ratios": [
+              0.10000000000000002,
+              0.10000000000000002,
+              0.10000000000000002,
+              0.10000000000000002,
+              0.10000000000000002
+            ],
+            "unresolved": 0
+          }
+        },
+        "informative_cases": null,
+        "ratio_gm_all_cases": 0.10000000000000002,
+        "refused": [],
+        "rejected": [],
+        "verdict": "adopte"
+      }
+    },
+    {
+      "bench_process_calls": 5,
+      "choice": "j3",
+      "cli_deciding_configs": "5:24,10:24",
+      "configured_case": "synthetic_k5_l16",
+      "driver_exit_code": 0,
+      "fresh_bench_json_writes": 5,
+      "host_identity_code": 0,
+      "probe": "no_deciding_case",
+      "refusals": [],
+      "stale_payload_metadata": null,
+      "verdict": {
+        "cases": {
+          "synthetic_k5_l16": {
+            "ci95": [
+              0.10000000000000002,
+              0.10000000000000002
+            ],
+            "deciding": false,
+            "identity": true,
+            "processes": 5,
+            "ratio_gm": 0.10000000000000002,
+            "ratios": [
+              0.10000000000000002,
+              0.10000000000000002,
+              0.10000000000000002,
+              0.10000000000000002,
+              0.10000000000000002
+            ],
+            "unresolved": 0
+          }
+        },
+        "informative_cases": {
+          "all_upper_bounds_below_threshold": true,
+          "ratio_gm": 0.10000000000000002
+        },
+        "ratio_gm_all_cases": null,
+        "refused": [],
+        "rejected": [],
+        "verdict": "adopte"
+      }
+    },
+    {
+      "bench_process_calls": 5,
+      "choice": null,
+      "cli_deciding_configs": "5:24,10:24",
+      "configured_case": "synthetic_k5_l24",
+      "driver_exit_code": 0,
+      "fresh_bench_json_writes": 5,
+      "host_identity_code": 0,
+      "probe": "arena_failure_control",
+      "refusals": [
+        "auto-test de la verification d arene en echec"
+      ],
+      "stale_payload_metadata": null,
+      "verdict": {
+        "cases": {
+          "synthetic_k5_l24": {
+            "ci95": [
+              0.10000000000000002,
+              0.10000000000000002
+            ],
+            "deciding": true,
+            "identity": true,
+            "processes": 5,
+            "ratio_gm": 0.10000000000000002,
+            "ratios": [
+              0.10000000000000002,
+              0.10000000000000002,
+              0.10000000000000002,
+              0.10000000000000002,
+              0.10000000000000002
+            ],
+            "unresolved": 0
+          }
+        },
+        "informative_cases": null,
+        "ratio_gm_all_cases": 0.10000000000000002,
+        "refused": [
+          "auto-test de la verification d arene en echec"
+        ],
+        "rejected": [],
+        "verdict": "refuse"
+      }
+    },
+    {
+      "bench_process_calls": 5,
+      "choice": null,
+      "cli_deciding_configs": "5:24,10:24",
+      "configured_case": "synthetic_k5_l24",
+      "driver_exit_code": 0,
+      "fresh_bench_json_writes": 0,
+      "host_identity_code": 0,
+      "probe": "bench_execution_failure_control",
+      "refusals": [
+        "synthetic_k5_l24 : 5 processus en echec"
+      ],
+      "stale_payload_metadata": null,
+      "verdict": {
+        "cases": {},
+        "informative_cases": null,
+        "ratio_gm_all_cases": null,
+        "refused": [
+          "synthetic_k5_l24 : 0 processus valides sur 5 exiges",
+          "synthetic_k5_l24 : 5 processus en echec"
+        ],
+        "rejected": [],
+        "verdict": "refuse"
+      }
+    }
+  ],
+  "m2_nonfinite": {
+    "choice": "j3",
+    "probe": "nonfinite_timings",
+    "ratio_is_nan": true,
+    "reason_refused": [],
+    "verdict": "adopte"
+  },
+  "m34_empty": {
+    "binary_hashes": {
+      "mhgp12_mes_m3": "306c6ca7407560340797866e077e053627ad409277d1b9da58106fce4cf717cb",
+      "mhgp12_mes_m4": "306c6ca7407560340797866e077e053627ad409277d1b9da58106fce4cf717cb",
+      "mhgp12_mes_m4_mutant_sans_contraction": "275239824e00e61b0a220e61a41791c7e9b4bd726f8b0c27077a338f8131c9dc"
+    },
+    "m3_driver_code": 0,
+    "m3_processes": 5,
+    "m3_routes_declared_deterministic": true,
+    "m4_driver_code": 0,
+    "m4_mutant_declared_killed": true,
+    "probe": "zero_output_native_processes",
+    "summaries": {
+      "mes_m3": {
+        "synthetic_k10": {}
+      },
+      "mes_m4": {},
+      "resolution": {}
+    }
+  },
+  "m34_resolution": {
+    "bin_files_created": 0,
+    "driver_codes": [
+      0,
+      0
+    ],
+    "ful1_present": false,
+    "input_data_opened": false,
+    "probe": "resolution_replication_and_overwrite",
+    "processus_requested": 5,
+    "resolution_ratio_after_first": 0.1,
+    "resolution_ratio_after_second": 0.2,
+    "retained_resolution_lines": 1,
+    "vidage_calls_after_first": 1,
+    "vidage_calls_after_second": 2
+  },
+  "pin": "95247cf4baf2ebd0856c1ac75670f643d24daa6e",
+  "schema": "ehgp.v12.audit_pilotes.v1",
+  "scope": "synthetic fault injections; no CUDA, no real cloud, no actual timing or algorithm verdict",
+  "source_sha256": {
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/scripts/g4_leaf_bench.py": "84e4c192d9dd8a42e1b45aa096440129e749c5e3f957f4d4ee8dc83b4ee6cd88",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/pilote.py": "e646a6de57007d8a121184ed347eb1049789d0fa55d01aee647a90de1907f30d"
+  }
+}

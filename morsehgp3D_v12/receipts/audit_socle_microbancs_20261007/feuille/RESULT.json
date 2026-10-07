@@ -1,0 +1,188 @@
+{
+  "pin": "95247cf4baf2ebd0856c1ac75670f643d24daa6e",
+  "current_head": "95247cf4baf2ebd0856c1ac75670f643d24daa6e",
+  "profile": 21,
+  "source_hashes_verified_before_after": true,
+  "explicit_expectations_verified": true,
+  "compiled_local_dependencies": {
+    "probe": [
+      "morsehgp3D_v11/src/catalogue/leaf_device.hpp",
+      "morsehgp3D_v11/src/catalogue/leaf_device_predicates.hpp",
+      "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/dump_format.hpp",
+      "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_coherent.hpp",
+      "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_common.hpp",
+      "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_j3.hpp",
+      "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/predicates.hpp",
+      "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/simt.hpp",
+      "morsehgp3D_v12/receipts/audit_socle_microbancs_20261007/feuille/probe.cpp"
+    ],
+    "identity": [
+      "morsehgp3D_v12/microbancs/mes_m2_feuille/host/leaf_identity.cpp",
+      "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/dump_format.hpp",
+      "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_coherent.hpp",
+      "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_common.hpp",
+      "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_j3.hpp",
+      "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/predicates.hpp",
+      "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/simt.hpp"
+    ]
+  },
+  "scope": "host_simulation_and_original_reader_no_gpu",
+  "probe": [
+    {
+      "shape": "sphere32",
+      "form": 0,
+      "status": 0,
+      "records": 347,
+      "chunks": 82,
+      "triples": 4960,
+      "quadruples": 35960
+    },
+    {
+      "shape": "sphere32",
+      "form": 1,
+      "status": 0,
+      "records": 347,
+      "chunks": 0,
+      "triples": 0,
+      "quadruples": 0
+    },
+    {
+      "shape": "span_exact",
+      "form": 0,
+      "status": 0,
+      "records": 1,
+      "chunks": 1,
+      "triples": 0,
+      "quadruples": 0
+    },
+    {
+      "shape": "span_exact",
+      "form": 1,
+      "status": 0,
+      "records": 1,
+      "chunks": 0,
+      "triples": 0,
+      "quadruples": 0
+    },
+    {
+      "shape": "span_plus_one",
+      "form": 0,
+      "status": 1,
+      "records": 0,
+      "chunks": 0,
+      "triples": 0,
+      "quadruples": 0
+    },
+    {
+      "shape": "span_plus_one",
+      "form": 1,
+      "status": 1,
+      "records": 0,
+      "chunks": 0,
+      "triples": 0,
+      "quadruples": 0
+    },
+    {
+      "dump_case": "baseline",
+      "reader_accepted": true
+    },
+    {
+      "dump_case": "site_out_of_cloud",
+      "reader_accepted": true
+    },
+    {
+      "dump_case": "wrapped_job_begin",
+      "reader_accepted": true
+    },
+    {
+      "dump_case": "zero_k",
+      "reader_accepted": true
+    },
+    {
+      "dump_case": "profile_mismatch",
+      "reader_accepted": true
+    },
+    {
+      "dump_case": "coordinate_out_of_profile",
+      "reader_accepted": true
+    },
+    {
+      "dump_case": "short_record_population",
+      "reader_accepted": true
+    }
+  ],
+  "identity": [
+    {
+      "case": "baseline",
+      "exit": 0,
+      "forms": [
+        {
+          "form": "j3",
+          "resolved": 1,
+          "unresolved": 0,
+          "identity": true
+        },
+        {
+          "form": "coherent",
+          "resolved": 1,
+          "unresolved": 0,
+          "identity": true
+        }
+      ]
+    },
+    {
+      "case": "zero_k",
+      "exit": 0,
+      "forms": [
+        {
+          "form": "j3",
+          "resolved": 0,
+          "unresolved": 1,
+          "identity": true
+        },
+        {
+          "form": "coherent",
+          "resolved": 0,
+          "unresolved": 1,
+          "identity": true
+        }
+      ]
+    },
+    {
+      "case": "profile_mismatch",
+      "exit": 0,
+      "forms": [
+        {
+          "form": "j3",
+          "resolved": 1,
+          "unresolved": 0,
+          "identity": true
+        },
+        {
+          "form": "coherent",
+          "resolved": 1,
+          "unresolved": 0,
+          "identity": true
+        }
+      ]
+    },
+    {
+      "case": "coordinate_out_of_profile",
+      "exit": 0,
+      "forms": [
+        {
+          "form": "j3",
+          "resolved": 1,
+          "unresolved": 0,
+          "identity": true
+        },
+        {
+          "form": "coherent",
+          "resolved": 1,
+          "unresolved": 0,
+          "identity": true
+        }
+      ]
+    }
+  ]
+}

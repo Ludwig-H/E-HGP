@@ -1,0 +1,20 @@
+{
+  "pin": "95247cf4b",
+  "source_sha256": {
+    "morsehgp3D_v12/src/core/buffer.cpp": "069a658c0750b99d2c90dff31b9700cd5435cfce7eb7ee495a22a0358811a0ad",
+    "morsehgp3D_v12/src/core/buffer.hpp": "73cac26c57ce59c205943fcb1a484d9efce79f81cfe3851048d7c9fb2732c494",
+    "morsehgp3D_v12/src/core/types.hpp": "e801366355753ac0df37dd0fff33d31b59c63fb5473d5d61470ba7de94fc3cc7",
+    "morsehgp3D_v12/src/core/status.hpp": "d81b3e8aab647c97fe97fa7d91081efa28ab88cdac8706cafdd825b17e4046ea",
+    "morsehgp3D_v12/src/core/reasons.def": "43015ae452b06fed099e933f2bbd756e613e83607466f6d38c724494fc2c62e0"
+  },
+  "result": {
+    "limit": 262145,
+    "live_accounted": 262145,
+    "allocator_request": 286720,
+    "after_reset_used": 0,
+    "after_reset_idle": 286720,
+    "admit_limit_again": true
+  },
+  "scope": "real v12 buffer; requested allocation capacity, not RSS; no sanitizer campaign",
+  "verdict": "CST-0007/0019 remain open after the mechanical port"
+}

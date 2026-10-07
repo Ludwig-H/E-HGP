@@ -7,7 +7,7 @@
 | Lecture | Contenu |
 | --- | --- |
 | [Auditeur Codex](AUDIT_CODEX_20261007.md) | état de sa dernière contre-lecture et travail restant |
-| [Auditeur Claude](AUDIT_CLAUDE_20261007.md) | synthèse attribuée des lemmes T et du contrat numérique |
+| [Auditeur Claude](AUDIT_CLAUDE_20261007.md) | contre-lectures des lemmes, du contrat numérique et des ports |
 | [Registre](CONSTATS.md) | tous les constats, y compris ceux reportés de la v11 |
 | [Historique et réponse du développeur](../receipts/audit_canal_20261007/README.md) | notes antérieures, réponse du développeur, pins et table des déplacements |
 

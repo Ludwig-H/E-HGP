@@ -1,0 +1,43 @@
+{
+  "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "runs": [
+    {
+      "binary": "mes_m3",
+      "binary_sha256": "da2a7c6d1bbba1a71301e5b1be73d38174ad39508fcad864cfa588c2a2471c0e",
+      "args": [
+        "--porte"
+      ],
+      "expected_code": 0,
+      "exit_code": 0
+    },
+    {
+      "binary": "mes_m3_mutant",
+      "binary_sha256": "eb5610ed0c2d866b56c57b158ad3eb06b8b1f9e397cceebf59d6878805f1389b",
+      "args": [
+        "--porte"
+      ],
+      "expected_code": 1,
+      "exit_code": 1
+    },
+    {
+      "binary": "mes_m4",
+      "binary_sha256": "20081e0d344cf02c853fa530cafc7ca0f61122b2ed9d2c8b388889a1bf3891a5",
+      "args": [
+        "--porte",
+        "120"
+      ],
+      "expected_code": 0,
+      "exit_code": 0
+    },
+    {
+      "binary": "mes_m4_mutant",
+      "binary_sha256": "c12f490024285e724e6cc1f6efac3c2b3ad405dbfa8da84b3c752a96b20d5108",
+      "args": [
+        "--porte",
+        "120"
+      ],
+      "expected_code": 1,
+      "exit_code": 1
+    }
+  ]
+}

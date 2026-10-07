@@ -1,0 +1,576 @@
+{
+  "before_after_unchanged": true,
+  "binary_sha256": "20081e0d344cf02c853fa530cafc7ca0f61122b2ed9d2c8b388889a1bf3891a5",
+  "native_microbench_executed": true,
+  "results": [
+    {
+      "exit_code": 0,
+      "mode": "valid",
+      "rows": [
+        {
+          "K": 4,
+          "mutant_sans_contraction": false,
+          "phase": "entree",
+          "repetitions": 1,
+          "trame": "audit_square"
+        },
+        {
+          "cellules": 5,
+          "contraction_parallele": {
+            "fils": 2,
+            "identique": true,
+            "secondes": 6.5793e-05
+          },
+          "evenements": 3,
+          "fusions": 1,
+          "groupes_de_rang": 1,
+          "groupes_multiples": 1,
+          "identite": {
+            "dates_ecarts": 0,
+            "enfants_ecarts": 0,
+            "forme": true,
+            "graines_ecarts": 0,
+            "identiques": true,
+            "naissances_ecarts": 0,
+            "noeuds_ecarts": 0
+          },
+          "k": 1,
+          "lem_t6": {
+            "ecarts": 0,
+            "images_par_naissance_basse": 0,
+            "naissances_jugees": 0
+          },
+          "naissances": 4,
+          "noeuds": 5,
+          "noeuds_v11": 5,
+          "phase": "ordre",
+          "plus_grand_groupe": 3,
+          "racine_unique": true,
+          "representants": 12,
+          "temps_un_fil_s": {
+            "contraction": 1.412e-06,
+            "naissances": 1.022e-06,
+            "noyau": 6.41e-07
+          }
+        },
+        {
+          "cellules": 1,
+          "contraction_parallele": {
+            "fils": 2,
+            "identique": true,
+            "secondes": 2.8353e-05
+          },
+          "evenements": 3,
+          "fusions": 1,
+          "groupes_de_rang": 1,
+          "groupes_multiples": 1,
+          "identite": {
+            "dates_ecarts": 0,
+            "enfants_ecarts": 0,
+            "forme": true,
+            "graines_ecarts": 0,
+            "identiques": true,
+            "naissances_ecarts": 0,
+            "noeuds_ecarts": 0
+          },
+          "k": 2,
+          "lem_t6": {
+            "ecarts": 0,
+            "images_par_naissance_basse": 0,
+            "naissances_jugees": 4
+          },
+          "naissances": 4,
+          "noeuds": 5,
+          "noeuds_v11": 5,
+          "phase": "ordre",
+          "plus_grand_groupe": 3,
+          "racine_unique": true,
+          "representants": 4,
+          "temps_un_fil_s": {
+            "contraction": 1.062e-06,
+            "naissances": 5.21e-07,
+            "noyau": 4e-07
+          }
+        },
+        {
+          "cellules": 0,
+          "contraction_parallele": {
+            "fils": 2,
+            "identique": true,
+            "secondes": 2.6119e-05
+          },
+          "evenements": 0,
+          "fusions": 0,
+          "groupes_de_rang": 0,
+          "groupes_multiples": 0,
+          "identite": {
+            "dates_ecarts": 0,
+            "enfants_ecarts": 0,
+            "forme": true,
+            "graines_ecarts": 0,
+            "identiques": true,
+            "naissances_ecarts": 0,
+            "noeuds_ecarts": 0
+          },
+          "k": 3,
+          "lem_t6": {
+            "ecarts": 0,
+            "images_par_naissance_basse": 0,
+            "naissances_jugees": 1
+          },
+          "naissances": 1,
+          "noeuds": 1,
+          "noeuds_v11": 1,
+          "phase": "ordre",
+          "plus_grand_groupe": 0,
+          "racine_unique": true,
+          "representants": 0,
+          "temps_un_fil_s": {
+            "contraction": 3.2e-07,
+            "naissances": 1.5e-07,
+            "noyau": 3.2e-07
+          }
+        },
+        {
+          "cellules": 0,
+          "contraction_parallele": {
+            "fils": 2,
+            "identique": true,
+            "secondes": 2.4496e-05
+          },
+          "evenements": 0,
+          "fusions": 0,
+          "groupes_de_rang": 0,
+          "groupes_multiples": 0,
+          "identite": {
+            "dates_ecarts": 0,
+            "enfants_ecarts": 0,
+            "forme": true,
+            "graines_ecarts": 0,
+            "identiques": true,
+            "naissances_ecarts": 0,
+            "noeuds_ecarts": 0
+          },
+          "k": 4,
+          "lem_t6": {
+            "ecarts": 0,
+            "images_par_naissance_basse": 1,
+            "naissances_jugees": 1
+          },
+          "naissances": 1,
+          "noeuds": 1,
+          "noeuds_v11": 1,
+          "phase": "ordre",
+          "plus_grand_groupe": 0,
+          "racine_unique": true,
+          "representants": 0,
+          "temps_un_fil_s": {
+            "contraction": 2.3e-07,
+            "naissances": 1.11e-07,
+            "noyau": 2.41e-07
+          }
+        },
+        {
+          "code": 0,
+          "phase": "fin"
+        }
+      ],
+      "stderr": "",
+      "synthetic_dumps": {
+        "cat.bin": "ffd0d96e64ae4bacd57cd70c9057c8b9fe792e814417db40095a9d88c36d994b",
+        "foret_1.bin": "91cfda8eb7ad04344aa07d39a197eb6923bcfd21d20820bbf1dc981d74e1b15f",
+        "foret_2.bin": "eb85aef53887a5f1a96294f02207f7c960578605a66be5c55476bb9fa88bfb64",
+        "foret_3.bin": "2eaba04335d1db6e7c216c9cdd0babeb9f0b7316379847af7bad23251683752d",
+        "foret_4.bin": "27cb118e4772eef1bcb4b76e150bc441b576fb2fcb5ff3e3d16efeb190ed2a85",
+        "ordre_1.bin": "ce1ffd2a89fd527300af1e0cfa0fe812444f60a7b5aa590c237b54dc7fb138ce",
+        "ordre_2.bin": "454d3f1a4bfb7477a7c1b50bca3ad8b68a7734e5c9264d4c4b68d6d26803a201",
+        "ordre_3.bin": "ef640c1e86a6724d9138eecef3ea47acecadd91895f7a770e0d193492879dedc",
+        "ordre_4.bin": "976b3f438c39ef2ff11c5715b0352fa420b8c806561de30d37822675ea72521e"
+      }
+    },
+    {
+      "exit_code": 1,
+      "mode": "wrong",
+      "rows": [
+        {
+          "K": 4,
+          "mutant_sans_contraction": false,
+          "phase": "entree",
+          "repetitions": 1,
+          "trame": "audit_square"
+        },
+        {
+          "cellules": 5,
+          "contraction_parallele": {
+            "fils": 2,
+            "identique": true,
+            "secondes": 5.9712e-05
+          },
+          "evenements": 3,
+          "fusions": 1,
+          "groupes_de_rang": 1,
+          "groupes_multiples": 1,
+          "identite": {
+            "dates_ecarts": 0,
+            "enfants_ecarts": 0,
+            "forme": true,
+            "graines_ecarts": 0,
+            "identiques": true,
+            "naissances_ecarts": 0,
+            "noeuds_ecarts": 0
+          },
+          "k": 1,
+          "lem_t6": {
+            "ecarts": 0,
+            "images_par_naissance_basse": 0,
+            "naissances_jugees": 0
+          },
+          "naissances": 4,
+          "noeuds": 5,
+          "noeuds_v11": 5,
+          "phase": "ordre",
+          "plus_grand_groupe": 3,
+          "racine_unique": true,
+          "representants": 12,
+          "temps_un_fil_s": {
+            "contraction": 1.222e-06,
+            "naissances": 7.71e-07,
+            "noyau": 5.51e-07
+          }
+        },
+        {
+          "cellules": 1,
+          "contraction_parallele": {
+            "fils": 2,
+            "identique": true,
+            "secondes": 1.7983e-05
+          },
+          "evenements": 3,
+          "fusions": 1,
+          "groupes_de_rang": 1,
+          "groupes_multiples": 1,
+          "identite": {
+            "dates_ecarts": 0,
+            "enfants_ecarts": 0,
+            "forme": true,
+            "graines_ecarts": 0,
+            "identiques": true,
+            "naissances_ecarts": 0,
+            "noeuds_ecarts": 0
+          },
+          "k": 2,
+          "lem_t6": {
+            "ecarts": 1,
+            "images_par_naissance_basse": 0,
+            "naissances_jugees": 4
+          },
+          "naissances": 4,
+          "noeuds": 5,
+          "noeuds_v11": 5,
+          "phase": "ordre",
+          "plus_grand_groupe": 3,
+          "racine_unique": true,
+          "representants": 4,
+          "temps_un_fil_s": {
+            "contraction": 1.042e-06,
+            "naissances": 4.81e-07,
+            "noyau": 4.21e-07
+          }
+        },
+        {
+          "cellules": 0,
+          "contraction_parallele": {
+            "fils": 2,
+            "identique": true,
+            "secondes": 2.4696e-05
+          },
+          "evenements": 0,
+          "fusions": 0,
+          "groupes_de_rang": 0,
+          "groupes_multiples": 0,
+          "identite": {
+            "dates_ecarts": 0,
+            "enfants_ecarts": 0,
+            "forme": true,
+            "graines_ecarts": 0,
+            "identiques": true,
+            "naissances_ecarts": 0,
+            "noeuds_ecarts": 0
+          },
+          "k": 3,
+          "lem_t6": {
+            "ecarts": 0,
+            "images_par_naissance_basse": 0,
+            "naissances_jugees": 1
+          },
+          "naissances": 1,
+          "noeuds": 1,
+          "noeuds_v11": 1,
+          "phase": "ordre",
+          "plus_grand_groupe": 0,
+          "racine_unique": true,
+          "representants": 0,
+          "temps_un_fil_s": {
+            "contraction": 3e-07,
+            "naissances": 1.5e-07,
+            "noyau": 2.51e-07
+          }
+        },
+        {
+          "cellules": 0,
+          "contraction_parallele": {
+            "fils": 2,
+            "identique": true,
+            "secondes": 2.3744e-05
+          },
+          "evenements": 0,
+          "fusions": 0,
+          "groupes_de_rang": 0,
+          "groupes_multiples": 0,
+          "identite": {
+            "dates_ecarts": 0,
+            "enfants_ecarts": 0,
+            "forme": true,
+            "graines_ecarts": 0,
+            "identiques": true,
+            "naissances_ecarts": 0,
+            "noeuds_ecarts": 0
+          },
+          "k": 4,
+          "lem_t6": {
+            "ecarts": 0,
+            "images_par_naissance_basse": 1,
+            "naissances_jugees": 1
+          },
+          "naissances": 1,
+          "noeuds": 1,
+          "noeuds_v11": 1,
+          "phase": "ordre",
+          "plus_grand_groupe": 0,
+          "racine_unique": true,
+          "representants": 0,
+          "temps_un_fil_s": {
+            "contraction": 2.01e-07,
+            "naissances": 1.51e-07,
+            "noyau": 2.1e-07
+          }
+        },
+        {
+          "code": 1,
+          "phase": "fin"
+        }
+      ],
+      "stderr": "",
+      "synthetic_dumps": {
+        "cat.bin": "ffd0d96e64ae4bacd57cd70c9057c8b9fe792e814417db40095a9d88c36d994b",
+        "foret_1.bin": "91cfda8eb7ad04344aa07d39a197eb6923bcfd21d20820bbf1dc981d74e1b15f",
+        "foret_2.bin": "80425005d12e0bf22c66e23758c725acf3e3d2f8a12b4beabe1edc7303d95eb1",
+        "foret_3.bin": "2eaba04335d1db6e7c216c9cdd0babeb9f0b7316379847af7bad23251683752d",
+        "foret_4.bin": "27cb118e4772eef1bcb4b76e150bc441b576fb2fcb5ff3e3d16efeb190ed2a85",
+        "ordre_1.bin": "ce1ffd2a89fd527300af1e0cfa0fe812444f60a7b5aa590c237b54dc7fb138ce",
+        "ordre_2.bin": "454d3f1a4bfb7477a7c1b50bca3ad8b68a7734e5c9264d4c4b68d6d26803a201",
+        "ordre_3.bin": "ef640c1e86a6724d9138eecef3ea47acecadd91895f7a770e0d193492879dedc",
+        "ordre_4.bin": "976b3f438c39ef2ff11c5715b0352fa420b8c806561de30d37822675ea72521e"
+      }
+    },
+    {
+      "exit_code": 0,
+      "mode": "absent",
+      "rows": [
+        {
+          "K": 4,
+          "mutant_sans_contraction": false,
+          "phase": "entree",
+          "repetitions": 1,
+          "trame": "audit_square"
+        },
+        {
+          "cellules": 5,
+          "contraction_parallele": {
+            "fils": 2,
+            "identique": true,
+            "secondes": 7.4449e-05
+          },
+          "evenements": 3,
+          "fusions": 1,
+          "groupes_de_rang": 1,
+          "groupes_multiples": 1,
+          "identite": {
+            "dates_ecarts": 0,
+            "enfants_ecarts": 0,
+            "forme": true,
+            "graines_ecarts": 0,
+            "identiques": true,
+            "naissances_ecarts": 0,
+            "noeuds_ecarts": 0
+          },
+          "k": 1,
+          "lem_t6": {
+            "ecarts": 0,
+            "images_par_naissance_basse": 0,
+            "naissances_jugees": 0
+          },
+          "naissances": 4,
+          "noeuds": 5,
+          "noeuds_v11": 5,
+          "phase": "ordre",
+          "plus_grand_groupe": 3,
+          "racine_unique": true,
+          "representants": 12,
+          "temps_un_fil_s": {
+            "contraction": 1.222e-06,
+            "naissances": 7.61e-07,
+            "noyau": 5.3e-07
+          }
+        },
+        {
+          "cellules": 1,
+          "contraction_parallele": {
+            "fils": 2,
+            "identique": true,
+            "secondes": 3.9794e-05
+          },
+          "evenements": 3,
+          "fusions": 1,
+          "groupes_de_rang": 1,
+          "groupes_multiples": 1,
+          "identite": {
+            "dates_ecarts": 0,
+            "enfants_ecarts": 0,
+            "forme": true,
+            "graines_ecarts": 0,
+            "identiques": true,
+            "naissances_ecarts": 0,
+            "noeuds_ecarts": 0
+          },
+          "k": 2,
+          "lem_t6": {
+            "ecarts": 0,
+            "images_par_naissance_basse": 0,
+            "naissances_jugees": 0
+          },
+          "naissances": 4,
+          "noeuds": 5,
+          "noeuds_v11": 5,
+          "phase": "ordre",
+          "plus_grand_groupe": 3,
+          "racine_unique": true,
+          "representants": 4,
+          "temps_un_fil_s": {
+            "contraction": 1.062e-06,
+            "naissances": 4.71e-07,
+            "noyau": 3.91e-07
+          }
+        },
+        {
+          "cellules": 0,
+          "contraction_parallele": {
+            "fils": 2,
+            "identique": true,
+            "secondes": 4.0415e-05
+          },
+          "evenements": 0,
+          "fusions": 0,
+          "groupes_de_rang": 0,
+          "groupes_multiples": 0,
+          "identite": {
+            "dates_ecarts": 0,
+            "enfants_ecarts": 0,
+            "forme": true,
+            "graines_ecarts": 0,
+            "identiques": true,
+            "naissances_ecarts": 0,
+            "noeuds_ecarts": 0
+          },
+          "k": 3,
+          "lem_t6": {
+            "ecarts": 0,
+            "images_par_naissance_basse": 0,
+            "naissances_jugees": 0
+          },
+          "naissances": 1,
+          "noeuds": 1,
+          "noeuds_v11": 1,
+          "phase": "ordre",
+          "plus_grand_groupe": 0,
+          "racine_unique": true,
+          "representants": 0,
+          "temps_un_fil_s": {
+            "contraction": 3.21e-07,
+            "naissances": 1.5e-07,
+            "noyau": 2.6e-07
+          }
+        },
+        {
+          "cellules": 0,
+          "contraction_parallele": {
+            "fils": 2,
+            "identique": true,
+            "secondes": 3.4554e-05
+          },
+          "evenements": 0,
+          "fusions": 0,
+          "groupes_de_rang": 0,
+          "groupes_multiples": 0,
+          "identite": {
+            "dates_ecarts": 0,
+            "enfants_ecarts": 0,
+            "forme": true,
+            "graines_ecarts": 0,
+            "identiques": true,
+            "naissances_ecarts": 0,
+            "noeuds_ecarts": 0
+          },
+          "k": 4,
+          "lem_t6": {
+            "ecarts": 0,
+            "images_par_naissance_basse": 0,
+            "naissances_jugees": 0
+          },
+          "naissances": 1,
+          "noeuds": 1,
+          "noeuds_v11": 1,
+          "phase": "ordre",
+          "plus_grand_groupe": 0,
+          "racine_unique": true,
+          "representants": 0,
+          "temps_un_fil_s": {
+            "contraction": 2.41e-07,
+            "naissances": 8e-08,
+            "noyau": 2.11e-07
+          }
+        },
+        {
+          "code": 0,
+          "phase": "fin"
+        }
+      ],
+      "stderr": "",
+      "synthetic_dumps": {
+        "cat.bin": "ffd0d96e64ae4bacd57cd70c9057c8b9fe792e814417db40095a9d88c36d994b",
+        "foret_1.bin": "91cfda8eb7ad04344aa07d39a197eb6923bcfd21d20820bbf1dc981d74e1b15f",
+        "foret_2.bin": "99821cb69d97f5fb76d08a52079f856b2b92845bd0d19978d78bac496383a1d4",
+        "foret_3.bin": "91caa2975ff965671679a444084eb0c37fedd5376f2c950168cfe1a5803362eb",
+        "foret_4.bin": "e8aa5697c3caa933e95ca76f998ab0f8f293c630f446f331bc52fd08e222ae13",
+        "ordre_1.bin": "ce1ffd2a89fd527300af1e0cfa0fe812444f60a7b5aa590c237b54dc7fb138ce",
+        "ordre_2.bin": "454d3f1a4bfb7477a7c1b50bca3ad8b68a7734e5c9264d4c4b68d6d26803a201",
+        "ordre_3.bin": "ef640c1e86a6724d9138eecef3ea47acecadd91895f7a770e0d193492879dedc",
+        "ordre_4.bin": "976b3f438c39ef2ff11c5715b0352fa420b8c806561de30d37822675ea72521e"
+      }
+    }
+  ],
+  "schema": "ehgp.v12.m4.t6_missing_section.v1",
+  "script_sha256": "b6b333bde0ab9627f957b76a553281bf645b42163c970d816b1888a4f9e93f2e",
+  "source_closure": {
+    "audited_pin": "95247cf4baf2ebd0856c1ac75670f643d24daa6e",
+    "checkout_head": "95247cf4baf2ebd0856c1ac75670f643d24daa6e",
+    "manifest_sha256": "b34013c8d3b8daeb7720ca52fe3b61c48421029f468c49c9fa4937cbd0e58073",
+    "sources_checked": 11
+  },
+  "synthetic_points": 4,
+  "verdicts": {
+    "missing_flower_false_success_reproduced": true,
+    "valid_square_accepted": true,
+    "wrong_vertical_refused": true
+  }
+}

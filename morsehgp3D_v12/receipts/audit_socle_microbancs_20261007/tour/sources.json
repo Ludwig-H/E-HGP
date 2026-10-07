@@ -1,0 +1,60 @@
+{
+  "pin": "95247cf4baf2ebd0856c1ac75670f643d24daa6e",
+  "files": [
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m3_m4_tour/README.md",
+      "sha256": "1cecc65c58d8d3032f2cd9a7e97d9445504a59e968857c7b48f79d6ddcf63cc2",
+      "blob": "a4faf8f2d2cd5560054ca102c730fda76e60cb9c"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m3_m4_tour/CMakeLists.txt",
+      "sha256": "6d34fae16f7386edfd458e51d2e27b96cbc8271b0338e9555061b31ce66134cc",
+      "blob": "caa18c2d7b0d685115220df384248e3c7ca7f792"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m3_m4_tour/common/format.hpp",
+      "sha256": "b0ce982cf71f4e2f9438612221484c69d5e83d7c899c4aedbd1101d7b6f55a9c",
+      "blob": "3733cc53250b38c6c254046c213f6ed56ea0a3f0"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m3_m4_tour/mes_m3/meb_cert.hpp",
+      "sha256": "c3ccb3b6588d94a8854098f2f800352b2748ce804ec8188e2b03fa3a016f6934",
+      "blob": "5bdcb550909fecdde565ce979a57913d8fbb7a38"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m3_m4_tour/mes_m3/mes_m3.cpp",
+      "sha256": "d69427c915d893c85810074b453fb8c460582689e1c0a8887e20f7bc1149487f",
+      "blob": "79a60102f7e866a0bf8a525fa569bafb6834749e"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m3_m4_tour/mes_m3/welzl_proposal.hpp",
+      "sha256": "3f7a0f113b5fe8a28b878c05be0c933e3e3eb28023e686e3fb0812900d863d62",
+      "blob": "ac07720e4d8d6aa9e4374d5dc3981dbda02be921"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m3_m4_tour/mes_m4/mes_m4.cpp",
+      "sha256": "14c138201a6d9e805410b1667ee444a41d2a712a630a8fb252a5486f979141cb",
+      "blob": "87b377bbb15dd8efce511be1dfc67f05a1e82b8e"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m3_m4_tour/vidage/vidage_v11.cpp",
+      "sha256": "c7e3d17cd658137e8dbc85ab51b915113bf2eb65675f45ff14ef989695285604",
+      "blob": "1ecfdaa7bb9cd254e7a538148032942a756d7c9a"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/meb.cpp",
+      "sha256": "a7b828ec6922554e6142fb38b9d7a359db22b59beee5e7250525b077cedd3d00",
+      "blob": "afad7047e18cd8cf2a712f5d3b841ceedc95de92"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/meb.hpp",
+      "sha256": "fd307ad49e3f0aa807d080e2467a577697db01501732bdfd7b6502dec9760380",
+      "blob": "05c1567b10a0b35e63da78e0684e41754f3085c9"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/cells.cpp",
+      "sha256": "e73b3d34b8145463aa4b4841add96fba4e9dc1094ead556508d2d79b399d89f0",
+      "blob": "a0b8216f02a7abdea0ce3420bab8af80bd2dfc4a"
+    }
+  ]
+}

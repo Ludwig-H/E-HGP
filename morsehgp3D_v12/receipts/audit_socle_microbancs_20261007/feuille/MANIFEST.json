@@ -1,0 +1,49 @@
+{
+  "pin": "95247cf4baf2ebd0856c1ac75670f643d24daa6e",
+  "scope": "CPU simulated warp and binary reader, no GPU",
+  "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "sources": {
+    "morsehgp3D_v11/src/catalogue/leaf_device.hpp": "e7e3ce1b81cca63161b38dbbc6d4f0ee9c3e984cd3fc3e8c208776423aa0a26a",
+    "morsehgp3D_v11/src/catalogue/leaf_device_predicates.hpp": "c638996b661c6fc690a9dff30d61a0c5294b882001bb806009d72120f6168472",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/README.md": "1523e908155cd01cfcff69930abeef7d9391ecca3bee938e685329dcf69b3256",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/cuda/leaf_bench.cu": "48c2fdbd73db55d85f6271fdf14b35fa513acec8d292f333efecd1e0d91ef26c",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/host/leaf_identity.cpp": "cf2c80ef604887f7308b68cc114cba5376116e4117dbc7df9e4764cb0cd72013",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/arena.hpp": "ca4b821b69c4724b8d4d9076802ba5efff1e040cf60bd7eef51b9eb1991cb78a",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/compare.hpp": "aa31b79d417452bc575246b506a45ca3fb0021f96fd349fabd851bfd31ceeae4",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/dump_format.hpp": "e01f8d3146d09bfcb05e96b06a33cfad27c27370b1d1aade7800a4a315b913a3",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_coherent.hpp": "a928efb5092780f407284d7eff49a443ad2079162d00f52254ba7a86d2eddd7d",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_common.hpp": "db205b77a9b04180e6a74597b876744641b4e5220665851f492875fa9b540afb",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_j3.hpp": "8235004c799097815bbd48c15c806c9e4d4a7cb6d99934491617c29d7d28a5b5",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/predicates.hpp": "36144eff2d5ddf57bee5453d2e72b758a72b88dabf037d2323b0a10ad55f4be1",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/simt.hpp": "c7276ddb0aba9b196e1b3c8ad138f778afda04614a3d57e285b94f3cb6f07691"
+  },
+  "receipts": {
+    "REPORT.md": "9413d4db5bc6d0bf6c8323615ff87f1f53c7413f8c7b8f72cfa3f0c3419d6337",
+    "RESULT.json": "5ebfcfc0c4a2c37b9ff51df6df4d99e912e3826bef2d054724f9cff78da38fda",
+    "probe.cpp": "edf32a7ad60e15bb7dd4aa236943d21e250e8cb52aa1c3f228b630269854b96e",
+    "run.py": "dd7d6acb88672ffe3476b1eef069bcd0c8e4570ffc900338c21f8806e777b890"
+  },
+  "compiled_local_dependencies": {
+    "probe": [
+      "morsehgp3D_v11/src/catalogue/leaf_device.hpp",
+      "morsehgp3D_v11/src/catalogue/leaf_device_predicates.hpp",
+      "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/dump_format.hpp",
+      "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_coherent.hpp",
+      "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_common.hpp",
+      "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_j3.hpp",
+      "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/predicates.hpp",
+      "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/simt.hpp",
+      "morsehgp3D_v12/receipts/audit_socle_microbancs_20261007/feuille/probe.cpp"
+    ],
+    "identity": [
+      "morsehgp3D_v12/microbancs/mes_m2_feuille/host/leaf_identity.cpp",
+      "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/dump_format.hpp",
+      "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_coherent.hpp",
+      "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_common.hpp",
+      "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_j3.hpp",
+      "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/predicates.hpp",
+      "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/simt.hpp"
+    ]
+  },
+  "final_capture_python_optimized": true
+}

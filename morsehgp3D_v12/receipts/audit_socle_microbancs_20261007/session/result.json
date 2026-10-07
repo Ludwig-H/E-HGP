@@ -1,0 +1,106 @@
+{
+  "pin": "95247cf4b",
+  "source": "morsehgp3D_v12/microbancs/mes_m6_session/mes_m6_session_cost.cu",
+  "source_sha256": "49c6afc51d48e124c866e509700764a59150410d7664fabdadf14ee41887dff1",
+  "extracted_sha256": "dadedd0058d2a05f13e6f4389b7cab644c22b8fcf6168e807ce27c3feff9b6c3",
+  "rows": [
+    {
+      "case": 0,
+      "p05": 1.45,
+      "p50": 5.5,
+      "p95": 9.549999999999999,
+      "max": 10
+    },
+    {
+      "case": 1,
+      "p05": 1.1,
+      "p50": 2,
+      "p95": 2.9,
+      "max": 3
+    },
+    {
+      "case": 2,
+      "p05": 7,
+      "p50": 7,
+      "p95": 7,
+      "max": 7
+    },
+    {
+      "case": 3,
+      "p05": 2,
+      "p50": 2,
+      "p95": 2,
+      "max": 2
+    },
+    {
+      "case": 4,
+      "p05": 5,
+      "p50": 50,
+      "p95": 95,
+      "max": 100
+    },
+    {
+      "case": 5,
+      "p05": 1.9500000000000002,
+      "p50": 10.5,
+      "p95": 19.05,
+      "max": 20
+    },
+    {
+      "mes": "M6",
+      "name": "synthetic_first",
+      "n": 1,
+      "us": 100.0
+    },
+    {
+      "mes": "M6",
+      "name": "synthetic",
+      "n": 10,
+      "p05_us": 1.0,
+      "p50_us": 1.0,
+      "p95_us": 1.0,
+      "max_us": 1.0
+    }
+  ],
+  "repeated_call_sites": [
+    "pool_alloc_free_256mib",
+    "empty_kernel_launch_sync",
+    "ten_launches_sync",
+    "graph_of_ten_sync",
+    "copy",
+    "touch_256mib"
+  ],
+  "cuda_compiler": [
+    "Cuda compilation tools, release 12.9, V12.9.86",
+    "Build cuda_12.9.r12.9/compiler.36037853_0"
+  ],
+  "invalid_cli": [
+    {
+      "argument": "--reps=9",
+      "exit": 2,
+      "empty_stdout": true
+    },
+    {
+      "argument": "--reps=100001",
+      "exit": 2,
+      "empty_stdout": true
+    },
+    {
+      "argument": "--reps=",
+      "exit": 2,
+      "empty_stdout": true
+    },
+    {
+      "argument": "--sync=invalid",
+      "exit": 2,
+      "empty_stdout": true
+    },
+    {
+      "argument": "--reps=999999999999999999999999999999999999999999",
+      "exit": 2,
+      "empty_stdout": true
+    }
+  ],
+  "scope": "synthetic host values; CUDA compilation and invalid CLI only; no GPU timing",
+  "verdict": "CST-0209 and CST-0210 corrected in M6 at this pin"
+}

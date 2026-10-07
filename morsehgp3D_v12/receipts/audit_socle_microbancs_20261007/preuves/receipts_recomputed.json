@@ -1,0 +1,459 @@
+{
+  "limits": "Verifies versioned receipt integrity and recomputes claims; raw clouds/dumps and original binaries not opened.",
+  "m2_host_identity": {
+    "coherent": {
+      "cases": 9,
+      "identities": true,
+      "leaves": 2748544,
+      "mismatched_counts": 0,
+      "mismatched_emissions": 0,
+      "resolved": 2748544,
+      "unresolved": 0
+    },
+    "j3": {
+      "cases": 9,
+      "identities": true,
+      "leaves": 2748544,
+      "mismatched_counts": 0,
+      "mismatched_emissions": 0,
+      "resolved": 2748544,
+      "unresolved": 0
+    }
+  },
+  "m2_source_manifest_verified": [
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m2_feuille/CMakeLists.txt",
+      "sha256": "2ca7438324188a8a41f8aab39dce2cbfe5663c3fc08cd384c6d4f99ee3206697"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m2_feuille/README.md",
+      "sha256": "1523e908155cd01cfcff69930abeef7d9391ecca3bee938e685329dcf69b3256"
+    },
+    {
+      "path": "morsehgp3D_v12/receipts/mes_m2_local_20261007/RAPPORT.md",
+      "sha256": "c4529b2e0e9eb64c91e46fae378a0bfe77d0a5e8c55125eef83ba3aecfd8626f"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/arena.hpp",
+      "sha256": "ca4b821b69c4724b8d4d9076802ba5efff1e040cf60bd7eef51b9eb1991cb78a"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/compare.hpp",
+      "sha256": "aa31b79d417452bc575246b506a45ca3fb0021f96fd349fabd851bfd31ceeae4"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/dump_format.hpp",
+      "sha256": "e01f8d3146d09bfcb05e96b06a33cfad27c27370b1d1aade7800a4a315b913a3"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_coherent.hpp",
+      "sha256": "a928efb5092780f407284d7eff49a443ad2079162d00f52254ba7a86d2eddd7d"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_common.hpp",
+      "sha256": "db205b77a9b04180e6a74597b876744641b4e5220665851f492875fa9b540afb"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_j3.hpp",
+      "sha256": "8235004c799097815bbd48c15c806c9e4d4a7cb6d99934491617c29d7d28a5b5"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/predicates.hpp",
+      "sha256": "36144eff2d5ddf57bee5453d2e72b758a72b88dabf037d2323b0a10ad55f4be1"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/simt.hpp",
+      "sha256": "c7276ddb0aba9b196e1b3c8ad138f778afda04614a3d57e285b94f3cb6f07691"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m2_feuille/cuda/leaf_bench.cu",
+      "sha256": "48c2fdbd73db55d85f6271fdf14b35fa513acec8d292f333efecd1e0d91ef26c"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m2_feuille/host/arena_selftest.cpp",
+      "sha256": "52dfaaae83686020c99d826dd8998df3a8b75ddcfdb0ea822650b47608d943e3"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m2_feuille/host/leaf_identity.cpp",
+      "sha256": "cf2c80ef604887f7308b68cc114cba5376116e4117dbc7df9e4764cb0cd72013"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m2_feuille/host/mes_s.cpp",
+      "sha256": "d8d386a1420010254adb94606ea61ba46c98e85bc490a98ba561ba236d0a22ea"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m2_feuille/vidage/leaf_dump.cpp",
+      "sha256": "fdb5bd65efce1d11773e2c261a6d689cd5d1e97e7b975500243d91a51f89a3f6"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m2_feuille/vidage/leaf_timing.cpp",
+      "sha256": "e5df0a53369387f50308c5f64c67c6bb83c68eb806d0b6cf4ff962a949479816"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m2_feuille/scripts/g4_leaf_bench.py",
+      "sha256": "84e4c192d9dd8a42e1b45aa096440129e749c5e3f957f4d4ee8dc83b4ee6cd88"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m2_feuille/scripts/make_dumps_local.sh",
+      "sha256": "33ee9e4146a31069c95e2f10d77835338ca5c2c8af4712dde5a9c72876ceca70"
+    }
+  ],
+  "m34_construction_fields": [
+    "code",
+    "dossier",
+    "erreur",
+    "etapes",
+    "libmhgp11_sha256"
+  ],
+  "m34_recorded_v11_library_sha256": "050532a95c322cc2d064eef5bfcba74b3920227f98dc21d157a0d675732cf7ca",
+  "m34_report_sha256": "6095920fb36ba6aed20c2c528d2cfd8e2b5e1a5f1e574aeff23b9c7a0f7c320c",
+  "m34_top_level_keys": [
+    "cadre",
+    "construction",
+    "executions",
+    "mes_m3",
+    "mes_m4",
+    "portes",
+    "synthese",
+    "vidages"
+  ],
+  "m3_cases": {
+    "ng00_k10": {
+      "code": 0,
+      "identity": true,
+      "orders": 9,
+      "parts": 8856134,
+      "processes": 1
+    },
+    "ng00_k5": {
+      "code": 0,
+      "identity": true,
+      "orders": 4,
+      "parts": 1175034,
+      "processes": 1
+    },
+    "ng01_k10": {
+      "code": 0,
+      "identity": true,
+      "orders": 9,
+      "parts": 6557526,
+      "processes": 1
+    },
+    "ng01_k5": {
+      "code": 0,
+      "identity": true,
+      "orders": 4,
+      "parts": 911687,
+      "processes": 1
+    },
+    "ng02_k10": {
+      "code": 0,
+      "identity": true,
+      "orders": 9,
+      "parts": 7148742,
+      "processes": 1
+    },
+    "ng02_k5": {
+      "code": 0,
+      "identity": true,
+      "orders": 4,
+      "parts": 1039136,
+      "processes": 1
+    },
+    "u16000_k5": {
+      "code": 0,
+      "identity": true,
+      "orders": 4,
+      "parts": 1178683,
+      "processes": 1
+    },
+    "u32000_k5": {
+      "code": 0,
+      "identity": true,
+      "orders": 4,
+      "parts": 2446499,
+      "processes": 1
+    },
+    "u8000_k5": {
+      "code": 0,
+      "identity": true,
+      "orders": 4,
+      "parts": 565549,
+      "processes": 1
+    }
+  },
+  "m3_parts": 29878990,
+  "m4_births_all_orders": 17795769,
+  "m4_cases": {
+    "ng00_k10": {
+      "births": 4414230,
+      "code": 0,
+      "identity": true,
+      "orders": 10,
+      "processes": 1,
+      "t6_births": 4374345,
+      "t6_differences": 0
+    },
+    "ng00_k5": {
+      "births": 897776,
+      "code": 0,
+      "identity": true,
+      "orders": 5,
+      "processes": 1,
+      "t6_births": 857891,
+      "t6_differences": 0
+    },
+    "ng01_k10": {
+      "births": 3548340,
+      "code": 0,
+      "identity": true,
+      "orders": 10,
+      "processes": 1,
+      "t6_births": 3512789,
+      "t6_differences": 0
+    },
+    "ng01_k5": {
+      "births": 761726,
+      "code": 0,
+      "identity": true,
+      "orders": 5,
+      "processes": 1,
+      "t6_births": 726175,
+      "t6_differences": 0
+    },
+    "ng02_k10": {
+      "births": 4466884,
+      "code": 0,
+      "identity": true,
+      "orders": 10,
+      "processes": 1,
+      "t6_births": 4421039,
+      "t6_differences": 0
+    },
+    "ng02_k5": {
+      "births": 982670,
+      "code": 0,
+      "identity": true,
+      "orders": 5,
+      "processes": 1,
+      "t6_births": 936825,
+      "t6_differences": 0
+    },
+    "u16000_k5": {
+      "births": 770099,
+      "code": 0,
+      "identity": true,
+      "orders": 5,
+      "processes": 1,
+      "t6_births": 754099,
+      "t6_differences": 0
+    },
+    "u32000_k5": {
+      "births": 1578871,
+      "code": 0,
+      "identity": true,
+      "orders": 5,
+      "processes": 1,
+      "t6_births": 1546871,
+      "t6_differences": 0
+    },
+    "u8000_k5": {
+      "births": 375173,
+      "code": 0,
+      "identity": true,
+      "orders": 5,
+      "processes": 1,
+      "t6_births": 367173,
+      "t6_differences": 0
+    }
+  },
+  "m4_t6_births": 17497207,
+  "pin": "95247cf4baf2ebd0856c1ac75670f643d24daa6e",
+  "receipt_files_missing": [
+    {
+      "path": "./out/campagne_locale.log",
+      "receipt": "mes_m3_m4_local_20261007",
+      "sha256": "1c40854330cc04f4dc88b8824ddb7865229ae9f420cec743ce27a9d937a55bbc"
+    },
+    {
+      "path": "./out/campagne_locale_2.log",
+      "receipt": "mes_m3_m4_local_20261007",
+      "sha256": "cd3aa6477b2ed1d6200094a48d5925ae2731a3f858899505d76fa97195a5160d"
+    },
+    {
+      "path": "./out/campagne_locale_3.log",
+      "receipt": "mes_m3_m4_local_20261007",
+      "sha256": "f1ee789f61a3a7dfa9fe03ecff088171c2763f9284d339901d476fe3f2e767da"
+    },
+    {
+      "path": "./out/campagne_locale_4.log",
+      "receipt": "mes_m3_m4_local_20261007",
+      "sha256": "85b663785949230dc9c06ae124598805ee1bfeff9b0b094d936b66bd3cb1f45f"
+    }
+  ],
+  "receipt_files_verified": [
+    {
+      "path": "README.md",
+      "receipt": "mes_m2_local_20261007",
+      "sha256": "d722cb68d2973b06426bb6d369eb60d0fc6ffe340f007746d32f98b1d7a14409"
+    },
+    {
+      "path": "RAPPORT.md",
+      "receipt": "mes_m2_local_20261007",
+      "sha256": "c4529b2e0e9eb64c91e46fae378a0bfe77d0a5e8c55125eef83ba3aecfd8626f"
+    },
+    {
+      "path": "results/MES_S.md",
+      "receipt": "mes_m2_local_20261007",
+      "sha256": "1b15e015c68efa35f9b6dd093f135d21a0b8685302bf63230c6cb8b659e8474a"
+    },
+    {
+      "path": "results/SHA256SUMS.sources",
+      "receipt": "mes_m2_local_20261007",
+      "sha256": "fb387cafec8f37780b090f4a66249f40dab07840cdb05828f3abf1b85a955852"
+    },
+    {
+      "path": "results/identity_host_v2.jsonl",
+      "receipt": "mes_m2_local_20261007",
+      "sha256": "d82a02da51ca14df7e77097c90640a3d8ff5850ba489ba5cedc672a0ebed8493"
+    },
+    {
+      "path": "results/mes_s.jsonl",
+      "receipt": "mes_m2_local_20261007",
+      "sha256": "c0c499ca727db813ecd4e6f30694274d6cbdfa9cdb236d3674f9e10fd35815a8"
+    },
+    {
+      "path": "results/timing_ng00_k10_l24_150k.json",
+      "receipt": "mes_m2_local_20261007",
+      "sha256": "fb64221d56f6089580328eb8ac838b691f5b8daaf2a72a5b452415df2ae30bea"
+    },
+    {
+      "path": "results/timing_ng00_k5_l16.json",
+      "receipt": "mes_m2_local_20261007",
+      "sha256": "682eee440c578204683b06e079a70192abae120ff558bef2148b1464d8e6c700"
+    },
+    {
+      "path": "results/timing_ng00_k5_l24.json",
+      "receipt": "mes_m2_local_20261007",
+      "sha256": "d1694e06450182dc8a8df8fcaa62b8e9dafe391f1dab03fd56ac4b62cb6a2867"
+    },
+    {
+      "path": "./RAPPORT.md",
+      "receipt": "mes_m3_m4_local_20261007",
+      "sha256": "b2f56659b50f7142bed99e42150f5483b032816687297ea9d228fbc8c3f3c8a0"
+    },
+    {
+      "path": "./README.md",
+      "receipt": "mes_m3_m4_local_20261007",
+      "sha256": "0875d0c041727b1623b047c0be09b2eb25eee621c3608160123f12436f7fb695"
+    },
+    {
+      "path": "./out/porte_mes_m3.jsonl",
+      "receipt": "mes_m3_m4_local_20261007",
+      "sha256": "e4a576194542a6faff2952cb087ba9d5ee05f19727f2c726adf03703aa87cc70"
+    },
+    {
+      "path": "./out/porte_mes_m3_mutant_sans_s_dans_f.jsonl",
+      "receipt": "mes_m3_m4_local_20261007",
+      "sha256": "2ca2395689a0fea0fc9fcbd3a1d773e1eb4cf1ef76e91530d1f8431b8da2471f"
+    },
+    {
+      "path": "./out/porte_mes_m4.jsonl",
+      "receipt": "mes_m3_m4_local_20261007",
+      "sha256": "3242950919c932fe601f3242237802f0d05460137dbb0f332cf0e0cd2bd27bb1"
+    },
+    {
+      "path": "./out/porte_mes_m4_mutant_sans_contraction.jsonl",
+      "receipt": "mes_m3_m4_local_20261007",
+      "sha256": "57c44d7cc571c32f4277b9b2b776d2c10f20fee8191d2b2e8b11cc1c208f3deb"
+    },
+    {
+      "path": "./out/rapport_mes_m3_m4.json",
+      "receipt": "mes_m3_m4_local_20261007",
+      "sha256": "6095920fb36ba6aed20c2c528d2cfd8e2b5e1a5f1e574aeff23b9c7a0f7c320c"
+    },
+    {
+      "path": "./out/tableaux.md",
+      "receipt": "mes_m3_m4_local_20261007",
+      "sha256": "30a04f20c318a93a43c4cd22684997537b5d8f30922ee3030d52a49bf09d31ac"
+    }
+  ],
+  "resolution_cases": {
+    "ng00_k10": {
+      "dump_files": 21,
+      "full_equals_expected": true,
+      "full_sha256": "61a4245b91d9a4fdad012f0a2e26a63c3e48db1d46a180db756f2c4e4aa77295",
+      "orders": 9,
+      "processes_stored": 1
+    },
+    "ng00_k5": {
+      "dump_files": 11,
+      "full_equals_expected": true,
+      "full_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+      "orders": 4,
+      "processes_stored": 1
+    },
+    "ng01_k10": {
+      "dump_files": 21,
+      "full_equals_expected": true,
+      "full_sha256": "838a447e0b92e13e42f7f69a84fd536d5d46d26463d3f4cc7c688475878fe0de",
+      "orders": 9,
+      "processes_stored": 1
+    },
+    "ng01_k5": {
+      "dump_files": 11,
+      "full_equals_expected": true,
+      "full_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+      "orders": 4,
+      "processes_stored": 1
+    },
+    "ng02_k10": {
+      "dump_files": 21,
+      "full_equals_expected": true,
+      "full_sha256": "81f89995eaccb497cfe92abb81213bebd0d4ce5076210570d86aa9456cf7ff2e",
+      "orders": 9,
+      "processes_stored": 1
+    },
+    "ng02_k5": {
+      "dump_files": 11,
+      "full_equals_expected": true,
+      "full_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+      "orders": 4,
+      "processes_stored": 1
+    },
+    "u16000_k5": {
+      "dump_files": 11,
+      "full_equals_expected": true,
+      "full_sha256": "141bc7d6523154cff1dd22b288e4155259e3d97a82877205887642bad8286889",
+      "orders": 4,
+      "processes_stored": 1
+    },
+    "u32000_k5": {
+      "dump_files": 11,
+      "full_equals_expected": true,
+      "full_sha256": "a7563907a5c9f1b273776b811d8a559eb80713eb161460edd948664f5433811b",
+      "orders": 4,
+      "processes_stored": 1
+    },
+    "u8000_k5": {
+      "dump_files": 11,
+      "full_equals_expected": true,
+      "full_sha256": "f87dbb19dd928311fcb65d5a98d30b4fb50eddf7de1d26708bbc278f46dcc7cf",
+      "orders": 4,
+      "processes_stored": 1
+    }
+  },
+  "schema": "ehgp.v12.audit_microbench_receipts.v1",
+  "source_sha256": {
+    "morsehgp3D_v12/docs/MESURE.md": "85c89f03aa79d540dca81a7f494ad22c151f9753bae3bf8e5cf8ea07a9cd9fa0",
+    "morsehgp3D_v12/docs/PLAN.md": "38784faa1694ddb23f5619dd2aef179b6f4c0e129c5e49854b70647a9843b9f6",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/README.md": "1523e908155cd01cfcff69930abeef7d9391ecca3bee938e685329dcf69b3256",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/cuda/leaf_bench.cu": "48c2fdbd73db55d85f6271fdf14b35fa513acec8d292f333efecd1e0d91ef26c",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/host/leaf_identity.cpp": "cf2c80ef604887f7308b68cc114cba5376116e4117dbc7df9e4764cb0cd72013",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/scripts/g4_leaf_bench.py": "84e4c192d9dd8a42e1b45aa096440129e749c5e3f957f4d4ee8dc83b4ee6cd88",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/CMakeLists.txt": "6d34fae16f7386edfd458e51d2e27b96cbc8271b0338e9555061b31ce66134cc",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/README.md": "1cecc65c58d8d3032f2cd9a7e97d9445504a59e968857c7b48f79d6ddcf63cc2",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/pilote.py": "e646a6de57007d8a121184ed347eb1049789d0fa55d01aee647a90de1907f30d",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/vidage/vidage_v11.cpp": "c7e3d17cd658137e8dbc85ab51b915113bf2eb65675f45ff14ef989695285604"
+  }
+}
