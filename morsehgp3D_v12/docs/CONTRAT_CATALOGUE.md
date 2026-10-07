@@ -114,6 +114,24 @@ Budget de l'étage C à K5 sur une trame de type ng00, G4, à chaud : **35 à 45
 le reste se mesure par `MES-M5` et à l'intégration. Sortie de T1 : portes vertes et budget atteint, ou écart publié avec
 sa cause ; à K10, objectif publié (le noyau de feuille seul y vaut 37,2 ms sur ng00).
 
+## 8 bis. Format d'échange et lecteur de transition
+
+Le catalogue de la v12 s'exporte, hors du chemin chronométré, au format `MHGP12DP` version 1 de genre « catalogue »
+déjà écrit par l'outil de vidage de la v11 des microbancs de la tour
+([`common/format.hpp`](../microbancs/mes_m3_m4_tour/common/format.hpp)) : en-tête (profil, $K$, nombre de sites),
+section des sites (coordonnées et `PointId`), section des boules (rang de niveau, $p$, $m$, $q_{\min}$, $S^{*}$ en indices
+de sites) dans l'ordre canonique, puis les populations $I$ et $U$ en CSR. Les deux versions partagent ainsi un format et
+le même ordre des sites (clé de Morton exacte sur coordonnées absolues).
+
+Le lecteur de transition (`reference/transition_catalogue.py`, bibliothèque standard, rationnels exacts) lit deux
+vidages, ramène chaque indice à sa position, **recalcule** le centre exact et le rayon carré de chaque boule à partir des
+positions de son $S^{*}$ (plus petite boule de 2, 3 ou 4 points), puis applique la règle du § 6.1 : bijection des
+boules par (centre, rayon carré) ; $p$, $m$, $q_{\min}$, $I$ et $U$ égaux comme ensembles de positions ; rangs recalculés
+et comparés par valeur ; pour tout $S^{*}$ différent, même boule, même cardinal, et minimum propre à chaque convention
+(rangs de Morton pour la v11, positions lexicographiques pour la v12). Il est gravé et jugé sur ses témoins (triangle
+`WIT-TRANSL`, carré `WIT-T1-CARRE` et ses deux diagonales, coquille à plusieurs supports, mutants de chaque règle) avant
+de juger le premier catalogue de la v12.
+
 ## 8. Questions pour les auditeurs
 
 1. La règle « une seule implantation » appliquée à la feuille sur l'hôte (warp simulé, plus lent que la DFS de la v11)
