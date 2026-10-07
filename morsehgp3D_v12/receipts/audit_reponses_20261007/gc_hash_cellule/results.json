@@ -1,0 +1,22 @@
+{
+  "checked": 5000,
+  "distinct_full_keys_with_hash_zero": 56,
+  "masks": 5,
+  "native_executed": false,
+  "omitted_interior": {
+    "correct_key": 2909998031247618959,
+    "first_hit_correct": 1,
+    "first_hit_wrong": 0,
+    "first_hit_zero_mask_reference": 1,
+    "inner": [
+      1
+    ],
+    "selected": [
+      2
+    ],
+    "wrong_key": 10905525725756348110
+  },
+  "traces": 1000,
+  "traces_with_bit63": 155,
+  "traces_with_wrap": 907
+}

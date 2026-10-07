@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-7 octobre 2026. Base publiée **`b06cd1449`** ; prototypes non publiés épinglés dans les reçus.
+7 octobre 2026. Base publiée **`afa21ac16`** ; prototypes non publiés épinglés dans les reçus.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. États et clôtures au [registre unique](CONSTATS.md).
 
@@ -16,7 +16,8 @@ Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalo
   Changer le résumé seul fait adopter un gain malgré 120 journaux inchangés ; huit prises testent aussi
   types, passes et configuration. [Correctif proposé](../receipts/audit_reponses_20261007/t2c_pilote_proposition/README.md) :
   21 prises, trois jugements, cinq auto-tests et deux vrais formats admis ; références corrigées, rien d'intégré.
-  Identité finale seulement ; garde auto-test en mode `rapport` encore hors patch.
+  [30 journaux réels admis](../receipts/audit_reponses_20261007/t2c_pilote_essai_local/README.md), quotas insuffisants :
+  essai toujours refusé. Identité finale seulement ; garde auto-test du mode `rapport` hors patch.
 - **G** : [couverture corrigée et erratum](../receipts/audit_reponses_20261007/g_juge_integration/README.md).
   Ma première proposition omettait `exit`, corrigé par le développeur avant livraison ; résidu `exit.order=False/0.0`.
   [Gc `c002345` contre-lu](../receipts/audit_reponses_20261007/gc_empreinte/README.md) : travail hors digest,
@@ -41,7 +42,9 @@ Catalogue CPU K5 : 451,6 / 372,7 / 469,5 ms ; v11 historique 200 / 163 / 195 ms,
 
 [Gc actif](../receipts/audit_reponses_20261007/gc_index_borne/README.md) : recherche exacte logarithmique sous collisions,
 construction d'un gros seau encore séquentielle ; G-L5 reste une dichotomie par requête. File G-L7 conforme au modèle,
-3 123 requêtes. Chronos rétablis **disjoints**, correction du prototype précédent ; reconstruction de l'index par appel.
+3 123 requêtes. [Hash par cellule](../receipts/audit_reponses_20261007/gc_hash_cellule/README.md) : 5 000 égalités,
+coût conditionnel ; W1/W8 seul ne détecte pas le mutant déterministe, le rejeu indépendant des compteurs le peut.
+Chronos **disjoints**, reconstruction par appel.
 Les [rapports locaux](../receipts/audit_reponses_20261007/gc_rapports/README.md) prennent des minima, passe 0 comprise :
 pas des médianes chaudes G4, ratios appariés non recalculables sans les passes manquantes.
 

@@ -1,0 +1,59 @@
+{
+ "cohorte": {
+  "ng00": {
+   "admises": 10,
+   "digests_distincts": 1,
+   "sites": [
+    39885
+   ]
+  },
+  "ng01": {
+   "admises": 10,
+   "digests_distincts": 1,
+   "sites": [
+    35551
+   ]
+  },
+  "ng02": {
+   "admises": 10,
+   "digests_distincts": 1,
+   "sites": [
+    45845
+   ]
+  }
+ },
+ "config": {
+  "K": 5,
+  "P": 3,
+  "W": 3,
+  "tours": 2
+ },
+ "ratios": {
+  "ng00": {
+   "A/A": 0.921759192220078,
+   "lot_t2c": 0.6727156182547416
+  },
+  "ng01": {
+   "A/A": 1.1987928355415616,
+   "lot_t2c": 0.8155372674199904
+  },
+  "ng02": {
+   "A/A": 1.055499320565413,
+   "lot_t2c": 0.7834414844972512
+  }
+ },
+ "refus": [
+  "moins de 6 passes par processus",
+  "ng00 : 2 tours valides sur 8 exiges",
+  "ng01 : 2 tours valides sur 8 exiges",
+  "ng02 : 2 tours valides sur 8 exiges"
+ ],
+ "refus_lecture": 0,
+ "stable": true,
+ "verdicts": {
+  "G-L5_au_lieu_de_G-L7": "refuse",
+  "G-L7": "refuse",
+  "index_et_corrections": "refuse",
+  "lot_t2c": "refuse"
+ }
+}
