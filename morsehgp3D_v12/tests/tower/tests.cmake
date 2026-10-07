@@ -50,7 +50,7 @@ mhgp12_python_gate(mhgp12_tower_juge_temoin 0 g_determinism.py ${tower_fausse_so
                    --threads=1,8 LABELS fast
                    LINE "g_determinism_ok cas=fausse fils=1,8 empreinte=abababababababab naissances=22 cellules=5 representants=10 cibles_cellule=0"
                    ENV MHGP12_FAUSSE_SONDE=ok)
-foreach(mode k1_seul ordre_double empreinte_courte sans_sortie)
+foreach(mode k1_seul ordre_double empreinte_courte sans_sortie sortie_ordre_booleen sortie_ordre_flottant)
   mhgp12_python_gate(mhgp12_tower_juge_refus_${mode} 2 g_determinism.py ${tower_fausse_sonde} fausse
                      --uniform=10,1,18 --k=5 --threads=1,8 LABELS fast ENV MHGP12_FAUSSE_SONDE=${mode})
 endforeach()
