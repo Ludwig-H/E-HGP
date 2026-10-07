@@ -2,7 +2,33 @@
 
 Ce guide s'applique à tout le dépôt. Les règles de sécurité et de preuve ci-dessous sont impératives, même lorsqu'une tâche ne touche qu'un prototype ou de la documentation.
 
-## Ouverture v11 — 2 octobre 2026 (chantier actif)
+## Ouverture v12 — 7 octobre 2026 (chantier actif)
+
+`morsehgp3D_v12/` remplace `morsehgp3D_v11/` comme chantier actif, sur demande de l'utilisateur du 7 octobre 2026 :
+« Lance-toi à fond maintenant dans le développement de la v12 de Morse HGP 3D », pour « une v12 aussi propre, simple
+et efficace que possible », feu vert GCP G4. Lire d'abord `morsehgp3D_v12/README.md`, `docs/DECISIONS.md`,
+`docs/ARCHITECTURE.md`, `docs/PLAN.md`, `docs/MESURE.md`, puis l'audit géant `morsehgp3D_v11/docs/AUDIT_GEANT_V11.md`.
+Cadre à annoncer : `phase=exploration_v12_hors_registre`, `backend=cpu_reference ; cuda_g4 pour le catalogue`,
+`objet=full_pi0`, `quantification=quantized_u21_input_only`, `public_status=not_claimed`.
+
+Décisions (`morsehgp3D_v12/docs/DECISIONS.md`, prises le 7 octobre sur délégation de l'utilisateur : « Je te laisse
+libre pour ces choix de mesure et de régime ; il faut tâcher d'être le meilleur à tous points de vue ») : Session
+résidente, contrat jugé à chaud en latence par trame ; FULL K1..5 en mémoire, verticales comprises, 100 ms sur G4 sur
+les trames SemanticKITTI sans sol (environ 60 000 sites, plusieurs séquences, médiane et maximum) ; K = 10 en objectif ;
+GPU dans le chemin contractuel du catalogue. Décisions de l'utilisateur du même jour : u18 abandonné, u21 au moins, u24
+voire u32 visés (le moteur est conçu pour B ≤ 32 avec une arithmétique en repère local) ; benchmarks LiDAR réels de
+plusieurs millions de points par scène, et petits nuages, sur lesquels l'algorithme doit aussi exceller (cela remplace
+la décision du 22 septembre qui rendait le multi-millions secondaire). Même objet que la v11 ; la v11 gelée
+(`ac081a06f`) et la v10 (`777406b82`, figée `c764e121a`) sont des sources différentielles : tout port est explicite,
+épinglé et requalifié (`morsehgp3D_v12/docs/PROVENANCE.md`) ; la conformité se prouve par l'oracle borné et par les
+empreintes FULL de la v11. Changements d'algorithme déclarés d'avance et mesurés d'abord par microbancs sur G4 ; un seul
+chemin produit, qui est le chemin mesuré. Tests lourds sur G4, sessions gardées, une seule VM (verrou commun), arrêt
+certifié. Pousser sur `main`, sans branche, un worktree par acteur, index vérifié avant tout `git add`. Aucun octet de
+données KITTI ni d'autre jeu sous licence, ni identité de compte dans le dépôt. Un auditeur suit la v12 et dépose ses
+notes dans `morsehgp3D_v12/audits/`. Les paragraphes v11 et antérieurs ci-dessous restent l'historique ; en cas de
+conflit sur le régime, la précision ou le contrat de temps, les décisions datées les plus récentes prévalent.
+
+## Ouverture v11 — 2 octobre 2026 (historique)
 
 `morsehgp3D_v11/` remplace `morsehgp3D_v10/` comme chantier actif, sur demande
 de l'utilisateur du 2 octobre 2026 : « repartir de zéro pour avoir quelque

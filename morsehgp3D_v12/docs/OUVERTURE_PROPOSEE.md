@@ -1,8 +1,8 @@
 # Ouverture proposée de la v12 (texte pour `AGENTS.md` et `CLAUDE.md`)
 
-7 octobre 2026. **Rien de ce texte n'est appliqué** : `AGENTS.md` et `CLAUDE.md` ne changent qu'avec l'accord de
-l'utilisateur (décision D15 de [`DECISIONS.md`](DECISIONS.md)), de préférence après les décisions D1 à D7. Les passages
-entre crochets se remplacent par les décisions prises.
+7 octobre 2026. **Appliqué le même jour** (décision D15) : les sections effectivement écrites dans `AGENTS.md`
+(« Ouverture v12 ») et `CLAUDE.md` (« Cible de travail : morsehgp3D_v12 ») reprennent ce texte, décisions D1 à D9
+remplies ; elles font foi. Ce fichier garde la proposition d'origine.
 
 ## 1. Section à ajouter en tête de `AGENTS.md`
 

@@ -1,16 +1,15 @@
 # Morse HGP 3D v12
 
-**En préparation depuis le 7 octobre 2026. Aucun code.** Ce dossier rassemble tout ce qui est utile au développement à
-venir : décisions à prendre, objet et contrat mathématique à porter, architecture proposée, plan par tranches,
-protocole de mesure, provenance des sources, leçons et pièges. L'ouverture formelle (sections de `AGENTS.md` et de
-`CLAUDE.md`) attend l'accord de l'utilisateur ; son texte est prêt dans
-[`docs/OUVERTURE_PROPOSEE.md`](docs/OUVERTURE_PROPOSEE.md).
+**Chantier actif depuis le 7 octobre 2026** (ouverture dans `AGENTS.md` et `CLAUDE.md`, sur « Lance-toi à fond
+maintenant dans le développement de la v12 »). Ce dossier rassemble les décisions prises, l'objet et le contrat
+mathématique à porter, l'architecture, le plan par tranches, le protocole de mesure, la provenance des sources, les
+leçons et les pièges ; le code arrive par tranches ([`docs/PLAN.md`](docs/PLAN.md)).
 
 ```text
-phase=exploration_v12_hors_registre (en préparation)
-backend=aucun (pas encore de moteur) ; cibles prévues : cpu_reference et cuda_g4
+phase=exploration_v12_hors_registre
+backend=cpu_reference ; cuda_g4 pour le catalogue
 objet=full_pi0 (tour FULL des ordres 1..K, verticales comprises)
-quantification=quantized_u21_input_only
+quantification=quantized_u21_input_only (moteur conçu pour B <= 32, arithmétique en repère local ; u24 puis u32 à qualifier)
 public_status=not_claimed
 ```
 
@@ -66,7 +65,7 @@ Le contrat de 100 ms n'a jamais été tenu, par aucune version, pour l'objet vra
 ## Lire d'abord
 
 1. L'[audit géant de la v11](../morsehgp3D_v11/docs/AUDIT_GEANT_V11.md), au moins § 0, § 2, § 5, § 7.5 et § 9.
-2. [`docs/DECISIONS.md`](docs/DECISIONS.md) : ce qui doit être tranché avant tout code.
+2. [`docs/DECISIONS.md`](docs/DECISIONS.md) : régime, contrat, précision, données, multiplicités, seuil.
 3. [`docs/OBJET_ET_CONTRAT_MATHEMATIQUE.md`](docs/OBJET_ET_CONTRAT_MATHEMATIQUE.md) : énoncés à porter, identifiants,
    témoins à graver d'abord, questions ouvertes.
 4. [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) : étages, budgets, règles de simplicité.
@@ -81,7 +80,7 @@ Le contrat de 100 ms n'a jamais été tenu, par aucune version, pour l'objet vra
 | Fichier | Rôle |
 | --- | --- |
 | `README.md` | ce fichier |
-| `docs/DECISIONS.md` | décisions en attente, recommandations, décisions déjà en vigueur |
+| `docs/DECISIONS.md` | décisions prises le 7 octobre (délégation de l'utilisateur), décisions antérieures en vigueur |
 | `docs/OBJET_ET_CONTRAT_MATHEMATIQUE.md` | objet, énoncés à porter, témoins, doctrine numérique, questions ouvertes |
 | `docs/ARCHITECTURE.md` | architecture proposée et règles de simplicité |
 | `docs/PLAN.md` | ordre de travail, portes d'entrée et de sortie |
