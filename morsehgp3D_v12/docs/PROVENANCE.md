@@ -52,7 +52,7 @@ Ce sont des notes de travail : leurs estimations ne sont pas des mesures, et la 
 
 | Tranche | Contenu | Table fichier par fichier | Qualification locale |
 | --- | --- | --- | --- |
-| T0, socle (7 octobre 2026) | modules `core`, `num`, `sched`, `cloud`, `io`, `index` (5 475 lignes de C++), harnais de portes, lanceur de mutants, contrôle de style, oracle borné `reference/` (`hgp12_ref`), sonde d'index ; profils u21 et u24 ; 18 refusé (D6), 32 refusé jusqu'au repère local | [`PORTS.md`](PORTS.md) : 210 fichiers, SHA-256 de chaque source à `ac081a06f`, 28 copies, 112 renommages, 69 adaptations décrites | Release u21 et u24 sans avertissement ; portes hors `long` vertes (u21 : 408 sur 409, la sentinelle LiDAR sautée faute de données ; 26 portes `diff_v10` contre la v10 figée) ; ni sanitizers, ni matrice G4, ni suite longue de l'oracle |
+| T0, socle (7 octobre 2026) | modules `core`, `num`, `sched`, `cloud`, `io`, `index` (5 475 lignes de C++), harnais de portes, lanceur de mutants, contrôle de style, oracle borné `reference/` (`hgp12_ref`), sonde d'index ; profils u21 et u24 ; 18 refusé (D6), 32 refusé jusqu'au repère local | [`PORTS.md`](PORTS.md) : 210 fichiers, SHA-256 de chaque source à `ac081a06f`, 28 copies, 111 renommages, 70 adaptations décrites | Release u21 et u24 sans avertissement ; portes hors `long` vertes (u21 : 408 sur 409, la sentinelle LiDAR sautée faute de données ; 26 portes `diff_v10` contre la v10 figée) ; ni sanitizers, ni matrice G4, ni suite longue de l'oracle |
 
 Le socle porte le code de la v11 **tel quel** pour $B\leq 24$ : les corrections du contrat numérique (repère local,
 certificats liés à leur domaine, clé de Morton exacte, boîtes à 33 bits, test du milieu local) s'y appliqueront par

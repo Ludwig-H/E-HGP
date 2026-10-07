@@ -13,7 +13,7 @@ chemins portés). Pour chaque fichier, le SHA-256 est celui de la source : `git 
 
 États : *copie à l'identique* (octets égaux à la source) ; *renommage seul* (égal au renommage mécanique de la source) ;
 *renommage et adaptations* (modifié à la main en plus, adaptation décrite). Bilan : 210 fichiers, dont 28
-copiés à l'identique, 112 renommés seulement, 69 adaptés, et un fichier sans source dans la v11
+copiés à l'identique, 111 renommés seulement, 70 adaptés (dont `reference/tests.cmake`, adapté à l'intégration), et un fichier sans source dans la v11
 (`docs/ARCHITECTURE.md`, ci-dessous).
 
 `docs/ARCHITECTURE.md` n'est pas un port : c'est le document de la v12 (dernier commit qui le modifie : `c0bb99fd8` ;
@@ -49,7 +49,7 @@ de la v11 les références « ARCHITECTURE.md de la v11 » des commentaires port
 | `reference/test_projection_contracts.py` | `reference/test_projection_contracts.py` | `61c222b4e5717eb7c5f98bb9abfd35a17cf51e2570d7e033ff7806c7bab29936` | renommage seul |
 | `reference/test_ref.py` | `reference/test_ref.py` | `e89e1f15b0dad7c47467ab5f3b586f197679d0ffd9bbcb27eb93b67bc7f1da68` | renommage et adaptations : docstring (v12) ; références de doctrine requalifiées « ARCHITECTURE.md de la v11 » |
 | `reference/test_supports.py` | `reference/test_supports.py` | `1b90fdadfd896fa6b92ea02d34e457d111c80659683ddcc92117e3a07d205b12` | renommage et adaptations : références de doctrine requalifiées « ARCHITECTURE.md de la v11 » |
-| `reference/tests.cmake` | `reference/tests.cmake` | `98f4f68668bda999ba7fd6cc6a8633797c7e0e902564579dfcb11862871c7d15` | renommage seul |
+| `reference/tests.cmake` | `reference/tests.cmake` | `98f4f68668bda999ba7fd6cc6a8633797c7e0e902564579dfcb11862871c7d15` | renommage et adaptations : à l'intégration (`a0091e2b7`), trois portes ajoutées pour le témoin `WIT-T1-CARRE` (porte, mutant `sans_inclusion`, refus), avec leurs jumelles `-O` (`CST-0115`) |
 | `src/cloud/cloud.cpp` | `src/cloud/cloud.cpp` | `64c5a3d29e1fe0cd05adc5f1d04c4d957731fa1f1eb9e583330675b65751afe9` | renommage seul |
 | `src/cloud/cloud.hpp` | `src/cloud/cloud.hpp` | `dd04b4f051cf356a0a12639d29c037594cacc4f9d9913a1238d94faafbbcfc68` | renommage seul |
 | `src/cloud/module.cmake` | `src/cloud/module.cmake` | `81d1470bc740f0fa7aca00e56eab47ee72700b848bae91b99a9fad4998a050b5` | renommage seul |
@@ -260,6 +260,10 @@ enregistre 404 portes (381 hors `long`), le socle 406 (383 hors `long`). Différ
   voir ci-dessus) ;
 - **ajoutées (4)** : `mhgp12_core_coord_bits_18_refusal` et `mhgp12_core_coord_bits_32_refusal` (refus à la compilation),
   `mhgp12_support_configure_coord_bits_18` et `mhgp12_support_configure_coord_bits_32` (refus à la configuration).
+- **ajoutées à l'intégration (6)**, hors du port (`a0091e2b7`, `CST-0115`) : `mhgp12_reference_witness_t1`, son
+  mutant `mhgp12_reference_witness_t1_mutant_sans_inclusion` et son refus `mhgp12_reference_witness_t1_refusal`, avec
+  leurs trois jumelles `-O` : le dépôt enregistre donc 412 portes (389 hors `long`) ; avec la v10 figée, 26 portes
+  `diff_v10` de plus, d'où les 415 portes hors `long` jouées à l'intégration.
 
 Attendus retirés avec le profil 18, sans retirer de porte : contrôles `Budgets<18>` (`tests/num/integer_test.cpp`,
 plancher 16 → 15), clé de Morton à 18 bits (`tests/cloud/cloud_test.cpp`, plancher 16 → 15), branches et attendus

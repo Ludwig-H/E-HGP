@@ -34,8 +34,10 @@ objets qu'il touche et le pas de la grille, pas par le domaine. Deux conséquenc
   plus fine que la précision du capteur (1 à 2 cm pour le LiDAR) ne change pas l'objet utile et alourdit tout le calcul ;
   la v12 la mesure et la publie, sans l'optimiser.
 
-Hypothèse à mesurer (`MES-S`, § 8) : sur les trames SemanticKITTI au millimètre, l'étendue d'une feuille ou d'un
-support de boule critique tient presque toujours sous $2^{17}$ (131 m).
+Hypothèse mesurée (`MES-S`, § 8 ; [reçu local](../receipts/mes_m2_local_20261007/README.md)) : sur ng00, ng01 et ng02
+(séquence 08, 1 mm, K5 et K10), **toutes** les feuilles ont $s\leq 17$ (au plus 13 sur 430 579 à $s=17$, médiane
+10 à 11) et tous les supports $s\leq 15$ (médiane 8 à 10) ; le palier étroit couvre tout. Portée : trois trames d'une
+séquence, au millimètre ; ni autres séquences, ni dixième de millimètre, ni scènes de plusieurs millions de sites.
 
 ## 2. Repères, garde et requêtes
 
@@ -63,9 +65,10 @@ support de boule critique tient presque toujours sous $2^{17}$ (131 m).
   - un site ou une boîte qui n'appartient pas à $E$ (recensement sur l'index, site extérieur interrogé) n'est confronté
     à une boule qu'à travers `NUM-GARDE`.
   - **Aucun plafond d'étendue** : la voie large est exacte, et un refus par étendue serait une incomplétude sur des
-    entrées légitimes. Le coût d'une liste étirée par un seul site lointain se mesure (`MES-S`) ; remèdes dans l'ordre :
-    subdiviser encore (l'étendue d'un enfant est au plus celle de son parent), puis choisir la voie par prédicat
-    d'après des décalages par site calculés une fois par feuille.
+    entrées légitimes. Une liste étirée par un seul site lointain est marginale sur les trames mesurées : le site le
+    plus lointain ne fixe l'étendue à deux bits ou plus que dans 0,0023 à 0,0085 % des feuilles (`MES-S`). La voie
+    par prédicat est donc inutile sur ces trames ; si une autre famille de données la rendait utile, le premier
+    remède resterait de subdiviser (l'étendue d'un enfant est au plus celle de son parent).
 - **`NUM-CERTIFIEE` (garde réservée aux boules certifiées, `CST-0108`).** Aucun site ni aucune boîte extérieurs ne sont
   confrontés à une boule avant le **certificat exact** de son support. La garde repose sur $c\in\mathrm{conv}(S)$, qui
   est faux pour une proposition flottante non certifiée (centre circonscrit d'un triangle obtus hors du triangle ;
