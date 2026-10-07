@@ -1,0 +1,256 @@
+{
+  "cases": [
+    {
+      "cas": "temoin_cinq_ordres",
+      "code": 0,
+      "json_sha256": "9737c347c53bd50f62f137e4f98c6e2fe80124f129702bd37cb7e3bd1dbf79dd",
+      "stderr": "",
+      "stdout": "g_determinism_ok cas=temoin_cinq_ordres fils=1,48 empreinte=0000000000000000 naissances=14 cellules=0 representants=0 cibles_cellule=0"
+    },
+    {
+      "cas": "seul_k1",
+      "code": 2,
+      "json_sha256": "9108352f6c07f7abbd1be8b2e4d37f009aae0f58e32a8d70aeb95322737e0cad",
+      "stderr": "",
+      "stdout": "g_determinism_refus sonde code 2 a 1 fils"
+    },
+    {
+      "cas": "k3_absent",
+      "code": 2,
+      "json_sha256": "f4de2adb2ddeeb289756536646b11da340224274bfab7fd51836a7516cf801e2",
+      "stderr": "",
+      "stdout": "g_determinism_refus sonde code 2 a 1 fils"
+    },
+    {
+      "cas": "k2_duplique_k3_absent",
+      "code": 2,
+      "json_sha256": "c773f91a4bef99aa4dc81184cf8b5dd2b7b372bdc08cec8f58ff871f58be3b22",
+      "stderr": "",
+      "stdout": "g_determinism_refus sonde code 2 a 1 fils"
+    },
+    {
+      "cas": "digest_non_hexadecimal",
+      "code": 2,
+      "json_sha256": "ac88e3f99840de845a3ac52d29006e178d9852b44a896ea7f4ce72ca510256d3",
+      "stderr": "",
+      "stdout": "g_determinism_refus sonde code 2 a 1 fils"
+    },
+    {
+      "cas": "digest_liste",
+      "code": 2,
+      "json_sha256": "3fec484173be85eaeb56d8f1f9aaa066a5f20295d068f18a8488710ca19a6a8e",
+      "stderr": "",
+      "stdout": "g_determinism_refus sonde code 2 a 1 fils"
+    },
+    {
+      "cas": "k1_tronque_totaux_wrapper",
+      "code": 2,
+      "json_sha256": "f8a4e14552f6b25b6fc6913383ba23428d2e5d8a69210a865dd5cc88ca522b57",
+      "stderr": "",
+      "stdout": "g_determinism_refus sonde code 2 a 1 fils"
+    },
+    {
+      "cas": "format_complet_tower_probe",
+      "code": 0,
+      "json_sha256": "4dbcee42fd0dd49c02bcb54544c8913479beb9ea7d9f5c07b1c011dd002cb8c2",
+      "stderr": "",
+      "stdout": "g_determinism_ok cas=format_complet_tower_probe fils=1,48 empreinte=0000000000000000 naissances=14 cellules=0 representants=0 cibles_cellule=0"
+    },
+    {
+      "cas": "sites_dedup_deux_sur_dix",
+      "code": 0,
+      "json_sha256": "ee17266c5dd8c22664173b3909834d54d6d19a079380dc1b6bf4ec40cac89854",
+      "stderr": "",
+      "stdout": "g_determinism_ok cas=sites_dedup_deux_sur_dix fils=1,48 empreinte=0000000000000000 naissances=3 cellules=0 representants=0 cibles_cellule=0"
+    },
+    {
+      "cas": "fils_dupliques",
+      "code": 2,
+      "json_sha256": "9737c347c53bd50f62f137e4f98c6e2fe80124f129702bd37cb7e3bd1dbf79dd",
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "cas": "fils_texte_ignore",
+      "code": 2,
+      "json_sha256": "9737c347c53bd50f62f137e4f98c6e2fe80124f129702bd37cb7e3bd1dbf79dd",
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "cas": "compteur_booleen",
+      "code": 2,
+      "json_sha256": "eca74ec339a2b0e9927f36cdb1055e63af0dae2619e3688a21a5c9d1f6627e1e",
+      "stderr": "",
+      "stdout": "g_determinism_refus sonde code 2 a 1 fils"
+    },
+    {
+      "cas": "k_stage_different",
+      "code": 2,
+      "json_sha256": "cc73b70babbcea8aa7dee78fc80ffb1c941349a53cde4fb90913c48f83cd8c9e",
+      "stderr": "",
+      "stdout": "g_determinism_refus sonde code 2 a 1 fils"
+    },
+    {
+      "cas": "tour_g_absent",
+      "code": 2,
+      "json_sha256": "2d3493bc200430632e7b6fc34ab4de28b8ba139873e212144e10c6b0d875ffa0",
+      "stderr": "",
+      "stdout": "g_determinism_refus sonde code 2 a 1 fils"
+    },
+    {
+      "cas": "digest_suffixe_different",
+      "code": 1,
+      "json_sha256": "9737c347c53bd50f62f137e4f98c6e2fe80124f129702bd37cb7e3bd1dbf79dd",
+      "stderr": "",
+      "stdout": "g_determinism_ecart fils=48 : sorties ou compteurs differents de 1 fils"
+    }
+  ],
+  "ctest_printed_digest_characters": 16,
+  "exit_type_proposal_cases": [
+    {
+      "cas": "temoin_cinq_ordres",
+      "code": 0,
+      "output_identical": true
+    },
+    {
+      "cas": "seul_k1",
+      "code": 2,
+      "output_identical": true
+    },
+    {
+      "cas": "k3_absent",
+      "code": 2,
+      "output_identical": true
+    },
+    {
+      "cas": "k2_duplique_k3_absent",
+      "code": 2,
+      "output_identical": true
+    },
+    {
+      "cas": "digest_non_hexadecimal",
+      "code": 2,
+      "output_identical": true
+    },
+    {
+      "cas": "digest_liste",
+      "code": 2,
+      "output_identical": true
+    },
+    {
+      "cas": "k1_tronque_totaux_wrapper",
+      "code": 2,
+      "output_identical": true
+    },
+    {
+      "cas": "format_complet_tower_probe",
+      "code": 0,
+      "output_identical": true
+    },
+    {
+      "cas": "sites_dedup_deux_sur_dix",
+      "code": 0,
+      "output_identical": true
+    },
+    {
+      "cas": "fils_dupliques",
+      "code": 2,
+      "output_identical": true
+    },
+    {
+      "cas": "fils_texte_ignore",
+      "code": 2,
+      "output_identical": true
+    },
+    {
+      "cas": "compteur_booleen",
+      "code": 2,
+      "output_identical": true
+    },
+    {
+      "cas": "k_stage_different",
+      "code": 2,
+      "output_identical": true
+    },
+    {
+      "cas": "tour_g_absent",
+      "code": 2,
+      "output_identical": true
+    },
+    {
+      "cas": "digest_suffixe_different",
+      "code": 1,
+      "output_identical": true
+    }
+  ],
+  "frozen_files_sha256": {
+    "check.py": "fa45e090d30455f8ef694b9bd8118ec55ee592c861b5827b410e1a4de2a5918c",
+    "exit_order_type.patch": "58e2c54f1ff3fd0d4b2f98a7ffa9cf28b6bb8db81a463524e3a6a0752da32e10",
+    "g_determinism.snapshot.py": "650c63a13a9af242a4ea6f033a9d944f0416c357683f40f57e04942606ef3ce9",
+    "sources.json": "5267dad65c930672ec2ae67ff7a99ed23505600d2a3140f0ca5ac09755b62cb6",
+    "tests.cmake.snapshot": "25043566be71f8f2d8f102d6831a8470b1d42290c89c1f80e1d9e3c284c5517e"
+  },
+  "proposal_erratum": [
+    {
+      "cas": "f7a_ancien_format_sans_exit",
+      "code": 0,
+      "json_sha256": "9b0186d6b69e84c1ee2aa107de0165c527ab27d91a688c1ea3bdc009084f1b41",
+      "stderr": "",
+      "stdout": "g_determinism_ok cas=f7a_ancien_format_sans_exit fils=1,48 empreinte=0000000000000000 naissances=14 cellules=0 representants=0 cibles_cellule=0"
+    },
+    {
+      "cas": "f7a_format_producteur_avec_exit",
+      "code": 2,
+      "json_sha256": "4dbcee42fd0dd49c02bcb54544c8913479beb9ea7d9f5c07b1c011dd002cb8c2",
+      "stderr": "",
+      "stdout": "g_determinism_refus sonde code 2 a 1 fils"
+    },
+    {
+      "cas": "integration_sans_exit",
+      "code": 2,
+      "json_sha256": "9b0186d6b69e84c1ee2aa107de0165c527ab27d91a688c1ea3bdc009084f1b41",
+      "stderr": "",
+      "stdout": "g_determinism_refus sonde code 2 a 1 fils"
+    }
+  ],
+  "proposed_f7a_sha256": "f7a301880d5e432592d5433cd3374451b1a7d83043fcbcef50225f147113c90b",
+  "residual_type_validation": [
+    {
+      "cas": "exit_order_booleen",
+      "integrated": {
+        "cas": "exit_order_booleen",
+        "code": 0,
+        "json_sha256": "e3b03c943fb4c3bb7352e72e3975c74faaf7e13d7ea95cb009f6423cc7953ffe",
+        "stderr": "",
+        "stdout": "g_determinism_ok cas=exit_order_booleen fils=1,48 empreinte=0000000000000000 naissances=14 cellules=0 representants=0 cibles_cellule=0"
+      },
+      "proposed": {
+        "cas": "exit_order_booleen",
+        "code": 2,
+        "json_sha256": "e3b03c943fb4c3bb7352e72e3975c74faaf7e13d7ea95cb009f6423cc7953ffe",
+        "stderr": "",
+        "stdout": "g_determinism_refus sonde code 2 a 1 fils"
+      }
+    },
+    {
+      "cas": "exit_order_flottant",
+      "integrated": {
+        "cas": "exit_order_flottant",
+        "code": 0,
+        "json_sha256": "621a9eeea86b30c3a7ecce58b6774f7d9fd42c91f5843830efd570ee27fdb29e",
+        "stderr": "",
+        "stdout": "g_determinism_ok cas=exit_order_flottant fils=1,48 empreinte=0000000000000000 naissances=14 cellules=0 representants=0 cibles_cellule=0"
+      },
+      "proposed": {
+        "cas": "exit_order_flottant",
+        "code": 2,
+        "json_sha256": "621a9eeea86b30c3a7ecce58b6774f7d9fd42c91f5843830efd570ee27fdb29e",
+        "stderr": "",
+        "stdout": "g_determinism_refus sonde code 2 a 1 fils"
+      }
+    }
+  ],
+  "scope": "JSON uniquement ; aucune execution native HGP",
+  "source_sha256": "650c63a13a9af242a4ea6f033a9d944f0416c357683f40f57e04942606ef3ce9"
+}

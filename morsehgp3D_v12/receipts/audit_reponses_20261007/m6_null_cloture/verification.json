@@ -1,0 +1,8 @@
+{
+  "capture_sha256": "9a74c0758a9a860e2a25ab4e7ceec2421a72fccb5a9140a77167360af0fb1ef5",
+  "mutant_matrix_executed": false,
+  "native_execution": false,
+  "normal_optimized_identical": true,
+  "shared_head_after": "60c041aef1f12b6d5b309f620c4d29745e629f62",
+  "shared_sources_before_after_equal": true
+}

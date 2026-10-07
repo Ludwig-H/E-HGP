@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-7 octobre 2026. Base publiée **`9b2747eff`** ; prototypes et correctifs non publiés épinglés par
+7 octobre 2026. Base publiée **`28cf75cd1`** ; prototypes et correctifs non publiés épinglés par
 hashes séparés. Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. États au [registre unique](CONSTATS.md).
 
@@ -9,16 +9,12 @@ hashes séparés. Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda
 - **Profils D6, `0207/0018`** : `9b2747eff` compare les binaires séparés ; [contre-audit du pilote](../receipts/audit_d6_20261007/README.md).
   Référence u21 absente et sorties tronquées encore admises ; patch du plan prêt, lecteur à durcir.
   ×8/×2048 conserve la géométrie avec niveaux ×64/×4194304, sans précision nouvelle.
-  Égalité des comptes seule insuffisante ; prises G4 et décision de profil restent à faire.
-- **Juge M6, `0018`** : `e50114adf` corrige les indices/types et schémas, mais un rapport
-  JSON `null` rend encore `mes_m6_ok`, zéro prise et zéro ligne. [Contre-épreuve de la livraison](../receipts/audit_reponses_20261007/m6_integration/README.md).
-  Refuser tout non-dictionnaire, y compris `null` : cette garde figurait déjà dans le
-  [patch proposé](../receipts/audit_reponses_20261007/m6_proposition/README.md). Les 68 cas officiels et le reçu historique v1 passent.
-- **Juge multi-fils G livré en `99fa83246`, `0018`** : [sortie tronquée acceptée](../receipts/audit_t2g_prepublication_20261007/README.md),
-  k1 seul pour K5, avec exactement la ligne attendue par CTest. Exiger tous les ordres,
-  k1 lié aux sites, types stricts, empreinte complète et régimes distincts. [Patch proposé](../receipts/audit_reponses_20261007/g_juge_proposition/README.md),
-  15 comparaisons JSON normal/−O ; empreinte historique complète encore à capturer.
-  Aucune erreur géométrique trouvée dans T1/T3/census/NUM-GARDE lus.
+  Égalité des comptes seule insuffisante. [Préparation hors chrono](../receipts/audit_d6_preparation_20261007/README.md),
+  records de 16→32 octets : mesurer la latence intégrée avant le choix D6 à 3 %.
+- **Juge G, `0018`** : les ordres manquants sont désormais refusés ; [contre-rejeu et erratum](../receipts/audit_reponses_20261007/g_juge_integration/README.md).
+  Ma proposition initiale omettait la ligne finale `exit` ; le développeur l’a corrigée avant intégration.
+  Résidu de type limité : `exit.order=False/0.0` encore admis ; patch d’une ligne contre-jugé.
+  Pas d’erreur géométrique trouvée dans T1/T3/census/NUM-GARDE lus.
 - **Catalogue CUDA** : [nettoyage des erreurs corrigé dans le prototype](../receipts/audit_reponses_20261007/cuda_integration/README.md),
   corps `5e215fe2…`, lecture statique seulement. Le compteur des feuilles réécrites reste
   nul malgré leur rejeu. Voie hybride : GPU ≤32 sites/16 bits locaux, sinon reprise CPU exacte.
@@ -27,12 +23,12 @@ hashes séparés. Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda
   par plateau ni nouvelle descente G ; 69 modèles abstraits conformes. Six événements
   peuvent demander 27 branches : budgéter la vraie sortie. Report à T3 possible s’il est
   déclaré ; aucun défaut de pi0 établi. Rebaser les copies du socle avant qualification.
-- **Petits nuages, `0238`** : le lecteur livré en `59d604b87` sépare les pentes, mais oublie
-  les régimes entièrement en échec dans la cohorte commune. [Patch de cinq lignes prêt](../receipts/audit_reponses_20261007/mes_p_proposition/README.md) :
-  cinq contre-témoins et quatre cas officiels passent, normal/−O. Hors produit ; temps inventés.
-
 **Clôtures vérifiées au registre.**
 
+- **Livraison `28cf75cd1` confirmée** : [M6, G et MES-P](../receipts/audit_reponses_20261007/livraison_28cf75/README.md).
+  `null` refusé par M6 (71 cas) ; couverture G corrigée (15 témoins) ; **`0238` clos**, cohortes
+  conservant les régimes entièrement échoués (cinq témoins et cinq cas officiels). Normal/−O identiques.
+  `0018` reste ouvert, notamment pour D6 ; aucune nouvelle mesure moteur.
 - **Cache, `0007/0019` clos** : livré en `7b7d025b3`, [porte complétée](../receipts/audit_reponses_20261007/cache/README.md), 12 contrôles ; mutant de
   relecture tué par le bras 300+200 Kio. ASan Clang/GCC détecte les deux lectures interdites.
   Le corps courant `5c885dbf…` est [équivalent à `1844a7d6…`](../receipts/audit_reponses_20261007/cache_equivalence/README.md), simple remplacement

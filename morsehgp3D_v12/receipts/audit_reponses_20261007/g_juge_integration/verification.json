@@ -1,0 +1,31 @@
+{
+  "closed_utc": "2026-10-07T22:03:37+00:00",
+  "published_integration_commit": "28cf75cd1861cd3f8ce9d038a7aac24874c2f2fa",
+  "main_after": "28cf75cd1861cd3f8ce9d038a7aac24874c2f2fa",
+  "normal_and_optimized_identical": true,
+  "result_sha256": "4d8e70dd36da9bbd29316d15b91d07e334b7ecb104c89f520cd876f46b4a8122",
+  "primary_cases_per_mode": 15,
+  "proposal_cases_per_mode": 15,
+  "causal_erratum_cases_per_mode": 3,
+  "type_residual_executions_per_mode": 4,
+  "frozen_inputs_stable": true,
+  "source_comparison": {
+    "morsehgp3D_v12/tests/tower/g_determinism.py": {
+      "published_sha256": "650c63a13a9af242a4ea6f033a9d944f0416c357683f40f57e04942606ef3ce9",
+      "live_sha256": "650c63a13a9af242a4ea6f033a9d944f0416c357683f40f57e04942606ef3ce9",
+      "live_matches_published": true,
+      "published_matches_snapshot": true
+    },
+    "morsehgp3D_v12/tests/tower/tests.cmake": {
+      "published_sha256": "b56ad07a5b17451b179902561fd7a1e8fafcd63dedd84afaf062a282f4f37f22",
+      "live_sha256": "b56ad07a5b17451b179902561fd7a1e8fafcd63dedd84afaf062a282f4f37f22",
+      "live_matches_published": true,
+      "published_matches_snapshot": false
+    }
+  },
+  "ctest_scale_lines_unchanged_from_snapshot": true,
+  "ctest_snapshot_note": "Le fichier vivant a changé pendant le rejeu sur le nouveau témoin JSON conforme, pas les références échelle ; le rejeu emploie sa capture figée.",
+  "native_hgp_executions": 0,
+  "cuda_calls": 0,
+  "cloud_calls": 0
+}

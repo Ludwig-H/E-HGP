@@ -1,0 +1,33 @@
+{
+  "schema": "mhgp12.g_judge_integration.v1",
+  "captured_utc": "2026-10-07T21:59:02+00:00",
+  "main_pin": "60c041aef1f12b6d5b309f620c4d29745e629f62",
+  "scope": "juge Python sur doubles JSON ; aucun moteur",
+  "sources": {
+    "morsehgp3D_v12/tests/tower/g_determinism.py": {
+      "sha256": "650c63a13a9af242a4ea6f033a9d944f0416c357683f40f57e04942606ef3ce9",
+      "bytes": 9124,
+      "snapshot": "g_determinism.snapshot.py"
+    },
+    "morsehgp3D_v12/tests/tower/tests.cmake": {
+      "sha256": "25043566be71f8f2d8f102d6831a8470b1d42290c89c1f80e1d9e3c284c5517e",
+      "bytes": 6279,
+      "snapshot": "tests.cmake.snapshot"
+    }
+  },
+  "pinned_dependencies": {
+    "morsehgp3D_v12/bench/tower_probe.cpp": "4a98efd16e70e8f05afcbb181bdfbf994387fd708a9161eef9585dca2c166643",
+    "morsehgp3D_v12/bench/tower_export.hpp": "b7f27e021ef935148d9a1962d1b6f7137d84d2d142d3555823a704f2c2e8bb73",
+    "morsehgp3D_v12/receipts/audit_t2g_prepublication_20261007/check.py": "f3d35950179115762234a7fad60fae2f9557d16df2638ba442a0e3fcf6a30cf3",
+    "morsehgp3D_v12/receipts/audit_reponses_20261007/g_juge_proposition/proposition.patch": "71c1a452512f48ac2d9ec9132f208e903f4c25df836ec6107b3106c266f051d5",
+    "morsehgp3D_v12/receipts/audit_reponses_20261007/g_juge_proposition/sources.json": "cbcfd88d733382e65f09482e265c3cb395ee8cc4cdc3a893d6760cedc8c45c7a"
+  },
+  "dirty_paths_at_capture": [
+    " M morsehgp3D_v12/tests/tower/g_determinism.py",
+    " M morsehgp3D_v12/tests/tower/tests.cmake"
+  ],
+  "exit_type_patch_sha256": "58e2c54f1ff3fd0d4b2f98a7ffa9cf28b6bb8db81a463524e3a6a0752da32e10",
+  "exit_type_proposed_sha256": "c88be31c7bdb1c24154eeb98c353163bc54c590664e71f5d9ab8475d00abb9b9",
+  "published_integration_commit": "28cf75cd1",
+  "published_source_matches_capture": true
+}

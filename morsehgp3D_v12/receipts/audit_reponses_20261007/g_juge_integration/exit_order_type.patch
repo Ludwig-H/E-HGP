@@ -1,0 +1,11 @@
+--- a/morsehgp3D_v12/tests/tower/g_determinism.py
++++ b/morsehgp3D_v12/tests/tower/g_determinism.py
+@@ -54,7 +54,7 @@
+     # Une passe, tous les ordres, une seule empreinte, puis la ligne de sortie conforme que tower_probe.cpp ecrit
+     # toujours en dernier (contre-lecture de la proposition de l'auditeur : sa derniere ligne n'est pas l'empreinte).
+     stage, orders, last, end = rows[0], rows[1:-2], rows[-2], rows[-1]
+-    if end != {'phase': 'exit', 'status': 'ok', 'reason': 'none', 'order': 0}:
++    if type(end.get('order')) is not int or end != {'phase': 'exit', 'status': 'ok', 'reason': 'none', 'order': 0}:
+         return 2, None, None
+     numeric = ('pass', 'order', 'coord_bits', 'kmax', 'threads', 'sites', 'wall_ns')
+     if stage.get('phase') != 'tour_g' or stage.get('status') != 'ok' or stage.get('reason') != 'none' or \

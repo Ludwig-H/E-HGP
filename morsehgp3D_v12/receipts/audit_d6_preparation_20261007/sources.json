@@ -1,0 +1,12 @@
+{
+  "pin": "60c041aef1f12b6d5b309f620c4d29745e629f62",
+  "scope": "static_read_no_native_no_benchmark",
+  "sources_sha256": {
+    "bench/catalogue_probe.cpp": "7dfb919813bc7c757946fabcd91149108890590b7639e042c5e31256a19786e9",
+    "bench/tower_probe.cpp": "4a98efd16e70e8f05afcbb181bdfbf994387fd708a9161eef9585dca2c166643",
+    "docs/DECISIONS.md": "73c5f5287bc5dc99e5baca9a1a943da20f33d1315b7d1410d7588788591b2171",
+    "microbancs/mes_d6_profils/pilote_d6.py": "da2fa5c0b5d48ce2aff357a1174b47773076335b1c4e7ff2ff850afac9f6e118",
+    "src/cloud/cloud.cpp": "26c82a1bfc1411606fbe1189541925539cb3c48a4cd1c1c3fe3a5d6a43a5684b",
+    "src/cloud/morton.hpp": "03b6fd1b750ed24a64e481a63bdf2b122a40e6d104a04ce31c7769cd04bd3eda"
+  }
+}

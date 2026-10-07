@@ -1,0 +1,18 @@
+{
+  "m6_matches_tested_capture": true,
+  "m6_published_sha256": {
+    "morsehgp3D_v12/microbancs/mes_m6_session/mes_m6_session_cost.cu": "49c6afc51d48e124c866e509700764a59150410d7664fabdadf14ee41887dff1",
+    "morsehgp3D_v12/microbancs/mes_m6_session/run_m6.py": "f90b56a7ee31345642f87c7319cc979d8533966c2fbac275e2e17130092e7498",
+    "morsehgp3D_v12/microbancs/mes_m6_session/tests/test_juge_m6.py": "c1d6f5a29494dc7c0356909f9e1ffc41cfe14341e9791e6c1a99084a3bffc2e5",
+    "morsehgp3D_v12/microbancs/outils/mutants_juges.py": "b1c8ccd13a637de71d1acf89b1ea61138a040bb78e2a843f539025ce8111fdd8"
+  },
+  "native_tests_rerun": false,
+  "published_pin": "28cf75cd1861cd3f8ce9d038a7aac24874c2f2fa",
+  "registry_ids_preserved": 73,
+  "state_changes": {
+    "| `CST-0238`": {
+      "after": "clos",
+      "before": "en cours"
+    }
+  }
+}

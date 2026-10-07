@@ -1,0 +1,62 @@
+diff --git a/morsehgp3D_v12/microbancs/mes_m6_session/run_m6.py b/morsehgp3D_v12/microbancs/mes_m6_session/run_m6.py
+index fd8853dea..360343a30 100644
+--- a/morsehgp3D_v12/microbancs/mes_m6_session/run_m6.py
++++ b/morsehgp3D_v12/microbancs/mes_m6_session/run_m6.py
+@@ -407,8 +407,10 @@ def rejudge(folder, args):
+     report = json.loads((folder / 'm6_report.json').read_text(encoding='utf-8'))
+   except (OSError, ValueError) as error:
+     report, problems = None, ['rapport illisible : %s' % error]
+-  if report is not None and not isinstance(report, dict):
+-    report, problems = None, ['rapport hors schema']
++  if not isinstance(report, dict):
++    if not problems:
++      problems.append('rapport hors schema')
++    report = None
+   schema = report.get('schema') if report is not None else None
+   if report is not None and not (isinstance(schema, str) and schema in KNOWN_SCHEMAS):
+     problems.append('schema %r inconnu : seuls %s (historique) et %s sont lus' % (schema, SCHEMA_V1, SCHEMA))
+diff --git a/morsehgp3D_v12/microbancs/mes_m6_session/tests/test_juge_m6.py b/morsehgp3D_v12/microbancs/mes_m6_session/tests/test_juge_m6.py
+index 6a58dfd84..dcf461762 100644
+--- a/morsehgp3D_v12/microbancs/mes_m6_session/tests/test_juge_m6.py
++++ b/morsehgp3D_v12/microbancs/mes_m6_session/tests/test_juge_m6.py
+@@ -346,7 +346,12 @@ def cas_relecture(tmp, recu):
+                               ('v1_avec_refus_publie', lambda d: _rapport(d, lambda r: r.update(
+                                   refusals=['binaire modifie pendant les prises'])), 'format historique'),
+                               ('v1_prise_avec_champ_inconnu', lambda d: _rapport(d, lambda r: r['runs'][3].update(
+-                                  sha256='0' * 64)), 'format historique')):
++                                  sha256='0' * 64)), 'format historique'),
++                              # Recu audit_reponses_20261007/m6_integration : un rapport JSON qui n'est pas un objet,
++                              # seul dans son dossier, rendait mes_m6_ok avec zero prise.
++                              ('rapport_null_seul', lambda d: _seul_rapport(d, 'null\n'), 'hors schema'),
++                              ('rapport_liste_seul', lambda d: _seul_rapport(d, '[]\n'), 'hors schema'),
++                              ('rapport_nombre_seul', lambda d: _seul_rapport(d, '0\n'), 'hors schema')):
+     copie = Path(tmp) / ('session_a_' + nom)
+     shutil.copytree(str(recu), str(copie))
+     alterer(copie)
+@@ -383,6 +388,13 @@ def _medianes_fausses(rapport):
+   rapport['summary_median_us']['spin']['context_open'] += 1.0
+ 
+ 
++def _seul_rapport(dossier, texte):
++  """Ne laisse dans le dossier qu'un rapport de texte donne (aucun fichier de prise)."""
++  for prise in dossier.glob('m6_*.jsonl'):
++    prise.unlink()
++  (dossier / 'm6_report.json').write_text(texte)
++
++
+ def _rapport(dossier, falsifier):
+   """Falsifie le rapport publie d'un dossier (copie jetable)."""
+   chemin = dossier / 'm6_report.json'
+diff --git a/morsehgp3D_v12/microbancs/outils/mutants_juges.py b/morsehgp3D_v12/microbancs/outils/mutants_juges.py
+index 674571204..f0210f2cc 100644
+--- a/morsehgp3D_v12/microbancs/outils/mutants_juges.py
++++ b/morsehgp3D_v12/microbancs/outils/mutants_juges.py
+@@ -236,6 +236,8 @@ MUTANTS = [
+      'm6'),
+     ('m6_rejuge_doublons_admis', M6, [('      if (mode, index) in declared:', '      if False:')], 'm6'),
+     ('m6_rejuge_effectif_non_valide', M6, [('    if sorted(takes) != sorted(expected):', '    if False:')], 'm6'),
++    ('m6_rejuge_rapport_null_admis', M6, [('  if not isinstance(report, dict):', '  if report is not None and not '
++                                          'isinstance(report, dict):')], 'm6'),
+     ('m6_rejuge_schema_ouvert', M6, [('  if report is not None and not (isinstance(schema, str) and schema in '
+                                       'KNOWN_SCHEMAS):', '  if False:')], 'm6'),
+     ('m6_rejuge_v1_champs_libres', M6, [('  if report is not None and schema == SCHEMA_V1 and sorted(report) != '

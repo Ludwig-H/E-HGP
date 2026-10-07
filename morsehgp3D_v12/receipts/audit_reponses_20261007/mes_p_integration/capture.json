@@ -1,0 +1,15 @@
+{
+  "capture_matches_committed_sources": true,
+  "capture_stable_double_read": true,
+  "commit": "28cf75cd1861cd3f8ce9d038a7aac24874c2f2fa",
+  "phase": "exploration_v12_hors_registre",
+  "proposed_analysis_sha256": "aa64cdbff590931c8c21ce30ad2a8f5403ac94a4fdb1da6903255bca5e60b45e",
+  "public_status": "not_claimed",
+  "source_sha256": {
+    "morsehgp3D_v12/microbancs/mes_p_petits/analyse_p.py": "aa64cdbff590931c8c21ce30ad2a8f5403ac94a4fdb1da6903255bca5e60b45e",
+    "morsehgp3D_v12/microbancs/mes_p_petits/pilote_p.py": "68995f99efc653690484264b4e1bfbac76bb5cfbe50e8ecf2d9b9b7bf4050d4f",
+    "morsehgp3D_v12/microbancs/mes_p_petits/test_pilote_p.py": "c8e5c4bced71f181515046704e43596ec55c81f8c7e72ecb5f331b0c4ee4fc15",
+    "morsehgp3D_v12/receipts/audit_mes_p_corrections_20261007/check.py": "996051cc6c33e2b4e0287844807a6aca2e29d8f8e46361ec5c661f9504f07ee5"
+  },
+  "unchanged_pilot_sha256": "68995f99efc653690484264b4e1bfbac76bb5cfbe50e8ecf2d9b9b7bf4050d4f"
+}

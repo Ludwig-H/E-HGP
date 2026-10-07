@@ -1,0 +1,13 @@
+{
+  "base_pin": "c72175396daf5d2095ca3061dd3e2588ada457c8",
+  "capture_patch_sha256": "78adc7d36579cc957093ff784008c9c2c9c6b0645f984594c8680feb0fbed44f",
+  "expected_gate_cases": 71,
+  "matches_previous_null_patch": true,
+  "scope": "capture stable non commise; controles JSON seulement",
+  "sources_sha256": {
+    "morsehgp3D_v12/microbancs/mes_m6_session/mes_m6_session_cost.cu": "49c6afc51d48e124c866e509700764a59150410d7664fabdadf14ee41887dff1",
+    "morsehgp3D_v12/microbancs/mes_m6_session/run_m6.py": "f90b56a7ee31345642f87c7319cc979d8533966c2fbac275e2e17130092e7498",
+    "morsehgp3D_v12/microbancs/mes_m6_session/tests/test_juge_m6.py": "c1d6f5a29494dc7c0356909f9e1ffc41cfe14341e9791e6c1a99084a3bffc2e5",
+    "morsehgp3D_v12/microbancs/outils/mutants_juges.py": "b1c8ccd13a637de71d1acf89b1ea61138a040bb78e2a843f539025ce8111fdd8"
+  }
+}

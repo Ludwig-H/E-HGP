@@ -1,0 +1,174 @@
+{
+  "audit": {
+    "analyser": {
+      "all_failed": {
+        "cohorts": [
+          "| 1 fils | 0 | 0 | - | - |",
+          "| 4 fils | 0 | 0 | - | - |",
+          "| 48 fils | 0 | 0 | - | - |"
+        ],
+        "common_contract_pass": true,
+        "expected_cohorts": [
+          "| 1 fils | 0 | 0 | - | - |",
+          "| 4 fils | 0 | 0 | - | - |",
+          "| 48 fils | 0 | 0 | - | - |"
+        ],
+        "failures": [
+          "| bout_n100 | 5 | 1 | 100 | expire | - |",
+          "| bout_n200 | 5 | 1 | 200 | expire | - |",
+          "| bout_n100 | 5 | 4 | 100 | expire | - |",
+          "| bout_n200 | 5 | 4 | 200 | expire | - |",
+          "| bout_n100 | 5 | 48 | 100 | expire | - |",
+          "| bout_n200 | 5 | 48 | 200 | expire | - |"
+        ],
+        "slopes": [],
+        "stdout_sha256": "47a21ab2de64f4e906b2b2a77dfbd8d87df032952d53a40f108c20ffc0f3e456",
+        "synthetics": []
+      },
+      "all_good": {
+        "cohorts": [
+          "| 1 fils | 2 | 0 | -0.00 | 100.00 |",
+          "| 4 fils | 2 | 0 | 0.00 | 60.00 |",
+          "| 48 fils | 2 | 0 | 0.00 | 10.00 |"
+        ],
+        "failures": [],
+        "slopes": [
+          "Droite des moindres carres (familles reelles, K = 5, 1 fils) : cout fixe -0.00 ms, 100.00 \u00b5s par site.",
+          "Droite des moindres carres (familles reelles, K = 5, 4 fils) : cout fixe 0.00 ms, 60.00 \u00b5s par site.",
+          "Droite des moindres carres (familles reelles, K = 5, 48 fils) : cout fixe 0.00 ms, 10.00 \u00b5s par site."
+        ],
+        "stdout_sha256": "71a829d436438396b0d025a2e94e0264ceb82aa25aed26faf4415d5b631599c9",
+        "synthetics": []
+      },
+      "k_threads_family_isolation": {
+        "cohorts": [
+          "| 1 fils | 2 | 0 | -0.00 | 100.00 |",
+          "| 4 fils | 2 | 0 | 0.00 | 60.00 |",
+          "| 48 fils | 2 | 0 | 0.00 | 10.00 |"
+        ],
+        "failures": [],
+        "slopes": [
+          "Droite des moindres carres (familles reelles, K = 5, 1 fils) : cout fixe -0.00 ms, 100.00 \u00b5s par site.",
+          "Droite des moindres carres (familles reelles, K = 5, 4 fils) : cout fixe 0.00 ms, 60.00 \u00b5s par site.",
+          "Droite des moindres carres (familles reelles, K = 5, 48 fils) : cout fixe 0.00 ms, 10.00 \u00b5s par site.",
+          "Droite des moindres carres (familles reelles, K = 10, 4 fils) : cout fixe -0.00 ms, 800.00 \u00b5s par site."
+        ],
+        "stdout_sha256": "21c7cc75b32b2acbe2c985eb16d267b2b4e7d70c23f22e47d05c39d9b7309292",
+        "synthetics": [
+          "| synth_lattice | 5 | 1 | 100 : 200.0 |",
+          "| synth_lattice | 5 | 4 | 100 : 400.0 |",
+          "| synth_lattice | 10 | 4 | 100 : 800.0 |",
+          "| synth_sphere | 5 | 4 | 100 : 1200.0 |"
+        ]
+      },
+      "one_failed": {
+        "cohorts": [
+          "| 1 fils | 1 | 0 | - | - |",
+          "| 4 fils | 1 | 1 | - | - |",
+          "| 48 fils | 1 | 1 | - | - |"
+        ],
+        "failures": [
+          "| bout_n200 | 5 | 1 | 200 | expire | - |"
+        ],
+        "slopes": [
+          "Droite des moindres carres (familles reelles, K = 5, 4 fils) : cout fixe 0.00 ms, 60.00 \u00b5s par site.",
+          "Droite des moindres carres (familles reelles, K = 5, 48 fils) : cout fixe 0.00 ms, 10.00 \u00b5s par site."
+        ],
+        "stdout_sha256": "5214230e102b1894506d4a450d202ab9547c6835b67d1ba1dca668982b88bf57",
+        "synthetics": []
+      },
+      "whole_regime_failed": {
+        "cohorts": [
+          "| 1 fils | 0 | 0 | - | - |",
+          "| 4 fils | 0 | 2 | - | - |",
+          "| 48 fils | 0 | 2 | - | - |"
+        ],
+        "common_contract_pass": true,
+        "expected_cohorts": [
+          "| 1 fils | 0 | 0 | - | - |",
+          "| 4 fils | 0 | 2 | - | - |",
+          "| 48 fils | 0 | 2 | - | - |"
+        ],
+        "failures": [
+          "| bout_n100 | 5 | 1 | 100 | expire | - |",
+          "| bout_n200 | 5 | 1 | 200 | expire | - |"
+        ],
+        "slopes": [
+          "Droite des moindres carres (familles reelles, K = 5, 4 fils) : cout fixe 0.00 ms, 60.00 \u00b5s par site.",
+          "Droite des moindres carres (familles reelles, K = 5, 48 fils) : cout fixe 0.00 ms, 10.00 \u00b5s par site."
+        ],
+        "stdout_sha256": "2537df27762afc8a979b08a62c335d0187c4385a3fc67b80f466fb3b729029f5",
+        "synthetics": []
+      }
+    },
+    "cst_0238_common_cohort_contract_pass": true,
+    "pilot": {
+      "mocked_processes": [
+        {
+          "chaud": 0.0015,
+          "code": 0,
+          "fils": 4,
+          "froid": 0.003,
+          "k": 5,
+          "nuage": "success",
+          "passes": [
+            0.003,
+            0.001,
+            0.002
+          ],
+          "processus_secondes": 0.25,
+          "sites": 100
+        },
+        {
+          "chaud": null,
+          "code": 3,
+          "fils": 4,
+          "froid": 0.003,
+          "k": 5,
+          "nuage": "failure",
+          "passes": [
+            0.003,
+            0.001,
+            0.002
+          ],
+          "processus_secondes": 0.25,
+          "sites": 100
+        },
+        {
+          "chaud": null,
+          "code": "expire",
+          "fils": 4,
+          "froid": 0.003,
+          "k": 5,
+          "nuage": "timeout",
+          "passes": [
+            0.003,
+            0.001,
+            0.002
+          ],
+          "processus_secondes": 0.25,
+          "sites": 100
+        }
+      ],
+      "scope": "Popen/killpg doubles: controle du protocole, pas preuve systeme de terminaison",
+      "selection_empty_code": 2
+    },
+    "source_sha256": {
+      "analyse_p.py": "aa64cdbff590931c8c21ce30ad2a8f5403ac94a4fdb1da6903255bca5e60b45e",
+      "pilote_p.py": "68995f99efc653690484264b4e1bfbac76bb5cfbe50e8ecf2d9b9b7bf4050d4f"
+    }
+  },
+  "commit": "28cf75cd1861cd3f8ce9d038a7aac24874c2f2fa",
+  "official": {
+    "cas": 5,
+    "ecarts": 0,
+    "porte": "mes_p"
+  },
+  "published_analysis_equals_proposal": true,
+  "source_sha256": {
+    "morsehgp3D_v12/microbancs/mes_p_petits/analyse_p.py": "aa64cdbff590931c8c21ce30ad2a8f5403ac94a4fdb1da6903255bca5e60b45e",
+    "morsehgp3D_v12/microbancs/mes_p_petits/pilote_p.py": "68995f99efc653690484264b4e1bfbac76bb5cfbe50e8ecf2d9b9b7bf4050d4f",
+    "morsehgp3D_v12/microbancs/mes_p_petits/test_pilote_p.py": "c8e5c4bced71f181515046704e43596ec55c81f8c7e72ecb5f331b0c4ee4fc15",
+    "morsehgp3D_v12/receipts/audit_mes_p_corrections_20261007/check.py": "996051cc6c33e2b4e0287844807a6aca2e29d8f8e46361ec5c661f9504f07ee5"
+  }
+}
