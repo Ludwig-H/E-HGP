@@ -92,8 +92,15 @@ bool ForestBuilder::await_job(u64 job) noexcept {
 
 // Publication des noeuds clos par lots de plateaux : moins d'ecritures partagees, meme garantie pour les lecteurs
 // (nodes avant closed, release). La fin de la publication est publiee par la tache (done).
+// Annonces aux balayages verticaux : tous les kAnnounceEvery plateaux clos, et a la fin. Une annonce qui trouve un
+// balayage endormi coute au publieur un reveil futex, et les publieurs des ordres hauts sont le chemin critique du
+// pipeline (chronologie G4 de claudebirths1 : 86 a 100 ms de calcul sans attente aux ordres 3 a 5). Mesure locale du
+// 7 octobre, une annonce tous les 32 plateaux, W12 a W16 : 1 a 2 us par reveil, 9 a 18 ms par publieur des ordres 3
+// a 5. Le rythme ne change aucune decision : le balayage suit l'etat publie (follow_step), et finish clot tout.
+inline constexpr u32 kAnnounceEvery = 1024;
+
 void ForestBuilder::announce(LevelRank closed, bool last) noexcept {
-  if (progress == nullptr || (!last && ++unannounced < 32)) return;
+  if (progress == nullptr || (!last && ++unannounced < kAnnounceEvery)) return;
   unannounced = 0;
   progress->nodes.store(result.count_, std::memory_order_release);
   progress->closed.store(idx(closed) + 1, std::memory_order_release);
