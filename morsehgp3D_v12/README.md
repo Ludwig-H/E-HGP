@@ -99,6 +99,7 @@ Codes des portes : 0 conforme, 1 désaccord du juge, 2 refus avant calcul, 3 inv
 | `README.md` | ce fichier |
 | `docs/DECISIONS.md` | décisions prises le 7 octobre (délégation de l'utilisateur), décisions antérieures en vigueur |
 | `docs/CONTRAT_NUMERIQUE.md` | coordonnées jusqu'à 32 bits : repère local, garde entière, budgets par étendue, clé de Morton |
+| `docs/CONTRAT_CATALOGUE.md` | contrat de la tranche T1 : objet, changements d'algorithme, numérique, capacité, compteurs, portes, budget |
 | `docs/OBJET_ET_CONTRAT_MATHEMATIQUE.md` | objet, énoncés à porter, témoins, doctrine numérique, questions ouvertes |
 | `docs/ARCHITECTURE.md` | architecture proposée et règles de simplicité |
 | `docs/PLAN.md` | ordre de travail, portes d'entrée et de sortie |
