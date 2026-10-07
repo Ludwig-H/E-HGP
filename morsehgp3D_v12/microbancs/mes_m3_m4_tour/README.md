@@ -27,7 +27,9 @@ dossier de sortie, jamais dans un dépôt. Seuls des comptes, des empreintes et 
 | `mes_m3/meb_cert.hpp` | cœur de `LEV-MEB-CERT` : `LEM-T1` corrigé, certificat exact, canonisation, repli, juge |
 | `mes_m3/mes_m3.cpp` | `mhgp12_mes_m3` : porte (témoins gravés) et banc sur vidage |
 | `mes_m4/mes_m4.cpp` | `mhgp12_mes_m4` : noyau union-find sans lots, contraction `LEM-T4`, numérotation, juge, `LEM-T6` |
-| `pilote.py` | pilote (bibliothèque standard, Python ≥ 3.10, jouable sous `python3 -S`) |
+| `pilote.py` | pilote (bibliothèque standard, Python ≥ 3.10, jouable sous `python3 -S`) : étapes, preuves, juges |
+| `tests/test_pilote.py` | porte du pilote (`CST-0018`, `0213`, `0214`) : sorties réelles du reçu G4, injections de l'auditeur par binaires simulés, juge de MES-M3, binaires réels sur le carré |
+| `tests/test_m4_preuves.py`, `tests/carre.py` | porte native de MES-M4 sur le carré K1..4 de l'auditeur : verticales correctes, fausses, absentes ; entrées hors domaine |
 | `RAPPORT.md` | rapport des passages locaux et ce qui reste pour G4 |
 | `out/` | sorties (vidages, journaux JSON, `rapport_mes_m3_m4.json`) ; jamais versées |
 
@@ -42,18 +44,29 @@ python3 pilote.py --v11-source <dépôt>/morsehgp3D_v11 --v11-build <constructio
     --donnees <dossier des trames>/ --sortie out --cas ng00:5,ng01:5,ng02:5,ng00:10 tout
 ```
 
-`tout` = `construire portes vider m3 m3var m4 rapport` (`rapport` écrit aussi `out/tableaux.md`, tableaux Markdown tirés du
-JSON, sans valeur recopiée à la main). `--processus N` rejoue chaque microbanc dans N processus (l'unité de
-réplication de `MESURE.md` § 5) ; les temps publiés sont alors des médianes entre processus, et les routes doivent être
-identiques d'un processus à l'autre. Les cas sont `trame:K` avec `trame` dans `ng00`, `ng01`, `ng02`,
+`tout` = `construire portes vider resolution m3 m3var m4 rapport` (`rapport` écrit aussi `out/tableaux.md`, tableaux
+Markdown tirés du JSON, sans valeur recopiée à la main). `--processus N` rejoue chaque microbanc **et la mesure de
+résolution** dans N processus (l'unité de réplication de `MESURE.md` § 5) ; les temps publiés des microbancs sont alors
+des médianes entre processus, et les routes doivent être identiques d'un processus à l'autre.
+
+**Preuves** (`CST-0018`, `CST-0213`, `CST-0214`) : aucune conformité sans preuve. `construire` hache tous les binaires
+et `libmhgp11.a` ; chaque exécution hache le binaire lancé avant et après (égal à `construire`, sinon refus), vérifie
+les empreintes des vidages de `vider` avant et après, garde son journal sous un nom propre à la campagne (identifiant
+`c<date>_<hasard>` par invocation, jamais écrasé) avec son empreinte, et exige toutes ses phases : une ligne d'entrée du
+bon cas, une ligne par ordre (comptes égaux aux sections du vidage), une fin explicite au code du processus, ni
+exception ni refus. Un bloc remplacé passe dans `historique` ; les campagnes de résolution s'ajoutent. Les sources du
+microbanc sont hachées au début et à la fin de chaque invocation. Un mutant n'est tué que par sa réponse géométrique
+(témoin faux, écarts), jamais par un simple code. Les cas sont `trame:K` avec `trame` dans `ng00`, `ng01`, `ng02`,
 `u8000`, `u16000`, `u32000` (fichiers `lidar_ng0*.u32le` et `uniform_u18_n*.u32le` du dossier de données), ou tout
 autre nom `X` désignant `<données>/X.u32le` et `<données>/X.ids.u32le` (nouvelles trames de plusieurs séquences ; pas
 d'empreinte de référence, l'identité `MHGP11FUL1` est alors publiée « sans référence »). Le vidage
 utilise `--fils` fils (3 par défaut sur le codespace partagé) ; les microbancs sont à **un fil**. Le rapport JSON est
 `out/rapport_mes_m3_m4.json` ; chaque binaire écrit aussi ses lignes JSON dans `out/<cas>/*.jsonl`.
 
-Codes de sortie : `0` conforme ; `1` écart d'identité, porte en échec, mutant survivant ; `2` usage ; `3` refus ou
-invariant (vidage) ou exception (microbancs).
+Codes de sortie : `0` conforme ; `1` écart d'identité, porte en échec, mutant survivant ; `2` usage (et domaine des
+opérandes de MES-M4, `CST-0212`) ; `3` refus (preuve absente, périmée ou non rattachée ; section absente ; entrée hors
+domaine) ou invariant (vidage) ou exception (microbancs). Le pilote rend le pire code de ses étapes ; le verdict
+d'adoption de MES-M3 est dans le rapport et ne change pas ce code.
 
 ## 3. Le vidage (`mhgp12_vidage`)
 
@@ -144,7 +157,7 @@ global (`global_support`) puis table. Un census saturé au seuil K implique p �
 | --- | --- | --- |
 | `FNODES` | 24 octets : `u32 rank, parent, birth_key, child_count ; u64 child_begin` | nœuds dans l'ordre de la v11 (naissances canoniques, puis fusions par rang et plus petite naissance) ; `parent` et `birth_key` à `0xFFFFFFFF` si absents |
 | `FEDGES` | `u32` | enfants (CSR dans l'ordre des nœuds, triés) |
-| `FLOWER` | `u32` | verticales vers l'ordre k − 1 (k ≥ 2), par nœud |
+| `FLOWER` | `u32` | verticales vers l'ordre k − 1, par nœud : **exigée** à tout ordre k ≥ 2, absente à l'ordre 1 (`CST-0214`) |
 | `FMETA` | 3 × `u64` | naissances, racine, nombre d'arêtes |
 
 ## 5. MES-M3 : plus petite boule proposée puis certifiée
@@ -217,6 +230,20 @@ mêmes traces, dans le même processus, à un fil :
 Les graines des trois bras doivent être identiques trace par trace (sinon refus). Seule la plus petite boule diffère
 entre les deux répliques : leur rapport isole l'effet de `LEV-MEB-CERT` sur le CPU de résolution.
 
+**Réplication et juge** (`CST-0213`). L'étape `resolution` du pilote joue cette mesure dans `--processus` processus neufs
+par cas (`--journal aucun`, `--chrono-resolution R` avec R = `--chrono-k5` ou `--chrono-k10`) ; chaque processus réécrit
+les vidages, qui doivent être identiques à l'octet à ceux de `vider` (mêmes traces, mêmes parties), puis les efface ;
+ses lignes doivent couvrir les ordres 2..K, graines identiques et temps finis positifs. Chaque prise garde son journal
+(`<cas>/resolution/<campagne>/p<i>/resolution.jsonl`) et chaque campagne s'ajoute aux précédentes. Le temps d'un bras
+dans un processus est le **minimum de R passes** de ce processus (identifié comme tel au rapport) ; l'unité de
+réplication est le processus. Juge (étape `rapport`, `REGLE_M3`) : par processus, rapport des sommes sur les ordres
+2..K (réplique v12 sur réplique v11) ; moyenne géométrique des rapports par processus, IC 95 % par bootstrap sur les
+processus (10 000 tirages, graine fixe), comme MES-M2 ; **adopté** si la borne haute est au plus 0,60 sur ng00, ng01 et
+ng02 à K10, avec au moins 5 prises valides par cas dans la dernière campagne, l'identité de MES-M3 et la porte
+(`WIT-T1-CARRE`, mutant tué) rattachées aux mêmes binaires et vidages ; **rejeté** si une borne haute dépasse 0,60 ou
+si l'identité est en défaut ; **refusé** si une preuve manque. Le verdict cite ses journaux et empreintes. La prise de
+`vider` (`--chrono-vidage oui`) reste informative.
+
 ## 6. MES-M4 : forêt sans lots
 
 1. **Naissances** : numérotation canonique par (rang, centre exact) ; les cohortes de même rang sont contiguës dans
@@ -239,7 +266,12 @@ entre les deux répliques : leur rapport isole l'effet de `LEV-MEB-CERT` sur le 
    cellule. Sur les ordres consécutifs : image de chaque naissance par **`LEM-T6`** (sommet laissé par la jonction de la
    même boule à l'ordre k − 1, remonté d'un cran si le parent a le rang de la boule ; nœud de naissance si la boule
    était déjà une naissance à k − 1) contre les verticales `FLOWER` de la v11.
-5. **Porte** : `mhgp12_mes_m4 --porte [cas]` : borne du domaine des opérandes, trois témoins de plateau (ternaire
+5. **Preuves exigées** (`CST-0214`) : à tout ordre k ≥ 2, la section `FLOWER` est obligatoire et toutes les naissances
+   de l'ordre sont jugées par `LEM-T6` (au moins une) ; une section absente, un ordre sans naissance, des en-têtes
+   discordants (genre, ordre, K, trame, profil), des clés de naissance hors domaine ou non croissantes, une boule de
+   cellule hors du catalogue ou des décalages décroissants rendent un refus explicite (ligne `refus`, code 3), jamais
+   un succès. Le pilote exige de plus, par processus, une ligne par ordre aux comptes du vidage et `LEM-T6` complet.
+6. **Porte** : `mhgp12_mes_m4 --porte [cas]` : borne du domaine des opérandes, trois témoins de plateau (ternaire
    d'une cellule, chaîné par deux cellules de même rang, plateaux disjoints puis fusion) et des hypergraphes aléatoires
    à rangs très répétés (2 à 40 naissances) contre un Kruskal par lots (sémantique de la v10,
    `preuves_tour/foret_check.py`). Le mutant `mhgp12_mes_m4_mutant_sans_contraction` doit être tué par la porte et par
@@ -264,16 +296,14 @@ Domaine de chaque espace du noyau et de la contraction :
 
 ## 7. Sur G4
 
-Le pilote est prêt pour une session gardée (le développeur principal la lance) : construire la v11 Release u21
-(`-DMHGP11_COORD_BITS=21`, CMake 3.22, cible `mhgp11`), puis, en deux lots de moins de 30 minutes :
+Le pilote est prêt pour une session gardée (le développeur principal la lance). Plan proposé (`{src}`, `{build}`,
+`{data}`, `{out}` du plan de session v12) : K5 en un lot (`tout`, 5 processus) ; K10 en lots de moins de 30 minutes :
+`construire portes vider m4 rapport` (5 processus), `construire m3 rapport` (3 processus), puis une commande
+`construire resolution rapport` par trame (5 processus chacune, environ 7 minutes) ; publication par
+`microbancs/outils/publier.py --exclude-suffix .bin` (vidages exclus). Le vidage tourne à 48 fils ; MES-M3, la mesure
+de résolution et le noyau de MES-M4 restent à **un fil** (seule la contraction parallèle de MES-M4 utilise
+`--fils-contraction`). Rapatrier `rapport_mes_m3_m4.json`, `tableaux.md` et les `*.jsonl` ; jamais les vidages (ils
+dérivent de KITTI). Les temps locaux de `RAPPORT.md` ne prédisent pas G4.
 
-```bash
-python3 pilote.py --v11-source <v11> --v11-build <b> --donnees <données> --sortie <out> --fils 48 \
-    --fils-construction 48 --fils-contraction 48 --processus 5 --cas ng00:5,ng01:5,ng02:5 tout
-python3 pilote.py ... --fils 48 --fils-contraction 48 --processus 3 --cas ng00:10,ng01:10,ng02:10 vider m3 m4 rapport
-```
-
-Le vidage tourne à 48 fils ; MES-M3, la mesure de résolution et le noyau de MES-M4 restent à **un fil** (seule la
-contraction parallèle de MES-M4 utilise `--fils-contraction`). Rapatrier `rapport_mes_m3_m4.json`, `tableaux.md` et
-les `*.jsonl` ; ne rapatrier les vidages que si une analyse hors G4 l'exige (ils dérivent de KITTI). Les temps locaux
-de `RAPPORT.md` ne prédisent pas G4.
+Portes locales : `python3 -S -O tests/test_pilote.py [--binaires <construction>]` et
+`python3 -S -O tests/test_m4_preuves.py --binaire <construction>/mhgp12_mes_m4`.

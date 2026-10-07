@@ -15,9 +15,14 @@
 //
 // Usage : mhgp12_leaf_bench --dump F.bin [--dump G.bin ...] [--forms witness,j3,j3_r168,...]
 //                           [--reps 20] [--warmup 3]
-//                           [--order size|natural] [--json sortie.json] [--leaves N]
+//                           [--order size|natural] [--json sortie.json] [--leaves N] [--nonce JETON]
 // Variantes : j3 et coherent (registres libres), *_r168 (au plus 168 registres), *_r128 (au plus 128 registres).
-// Codes : 0 identite partout, 1 ecart d'identite ou debordement d'arene, 2 refus (arguments, vidage, CUDA).
+// Preuves (constats CST-0018 et CST-0215) : tous les vidages sont admis (dump::read : domaine, taille, empreinte)
+// AVANT le contexte CUDA et le premier noyau, puis relus avec la meme empreinte exigee ; le JSON cite pour chaque cas
+// l'empreinte FNV-1a du vidage lu (dump_fnv1a), son profil et ses comptes, et repete le jeton --nonce du pilote (prise
+// de la session en cours) ; il est ecrit dans un fichier temporaire puis renomme, et toute ecriture incomplete rend le
+// code 2 (jamais un code 0 sans fichier de resultat).
+// Codes : 0 identite partout, 1 ecart d'identite ou debordement d'arene, 2 refus (arguments, vidage, CUDA, ecriture).
 #include <cuda_runtime.h>
 
 #include <algorithm>
@@ -25,6 +30,7 @@
 #include <chrono>
 #include <cstdio>
 #include <cstring>
+#include <exception>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -474,16 +480,23 @@ void json_string(std::ostream& o, const std::string& s) {
 
 }  // namespace
 
-int main(int argc, char** argv) {
+int run(int argc, char** argv) {
   std::vector<std::string> paths, forms = {"witness",  "j3",       "j3_r168",      "j3_r128",
                                            "coherent", "coherent_r168", "coherent_r128"};
   int reps = 20, warmup = 3;
   unsigned long long leaf_limit = 0;  // 0 : toutes les feuilles
   bool size_order = true;
-  std::string json_path;
+  std::string json_path, nonce;
   for (int i = 1; i < argc; ++i) {
     const std::string a = argv[i];
     if (a == "--dump" && i + 1 < argc) paths.push_back(argv[++i]);
+    else if (a == "--nonce" && i + 1 < argc) {
+      nonce = argv[++i];
+      for (char c : nonce)
+        if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '-' || c == '_' ||
+              c == '.'))
+          return 2;
+    }
     else if (a == "--forms" && i + 1 < argc) {
       forms.clear();
       std::stringstream ss(argv[++i]);
@@ -503,6 +516,17 @@ int main(int argc, char** argv) {
     else return 2;
   }
   if (paths.empty() || forms.empty() || reps < 1 || warmup < 0) return 2;
+  // Admission de tous les vidages avant le contexte CUDA et le premier noyau (CST-0215).
+  std::vector<u64> admitted;
+  for (const auto& path : paths) {
+    dump::LeafDump d;
+    std::string error;
+    if (!dump::read(path, d, error)) {
+      std::cerr << "refus : " << error << '\n';
+      return 2;
+    }
+    admitted.push_back(d.digest);
+  }
   int device = 0;
   MHGP12_CUDA(cudaGetDevice(&device));
   cudaDeviceProp prop{};
@@ -512,7 +536,9 @@ int main(int argc, char** argv) {
   const double context_ms =
       std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
   std::ostringstream out;
-  out << "{\"bench\":\"mhgp12_leaf_bench\",\"device\":";
+  out << "{\"bench\":\"mhgp12_leaf_bench\",\"nonce\":";
+  json_string(out, nonce);
+  out << ",\"device\":";
   json_string(out, prop.name);
   out << ",\"sm\":" << prop.multiProcessorCount << ",\"cc\":\"" << prop.major << '.' << prop.minor
       << "\",\"context_ms\":" << context_ms << ",\"warps_per_block\":" << kWarpsPerBlock
@@ -523,9 +549,14 @@ int main(int argc, char** argv) {
     dump::LeafDump d;
     std::string error;
     if (!dump::read(paths[p], d, error)) {
-      std::cerr << error << '\n';
+      std::cerr << "refus : " << error << '\n';
       return 2;
     }
+    if (d.digest != admitted[p]) {
+      std::cerr << "refus : vidage change depuis son admission : " << paths[p] << '\n';
+      return 2;
+    }
+    const u64 dump_leaves = d.header.n_leaves;
     if (leaf_limit != 0 && leaf_limit < d.header.n_leaves) {  // premieres feuilles seulement (outils de controle)
       const u64 n = leaf_limit;
       d.header.n_leaves = n;
@@ -567,7 +598,9 @@ int main(int argc, char** argv) {
     }
     out << (p ? "," : "") << "{\"dump\":";
     json_string(out, paths[p]);
-    out << ",\"kmax\":" << d.header.kmax << ",\"leaf_size\":" << d.header.leaf_size << ",\"leaves\":"
+    out << ",\"dump_fnv1a\":\"" << dump::digest_hex(d.digest) << "\",\"coord_bits\":" << d.header.coord_bits
+        << ",\"sites\":" << d.header.n_sites << ",\"dump_leaves\":" << dump_leaves
+        << ",\"kmax\":" << d.header.kmax << ",\"leaf_size\":" << d.header.leaf_size << ",\"leaves\":"
         << d.header.n_leaves << ",\"reference_records\":" << d.header.n_records
         << ",\"reference_population\":" << d.header.n_population << ",\"forms\":[";
     for (size_t f = 0; f < results.size(); ++f) {
@@ -597,11 +630,29 @@ int main(int argc, char** argv) {
     std::fprintf(stderr, "\n");
   }
   out << "],\"identity\":" << (all_ok ? "true" : "false") << "}\n";
-  if (!json_path.empty()) {
-    std::ofstream file(json_path);
+  if (!json_path.empty()) {  // fichier temporaire puis renommage : jamais un resultat partiel ni un code 0 sans fichier
+    const std::string tmp = json_path + ".tmp";
+    std::ofstream file(tmp, std::ios::binary | std::ios::trunc);
     file << out.str();
+    file.flush();
+    const bool written = file.good();
+    file.close();
+    if (!written || file.fail() || std::rename(tmp.c_str(), json_path.c_str()) != 0) {
+      std::remove(tmp.c_str());
+      std::cerr << "refus : ecriture du resultat impossible : " << json_path << '\n';
+      return 2;
+    }
   } else {
     std::cout << out.str();
   }
   return all_ok ? 0 : 1;
+}
+
+int main(int argc, char** argv) {
+  try {
+    return run(argc, argv);
+  } catch (const std::exception& e) {  // arguments illisibles, allocation : refus, jamais un signal
+    std::cerr << "refus : " << e.what() << '\n';
+    return 2;
+  }
 }

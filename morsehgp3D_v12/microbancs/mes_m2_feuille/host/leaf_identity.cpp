@@ -7,13 +7,21 @@
 // listes sont triees par S* avant comparaison. Les feuilles non resolues sont comptees (l'hote les rejouerait par
 // leaf.cpp avant admission) et exclues de l'identite.
 //
-// Usage : mhgp12_leaf_identity [--forms j3,coherent] [--threads N] [--leaves N] [--json] <vidage.bin> [...]
-// Codes : 0 identite sur toutes les feuilles resolues, 1 ecart, 2 refus (arguments, vidage illisible).
+// Usage : mhgp12_leaf_identity [--forms j3,coherent] [--threads N] [--leaves N] [--no-diag] <vidage.bin> [...]
+//         mhgp12_leaf_identity --admission <vidage.bin> [...]
+// Admission (constat CST-0215) : TOUS les vidages sont lus et valides (dump::read : domaine de l'en-tete, taille du
+// fichier, empreinte FNV-1a, domaine semantique) AVANT le premier noyau ; un seul refus rend le code 2 sans qu'aucune
+// feuille ne soit jouee (ligne JSON "admis":false et sa raison). Chaque vidage est relu ensuite pour le calcul : son
+// empreinte doit egaler celle de l'admission (fichier change entre les deux lectures : refus, code 2). Chaque ligne de
+// resultat cite l'empreinte FNV-1a du vidage lu (dump_fnv1a). --admission ne joue aucun noyau : une ligne par vidage.
+// Codes : 0 identite sur toutes les feuilles resolues (ou tous les vidages admis), 1 ecart, 2 refus (arguments,
+// vidage illisible ou hors domaine).
 #include <algorithm>
 #include <array>
 #include <atomic>
 #include <chrono>
 #include <cstring>
+#include <exception>
 #include <iostream>
 #include <memory>
 #include <sstream>
@@ -171,11 +179,26 @@ void check_range(const dump::LeafDump& d, Form form, u64 begin, u64 end, Tally& 
   t.ns = now_ns() - start;
 }
 
+void admission_line(const std::string& path, const dump::LeafDump& d) {
+  const auto& h = d.header;
+  std::cout << "{\"dump\":\"" << path << "\",\"admis\":true,\"dump_fnv1a\":\"" << dump::digest_hex(d.digest)
+            << "\",\"coord_bits\":" << h.coord_bits << ",\"kmax\":" << h.kmax << ",\"leaf_size\":" << h.leaf_size
+            << ",\"sites\":" << h.n_sites << ",\"leaves\":" << h.n_leaves << ",\"leaf_sites\":" << h.n_leaf_sites
+            << ",\"records\":" << h.n_records << ",\"population\":" << h.n_population << "}\n";
+}
+
+void refusal_line(const std::string& path, const std::string& error) {
+  std::string why;
+  for (char c : error) why += (c == '"' || c == '\\') ? '\'' : c;
+  std::cout << "{\"dump\":\"" << path << "\",\"admis\":false,\"raison\":\"" << why << "\"}\n" << std::flush;
+  std::cerr << error << '\n';
+}
+
 int run(int argc, char** argv) {
   std::vector<Form> forms = {Form::j3, Form::coherent};
   u32 threads = 1;
   u64 limit = ~u64{0};
-  bool diag = true;
+  bool diag = true, admission_only = false;
   std::vector<std::string> paths;
   for (int i = 1; i < argc; ++i) {
     const std::string a = argv[i];
@@ -194,19 +217,40 @@ int run(int argc, char** argv) {
       limit = std::stoull(argv[++i]);
     } else if (a == "--no-diag") {
       diag = false;
+    } else if (a == "--admission") {
+      admission_only = true;
     } else if (!a.empty() && a[0] == '-') {
       return 2;
     } else {
       paths.push_back(a);
     }
   }
-  if (paths.empty() || threads == 0 || threads > 64) return 2;
+  if (paths.empty() || forms.empty() || threads == 0 || threads > 64) return 2;
+  // 1. Admission de tous les vidages avant le premier noyau.
+  std::vector<u64> admitted(paths.size(), 0);
+  for (std::size_t p = 0; p < paths.size(); ++p) {
+    dump::LeafDump d;
+    std::string error;
+    if (!dump::read(paths[p], d, error)) {
+      refusal_line(paths[p], error);
+      return 2;
+    }
+    admitted[p] = d.digest;
+    if (admission_only) admission_line(paths[p], d);
+  }
+  if (admission_only) return 0;
+  // 2. Identite, vidage par vidage (relu : meme empreinte exigee).
   bool all_ok = true;
-  for (const auto& path : paths) {
+  for (std::size_t p = 0; p < paths.size(); ++p) {
+    const std::string& path = paths[p];
     dump::LeafDump d;
     std::string error;
     if (!dump::read(path, d, error)) {
-      std::cerr << error << '\n';
+      refusal_line(path, error);
+      return 2;
+    }
+    if (d.digest != admitted[p]) {
+      refusal_line(path, "vidage change depuis son admission : " + path);
       return 2;
     }
     const u64 n = std::min<u64>(d.header.n_leaves, limit);
@@ -225,11 +269,13 @@ int run(int argc, char** argv) {
       for (auto& th : pool) th.join();
       const u64 wall = now_ns() - start;
       Tally t;
-      for (const auto& p : parts) t.add(p);
+      for (const auto& part : parts) t.add(part);
       const bool ok = t.mismatched_counts == 0 && t.mismatched_emissions == 0 && t.leaves == n;
       all_ok = all_ok && ok;
-      std::cout << "{\"dump\":\"" << path << "\",\"form\":\"" << name_of(form) << "\",\"kmax\":" << d.header.kmax
-                << ",\"leaf_size\":" << d.header.leaf_size << ",\"leaves\":" << t.leaves
+      std::cout << "{\"dump\":\"" << path << "\",\"dump_fnv1a\":\"" << dump::digest_hex(d.digest)
+                << "\",\"form\":\"" << name_of(form) << "\",\"kmax\":" << d.header.kmax
+                << ",\"leaf_size\":" << d.header.leaf_size << ",\"dump_leaves\":" << d.header.n_leaves
+                << ",\"leaves\":" << t.leaves
                 << ",\"resolved\":" << t.resolved << ",\"unresolved\":" << t.unresolved
                 << ",\"mismatched_counts\":" << t.mismatched_counts
                 << ",\"mismatched_emissions\":" << t.mismatched_emissions << ",\"emissions\":" << t.emissions
@@ -255,4 +301,11 @@ int run(int argc, char** argv) {
 
 }  // namespace
 
-int main(int argc, char** argv) { return run(argc, argv); }
+int main(int argc, char** argv) {
+  try {
+    return run(argc, argv);
+  } catch (const std::exception& e) {  // arguments numeriques illisibles, allocation : refus, jamais un signal
+    std::cerr << "refus : " << e.what() << '\n';
+    return 2;
+  }
+}

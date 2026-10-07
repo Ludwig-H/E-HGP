@@ -4,7 +4,9 @@
 // rendre l'identite, puis detecter six alterations (code 4 de la v11 : mutant tue).
 //
 // Usage : mhgp12_arena_selftest <vidage.bin> [feuilles=20000]   Codes : 0 conforme, 1 ecart, 2 refus, 3 mutant vivant.
+// Le vidage passe l'admission de dump::read (CST-0215) ; la sortie cite son empreinte FNV-1a (dump_fnv1a).
 #include <algorithm>
+#include <exception>
 #include <iostream>
 #include <memory>
 #include <random>
@@ -56,7 +58,13 @@ int main(int argc, char** argv) {
     std::cerr << error << '\n';
     return 2;
   }
-  const u64 limit = argc == 3 ? std::stoull(argv[2]) : 20000;
+  u64 limit = 20000;
+  try {
+    if (argc == 3) limit = std::stoull(argv[2]);
+  } catch (const std::exception&) {
+    return 2;
+  }
+  if (limit == 0) return 2;  // aucun mutant ne serait juge : refus, jamais un vert vide
   // Vidage restreint aux premieres feuilles (meme reference).
   const u64 n = std::min<u64>(limit, d.header.n_leaves);
   d.header.n_leaves = n;
@@ -96,11 +104,16 @@ int main(int argc, char** argv) {
   // Entrelacement des enregistrements de feuilles differentes (l'ordre interne d'une feuille est libre aussi).
   std::shuffle(records.begin(), records.end(), rng);
   const auto base = dump::verify_arena(d, status, counts, records, population);
-  std::cout << "{\"leaves\":" << n << ",\"records\":" << records.size() << ",\"population\":" << population.size()
+  std::cout << "{\"dump_fnv1a\":\"" << dump::digest_hex(d.digest) << "\",\"leaves\":" << n
+            << ",\"records\":" << records.size() << ",\"population\":" << population.size()
             << ",\"identity\":" << (base.identity() ? "true" : "false") << ",\"unresolved\":" << base.unresolved;
   if (!base.identity()) {
     std::cout << "}\n";
     return 1;
+  }
+  if (records.size() < 2 || population.empty() || n < 2) {  // mutants sans objet : refus, jamais un vert vide
+    std::cout << ",\"mutants\":\"sans_objet\"}\n";
+    return 2;
   }
   int alive = 0;
   auto mutant = [&](const char* name, auto&& change) {

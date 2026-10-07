@@ -12,6 +12,8 @@
 // Le critere de la voie etroite de la v11 (etendue <= 2^20 sur chaque axe, kNarrowSpan) est aussi compte.
 //
 // Usage : mhgp12_mes_s <vidage.bin> [...]   Sortie : une ligne JSON par vidage.
+// Admission (CST-0215) : tous les vidages sont lus et valides (dump::read) avant la premiere mesure ; un refus rend le
+// code 2 sans mesure ; chaque vidage relu doit garder l'empreinte de son admission. Codes : 0 conforme, 2 refus.
 #include <algorithm>
 #include <array>
 #include <cstdint>
@@ -83,11 +85,15 @@ struct Histogram {
   }
 };
 
-int run(const std::string& path) {
+int run(const std::string& path, std::uint64_t admitted) {
   mhgp12::dump::LeafDump d;
   std::string error;
   if (!mhgp12::dump::read(path, d, error)) {
     std::cerr << error << '\n';
+    return 2;
+  }
+  if (d.digest != admitted) {
+    std::cerr << "vidage change depuis son admission : " << path << '\n';
     return 2;
   }
   Histogram leaf, box, without_far, best_removal, delta_far, delta_box, delta_best;
@@ -158,7 +164,8 @@ int run(const std::string& path) {
   // Etendue globale du nuage.
   Envelope cloud;
   for (u64 s = 0; s < d.header.n_sites; ++s) cloud.add(d.x[s], d.y[s], d.z[s]);
-  std::cout << "{\"dump\":\"" << path << "\",\"kmax\":" << d.header.kmax << ",\"leaf_size\":" << d.header.leaf_size
+  std::cout << "{\"dump\":\"" << path << "\",\"dump_fnv1a\":\"" << mhgp12::dump::digest_hex(d.digest)
+            << "\",\"kmax\":" << d.header.kmax << ",\"leaf_size\":" << d.header.leaf_size
             << ",\"leaves\":" << d.header.n_leaves << ",\"sites\":" << d.header.n_sites
             << ",\"cloud_bits\":" << cloud.bits() << ",\"cloud_span\":[" << cloud.high[0] - cloud.low[0] << ','
             << cloud.high[1] - cloud.low[1] << ',' << cloud.high[2] - cloud.low[2] << "]"
@@ -193,7 +200,17 @@ int run(const std::string& path) {
 
 int main(int argc, char** argv) {
   if (argc < 2) return 2;
+  std::vector<std::uint64_t> admitted;
+  for (int i = 1; i < argc; ++i) {  // admission de tous les vidages avant la premiere mesure
+    mhgp12::dump::LeafDump d;
+    std::string error;
+    if (!mhgp12::dump::read(argv[i], d, error)) {
+      std::cerr << error << '\n';
+      return 2;
+    }
+    admitted.push_back(d.digest);
+  }
   int code = 0;
-  for (int i = 1; i < argc; ++i) code = std::max(code, run(argv[i]));
+  for (int i = 1; i < argc; ++i) code = std::max(code, run(argv[i], admitted[static_cast<std::size_t>(i - 1)]));
   return code;
 }

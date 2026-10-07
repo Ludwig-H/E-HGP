@@ -30,6 +30,10 @@ set(MHGP12_M2_DIR "${PROJECT_SOURCE_DIR}/../mes_m2_feuille" CACHE PATH "Racine d
 set(MHGP11_SOURCE_DIR "" CACHE PATH "Racine de morsehgp3D_v11 (en-tetes de l'outil de vidage et du chrono v11)")
 set(MHGP11_LIBRARY "" CACHE FILEPATH "libmhgp11.a construite au profil u21 (outil de vidage, chrono v11)")
 option(MHGP12_PARCOURS_CUDA "Banc CUDA (sm_120)" OFF)
+# Profil exige par l'admission des vidages MHGP12LF de MES-M2 (dump_format.hpp, durci le 7 octobre) ; le
+# parcours lui-meme couvre les etendues jusqu'a s = 33, independamment de ce profil.
+set(MHGP12_COORD_BITS 21 CACHE STRING "Profil de coordonnees des vidages MHGP12LF de MES-M2 (21)")
+add_compile_definitions(MHGP12_COORD_BITS=${MHGP12_COORD_BITS})
 
 if(NOT EXISTS "${MHGP12_M2_DIR}/include/mhgp12/leaf/simt.hpp")
   message(FATAL_ERROR "MHGP12_M2_DIR=${MHGP12_M2_DIR} : include/mhgp12/leaf/simt.hpp introuvable (microbanc MES-M2)")

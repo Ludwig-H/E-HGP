@@ -9,12 +9,20 @@
 //      (rang, plus petite naissance) ; parents ; enfants en CSR tries ;
 //   4. juge : IDENTITE avec la foret publiee par la v11 (noeuds, parents, rangs, cles de naissance, enfants, racine) ;
 //      plus, sur les ordres consecutifs, l'image de chaque naissance par LEM-T6 contre les verticales de la v11.
+// Preuves exigees (constat CST-0214 de l'auditeur Codex) : a chaque ordre k >= 2, la section FLOWER (verticales) est
+// obligatoire et TOUTES les naissances de l'ordre sont jugees par LEM-T6 (au moins une) ; une section absente, un
+// ordre sans naissance ou un jugement incomplet rendent un refus explicite (ligne "refus", code 3), jamais un succes.
+// Admission des entrees : genres, ordres, K, trame et profil concordants entre cat.bin, ordre_k.bin et foret_k.bin ;
+// cles de naissance strictement croissantes et dans leur domaine (sites a l'ordre 1, boules ensuite) ; boules des
+// cellules dans le catalogue ; decalages des representants nuls a l'origine, croissants et de total exact.
 // Modes :
 //   mhgp12_mes_m4 --porte [cas]                  hypergraphes aleatoires a rangs repetes contre un Kruskal par lots
 //                                                (semantique v10), temoins de plateau ; code 0 conforme, 1 ecart
 //   mhgp12_mes_m4 <dossier> [--repetitions R] [--fils-contraction T]
 //                                                banc sur un vidage ; JSON sur la sortie standard ; T > 1 : contraction
 //                                                parallele par tranches alignees sur les rangs, identite exigee
+// Codes du banc : 0 conforme (toutes les preuves jugees), 1 ecart (identite, LEM-T6, contraction parallele),
+// 2 usage ou domaine des operandes (CST-0212), 3 refus (preuve absente, entree hors domaine) ou exception.
 // Mutant : MHGP12_MUTANT_SANS_CONTRACTION (chaque evenement binaire devient un noeud) ; la porte et le banc doivent le
 // tuer.
 #include <algorithm>
@@ -607,10 +615,27 @@ struct PreviousOrder {  // ordre k-1, pour LEM-T6
   std::vector<u32> rank, parent;
 };
 
+// Refus explicite : ligne JSON "refus" (raison, ordre), puis fin de code 3. Jamais un succes sans preuve.
+int refuse(u32 k, const std::string& reason) {
+  std::cout << "{\"phase\":\"refus\",\"k\":" << k << ",\"raison\":\"" << reason << "\"}\n";
+  std::cout << "{\"phase\":\"fin\",\"code\":3}\n" << std::flush;
+  return 3;
+}
+
+bool same_file_header(const d::Header& a, const d::Header& b) {
+  return a.coord_bits == b.coord_bits && a.kmax == b.kmax && std::string(a.frame, strnlen(a.frame, 24)) ==
+                                                                  std::string(b.frame, strnlen(b.frame, 24));
+}
+
 int run_bench(const std::string& dir, int repetitions, u32 threads) {
   const d::Reader cat(dir + "/cat.bin");
   const u32 kmax = cat.header().kmax;
-  const u32 balls = static_cast<u32>(cat.get<d::BallRec>("BALLS").second);
+  if (cat.header().kind != d::kCatalogue || cat.header().order != 0 || kmax < 1 || kmax > 12)
+    return refuse(0, "cat.bin : genre, ordre ou K hors domaine");
+  const auto balls_s = cat.get<d::BallRec>("BALLS");
+  if (balls_s.second >= u64{kNone}) return refuse(0, "cat.bin : boules hors du domaine u32");
+  const u32 balls = static_cast<u32>(balls_s.second);
+  const u64 sites = cat.header().sites;
   std::cout << "{\"phase\":\"entree\",\"trame\":\"" << cat.frame() << "\",\"K\":" << kmax << ",\"repetitions\":"
             << repetitions << ",\"mutant_sans_contraction\":" << (kMutantSansContraction ? "true" : "false") << "}\n"
             << std::flush;
@@ -619,6 +644,13 @@ int run_bench(const std::string& dir, int repetitions, u32 threads) {
   for (u32 k = 1; k <= kmax; ++k) {
     const d::Reader order(dir + "/ordre_" + std::to_string(k) + ".bin");
     const d::Reader forest(dir + "/foret_" + std::to_string(k) + ".bin");
+    if (order.header().kind != d::kOrder || order.header().order != k || !same_file_header(order.header(), cat.header()))
+      return refuse(k, "ordre_k.bin : genre, ordre, K, trame ou profil discordants");
+    if (forest.header().kind != d::kForest || forest.header().order != k ||
+        !same_file_header(forest.header(), cat.header()))
+      return refuse(k, "foret_k.bin : genre, ordre, K, trame ou profil discordants");
+    // CST-0214 : les verticales sont une preuve exigee a tout ordre k >= 2, jamais une option.
+    if (k >= 2 && !forest.has("FLOWER")) return refuse(k, "section_absente FLOWER (verticales de l'ordre k)");
     // Pointeurs et comptes nommes (pas de liaisons structurees capturees par les lambdas : GCC 11).
     const auto births_s = order.get<d::BirthRec>("BIRTHS");
     const auto centers_s = order.get<d::CenterRec>("BCENTER");
@@ -645,6 +677,17 @@ int run_bench(const std::string& dir, int repetitions, u32 threads) {
                 << "\"naissances\":" << nb64 << ",\"maximum\":" << kMaxBirths << "}\n";
       return 2;
     }
+    if (nb64 == 0) return refuse(k, "ordre sans naissance : aucune preuve a juger");
+    // Domaines des cles, des boules et des decalages, avant tout calcul (aucune lecture hors des sections).
+    const u64 key_domain = k == 1 ? sites : balls;
+    for (u64 i = 0; i < nb64; ++i)
+      if (births_s.first[i].key >= key_domain || (i > 0 && births_s.first[i].key <= births_s.first[i - 1].key))
+        return refuse(k, "BIRTHS : cles hors domaine ou non strictement croissantes");
+    for (u64 j = 0; j < ncell; ++j)
+      if (cells_s.first[j].ball >= balls) return refuse(k, "CELLS : boule hors du catalogue");
+    if (cell_off_s.first[0] != 0) return refuse(k, "CELLOFF : origine non nulle");
+    for (u64 j = 0; j < ncell; ++j)
+      if (cell_off_s.first[j + 1] < cell_off_s.first[j]) return refuse(k, "CELLOFF : decalages non croissants");
     const u32 nb = static_cast<u32>(nb64);
     // 1. Naissances canoniques.
     Births b;
@@ -745,11 +788,11 @@ int run_bench(const std::string& dir, int repetitions, u32 threads) {
     // 5. LEM-T6 : image d'une naissance de l'ordre k depuis le sommet laisse par la jonction de la meme boule a
     //    l'ordre k-1 (remontee d'un cran si le parent a le rang de la boule), contre les verticales de la v11.
     u64 t6_checked = 0, t6_bad = 0, t6_birth_lower = 0;
-    if (k >= 2 && prev.valid && forest.has("FLOWER")) {
+    if (k >= 2 && prev.valid) {  // FLOWER exigee (controle d'entree ci-dessus)
       const auto lower_s = forest.get<u32>("FLOWER");
       const u32* lower = lower_s.first;
       const u64 nl = lower_s.second;
-      if (nl != nn) throw std::runtime_error("FLOWER");
+      if (nl != nn) return refuse(k, "FLOWER : une verticale par noeud attendue");
       for (u32 i = 0; i < nb; ++i) {
         const u32 ball = births[i].key;
         u32 image = kNone;
@@ -766,6 +809,9 @@ int run_bench(const std::string& dir, int repetitions, u32 threads) {
       }
       if (t6_bad != 0) code = 1;
     }
+    // CST-0214 : a k >= 2, toutes les naissances jugees par LEM-T6 ; sinon l'ordre k-1 n'etait pas identique (code 1
+    // deja pose) et l'ordre k ne peut pas etre conforme.
+    if (k >= 2 && t6_checked != nb) code = std::max(code, 1);
     // Etat de l'ordre k pour LEM-T6 a l'ordre k+1 (cles de boules seulement : ordres >= 1 vers >= 2).
     prev = PreviousOrder{};
     if (identical) {

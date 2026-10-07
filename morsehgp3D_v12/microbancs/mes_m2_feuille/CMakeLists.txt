@@ -4,6 +4,7 @@
 #   mhgp12_leaf_identity  identite sur l'hote des deux formes (warp simule) contre les vidages de leaf.cpp (C++ seul)
 #   mhgp12_mes_s          histogrammes d'etendue locale (contrat numerique, MES-S) sur les vidages (C++ seul)
 #   mhgp12_arena_selftest auto-test de la verification d'arene du banc (warp simule, arrivees melangees, mutants)
+#   mhgp12_dump_admission_selftest  porte d'admission des vidages (CST-0215) : vidage valide admis, mutants refuses
 #   mhgp12_leaf_dump      vidage des feuilles de la v11 ; exige MHGP11_SOURCE_DIR et MHGP11_LIBRARY (libmhgp11.a, u21)
 #   mhgp12_leaf_timing    chrono local indicatif a un fil : leaf.cpp, feuille v11 sur l'hote, formes v12 simulees
 #   mhgp12_leaf_bench     banc CUDA (sm_120) : temoin v11 un fil par feuille, formes j3 et coherente ; exige
@@ -68,6 +69,10 @@ mhgp12_host_target(mhgp12_mes_s)
 
 add_executable(mhgp12_arena_selftest host/arena_selftest.cpp)
 mhgp12_host_target(mhgp12_arena_selftest)
+
+# Porte d'admission des vidages (CST-0215) : vidage synthetique valide et mutants a empreinte juste.
+add_executable(mhgp12_dump_admission_selftest host/dump_admission_selftest.cpp)
+mhgp12_host_target(mhgp12_dump_admission_selftest)
 
 if(MHGP11_SOURCE_DIR AND MHGP11_LIBRARY)
   add_executable(mhgp12_leaf_dump vidage/leaf_dump.cpp)

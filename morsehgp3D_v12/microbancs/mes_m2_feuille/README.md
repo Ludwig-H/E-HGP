@@ -30,9 +30,12 @@ de la v11 (témoin), et **identité** avec la feuille de référence `leaf.cpp`.
 | `include/mhgp12/leaf/arena.hpp`, `compare.hpp` | arène d'émissions (16 o par boule) et vérification contre le vidage |
 | `host/leaf_identity.cpp` | identité sur l'hôte des deux formes, toutes les feuilles |
 | `host/arena_selftest.cpp` | auto-test de la vérification d'arène du banc (arrivées mélangées, six mutants) |
+| `host/dump_admission_selftest.cpp` | porte d'admission des vidages (`CST-0215`) : vidage synthétique valide admis, 46 mutants à empreinte juste refusés |
 | `host/mes_s.cpp` | mesure `MES-S` du contrat numérique (étendues locales) |
 | `cuda/leaf_bench.cu` | banc CUDA : témoin v11, formes J3 et cohérente, variantes de registres, chrono, identité |
-| `scripts/g4_leaf_bench.py` | session G4 complète (bibliothèque standard) : construit, vide, vérifie, mesure, juge |
+| `scripts/g4_leaf_bench.py` | session G4 complète (bibliothèque standard) : construit, vide, admet, vérifie, mesure, juge |
+| `tests/test_juge_m2.py` | porte du juge et du pilote (`CST-0018`, `CST-0215`) : 25 scénarios simulés (dont les six injections de l'auditeur), juge pur, rejugement des 45 prises réelles du reçu G4 |
+| `tests/test_admission_m2.py` | porte native de l'admission : mutants rejoués par les vrais outils (code 2, aucun noyau), vidages réels admis |
 | `scripts/make_dumps_local.sh` | vidages locaux (hors dépôt) |
 | `CMakeLists.txt` | CMake ≥ 3.20 (3.22.1 de la VM), C++20, `-Wall -Wextra -Wpedantic -Werror` côté hôte |
 | `RAPPORT.md` | résultats du 7 octobre |
@@ -60,6 +63,20 @@ reconstruit depuis une bibliothèque v11 neuve, il est identique à l'octet (§ 
 drapeaux, comptes), puis nuage (x, y, z), feuilles (64 octets, disposition de `LeafJob`), sites, compteurs (15 × u32 par
 feuille), statuts, débuts et enregistrements (8 octets, disposition de `LeafRecord` : $S^{*}$ en rangs locaux, p, m,
 $q_{\min}$), débuts et populations (rangs locaux, I puis U) ; FNV-1a 64 final ; lecteur strict.
+
+**Admission** (`CST-0215`, contre-audit Codex) : une empreinte FNV-1a juste protège les octets, pas le domaine des
+noyaux. `dump::read` refuse donc, jamais en silence : avant toute allocation dépendant des comptes, un en-tête hors
+domaine (profil différent de celui du binaire, K hors de 1..12, taille de feuille hors de K+3..256, `max_leaf` hors de
+taille..256, drapeaux inconnus ou sans graphe de paires, comptes au-delà des indices `u32` du banc, vidage sans
+feuille, champ réservé non nul) ou dont les tailles de sections ne donnent pas exactement la taille du fichier ; après
+l'empreinte, toute coordonnée hors de $[0,2^{B})$, toute feuille qui ne pave pas la liste des sites dans l'ordre (d'où
+aucun débordement de début + m), toute boîte hors de $0\leq lo<hi\leq 2^{B}$, tout site hors du nuage, non croissant ou
+répété, tout statut sans le bit de `leaf.cpp` ou avec l'écart du témoin v11, tout début d'enregistrements ou
+d'incidences faux, tout compteur `emitted`/`incidences` différent de sa plage, tout enregistrement hors domaine
+($q_{\min}$, S* croissant dans la feuille, $p+m$, $p+q_{\min}\leq K+1$) et toute population non croissante, hors de la
+feuille, non disjointe ou sans S* dans la coquille. Les outils (`mhgp12_leaf_identity`, `mhgp12_mes_s`, le banc) admettent
+**tous** leurs vidages avant le premier noyau, relisent chacun avec la même empreinte et la citent (`dump_fnv1a`) ;
+`mhgp12_leaf_identity --admission` admet sans calculer. Les neuf vidages réels (ng00–02) sont admis.
 
 ## 3. Sémantique de référence et compteurs logiques
 
@@ -167,7 +184,10 @@ sont recalculées. Mémoire partagée par warp : 1 152 octets.
 - vérification après la dernière prise : statuts, compteurs par feuille et **ensemble des émissions** par feuille
   (arène regroupée par feuille, triée par $S^{*}$) pour les formes v12 ; totaux des compteurs, boules et incidences par
   feuille pour le témoin. La vérification d'arène est partagée avec `host/arena_selftest.cpp` ;
-- `--leaves N` restreint le banc aux N premières feuilles (contrôles sous Compute Sanitizer).
+- `--leaves N` restreint le banc aux N premières feuilles (contrôles sous Compute Sanitizer) ;
+- preuves de la prise (`CST-0018`) : `--nonce` répète le jeton de la session dans le JSON ; chaque cas cite l'empreinte
+  du vidage lu, son profil et ses comptes ; le JSON est écrit dans un fichier temporaire puis renommé, et une écriture
+  incomplète rend le code 2 (jamais un code 0 sans résultat).
 
 Ressources (ptxas 12.9, sm_120) :
 
@@ -196,6 +216,26 @@ Ressources (ptxas 12.9, sm_120) :
 5. choix : parmi les variantes adoptées, la plus petite moyenne géométrique sur les six cas qui décident ; les feuilles
    non résolues sont publiées (attendu : zéro sur ces trames), ainsi que les rapports des cas K5/16.
 
+**Preuves exigées** (`CST-0018`, `CST-0215` ; la règle et sa statistique ne changent pas, le juge rejugeant les 45
+prises du reçu G4 redonne exactement ses verdicts et intervalles). « Adopté » exige toutes les preuves présentes et
+fraîches ; toute absence rend « refusé », jamais « adopté » ni « rejeté » :
+
+- contrat : trames ng00–02, configurations 5:16, 5:24, 10:24, cas qui décident 5:24 et 10:24, au moins 5 processus,
+  identité hôte et sanitizers joués, banc CUDA joué ; une option qui s'en écarte publie la mesure et refuse l'adoption ;
+- binaires construits et hachés, inchangés en fin de session ; sources inchangées ; porte d'admission conforme ;
+- vidages : construits dans la session (cible effacée avant, code 0) ou fournis, en-tête conforme au cas, empreintes
+  (sha256 et FNV-1a finale) relevées, admis par le lecteur C++ avant tout noyau, inchangés en fin de session ;
+- identité hôte de code 0, une ligne par cas et par forme de base, identité, couverture complète et empreinte du vidage ;
+- auto-test d'arène de code 0 sur le vidage cité, aucun mutant vivant ;
+- Compute Sanitizer trouvé et joué (memcheck, racecheck, synccheck) : aucun défaut (code 0, ou 1 si le banc constate
+  lui-même un écart d'identité), prise neuve de la session sur le bon vidage ;
+- prise d'échauffement et chaque prise du banc : fichier neuf (cible effacée avant), jeton de la session, vidage cité
+  par son chemin, son empreinte et ses comptes, exactement les formes et répétitions demandées, durées finies
+  strictement positives, code cohérent avec l'identité, témoin identique à la référence ;
+- chaque cas attendu présent avec ses N processus valides ; isolation du GPU relevée au début, avant et après le banc.
+
+Le rapport cite ses preuves (`evidence` : jeton, empreintes des vidages, prises et journaux).
+
 ## 10. Session G4
 
 Depuis la racine du dépôt où ce dossier est intégré (`<chemin>` ci-dessous), sur la VM :
@@ -211,6 +251,8 @@ hôte, vide les neuf cas en parallèle, joue l'identité hôte, l'auto-test d'ar
 banc), puis 1 + 5 processus de banc par cas (15 répétitions, 3 d'échauffement), et écrit `<sortie>/report.json`
 (versions, empreintes des sources, des binaires et des vidages, journaux, verdicts). Option `--dumps` pour des vidages déjà faits. Durée estimée : 15 à
 25 minutes. Codes : 0 rapport écrit (quel que soit le verdict), 2 refus avant toute mesure.
+Portes locales (sans GPU) : `python3 -S -O tests/test_juge_m2.py` (juge, pilote, reçu G4) et
+`python3 -S -O tests/test_admission_m2.py --binaires <hôte>` (admission native).
 
 ## 11. Limites et risques
 
