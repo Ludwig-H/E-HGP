@@ -61,8 +61,8 @@ endroit du code, à une porte et, s'il en a un, à un mutant.
 | `JUG-J1` | restriction de $\mathrm{Cat}_{K'}$ | complète | V11 (Euler) | — |
 | `JUG-EMST` (ancien J2) | ordre un = arbre couvrant euclidien minimal coupé à $4a$ | complète | aucune | **l'implanter** : c'est le juge d'échelle le moins coûteux, jamais implanté en v11 |
 | `JUG-EULER` (ancien J3) | identité d'Euler par ordre ; $\mathrm{Cat}_{K+2}$ suffit ; filet, pas certificat | résumée ; complète en v9 | `proved_here` | importer la preuve par le nerf (v9, `559c8ab84`) |
-| `SUP-A`…`SUP-H`, `SUP-W` | rattachement, rôles, branches, graines, juge, supports minimaux, comptes, polyèdres datés, périmètre (Th. 4 sans position générale) | complètes | `proved_here` (§ 10) | réparer la ligne E fusionnée à D2 (`\n` littéral, l. 1370) |
-| `SUP-KRUSKAL` | les boules de naissance et de fusion déterminent $T_K$ ; sélection de Kruskal au plateau | conclusion juste, citation fausse (C.3 au lieu de P.3) | **absente** | corriger la citation, ajouter la ligne |
+| `SUP-A`…`SUP-H`, `SUP-W` | rattachement, rôles, branches, graines, juge, supports minimaux, comptes, polyèdres datés, périmètre (Th. 4 sans position générale) | complètes | `proved_here` (§ 10) | ligne E séparée de D2 le 7 octobre 2026 (`CST-0013`) |
+| `SUP-KRUSKAL` | les boules de naissance et de fusion déterminent $T_K$ ; sélection de Kruskal au plateau | conclusion juste, citation fausse (C.3 au lieu de P.3) | `proved_here`, ligne ajoutée le 7 octobre 2026 avec la citation corrigée (`CST-0013`) | — |
 
 ## 4. Lemmes de calcul
 
