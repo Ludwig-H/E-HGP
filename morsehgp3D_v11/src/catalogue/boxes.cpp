@@ -1,8 +1,6 @@
 // Boites T0 et listes K-certifiees : preparation possedee puis reprise, sans refiltrer un noeud prepare.
 #include "catalogue/internal.hpp"
 
-#include "catalogue/g1.hpp"
-
 namespace mhgp11::catalogue_detail {
 namespace {
 
@@ -40,20 +38,46 @@ u32 reservoir(const Cloud& cloud, std::span<const SiteIdx> parent, const Box& bo
   return count;
 }
 
+// Termes du test G1 separes par site : 2*largeur*(x-lo) par axe et |x-lo|^2. Leur difference redonne
+// exactement 2*largeur*(x-y) ; memes entiers (<2^(2B+2)), donc memes decisions G1.
+struct Terms {
+  std::array<i64, 3> scaled;
+  i64 square;
+};
+
+Terms terms(const std::array<i64, 3>& site, const Box& box) noexcept {
+  Terms t{};
+  for (int axis = 0; axis < 3; ++axis) {
+    const i64 x = site[axis] - box.lo[axis];
+    t.scaled[axis] = 2 * (box.hi[axis] - box.lo[axis]) * x;
+    t.square += x * x;
+  }
+  return t;
+}
+
 Outcome filter(Run& run, std::span<const SiteIdx> parent, const Box& box, Buffer<SiteIdx>& storage,
                u32& count) noexcept {
   MHGP11_TRY(storage.allocate(parent.size(), run.budget));
   std::array<SiteIdx, 3 * kMaxOrder> witnesses{};
   const u32 selected = reservoir(run.cloud, parent, box, run.params.kmax, witnesses);
-  // Temoins pretraites une fois par noeud, en colonnes ; le compte de tests (meme arret a K dominateurs) est ajoute en
-  // fin. Le test lui-meme (boucle de reference ou masque AVX2, memes decisions et meme compte) vit dans g1.cpp.
-  std::array<G1Terms, 3 * kMaxOrder> prepared{};
-  for (u32 i = 0; i < selected; ++i) prepared[i] = g1_terms(coordinates(run.cloud, witnesses[i]), box);
-  G1Witnesses columns;
-  g1_witnesses(std::span<const G1Terms>(prepared).first(selected), columns);
+  // Temoins pretraites une fois par noeud ; le compte de tests (meme arret a K dominateurs) est ajoute en fin.
+  std::array<Terms, 3 * kMaxOrder> prepared{};
+  for (u32 i = 0; i < selected; ++i) prepared[i] = terms(coordinates(run.cloud, witnesses[i]), box);
+  const u32 kmax = static_cast<u32>(run.params.kmax);
   u64 tests = 0;  // <= |parent|*3K < 2^38
   count = 0;
-  g1_filter(run.cloud, parent, box, columns, static_cast<u32>(run.params.kmax), storage.data(), count, tests);
+  for (SiteIdx s : parent) {
+    const Terms x = terms(coordinates(run.cloud, s), box);
+    u32 found = 0, i = 0;
+    for (; i < selected && found < kmax; ++i) {
+      const auto& y = prepared[i];
+      const i64 right = std::max<i64>(0, x.scaled[0] - y.scaled[0]) + std::max<i64>(0, x.scaled[1] - y.scaled[1]) +
+                        std::max<i64>(0, x.scaled[2] - y.scaled[2]);
+      found += x.square - y.square > right ? 1u : 0u;  // G1 : egalite conservee sur la fermeture de la boite.
+    }
+    tests += i;
+    if (found < kmax) storage[count++] = s;
+  }
   return checked_add(run.ledger.filter_tests, tests);
 }
 

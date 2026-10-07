@@ -1,6 +1,6 @@
 {
   "module": "catalogue",
-  "plancher": 78,
+  "plancher": 74,
   "mutants": [
     {
       "id": "support_tetra_strict_ignore",
@@ -12,10 +12,10 @@
     },
     {
       "id": "dominance_egalite_retiree",
-      "fichier": "src/catalogue/g1.cpp",
-      "cherche": "    found += x.square - w.square[i] > right ? 1u : 0u;  // G1 : egalite conservee sur la fermeture de la boite.",
-      "remplace": "    found += x.square - w.square[i] >= right ? 1u : 0u;  // G1 : egalite conservee sur la fermeture de la boite.",
-      "porte": "mhgp11_catalogue_g1_equivalence",
+      "fichier": "src/catalogue/boxes.cpp",
+      "cherche": "found += x.square - y.square > right ? 1u : 0u;",
+      "remplace": "found += x.square - y.square >= right ? 1u : 0u;",
+      "porte": "mhgp11_catalogue_fraction",
       "note": "une egalite sur la boite fermee eliminerait un candidat"
     },
     {
@@ -599,38 +599,6 @@
       "remplace": "u64 target = total, acquired = 0;",
       "porte": "mhgp11_catalogue_leaf_split_select",
       "note": "partage : part demandee ignoree, tout le lot a l'hote"
-    },
-    {
-      "id": "g1_avx2_egalite_comptee",
-      "fichier": "src/catalogue/g1.cpp",
-      "cherche": "    const __m256i strict = _mm256_cmpgt_epi64(left, right);  // G1 : inegalite stricte, comme la reference",
-      "remplace": "    const __m256i strict = _mm256_or_si256(_mm256_cmpgt_epi64(left, right), _mm256_cmpeq_epi64(left, right));",
-      "porte": "mhgp11_catalogue_g1_equivalence",
-      "note": "Masque G1 AVX2 : inegalite stricte, une egalite ne domine pas."
-    },
-    {
-      "id": "g1_avx2_arret_decale",
-      "fichier": "src/catalogue/g1.cpp",
-      "cherche": "  return {kmax, static_cast<u32>(std::countr_zero(mask)) + 1};",
-      "remplace": "  return {kmax, static_cast<u32>(std::countr_zero(mask))};",
-      "porte": "mhgp11_catalogue_g1_equivalence",
-      "note": "Masque G1 : la boucle de reference s'arrete juste apres le kmax-ieme dominateur (compte de tests)."
-    },
-    {
-      "id": "g1_avx2_max_omis",
-      "fichier": "src/catalogue/g1.cpp",
-      "cherche": "    d0 = _mm256_and_si256(d0, _mm256_cmpgt_epi64(d0, zero));  // max(0, d)\n",
-      "remplace": "",
-      "porte": "mhgp11_catalogue_g1_equivalence",
-      "note": "Masque G1 AVX2 : seules les differences positives entrent dans le terme de droite."
-    },
-    {
-      "id": "g1_filtre_avx2_garde_inverse",
-      "fichier": "src/catalogue/g1.cpp",
-      "cherche": "    const G1Result r = g1_avx2(g1_terms(site_coordinates(cloud, s), box), w, kmax);\n    tests += r.tests;\n    if (r.found < kmax) out[count++] = s;",
-      "remplace": "    const G1Result r = g1_avx2(g1_terms(site_coordinates(cloud, s), box), w, kmax);\n    tests += r.tests;\n    if (r.found <= kmax) out[count++] = s;",
-      "porte": "mhgp11_catalogue_g1_filter",
-      "note": "Filtre G1 par liste : un site garde a moins de kmax dominateurs."
     }
   ]
 }

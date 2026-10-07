@@ -170,6 +170,3 @@ mhgp11_add_unit(mhgp11_catalogue_leaf_narrow SOURCES leaf_device_narrow_test.cpp
                 GROUPS line_reference acute_and_triple span_refusal LABELS fast)
 # Executeur partage du lot de feuilles : selection des feuilles de l'hote contre une recomputation independante.
 mhgp11_add_unit(mhgp11_catalogue_leaf_split SOURCES leaf_split_test.cpp GROUPS select refusals LABELS fast)
-
-# Test G1 du filtre des noeuds : boucle de reference contre masque AVX2 (memes decisions, meme compte de tests).
-mhgp11_add_unit(mhgp11_catalogue_g1 SOURCES g1_test.cpp GROUPS equivalence filter LABELS fast)
