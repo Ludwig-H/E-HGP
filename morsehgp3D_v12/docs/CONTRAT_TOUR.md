@@ -20,10 +20,14 @@ d'événements** (étage R, [`ARCHITECTURE.md`](ARCHITECTURE.md) § 4.4), dont l
 **Même objet que la v11 gelée, à l'octet.** La v12 écrit, hors du chemin chronométré, le vidage `MHGP11FUL1` de la
 sonde de la v11 : sites dans l'ordre de Morton exact avec leur `PointId`, puis par ordre les nœuds (parent, enfants en
 CSR, niveau en rationnel exact), les naissances par (niveau, centre exact) avec leur centre, les fusions par (niveau,
-plus petite naissance), les verticales. Aucun indice de boule n'y figure : le départage de $S^{*}$ par positions, seul
-écart déclaré du catalogue ([`CONTRAT_CATALOGUE.md`](CONTRAT_CATALOGUE.md) § 1), ne le touche pas. Au profil 21, les
-octets doivent être **identiques** aux empreintes de [`MESURE.md`](MESURE.md) § 4 ; aux profils 24 et 32, sur les mêmes
-coordonnées absolues, l'empreinte sémantique du lecteur strict doit l'être (§ 9).
+plus petite naissance), les verticales. Aucun indice de boule n'y figure, mais chaque niveau y est écrit sous la forme
+**non réduite** de la première boule de son rang, et le centre d'une naissance sous le dénominateur de son support :
+le départage de $S^{*}$ par positions ([`CONTRAT_CATALOGUE.md`](CONTRAT_CATALOGUE.md) § 1) peut donc changer ces
+formes sans changer leurs valeurs (correction du 7 octobre, témoin de l'agent de T2-b : niveau 25 porté par une paire,
+forme 100/4, et par un triangle aigu, forme 409600/16384 ; même empreinte sémantique, octets différents). **`MES-M0` se
+juge donc par l'empreinte sémantique** du lecteur strict (rationnels réduits) à tous les profils ; l'identité **à
+l'octet** avec les empreintes de [`MESURE.md`](MESURE.md) § 4 n'est exigée que pour une tour nourrie par le catalogue
+de la v11 (adaptateur de test, § 2), où elle juge l'exportateur (§ 9).
 
 ## 2. Entrée
 
@@ -223,10 +227,10 @@ le nombre de fils est un défaut (porte W1 contre W48).
 
 ## 9. Portes
 
-1. **Différentiel `MES-M0`** : vidages `MHGP11FUL1` de la v12 identiques à l'octet à ceux de la v11 au profil 21
-   (ng00–02 à K5 et K10, uniformes de 8 000, 16 000 et 32 000 sites à K5) ; aux profils 24 et 32, empreinte sémantique
-   identique sur les mêmes coordonnées, par le lecteur strict de la v11 adapté (profils 21, 24 et 32 ; ordre de Morton
-   exact). L'invariance par translation reste un **contrat distinct**, jugé par translation explicite des sites et des
+1. **Différentiel `MES-M0`** : empreinte sémantique des vidages `MHGP11FUL1` de la v12 identique à celle de la v11
+   (ng00–02 à K5 et K10, uniformes de 8 000, 16 000 et 32 000 sites à K5), à tous les profils, par le lecteur strict de
+   la v11 adapté (profils 21, 24 et 32 ; ordre de Morton exact) ; avec le catalogue de la v11 en entrée, vidages
+   identiques **à l'octet** aux empreintes de `MESURE.md` § 4. L'invariance par translation reste un **contrat distinct**, jugé par translation explicite des sites et des
    centres, jamais par cette empreinte (note de mesure de l'auditeur, `CST-0207`).
 2. **Oracle borné** (`reference/`, $n\leq 14$) : forêt, coupes ouvertes et fermées, verticales, sur la suite rapide.
    La règle du § 4.1 y est gravée depuis le 7 octobre (porte `mhgp12_reference_resolution_v12`) : arrêt sur la
