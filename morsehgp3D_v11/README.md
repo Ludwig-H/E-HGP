@@ -1,7 +1,8 @@
 # Morse HGP 3D v11
 
 **Chantier clos le 7 octobre 2026.** L'utilisateur a décidé une passation et une reconstruction à neuf pour une v12.
-Commencer par la [passation](PASSATION.md), puis lire l'[audit final](docs/AUDIT_FINAL_V11.md).
+Commencer par la [passation](PASSATION.md), puis lire l'[audit final](docs/AUDIT_FINAL_V11.md) et l'[audit
+géant](docs/AUDIT_GEANT_V11.md). La v12 se prépare dans [`morsehgp3D_v12/`](../morsehgp3D_v12/README.md).
 
 Ouverte le 2 octobre 2026, sur `main`, avec une base de code **neuve** : la v10 y était un sujet différentiel et une
 source de fixtures ; tout ce qui en est repris est un port explicite, épinglé et requalifié

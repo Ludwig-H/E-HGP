@@ -1182,7 +1182,8 @@ les reçus, les rapports bruts ou par une exécution ; la lecture qui les établ
 ## 9. Pour une v12 propre, simple et efficace
 
 Demande de l'utilisateur (7 octobre) : « Le but est de faire une v12 aussi propre, simple et efficace que possible. »
-Cette partie tire les conséquences de l'audit. Tout ce qui suit est une proposition **[I]**, fondée sur les constats
+Cette partie tire les conséquences de l'audit ; le dossier [`morsehgp3D_v12/`](../../morsehgp3D_v12/README.md), créé le
+même jour, les développe (décisions, contrat à porter, architecture, plan, mesure, provenance). Tout ce qui suit est une proposition **[I]**, fondée sur les constats
 ci-dessus ; les chiffres d'objectif sont des hypothèses à confirmer par microbancs avant tout port.
 
 ### 9.1 Le diagnostic en trois phrases

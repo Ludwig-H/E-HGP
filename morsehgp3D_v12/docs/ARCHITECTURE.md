@@ -1,0 +1,145 @@
+# Architecture proposée pour la v12
+
+7 octobre 2026. Proposition tirée de l'audit géant de la v11 (§ 7 et § 9) et des conceptions d'origine de la v11
+(`../../morsehgp3D_v11/receipts/conception_v11_20261002/conception/`). **Les budgets sont des hypothèses** : chacun est
+confirmé ou révisé par un microbanc sur G4 avant le port de l'étage ([`PLAN.md`](PLAN.md)).
+
+## 1. Règles de simplicité
+
+1. **Un seul chemin produit, qui est le chemin mesuré.** Pas de masque d'options dans le produit. Les variantes de
+   recherche vivent dans des microbancs, hors du produit, avec des noms (jamais un entier opaque).
+2. **Une seule implantation par noyau.** La feuille du catalogue est écrite une fois, en source unique, compilée en
+   SIMD sur l'hôte et en CUDA sur l'appareil ; le DFS scalaire exact reste la référence de test et le chemin des
+   feuilles larges, pas un second produit.
+3. **Un seul profil de quantification dans le produit** (u21) ; u24 en matrice.
+4. **Des compteurs logiques indépendants de l'ordre de visite**, définis avant la forêt parallèle ; des diagnostics
+   physiques séparés, jamais dans une empreinte de sortie. Pas de registre transactionnel recopié à chaque pas : des
+   accumulateurs locaux par voie, une garde de débordement unique en fin de voie.
+5. **Un départage canonique invariant par translation** partout où un ordre est publié : ordre lexicographique des
+   coordonnées exactes (centres, supports), jamais le rang de Morton.
+6. **Transactions** : une opération rend son résultat entier ou un refus ; jamais un préfixe publié (règle v11 conservée).
+7. **Mémoire comptée** : hôte, mémoire épinglée et appareil dans un même budget ; arènes et caches **comptés** (le cache
+   de blocs de la v11 ne l'était pas) ; plusieurs pilotes déclarés explicitement.
+8. **Déterminisme** : sorties identiques à l'octet quel que soit le nombre de fils et la voie (CPU ou GPU).
+9. **Exactitude** : doctrine numérique F1–F6 et budgets `constexpr` de la v11, portés tels quels.
+10. **Pas plus de fichiers qu'il n'en faut** : la v11 comptait 22 200 lignes de moteur, 50 300 de tests, 19 100 de bancs
+    et 357 Mo de reçus ; la v12 vise moins de modes, moins de doublons, et des reçus sans copies de sources.
+
+## 2. La Session résidente
+
+Une `Session` possède, et ouvre une seule fois : le budget mémoire, le Pool de fils, le contexte CUDA, ses flux, son
+pool de mémoire d'appareil et ses tampons épinglés, les arènes réutilisées d'une trame à l'autre, les modules CUDA
+chargés. Elle reçoit des trames successives. Le temps à froid (ouverture comprise) est publié à côté du temps à chaud.
+Si la décision D2 retient la cadence, la Session peut recouvrir le catalogue de la trame $t+1$ (GPU) et la tour de la
+trame $t$ (CPU).
+
+## 3. Le pipeline et ses budgets (K = 5, trame de type ng00, G4, à chaud)
+
+| Étage | Rôle | Au gel de la v11 | Budget v12 (hypothèse) | Changement |
+| --- | --- | ---: | ---: | --- |
+| P | entrée, tri de Morton, index radix, préparation de la Session | < 1 ms | ≤ 5 ms | port v11 |
+| C | catalogue $\mathrm{Cat}_K$ résident sur le GPU, en flux | 138 ms (GPU) ; 199 ms (CPU) | ≤ 35–45 ms | **algorithme** |
+| G | résolution des graines (descentes) | 63–83 ms | ≤ 25–30 ms | **algorithme** (plus petite boule certifiée) |
+| T | noyau union-find par ordre, recouvert par G | 81–102 ms (publieur de l'ordre 5) | 8–12 ms, recouvert | **algorithme** (sans lots) |
+| M, V | contraction des plateaux, numérotation, verticales | collées au publieur | ≤ 5 ms | **algorithme** |
+| R | registre d'événements | — | à mesurer | nouveau |
+| **Total** | | **212–314 ms** | **≈ 80–100 ms** | |
+
+À K = 10, l'objectif est de 0,3 à 0,5 s (catalogue résident 70–130 ms estimé ; résolution 150–250 ms ; noyau 20–35 ms).
+
+## 4. Étage par étage
+
+### 4.1 C — catalogue résident sur le GPU
+
+- **Parcours des boîtes en largeur sur l'appareil** (au plus 38 niveaux) : réservoir des $3K$ témoins les plus proches
+  par nœud (clé : distance puis rang dans la liste parente), filtre G1 par couple nœud–site en `i64` natif
+  ($2B+5\leq 63$), compactage stable par préfixes, enveloppe par réduction segmentée, bissection.
+- **Feuilles consommées en flux** pendant le parcours, par un noyau **data-parallèle** : phases de la feuille J3
+  (paires, puis triplets avec termes de paire et table H, puis quadruplets par ET de trois lignes de H, census par vote
+  du warp) ou forme « cohérente » (tout le warp sur un même préfixe). Le choix se fait par microbanc. **Jamais un fil par
+  feuille** (3 fils actifs sur 32 en v11).
+- **Arènes proportionnelles aux émissions** (environ 16 octets par boule et 1 par incidence), et non aux feuilles.
+- **Fin sur l'appareil** : tri radix des clés F3, chaînes de voisins non certainement ordonnés résolues en exact, rangs,
+  CSR, table $S^{*}$ → boule ; rapatriement compact ; niveaux exacts matérialisés à la demande, seulement pour les rangs
+  distincts.
+- **Contrat R7 porté** : seuls les chemins `i128` prouvés décident sur l'appareil ; sinon `unresolved`, rejoué en exact
+  avant admission, **en parallèle** (le repli de la v11 était en série).
+- **Référence CPU** : le même noyau en SIMD sur l'hôte, et le DFS exact pour les feuilles larges et les tests.
+- **Ce qui est porté** : contrat G1–G4, filtres de feuille (`LEM-CLIQUE`, `LEM-ZONO`, `LEM-R`, `LEM-DEFER`), $S^{*}$
+  canonique (avec départage par coordonnées), admission $p+q\leq K+1$, clés F3/F4, budget transactionnel.
+- **Risques** : le gain d'une feuille data-parallèle (×3 sur le noyau un-fil) n'est pas établi ; la feuille coopérative
+  par paires a échoué en v11 ; reproduire exactement l'ordre du réservoir et les compteurs ; mémoire des listes par
+  niveau sur l'appareil.
+
+### 4.2 G — résolution des graines
+
+- **Fonction pure** du domaine immuable ; elle ne lit jamais la structure d'union : toute la résolution se calcule en
+  parallèle.
+- **Plus petite boule proposée puis certifiée** (`LEV-MEB-CERT`, mécanisme de la v10 et décision D-G3 de la conception
+  d'origine) : proposition en flottant (Welzl), qui ne décide rien ; si le support proposé est le $S^{*}$ d'une boule
+  $b$ du catalogue et que $F\subseteq P_b$, la boule est certifiée sans arithmétique (`LEM-T1`) ; sinon certificat exact
+  du support proposé, puis canonisation parmi les points de $F$ sur la sphère ; repli exact. L'énumération exhaustive
+  (74 présentations par boule à l'ordre 10 en v11) ne reste que dans l'oracle.
+- **Mémo de cellule déterministe** (`LEM-T3`) : arrêt sur la première cellule de fenêtre, pointeurs datés suivis après
+  coup ; aucun atomique partagé.
+- **Census borné** : arrêt au seuil $k$ ; saut vers les $k$ plus proches avec un comparateur exact.
+- **Table de populations** (`LEM-POP`) produite par le catalogue, compacte (cases à étiquette vérifiées contre la CSR),
+  gardée par la Session (en v11 : 44 Mo à K5 et environ 360 Mo à K10, reconstruite à chaque appel).
+- **Garde de date** : date initiale strictement inférieure au niveau de la cellule (témoins `WIT-MEMO`, `WIT-D2`).
+
+### 4.3 T, M, V — forêt sans lots et verticales
+
+- **T** : pour chaque ordre, un noyau union-find par taille sur des événements binaires (20 octets), un fil propriétaire
+  par ordre, recouvert par G ; les propriétaires résolvent quand ils attendent (D-F1, D-F2). Prototype de la conception :
+  ×2,6 plus rapide que le Kruskal par lots de la v10, forêts identiques.
+- **M** : contraction parallèle des plateaux (`LEM-T4`), numérotation canonique par tri parallèle (rang, plus petite
+  naissance). Les plateaux sont presque singletons (1,02 cellule par plateau à l'ordre 5) : une barrière par plateau est
+  exclue.
+- **V** : image d'une naissance en $O(1)$ depuis la jonction de la même boule à l'ordre $k-1$ (`LEM-T6`) ; image d'une
+  fusion par une requête d'ancêtre sur l'historique d'attache (`LEM-T5`) ; naturalité contrôlée dans les portes.
+- **Second recours**, seulement si G descend sous le temps du noyau : la forêt comme arbre couvrant minimal parallèle et
+  déterministe (`LEM-MSTC`), sur un ordre total des arêtes (rang, boule, indice de graine), en contractant le **lien
+  choisi**, jamais toute l'étoile (piège `REG:238`).
+
+### 4.4 R — le registre d'événements
+
+Une seule structure par ordre, produite au fil du calcul (et non par un balayage a posteriori : l'`attach` sériel de la
+v11 coûtait 75 ms) :
+- nœuds : rang exact, parent, genre (naissance, fusion), référence de la boule de naissance, vie rapportée à
+  $\delta=\sqrt{3}/2$ mm ;
+- hyperarêtes de fusion retenues par Kruskal, avec leurs branches $\mathrm{ant}(b)$ ;
+- verticales ;
+- pendaisons de points ($H^{r}_{K+1}$) ;
+- sur demande, incidences coface–facette pour les masses du § 9.1 (séquence compter, réserver, remplir).
+
+**Toutes les sorties en sont des vues**, chacune avec son lecteur en bibliothèque standard et la signature commune
+`tree_k_sha256` : `full` compact ; squelette (arbre couvrant d'ordre K, $S^{*}$ seul, départage par coordonnées) ;
+`points` ; `condense` ; `plat` ; selon D11, `coverage_v1` et `weighted_gabriel_v1` (pilotes Zoltan) ; selon D13, un
+`CertifiedTowerInput` v2 ; les polyèdres d'ordre $k$ à la demande (D12).
+
+### 4.5 Écriture
+
+SHA-256 avec SHA-NI, ou calculé hors du chemin critique ; tampons d'écriture réels (le `setvbuf` de la v11 laissait
+glibc choisir 4 Kio) ; colonnes écrites en bloc ; un format `full` compact (le vidage de la v11 pèse 301 Mo à K5 et
+1,46 Go à K10 sur ng00, soit 5,8 To pour une passe sur les 19 130 scans d'entraînement de SemanticKITTI).
+
+## 5. Modules
+
+| Module | Rôle | Origine |
+| --- | --- | --- |
+| `core` | statuts, `Result`, budget mémoire (hôte, épinglé, appareil), tampons, arènes | port v11, budget étendu |
+| `num` | entiers à budget, prédicats exacts, certificats, clés F3/F4, racines et sommes de radicaux | port v11 |
+| `sched` | Pool persistant à faible coût par appel ; flux CUDA | réécrit (le Pool v11 réveillait 47 fils par appel) |
+| `cloud`, `io` | entrée u21, multiplicités refusées avec compteur, formats, dossier transactionnel | port v11 |
+| `index` | arbre radix de Morton, bornes sur sites | port v11 |
+| `catalogue` | parcours des boîtes, feuille en source unique, fin d'étage, table $S^{*}$ → boule | réécrit (§ 4.1) |
+| `tower` | résolution, noyau, contraction, verticales | réécrit (§ 4.2, § 4.3) |
+| `registry` | registre d'événements | nouveau |
+| `views` | `full`, squelette, `points`, `condense`, `plat`, exports | port des règles v11, nouvelle structure |
+| `api`, `cli` | `Session`, un exécutable à sortie obligatoire | port v11 |
+
+## 6. Ce qui reste hors du produit
+
+L'oracle exhaustif borné (`reference/`, $n\leq 14$) ; l'énumération exhaustive des supports ; la mosaïque d'ordre $k$
+(en aval, à la demande) ; la tour pondérée (refus explicite tant que le contrat n'est pas prouvé) ; les coquilles
+étendues au-delà d'un plafond déclaré (refus explicite) ; tout juge qui re-vérifie un théorème dans le chemin produit.
