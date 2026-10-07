@@ -1,0 +1,6 @@
+index	name	status	exit_code	wall_seconds	timeout_seconds	max_rss_kb
+0	source_v11	ok	0	5.032	900	277976
+1	socle	ok	0	25.183	1200	251468
+2	m6	ok	0	14.487	900	647328
+3	m2	ok	0	457.252	1500	1922192
+4	m2_publier	ok	0	0.021	300	10752

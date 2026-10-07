@@ -32,6 +32,10 @@ confirmé ou révisé par un microbanc sur G4 avant le port de l'étage ([`PLAN.
 Une `Session` possède, et ouvre une seule fois : le budget mémoire, le Pool de fils, le contexte CUDA, ses flux, son
 pool de mémoire d'appareil et ses tampons épinglés, les arènes réutilisées d'une trame à l'autre, les modules CUDA
 chargés. Elle reçoit des trames successives. Le temps à froid (ouverture comprise) est publié à côté du temps à chaud.
+Mesures de `MES-M6` sur G4 ([reçu](../receipts/g4_t0a_20261007/README.md)) : contexte 116 ms, payés une fois ; puis
+8 µs par lancement synchronisé, 11 µs pour un graphe de dix noyaux, 20 µs pour copier une trame de 60 000 sites ;
+la Session attend en mode `yield` (l'attente bloquante double le coût des petites copies) et groupe ses suites de
+lancements en graphes.
 Si la décision D2 retient la cadence, la Session peut recouvrir le catalogue de la trame $t+1$ (GPU) et la tour de la
 trame $t$ (CPU).
 
@@ -61,8 +65,10 @@ trame $t$ (CPU).
   voie contrôlée au-delà ; compactage stable par préfixes, enveloppe par réduction segmentée, bissection.
 - **Feuilles consommées en flux** pendant le parcours, par un noyau **data-parallèle** : phases de la feuille J3
   (paires, puis triplets avec termes de paire et table H, puis quadruplets par ET de trois lignes de H, census par vote
-  du warp) ou forme « cohérente » (tout le warp sur un même préfixe). Le choix se fait par microbanc. **Jamais un fil par
-  feuille** (3 fils actifs sur 32 en v11).
+  du warp) ou forme « cohérente » (tout le warp sur un même préfixe). **Choix fait par `MES-M2` sur G4 le 7 octobre :
+  J3 par phases, 168 registres** (`j3_r168`, 0,18 du témoin un-fil de la v11 en moyenne géométrique, 11,6 ms contre
+  69,6 ms à K5/24 et 37,2 ms contre 183,9 ms à K10/24 sur ng00, noyau seul ; forme cohérente rejetée ;
+  [reçu](../receipts/g4_t0a_20261007/README.md)). **Jamais un fil par feuille** (3 fils actifs sur 32 en v11).
 - **Arènes proportionnelles aux émissions** (environ 16 octets par boule et 1 par incidence), et non aux feuilles.
 - **Fin sur l'appareil** : tri radix des clés F3, chaînes de voisins non certainement ordonnés résolues en exact, rangs,
   CSR, table $S^{*}$ → boule ; rapatriement compact ; niveaux exacts matérialisés à la demande, seulement pour les rangs
