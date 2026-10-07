@@ -1,0 +1,2 @@
+rows=209 sha_ok=209 copies=28 renames=112 adapted=69
+renommage seul démenti : reference/tests.cmake

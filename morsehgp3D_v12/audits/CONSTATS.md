@@ -6,7 +6,8 @@ v11 et points de Codex). Bloc `CST-0101` à `CST-0199` : contre-lecture des lemm
 `CST-0107`, pin `13c52bc60`, `CONCEPTION_TOUR.md` blob `8e7432dcc680`) et relecture du contrat numérique
 ([`AUDIT_CONTRAT_NUMERIQUE_20261007.md`](../receipts/audit_canal_20261007/archives/AUDIT_CONTRAT_NUMERIQUE_20261007.md), `CST-0108` à `CST-0113`, pin
 `e264de6f2`, `CONTRAT_NUMERIQUE.md` blob `9b6a17bd61d1`), puis son addendum
-([`ADDENDUM_CONTRAT_NUMERIQUE_20261007.md`](../receipts/audit_canal_20261007/archives/ADDENDUM_CONTRAT_NUMERIQUE_20261007.md), `CST-0114`, pin `8865e32c1`).
+([`ADDENDUM_CONTRAT_NUMERIQUE_20261007.md`](../receipts/audit_canal_20261007/archives/ADDENDUM_CONTRAT_NUMERIQUE_20261007.md), `CST-0114`, pin `8865e32c1`), et relecture du
+socle T0 ([reçu](../receipts/audit_claude_socle_t0_20261007/README.md), `CST-0115`, pin `a0091e2b7`).
 
 | Identifiant | Constat | Date | Rôle | Classe | Gravité | Pin | Témoin | État | Preuve de clôture |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -24,6 +25,7 @@ v11 et points de Codex). Bloc `CST-0101` à `CST-0199` : contre-lecture des lemm
 | `CST-0112` | `NUM-COUVERTURE` : le filtrage G1 d'un enfant lit la liste du parent ; il s'évalue dans le repère du parent | 2026-10-07 | auditeur (Claude) | document | mineure | contrat § 2 ; `src/catalogue/boxes.cpp` | témoin hors de la liste de l'enfant | clos | `8865e32c1` : `NUM-COUVERTURE` |
 | `CST-0113` | la clé de Morton décide $S^{*}$ (coquilles à plusieurs supports minimaux), donc l'ordre des `BallIdx`, des lignes `supports` et `cover_v10`, et l'ordre des sites que le lecteur strict exige et hache ; une clé sur (coordonnées − minimum) change ces ordres ; la porte d'invariance par translation doit comparer à translation près | 2026-10-07 | auditeur (Claude) | exactitude | majeure | contrat § 4 et § 7 ; `bench/full_semantic.py` l. 110 à 113 | carré à deux diagonales, translaté | en cours | contrat corrigé (`8865e32c1`) ; lecteur qui retrie et porte de translation à venir |
 | `CST-0114` | test du milieu de la v11 en coordonnées absolues ($2(Do_j+N_j)=D(a_j+b_j)$, $5B+7$ bits, $B \leq 24$), sur l'hôte et sur l'appareil, pendant la canonicalisation ; forme locale $2N_j=D((a_j-o_j)+(b_j-o_j))$, $5s+8$ bits | 2026-10-07 | auditeur (Claude) | numérique | majeure (bloque u32) | `src/catalogue/support.cpp` l. 25 ; `src/catalogue/leaf_device_predicates.hpp` l. 176 | paire antipodale à $B=32$ | en cours | contrat corrigé (`d3fc3ff09`, forme locale de $5s+8$ bits) ; code local à venir |
+| `CST-0115` | `docs/PORTS.md` : `reference/tests.cmake` déclaré « renommage seul » porte aussi les trois portes de `WIT-T1-CARRE` (et leurs jumelles `-O`) ; le bilan 404 → 406 ne les compte pas | 2026-10-07 | auditeur (Claude) | document | mineure | `a0091e2b7` | contrôle mécanique de la table (SHA-256, copies, renommages) | ouvert | — |
 
 Bloc `CST-0001` à `CST-0099` : développeur. `CST-0001` à `CST-0017` reprennent les constats reportés de la v11
 ([origine archivée du canal](../receipts/audit_canal_20261007/README.md)) ; `CST-0018` à `CST-0023` inscrivent les six points de la note d'ouverture de l'auditeur
