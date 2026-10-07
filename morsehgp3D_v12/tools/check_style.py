@@ -25,6 +25,8 @@ Regles (nom entre crochets dans la sortie) :
   [macro]            dans src/ et cli/, toute macro definie s'appelle MHGP12_...
   [mhgp10]           aucun identifiant de la v10 : MHGP10 partout (C++, CMake), namespace mhgp10 et mhgp10:: dans le C++
   [mhgp11]           aucun identifiant de la v11 : MHGP11 partout (C++, CMake), namespace mhgp11 et mhgp11:: dans le C++
+  [recus]            aucun fichier CMake (portes, modules, tests) ne cite receipts hors commentaire : une porte ne lit
+                     jamais un recu (CST-0014)
   [inclusion]        dans src/ et cli/, une inclusion entre guillemets a la forme "module/fichier" ; un module n'inclut
                      d'un AUTRE module que son en-tete public "module/module.hpp"
   [dependance]       un module n'inclut que lui-meme et les modules dont il depend, directement ou non, d'apres la table
@@ -432,6 +434,9 @@ def check_cmake(root, relative, problems):
                 problems.append((relative, number, 'mhgp10', 'identifiant de la v10 : MHGP10'))
             if 'MHGP11' in line:
                 problems.append((relative, number, 'mhgp11', 'identifiant de la v11 : MHGP11'))
+            if 'receipts' in line.split('#', 1)[0]:
+                problems.append((relative, number, 'recus',
+                                 'une porte ne lit pas un recu : receipts cite hors commentaire'))
 
 
 def module_code(root, module):

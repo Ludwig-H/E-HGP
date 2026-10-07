@@ -11,7 +11,7 @@ import tempfile
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import mhgp12_gate  # noqa: E402
 
-FLOOR = 139  # 133 dans la v11, plus les trois cas de la regle [mhgp11]
+FLOOR = 142  # 133 dans la v11, plus les trois cas de la regle [mhgp11] et les trois de [recus]
 
 HEADER = '// Role du fichier.\n'
 
@@ -111,6 +111,13 @@ CASES = [
      'mhgp11', 1, []),
     ('MHGP11 dans un fichier CMake', {'src/core/module.cmake': '# Module.\noption(MHGP11_POISON "" OFF)\n'},
      'mhgp11', 1, []),
+    # une porte ne lit jamais un recu (CST-0014)
+    ('receipts dans un module CMake',
+     {'src/core/module.cmake': '# Module.\nset(X ${CMAKE_CURRENT_LIST_DIR}/receipts/a.json)\n'}, 'recus', 1, []),
+    ('receipts dans un commentaire CMake', {'src/core/module.cmake': '# Module ; voir receipts/a/README.md.\n'},
+     None, 0, []),
+    ('receipts dans les portes d un test', {'tests/core/tests.cmake': 'add_test(NAME t COMMAND cat receipts/x.json)\n'},
+     'recus', 1, []),
     # inclusions et dependances
     ('inclusion sans module', {'src/core/a.cpp': HEADER + '#include "buffer.hpp"\nnamespace mhgp12 {\n}\n'},
      'inclusion', 1, []),
