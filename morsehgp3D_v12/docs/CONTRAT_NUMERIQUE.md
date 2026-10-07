@@ -195,14 +195,17 @@ Conséquences :
 | lecture et contrôle de l'entrée | $B\leq 32$ | refus explicite au-delà |
 | clé de Morton exacte | $3B_{\mathrm{eff}}\leq 96$ (`u64` si $B_{\mathrm{eff}}\leq 21$, `u128` sinon) | identité des sites et ordre interne ; ci-dessous |
 | centre absolu $o+N/D$ (export des naissances) | $B+4s+6$ (v11 : $5B+6$ à $s=B$) | entiers larges, à l'export seulement |
-| comparaison de deux centres absolus (`compare_centers`, naissances de même rang, seul appelant de la v11) | $9B+11$ en v11 ; en v12, parties entières sur 64 bits (dividende $N_j$ de $5s+5$ bits) puis parties fractionnaires sur $8s+10$ bits | en deux temps, sans entier de la taille de $B$ ; même ordre que la v11 |
+| comparaison de deux centres absolus (`compare_centers`, naissances de même rang, seul appelant de la v11) | $9B+11$ en v11 ; en v12, parties entières (64 bits suffisent **pour une boule certifiée**, centre dans l'enveloppe de ses sites ; calculées en `i128`, `Big` au palier large, ce qui couvre aussi les candidates génériques ; dividende $N_j$ de $5s+5$ bits), puis parties fractionnaires sur $8s+10$ bits | en deux temps, sans entier de la taille de $B$ ; même ordre que la v11 |
 | test du milieu de la canonisation (v11 : $2(Do_j+N_j)=D(a_j+b_j)$) | $5B+7$ en v11 ; $5s+8$ en forme locale | § 3 (`CST-0114`) |
 | export d'un niveau | numérateur $\leq 8s+12$, dénominateur $\leq 6s+8$ | mots de 64 bits, nombre de mots en tête |
 | distances carrées des requêtes à centre entier | $2B+2$ | `NUM-REQUETE` |
 
 **Comparaison de centres en deux temps.** L'ordre (niveau, centre) des naissances est invariant par translation ;
 seule sa largeur lisait $B$. Pour $c=o+N/D$ avec $D>0$, la partie entière $\lfloor c_j\rfloor=o_j+\lfloor N_j/D\rfloor$
-tient sur 64 bits ; deux centres de parties entières différentes sont ordonnés par elles, sinon par leurs parties
+tient sur 64 bits **quand la boule est certifiée** (son centre est dans l'enveloppe de ses sites, donc dans
+$[0,2^{32})^{3}$) ; le centre d'une candidate générique peut en sortir (témoin q3 de l'auditeur,
+`(0,0,0)`, `(4294967295,4294967294,0)`, `(4294967294,4294967293,0)` : planchers au-delà de `i64`), et
+`centers.cpp` calcule la partie entière en `i128` (`Big` au palier large), ce qui couvre les deux cas ; deux centres de parties entières différentes sont ordonnés par elles, sinon par leurs parties
 fractionnaires $(N_j-\lfloor N_j/D\rfloor D)/D$, comparées par produits croisés de moins de $8s+10$ bits (natifs
 jusqu'à $s=14$, $s$ le plus grand des deux repères). Préconditions : $D>0$ (signe normalisé en q4) et plancher
 mathématique pour $N_j<0$. Le dividende $N_j$ du plancher a $5s+5$ bits en q3 : entier large au-delà de $s=24$, même

@@ -162,8 +162,10 @@ class Q4Candidate {
 };
 
 // Ordre lexicographique (x,y,z) exact des centres a+N/D, meme hors du domaine de Point. En deux temps (paragraphe 4
-// du contrat) : parties entieres floor(c_j) = a_j + floor(N_j/D) sur 64 bits, puis parties fractionnaires
-// (N_j mod D)/D par produits croises au palier du plus large des deux supports ; axe par axe, meme ordre que la v11.
+// du contrat) : parties entieres floor(c_j) = a_j + floor(N_j/D) en i128 (Big au palier large) ; 64 bits
+// suffiraient pour une boule certifiee (centre dans l'enveloppe de ses sites), pas pour une candidate generique ;
+// puis parties fractionnaires (N_j mod D)/D par produits croises au palier du plus large des deux supports ;
+// axe par axe, meme ordre que la v11.
 // Ignore le rayon et l'arite ; centres egaux sous des ancres/denominateurs differents =>0. Aucun tas/flottant.
 int compare_centers(const Sphere& a, const Sphere& b, LaneCount* lanes = nullptr) noexcept;
 
