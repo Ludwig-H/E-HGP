@@ -1,0 +1,133 @@
+{
+  "cases": [
+    {
+      "after": {
+        "baseline_takes": 1,
+        "code": 0,
+        "duplicate_tags": 0,
+        "issues": [],
+        "ratios": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "takes": 6
+      },
+      "before": {
+        "baseline_takes": 1,
+        "code": 0,
+        "duplicate_tags": 0,
+        "issues": [],
+        "ratios": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "takes": 6
+      },
+      "case": "reference_present"
+    },
+    {
+      "after": {
+        "baseline_takes": 0,
+        "code": 2,
+        "duplicate_tags": 0,
+        "issues": null,
+        "ratios": [],
+        "takes": 0
+      },
+      "before": {
+        "baseline_takes": 0,
+        "code": 0,
+        "duplicate_tags": 0,
+        "issues": [],
+        "ratios": [
+          null
+        ],
+        "takes": 1
+      },
+      "case": "u21_absent_u24_present"
+    },
+    {
+      "after": {
+        "baseline_takes": 0,
+        "code": 2,
+        "duplicate_tags": 0,
+        "issues": null,
+        "ratios": [],
+        "takes": 0
+      },
+      "before": {
+        "baseline_takes": 0,
+        "code": "ZeroDivisionError",
+        "duplicate_tags": 0,
+        "issues": null,
+        "ratios": [],
+        "takes": 0
+      },
+      "case": "all_combinations_absent"
+    },
+    {
+      "after": {
+        "baseline_takes": 0,
+        "code": 2,
+        "duplicate_tags": 0,
+        "issues": null,
+        "ratios": [],
+        "takes": 0
+      },
+      "before": {
+        "baseline_takes": 2,
+        "code": 0,
+        "duplicate_tags": 3,
+        "issues": [],
+        "ratios": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "takes": 9
+      },
+      "case": "duplicate_profile"
+    },
+    {
+      "after": {
+        "baseline_takes": 0,
+        "code": 2,
+        "duplicate_tags": 0,
+        "issues": null,
+        "ratios": [],
+        "takes": 0
+      },
+      "before": {
+        "baseline_takes": 2,
+        "code": 0,
+        "duplicate_tags": 6,
+        "issues": [],
+        "ratios": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "takes": 12
+      },
+      "case": "duplicate_case"
+    }
+  ],
+  "pin": "9b2747eff364d56215b589c782b1a4e51d59a576",
+  "proposed_sha256": "008e756bb5a3a400ad66ecb68b5588cbf6ccac9e9af320ab0d27607aac9c9c19",
+  "scope": "main instrumente : build et take simules ; aucun calcul HGP",
+  "source_sha256": "da2fa5c0b5d48ce2aff357a1174b47773076335b1c4e7ff2ff850afac9f6e118"
+}

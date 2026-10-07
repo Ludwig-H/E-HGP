@@ -1,0 +1,52 @@
+{
+  "observations": {
+    "bool_wall_and_bool_digest": {
+      "catalogue_ok": true,
+      "controle_conforme": true,
+      "ordres": [
+        1,
+        2
+      ],
+      "tour_g_ok": true
+    },
+    "dilation_changed_digest_same_counts": {
+      "controle_conforme": true,
+      "empreintes_distinctes": true
+    },
+    "explicit_refusal_code_zero": {
+      "catalogue_ok": true,
+      "controle_conforme": true,
+      "ordres": [
+        1,
+        2
+      ],
+      "tour_g_ok": true
+    },
+    "main_small_doubles": {
+      "code": 0,
+      "controles": [],
+      "prises": 3
+    },
+    "schema_success_two_passes": {
+      "catalogue_ok": true,
+      "controle_conforme": true,
+      "ordres": [
+        1,
+        2
+      ],
+      "tour_g_ok": true
+    },
+    "take_P5_two_passes_no_orders_invalid_json_invalid_export": {
+      "admitted_passes": 2,
+      "catalogue_ok": true,
+      "controle_conforme": true,
+      "empty_body_hash": true,
+      "ordres": [],
+      "requested_passes": 5,
+      "tour_g_ok": true
+    }
+  },
+  "observations_reproduites": true,
+  "pilot_sha256": "da2fa5c0b5d48ce2aff357a1174b47773076335b1c4e7ff2ff850afac9f6e118",
+  "pin": "9b2747eff364d56215b589c782b1a4e51d59a576"
+}

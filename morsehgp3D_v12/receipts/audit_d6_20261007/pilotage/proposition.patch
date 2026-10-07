@@ -1,0 +1,23 @@
+--- a/morsehgp3D_v12/microbancs/mes_d6_profils/pilote_d6.py
++++ b/morsehgp3D_v12/microbancs/mes_d6_profils/pilote_d6.py
+@@ -231,6 +231,8 @@
+     if not cases or 21 not in profiles or any(p not in (21, 24, 32) for p in profiles) or args.passes < 2 or \
+             args.tours < 1 or not 1 <= args.k <= 12 or args.fils < 1:
+         return 2
++    if len(cases) != len(set(cases)) or len(profiles) != len(set(profiles)) or args.jobs < 1 or args.delai < 1:
++        return 2
+     os.makedirs(os.path.join(args.sortie, 'brut'), exist_ok=True)
+     inputs_dir = os.path.join(args.racine, 'entrees')
+     os.makedirs(inputs_dir, exist_ok=True)
+@@ -244,7 +246,10 @@
+     for case in cases:
+         try:
+             inputs = {f: dilate(args.donnees, case, f, inputs_dir) for f in FACTORS}
+-        except OSError:
++        except (OSError, ValueError, OverflowError):
++            return 2
++        # La comparaison D6 exige sa reference (21, x1) pour chaque trame.
++        if inputs[1][0] is None or inputs[1][2] >= 1 << 21:
+             return 2
+         combos = [(bits, f) for bits in profiles for f in FACTORS
+                   if inputs[f][0] is not None and inputs[f][2] < 1 << bits]

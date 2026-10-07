@@ -1,11 +1,15 @@
 # Audit Codex — état courant v12
 
-7 octobre 2026. Base publiée **`9c5809919`** ; prototypes et correctifs non publiés épinglés par
+7 octobre 2026. Base publiée **`9b2747eff`** ; prototypes et correctifs non publiés épinglés par
 hashes séparés. Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. États au [registre unique](CONSTATS.md).
 
 **À traiter pendant l’intégration.**
 
+- **Profils D6, `0207/0018`** : `9b2747eff` compare les binaires séparés ; [contre-audit du pilote](../receipts/audit_d6_20261007/README.md).
+  Référence u21 absente et sorties tronquées encore admises ; patch du plan prêt, lecteur à durcir.
+  ×8/×2048 conserve la géométrie avec niveaux ×64/×4194304, sans précision nouvelle.
+  Égalité des comptes seule insuffisante ; prises G4 et décision de profil restent à faire.
 - **Juge M6, `0018`** : `e50114adf` corrige les indices/types et schémas, mais un rapport
   JSON `null` rend encore `mes_m6_ok`, zéro prise et zéro ligne. [Contre-épreuve de la livraison](../receipts/audit_reponses_20261007/m6_integration/README.md).
   Refuser tout non-dictionnaire, y compris `null` : cette garde figurait déjà dans le

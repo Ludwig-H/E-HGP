@@ -1,0 +1,9 @@
+{
+  "pin": "9b2747eff364d56215b589c782b1a4e51d59a576",
+  "sources_sha256": {
+    "morsehgp3D_v12/bench/catalogue_probe.cpp": "7dfb919813bc7c757946fabcd91149108890590b7639e042c5e31256a19786e9",
+    "morsehgp3D_v12/bench/tower_probe.cpp": "4a98efd16e70e8f05afcbb181bdfbf994387fd708a9161eef9585dca2c166643",
+    "morsehgp3D_v12/microbancs/mes_d6_profils/README.md": "7e2d2c4271c5b3e463fa3c9fd934c72db2305c214f5380312081f3ac2e0a62a6",
+    "morsehgp3D_v12/microbancs/mes_d6_profils/pilote_d6.py": "da2fa5c0b5d48ce2aff357a1174b47773076335b1c4e7ff2ff850afac9f6e118"
+  }
+}
