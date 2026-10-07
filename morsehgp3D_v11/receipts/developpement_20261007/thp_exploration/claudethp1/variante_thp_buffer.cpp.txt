@@ -1,0 +1,88 @@
+// Compte du budget memoire et allocation des tampons (buffer.hpp). Port de src/core/buffer.hpp et buffer.cpp de la
+// v10 (raccord R2, commit 865f5e6) : reserve et release de MemoryBudget, corps d'allocation de Buffer.
+#include "core/buffer.hpp"
+
+#include <cstdlib>
+#include <cstring>
+#include <new>
+#if defined(__linux__)
+#include <sys/mman.h>
+#endif
+
+namespace mhgp11::detail {
+
+namespace {
+
+// Reserve `bytes` dans le compte si used + bytes <= limit, de facon atomique.
+// Bornes : cur <= limit est l'invariant du compte ; quand bytes <= limit, limit - bytes ne deborde pas, et le test
+// cur <= limit - bytes equivaut a cur + bytes <= limit sans jamais calculer une somme qui deborderait.
+bool budget_reserve(BudgetAccount& account, u64 bytes) noexcept {
+  u64 cur = account.used.load(std::memory_order_relaxed);
+  for (;;) {
+    if (bytes > account.limit || cur > account.limit - bytes) return false;
+    if (account.used.compare_exchange_weak(cur, cur + bytes, std::memory_order_relaxed)) break;
+  }
+  // Pic : maximum des valeurs prises par used. used ne croit qu'ici, donc le maximum des valeurs `reached` de toutes
+  // les reservations reussies est le pic exact.
+  const u64 reached = cur + bytes;
+  u64 peak = account.peak.load(std::memory_order_relaxed);
+  while (reached > peak && !account.peak.compare_exchange_weak(peak, reached, std::memory_order_relaxed)) {
+  }
+  return true;
+}
+
+// Pages de 2 Mio (THP, 7 octobre 2026). Sous Linux, un tampon d'au moins 2 Mio est aligne sur 2 Mio et conseille
+// MADV_HUGEPAGE sur ses `bytes` exacts : chaque etendue de 2 Mio qu'il couvre entierement peut passer en page enorme
+// (bien moins de fautes de page et de defauts de TLB) ; la queue partielle reste en pages de 4 Kio. La memoire
+// physique suit donc `bytes`, et le compte du budget reste celui du tampon. Simple indication : aucune sortie n'en
+// depend, et sans THP (politique never, ou hors Linux) rien ne change.
+#if defined(__linux__)
+constexpr u64 kHugePage = u64{1} << 21;
+bool huge(u64 bytes) noexcept { return bytes >= kHugePage; }
+#else
+bool huge(u64) noexcept { return false; }
+#endif
+
+void* allocate_block(u64 bytes) noexcept {
+#if defined(__linux__)
+  if (huge(bytes)) {
+    void* block = nullptr;
+    if (::posix_memalign(&block, static_cast<std::size_t>(kHugePage), static_cast<std::size_t>(bytes)) != 0)
+      return nullptr;
+#if defined(MADV_HUGEPAGE)
+    static_cast<void>(::madvise(block, static_cast<std::size_t>(bytes), MADV_HUGEPAGE));
+#endif
+    return block;
+  }
+#endif
+  return ::operator new(static_cast<std::size_t>(bytes), std::nothrow);
+}
+
+}  // namespace
+
+void* buffer_acquire(BudgetAccount& account, u64 bytes) noexcept {
+  if (!budget_reserve(account, bytes)) return nullptr;
+  void* block = allocate_block(bytes);
+  if (block == nullptr) {
+    account.used.fetch_sub(bytes, std::memory_order_relaxed);
+    return nullptr;
+  }
+#ifdef MHGP11_POISON
+  std::memset(block, 0xA5, static_cast<std::size_t>(bytes));
+#endif
+  return block;
+}
+
+void buffer_release(BudgetAccount& account, void* block, u64 bytes) noexcept {
+  if (huge(bytes)) std::free(block);  // bloc de posix_memalign (meme taille qu'a l'acquisition, buffer.hpp)
+  else ::operator delete(block);
+  account.used.fetch_sub(bytes, std::memory_order_relaxed);
+}
+
+bool budget_reserve_only(BudgetAccount& account, u64 bytes) noexcept { return budget_reserve(account, bytes); }
+
+void budget_release_only(BudgetAccount& account, u64 bytes) noexcept {
+  account.used.fetch_sub(bytes, std::memory_order_relaxed);
+}
+
+}  // namespace mhgp11::detail
