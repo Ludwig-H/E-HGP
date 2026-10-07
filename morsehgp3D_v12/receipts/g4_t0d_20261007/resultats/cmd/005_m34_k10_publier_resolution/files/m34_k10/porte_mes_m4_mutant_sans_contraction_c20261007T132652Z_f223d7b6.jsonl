@@ -1,0 +1,4 @@
+{"temoin":"borne_operandes_cst0212","maximum":2147483647,"conforme":true}
+{"temoin":"plateau_ternaire_une_cellule","conforme":false}
+{"temoin":"plateau_chaine_deux_cellules","conforme":false}
+{"porte":"mes_m4","mutant_sans_contraction":true,"temoins_ecarts":2,"cas_aleatoires":6000,"ecarts":5646,"noeuds":149415,"fusions_nary_3plus":15419,"voisins_meme_rang":150516,"evenements":105907}

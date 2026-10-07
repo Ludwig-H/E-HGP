@@ -1,0 +1,11 @@
+{
+ "bytes": 624114,
+ "copied": 57,
+ "excluded_dirs": [],
+ "excluded_suffixes": [
+  ".bin",
+  ".ful1"
+ ],
+ "schema": "ehgp.v12.publier.v1",
+ "skipped": []
+}

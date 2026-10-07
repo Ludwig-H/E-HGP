@@ -1,0 +1,11 @@
+{"temoin":"WIT-T1-CARRE","route":"t1","raison":"aucune","sphere_identique":false,"boule_identique":false,"support_identique":false,"route_attendue":false,"raison_attendue":false,"conforme":false}
+{"temoin":"carre_diagonale","route":"t1","raison":"aucune","sphere_identique":true,"boule_identique":true,"support_identique":true,"route_attendue":true,"raison_attendue":true,"conforme":true}
+{"temoin":"carre_triangle_droit","route":"t1","raison":"aucune","sphere_identique":true,"boule_identique":true,"support_identique":true,"route_attendue":true,"raison_attendue":true,"conforme":true}
+{"temoin":"carre_entier_proposition_non_canonique","route":"cert_table","raison":"aucune","sphere_identique":true,"boule_identique":true,"support_identique":true,"route_attendue":true,"raison_attendue":true,"conforme":true}
+{"temoin":"carre_entier_welzl","route":"t1","raison":"aucune","sphere_identique":true,"boule_identique":true,"support_identique":true,"route_attendue":true,"raison_attendue":true,"conforme":true}
+{"temoin":"site_exterieur","route":"repli_census","raison":"site_exterieur","sphere_identique":true,"boule_identique":true,"support_identique":true,"route_attendue":true,"raison_attendue":true,"conforme":true}
+{"temoin":"triangle_droit_force","route":"repli_table","raison":"barycentre_non_strict","sphere_identique":true,"boule_identique":true,"support_identique":true,"route_attendue":true,"raison_attendue":true,"conforme":true}
+{"temoin":"triangle_aigu_t1","route":"t1","raison":"aucune","sphere_identique":true,"boule_identique":true,"support_identique":true,"route_attendue":true,"raison_attendue":true,"conforme":true}
+{"temoin":"tetraedre_t1","route":"t1","raison":"aucune","sphere_identique":true,"boule_identique":true,"support_identique":true,"route_attendue":true,"raison_attendue":true,"conforme":true}
+{"temoin":"hors_catalogue","route":"cert_census","raison":"aucune","sphere_identique":true,"boule_identique":true,"support_identique":true,"route_attendue":true,"raison_attendue":true,"conforme":true}
+{"porte":"mes_m3","mutant_sans_s_dans_f":true,"temoins":10,"ecarts":1}
