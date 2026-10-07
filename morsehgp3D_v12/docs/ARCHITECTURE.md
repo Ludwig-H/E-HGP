@@ -9,8 +9,8 @@ confirmé ou révisé par un microbanc sur G4 avant le port de l'étage ([`PLAN.
 1. **Un seul chemin produit, qui est le chemin mesuré.** Pas de masque d'options dans le produit. Les variantes de
    recherche vivent dans des microbancs, hors du produit, avec des noms (jamais un entier opaque).
 2. **Une seule implantation par noyau.** La feuille du catalogue est écrite une fois, en source unique, compilée en
-   SIMD sur l'hôte et en CUDA sur l'appareil ; le DFS scalaire exact reste la référence de test et le chemin des
-   feuilles larges, pas un second produit.
+   SIMD sur l'hôte et en CUDA sur l'appareil ; le DFS scalaire de la v11, gelé, reste un témoin de test, jamais un
+   second produit ni le chemin des feuilles larges, que la même source rejoue en exact plus large.
 3. **Un seul profil de quantification dans le produit**, choisi selon la décision D6 (le plus large qualifié dont le
    surcoût sur LiDAR reste sous 3 % de u21) ; pendant le développement, u21 est la base de mesure, u24 et u32 des
    candidats, jamais un second chemin produit.

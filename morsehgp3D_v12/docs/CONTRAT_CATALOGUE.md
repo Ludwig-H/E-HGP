@@ -1,6 +1,8 @@
 # Contrat de la tranche T1 : le catalogue
 
-7 octobre 2026. Proposition du développeur, **à relire avant tout code** ([`PLAN.md`](PLAN.md) § 0 : contrat, puis
+7 octobre 2026. Proposition du développeur, **contre-lue par l'auditeur Codex**
+([`contrat/README.md`](../receipts/audit_session_t1_20261007/contrat/README.md), pin `4147c5460`) et révisée en
+conséquence le même jour ; à relire encore avant tout code ([`PLAN.md`](PLAN.md) § 0 : contrat, puis
 témoins et oracle, puis le natif). Entrée de la tranche : `MES-M2` jugé sur G4 (feuille J3 adoptée, variante
 `j3_r168`, [reçu](../receipts/g4_t0a_20261007/README.md)) ; `MES-M5` (parcours des boîtes en largeur sur le GPU) en
 cours. Cadre : `phase=exploration_v12_hors_registre`, `backend=cpu_reference ; cuda_g4 pour le catalogue`,
@@ -8,9 +10,10 @@ cours. Cadre : `phase=exploration_v12_hors_registre`, `backend=cpu_reference ; c
 
 ## 1. L'objet
 
-Le catalogue $\mathrm{Cat}_K$ est l'ensemble des boules critiques $b$ telles que $p+q\leq K+1$ (`CAT-`,
+Le catalogue $\mathrm{Cat}_K$ est l'ensemble des boules critiques **positives** ($q=q_{\min}\geq 2$ ; les naissances des
+sites au niveau zéro n'en sont pas) telles que $p+q\leq K+1$ (`CAT-`,
 [`OBJET_ET_CONTRAT_MATHEMATIQUE.md`](OBJET_ET_CONTRAT_MATHEMATIQUE.md)), chacune avec son support canonique $S^{*}$,
-son intérieur strict $I$ ($p$ sites), sa coquille $U$ ($m$ sites, dont $q_{\min}=\lvert S^{*}\rvert$), son niveau exact.
+son intérieur strict $I$ ($p$ sites), sa coquille $U$ ($m$ sites), $q_{\min}=\lvert S^{*}\rvert$, son niveau exact.
 La complétude est **conditionnelle** (`CAT-G4`) : listes $K$-certifiées des boîtes, recensement local, élagage. Le
 catalogue de la v12 est **le même ensemble** que celui de la v11 gelée (`ac081a06f`), à un seul écart déclaré près :
 $S^{*}$ se départage par la liste triée des positions de ses sites (ordre lexicographique des coordonnées), et non plus
@@ -27,16 +30,24 @@ coquilles à plusieurs supports minimaux.
 | repli | `unresolved` rejoué en série sur l'hôte | rejoué **en parallèle** et budgété (`CST-0009`) | même décision que la voie exacte |
 
 **Une seule implantation par noyau** ([`ARCHITECTURE.md`](ARCHITECTURE.md), règle 2) : sur l'hôte, la feuille du
-produit est la même source J3, jouée sur un warp simulé (1,4 à 1,9 fois le coût de la feuille DFS de la v11 à un fil,
-mesure locale de `MES-M2`), répartie sur les fils ; la feuille DFS de la v11 ne reste que comme **oracle de test**,
-jamais comme second produit. La voie CPU sert la référence exacte et les petits nuages (décision D5).
+produit est la même source J3, jouée sur un warp simulé, répartie sur les fils ; la feuille DFS de la v11, gelée, et
+l'oracle borné indépendant restent comme **témoins de test** (une source commune peut porter le même défaut sur l'hôte
+et l'appareil), jamais comme second produit. La voie CPU sert la référence exacte et les petits nuages (décision D5).
+Conditions d'adoption, accordées par l'auditeur : le surcoût local de la feuille simulée (1,4 à 1,9 fois la DFS de la
+v11 à un fil, `MES-M2`) ne décide pas seul ; on mesure le **catalogue CPU entier** et la chaîne des petits nuages
+(`MES-P` : 100 à 10 000 sites, froid et chaud), qui fixe aussi le seuil entre voie CPU et voie GPU ; en cas d'échec,
+la décision de conception est révisée ouvertement, jamais par une seconde implantation discrète. Le **repli exact** de
+l'hôte rejoue une feuille refusée avec la même structure J3 mais des opérations exactes plus larges : rejouer sur le
+même domaine arithmétique ne résoudrait rien.
 
 ## 3. Numérique
 
 Tout le contrat numérique s'applique ([`CONTRAT_NUMERIQUE.md`](CONTRAT_NUMERIQUE.md)) : repère d'une feuille = fermeture
 de sa boîte et tous les sites de sa liste ; filtrage G1 d'un enfant dans le repère du parent ; budgets par palier
-d'étendue (sur les trames mesurées, toutes les feuilles ont $s\leq 17$ et tous les supports $s\leq 15$ : le palier étroit
-couvre tout) ; certificats liés à leur domaine ; test du milieu local ; réservoir $2s+4$ ; boîtes fermées jusqu'à
+d'étendue (sur les trames mesurées, toutes les feuilles ont $s\leq 17$ et tous les supports $s\leq 15$ ; la voie étroite
+historique de la v11, d'enveloppe au plus $2^{20}$, les couvre toutes ; le palier étroit proposé, $s\leq 16$, en couvre au
+moins 99,997 %, et les feuilles à $s=17$, au plus 13 par cas, passent au palier moyen, l'orientation y valant 128 bits ;
+des supports à $s\leq 15$ ne couvrent pas d'office les autres sites interrogés) ; certificats liés à leur domaine ; test du milieu local ; réservoir $2s+4$ ; boîtes fermées jusqu'à
 $s=33$. Sur l'appareil (contrat R7 de la v11) : seules décident les voies garanties par le palier ou par un certificat ;
 toute autre feuille est **non résolue**, comptée, et rejouée en exact sur l'hôte avant admission. Aucune décision en
 flottant ; les clés F3 ne servent qu'à trier, avec repli exact.
@@ -44,13 +55,18 @@ flottant ; les clés F3 ne servent qu'à trier, avec repli exact.
 ## 4. Capacité, mémoire, refus
 
 - **Comptage puis réservation** (`CST-0211`) : chaque lot de feuilles compte exactement ses boules et ses incidences
-  avant de les écrire ; la réservation est contrôlée ; un dépassement rend `resource_exhausted` sans rien publier. La
+  avant de les écrire, **repli des feuilles non résolues compris, avant admission** ; décalages et sommes contrôlés ;
+  le budget couvre les listes du front du parcours et la fin d'étage ; la trame entière s'engage de façon transactionnelle,
+  et un dépassement rend `resource_exhausted` sans rien publier. Le résultat partiel et les compteurs d'une tentative
+  non résolue sont jetés : une feuille ne compte qu'une fois, après succès, et les deux passes (comptage, écriture) ne
+  doublent pas les compteurs logiques ; leurs coûts physiques, et ceux des tentatives, sont publiés à part. La
   prévision par les lois par site (33 boules et 153 incidences par site à K5 sur le LiDAR) ne sert qu'à dimensionner les
   lots.
 - **Domaines d'indices** (`CST-0212`) : sites, boules et feuilles sur 32 bits avec refus à la vraie limite ; décalages
   et compteurs sur 64 bits.
 - **Profondeur** du parcours au plus $3B$ (`CST-0205`) ; nombre de nœuds budgété à part.
-- **Flux** : une trame de 60 000 sites tient en un lot ; une scène de plusieurs millions de sites passe par lots de
+- **Flux** : une trame de 60 000 sites tient en un lot (prévision de régime, non conséquence de $n$ : l'admission
+  certifiée prévaut) ; une scène de plusieurs millions de sites passe par lots de
   feuilles dans l'ordre de Morton, l'appareil étant réutilisé d'un lot à l'autre ([`ARCHITECTURE.md`](ARCHITECTURE.md)
   § 4.6).
 - **Refus** : entrée invalide ; multiplicités par défaut (décision D8, option « sites distincts ») ; coquille étendue
@@ -65,11 +81,22 @@ par cause, temps) sont publiés à part, jamais dans une empreinte.
 
 ## 6. Portes
 
-1. **Différentiel contre la v11** : catalogue complet (boules, $S^{*}$, $p$, $m$, $q_{\min}$, $I$, $U$, niveaux) égal
-   à celui de la v11 gelée sur ng00–02 à K5 et K10 et sur les uniformes de 8 000, 16 000 et 32 000 sites, au départage
-   de $S^{*}$ près, chaque écart de $S^{*}$ vérifié en exact comme coquille à plusieurs supports minimaux.
+1. **Différentiel contre la v11, par un lecteur de transition gravé avant le catalogue** : identité des sites par
+   position et des boules par centre exact et rayon carré (jamais par $S^{*}$), bijection exigée (absence, doublon ou
+   boule de trop sont des échecs) ; $p$, $m$, $q_{\min}$, $I$, $U$ et niveaux comparés exactement, par valeur ; pour tout
+   $S^{*}$ différent, même boule, même cardinal minimal et minimum lexicographique propre à chaque convention vérifiés
+   ($m>q$ seul ne prouve pas plusieurs supports admissibles) ; ordre publié et renumérotations recalculés. Sur ng00–02
+   à K5 et K10 et sur les uniformes de 8 000, 16 000 et 32 000 sites. **Ordre parent du parcours** : l'égalité des
+   feuilles avec la v11 ne vaut qu'à liste parente ordonnée identique (réservoir départagé par le rang dans la liste
+   parente) ; avec l'ordre de la v12 (clé de Morton sur coordonnées normalisées), la partition en feuilles et les
+   compteurs peuvent changer sans qu'aucune boule ne soit perdue (modèle exact à six sites de l'auditeur) : le
+   différentiel se juge alors sur $\mathrm{Cat}_K$, écarts de feuilles et de coûts publiés ; à ordre parent fixé, BFS
+   et DFS rendent les mêmes feuilles et compteurs (`MES-M5`).
 2. **Oracle borné** (`reference/`, $n\leq 14$) : égalité du catalogue sur la suite rapide.
-3. **Témoins** : `WIT-FEUILLES` (cube et son centre), `WIT-SPHERE50`, `WIT-T1-CARRE` (côté catalogue : table
+3. **Témoins** : le triangle $(0,1,1),(1,0,1),(1,1,0)$ (`WIT-TRANSL`) dont les trois boules diamétrales de niveau $1/2$
+   changent d'ordre entre conventions, ce qui change les choix de Kruskal et de `cover` sans changer la forêt (le
+   lecteur de transition des sorties `supports` et `cover` refait la sélection canonique de chaque convention et vérifie
+   la relation de couverture **et** le choix prescrit) ; `WIT-FEUILLES` (cube et son centre), `WIT-SPHERE50`, `WIT-T1-CARRE` (côté catalogue : table
    $S^{*}\to$ boule), témoins de palier du contrat numérique, profondeur 60 et 63 (`CST-0205`), boîte fermée à
    $2^{32}$ (`CST-0204`).
 4. **Filets** : restriction J1 et Euler à $K+2$ (`JUG-EULER`), sur les trames et les uniformes.

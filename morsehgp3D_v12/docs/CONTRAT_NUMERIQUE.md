@@ -36,8 +36,9 @@ objets qu'il touche et le pas de la grille, pas par le domaine. Deux conséquenc
 
 Hypothèse mesurée (`MES-S`, § 8 ; [reçu local](../receipts/mes_m2_local_20261007/README.md)) : sur ng00, ng01 et ng02
 (séquence 08, 1 mm, K5 et K10), **toutes** les feuilles ont $s\leq 17$ (au plus 13 sur 430 579 à $s=17$, médiane
-10 à 11) et tous les supports $s\leq 15$ (médiane 8 à 10) ; le palier étroit couvre tout. Portée : trois trames d'une
-séquence, au millimètre ; ni autres séquences, ni dixième de millimètre, ni scènes de plusieurs millions de sites.
+10 à 11) et tous les supports $s\leq 15$ (médiane 8 à 10) ; le palier étroit proposé ($s\leq 16$) couvre au moins
+99,997 % des feuilles et tous les supports, et les feuilles à $s=17$ passent au palier moyen. Portée : trois trames
+d'une séquence, au millimètre ; ni autres séquences, ni dixième de millimètre, ni scènes de plusieurs millions de sites.
 
 ## 2. Repères, garde et requêtes
 
