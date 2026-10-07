@@ -54,10 +54,13 @@ Ce sont des notes de travail : leurs estimations ne sont pas des mesures, et la 
 | --- | --- | --- | --- |
 | T0, socle (7 octobre 2026) | modules `core`, `num`, `sched`, `cloud`, `io`, `index` (5 475 lignes de C++), harnais de portes, lanceur de mutants, contrôle de style, oracle borné `reference/` (`hgp12_ref`), sonde d'index ; profils u21 et u24 ; 18 refusé (D6), 32 refusé jusqu'au repère local | [`PORTS.md`](PORTS.md) : 210 fichiers, SHA-256 de chaque source à `ac081a06f`, 28 copies, 111 renommages, 70 adaptations décrites | Release u21 et u24 sans avertissement ; portes hors `long` vertes (u21 : 408 sur 409, la sentinelle LiDAR sautée faute de données ; 26 portes `diff_v10` contre la v10 figée) ; ni sanitizers, ni matrice G4, ni suite longue de l'oracle |
 | T0, outillage de session G4 (7 octobre 2026) | `gcp-migration/v12_session.py`, `v12_worker.sh`, `v12_selftest.py`, `v12_target_selftest.py`, `README_V12.md` : port explicite du protocole gardé de la v11 (`f31845d16`) ; verrou commun aux trois lignées, reçu sans chemin personnel et examen d'identité des résultats, cache des jeux publics sur la VM (`morsehgp3D_v12/bench/data_cache.py`) | diff commenté de l'agent du port (vue « de fond » : aucun changement du cycle de vie, des échéances, des épingles ni des codes) ; scripts gardés inchangés (`73d76c67…`, `ddcad77a…`) | autotest hors ligne : 60 scénarios conformes, 1 sauté (matrice) ; autotests de cible conformes sous `-B` et `-B -O` ; rien contre le vrai GCE |
+| socle, contrat numérique (7 octobre 2026, `6a38f7e4b`) | développement de la v12, pas un port : repère local certifié jusqu'aux fermetures à $2^{32}$ ($s=33$), budgets par palier d'étendue, certificats liés à leur domaine, census gardé, requêtes à centre entier `u64` puis `u128`, test du milieu local, clé de Morton exacte ; **profil 32 admis**, 18 et 33 refusés à la configuration et à la compilation | 82 fichiers ; `PORTS.md` garde l'état **du port** (`a0091e2b7`) et ne suit pas ces modifications (30 fichiers y passent de « copie » ou « renommage » à « modifié depuis », `CST-0226`) ; l'histoire des fichiers est celle de Git | 414 portes rapides sur 415 aux profils 21, 24 et 32 (sentinelle LiDAR sautée) ; ASan/UBSan 172 sur 172 ; mutants `num` 76, `index` 18, `cloud` 17, `core` 7 ; avec la v10 figée, 441 sur 441 au profil 32 |
 
-Le socle porte le code de la v11 **tel quel** pour $B\leq 24$ : les corrections du contrat numérique (repère local,
-certificats liés à leur domaine, clé de Morton exacte, boîtes à 33 bits, test du milieu local) s'y appliqueront par
-tranches, chacune avec ses portes ; tant qu'elles manquent, u32 reste refusé à la configuration.
+Le socle a d'abord porté le code de la v11 **tel quel** pour $B\leq 24$ ; les corrections du contrat numérique (repère
+local, certificats liés à leur domaine, clé de Morton exacte, boîtes à 33 bits, test du milieu local) y sont entrées par
+le commit `6a38f7e4b`, avec leurs portes : depuis, **u32 est admis** (profil 32), 18 et 33 restent refusés. Les
+fichiers évoluent ensuite avec la v12 (règle de résolution de la v12 dans l'oracle borné, par exemple) ; la table de
+[`PORTS.md`](PORTS.md) reste celle du port.
 
 ## 4. Ce que la v12 porte de la v10 (`777406b82`, R2 `865f5e6`)
 

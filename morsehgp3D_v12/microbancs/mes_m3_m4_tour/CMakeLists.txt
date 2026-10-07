@@ -54,3 +54,9 @@ target_compile_options(mhgp12_mes_m4 PRIVATE ${mhgp12_warnings})
 add_executable(mhgp12_mes_m4_mutant_sans_contraction mes_m4/mes_m4.cpp)
 target_compile_options(mhgp12_mes_m4_mutant_sans_contraction PRIVATE ${mhgp12_warnings})
 target_compile_definitions(mhgp12_mes_m4_mutant_sans_contraction PRIVATE MHGP12_MUTANT_SANS_CONTRACTION)
+
+# Porte de l'admission du lecteur MHGP12DP (CST-0225) : neuf fichiers synthetiques, dont le temoin de 88 octets de
+# l'auditeur ; independante de la v11. Usage : mhgp12_format_test <dossier de travail> (code 0 conforme, 1 ecart).
+add_executable(mhgp12_format_test tests/format_reader_test.cpp)
+target_include_directories(mhgp12_format_test PRIVATE common)
+target_compile_options(mhgp12_format_test PRIVATE ${mhgp12_warnings})

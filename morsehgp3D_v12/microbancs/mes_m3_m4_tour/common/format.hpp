@@ -202,21 +202,25 @@ class Reader {
     std::memcpy(&header_, base_, sizeof(header_));
     if (std::memcmp(header_.magic, kMagic, 8) != 0) throw std::runtime_error("lecture : magie inconnue " + path);
     if (header_.version != kVersion) throw std::runtime_error("lecture : version non prise en charge " + path);
+    // Invariant : at <= size_ a chaque instant ; chaque avancee (en-tete de section, donnees, remplissage) est
+    // comparee a la place restante size_ - at, jamais par une addition qui pourrait deborder (CST-0225 : un fichier
+    // de 88 octets annoncant 2^62 - 1 elements passait par debordement de at + bytes).
     u64 at = sizeof(Header);
     for (u32 s = 0; s < header_.sections; ++s) {
-      if (at + sizeof(SectionHeader) > size_) throw std::runtime_error("lecture : section tronquee " + path);
+      if (size_ - at < sizeof(SectionHeader)) throw std::runtime_error("lecture : section tronquee " + path);
       SectionHeader h{};
       std::memcpy(&h, base_ + at, sizeof(h));
       at += sizeof(h);
+      if (h.elem_bytes != 0 && h.count > UINT64_MAX / h.elem_bytes) throw std::runtime_error("lecture : taille " + path);
       const u64 bytes = u64{h.elem_bytes} * h.count;
-      if (h.elem_bytes != 0 && bytes / h.elem_bytes != h.count) throw std::runtime_error("lecture : taille " + path);
-      if (at + bytes > size_) throw std::runtime_error("lecture : donnees tronquees " + path);
+      if (bytes > size_ - at) throw std::runtime_error("lecture : donnees tronquees " + path);
+      const u64 pad = (8 - bytes % 8) % 8;
+      if (pad > size_ - at - bytes) throw std::runtime_error("lecture : remplissage tronque " + path);
       char tag[9] = {};
       std::memcpy(tag, h.tag, 8);
       if (sections_.count(tag) != 0) throw std::runtime_error("lecture : section en double " + std::string(tag));
       sections_[tag] = SectionView{base_ + at, h.elem_bytes, h.count};
-      at += bytes;
-      if (bytes % 8 != 0) at += 8 - bytes % 8;
+      at += bytes + pad;
     }
     if (at != size_) throw std::runtime_error("lecture : octets en trop " + path);
   }

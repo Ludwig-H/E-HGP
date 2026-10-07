@@ -21,7 +21,8 @@ dossier de sortie, jamais dans un dépôt. Seuls des comptes, des empreintes et 
 | Chemin | Rôle |
 | --- | --- |
 | `CMakeLists.txt` | construction (CMake ≥ 3.22, C++20 sans extensions, `-Wall -Wextra -Wpedantic -Werror`, GCC 11.4 visé) |
-| `common/format.hpp` | format binaire des vidages (écriture, lecture par projection en mémoire), comparaison exacte de centres |
+| `common/format.hpp` | format binaire des vidages (écriture, lecture par projection en mémoire), comparaison exacte de centres ; chaque avancée de la lecture est contrôlée contre la place restante (`CST-0225`) |
+| `tests/format_reader_test.cpp` | `mhgp12_format_test <dossier>` : porte de l'admission du lecteur, neuf fichiers synthétiques dont le témoin de 88 octets de l'auditeur (code 0 conforme, 1 écart) |
 | `vidage/vidage_v11.cpp` | `mhgp12_vidage` : vidage de la tour v11, lié à `libmhgp11.a` ; mesure de résolution à trois bras |
 | `mes_m3/welzl_proposal.hpp` | port de `DWelzl` de la v10 (proposition flottante, ne décide rien) |
 | `mes_m3/meb_cert.hpp` | cœur de `LEV-MEB-CERT` : `LEM-T1` corrigé, certificat exact, canonisation, repli, juge |

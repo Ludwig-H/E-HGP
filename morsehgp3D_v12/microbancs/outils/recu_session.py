@@ -12,7 +12,9 @@ Usage : recu_session.py --session DOSSIER_DE_SESSION --dest DOSSIER_DU_RECU [--i
 Le dossier de destination doit etre absent ou vide : il n'est jamais efface s'il preexistait (CST-0221) ; en cas
 d'identite restante, seuls les fichiers crees par l'appel sont retires. Les noms de fichiers sont expurges comme les
 contenus, et le controle final porte sur les noms et sur tous les fichiers, SHA256SUMS compris (CST-0219).
-Deux fichiers dont les noms deviendraient identiques apres expurgation font refuser le recu (CST-0224).
+Deux fichiers dont les noms deviendraient identiques apres expurgation, ou dont l'un deviendrait un dossier ancetre de
+l'autre, font refuser le recu (CST-0224) : tout l'arbre des destinations expurgees est valide AVANT d'ecrire quoi que
+ce soit ; une erreur d'ecriture ensuite retire les fichiers crees (jamais de recu partiel sans manifeste).
 Bibliotheque standard seule. Codes : 0 conforme ; 2 usage ; 3 identite restante ou collision de noms (fichiers
 crees retires).
 """
@@ -93,8 +95,46 @@ def main(argv):
   if os.path.exists(args.dest) and (not os.path.isdir(args.dest) or os.listdir(args.dest)):
     print('recu_session : la destination existe et n\'est pas vide ; rien n\'est ecrit', file=sys.stderr)
     return 2
+  selected = select(results, args.include, account, user)
+  if selected is None:
+    return 3
   created_dest = not os.path.exists(args.dest)
   os.makedirs(args.dest, exist_ok=True)
+  try:
+    return publish(args, receipt_path, selected, account, user, created_dest)
+  except OSError as error:
+    remove_created(args.dest, created_dest)
+    print('recu_session : ecriture interrompue (%s) ; fichiers crees retires' % error.__class__.__name__,
+          file=sys.stderr)
+    return 3
+
+
+def select(results, patterns, account, user):
+  """Fichiers retenus et leurs chemins expurges, dans l'ordre de parcours ; None (refus, rien d'ecrit) si deux
+  chemins expurges sont egaux ou si un fichier expurge serait un dossier ancetre d'un autre (CST-0224)."""
+  selected = []
+  for root, _, files in os.walk(results):
+    for name in sorted(files):
+      path = os.path.join(root, name)
+      relative = os.path.relpath(path, results)
+      if any(fnmatch.fnmatch(relative, pattern) for pattern in patterns):
+        selected.append((path, relative, redact_text(relative, account, user)))
+  targets = [redacted for _path, _relative, redacted in selected]
+  files = set(targets)
+  folders = set()
+  for redacted in targets:
+    parts = redacted.split(os.sep)
+    for i in range(1, len(parts)):
+      folders.add(os.sep.join(parts[:i]))
+  if len(files) != len(targets) or files & folders:
+    print('recu_session : collision de chemins apres expurgation (%d fichier(s) en conflit) ; rien n\'est publie'
+          % (len(targets) - len(files) + len(files & folders)), file=sys.stderr)
+    return None
+  return selected
+
+
+def publish(args, receipt_path, selected, account, user, created_dest):
+  """Ecrit le recu dans args.dest (deja cree ou vide) ; rend le code de sortie."""
   with open(receipt_path, encoding='utf-8') as handle:
     receipt = json.load(handle)
   for key in ('recovery_command', 'recovery'):
@@ -104,32 +144,17 @@ def main(argv):
   with open(os.path.join(args.dest, 'receipt.json'), 'w', encoding='utf-8') as out:
     out.write(text + '\n')
   copied = 0
-  targets = {}
-  for root, _, files in os.walk(results):
-    for name in sorted(files):
-      path = os.path.join(root, name)
-      relative = os.path.relpath(path, results)
-      if not any(fnmatch.fnmatch(relative, pattern) for pattern in args.include):
-        continue
-      redacted = redact_text(relative, account, user)
-      if redacted in targets:
-        # Deux fichiers dont les noms deviennent identiques apres expurgation (CST-0224) : refus explicite, jamais
-        # d'ecrasement silencieux ; les fichiers deja ecrits sont retires comme pour une fuite.
-        print('recu_session : collision de noms apres expurgation (%d fichier(s)) ; rien n\'est publie' % 2,
-              file=sys.stderr)
-        remove_created(args.dest, created_dest)
-        return 3
-      targets[redacted] = relative
-      target = os.path.join(args.dest, 'resultats', redacted)
-      os.makedirs(os.path.dirname(target), exist_ok=True)
-      if is_text(path):
-        with open(path, encoding='utf-8', errors='replace') as handle:
-          content = redact_text(handle.read(), account, user)
-        with open(target, 'w', encoding='utf-8') as out:
-          out.write(content)
-      else:
-        shutil.copyfile(path, target)
-      copied += 1
+  for path, _relative, redacted in selected:
+    target = os.path.join(args.dest, 'resultats', redacted)
+    os.makedirs(os.path.dirname(target), exist_ok=True)
+    if is_text(path):
+      with open(path, encoding='utf-8', errors='replace') as handle:
+        content = redact_text(handle.read(), account, user)
+      with open(target, 'w', encoding='utf-8') as out:
+        out.write(content)
+    else:
+      shutil.copyfile(path, target)
+    copied += 1
   needles = [n for n in (account, user, '/home/') if n]
   sums = []
   for root, _, files in os.walk(args.dest):
