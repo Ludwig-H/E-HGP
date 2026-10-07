@@ -1,0 +1,65 @@
+{
+ "schema": "ehgp.v11.session_plan.v1",
+ "note": "Diagnostic sans regle d'adoption (Claude, 7 octobre 2026, 4f0c6cb9c) : sous-chronos de la frontiere adaptative (racine, rondes, selections, publications), somme et maximum des taches de la passe unique, profil echantillonne des publieurs, dans les modes de reference K5 CPU feuilles 16 (802811) et K5 GPU feuilles 24 (868347:400), trois trames LiDAR reelles. Aucune decision n'en depend ; il oriente les leviers suivants.",
+ "python_packages": "none",
+ "default_build": false,
+ "results_cap_bytes": 33554432,
+ "commands": [
+  {
+   "name": "diag_k5_16_cpu",
+   "timeout_seconds": 1800,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/gpu_ab.py",
+    "--src",
+    "{src}",
+    "--work",
+    "{build}/gpu",
+    "--data",
+    "{data}",
+    "--out",
+    "{out}/diag_k5_16_cpu",
+    "--modes",
+    "cpu=802811",
+    "--reps",
+    "3",
+    "--workers",
+    "48",
+    "--warm-passes",
+    "5",
+    "--kmax",
+    "5",
+    "--leaf",
+    "16"
+   ]
+  },
+  {
+   "name": "diag_k5_24_gpu",
+   "timeout_seconds": 1800,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/gpu_ab.py",
+    "--src",
+    "{src}",
+    "--work",
+    "{build}/gpu",
+    "--data",
+    "{data}",
+    "--out",
+    "{out}/diag_k5_24_gpu",
+    "--modes",
+    "gpu=868347:400",
+    "--reps",
+    "3",
+    "--workers",
+    "48",
+    "--warm-passes",
+    "5",
+    "--kmax",
+    "5",
+    "--leaf",
+    "24"
+   ]
+  }
+ ]
+}
