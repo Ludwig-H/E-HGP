@@ -64,6 +64,14 @@ Temps du noyau seul (médiane des médianes de 5 processus, millisecondes ; ni t
 La prédiction écrite avant G4 (J3 entre 0,1 et 0,4 du témoin, forme cohérente probablement rejetée) est confirmée. Le
 témoin mesure 70 et 184 ms sur ng00, contre environ 60 et 196 ms prédits d'après la v11.
 
+**Portée du verdict, au regard des constats `CST-0018` et `CST-0215`** (contre-audit Codex au pin `95247cf4b`, antérieur
+à cette session : le juge de M2 peut adopter sans toutes ses preuves, et le lecteur de vidages accepte des entrées
+invalides dont l'empreinte est juste). Dans cette session, les preuves exigées sont présentes et vérifiées dans
+`report.json` : identité sur l'hôte (code 0, les neuf cas), les six cas qui décident tous présents avec identité,
+prises fraîches de la session (`runs/`), sanitizers sans erreur, isolation du GPU vérifiée ; les vidages sont ceux
+de la v11 gelée, construits dans la session, empreintes au rapport. L'adoption tient sur ces preuves ; le juge et le
+lecteur restent à durcir avant tout nouvel usage.
+
 ## MES-M6 : coût de la Session résidente
 
 Médianes d'un processus par mode (microsecondes ; trois processus par mode dans `resultats/`) :

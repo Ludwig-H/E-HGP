@@ -33,7 +33,10 @@ sont identiques au journal de la v11 ; les portes de MES-M3 et MES-M4 sont confo
 ## MES-M3 : plus petite boule proposée puis certifiée
 
 Règle ([`PLAN.md`](../../docs/PLAN.md), T0) : résolution à K10 réduite d'au moins 40 % à un fil, résultats identiques.
-**Verdict : adoptée.**
+**Verdict : adoptée à titre provisoire.** La mesure de résolution qui porte le seuil n'a qu'une prise par cas : le
+pilote répète les microbancs par processus, mais pas ce vidage (`CST-0213`, contre-audit Codex). Les trois trames
+donnent le même rapport à 0,6 point près (0,541 à 0,547), avec 5 à 6 points de marge sur le seuil ; l'adoption
+deviendra définitive avec une mesure répliquée (au moins 5 processus).
 
 | Cas | Parties | Certifiées par `LEM-T1` | Plus petite boule v12 / référence | Résolution à un fil, tous ordres : réplique v12 / réplique v11 | Ordre 10 seul |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -60,6 +63,10 @@ identiques à la v11 sur tous les ordres ; `LEM-T6` sans écart. Temps à un fil
 | ng00, ordre 10 | 979 350 | 26,40 | 21,73 | **4,09** |
 | ng01, ordre 10 | 758 514 | 19,66 | 16,30 | **3,14** |
 | ng02, ordre 10 | 937 412 | 24,55 | 21,09 | **3,95** |
+
+Jugement des verticales non vide (`CST-0214` relevait qu'un juge sans sections de verticales réussissait) : dans cette
+session, `LEM-T6` a jugé toutes les naissances des ordres 2 à K (`naissances_jugees` égal aux naissances dans
+`mes_m4_*.jsonl` ; l'ordre 1 n'a pas d'ordre inférieur).
 
 **Verdict : tenue à K5 sur tous les critères ; à K10, noyau conforme, mais contraction de 3,1 à 4,1 ms au-dessus du
 seuil de 3 ms.** La règle, écrite sans préciser K, n'est donc pas tenue à K10 ; elle n'est pas réécrite. La forêt sans

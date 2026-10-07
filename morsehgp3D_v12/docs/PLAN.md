@@ -40,7 +40,7 @@ son reçu. **Aucune tranche ne commence avant les décisions D1 à D7** de [`DEC
 | --- | --- | --- |
 | `MES-M0` | différentiel : un lecteur canonique relit les vidages `MHGP11FUL1` et en tire l'empreinte sémantique | identité avec les empreintes de la v11 |
 | `MES-M2` | feuille sur GPU : noyau un-fil de la v11 (témoin), phases J3, forme cohérente | comptage ≤ 1/3 du témoin ; identité avec la feuille de référence. **Jugé le 7 octobre : J3 adoptée (`j3_r168`, 0,18 du témoin), cohérente rejetée** |
-| `MES-M3` | plus petite boule proposée et certifiée, sur les parties de descente vidées | CPU de résolution à K10 réduit d'au moins 40 % à un fil ; résultats identiques. **Jugé le 7 octobre : adoptée** (−45 à −46 % à K10) |
+| `MES-M3` | plus petite boule proposée et certifiée, sur les parties de descente vidées | CPU de résolution à K10 réduit d'au moins 40 % à un fil ; résultats identiques. **Jugé le 7 octobre : adoptée à titre provisoire** (−45 à −46 % à K10 ; une seule prise de résolution par cas, `CST-0213`) |
 | `MES-M4` | noyau union-find sans lots et contraction, sur les graines vidées | noyau ≤ 10 ms à K5 et ≤ 35 ms à K10 à un fil ; contraction ≤ 3 ms ; forêts identiques. **Jugé le 7 octobre : tenue à K5 ; à K10, contraction 3,1 à 4,1 ms, au-dessus du seuil** |
 | `MES-M5` | parcours des boîtes en largeur sur GPU | même ensemble final de feuilles que le CPU |
 | `MES-M6` | coût de Session : contexte, modules, transferts épinglés, attente bloquante ou active | publié ; fixe le budget du régime résident. **Mesuré le 7 octobre** : contexte 116 ms, lancement synchronisé 8 µs, attente `yield` |
