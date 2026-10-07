@@ -1,0 +1,12 @@
+{
+  "capture_sha256": "d8b042c3ee48730591aad11c1c7d13d67237de2f63c0c9bb43cf34d935022c55",
+  "causal_cases_per_mode": 15,
+  "no_gcp": true,
+  "no_native_build": true,
+  "normal_code": 0,
+  "normal_optimized_identical": true,
+  "official_gate_cases_per_mode": 54,
+  "official_gate_errors": 0,
+  "optimized_code": 0,
+  "product_changed": false
+}

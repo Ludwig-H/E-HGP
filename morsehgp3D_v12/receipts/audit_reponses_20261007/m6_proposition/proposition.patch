@@ -1,0 +1,103 @@
+--- a/morsehgp3D_v12/microbancs/mes_m6_session/run_m6.py
++++ b/morsehgp3D_v12/microbancs/mes_m6_session/run_m6.py
+@@ -39,6 +39,7 @@
+ SOURCE = HERE / 'mes_m6_session_cost.cu'
+ DRIVER = Path(__file__).resolve()
+ SCHEMA = 'ehgp.v12.mes_m6.v2'
++LEGACY_SCHEMA = 'ehgp.v12.mes_m6.v1'
+ MODES = ('spin', 'yield', 'blocking')
+ GPU_APPS = ['nvidia-smi', '--query-compute-apps=pid,process_name,used_memory', '--format=csv,noheader']
+ BIG = 256 << 20
+@@ -363,14 +364,12 @@
+       not all(is_sha256(v) for v in sources.values()):
+     problems.append('empreintes des sources absentes, incompletes ou illisibles')
+   compiled = report.get('compile')
+-  if not isinstance(compiled, dict) or compiled.get('code') != 0 or not isinstance(compiled.get('stderr'), str):
++  if not isinstance(compiled, dict) or not is_int(compiled.get('code')) or compiled['code'] != 0 or \
++      not isinstance(compiled.get('stderr'), str):
+     problems.append('compilation absente ou en echec')
+   why = isolation_problem(report.get('isolation_start'), 'du debut')
+   if why is not None:
+     problems.append(why)
+-  refusals = report.get('refusals')
+-  if isinstance(refusals, list) and refusals:
+-    problems.append('refus publies dans le rapport : ' + '; '.join(str(r) for r in refusals[:3]))
+   return problems
+ 
+ 
+@@ -398,8 +397,13 @@
+     report = json.loads((folder / 'm6_report.json').read_text(encoding='utf-8'))
+   except (OSError, ValueError) as error:
+     report, problems = None, ['rapport illisible : %s' % error]
+-  if report is not None and not isinstance(report, dict):
+-    report, problems = None, ['rapport hors schema']
++  if not isinstance(report, dict):
++    if not problems:
++      problems.append('rapport hors schema')
++    report = None
++  if report is not None and report.get('schema') not in (LEGACY_SCHEMA, SCHEMA):
++    problems.append('schema inconnu ou absent')
++    report = None
+   v2 = report is not None and report.get('schema') == SCHEMA
+   reps, processes = (report.get('reps'), report.get('processes')) if v2 else (args.reps, args.processes)
+   if report is not None and not v2:
+@@ -414,30 +418,42 @@
+     report = None
+   if report is not None:
+     compiled = report.get('compile')
+-    if not isinstance(compiled, dict) or compiled.get('code') != 0:
++    if not isinstance(compiled, dict) or not is_int(compiled.get('code')) or compiled['code'] != 0:
+       problems.append('compilation absente ou en echec')
++    if 'refusal' in report:
++      problems.append('refus publie dans le rapport : %s' % report['refusal'])
++    if 'refusals' in report and (not isinstance(report['refusals'], list) or report['refusals']):
++      problems.append('refus publies dans le rapport : %r' % report['refusals'])
++    if 'verdict' in report and report['verdict'] != 'mes_m6_ok':
++      problems.append('verdict publie non conforme')
+     if report.get('gpu_apps') != '':
+       problems.append('GPU occupe ou non releve au debut')
+     if v2:
+       problems += report_v2_problems(report)
+     runs = report.get('runs')
+     runs = runs if isinstance(runs, list) and all(isinstance(r, dict) for r in runs) else []
+-    keys = [(r.get('mode'), r.get('process')) for r in runs]
++    valid_runs = []
++    for r in runs:
++      mode, index = r.get('mode'), r.get('process')
++      if not isinstance(mode, str) or mode not in MODES or not is_int(index) or not 0 <= index < processes:
++        problems.append('identite de prise invalide : mode=%r, process=%r' % (mode, index))
++      else:
++        valid_runs.append(r)
++    keys = [(r['mode'], r['process']) for r in valid_runs]
+     expected = {(mode, index) for index in range(processes) for mode in MODES}
+     if len(keys) != len(expected) or set(keys) != expected:
+       problems.append('prises manquantes, en double ou en trop (%d pour %d)' % (len(keys), len(expected)))
+-    for r in runs:
+-      mode, index = r.get('mode'), r.get('process')
+-      if mode not in MODES or not is_int(index):
+-        continue
++    for r in valid_runs:
++      mode, index = r['mode'], r['process']
+       try:
+         data = (folder / ('m6_%s_%d.jsonl' % (mode, index))).read_bytes()
+         text = data.decode('utf-8')
+       except (OSError, UnicodeDecodeError) as error:
+         problems.append('prise %s %d illisible : %s' % (mode, index, error))
+         continue
+-      found = (['code %r' % r.get('code')] if r.get('code') != 0 else []) + check_take(text, mode, reps)
+-      if r.get('lines') != text.count('\n'):
++      found = (['code %r' % r.get('code')] if not is_int(r.get('code')) or r['code'] != 0 else []) + \
++          check_take(text, mode, reps)
++      if not is_int(r.get('lines')) or r['lines'] != text.count('\n'):
+         found.append('nombre de lignes different du rapport')
+       if v2:
+         if r.get('sha256') != hashlib.sha256(data).hexdigest():
+@@ -448,6 +464,8 @@
+       else:
+         takes[(mode, index)] = text
+         lines += text.count('\n')
++    if len(takes) != len(expected):
++      problems.append('prises validees incompletes (%d pour %d)' % (len(takes), len(expected)))
+     if len({device_of(text) for text in takes.values()}) > 1:
+       problems.append('appareil different entre prises')
+     if v2 and not problems and report.get('summary_median_us') != summary(takes):

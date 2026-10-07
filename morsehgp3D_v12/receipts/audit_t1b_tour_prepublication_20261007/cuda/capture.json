@@ -1,0 +1,280 @@
+{
+  "schema": "mhgp12.static_prepublication_cuda.v1",
+  "captured_utc": "2026-10-07T21:09:31+00:00",
+  "prototype_base_commit": "eddf181b9eb7da70668872dec53d8012deec19bf",
+  "published_main_observed": "9428db65b25e1660e78e34ce273e155d99b4fac3",
+  "source_state": "prototype local modifié/non publié ; les hashes des fichiers, pas le commit de base seul, identifient la lecture",
+  "scope": {
+    "phase": "exploration_v12_hors_registre",
+    "backend": "cpu_reference ; cuda_g4 pour le catalogue",
+    "object": "full_pi0",
+    "quantification": "quantized_u21_input_only ; lecture des frontières u24/u32 sans qualification",
+    "public_status": "not_claimed"
+  },
+  "method": {
+    "kind": "lecture statique seulement",
+    "builds": 0,
+    "native_executions": 0,
+    "cuda_executions": 0,
+    "cloud_calls": 0,
+    "payload_read": false,
+    "source_bytes_stable_before_after": true
+  },
+  "observations": [
+    {
+      "key": "memory_error_paths",
+      "status": "écarts statiques, sans injection de panne",
+      "grow": "Après cudaMalloc réussi, un refus de cudaMemcpyAsync ou sync retourne avant adoption de fresh. fresh est un pointeur brut sans nettoyage de sortie ; sa réservation locale est détruite. Ni Array ni CudaExecutor ne possède ce pointeur à la sortie.",
+      "stage": "Après reserve(bytes) réussi puis cudaMallocHost refusé sans allocation, le membre staging_reservation conserve bytes alors que staging_bytes reste 0. check(memory allocation) laisse le contexte réutilisable.",
+      "retry_limit": "Un prochain stage() réinitialise cette réservation avant de réserver à nouveau : pas de refus permanent démontré pour une reprise identique. Avant ce prochain stage(), cette charge peut refuser une autre admission ou la croissance XYZ d’une trame plus grande ; device_catalogue appelle ensure(XYZ) avant upload/stage. Effet conditionnel de contrôle de flux, pas panne réellement injectée.",
+      "evidence": [
+        "src/catalogue/device_cuda.cu:40-60,75-104,116-128",
+        "src/core/buffer.hpp:129-151",
+        "src/core/status.hpp:182-190",
+        "src/catalogue/device_pipeline.hpp:183-188"
+      ],
+      "correction": "Posséder temporairement pointeur CUDA et réservation ensemble, transférer à l’objet seulement après succès ; rollback de la réservation épinglée en cas de refus."
+    },
+    {
+      "key": "physical_rewrite_counter",
+      "status": "diagnostic incomplet dans la voie appareil",
+      "finding": "CatalogueDiagnostics initialise leaves_rewritten à zéro. DeviceTotals ne possède pas ce compte ; accumulate et device_diagnostics ne reprennent pas les réécritures du LeafStage CPU. ReplayKernel réexécute les feuilles GPU >64 émissions sans les compter dans leaves_rewritten. Les compteurs replayed_leaves/replayed_balls décrivent les feuilles non résolues sur appareil, pas ces réécritures physiques.",
+      "timing": "Ces recalculs restent dans wall_ns ; il s’agit d’un coût masqué dans le diagnostic, pas d’un coût exclu du chrono global.",
+      "evidence": [
+        "src/catalogue/catalogue.hpp:78-89",
+        "src/catalogue/device_driver.hpp:46-51",
+        "src/catalogue/device_pipeline.hpp:83-93,144-172",
+        "src/catalogue/device_leaves.hpp:235-247",
+        "src/catalogue/leaves.cpp:188-209,299-301"
+      ],
+      "correction": "Compter séparément les rejeux GPU >64 émissions et agréger les réécritures CPU ; conserver les compteurs de reprise CPU distincts."
+    },
+    {
+      "key": "hybrid_scope_and_timing",
+      "status": "frontière de portée, pas défaut géométrique constaté",
+      "finding": "J3 GPU traite les feuilles de 32 sites au plus, étendue locale au plus 16 bits. Les autres sont compactées, téléchargées et rejouées exactement par LeafStage CPU, puis remontées. Les plafonds 256 candidats et 64 sites de coquille restent en vigueur. Les limites numériques globales u24/u32 ne sont donc pas une qualification intégralement GPU.",
+      "timing_in": "Le wall du probe inclut chargement XYZ à chaque appel, parcours, comptage/émission/reprises, transferts, finition et matérialisation CPU.",
+      "timing_out": "Lecture/préparation Cloud et Pool, ouverture du contexte, digest/export et destruction du Catalogue retourné restent hors wall. Aucun temps FULL nouveau.",
+      "evidence": [
+        "src/catalogue/device_leaves.hpp:95-105",
+        "src/catalogue/device_pipeline.hpp:47-78,177-189,199-217",
+        "src/catalogue/catalogue.hpp:45-46",
+        "bench/catalogue_probe.cpp:178-185,200-232",
+        "src/catalogue/device_cuda.cu:137-159"
+      ],
+      "limits": "Pas de témoin numérique supplémentaire ni mesure de fréquence/coût des reprises. Le calcul i64 de max+1 au bord u32 est conservé dans traversal_root."
+    }
+  ],
+  "sources": [
+    {
+      "path": "morsehgp3D_v12/src/catalogue/device_cuda.cu",
+      "sha256": "620c840df6a8c3c9819bf1719754ba50f69a7d1ef7e710b031ecc0f9218fd131",
+      "bytes": 10919,
+      "lines": 262,
+      "excerpts": [
+        {
+          "first_line": 40,
+          "last_line": 60,
+          "text": "struct CudaExecutor {\n  MemoryBudget& budget;\n  sched::Pool* pool = nullptr;  // copies hote paralleles, donne a chaque appel\n  cudaStream_t stream = nullptr;\n  bool broken = false;\n  u8* staging = nullptr;\n  u64 staging_bytes = 0;\n  BudgetReservation staging_reservation;\n  u64 allocations = 0, device_bytes = 0;\n\n  template <class T>\n  struct Array {\n    T* ptr = nullptr;\n    u64 cap = 0;\n    BudgetReservation reservation;\n    Array() = default;\n    Array(const Array&) = delete;\n    Array& operator=(const Array&) = delete;\n    ~Array() {\n      if (ptr != nullptr) cudaFree(ptr);\n    }\n"
+        },
+        {
+          "first_line": 75,
+          "last_line": 84,
+          "text": "  Outcome check(cudaError_t e) noexcept {\n    if (e == cudaSuccess) return {};\n    if (e == cudaErrorMemoryAllocation) {\n      (void)cudaGetLastError();\n      return fail(Reason::memory_budget);\n    }\n    broken = true;\n    return device_refusal(true);\n  }\n  Outcome sync() noexcept { return check(cudaStreamSynchronize(stream)); }\n"
+        },
+        {
+          "first_line": 88,
+          "last_line": 104,
+          "text": "  Outcome grow(Array<T>& a, u64 n, u64 keep) noexcept {\n    if (a.cap >= n) return {};\n    const u64 cap = n > a.cap + a.cap / 2 + 1024 ? n : a.cap + a.cap / 2 + 1024;\n    if (cap > ~u64{0} / sizeof(T)) return fail(Reason::memory_budget);\n    BudgetReservation reservation;\n    MHGP12_TRY(reservation.reserve(cap * sizeof(T), budget));\n    T* fresh = nullptr;\n    MHGP12_TRY(check(cudaMalloc(reinterpret_cast<void**>(&fresh), cap * sizeof(T))));\n    if (keep != 0) MHGP12_TRY(check(cudaMemcpyAsync(fresh, a.ptr, keep * sizeof(T), cudaMemcpyDeviceToDevice, stream)));\n    MHGP12_TRY(sync());  // l'ancien tableau peut servir a des noyaux en file\n    if (a.ptr != nullptr) cudaFree(a.ptr);\n    device_bytes += (cap - a.cap) * sizeof(T);\n    a.ptr = fresh;\n    a.cap = cap;\n    a.reservation.swap(reservation);  // l'ancienne reservation est rendue en sortie\n    ++allocations;\n    return {};\n"
+        },
+        {
+          "first_line": 116,
+          "last_line": 128,
+          "text": "  Outcome stage(u64 bytes) noexcept {\n    bytes = bytes < kStagingMin ? kStagingMin : bytes < kStagingMax ? bytes : kStagingMax;\n    if (staging_bytes >= bytes) return {};\n    MHGP12_TRY(sync());\n    if (staging != nullptr) cudaFreeHost(staging);\n    staging = nullptr;\n    staging_bytes = 0;\n    staging_reservation.reset();\n    MHGP12_TRY(staging_reservation.reserve(bytes, budget));\n    MHGP12_TRY(check(cudaMallocHost(reinterpret_cast<void**>(&staging), bytes)));\n    staging_bytes = bytes;\n    ++allocations;\n    return {};\n"
+        },
+        {
+          "first_line": 137,
+          "last_line": 159,
+          "text": "  template <class T>\n  Outcome upload(Array<T>& a, const T* from, u64 n, u64 at) noexcept {\n    const u64 total = n * sizeof(T);\n    MHGP12_TRY(stage(total));\n    for (u64 done = 0; done < total; done += staging_bytes) {\n      const u64 part = total - done < staging_bytes ? total - done : staging_bytes;\n      MHGP12_TRY(host_copy(staging, reinterpret_cast<const u8*>(from) + done, part));\n      MHGP12_TRY(check(cudaMemcpyAsync(reinterpret_cast<u8*>(a.ptr + at) + done, staging, part,\n                                       cudaMemcpyHostToDevice, stream)));\n      MHGP12_TRY(sync());\n    }\n    return {};\n  }\n  template <class T>\n  Outcome download(T* to, Array<T>& a, u64 n, u64 at) noexcept {\n    const u64 total = n * sizeof(T);\n    MHGP12_TRY(stage(total));\n    for (u64 done = 0; done < total; done += staging_bytes) {\n      const u64 part = total - done < staging_bytes ? total - done : staging_bytes;\n      MHGP12_TRY(check(cudaMemcpyAsync(staging, reinterpret_cast<const u8*>(a.ptr + at) + done, part,\n                                       cudaMemcpyDeviceToHost, stream)));\n      MHGP12_TRY(sync());\n      MHGP12_TRY(host_copy(reinterpret_cast<u8*>(to) + done, staging, part));\n"
+        }
+      ]
+    },
+    {
+      "path": "morsehgp3D_v12/src/catalogue/device_pipeline.hpp",
+      "sha256": "318fe91d450f7d5dce4ea15451ef396b16482a09da9ca4912dffd8ff5c1266db",
+      "bytes": 11020,
+      "lines": 220,
+      "excerpts": [
+        {
+          "first_line": 47,
+          "last_line": 61,
+          "text": "  // Feuilles non resolues du lot : compactees, rapatriees, rejouees par LeafStage ; rend leur premiere faute.\n  Result<Failure> replay(const LeafView& v, const BatchCounts& c, LeafStage& stage) noexcept {\n    LeafArrays<B>& a = st.leaves;\n    MHGP12_TRY(b.ensure(a.held_leaves, c.unresolved));\n    MHGP12_TRY(b.ensure(a.held_sites, c.unresolved_sites));\n    MHGP12_TRY(b.launch(CompactKernel{v, a.cls.data(), a.unresolved_at.data(), a.unresolved_site_at.data(),\n                                      a.held_leaves.data(), a.held_sites.data()},\n                        v.n));\n    Buffer<bfs::Leaf> leaves;\n    Buffer<u32> sites;\n    MHGP12_TRY(leaves.allocate(c.unresolved, budget));\n    MHGP12_TRY(sites.allocate(c.unresolved_sites, budget));\n    MHGP12_TRY(b.download(leaves.data(), a.held_leaves, c.unresolved, 0));\n    MHGP12_TRY(b.download(sites.data(), a.held_sites, c.unresolved_sites, 0));\n    totals.replayed_leaves += c.unresolved;\n"
+        },
+        {
+          "first_line": 66,
+          "last_line": 78,
+          "text": "  Outcome upload_replayed(LeafStage& stage, u64 at, u64 population_at) noexcept {\n    for (const Chunk& chunk : stage.chunks()) {\n      Buffer<BallRecord> moved;\n      MHGP12_TRY(moved.allocate(chunk.records.size(), budget));\n      for (u64 i = 0; i < chunk.records.size(); ++i) {\n        moved[i] = chunk.records[i];\n        moved[i].population += population_at;\n        moved[i].chunk = 0;\n      }\n      MHGP12_TRY(b.upload(st.records, moved.data(), moved.size(), at));\n      MHGP12_TRY(b.upload(st.population, chunk.population.data(), chunk.population.size(), population_at));\n      at += chunk.records.size();\n      population_at += chunk.population.size();\n"
+        },
+        {
+          "first_line": 83,
+          "last_line": 93,
+          "text": "  Outcome accumulate(const BatchCounts& c, LeafStage& stage) noexcept {\n    if (c.stats.overflow != 0) return fail(Reason::catalogue_counter_overflow);\n    LeafCounts device{};\n    for (u32 f = 0; f < kLeafCounters; ++f) device.c[f] = c.stats.counts[f];\n    if (!add_leaf_counts(totals.counts, device) || !add_leaf_counts(totals.counts, stage.totals().counts))\n      return fail(Reason::catalogue_counter_overflow);\n    for (u32 f = 0; f < 5; ++f) totals.tiers[f] += c.stats.tiers[f];\n    totals.max_span = c.stats.max_span > totals.max_span ? c.stats.max_span : totals.max_span;\n    totals.replayed_balls += stage.balls();\n    ++totals.batches;\n    return {};\n"
+        },
+        {
+          "first_line": 144,
+          "last_line": 172,
+          "text": "// Diagnostics de la voie appareil dans CatalogueDiagnostics, durees disjointes (CST-0235) : parcours (traversal_ns),\n// feuilles (count_ns : classement, comptage J3, decalages), emission (fill_ns : rejeu des non resolues, admission,\n// ecriture), fin d'etage (levels_ns, sort_ns, assemble_ns, table_ns), transferts (transfer_ns : nuage vers l'appareil,\n// sorties vers l'hote), publication (publish_ns : niveaux exacts materialises sur l'hote).\ninline void device_diagnostics(const TraversalDiagnostics& front, const DeviceTotals& t, const fin::FinishStats& f,\n                               u64 traversal_ns, u64 upload_ns, CatalogueDiagnostics& d) noexcept {\n  d.levels = front.levels;\n  d.tasks = front.tasks;\n  d.candidates = front.candidates;\n  d.leaves_narrow = t.tiers[0];\n  d.leaves_medium = t.tiers[1];\n  d.leaves_wide = t.tiers[2];\n  d.leaves_exact = t.tiers[3];\n  d.leaves_virtual_warp = t.tiers[4];\n  d.max_leaf_span = t.max_span;\n  d.traversal_ns = traversal_ns - upload_ns - t.leaves_ns - t.emission_ns;  // parcours seul\n  d.count_ns = t.leaves_ns;                                                 // feuilles\n  d.fill_ns = t.emission_ns;                                                // emission\n  d.levels_ns = f.keys_ns;\n  d.sort_ns = f.sort_ns;\n  d.assemble_ns = f.check_ns + f.emit_ns;\n  d.transfer_ns = upload_ns + f.take_ns;\n  d.table_ns = f.table_ns;\n  d.chains_repaired = f.chains_repaired;\n  d.chain_elements = f.chain_elements;\n  d.batches = t.batches;\n  d.replayed_leaves = t.replayed_leaves;\n  d.replayed_balls = t.replayed_balls;\n}\n"
+        },
+        {
+          "first_line": 177,
+          "last_line": 189,
+          "text": "Result<Catalogue> device_catalogue(B& b, DeviceState<B>& st, const Cloud& cloud, const CatalogueParams& params,\n                                   MemoryBudget& budget, sched::Pool& pool, CatalogueDiagnostics& diag) noexcept {\n  MHGP12_TRY(check_catalogue_params(params));\n  if (cloud.sites() == 0) return fail(Reason::empty_input);\n  for (const u32 weight : cloud.w())\n    if (weight != 1) return fail(Reason::multiplicity_unsupported);  // decision D8 : refus par defaut\n  const u64 n = cloud.sites();\n  Stopwatch watch;\n  for (auto* array : {&st.x, &st.y, &st.z}) MHGP12_TRY(b.ensure(*array, n));\n  MHGP12_TRY(b.upload(st.x, cloud.x().data(), n, 0));\n  MHGP12_TRY(b.upload(st.y, cloud.y().data(), n, 0));\n  MHGP12_TRY(b.upload(st.z, cloud.z().data(), n, 0));\n  const u64 upload_ns = watch.nanoseconds();\n"
+        },
+        {
+          "first_line": 199,
+          "last_line": 217,
+          "text": "  const auto fault = b.read(st.fault, 0);\n  if (!fault.ok()) return fault.outcome();\n  if (fault.value() != 0) return fail(Reason::catalogue_invariant);\n  const CatalogueLedger ledger = make_ledger(walked, hook.totals.counts);\n  if (ledger.emitted != hook.balls) return fail(Reason::catalogue_invariant);\n  const fin::FinishInput fi{st.x.data(), st.y.data(), st.z.data(), cloud.sites(), st.records.data(),\n                            st.population.data(), hook.balls, hook.incidences};\n  fin::FinishStats fs;\n  auto out = fin::finish_stage(b, st.finish, fi, budget, fs);\n  if (!out.ok()) return out.outcome();\n  Stopwatch adopt_watch;\n  auto result = Assembly::adopt(out.value(), static_cast<Order>(params.kmax), ledger, budget, pool);\n  if (!result.ok()) return result.outcome();\n  if (result.value().population().size() != ledger.incidences) return fail(Reason::catalogue_invariant);\n  device_diagnostics(front, hook.totals, fs, traversal_ns, upload_ns, diag);\n  diag.publish_ns = adopt_watch.nanoseconds();\n  diag.arena_bytes = hook.balls * sizeof(BallRecord) + hook.incidences * sizeof(SiteIdx);\n  diag.peak_bytes = budget.peak();\n  return result;\n"
+        }
+      ]
+    },
+    {
+      "path": "morsehgp3D_v12/src/catalogue/device_leaves.hpp",
+      "sha256": "bb47089fd476387bb9df42a2f5e930a126d6809180299bad41b08f04d19718bd",
+      "bytes": 13748,
+      "lines": 369,
+      "excerpts": [
+        {
+          "first_line": 23,
+          "last_line": 26,
+          "text": "inline constexpr u64 kBatchLeaves = u64{1} << 17;  // feuilles par lot : cases <= 192 Mio\ninline constexpr u32 kCase = 64;                   // emissions gardees par feuille au comptage (voie CPU : 64)\ninline constexpr u32 kLeafUnresolved = 3;          // statut d'une feuille laissee a l'hote\nenum : u32 { kCauseWide = 1, kCauseSpan = 2 };      // m > 32 ; etendue > 16\n"
+        },
+        {
+          "first_line": 95,
+          "last_line": 105,
+          "text": "      const i64 lo = static_cast<i64>(simt::reduce_min(mn[a])), hi = static_cast<i64>(simt::reduce_max(mx[a]));\n      out.origin[a] = f.lo[a] < lo ? f.lo[a] : lo;  // fermeture [lo, hi] de la boite et sites de la liste\n      const i64 top = f.hi[a] > hi ? f.hi[a] : hi;\n      width = static_cast<u64>(top - out.origin[a]) > width ? static_cast<u64>(top - out.origin[a]) : width;\n    }\n    out.span = fin::width_of(width) - (width == 0 ? 1u : 0u);  // plus petit s tel que width < 2^s (0 si nulle)\n    out.cause = (f.m > kGraphSites ? kCauseWide : 0u) | (out.span > static_cast<u32>(kLeafNarrowSpan) ? kCauseSpan : 0u);\n    if (simt::leader()) {\n      cls[i] = out;\n      size_key[i] = out.cause != 0 ? 255u : 32u - f.m;  // grandes feuilles d'abord (MES-M2), non resolues en queue\n      unresolved[i] = out.cause != 0 ? 1u : 0u;\n"
+        },
+        {
+          "first_line": 235,
+          "last_line": 247,
+          "text": "struct ReplayKernel {\n  LeafView v;\n  FillView f;\n  using Shared = LeafShared<32>;\n  MHGP12_HD void operator()(u64 i, Shared& shared) const {\n    const LeafClass c = f.cls[i];\n    if (c.cause != 0 || f.balls[i] <= kCase) return;\n    WriteSink sink{v.sites + v.leaves[i].begin, f.records + f.ball_at[i], f.population,\n                   f.population_base + f.population_at[i], f.balls[i], f.incidences[i]};\n    LeafCounts counts;\n    const u32 status = run_leaf<32, Narrow>(leaf_input(v, i, c), shared, counts, sink);\n    if (status != kLeafOk || sink.overflow || sink.balls != f.balls[i] || sink.incidences != f.incidences[i])\n      simt::global_or(f.fault, kFaultFill);\n"
+        }
+      ]
+    },
+    {
+      "path": "morsehgp3D_v12/src/catalogue/device_driver.hpp",
+      "sha256": "dd04fcbf3060cd16eec3eb30865e8fd31def26dd5d4bad9acc3fc25369fd8792",
+      "bytes": 6446,
+      "lines": 132,
+      "excerpts": [
+        {
+          "first_line": 46,
+          "last_line": 51,
+          "text": "// Comptes et diagnostics accumules sur les lots.\nstruct DeviceTotals {\n  LeafCounts counts{};\n  u64 tiers[5] = {0, 0, 0, 0, 0};\n  u64 max_span = 0, batches = 0, replayed_leaves = 0, replayed_balls = 0;\n  u64 leaves_ns = 0, emission_ns = 0;  // feuilles (classement, comptage J3, decalages) ; emission (rejeu, ecriture)\n"
+        }
+      ]
+    },
+    {
+      "path": "morsehgp3D_v12/src/catalogue/catalogue.hpp",
+      "sha256": "e3dda43c8e88dc92e964e39c24fe376e84ed24e34c78676877b61c5f91af0076",
+      "bytes": 11249,
+      "lines": 182,
+      "excerpts": [
+        {
+          "first_line": 45,
+          "last_line": 46,
+          "text": "inline constexpr u32 kCatalogueMaxLeaf = 256;  // feuilles de plus de 256 sites : wide_leaf (capacite de la v11)\ninline constexpr u32 kCatalogueMaxShell = 64;  // coquille d'une boule emise : au plus 64 sites (shell_capacity)\n"
+        },
+        {
+          "first_line": 78,
+          "last_line": 89,
+          "text": "  u64 levels = 0, tasks = 0, candidates = 0;\n  u64 leaves_narrow = 0, leaves_medium = 0, leaves_wide = 0, leaves_exact = 0, leaves_virtual_warp = 0;\n  u64 leaves_rewritten = 0, max_leaf_span = 0;\n  u64 traversal_ns = 0, count_ns = 0, fill_ns = 0, levels_ns = 0, sort_ns = 0, assemble_ns = 0, table_ns = 0;\n  u64 peak_bytes = 0;\n  u64 chains_repaired = 0, chain_elements = 0;\n  // Voie appareil seulement (nuls sur la voie CPU) : lots de feuilles, feuilles non resolues rejouees sur l'hote et\n  // leurs boules, octets de l'appareil et de la memoire epinglee reserves, reservations faites pendant l'appel, octets\n  // de l'arene des boules occupes, duree des transferts (nuage vers l'appareil, sorties vers l'hote) et de la\n  // publication (niveaux materialises sur l'hote). Sur la voie appareil, count_ns porte les feuilles (classement,\n  // comptage J3, decalages) et fill_ns l'emission (rejeu des non resolues, admission, ecriture) : CST-0235.\n  u64 batches = 0, replayed_leaves = 0, replayed_balls = 0, device_bytes = 0, pinned_bytes = 0, allocations = 0;\n"
+        }
+      ]
+    },
+    {
+      "path": "morsehgp3D_v12/src/catalogue/leaves.cpp",
+      "sha256": "2172f739d7f3a5a49bfe748f4f8c3a38b4d6a4e6b393bbf22bf1b6396367fff8",
+      "bytes": 13102,
+      "lines": 314,
+      "excerpts": [
+        {
+          "first_line": 188,
+          "last_line": 192,
+          "text": "    if (w.width == 32 && w.balls <= kCase) {\n      u64 offset = pat;\n      for (u64 j = 0; j < w.balls; ++j) {\n        const Emission<32>& e = b.cases[i * kCase + j];\n        convert<32>(e, sites, b.records[at + j], b.population, offset, b.chunk);\n"
+        },
+        {
+          "first_line": 201,
+          "last_line": 209,
+          "text": "    WriteSink<256> s256{sites, b.records + at, b.population, pat, w.balls, w.incidences, b.chunk};\n    const u32 status = play(in, frame.span(), b, worker, counts, s32, s256);\n    const auto& sink_balls = w.width == 32 ? s32.balls : s256.balls;\n    const auto& sink_incidences = w.width == 32 ? s32.incidences : s256.incidences;\n    if (status != kLeafOk || s32.overflow || s256.overflow || sink_balls != w.balls || sink_incidences != w.incidences)\n      return fail(Reason::catalogue_invariant);\n    ++b.tallies[worker].rewritten;\n  }\n  return {};\n"
+        },
+        {
+          "first_line": 299,
+          "last_line": 301,
+          "text": "  MHGP12_TRY(pool_.parallel_for(n, kLeafGrain, &b, &fill_body));\n  totals_.fill_ns += fill_watch.nanoseconds();\n  for (const Tally& t : tallies) totals_.rewritten += t.rewritten;\n"
+        }
+      ]
+    },
+    {
+      "path": "morsehgp3D_v12/src/catalogue/traversal_driver.hpp",
+      "sha256": "971c47dfe40394398d1dc42fb5c14b47031940b9db031be4dc500daa46f5eae9",
+      "bytes": 8624,
+      "lines": 188,
+      "excerpts": [
+        {
+          "first_line": 49,
+          "last_line": 55,
+          "text": "    root.lo[a] = lo[a];\n    root.hi[a] = static_cast<i64>(hi[a]) + 1;  // 2^32 au bord du domaine u32 : bornes en i64 (CST-0204)\n    const u64 w = static_cast<u64>(root.hi[a] - root.lo[a]);\n    span = w > span ? w : span;\n  }\n  root.count = static_cast<u32>(x.size());\n  root.frame_bits = bfs::bit_length(span);\n"
+        }
+      ]
+    },
+    {
+      "path": "morsehgp3D_v12/src/core/buffer.hpp",
+      "sha256": "581ee5beadc61e01971c31200956acc17c6d6b64d4878c8950ae09ddafa9a2a0",
+      "bytes": 13015,
+      "lines": 258,
+      "excerpts": [
+        {
+          "first_line": 129,
+          "last_line": 151,
+          "text": "// Octets reserves dans un budget sans allocation hote, pour une memoire que le processus ne tient pas par operator\n// new (tableaux du GPU, contrat R7) : comptes avec les Buffer du meme budget, donc dans leurs coexistences et le pic,\n// et rendus a la destruction ou par reset. Memes refus que Buffer::allocate (memory_budget, rien de reserve).\nclass BudgetReservation {\n public:\n  BudgetReservation() = default;\n  BudgetReservation(const BudgetReservation&) = delete;\n  BudgetReservation& operator=(const BudgetReservation&) = delete;\n  ~BudgetReservation() { reset(); }\n\n  // Rend d'abord la reservation precedente ; zero octet ne reserve rien.\n  [[nodiscard]] Outcome reserve(u64 bytes, MemoryBudget& budget) noexcept {\n    reset();\n    if (bytes == 0) return {};\n    if (!detail::budget_reserve_only(*budget.account_, bytes)) return fail(Reason::memory_budget);\n    account_ = budget.account_;\n    bytes_ = bytes;\n    return {};\n  }\n  void reset() noexcept {\n    if (bytes_ != 0) detail::budget_release_only(*account_, bytes_);\n    bytes_ = 0;\n    account_.reset();\n"
+        }
+      ]
+    },
+    {
+      "path": "morsehgp3D_v12/src/core/status.hpp",
+      "sha256": "d81b3e8aab647c97fe97fa7d91081efa28ab88cdac8706cafdd825b17e4046ea",
+      "bytes": 8153,
+      "lines": 185,
+      "excerpts": [
+        {
+          "first_line": 182,
+          "last_line": 185,
+          "text": "#define MHGP12_TRY(expr)                                                                     \\\n  do {                                                                                       \\\n    if (const ::mhgp12::Outcome mhgp12_try_ = (expr); !mhgp12_try_.ok()) return mhgp12_try_; \\\n  } while (0)\n"
+        }
+      ]
+    },
+    {
+      "path": "morsehgp3D_v12/bench/catalogue_probe.cpp",
+      "sha256": "3d46dfd1fae0e1de7c8b3b93a9a929aa794d2dc327a57fcde9a8defb14a53878",
+      "bytes": 13753,
+      "lines": 249,
+      "excerpts": [
+        {
+          "first_line": 178,
+          "last_line": 185,
+          "text": "// Passes du catalogue sur la voie CPU (device nul) ou la voie appareil.\nOutcome passes(const Options& o, const Cloud& cloud, sched::Pool& pool, MemoryBudget& budget, CatalogueDevice* device) {\n  for (u64 pass = 0; pass < o.passes; ++pass) {\n    CatalogueDiagnostics diag;\n    Stopwatch watch;\n    auto catalogue = device != nullptr ? build_catalogue_device(cloud, o.params, *device, pool, &diag)\n                                       : build_catalogue(cloud, o.params, budget, pool, &diag);\n    const u64 wall = watch.nanoseconds();\n"
+        },
+        {
+          "first_line": 200,
+          "last_line": 209,
+          "text": "    std::fflush(stdout);\n    if (!catalogue.ok()) return catalogue.outcome();\n    if (o.digest) {\n      const auto digest = catalogue_digest(cloud, catalogue.value(), o.frame);\n      if (!digest.ok()) return digest.outcome();\n      const auto hex = io::to_hex(digest.value());\n      std::printf(\"{\\\"phase\\\":\\\"digest\\\",\\\"catalogue_sha256\\\":\\\"%s\\\"}\\n\", std::string(hex.data(), hex.size()).c_str());\n    }\n    if (pass + 1 == o.passes && o.out != nullptr) MHGP12_TRY(export_to(o, cloud, catalogue.value()));\n  }\n"
+        },
+        {
+          "first_line": 213,
+          "last_line": 232,
+          "text": "Outcome run(const Options& o) {\n  MemoryBudget budget(o.budget);\n  Result<io::InputFiles> input = io::InputFiles{};\n  if (o.xyz != nullptr) input = io::read_u32le(o.xyz, o.ids, budget);\n  else MHGP12_TRY(synthetic(o, budget, input.value()));\n  if (!input.ok()) return input.outcome();\n  auto cloud = prepare_cloud(input.value().x.span(), input.value().y.span(), input.value().z.span(),\n                             input.value().ids.span(), CoordWidth(), budget);\n  if (!cloud.ok()) return cloud.outcome();\n  input.value() = {};\n  auto pool = sched::make_pool({static_cast<u32>(o.threads)});\n  if (!pool.ok()) return pool.outcome();\n  if (!o.device) return passes(o, cloud.value(), *pool.value(), budget, nullptr);\n  Stopwatch open_watch;\n  auto device = CatalogueDevice::open(budget);\n  std::printf(\"{\\\"phase\\\":\\\"open\\\",\\\"status\\\":\\\"%s\\\",\\\"reason\\\":\\\"%s\\\",\\\"open_ns\\\":%llu}\\n\",\n              std::string(status_name(device.outcome().status())).c_str(),\n              std::string(reason_name(device.outcome().reason)).c_str(), (unsigned long long)open_watch.nanoseconds());\n  if (!device.ok()) return device.outcome();\n  return passes(o, cloud.value(), *pool.value(), budget, &device.value());\n"
+        }
+      ]
+    }
+  ]
+}

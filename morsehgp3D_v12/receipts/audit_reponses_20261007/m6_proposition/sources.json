@@ -1,0 +1,9 @@
+{
+  "base_pin": "f601b36ace16bcc8f7ac9bc532e45ab5079f9667",
+  "driver_sha256": "4a5b30fefdceba039b336ef2590013aaaec2a22b3fddea30c9f0a5bd650fa90e",
+  "historical_schema": "ehgp.v12.mes_m6.v1",
+  "patch_sha256": "1a08ae75aa314b5c0db1084e42326c7668c70bb4e66c1b443e40b92be1fdc7ee",
+  "proposed_driver_sha256": "03ccabafd64c5edb59fddb6d5266e5c9c46ebfd6eb388e035aeb6f943c1ec0f2",
+  "scope": "proposition auditeur, aucune livraison produit",
+  "shared_head_at_capture": "9428db65b25e1660e78e34ce273e155d99b4fac3"
+}

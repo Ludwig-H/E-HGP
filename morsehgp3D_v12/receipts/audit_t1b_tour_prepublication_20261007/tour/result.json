@@ -1,0 +1,165 @@
+{
+  "ant_at_open_cut": [
+    [
+      [
+        0,
+        1
+      ],
+      [
+        0,
+        2
+      ]
+    ],
+    [
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        2
+      ]
+    ]
+  ],
+  "common": {
+    "events": [
+      {
+        "a": [
+          "birth",
+          0
+        ],
+        "b": [
+          "birth",
+          1
+        ],
+        "minleaf": 0,
+        "rank": 1,
+        "surv": 0
+      },
+      {
+        "a": [
+          "event",
+          0
+        ],
+        "b": [
+          "birth",
+          2
+        ],
+        "minleaf": 0,
+        "rank": 1,
+        "surv": 0
+      }
+    ],
+    "registry": {
+      "attach_parent": [
+        null,
+        0,
+        0
+      ],
+      "attach_rank": [
+        0,
+        1,
+        1
+      ],
+      "birth_key": [
+        0,
+        1,
+        2
+      ],
+      "birth_node": [
+        0,
+        1,
+        2
+      ],
+      "births": 3,
+      "cell_node": [
+        3,
+        3
+      ],
+      "children": {
+        "off": [
+          0,
+          0,
+          0,
+          0,
+          3
+        ],
+        "val": [
+          0,
+          1,
+          2
+        ]
+      },
+      "event_cell": [
+        0,
+        1
+      ],
+      "event_node": [
+        3,
+        3
+      ],
+      "event_rank": [
+        1,
+        1
+      ],
+      "k": 1,
+      "lower": [],
+      "minleaf": [
+        0,
+        1,
+        2,
+        0
+      ],
+      "parent": [
+        3,
+        3,
+        3,
+        null
+      ],
+      "rank": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "root": 3,
+      "survivor_events": {
+        "off": [
+          0,
+          2,
+          2,
+          2
+        ],
+        "val": [
+          0,
+          1
+        ]
+      }
+    }
+  },
+  "graphs": [
+    [
+      [
+        0,
+        1
+      ],
+      [
+        0,
+        2
+      ]
+    ],
+    [
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        2
+      ]
+    ]
+  ],
+  "same_binary_events": true,
+  "same_registry": true,
+  "scope": "algebraic_single_plateau_no_native_execution"
+}

@@ -1,0 +1,397 @@
+{
+  "observations": [
+    {
+      "before": {
+        "code": 0,
+        "lignes": 585,
+        "limites_declarees": 0,
+        "prises": 9,
+        "refus": [],
+        "verdict": "mes_m6_ok"
+      },
+      "cas": "temoin_complet",
+      "proposed": {
+        "code": 0,
+        "lignes": 585,
+        "limites_declarees": 0,
+        "prises": 9,
+        "refus": [],
+        "verdict": "mes_m6_ok"
+      }
+    },
+    {
+      "before": {
+        "code": 0,
+        "lignes": 520,
+        "limites_declarees": 0,
+        "prises": 8,
+        "refus": [],
+        "verdict": "mes_m6_ok"
+      },
+      "cas": "indice_false",
+      "proposed": {
+        "code": 3,
+        "lignes": 520,
+        "limites_declarees": 0,
+        "prises": 8,
+        "refus": [
+          "identite de prise invalide : mode='spin', process=False",
+          "prises manquantes, en double ou en trop (8 pour 9)",
+          "prises validees incompletes (8 pour 9)",
+          "verdict publie 'mes_m6_ok', rejuge mes_m6_echec"
+        ],
+        "verdict": "mes_m6_echec"
+      }
+    },
+    {
+      "before": {
+        "code": 0,
+        "lignes": 520,
+        "limites_declarees": 0,
+        "prises": 8,
+        "refus": [],
+        "verdict": "mes_m6_ok"
+      },
+      "cas": "indice_float",
+      "proposed": {
+        "code": 3,
+        "lignes": 520,
+        "limites_declarees": 0,
+        "prises": 8,
+        "refus": [
+          "identite de prise invalide : mode='spin', process=0.0",
+          "prises manquantes, en double ou en trop (8 pour 9)",
+          "prises validees incompletes (8 pour 9)",
+          "verdict publie 'mes_m6_ok', rejuge mes_m6_echec"
+        ],
+        "verdict": "mes_m6_echec"
+      }
+    },
+    {
+      "before": {
+        "code": 0,
+        "lignes": 0,
+        "limites_declarees": 0,
+        "prises": 0,
+        "refus": [],
+        "verdict": "mes_m6_ok"
+      },
+      "cas": "indices_float_sans_fichiers",
+      "proposed": {
+        "code": 3,
+        "lignes": 0,
+        "limites_declarees": 0,
+        "prises": 0,
+        "refus": [
+          "identite de prise invalide : mode='spin', process=0.0",
+          "identite de prise invalide : mode='yield', process=0.0",
+          "identite de prise invalide : mode='blocking', process=0.0",
+          "identite de prise invalide : mode='spin', process=1.0",
+          "identite de prise invalide : mode='yield', process=1.0",
+          "identite de prise invalide : mode='blocking', process=1.0",
+          "identite de prise invalide : mode='spin', process=2.0",
+          "identite de prise invalide : mode='yield', process=2.0",
+          "identite de prise invalide : mode='blocking', process=2.0",
+          "prises manquantes, en double ou en trop (0 pour 9)",
+          "prises validees incompletes (0 pour 9)",
+          "verdict publie 'mes_m6_ok', rejuge mes_m6_echec"
+        ],
+        "verdict": "mes_m6_echec"
+      }
+    },
+    {
+      "before": {
+        "code": 0,
+        "lignes": 585,
+        "limites_declarees": 3,
+        "prises": 9,
+        "refus": [],
+        "verdict": "mes_m6_ok"
+      },
+      "cas": "schema_inconnu_refus_explicite",
+      "proposed": {
+        "code": 3,
+        "lignes": 0,
+        "limites_declarees": 0,
+        "prises": 0,
+        "refus": [
+          "schema inconnu ou absent"
+        ],
+        "verdict": "mes_m6_echec"
+      }
+    },
+    {
+      "before": {
+        "code": 0,
+        "lignes": 585,
+        "limites_declarees": 0,
+        "prises": 9,
+        "refus": [],
+        "verdict": "mes_m6_ok"
+      },
+      "cas": "code_compilation_false",
+      "proposed": {
+        "code": 3,
+        "lignes": 585,
+        "limites_declarees": 0,
+        "prises": 9,
+        "refus": [
+          "compilation absente ou en echec",
+          "compilation absente ou en echec",
+          "verdict publie 'mes_m6_ok', rejuge mes_m6_echec"
+        ],
+        "verdict": "mes_m6_echec"
+      }
+    },
+    {
+      "before": {
+        "code": 0,
+        "lignes": 585,
+        "limites_declarees": 0,
+        "prises": 9,
+        "refus": [],
+        "verdict": "mes_m6_ok"
+      },
+      "cas": "code_prise_false",
+      "proposed": {
+        "code": 3,
+        "lignes": 520,
+        "limites_declarees": 0,
+        "prises": 8,
+        "refus": [
+          "prise spin 0 : code False",
+          "prises validees incompletes (8 pour 9)",
+          "verdict publie 'mes_m6_ok', rejuge mes_m6_echec"
+        ],
+        "verdict": "mes_m6_echec"
+      }
+    },
+    {
+      "before": {
+        "code": 0,
+        "lignes": 585,
+        "limites_declarees": 0,
+        "prises": 9,
+        "refus": [],
+        "verdict": "mes_m6_ok"
+      },
+      "cas": "code_compilation_float",
+      "proposed": {
+        "code": 3,
+        "lignes": 585,
+        "limites_declarees": 0,
+        "prises": 9,
+        "refus": [
+          "compilation absente ou en echec",
+          "compilation absente ou en echec",
+          "verdict publie 'mes_m6_ok', rejuge mes_m6_echec"
+        ],
+        "verdict": "mes_m6_echec"
+      }
+    },
+    {
+      "before": {
+        "code": 0,
+        "lignes": 585,
+        "limites_declarees": 0,
+        "prises": 9,
+        "refus": [],
+        "verdict": "mes_m6_ok"
+      },
+      "cas": "code_prise_float",
+      "proposed": {
+        "code": 3,
+        "lignes": 520,
+        "limites_declarees": 0,
+        "prises": 8,
+        "refus": [
+          "prise spin 0 : code 0.0",
+          "prises validees incompletes (8 pour 9)",
+          "verdict publie 'mes_m6_ok', rejuge mes_m6_echec"
+        ],
+        "verdict": "mes_m6_echec"
+      }
+    },
+    {
+      "before": {
+        "code": 3,
+        "lignes": 520,
+        "limites_declarees": 0,
+        "prises": 8,
+        "refus": [
+          "prises manquantes, en double ou en trop (9 pour 9)",
+          "prise spin -1 illisible : [Errno 2] No such file or directory: '<dossier>/m6_spin_-1.jsonl'",
+          "verdict publie 'mes_m6_ok', rejuge mes_m6_echec"
+        ],
+        "verdict": "mes_m6_echec"
+      },
+      "cas": "indice_negatif",
+      "proposed": {
+        "code": 3,
+        "lignes": 520,
+        "limites_declarees": 0,
+        "prises": 8,
+        "refus": [
+          "identite de prise invalide : mode='spin', process=-1",
+          "prises manquantes, en double ou en trop (8 pour 9)",
+          "prises validees incompletes (8 pour 9)",
+          "verdict publie 'mes_m6_ok', rejuge mes_m6_echec"
+        ],
+        "verdict": "mes_m6_echec"
+      }
+    },
+    {
+      "before": {
+        "code": 3,
+        "lignes": 520,
+        "limites_declarees": 0,
+        "prises": 8,
+        "refus": [
+          "prises manquantes, en double ou en trop (9 pour 9)",
+          "prise spin 3 illisible : [Errno 2] No such file or directory: '<dossier>/m6_spin_3.jsonl'",
+          "verdict publie 'mes_m6_ok', rejuge mes_m6_echec"
+        ],
+        "verdict": "mes_m6_echec"
+      },
+      "cas": "indice_hors_plage",
+      "proposed": {
+        "code": 3,
+        "lignes": 520,
+        "limites_declarees": 0,
+        "prises": 8,
+        "refus": [
+          "identite de prise invalide : mode='spin', process=3",
+          "prises manquantes, en double ou en trop (8 pour 9)",
+          "prises validees incompletes (8 pour 9)",
+          "verdict publie 'mes_m6_ok', rejuge mes_m6_echec"
+        ],
+        "verdict": "mes_m6_echec"
+      }
+    },
+    {
+      "before": {
+        "code": 0,
+        "lignes": 585,
+        "limites_declarees": 3,
+        "prises": 9,
+        "refus": [],
+        "verdict": "mes_m6_ok"
+      },
+      "cas": "schema_absent",
+      "proposed": {
+        "code": 3,
+        "lignes": 0,
+        "limites_declarees": 0,
+        "prises": 0,
+        "refus": [
+          "schema inconnu ou absent"
+        ],
+        "verdict": "mes_m6_echec"
+      }
+    },
+    {
+      "before": {
+        "code": 0,
+        "lignes": 585,
+        "limites_declarees": 3,
+        "prises": 9,
+        "refus": [],
+        "verdict": "mes_m6_ok"
+      },
+      "cas": "schema_null",
+      "proposed": {
+        "code": 3,
+        "lignes": 0,
+        "limites_declarees": 0,
+        "prises": 0,
+        "refus": [
+          "schema inconnu ou absent"
+        ],
+        "verdict": "mes_m6_echec"
+      }
+    },
+    {
+      "before": {
+        "code": 0,
+        "lignes": 585,
+        "limites_declarees": 3,
+        "prises": 9,
+        "refus": [],
+        "verdict": "mes_m6_ok"
+      },
+      "cas": "schema_liste",
+      "proposed": {
+        "code": 3,
+        "lignes": 0,
+        "limites_declarees": 0,
+        "prises": 0,
+        "refus": [
+          "schema inconnu ou absent"
+        ],
+        "verdict": "mes_m6_echec"
+      }
+    },
+    {
+      "before": {
+        "code": 0,
+        "lignes": 585,
+        "limites_declarees": 3,
+        "prises": 9,
+        "refus": [],
+        "verdict": "mes_m6_ok"
+      },
+      "cas": "v1_refus_explicite",
+      "proposed": {
+        "code": 3,
+        "lignes": 585,
+        "limites_declarees": 3,
+        "prises": 9,
+        "refus": [
+          "refus publies dans le rapport : ['binaire modifie pendant les prises']"
+        ],
+        "verdict": "mes_m6_echec"
+      }
+    }
+  ],
+  "official_gate": {
+    "cas": 54,
+    "code": 0,
+    "ecarts": [],
+    "historique_v1": {
+      "cas": "rejuge_session_g4_a",
+      "code": 0,
+      "code_publie": 0,
+      "lignes": 585,
+      "medianes_egales_auditeur": true,
+      "non_rejouable": 3,
+      "prises": 9,
+      "verdict": "mes_m6_ok"
+    }
+  },
+  "proposition": {
+    "base_pin": "f601b36ace16bcc8f7ac9bc532e45ab5079f9667",
+    "driver_sha256": "4a5b30fefdceba039b336ef2590013aaaec2a22b3fddea30c9f0a5bd650fa90e",
+    "historical_schema": "ehgp.v12.mes_m6.v1",
+    "patch_sha256": "1a08ae75aa314b5c0db1084e42326c7668c70bb4e66c1b443e40b92be1fdc7ee",
+    "proposed_driver_sha256": "03ccabafd64c5edb59fddb6d5266e5c9c46ebfd6eb388e035aeb6f943c1ec0f2",
+    "scope": "proposition auditeur, aucune livraison produit",
+    "shared_head_at_capture": "9428db65b25e1660e78e34ce273e155d99b4fac3"
+  },
+  "scope": "JSON synthetiques et relecture historique, aucun GPU",
+  "sources_sha256": {
+    "morsehgp3D_v12/microbancs/mes_m6_session/mes_m6_session_cost.cu": "49c6afc51d48e124c866e509700764a59150410d7664fabdadf14ee41887dff1",
+    "morsehgp3D_v12/microbancs/mes_m6_session/run_m6.py": "4a5b30fefdceba039b336ef2590013aaaec2a22b3fddea30c9f0a5bd650fa90e",
+    "morsehgp3D_v12/microbancs/mes_m6_session/tests/test_juge_m6.py": "949f6dfc872a46e9cdfe66cc3bf78cbf5f62696408a992797d27d9aab2d2b764",
+    "morsehgp3D_v12/receipts/g4_t0a_20261007/resultats/cmd/002_m6/files/m6/m6_blocking_0.jsonl": "216bc06ca7166fe97293c6bd54d063233a5b22b8ff93197f32f53074a0d9d78a",
+    "morsehgp3D_v12/receipts/g4_t0a_20261007/resultats/cmd/002_m6/files/m6/m6_blocking_1.jsonl": "91931061bd1cf9e06082abc255df2141c9ead66f531094b0c36947222430b4b1",
+    "morsehgp3D_v12/receipts/g4_t0a_20261007/resultats/cmd/002_m6/files/m6/m6_blocking_2.jsonl": "5eb33c2f651f32e5321bd4f11843dea1f3896a2ab234fe94263f48838ad08bda",
+    "morsehgp3D_v12/receipts/g4_t0a_20261007/resultats/cmd/002_m6/files/m6/m6_report.json": "6a2d37be14d2e34e77f0bbcbe6f4203dd56e9f76eaa5acadefe238eec6086d9b",
+    "morsehgp3D_v12/receipts/g4_t0a_20261007/resultats/cmd/002_m6/files/m6/m6_spin_0.jsonl": "06bb274c73dd3e778a5ad96349cc55b4ce9cddd7b4c36b5f592330fdce05060b",
+    "morsehgp3D_v12/receipts/g4_t0a_20261007/resultats/cmd/002_m6/files/m6/m6_spin_1.jsonl": "9a2c7041479b8252b321401172d7c11eebe7d1834d48da6029ee714aef8d18c3",
+    "morsehgp3D_v12/receipts/g4_t0a_20261007/resultats/cmd/002_m6/files/m6/m6_spin_2.jsonl": "263d3f033797813c83a3f141a7ed8aff3819ec94823737e192c364997e139a18",
+    "morsehgp3D_v12/receipts/g4_t0a_20261007/resultats/cmd/002_m6/files/m6/m6_yield_0.jsonl": "3cf60069bb420c329eda44386a67f7dd541bbfba63d436b53f1e015570f7af19",
+    "morsehgp3D_v12/receipts/g4_t0a_20261007/resultats/cmd/002_m6/files/m6/m6_yield_1.jsonl": "b57c5c5be0bc10df4fbd84ee0b0209aabfebe78694e909cd134ddf074925f640",
+    "morsehgp3D_v12/receipts/g4_t0a_20261007/resultats/cmd/002_m6/files/m6/m6_yield_2.jsonl": "565d0a7753d082bf850fe931d2243a05d84758c985903ef41338fd2b7e50065e",
+    "morsehgp3D_v12/receipts/g4_t0a_20261007/resultats/cmd/002_m6/meta.txt": "e1cfbd2492a7b9e0f6b9e5c0eace01fecec47c58050dc36359e65cea83caa230"
+  }
+}

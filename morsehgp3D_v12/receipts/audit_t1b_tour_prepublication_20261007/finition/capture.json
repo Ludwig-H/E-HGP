@@ -1,0 +1,46 @@
+{
+  "published_main": "9428db65b",
+  "scope": "prototype local non publie; lecture statique seulement",
+  "files": {
+    "src/catalogue/finish_driver.hpp": {
+      "bytes": 14116,
+      "sha256": "7fb2c336ba6c76d36b38d989709256fe52ede4781dc17d8c6f01245778d7f18c"
+    },
+    "src/catalogue/finish_kernels.hpp": {
+      "bytes": 10794,
+      "sha256": "96b1afe896fcbd65afce3cc119a3db4d9149c059e5e8251f53605c2f3f059426"
+    },
+    "src/catalogue/finish_level.hpp": {
+      "bytes": 9591,
+      "sha256": "d5dd177a787367330ef6a35e4e949a9e997681dcf2267b392e1bf19d44fa7ecb"
+    },
+    "src/catalogue/finish_sort.hpp": {
+      "bytes": 11625,
+      "sha256": "c7355b1e5b2b278dccb62a726bf20deb92b89ceed39cb9635db7a6763d47d5ce"
+    },
+    "src/catalogue/assemble.cpp": {
+      "bytes": 6119,
+      "sha256": "1a9ffc5363f6e59a355b2be3f71a82febc2d6147b7c53138bd3f0199efcffb42"
+    },
+    "src/catalogue/table.cpp": {
+      "bytes": 1792,
+      "sha256": "cb76b465e6453f09684efb747ca8bf2de55f3d1788a15df3181e6f38723f0396"
+    },
+    "src/catalogue/exec_host.hpp": {
+      "bytes": 4574,
+      "sha256": "32085c0b18254c48b64972cac273c93d59daed695906011b07f4e6b87f10ab57"
+    },
+    "src/catalogue/simt.hpp": {
+      "bytes": 13156,
+      "sha256": "1cc09438e9b568b19a529a294b469408c97da57318b70fc1a8f30be8a795c97b"
+    },
+    "tests/catalogue/device_finish_test.cpp": {
+      "bytes": 12432,
+      "sha256": "401f439594867a4de72b4d20bdd1e728014d0164af3d2b520e6b1685e95038b0"
+    },
+    "tests/catalogue/device_unit.cpp": {
+      "bytes": 6501,
+      "sha256": "0dbffb2043133086154fcaf3c138c10124cc187e9700e78e518763b7c44edaff"
+    }
+  }
+}

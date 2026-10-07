@@ -1,0 +1,24 @@
+{
+  "contract_identical_to_main": true,
+  "main_head_at_capture": "9428db65b25e1660e78e34ce273e155d99b4fac3",
+  "prototype_tower_absent_in_main": true,
+  "sha256": {
+    "README.md": "b80cd7533457a14ec5d7a680877b3d119668024e99cb25de162da230dbf7465f",
+    "docs/ARCHITECTURE.md": "53f857cd3bfd4c00df6f20de9e739ccd1820e9bfc691a7e2ac781be2668d1787",
+    "docs/CONTRAT_TOUR.md": "262b3bb57f68f9deb3f4b6172419b4e4ba105ffc98ce8f9394e5343de4eb09af",
+    "docs/PLAN.md": "bbc475bb2efa73015053451676bbc1f9db3a3ed2fc0c12ff79819793b9a3d06f",
+    "livraison/INTERFACE_TMV.md": "1107a0a7ee9558cade67c304fdb1999c921205b963af3aaa04e6e8e8c274ffa1",
+    "livraison/RAPPORT.md": "358b4ea561a4de796e9c894c16405f5b205490950c60d9413902fc7be91553e5",
+    "src/core/buffer.hpp": "73cac26c57ce59c205943fcb1a484d9efce79f81cfe3851048d7c9fb2732c494",
+    "src/tower/forest.hpp": "44696134ed374759dc03eae9d8fc13e77835af5cdd8e7de5f9bb8fa5b802d5f8",
+    "src/tower/forest_build.cpp": "a59e7eec4646d4c9bf1113444a66ce4ec06f23bada15d22f243b59a9c94800e0",
+    "src/tower/forest_contract.cpp": "5dacf8cef8a7827ba50c01b3a4908e264b946b5caccc0dda0abf5ad83117870d",
+    "src/tower/forest_internal.hpp": "b0365cf1103d722d61ee0c60b65b059f28163cd9a5a2623bc93ffe5f8c045fd8",
+    "src/tower/forest_kernel.cpp": "8e75883f81986090491ca6a44800286b616b8e8bd5bfab937c352fb0c52f5cf6",
+    "src/tower/forest_stages.cpp": "c1293f7f18d4586d4188765c314d6c9216f8f40e3398f1e9a2d452363cc52cf0",
+    "src/tower/forest_validate.cpp": "a3dd55b53d7903533a1b80da1fb1d7c43a7b80c60c1d3580dd88a2970b70eab0",
+    "src/tower/vertical_images.cpp": "b0543caf0adb031cf58f59d7eb337aa79c41ad226f28da527456e22f6b0df8eb",
+    "tests/tower/forest_unit.cpp": "017ed497dd41f98d81e24ddd0e5c727d750197034f2900aed2107ee42c28a419"
+  },
+  "status": "prepublication_read_only_no_native_execution"
+}
