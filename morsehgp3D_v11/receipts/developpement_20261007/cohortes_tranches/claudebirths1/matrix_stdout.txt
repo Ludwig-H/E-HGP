@@ -1,0 +1,10 @@
+[g4_matrix 00:10:51] gcc_asan_ubsan : lancement (8 fils ; en cours : gcc_asan_ubsan)
+[g4_matrix 00:10:51] gcc_tsan : lancement (8 fils ; en cours : gcc_asan_ubsan, gcc_tsan)
+[g4_matrix 00:10:51] gcc_tsan_lidar_ng00 : lancement (4 fils ; en cours : gcc_asan_ubsan, gcc_tsan, gcc_tsan_lidar_ng00)
+[g4_matrix 00:15:55] gcc_asan_ubsan : ok (302.838 s)
+[g4_matrix 00:16:33] gcc_tsan : ok (341.799 s)
+[g4_matrix 00:35:38] gcc_tsan_lidar_ng00 : ok (1486.226 s)
+gcc_asan_ubsan   ok                   portes 803/803
+gcc_tsan         ok                   portes 803/803
+gcc_tsan_lidar_ng00 ok                   portes 13/13
+[g4_matrix 00:35:38] code de sortie 0 ; resume : /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.FFBkD77A65/results/cmd/004_matrix/files/matrix/summary.json

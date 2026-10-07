@@ -149,8 +149,11 @@ Inspiration : le semis H_K de la v10, qui rendait la naissance sans passer par l
 boules garde ses comptes de naissances et de cellules régulières par bloc (`BirthBlocks`, sommes préfixes). Trois
 distributions pour tous les ordres : (1) naissances et cellules régulières écrites à leurs rangs, cases denses
 remises à `kNone`, états DSU ; l'ordre 1 trie ses sites en une tâche (`std::sort` sur l'ordre xyz strict, même
-permutation que le tas) ; (2) cohortes de même rang triées par centre exact, une tâche par ordre ; (3) table dense
-par blocs. Mêmes nœuds, mêmes états, mêmes listes et même table que `births`, `prepare_states` et `collect_jobs`.
+permutation que le tas) ; (2) cohortes de même rang triées par centre exact, en (K−1) × 32 tranches alignées sur
+les cohortes depuis le 7 octobre (bornes lues par le pilote avant toute écriture, un tampon de la plus longue cohorte
+par ouvrier, registres de tranche ajoutés dans l'ordre ; naissances 6,8–11,6 → 4,0–5,3 ms à K5 sur G4, reçu
+[`cohortes_tranches`](../receipts/developpement_20261007/cohortes_tranches/README.md)) ; (3) table dense par blocs.
+Mêmes nœuds, mêmes états, mêmes listes et même table que `births`, `prepare_states` et `collect_jobs`.
 
 **Pipeline des ordres concurrents** (`forest_pipeline.cpp`, `forest_vertical.cpp`). Quand W ≥ 2K et au moins 2K
 espaces census existent (sinon la voie par étages reste), résolution, publication et verticales sont recouvertes

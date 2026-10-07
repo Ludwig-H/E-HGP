@@ -1,0 +1,5 @@
+births_blocs_cohortes_omises             TUE      code
+cohortes_registre_omis                   TUE      code
+cohortes_bornes_non_alignees             TUE      code
+cohortes_premiere_tranche_omise          TUE      code
+mutants_ok module=tower mutants=4 tues=4 dont_signal=0 dont_delai=0 dont_construction=0 plancher=4
