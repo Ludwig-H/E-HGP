@@ -245,7 +245,8 @@ Outcome full_pass(Cloud cloud_value, MemoryBudget& budget, sched::Pool& pool_ref
               << ",\"batch_executor_ns\":" << timings.batch_executor_ns
               << ",\"batch_device_init_ns\":" << timings.batch_device_init_ns
               << ",\"batch_count_ns\":" << timings.batch_count_ns << ",\"batch_fill_ns\":" << timings.batch_fill_ns
-              << ",\"batch_levels_ns\":" << timings.batch_levels_ns << ",\"cpu_seconds\":" << std::setprecision(12)
+              << ",\"batch_levels_ns\":" << timings.batch_levels_ns << ",\"release_ns\":" << timings.release_ns
+              << ",\"lookup_ns\":" << timings.lookup_ns << ",\"cpu_seconds\":" << std::setprecision(12)
               << cpu_seconds << "}\n" << std::flush;
   if (!detailed) return tower.outcome();
   std::cout << "{\"phase\":\"full\","; status(tower.outcome());

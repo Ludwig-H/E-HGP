@@ -56,9 +56,14 @@ def phases(text):
     return out, passes
 
 
-def run(cmd, timeout):
+# Prereglages d'environnement d'un mode (suffixe @nom) : "tas" garde les grands blocs dans le tas de glibc (seuil mmap
+# a 1 Gio, pas de rognage), donc ni munmap a la restitution ni nouvelles fautes de page a la passe suivante.
+ENV_PRESETS = {'tas': {'GLIBC_TUNABLES': 'glibc.malloc.mmap_threshold=1073741824:glibc.malloc.trim_threshold=4294967296'}}
+
+
+def run(cmd, timeout, env=None):
     t0 = time.monotonic()
-    done = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+    done = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, env=env)
     return done.returncode, done.stdout, done.stderr, round(time.monotonic() - t0, 3)
 
 
@@ -70,6 +75,10 @@ def median(values):
 def host_memory():
     """Politique des pages de 2 Mio (THP) et pages enormes anonymes de l'hote, pour lire les mesures (7 octobre)."""
     out = {}
+    try:
+        out['libc'] = os.confstr('CS_GNU_LIBC_VERSION')
+    except (ValueError, OSError):
+        out['libc'] = None
     for key, path in (('thp_enabled', '/sys/kernel/mm/transparent_hugepage/enabled'),
                       ('thp_defrag', '/sys/kernel/mm/transparent_hugepage/defrag'),
                       ('kernel', '/proc/sys/kernel/osrelease')):
@@ -183,7 +192,8 @@ def main():
     args.out.mkdir(parents=True, exist_ok=True)
     build_log = []
     benches = {}
-    if any(len(m) != 2 for m in raw_modes) or not variants or len(set(variants)) != len(variants):
+    if (any(len(m) != 2 for m in raw_modes) or not variants or len(set(variants)) != len(variants) or
+            any(m[1].partition('@')[2] not in ('',) + tuple(ENV_PRESETS) for m in raw_modes if len(m) == 2)):
         print('refus : --modes ou --variants invalide', file=sys.stderr)
         return 1
     for variant in variants:
@@ -226,11 +236,14 @@ def main():
     def one(frame, name, mode, bench, workers, passes):
         cmd = [str(bench), str(args.data / (frame + '.u32le')), str(args.data / (frame + '.ids.u32le')), str(dump)]
         # Mode MASQUE ou MASQUE:PART (executeur partage du lot, part de l'hote pour mille : argument final de la sonde).
-        mask, _, split = mode.partition(':')
+        # Suffixe @nom : prereglage d'environnement du banc (ENV_PRESETS), le reste du mode inchange.
+        bare, _, preset = mode.partition('@')
+        mask, _, split = bare.partition(':')
         cmd += tail + [workers, mask] + ([str(passes)] if passes > 1 or split else []) + ([split] if split else [])
         if dump.exists():
             dump.unlink()
-        code, out, err, seconds = run(cmd, 900)
+        env = None if not preset else dict(os.environ, **ENV_PRESETS[preset])
+        code, out, err, seconds = run(cmd, 900, env)
         got, passes_seen = phases(out)
         work = got.get('domain', {}).get('catalogue_work')
         digest = sha256(dump) if dump.exists() else None
@@ -286,7 +299,9 @@ def main():
             batch_executor_ms=median([p['batch_executor_ns'] / 1e6 for p in later]),
             best_wall_ms=min([p['wall_ns'] / 1e6 for p in later], default=None),
             first_pass_wall_ms=(row['passes'][0]['wall_ns'] / 1e6) if row['passes'] else None,
-            first_pass_device_init_ms=(row['passes'][0]['batch_device_init_ns'] / 1e6) if row['passes'] else None)
+            first_pass_device_init_ms=(row['passes'][0]['batch_device_init_ns'] / 1e6) if row['passes'] else None,
+            release_ms=median([p['release_ns'] / 1e6 for p in later if 'release_ns' in p]),
+            lookup_ms=median([p['lookup_ns'] / 1e6 for p in later if 'lookup_ns' in p]))
     report['warm_medians_ms'] = warm
     report['scope'] = ('a froid : dump et registre de chaque prise ; a chaud : passes 1..P toutes reussies, dump et '
                        'registre de la derniere passe P seulement (les passes 1..P-1 ne serialisent rien)')
