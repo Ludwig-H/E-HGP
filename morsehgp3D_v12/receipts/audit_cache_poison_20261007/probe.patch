@@ -1,0 +1,59 @@
+diff --git a/morsehgp3D_v12/tests/core/cache_poison_probe.cpp b/morsehgp3D_v12/tests/core/cache_poison_probe.cpp
+new file mode 100644
+index 000000000..2b10e8056
+--- /dev/null
++++ b/morsehgp3D_v12/tests/core/cache_poison_probe.cpp
+@@ -0,0 +1,53 @@
++// Sonde de l'empoisonnement ASan du cache de blocs (CST-0019). Sous ASan (GCC ou Clang), lire un bloc rendu au cache,
++// ou la queue d'un bloc de classe au-dela de sa taille, doit arreter le processus : un rappel de mort du sanitizer
++// appelle abort() apres le rapport, et la porte exige ce SIGABRT (le code de sortie 1 d'ASan ne suffit pas a une
++// porte d'arret anormal). Le rappel passe par l'interface du runtime : __asan_default_options, defini dans
++// l'executable, n'est pas vu du runtime partage de Clang. Le temoin `garde` montre que la sonde finit sinon par le code
++// 0. Hors ASan, les deux lectures touchent une memoire allouee et finissent aussi par 0 : les portes n'existent que sous
++// MHGP12_SANITIZE.
++#include <cstdio>
++#include <cstdlib>
++#include <cstring>
++
++#include "core/core.hpp"
++
++#if defined(__SANITIZE_ADDRESS__)
++#define MHGP12_PROBE_ASAN 1
++#elif defined(__has_feature)
++#if __has_feature(address_sanitizer)
++#define MHGP12_PROBE_ASAN 1
++#endif
++#endif
++#if defined(MHGP12_PROBE_ASAN)
++#include <sanitizer/common_interface_defs.h>
++#endif
++
++namespace {
++[[noreturn]] void stop_on_report() { std::abort(); }
++}  // namespace
++
++int main(int argc, char** argv) {
++  using namespace mhgp12;
++#if defined(MHGP12_PROBE_ASAN)
++  __sanitizer_set_death_callback(stop_on_report);
++#else
++  static_cast<void>(&stop_on_report);
++#endif
++  const char* mode = argc == 2 ? argv[1] : "";
++  const bool after = std::strcmp(mode, "lecture_apres_restitution") == 0;
++  const bool tail = std::strcmp(mode, "lecture_hors_taille") == 0;
++  if (!after && !tail && std::strcmp(mode, "garde") != 0) return 2;
++  MemoryBudget budget(MemoryBudget::kUnlimited, u64{1} << 24);
++  Buffer<u8> b;
++  if (!b.allocate(300 * 1024, budget).ok()) return 3;
++  b[0] = 1;
++  b[b.size() - 1] = 2;
++  const volatile u8* past_end = b.data() + b.size();  // dans la classe (308 Kio), hors de la taille demandee
++  if (tail) std::printf("lu %u\n", static_cast<unsigned>(*past_end));
++  const volatile u8* stale = b.data();
++  b.reset();
++  if (budget.cache_stats().idle == 0) return 3;  // le bloc doit etre garde par le cache
++  if (after) std::printf("lu %u\n", static_cast<unsigned>(*stale));
++  std::printf("sonde_cache_ok %s\n", mode);
++  return 0;
++}

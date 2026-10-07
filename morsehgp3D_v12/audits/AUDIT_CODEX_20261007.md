@@ -16,6 +16,9 @@ Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalo
   Plafond physique respecté, promesse d'admission indépendante de l'entrelacement rompue.
   Synchroniser les transitions et recontrôler l'état avant refus ; ne pas rendre le crédit
   physique avant la libération. Constat sur capture de travail, pas sur un commit livré.
+  [Poison ASan confirmé](../receipts/audit_cache_poison_20261007/README.md) : neuf petits
+  processus sous Clang/GCC ; ancienne détection Clang prise en défaut causalement.
+  Cet acquis ne clôt pas le refus concurrent ; aucun chrono produit nouveau.
 - **Juges, `0018`** : contre-lecture M5/M6 du lot `2b2113264`. M6 laisse encore sortir
   `mes_m6_ok` avec moins de prises que demandé, voire zéro : indices `false`/`0.0`
   égaux aux entiers dans une première garde puis ignorés par la suivante. Un schéma inconnu

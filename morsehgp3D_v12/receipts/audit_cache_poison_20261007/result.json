@@ -1,0 +1,82 @@
+{
+  "clang_runtime": "shared",
+  "compilers": {
+    "clang++": "Ubuntu clang version 18.1.3 (1ubuntu1)",
+    "g++": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
+  },
+  "core_dumps": false,
+  "leak_detection": false,
+  "memory_patch_sha256": "b45763acc6e254eefc44b69860f8fa45cd8ac329d3926bfadea490dd5e65a9fb",
+  "observations": [
+    {
+      "mode": "garde",
+      "normal_completion": true,
+      "returncode": 0,
+      "use_after_poison": false,
+      "variant": "clang_corrected"
+    },
+    {
+      "mode": "lecture_apres_restitution",
+      "normal_completion": false,
+      "returncode": -6,
+      "use_after_poison": true,
+      "variant": "clang_corrected"
+    },
+    {
+      "mode": "lecture_hors_taille",
+      "normal_completion": false,
+      "returncode": -6,
+      "use_after_poison": true,
+      "variant": "clang_corrected"
+    },
+    {
+      "mode": "garde",
+      "normal_completion": true,
+      "returncode": 0,
+      "use_after_poison": false,
+      "variant": "clang_gcc_guard_only"
+    },
+    {
+      "mode": "lecture_apres_restitution",
+      "normal_completion": true,
+      "returncode": 0,
+      "use_after_poison": false,
+      "variant": "clang_gcc_guard_only"
+    },
+    {
+      "mode": "lecture_hors_taille",
+      "normal_completion": true,
+      "returncode": 0,
+      "use_after_poison": false,
+      "variant": "clang_gcc_guard_only"
+    },
+    {
+      "mode": "garde",
+      "normal_completion": true,
+      "returncode": 0,
+      "use_after_poison": false,
+      "variant": "gcc_corrected"
+    },
+    {
+      "mode": "lecture_apres_restitution",
+      "normal_completion": false,
+      "returncode": -6,
+      "use_after_poison": true,
+      "variant": "gcc_corrected"
+    },
+    {
+      "mode": "lecture_hors_taille",
+      "normal_completion": false,
+      "returncode": -6,
+      "use_after_poison": true,
+      "variant": "gcc_corrected"
+    }
+  ],
+  "sanitizers": "address,undefined",
+  "scope": "three_small_binaries_only_no_pipeline_no_GCP",
+  "source_sha256": {
+    "morsehgp3D_v12/src/core/buffer.cpp": "fb3c52393cef9b31fe064995a94958b24edcbe3aeda0925dfa30ebf54f37664d",
+    "morsehgp3D_v12/src/core/buffer.hpp": "3c7fffc6ed97b6456f666ef849ddd6f4f3a1b3f2427c0fc875b7d5edcd14130b",
+    "morsehgp3D_v12/tests/core/cache_poison_probe.cpp": "3848d1865fec74b05dd0a457bc1f0eeb654089bfcf5ce3293a9c3602d308aad6"
+  }
+}

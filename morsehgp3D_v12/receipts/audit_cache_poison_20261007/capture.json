@@ -1,0 +1,10 @@
+{
+  "base": "f601b36ace16bcc8f7ac9bc532e45ab5079f9667",
+  "memory_snapshot_receipt_commit": "c9356b5b864a3d601744a0ba45f9012ead46ab22",
+  "source_sha256": {
+    "morsehgp3D_v12/src/core/buffer.cpp": "fb3c52393cef9b31fe064995a94958b24edcbe3aeda0925dfa30ebf54f37664d",
+    "morsehgp3D_v12/src/core/buffer.hpp": "3c7fffc6ed97b6456f666ef849ddd6f4f3a1b3f2427c0fc875b7d5edcd14130b",
+    "morsehgp3D_v12/tests/core/cache_poison_probe.cpp": "3848d1865fec74b05dd0a457bc1f0eeb654089bfcf5ce3293a9c3602d308aad6"
+  },
+  "developer_note_sha256": "18676fe738df5e3e43c82609aa6f6dc932d2fed5b309b1356c4b9f95f9d8f1ab"
+}
