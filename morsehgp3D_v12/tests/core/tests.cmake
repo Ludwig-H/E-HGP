@@ -1,11 +1,13 @@
 # Portes du module core.
 mhgp12_add_unit(mhgp12_core_unit SOURCES status_test.cpp buffer_test.cpp ledger_test.cpp
                 GROUPS types reasons outcome macros result guarded budget budget_threads reservation buffer csr ledger
-                       block_cache
+                       block_cache block_cache_limit
                 LABELS fast)
 
 # Penurie de memoire injectee : operator new remplace dans cet executable seulement.
-mhgp12_add_unit(mhgp12_core_fault SOURCES alloc_fault.cpp GROUPS alloc_fault refusal ledger LABELS fast)
+mhgp12_add_unit(mhgp12_core_fault SOURCES alloc_fault.cpp GROUPS alloc_fault alloc_fault_cache eviction_admise refusal
+                       ledger
+                LABELS fast)
 
 # Acces verifies de Result : value() et take() sur un refus terminent le processus. La porte exige l'arret anormal
 # de la sonde ; le temoin value_ok montre que la sonde finit sinon par le code 0, que ces portes refuseraient.
@@ -23,7 +25,20 @@ target_link_libraries(mhgp12_core_poison_probe PRIVATE mhgp12)
 target_include_directories(mhgp12_core_poison_probe PRIVATE ${PROJECT_SOURCE_DIR}/tests/support)
 if(MHGP12_POISON)
   mhgp12_expect_code(mhgp12_core_poison 0 mhgp12_core_poison_probe
-                     LINE "mhgp12_test_ok tests=1 controles=7" LABELS unit fast)
+                     LINE "mhgp12_test_ok tests=1 controles=11" LABELS unit fast)
+endif()
+
+# Empoisonnement ASan du cache de blocs (CST-0019) : sous ASan, GCC ou Clang, lire un bloc rendu au cache ou la queue
+# d'un bloc de classe arrete le processus (SIGABRT par abort_on_error) ; le temoin garde finit par le code 0. La sonde
+# est toujours construite, les portes n'existent que sous MHGP12_SANITIZE.
+add_executable(mhgp12_core_cache_poison_probe ${CMAKE_CURRENT_LIST_DIR}/cache_poison_probe.cpp)
+target_link_libraries(mhgp12_core_cache_poison_probe PRIVATE mhgp12)
+if(MHGP12_SANITIZE)
+  mhgp12_expect_code(mhgp12_core_cache_poison_garde 0 mhgp12_core_cache_poison_probe garde
+                     LINE "sonde_cache_ok garde" LABELS unit fast)
+  foreach(mode lecture_apres_restitution lecture_hors_taille)
+    mhgp12_expect_abnormal_stop(mhgp12_core_cache_poison_${mode} mhgp12_core_cache_poison_probe ${mode} LABELS unit fast)
+  endforeach()
 endif()
 
 # Refus a la compilation. Gardes de core/types.hpp : flottant (F5 ; -ffast-math par l'en-tete interne, -Ofast par

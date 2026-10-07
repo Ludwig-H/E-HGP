@@ -1,5 +1,6 @@
 // Portes de core : budget memoire honnete (seul, puis sous concurrence), Buffer et ses refus, Csr bien forme.
 #include <array>
+#include <atomic>
 #include <memory>
 #include <thread>
 #include <utility>
@@ -358,7 +359,8 @@ MHGP12_TEST(block_cache, 40) {
   CHECK(a.data() == first);
   CHECK_EQ(budget.cache_stats().hits, 1u);
   CHECK_EQ(budget.cache_stats().idle, 0u);
-  CHECK_EQ(budget.used(), 300 * kKib);
+  CHECK_EQ(budget.used(), 315392u);  // taille physique : classe de 300 Kio, 77 pages de 4 Kio (CST-0007)
+  CHECK_EQ(budget.cache_stats().held, 315392u);
   a.reset();
   REQUIRE(a.allocate(300 * kKib - 1000, budget).ok());  // meme classe : meme bloc
   CHECK(a.data() == first);
@@ -393,20 +395,23 @@ MHGP12_TEST(block_cache, 40) {
     for (auto& h : held) REQUIRE(h.allocate(260 * kKib, roomy).ok());
   }
   CHECK_EQ(roomy.cache_stats().rejected, 1u);
-  // Compte du budget identique avec et sans cache, pas a pas.
+  // Sous cache, le compte porte la taille physique des blocs (CST-0007) : au moins le compte sans cache, au plus ses
+  // 9/8, et held = vivants + inactifs a chaque pas.
   MemoryBudget with(MemoryBudget::kUnlimited, u64{1} << 30), without(MemoryBudget::kUnlimited);
-  bool same = true;
+  bool bounded = true;
   {
     std::vector<Buffer<u8>> x(6), y(6);
     for (int step = 0; step < 24; ++step) {
       const u64 i = static_cast<u64>(step % 6), size = (128 + 97 * static_cast<u64>(step)) * kKib;
       if (step % 4 == 3) { x[i].reset(); y[i].reset(); continue; }
-      same = same && x[i].allocate(size, with).ok() && y[i].allocate(size, without).ok();
-      same = same && with.used() == without.used() && with.peak() == without.peak();
+      bounded = bounded && x[i].allocate(size, with).ok() && y[i].allocate(size, without).ok();
+      bounded = bounded && with.used() >= without.used() && with.used() <= without.used() + without.used() / 8;
+      bounded = bounded && with.cache_stats().held == with.used() + with.cache_stats().idle;
     }
   }
-  CHECK(same);
-  CHECK(with.used() == 0 && without.used() == 0 && with.peak() == without.peak());
+  CHECK(bounded);
+  CHECK(with.used() == 0 && without.used() == 0 && with.peak() >= without.peak());
+  CHECK_EQ(with.cache_stats().held, with.cache_stats().idle);
   // Fils concurrents : chaque bloc vivant porte la marque de son fil du premier au dernier octet.
   MemoryBudget shared(MemoryBudget::kUnlimited, u64{1} << 28);
   std::atomic<u64> bad{0}, cacheable{0};
@@ -433,4 +438,102 @@ MHGP12_TEST(block_cache, 40) {
   CHECK_EQ(stats.hits + stats.misses, cacheable.load());
   CHECK(stats.hits > 0 && stats.idle <= stats.capacity);
   CHECK_EQ(shared.used(), 0u);
+  CHECK_EQ(stats.held, stats.idle);
+}
+
+// Cache compte comme une reserve sous une limite finie (CST-0007, CST-0019) : blocs vivants a leur taille physique,
+// blocs inactifs sous la meme limite, restitution des inactifs avant un refus, repli a la taille exacte.
+MHGP12_TEST(block_cache_limit, 40) {
+  constexpr u64 kKib = 1024, kClass256 = 262144, kClass257 = 286720, kClass300 = 315392;  // capacites de classe
+  {
+    // Temoin de l'auditeur : limite 256 Kio + 1, bloc de 256 Kio + 1. La classe (280 Kio) ne tient pas : bloc exact,
+    // jamais garde ; rien d'inactif ne reste hors de la limite.
+    MemoryBudget budget(kClass256 + 1, kKib * kKib);
+    Buffer<u8> b;
+    REQUIRE(b.allocate(kClass256 + 1, budget).ok());
+    CHECK_EQ(budget.used(), kClass256 + 1);
+    CHECK_EQ(budget.cache_stats().exact, 1u);
+    CHECK_EQ(budget.peak(), kClass256 + 1);
+    b.reset();
+    CHECK_EQ(budget.used(), 0u);
+    CHECK_EQ(budget.cache_stats().idle, 0u);
+    CHECK_EQ(budget.cache_stats().held, 0u);
+    // admission sous cache : marge de 1/8 (la classe arrondit de moins de 10,7 %)
+    CHECK_EQ(budget.admit(kClass256 + 1).reason, Reason::memory_budget);
+    CHECK(budget.admit(229000).ok());
+    CHECK(budget.peak() <= budget.limit());
+  }
+  {
+    // Les blocs inactifs comptent sous la limite et sont rendus au systeme pour faire place.
+    MemoryBudget budget(600000, kKib * kKib);
+    Buffer<u8> a, b;
+    REQUIRE(a.allocate(kClass256 + 1, budget).ok());
+    CHECK_EQ(budget.used(), kClass257);
+    a.reset();
+    CHECK_EQ(budget.used(), 0u);
+    CHECK_EQ(budget.cache_stats().idle, kClass257);
+    CHECK_EQ(budget.cache_stats().held, kClass257);
+    CHECK(budget.admit(500000).ok());  // l'inactif ne bloque pas l'admission : il sera rendu
+    REQUIRE(b.allocate(300 * kKib, budget).ok());  // 280 Kio inactifs + 308 Kio > 600 000 : l'inactif est rendu
+    CHECK_EQ(budget.cache_stats().evicted, 1u);
+    CHECK_EQ(budget.cache_stats().idle, 0u);
+    CHECK_EQ(budget.used(), kClass300);
+    CHECK_EQ(budget.cache_stats().held, kClass300);
+    // Classe de 280 Kio : 308 + 280 Kio > 600 000 meme cache vide ; la taille exacte (263 680) tient.
+    Buffer<u8> c;
+    REQUIRE(c.allocate(263680, budget).ok());
+    CHECK_EQ(budget.cache_stats().exact, 1u);
+    CHECK_EQ(budget.used(), kClass300 + 263680);
+    CHECK_EQ(budget.peak(), kClass300 + 263680);
+    Buffer<u8> d;
+    CHECK_EQ(d.allocate(30000, budget).reason, Reason::memory_budget);  // 315 392 + 263 680 + 30 000 > 600 000
+    CHECK(budget.cache_stats().held <= budget.limit() && budget.peak() <= budget.limit());
+    c.reset();  // bloc exact : rendu au systeme, jamais garde
+    CHECK_EQ(budget.cache_stats().idle, 0u);
+    CHECK_EQ(budget.cache_stats().held, kClass300);
+    b.reset();  // bloc de classe : garde
+    CHECK_EQ(budget.cache_stats().idle, kClass300);
+    // Une reservation sans bloc (tableaux de l'appareil) rend aussi les inactifs.
+    BudgetReservation r;
+    REQUIRE(r.reserve(400000, budget).ok());
+    CHECK_EQ(budget.cache_stats().evicted, 2u);
+    CHECK_EQ(budget.used(), 400000u);
+    CHECK_EQ(budget.cache_stats().held, 400000u);
+    r.reset();
+    CHECK_EQ(budget.cache_stats().held, 0u);
+    CHECK(budget.released().ok());
+  }
+  {
+    // Fils concurrents sous une limite finie et un cache plus grand qu'elle : aucune reservation au-dela de la limite,
+    // chaque bloc vivant garde la marque de son fil, comptes revenus a l'equilibre.
+    MemoryBudget budget(12 * kKib * kKib, 64 * kKib * kKib);
+    std::atomic<u64> bad{0}, refused{0}, over{0};
+    {
+      std::vector<std::thread> threads;
+      for (u32 t = 0; t < 8; ++t)
+        threads.emplace_back([&budget, &bad, &refused, &over, t] {
+          u64 state = 0xD1B54A32D192ED03ull * (t + 1);
+          for (int it = 0; it < 200; ++it) {
+            state = state * 6364136223846793005ull + 1442695040888963407ull;
+            const u64 size = 200 * kKib + (state >> 33) % (1800 * kKib);
+            Buffer<u8> mine;
+            if (!mine.allocate(size, budget).ok()) { ++refused; continue; }
+            if (budget.cache_stats().held > budget.limit()) ++over;
+            mine[0] = static_cast<u8>(t); mine[size - 1] = static_cast<u8>(t);
+            std::this_thread::yield();
+            if (mine[0] != t || mine[size - 1] != t) ++bad;
+          }
+        });
+      for (auto& th : threads) th.join();
+    }
+    const auto stats = budget.cache_stats();
+    CHECK_EQ(bad.load(), 0u);
+    CHECK_EQ(over.load(), 0u);
+    CHECK(budget.peak() <= budget.limit());
+    CHECK_EQ(budget.used(), 0u);
+    CHECK_EQ(stats.held, stats.idle);
+    CHECK(stats.held <= budget.limit());
+    CHECK(stats.hits > 0);
+    CHECK(refused.load() < 8 * 200);
+  }
 }

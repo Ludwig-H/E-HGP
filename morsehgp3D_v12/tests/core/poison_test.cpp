@@ -6,7 +6,7 @@
 
 using namespace mhgp12;
 
-MHGP12_TEST(poison, 7) {
+MHGP12_TEST(poison, 11) {
   MemoryBudget budget(MemoryBudget::kUnlimited);
   Buffer<u8> bytes;
   REQUIRE(bytes.allocate(4096, budget).ok());
@@ -29,6 +29,19 @@ MHGP12_TEST(poison, 7) {
   CHECK_EQ(poisoned, 4096u);
 
   CHECK_EQ(budget.used(), 4096u + 4096u);
+
+  // sous cache de blocs (CST-0007) : le bloc repris du cache est de nouveau empoisonne sur toute sa taille
+  MemoryBudget cached(MemoryBudget::kUnlimited, u64{1} << 23);
+  Buffer<u8> large;
+  REQUIRE(large.allocate(300 * 1024, cached).ok());
+  const u8* first = large.data();
+  for (u8& b : large) b = 0x11;
+  large.reset();
+  REQUIRE(large.allocate(300 * 1024, cached).ok());
+  CHECK(large.data() == first);  // repris du cache, pas de l'allocateur
+  poisoned = 0;
+  for (const u8 b : large) poisoned += b == 0xA5 ? 1 : 0;
+  CHECK_EQ(poisoned, 300u * 1024u);
 }
 
 MHGP12_TEST_MAIN()

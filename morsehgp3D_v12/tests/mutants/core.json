@@ -1,6 +1,6 @@
 {
   "module": "core",
-  "plancher": 84,
+  "plancher": 95,
   "mutants": [
     {
       "id": "priorite_plus_petit_k",
@@ -175,24 +175,24 @@
     {
       "id": "pic_non_suivi",
       "fichier": "src/core/buffer.cpp",
-      "cherche": "while (reached > peak &&",
-      "remplace": "while (reached < peak &&",
+      "cherche": "  while (reached > peak && !account.peak.compare_exchange_weak(peak, reached, std::memory_order_relaxed)) {\n  }\n  return true;",
+      "remplace": "  while (reached < peak && !account.peak.compare_exchange_weak(peak, reached, std::memory_order_relaxed)) {\n  }\n  return true;",
       "porte": "mhgp12_core_unit_budget",
       "note": "le pic ne monterait plus"
     },
     {
       "id": "reservation_gardee_apres_echec",
       "fichier": "src/core/buffer.cpp",
-      "cherche": "  if (block == nullptr) {\n    account.used.fetch_sub(bytes, std::memory_order_relaxed);\n    return nullptr;",
-      "remplace": "  if (block == nullptr) {\n    return nullptr;",
+      "cherche": "    if (block == nullptr) account.used.fetch_sub(bytes, std::memory_order_relaxed);\n    else reserved = bytes;",
+      "remplace": "    if (block != nullptr) reserved = bytes;",
       "porte": "mhgp12_core_fault_alloc_fault",
       "note": "une allocation en echec garderait sa reservation dans le budget"
     },
     {
       "id": "liberation_non_comptee",
       "fichier": "src/core/buffer.cpp",
-      "cherche": "  else ::operator delete(block);\n  account.used.fetch_sub(bytes, std::memory_order_relaxed);",
-      "remplace": "  else ::operator delete(block);\n  (void)account;",
+      "cherche": "    ::operator delete(block);\n    account.used.fetch_sub(reserved, std::memory_order_relaxed);\n    return;\n  }",
+      "remplace": "    ::operator delete(block);\n    return;\n  }",
       "porte": "mhgp12_core_unit_budget",
       "note": "un tampon rendu resterait compte"
     },
@@ -218,10 +218,10 @@
     {
       "id": "liberation_en_elements",
       "fichier": "src/core/buffer.hpp",
-      "cherche": "detail::buffer_release(*account_, static_cast<void*>(data_), size_ * sizeof(T));",
-      "remplace": "detail::buffer_release(*account_, static_cast<void*>(data_), size_);",
+      "cherche": "    reserved_ = reserved;\n",
+      "remplace": "    reserved_ = n;\n",
       "porte": "mhgp12_core_unit_budget",
-      "note": "liberation comptee en elements au lieu d octets (mutant M16 de l audit L04 de la v10)"
+      "note": "liberation comptee en elements au lieu d octets (mutant M16 de l audit L04 de la v10 ; la taille rendue est celle reservee depuis CST-0007)"
     },
     {
       "id": "reallocation_sans_liberation",
@@ -234,8 +234,8 @@
     {
       "id": "admission_toujours_accordee",
       "fichier": "src/core/buffer.hpp",
-      "cherche": "return bytes <= account_->limit - used() ? Outcome{} : fail(Reason::memory_budget);",
-      "remplace": "return bytes <= account_->limit ? Outcome{} : fail(Reason::memory_budget);",
+      "cherche": "    const u64 room = account_->limit - used();",
+      "remplace": "    const u64 room = account_->limit;",
       "porte": "mhgp12_core_unit_budget",
       "note": "l admission d un etage ignorerait ce qui est deja reserve"
     },
@@ -650,23 +650,23 @@
     {
       "id": "cache_reprise_sans_retrait",
       "fichier": "src/core/buffer.cpp",
-      "cherche": "      block = cache.slots[k][--cache.count[k]];",
-      "remplace": "      block = cache.slots[k][cache.count[k] - 1];",
+      "cherche": "  return cache.slots[k][--cache.count[k]];",
+      "remplace": "  return cache.slots[k][cache.count[k] - 1];",
       "porte": "mhgp12_core_unit_block_cache",
       "note": "Cache de blocs : un bloc repris quitte le cache ; sinon deux Buffer vivants partagent le meme bloc."
     },
     {
       "id": "cache_capacite_ignoree",
       "fichier": "src/core/buffer.cpp",
-      "cherche": "    if (cache.count[k] < kCacheSlots && capacity <= cache.capacity - cache.idle) {  // invariant : idle <= capacity",
-      "remplace": "    if (cache.count[k] < kCacheSlots) {",
+      "cherche": "  if (cache.count[k] < kCacheSlots && capacity <= cache.capacity - cache.idle) {  // invariant : idle <= capacity",
+      "remplace": "  if (cache.count[k] < kCacheSlots) {",
       "porte": "mhgp12_core_unit_block_cache",
       "note": "Cache de blocs : les octets inactifs restent sous la capacite declaree, seconde borne de la memoire."
     },
     {
       "id": "cache_inactif_non_decompte",
       "fichier": "src/core/buffer.cpp",
-      "cherche": "      cache.idle -= capacity;\n",
+      "cherche": "  cache.idle -= class_capacity(k);\n",
       "remplace": "",
       "porte": "mhgp12_core_unit_block_cache",
       "note": "Cache de blocs : un bloc repris ne compte plus parmi les octets inactifs."
@@ -674,10 +674,98 @@
     {
       "id": "cache_reprise_jamais",
       "fichier": "src/core/buffer.cpp",
-      "cherche": "    if (cache.count[k] != 0) {",
-      "remplace": "    if (cache.count[k] > 1) {",
+      "cherche": "  if (cache.count[k] == 0) {\n    ++cache.misses;",
+      "remplace": "  if (cache.count[k] <= 1) {\n    ++cache.misses;",
       "porte": "mhgp12_core_unit_block_cache",
       "note": "Cache de blocs : un seul bloc inactif de la classe suffit a servir la reservation suivante."
+    },
+    {
+      "id": "pic_non_suivi_sous_cache",
+      "fichier": "src/core/buffer.cpp",
+      "cherche": "  const u64 reached = account.used.fetch_add(x, std::memory_order_relaxed) + x;\n  u64 peak = account.peak.load(std::memory_order_relaxed);\n  while (reached > peak &&",
+      "remplace": "  const u64 reached = account.used.fetch_add(x, std::memory_order_relaxed) + x;\n  u64 peak = account.peak.load(std::memory_order_relaxed);\n  while (reached < peak &&",
+      "porte": "mhgp12_core_unit_block_cache_limit",
+      "note": "CST-0007 : sous cache, le pic ne suivrait plus la taille physique des blocs vivants"
+    },
+    {
+      "id": "cache_tenue_hors_limite",
+      "fichier": "src/core/buffer.cpp",
+      "cherche": "    if (cur <= account.limit - x) {",
+      "remplace": "    if (cur <= account.limit) {",
+      "porte": "mhgp12_core_unit_block_cache_limit",
+      "note": "CST-0007 : blocs vivants et inactifs pourraient depasser la limite"
+    },
+    {
+      "id": "cache_inactifs_jamais_rendus",
+      "fichier": "src/core/buffer.cpp",
+      "cherche": "    if (evict_locked(account, *account.cache)) continue;",
+      "remplace": "    if (account.limit == 0 && evict_locked(account, *account.cache)) continue;",
+      "porte": "mhgp12_core_unit_block_cache_limit",
+      "note": "CST-0007 : une reservation serait refusee alors que des blocs inactifs pouvaient faire place"
+    },
+    {
+      "id": "cache_eviction_inactif_non_decompte",
+      "fichier": "src/core/buffer.cpp",
+      "cherche": "    cache.idle -= capacity;\n    ++cache.evicted;",
+      "remplace": "    ++cache.evicted;",
+      "porte": "mhgp12_core_unit_block_cache_limit",
+      "note": "CST-0007 : un bloc rendu au systeme compterait encore parmi les inactifs"
+    },
+    {
+      "id": "cache_eviction_tenue_gardee",
+      "fichier": "src/core/buffer.cpp",
+      "cherche": "    ::operator delete(block);\n    account.held.fetch_sub(capacity, std::memory_order_relaxed);\n    return true;",
+      "remplace": "    ::operator delete(block);\n    static_cast<void>(account);\n    return true;",
+      "porte": "mhgp12_core_unit_block_cache_limit",
+      "note": "CST-0007 : un bloc inactif rendu au systeme resterait tenu sous la limite"
+    },
+    {
+      "id": "repli_exact_absent",
+      "fichier": "src/core/buffer.cpp",
+      "cherche": "    const std::lock_guard<std::mutex> lock(account.cache->mutex);\n    ++account.cache->exact;\n  }",
+      "remplace": "    return nullptr;\n  }",
+      "porte": "mhgp12_core_unit_block_cache_limit",
+      "note": "CST-0007 : un tampon qui tient a sa taille exacte serait refuse parce que sa classe ne tient pas"
+    },
+    {
+      "id": "bloc_exact_garde",
+      "fichier": "src/core/buffer.cpp",
+      "cherche": "  if (k < kCacheClasses && class_capacity(k) == reserved) {",
+      "remplace": "  if (k < kCacheClasses) {",
+      "porte": "mhgp12_core_unit_block_cache_limit",
+      "note": "CST-0007 : un bloc exact, plus petit que sa classe, serait garde et repris comme un bloc de classe"
+    },
+    {
+      "id": "admission_sans_marge_sous_cache",
+      "fichier": "src/core/buffer.hpp",
+      "cherche": "    if (account_->cache != nullptr && bytes / 8 > room - bytes) return fail(Reason::memory_budget);\n",
+      "remplace": "",
+      "porte": "mhgp12_core_unit_block_cache_limit",
+      "note": "CST-0007 : l'admission d'un etage ignorerait l'arrondi des classes et son engagement tomberait"
+    },
+    {
+      "id": "echec_d_allocation_tenu_sous_cache",
+      "fichier": "src/core/buffer.cpp",
+      "cherche": "    account.used.fetch_sub(x, std::memory_order_relaxed);\n    account.held.fetch_sub(x, std::memory_order_relaxed);\n  }\n  return block;",
+      "remplace": "    account.used.fetch_sub(x, std::memory_order_relaxed);\n  }\n  return block;",
+      "porte": "mhgp12_core_fault_alloc_fault_cache",
+      "note": "CST-0007 : une allocation en echec sous cache resterait tenue sous la limite"
+    },
+    {
+      "id": "taille_physique_non_comptee",
+      "fichier": "src/core/buffer.cpp",
+      "cherche": "    if (hold(account, capacity)) {\n      void* block = fresh_block(account, capacity);",
+      "remplace": "    if (hold(account, bytes)) {\n      void* block = fresh_block(account, bytes);",
+      "porte": "mhgp12_core_unit_block_cache_limit",
+      "note": "CST-0007 : un bloc de classe ne compterait que sa taille demandee"
+    },
+    {
+      "id": "refus_sans_relecture",
+      "fichier": "src/core/buffer.cpp",
+      "cherche": "    if (account.held.load(std::memory_order_relaxed) > account.limit - x) return false;",
+      "remplace": "    return false;",
+      "porte": "mhgp12_core_fault_eviction_admise",
+      "note": "CST-0007 (course d'eviction, contre-lecture du 7 octobre) : un fil refuserait sur une lecture de held anterieure a la fin d'une eviction, cache vide, alors que son etage a ete admis"
     }
   ]
 }
