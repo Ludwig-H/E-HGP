@@ -62,6 +62,22 @@ Le contrat de 100 ms n'a jamais été tenu, par aucune version, pour l'objet vra
 3. **Un seul chemin produit, qui est le chemin mesuré.** Pas de modes à masque d'options, un seul profil, une seule
    implantation de chaque noyau.
 
+## Commandes
+
+Le socle (tranche T0) se construit et se juge ainsi ; `<build>` hors de `/workspaces`, presque plein.
+
+```bash
+cmake -S morsehgp3D_v12 -B <build> -DCMAKE_BUILD_TYPE=Release   # profil u21 ; -DMHGP12_COORD_BITS=24 ; 18 et 32 refusés
+#   option : -DMHGP12_V10_FROZEN_DIR=<dossier de mhgp10_catalogue et mhgp10_tower>  (portes diff_v10 de l'oracle)
+cmake --build <build> -j4
+ctest --test-dir <build> -LE long --no-tests=error --output-on-failure -j4    # portes rapides
+python3 morsehgp3D_v12/tools/check_style.py --root morsehgp3D_v12
+python3 morsehgp3D_v12/tools/check_constats.py                                # registre et canal d'audit
+```
+
+Labels CTest : `fast`, `long`, `unit`, `oracle`, `diff_v10`, `mutant`, `lidar` (sautées sans `MHGP12_DATA_DIR`).
+Codes des portes : 0 conforme, 1 désaccord du juge, 2 refus avant calcul, 3 invariant violé, 4 mutant tué.
+
 ## Lire d'abord
 
 1. L'[audit géant de la v11](../morsehgp3D_v11/docs/AUDIT_GEANT_V11.md), au moins § 0, § 2, § 5, § 7.5 et § 9.

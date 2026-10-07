@@ -1,0 +1,683 @@
+{
+  "module": "core",
+  "plancher": 84,
+  "mutants": [
+    {
+      "id": "priorite_plus_petit_k",
+      "fichier": "src/core/status.hpp",
+      "cherche": "if (order != o.order) return order < o.order;",
+      "remplace": "if (order != o.order) return order > o.order;",
+      "porte": "mhgp12_core_unit_outcome",
+      "note": "priorite des refus : le plus grand K passerait d abord"
+    },
+    {
+      "id": "priorite_rang_de_la_raison",
+      "fichier": "src/core/status.hpp",
+      "cherche": "return static_cast<u16>(reason) < static_cast<u16>(o.reason);",
+      "remplace": "return static_cast<u16>(reason) > static_cast<u16>(o.reason);",
+      "porte": "mhgp12_core_unit_outcome",
+      "note": "priorite des refus : ordre de la table inverse"
+    },
+    {
+      "id": "priorite_refus_avant_succes",
+      "fichier": "src/core/status.hpp",
+      "cherche": "if (ok() != o.ok()) return !ok();",
+      "remplace": "if (ok() != o.ok()) return ok();",
+      "porte": "mhgp12_core_unit_outcome",
+      "note": "priorite des refus : un succes precederait un refus"
+    },
+    {
+      "id": "fusion_garde_la_moins_prioritaire",
+      "fichier": "src/core/status.hpp",
+      "cherche": "return b.precedes(a) ? b : a; }",
+      "remplace": "return b.precedes(a) ? a : b; }",
+      "porte": "mhgp12_core_unit_outcome",
+      "note": "merge rendrait l issue qui ne precede pas"
+    },
+    {
+      "id": "refus_sans_raison_admis",
+      "fichier": "src/core/status.hpp",
+      "cherche": "return Outcome{r == Reason::none ? Reason::refusal_without_reason : r, k};",
+      "remplace": "return Outcome{r, k};",
+      "porte": "mhgp12_core_unit_outcome",
+      "note": "fail(Reason::none) redeviendrait un succes"
+    },
+    {
+      "id": "result_depuis_issue_ok",
+      "fichier": "src/core/status.hpp",
+      "cherche": "outcome_(refusal.ok() ? fail(Reason::refusal_without_reason) : refusal)",
+      "remplace": "outcome_(refusal)",
+      "porte": "mhgp12_core_unit_result",
+      "note": "Result construit depuis une issue ok : succes sans valeur"
+    },
+    {
+      "id": "garde_bad_alloc_autre_raison",
+      "fichier": "src/core/status.hpp",
+      "cherche": "  } catch (const std::bad_alloc&) {\n    return fail(Reason::memory_budget);",
+      "remplace": "  } catch (const std::bad_alloc&) {\n    return fail(Reason::session_overhead);",
+      "porte": "mhgp12_core_unit_guarded",
+      "note": "std::bad_alloc convertie en une raison d invariant"
+    },
+    {
+      "id": "code_de_sortie_invariant",
+      "fichier": "src/core/status.hpp",
+      "cherche": "return o.status() == Status::invariant_violated ? 3 : 2;",
+      "remplace": "return 2;",
+      "porte": "mhgp12_core_unit_outcome",
+      "note": "un invariant viole sortirait avec le code d un refus avant calcul"
+    },
+    {
+      "id": "controle_inverse",
+      "fichier": "src/core/status.hpp",
+      "cherche": "if (!(cond)) return ::mhgp12::fail(::mhgp12::Reason::reason_name_);",
+      "remplace": "if ((cond)) return ::mhgp12::fail(::mhgp12::Reason::reason_name_);",
+      "porte": "mhgp12_core_unit_macros",
+      "note": "MHGP12_CHECK refuserait quand la condition est vraie"
+    },
+    {
+      "id": "propagation_perdue",
+      "fichier": "src/core/status.hpp",
+      "cherche": "!mhgp12_try_.ok()) return mhgp12_try_;",
+      "remplace": "false) return mhgp12_try_;",
+      "porte": "mhgp12_core_unit_macros",
+      "note": "MHGP12_TRY ne propagerait plus le refus"
+    },
+    {
+      "id": "refus_construit_une_valeur",
+      "fichier": "src/core/status.hpp",
+      "cherche": "  std::optional<T> value_;",
+      "remplace": "  std::optional<T> value_{std::in_place};",
+      "attendu": "construction",
+      "jeton": "NoDefault",
+      "note": "un refus construirait un T par defaut : il pourrait allouer, et exigerait un constructeur"
+    },
+    {
+      "id": "acces_non_verifie",
+      "fichier": "src/core/status.hpp",
+      "cherche": "    if (!value_.has_value()) std::terminate();\n",
+      "remplace": "",
+      "porte": "mhgp12_core_result_value_on_refusal",
+      "note": "value() sur un refus lirait un stockage vide au lieu de terminer (comportement indefini)"
+    },
+    {
+      "id": "statut_d_une_raison",
+      "fichier": "src/core/reasons.def",
+      "cherche": "MHGP12_REASON(memory_budget, resource_exhausted, core)",
+      "remplace": "MHGP12_REASON(memory_budget, invalid_input, core)",
+      "porte": "mhgp12_core_unit_reasons",
+      "note": "statut d une raison change"
+    },
+    {
+      "id": "ordre_de_la_table",
+      "fichier": "src/core/reasons.def",
+      "cherche": "MHGP12_REASON(empty_input, invalid_input, cloud)\nMHGP12_REASON(size_mismatch, invalid_input, cloud)",
+      "remplace": "MHGP12_REASON(size_mismatch, invalid_input, cloud)\nMHGP12_REASON(empty_input, invalid_input, cloud)",
+      "porte": "mhgp12_core_unit_reasons",
+      "note": "deux raisons permutees : la priorite deterministe changerait"
+    },
+    {
+      "id": "garde_fast_math_retiree",
+      "fichier": "src/core/types.hpp",
+      "cherche": "#if defined(__FAST_MATH__)\n#error \"mhgp12_fast_math_interdit",
+      "remplace": "#if 0\n#error \"mhgp12_fast_math_interdit",
+      "porte": "mhgp12_core_fast_math_refusal",
+      "note": "le refus de __FAST_MATH__ a la compilation est retire"
+    },
+    {
+      "id": "profil_de_20_bits_admis",
+      "fichier": "src/core/types.hpp",
+      "cherche": "static_assert(kCoordBits == 21 || kCoordBits == 24,",
+      "remplace": "static_assert(kCoordBits >= 18 && kCoordBits <= 24,",
+      "porte": "mhgp12_core_coord_bits_refusal",
+      "note": "un nombre de bits hors de {21, 24} compilerait"
+    },
+    {
+      "id": "profil_18_readmis",
+      "fichier": "src/core/types.hpp",
+      "cherche": "static_assert(kCoordBits == 21 || kCoordBits == 24,",
+      "remplace": "static_assert(kCoordBits == 18 || kCoordBits == 21 || kCoordBits == 24,",
+      "porte": "mhgp12_core_coord_bits_18_refusal",
+      "note": "le profil 18 bits de la v11, abandonne par la decision D6, compilerait de nouveau"
+    },
+    {
+      "id": "profil_32_admis",
+      "fichier": "src/core/types.hpp",
+      "cherche": "static_assert(kCoordBits == 21 || kCoordBits == 24,",
+      "remplace": "static_assert(kCoordBits == 21 || kCoordBits == 24 || kCoordBits == 32,",
+      "porte": "mhgp12_core_coord_bits_32_refusal",
+      "note": "32 bits passerait la garde sans l'arithmetique en repere local ; le refus explicite et son jeton disparaissent"
+    },
+    {
+      "id": "coordonnee_maximale_decalee",
+      "fichier": "src/core/types.hpp",
+      "cherche": "inline constexpr u32 kCoordMax = (u32{1} << kCoordBits) - 1;",
+      "remplace": "inline constexpr u32 kCoordMax = (u32{1} << kCoordBits);",
+      "porte": "mhgp12_core_unit_types",
+      "note": "la plus grande coordonnee vaudrait 2^B"
+    },
+    {
+      "id": "identifiants_confondus",
+      "fichier": "src/core/types.hpp",
+      "cherche": "enum class SiteIdx : u32 {};    // rang dense d'une position distincte (ordre de Morton)",
+      "remplace": "using SiteIdx = PointId;",
+      "attendu": "construction",
+      "jeton": "static assertion failed",
+      "note": "un rang de site et un identifiant de point auraient le meme type"
+    },
+    {
+      "id": "budget_depasse",
+      "fichier": "src/core/buffer.cpp",
+      "cherche": "if (bytes > account.limit || cur > account.limit - bytes) return false;",
+      "remplace": "if (bytes > account.limit) return false;",
+      "porte": "mhgp12_core_unit_budget",
+      "note": "la somme reservee pourrait depasser la limite"
+    },
+    {
+      "id": "pic_non_suivi",
+      "fichier": "src/core/buffer.cpp",
+      "cherche": "while (reached > peak &&",
+      "remplace": "while (reached < peak &&",
+      "porte": "mhgp12_core_unit_budget",
+      "note": "le pic ne monterait plus"
+    },
+    {
+      "id": "reservation_gardee_apres_echec",
+      "fichier": "src/core/buffer.cpp",
+      "cherche": "  if (block == nullptr) {\n    account.used.fetch_sub(bytes, std::memory_order_relaxed);\n    return nullptr;",
+      "remplace": "  if (block == nullptr) {\n    return nullptr;",
+      "porte": "mhgp12_core_fault_alloc_fault",
+      "note": "une allocation en echec garderait sa reservation dans le budget"
+    },
+    {
+      "id": "liberation_non_comptee",
+      "fichier": "src/core/buffer.cpp",
+      "cherche": "  else ::operator delete(block);\n  account.used.fetch_sub(bytes, std::memory_order_relaxed);",
+      "remplace": "  else ::operator delete(block);\n  (void)account;",
+      "porte": "mhgp12_core_unit_budget",
+      "note": "un tampon rendu resterait compte"
+    },
+    {
+      "id": "poison_efface",
+      "fichier": "src/core/buffer.cpp",
+      "cherche": "std::memset(block, 0xA5, static_cast<std::size_t>(bytes));",
+      "remplace": "std::memset(block, 0x00, static_cast<std::size_t>(bytes));",
+      "porte": "mhgp12_core_poison",
+      "note": "l empoisonnement ecrirait des zeros",
+      "options": [
+        "-DMHGP12_POISON=ON"
+      ]
+    },
+    {
+      "id": "garde_de_taille_retiree",
+      "fichier": "src/core/buffer.hpp",
+      "cherche": "    if (n > kMaxCount) return fail(Reason::memory_budget);\n",
+      "remplace": "",
+      "porte": "mhgp12_core_unit_buffer",
+      "note": "n * sizeof(T) deborderait de u64 : 2^61 elements de 8 octets feraient 0 octet"
+    },
+    {
+      "id": "liberation_en_elements",
+      "fichier": "src/core/buffer.hpp",
+      "cherche": "detail::buffer_release(*account_, static_cast<void*>(data_), size_ * sizeof(T));",
+      "remplace": "detail::buffer_release(*account_, static_cast<void*>(data_), size_);",
+      "porte": "mhgp12_core_unit_budget",
+      "note": "liberation comptee en elements au lieu d octets (mutant M16 de l audit L04 de la v10)"
+    },
+    {
+      "id": "reallocation_sans_liberation",
+      "fichier": "src/core/buffer.hpp",
+      "cherche": "  [[nodiscard]] Outcome allocate(u64 n, MemoryBudget& budget) {\n    reset();",
+      "remplace": "  [[nodiscard]] Outcome allocate(u64 n, MemoryBudget& budget) {",
+      "porte": "mhgp12_core_unit_budget",
+      "note": "une reallocation garderait l ancien bloc reserve"
+    },
+    {
+      "id": "admission_toujours_accordee",
+      "fichier": "src/core/buffer.hpp",
+      "cherche": "return bytes <= account_->limit - used() ? Outcome{} : fail(Reason::memory_budget);",
+      "remplace": "return bytes <= account_->limit ? Outcome{} : fail(Reason::memory_budget);",
+      "porte": "mhgp12_core_unit_budget",
+      "note": "l admission d un etage ignorerait ce qui est deja reserve"
+    },
+    {
+      "id": "csr_vide_toujours_admis",
+      "fichier": "src/core/buffer.hpp",
+      "cherche": "if (off.empty()) return val.empty();",
+      "remplace": "if (off.empty()) return true;",
+      "porte": "mhgp12_core_unit_csr",
+      "note": "des valeurs sans decalages seraient admises"
+    },
+    {
+      "id": "csr_premier_decalage",
+      "fichier": "src/core/buffer.hpp",
+      "cherche": "    if (off[0] != 0) return false;\n",
+      "remplace": "",
+      "porte": "mhgp12_core_unit_csr",
+      "note": "un premier decalage non nul serait admis"
+    },
+    {
+      "id": "csr_decalages_decroissants",
+      "fichier": "src/core/buffer.hpp",
+      "cherche": "      if (off[i + 1] < off[i]) return false;",
+      "remplace": "      if (off[i + 1] < off[i]) continue;",
+      "porte": "mhgp12_core_unit_csr",
+      "note": "des decalages decroissants seraient admis"
+    },
+    {
+      "id": "csr_derniere_ligne_non_lue",
+      "fichier": "src/core/buffer.hpp",
+      "cherche": "for (u64 i = 0; i + 1 < off.size(); ++i)",
+      "remplace": "for (u64 i = 0; i + 2 < off.size(); ++i)",
+      "porte": "mhgp12_core_unit_csr",
+      "note": "la derniere ligne ne serait pas controlee"
+    },
+    {
+      "id": "csr_taille_des_valeurs",
+      "fichier": "src/core/buffer.hpp",
+      "cherche": "return off[off.size() - 1] == val.size();",
+      "remplace": "return true;",
+      "porte": "mhgp12_core_unit_csr",
+      "note": "un dernier decalage different de la taille des valeurs serait admis"
+    },
+    {
+      "id": "budget_fin_de_vie_muette",
+      "fichier": "src/core/buffer.hpp",
+      "cherche": "return used() == 0 ? Outcome{} : fail(Reason::budget_not_released);",
+      "remplace": "return Outcome{};",
+      "porte": "mhgp12_core_unit_budget",
+      "note": "un budget non revenu a zero ne serait plus signale"
+    },
+    {
+      "id": "pic_d_etage_non_remis",
+      "fichier": "src/core/buffer.hpp",
+      "cherche": "u64 restart_peak() noexcept { return account_->peak.exchange(used(), std::memory_order_relaxed); }",
+      "remplace": "u64 restart_peak() noexcept { return account_->peak.load(std::memory_order_relaxed); }",
+      "porte": "mhgp12_core_unit_budget",
+      "note": "le pic d un etage garderait celui des etages precedents"
+    },
+    {
+      "id": "fusion_avec_prefixe",
+      "fichier": "src/core/ledger.cpp",
+      "cherche": "  LedgerTable counters = counters_;\n  LedgerTable times = times_;",
+      "remplace": "  LedgerTable& counters = counters_;\n  LedgerTable& times = times_;",
+      "porte": "mhgp12_core_fault_ledger",
+      "note": "une fusion interrompue par une penurie laisserait un prefixe dans le registre"
+    },
+    {
+      "id": "json_octets_hors_ascii_bruts",
+      "fichier": "src/core/ledger.cpp",
+      "cherche": "} else if (byte < 0x20 || byte > 0x7E) {",
+      "remplace": "} else if (byte < 0x20) {",
+      "porte": "mhgp12_core_unit_ledger",
+      "note": "un octet hors ASCII sortirait brut : JSON invalide"
+    },
+    {
+      "id": "registre_ecrase",
+      "fichier": "src/core/ledger.cpp",
+      "cherche": "it->second = saturating_add(it->second, delta);",
+      "remplace": "it->second = saturating_add(0, delta);",
+      "porte": "mhgp12_core_unit_ledger",
+      "note": "un ajout ecraserait le compteur"
+    },
+    {
+      "id": "somme_non_saturee",
+      "fichier": "src/core/ledger.cpp",
+      "cherche": "return a > max - b ? max : a + b;",
+      "remplace": "(void)max;\n  return a + b;",
+      "porte": "mhgp12_core_unit_ledger",
+      "note": "un compteur reviendrait a une petite valeur apres 2^64"
+    },
+    {
+      "id": "json_sans_echappement",
+      "fichier": "src/core/ledger.cpp",
+      "cherche": "if (c == '\"' || c == '\\\\') {",
+      "remplace": "if (false) {",
+      "porte": "mhgp12_core_unit_ledger",
+      "note": "un guillemet dans un nom casserait le JSON"
+    },
+    {
+      "id": "fusion_sans_durees",
+      "fichier": "src/core/ledger.cpp",
+      "cherche": "  for (const auto& [key, value] : other.times_) add_to(times, key, value);\n",
+      "remplace": "",
+      "porte": "mhgp12_core_unit_ledger",
+      "note": "la fusion perdrait les durees"
+    },
+    {
+      "id": "cadre_plancher_ignore",
+      "fichier": "tests/support/test.hpp",
+      "cherche": "return s.failures != 0 || s.checks >= c.floor;",
+      "remplace": "return true;",
+      "porte": "mhgp12_support_framework_floor",
+      "note": "un test sous son plancher passerait : vert par vacuite"
+    },
+    {
+      "id": "cadre_echec_non_compte",
+      "fichier": "tests/support/test.hpp",
+      "cherche": "    ++s.failures;\n    std::printf(\"ECHEC %s:%d: %s\\n\", base_name(file), line, what);",
+      "remplace": "    std::printf(\"ECHEC %s:%d: %s\\n\", base_name(file), line, what);",
+      "porte": "mhgp12_support_framework_fail",
+      "note": "un controle en echec ne compterait plus"
+    },
+    {
+      "id": "cadre_inventaire_muet",
+      "fichier": "tests/support/test.hpp",
+      "cherche": "  if (given == known) {",
+      "remplace": "  if (true) {",
+      "porte": "mhgp12_support_framework_inventory_missing",
+      "note": "un test sans porte ne serait plus signale"
+    },
+    {
+      "id": "signal_admis",
+      "fichier": "cmake/run_expect.cmake",
+      "cherche": "if(NOT \"${rc}\" MATCHES \"^[0-9]+$\")",
+      "remplace": "if(FALSE)",
+      "porte": "mhgp12_support_signal_refused",
+      "note": "un arret par signal ne serait plus reconnu"
+    },
+    {
+      "id": "code_non_compare",
+      "fichier": "cmake/run_expect.cmake",
+      "cherche": "if(NOT \"${rc}\" STREQUAL \"${EXPECTED}\")",
+      "remplace": "if(FALSE)",
+      "porte": "mhgp12_support_code_mismatch",
+      "note": "tout code de sortie serait admis"
+    },
+    {
+      "id": "ligne_non_exigee",
+      "fichier": "cmake/run_expect.cmake",
+      "cherche": "  if(run_expect_pos EQUAL -1)",
+      "remplace": "  if(FALSE)",
+      "porte": "mhgp12_support_line_absent",
+      "note": "la ligne attendue ne serait plus exigee"
+    },
+    {
+      "id": "donnees_absentes_non_sautees",
+      "fichier": "cmake/run_expect.cmake",
+      "cherche": "if(\"${required_dir}\" STREQUAL \"\" OR NOT IS_DIRECTORY \"${required_dir}\")",
+      "remplace": "if(FALSE)",
+      "porte": "mhgp12_support_skip_token",
+      "note": "une porte sans ses donnees serait jouee au lieu d etre sautee"
+    },
+    {
+      "id": "lancement_non_distingue",
+      "fichier": "cmake/run_expect.cmake",
+      "cherche": "if(\"${rc}\" STREQUAL \"126\" OR \"${rc}\" STREQUAL \"127\")",
+      "remplace": "if(FALSE)",
+      "porte": "mhgp12_support_program_bad_interpreter",
+      "note": "un programme impossible a lancer serait compte comme un code de sortie : un mutant serait dit tue sans juge"
+    },
+    {
+      "id": "jeton_de_saut_usurpable",
+      "fichier": "cmake/run_expect.cmake",
+      "cherche": "  if(NOT run_expect_in_out EQUAL -1 OR NOT run_expect_in_err EQUAL -1)",
+      "remplace": "  if(FALSE)",
+      "porte": "mhgp12_support_skip_token_forged",
+      "note": "un programme qui ecrit le jeton de saut ne serait plus refuse"
+    },
+    {
+      "id": "jeton_de_saut_reemis",
+      "fichier": "cmake/run_expect.cmake",
+      "cherche": "string(REPLACE \"${run_expect_skip_token}\" \"[jeton de saut retire]\" run_expect_shown_out \"${run_stdout}\")",
+      "remplace": "set(run_expect_shown_out \"${run_stdout}\")",
+      "porte": "mhgp12_support_gate_properties",
+      "note": "le jeton ecrit par le programme atteindrait CTest : la porte en echec serait sautee"
+    },
+    {
+      "id": "temoin_du_refus_ignore",
+      "fichier": "cmake/expect_refusal.cmake",
+      "cherche": "if(NOT \"${rc}\" STREQUAL \"0\")\n  expect_refusal_say(\"expect_refusal_verdict temoin_en_echec\")",
+      "remplace": "if(FALSE)\n  expect_refusal_say(\"expect_refusal_verdict temoin_en_echec\")",
+      "porte": "mhgp12_support_refusal_control_red",
+      "note": "un refus pour une autre cause passerait : temoin non exige"
+    },
+    {
+      "id": "jeton_du_refus_ignore",
+      "fichier": "cmake/expect_refusal.cmake",
+      "cherche": "if(expect_refusal_pos EQUAL -1)",
+      "remplace": "if(FALSE)",
+      "porte": "mhgp12_support_refusal_token_absent",
+      "note": "un echec sans le jeton grave passerait"
+    },
+    {
+      "id": "refus_non_exige",
+      "fichier": "cmake/expect_refusal.cmake",
+      "cherche": "if(\"${rc}\" STREQUAL \"0\")",
+      "remplace": "if(FALSE)",
+      "porte": "mhgp12_support_refusal_absent",
+      "note": "une commande qui reussit malgre les options de refus passerait"
+    },
+    {
+      "id": "sonde_fast_math_retiree",
+      "fichier": "CMakeLists.txt",
+      "cherche": "if(mhgp12_probe_macros MATCHES \"#define __FAST_MATH__\")",
+      "remplace": "if(FALSE)",
+      "porte": "mhgp12_support_configure_fast_math_cxx_flags",
+      "note": "la configuration accepterait -Ofast"
+    },
+    {
+      "id": "aides_label_inconnu_admis",
+      "fichier": "cmake/gates.cmake",
+      "cherche": "    if(NOT label IN_LIST MHGP12_GATE_LABELS)",
+      "remplace": "    if(FALSE)",
+      "porte": "mhgp12_support_gates_refuse_label",
+      "note": "un label mal ecrit sortirait la porte de ctest -L sans erreur"
+    },
+    {
+      "id": "aides_fast_et_long_admis",
+      "fichier": "cmake/gates.cmake",
+      "cherche": "  if(\"fast\" IN_LIST gate_labels AND \"long\" IN_LIST gate_labels)",
+      "remplace": "  if(FALSE)",
+      "porte": "mhgp12_support_gates_refuse_fast_long",
+      "note": "une porte longue pourrait se dire rapide"
+    },
+    {
+      "id": "aides_code_hors_plage_admis",
+      "fichier": "cmake/gates.cmake",
+      "cherche": "  if(NOT expected MATCHES \"^[0-4]$\")\n    message(FATAL_ERROR \"mhgp12_porte_code_invalide",
+      "remplace": "  if(FALSE)\n    message(FATAL_ERROR \"mhgp12_porte_code_invalide",
+      "porte": "mhgp12_support_gates_refuse_code",
+      "note": "un code attendu hors de 0..4 serait enregistre"
+    },
+    {
+      "id": "aides_add_test_direct_admis",
+      "fichier": "cmake/gates.cmake",
+      "cherche": "    if(NOT test IN_LIST gates)",
+      "remplace": "    if(FALSE)",
+      "porte": "mhgp12_support_gates_refuse_direct",
+      "note": "un add_test direct echapperait au code exact"
+    },
+    {
+      "id": "aides_jumelle_retiree",
+      "fichier": "cmake/gates.cmake",
+      "cherche": "  if(NOT \"long\" IN_LIST gate_labels)\n    list(APPEND gate_env PYTHONOPTIMIZE=1)",
+      "remplace": "  if(FALSE)\n    list(APPEND gate_env PYTHONOPTIMIZE=1)",
+      "porte": "mhgp12_support_gate_properties",
+      "note": "les portes Python ne seraient plus rejouees sous python3 -O"
+    },
+    {
+      "id": "aides_jumelle_concurrente",
+      "fichier": "cmake/gates.cmake",
+      "cherche": "    set_property(TEST ${name}_opt PROPERTY DEPENDS ${name})\n",
+      "remplace": "",
+      "porte": "mhgp12_support_gate_properties",
+      "note": "la jumelle sous -O tournerait en meme temps que la porte, sur les memes dossiers"
+    },
+    {
+      "id": "aides_arret_anormal_code_du_juge_inverse",
+      "fichier": "cmake/gates.cmake",
+      "cherche": "  _mhgp12_register(${name} 0 \"${Python3_EXECUTABLE}\")",
+      "remplace": "  _mhgp12_register(${name} 1 \"${Python3_EXECUTABLE}\")",
+      "porte": "mhgp12_support_gate_properties",
+      "note": "une porte d arret anormal accepterait une terminaison normale refusee par le juge"
+    },
+    {
+      "id": "aides_bytecode_ecrit",
+      "fichier": "cmake/gates.cmake",
+      "cherche": "set_property(TEST ${name} PROPERTY ENVIRONMENT PYTHONDONTWRITEBYTECODE=1 ${gate_env})",
+      "remplace": "set_property(TEST ${name} PROPERTY ENVIRONMENT ${gate_env})",
+      "porte": "mhgp12_support_gate_properties",
+      "note": "les portes ecriraient du bytecode Python dans les sources"
+    },
+    {
+      "id": "aides_mesure_non_serie",
+      "fichier": "cmake/gates.cmake",
+      "cherche": "      set_property(TEST ${name} PROPERTY RUN_SERIAL TRUE)",
+      "remplace": "      set_property(TEST ${name} PROPERTY RUN_SERIAL FALSE)",
+      "porte": "mhgp12_support_gate_properties",
+      "note": "une porte de mesure serait jouee en meme temps que d autres"
+    },
+    {
+      "id": "aides_lidar_jamais_sautee",
+      "fichier": "cmake/gates.cmake",
+      "cherche": "    list(APPEND defs \"-DREQUIRE_DIR_ENV=${MHGP12_DATA_DIR_ENV}\")\n",
+      "remplace": "",
+      "porte": "mhgp12_support_gate_properties",
+      "note": "une porte lidar sans donnees echouerait au lieu d etre sautee"
+    },
+    {
+      "id": "registre_non_recursif",
+      "fichier": "cmake/gates.cmake",
+      "cherche": "  _mhgp12_subdirectory_tests(nested ${PROJECT_SOURCE_DIR})\n",
+      "remplace": "  set(nested)\n",
+      "porte": "mhgp12_support_gates_refuse_subdirectory",
+      "note": "un add_test d un sous-dossier echapperait au registre"
+    },
+    {
+      "id": "propriete_interdite_admise",
+      "fichier": "cmake/gates.cmake",
+      "cherche": "      if(is_set)\n        message(FATAL_ERROR \"mhgp12_porte_propriete_interdite : porte ${test}, propriete",
+      "remplace": "      if(FALSE)\n        message(FATAL_ERROR \"mhgp12_porte_propriete_interdite : porte ${test}, propriete",
+      "porte": "mhgp12_support_gates_refuse_pass_regex",
+      "note": "PASS_REGULAR_EXPRESSION ferait passer un code de sortie non nul"
+    },
+    {
+      "id": "saut_etranger_admis",
+      "fichier": "cmake/gates.cmake",
+      "cherche": "    if(NOT \"${skip}\" STREQUAL \"${expected_skip}\")",
+      "remplace": "    if(FALSE)",
+      "porte": "mhgp12_support_gates_refuse_skip_regex",
+      "note": "une porte pourrait se faire sauter par sa propre sortie"
+    },
+    {
+      "id": "style_fonctions_longues_admises",
+      "fichier": "tools/check_style.py",
+      "cherche": "MAX_FUNCTION_LINES = 100",
+      "remplace": "MAX_FUNCTION_LINES = 1000",
+      "porte": "mhgp12_support_check_style",
+      "note": "une fonction de 101 lignes passerait"
+    },
+    {
+      "id": "style_assert_admis",
+      "fichier": "tools/check_style.py",
+      "cherche": "if re.search(r'(?<![A-Za-z0-9_])assert\\s*\\(', line):",
+      "remplace": "if False:",
+      "porte": "mhgp12_support_check_style",
+      "note": "assert(...) passerait dans src/"
+    },
+    {
+      "id": "style_dependances_non_jugees",
+      "fichier": "tools/check_style.py",
+      "cherche": "if area == 'src' and other not in closure(module, deps):",
+      "remplace": "if False:",
+      "porte": "mhgp12_support_check_style",
+      "note": "une dependance hors table passerait"
+    },
+    {
+      "id": "mutants_survivant_admis",
+      "fichier": "tests/mutants/run_mutants.py",
+      "cherche": "    if counts['SURVIT']:",
+      "remplace": "    if False:",
+      "porte": "mhgp12_support_run_mutants",
+      "note": "un mutant survivant ne ferait plus echouer la campagne"
+    },
+    {
+      "id": "mutants_motif_multiple_admis",
+      "fichier": "tests/mutants/run_mutants.py",
+      "cherche": "        if count != 1:\n            raise Refusal(3, 'mutant %s : motif present %d fois",
+      "remplace": "        if count < 1:\n            raise Refusal(3, 'mutant %s : motif present %d fois",
+      "porte": "mhgp12_support_run_mutants",
+      "note": "un motif present plusieurs fois serait applique"
+    },
+    {
+      "id": "mutants_temoin_saute_admis",
+      "fichier": "tests/mutants/run_mutants.py",
+      "cherche": "            if issue.status != 'passe':\n                return 'temoin [%s]",
+      "remplace": "            if issue.status == 'echec':\n                return 'temoin [%s]",
+      "porte": "mhgp12_support_run_mutants",
+      "note": "un temoin saute ou absent serait dit vert"
+    },
+    {
+      "id": "mutants_echec_sans_juge_tue",
+      "fichier": "tests/mutants/run_mutants.py",
+      "cherche": "    if cause is None:\n        return 'INVALIDE'",
+      "remplace": "    if False:\n        return 'INVALIDE'",
+      "porte": "mhgp12_support_run_mutants",
+      "note": "une porte en echec sans verdict du juge compterait pour un mutant tue"
+    },
+    {
+      "id": "arret_normal_accepte_comme_signal",
+      "fichier": "tests/support/expect_abnormal_stop.py",
+      "cherche": "    if completed.returncode >= 0:",
+      "remplace": "    if False:",
+      "porte": "mhgp12_support_abnormal_stop_forged",
+      "note": "un faux verdict suivi du code 3 serait pris pour un arret par signal"
+    },
+    {
+      "id": "lancement_accepte_comme_signal",
+      "fichier": "tests/support/expect_abnormal_stop.py",
+      "cherche": "        print(str(error), file=sys.stderr)\n        return 2",
+      "remplace": "        print(str(error), file=sys.stderr)\n        return 0",
+      "porte": "mhgp12_support_abnormal_stop_launch_impossible",
+      "note": "un programme absent serait pris pour un arret par signal"
+    },
+    {
+      "id": "signal_reel_refuse",
+      "fichier": "tests/support/expect_abnormal_stop.py",
+      "cherche": "    print('abnormal_stop_verdict conforme signal %d' % -completed.returncode)\n    return 0",
+      "remplace": "    print('abnormal_stop_verdict conforme signal %d' % -completed.returncode)\n    return 1",
+      "porte": "mhgp12_support_abnormal_stop",
+      "note": "un vrai signal ferait echouer la porte d arret anormal"
+    },
+    {
+      "id": "issue_d_une_autre_porte",
+      "fichier": "tests/support/mhgp12_gate.py",
+      "cherche": "    if len(cases) != 1 or cases[0][0] != name:",
+      "remplace": "    if len(cases) != 1:",
+      "porte": "mhgp12_support_run_mutants",
+      "note": "l issue d une porte d un autre nom serait prise pour celle de la porte citee"
+    },
+    {
+      "id": "cache_reprise_sans_retrait",
+      "fichier": "src/core/buffer.cpp",
+      "cherche": "      block = cache.slots[k][--cache.count[k]];",
+      "remplace": "      block = cache.slots[k][cache.count[k] - 1];",
+      "porte": "mhgp12_core_unit_block_cache",
+      "note": "Cache de blocs : un bloc repris quitte le cache ; sinon deux Buffer vivants partagent le meme bloc."
+    },
+    {
+      "id": "cache_capacite_ignoree",
+      "fichier": "src/core/buffer.cpp",
+      "cherche": "    if (cache.count[k] < kCacheSlots && capacity <= cache.capacity - cache.idle) {  // invariant : idle <= capacity",
+      "remplace": "    if (cache.count[k] < kCacheSlots) {",
+      "porte": "mhgp12_core_unit_block_cache",
+      "note": "Cache de blocs : les octets inactifs restent sous la capacite declaree, seconde borne de la memoire."
+    },
+    {
+      "id": "cache_inactif_non_decompte",
+      "fichier": "src/core/buffer.cpp",
+      "cherche": "      cache.idle -= capacity;\n",
+      "remplace": "",
+      "porte": "mhgp12_core_unit_block_cache",
+      "note": "Cache de blocs : un bloc repris ne compte plus parmi les octets inactifs."
+    },
+    {
+      "id": "cache_reprise_jamais",
+      "fichier": "src/core/buffer.cpp",
+      "cherche": "    if (cache.count[k] != 0) {",
+      "remplace": "    if (cache.count[k] > 1) {",
+      "porte": "mhgp12_core_unit_block_cache",
+      "note": "Cache de blocs : un seul bloc inactif de la classe suffit a servir la reservation suivante."
+    }
+  ]
+}

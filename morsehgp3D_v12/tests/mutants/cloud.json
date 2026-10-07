@@ -1,0 +1,134 @@
+{
+  "module": "cloud",
+  "plancher": 16,
+  "mutants": [
+    {
+      "id": "largeur_zero_admise",
+      "fichier": "src/cloud/cloud.hpp",
+      "cherche": "if (bits < 1 || bits > kCoordBits)",
+      "remplace": "if (bits < 0 || bits > kCoordBits)",
+      "porte": "mhgp12_cloud_unit_width",
+      "note": "largeur zero devient representable"
+    },
+    {
+      "id": "cardinal_sentinelle_admis",
+      "fichier": "src/cloud/cloud.cpp",
+      "cherche": "if (x >= kNone)",
+      "remplace": "if (x > kNone)",
+      "porte": "mhgp12_cloud_unit_sizes",
+      "note": "cardinal kNone non refuse"
+    },
+    {
+      "id": "domaine_z_ignore",
+      "fichier": "src/cloud/cloud.cpp",
+      "cherche": "any |= x[i] | y[i] | z[i];",
+      "remplace": "any |= x[i] | y[i] | (z[i] & 0u);",
+      "porte": "mhgp12_cloud_unit_refusals",
+      "note": "coordonnees z hors domaine admises"
+    },
+    {
+      "id": "borne_maximale_refusee",
+      "fichier": "src/cloud/cloud.cpp",
+      "cherche": "return any <= max;",
+      "remplace": "return any < max;",
+      "porte": "mhgp12_cloud_unit_refusals",
+      "note": "frontiere fermee rendue stricte"
+    },
+    {
+      "id": "identifiants_doubles_admis",
+      "fichier": "src/cloud/cloud.cpp",
+      "cherche": "if (sorted[i].id == sorted[i - 1].id) return true;",
+      "remplace": "if (false && sorted[i].id == sorted[i - 1].id) return true;",
+      "porte": "mhgp12_cloud_unit_refusals",
+      "note": "deux PointId egaux seraient acceptes"
+    },
+    {
+      "id": "chiffre_haut_identifiant_omis",
+      "fichier": "src/cloud/cloud.cpp",
+      "cherche": "sort_passes(src, dst, n, counts.data(), 0, kIdDigits);",
+      "remplace": "sort_passes(src, dst, n, counts.data(), 0, kIdDigits - 1);",
+      "porte": "mhgp12_cloud_unit_judge",
+      "note": "bits 22 a 31 des PointId ignores par le tri"
+    },
+    {
+      "id": "chiffre_haut_morton_omis",
+      "fichier": "src/cloud/cloud.cpp",
+      "cherche": "sort_passes(src, dst, n, counts.data(), kIdDigits, kDigits);",
+      "remplace": "sort_passes(src, dst, n, counts.data(), kIdDigits, kDigits - 1);",
+      "porte": "mhgp12_cloud_unit_fixture",
+      "note": "dernier chiffre de la cle omis"
+    },
+    {
+      "id": "passe_radix_non_stable",
+      "fichier": "src/cloud/cloud.cpp",
+      "cherche": "for (u64 i = 0; i < n; ++i) dst[bucket[digit_of(src[i], pass)]++] = src[i];",
+      "remplace": "for (u64 i = n; i-- > 0;) dst[bucket[digit_of(src[i], pass)]++] = src[i];",
+      "porte": "mhgp12_cloud_unit_judge",
+      "note": "ordre precedent inverse dans chaque chiffre egal"
+    },
+    {
+      "id": "multiplicite_unitaire",
+      "fichier": "src/cloud/cloud.cpp",
+      "cherche": "++cloud.w[sites - 1];",
+      "remplace": "cloud.w[sites - 1] = 1;",
+      "porte": "mhgp12_cloud_unit_fixture",
+      "note": "multiplicites ecrasees"
+    },
+    {
+      "id": "pointid_remplace_par_rang",
+      "fichier": "src/cloud/cloud.cpp",
+      "cherche": "cloud.ids[i] = make_id<PointId>(r.id);",
+      "remplace": "cloud.ids[i] = make_id<PointId>(r.index);",
+      "porte": "mhgp12_cloud_unit_fixture",
+      "note": "identifiants utilisateur remplaces par les rangs entree"
+    },
+    {
+      "id": "dernier_decalage_incomplet",
+      "fichier": "src/cloud/cloud.cpp",
+      "cherche": "cloud.offsets[sites] = n;",
+      "remplace": "cloud.offsets[sites] = n - 1;",
+      "porte": "mhgp12_cloud_unit_fixture",
+      "note": "dernier PointId non couvert par la table des sites"
+    },
+    {
+      "id": "histogrammes_conserves_au_remplissage",
+      "fichier": "src/cloud/cloud.cpp",
+      "cherche": "  counts.reset();\n",
+      "remplace": "",
+      "porte": "mhgp12_cloud_unit_budget",
+      "note": "pic hors formule si histogrammes conserves pendant allocation resultat"
+    },
+    {
+      "id": "tampon_tri_conserve_au_remplissage",
+      "fichier": "src/cloud/cloud.cpp",
+      "cherche": "  (src == first.data() ? second : first).reset();\n",
+      "remplace": "",
+      "porte": "mhgp12_cloud_unit_budget",
+      "note": "pic hors formule si second tampon conserve pendant allocation resultat"
+    },
+    {
+      "id": "poids_deplace_non_vide",
+      "fichier": "src/cloud/cloud.hpp",
+      "cherche": "weight_(std::exchange(other.weight_, 0))",
+      "remplace": "weight_(other.weight_)",
+      "porte": "mhgp12_cloud_unit_ownership",
+      "note": "proprietaire deplace garde un poids non nul"
+    },
+    {
+      "id": "construction_publique",
+      "fichier": "src/cloud/cloud.hpp",
+      "cherche": " private:\n  Cloud() = default;",
+      "remplace": " public:\n  Cloud() = default;\n\n private:",
+      "porte": "mhgp12_cloud_unit_ownership",
+      "note": "nuage vide non certifie constructible par un consommateur"
+    },
+    {
+      "id": "vue_x_mutable",
+      "fichier": "src/cloud/cloud.hpp",
+      "cherche": "  std::span<const u32> x() const noexcept { return x_.span(); }",
+      "remplace": "  std::span<u32> x() noexcept { return x_.span(); }\n  std::span<const u32> x() const noexcept { return x_.span(); }",
+      "porte": "mhgp12_cloud_unit_ownership",
+      "note": "consommateur non const peut modifier les positions certifiees"
+    }
+  ]
+}

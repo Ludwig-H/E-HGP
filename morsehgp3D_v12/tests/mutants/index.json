@@ -1,0 +1,126 @@
+{
+  "module": "index",
+  "plancher": 15,
+  "mutants": [
+    {
+      "id": "contact_exterieur",
+      "fichier": "src/index/census.cpp",
+      "cherche": "if (signs.value().lower > 0) {",
+      "remplace": "if (signs.value().lower >= 0) {",
+      "porte": "mhgp12_index_fraction",
+      "note": "egalite de borne exclut abusivement les contacts/coquilles"
+    },
+    {
+      "id": "contact_interieur",
+      "fichier": "src/index/census.cpp",
+      "cherche": "} else if (signs.value().upper < 0) {",
+      "remplace": "} else if (signs.value().upper <= 0) {",
+      "porte": "mhgp12_index_fraction",
+      "note": "egalite de borne devient un certificat strict faux"
+    },
+    {
+      "id": "bloc_temoin_duplique",
+      "fichier": "src/index/census.cpp",
+      "cherche": "SiteIdx{static_cast<u32>(begin + i)}",
+      "remplace": "SiteIdx{begin}",
+      "porte": "mhgp12_index_fraction",
+      "note": "un bloc certifie produit plusieurs copies du meme SiteIdx au lieu de temoins distincts"
+    },
+    {
+      "id": "coquille_limitee_a_k",
+      "fichier": "src/index/census.cpp",
+      "cherche": "side.value() == 0 && keep_shell",
+      "remplace": "side.value() == 0 && keep_shell && m < threshold",
+      "porte": "mhgp12_index_fraction",
+      "note": "une coquille complete peut depasser le seuil saturant"
+    },
+    {
+      "id": "saturation_egalite_perdue",
+      "fichier": "src/index/census.cpp",
+      "cherche": "const bool saturated = count.p == threshold;",
+      "remplace": "const bool saturated = count.p > threshold;",
+      "porte": "mhgp12_index_fraction",
+      "note": "p=K doit rendre le certificat saturant, pas un census complet interrompu"
+    },
+    {
+      "id": "compte_une_passe_omis",
+      "fichier": "src/index/census.cpp",
+      "cherche": "++ledger.passes;",
+      "remplace": "ledger.passes += 0;",
+      "porte": "mhgp12_index_fraction",
+      "note": "les deux parcours doivent etre comptes reellement"
+    },
+    {
+      "id": "allocation_noeuds_excedentaire",
+      "fichier": "src/index/build.cpp",
+      "cherche": "return 1 + node_count(cloud, begin, split, leaf_size) + node_count(cloud, split, end, leaf_size);",
+      "remplace": "return 3 + node_count(cloud, begin, split, leaf_size) + node_count(cloud, split, end, leaf_size);",
+      "porte": "mhgp12_index_unit_structure",
+      "note": "compte radix gonfle de deux noeuds par noeud interne : la recurrence independante, le budget exact et la garde du remplissage refusent"
+    },
+    {
+      "id": "nuage_consomme_sur_refus",
+      "fichier": "src/index/build.cpp",
+      "cherche": "MHGP12_TRY(budget.admit(count * sizeof(index_detail::Node)));",
+      "remplace": "if (!budget.admit(count * sizeof(index_detail::Node)).ok()) {\n    Cloud consumed(std::move(cloud));\n    return fail(Reason::memory_budget);\n  }",
+      "porte": "mhgp12_index_unit_ownership",
+      "note": "un refus memoire ne doit pas vider le Cloud de l appelant"
+    },
+    {
+      "id": "borrowed_coquille_inversee",
+      "fichier": "src/index/census_workspace.cpp",
+      "cherche": "std::reverse(shell.begin(), shell.end());",
+      "remplace": "(void)shell;",
+      "porte": "mhgp12_index_borrowed_fixtures",
+      "note": "la coquille empilee a droite doit etre rendue croissante"
+    },
+    {
+      "id": "borrowed_coquille_saturee_exposee",
+      "fichier": "src/index/census_workspace.cpp",
+      "cherche": "storage_.span().last(saturated ? 0 : pass.m)",
+      "remplace": "storage_.span().last(pass.m)",
+      "porte": "mhgp12_index_borrowed_fixtures",
+      "note": "la saturation rend une coquille vide, jamais le prefixe deja rencontre"
+    },
+    {
+      "id": "borrowed_derniers_interieurs",
+      "fichier": "src/index/census_workspace.cpp",
+      "cherche": "SiteIdx{static_cast<u32>(begin + i)}",
+      "remplace": "SiteIdx{static_cast<u32>(end - 1 - i)}",
+      "porte": "mhgp12_index_borrowed_fixtures",
+      "note": "les blocs stricts rendent les premiers SiteIdx croissants, pas les derniers"
+    },
+    {
+      "id": "census_borne_continue",
+      "fichier": "src/index/census.cpp",
+      "cherche": "auto signs = lattice.bound_signs(node.box);",
+      "remplace": "auto signs = num::power_bound_signs(sphere, node.box);",
+      "porte": "mhgp12_index_unit_lattice",
+      "note": "levier V3 retire du census possede : memes listes, mais la racine n'est plus decidee (registres absolus)"
+    },
+    {
+      "id": "census_emprunte_borne_continue",
+      "fichier": "src/index/census_workspace.cpp",
+      "cherche": "auto signs = lattice.bound_signs(node.box);",
+      "remplace": "auto signs = num::power_bound_signs(sphere, node.box);",
+      "porte": "mhgp12_index_borrowed_lattice",
+      "note": "levier V3 retire du census emprunte (chemin des descentes FULL) : registres absolus d'une passe"
+    },
+    {
+      "id": "coupe_mediane",
+      "fichier": "src/index/build.cpp",
+      "cherche": "u32 lo = begin + 1, hi = last;  // bit nul en begin, bit a 1 en last",
+      "remplace": "return begin + (end - begin) / 2;\n  u32 lo = begin + 1, hi = last;",
+      "porte": "mhgp12_index_unit_structure",
+      "note": "retour a la coupe mediane des rangs, comptee et remplie de facon coherente : memes listes, autre arbre (recurrence radix independante)"
+    },
+    {
+      "id": "coupe_axe_decale",
+      "fichier": "src/index/build.cpp",
+      "cherche": "const int axis = bit % 3, level = bit / 3;",
+      "remplace": "const int axis = (bit + 1) % 3, level = bit / 3;",
+      "porte": "mhgp12_index_unit_structure",
+      "note": "bit de Morton lu sur la mauvaise coordonnee (convention x, y, z de morton.hpp) : coupe hors cellule"
+    }
+  ]
+}

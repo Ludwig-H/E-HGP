@@ -1,0 +1,345 @@
+{
+  "source_root": "build/v10-integration-r2/src",
+  "source_commit": "865f5e64ddd08bedf6ab8f94e8bb94812e380e79",
+  "sources": [
+    {
+      "path": "morsehgp3D_v10/src/arith/wide.hpp",
+      "sha256": "9cd1a34563501fa1c26d9ec79d510f755f49e6fc0a452e432dfc271a209f4800"
+    },
+    {
+      "path": "morsehgp3D_v10/src/arith/geometry.hpp",
+      "sha256": "e5954da39ab6c216bfb05535158cf862eca9a4ba78a81f7dd0c33b6be1fed673"
+    },
+    {
+      "path": "morsehgp3D_v10/src/arith/geometry.cpp",
+      "sha256": "0e98cf5050c64e880386736de9aa47779fae377db0c9fe7acc64dfcf6c039de2"
+    }
+  ],
+  "adaptations": [
+    "Wide : signe-magnitude et algorithmes repris, constexpr/noexcept, countl_zero standard, conversion u128/i128 exige deux mots ; sorties transactionnelles conservees, suppression de conversion decimale allouante.",
+    "Int<bits> et Budgets<B> nouveaux : choix i64/i128/Wide derive du budget strict, profils 18/21/24, conversions controlees avant retrecissement.",
+    "Point et Sphere nouveaux domaines publics fermes ; supports affinement dependants renvoient optional vide, sans refus de degenerescence globale.",
+    "Centres, puissance, orientation, aigu, convexite stricte et milieu : formules R2 avec types derives et controles de tous les retrecissements/accumulations larges.",
+    "Niveaux non reduits exacts avec forme reduite q3 ; suppression des approximations double, ordre par produits croises complets, validation du numerateur/denominateur avant stockage.",
+    "Tests neufs : juge Gauss/Fraction et entiers Python, domaines/extremes/poids nul, neuf mutants initiaux. Aucune qualification R2 heritee."
+  ],
+  "power_revision": {
+    "baseline_commit": "3e7b52b430deaa115464672d27e3b81cbc8d371e",
+    "baseline_sources": [
+      {
+        "path": "src/num/predicates.cpp",
+        "sha256": "c3c3c00800a3b328350052e8648b718592996775bf35c816cd52e1fbd2868d29"
+      },
+      {
+        "path": "src/num/geometry.hpp",
+        "sha256": "ee948d796a77ffd0d6882523510422b7e9ee0b7db80a30c538a50edc8f362011"
+      },
+      {
+        "path": "src/num/sphere.cpp",
+        "sha256": "f8499e0c36c443d15d44e7f6adb81011ba40692e81786506f3c8fc15dae79bdd"
+      }
+    ],
+    "action": "Arity certifiee par les factories, power/side i128 pour q1/q2/q4 aux trois profils et q3 u18 ; q3 u21/u24 garde la formule Wide. Borne q4 resserree par ancrage commun, sans filtre flottant.",
+    "tests": "Reference Wide privee au harnais et Gram/Fraction ; side/arity explicites ; q3 hors i128 et annulation ; tailles Sphere par profil ; quatre mutants supplementaires u21/u24. Qualification G4 nouvelle requise."
+  },
+  "q4_candidate_revision": {
+    "baseline_commit": "d4058557063a4b508addba37067611e44397fc0f",
+    "baseline_sources": [
+      {
+        "path": "src/num/geometry.hpp",
+        "sha256": "16b1776fffac004a6e79a8df8cbc89abbea7129235295bb1530ae871127dcc52"
+      },
+      {
+        "path": "src/num/sphere.cpp",
+        "sha256": "e8dc9143fbf200eeca457fd60a0c63af909effc87f2453e1f307345344d5082a"
+      },
+      {
+        "path": "src/num/predicates.cpp",
+        "sha256": "114671e721703a64c1ea1dbd30d98f1d91c89feb6e3dfe5fb33872a8cd7bacb4"
+      }
+    ],
+    "action": "Separation fermee Q4Candidate(a,N,D), predicats exacts sans niveau, materialize explicite et Sphere::through4 delegue ; coefficients et niveau non reduits conserves. Aucun filtre ni allocation.",
+    "tests": "Gram/Fraction independant sur candidat avant materialisation, Sphere materalisee et eager ; 528 geometries/160 entiers/11838 controles ; huit groupes natifs dont candidate attendu831 ; trois mutants supplementaires. Qualification G4 nouvelle requise."
+  },
+  "power_bounds_revision": {
+    "baseline_commit": "d0dc9cd8b8551e559ef8baa9fbcb1d8f2050dcbe",
+    "baseline_sources": [
+      {
+        "path": "src/num/geometry.hpp",
+        "sha256": "9520e40c617efae96bad37d5ea6054bb014003863bdaf503c822a9f025879f9e"
+      },
+      {
+        "path": "src/num/predicates.cpp",
+        "sha256": "bf56f40a362957661f589e64c8aa05fb7b0f29579e0959cc97b6ebed26e18650"
+      },
+      {
+        "path": "src/num/sphere.cpp",
+        "sha256": "e1c4faab47472734a061d30c07f28afe4d83ad8717115039abaccc6a82d5f5bc"
+      },
+      {
+        "path": "src/num/budgets.hpp",
+        "sha256": "149a452135de8bb5208b21635ba394975fdafa8936b34d44a700ae5b2e6c91ba"
+      },
+      {
+        "path": "tests/num/fraction_oracle.py",
+        "sha256": "32a8bd7bac67c6c0eadccb88c6fccef66a45be9099321615c58de7142239db3e"
+      }
+    ],
+    "action": "Box fermee a extremites Point possedees ; power_bounds separe extrema du terme D|z-a|^2 et de -2N.(z-a). Meme certificat natif q1/q2/q4 et q3u18 ; Wide q3u21/u24. Aucun N^2 ni degre10, borne non necessairement serree.",
+    "tests": "391 boites par profil, 354 valides/34 supports degeneres/3 boites inversees, 3400 controles Fraction et extrema continus ; modele normal/-O ; groupe natif bounds attendu183, plancher180 ; quatre mutants supplementaires. Qualification G4 a venir."
+  },
+  "global_centers_revision": {
+    "baseline_commit": "2e3af233f463592583196cb7082fdc3c112017de",
+    "baseline_sources": [
+      {
+        "path": "src/num/geometry.hpp",
+        "sha256": "6c93f72efa805f633927710b9e612b611a29a3fea1486605653bda8aa188fa89"
+      },
+      {
+        "path": "src/num/budgets.hpp",
+        "sha256": "149a452135de8bb5208b21635ba394975fdafa8936b34d44a700ae5b2e6c91ba"
+      },
+      {
+        "path": "src/num/wide.hpp",
+        "sha256": "58478d10a1e2b526652e5f5b1aeb87f23325bfb515997808a65eae380a531fb1"
+      },
+      {
+        "path": "tests/catalogue/fraction_model.py",
+        "sha256": "19d52412a48000efdc238b18493671327c44c587c7d4831c99fdb5a37e592a1a"
+      }
+    ],
+    "action": "Nouvelle comparaison lexicographique des centres (aD+N)/D, i128 global puis produits Wide4, pas de soustraction de croises ni test du rayon. Aucune allocation/flottant, toute Sphere fermee meme non positive.",
+    "proof": "|aD+N|<2^(5B+6)<=2^126 ; chaque produit croise<2^(9B+11)<=2^227. Domaines B=18/21/24.",
+    "tests": "916 paires/profil Gram/Gauss Fraction dont ancres/denominateurs differents et centres hors domaine ; 108 controles natifs prevus avec quatre arrondis ; trois mutations. Qualification native a venir."
+  },
+  "squared_distance_revision": {
+    "baseline_commit": "4b8e04be6107d27cb91fea3746d944a3c9beadb4",
+    "baseline_sources": [
+      {
+        "path": "src/num/geometry.hpp",
+        "sha256": "9735448015c533467f9ee8f54051e97d3ee6c6987a1c19cbb36cef5e4ce95c4f"
+      },
+      {
+        "path": "src/num/predicates.cpp",
+        "sha256": "70a2d56d8e10640614d67a47b81259393bb6687ab9e1a53086abd0f40b03755d"
+      },
+      {
+        "path": "src/tower/meb.cpp",
+        "sha256": "be833924298a37724b25263fe4d781f6a8e4facd3b45463376bd123b1d4bddf2"
+      },
+      {
+        "path": "tests/num/power_reference.hpp",
+        "sha256": "4b824081147ff40ca84872c020b3b1f142c7d60b715d94e30ef652d85181521e"
+      }
+    ],
+    "action": "Nouvelle primitive fermee squared_distance(Point,Point)->DotInt/i64 ; raccord exclusif du diametre MEB, memes diameter_pairs et ordre lex strict. La reference power q1 et son protocole restent inchanges.",
+    "proof": "Conversion i64 avant chaque soustraction u32 ; |delta|<2^B ; chaque carre et somme partielle positive <=3*(2^B-1)^2<2^50 pour B18/21/24. Aucun repli ni allocation.",
+    "tests": "525 controles natifs prepares ; sonde distincte et polarisation Fraction 1178 requetes/profil, 15 refus, 8268 controles attendus ; modele normal/-O 8253 controles/13 corruptions par profil. Trois mutants num ; deux ancres de mutants MEB adaptees. Qualification G4 a venir, aucun gain revendique."
+  },
+  "checked_power_revision": {
+    "baseline_commit": "e5f6a5683237005117a6b9f2c23bdc7eda6e3caa",
+    "baseline_sources": [
+      {
+        "path": "src/num/predicates.cpp",
+        "sha256": "d46425a33afe865354407da58ed34c9d601dd9677623458f4906de2d0957d5da"
+      },
+      {
+        "path": "src/num/budgets.hpp",
+        "sha256": "b86c7918573e473a9492b3c26c463f9cb340cec5e97d092e774a5c0af44c062e"
+      },
+      {
+        "path": "src/num/geometry_internal.hpp",
+        "sha256": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97"
+      },
+      {
+        "path": "src/num/sphere.cpp",
+        "sha256": "f47ee13dfd5dc0f9cad0a2b310d8c645f0cffbf37a72b533effb4b18d77cf325"
+      },
+      {
+        "path": "tests/num/fraction_oracle.py",
+        "sha256": "32a8bd7bac67c6c0eadccb88c6fccef66a45be9099321615c58de7142239db3e"
+      },
+      {
+        "path": "tests/num/power_reference.hpp",
+        "sha256": "4b824081147ff40ca84872c020b3b1f142c7d60b715d94e30ef652d85181521e"
+      }
+    ],
+    "action": "Essai i128 prive pour power/side/bounds q3 u21/u24 : chaque produit et somme controle par builtin ; repli Wide historique depuis coefficients originaux au premier depassement. q1/q2/q4 et q3u18 inchanges ; aucune modification des niveaux ou ordres.",
+    "proof": "Difference Point signee exacte ; norme<3*2^(2B)<2^50 et facteurs<2^(B+1)<2^25 avant builtins. Optional publie uniquement apres quatre produits et trois sommes representables. Les deux bornes doivent reussir avant publication, sinon calcul integral Wide.",
+    "tests": "Modele Gram/Fraction normal et -O : 329 requetes/profil, 3542/3546/3548 controles et 15 corruptions/profil. Tests natifs limites12 et public259/266/273 prepares, sans execution native locale. Six nouveaux mutants, qualification G4 requise ; aucun gain temporel revendique."
+  },
+  "global_q3_power_certificate_revision": {
+    "baseline_commit": "220047c0725273810ff420d97196ac5639da9378",
+    "baseline_sources": [
+      {
+        "path": "src/num/geometry.hpp",
+        "sha256": "a98465bf07bc7e90ecbca756ddaf08730c47c222cf75e88e555748e8c3b55868"
+      },
+      {
+        "path": "src/num/sphere.cpp",
+        "sha256": "f47ee13dfd5dc0f9cad0a2b310d8c645f0cffbf37a72b533effb4b18d77cf325"
+      },
+      {
+        "path": "src/num/predicates.cpp",
+        "sha256": "523e01e9052ed668cdba8555cb6fd56bdda8371936f6f520f1fd97ce7f82a932"
+      },
+      {
+        "path": "src/num/power_checked.hpp",
+        "sha256": "e38083a1cb0d1f4b90df711ecd47496ddd3d7998306b5ba713062107a610228b"
+      },
+      {
+        "path": "tests/num/checked_power_oracle.py",
+        "sha256": "cf2f37023a8586e61b82baa55d47335abce2091bb8e8a5df1101601942bcb693"
+      },
+      {
+        "path": "tests/num/power_reference.hpp",
+        "sha256": "4b824081147ff40ca84872c020b3b1f142c7d60b715d94e30ef652d85181521e"
+      }
+    ],
+    "action": "Certificat q3 ferme calcule une fois depuis D/N ; flag prive initialise/copie, power/side/bounds natifs si certifie. Autres predicats et niveaux inchanges ; essai builtin puis Wide conserves sans certificat.",
+    "proof": "D<2^(123-2B), |N_j|<2^(124-B) : somme absolue des quatre termes <15*2^123<2^127 pour tous Point et chaque borne Box. Seuils signes stricts sans abs ni conversion.",
+    "tests": "Modele Gram/Fraction normal et -O :330/333/334 requetes,3945/3989/4005 controles,34 corruptions/profil. Natif prepare limites54/public279/owners29-58-66 ; tailles Sphere128-144-160 et Q4Candidate80 a attester G4. Requete non certifiee proche de l'ancre pour garder une puissance non nulle dans la voie checked. Aucun gain revendique."
+  },
+  "global_orientation_certificate_revision": {
+    "baseline_commit": "372c296c367961ed55c0404478e9ba7bb9dba2b1",
+    "baseline_sources": [
+      {
+        "path": "src/num/geometry.hpp",
+        "sha256": "3f100e32d7b7270c5e5f0d67c941c32e5bd5eb556c16c931c315ea95b1105c34"
+      },
+      {
+        "path": "src/num/sphere.cpp",
+        "sha256": "69bf7f28d32e94cd95ddd9af0fc9872fcca20290f30f0c044225cad1a3ca0b9b"
+      },
+      {
+        "path": "src/num/predicates.cpp",
+        "sha256": "f6e71e528906f1cec8b0224aed0bd946dd71238c51e50d5f3a4a4f7dd9ded835"
+      },
+      {
+        "path": "src/num/geometry_internal.hpp",
+        "sha256": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97"
+      },
+      {
+        "path": "src/num/budgets.hpp",
+        "sha256": "b86c7918573e473a9492b3c26c463f9cb340cec5e97d092e774a5c0af44c062e"
+      },
+      {
+        "path": "tests/num/fraction_oracle.py",
+        "sha256": "32a8bd7bac67c6c0eadccb88c6fccef66a45be9099321615c58de7142239db3e"
+      }
+    ],
+    "action": "Certificat orientation distinct dans Sphere/Q4Candidate depuis D/N ; native i128 si certifie, sinon ancienne voie Wide inchangee. Transmission exacte a materialize, aucun checked additionnel.",
+    "proof": "D<2^(124-3B), |N|<2^(124-2B) ; T=N+D*offset <2^(125-2B). Normale de trois Point du meme cube <2^(2B), jamais Vec arbitraires ; trois termes <2^125 et toute somme partielle <3*2^125<2^127.",
+    "tests": "Modeles Gram/Fraction normal et -O identiques :488/491/491 requetes,8091/8151/8152 controles et90 corruptions/profil. Natif prepare limites97/public1154/owners34-55-57 ; tailles a attester G4. Aucun gain temporel ni qualification heritee."
+  },
+  "q4_presentation_weights_revision": {
+    "baseline_commit": "245eee1aec7ee9e3e8fd50d227d20ab7554c75db",
+    "baseline_sources": [
+      {
+        "path": "src/num/geometry.hpp",
+        "sha256": "90b27e5d28e10c2165a8f066320ba4447241ce9f8ea56ae058b99008b07a620c"
+      },
+      {
+        "path": "src/num/sphere.cpp",
+        "sha256": "da27f58acf7bfaebc351b469bd9ab956b379a4e42a7cb45be5c71fa72a5a93bb"
+      },
+      {
+        "path": "src/num/predicates.cpp",
+        "sha256": "79333eb11930c192aecfdd1d5ae392bcfd01996a94c504a30971d0a77583906e"
+      },
+      {
+        "path": "src/num/geometry_internal.hpp",
+        "sha256": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97"
+      },
+      {
+        "path": "src/catalogue/leaf.cpp",
+        "sha256": "5a387fe8e62d5fa68a2c9b9499052e8d5714d52aee50c03f7b89bfe578df101c"
+      },
+      {
+        "path": "src/tower/meb.cpp",
+        "sha256": "36071654a5b7ea6a3eab6653348fa3d9b7859e7d7e7cee8c3759304d3afa1b63"
+      },
+      {
+        "path": "tests/num/fraction_oracle.py",
+        "sha256": "32a8bd7bac67c6c0eadccb88c6fccef66a45be9099321615c58de7142239db3e"
+      }
+    ],
+    "action": "Calcule les poids stricts de la presentation originale avant normalisation du determinant ; flag prive copie et materialise. Deux consommateurs du meme tuple ; predicat generique inchange.",
+    "proof": "H=2det^2 ; w_i=N_brut.cross_i ; w0=H-N_brut.face. Cube commun cote L, cross et face <=L^2, N<=9L^4, toute partielle <=117L^6. L<=2^20 autorise i128 ; sinon Wide6B+7, au plus151bits.",
+    "tests": "Gram/Fraction independant, poids zero/negatifs, permutations, extremes, bornes bbox, autres tetraedres de meme sphere, copie/materialisation/ABI. Qualification native G4 encore requise."
+  },
+  "meb_deferred_revision": {
+    "baseline_commit": "30aa39c20a85d3e07e96cd7ae9b2166a55e543ce",
+    "baseline_sources": [
+      {
+        "path": "src/num/geometry.hpp",
+        "sha256": "b785c8efe726abe6da820ff2338fb69e91b012af5e9e28a31b4f1c1424283380"
+      },
+      {
+        "path": "src/num/predicates.cpp",
+        "sha256": "79333eb11930c192aecfdd1d5ae392bcfd01996a94c504a30971d0a77583906e"
+      }
+    ],
+    "action": "Classifie q3 avant Sphere sans changer son domaine generique ; q4 garde Q4Candidate jusqu apres inclusion complete avant Level. Enumeration, sept compteurs logiques et representation brute preserves.",
+    "proof": "strictly_acute certifie non-collinearite ; sinon cross i64 nul distingue degenere/non_strict sans norme carree i64. Q4Candidate et Sphere partagent les memes coefficients side. Aucun repli flottant, allocation ou coupe par prefixe q3.",
+    "tests": "Gram/Fraction normal/-O triangle852/1717/72 et MEB54/655/540 ; parite native eager preparee438controles. Qualification native G4 encore requise."
+  },
+  "power_bound_signs_revision": {
+    "baseline_commit": "895680ff866fbe41c450c87b2498ebff2ac7408b",
+    "baseline_sources": [
+      {
+        "path": "src/num/geometry.hpp",
+        "sha256": "458327d6ee26c118b69f6c3e700765e27b8bda4653ad3176d2afb4d2c965cfee"
+      },
+      {
+        "path": "src/num/predicates.cpp",
+        "sha256": "17de0a017c1fbc46f50ce15f09cefd99de8bd16210acd5b7ab072a0ab999c601"
+      },
+      {
+        "path": "src/index/census.cpp",
+        "sha256": "27d62c89985bafc59cd5339f044b9b883a848ac73de13664f63babb39ed546d1"
+      },
+      {
+        "path": "src/index/census_workspace.cpp",
+        "sha256": "e834fc884ffea3011dd0ef2976a1fffb15694f5c1aadddc5c3303670c98be0e8"
+      },
+      {
+        "path": "tests/num/bounds_probe.cpp",
+        "sha256": "2e6073d49cc454617389e86162756b964eb3f49fb727b6b3e1c29ec41cb0ce04"
+      },
+      {
+        "path": "tests/num/bounds_test.cpp",
+        "sha256": "f7ac3575608a84ecc26c47cf60d4e8a0ad12df56837d7e6c3210661b2040c9b4"
+      }
+    ],
+    "action": "power_bound_signs rend les signes des deux bornes de power_bounds avec les memes refus ; voie native : memes sommes i128 (native_bounds partage par les deux fonctions) lues sans conversion Wide ni require_fit, comme center_side, ordre des bornes controle ; voie Wide inchangee. Les deux parcours census de l index ne lisent plus que ces signes.",
+    "tests": "Sonde Fraction des bornes : tout ecart de signe avec power_bounds rend 3 ; groupe natif bounds 372 controles (fixtures contact, interieur, intervalle a cheval, quatre arites). Mutant bound_signs_native_swapped tue par mhgp11_num_bounds_fraction ; contact_exterieur et contact_interieur reancres et tues. Qualification native G4 encore requise."
+  },
+  "lattice_bounds_revision": {
+    "baseline_commit": "9d10de21341fee138c15c3caf9cb30925e030cb9",
+    "baseline_sources": [
+      {
+        "path": "src/num/predicates.cpp",
+        "sha256": "4bfa98717529baffb9072a3c014078a64c8d96f23d69856b4136a210f3ae6d6a"
+      },
+      {
+        "path": "src/num/num.hpp",
+        "sha256": "bde9c4a076a8f7c3d82940252e1c132804a65f56360acd510922274255df82f2"
+      },
+      {
+        "path": "src/index/census.cpp",
+        "sha256": "d6e3aad8b2180c9f837bc32380d7142e56113e098c0210df3e26c1aff9d4eae9"
+      },
+      {
+        "path": "src/index/census_workspace.cpp",
+        "sha256": "ba921a4e3bccc823e23e4668941ebafb9a14cf510b318e86d3d6cec270ca8f6c"
+      },
+      {
+        "path": "src/index/build.cpp",
+        "sha256": "45f63a79e7b2bd8989de1a3e10e4a21502d2482f5f1cf9586076db93066d16af"
+      }
+    ],
+    "action": "Levier V3 (audit des transpositions ; contrat de la revue independante 10) : LatticeSphere, minorant exact de la puissance sur les points entiers d'une boite (entier le plus proche du centre ramene dans la boite) et majorant exact au coin eloigne, prepares une fois par parcours ; reserve au census des sites de l'index, voie Wide sur power_bound_signs. Arbre de l'index coupe au plus haut bit de Morton qui differe (radix), compte avant allocation.",
+    "tests": "mhgp11_num_lattice (enumeration exacte, monotonie, fixtures, trois profils), groupes lattice des deux census, structure radix (recurrence independante, chaine de profondeur 3B+1), juges Python a forme radix exacte ; mutants num (3) et index (5). Qualification G4 nouvelle requise."
+  }
+}

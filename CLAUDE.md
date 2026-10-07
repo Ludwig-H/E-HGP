@@ -75,6 +75,16 @@ La v5 calcule **le même objet** que la v4 avec **une base de code neuve** : la 
 
 ## Commandes
 
+Chantier actif `morsehgp3D_v12/` (C++20, `-Wall -Wextra -Wpedantic -Werror`, portes à code exact, Python 3.10 nu pour les
+portes Python) ; dossier de construction hors de `/workspaces`, presque plein :
+
+```bash
+cmake -S morsehgp3D_v12 -B <build> -DCMAKE_BUILD_TYPE=Release   # u21 ; -DMHGP12_COORD_BITS=24 ; 18 et 32 refusés
+cmake --build <build> -j4
+ctest --test-dir <build> -LE long --no-tests=error --output-on-failure -j4
+python3 morsehgp3D_v12/tools/check_style.py --root morsehgp3D_v12 && python3 morsehgp3D_v12/tools/check_constats.py
+```
+
 Ancien chantier `morsehgp3D_v5/` (C++20 sans extensions, `-Wall -Wextra -Wpedantic -Werror`, portes à code exact via `cmake/run_expect.cmake`, labels CTest `gate` / `oracle` / `scale8000` / `scale16000` / `scale32000`) :
 
 ```bash

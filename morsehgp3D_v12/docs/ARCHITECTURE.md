@@ -171,13 +171,24 @@ v11, contre 96 Go sur la carte de G4 (hôte : 180 Gio, 48 fils).
 
 ## 5. Modules
 
-| Module | Rôle | Origine |
+Un module = un dossier `src/<module>/` = un en-tête public `src/<module>/<module>.hpp`. Un module ne dépend que des
+modules placés avant lui dans la table ci-dessous, sans cycle. Cette table est celle des **modules présents** ; sa copie
+lisible par CMake est `cmake/modules.cmake`, et `tools/check_style.py` (porte `mhgp12_style`) refuse tout écart entre
+les deux. Une tranche qui livre un module ajoute sa ligne ici et dans `cmake/modules.cmake`, dans le même commit.
+
+| Module | Rôle | Dépend de |
 | --- | --- | --- |
-| `core` | statuts, `Result`, budget mémoire (hôte, épinglé, appareil), tampons, arènes | port v11, budget étendu |
-| `num` | entiers à budget, prédicats exacts, certificats, clés F3/F4, racines et sommes de radicaux | port v11 |
-| `sched` | Pool persistant à faible coût par appel ; flux CUDA | réécrit (le Pool v11 réveillait 47 fils par appel) |
-| `cloud`, `io` | entrée u21, multiplicités refusées avec compteur, formats, dossier transactionnel | port v11 |
-| `index` | arbre radix de Morton, bornes sur sites | port v11 |
+| `core` | statuts et raisons, `Result`, budget mémoire, `Buffer`, `Csr`, registre de compteurs ; port v11 (budget à étendre à la mémoire épinglée et à l'appareil, arènes) | — |
+| `num` | entiers à budget, prédicats exacts, certificats, clés F3/F4, racines et sommes de radicaux ; port v11 | `core` |
+| `sched` | `Pool`, `parallel_for` ; port v11, à réécrire (le Pool v11 réveillait 47 fils par appel ; flux CUDA) | `core` |
+| `cloud` | domaine, sites en ordre de Morton, multiplicités, table site → `PointId` ; port v11 | `core` |
+| `io` | lecture `u32le`, SHA-256, écrivains, dossier transactionnel ; port v11 | `core`, `cloud` |
+| `index` | arbre radix de Morton, bornes et census exacts sur sites ; port v11 | `num`, `cloud` |
+
+Modules prévus, ajoutés à la table ci-dessus par leur tranche :
+
+| Module prévu | Rôle | Origine |
+| --- | --- | --- |
 | `catalogue` | parcours des boîtes, feuille en source unique, fin d'étage, table $S^{*}$ → boule | réécrit (§ 4.1) |
 | `tower` | résolution, noyau, contraction, verticales | réécrit (§ 4.2, § 4.3) |
 | `registry` | registre d'événements | nouveau |
@@ -186,6 +197,27 @@ v11, contre 96 Go sur la carte de G4 (hôte : 180 Gio, 48 fils).
 
 ## 6. Ce qui reste hors du produit
 
-L'oracle exhaustif borné (`reference/`, $n\leq 14$) ; l'énumération exhaustive des supports ; la mosaïque d'ordre $k$
+Les microbancs (`microbancs/`, un dossier par mesure `MES-*`, règle d'adoption écrite d'avance, juge à trois
+verdicts) peuvent lier la v11 gelée pour leurs vidages et témoins ; ils échappent pour cette raison au contrôle de
+style du produit ([`../microbancs/README.md`](../microbancs/README.md)). L'oracle exhaustif borné (`reference/`, $n\leq 14$) ; l'énumération exhaustive des supports ; la mosaïque d'ordre $k$
 (en aval, à la demande) ; la tour pondérée (refus explicite tant que le contrat n'est pas prouvé) ; les coquilles
 étendues au-delà d'un plafond déclaré (refus explicite) ; tout juge qui re-vérifie un théorème dans le chemin produit.
+
+## 7. Règles du code portées de la v11
+
+Le socle (modules du § 5, harnais de portes, lanceur de mutants, contrôle de style, oracle borné `reference/`) est un
+port explicite de la v11 gelée (`ac081a06f`), consigné dans [`PROVENANCE.md`](PROVENANCE.md). Valent pour tout le code
+de la v12 les paragraphes suivants de l'architecture de la v11
+([`../../morsehgp3D_v11/docs/ARCHITECTURE.md`](../../morsehgp3D_v11/docs/ARCHITECTURE.md)), que les commentaires du
+code citent comme « ARCHITECTURE.md de la v11 » : règles de propreté (§ 1), profil numérique (§ 3), doctrine flottante
+F1–F6 (§ 4), construction et portes (§ 5), contrats du budget mémoire, de l'opération atomique et des identifiants
+(§ 7). Ils s'appliquent avec ces adaptations :
+
+- préfixes `mhgp12` (cibles, portes, namespace, jetons), `MHGP12_` (macros, options) et `hgp12_ref` (oracle) ;
+- profil `MHGP12_COORD_BITS` : 21 (défaut) ou 24. Le profil 18 est abandonné (décision D6) et refusé à la configuration
+  comme à la compilation ; 32 est refusé jusqu'à l'arithmétique en repère local
+  ([`CONTRAT_NUMERIQUE.md`](CONTRAT_NUMERIQUE.md)) ;
+- la table des modules est celle du § 5 ;
+- variables d'environnement : `MHGP12_DATA_DIR` (portes `lidar`), `MHGP12_V10_FROZEN_DIR` (portes `diff_v10` de
+  l'oracle) ;
+- l'option CUDA de la v11 n'est pas reprise : elle reviendra avec le catalogue.

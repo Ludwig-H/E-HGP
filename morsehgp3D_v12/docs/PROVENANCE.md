@@ -48,6 +48,16 @@ Ce sont des notes de travail : leurs estimations ne sont pas des mesures, et la 
 | session G4 gardée | `gcp-migration/v11_session.py`, `v11_worker.sh`, `README_V11.md` | autotest hors ligne, puis une session à blanc |
 | préparation des trames | `bench/points_lidar_prepare.py` | empreintes de la trame 08/000040 et du masque de 08/000000 |
 
+### 3.1 Ports réalisés
+
+| Tranche | Contenu | Table fichier par fichier | Qualification locale |
+| --- | --- | --- | --- |
+| T0, socle (7 octobre 2026) | modules `core`, `num`, `sched`, `cloud`, `io`, `index` (5 475 lignes de C++), harnais de portes, lanceur de mutants, contrôle de style, oracle borné `reference/` (`hgp12_ref`), sonde d'index ; profils u21 et u24 ; 18 refusé (D6), 32 refusé jusqu'au repère local | [`PORTS.md`](PORTS.md) : 210 fichiers, SHA-256 de chaque source à `ac081a06f`, 28 copies, 112 renommages, 69 adaptations décrites | Release u21 et u24 sans avertissement ; portes hors `long` vertes (u21 : 408 sur 409, la sentinelle LiDAR sautée faute de données ; 26 portes `diff_v10` contre la v10 figée) ; ni sanitizers, ni matrice G4, ni suite longue de l'oracle |
+
+Le socle porte le code de la v11 **tel quel** pour $B\leq 24$ : les corrections du contrat numérique (repère local,
+certificats liés à leur domaine, clé de Morton exacte, boîtes à 33 bits, test du milieu local) s'y appliqueront par
+tranches, chacune avec ses portes ; tant qu'elles manquent, u32 reste refusé à la configuration.
+
 ## 4. Ce que la v12 porte de la v10 (`777406b82`, R2 `865f5e6`)
 
 | Mécanisme | Où | Note |

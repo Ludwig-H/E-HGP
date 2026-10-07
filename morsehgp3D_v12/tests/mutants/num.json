@@ -1,0 +1,587 @@
+{
+  "module": "num",
+  "plancher": 61,
+  "mutants": [
+    {
+      "id": "checked_first_overflow_ignored_u24",
+      "fichier": "src/num/power_checked.hpp",
+      "cherche": "if (__builtin_mul_overflow(denominator, i128{norm}, &total)) return std::nullopt;",
+      "remplace": "if (__builtin_mul_overflow(denominator, i128{norm}, &total) && false) return std::nullopt;",
+      "porte": "mhgp12_num_unit_checked_public",
+      "options": [
+        "-DMHGP12_COORD_BITS=24"
+      ],
+      "note": "Le produit initial deborde pour le temoin global24 du support local19. Le builtin reste sans UB, mais la valeur tronquee est fausse."
+    },
+    {
+      "id": "checked_term_overflow_ignored_u21",
+      "fichier": "src/num/power_checked.hpp",
+      "cherche": "if (__builtin_mul_overflow(numerator[j], i128{factors[j]}, &term)) return std::nullopt;",
+      "remplace": "if (__builtin_mul_overflow(numerator[j], i128{factors[j]}, &term) && false) return std::nullopt;",
+      "porte": "mhgp12_num_unit_checked_public",
+      "options": [
+        "-DMHGP12_COORD_BITS=21"
+      ],
+      "note": "La borne basse seule deborde ; ignorer le drapeau publie une fausse borne ou refuse une boite valide, sans UB."
+    },
+    {
+      "id": "checked_sum_overflow_ignored_u24",
+      "fichier": "src/num/power_checked.hpp",
+      "cherche": "if (__builtin_add_overflow(total, term, &next)) return std::nullopt;",
+      "remplace": "if (__builtin_add_overflow(total, term, &next) && false) return std::nullopt;",
+      "porte": "mhgp12_num_unit_checked_public",
+      "options": [
+        "-DMHGP12_COORD_BITS=24"
+      ],
+      "note": "Tous les produits de la fixture addition tiennent, mais leur somme sort de i128 ; le resultat exact public doit rester large."
+    },
+    {
+      "id": "checked_fast_power_zero_u21",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "if (const auto value = checked_power(sphere, point))\n    return detail::require_fit<Budget::side>(to_wide(*value));",
+      "remplace": "if (const auto value = checked_power(sphere, point))\n    return detail::require_fit<Budget::side>(to_wide(i128{0}));",
+      "porte": "mhgp12_num_unit_certificate_owners",
+      "options": [
+        "-DMHGP12_COORD_BITS=21"
+      ],
+      "note": "Une puissance q3 calculable en i128 doit garder sa valeur exacte ; le controle atteint la vraie branche publique rapide."
+    },
+    {
+      "id": "checked_fast_side_inverted_u24",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "if (const auto value = checked_power(sphere, point)) return detail::sign(*value);",
+      "remplace": "if (const auto value = checked_power(sphere, point)) return -detail::sign(*value);",
+      "porte": "mhgp12_num_unit_certificate_owners",
+      "options": [
+        "-DMHGP12_COORD_BITS=24"
+      ],
+      "note": "Les signes q3 positifs et negatifs jugent la vraie branche publique side, distincte de power."
+    },
+    {
+      "id": "checked_partial_bounds_published_u21",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "if (native_lower && native_upper) return checked_bounds(to_wide(*native_lower), to_wide(*native_upper));",
+      "remplace": "if (native_lower || native_upper) return checked_bounds(to_wide(native_lower.value_or(0)), to_wide(native_upper.value_or(0)));",
+      "porte": "mhgp12_num_unit_checked_public",
+      "options": [
+        "-DMHGP12_COORD_BITS=21"
+      ],
+      "note": "Lower-only et upper-only imposent le repli integral ; value_or evite toute dereference vide et toute UB du mutant."
+    },
+    {
+      "id": "distance_last_axis_omitted",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "return dx * dx + dy * dy + dz * dz;",
+      "remplace": "return dx * dx + dy * dy + dz * dz * 0;",
+      "porte": "mhgp12_num_unit_distance",
+      "note": "Une distance portee seulement par z doit rester positive ; variable consommee, aucun depassement injecte."
+    },
+    {
+      "id": "distance_coordinate_truncated_u24",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "const i64 dx = i64{a.x()} - b.x(), dy = i64{a.y()} - b.y(), dz = i64{a.z()} - b.z();",
+      "remplace": "const i64 dx = i64{static_cast<u16>(a.x())} - static_cast<u16>(b.x()), dy = i64{a.y()} - b.y(), dz = i64{a.z()} - b.z();",
+      "porte": "mhgp12_num_unit_distance",
+      "options": [
+        "-DMHGP12_COORD_BITS=24"
+      ],
+      "note": "Les derniers bits du profil font partie de la distance ; la troncature donne une valeur fausse sans UB."
+    },
+    {
+      "id": "distance_difference_is_sum_u21",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "const i64 dx = i64{a.x()} - b.x(), dy = i64{a.y()} - b.y(), dz = i64{a.z()} - b.z();",
+      "remplace": "const i64 dx = i64{a.x()} + b.x(), dy = i64{a.y()} - b.y(), dz = i64{a.z()} - b.z();",
+      "porte": "mhgp12_num_unit_distance",
+      "options": [
+        "-DMHGP12_COORD_BITS=21"
+      ],
+      "note": "Identite et invariance par translation refusent une somme de coordonnees ; les produits restent i64 representables."
+    },
+    {
+      "id": "region_pair_contact_lost",
+      "fichier": "src/num/center_region.cpp",
+      "cherche": "return lower <= 0 && upper >= 0;",
+      "remplace": "return lower < 0 && upper > 0;",
+      "porte": "mhgp12_num_center_region_fraction",
+      "note": "une bissectrice tangente a une face, arete ou sommet doit rester possible"
+    },
+    {
+      "id": "region_line_contact_lost_u24",
+      "fichier": "src/num/center_region.cpp",
+      "cherche": "if (left > right) return CenterLineRelation::disjoint;",
+      "remplace": "if (left >= right) return CenterLineRelation::disjoint;",
+      "porte": "mhgp12_num_center_region_fraction",
+      "options": [
+        "-DMHGP12_COORD_BITS=24"
+      ],
+      "note": "le contact ferme de la droite equidistante serait perdu"
+    },
+    {
+      "id": "region_line_test_omitted",
+      "fichier": "src/num/center_region.cpp",
+      "cherche": "if (left > right) return CenterLineRelation::disjoint;",
+      "remplace": "if (left > right && false) return CenterLineRelation::disjoint;",
+      "porte": "mhgp12_num_center_region_fraction",
+      "note": "toute droite non degeneree serait acceptee, meme disjointe de la boite"
+    },
+    {
+      "id": "region_line_axis_omitted_u21",
+      "fichier": "src/num/center_region.cpp",
+      "cherche": "for (int k = 0; k < 3; ++k) {",
+      "remplace": "for (int k = 0; k < 2; ++k) {",
+      "porte": "mhgp12_num_center_region_fraction",
+      "options": [
+        "-DMHGP12_COORD_BITS=21"
+      ],
+      "note": "une normale de facette du zonogone manquerait au test"
+    },
+    {
+      "id": "region_line_determinant_sign_u24",
+      "fichier": "src/num/center_region.cpp",
+      "cherche": "Test{g.u[k]} * p0 - Test{f.u[k]} * p1",
+      "remplace": "Test{g.u[k]} * p0 + Test{f.u[k]} * p1",
+      "porte": "mhgp12_num_center_region_fraction",
+      "options": [
+        "-DMHGP12_COORD_BITS=24"
+      ],
+      "note": "le signe du determinant reduit changerait la geometrie"
+    },
+    {
+      "id": "region_upper_domain_unguarded",
+      "fichier": "src/num/center_region.cpp",
+      "cherche": "hi[axis] > maximum",
+      "remplace": "hi[axis] > maximum + 1",
+      "porte": "mhgp12_num_unit_region_domain",
+      "note": "la factory accepterait une borne hors du domaine prouve"
+    },
+    {
+      "id": "bounds_anchor_inside_ignored",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "terms.norm_lower += lo[j] > 0 ? lo2 : hi[j] < 0 ? hi2 : 0;",
+      "remplace": "terms.norm_lower += lo[j] > 0 ? lo2 : hi[j] < 0 ? hi2 : lo2;",
+      "porte": "mhgp12_num_bounds_fraction",
+      "note": "une boite contenant l ancre aurait un minorant quadratique strictement positif, perdant un contact"
+    },
+    {
+      "id": "bounds_linear_upper_inverted_u24",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "terms.linear_upper[j] = -2 * (nonnegative ? lo[j] : hi[j]);",
+      "remplace": "terms.linear_upper[j] = -2 * (nonnegative ? hi[j] : lo[j]);",
+      "porte": "mhgp12_num_bounds_fraction",
+      "options": [
+        "-DMHGP12_COORD_BITS=24"
+      ],
+      "note": "extremite lineaire superieure choisie a l envers ; Fraction juge le majorant continu"
+    },
+    {
+      "id": "bounds_wide_upper_omitted_u21",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "const auto hi = detail::product<words>(sphere.numerator()[j], terms.linear_upper[j]);",
+      "remplace": "const auto hi = detail::product<words>(sphere.numerator()[j], i64{0});",
+      "porte": "mhgp12_num_bounds_fraction",
+      "options": [
+        "-DMHGP12_COORD_BITS=21"
+      ],
+      "note": "le terme lineaire du majorant q3 large disparait, notamment sur les boites singleton"
+    },
+    {
+      "id": "bounds_zero_width_refused",
+      "fichier": "src/num/sphere.cpp",
+      "cherche": "if (lo.coordinates()[j] > hi.coordinates()[j]) return fail(Reason::parameter_out_of_range);",
+      "remplace": "if (lo.coordinates()[j] >= hi.coordinates()[j]) return fail(Reason::parameter_out_of_range);",
+      "porte": "mhgp12_num_unit_bounds",
+      "note": "la boite fermee reduite a un point est valide et ne doit pas etre refusee"
+    },
+    {
+      "id": "candidate_side_inverse_u24",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "Result<int> side(const Q4Candidate& sphere, Point point) noexcept {\n  return center_side(CenterView(sphere), point);\n}",
+      "remplace": "Result<int> side(const Q4Candidate& sphere, Point point) noexcept {\n  auto value = center_side(CenterView(sphere), point);\n  if (!value.ok()) return value.outcome();\n  return -value.value();\n}",
+      "porte": "mhgp12_num_fraction",
+      "options": [
+        "-DMHGP12_COORD_BITS=24"
+      ],
+      "note": "la voie candidate est jugee par Fraction avant materialisation, meme lorsque Sphere reste correcte"
+    },
+    {
+      "id": "candidate_ancre_perdue_u21",
+      "fichier": "src/num/sphere.cpp",
+      "cherche": "return std::optional<Q4Candidate>{Q4Candidate(a, n, denominator,\n      detail::global_orientation_i128(denominator, n), strict.value())};",
+      "remplace": "return std::optional<Q4Candidate>{Q4Candidate(Point{}, n, denominator,\n      detail::global_orientation_i128(denominator, n), strict.value())};",
+      "porte": "mhgp12_num_fraction",
+      "options": [
+        "-DMHGP12_COORD_BITS=21"
+      ],
+      "note": "les coefficients locaux doivent conserver leur ancre de coquille originale"
+    },
+    {
+      "id": "candidate_niveau_zero_u24",
+      "fichier": "src/num/sphere.cpp",
+      "cherche": "return Sphere(anchor_, numerator_, denominator_, level.value(), 4, false, orientation_i128_, q4_presentation_inside_);",
+      "remplace": "return Sphere(anchor_, numerator_, denominator_, Level{}, 4, false, orientation_i128_, q4_presentation_inside_);",
+      "porte": "mhgp12_num_fraction",
+      "options": [
+        "-DMHGP12_COORD_BITS=24"
+      ],
+      "note": "materialize doit calculer le niveau exact non reduit, sans Sphere factice de niveau zero"
+    },
+    {
+      "id": "presentation_q3_taguee_q4_u21",
+      "fichier": "src/num/sphere.cpp",
+      "cherche": "return Sphere(anchor_, numerator_, denominator_, level.value(), 3, q3_power_i128_, orientation_i128_);",
+      "remplace": "return Sphere(anchor_, numerator_, denominator_, level.value(), 4, q3_power_i128_, orientation_i128_);",
+      "porte": "mhgp12_num_unit_power_paths",
+      "options": [
+        "-DMHGP12_COORD_BITS=21"
+      ],
+      "note": "le tag q3 commande le repli large ; la porte refuse le tag faux avant toute execution native hors domaine ; depuis le report du Level q3, la Sphere q3 nait dans Q3Candidate::materialize"
+    },
+    {
+      "id": "power_natif_q4_signe_inverse_u24",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "  return total;",
+      "remplace": "  return sphere.presentation_arity() == 4 ? -total : total;",
+      "porte": "mhgp12_num_fraction",
+      "options": [
+        "-DMHGP12_COORD_BITS=24"
+      ],
+      "note": "voie q4 i128 a24bits : Fraction doit tuer la puissance de signe inverse"
+    },
+    {
+      "id": "power_large_q3_termes_omis_u21",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "auto term = detail::product<words>(sphere.numerator()[j], -2 * i128{v[j]});",
+      "remplace": "auto term = detail::product<words>(sphere.numerator()[j], i128{0});",
+      "porte": "mhgp12_num_fraction",
+      "options": [
+        "-DMHGP12_COORD_BITS=21"
+      ],
+      "note": "repli q3 large a21bits : termes lineaires perdus, coquille et puissance fausses"
+    },
+    {
+      "id": "side_natif_coquille_exterieure_u24",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "if (use_native_power(sphere)) return detail::sign(native_power(sphere, point));",
+      "remplace": "if (use_native_power(sphere)) return native_power(sphere, point) == 0 ? 1 : detail::sign(native_power(sphere, point));",
+      "porte": "mhgp12_num_unit_power_paths",
+      "options": [
+        "-DMHGP12_COORD_BITS=24"
+      ],
+      "note": "voie side native : un point de coquille serait classe exterieur malgre power nul"
+    },
+    {
+      "id": "retenue_addition_perdue",
+      "fichier": "src/num/wide.hpp",
+      "cherche": "carry = static_cast<u64>(sum >> 64);",
+      "remplace": "carry = 0;",
+      "porte": "mhgp12_num_unit_wide",
+      "note": "le debordement et les retenues seraient ignores"
+    },
+    {
+      "id": "emprunt_perdu",
+      "fichier": "src/num/wide.hpp",
+      "cherche": "borrow = (difference >> 64) != 0 ? 1 : 0;",
+      "remplace": "borrow = 0;",
+      "porte": "mhgp12_num_unit_wide",
+      "note": "2^64 moins un ne vaudrait plus 2^64-1"
+    },
+    {
+      "id": "produit_signe_perdu",
+      "fichier": "src/num/wide.hpp",
+      "cherche": "out.neg = (a.neg != b.neg) && !out.is_zero();",
+      "remplace": "out.neg = false;",
+      "porte": "mhgp12_num_unit_wide",
+      "note": "le produit negatif serait positif"
+    },
+    {
+      "id": "conversion_borne_large",
+      "fichier": "src/num/integer.hpp",
+      "cherche": "if (value.bit_length() > Bits) return std::nullopt;",
+      "remplace": "if (value.bit_length() > Bits + 1) return std::nullopt;",
+      "porte": "mhgp12_num_unit_budgets",
+      "note": "2^63 serait admis par un budget strict de 63 bits"
+    },
+    {
+      "id": "denominateur_nul_admis",
+      "fichier": "src/num/level.hpp",
+      "cherche": "numerator.sign() < 0 || denominator.sign() <= 0 || !n || !d",
+      "remplace": "numerator.sign() < 0 || denominator.sign() < 0 || !n || !d",
+      "porte": "mhgp12_num_unit_levels",
+      "note": "un niveau a denominateur nul serait accepte"
+    },
+    {
+      "id": "ordre_niveaux_inverse",
+      "fichier": "src/num/level.hpp",
+      "cherche": "return compare(left, right);",
+      "remplace": "return compare(right, left);",
+      "porte": "mhgp12_num_unit_levels",
+      "note": "les niveaux distincts seraient ordonnes a l envers"
+    },
+    {
+      "id": "milieu_denominateur_un",
+      "fichier": "src/num/sphere.cpp",
+      "cherche": "Sphere(a, n, 2, level.value(), 2, false, detail::global_orientation_i128(2, n))",
+      "remplace": "Sphere(a, n, 1, level.value(), 2, false, detail::global_orientation_i128(2, n))",
+      "porte": "mhgp12_num_unit_geometry",
+      "note": "q2 serait centre en b au lieu du milieu"
+    },
+    {
+      "id": "angle_droit_admis",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "detail::dot(detail::difference(b, a), detail::difference(c, a)) > 0",
+      "remplace": "detail::dot(detail::difference(b, a), detail::difference(c, a)) >= 0",
+      "porte": "mhgp12_num_unit_geometry",
+      "note": "un angle droit serait dit strictement aigu"
+    },
+    {
+      "id": "convexite_face_admise",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "if (center_sign.value() != vertex_sign) return false;",
+      "remplace": "if (center_sign.value() != 0 && center_sign.value() != vertex_sign) return false;",
+      "porte": "mhgp12_num_unit_geometry",
+      "note": "un centre sur une face serait dit strictement interieur"
+    },
+    {
+      "id": "centers_anchor_omitted",
+      "fichier": "src/num/centers.cpp",
+      "cherche": "i128{anchor_a.coordinates()[axis]} * da + a.numerator()[axis]",
+      "remplace": "i128{anchor_a.coordinates()[axis]} * da * 0 + a.numerator()[axis]",
+      "porte": "mhgp12_num_centers_fraction",
+      "note": "Une presentation change ancre et denominateur sans changer le centre."
+    },
+    {
+      "id": "centers_denominator_swapped_u24",
+      "fichier": "src/num/centers.cpp",
+      "cherche": "multiply(to_wide(na), to_wide(db)), multiply(to_wide(nb), to_wide(da))",
+      "remplace": "multiply(to_wide(na), to_wide(da)), multiply(to_wide(nb), to_wide(db))",
+      "porte": "mhgp12_num_centers_fraction",
+      "options": [
+        "-DMHGP12_COORD_BITS=24"
+      ],
+      "note": "Comparer les numerateurs sous un mauvais denominateur altere l ordre exact."
+    },
+    {
+      "id": "centers_last_axis_omitted_u21",
+      "fichier": "src/num/centers.cpp",
+      "cherche": "axis < 3",
+      "remplace": "axis < 2",
+      "porte": "mhgp12_num_centers_fraction",
+      "options": [
+        "-DMHGP12_COORD_BITS=21"
+      ],
+      "note": "Egalite x/y ne dispense pas de comparer z."
+    },
+    {
+      "id": "certificate_denominator_boundary",
+      "fichier": "src/num/power_certificate.hpp",
+      "cherche": "denominator >= d_limit",
+      "remplace": "denominator > d_limit",
+      "porte": "mhgp12_num_unit_certificate_limits",
+      "options": [
+        "-DMHGP12_COORD_BITS=21"
+      ],
+      "note": "Egalite D au seuil strict refusee par le helper ; garde du drapeau avant toute puissance. Contrat strict du certificat, pas une fausse geometrie ni un debordement demontre par cette egalite."
+    },
+    {
+      "id": "certificate_numerator_boundary",
+      "fichier": "src/num/power_certificate.hpp",
+      "cherche": "coordinate <= -n_limit || coordinate >= n_limit",
+      "remplace": "coordinate < -n_limit || coordinate > n_limit",
+      "porte": "mhgp12_num_unit_certificate_limits",
+      "options": [
+        "-DMHGP12_COORD_BITS=24"
+      ],
+      "note": "Les deux egalites N au seuil strict doivent rester refusees sans negation de i128 minimum. Contrat strict du certificat, pas une fausse geometrie ni un debordement demontre par cette egalite."
+    },
+    {
+      "id": "certificate_factory_flag_absent",
+      "fichier": "src/num/sphere.cpp",
+      "cherche": "detail::q3_global_power_i128(2 * g, n)",
+      "remplace": "false",
+      "porte": "mhgp12_num_unit_certificate_public",
+      "options": [
+        "-DMHGP12_COORD_BITS=21"
+      ],
+      "note": "La vraie fabrique q3 doit certifier les petits supports ; aucune mort attendue par UB."
+    },
+    {
+      "id": "orientation_native_sign_inverted_u21",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "return detail::sign(native_total);",
+      "remplace": "return -detail::sign(native_total);",
+      "porte": "mhgp12_num_unit_orientation_public",
+      "options": [
+        "-DMHGP12_COORD_BITS=21"
+      ],
+      "note": "Resultat geometrique faux pour un vrai candidat petit certifie, sans UB."
+    },
+    {
+      "id": "orientation_wide_sign_inverted_u24",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "if (total.bit_length() > Budget::center_orientation) return fail(Reason::arithmetic_invariant);\n  return total.sign();",
+      "remplace": "if (total.bit_length() > Budget::center_orientation) return fail(Reason::arithmetic_invariant);\n  return -total.sign();",
+      "porte": "mhgp12_num_unit_orientation_owners",
+      "options": [
+        "-DMHGP12_COORD_BITS=24"
+      ],
+      "note": "La vraie famille q4 a H=-2*m^6 (145bits) ; signe du repli large juge separement."
+    },
+    {
+      "id": "orientation_materialized_certificate_lost",
+      "fichier": "src/num/sphere.cpp",
+      "cherche": "return Sphere(anchor_, numerator_, denominator_, level.value(), 4, false, orientation_i128_, q4_presentation_inside_);",
+      "remplace": "return Sphere(anchor_, numerator_, denominator_, level.value(), 4, false, false, q4_presentation_inside_);",
+      "porte": "mhgp12_num_unit_orientation_public",
+      "options": [
+        "-DMHGP12_COORD_BITS=21"
+      ],
+      "note": "Contrat de transmission du certificat, pas corruption geometrique du fallback Wide."
+    },
+    {
+      "id": "orientation_numerator_boundary",
+      "fichier": "src/num/orientation_certificate.hpp",
+      "cherche": "coordinate <= -n_limit || coordinate >= n_limit",
+      "remplace": "coordinate < -n_limit || coordinate > n_limit",
+      "porte": "mhgp12_num_unit_orientation_limits",
+      "options": [
+        "-DMHGP12_COORD_BITS=24"
+      ],
+      "note": "Contrat bool strict seulement : egalites encore sures avec la marge, aucune fausse geometrie revendiquee."
+    },
+    {
+      "cherche": "if (w0<=0) return false;",
+      "fichier": "src/num/q4_weights.hpp",
+      "id": "q4_presentation_zero_native",
+      "note": "Poids nul de la presentation admis, aucune UB.",
+      "porte": "mhgp12_num_q4_presentation_presentation",
+      "remplace": "if (w0<0) return false;"
+    },
+    {
+      "cherche": "if (w0.value().sign()<=0) return false;",
+      "fichier": "src/num/q4_weights.hpp",
+      "id": "q4_presentation_zero_wide_u24",
+      "note": "Meme poids nul avec bbox hors certificat natif, echelle 2^20.",
+      "options": [
+        "-DMHGP12_COORD_BITS=24"
+      ],
+      "porte": "mhgp12_num_q4_presentation_presentation",
+      "remplace": "if (w0.value().sign()<0) return false;"
+    },
+    {
+      "cherche": "return Sphere(anchor_, numerator_, denominator_, level.value(), 4, false, orientation_i128_, q4_presentation_inside_);",
+      "fichier": "src/num/sphere.cpp",
+      "id": "q4_presentation_materialize_lost",
+      "note": "La geometrie reste correcte mais la propriete exacte de presentation est perdue.",
+      "porte": "mhgp12_num_q4_presentation_presentation",
+      "remplace": "return Sphere(anchor_, numerator_, denominator_, level.value(), 4, false, orientation_i128_, false);"
+    },
+    {
+      "id": "triangle_collinear_non_strict",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "if (normal[0] == 0 && normal[1] == 0 && normal[2] == 0) return TriangleKind::degenerate;",
+      "remplace": "if (normal[0] == 0 && normal[1] == 0 && normal[2] == 0) return TriangleKind::non_strict;",
+      "porte": "mhgp12_num_triangle_kind_kinds",
+      "note": "Classification geometrique incorrecte, sans UB ni refus de construction."
+    },
+    {
+      "id": "triangle_non_strict_admis",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "return TriangleKind::non_strict;",
+      "remplace": "return TriangleKind::strict;",
+      "porte": "mhgp12_num_triangle_kind_kinds",
+      "note": "Classification geometrique incorrecte, sans UB ni refus de construction."
+    },
+    {
+      "id": "bound_signs_native_swapped",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "return PowerBoundSigns{detail::sign(lower), detail::sign(upper)};",
+      "remplace": "return PowerBoundSigns{detail::sign(upper), detail::sign(lower)};",
+      "porte": "mhgp12_num_bounds_fraction",
+      "note": "Les signes natifs des bornes doivent suivre power_bounds ; la sonde Fraction refuse tout ecart."
+    },
+    {
+      "id": "candidat_q3_tague_q4_u21",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "  explicit CenterView(const Q3Candidate& sphere) noexcept\n      : anchor_(sphere.anchor()), numerator_(sphere.numerator()), denominator_(sphere.denominator()),\n        arity_(sphere.presentation_arity()),",
+      "remplace": "  explicit CenterView(const Q3Candidate& sphere) noexcept\n      : anchor_(sphere.anchor()), numerator_(sphere.numerator()), denominator_(sphere.denominator()),\n        arity_(4),",
+      "porte": "mhgp12_num_unit_q3_candidate",
+      "options": [
+        "-DMHGP12_COORD_BITS=21"
+      ],
+      "note": "candidat q3 vu comme q4 : la voie native i128 sans certificat deborde sur le temoin homothetique (puissance 256 s^6, 128 bits en u21)"
+    },
+    {
+      "id": "candidat_q3_niveau_brut_change",
+      "fichier": "src/num/sphere.cpp",
+      "cherche": "auto level = detail::checked_level(numerator, to_wide(2 * denominator_));",
+      "remplace": "auto level = detail::checked_level(multiply(numerator, to_wide(i128{3})), multiply(to_wide(2 * denominator_), to_wide(i128{3})));",
+      "porte": "mhgp12_num_unit_q3_candidate",
+      "note": "meme valeur rationnelle, forme brute changee : le niveau q3 differe doit garder la formule de degre six non reduite"
+    },
+    {
+      "id": "carre_parfait_hors_classe",
+      "fichier": "src/num/radical.cpp",
+      "cherche": "const u32 parity = valuation & 1u;",
+      "remplace": "const u32 parity = valuation;",
+      "porte": "mhgp12_num_radical",
+      "note": "defaut b4632db51 transpose : la signature garde la valuation au lieu de sa parite, un radicande carre parfait (36, 64, 144 de F5) ne rejoint plus la classe rationnelle ; trois classes de somme nulle, refus au lieu de l'egalite certifiee 1/4"
+    },
+    {
+      "id": "egalite_non_certifiee",
+      "fichier": "src/num/radical.cpp",
+      "cherche": "    if (high.sign() < 0) return set_sign(-1, out);\n",
+      "remplace": "    if (high.sign() < 0) return set_sign(-1, out);\n    return set_sign(0, out);\n",
+      "porte": "mhgp12_num_radical",
+      "note": "un encadrement qui contient 0 conclut a l'egalite au lieu de raffiner : le temoin du second ordre (ecart -2^-122, trois classes) rend 0 au lieu de -1 a 192 bits"
+    },
+    {
+      "id": "budget_ignore",
+      "fichier": "src/num/radical.cpp",
+      "cherche": "return fail(Reason::radical_sign_budget);  // `raise Refusal`",
+      "remplace": "return set_sign(0, out);  // `raise Refusal`",
+      "porte": "mhgp12_num_radical",
+      "note": "au-dela de 2^-8192 la somme non separee est declaree nulle au lieu du refus radical_sign_budget : temoin du second ordre a n = 2^2050 + 1 (ecart -2^-6152)"
+    },
+    {
+      "id": "encadrement_decale",
+      "fichier": "src/num/roots.cpp",
+      "cherche": "      high += r + 1;",
+      "remplace": "      high += r;",
+      "porte": "mhgp12_num_roots",
+      "note": "borne haute d'une racine positive prise a R au lieu de R + 1 : l'encadrement ne contient plus la valeur vraie ; bornes lo, hi comparees a Python et decisions de la table fausses"
+    },
+    {
+      "id": "lattice_plancher_au_lieu_du_plus_proche",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "const i64 nearest = q + (2 * remainder > d ? 1 : 0);",
+      "remplace": "const i64 nearest = q;",
+      "porte": "mhgp12_num_lattice_lattice_random",
+      "note": "minorant au plancher de c_j au lieu de l'entier le plus proche : F n'y est plus minimale, exclusion abusive"
+    },
+    {
+      "id": "lattice_coin_proche",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "far[j] = i64{lo[j]} + hi[j] >= far_threshold_[j] ? hi[j] : lo[j];",
+      "remplace": "far[j] = i64{lo[j]} + hi[j] >= far_threshold_[j] ? lo[j] : hi[j];",
+      "porte": "mhgp12_num_lattice_lattice_random",
+      "note": "majorant au coin proche du centre : ce n'est plus le maximum, inclusion abusive"
+    },
+    {
+      "id": "lattice_seuil_plancher",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "const i64 twice = 2 * q + (remainder == 0 ? 0 : 2 * remainder <= d ? 1 : 2);  // ceil(2C/D)",
+      "remplace": "const i64 twice = 2 * q;  // ceil(2C/D)",
+      "porte": "mhgp12_num_lattice_lattice_random",
+      "note": "seuil du coin eloigne au plancher de 2c_j au lieu du plafond : mauvais coin quand c_j passe le milieu"
+    },
+    {
+      "id": "lattice_puissance_sans_ancre_z",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "const std::array<i64, 3> v{point[0] - anchor_[0], point[1] - anchor_[1], point[2] - anchor_[2]};",
+      "remplace": "const std::array<i64, 3> v{point[0] - anchor_[0], point[1] - anchor_[1], point[2]};",
+      "porte": "mhgp12_num_lattice_lattice_random",
+      "note": "puissance copiee de LatticeSphere sans l'ancre sur z : bornes et cote faux des que l'ancre a z non nul"
+    }
+  ]
+}
