@@ -1,0 +1,15 @@
+index	name	status	exit_code	wall_seconds	timeout_seconds	max_rss_kb
+0	socle_ctest	ok	0	166.166	900	687776
+1	tour_ng00_k5_w48	ok	0	1.523	300	384964
+2	tour_ng01_k5_w48	ok	0	1.247	300	337532
+3	tour_ng02_k5_w48	ok	0	1.522	300	433844
+4	tour_ng00_k10_w48	ok	0	4.810	600	1752032
+5	tour_ng01_k10_w48	ok	0	3.672	600	1365664
+6	tour_ng02_k10_w48	ok	0	4.432	600	1705984
+7	tour_ng00_k5_w1	ok	0	11.306	600	364136
+8	tour_u8000_k5_w48	ok	0	0.444	300	154776
+9	tour_u16000_k5_w48	ok	0	0.984	300	327736
+10	tour_u32000_k5_w48	ok	0	2.133	300	673224
+11	lidar_ctest	ok	0	57.302	1500	1078996
+12	source_v11	ok	0	5.082	900	277220
+13	mes_p_fils_1_4	deadline_cut	124	2174.003	3000	2464640
