@@ -56,8 +56,12 @@
   const lerp = (a, b, u) => a + (b - a) * u;
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const smooth = (u) => { u = clamp(u, 0, 1); return u * u * (3 - 2 * u); };
-  const frNum = (v, d) => v.toFixed(d).replace('.', ',');
+  // Langue de l'habillage : paramètre lang de l'adresse (« fr » par défaut ; « en » pour les vidéos anglaises, dont la
+  // scène, data/duel_k<k>_en.js, porte déjà ses titres et ses bandeaux en anglais : tools/duel_scene.py --relabel en).
+  const EN = typeof location !== 'undefined' && new URLSearchParams(location.search).get('lang') === 'en';
+  const frNum = (v, d) => (EN ? v.toFixed(d) : v.toFixed(d).replace('.', ','));  // virgule décimale, point en anglais
   function typo(str) {  // apostrophe courbe, espaces insécables de la typographie française
+    if (EN) return String(str).replace(/'/g, '’');
     return String(str).replace(/'/g, '’').replace(/ ([:;%?!»])/g, ' $1').replace(/« /g, '« ');
   }
   function hexToRgb(h) { const v = parseInt(h.slice(1), 16); return [(v >> 16) & 255, (v >> 8) & 255, v & 255]; }
@@ -376,7 +380,7 @@
     const axisY = LANES.y + LANES.h - 38;
     const laneH = Math.min(70, (axisY - LANES.y - 40) / nobj);
     const top0 = LANES.y + 36 + (axisY - LANES.y - 40 - laneH * nobj) / 2;
-    text(ctx, 'IoU du groupe qui suit chaque objet', col.x + 18, LANES.y + 26, 17, C.dim);
+    text(ctx, EN ? 'IoU of the group tracking each object' : 'IoU du groupe qui suit chaque objet', col.x + 18, LANES.y + 26, 17, C.dim);
     const rShow = phase === 'intro' ? 0 : reveal;
     // graduations en centimètres
     ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
@@ -397,7 +401,7 @@
       ctx.setLineDash([5, 5]); ctx.strokeStyle = C.dim; ctx.globalAlpha = 0.8;
       ctx.beginPath(); ctx.moveTo(x0, Y(0.5)); ctx.lineTo(x1, Y(0.5)); ctx.stroke();
       ctx.setLineDash([]); ctx.globalAlpha = 1;
-      if (o === 0) text(ctx, '0,5', x0 - 8, Y(0.5) + 5, 14, C.dim, { align: 'right' });
+      if (o === 0) text(ctx, frNum(0.5, 1), x0 - 8, Y(0.5) + 5, 14, C.dim, { align: 'right' });
       // courbe en escalier jusqu'au niveau courant
       const tr = M.tracks[o];
       const segs = [];
@@ -441,7 +445,7 @@
         rich(ctx, parts, x1 + 18, ty + laneH / 2 + 7, 20, 'left');
       }
     }
-    text(ctx, 'meilleur', x1 + 18, LANES.y + 26, 15, C.dim);
+    text(ctx, EN ? 'best' : 'meilleur', x1 + 18, LANES.y + 26, 15, C.dim);
     // curseur
     if (phase !== 'intro') {
       const xx = X(clamp(r, S.rmin, S.rmax));
@@ -458,15 +462,16 @@
       const lab = `r = ${cm(r)}`;
       text(ctx, lab, W - 24, 62, 38, C.text, { bold: true, align: 'right' });
     } else {
-      text(ctx, 'vérité terrain', W - 24, 62, 30, C.dim, { bold: true, align: 'right' });
+      text(ctx, EN ? 'ground truth' : 'vérité terrain', W - 24, 62, 30, C.dim, { bold: true, align: 'right' });
     }
     for (const col of COLS) {
       const isH = col.key === 'hgp';
       const name = isH ? 'HGP' : 'HDBSCAN';
-      const sub = isH ? `Morse HGP 3D v11 · hiérarchie de points Hʳₖ₊₁ · k = ${m.k}` : `scikit-learn 1.7.2 · min_samples = ${m.k}`;
+      const sub = isH ? (EN ? `Morse HGP 3D v11 · point hierarchy Hʳₖ₊₁ · k = ${m.k}` : `Morse HGP 3D v11 · hiérarchie de points Hʳₖ₊₁ · k = ${m.k}`)
+        : `scikit-learn 1.7.2 · min_samples = ${m.k}`;
       text(ctx, name, col.x + 4, 140, 32, C.text, { bold: true });
       text(ctx, sub, col.x + 14 + measure(ctx, name, 32, true), 139, 19, C.dim);
-      if (waiting === col.key) text(ctx, 'ensuite', col.x + col.w - 6, 139, 21, C.dim, { bold: true, align: 'right' });
+      if (waiting === col.key) text(ctx, EN ? 'next' : 'ensuite', col.x + col.w - 6, 139, 21, C.dim, { bold: true, align: 'right' });
     }
   }
 
@@ -475,18 +480,19 @@
     const y = FOOT.y + 20;
     let x = 28;
     const item = (draw, label) => { draw(x, y - 6); x += 22; text(ctx, label, x, y, 16, C.dim); x += measure(ctx, label, 16) + 26; };
-    item((xx, yy) => { ctx.fillStyle = rgba(C.objects[0], C.halo * 2.2); ctx.beginPath(); disc(ctx, xx + 6, yy, 9); ctx.fill(); }, 'halo : objet (vérité terrain)');
-    item((xx, yy) => { ctx.fillStyle = C.objects[0]; ctx.beginPath(); disc(ctx, xx + 6, yy, 5); ctx.fill(); }, 'groupe qui suit l\'objet');
-    item((xx, yy) => { ctx.fillStyle = C.fusion; ctx.beginPath(); disc(ctx, xx + 6, yy, 5); ctx.fill(); }, 'objets réunis');
-    item((xx, yy) => { ctx.fillStyle = C.other; ctx.beginPath(); disc(ctx, xx + 6, yy, 3.6); ctx.fill(); }, 'autre groupe');
-    item((xx, yy) => { ctx.fillStyle = C.alone; ctx.beginPath(); disc(ctx, xx + 6, yy, 2.4); ctx.fill(); }, 'point seul');
-    if (S.background) item((xx, yy) => { ctx.fillStyle = C.other; ctx.beginPath(); disc(ctx, xx + 6, yy, 2.1); ctx.fill(); }, 'petits points : le fond (hors objets)');
-    text(ctx, 'r : rayon des boules d\'ordre k ; pour HDBSCAN, distance d\'atteignabilité mutuelle (rayon de la boule des k voisins) · SemanticKITTI (CC BY-NC-SA)',
+    item((xx, yy) => { ctx.fillStyle = rgba(C.objects[0], C.halo * 2.2); ctx.beginPath(); disc(ctx, xx + 6, yy, 9); ctx.fill(); }, EN ? 'halo: object (ground truth)' : 'halo : objet (vérité terrain)');
+    item((xx, yy) => { ctx.fillStyle = C.objects[0]; ctx.beginPath(); disc(ctx, xx + 6, yy, 5); ctx.fill(); }, EN ? 'group tracking the object' : 'groupe qui suit l\'objet');
+    item((xx, yy) => { ctx.fillStyle = C.fusion; ctx.beginPath(); disc(ctx, xx + 6, yy, 5); ctx.fill(); }, EN ? 'merged objects' : 'objets réunis');
+    item((xx, yy) => { ctx.fillStyle = C.other; ctx.beginPath(); disc(ctx, xx + 6, yy, 3.6); ctx.fill(); }, EN ? 'other group' : 'autre groupe');
+    item((xx, yy) => { ctx.fillStyle = C.alone; ctx.beginPath(); disc(ctx, xx + 6, yy, 2.4); ctx.fill(); }, EN ? 'isolated point' : 'point seul');
+    if (S.background) item((xx, yy) => { ctx.fillStyle = C.other; ctx.beginPath(); disc(ctx, xx + 6, yy, 2.1); ctx.fill(); }, EN ? 'small points: background (non-object points)' : 'petits points : le fond (hors objets)');
+    text(ctx, EN ? 'r: radius of the order-k balls; for HDBSCAN, mutual reachability distance (radius of the k-nearest-neighbour ball) · SemanticKITTI (CC BY-NC-SA)'
+      : 'r : rayon des boules d\'ordre k ; pour HDBSCAN, distance d\'atteignabilité mutuelle (rayon de la boule des k voisins) · SemanticKITTI (CC BY-NC-SA)',
       28, y + 26, 15, C.dim);
   }
 
   function listing(keys) {
-    return keys.length === 1 ? keys[0] : keys.slice(0, -1).join(', ') + ' et ' + keys[keys.length - 1];
+    return keys.length === 1 ? keys[0] : keys.slice(0, -1).join(', ') + (EN ? ' and ' : ' et ') + keys[keys.length - 1];
   }
   // rôle de couleur écrit par tools/duel_scene.py -> couleur du thème courant
   function roleColor(role) {
@@ -516,7 +522,7 @@
   function drawSummary(ctx, S, col, u) {
     const M = S.methods[col.key].m;
     const letters = S.scene.objects.map((ob) => ob.key);
-    const parts = [['meilleur IoU   ', C.dim, false]];
+    const parts = [[EN ? 'best IoU   ' : 'meilleur IoU   ', C.dim, false]];
     M.best.forEach((v, o) => {
       parts.push([`${letters[o]} ${iouText(v)}`, C.objects[o], true]);
       parts.push([v > 0.5 ? ' ✓' : ' ✗', v > 0.5 ? C.ok : C.fusion, true]);
@@ -524,8 +530,9 @@
     });
     const never = M.best.map((v, o) => (v <= 0.5 ? letters[o] : null)).filter(Boolean);
     const plural = never.length > 1;
-    const verdict = never.length ? [[`${listing(never)} jamais retrouvé${plural ? 's' : ''} : aucun groupe ne ${plural ? 'les' : 'le'} recouvre à plus de 50 %`, C.fusion, true]]
-      : [['chaque objet retrouvé par un groupe de la hiérarchie', C.ok, true]];
+    const verdict = never.length ? [[EN ? `${listing(never)} never recovered: no group covers ${plural ? 'them' : 'it'} by more than 50%`
+      : `${listing(never)} jamais retrouvé${plural ? 's' : ''} : aucun groupe ne ${plural ? 'les' : 'le'} recouvre à plus de 50 %`, C.fusion, true]]
+      : [[EN ? 'every object recovered by a group of the hierarchy' : 'chaque objet retrouvé par un groupe de la hiérarchie', C.ok, true]];
     ctx.globalAlpha = u;
     const w = Math.max(richWidth(ctx, parts, 26), richWidth(ctx, verdict, 20)) + 48, x = col.x + col.w / 2 - w / 2, y = VIEW.y + 16;
     ctx.fillStyle = C.plate; roundRect(ctx, x, y, w, 92, 14); ctx.fill();

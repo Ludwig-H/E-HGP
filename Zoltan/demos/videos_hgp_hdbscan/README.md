@@ -201,6 +201,28 @@ python3 -O -m unittest discover -s $T -p 'test_*.py'
 
 `NOMS` : les groupes de vélos et de piétons (`kind` ≠ « voitures » dans `bouts.json`).
 
+## Versions anglaises
+
+Quatre vidéos existent aussi en anglais (thème clair), pour une présentation : mêmes points, mêmes niveaux, mêmes
+pauses et même minutage que les vidéos françaises ; seuls les mots changent (titres, bandeaux, légende, nombres à
+point décimal).
+
+| Vidéo française | Version anglaise |
+| --- | --- |
+| [un piéton et un vélo, 00/002140, instances, k = 10](00_002140_pieton_velo_1_6/instances/00_002140_pieton_velo_1_6_instances_k10_clair.mp4) | [anglais](00_002140_pieton_velo_1_6/instances/00_002140_pieton_velo_1_6_instances_k10_clair_en.mp4) |
+| [un piéton et deux vélos, 06/000800, sans sol, k = 10](06_000800_pieton_deux_velos_2_8_12/sans_sol/06_000800_pieton_deux_velos_2_8_12_sans_sol_k10_clair.mp4) | [anglais](06_000800_pieton_deux_velos_2_8_12/sans_sol/06_000800_pieton_deux_velos_2_8_12_sans_sol_k10_clair_en.mp4) |
+| [deux vélos, 08/001170, sans sol, k = 5](08_001170_deux_velos_43_57/sans_sol/08_001170_deux_velos_43_57_sans_sol_k5_clair.mp4) | [anglais](08_001170_deux_velos_43_57/sans_sol/08_001170_deux_velos_43_57_sans_sol_k5_clair_en.mp4) |
+| [deux vélos, 08/002852, sans sol, k = 5](08_002852_deux_velos_6_51/sans_sol/08_002852_deux_velos_6_51_sans_sol_k5_clair.mp4) | [anglais](08_002852_deux_velos_6_51/sans_sol/08_002852_deux_velos_6_51_sans_sol_k5_clair_en.mp4) |
+
+Les textes d'une scène déjà construite se réécrivent sans recalculer les hiérarchies (`duel_scene.py --relabel en`,
+qui écrit `data/duel_k<k>_en.js`) ; le lecteur prend `lang=en` dans son adresse. En français, `--relabel fr` redonne
+chaque scène à l'octet près (32 scènes sur 32, et un test le vérifie) : les vidéos françaises ne changent pas.
+
+```bash
+python3 $T/duel_scene.py --relabel en --k 5 Zoltan/demos/videos_hgp_hdbscan/08_002852_deux_velos_6_51/sans_sol
+node $T/render_duel.cjs Zoltan/demos/videos_hgp_hdbscan/08_002852_deux_velos_6_51/sans_sol --k 5 --theme clair --lang en
+```
+
 ## Limites
 
 - Les groupes viennent d'une recherche par la vérité terrain : ce sont des cas difficiles choisis, pas un échantillon

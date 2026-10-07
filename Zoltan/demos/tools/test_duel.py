@@ -127,10 +127,33 @@ class Oracles(unittest.TestCase):
     def test_iou_text(self):
         self.assertEqual([ds.iou_text(v) for v in (0.502, 0.4999, 0.49, 0.51, 0.5, 0.963768)],
                          ['0,502', '0,4999', '0,49', '0,51', '0,50', '0,96'])
+        self.assertEqual([ds.iou_text(v, 'en') for v in (0.502, 0.4999, 0.49, 0.51, 0.5, 0.963768)],
+                         ['0.502', '0.4999', '0.49', '0.51', '0.50', '0.96'])
+
+    def test_english_words(self):
+        self.assertEqual(ds.title(['bicycle', 'bicycle'], 'en'), 'Two bicycles')
+        self.assertEqual(ds.title(['bicycle', 'person', 'bicycle'], 'en'), 'A pedestrian and two bicycles')
+        self.assertEqual(ds.title(['bicycle', 'person', 'bicycle']), 'Un piéton et deux vélos')
+        self.assertEqual((ds.listing([0, 1, 2], 'en'), ds.listing([0, 1, 2])), ('A, B and C', 'A, B et C'))
+        self.assertEqual((ds.thousands(1283, 'en'), ds.thousands(1283)), ('1,283', '1\u202f283'))
+        self.assertEqual((ds.object_name('person', 'en'), ds.object_name('person')), ('pedestrian', 'piéton'))
 
 
 def local_scenes():
     return sorted(ROOT.glob('videos_hgp_hdbscan/*/*/data/duel_k*.js'))
+
+
+def strip_texts(scene):
+    """Scène privée de ses textes (titres, noms, mots des bandeaux) : ce qui ne doit pas dépendre de la langue."""
+    out = json.loads(json.dumps(scene))
+    out['meta'].pop('title'), out['meta'].pop('subtitle')
+    for ob in out['objects']:
+        ob.pop('name')
+    for pause in out['timing']['pauses']:
+        for side in pause['badges'].values():
+            for b in side:
+                b['parts'] = [[role, bold] for _, role, bold in b['parts']]
+    return out
 
 
 def load(path):
@@ -143,6 +166,28 @@ class LocalScenes(unittest.TestCase):
         self.scenes = local_scenes()
         if not self.scenes:
             self.skipTest('aucune scène locale (lancer tools/duel_scene.py)')
+
+    def test_french_relabel_is_identity(self):
+        # les textes réécrits par relabel (même code que l'anglais) redonnent la scène française à l'octet près
+        for path in self.scenes:
+            if path.stem.endswith('_en'):
+                continue
+            out = ds.relabel(path.parents[1], int(path.stem.split('_k')[1]), 'fr')
+            self.assertTrue(out['identique'], path)
+
+    def test_english_scenes_change_only_words(self):
+        for path in self.scenes:
+            if not path.stem.endswith('_en'):
+                continue
+            french = path.with_name(path.name.replace('_en.js', '.js'))
+            en, fr = load(path), load(french)
+            self.assertEqual(strip_texts(en), strip_texts(fr), path)
+            words = [en['meta']['title'], en['meta']['subtitle']] + [ob['name'] for ob in en['objects']] + [
+                part[0] for pause in en['timing']['pauses'] for side in pause['badges'].values() for b in side
+                for part in b['parts']]
+            for word in words:
+                self.assertIsNone(re.search(r'[éèêàçù]|\b(et|réunis|retrouvé|jamais|encore|avec|fond)\b|\b0,\d|\d,\d+ cm', word),
+                                  (path, word))
 
     def test_scene_contract(self):
         roles = {'ok', 'fusion', 'text', 'dim', 'obj0', 'obj1', 'obj2'}

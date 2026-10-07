@@ -62,6 +62,13 @@ from kitti import FR, class_name  # noqa: E402
 LETTERS = 'ABC'
 NUMBER = {1: 'un', 2: 'deux', 3: 'trois'}
 WORD = {'bicycle': 'vélo', 'person': 'piéton', 'car': 'voiture', 'bicyclist': 'cycliste'}
+# Version anglaise des textes d'une scène (--relabel en) : mêmes niveaux, mêmes bandeaux, seuls les mots changent.
+LANGS = ('fr', 'en')
+NUMBER_EN = {1: 'a', 2: 'two', 3: 'three'}
+WORD_EN = {'bicycle': 'bicycle', 'person': 'pedestrian', 'car': 'car', 'bicyclist': 'cyclist'}
+NAME_EN = {'person': 'pedestrian', 'bicyclist': 'cyclist', 'other-vehicle': 'other vehicle', 'on-rails': 'tram',
+           'other-ground': 'other ground', 'other-structure': 'other structure', 'other-object': 'other object',
+           'lane-marking': 'lane marking', 'traffic-sign': 'traffic sign'}
 KMAX, ORDERS = 10, (2, 3, 5, 10)
 NONE, FRAGMENT, MATCHED, FUSED = 0, 1, 2, 3
 
@@ -84,17 +91,26 @@ def objects_of(raw, keys):
     return obj, np.isin(raw & 0xFFFF, VOID)
 
 
-def title(classes):
+def title(classes, lang='fr'):
     seen = []
     for cl in classes:
         if cl not in seen:
             seen.append(cl)
     parts = []
     for cl in sorted(seen, key=lambda c: (c != 'person', c)):
-        n, word = classes.count(cl), WORD.get(cl, cl)
-        parts.append('un ' + word if n == 1 else '%s %ss' % (NUMBER[n], word))
-    text = ' et '.join(parts)
+        if lang == 'en':
+            n, word = classes.count(cl), WORD_EN.get(cl, cl)
+            parts.append('a ' + word if n == 1 else '%s %ss' % (NUMBER_EN[n], word))
+        else:
+            n, word = classes.count(cl), WORD.get(cl, cl)
+            parts.append('un ' + word if n == 1 else '%s %ss' % (NUMBER[n], word))
+    text = (' and ' if lang == 'en' else ' et ').join(parts)
     return text[0].upper() + text[1:]
+
+
+def object_name(cl, lang='fr'):
+    """Nom d'un objet suivi (étiquette « A · vélo » du lecteur)."""
+    return NAME_EN.get(cl, cl) if lang == 'en' else FR.get(cl, cl)
 
 
 # ------------------------------------------------------------------ hiérarchies
@@ -579,20 +595,28 @@ ABSORBED = {'building': 'le bâtiment', 'fence': 'la clôture', 'vegetation': 'l
             'truck': 'un camion', 'bus': 'un bus', 'other-vehicle': 'un véhicule', 'person': 'un piéton',
             'bicycle': 'un autre vélo', 'motorcycle': 'une moto', 'bicyclist': 'un cycliste',
             'motorcyclist': 'un motard', 'on-rails': 'un tram'}
+ABSORBED_EN = {'building': 'the building', 'fence': 'the fence', 'vegetation': 'the vegetation', 'trunk': 'a trunk',
+               'terrain': 'the ground', 'road': 'the ground', 'sidewalk': 'the ground', 'parking': 'the ground',
+               'other-ground': 'the ground', 'lane-marking': 'the ground', 'pole': 'a pole',
+               'traffic-sign': 'a traffic sign', 'car': 'a car', 'truck': 'a truck', 'bus': 'a bus',
+               'other-vehicle': 'a vehicle', 'person': 'a pedestrian', 'bicycle': 'another bicycle',
+               'motorcycle': 'a motorcycle', 'bicyclist': 'a cyclist', 'motorcyclist': 'a motorcyclist',
+               'on-rails': 'a tram'}
 HOLD_INTRO = 1.6  # secondes de vérité terrain immobile au début de la vidéo
 
 
-def listing(objs):
+def listing(objs, lang='fr'):
     keys = [LETTERS[o] for o in objs]
-    return keys[0] if len(keys) == 1 else ', '.join(keys[:-1]) + ' et ' + keys[-1]
+    return keys[0] if len(keys) == 1 else ', '.join(keys[:-1]) + (' and ' if lang == 'en' else ' et ') + keys[-1]
 
 
-def iou_text(v):
+def iou_text(v, lang='fr'):
     """Deux décimales, davantage près du seuil : 0,502 > 0,5 ne doit pas se lire « 0,50 » (même règle que le lecteur)."""
     d = 2
     while d < 6 and v != 0.5 and round(v, d) == 0.5:
         d += 1
-    return ('%.*f' % (d, v)).replace('.', ',')
+    out = '%.*f' % (d, v)
+    return out if lang == 'en' else out.replace('.', ',')
 
 
 def row_at(track, r):
@@ -627,9 +651,11 @@ def separate(m, objs, r):
     return True
 
 
-def badges(scene, pause):
+def badges(scene, pause, lang='fr'):
     """Bandeaux d'une pause, par colonne : bordure et morceaux de texte [texte, rôle de couleur, gras]. Le lecteur
-    les affiche tels quels ; les README en tirent le tableau des événements (une seule source de texte)."""
+    les affiche tels quels ; les README en tirent le tableau des événements (une seule source de texte). lang : 'fr'
+    (vidéos d'origine) ou 'en' (--relabel en) ; seuls les mots changent."""
+    en = lang == 'en'
     out = dict(hgp=[], hdbscan=[])
     r = pause['r']
     collapsed, compared = {}, []
@@ -643,7 +669,8 @@ def badges(scene, pause):
             compared += [(method, o)]
             row = row_at(m['tracks'][o], r)
             out[method].append(dict(border='obj%d' % o, parts=[['✓ ', 'ok', True], [LETTERS[o], 'obj%d' % o, True],
-                                                               [', IoU maximal : ' + iou_text(row[1]), 'text', True]]))
+                                                               [(', maximum IoU: ' if en else ', IoU maximal : ')
+                                                                + iou_text(row[1], lang), 'text', True]]))
         elif kind == 'chute':
             # objets déjà réunis qui absorbent ensemble le fond : un seul bandeau pour leur groupe (même masque)
             mask = row_at(m['tracks'][int(what)], r)[3]
@@ -651,23 +678,34 @@ def badges(scene, pause):
         elif kind == 'sep':
             group = [int(x) for x in what.split('+')]
             out[method].append(dict(border='ok', parts=[['✓ ', 'ok', True],
-                                                        [listing(group) + ' retrouvés, encore séparés', 'text', True]]))
+                                                        [listing(group, lang) + (' recovered, still separate' if en else
+                                                                                 ' retrouvés, encore séparés'),
+                                                         'text', True]]))
             compared += [(method, o) for o in group]
         else:
             objs = [int(x) for x in what.split('+')]
             f = next(f for f in m['fusions'] if f['r'] == r and f['objects'] == objs)
             if all(f['before']):
                 out[method].append(dict(border='ok', parts=[['✓ ', 'ok', True],
-                                                            [listing(objs) + ' réunis, chacun retrouvé avant', 'text', True]]))
+                                                            [listing(objs, lang) + (' merged, each recovered before' if en
+                                                                                    else ' réunis, chacun retrouvé avant'),
+                                                             'text', True]]))
                 continue
             never = [o for o in objs if m['best'][o] <= 0.5]  # aucun bloc d'IoU > 1/2, à aucun niveau
             late = [o for j, o in enumerate(objs) if not f['before'][j]]  # retrouvé après la fusion seulement
             shown = never or late
-            why = '%s %s retrouvé%s' % (listing(shown), 'jamais' if never else 'pas encore', 's' if len(shown) > 1 else '')
-            out[method].append(dict(border='fusion', parts=[['✗ ', 'fusion', True], [listing(objs) + ' réunis : ', 'text', True],
+            if en:
+                why = '%s %s recovered' % (listing(shown, lang), 'never' if never else 'not yet')
+            else:
+                why = '%s %s retrouvé%s' % (listing(shown), 'jamais' if never else 'pas encore', 's' if len(shown) > 1 else '')
+            out[method].append(dict(border='fusion', parts=[['✗ ', 'fusion', True],
+                                                            [listing(objs, lang) + (' merged: ' if en else ' réunis : '),
+                                                             'text', True],
                                                             [why, 'fusion', True]]))
             if separate(mo, objs, r):
-                out[other].append(dict(border='dim', parts=[[listing(objs) + ' encore séparés', 'text', True]]))
+                out[other].append(dict(border='dim', parts=[[listing(objs, lang) + (' still separate' if en else
+                                                                                    ' encore séparés'),
+                                                             'text', True]]))
     # pause réussie de HGP (les pauses de HDBSCAN viennent d'abord, HGP attend) : la colonne HDBSCAN dit, au même r,
     # quels objets y sont déjà réunis et l'IoU des autres (en rouge s'il ne dépasse pas 1/2)
     for method in ('hgp',):
@@ -678,32 +716,46 @@ def badges(scene, pause):
         fused = [g for g in fused_groups(mo, list(range(len(scene['objects']))), r) if set(g) & set(objs)]
         for group in fused:
             out['hdbscan'].append(dict(border='fusion', parts=[['✗ ', 'fusion', True],
-                                                               [listing(group) + ' déjà réunis', 'text', True]]))
+                                                               [listing(group, lang) + (' already merged' if en else
+                                                                                        ' déjà réunis'),
+                                                                'text', True]]))
         rest = [o for o in objs if not any(o in g for g in fused)]
         if rest:
-            parts = [['IoU au même r : ', 'dim', False]]
+            parts = [['IoU at the same r: ' if en else 'IoU au même r : ', 'dim', False]]
             for j, o in enumerate(rest):
                 row = row_at(mo['tracks'][o], r)
                 v = 0.0 if row is None or row[2] == NONE else row[1]
                 parts += ([['  ·  ', 'dim', False]] if j else []) + [[LETTERS[o], 'obj%d' % o, True],
-                                                                     [' ' + iou_text(v), 'text' if v > 0.5 else 'fusion', True]]
+                                                                     [' ' + iou_text(v, lang),
+                                                                      'text' if v > 0.5 else 'fusion', True]]
             out['hdbscan'].append(dict(border='dim', parts=parts))
     for (method, _), objs in collapsed.items():
         m = scene['methods'][method]
         chutes = [next(c for c in m['chutes'] if c['r'] == r and c['objet'] == o and not c['fusion']) for o in objs]
         c = chutes[0]
         if c['fond'] >= sum(c['objets'].values()):
-            taken = 'avec ' + ABSORBED.get(c['classe'], 'le fond')
+            taken = ('with ' + ABSORBED_EN.get(c['classe'], 'the background') if en
+                     else 'avec ' + ABSORBED.get(c['classe'], 'le fond'))
         else:
-            taken = 'avec une partie de ' + LETTERS[max(c['objets'], key=c['objets'].get)]
+            taken = ('with part of ' if en else 'avec une partie de ') + LETTERS[max(c['objets'], key=c['objets'].get)]
         if len(objs) == 1:
-            detail = [[' fusionne %s · IoU %s → %s' % (taken, iou_text(c['avant']), iou_text(c['apres'])), 'text', True]]
+            detail = [[(' merges %s · IoU %s → %s' if en else ' fusionne %s · IoU %s → %s')
+                       % (taken, iou_text(c['avant'], lang), iou_text(c['apres'], lang)), 'text', True]]
             out[method].append(dict(border='fusion', parts=[['✗ ', 'fusion', True], [LETTERS[objs[0]], 'obj%d' % objs[0], True]]
                                     + detail))
         else:
             out[method].append(dict(border='fusion', parts=[['✗ ', 'fusion', True],
-                                                            ['%s, déjà réunis, fusionnent %s' % (listing(objs), taken),
+                                                            [('%s (already merged) merge %s' if en else
+                                                              '%s, déjà réunis, fusionnent %s') % (listing(objs, lang), taken),
                                                              'text', True]]))
+    return out
+
+
+def pause_badges(scene, pause, lang='fr'):
+    """Bandeaux d'une pause ; pendant le balayage de HDBSCAN, HGP attend : rien à comparer au même r."""
+    out = badges(scene, pause, lang)
+    if pause['method'] == 'hdbscan':
+        out['hgp'] = []
     return out
 
 
@@ -772,9 +824,7 @@ def schedule(scene):
     t = sweep('hgp', t)
     summary = t + 0.4
     for p in pauses:
-        p['badges'] = badges(scene, p)
-        if p['method'] == 'hdbscan':  # HGP attend : rien à comparer au même r
-            p['badges']['hgp'] = []
+        p['badges'] = pause_badges(scene, p)
 
     def first(test):
         return next((p for p in pauses if any(test(r) for r in p['roles'])), None)
@@ -835,20 +885,14 @@ def build(args, folder):
     objs = []
     for o in range(objects):
         sel = obj == o
-        objs.append(dict(key=LETTERS[o], name=FR.get(entry['classes'][o], entry['classes'][o]),
+        objs.append(dict(key=LETTERS[o], name=object_name(entry['classes'][o]),
                          points=int(np.sum(sel & ~void)), center=[round(float(v), 4) for v in q[sel].mean(axis=0)],
                          top=round(float(q[sel, 2].max()), 4),
                          box=[round(float(v), 4) for v in np.r_[q[sel].min(axis=0), q[sel].max(axis=0)]]))
-    if variante == 'sans_sol':
-        detail = 'sol retiré automatiquement (Patchwork++) · %s points, dont %s des objets' % (
-            thousands(n), thousands(int(np.sum(obj >= 0))))
-    else:
-        detail = 'instances de la vérité terrain seules · %s points' % thousands(n)
+    head, subtitle = meta_texts(variante, entry, k, n, int(np.sum(obj >= 0)))
     scene = dict(
         schema='ehgp.zoltan.duel.v3', variante=variante,
-        meta=dict(title='%s · SemanticKITTI %s/%s' % (title(entry['classes']), entry['seq'], entry['frame']),
-                  subtitle='même ordre k = %d pour les deux hiérarchies · %s' % (k, detail),
-                  k=k, exemple=folder.parent.name, sites=n, gaps=entry['gaps']),
+        meta=dict(title=head, subtitle=subtitle, k=k, exemple=folder.parent.name, sites=n, gaps=entry['gaps']),
         objects=objs, gt=obj.tolist(), void=void.astype(int).tolist(),
         sensor=None if sensor is None else [round(float(v), 3) for v in sensor], view=view,
         points=dict(x=[round(float(v), 4) for v in q[:, 0]], y=[round(float(v), 4) for v in q[:, 1]],
@@ -876,24 +920,92 @@ def build(args, folder):
                 view=view, duration=scene['timing']['duration'])
 
 
-def thousands(n):
-    """Entier avec espace fine insécable des milliers (typographie française)."""
-    return '{:,}'.format(int(n)).replace(',', '\u202f')
+def thousands(n, lang='fr'):
+    """Entier avec espace fine insécable des milliers (typographie française) ; virgule en anglais."""
+    out = '{:,}'.format(int(n))
+    return out if lang == 'en' else out.replace(',', '\u202f')
+
+
+def meta_texts(variante, entry, k, n, inside, lang='fr'):
+    """Titre et sous-titre d'une scène : n points, dont inside des objets suivis."""
+    if lang == 'en':
+        if variante == 'sans_sol':
+            detail = 'ground removed automatically (Patchwork++) · %s points, including %s object points' % (
+                thousands(n, lang), thousands(inside, lang))
+        else:
+            detail = 'ground-truth instances only · %s points' % thousands(n, lang)
+        sub = 'same order k = %d for both hierarchies · %s' % (k, detail)
+    else:
+        if variante == 'sans_sol':
+            detail = 'sol retiré automatiquement (Patchwork++) · %s points, dont %s des objets' % (
+                thousands(n), thousands(inside))
+        else:
+            detail = 'instances de la vérité terrain seules · %s points' % thousands(n)
+        sub = 'même ordre k = %d pour les deux hiérarchies · %s' % (k, detail)
+    return '%s · SemanticKITTI %s/%s' % (title(entry['classes'], lang), entry['seq'], entry['frame']), sub
+
+
+SCENE_PREFIX = 'window.DUEL_SCENE = '
+
+
+def relabel(folder, k, lang):
+    """Textes d'une scène déjà construite (titre, sous-titre, noms des objets, bandeaux des pauses) réécrits dans la
+    langue lang, sans recalculer les hiérarchies : mêmes points, mêmes niveaux, même minutage. En français, la scène
+    réécrite doit être identique à l'octet à celle de build (contrôle de la factorisation des textes) ; rien n'est
+    alors écrit. Dans une autre langue : VARIANTE/data/duel_k<k>_<lang>.js (ignoré par git, comme duel_k<k>.js)."""
+    if lang not in LANGS:
+        raise Refus('langue inconnue : %s' % lang)
+    spec = json.loads((folder / 'bout.json').read_text())
+    if spec.get('schema') != 'ehgp.zoltan.bout_variante.v1':
+        raise Refus('bout.json de variante attendu (tools/choisir_exemples.py)')
+    entry = spec['bout']
+    k = int(k or spec['ordre_montre'])
+    source = folder / 'data' / ('duel_k%d.js' % k)
+    text = source.read_text()
+    if not (text.startswith(SCENE_PREFIX) and text.endswith(';\n')):
+        raise Refus('%s : scène illisible' % source)
+    scene = json.loads(text[len(SCENE_PREFIX):-2])
+    if scene.get('schema') != 'ehgp.zoltan.duel.v3' or scene['meta']['k'] != k:
+        raise Refus('%s : schéma ou ordre inattendu' % source)
+    for m in scene['methods'].values():  # JSON rend les clés entières en chaînes : celles de build sont entières
+        for c in m['chutes']:
+            c['objets'] = {int(key): value for key, value in c['objets'].items()}
+    inside = sum(1 for g in scene['gt'] if g >= 0)
+    scene['meta']['title'], scene['meta']['subtitle'] = meta_texts(scene['variante'], entry, k, scene['meta']['sites'],
+                                                                   inside, lang)
+    for o, ob in enumerate(scene['objects']):
+        ob['name'] = object_name(entry['classes'][o], lang)
+    for pause in scene['timing']['pauses']:
+        pause['badges'] = pause_badges(scene, pause, lang)
+    payload = SCENE_PREFIX + json.dumps(scene, separators=(',', ':')) + ';\n'
+    if lang == 'fr':
+        if payload != text:
+            raise Refus('%s : les textes français réécrits diffèrent de la scène construite' % source)
+        return dict(folder='%s/%s' % (folder.parent.name, folder.name), k=k, lang=lang, identique=True)
+    target = folder / 'data' / ('duel_k%d_%s.js' % (k, lang))
+    target.write_text(payload)
+    return dict(folder='%s/%s' % (folder.parent.name, folder.name), k=k, lang=lang, scene=str(target),
+                title=scene['meta']['title'])
 
 
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('examples', nargs='+', type=Path)
-    p.add_argument('--export', type=Path, required=True, help='binaire mhgp11_points_export de morsehgp3D_v11')
+    p.add_argument('--export', type=Path, help='binaire mhgp11_points_export de morsehgp3D_v11 (sauf --relabel)')
     p.add_argument('--data', type=Path, help='dossier des points des bouts, si EXEMPLE/data/ est vide')
     p.add_argument('--members', type=Path, help='résultats --members-all de la session G4 (contrôle des blocs)')
     p.add_argument('--k', type=int)
     p.add_argument('--workers', type=int, default=2)
+    p.add_argument('--relabel', choices=LANGS, help='réécrire seulement les textes d\'une scène déjà construite '
+                   '(fr : contrôle d\'identité, rien n\'est écrit ; en : data/duel_k<k>_en.js)')
     args = p.parse_args()
+    if not args.relabel and args.export is None:
+        p.error('--export est requis pour construire une scène')
     code = 0
     for folder in args.examples:
         try:
-            print(json.dumps(build(args, folder), ensure_ascii=False), flush=True)
+            out = relabel(folder, args.k, args.relabel) if args.relabel else build(args, folder)
+            print(json.dumps(out, ensure_ascii=False), flush=True)
         except Refus as error:
             print('refus %s : %s' % (folder.name, error), file=sys.stderr, flush=True)
             code = 1

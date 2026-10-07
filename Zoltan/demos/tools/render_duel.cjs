@@ -4,12 +4,14 @@
  *
  * Usage : node Zoltan/demos/tools/render_duel.cjs <variante> [--k 5] [--theme clair|sombre] [--fps 30]
  *                                                 [--crf 26] [--stills t1,t2,...|key|end|pauses --out DIR]
- *                                                 [--lecteur duel|supports]
+ *                                                 [--lecteur duel|supports] [--lang fr|en]
  *   <variante> : sous-dossier d'exemple (videos_hgp_hdbscan/<exemple>/instances ou sans_sol, avec data/duel_k<k>.js
  *   écrit par tools/duel_scene.py) ; sans --k, le seul data/duel_k*.js présent. Sans --theme, les deux thèmes, comme
  *   Percolia.com. --stills : seulement des images fixes aux instants donnés (secondes), pour relecture.
  *   --lecteur supports : vidéo de la hiérarchie des supports (player/supports.html, data/supports_k<k>.js écrit par
  *   tools/supports_scene.py) ; ses sorties portent « _supports » après l'ordre.
+ *   --lang en : version anglaise (lecteur duel seulement) : scène data/duel_k<k>_en.js (tools/duel_scene.py --relabel en,
+ *   mêmes points, mêmes niveaux, même minutage), habillage anglais du lecteur ; les sorties portent « _en » à la fin.
  *
  * Sorties (un jeu par thème) : <exemple>_<variante>_k<k>_<thème>.mp4 (H.264 High, yuv420p, 1920 × 1080, 30 i/s,
  * sans son, +faststart), _instant_cle.png (l'instant clé de la scène) et _bilan.png (dernière image).
@@ -38,6 +40,9 @@ async function main() {
   const bout = path.resolve(args[0]);
   const lecteur = opt(args, '--lecteur', 'duel');
   if (!['duel', 'supports'].includes(lecteur)) throw new Error('--lecteur : duel ou supports');
+  const lang = opt(args, '--lang', 'fr');
+  if (!['fr', 'en'].includes(lang)) throw new Error('--lang : fr ou en');
+  if (lang !== 'fr' && lecteur !== 'duel') throw new Error('--lang en : lecteur duel seulement');
   let k = opt(args, '--k', null);
   if (k == null) {
     const found = fs.readdirSync(path.join(bout, 'data')).filter((f) => new RegExp(`^${lecteur}_k\\d+\\.js$`).test(f));
@@ -49,15 +54,17 @@ async function main() {
   if (only && !['clair', 'sombre'].includes(only)) throw new Error('--theme : clair ou sombre');
   const themes = only ? [only] : ['sombre', 'clair'];
   const root = path.resolve(__dirname, '..');
-  const sceneFile = path.join(bout, 'data', `${lecteur}_k${k}.js`);
-  if (!fs.existsSync(sceneFile)) throw new Error(`scène absente : lancer tools/${lecteur}_scene.py`);
+  const sceneFile = path.join(bout, 'data', lang === 'fr' ? `${lecteur}_k${k}.js` : `${lecteur}_k${k}_${lang}.js`);
+  if (!fs.existsSync(sceneFile)) {
+    throw new Error(`scène absente : lancer tools/${lecteur}_scene.py${lang === 'fr' ? '' : ' --relabel ' + lang}`);
+  }
   const sceneRel = path.relative(path.join(root, 'player'), sceneFile).split(path.sep).join('/');
   const stills = opt(args, '--stills', null);
   const { chromium } = requirePlaywright();
   const browser = await chromium.launch({ args: ['--allow-file-access-from-files'] });
   try {
     for (const theme of themes) {
-      await renderTheme(browser, { bout, k, fps, theme, root, sceneRel, stills, lecteur, out: opt(args, '--out', null),
+      await renderTheme(browser, { bout, k, fps, theme, root, sceneRel, stills, lecteur, lang, out: opt(args, '--out', null),
         crf: opt(args, '--crf', '26') });
     }
   } finally {
@@ -66,7 +73,7 @@ async function main() {
 }
 
 async function renderTheme(browser, o) {
-  const url = 'file://' + path.join(o.root, 'player', `${o.lecteur}.html`) + `?capture=1&theme=${o.theme}&scene=${encodeURIComponent(o.sceneRel)}`;
+  const url = 'file://' + path.join(o.root, 'player', `${o.lecteur}.html`) + `?capture=1&theme=${o.theme}&lang=${o.lang}&scene=${encodeURIComponent(o.sceneRel)}`;
   const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
@@ -90,13 +97,14 @@ async function renderTheme(browser, o) {
   };
   const base = `${path.basename(path.dirname(o.bout))}_${path.basename(o.bout)}`;
   const tag = o.lecteur === 'supports' ? '_supports' : '';
+  const suffix = o.lang === 'fr' ? '' : `_${o.lang}`;
   if (o.stills) {
     const dir = path.resolve(o.out || '.');
     fs.mkdirSync(dir, { recursive: true });
     const list = o.stills.split(',').flatMap((s) => (s === 'pauses' ? info.timing.pauses.map((p) => String((p.t0 + p.t1) / 2)) : [s]));
     for (const s of list) {
       const t = s === 'key' ? info.timing.key : (s === 'end' ? info.duration - 0.05 : Number(s));
-      const file = path.join(dir, `${base}_k${o.k}${tag}_${o.theme}_${String(t.toFixed(2)).replace('.', '_')}.png`);
+      const file = path.join(dir, `${base}_k${o.k}${tag}_${o.theme}${suffix}_${String(t.toFixed(2)).replace('.', '_')}.png`);
       fs.writeFileSync(file, await grab(t));
       console.log(file);
     }
@@ -105,7 +113,7 @@ async function renderTheme(browser, o) {
     return;
   }
   const nframes = Math.ceil(info.duration * o.fps);
-  const stem = path.join(o.bout, `${base}_k${o.k}${tag}_${o.theme}`);
+  const stem = path.join(o.bout, `${base}_k${o.k}${tag}_${o.theme}${suffix}`);
   const outMp4 = `${stem}.mp4`, partMp4 = `${stem}.part.mp4`;
   const ff = spawn(ffmpegPath(), ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-vcodec', 'png', '-framerate', String(o.fps), '-i', '-',
     '-c:v', 'libx264', '-preset', 'veryslow', '-crf', String(o.crf), '-tune', 'animation', '-pix_fmt', 'yuv420p', '-profile:v', 'high', '-level', '4.1',

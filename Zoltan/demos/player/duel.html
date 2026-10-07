@@ -91,6 +91,7 @@
   const params = new URLSearchParams(location.search);
   const src = params.get('scene');
   if (params.has('capture')) document.body.classList.add('capture');
+  if (params.get('lang') === 'en') document.documentElement.lang = 'en';  // vidéos anglaises (render_duel.cjs --lang en)
   const canvas = document.getElementById('c');
   const ctx = canvas.getContext('2d');
   const toggle = document.getElementById('theme');
@@ -156,8 +157,8 @@
   }
   if (!src) { note('Indiquer la scène : duel.html?scene=../videos_hgp_hdbscan/00_001502_deux_velos_28_66/sans_sol/data/duel_k5.js (et, au choix, &theme=clair).'); return; }
   // seules les scènes des exemples sont chargées : ?scene= ne doit pas exécuter un script quelconque
-  if (!/^\.\.\/videos_hgp_hdbscan\/[0-9a-z_]+\/(instances|sans_sol)\/data\/duel_k\d+\.js$/.test(src)) {
-    note('Scène refusée : chemin attendu ../videos_hgp_hdbscan/<exemple>/<instances|sans_sol>/data/duel_k<k>.js'); return;
+  if (!/^\.\.\/videos_hgp_hdbscan\/[0-9a-z_]+\/(instances|sans_sol)\/data\/duel_k\d+(_en)?\.js$/.test(src)) {
+    note('Scène refusée : chemin attendu ../videos_hgp_hdbscan/<exemple>/<instances|sans_sol>/data/duel_k<k>.js (ou duel_k<k>_en.js)'); return;
   }
   const s = document.createElement('script');
   // une scène refusée par prepare() : message dans la page (et sceneError), puis l'erreur remonte
