@@ -1,0 +1,158 @@
+{
+  "note": "Ports explicites du module catalogue (tranche T1), empreintes SHA-256 des sources lues au HEAD df9140b5d (microbancs de la v12) et au moteur gele ac081a06f de la v11 ; chaque port est requalifie par les portes de tests/catalogue, aucune qualification n'est heritee.",
+  "sources": [
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/bfs.hpp",
+      "commit": "e30000dec",
+      "sha256": "baa5cb5f99f168a31765394b6adfe7c836c006a00ff1bcd5d923c23835bc23d1",
+      "port": [
+        "src/catalogue/traversal_records.hpp",
+        "src/catalogue/traversal_kernels.hpp",
+        "src/catalogue/traversal_scan.hpp"
+      ],
+      "changes": "mutants retires (correctifs de tests/mutants/catalogue.json) ; collectives en code uniforme ; arene des feuilles par niveau"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/driver.hpp",
+      "commit": "e30000dec",
+      "sha256": "7fe2d808c0675f3423a29c0ba4699c2a826c154162b1025627eafd009cd5daa1",
+      "port": [
+        "src/catalogue/traversal.cpp"
+      ],
+      "changes": "tableaux du front en Buffer du budget, noyaux repartis sur le Pool, feuilles remises au consommateur niveau par niveau, refus en Outcome"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/warp.hpp",
+      "commit": "e30000dec",
+      "sha256": "919ba0a2f3c54e99919df7e9bb90e8be8528b2f8c0e2b581124c041f85de930a",
+      "port": [
+        "src/catalogue/simt.hpp"
+      ],
+      "changes": "collectives du warp de 32 voies reprises telles quelles"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/simt.hpp",
+      "commit": "a0091e2b7",
+      "sha256": "c7276ddb0aba9b196e1b3c8ad138f778afda04614a3d57e285b94f3cb6f07691",
+      "port": [
+        "src/catalogue/simt.hpp"
+      ],
+      "changes": "largeur N du warp (32 : appareil et hote ; 256 : warp virtuel de l'hote, masques Bits<4>)"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_common.hpp",
+      "commit": "a0091e2b7",
+      "sha256": "db205b77a9b04180e6a74597b876744641b4e5220665851f492875fa9b540afb",
+      "port": [
+        "src/catalogue/leaf_common.hpp",
+        "src/catalogue/leaf_census.hpp"
+      ],
+      "changes": "warp de N voies, politique arithmetique, coordonnees locales, S* par positions (CST-0113), compteurs de la voie DFS de la v11 pour m > 32, plafond declare de coquille"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_j3.hpp",
+      "commit": "a0091e2b7",
+      "sha256": "8235004c799097815bbd48c15c806c9e4d4a7cb6d99934491617c29d7d28a5b5",
+      "port": [
+        "src/catalogue/leaf_j3.hpp"
+      ],
+      "changes": "warp de N voies, politique arithmetique, jugement d'un item isole (judge_item)"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/predicates.hpp",
+      "commit": "a0091e2b7",
+      "sha256": "36144eff2d5ddf57bee5453d2e72b758a72b88dabf037d2323b0a10ad55f4be1",
+      "port": [
+        "src/catalogue/leaf_predicates.hpp",
+        "src/catalogue/leaf_arith.hpp"
+      ],
+      "changes": "repere local et paliers d'etendue (Narrow s <= 16 natif, Exact 320 bits), plus de certificats globaux, milieu en forme locale (CST-0114)"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/leaf_device_predicates.hpp",
+      "commit": "ac081a06f",
+      "sha256": "c638996b661c6fc690a9dff30d61a0c5294b882001bb806009d72120f6168472",
+      "port": [
+        "src/catalogue/leaf_predicates.hpp"
+      ],
+      "changes": "via MES-M2"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/boxes.cpp",
+      "commit": "ac081a06f",
+      "sha256": "2fc06e5e781ef51891ceecb324ecc460b023ea8e15079a32d22eb7d159ecc5a2",
+      "port": [],
+      "changes": "regles du parcours, via MES-M5 (temoin de test seulement)"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "commit": "ac081a06f",
+      "sha256": "1cb484cb2768b5e9ce4a73198ca18c042811a9adf324712a654a723f5ca5f897",
+      "port": [],
+      "changes": "semantique de reference et compteurs de la feuille (voie graphe de paires et DFS historique), via MES-M2"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/support.cpp",
+      "commit": "ac081a06f",
+      "sha256": "ee0f495a21e229dd25671c6b29d0e0fe7f92d4e8f090d5955a7a1783d6db02e9",
+      "port": [
+        "src/catalogue/leaf_census.hpp"
+      ],
+      "changes": "ordre d'enumeration des supports (paires, triangles aigus, tetraedres), departage par positions"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/assemble.cpp",
+      "commit": "ac081a06f",
+      "sha256": "3690de6d856e05e72ce4cebbe1eda14152d609a262bb45efb4c2e7f45a1f13a5",
+      "port": [
+        "src/catalogue/assemble.cpp"
+      ],
+      "changes": "rangs, niveau de la premiere boule d'un rang, CSR ; departage par positions"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.cpp",
+      "commit": "ac081a06f",
+      "sha256": "eb6160b386d344f2017a0da62731259c6d3b71305992f69f7d399f1e583fc3e0",
+      "port": [
+        "src/catalogue/catalogue.cpp"
+      ],
+      "changes": "validation des parametres, refus des multiplicites"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/sort_indices.cpp",
+      "commit": "ac081a06f",
+      "sha256": "1a29095f472a98ae5a44108a4dd3352f1c9be0cbc48d107dd81130fa57aff0c0",
+      "port": [
+        "src/catalogue/sort.cpp"
+      ],
+      "changes": "comparateur v12 (S* par positions), Pool obligatoire"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/sort_level_key.hpp",
+      "commit": "ac081a06f",
+      "sha256": "09de86ef2006bf3dc466f2865123cb201ddbe616e5d3d0a20237205db8dc09cd",
+      "port": [
+        "src/catalogue/sort.cpp"
+      ],
+      "changes": "cles F3 et decision F4 reprises telles quelles"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m3_m4_tour/common/format.hpp",
+      "commit": "d8407e374",
+      "sha256": "cf1d640f567146660a5625688146df2eb79347383a2a9d92f277a4192d11e587",
+      "port": [
+        "src/catalogue/export.cpp"
+      ],
+      "changes": "disposition MHGP12DP v1 genre catalogue, ecrite a neuf sur io::FileWriter (aucune dependance aux microbancs)"
+    },
+    {
+      "path": "morsehgp3D_v11/bench/catalogue_euler.hpp",
+      "commit": "ac081a06f",
+      "sha256": "f293df6ea1a2cc8d5fef6e78453de66343728a61d3013a5d1613cfdbb374dd18",
+      "port": [
+        "tests/catalogue/euler.py"
+      ],
+      "changes": "regles du juge d'Euler a K+2 et de la restriction J1 reecrites en Python exact"
+    }
+  ]
+}

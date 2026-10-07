@@ -48,3 +48,11 @@ MHGP12_REASON(task_exception, invariant_violated, sched)
 // somme de radicaux (num::RadicalSum, num::Big) : signe non separe par les encadrements jusqu'a 2^-8192, entier au-dela
 // de la capacite de Big (16384 + 1024 bits), ou plus de termes que le budget declare ; jamais une egalite supposee
 MHGP12_REASON(radical_sign_budget, resource_exhausted, num)
+// catalogue (tranche T1) : domaine, capacites declarees et coherence, raisons de la v11 (ac081a06f) reprises en fin de
+// table, plus le plafond declare de la coquille d'une boule emise (64 sites, WIT-SPHERE50)
+MHGP12_REASON(kmax_out_of_range, invalid_input, catalogue)
+MHGP12_REASON(multiplicity_unsupported, unsupported_degeneracy, catalogue)
+MHGP12_REASON(wide_leaf, unsupported_degeneracy, catalogue)
+MHGP12_REASON(shell_capacity, unsupported_degeneracy, catalogue)
+MHGP12_REASON(catalogue_invariant, invariant_violated, catalogue)
+MHGP12_REASON(catalogue_counter_overflow, resource_exhausted, catalogue)

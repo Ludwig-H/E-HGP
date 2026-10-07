@@ -1,0 +1,57 @@
+{
+  "module": "catalogue",
+  "plancher": 6,
+  "mutants": [
+    {
+      "id": "temoin_perdu_du_reservoir",
+      "fichier": "src/catalogue/traversal_records.hpp",
+      "cherche": "MHGP12_HD u32 reservoir_capacity(const Params& p) { return 3 * p.kmax; }",
+      "remplace": "MHGP12_HD u32 reservoir_capacity(const Params& p) { return 3 * p.kmax - 1; }",
+      "porte": "mhgp12_catalogue_unit_depth_witnesses",
+      "note": "reservoir de 3K - 1 temoins (CONTRAT_CATALOGUE.md, paragraphe 6.6) : tests G1 et feuilles changent (WIT-FEUILLES, 9 sites, n'a pas 3K - 1 temoins : le grand livre grave des coquilles de 24 et 48 sites le voit)"
+    },
+    {
+      "id": "g1_repere_enfant",
+      "fichier": "src/catalogue/traversal_records.hpp",
+      "cherche": "  return p.frame_bits;",
+      "remplace": "  return 0u * p.frame_bits + bit_length(static_cast<u64>(max_i64(max_i64(hi[0] - lo[0], hi[1] - lo[1]), hi[2] - lo[2])));",
+      "porte": "mhgp12_catalogue_unit_wide_traversal",
+      "options": [
+        "-DMHGP12_COORD_BITS=32"
+      ],
+      "note": "G1 dans le repere de la seule boite de l'enfant (CST-0112) : voie native i64 sur un repere parent de 32 bits ; au profil 21 la branche est equivalente (tout est natif), d'ou le profil 32 du mutant"
+    },
+    {
+      "id": "sstar_par_rang_de_morton",
+      "fichier": "src/catalogue/leaf_census.hpp",
+      "cherche": "while (at > 0 && lex_less(P[r], P[order[at - 1]])) {",
+      "remplace": "while (at > 0 && r < order[at - 1]) {",
+      "porte": "mhgp12_catalogue_unit_witness_rectangle",
+      "note": "S* departage par les rangs locaux (ordre de Morton, convention de la v11) au lieu des positions (CST-0113)"
+    },
+    {
+      "id": "ordre_par_rang_de_morton",
+      "fichier": "src/catalogue/sort.cpp",
+      "cherche": "const int support = compare_support_positions(*cloud, records[a].support, records[b].support);",
+      "remplace": "const int support = records[a].support[0] != records[b].support[0] ? (records[a].support[0] < records[b].support[0] ? -1 : 1) : (records[a].support[1] < records[b].support[1] ? -1 : records[a].support[1] > records[b].support[1] ? 1 : 0);",
+      "porte": "mhgp12_catalogue_unit_witness_transl",
+      "note": "boules de meme niveau rangees par SiteIdx de S* (ordre de la v11) au lieu des positions (ARCHITECTURE.md, regle 5)"
+    },
+    {
+      "id": "feuille_large_sans_elargir",
+      "fichier": "src/catalogue/leaves.cpp",
+      "cherche": "const bool narrow = span <= kLeafNarrowSpan;",
+      "remplace": "const bool narrow = span <= kLeafNarrowSpan || span > 0;",
+      "porte": "mhgp12_catalogue_unit_witness_long_triangle",
+      "note": "feuille d'etendue > 16 jouee en arithmetique native, sans le repli exact plus large (CONTRAT_CATALOGUE.md, paragraphe 2) : le triangle equilateral de cote M*sqrt(2) au bord du domaine fait deborder t = 2 M^3 de l'i64 (les coquilles a l'etendue 21 ne debordent pas en pratique)"
+    },
+    {
+      "id": "feuille_comptee_deux_fois",
+      "fichier": "src/catalogue/leaves.cpp",
+      "cherche": "if (w.status == kLeafOk && !add_leaf_counts(tally.counts, counts)) tally.overflow = true;",
+      "remplace": "if (w.status == kLeafOk && !(add_leaf_counts(tally.counts, counts) && add_leaf_counts(tally.counts, counts))) tally.overflow = true;",
+      "porte": "mhgp12_catalogue_unit_witness_leaves",
+      "note": "les compteurs logiques d'une feuille ajoutes deux fois (une feuille ne compte qu'une fois, apres succes)"
+    }
+  ]
+}

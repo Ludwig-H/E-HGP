@@ -82,6 +82,10 @@ Euler à K+2 (filet), différentiel du catalogue contre la v11 sur trames entiè
 **Sortie** : catalogue identique à celui de la v11 (au départage près, déclaré) ; budget de l'étage atteint sur G4 ou
 écart publié.
 
+**État de T1 (7 octobre 2026, soir)** : voie CPU de référence livrée et conforme à la v11 gelée (K5 et K10, profils
+21 et 32, [contrat § 9](CONTRAT_CATALOGUE.md)) ; lecteur de transition livré ; voie appareil (T1-b) à écrire et à
+juger sur G4 (identité à l'octet avec la voie CPU, budget de l'étage C).
+
 ## 3. T2 — tour
 
 **Entrée** : `MES-M3`, `MES-M4`, `MES-M7` jugés ; `LEM-T1`, `LEM-T3`–`LEM-T6` contre-lus et inscrits au registre ;

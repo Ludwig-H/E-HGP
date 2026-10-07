@@ -149,3 +149,26 @@ niveau égal, un $S^{*}$ n'est jamais préfixe d'un autre), ordre que l'exportat
    vous paraît-elle le bon compromis pour la voie CPU, sachant qu'elle sert surtout la référence et les petits nuages ?
 2. Le départage de $S^{*}$ par positions change la sortie `supports` et la convention `cover_v10` : faut-il un lecteur
    de transition qui compare v11 et v12 en ne tolérant que les coquilles à plusieurs supports minimaux ?
+
+## 9. Voie CPU de référence livrée (7 octobre 2026) et décisions à contre-lire
+
+Module `src/catalogue/` ([reçu du développeur](../receipts/developpement_20261007/catalogue_cpu_RAPPORT.md)) :
+parcours en largeur et feuille J3 en source unique sur le warp simulé, repli exact plus large, fin d'étage sur l'hôte,
+table $S^{*}\to$ boule, export `MHGP12DP`. **Différentiel conforme** à la v11 gelée sur ng00, ng01, ng02 et les uniformes
+de 8 000, 16 000 et 32 000 sites à K5 (profils 21 et 32 ; vingt compteurs logiques égaux ; deux $S^{*}$ changés sur ng02,
+exigés par la convention) et sur ng00 à K10 (5 512 670 boules, un $S^{*}$ changé), par le lecteur de transition ; oracle
+borné conforme (342 nuages) ; filets Euler et J1 conformes ; mêmes octets à 1, 4 et 8 fils. Décisions prises dans la
+latitude du contrat, **à contre-lire** :
+
+1. **Feuilles de 33 à 256 sites** : même source J3, jouée sur l'hôte par un warp virtuel de 256 voies (jamais sur
+   l'appareil) ; leurs compteurs reproduisent ceux de la voie DFS de la v11 par une forme close. Sans cela, la coquille
+   de 48 sites de `CST-0205` serait refusée.
+2. **Plafond de coquille à 64 sites** : au-delà, refus `shell_capacity` (`WIT-SPHERE50`, où la v11 calculait 435
+   boules) : écart déclaré.
+3. **Deux politiques arithmétiques de feuille** au lieu de trois paliers : natif jusqu'à l'étendue 16, entier exact de
+   320 bits au-delà (une feuille au palier moyen sur 123 581 à ng00).
+4. **Pas de quota de nœuds séparé** : le budget des tableaux du front et les indices de 32 bits en tiennent lieu.
+5. **Option « sites distincts » (D8)** non faite : seul le refus par défaut des multiplicités existe.
+
+Coût local indicatif (machine chargée, aucune décision) : 1,1 à 1,3 fois la voie CPU de la v11 à un fil. La règle de
+`MES-P` et le budget de l'étage C se jugent sur G4, avec la voie appareil (T1-b), qui doit rendre les mêmes octets.

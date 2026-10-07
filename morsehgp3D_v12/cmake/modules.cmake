@@ -5,13 +5,14 @@
 #
 # MHGP12_ALL_MODULES : les modules dans l'ordre de dependance (un module ne depend que de modules places avant lui).
 # MHGP12_DEPS_<module> : ses dependances directes (colonne "Depend de").
-set(MHGP12_ALL_MODULES core num sched cloud io index)
+set(MHGP12_ALL_MODULES core num sched cloud io index catalogue)
 set(MHGP12_DEPS_core)
 set(MHGP12_DEPS_num core)
 set(MHGP12_DEPS_sched core)
 set(MHGP12_DEPS_cloud core)
 set(MHGP12_DEPS_io core cloud)
 set(MHGP12_DEPS_index num cloud)
+set(MHGP12_DEPS_catalogue num sched cloud io)
 
 # mhgp12_module_closure(<sortie> <module>...) : les modules donnes et toutes leurs dependances, directes ou non, dans
 # l'ordre de la table. Un nom hors table est une erreur de configuration.

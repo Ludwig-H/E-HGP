@@ -69,6 +69,7 @@ Le socle (tranche T0) se construit et se juge ainsi ; `<build>` hors de `/worksp
 ```bash
 cmake -S morsehgp3D_v12 -B <build> -DCMAKE_BUILD_TYPE=Release   # profil u21 ; -DMHGP12_COORD_BITS=24 ou 32 ; 18 refusé
 #   option : -DMHGP12_V10_FROZEN_DIR=<dossier de mhgp10_catalogue et mhgp10_tower>  (portes diff_v10 de l'oracle)
+#   option : -DMHGP12_V11_CATALOGUE_DIR=<vidages <cas>_k5/cat.bin de la v11 gelee>  (portes diff_v11 du catalogue)
 cmake --build <build> -j4
 ctest --test-dir <build> -LE long --no-tests=error --output-on-failure -j4    # portes rapides
 python3 morsehgp3D_v12/tools/check_style.py --root morsehgp3D_v12
