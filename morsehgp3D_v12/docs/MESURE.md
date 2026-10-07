@@ -23,8 +23,8 @@ et appareil, CPU·s par trame.
 | --- | --- | --- |
 | ng00, ng01, ng02 | SemanticKITTI 08/000000, 000100, 000200 sans sol (Patchwork++ épinglé), grille 1 mm : 39 885, 35 551, 45 845 sites | contrat historique et différentiel ; hors dépôt (`build/v11-full-data-20261002/`) |
 | uniformes | 8 000, 16 000, 32 000 sites, coordonnées sur 18 bits (« u18 » désigne la **donnée**, jouée au profil u21) | tailles d'intérêt de `CLAUDE.md` ; oracle d'échelle |
-| trames de plusieurs séquences | à préparer (00–10), sans sol, toutes tailles | **base de toute décision de vitesse** (consigne du 6 octobre) |
-| scènes de plusieurs millions de sites | LiDAR réel, mobile, terrestre ou aérien, téléchargeable pour la recherche ; jeux retenus dans `DONNEES.md` (recensement en cours) ; tailles 1, 2, 4 et 8 millions par découpe spatiale (jamais par sous-échantillonnage), puis la scène entière ; avec et sans sol | régime (b) de la décision D7 |
+| trames de plusieurs séquences | 275 trames sans sol de 6 séquences (00, 02, 05, 06, 08, 10), sélection stratifiée `v12set` de 37 trames de 33 179 à 99 099 sites ([`DONNEES.md`](DONNEES.md) § 4) | **base de toute décision de vitesse** (consigne du 6 octobre) |
+| scènes de plusieurs millions de sites | LiDAR réel, mobile, terrestre ou aérien, téléchargeable pour la recherche ; jeux retenus dans [`DONNEES.md`](DONNEES.md) (IGN LiDAR HD, ETH3D, FOR-instance, Boreas) ; tailles 1, 2, 4 et 8 millions par découpe spatiale (jamais par sous-échantillonnage), puis la scène entière ; avec et sans sol | régime (b) de la décision D7 |
 | petits nuages | 100, 300, 1 000, 3 000 et 10 000 sites : familles synthétiques et découpes de trames LiDAR | régime (c) de la décision D7 ; oracle borné en dessous de 14 sites |
 
 **Tailles réelles.** Sur les 132 trames sans sol distinctes de la séquence 08 du reçu `pts4_review_20261003` de la v11,

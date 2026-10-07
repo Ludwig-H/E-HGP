@@ -103,6 +103,7 @@ Codes des portes : 0 conforme, 1 désaccord du juge, 2 refus avant calcul, 3 inv
 | `docs/ARCHITECTURE.md` | architecture proposée et règles de simplicité |
 | `docs/PLAN.md` | ordre de travail, portes d'entrée et de sortie |
 | `docs/MESURE.md` | protocole de mesure et chiffres de référence |
+| `docs/DONNEES.md` | données des trois régimes : recensement de 43 jeux, jeux retenus, scènes, trames, petits nuages, préparation et rejeu (`bench/data/`) |
 | `docs/PROVENANCE.md` | épingles des sources (v11, v10, conception, données) |
 | `docs/LECONS_ET_PIEGES.md` | leçons de la lignée, pistes fermées, pièges d'exploitation |
 | `docs/OUVERTURE_PROPOSEE.md` | texte proposé pour `AGENTS.md` et `CLAUDE.md` |
