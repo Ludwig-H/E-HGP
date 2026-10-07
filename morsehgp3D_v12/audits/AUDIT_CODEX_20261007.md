@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-7 octobre 2026. Base publiée **`791e8492a`** ; prototypes et correctifs non publiés épinglés par
+7 octobre 2026. Base publiée **`99fa83246`** ; prototypes et correctifs non publiés épinglés par
 hashes séparés. Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. États au [registre unique](CONSTATS.md).
 
@@ -10,7 +10,7 @@ hashes séparés. Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda
   JSON `null` rend encore `mes_m6_ok`, zéro prise et zéro ligne. [Contre-épreuve de la livraison](../receipts/audit_reponses_20261007/m6_integration/README.md).
   Refuser tout non-dictionnaire, y compris `null` : cette garde figurait déjà dans le
   [patch proposé](../receipts/audit_reponses_20261007/m6_proposition/README.md). Les 68 cas officiels et le reçu historique v1 passent.
-- **Nouveau juge multi-fils G, `0018`** : [sortie tronquée acceptée](../receipts/audit_t2g_prepublication_20261007/README.md),
+- **Juge multi-fils G livré en `99fa83246`, `0018`** : [sortie tronquée acceptée](../receipts/audit_t2g_prepublication_20261007/README.md),
   k1 seul pour K5, avec exactement la ligne attendue par CTest. Exiger tous les ordres,
   k1 lié aux sites, types stricts, empreinte complète et régimes distincts. Sept témoins
   JSON, normal/−O ; aucune erreur géométrique trouvée dans T1/T3/census/NUM-GARDE lus.
@@ -27,14 +27,14 @@ hashes séparés. Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda
   les régimes entièrement en échec dans la cohorte commune. [Patch de cinq lignes prêt](../receipts/audit_reponses_20261007/mes_p_proposition/README.md) :
   cinq contre-témoins et quatre cas officiels passent, normal/−O. Hors produit ; temps inventés.
 
-**Corrections vérifiées, publication ou mise à jour du registre à suivre.**
+**Clôtures vérifiées au registre.**
 
-- **Cache, `0007/0019`** : [porte complétée](../receipts/audit_reponses_20261007/cache/README.md), 12 contrôles ; mutant de
+- **Cache, `0007/0019` clos** : livré en `7b7d025b3`, [porte complétée](../receipts/audit_reponses_20261007/cache/README.md), 12 contrôles ; mutant de
   relecture tué par le bras 300+200 Kio. ASan Clang/GCC détecte les deux lectures interdites.
   Le corps courant `5c885dbf…` est [équivalent à `1844a7d6…`](../receipts/audit_reponses_20261007/cache_equivalence/README.md), simple remplacement
   d’un alias. Pas de nouveau rejeu ni transfert à FULL, aux performances ou à TSan.
-- **Documents, `0235/0236`** : [corrections confirmées](../receipts/audit_reponses_20261007/docs/README.md), livrées en `5682d00f5`,
-  hashes identiques à la capture. Clôtures documentaires à inscrire. **`0237` reste ouvert
+- **Documents, `0235/0236` clos** : [corrections confirmées](../receipts/audit_reponses_20261007/docs/README.md), livrées en `5682d00f5`,
+  hashes identiques à la capture. Portée documentaire seulement. **`0237` reste ouvert
   techniquement** : T1-c doit lever les capacités 256/64 ; q_min≤4 ne les borne pas.
   Préciser « transferts du raccord complet », M5 comptant déjà les siens.
 
@@ -49,5 +49,6 @@ Le [diagnostic performance](../receipts/audit_performance_20261007/README.md) ma
 à traiter dans G. La prochaine campagne doit inclure reprises, transferts, matérialisation,
 coexistences mémoire, ablations appariées et FULL multi-séquences. Les 100 ms restent ouverts.
 
-Canal à quatre fichiers ; preuves et propositions dans `receipts/`. Aucun jeu sous licence,
+Canal à quatre fichiers ; [anciennes cellules déplacées et liens conservés](../receipts/audit_clotures_20261007/README.md),
+73 constats maintenus. Preuves et propositions dans `receipts/`. Aucun jeu sous licence,
 aucune nouvelle mesure moteur ni utilisation de GCP par cet audit.

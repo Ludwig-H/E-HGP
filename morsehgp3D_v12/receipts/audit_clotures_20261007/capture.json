@@ -1,0 +1,191 @@
+{
+  "base": "99fa832466f65b3278bb62ad2156dae805efab5b",
+  "cache": {
+    "pin": "7b7d025b3373b67792680588e5e8a3de18ed282d",
+    "files": {
+      "morsehgp3D_v12/src/core/buffer.cpp": {
+        "sha256": "5c885dbf0e4813f1a8ee653115092536348877e6b93aa5b831d7490fe0d6e756",
+        "bytes": 12383
+      },
+      "morsehgp3D_v12/src/core/buffer.hpp": {
+        "sha256": "3c7fffc6ed97b6456f666ef849ddd6f4f3a1b3f2427c0fc875b7d5edcd14130b",
+        "bytes": 14409
+      },
+      "morsehgp3D_v12/tests/core/alloc_fault.cpp": {
+        "sha256": "1111d433910d1cc1ae05400721a0849eab43cfc58fccd9b752f7e56d6aaf227c",
+        "bytes": 12943
+      }
+    }
+  },
+  "docs": {
+    "pin": "5682d00f585222b91b482b54952ed5030038622a",
+    "files": {
+      "morsehgp3D_v12/docs/MESURE.md": {
+        "sha256": "b0ae883299163b783fbae40954a7fc22c15fe22bf7248f7caeee39e536a9213f",
+        "bytes": 10988
+      },
+      "morsehgp3D_v12/docs/PLAN.md": {
+        "sha256": "a706039eb079bae4e097c0eca12d92e3d5910ddac7ee590c46b10ccbe8de75dc",
+        "bytes": 14054
+      },
+      "morsehgp3D_v12/receipts/g4_t0g_20261007/ERRATUM_20261007.md": {
+        "sha256": "684e09e4480424f81f085c8446b4d1f86fab2153f55cb6bd7564468373e5a2f5",
+        "bytes": 2231
+      }
+    }
+  },
+  "resolution_G": {
+    "pin": "99fa832466f65b3278bb62ad2156dae805efab5b",
+    "files": {
+      "morsehgp3D_v12/src/index/census_workspace.cpp": {
+        "sha256": "dc48110ce8f81094f1374de0f09c352181e71379808a40aec0af79998ba515f8",
+        "bytes": 4979
+      },
+      "morsehgp3D_v12/src/num/guard.cpp": {
+        "sha256": "459b99dfe154f32d8ab468d3a410a1bd74ca4c94363634244f37c8cdf7fc720b",
+        "bytes": 9777
+      },
+      "morsehgp3D_v12/src/num/predicates.cpp": {
+        "sha256": "4ebfbf2029c5addd44c48e13d34212f9f4b080c8be9b437b2d725d47238be394",
+        "bytes": 20177
+      },
+      "morsehgp3D_v12/src/tower/cells.cpp": {
+        "sha256": "67720e8d3ac7eb71eabb7bb957f9c2256537d89fde27cbdc1e740fad6e6d24d2",
+        "bytes": 4527
+      },
+      "morsehgp3D_v12/src/tower/cells_stage.cpp": {
+        "sha256": "ee8c0294de73f95096f571db5f0fd0718ba99ad17c036e42e84d703f8c9fd720",
+        "bytes": 7490
+      },
+      "morsehgp3D_v12/src/tower/internal.hpp": {
+        "sha256": "041d7ebc1dde3e397d4b09d5cc0571f0456287420893458ff6d71f89d6071624",
+        "bytes": 10401
+      },
+      "morsehgp3D_v12/src/tower/module.cmake": {
+        "sha256": "b8be9ad2066f574fc8c092f143de295f08ca9e85d429df14e757c3a9ebf4ccf9",
+        "bytes": 308
+      },
+      "morsehgp3D_v12/src/tower/populations.cpp": {
+        "sha256": "f40b4b1b64d99df505f6c9dd280485648360996f6ddf87fdc08090f101e98aed",
+        "bytes": 4894
+      },
+      "morsehgp3D_v12/src/tower/proposal.hpp": {
+        "sha256": "92495aa67223577c8acef74967f89853c0dab3c5881afe1fb2c7826327f28c18",
+        "bytes": 7502
+      },
+      "morsehgp3D_v12/src/tower/resolve.cpp": {
+        "sha256": "30abe334849164303a0e81623f7345de482ad6f56d523f6c0e94a7aca0621908",
+        "bytes": 13633
+      },
+      "morsehgp3D_v12/src/tower/source_pins.json": {
+        "sha256": "e8374ce3328d81de817d18075e1090be7afb88a748cc43558cb35c9350a30bd7",
+        "bytes": 5383
+      },
+      "morsehgp3D_v12/src/tower/stage.cpp": {
+        "sha256": "2682f23922ad97464d2e4e40fb30ce0358510128cc0edcdcf695caf832b42721",
+        "bytes": 13556
+      },
+      "morsehgp3D_v12/src/tower/stage.hpp": {
+        "sha256": "0531963c328ef9b99de4247de3fa3f981413e57964cad1542f79963333c34e41",
+        "bytes": 1759
+      },
+      "morsehgp3D_v12/src/tower/supports.cpp": {
+        "sha256": "22d24174caf0c1c489ff7ad8caaf0343ef943080d2953b6ff616fbb79177c491",
+        "bytes": 10007
+      },
+      "morsehgp3D_v12/src/tower/tower.hpp": {
+        "sha256": "3c22c52f03ec0d78227f390ca01872fa6f04279e219ca26c1e3481458a128607",
+        "bytes": 10732
+      },
+      "morsehgp3D_v12/tests/tower/g_determinism.py": {
+        "sha256": "beb8c3a1c873ebb14aaf81ee94d746ea0d6517ad8d6521f5c0131fd5f6ad977f",
+        "bytes": 4802
+      },
+      "morsehgp3D_v12/tests/tower/tests.cmake": {
+        "sha256": "a91e2db54ab086dbcba4a7ab19367acad3a8d7c9f8191c188ac53c09a427175f",
+        "bytes": 5255
+      }
+    }
+  },
+  "no_new_native_tests": true,
+  "no_new_gpu_measurement": true,
+  "registry_sha256_before": "d63278e1fff0dfb3906affd352fb6d5d6b18944f2651d2161215cd64b97f275a",
+  "registry_sha256_after": "ca813baf0b1f47e9fa664480c5e8b5654507bd6a81da93f7430ef923173cb3af",
+  "registry_bytes_saved": 2071,
+  "identifiers_before": [
+    "CST-0101",
+    "CST-0102",
+    "CST-0103",
+    "CST-0104",
+    "CST-0105",
+    "CST-0106",
+    "CST-0107",
+    "CST-0108",
+    "CST-0109",
+    "CST-0110",
+    "CST-0111",
+    "CST-0112",
+    "CST-0113",
+    "CST-0114",
+    "CST-0115",
+    "CST-0001",
+    "CST-0002",
+    "CST-0003",
+    "CST-0004",
+    "CST-0005",
+    "CST-0006",
+    "CST-0007",
+    "CST-0008",
+    "CST-0009",
+    "CST-0010",
+    "CST-0011",
+    "CST-0012",
+    "CST-0013",
+    "CST-0014",
+    "CST-0015",
+    "CST-0016",
+    "CST-0017",
+    "CST-0018",
+    "CST-0019",
+    "CST-0020",
+    "CST-0021",
+    "CST-0022",
+    "CST-0023",
+    "CST-0024",
+    "CST-0201",
+    "CST-0202",
+    "CST-0204",
+    "CST-0205",
+    "CST-0207",
+    "CST-0208",
+    "CST-0209",
+    "CST-0210",
+    "CST-0211",
+    "CST-0212",
+    "CST-0213",
+    "CST-0214",
+    "CST-0215",
+    "CST-0216",
+    "CST-0217",
+    "CST-0218",
+    "CST-0219",
+    "CST-0220",
+    "CST-0221",
+    "CST-0222",
+    "CST-0223",
+    "CST-0224",
+    "CST-0225",
+    "CST-0226",
+    "CST-0227",
+    "CST-0228",
+    "CST-0229",
+    "CST-0232",
+    "CST-0233",
+    "CST-0234",
+    "CST-0235",
+    "CST-0236",
+    "CST-0237",
+    "CST-0238"
+  ],
+  "identifiers_preserved": true
+}
