@@ -1,0 +1,93 @@
+{
+ "schema": "ehgp.v11.session_plan.v1",
+ "note": "Exploration : garder les grands blocs dans le tas de glibc (prereglage @tas de gpu_ab : seuil mmap 1 Gio, pas de rognage), sans changer le moteur (Claude, 7 octobre 2026, source 01f10d256). Sur G4, la restitution des tampons de la passe unique coute 11 a 17 ms a K5 GPU et 48 a 58 ms a K10, sur un seul fil (claudefront1) ; en local, le prereglage la ramene a 2-4 ms et supprime les fautes de page des passes suivantes. Regle ecrite avant toute donnee G4 : exactitude = bancs conformes, dumps identiques entre modes et egaux aux empreintes ; la session releve la version de glibc. Si la moyenne geometrique des 6 rapports tas/nu du mur a chaud (wall_ms, mediane des passes 2 a 10 d'un processus, K5 CPU feuilles 16 en 278523 et K5 GPU feuilles 24 en 344059:400, trois trames reelles) est <= 0,95, une retention propre est implementee dans le moteur, qualifiee et jugee dans une session suivante sur des prises neuves ; sinon la piste est notee et fermee. Froid, release_ms, K10 descriptifs.",
+ "python_packages": "none",
+ "default_build": false,
+ "results_cap_bytes": 67108864,
+ "commands": [
+  {
+   "name": "ab_k5_16_cpu",
+   "timeout_seconds": 2400,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/gpu_ab.py",
+    "--src",
+    "{src}",
+    "--work",
+    "{build}/gpu",
+    "--data",
+    "{data}",
+    "--out",
+    "{out}/ab_k5_16_cpu",
+    "--modes",
+    "cpu=278523,cpu_tas=278523@tas",
+    "--reps",
+    "6",
+    "--workers",
+    "48",
+    "--warm-passes",
+    "10",
+    "--kmax",
+    "5",
+    "--leaf",
+    "16"
+   ]
+  },
+  {
+   "name": "ab_k5_24_gpu",
+   "timeout_seconds": 2400,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/gpu_ab.py",
+    "--src",
+    "{src}",
+    "--work",
+    "{build}/gpu",
+    "--data",
+    "{data}",
+    "--out",
+    "{out}/ab_k5_24_gpu",
+    "--modes",
+    "gpu=344059:400,gpu_tas=344059:400@tas",
+    "--reps",
+    "6",
+    "--workers",
+    "48",
+    "--warm-passes",
+    "10",
+    "--kmax",
+    "5",
+    "--leaf",
+    "24"
+   ]
+  },
+  {
+   "name": "ab_k10_24_gpu",
+   "timeout_seconds": 2400,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/gpu_ab.py",
+    "--src",
+    "{src}",
+    "--work",
+    "{build}/gpu",
+    "--data",
+    "{data}",
+    "--out",
+    "{out}/ab_k10_24_gpu",
+    "--modes",
+    "gpu=344059,gpu_tas=344059@tas",
+    "--reps",
+    "3",
+    "--workers",
+    "48",
+    "--warm-passes",
+    "6",
+    "--kmax",
+    "10",
+    "--leaf",
+    "24"
+   ]
+  }
+ ]
+}
