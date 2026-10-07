@@ -81,11 +81,7 @@ void ForestBuilder::prefetch_seeds(std::span<const NodeIdx> seeds, u64 job) cons
   if (job >= seeds.size() / 4 || (gate != nullptr && job / gate->width >= confirmed)) return;
   for (u32 i = 0; i < 4; ++i) {
     const u32 seed = idx(seeds[4 * job + i]);  // kNone au-dela de qmin
-    // Noeud de la graine aussi : regular_cell y lit son rang (controle d'invariant), dans un tableau de ~17 Mo a K5
-    // lu au hasard ; le profil G4 de claudecache1 donne 145 ns par cellule au publieur 5, chemin critique.
-    if (seed < parents.size()) {
-      __builtin_prefetch(&parents[seed]); __builtin_prefetch(&states[seed]); __builtin_prefetch(&result.nodes_[seed]);
-    }
+    if (seed < parents.size()) { __builtin_prefetch(&parents[seed]); __builtin_prefetch(&states[seed]); }
   }
 }
 
