@@ -57,10 +57,10 @@ voitures du criblage ([README de `demos/`](../README.md)). Issues, mêmes critè
 | --- | --- | --- | --- | --- | --- |
 | instances seules | 5 | 10 | 1 | 14 | 72 |
 | instances seules | 10 | 7 | 0 | 18 | 72 |
-| sans sol (Patchwork++) | 5 | 8 | 9 | 35 | 45 |
-| sans sol (Patchwork++) | 10 | 25 | 0 | 38 | 34 |
+| sans sol (Patchwork++) | 5 | 8 | 9 | 39 | 41 |
+| sans sol (Patchwork++) | 10 | 25 | 0 | 39 | 33 |
 
-- Le fond durcit le test : deux échecs passent de 14 à 35 à k = 5 ; les objets touchent des murs, des haies, d'autres
+- Le fond durcit le test : deux échecs passent de 14 à 39 à k = 5 ; les objets touchent des murs, des haies, d'autres
   objets, et Patchwork++ retire une partie des roues (86 groupes sur 97 y perdent des points d'objet).
 - Sans sol, à k = 5, HGP perd autant qu'il gagne : 8 gains, 9 pertes. Les 9 pertes sont toutes des groupes d'une même
   rangée de quatre vélos, vue dans les trames 08/001180 et 08/001182 (instances 43, 55, 56, 57) ; l'exemple
@@ -68,6 +68,9 @@ voitures du criblage ([README de `demos/`](../README.md)). Issues, mêmes critè
   dans les deux variantes.
 - Sans sol, à k = 10, HGP gagne 25 fois et ne perd jamais.
 - 31 groupes ont au moins un gain ; beaucoup sont des sous-groupes d'une même rangée, d'où douze scènes.
+- Depuis le 7 octobre 2026, « autre structure » et « autre objet » comptent comme du fond (section « Critères ») :
+  cinq issues « deux réussites » sans sol deviennent « deux échecs » (trois groupes de 08/002700 à k = 5, 08/002860
+  aux deux ordres : les deux hiérarchies y avalent une telle structure) ; aucun gain ni aucune perte ne change.
 
 Tableau complet, groupe par groupe : [`exemples.json`](exemples.json).
 
@@ -76,12 +79,23 @@ Tableau complet, groupe par groupe : [`exemples.json`](exemples.json).
 Fixés avant la lecture des résultats (`tools/choisir_exemples.py`) :
 
 - à l'ordre k (5 et 10) et dans une variante, une méthode réussit si chaque objet du groupe a un bloc d'IoU > 1/2, au
-  sens de la qualité panoptique (meilleur bloc, points void exclus ; un point du fond compte comme un point quelconque) ;
+  sens de la qualité panoptique (meilleur bloc ; seuls les points non étiquetés et aberrants, classes 0 et 1, sont
+  exclus ; tout autre point du fond, « autre structure » et « autre objet » compris, compte comme un point quelconque) ;
 - un groupe est un exemple s'il a au moins un gain HGP (k = 5 ou 10, l'une ou l'autre variante) ;
 - deux groupes d'une même séquence qui partagent une instance montrent la même scène : un seul exemple par scène, celui
   qui a le plus de gains, puis le plus de gains à k = 5, puis le plus d'objets ;
 - une variante a une vidéo à chaque ordre où HGP gagne ; sans gain, une seule, à k = 5 (au moins quatre vidéos par
   scène : deux variantes, deux thèmes).
+
+**Écart assumé au protocole officiel (7 octobre 2026).** L'évaluation panoptique de SemanticKITTI ignore aussi les
+classes 52 (« autre structure ») et 99 (« autre objet »). Ce sont pourtant de vraies structures : ignorées, elles
+laissaient un groupe les absorber sans perdre d'IoU. Dans 08/002852 sans sol, à k = 5, le vélo B rejoignait à
+r = 15,1 cm tout un mur « autre objet » (361 points, à 2,8 cm du vélo) : la vidéo le peignait en jaune et annonçait
+ensuite un IoU maximal de 0,88. Compté comme du fond, ce mur ramène le meilleur IoU de B à 0,81, à 15,0 cm, juste
+avant ; son absorption devient un effondrement, montré comme celui de A dans le bâtiment. Seules les 44 découpes sans
+sol qui contiennent de tels points pouvaient changer : elles ont été remesurées (les découpes « instances » n'en
+contiennent aucun ; les 53 autres gardent leur masque, donc leurs mesures), puis les scènes touchées reconstruites et
+leurs vidéos refaites (`tools/kitti.py`, `VOID_DUEL`) ; les autres démos gardent le protocole officiel.
 
 Le meilleur bloc est une borne optimiste : il suppose un oracle qui choisirait, objet par objet, le meilleur niveau. Toute
 extraction à partir de la même hiérarchie (EOM, feuilles) rend des blocs de cette hiérarchie : elle fait au mieux aussi
@@ -138,7 +152,8 @@ dans l'ordre des boules). Un nœud est réalisé par les supports des boules de 
   points, comme dans les vidéos du duel.
 - **Nœud qui suit un objet** : le nœud de meilleur IoU des sites de ses supports (complet, juste avant la naissance de
   son parent) ; en dessous, l'enfant de meilleur IoU à chaque étage ; au-dessus, ses ancêtres. Les IoU se comptent sur
-  les sites des supports, points void exclus : les sites intérieurs, qu'aucun support ne porte, n'y sont pas.
+  les sites des supports, points non étiquetés et aberrants exclus (classes 0 et 1) : les sites intérieurs, qu'aucun
+  support ne porte, n'y sont pas.
 - **Pauses** : les mêmes règles que les vidéos du duel (IoU maximal, objets encore séparés, effondrement quand le nœud
   absorbe le fond, fusion d'objets).
 - **Accord avec la hiérarchie de points** : sur les 32 configurations, le meilleur IoU par les supports s'écarte d'au plus

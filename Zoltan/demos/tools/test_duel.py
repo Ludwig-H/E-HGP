@@ -21,6 +21,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
 import duel_scene as ds  # noqa: E402
+import kitti  # noqa: E402
 from test_scene_contract import ciede2000, contrast, hex_rgb, rgba_over, simulate  # noqa: E402
 
 
@@ -110,6 +111,28 @@ class Oracles(unittest.TestCase):
         self.assertAlmostEqual(chutes[0]['apres'], 3 / 7, places=6)
         events = ds.events_of('hgp', dict(tracks=track, fusions=fusions, best=best, chutes=chutes), 1)
         self.assertEqual(events, [(1.2, 'best:hgp:0'), (2.0, 'chute:hgp:0')])
+
+    def test_other_object_wall_is_background(self):
+        # 08/002852 sans sol, k = 5 : le bloc du vélo B avale un mur « autre objet » (classe 99). Pour le duel, seules
+        # les classes 0 et 1 sont void (kitti.VOID_DUEL) : le mur est du fond et l'IoU chute de 1 à 3/7. Avec le void
+        # panoptique officiel (kitti.VOID), le mur était ignoré : IoU 1 jusqu'au bout, aucune chute, aucun bandeau.
+        plateaus, levels, _, _ = toy([0, 0, 0, -1, -1, -1, -1],
+                                     [(1000, 0, 1), (1200, 1, 2), (1300, 3, 4), (1400, 4, 5), (1500, 5, 6),
+                                      (2000, 2, 3)], 1)
+        raw = np.array([11 | 7 << 16] * 3 + [99] * 4)  # vélo, puis mur « autre objet »
+        obj, void = ds.objects_of(raw, [11 | 7 << 16])
+        self.assertEqual((obj.tolist(), void.tolist()), ([0, 0, 0, -1, -1, -1, -1], [False] * 7))
+        track, best, fusions = ds.tracks(plateaus, levels, 7, obj, void, 1, [0])
+        chutes = ds.collapses(plateaus, levels, 7, obj, void, raw, 1, [0], track)
+        self.assertEqual([(c['r'], c['fond'], c['classe'], c['fusion']) for c in chutes],
+                         [(2.0, 4, 'other-object', False)])
+        self.assertAlmostEqual(chutes[0]['apres'], 3 / 7, places=6)
+        official = np.isin(raw & 0xFFFF, kitti.VOID)
+        track, best, fusions = ds.tracks(plateaus, levels, 7, obj, official, 1, [0])
+        self.assertEqual((best, ds.collapses(plateaus, levels, 7, obj, official, raw, 1, [0], track)), ([1.0], []))
+        # void du duel : non étiqueté (0) et aberrant (1) seulement, quelle que soit l'instance
+        _, void = ds.objects_of(np.array([0, 1, 52, 99, 50 | 3 << 16, 1 | 5 << 16]), [])
+        self.assertEqual(void.tolist(), [True, True, False, False, False, True])
 
     def test_hdbscan_plateaus_group_ties_full_distance(self):
         # niveau = distance d'atteignabilité mutuelle entière (même échelle que le rayon de HGP), plus de facteur 1/2

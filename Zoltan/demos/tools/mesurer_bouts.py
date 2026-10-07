@@ -6,7 +6,7 @@ HDBSCAN (scikit-learn), aux ordres demandés.
         [--variante instances|sans_sol] [--orders 5,10] [--jobs 6] [--noms a,b]
 
 Même mesure que morsehgp3D_v11/bench/points_campaign.py (évaluateur de bench/points_hierarchy.py : meilleur bloc aux
-plateaux fermés, points void exclus), restreinte aux objets du groupe : un point d'une autre instance compte comme un
+plateaux fermés, points void exclus : classes 0 et 1 seulement, kitti.VOID_DUEL), restreinte aux objets du groupe : un point d'une autre instance compte comme un
 point quelconque du bout. HGP : export natif de la tour FULL (kmax = 10), puis la règle Hʳₖ₊₁ (bench/points_radius.py) ;
 HDBSCAN : arbre du lien simple de l'atteignabilité mutuelle de sklearn (min_samples = k). Variante « instances » :
 les seuls points des objets (bouts.json) ; « sans_sol » : la découpe nettoyée par Patchwork++ (bouts_sans_sol.json,
@@ -29,7 +29,7 @@ import points_radius as prad  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from duel_scene import export_native  # noqa: E402
-from kitti import VOID  # noqa: E402
+from kitti import VOID_DUEL  # noqa: E402
 
 
 def crop_of(entry, variante):
@@ -42,7 +42,7 @@ def objects_of(raw, keys):
     obj = np.full(len(raw), -1, dtype=np.int64)
     for o, key in enumerate(keys):
         obj[raw == key] = o
-    return obj, np.isin(raw & 0xFFFF, VOID)
+    return obj, np.isin(raw & 0xFFFF, VOID_DUEL)
 
 
 def measure(args, entry):

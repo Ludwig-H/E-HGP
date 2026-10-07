@@ -33,6 +33,12 @@ STUFF = {0: 'unlabeled', 1: 'outlier', 40: 'road', 44: 'parking', 48: 'sidewalk'
 # Classes « void » de l'évaluation panoptique SemanticKITTI (learning_map -> 0) : retirées avant
 # l'appariement, donc exclues de l'IoU (elles restent dans le nuage et dans la hiérarchie).
 VOID = (0, 1, 52, 99)
+# Démos du duel HGP contre HDBSCAN (videos_hgp_hdbscan : mesurer_bouts, duel_scene, supports_scene) : seules les classes
+# 0 (non étiqueté) et 1 (aberrant) sont ignorées par l'IoU. « Autre structure » (52) et « autre objet » (99) sont de
+# vraies structures (mur, clôture) : ignorées, elles laissaient un groupe les absorber sans perdre d'IoU (08/002852 sans
+# sol, k = 5 : le vélo B et tout un mur « autre objet », IoU affiché 0,88 au lieu de 0,81). Écart assumé au protocole
+# panoptique officiel, décidé le 7 octobre 2026 ; les autres démos (build_scene.py) gardent VOID.
+VOID_DUEL = (0, 1)
 FR = {'car': 'voiture', 'bicycle': 'vélo', 'bus': 'bus', 'motorcycle': 'moto', 'truck': 'camion',
       'other-vehicle': 'autre véhicule', 'person': 'piéton', 'bicyclist': 'cycliste',
       'motorcyclist': 'motard', 'unlabeled': 'non étiqueté', 'outlier': 'aberrant', 'road': 'route',

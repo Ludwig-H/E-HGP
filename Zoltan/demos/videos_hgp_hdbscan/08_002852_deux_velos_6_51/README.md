@@ -10,13 +10,13 @@ Exemple vidéo HGP contre HDBSCAN ([liste](../README.md)) : SemanticKITTI, séqu
 | A | vélo | 157 | 148 | 9 |
 | B | vélo | 122 | 119 | 3 |
 
-Écarts (plus courte distance entre les points de deux objets) : A–B : 0,05 m. Dans la découpe sans sol : aucune autre instance ; 362 points void ; 690 points de sol retirés.
+Écarts (plus courte distance entre les points de deux objets) : A–B : 0,05 m. Dans la découpe sans sol : aucune autre instance ; 362 points des classes 0, 1, 52 et 99 (non étiqueté, aberrant, autre structure, autre objet) ; 690 points de sol retirés.
 
 | variante | k | HGP, meilleur IoU (A / B) | HDBSCAN, meilleur IoU | issue |
 | --- | --- | --- | --- | --- |
 | instances de la vérité terrain seules | 5 | 0,85 / 0,83 | 0,74 / **0,44** | HGP réussit, HDBSCAN échoue |
 | instances de la vérité terrain seules | 10 | 0,85 / **0,50** | 0,73 / **0,44** | les deux échouent |
-| sol retiré automatiquement (Patchwork++) | 5 | 0,77 / 0,88 | 0,68 / **0,44** | HGP réussit, HDBSCAN échoue |
+| sol retiré automatiquement (Patchwork++) | 5 | 0,77 / 0,81 | 0,68 / **0,44** | HGP réussit, HDBSCAN échoue |
 | sol retiré automatiquement (Patchwork++) | 10 | 0,62 / 0,50 | 0,65 / **0,36** | HGP réussit, HDBSCAN échoue |
 
 En gras : objet à 0,5 ou moins, qu'aucun groupe de la hiérarchie ne recouvre à plus de la moitié. Vidéos : k = 5 (instances) ; k = 5 et k = 10 (sans sol). Objets : instances SemanticKITTI A = 6, B = 51.
@@ -39,7 +39,7 @@ En gras : objet à 0,5 ou moins, qu'aucun groupe de la hiérarchie ne recouvre �
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="sans_sol/08_002852_deux_velos_6_51_sans_sol_k5_sombre_instant_cle.png">
-  <img alt="Instant clé, k = 5, r = 15,3 cm : HGP, B, IoU maximal : 0,88 ; HDBSCAN au même r, A et B déjà réunis" src="sans_sol/08_002852_deux_velos_6_51_sans_sol_k5_clair_instant_cle.png">
+  <img alt="Instant clé, k = 5, r = 15,0 cm : HGP, B, IoU maximal : 0,81 ; HDBSCAN au même r, IoU au même r : B 0,44" src="sans_sol/08_002852_deux_velos_6_51_sans_sol_k5_clair_instant_cle.png">
 </picture>
 
 <!-- video:fin -->

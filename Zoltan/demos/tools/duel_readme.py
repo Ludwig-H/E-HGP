@@ -154,7 +154,8 @@ def variant_readme(variant):
         out += ['Points : les seuls points des objets du groupe (vérité terrain SemanticKITTI), %s points (%s) : ni sol, '
                 'ni fond, ni autre objet.' % (thousands(crop['sites']), ', '.join(
                     '%s %d' % (LETTERS[j], c) for j, c in enumerate(entry['points']))), '']
-    out += ['Meilleur IoU de chaque objet, même mesure que la campagne G4 (points void exclus) :', ''] + measures(spec)
+    out += ['Meilleur IoU de chaque objet (meilleur bloc ; seuls les points non étiquetés et aberrants, classes 0 et 1, '
+            'sont exclus : « autre structure » et « autre objet » comptent comme du fond) :', ''] + measures(spec)
     out += ['', 'En gras : objet à 0,5 ou moins, qu\'aucun groupe de la hiérarchie ne recouvre à plus de la moitié. Une '
             'vidéo par ordre où HGP réussit et HDBSCAN échoue ; sans gain, une seule, à k = 5.', '']
     for k, res, stem in found:

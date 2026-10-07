@@ -16,7 +16,7 @@ versionné : coordonnées) et resultats_supports_k<k>.json.
   résultats.
 - Réalisation d'un nœud v au niveau r : les sites des supports des boules rattachées à son sous-arbre, de niveau au
   plus r (docs/SORTIES.md § 6, « Lectures »). Les sites intérieurs n'y sont pas ; les IoU se comptent sur ces sites,
-  points void exclus.
+  points void exclus (masque de la scène du duel : classes 0 et 1 seulement, kitti.VOID_DUEL).
 - Nœud qui suit un objet : le nœud de meilleur IoU (complet, juste avant la naissance de son parent) ; en dessous,
   l'enfant de meilleur IoU à chaque étage ; au-dessus, ses ancêtres. Au niveau r, la branche de l'objet est le nœud de
   cette chaîne vivant à r. Deux objets dont les branches sont le même nœud sont réunis.

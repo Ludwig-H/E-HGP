@@ -134,7 +134,8 @@ def example_readme(g, shown, mates=()):
                      for (a, b), v in ((tuple(p.split('-')), v) for p, v in sorted(g['gaps'].items())))
     others = ss['autres_instances']
     out += ['', 'Écarts (plus courte distance entre les points de deux objets) : %s. Dans la découpe sans sol : %s ; '
-            '%d points void ; %d points de sol retirés.' % (
+            '%d points des classes 0, 1, 52 et 99 (non étiqueté, aberrant, autre structure, autre objet) ; %d points '
+            'de sol retirés.' % (
                 gaps, ('%d autre%s instance%s (%s points)' % (len(others), 's' if len(others) > 1 else '',
                                                              's' if len(others) > 1 else '',
                                                              ', '.join(str(v) for v in others.values())))

@@ -14,7 +14,8 @@ l'ordre montré par la variante.
 - HDBSCAN : arbre du lien simple de l'atteignabilité mutuelle de scikit-learn (min_samples = k, soi compris), celui
   de bench/points_hierarchy.py.
 - Objets suivis : les instances du groupe ; tout autre point (autre instance, mur, végétation, sol laissé par
-  Patchwork++) est un point du fond, qui compte dans les IoU comme dans la mesure (points void exclus).
+  Patchwork++) est un point du fond, qui compte dans les IoU comme dans la mesure (points void exclus : classes 0 et 1
+  seulement, kitti.VOID_DUEL ; « autre structure » et « autre objet » comptent comme du fond).
 - Contrôle : le meilleur IoU de chaque objet doit être exactement celui de bout.json (tools/mesurer_bouts.py) et, si
   --members est donné, le meilleur bloc doit avoir exactement les points publiés par G4 ; sinon refus, code 1.
 
@@ -83,12 +84,12 @@ def sha256(path):
 
 def objects_of(raw, keys):
     """Objet suivi de chaque point (rang de sa clé dans le groupe, -1 sinon) et masque des points void."""
-    from kitti import VOID
+    from kitti import VOID_DUEL
     raw = np.asarray(raw, dtype=np.int64)
     obj = np.full(len(raw), -1, dtype=np.int64)
     for o, key in enumerate(keys):
         obj[raw == key] = o
-    return obj, np.isin(raw & 0xFFFF, VOID)
+    return obj, np.isin(raw & 0xFFFF, VOID_DUEL)
 
 
 def title(classes, lang='fr'):
