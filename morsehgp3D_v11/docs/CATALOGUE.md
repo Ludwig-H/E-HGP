@@ -37,7 +37,12 @@ La Session et son budget doivent survivre au résultat.
 Chaque liste contient les K plus proches avec tous les ex æquo pour tout centre de la boîte fermée.
 Un réservoir de min(nœud,3K) sites distincts fournit des témoins ; un site n'est retiré que si au moins K
 témoins le dominent strictement sur cette fermeture. L'égalité conserve le candidat. Le filtre coûte
-$O(K\lvert L\rvert)$ par nœud, sans matrice globale de toutes les paires.
+$O(K\lvert L\rvert)$ par nœud, sans matrice globale de toutes les paires. Depuis le 7 octobre
+([`g1.cpp`](../src/catalogue/g1.cpp)), le test se fait par un masque AVX2 de tous les témoins lorsque le
+processeur le porte. Le rang du K-ième dominateur redonne l'arrêt et le compte de tests de la boucle de
+référence : mêmes décisions et même registre (porte `mhgp11_catalogue_g1`). En voie lot, ce filtre fait à
+peu près toute la passe unique (reçu
+[`diagnostic_domaine`](../receipts/developpement_20261007/diagnostic_domaine/README.md)).
 
 **G2, census.** Le centre est dans sa boîte propriétaire. Si le vrai nombre d'intérieurs est inférieur à K,
 la liste contient toute la boule fermée, coquille comprise. Sinon elle contient au moins K intérieurs.
