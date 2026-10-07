@@ -1,0 +1,193 @@
+diff --git a/morsehgp3D_v12/bench/tower_export.hpp b/morsehgp3D_v12/bench/tower_export.hpp
+index 3b54419..ba78f9a 100644
+--- a/morsehgp3D_v12/bench/tower_export.hpp
++++ b/morsehgp3D_v12/bench/tower_export.hpp
+@@ -2,8 +2,15 @@
+ // fixe, et fichier res.bin au format MHGP12DP version 1, genre 4 << resolution >> (disposition de
+ // microbancs/mes_m3_m4_tour/common/format.hpp : en-tete de 64 octets ; section = etiquette de 8 octets, taille d'un
+ // element u32, reserve u32 nul, nombre d'elements u64, elements, zeros jusqu'a un multiple de 8 octets). Lu par
+-// tests/tower/g_dump.py. Empreinte : SHA-256 des octets exacts des sections de cet export, en-tete exclu (portes de
+-// determinisme ; memes empreintes aux trois profils sur les memes coordonnees).
++// tests/tower/g_dump.py ; res.bin porte TOUS les compteurs (section CNTR : objet puis travail).
++//
++// Empreinte de la resolution (portes de determinisme et d'echelle ; memes empreintes aux trois profils sur les memes
++// coordonnees) : SHA-256 des sections de l'OBJET seulement (CONTRAT_TOUR.md, paragraphe 8 : seule la classe << objet >>
++// fait l'empreinte), en-tete exclu : naissances (cles, rangs), cellules (boules, rangs, drapeaux, decalages), traces,
++// cibles (sous la politique de saut declaree, v12_indices) et, a la place de CNTR, une section COBJ des seuls compteurs
++// de l'objet. Les compteurs du travail (sondes, routes, censuses, sauts, chaines...) restent publies dans les lignes
++// << ordre >> de la sonde et dans res.bin, HORS de l'empreinte : un levier qui change le travail sans changer l'objet
++// garde l'empreinte ; les portes comparent le travail ligne a ligne entre nombres de fils (g_determinism.py).
+ #pragma once
+ 
+ #include <array>
+@@ -81,9 +88,10 @@ Outcome column(Out& out, std::string_view tag, int k, std::span<const T> values)
+ }
+ 
+ // header = false : sections seules (empreinte : l'en-tete porte le profil et la trame, les sections sont les memes aux
+-// profils 21, 24 et 32 sur les memes coordonnees).
++// profils 21, 24 et 32 sur les memes coordonnees) ; object_only : section COBJ (compteurs de l'objet) au lieu de CNTR.
+ template <class Out>
+-Outcome write_all(const Cloud& cloud, const Resolution& r, std::string_view frame, Out& out, bool header = true) {
++Outcome write_all(const Cloud& cloud, const Resolution& r, std::string_view frame, Out& out, bool header = true,
++                  bool object_only = false) {
+   if (frame.size() >= 24) return fail(Reason::parameter_out_of_range);
+   constexpr u32 kPerOrder = 9;
+   std::array<u8, 64> h{};
+@@ -109,7 +117,8 @@ Outcome write_all(const Cloud& cloud, const Resolution& r, std::string_view fram
+     MHGP12_TRY(column(out, "TMSK", k, o.trace_masks()));
+     MHGP12_TRY(column(out, "TARG", k, o.targets()));
+     const auto v = counter_values(o.counters());
+-    MHGP12_TRY(column(out, "CNTR", k, std::span<const u64>(v.data(), v.size())));
++    if (object_only) MHGP12_TRY(column(out, "COBJ", k, std::span<const u64>(v.data(), kObjectCounters)));
++    else MHGP12_TRY(column(out, "CNTR", k, std::span<const u64>(v.data(), v.size())));
+   }
+   return {};
+ }
+@@ -133,9 +142,10 @@ inline Outcome write_resolution(const Cloud& cloud, const Resolution& r, std::st
+   return detail::write_all(cloud, r, frame, out);
+ }
+ 
++// Empreinte de l'OBJET de la resolution (voir l'en-tete) : sections sans en-tete, COBJ au lieu de CNTR.
+ inline Result<io::Digest> resolution_digest(const Cloud& cloud, const Resolution& r, std::string_view frame) {
+   detail::DigestSink sink;
+-  MHGP12_TRY(detail::write_all(cloud, r, frame, sink, false));
++  MHGP12_TRY(detail::write_all(cloud, r, frame, sink, false, true));
+   return sink.sha.finish();
+ }
+ 
+diff --git a/morsehgp3D_v12/bench/tower_probe.cpp b/morsehgp3D_v12/bench/tower_probe.cpp
+index a2179fa..93a4a97 100644
+--- a/morsehgp3D_v12/bench/tower_probe.cpp
++++ b/morsehgp3D_v12/bench/tower_probe.cpp
+@@ -1,8 +1,10 @@
+ // Sonde de l'etage G de la tour (tranche T2) : lit une entree u32le et ses ids.u32le (ou un nuage synthetique),
+ // construit l'index, le catalogue Cat_K et la resolution (module tower, voie CPU de reference), ecrit une ligne JSON
+ // par passe et par ordre (compteurs de l'objet et du travail, diagnostics physiques), et, sur demande, l'empreinte
+-// de la resolution et un export (exportateur de TEST, hors du chemin chronometre) : cat.bin (MHGP12DP genre 1, export
+-// du catalogue) et res.bin (MHGP12DP genre 4, << resolution >>), dans un dossier transactionnel.
++// de l'OBJET de la resolution (resolution_sha256 : naissances, cellules, traces, cibles, compteurs de l'objet ; les
++// compteurs du travail n'y entrent pas, bench/tower_export.hpp) et un export (exportateur de TEST, hors du chemin
++// chronometre) : cat.bin (MHGP12DP genre 1, export du catalogue) et res.bin (MHGP12DP genre 4, << resolution >>, tous
++// les compteurs), dans un dossier transactionnel.
+ //
+ //   mhgp12_tower_probe <xyz.u32le> <ids.u32le> [options]
+ //   mhgp12_tower_probe --uniform=N,GRAINE,BITS [options]
+diff --git a/morsehgp3D_v12/tests/tower/g_determinism.py b/morsehgp3D_v12/tests/tower/g_determinism.py
+index 7403f4a..e570b20 100644
+--- a/morsehgp3D_v12/tests/tower/g_determinism.py
++++ b/morsehgp3D_v12/tests/tower/g_determinism.py
+@@ -1,9 +1,12 @@
+ #!/usr/bin/env python3
+ """Determinisme et invariants globaux de l'etage G a l'echelle (CONTRAT_TOUR.md, paragraphes 8 et 9.5-9.6) : la sonde
+-joue la meme entree a plusieurs nombres de fils ; l'empreinte de la resolution (naissances, cellules, traces, cibles,
+-compteurs de l'objet et du travail : bench/tower_export.hpp) et les lignes par ordre doivent etre identiques ; par
+-ordre, invariants globaux (jamais un juge exhaustif) : un controle de decroissance par plus petite boule et par succes
+-de sonde, une longueur de chaine par representant, chaque representant termine par une sonde ou un arret.
++joue la meme entree a plusieurs nombres de fils. L'EMPREINTE de la resolution ne porte que l'objet (naissances,
++cellules, traces, cibles, compteurs de l'objet : bench/tower_export.hpp, paragraphe 8) ; elle et les compteurs de
++l'objet doivent etre identiques. Les compteurs du TRAVAIL (politique fixe, ordre canonique) sont hors de l'empreinte
++mais doivent etre identiques eux aussi (W1 = W48), compares ligne a ligne, ordre par ordre ; un ecart dit lequel des
++deux differe. Par ordre, invariants globaux (jamais un juge exhaustif) : un controle de decroissance par plus petite
++boule et par succes de sonde, une longueur de chaine par representant, chaque representant termine par une sonde ou un
++arret.
+ Admission : une passe tour_g conforme a K/fils, tous les ordres 1..min(K,sites), naissances k1 = sites, compteurs
+ entiers non negatifs, histogrammes de 16 cases et SHA-256 complet ; au moins deux nombres de fils distincts.
+ Le generateur deduplique : --uniform=N borne les sites par N sans imposer leur egalite. Le digest complet est compare
+@@ -160,9 +163,17 @@ def main(argv):
+             return 3
+         if first is None:
+             first = (orders, digest)
+-        elif (orders, digest) != first:
+-            print('g_determinism_ecart fils=%d : sorties ou compteurs differents de %d fils' % (w, threads[0]))
++            continue
++        if digest != first[1] or [r['objet'] for r in orders] != [r['objet'] for r in first[0]]:
++            print('g_determinism_ecart fils=%d : objet (empreinte ou compteurs de l\'objet) different de %d fils'
++                  % (w, threads[0]))
+             return 1
++        for mine, ref in zip(orders, first[0]):
++            if mine['travail'] != ref['travail']:
++                keys = sorted(key for key in ref['travail'] if mine['travail'][key] != ref['travail'][key])
++                print('g_determinism_ecart fils=%d : travail de l\'ordre %d different de %d fils, hors empreinte (%s)'
++                      % (w, mine['k'], threads[0], ','.join(keys)))
++                return 1
+     orders, digest = first
+     total = dict((key, sum(r['objet'][key] for r in orders)) for key in ('births', 'cells', 'representatives'))
+     cell_targets = sum(r['travail']['cell_stops'] for r in orders)
+diff --git a/morsehgp3D_v12/tests/tower/g_fausse_sonde.py b/morsehgp3D_v12/tests/tower/g_fausse_sonde.py
+index 2487a3a..b7b3f9f 100755
+--- a/morsehgp3D_v12/tests/tower/g_fausse_sonde.py
++++ b/morsehgp3D_v12/tests/tower/g_fausse_sonde.py
+@@ -2,8 +2,10 @@
+ """Fausse sonde de l'etage G (hors produit) : rejoue les faux succes que le juge g_determinism.py admettait avant la
+ contre-lecture de l'auditeur Codex du 7 octobre (reçu audit_t2g_prepublication_20261007) ; le juge doit les refuser
+ (code 2). Mode lu dans MHGP12_FAUSSE_SONDE : k1_seul (sortie tronquee apres l'ordre 1, ligne CTest imitee),
+-ordre_double, empreinte_courte, sans_sortie (ligne exit absente). Arguments de la vraie sonde acceptes et ignores,
+-sauf --threads, recopie dans la passe. Bibliotheque standard seule.
++ordre_double, empreinte_courte, sans_sortie (ligne exit absente) ; et deux ecarts entre nombres de fils que le juge doit
++voir (code 1) a empreinte egale : travail_8 (un compteur du travail differe a 8 fils, hors empreinte) et objet_8 (un
++compteur de l'objet differe a 8 fils). Arguments de la vraie sonde acceptes et ignores, sauf --threads, recopie dans
++la passe. Bibliotheque standard seule.
+ """
+ import json
+ import os
+@@ -34,6 +36,10 @@ def main(argv):
+     ks = [1] if mode == 'k1_seul' else [1, 1] + list(range(2, kmax + 1)) if mode == 'ordre_double' else \
+         list(range(1, kmax + 1))
+     rows += [order(k, sites) for k in ks]
++    if threads == 8 and mode == 'travail_8':
++        rows[3]['travail']['census_sites'] = 1  # ordre 3 : travail different, objet et empreinte egaux
++    if threads == 8 and mode == 'objet_8':
++        rows[3]['objet']['inert_cells'] = 1  # ordre 3 : objet different, empreinte egale
+     rows.append(dict(phase='digest', resolution_sha256=('ab' * 8) if mode == 'empreinte_courte' else 'ab' * 32))
+     if mode != 'sans_sortie':
+         rows.append(dict(phase='exit', status='ok', reason='none', order=0))
+diff --git a/morsehgp3D_v12/tests/tower/tests.cmake b/morsehgp3D_v12/tests/tower/tests.cmake
+index b07e5c7..613fb5f 100644
+--- a/morsehgp3D_v12/tests/tower/tests.cmake
++++ b/morsehgp3D_v12/tests/tower/tests.cmake
+@@ -24,13 +24,16 @@ mhgp12_python_gate(mhgp12_tower_oracle 0 g_oracle.py ${tower_probe}
+                    LINE "g_oracle_ok nuages=342 doublons_refuses=34 cibles=21225 cibles_cellule=2359 cellules=7821 inertes=876"
+                    LABELS oracle fast TIMEOUT 300)
+ 
+-# Determinisme et invariants globaux a l'echelle (jamais un juge exhaustif) : la sonde a 1 et 8 fils, empreinte de la
+-# resolution (naissances, cellules, traces, cibles, compteurs de l'objet et du travail) et lignes par ordre identiques ;
+-# un controle de decroissance par plus petite boule et par succes de sonde ; une chaine par representant. Nuages
+-# synthetiques de la porte d'echelle du catalogue (--uniform=N,20261007,18), puis la trame ng00 (MHGP12_DATA_DIR).
+-set(tower_scale_8000 "empreinte=5304d1c8fe7c25ff naissances=376649 cellules=600630 representants=1780799 cibles_cellule=370896")
+-set(tower_scale_16000 "empreinte=fdd42b4e0fba5d08 naissances=772572 cellules=1238402 representants=3674998 cibles_cellule=774576")
+-set(tower_scale_32000 "empreinte=9fd0fd9e98fa5305 naissances=1580630 cellules=2540941 representants=7550507 cibles_cellule=1594813")
++# Determinisme et invariants globaux a l'echelle (jamais un juge exhaustif) : la sonde a 1 et 8 fils, empreinte de
++# l'OBJET de la resolution (naissances, cellules, traces, cibles, compteurs de l'objet : CONTRAT_TOUR.md, paragraphe 8)
++# et compteurs de l'objet identiques ; compteurs du travail identiques ligne a ligne, hors empreinte ; un controle de
++# decroissance par plus petite boule et par succes de sonde ; une chaine par representant. Nuages synthetiques de la
++# porte d'echelle du catalogue (--uniform=N,20261007,18), puis la trame ng00 (MHGP12_DATA_DIR). Empreintes de l'objet
++# du 7 octobre (T2-c) : exports res.bin et cat.bin identiques a l'octet a ceux d'avant ; seule la definition de
++# l'empreinte a change (anciennes, travail compris : 5304d1c8, fdd42b4e, 9fd0fd9e, 231d826b).
++set(tower_scale_8000 "empreinte=a40f1b2ef8547269 naissances=376649 cellules=600630 representants=1780799 cibles_cellule=370896")
++set(tower_scale_16000 "empreinte=cf7c7745fcb4ae6e naissances=772572 cellules=1238402 representants=3674998 cibles_cellule=774576")
++set(tower_scale_32000 "empreinte=d1f08fd0dbdf48eb naissances=1580630 cellules=2540941 representants=7550507 cibles_cellule=1594813")
+ foreach(n 8000 16000 32000)
+   mhgp12_python_gate(mhgp12_tower_scale${n} 0 g_determinism.py ${tower_probe} synth_u${n}_k5
+                      --uniform=${n},20261007,18 --k=5 --threads=1,8
+@@ -38,7 +41,7 @@ foreach(n 8000 16000 32000)
+ endforeach()
+ mhgp12_python_gate(mhgp12_tower_determinism_lidar_ng00_k5 0 g_determinism.py ${tower_probe} lidar_ng00_k5
+                    --data=lidar_ng00 --k=5 --threads=1,8
+-                   LINE "g_determinism_ok cas=lidar_ng00_k5 fils=1,8 empreinte=231d826bb0d4fe57 naissances=897776 cellules=1306872 representants=3622258 cibles_cellule=650932"
++                   LINE "g_determinism_ok cas=lidar_ng00_k5 fils=1,8 empreinte=e5a81154fb1b15f1 naissances=897776 cellules=1306872 representants=3622258 cibles_cellule=650932"
+                    LABELS lidar long TIMEOUT 1800)
+ 
+ # Juge du determinisme contre ses faux succes (contre-lecture de l'auditeur Codex du 7 octobre, CST-0018) : la fausse
+@@ -54,6 +57,12 @@ foreach(mode k1_seul ordre_double empreinte_courte sans_sortie)
+   mhgp12_python_gate(mhgp12_tower_juge_refus_${mode} 2 g_determinism.py ${tower_fausse_sonde} fausse
+                      --uniform=10,1,18 --k=5 --threads=1,8 LABELS fast ENV MHGP12_FAUSSE_SONDE=${mode})
+ endforeach()
++# L'empreinte ne porte que l'objet (T2-c) : un ecart du travail ou de l'objet entre 1 et 8 fils, a empreinte egale,
++# reste un ecart (code 1).
++foreach(mode travail_8 objet_8)
++  mhgp12_python_gate(mhgp12_tower_juge_ecart_${mode} 1 g_determinism.py ${tower_fausse_sonde} fausse
++                     --uniform=10,1,18 --k=5 --threads=1,8 LABELS fast ENV MHGP12_FAUSSE_SONDE=${mode})
++endforeach()
+ 
+ # Differentiel contre la v11 gelee (MHGP12_V11_TOWER_DIR : <cas>_k5/ avec cat.bin, ordre_<k>.bin et foret_<k>.bin de
+ # mhgp12_vidage, feuille 16, microbancs/mes_m3_m4_tour ; donnees MHGP12_DATA_DIR) : la sonde exporte l'etage G, le juge

@@ -1,0 +1,189 @@
+{
+  "binary_model": {
+    "mask_retained": true,
+    "object_counter_retained": true,
+    "target_retained": true,
+    "work_excluded": true,
+    "work_retained_in_export": true
+  },
+  "judge_cases": [
+    {
+      "case": "controle",
+      "code": 0,
+      "expected": 0,
+      "output": "g_determinism_ok cas=audit_json fils=1,8 empreinte=abababababababab naissances=22 cellules=5 representants=10 cibles_cellule=0"
+    },
+    {
+      "case": "k1_seul",
+      "code": 2,
+      "expected": 2,
+      "output": "g_determinism_refus sonde code 2 a 1 fils"
+    },
+    {
+      "case": "ordre_double",
+      "code": 2,
+      "expected": 2,
+      "output": "g_determinism_refus sonde code 2 a 1 fils"
+    },
+    {
+      "case": "empreinte_courte",
+      "code": 2,
+      "expected": 2,
+      "output": "g_determinism_refus sonde code 2 a 1 fils"
+    },
+    {
+      "case": "sans_sortie",
+      "code": 2,
+      "expected": 2,
+      "output": "g_determinism_refus sonde code 2 a 1 fils"
+    },
+    {
+      "case": "travail_8",
+      "code": 1,
+      "expected": 1,
+      "output": "g_determinism_ecart fils=8 : travail de l'ordre 3 different de 1 fils, hors empreinte (census_sites)"
+    },
+    {
+      "case": "objet_8",
+      "code": 1,
+      "expected": 1,
+      "output": "g_determinism_ecart fils=8 : objet (empreinte ou compteurs de l'objet) different de 1 fils"
+    },
+    {
+      "case": "digest_suffix_8",
+      "code": 1,
+      "expected": 1,
+      "output": "g_determinism_ecart fils=8 : objet (empreinte ou compteurs de l'objet) different de 1 fils"
+    },
+    {
+      "case": "negative_work",
+      "code": 2,
+      "expected": 2,
+      "output": "g_determinism_refus sonde code 2 a 1 fils"
+    },
+    {
+      "case": "bool_work",
+      "code": 2,
+      "expected": 2,
+      "output": "g_determinism_refus sonde code 2 a 1 fils"
+    },
+    {
+      "case": "exit_order_false",
+      "code": 0,
+      "expected": 0,
+      "output": "g_determinism_ok cas=audit_json fils=1,8 empreinte=abababababababab naissances=22 cellules=5 representants=10 cibles_cellule=0"
+    }
+  ],
+  "native_executed": false,
+  "policy_witness": {
+    "K": 4,
+    "fixture": "generic_11_11",
+    "full_order_equal": true,
+    "k": 4,
+    "parent_ball": 45,
+    "parent_level": "34207817562943255/115929041772",
+    "points": [
+      [
+        112,
+        245,
+        101
+      ],
+      [
+        664,
+        38,
+        692
+      ],
+      [
+        78,
+        572,
+        78
+      ],
+      [
+        41,
+        278,
+        136
+      ],
+      [
+        264,
+        343,
+        681
+      ],
+      [
+        457,
+        904,
+        832
+      ],
+      [
+        42,
+        397,
+        56
+      ],
+      [
+        338,
+        811,
+        241
+      ]
+    ],
+    "targets": [
+      {
+        "center": [
+          "379/2",
+          "1089/2",
+          "377/2"
+        ],
+        "level": "383323/4",
+        "policy": "v12_indices",
+        "target": [
+          "naissance",
+          21
+        ]
+      },
+      {
+        "center": [
+          "470646149915/2106584558",
+          "2073923202705/4213169116",
+          "1507498746011/4213169116"
+        ],
+        "level": "14062618234256925/109542397016",
+        "policy": "v12_proches",
+        "target": [
+          "naissance",
+          29
+        ]
+      }
+    ],
+    "trace_internal": [
+      0,
+      4,
+      5,
+      7
+    ],
+    "trace_positions": [
+      [
+        112,
+        245,
+        101
+      ],
+      [
+        338,
+        811,
+        241
+      ],
+      [
+        264,
+        343,
+        681
+      ],
+      [
+        457,
+        904,
+        832
+      ]
+    ]
+  },
+  "source_checks": {
+    "admission_ast_unchanged": true,
+    "res_bin_default_code_unchanged": true
+  },
+  "sources_verified": 17
+}

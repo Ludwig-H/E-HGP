@@ -1,0 +1,337 @@
+{
+ "analysis_cli": {
+  "cohort_rows": [
+   "| 1 fils | 2 | 0 | 1.00 | 100.00 |",
+   "| 4 fils | 2 | 1 | 1.00 | 60.00 |",
+   "| 48 fils | 2 | 1 | 1.00 | 10.00 |"
+  ],
+  "common_cohort_unchanged": true,
+  "proposed_failure_row": "| knn_300 | 5 | 1 | 300 | 0 | processus_ou_protocole_invalide |",
+  "single_old_header": "Prises : 1 ; rendues : 0 ; en echec ou expirees : 0.",
+  "single_proposed_header": "Prises : 1 ; rendues : 0 ; en echec ou expirees : 1."
+ },
+ "base_pin": "6f362f0bf4806d410657da8b3cdf36836837eb4f",
+ "builds": 0,
+ "cases": [
+  {
+   "name": "real_published_v11_P4",
+   "old_admitted": true,
+   "old_warm_seconds": 0.006163313,
+   "process_code": 0,
+   "proposed_admission": "conforme",
+   "proposed_admitted": true,
+   "proposed_warm_seconds": 0.006163313,
+   "raw_preserved": true,
+   "requested_passes": 4
+  },
+  {
+   "name": "real_layout_P2_requested_P2",
+   "old_admitted": true,
+   "old_warm_seconds": 0.006163313,
+   "process_code": 0,
+   "proposed_admission": "conforme",
+   "proposed_admitted": true,
+   "proposed_warm_seconds": 0.006163313,
+   "raw_preserved": true,
+   "requested_passes": 2
+  },
+  {
+   "name": "two_passes_requested_four",
+   "old_admitted": true,
+   "old_warm_seconds": 0.006163313,
+   "process_code": 0,
+   "proposed_admission": "processus_ou_protocole_invalide",
+   "proposed_admitted": false,
+   "proposed_warm_seconds": null,
+   "raw_preserved": true,
+   "requested_passes": 4
+  },
+  {
+   "name": "explicit_refusal_process_code_zero",
+   "old_admitted": true,
+   "old_warm_seconds": 0.006163313,
+   "process_code": 0,
+   "proposed_admission": "processus_ou_protocole_invalide",
+   "proposed_admitted": false,
+   "proposed_warm_seconds": null,
+   "raw_preserved": true,
+   "requested_passes": 4
+  },
+  {
+   "name": "pass_index_duplicate",
+   "old_admitted": true,
+   "old_warm_seconds": 0.006163313,
+   "process_code": 0,
+   "proposed_admission": "processus_ou_protocole_invalide",
+   "proposed_admitted": false,
+   "proposed_warm_seconds": null,
+   "raw_preserved": true,
+   "requested_passes": 4
+  },
+  {
+   "name": "pass_index_boolean",
+   "old_admitted": true,
+   "old_warm_seconds": 0.006163313,
+   "process_code": 0,
+   "proposed_admission": "processus_ou_protocole_invalide",
+   "proposed_admitted": false,
+   "proposed_warm_seconds": null,
+   "raw_preserved": true,
+   "requested_passes": 4
+  },
+  {
+   "name": "pass_index_float",
+   "old_admitted": true,
+   "old_warm_seconds": 0.006163313,
+   "process_code": 0,
+   "proposed_admission": "processus_ou_protocole_invalide",
+   "proposed_admitted": false,
+   "proposed_warm_seconds": null,
+   "raw_preserved": true,
+   "requested_passes": 4
+  },
+  {
+   "name": "pass_index_negative",
+   "old_admitted": true,
+   "old_warm_seconds": 0.006163313,
+   "process_code": 0,
+   "proposed_admission": "processus_ou_protocole_invalide",
+   "proposed_admitted": false,
+   "proposed_warm_seconds": null,
+   "raw_preserved": true,
+   "requested_passes": 4
+  },
+  {
+   "name": "wall_boolean",
+   "old_admitted": true,
+   "old_warm_seconds": 1e-09,
+   "process_code": 0,
+   "proposed_admission": "processus_ou_protocole_invalide",
+   "proposed_admitted": false,
+   "proposed_warm_seconds": null,
+   "raw_preserved": true,
+   "requested_passes": 4
+  },
+  {
+   "name": "wall_negative",
+   "old_admitted": true,
+   "old_warm_seconds": -1e-09,
+   "process_code": 0,
+   "proposed_admission": "processus_ou_protocole_invalide",
+   "proposed_admitted": false,
+   "proposed_warm_seconds": null,
+   "raw_preserved": true,
+   "requested_passes": 4
+  },
+  {
+   "name": "wall_float",
+   "old_admitted": true,
+   "old_warm_seconds": 0.006153383,
+   "process_code": 0,
+   "proposed_admission": "processus_ou_protocole_invalide",
+   "proposed_admitted": false,
+   "proposed_warm_seconds": null,
+   "raw_preserved": true,
+   "requested_passes": 4
+  },
+  {
+   "name": "domain_time_only",
+   "old_admitted": true,
+   "old_warm_seconds": 0.003968942,
+   "process_code": 0,
+   "proposed_admission": "processus_ou_protocole_invalide",
+   "proposed_admitted": false,
+   "proposed_warm_seconds": null,
+   "raw_preserved": true,
+   "requested_passes": 4
+  },
+  {
+   "name": "missing_final_exit",
+   "old_admitted": true,
+   "old_warm_seconds": 0.006163313,
+   "process_code": 0,
+   "proposed_admission": "processus_ou_protocole_invalide",
+   "proposed_admitted": false,
+   "proposed_warm_seconds": null,
+   "raw_preserved": true,
+   "requested_passes": 4
+  },
+  {
+   "name": "missing_final_full",
+   "old_admitted": true,
+   "old_warm_seconds": 0.006163313,
+   "process_code": 0,
+   "proposed_admission": "processus_ou_protocole_invalide",
+   "proposed_admitted": false,
+   "proposed_warm_seconds": null,
+   "raw_preserved": true,
+   "requested_passes": 4
+  },
+  {
+   "name": "wrong_requested_K",
+   "old_admitted": true,
+   "old_warm_seconds": 0.006163313,
+   "process_code": 0,
+   "proposed_admission": "processus_ou_protocole_invalide",
+   "proposed_admitted": false,
+   "proposed_warm_seconds": null,
+   "raw_preserved": true,
+   "requested_passes": 4
+  },
+  {
+   "name": "wrong_requested_threads",
+   "old_admitted": true,
+   "old_warm_seconds": 0.006163313,
+   "process_code": 0,
+   "proposed_admission": "processus_ou_protocole_invalide",
+   "proposed_admitted": false,
+   "proposed_warm_seconds": null,
+   "raw_preserved": true,
+   "requested_passes": 4
+  },
+  {
+   "name": "full_coord_bits_24",
+   "old_admitted": true,
+   "old_warm_seconds": 0.006163313,
+   "process_code": 0,
+   "proposed_admission": "processus_ou_protocole_invalide",
+   "proposed_admitted": false,
+   "proposed_warm_seconds": null,
+   "raw_preserved": true,
+   "requested_passes": 4
+  },
+  {
+   "name": "full_coord_bits_True",
+   "old_admitted": true,
+   "old_warm_seconds": 0.006163313,
+   "process_code": 0,
+   "proposed_admission": "processus_ou_protocole_invalide",
+   "proposed_admitted": false,
+   "proposed_warm_seconds": null,
+   "raw_preserved": true,
+   "requested_passes": 4
+  },
+  {
+   "name": "full_optimizations_0",
+   "old_admitted": true,
+   "old_warm_seconds": 0.006163313,
+   "process_code": 0,
+   "proposed_admission": "processus_ou_protocole_invalide",
+   "proposed_admitted": false,
+   "proposed_warm_seconds": null,
+   "raw_preserved": true,
+   "requested_passes": 4
+  },
+  {
+   "name": "full_workers_True",
+   "old_admitted": true,
+   "old_warm_seconds": 0.006163313,
+   "process_code": 0,
+   "proposed_admission": "processus_ou_protocole_invalide",
+   "proposed_admitted": false,
+   "proposed_warm_seconds": null,
+   "raw_preserved": true,
+   "requested_passes": 4
+  },
+  {
+   "name": "full_wall_ns_1",
+   "old_admitted": true,
+   "old_warm_seconds": 0.006163313,
+   "process_code": 0,
+   "proposed_admission": "processus_ou_protocole_invalide",
+   "proposed_admitted": false,
+   "proposed_warm_seconds": null,
+   "raw_preserved": true,
+   "requested_passes": 4
+  },
+  {
+   "name": "cloud_boolean_sites",
+   "old_admitted": true,
+   "old_warm_seconds": 0.006163313,
+   "process_code": 0,
+   "proposed_admission": "processus_ou_protocole_invalide",
+   "proposed_admitted": false,
+   "proposed_warm_seconds": null,
+   "raw_preserved": true,
+   "requested_passes": 4
+  },
+  {
+   "name": "wrong_leaf",
+   "old_admitted": true,
+   "old_warm_seconds": 0.006163313,
+   "process_code": 0,
+   "proposed_admission": "processus_ou_protocole_invalide",
+   "proposed_admitted": false,
+   "proposed_warm_seconds": null,
+   "raw_preserved": true,
+   "requested_passes": 4
+  },
+  {
+   "name": "nonzero_process_code",
+   "old_admitted": false,
+   "old_warm_seconds": null,
+   "process_code": 2,
+   "proposed_admission": "processus_ou_protocole_invalide",
+   "proposed_admitted": false,
+   "proposed_warm_seconds": null,
+   "raw_preserved": true,
+   "requested_passes": 4
+  },
+  {
+   "name": "invalid_json_line",
+   "old_admitted": true,
+   "old_warm_seconds": 0.006163313,
+   "process_code": 0,
+   "proposed_admission": "processus_ou_protocole_invalide",
+   "proposed_admitted": false,
+   "proposed_warm_seconds": null,
+   "raw_preserved": true,
+   "requested_passes": 4
+  },
+  {
+   "name": "non_object_line",
+   "old_admitted": true,
+   "old_warm_seconds": 0.006163313,
+   "process_code": 0,
+   "proposed_admission": "processus_ou_protocole_invalide",
+   "proposed_admitted": false,
+   "proposed_warm_seconds": null,
+   "raw_preserved": true,
+   "requested_passes": 4
+  },
+  {
+   "name": "invalid_utf8",
+   "old_admitted": true,
+   "old_warm_seconds": 0.006163313,
+   "process_code": 0,
+   "proposed_admission": "processus_ou_protocole_invalide",
+   "proposed_admitted": false,
+   "proposed_warm_seconds": null,
+   "raw_preserved": true,
+   "requested_passes": 4
+  },
+  {
+   "name": "duplicate_json_key",
+   "old_admitted": true,
+   "old_warm_seconds": 0.006163313,
+   "process_code": 0,
+   "proposed_admission": "processus_ou_protocole_invalide",
+   "proposed_admitted": false,
+   "proposed_warm_seconds": null,
+   "raw_preserved": true,
+   "requested_passes": 4
+  }
+ ],
+ "cloud_calls": 0,
+ "existing_gate": {
+  "cas": 5,
+  "ecarts": 0,
+  "porte": "mes_p"
+ },
+ "historical_H_838_complete_successes_not_revoked": true,
+ "native_runs": 0,
+ "nominal_fixture_sha256": "90dd693785497eb224ed4c6d82710df2ab662c0d1077b9bd1a38332e7880989e",
+ "pilot_sha256": "68995f99efc653690484264b4e1bfbac76bb5cfbe50e8ecf2d9b9b7bf4050d4f",
+ "proposed_analyse_sha256": "7514ace73635342e6dda58d389097c35c9d44716c301143c5b309e8f329c1584",
+ "proposed_sha256": "a5ca62fcdb3babd944f9ec0b60a526a9f73f7fd3e2b24d0657acfd8de3a4de0b"
+}

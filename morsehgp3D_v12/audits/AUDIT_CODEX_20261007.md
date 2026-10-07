@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-7 octobre 2026. Base publiée **`136e07628`** ; prototypes et correctifs non publiés épinglés par
+7 octobre 2026. Base publiée **`6f362f0bf`** ; prototypes et correctifs non publiés épinglés par
 hashes séparés. Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. États au [registre unique](CONSTATS.md).
 
@@ -8,18 +8,22 @@ hashes séparés. Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda
 
 - **Avant adoption CUDA, `0018`** : [juge permissif confirmé](../receipts/audit_reponses_20261007/cuda_juge_prepublication/README.md).
   Étapes absentes, processus dupliqués, comptes manquants ou durées négatives encore « adoptés » ;
-  diagnostics des premières passes perdus par le pilote. Dix contre-rapports, normal/−O identiques.
-  Corriger le schéma, les cohortes et les critères de mutants avant de conclure la campagne.
+  diagnostics des premières passes perdus par le pilote. [Correctif proposé](../receipts/audit_reponses_20261007/cuda_juge_proposition/README.md) :
+  18 injections + 31 cas, normal/−O ; vraie sortie CPU acceptée. Extension C++ `device_open` à qualifier sur GPU.
 - **Profils D6, `0207/0018`** : `9b2747eff` compare les binaires séparés ; [contre-audit du pilote](../receipts/audit_d6_20261007/README.md).
   Référence u21 absente et sorties tronquées encore admises ; correctifs du plan et du
   [lecteur strict proposés](../receipts/audit_reponses_20261007/d6_admission_proposition/README.md), non intégrés.
   ×8/×2048 conserve la géométrie avec niveaux ×64/×4194304, sans précision nouvelle.
   Égalité des comptes seule insuffisante. [Préparation hors chrono](../receipts/audit_d6_preparation_20261007/README.md),
   records de 16→32 octets : mesurer la latence intégrée avant le choix D6 à 3 %.
+- **MES-P, `0018`** : [passes tronquées/refusées encore chronométrées ; proposition](../receipts/audit_reponses_20261007/mes_p_admission/README.md).
+  28 cas, 26 anomalies refusées après patch, porte 5/5 conservée ; échecs visibles dans l'analyseur.
+  Aucun retrait des 838 succès H relus dans leur portée ; `0238` reste clos.
 - **Juge G, `0018`** : les ordres manquants sont désormais refusés ; [contre-rejeu et erratum](../receipts/audit_reponses_20261007/g_juge_integration/README.md).
   Ma proposition initiale omettait la ligne finale `exit` ; le développeur l’a corrigée avant intégration.
   Résidu de type limité : `exit.order=False/0.0` encore admis ; patch d’une ligne contre-jugé.
-  Pas d’erreur géométrique trouvée dans T1/T3/census/NUM-GARDE lus.
+  [Patch Gc `c002345` contre-lu](../receipts/audit_reponses_20261007/gc_empreinte/README.md) : travail hors digest,
+  comparaison entre fils conservée. Ce hash reste lié à la politique de résolution : témoin exact de huit points.
 - **Catalogue CUDA** : [compteurs corrigés dans le prototype actif `66c41ed`](../receipts/audit_reponses_20261007/cuda_compteurs_reponse/README.md),
   réécritures appareil/hôte séparées et sommées ; nettoyages mémoire conservés. Lecture statique,
   comparaison des diagnostics sur GPU réel encore attendue. GPU ≤32 sites/16 bits locaux, sinon reprise CPU exacte.
@@ -39,7 +43,6 @@ hashes séparés. Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda
 - **Documents, `0235/0236` clos** : [corrections confirmées](../receipts/audit_reponses_20261007/docs/README.md), livrées en `5682d00f5`,
   hashes identiques à la capture. Portée documentaire seulement. **`0237` reste ouvert
   techniquement** : T1-c doit lever les capacités 256/64 ; q_min≤4 ne les borne pas.
-  Préciser « transferts du raccord complet », M5 comptant déjà les siens.
 
 **Performance.** [Session G4 H contre-lue](../receipts/audit_reponses_20261007/session_h_mesures/README.md), étape **G sur CPU** à 48 fils :
 **80,13 / 63,24 / 75,70 ms à K5** ; **633,63 / 449,31 / 517,49 ms à K10**, ng00/01/02.
@@ -54,19 +57,17 @@ par deux laisseraient encore 40,16 / 32,56 / 38,07 ms, reste inchangé. Prépara
 Le prototype Gc inclut désormais les tables dans `resolve_ns` ; comparer des frontières homogènes.
 Réutiliser les buffers entre trames ne dispense pas de reconstruire les tables d'une nouvelle trame.
 
-[G-L5 : jointure exacte proposée](../receipts/audit_reponses_20261007/g_l5_proposition/README.md), sans produit
-cartésien sous collisions ; 180 modèles, 7 560 réponses. Compteurs/reprise des échecs et coexistence avec la table
-actuelle explicités. La baisse du temps total reste à juger par MES-G3.
+[Jointure exacte G-L5 proposée](../receipts/audit_reponses_20261007/g_l5_proposition/README.md) : 180 modèles,
+7 560 réponses ; collisions, reprise et mémoire traitées. Gain total à juger par MES-G3.
 
 [Pistes complémentaires G](../receipts/audit_g_pistes_20261007/README.md) : espaces census inutiles à K1,
 stockage borné avec refus de coquille différé, tests évitables sur support certifié. Propositions, gains non mesurés.
 
 La [finition commune en cours](../receipts/audit_t1b_tour_prepublication_20261007/finition/README.md) répond à `0233` : rangs,
 tris stables, chaînes exactes, CSR et table. Qualification et gains restent à mesurer.
-Le [diagnostic performance](../receipts/audit_performance_20261007/README.md) maintient les priorités : finition série
-122,5–171,3 ms ; travail CPU de feuille répété (`0234`) ; G-L3 rejeté, sondes puis proposition
-à traiter dans G. La prochaine campagne doit inclure reprises, transferts, matérialisation,
-coexistences mémoire, ablations appariées et FULL multi-séquences. Les 100 ms restent ouverts.
+Le [diagnostic initial](../receipts/audit_performance_20261007/README.md) garde la référence de finition
+122,5–171,3 ms et du travail CPU répété (`0234`). Prochain bilan : reprises, transferts, matérialisation,
+mémoire, ablations appariées et FULL multi-séquences. Les 100 ms restent ouverts.
 
 Canal à quatre fichiers, 73 constats ; [historique conservé](../receipts/audit_clotures_20261007/README.md).
-Aucun jeu sous licence, nouvelle mesure moteur ou utilisation de GCP par cet audit.
+Aucun jeu sous licence ni GCP ; seul nouveau contrôle natif : deux points CPU pour le format JSON, pas un benchmark.

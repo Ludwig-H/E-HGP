@@ -1,0 +1,164 @@
+{
+  "cases": [
+    {
+      "case": "conforme_synthetique",
+      "verdict": "adopte"
+    },
+    {
+      "case": "etapes_absentes",
+      "verdict": "refuse"
+    },
+    {
+      "case": "processus_dupliques",
+      "verdict": "refuse"
+    },
+    {
+      "case": "identite_absente_des_deux_cotes",
+      "verdict": "refuse"
+    },
+    {
+      "case": "un_digest_cpu_sur_dix",
+      "verdict": "refuse"
+    },
+    {
+      "case": "durees_negatives",
+      "verdict": "refuse"
+    },
+    {
+      "case": "mutants_identite_changes_en_temps",
+      "verdict": "refuse"
+    },
+    {
+      "case": "sortie_exit_absente",
+      "verdict": "refuse"
+    },
+    {
+      "case": "premiere_passe_reecritures_perdues",
+      "verdict": "rejete"
+    },
+    {
+      "case": "temps_passe_intermediaire_reecritures_perdues",
+      "verdict": "rejete"
+    },
+    {
+      "case": "capacite_absente",
+      "verdict": "refuse"
+    },
+    {
+      "case": "type_booleen_duree",
+      "verdict": "refuse"
+    },
+    {
+      "case": "profil_errone",
+      "verdict": "refuse"
+    },
+    {
+      "case": "sortie_porte_non_texte",
+      "verdict": "refuse"
+    },
+    {
+      "case": "isolation_apres_absente_nouvelle_regle",
+      "verdict": "refuse"
+    },
+    {
+      "case": "arret_precoce_sans_etapes",
+      "verdict": "refuse"
+    },
+    {
+      "case": "cohorte_6x11",
+      "verdict": "adopte"
+    },
+    {
+      "case": "ligne_null",
+      "parse": "illisible",
+      "valid_run": false
+    },
+    {
+      "case": "ligne_tableau",
+      "parse": "illisible",
+      "valid_run": false
+    },
+    {
+      "case": "ligne_texte",
+      "parse": "illisible",
+      "valid_run": false
+    },
+    {
+      "case": "cle_dupliquee",
+      "parse": "illisible",
+      "valid_run": false
+    },
+    {
+      "case": "constante_NaN",
+      "parse": "illisible",
+      "valid_run": false
+    },
+    {
+      "case": "texte_non_ASCII",
+      "parse": "illisible",
+      "valid_run": false
+    },
+    {
+      "case": "remplacement_UTF8",
+      "parse": "illisible",
+      "valid_run": false
+    },
+    {
+      "case": "unicode_echappe",
+      "parse": "illisible",
+      "valid_run": false
+    },
+    {
+      "case": "diagnostics_structure_invalide",
+      "exception": false,
+      "valid_run": false
+    },
+    {
+      "case": "device_structure_invalide",
+      "exception": false,
+      "valid_run": false
+    },
+    {
+      "case": "exit_duplique",
+      "parse": "illisible"
+    },
+    {
+      "case": "digest_avant_catalogue",
+      "parse": "illisible"
+    },
+    {
+      "case": "catalogue_apres_exit",
+      "parse": "illisible"
+    },
+    {
+      "case": "summary_garde_chaque_passe",
+      "result": "distinct"
+    }
+  ],
+  "engine_executed": false,
+  "gcp_used": false,
+  "native_format_capture": "CPU seulement ; adaptation GPU synthetique",
+  "official": [
+    "conforme juge=adopte attendu=adopte ok",
+    "budget_ng01 juge=rejete attendu=rejete ok",
+    "processus_lent juge=rejete attendu=rejete ok",
+    "empreinte_u16000 juge=rejete attendu=rejete ok",
+    "grand_livre_ng02 juge=rejete attendu=rejete ok",
+    "cas_absent juge=refuse attendu=refuse ok",
+    "mutant_survivant juge=rejete attendu=rejete ok",
+    "voie_cpu_changee juge=rejete attendu=rejete ok",
+    "portes_rouges juge=rejete attendu=rejete ok",
+    "sans_voie_appareil juge=refuse attendu=refuse ok",
+    "gpu_occupe juge=refuse attendu=refuse ok",
+    "quatre_processus juge=refuse attendu=refuse ok",
+    "mutants_sautes juge=refuse attendu=refuse ok",
+    "sonde_tuee juge=refuse attendu=refuse ok",
+    "invariant_appareil juge=rejete attendu=rejete ok",
+    "passe_manquante juge=refuse attendu=refuse ok",
+    "reecritures_perdues juge=rejete attendu=rejete ok",
+    "etapes_recouvertes juge=refuse attendu=refuse ok",
+    "juge_g4_t1b_ok injections=18"
+  ],
+  "patch_applied": true,
+  "source_hashes_stable": true
+}

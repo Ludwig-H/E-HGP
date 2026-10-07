@@ -1,0 +1,19 @@
+{
+  "head_after": "6f362f0bf4806d410657da8b3cdf36836837eb4f",
+  "live_sources_after": [
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_p_petits/pilote_p.py",
+      "sha256": "68995f99efc653690484264b4e1bfbac76bb5cfbe50e8ecf2d9b9b7bf4050d4f",
+      "unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_p_petits/analyse_p.py",
+      "sha256": "aa64cdbff590931c8c21ce30ad2a8f5403ac94a4fdb1da6903255bca5e60b45e",
+      "unchanged": true
+    }
+  ],
+  "normal_exit": 0,
+  "normal_optimized_results_equal": true,
+  "optimized_exit": 0,
+  "proposal_not_applied_to_product": true
+}

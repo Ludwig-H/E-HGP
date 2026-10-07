@@ -1,0 +1,36 @@
+{
+  "inputs": [
+    {
+      "bytes": 10079,
+      "path": "morsehgp3D_v12/microbancs/mes_p_petits/pilote_p.py",
+      "pin": "6f362f0bf4806d410657da8b3cdf36836837eb4f",
+      "sha256": "68995f99efc653690484264b4e1bfbac76bb5cfbe50e8ecf2d9b9b7bf4050d4f"
+    },
+    {
+      "bytes": 5800,
+      "path": "morsehgp3D_v12/microbancs/mes_p_petits/test_pilote_p.py",
+      "pin": "6f362f0bf4806d410657da8b3cdf36836837eb4f",
+      "sha256": "c8e5c4bced71f181515046704e43596ec55c81f8c7e72ecb5f331b0c4ee4fc15"
+    },
+    {
+      "bytes": 7551,
+      "path": "morsehgp3D_v12/microbancs/mes_p_petits/analyse_p.py",
+      "pin": "6f362f0bf4806d410657da8b3cdf36836837eb4f",
+      "sha256": "aa64cdbff590931c8c21ce30ad2a8f5403ac94a4fdb1da6903255bca5e60b45e"
+    },
+    {
+      "bytes": 29151,
+      "path": "morsehgp3D_v11/bench/full_probe.cpp",
+      "pin": "ac081a06fd684fdcd3b11c2b1faa4679f2ad287c",
+      "sha256": "9d70956efddcef97be0a9153da5feb2417702402b46394ac778c6d78e2c49c2c"
+    },
+    {
+      "bytes": 14024,
+      "path": "morsehgp3D_v12/receipts/g4_t0g_20261007/resultats/cmd/001_mes_p/files/mes_p/brut/synth_uniform_n100_k5_f48.jsonl",
+      "pin": "6f362f0bf4806d410657da8b3cdf36836837eb4f",
+      "sha256": "90dd693785497eb224ed4c6d82710df2ab662c0d1077b9bd1a38332e7880989e"
+    }
+  ],
+  "proposed_analyse_sha256": "7514ace73635342e6dda58d389097c35c9d44716c301143c5b309e8f329c1584",
+  "proposed_sha256": "a5ca62fcdb3babd944f9ec0b60a526a9f73f7fd3e2b24d0657acfd8de3a4de0b"
+}
