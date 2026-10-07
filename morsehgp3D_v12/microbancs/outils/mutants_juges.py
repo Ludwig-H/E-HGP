@@ -206,8 +206,9 @@ MUTANTS = [
                                     '        problems = check_take(run_out, mode, args.reps)')], 'm6'),
     ('m6_rejuge_empreintes_ignorees', M6, [("        if r.get('sha256') != hashlib.sha256(data).hexdigest():",
                                             '        if False:')], 'm6'),
-    ('m6_rejuge_code_ignore', M6, [("      found = (['code %r' % r.get('code')] if r.get('code') != 0 else []) + "
-                                    "check_take(text, mode, reps)", '      found = check_take(text, mode, reps)')], 'm6'),
+    ('m6_rejuge_code_ignore', M6, [("      found = ([] if is_int(r.get('code')) and r['code'] == 0 else ['code %r' % "
+                                    "r.get('code')]) + \\\n          check_take(text, mode, reps)",
+                                    '      found = check_take(text, mode, reps)')], 'm6'),
     ('m6_rejuge_isolation_ignoree', M6, [('    why = isolation_problem(r.get(side), label)\n    if why is not None:\n'
                                           '      found.append(why)\n', '    pass\n')], 'm6'),
     # MES-M6 : relecture stricte d'un rapport v2 (recu audit_juges_emst_20261007/juges), une garde par mutant.
@@ -228,6 +229,24 @@ MUTANTS = [
                                                   '  if False:')], 'm6'),
     ('m6_rejuge_medianes_non_recoupees', M6, [("    if v2 and not problems and report.get('summary_median_us') != "
                                                "summary(takes):", '    if False:')], 'm6'),
+    # MES-M6 : entiers stricts, effectif valide, schemas connus (recu audit_reprise_20261007/juges), une garde par mutant.
+    ('m6_entiers_laxistes', M6, [('  return type(value) is int', '  return isinstance(value, (int, float))')], 'm6'),
+    ('m6_rejuge_identifiants_non_types', M6, [('      if not isinstance(mode, str) or mode not in MODES or not '
+                                               'is_int(index) or not 0 <= index < processes:', '      if False:')],
+     'm6'),
+    ('m6_rejuge_doublons_admis', M6, [('      if (mode, index) in declared:', '      if False:')], 'm6'),
+    ('m6_rejuge_effectif_non_valide', M6, [('    if sorted(takes) != sorted(expected):', '    if False:')], 'm6'),
+    ('m6_rejuge_schema_ouvert', M6, [('  if report is not None and not (isinstance(schema, str) and schema in '
+                                      'KNOWN_SCHEMAS):', '  if False:')], 'm6'),
+    ('m6_rejuge_v1_champs_libres', M6, [('  if report is not None and schema == SCHEMA_V1 and sorted(report) != '
+                                         'sorted(V1_FIELDS):', '  if False:')], 'm6'),
+    ('m6_rejuge_v1_prises_libres', M6, [('      if not v2 and sorted(r) != sorted(V1_RUN_FIELDS):', '      if False:')],
+     'm6'),
+    ('m6_rejuge_code_compilation_laxiste', M6, [("    if not isinstance(compiled, dict) or not is_int(compiled.get("
+                                                 "'code')) or compiled['code'] != 0:", "    if not isinstance("
+                                                 "compiled, dict) or compiled.get('code') != 0:")], 'm6'),
+    ('m6_rejuge_code_de_prise_laxiste', M6, [("      found = ([] if is_int(r.get('code')) and r['code'] == 0 else",
+                                              "      found = ([] if r.get('code') == 0 else")], 'm6'),
 ]
 
 

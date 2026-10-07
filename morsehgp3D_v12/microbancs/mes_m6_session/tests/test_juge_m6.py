@@ -19,7 +19,11 @@ l'ordre et au format de mes_m6_session_cost.cu. Attendus :
     3) : code non nul, isolation non prouvee, et les trois mutations du recu audit_juges_emst_20261007/juges
     (provenance vide, isolation de prise quiet=true avec code 9 et un processus, refus explicite laisse sous un
     verdict positif), puis chaque garde seule (empreinte du binaire vide, sources vides ou incompletes, isolation du
-    debut contredite, prise declaree non conforme, medianes publiees fausses, champ obligatoire absent).
+    debut contredite, prise declaree non conforme, medianes publiees fausses, champ obligatoire absent) ; puis
+    les injections du recu audit_reprise_20261007/juges (indice de prise false ou 0.0, tous les indices flottants sans
+    fichier ni mediane, schema inconnu avec un refus publie, codes de compilation et de prise a false) et chaque garde
+    seule (prise retiree du rapport, prise en double, indice hors plage, schema absent, effectif flottant ; copie de
+    la session A au schema inconnu, avec un refus publie, ou avec une prise au champ inconnu).
 Usage : python3 -S -O tests/test_juge_m6.py [--recu-g4 DOSSIER_m6]   (dossier par defaut : recu du depot)
 Bibliotheque standard ; aucune garde par assert. Codes : 0 conforme, 1 ecart (detail en JSON), 2 usage.
 """
@@ -332,15 +336,23 @@ def cas_relecture(tmp, recu):
   c, r = rejuger(recu, '--reps', '1000')
   exiger(c == 3, 'session G4 A relue avec --reps 1000 : code %d' % c)
   resultats.append({'cas': 'rejuge_session_g4_a_effectif_faux', 'code': c, 'refus': r['refus'][0][:80]})
-  for nom, alterer in (('prise_alteree', lambda d: (d / 'm6_yield_1.jsonl').write_text(
-                          (d / 'm6_yield_1.jsonl').read_text().replace('"p05_us":', '"p05_us":1', 1))),
-                       ('prise_absente', lambda d: (d / 'm6_blocking_2.jsonl').unlink()),
-                       ('rapport_absent', lambda d: (d / 'm6_report.json').unlink())):
+  for nom, alterer, motif in (('prise_alteree', lambda d: (d / 'm6_yield_1.jsonl').write_text(
+                                 (d / 'm6_yield_1.jsonl').read_text().replace('"p05_us":', '"p05_us":1', 1)), None),
+                              ('prise_absente', lambda d: (d / 'm6_blocking_2.jsonl').unlink(), None),
+                              ('rapport_absent', lambda d: (d / 'm6_report.json').unlink(), None),
+                              # Recu audit_reprise_20261007/juges : le format historique n'est pas un repli.
+                              ('v1_schema_inconnu', lambda d: _rapport(d, lambda r: r.update(
+                                  schema='ehgp.v12.mes_m6.v0')), 'schema'),
+                              ('v1_avec_refus_publie', lambda d: _rapport(d, lambda r: r.update(
+                                  refusals=['binaire modifie pendant les prises'])), 'format historique'),
+                              ('v1_prise_avec_champ_inconnu', lambda d: _rapport(d, lambda r: r['runs'][3].update(
+                                  sha256='0' * 64)), 'format historique')):
     copie = Path(tmp) / ('session_a_' + nom)
     shutil.copytree(str(recu), str(copie))
     alterer(copie)
     c, r = rejuger(copie)
-    exiger(c == 3 and r['verdict'] == 'mes_m6_echec', 'session G4 A, %s : code %d' % (nom, c))
+    exiger(c == 3 and r['verdict'] == 'mes_m6_echec' and (motif is None or any(motif in x for x in r['refus'])),
+           'session G4 A, %s : code %d, %s' % (nom, c, r['refus'][:2]))
     resultats.append({'cas': 'rejuge_session_g4_a_' + nom, 'code': c, 'refus': r['refus'][0][:80]})
   code, _, _, out, _ = passage(tmp, 'v2')
   c, r = rejuger(out)
@@ -352,11 +364,14 @@ def cas_relecture(tmp, recu):
   c, r = rejuger(out)
   exiger(c == 3 and any('empreinte' in x for x in r['refus']), 'dossier v2 altere : code %d' % c)
   resultats.append({'cas': 'rejuge_v2_prise_alteree_mais_conforme', 'code': c, 'refus': r['refus'][0][:80]})
-  for nom, falsifier, motif in FALSIFICATIONS_V2:
+  for entree in FALSIFICATIONS_V2:
+    nom, falsifier, motif = entree[:3]
     code, _, _, out, _ = passage(tmp, 'v2_' + nom)
     rapport = json.loads((out / 'm6_report.json').read_text())
     falsifier(rapport)
     (out / 'm6_report.json').write_text(json.dumps(rapport))
+    if len(entree) > 3:  # action sur le dossier publie (fichiers des prises)
+      entree[3](out)
     c, r = rejuger(out)
     exiger(code == 0 and c == 3 and any(motif in x for x in r['refus']), 'rapport v2 falsifie (%s) : code %d, %s' % (
         nom, c, r['refus'][:2]))
@@ -366,6 +381,25 @@ def cas_relecture(tmp, recu):
 
 def _medianes_fausses(rapport):
   rapport['summary_median_us']['spin']['context_open'] += 1.0
+
+
+def _rapport(dossier, falsifier):
+  """Falsifie le rapport publie d'un dossier (copie jetable)."""
+  chemin = dossier / 'm6_report.json'
+  rapport = json.loads(chemin.read_text())
+  falsifier(rapport)
+  chemin.write_text(json.dumps(rapport))
+
+
+def _indices_flottants_sans_medianes(rapport):  # recu audit_reprise_20261007/juges : zero prise lue
+  for entree in rapport['runs']:
+    entree['process'] = float(entree['process'])
+  rapport['summary_median_us'] = {mode: {} for mode in ('spin', 'yield', 'blocking')}
+
+
+def _effacer_prises(dossier):
+  for chemin in dossier.glob('m6_*.jsonl'):
+    chemin.unlink()
 
 
 FALSIFICATIONS_V2 = (  # (nom, falsification d'un rapport v2 conforme, motif attendu dans les refus de la relecture)
@@ -385,6 +419,20 @@ FALSIFICATIONS_V2 = (  # (nom, falsification d'un rapport v2 conforme, motif att
     ('prise_declaree_non_conforme', lambda r: r['runs'][1].update(conform=False), 'non conforme'),
     ('medianes_publiees_fausses', _medianes_fausses, 'medianes'),
     ('champ_obligatoire_absent', lambda r: r.pop('date_utc'), 'date_utc'),
+    # Recu audit_reprise_20261007/juges : identifiants non entiers, codes booleens, schema inconnu.
+    ('auditeur_indice_false', lambda r: r['runs'][0].update(process=False), 'identifiant'),
+    ('auditeur_indice_float', lambda r: r['runs'][0].update(process=0.0), 'identifiant'),
+    ('auditeur_indices_float_sans_fichiers', _indices_flottants_sans_medianes, 'identifiant', _effacer_prises),
+    ('auditeur_schema_inconnu_refus_explicite',
+     lambda r: r.update(schema='ehgp.v12.mes_m6.v999', refusals=['binaire modifie pendant les prises']), 'schema'),
+    ('auditeur_code_compilation_false', lambda r: r['compile'].update(code=False), 'compilation'),
+    ('auditeur_code_prise_false', lambda r: r['runs'][0].update(code=False), 'code False'),
+    # Chaque garde seule.
+    ('prise_retiree_du_rapport', lambda r: r['runs'].pop(0), 'prises validees'),
+    ('prise_en_double', lambda r: r['runs'].append(dict(r['runs'][0])), 'en double'),
+    ('indice_hors_plage', lambda r: r['runs'][0].update(process=3), 'identifiant'),
+    ('schema_absent', lambda r: r.pop('schema'), 'schema'),
+    ('effectif_flottant', lambda r: r.update(reps=2000.0), 'effectif'),
 )
 
 

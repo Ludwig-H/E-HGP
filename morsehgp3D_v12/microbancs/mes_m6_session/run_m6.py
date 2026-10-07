@@ -13,10 +13,14 @@ effaces avant tout), binaire efface, recompile, present et rehache apres les pri
 isole (nvidia-smi lisible, aucun processus de calcul) au debut, avant et apres chaque prise ; chaque prise de code 0
 rend exactement les 65 mesures attendues (une ligne JSON chacune, aucune en double ni en trop, ligne device du mode
 joue et du meme appareil pour toutes les prises, effectifs n fixes par --reps comme dans le banc, nombres finis
-positifs, p05 <= p50 <= p95 <= max). --rejuger relit un dossier publie avec les memes regles. Rapport v2 : schema
-strict (champs obligatoires types, empreintes SHA-256 du binaire et des deux sources, releves d'isolation coherents
-avec leur code et leurs processus, aucun refus publie, prises declarees conformes sans probleme, medianes publiees
-egales a celles des prises ; recu audit_juges_emst_20261007/juges). Rapport v1 (historique) : relu avec ses limites
+positifs, p05 <= p50 <= p95 <= max). --rejuger relit un dossier publie avec les memes regles. Liste fermee de
+schemas : v2, ou v1 (historique, celui de la session A) relu par sa seule branche documentee, aux champs exacts du
+format historique ; tout autre schema (absent, inconnu, mal type) est refuse. Entiers stricts (type int exact :
+booleens et flottants refuses), identifiants de prise types avant toute comparaison, effectif reellement valide :
+exactement les 3 x processus prises attendues, chacune lue et conforme (recu audit_reprise_20261007/juges). Rapport
+v2 : schema strict (champs obligatoires types, empreintes SHA-256 du binaire et des deux sources, releves d'isolation
+coherents avec leur code et leurs processus, aucun refus publie, prises declarees conformes sans probleme, medianes
+publiees egales a celles des prises ; recu audit_juges_emst_20261007/juges). Rapport v1 : relu avec ses limites
 declarees non rejouables (ni empreintes, ni isolation par prise, ni effectif publie). Bibliotheque standard seule
 (Python 3.10 nu, aucun assert). Codes : 0 conforme (mes_m6_ok) ; 2 usage ; 3 compilation, execution, preuve ou
 sortie en echec (mes_m6_echec, raisons dans le rapport et sur stderr).
@@ -39,6 +43,10 @@ HERE = Path(__file__).resolve().parent
 SOURCE = HERE / 'mes_m6_session_cost.cu'
 DRIVER = Path(__file__).resolve()
 SCHEMA = 'ehgp.v12.mes_m6.v2'
+SCHEMA_V1 = 'ehgp.v12.mes_m6.v1'  # format historique (session A, 7 octobre) : relu par sa seule branche documentee
+KNOWN_SCHEMAS = (SCHEMA_V1, SCHEMA)  # liste fermee : tout autre schema (absent, inconnu, mal type) est refuse
+V1_FIELDS = ('compile', 'date_utc', 'gpu', 'gpu_apps', 'nvcc', 'runs', 'schema', 'uptime_since')
+V1_RUN_FIELDS = ('code', 'lines', 'mode', 'process', 'seconds', 'stderr')
 MODES = ('spin', 'yield', 'blocking')
 GPU_APPS = ['nvidia-smi', '--query-compute-apps=pid,process_name,used_memory', '--format=csv,noheader']
 BIG = 256 << 20
@@ -88,7 +96,8 @@ def sha256(path):
 
 
 def is_int(value):
-  return isinstance(value, int) and not isinstance(value, bool)
+  """Entier strict : type int exact. Booleens et flottants refuses (en Python, False == 0 et 0.0 == 0)."""
+  return type(value) is int
 
 
 def finite(value):
@@ -400,7 +409,15 @@ def rejudge(folder, args):
     report, problems = None, ['rapport illisible : %s' % error]
   if report is not None and not isinstance(report, dict):
     report, problems = None, ['rapport hors schema']
-  v2 = report is not None and report.get('schema') == SCHEMA
+  schema = report.get('schema') if report is not None else None
+  if report is not None and not (isinstance(schema, str) and schema in KNOWN_SCHEMAS):
+    problems.append('schema %r inconnu : seuls %s (historique) et %s sont lus' % (schema, SCHEMA_V1, SCHEMA))
+    report = None
+  if report is not None and schema == SCHEMA_V1 and sorted(report) != sorted(V1_FIELDS):
+    problems.append('rapport v1 aux champs differents du format historique (%s)' % ', '.join(
+        sorted(str(k) for k in set(report) ^ set(V1_FIELDS))))
+    report = None
+  v2 = report is not None and schema == SCHEMA
   reps, processes = (report.get('reps'), report.get('processes')) if v2 else (args.reps, args.processes)
   if report is not None and not v2:
     not_replayable.append('rapport %s : effectif et nombre de processus non publies, pris de la commande (--reps %d, '
@@ -414,21 +431,31 @@ def rejudge(folder, args):
     report = None
   if report is not None:
     compiled = report.get('compile')
-    if not isinstance(compiled, dict) or compiled.get('code') != 0:
-      problems.append('compilation absente ou en echec')
+    if not isinstance(compiled, dict) or not is_int(compiled.get('code')) or compiled['code'] != 0:
+      problems.append('compilation absente, en echec ou de code mal type')
     if report.get('gpu_apps') != '':
       problems.append('GPU occupe ou non releve au debut')
     if v2:
       problems += report_v2_problems(report)
     runs = report.get('runs')
-    runs = runs if isinstance(runs, list) and all(isinstance(r, dict) for r in runs) else []
-    keys = [(r.get('mode'), r.get('process')) for r in runs]
-    expected = {(mode, index) for index in range(processes) for mode in MODES}
-    if len(keys) != len(expected) or set(keys) != expected:
-      problems.append('prises manquantes, en double ou en trop (%d pour %d)' % (len(keys), len(expected)))
+    if not isinstance(runs, list) or not all(isinstance(r, dict) for r in runs):
+      problems.append('liste des prises absente ou illisible')
+      runs = []
+    expected = [(mode, index) for index in range(processes) for mode in MODES]
+    declared = []
     for r in runs:
       mode, index = r.get('mode'), r.get('process')
-      if mode not in MODES or not is_int(index):
+      # Identifiant type AVANT toute comparaison ou tout ensemble (recu audit_reprise_20261007/juges) : une entree
+      # illisible est refusee, jamais sautee.
+      if not isinstance(mode, str) or mode not in MODES or not is_int(index) or not 0 <= index < processes:
+        problems.append('prise d identifiant illisible ou hors plage : mode %r, processus %r' % (mode, index))
+        continue
+      if (mode, index) in declared:
+        problems.append('prise en double : %s %d' % (mode, index))
+        continue
+      declared.append((mode, index))
+      if not v2 and sorted(r) != sorted(V1_RUN_FIELDS):
+        problems.append('prise %s %d : champs differents du format historique' % (mode, index))
         continue
       try:
         data = (folder / ('m6_%s_%d.jsonl' % (mode, index))).read_bytes()
@@ -436,8 +463,9 @@ def rejudge(folder, args):
       except (OSError, UnicodeDecodeError) as error:
         problems.append('prise %s %d illisible : %s' % (mode, index, error))
         continue
-      found = (['code %r' % r.get('code')] if r.get('code') != 0 else []) + check_take(text, mode, reps)
-      if r.get('lines') != text.count('\n'):
+      found = ([] if is_int(r.get('code')) and r['code'] == 0 else ['code %r' % r.get('code')]) + \
+          check_take(text, mode, reps)
+      if not is_int(r.get('lines')) or r['lines'] != text.count('\n'):
         found.append('nombre de lignes different du rapport')
       if v2:
         if r.get('sha256') != hashlib.sha256(data).hexdigest():
@@ -448,6 +476,10 @@ def rejudge(folder, args):
       else:
         takes[(mode, index)] = text
         lines += text.count('\n')
+    # Effectif reellement valide : exactement les 3 x processes prises attendues, chacune lue et conforme.
+    if sorted(takes) != sorted(expected):
+      problems.append('prises validees %d sur %d attendues (absentes : %s)' % (
+          len(takes), len(expected), ', '.join('%s %d' % k for k in expected if k not in takes)[:200]))
     if len({device_of(text) for text in takes.values()}) > 1:
       problems.append('appareil different entre prises')
     if v2 and not problems and report.get('summary_median_us') != summary(takes):
@@ -456,7 +488,7 @@ def rejudge(folder, args):
   if v2 and report is not None and report.get('verdict') != verdict:
     problems.append('verdict publie %r, rejuge %s' % (report.get('verdict'), verdict))
     verdict = 'mes_m6_echec'
-  print(json.dumps({'rejuge': folder.name, 'schema': report.get('schema') if report else None, 'verdict': verdict,
+  print(json.dumps({'rejuge': folder.name, 'schema': schema, 'verdict': verdict,
                     'prises': len(takes), 'lignes': lines, 'refus': problems[:20], 'non_rejouable': not_replayable,
                     'medianes_us': summary(takes) if not problems else None}, ensure_ascii=False, sort_keys=True))
   return 0 if not problems else 3
