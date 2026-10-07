@@ -19,6 +19,9 @@
 //
 // Option --profil-resolution (MES-M7) : apres toutes les mesures existantes, sans changer leurs sorties, une passe de
 // plus du bras replique_v12 a un fil, instrumentee au compteur de cycles par composante (README.md, paragraphe 5.5).
+// Option --bras-saut (MES-G1, levier G-L3, avec --chrono-resolution R) : quatrieme bras replique_v12_saut, entrelace
+// avec les trois autres, dont le pas interieur hors catalogue tente d'abord les candidats voisins de mes_g1_saut ;
+// controle de la foret contre celle de la v11 (README.md, paragraphe 5.6). Sans l'option, rien ne change.
 #include <x86intrin.h>
 
 #include <algorithm>
@@ -41,6 +44,7 @@
 #include "tower/seed_log.hpp"
 #include "../common/format.hpp"
 #include "../mes_m3/meb_cert.hpp"
+#include "../../mes_g1_saut/voisins.hpp"
 
 using namespace mhgp11;
 using namespace mhgp11::tower_detail;
@@ -57,13 +61,14 @@ struct Args {
   u64 budget = u64{16} << 30;
   u32 chrono = 0;             // repetitions de la mesure de resolution a un fil (0 : pas de mesure)
   bool profile = false;       // profil de la resolution par composante (MES-M7), apres les mesures existantes
+  bool jump_arm = false;      // quatrieme bras replique_v12_saut (MES-G1) dans la mesure de resolution
   std::vector<bool> journal;  // ordres dont le journal de graines v11 est rejoue et compare (1..K)
 };
 
 [[noreturn]] void usage() {
   std::cerr << "usage : mhgp12_vidage <xyz.u32le> <ids.u32le> <trame> <K> <feuille> <fils> <dossier>"
                " [--ful1 <chemin>] [--journal tous|aucun|k1,k2,...] [--budget <octets>]"
-               " [--chrono-resolution R] [--profil-resolution]\n";
+               " [--chrono-resolution R [--bras-saut]] [--profil-resolution]\n";
   std::exit(2);
 }
 
@@ -94,6 +99,8 @@ Args parse_args(int argc, char** argv) {
       if (!bench::parse(argv[++i], a.budget)) usage();
     } else if (opt == "--profil-resolution") {
       a.profile = true;
+    } else if (opt == "--bras-saut") {
+      a.jump_arm = true;
     } else if (opt == "--journal" && i + 1 < argc) {
       const std::string list = argv[++i];
       std::fill(a.journal.begin(), a.journal.end(), list == "tous");
@@ -113,6 +120,7 @@ Args parse_args(int argc, char** argv) {
       usage();
     }
   }
+  if (a.jump_arm && a.chrono == 0) usage();  // le quatrieme bras n'existe que dans la mesure de resolution
   return a;
 }
 
@@ -674,6 +682,14 @@ struct CensusCopy {
   }
 };
 
+// Etat du quatrieme bras (replique_v12_saut, levier G-L3) : voisins de l'etage P, tampon et compteurs logiques.
+struct JumpState {
+  const std::vector<u32>* neighbours = nullptr;  // K voisins par site (g1::table_des_voisins), kNone au-dela
+  u32 K = 0;
+  std::vector<u32> candidates;                   // tampon : F et les voisins de ses sites, tries sans doublon
+  u64 probes = 0, attempts = 0, jumps = 0, tested = 0, census_saturated = 0, census_complete = 0;
+};
+
 struct Replica {
   const FullDomain& domain;
   const PopulationLookup& population;
@@ -682,8 +698,49 @@ struct Replica {
   std::vector<u32> interior, shell;  // copies du census (un fil)
   std::array<u64, mebcert::kRouteCount> routes{};
   u64 meb_steps = 0, census = 0;
+  JumpState* jump = nullptr;  // quatrieme bras seulement
 };
 
+// Tentative de saut certifie (G-L3) du quatrieme bras : vrai, et cur remplace, si k sites strictement interieurs a la
+// sphere sont exhibes parmi F et les K voisins de ses sites (tries par SiteIdx, testes dans cet ordre).
+Result<bool> try_jump(Replica& r, const num::Sphere& sphere, std::array<SiteIdx, kMaxMebSites>& cur, u32 k) {
+  JumpState& js = *r.jump;
+  ++js.attempts;
+  auto& cand = js.candidates;
+  cand.clear();
+  for (u32 i = 0; i < k; ++i) {
+    const u32 s = idx(cur[i]);
+    cand.push_back(s);
+    const u32* near = js.neighbours->data() + u64{s} * js.K;
+    for (u32 j = 0; j < js.K; ++j)
+      if (near[j] != kNone) cand.push_back(near[j]);
+  }
+  std::sort(cand.begin(), cand.end());
+  cand.erase(std::unique(cand.begin(), cand.end()), cand.end());
+  const num::LatticeSphere lattice(sphere);
+  std::array<SiteIdx, kMaxMebSites> next{};
+  u32 found = 0;
+  for (const u32 c : cand) {
+    ++js.tested;
+    auto side = lattice.side(r.ctx.points[c]);
+    if (!side.ok()) return side.outcome();
+    if (side.value() < 0) {
+      next[found++] = SiteIdx{c};
+      if (found == k) break;
+    }
+  }
+  if (found < k) return false;
+  ++js.jumps;
+  std::copy(next.begin(), next.begin() + k, cur.begin());
+  return true;
+}
+
+// Quatrieme bras (MES-G1, r.jump non nul, replique v12 seulement) : pour une plus petite boule hors catalogue, avant le
+// census, F et les K plus proches voisins de chacun de ses sites (memes definitions et meme ordre que mes_g1_saut :
+// tries par SiteIdx, testes dans cet ordre au cote exact de la v11, strictement interieur = cote < 0, arret au k-ieme) ;
+// k sites strictement interieurs prouvent p >= k et la partie suivante est formee des k plus petits SiteIdx d'entre eux
+// (pas valide du theoreme D) ; sinon census, comme les autres bras. Le test passe par LatticeSphere, la voie du census
+// (identique a num::side). Les bras replique_v12 et replique_v12_saut executent la meme fonction : seul le saut differe.
 template <bool NewMeb>
 Result<u32> resolve_replica(Replica& r, CensusWorkspace* ws, const SiteIdx* trace, u32 k) {
   const auto& cat = r.domain.catalogue();
@@ -691,6 +748,9 @@ Result<u32> resolve_replica(Replica& r, CensusWorkspace* ws, const SiteIdx* trac
   std::array<SiteIdx, kMaxMebSites> cur{};
   std::copy(trace, trace + k, cur.begin());
   for (;;) {
+    if constexpr (NewMeb) {
+      if (r.jump != nullptr) ++r.jump->probes;
+    }
     auto hit = r.population.hit({cur.data(), k}, k);
     if (!hit.ok()) return hit.outcome();
     if (hit.value()) {
@@ -735,10 +795,20 @@ Result<u32> resolve_replica(Replica& r, CensusWorkspace* ws, const SiteIdx* trac
       q = rec.q;
       level = &cat.levels()[rec.rank];
     } else {
+      if constexpr (NewMeb) {
+        if (r.jump != nullptr) {  // G-L3 : saut certifie sans census, s'il se peut
+          auto jumped = try_jump(r, *sphere, cur, k);
+          if (!jumped.ok()) return jumped.outcome();
+          if (jumped.value()) continue;
+        }
+      }
       ++r.census;
       CensusCopy copy{&r.interior, &r.shell, false};
       MHGP11_TRY(ws->query(r.domain.index(), *sphere, k, &copy, CensusCopy::consume));
       complete = copy.complete;
+      if constexpr (NewMeb) {
+        if (r.jump != nullptr) ++(complete ? r.jump->census_complete : r.jump->census_saturated);
+      }
       inner = r.interior.data();
       shell = r.shell.data();
       p = static_cast<u32>(r.interior.size());
@@ -808,29 +878,211 @@ Result<u32> resolve_replica(Replica& r, CensusWorkspace* ws, const SiteIdx* trac
   }
 }
 
-Outcome measure_resolution(const Args& a, const FullDomain& domain, const PopulationLookup& population,
-                           const mebcert::Ctx& ctx, MemoryBudget& budget, CensusWorkspace* ws) {
+// ---- Quatrieme bras : controle de la foret (MES-G1) ----------------------------------------------------------------
+// Les graines terminales du bras replique_v12_saut peuvent differer de celles de la v11 ; ce qui doit tenir, c'est que
+// la cible de chaque representant soit dans la meme composante que celle de la v11 a la COUPE OUVERTE du niveau de sa
+// jonction. Union-find des cibles par jonction, rangs croissants (une jonction ne voit que les unions des rangs
+// strictement inferieurs) ; chaque composante porte le noeud de la foret publiee de la v11 qui la represente ; chaque
+// fusion formee doit etre un noeud publie (meme rang, memes enfants), chaque rang doit former autant de fusions que la
+// foret publiee, et la fin doit laisser une seule composante, portee par la racine publiee. Joue d'abord avec les
+// graines de la v11 (controle du controle : la foret publiee doit etre reproduite), puis avec celles du bras.
+struct ForestCheck {
+  u64 outside = 0;    // representants dont la cible n'est pas dans la composante de la cible v11 (coupe ouverte)
+  u64 merges = 0;     // fusions formees par les cibles
+  u64 published = 0;  // fusions de la foret publiee
+  u64 structure = 0;  // ecarts de structure (rang, enfants, compte par rang, racine)
+  bool same() const { return outside == 0 && structure == 0 && merges == published; }
+};
+
+Result<ForestCheck> check_forest(const FullDomain& domain, const OrderForest& forest, std::span<const u32> cells,
+                                 std::span<const u64> cell_traces, std::span<const u32> targets,
+                                 std::span<const u32> reference) {
   const auto& cat = domain.catalogue();
+  const u32 nb = forest.births();
+  const auto nodes = forest.nodes();
+  if (cell_traces.size() != cells.size() + 1 || targets.size() != reference.size() ||
+      cell_traces.back() != targets.size())
+    return fail(Reason::tower_invariant);
+  std::vector<u32> node_of(cat.balls(), kNone);  // cle de naissance (BallIdx, k >= 2) -> noeud de naissance
+  for (u32 i = 0; i < nb; ++i) {
+    const u32 key = forest.birth_nodes()[i].birth_key;
+    if (key >= cat.balls() || node_of[key] != kNone) return fail(Reason::tower_invariant);
+    node_of[key] = i;
+  }
+  std::vector<u64> published_at(cat.levels().size(), 0);
+  for (u64 x = nb; x < nodes.size(); ++x) ++published_at[idx(nodes[x].rank)];
+  ForestCheck out;
+  out.published = nodes.size() - nb;
+  std::vector<u32> parent(nb), size(nb, 1), alive(nb);
+  for (u32 i = 0; i < nb; ++i) parent[i] = alive[i] = i;
+  auto find = [&](u32 x) {
+    while (parent[x] != x) {
+      parent[x] = parent[parent[x]];
+      x = parent[x];
+    }
+    return x;
+  };
+  auto unite = [&](u32 x, u32 y) {  // deux racines ; rend la racine de la reunion (union par taille)
+    if (x == y) return x;
+    if (size[x] < size[y]) std::swap(x, y);
+    parent[y] = x;
+    size[x] += size[y];
+    return x;
+  };
+  std::vector<std::pair<u32, u32>> before, after;  // (racine, noeud vivant a la coupe ouverte)
+  std::vector<u32> kids, published_kids;
+  u64 c = 0;
+  while (c < cells.size()) {
+    const u32 rank = idx(cat.balls_data()[cells[c]].rank);
+    u64 e = c;
+    while (e < cells.size() && idx(cat.balls_data()[cells[e]].rank) == rank) ++e;
+    // Coupe ouverte du rang : composantes avant toute union de ce rang.
+    // Une graine de la v11 est une naissance de rang strictement inferieur a sa jonction (invariant) ; une cible qui
+    // ne l'est pas est un ecart, et ne participe a aucune union.
+    before.clear();
+    for (u64 t = cell_traces[c]; t < cell_traces[e]; ++t) {
+      if (reference[t] >= cat.balls()) return fail(Reason::tower_invariant);
+      const u32 nr = node_of[reference[t]];
+      if (nr == kNone || idx(nodes[nr].rank) >= rank) return fail(Reason::tower_invariant);
+      const u32 nt = targets[t] < cat.balls() ? node_of[targets[t]] : kNone;
+      if (nt == kNone || idx(nodes[nt].rank) >= rank) {
+        ++out.outside;
+        before.emplace_back(kNone, kNone);
+        continue;
+      }
+      const u32 rt = find(nt);
+      if (alive[rt] != alive[find(nr)]) ++out.outside;
+      before.emplace_back(rt, alive[rt]);
+    }
+    // Unions des cibles de chaque jonction du rang.
+    for (u64 j = c; j < e; ++j) {
+      u32 root = kNone;
+      for (u64 t = cell_traces[j]; t < cell_traces[j + 1]; ++t) {
+        const u32 b = before[t - cell_traces[c]].first;
+        if (b == kNone) continue;
+        const u32 r = find(b);
+        root = root == kNone ? r : unite(find(root), r);
+      }
+    }
+    // Fusions formees : composantes d'avant le rang reunies sous une meme racine ; chacune doit etre publiee.
+    after.clear();
+    for (const auto& [r, v] : before)
+      if (r != kNone) after.emplace_back(find(r), v);
+    std::sort(after.begin(), after.end());
+    after.erase(std::unique(after.begin(), after.end()), after.end());
+    u64 formed = 0;
+    for (u64 i = 0; i < after.size();) {
+      u64 j = i;
+      while (j < after.size() && after[j].first == after[i].first) ++j;
+      if (j - i >= 2) {
+        ++formed;
+        ++out.merges;
+        kids.clear();
+        for (u64 x = i; x < j; ++x) kids.push_back(after[x].second);
+        std::sort(kids.begin(), kids.end());
+        const u32 m = idx(nodes[kids[0]].parent);
+        bool ok = m != kNone && m < nodes.size() && idx(nodes[m].rank) == rank;
+        if (ok) {
+          const auto ch = forest.children(NodeIdx{m});
+          published_kids.clear();
+          for (const NodeIdx x : ch) published_kids.push_back(idx(x));
+          std::sort(published_kids.begin(), published_kids.end());
+          ok = published_kids == kids;
+        }
+        if (ok) alive[after[i].first] = m;
+        else ++out.structure;
+      }
+      i = j;
+    }
+    if (formed != published_at[rank]) ++out.structure;
+    c = e;
+  }
+  // Fin : une seule composante, portee par la racine publiee.
+  if (nb > 0) {
+    const u32 r0 = find(0);
+    for (u32 i = 1; i < nb; ++i)
+      if (find(i) != r0) {
+        ++out.structure;
+        break;
+      }
+    if (alive[r0] != idx(forest.root())) ++out.structure;
+  }
+  return out;
+}
+
+// Ecart du quatrieme bras (foret differente de celle de la v11) : code 1 a la fin, apres tous les ordres.
+bool g_jump_gap = false;
+
+Outcome measure_resolution(const Args& a, const FullDomain& domain, const PopulationLookup& population,
+                           const mebcert::Ctx& ctx, MemoryBudget& budget, CensusWorkspace* ws,
+                           const std::array<std::optional<OrderForest>, kMaxMebSites>& orders,
+                           const std::vector<OrderCounters>& dumped) {
+  const auto& cat = domain.catalogue();
+  // Quatrieme bras : K plus proches voisins de tous les sites, une fois avant les passes (cout de l'etage P, publie
+  // a part, recopie des coordonnees comprise), puis juges contre la force brute sur un echantillon (hors chronometre).
+  std::vector<u32> neighbours;
+  if (a.jump_arm) {
+    const auto& cloud = domain.index().cloud();
+    const u32 n = cloud.sites();
+    const auto t0 = Clock::now();
+    std::vector<u32> xyz(3 * u64{n});
+    for (u32 s = 0; s < n; ++s) {
+      xyz[3 * u64{s}] = cloud.x()[s];
+      xyz[3 * u64{s} + 1] = cloud.y()[s];
+      xyz[3 * u64{s} + 2] = cloud.z()[s];
+    }
+    neighbours = g1::table_des_voisins(xyz.data(), n, a.kmax, 16);
+    const double secs = seconds_since(t0);
+    const u32 sample = std::min<u32>(n, 64);
+    for (u32 j = 0; j < sample; ++j) {
+      const u32 q = static_cast<u32>((u64{j} * n) / sample);
+      const auto ref = g1::voisins_force_brute(xyz.data(), n, q, a.kmax);
+      for (u32 i = 0; i < a.kmax; ++i)
+        if (neighbours[u64{q} * a.kmax + i] != (i < ref.size() ? ref[i].site : kNone)) return fail(Reason::tower_invariant);
+    }
+    std::cout << "{\"phase\":\"voisins_etage_p\",\"K\":" << a.kmax << ",\"sites\":" << n
+              << ",\"feuille_arbre\":16,\"echantillon_force_brute\":" << sample << ",\"secondes\":" << secs << "}\n"
+              << std::flush;
+  }
   for (u32 k = 2; k <= a.kmax; ++k) {
     std::vector<u8> kinds(cat.balls(), 0);
     ClassifyCounts counts;
     MHGP11_TRY(classify_range(domain, k, std::span<u8>(kinds), 0, cat.balls(), counts));
     // Traces de toutes les cellules, a plat (hors chronometre).
     std::vector<SiteIdx> traces;
+    std::vector<u32> cells;          // quatrieme bras : jonctions dans l'ordre des boules (rangs croissants)
+    std::vector<u64> cell_traces;    // et premieres traces de chacune (CSR)
     {
       for (u32 b = 0; b < cat.balls(); ++b) {
         if (kinds[b] != 2) continue;
         auto made = build_cell(domain, BallIdx{b}, static_cast<Order>(k), budget);
         if (!made.ok()) return made.outcome();
+        if (a.jump_arm) {
+          cells.push_back(b);
+          cell_traces.push_back(traces.size() / k);
+        }
         for (const auto& tr : made.value().traces()) traces.insert(traces.end(), tr.part().begin(), tr.part().end());
       }
     }
     const u64 nt = traces.size() / k;
+    if (a.jump_arm) cell_traces.push_back(nt);
     std::vector<u32> seeds_v11(nt), seeds_r11(nt), seeds_r12(nt);
     double best_v11 = 1e300, best_r11 = 1e300, best_r12 = 1e300;
     Replica r11{domain, population, ctx, a.kmax, {}, {}, {}, 0, 0};
     Replica r12{domain, population, ctx, a.kmax, {}, {}, {}, 0, 0};
     r11.interior.reserve(64); r11.shell.reserve(64); r12.interior.reserve(64); r12.shell.reserve(64);
+    // Quatrieme bras (--bras-saut) : meme replique v12, saut certifie par les voisins avant le census.
+    JumpState js;
+    js.neighbours = &neighbours;
+    js.K = a.kmax;
+    js.candidates.reserve(u64{kMaxMebSites} * (a.kmax + 1));
+    Replica r12s{domain, population, ctx, a.kmax, {}, {}, {}, 0, 0, &js};
+    r12s.interior.reserve(64);
+    r12s.shell.reserve(64);
+    std::vector<u32> seeds_r12s(a.jump_arm ? nt : 0), seeds_r12s_first;
+    double best_r12s = 1e300;
+    std::array<u64, 16> chain_hist{};
+    u64 chain_max = 0;
     for (u32 rep = 0; rep < a.chrono; ++rep) {
       auto t0 = Clock::now();
       for (u64 i = 0; i < nt; ++i) {
@@ -856,6 +1108,26 @@ Outcome measure_resolution(const Args& a, const FullDomain& domain, const Popula
         seeds_r12[i] = seed.value();
       }
       best_r12 = std::min(best_r12, seconds_since(t0));
+      if (a.jump_arm) {
+        r12s.routes = {};
+        r12s.meb_steps = r12s.census = 0;
+        js.probes = js.attempts = js.jumps = js.tested = js.census_saturated = js.census_complete = 0;
+        chain_hist = {};
+        chain_max = 0;
+        t0 = Clock::now();
+        for (u64 i = 0; i < nt; ++i) {
+          const u64 before = r12s.meb_steps;
+          auto seed = resolve_replica<true>(r12s, ws, traces.data() + i * k, k);
+          if (!seed.ok()) return seed.outcome();
+          seeds_r12s[i] = seed.value();
+          const u64 length = r12s.meb_steps - before;
+          ++chain_hist[std::min<u64>(length, 15)];
+          chain_max = std::max(chain_max, length);
+        }
+        best_r12s = std::min(best_r12s, seconds_since(t0));
+        if (rep == 0) seeds_r12s_first = seeds_r12s;
+        else if (seeds_r12s != seeds_r12s_first) return fail(Reason::tower_invariant, static_cast<Order>(k));
+      }
       if (seeds_v11 != seeds_r11 || seeds_v11 != seeds_r12) return fail(Reason::tower_invariant, static_cast<Order>(k));
     }
     std::cout << "{\"phase\":\"resolution_un_fil\",\"k\":" << k << ",\"traces\":" << nt
@@ -867,6 +1139,51 @@ Outcome measure_resolution(const Args& a, const FullDomain& domain, const Popula
     for (u32 rt = 0; rt < mebcert::kRouteCount; ++rt)
       std::cout << (rt ? "," : "") << '"' << mebcert::kRouteNames[rt] << "\":" << r12.routes[rt];
     std::cout << "}}\n" << std::flush;
+    if (!a.jump_arm) continue;
+    // Quatrieme bras : controle de la foret (hors chronometre), puis ligne de l'ordre.
+    const OrderCounters& n = dumped[k];
+    if (r12.census != n.route_saturated + n.route_complete || r12.meb_steps != n.parts || n.traces != nt)
+      return fail(Reason::tower_invariant, static_cast<Order>(k));
+    const OrderForest& forest = *orders[k - 1];
+#ifdef MHGP12_MUTANT_SAUT_CIBLES_DECALEES
+    // Mutant causal du controle (copie compilee a part) : chaque representant recoit la cible du suivant ; le controle
+    // de la foret doit le voir (code 1), sinon il serait vert par vacuite.
+    if (nt > 1) std::rotate(seeds_r12s.begin(), seeds_r12s.begin() + 1, seeds_r12s.end());
+#endif
+    auto control = check_forest(domain, forest, cells, cell_traces, seeds_v11, seeds_v11);
+    if (!control.ok()) return control.outcome();
+    if (!control.value().same()) return fail(Reason::tower_invariant, static_cast<Order>(k));
+    auto judged = check_forest(domain, forest, cells, cell_traces, seeds_r12s, seeds_v11);
+    if (!judged.ok()) return judged.outcome();
+    const ForestCheck& fc = judged.value();
+    if (!fc.same()) g_jump_gap = true;
+    u64 differ = 0;
+    for (u64 i = 0; i < nt; ++i) differ += seeds_r12s[i] != seeds_v11[i];
+    const i64 avoided = static_cast<i64>(n.route_saturated) - static_cast<i64>(js.census_saturated);
+    std::cout << "{\"phase\":\"resolution_saut\",\"k\":" << k << ",\"traces\":" << nt << ",\"K_voisins\":" << a.kmax
+              << ",\"secondes\":{\"v11\":" << best_v11 << ",\"replique_v11\":" << best_r11
+              << ",\"replique_v12\":" << best_r12 << ",\"replique_v12_saut\":" << best_r12s
+              << "},\"rapport_saut_sur_replique_v12\":" << (best_r12 > 0 ? best_r12s / best_r12 : 0.0)
+              << ",\"census\":{\"replique_v12\":{\"satures\":" << n.route_saturated << ",\"complets\":"
+              << n.route_complete << "},\"replique_v12_saut\":{\"satures\":" << js.census_saturated
+              << ",\"complets\":" << js.census_complete << "},\"satures_evites\":" << avoided
+              << ",\"part_satures_evites\":" << (n.route_saturated ? double(avoided) / double(n.route_saturated) : 0.0)
+              << ",\"restants\":" << js.census_saturated + js.census_complete << "},\"sauts\":{\"tentatives\":"
+              << js.attempts << ",\"certifies\":" << js.jumps << ",\"candidats_testes\":" << js.tested
+              << ",\"tests_par_tentative\":" << (js.attempts ? double(js.tested) / double(js.attempts) : 0.0)
+              << "},\"pas\":{\"replique_v12\":" << n.steps << ",\"replique_v12_saut\":" << js.probes
+              << "},\"plus_petites_boules\":{\"replique_v12\":" << r12.meb_steps << ",\"replique_v12_saut\":"
+              << r12s.meb_steps << "},\"chaines\":{\"replique_v12\":{\"histogramme\":[";
+    for (u64 b = 0; b < n.parts_histogram.size(); ++b) std::cout << (b ? "," : "") << n.parts_histogram[b];
+    std::cout << "],\"max\":" << n.max_parts_per_trace << ",\"moyenne\":" << (nt ? double(n.parts) / double(nt) : 0.0)
+              << "},\"replique_v12_saut\":{\"histogramme\":[";
+    for (u64 b = 0; b < chain_hist.size(); ++b) std::cout << (b ? "," : "") << chain_hist[b];
+    std::cout << "],\"max\":" << chain_max << ",\"moyenne\":" << (nt ? double(r12s.meb_steps) / double(nt) : 0.0)
+              << "}},\"graines_differentes_de_la_v11\":" << differ << ",\"foret\":{\"identique\":"
+              << (fc.same() ? "true" : "false") << ",\"representants_hors_composante\":" << fc.outside
+              << ",\"fusions_formees\":" << fc.merges << ",\"fusions_publiees\":" << fc.published
+              << ",\"ecarts_structure\":" << fc.structure << ",\"controle_v11_reproduit\":true}}\n"
+              << std::flush;
   }
   return {};
 }
@@ -962,7 +1279,7 @@ mebcert::NewOut profiled_new_path(const mebcert::Ctx& c, const mebcert::Part& f,
   } else if (q < 2 || q > 4) {
     out.why = kCertDegenerate;
   } else {
-    std::sort(s.begin(), s.begin() + q);
+    sort_support(s, q);
     for (int i = q; i < 4; ++i) s[i] = d::kNone;
     if (!sorted_subset(s.data(), static_cast<u32>(q), f.id.data(), f.k)) {
       out.why = kSNotInF;
@@ -1315,7 +1632,8 @@ Outcome run(const Args& a) {
             << ",\"forets_serie_identiques\":true}\n" << std::flush;
   serial.clear();
 
-  // Comptes et graines du vidage par ordre, gardes pour le controle du profil (--profil-resolution seulement).
+  // Comptes et graines du vidage par ordre, gardes pour les controles du profil (--profil-resolution) et du quatrieme
+  // bras (--bras-saut, comptes seulement).
   std::vector<OrderCounters> dumped(kmax + 1);
   std::vector<std::vector<u32>> dumped_seeds(kmax + 1);
   for (u32 k = 1; k <= kmax; ++k) {
@@ -1361,8 +1679,8 @@ Outcome run(const Args& a) {
       }
       if (s != log.seeds()) return fail(Reason::tower_invariant, static_cast<Order>(k));
     }
+    if (a.profile || a.jump_arm) dumped[k] = total;
     if (a.profile) {
-      dumped[k] = total;
       for (const auto& b : blocks)
         for (const auto& s : b.seeds) dumped_seeds[k].push_back(s.key);
     }
@@ -1401,7 +1719,7 @@ Outcome run(const Args& a) {
     const mebcert::Ctx ctx{cloud, view, table, points};
     if (a.chrono > 0) {
       const auto t0 = Clock::now();
-      MHGP11_TRY(measure_resolution(a, domain, population.value(), ctx, budget, workspaces[0].get()));
+      MHGP11_TRY(measure_resolution(a, domain, population.value(), ctx, budget, workspaces[0].get(), orders, dumped));
       std::cout << "{\"phase\":\"resolution_fin\",\"seconds\":" << seconds_since(t0) << "}\n" << std::flush;
     }
     if (a.profile) {  // MES-M7 : apres les mesures existantes, sans changer leurs sorties
@@ -1427,6 +1745,10 @@ int main(int argc, char** argv) {
   } catch (const std::exception& e) {
     std::cout << "{\"phase\":\"exception\",\"message\":\"" << e.what() << "\"}\n";
     return 2;
+  }
+  if (result.ok() && mhgp12::g_jump_gap) {  // quatrieme bras : foret differente de celle de la v11 (ecart, code 1)
+    std::cout << "{\"phase\":\"exit\",\"status\":\"ecart\",\"reason\":\"foret_du_bras_saut_differente\",\"order\":0}\n";
+    return 1;
   }
   std::cout << "{\"phase\":\"exit\",\"status\":\"" << status_name(result.status()) << "\",\"reason\":\""
             << reason_name(result.reason) << "\",\"order\":" << unsigned(result.order) << "}\n";

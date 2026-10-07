@@ -23,7 +23,7 @@ dossier de sortie, jamais dans un dépôt. Seuls des comptes, des empreintes et 
 | `CMakeLists.txt` | construction (CMake ≥ 3.22, C++20 sans extensions, `-Wall -Wextra -Wpedantic -Werror`, GCC 11.4 visé) |
 | `common/format.hpp` | format binaire des vidages (écriture, lecture par projection en mémoire), comparaison exacte de centres ; chaque avancée de la lecture est contrôlée contre la place restante (`CST-0225`) |
 | `tests/format_reader_test.cpp` | `mhgp12_format_test <dossier>` : porte de l'admission du lecteur, neuf fichiers synthétiques dont le témoin de 88 octets de l'auditeur (code 0 conforme, 1 écart) |
-| `vidage/vidage_v11.cpp` | `mhgp12_vidage` : vidage de la tour v11, lié à `libmhgp11.a` ; mesure de résolution à trois bras ; profil par composante (`MES-M7`) |
+| `vidage/vidage_v11.cpp` | `mhgp12_vidage` : vidage de la tour v11, lié à `libmhgp11.a` ; mesure de résolution à trois bras, et quatrième bras `replique_v12_saut` (`MES-G1`) ; profil par composante (`MES-M7`) |
 | `mes_m3/welzl_proposal.hpp` | port de `DWelzl` de la v10 (proposition flottante, ne décide rien) |
 | `mes_m3/meb_cert.hpp` | cœur de `LEV-MEB-CERT` : `LEM-T1` corrigé, certificat exact, canonisation, repli, juge |
 | `mes_m3/mes_m3.cpp` | `mhgp12_mes_m3` : porte (témoins gravés) et banc sur vidage |
@@ -78,7 +78,7 @@ d'adoption de MES-M3 est dans le rapport et ne change pas ce code.
 ```text
 mhgp12_vidage <xyz.u32le> <ids.u32le> <trame> <K> <feuille> <fils> <dossier>
               [--ful1 <chemin>] [--journal tous|aucun|k1,k2,...] [--chrono-resolution R] [--budget <octets>]
-              [--profil-resolution]
+              [--profil-resolution] [--bras-saut]
 ```
 
 Il reproduit la sonde `mhgp11_full_bench` au masque `802811` (voie CPU de référence des empreintes ; feuilles 16 à
@@ -98,6 +98,8 @@ n'est réimplantée dans le vidage.
    jusqu'à la naissance. Chaque partie dont la v11 calcule une plus petite boule est vidée avec sa route et B(F).
 5. Option `--chrono-resolution R` : mesure de résolution à **un fil**, trois bras sur les mêmes traces (§ 5.4).
 6. Option `--profil-resolution` : profil par composante du bras `replique_v12` (`MES-M7`, § 5.5), après tout le reste.
+7. Option `--bras-saut` (avec `--chrono-resolution R`) : quatrième bras `replique_v12_saut` de la mesure de résolution
+   et contrôle de sa forêt contre celle de la v11 (`MES-G1`, § 5.6).
 
 Le vidage refuse, jamais en silence : code 3 (invariant) si la forêt série ≠ la forêt publiée, si une graine rejouée ≠
 le journal v11, si les naissances ≠ la classification, si une route « catalogue » n'a pas son support local dans la
@@ -279,6 +281,37 @@ catalogue, census saturé et complet, sauts, traces ou terminaux). Les lectures 
 dans sa section, mais suppriment le recouvrement entre composantes : la passe instrumentée est plus lente que le bras
 (de 18 à 28 % en local sur ng00 K5) ; ce sont les parts qui se mesurent. Les temps locaux ne décident rien : `MES-M7` se
 joue sur G4, K5 et K10, ng00–02 et une trame d'une autre séquence.
+
+### 5.6 Quatrième bras `replique_v12_saut` (`MES-G1`, option `--bras-saut`)
+
+Seconde moitié de la règle du levier `G-L3` ([`CONTRAT_TOUR.md`](../../docs/CONTRAT_TOUR.md) § 4.3) ; le pilote et le
+juge sont ceux de [`../mes_g1_saut/`](../mes_g1_saut/README.md). Avec `--chrono-resolution R --bras-saut`, chaque
+répétition joue un quatrième bras après les trois autres, sur les mêmes traces, à un fil :
+
+- **même fonction** que `replique_v12` (`resolve_replica<true>`), le saut étant un commutateur d'exécution : seule la
+  tentative de saut distingue les deux bras ; la réplique v11 n'est pas touchée ;
+- pour une plus petite boule **hors catalogue**, avant le census : F et les K plus proches voisins de chacun de ses
+  sites (`../mes_g1_saut/voisins.hpp`, mutualisé), triés par `SiteIdx` et testés dans cet ordre au côté exact de la
+  v11 (`LatticeSphere`, la voie du census) ; k sites strictement intérieurs prouvent p ≥ k, et la partie suivante est
+  formée des k plus petits `SiteIdx` d'entre eux (pas valide du théorème D) ; sinon census, comme les autres bras ;
+- voisins calculés **une fois** avant les passes (ligne `voisins_etage_p`, temps publié à part comme un coût de
+  l'étage P), jugés contre la force brute sur 64 sites.
+
+**Contrôle de forêt** (hors chronomètre) : les graines terminales du bras peuvent différer de celles de la v11 ; il
+faut que la cible de chaque représentant soit dans la même composante que la graine de la v11 à la coupe ouverte de sa
+jonction. Union-find des cibles par jonction, rangs croissants ; chaque fusion formée doit être un nœud de la forêt
+publiée de la v11 (même rang, mêmes enfants), autant de fusions par rang, une seule composante finale portée par la
+racine publiée. Le contrôle est d'abord joué avec les graines de la v11 (il doit reproduire la forêt publiée, sinon
+refus, code 3). Une forêt différente est un **écart** : ligne `exit` « ecart », code 1, après tous les ordres. Mutant
+causal du contrôle (construit par `../mes_g1_saut/CMakeLists.txt`) : `mhgp12_vidage_mutant_cibles_decalees`, chaque
+représentant reçoit la cible du suivant ; il doit sortir en code 1, forêt différente à chaque ordre.
+
+Sortie : une ligne `resolution_saut` par ordre (temps des quatre bras, rapport saut sur `replique_v12`, censuses saturés
+et complets des deux bras, saturés évités et leur part, censuses restants, tentatives, sauts certifiés, candidats
+testés, pas, plus petites boules, histogrammes et maximum des longueurs de chaîne, graines différentes de la v11,
+contrôle de forêt) ; sans `--bras-saut`, les sorties ne changent pas. Le tri des supports de `meb_cert.hpp` passe par
+`sort_support` (insertion à bornes explicites, même résultat que `std::sort`) : `std::sort` y déclenchait un faux
+positif `-Warray-bounds` de GCC 13 une fois `certify` expansée dans la boucle de résolution.
 
 ## 6. MES-M4 : forêt sans lots
 

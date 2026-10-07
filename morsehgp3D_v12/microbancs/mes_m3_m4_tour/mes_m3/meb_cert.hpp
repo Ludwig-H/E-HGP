@@ -235,6 +235,15 @@ void finish_certificate(const Ctx& c, const Part& f, const num::Point* fp, const
   out.sink = materialize_sink(center, out);
 }
 
+// Tri croissant des q premiers identifiants d'un support (q dans [2, 4]) par insertion, a bornes explicites : meme
+// resultat que std::sort, sans le faux positif -Warray-bounds de GCC 13 qu'engendre std::sort sur ce tableau de
+// quatre cases quand certify est expansee dans une boucle de resolution (chemin des plus de seize elements).
+inline void sort_support(std::array<u32, 4>& s, int q) {
+  const int n = q < 4 ? q : 4;
+  for (int i = 1; i < n; ++i)
+    for (int j = i; j > 0 && s[j - 1] > s[j]; --j) std::swap(s[j - 1], s[j]);
+}
+
 // Certification d'un support propose S (indices de sites, quelconques) pour la partie F.
 inline NewOut certify(const Ctx& c, const Part& f, const num::Point* fp, std::array<u32, 4> s, int q) {
   NewOut out;
@@ -242,7 +251,7 @@ inline NewOut certify(const Ctx& c, const Part& f, const num::Point* fp, std::ar
     out.why = kCertDegenerate;
     return out;
   }
-  std::sort(s.begin(), s.begin() + q);
+  sort_support(s, q);
   for (int i = q; i < 4; ++i) s[i] = d::kNone;
   // Correctif LEM-T1 (CST-0101) : S dans F, inclusion de multiensembles d'indices de sites. Echec : repli exact.
   if (!kMutantSansSDansF && !sorted_subset(s.data(), static_cast<u32>(q), f.id.data(), f.k)) {

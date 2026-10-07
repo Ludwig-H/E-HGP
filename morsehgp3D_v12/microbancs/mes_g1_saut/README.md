@@ -19,8 +19,9 @@ Pour une partie de descente F dont la v11 fait un **census saturé** (route 2 de
 intérieurs parmi des **candidats locaux**, testés en exact contre la plus petite boule de F ; s'ils existent, ils
 prouvent p ≥ k sans census, et les k plus petits `SiteIdx` d'entre eux font le saut (une k-partie de I : pas valide du
 théorème D). Règle d'adoption de `G-L3`, écrite au contrat : au moins la moitié des censuses saturés disparaissent à K5
-sur ng00–02, **et** le temps de G à un fil baisse (borne haute de l'IC 95 % du rapport sous 1). Ce microbanc mesure la
-première moitié, en comptes déterministes ; la seconde exige un bras de résolution avec le saut, joué sur G4.
+sur ng00–02, **et** le temps de G à un fil baisse (borne haute de l'IC 95 % du rapport sous 1). `mhgp12_mes_g1` mesure
+la première moitié hors ligne, en comptes déterministes ; la seconde moitié se mesure par le quatrième bras
+`replique_v12_saut` de `mhgp12_vidage`, que pilote et juge `pilote_g1.py` (§ 7).
 
 ## 2. Méthode
 
@@ -59,9 +60,12 @@ lemme) sont publiés à part, par ordre, et recoupés avec le catalogue (p, m, q
 cmake -S mes_g1_saut -B <build> -DCMAKE_BUILD_TYPE=Release \
       -DMHGP11_SOURCE=<sources>/morsehgp3D_v11 -DMHGP11_BUILD=<construction Release u21 de la v11>
 cmake --build <build> -j 3
-ctest --test-dir <build> --output-on-failure          # porte (0), mutant (1), usage (2)
+ctest --test-dir <build> --output-on-failure          # porte (0), mutant (1), usage (2), juge du pilote (0)
 <build>/mhgp12_mes_g1 <vidage complet> [--ordres k1,k2,...] [--echantillon N] > mes_g1_<cas>.jsonl
 ```
+
+La construction donne aussi `mhgp12_vidage` (même source que `mes_m3_m4_tour`, quatrième bras compris) et le mutant de
+son contrôle de forêt, utilisés par le pilote (§ 7).
 
 Le vidage complet est celui de `mhgp12_vidage` (`cat.bin` et `ordre_<k>.bin`, sans effacer les ordres). Un fil ;
 comptes déterministes, indépendants de la machine : ils se jouent en local, seuls les temps exigent G4.
@@ -97,3 +101,39 @@ Limites : la mesure suit les chaînes de la **v11** ; quand la cible G1 diffère
 diffère, et le nombre réel de censuses évités par une descente avec saut se mesure par un bras de résolution, pas ici.
 Les tests de côté utilisent `num::side` de la v11 au profil 21 ; le budget mixte de la boule en repère local
 ([`CONTRAT_TOUR.md`](../../docs/CONTRAT_TOUR.md) § 6) n'est pas exercé.
+
+## 7. Seconde moitié : quatrième bras, pilote et juge
+
+**Quatrième bras.** `mhgp12_vidage … --chrono-resolution R --bras-saut` joue, entrelacé avec les trois bras de la
+mesure de résolution et à un fil, le bras `replique_v12_saut` : la même réplique v12 (même fonction), dont le pas
+intérieur hors catalogue tente d'abord les candidats `voisins` (mêmes définitions et même ordre qu'au § 2) et ne fait
+le census qu'à défaut ; voisins calculés une fois avant les passes, temps publié à part (étage P) ; contrôle de la
+forêt contre celle de la v11 à chaque ordre (écart : code 1) ; détail au § 5.6 de
+[`../mes_m3_m4_tour/README.md`](../mes_m3_m4_tour/README.md).
+
+**Pilote** `pilote_g1.py` (bibliothèque standard, `python3 -S -O`), étapes `construire portes campagne rapport`
+(`tout`) :
+
+- `construire` : ce microbanc (quatre binaires), empreintes des binaires, de `libmhgp11.a` et des sources ;
+- `portes` : porte gravée et mutant « côté nul admis » ; quatrième bras sur le premier cas (forêt identique à chaque
+  ordre) et mutant des cibles décalées (tué par une forêt différente, jamais par un simple code) ;
+- `campagne` : `--processus` processus neufs par cas (5 par défaut), chacun avec `--passes` passes (minimum par bras et
+  par ordre) ; journaux sous `<sortie>/<cas>/campagnes/<campagne>/p<i>/`, identifiant `c<date>_<hasard>`, jamais
+  écrasés ; vidages hachés (mêmes entrées d'une prise à l'autre) puis effacés ;
+- `rapport` : juge et tableaux (`rapport_g1.json`, `tableaux_g1.md`).
+
+**Règle `REGLE_G1`** (écrite avant la mesure) : par processus, somme sur les ordres 2..K du minimum de R passes de
+`replique_v12_saut`, rapportée à la même somme pour `replique_v12` ; moyenne géométrique des rapports par processus et
+IC 95 % par bootstrap sur les processus (10 000 tirages, graine fixe), comme `REGLE_M3`. **Adopté** si, sur chacun de
+ng00, ng01 et ng02 à K5, au moins 50 % des censuses saturés disparaissent (ordres 2..K), la forêt est identique à celle
+de la v11 à chaque ordre de chaque prise et la borne haute de l'IC est sous 1 ; **rejeté** si une borne haute est au
+moins 1, si la première moitié manque ou si une forêt diffère ; **refusé** si une preuve manque (construction, portes
+conformes et mutants tués par les mêmes binaires, binaires hachés avant et après chaque exécution et égaux à la
+construction, journaux gardés et inchangés, au moins cinq prises valides par cas, mêmes vidages et mêmes comptes d'une
+prise à l'autre, sources inchangées pendant l'invocation). Le verdict est dans le rapport ; le code du pilote dit les
+preuves (0 conforme, 1 écart, 2 usage, 3 refus).
+
+**Porte du juge** `test_pilote_g1.py` (CTest `mhgp12_mes_g1_pilote_juge`, sorties synthétiques) : validation d'une
+prise (conforme, ordre manquant, temps nul, forêt différente avec code 1 ou 0, contrôle non reproduit) et dix verdicts
+(adopté ; rejeté par la borne, la première moitié ou la forêt ; refusé pour quatre prises, un binaire différent, un
+journal modifié, un mutant de forêt absent, des comptes non déterministes, une construction absente).
