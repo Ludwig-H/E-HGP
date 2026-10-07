@@ -319,4 +319,6 @@ et 100 %, avec un partage observable. Mesures G4 : à froid, la règle de `claud
 de CUDA, environ 75 ms, domine l'étage ; reçu [`lot_partage`](../receipts/developpement_20261006/lot_partage/README.md)).
 À chaud, `claudesplitconf` admet 400 ‰, avec un étage `domain` à 0,873–0,907 fois celui du lot entier sur le GPU (reçu
 [`lot_partage_confirmation`](../receipts/developpement_20261006/lot_partage_confirmation/README.md)). **La voie GPU de
-référence à K = 5 est donc `344059:400`.** Le banc garde 0 par défaut, et aucune part n'est adoptée à K = 10.
+référence à K = 5 est donc `344059:400`.** Le banc garde 0 par défaut, et aucune part n'est adoptée à K = 10. Depuis
+le 7 octobre, les modes de référence portent aussi le cache de blocs du budget (bit 524288) : `868347:400` en voie
+GPU et `802811` en voie CPU (reçu [`cache_blocs`](../receipts/developpement_20261007/cache_blocs/README.md)).

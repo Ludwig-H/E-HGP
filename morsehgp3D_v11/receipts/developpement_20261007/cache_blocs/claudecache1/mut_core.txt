@@ -1,0 +1,6 @@
+liberation_non_comptee                   TUE      code
+cache_reprise_sans_retrait               TUE      signal
+cache_capacite_ignoree                   TUE      code
+cache_inactif_non_decompte               TUE      code
+cache_reprise_jamais                     TUE      code
+mutants_ok module=core mutants=5 tues=5 dont_signal=1 dont_delai=0 dont_construction=0 plancher=5
