@@ -118,6 +118,29 @@ def fact_neighbour_fallback(package):
     return [] if got == want else ['repli des voisins : %r au lieu de %r' % (got, want)]
 
 
+def fact_complete_census_in_catalogue(package):
+    """Fait grave de la portee de LEM-HORS-CAT (CONTRAT_TOUR.md, paragraphe 4.2 ; correction du 7 octobre 2026) : le
+    lemme ne parle que des spheres HORS de Cat_K. Carre A = (0,0,0), B = (2,0,0), C = (2,2,0), D = (0,2,0) et un point
+    lointain E = (40,40,40), K = 5 : la partie F = {B, D} a pour boule le cercle du carre (rayon carre 2, p = 0), qui
+    est dans Cat_5 avec S* = {A, C} (cardinal minimal, premier dans l'ordre de Morton comme dans l'ordre des
+    positions) ; S* n'est pas dans F, donc la table S* -> boule ne la trouve pas par le support local de F et le moteur
+    recense la sphere : census complet (p = 0 < k = 2) a l'ordre 2 = K - 3. La glose << un census complet n'arrive
+    qu'aux ordres K - 1 et K >> etait fausse en general. Rend la liste des ecarts."""
+    pts = [(0, 0, 0), (2, 0, 0), (2, 2, 0), (0, 2, 0), (40, 40, 40)]
+    ref = package.Reference(pts, 5)
+    ident = dict((ref.input[i], ref.internal[i]) for i in range(len(pts)))
+    part = tuple(sorted((ident[(2, 0, 0)], ident[(0, 2, 0)])))
+    _anchor, _ctr, key = ref._meb(part)
+    ball = ref._by_key.get(key)
+    if ball is None:
+        return ['census complet du catalogue : la sphere de {B, D} est absente du catalogue de reference']
+    support = sorted(ref.sites[s] for s in ball.support)
+    local = sorted(ref.sites[ref.site_of[x]] for x in part)
+    got = (str(ball.level), ball.p, ball.qmin, support, support == local, ball.p < 2, 2 <= ref.kmax - 3)
+    want = ('2', 0, 2, [(0, 0, 0), (2, 2, 0)], False, True, True)
+    return [] if got == want else ['census complet du catalogue : %r au lieu de %r' % (got, want)]
+
+
 def same(a, b):
     return (a.nodes == b.nodes and a.lower == b.lower and a.core == b.core and a.cover == b.cover and
             a.cuts == b.cuts)
@@ -167,7 +190,7 @@ def main(argv):
     # l'invariant d'un paquet mute est la classe de SA copie de model.py
     invariants = (InvariantError, importlib.import_module(package.__name__ + '.model').InvariantError)
     try:
-        facts = fact_neighbour_fallback(package)
+        facts = fact_neighbour_fallback(package) + fact_complete_census_in_catalogue(package)
         gaps, totals, orders = run(package)
     except invariants as error:
         if inject is not None:
@@ -200,7 +223,7 @@ def main(argv):
             print(problem, file=sys.stderr)
         return FLOOR
     common = totals[POLICIES[0]]
-    print('resolution_v12_ok nuages=%d ordres=%d politiques=%d cibles=%d cellules=%d inertes=%d faits=1'
+    print('resolution_v12_ok nuages=%d ordres=%d politiques=%d cibles=%d cellules=%d inertes=%d faits=2'
           % (len(families.fast_suite()), orders, len(POLICIES), common['targets'], common['cells'],
              common['inert_cells']))
     return OK

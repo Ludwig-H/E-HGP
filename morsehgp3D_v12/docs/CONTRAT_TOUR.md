@@ -99,12 +99,21 @@ d'une cellule ne vaut qu'à partir du niveau de $b'$ ; **aucune** garde $\beta(F
 ### 4.2 Un fait qui dimensionne le census
 
 **`LEM-HORS-CAT`.** Si la plus petite boule $b$ d'une $k$-partie ($k\leq K$) n'est pas dans $\mathrm{Cat}_K$, alors
-$p\geq K-2$ ; si de plus $p<k$ (census complet), alors $k\geq K-1$, et $p=K-2$ exige $q_{\min}=4$. *Preuve.* Dans
+$p\geq K-2$ ; si de plus $p<k$, alors $k\geq K-1$, et $p=K-2$ exige $q_{\min}=4$. *Preuve.* Dans
 $\mathbb{R}^{3}$, le centre d'une boule critique est dans l'enveloppe convexe d'au plus quatre sites de sa coquille
 (Carathéodory), donc $q_{\min}\leq 4$ ; hors de $\mathrm{Cat}_K$ signifie $p+q_{\min}\geq K+2$, d'où $p\geq K-2$, et
 $p<k\leq K$ donne $k\geq p+1\geq K-1$. $\square$ Aux ordres $k\leq K-3$, toute sphère hors du catalogue est donc
-saturée. Mesuré (session D, ng00 K5) : censuses complets 0, 0, 435 et 66 906 aux ordres 2, 3, 4 et 5 ; saturés 2 515,
-14 000, 57 239 et 150 419.
+saturée.
+
+**Portée** (correction du 7 octobre, données de `MES-G1`) : le lemme ne parle que des sphères **hors** du catalogue. Une
+sphère **du** catalogue dont $S^{*}$ n'est pas dans la partie (coquille à plusieurs supports minimaux, partie qui en
+contient un autre) n'est pas trouvée par le support local et demande elle aussi un census, complet si $p<k$, **à tout
+ordre** : la glose écrite d'abord, « un census complet n'arrive qu'aux ordres $K-1$ et $K$ », était fausse en général.
+Témoin gravé (`fact_complete_census_in_catalogue` de `reference/test_resolution_v12.py`) : carré
+$A,B,C,D$ et un point lointain, $K=5$, $F=\lbrace B,D\rbrace$, sphère du carré ($S^{*}=\lbrace A,C\rbrace$), census
+complet à l'ordre $2=K-3$. Ces cas sont rares : 3 parties sur ng00 à K5 ; 16 parties aux ordres 5 à 8 sur ng00 à K10.
+Mesuré (session D, ng00 K5, toutes causes) : censuses complets 0, 0, 435 et 66 906 aux ordres 2, 3, 4 et 5 ; saturés
+2 515, 14 000, 57 239 et 150 419.
 
 ### 4.3 Où passe le temps, et les leviers
 
@@ -124,7 +133,7 @@ coût à un fil par 1,5 à 2**, ou mieux paralléliser, pour tenir 25 à 30 ms.
 | `G-L1` | plus petite boule certifiée (`LEM-T1`) | `MES-M3` | **adopté** |
 | `G-L2` | mémo de cellule (`LEM-T3`) | structurel ; parties et censuses évités publiés (`MES-M7`) | déclaré |
 | `G-L3` | **saut certifié sans census** : tester exactement des candidats locaux contre la boule certifiée ; $k$ sites strictement intérieurs exhibés prouvent $p\geq k$, et les $k$ plus petits `SiteIdx` d'entre eux font le saut (pas valide) ; sinon census | `MES-G1` : part des censuses saturés évités, hors ligne sur les vidages (deux ensembles de candidats : $K$ plus proches voisins des sites de $F$, calculés en P et utiles aussi à `points` ; fenêtre de Morton autour de $F$) ; adopté si au moins la moitié des censuses saturés disparaissent à K5 sur ng00–02 **et** si le temps de G à un fil baisse (borne haute de l'IC 95 % du rapport sous 1) | à mesurer |
-| `G-L4` | catalogue **hors fenêtre** : par `LEM-HORS-CAT`, les censuses complets ne visent que des boules de $\mathrm{Cat}_{K+2}$ à $p\in\lbrace K-2,K-1\rbrace$ ; le catalogue les émettrait marquées, sans cellule, et `LEM-T1` les trouverait | `MES-G2` : nombre de boules distinctes concernées, puis coût du catalogue élargi contre census évités, sur G4 ; adopté si le gain net est positif | à mesurer |
+| `G-L4` | catalogue **hors fenêtre** : par `LEM-HORS-CAT`, les censuses complets des sphères hors du catalogue ne visent que des boules de $\mathrm{Cat}_{K+2}$ à $p\in\lbrace K-2,K-1\rbrace$ ; le catalogue les émettrait marquées, sans cellule, et `LEM-T1` les trouverait | `MES-G2` : nombre de boules distinctes concernées, puis coût du catalogue élargi contre census évités, sur G4 ; adopté si le gain net est positif | à mesurer |
 | `G-L5` | **premières sondes sur l'appareil** : la table de populations y est construite ; 71 % des représentants s'arrêtent à la première sonde | `MES-G3` : passe de sondes sur le GPU et rapatriement des échecs contre sondes sur l'hôte, de bout en bout ; adopté si G baisse (IC) | à mesurer |
 | `G-L6` | politique de saut : $k$ plus petits `SiteIdx` (v11) ou $k$ plus proches du centre (comparateur exact) | `MES-G4` : temps de G à un fil et histogramme des chaînes ; le moins cher est retenu | à mesurer |
 | `G-L7` | localité : travail trié par clé de Morton de la partie, sondes préchargées par lots de 32 (v10), census partant de la feuille du premier site | publié avec `MES-M7` | à mesurer |
