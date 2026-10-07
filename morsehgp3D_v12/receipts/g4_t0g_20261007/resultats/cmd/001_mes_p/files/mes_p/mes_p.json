@@ -1,0 +1,5085 @@
+{
+ "ajustements": {
+  "k10_f48": {
+   "fixe_ms": 96.86,
+   "par_site_us": 52.7903,
+   "points": 156
+  },
+  "k5_f48": {
+   "fixe_ms": -20.5032,
+   "par_site_us": 55.334,
+   "points": 157
+  }
+ },
+ "masque": "802811",
+ "mesure": "MES-P",
+ "passes": 4,
+ "prises": [
+  {
+   "chaud": 0.006163313,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.007861894,
+   "k": 5,
+   "nuage": "synth_uniform_n100",
+   "passes": [
+    0.007862,
+    0.006052,
+    0.006325,
+    0.006163
+   ],
+   "processus_secondes": 0.0301,
+   "sites": 100
+  },
+  {
+   "chaud": 0.012505915,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.013407356,
+   "k": 10,
+   "nuage": "synth_uniform_n100",
+   "passes": [
+    0.013407,
+    0.012447,
+    0.012506,
+    0.012843
+   ],
+   "processus_secondes": 0.0596,
+   "sites": 100
+  },
+  {
+   "chaud": 0.010553655,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.012800186,
+   "k": 5,
+   "nuage": "synth_uniform_n300",
+   "passes": [
+    0.0128,
+    0.010554,
+    0.010578,
+    0.010261
+   ],
+   "processus_secondes": 0.0518,
+   "sites": 300
+  },
+  {
+   "chaud": 0.032941435,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.036128756,
+   "k": 10,
+   "nuage": "synth_uniform_n300",
+   "passes": [
+    0.036129,
+    0.032941,
+    0.032511,
+    0.033277
+   ],
+   "processus_secondes": 0.1645,
+   "sites": 300
+  },
+  {
+   "chaud": 0.019050398,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.0218236,
+   "k": 5,
+   "nuage": "synth_uniform_n1000",
+   "passes": [
+    0.021824,
+    0.019207,
+    0.018554,
+    0.01905
+   ],
+   "processus_secondes": 0.1001,
+   "sites": 1000
+  },
+  {
+   "chaud": 0.107064988,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.115587132,
+   "k": 10,
+   "nuage": "synth_uniform_n1000",
+   "passes": [
+    0.115587,
+    0.106451,
+    0.108558,
+    0.107065
+   ],
+   "processus_secondes": 0.5636,
+   "sites": 1000
+  },
+  {
+   "chaud": 0.044953911,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.053371214,
+   "k": 5,
+   "nuage": "synth_uniform_n3000",
+   "passes": [
+    0.053371,
+    0.045682,
+    0.044954,
+    0.044577
+   ],
+   "processus_secondes": 0.2528,
+   "sites": 3000
+  },
+  {
+   "chaud": 0.357042061,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.361858474,
+   "k": 10,
+   "nuage": "synth_uniform_n3000",
+   "passes": [
+    0.361858,
+    0.36091,
+    0.3514,
+    0.357042
+   ],
+   "processus_secondes": 1.8933,
+   "sites": 3000
+  },
+  {
+   "chaud": 0.143995745,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.155743881,
+   "k": 5,
+   "nuage": "synth_uniform_n10000",
+   "passes": [
+    0.155744,
+    0.143996,
+    0.144813,
+    0.142798
+   ],
+   "processus_secondes": 0.8236,
+   "sites": 10000
+  },
+  {
+   "chaud": 1.382386216,
+   "code": 0,
+   "fils": 48,
+   "froid": 1.402507545,
+   "k": 10,
+   "nuage": "synth_uniform_n10000",
+   "passes": [
+    1.402508,
+    1.377196,
+    1.382386,
+    1.426978
+   ],
+   "processus_secondes": 7.3386,
+   "sites": 10000
+  },
+  {
+   "chaud": 0.005743853,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.005712693,
+   "k": 5,
+   "nuage": "synth_clusters8_n100",
+   "passes": [
+    0.005713,
+    0.005721,
+    0.005801,
+    0.005744
+   ],
+   "processus_secondes": 0.0265,
+   "sites": 100
+  },
+  {
+   "chaud": 0.008641854,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.008863064,
+   "k": 10,
+   "nuage": "synth_clusters8_n100",
+   "passes": [
+    0.008863,
+    0.008807,
+    0.008565,
+    0.008642
+   ],
+   "processus_secondes": 0.0395,
+   "sites": 100
+  },
+  {
+   "chaud": 0.010459035,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.010935075,
+   "k": 5,
+   "nuage": "synth_clusters8_n300",
+   "passes": [
+    0.010935,
+    0.010072,
+    0.010578,
+    0.010459
+   ],
+   "processus_secondes": 0.048,
+   "sites": 300
+  },
+  {
+   "chaud": 0.020353319,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.02055541,
+   "k": 10,
+   "nuage": "synth_clusters8_n300",
+   "passes": [
+    0.020555,
+    0.020799,
+    0.020315,
+    0.020353
+   ],
+   "processus_secondes": 0.0956,
+   "sites": 300
+  },
+  {
+   "chaud": 0.018974649,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.020621549,
+   "k": 5,
+   "nuage": "synth_clusters8_n1000",
+   "passes": [
+    0.020622,
+    0.018975,
+    0.018887,
+    0.019019
+   ],
+   "processus_secondes": 0.0949,
+   "sites": 1000
+  },
+  {
+   "chaud": 0.080026096,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.083224908,
+   "k": 10,
+   "nuage": "synth_clusters8_n1000",
+   "passes": [
+    0.083225,
+    0.07895,
+    0.081214,
+    0.080026
+   ],
+   "processus_secondes": 0.3996,
+   "sites": 1000
+  },
+  {
+   "chaud": 0.04432778,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.054670824,
+   "k": 5,
+   "nuage": "synth_clusters8_n3000",
+   "passes": [
+    0.054671,
+    0.044311,
+    0.044772,
+    0.044328
+   ],
+   "processus_secondes": 0.2456,
+   "sites": 3000
+  },
+  {
+   "chaud": 0.28685273,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.297655665,
+   "k": 10,
+   "nuage": "synth_clusters8_n3000",
+   "passes": [
+    0.297656,
+    0.285338,
+    0.287787,
+    0.286853
+   ],
+   "processus_secondes": 1.5226,
+   "sites": 3000
+  },
+  {
+   "chaud": 0.147226017,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.153266749,
+   "k": 5,
+   "nuage": "synth_clusters8_n10000",
+   "passes": [
+    0.153267,
+    0.142888,
+    0.147226,
+    0.148055
+   ],
+   "processus_secondes": 0.8262,
+   "sites": 10000
+  },
+  {
+   "chaud": 1.273268707,
+   "code": 0,
+   "fils": 48,
+   "froid": 1.318078717,
+   "k": 10,
+   "nuage": "synth_clusters8_n10000",
+   "passes": [
+    1.318079,
+    1.273269,
+    1.272456,
+    1.276897
+   ],
+   "processus_secondes": 6.8234,
+   "sites": 10000
+  },
+  {
+   "chaud": 0.018133908,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.018872249,
+   "k": 5,
+   "nuage": "synth_sphere_n100",
+   "passes": [
+    0.018872,
+    0.018134,
+    0.018366,
+    0.018077
+   ],
+   "processus_secondes": 0.0771,
+   "sites": 100
+  },
+  {
+   "chaud": 0.08696594,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.086426569,
+   "k": 10,
+   "nuage": "synth_sphere_n100",
+   "passes": [
+    0.086427,
+    0.086514,
+    0.086966,
+    0.087106
+   ],
+   "processus_secondes": 0.352,
+   "sites": 100
+  },
+  {
+   "chaud": 0.083330188,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.082732817,
+   "k": 5,
+   "nuage": "synth_sphere_n300",
+   "passes": [
+    0.082733,
+    0.083305,
+    0.08401,
+    0.08333
+   ],
+   "processus_secondes": 0.3381,
+   "sites": 300
+  },
+  {
+   "chaud": 0.57568963,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.582229174,
+   "k": 10,
+   "nuage": "synth_sphere_n300",
+   "passes": [
+    0.582229,
+    0.57569,
+    0.575453,
+    0.580236
+   ],
+   "processus_secondes": 2.3242,
+   "sites": 300
+  },
+  {
+   "chaud": 0.170522768,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.171762017,
+   "k": 5,
+   "nuage": "synth_sphere_n1000",
+   "passes": [
+    0.171762,
+    0.171498,
+    0.170423,
+    0.170523
+   ],
+   "processus_secondes": 0.6943,
+   "sites": 1000
+  },
+  {
+   "chaud": 1.365131938,
+   "code": 0,
+   "fils": 48,
+   "froid": 1.370977011,
+   "k": 10,
+   "nuage": "synth_sphere_n1000",
+   "passes": [
+    1.370977,
+    1.357169,
+    1.37137,
+    1.365132
+   ],
+   "processus_secondes": 5.4928,
+   "sites": 1000
+  },
+  {
+   "chaud": null,
+   "code": 2,
+   "fils": 48,
+   "froid": null,
+   "k": 5,
+   "nuage": "synth_sphere_n3000",
+   "passes": [],
+   "processus_secondes": 0.0649,
+   "sites": 3000
+  },
+  {
+   "chaud": null,
+   "code": 2,
+   "fils": 48,
+   "froid": null,
+   "k": 10,
+   "nuage": "synth_sphere_n3000",
+   "passes": [],
+   "processus_secondes": 0.0886,
+   "sites": 3000
+  },
+  {
+   "chaud": null,
+   "code": 2,
+   "fils": 48,
+   "froid": null,
+   "k": 5,
+   "nuage": "synth_sphere_n10000",
+   "passes": [],
+   "processus_secondes": 0.0541,
+   "sites": 10000
+  },
+  {
+   "chaud": null,
+   "code": 2,
+   "fils": 48,
+   "froid": null,
+   "k": 10,
+   "nuage": "synth_sphere_n10000",
+   "passes": [],
+   "processus_secondes": 0.269,
+   "sites": 10000
+  },
+  {
+   "chaud": 0.003328201,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.003675862,
+   "k": 5,
+   "nuage": "synth_slab_n100",
+   "passes": [
+    0.003676,
+    0.003392,
+    0.003285,
+    0.003328
+   ],
+   "processus_secondes": 0.0167,
+   "sites": 100
+  },
+  {
+   "chaud": 0.005259112,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.005737302,
+   "k": 10,
+   "nuage": "synth_slab_n100",
+   "passes": [
+    0.005737,
+    0.004923,
+    0.005316,
+    0.005259
+   ],
+   "processus_secondes": 0.0254,
+   "sites": 100
+  },
+  {
+   "chaud": 0.005063003,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.005330953,
+   "k": 5,
+   "nuage": "synth_slab_n300",
+   "passes": [
+    0.005331,
+    0.004753,
+    0.00531,
+    0.005063
+   ],
+   "processus_secondes": 0.0249,
+   "sites": 300
+  },
+  {
+   "chaud": 0.008208333,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.008696914,
+   "k": 10,
+   "nuage": "synth_slab_n300",
+   "passes": [
+    0.008697,
+    0.008208,
+    0.007996,
+    0.008473
+   ],
+   "processus_secondes": 0.0421,
+   "sites": 300
+  },
+  {
+   "chaud": 0.009592924,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.009340414,
+   "k": 5,
+   "nuage": "synth_slab_n1000",
+   "passes": [
+    0.00934,
+    0.009249,
+    0.009593,
+    0.009617
+   ],
+   "processus_secondes": 0.0469,
+   "sites": 1000
+  },
+  {
+   "chaud": 0.017299858,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.019549579,
+   "k": 10,
+   "nuage": "synth_slab_n1000",
+   "passes": [
+    0.01955,
+    0.017139,
+    0.0173,
+    0.017317
+   ],
+   "processus_secondes": 0.0983,
+   "sites": 1000
+  },
+  {
+   "chaud": 0.015379847,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.018730619,
+   "k": 5,
+   "nuage": "synth_slab_n3000",
+   "passes": [
+    0.018731,
+    0.015405,
+    0.01538,
+    0.014857
+   ],
+   "processus_secondes": 0.0871,
+   "sites": 3000
+  },
+  {
+   "chaud": 0.033292505,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.038560587,
+   "k": 10,
+   "nuage": "synth_slab_n3000",
+   "passes": [
+    0.038561,
+    0.033293,
+    0.032835,
+    0.03383
+   ],
+   "processus_secondes": 0.2162,
+   "sites": 3000
+  },
+  {
+   "chaud": 0.031333854,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.038550628,
+   "k": 5,
+   "nuage": "synth_slab_n10000",
+   "passes": [
+    0.038551,
+    0.031334,
+    0.030531,
+    0.031389
+   ],
+   "processus_secondes": 0.2035,
+   "sites": 10000
+  },
+  {
+   "chaud": 0.094315362,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.11148531,
+   "k": 10,
+   "nuage": "synth_slab_n10000",
+   "passes": [
+    0.111485,
+    0.09515,
+    0.094315,
+    0.093626
+   ],
+   "processus_secondes": 0.6675,
+   "sites": 10000
+  },
+  {
+   "chaud": 0.003260582,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.003759292,
+   "k": 5,
+   "nuage": "synth_line_n100",
+   "passes": [
+    0.003759,
+    0.003221,
+    0.003261,
+    0.003403
+   ],
+   "processus_secondes": 0.0165,
+   "sites": 100
+  },
+  {
+   "chaud": 0.003846502,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.003971862,
+   "k": 10,
+   "nuage": "synth_line_n100",
+   "passes": [
+    0.003972,
+    0.003847,
+    0.003842,
+    0.003887
+   ],
+   "processus_secondes": 0.0182,
+   "sites": 100
+  },
+  {
+   "chaud": 0.006751733,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.006928523,
+   "k": 5,
+   "nuage": "synth_line_n1000",
+   "passes": [
+    0.006929,
+    0.006668,
+    0.006752,
+    0.007087
+   ],
+   "processus_secondes": 0.0323,
+   "sites": 1000
+  },
+  {
+   "chaud": 0.008501064,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.009222124,
+   "k": 10,
+   "nuage": "synth_line_n1000",
+   "passes": [
+    0.009222,
+    0.008167,
+    0.008501,
+    0.008559
+   ],
+   "processus_secondes": 0.0415,
+   "sites": 1000
+  },
+  {
+   "chaud": 0.047575092,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.048479052,
+   "k": 5,
+   "nuage": "synth_lattice_n100",
+   "passes": [
+    0.048479,
+    0.047435,
+    0.047575,
+    0.047946
+   ],
+   "processus_secondes": 0.1944,
+   "sites": 100
+  },
+  {
+   "chaud": 0.137637908,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.15369962,
+   "k": 10,
+   "nuage": "synth_lattice_n100",
+   "passes": [
+    0.1537,
+    0.141518,
+    0.13683,
+    0.137638
+   ],
+   "processus_secondes": 0.5746,
+   "sites": 100
+  },
+  {
+   "chaud": 0.168987854,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.1704138,
+   "k": 5,
+   "nuage": "synth_lattice_n300",
+   "passes": [
+    0.170414,
+    0.168988,
+    0.169172,
+    0.165318
+   ],
+   "processus_secondes": 0.6781,
+   "sites": 300
+  },
+  {
+   "chaud": 0.63691369,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.643373296,
+   "k": 10,
+   "nuage": "synth_lattice_n300",
+   "passes": [
+    0.643373,
+    0.62235,
+    0.648629,
+    0.636914
+   ],
+   "processus_secondes": 2.5631,
+   "sites": 300
+  },
+  {
+   "chaud": 0.683795021,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.694815932,
+   "k": 5,
+   "nuage": "synth_lattice_n1000",
+   "passes": [
+    0.694816,
+    0.682944,
+    0.690138,
+    0.683795
+   ],
+   "processus_secondes": 2.7604,
+   "sites": 1000
+  },
+  {
+   "chaud": 2.93219651,
+   "code": 0,
+   "fils": 48,
+   "froid": 2.965743061,
+   "k": 10,
+   "nuage": "synth_lattice_n1000",
+   "passes": [
+    2.965743,
+    2.937069,
+    2.919005,
+    2.932197
+   ],
+   "processus_secondes": 11.7972,
+   "sites": 1000
+  },
+  {
+   "chaud": 2.273020734,
+   "code": 0,
+   "fils": 48,
+   "froid": 2.420683742,
+   "k": 5,
+   "nuage": "synth_lattice_n3000",
+   "passes": [
+    2.420684,
+    2.270824,
+    2.273021,
+    2.282346
+   ],
+   "processus_secondes": 9.2685,
+   "sites": 3000
+  },
+  {
+   "chaud": 10.515640284,
+   "code": 0,
+   "fils": 48,
+   "froid": 10.515453004,
+   "k": 10,
+   "nuage": "synth_lattice_n3000",
+   "passes": [
+    10.515453,
+    10.51564,
+    10.433989,
+    10.552513
+   ],
+   "processus_secondes": 42.1559,
+   "sites": 3000
+  },
+  {
+   "chaud": 8.435472176,
+   "code": 0,
+   "fils": 48,
+   "froid": 8.448271883,
+   "k": 5,
+   "nuage": "synth_lattice_n10000",
+   "passes": [
+    8.448272,
+    8.435472,
+    8.93924,
+    8.387199
+   ],
+   "processus_secondes": 34.2746,
+   "sites": 10000
+  },
+  {
+   "chaud": 40.6521802,
+   "code": "expire",
+   "fils": 48,
+   "froid": 40.683768954,
+   "k": 10,
+   "nuage": "synth_lattice_n10000",
+   "passes": [
+    40.683769,
+    40.65218
+   ],
+   "processus_secondes": 120.0692,
+   "sites": 10000
+  },
+  {
+   "chaud": 0.00551724,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.00649986,
+   "k": 5,
+   "nuage": "kobj_10_000430_bicycle_i2",
+   "passes": [
+    0.0065,
+    0.005804,
+    0.005517,
+    0.005322
+   ],
+   "processus_secondes": 0.0269,
+   "sites": 102
+  },
+  {
+   "chaud": 0.00966498,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.01037199,
+   "k": 10,
+   "nuage": "kobj_10_000430_bicycle_i2",
+   "passes": [
+    0.010372,
+    0.009665,
+    0.009449,
+    0.010022
+   ],
+   "processus_secondes": 0.0459,
+   "sites": 102
+  },
+  {
+   "chaud": 0.019739109,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.02096566,
+   "k": 5,
+   "nuage": "kctx_10_000430_bicycle_i2",
+   "passes": [
+    0.020966,
+    0.020102,
+    0.019384,
+    0.019739
+   ],
+   "processus_secondes": 0.097,
+   "sites": 1390
+  },
+  {
+   "chaud": 0.071069198,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.082835999,
+   "k": 10,
+   "nuage": "kctx_10_000430_bicycle_i2",
+   "passes": [
+    0.082836,
+    0.072275,
+    0.069253,
+    0.071069
+   ],
+   "processus_secondes": 0.3714,
+   "sites": 1390
+  },
+  {
+   "chaud": 0.006121109,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.00692842,
+   "k": 5,
+   "nuage": "kobj_10_000424_bicycle_i2",
+   "passes": [
+    0.006928,
+    0.006121,
+    0.005837,
+    0.00613
+   ],
+   "processus_secondes": 0.029,
+   "sites": 124
+  },
+  {
+   "chaud": 0.010212889,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.01101623,
+   "k": 10,
+   "nuage": "kobj_10_000424_bicycle_i2",
+   "passes": [
+    0.011016,
+    0.010213,
+    0.009937,
+    0.010654
+   ],
+   "processus_secondes": 0.0489,
+   "sites": 124
+  },
+  {
+   "chaud": 0.015964679,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.0173921,
+   "k": 5,
+   "nuage": "kctx_10_000424_bicycle_i2",
+   "passes": [
+    0.017392,
+    0.015895,
+    0.015965,
+    0.016375
+   ],
+   "processus_secondes": 0.0777,
+   "sites": 973
+  },
+  {
+   "chaud": 0.054061809,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.056770799,
+   "k": 10,
+   "nuage": "kctx_10_000424_bicycle_i2",
+   "passes": [
+    0.056771,
+    0.054062,
+    0.052227,
+    0.054448
+   ],
+   "processus_secondes": 0.2619,
+   "sites": 973
+  },
+  {
+   "chaud": 0.00826559,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.00989426,
+   "k": 5,
+   "nuage": "kobj_08_001176_bicycle_i56",
+   "passes": [
+    0.009894,
+    0.00795,
+    0.008266,
+    0.008698
+   ],
+   "processus_secondes": 0.04,
+   "sites": 207
+  },
+  {
+   "chaud": 0.01775129,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.01838845,
+   "k": 10,
+   "nuage": "kobj_08_001176_bicycle_i56",
+   "passes": [
+    0.018388,
+    0.017452,
+    0.018079,
+    0.017751
+   ],
+   "processus_secondes": 0.0837,
+   "sites": 207
+  },
+  {
+   "chaud": 0.040746589,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.049087099,
+   "k": 5,
+   "nuage": "kctx_08_001176_bicycle_i56",
+   "passes": [
+    0.049087,
+    0.041071,
+    0.040747,
+    0.039964
+   ],
+   "processus_secondes": 0.2225,
+   "sites": 4522
+  },
+  {
+   "chaud": 0.196548496,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.217500696,
+   "k": 10,
+   "nuage": "kctx_08_001176_bicycle_i56",
+   "passes": [
+    0.217501,
+    0.195344,
+    0.196548,
+    0.19917
+   ],
+   "processus_secondes": 1.0876,
+   "sites": 4522
+  },
+  {
+   "chaud": 0.00986804,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.01107022,
+   "k": 5,
+   "nuage": "kobj_02_001610_bicycle_i5",
+   "passes": [
+    0.01107,
+    0.009868,
+    0.009971,
+    0.00952
+   ],
+   "processus_secondes": 0.0466,
+   "sites": 365
+  },
+  {
+   "chaud": 0.022284159,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.022894059,
+   "k": 10,
+   "nuage": "kobj_02_001610_bicycle_i5",
+   "passes": [
+    0.022894,
+    0.022856,
+    0.022284,
+    0.022101
+   ],
+   "processus_secondes": 0.1077,
+   "sites": 365
+  },
+  {
+   "chaud": 0.021337839,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.024777089,
+   "k": 5,
+   "nuage": "kctx_02_001610_bicycle_i5",
+   "passes": [
+    0.024777,
+    0.021923,
+    0.021078,
+    0.021338
+   ],
+   "processus_secondes": 0.108,
+   "sites": 1866
+  },
+  {
+   "chaud": 0.070404338,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.081220938,
+   "k": 10,
+   "nuage": "kctx_02_001610_bicycle_i5",
+   "passes": [
+    0.081221,
+    0.071595,
+    0.070404,
+    0.068704
+   ],
+   "processus_secondes": 0.3663,
+   "sites": 1866
+  },
+  {
+   "chaud": 0.00588703,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.00632831,
+   "k": 5,
+   "nuage": "kobj_08_001847_bicyclist_i28",
+   "passes": [
+    0.006328,
+    0.005887,
+    0.005798,
+    0.005949
+   ],
+   "processus_secondes": 0.0276,
+   "sites": 103
+  },
+  {
+   "chaud": 0.010085869,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.01090149,
+   "k": 10,
+   "nuage": "kobj_08_001847_bicyclist_i28",
+   "passes": [
+    0.010901,
+    0.00993,
+    0.010425,
+    0.010086
+   ],
+   "processus_secondes": 0.0471,
+   "sites": 103
+  },
+  {
+   "chaud": 0.00773816,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.00805167,
+   "k": 5,
+   "nuage": "kctx_08_001847_bicyclist_i28",
+   "passes": [
+    0.008052,
+    0.007353,
+    0.007887,
+    0.007738
+   ],
+   "processus_secondes": 0.0348,
+   "sites": 140
+  },
+  {
+   "chaud": 0.01400319,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.0148702,
+   "k": 10,
+   "nuage": "kctx_08_001847_bicyclist_i28",
+   "passes": [
+    0.01487,
+    0.014406,
+    0.01397,
+    0.014003
+   ],
+   "processus_secondes": 0.0647,
+   "sites": 140
+  },
+  {
+   "chaud": 0.00754503,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.00842314,
+   "k": 5,
+   "nuage": "kobj_05_002064_bicyclist_i2",
+   "passes": [
+    0.008423,
+    0.007545,
+    0.007419,
+    0.007721
+   ],
+   "processus_secondes": 0.0354,
+   "sites": 159
+  },
+  {
+   "chaud": 0.01364952,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.013972989,
+   "k": 10,
+   "nuage": "kobj_05_002064_bicyclist_i2",
+   "passes": [
+    0.013973,
+    0.01365,
+    0.014169,
+    0.013619
+   ],
+   "processus_secondes": 0.0641,
+   "sites": 159
+  },
+  {
+   "chaud": 0.01149977,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.01286922,
+   "k": 5,
+   "nuage": "kctx_05_002064_bicyclist_i2",
+   "passes": [
+    0.012869,
+    0.011356,
+    0.011663,
+    0.0115
+   ],
+   "processus_secondes": 0.0546,
+   "sites": 423
+  },
+  {
+   "chaud": 0.03214372,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.033892559,
+   "k": 10,
+   "nuage": "kctx_05_002064_bicyclist_i2",
+   "passes": [
+    0.033893,
+    0.032144,
+    0.03157,
+    0.033084
+   ],
+   "processus_secondes": 0.1549,
+   "sites": 423
+  },
+  {
+   "chaud": 0.00965074,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.01090738,
+   "k": 5,
+   "nuage": "kobj_08_001302_bicyclist_i24",
+   "passes": [
+    0.010907,
+    0.009718,
+    0.009567,
+    0.009651
+   ],
+   "processus_secondes": 0.0455,
+   "sites": 315
+  },
+  {
+   "chaud": 0.02254086,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.023970609,
+   "k": 10,
+   "nuage": "kobj_08_001302_bicyclist_i24",
+   "passes": [
+    0.023971,
+    0.022541,
+    0.023402,
+    0.022111
+   ],
+   "processus_secondes": 0.1073,
+   "sites": 315
+  },
+  {
+   "chaud": 0.009406059,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.010861119,
+   "k": 5,
+   "nuage": "kctx_08_001302_bicyclist_i24",
+   "passes": [
+    0.010861,
+    0.009013,
+    0.009642,
+    0.009406
+   ],
+   "processus_secondes": 0.0448,
+   "sites": 316
+  },
+  {
+   "chaud": 0.023475909,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.02432139,
+   "k": 10,
+   "nuage": "kctx_08_001302_bicyclist_i24",
+   "passes": [
+    0.024321,
+    0.023476,
+    0.023652,
+    0.023065
+   ],
+   "processus_secondes": 0.11,
+   "sites": 316
+  },
+  {
+   "chaud": 0.02806721,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.035110769,
+   "k": 5,
+   "nuage": "kobj_00_000660_bicyclist_i9",
+   "passes": [
+    0.035111,
+    0.028752,
+    0.027403,
+    0.028067
+   ],
+   "processus_secondes": 0.1464,
+   "sites": 2413
+  },
+  {
+   "chaud": 0.115746687,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.134794407,
+   "k": 10,
+   "nuage": "kobj_00_000660_bicyclist_i9",
+   "passes": [
+    0.134794,
+    0.115871,
+    0.114147,
+    0.115747
+   ],
+   "processus_secondes": 0.6053,
+   "sites": 2413
+  },
+  {
+   "chaud": 0.041945929,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.050438239,
+   "k": 5,
+   "nuage": "kctx_00_000660_bicyclist_i9",
+   "passes": [
+    0.050438,
+    0.042275,
+    0.041946,
+    0.040421
+   ],
+   "processus_secondes": 0.2166,
+   "sites": 3958
+  },
+  {
+   "chaud": 0.187708576,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.200712356,
+   "k": 10,
+   "nuage": "kctx_00_000660_bicyclist_i9",
+   "passes": [
+    0.200712,
+    0.187709,
+    0.185868,
+    0.189445
+   ],
+   "processus_secondes": 0.9815,
+   "sites": 3958
+  },
+  {
+   "chaud": 0.00491555,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.00524031,
+   "k": 5,
+   "nuage": "kobj_00_001502_car_i260",
+   "passes": [
+    0.00524,
+    0.004973,
+    0.004893,
+    0.004916
+   ],
+   "processus_secondes": 0.0234,
+   "sites": 102
+  },
+  {
+   "chaud": 0.00734197,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.008133179,
+   "k": 10,
+   "nuage": "kobj_00_001502_car_i260",
+   "passes": [
+    0.008133,
+    0.007022,
+    0.007342,
+    0.007803
+   ],
+   "processus_secondes": 0.035,
+   "sites": 102
+  },
+  {
+   "chaud": 0.00500999,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.00516103,
+   "k": 5,
+   "nuage": "kctx_00_001502_car_i260",
+   "passes": [
+    0.005161,
+    0.00472,
+    0.005032,
+    0.00501
+   ],
+   "processus_secondes": 0.0229,
+   "sites": 103
+  },
+  {
+   "chaud": 0.00747521,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.00815769,
+   "k": 10,
+   "nuage": "kctx_00_001502_car_i260",
+   "passes": [
+    0.008158,
+    0.007499,
+    0.007265,
+    0.007475
+   ],
+   "processus_secondes": 0.0349,
+   "sites": 103
+  },
+  {
+   "chaud": 0.008232449,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.00858239,
+   "k": 5,
+   "nuage": "kobj_00_000660_car_i304",
+   "passes": [
+    0.008582,
+    0.008072,
+    0.008232,
+    0.008238
+   ],
+   "processus_secondes": 0.0382,
+   "sites": 305
+  },
+  {
+   "chaud": 0.017776129,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.01928677,
+   "k": 10,
+   "nuage": "kobj_00_000660_car_i304",
+   "passes": [
+    0.019287,
+    0.017597,
+    0.017776,
+    0.017866
+   ],
+   "processus_secondes": 0.0855,
+   "sites": 305
+  },
+  {
+   "chaud": 0.0092041,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.01037438,
+   "k": 5,
+   "nuage": "kctx_00_000660_car_i304",
+   "passes": [
+    0.010374,
+    0.009217,
+    0.009107,
+    0.009204
+   ],
+   "processus_secondes": 0.0434,
+   "sites": 323
+  },
+  {
+   "chaud": 0.020285329,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.02098517,
+   "k": 10,
+   "nuage": "kctx_00_000660_car_i304",
+   "passes": [
+    0.020985,
+    0.020055,
+    0.020285,
+    0.020705
+   ],
+   "processus_secondes": 0.095,
+   "sites": 323
+  },
+  {
+   "chaud": 0.015104859,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.01731338,
+   "k": 5,
+   "nuage": "kobj_00_003612_car_i316",
+   "passes": [
+    0.017313,
+    0.015105,
+    0.015006,
+    0.016086
+   ],
+   "processus_secondes": 0.0754,
+   "sites": 968
+  },
+  {
+   "chaud": 0.040995599,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.0498661,
+   "k": 10,
+   "nuage": "kobj_00_003612_car_i316",
+   "passes": [
+    0.049866,
+    0.041229,
+    0.040996,
+    0.040889
+   ],
+   "processus_secondes": 0.2165,
+   "sites": 968
+  },
+  {
+   "chaud": 0.030902879,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.03630613,
+   "k": 5,
+   "nuage": "kctx_00_003612_car_i316",
+   "passes": [
+    0.036306,
+    0.030903,
+    0.030306,
+    0.03167
+   ],
+   "processus_secondes": 0.163,
+   "sites": 3454
+  },
+  {
+   "chaud": 0.117832798,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.161891257,
+   "k": 10,
+   "nuage": "kctx_00_003612_car_i316",
+   "passes": [
+    0.161891,
+    0.117833,
+    0.116524,
+    0.118719
+   ],
+   "processus_secondes": 0.6677,
+   "sites": 3454
+  },
+  {
+   "chaud": 0.073835118,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.084510378,
+   "k": 5,
+   "nuage": "kobj_00_003624_car_i321",
+   "passes": [
+    0.08451,
+    0.073507,
+    0.075836,
+    0.073835
+   ],
+   "processus_secondes": 0.3947,
+   "sites": 8304
+  },
+  {
+   "chaud": 0.380463553,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.536471779,
+   "k": 10,
+   "nuage": "kobj_00_003624_car_i321",
+   "passes": [
+    0.536472,
+    0.381444,
+    0.376894,
+    0.380464
+   ],
+   "processus_secondes": 2.1928,
+   "sites": 8304
+  },
+  {
+   "chaud": 0.00570133,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.00584397,
+   "k": 5,
+   "nuage": "kobj_08_001193_motorcycle_i12",
+   "passes": [
+    0.005844,
+    0.005613,
+    0.005701,
+    0.005877
+   ],
+   "processus_secondes": 0.0265,
+   "sites": 120
+  },
+  {
+   "chaud": 0.0088463,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.00891364,
+   "k": 10,
+   "nuage": "kobj_08_001193_motorcycle_i12",
+   "passes": [
+    0.008914,
+    0.008869,
+    0.008798,
+    0.008846
+   ],
+   "processus_secondes": 0.0405,
+   "sites": 120
+  },
+  {
+   "chaud": 0.027731539,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.03124783,
+   "k": 5,
+   "nuage": "kctx_08_001193_motorcycle_i12",
+   "passes": [
+    0.031248,
+    0.027527,
+    0.028253,
+    0.027732
+   ],
+   "processus_secondes": 0.1427,
+   "sites": 2204
+  },
+  {
+   "chaud": 0.129341408,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.155641738,
+   "k": 10,
+   "nuage": "kctx_08_001193_motorcycle_i12",
+   "passes": [
+    0.155642,
+    0.129341,
+    0.127951,
+    0.130888
+   ],
+   "processus_secondes": 0.6906,
+   "sites": 2204
+  },
+  {
+   "chaud": 0.00704567,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.00750936,
+   "k": 5,
+   "nuage": "kobj_08_002119_motorcycle_i15",
+   "passes": [
+    0.007509,
+    0.007046,
+    0.006887,
+    0.007166
+   ],
+   "processus_secondes": 0.0328,
+   "sites": 188
+  },
+  {
+   "chaud": 0.012242589,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.013041509,
+   "k": 10,
+   "nuage": "kobj_08_002119_motorcycle_i15",
+   "passes": [
+    0.013042,
+    0.01218,
+    0.012479,
+    0.012243
+   ],
+   "processus_secondes": 0.0578,
+   "sites": 188
+  },
+  {
+   "chaud": 0.017956869,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.02094894,
+   "k": 5,
+   "nuage": "kctx_08_002119_motorcycle_i15",
+   "passes": [
+    0.020949,
+    0.017957,
+    0.018522,
+    0.017722
+   ],
+   "processus_secondes": 0.0891,
+   "sites": 1210
+  },
+  {
+   "chaud": 0.058447889,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.072134759,
+   "k": 10,
+   "nuage": "kctx_08_002119_motorcycle_i15",
+   "passes": [
+    0.072135,
+    0.058893,
+    0.058448,
+    0.05796
+   ],
+   "processus_secondes": 0.3055,
+   "sites": 1210
+  },
+  {
+   "chaud": 0.00824232,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.00924277,
+   "k": 5,
+   "nuage": "kobj_02_001610_motorcycle_i4",
+   "passes": [
+    0.009243,
+    0.008242,
+    0.008112,
+    0.008371
+   ],
+   "processus_secondes": 0.0387,
+   "sites": 211
+  },
+  {
+   "chaud": 0.01550258,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.01664359,
+   "k": 10,
+   "nuage": "kobj_02_001610_motorcycle_i4",
+   "passes": [
+    0.016644,
+    0.015583,
+    0.015503,
+    0.015479
+   ],
+   "processus_secondes": 0.0735,
+   "sites": 211
+  },
+  {
+   "chaud": 0.01805314,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.01872291,
+   "k": 5,
+   "nuage": "kctx_02_001610_motorcycle_i4",
+   "passes": [
+    0.018723,
+    0.018011,
+    0.018458,
+    0.018053
+   ],
+   "processus_secondes": 0.0855,
+   "sites": 1229
+  },
+  {
+   "chaud": 0.0570508,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.058875388,
+   "k": 10,
+   "nuage": "kctx_02_001610_motorcycle_i4",
+   "passes": [
+    0.058875,
+    0.057051,
+    0.055673,
+    0.057497
+   ],
+   "processus_secondes": 0.2693,
+   "sites": 1229
+  },
+  {
+   "chaud": 0.015487219,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.016464389,
+   "k": 5,
+   "nuage": "kobj_08_002119_motorcycle_i6",
+   "passes": [
+    0.016464,
+    0.015444,
+    0.015726,
+    0.015487
+   ],
+   "processus_secondes": 0.0746,
+   "sites": 849
+  },
+  {
+   "chaud": 0.049422439,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.053503099,
+   "k": 10,
+   "nuage": "kobj_08_002119_motorcycle_i6",
+   "passes": [
+    0.053503,
+    0.049518,
+    0.049422,
+    0.048937
+   ],
+   "processus_secondes": 0.2467,
+   "sites": 849
+  },
+  {
+   "chaud": 0.03546158,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.047388039,
+   "k": 5,
+   "nuage": "kctx_08_002119_motorcycle_i6",
+   "passes": [
+    0.047388,
+    0.035462,
+    0.035858,
+    0.035402
+   ],
+   "processus_secondes": 0.1955,
+   "sites": 3031
+  },
+  {
+   "chaud": 0.193667336,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.209874616,
+   "k": 10,
+   "nuage": "kctx_08_002119_motorcycle_i6",
+   "passes": [
+    0.209875,
+    0.192627,
+    0.193667,
+    0.194813
+   ],
+   "processus_secondes": 1.0243,
+   "sites": 3031
+  },
+  {
+   "chaud": 0.00504846,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.00540089,
+   "k": 5,
+   "nuage": "kobj_05_002060_othervehicle_i10",
+   "passes": [
+    0.005401,
+    0.004918,
+    0.005048,
+    0.005342
+   ],
+   "processus_secondes": 0.0243,
+   "sites": 103
+  },
+  {
+   "chaud": 0.0083456,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.009573909,
+   "k": 10,
+   "nuage": "kobj_05_002060_othervehicle_i10",
+   "passes": [
+    0.009574,
+    0.007912,
+    0.008346,
+    0.00866
+   ],
+   "processus_secondes": 0.0396,
+   "sites": 103
+  },
+  {
+   "chaud": 0.005218569,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.00520533,
+   "k": 5,
+   "nuage": "kctx_05_002060_othervehicle_i10",
+   "passes": [
+    0.005205,
+    0.005169,
+    0.005219,
+    0.005285
+   ],
+   "processus_secondes": 0.0245,
+   "sites": 119
+  },
+  {
+   "chaud": 0.00901017,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.00970104,
+   "k": 10,
+   "nuage": "kctx_05_002060_othervehicle_i10",
+   "passes": [
+    0.009701,
+    0.00901,
+    0.008803,
+    0.009264
+   ],
+   "processus_secondes": 0.0421,
+   "sites": 119
+  },
+  {
+   "chaud": 0.0075197,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.007933669,
+   "k": 5,
+   "nuage": "kobj_06_000804_othervehicle_i4",
+   "passes": [
+    0.007934,
+    0.007775,
+    0.007456,
+    0.00752
+   ],
+   "processus_secondes": 0.0349,
+   "sites": 239
+  },
+  {
+   "chaud": 0.0138163,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.01426047,
+   "k": 10,
+   "nuage": "kobj_06_000804_othervehicle_i4",
+   "passes": [
+    0.01426,
+    0.013629,
+    0.013816,
+    0.01386
+   ],
+   "processus_secondes": 0.0646,
+   "sites": 239
+  },
+  {
+   "chaud": 0.00939133,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.01040318,
+   "k": 5,
+   "nuage": "kctx_06_000804_othervehicle_i4",
+   "passes": [
+    0.010403,
+    0.009233,
+    0.00968,
+    0.009391
+   ],
+   "processus_secondes": 0.0442,
+   "sites": 404
+  },
+  {
+   "chaud": 0.019902309,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.020798509,
+   "k": 10,
+   "nuage": "kctx_06_000804_othervehicle_i4",
+   "passes": [
+    0.020799,
+    0.019973,
+    0.019812,
+    0.019902
+   ],
+   "processus_secondes": 0.0956,
+   "sites": 404
+  },
+  {
+   "chaud": 0.021285749,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.021223579,
+   "k": 5,
+   "nuage": "kobj_00_001464_othervehicle_i15",
+   "passes": [
+    0.021224,
+    0.021316,
+    0.021286,
+    0.020671
+   ],
+   "processus_secondes": 0.1023,
+   "sites": 1519
+  },
+  {
+   "chaud": 0.083829919,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.085666858,
+   "k": 10,
+   "nuage": "kobj_00_001464_othervehicle_i15",
+   "passes": [
+    0.085667,
+    0.082275,
+    0.084411,
+    0.08383
+   ],
+   "processus_secondes": 0.4114,
+   "sites": 1519
+  },
+  {
+   "chaud": 0.024641229,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.028413119,
+   "k": 5,
+   "nuage": "kctx_00_001464_othervehicle_i15",
+   "passes": [
+    0.028413,
+    0.024641,
+    0.02424,
+    0.025862
+   ],
+   "processus_secondes": 0.1266,
+   "sites": 2204
+  },
+  {
+   "chaud": 0.096790328,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.109237408,
+   "k": 10,
+   "nuage": "kctx_00_001464_othervehicle_i15",
+   "passes": [
+    0.109237,
+    0.09679,
+    0.098273,
+    0.095977
+   ],
+   "processus_secondes": 0.5025,
+   "sites": 2204
+  },
+  {
+   "chaud": 0.067373319,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.073160478,
+   "k": 5,
+   "nuage": "kobj_08_002554_othervehicle_i7",
+   "passes": [
+    0.07316,
+    0.066797,
+    0.068862,
+    0.067373
+   ],
+   "processus_secondes": 0.3646,
+   "sites": 9628
+  },
+  {
+   "chaud": 0.298019553,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.367160604,
+   "k": 10,
+   "nuage": "kobj_08_002554_othervehicle_i7",
+   "passes": [
+    0.367161,
+    0.29802,
+    0.297833,
+    0.300125
+   ],
+   "processus_secondes": 1.713,
+   "sites": 9628
+  },
+  {
+   "chaud": 0.00498714,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.00566307,
+   "k": 5,
+   "nuage": "kobj_08_001847_person_i39",
+   "passes": [
+    0.005663,
+    0.0049,
+    0.004987,
+    0.005187
+   ],
+   "processus_secondes": 0.024,
+   "sites": 106
+  },
+  {
+   "chaud": 0.00812471,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.00868261,
+   "k": 10,
+   "nuage": "kobj_08_001847_person_i39",
+   "passes": [
+    0.008683,
+    0.008125,
+    0.007773,
+    0.008317
+   ],
+   "processus_secondes": 0.038,
+   "sites": 106
+  },
+  {
+   "chaud": 0.01982648,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.021907399,
+   "k": 5,
+   "nuage": "kctx_08_001847_person_i39",
+   "passes": [
+    0.021907,
+    0.019778,
+    0.020004,
+    0.019826
+   ],
+   "processus_secondes": 0.0966,
+   "sites": 1350
+  },
+  {
+   "chaud": 0.071915689,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.074322939,
+   "k": 10,
+   "nuage": "kctx_08_001847_person_i39",
+   "passes": [
+    0.074323,
+    0.075253,
+    0.069925,
+    0.071916
+   ],
+   "processus_secondes": 0.3538,
+   "sites": 1350
+  },
+  {
+   "chaud": 0.00773076,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.00827958,
+   "k": 5,
+   "nuage": "kobj_06_000806_person_i2",
+   "passes": [
+    0.00828,
+    0.007492,
+    0.007917,
+    0.007731
+   ],
+   "processus_secondes": 0.036,
+   "sites": 204
+  },
+  {
+   "chaud": 0.01495415,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.01568901,
+   "k": 10,
+   "nuage": "kobj_06_000806_person_i2",
+   "passes": [
+    0.015689,
+    0.015494,
+    0.014954,
+    0.014896
+   ],
+   "processus_secondes": 0.072,
+   "sites": 204
+  },
+  {
+   "chaud": 0.02649833,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.03127984,
+   "k": 5,
+   "nuage": "kctx_06_000806_person_i2",
+   "passes": [
+    0.03128,
+    0.026367,
+    0.026498,
+    0.027346
+   ],
+   "processus_secondes": 0.1402,
+   "sites": 2508
+  },
+  {
+   "chaud": 0.124797477,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.145364957,
+   "k": 10,
+   "nuage": "kctx_06_000806_person_i2",
+   "passes": [
+    0.145365,
+    0.123147,
+    0.124797,
+    0.124843
+   ],
+   "processus_secondes": 0.6583,
+   "sites": 2508
+  },
+  {
+   "chaud": 0.009898349,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.011521599,
+   "k": 5,
+   "nuage": "kobj_02_001600_person_i5",
+   "passes": [
+    0.011522,
+    0.009849,
+    0.010072,
+    0.009898
+   ],
+   "processus_secondes": 0.048,
+   "sites": 366
+  },
+  {
+   "chaud": 0.02358208,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.02408484,
+   "k": 10,
+   "nuage": "kobj_02_001600_person_i5",
+   "passes": [
+    0.024085,
+    0.023602,
+    0.023582,
+    0.02329
+   ],
+   "processus_secondes": 0.113,
+   "sites": 366
+  },
+  {
+   "chaud": 0.01422382,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.01597254,
+   "k": 5,
+   "nuage": "kctx_02_001600_person_i5",
+   "passes": [
+    0.015973,
+    0.014342,
+    0.014136,
+    0.014224
+   ],
+   "processus_secondes": 0.0689,
+   "sites": 799
+  },
+  {
+   "chaud": 0.042043359,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.045856149,
+   "k": 10,
+   "nuage": "kctx_02_001600_person_i5",
+   "passes": [
+    0.045856,
+    0.042043,
+    0.043377,
+    0.042023
+   ],
+   "processus_secondes": 0.2087,
+   "sites": 799
+  },
+  {
+   "chaud": 0.01467083,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.01605996,
+   "k": 5,
+   "nuage": "kobj_02_001604_person_i5",
+   "passes": [
+    0.01606,
+    0.01475,
+    0.014671,
+    0.014517
+   ],
+   "processus_secondes": 0.0694,
+   "sites": 772
+  },
+  {
+   "chaud": 0.041457089,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.04845996,
+   "k": 10,
+   "nuage": "kobj_02_001604_person_i5",
+   "passes": [
+    0.04846,
+    0.041389,
+    0.042249,
+    0.041457
+   ],
+   "processus_secondes": 0.2056,
+   "sites": 772
+  },
+  {
+   "chaud": 0.02233967,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.025687429,
+   "k": 5,
+   "nuage": "kctx_02_001604_person_i5",
+   "passes": [
+    0.025687,
+    0.02234,
+    0.022266,
+    0.023001
+   ],
+   "processus_secondes": 0.112,
+   "sites": 1813
+  },
+  {
+   "chaud": 0.076579968,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.091013148,
+   "k": 10,
+   "nuage": "kctx_02_001604_person_i5",
+   "passes": [
+    0.091013,
+    0.07658,
+    0.077269,
+    0.075428
+   ],
+   "processus_secondes": 0.4014,
+   "sites": 1813
+  },
+  {
+   "chaud": 0.00932853,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.01082314,
+   "k": 5,
+   "nuage": "kobj_06_000798_truck_i1",
+   "passes": [
+    0.010823,
+    0.009551,
+    0.009291,
+    0.009329
+   ],
+   "processus_secondes": 0.045,
+   "sites": 383
+  },
+  {
+   "chaud": 0.0196581,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.02146595,
+   "k": 10,
+   "nuage": "kobj_06_000798_truck_i1",
+   "passes": [
+    0.021466,
+    0.019513,
+    0.019753,
+    0.019658
+   ],
+   "processus_secondes": 0.0953,
+   "sites": 383
+  },
+  {
+   "chaud": 0.009484049,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.01108781,
+   "k": 5,
+   "nuage": "kobj_06_000800_truck_i1",
+   "passes": [
+    0.011088,
+    0.009386,
+    0.009484,
+    0.009611
+   ],
+   "processus_secondes": 0.0462,
+   "sites": 429
+  },
+  {
+   "chaud": 0.023642799,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.02330967,
+   "k": 10,
+   "nuage": "kobj_06_000800_truck_i1",
+   "passes": [
+    0.02331,
+    0.022863,
+    0.023912,
+    0.023643
+   ],
+   "processus_secondes": 0.111,
+   "sites": 429
+  },
+  {
+   "chaud": 0.0119407,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.01311277,
+   "k": 5,
+   "nuage": "kobj_06_000804_truck_i1",
+   "passes": [
+    0.013113,
+    0.011799,
+    0.012362,
+    0.011941
+   ],
+   "processus_secondes": 0.0576,
+   "sites": 602
+  },
+  {
+   "chaud": 0.036687529,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.042435549,
+   "k": 10,
+   "nuage": "kobj_06_000804_truck_i1",
+   "passes": [
+    0.042436,
+    0.038105,
+    0.036457,
+    0.036688
+   ],
+   "processus_secondes": 0.1798,
+   "sites": 602
+  },
+  {
+   "chaud": 0.012799719,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.01418009,
+   "k": 5,
+   "nuage": "kobj_06_000806_truck_i1",
+   "passes": [
+    0.01418,
+    0.013098,
+    0.0128,
+    0.01265
+   ],
+   "processus_secondes": 0.0616,
+   "sites": 703
+  },
+  {
+   "chaud": 0.03699742,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.037781069,
+   "k": 10,
+   "nuage": "kobj_06_000806_truck_i1",
+   "passes": [
+    0.037781,
+    0.037611,
+    0.036526,
+    0.036997
+   ],
+   "processus_secondes": 0.18,
+   "sites": 703
+  },
+  {
+   "chaud": 0.01296863,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.01408421,
+   "k": 5,
+   "nuage": "kctx_06_000806_truck_i1",
+   "passes": [
+    0.014084,
+    0.013225,
+    0.012662,
+    0.012969
+   ],
+   "processus_secondes": 0.0618,
+   "sites": 709
+  },
+  {
+   "chaud": 0.037789159,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.037957179,
+   "k": 10,
+   "nuage": "kctx_06_000806_truck_i1",
+   "passes": [
+    0.037957,
+    0.037789,
+    0.037127,
+    0.037993
+   ],
+   "processus_secondes": 0.1811,
+   "sites": 709
+  },
+  {
+   "chaud": 0.00493135,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.00532267,
+   "k": 5,
+   "nuage": "knn_k00_000648_n100",
+   "passes": [
+    0.005323,
+    0.004844,
+    0.004931,
+    0.00507
+   ],
+   "processus_secondes": 0.0239,
+   "sites": 100
+  },
+  {
+   "chaud": 0.00895331,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.009509729,
+   "k": 10,
+   "nuage": "knn_k00_000648_n100",
+   "passes": [
+    0.00951,
+    0.008691,
+    0.008953,
+    0.009056
+   ],
+   "processus_secondes": 0.042,
+   "sites": 100
+  },
+  {
+   "chaud": 0.00844199,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.00956933,
+   "k": 5,
+   "nuage": "knn_k00_000648_n300",
+   "passes": [
+    0.009569,
+    0.008268,
+    0.008442,
+    0.008471
+   ],
+   "processus_secondes": 0.0404,
+   "sites": 300
+  },
+  {
+   "chaud": 0.01925086,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.020434369,
+   "k": 10,
+   "nuage": "knn_k00_000648_n300",
+   "passes": [
+    0.020434,
+    0.019314,
+    0.019251,
+    0.018746
+   ],
+   "processus_secondes": 0.0938,
+   "sites": 300
+  },
+  {
+   "chaud": 0.01535951,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.016405919,
+   "k": 5,
+   "nuage": "knn_k00_000648_n1000",
+   "passes": [
+    0.016406,
+    0.015274,
+    0.01536,
+    0.015539
+   ],
+   "processus_secondes": 0.0767,
+   "sites": 1000
+  },
+  {
+   "chaud": 0.051961569,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.056482419,
+   "k": 10,
+   "nuage": "knn_k00_000648_n1000",
+   "passes": [
+    0.056482,
+    0.052983,
+    0.051962,
+    0.051752
+   ],
+   "processus_secondes": 0.268,
+   "sites": 1000
+  },
+  {
+   "chaud": 0.025981029,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.031680089,
+   "k": 5,
+   "nuage": "knn_k00_000648_n3000",
+   "passes": [
+    0.03168,
+    0.025981,
+    0.025831,
+    0.026409
+   ],
+   "processus_secondes": 0.145,
+   "sites": 3000
+  },
+  {
+   "chaud": 0.111518058,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.131544337,
+   "k": 10,
+   "nuage": "knn_k00_000648_n3000",
+   "passes": [
+    0.131544,
+    0.111518,
+    0.112187,
+    0.110959
+   ],
+   "processus_secondes": 0.634,
+   "sites": 3000
+  },
+  {
+   "chaud": 0.072375389,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.085125328,
+   "k": 5,
+   "nuage": "knn_k00_000648_n10000",
+   "passes": [
+    0.085125,
+    0.073607,
+    0.069017,
+    0.072375
+   ],
+   "processus_secondes": 0.4071,
+   "sites": 10000
+  },
+  {
+   "chaud": 0.332093064,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.349023533,
+   "k": 10,
+   "nuage": "knn_k00_000648_n10000",
+   "passes": [
+    0.349024,
+    0.332093,
+    0.334606,
+    0.329687
+   ],
+   "processus_secondes": 1.8972,
+   "sites": 10000
+  },
+  {
+   "chaud": 0.00634789,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.00789984,
+   "k": 5,
+   "nuage": "knn_k02_000620_n100",
+   "passes": [
+    0.0079,
+    0.006328,
+    0.006348,
+    0.006844
+   ],
+   "processus_secondes": 0.0314,
+   "sites": 100
+  },
+  {
+   "chaud": 0.01356925,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.014925959,
+   "k": 10,
+   "nuage": "knn_k02_000620_n100",
+   "passes": [
+    0.014926,
+    0.013377,
+    0.013829,
+    0.013569
+   ],
+   "processus_secondes": 0.0639,
+   "sites": 100
+  },
+  {
+   "chaud": 0.01051805,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.012048789,
+   "k": 5,
+   "nuage": "knn_k02_000620_n300",
+   "passes": [
+    0.012049,
+    0.010595,
+    0.010467,
+    0.010518
+   ],
+   "processus_secondes": 0.0508,
+   "sites": 300
+  },
+  {
+   "chaud": 0.0334146,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.035983739,
+   "k": 10,
+   "nuage": "knn_k02_000620_n300",
+   "passes": [
+    0.035984,
+    0.034172,
+    0.033415,
+    0.032857
+   ],
+   "processus_secondes": 0.1631,
+   "sites": 300
+  },
+  {
+   "chaud": 0.01959125,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.021989889,
+   "k": 5,
+   "nuage": "knn_k02_000620_n1000",
+   "passes": [
+    0.02199,
+    0.019541,
+    0.019591,
+    0.020156
+   ],
+   "processus_secondes": 0.0993,
+   "sites": 1000
+  },
+  {
+   "chaud": 0.095947198,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.105374778,
+   "k": 10,
+   "nuage": "knn_k02_000620_n1000",
+   "passes": [
+    0.105375,
+    0.095788,
+    0.097449,
+    0.095947
+   ],
+   "processus_secondes": 0.4947,
+   "sites": 1000
+  },
+  {
+   "chaud": 0.04049755,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.047465369,
+   "k": 5,
+   "nuage": "knn_k02_000620_n3000",
+   "passes": [
+    0.047465,
+    0.040822,
+    0.040498,
+    0.040225
+   ],
+   "processus_secondes": 0.2132,
+   "sites": 3000
+  },
+  {
+   "chaud": 0.258745695,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.262034866,
+   "k": 10,
+   "nuage": "knn_k02_000620_n3000",
+   "passes": [
+    0.262035,
+    0.251498,
+    0.258746,
+    0.259855
+   ],
+   "processus_secondes": 1.3286,
+   "sites": 3000
+  },
+  {
+   "chaud": 0.100010639,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.140935097,
+   "k": 5,
+   "nuage": "knn_k02_000620_n10000",
+   "passes": [
+    0.140935,
+    0.100011,
+    0.100069,
+    0.098383
+   ],
+   "processus_secondes": 0.5773,
+   "sites": 10000
+  },
+  {
+   "chaud": 0.710176387,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.779283415,
+   "k": 10,
+   "nuage": "knn_k02_000620_n10000",
+   "passes": [
+    0.779283,
+    0.710176,
+    0.714231,
+    0.701736
+   ],
+   "processus_secondes": 3.8317,
+   "sites": 10000
+  },
+  {
+   "chaud": 0.00566964,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.00612119,
+   "k": 5,
+   "nuage": "knn_k05_002060_n100",
+   "passes": [
+    0.006121,
+    0.00567,
+    0.005425,
+    0.005777
+   ],
+   "processus_secondes": 0.0265,
+   "sites": 100
+  },
+  {
+   "chaud": 0.01012007,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.01057532,
+   "k": 10,
+   "nuage": "knn_k05_002060_n100",
+   "passes": [
+    0.010575,
+    0.010323,
+    0.009906,
+    0.01012
+   ],
+   "processus_secondes": 0.0467,
+   "sites": 100
+  },
+  {
+   "chaud": 0.00827566,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.0094242,
+   "k": 5,
+   "nuage": "knn_k05_002060_n300",
+   "passes": [
+    0.009424,
+    0.008293,
+    0.008276,
+    0.008205
+   ],
+   "processus_secondes": 0.0393,
+   "sites": 300
+  },
+  {
+   "chaud": 0.014699659,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.01627233,
+   "k": 10,
+   "nuage": "knn_k05_002060_n300",
+   "passes": [
+    0.016272,
+    0.014517,
+    0.0147,
+    0.015084
+   ],
+   "processus_secondes": 0.0716,
+   "sites": 300
+  },
+  {
+   "chaud": 0.01336021,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.01433654,
+   "k": 5,
+   "nuage": "knn_k05_002060_n1000",
+   "passes": [
+    0.014337,
+    0.01336,
+    0.013515,
+    0.013262
+   ],
+   "processus_secondes": 0.0637,
+   "sites": 1000
+  },
+  {
+   "chaud": 0.03126459,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.031112059,
+   "k": 10,
+   "nuage": "knn_k05_002060_n1000",
+   "passes": [
+    0.031112,
+    0.031265,
+    0.030543,
+    0.031533
+   ],
+   "processus_secondes": 0.153,
+   "sites": 1000
+  },
+  {
+   "chaud": 0.02692392,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.029337049,
+   "k": 5,
+   "nuage": "knn_k05_002060_n3000",
+   "passes": [
+    0.029337,
+    0.026924,
+    0.027061,
+    0.026616
+   ],
+   "processus_secondes": 0.139,
+   "sites": 3000
+  },
+  {
+   "chaud": 0.096403559,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.117096918,
+   "k": 10,
+   "nuage": "knn_k05_002060_n3000",
+   "passes": [
+    0.117097,
+    0.096586,
+    0.095679,
+    0.096404
+   ],
+   "processus_secondes": 0.5332,
+   "sites": 3000
+  },
+  {
+   "chaud": 0.077453409,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.085472579,
+   "k": 5,
+   "nuage": "knn_k05_002060_n10000",
+   "passes": [
+    0.085473,
+    0.075352,
+    0.077453,
+    0.078098
+   ],
+   "processus_secondes": 0.4194,
+   "sites": 10000
+  },
+  {
+   "chaud": 0.424159321,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.446395751,
+   "k": 10,
+   "nuage": "knn_k05_002060_n10000",
+   "passes": [
+    0.446396,
+    0.424159,
+    0.424575,
+    0.420163
+   ],
+   "processus_secondes": 2.3104,
+   "sites": 10000
+  },
+  {
+   "chaud": 0.00468422,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.005284661,
+   "k": 5,
+   "nuage": "knn_k06_000770_n100",
+   "passes": [
+    0.005285,
+    0.004534,
+    0.004684,
+    0.004931
+   ],
+   "processus_secondes": 0.0232,
+   "sites": 100
+  },
+  {
+   "chaud": 0.00945331,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.010179791,
+   "k": 10,
+   "nuage": "knn_k06_000770_n100",
+   "passes": [
+    0.01018,
+    0.009017,
+    0.009707,
+    0.009453
+   ],
+   "processus_secondes": 0.0452,
+   "sites": 100
+  },
+  {
+   "chaud": 0.008399401,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.009989311,
+   "k": 5,
+   "nuage": "knn_k06_000770_n300",
+   "passes": [
+    0.009989,
+    0.007991,
+    0.008519,
+    0.008399
+   ],
+   "processus_secondes": 0.0412,
+   "sites": 300
+  },
+  {
+   "chaud": 0.020095082,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.020899862,
+   "k": 10,
+   "nuage": "knn_k06_000770_n300",
+   "passes": [
+    0.0209,
+    0.019586,
+    0.020245,
+    0.020095
+   ],
+   "processus_secondes": 0.0991,
+   "sites": 300
+  },
+  {
+   "chaud": 0.012279541,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.014688901,
+   "k": 5,
+   "nuage": "knn_k06_000770_n1000",
+   "passes": [
+    0.014689,
+    0.01228,
+    0.012539,
+    0.012249
+   ],
+   "processus_secondes": 0.065,
+   "sites": 1000
+  },
+  {
+   "chaud": 0.034871503,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.041379184,
+   "k": 10,
+   "nuage": "knn_k06_000770_n1000",
+   "passes": [
+    0.041379,
+    0.034855,
+    0.035661,
+    0.034872
+   ],
+   "processus_secondes": 0.1982,
+   "sites": 1000
+  },
+  {
+   "chaud": 0.023431252,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.025468522,
+   "k": 5,
+   "nuage": "knn_k06_000770_n3000",
+   "passes": [
+    0.025469,
+    0.022856,
+    0.023857,
+    0.023431
+   ],
+   "processus_secondes": 0.1271,
+   "sites": 3000
+  },
+  {
+   "chaud": 0.085099707,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.096771818,
+   "k": 10,
+   "nuage": "knn_k06_000770_n3000",
+   "passes": [
+    0.096772,
+    0.0851,
+    0.084838,
+    0.085658
+   ],
+   "processus_secondes": 0.4926,
+   "sites": 3000
+  },
+  {
+   "chaud": 0.067749596,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.097179708,
+   "k": 5,
+   "nuage": "knn_k06_000770_n10000",
+   "passes": [
+    0.09718,
+    0.06775,
+    0.068063,
+    0.067317
+   ],
+   "processus_secondes": 0.4009,
+   "sites": 10000
+  },
+  {
+   "chaud": 0.323692597,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.377620411,
+   "k": 10,
+   "nuage": "knn_k06_000770_n10000",
+   "passes": [
+    0.37762,
+    0.323693,
+    0.318288,
+    0.324221
+   ],
+   "processus_secondes": 1.8781,
+   "sites": 10000
+  },
+  {
+   "chaud": 0.00596348,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.007076621,
+   "k": 5,
+   "nuage": "knn_k08_000000_n100",
+   "passes": [
+    0.007077,
+    0.006196,
+    0.005869,
+    0.005963
+   ],
+   "processus_secondes": 0.029,
+   "sites": 100
+  },
+  {
+   "chaud": 0.011778281,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.013202542,
+   "k": 10,
+   "nuage": "knn_k08_000000_n100",
+   "passes": [
+    0.013203,
+    0.011578,
+    0.01216,
+    0.011778
+   ],
+   "processus_secondes": 0.0565,
+   "sites": 100
+  },
+  {
+   "chaud": 0.010430151,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.01191653,
+   "k": 5,
+   "nuage": "knn_k08_000000_n300",
+   "passes": [
+    0.011917,
+    0.010233,
+    0.010581,
+    0.01043
+   ],
+   "processus_secondes": 0.0499,
+   "sites": 300
+  },
+  {
+   "chaud": 0.028171752,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.028875933,
+   "k": 10,
+   "nuage": "knn_k08_000000_n300",
+   "passes": [
+    0.028876,
+    0.028172,
+    0.028384,
+    0.028008
+   ],
+   "processus_secondes": 0.1348,
+   "sites": 300
+  },
+  {
+   "chaud": 0.018820782,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.020554911,
+   "k": 5,
+   "nuage": "knn_k08_000000_n1000",
+   "passes": [
+    0.020555,
+    0.018889,
+    0.018457,
+    0.018821
+   ],
+   "processus_secondes": 0.0935,
+   "sites": 1000
+  },
+  {
+   "chaud": 0.083164367,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.093343878,
+   "k": 10,
+   "nuage": "knn_k08_000000_n1000",
+   "passes": [
+    0.093344,
+    0.087147,
+    0.081418,
+    0.083164
+   ],
+   "processus_secondes": 0.4335,
+   "sites": 1000
+  },
+  {
+   "chaud": 0.039539704,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.041743293,
+   "k": 5,
+   "nuage": "knn_k08_000000_n3000",
+   "passes": [
+    0.041743,
+    0.03954,
+    0.040659,
+    0.039139
+   ],
+   "processus_secondes": 0.2072,
+   "sites": 3000
+  },
+  {
+   "chaud": 0.24480552,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.296797425,
+   "k": 10,
+   "nuage": "knn_k08_000000_n3000",
+   "passes": [
+    0.296797,
+    0.244806,
+    0.241891,
+    0.247725
+   ],
+   "processus_secondes": 1.3442,
+   "sites": 3000
+  },
+  {
+   "chaud": 0.108079139,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.12379047,
+   "k": 5,
+   "nuage": "knn_k08_000000_n10000",
+   "passes": [
+    0.12379,
+    0.110963,
+    0.107569,
+    0.108079
+   ],
+   "processus_secondes": 0.5896,
+   "sites": 10000
+  },
+  {
+   "chaud": 0.748974871,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.793264785,
+   "k": 10,
+   "nuage": "knn_k08_000000_n10000",
+   "passes": [
+    0.793265,
+    0.765075,
+    0.734273,
+    0.748975
+   ],
+   "processus_secondes": 3.9658,
+   "sites": 10000
+  },
+  {
+   "chaud": 0.00389063,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.00460845,
+   "k": 5,
+   "nuage": "knn_k10_000424_n100",
+   "passes": [
+    0.004608,
+    0.004076,
+    0.003823,
+    0.003891
+   ],
+   "processus_secondes": 0.0198,
+   "sites": 100
+  },
+  {
+   "chaud": 0.00544365,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.00582656,
+   "k": 10,
+   "nuage": "knn_k10_000424_n100",
+   "passes": [
+    0.005827,
+    0.005486,
+    0.004967,
+    0.005444
+   ],
+   "processus_secondes": 0.0264,
+   "sites": 100
+  },
+  {
+   "chaud": 0.00808426,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.008696351,
+   "k": 5,
+   "nuage": "knn_k10_000424_n300",
+   "passes": [
+    0.008696,
+    0.00791,
+    0.008084,
+    0.008229
+   ],
+   "processus_secondes": 0.0378,
+   "sites": 300
+  },
+  {
+   "chaud": 0.016925311,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.017268542,
+   "k": 10,
+   "nuage": "knn_k10_000424_n300",
+   "passes": [
+    0.017269,
+    0.016925,
+    0.017261,
+    0.016673
+   ],
+   "processus_secondes": 0.0797,
+   "sites": 300
+  },
+  {
+   "chaud": 0.016440031,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.017237672,
+   "k": 5,
+   "nuage": "knn_k10_000424_n1000",
+   "passes": [
+    0.017238,
+    0.01644,
+    0.016482,
+    0.015981
+   ],
+   "processus_secondes": 0.0797,
+   "sites": 1000
+  },
+  {
+   "chaud": 0.048428364,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.053195264,
+   "k": 10,
+   "nuage": "knn_k10_000424_n1000",
+   "passes": [
+    0.053195,
+    0.048232,
+    0.049144,
+    0.048428
+   ],
+   "processus_secondes": 0.2439,
+   "sites": 1000
+  },
+  {
+   "chaud": 0.028481172,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.038624513,
+   "k": 5,
+   "nuage": "knn_k10_000424_n3000",
+   "passes": [
+    0.038625,
+    0.028961,
+    0.028481,
+    0.028205
+   ],
+   "processus_secondes": 0.159,
+   "sites": 3000
+  },
+  {
+   "chaud": 0.11748094,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.128140661,
+   "k": 10,
+   "nuage": "knn_k10_000424_n3000",
+   "passes": [
+    0.128141,
+    0.117481,
+    0.115776,
+    0.117988
+   ],
+   "processus_secondes": 0.6264,
+   "sites": 3000
+  },
+  {
+   "chaud": 0.087059527,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.094844288,
+   "k": 5,
+   "nuage": "knn_k10_000424_n10000",
+   "passes": [
+    0.094844,
+    0.08706,
+    0.084747,
+    0.088192
+   ],
+   "processus_secondes": 0.4708,
+   "sites": 10000
+  },
+  {
+   "chaud": 0.478808699,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.494717731,
+   "k": 10,
+   "nuage": "knn_k10_000424_n10000",
+   "passes": [
+    0.494718,
+    0.478809,
+    0.4807,
+    0.477922
+   ],
+   "processus_secondes": 2.5952,
+   "sites": 10000
+  },
+  {
+   "chaud": 0.00425424,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.00417422,
+   "k": 5,
+   "nuage": "bout_b00_000660_velos_48_64",
+   "passes": [
+    0.004174,
+    0.004034,
+    0.004254,
+    0.004512
+   ],
+   "processus_secondes": 0.0203,
+   "sites": 107
+  },
+  {
+   "chaud": 0.00654178,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.00712985,
+   "k": 10,
+   "nuage": "bout_b00_000660_velos_48_64",
+   "passes": [
+    0.00713,
+    0.006202,
+    0.006542,
+    0.00694
+   ],
+   "processus_secondes": 0.0315,
+   "sites": 107
+  },
+  {
+   "chaud": 0.013666642,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.014637301,
+   "k": 5,
+   "nuage": "bout_b00_004490_voitures_214_215",
+   "passes": [
+    0.014637,
+    0.013694,
+    0.013628,
+    0.013667
+   ],
+   "processus_secondes": 0.0645,
+   "sites": 767
+  },
+  {
+   "chaud": 0.035481062,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.036135244,
+   "k": 10,
+   "nuage": "bout_b00_004490_voitures_214_215",
+   "passes": [
+    0.036135,
+    0.035481,
+    0.035173,
+    0.036092
+   ],
+   "processus_secondes": 0.1673,
+   "sites": 767
+  },
+  {
+   "chaud": 0.023699361,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.026261483,
+   "k": 5,
+   "nuage": "bout_b00_001500_voitures_250_251",
+   "passes": [
+    0.026261,
+    0.023699,
+    0.023598,
+    0.023776
+   ],
+   "processus_secondes": 0.1201,
+   "sites": 2160
+  },
+  {
+   "chaud": 0.083992407,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.091510618,
+   "k": 10,
+   "nuage": "bout_b00_001500_voitures_250_251",
+   "passes": [
+    0.091511,
+    0.084961,
+    0.083992,
+    0.083732
+   ],
+   "processus_secondes": 0.4364,
+   "sites": 2160
+  },
+  {
+   "chaud": 0.031602192,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.038258833,
+   "k": 5,
+   "nuage": "bout_b00_003600_voitures_305_308",
+   "passes": [
+    0.038259,
+    0.031925,
+    0.031602,
+    0.030939
+   ],
+   "processus_secondes": 0.1664,
+   "sites": 3651
+  },
+  {
+   "chaud": 0.12054342,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.150513483,
+   "k": 10,
+   "nuage": "bout_b00_003600_voitures_305_308",
+   "passes": [
+    0.150513,
+    0.120543,
+    0.121015,
+    0.119874
+   ],
+   "processus_secondes": 0.6646,
+   "sites": 3651
+  },
+  {
+   "chaud": 0.047069374,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.053149854,
+   "k": 5,
+   "nuage": "bout_b00_001460_voitures_268_511",
+   "passes": [
+    0.05315,
+    0.047853,
+    0.047069,
+    0.046943
+   ],
+   "processus_secondes": 0.25,
+   "sites": 6008
+  },
+  {
+   "chaud": 0.195611526,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.210984557,
+   "k": 10,
+   "nuage": "bout_b00_001460_voitures_268_511",
+   "passes": [
+    0.210985,
+    0.195612,
+    0.195743,
+    0.193196
+   ],
+   "processus_secondes": 1.0747,
+   "sites": 6008
+  },
+  {
+   "chaud": 0.068528275,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.077094487,
+   "k": 5,
+   "nuage": "bout_b00_002770_voitures_193_525_526",
+   "passes": [
+    0.077094,
+    0.069602,
+    0.068528,
+    0.068296
+   ],
+   "processus_secondes": 0.3654,
+   "sites": 9600
+  },
+  {
+   "chaud": 0.318042686,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.35409401,
+   "k": 10,
+   "nuage": "bout_b00_002770_voitures_193_525_526",
+   "passes": [
+    0.354094,
+    0.314979,
+    0.318043,
+    0.319742
+   ],
+   "processus_secondes": 1.76,
+   "sites": 9600
+  },
+  {
+   "chaud": 0.00605589,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.00560609,
+   "k": 5,
+   "nuage": "bout_b02_000560_voitures_47_263",
+   "passes": [
+    0.005606,
+    0.00585,
+    0.006056,
+    0.006073
+   ],
+   "processus_secondes": 0.0271,
+   "sites": 128
+  },
+  {
+   "chaud": 0.009739331,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.010623251,
+   "k": 10,
+   "nuage": "bout_b02_000560_voitures_47_263",
+   "passes": [
+    0.010623,
+    0.009457,
+    0.00993,
+    0.009739
+   ],
+   "processus_secondes": 0.0448,
+   "sites": 128
+  },
+  {
+   "chaud": 0.0106201,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.011059131,
+   "k": 5,
+   "nuage": "bout_b02_000560_voitures_47_262_263",
+   "passes": [
+    0.011059,
+    0.009925,
+    0.01062,
+    0.010706
+   ],
+   "processus_secondes": 0.0482,
+   "sites": 476
+  },
+  {
+   "chaud": 0.023528012,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.024875072,
+   "k": 10,
+   "nuage": "bout_b02_000560_voitures_47_262_263",
+   "passes": [
+    0.024875,
+    0.023528,
+    0.023607,
+    0.023383
+   ],
+   "processus_secondes": 0.1118,
+   "sites": 476
+  },
+  {
+   "chaud": 0.016562331,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.017320781,
+   "k": 5,
+   "nuage": "bout_b02_003910_voitures_11_12",
+   "passes": [
+    0.017321,
+    0.016415,
+    0.016562,
+    0.016657
+   ],
+   "processus_secondes": 0.078,
+   "sites": 1013
+  },
+  {
+   "chaud": 0.048523724,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.051593625,
+   "k": 10,
+   "nuage": "bout_b02_003910_voitures_11_12",
+   "passes": [
+    0.051594,
+    0.045874,
+    0.049494,
+    0.048524
+   ],
+   "processus_secondes": 0.2331,
+   "sites": 1013
+  },
+  {
+   "chaud": 0.018821511,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.022060982,
+   "k": 5,
+   "nuage": "bout_b02_000550_voitures_46_47_263",
+   "passes": [
+    0.022061,
+    0.018822,
+    0.019226,
+    0.018795
+   ],
+   "processus_secondes": 0.0941,
+   "sites": 1518
+  },
+  {
+   "chaud": 0.064232925,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.067924455,
+   "k": 10,
+   "nuage": "bout_b02_000550_voitures_46_47_263",
+   "passes": [
+    0.067924,
+    0.065986,
+    0.064233,
+    0.064161
+   ],
+   "processus_secondes": 0.322,
+   "sites": 1518
+  },
+  {
+   "chaud": 0.035120373,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.046709394,
+   "k": 5,
+   "nuage": "bout_b02_000590_voitures_60_255_256",
+   "passes": [
+    0.046709,
+    0.03512,
+    0.034824,
+    0.035333
+   ],
+   "processus_secondes": 0.1929,
+   "sites": 4618
+  },
+  {
+   "chaud": 0.141111611,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.154006533,
+   "k": 10,
+   "nuage": "bout_b02_000590_voitures_60_255_256",
+   "passes": [
+    0.154007,
+    0.141884,
+    0.141112,
+    0.140749
+   ],
+   "processus_secondes": 0.7596,
+   "sites": 4618
+  },
+  {
+   "chaud": 0.079093566,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.086895578,
+   "k": 5,
+   "nuage": "bout_b02_000600_voitures_61_254_256",
+   "passes": [
+    0.086896,
+    0.079989,
+    0.077069,
+    0.079094
+   ],
+   "processus_secondes": 0.4222,
+   "sites": 9869
+  },
+  {
+   "chaud": 0.396238353,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.432266405,
+   "k": 10,
+   "nuage": "bout_b02_000600_voitures_61_254_256",
+   "passes": [
+    0.432266,
+    0.399608,
+    0.396238,
+    0.395373
+   ],
+   "processus_secondes": 2.2002,
+   "sites": 9869
+  },
+  {
+   "chaud": 0.010006971,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.011591421,
+   "k": 5,
+   "nuage": "bout_b03_000100_voitures_22_23",
+   "passes": [
+    0.011591,
+    0.009879,
+    0.010043,
+    0.010007
+   ],
+   "processus_secondes": 0.0483,
+   "sites": 483
+  },
+  {
+   "chaud": 0.023745982,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.025901592,
+   "k": 10,
+   "nuage": "bout_b03_000100_voitures_22_23",
+   "passes": [
+    0.025902,
+    0.024519,
+    0.023746,
+    0.023165
+   ],
+   "processus_secondes": 0.1133,
+   "sites": 483
+  },
+  {
+   "chaud": 0.007451051,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.007712241,
+   "k": 5,
+   "nuage": "bout_b04_000000_voitures_7_8",
+   "passes": [
+    0.007712,
+    0.007041,
+    0.007451,
+    0.007557
+   ],
+   "processus_secondes": 0.034,
+   "sites": 198
+  },
+  {
+   "chaud": 0.012454251,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.013250571,
+   "k": 10,
+   "nuage": "bout_b04_000000_voitures_7_8",
+   "passes": [
+    0.013251,
+    0.012454,
+    0.012292,
+    0.012548
+   ],
+   "processus_secondes": 0.0578,
+   "sites": 198
+  },
+  {
+   "chaud": 0.009678821,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.01031437,
+   "k": 5,
+   "nuage": "bout_b04_000020_voitures_5_6",
+   "passes": [
+    0.010314,
+    0.009616,
+    0.009874,
+    0.009679
+   ],
+   "processus_secondes": 0.0453,
+   "sites": 370
+  },
+  {
+   "chaud": 0.020031401,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.020354112,
+   "k": 10,
+   "nuage": "bout_b04_000020_voitures_5_6",
+   "passes": [
+    0.020354,
+    0.019451,
+    0.020031,
+    0.020264
+   ],
+   "processus_secondes": 0.0952,
+   "sites": 370
+  },
+  {
+   "chaud": 0.008569051,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.009651511,
+   "k": 5,
+   "nuage": "bout_b05_002060_velos_1_2",
+   "passes": [
+    0.009652,
+    0.008188,
+    0.008655,
+    0.008569
+   ],
+   "processus_secondes": 0.0402,
+   "sites": 237
+  },
+  {
+   "chaud": 0.021163972,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.022102932,
+   "k": 10,
+   "nuage": "bout_b05_002060_velos_1_2",
+   "passes": [
+    0.022103,
+    0.021415,
+    0.021164,
+    0.020833
+   ],
+   "processus_secondes": 0.1001,
+   "sites": 237
+  },
+  {
+   "chaud": 0.013541021,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.015091771,
+   "k": 5,
+   "nuage": "bout_b05_002050_voitures_126_127",
+   "passes": [
+    0.015092,
+    0.013387,
+    0.014069,
+    0.013541
+   ],
+   "processus_secondes": 0.0658,
+   "sites": 735
+  },
+  {
+   "chaud": 0.041953794,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.044404603,
+   "k": 10,
+   "nuage": "bout_b05_002050_voitures_126_127",
+   "passes": [
+    0.044405,
+    0.043114,
+    0.041954,
+    0.041006
+   ],
+   "processus_secondes": 0.2031,
+   "sites": 735
+  },
+  {
+   "chaud": 0.017253492,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.018275681,
+   "k": 5,
+   "nuage": "bout_b05_002000_voitures_148_173",
+   "passes": [
+    0.018276,
+    0.017253,
+    0.016924,
+    0.017459
+   ],
+   "processus_secondes": 0.0803,
+   "sites": 887
+  },
+  {
+   "chaud": 0.056325854,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.058625475,
+   "k": 10,
+   "nuage": "bout_b05_002000_voitures_148_173",
+   "passes": [
+    0.058625,
+    0.056326,
+    0.053755,
+    0.056438
+   ],
+   "processus_secondes": 0.2589,
+   "sites": 887
+  },
+  {
+   "chaud": 0.017417562,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.018533472,
+   "k": 5,
+   "nuage": "bout_b05_002240_voitures_108_110",
+   "passes": [
+    0.018533,
+    0.017564,
+    0.017418,
+    0.016616
+   ],
+   "processus_secondes": 0.0859,
+   "sites": 1377
+  },
+  {
+   "chaud": 0.051633354,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.064509265,
+   "k": 10,
+   "nuage": "bout_b05_002240_voitures_108_110",
+   "passes": [
+    0.064509,
+    0.054526,
+    0.050914,
+    0.051633
+   ],
+   "processus_secondes": 0.2759,
+   "sites": 1377
+  },
+  {
+   "chaud": 0.020083951,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.022730922,
+   "k": 5,
+   "nuage": "bout_b05_002010_voitures_131_146",
+   "passes": [
+    0.022731,
+    0.020084,
+    0.019633,
+    0.020326
+   ],
+   "processus_secondes": 0.1011,
+   "sites": 1765
+  },
+  {
+   "chaud": 0.062812205,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.077487046,
+   "k": 10,
+   "nuage": "bout_b05_002010_voitures_131_146",
+   "passes": [
+    0.077487,
+    0.062808,
+    0.062812,
+    0.063447
+   ],
+   "processus_secondes": 0.3326,
+   "sites": 1765
+  },
+  {
+   "chaud": 0.034630243,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.037657633,
+   "k": 5,
+   "nuage": "bout_b05_000050_voitures_48_49",
+   "passes": [
+    0.037658,
+    0.034879,
+    0.03463,
+    0.034405
+   ],
+   "processus_secondes": 0.1777,
+   "sites": 3810
+  },
+  {
+   "chaud": 0.155986393,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.170283984,
+   "k": 10,
+   "nuage": "bout_b05_000050_voitures_48_49",
+   "passes": [
+    0.170284,
+    0.155986,
+    0.153897,
+    0.156177
+   ],
+   "processus_secondes": 0.8243,
+   "sites": 3810
+  },
+  {
+   "chaud": 0.00630776,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.0062139,
+   "k": 5,
+   "nuage": "bout_b06_000770_velos_14_15",
+   "passes": [
+    0.006214,
+    0.0062,
+    0.006308,
+    0.006423
+   ],
+   "processus_secondes": 0.029,
+   "sites": 113
+  },
+  {
+   "chaud": 0.011536831,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.012275121,
+   "k": 10,
+   "nuage": "bout_b06_000770_velos_14_15",
+   "passes": [
+    0.012275,
+    0.011351,
+    0.01173,
+    0.011537
+   ],
+   "processus_secondes": 0.0545,
+   "sites": 113
+  },
+  {
+   "chaud": 0.008563211,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.00860945,
+   "k": 5,
+   "nuage": "bout_b06_000770_velos_6_14",
+   "passes": [
+    0.008609,
+    0.008293,
+    0.008563,
+    0.008586
+   ],
+   "processus_secondes": 0.0383,
+   "sites": 187
+  },
+  {
+   "chaud": 0.018415432,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.018171352,
+   "k": 10,
+   "nuage": "bout_b06_000770_velos_6_14",
+   "passes": [
+    0.018171,
+    0.017621,
+    0.018415,
+    0.018467
+   ],
+   "processus_secondes": 0.0834,
+   "sites": 187
+  },
+  {
+   "chaud": 0.009309041,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.010831281,
+   "k": 5,
+   "nuage": "bout_b06_000800_velos_8_12_13",
+   "passes": [
+    0.010831,
+    0.009309,
+    0.00963,
+    0.00922
+   ],
+   "processus_secondes": 0.0444,
+   "sites": 264
+  },
+  {
+   "chaud": 0.024777003,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.026230772,
+   "k": 10,
+   "nuage": "bout_b06_000800_velos_8_12_13",
+   "passes": [
+    0.026231,
+    0.024777,
+    0.024707,
+    0.024937
+   ],
+   "processus_secondes": 0.1184,
+   "sites": 264
+  },
+  {
+   "chaud": 0.013431841,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.015366471,
+   "k": 5,
+   "nuage": "bout_b06_000380_voitures_65_101",
+   "passes": [
+    0.015366,
+    0.013411,
+    0.013432,
+    0.013659
+   ],
+   "processus_secondes": 0.0663,
+   "sites": 1018
+  },
+  {
+   "chaud": 0.040092084,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.046683744,
+   "k": 10,
+   "nuage": "bout_b06_000380_voitures_65_101",
+   "passes": [
+    0.046684,
+    0.038565,
+    0.040092,
+    0.040106
+   ],
+   "processus_secondes": 0.1962,
+   "sites": 1018
+  },
+  {
+   "chaud": 0.015950211,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.018003971,
+   "k": 5,
+   "nuage": "bout_b06_000060_voitures_44_94_95",
+   "passes": [
+    0.018004,
+    0.01638,
+    0.015835,
+    0.01595
+   ],
+   "processus_secondes": 0.0803,
+   "sites": 1403
+  },
+  {
+   "chaud": 0.047227374,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.051976265,
+   "k": 10,
+   "nuage": "bout_b06_000060_voitures_44_94_95",
+   "passes": [
+    0.051976,
+    0.049261,
+    0.047227,
+    0.047095
+   ],
+   "processus_secondes": 0.2458,
+   "sites": 1403
+  },
+  {
+   "chaud": 0.064777506,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.072188625,
+   "k": 5,
+   "nuage": "bout_b06_000610_voitures_22_100",
+   "passes": [
+    0.072189,
+    0.064778,
+    0.064635,
+    0.0668
+   ],
+   "processus_secondes": 0.3465,
+   "sites": 8941
+  },
+  {
+   "chaud": 0.292010914,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.337003428,
+   "k": 10,
+   "nuage": "bout_b06_000610_voitures_22_100",
+   "passes": [
+    0.337003,
+    0.297182,
+    0.289904,
+    0.292011
+   ],
+   "processus_secondes": 1.6251,
+   "sites": 8941
+  },
+  {
+   "chaud": 0.00852005,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.009086941,
+   "k": 5,
+   "nuage": "bout_b07_000720_voitures_124_128",
+   "passes": [
+    0.009087,
+    0.008435,
+    0.008753,
+    0.00852
+   ],
+   "processus_secondes": 0.0404,
+   "sites": 336
+  },
+  {
+   "chaud": 0.018956931,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.019847121,
+   "k": 10,
+   "nuage": "bout_b07_000720_voitures_124_128",
+   "passes": [
+    0.019847,
+    0.019213,
+    0.018404,
+    0.018957
+   ],
+   "processus_secondes": 0.0899,
+   "sites": 336
+  },
+  {
+   "chaud": 0.015140712,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.015748022,
+   "k": 5,
+   "nuage": "bout_b07_001080_voitures_5_52",
+   "passes": [
+    0.015748,
+    0.015333,
+    0.015141,
+    0.014843
+   ],
+   "processus_secondes": 0.0707,
+   "sites": 810
+  },
+  {
+   "chaud": 0.043012723,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.044988853,
+   "k": 10,
+   "nuage": "bout_b07_001080_voitures_5_52",
+   "passes": [
+    0.044989,
+    0.043083,
+    0.043013,
+    0.042722
+   ],
+   "processus_secondes": 0.2047,
+   "sites": 810
+  },
+  {
+   "chaud": 0.020156302,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.021671992,
+   "k": 5,
+   "nuage": "bout_b07_000840_voitures_68_69",
+   "passes": [
+    0.021672,
+    0.019899,
+    0.020359,
+    0.020156
+   ],
+   "processus_secondes": 0.0998,
+   "sites": 1729
+  },
+  {
+   "chaud": 0.063010265,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.082572007,
+   "k": 10,
+   "nuage": "bout_b07_000840_voitures_68_69",
+   "passes": [
+    0.082572,
+    0.064964,
+    0.06301,
+    0.062918
+   ],
+   "processus_secondes": 0.3421,
+   "sites": 1729
+  },
+  {
+   "chaud": 0.030198463,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.032222323,
+   "k": 5,
+   "nuage": "bout_b07_000130_voitures_91_92",
+   "passes": [
+    0.032222,
+    0.030198,
+    0.028646,
+    0.030268
+   ],
+   "processus_secondes": 0.1494,
+   "sites": 3192
+  },
+  {
+   "chaud": 0.106429089,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.12667894,
+   "k": 10,
+   "nuage": "bout_b07_000130_voitures_91_92",
+   "passes": [
+    0.126679,
+    0.106534,
+    0.105095,
+    0.106429
+   ],
+   "processus_secondes": 0.5708,
+   "sites": 3192
+  },
+  {
+   "chaud": 0.040357314,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.048690774,
+   "k": 5,
+   "nuage": "bout_b07_000790_voitures_57_59",
+   "passes": [
+    0.048691,
+    0.040753,
+    0.040339,
+    0.040357
+   ],
+   "processus_secondes": 0.2197,
+   "sites": 5633
+  },
+  {
+   "chaud": 0.158515293,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.178884344,
+   "k": 10,
+   "nuage": "bout_b07_000790_voitures_57_59",
+   "passes": [
+    0.178884,
+    0.158221,
+    0.158865,
+    0.158515
+   ],
+   "processus_secondes": 0.882,
+   "sites": 5633
+  },
+  {
+   "chaud": 0.078951256,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.094150938,
+   "k": 5,
+   "nuage": "bout_b07_000860_voitures_10_11",
+   "passes": [
+    0.094151,
+    0.082695,
+    0.078951,
+    0.078799
+   ],
+   "processus_secondes": 0.4301,
+   "sites": 9373
+  },
+  {
+   "chaud": 0.414897804,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.47649877,
+   "k": 10,
+   "nuage": "bout_b07_000860_voitures_10_11",
+   "passes": [
+    0.476499,
+    0.417782,
+    0.414898,
+    0.412247
+   ],
+   "processus_secondes": 2.291,
+   "sites": 9373
+  },
+  {
+   "chaud": 0.00614152,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.006338801,
+   "k": 5,
+   "nuage": "bout_b08_002500_voitures_148_149",
+   "passes": [
+    0.006339,
+    0.005903,
+    0.006298,
+    0.006142
+   ],
+   "processus_secondes": 0.028,
+   "sites": 134
+  },
+  {
+   "chaud": 0.008451491,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.008985921,
+   "k": 10,
+   "nuage": "bout_b08_002500_voitures_148_149",
+   "passes": [
+    0.008986,
+    0.008401,
+    0.008656,
+    0.008451
+   ],
+   "processus_secondes": 0.0394,
+   "sites": 134
+  },
+  {
+   "chaud": 0.010300761,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.011176081,
+   "k": 5,
+   "nuage": "bout_b08_002700_velos_52_53",
+   "passes": [
+    0.011176,
+    0.010212,
+    0.010703,
+    0.010301
+   ],
+   "processus_secondes": 0.0494,
+   "sites": 366
+  },
+  {
+   "chaud": 0.025868682,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.027516642,
+   "k": 10,
+   "nuage": "bout_b08_002700_velos_52_53",
+   "passes": [
+    0.027517,
+    0.02575,
+    0.025869,
+    0.027037
+   ],
+   "processus_secondes": 0.1256,
+   "sites": 366
+  },
+  {
+   "chaud": 0.016080381,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.017502262,
+   "k": 5,
+   "nuage": "bout_b08_001180_velos_43_56_57",
+   "passes": [
+    0.017502,
+    0.01608,
+    0.016501,
+    0.016053
+   ],
+   "processus_secondes": 0.0777,
+   "sites": 898
+  },
+  {
+   "chaud": 0.054301485,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.061686565,
+   "k": 10,
+   "nuage": "bout_b08_001180_velos_43_56_57",
+   "passes": [
+    0.061687,
+    0.052918,
+    0.054459,
+    0.054301
+   ],
+   "processus_secondes": 0.2737,
+   "sites": 898
+  },
+  {
+   "chaud": 0.027747512,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.030279323,
+   "k": 5,
+   "nuage": "bout_b08_002630_voitures_382_383",
+   "passes": [
+    0.030279,
+    0.027748,
+    0.027604,
+    0.031515
+   ],
+   "processus_secondes": 0.1432,
+   "sites": 2740
+  },
+  {
+   "chaud": 0.1098798,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.11569283,
+   "k": 10,
+   "nuage": "bout_b08_002630_voitures_382_383",
+   "passes": [
+    0.115693,
+    0.109314,
+    0.10988,
+    0.111805
+   ],
+   "processus_secondes": 0.5606,
+   "sites": 2740
+  },
+  {
+   "chaud": 0.049571744,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.060862275,
+   "k": 5,
+   "nuage": "bout_b08_003530_voitures_67_68",
+   "passes": [
+    0.060862,
+    0.048811,
+    0.049572,
+    0.049851
+   ],
+   "processus_secondes": 0.2663,
+   "sites": 6450
+  },
+  {
+   "chaud": 0.201043177,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.217470057,
+   "k": 10,
+   "nuage": "bout_b08_003530_voitures_67_68",
+   "passes": [
+    0.21747,
+    0.204272,
+    0.201043,
+    0.199599
+   ],
+   "processus_secondes": 1.106,
+   "sites": 6450
+  },
+  {
+   "chaud": 0.078812907,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.088109867,
+   "k": 5,
+   "nuage": "bout_b08_003900_voitures_157_159",
+   "passes": [
+    0.08811,
+    0.078948,
+    0.077736,
+    0.078813
+   ],
+   "processus_secondes": 0.4221,
+   "sites": 9957
+  },
+  {
+   "chaud": 0.407295323,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.428362906,
+   "k": 10,
+   "nuage": "bout_b08_003900_voitures_157_159",
+   "passes": [
+    0.428363,
+    0.407939,
+    0.407295,
+    0.402283
+   ],
+   "processus_secondes": 2.2385,
+   "sites": 9957
+  },
+  {
+   "chaud": 0.006949591,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.007304211,
+   "k": 5,
+   "nuage": "bout_b09_001220_voitures_2_17",
+   "passes": [
+    0.007304,
+    0.007197,
+    0.00695,
+    0.006769
+   ],
+   "processus_secondes": 0.032,
+   "sites": 156
+  },
+  {
+   "chaud": 0.012741941,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.012559321,
+   "k": 10,
+   "nuage": "bout_b09_001220_voitures_2_17",
+   "passes": [
+    0.012559,
+    0.012511,
+    0.012742,
+    0.01344
+   ],
+   "processus_secondes": 0.0586,
+   "sites": 156
+  },
+  {
+   "chaud": 0.007711731,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.008441631,
+   "k": 5,
+   "nuage": "bout_b09_000690_voitures_102_104",
+   "passes": [
+    0.008442,
+    0.007799,
+    0.007638,
+    0.007712
+   ],
+   "processus_secondes": 0.0364,
+   "sites": 278
+  },
+  {
+   "chaud": 0.013502171,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.015274162,
+   "k": 10,
+   "nuage": "bout_b09_000690_voitures_102_104",
+   "passes": [
+    0.015274,
+    0.013397,
+    0.013502,
+    0.013551
+   ],
+   "processus_secondes": 0.0655,
+   "sites": 278
+  },
+  {
+   "chaud": 0.01046818,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.012670751,
+   "k": 5,
+   "nuage": "bout_b09_001420_voitures_62_63",
+   "passes": [
+    0.012671,
+    0.010553,
+    0.010422,
+    0.010468
+   ],
+   "processus_secondes": 0.051,
+   "sites": 538
+  },
+  {
+   "chaud": 0.025483192,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.024004422,
+   "k": 10,
+   "nuage": "bout_b09_001420_voitures_62_63",
+   "passes": [
+    0.024004,
+    0.025559,
+    0.025236,
+    0.025483
+   ],
+   "processus_secondes": 0.1188,
+   "sites": 538
+  },
+  {
+   "chaud": 0.018048432,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.020162062,
+   "k": 5,
+   "nuage": "bout_b09_000790_voitures_91_92",
+   "passes": [
+    0.020162,
+    0.017925,
+    0.018048,
+    0.018378
+   ],
+   "processus_secondes": 0.0903,
+   "sites": 1496
+  },
+  {
+   "chaud": 0.059513715,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.063284976,
+   "k": 10,
+   "nuage": "bout_b09_000790_voitures_91_92",
+   "passes": [
+    0.063285,
+    0.059658,
+    0.059003,
+    0.059514
+   ],
+   "processus_secondes": 0.3062,
+   "sites": 1496
+  },
+  {
+   "chaud": 0.026456733,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.029388532,
+   "k": 5,
+   "nuage": "bout_b09_000580_voitures_81_82",
+   "passes": [
+    0.029389,
+    0.026457,
+    0.025522,
+    0.026643
+   ],
+   "processus_secondes": 0.1341,
+   "sites": 2636
+  },
+  {
+   "chaud": 0.091003727,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.094712778,
+   "k": 10,
+   "nuage": "bout_b09_000580_voitures_81_82",
+   "passes": [
+    0.094713,
+    0.091004,
+    0.089922,
+    0.091918
+   ],
+   "processus_secondes": 0.4744,
+   "sites": 2636
+  },
+  {
+   "chaud": 0.047233654,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.057072834,
+   "k": 5,
+   "nuage": "bout_b09_001200_voitures_17_136",
+   "passes": [
+    0.057073,
+    0.047234,
+    0.046403,
+    0.047452
+   ],
+   "processus_secondes": 0.2537,
+   "sites": 5954
+  },
+  {
+   "chaud": 0.222640668,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.2481746,
+   "k": 10,
+   "nuage": "bout_b09_001200_voitures_17_136",
+   "passes": [
+    0.248175,
+    0.22341,
+    0.220582,
+    0.222641
+   ],
+   "processus_secondes": 1.2167,
+   "sites": 5954
+  },
+  {
+   "chaud": 0.006986661,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.006960191,
+   "k": 5,
+   "nuage": "bout_b10_000850_voitures_17_19",
+   "passes": [
+    0.00696,
+    0.006517,
+    0.006987,
+    0.007178
+   ],
+   "processus_secondes": 0.0315,
+   "sites": 162
+  },
+  {
+   "chaud": 0.011995701,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.011962631,
+   "k": 10,
+   "nuage": "bout_b10_000850_voitures_17_19",
+   "passes": [
+    0.011963,
+    0.011996,
+    0.011737,
+    0.012673
+   ],
+   "processus_secondes": 0.0551,
+   "sites": 162
+  },
+  {
+   "chaud": 0.008940661,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.010490471,
+   "k": 5,
+   "nuage": "bout_b10_000430_velos_2_3",
+   "passes": [
+    0.01049,
+    0.00864,
+    0.008974,
+    0.008941
+   ],
+   "processus_secondes": 0.0424,
+   "sites": 230
+  },
+  {
+   "chaud": 0.019648201,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.020693121,
+   "k": 10,
+   "nuage": "bout_b10_000430_velos_2_3",
+   "passes": [
+    0.020693,
+    0.020332,
+    0.019636,
+    0.019648
+   ],
+   "processus_secondes": 0.0956,
+   "sites": 230
+  },
+  {
+   "chaud": 0.008539491,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.009148661,
+   "k": 5,
+   "nuage": "bout_b10_000840_voitures_17_18",
+   "passes": [
+    0.009149,
+    0.008301,
+    0.008539,
+    0.008638
+   ],
+   "processus_secondes": 0.039,
+   "sites": 235
+  },
+  {
+   "chaud": 0.016880491,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.017527632,
+   "k": 10,
+   "nuage": "bout_b10_000840_voitures_17_18",
+   "passes": [
+    0.017528,
+    0.016861,
+    0.01688,
+    0.017152
+   ],
+   "processus_secondes": 0.079,
+   "sites": 235
+  },
+  {
+   "chaud": 0.008783631,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.009372211,
+   "k": 5,
+   "nuage": "bout_b10_000840_voitures_17_18_19",
+   "passes": [
+    0.009372,
+    0.008782,
+    0.008784,
+    0.008902
+   ],
+   "processus_secondes": 0.0408,
+   "sites": 314
+  },
+  {
+   "chaud": 0.020972552,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.021147462,
+   "k": 10,
+   "nuage": "bout_b10_000840_voitures_17_18_19",
+   "passes": [
+    0.021147,
+    0.020973,
+    0.02084,
+    0.021279
+   ],
+   "processus_secondes": 0.0967,
+   "sites": 314
+  },
+  {
+   "chaud": 0.029162263,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.034167583,
+   "k": 5,
+   "nuage": "bout_b10_000410_voitures_47_65",
+   "passes": [
+    0.034168,
+    0.029578,
+    0.028898,
+    0.029162
+   ],
+   "processus_secondes": 0.155,
+   "sites": 3088
+  },
+  {
+   "chaud": 0.12053217,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.154021013,
+   "k": 10,
+   "nuage": "bout_b10_000410_voitures_47_65",
+   "passes": [
+    0.154021,
+    0.121247,
+    0.120532,
+    0.120227
+   ],
+   "processus_secondes": 0.6792,
+   "sites": 3088
+  },
+  {
+   "chaud": 0.048417894,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.062397956,
+   "k": 5,
+   "nuage": "bout_b10_001080_voitures_8_9",
+   "passes": [
+    0.062398,
+    0.051945,
+    0.048418,
+    0.048201
+   ],
+   "processus_secondes": 0.2636,
+   "sites": 5865
+  },
+  {
+   "chaud": 0.226730939,
+   "code": 0,
+   "fils": 48,
+   "froid": 0.23570874,
+   "k": 10,
+   "nuage": "bout_b10_001080_voitures_8_9",
+   "passes": [
+    0.235709,
+    0.226731,
+    0.226313,
+    0.231133
+   ],
+   "processus_secondes": 1.177,
+   "sites": 5865
+  }
+ ]
+}

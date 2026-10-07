@@ -47,7 +47,7 @@ son reçu. **Aucune tranche ne commence avant les décisions D1 à D7** de [`DEC
 | `MES-M7` | profil par composante de la résolution (sonde, plus petite boule par route, census saturé et complet, saut, partie suivante), à un fil, compteur de cycles, sur la réplique v12, K5 et K10 ; la comparaison à la v10 R2 est abandonnée (précision du 7 octobre, [contrat de la tour](CONTRAT_TOUR.md) § 11) | publié ; confirme la part de la plus petite boule, du census et des sondes. **Mesuré sur G4 le 7 octobre** ([session E](../receipts/g4_t2e_20261007/README.md)) : sondes 39 à 43 %, proposition 26 %, census 14 à 19 % à K5 |
 | `MES-S` | étendues locales (feuilles, supports, parties de descente) et part de chaque voie numérique ([`CONTRAT_NUMERIQUE.md`](CONTRAT_NUMERIQUE.md) § 8) | publié ; fixe les paliers |
 | `MES-E` | v11 gelée sur des découpes de 1, 2, 4 et 8 millions de sites d'une scène réelle, K5 puis K10 : volumes par site, pic mémoire, temps, point de rupture | publié ; fixe les objectifs du régime (b) et la taille des lots. **Mesuré sur G4 le 7 octobre** ([session E](../receipts/g4_t2e_20261007/README.md)) : à K5, 16 à 25 µs et 7 à 17 Ko résidents par site (8 M en 155 à 203 s, 54 à 75 Gio) ; à K10, 28 à 43 Ko par site, rupture vers 4 M ; étage forêt superlinéaire sur ETH3D |
-| `MES-P` | v11 gelée sur 100 à 10 000 sites, voie CPU et voie GPU, à chaud : coût fixe et coût par site | publié ; fixe le seuil de la voie CPU des petits nuages |
+| `MES-P` | v11 gelée sur 100 à 10 000 sites, voie CPU et voie GPU, à chaud : coût fixe et coût par site | publié ; fixe le seuil de la voie CPU des petits nuages. **Mesuré sur G4 le 7 octobre** ([session G](../receipts/g4_t0g_20261007/README.md), 48 fils) : morceaux de trames réels, K5 6,9 ms + 7,4 µs par site, K10 5,5 ms + 42 µs par site ; la v11 s'effondre sur le réseau entier (étage forêt 92 à 99 %, 8,4 s à 10 000 sites à K5, prise expirée à K10) et refuse la sphère dès 3 000 sites (`wide_leaf`) ; régime à un fil non mesuré |
 
 **Sortie** : les microbancs sont jugés ; la forme de la feuille est choisie ; les budgets de [`ARCHITECTURE.md`](ARCHITECTURE.md)
 sont confirmés ou révisés **avant** tout port d'étage. Si un budget tombe, le plan se révise ici, pas en fin de tranche.
@@ -64,9 +64,9 @@ terminées par un arrêt certifié) :
 - **Forêt sans lots** : tenue à K5 (`MES-M4`) ; à K10, contraction de 3,2 à 4,3 ms au-dessus du seuil de 3 ms,
   publiée ; le budget de l'étage T est confirmé à K5.
 - **Session** : coûts fixes mesurés (`MES-M6`) ; attente `yield`, graphes pour les suites de lancements.
-- **Non faits en T0** : `MES-M7` (profil par route contre la v10 R2, couvert en partie par la résolution à trois bras),
-  `MES-E` et `MES-P` (v11 gelée sur les scènes de plusieurs millions et sur les petits nuages), qui attendent les outils
-  de données corrigés (`CST-0216` à `CST-0218`) ; ils seront joués avant les objectifs des régimes (b) et (c).
+- **Non faits en T0**, joués depuis : `MES-M7` et `MES-E` (session E, `g4_t2e_20261007`), `MES-P` (session G,
+  `g4_t0g_20261007`), sur les outils de données corrigés (`CST-0216` à `CST-0218`) ; les découpes de `MES-E` sont à
+  rejouer sur les découpes refaites (`CST-0218`), sans changement attendu de l'ordre de grandeur.
 - **Outils de jugement** : les juges des microbancs ont été durcis après l'audit (`CST-0213` à `0215` clos) ; des résidus
   de `CST-0018` restent à fermer avant toute nouvelle adoption.
 

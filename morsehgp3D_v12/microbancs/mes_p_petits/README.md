@@ -29,3 +29,12 @@ téléversement d'une session paie chaque fichier, et les 320 petits fichiers on
 
 Premier passage local (7 octobre, trois nuages de 1 000 sites, indicatif) : 0,45 s par passe chaude à K5 sur un fil ;
 les temps de la VM G4 font foi.
+
+**Lecture par famille** : [`analyse_p.py`](analyse_p.py) `MES_P_JSON [--brut DOSSIER]` sépare les morceaux de trames
+réels (droite des moindres carrés sur eux seuls, médianes par classe de taille), chaque famille synthétique (avec la
+part de l'étage forêt lue dans les lignes brutes) et les prises en échec avec leur motif : la droite unique du
+pilote mêle des familles dégénérées dont le coût explose et ne fixe aucun seuil (coût fixe négatif le 7 octobre).
+
+**Mesuré sur G4 le 7 octobre** ([session G](../../receipts/g4_t0g_20261007/README.md), 48 fils, quatre passes) :
+morceaux de trames, K5 6,9 ms + 7,4 µs par site et K10 5,5 ms + 42 µs par site ; réseau entier, étage forêt à 92 à
+99 % du temps (8,4 s à 10 000 sites à K5, prise expirée à K10) ; sphère refusée dès 3 000 sites (`wide_leaf`).
