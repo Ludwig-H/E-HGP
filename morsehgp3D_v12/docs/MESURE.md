@@ -24,6 +24,8 @@ et appareil, CPU·s par trame.
 | ng00, ng01, ng02 | SemanticKITTI 08/000000, 000100, 000200 sans sol (Patchwork++ épinglé), grille 1 mm : 39 885, 35 551, 45 845 sites | contrat historique et différentiel ; hors dépôt (`build/v11-full-data-20261002/`) |
 | uniformes | 8 000, 16 000, 32 000 sites, coordonnées sur 18 bits (« u18 » désigne la **donnée**, jouée au profil u21) | tailles d'intérêt de `CLAUDE.md` ; oracle d'échelle |
 | trames de plusieurs séquences | à préparer (00–10), sans sol, toutes tailles | **base de toute décision de vitesse** (consigne du 6 octobre) |
+| scènes de plusieurs millions de sites | LiDAR réel, mobile, terrestre ou aérien, téléchargeable pour la recherche ; jeux retenus dans `DONNEES.md` (recensement en cours) ; tailles 1, 2, 4 et 8 millions par découpe spatiale (jamais par sous-échantillonnage), puis la scène entière ; avec et sans sol | régime (b) de la décision D7 |
+| petits nuages | 100, 300, 1 000, 3 000 et 10 000 sites : familles synthétiques et découpes de trames LiDAR | régime (c) de la décision D7 ; oracle borné en dessous de 14 sites |
 
 **Tailles réelles.** Sur les 132 trames sans sol distinctes de la séquence 08 du reçu `pts4_review_20261003` de la v11,
 89 dépassent 60 000 sites, aucune n'est sous 30 000 ; médiane 68 049, maximum 126 267. Les trois trames du contrat
@@ -31,6 +33,14 @@ sont parmi les plus petites. La plage « 30 000 à 60 000 sites » est à redéf
 
 **Licence.** Aucune donnée ni coordonnée SemanticKITTI dans le dépôt (CC BY-NC-SA) : ni trames, ni vidages, ni sorties
 de CLI. Seuls des empreintes, des comptes et des manifestes.
+
+**Objectifs des régimes (b) et (c)** (hypothèses du 7 octobre, à confirmer ou réviser après les premières mesures de
+la v11 gelée sur ces données, `MES-E` et `MES-P` de [`PLAN.md`](PLAN.md)) :
+
+| Régime | Mesures publiées | Objectif proposé |
+| --- | --- | --- |
+| (b) plusieurs millions | mur, CPU·s, pic de mémoire hôte et appareil, exposant d'échelle sur 1, 2, 4, 8 millions, à K5 et K10, à froid et à chaud | exposant au plus 1,1 ; K5 au plus 2 s par million de sites (le contrat principal, 100 ms pour 60 000 sites, en vaut 1,7) ; K10 au plus 10 s par million ; aucune scène refusée sous 10 millions de sites à K5 |
+| (c) petits nuages | latence à chaud et à froid, voie CPU et voie GPU | coût fixe à chaud au plus 2 ms ; coût par site jamais supérieur à celui du régime principal |
 
 ## 3. Chiffres de référence
 

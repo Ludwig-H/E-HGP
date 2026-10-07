@@ -45,6 +45,9 @@ son reçu. **Aucune tranche ne commence avant les décisions D1 à D7** de [`DEC
 | `MES-M5` | parcours des boîtes en largeur sur GPU | même ensemble final de feuilles que le CPU |
 | `MES-M6` | coût de Session : contexte, modules, transferts épinglés, attente bloquante ou active | publié ; fixe le budget du régime résident |
 | `MES-M7` | profil par route des descentes, v11 contre v10 R2, même session, à un fil, K5 et K10 | publié ; confirme la part de la plus petite boule, du census et des coûts fixes |
+| `MES-S` | étendues locales (feuilles, supports, parties de descente) et part de chaque voie numérique ([`CONTRAT_NUMERIQUE.md`](CONTRAT_NUMERIQUE.md) § 8) | publié ; fixe les paliers |
+| `MES-E` | v11 gelée sur des découpes de 1, 2, 4 et 8 millions de sites d'une scène réelle, K5 puis K10 : volumes par site, pic mémoire, temps, point de rupture | publié ; fixe les objectifs du régime (b) et la taille des lots |
+| `MES-P` | v11 gelée sur 100 à 10 000 sites, voie CPU et voie GPU, à chaud : coût fixe et coût par site | publié ; fixe le seuil de la voie CPU des petits nuages |
 
 **Sortie** : les microbancs sont jugés ; la forme de la feuille est choisie ; les budgets de [`ARCHITECTURE.md`](ARCHITECTURE.md)
 sont confirmés ou révisés **avant** tout port d'étage. Si un budget tombe, le plan se révise ici, pas en fin de tranche.
@@ -85,9 +88,10 @@ exports Zoltan ; écriture à SHA-NI. Chaque vue a son lecteur en bibliothèque 
 
 ## 5. T4 — qualification et campagne de mesure
 
-Matrice complète au profil u21 (Release, ASan/UBSan, TSan, tampons empoisonnés, mutants, échelle 8 000 / 16 000 / 32 000,
-LiDAR), u24 en matrice ; campagne de temps sur plusieurs séquences, à froid et à chaud, selon le protocole de
-[`MESURE.md`](MESURE.md) ; reçu immuable.
+Matrice complète au profil produit (Release, ASan/UBSan, TSan, tampons empoisonnés, mutants, échelle 8 000 / 16 000 /
+32 000, LiDAR) avec des entrées u21, u24 et u32 ; campagne de temps sur plusieurs séquences, à froid et à chaud, selon le
+protocole de [`MESURE.md`](MESURE.md), puis sur les scènes de plusieurs millions de sites et sur les petits nuages,
+contre leurs objectifs publiés ; reçu immuable.
 
 ## 6. T5 — comparaison à HDBSCAN
 

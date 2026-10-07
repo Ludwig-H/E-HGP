@@ -125,6 +125,37 @@ SHA-256 avec SHA-NI, ou calculé hors du chemin critique ; tampons d'écriture r
 glibc choisir 4 Kio) ; colonnes écrites en bloc ; un format `full` compact (le vidage de la v11 pèse 301 Mo à K5 et
 1,46 Go à K10 sur ng00, soit 5,8 To pour une passe sur les 19 130 scans d'entraînement de SemanticKITTI).
 
+### 4.6 Échelle : du petit nuage à plusieurs millions de sites
+
+La décision D7 ajoute deux régimes au contrat principal : des scènes LiDAR réelles de **plusieurs millions de sites**,
+et des **petits nuages** de 100 à 10 000 sites. Un seul chemin les sert tous ; seule la taille des lots change.
+
+**Volumes par site** (v11, [`MESURE.md`](MESURE.md) § 3.3) : sur le LiDAR sans sol, 33 boules et 153 incidences par
+site à K5, 138 boules et 1 137 incidences à K10 ; sur nuages uniformes, 75 à 79 boules par site à K5. Mémoire de
+l'appareil de la v11 : 6 Ko par site à K5, 36 Ko à K10. Projection à 5 millions de sites : 164 M boules et 0,77 G
+incidences à K5 ; 690 M boules et 5,7 G incidences à K10, au-delà de $2^{32}$, et 178 Go d'appareil au tarif de la
+v11, contre 96 Go sur la carte de G4 (hôte : 180 Gio, 48 fils).
+
+**Règles** :
+
+- **Types** : identifiants sur 32 bits (sites, boules, nœuds, feuilles), avec refus explicite au-delà de
+  $2^{32}-1$ ; **décalages et compteurs sur 64 bits** partout (CSR d'incidences, volumes, budgets).
+- **Catalogue en flux par lots de feuilles** : le parcours des boîtes produit les feuilles dans l'ordre de Morton ; un
+  lot tient dans un budget d'appareil fixé par la Session ; ses boules et incidences sont rapatriées dans des CSR de
+  l'hôte, puis l'appareil est réutilisé. Un nuage de 60 000 sites tient en un seul lot : le contrat principal ne paie
+  rien pour le flux.
+- **Tour** : les événements de chaque ordre sont triés par rang (tri par base, parallèle) ; le noyau union-find
+  (`LEM-T4`) est le seul passage séquentiel par ordre, et les $K$ ordres sont indépendants jusqu'aux verticales, donc
+  traités en parallèle.
+- **Pré-vol mémoire** : avant tout calcul, une borne de la mémoire hôte et appareil est tirée de $n$, de $K$ et des
+  lois par site mesurées ; au-delà du budget, refus explicite (`resource_exhausted`) plutôt qu'un échec en cours de
+  route. Pas de stockage sur disque dans la v12 : la v5 l'avait conçu (`morsehgp3D_v5/docs/ECHELLE.md`), il n'est
+  repris que si une scène réelle utile dépasse l'hôte.
+- **Multiplicités** : les nuages agrégés contiennent des doublons au millimètre ; refus par défaut, option « sites
+  distincts » déclarée (décision D8).
+- **Petits nuages** : les coûts fixes (lancements, allocations, contexte) sont payés une fois par la Session ; sous un
+  seuil mesuré (`MES-P`), la voie CPU complète sert la trame sans toucher l'appareil.
+
 ## 5. Modules
 
 | Module | Rôle | Origine |
