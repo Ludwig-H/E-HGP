@@ -69,6 +69,7 @@ Le contrat de 100 ms n'a jamais été tenu, par aucune version, pour l'objet vra
 3. [`docs/OBJET_ET_CONTRAT_MATHEMATIQUE.md`](docs/OBJET_ET_CONTRAT_MATHEMATIQUE.md) : énoncés à porter, identifiants,
    témoins à graver d'abord, questions ouvertes.
 4. [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) : étages, budgets, règles de simplicité.
+   [`docs/CONTRAT_NUMERIQUE.md`](docs/CONTRAT_NUMERIQUE.md) : coordonnées jusqu'à 32 bits, arithmétique en repère local.
 5. [`docs/PLAN.md`](docs/PLAN.md) : tranches, microbancs et règles d'adoption.
 6. [`docs/MESURE.md`](docs/MESURE.md) : régimes, données, chiffres de référence, empreintes, protocole statistique.
 7. [`docs/PROVENANCE.md`](docs/PROVENANCE.md) : sources épinglées et règle de port.
@@ -81,6 +82,7 @@ Le contrat de 100 ms n'a jamais été tenu, par aucune version, pour l'objet vra
 | --- | --- |
 | `README.md` | ce fichier |
 | `docs/DECISIONS.md` | décisions prises le 7 octobre (délégation de l'utilisateur), décisions antérieures en vigueur |
+| `docs/CONTRAT_NUMERIQUE.md` | coordonnées jusqu'à 32 bits : repère local, garde entière, budgets par étendue, clé de Morton |
 | `docs/OBJET_ET_CONTRAT_MATHEMATIQUE.md` | objet, énoncés à porter, témoins, doctrine numérique, questions ouvertes |
 | `docs/ARCHITECTURE.md` | architecture proposée et règles de simplicité |
 | `docs/PLAN.md` | ordre de travail, portes d'entrée et de sortie |
