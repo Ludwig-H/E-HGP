@@ -7,7 +7,8 @@ hashes séparés. Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda
 **À traiter pendant l’intégration.**
 
 - **Profils D6, `0207/0018`** : `9b2747eff` compare les binaires séparés ; [contre-audit du pilote](../receipts/audit_d6_20261007/README.md).
-  Référence u21 absente et sorties tronquées encore admises ; patch du plan prêt, lecteur à durcir.
+  Référence u21 absente et sorties tronquées encore admises ; correctifs du plan et du
+  [lecteur strict proposés](../receipts/audit_reponses_20261007/d6_admission_proposition/README.md), non intégrés.
   ×8/×2048 conserve la géométrie avec niveaux ×64/×4194304, sans précision nouvelle.
   Égalité des comptes seule insuffisante. [Préparation hors chrono](../receipts/audit_d6_preparation_20261007/README.md),
   records de 16→32 octets : mesurer la latence intégrée avant le choix D6 à 3 %.
@@ -44,6 +45,10 @@ rapport descriptif ≈2,3, pas A/B apparié. [Nouveaux temps locaux de G](../rec
 K5 ≈2,83 s à un fil, 1,05 s à trois ; K10 ≈10,1 s à trois. G seul, codespace partagé,
 sans index/catalogue ni T/M/V : ne pas les additionner aux mesures G4. Aucun temps intégré
 catalogue GPU ou FULL v12 publié.
+
+[G-L5 : jointure exacte proposée](../receipts/audit_reponses_20261007/g_l5_proposition/README.md), sans produit
+cartésien sous collisions ; 180 modèles, 7 560 réponses. Compteurs/reprise des échecs et coexistence avec la table
+actuelle explicités. La baisse du temps total reste à juger par MES-G3.
 
 [Pistes concrètes pour G](../receipts/audit_g_pistes_20261007/README.md) : omettre les espaces census inutilisés
 à K1 ; proposer un stockage borné avec refus de coquille différé jusqu’au parcours complet ; éviter les tests

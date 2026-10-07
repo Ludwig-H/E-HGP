@@ -1,0 +1,56 @@
+{
+  "inputs": [
+    {
+      "bytes": 14064,
+      "path": "morsehgp3D_v12/microbancs/mes_d6_profils/pilote_d6.py",
+      "sha256": "da2fa5c0b5d48ce2aff357a1174b47773076335b1c4e7ff2ff850afac9f6e118"
+    },
+    {
+      "bytes": 11629,
+      "path": "morsehgp3D_v12/bench/catalogue_probe.cpp",
+      "sha256": "7dfb919813bc7c757946fabcd91149108890590b7639e042c5e31256a19786e9"
+    },
+    {
+      "bytes": 11232,
+      "path": "morsehgp3D_v12/bench/tower_probe.cpp",
+      "sha256": "4a98efd16e70e8f05afcbb181bdfbf994387fd708a9161eef9585dca2c166643"
+    },
+    {
+      "bytes": 6498,
+      "path": "morsehgp3D_v12/bench/tower_export.hpp",
+      "sha256": "b7f27e021ef935148d9a1962d1b6f7137d84d2d142d3555823a704f2c2e8bb73"
+    },
+    {
+      "bytes": 6365,
+      "path": "morsehgp3D_v12/src/catalogue/export.cpp",
+      "sha256": "5f4fd372d50283cb25e0a467b629df2bc7b0184a99d9b8cd6bb951cac0dc0dec"
+    },
+    {
+      "bytes": 5792,
+      "path": "morsehgp3D_v12/tests/catalogue/catalogue_dump.py",
+      "sha256": "f5fb6ce4bd0be9581b2bc1a6d46dcdb1e4da55d7f90344fe0a1ec1f05cd2b542"
+    },
+    {
+      "bytes": 13556,
+      "path": "morsehgp3D_v12/src/tower/stage.cpp",
+      "sha256": "2682f23922ad97464d2e4e40fb30ce0358510128cc0edcdcf695caf832b42721"
+    },
+    {
+      "bytes": 8208,
+      "path": "morsehgp3D_v12/src/catalogue/catalogue.hpp",
+      "sha256": "23c2cd9111938dd4a193972f102515fe01bad53f84e415828f4a579b2907e400"
+    },
+    {
+      "bytes": 3246,
+      "path": "morsehgp3D_v12/src/sched/sched.hpp",
+      "sha256": "de9bbd3b67cc701c19ba46ee627c4212ca8e324fc52f35a9fce466bb923a80f1"
+    },
+    {
+      "bytes": 7837,
+      "path": "morsehgp3D_v12/receipts/audit_d6_20261007/math/check.py",
+      "sha256": "09faf9df21fb138a10ac24a171e54566973f1b5826280e1d9ec60da71804b7e6"
+    }
+  ],
+  "pin": "b24c256541ffdbe8327f894cd9efebdd7476b51c",
+  "proposed_sha256": "4d9e6a457d188d740c64fc04abb172d0158242a2ae537746bcd9453686e778c1"
+}

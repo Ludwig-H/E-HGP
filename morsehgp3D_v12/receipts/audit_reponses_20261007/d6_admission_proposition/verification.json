@@ -1,0 +1,66 @@
+{
+  "combined_patch_check": {
+    "admission_patch_applies_after_prior": true,
+    "prior_patch": "morsehgp3D_v12/receipts/audit_d6_20261007/pilotage/proposition.patch",
+    "prior_patch_sha256": "e18e46a7535cbaec74acbb2b973e74753316c30bf4508155ac2327101685496a"
+  },
+  "head_after": "04d3ac46ed2084aee21aa694e711179bd7ec7843",
+  "head_at_capture": "b24c256541ffdbe8327f894cd9efebdd7476b51c",
+  "live_inputs_after": [
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_d6_profils/pilote_d6.py",
+      "sha256": "da2fa5c0b5d48ce2aff357a1174b47773076335b1c4e7ff2ff850afac9f6e118",
+      "unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v12/bench/catalogue_probe.cpp",
+      "sha256": "7dfb919813bc7c757946fabcd91149108890590b7639e042c5e31256a19786e9",
+      "unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v12/bench/tower_probe.cpp",
+      "sha256": "4a98efd16e70e8f05afcbb181bdfbf994387fd708a9161eef9585dca2c166643",
+      "unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v12/bench/tower_export.hpp",
+      "sha256": "b7f27e021ef935148d9a1962d1b6f7137d84d2d142d3555823a704f2c2e8bb73",
+      "unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v12/src/catalogue/export.cpp",
+      "sha256": "5f4fd372d50283cb25e0a467b629df2bc7b0184a99d9b8cd6bb951cac0dc0dec",
+      "unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v12/tests/catalogue/catalogue_dump.py",
+      "sha256": "f5fb6ce4bd0be9581b2bc1a6d46dcdb1e4da55d7f90344fe0a1ec1f05cd2b542",
+      "unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v12/src/tower/stage.cpp",
+      "sha256": "2682f23922ad97464d2e4e40fb30ce0358510128cc0edcdcf695caf832b42721",
+      "unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v12/src/catalogue/catalogue.hpp",
+      "sha256": "23c2cd9111938dd4a193972f102515fe01bad53f84e415828f4a579b2907e400",
+      "unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v12/src/sched/sched.hpp",
+      "sha256": "de9bbd3b67cc701c19ba46ee627c4212ca8e324fc52f35a9fce466bb923a80f1",
+      "unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v12/receipts/audit_d6_20261007/math/check.py",
+      "sha256": "09faf9df21fb138a10ac24a171e54566973f1b5826280e1d9ec60da71804b7e6",
+      "unchanged": true
+    }
+  ],
+  "normal_exit": 0,
+  "normal_optimized_bytes_equal": true,
+  "optimized_exit": 0,
+  "proposal_not_applied_to_product": true,
+  "results_sha256": "3d2afeb5e43f118680d627fefb49e5660a7f90b15326e04a5f102c5524c53edb"
+}

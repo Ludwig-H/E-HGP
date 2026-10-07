@@ -1,0 +1,12 @@
+{
+  "pin": "b24c256541ffdbe8327f894cd9efebdd7476b51c",
+  "scope": "proposition de jointure exacte, aucun changement produit",
+  "source_sha256": {
+    "morsehgp3D_v12/docs/CONTRAT_TOUR.md": "262b3bb57f68f9deb3f4b6172419b4e4ba105ffc98ce8f9394e5343de4eb09af",
+    "morsehgp3D_v12/src/tower/internal.hpp": "041d7ebc1dde3e397d4b09d5cc0571f0456287420893458ff6d71f89d6071624",
+    "morsehgp3D_v12/src/tower/populations.cpp": "f40b4b1b64d99df505f6c9dd280485648360996f6ddf87fdc08090f101e98aed",
+    "morsehgp3D_v12/src/tower/resolve.cpp": "30abe334849164303a0e81623f7345de482ad6f56d523f6c0e94a7aca0621908",
+    "morsehgp3D_v12/src/tower/stage.cpp": "2682f23922ad97464d2e4e40fb30ce0358510128cc0edcdcf695caf832b42721",
+    "morsehgp3D_v12/src/tower/tower.hpp": "3c22c52f03ec0d78227f390ca01872fa6f04279e219ca26c1e3481458a128607"
+  }
+}

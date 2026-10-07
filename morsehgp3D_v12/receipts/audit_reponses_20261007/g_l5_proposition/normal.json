@@ -1,0 +1,110 @@
+{
+  "abstract_differential_runs": 180,
+  "elapsed_times_published": false,
+  "forced_collision_witness": {
+    "birth_population": [
+      0,
+      3
+    ],
+    "exact_result": "miss",
+    "query_population": [
+      1,
+      2
+    ],
+    "sum": 3,
+    "wrong_hash_only_target": 7
+  },
+  "geometry_computed": false,
+  "hash_modes": [
+    "no_hash",
+    "constant",
+    "sum_mod_u64"
+  ],
+  "linear_join_work": {
+    "join_advances": 1,
+    "query_rows": 3,
+    "radix_bucket_visits": 8192,
+    "radix_record_visits": 128
+  },
+  "max_births": 18,
+  "max_queries": 42,
+  "model_sha256": "de1f46f204188dd5ef28b01e2a30f7fed8ee1ff96fa6e36b8d380eef0088c06f",
+  "native_execution": false,
+  "owner_generation_distinct_targets": [
+    7,
+    11,
+    13
+  ],
+  "query_rows_checked": 7560,
+  "refusals": {
+    "duplicate_birth_other_target": "duplicate complete birth population",
+    "duplicate_birth_same_payload": "duplicate complete birth population",
+    "duplicate_representative_slot": "duplicate representative slot",
+    "equal_rank_for_one_duplicate_query": "nondecreasing birth rank",
+    "k1_keeps_special_path": "scope",
+    "owner_absent": "query population or owner",
+    "population_not_strict": "birth population or owner",
+    "wrong_order_length": "query population or owner"
+  },
+  "schedules": "original, inverse et permutation; aucune execution concurrente native",
+  "schema": "mhgp12.audit.g_l5_model.v1",
+  "valid_duplicate_query_states": [
+    [
+      [
+        1,
+        7,
+        2
+      ],
+      0,
+      "hit",
+      7,
+      1,
+      1,
+      1,
+      0,
+      2,
+      [
+        0,
+        3
+      ]
+    ],
+    [
+      [
+        1,
+        7,
+        2
+      ],
+      1,
+      "hit",
+      7,
+      1,
+      1,
+      1,
+      0,
+      5,
+      [
+        0,
+        3
+      ]
+    ],
+    [
+      [
+        1,
+        7,
+        2
+      ],
+      2,
+      "miss",
+      null,
+      1,
+      0,
+      0,
+      1,
+      4,
+      [
+        1,
+        2
+      ]
+    ]
+  ]
+}

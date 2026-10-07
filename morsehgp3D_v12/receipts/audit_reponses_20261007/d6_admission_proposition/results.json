@@ -1,0 +1,609 @@
+{
+ "archived_six_before": {
+  "bool_wall_and_bool_digest": {
+   "catalogue_ok": true,
+   "controle_conforme": true,
+   "ordres": [
+    1,
+    2
+   ],
+   "tour_g_ok": true
+  },
+  "dilation_changed_digest_same_counts": {
+   "controle_conforme": true,
+   "empreintes_distinctes": true
+  },
+  "explicit_refusal_code_zero": {
+   "catalogue_ok": true,
+   "controle_conforme": true,
+   "ordres": [
+    1,
+    2
+   ],
+   "tour_g_ok": true
+  },
+  "main_small_doubles": {
+   "code": 0,
+   "controles": [],
+   "prises": 3
+  },
+  "schema_success_two_passes": {
+   "catalogue_ok": true,
+   "controle_conforme": true,
+   "ordres": [
+    1,
+    2
+   ],
+   "tour_g_ok": true
+  },
+  "take_P5_two_passes_no_orders_invalid_json_invalid_export": {
+   "admitted_passes": 2,
+   "catalogue_ok": true,
+   "controle_conforme": true,
+   "empty_body_hash": true,
+   "ordres": [],
+   "requested_passes": 5,
+   "tour_g_ok": true
+  }
+ },
+ "archived_six_proposed_with_expected": {
+  "bool_wall_and_bool_digest": {
+   "catalogue_ok": false,
+   "controle_conforme": false,
+   "ordres": [],
+   "tour_g_ok": false
+  },
+  "dilation_changed_digest_same_counts": {
+   "controle_conforme": false,
+   "empreintes_distinctes": true
+  },
+  "explicit_refusal_code_zero": {
+   "catalogue_ok": false,
+   "controle_conforme": false,
+   "ordres": [],
+   "tour_g_ok": false
+  },
+  "main_small_doubles": {
+   "code": 1,
+   "controles": [
+    "public_fixture p21 x1 tour 0 : catalogue non conforme (code 0)",
+    "public_fixture p21 x1 tour 0 : tour_g non conforme (code 0)",
+    "public_fixture p21 x8 tour 0 : catalogue non conforme (code 0)",
+    "public_fixture p21 x8 tour 0 : tour_g non conforme (code 0)",
+    "public_fixture p21 x2048 tour 0 : catalogue non conforme (code 0)",
+    "public_fixture p21 x2048 tour 0 : tour_g non conforme (code 0)",
+    "public_fixture : exports du catalogue (en-tete exclu) differents entre profils a facteur 1"
+   ],
+   "prises": 3
+  },
+  "schema_success_two_passes": {
+   "catalogue_ok": false,
+   "controle_conforme": false,
+   "ordres": [],
+   "tour_g_ok": false
+  },
+  "take_P5_two_passes_no_orders_invalid_json_invalid_export": {
+   "admitted_passes": 0,
+   "catalogue_ok": false,
+   "controle_conforme": false,
+   "empty_body_hash": false,
+   "ordres": [],
+   "requested_passes": 5,
+   "tour_g_ok": false
+  }
+ },
+ "builds": 0,
+ "cloud_calls": 0,
+ "faithful_take": {
+  "body_sha256": "7f4bc0c7a8941d2cea6dc9c94f181e3419881494dfa2b4cf9e213f7e52ca214c",
+  "catalogue_ok": true,
+  "controles": [],
+  "passes": 5,
+  "tour_g_ok": true
+ },
+ "native_engine_runs": 0,
+ "pin": "b24c256541ffdbe8327f894cd9efebdd7476b51c",
+ "producer_protocol": [
+  {
+   "before": true,
+   "expected": true,
+   "name": "complete_G_P5_final_digest_and_exit",
+   "proposed": true
+  },
+  {
+   "before": true,
+   "expected": true,
+   "name": "complete_catalogue_P5",
+   "proposed": true
+  },
+  {
+   "before": true,
+   "expected": true,
+   "name": "complete_G_u24",
+   "proposed": true
+  },
+  {
+   "before": true,
+   "expected": true,
+   "name": "complete_G_u32",
+   "proposed": true
+  },
+  {
+   "before": true,
+   "expected": true,
+   "name": "complete_G_K5_sites3_three_orders",
+   "proposed": true
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_stage_pass_True",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_stage_coord_bits_24",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_stage_coord_bits_True",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_stage_kmax_3",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_stage_threads_2",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_stage_threads_True",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_stage_kmax_True",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_stage_sites_0",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_stage_sites_True",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_stage_wall_ns_True",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_stage_wall_ns_0.5",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_stage_wall_ns_-1",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_stage_wall_ns_18446744073709551616",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_stage_order_True",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_stage_status_resource_exhausted",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_stage_reason_memory_budget",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_exit_order_False",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_exit_order_0.0",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_exit_order_1",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_digest_True",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_digest_aaaaaaaaaaaaaaaa",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_digest_GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "config_bool_passes",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "config_bool_coord_bits",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "config_bool_kmax",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "config_bool_threads",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "config_bool_leaf",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_duplicate_pass_index",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_missing_exit",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_duplicate_exit",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_no_orders",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_duplicate_order",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_reversed_orders",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_repeated_final_digest",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_digest_after_each_pass",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_two_passes_for_P5",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_six_passes_for_P5",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_unknown_phase",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_order_k_True",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_order_k_0",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_bool_object_counter",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_short_histogram",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_short_order_diagnostics",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "G_sites_changed_between_passes",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "cat_missing_digest",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "cat_swapped_digest_and_stage",
+   "proposed": false
+  },
+  {
+   "before": false,
+   "expected": false,
+   "name": "cat_digest_changed_between_passes",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "cat_bool_count",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "cat_wrong_leaf",
+   "proposed": false
+  },
+  {
+   "before": false,
+   "expected": false,
+   "name": "process_nonzero",
+   "proposed": false
+  }
+ ],
+ "proposed_sha256": "4d9e6a457d188d740c64fc04abb172d0158242a2ae537746bcd9453686e778c1",
+ "semantic_residual": {
+  "dilation_changed_digest_same_counts_admitted": true,
+  "geometry_tested": false
+ },
+ "strict_json": [
+  {
+   "expected": true,
+   "name": "valid",
+   "proposed": true,
+   "raw_preserved": true
+  },
+  {
+   "expected": false,
+   "name": "invalid_line",
+   "proposed": false,
+   "raw_preserved": true
+  },
+  {
+   "expected": false,
+   "name": "non_object",
+   "proposed": false,
+   "raw_preserved": true
+  },
+  {
+   "expected": false,
+   "name": "duplicate_key",
+   "proposed": false,
+   "raw_preserved": true
+  },
+  {
+   "expected": false,
+   "name": "invalid_utf8",
+   "proposed": false,
+   "raw_preserved": true
+  },
+  {
+   "expected": false,
+   "name": "NaN",
+   "proposed": false,
+   "raw_preserved": true
+  }
+ ],
+ "structure_only": [
+  {
+   "before": true,
+   "expected": true,
+   "name": "MHGP12DP_v1_producer_layout",
+   "proposed": true
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "old_64bytes_X",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "valid_header_without_sections",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "truncated_payload",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "extra_EOF_byte",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "magic",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "version",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "kind",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "bits",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "K",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "order",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "sections",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "frame",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "tag",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "element_size",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "reserved",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "sites_count",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "padding",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "wrong_full_hash",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "wrong_reported_bytes",
+   "proposed": false
+  },
+  {
+   "before": true,
+   "expected": false,
+   "name": "wrong_json_ball_count",
+   "proposed": false
+  }
+ ]
+}
