@@ -60,7 +60,8 @@ RESULT_RE = re.compile(r'^\s*\d+/\d+ Test\s+#\d+: (\S+) \.*\s*(Passed|\*\*\*\S.*
 TOTAL_RE = re.compile(r'^(\d+)% tests passed, (\d+) tests failed out of (\d+)\s*$', re.M)
 # Options de ctest que le script fixe lui-meme, ou qui changent sa nature (tableau de bord, script, repetition,
 # listage) : une matrice ne peut ni les redefinir ni les affaiblir. Comparaison par prefixe.
-CTEST_RESERVED = ('--no-tests', '--show-only', '--test-dir', '--parallel', '--timeout', '--output-junit',
+CTEST_RESERVED = ('--no-tests', '--output-on-failure', '--show-only', '--test-dir', '--parallel', '--timeout',
+                  '--output-junit',
                   '--quiet', '--repeat', '--script', '--dashboard', '--build-', '--test-action', '--test-model',
                   '--extra-submit', '--submit', '-N', '-j', '-Q', '-S', '-D', '-T', '-M')
 MIN_CONFIGURATION_SECONDS = 20      # sous ce reste de budget, une configuration n'est pas lancee
@@ -538,7 +539,8 @@ def commands(config, context, threads, generator='Unix Makefiles', wrapper=()):
                       '-DCMAKE_CXX_COMPILER=' + config['compiler']] + options,
         'build': ['cmake', '--build', str(build), '-j', str(threads), '--'] + keep_going,
         'list': ['ctest', '--show-only=json-v1'] + config['ctest_args'],
-        'test': list(wrapper) + ['ctest', '--no-tests=error', '--timeout', str(config['test_timeout_seconds']),
+        'test': list(wrapper) + ['ctest', '--no-tests=error', '--output-on-failure',
+                                 '--timeout', str(config['test_timeout_seconds']),
                                  '-j', str(parallel)] + config['ctest_args'] + junit}
 
 

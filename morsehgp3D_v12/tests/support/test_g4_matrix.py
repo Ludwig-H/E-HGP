@@ -17,7 +17,7 @@ from unittest import mock
 
 import mhgp12_gate
 
-FLOOR = 37
+FLOOR = 39  # 37, plus la sortie des portes en echec gardee dans le journal de ctest (CST-0004)
 
 
 class FakeSteps:
@@ -157,6 +157,12 @@ def main():
             probes = matrix.run_probes(config, {}, context, 1)
         gate.check_eq((probes[0]['status'], probes[0]['isolation']), ('absent', 'not_certified'),
                       'aucune certification implicite de l isolation des sondes')
+        config = {'name': 'sortie', 'compiler': 'c++', 'cmake_options': [], 'ctest_args': [], 'ctest_parallel': 0,
+                  'test_timeout_seconds': 300}
+        context = SimpleNamespace(work=root, src=root, junit=True)
+        test = matrix.commands(config, context, 4)['test']
+        gate.check('--output-on-failure' in test, 'sortie des portes en echec gardee dans le journal de ctest')
+        gate.check('--output-on-failure' in matrix.CTEST_RESERVED, 'option fixee par le script, reservee')
     return gate.finish(FLOOR)
 
 

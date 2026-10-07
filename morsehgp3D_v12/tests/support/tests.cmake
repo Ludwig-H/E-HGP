@@ -174,7 +174,7 @@ endforeach()
 
 # ---- pilote de la matrice G4 (tools/g4_matrix.py), appels externes remplaces ------------------------------------
 mhgp12_python_gate(mhgp12_support_g4_matrix 0 test_g4_matrix.py
-                    ${PROJECT_SOURCE_DIR}/tools/g4_matrix.py LINE "g4_matrix_ok controles=37" LABELS unit fast)
+                    ${PROJECT_SOURCE_DIR}/tools/g4_matrix.py LINE "g4_matrix_ok controles=39" LABELS unit fast)
 
 # ---- garde simple contre -ffast-math a la configuration (CMakeLists.txt) ----------------------------------------
 # Temoin : ce projet se configure dans un dossier de travail. Refus : -ffast-math dans CMAKE_CXX_FLAGS, puis -Ofast
