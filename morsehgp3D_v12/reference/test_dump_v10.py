@@ -9,8 +9,8 @@ de la v10 (mhgp10_catalogue et mhgp10_tower du 29 septembre 2026, commit c764e12
 
 Par nuage et par K : le dump du catalogue (doublons compris) ; sans doublon, le dump de la tour en entree core et
 en entree cover, serialise depuis l'etage B et, jusqu'a 9 points, depuis l'etage A (la verite, ecrite dans les
-conventions de la v10) ; avec doublons, le binaire refuse la tour et la serialisation aussi. Les nombres de fils du
-binaire alternent (1, 2, 4) : ses dumps n'en dependent pas.
+conventions de la v10) ; avec doublons, le binaire refuse la tour et la serialisation aussi. Le binaire fige est
+joue a UN fil : son pool de fils a une course de donnees (constat CST-0024, voir THREADS).
 
 Codes : 0 conforme ; 1 un dump differe ; 2 refus avant calcul (usage, binaire fige absent) ; 3 plancher viole ;
 4 mutant tue. Python 3.10 nu ; les nuages sont ecrits dans un dossier temporaire.
@@ -28,7 +28,12 @@ from hgp12_ref import dumps, families  # noqa: E402
 
 OK, DISAGREEMENT, REFUSAL, FLOOR, MUTANT_KILLED = 0, 1, 2, 3, 4
 TOOLS = ('mhgp10_catalogue', 'mhgp10_tower')
-THREADS = (1, 2, 4)
+# Le binaire fige (v10, c764e121a) precede le correctif de la course de son pool de fils (8e3b76245, 29 septembre) :
+# un ouvrier en retard lit le descripteur du travail, pose sur la pile du fil principal par parallel_for, apres son
+# retour (ThreadSanitizer, pool.cpp lignes 32 et 33, a 4 fils) ; sous charge, la tour publiee est fausse ou le fil
+# principal tourne sans fin (constat CST-0024, 7 octobre 2026 : expiration a 300 s, puis un ecart de dump). La porte
+# juge les dumps de la v10, pas son parallelisme : elle le joue a UN fil, ou la course n'existe pas (TSan muet).
+THREADS = (1,)
 DEFINITION_MAX_POINTS = 9  # au-dela, seule la serialisation de l'etage B est comparee
 
 # Grands nuages de l'option --large : famille, nombre de points, K. Hors de portee de l'etage A : c'est l'etage B
