@@ -1,0 +1,19 @@
+{
+  "files": {
+    "morsehgp3D_v11/bench/catalogue_semantic.py": "f09d2dff28098ff9c5288a69058b776350a6339034d17397491c073257196f2c",
+    "morsehgp3D_v11/bench/full_semantic.py": "1ffda4fb32e58d9cadd6f8c87a4cabe0eb28c0bcc5769ba8370b2738bd4d8d25",
+    "morsehgp3D_v12/docs/CONTRAT_CATALOGUE.md": "5314136fe399dc72359472b32ab556be3f395e8d1276a16f0b8a8456968d3618",
+    "morsehgp3D_v12/docs/CONTRAT_TOUR.md": "b7c455048ce0b514c6ff3a58430832ebf82944a37a427218b3c2f3a2eafaa054",
+    "morsehgp3D_v12/src/catalogue/assemble.cpp": "16fd23f366d0431c50876e8b82a530d5d5a4670e09496b7d6014dcb607e464cb",
+    "morsehgp3D_v12/src/catalogue/leaf_arith.hpp": "47abe759d9d253e1f0c9e1911d587766a0c2869c5e571365e2a7cfe3e33b40a6",
+    "morsehgp3D_v12/src/catalogue/leaf_census.hpp": "b031a7a161dca9d3ff22e89c48d9ec2a9a029bc34c5a89952ac3d9e487b00277",
+    "morsehgp3D_v12/src/catalogue/leaf_common.hpp": "56fc868487cd6f9194ae88baff2dcf0ca6c2a0d5d064651107fdbb63c27c6f12",
+    "morsehgp3D_v12/src/catalogue/leaf_j3.hpp": "a0114ee1839768d8feb24f43aea005f2fdd031c275c6c8d813dc3ca6100d9fd2",
+    "morsehgp3D_v12/src/catalogue/sort.cpp": "e8583afc9ecf48e5b37c4ef4a17231d2db6e92dd586132c6e0675c3071906f12",
+    "morsehgp3D_v12/src/catalogue/table.cpp": "a55ab9946cb8e3f67067f558b8443708a9a6262b3230b723d47cb04f94293fdd"
+  },
+  "normal_and_optimized_identical": true,
+  "pin": "58d384721678d11ef8ccd86c76cca182f41a716c",
+  "resultats_sha256": "7e33b0e74b12540dd0ad8a7a3923ee7884db4dc59bb3061010ab7cf2dbd1f62b",
+  "script_sha256": "9612f8ab70818dc5c998c43229bf19c2d91fcb0e8581db80904eb51f014e0e36"
+}

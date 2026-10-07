@@ -1,0 +1,21 @@
+{
+  "actual_public_generator_check": {
+    "all_match": true,
+    "cases": 3,
+    "private_data_read": false,
+    "returned_points_per_case": 5
+  },
+  "code_base_pin": "58d384721678d11ef8ccd86c76cca182f41a716c",
+  "document_pin": "5c5fc710921ac03f6d4c2aca40f17e8442202a5c",
+  "files": {
+    "morsehgp3D_v12/bench/data/prepare_small.py": "bae06a7a09f67c65934d5df96d0618fe81e7fee482220c4589f169ae27e72f3d",
+    "morsehgp3D_v12/bench/data/v12data/splitmix.py": "79739ecfc6b0965d24d0afd9d0797b94345b8d859e1617248b3784d96460dbe9",
+    "morsehgp3D_v12/receipts/g4_t0g_20261007/README.md": "df1b6c33d1b8eea857e896e566cf29bbd7918d1afec09e2107fd33281e37a167",
+    "morsehgp3D_v12/src/catalogue/catalogue.hpp": "23c2cd9111938dd4a193972f102515fe01bad53f84e415828f4a579b2907e400",
+    "morsehgp3D_v12/src/catalogue/internal.hpp": "6d26e288e480e5c8630900a7b6e80b7c78a12c70043620fa7beed97d5e228309",
+    "morsehgp3D_v12/src/catalogue/leaf_census.hpp": "b031a7a161dca9d3ff22e89c48d9ec2a9a029bc34c5a89952ac3d9e487b00277"
+  },
+  "normal_and_optimized_identical": true,
+  "resultats_sha256": "ebe0105f20efb1f2069f3f87c5d499dd2b6c37cd58ac4d5f925c8164527bb2a1",
+  "script_sha256": "92e7f576741ab0216b39ace8d3e7b9bc17091cc2ff030004c1685808a088fca9"
+}

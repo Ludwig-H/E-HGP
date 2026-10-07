@@ -1,0 +1,110 @@
+{
+  "cases": [
+    {
+      "all_on_one_exact_sphere": false,
+      "cosphericity_determinant": -5956889720665386,
+      "generated_sites": 5,
+      "nominal_sites": 100,
+      "points": [
+        [
+          -4772,
+          1084,
+          8721
+        ],
+        [
+          7689,
+          6329,
+          -906
+        ],
+        [
+          7258,
+          -6797,
+          1060
+        ],
+        [
+          -1393,
+          -6117,
+          -7787
+        ],
+        [
+          -4509,
+          5939,
+          6663
+        ]
+      ],
+      "seed": 20263107
+    },
+    {
+      "all_on_one_exact_sphere": false,
+      "cosphericity_determinant": -7198927785526392,
+      "generated_sites": 5,
+      "nominal_sites": 3000,
+      "points": [
+        [
+          -9313,
+          1434,
+          -3348
+        ],
+        [
+          -9934,
+          -132,
+          1143
+        ],
+        [
+          -1037,
+          -9837,
+          -1472
+        ],
+        [
+          -9898,
+          18,
+          -1428
+        ],
+        [
+          4698,
+          7454,
+          4729
+        ]
+      ],
+      "seed": 20266007
+    },
+    {
+      "all_on_one_exact_sphere": false,
+      "cosphericity_determinant": 7919238563384820,
+      "generated_sites": 5,
+      "nominal_sites": 10000,
+      "points": [
+        [
+          2369,
+          9289,
+          2846
+        ],
+        [
+          5462,
+          7816,
+          -3012
+        ],
+        [
+          -4739,
+          5763,
+          -6658
+        ],
+        [
+          -3517,
+          417,
+          9352
+        ],
+        [
+          -1898,
+          -9793,
+          698
+        ]
+      ],
+      "seed": 20273007
+    }
+  ],
+  "document_pin": "5c5fc710921ac03f6d4c2aca40f17e8442202a5c",
+  "native_engine_executed": false,
+  "private_data_read": false,
+  "schema": "ehgp.v12.audit_performance.degeneracy.v1"
+}

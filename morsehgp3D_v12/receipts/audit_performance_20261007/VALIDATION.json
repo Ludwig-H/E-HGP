@@ -1,0 +1,36 @@
+{
+  "audit_channel_bytes": 59698,
+  "audit_channel_files": 4,
+  "checks": [
+    {
+      "check": "math",
+      "normal_optimized_equal": true,
+      "output_sha256": "7e33b0e74b12540dd0ad8a7a3923ee7884db4dc59bb3061010ab7cf2dbd1f62b"
+    },
+    {
+      "check": "degeneracy",
+      "normal_optimized_equal": true,
+      "output_sha256": "ebe0105f20efb1f2069f3f87c5d499dd2b6c37cd58ac4d5f925c8164527bb2a1"
+    },
+    {
+      "check": "feuilles",
+      "normal_optimized_equal": true,
+      "output_sha256": "5fa9f6abef3c340473bab180e8575e0ca7fe495d78edb5159e806c125e8828c7"
+    },
+    {
+      "check": "assemblage",
+      "normal_optimized_equal": true,
+      "output_sha256": "64bd5c2274bdf7b3a0252dcb3480f8bcc61a97c758845eba0026c8b9da8537a2"
+    },
+    {
+      "check": "mesures_git_pin",
+      "normal_optimized_equal": true,
+      "output_sha256": "b2cb8dd34e47239d5e8b31ab4ab4c98e8af87e8e887571cbc53552a35ae34e3c"
+    }
+  ],
+  "engine_pin": "58d384721678d11ef8ccd86c76cca182f41a716c",
+  "local_links_checked": true,
+  "new_gcp_or_lidar_benchmark": false,
+  "product_changed": false,
+  "publication_base": "2b21132646a4a007a98e12f2aa6f198fbff235bf"
+}

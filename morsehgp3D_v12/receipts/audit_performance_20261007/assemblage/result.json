@@ -1,0 +1,20 @@
+{
+  "comparaisons_scan": 3537,
+  "modele_seulement": true,
+  "mutants": {
+    "dernier_representant": true,
+    "formes_non_valeurs": true,
+    "prefixe_inclusif": true,
+    "sans_halo": true
+  },
+  "nuages": 0,
+  "pin": "58d384721678d11ef8ccd86c76cca182f41a716c",
+  "refus": 6,
+  "requetes_table": 13468,
+  "source_sha256": {
+    "src/catalogue/assemble.cpp": "16fd23f366d0431c50876e8b82a530d5d5a4670e09496b7d6014dcb607e464cb",
+    "src/catalogue/sort.cpp": "e8583afc9ecf48e5b37c4ef4a17231d2db6e92dd586132c6e0675c3071906f12",
+    "src/catalogue/table.cpp": "a55ab9946cb8e3f67067f558b8443708a9a6262b3230b723d47cb04f94293fdd"
+  },
+  "suites": 131
+}

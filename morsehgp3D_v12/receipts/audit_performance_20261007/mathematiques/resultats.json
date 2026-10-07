@@ -1,0 +1,86 @@
+{
+  "cache": {
+    "clouds": 3,
+    "critical_presentations": 66,
+    "negative_controls": [
+      "cardinality-only cache",
+      "additive fingerprint without exact equality"
+    ],
+    "population_reuses": 12,
+    "shell_reuses": 12
+  },
+  "forms": {
+    "extended_shell_needed": false,
+    "first_morton": "triangle",
+    "first_positions": "pair",
+    "level": "25",
+    "pair_form": [
+      100,
+      4
+    ],
+    "points": [
+      [
+        15,
+        10,
+        3
+      ],
+      [
+        7,
+        14,
+        3
+      ],
+      [
+        7,
+        6,
+        3
+      ],
+      [
+        0,
+        100,
+        0
+      ],
+      [
+        0,
+        110,
+        0
+      ]
+    ],
+    "triangle_form": [
+      409600,
+      16384
+    ]
+  },
+  "full_reader": {
+    "changed_semantics": [
+      "level",
+      "center",
+      "point_id"
+    ],
+    "raw_sha256": [
+      "1b6d8b907f7b39fdf933b38af8ab792bee908fca2cf157f85dd290de8e2c6913",
+      "d1d9e17a3bee39eb71917642379d3008d90651d73e67adf6546b0f62956b14e7"
+    ],
+    "rejected": [
+      {
+        "field": "vertical",
+        "reason": "FULL vertical not alive at closed cut"
+      },
+      {
+        "field": "parent",
+        "reason": "FULL parent"
+      }
+    ],
+    "semantic_sha256": "9e8dbfddd136c7b2e6a6b53b3addcee776f6e20088bf1e53e5e42c18cfe4f764",
+    "warning": "strict structural reader is not an independent geometric oracle"
+  },
+  "gcp_used": false,
+  "lex_rank": {
+    "comparisons": 30381,
+    "encoding": "site lex ranks 1..n; zero padding; never Morton ranks",
+    "sites": 9,
+    "supports": 246
+  },
+  "native_engine_executed": false,
+  "pin": "58d384721678d11ef8ccd86c76cca182f41a716c",
+  "schema": "ehgp.v12.audit_performance.math.v1"
+}

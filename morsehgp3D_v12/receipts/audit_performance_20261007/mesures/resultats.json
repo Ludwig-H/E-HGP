@@ -1,0 +1,821 @@
+{
+  "MES_E": {
+    "cas": [
+      {
+        "cas": "boreas_202011261358_f4500_n10_sans_sol_c1M",
+        "domain_s": 7.075305197,
+        "forest_s": 5.680099599,
+        "k": 5,
+        "mur_processus_secondes": 27.583,
+        "pic_rss_gio": 16.36269,
+        "processus": 1,
+        "sites": 1000005
+      },
+      {
+        "cas": "ign_lyon_0842_6521_sans_sol_c1M",
+        "domain_s": 4.613528825,
+        "forest_s": 2.956178072,
+        "k": 5,
+        "mur_processus_secondes": 16.042,
+        "pic_rss_gio": 11.732887,
+        "processus": 1,
+        "sites": 1000141
+      },
+      {
+        "cas": "eth3d_courtyard_c1M",
+        "domain_s": 5.232559426,
+        "forest_s": 4.319401528,
+        "k": 5,
+        "mur_processus_secondes": 16.073,
+        "pic_rss_gio": 9.358921,
+        "processus": 1,
+        "sites": 1000109
+      },
+      {
+        "cas": "ign_lyon_0842_6521_sans_sol_c2M",
+        "domain_s": 9.632649453,
+        "forest_s": 6.521691702,
+        "k": 5,
+        "mur_processus_secondes": 33.556,
+        "pic_rss_gio": 18.767742,
+        "processus": 1,
+        "sites": 2000222
+      },
+      {
+        "cas": "eth3d_courtyard_c2M",
+        "domain_s": 9.173552171,
+        "forest_s": 12.164457011,
+        "k": 5,
+        "mur_processus_secondes": 34.379,
+        "pic_rss_gio": 14.891479,
+        "processus": 1,
+        "sites": 2001165
+      },
+      {
+        "cas": "ign_lyon_0842_6521_sans_sol_c4M",
+        "domain_s": 19.807167166,
+        "forest_s": 14.257580788,
+        "k": 5,
+        "mur_processus_secondes": 71.706,
+        "pic_rss_gio": 38.013622,
+        "processus": 1,
+        "sites": 4000022
+      },
+      {
+        "cas": "eth3d_courtyard_c4M",
+        "domain_s": 15.668109804,
+        "forest_s": 42.959321379,
+        "k": 5,
+        "mur_processus_secondes": 84.224,
+        "pic_rss_gio": 28.214893,
+        "processus": 1,
+        "sites": 4003201
+      },
+      {
+        "cas": "ign_lyon_0842_6521_sans_sol_c8M",
+        "domain_s": 40.462826016,
+        "forest_s": 32.40876861,
+        "k": 5,
+        "mur_processus_secondes": 155.25,
+        "pic_rss_gio": 74.997849,
+        "processus": 1,
+        "sites": 8000226
+      },
+      {
+        "cas": "ign_lyon_0842_6521_sans_sol_c1M",
+        "domain_s": 17.889318764,
+        "forest_s": 20.514660594,
+        "k": 10,
+        "mur_processus_secondes": 84.101,
+        "pic_rss_gio": 40.422451,
+        "processus": 1,
+        "sites": 1000141
+      },
+      {
+        "cas": "eth3d_courtyard_c1M",
+        "domain_s": 13.051304307,
+        "forest_s": 10.399885131,
+        "k": 10,
+        "mur_processus_secondes": 48.562,
+        "pic_rss_gio": 26.333858,
+        "processus": 1,
+        "sites": 1000109
+      },
+      {
+        "cas": "eth3d_courtyard_c8M",
+        "domain_s": 30.721840392,
+        "forest_s": 121.880766983,
+        "k": 5,
+        "mur_processus_secondes": 203.038,
+        "pic_rss_gio": 53.872963,
+        "processus": 1,
+        "sites": 8001967
+      }
+    ],
+    "echelle_descriptive_sans_intervalle": {
+      "eth3d_courtyard": {
+        "exposant_descriptif_1M_8M": 1.219599,
+        "rapport_forest_8M_1M": 28.21705
+      },
+      "ign_lyon": {
+        "exposant_descriptif_1M_8M": 1.091615,
+        "rapport_forest_8M_1M": 10.963064
+      }
+    },
+    "voie": "v11 gelee CPU 48 fils, une prise froide par cas, serialization comprise"
+  },
+  "base_commit": "58d384721678d11ef8ccd86c76cca182f41a716c",
+  "catalogue_F2": [
+    {
+      "assemblage_plus_table_ms": {
+        "max": 156.247067,
+        "median": 154.976678,
+        "min": 154.616398
+      },
+      "balls": 1306696,
+      "cas": "cat_ng00_k5_f16",
+      "catalogue_digest": "698efd3d46e2d9c24363dca26eb76d293d78ddb46e4594d1fcb16eef2f1dd977",
+      "incidences": 6097121,
+      "kmax": 5,
+      "leaf": 16,
+      "levels": 1085776,
+      "passes": 10,
+      "passes_chaudes": 9,
+      "passes_chaudes_sous_100ms": 0,
+      "phases_medianes_ms": {
+        "assemble": 105.805239,
+        "count": 141.794929,
+        "fill": 23.41695,
+        "levels": 4.43388,
+        "sort": 8.99889,
+        "table": 49.41973,
+        "traversal": 115.120737
+      },
+      "premiere_passe_ms": 469.090343,
+      "processus": 1,
+      "ratio_descriptif_sur_domain_v11_historique": 2.324159,
+      "residu_non_ventile_ms": {
+        "max": 16.35324,
+        "median": 15.752899,
+        "min": 15.374969
+      },
+      "reste_si_parcours_et_feuilles_gratuits_ms": {
+        "max": 185.625077,
+        "median": 184.236108,
+        "min": 183.564337
+      },
+      "sites": 39885,
+      "source": "morsehgp3D_v12/receipts/g4_t1f_20261007/resultats/cmd/001_cat_ng00_k5_f16/stdout",
+      "wall_chaud_ms": {
+        "max": 465.999044,
+        "median": 464.831793,
+        "min": 463.419213
+      }
+    },
+    {
+      "assemblage_plus_table_ms": {
+        "max": 155.786258,
+        "median": 154.004028,
+        "min": 153.062718
+      },
+      "balls": 1306696,
+      "cas": "cat_ng00_k5_f24",
+      "catalogue_digest": "698efd3d46e2d9c24363dca26eb76d293d78ddb46e4594d1fcb16eef2f1dd977",
+      "incidences": 6097121,
+      "kmax": 5,
+      "leaf": 24,
+      "levels": 1085776,
+      "passes": 10,
+      "passes_chaudes": 9,
+      "passes_chaudes_sous_100ms": 0,
+      "phases_medianes_ms": {
+        "assemble": 104.394138,
+        "count": 169.672207,
+        "fill": 27.783689,
+        "levels": 4.541379,
+        "sort": 8.87243,
+        "table": 49.728489,
+        "traversal": 73.638727
+      },
+      "premiere_passe_ms": 460.797253,
+      "processus": 1,
+      "ratio_descriptif_sur_domain_v11_historique": 2.258031,
+      "residu_non_ventile_ms": {
+        "max": 13.36849,
+        "median": 13.106689,
+        "min": 12.79077
+      },
+      "reste_si_parcours_et_feuilles_gratuits_ms": {
+        "max": 182.457618,
+        "median": 180.571997,
+        "min": 179.432047
+      },
+      "sites": 39885,
+      "source": "morsehgp3D_v12/receipts/g4_t1f_20261007/resultats/cmd/002_cat_ng00_k5_f24/stdout",
+      "wall_chaud_ms": {
+        "max": 454.952294,
+        "median": 451.606273,
+        "min": 450.199133
+      }
+    },
+    {
+      "assemblage_plus_table_ms": {
+        "max": 733.02654,
+        "median": 727.053829,
+        "min": 724.18804
+      },
+      "balls": 5512670,
+      "cas": "cat_ng00_k10_f24",
+      "catalogue_digest": "0f92e4f1187d88a0d5bcd94b5814aad4f40a6dc76ed1e598bfffac441639eaf7",
+      "incidences": 45383538,
+      "kmax": 10,
+      "leaf": 24,
+      "levels": 5085986,
+      "passes": 10,
+      "passes_chaudes": 9,
+      "passes_chaudes_sous_100ms": 0,
+      "phases_medianes_ms": {
+        "assemble": 440.719074,
+        "count": 599.02935,
+        "fill": 94.329428,
+        "levels": 20.33556,
+        "sort": 39.488169,
+        "table": 286.362396,
+        "traversal": 208.835508
+      },
+      "premiere_passe_ms": 1760.983075,
+      "processus": 1,
+      "residu_non_ventile_ms": {
+        "max": 62.695709,
+        "median": 62.068759,
+        "min": 59.256779
+      },
+      "reste_si_parcours_et_feuilles_gratuits_ms": {
+        "max": 856.085957,
+        "median": 848.363638,
+        "min": 845.389278
+      },
+      "sites": 39885,
+      "source": "morsehgp3D_v12/receipts/g4_t1f_20261007/resultats/cmd/003_cat_ng00_k10_f24/stdout",
+      "wall_chaud_ms": {
+        "max": 1762.721604,
+        "median": 1750.207615,
+        "min": 1747.875395
+      }
+    },
+    {
+      "assemblage_plus_table_ms": {
+        "max": 123.560098,
+        "median": 122.546378,
+        "min": 121.521558
+      },
+      "balls": 1095926,
+      "cas": "cat_ng01_k5_f16",
+      "catalogue_digest": "12e7684173191378e43dcf306b87259111fbea427c5381829a447a563ce4d309",
+      "incidences": 5085683,
+      "kmax": 5,
+      "leaf": 16,
+      "levels": 941217,
+      "passes": 10,
+      "passes_chaudes": 9,
+      "passes_chaudes_sous_100ms": 0,
+      "phases_medianes_ms": {
+        "assemble": 82.342868,
+        "count": 113.829029,
+        "fill": 15.437811,
+        "levels": 3.85251,
+        "sort": 7.25229,
+        "table": 40.116039,
+        "traversal": 97.017538
+      },
+      "premiere_passe_ms": 374.923075,
+      "processus": 1,
+      "ratio_descriptif_sur_domain_v11_historique": 2.291266,
+      "residu_non_ventile_ms": {
+        "max": 13.802089,
+        "median": 13.56616,
+        "min": 13.12545
+      },
+      "reste_si_parcours_et_feuilles_gratuits_ms": {
+        "max": 148.237698,
+        "median": 147.209417,
+        "min": 145.890488
+      },
+      "sites": 35551,
+      "source": "morsehgp3D_v12/receipts/g4_t1f_20261007/resultats/cmd/004_cat_ng01_k5_f16/stdout",
+      "wall_chaud_ms": {
+        "max": 374.944714,
+        "median": 373.476345,
+        "min": 371.932705
+      }
+    },
+    {
+      "assemblage_plus_table_ms": {
+        "max": 123.213636,
+        "median": 122.496975,
+        "min": 121.606025
+      },
+      "balls": 1095926,
+      "cas": "cat_ng01_k5_f24",
+      "catalogue_digest": "12e7684173191378e43dcf306b87259111fbea427c5381829a447a563ce4d309",
+      "incidences": 5085683,
+      "kmax": 5,
+      "leaf": 24,
+      "levels": 941217,
+      "passes": 10,
+      "passes_chaudes": 9,
+      "passes_chaudes_sous_100ms": 0,
+      "phases_medianes_ms": {
+        "assemble": 82.26258,
+        "count": 137.189905,
+        "fill": 27.27727,
+        "levels": 4.00252,
+        "sort": 7.52114,
+        "table": 40.196305,
+        "traversal": 62.965692
+      },
+      "premiere_passe_ms": 379.119185,
+      "processus": 1,
+      "ratio_descriptif_sur_domain_v11_historique": 2.286788,
+      "residu_non_ventile_ms": {
+        "max": 11.487371,
+        "median": 11.027571,
+        "min": 10.703329
+      },
+      "reste_si_parcours_et_feuilles_gratuits_ms": {
+        "max": 146.001608,
+        "median": 145.137578,
+        "min": 144.234648
+      },
+      "sites": 35551,
+      "source": "morsehgp3D_v12/receipts/g4_t1f_20261007/resultats/cmd/005_cat_ng01_k5_f24/stdout",
+      "wall_chaud_ms": {
+        "max": 373.184824,
+        "median": 372.746486,
+        "min": 370.942216
+      }
+    },
+    {
+      "assemblage_plus_table_ms": {
+        "max": 566.84536,
+        "median": 560.60424,
+        "min": 559.448519
+      },
+      "balls": 4383302,
+      "cas": "cat_ng01_k10_f24",
+      "catalogue_digest": "2c0018b203c65feee260535b6ce6d904a75276c674daa45e27d217a01db445c3",
+      "incidences": 35706993,
+      "kmax": 10,
+      "leaf": 24,
+      "levels": 4094746,
+      "passes": 10,
+      "passes_chaudes": 9,
+      "passes_chaudes_sous_100ms": 0,
+      "phases_medianes_ms": {
+        "assemble": 338.051722,
+        "count": 474.933031,
+        "fill": 82.464496,
+        "levels": 16.396482,
+        "sort": 29.392154,
+        "table": 223.149928,
+        "traversal": 174.154553
+      },
+      "premiere_passe_ms": 1390.768062,
+      "processus": 1,
+      "residu_non_ventile_ms": {
+        "max": 41.261935,
+        "median": 40.551915,
+        "min": 40.112315
+      },
+      "reste_si_parcours_et_feuilles_gratuits_ms": {
+        "max": 653.317581,
+        "median": 647.43487,
+        "min": 645.4294
+      },
+      "sites": 35551,
+      "source": "morsehgp3D_v12/receipts/g4_t1f_20261007/resultats/cmd/006_cat_ng01_k10_f24/stdout",
+      "wall_chaud_ms": {
+        "max": 1387.055851,
+        "median": 1379.845101,
+        "min": 1376.506021
+      }
+    },
+    {
+      "assemblage_plus_table_ms": {
+        "max": 174.803032,
+        "median": 172.700032,
+        "min": 172.244722
+      },
+      "balls": 1407885,
+      "cas": "cat_ng02_k5_f16",
+      "catalogue_digest": "d0578a530bd4247b873fbb99efac3038f2b9eb3f9c52da3a2de9e44821046c7c",
+      "incidences": 6514697,
+      "kmax": 5,
+      "leaf": 16,
+      "levels": 1099582,
+      "passes": 10,
+      "passes_chaudes": 9,
+      "passes_chaudes_sous_100ms": 0,
+      "phases_medianes_ms": {
+        "assemble": 121.017755,
+        "count": 131.980428,
+        "fill": 16.662101,
+        "levels": 4.963411,
+        "sort": 11.811171,
+        "table": 51.667796,
+        "traversal": 113.097214
+      },
+      "premiere_passe_ms": 466.972078,
+      "processus": 1,
+      "ratio_descriptif_sur_domain_v11_historique": 2.39869,
+      "residu_non_ventile_ms": {
+        "max": 17.661051,
+        "median": 16.737423,
+        "min": 14.170831
+      },
+      "reste_si_parcours_et_feuilles_gratuits_ms": {
+        "max": 209.341545,
+        "median": 206.023046,
+        "min": 203.190245
+      },
+      "sites": 45845,
+      "source": "morsehgp3D_v12/receipts/g4_t1f_20261007/resultats/cmd/007_cat_ng02_k5_f16/stdout",
+      "wall_chaud_ms": {
+        "max": 472.587358,
+        "median": 467.744638,
+        "min": 463.194277
+      }
+    },
+    {
+      "assemblage_plus_table_ms": {
+        "max": 172.236652,
+        "median": 171.339061,
+        "min": 170.582401
+      },
+      "balls": 1407885,
+      "cas": "cat_ng02_k5_f24",
+      "catalogue_digest": "d0578a530bd4247b873fbb99efac3038f2b9eb3f9c52da3a2de9e44821046c7c",
+      "incidences": 6514697,
+      "kmax": 5,
+      "leaf": 24,
+      "levels": 1099582,
+      "passes": 10,
+      "passes_chaudes": 9,
+      "passes_chaudes_sous_100ms": 0,
+      "phases_medianes_ms": {
+        "assemble": 119.474674,
+        "count": 160.345931,
+        "fill": 32.133739,
+        "levels": 4.673481,
+        "sort": 11.606229,
+        "table": 52.072806,
+        "traversal": 75.686515
+      },
+      "premiere_passe_ms": 478.67137,
+      "processus": 1,
+      "ratio_descriptif_sur_domain_v11_historique": 2.407594,
+      "residu_non_ventile_ms": {
+        "max": 14.307961,
+        "median": 13.646982,
+        "min": 13.499911
+      },
+      "reste_si_parcours_et_feuilles_gratuits_ms": {
+        "max": 203.129035,
+        "median": 201.719049,
+        "min": 200.409305
+      },
+      "sites": 45845,
+      "source": "morsehgp3D_v12/receipts/g4_t1f_20261007/resultats/cmd/008_cat_ng02_k5_f24/stdout",
+      "wall_chaud_ms": {
+        "max": 472.130278,
+        "median": 469.480798,
+        "min": 468.330828
+      }
+    },
+    {
+      "assemblage_plus_table_ms": {
+        "max": 729.427726,
+        "median": 722.729085,
+        "min": 715.45201
+      },
+      "balls": 5483320,
+      "cas": "cat_ng02_k10_f24",
+      "catalogue_digest": "aea71fe1eea83fd15a7d70dd6fd27d7c18bf320ed40e75b00b2d893cecefeca7",
+      "incidences": 44413313,
+      "kmax": 10,
+      "leaf": 24,
+      "levels": 4908696,
+      "passes": 10,
+      "passes_chaudes": 9,
+      "passes_chaudes_sous_100ms": 0,
+      "phases_medianes_ms": {
+        "assemble": 449.22382,
+        "count": 545.867966,
+        "fill": 104.375784,
+        "levels": 19.71247,
+        "sort": 43.988031,
+        "table": 273.326666,
+        "traversal": 204.423612
+      },
+      "premiere_passe_ms": 1710.371405,
+      "processus": 1,
+      "residu_non_ventile_ms": {
+        "max": 58.775127,
+        "median": 57.897342,
+        "min": 57.122251
+      },
+      "reste_si_parcours_et_feuilles_gratuits_ms": {
+        "max": 849.866648,
+        "median": 844.690138,
+        "min": 836.458663
+      },
+      "sites": 45845,
+      "source": "morsehgp3D_v12/receipts/g4_t1f_20261007/resultats/cmd/009_cat_ng02_k10_f24/stdout",
+      "wall_chaud_ms": {
+        "max": 1704.888886,
+        "median": 1699.433266,
+        "min": 1692.430986
+      }
+    },
+    {
+      "assemblage_plus_table_ms": {
+        "max": 61.347981,
+        "median": 61.022881,
+        "min": 60.010781
+      },
+      "balls": 597998,
+      "cas": "cat_u8000_k5",
+      "catalogue_digest": "b38e265772e407cc49d2efc5c51d6f4d5ddb94d3397bddeebac6c6b9da8c2230",
+      "incidences": 2895136,
+      "kmax": 5,
+      "leaf": 24,
+      "levels": 597987,
+      "passes": 10,
+      "passes_chaudes": 9,
+      "passes_chaudes_sous_100ms": 0,
+      "phases_medianes_ms": {
+        "assemble": 36.864841,
+        "count": 56.901471,
+        "fill": 9.42048,
+        "levels": 2.79989,
+        "sort": 3.34357,
+        "table": 24.136621,
+        "traversal": 18.9084
+      },
+      "premiere_passe_ms": 160.136383,
+      "processus": 1,
+      "residu_non_ventile_ms": {
+        "max": 5.39355,
+        "median": 5.33749,
+        "min": 4.78087
+      },
+      "reste_si_parcours_et_feuilles_gratuits_ms": {
+        "max": 72.961902,
+        "median": 72.545981,
+        "min": 70.881681
+      },
+      "sites": 8000,
+      "source": "morsehgp3D_v12/receipts/g4_t1f_20261007/resultats/cmd/010_cat_u8000_k5/stdout",
+      "wall_chaud_ms": {
+        "max": 158.341533,
+        "median": 157.874053,
+        "min": 155.909933
+      }
+    },
+    {
+      "assemblage_plus_table_ms": {
+        "max": 136.455413,
+        "median": 135.406323,
+        "min": 134.464102
+      },
+      "balls": 1233046,
+      "cas": "cat_u16000_k5",
+      "catalogue_digest": "3838851969c0ca2511fd84265127e53b32f89e5fffaa942c3b5402c18ee345cc",
+      "incidences": 5979160,
+      "kmax": 5,
+      "leaf": 24,
+      "levels": 1232923,
+      "passes": 10,
+      "passes_chaudes": 9,
+      "passes_chaudes_sous_100ms": 0,
+      "phases_medianes_ms": {
+        "assemble": 80.005571,
+        "count": 120.387024,
+        "fill": 16.809311,
+        "levels": 5.5903,
+        "sort": 6.56691,
+        "table": 55.315881,
+        "traversal": 30.101
+      },
+      "premiere_passe_ms": 336.265887,
+      "processus": 1,
+      "residu_non_ventile_ms": {
+        "max": 12.565741,
+        "median": 12.36702,
+        "min": 12.05481
+      },
+      "reste_si_parcours_et_feuilles_gratuits_ms": {
+        "max": 161.529834,
+        "median": 159.467713,
+        "min": 158.710403
+      },
+      "sites": 16000,
+      "source": "morsehgp3D_v12/receipts/g4_t1f_20261007/resultats/cmd/011_cat_u16000_k5/stdout",
+      "wall_chaud_ms": {
+        "max": 328.815087,
+        "median": 326.702907,
+        "min": 326.065166
+      }
+    },
+    {
+      "assemblage_plus_table_ms": {
+        "max": 292.001786,
+        "median": 290.408126,
+        "min": 289.148536
+      },
+      "balls": 2536732,
+      "cas": "cat_u32000_k5",
+      "catalogue_digest": "2fe412a5066e83d9ca223bc4ade93f45dcd7eaee6a6a2017d47db750d7e12561",
+      "incidences": 12316439,
+      "kmax": 5,
+      "leaf": 24,
+      "levels": 2535983,
+      "passes": 10,
+      "passes_chaudes": 9,
+      "passes_chaudes_sous_100ms": 0,
+      "phases_medianes_ms": {
+        "assemble": 174.579293,
+        "count": 241.814604,
+        "fill": 37.058472,
+        "levels": 10.10818,
+        "sort": 13.56698,
+        "table": 115.828833,
+        "traversal": 51.627393
+      },
+      "premiere_passe_ms": 675.028524,
+      "processus": 1,
+      "residu_non_ventile_ms": {
+        "max": 27.251651,
+        "median": 26.445841,
+        "min": 25.84327
+      },
+      "reste_si_parcours_et_feuilles_gratuits_ms": {
+        "max": 342.755218,
+        "median": 340.437867,
+        "min": 339.333717
+      },
+      "sites": 32000,
+      "source": "morsehgp3D_v12/receipts/g4_t1f_20261007/resultats/cmd/012_cat_u32000_k5/stdout",
+      "wall_chaud_ms": {
+        "max": 674.089514,
+        "median": 671.225964,
+        "min": 668.859944
+      }
+    }
+  ],
+  "inputs_verified": 48,
+  "profil_M7": [
+    {
+      "cas": "ng00_k5",
+      "fils_resolution": 1,
+      "parts_cycles_pct": {
+        "census_complet": 5.8162,
+        "census_sature": 12.802451,
+        "certificat": 2.002358,
+        "proposition_t1": 26.021335,
+        "repli": 0.0,
+        "reste": 12.963495,
+        "saut": 0.35512,
+        "sonde": 38.617867,
+        "trace_stricte": 1.421175
+      },
+      "rapport_instrumente_sur_non_instrumente": 1.204369,
+      "secondes_instrumentees": 1.75173,
+      "secondes_non_instrumentees_meme_journal": 1.45448
+    },
+    {
+      "cas": "ng01_k5",
+      "fils_resolution": 1,
+      "parts_cycles_pct": {
+        "census_complet": 5.149215,
+        "census_sature": 11.909339,
+        "certificat": 1.960492,
+        "proposition_t1": 25.520284,
+        "repli": 0.0,
+        "reste": 13.710772,
+        "saut": 0.357098,
+        "sonde": 39.90676,
+        "trace_stricte": 1.486041
+      },
+      "rapport_instrumente_sur_non_instrumente": 1.20804,
+      "secondes_instrumentees": 1.315929,
+      "secondes_non_instrumentees_meme_journal": 1.089309
+    },
+    {
+      "cas": "ng02_k5",
+      "fils_resolution": 1,
+      "parts_cycles_pct": {
+        "census_complet": 4.579478,
+        "census_sature": 9.250306,
+        "certificat": 1.586897,
+        "proposition_t1": 25.867018,
+        "repli": 0.0,
+        "reste": 14.000799,
+        "saut": 0.283729,
+        "sonde": 42.92658,
+        "trace_stricte": 1.505193
+      },
+      "rapport_instrumente_sur_non_instrumente": 1.224339,
+      "secondes_instrumentees": 1.566865,
+      "secondes_non_instrumentees_meme_journal": 1.279764
+    },
+    {
+      "cas": "ng00_k10",
+      "fils_resolution": 1,
+      "parts_cycles_pct": {
+        "census_complet": 5.574214,
+        "census_sature": 13.46964,
+        "certificat": 2.841713,
+        "proposition_t1": 32.098942,
+        "repli": 0.0,
+        "reste": 9.645339,
+        "saut": 0.344129,
+        "sonde": 34.43368,
+        "trace_stricte": 1.592343
+      },
+      "rapport_instrumente_sur_non_instrumente": 1.162761,
+      "secondes_instrumentees": 15.619039,
+      "secondes_non_instrumentees_meme_journal": 13.432716
+    }
+  ],
+  "saut_G_L3": [
+    {
+      "cas": "ng00_k5",
+      "forets_identiques_selon_journaux": true,
+      "ic95": [
+        1.030102311,
+        1.035545109
+      ],
+      "moyenne_geometrique": 1.032290121,
+      "passes_par_processus": 3,
+      "processus": 5,
+      "rapports_par_processus": [
+        1.031595491,
+        1.030941941,
+        1.029193791,
+        1.038405919,
+        1.031337716
+      ],
+      "rejet_performance_reproduit": true,
+      "satures_evites_pct": 81.124399,
+      "statistique": "ratio des sommes par ordre des minima de trois passes"
+    },
+    {
+      "cas": "ng01_k5",
+      "forets_identiques_selon_journaux": true,
+      "ic95": [
+        1.038878456,
+        1.042590098
+      ],
+      "moyenne_geometrique": 1.040796816,
+      "passes_par_processus": 3,
+      "processus": 5,
+      "rapports_par_processus": [
+        1.043263061,
+        1.042377587,
+        1.041670076,
+        1.039014766,
+        1.03766931
+      ],
+      "rejet_performance_reproduit": true,
+      "satures_evites_pct": 81.531326,
+      "statistique": "ratio des sommes par ordre des minima de trois passes"
+    },
+    {
+      "cas": "ng02_k5",
+      "forets_identiques_selon_journaux": true,
+      "ic95": [
+        1.03306131,
+        1.036491903
+      ],
+      "moyenne_geometrique": 1.034901546,
+      "passes_par_processus": 3,
+      "processus": 5,
+      "rapports_par_processus": [
+        1.037238954,
+        1.035913102,
+        1.036034702,
+        1.031973926,
+        1.0333561
+      ],
+      "rejet_performance_reproduit": true,
+      "satures_evites_pct": 82.498548,
+      "statistique": "ratio des sommes par ordre des minima de trois passes"
+    }
+  ],
+  "schema": "audit_performance_F2_E_v1",
+  "sources_identiques_aux_captures": {
+    "morsehgp3D_v12/receipts/g4_t1f_20261007/receipt.json": 4,
+    "morsehgp3D_v12/receipts/g4_t2e_20261007/receipt.json": 3
+  }
+}
