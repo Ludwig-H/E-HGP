@@ -183,8 +183,8 @@ Outcome generate_single(const Cloud& cloud, const CatalogueParams& params, Memor
                         Buffer<Emission>& records, Buffer<SiteIdx>& population, CatalogueLedger& ledger,
                         CatalogueExecution& execution, CatalogueTimings* timings, CatalogueDiagnostics* diagnostics) noexcept {
   if (params.cuda_leaves) prefetch_cuda_context();  // recouvre l'ouverture du GPU par la frontiere et le parcours
-  std::optional<Stopwatch> stage;
-  if (timings != nullptr) stage.emplace();
+  std::optional<Stopwatch> stage, body;
+  if (timings != nullptr) { stage.emplace(); body.emplace(); }
   Front frontier;
   Workspace unused;
   Collector unused_collector;
@@ -246,6 +246,7 @@ Outcome generate_single(const Cloud& cloud, const CatalogueParams& params, Memor
     }
     DiagnosticAccess::single_result(diagnostics, i, out.ledger, out.generation_ns, out.compact_ns);
   }
+  if (timings != nullptr) timings->release_ns = body->nanoseconds();  // duree du corps ; l'appelant en tire la sortie
   return {};  // Pages et metadonnees sont rendues AVANT le tri/assemblage.
 }
 }  // namespace
@@ -257,6 +258,8 @@ Result<Catalogue> build_single_pass(const Cloud& cloud, const CatalogueParams& p
   CatalogueLedger ledger;
   CatalogueExecution execution;
   execution.geometry_passes = 1;
+  std::optional<Stopwatch> call;
+  if (timings != nullptr) call.emplace();
   if (params.adaptive_frontier) {
     MHGP11_TRY((generate_single<AdaptiveFrontier,kAdaptiveTasks>(cloud, params, budget, pool, records, population,
                                                                 ledger, execution, timings, diagnostics)));
@@ -264,7 +267,15 @@ Result<Catalogue> build_single_pass(const Cloud& cloud, const CatalogueParams& p
     MHGP11_TRY((generate_single<Frontier,kFrontierTasks>(cloud, params, budget, pool, records, population,
                                                        ledger, execution, timings, diagnostics)));
   }
-  return Assembly::finish(records, population, params, ledger, budget, timings, &pool, &execution);
+  // Restitution des locaux de generate_single (frontiere, espaces, sorties de taches, lot) : appel moins corps.
+  if (timings != nullptr) timings->release_ns = call->nanoseconds() - timings->release_ns;
+  auto made = Assembly::finish(records, population, params, ledger, budget, timings, &pool, &execution);
+  std::optional<Stopwatch> release;
+  if (timings != nullptr) release.emplace();
+  records.reset();  // entrees de l'assemblage, rendues ici plutot qu'au retour : meme effet, chronometre
+  population.reset();
+  if (timings != nullptr) timings->release_ns += release->nanoseconds();
+  return made;
 }
 
 }  // namespace mhgp11::catalogue_detail

@@ -123,6 +123,7 @@ Result<FullDomain> prepare_full_domain(GlobalIndex&& index, const CatalogueParam
   CatalogueTimings draft;
   auto made = build_catalogue(index.cloud(), params, budget, pool, timings == nullptr ? nullptr : &draft);
   if (!made.ok()) return made.outcome();
+  const Stopwatch lookup;  // diagnostic : table support -> boule (draft.lookup_ns)
   auto& catalogue = made.value();
   const u64 capacity = lookup_capacity(catalogue.balls());
   MHGP11_TRY(budget.admit(capacity * sizeof(BallIdx)));
@@ -135,6 +136,7 @@ Result<FullDomain> prepare_full_domain(GlobalIndex&& index, const CatalogueParam
     MHGP11_TRY(pool.parallel_for(catalogue.balls(), 16384, &fill, SharedFill::insert));
   }
   FullDomain result(std::move(index), std::move(catalogue), std::move(slots));
+  draft.lookup_ns = lookup.nanoseconds();
   if (timings != nullptr) *timings = draft;
   return result;
 }

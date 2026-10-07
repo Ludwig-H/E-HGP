@@ -95,7 +95,8 @@ def take_summary(got):
                 single_pass_ms=ms(domain.get('single_pass_ns')), prefix_ms=ms(domain.get('prefix_ns')),
                 sort_ms=ms(domain.get('sort_ns')), level_scan_ms=ms(domain.get('level_scan_ns')),
                 assembly_ms=ms(domain.get('assembly_ns')), compact_ms=ms(domain.get('compact_ns')),
-                allocation_ms=ms(domain.get('allocation_ns')), cpu_seconds=full.get('cpu_seconds'),
+                allocation_ms=ms(domain.get('allocation_ns')), release_ms=ms(domain.get('release_ns')),
+                lookup_ms=ms(domain.get('lookup_ns')), cpu_seconds=full.get('cpu_seconds'),
                 pipeline_placement_cores=(full.get('pipeline_tasks') or {}).get('placement_cores'),
                 pipeline=pipeline_summary(full), batch=dict(batch))
 

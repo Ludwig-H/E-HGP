@@ -222,6 +222,7 @@ Outcome full_pass(Cloud cloud_value, MemoryBudget& budget, sched::Pool& pool_ref
             << ",\"fill_ns\":" << timings.fill_ns << ",\"prefix_ns\":" << timings.prefix_ns
             << ",\"replay_ns\":" << timings.replay_ns << ",\"level_scan_ns\":" << timings.level_scan_ns
             << ",\"allocation_ns\":" << timings.allocation_ns << ",\"assembly_ns\":" << timings.assembly_ns
+            << ",\"release_ns\":" << timings.release_ns << ",\"lookup_ns\":" << timings.lookup_ns
             << ",\"catalogue_optimizations\":" << (unsigned(params.cache_center_lines) +
                 2 * unsigned(params.indirect_sort) + 4 * unsigned(params.adaptive_frontier) +
                 8 * unsigned(params.parallel_assembly) + 16 * unsigned(params.single_pass) +

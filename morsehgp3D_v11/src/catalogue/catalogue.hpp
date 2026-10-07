@@ -98,6 +98,9 @@ struct CatalogueTimings {
   u64 batch_spare_record_chunks = 0, batch_spare_population_chunks = 0;  // blocs du reservoir pris
   u64 batch_device_pool_used_high = 0, batch_device_pool_reserved_high = 0;  // pics physiques du pool CUDA
   u64 batch_split_host_jobs = 0, batch_split_host_ns = 0, batch_split_device_ns = 0;  // executeur partage
+  // Diagnostic du 7 octobre : restitution des tampons de la passe unique (locaux de generate_single, puis entrees de
+  // l'assemblage) et remplissage de la table support -> boule du domaine (prepare_full_domain, voie Pool).
+  u64 release_ns = 0, lookup_ns = 0;
 };
 
 // Travail de stockage distinct de la geometrie ; valeurs de l'option une passe, zero sinon sauf passes=2.
