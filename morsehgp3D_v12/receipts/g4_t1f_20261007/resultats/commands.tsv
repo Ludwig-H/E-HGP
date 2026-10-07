@@ -1,0 +1,14 @@
+index	name	status	exit_code	wall_seconds	timeout_seconds	max_rss_kb
+0	socle_ctest	ok	0	103.274	1500	687776
+1	cat_ng00_k5_f16	ok	0	7.851	600	421820
+2	cat_ng00_k5_f24	ok	0	7.729	600	369308
+3	cat_ng00_k10_f24	ok	0	33.990	600	1766696
+4	cat_ng01_k5_f16	ok	0	6.399	600	323548
+5	cat_ng01_k5_f24	ok	0	6.421	600	305376
+6	cat_ng01_k10_f24	ok	0	26.888	600	1394900
+7	cat_ng02_k5_f16	ok	0	8.089	600	417844
+8	cat_ng02_k5_f24	ok	0	8.128	600	392824
+9	cat_ng02_k10_f24	ok	0	33.174	600	1730800
+10	cat_u8000_k5	ok	0	3.059	300	163564
+11	cat_u16000_k5	ok	0	6.329	300	353244
+12	cat_u32000_k5	ok	0	12.927	300	726416
