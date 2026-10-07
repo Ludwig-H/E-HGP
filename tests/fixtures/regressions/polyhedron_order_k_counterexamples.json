@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "kind": "morsehgp3d_v11_polyhedron_order_k_counterexamples",
+  "fixture_id": "polyhedron-order-k-counterexamples-v1",
+  "description": "Three exact counterexamples from the v11 exploration of polyhedral representatives of the HGP dense components (6-7 October 2026): fewer than k added sites can create or merge components of Omega_k(r); identities of contracted chains are not stable under a matched displacement; order-k realizations (barycentric alpha complex, coverage shadow) are not nested in the order-(k-1) alpha complex at the same radius.",
+  "provenance": {
+    "exploration": "workflow alpha-ordre-k-robuste-v2 (wf_cd387a02-4b0), outputs kept under build/v11-persist/polyedres_ordre_k/ (not versioned)",
+    "auditor_receipts": [
+      "morsehgp3D_v11/receipts/audit_hartigan_delaunay_20261006/README.md",
+      "morsehgp3D_v11/receipts/audit_hartigan_robustesse_20261006/README.md"
+    ],
+    "developer_claim_refuted": "morsehgp3D_v11/audits/REPONSE_CLAUDE_POLYEDRE_ORDRE_K_20261006.md (ee2df0362), question 1 (b)"
+  },
+  "cases": {
+    "outliers_fewer_than_k": {
+      "claim": "Adding fewer than k sites creates no component of Omega_k(r) and merges none.",
+      "refuted_by": "auditor, receipts/audit_hartigan_robustesse_20261006 section 1.2; correct statements: a group farther than 2r changes nothing, and Omega_k^P(r) is inside Omega_k^(P+O)(r), itself inside Omega_(k-m)^P(r)",
+      "subcases": [
+        {
+          "name": "single_site_creates_a_lens",
+          "role": "creation",
+          "sites": [[0, 0, 0], [6, 0, 0], [12, 0, 0]],
+          "added": [[1, 0, 0]],
+          "order": 2,
+          "radius": 2,
+          "trace_before": [],
+          "trace_after": [[-1, 2]],
+          "lower_order_trace": [[-2, 2], [4, 8], [10, 14]]
+        },
+        {
+          "name": "single_site_merges_two_components",
+          "role": "merge",
+          "sites": [[0, 0, 0], [2, 0, 0], [5, 0, 0]],
+          "added": [[3, 0, 0]],
+          "order": 2,
+          "radius": 2,
+          "trace_before": [[0, 2], [3, 4]],
+          "trace_after": [[0, 5]],
+          "lower_order_trace": [[-2, 7]]
+        },
+        {
+          "name": "separated_site_changes_nothing",
+          "role": "separated_control",
+          "sites": [[0, 0, 0], [2, 0, 0], [5, 0, 0]],
+          "added": [[20, 0, 0]],
+          "order": 2,
+          "radius": 2,
+          "trace_before": [[0, 2], [3, 4]],
+          "trace_after": [[0, 2], [3, 4]],
+          "lower_order_trace": [[-2, 7]]
+        }
+      ]
+    },
+    "contracted_chain_identity": {
+      "claim": "Contracting every merge where exactly one child lives longer than 2 delta (the parent continues that child) and forgetting nodes of life at most 2 delta gives chains matched injectively on their interiors under a matched displacement of delta.",
+      "refuted_by": "critique of the exploration (fixture contraction_instable); only FULL nodes of life greater than 2 delta keep a stable identity",
+      "order": 1,
+      "sites_before": [[0, 0, 0], [50, 0, 0], [99, 0, 0]],
+      "sites_after": [[0, 0, 0], [49, 0, 0], [99, 0, 0]],
+      "delta": 1,
+      "merges_before": [
+        {"radius": {"numerator": 49, "denominator": 2}, "members": [1, 2]},
+        {"radius": 25, "members": [0, 1, 2]}
+      ],
+      "merges_after": [
+        {"radius": {"numerator": 49, "denominator": 2}, "members": [0, 1]},
+        {"radius": 25, "members": [0, 1, 2]}
+      ],
+      "root_chain_leaf_before": 0,
+      "root_chain_leaf_after": 2,
+      "probes": [
+        {"radius": 10, "image_chain_leaf": 0},
+        {"radius": 30, "image_chain_leaf": 2}
+      ]
+    },
+    "no_nesting_across_orders": {
+      "claim": "At the same radius, the order-k realization (barycentric alpha complex, or coverage shadow) is inside the order-(k-1) one.",
+      "refuted_by": "exploration notes E11 and O4; dense regions, offsets and coverages are nested across orders, their realizations are not",
+      "subcases": [
+        {
+          "name": "pqst_barycentric",
+          "realization": "barycentric",
+          "points": [[-2, 0, 0], [0, -1, 0], [2, 0, 0], [0, 3, 0]],
+          "radius_squared": 4,
+          "query": [{"numerator": -1, "denominator": 2}, {"numerator": -1, "denominator": 2}, 0],
+          "order_one_triangles": [[0, 1, 3], [1, 2, 3]],
+          "containing_triangle": 0,
+          "containing_circumradius_squared": {"numerator": 65, "denominator": 16},
+          "witness": [0, 0, 0],
+          "witness_order": 2,
+          "witness_k_sets": [[0, 1], [1, 2]],
+          "witness_kth_distance_squared": 4,
+          "perturbations": [
+            {"k_set": [0, 1], "direction": [-1, 0, 0]},
+            {"k_set": [1, 2], "direction": [1, 0, 0]}
+          ]
+        },
+        {
+          "name": "o4_shadow",
+          "realization": "shadow",
+          "points": [[-4, 0, 0], [4, 0, 0], [0, 4, 0], [0, 1, 0]],
+          "radius_squared": 16,
+          "query": [0, {"numerator": 1, "denominator": 2}, 0],
+          "order_one_triangles": [[0, 1, 3], [1, 2, 3], [0, 2, 3]],
+          "containing_triangle": 0,
+          "containing_circumradius_squared": {"numerator": 289, "denominator": 4},
+          "witness": [0, 0, 0],
+          "witness_order": 2,
+          "witness_k_sets": [[0, 3], [1, 3], [2, 3]],
+          "witness_kth_distance_squared": 16,
+          "perturbations": [
+            {"k_set": [0, 3], "direction": [-1, -1, 0]},
+            {"k_set": [1, 3], "direction": [1, -1, 0]},
+            {"k_set": [2, 3], "direction": [0, 1, 0]}
+          ]
+        },
+        {
+          "name": "o4_barycentric",
+          "realization": "barycentric",
+          "points": [[-4, 0, 0], [4, 0, 0], [0, 4, 0], [0, 1, 0]],
+          "radius_squared": 16,
+          "query": [0, {"numerator": 1, "denominator": 2}, 0],
+          "order_one_triangles": [[0, 1, 3], [1, 2, 3], [0, 2, 3]],
+          "containing_triangle": 0,
+          "containing_circumradius_squared": {"numerator": 289, "denominator": 4},
+          "witness": [0, 0, 0],
+          "witness_order": 2,
+          "witness_k_sets": [[0, 3], [1, 3], [2, 3]],
+          "witness_kth_distance_squared": 16,
+          "perturbations": [
+            {"k_set": [0, 3], "direction": [-1, -1, 0]},
+            {"k_set": [1, 3], "direction": [1, -1, 0]},
+            {"k_set": [2, 3], "direction": [0, 1, 0]}
+          ]
+        }
+      ]
+    }
+  }
+}
