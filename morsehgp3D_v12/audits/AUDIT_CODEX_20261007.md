@@ -9,16 +9,14 @@ Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalo
 
 **À corriger pendant le développement.**
 
-- **Cache, `0007/0019`** : le correctif en cours compte l'arrondi et les blocs inactifs,
-  mais une éviction concurrente peut encore refuser une allocation admise. Budget/cache
-  1 Mio, deux demandes de 300 Kio : pendant la libération d'un ancien bloc, la liste est
-  vide et `held` encore plein ; le second fil refuse puis réussit après libération.
-  Plafond physique respecté, promesse d'admission indépendante de l'entrelacement rompue.
-  Synchroniser les transitions et recontrôler l'état avant refus ; ne pas rendre le crédit
-  physique avant la libération. Constat sur capture de travail, pas sur un commit livré.
-  [Poison ASan confirmé](../receipts/audit_cache_poison_20261007/README.md) : neuf petits
-  processus sous Clang/GCC ; ancienne détection Clang prise en défaut causalement.
-  Cet acquis ne clôt pas le refus concurrent ; aucun chrono produit nouveau.
+- **Cache, `0007/0019`** : le [nouveau correctif non commis](../receipts/audit_cache_concurrence_20261007/README.md)
+  (`buffer.cpp` SHA `1844a7d6…`) ferme la course d'éviction sur deux contre-épreuves.
+  Reprises/restitutions/évictions sont protégées ensemble, puis `held` est relu avant refus.
+  La porte du développeur doit encore exercer cette relecture : deux demandes de 300 Kio
+  laissent survivre son mutant ; une seconde demande de 200 Kio le tue causalement.
+  États formels en cours pendant la livraison ; acquis ASan de la capture précédente
+  [confirmé sous Clang/GCC](../receipts/audit_cache_poison_20261007/README.md), sans transfert
+  implicite au nouveau corps ni chrono produit nouveau.
 - **Juges, `0018`** : contre-lecture M5/M6 du lot `2b2113264`. M6 laisse encore sortir
   `mes_m6_ok` avec moins de prises que demandé, voire zéro : indices `false`/`0.0`
   égaux aux entiers dans une première garde puis ignorés par la suivante. Un schéma inconnu

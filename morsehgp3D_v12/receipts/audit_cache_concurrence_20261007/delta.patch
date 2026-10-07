@@ -1,0 +1,150 @@
+--- a/morsehgp3D_v12/src/core/buffer.cpp
++++ b/morsehgp3D_v12/src/core/buffer.cpp
+@@ -104,9 +104,16 @@
+ 
+ namespace {
+ 
+-// Bloc inactif de la classe k, sinon nullptr (un echec compte un defaut de cache). Le bloc passe d'inactif a vivant :
+-// held ne change pas.
+-void* cache_pop(BlockCache& cache, u32 k) noexcept {
++// Transitions sous le verrou du cache (CST-0007, contre-lecture du 7 octobre, course d'eviction) : reprise d'un
++// inactif, restitution d'un bloc de classe et eviction changent used, idle et held ensemble, restitution au systeme
++// comprise. Aucune de ces transitions n'est donc en cours hors du verrou : un fil qui le tient et trouve le cache vide
++// lit dans held tout ce qui reste a rendre. Ordre des verrous : celui du cache, puis ceux de l'allocateur ; aucun
++// chemin ne prend le premier sous les seconds (l'allocateur n'appelle jamais ce fichier).
++
++// Bloc inactif de la classe k repris par un tampon vivant (inactif -> vivant, held inchange), sinon nullptr (un echec
++// compte un defaut de cache).
++void* cache_pop(BudgetAccount& account, u32 k) noexcept {
++  BlockCache& cache = *account.cache;
+   const std::lock_guard<std::mutex> lock(cache.mutex);
+   if (cache.count[k] == 0) {
+     ++cache.misses;
+@@ -114,62 +121,62 @@
+   }
+   cache.idle -= class_capacity(k);
+   ++cache.hits;
++  count_live(account, class_capacity(k));
+   return cache.slots[k][--cache.count[k]];
+ }
+ 
+-// Garde un bloc de la classe k si la classe a une place et si les blocs inactifs restent sous la capacite du cache ;
+-// false sinon (l'appelant le rend au systeme). Le bloc est empoisonne avant d'etre visible des autres fils.
+-bool cache_push(BlockCache& cache, u32 k, void* block) noexcept {
++// Restitution d'un bloc vivant de la classe k : garde si la classe a une place et si les inactifs restent sous la
++// capacite du cache, sinon rendu au systeme. Le bloc est empoisonne avant d'etre visible des autres fils.
++void release_class(BudgetAccount& account, u32 k, void* block) noexcept {
++  BlockCache& cache = *account.cache;
+   const u64 capacity = class_capacity(k);
+   poison(block, capacity);
+-  {
+-    const std::lock_guard<std::mutex> lock(cache.mutex);
+-    if (cache.count[k] < kCacheSlots && capacity <= cache.capacity - cache.idle) {  // invariant : idle <= capacity
+-      cache.slots[k][cache.count[k]++] = block;
+-      cache.idle += capacity;
+-      cache.idle_peak = std::max(cache.idle_peak, cache.idle);
+-      return true;
+-    }
+-    ++cache.rejected;
+-  }
+-  unpoison(block, capacity);
+-  return false;
+-}
+-
+-// Rend au systeme le plus grand bloc inactif et le retire de held ; false si le cache est vide.
+-bool cache_evict(BudgetAccount& account) noexcept {
+-  BlockCache& cache = *account.cache;
+-  void* block = nullptr;
+-  u64 capacity = 0;
+-  {
+-    const std::lock_guard<std::mutex> lock(cache.mutex);
+-    for (u32 k = kCacheClasses; k-- > 0;) {
+-      if (cache.count[k] == 0) continue;
+-      capacity = class_capacity(k);
+-      block = cache.slots[k][--cache.count[k]];
+-      cache.idle -= capacity;
+-      ++cache.evicted;
+-      break;
+-    }
+-  }
+-  if (block == nullptr) return false;
++  const std::lock_guard<std::mutex> lock(cache.mutex);
++  account.used.fetch_sub(capacity, std::memory_order_relaxed);
++  if (cache.count[k] < kCacheSlots && capacity <= cache.capacity - cache.idle) {  // invariant : idle <= capacity
++    cache.slots[k][cache.count[k]++] = block;
++    cache.idle += capacity;
++    cache.idle_peak = std::max(cache.idle_peak, cache.idle);
++    return;
++  }
++  ++cache.rejected;
+   unpoison(block, capacity);
+   ::operator delete(block);
+   account.held.fetch_sub(capacity, std::memory_order_relaxed);
+-  return true;
+-}
+-
+-// Sous cache : retient x octets physiques dans held (held <= limit), en rendant des blocs inactifs au systeme tant que
+-// x ne tient pas ; false si x ne tient pas meme cache vide (rien n'est alors retenu).
++}
++
++// Verrou du cache tenu : rend au systeme le plus grand bloc inactif et le retire de held ; false si le cache est vide.
++bool evict_locked(BudgetAccount& account, BlockCache& cache) noexcept {
++  for (u32 k = kCacheClasses; k-- > 0;) {
++    if (cache.count[k] == 0) continue;
++    const u64 capacity = class_capacity(k);
++    void* block = cache.slots[k][--cache.count[k]];
++    cache.idle -= capacity;
++    ++cache.evicted;
++    unpoison(block, capacity);
++    ::operator delete(block);
++    account.held.fetch_sub(capacity, std::memory_order_relaxed);
++    return true;
++  }
++  return false;
++}
++
++// Sous cache : retient x octets physiques dans held (held <= limit). Sans place, rend des blocs inactifs au systeme
++// sous le verrou du cache, et ne refuse qu'apres avoir relu held sous ce verrou, cache vide : une eviction ou la
++// restitution d'un bloc de classe en cours sur un autre fil ne fait jamais refuser une reservation qui tiendra a sa
++// fin. Un bloc exact ou une reservation sans bloc en cours de restitution compte encore dans held, comme sans cache :
++// il appartient a l'etage admis ou a ce qui etait reserve avant lui, et l'engagement de MemoryBudget::admit tient.
+ bool hold(BudgetAccount& account, u64 x) noexcept {
+-  u64 cur = account.held.load(std::memory_order_relaxed);
++  if (x > account.limit) return false;
+   for (;;) {
+-    if (x <= account.limit && cur <= account.limit - x) {
++    u64 cur = account.held.load(std::memory_order_relaxed);
++    if (cur <= account.limit - x) {
+       if (account.held.compare_exchange_weak(cur, cur + x, std::memory_order_relaxed)) return true;
+       continue;
+     }
+-    if (!cache_evict(account)) return false;
+-    cur = account.held.load(std::memory_order_relaxed);
++    const std::lock_guard<std::mutex> lock(account.cache->mutex);
++    if (evict_locked(account, *account.cache)) continue;
++    if (account.held.load(std::memory_order_relaxed) > account.limit - x) return false;
+   }
+ }
+ 
+@@ -191,8 +198,7 @@
+   const u32 k = class_of(bytes);
+   if (k < kCacheClasses) {
+     const u64 capacity = class_capacity(k);
+-    if (void* block = cache_pop(cache, k); block != nullptr) {
+-      count_live(account, capacity);
++    if (void* block = cache_pop(account, k); block != nullptr) {
+       unpoison(block, bytes);
+       reserved = capacity;
+       return block;
+@@ -263,10 +269,7 @@
+   // Un bloc de classe a pour taille reservee la capacite de sa classe ; un bloc exact n'est jamais garde.
+   const u32 k = class_of(reserved);
+   if (k < kCacheClasses && class_capacity(k) == reserved) {
+-    account.used.fetch_sub(reserved, std::memory_order_relaxed);  // vivant -> inactif : held inchange
+-    if (cache_push(*account.cache, k, block)) return;
+-    ::operator delete(block);
+-    account.held.fetch_sub(reserved, std::memory_order_relaxed);
++    release_class(account, k, block);
+     return;
+   }
+   ::operator delete(block);

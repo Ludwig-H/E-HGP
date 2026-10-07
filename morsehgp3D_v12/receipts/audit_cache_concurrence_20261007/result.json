@@ -1,0 +1,91 @@
+{
+  "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "observations": [
+    {
+      "mode": "cached",
+      "observation": {
+        "admitted": 1,
+        "evicted": 1,
+        "finished_before_release": 1,
+        "first_ok": 1,
+        "held": 315392,
+        "second_ok": 0,
+        "used": 315392
+      },
+      "version": "old"
+    },
+    {
+      "mode": "small",
+      "observation": {
+        "admitted": 1,
+        "evicted": 1,
+        "finished_before_release": 1,
+        "first_ok": 1,
+        "held": 315392,
+        "second_ok": 0,
+        "used": 315392
+      },
+      "version": "old"
+    },
+    {
+      "mode": "cached",
+      "observation": {
+        "admitted": 1,
+        "evicted": 1,
+        "finished_before_release": 0,
+        "first_ok": 1,
+        "held": 630784,
+        "second_ok": 1,
+        "used": 630784
+      },
+      "version": "corrected"
+    },
+    {
+      "mode": "small",
+      "observation": {
+        "admitted": 1,
+        "evicted": 1,
+        "finished_before_release": 0,
+        "first_ok": 1,
+        "held": 520192,
+        "second_ok": 1,
+        "used": 520192
+      },
+      "version": "corrected"
+    },
+    {
+      "mode": "cached",
+      "observation": {
+        "admitted": 1,
+        "evicted": 1,
+        "finished_before_release": 0,
+        "first_ok": 1,
+        "held": 630784,
+        "second_ok": 1,
+        "used": 630784
+      },
+      "version": "no_reread"
+    },
+    {
+      "mode": "small",
+      "observation": {
+        "admitted": 1,
+        "evicted": 1,
+        "finished_before_release": 0,
+        "first_ok": 1,
+        "held": 315392,
+        "second_ok": 0,
+        "used": 315392
+      },
+      "version": "no_reread"
+    }
+  ],
+  "scope": "six_bounded_processes_no_sanitizer_no_pipeline_no_GCP",
+  "source_sha256": {
+    "morsehgp3D_v12/src/core/buffer.cpp": "1844a7d6e6d063347ace171be4ca9899669b08b30b2bf2106fa73d9b096c47cd",
+    "morsehgp3D_v12/src/core/buffer.hpp": "3c7fffc6ed97b6456f666ef849ddd6f4f3a1b3f2427c0fc875b7d5edcd14130b",
+    "morsehgp3D_v12/tests/core/alloc_fault.cpp": "c319c957f71342ea91c6cf1326eefb1b87f4062eeaf5c5ba0e6b7dbbb5732c59",
+    "morsehgp3D_v12/tests/core/tests.cmake": "75441d6f2a4f72efcd4d388c72d0e3bc761e82da36e6fb91956557404bf952b5",
+    "morsehgp3D_v12/tests/mutants/core.json": "09c58756f3b8bd86dc7b2bf588c9cebf72e2e06d5c2cbdd440bd767a8bcd9a41"
+  }
+}
