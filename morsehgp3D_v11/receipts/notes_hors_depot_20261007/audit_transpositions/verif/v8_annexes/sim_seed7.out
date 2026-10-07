@@ -1,0 +1,7 @@
+sites 39885 noeuds morton/kd_median/kd_middle 16383 16383 15019 requetes 300 saturees 271 voisinage 12 K 5 secondes 2.3
+A morton    bornes/requete  115.7 tests/requete   50.7 comptes_ok 300 | sature 271 : 106.2 / 47.1 | complet 29 : 204.2 / 83.8
+B morton    bornes/requete   76.9 tests/requete   27.0 comptes_ok 300 | sature 271 : 72.1 / 25.7 | complet 29 : 121.7 / 39.0
+C morton    bornes/requete   76.0 tests/requete   24.8 comptes_ok 300 | sature 271 : 71.2 / 23.3 | complet 29 : 121.7 / 39.0
+E kd_median bornes/requete   62.5 tests/requete   30.7 comptes_ok 300 | sature 271 : 59.0 / 28.8 | complet 29 : 94.7 / 49.3
+F kd_median bornes/requete   33.9 tests/requete   16.2 comptes_ok 300 | sature 271 : 32.9 / 15.4 | complet 29 : 43.8 / 23.1
+G kd_middle bornes/requete   34.3 tests/requete   14.1 comptes_ok 299 | sature 271 : 32.9 / 13.4 | complet 29 : 47.0 / 20.7

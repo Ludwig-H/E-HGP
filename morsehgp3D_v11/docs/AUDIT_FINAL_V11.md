@@ -547,7 +547,7 @@ suiveurs attendent environ 1 s sur 1,22 s.
 | Annonces tous les 1 024 plateaux | publieur 5 ×0,966 pour un seuil de 0,90 ; retiré `06fdf8013` | `annonces_publieurs` |
 | Préchargement du nœud des graines | 0,865 pour un seuil de 0,85 ; retiré `caca9d8d7` | `prechargement_graines` |
 | Préchargements combinés | 0,950 pour 0,90 ; clôtures inchangées ; retiré `4de17f141` | `prechargements_publieurs` |
-| Forêt parallèle (V4/O7) | jamais construite ; précédents négatifs (Borůvka v9 à 1 264,7 ms ; 31–45 % des fusions à la couture) | notes hors dépôt `build/v11-persist/gpu_optim/carte_forets.md` et `build/v11-persist/conception/PISTES_DE_RUPTURE.md` |
+| Forêt parallèle (V4/O7) | jamais construite ; précédents négatifs (Borůvka v9 à 1 264,7 ms ; 31–45 % des fusions à la couture) | `receipts/notes_hors_depot_20261007/gpu_optim/carte_forets.md`, `.../conception/PISTES_DE_RUPTURE.md` |
 
 ### 7.4 Pièges
 
@@ -988,8 +988,9 @@ Le tableau suivant en donne la synthèse.
 - leviers : `developpement_20261006/*` et `developpement_20261007/*` ;
 - audits : `audit_deep_20261004/performance`, `audit_plan_gpu_20261006`.
 
-**Rapports bruts de cet audit** : `receipts/passation_20261007/`. Les notes de travail restées hors dépôt sont
-listées au § 10 de la [passation](../PASSATION.md).
+**Rapports bruts de cet audit** : `receipts/passation_20261007/`. **Notes de travail des workflows, jusqu'ici hors
+dépôt** (cartes GPU et forêts, pistes de rupture, audit des transpositions, synthèse des polyèdres reconnaissables) :
+`receipts/notes_hors_depot_20261007/`, avec la liste de leurs points dépassés et de leurs erreurs connues.
 
 **Canal d'audit** : `audits/`, en particulier `AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md`,
 `AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md` et `REPONSE_CLAUDE_SUPPORTS_20261004.md` (sections A à Y).

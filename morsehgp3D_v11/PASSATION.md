@@ -325,14 +325,16 @@ Ces documents ne sont pas réécrits : ce sont des sources. Les errata sont rele
 
 ## 10. Hors dépôt, hygiène et données
 
-- **Notes de travail hors dépôt**, sur ce codespace seulement, dans `build/v11-persist/` :
+- **Notes de travail jusqu'ici hors dépôt.** Elles sont versées, après une relecture intégrale, dans le reçu
+  [`receipts/notes_hors_depot_20261007/`](receipts/notes_hors_depot_20261007/README.md) :
   - `gpu_optim/` : cartes du catalogue, des forêts, de l'aval, de l'infrastructure, du profil des étages et du GPU
     existant ; plans GPU ;
   - `conception/PISTES_DE_RUPTURE.md` ;
   - `audit_transpositions/` : audit des transpositions v2–v10 vers la v11 ;
   - `polyedres_reconnaissables/SYNTHESE.md`.
 
-  Le plan GPU final est déjà archivé dans `receipts/audit_plan_gpu_20261006/PLAN_GPU_FINAL.snapshot.md`.
+  Ce sont des notes de travail, avec des estimations antérieures aux mesures. Le README du reçu liste les points
+  dépassés et les erreurs connues. Les images et les données réelles restent hors dépôt.
 - **Paquets de sessions G4** : `/workspaces/.ehgp-sessions/` et le bloc-notes de la session de développement. Ils
   sont volatils ; les reçus du dépôt en conservent l'essentiel.
 - **Identité du compte GCP.** L'adresse électronique du compte figure dans 143 fichiers de reçus (champs `user`,

@@ -1,0 +1,21 @@
+parametres {'n': 8, 'kmax': 3, 'span': 9, 'seed': 4102026, 'surfaces_par_nuage': 240}
+clouds       150
+ma           43048
+ma_caught    13229
+mb           27754
+mb_caught    13539
+mc           7838
+mc_caught    2922
+nodes        8465
+orders       450
+s_equal      1109
+s_pairs      27754
+s_violations 0
+surfaces     36000
+t1_checks    378772
+t2_checks    89935
+t3_checks    96604
+violations   0
+minorant de tranche / niveau LCA (paires de naissances, niveau > 0) : mediane 0.495, q10 0.318, part = 1 : 0.002
+majorant de segment / niveau LCA : mediane 1.162, q90 1.444, part = 1 : 0.040
+code 0

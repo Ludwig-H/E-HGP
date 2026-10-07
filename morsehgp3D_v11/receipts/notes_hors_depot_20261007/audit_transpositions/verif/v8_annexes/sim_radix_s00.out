@@ -1,0 +1,10 @@
+noeuds radix 16523
+sites 39885 noeuds morton/kd_median/kd_middle 16383 16383 15019 requetes 500 saturees 442 voisinage 12 K 5 secondes 2.6
+A morton    bornes/requete  113.9 tests/requete   50.3 comptes_ok 500 | sature 442 : 103.0 / 45.6 | complet 58 : 197.4 / 85.8
+B morton    bornes/requete   75.7 tests/requete   26.0 comptes_ok 500 | sature 442 : 69.0 / 24.2 | complet 58 : 126.8 / 39.8
+R radix     bornes/requete   59.1 tests/requete   24.8 comptes_ok 500 | sature 442 : 54.7 / 23.0 | complet 58 : 92.0 / 39.1
+S radix     bornes/requete   39.8 tests/requete   14.0 comptes_ok 499 | sature 442 : 37.9 / 13.3 | complet 58 : 54.5 / 18.9
+C morton    bornes/requete   78.5 tests/requete   24.9 comptes_ok 500 | sature 442 : 72.1 / 23.0 | complet 58 : 126.8 / 39.8
+E kd_median bornes/requete   61.5 tests/requete   31.0 comptes_ok 500 | sature 442 : 56.6 / 28.7 | complet 58 : 98.8 / 48.4
+F kd_median bornes/requete   34.1 tests/requete   16.7 comptes_ok 500 | sature 442 : 32.7 / 15.9 | complet 58 : 44.4 / 22.8
+G kd_middle bornes/requete   34.6 tests/requete   14.8 comptes_ok 500 | sature 442 : 33.1 / 14.1 | complet 58 : 45.8 / 20.5

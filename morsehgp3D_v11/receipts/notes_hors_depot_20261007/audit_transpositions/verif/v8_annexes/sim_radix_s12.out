@@ -1,0 +1,14 @@
+== scene_01
+noeuds radix 14583
+A morton    bornes/requete  100.2 tests/requete   51.9 comptes_ok 500 | sature 448 : 94.0 / 48.8 | complet 52 : 153.4 / 78.3
+B morton    bornes/requete   67.0 tests/requete   27.9 comptes_ok 500 | sature 448 : 62.4 / 26.3 | complet 52 : 106.3 / 41.9
+R radix     bornes/requete   54.7 tests/requete   24.3 comptes_ok 500 | sature 448 : 52.7 / 23.1 | complet 52 : 72.6 / 34.4
+S radix     bornes/requete   38.2 tests/requete   14.1 comptes_ok 499 | sature 448 : 36.8 / 13.7 | complet 52 : 50.3 / 18.3
+G kd_middle bornes/requete   32.7 tests/requete   14.0 comptes_ok 499 | sature 448 : 31.7 / 13.3 | complet 52 : 41.1 / 19.2
+== scene_02
+noeuds radix 18325
+A morton    bornes/requete  103.5 tests/requete   55.0 comptes_ok 500 | sature 449 : 95.6 / 51.8 | complet 51 : 172.5 / 83.0
+B morton    bornes/requete   67.0 tests/requete   27.6 comptes_ok 500 | sature 449 : 62.5 / 26.4 | complet 51 : 107.3 / 38.0
+R radix     bornes/requete   58.4 tests/requete   24.8 comptes_ok 500 | sature 449 : 55.7 / 23.8 | complet 51 : 82.1 / 33.5
+S radix     bornes/requete   39.8 tests/requete   14.4 comptes_ok 499 | sature 449 : 38.6 / 13.9 | complet 51 : 50.5 / 19.1
+G kd_middle bornes/requete   33.8 tests/requete   14.2 comptes_ok 499 | sature 449 : 32.7 / 13.7 | complet 51 : 43.4 / 18.9
