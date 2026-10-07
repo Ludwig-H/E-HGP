@@ -1,0 +1,428 @@
+{
+  "dependencies_sha256": {
+    "audit_reponses_20261007/m6_integration/check.py": "66196469e68ad11909b01c6d0ad2b690a7724948ed45a165b4714d1e89f307b2",
+    "audit_reponses_20261007/m6_integration/refus_null.patch": "b879b3b541ee67ba12b4b9e07847304b75a2ea6dafc8dba3f38aa43d6618cf19",
+    "audit_reponses_20261007/m6_integration/sources.json": "7eb1e47697a36d85ee983e9877208ad1164bf06f8f177742125fa5014e43911b",
+    "audit_reponses_20261007/m6_proposition/check.py": "4c7c055587d00d6b2322fdf4831d05b56e11df2c5f15697025b277e378380ab4",
+    "audit_reponses_20261007/m6_proposition/proposition.patch": "1a08ae75aa314b5c0db1084e42326c7668c70bb4e66c1b443e40b92be1fdc7ee",
+    "audit_reponses_20261007/m6_proposition/sources.json": "ce224e2d1ae53681b9cd880d94283b4891bbbea2cf4568eae08043bc8b0686f8"
+  },
+  "mutant_matrix_executed": false,
+  "native_execution": false,
+  "observations": [
+    {
+      "before": {
+        "code": 0,
+        "lignes": 585,
+        "limites_declarees": 0,
+        "prises": 9,
+        "refus": [],
+        "verdict": "mes_m6_ok"
+      },
+      "cas": "temoin_complet",
+      "published_e501": {
+        "code": 0,
+        "lignes": 585,
+        "limites_declarees": 0,
+        "prises": 9,
+        "refus": [],
+        "verdict": "mes_m6_ok"
+      }
+    },
+    {
+      "before": {
+        "code": 0,
+        "lignes": 520,
+        "limites_declarees": 0,
+        "prises": 8,
+        "refus": [],
+        "verdict": "mes_m6_ok"
+      },
+      "cas": "indice_false",
+      "published_e501": {
+        "code": 3,
+        "lignes": 520,
+        "limites_declarees": 0,
+        "prises": 8,
+        "refus": [
+          "prise d identifiant illisible ou hors plage : mode 'spin', processus False",
+          "prises validees 8 sur 9 attendues (absentes : spin 0)",
+          "verdict publie 'mes_m6_ok', rejuge mes_m6_echec"
+        ],
+        "verdict": "mes_m6_echec"
+      }
+    },
+    {
+      "before": {
+        "code": 0,
+        "lignes": 520,
+        "limites_declarees": 0,
+        "prises": 8,
+        "refus": [],
+        "verdict": "mes_m6_ok"
+      },
+      "cas": "indice_float",
+      "published_e501": {
+        "code": 3,
+        "lignes": 520,
+        "limites_declarees": 0,
+        "prises": 8,
+        "refus": [
+          "prise d identifiant illisible ou hors plage : mode 'spin', processus 0.0",
+          "prises validees 8 sur 9 attendues (absentes : spin 0)",
+          "verdict publie 'mes_m6_ok', rejuge mes_m6_echec"
+        ],
+        "verdict": "mes_m6_echec"
+      }
+    },
+    {
+      "before": {
+        "code": 0,
+        "lignes": 0,
+        "limites_declarees": 0,
+        "prises": 0,
+        "refus": [],
+        "verdict": "mes_m6_ok"
+      },
+      "cas": "indices_float_sans_fichiers",
+      "published_e501": {
+        "code": 3,
+        "lignes": 0,
+        "limites_declarees": 0,
+        "prises": 0,
+        "refus": [
+          "prise d identifiant illisible ou hors plage : mode 'spin', processus 0.0",
+          "prise d identifiant illisible ou hors plage : mode 'yield', processus 0.0",
+          "prise d identifiant illisible ou hors plage : mode 'blocking', processus 0.0",
+          "prise d identifiant illisible ou hors plage : mode 'spin', processus 1.0",
+          "prise d identifiant illisible ou hors plage : mode 'yield', processus 1.0",
+          "prise d identifiant illisible ou hors plage : mode 'blocking', processus 1.0",
+          "prise d identifiant illisible ou hors plage : mode 'spin', processus 2.0",
+          "prise d identifiant illisible ou hors plage : mode 'yield', processus 2.0",
+          "prise d identifiant illisible ou hors plage : mode 'blocking', processus 2.0",
+          "prises validees 0 sur 9 attendues (absentes : spin 0, yield 0, blocking 0, spin 1, yield 1, blocking 1, spin 2, yield 2, blocking 2)",
+          "verdict publie 'mes_m6_ok', rejuge mes_m6_echec"
+        ],
+        "verdict": "mes_m6_echec"
+      }
+    },
+    {
+      "before": {
+        "code": 0,
+        "lignes": 585,
+        "limites_declarees": 3,
+        "prises": 9,
+        "refus": [],
+        "verdict": "mes_m6_ok"
+      },
+      "cas": "schema_inconnu_refus_explicite",
+      "published_e501": {
+        "code": 3,
+        "lignes": 0,
+        "limites_declarees": 0,
+        "prises": 0,
+        "refus": [
+          "schema 'ehgp.v12.mes_m6.v999' inconnu : seuls ehgp.v12.mes_m6.v1 (historique) et ehgp.v12.mes_m6.v2 sont lus"
+        ],
+        "verdict": "mes_m6_echec"
+      }
+    },
+    {
+      "before": {
+        "code": 0,
+        "lignes": 585,
+        "limites_declarees": 0,
+        "prises": 9,
+        "refus": [],
+        "verdict": "mes_m6_ok"
+      },
+      "cas": "code_compilation_false",
+      "published_e501": {
+        "code": 3,
+        "lignes": 585,
+        "limites_declarees": 0,
+        "prises": 9,
+        "refus": [
+          "compilation absente, en echec ou de code mal type",
+          "verdict publie 'mes_m6_ok', rejuge mes_m6_echec"
+        ],
+        "verdict": "mes_m6_echec"
+      }
+    },
+    {
+      "before": {
+        "code": 0,
+        "lignes": 585,
+        "limites_declarees": 0,
+        "prises": 9,
+        "refus": [],
+        "verdict": "mes_m6_ok"
+      },
+      "cas": "code_prise_false",
+      "published_e501": {
+        "code": 3,
+        "lignes": 520,
+        "limites_declarees": 0,
+        "prises": 8,
+        "refus": [
+          "prise spin 0 : code False",
+          "prises validees 8 sur 9 attendues (absentes : spin 0)",
+          "verdict publie 'mes_m6_ok', rejuge mes_m6_echec"
+        ],
+        "verdict": "mes_m6_echec"
+      }
+    },
+    {
+      "before": {
+        "code": 0,
+        "lignes": 585,
+        "limites_declarees": 0,
+        "prises": 9,
+        "refus": [],
+        "verdict": "mes_m6_ok"
+      },
+      "cas": "code_compilation_float",
+      "published_e501": {
+        "code": 3,
+        "lignes": 585,
+        "limites_declarees": 0,
+        "prises": 9,
+        "refus": [
+          "compilation absente, en echec ou de code mal type",
+          "verdict publie 'mes_m6_ok', rejuge mes_m6_echec"
+        ],
+        "verdict": "mes_m6_echec"
+      }
+    },
+    {
+      "before": {
+        "code": 0,
+        "lignes": 585,
+        "limites_declarees": 0,
+        "prises": 9,
+        "refus": [],
+        "verdict": "mes_m6_ok"
+      },
+      "cas": "code_prise_float",
+      "published_e501": {
+        "code": 3,
+        "lignes": 520,
+        "limites_declarees": 0,
+        "prises": 8,
+        "refus": [
+          "prise spin 0 : code 0.0",
+          "prises validees 8 sur 9 attendues (absentes : spin 0)",
+          "verdict publie 'mes_m6_ok', rejuge mes_m6_echec"
+        ],
+        "verdict": "mes_m6_echec"
+      }
+    },
+    {
+      "before": {
+        "code": 3,
+        "lignes": 520,
+        "limites_declarees": 0,
+        "prises": 8,
+        "refus": [
+          "prises manquantes, en double ou en trop (9 pour 9)",
+          "prise spin -1 illisible : [Errno 2] No such file or directory: '<dossier>/m6_spin_-1.jsonl'",
+          "verdict publie 'mes_m6_ok', rejuge mes_m6_echec"
+        ],
+        "verdict": "mes_m6_echec"
+      },
+      "cas": "indice_negatif",
+      "published_e501": {
+        "code": 3,
+        "lignes": 520,
+        "limites_declarees": 0,
+        "prises": 8,
+        "refus": [
+          "prise d identifiant illisible ou hors plage : mode 'spin', processus -1",
+          "prises validees 8 sur 9 attendues (absentes : spin 0)",
+          "verdict publie 'mes_m6_ok', rejuge mes_m6_echec"
+        ],
+        "verdict": "mes_m6_echec"
+      }
+    },
+    {
+      "before": {
+        "code": 3,
+        "lignes": 520,
+        "limites_declarees": 0,
+        "prises": 8,
+        "refus": [
+          "prises manquantes, en double ou en trop (9 pour 9)",
+          "prise spin 3 illisible : [Errno 2] No such file or directory: '<dossier>/m6_spin_3.jsonl'",
+          "verdict publie 'mes_m6_ok', rejuge mes_m6_echec"
+        ],
+        "verdict": "mes_m6_echec"
+      },
+      "cas": "indice_hors_plage",
+      "published_e501": {
+        "code": 3,
+        "lignes": 520,
+        "limites_declarees": 0,
+        "prises": 8,
+        "refus": [
+          "prise d identifiant illisible ou hors plage : mode 'spin', processus 3",
+          "prises validees 8 sur 9 attendues (absentes : spin 0)",
+          "verdict publie 'mes_m6_ok', rejuge mes_m6_echec"
+        ],
+        "verdict": "mes_m6_echec"
+      }
+    },
+    {
+      "before": {
+        "code": 0,
+        "lignes": 585,
+        "limites_declarees": 3,
+        "prises": 9,
+        "refus": [],
+        "verdict": "mes_m6_ok"
+      },
+      "cas": "schema_absent",
+      "published_e501": {
+        "code": 3,
+        "lignes": 0,
+        "limites_declarees": 0,
+        "prises": 0,
+        "refus": [
+          "schema None inconnu : seuls ehgp.v12.mes_m6.v1 (historique) et ehgp.v12.mes_m6.v2 sont lus"
+        ],
+        "verdict": "mes_m6_echec"
+      }
+    },
+    {
+      "before": {
+        "code": 0,
+        "lignes": 585,
+        "limites_declarees": 3,
+        "prises": 9,
+        "refus": [],
+        "verdict": "mes_m6_ok"
+      },
+      "cas": "schema_null",
+      "published_e501": {
+        "code": 3,
+        "lignes": 0,
+        "limites_declarees": 0,
+        "prises": 0,
+        "refus": [
+          "schema None inconnu : seuls ehgp.v12.mes_m6.v1 (historique) et ehgp.v12.mes_m6.v2 sont lus"
+        ],
+        "verdict": "mes_m6_echec"
+      }
+    },
+    {
+      "before": {
+        "code": 0,
+        "lignes": 585,
+        "limites_declarees": 3,
+        "prises": 9,
+        "refus": [],
+        "verdict": "mes_m6_ok"
+      },
+      "cas": "schema_liste",
+      "published_e501": {
+        "code": 3,
+        "lignes": 0,
+        "limites_declarees": 0,
+        "prises": 0,
+        "refus": [
+          "schema [] inconnu : seuls ehgp.v12.mes_m6.v1 (historique) et ehgp.v12.mes_m6.v2 sont lus"
+        ],
+        "verdict": "mes_m6_echec"
+      }
+    },
+    {
+      "before": {
+        "code": 0,
+        "lignes": 585,
+        "limites_declarees": 3,
+        "prises": 9,
+        "refus": [],
+        "verdict": "mes_m6_ok"
+      },
+      "cas": "v1_refus_explicite",
+      "published_e501": {
+        "code": 3,
+        "lignes": 0,
+        "limites_declarees": 0,
+        "prises": 0,
+        "refus": [
+          "rapport v1 aux champs differents du format historique (binary_sha256, cleared, isolation_start, processes, refusals, reps, sources_sha256, summary_median_us, verdict)"
+        ],
+        "verdict": "mes_m6_echec"
+      }
+    }
+  ],
+  "official_gate": {
+    "cas": 68,
+    "code": 0,
+    "ecarts": [],
+    "historical_v1": {
+      "cas": "rejuge_session_g4_a",
+      "code": 0,
+      "code_publie": 0,
+      "lignes": 585,
+      "medianes_egales_auditeur": true,
+      "non_rejouable": 3,
+      "prises": 9,
+      "verdict": "mes_m6_ok"
+    }
+  },
+  "rapport_null": {
+    "before": {
+      "code": 0,
+      "lignes": 0,
+      "limites_declarees": 0,
+      "prises": 0,
+      "refus": [],
+      "verdict": "mes_m6_ok"
+    },
+    "proposition_03ccabaf": {
+      "code": 3,
+      "lignes": 0,
+      "limites_declarees": 0,
+      "prises": 0,
+      "refus": [
+        "rapport hors schema"
+      ],
+      "verdict": "mes_m6_echec"
+    },
+    "proposition_refus_null": {
+      "code": 3,
+      "lignes": 0,
+      "limites_declarees": 0,
+      "prises": 0,
+      "refus": [
+        "rapport hors schema"
+      ],
+      "verdict": "mes_m6_echec"
+    },
+    "published_e501": {
+      "code": 0,
+      "lignes": 0,
+      "limites_declarees": 0,
+      "prises": 0,
+      "refus": [],
+      "verdict": "mes_m6_ok"
+    }
+  },
+  "scope": "anciens residus corriges; null accepte sans prise par e50114adf",
+  "sources": {
+    "parent": "e545ebaaf38ac38c9faf03b78446eecff3708c0d",
+    "patch_sha256": "b879b3b541ee67ba12b4b9e07847304b75a2ea6dafc8dba3f38aa43d6618cf19",
+    "patched_driver_sha256": "f90b56a7ee31345642f87c7319cc979d8533966c2fbac275e2e17130092e7498",
+    "pin": "e50114adf7dc5178a56fb77049a747ae83fca82b",
+    "proposition_previous_sha256": "03ccabafd64c5edb59fddb6d5266e5c9c46ebfd6eb388e035aeb6f943c1ec0f2",
+    "scope": "contre-audit produit publie; proposition null hors produit",
+    "sources_sha256": {
+      "morsehgp3D_v12/microbancs/README.md": "183103b7d0d83c336340aa55aa55db6ba16908cae68b0b4a625ecded815a2ce2",
+      "morsehgp3D_v12/microbancs/mes_m6_session/mes_m6_session_cost.cu": "49c6afc51d48e124c866e509700764a59150410d7664fabdadf14ee41887dff1",
+      "morsehgp3D_v12/microbancs/mes_m6_session/run_m6.py": "6df285c7c1d2f0e7e790cad2c4bd191f5348ef413ec02590c4f2d18e765badc2",
+      "morsehgp3D_v12/microbancs/mes_m6_session/tests/test_juge_m6.py": "57383f1f081956b252dbf5b1fdf830f28413ef8f6b9fcf96db902765b01b698a",
+      "morsehgp3D_v12/microbancs/outils/mutants_juges.py": "f6616c4f90f0976d24c8d39470eca0298a33872e759ef69952865a6a9cd83cdc"
+    }
+  }
+}

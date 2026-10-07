@@ -1,0 +1,15 @@
+{
+  "capture_sha256": "c9a5d87581d2e98603fe143af579f89d047d503100157add40a1d7c848c7ec15",
+  "mutant_matrix_executed": false,
+  "native_execution": false,
+  "no_gcp": true,
+  "normal_code": 0,
+  "normal_optimized_identical": true,
+  "null_proposed_code": 3,
+  "null_published_code": 0,
+  "official_gate_cases_per_mode": 68,
+  "official_gate_errors": 0,
+  "optimized_code": 0,
+  "pin": "e50114adf7dc5178a56fb77049a747ae83fca82b",
+  "prior_cases_per_mode": 15
+}
