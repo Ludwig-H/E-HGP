@@ -11,9 +11,10 @@ les mutants de la porte par vacuite ; un temoin en echec fait echouer l'outil (T
 Portes : m2 (mes_m2_feuille/tests/test_juge_m2.py, sorties reelles de la session A) ; tour (mes_m3_m4_tour/tests/
 test_pilote.py, sessions B et D) ; m4 (mutants natifs de mhgp12_mes_m4, compiles par g++ -std=c++20 -Wall -Wextra
 -Wpedantic -Werror et joues par tests/test_m4_preuves.py) ; m5 (mes_m5_parcours/tests/test_juge_m5.py, session C) ;
-m5_format (porte du lecteur strict host/format_selftest.cpp, CST-0223, compilee) ; m5_unit (portes unitaires de
-host/traversal_identity.cpp --unit, CST-0222 : code 3 et "ok":false = tue) ; m6 (mes_m6_session/tests/
-test_juge_m6.py, session A).
+m5_format (porte du lecteur strict host/format_selftest.cpp, CST-0223, compilee) ; m5_driver (porte de l'ordre des
+gardes du parcours host/driver_selftest.cpp, compilee : ni reservation, ni noyau, ni allocation de l'hote apres les
+totaux d'un niveau refuse) ; m5_unit (portes unitaires de host/traversal_identity.cpp --unit, CST-0222 : code 3 et
+"ok":false = tue) ; m6 (mes_m6_session/tests/test_juge_m6.py, session A).
 
 Gardes doublees, tuees seulement ensemble (retiree seule, l'autre refuse encore ; mutant combine) : effacement de la
 cible et jeton de session (MES-M2, MES-M5) ; passes v11 exigees et repli sur la passe froide, garde de contrat du juge
@@ -42,6 +43,7 @@ M4 = 'mes_m3_m4_tour/mes_m4/mes_m4.cpp'
 M5 = 'mes_m5_parcours/scripts/g4_traversal_bench.py'
 M5_FORMAT = 'mes_m5_parcours/include/mhgp12/traversal/format.hpp'
 M5_BFS = 'mes_m5_parcours/include/mhgp12/traversal/bfs.hpp'
+M5_DRIVER = 'mes_m5_parcours/include/mhgp12/traversal/driver.hpp'
 M6 = 'mes_m6_session/run_m6.py'
 RECUS = ('--recu-g4-m2', '--recu-g4-tour', '--recu-g4-tour-d', '--recu-g4-m5', '--recu-g4-m6')
 
@@ -154,6 +156,20 @@ MUTANTS = [
     ('m5_reservation_admise', M5, [("  if r.get('timed_allocations') != 0:", '  if False:')], 'm5'),
     ('m5_code_et_identite_discordants', M5, [("        if gpu is not None and (code == 0) != (gpu['gpu_identity'] is "
                                               "True):", '        if False:')], 'm5'),
+    # MES-M5 : preuves incoherentes ou incompletes (recu audit_juges_emst_20261007/juges), une garde par mutant.
+    ('m5_identite_sans_recoupement', M5, [("  if c['identity']:\n    faults = ", "  if False:\n    faults = ")], 'm5'),
+    ('m5_grand_livre_facultatif', M5, [("  if not ledger_ok(c.get('ledger')):\n    return 'grand livre absent ou "
+                                        "illisible'\n", '')], 'm5'),
+    ('m5_empreintes_non_typees', M5, [("  for key in ('digest', 'reference_digest'):\n    if not isinstance(c.get(key), "
+                                       "str) or not HEX_DIGEST.match(c[key]):\n      return 'empreinte %s absente ou "
+                                       "illisible' % key\n", '')], 'm5'),
+    ('m5_feuilles_de_reference_libres', M5, [("  if c['reference_leaves'] != ident.get('n_leaves'):", '  if False:')],
+     'm5'),
+    ('m5_empreinte_croisee_ignoree', M5, [("  if reference_digest is not None and c['reference_digest'] != "
+                                           "reference_digest:", '  if False:')], 'm5'),
+    ('m5_mesures_non_comptees', M5, [('    if not isinstance(values, list) or len(values) != reps or not '
+                                      "finite_positive(values):\n      return None, 'mesures %s absentes",
+                                      "    if False:\n      return None, 'mesures %s absentes")], 'm5'),
     # MES-M5 : lecteur strict (CST-0223) et emission des taches (CST-0222), natifs.
     ('m5_lecteur_tests_g1_non_bornes', M5_FORMAT, [('    if (!tests_in_bounds(n.tests, n.candidates, h.kmax))',
                                                     '    if (false)')], 'm5_format'),
@@ -165,6 +181,9 @@ MUTANTS = [
                                                       '    if (false) return fail')], 'm5_format'),
     ('m5_emission_taches_u32', M5_BFS, [('      q.tasks = static_cast<u32>(tasks_of(o.count));',
                                          '      q.tasks = (o.count + kChunk - 1) / kChunk;')], 'm5_unit'),
+    # MES-M5 : diagnostic stats reserve avant la boucle (recu audit_juges_emst_20261007/m5), natif.
+    ('m5_stats_alloue_avant_la_garde', M5_DRIVER, [('    if (keep_stats) res.stats.reserve(max_depth + 1);\n', '')],
+     'm5_driver'),
     # MES-M6 : pilote (CST-0018, complement de pilote du recu audit_session_t1_20261007/m6).
     ('m6_prises_non_lues', M6, [('def check_take(text, mode, reps):\n',
                                  'def check_take(text, mode, reps):\n  return []\n')], 'm6'),
@@ -189,9 +208,26 @@ MUTANTS = [
                                             '        if False:')], 'm6'),
     ('m6_rejuge_code_ignore', M6, [("      found = (['code %r' % r.get('code')] if r.get('code') != 0 else []) + "
                                     "check_take(text, mode, reps)", '      found = check_take(text, mode, reps)')], 'm6'),
-    ('m6_rejuge_isolation_ignoree', M6, [("        if not all(isinstance(r.get(side), dict) and r[side].get('quiet') "
-                                          "is True\n                   for side in ('isolation_before', "
-                                          "'isolation_after')):", '        if False:')], 'm6'),
+    ('m6_rejuge_isolation_ignoree', M6, [('    why = isolation_problem(r.get(side), label)\n    if why is not None:\n'
+                                          '      found.append(why)\n', '    pass\n')], 'm6'),
+    # MES-M6 : relecture stricte d'un rapport v2 (recu audit_juges_emst_20261007/juges), une garde par mutant.
+    ('m6_rejuge_schema_ignore', M6, [("  for key, kind in REPORT_V2_FIELDS:\n    if not isinstance(report.get(key), "
+                                      "kind):\n      problems.append('champ %s absent ou illisible' % key)\n", '')],
+     'm6'),
+    ('m6_rejuge_binaire_non_type', M6, [("  if not is_sha256(report.get('binary_sha256')):", '  if False:')], 'm6'),
+    ('m6_rejuge_sources_non_typees', M6, [("  if not isinstance(sources, dict) or sorted(sources) != sorted(SOURCES) or "
+                                           "\\\n      not all(is_sha256(v) for v in sources.values()):",
+                                           '  if False:')], 'm6'),
+    ('m6_rejuge_isolation_contredite_admise', M6, [("  if record['quiet'] != (record['code'] == 0 and "
+                                                    "record['processes'].strip() == ''):", '  if False:')], 'm6'),
+    ('m6_rejuge_isolation_du_debut_ignoree', M6, [("  why = isolation_problem(report.get('isolation_start'), 'du "
+                                                   "debut')\n  if why is not None:\n    problems.append(why)\n", '')],
+     'm6'),
+    ('m6_rejuge_refus_publies_ignores', M6, [('  if isinstance(refusals, list) and refusals:', '  if False:')], 'm6'),
+    ('m6_rejuge_prise_non_conforme_admise', M6, [("  if r.get('problems') != [] or r.get('conform') is not True:",
+                                                  '  if False:')], 'm6'),
+    ('m6_rejuge_medianes_non_recoupees', M6, [("    if v2 and not problems and report.get('summary_median_us') != "
+                                               "summary(takes):", '    if False:')], 'm6'),
 ]
 
 
@@ -231,20 +267,21 @@ def jouer_porte(porte, racine, copie, options, cxx, python):
         if erreur is not None:
             return None, '', '', erreur
         return run([python, '-S', '-O', racine / 'mes_m3_m4_tour/tests/test_m4_preuves.py', '--binaire', exe]) + (None,)
-    source = 'host/format_selftest.cpp' if porte == 'm5_format' else 'host/traversal_identity.cpp'
+    source = {'m5_format': 'host/format_selftest.cpp', 'm5_driver': 'host/driver_selftest.cpp'}.get(
+        porte, 'host/traversal_identity.cpp')
     exe = copie / ('mhgp12_' + porte)
     erreur = compiler(cxx, ['-DMHGP12_COORD_BITS=21', racine / 'mes_m5_parcours' / source], exe,
                       [racine / 'mes_m5_parcours/include', racine / 'mes_m2_feuille/include'])
     if erreur is not None:
         return None, '', '', erreur
-    if porte == 'm5_format':
+    if porte in ('m5_format', 'm5_driver'):
         dossier = copie / 'vidages'
         dossier.mkdir(exist_ok=True)
-        code, out, err = run([exe, dossier])
+        code, out, err = run([exe, dossier] if porte == 'm5_format' else [exe])
         bilan = [json.loads(l) for l in out.splitlines() if l.startswith('{"porte"')]
         ecarts = bilan[-1].get('ecarts') if bilan else None
         if isinstance(ecarts, int):  # bilan natif : nombre d'ecarts
-            out += '\n' + json.dumps({'ecarts': ['%d cas du lecteur differents de l attendu' % ecarts] if ecarts else []})
+            out += '\n' + json.dumps({'ecarts': ['%d cas de la porte differents de l attendu' % ecarts] if ecarts else []})
         return code, out, err, None
     code, out, err = run([exe, '--unit'])
     if code == 3 and '"ok":false' in out:  # porte unitaire en echec : le mutant est tue

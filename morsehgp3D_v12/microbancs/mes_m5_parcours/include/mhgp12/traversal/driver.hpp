@@ -79,6 +79,11 @@ struct Driver {
   RunResult run(const u32* hx, const u32* hy, const u32* hz, Hook& hook) {
     RunResult res;
     const u64 n = n_sites;
+    // Diagnostic par niveau reserve d'avance, borne fixe independante des totaux (au plus max_depth + 1 niveaux) :
+    // aucune allocation, meme sur l'hote, entre la lecture des totaux d'un niveau et ses gardes wide_leaf et capacite
+    // (observation de l'auditeur, recu audit_juges_emst_20261007/m5 ; porte host/driver_selftest.cpp).
+    const u64 max_depth = 3 * u64{params.coord_bits};
+    if (keep_stats) res.stats.reserve(max_depth + 1);
     // Racine : enveloppe [min, max+1) et repere de sa fermeture.
     bfs::Parent root{};
     u32 lo[3] = {hx[0], hy[0], hz[0]}, hi[3] = {hx[0], hy[0], hz[0]};
@@ -107,7 +112,6 @@ struct Driver {
     res.allocations += b.ensure(list[cur], n) + b.ensure(totals, 1);
     b.launch(bfs::IotaKernel{list[cur].data(), n}, (n + bfs::kTile - 1) / bfs::kTile);
     u64 n_parents = 1, n_tasks = root.tasks, leaf_count = 0, site_count = 0;
-    const u64 max_depth = 3 * u64{params.coord_bits};
     for (u32 depth = 0;; ++depth) {
       if (depth > max_depth) {  // prepare_node de la v11 : depth > kMaxDepth
         res.status = kStatusDepth;
@@ -169,7 +173,7 @@ struct Driver {
         s.splits = t.f[0];
         s.leaves = t.f[3];
         s.next_list = t.f[1];
-        res.stats.push_back(s);
+        res.stats.push_back(s);  // capacite reservee avant la boucle : jamais de reallocation ici
       }
       if (t.max_leaf > params.max_leaf) {  // run_ready de la v11 : wide_leaf
         res.status = kStatusWideLeaf;

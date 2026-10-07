@@ -7,10 +7,11 @@
 >
 > **Correctifs du 7 octobre (constats `CST-0216` à `CST-0218` de l'auditeur Codex).** Le pilote de rejeu cherche ses
 > outils à côté de lui et se rejoue à blanc (`outils`) ; `verify_inputs.py` refuse un manifeste vide ou un fichier sans
-> empreinte valide ; les découpes sont des carrés fermés qui ne tranchent jamais une colonne (§ 3). **Les 69 découpes du
-> § 3 ont été produites par la règle antérieure (les N premiers sites, frontière tronquée) : elles sont à rejouer**
-> (étape `crops`, puis `bundles`) ; leurs comptes, retours couverts et empreintes changeront, pas les rayons ni les
-> côtés des carrés, ni les scènes entières.
+> empreinte valide ; les découpes sont des carrés fermés qui ne tranchent jamais une colonne (§ 3). Les 69 découpes
+> du § 3 ont été **régénérées par la règle corrigée** le 7 octobre (rejeu complet de 17 h 43 à 18 h 00 UTC, étapes
+> `crops`, `verify` et `bundles` comprises, zéro écart de `verify_inputs.py` sur les quatre manifestes et les quatre
+> paquets) : comptes réels, retours couverts et empreintes publiés au § 3 ; rayons, côtés des carrés, bits et scènes
+> entières inchangés.
 
 
 7 octobre 2026 (heures UTC lues par `date -u`). Dossier hors dépôt :
@@ -142,10 +143,13 @@ et le dépasse quand plusieurs sites sont à la distance $r_N$ ; $N$ est publié
 nom (`_c1M`, …). Les rayons croissent avec $N$, donc les découpes restent emboîtées. Une découpe dont le carré
 couvrirait toute la scène est sautée. Le rayon publié (`crop.radius_chebyshev_mm`) est le même qu'avec la règle
 antérieure, qui gardait les $N$ premiers sites de l'ordre (distance, distance euclidienne horizontale, rang) et pouvait
-couper le dernier anneau, jusque dans une colonne. **Les tables de découpes ci-dessous ont été produites par cette
-règle antérieure** : la colonne « Sites distincts » y vaut exactement $N$ et les empreintes sont à remplacer après le
-rejeu ; les côtés des carrés ne changent pas. Mesuré en lecture seule sur les données préparées le 7 octobre : les 69
-découpes tronquaient leur anneau frontière (de 2 à 6 287 sites de plus selon la découpe) ; toutes changeront.
+couper le dernier anneau, jusque dans une colonne. Les tables de découpes ci-dessous viennent des manifestes du
+rejeu du 7 octobre par la règle exacte (étape `crops`, 17 h 52 UTC) : « Taille visée » est $N$
+(`crop.target_sites`), « Sites distincts » le compte réel (`count`), « Retours couverts » la somme des multiplicités
+(`returns`). Le compte réel dépasse $N$ de 2 à 6 287 sites selon la découpe (IGN 5 à 317, ETH3D 109 à 3 586,
+FOR-instance 65 à 6 287, Boreas 2 à 308) : c'est l'anneau frontière que la règle antérieure tronquait. Rayons (donc
+côtés des carrés) et bits sont ceux de la règle antérieure ; les 69 empreintes ont changé, pas celles des 24 scènes
+entières.
 
 ### 3.1 IGN LiDAR HD (aérien)
 
@@ -158,29 +162,29 @@ découpes tronquaient leur anneau frontière (de 2 à 6 287 sites de plus selon 
 | `ign_paris_0651_6863` | 14 552 516 | 14 551 520 | 996 | 1000.0 × 1000.0 × 112.1 | 20 | `1eb625c14b8e1cca` | `8d89af8dcc4fd55f` |
 | `ign_paris_0651_6863_sans_sol` | 9 111 862 | 9 111 422 | 440 | 1000.0 × 1000.0 × 112.1 | 20 | `4c8ee30f1cc964c6` | `7ec5de4be28c4cc8` |
 
-| Découpe | Sites distincts | Retours couverts | Côté du carré (m) | Bits | SHA-256 (16) |
-| --- | ---: | ---: | ---: | ---: | --- |
-| `ign_lyon_0842_6521_c1M` | 1 000 000 | 1 000 099 | 163.2 | 18 | `e773b4edbf03b09c` |
-| `ign_lyon_0842_6521_c2M` | 2 000 000 | 2 000 202 | 230.7 | 18 | `5d3a7704e72d2a56` |
-| `ign_lyon_0842_6521_c4M` | 4 000 000 | 4 000 377 | 324.8 | 19 | `81681a1b64e30c10` |
-| `ign_lyon_0842_6521_c8M` | 8 000 000 | 8 000 688 | 463.6 | 19 | `1c6699ce5e313887` |
-| `ign_lyon_0842_6521_sans_sol_c1M` | 1 000 000 | 1 000 101 | 173.4 | 18 | `2b44dfb423a33218` |
-| `ign_lyon_0842_6521_sans_sol_c2M` | 2 000 000 | 2 000 201 | 246.3 | 18 | `488689ff8d96e188` |
-| `ign_lyon_0842_6521_sans_sol_c4M` | 4 000 000 | 4 000 373 | 358.0 | 19 | `9934c9fdaccf3d61` |
-| `ign_lyon_0842_6521_sans_sol_c8M` | 8 000 000 | 8 000 680 | 529.3 | 20 | `5e0881adfa4af4d3` |
-| `ign_marseille_0891_6248_c1M` | 1 000 000 | 1 000 203 | 550.2 | 20 | `e0e2d1395c772046` |
-| `ign_marseille_0891_6248_c2M` | 2 000 000 | 2 000 500 | 663.3 | 20 | `412a35a5e453ed0c` |
-| `ign_marseille_0891_6248_c4M` | 4 000 000 | 4 001 009 | 820.2 | 20 | `691bb739552c51f0` |
-| `ign_marseille_0891_6248_sans_sol_c1M` | 1 000 000 | 1 000 119 | 791.5 | 20 | `4ef6dfe702dc879b` |
-| `ign_marseille_0891_6248_sans_sol_c2M` | 2 000 000 | 2 000 232 | 953.5 | 20 | `49566ed5a3162d71` |
-| `ign_paris_0651_6863_c1M` | 1 000 000 | 1 000 082 | 268.4 | 19 | `aa7f80f6f75959a2` |
-| `ign_paris_0651_6863_c2M` | 2 000 000 | 2 000 154 | 370.3 | 19 | `e003c71a4343d882` |
-| `ign_paris_0651_6863_c4M` | 4 000 000 | 4 000 280 | 535.1 | 20 | `1041d013cb865c61` |
-| `ign_paris_0651_6863_c8M` | 8 000 000 | 8 000 538 | 750.1 | 20 | `81ce2aca6470cdcd` |
-| `ign_paris_0651_6863_sans_sol_c1M` | 1 000 000 | 1 000 034 | 364.5 | 19 | `6b3eeba5860be97e` |
-| `ign_paris_0651_6863_sans_sol_c2M` | 2 000 000 | 2 000 076 | 490.5 | 19 | `bfce6ea1c4f35670` |
-| `ign_paris_0651_6863_sans_sol_c4M` | 4 000 000 | 4 000 171 | 690.8 | 20 | `0203772bcbedf2f4` |
-| `ign_paris_0651_6863_sans_sol_c8M` | 8 000 000 | 8 000 393 | 938.2 | 20 | `7d9b619953f03d59` |
+| Découpe | Taille visée | Sites distincts | Retours couverts | Côté du carré (m) | Bits | SHA-256 (16) |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| `ign_lyon_0842_6521_c1M` | 1 000 000 | 1 000 153 | 1 000 252 | 163.2 | 18 | `6cca4f057d08fb1b` |
+| `ign_lyon_0842_6521_c2M` | 2 000 000 | 2 000 152 | 2 000 354 | 230.7 | 18 | `5ae5585909189303` |
+| `ign_lyon_0842_6521_c4M` | 4 000 000 | 4 000 295 | 4 000 672 | 324.8 | 19 | `1ceecdd40b0f815b` |
+| `ign_lyon_0842_6521_c8M` | 8 000 000 | 8 000 317 | 8 001 005 | 463.6 | 19 | `7911c24330f98544` |
+| `ign_lyon_0842_6521_sans_sol_c1M` | 1 000 000 | 1 000 141 | 1 000 242 | 173.4 | 18 | `dfd41de403b385fb` |
+| `ign_lyon_0842_6521_sans_sol_c2M` | 2 000 000 | 2 000 222 | 2 000 423 | 246.3 | 18 | `03af6fc5ce75ad66` |
+| `ign_lyon_0842_6521_sans_sol_c4M` | 4 000 000 | 4 000 022 | 4 000 395 | 358.0 | 19 | `2b55392529806064` |
+| `ign_lyon_0842_6521_sans_sol_c8M` | 8 000 000 | 8 000 226 | 8 000 906 | 529.3 | 20 | `cd1e5d9e20fa2bb6` |
+| `ign_marseille_0891_6248_c1M` | 1 000 000 | 1 000 039 | 1 000 242 | 550.2 | 20 | `cedd2cf14d05b539` |
+| `ign_marseille_0891_6248_c2M` | 2 000 000 | 2 000 188 | 2 000 688 | 663.3 | 20 | `8d70efe5f427e4f8` |
+| `ign_marseille_0891_6248_c4M` | 4 000 000 | 4 000 005 | 4 001 014 | 820.2 | 20 | `4326e80c204af297` |
+| `ign_marseille_0891_6248_sans_sol_c1M` | 1 000 000 | 1 000 029 | 1 000 148 | 791.5 | 20 | `a11511b561f1bef4` |
+| `ign_marseille_0891_6248_sans_sol_c2M` | 2 000 000 | 2 000 051 | 2 000 283 | 953.5 | 20 | `deeab6a9d79e7bab` |
+| `ign_paris_0651_6863_c1M` | 1 000 000 | 1 000 179 | 1 000 261 | 268.4 | 19 | `9b8c549586364d64` |
+| `ign_paris_0651_6863_c2M` | 2 000 000 | 2 000 086 | 2 000 240 | 370.3 | 19 | `970de25e52e98bc3` |
+| `ign_paris_0651_6863_c4M` | 4 000 000 | 4 000 106 | 4 000 386 | 535.1 | 20 | `b3b6586f989209ea` |
+| `ign_paris_0651_6863_c8M` | 8 000 000 | 8 000 093 | 8 000 631 | 750.1 | 20 | `db3c3b239ba14d05` |
+| `ign_paris_0651_6863_sans_sol_c1M` | 1 000 000 | 1 000 011 | 1 000 045 | 364.5 | 19 | `72f18cd726f1846f` |
+| `ign_paris_0651_6863_sans_sol_c2M` | 2 000 000 | 2 000 062 | 2 000 138 | 490.5 | 19 | `21ec1907a2c7c767` |
+| `ign_paris_0651_6863_sans_sol_c4M` | 4 000 000 | 4 000 012 | 4 000 183 | 690.8 | 20 | `8bcbed7f66a3c7ff` |
+| `ign_paris_0651_6863_sans_sol_c8M` | 8 000 000 | 8 000 148 | 8 000 541 | 938.2 | 20 | `5a81bf6e3e557ef7` |
 
 
 ### 3.2 ETH3D (terrestre)
@@ -192,23 +196,23 @@ découpes tronquaient leur anneau frontière (de 2 à 6 287 sites de plus selon 
 | `eth3d_electro` | 48 385 601 | 46 600 012 | 1 785 589 | 57.9 × 66.0 × 47.2 | 17 | `0fe8ec458e99d06a` | `d1bb59b385c0ddaa` |
 | `eth3d_meadow_scan1` | 6 250 029 | 6 181 091 | 68 938 | 55.1 × 56.0 × 8.2 | 16 | `00bb5ed330c343a9` | `54ca49a3880bd9a9` |
 
-| Découpe | Sites distincts | Retours couverts | Côté du carré (m) | Bits | SHA-256 (16) |
-| --- | ---: | ---: | ---: | ---: | --- |
-| `eth3d_courtyard_c1M` | 1 000 000 | 1 001 683 | 11.2 | 14 | `a04ad7655158b0ef` |
-| `eth3d_courtyard_c2M` | 2 000 000 | 2 004 552 | 12.8 | 14 | `3da3d6640ce05862` |
-| `eth3d_courtyard_c4M` | 4 000 000 | 4 014 324 | 14.4 | 14 | `d89571eacbc35c77` |
-| `eth3d_courtyard_c8M` | 8 000 000 | 8 134 486 | 16.2 | 15 | `f8bc65d25121ce5d` |
-| `eth3d_courtyard_scan1_c1M` | 1 000 000 | 1 002 315 | 11.8 | 14 | `50dc335bf20a3f1c` |
-| `eth3d_courtyard_scan1_c2M` | 2 000 000 | 2 032 749 | 13.3 | 14 | `290cabd8376933c7` |
-| `eth3d_courtyard_scan1_c4M` | 4 000 000 | 4 106 307 | 15.6 | 15 | `14a4bb2cc10c72e1` |
-| `eth3d_courtyard_scan1_c8M` | 8 000 000 | 8 136 184 | 19.0 | 15 | `d293700808b0c226` |
-| `eth3d_electro_c1M` | 1 000 000 | 1 006 171 | 24.7 | 15 | `d10c915dc7a804a5` |
-| `eth3d_electro_c2M` | 2 000 000 | 2 031 074 | 26.5 | 15 | `3672bb91415879e2` |
-| `eth3d_electro_c4M` | 4 000 000 | 4 121 890 | 28.4 | 15 | `cb44807ed9d6a978` |
-| `eth3d_electro_c8M` | 8 000 000 | 8 374 231 | 30.5 | 16 | `af9a329cc1f71295` |
-| `eth3d_meadow_scan1_c1M` | 1 000 000 | 1 000 000 | 40.6 | 16 | `743b190cac2edc62` |
-| `eth3d_meadow_scan1_c2M` | 2 000 000 | 2 000 000 | 41.8 | 16 | `fbeb561d56215fc4` |
-| `eth3d_meadow_scan1_c4M` | 4 000 000 | 4 000 000 | 44.1 | 16 | `e6c0d9f489bdbb9c` |
+| Découpe | Taille visée | Sites distincts | Retours couverts | Côté du carré (m) | Bits | SHA-256 (16) |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| `eth3d_courtyard_c1M` | 1 000 000 | 1 000 109 | 1 001 792 | 11.2 | 14 | `6be00696ec8af56e` |
+| `eth3d_courtyard_c2M` | 2 000 000 | 2 001 165 | 2 005 720 | 12.8 | 14 | `6e6285ee4b99ae57` |
+| `eth3d_courtyard_c4M` | 4 000 000 | 4 003 201 | 4 017 566 | 14.4 | 14 | `a03765898295b8cc` |
+| `eth3d_courtyard_c8M` | 8 000 000 | 8 001 967 | 8 136 488 | 16.2 | 15 | `41b7cdec0630424a` |
+| `eth3d_courtyard_scan1_c1M` | 1 000 000 | 1 000 235 | 1 002 559 | 11.8 | 14 | `d182b1ecdee7d762` |
+| `eth3d_courtyard_scan1_c2M` | 2 000 000 | 2 000 160 | 2 032 921 | 13.3 | 14 | `b2afd3dd376430e0` |
+| `eth3d_courtyard_scan1_c4M` | 4 000 000 | 4 001 382 | 4 107 745 | 15.6 | 15 | `70434b7a619bd817` |
+| `eth3d_courtyard_scan1_c8M` | 8 000 000 | 8 001 601 | 8 137 785 | 19.0 | 15 | `721e16181e4dc65d` |
+| `eth3d_electro_c1M` | 1 000 000 | 1 000 396 | 1 006 579 | 24.7 | 15 | `fa51b7c419e656c8` |
+| `eth3d_electro_c2M` | 2 000 000 | 2 000 294 | 2 031 402 | 26.5 | 15 | `db18df5dcd30ff97` |
+| `eth3d_electro_c4M` | 4 000 000 | 4 001 120 | 4 123 096 | 28.4 | 15 | `55a319d0349c477b` |
+| `eth3d_electro_c8M` | 8 000 000 | 8 003 586 | 8 378 148 | 30.5 | 16 | `d38ec06d073bdca8` |
+| `eth3d_meadow_scan1_c1M` | 1 000 000 | 1 000 176 | 1 000 176 | 40.6 | 16 | `dac5cd9ac0366318` |
+| `eth3d_meadow_scan1_c2M` | 2 000 000 | 2 000 856 | 2 000 856 | 41.8 | 16 | `b1d863c0d3ef7be1` |
+| `eth3d_meadow_scan1_c4M` | 4 000 000 | 4 000 246 | 4 000 246 | 44.1 | 16 | `443a913c3cc2cd4f` |
 
 
 ### 3.3 FOR-instance (drone)
@@ -222,24 +226,24 @@ découpes tronquaient leur anneau frontière (de 2 à 6 287 sites de plus selon 
 | `forinst_tuwien_train` | 7 568 844 | 6 236 167 | 1 332 677 | 85.9 × 61.0 × 41.3 | 17 | `03c190b87900ae21` | `fcac43bb8fc9f8a2` |
 | `forinst_tuwien_train_sans_sol` | 6 277 880 | 5 199 758 | 1 078 122 | 85.9 × 61.0 × 40.7 | 17 | `d91761768355332c` | `984280b0b1ba7b79` |
 
-| Découpe | Sites distincts | Retours couverts | Côté du carré (m) | Bits | SHA-256 (16) |
-| --- | ---: | ---: | ---: | ---: | --- |
-| `forinst_nibio_plot12_c1M` | 1 000 000 | 1 004 840 | 8.2 | 15 | `86812d39fe33e895` |
-| `forinst_nibio_plot12_c2M` | 2 000 000 | 2 009 659 | 12.0 | 15 | `aea517c7a17c4688` |
-| `forinst_nibio_plot12_c4M` | 4 000 000 | 4 019 782 | 16.8 | 15 | `ac579365fe46eacb` |
-| `forinst_nibio_plot12_sans_sol_c1M` | 1 000 000 | 1 004 844 | 8.2 | 15 | `e578fd436d2fe7e2` |
-| `forinst_nibio_plot12_sans_sol_c2M` | 2 000 000 | 2 009 666 | 12.0 | 15 | `d7c5a65c469a64eb` |
-| `forinst_nibio_plot12_sans_sol_c4M` | 4 000 000 | 4 019 789 | 16.8 | 15 | `c53050d6b4227d14` |
-| `forinst_scion_plot61_c1M` | 1 000 000 | 1 000 002 | 12.6 | 16 | `e38f4f487829c625` |
-| `forinst_scion_plot61_c2M` | 2 000 000 | 2 000 003 | 18.8 | 16 | `bf25f3a47b7151a0` |
-| `forinst_scion_plot61_sans_sol_c1M` | 1 000 000 | 1 000 002 | 12.9 | 16 | `b078b74feba5a33d` |
-| `forinst_scion_plot61_sans_sol_c2M` | 2 000 000 | 2 000 003 | 19.2 | 16 | `5327af5968c51638` |
-| `forinst_tuwien_train_c1M` | 1 000 000 | 1 222 955 | 24.2 | 16 | `ff165c466239b6d1` |
-| `forinst_tuwien_train_c2M` | 2 000 000 | 2 420 415 | 34.8 | 16 | `bc8aa51000866b62` |
-| `forinst_tuwien_train_c4M` | 4 000 000 | 4 883 021 | 51.0 | 16 | `b93f8811efce8393` |
-| `forinst_tuwien_train_sans_sol_c1M` | 1 000 000 | 1 210 564 | 26.4 | 16 | `05da0ff75bd57ee9` |
-| `forinst_tuwien_train_sans_sol_c2M` | 2 000 000 | 2 403 692 | 38.1 | 16 | `90f534f973273419` |
-| `forinst_tuwien_train_sans_sol_c4M` | 4 000 000 | 4 841 606 | 58.8 | 16 | `c23e3152c3c9f4df` |
+| Découpe | Taille visée | Sites distincts | Retours couverts | Côté du carré (m) | Bits | SHA-256 (16) |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| `forinst_nibio_plot12_c1M` | 1 000 000 | 1 002 833 | 1 007 685 | 8.2 | 15 | `76bba687a6fb996e` |
+| `forinst_nibio_plot12_c2M` | 2 000 000 | 2 005 519 | 2 015 205 | 12.0 | 15 | `5c331b085464ed5c` |
+| `forinst_nibio_plot12_c4M` | 4 000 000 | 4 005 278 | 4 025 075 | 16.8 | 15 | `4ea7792bc616e2e2` |
+| `forinst_nibio_plot12_sans_sol_c1M` | 1 000 000 | 1 003 384 | 1 008 240 | 8.2 | 15 | `257eed25226f7fe1` |
+| `forinst_nibio_plot12_sans_sol_c2M` | 2 000 000 | 2 006 287 | 2 015 988 | 12.0 | 15 | `7c38b45063204f9f` |
+| `forinst_nibio_plot12_sans_sol_c4M` | 4 000 000 | 4 000 667 | 4 020 458 | 16.8 | 15 | `f8b5bc3e73183b7d` |
+| `forinst_scion_plot61_c1M` | 1 000 000 | 1 000 077 | 1 000 079 | 12.6 | 16 | `c2efaf9f982d02e3` |
+| `forinst_scion_plot61_c2M` | 2 000 000 | 2 000 071 | 2 000 074 | 18.8 | 16 | `7d9d7c35e88865b4` |
+| `forinst_scion_plot61_sans_sol_c1M` | 1 000 000 | 1 000 171 | 1 000 173 | 12.9 | 16 | `b0bf04bf05313466` |
+| `forinst_scion_plot61_sans_sol_c2M` | 2 000 000 | 2 000 156 | 2 000 159 | 19.2 | 16 | `f6faf083d99ea077` |
+| `forinst_tuwien_train_c1M` | 1 000 000 | 1 000 091 | 1 223 063 | 24.2 | 16 | `76c89a277b6d753a` |
+| `forinst_tuwien_train_c2M` | 2 000 000 | 2 000 098 | 2 420 535 | 34.8 | 16 | `c7468e87f956aa0e` |
+| `forinst_tuwien_train_c4M` | 4 000 000 | 4 000 065 | 4 883 105 | 51.0 | 16 | `0cf2c3c3715027ca` |
+| `forinst_tuwien_train_sans_sol_c1M` | 1 000 000 | 1 000 106 | 1 210 689 | 26.4 | 16 | `22c817db7bd1d190` |
+| `forinst_tuwien_train_sans_sol_c2M` | 2 000 000 | 2 000 124 | 2 403 846 | 38.1 | 16 | `2bc934585e091463` |
+| `forinst_tuwien_train_sans_sol_c4M` | 4 000 000 | 4 000 110 | 4 841 736 | 58.8 | 16 | `8b684c40992dd877` |
 
 
 ### 3.4 Boreas (véhicule)
@@ -255,25 +259,25 @@ découpes tronquaient leur anneau frontière (de 2 à 6 287 sites de plus selon 
 | `boreas_202011261358_route_s200` | 9 236 006 | 9 235 702 | 304 | 1748.0 × 2503.3 × 71.9 | 22 | `b7c5a26638f1feee` | `4c5e4eac20e3a4c5` |
 | `boreas_202011261358_route_s200_sans_sol` | 6 455 630 | 6 455 329 | 301 | 1748.0 × 2503.3 × 60.4 | 22 | `e1aed252f94ce2ac` | `cacc4d5d25c3a70a` |
 
-| Découpe | Sites distincts | Retours couverts | Côté du carré (m) | Bits | SHA-256 (16) |
-| --- | ---: | ---: | ---: | ---: | --- |
-| `boreas_202011261358_f4500_n10_c1M` | 1 000 000 | 1 000 024 | 37.6 | 16 | `e19914c386f5c600` |
-| `boreas_202011261358_f4500_n10_c2M` | 2 000 000 | 2 000 031 | 98.3 | 17 | `799cd10e7c1377f8` |
-| `boreas_202011261358_f4500_n10_sans_sol_c1M` | 1 000 000 | 1 000 025 | 56.3 | 16 | `52362a1e30381fe0` |
-| `boreas_202011261358_f4500_n50_c1M` | 1 000 000 | 1 000 025 | 17.3 | 15 | `b237d21d22d0ee1f` |
-| `boreas_202011261358_f4500_n50_c2M` | 2 000 000 | 2 000 050 | 29.5 | 15 | `5ba0a2df58ba7c74` |
-| `boreas_202011261358_f4500_n50_c4M` | 4 000 000 | 4 000 158 | 44.1 | 16 | `986ea17433c219d7` |
-| `boreas_202011261358_f4500_n50_c8M` | 8 000 000 | 8 000 308 | 73.4 | 17 | `ca8a9aa88b05b022` |
-| `boreas_202011261358_f4500_n50_sans_sol_c1M` | 1 000 000 | 1 000 032 | 20.1 | 15 | `189ca6c81efe01f9` |
-| `boreas_202011261358_f4500_n50_sans_sol_c2M` | 2 000 000 | 2 000 074 | 38.2 | 16 | `b831607ce1bb9b7f` |
-| `boreas_202011261358_f4500_n50_sans_sol_c4M` | 4 000 000 | 4 000 214 | 55.6 | 16 | `c2a8287f9eef5187` |
-| `boreas_202011261358_route_s200_c1M` | 1 000 000 | 1 000 000 | 430.4 | 19 | `ea2d6d4e4580a4a6` |
-| `boreas_202011261358_route_s200_c2M` | 2 000 000 | 2 000 000 | 705.5 | 20 | `de7e7b58b52e62a9` |
-| `boreas_202011261358_route_s200_c4M` | 4 000 000 | 4 000 001 | 1275.5 | 21 | `5e1bbd25648fa8c8` |
-| `boreas_202011261358_route_s200_c8M` | 8 000 000 | 8 000 304 | 2010.5 | 21 | `7b661e2db942e6e0` |
-| `boreas_202011261358_route_s200_sans_sol_c1M` | 1 000 000 | 1 000 000 | 539.3 | 20 | `bf0f6e5e432db57e` |
-| `boreas_202011261358_route_s200_sans_sol_c2M` | 2 000 000 | 2 000 000 | 1153.7 | 21 | `a93c74c5e8dde98b` |
-| `boreas_202011261358_route_s200_sans_sol_c4M` | 4 000 000 | 4 000 002 | 1585.0 | 21 | `5f726b0ae7ae8e6e` |
+| Découpe | Taille visée | Sites distincts | Retours couverts | Côté du carré (m) | Bits | SHA-256 (16) |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| `boreas_202011261358_f4500_n10_c1M` | 1 000 000 | 1 000 057 | 1 000 081 | 37.6 | 16 | `7f06aef90ac57a58` |
+| `boreas_202011261358_f4500_n10_c2M` | 2 000 000 | 2 000 010 | 2 000 041 | 98.3 | 17 | `28ad2ec2004819b7` |
+| `boreas_202011261358_f4500_n10_sans_sol_c1M` | 1 000 000 | 1 000 005 | 1 000 030 | 56.3 | 16 | `778db374d3a816f7` |
+| `boreas_202011261358_f4500_n50_c1M` | 1 000 000 | 1 000 119 | 1 000 144 | 17.3 | 15 | `87603f9578b9e0f3` |
+| `boreas_202011261358_f4500_n50_c2M` | 2 000 000 | 2 000 063 | 2 000 113 | 29.5 | 15 | `c2eae8867034e679` |
+| `boreas_202011261358_f4500_n50_c4M` | 4 000 000 | 4 000 056 | 4 000 214 | 44.1 | 16 | `8b532b1d716f79a4` |
+| `boreas_202011261358_f4500_n50_c8M` | 8 000 000 | 8 000 308 | 8 000 616 | 73.4 | 17 | `b812d4f44112fc24` |
+| `boreas_202011261358_f4500_n50_sans_sol_c1M` | 1 000 000 | 1 000 015 | 1 000 047 | 20.1 | 15 | `b43150a36d1cd465` |
+| `boreas_202011261358_f4500_n50_sans_sol_c2M` | 2 000 000 | 2 000 152 | 2 000 226 | 38.2 | 16 | `f380226a503982e1` |
+| `boreas_202011261358_f4500_n50_sans_sol_c4M` | 4 000 000 | 4 000 025 | 4 000 239 | 55.6 | 16 | `e7dbe1e204a10784` |
+| `boreas_202011261358_route_s200_c1M` | 1 000 000 | 1 000 011 | 1 000 011 | 430.4 | 19 | `b82df475c0223dd3` |
+| `boreas_202011261358_route_s200_c2M` | 2 000 000 | 2 000 003 | 2 000 003 | 705.5 | 20 | `603425faea693266` |
+| `boreas_202011261358_route_s200_c4M` | 4 000 000 | 4 000 018 | 4 000 019 | 1275.5 | 21 | `6eec5f571bff53d9` |
+| `boreas_202011261358_route_s200_c8M` | 8 000 000 | 8 000 014 | 8 000 318 | 2010.5 | 21 | `cf57ad2eaf01ab33` |
+| `boreas_202011261358_route_s200_sans_sol_c1M` | 1 000 000 | 1 000 004 | 1 000 004 | 539.3 | 20 | `ec3957110b97cd99` |
+| `boreas_202011261358_route_s200_sans_sol_c2M` | 2 000 000 | 2 000 002 | 2 000 002 | 1153.7 | 21 | `80268db186c71fe0` |
+| `boreas_202011261358_route_s200_sans_sol_c4M` | 4 000 000 | 4 000 005 | 4 000 007 | 1585.0 | 21 | `e9b4faf51cf7a483` |
 
 ## 4. Trames SemanticKITTI sans sol (famille a)
 
@@ -407,16 +411,19 @@ la voie B.
 
 1. Sur le codespace (ou toute machine avec Internet, numpy, laspy + lazrs, py7zr, g++) :
    `ROOT=<dossier hors dépôt> PY=<python> bash morsehgp3D_v12/bench/data/replay_all.sh` (12 min 27 s mesurées,
-   téléchargements en cache ; idempotent ; sorties identiques à l'octet, empreintes aux §§ 3–5, découpes à rejouer
-   selon la règle du § 3). Les outils sont cherchés à côté de `replay_all.sh`, quel que soit le répertoire courant ;
-   `ROOT` est obligatoire et refusé dans l'arbre `morsehgp3D_v12` (code 2). Toute étape commence par le contrôle des
+   téléchargements en cache ; rejeu complet du 7 octobre après redémarrage, téléchargements compris : 17 min ;
+   idempotent ; sorties identiques à l'octet, empreintes aux §§ 3–5). Les outils sont cherchés à côté de
+   `replay_all.sh`, quel que soit le répertoire courant ; `ROOT` est obligatoire et refusé dans l'arbre
+   `morsehgp3D_v12` (code 2). Toute étape commence par le contrôle des
    outils contre `SHA256SUMS.txt` (présence, empreinte, aucun script non épinglé ; code 1 sinon), qui se joue seul et à
    blanc, sans donnée ni Python : `bash morsehgp3D_v12/bench/data/replay_all.sh outils`. `/tmp` étant vidé à chaque
    redémarrage et `/workspaces` plein, rejouer juste avant la session.
 2. Les paquets `bundles/g4_kitti_v12set` (37 trames, avec étiquettes, 45 Mo), `g4_small` (159 petits nuages,
-   6 Mo), `g4_ign_lidarhd` (3,2 Go), `g4_eth3d` (3,1 Go), `g4_forinstance` (1,4 Go) et `g4_boreas` (1,7 Go) —
-   scènes entières en variante distincte et toutes les découpes — respectent les contraintes de `--data` du lanceur
-   gardé (dossier plat, noms `[A-Za-z0-9][A-Za-z0-9._-]*`, au plus 512 fichiers et 8 Gio, aucun fichier vide,
+   6 Mo), `g4_ign_lidarhd` (3,19 Go, 27 cas, 81 fichiers), `g4_eth3d` (3,11 Go, 19 cas, 57 fichiers),
+   `g4_forinstance` (1,36 Go, 22 cas, 66 fichiers) et `g4_boreas` (1,73 Go, 25 cas, 73 fichiers ; paquets
+   multi-millions régénérés le 7 octobre, octets de données du manifeste) — scènes entières en variante distincte et
+   toutes les découpes — respectent les contraintes de `--data` du lanceur gardé (dossier plat, noms
+   `[A-Za-z0-9][A-Za-z0-9._-]*`, au plus 512 fichiers et 8 Gio, aucun fichier vide,
    `.u32le` multiple de 4 ; `SHA256SUMS.txt` et non `SHA256SUMS`, nom réservé au lanceur). Un paquet par session, ou
    plusieurs petits réunis par `make_g4_bundle.py`, qui accepte plusieurs manifestes.
 3. Sur la VM, avant toute mesure : `python3 -S verify_inputs.py <dossier de données>/bundle_manifest.json`
@@ -498,7 +505,7 @@ sinon). Les sorties doivent reproduire à l'octet les empreintes des §§ 3–5 
    rapport comme `morsehgp3D_v12/docs/DONNEES.md` (que `MESURE.md` § 2 annonce) ; aucune donnée ni coordonnée.
 2. Première session G4 : envoyer `g4_kitti_v12set` + `g4_small` (50 Mo), vérifier par `verify_inputs.py`, puis
    mesurer la v11 gelée (`MES-E`, `MES-P` du plan) sur les 37 trames : médiane **et** maximum (D7).
-3. Sessions suivantes : un paquet multi-millions par session (3,2 Go IGN, 3,1 Go ETH3D, 1,4 Go FOR-instance,
-   1,7 Go Boreas), découpes 1, 2, 4, 8 M d'abord (exposant d'échelle), scènes entières ensuite.
+3. Sessions suivantes : un paquet multi-millions par session (3,19 Go IGN, 3,11 Go ETH3D, 1,36 Go FOR-instance,
+   1,73 Go Boreas), découpes 1, 2, 4, 8 M d'abord (exposant d'échelle), scènes entières ensuite.
 4. À décider par l'utilisateur : étendre SemanticKITTI aux séquences 01, 03, 04, 07, 09 avec l'outil de cache du
    projet ; préparer une entrée réelle de 23–24 bits (itinéraire Boreas multi-séquences).

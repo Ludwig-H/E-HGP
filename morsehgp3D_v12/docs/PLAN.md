@@ -65,8 +65,8 @@ terminées par un arrêt certifié) :
   publiée ; le budget de l'étage T est confirmé à K5.
 - **Session** : coûts fixes mesurés (`MES-M6`) ; attente `yield`, graphes pour les suites de lancements.
 - **Non faits en T0**, joués depuis : `MES-M7` et `MES-E` (session E, `g4_t2e_20261007`), `MES-P` (session G,
-  `g4_t0g_20261007`), sur les outils de données corrigés (`CST-0216` à `CST-0218`) ; les découpes de `MES-E` sont à
-  rejouer sur les découpes refaites (`CST-0218`), sans changement attendu de l'ordre de grandeur.
+  `g4_t0g_20261007`), sur les outils de données corrigés (`CST-0216` à `CST-0218`) ; `MES-E` a lu les découpes
+  refaites par la règle exacte (par exemple `eth3d_courtyard_c1M` : 1 000 109 sites, `DONNEES.md` § 3).
 - **Outils de jugement** : les juges des microbancs ont été durcis après l'audit (`CST-0213` à `0215` clos) ; des résidus
   de `CST-0018` restent à fermer avant toute nouvelle adoption.
 

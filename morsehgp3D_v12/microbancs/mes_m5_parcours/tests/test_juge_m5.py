@@ -84,6 +84,18 @@ def ecrire_vidage(oracle, chemin, pts, kmax, feuille, bits, max_leaf=256, kmax_e
   return statut, dict(livre)
 
 
+def champs_comparaison(ident):
+  """Champs de comparaison d'une prise conforme (compare.hpp, publies par traversal_identity.cpp et traversal_bench.cu),
+  lus dans l'en-tete du vidage ; l'empreinte canonique est simulee par la FNV-1a finale du fichier, la meme pour
+  l'outil hote et le banc."""
+  livre = {'nodes': ident['nodes'], 'leaves': ident['leaves'], 'filter_tests': ident['filter_tests'],
+           'max_depth': ident['max_depth'], 'max_leaf': ident['max_leaf_seen']}
+  empreinte = '%x' % int(ident['fnv1a'], 16)
+  return {'status': ident['status'], 'ledger': livre, 'leaves': ident['n_leaves'], 'reference_leaves': ident['n_leaves'],
+          'digest': empreinte, 'reference_digest': empreinte, 'missing': 0, 'extra': 0, 'list_mismatch': 0,
+          'meta_mismatch': 0, 'first': ''}
+
+
 def prise_banc(m, chemins, jeton, reps, warmup, scenario, nom_etape):
   """JSON du banc CUDA pour ces vidages, tel que le vrai banc l'ecrit (sauf injection)."""
   cas = []
@@ -95,8 +107,27 @@ def prise_banc(m, chemins, jeton, reps, warmup, scenario, nom_etape):
     c = {'dump': str(chemin) + ('.wrong' if scenario.get('vidage_errone') and nom_etape.startswith('gpu_') else ''),
          'kmax': ident['kmax'], 'leaf_size': ident['leaf_size'], 'coord_bits': ident['coord_bits'],
          'sites': ident['n_sites'], 'identity': identite, 'total_ms': [brut] * reps, 'resident_ms': [5.0] * reps,
-         'median_ms': {'total': declare, 'resident': 5.0}, 'timed_allocations': scenario.get('reservations', 0),
+         'wall_ms': [brut + 1.0] * reps, 'median_ms': {'total': declare, 'resident': 5.0},
+         'timed_allocations': scenario.get('reservations', 0),
          'mutants': {mu: {'killed': True} for mu in m.MUTANTS}, 'profile': {'kernels_ms': 1.0}}
+    c.update(champs_comparaison(ident))
+    if not identite:  # ecart honnete : une feuille absente, empreintes differentes
+      c.update(missing=1, digest='%x' % (int(c['reference_digest'], 16) ^ 1), first='feuille absente : simulee')
+    if nom_etape.startswith('gpu_ng00_k5_l24'):  # recu audit_juges_emst_20261007/juges, puis chaque garde seule
+      if scenario.get('gpu_feuille_manquante'):
+        c['missing'] = 1
+      if scenario.get('gpu_empreinte_differente'):
+        c['digest'] = '%x' % (int(c['reference_digest'], 16) ^ 0x5678)
+      if scenario.get('gpu_grand_livre_different'):
+        c['ledger'] = dict(c['ledger'], nodes=c['ledger']['nodes'] + 1)
+      if scenario.get('gpu_reference_hors_vidage'):
+        c['leaves'] = c['reference_leaves'] = c['reference_leaves'] + 1
+      if scenario.get('gpu_empreinte_de_reference_forgee'):
+        c['digest'] = c['reference_digest'] = 'abc123'
+      if scenario.get('gpu_empreintes_absentes'):
+        del c['digest'], c['reference_digest']
+    if nom_etape.startswith('sanitizer_') and scenario.get('sanitizer_sans_mesures'):
+      c.update(total_ms=[], resident_ms=[])
     cas.append(c)
   return {'bench': 'mhgp12_traversal_bench', 'nonce': scenario.get('jeton_banc', jeton), 'device': 'SYNTHETIQUE',
           'reps': reps, 'warmup': warmup, 'cases': cas, 'identity': all(c['identity'] for c in cas)}
@@ -146,12 +177,14 @@ def simulation(m, oracle, scenario, journal, bdir, travail):
         ident = m.dump_identity(Path(chemin))
         livre = {'nodes': ident['nodes'], 'leaves': ident['leaves'], 'filter_tests': ident['filter_tests'],
                  'max_depth': ident['max_depth'], 'max_leaf': ident['max_leaf_seen']}
-        lignes.append({'phase': 'identity', 'nonce': jeton, 'dump': chemin, 'kmax': ident['kmax'],
-                       'leaf_size': ident['leaf_size'], 'coord_bits': ident['coord_bits'], 'sites': ident['n_sites'],
-                       'identity': True, 'status': ident['status'], 'reference_status': ident['status'],
-                       'ledger': livre, 'reference_ledger': livre, 'nodes_checked': ident['status'] == 0,
-                       'nodes_equal': ident['status'] == 0,
-                       'mutants': {mu: {'killed': True} for mu in m.MUTANTS}})
+        ligne = dict(champs_comparaison(ident), phase='identity', nonce=jeton, dump=chemin, kmax=ident['kmax'],
+                     leaf_size=ident['leaf_size'], coord_bits=ident['coord_bits'], sites=ident['n_sites'],
+                     identity=True, reference_status=ident['status'], reference_ledger=livre,
+                     nodes_checked=ident['status'] == 0, nodes_equal=ident['status'] == 0,
+                     mutants={mu: {'killed': True} for mu in m.MUTANTS})
+        if scenario.get('hote_grands_livres_absents'):  # recu audit_juges_emst_20261007/juges
+          del ligne['ledger'], ligne['reference_ledger']
+        lignes.append(ligne)
       cible.write_text('\n'.join(json.dumps(x) for x in lignes) + '\n')
     elif name.startswith('sanitizer_') or name == 'device_fixtures' or name.startswith('gpu_'):
       cible, jeton = Path(valeur(cmd, '--json')), valeur(cmd, '--nonce')
@@ -235,28 +268,19 @@ def jouer(scenario, options):
                for j in range(n)]
         kmax_entete = scenario.get('kmax_faux') if nom.startswith('dump_ng01') else None
         statut, livre = ecrire_vidage(oracle, cible, pts, int(argv[3]), int(argv[4]), 21, kmax_entete=kmax_entete)
+        if scenario.get('prise_perimee') and '--crop' not in argv:
+          # Prises COMPLETES d'une autre session laissees dans runs/ (meme vidage, memes comptes et champs de
+          # comparaison, autre jeton), pour chaque tour ; le banc de cette session n'ecrit rien. Seuls l'effacement des
+          # cibles et le jeton les ecartent (gardes doublees : outils/mutants_juges.py les retire ensemble).
+          (sortie / 'runs').mkdir(parents=True, exist_ok=True)
+          for tour in range(6):
+            prise = prise_banc(m, [cible], 'm5-ancienne-session', 15, 3, {}, 'gpu_%s_p%d' % (cible.stem, tour))
+            (sortie / 'runs' / ('%s_p%d_gpu.json' % (cible.stem, tour))).write_text(json.dumps(prise))
         resultats[nom] = (0, json.dumps(dict(livre, sites=n, kmax=int(argv[3]), leaf_size=int(argv[4]), coord_bits=21,
                                              status=statut, phase='dump')))
         s.steps.append({'step': nom, 'code': 0, 'seconds': 0.0})
       return resultats
     m.run_parallel = vidages
-    if scenario.get('prise_perimee'):
-      # Prises COMPLETES d'une autre session laissees dans runs/ (meme vidage, memes comptes, autre jeton), pour tous
-      # les cas et tous les tours ; le banc de cette session n'ecrit rien. Seuls l'effacement des cibles et le jeton les
-      # ecartent (gardes doublees : outils/mutants_juges.py les retire ensemble).
-      (sortie / 'runs').mkdir(parents=True)
-      for trame in trames:
-        for k, feuille in ((5, 16), (5, 24), (10, 24)):
-          nom = '%s_k%d_l%d' % (trame, k, feuille)
-          chemin = tmp / 'work' / 'dumps' / (nom + '.bin')
-          for tour in range(6):
-            prise = {'bench': 'mhgp12_traversal_bench', 'nonce': 'm5-ancienne-session', 'reps': 15, 'warmup': 3,
-                     'identity': True, 'cases': [{'dump': str(chemin), 'kmax': k, 'leaf_size': feuille,
-                                                  'coord_bits': 21, 'sites': 40, 'identity': True,
-                                                  'total_ms': [6.0] * 15, 'resident_ms': [5.0] * 15,
-                                                  'median_ms': {'total': 6.0, 'resident': 5.0},
-                                                  'timed_allocations': 0}]}
-            (sortie / 'runs' / ('%s_p%d_gpu.json' % (nom, tour))).write_text(json.dumps(prise))
     argv = ['g4_traversal_bench.py', '--out', str(sortie), '--work', str(tmp / 'work'), '--data', str(donnees),
             '--repo', str(depot), '--v11-lib', str(bibliotheque), '--extra', '', '--jobs', '1', '--cmake',
             '/fake/cmake'] + options
@@ -299,6 +323,16 @@ INJECTIONS = [
   ('sans_cuda', {}, ['--no-cuda'], 'refuse'),
   ('sanitizers_non_joues', {}, ['--skip-sanitizer'], 'refuse'),
   ('passes_v11_hors_contrat', {}, ['--v11-passes', '5'], 'refuse'),
+  # Recu audit_juges_emst_20261007/juges (CST-0018) : les quatre preuves incoherentes ou incompletes de l'auditeur,
+  # puis chaque garde seule (champs de comparaison, empreinte croisee avec l'identite hote).
+  ('auditeur_feuille_manquante_identite_vraie', {'gpu_feuille_manquante': True}, [], 'refuse'),
+  ('auditeur_empreinte_differente_identite_vraie', {'gpu_empreinte_differente': True}, [], 'refuse'),
+  ('auditeur_grands_livres_hote_absents', {'hote_grands_livres_absents': True}, [], 'refuse'),
+  ('auditeur_sanitizer_sans_mesures', {'sanitizer_sans_mesures': True}, [], 'refuse'),
+  ('grand_livre_gpu_different_identite_vraie', {'gpu_grand_livre_different': True}, [], 'refuse'),
+  ('feuilles_de_reference_hors_vidage', {'gpu_reference_hors_vidage': True}, [], 'refuse'),
+  ('empreinte_de_reference_forgee', {'gpu_empreinte_de_reference_forgee': True}, [], 'refuse'),
+  ('empreintes_absentes_identite_vraie', {'gpu_empreintes_absentes': True}, [], 'refuse'),
   ('identite_appareil_en_defaut', {'identite_appareil_fausse': True}, [], 'rejete'),
 ]
 
@@ -376,11 +410,15 @@ def main(argv):
       resultats += porte()
     except Ecart as e:
       ecarts.append(str(e))
+    except Exception as e:  # une exception du pilote ou de la porte est un ecart, jamais un succes
+      ecarts.append('%s : exception %s: %s' % (porte.__name__, type(e).__name__, e))
   if (dossier / 'report.json').is_file():
     try:
       resultats += porte_recu_reel(dossier)
     except Ecart as e:
       ecarts.append(str(e))
+    except Exception as e:
+      ecarts.append('porte_recu_reel : exception %s: %s' % (type(e).__name__, e))
   else:
     ecarts.append('recu G4 absent : %s (preuve positive non jouee)' % dossier)
   for r in resultats:

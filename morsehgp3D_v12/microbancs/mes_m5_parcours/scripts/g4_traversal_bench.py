@@ -98,6 +98,11 @@ HEADER = struct.Struct('<8s16Q15Q')  # en-tete MHGP12TR v1 (format.hpp, 256 octe
 HEADER_FIELDS = ('version', 'producer', 'coord_bits', 'kmax', 'leaf_size', 'max_leaf', 'n_sites', 'n_nodes',
                  'n_leaves', 'n_leaf_sites', 'status', 'nodes', 'leaves', 'filter_tests', 'max_depth', 'max_leaf_seen')
 FORMAT_GATE_MIN = {'valid': 4, 'invalid': 15}  # cas de la porte du lecteur (host/format_selftest.cpp)
+# Champs de comparaison publies par traversal_identity.cpp et traversal_bench.cu (definitions de compare.hpp).
+LEDGER_KEYS = ('nodes', 'leaves', 'filter_tests', 'max_depth', 'max_leaf')
+COMPARISON_COUNTERS = ('missing', 'extra', 'list_mismatch', 'meta_mismatch')
+HEX_DIGEST = re.compile(r'[0-9a-f]{1,16}\Z')  # empreinte canonique FNV-1a 64, std::hex sans zeros de tete
+MEASURES = ('total_ms', 'resident_ms', 'wall_ms')  # une valeur par repetition demandee (traversal_bench.cu)
 
 
 def load_m2(m2_dir):
@@ -526,6 +531,49 @@ def dump_identity(path):
   return out
 
 
+def dump_ledger(ident):
+  """Grand livre de reference d'un vidage : en-tete MHGP12TR (session) ou sortie publiee de l'outil (relecture)."""
+  return {'nodes': ident.get('nodes'), 'leaves': ident.get('leaves'), 'filter_tests': ident.get('filter_tests'),
+          'max_depth': ident.get('max_depth'), 'max_leaf': ident.get('max_leaf_seen')}
+
+
+def ledger_ok(value):
+  return isinstance(value, dict) and sorted(value) == sorted(LEDGER_KEYS) and \
+      all(is_int(value[k]) and value[k] >= 0 for k in LEDGER_KEYS)
+
+
+def comparison_problem(c, ident):
+  """Champs de comparaison d'une ligne d'identite hote ou d'un cas du banc, types et recoupes avec le vidage (CST-0018,
+  recu audit_juges_emst_20261007/juges). Exiges : identite booleenne, statut, grand livre aux cinq comptes, feuilles et
+  feuilles de reference, empreintes canoniques hexadecimales, compteurs missing, extra, list_mismatch et meta_mismatch,
+  premiere difference ; feuilles de reference egales a celles du vidage. Une identite declaree vraie exige en plus le
+  statut et le grand livre du vidage, autant de feuilles que la reference, aucun ecart et deux empreintes egales
+  (leaves_equal de compare.hpp) : sinon la ligne n'est pas une preuve. Rend None ou la raison."""
+  if not isinstance(c.get('identity'), bool) or not is_int(c.get('status')):
+    return 'identite ou statut illisible'
+  if not ledger_ok(c.get('ledger')):
+    return 'grand livre absent ou illisible'
+  for key in ('leaves', 'reference_leaves') + COMPARISON_COUNTERS:
+    if not is_int(c.get(key)) or c[key] < 0:
+      return '%s absent ou illisible' % key
+  for key in ('digest', 'reference_digest'):
+    if not isinstance(c.get(key), str) or not HEX_DIGEST.match(c[key]):
+      return 'empreinte %s absente ou illisible' % key
+  if not isinstance(c.get('first'), str):
+    return 'premiere difference illisible'
+  if c['reference_leaves'] != ident.get('n_leaves'):
+    return 'feuilles de reference (%d) differentes du vidage (%r)' % (c['reference_leaves'], ident.get('n_leaves'))
+  if c['identity']:
+    faults = [label for label, bad in (('statut', c['status'] != ident.get('status')),
+                                       ('grand livre', c['ledger'] != dump_ledger(ident)),
+                                       ('feuilles', c['leaves'] != c['reference_leaves']),
+                                       ('ecarts de feuilles', any(c[k] != 0 for k in COMPARISON_COUNTERS)),
+                                       ('empreintes', c['digest'] != c['reference_digest'])) if bad]
+    if faults:
+      return 'identite declaree malgre : ' + ', '.join(faults)
+  return None
+
+
 def identity_line(line, ident, nonce):
   """Ligne d'identite hote d'un vidage : (identite bool, None), ou (None, raison) si la ligne n'est pas une preuve."""
   if not isinstance(line, dict):
@@ -543,6 +591,9 @@ def identity_line(line, ident, nonce):
     return None, 'mutants absents ou illisibles'
   if line.get('reference_status') != ident.get('status'):
     return None, 'statut de reference different du vidage'
+  why = comparison_problem(line, ident)  # grand livre present, type et, si identite, egal a celui du vidage
+  if why is not None:
+    return None, why
   if identity:
     if line.get('status') != line.get('reference_status') or line.get('ledger') != line.get('reference_ledger'):
       return None, 'identite declaree avec statut ou grand livre differents'
@@ -551,15 +602,26 @@ def identity_line(line, ident, nonce):
   return identity, None
 
 
-def bench_case(c, path, ident):
-  """Cas d'une prise du banc CUDA rattache a son vidage : (identite bool, None) ou (None, raison)."""
+def bench_case(c, path, ident, reps, reference_digest=None):
+  """Cas d'une prise du banc CUDA rattache a son vidage : (identite bool, None) ou (None, raison). Memes champs de
+  comparaison que l'identite hote (comparison_problem), empreinte de reference egale a celle que l'outil d'identite
+  hote a lue dans le meme vidage (reference_digest, si connue), et exactement reps mesures finies positives par
+  serie (total, resident, mur) : une prise sanitizer sans valeur pour sa repetition n'est pas une preuve."""
   if not isinstance(c, dict) or c.get('dump') != str(path):
     return None, 'prise d un autre vidage (chemin)'
   for key, ref in (('kmax', 'kmax'), ('leaf_size', 'leaf_size'), ('coord_bits', 'coord_bits'), ('sites', 'n_sites')):
     if c.get(key) != ident.get(ref):
       return None, '%s different du vidage' % key
-  if not isinstance(c.get('identity'), bool):
-    return None, 'identite illisible'
+  why = comparison_problem(c, ident)
+  if why is not None:
+    return None, why
+  if reference_digest is not None and c['reference_digest'] != reference_digest:
+    return None, 'empreinte de reference differente de celle de l identite hote'
+  for key in MEASURES:
+    values = c.get(key)
+    if not isinstance(values, list) or len(values) != reps or not finite_positive(values):
+      return None, 'mesures %s absentes, non finies, non positives ou en nombre faux (%s pour %d repetition(s))' % (
+          key, len(values) if isinstance(values, list) else 'aucune', reps)
   return c['identity'], None
 
 
@@ -598,12 +660,12 @@ def v11_take(v, k, leaf, workers, ident):
           v.get('catalogue_filter_tests') == ident.get('filter_tests')}, None
 
 
-def gpu_take(g, path, ident, nonce, reps, warmup):
+def gpu_take(g, path, ident, nonce, reps, warmup, reference_digest=None):
   """Prise du banc GPU d'un tour : (valeurs brutes, None) ou (None, raison)."""
   cases, why = bench_json(g, nonce, reps, warmup, [path])
   if cases is None:
     return None, why
-  identity, why = bench_case(cases[0], path, ident)
+  identity, why = bench_case(cases[0], path, ident, reps, reference_digest)
   if identity is None:
     return None, why
   c = cases[0]
@@ -950,7 +1012,7 @@ def main():
   report['dump_identity'] = {name: {k: v for k, v in ident.items() if k != 'magic'} for name, ident in idents.items()}
 
   # 5. Identite hote : tous les vidages, noeuds, mutants, portes unitaires ; une ligne fraiche par vidage.
-  host_identity, fixtures_host, host_kills = {}, {}, {m: [] for m in MUTANTS}
+  host_identity, fixtures_host, host_kills, reference_digests = {}, {}, {m: [] for m in MUTANTS}, {}
   unit_ok, host_code = False, None
   identity_tool = tools['mhgp12_traversal_identity']
   target = out / 'identity_host.json'
@@ -977,6 +1039,7 @@ def main():
       if ok is None:
         s.refuse('identite hote %s : %s' % (name, why))
         continue
+      reference_digests[name] = found[0]['reference_digest']
       if name in fixture_dumps:
         fixtures_host[name] = ok
       elif name in cases:
@@ -1019,8 +1082,11 @@ def main():
         sanitizer_codes[t] = code
         taken, why = bench_json(read_json(json_target), nonce, 1, 0, targets)
         names = [crop_name] + [f for f in SANITIZER_FIXTURES]
-        proof = taken is not None and all(bench_case(c, p, idents[n])[0] is True
-                                          for c, p, n in zip(taken, targets, names))
+        checks = [bench_case(c, p, idents[n], 1, reference_digests.get(n)) for c, p, n in zip(taken, targets, names)] \
+            if taken is not None else []
+        proof = taken is not None and all(ok is True for ok, _ in checks)
+        why = why or next(('%s : %s' % (n, w or 'identite en defaut') for (ok, w), n in zip(checks, names)
+                           if ok is not True), None)
         sanitizer_proof[t] = proof
         report['sanitizer'][t] = {'code': code, 'tail': (o2 + e2)[-600:], 'proof': proof, 'reason': why}
     target = out / 'device_fixtures.json'
@@ -1037,7 +1103,7 @@ def main():
         s.refuse('fixtures sur l appareil : %s' % why)
       else:
         for c, (name, p) in zip(taken, fixture_dumps.items()):
-          ok, why = bench_case(c, p, idents[name])
+          ok, why = bench_case(c, p, idents[name], 1, reference_digests.get(name))
           mutants = c.get('mutants') if isinstance(c.get('mutants'), dict) else {}
           if ok is None or sorted(mutants) != sorted(MUTANTS):
             s.refuse('fixture %s sur l appareil : %s' % (name, why or 'mutants absents'))
@@ -1086,8 +1152,8 @@ def main():
         code, _, _ = s.run('gpu_%s_p%d' % (name, p), [bench, '--dump', case_dumps[name], '--reps', args.reps,
                                                        '--warmup', args.warmup, '--mutants', 'none', '--json',
                                                        gpu_target, '--nonce', nonce], 1800)
-        gpu, why = gpu_take(read_json(gpu_target), case_dumps[name], idents[name], nonce, args.reps, args.warmup) \
-            if code in (0, 1) else (None, 'code %d' % code)
+        gpu, why = gpu_take(read_json(gpu_target), case_dumps[name], idents[name], nonce, args.reps, args.warmup,
+                            reference_digests.get(name)) if code in (0, 1) else (None, 'code %d' % code)
         if gpu is not None and (code == 0) != (gpu['gpu_identity'] is True):
           gpu, why = None, 'code %d et identite discordants' % code
         if gpu is None:
@@ -1185,7 +1251,9 @@ def evidence_from_outputs(folder, nonce=None):
     idents[name] = {'kmax': summary.get('kmax'), 'leaf_size': summary.get('leaf_size'),
                     'coord_bits': summary.get('coord_bits'), 'n_sites': summary.get('sites'),
                     'status': summary.get('status'), 'nodes': summary.get('nodes'),
-                    'filter_tests': summary.get('filter_tests')}
+                    'filter_tests': summary.get('filter_tests'), 'leaves': summary.get('leaves'),
+                    'max_depth': summary.get('max_depth'), 'max_leaf_seen': summary.get('max_leaf_seen'),
+                    'n_leaves': summary.get('queued_leaves', summary.get('leaves'))}
     paths[name] = work / 'dumps' / (name + '.bin')
     want = frame_of.get(name, (frames[0], 5, 24))
     if idents[name]['coord_bits'] != PROFILE_BITS or idents[name]['kmax'] != want[1] or \
@@ -1198,8 +1266,12 @@ def evidence_from_outputs(folder, nonce=None):
     refusals.append('fixtures : %s' % (why or 'outil en echec'))
   for e in (manifest or {}).get('fixtures', []) if complete else []:
     check = e.get('oracle_check') or {}
+    ledger = check.get('ledger') if isinstance(check.get('ledger'), dict) else {}
     idents[e['name']] = {'kmax': e.get('kmax'), 'leaf_size': e.get('leaf'), 'coord_bits': e.get('bits'),
-                         'n_sites': e.get('sites'), 'status': check.get('status')}
+                         'n_sites': e.get('sites'), 'status': check.get('status'), 'nodes': ledger.get('nodes'),
+                         'leaves': ledger.get('leaves'), 'filter_tests': ledger.get('filter_tests'),
+                         'max_depth': ledger.get('max_depth'), 'max_leaf_seen': ledger.get('max_leaf'),
+                         'n_leaves': check.get('leaves')}
     paths[e['name']] = work / 'fixtures' / (e['name'] + '.bin')
   # Identite hote : JSON brut, egal a celui du rapport.
   lines = []
@@ -1220,7 +1292,7 @@ def evidence_from_outputs(folder, nonce=None):
   for line in lines:
     if line.get('phase') == 'identity':
       by_path.setdefault(line.get('dump'), []).append(line)
-  host_identity, fixtures_host, host_kills = {}, {}, {m: [] for m in MUTANTS}
+  host_identity, fixtures_host, host_kills, reference_digests = {}, {}, {m: [] for m in MUTANTS}, {}
   for name in cases + [crop_name] + list(fixture_names if complete else []):
     if name not in paths:
       continue
@@ -1232,6 +1304,7 @@ def evidence_from_outputs(folder, nonce=None):
     if ok is None:
       refusals.append('identite hote %s : %s' % (name, why))
       continue
+    reference_digests[name] = found[0]['reference_digest']
     if name in FIXTURES:
       fixtures_host[name] = ok
     elif name in cases:
@@ -1255,7 +1328,8 @@ def evidence_from_outputs(folder, nonce=None):
       sanitizer_proof[t] = False
       continue
     taken, _ = bench_json(read_json(folder / ('sanitizer_%s.json' % t)), nonce, 1, 0, [paths[n] for n in targets])
-    sanitizer_proof[t] = taken is not None and all(bench_case(c, paths[n], idents[n])[0] is True
+    sanitizer_proof[t] = taken is not None and all(bench_case(c, paths[n], idents[n], 1,
+                                                              reference_digests.get(n))[0] is True
                                                    for c, n in zip(taken, targets))
   # Fixtures sur l'appareil : JSON brut, egal a celui du rapport.
   device = report.get('device_fixtures') or {}
@@ -1271,7 +1345,7 @@ def evidence_from_outputs(folder, nonce=None):
     refusals.append('fixtures sur l appareil : %s' % why)
   else:
     for c, name in zip(taken, order):
-      ok, why = bench_case(c, paths[name], idents[name])
+      ok, why = bench_case(c, paths[name], idents[name], 1, reference_digests.get(name))
       mutants = c.get('mutants') if isinstance(c.get('mutants'), dict) else {}
       if ok is None or sorted(mutants) != sorted(MUTANTS):
         refusals.append('fixture %s sur l appareil : %s' % (name, why or 'mutants absents'))
@@ -1294,7 +1368,8 @@ def evidence_from_outputs(folder, nonce=None):
         refusals.append('%s tour %d : chrono v11 (%s)' % (name, p, why))
         continue
       gpu, why = gpu_take(read_json(folder / 'runs' / ('%s_p%d_gpu.json' % (name, p))), paths[name], idents[name],
-                          nonce, args['reps'], args['warmup']) if g_code in (0, 1) else (None, 'code %r' % g_code)
+                          nonce, args['reps'], args['warmup'], reference_digests.get(name)) \
+          if g_code in (0, 1) else (None, 'code %r' % g_code)
       if gpu is not None and (g_code == 0) != (gpu['gpu_identity'] is True):
         gpu, why = None, 'code %r et identite discordants' % g_code
       if gpu is None:

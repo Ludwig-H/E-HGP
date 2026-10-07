@@ -30,11 +30,12 @@ v11 sur la même machine ? La règle d'adoption est écrite au § 6, avant toute
 | `vidage/v11_timing.cpp` | chrono de la frontière et de la passe unique de la v11 (W fils, passes chaudes), et du `walk` séquentiel |
 | `host/traversal_identity.cpp` | identité sur l'hôte (warp simulé) contre les vidages, nœuds compris, mutants, portes unitaires |
 | `host/format_selftest.cpp` | porte du lecteur strict (`CST-0223`) : vidages synthétiques valides admis, invalides refusés (dont les quatre références de l'auditeur) |
+| `host/driver_selftest.cpp` | porte de l'ordre des gardes du parcours : après les totaux d'un niveau refusé (capacité, feuille large), ni réservation, ni noyau, ni allocation de l'hôte, diagnostic par niveau compris (exécuteur factice, opérateur `new` compté) |
 | `cuda/traversal_bench.cu` | banc CUDA : exécuteur appareil du même pilote, chrono, profil par niveau, identité, mutants |
 | `oracle/oracle_parcours.py` | oracle du parcours de la v11 en entiers Python exacts (arithmétique volontairement autre) |
 | `fixtures/fixtures.py` | six fixtures synthétiques (u21 et u32) et leurs vidages de référence |
 | `scripts/g4_traversal_bench.py` | session G4 complète (bibliothèque standard) : construit, vide, vérifie, mesure, juge ; `--selftest-judge` ; `--rejudge` (sorties publiées d'une session) |
-| `tests/test_juge_m5.py` | porte du juge et du pilote (`CST-0018`) : injections de l'auditeur rejouées par le vrai `main`, rejugement de la session G4 C |
+| `tests/test_juge_m5.py` | porte du juge et du pilote (`CST-0018`) : injections de l'auditeur (reçus `audit_b_m5_20261007` et `audit_juges_emst_20261007`) rejouées par le vrai `main`, rejugement de la session G4 C |
 | `CMakeLists.txt` | CMake ≥ 3.20 (3.22.1 de la VM), C++20, `-Wall -Wextra -Wpedantic -Werror` côté hôte, CUDA sm_120 |
 | `RAPPORT.md` | résultats locaux du 7 octobre |
 
@@ -215,7 +216,14 @@ et égales aux médianes déclarées, aucune réservation chronométrée, code e
 code 0 avec sa prise sur les trois cibles ; les mutants tués ; les portes unitaires et la porte du lecteur conformes ;
 l'isolation du GPU au début, avant et après les tours ; chaque prise fraîche (cible effacée avant la commande, jeton
 de la session répété par chaque outil) et rattachée à son vidage (chemin, profil, K, feuille, sites, statut, grand
-livre) ; binaires, sources, dépendances compilées et vidages rehachés égaux en fin de session. Une preuve manquante,
+livre) ; binaires, sources, dépendances compilées et vidages rehachés égaux en fin de session. Les champs de
+comparaison de chaque ligne d'identité hôte et de chaque prise du banc (tours, fixtures sur l'appareil, Compute
+Sanitizer) sont typés et recoupés (reçu `audit_juges_emst_20261007/juges`) : identité, statut, grand livre aux cinq
+comptes, feuilles et feuilles de référence (égales à celles du vidage), empreintes canoniques, compteurs `missing`,
+`extra`, `list_mismatch`, `meta_mismatch` ; une identité déclarée vraie exige le statut et le grand livre du vidage,
+autant de feuilles que la référence, aucun écart et deux empreintes égales (`leaves_equal` de `compare.hpp`) ;
+l'empreinte de référence d'une prise du banc égale celle que l'outil d'identité hôte a lue dans le même vidage ; chaque
+série `total_ms`, `resident_ms`, `wall_ms` compte exactement les répétitions de sa commande. Une preuve manquante,
 périmée ou incohérente rend « refusé ». `--rejudge` rejuge les sorties publiées d'une session par les mêmes
 validateurs ; pour une session antérieure au jeton, ce qui n'existait pas (jeton, porte du lecteur, isolation avant et
 après les tours, rehachage des sources) est déclaré non rejouable, jamais supposé.
@@ -259,7 +267,8 @@ aucun `publier.py` n'est nécessaire. Durée : 6 à 8 minutes sur le codespace s
 à 20 minutes sur G4 (constructions et vidages plus rapides, mais six tours, Compute Sanitizer et passes GPU). Codes : 0
 rapport écrit (quel que soit le verdict), 2 refus avant toute mesure. Avant la session : `python3 -S -O
 scripts/g4_traversal_bench.py --selftest-judge` et `python3 -S -O tests/test_juge_m5.py` (code 0 ; la seconde rejoue
-les injections de l'auditeur et rejuge la session C).
+les injections de l'auditeur et rejuge la session C), et les portes natives `mhgp12_traversal_format_selftest
+<dossier temporaire>` (lecteur) et `mhgp12_traversal_driver_selftest` (ordre des gardes), code 0.
 
 ## 8. Prédiction, écrite avant G4
 
@@ -294,5 +303,6 @@ Voir `RAPPORT.md` § 6 (chiffrée à partir des statistiques par niveau mesurée
      montre coûteux, et le `Merge` en série des premiers niveaux si son temps compte ;
   6. budgéter la mémoire des niveaux et de l'arène des feuilles dans le budget de la Session (prévision, admission,
      réservation, `CST-0211`) ; refus transactionnel au-delà des indices 32 bits des tâches (déjà refusé ici, statut
-     `capacité`, admis désormais avant toute réservation du niveau suivant, `Scatter`, `Emit` ou conversion) ; régime de plusieurs millions de sites (lots de feuilles, `ARCHITECTURE.md` § 4.6) ;
+     `capacité`, admis désormais avant toute réservation du niveau suivant, `Scatter`, `Emit` ou conversion, et
+     avant toute allocation de l'hôte : le diagnostic par niveau est réservé d'avance, à une borne fixe) ; régime de plusieurs millions de sites (lots de feuilles, `ARCHITECTURE.md` § 4.6) ;
   7. qualifier u24 puis u32 sur des données réelles : la voie large `i128` n'est exercée ici que par des fixtures.

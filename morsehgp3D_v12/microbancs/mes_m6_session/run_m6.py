@@ -13,8 +13,11 @@ effaces avant tout), binaire efface, recompile, present et rehache apres les pri
 isole (nvidia-smi lisible, aucun processus de calcul) au debut, avant et apres chaque prise ; chaque prise de code 0
 rend exactement les 65 mesures attendues (une ligne JSON chacune, aucune en double ni en trop, ligne device du mode
 joue et du meme appareil pour toutes les prises, effectifs n fixes par --reps comme dans le banc, nombres finis
-positifs, p05 <= p50 <= p95 <= max). --rejuger relit un dossier publie avec les memes regles et dit ce qui n'y est pas
-rejouable (rapport v1 : ni empreintes, ni isolation par prise, ni effectif publie). Bibliotheque standard seule
+positifs, p05 <= p50 <= p95 <= max). --rejuger relit un dossier publie avec les memes regles. Rapport v2 : schema
+strict (champs obligatoires types, empreintes SHA-256 du binaire et des deux sources, releves d'isolation coherents
+avec leur code et leurs processus, aucun refus publie, prises declarees conformes sans probleme, medianes publiees
+egales a celles des prises ; recu audit_juges_emst_20261007/juges). Rapport v1 (historique) : relu avec ses limites
+declarees non rejouables (ni empreintes, ni isolation par prise, ni effectif publie). Bibliotheque standard seule
 (Python 3.10 nu, aucun assert). Codes : 0 conforme (mes_m6_ok) ; 2 usage ; 3 compilation, execution, preuve ou
 sortie en echec (mes_m6_echec, raisons dans le rapport et sur stderr).
 """
@@ -46,6 +49,11 @@ QUANTILES = ('p05_us', 'p50_us', 'p95_us', 'max_us')
 DEVICE_FIELDS = ('cc', 'device', 'global_mib', 'mes', 'name', 'sm', 'sync')
 EXTRA_FIELDS = ('bytes', 'host', 'dir', 'bytes_rw')
 SUMMARY = ('context_open', 'first_launch', 'empty_kernel_launch_sync', 'graph_of_ten_sync', 'touch_256mib')
+SHA256_HEX = re.compile(r'[0-9a-f]{64}\Z')
+SOURCES = ('mes_m6_session_cost.cu', 'run_m6.py')
+# Champs obligatoires d'un rapport v2 et leur type (schema strict de la relecture).
+REPORT_V2_FIELDS = (('date_utc', str), ('cleared', list), ('nvcc', list), ('gpu', str), ('gpu_apps', str),
+                    ('uptime_since', str), ('runs', list), ('refusals', list), ('verdict', str))
 
 
 def find_nvcc(explicit):
@@ -322,6 +330,67 @@ def run(args):
 
 
 # ---------------------------------------------------------------- relecture d'un dossier publie
+def is_sha256(value):
+  return isinstance(value, str) and SHA256_HEX.match(value) is not None
+
+
+def isolation_problem(record, label):
+  """Releve d'isolation d'un rapport v2 : champs types, quiet vrai si et seulement si nvidia-smi a rendu le code 0 et
+  aucune ligne de processus (comme gpu_quiet), et quiet vrai. Rend None ou la raison."""
+  if not isinstance(record, dict) or not is_int(record.get('code')) or not isinstance(record.get('processes'), str) \
+      or not isinstance(record.get('quiet'), bool) or not is_int(record.get('attempts')) or record['attempts'] < 1:
+    return 'isolation %s : releve absent ou illisible' % label
+  if record['quiet'] != (record['code'] == 0 and record['processes'].strip() == ''):
+    return 'isolation %s : quiet=%r contredit par le code %d et les processus %r' % (
+        label, record['quiet'], record['code'], record['processes'][:40])
+  if not record['quiet']:
+    return 'isolation %s : GPU non isole' % label
+  return None
+
+
+def report_v2_problems(report):
+  """Schema strict d'un rapport v2 (CST-0018, recu audit_juges_emst_20261007/juges) : champs obligatoires types,
+  provenance (empreintes SHA-256 du binaire et des deux sources), compilation de code 0, isolation du debut coherente,
+  et aucun refus publie : une relecture ne peut pas etablir apres coup ce que le passage a refuse."""
+  problems = []
+  for key, kind in REPORT_V2_FIELDS:
+    if not isinstance(report.get(key), kind):
+      problems.append('champ %s absent ou illisible' % key)
+  if not is_sha256(report.get('binary_sha256')):
+    problems.append('empreinte du binaire absente ou illisible')
+  sources = report.get('sources_sha256')
+  if not isinstance(sources, dict) or sorted(sources) != sorted(SOURCES) or \
+      not all(is_sha256(v) for v in sources.values()):
+    problems.append('empreintes des sources absentes, incompletes ou illisibles')
+  compiled = report.get('compile')
+  if not isinstance(compiled, dict) or compiled.get('code') != 0 or not isinstance(compiled.get('stderr'), str):
+    problems.append('compilation absente ou en echec')
+  why = isolation_problem(report.get('isolation_start'), 'du debut')
+  if why is not None:
+    problems.append(why)
+  refusals = report.get('refusals')
+  if isinstance(refusals, list) and refusals:
+    problems.append('refus publies dans le rapport : ' + '; '.join(str(r) for r in refusals[:3]))
+  return problems
+
+
+def run_v2_problems(r):
+  """Entree v2 d'une prise : duree, sortie d'erreur, empreinte, deux releves d'isolation coherents, et ni probleme
+  publie ni prise declaree non conforme."""
+  found = []
+  seconds = r.get('seconds')
+  if not isinstance(seconds, (int, float)) or isinstance(seconds, bool) or not math.isfinite(seconds) or seconds < 0 \
+      or not isinstance(r.get('stderr'), str) or not is_sha256(r.get('sha256')):
+    found.append('entree de la prise illisible (duree, sortie d erreur ou empreinte)')
+  for side, label in (('isolation_before', 'avant la prise'), ('isolation_after', 'apres la prise')):
+    why = isolation_problem(r.get(side), label)
+    if why is not None:
+      found.append(why)
+  if r.get('problems') != [] or r.get('conform') is not True:
+    found.append('prise declaree non conforme ou problemes publies')
+  return found
+
+
 def rejudge(folder, args):
   """Relit un dossier publie (rapport et prises) avec les regles du passage. Rend 0 si tout est conforme."""
   problems, not_replayable, takes, lines = [], [], {}, 0
@@ -350,11 +419,7 @@ def rejudge(folder, args):
     if report.get('gpu_apps') != '':
       problems.append('GPU occupe ou non releve au debut')
     if v2:
-      if not isinstance(report.get('isolation_start'), dict) or report['isolation_start'].get('quiet') is not True:
-        problems.append('isolation du debut non prouvee')
-      if not isinstance(report.get('binary_sha256'), str) or not isinstance(report.get('sources_sha256'), dict) or \
-          None in report['sources_sha256'].values():
-        problems.append('empreintes du binaire ou des sources absentes')
+      problems += report_v2_problems(report)
     runs = report.get('runs')
     runs = runs if isinstance(runs, list) and all(isinstance(r, dict) for r in runs) else []
     keys = [(r.get('mode'), r.get('process')) for r in runs]
@@ -377,9 +442,7 @@ def rejudge(folder, args):
       if v2:
         if r.get('sha256') != hashlib.sha256(data).hexdigest():
           found.append('empreinte differente du rapport')
-        if not all(isinstance(r.get(side), dict) and r[side].get('quiet') is True
-                   for side in ('isolation_before', 'isolation_after')):
-          found.append('isolation de la prise non prouvee')
+        found += run_v2_problems(r)
       if found:
         problems.append('prise %s %d : %s' % (mode, index, '; '.join(found[:3])))
       else:
@@ -387,6 +450,8 @@ def rejudge(folder, args):
         lines += text.count('\n')
     if len({device_of(text) for text in takes.values()}) > 1:
       problems.append('appareil different entre prises')
+    if v2 and not problems and report.get('summary_median_us') != summary(takes):
+      problems.append('medianes publiees differentes de celles des prises')
   verdict = 'mes_m6_ok' if not problems else 'mes_m6_echec'
   if v2 and report is not None and report.get('verdict') != verdict:
     problems.append('verdict publie %r, rejuge %s' % (report.get('verdict'), verdict))

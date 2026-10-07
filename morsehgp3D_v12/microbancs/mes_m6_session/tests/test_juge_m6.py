@@ -15,7 +15,11 @@ l'ordre et au format de mes_m6_session_cost.cu. Attendus :
     (le releve seul est repete) ; sorties perimees d'un passage anterieur effacees avant tout ;
   - relecture (--rejuger) des sorties REELLES de la session G4 A (recu g4_t0a_20261007, 002_m6 : 9 prises, 585
     lignes, code publie 0 donc mes_m6_ok retrouve, medianes egales a celles de l'auditeur, manques du rapport v1
-    declares non rejouables), d'un dossier v2 conforme, et de dossiers alteres ou de rapports falsifies (code 3).
+    declares non rejouables), d'un dossier v2 conforme, et de dossiers alteres ou de rapports v2 falsifies (code
+    3) : code non nul, isolation non prouvee, et les trois mutations du recu audit_juges_emst_20261007/juges
+    (provenance vide, isolation de prise quiet=true avec code 9 et un processus, refus explicite laisse sous un
+    verdict positif), puis chaque garde seule (empreinte du binaire vide, sources vides ou incompletes, isolation du
+    debut contredite, prise declaree non conforme, medianes publiees fausses, champ obligatoire absent).
 Usage : python3 -S -O tests/test_juge_m6.py [--recu-g4 DOSSIER_m6]   (dossier par defaut : recu du depot)
 Bibliotheque standard ; aucune garde par assert. Codes : 0 conforme, 1 ecart (detail en JSON), 2 usage.
 """
@@ -348,9 +352,7 @@ def cas_relecture(tmp, recu):
   c, r = rejuger(out)
   exiger(c == 3 and any('empreinte' in x for x in r['refus']), 'dossier v2 altere : code %d' % c)
   resultats.append({'cas': 'rejuge_v2_prise_alteree_mais_conforme', 'code': c, 'refus': r['refus'][0][:80]})
-  for nom, falsifier, motif in (('code_non_nul', lambda r: r['runs'][4].update(code=1), 'code 1'),
-                                ('isolation_non_prouvee', lambda r: r['runs'][2]['isolation_after'].update(quiet=False),
-                                 'isolation de la prise')):
+  for nom, falsifier, motif in FALSIFICATIONS_V2:
     code, _, _, out, _ = passage(tmp, 'v2_' + nom)
     rapport = json.loads((out / 'm6_report.json').read_text())
     falsifier(rapport)
@@ -360,6 +362,30 @@ def cas_relecture(tmp, recu):
         nom, c, r['refus'][:2]))
     resultats.append({'cas': 'rejuge_v2_rapport_falsifie_' + nom, 'code': c, 'refus': r['refus'][0][:80]})
   return resultats
+
+
+def _medianes_fausses(rapport):
+  rapport['summary_median_us']['spin']['context_open'] += 1.0
+
+
+FALSIFICATIONS_V2 = (  # (nom, falsification d'un rapport v2 conforme, motif attendu dans les refus de la relecture)
+    ('code_non_nul', lambda r: r['runs'][4].update(code=1), 'code 1'),
+    ('isolation_non_prouvee', lambda r: r['runs'][2]['isolation_after'].update(quiet=False), 'apres la prise'),
+    # Recu audit_juges_emst_20261007/juges : provenance vide, isolation contredite, refus explicite laisse.
+    ('auditeur_provenance_vide', lambda r: r.update(binary_sha256='', sources_sha256={}), 'empreinte du binaire'),
+    ('auditeur_isolation_contredite',
+     lambda r: r['runs'][0]['isolation_before'].update(code=9, processes='synthetic-process', quiet=True), 'contredit'),
+    ('auditeur_refus_explicite', lambda r: r.update(refusals=['binaire modifie ou retire pendant les prises']),
+     'refus publies'),
+    # Chaque garde seule.
+    ('empreinte_du_binaire_vide', lambda r: r.update(binary_sha256=''), 'empreinte du binaire'),
+    ('sources_vides', lambda r: r.update(sources_sha256={}), 'sources'),
+    ('sources_incompletes', lambda r: r['sources_sha256'].pop('mes_m6_session_cost.cu'), 'sources'),
+    ('isolation_du_debut_contredite', lambda r: r['isolation_start'].update(code=-1), 'du debut'),
+    ('prise_declaree_non_conforme', lambda r: r['runs'][1].update(conform=False), 'non conforme'),
+    ('medianes_publiees_fausses', _medianes_fausses, 'medianes'),
+    ('champ_obligatoire_absent', lambda r: r.pop('date_utc'), 'date_utc'),
+)
 
 
 def cas_usage(tmp):
