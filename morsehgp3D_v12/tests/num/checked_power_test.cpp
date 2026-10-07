@@ -91,7 +91,8 @@ MHGP12_TEST(checked_public, 250) {
   const i64 local = std::min(m, i64{524287});
   const auto upper = sphere({zero, point(local, local, 0), point(local, 0, local)});
   const auto upper_fit = fits_box(upper, zero, top);
-  CHECK(upper_fit[0]); CHECK_EQ(upper_fit[1], kCoordBits != 24);
+  // Fait du profil : la boite est le domaine entier ; au profil 32 ses facteurs lineaires sortent aussi de i128.
+  CHECK_EQ(upper_fit[0], kCoordBits != 32); CHECK_EQ(upper_fit[1], kCoordBits == 21);
   judge(upper, top, zero, top);  // Support local19bits ne borne PAS le temoin global24bits.
   const i64 u = std::min(m, i64{1250000}), h = std::min(m, i64{2097151});
   const auto asymmetric = sphere({zero, point(u, u, 0), point(u, 0, u)});

@@ -1,6 +1,6 @@
 # Portes du module cloud.
 mhgp12_add_unit(mhgp12_cloud_unit SOURCES cloud_test.cpp
-                GROUPS morton width sizes refusals fixture judge permutation renumbering budget ownership
+                GROUPS morton width sizes refusals fixture judge identity permutation renumbering budget ownership
                        refusal_priority shared_budget
                 LABELS fast)
 

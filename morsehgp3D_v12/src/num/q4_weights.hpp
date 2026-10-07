@@ -1,4 +1,6 @@
 // Positivite du tetraedre de PRESENTATION : jamais un certificat pour un autre quadruplet.
+// Repere local (v12) : le cube commun aux quatre points borne les poids (voie native) ; sinon voie large a la largeur
+// du palier moyen (6s+7 bits, s <= 24) ; au palier large, entiers exacts (detail::Exact).
 #pragma once
 #include <algorithm>
 #include "num/geometry_internal.hpp"
@@ -23,7 +25,7 @@ inline bool q4_weights_i128(const std::array<Point,4>& points) noexcept {
 // |N_j|<=9L^4. face=vs+su+uv est aussi un cross a meme ancrage, donc |face_j|<=L^2.
 // H<=18L^6, |N.face| et |N.cross_i|<=27L^6. Tous produits/sommes, y compris H-w0-w1-w2,
 // sont <=117L^6. L<=2^20 implique <2^127 AVANT toute multiplication i128 de degre six.
-inline bool q4_weights_native(const std::array<CenterInt,3>& n,i128 det,
+inline bool q4_weights_native(const std::array<i128,3>& n,i128 det,
                               const Vec& face,const Vec& vs,const Vec& su) noexcept {
   const i128 h=2*(det*det);
   const auto scalar=[&](const Vec& normal) noexcept {
@@ -38,9 +40,10 @@ inline bool q4_weights_native(const std::array<CenterInt,3>& n,i128 det,
   return h-w0-w1-w2>0;
 }
 
-inline Result<bool> q4_weights_wide(const std::array<CenterInt,3>& n,i128 det,
+// Palier moyen au plus (s <= 24) : bornes du commentaire precedent avec L = 2^s, 117 L^6 < 2^(6s+7).
+inline Result<bool> q4_weights_wide(const std::array<i128,3>& n,i128 det,
                                    const Vec& face,const Vec& vs,const Vec& su) noexcept {
-  constexpr int bits=6*kCoordBits+7, words=(bits+63)/64;
+  constexpr int bits=6*kMediumSpan+7, words=(bits+63)/64;
   static_assert(bits<=151);
   auto square=product<words>(det,det);
   if (!square.ok()) return square.outcome();
@@ -79,12 +82,27 @@ inline Result<bool> q4_weights_wide(const std::array<CenterInt,3>& n,i128 det,
 }
 
 inline Result<bool> q4_presentation_inside(const std::array<Point,4>& points,
-                                          const std::array<CenterInt,3>& n,i128 det,
+                                          const std::array<i128,3>& n,i128 det,
                                           const Vec& vs,const Vec& su,const Vec& uv) noexcept {
-  // <=3L^2 par somme partielle, <=3*2^48 aux trois profils : i64 exact sans certificat.
+  // <=3L^2 par somme partielle, <=3*2^48 au palier moyen : i64 exact sans certificat.
   const Vec face{vs[0]+su[0]+uv[0],vs[1]+su[1]+uv[1],vs[2]+su[2]+uv[2]};
   if (q4_weights_i128(points)) return q4_weights_native(n,det,face,vs,su);
   return q4_weights_wide(n,det,face,vs,su);
+}
+
+// Palier large (25 <= s <= 32) : memes poids en entiers exacts ; 117 L^6 < 2^199 a s = 32, sous les 320 bits.
+inline Result<bool> q4_presentation_inside_exact(const std::array<Exact,3>& n,i128 det,
+                                                const Vec128& vs,const Vec128& su,const Vec128& uv) noexcept {
+  const Vec128 face{vs[0]+su[0]+uv[0],vs[1]+su[1]+uv[1],vs[2]+su[2]+uv[2]};
+  const auto scalar=[&](const Vec128& normal) noexcept {
+    return n[0]*Exact(normal[0])+n[1]*Exact(normal[1])+n[2]*Exact(normal[2]);
+  };
+  const Exact h=Exact(det)*Exact(det)+Exact(det)*Exact(det);
+  const Exact w0=h-scalar(face), w1=scalar(vs), w2=scalar(su);
+  const Exact rest=h-w0-w1-w2;
+  if (h.overflow || w0.overflow || w1.overflow || w2.overflow || rest.overflow)
+    return fail(Reason::arithmetic_invariant);
+  return w0.sign()>0 && w1.sign()>0 && w2.sign()>0 && rest.sign()>0;
 }
 
 }  // namespace mhgp12::num::detail

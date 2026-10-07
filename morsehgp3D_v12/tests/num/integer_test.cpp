@@ -69,9 +69,9 @@ MHGP12_TEST(budgets, 15) {
   CHECK_EQ(integer_one<63>(), 1);
   CHECK_EQ(integer_one<127>(), 1);
   CHECK_EQ(integer_one<128>().words[0], 1u);
-  CHECK_EQ(Budgets<21>::side, 134);  // la v11 controlait aussi Budgets<18>::side, profil abandonne
-  CHECK_EQ(Budgets<24>::side, 152);
-  CHECK_EQ(Budgets<24>::level_comparison, 356);
+  CHECK_EQ(SpanBudgets<21>::side, 134);  // la v11 controlait aussi Budgets<18>::side, profil abandonne
+  CHECK_EQ(SpanBudgets<24>::side, 152);
+  CHECK_EQ(SpanBudgets<24>::level_comparison, 356);
   auto failure = mhgp12::num::detail::require_fit<63>(edge63);
   CHECK(!failure.ok());
   CHECK_EQ(failure.outcome().reason, Reason::arithmetic_invariant);
@@ -81,7 +81,7 @@ MHGP12_TEST(budgets, 15) {
 MHGP12_TEST(levels, 18) {
   const Level zero;
   CHECK_EQ(to_wide(zero.numerator()).sign(), 0);
-  CHECK_EQ(compare(to_wide(zero.denominator()), to_wide(integer_one<Budget::level_denominator>())), 0);
+  CHECK_EQ(compare(to_wide(zero.denominator()), to_wide(integer_one<DomainBudget::level_denominator>())), 0);
   auto a = Level::make(to_wide(i64{2}), to_wide(i64{3}));
   auto b = Level::make(to_wide(i64{4}), to_wide(i64{6}));
   auto c = Level::make(to_wide(i64{3}), to_wide(i64{4}));
@@ -98,8 +98,8 @@ MHGP12_TEST(levels, 18) {
     CHECK_EQ(bad.outcome().status(), Status::invalid_input);
     CHECK_EQ(bad.outcome().reason, Reason::parameter_out_of_range);
   }
-  Wide<4> huge;
-  huge.words[3] = u64{1} << 63;
+  Wide<8> huge;  // 512 bits : au-dela des budgets de niveau des trois profils
+  huge.words[7] = u64{1} << 63;
   CHECK(!Level::make(huge, to_wide(i64{1})).ok());
   CHECK(!Level::make(to_wide(i64{1}), huge).ok());
 }

@@ -1,5 +1,7 @@
 // Un seul parcours : I croissant a gauche, U empilee a droite puis inversee. Aucune allocation par requete.
+// Le meme parcours sert le census generique (LatticeSphere) et le census garde d'une boule certifiee (GuardedSphere).
 #include "index/access.hpp"
+#include "index/bounds.hpp"
 #include <algorithm>
 #include <new>
 
@@ -15,6 +17,7 @@ class ActiveQuery {
   std::atomic_flag& flag_;
 };
 
+template <class Bounds>
 struct BorrowedPass {
   std::span<SiteIdx> storage;
   u32 threshold;
@@ -29,12 +32,12 @@ struct BorrowedPass {
     p += count;
     return {};
   }
-  Outcome points(const Cloud& cloud, u32 begin, u32 end, const num::LatticeSphere& lattice) noexcept {
+  Outcome points(const Cloud& cloud, u32 begin, u32 end, const Bounds& lattice) noexcept {
     for (u32 i = begin; i < end && p < threshold; ++i) {
       ++ledger.point_tests;
       auto point = num::Point::make(cloud.x()[i], cloud.y()[i], cloud.z()[i]);
       if (!point.ok()) return point.outcome();
-      auto side = lattice.side(point.value());
+      auto side = lattice.side(point.value(), ledger);
       if (!side.ok()) return side.outcome();
       if (side.value() < 0) { MHGP12_TRY(inside(i, i + 1)); }
       else if (side.value() == 0) {
@@ -44,14 +47,14 @@ struct BorrowedPass {
     }
     return {};
   }
-  Outcome walk(const GlobalIndex& index, const num::Sphere& sphere) noexcept {
+  // Une preparation des bornes par parcours (lattice), sites de l'index entiers.
+  Outcome walk(const GlobalIndex& index, const Bounds& lattice) noexcept {
     ++ledger.passes;
-    const num::LatticeSphere lattice(sphere);  // une preparation par parcours ; sites de l'index entiers
     const auto nodes = index_detail::Access::nodes(index);
     for (u64 cursor = 0; cursor < nodes.size() && p < threshold;) {
       const auto& node = nodes[cursor];
       ++ledger.nodes; ++ledger.bounds;
-      auto signs = lattice.bound_signs(node.box);  // minorant sur sites entiers, majorant continu
+      auto signs = lattice.bound_signs(node.box, ledger);
       if (!signs.ok()) return signs.outcome();
       if (signs.value().lower > 0) {
         ++ledger.outside_blocks; cursor = node.escape;
@@ -77,14 +80,18 @@ Result<std::unique_ptr<CensusWorkspace>> CensusWorkspace::make(const GlobalIndex
   return made;
 }
 
-Outcome CensusWorkspace::query(const GlobalIndex& index, const num::Sphere& sphere, u32 threshold,
-                               void* context, Callback callback) noexcept {
+template <class Bounds, class Ball>
+Outcome CensusWorkspace::run(const GlobalIndex& index, const Ball& sphere, u32 threshold, void* context,
+                             Callback callback) noexcept {
   if (active_.test_and_set(std::memory_order_acquire)) return fail(Reason::parameter_out_of_range);
   const ActiveQuery active(active_);
   if (&index != index_ || index.cloud().sites() != storage_.size() || threshold == 0 || callback == nullptr)
     return fail(Reason::parameter_out_of_range);
-  BorrowedPass pass{storage_.span(), threshold, {}};
-  MHGP12_TRY(pass.walk(index, sphere));
+  BorrowedPass<Bounds> pass{storage_.span(), threshold, {}};
+  {
+    const Bounds lattice(sphere);
+    MHGP12_TRY(pass.walk(index, lattice));
+  }
   const bool saturated = pass.p == threshold;
   auto shell = storage_.span().last(saturated ? 0 : pass.m);
   std::reverse(shell.begin(), shell.end());
@@ -93,5 +100,15 @@ Outcome CensusWorkspace::query(const GlobalIndex& index, const num::Sphere& sphe
   try { return callback(context, result); }
   catch (const std::bad_alloc&) { return fail(Reason::memory_budget); }
   catch (...) { return fail(Reason::task_exception); }
+}
+
+Outcome CensusWorkspace::query(const GlobalIndex& index, const num::Sphere& sphere, u32 threshold,
+                               void* context, Callback callback) noexcept {
+  return run<index_detail::GenericBounds>(index, sphere, threshold, context, callback);
+}
+
+Outcome CensusWorkspace::query(const GlobalIndex& index, const num::CertifiedBall& ball, u32 threshold,
+                               void* context, Callback callback) noexcept {
+  return run<index_detail::GuardedBounds>(index, ball, threshold, context, callback);
 }
 }  // namespace mhgp12

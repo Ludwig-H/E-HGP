@@ -13,6 +13,10 @@ MINIMUM, MAXIMUM = -(1 << 127), (1 << 127) - 1
 
 
 def checked(d, n, norm, factors):
+    # Operandes hors de i128 (coefficients d'un support d'etendue > 24 au profil 32) : aucun essai i128 possible,
+    # le produit passe d'office a la voie large. Aux profils 21 et 24 les coefficients tiennent toujours.
+    if not all(MINIMUM <= x <= MAXIMUM for x in [d] + list(n)):
+        return False, 'operands'
     terms = [d * norm] + [x * y for x, y in zip(n, factors)]
     total = terms[0]
     if not MINIMUM <= total <= MAXIMUM:
@@ -187,7 +191,7 @@ def run(executable):
     header = subprocess.run([executable], input='', text=True, capture_output=True, timeout=5)
     require(header.returncode == 0 and not header.stderr, 'probe header process')
     words = header.stdout.split()
-    require(len(words) == 2 and words[0] == 'bits' and int(words[1]) in (21, 24), 'header bits')
+    require(len(words) == 2 and words[0] == 'bits' and int(words[1]) in (21, 24, 32), 'header bits')
     bits = int(words[1]); rows = cases(bits); text = payload(rows)
     process = subprocess.run([executable], input=text, text=True, capture_output=True, timeout=45)
     require(process.returncode == 0 and not process.stderr, 'probe process')

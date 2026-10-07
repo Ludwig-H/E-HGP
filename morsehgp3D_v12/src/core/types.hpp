@@ -9,9 +9,9 @@
 //
 // Profil numerique (ARCHITECTURE.md de la v11, paragraphe 3) : coordonnees entieres 0 <= x < 2^B par axe, ou
 // B = MHGP12_COORD_BITS est une constante de compilation posee par la construction (CMakeLists.txt). Aucune valeur par
-// defaut ici : deux sources d'une meme constante finissent par diverger. Valeurs admises (decision D6 de la v12) : 21
-// et 24 ; le profil 18 bits de la v11 est abandonne, et 32 bits attend l'arithmetique en repere local
-// (docs/CONTRAT_NUMERIQUE.md) : l'un et l'autre sont refuses ici comme a la configuration.
+// defaut ici : deux sources d'une meme constante finissent par diverger. Valeurs admises (decision D6 de la v12) : 21,
+// 24 et 32 (ce dernier depuis l'arithmetique en repere local, docs/CONTRAT_NUMERIQUE.md) ; le profil 18 bits de la
+// v11 est abandonne et refuse ici comme a la configuration.
 //
 // Garde du flottant (ARCHITECTURE.md de la v11, paragraphe 4, F5). La v10 exigeait IEEE-754 strict de chaque unite
 // et refusait une a une les macros de ses affaiblissements (fp_strict.hpp), sans fermer tous les canaux. La v11 et la
@@ -33,7 +33,7 @@
 #endif
 
 #ifndef MHGP12_COORD_BITS
-#error "mhgp12_coord_bits_absent : MHGP12_COORD_BITS (21 ou 24) doit etre defini par la construction"
+#error "mhgp12_coord_bits_absent : MHGP12_COORD_BITS (21, 24 ou 32) doit etre defini par la construction"
 #endif
 
 namespace mhgp12 {
@@ -42,6 +42,7 @@ using u8 = std::uint8_t;
 using u16 = std::uint16_t;
 using u32 = std::uint32_t;
 using u64 = std::uint64_t;
+using i8 = std::int8_t;
 using i32 = std::int32_t;
 using i64 = std::int64_t;
 __extension__ typedef __int128 i128;
@@ -67,12 +68,11 @@ using Order = u8;  // ordre K dans [1, kmax] ; 0 = sans objet
 // 0xFFFFFFFF compris.
 inline constexpr u32 kNone = 0xFFFFFFFFu;
 
-// Bits par coordonnee et plus grande coordonnee admise, 2^B - 1. B <= 24 < 32 : le decalage tient dans u32.
+// Bits par coordonnee et plus grande coordonnee admise, 2^B - 1. Le decalage se fait en u64 : B peut valoir 32.
 inline constexpr int kCoordBits = MHGP12_COORD_BITS;
-static_assert(kCoordBits == 21 || kCoordBits == 24,
-              "mhgp12_coord_bits_invalide : MHGP12_COORD_BITS doit valoir 21 ou 24 (18 abandonne, decision D6 ; "
-              "32 refuse jusqu'a l'arithmetique en repere local)");
-inline constexpr u32 kCoordMax = (u32{1} << kCoordBits) - 1;
+static_assert(kCoordBits == 21 || kCoordBits == 24 || kCoordBits == 32,
+              "mhgp12_coord_bits_invalide : MHGP12_COORD_BITS doit valoir 21, 24 ou 32 (18 abandonne, decision D6)");
+inline constexpr u32 kCoordMax = static_cast<u32>((u64{1} << kCoordBits) - 1);
 
 // Identifiant fort : enum class sur u32.
 template <class Id>

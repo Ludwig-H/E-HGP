@@ -72,7 +72,8 @@ def facts(rows,bits):
     require(not certificate(values['product_cancellation'],bits), 'extreme cancellation fallback')
     small_query=values['uncertified_small_query']
     require(not certificate(small_query,bits), 'small query is not a global certificate')
-    require(small_query['flags'][0]==1, 'non-certified controlled path succeeds')
+    # Au profil 32 ce support du domaine entier a D = 6(2^32-1)^4 > 2^127 : aucun essai i128, voie large d'office.
+    require(small_query['flags'][0]==(1 if bits<=24 else 0), 'non-certified controlled path succeeds')
     require(small_query['power']<0, 'non-certified controlled path is nonzero')
     all_values=[base.geometry(row,bits) for row in rows]
     require(any(any(n<0 for n in v['n']) and certificate(v,bits) for v in all_values if isinstance(v,dict)),
@@ -125,7 +126,7 @@ def run(executable):
     header=subprocess.run([executable],input='',text=True,capture_output=True,timeout=5)
     require(header.returncode==0 and not header.stderr,'header process')
     words=header.stdout.split()
-    require(len(words)==2 and words[0]=='bits' and int(words[1]) in (21,24),'header bits')
+    require(len(words)==2 and words[0]=='bits' and int(words[1]) in (21,24,32),'header bits')
     bits=int(words[1]); rows=cases(bits); payload=base.payload(rows)
     child=subprocess.run([executable],input=payload,text=True,capture_output=True,timeout=45)
     require(child.returncode==0 and not child.stderr,'certificate native process')

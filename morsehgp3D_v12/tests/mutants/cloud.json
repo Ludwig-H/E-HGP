@@ -1,6 +1,6 @@
 {
   "module": "cloud",
-  "plancher": 16,
+  "plancher": 17,
   "mutants": [
     {
       "id": "largeur_zero_admise",
@@ -129,6 +129,21 @@
       "remplace": "  std::span<u32> x() noexcept { return x_.span(); }\n  std::span<const u32> x() const noexcept { return x_.span(); }",
       "porte": "mhgp12_cloud_unit_ownership",
       "note": "consommateur non const peut modifier les positions certifiees"
+    },
+    {
+      "id": "identite_par_cle_tronquee",
+      "fichier": "src/cloud/cloud.cpp",
+      "cherche": "    if (sorted[i].key != sorted[i - 1].key) ++sites;",
+      "remplace": "    if ((sorted[i].key >> 33) != (sorted[i - 1].key >> 33)) ++sites;",
+      "aussi": [
+        {
+          "fichier": "src/cloud/cloud.cpp",
+          "cherche": "    if (i == 0 || r.key != sorted[i - 1].key) {",
+          "remplace": "    if (i == 0 || (r.key >> 33) != (sorted[i - 1].key >> 33)) {"
+        }
+      ],
+      "porte": "mhgp12_cloud_unit_identity",
+      "note": "CST-0202 : identite des sites par une cle tronquee de onze bits par axe ; (0,0,0) et (1,0,0) fusionneraient"
     }
   ]
 }

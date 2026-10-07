@@ -99,7 +99,7 @@ Result<int> half_of(int v) {
 MHGP12_TEST(types, 11) {
   CHECK_EQ(kNone, 4294967295u);
   CHECK_EQ(kCoordBits, MHGP12_COORD_BITS);
-  CHECK(kCoordBits == 21 || kCoordBits == 24);
+  CHECK(kCoordBits == 21 || kCoordBits == 24 || kCoordBits == 32);
   CHECK_EQ(u64{kCoordMax} + 1, u64{1} << kCoordBits);
   CHECK_EQ(sizeof(PointId), 4u);
   CHECK_EQ(sizeof(i128), 16u);

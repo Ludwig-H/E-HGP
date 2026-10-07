@@ -79,7 +79,7 @@ Chantier actif `morsehgp3D_v12/` (C++20, `-Wall -Wextra -Wpedantic -Werror`, por
 portes Python) ; dossier de construction hors de `/workspaces`, presque plein :
 
 ```bash
-cmake -S morsehgp3D_v12 -B <build> -DCMAKE_BUILD_TYPE=Release   # u21 ; -DMHGP12_COORD_BITS=24 ; 18 et 32 refusés
+cmake -S morsehgp3D_v12 -B <build> -DCMAKE_BUILD_TYPE=Release   # u21 ; -DMHGP12_COORD_BITS=24 ou 32 ; 18 et 33 refusés
 cmake --build <build> -j4
 ctest --test-dir <build> -LE long --no-tests=error --output-on-failure -j4
 python3 morsehgp3D_v12/tools/check_style.py --root morsehgp3D_v12 && python3 morsehgp3D_v12/tools/check_constats.py

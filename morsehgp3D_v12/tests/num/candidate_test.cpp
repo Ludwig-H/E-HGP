@@ -6,6 +6,7 @@
 
 #include "num/num.hpp"
 #include "power_reference.hpp"
+#include "profile_values.hpp"
 #include "test.hpp"
 
 using namespace mhgp12;
@@ -36,7 +37,7 @@ struct Fixture {
 
 MHGP12_TEST(candidate, 800) {
   // Taille attendue de ce type sans Level sur les ABI G4, pas un format de serialisation.
-  CHECK_EQ(sizeof(Q4Candidate), std::size_t{80});
+  CHECK_EQ(sizeof(Q4Candidate), profile_test::kQ4CandidateBytes);
   const i64 m = kCoordMax;
   const Point origin = point(0, 0, 0);
   const std::array<Fixture, 6> fixtures{{
@@ -65,8 +66,8 @@ MHGP12_TEST(candidate, 800) {
       const auto numerator = candidate.numerator();
       const auto denominator = candidate.denominator();
       CHECK(anchor == points[0]);
-      CHECK(denominator > 0);
-      CHECK_EQ(denominator, 2 * (det > 0 ? i128{det} : -i128{det}));
+      CHECK(profile_test::sign_of(denominator) > 0);
+      CHECK(profile_test::same_value(denominator, 2 * (det > 0 ? i128{det} : -i128{det})));
       const auto inside = strictly_inside(candidate, points[0], points[1], points[2], points[3]);
       REQUIRE(inside.ok());
       CHECK_EQ(inside.value(), fixture.inside);

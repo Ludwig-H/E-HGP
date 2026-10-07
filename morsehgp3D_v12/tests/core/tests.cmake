@@ -35,9 +35,9 @@ mhgp12_expect_compile_failure(mhgp12_core_ofast_refusal SOURCE refusal_probe.cpp
 mhgp12_expect_compile_failure(mhgp12_core_coord_bits_refusal SOURCE guard_probe.cpp
                               TOKEN mhgp12_coord_bits_invalide
                               OPTIONS -UMHGP12_COORD_BITS -DMHGP12_COORD_BITS=20 LABELS unit fast)
-# Profils retires ou differes (decision D6 de la v12) : 18 bits, admis par la v11, et 32 bits, avant l'arithmetique
-# en repere local. Meme refus a la configuration : tests/support/tests.cmake.
-foreach(bits 18 32)
+# Profils refuses (decision D6 de la v12) : 18 bits, admis par la v11, et 33 bits, au-dela des coordonnees u32 (32 est
+# admis depuis l'arithmetique en repere local). Meme refus a la configuration : tests/support/tests.cmake.
+foreach(bits 18 33)
   mhgp12_expect_compile_failure(mhgp12_core_coord_bits_${bits}_refusal SOURCE guard_probe.cpp
                                 TOKEN mhgp12_coord_bits_invalide
                                 OPTIONS -UMHGP12_COORD_BITS -DMHGP12_COORD_BITS=${bits} LABELS unit fast)

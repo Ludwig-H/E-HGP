@@ -94,7 +94,7 @@ def run(executable):
         words = header.stdout.split()
         require(len(words) == 2 and words[0] == 'bits', 'header')
         bits = int(words[1])
-        require(bits in (21, 24), 'profile')
+        require(bits in (21, 24, 32), 'profile')
     except ValueError as error:
         process.diagnostic(executable, 'header', header.returncode, header.stdout, header.stderr, reason=error)
         raise

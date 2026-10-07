@@ -108,7 +108,12 @@ def check_case(case, line):
     return 9 + int(case[2] == case[3]), value
 
 
-def judge(data, lines):
+# Strates exactes de la geometrie tiree (Fraction seule, aucune voie native) : identiques aux profils 21 et 24 ; au
+# profil 32 les tirages sur [0,2^32) changent deux degenerescences en cas valides.
+STRATA = {21: (3400, 354, 34), 24: (3400, 354, 34), 32: (3417, 356, 32)}
+
+
+def judge(data, lines, bits):
     require(len(data) == len(lines) == 391, 'bounds case inventory')
     stats = dict(checks=0, valid=0, degenerate=0, refused=0, loose=0, outside=0, inside=0, contacts=0, wide=0)
     for case, line in zip(data, lines):
@@ -123,7 +128,9 @@ def judge(data, lines):
         stats['inside'] += value['upper'] < 0
         stats['contacts'] += value['true_min'] == 0 or value['true_max'] == 0
         stats['wide'] += max(abs(value['lower']).bit_length(), abs(value['upper']).bit_length()) > 127
-    require(stats['checks'] == 3400 and stats['refused'] == 3 and stats['valid'] == 354 and stats['degenerate'] == 34 and
+    checks, valid, degenerate = STRATA[bits]
+    require(stats['checks'] == checks and stats['refused'] == 3 and stats['valid'] == valid and
+            stats['degenerate'] == degenerate and
             stats['loose'] >= 20 and stats['outside'] >= 5 and stats['inside'] >= 1 and stats['contacts'] >= 15,
             'bounds non-vacuity')
     return stats
@@ -134,7 +141,7 @@ def selftest():
     for bits in (21, 24):
         data = cases(bits)
         lines = [model_line(case) for case in data]
-        stats = judge(data, lines)
+        stats = judge(data, lines, bits)
         require(stats['wide'] > 0, 'wide q3 branch not exercised')
         index = next(i for i, case in enumerate(data) if case[2] == case[3] and lines[i].startswith('ok'))
         killed = 0
@@ -156,7 +163,7 @@ def run(probe):
     info = subprocess.run([probe], input='', capture_output=True, text=True, timeout=15)
     require(info.returncode == 0 and not info.stderr, 'bounds metadata failed')
     words = info.stdout.split()
-    require(len(words) == 2 and words[0] == 'bits' and int(words[1]) in (21, 24), 'bounds profile absent')
+    require(len(words) == 2 and words[0] == 'bits' and int(words[1]) in (21, 24, 32), 'bounds profile absent')
     bits = int(words[1])
     data = cases(bits)
     payload = '\n'.join(' '.join(map(str, [q] + [v for p in list(points) + [lo, hi] for v in p]))
@@ -165,7 +172,7 @@ def run(probe):
     require(result.returncode == 0 and not result.stderr, 'bounds native failure')
     lines = result.stdout.splitlines()
     require(lines and lines[0] == 'bits %d' % bits, 'bounds native profile changed')
-    stats = judge(data, lines[1:])
+    stats = judge(data, lines[1:], bits)
     require(stats['wide'] > 0, 'wide bounds branch missing')
     print(json.dumps(dict(bits=bits, cases=len(data), input_sha256=hashlib.sha256(payload.encode()).hexdigest(),
                          **stats), sort_keys=True))

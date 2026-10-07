@@ -3,6 +3,13 @@
 // continue. Contrat distinct de power_bounds, qui borne la boite continue : le minorant entier ne minore pas un
 // segment continu (q2 de (0,0,0) a (1,0,0) : F vaut 0 aux deux sites et -1/2 au milieu). Reserve aux sites de
 // l'index ; aucun transfert a un centre, a un flottant ou a un autre domaine sans nouvelle preuve.
+//
+// Deux preparations :
+//   - LatticeSphere, voie GENERIQUE : toute Sphere, certifiee ou non, contre des boites et des sites n'importe ou dans
+//     le domaine du profil (aucune garde) ;
+//   - GuardedSphere (num/guard.hpp), voie GARDEE : seulement une boule certifiee (NUM-CERTIFIEE), dans son pave.
+// Ni l'une ni l'autre ne forme le centre absolu a_j D + N_j (5B+6 bits, CST-0109) : le point entier le plus proche
+// se lit sur le plancher et le plafond de N_j/D en LOCAL, puis + a_j, puis saturation a la boite.
 #pragma once
 
 #include <array>
@@ -14,9 +21,10 @@ namespace mhgp12::num {
 // Sphere preparee une fois par parcours. F(x)=D|x-a|^2-2N.(x-a)=D(|x-c|^2-r^2), c=a+N/D, D>0 : chaque axe est une
 // parabole convexe et les axes sont independants. Minorant : F au point entier le plus proche de c, ramene dans la
 // boite (minimum exact sur boite inter Z^3). Majorant : F au coin le plus eloigne de c (maximum exact sur la boite
-// continue). Les deux points sont dans la boite : leurs puissances reprennent les budgets natifs de power/side.
-// Voie Wide (q3 non certifie, profils 21 et 24) : power_bound_signs inchange, comme avant ce levier.
-// La sphere doit survivre a l'objet ; aucune copie de ses coefficients.
+// continue). Les deux points sont dans la boite : leurs puissances reprennent les budgets natifs de power/side pour
+// tout point du domaine (voie native ou certifiee pour l'etendue B). Sinon (q3 non certifie aux profils 21 et 24,
+// q3/q4 non certifies au profil 32) : power_bound_signs inchange, comme avant ce levier.
+// La sphere doit survivre a l'objet ; aucune copie de ses coefficients hors voie native.
 class LatticeSphere {
  public:
   explicit LatticeSphere(const Sphere& sphere) noexcept;
@@ -24,14 +32,15 @@ class LatticeSphere {
   LatticeSphere& operator=(const LatticeSphere&) = delete;
   // Signes (-1,0,1) du minorant entier et du majorant continu, lower<=upper ; memes refus que power_bound_signs.
   // lower>0 exclut la boite sans evaluer le majorant : upper vaut alors +1 (le maximum majore le minimum).
-  [[nodiscard]] Result<PowerBoundSigns> bound_signs(const Box& box) const noexcept;
+  [[nodiscard]] Result<PowerBoundSigns> bound_signs(const Box& box, LaneCount* lanes = nullptr) const noexcept;
   // Identique a side(sphere, point), sans reconstruire la vue a chaque site.
-  [[nodiscard]] Result<int> side(Point point) const noexcept;
+  [[nodiscard]] Result<int> side(Point point, LaneCount* lanes = nullptr) const noexcept;
   bool lattice() const noexcept { return lattice_; }
 
  private:
   const Sphere& sphere_;
   bool lattice_;
+  Lane lane_ = Lane::wide;  // native ou certifiee quand lattice_
   // Entier le plus proche de c_j (ex aequo : le plus petit), sature a [0,M-1] : le ramener dans [lo_j,hi_j] donne
   // le meme point qu'avant saturation, car toute boite est dans [0,M-1].
   std::array<i64, 3> nearest_{};

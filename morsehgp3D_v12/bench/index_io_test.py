@@ -42,7 +42,9 @@ def main():
                      'native identity/count/hash')
             digests.append(value['sha256'])
         sem.need(len(set(digests)) == 1, 'repeat/permutation changed result')
-        for mode in ('truncated_xyz', 'truncated_ids', 'duplicate_id', 'out_of_domain', 'budget'):
+        # Au profil 32 tout u32 est dans le domaine : le refus hors domaine n'a pas d'entree qui le provoque.
+        modes = ('truncated_xyz', 'truncated_ids', 'duplicate_id') + (('out_of_domain',) if bits < 32 else ()) + ('budget',)
+        for mode in modes:
             write(range(4))
             if mode == 'truncated_xyz':
                 xyz.write_bytes(xyz.read_bytes()[:-1])
@@ -55,8 +57,8 @@ def main():
                 xyz.write_bytes(struct.pack('<I', 2**bits) + data[4:])
             result, _ = child(0 if mode == 'budget' else sem.BUDGET)
             sem.need(result.returncode == 2 and not output.exists(), 'refusal published output: ' + mode)
-    sem.need(calls == 8, 'native I/O floor')
-    print('index_io_verdict conforme attempts8 queries192 refusals5')
+    sem.need(calls == 3 + len(modes), 'native I/O floor')
+    print('index_io_verdict conforme attempts%d queries192 refusals%d' % (calls, len(modes)))
 
 
 if __name__ == '__main__':

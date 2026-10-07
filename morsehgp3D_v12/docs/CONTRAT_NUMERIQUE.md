@@ -222,15 +222,19 @@ proches, les représentants et les propositions ne changent que des compteurs, p
   positions de ses sites dans l'ordre lexicographique des coordonnées. Cet ordre est invariant par translation et
   équivariant par permutation ; il ne diffère de celui de la v11 que sur les coquilles à plusieurs supports minimaux
   (0,02 à 0,04 % des boules selon la contre-lecture des lemmes T).
-- **Clé de Morton exacte, identité des sites** (`CST-0202`). La clé entrelace les coordonnées moins le minimum global
-  sur $3B_{\mathrm{eff}}$ bits, sans troncature : `u64` si $B_{\mathrm{eff}}\leq 21$ (toutes les trames SemanticKITTI),
-  `u128` sinon, type choisi une fois par entrée. Égalité de clé et égalité de position sont alors équivalentes : la clé
-  reste l'identité des sites, comme dans la v11 (`cloud.cpp` regroupe les clés égales en un site), donc la détection
-  des multiplicités (refus D8 ou option « sites distincts »). La clé tronquée de la première rédaction est abandonnée :
-  elle fusionnait des positions distinctes, et un départage par `PointId` pouvait séparer deux vrais doublons par un
-  troisième site de même clé. La coupe de l'index lit les coordonnées **normalisées** (moins le minimum), dont la clé
-  est faite ; les clés étant distinctes, aucune branche « clés égales » n'existe. Les boîtes de l'index restent
-  exactes, réunies de bas en haut. La clé n'entre dans aucun ordre publié.
+- **Clé de Morton exacte sur les coordonnées absolues, identité des sites** (`CST-0202`). La clé entrelace les
+  coordonnées absolues sur $3B$ bits, sans troncature : `u64` au profil 21, `u128` (96 bits) aux profils 24 et 32.
+  Égalité de clé et égalité de position sont alors équivalentes : la clé reste l'identité des sites, comme dans la
+  v11 (`cloud.cpp` regroupe les clés égales en un site), donc la détection des multiplicités (refus D8 ou option
+  « sites distincts »). La clé tronquée de la première rédaction est abandonnée : elle fusionnait des positions
+  distinctes, et un départage par `PointId` pouvait séparer deux vrais doublons par un troisième site de même clé.
+  Une clé prise sur les coordonnées **normalisées** (moins le minimum) a été essayée puis écartée le 7 octobre :
+  l'ordre de Morton n'est pas invariant par translation (pour $P=(2,0,0)$ et $Q=(1,1,0)$, de minimum $(1,0,0)$, $Q$
+  précède $P$ en clés absolues et le suit en clés normalisées), si bien qu'elle changeait l'ordre des sites que lisent
+  les juges du socle (neuf portes au rouge) et la liste parente du parcours, donc le différentiel des feuilles contre
+  la v11 (`CST-0113`). La clé absolue garde l'ordre de la v11 ; la coupe de l'index lit les coordonnées absolues ; les
+  boîtes de l'index restent exactes, réunies de bas en haut ; la clé n'entre dans aucun ordre publié. Coût : au profil
+  32, toutes les clés ont 96 bits, mesuré avec la décision D6.
 - **Exports** : la sortie FULL au schéma de la v11, qui ne contient pas $S^{*}$, écrit ses sites dans l'ordre de
   Morton absolu sur `bits` bits, par un tri à l'export (clé absolue de 96 bits si $B>21$), hors du chemin chronométré :
   sur les **mêmes coordonnées absolues**, l'empreinte sémantique de la v11 se reproduit à l'octet. Cette empreinte hache

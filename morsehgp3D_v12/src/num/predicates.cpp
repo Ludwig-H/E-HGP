@@ -1,124 +1,117 @@
 // Predicats R2 portes avec budgets par expression. Pas de conversion flottante, pas de filtre heuristique.
-#include "num/geometry_internal.hpp"
-#include "num/lattice_bounds.hpp"
+// Repere local (v12, docs/CONTRAT_NUMERIQUE.md, paragraphe 3) : chaque predicat lit l'etendue u de son repere
+// (support de la sphere et arguments, autour de l'ancre) et prend la voie de son palier : native garantie par le
+// palier, native certifiee (certificat de domaine), essai controle, ou large a la largeur du palier. Les voies donnent
+// toutes la valeur exacte ; seule la largeur des intermediaires change, et chacune peut etre comptee (LaneCount).
+#include "num/center_view.hpp"
 #include "num/power_checked.hpp"
 
 #include <algorithm>
 
 namespace mhgp12::num {
 namespace {
+using detail::CenterView;
 
-// Vue synchrone privee a cette unite : seuls les trois proprietaires certifies peuvent la construire.
-// Aucun appel public n'accepte un tuple de coefficients ou un type satisfaisant seulement des getters.
-class CenterView {
- public:
-  explicit CenterView(const Sphere& sphere) noexcept
-      : anchor_(sphere.anchor()), numerator_(sphere.numerator()), denominator_(sphere.denominator()),
-        arity_(sphere.presentation_arity()), q3_power_i128_(sphere.q3_power_i128_certified()),
-        orientation_i128_(sphere.orientation_i128_certified()) {}
-  explicit CenterView(const Q3Candidate& sphere) noexcept
-      : anchor_(sphere.anchor()), numerator_(sphere.numerator()), denominator_(sphere.denominator()),
-        arity_(sphere.presentation_arity()), q3_power_i128_(sphere.q3_power_i128_certified()),
-        orientation_i128_(sphere.orientation_i128_certified()) {}
-  explicit CenterView(const Q4Candidate& sphere) noexcept
-      : anchor_(sphere.anchor()), numerator_(sphere.numerator()), denominator_(sphere.denominator()),
-        arity_(sphere.presentation_arity()), q3_power_i128_(false),
-        orientation_i128_(sphere.orientation_i128_certified()) {}
-  Point anchor() const noexcept { return anchor_; }
-  const std::array<CenterInt, 3>& numerator() const noexcept { return numerator_; }
-  CenterDen denominator() const noexcept { return denominator_; }
-  u8 presentation_arity() const noexcept { return arity_; }
-  bool q3_power_i128_certified() const noexcept { return q3_power_i128_; }
-  bool orientation_i128_certified() const noexcept { return orientation_i128_; }
-
- private:
-  Point anchor_;
-  const std::array<CenterInt, 3>& numerator_;
-  CenterDen denominator_;
-  u8 arity_;
-  bool q3_power_i128_;
-  bool orientation_i128_;
+// Requete autour de l'ancre : ecart v et son etendue t (|v_j| < 2^t <= 2^32).
+struct Query {
+  detail::Vec v;
+  int t;
 };
-
-bool use_native_power(const CenterView& sphere) noexcept {
-  return Budget::side <= 127 || sphere.presentation_arity() != 3 || sphere.q3_power_i128_certified();
+Query query_of(const CenterView& sphere, Point point) noexcept {
+  const auto v = detail::difference(point, sphere.anchor());
+  return {v, detail::span_of(v)};
 }
 
-// Precondition interne : use_native_power(sphere). M=2^B, |v_j|<M ; chaque carre et somme de dot<3M^2
-// tient en i64. La conversion en i128 est exacte ; |-2*v_j|<2M, avant multiplication par N_j.
-// q1 : somme absolue <3M^2. q2 : premier terme <6M^2, chacun des trois suivants <2M^2, total <12M^2.
-// q4 : cross(b-a,c-a)_j est le determinant de trois points du MEME carre [0,M-1]^2. Multiaffine,
-// son maximum absolu est aux coins, ou il vaut 0 ou (M-1)^2 : donc <M^2, pas pour deux Vec arbitraires.
-// Cramer donne D<6M^3 et |N_j|<9M^4 : chacun des quatre termes <18M^5, somme des magnitudes <72M^5.
-// q3 sans certificat : uniquement si Budget::side<=127 ; D<24M^4, |N_j|<24M^5, total <216M^6.
-// q3 certifie : D<2^(123-2B), |N_j|<2^(124-B). Terme quadratique <3*2^123, chaque lineaire <2^125.
-// La somme des magnitudes <15*2^123<2^127 borne les produits ET toutes les sommes partielles, pour tout Point.
-// Ces sommes majorent CHAQUE produit et somme partielle, sans utiliser une annulation ni la convexite.
-i128 native_power(const CenterView& sphere, Point point) noexcept {
-  static_assert(Budget::dot <= 63 && 2 * kCoordBits + 4 <= 127 && 5 * kCoordBits + 7 <= 127);
-  static_assert(Budget::side == 6 * kCoordBits + 8 && 5 * kCoordBits + 7 <= Budget::side);
-  const auto v = detail::difference(point, sphere.anchor());
-  i128 total = sphere.denominator() * i128{detail::dot(v, v)};
-  for (int j = 0; j < 3; ++j) total += sphere.numerator()[j] * (-2 * i128{v[j]});
+// Precondition : power_lane native ou certifiee. Natif par palier : q1 < 3M^2, q2 < 12M^2, q4 < 72M^5 (normales a
+// ancrage commun dans le cube du repere, D < 6M^3, |N_j| < 9M^4), q3 etroit < 216M^6, avec M = 2^u. Certifie (domaine
+// t) : terme quadratique < 3*2^123, chaque lineaire < 2^125, somme des magnitudes < 15*2^123 < 2^127. Ces sommes
+// majorent CHAQUE produit et somme partielle, sans annulation ni convexite. Norme en i64 jusqu'a t = 30.
+i128 native_power(const CenterView& sphere, const Query& q) noexcept {
+  const i128 norm = q.t <= 30 ? i128{detail::dot(q.v, q.v)} : detail::dot128(q.v, q.v);
+  i128 total = sphere.d128() * norm;
+  for (int j = 0; j < 3; ++j) total += sphere.n128()[j] * (-2 * i128{q.v[j]});
   return total;
 }
 
-Result<SideInt> wide_power(const CenterView& sphere, Point point) noexcept {
-  constexpr int words = (Budget::side + 63) / 64;
-  const auto v = detail::difference(point, sphere.anchor());
-  auto first = detail::product<words>(sphere.denominator(), detail::dot(v, v));
+template <int Words>
+Result<SideInt> wide_power(const CenterView& sphere, const Query& q) noexcept {
+  auto first = detail::product<Words>(sphere.denominator(), detail::dot128(q.v, q.v));
   if (!first.ok()) return first.outcome();
   auto total = first.value();
   for (int j = 0; j < 3; ++j) {
-    auto term = detail::product<words>(sphere.numerator()[j], -2 * i128{v[j]});
+    auto term = detail::product<Words>(sphere.numerator()[j], -2 * i128{q.v[j]});
     if (!term.ok()) return term.outcome();
     auto sum = detail::require_add(total, term.value());
     if (!sum.ok()) return sum.outcome();
     total = sum.value();
   }
-  return detail::require_fit<Budget::side>(total);
+  return detail::require_fit<DomainBudget::side>(total);
+}
+// Voie large a la largeur du palier de u (6u+8 au plafond du palier).
+Result<SideInt> wide_power(const CenterView& sphere, const Query& q) noexcept {
+  const int words = detail::power_words(sphere, q.t);
+  return words <= 2 ? wide_power<2>(sphere, q) : words == 3 ? wide_power<3>(sphere, q) : wide_power<4>(sphere, q);
 }
 
-std::optional<i128> checked_power(const CenterView& sphere, Point point) noexcept {
-  const auto v = detail::difference(point, sphere.anchor());
-  // Ces operations PRECEDENT les builtins : |v_j|<2^B, norme<3*2^(2B)<2^50 et facteurs<2^(B+1).
-  static_assert(2 * kCoordBits + 2 <= 50 && kCoordBits + 1 < 63);
-  const std::array<i64, 3> factors{-2 * v[0], -2 * v[1], -2 * v[2]};
-  return detail::checked_power_sum(sphere.denominator(), sphere.numerator(), detail::dot(v, v), factors);
+std::optional<i128> checked_power(const CenterView& sphere, const Query& q) noexcept {
+  // Operandes deja en i128 : norme < 3*2^66, facteurs -2v_j < 2^34 ; aucune conversion retrecissante avant les builtins.
+  const std::array<i128, 3> factors{-2 * i128{q.v[0]}, -2 * i128{q.v[1]}, -2 * i128{q.v[2]}};
+  return detail::checked_power_sum(sphere.d128(), sphere.n128(), detail::dot128(q.v, q.v), factors);
 }
 
-Result<SideInt> center_power(const CenterView& sphere, Point point) noexcept {
-  if (use_native_power(sphere))
-    return detail::require_fit<Budget::side>(to_wide(native_power(sphere, point)));
-  if (const auto value = checked_power(sphere, point))
-    return detail::require_fit<Budget::side>(to_wide(*value));
-  return wide_power(sphere, point);
+Result<SideInt> center_power(const CenterView& sphere, Point point, LaneCount* lanes) noexcept {
+  const Query q = query_of(sphere, point);
+  const Lane lane = detail::power_lane(sphere, q.t);
+  if (lane == Lane::native || lane == Lane::certified) {
+    count_lane(lanes, lane);
+    return detail::require_fit<DomainBudget::side>(to_wide(native_power(sphere, q)));
+  }
+  if (lane == Lane::checked) {
+    if (const auto value = checked_power(sphere, q)) {
+      count_lane(lanes, Lane::checked);
+      return detail::require_fit<DomainBudget::side>(to_wide(*value));
+    }
+  }
+  count_lane(lanes, Lane::wide);
+  return wide_power(sphere, q);
 }
 
-Result<int> center_side(const CenterView& sphere, Point point) noexcept {
-  if (use_native_power(sphere)) return detail::sign(native_power(sphere, point));
-  if (const auto value = checked_power(sphere, point)) return detail::sign(*value);
-  auto value = wide_power(sphere, point);
+Result<int> center_side(const CenterView& sphere, Point point, LaneCount* lanes) noexcept {
+  const Query q = query_of(sphere, point);
+  const Lane lane = detail::power_lane(sphere, q.t);
+  if (lane == Lane::native || lane == Lane::certified) {
+    count_lane(lanes, lane);
+    return detail::sign(native_power(sphere, q));
+  }
+  if (lane == Lane::checked) {
+    if (const auto value = checked_power(sphere, q)) {
+      count_lane(lanes, Lane::checked);
+      return detail::sign(*value);
+    }
+  }
+  count_lane(lanes, Lane::wide);
+  auto value = wide_power(sphere, q);
   if (!value.ok()) return value.outcome();
   return to_wide(value.value()).sign();
 }
 
 struct BoundTerms {
-  i64 norm_lower = 0, norm_upper = 0;
+  i128 norm_lower = 0, norm_upper = 0;
   std::array<i64, 3> linear_lower{}, linear_upper{};
+  int t = 0;  // etendue des coins de la boite autour de l'ancre
 };
 
 BoundTerms bound_terms(const CenterView& sphere, const Box& box) noexcept {
   const auto lo = detail::difference(box.lo(), sphere.anchor());
   const auto hi = detail::difference(box.hi(), sphere.anchor());
   BoundTerms terms;
-  // |lo_j|,|hi_j|<M : les carres <M^2, leurs trois sommes <3M^2, les facteurs doubles <2M.
-  static_assert(Budget::dot <= 63 && kCoordBits + 1 <= 63);
+  terms.t = std::max(detail::span_of(lo), detail::span_of(hi));
+  // |lo_j|,|hi_j| < 2^t <= 2^32 : les carres < 2^64 en i128, leurs trois sommes < 3*2^64, les facteurs doubles < 2^34.
   for (int j = 0; j < 3; ++j) {
-    const i64 lo2 = lo[j] * lo[j], hi2 = hi[j] * hi[j];
+    const i128 lo2 = i128{lo[j]} * lo[j], hi2 = i128{hi[j]} * hi[j];
     terms.norm_lower += lo[j] > 0 ? lo2 : hi[j] < 0 ? hi2 : 0;
     terms.norm_upper += lo2 > hi2 ? lo2 : hi2;
-    const bool nonnegative = sphere.numerator()[j] >= 0;
+    const bool nonnegative = sphere.numerator_sign(j) >= 0;
     terms.linear_lower[j] = -2 * (nonnegative ? hi[j] : lo[j]);
     terms.linear_upper[j] = -2 * (nonnegative ? lo[j] : hi[j]);
   }
@@ -128,51 +121,33 @@ BoundTerms bound_terms(const CenterView& sphere, const Box& box) noexcept {
 template <int Words>
 Result<PowerBounds> checked_bounds(const Wide<Words>& lower, const Wide<Words>& upper) noexcept {
   if (compare(lower, upper) > 0) return fail(Reason::arithmetic_invariant);
-  const auto lo = detail::require_fit<Budget::side>(lower), hi = detail::require_fit<Budget::side>(upper);
+  const auto lo = detail::require_fit<DomainBudget::side>(lower), hi = detail::require_fit<DomainBudget::side>(upper);
   if (!lo.ok()) return lo.outcome();
   if (!hi.ok()) return hi.outcome();
   return PowerBounds{lo.value(), hi.value()};
 }
 
-// Precondition : use_native_power(sphere). Memes majorants que native_power pour chaque borne (voir
-// center_power_bounds) : produits et sommes partielles exacts en i128, valeurs dans Budget::side.
+// Precondition : voie native ou certifiee pour l'etendue t des coins. Memes majorants que native_power pour chaque
+// borne : chaque extremite est un point d'etendue < 2^t autour de l'ancre, norme < 3*2^(2t), facteurs < 2^(t+1).
 std::array<i128, 2> native_bounds(const CenterView& sphere, const BoundTerms& terms) noexcept {
-  i128 lower = sphere.denominator() * i128{terms.norm_lower};
-  i128 upper = sphere.denominator() * i128{terms.norm_upper};
+  i128 lower = sphere.d128() * terms.norm_lower;
+  i128 upper = sphere.d128() * terms.norm_upper;
   for (int j = 0; j < 3; ++j) {
-    lower += sphere.numerator()[j] * terms.linear_lower[j];
-    upper += sphere.numerator()[j] * terms.linear_upper[j];
+    lower += sphere.n128()[j] * terms.linear_lower[j];
+    upper += sphere.n128()[j] * terms.linear_upper[j];
   }
   return {lower, upper};
 }
 
-Result<PowerBounds> center_power_bounds(const CenterView& sphere, const Box& box) noexcept {
-  const auto terms = bound_terms(sphere, box);
-  // D>0. Separer les extrema peut elargir l'intervalle, jamais l'inverser ou supprimer un contact.
-  // Les quatre termes de CHAQUE borne ont les memes majorants absolus que native_power, y compris le
-  // certificat global q3 : norme<3M^2 et facteurs<2M pour chaque extremite Point, meme centre exterieur.
-  // Sinon <12M^2 pour q2,
-  // <72M^5 pour q4 grace aux cross a ancrage commun, <216M^6 pour q3. Toute somme partielle est bornee ainsi.
-  static_assert(2 * kCoordBits + 4 <= 127 && 5 * kCoordBits + 7 <= 127);
-  static_assert(Budget::side == 6 * kCoordBits + 8 && 5 * kCoordBits + 7 <= Budget::side);
-  if (use_native_power(sphere)) {
-    const auto [lower, upper] = native_bounds(sphere, terms);
-    return checked_bounds(to_wide(lower), to_wide(upper));
-  }
-  const auto native_lower = detail::checked_power_sum(sphere.denominator(), sphere.numerator(),
-                                                      terms.norm_lower, terms.linear_lower);
-  const auto native_upper = detail::checked_power_sum(sphere.denominator(), sphere.numerator(),
-                                                      terms.norm_upper, terms.linear_upper);
-  // Aucun resultat partiel : si l'un des essais refuse, reprendre LES DEUX bornes dans la voie Wide historique.
-  if (native_lower && native_upper) return checked_bounds(to_wide(*native_lower), to_wide(*native_upper));
-  constexpr int words = (Budget::side + 63) / 64;
-  auto lower = detail::product<words>(sphere.denominator(), terms.norm_lower);
-  auto upper = detail::product<words>(sphere.denominator(), terms.norm_upper);
+template <int Words>
+Result<PowerBounds> wide_bounds(const CenterView& sphere, const BoundTerms& terms) noexcept {
+  auto lower = detail::product<Words>(sphere.denominator(), terms.norm_lower);
+  auto upper = detail::product<Words>(sphere.denominator(), terms.norm_upper);
   if (!lower.ok()) return lower.outcome();
   if (!upper.ok()) return upper.outcome();
   for (int j = 0; j < 3; ++j) {
-    const auto lo = detail::product<words>(sphere.numerator()[j], terms.linear_lower[j]);
-    const auto hi = detail::product<words>(sphere.numerator()[j], terms.linear_upper[j]);
+    const auto lo = detail::product<Words>(sphere.numerator()[j], terms.linear_lower[j]);
+    const auto hi = detail::product<Words>(sphere.numerator()[j], terms.linear_upper[j]);
     if (!lo.ok()) return lo.outcome();
     if (!hi.ok()) return hi.outcome();
     lower = detail::require_add(lower.value(), lo.value());
@@ -183,40 +158,88 @@ Result<PowerBounds> center_power_bounds(const CenterView& sphere, const Box& box
   return checked_bounds(lower.value(), upper.value());
 }
 
-Result<int> center_orientation(Point a, Point b, Point c, const CenterView& center) noexcept {
-  constexpr int words = (Budget::center_orientation + 63) / 64;
-  const auto normal = detail::cross(detail::difference(b, a), detail::difference(c, a));
-  const auto offset = detail::difference(center.anchor(), a);
-  if (center.orientation_i128_certified()) {
-    static_assert(Budget::center_orientation >= 127);  // La borne native implique aussi le budget public.
-    // D<2^(124-3B), |N_j|<2^(124-2B), |offset_j|<2^B : chaque D*offset et N tient,
-    // |coordinate|<2^(125-2B). Le cross de TROIS Point a meme ancrage a |normal_j|<2^(2B) :
-    // determinant multiaffine dans un carre de cote M-1, maxima aux coins, valeurs 0 ou +/-(M-1)^2.
-    // Chaque produit <2^125 ; somme des magnitudes <3*2^125<2^127, donc chaque somme partielle tient.
-    // Cette preuve ne s'applique PAS a deux Vec arbitraires ni aux autres predicats du centre.
-    i128 native_total = 0;
-    for (int j = 0; j < 3; ++j) {
-      const i128 coordinate = center.numerator()[j] + center.denominator() * offset[j];
-      native_total += coordinate * normal[j];
-    }
-    return detail::sign(native_total);
+Result<PowerBounds> center_power_bounds(const CenterView& sphere, const Box& box, LaneCount* lanes) noexcept {
+  const auto terms = bound_terms(sphere, box);
+  // D>0. Separer les extrema peut elargir l'intervalle, jamais l'inverser ou supprimer un contact.
+  const Lane lane = detail::power_lane(sphere, terms.t);
+  if (lane == Lane::native || lane == Lane::certified) {
+    count_lane(lanes, lane);
+    const auto [lower, upper] = native_bounds(sphere, terms);
+    return checked_bounds(to_wide(lower), to_wide(upper));
   }
-  Wide<words> total;
+  if (lane == Lane::checked) {
+    const std::array<i128, 3> ll{terms.linear_lower[0], terms.linear_lower[1], terms.linear_lower[2]};
+    const std::array<i128, 3> lu{terms.linear_upper[0], terms.linear_upper[1], terms.linear_upper[2]};
+    const auto native_lower = detail::checked_power_sum(sphere.d128(), sphere.n128(), terms.norm_lower, ll);
+    const auto native_upper = detail::checked_power_sum(sphere.d128(), sphere.n128(), terms.norm_upper, lu);
+    // Aucun resultat partiel : si l'un des essais refuse, reprendre LES DEUX bornes dans la voie Wide historique.
+    if (native_lower && native_upper) {
+      count_lane(lanes, Lane::checked);
+      return checked_bounds(to_wide(*native_lower), to_wide(*native_upper));
+    }
+  }
+  count_lane(lanes, Lane::wide);
+  const int words = detail::power_words(sphere, terms.t);
+  return words <= 2 ? wide_bounds<2>(sphere, terms) : words == 3 ? wide_bounds<3>(sphere, terms)
+                    : wide_bounds<4>(sphere, terms);
+}
+
+template <int Words>
+Result<int> wide_orientation(const detail::Vec128& normal, const detail::Vec& offset, const CenterView& center,
+                             int bits) noexcept {
+  Wide<Words> total;
   for (int j = 0; j < 3; ++j) {
-    // N + D*(anchor-a) < 48 M^5, donc < 2^(5B+6) <= 2^126 : i128 reste exact.
-    static_assert(5 * kCoordBits + 6 <= 127);
-    const i128 coordinate = center.numerator()[j] + center.denominator() * offset[j];
-    auto term = detail::product<words>(coordinate, normal[j]);
+    // Palier moyen : N + D*(anchor-a) < 48 M^5 < 2^(5u+6) <= 2^126, exact en i128.
+    const i128 coordinate = center.n128()[j] + center.d128() * offset[j];
+    auto term = detail::product<Words>(coordinate, normal[j]);
     if (!term.ok()) return term.outcome();
     auto sum = detail::require_add(total, term.value());
     if (!sum.ok()) return sum.outcome();
     total = sum.value();
   }
-  if (total.bit_length() > Budget::center_orientation) return fail(Reason::arithmetic_invariant);
+  if (total.bit_length() > bits) return fail(Reason::arithmetic_invariant);
   return total.sign();
 }
 
-Result<bool> center_inside(const CenterView& center, Point a, Point b, Point c, Point d) noexcept {
+// Palier large : coefficients et coordonnees en entiers exacts (< 288 M^7 < 2^240 a u = 33).
+Result<int> exact_orientation(const detail::Vec128& normal, const detail::Vec& offset,
+                              const CenterView& center) noexcept {
+  using detail::Exact;
+  Exact total;
+  for (int j = 0; j < 3; ++j)
+    total = total + (Exact(to_wide(center.numerator()[j])) +
+                     Exact(to_wide(center.denominator())) * Exact(i128{offset[j]})) * Exact(normal[j]);
+  if (total.overflow) return fail(Reason::arithmetic_invariant);
+  return total.sign();
+}
+
+Result<int> center_orientation(Point a, Point b, Point c, const CenterView& center, LaneCount* lanes) noexcept {
+  const auto u = detail::difference(b, a), v = detail::difference(c, a);
+  const auto offset = detail::difference(center.anchor(), a);
+  // Repere : les trois points dans un cube de cote < 2^t, l'ancre a moins de 2^t de a.
+  const int t = std::max<int>(detail::presentation_span(a, b, c), detail::span_of(offset));
+  const Tier tier = tier_of(std::max(center.span(), t));
+  const detail::Vec128 normal = detail::cross128(u, v);  // < 2 M^2 : exact en i128 a toute etendue
+  if (tier == Tier::narrow || (center.native_coefficients() && center.orientation_domain() >= t)) {
+    count_lane(lanes, tier == Tier::narrow ? Lane::native : Lane::certified);
+    // Palier etroit (u <= 16) : |N_j + D offset_j| < 48 M^5, |normal_j| < M^2 (determinant multiaffine dans le cube),
+    // somme < 3*48 M^7 < 2^(7u+8) <= 2^120. Certificat t : |N_j + D offset_j| < 2^(125-2t), |normal_j| < 2^(2t),
+    // chaque produit < 2^125, somme des magnitudes < 3*2^125 < 2^127. Pas pour deux Vec arbitraires.
+    i128 native_total = 0;
+    for (int j = 0; j < 3; ++j) {
+      const i128 coordinate = center.n128()[j] + center.d128() * offset[j];
+      native_total += coordinate * normal[j];
+    }
+    return detail::sign(native_total);
+  }
+  count_lane(lanes, Lane::wide);
+  if (tier == Tier::medium)
+    return wide_orientation<words_for(TierBudgets<Tier::medium>::center_orientation)>(
+        normal, offset, center, TierBudgets<Tier::medium>::center_orientation);
+  return exact_orientation(normal, offset, center);
+}
+
+Result<bool> center_inside(const CenterView& center, Point a, Point b, Point c, Point d, LaneCount* lanes) noexcept {
   const std::array<Point, 4> points{a, b, c, d};
   for (int opposite = 0; opposite < 4; ++opposite) {
     std::array<Point, 3> face{};
@@ -225,187 +248,154 @@ Result<bool> center_inside(const CenterView& center, Point a, Point b, Point c, 
       if (i != opposite) face[j++] = points[i];
     const int vertex_sign = detail::sign(orientation(face[0], face[1], face[2], points[opposite]));
     if (vertex_sign == 0) return false;
-    auto center_sign = center_orientation(face[0], face[1], face[2], center);
+    auto center_sign = center_orientation(face[0], face[1], face[2], center, lanes);
     if (!center_sign.ok()) return center_sign.outcome();
     if (center_sign.value() != vertex_sign) return false;
   }
   return true;
 }
 
-bool center_midpoint(const CenterView& center, Point a, Point b) noexcept {
-  // Chaque cote < 96 M^5 < 2^(5B+7) <= 2^127 ; les intermediaires signes restent representables.
-  static_assert(5 * kCoordBits + 7 <= 127);
-  const auto anchor = center.anchor().coordinates(), ac = a.coordinates(), bc = b.coordinates();
-  for (int j = 0; j < 3; ++j)
-    if (2 * (center.denominator() * anchor[j] + center.numerator()[j]) !=
-        center.denominator() * (i128{ac[j]} + bc[j])) return false;
+// Test du milieu en forme locale (CST-0114) : 2 N_j = D ((a_j-o_j)+(b_j-o_j)), jamais le centre absolu D a_j + N_j.
+bool center_midpoint(const CenterView& center, Point a, Point b, LaneCount* lanes) noexcept {
+  const auto da = detail::difference(a, center.anchor()), db = detail::difference(b, center.anchor());
+  const Tier tier = tier_of(std::max({center.span(), detail::span_of(da), detail::span_of(db)}));
+  if (tier != Tier::wide) {
+    // Repere d'etendue u <= 24 : 2|N_j| < 48 M^5 et |D (da_j+db_j)| < 24 M^4 * 2M, donc < 2^(5u+6) <= 2^126.
+    static_assert(TierBudgets<Tier::medium>::midpoint_frame <= 127);
+    count_lane(lanes, Lane::native);
+    for (int j = 0; j < 3; ++j)
+      if (2 * center.n128()[j] != center.d128() * (i128{da[j]} + db[j])) return false;
+    return true;
+  }
+  count_lane(lanes, Lane::wide);
+  using detail::Exact;
+  for (int j = 0; j < 3; ++j) {
+    const Exact twice = Exact(to_wide(center.numerator()[j])) + Exact(to_wide(center.numerator()[j]));
+    const Exact other = Exact(to_wide(center.denominator())) * Exact(i128{da[j]} + db[j]);
+    if (twice.overflow || other.overflow || compare(twice.value, other.value) != 0) return false;
+  }
   return true;
 }
 
 }  // namespace
 
-DotInt squared_distance(Point a, Point b) noexcept {
+DotInt squared_distance(Point a, Point b, LaneCount* lanes) noexcept {
   // Elargir en SIGNE avant chaque soustraction : les u32 de Point ne doivent jamais soustraire en non signe.
-  // |delta|<2^B ; chaque carre et chaque somme partielle positive <=3*(2^B-1)^2<2^50 pour B<=24.
-  static_assert(std::same_as<DotInt, i64> && 2 * kCoordBits + 2 <= 50);
   const i64 dx = i64{a.x()} - b.x(), dy = i64{a.y()} - b.y(), dz = i64{a.z()} - b.z();
-  return dx * dx + dy * dy + dz * dz;
+  // NUM-REQUETE (CST-0110) : |delta| < 2^32, chaque carre < 2^64 tient en u64. Etendue de la paire <= 31 : somme
+  // < 3*2^62, native. Sinon somme u64 controlee, recalculee en u128 au debordement (profil 32 seulement).
+  const auto magnitude = [](i64 value) noexcept { return static_cast<u64>(value < 0 ? -value : value); };
+  const u64 sx = magnitude(dx) * magnitude(dx), sy = magnitude(dy) * magnitude(dy), sz = magnitude(dz) * magnitude(dz);
+  if (detail::span_of({dx, dy, dz}) <= 31) {
+    count_lane(lanes, Lane::native);
+    return static_cast<DotInt>(sx + sy + sz);
+  }
+  if constexpr (DomainBudget::dot > 63) {
+    u64 partial = 0, total = 0;
+    if (!__builtin_add_overflow(sx, sy, &partial) && !__builtin_add_overflow(partial, sz, &total)) {
+      count_lane(lanes, Lane::checked);
+      return static_cast<DotInt>(total);
+    }
+    count_lane(lanes, Lane::wide);
+    return static_cast<DotInt>(u128{sx} + sy + sz);
+  } else {
+    return static_cast<DotInt>(sx + sy + sz);  // inatteignable : etendue <= B <= 31 sous ce profil
+  }
 }
 
-Result<SideInt> power(const Sphere& sphere, Point point) noexcept {
-  return center_power(CenterView(sphere), point);
+Result<SideInt> power(const Sphere& sphere, Point point, LaneCount* lanes) noexcept {
+  return center_power(CenterView(sphere), point, lanes);
 }
-Result<SideInt> power(const Q3Candidate& sphere, Point point) noexcept {
-  return center_power(CenterView(sphere), point);
+Result<SideInt> power(const Q3Candidate& sphere, Point point, LaneCount* lanes) noexcept {
+  return center_power(CenterView(sphere), point, lanes);
 }
-Result<SideInt> power(const Q4Candidate& sphere, Point point) noexcept {
-  return center_power(CenterView(sphere), point);
+Result<SideInt> power(const Q4Candidate& sphere, Point point, LaneCount* lanes) noexcept {
+  return center_power(CenterView(sphere), point, lanes);
 }
-Result<int> side(const Sphere& sphere, Point point) noexcept {
-  return center_side(CenterView(sphere), point);
+Result<int> side(const Sphere& sphere, Point point, LaneCount* lanes) noexcept {
+  return center_side(CenterView(sphere), point, lanes);
 }
-Result<int> side(const Q3Candidate& sphere, Point point) noexcept {
-  return center_side(CenterView(sphere), point);
+Result<int> side(const Q3Candidate& sphere, Point point, LaneCount* lanes) noexcept {
+  return center_side(CenterView(sphere), point, lanes);
 }
-Result<int> side(const Q4Candidate& sphere, Point point) noexcept {
-  return center_side(CenterView(sphere), point);
+Result<int> side(const Q4Candidate& sphere, Point point, LaneCount* lanes) noexcept {
+  return center_side(CenterView(sphere), point, lanes);
 }
-Result<PowerBounds> power_bounds(const Sphere& sphere, const Box& box) noexcept {
-  return center_power_bounds(CenterView(sphere), box);
+Result<PowerBounds> power_bounds(const Sphere& sphere, const Box& box, LaneCount* lanes) noexcept {
+  return center_power_bounds(CenterView(sphere), box, lanes);
 }
-Result<PowerBoundSigns> power_bound_signs(const Sphere& sphere, const Box& box) noexcept {
+Result<PowerBoundSigns> power_bound_signs(const Sphere& sphere, const Box& box, LaneCount* lanes) noexcept {
   const CenterView view(sphere);
-  if (use_native_power(view)) {
-    // Comme center_side : la voie native certifiee tient dans Budget::side, require_fit ne refuse jamais ;
-    // seul l'ordre des bornes reste controle, comme checked_bounds.
-    const auto [lower, upper] = native_bounds(view, bound_terms(view, box));
+  const auto terms = bound_terms(view, box);
+  const Lane lane = detail::power_lane(view, terms.t);
+  if (lane == Lane::native || lane == Lane::certified) {
+    // Comme center_side : la voie native tient dans le budget, require_fit ne refuse jamais ; seul l'ordre des
+    // bornes reste controle, comme checked_bounds.
+    count_lane(lanes, lane);
+    const auto [lower, upper] = native_bounds(view, terms);
     if (lower > upper) return fail(Reason::arithmetic_invariant);
     return PowerBoundSigns{detail::sign(lower), detail::sign(upper)};
   }
-  auto bounds = center_power_bounds(view, box);
+  auto bounds = center_power_bounds(view, box, lanes);
   if (!bounds.ok()) return bounds.outcome();
   return PowerBoundSigns{to_wide(bounds.value().lower).sign(), to_wide(bounds.value().upper).sign()};
 }
 
-namespace {
-// Plancher exact de C/D pour D>0 : C++ tronque vers zero, le reste negatif est ramene dans [0,D).
-struct FloorDivision { i128 quotient, remainder; };
-FloorDivision floor_division(i128 numerator, i128 denominator) noexcept {
-  i128 quotient = numerator / denominator;  // une seule division large ; |quotient*D| <= |numerator|, aucun depassement
-  i128 remainder = numerator - quotient * denominator;
-  if (remainder < 0) { --quotient; remainder += denominator; }
-  return {quotient, remainder};
-}
-}  // namespace
-
-LatticeSphere::LatticeSphere(const Sphere& sphere) noexcept
-    : sphere_(sphere), lattice_(use_native_power(CenterView(sphere))) {
-  if (!lattice_) return;
-  static_assert(Budget::global_center_numerator <= 126 && Budget::center_denominator + 1 <= 126);
-  constexpr i64 m = i64{1} << kCoordBits;
-  const i128 d = sphere.denominator();  // D>0 pour toute Sphere fabriquee
-  denominator_ = d;
-  for (int j = 0; j < 3; ++j) {
-    anchor_[j] = sphere.anchor().coordinates()[j];
-    numerator_[j] = sphere.numerator()[j];
-  }
-  for (int j = 0; j < 3; ++j) {
-    // Comme compare_centers : |a_j D|<2^(5B+5) et |N_j|<2^(5B+5), donc C_j=a_j D+N_j<2^(5B+6)<=2^126.
-    const i128 c = i128{sphere.anchor().coordinates()[j]} * d + sphere.numerator()[j];
-    const auto [whole, remainder] = floor_division(c, d);  // c=whole*D+remainder, 0<=remainder<D
-    // Saturer le plancher avant tout produit : au-dela de [-2,M+1], ni le point proche ramene dans une boite de
-    // [0,M-1] ni le coin eloigne ne changent plus. 2*remainder<2D<2^(4B+6) tient dans i128.
-    const i64 q = whole < -2 ? -2 : whole > m + 1 ? m + 1 : static_cast<i64>(whole);
-    const i64 nearest = q + (2 * remainder > d ? 1 : 0);  // ex aequo 2r=D : le plus petit, meme distance
-    const i64 twice = 2 * q + (remainder == 0 ? 0 : 2 * remainder <= d ? 1 : 2);  // ceil(2C/D)
-    nearest_[j] = std::clamp<i64>(nearest, 0, m - 1);
-    far_threshold_[j] = std::clamp<i64>(twice, 0, 2 * m - 1);
-  }
-}
-
-// Precondition : lattice_. Meme expression et meme ordre que native_power ; les points evalues sont des points du
-// domaine (sommets ou points entiers d'une Box, sites d'un Point), donc ses majorants valent ici a l'identique.
-i128 LatticeSphere::power_at(const std::array<i64, 3>& point) const noexcept {
-  const std::array<i64, 3> v{point[0] - anchor_[0], point[1] - anchor_[1], point[2] - anchor_[2]};
-  i128 power = denominator_ * i128{detail::dot(v, v)};
-  for (int j = 0; j < 3; ++j) power += numerator_[j] * (-2 * i128{v[j]});
-  return power;
-}
-
-Result<PowerBoundSigns> LatticeSphere::bound_signs(const Box& box) const noexcept {
-  if (!lattice_) return power_bound_signs(sphere_, box);
-  const auto lo = box.lo().coordinates(), hi = box.hi().coordinates();  // copies : lo()/hi() rendent des valeurs
-  std::array<i64, 3> near{}, far{};
-  for (int j = 0; j < 3; ++j) {
-    near[j] = std::clamp<i64>(nearest_[j], lo[j], hi[j]);
-    far[j] = i64{lo[j]} + hi[j] >= far_threshold_[j] ? hi[j] : lo[j];
-  }
-  // Deux points de la boite fermee, donc du domaine : la puissance native garde ses budgets, pour tout Point.
-  const i128 lower = power_at(near);
-  if (lower > 0) return PowerBoundSigns{.lower = 1, .upper = 1};
-  const i128 upper = power_at(far);
-  if (lower > upper) return fail(Reason::arithmetic_invariant);
-  return PowerBoundSigns{.lower = detail::sign(lower), .upper = detail::sign(upper)};
-}
-
-Result<int> LatticeSphere::side(Point point) const noexcept {
-  if (!lattice_) return center_side(CenterView(sphere_), point);
-  const auto c = point.coordinates();
-  return detail::sign(power_at({i64{c[0]}, i64{c[1]}, i64{c[2]}}));
-}
-
 DeterminantInt orientation(Point a, Point b, Point c, Point d) noexcept {
   const auto u = detail::difference(b, a), v = detail::difference(c, a), w = detail::difference(d, a);
-  const auto normal = detail::cross(u, v);
-  static_assert(Budget::determinant <= 127);
-  // La somme a six monomes est < 6 M^3 < 2^Budget::determinant : DeterminantInt (i128 aux profils 21 et 24) la porte.
-  return static_cast<DeterminantInt>(i128{normal[0]} * w[0] + i128{normal[1]} * w[1] + i128{normal[2]} * w[2]);
+  const auto normal = detail::cross128(u, v);
+  // Six monomes < 6 M^3 < 2^(3s+3) <= 2^102 a toute etendue de Point : i128 exact, DeterminantInt le porte.
+  static_assert(SpanBudgets<32>::determinant <= 127);
+  return static_cast<DeterminantInt>(normal[0] * w[0] + normal[1] * w[1] + normal[2] * w[2]);
 }
 
-Result<int> orientation(Point a, Point b, Point c, const Sphere& center) noexcept {
-  return center_orientation(a, b, c, CenterView(center));
+Result<int> orientation(Point a, Point b, Point c, const Sphere& center, LaneCount* lanes) noexcept {
+  return center_orientation(a, b, c, CenterView(center), lanes);
 }
-Result<int> orientation(Point a, Point b, Point c, const Q3Candidate& center) noexcept {
-  return center_orientation(a, b, c, CenterView(center));
+Result<int> orientation(Point a, Point b, Point c, const Q3Candidate& center, LaneCount* lanes) noexcept {
+  return center_orientation(a, b, c, CenterView(center), lanes);
 }
-Result<int> orientation(Point a, Point b, Point c, const Q4Candidate& center) noexcept {
-  return center_orientation(a, b, c, CenterView(center));
+Result<int> orientation(Point a, Point b, Point c, const Q4Candidate& center, LaneCount* lanes) noexcept {
+  return center_orientation(a, b, c, CenterView(center), lanes);
 }
 
 bool strictly_acute(Point a, Point b, Point c) noexcept {
-  return detail::dot(detail::difference(b, a), detail::difference(c, a)) > 0 &&
-         detail::dot(detail::difference(a, b), detail::difference(c, b)) > 0 &&
-         detail::dot(detail::difference(a, c), detail::difference(b, c)) > 0;
+  // Trois produits scalaires < 3 M^2 : i64 jusqu'a l'etendue 30, i128 au-dela (profil 32).
+  if (detail::presentation_span(a, b, c) <= 30)
+    return detail::dot(detail::difference(b, a), detail::difference(c, a)) > 0 &&
+           detail::dot(detail::difference(a, b), detail::difference(c, b)) > 0 &&
+           detail::dot(detail::difference(a, c), detail::difference(b, c)) > 0;
+  return detail::dot128(detail::difference(b, a), detail::difference(c, a)) > 0 &&
+         detail::dot128(detail::difference(a, b), detail::difference(c, b)) > 0 &&
+         detail::dot128(detail::difference(a, c), detail::difference(b, c)) > 0;
 }
 
 TriangleKind classify_triangle(Point a, Point b, Point c) noexcept {
   // Les trois angles stricts excluent toute dependance affine, y compris les points confondus.
-  // Sinon cross==0 distingue l'alignement du triangle droit/obtus. M=2^B : chaque dot et ses
-  // sommes partielles sont <3M^2 en valeur absolue, chaque cross <2M^2 ; aucun carre de cross.
-  static_assert(Budget::dot <= 63 && Budget::cross <= 63);
+  // Sinon cross==0 distingue l'alignement du triangle droit/obtus. Chaque cross < 2 M^2, exact en i128.
   if (strictly_acute(a, b, c)) return TriangleKind::strict;
-  const auto normal = detail::cross(detail::difference(b, a), detail::difference(c, a));
+  const auto normal = detail::cross128(detail::difference(b, a), detail::difference(c, a));
   if (normal[0] == 0 && normal[1] == 0 && normal[2] == 0) return TriangleKind::degenerate;
   return TriangleKind::non_strict;
 }
 
 Result<bool> strictly_inside(const Sphere& center, Point a, Point b, Point c, Point d) noexcept {
-  return center_inside(CenterView(center), a, b, c, d);
+  return center_inside(CenterView(center), a, b, c, d, nullptr);
 }
 Result<bool> strictly_inside(const Q3Candidate& center, Point a, Point b, Point c, Point d) noexcept {
-  return center_inside(CenterView(center), a, b, c, d);
+  return center_inside(CenterView(center), a, b, c, d, nullptr);
 }
 Result<bool> strictly_inside(const Q4Candidate& center, Point a, Point b, Point c, Point d) noexcept {
-  return center_inside(CenterView(center), a, b, c, d);
+  return center_inside(CenterView(center), a, b, c, d, nullptr);
 }
-bool is_midpoint(const Sphere& center, Point a, Point b) noexcept {
-  return center_midpoint(CenterView(center), a, b);
+bool is_midpoint(const Sphere& center, Point a, Point b, LaneCount* lanes) noexcept {
+  return center_midpoint(CenterView(center), a, b, lanes);
 }
-bool is_midpoint(const Q3Candidate& center, Point a, Point b) noexcept {
-  return center_midpoint(CenterView(center), a, b);
+bool is_midpoint(const Q3Candidate& center, Point a, Point b, LaneCount* lanes) noexcept {
+  return center_midpoint(CenterView(center), a, b, lanes);
 }
-bool is_midpoint(const Q4Candidate& center, Point a, Point b) noexcept {
-  return center_midpoint(CenterView(center), a, b);
+bool is_midpoint(const Q4Candidate& center, Point a, Point b, LaneCount* lanes) noexcept {
+  return center_midpoint(CenterView(center), a, b, lanes);
 }
 
 }  // namespace mhgp12::num

@@ -13,7 +13,7 @@ def run(probe):
     info = subprocess.run([probe, '--profile'], capture_output=True, text=True, timeout=15)
     require(info.returncode == 0 and not info.stderr, 'profil natif en echec')
     bits = parse(info.stdout).get('coord_bits')
-    require(type(bits) is int and bits in (21, 24), 'profil absent')
+    require(type(bits) is int and bits in (21, 24, 32), 'profil absent')
     queries, pairs = requests(bits)
     payload = ''.join(query.encode() for query in queries)
     result = subprocess.run([probe], input=payload, capture_output=True, text=True, timeout=90)

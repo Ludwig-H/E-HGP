@@ -6,6 +6,7 @@
 
 #include "num/num.hpp"
 #include "num/orientation_certificate.hpp"
+#include "profile_values.hpp"
 #include "test.hpp"
 
 using namespace mhgp12;
@@ -30,20 +31,23 @@ std::array<Point,4> regular(i64 scale) {
   return {point(0,0,0),point(scale,scale,0),point(scale,0,scale),point(0,scale,scale)};
 }
 template<class Ball>
-Wide<4> reference(Point a,Point b,Point c,const Ball& ball) {
+Wide<8> reference(Point a,Point b,Point c,const Ball& ball) {
   std::array<i64,3> u{},v{},offset{};
   for (u32 j=0;j<3;++j) {
     u[j]=i64{b.coordinates()[j]}-a.coordinates()[j];
     v[j]=i64{c.coordinates()[j]}-a.coordinates()[j];
     offset[j]=i64{ball.anchor().coordinates()[j]}-a.coordinates()[j];
   }
-  const std::array<i64,3> normal{u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]};
-  Wide<4> total;
+  // Produits en i128 et coefficients au stockage du profil : la reference reste exacte au profil 32.
+  const std::array<i128,3> normal{i128{u[1]}*v[2]-i128{u[2]}*v[1],i128{u[2]}*v[0]-i128{u[0]}*v[2],
+                                  i128{u[0]}*v[1]-i128{u[1]}*v[0]};
+  Wide<8> total;
   for (u32 j=0;j<3;++j) {
-    const i128 coordinate=ball.numerator()[j]+ball.denominator()*offset[j];
-    const auto term=multiply(to_wide(coordinate),to_wide(i128{normal[j]}));
-    Wide<4> next;
-    if (!add(total,term,next)) throw std::runtime_error("reference orientation trop large");
+    Wide<8> scaled, coordinate, term, next;
+    if (!multiply_into(profile_test::wide8(ball.denominator()),to_wide(i128{offset[j]}),scaled) ||
+        !add(profile_test::wide8(ball.numerator()[j]),scaled,coordinate) ||
+        !multiply_into(coordinate,to_wide(normal[j]),term) || !add(total,term,next))
+      throw std::runtime_error("reference orientation trop large");
     total=next;
   }
   return total;
@@ -77,13 +81,13 @@ MHGP12_TEST(orientation_limits,97) {
     CHECK(normal>=-1 && normal<=1); positive=positive||normal==1; negative=negative||normal==-1;
   }
   CHECK(positive); CHECK(negative);
-  const i64 m=kCoordMax;
+  const i128 m=kCoordMax;
   CHECK(m*(-m)-m*m < -m*m);  // Deux Vec arbitraires peuvent donner 2m^2 : preuve inapplicable.
 }
 
 MHGP12_TEST(orientation_public,1050) {
-  CHECK_EQ(sizeof(Sphere),kCoordBits==21?std::size_t{144}:std::size_t{160});
-  CHECK_EQ(sizeof(Q4Candidate),std::size_t{80});
+  CHECK_EQ(sizeof(Sphere),profile_test::kSphereBytes);
+  CHECK_EQ(sizeof(Q4Candidate),profile_test::kQ4CandidateBytes);
   const auto zero=point(0,0,0), y=point(0,kCoordMax,0), z=point(0,0,kCoordMax);
   for (const i64 scale : {i64{4},i64{kCoordMax}}) {
     const auto points=regular(scale); std::array<u32,4> order{0,1,2,3};
@@ -124,7 +128,7 @@ MHGP12_TEST(orientation_owners,34) {
   const auto contact=orientation(zero,xy,z,ball); REQUIRE(contact.ok()); CHECK_EQ(contact.value(),0);
   const auto negative=orientation(zero,z,y,ball); REQUIRE(negative.ok()); CHECK_EQ(negative.value(),-1);
   const auto positive=orientation(zero,y,z,large.value()); REQUIRE(positive.ok()); CHECK_EQ(positive.value(),1);
-  CHECK(reference(zero,z,y,ball).bit_length()==(kCoordBits==21?127:145));
+  CHECK(reference(zero,z,y,ball).bit_length()==(kCoordBits==21?127:kCoordBits==24?145:193));  // 2m^6
   if constexpr (kCoordBits==24) {
     const auto exact=reference(zero,z,y,ball);
     const u128 magnitude=u128{exact.words[0]}|(u128{exact.words[1]}<<64);

@@ -126,32 +126,32 @@
     {
       "id": "profil_de_20_bits_admis",
       "fichier": "src/core/types.hpp",
-      "cherche": "static_assert(kCoordBits == 21 || kCoordBits == 24,",
-      "remplace": "static_assert(kCoordBits >= 18 && kCoordBits <= 24,",
+      "cherche": "static_assert(kCoordBits == 21 || kCoordBits == 24 || kCoordBits == 32,",
+      "remplace": "static_assert(kCoordBits >= 18 && kCoordBits <= 32,",
       "porte": "mhgp12_core_coord_bits_refusal",
-      "note": "un nombre de bits hors de {21, 24} compilerait"
+      "note": "un nombre de bits hors de {21, 24, 32} compilerait"
     },
     {
       "id": "profil_18_readmis",
       "fichier": "src/core/types.hpp",
-      "cherche": "static_assert(kCoordBits == 21 || kCoordBits == 24,",
-      "remplace": "static_assert(kCoordBits == 18 || kCoordBits == 21 || kCoordBits == 24,",
+      "cherche": "static_assert(kCoordBits == 21 || kCoordBits == 24 || kCoordBits == 32,",
+      "remplace": "static_assert(kCoordBits == 18 || kCoordBits == 21 || kCoordBits == 24 || kCoordBits == 32,",
       "porte": "mhgp12_core_coord_bits_18_refusal",
       "note": "le profil 18 bits de la v11, abandonne par la decision D6, compilerait de nouveau"
     },
     {
-      "id": "profil_32_admis",
+      "id": "profil_33_admis",
       "fichier": "src/core/types.hpp",
-      "cherche": "static_assert(kCoordBits == 21 || kCoordBits == 24,",
-      "remplace": "static_assert(kCoordBits == 21 || kCoordBits == 24 || kCoordBits == 32,",
-      "porte": "mhgp12_core_coord_bits_32_refusal",
-      "note": "32 bits passerait la garde sans l'arithmetique en repere local ; le refus explicite et son jeton disparaissent"
+      "cherche": "static_assert(kCoordBits == 21 || kCoordBits == 24 || kCoordBits == 32,",
+      "remplace": "static_assert(kCoordBits == 21 || kCoordBits == 24 || kCoordBits >= 32,",
+      "porte": "mhgp12_core_coord_bits_33_refusal",
+      "note": "33 bits passerait la garde : des coordonnees qui ne tiennent plus dans u32 seraient admises"
     },
     {
       "id": "coordonnee_maximale_decalee",
       "fichier": "src/core/types.hpp",
-      "cherche": "inline constexpr u32 kCoordMax = (u32{1} << kCoordBits) - 1;",
-      "remplace": "inline constexpr u32 kCoordMax = (u32{1} << kCoordBits);",
+      "cherche": "inline constexpr u32 kCoordMax = static_cast<u32>((u64{1} << kCoordBits) - 1);",
+      "remplace": "inline constexpr u32 kCoordMax = static_cast<u32>((u64{1} << kCoordBits));",
       "porte": "mhgp12_core_unit_types",
       "note": "la plus grande coordonnee vaudrait 2^B"
     },

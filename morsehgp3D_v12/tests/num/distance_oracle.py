@@ -52,8 +52,10 @@ def model_line(pair, bits):
 def validate(lines, pairs, bits):
     require(lines and lines[0] == 'bits %d' % bits, 'profile header')
     require(len(lines) == len(pairs)+1, 'one result per request')
-    width = 48
-    pattern = re.compile(r'ok ([0-9]{1,15}) ([0-9a-f]{%d}) ([0-9a-f]{64})' % width)
+    # Valeur publique SideInt de la puissance q1 : 192 bits (48 chiffres) aux profils 21 et 24, 256 au profil 32 ;
+    # distance au plus 3(2^B-1)^2 < 2^(2B+2) : 15 chiffres decimaux au plus jusqu'au profil 24, 20 au profil 32.
+    width = 48 if bits <= 24 else 64
+    pattern = re.compile(r'ok ([0-9]{1,%d}) ([0-9a-f]{%d}) ([0-9a-f]{64})' % (15 if bits <= 24 else 20, width))
     checks = 2
     for line, pair in zip(lines[1:], pairs):
         match = pattern.fullmatch(line)
@@ -61,7 +63,7 @@ def validate(lines, pairs, bits):
         decimal, old, wide = match.groups()
         native = int(decimal)
         require(str(native) == decimal, 'canonical native decimal')
-        require(0 <= native < (1 << 50), 'native distance budget')
+        require(0 <= native < (1 << (50 if bits <= 24 else 2 * bits + 2)), 'native distance budget')
         expected = squared(pair)
         require(native == expected, 'native distance versus Fraction')
         require(int(old, 16) == expected, 'old q1 versus Fraction')
@@ -117,7 +119,7 @@ def model(bits):
 
 def run(exe):
     header = subprocess.run([exe], input='', capture_output=True, text=True, timeout=10, check=False)
-    require(header.returncode == 0 and not header.stderr and header.stdout in ('bits 21\n', 'bits 24\n'),
+    require(header.returncode == 0 and not header.stderr and header.stdout in ('bits 21\n', 'bits 24\n', 'bits 32\n'),
             'native profile probe')
     bits = int(header.stdout.split()[1])
     pairs = cases(bits)

@@ -7,6 +7,7 @@
 
 #include "num/num.hpp"
 #include "power_reference.hpp"
+#include "profile_values.hpp"
 #include "test.hpp"
 
 using namespace mhgp12;
@@ -42,8 +43,15 @@ std::pair<Wide<8>, Wide<8>> raw_level(Point a, Point b, Point c) {
   auto norm = [](const std::array<i128, 3>& v) { return v[0] * v[0] + v[1] * v[1] + v[2] * v[2]; };
   const auto u = diff(b, a), v = diff(c, a), bc = diff(c, b);
   const std::array<i128, 3> w{u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]};
+  // |w_j| < 2^66 au profil 32 : |w|^2 hors de i128, somme des carres en entiers larges.
+  Wide<8> w2;
+  for (const i128 x : w) {
+    Wide<8> next;
+    if (!add(w2, widen(multiply(to_wide(x), to_wide(x))), next)) throw std::runtime_error("reference q3");
+    w2 = next;
+  }
   return {widen(multiply(multiply(to_wide(norm(u)), to_wide(norm(v))), to_wide(norm(bc)))),
-          widen(multiply(to_wide(i128{4}), to_wide(norm(w))))};
+          widen(multiply(to_wide(i128{4}), w2))};
 }
 
 void check_raw(const Level& level, const std::pair<Wide<8>, Wide<8>>& expected) {
@@ -64,7 +72,7 @@ void check_against_eager(Point a, Point b, Point c, const std::array<Point, 6>& 
   CHECK(candidate.anchor() == a && sphere.anchor() == a);
   CHECK(candidate.numerator() == sphere.numerator());
   CHECK_EQ(candidate.denominator(), sphere.denominator());
-  CHECK(candidate.denominator() > 0);
+  CHECK(profile_test::sign_of(candidate.denominator()) > 0);
   CHECK_EQ(candidate.q3_power_i128_certified(), sphere.q3_power_i128_certified());
   CHECK_EQ(candidate.orientation_i128_certified(), sphere.orientation_i128_certified());
   const auto first = candidate.materialize(), second = candidate.materialize();
@@ -106,8 +114,9 @@ MHGP12_TEST(q3_candidate, 500) {
   const std::array<Point, 4> f{point(0, 0, 0), point(2, 2, 0), point(2, 0, 2), point(0, 2, 2)};
   const auto face = Q3Candidate::through(f[0], f[1], f[2]);
   REQUIRE(face.ok() && face.value());
-  CHECK(face.value()->numerator() == (std::array<CenterInt, 3>{128, 64, 64}));
-  CHECK_EQ(face.value()->denominator(), CenterDen{96});
+  CHECK(face.value()->numerator() == (std::array<CenterInt, 3>{profile_test::center(128), profile_test::center(64),
+                                                                profile_test::center(64)}));
+  CHECK_EQ(face.value()->denominator(), profile_test::den(96));
   CHECK(face.value()->q3_power_i128_certified());
   const auto opposite = power(*face.value(), f[3]);
   REQUIRE(opposite.ok());

@@ -85,7 +85,7 @@ def main():
     require(len(sys.argv) == 2, 'one probe path or --selftest')
     exe = sys.argv[1]
     header = subprocess.run([exe], input='', capture_output=True, text=True, timeout=10, check=False)
-    require(header.returncode == 0 and not header.stderr and header.stdout in ('bits 21\n','bits 24\n'),
+    require(header.returncode == 0 and not header.stderr and header.stdout in ('bits 21\n','bits 24\n','bits 32\n'),
             'native profile probe')
     bits = int(header.stdout.split()[1]); pairs = cases(bits)
     result = subprocess.run([exe], input=''.join(map(encode,pairs)), capture_output=True, text=True,

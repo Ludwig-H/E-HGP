@@ -1,8 +1,8 @@
 # MorseHGP3D v12 : squelette de construction (ARCHITECTURE.md de la v11, paragraphe 5).
 # Port du CMakeLists.txt de la v11 (commit ac081a06f), lui-meme port de celui de la v10 du raccord R2 (commit 865f5e6) :
 # options, sanitizers, runtime partage de Clang, portes a code exact ; les modules s'ajoutent par leurs seuls fichiers,
-# sans editer celui-ci. Ce que la v12 change : prefixes mhgp12 et MHGP12_, profils 21 (defaut) et 24 seulement (18
-# abandonne, decision D6 ; 32 differe), option CUDA retiree tant qu'aucun module ne compile pour le GPU.
+# sans editer celui-ci. Ce que la v12 change : prefixes mhgp12 et MHGP12_, profils 21 (defaut), 24 et 32 (18
+# abandonne, decision D6 ; 32 depuis le repere local), option CUDA retiree tant qu'aucun module ne compile pour le GPU.
 #
 # ---------------------------------------------------------------------------------------------------------------
 # MODE D'EMPLOI POUR L'AUTEUR D'UN MODULE (table des modules : cmake/modules.cmake, copie du paragraphe 5 de
@@ -62,25 +62,22 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 set(MHGP12_MODULES "" CACHE STRING "Unites a construire et a tester (modules, cli, reference) ; vide : toutes")
-set(MHGP12_COORD_BITS 21 CACHE STRING "Bits par coordonnee : 21 (defaut) ou 24 ; chaque profil a ses portes")
+set(MHGP12_COORD_BITS 21 CACHE STRING "Bits par coordonnee : 21 (defaut), 24 ou 32 ; chaque profil a ses portes")
 option(MHGP12_SANITIZE "ASan + UBSan" OFF)
 option(MHGP12_TSAN "ThreadSanitizer" OFF)
 option(MHGP12_POISON "Empoisonne les tampons non initialises (0xA5)" OFF)
 set(MHGP12_MARCH "" CACHE STRING "Jeu d'instructions cible (-march), par exemple x86-64-v3 ; vide : aucun")
 set(MHGP12_MUTANT_JOBS 0 CACHE STRING "Mutants traites en parallele par une porte de mutants ; 0 : d'apres la machine")
 
-# Profil de coordonnees (decision D6 de la v12) : 21 bits (defaut) ou 24. Le profil 18 bits est abandonne ; 32 bits
-# attend l'arithmetique en repere local (docs/CONTRAT_NUMERIQUE.md), qui arrive dans une tranche ulterieure. Chaque
-# refus a son jeton et sa porte (tests/support/tests.cmake) ; core/types.hpp refuse les memes valeurs a la compilation.
+# Profil de coordonnees (decision D6 de la v12) : 21 bits (defaut), 24 ou 32. Le profil 18 bits est abandonne ; 32
+# bits est admis depuis l'arithmetique en repere local (docs/CONTRAT_NUMERIQUE.md) : chaque predicat lit l'etendue de
+# son repere, jamais B. Chaque refus a son jeton et sa porte (tests/support/tests.cmake) ; core/types.hpp refuse les
+# memes valeurs a la compilation.
 if(MHGP12_COORD_BITS STREQUAL "18")
   message(FATAL_ERROR "mhgp12_coord_bits_18_abandonne : MHGP12_COORD_BITS=18 ; le profil 18 bits est abandonne "
-                      "(decision D6 de la v12), attendu 21 (defaut) ou 24")
-elseif(MHGP12_COORD_BITS STREQUAL "32")
-  message(FATAL_ERROR "mhgp12_coord_bits_32_differe : MHGP12_COORD_BITS=32 est refuse pour l'instant ; "
-                      "l'arithmetique en repere local (B <= 32, docs/CONTRAT_NUMERIQUE.md) arrive dans une tranche "
-                      "ulterieure, attendu 21 (defaut) ou 24")
-elseif(NOT MHGP12_COORD_BITS MATCHES "^(21|24)$")
-  message(FATAL_ERROR "mhgp12_coord_bits_invalide : MHGP12_COORD_BITS=${MHGP12_COORD_BITS}, attendu 21 ou 24")
+                      "(decision D6 de la v12), attendu 21 (defaut), 24 ou 32")
+elseif(NOT MHGP12_COORD_BITS MATCHES "^(21|24|32)$")
+  message(FATAL_ERROR "mhgp12_coord_bits_invalide : MHGP12_COORD_BITS=${MHGP12_COORD_BITS}, attendu 21, 24 ou 32")
 endif()
 if(MHGP12_SANITIZE AND MHGP12_TSAN)
   message(FATAL_ERROR "MHGP12_SANITIZE et MHGP12_TSAN s'excluent (ASan et TSan ne se combinent pas)")

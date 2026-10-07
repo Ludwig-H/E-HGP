@@ -7,6 +7,7 @@
 
 #include "num/num.hpp"
 #include "power_reference.hpp"
+#include "profile_values.hpp"
 
 using namespace mhgp12;
 using namespace mhgp12::num;
@@ -28,7 +29,7 @@ Outcome query(const std::array<i64, 6>& raw) {
   if (!b.ok()) return b.outcome();
   const auto old = power(Sphere::point(a.value()), b.value());
   if (!old.ok()) return old.outcome();
-  std::cout << "ok " << squared_distance(a.value(), b.value()) << ' ' << hex(old.value()) << ' '
+  std::cout << "ok " << profile_test::decimal(squared_distance(a.value(), b.value())) << ' ' << hex(old.value()) << ' '
             << hex(num_test::wide_power(Sphere::point(a.value()), b.value())) << '\n';
   return {};
 }

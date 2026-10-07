@@ -70,7 +70,7 @@ Outcome RootTable::bracket(std::span<const SignedRank> terms, i128& lo, i128& hi
   for (const SignedRank& term : terms) {
     const auto value = root(term.rank);
     if (!value || (term.sign != 1 && term.sign != -1)) return fail(Reason::arithmetic_invariant);
-    const i128 r = static_cast<i128>(*value);  // R <= 2^89 : j R + j < 2^94
+    const i128 r = static_cast<i128>(*value);  // R < 2^97 : j R + j < 2^102 (j <= 16)
     if (term.sign > 0) {  // R <= 2^64 sqrt(l) < R + 1
       low += r;
       high += r + 1;

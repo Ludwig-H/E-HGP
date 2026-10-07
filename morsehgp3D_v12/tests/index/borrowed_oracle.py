@@ -92,18 +92,21 @@ def run(probe, owned):
     other = subprocess.run([owned, '--profile'], capture_output=True, text=True, timeout=15)
     require(info.returncode == other.returncode == 0 and not info.stderr and not other.stderr, 'profils refuses')
     bits = parse(info.stdout).get('coord_bits')
-    require(type(bits) is int and bits in (21, 24) and parse(other.stdout).get('coord_bits') == bits,
+    require(type(bits) is int and bits in (21, 24, 32) and parse(other.stdout).get('coord_bits') == bits,
             'profils apparies requis')
     queries, pairs = requests(bits)
     payload = ''.join(req.encode() for req in queries)
     answers, references = execute(probe, payload), execute(owned, payload)
-    require(len(answers) == len(references) == len(queries) == 1010, 'inventaire requetes')
+    # Inventaire de la matrice : 1010 requetes aux profils 21 et 24 ; au profil 32, les tirages sur [0,2^32) donnent
+    # trois seuils distincts de plus (requests.py), 1013.
+    inventory = {21: 1010, 24: 1010, 32: 1013}[bits]
+    require(len(answers) == len(references) == len(queries) == inventory, 'inventaire requetes')
     checks = sum(validate(req, a, bits, r) for req, a, r in zip(queries, answers, references))
     for i, j in pairs:
         require(canonical(answers[i]) == canonical(answers[j]), 'permutation entree change certificat')
         require(answers[i]['ledger'] == answers[j]['ledger'], 'permutation entree change travail')
     require(checks > 35000 and len(pairs) == 47, 'plancher Fraction')
-    print(json.dumps(dict(verdict='conforme', bits=bits, requests=1010, paired=1010,
+    print(json.dumps(dict(verdict='conforme', bits=bits, requests=inventory, paired=inventory,
                           permutations=47, checks=checks, refusals=6), sort_keys=True))
 
 

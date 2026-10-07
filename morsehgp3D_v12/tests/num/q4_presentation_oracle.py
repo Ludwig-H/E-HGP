@@ -206,7 +206,7 @@ def run(executable):
     header=run_child(executable,'',20,'header')
     try:
         fields=header.stdout.split();require(len(fields)==2 and fields[0]=='bits','header')
-        bits=int(fields[1]);require(bits in (21,24),'profile')
+        bits=int(fields[1]);require(bits in (21,24,32),'profile')
     except ValueError as error:
         diagnostic(executable,'header',header.returncode,header.stdout,header.stderr,reason=error)
         raise

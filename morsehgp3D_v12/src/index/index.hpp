@@ -60,8 +60,13 @@ enum class CensusKind : u8 { complete, saturated };
 
 // Travail reel CUMULE des parcours executes : deux pour census possede (compte puis remplissage),
 // un pour CensusWorkspace. `passes` rend ce nombre ; jamais une estimation de passe logique.
+// `lanes` compte les voies numeriques des evaluations (repere local, docs/CONTRAT_NUMERIQUE.md, paragraphe 3) ;
+// les trois compteurs `guard_*` comptent les decisions que la garde (census d'une boule certifiee) prend sans
+// arithmetique : boites disjointes du pave, boites partielles a raffiner, sites hors du pave.
 struct CensusLedger {
   u64 nodes = 0, bounds = 0, point_tests = 0, inside_blocks = 0, outside_blocks = 0, passes = 0;
+  num::LaneCount lanes;
+  u64 guard_disjoint = 0, guard_partial = 0, guard_outside = 0;
   friend bool operator==(const CensusLedger&, const CensusLedger&) = default;
 };
 
@@ -80,6 +85,7 @@ class Census {
 
  private:
   friend Result<Census> census(const GlobalIndex&, const num::Sphere&, u32, MemoryBudget&) noexcept;
+  friend Result<Census> census(const GlobalIndex&, const num::CertifiedBall&, u32, MemoryBudget&) noexcept;
   Census() = default;
   Buffer<SiteIdx> interior_, shell_;
   CensusKind kind_ = CensusKind::complete;
@@ -93,6 +99,13 @@ class Census {
 // Index immuable partageable ; resultats possedes, etat prive, un pilote par budget, pas d'allocation cachee.
 // Reservations propres exactes : sizeof(SiteIdx)*(K si sature, sinon |I|+|U|). Refus sans resultat partiel.
 [[nodiscard]] Result<Census> census(const GlobalIndex& index, const num::Sphere& sphere, u32 threshold,
+                                    MemoryBudget& budget) noexcept;
+// Census GARDE (NUM-CERTIFIEE, NUM-GARDE ; CST-0108, CST-0109) : le meme contrat pour une boule certifiee, dont le
+// centre est prouve dans l'enveloppe de son support. Memes populations et memes refus que census(index,
+// ball.sphere(), ...) ; le parcours rejette sans arithmetique les boites disjointes de son pave et les sites hors du
+// pave, ne forme jamais de centre absolu et evalue au budget mixte de la boule (6s+11). Une sphere non certifiee n'a
+// pas ce type : elle reste dans le census generique.
+[[nodiscard]] Result<Census> census(const GlobalIndex& index, const num::CertifiedBall& ball, u32 threshold,
                                     MemoryBudget& budget) noexcept;
 
 class CensusWorkspace;
@@ -141,9 +154,14 @@ class CensusWorkspace {
   // toute autre exception task_exception. Le verrou est libere dans tous les cas. Aucun Buffer alloue ici.
   [[nodiscard]] Outcome query(const GlobalIndex&, const num::Sphere&, u32 threshold,
                                void* context, Callback) noexcept;
+  // Meme requete pour une boule certifiee : census garde, une passe.
+  [[nodiscard]] Outcome query(const GlobalIndex&, const num::CertifiedBall&, u32 threshold,
+                               void* context, Callback) noexcept;
 
  private:
   explicit CensusWorkspace(const GlobalIndex& index) noexcept : index_(&index) {}
+  template <class Bounds, class Ball>
+  Outcome run(const GlobalIndex&, const Ball&, u32 threshold, void* context, Callback) noexcept;
   const GlobalIndex* index_;
   Buffer<SiteIdx> storage_;
   std::atomic_flag active_ = ATOMIC_FLAG_INIT;

@@ -1,4 +1,4 @@
-# Portes exactes : la meme batterie s'applique au profil compile (21 ou 24 bits).
+# Portes exactes : la meme batterie s'applique au profil compile (21, 24 ou 32 bits).
 mhgp12_add_unit(mhgp12_num_unit SOURCES integer_test.cpp geometry_test.cpp power_test.cpp candidate_test.cpp q3_candidate_test.cpp bounds_test.cpp
                                      center_region_test.cpp centers_test.cpp distance_test.cpp checked_power_test.cpp power_certificate_test.cpp
                                      orientation_certificate_test.cpp
@@ -6,6 +6,13 @@ mhgp12_add_unit(mhgp12_num_unit SOURCES integer_test.cpp geometry_test.cpp power
                        region_domain region_pair region_line region_cubic_width centers distance checked_limits checked_public
                        certificate_limits certificate_public certificate_owners
                        orientation_limits orientation_public orientation_owners LABELS fast)
+# Repere local, paliers et garde (docs/CONTRAT_NUMERIQUE.md, paragraphe 7) : etendues certifiees, portes de palier
+# (temoin a s* et a s*+1, compteur de voies), boules certifiees, pave, certificats lies a leur domaine.
+mhgp12_add_unit(mhgp12_num_local SOURCES frame_test.cpp lanes_test.cpp translation_test.cpp guard_test.cpp
+                GROUPS frame_extents frame_refusals frame_tiers lane_side lane_orientation lane_midpoint lane_distance
+                       lane_reservoir lane_center lane_levels lane_centers_order translation certify guard_sites
+                       guard_boxes guard_certificate
+                LABELS fast TIMEOUT 120)
 # Bornes de census sur sites entiers (levier V3) : enumeration exacte, monotonie contre la borne continue.
 mhgp12_add_unit(mhgp12_num_lattice SOURCES lattice_bounds_test.cpp GROUPS lattice_fixtures lattice_random
                 LABELS fast TIMEOUT 120)

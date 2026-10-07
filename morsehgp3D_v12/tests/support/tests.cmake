@@ -195,12 +195,13 @@ foreach(case cxx_flags release_ofast)
 endforeach()
 
 # ---- profil de coordonnees a la configuration (CMakeLists.txt, decision D6 de la v12) -----------------------------
-# Temoin : ce projet se configure au profil par defaut. Refus : 18 bits (profil abandonne) et 32 bits (differe jusqu'a
-# l'arithmetique en repere local), chacun avec son jeton. Les memes valeurs sont refusees a la compilation
-# (core/types.hpp : portes mhgp12_core_coord_bits_18_refusal et mhgp12_core_coord_bits_32_refusal).
-foreach(case 18_abandonne 32_differe)
+# Temoin : ce projet se configure au profil par defaut. Refus : 18 bits (profil abandonne, jeton propre) et 33 bits
+# (au-dela des coordonnees u32 ; 32 est admis depuis l'arithmetique en repere local), chacun avec son jeton. Les memes
+# valeurs sont refusees a la compilation (core/types.hpp : mhgp12_core_coord_bits_18_refusal et _33_refusal).
+foreach(case 18_abandonne 33_invalide)
   string(SUBSTRING ${case} 0 2 bits)
-  mhgp12_expect_refusal(mhgp12_support_configure_coord_bits_${bits} TOKEN mhgp12_coord_bits_${case}
+  string(REPLACE "33_" "" token ${case})
+  mhgp12_expect_refusal(mhgp12_support_configure_coord_bits_${bits} TOKEN mhgp12_coord_bits_${token}
     COMMAND ${CMAKE_COMMAND} -S ${PROJECT_SOURCE_DIR} -B ${PROJECT_BINARY_DIR}/gates/configure_bits_${bits}
             -G ${CMAKE_GENERATOR} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DCMAKE_BUILD_TYPE=Release
             -DMHGP12_MODULES=core -DBUILD_TESTING=OFF

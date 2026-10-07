@@ -5,6 +5,7 @@
 #include <type_traits>
 #include "num/num.hpp"
 #include "num/q4_weights.hpp"
+#include "profile_values.hpp"
 #include "test.hpp"
 using namespace mhgp12;
 using namespace mhgp12::num;
@@ -64,8 +65,8 @@ MHGP12_TEST(presentation,3600) {
 }
 MHGP12_TEST(boundaries,50) {
   const auto native=mhgp12::num::detail::q4_weights_i128;
-  CHECK_EQ(sizeof(Sphere),kCoordBits==21?std::size_t{144}:std::size_t{160});
-  CHECK_EQ(sizeof(Q4Candidate),std::size_t{80});
+  CHECK_EQ(sizeof(Sphere),profile_test::kSphereBytes);
+  CHECK_EQ(sizeof(Q4Candidate),profile_test::kQ4CandidateBytes);
   judge(regular(kCoordMax),true);
   CHECK(!native(regular(kCoordMax)));
   judge(regular(4,kCoordMax-4),true); CHECK(native(regular(4,kCoordMax-4)));

@@ -2,6 +2,7 @@
 #include <algorithm>
 #include "checked_power_support.hpp"
 #include "num/power_certificate.hpp"
+#include "profile_values.hpp"
 #include "test.hpp"
 using namespace mhgp12;
 using namespace mhgp12::num;
@@ -41,7 +42,7 @@ MHGP12_TEST(certificate_limits, 54) {
     ns[axis]=-n+1; CHECK(cert(1,ns)); ns[axis]=-n; CHECK(!cert(1,ns)); ns[axis]=-n-1; CHECK(!cert(1,ns));
     ns[axis]=maximum; CHECK(!cert(1,ns)); ns[axis]=minimum; CHECK(!cert(1,ns));
   }
-  const i64 norm = 3*i64{kCoordMax}*kCoordMax, factor = 2*i64{kCoordMax};
+  const i128 norm = 3*i128{kCoordMax}*kCoordMax, factor = 2*i128{kCoordMax};  // i128 : 3(2^32-1)^2 au profil 32
   for (u32 signs = 0; signs < 8; ++signs) {
     std::array<i128,3> ns{};
     for (u32 j = 0; j < 3; ++j) ns[j] = (signs & (u32{1}<<j)) != 0 ? n-1 : -n+1;
@@ -60,8 +61,8 @@ MHGP12_TEST(certificate_limits, 54) {
 }
 
 MHGP12_TEST(certificate_public, 275) {
-  CHECK_EQ(sizeof(Sphere), kCoordBits==21 ? std::size_t{144} : std::size_t{160});
-  CHECK_EQ(sizeof(Q4Candidate),std::size_t{80});
+  CHECK_EQ(sizeof(Sphere), profile_test::kSphereBytes);
+  CHECK_EQ(sizeof(Q4Candidate),profile_test::kQ4CandidateBytes);
   const auto zero = point(0,0,0), top = point(kCoordMax,kCoordMax,kCoordMax);
   bool negative = false;
   for (const i64 scale : {i64{4},i64{kCoordMax}}) {
@@ -75,7 +76,7 @@ MHGP12_TEST(certificate_public, 275) {
       const auto copied = s; CHECK(copied.q3_power_i128_certified()==expected);
       auto assigned = Sphere::point(zero); assigned = copied;
       CHECK(assigned.q3_power_i128_certified()==expected); CHECK(assigned.numerator()==s.numerator());
-      for (const auto n : s.numerator()) negative = negative || n<0;
+      for (const auto& n : s.numerator()) negative = negative || profile_test::sign_of(n)<0;
       for (const auto p : {zero,pts[1],top}) judge(assigned,p,zero,top);
     } while (std::next_permutation(order.begin(),order.end()));
   }
@@ -107,7 +108,8 @@ MHGP12_TEST(certificate_owners, 29) {
   {  // Aux profils 21 et 24 (garde de la v11 pour son profil 18, abandonne).
     const auto near=point(1,0,0);
     const auto attempt=checked_test::attempt(large,checked_test::query_terms(large,near));
-    REQUIRE(attempt.has_value()); CHECK(*attempt!=0);
+    // Au profil 32, D = 6(2^32-1)^4 sort de i128 : aucun essai controle possible, voie large d'office.
+    REQUIRE(attempt.has_value() == (kCoordBits <= 24)); CHECK(!attempt || *attempt!=0);
     judge(large,near,near,near);  // Non certifie globalement, mais vraie branche checked non nulle.
     constexpr int cross_bits=(123-2*kCoordBits-1)/2;
     const i64 a=i64{1}<<(cross_bits/2), b=i64{1}<<(cross_bits-cross_bits/2);

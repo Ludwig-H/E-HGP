@@ -5,6 +5,7 @@
 
 #include "num/num.hpp"
 #include "power_reference.hpp"
+#include "profile_values.hpp"
 #include "test.hpp"
 
 using namespace mhgp12;
@@ -29,7 +30,7 @@ Sphere sphere(u8 arity, const std::array<Point, 4>& points) {
 
 MHGP12_TEST(power_paths, 205) {
   // Tailles attendues sur les ABI natives de la matrice G4 ; aucune promesse de serialisation/ABI publique.
-  CHECK_EQ(sizeof(Sphere), kCoordBits == 21 ? std::size_t{144} : std::size_t{160});
+  CHECK_EQ(sizeof(Sphere), profile_test::kSphereBytes);
   const i64 m = kCoordMax;
   const std::array<Point, 4> small{point(0, 0, 0), point(4, 0, 0), point(0, 4, 0), point(0, 0, 4)};
   const std::array<Point, 4> large{point(0, 0, 0), point(m, m, 0), point(m, 0, m), point(0, m, m)};
@@ -62,7 +63,7 @@ MHGP12_TEST(power_paths, 205) {
   const auto actual = power(triangle, large[3]);
   REQUIRE(actual.ok());
   CHECK(num_test::equals_wide(actual.value(), expected));
-  CHECK_EQ(expected.bit_length(), kCoordBits == 21 ? 128 : 146);
+  CHECK_EQ(expected.bit_length(), kCoordBits == 21 ? 128 : kCoordBits == 24 ? 146 : 194);
   CHECK_EQ(side(triangle, large[3]).value(), 1);
   // Annulation exacte : H(b)=0, mais D*||b-a||^2=12L^6 sort deja de i128 a B21/24.
   const auto first_term = multiply(to_wide(triangle.denominator()), to_wide(2 * i128{m} * m));

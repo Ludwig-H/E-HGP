@@ -215,7 +215,7 @@ MHGP12_TEST(width, 12) {
   CHECK(!CoordWidth::of(0).has_value());
   CHECK(!CoordWidth::of(-1).has_value());
   CHECK(!CoordWidth::of(kCoordBits + 1).has_value());
-  CHECK(!CoordWidth::of(32).has_value());
+  CHECK_EQ(CoordWidth::of(32).has_value(), kCoordBits == 32);
   REQUIRE(CoordWidth::of(1).has_value());
   CHECK_EQ(CoordWidth::of(1)->bits(), 1);
   CHECK_EQ(CoordWidth::of(1)->max(), 1u);
@@ -263,19 +263,21 @@ MHGP12_TEST(refusals, 30) {
     CHECK_EQ(refusal_of(bad), Reason::size_mismatch);
   }
 
-  // domaine du profil : 2^B - 1 est admis sur chaque axe, 2^B est refuse sur chaque axe, a chaque rang
+  // domaine du profil : 2^B - 1 est admis sur chaque axe, 2^B est refuse sur chaque axe, a chaque rang. Au profil 32
+  // tout u32 est dans le domaine du profil : le meme temoin se joue a la largeur declaree 31.
+  const CoordWidth limit = kCoordBits < 32 ? CoordWidth() : *CoordWidth::of(31);
   for (int axis = 0; axis < 3; ++axis) {
     for (u64 at : {u64{0}, u64{3}}) {
       Input edge = four, out = four, far = four;
       std::vector<u32>& e = axis == 0 ? edge.x : axis == 1 ? edge.y : edge.z;
       std::vector<u32>& o = axis == 0 ? out.x : axis == 1 ? out.y : out.z;
       std::vector<u32>& f = axis == 0 ? far.x : axis == 1 ? far.y : far.z;
-      e[at] = kCoordMax;
-      o[at] = kCoordMax + 1;
+      e[at] = limit.max();
+      o[at] = limit.max() + 1;
       f[at] = 0xFFFFFFFFu;
-      CHECK_EQ(refusal_of(edge), Reason::none);
-      CHECK_EQ(refusal_of(out), Reason::coordinate_out_of_domain);
-      CHECK_EQ(refusal_of(far), Reason::coordinate_out_of_domain);
+      CHECK_EQ(refusal_of(edge, limit), Reason::none);
+      CHECK_EQ(refusal_of(out, limit), Reason::coordinate_out_of_domain);
+      CHECK_EQ(refusal_of(far, limit), Reason::coordinate_out_of_domain);
     }
   }
   // largeur declaree plus etroite que le profil : 8 demande 4 bits
@@ -300,9 +302,9 @@ MHGP12_TEST(refusals, 30) {
 
   // ordre des refus : le domaine est juge avant les identifiants
   Input both = four;
-  both.x[1] = kCoordMax + 1;
+  both.x[1] = limit.max() + 1;
   both.ids[3] = both.ids[0];
-  CHECK_EQ(refusal_of(both), Reason::coordinate_out_of_domain);
+  CHECK_EQ(refusal_of(both, limit), Reason::coordinate_out_of_domain);
 }
 
 MHGP12_TEST(fixture, 12) {
@@ -392,6 +394,63 @@ MHGP12_TEST(judge, 51) {
   CHECK_EQ(clouds.size(), 12u);
   CHECK(weighted >= 6);  // plancher : des nuages a multiplicites ont bien ete juges
   CHECK(budget.released().ok());
+}
+
+// Identite des sites par egalite de cle exacte (CST-0202) : une cle tronquee aurait fusionne deux positions
+// distinctes, et un departage par PointId aurait separe deux vrais doublons par un troisieme site de meme cle.
+// Temoins de l'auditeur Codex (receipts/audit_contrats_20261007/numerique/witness.py, morton_identity), au profil
+// compile : au profil 32 les trois positions sont exactement (0,0,0), (1,0,0) et (2^32-1,0,0).
+MHGP12_TEST(identity, 30) {
+  MemoryBudget budget(MemoryBudget::kUnlimited);
+  // Trois positions dont les deux premieres auraient la meme cle apres un decalage de B - 21 bits (11 au profil 32).
+  Input three;
+  three.add(0, 0, 0, 1);
+  three.add(1, 0, 0, 2);
+  three.add(kCoordMax, 0, 0, 3);
+  CHECK(reference_key(0, 0, 0) != reference_key(1, 0, 0));
+  CHECK((reference_key(0, 0, 0) >> 33) == (reference_key(1, 0, 0) >> 33));  // meme cle une fois tronquee
+  {
+    const Result<Cloud> r = prepare(three, budget);
+    REQUIRE(r.ok());
+    CHECK_EQ(r.value().sites(), 3u);
+    CHECK(matches(r.value(), expected_of(three)));
+  }
+  // Deux vrais doublons separes dans l'entree par un troisieme site : (A,1), (B,2), (A,3) donnent deux sites, A de
+  // multiplicite 2 (PointId 1 et 3), B de multiplicite 1.
+  Input interleaved;
+  interleaved.add(0, 0, 0, 1);
+  interleaved.add(1, 0, 0, 2);
+  interleaved.add(0, 0, 0, 3);
+  {
+    const Result<Cloud> r = prepare(interleaved, budget);
+    REQUIRE(r.ok());
+    const Cloud& c = r.value();
+    REQUIRE(c.sites() == 2u);
+    CHECK(c.x()[0] == 0u && c.w()[0] == 2u && c.w()[1] == 1u);
+    const auto first = c.points(make_id<SiteIdx>(0));
+    REQUIRE(first.size() == 2u);
+    CHECK(idx(first[0]) == 1u && idx(first[1]) == 3u);
+    CHECK(idx(c.points(make_id<SiteIdx>(1))[0]) == 2u);
+  }
+  // Permutations de l'entree, PointId stables : meme nuage, octet pour octet, pour les deux temoins reunis et des
+  // positions aux deux bords du domaine.
+  Input all = three;
+  for (u64 i = 0; i < interleaved.size(); ++i)
+    all.add(interleaved.x[i], interleaved.y[i] + 5, interleaved.z[i], idx(interleaved.ids[i]) + 10);
+  all.add(kCoordMax, kCoordMax, kCoordMax, 20);
+  all.add(kCoordMax, kCoordMax, kCoordMax, 21);
+  all.add(kCoordMax - 1, kCoordMax, kCoordMax, 22);
+  const Result<Cloud> reference = prepare(all, budget);
+  REQUIRE(reference.ok());
+  CHECK(matches(reference.value(), expected_of(all)));
+  CHECK_EQ(reference.value().sites(), 7u);
+  for (u64 seed = 0; seed < 8; ++seed) {
+    Input permuted = all;
+    shuffle(permuted, 700 + seed);
+    const Result<Cloud> again = prepare(permuted, budget);
+    REQUIRE(again.ok());
+    CHECK(same_clouds(reference.value(), again.value()));
+  }
 }
 
 MHGP12_TEST(permutation, 14) {
@@ -564,24 +623,26 @@ MHGP12_TEST(ownership, 27) {
 }
 
 MHGP12_TEST(refusal_priority, 10) {
+  // Au profil 32 tout u32 est dans le domaine du profil : le hors-domaine se joue a la largeur declaree 31.
+  const CoordWidth limit = kCoordBits < 32 ? CoordWidth() : *CoordWidth::of(31);
   MemoryBudget zero(0);
   Input in;
-  CHECK_EQ(prepare(in, zero).outcome().reason, Reason::empty_input);
-  in.add(kCoordMax + 1, 0, 0, 0);
+  CHECK_EQ(prepare(in, zero, limit).outcome().reason, Reason::empty_input);
+  in.add(limit.max() + 1, 0, 0, 0);
   in.ids.clear();
-  CHECK_EQ(prepare(in, zero).outcome().reason, Reason::size_mismatch);
+  CHECK_EQ(prepare(in, zero, limit).outcome().reason, Reason::size_mismatch);
   in.ids.push_back(make_id<PointId>(0));
-  CHECK_EQ(prepare(in, zero).outcome().reason, Reason::coordinate_out_of_domain);
+  CHECK_EQ(prepare(in, zero, limit).outcome().reason, Reason::coordinate_out_of_domain);
   in.x[0] = 0;
   in.add(0, 0, 0, 0);
-  CHECK_EQ(prepare(in, zero).outcome().reason, Reason::memory_budget);
+  CHECK_EQ(prepare(in, zero, limit).outcome().reason, Reason::memory_budget);
   CHECK_EQ(zero.peak(), 0u);
   CHECK(zero.released().ok());
   MemoryBudget ample(MemoryBudget::kUnlimited);
-  CHECK_EQ(prepare(in, ample).outcome().reason, Reason::duplicate_point_id);
+  CHECK_EQ(prepare(in, ample, limit).outcome().reason, Reason::duplicate_point_id);
   CHECK(ample.released().ok());
-  in.x[0] = kCoordMax + 1;
-  CHECK_EQ(prepare(in, ample).outcome().reason, Reason::coordinate_out_of_domain);
+  in.x[0] = limit.max() + 1;
+  CHECK_EQ(prepare(in, ample, limit).outcome().reason, Reason::coordinate_out_of_domain);
   CHECK(ample.released().ok());
 }
 

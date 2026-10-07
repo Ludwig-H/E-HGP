@@ -44,8 +44,8 @@ class CoordWidth {
     return CoordWidth(bits);
   }
   constexpr int bits() const noexcept { return bits_; }
-  // Plus grande coordonnee admise, 2^bits - 1. bits <= kCoordBits <= 24 : le decalage tient dans u32.
-  constexpr u32 max() const noexcept { return (u32{1} << bits_) - 1; }
+  // Plus grande coordonnee admise, 2^bits - 1. bits <= kCoordBits <= 32 : le decalage se fait en u64.
+  constexpr u32 max() const noexcept { return static_cast<u32>((u64{1} << bits_) - 1); }
 
  private:
   constexpr explicit CoordWidth(int bits) noexcept : bits_(bits) {}

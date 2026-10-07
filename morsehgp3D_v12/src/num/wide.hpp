@@ -67,6 +67,11 @@ constexpr int compare(const Wide<Words>& a, const Wide<Words>& b) noexcept {
   const int order = compare_magnitude(a, b);
   return sa >= 0 ? order : -order;
 }
+// Egalite de valeur (le zero negatif egale le zero) : stockage large des coefficients au profil 32.
+template <int Words>
+constexpr bool operator==(const Wide<Words>& a, const Wide<Words>& b) noexcept {
+  return compare(a, b) == 0;
+}
 
 namespace detail {
 template <int Words>
@@ -130,6 +135,33 @@ constexpr Wide<A + B> multiply(const Wide<A>& a, const Wide<B>& b) noexcept {
   }
   out.neg = (a.neg != b.neg) && !out.is_zero();
   return out;
+}
+
+// Produit dans W mots, en ne parcourant que les mots utiles des deux facteurs (repli large a largeur fixee par le
+// palier, docs/CONTRAT_NUMERIQUE.md, paragraphe 3). Faux, sortie inchangee, si le produit exact ne tient pas.
+template <int W, int A, int B>
+[[nodiscard]] constexpr bool multiply_into(const Wide<A>& a, const Wide<B>& b, Wide<W>& out) noexcept {
+  int la = A, lb = B;
+  while (la > 0 && a.words[la - 1] == 0) --la;
+  while (lb > 0 && b.words[lb - 1] == 0) --lb;
+  if (la + lb > W + 1) return false;  // le produit a au moins 64 (la + lb - 1) + 1 bits
+  Wide<W + 1> full;
+  for (int i = 0; i < la; ++i) {
+    u64 carry = 0;
+    for (int j = 0; j < lb; ++j) {
+      const u128 value = static_cast<u128>(a.words[i]) * b.words[j] + full.words[i + j] + carry;
+      full.words[i + j] = static_cast<u64>(value);
+      carry = static_cast<u64>(value >> 64);
+    }
+    full.words[i + lb] = carry;
+  }
+  full.neg = (a.neg != b.neg) && !full.is_zero();
+  Wide<W> value;
+  for (int i = 0; i < W; ++i) value.words[i] = full.words[i];
+  if (full.words[W] != 0) return false;
+  value.neg = full.neg;
+  out = value;
+  return true;
 }
 
 template <int To, int From>

@@ -1,6 +1,6 @@
 // Table d'encadrements des racines de niveaux (tranche S8, specification paragraphe 7.8). Pour chaque rang r reference,
 // R_r = floor(2^64 sqrt(l_r)) = isqrt(floor(N 2^128 / D)) pour le niveau non reduit l_r = N / D. Le centre d'une
-// boule est dans l'enveloppe de son support, donc sqrt(l_r) < 2^(B+1) et R_r < 2^(B+65) <= 2^89 : un u128 suffit
+// boule est dans l'enveloppe de son support, donc sqrt(l_r) < 2^(B+1) et R_r < 2^(B+65) <= 2^97 : un u128 suffit
 // (au-dela : arithmetic_invariant, un niveau du catalogue hors du domaine geometrique). La racine entiere recoit une
 // proposition binary64 et la certifie en entier (num::isqrt) : le flottant propose, l'entier decide.
 //
@@ -33,7 +33,8 @@ class RootTable {
  public:
   static constexpr u32 kRootBits = static_cast<u32>(kCoordBits) + 65;
   static constexpr u32 kMaxTerms = RadicalSum::kMaxTerms;
-  static_assert(kRootBits <= 89, "num : racines de la table en u128, budget de la specification");
+  // B <= 32 : R < 2^97 ; kMaxTerms = 16 termes et leurs 16 unites d'encadrement restent sous 2^102 en i128.
+  static_assert(kRootBits <= 97 && kRootBits + 5 < 127, "num : racines de la table en u128, sommes en i128");
 
   RootTable() = default;
   // Octets reserves par allocate pour `ranks` rangs : formule d'admission.

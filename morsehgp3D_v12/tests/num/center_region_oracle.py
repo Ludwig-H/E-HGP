@@ -214,7 +214,7 @@ def run(probe):
     info = subprocess.run([probe], input='', text=True, capture_output=True, timeout=15)
     need(info.returncode == 0 and not info.stderr, 'metadata pilote')
     words = info.stdout.split()
-    need(len(words) == 2 and words[0] == 'bits' and words[1] in ('21', '24'), 'profil pilote')
+    need(len(words) == 2 and words[0] == 'bits' and words[1] in ('21', '24', '32'), 'profil pilote')
     bits = int(words[1]); data, pairs = cases(bits)
     payload = ''.join(case.encode() for case in data)
     process = subprocess.run([probe], input=payload, text=True, capture_output=True, timeout=45)

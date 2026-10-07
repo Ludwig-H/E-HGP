@@ -88,10 +88,11 @@ par cause, temps) sont publiés à part, jamais dans une empreinte.
    ($m>q$ seul ne prouve pas plusieurs supports admissibles) ; ordre publié et renumérotations recalculés. Sur ng00–02
    à K5 et K10 et sur les uniformes de 8 000, 16 000 et 32 000 sites. **Ordre parent du parcours** : l'égalité des
    feuilles avec la v11 ne vaut qu'à liste parente ordonnée identique (réservoir départagé par le rang dans la liste
-   parente) ; avec l'ordre de la v12 (clé de Morton sur coordonnées normalisées), la partition en feuilles et les
-   compteurs peuvent changer sans qu'aucune boule ne soit perdue (modèle exact à six sites de l'auditeur) : le
-   différentiel se juge alors sur $\mathrm{Cat}_K$, écarts de feuilles et de coûts publiés ; à ordre parent fixé, BFS
-   et DFS rendent les mêmes feuilles et compteurs (`MES-M5`).
+   parente). La v12 garde l'ordre des sites de la v11 (clé de Morton exacte sur coordonnées absolues,
+   [contrat numérique](CONTRAT_NUMERIQUE.md) § 4) : la liste parente est la même, et l'égalité des feuilles et des
+   quinze compteurs avec la v11 est exigée, comme `MES-M5` l'a établie à ordre fixé. Une normalisation d'ordre future
+   changerait la partition en feuilles sans perdre de boule (modèle exact à six sites de l'auditeur) : elle se
+   jugerait sur $\mathrm{Cat}_K$, écarts de feuilles et de coûts publiés.
 2. **Oracle borné** (`reference/`, $n\leq 14$) : égalité du catalogue sur la suite rapide.
 3. **Témoins** : le triangle $(0,1,1),(1,0,1),(1,1,0)$ (`WIT-TRANSL`) dont les trois boules diamétrales de niveau $1/2$
    changent d'ordre entre conventions, ce qui change les choix de Kruskal et de `cover` sans changer la forêt (le

@@ -195,7 +195,7 @@ def selftest():
 
 def run(executable):
     header=run_child(executable,'',5,'header')
-    words=header.stdout.split();require(len(words)==2 and words[0]=='bits' and int(words[1]) in (21,24),'header bits')
+    words=header.stdout.split();require(len(words)==2 and words[0]=='bits' and int(words[1]) in (21,24,32),'header bits')
     bits=int(words[1]);rows=cases(bits)
     payload=''.join(str(q)+' '+' '.join(str(x) for p in (*points,*plane) for x in p)+'\n' for _,q,points,plane in rows)
     child=run_child(executable,payload,60,'native')

@@ -235,8 +235,8 @@ F1–F6 (§ 4), construction et portes (§ 5), contrats du budget mémoire, de l
 (§ 7). Ils s'appliquent avec ces adaptations :
 
 - préfixes `mhgp12` (cibles, portes, namespace, jetons), `MHGP12_` (macros, options) et `hgp12_ref` (oracle) ;
-- profil `MHGP12_COORD_BITS` : 21 (défaut) ou 24. Le profil 18 est abandonné (décision D6) et refusé à la configuration
-  comme à la compilation ; 32 est refusé jusqu'à l'arithmétique en repère local
+- profil `MHGP12_COORD_BITS` : 21 (défaut), 24 ou 32. Le profil 18 est abandonné (décision D6) et refusé à la
+  configuration comme à la compilation ; 32 est admis depuis l'arithmétique en repère local
   ([`CONTRAT_NUMERIQUE.md`](CONTRAT_NUMERIQUE.md)) ;
 - la table des modules est celle du § 5 ;
 - variables d'environnement : `MHGP12_DATA_DIR` (portes `lidar`), `MHGP12_V10_FROZEN_DIR` (portes `diff_v10` de

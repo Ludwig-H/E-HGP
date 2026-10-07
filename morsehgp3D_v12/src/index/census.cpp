@@ -1,12 +1,15 @@
 // Deux parcours sans pile : comptage saturant, puis allocation exacte et remplissage transactionnel.
+// Le meme parcours sert le census generique (LatticeSphere) et le census garde d'une boule certifiee (GuardedSphere).
 #include "index/index.hpp"
 #include "index/access.hpp"
+#include "index/bounds.hpp"
 
 #include <algorithm>
 
 namespace mhgp12 {
 namespace {
 
+template <class Bounds>
 struct Pass {
   u32 threshold;
   bool keep_shell;
@@ -22,12 +25,12 @@ struct Pass {
     p += added;
   }
 
-  Outcome points(const Cloud& cloud, u32 begin, u32 end, const num::LatticeSphere& lattice) noexcept {
+  Outcome points(const Cloud& cloud, u32 begin, u32 end, const Bounds& lattice) noexcept {
     for (u32 i = begin; i < end && p < threshold; ++i) {
       ++ledger.point_tests;
       auto point = num::Point::make(cloud.x()[i], cloud.y()[i], cloud.z()[i]);
       if (!point.ok()) return point.outcome();
-      auto side = lattice.side(point.value());
+      auto side = lattice.side(point.value(), ledger);
       if (!side.ok()) return side.outcome();
       if (side.value() < 0) {
         if (fill) interior[p] = SiteIdx{i};
@@ -40,15 +43,15 @@ struct Pass {
     return {};
   }
 
-  Outcome walk(const GlobalIndex& index, const num::Sphere& sphere) noexcept {
+  // Une preparation des bornes par parcours (lattice), sites de l'index entiers.
+  Outcome walk(const GlobalIndex& index, const Bounds& lattice) noexcept {
     ++ledger.passes;
-    const num::LatticeSphere lattice(sphere);  // une preparation par parcours ; sites de l'index entiers
     const auto nodes = index_detail::Access::nodes(index);
     for (u64 cursor = 0; cursor < nodes.size() && p < threshold;) {
       const auto& node = nodes[cursor];
       ++ledger.nodes;
       ++ledger.bounds;
-      auto signs = lattice.bound_signs(node.box);  // minorant sur sites entiers, majorant continu
+      auto signs = lattice.bound_signs(node.box, ledger);
       if (!signs.ok()) return signs.outcome();
       if (signs.value().lower > 0) {
         ++ledger.outside_blocks;
@@ -68,24 +71,50 @@ struct Pass {
   }
 };
 
-}  // namespace
-
-Result<Census> census(const GlobalIndex& index, const num::Sphere& sphere, u32 threshold,
-                      MemoryBudget& budget) noexcept {
+// Les deux passes du census, sur les tableaux du resultat ; rend le genre du certificat.
+template <class Bounds, class Ball>
+Result<CensusKind> run_census(const GlobalIndex& index, const Ball& ball, u32 threshold, MemoryBudget& budget,
+                              CensusLedger& ledger, Buffer<SiteIdx>& interior, Buffer<SiteIdx>& shell) noexcept {
   if (threshold == 0) return fail(Reason::parameter_out_of_range);
   if (index.cloud().sites() == 0) return fail(Reason::empty_input);
-  Census result;
-  Pass count{threshold, true, {}, {}, false, result.ledger_};
-  MHGP12_TRY(count.walk(index, sphere));
+  Pass<Bounds> count{threshold, true, {}, {}, false, ledger};
+  {
+    const Bounds lattice(ball);
+    MHGP12_TRY(count.walk(index, lattice));
+  }
   const bool saturated = count.p == threshold;
   const u64 shell_size = saturated ? 0 : count.m;
   // I et U disjoints, leurs tailles cumulees <= sites<2^32. Toutes les allocations sont payees ici.
   MHGP12_TRY(budget.admit((count.p + shell_size) * sizeof(SiteIdx)));
-  MHGP12_TRY(result.interior_.allocate(count.p, budget));
-  MHGP12_TRY(result.shell_.allocate(shell_size, budget));
-  Pass fill{threshold, !saturated, result.interior_.span(), result.shell_.span(), true, result.ledger_};
-  MHGP12_TRY(fill.walk(index, sphere));
-  result.kind_ = saturated ? CensusKind::saturated : CensusKind::complete;
+  MHGP12_TRY(interior.allocate(count.p, budget));
+  MHGP12_TRY(shell.allocate(shell_size, budget));
+  Pass<Bounds> fill{threshold, !saturated, interior.span(), shell.span(), true, ledger};
+  {
+    const Bounds lattice(ball);
+    MHGP12_TRY(fill.walk(index, lattice));
+  }
+  return saturated ? CensusKind::saturated : CensusKind::complete;
+}
+
+}  // namespace
+
+Result<Census> census(const GlobalIndex& index, const num::Sphere& sphere, u32 threshold,
+                      MemoryBudget& budget) noexcept {
+  Census result;
+  auto kind = run_census<index_detail::GenericBounds>(index, sphere, threshold, budget, result.ledger_,
+                                                      result.interior_, result.shell_);
+  if (!kind.ok()) return kind.outcome();
+  result.kind_ = kind.value();
+  return result;
+}
+
+Result<Census> census(const GlobalIndex& index, const num::CertifiedBall& ball, u32 threshold,
+                      MemoryBudget& budget) noexcept {
+  Census result;
+  auto kind = run_census<index_detail::GuardedBounds>(index, ball, threshold, budget, result.ledger_,
+                                                      result.interior_, result.shell_);
+  if (!kind.ok()) return kind.outcome();
+  result.kind_ = kind.value();
   return result;
 }
 

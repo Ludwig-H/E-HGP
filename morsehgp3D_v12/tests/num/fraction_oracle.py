@@ -192,7 +192,7 @@ def run(probe):
     info = subprocess.run([probe], input='', capture_output=True, text=True, timeout=15)
     require(info.returncode == 0 and not info.stderr, 'sonde metadata en echec')
     words = info.stdout.split()
-    require(len(words) == 2 and words[0] == 'bits' and int(words[1]) in (21, 24), 'profil absent')
+    require(len(words) == 2 and words[0] == 'bits' and int(words[1]) in (21, 24, 32), 'profil absent')
     bits = int(words[1])
     geometry, integers = cases(bits), integer_cases()
     inputs = [' '.join(map(str, [q] + [v for p in list(points) + [query] for v in p])) for q, points, query in geometry]

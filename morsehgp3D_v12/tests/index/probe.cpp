@@ -1,5 +1,7 @@
 // Pilote de test en lots : feuille seuil budget_index budget_requete n q, puis n XYZ/PointId et q XYZ supports.
 // Cloud, index et resultats ont des budgets separes ; entrees et JSON appartiennent au harnais.
+// Option --guarded (v12, NUM-GARDE) : le support est d'abord certifie (num::CertifiedBall) ; certifie, le census
+// garde remplace le census generique ; non certifie, la reponse est {"status":"uncertified",...} sans census.
 #include <array>
 #include <charconv>
 #include <iostream>
@@ -57,6 +59,12 @@ bool request(std::string_view first, Request& req) {
   return true;
 }
 
+bool guarded_mode = false;
+
+Result<std::optional<num::CertifiedBall>> certified(const Request& req) {
+  return num::CertifiedBall::certify(std::span<const num::Point>(req.support.data(), req.arity));
+}
+
 Result<std::optional<num::Sphere>> sphere(const Request& req) {
   const auto& p = req.support;
   if (req.arity == 1) return std::optional<num::Sphere>{num::Sphere::point(p[0])};
@@ -84,7 +92,14 @@ Result<std::string> payload(const Request& req, MemoryBudget& cloud_budget,
   const auto ball = sphere(req);
   if (!ball.ok()) return ball.outcome();
   if (!ball.value()) return fail(Reason::parameter_out_of_range);
-  auto result = census(index.value(), *ball.value(), req.threshold, query_budget);
+  std::optional<num::CertifiedBall> certified_ball;
+  if (guarded_mode) {
+    auto made = certified(req);
+    if (!made.ok()) return made.outcome();
+    certified_ball = made.value();
+  }
+  auto result = certified_ball ? census(index.value(), *certified_ball, req.threshold, query_budget)
+                               : census(index.value(), *ball.value(), req.threshold, query_budget);
   if (!result.ok()) return result.outcome();
   const auto& owner = index.value().cloud();
   std::ostringstream out;
@@ -108,7 +123,10 @@ Result<std::string> payload(const Request& req, MemoryBudget& cloud_budget,
   out << ",\"ledger\":{\"nodes\":" << l.nodes << ",\"bounds\":" << l.bounds
       << ",\"point_tests\":" << l.point_tests << ",\"inside_blocks\":" << l.inside_blocks
       << ",\"outside_blocks\":" << l.outside_blocks << ",\"passes\":" << l.passes
-      << "},\"index_nodes\":" << index.value().nodes() << ",\"index_depth\":" << index.value().max_depth();
+      << "},\"index_nodes\":" << index.value().nodes() << ",\"index_depth\":" << index.value().max_depth()
+      << ",\"lanes\":{\"native\":" << l.lanes.native << ",\"certified\":" << l.lanes.certified
+      << ",\"checked\":" << l.lanes.checked << ",\"wide\":" << l.lanes.wide << "},\"guard\":{\"disjoint\":"
+      << l.guard_disjoint << ",\"partial\":" << l.guard_partial << ",\"outside\":" << l.guard_outside << '}';
   return out.str();
 }
 
@@ -118,6 +136,14 @@ void memory(std::string_view name, const MemoryBudget& budget) {
 }
 
 void execute(const Request& req) {
+  if (guarded_mode) {
+    const auto ball = certified(req);
+    if (ball.ok() && !ball.value()) {
+      std::cout << "{\"status\":\"uncertified\",\"coord_bits\":" << kCoordBits << ",\"threshold\":" << req.threshold
+                << "}\n";
+      return;
+    }
+  }
   MemoryBudget cloud_budget(MemoryBudget::kUnlimited), index_budget(req.index_budget), query_budget(req.query_budget);
   auto answer = guarded([&]() { return payload(req, cloud_budget, index_budget, query_budget); });
   const auto issue = merge(answer.outcome(), merge(cloud_budget.released(),
@@ -137,7 +163,8 @@ int main(int argc, char** argv) {
     std::cout << "{\"coord_bits\":" << kCoordBits << "}\n";
     return 0;
   }
-  if (argc != 1) return 2;
+  if (argc == 2 && std::string_view(argv[1]) == "--guarded") guarded_mode = true;
+  else if (argc != 1) return 2;
   try {
     std::string first;
     while (std::cin >> first) {

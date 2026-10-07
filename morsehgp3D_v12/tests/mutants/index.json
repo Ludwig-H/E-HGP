@@ -1,6 +1,6 @@
 {
   "module": "index",
-  "plancher": 15,
+  "plancher": 18,
   "mutants": [
     {
       "id": "contact_exterieur",
@@ -93,16 +93,16 @@
     {
       "id": "census_borne_continue",
       "fichier": "src/index/census.cpp",
-      "cherche": "auto signs = lattice.bound_signs(node.box);",
-      "remplace": "auto signs = num::power_bound_signs(sphere, node.box);",
+      "cherche": "auto signs = lattice.bound_signs(node.box, ledger);",
+      "remplace": "auto signs = num::power_bound_signs(lattice.sphere(), node.box);",
       "porte": "mhgp12_index_unit_lattice",
       "note": "levier V3 retire du census possede : memes listes, mais la racine n'est plus decidee (registres absolus)"
     },
     {
       "id": "census_emprunte_borne_continue",
       "fichier": "src/index/census_workspace.cpp",
-      "cherche": "auto signs = lattice.bound_signs(node.box);",
-      "remplace": "auto signs = num::power_bound_signs(sphere, node.box);",
+      "cherche": "auto signs = lattice.bound_signs(node.box, ledger);",
+      "remplace": "auto signs = num::power_bound_signs(lattice.sphere(), node.box);",
       "porte": "mhgp12_index_borrowed_lattice",
       "note": "levier V3 retire du census emprunte (chemin des descentes FULL) : registres absolus d'une passe"
     },
@@ -121,6 +121,30 @@
       "remplace": "const int axis = (bit + 1) % 3, level = bit / 3;",
       "porte": "mhgp12_index_unit_structure",
       "note": "bit de Morton lu sur la mauvaise coordonnee (convention x, y, z de morton.hpp) : coupe hors cellule"
+    },
+    {
+      "id": "census_garde_sans_garde",
+      "fichier": "src/index/census.cpp",
+      "cherche": "auto kind = run_census<index_detail::GuardedBounds>(index, ball, threshold, budget, result.ledger_,",
+      "remplace": "auto kind = run_census<index_detail::GenericBounds>(index, ball.sphere(), threshold, budget, result.ledger_,",
+      "porte": "mhgp12_index_guarded_witnesses",
+      "note": "census garde servi par la voie generique : memes populations, aucune decision de pave (compteurs)"
+    },
+    {
+      "id": "census_garde_emprunte_sans_garde",
+      "fichier": "src/index/census_workspace.cpp",
+      "cherche": "return run<index_detail::GuardedBounds>(index, ball, threshold, context, callback);",
+      "remplace": "return run<index_detail::GenericBounds>(index, ball.sphere(), threshold, context, callback);",
+      "porte": "mhgp12_index_guarded_fixtures",
+      "note": "requete empruntee d'une boule certifiee servie sans garde"
+    },
+    {
+      "id": "garde_compteur_partiel_perdu",
+      "fichier": "src/index/bounds.hpp",
+      "cherche": "ledger.guard_partial += guard.partial_boxes;",
+      "remplace": "ledger.guard_partial += 0;",
+      "porte": "mhgp12_index_guarded_witnesses",
+      "note": "boites partielles raffinees non comptees au registre du census"
     }
   ]
 }

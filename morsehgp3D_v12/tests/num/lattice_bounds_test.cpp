@@ -7,6 +7,7 @@
 
 #include "num/num.hpp"
 #include "power_reference.hpp"
+#include "profile_values.hpp"
 #include "test.hpp"
 
 using namespace mhgp12;
@@ -72,20 +73,23 @@ u64 next(u64& state) {  // splitmix64 : tirage deterministe, independant du prof
   return z ^ (z >> 31);
 }
 
-// Signe de la coordonnee j du centre, c_j=(a_j D+N_j)/D avec D>0, et position par rapport au domaine.
-int center_sign(const Sphere& s, int j) {
-  const i128 c = i128{s.anchor().coordinates()[j]} * s.denominator() + s.numerator()[j];
-  return (c > 0) - (c < 0);
-}
+// Signe de la coordonnee j du centre, c_j=(a_j D+N_j)/D avec D>0, et position par rapport au domaine. Juges de test
+// en entiers larges (profile_values.hpp) : jamais une voie du produit, valables au stockage de chaque profil.
+int center_sign(const Sphere& s, int j) { return profile_test::absolute_center(s, j).sign(); }
 bool center_far(const Sphere& s, int j) {  // c_j<-2 ou c_j>M+1 : plancher sature
-  const i128 c = i128{s.anchor().coordinates()[j]} * s.denominator() + s.numerator()[j];
-  const i128 d = s.denominator(), m = i128{1} << kCoordBits;
-  return c < -2 * d || c > (m + 2) * d;
+  const auto c = profile_test::absolute_center(s, j), d = profile_test::wide8(s.denominator());
+  Wide<8> low, high;
+  if (!multiply_into(d, to_wide(i128{-2}), low) || !multiply_into(d, to_wide((i128{1} << kCoordBits) + 2), high))
+    throw std::runtime_error("bornes de centre lointain");
+  return compare(c, low) < 0 || compare(c, high) > 0;
 }
 bool center_tie(const Sphere& s, int j) {  // c_j demi-entier : 2C = 0 mod D et C != 0 mod D
-  const i128 c = i128{s.anchor().coordinates()[j]} * s.denominator() + s.numerator()[j];
-  const i128 d = s.denominator();
-  return (2 * c) % d == 0 && c % d != 0;
+  const Big c = Big::from_wide(profile_test::absolute_center(s, j)), d = Big::from_wide(to_wide(s.denominator()));
+  Big twice, quotient, rest, other;
+  if (!shift_left(c, 1, twice).ok() || !divide(twice, d, quotient, rest).ok()) throw std::runtime_error("modulo");
+  const bool even = rest.is_zero();
+  if (!divide(c, d, quotient, other).ok()) throw std::runtime_error("modulo");
+  return even && !other.is_zero();
 }
 }  // namespace
 
@@ -137,20 +141,24 @@ MHGP12_TEST(lattice_fixtures, 40) {
   REQUIRE(contact.ok());
   CHECK_EQ(contact.value().lower, 0);
   CHECK_EQ(contact.value().upper, 1);
-  // Centres lointains (plancher sature des deux cotes) : triangles presque alignes, centre a |c_y| > 2^24.
-  const i64 k = 1000;
-  const auto below = sphere(3, {point(0, k, 0), point(20000, k + 1, 0), point(40000, k, 0), zero});
-  const auto above = sphere(3, {point(0, k + 1, 0), point(20000, k, 0), point(40000, k + 1, 0), zero});
+  // Centres lointains (plancher sature des deux cotes) : triangles presque alignes, centre a |c_y| > 2^B, soit
+  // y = k +- w^2/2 environ ; w = 20000 aux profils 21 et 24 (2.10^8), 100000 au profil 32 (5.10^9 > 2^32).
+  const i64 k = 1000, w = kCoordBits <= 24 ? 20000 : 100000;
+  const auto below = sphere(3, {point(0, k, 0), point(w, k + 1, 0), point(2 * w, k, 0), zero});
+  const auto above = sphere(3, {point(0, k + 1, 0), point(w, k, 0), point(2 * w, k + 1, 0), zero});
   CHECK(center_far(below, 1));
   CHECK(center_far(above, 1));
   CHECK_EQ(center_sign(below, 1), -1);  // le centre est du cote oppose au sommet obtus : y = k - 2.10^8 environ
   CHECK_EQ(center_sign(above, 1), 1);   // y = k + 2.10^8 environ, au-dela de M aux trois profils
   for (const Sphere* far : {&below, &above}) {
-    for (const Box b : {box(point(19998, k - 2, 0), point(20002, k + 3, 2)), box(point(0, 0, 0), point(3, 3, 3)),
-                        box(point(39999, k, 0), point(40001, k + 1, 1))}) {
-      const auto signs = LatticeSphere(*far).bound_signs(b);
+    for (const Box b : {box(point(w - 2, k - 2, 0), point(w + 2, k + 3, 2)), box(point(0, 0, 0), point(3, 3, 3)),
+                        box(point(2 * w - 1, k, 0), point(2 * w + 1, k + 1, 1))}) {
+      const LatticeSphere lattice(*far);
+      const auto signs = lattice.bound_signs(b);
       REQUIRE(signs.ok());
       const auto expected = truth(*far, b);
+      CHECK(signs.value().lower <= expected.lower);
+      if (!lattice.lattice()) continue;  // repli continu (profil 32 sans certificat), encadrement seulement
       CHECK_EQ(signs.value().lower, expected.lower);
       if (expected.lower <= 0) CHECK_EQ(signs.value().upper, expected.upper);
     }
@@ -179,7 +187,7 @@ MHGP12_TEST(lattice_fixtures, 40) {
 MHGP12_TEST(lattice_random, 200000) {
   u64 state = 0x6C61747469636531ull;
   u64 spheres = 0, boxes = 0, outside = 0, inside = 0, contacts = 0, gained_out = 0, gained_in = 0;
-  u64 negative = 0, far = 0, ties = 0, sides = 0;
+  u64 negative = 0, far = 0, ties = 0, sides = 0, native_spheres = 0;
   const i64 m = kCoordMax;
   for (int trial = 0; trial < 6000; ++trial) {
     const int region = trial % 3;
@@ -201,7 +209,10 @@ MHGP12_TEST(lattice_random, 200000) {
       ties += center_tie(s, j);
     }
     const LatticeSphere lattice(s);
-    CHECK(lattice.lattice());  // supports locaux : centre natif a tout profil
+    // Supports locaux : voie native ou certifiee pour tout point du domaine aux profils 21 et 24. Au profil 32, le
+    // repere de la voie generique est le domaine entier (2^32) : sans certificat, le repli continu, juge plus bas.
+    CHECK(lattice.lattice() || kCoordBits > 24);
+    native_spheres += lattice.lattice();
     for (int draw = 0; draw < 6; ++draw) {
       std::array<i64, 3> lo{}, hi{};
       for (int j = 0; j < 3; ++j) {
@@ -215,18 +226,24 @@ MHGP12_TEST(lattice_random, 200000) {
       REQUIRE(signs.ok() && old.ok());
       const auto expected = truth(s, b);
       ++boxes;
-      CHECK_EQ(signs.value().lower, expected.lower);
-      if (expected.lower <= 0) CHECK_EQ(signs.value().upper, expected.upper);
-      else CHECK_EQ(signs.value().upper, 1);
+      if (lattice.lattice()) {
+        CHECK_EQ(signs.value().lower, expected.lower);
+        if (expected.lower <= 0) CHECK_EQ(signs.value().upper, expected.upper);
+        else CHECK_EQ(signs.value().upper, 1);
+        outside += signs.value().lower > 0;
+        inside += signs.value().upper < 0;
+        contacts += signs.value().lower == 0;
+        gained_out += signs.value().lower > 0 && old.value().lower <= 0;
+        gained_in += signs.value().upper < 0 && old.value().upper >= 0;
+      } else {  // repli continu (profil 32 sans certificat), identique a power_bound_signs, encadrant la verite
+        CHECK_EQ(signs.value().lower, old.value().lower);
+        CHECK_EQ(signs.value().upper, old.value().upper);
+        CHECK(signs.value().lower <= expected.lower && signs.value().upper >= expected.upper);
+      }
       CHECK(signs.value().lower <= signs.value().upper);
       // Monotonie : toute decision de la borne continue est prise aussi par la borne entiere.
       CHECK(old.value().lower <= 0 || signs.value().lower > 0);
       CHECK(old.value().upper >= 0 || signs.value().upper < 0);
-      outside += signs.value().lower > 0;
-      inside += signs.value().upper < 0;
-      contacts += signs.value().lower == 0;
-      gained_out += signs.value().lower > 0 && old.value().lower <= 0;
-      gained_in += signs.value().upper < 0 && old.value().upper >= 0;
       const Point probe = point(lo[0] + static_cast<i64>(next(state) % static_cast<u64>(hi[0] - lo[0] + 1)), lo[1], hi[2]);
       const auto mine = lattice.side(probe);
       const auto reference = num::side(s, probe);
@@ -245,6 +262,7 @@ MHGP12_TEST(lattice_random, 200000) {
               static_cast<unsigned long long>(sides));
   // Planchers de couverture, fixes sous les valeurs observees aux trois profils (vert par vacuite refuse).
   CHECK(spheres >= 5000 && boxes >= 30000 && sides >= 30000);
+  CHECK(native_spheres >= (kCoordBits <= 24 ? spheres : spheres / 2));
   CHECK(outside >= 20000 && inside >= 1500 && contacts >= 250);
   CHECK(gained_out >= 2000 && gained_in >= 600);
   CHECK(negative >= 100 && far >= 100 && ties >= 2000);
