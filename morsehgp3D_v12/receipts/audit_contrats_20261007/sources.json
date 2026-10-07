@@ -1,0 +1,25 @@
+{
+  "schema": "mhgp12.audit.sources.v1",
+  "v12_pin": "fc1f913ce325b04922b897137a9507153b129894",
+  "v11_engine_pin": "ac081a06f",
+  "v11_build_source_pin": "33c2ae3c8b66d12ef5b2405f1b0f807d7e57aeae",
+  "v11_build_source_files_rechecked": 644,
+  "v11_build_source_changed": [],
+  "source_sha256": {
+    "morsehgp3D_v12/docs/CONTRAT_NUMERIQUE.md": "40baf861e474c89e3155513cdbfa3f7a61896412a85948029c776bd1ad03af0e",
+    "morsehgp3D_v12/docs/ARCHITECTURE.md": "92e1be194bd5c2380143b4d996a6b477702b396c11d6548faa49a5f9a87ee57b",
+    "morsehgp3D_v12/docs/DECISIONS.md": "73c5f5287bc5dc99e5baca9a1a943da20f33d1315b7d1410d7588788591b2171",
+    "morsehgp3D_v12/docs/MESURE.md": "a3f7e6feddb5af21a6fe9dfbfdd41874ef6942e9e8bfd6f6ffbee2a3f9cacc75",
+    "morsehgp3D_v12/docs/PLAN.md": "52b2b325c059aeb50f8606911fc65de0f4d6d18f957fa584c20ca2e3550d4b6b",
+    "morsehgp3D_v12/docs/OBJET_ET_CONTRAT_MATHEMATIQUE.md": "4a12bfc47fd17dc3e6ec9049149a8d86af784c9f12e5440f06e103a15761b3bb",
+    "morsehgp3D_v11/src/catalogue/boxes.cpp": "2fc06e5e781ef51891ceecb324ecc460b023ea8e15079a32d22eb7d159ecc5a2",
+    "morsehgp3D_v11/src/catalogue/internal.hpp": "ed015ca9881eb23ac3ffe96526d008267f23859efd49c34b65126c83612675a1",
+    "morsehgp3D_v11/tests/catalogue/probe.cpp": "7cd70d3fdb8216cd3f4d743eb84ac48fdb48cb1fc849aee120b4c07436a8747d"
+  },
+  "gcp_used": false,
+  "native_v12_tested": false,
+  "python_normal_optimized_identical": true,
+  "latest_review_pin": "8865e32c1",
+  "latest_numeric_sha256": "9d553cd4dc5df27a1e35a166a23aeb952ba5a16f78f4b6342d7d0b6fe03f51d7",
+  "developer_t1_reply_published_pin": "a0e31abfe"
+}

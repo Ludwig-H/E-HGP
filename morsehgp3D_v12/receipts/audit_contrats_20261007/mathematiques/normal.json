@@ -1,0 +1,618 @@
+{
+  "native_engine_executed": false,
+  "pin": "13c52bc602a4e7ea90964ee23e155a8ad2cfd301",
+  "schema": "v12.math_contracts.independent.v1",
+  "t1": {
+    "F": [
+      0,
+      1
+    ],
+    "K": 2,
+    "ball_level": "1",
+    "meb_F_level": "1/4",
+    "points": [
+      0,
+      1,
+      2
+    ],
+    "support": [
+      0,
+      2
+    ]
+  },
+  "t4_t5_t6": {
+    "cases": 720,
+    "delayed_jtop_climbs": 240,
+    "geometric_realization_claimed": false,
+    "history_queries": 23040,
+    "max_history_depth": 2
+  },
+  "t7": [
+    {
+      "name": "antipodes",
+      "nonmaximal_windows": [],
+      "orders": [
+        {
+          "pieces": 2,
+          "strict_parts": 2,
+          "t": 1
+        },
+        {
+          "pieces": 0,
+          "strict_parts": 0,
+          "t": 2
+        }
+      ],
+      "points": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          -1,
+          0,
+          0
+        ]
+      ],
+      "windows": 2
+    },
+    {
+      "name": "square",
+      "nonmaximal_windows": [],
+      "orders": [
+        {
+          "pieces": 1,
+          "strict_parts": 4,
+          "t": 1
+        },
+        {
+          "pieces": 4,
+          "strict_parts": 4,
+          "t": 2
+        },
+        {
+          "pieces": 0,
+          "strict_parts": 0,
+          "t": 3
+        },
+        {
+          "pieces": 0,
+          "strict_parts": 0,
+          "t": 4
+        }
+      ],
+      "points": [
+        [
+          1,
+          1,
+          0
+        ],
+        [
+          -1,
+          1,
+          0
+        ],
+        [
+          -1,
+          -1,
+          0
+        ],
+        [
+          1,
+          -1,
+          0
+        ]
+      ],
+      "windows": 4
+    },
+    {
+      "name": "tetrahedron",
+      "nonmaximal_windows": [
+        3,
+        5,
+        6,
+        9,
+        10,
+        12
+      ],
+      "orders": [
+        {
+          "pieces": 1,
+          "strict_parts": 4,
+          "t": 1
+        },
+        {
+          "pieces": 1,
+          "strict_parts": 6,
+          "t": 2
+        },
+        {
+          "pieces": 4,
+          "strict_parts": 4,
+          "t": 3
+        },
+        {
+          "pieces": 0,
+          "strict_parts": 0,
+          "t": 4
+        }
+      ],
+      "points": [
+        [
+          1,
+          1,
+          1
+        ],
+        [
+          1,
+          -1,
+          -1
+        ],
+        [
+          -1,
+          1,
+          -1
+        ],
+        [
+          -1,
+          -1,
+          1
+        ]
+      ],
+      "windows": 10
+    },
+    {
+      "name": "octahedron",
+      "nonmaximal_windows": [],
+      "orders": [
+        {
+          "pieces": 1,
+          "strict_parts": 6,
+          "t": 1
+        },
+        {
+          "pieces": 1,
+          "strict_parts": 12,
+          "t": 2
+        },
+        {
+          "pieces": 8,
+          "strict_parts": 8,
+          "t": 3
+        },
+        {
+          "pieces": 0,
+          "strict_parts": 0,
+          "t": 4
+        },
+        {
+          "pieces": 0,
+          "strict_parts": 0,
+          "t": 5
+        },
+        {
+          "pieces": 0,
+          "strict_parts": 0,
+          "t": 6
+        }
+      ],
+      "points": [
+        [
+          -1,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          -1,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          -1
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "windows": 8
+    },
+    {
+      "name": "cube",
+      "nonmaximal_windows": [],
+      "orders": [
+        {
+          "pieces": 1,
+          "strict_parts": 8,
+          "t": 1
+        },
+        {
+          "pieces": 1,
+          "strict_parts": 24,
+          "t": 2
+        },
+        {
+          "pieces": 1,
+          "strict_parts": 32,
+          "t": 3
+        },
+        {
+          "pieces": 14,
+          "strict_parts": 14,
+          "t": 4
+        },
+        {
+          "pieces": 0,
+          "strict_parts": 0,
+          "t": 5
+        },
+        {
+          "pieces": 0,
+          "strict_parts": 0,
+          "t": 6
+        },
+        {
+          "pieces": 0,
+          "strict_parts": 0,
+          "t": 7
+        },
+        {
+          "pieces": 0,
+          "strict_parts": 0,
+          "t": 8
+        }
+      ],
+      "points": [
+        [
+          -1,
+          -1,
+          -1
+        ],
+        [
+          -1,
+          -1,
+          1
+        ],
+        [
+          -1,
+          1,
+          -1
+        ],
+        [
+          -1,
+          1,
+          1
+        ],
+        [
+          1,
+          -1,
+          -1
+        ],
+        [
+          1,
+          -1,
+          1
+        ],
+        [
+          1,
+          1,
+          -1
+        ],
+        [
+          1,
+          1,
+          1
+        ]
+      ],
+      "windows": 14
+    },
+    {
+      "name": "circle_nonmaximal",
+      "nonmaximal_windows": [
+        6,
+        9
+      ],
+      "orders": [
+        {
+          "pieces": 1,
+          "strict_parts": 4,
+          "t": 1
+        },
+        {
+          "pieces": 2,
+          "strict_parts": 6,
+          "t": 2
+        },
+        {
+          "pieces": 2,
+          "strict_parts": 2,
+          "t": 3
+        },
+        {
+          "pieces": 0,
+          "strict_parts": 0,
+          "t": 4
+        }
+      ],
+      "points": [
+        [
+          5,
+          0,
+          0
+        ],
+        [
+          4,
+          3,
+          0
+        ],
+        [
+          -3,
+          4,
+          0
+        ],
+        [
+          -3,
+          -4,
+          0
+        ]
+      ],
+      "windows": 5
+    },
+    {
+      "name": "shared_plane_axis",
+      "nonmaximal_windows": [
+        25,
+        26,
+        38,
+        41,
+        89,
+        101,
+        102,
+        150,
+        153,
+        166
+      ],
+      "orders": [
+        {
+          "pieces": 1,
+          "strict_parts": 8,
+          "t": 1
+        },
+        {
+          "pieces": 1,
+          "strict_parts": 25,
+          "t": 2
+        },
+        {
+          "pieces": 2,
+          "strict_parts": 36,
+          "t": 3
+        },
+        {
+          "pieces": 3,
+          "strict_parts": 22,
+          "t": 4
+        },
+        {
+          "pieces": 5,
+          "strict_parts": 5,
+          "t": 5
+        },
+        {
+          "pieces": 0,
+          "strict_parts": 0,
+          "t": 6
+        },
+        {
+          "pieces": 0,
+          "strict_parts": 0,
+          "t": 7
+        },
+        {
+          "pieces": 0,
+          "strict_parts": 0,
+          "t": 8
+        }
+      ],
+      "points": [
+        [
+          5,
+          0,
+          0
+        ],
+        [
+          -5,
+          0,
+          0
+        ],
+        [
+          0,
+          5,
+          0
+        ],
+        [
+          0,
+          -5,
+          0
+        ],
+        [
+          0,
+          0,
+          5
+        ],
+        [
+          0,
+          0,
+          -5
+        ],
+        [
+          3,
+          4,
+          0
+        ],
+        [
+          0,
+          3,
+          4
+        ]
+      ],
+      "windows": 18
+    }
+  ],
+  "translation": [
+    {
+      "lex_edges": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      "morton_edges": [
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          2
+        ]
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "v11_full_semantic_sha256": "158662f08f1091f61272ff9708f6d05b32154fdf09e55c84f95602185f9cc517"
+    },
+    {
+      "lex_edges": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      "morton_edges": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      "translation": [
+        1,
+        0,
+        0
+      ],
+      "v11_full_semantic_sha256": "070a84b2bb1c10acf1d22dfe1563fa41d62a471d3913d79576b704272f101732"
+    },
+    {
+      "lex_edges": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      "morton_edges": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          2
+        ]
+      ],
+      "translation": [
+        0,
+        1,
+        0
+      ],
+      "v11_full_semantic_sha256": "c5c0d4d0a8d3ba63a7b280b134cbe6bd43949a1924d1744b555dddc76886b825"
+    },
+    {
+      "lex_edges": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      "morton_edges": [
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          2
+        ]
+      ],
+      "translation": [
+        0,
+        0,
+        1
+      ],
+      "v11_full_semantic_sha256": "2f09cb2679cd5b7a76a7f39ce658774f02723ecc7961de397157877930067880"
+    },
+    {
+      "lex_edges": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      "morton_edges": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          2
+        ]
+      ],
+      "translation": [
+        5,
+        11,
+        17
+      ],
+      "v11_full_semantic_sha256": "aaa73fdaae187873c94ef4021ebb8d8b503236e69a253cf26853d49be526c45f"
+    }
+  ]
+}

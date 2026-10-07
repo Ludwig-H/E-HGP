@@ -1,0 +1,119 @@
+{
+  "depth": [
+    {
+      "k": 2,
+      "leaf": 16,
+      "ledger": {
+        "census_tests": 2684,
+        "dominance_tests": 3504,
+        "emitted": 99,
+        "filter_tests": 108361,
+        "incidences": 312,
+        "judged": 443,
+        "leaves": 44,
+        "max_depth": 60,
+        "max_leaf": 24,
+        "nodes": 927,
+        "prefixes": 23172,
+        "q4_candidates": 0,
+        "q4_levels": 0,
+        "region_line_cache_hits": 0,
+        "region_line_evaluations": 18992,
+        "region_line_fallbacks": 0,
+        "region_line_rejects": 336,
+        "region_line_tests": 18992,
+        "region_pair_rejects": 60,
+        "region_pair_tests": 41799
+      },
+      "name": "shell24_k2_leaf16",
+      "peak": 74496,
+      "request_sha256": "531188ed74765a73cb1acbe045ac017cf25c824ca6d4ffa4d08583b0d986cdaa",
+      "sites": 24
+    },
+    {
+      "k": 5,
+      "leaf": 24,
+      "ledger": {
+        "census_tests": 923914,
+        "dominance_tests": 75770,
+        "emitted": 639,
+        "filter_tests": 566814,
+        "incidences": 3168,
+        "judged": 21187,
+        "leaves": 328,
+        "max_depth": 63,
+        "max_leaf": 48,
+        "nodes": 951,
+        "prefixes": 2657983,
+        "q4_candidates": 1589372,
+        "q4_levels": 0,
+        "region_line_cache_hits": 0,
+        "region_line_evaluations": 5715481,
+        "region_line_fallbacks": 0,
+        "region_line_rejects": 240987,
+        "region_line_tests": 5715481,
+        "region_pair_rejects": 202047,
+        "region_pair_tests": 7225833
+      },
+      "name": "shell48_k5_leaf24",
+      "peak": 119936,
+      "request_sha256": "5fc357697468e4ab50a5c1ba2ad7db5a709a0e251d36567693c79898d8fe5278",
+      "sites": 48
+    }
+  ],
+  "external_site": {
+    "box_bits": 1,
+    "union_bits": 21
+  },
+  "frames": [
+    {
+      "closed_box_frame_bits": 22,
+      "input_bits": 21,
+      "site_frame_bits": 21,
+      "upper_endpoint": 2097152
+    },
+    {
+      "closed_box_frame_bits": 25,
+      "input_bits": 24,
+      "site_frame_bits": 24,
+      "upper_endpoint": 16777216
+    },
+    {
+      "closed_box_frame_bits": 33,
+      "input_bits": 32,
+      "site_frame_bits": 32,
+      "upper_endpoint": 4294967296
+    }
+  ],
+  "guard_union": {
+    "per_query_bits_max": 4,
+    "points": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        0,
+        0
+      ],
+      [
+        -7,
+        0,
+        0
+      ],
+      [
+        11,
+        0,
+        0
+      ]
+    ],
+    "support_bits": 2,
+    "union_bits": 5
+  },
+  "native_sha256": "485eca05a916044b348547d891cabd37ae2d8443c47f6b30edf3552d2cfa21d6",
+  "public_status": "not_claimed",
+  "schema": "mhgp12.audit.contract_witnesses.v1",
+  "v12_native_tested": false
+}

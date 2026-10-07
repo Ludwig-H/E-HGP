@@ -1,0 +1,24 @@
+{
+  "schema": "mhgp12.audit.packet_check.v1",
+  "integrated_scripts": 3,
+  "integrated_outputs_match_agent_captures": true,
+  "normal_optimized_pairs": [
+    "numerique",
+    "mathematiques",
+    "mesure",
+    "repere_et_profondeur"
+  ],
+  "local_entry_links_checked": true,
+  "registry_negative_cases": 4,
+  "latest_read_pin": "d3fc3ff09",
+  "new_findings": [
+    "CST-0201",
+    "CST-0202",
+    "CST-0204",
+    "CST-0205",
+    "CST-0207",
+    "CST-0208"
+  ],
+  "gcp_used": false,
+  "v12_native_tested": false
+}

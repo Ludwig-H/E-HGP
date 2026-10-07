@@ -1,0 +1,74 @@
+[
+  {
+    "commit": "13c52bc60",
+    "git_blob": "8e7432dcc6803da05b66ab485b3f686f5b340820",
+    "path": "morsehgp3D_v11/receipts/conception_v11_20261002/conception/CONCEPTION_TOUR.md",
+    "sha256": "01e217f03ad60187e2b2005ed12d16db0e04635725fafee880ae8cc52071c0e6"
+  },
+  {
+    "commit": "13c52bc60",
+    "git_blob": "14bc874015daf07c6070d079e775167f3868548d",
+    "path": "morsehgp3D_v12/docs/OBJET_ET_CONTRAT_MATHEMATIQUE.md",
+    "sha256": "4a12bfc47fd17dc3e6ec9049149a8d86af784c9f12e5440f06e103a15761b3bb"
+  },
+  {
+    "commit": "13c52bc60",
+    "git_blob": "98fa9ca69bf91cd8919cf20303932aa32453ddef",
+    "path": "morsehgp3D_v12/docs/ARCHITECTURE.md",
+    "sha256": "92e1be194bd5c2380143b4d996a6b477702b396c11d6548faa49a5f9a87ee57b"
+  },
+  {
+    "commit": "13c52bc60",
+    "git_blob": "f651f99a74d4a09ba67f0c1aef6a7ed4bc5a70ac",
+    "path": "morsehgp3D_v11/bench/full_semantic.py",
+    "sha256": "1ffda4fb32e58d9cadd6f8c87a4cabe0eb28c0bcc5769ba8370b2738bd4d8d25"
+  },
+  {
+    "commit": "13c52bc60",
+    "git_blob": "5a22e4af500f75eb43009fa2ecb37eb4ee211741",
+    "path": "morsehgp3D_v11/bench/catalogue_semantic.py",
+    "sha256": "f09d2dff28098ff9c5288a69058b776350a6339034d17397491c073257196f2c"
+  },
+  {
+    "commit": "fc1f913ce",
+    "git_blob": "ed70bc1de92003750b19496528f5fa25aac06a3e",
+    "path": "morsehgp3D_v12/audits/AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md",
+    "sha256": "68a826d26019db433485c8bb14e568eabf564836689ecbadb4ca3fe65d3cc19a"
+  },
+  {
+    "commit": "e264de6f2",
+    "git_blob": "9b6a17bd61d15538096a234ac9fe0fa9310d024d",
+    "path": "morsehgp3D_v12/docs/CONTRAT_NUMERIQUE.md",
+    "sha256": "40baf861e474c89e3155513cdbfa3f7a61896412a85948029c776bd1ad03af0e"
+  },
+  {
+    "commit": "a0e31abfe",
+    "git_blob": "89b3fb01d43185b05acae9335877ef98bb73d5a9",
+    "path": "morsehgp3D_v12/audits/REPONSE_CLAUDE_LEMMES_T_ET_OUVERTURE_20261007.md",
+    "sha256": "6526fddffcbdd58bd0a9ded41595a4c47aa89059db46c6f879d62ca6c90411e9"
+  },
+  {
+    "commit": "a0e31abfe",
+    "git_blob": "7f03f7cddf81aabe650913b28dcdf6323cbf7c75",
+    "path": "morsehgp3D_v12/reference/test_witness_t1.py",
+    "sha256": "56ca0db95bac03521c4805f506074bc6f5f0b27af0410813b4c75434da4a188f"
+  },
+  {
+    "commit": "a0e31abfe",
+    "git_blob": "2710219439fa084bf42310b7bfff98b09f9bc1e6",
+    "path": "morsehgp3D_v12/reference/fixtures/wit_t1_carre.json",
+    "sha256": "3511793a5d101b16ac16813f49c13b0e1ca4bf54a60d2076341fbc49de184de3"
+  },
+  {
+    "commit": "a0e31abfe",
+    "git_blob": "1d9f02fbb46768841e5e60baca8638e12b4dacab",
+    "path": "morsehgp3D_v12/docs/OBJET_ET_CONTRAT_MATHEMATIQUE.md",
+    "sha256": "0ca6fa05b018f83574c3b935e14b70df05eace7fc839a45fbc41ac79ff36870b"
+  },
+  {
+    "commit": "a0e31abfe",
+    "git_blob": "f193bef8420bfb2e6da0e9df1483322ed19170bc",
+    "path": "morsehgp3D_v12/docs/ARCHITECTURE.md",
+    "sha256": "b164977859cc3c63cad33349c5c71a3aa7c6b13ab552a12ffc916bdeefb24e5e"
+  }
+]

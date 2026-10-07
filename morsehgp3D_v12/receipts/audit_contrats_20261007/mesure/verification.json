@@ -1,0 +1,17 @@
+{
+  "checks": [
+    "translation witness accepted by pinned original reader",
+    "translation semantic hashes differ",
+    "same-input u21/u24 hashes equal",
+    "legacy u32 reader refusal recorded",
+    "both profile/translation ratio countermodels disagree",
+    "three source reports identified",
+    "receipt contains no email or home directory path"
+  ],
+  "code_product_modified": false,
+  "gcp_used": false,
+  "normal_exit_code": 0,
+  "normal_optimized_equal": true,
+  "optimized_exit_code": 0,
+  "schema": "ehgp.v12.audit_measure_contracts.validation.v1"
+}

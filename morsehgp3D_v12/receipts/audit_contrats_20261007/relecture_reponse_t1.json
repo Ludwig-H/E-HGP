@@ -1,0 +1,60 @@
+{
+  "pin": "a0e31abfe",
+  "scope": "porte Python et mutant de regle seulement; aucun moteur v12",
+  "script_sha256": "56ca0db95bac03521c4805f506074bc6f5f0b27af0410813b4c75434da4a188f",
+  "fixture_sha256": "3511793a5d101b16ac16813f49c13b0e1ca4bf54a60d2076341fbc49de184de3",
+  "runs": [
+    {
+      "optimized": false,
+      "args": [],
+      "exit_code": 0,
+      "stdout": "wit_t1_carre_ok faits=5 couples_lemme=8\n",
+      "stderr": ""
+    },
+    {
+      "optimized": false,
+      "args": [
+        "--mutant=sans_inclusion"
+      ],
+      "exit_code": 4,
+      "stdout": "mutant_tue sans_inclusion : certification fausse : F = (0,), B(F) differente de b\n",
+      "stderr": ""
+    },
+    {
+      "optimized": false,
+      "args": [
+        "--inconnu"
+      ],
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": "usage : reference/test_witness_t1.py [--mutant=sans_inclusion] [--fixture=CHEMIN]\n"
+    },
+    {
+      "optimized": true,
+      "args": [],
+      "exit_code": 0,
+      "stdout": "wit_t1_carre_ok faits=5 couples_lemme=8\n",
+      "stderr": ""
+    },
+    {
+      "optimized": true,
+      "args": [
+        "--mutant=sans_inclusion"
+      ],
+      "exit_code": 4,
+      "stdout": "mutant_tue sans_inclusion : certification fausse : F = (0,), B(F) differente de b\n",
+      "stderr": ""
+    },
+    {
+      "optimized": true,
+      "args": [
+        "--inconnu"
+      ],
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": "usage : reference/test_witness_t1.py [--mutant=sans_inclusion] [--fixture=CHEMIN]\n"
+    }
+  ],
+  "initial_work_commit": "d389e1fe5",
+  "published_source_bytes_identical": true
+}

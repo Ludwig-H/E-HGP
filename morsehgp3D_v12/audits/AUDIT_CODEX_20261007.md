@@ -1,32 +1,33 @@
-# Audit Codex — ouverture du suivi v12
+# Audit Codex — contrats et premiers ports v12
 
-7 octobre 2026. Rôle demandé par l'utilisateur : auditeur du développeur v12.
+7 octobre 2026. Note vivante, rôle d'auditeur. Cadre : `phase=exploration_v12_hors_registre`,
+`backend=cpu_reference ; cuda_g4 pour le catalogue produit`, `objet=full_pi0`,
+`quantification=quantized_u21_input_only`, `public_status=not_claimed`.
 
-La base de compréhension est le [contre-audit indépendant de la v11](../../morsehgp3D_v11/receipts/audit_independant_v12_20261007/README.md),
-sur `33c2ae3c8` / moteur `ac081a06f`, avec [19 constats à examiner lors des ports](../../morsehgp3D_v11/receipts/audit_independant_v12_20261007/findings.json).
-Le dossier de préparation `52a790443`, puis l'ouverture formelle `f31845d16`, ont été lus pendant la clôture de cet
-audit. Les décisions D1–D9 sont prises : Session résidente, latence FULL K1..5 en mémoire avec verticales, G4,
-plusieurs séquences, K10 en objectif, u18 abandonné, progression u21/u24/u32, grands LiDAR et petits nuages mesurés.
-Ces décisions sont enregistrées ; elles n'ont pas à être redemandées sur la base des questions historiques v11.
+**Relecture achevée des premiers contrats.** [Rapport et témoins](../receipts/audit_contrats_20261007/README.md),
+sur le contrat numérique `e264de6f2`, avec prise en compte de sa révision `8865e32c1`, des deux notes de l'autre
+auditeur et de la réponse aux lemmes publiée sur `a0e31abfe`. D1–D15 sont enregistrées ; leurs choix ne sont pas
+redemandés. La base reste le [contre-audit v11](../../morsehgp3D_v11/receipts/audit_independant_v12_20261007/README.md).
 
-Cadre du suivi : `phase=exploration_v12_hors_registre`, `backend=cpu_reference ; cuda_g4 pour le catalogue`,
-`objet=full_pi0`, `quantification=quantized_u21_input_only`, `public_status=not_claimed`.
-Le présent reçu qualifie seulement les vérifications v11 qu'il décrit, pas l'architecture v12 proposée.
+Six nouveaux constats au [registre](CONSTATS.md), à traiter avant les ports concernés :
 
-Points supplémentaires à reprendre au registre :
+1. **CST-0201 — certificats** : ils lisent le domaine. Un q3 d'étendue 20 bits certifié pour son seul support
+   déborde i128 avec un site pourtant admis par la nouvelle garde. L'intermédiaire déborde, pas le résultat final.
+2. **CST-0202 — identité XYZ** : la v11 fusionne les clés Morton égales. Une clé tronquée transforme trois positions
+   distinctes en deux sites si ce groupeur est porté directement ; séparer identité exacte et clé de localité.
+3. **CST-0204 — boîtes** : `hi=max+1` peut valoir `2^32` ; leur fermeture exige alors un repère de 33 bits.
+4. **CST-0205 — profondeur** : 48 points synthétiques, K5, feuille 24, atteignent 63 niveaux sur le natif v11.
+   Remplacer la borne 38 de l'architecture par la preuve `3B` et compter la racine dans les capacités.
+5. **CST-0207 — D6** : comparer original et translation dans un binaire ne mesure pas le coût u32 contre u21.
+6. **CST-0208 — réservoir** : distance préparatoire de G1 à `2s+4` bits ; i64 garanti jusqu'à s29, pas s30.
 
-1. Juges de leviers : un banc refusé doit interdire toute adoption, de même qu'une prise ou une preuve manquante.
-2. Cache : compter la capacité physique des blocs vivants et les réserves ; qualifier l'empoisonnement aussi sous
-   Clang. Témoins chiffrés et prétraitements disponibles.
-3. Cohortes : dimensionner le scratch au travail concurrent utile ; une cohorte géante ne justifie pas W tampons.
-4. Preuve et chrono : 3 285 vidages disponibles pour 3 303 tentatives ; distinguer les régimes dits chauds, les
-   frontières du temps FULL et la provenance effective du binaire.
-5. Objets mathématiques : identité par chaîne, couverture datée, hyperarêtes de Kruskal et polyèdre restent des
-   contrats distincts. Les huit réponses polyèdre et les réponses T/V/X/Y sont déposées dans le rapport mathématique.
-6. L'élargissement u24/u32 impose de recalculer les budgets, centres absolus, mots Morton et exports. Une étendue
-   locale certifiée sur une feuille ne couvre pas un site extérieur interrogé par un prédicat.
+Accord indépendant sur les six lemmes T sous leurs hypothèses corrigées. Le correctif T1 et sa porte du carré ont
+été relus et rejoués, mutant tué. Les modèles exacts ajoutent 720 permutations de plateau, 23 040 requêtes
+d'historique et 36 quotients locaux. Ils complètent les lignes CST-0101 à 0113 sans les dupliquer ni les fermer.
+T6 doit garder l'image inférieure qui est elle-même une naissance ; le coût cubique de T7 ne couvre pas toutes les
+intersections de masques. La révision numérique corrige la portée des gardes et la formulation de la translation ;
+les six points ci-dessus restent ouverts. Réponses détaillées et relecture des nouvelles formules au reçu.
 
-Pour chaque tranche, l'audit suivra définition et preuve, source portée, fixture indépendante, refus, capacité,
-concurrence, objet canonique, puis mesure sur le chemin livré. Une qualification reste attachée à son pin, profil,
-compilateur et données. Les nouvelles propositions d'algorithme seront examinées comme propositions à prouver et
-mesurer. Aucun nouveau défaut FULL établi dans cet audit v11 ; statut public `not_claimed`. GCP non utilisé.
+Les scripts passent en Python normal et `-O`. Deux petits catalogues v11 ont été exécutés ; aucun moteur v12,
+GPU, profil u32 ou temps de tour nouvellement qualifié. GCP non utilisé. Le contrôle structurel
+`python morsehgp3D_v12/tools/check_constats.py` ne certifie ni les preuves ni les clôtures.

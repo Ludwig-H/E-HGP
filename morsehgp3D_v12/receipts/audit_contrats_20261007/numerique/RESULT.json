@@ -1,0 +1,282 @@
+{
+  "absolute_center_max_u32": {
+    "comparison_bits": 299,
+    "numerator_bits": 166
+  },
+  "certificate_guard": {
+    "denominator": 7253527247611246877343750,
+    "final_power": 151531357695222388613514543567625781250,
+    "final_power_bits": 127,
+    "first_product": 215333976975021689807285368499032031250,
+    "first_product_bits": 128,
+    "guarded_certificate": false,
+    "numerator": [
+      5070578222442642129607148437500,
+      2535289111221321064803574218750,
+      2535289111221321064803574218750
+    ],
+    "query": [
+      3145727,
+      3145727,
+      3145727
+    ],
+    "query_extent": 22,
+    "s": 20,
+    "support": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        1048575,
+        1048575,
+        0
+      ],
+      [
+        1048575,
+        0,
+        1048575
+      ]
+    ],
+    "support_certificate": true
+  },
+  "contract_commit": "e264de6f2",
+  "cutoffs": {
+    "cross": {
+      "i128": 63,
+      "i64": 31
+    },
+    "denominator3": {
+      "i128": 30,
+      "i64": 14
+    },
+    "denominator4": {
+      "i128": 41,
+      "i64": 19
+    },
+    "determinant": {
+      "i128": 41,
+      "i64": 20
+    },
+    "dot": {
+      "i128": 62,
+      "i64": 30
+    },
+    "g1": {
+      "i128": 62,
+      "i64": 30
+    },
+    "level_comparison": {
+      "i128": 7,
+      "i64": 3
+    },
+    "level_denominator": {
+      "i128": 19,
+      "i64": 9
+    },
+    "level_numerator": {
+      "i128": 14,
+      "i64": 6
+    },
+    "numerator3": {
+      "i128": 24,
+      "i64": 11
+    },
+    "numerator4": {
+      "i128": 30,
+      "i64": 14
+    },
+    "orientation": {
+      "i128": 16,
+      "i64": 7
+    },
+    "reservoir": {
+      "i128": 61,
+      "i64": 29
+    },
+    "side": {
+      "i128": 19,
+      "i64": 9
+    }
+  },
+  "lattice_domain": {
+    "continuous_min_power": "-1/2",
+    "continuous_projection": [
+      "1/2",
+      "0",
+      "0"
+    ],
+    "lattice_min_power": 0,
+    "support": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0
+      ]
+    ]
+  },
+  "morton_identity": {
+    "exact_distinct_sites": 3,
+    "inherited_key_grouping_sites": 2,
+    "interleaved_duplicates": [
+      [
+        [
+          0,
+          0,
+          0
+        ],
+        1
+      ],
+      [
+        [
+          1,
+          0,
+          0
+        ],
+        2
+      ],
+      [
+        [
+          0,
+          0,
+          0
+        ],
+        3
+      ]
+    ],
+    "keys": [
+      0,
+      0,
+      1317624576693539401
+    ],
+    "records": [
+      [
+        [
+          0,
+          0,
+          0
+        ],
+        1
+      ],
+      [
+        [
+          1,
+          0,
+          0
+        ],
+        2
+      ],
+      [
+        [
+          4294967295,
+          0,
+          0
+        ],
+        3
+      ]
+    ],
+    "shift": 11
+  },
+  "noncritical_candidate": {
+    "center": [
+      "419/2",
+      "479/2",
+      "0"
+    ],
+    "passes_guard": false,
+    "power": 0,
+    "qualification": "noncritical_exact_circumsphere",
+    "query": [
+      0,
+      479,
+      0
+    ],
+    "s": 5,
+    "support": [
+      [
+        419,
+        0,
+        0
+      ],
+      [
+        435,
+        15,
+        0
+      ],
+      [
+        434,
+        14,
+        0
+      ]
+    ]
+  },
+  "partial_box": {
+    "box": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        200,
+        200,
+        200
+      ]
+    ],
+    "contains_shell": true,
+    "guard": [
+      [
+        92,
+        92,
+        92
+      ],
+      [
+        112,
+        112,
+        112
+      ]
+    ],
+    "support": [
+      [
+        100,
+        100,
+        100
+      ],
+      [
+        102,
+        100,
+        100
+      ]
+    ]
+  },
+  "reservoir": {
+    "box": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        1,
+        1
+      ]
+    ],
+    "correct_i64_cutoff": 29,
+    "s": 30,
+    "site": [
+      1073741823,
+      1073741823,
+      1073741823
+    ],
+    "value": 13835058016627458075,
+    "value_bits": 64
+  },
+  "scope": "exact_python_models_not_native_v12"
+}

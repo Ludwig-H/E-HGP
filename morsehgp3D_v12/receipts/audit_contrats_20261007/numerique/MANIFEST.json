@@ -1,0 +1,73 @@
+{
+  "source_pin": "ac081a06f",
+  "contract_pin": "e264de6f2",
+  "contract_sha256": "40baf861e474c89e3155513cdbfa3f7a61896412a85948029c776bd1ad03af0e",
+  "normal_optimized_identical": true,
+  "sources": [
+    {
+      "commit": "ac081a06f",
+      "path": "morsehgp3D_v11/src/num/budgets.hpp",
+      "sha256": "b86c7918573e473a9492b3c26c463f9cb340cec5e97d092e774a5c0af44c062e"
+    },
+    {
+      "commit": "ac081a06f",
+      "path": "morsehgp3D_v11/src/num/power_certificate.hpp",
+      "sha256": "ba545b4f5d5bb7cd2d2b6198162241bbd4b89b3e6b725485f54f0387d6a804c0"
+    },
+    {
+      "commit": "ac081a06f",
+      "path": "morsehgp3D_v11/src/num/orientation_certificate.hpp",
+      "sha256": "f8571e6274677a3af1f93948a544b9091ee0e2b1d910cba26bf01b7a8cdc4ec0"
+    },
+    {
+      "commit": "ac081a06f",
+      "path": "morsehgp3D_v11/src/num/predicates.cpp",
+      "sha256": "cf7baabffc60f6213b6b0a1cc99a21bc47d92fac37577f93dfa9aa770d463849"
+    },
+    {
+      "commit": "ac081a06f",
+      "path": "morsehgp3D_v11/src/num/sphere.cpp",
+      "sha256": "4da1b9bf57afdc068e91afe9616491a70787ed934add72e0d25cf1a8b81a9dc3"
+    },
+    {
+      "commit": "ac081a06f",
+      "path": "morsehgp3D_v11/src/num/geometry.hpp",
+      "sha256": "3f1baafbd9cbd8d7640cf49c19fe227d3a3a0d14fe642f3dd4531a42f8724c11"
+    },
+    {
+      "commit": "ac081a06f",
+      "path": "morsehgp3D_v11/src/num/centers.cpp",
+      "sha256": "36fbb5b188189c05c6187906326943347f2e1fab2da52961a83826eb9a2590c0"
+    },
+    {
+      "commit": "ac081a06f",
+      "path": "morsehgp3D_v11/src/num/lattice_bounds.hpp",
+      "sha256": "54cd871f7a4c5b6e4a646ec656b1d939af710a2708ac247f1f4a7dd70cbde95a"
+    },
+    {
+      "commit": "ac081a06f",
+      "path": "morsehgp3D_v11/src/cloud/cloud.cpp",
+      "sha256": "64c5a3d29e1fe0cd05adc5f1d04c4d957731fa1f1eb9e583330675b65751afe9"
+    },
+    {
+      "commit": "ac081a06f",
+      "path": "morsehgp3D_v11/src/index/build.cpp",
+      "sha256": "d0e6bb36ea2e353bc6f4d4b6d3f0e744f80693fec52ec1a72ac5606a19443062"
+    },
+    {
+      "commit": "ac081a06f",
+      "path": "morsehgp3D_v11/src/catalogue/boxes.cpp",
+      "sha256": "2fc06e5e781ef51891ceecb324ecc460b023ea8e15079a32d22eb7d159ecc5a2"
+    },
+    {
+      "commit": "ac081a06f",
+      "path": "morsehgp3D_v11/src/tower/forest_build.cpp",
+      "sha256": "3161ca7b68c2e51c42eb9ef7503a75fceb8f4b349b4dd02c45121cf4cb75d888"
+    }
+  ],
+  "receipts": {
+    "REPORT.md": "8b7a5fd7a95b842170e312aebf9a9265df6cfc12f7039cfd930ca3d63e0391ce",
+    "RESULT.json": "4f3de238bbc507d651a0d9c74d24a9f2510d6ccc2c44049821453e135c8a2cb8",
+    "witness.py": "291b798fcf3cc39a64adca13f6ba9c24d394ecc65b62eb602be04ece9556085a"
+  }
+}

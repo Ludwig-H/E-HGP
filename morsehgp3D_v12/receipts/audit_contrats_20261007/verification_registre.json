@@ -1,0 +1,76 @@
+{
+  "scope": "structure seulement, pas validité des preuves",
+  "script_sha256": "52ad61553c1c9525e565152d268619f0490aca0b0179388fe4abd48143bb7bda",
+  "runs": [
+    {
+      "name": "normal",
+      "optimized": false,
+      "exit_code": 0,
+      "stdout": "OK: 42 constats, cohérence structurelle seulement\n",
+      "stderr": ""
+    },
+    {
+      "name": "doublon",
+      "optimized": false,
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "69: identifiant mal formé ou dupliqué: CST-0201\n"
+    },
+    {
+      "name": "identifiant_malforme",
+      "optimized": false,
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "62: identifiant mal formé ou dupliqué: C5T-0201\n"
+    },
+    {
+      "name": "cloture_sans_preuve",
+      "optimized": false,
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "62: clôture sans preuve\n"
+    },
+    {
+      "name": "etat_inconnu",
+      "optimized": false,
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "62: état inconnu\n"
+    },
+    {
+      "name": "normal",
+      "optimized": true,
+      "exit_code": 0,
+      "stdout": "OK: 42 constats, cohérence structurelle seulement\n",
+      "stderr": ""
+    },
+    {
+      "name": "doublon",
+      "optimized": true,
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "69: identifiant mal formé ou dupliqué: CST-0201\n"
+    },
+    {
+      "name": "identifiant_malforme",
+      "optimized": true,
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "62: identifiant mal formé ou dupliqué: C5T-0201\n"
+    },
+    {
+      "name": "cloture_sans_preuve",
+      "optimized": true,
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "62: clôture sans preuve\n"
+    },
+    {
+      "name": "etat_inconnu",
+      "optimized": true,
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "62: état inconnu\n"
+    }
+  ]
+}

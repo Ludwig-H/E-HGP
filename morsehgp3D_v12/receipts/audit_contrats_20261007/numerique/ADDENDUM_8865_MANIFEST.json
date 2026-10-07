@@ -1,0 +1,15 @@
+{
+  "contract_commit": "8865e32c1",
+  "contract_sha256": "9d553cd4dc5df27a1e35a166a23aeb952ba5a16f78f4b6342d7d0b6fe03f51d7",
+  "addendum_sha256": "1f5796b8e154ef8c06a9fc1ac6e8cdf0f3477efd182e132de18c3c16baa73e9b",
+  "checks": {
+    "power_terms_sum": 1080,
+    "power_budget_constant": 2048,
+    "orientation_terms_sum": 11520,
+    "orientation_budget_constant": 16384,
+    "fractional_comparison_constant": 576,
+    "fractional_budget_constant": 1024,
+    "i128_power_s19": 125,
+    "i128_orientation_s16": 126
+  }
+}

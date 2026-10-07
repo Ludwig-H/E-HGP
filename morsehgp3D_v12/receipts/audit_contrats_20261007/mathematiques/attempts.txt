@@ -1,0 +1,9 @@
+2026-10-07, worktree pin 13c52bc602a4e7ea90964ee23e155a8ad2cfd301.
+Initial normal and optimized attempts exited 1: RuntimeError('shell domain').
+Cause: the octahedron fixture stored delayed generator expressions capturing
+loop variables, making the generated sites identical. Converted each point
+to tuple immediately; no lemma or product implementation implicated.
+First corrected normal run exited 0.
+Added explicit comparison of every contracted node's children against the
+independent batch components; final normal and optimized captures use this
+version. No C++/CUDA build, native engine, GCP or external dataset invoked.
