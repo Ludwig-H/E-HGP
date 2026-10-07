@@ -1,0 +1,129 @@
+{
+  "entries": [
+    {
+      "archive_path": "morsehgp3D_v12/receipts/audit_canal_20261007/archives/AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md",
+      "archive_sha256": "82eadfc540c19bcdfee3e39903c6d47e29781c348cb31ec9a2b2847b028abfe5",
+      "link_rewrites": [
+        {
+          "archived_target": "https://github.com/Ludwig-H/E-HGP/blob/fc1f913ce325b04922b897137a9507153b129894/morsehgp3D_v11/receipts/conception_v11_20261002/conception/CONCEPTION_TOUR.md",
+          "original_target": "../../morsehgp3D_v11/receipts/conception_v11_20261002/conception/CONCEPTION_TOUR.md",
+          "pin": "fc1f913ce325b04922b897137a9507153b129894",
+          "source_target": "morsehgp3D_v11/receipts/conception_v11_20261002/conception/CONCEPTION_TOUR.md"
+        },
+        {
+          "archived_target": "https://github.com/Ludwig-H/E-HGP/blob/fc1f913ce325b04922b897137a9507153b129894/morsehgp3D_v11/receipts/conception_v11_20261002/audit_v10/L02_MATH_TOUR.md",
+          "original_target": "../../morsehgp3D_v11/receipts/conception_v11_20261002/audit_v10/L02_MATH_TOUR.md",
+          "pin": "fc1f913ce325b04922b897137a9507153b129894",
+          "source_target": "morsehgp3D_v11/receipts/conception_v11_20261002/audit_v10/L02_MATH_TOUR.md"
+        },
+        {
+          "archived_target": "https://github.com/Ludwig-H/E-HGP/blob/fc1f913ce325b04922b897137a9507153b129894/morsehgp3D_v11/docs/MATHEMATIQUES.md",
+          "original_target": "../../morsehgp3D_v11/docs/MATHEMATIQUES.md",
+          "pin": "fc1f913ce325b04922b897137a9507153b129894",
+          "source_target": "morsehgp3D_v11/docs/MATHEMATIQUES.md"
+        },
+        {
+          "archived_target": "https://github.com/Ludwig-H/E-HGP/blob/fc1f913ce325b04922b897137a9507153b129894/morsehgp3D_v12/audits/CONSTATS.md",
+          "original_target": "CONSTATS.md",
+          "pin": "fc1f913ce325b04922b897137a9507153b129894",
+          "source_target": "morsehgp3D_v12/audits/CONSTATS.md"
+        },
+        {
+          "archived_target": "https://github.com/Ludwig-H/E-HGP/blob/fc1f913ce325b04922b897137a9507153b129894/docs/SPECIFICATION_MORSEHGP3D.md",
+          "original_target": "../../docs/SPECIFICATION_MORSEHGP3D.md",
+          "pin": "fc1f913ce325b04922b897137a9507153b129894",
+          "source_target": "docs/SPECIFICATION_MORSEHGP3D.md"
+        },
+        {
+          "archived_target": "https://github.com/Ludwig-H/E-HGP/blob/fc1f913ce325b04922b897137a9507153b129894/morsehgp3D_v12/docs/OBJET_ET_CONTRAT_MATHEMATIQUE.md",
+          "original_target": "../docs/OBJET_ET_CONTRAT_MATHEMATIQUE.md",
+          "pin": "fc1f913ce325b04922b897137a9507153b129894",
+          "source_target": "morsehgp3D_v12/docs/OBJET_ET_CONTRAT_MATHEMATIQUE.md"
+        }
+      ],
+      "source_last_change": "fc1f913ce325b04922b897137a9507153b129894",
+      "source_path": "morsehgp3D_v12/audits/AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md",
+      "source_permalink": "https://github.com/Ludwig-H/E-HGP/blob/fc1f913ce325b04922b897137a9507153b129894/morsehgp3D_v12/audits/AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md",
+      "source_sha256": "68a826d26019db433485c8bb14e568eabf564836689ecbadb4ca3fe65d3cc19a",
+      "source_snapshot": "3e6e6a8e721c6dbe8aaa3a0c5cb20c56abfae5ff"
+    },
+    {
+      "archive_path": "morsehgp3D_v12/receipts/audit_canal_20261007/archives/AUDIT_CONTRAT_NUMERIQUE_20261007.md",
+      "archive_sha256": "c7529e47dd58a1c6056de1a833c800bda378c2902fea6fe4004bd4e2214d2fc6",
+      "link_rewrites": [
+        {
+          "archived_target": "https://github.com/Ludwig-H/E-HGP/blob/2a7a5f34622c6a09198e241e6d137b281c8e62be/morsehgp3D_v12/audits/AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md",
+          "original_target": "AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md",
+          "pin": "2a7a5f34622c6a09198e241e6d137b281c8e62be",
+          "source_target": "morsehgp3D_v12/audits/AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md"
+        },
+        {
+          "archived_target": "https://github.com/Ludwig-H/E-HGP/blob/2a7a5f34622c6a09198e241e6d137b281c8e62be/morsehgp3D_v12/docs/CONTRAT_NUMERIQUE.md",
+          "original_target": "../docs/CONTRAT_NUMERIQUE.md",
+          "pin": "2a7a5f34622c6a09198e241e6d137b281c8e62be",
+          "source_target": "morsehgp3D_v12/docs/CONTRAT_NUMERIQUE.md"
+        },
+        {
+          "archived_target": "https://github.com/Ludwig-H/E-HGP/blob/2a7a5f34622c6a09198e241e6d137b281c8e62be/morsehgp3D_v12/audits/CONSTATS.md",
+          "original_target": "CONSTATS.md",
+          "pin": "2a7a5f34622c6a09198e241e6d137b281c8e62be",
+          "source_target": "morsehgp3D_v12/audits/CONSTATS.md"
+        }
+      ],
+      "source_last_change": "2a7a5f34622c6a09198e241e6d137b281c8e62be",
+      "source_path": "morsehgp3D_v12/audits/AUDIT_CONTRAT_NUMERIQUE_20261007.md",
+      "source_permalink": "https://github.com/Ludwig-H/E-HGP/blob/2a7a5f34622c6a09198e241e6d137b281c8e62be/morsehgp3D_v12/audits/AUDIT_CONTRAT_NUMERIQUE_20261007.md",
+      "source_sha256": "4674b1750117911dc6ceebf4bdd05bab89df93e73de7d45c53dbccd148c65bd5",
+      "source_snapshot": "3e6e6a8e721c6dbe8aaa3a0c5cb20c56abfae5ff"
+    },
+    {
+      "archive_path": "morsehgp3D_v12/receipts/audit_canal_20261007/archives/ADDENDUM_CONTRAT_NUMERIQUE_20261007.md",
+      "archive_sha256": "a032611ce121abe9e7aa410fcfea677dabdf5ca4bb6861cebef4da9ef79091a1",
+      "link_rewrites": [
+        {
+          "archived_target": "https://github.com/Ludwig-H/E-HGP/blob/f6f65a0d82d29d41efc00babc98b285a2b072246/morsehgp3D_v12/docs/CONTRAT_NUMERIQUE.md",
+          "original_target": "../docs/CONTRAT_NUMERIQUE.md",
+          "pin": "f6f65a0d82d29d41efc00babc98b285a2b072246",
+          "source_target": "morsehgp3D_v12/docs/CONTRAT_NUMERIQUE.md"
+        }
+      ],
+      "source_last_change": "f6f65a0d82d29d41efc00babc98b285a2b072246",
+      "source_path": "morsehgp3D_v12/audits/ADDENDUM_CONTRAT_NUMERIQUE_20261007.md",
+      "source_permalink": "https://github.com/Ludwig-H/E-HGP/blob/f6f65a0d82d29d41efc00babc98b285a2b072246/morsehgp3D_v12/audits/ADDENDUM_CONTRAT_NUMERIQUE_20261007.md",
+      "source_sha256": "6e609290a3966de5cb79ee03c899a6d9c467915fd97036d3db5dd1e305ee58b9",
+      "source_snapshot": "3e6e6a8e721c6dbe8aaa3a0c5cb20c56abfae5ff"
+    },
+    {
+      "archive_path": "morsehgp3D_v12/receipts/audit_canal_20261007/archives/REPONSE_CLAUDE_LEMMES_T_ET_OUVERTURE_20261007.md",
+      "archive_sha256": "9d6b8d125071c46cc4d6b82bee170ee3ef0916befd00e850f79df4ac8eb6f86d",
+      "link_rewrites": [
+        {
+          "archived_target": "https://github.com/Ludwig-H/E-HGP/blob/a0e31abfe58d05bbdeb7bdd69c7eaaba81e3dc7e/morsehgp3D_v12/audits/AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md",
+          "original_target": "AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md",
+          "pin": "a0e31abfe58d05bbdeb7bdd69c7eaaba81e3dc7e",
+          "source_target": "morsehgp3D_v12/audits/AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md"
+        },
+        {
+          "archived_target": "https://github.com/Ludwig-H/E-HGP/blob/a0e31abfe58d05bbdeb7bdd69c7eaaba81e3dc7e/morsehgp3D_v12/audits/AUDIT_CODEX_20261007.md",
+          "original_target": "AUDIT_CODEX_20261007.md",
+          "pin": "a0e31abfe58d05bbdeb7bdd69c7eaaba81e3dc7e",
+          "source_target": "morsehgp3D_v12/audits/AUDIT_CODEX_20261007.md"
+        },
+        {
+          "archived_target": "https://github.com/Ludwig-H/E-HGP/blob/a0e31abfe58d05bbdeb7bdd69c7eaaba81e3dc7e/morsehgp3D_v12/docs/CONTRAT_NUMERIQUE.md",
+          "original_target": "../docs/CONTRAT_NUMERIQUE.md",
+          "pin": "a0e31abfe58d05bbdeb7bdd69c7eaaba81e3dc7e",
+          "source_target": "morsehgp3D_v12/docs/CONTRAT_NUMERIQUE.md"
+        }
+      ],
+      "source_last_change": "a0e31abfe58d05bbdeb7bdd69c7eaaba81e3dc7e",
+      "source_path": "morsehgp3D_v12/audits/REPONSE_CLAUDE_LEMMES_T_ET_OUVERTURE_20261007.md",
+      "source_permalink": "https://github.com/Ludwig-H/E-HGP/blob/a0e31abfe58d05bbdeb7bdd69c7eaaba81e3dc7e/morsehgp3D_v12/audits/REPONSE_CLAUDE_LEMMES_T_ET_OUVERTURE_20261007.md",
+      "source_sha256": "6526fddffcbdd58bd0a9ded41595a4c47aa89059db46c6f879d62ca6c90411e9",
+      "source_snapshot": "3e6e6a8e721c6dbe8aaa3a0c5cb20c56abfae5ff"
+    }
+  ],
+  "preservation": "Only Markdown link targets are changed in archived copies; all other source text is preserved. Original bytes remain addressable by the recorded Git pin and SHA-256.",
+  "schema": "ehgp.v12.audit_channel_archive.v1",
+  "snapshot": "3e6e6a8e721c6dbe8aaa3a0c5cb20c56abfae5ff"
+}

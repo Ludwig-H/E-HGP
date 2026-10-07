@@ -1,0 +1,103 @@
+{
+  "pin_before": "3e6e6a8e7",
+  "scope": "hygiene du canal, pas validation de preuve",
+  "tool_sha256": "852eca10a507f2bed8070dd8935451185619be5c483c8fc0c366ea9b85c7f644",
+  "cases": [
+    {
+      "case": "normal",
+      "optimized": false,
+      "exit": 0,
+      "output": "OK: 1 constats, canal 317 octets, cohérence structurelle seulement"
+    },
+    {
+      "case": "note_trop_longue",
+      "optimized": false,
+      "exit": 1,
+      "output": "AUDIT_CODEX_20261007.md: note trop longue (8193 octets, limite 8192)"
+    },
+    {
+      "case": "canal_trop_lourd",
+      "optimized": false,
+      "exit": 1,
+      "output": "canal trop lourd (65854 octets, limite 65536)"
+    },
+    {
+      "case": "lien_casse",
+      "optimized": false,
+      "exit": 1,
+      "output": "README.md: lien local absent: absent.md"
+    },
+    {
+      "case": "recu_json",
+      "optimized": false,
+      "exit": 1,
+      "output": "sortie.json: seuls les fichiers Markdown courants sont admis"
+    },
+    {
+      "case": "sous_dossier",
+      "optimized": false,
+      "exit": 1,
+      "output": "ancien: seuls les fichiers Markdown courants sont admis"
+    },
+    {
+      "case": "note_dupliquee",
+      "optimized": false,
+      "exit": 1,
+      "output": "AUDIT_CODEX_20261008.md: plusieurs notes vivantes du même auditeur"
+    },
+    {
+      "case": "texte_non_utf8",
+      "optimized": false,
+      "exit": 1,
+      "output": "AUDIT_CODEX_20261007.md: UTF-8 requis"
+    },
+    {
+      "case": "normal",
+      "optimized": true,
+      "exit": 0,
+      "output": "OK: 1 constats, canal 317 octets, cohérence structurelle seulement"
+    },
+    {
+      "case": "note_trop_longue",
+      "optimized": true,
+      "exit": 1,
+      "output": "AUDIT_CODEX_20261007.md: note trop longue (8193 octets, limite 8192)"
+    },
+    {
+      "case": "canal_trop_lourd",
+      "optimized": true,
+      "exit": 1,
+      "output": "canal trop lourd (65854 octets, limite 65536)"
+    },
+    {
+      "case": "lien_casse",
+      "optimized": true,
+      "exit": 1,
+      "output": "README.md: lien local absent: absent.md"
+    },
+    {
+      "case": "recu_json",
+      "optimized": true,
+      "exit": 1,
+      "output": "sortie.json: seuls les fichiers Markdown courants sont admis"
+    },
+    {
+      "case": "sous_dossier",
+      "optimized": true,
+      "exit": 1,
+      "output": "ancien: seuls les fichiers Markdown courants sont admis"
+    },
+    {
+      "case": "note_dupliquee",
+      "optimized": true,
+      "exit": 1,
+      "output": "AUDIT_CODEX_20261008.md: plusieurs notes vivantes du même auditeur"
+    },
+    {
+      "case": "texte_non_utf8",
+      "optimized": true,
+      "exit": 1,
+      "output": "AUDIT_CODEX_20261007.md: UTF-8 requis"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "pin": "3e6e6a8e7",
+  "channel_files": 4,
+  "channel_bytes": 26288,
+  "original_channel_bytes": 52192,
+  "original_findings_preserved": 43,
+  "findings_after": 47,
+  "active_links_checked": 40,
+  "broken_active_links": 0,
+  "existing_receipt_hashes_unchanged": 31,
+  "hygiene_positive_negative_checks": 16,
+  "normal_optimized_cleanup_identical": true,
+  "normal_optimized_scale_identical": true,
+  "product_changed": false,
+  "gcp_used": false,
+  "gpu_executed": false
+}

@@ -1,0 +1,192 @@
+{
+  "analytic_lines": [
+    {
+      "K": 5,
+      "binary_events_by_order": [
+        7,
+        6,
+        5,
+        4,
+        3
+      ],
+      "births_by_order": [
+        8,
+        7,
+        6,
+        5,
+        4
+      ],
+      "catalogue": 25,
+      "final_merges_by_order": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "final_nodes_by_order": [
+        9,
+        8,
+        7,
+        6,
+        5
+      ],
+      "incidences": 90,
+      "n": 8
+    },
+    {
+      "K": 5,
+      "binary_events_by_order": [
+        59999,
+        59998,
+        59997,
+        59996,
+        59995
+      ],
+      "births_by_order": [
+        60000,
+        59999,
+        59998,
+        59997,
+        59996
+      ],
+      "catalogue": 299985,
+      "final_merges_by_order": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "final_nodes_by_order": [
+        60001,
+        60000,
+        59999,
+        59998,
+        59997
+      ],
+      "incidences": 1199930,
+      "n": 60000
+    },
+    {
+      "K": 5,
+      "binary_events_by_order": [
+        9999998,
+        9999997,
+        9999996,
+        9999995,
+        9999994
+      ],
+      "births_by_order": [
+        9999999,
+        9999998,
+        9999997,
+        9999996,
+        9999995
+      ],
+      "catalogue": 49999980,
+      "final_merges_by_order": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "final_nodes_by_order": [
+        10000000,
+        9999999,
+        9999998,
+        9999997,
+        9999996
+      ],
+      "incidences": 199999910,
+      "n": 9999999
+    }
+  ],
+  "bounded_oracle": {
+    "cube_K2": {
+      "births": 12,
+      "merges": 1,
+      "nodes": 13,
+      "sites": 8
+    },
+    "line": [
+      {
+        "birth_level": "0",
+        "births": 8,
+        "children": 8,
+        "k": 1,
+        "merge_level": "1/4",
+        "merges": 1
+      },
+      {
+        "birth_level": "1/4",
+        "births": 7,
+        "children": 7,
+        "k": 2,
+        "merge_level": "1",
+        "merges": 1
+      },
+      {
+        "birth_level": "1",
+        "births": 6,
+        "children": 6,
+        "k": 3,
+        "merge_level": "9/4",
+        "merges": 1
+      },
+      {
+        "birth_level": "9/4",
+        "births": 5,
+        "children": 5,
+        "k": 4,
+        "merge_level": "4",
+        "merges": 1
+      },
+      {
+        "birth_level": "4",
+        "births": 4,
+        "children": 4,
+        "k": 5,
+        "merge_level": "25/4",
+        "merges": 1
+      }
+    ],
+    "max_sites": 8
+  },
+  "csr": {
+    "incidences_per_site": 1137,
+    "projected_K10_sites": 5000000,
+    "projected_incidences": 5685000000,
+    "wrapped_u32": 1390032704
+  },
+  "native_executed": false,
+  "per_site_claim": {
+    "allowed_100_site_total_ns_fraction": "500000/3",
+    "main_ns_per_site": 1666,
+    "two_ms_per_100_sites_ns_per_site": 20000
+  },
+  "pin": "3e6e6a8e721c6dbe8aaa3a0c5cb20c56abfae5ff",
+  "schema": "ehgp.v12.scale_audit.v1",
+  "sphere50": {
+    "admitted_K5": true,
+    "conditional_refusal_if_shell_cap_is_64": true,
+    "m": 84,
+    "native_refusal_claimed": false,
+    "p": 0,
+    "q_min": 2,
+    "sites": 84
+  },
+  "tag": {
+    "abstract_plateau_births": 2147483649,
+    "abstract_plateau_final_nodes": 2147483650,
+    "encoding_of_maximum_payload": 4294967295,
+    "event_encoding": 2147483648,
+    "event_index": 0,
+    "geometric_under_10M_realization_claimed": false,
+    "kNone": 4294967295,
+    "leaf_id": 2147483648,
+    "maximum_payload": 2147483647
+  },
+  "universal_combinatorial_bounds": "C<=sum(q=2..4,binomial(n,q)); I<=n*C; b1=n, bk<=C; Nk<=2*bk-1"
+}

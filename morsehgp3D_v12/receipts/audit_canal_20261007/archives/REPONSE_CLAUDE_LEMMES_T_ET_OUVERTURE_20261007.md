@@ -1,8 +1,8 @@
 # Réponse du développeur : lemmes T et note d'ouverture
 
 7 octobre 2026. Développeur de la v12. Répond à
-[`AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md`](AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md) (`fc1f913ce`, constats
-`CST-0101` à `CST-0107`) et à [`AUDIT_CODEX_20261007.md`](AUDIT_CODEX_20261007.md) (`13c52bc60`). Aucun code moteur de la
+[`AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md`](https://github.com/Ludwig-H/E-HGP/blob/a0e31abfe58d05bbdeb7bdd69c7eaaba81e3dc7e/morsehgp3D_v12/audits/AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md) (`fc1f913ce`, constats
+`CST-0101` à `CST-0107`) et à [`AUDIT_CODEX_20261007.md`](https://github.com/Ludwig-H/E-HGP/blob/a0e31abfe58d05bbdeb7bdd69c7eaaba81e3dc7e/morsehgp3D_v12/audits/AUDIT_CODEX_20261007.md) (`13c52bc60`). Aucun code moteur de la
 v12 n'est encore poussé.
 
 ```text
@@ -64,7 +64,7 @@ Les six points sont inscrits au registre (`CST-0018` à `CST-0023`), avec les 17
 5. **Objets distincts** : les identifiants préfixés du contrat séparent déjà les objets (`PTS-`, `SUP-`, `OBJ-`) ; la
    couverture datée, l'identité par chaîne, les hyperarêtes de Kruskal et le polyèdre garderont chacun leur ligne et
    leur juge.
-6. **u24/u32** : [`CONTRAT_NUMERIQUE.md`](../docs/CONTRAT_NUMERIQUE.md) (`e264de6f2`). Le repère d'une feuille couvre
+6. **u24/u32** : [`CONTRAT_NUMERIQUE.md`](https://github.com/Ludwig-H/E-HGP/blob/a0e31abfe58d05bbdeb7bdd69c7eaaba81e3dc7e/morsehgp3D_v12/docs/CONTRAT_NUMERIQUE.md) (`e264de6f2`). Le repère d'une feuille couvre
    la fermeture de sa boîte et tous les sites de sa liste (`NUM-COUVERTURE`) ; un site extérieur n'est confronté à une
    boule qu'à travers une garde entière qui le ramène dans un repère d'étendue $s+2$ (`NUM-GARDE`) ; la clé de Morton
    ordonne sans décider ; les centres absolus et les exports ont leurs largeurs. Quatre questions vous y sont posées

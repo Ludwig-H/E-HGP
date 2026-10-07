@@ -1,12 +1,12 @@
 # Registre des constats de la v12
 
-Une ligne par constat ([README](README.md) § 1). Bloc `CST-0001` à `CST-0099` : développeur (constats reportés de la
+Une ligne par constat ([règles du canal](README.md)). Bloc `CST-0001` à `CST-0099` : développeur (constats reportés de la
 v11 et points de Codex). Bloc `CST-0101` à `CST-0199` : contre-lecture des lemmes T
-([`AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md`](AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md), `CST-0101` à
+([`AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md`](../receipts/audit_canal_20261007/archives/AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md), `CST-0101` à
 `CST-0107`, pin `13c52bc60`, `CONCEPTION_TOUR.md` blob `8e7432dcc680`) et relecture du contrat numérique
-([`AUDIT_CONTRAT_NUMERIQUE_20261007.md`](AUDIT_CONTRAT_NUMERIQUE_20261007.md), `CST-0108` à `CST-0113`, pin
+([`AUDIT_CONTRAT_NUMERIQUE_20261007.md`](../receipts/audit_canal_20261007/archives/AUDIT_CONTRAT_NUMERIQUE_20261007.md), `CST-0108` à `CST-0113`, pin
 `e264de6f2`, `CONTRAT_NUMERIQUE.md` blob `9b6a17bd61d1`), puis son addendum
-([`ADDENDUM_CONTRAT_NUMERIQUE_20261007.md`](ADDENDUM_CONTRAT_NUMERIQUE_20261007.md), `CST-0114`, pin `8865e32c1`).
+([`ADDENDUM_CONTRAT_NUMERIQUE_20261007.md`](../receipts/audit_canal_20261007/archives/ADDENDUM_CONTRAT_NUMERIQUE_20261007.md), `CST-0114`, pin `8865e32c1`).
 
 | Identifiant | Constat | Date | Rôle | Classe | Gravité | Pin | Témoin | État | Preuve de clôture |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -26,7 +26,7 @@ v11 et points de Codex). Bloc `CST-0101` à `CST-0199` : contre-lecture des lemm
 | `CST-0114` | test du milieu de la v11 en coordonnées absolues ($2(Do_j+N_j)=D(a_j+b_j)$, $5B+7$ bits, $B \leq 24$), sur l'hôte et sur l'appareil, pendant la canonicalisation ; forme locale $2N_j=D((a_j-o_j)+(b_j-o_j))$, $5s+8$ bits | 2026-10-07 | auditeur (Claude) | numérique | majeure (bloque u32) | `src/catalogue/support.cpp` l. 25 ; `src/catalogue/leaf_device_predicates.hpp` l. 176 | paire antipodale à $B=32$ | en cours | contrat corrigé (`d3fc3ff09`, forme locale de $5s+8$ bits) ; code local à venir |
 
 Bloc `CST-0001` à `CST-0099` : développeur. `CST-0001` à `CST-0017` reprennent les constats reportés de la v11
-([README](README.md) § 2) ; `CST-0018` à `CST-0023` inscrivent les six points de la note d'ouverture de l'auditeur
+([origine archivée du canal](../receipts/audit_canal_20261007/README.md)) ; `CST-0018` à `CST-0023` inscrivent les six points de la note d'ouverture de l'auditeur
 Codex ([`AUDIT_CODEX_20261007.md`](AUDIT_CODEX_20261007.md)).
 
 | Identifiant | Constat | Date | Rôle | Classe | Gravité | Pin | Témoin | État | Preuve de clôture |
@@ -67,3 +67,12 @@ Les compléments sur les lemmes, les gardes et les empreintes sont rattachés au
 | `CST-0205` | parcours catalogue non borné à 38 niveaux ; témoin K5 u21 à profondeur 63, preuve existante 3B | 2026-10-07 | auditeur (Codex) | mémoire | majeure (avant port) | `8865e32c1`, architecture § 4.1 ; moteur v11 `ac081a06f` | [48 sites, K5, feuille 24, natif Release](../receipts/audit_contrats_20261007/repere_et_profondeur/README.md) | ouvert | — |
 | `CST-0207` | ratio original/translaté dans un même binaire différent du coût du profil élargi par rapport à u21 demandé par D6 | 2026-10-07 | auditeur (Codex) | mesure | majeure (avant adoption) | `8865e32c1`, contrat § 8 ; `DECISIONS.md` D6 | [contre-modèles des deux ratios](../receipts/audit_contrats_20261007/mesure/NOTE_MESURE.md) | ouvert | — |
 | `CST-0208` | distance du réservoir avant G1 : budget 2s+4, seuil i64 s29 ; le seuil s30 du seul G1 ne couvre pas cette préparation | 2026-10-07 | auditeur (Codex) | numérique | majeure (avant port) | `8865e32c1`, contrat § 3 ; v11 `ac081a06f`, `boxes.cpp:16` | [3(2^31−3)^2 dépasse i64](../receipts/audit_contrats_20261007/numerique/REPORT.md) | ouvert | — |
+
+Suite du suivi Codex au pin `3e6e6a8e7` : [microbanc M6 et contrat d'échelle](../receipts/audit_suivi_20261007/README.md).
+
+| Identifiant | Constat | Date | Rôle | Classe | Gravité | Pin | Témoin | État | Preuve de clôture |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `CST-0209` | M6 calcule la médiane basse pour un effectif pair ; p50 et débit dérivé biaisés | 2026-10-07 | auditeur (Codex) | mesure | majeure (avant campagne) | `c3e565f85`, `bench/mes_m6_session_cost.cu:41` | [fonction originale : 1..10 donne 5 au lieu de 5,5](../receipts/audit_suivi_20261007/session/REPORT.md) | ouvert | — |
+| `CST-0210` | M6 inclut le premier lancement du graphe et de touch dans les quantiles résidents, sans distinguer sa préparation | 2026-10-07 | auditeur (Codex) | mesure | mineure (protocole) | `c3e565f85`, `bench/mes_m6_session_cost.cu:151` | [lecture des boucles et modèle de premier échantillon](../receipts/audit_suivi_20261007/session/REPORT.md) | ouvert | — |
+| `CST-0211` | pré-vol mémoire qualifié de borne à partir de lois empiriques par site ; cette prévision ne garantit pas l'absence de refus en cours de calcul | 2026-10-07 | auditeur (Codex) | mémoire | majeure (avant port) | `c0bb99fd8`, `docs/ARCHITECTURE.md` § 4.6 | [domaines de bornes et compteurs nécessaires](../receipts/audit_suivi_20261007/echelle/README.md) | ouvert | — |
+| `CST-0212` | opérandes du prototype de forêt à 31 bits utiles, genre en bit haut et sentinelle ; le contrat générique d'indices u32 ne suffit pas | 2026-10-07 | auditeur (Codex) | exactitude | majeure (avant port) | `c0bb99fd8`, architecture § 4.6 ; `noyau_v11.cpp:22` | [naissance 2^31 confondue avec événement 0](../receipts/audit_suivi_20261007/echelle/README.md) | ouvert | — |

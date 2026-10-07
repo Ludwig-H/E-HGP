@@ -1,0 +1,16 @@
+{
+  "pin": "3e6e6a8e721c6dbe8aaa3a0c5cb20c56abfae5ff",
+  "gpu_executions": 0,
+  "sources": {
+    "morsehgp3D_v12/bench/mes_m6_session_cost.cu": "243a5ca23d7a1e0c8193082cfd113571ce45af567dcf0b550415ca5a0a3b3ee9",
+    "morsehgp3D_v12/docs/MESURE.md": "7423b314dbd0c6963b33328a748d2663a4f1e3124326583820299edafcf2145a",
+    "morsehgp3D_v12/docs/PLAN.md": "38784faa1694ddb23f5619dd2aef179b6f4c0e129c5e49854b70647a9843b9f6",
+    "morsehgp3D_v12/docs/ARCHITECTURE.md": "d2f1454502752441b213b8cf8a45f1201cd7c285f2086f6f08fe6fbfd92800e1",
+    "/usr/local/cuda-12.9/include/cuda_runtime_api.h": "e88147ea668332c16fba1614f159c105973cec9993870e09a4217dd7c17c8f02"
+  },
+  "receipts": {
+    "REPORT.md": "0ad5fc57ddad497ba845701b5a2d546ee9b26a3d7a8937cf6bec75837b0c0edf",
+    "RESULT.json": "d6a3c39ce16725705e7d72dfb4330a57fde1bb145f27340f8e567ada09dee344",
+    "probe.py": "9303dd8611bf6db43b370b1863042901b6f250197b26f3f142b3d0620842781c"
+  }
+}

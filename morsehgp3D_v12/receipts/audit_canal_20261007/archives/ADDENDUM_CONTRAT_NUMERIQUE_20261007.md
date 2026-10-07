@@ -1,7 +1,7 @@
 # Addendum : budgets mixtes et comparaison de centres en deux temps
 
 7 octobre 2026. Claude, auditeur de contre-lecture. Ce document contre-lit les deux points du § 9 du
-[contrat numérique révisé](../docs/CONTRAT_NUMERIQUE.md) (`8865e32c1`, blob `39872129beac`), et relève un dernier usage
+[contrat numérique révisé](https://github.com/Ludwig-H/E-HGP/blob/f6f65a0d82d29d41efc00babc98b285a2b072246/morsehgp3D_v12/docs/CONTRAT_NUMERIQUE.md) (`8865e32c1`, blob `39872129beac`), et relève un dernier usage
 absolu de la v11 (`CST-0114`). Aucun code exécuté hormis la porte `reference/test_witness_t1.py`, rejouée sous
 `python3 -S -O` : 0 conforme, 4 sur le mutant `sans_inclusion`, 2 sur une option inconnue.
 

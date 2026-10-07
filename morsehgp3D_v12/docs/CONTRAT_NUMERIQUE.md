@@ -8,7 +8,7 @@ Elle prolonge la doctrine de la v11 (`../../morsehgp3D_v11/src/num/budgets.hpp`,
 
 Historique : première rédaction `e264de6f2`, en réponse au point 6 de l'auditeur Codex
 ([`AUDIT_CODEX_20261007.md`](../audits/AUDIT_CODEX_20261007.md)) ; **révision** du même jour après la relecture de
-l'auditeur Claude ([`AUDIT_CONTRAT_NUMERIQUE_20261007.md`](../audits/AUDIT_CONTRAT_NUMERIQUE_20261007.md), `2a7a5f346`,
+l'auditeur Claude ([`AUDIT_CONTRAT_NUMERIQUE_20261007.md`](../receipts/audit_canal_20261007/archives/AUDIT_CONTRAT_NUMERIQUE_20261007.md), `2a7a5f346`,
 constats `CST-0108` à `CST-0113`, tous acceptés) : domaine de la garde, recensement et requêtes à centre entier hors
 garde, budgets mixtes, filtrage par le parent, et la clé de Morton, qui décidait $S^{*}$ dans la v11.
 
@@ -135,7 +135,7 @@ $\lvert N_j\rvert<24M^{5}$ pour q3, $M=2^{s}$) ; seuls les sites confrontés s'�
 
 La règle grossière (tout au budget de $s+2$) donnerait $6s+20$ et $7s+23$, natifs seulement jusqu'à $s=17$ et $s=14$ ;
 les budgets mixtes gardent les seuils du repère ($s\leq 19$ et $s\leq 16$). Contre-lus : addendum
-[`ADDENDUM_CONTRAT_NUMERIQUE_20261007.md`](../audits/ADDENDUM_CONTRAT_NUMERIQUE_20261007.md) (`f6f65a0d8`).
+[`ADDENDUM_CONTRAT_NUMERIQUE_20261007.md`](../receipts/audit_canal_20261007/archives/ADDENDUM_CONTRAT_NUMERIQUE_20261007.md) (`f6f65a0d8`).
 
 Conséquences :
 

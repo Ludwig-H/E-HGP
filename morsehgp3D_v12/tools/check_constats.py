@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Contrôle structurel du registre d'audit ; ne juge ni les preuves ni le moteur."""
+"""Registre et hygiène du canal actif ; ne juge ni les preuves ni le moteur."""
 import argparse
 import datetime
 from pathlib import Path
@@ -44,16 +44,62 @@ def check(path):
     return identifiers, errors
 
 
+def check_directory(folder):
+    """Limites du canal courant, sans modifier ni parcourir les reçus historiques."""
+    errors = []
+    total = 0
+    actors = set()
+    for path in sorted(folder.iterdir()):
+        if not path.is_file() or path.is_symlink() or path.suffix != ".md":
+            errors.append(f"{path.name}: seuls les fichiers Markdown courants sont admis")
+            continue
+        size = path.stat().st_size
+        total += size
+        limit = 4096 if path.name == "README.md" else 8192
+        if path.name != "CONSTATS.md" and size > limit:
+            errors.append(f"{path.name}: note trop longue ({size} octets, limite {limit})")
+        match = re.fullmatch(r"AUDIT_(CODEX|CLAUDE)(?:_\d{8})?\.md", path.name)
+        if match:
+            if match[1] in actors:
+                errors.append(f"{path.name}: plusieurs notes vivantes du même auditeur")
+            actors.add(match[1])
+        try:
+            content = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            errors.append(f"{path.name}: UTF-8 requis")
+            continue
+        for target in re.findall(r"\]\(([^)]+)\)", content):
+            target = target.strip().strip("<>")
+            if target.startswith("#") or re.match(r"[A-Za-z][A-Za-z0-9+.-]*:", target):
+                continue
+            destination = target.split("#", 1)[0]
+            if destination and not (path.parent / destination).exists():
+                errors.append(f"{path.name}: lien local absent: {destination}")
+    if total > 64 * 1024:
+        errors.append(f"canal trop lourd ({total} octets, limite 65536)")
+    for required in ("README.md", "CONSTATS.md"):
+        if not (folder / required).is_file():
+            errors.append(f"{required}: fichier requis")
+    return total, errors
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("path", nargs="?", type=Path,
-                        default=Path(__file__).resolve().parents[1] / "audits" / "CONSTATS.md")
+                        help="autre registre : contrôle structurel seul")
+    parser.add_argument("--hygiene", action="store_true", help="contrôler aussi le dossier d'un autre registre")
     args = parser.parse_args()
-    identifiers, errors = check(args.path)
+    path = args.path or Path(__file__).resolve().parents[1] / "audits" / "CONSTATS.md"
+    identifiers, errors = check(path)
+    total = None
+    if args.path is None or args.hygiene:
+        total, hygiene_errors = check_directory(path.parent)
+        errors.extend(hygiene_errors)
     if errors:
         print("\n".join(errors), file=sys.stderr)
         return 1
-    print(f"OK: {len(identifiers)} constats, cohérence structurelle seulement")
+    suffix = "" if total is None else f", canal {total} octets"
+    print(f"OK: {len(identifiers)} constats{suffix}, cohérence structurelle seulement")
     return 0
 
 

@@ -84,7 +84,7 @@ seul contrat, chacun avec sa fixture d'égalité.
 
 **Énoncés de la conception d'origine** (`../../morsehgp3D_v11/receipts/conception_v11_20261002/conception/CONCEPTION_TOUR.md`,
 annexe A ; prouvés par l'auteur, **contre-lus le 7 octobre 2026** par l'auditeur
-([`AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md`](../audits/AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md) : les six preuves
+([`AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md`](../receipts/audit_canal_20261007/archives/AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md) : les six preuves
 tiennent, avec les hypothèses ci-dessous) et inscrits au registre des preuves
 (`docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md`, section V12). La première rédaction de `LEM-T1` dans ce tableau omettait
 l'inclusion $S\subseteq F$ : elle était fausse (constat `CST-0101`, témoin `WIT-T1-CARRE`).

@@ -25,7 +25,10 @@ empreintes FULL de la v11. Changements d'algorithme déclarés d'avance et mesur
 chemin produit, qui est le chemin mesuré. Tests lourds sur G4, sessions gardées, une seule VM (verrou commun), arrêt
 certifié. Pousser sur `main`, sans branche, un worktree par acteur, index vérifié avant tout `git add`. Aucun octet de
 données KITTI ni d'autre jeu sous licence, ni identité de compte dans le dépôt. Un auditeur suit la v12 et dépose ses
-notes dans `morsehgp3D_v12/audits/`. Les paragraphes v11 et antérieurs ci-dessous restent l'historique ; en cas de
+notes dans `morsehgp3D_v12/audits/`. Consigne utilisateur du 7 octobre : garder ce canal propre, à jour et léger :
+une note courante courte par auditeur, registre unique, détails historiques dans `receipts/`, pas de séries de notes
+obsolètes. Lire `audits/README.md` ; avant un commit du canal, exécuter `python morsehgp3D_v12/tools/check_constats.py`
+(structure, tailles et liens, sans qualification des preuves). Les paragraphes v11 et antérieurs ci-dessous restent l'historique ; en cas de
 conflit sur le régime, la précision ou le contrat de temps, les décisions datées les plus récentes prévalent.
 
 ## Ouverture v11 — 2 octobre 2026 (historique)

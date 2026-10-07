@@ -1379,7 +1379,7 @@ Portée : énoncés de l'annexe A de la conception de la tour du 2 octobre 2026
 ([`CONCEPTION_TOUR.md`](../../morsehgp3D_v11/receipts/conception_v11_20261002/conception/CONCEPTION_TOUR.md)), portés par
 la v12 ([`OBJET_ET_CONTRAT_MATHEMATIQUE.md`](../../morsehgp3D_v12/docs/OBJET_ET_CONTRAT_MATHEMATIQUE.md)) et contre-lus
 le 7 octobre 2026 par l'auditeur
-([`AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md`](../../morsehgp3D_v12/audits/AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md),
+([`AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md`](../../morsehgp3D_v12/receipts/audit_canal_20261007/archives/AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md),
 constats `CST-0101` à `CST-0107`). Preuves écrites ; aucun code ne les implante encore. Exploration hors registre,
 aucun statut public.
 

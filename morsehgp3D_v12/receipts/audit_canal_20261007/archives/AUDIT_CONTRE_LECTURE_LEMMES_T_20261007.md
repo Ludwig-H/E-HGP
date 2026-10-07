@@ -2,12 +2,12 @@
 
 7 octobre 2026. Claude, à la demande du développeur v12 ; rôle : auditeur de contre-lecture, ponctuel (la même
 session tient par ailleurs les démos `Zoltan/demos`). Jugé :
-[`CONCEPTION_TOUR.md`](../../morsehgp3D_v11/receipts/conception_v11_20261002/conception/CONCEPTION_TOUR.md)
+[`CONCEPTION_TOUR.md`](https://github.com/Ludwig-H/E-HGP/blob/fc1f913ce325b04922b897137a9507153b129894/morsehgp3D_v11/receipts/conception_v11_20261002/conception/CONCEPTION_TOUR.md)
 (blob `8e7432dcc680`), annexe A et § 2.2, 3.2, 3.4, 4.1 à 4.3, 5, lu sur `13c52bc60`. Fondations relues :
-[L02](../../morsehgp3D_v11/receipts/conception_v11_20261002/audit_v10/L02_MATH_TOUR.md) § 4 (lemmes 1 à 4, théorèmes
-B à F et J ; blob `2edac5240eb3`) et [`MATHEMATIQUES.md`](../../morsehgp3D_v11/docs/MATHEMATIQUES.md) de la v11 (M1, M2,
+[L02](https://github.com/Ludwig-H/E-HGP/blob/fc1f913ce325b04922b897137a9507153b129894/morsehgp3D_v11/receipts/conception_v11_20261002/audit_v10/L02_MATH_TOUR.md) § 4 (lemmes 1 à 4, théorèmes
+B à F et J ; blob `2edac5240eb3`) et [`MATHEMATIQUES.md`](https://github.com/Ludwig-H/E-HGP/blob/fc1f913ce325b04922b897137a9507153b129894/morsehgp3D_v11/docs/MATHEMATIQUES.md) de la v11 (M1, M2,
 T2 à T6, lemmes A, C, D, P, témoins D2 et mémo ; blob `fc76c5840a01`). Aucun code du moteur exécuté ; deux témoins
-vérifiés en arithmétique exacte. Constats au [registre](CONSTATS.md), bloc `CST-0101` à `CST-0199`.
+vérifiés en arithmétique exacte. Constats au [registre](https://github.com/Ludwig-H/E-HGP/blob/fc1f913ce325b04922b897137a9507153b129894/morsehgp3D_v12/audits/CONSTATS.md), bloc `CST-0101` à `CST-0199`.
 
 ```text
 phase=exploration_v12_hors_registre
@@ -76,7 +76,7 @@ le rang strictement inférieur.
    composantes strictes, et leurs opérandes de rang inférieur ou feuilles en sont les enfants. **Continuation sans
    nœud** (une seule composante touchée, ou déjà réunie plus tôt dans le rang) : aucun événement. Cellule
    « passagère » : aucun événement, et son `jtop` relève de `LEM-T6`.
-3. **`REG:243`.** La ligne vient de la [spécification d'origine](../../docs/SPECIFICATION_MORSEHGP3D.md) (l. 729 :
+3. **`REG:243`.** La ligne vient de la [spécification d'origine](https://github.com/Ludwig-H/E-HGP/blob/fc1f913ce325b04922b897137a9507153b129894/docs/SPECIFICATION_MORSEHGP3D.md) (l. 729 :
    « graphe de successeurs multivalué traité par composantes fortement connexes »). `LEM-T4` ne prouve pas ce quotient,
    il le rend inutile :
    - les descentes ne restent jamais sur un plateau (théorème D, `OBJ-T2`) ;
@@ -88,7 +88,7 @@ le rang strictement inférieur.
    relation « liés » est une forêt orientée du producteur vers le consommateur. Ses composantes fortement connexes sont
    donc des singletons : c'est de composantes connexes qu'il s'agit.
 4. **Clé de numérotation.** La clé (rang, plus petite naissance) doit lire la numérotation canonique de la v12
-   (naissances par niveau puis centre exact, [contrat](../docs/OBJET_ET_CONTRAT_MATHEMATIQUE.md) § 1). L'ordre du
+   (naissances par niveau puis centre exact, [contrat](https://github.com/Ludwig-H/E-HGP/blob/fc1f913ce325b04922b897137a9507153b129894/morsehgp3D_v12/docs/OBJET_ET_CONTRAT_MATHEMATIQUE.md) § 1). L'ordre du
    catalogue (niveau, $S^{*}$) de la conception du 2 octobre (§ 2.1, § 4.2) donnerait d'autres empreintes.
 
 ## T5, T6 — historique d'attache, image d'une naissance

@@ -1,0 +1,116 @@
+{
+  "active_links_checked": 40,
+  "after": {
+    "bytes": 26288,
+    "files": 4,
+    "sizes": {
+      "AUDIT_CLAUDE_20261007.md": 2373,
+      "AUDIT_CODEX_20261007.md": 2399,
+      "CONSTATS.md": 18997,
+      "README.md": 2519
+    }
+  },
+  "archives": [
+    {
+      "archive": "morsehgp3D_v12/receipts/audit_canal_20261007/archives/AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md",
+      "pinned_link_targets": 6,
+      "source": "morsehgp3D_v12/audits/AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md",
+      "source_text_preserved_except_links": true
+    },
+    {
+      "archive": "morsehgp3D_v12/receipts/audit_canal_20261007/archives/AUDIT_CONTRAT_NUMERIQUE_20261007.md",
+      "pinned_link_targets": 3,
+      "source": "morsehgp3D_v12/audits/AUDIT_CONTRAT_NUMERIQUE_20261007.md",
+      "source_text_preserved_except_links": true
+    },
+    {
+      "archive": "morsehgp3D_v12/receipts/audit_canal_20261007/archives/ADDENDUM_CONTRAT_NUMERIQUE_20261007.md",
+      "pinned_link_targets": 1,
+      "source": "morsehgp3D_v12/audits/ADDENDUM_CONTRAT_NUMERIQUE_20261007.md",
+      "source_text_preserved_except_links": true
+    },
+    {
+      "archive": "morsehgp3D_v12/receipts/audit_canal_20261007/archives/REPONSE_CLAUDE_LEMMES_T_ET_OUVERTURE_20261007.md",
+      "pinned_link_targets": 3,
+      "source": "morsehgp3D_v12/audits/REPONSE_CLAUDE_LEMMES_T_ET_OUVERTURE_20261007.md",
+      "source_text_preserved_except_links": true
+    }
+  ],
+  "before": {
+    "bytes": 52192,
+    "files": 7,
+    "sizes": {
+      "ADDENDUM_CONTRAT_NUMERIQUE_20261007.md": 3905,
+      "AUDIT_CODEX_20261007.md": 2891,
+      "AUDIT_CONTRAT_NUMERIQUE_20261007.md": 7365,
+      "AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md": 10092,
+      "CONSTATS.md": 17026,
+      "README.md": 5522,
+      "REPONSE_CLAUDE_LEMMES_T_ET_OUVERTURE_20261007.md": 5391
+    }
+  },
+  "broken_active_links": [],
+  "codex_note_unchanged": false,
+  "existing_receipts_unchanged": true,
+  "gcp_used": false,
+  "immutable_receipt_markdown_links_to_moved_notes": [],
+  "immutable_receipt_mentions": [
+    {
+      "line": 18,
+      "source": "morsehgp3D_v12/receipts/audit_contrats_20261007/mathematiques/README.md",
+      "text": "La note Claude `audits/AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md` et ses"
+    }
+  ],
+  "new_files": [
+    "morsehgp3D_v12/audits/AUDIT_CLAUDE_20261007.md",
+    "morsehgp3D_v12/receipts/audit_canal_20261007/README.md",
+    "morsehgp3D_v12/receipts/audit_canal_20261007/SHA256SUMS",
+    "morsehgp3D_v12/receipts/audit_canal_20261007/archive_map.json",
+    "morsehgp3D_v12/receipts/audit_canal_20261007/archives/ADDENDUM_CONTRAT_NUMERIQUE_20261007.md",
+    "morsehgp3D_v12/receipts/audit_canal_20261007/archives/AUDIT_CONTRAT_NUMERIQUE_20261007.md",
+    "morsehgp3D_v12/receipts/audit_canal_20261007/archives/AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md",
+    "morsehgp3D_v12/receipts/audit_canal_20261007/archives/REPONSE_CLAUDE_LEMMES_T_ET_OUVERTURE_20261007.md",
+    "morsehgp3D_v12/receipts/audit_canal_20261007/verification.json",
+    "morsehgp3D_v12/receipts/audit_canal_20261007/verify_cleanup.py",
+    "morsehgp3D_v12/receipts/audit_suivi_20261007/README.md",
+    "morsehgp3D_v12/receipts/audit_suivi_20261007/canal/checks.json",
+    "morsehgp3D_v12/receipts/audit_suivi_20261007/echelle/README.md",
+    "morsehgp3D_v12/receipts/audit_suivi_20261007/echelle/SHA256SUMS",
+    "morsehgp3D_v12/receipts/audit_suivi_20261007/echelle/check.py",
+    "morsehgp3D_v12/receipts/audit_suivi_20261007/echelle/normal.json",
+    "morsehgp3D_v12/receipts/audit_suivi_20261007/echelle/optimized.json",
+    "morsehgp3D_v12/receipts/audit_suivi_20261007/echelle/sources.json",
+    "morsehgp3D_v12/receipts/audit_suivi_20261007/session/MANIFEST.json",
+    "morsehgp3D_v12/receipts/audit_suivi_20261007/session/REPORT.md",
+    "morsehgp3D_v12/receipts/audit_suivi_20261007/session/RESULT.json",
+    "morsehgp3D_v12/receipts/audit_suivi_20261007/session/probe.py"
+  ],
+  "pin": "3e6e6a8e721c6dbe8aaa3a0c5cb20c56abfae5ff",
+  "product_tests_unchanged": true,
+  "registry": {
+    "original_identifiers_preserved": true,
+    "original_rows_exactly_preserved": true,
+    "rows": 47,
+    "states": {
+      "clos": 5,
+      "en attente de l'utilisateur (D14)": 1,
+      "en cours": 12,
+      "ouvert": 29
+    }
+  },
+  "schema": "ehgp.v12.audit_channel_cleanup.v1",
+  "sparse_targets": [],
+  "tool_update": "check_constats.py: hygiène du canal",
+  "tracked_edits": [
+    "D\tmorsehgp3D_v12/audits/ADDENDUM_CONTRAT_NUMERIQUE_20261007.md",
+    "M\tmorsehgp3D_v12/audits/AUDIT_CODEX_20261007.md",
+    "D\tmorsehgp3D_v12/audits/AUDIT_CONTRAT_NUMERIQUE_20261007.md",
+    "D\tmorsehgp3D_v12/audits/AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md",
+    "M\tmorsehgp3D_v12/audits/CONSTATS.md",
+    "M\tmorsehgp3D_v12/audits/README.md",
+    "D\tmorsehgp3D_v12/audits/REPONSE_CLAUDE_LEMMES_T_ET_OUVERTURE_20261007.md",
+    "M\tmorsehgp3D_v12/docs/CONTRAT_NUMERIQUE.md",
+    "M\tmorsehgp3D_v12/docs/OBJET_ET_CONTRAT_MATHEMATIQUE.md",
+    "M\tmorsehgp3D_v12/tools/check_constats.py"
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "files": [
+    {
+      "blob": "b903945d7674c9c1d5e2981c29f69c70d63b0fd0",
+      "path": "AGENTS.md",
+      "sha256": "899d9a724def2b69be5ffa9de1264ac0f9702656374ca087c82943fcc7d7edc8"
+    },
+    {
+      "blob": "b93df249737685d57f1ae159909276612c3aad53",
+      "path": "morsehgp3D_v12/README.md",
+      "sha256": "3f8a38d157dcd21f838bc7419819ed554d01cb2c823265a5bc4dd52c72a23138"
+    },
+    {
+      "blob": "81f8b08e6482240c6ca4d14ec1ae9170c674f479",
+      "path": "morsehgp3D_v12/docs/DECISIONS.md",
+      "sha256": "73c5f5287bc5dc99e5baca9a1a943da20f33d1315b7d1410d7588788591b2171"
+    },
+    {
+      "blob": "a1344313a341345ede0052d758dfc56ca7239337",
+      "path": "morsehgp3D_v12/docs/ARCHITECTURE.md",
+      "sha256": "d2f1454502752441b213b8cf8a45f1201cd7c285f2086f6f08fe6fbfd92800e1"
+    },
+    {
+      "blob": "5666ea3cd8d689e44384e4dd382a90f20120253a",
+      "path": "morsehgp3D_v12/docs/MESURE.md",
+      "sha256": "7423b314dbd0c6963b33328a748d2663a4f1e3124326583820299edafcf2145a"
+    },
+    {
+      "blob": "5a6d2beb34ec78ee2b7ce45c0351715f7c782568",
+      "path": "morsehgp3D_v12/docs/PLAN.md",
+      "sha256": "38784faa1694ddb23f5619dd2aef179b6f4c0e129c5e49854b70647a9843b9f6"
+    },
+    {
+      "blob": "2eed5332c8bdd3615402bb051eff3aa0a03446fc",
+      "path": "morsehgp3D_v11/src/core/types.hpp",
+      "sha256": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954"
+    },
+    {
+      "blob": "8d466a533ca2472c1b04fe8897bbca25ca61378b",
+      "path": "morsehgp3D_v11/src/tower/ancestor_index.cpp",
+      "sha256": "2b99e3843ef9ad5210b68393018a77299764441419527bf0acab09358ef14781"
+    },
+    {
+      "blob": "593ffc7064ac14ebead145f4d3c26d9281d4a43a",
+      "path": "morsehgp3D_v11/src/tower/order_tree.cpp",
+      "sha256": "c5fd5c3859a525932cdfb9f4d7d420efec01ba95661a0b587689fa8d0159e5ab"
+    },
+    {
+      "blob": "8e7432dcc6803da05b66ab485b3f686f5b340820",
+      "path": "morsehgp3D_v11/receipts/conception_v11_20261002/conception/CONCEPTION_TOUR.md",
+      "sha256": "01e217f03ad60187e2b2005ed12d16db0e04635725fafee880ae8cc52071c0e6"
+    },
+    {
+      "blob": "00d9bbdbeee6157c9c0760f3234d6cddec392d52",
+      "path": "morsehgp3D_v11/receipts/conception_v11_20261002/conception/preuves_tour/noyau_v11.cpp",
+      "sha256": "0d712a53233fa2ce91bc080e8ed39cf1bf78c9a6c0b683d44b1bfccb94e62f40"
+    },
+    {
+      "blob": "4a07cff5e90740457876af8fbfca9a6ce202594e",
+      "path": "morsehgp3D_v11/reference/hgp11_ref/definition.py",
+      "sha256": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43"
+    },
+    {
+      "blob": "b89df5d88d90cfb5a416fd277d48e0858ee944bc",
+      "path": "morsehgp3D_v11/reference/hgp11_ref/model.py",
+      "sha256": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c"
+    },
+    {
+      "blob": "8d1bbf4a1bd6c38a07212c947faf53556eaddfaf",
+      "path": "morsehgp3D_v11/receipts/audit_gpu_euler_20261004/centre_leaf_counterexample/README.md",
+      "sha256": "af1e723a0ebeaae061ef9d55ab4697459e328f46c636f2f3e44fc16a2196baad"
+    }
+  ],
+  "pin": "3e6e6a8e721c6dbe8aaa3a0c5cb20c56abfae5ff"
+}

@@ -1,0 +1,44 @@
+{
+  "source_sha256": "243a5ca23d7a1e0c8193082cfd113571ce45af567dcf0b550415ca5a0a3b3ee9",
+  "scope": "host_only_invalid_cli_before_run_no_gpu_workload",
+  "quantiles": {
+    "even_p50": 5.0,
+    "odd_p50": 5.0,
+    "injected_cold_max": 100.0,
+    "warm_only_max": 1.0
+  },
+  "expected_even_median": 5.5,
+  "throughput_bias_example": 0.10000000000000009,
+  "injected_cold_note": "Synthetic timings, not measured GPU durations",
+  "nvcc_compile_exit": 0,
+  "nvcc_arch": "sm_120",
+  "cli": [
+    {
+      "argument": "--reps=9",
+      "exit": 2,
+      "empty_stdout": true
+    },
+    {
+      "argument": "--reps=100001",
+      "exit": 2,
+      "empty_stdout": true
+    },
+    {
+      "argument": "--reps=",
+      "exit": 2,
+      "empty_stdout": true
+    },
+    {
+      "argument": "--sync=invalid",
+      "exit": 2,
+      "empty_stdout": true
+    },
+    {
+      "argument": "--reps=999999999999999999999999999999999999999999",
+      "exit": 2,
+      "empty_stdout": true
+    }
+  ],
+  "check_last_error_calls": 1,
+  "kernel_launch_sites": 5
+}

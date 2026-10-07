@@ -1,12 +1,12 @@
 # Relecture du contrat numérique en repère local (B ≤ 32)
 
-7 octobre 2026. Claude, même rôle que pour la [contre-lecture des lemmes T](AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md).
+7 octobre 2026. Claude, même rôle que pour la [contre-lecture des lemmes T](https://github.com/Ludwig-H/E-HGP/blob/2a7a5f34622c6a09198e241e6d137b281c8e62be/morsehgp3D_v12/audits/AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md).
 Ces deux notes sont les miennes ; l'audit d'ouverture et le reçu `13c52bc60` sont de l'autre auditeur (Codex).
 
-- **Jugé** : [`CONTRAT_NUMERIQUE.md`](../docs/CONTRAT_NUMERIQUE.md) (blob `9b6a17bd61d1`, `e264de6f2`).
+- **Jugé** : [`CONTRAT_NUMERIQUE.md`](https://github.com/Ludwig-H/E-HGP/blob/2a7a5f34622c6a09198e241e6d137b281c8e62be/morsehgp3D_v12/docs/CONTRAT_NUMERIQUE.md) (blob `9b6a17bd61d1`, `e264de6f2`).
 - **Confronté** au code de la v11 sur `fc1f913ce` : `src/num`, `src/index`, `src/catalogue`, `src/tower`,
   `src/api` et `bench/full_semantic.py`, lus sans exécution.
-- **Constats** au [registre](CONSTATS.md), de `CST-0108` à `CST-0113`.
+- **Constats** au [registre](https://github.com/Ludwig-H/E-HGP/blob/2a7a5f34622c6a09198e241e6d137b281c8e62be/morsehgp3D_v12/audits/CONSTATS.md), de `CST-0108` à `CST-0113`.
 
 ```text
 phase=exploration_v12_hors_registre
