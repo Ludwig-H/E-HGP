@@ -37,4 +37,11 @@ pilote mêle des familles dégénérées dont le coût explose et ne fixe aucun 
 
 **Mesuré sur G4 le 7 octobre** ([session G](../../receipts/g4_t0g_20261007/README.md), 48 fils, quatre passes) :
 morceaux de trames, K5 6,9 ms + 7,4 µs par site et K10 5,5 ms + 42 µs par site ; réseau entier, étage forêt à 92 à
-99 % du temps (8,4 s à 10 000 sites à K5, prise expirée à K10) ; sphère refusée dès 3 000 sites (`wide_leaf`).
+99 % du temps (8,4 s à 10 000 sites à K5, prise expirée à K10) ; quasi-sphère refusée dès 3 000 sites (`wide_leaf`).
+Le générateur arrondit les points de la sphère à l'entier : ils ne sont pas exactement cosphériques (`CST-0236`), et
+le refus porte sur la largeur d'une liste candidate, pas sur une coquille de 3 000 sites.
+
+**Porte** : [`test_pilote_p.py`](test_pilote_p.py) (Python 3.10 nu, aussi sous `-O`) : lecteur par couple (K, fils)
+et cohorte commune (témoin de `CST-0238` : 100, 60 et 10 µs par site séparés, jamais 56,67 réunis ; l'ancien lecteur
+y échoue), sélection vide refusée (code 2) avant toute construction, prise expirée sans valeur chaude et groupe de
+processus entier tué au délai.

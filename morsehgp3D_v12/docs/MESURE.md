@@ -40,7 +40,7 @@ la v11 gelée sur ces données, `MES-E` et `MES-P` de [`PLAN.md`](PLAN.md)) :
 | Régime | Mesures publiées | Objectif proposé |
 | --- | --- | --- |
 | (b) plusieurs millions | mur, CPU·s, pic de mémoire hôte et appareil, exposant d'échelle sur 1, 2, 4, 8 millions, à K5 et K10, à froid et à chaud | exposant au plus 1,1 ; K5 au plus 2 s par million de sites (le contrat principal, 100 ms pour 60 000 sites, en vaut 1,7) ; K10 au plus 10 s par million ; aucune scène refusée sous 10 millions de sites à K5 |
-| (c) petits nuages | latence à chaud et à froid, voie CPU et voie GPU | coût fixe à chaud au plus 2 ms ; coût par site jamais supérieur à celui du régime principal ; aucune famille dégénérée de `g4_small` refusée ni expirée (réseau, sphère : la v11 y passe 92 à 99 % du temps dans l'étage forêt ou refuse `wide_leaf`, session G) |
+| (c) petits nuages | latence à chaud et à froid, voie CPU et voie GPU | coût fixe à chaud au plus 2 ms ; coût par site jamais supérieur à celui du régime principal ; aucune famille dégénérée de `g4_small` refusée ni expirée (réseau et quasi-sphère arrondie : la v11 y passe 92 à 99 % du temps dans son étage forêt, qui couvre aussi la résolution, ou refuse `wide_leaf`, session G) ; objectif de la voie large T1-c, **non couvert par T1** (`CST-0237`) |
 
 ## 3. Chiffres de référence
 

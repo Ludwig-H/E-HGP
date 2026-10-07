@@ -10,16 +10,20 @@ Puis un ajustement par moindres carres, par K et par nombre de fils, du temps ch
 b le cout par site.
 
 Usage : pilote_p.py --v11-build DIR (--donnees DIR | --archive TAR --deballage DIR) --sortie DIR [--fils 1,48]
-                    [--k 5,10] [--passes 6] [--delai 300] [--jobs 44] [--limite N]
+                    [--k 5,10] [--passes 6] [--delai 300] [--jobs 44] [--limite N] [--exclure PREFIXE,...]
+  --exclure : nuages dont le nom commence par l'un des prefixes ecartes (par exemple synth_lattice,synth_sphere : la
+  v11 y passe des dizaines de secondes par passe, session G du 7 octobre) ; les ecartes sont listes dans mes_p.json.
   --archive : le paquet g4_small en une seule archive tar (le televersement d'une session paie chaque fichier : 320
   petits fichiers depassent son delai) ; deballee dans --deballage apres controle de chaque membre (fichier simple, nom
   simple, aucun chemin), puis lue comme --donnees.
-Sorties : <sortie>/mes_p.json, <sortie>/mes_p.md, lignes brutes sous <sortie>/brut/. Codes : 0 rendu ; 2 usage ou
-manifeste illisible ; 3 construction impossible. Bibliotheque standard seule (Python 3.10 nu).
+Sorties : <sortie>/mes_p.json, <sortie>/mes_p.md, lignes brutes sous <sortie>/brut/. Codes : 0 rendu ; 2 usage,
+manifeste illisible ou selection vide ; 3 construction impossible. Une prise expiree (groupe de processus tue au
+delai) ou en echec n'a aucune valeur chaude. Bibliotheque standard seule (Python 3.10 nu).
 """
 import argparse
 import json
 import os
+import signal
 import statistics
 import subprocess
 import sys
@@ -72,11 +76,18 @@ def run_cloud(binary, data, raw_dir, name, k, threads, passes, delay):
     argv = [binary, os.path.join(data, name + '.u32le'), os.path.join(data, name + '.ids.u32le'), '/dev/null',
             str(k), str(leaf), '256', '0', '4294967295', str(8 << 30), str(threads), MASK, str(passes)]
     start = time.monotonic()
+    # Groupe de processus neuf : le delai tue tout le groupe, descendants d'un futur lanceur compris.
+    proc = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=True)
     try:
-        done = subprocess.run(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=delay)
-        code, out = done.returncode, done.stdout
-    except subprocess.TimeoutExpired as expired:
-        code, out = 'expire', expired.stdout or b''
+        out, _err = proc.communicate(timeout=delay)
+        code = proc.returncode
+    except subprocess.TimeoutExpired:
+        try:
+            os.killpg(proc.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        out, _err = proc.communicate()
+        code = 'expire'
     seconds = time.monotonic() - start
     with open(os.path.join(raw_dir, '%s_k%d_f%d.jsonl' % (name, k, threads)), 'wb') as handle:
         handle.write(out)
@@ -94,7 +105,8 @@ def run_cloud(binary, data, raw_dir, name, k, threads, passes, delay):
         value = pass_seconds(line)
         if value is not None:
             per_pass.append(value)
-    warm = statistics.median(per_pass[1:]) if len(per_pass) >= 2 else None
+    # Une prise en echec ou expiree reste incomplete : aucune valeur chaude, meme si des passes ont ete rendues.
+    warm = statistics.median(per_pass[1:]) if code == 0 and len(per_pass) >= 2 else None
     return dict(nuage=name, k=k, fils=threads, code=code, sites=sites, processus_secondes=round(seconds, 4),
                 passes=[round(v, 6) for v in per_pass], froid=per_pass[0] if per_pass else None, chaud=warm)
 
@@ -123,6 +135,7 @@ def main(argv):
     parser.add_argument('--delai', type=int, default=300)
     parser.add_argument('--jobs', type=int, default=44)
     parser.add_argument('--limite', type=int, default=0)
+    parser.add_argument('--exclure', default='')
     try:
         args = parser.parse_args(argv[1:])
         if (args.donnees is None) == (args.archive is None) or (args.archive is not None and args.deballage is None):
@@ -139,8 +152,14 @@ def main(argv):
         return 2
     if args.passes < 2 or not threads or not orders or any(t < 1 for t in threads) or any(not 1 <= k <= 12 for k in orders):
         return 2
+    prefixes = [x for x in args.exclure.split(',') if x]
+    excluded = [name for name in names if any(name.startswith(x) for x in prefixes)]
+    names = [name for name in names if name not in excluded]
     if args.limite > 0:
         names = names[:args.limite]
+    if not names:
+        print('pilote_p : selection vide (%d nuages exclus)' % len(excluded), file=sys.stderr)
+        return 2
     raw_dir = os.path.join(args.sortie, 'brut')
     os.makedirs(raw_dir, exist_ok=True)
     binary = build(args.v11_build, args.jobs)
@@ -152,8 +171,8 @@ def main(argv):
             for t in threads:
                 entries.append(run_cloud(binary, args.donnees, raw_dir, name, k, t, args.passes, args.delai))
         with open(os.path.join(args.sortie, 'mes_p.json'), 'w', encoding='utf-8') as out:
-            json.dump(dict(mesure='MES-P', masque=MASK, passes=args.passes, prises=entries), out, indent=1,
-                      sort_keys=True)
+            json.dump(dict(mesure='MES-P', masque=MASK, passes=args.passes, prises=entries, exclus=excluded), out,
+                      indent=1, sort_keys=True)
     fits = {}
     for k in orders:
         for t in threads:
@@ -161,8 +180,8 @@ def main(argv):
                       if e['k'] == k and e['fils'] == t and e['code'] == 0 and e['sites'] and e['chaud'] is not None]
             fits['k%d_f%d' % (k, t)] = fit(points)
     with open(os.path.join(args.sortie, 'mes_p.json'), 'w', encoding='utf-8') as out:
-        json.dump(dict(mesure='MES-P', masque=MASK, passes=args.passes, prises=entries, ajustements=fits), out,
-                  indent=1, sort_keys=True)
+        json.dump(dict(mesure='MES-P', masque=MASK, passes=args.passes, prises=entries, ajustements=fits,
+                       exclus=excluded), out, indent=1, sort_keys=True)
     lines = ['# MES-P : v11 gelee sur les petits nuages, a chaud', '', '| K et fils | cout fixe (ms) | cout par site (µs) '
              '| nuages |', '| --- | ---: | ---: | ---: |']
     for key, value in sorted(fits.items()):

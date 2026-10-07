@@ -57,7 +57,10 @@ terminées par un arrêt certifié) :
 
 - **Feuille** : J3 par phases, variante `j3_r168`, adoptée (`MES-M2`) ; la forme cohérente est rejetée.
 - **Parcours** : en largeur sur le GPU, adopté (`MES-M5`) ; avec la feuille, environ 16 ms à K5 sur ng00 avant la fin
-  d'étage : le budget de l'étage C (35 à 45 ms) est confirmé.
+  d'étage. **Correction du 7 octobre (`CST-0235`)** : le budget de l'étage C (35 à 45 ms) n'en est pas confirmé ;
+  seuls le parcours et les feuilles sont mesurés, l'émission, la fin d'étage et les transferts ne le sont pas, et à
+  aval CPU inchangé, parcours et feuilles gratuits laisseraient encore 145 à 202 ms à K5 (reçu
+  `audit_performance_20261007`) : la fin d'étage sur l'appareil (T1-b) décide du budget.
 - **Plus petite boule** : proposée puis certifiée, adoptée définitivement (`MES-M3`, −45 à −46 % de résolution à
   K10) ; à K5 le gain n'est que de 7 % : le budget de l'étage G (25 à 30 ms) **n'est pas atteignable sans le
   recensement borné aux $k$ plus proches et le mémo de cellule** (`LEM-T3`), qui deviennent la priorité de T2.
@@ -85,6 +88,19 @@ Euler à K+2 (filet), différentiel du catalogue contre la v11 sur trames entiè
 **État de T1 (7 octobre 2026, soir)** : voie CPU de référence livrée et conforme à la v11 gelée (K5 et K10, profils
 21 et 32, [contrat § 9](CONTRAT_CATALOGUE.md)) ; lecteur de transition livré ; voie appareil (T1-b) à écrire et à
 juger sur G4 (identité à l'octet avec la voie CPU, budget de l'étage C).
+
+**T1-c — voie large (ouverte le 7 octobre, `CST-0237`)**. L'objectif des petits nuages « aucune famille dégénérée
+refusée ni expirée » ([`MESURE.md`](MESURE.md) § 2) n'est pas couvert par T1 : feuilles d'au plus 256 sites,
+coquilles d'au plus 64 sites au census, $m$ sur un octet, masques de traces sur 64 bits dans la tour ; et
+$q_{\min}\leq 4$ ne borne ni la coquille ni la liste candidate. Relever une constante ne suffit pas. Protocole
+retenu (proposé par l'auditeur, reçu `audit_performance_20261007`, complément de la session G) : (1) publier, sur le
+générateur épinglé, maximum de liste candidate, profondeur, largeur au refus et histogramme des coquilles exactes,
+en distinguant quasi-sphère, sphère entière exacte et réseau ; (2) pour le réseau, ventiler préparation,
+résolution, noyau et contraction, avec cellules, représentants, boules, incidences et tailles de coquilles ;
+(3) écrire le contrat d'une voie large (masques et CSR extensibles, budgets, traitement certifié des listes
+larges, canonisation par boule, quotient de traces `LEM-T7` s'il est adopté ; ni écrêtage, ni jitter, ni
+préfixe) ; (4) graver les petites versions contre l'oracle, les frontières 32/33, 64/65 et 255/256/257 et les
+plateaux à supports minimaux différents, puis mesurer sur G4 avec sorties complètes et refus explicites.
 
 ## 3. T2 — tour
 
