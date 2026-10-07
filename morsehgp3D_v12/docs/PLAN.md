@@ -11,6 +11,9 @@ son reçu. **Aucune tranche ne commence avant les décisions D1 à D7** de [`DEC
   [`MESURE.md`](MESURE.md), § 4) ; tout écart est expliqué par un témoin exact ou corrigé.
 - **Une règle écrite d'avance par mesure**, jugée par le protocole de [`MESURE.md`](MESURE.md), § 5 ; jamais réécrite
   après les données ; les échecs sont publiés tels quels.
+- **Trois verdicts, une seule adoption** (point 1 de l'auditeur, `AUDIT_CODEX_20261007.md`) : un levier n'est adopté
+  que si son juge rend « adopté » ; un banc refusé (prise manquante, binaire non haché, isolation non certifiée,
+  donnée absente) ou une preuve manquante interdisent l'adoption au même titre qu'un rejet par la mesure.
 - **Local léger, G4 pour le lourd** : en local, Release et portes ciblées seulement ; sanitizers, profils, mutants,
   échelle et LiDAR sur G4, dans des sessions gardées.
 - **Table de réconciliation** « décision de conception → implantation → mesure », tenue à jour à chaque tranche : la

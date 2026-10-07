@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "kind": "mhgp12_exact_witness",
+  "witness_id": "WIT-T1-CARRE",
+  "statement": "LEM-T1 : si S est un support de la boule b et si S est inclus dans F, lui-meme inclus dans P_b, alors B(F) = b",
+  "refuted_reading": "S = S*(b) et F inclus dans P_b, sans l'inclusion de S dans F",
+  "source": "morsehgp3D_v12/audits/AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md, constat CST-0101",
+  "point_labels": ["A", "B", "C", "D"],
+  "points": [[0, 0, 0], [2, 0, 0], [2, 2, 0], [0, 2, 0]],
+  "ball": {
+    "center": ["1", "1", "0"],
+    "squared_radius": "2",
+    "interior": [],
+    "shell": [0, 1, 2, 3],
+    "canonical_support": [0, 2],
+    "other_minimal_supports": [[1, 3]]
+  },
+  "cases": [
+    {
+      "name": "cote",
+      "part": [0, 1],
+      "proposal": [0, 2],
+      "part_center": ["1", "0", "0"],
+      "part_squared_radius": "1",
+      "certified": false,
+      "certified_without_inclusion_test": true
+    },
+    {
+      "name": "diagonale_non_canonique",
+      "part": [1, 3],
+      "proposal": [1, 3],
+      "lookup": "miss",
+      "part_center": ["1", "1", "0"],
+      "part_squared_radius": "2",
+      "certified": false,
+      "certified_without_inclusion_test": false
+    }
+  ]
+}

@@ -240,7 +240,7 @@ Le statut d'une exécution est distinct : `exact`, `conditional`, `budget_exhaus
 
 | une descente d'un bras connu trouve sa composante globale hors du domaine exhaustif borné 6.9 | `conditional_theorem` | chemin initial correct et catalogue antérieur complet à une échelle non bornée |
 | le pointer-jumping préserve la racine | `proved_here` | DAG fonctionnel certifié |
-| contraction des plateaux par composantes fortement connexes | `proof_obligation` | exactitude locale à démontrer |
+| contraction des plateaux par composantes fortement connexes | `proof_obligation` | exactitude locale à démontrer ; **caduque pour la v12** (7 octobre 2026, constat `CST-0103`) : jamais prouvée, remplacée avec leur portée par le théorème D (aucune descente ne reste sur un plateau), le lemme P de la v11 (atomicité du plateau), `LEM-T4` (contraction du noyau) et `LEM-T7` (coquilles étendues), section V12 ci-dessous ; dans un rang, la relation « liés » est une forêt orientée du producteur vers le consommateur, dont les composantes fortement connexes sont des singletons |
 | traitement séquentiel de niveaux égaux | `false_in_general` | peut binariser une multifusion |
 | hyper-Kruskal par lot préserve les composantes | `proved_here` | incidences complètes et niveaux exacts |
 | un sous-flot certifié produit une connectivité partielle incluse dans l'exacte | `proved_here` | garantie unilatérale; les nœuds de la `partial_forest` ne sont pas des événements HGP |
@@ -1372,6 +1372,26 @@ aucun de ces énoncés ne change un statut public, et aucune implantation n'est 
 | G — `kparties_reliees` $=\binom{p+m}{K}$ ; `cofaces` de la boule $=\sum_{j}\binom{p}{K+1-j}N_j$ ; `cofaces` d'un support $=\binom{p+m-\lvert Q\rvert}{K+1-\lvert Q\rvert}$ ; `strict_traces` $=\binom{m}{t}-N_t$ ; `compressed_parts` $=\binom{m}{t}$ ; `gabriel_cofaces` $=N_{t+1}$ | `proved_here` | § 10.7 ; la somme des `cofaces` des supports compte des incidences $(Q,G)$, celle des `kparties_reliees` des boules des incidences $(b,F)$ (ligne $0,1,2$ à $K=2$ : 5 pour 3 paires) ; la somme des `cofaces` des boules compte des liaisons distinctes, limitées à $W_K$ |
 | H — forme datée de P3 : à $K\geq 2$, les sites du $K$-polyèdre d'un nœud $v$ à une coupe fermée $a$ où il vit sont la réunion des $P_b$, $b\in W_K$, $\mathrm{att}(b)$ dans le sous-arbre de $v$, $\lambda_b\leq a$ ; les boules fortes suffisent | `proved_here` | § 10.8 ; non publié par le format `MHGP11SP`, contrôlé par l'oracle borné ; la réunion des seules naissances ne suffit pas (`growth_ABCZ`) |
 | la réalisation par supports $P_v$ (réunion des $\mathrm{conv}\,Q$) est stable sous perturbation des sites | `false_in_general` | cercle à quatre points de l'audit `1bf4be68f` (revue `carrier`) : $\mathcal{Q}_b$ passe de $\lbrace AC,BD\rbrace$ à $\lbrace AC,B_tCD\rbrace$, saut de Hausdorff au moins $1/4$ pour un déplacement qui tend vers 0 ; la stabilité de FULL (P5) ne s'y transfère pas ; `kparties_reliees`, fonction de $(p,m,K)$, ne voit pas ce saut, sans être stable pour autant : sortir un site de la coquille d'une boule diamétrale le fait passer de 3 à 1 à $\mathcal{Q}_b$ fixé (auditeur, `aef7182b3`, D.1) |
+
+### V12 — lemmes de conception de la tour (`morsehgp3D_v12`, 7 octobre 2026)
+
+Portée : énoncés de l'annexe A de la conception de la tour du 2 octobre 2026
+([`CONCEPTION_TOUR.md`](../../morsehgp3D_v11/receipts/conception_v11_20261002/conception/CONCEPTION_TOUR.md)), portés par
+la v12 ([`OBJET_ET_CONTRAT_MATHEMATIQUE.md`](../../morsehgp3D_v12/docs/OBJET_ET_CONTRAT_MATHEMATIQUE.md)) et contre-lus
+le 7 octobre 2026 par l'auditeur
+([`AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md`](../../morsehgp3D_v12/audits/AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md),
+constats `CST-0101` à `CST-0107`). Preuves écrites ; aucun code ne les implante encore. Exploration hors registre,
+aucun statut public.
+
+| Énoncé | Statut | Justification |
+| --- | --- | --- |
+| `LEM-T1` lu « $S=S^{*}(b)$ et $F\subseteq P_b$ entraînent $B(F)=b$ » (contrat de la v12 au commit `52a790443` ; règle de décision des § 3.2 et 3.4 de la conception) | `false_in_general` | carré $A=(0,0,0)$, $B=(2,0,0)$, $C=(2,2,0)$, $D=(0,2,0)$ : $S^{*}=\lbrace A,C\rbrace$, $F=\lbrace A,B\rbrace\subseteq P_b$, mais $\beta(F)=1<2$ ; fixture permanente [`wit_t1_carre.json`](../../morsehgp3D_v12/reference/fixtures/wit_t1_carre.json), porte [`test_witness_t1.py`](../../morsehgp3D_v12/reference/test_witness_t1.py) (mutant `sans_inclusion` tué) ; `CST-0101` |
+| `LEM-T1` : si $S$ est un support de la sphère critique $b$ et $S\subseteq F\subseteq P_b$, alors $B(F)=b$ | `proved_here` | annexe A.1 (lemme 1 de L02, M2 de la v11) ; requiert seulement qu'aucun faux site ne figure dans $I\cup U$ et que $S$ soit un vrai support, pas la complétude du catalogue ; une clé qui ne trouve aucune boule renvoie au chemin exact, sans faux positif |
+| `LEM-T3` : l'arrêt de `resolve1` sur une cellule non naissance $(b',k)$ a un rang strictement inférieur à celui de la jonction, et la naissance atteinte par les pointeurs est dans la composante du représentant dans $\Gamma_k^{<}(\lambda)$ | `proved_here` | annexe A.3 ; la cible ne vaut qu'à partir de $\beta(F_0)$ (date d'usage) ; aucune garde $\beta(F_0)\leq\ell(r_b-1)$ ; `WIT-D2` et `WIT-MEMO` à graver dans sa porte (`CST-0104`) |
+| `LEM-T4` : jonctions traitées par rang croissant, ordre et règle d'union quelconques à rang égal ; les classes d'événements liés de rang $t$ sont les composantes de $G_t$ qui réunissent au moins deux composantes de $G_{t-1}$, celles-ci pour enfants | `proved_here` | annexe A.4, récurrence autonome (le théorème J n'en est pas une prémisse) ; égale au lemme P.3 de la v11 sous trois ponts : (H2) avec les cibles de `LEM-T3`, (H4) avec le lemme C.1, liste des jonctions égale aux cellules de $W_k$, boules faibles et cellules inertes comprises (`CST-0102`) ; clé (rang, plus petite naissance) lue dans la numérotation canonique par niveau puis centre exact (`CST-0107`) |
+| `LEM-T5` : avec l'union par taille, un chemin d'attache a au plus $\lfloor\log_2 n_b\rfloor$ arêtes, de rangs croissants ; `component_at` rend le nœud vivant à la coupe fermée de rang $r$ | `proved_here` | annexe A.5 ; (iii) **sous l'hypothèse** $\mathrm{rang}(\ell)\leq r$, listes d'événements par survivant dans l'ordre de traitement (`CST-0105`) |
+| `LEM-T6` : le nœud vivant à la coupe fermée $r$ qui contient les représentants d'une jonction de rang $r$ est le parent de $w$ s'il a le rang $r$, $w$ sinon | `proved_here` | annexe A.6, y compris une jonction qui n'unit rien suivie, au même rang, d'une absorption de sa composante |
+| `LEM-T7` : quotient local d'une coquille étendue par la famille $\mathcal{S}$ des fenêtres des plans par le centre | `proved_here` | annexe A.7 (Gordan, arrangement de grands cercles, fenêtres semi-ouvertes) ; $\mathcal{S}$ contient tous les séparables maximaux **sans s'y réduire** (cercle $x^{2}+y^{2}=25$ à quatre sites) ; (iv) donne l'union couverte, pas un compte de sites nouveaux (`CST-0106`) |
 
 ## 10. Règles de publication d'un résultat
 

@@ -76,8 +76,10 @@ trame $t$ (CPU).
 - **Fonction pure** du domaine immuable ; elle ne lit jamais la structure d'union : toute la résolution se calcule en
   parallèle.
 - **Plus petite boule proposée puis certifiée** (`LEV-MEB-CERT`, mécanisme de la v10 et décision D-G3 de la conception
-  d'origine) : proposition en flottant (Welzl), qui ne décide rien ; si le support proposé est le $S^{*}$ d'une boule
-  $b$ du catalogue et que $F\subseteq P_b$, la boule est certifiée sans arithmétique (`LEM-T1`) ; sinon certificat exact
+  d'origine) : proposition en flottant (Welzl), qui ne décide rien ; si le support proposé $S$ est le $S^{*}$ d'une
+  boule $b$ du catalogue et que $S\subseteq F\subseteq P_b$ (deux inclusions testées sur les identifiants ; sans la
+  première, le carré `WIT-T1-CARRE` certifie une fausse boule), la boule est certifiée sans arithmétique (`LEM-T1`) ;
+  sinon certificat exact
   du support proposé, puis canonisation parmi les points de $F$ sur la sphère ; repli exact. L'énumération exhaustive
   (74 présentations par boule à l'ordre 10 en v11) ne reste que dans l'oracle.
 - **Mémo de cellule déterministe** (`LEM-T3`) : arrêt sur la première cellule de fenêtre, pointeurs datés suivis après

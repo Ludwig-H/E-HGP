@@ -83,16 +83,20 @@ seul contrat, chacun avec sa fixture d'égalité.
 | `LEM-MSTC` | sur les étoiles de graines pondérées par rang, tout arbre couvrant minimal a les composantes par seuil ; contracter les chaînes de fusions de même rang redonne la forêt N-aire ; **le MST ne transporte pas les compteurs logiques** | `receipts/audit_plan_gpu_20261006/mathematics/REPORT.md` | forêt parallèle (second recours) |
 
 **Énoncés de la conception d'origine** (`../../morsehgp3D_v11/receipts/conception_v11_20261002/conception/CONCEPTION_TOUR.md`,
-annexe A ; prouvés par l'auteur, **à contre-lire avant tout port**) :
+annexe A ; prouvés par l'auteur, **contre-lus le 7 octobre 2026** par l'auditeur
+([`AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md`](../audits/AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md) : les six preuves
+tiennent, avec les hypothèses ci-dessous) et inscrits au registre des preuves
+(`docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md`, section V12). La première rédaction de `LEM-T1` dans ce tableau omettait
+l'inclusion $S\subseteq F$ : elle était fausse (constat `CST-0101`, témoin `WIT-T1-CARRE`).
 
 | Identifiant v12 | Énoncé | Usage prévu |
 | --- | --- | --- |
-| `LEM-T1` | certificat combinatoire de plus petite boule : si le support proposé $S$ est le $S^{*}$ d'une boule $b$ et $F\subseteq P_b$, alors $B(F)=b$ | `LEV-MEB-CERT` (plus petite boule sans arithmétique pour 76 % des pas) |
-| `LEM-T3` | arrêt d'une descente sur la première cellule de fenêtre, pointeurs strictement descendants suivis après coup | mémo de cellule déterministe |
-| `LEM-T4` | noyau union-find sans lots : les classes d'événements binaires liés de même rang sont exactement les multifusions | `LEV-FOREST-D-F1`, contraction parallèle ; clôt l'obligation `REG:243` |
-| `LEM-T5` | requêtes d'ancêtre par l'historique d'attache, profondeur au plus $\log_2$ du nombre de naissances | verticales et rattachements |
+| `LEM-T1` | certificat combinatoire de plus petite boule : si $S$ est un support de la sphère critique $b$ et $S\subseteq F\subseteq P_b$, alors $B(F)=b$ ; le moteur prend $S=S^{*}$ lu au catalogue et **teste les deux inclusions** sur les identifiants | `LEV-MEB-CERT` (76 % des plus petites boules des descentes sont au catalogue, mesure de la v10) |
+| `LEM-T3` | arrêt d'une descente sur la première cellule de fenêtre, pointeurs strictement descendants suivis après coup ; la cible d'un pointeur ne vaut qu'à partir de $\beta(F_0)$ ; **aucune** garde $\beta(F_0)\leq\ell(r_b-1)$ | mémo de cellule déterministe ; porte avec `WIT-D2` et `WIT-MEMO` (`CST-0104`) |
+| `LEM-T4` | noyau union-find sans lots : les classes d'événements binaires liés de même rang sont exactement les multifusions ; énoncé comme le lemme P.3 sous trois ponts : (H2) avec les cibles de `LEM-T3`, (H4) avec le lemme C.1, liste des jonctions égale aux cellules de $W_k$ (boules faibles et cellules inertes comprises) | `LEV-FOREST-D-F1`, contraction parallèle ; rend **caduque** l'obligation `REG:243`, sans la prouver (`CST-0103`) ; clé (rang, plus petite naissance) lue dans la numérotation canonique du § 1 (`CST-0107`) |
+| `LEM-T5` | requêtes d'ancêtre par l'historique d'attache, profondeur au plus $\log_2$ du nombre de naissances ; `component_at` **sous l'hypothèse** $\mathrm{rang}(\ell)\leq r$, listes par survivant dans l'ordre de traitement | verticales et rattachements (`CST-0105`) |
 | `LEM-T6` | image d'une naissance depuis le sommet laissé par la jonction de la même boule à l'ordre $k-1$ | verticales en $O(1)$ |
-| `LEM-T7` | quotient local des coquilles étendues par ensembles séparables maximaux, $O(m^{3})$ prédicats | coquilles étendues sans énumération |
+| `LEM-T7` | quotient local des coquilles étendues par la famille des fenêtres des plans par le centre, qui contient tous les séparables maximaux **sans s'y réduire** ; $O(m^{3})$ prédicats ; (iv) donne l'union couverte, pas un compte de sites nouveaux | coquilles étendues sans énumération (`CST-0106`) |
 
 ## 5. Témoins à graver d'abord
 
@@ -123,6 +127,8 @@ Python nu, une porte native et une ligne de registre. **Tout producteur et tout 
 | `WIT-RADICAUX` | $(2,162,50)$ et $(8,98,32)$, tous deux $5\sqrt{2}$ | départage de sommes de radicaux en décimal ou en binary64 | `bench/points_gate.py` |
 | `WIT-POLY` | trois réfutations du polyèdre d'ordre k | aberrants, chaînes contractées, emboîtement | `tests/fixtures/regressions/polyhedron_order_k_counterexamples.json` |
 | `WIT-SPHERE50` | 84 sites entiers de $x^{2}+y^{2}+z^{2}=50$ ; coquille de 270 sites | capacité des coquilles étendues (refus explicite) | `docs/MATHEMATIQUES.md` § 10.6 |
+| `WIT-T1-CARRE` | carré $(0,0,0),(2,0,0),(2,2,0),(0,2,0)$ ; $F$ un côté, proposition $S^{*}=\lbrace A,C\rbrace$ ; puis $F$ et proposition la diagonale $\lbrace B,D\rbrace$ | « $S=S^{*}(b)$ et $F\subseteq P_b$ suffisent » (`CST-0101`) ; support non canonique : recherche en échec, chemin exact | `reference/test_witness_t1.py` (mutant `sans_inclusion` tué) |
+| `WIT-T7-CERCLE25` | cercle $x^{2}+y^{2}=25$ de $z=0$ : $(5,0,0),(4,3,0),(-3,4,0),(-3,-4,0)$ | « la famille de `LEM-T7` est celle des séparables maximaux » (`CST-0106`) | **à graver** avec la porte de `LEM-T7` |
 | témoins du § 10.11 | carré à K1–K4, triangle droit, `growth_ABCZ`, passagère, ligne, triangle équilatéral faible, tétraèdre à intérieurs (K5), cube et octaèdre | rôles, comptes, polyèdres datés | `docs/MATHEMATIQUES.md` § 10.11 ; oracle S1 |
 
 ## 6. Doctrine numérique à porter
