@@ -21,6 +21,9 @@ Outcome ForestBuilder::touch(u32 root) noexcept {
   if (touched_count >= result.births_) return fail(Reason::tower_invariant);
   touched[touched_count++] = root;
   state.touched = true; state.head = root; state.tail = root; state.next = kNone;
+  // Noeud courant de la composante : close le relira et le rattachera a la fin du plateau, quelques cellules plus
+  // loin ; lecture au hasard dans un tableau de ~17 Mo a K5, prechargee des maintenant, en ecriture.
+  if (state.top < result.nodes_.size()) __builtin_prefetch(&result.nodes_[state.top], 1);
   return cell_add(result.ledger_.touched_components, 1);
 }
 
