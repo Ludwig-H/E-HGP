@@ -1,5 +1,8 @@
 # État courant du développement v11
 
+**Document figé au 3 octobre 2026.** La v11 est close depuis le 7 octobre 2026 : l'état au gel est décrit dans la
+[passation](../PASSATION.md) et l'[audit final](AUDIT_FINAL_V11.md). Le texte ci-dessous est historique.
+
 3 octobre 2026 ; moteur jugé **c40f40798**. Les lecteurs et documents sont publiés ensuite.
 Cette page décrit l'état présent ; sources, échecs et qualifications antérieurs restent dans receipts/Git.
 
