@@ -1,0 +1,1092 @@
+{
+ "cli_cases": [
+  {
+   "appariees": 3,
+   "bytes": [
+    384,
+    384
+   ],
+   "case": "exact_0_0",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "e60edc4a8d5f5317156d032ca5e657b83f566cb8189ff4a6a47d021b208ddadd",
+    "58f7c8513d6d30570ea5e04a428f32830dad4cd5158d0b46fa4020d12417a3ec"
+   ],
+   "line": "transition_catalogue_conforme boules=3 incidences=6 niveaux=2 coquilles_etendues=0 supports_multiples=0 sstar_selon_convention=0 sstar_differents=0 renumerotees=2",
+   "sstar_differents": 0,
+   "trame": "audit"
+  },
+  {
+   "appariees": 3,
+   "bytes": [
+    384,
+    384
+   ],
+   "case": "exact_0_1",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "c8461b3897be1ec5a90177f9339c8f46bfb49280cd692685f3474bdb12aab1fc",
+    "bce79d36d0049f3f4c801f6e4cc636e7636c6018200b7bf346fc5394ba025d46"
+   ],
+   "line": "transition_catalogue_conforme boules=3 incidences=6 niveaux=2 coquilles_etendues=0 supports_multiples=0 sstar_selon_convention=0 sstar_differents=0 renumerotees=2",
+   "sstar_differents": 0,
+   "trame": "audit"
+  },
+  {
+   "appariees": 3,
+   "bytes": [
+    384,
+    384
+   ],
+   "case": "exact_0_2",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "50d0cf209cff55fe254dd8c6516e5924c3878f4902d680acd2f4ad60195ce532",
+    "ccf6c9b0a2cbb8468c54cf60230bd933a87076712763286533040fc487a81d3c"
+   ],
+   "line": "transition_catalogue_conforme boules=3 incidences=6 niveaux=2 coquilles_etendues=0 supports_multiples=0 sstar_selon_convention=0 sstar_differents=0 renumerotees=2",
+   "sstar_differents": 0,
+   "trame": "audit"
+  },
+  {
+   "appariees": 3,
+   "bytes": [
+    384,
+    384
+   ],
+   "case": "exact_0_3",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "8e44810cb18b41241cb52af43d0f9b7475bdefa6499a3d10e3e428f9ec1be256",
+    "98bfe9ec583a9aa37abc2024c3a8c4c77b86d3b8b2dec0bd90c2a8f93e81db6d"
+   ],
+   "line": "transition_catalogue_conforme boules=3 incidences=6 niveaux=2 coquilles_etendues=0 supports_multiples=0 sstar_selon_convention=0 sstar_differents=0 renumerotees=2",
+   "sstar_differents": 0,
+   "trame": "audit"
+  },
+  {
+   "appariees": 5,
+   "bytes": [
+    496,
+    496
+   ],
+   "case": "exact_1_0",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "9a22fcd288701006054f6303ce925eae6046a89faecd86fc62f88fec3d9bd2e9",
+    "4763894a989573bfe88a2316a764cb2c42539488d1015b602e55f3fdc09838c7"
+   ],
+   "line": "transition_catalogue_conforme boules=5 incidences=12 niveaux=3 coquilles_etendues=1 supports_multiples=1 sstar_selon_convention=0 sstar_differents=0 renumerotees=4",
+   "sstar_differents": 0,
+   "trame": "audit"
+  },
+  {
+   "appariees": 5,
+   "bytes": [
+    496,
+    496
+   ],
+   "case": "exact_1_1",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "7c34aa59d43a50129058c1f369c753d17afe5b0b0aadec08b93d33af86c6d61f",
+    "2fcd758310fbc3ab5c9c0830f7c013ed10411d581a6458a31c530238abdcad83"
+   ],
+   "line": "transition_catalogue_conforme boules=5 incidences=12 niveaux=3 coquilles_etendues=1 supports_multiples=1 sstar_selon_convention=0 sstar_differents=0 renumerotees=4",
+   "sstar_differents": 0,
+   "trame": "audit"
+  },
+  {
+   "appariees": 5,
+   "bytes": [
+    496,
+    496
+   ],
+   "case": "exact_1_2",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "81f1c50c86075e3165db9247ea3b902cf0783dee26b8c4976e65c37f40b9a3fd",
+    "3400328b661f33785ffa12a83850c26cf0e00c77e70a3f7c51fd994354c92086"
+   ],
+   "line": "transition_catalogue_conforme boules=5 incidences=12 niveaux=3 coquilles_etendues=1 supports_multiples=1 sstar_selon_convention=0 sstar_differents=0 renumerotees=4",
+   "sstar_differents": 0,
+   "trame": "audit"
+  },
+  {
+   "appariees": 5,
+   "bytes": [
+    496,
+    496
+   ],
+   "case": "exact_1_3",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "dfba4896b3bdf601b0e1b07de6e05b39cbd99014aba09d1afef98ddcfbef0f10",
+    "968895ad44a9682117088bbf6f2d002a0e504bd80c0f444ae70e15bf03511140"
+   ],
+   "line": "transition_catalogue_conforme boules=5 incidences=12 niveaux=3 coquilles_etendues=1 supports_multiples=1 sstar_selon_convention=0 sstar_differents=0 renumerotees=4",
+   "sstar_differents": 0,
+   "trame": "audit"
+  },
+  {
+   "appariees": 9,
+   "bytes": [
+    728,
+    728
+   ],
+   "case": "exact_2_0",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "7808093ce8b6eec1369d84076e9ed3660b9f533ea92c42b178d8b88ca19e8dca",
+    "6d66870b5e3ba68aeadc863e7eff7fe4220bcd7dac0ea1a15c4411b42a52c5e1"
+   ],
+   "line": "transition_catalogue_conforme boules=9 incidences=25 niveaux=4 coquilles_etendues=5 supports_multiples=1 sstar_selon_convention=1 sstar_differents=1 renumerotees=6",
+   "sstar_differents": 1,
+   "trame": "audit"
+  },
+  {
+   "appariees": 9,
+   "bytes": [
+    728,
+    728
+   ],
+   "case": "exact_2_1",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "c1451fe8939ebc06a3266201ee4334245ac824f266901cba93c0d91ab3870a25",
+    "f710029bf419ce5f67811e23be92fc0374859b1e589bb34d0a3496b81d2ba034"
+   ],
+   "line": "transition_catalogue_conforme boules=9 incidences=25 niveaux=4 coquilles_etendues=5 supports_multiples=1 sstar_selon_convention=1 sstar_differents=1 renumerotees=6",
+   "sstar_differents": 1,
+   "trame": "audit"
+  },
+  {
+   "appariees": 9,
+   "bytes": [
+    728,
+    728
+   ],
+   "case": "exact_2_2",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "e3f5e7faa90272915402e65d6a697c0d29b51074e50d43edbb5aaa9a4b6d5c92",
+    "10668fac8a1cddae1286f89300a34f46e5a25fb8e7fa0c2eac4f82fd42c002c4"
+   ],
+   "line": "transition_catalogue_conforme boules=9 incidences=25 niveaux=4 coquilles_etendues=5 supports_multiples=1 sstar_selon_convention=1 sstar_differents=1 renumerotees=6",
+   "sstar_differents": 1,
+   "trame": "audit"
+  },
+  {
+   "appariees": 9,
+   "bytes": [
+    728,
+    728
+   ],
+   "case": "exact_2_3",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "d735ed961ebe7f48c0a99698435f94596557e28605f46e6960a9606b8b277045",
+    "b708adce7eb89b1eb9c39ff18bcdff7edd4f829a7287e2701c2b4b175e477268"
+   ],
+   "line": "transition_catalogue_conforme boules=9 incidences=25 niveaux=4 coquilles_etendues=5 supports_multiples=1 sstar_selon_convention=1 sstar_differents=1 renumerotees=6",
+   "sstar_differents": 1,
+   "trame": "audit"
+  },
+  {
+   "appariees": 16,
+   "bytes": [
+    1072,
+    1072
+   ],
+   "case": "exact_3_0",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "3ad0e8151bcddff8beaf273a225435472470915e7ffb41021873a9f5c8c68f7d",
+    "a0e3b42be686c727c3d890fa4dac4cb7a93b357d86a73c0069b895a9c09c770e"
+   ],
+   "line": "transition_catalogue_conforme boules=16 incidences=41 niveaux=7 coquilles_etendues=1 supports_multiples=0 sstar_selon_convention=0 sstar_differents=0 renumerotees=6",
+   "sstar_differents": 0,
+   "trame": "audit"
+  },
+  {
+   "appariees": 16,
+   "bytes": [
+    1072,
+    1072
+   ],
+   "case": "exact_3_1",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "24a819dfaaa5e9ba17a1bed0faad83a966b43986a98443526316614e4f3f087c",
+    "2e41d5659958941d55ecca4bfbd8cf63324a8c8b70a9928b458c4e37eb51d232"
+   ],
+   "line": "transition_catalogue_conforme boules=16 incidences=41 niveaux=7 coquilles_etendues=1 supports_multiples=0 sstar_selon_convention=0 sstar_differents=0 renumerotees=6",
+   "sstar_differents": 0,
+   "trame": "audit"
+  },
+  {
+   "appariees": 16,
+   "bytes": [
+    1072,
+    1072
+   ],
+   "case": "exact_3_2",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "a5b4a59c97b7f37518b4918c43a23cd49de96332fb5db8bd1e5cc54402e3376f",
+    "f757bc78f2240ea1edfc7ed2c65bf5eb24730671147eff4dbd3c3cd4932e8da2"
+   ],
+   "line": "transition_catalogue_conforme boules=16 incidences=41 niveaux=7 coquilles_etendues=1 supports_multiples=0 sstar_selon_convention=0 sstar_differents=0 renumerotees=6",
+   "sstar_differents": 0,
+   "trame": "audit"
+  },
+  {
+   "appariees": 16,
+   "bytes": [
+    1072,
+    1072
+   ],
+   "case": "exact_3_3",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "53b2b763a51c2b4392a8a4e430c1da8022411068e85245104442b6a8f0c6da8f",
+    "2ab95c1915def6468165acda059bbc8116f00a9f09032bcdb232ba9a585c8a6d"
+   ],
+   "line": "transition_catalogue_conforme boules=16 incidences=41 niveaux=7 coquilles_etendues=1 supports_multiples=0 sstar_selon_convention=0 sstar_differents=0 renumerotees=6",
+   "sstar_differents": 0,
+   "trame": "audit"
+  },
+  {
+   "appariees": 7,
+   "bytes": [
+    600,
+    600
+   ],
+   "case": "exact_4_0",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "7587a689bf3b59c746a1fb4c31d171cb5760ac2248b51c9ac17f65caed32901d",
+    "1921ad7866c3a552a97199cebcd09e6e8d3f0fe1264a309af6bfce7105d5f9c4"
+   ],
+   "line": "transition_catalogue_conforme boules=7 incidences=18 niveaux=6 coquilles_etendues=1 supports_multiples=1 sstar_selon_convention=1 sstar_differents=1 renumerotees=4",
+   "sstar_differents": 1,
+   "trame": "audit"
+  },
+  {
+   "appariees": 7,
+   "bytes": [
+    600,
+    600
+   ],
+   "case": "exact_4_1",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "332142519b4b44a6a093b15c4aac6ce3a77d381ff6158c4047feadb4bdcdefac",
+    "3a13b6e9dafd028f59482fdc4b4488421f34d01a4666556ee9b33d28407666ac"
+   ],
+   "line": "transition_catalogue_conforme boules=7 incidences=18 niveaux=6 coquilles_etendues=1 supports_multiples=1 sstar_selon_convention=1 sstar_differents=1 renumerotees=4",
+   "sstar_differents": 1,
+   "trame": "audit"
+  },
+  {
+   "appariees": 7,
+   "bytes": [
+    600,
+    600
+   ],
+   "case": "exact_4_2",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "6515c7c1a7b54b2e2ddcfb0288c6b8c106fe4c75e3d308b1a4f31c199da17f1d",
+    "21755fb8be07e554b76af391441d35cb4b3a54ad82673576ddde67a77eff0b83"
+   ],
+   "line": "transition_catalogue_conforme boules=7 incidences=18 niveaux=6 coquilles_etendues=1 supports_multiples=1 sstar_selon_convention=1 sstar_differents=1 renumerotees=4",
+   "sstar_differents": 1,
+   "trame": "audit"
+  },
+  {
+   "appariees": 7,
+   "bytes": [
+    600,
+    600
+   ],
+   "case": "exact_4_3",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "8f1dbb480c5350f66b156b06526f6f4f02314ee3d0fb342b8b7d98440fc93676",
+    "ea41915c49552d39ee90477ceab134d56acfc7ea2431c16a524b7a58ed33a226"
+   ],
+   "line": "transition_catalogue_conforme boules=7 incidences=18 niveaux=6 coquilles_etendues=1 supports_multiples=1 sstar_selon_convention=1 sstar_differents=1 renumerotees=4",
+   "sstar_differents": 1,
+   "trame": "audit"
+  },
+  {
+   "appariees": 15,
+   "bytes": [
+    1048,
+    1048
+   ],
+   "case": "exact_5_0",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "7cec2e70dd5c170eeb91734ca6e999f26c21d60b0aba3b473ba56f4c604e483f",
+    "4313c2619b69dfa9c42e786c1505797cd13973b4a8df8520efb14bdee59f5597"
+   ],
+   "line": "transition_catalogue_conforme boules=15 incidences=45 niveaux=13 coquilles_etendues=6 supports_multiples=1 sstar_selon_convention=1 sstar_differents=1 renumerotees=0",
+   "sstar_differents": 1,
+   "trame": "audit"
+  },
+  {
+   "appariees": 15,
+   "bytes": [
+    1048,
+    1048
+   ],
+   "case": "exact_5_1",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "3126c1eec641aa72ca1e68212c94568f99f018d62eb4d54c207e4514bf9ad437",
+    "6111081dddfffaee8f994b65e095f70d01b44507f3ba77dacc291a0dca833b4b"
+   ],
+   "line": "transition_catalogue_conforme boules=15 incidences=45 niveaux=13 coquilles_etendues=6 supports_multiples=1 sstar_selon_convention=1 sstar_differents=1 renumerotees=0",
+   "sstar_differents": 1,
+   "trame": "audit"
+  },
+  {
+   "appariees": 15,
+   "bytes": [
+    1048,
+    1048
+   ],
+   "case": "exact_5_2",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "768e412e98a0a2bf8f669aa6a192ca6c319c435c4ed1b715c4e788aae715e4ee",
+    "bd29ec7252d3465b1af648db3f3d8bb3e84e807f731ea21fe3798916c12b75d1"
+   ],
+   "line": "transition_catalogue_conforme boules=15 incidences=45 niveaux=13 coquilles_etendues=6 supports_multiples=1 sstar_selon_convention=1 sstar_differents=1 renumerotees=0",
+   "sstar_differents": 1,
+   "trame": "audit"
+  },
+  {
+   "appariees": 15,
+   "bytes": [
+    1048,
+    1048
+   ],
+   "case": "exact_5_3",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "4c0b4e456a0e2fad60e8b1bc925cb036656d8fb392474d35ded2beca37c95a7a",
+    "d50410a86ff573dd8e6652ba0e476f5ea0b818728bbc3f30c270016d59c15ae1"
+   ],
+   "line": "transition_catalogue_conforme boules=15 incidences=45 niveaux=13 coquilles_etendues=6 supports_multiples=1 sstar_selon_convention=1 sstar_differents=1 renumerotees=0",
+   "sstar_differents": 1,
+   "trame": "audit"
+  },
+  {
+   "appariees": 32,
+   "bytes": [
+    1944,
+    1944
+   ],
+   "case": "exact_6_0",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "a9b45143d86b44058223cd93f90ff40deddf641dc67e55bef71e3e505caad8f7",
+    "3a8f7416cfcb131a550139271c4ac421475cad96e47845dbe5140ee967dcdb07"
+   ],
+   "line": "transition_catalogue_conforme boules=32 incidences=98 niveaux=29 coquilles_etendues=0 supports_multiples=0 sstar_selon_convention=0 sstar_differents=0 renumerotees=6",
+   "sstar_differents": 0,
+   "trame": "audit"
+  },
+  {
+   "appariees": 32,
+   "bytes": [
+    1944,
+    1944
+   ],
+   "case": "exact_6_1",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "3fc71ae9c14c1e52b010912e0374b59cb71ff8b7c5019116195e4d3a65a09c52",
+    "a8cd827c072dd21a130b2e88600e5e6a219117358714d4e751ab4b0efa582a71"
+   ],
+   "line": "transition_catalogue_conforme boules=32 incidences=98 niveaux=29 coquilles_etendues=0 supports_multiples=0 sstar_selon_convention=0 sstar_differents=0 renumerotees=6",
+   "sstar_differents": 0,
+   "trame": "audit"
+  },
+  {
+   "appariees": 32,
+   "bytes": [
+    1944,
+    1944
+   ],
+   "case": "exact_6_2",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "e6de5fc768db8158c124adf6950a8e8acd074f42980e0f09a62b77fce224cd68",
+    "73366ffddc60a2e3e9612f779dc5a6d3a98f5ef35ed96c4e8c2f779ac71fd6ae"
+   ],
+   "line": "transition_catalogue_conforme boules=32 incidences=98 niveaux=29 coquilles_etendues=0 supports_multiples=0 sstar_selon_convention=0 sstar_differents=0 renumerotees=6",
+   "sstar_differents": 0,
+   "trame": "audit"
+  },
+  {
+   "appariees": 32,
+   "bytes": [
+    1944,
+    1944
+   ],
+   "case": "exact_6_3",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "a5c5becf43ac3bd3824e51a92adbeb94d47574278d6a7342ad8a0914bc12cca5",
+    "b2db17f1bb9cdba721fa9f8121ffcd9fce8cd335298371edbed263bc3aebe07e"
+   ],
+   "line": "transition_catalogue_conforme boules=32 incidences=98 niveaux=29 coquilles_etendues=0 supports_multiples=0 sstar_selon_convention=0 sstar_differents=0 renumerotees=6",
+   "sstar_differents": 0,
+   "trame": "audit"
+  },
+  {
+   "appariees": 35,
+   "bytes": [
+    2120,
+    2120
+   ],
+   "case": "exact_7_0",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "2f19e89f8a583b861a15b3efc37d0db8b9bc2857b7b5dc2f81f14f9625979c02",
+    "6720bb1ac516e11d24a373ebfe3540e71f1444b68ed939be9d41c05979f34e4b"
+   ],
+   "line": "transition_catalogue_conforme boules=35 incidences=111 niveaux=36 coquilles_etendues=0 supports_multiples=0 sstar_selon_convention=0 sstar_differents=0 renumerotees=0",
+   "sstar_differents": 0,
+   "trame": "audit"
+  },
+  {
+   "appariees": 35,
+   "bytes": [
+    2120,
+    2120
+   ],
+   "case": "exact_7_1",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "123c0d7adb575f89bcd8afc0ddbc9b27c28ceac4d0716b9b0430456969824a05",
+    "530c6be3012cca1294fbb552a8639daeecd060f4e9185ff9d48fe316a0997701"
+   ],
+   "line": "transition_catalogue_conforme boules=35 incidences=111 niveaux=36 coquilles_etendues=0 supports_multiples=0 sstar_selon_convention=0 sstar_differents=0 renumerotees=0",
+   "sstar_differents": 0,
+   "trame": "audit"
+  },
+  {
+   "appariees": 35,
+   "bytes": [
+    2120,
+    2120
+   ],
+   "case": "exact_7_2",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "3e1049736b309cee54f0719ec3cf6e0be3561bdd0b6e65dd32147236884cb779",
+    "633f24ee2b3bdd20bc2159e0c12e2eae222b5b0094cced2863abd7a6ed0cc6f2"
+   ],
+   "line": "transition_catalogue_conforme boules=35 incidences=111 niveaux=36 coquilles_etendues=0 supports_multiples=0 sstar_selon_convention=0 sstar_differents=0 renumerotees=0",
+   "sstar_differents": 0,
+   "trame": "audit"
+  },
+  {
+   "appariees": 35,
+   "bytes": [
+    2120,
+    2120
+   ],
+   "case": "exact_7_3",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "b209a2c9ac3de63f406ff0d8a4c0fada9d647cbefd92b48ddc7ea4122a5bf07e",
+    "4a93dc66beab0d6fd91acb7f531ce6fd86a12046d6e7cb61234f7c8d34def78c"
+   ],
+   "line": "transition_catalogue_conforme boules=35 incidences=111 niveaux=36 coquilles_etendues=0 supports_multiples=0 sstar_selon_convention=0 sstar_differents=0 renumerotees=0",
+   "sstar_differents": 0,
+   "trame": "audit"
+  },
+  {
+   "appariees": 21,
+   "bytes": [
+    1376,
+    1376
+   ],
+   "case": "exact_8_0",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "d5ccdc923be6d77cd73e443eacd41e6f42e95020249db51fe00ac2ccbcb85394",
+    "be567bd888aecfbb651ccb188984fcb9b5ab47f6a5b382dc6a043199d82f4600"
+   ],
+   "line": "transition_catalogue_conforme boules=21 incidences=65 niveaux=21 coquilles_etendues=0 supports_multiples=0 sstar_selon_convention=0 sstar_differents=0 renumerotees=2",
+   "sstar_differents": 0,
+   "trame": "audit"
+  },
+  {
+   "appariees": 21,
+   "bytes": [
+    1376,
+    1376
+   ],
+   "case": "exact_8_1",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "ff8c6bc8cc9b4a4ca520c182e6efa42e5a1af985b67683fd606b96a6cf12e61c",
+    "1e5bff699f493f36f1c369973fcfeae045f62994f6c15bb928753c0371c3827d"
+   ],
+   "line": "transition_catalogue_conforme boules=21 incidences=65 niveaux=21 coquilles_etendues=0 supports_multiples=0 sstar_selon_convention=0 sstar_differents=0 renumerotees=2",
+   "sstar_differents": 0,
+   "trame": "audit"
+  },
+  {
+   "appariees": 21,
+   "bytes": [
+    1376,
+    1376
+   ],
+   "case": "exact_8_2",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "20b6325a35fe30a38d19d40817d1f8dbf927e84fded0627b5f206428ff2260e9",
+    "68be901f4985fe6837630360652a0b5b3d13b65595ee0cdc163d1bacc06188ed"
+   ],
+   "line": "transition_catalogue_conforme boules=21 incidences=65 niveaux=21 coquilles_etendues=0 supports_multiples=0 sstar_selon_convention=0 sstar_differents=0 renumerotees=2",
+   "sstar_differents": 0,
+   "trame": "audit"
+  },
+  {
+   "appariees": 21,
+   "bytes": [
+    1376,
+    1376
+   ],
+   "case": "exact_8_3",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "73bb3c6a590d919b301f32181bc472711938b0dedfdc6d1ac4f5924d58085d3a",
+    "85e4772bdfb2e8386b468fce05a82e92bc86be018d1c68ecca27f195852ed1b1"
+   ],
+   "line": "transition_catalogue_conforme boules=21 incidences=65 niveaux=21 coquilles_etendues=0 supports_multiples=0 sstar_selon_convention=0 sstar_differents=0 renumerotees=2",
+   "sstar_differents": 0,
+   "trame": "audit"
+  },
+  {
+   "appariees": 22,
+   "bytes": [
+    1432,
+    1432
+   ],
+   "case": "exact_9_0",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "ae777fd49d0b923fe46fd1bc5dd32bb26eaf551f5daecebe8ace7b88b123ef0d",
+    "dd4c0b2fc768c74ba297a4f30f221af376796132c1b5a12264828d1078a2d947"
+   ],
+   "line": "transition_catalogue_conforme boules=22 incidences=70 niveaux=22 coquilles_etendues=1 supports_multiples=0 sstar_selon_convention=0 sstar_differents=0 renumerotees=2",
+   "sstar_differents": 0,
+   "trame": "audit"
+  },
+  {
+   "appariees": 22,
+   "bytes": [
+    1432,
+    1432
+   ],
+   "case": "exact_9_1",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "0ad67584b0cf86b20d81136ff9af6c63f4630be58bc3048ede37d29d190e671f",
+    "4f27f96839701741c5fe70c812f98d9081e9104501b4dd58f71a2f56f7f0d1e0"
+   ],
+   "line": "transition_catalogue_conforme boules=22 incidences=70 niveaux=22 coquilles_etendues=1 supports_multiples=0 sstar_selon_convention=0 sstar_differents=0 renumerotees=2",
+   "sstar_differents": 0,
+   "trame": "audit"
+  },
+  {
+   "appariees": 22,
+   "bytes": [
+    1432,
+    1432
+   ],
+   "case": "exact_9_2",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "c48e4547edc91e6523ba87c202946eebc6b648f9b134cb85816848288f505e87",
+    "586914c63f8b1552876caab1d980afca51f43ec4692eae94208346e14f606e49"
+   ],
+   "line": "transition_catalogue_conforme boules=22 incidences=70 niveaux=22 coquilles_etendues=1 supports_multiples=0 sstar_selon_convention=0 sstar_differents=0 renumerotees=2",
+   "sstar_differents": 0,
+   "trame": "audit"
+  },
+  {
+   "appariees": 22,
+   "bytes": [
+    1432,
+    1432
+   ],
+   "case": "exact_9_3",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "bd9c2b73365b350a89a2cfc47c3a684529b6bd18254e1ae586e56cd23a5e5b3c",
+    "a254ee05b3ea97b68e900b44b7e643a39e6e9972e70e522ff3d4084f53f164f4"
+   ],
+   "line": "transition_catalogue_conforme boules=22 incidences=70 niveaux=22 coquilles_etendues=1 supports_multiples=0 sstar_selon_convention=0 sstar_differents=0 renumerotees=2",
+   "sstar_differents": 0,
+   "trame": "audit"
+  },
+  {
+   "appariees": 8,
+   "bytes": [
+    728,
+    680
+   ],
+   "case": "drop",
+   "code": 1,
+   "ecarts": {
+    "absente": 1
+   },
+   "inputs_sha256": [
+    "7808093ce8b6eec1369d84076e9ed3660b9f533ea92c42b178d8b88ca19e8dca",
+    "2d88e1cab1ce69270123b9519c6b4064e5e3b548fc8fc76c76ff4f568e77595c"
+   ],
+   "line": "transition_catalogue_desaccord ecarts=1 categories=absente:1",
+   "sstar_differents": 1,
+   "trame": "audit"
+  },
+  {
+   "appariees": 9,
+   "bytes": [
+    728,
+    776
+   ],
+   "case": "duplicate",
+   "code": 1,
+   "ecarts": {
+    "doublon": 1
+   },
+   "inputs_sha256": [
+    "7808093ce8b6eec1369d84076e9ed3660b9f533ea92c42b178d8b88ca19e8dca",
+    "83ef670f9bfab49e73b234ddbf1ab189f3b474c81cca534b2472f2101d199222"
+   ],
+   "line": "transition_catalogue_desaccord ecarts=1 categories=doublon:1",
+   "sstar_differents": 1,
+   "trame": "audit"
+  },
+  {
+   "appariees": 9,
+   "bytes": [
+    728,
+    720
+   ],
+   "case": "omit_inner",
+   "code": 1,
+   "ecarts": {
+    "interieur": 1
+   },
+   "inputs_sha256": [
+    "7808093ce8b6eec1369d84076e9ed3660b9f533ea92c42b178d8b88ca19e8dca",
+    "fe31c4d7aa0c5c2bfe305456dc79d0069f898c83b8c3bbd73d6f34b06f8340d6"
+   ],
+   "line": "transition_catalogue_desaccord ecarts=1 categories=interieur:1",
+   "sstar_differents": 1,
+   "trame": "audit"
+  },
+  {
+   "appariees": 9,
+   "bytes": [
+    720,
+    720
+   ],
+   "case": "common_inner_omission_declared_limit",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "ae0793ce5777563728c56deb9b6f36f72ce9112081fa507665ec7d6d3dd3cbb0",
+    "fe31c4d7aa0c5c2bfe305456dc79d0069f898c83b8c3bbd73d6f34b06f8340d6"
+   ],
+   "line": "transition_catalogue_conforme boules=9 incidences=24 niveaux=4 coquilles_etendues=5 supports_multiples=1 sstar_selon_convention=1 sstar_differents=1 renumerotees=6",
+   "sstar_differents": 1,
+   "trame": "audit"
+  },
+  {
+   "bytes": [
+    728,
+    728
+   ],
+   "case": "different_ascii_frames_refused",
+   "code": 2,
+   "inputs_sha256": [
+    "7808093ce8b6eec1369d84076e9ed3660b9f533ea92c42b178d8b88ca19e8dca",
+    "ee9a999ff949090c8d0fdd7dda912b52ebd3fe5c1be5622776bd54774a147895"
+   ],
+   "line": ""
+  },
+  {
+   "appariees": 9,
+   "bytes": [
+    728,
+    728
+   ],
+   "case": "different_invalid_frames_accepted",
+   "code": 0,
+   "ecarts": {},
+   "inputs_sha256": [
+    "5c31d55018b86ed05d4ebd7d3c67b602d771f7d9b79dbebf637605afb832d1fb",
+    "c387fb9cbc2194076b183aa20cded878446d0a8593a52e3b700f14056d39d365"
+   ],
+   "line": "transition_catalogue_conforme boules=9 incidences=25 niveaux=4 coquilles_etendues=5 supports_multiples=1 sstar_selon_convention=1 sstar_differents=1 renumerotees=6",
+   "sstar_differents": 1,
+   "trame": "audit\ufffd"
+  },
+  {
+   "bytes": [
+    728,
+    728
+   ],
+   "case": "huge_section_refused",
+   "code": 2,
+   "inputs_sha256": [
+    "7808093ce8b6eec1369d84076e9ed3660b9f533ea92c42b178d8b88ca19e8dca",
+    "5a034c0dd66dec647fdb0477e375546e57fbf93ffc0c1971ca91b04e3636ea9e"
+   ],
+   "line": ""
+  }
+ ],
+ "independent_balls": 660,
+ "independent_by_q": {
+  "2": 412,
+  "3": 204,
+  "4": 44
+ },
+ "independent_catalogues": 40,
+ "official_small_tests": [
+  {
+   "args": [],
+   "code": 0,
+   "stdout": [
+    "transition_temoins_ok temoins=6 cas=49 conformes=10 desaccords=25 refus=14 boules=55 sstar_changes=4"
+   ]
+  },
+  {
+   "args": [
+    "--inject=boules_par_support"
+   ],
+   "code": 4,
+   "stdout": [
+    "mutant_killed boules_par_support",
+    "tue par carre_tourne, cercle_q3, sphere_q4, code 1 chacun (boules identifiees par S*, non par centre et rayon carre)"
+   ]
+  },
+  {
+   "args": [
+    "--inject=convention_v12_par_indices"
+   ],
+   "code": 4,
+   "stdout": [
+    "mutant_killed convention_v12_par_indices",
+    "tue par carre_tourne, cercle_q3, sphere_q4, code 1 chacun (convention v12 departagee par les SiteIdx (rang de Morton))"
+   ]
+  },
+  {
+   "args": [
+    "--inject=sans_absence"
+   ],
+   "code": 4,
+   "stdout": [
+    "mutant_killed sans_absence",
+    "tue par boule_manquante, niveau_manquant, code 0 chacun (bijection : boule ou niveau de reference sans image ignores)"
+   ]
+  },
+  {
+   "args": [
+    "--inject=sans_admission"
+   ],
+   "code": 4,
+   "stdout": [
+    "mutant_killed sans_admission",
+    "tue par admission_partout, code 0 chacun (boule hors de Cat_K (p + q > K + 1) acceptee)"
+   ]
+  },
+  {
+   "args": [
+    "--inject=sans_cardinal_support"
+   ],
+   "code": 0,
+   "stdout": [
+    "mutant_survives sans_cardinal_support",
+    "garde equivalente : garde defensive : qmin et U egales l'impliquent ; codes inchanges sur les 49 cas"
+   ]
+  },
+  {
+   "args": [
+    "--inject=sans_convention"
+   ],
+   "code": 4,
+   "stdout": [
+    "mutant_killed sans_convention",
+    "tue par sstar_non_canonique, sstar_morton_sous_v12, sstar_morton_sous_v12_q3, sstar_morton_sous_v12_q4, sstar_v12_sous_v11, code 0 chacun (S* non premier de sa convention accepte)"
+   ]
+  },
+  {
+   "args": [
+    "--inject=sans_coquille_croisee"
+   ],
+   "code": 4,
+   "stdout": [
+    "mutant_killed sans_coquille_croisee",
+    "tue par coquille_omise, code 0 chacun (U non comparees entre les vidages)"
+   ]
+  },
+  {
+   "args": [
+    "--inject=sans_coquille_sphere"
+   ],
+   "code": 4,
+   "stdout": [
+    "mutant_killed sans_coquille_sphere",
+    "tue par coquille_hors_sphere_partout, code 0 chacun (sites de U non juges sur la sphere)"
+   ]
+  },
+  {
+   "args": [
+    "--inject=sans_decalages"
+   ],
+   "code": 4,
+   "stdout": [
+    "mutant_killed sans_decalages",
+    "tue par refus_decalage, code 1 chacun (decalages non compares a p + m : population tronquee jugee comme une autre)"
+   ]
+  },
+  {
+   "args": [
+    "--inject=sans_domaine_des_indices"
+   ],
+   "code": 4,
+   "stdout": [
+    "mutant_killed sans_domaine_des_indices",
+    "tue par refus_index_hors_domaine, code 3 chacun (indices de sites hors domaine admis : le lecteur sort par une exception)"
+   ]
+  },
+  {
+   "args": [
+    "--inject=sans_doublon"
+   ],
+   "code": 4,
+   "stdout": [
+    "mutant_killed sans_doublon",
+    "tue par boule_en_double, code 0 chacun (bijection : cle repetee ignoree)"
+   ]
+  },
+  {
+   "args": [
+    "--inject=sans_en_trop"
+   ],
+   "code": 4,
+   "stdout": [
+    "mutant_killed sans_en_trop",
+    "tue par boule_de_trop, code 0 chacun (bijection : boule candidate sans antecedent ignoree)"
+   ]
+  },
+  {
+   "args": [
+    "--inject=sans_interieur_croise"
+   ],
+   "code": 4,
+   "stdout": [
+    "mutant_killed sans_interieur_croise",
+    "tue par interieur_omis, code 0 chacun (I non compares entre les vidages)"
+   ]
+  },
+  {
+   "args": [
+    "--inject=sans_interieur_strict"
+   ],
+   "code": 4,
+   "stdout": [
+    "mutant_killed sans_interieur_strict",
+    "tue par interieur_non_strict_partout, code 0 chacun (sites de I non juges strictement interieurs)"
+   ]
+  },
+  {
+   "args": [
+    "--inject=sans_niveaux"
+   ],
+   "code": 4,
+   "stdout": [
+    "mutant_killed sans_niveaux",
+    "tue par niveaux_faux_partout, code 0 chacun (NLEVELS non controle)"
+   ]
+  },
+  {
+   "args": [
+    "--inject=sans_niveaux_croissants"
+   ],
+   "code": 4,
+   "stdout": [
+    "mutant_killed sans_niveaux_croissants",
+    "tue par niveaux_decroissants_partout, code 0 chacun (niveaux decroissants dans l'ordre publie acceptes)"
+   ]
+  },
+  {
+   "args": [
+    "--inject=sans_ordre"
+   ],
+   "code": 4,
+   "stdout": [
+    "mutant_killed sans_ordre",
+    "tue par ordre_v11_sous_v12, code 0 chacun (ordre publie a niveau egal non recalcule)"
+   ]
+  },
+  {
+   "args": [
+    "--inject=sans_positions_distinctes"
+   ],
+   "code": 4,
+   "stdout": [
+    "mutant_killed sans_positions_distinctes",
+    "tue par refus_positions_en_double, code 1 chacun (positions en double admises : l'identite par position est perdue)"
+   ]
+  },
+  {
+   "args": [
+    "--inject=sans_qmin"
+   ],
+   "code": 4,
+   "stdout": [
+    "mutant_killed sans_qmin",
+    "tue par qmin_non_minimal_partout, code 0 chacun (support de cardinal < q dans U ignore)"
+   ]
+  },
+  {
+   "args": [
+    "--inject=sans_rangs"
+   ],
+   "code": 4,
+   "stdout": [
+    "mutant_killed sans_rangs",
+    "tue par rangs_faux_partout, code 0 chacun (rang publie non compare au rang dense recalcule)"
+   ]
+  },
+  {
+   "args": [
+    "--inject=sans_rangs_croises"
+   ],
+   "code": 0,
+   "stdout": [
+    "mutant_survives sans_rangs_croises",
+    "garde equivalente : garde defensive : bijection et rangs recalcules l'impliquent ; codes inchanges sur les 49 cas"
+   ]
+  },
+  {
+   "args": [
+    "--inject=sans_sites"
+   ],
+   "code": 4,
+   "stdout": [
+    "mutant_killed sans_sites",
+    "tue par site_en_trop, code 0 chacun (ensembles de positions des sites non compares)"
+   ]
+  },
+  {
+   "args": [
+    "--inject=sans_support_dans_coquille"
+   ],
+   "code": 4,
+   "stdout": [
+    "mutant_killed sans_support_dans_coquille",
+    "tue par support_hors_coquille_partout, code 0 chacun (S* hors de U accepte)"
+   ]
+  },
+  {
+   "args": [
+    "--inject=sans_support_minimal"
+   ],
+   "code": 4,
+   "stdout": [
+    "mutant_killed sans_support_minimal",
+    "tue par sstar_non_minimal_partout, code 0 chacun (S* non minimal (ou degenere) accepte)"
+   ]
+  },
+  {
+   "args": [
+    "--inject=sites_par_indice"
+   ],
+   "code": 4,
+   "stdout": [
+    "mutant_killed sites_par_indice",
+    "tue par carre_tourne_sites_inverses, code 1 chacun (sites identifies par leur indice, non par leur position)"
+   ]
+  }
+ ],
+ "pin": "274592a30f6961cb7702125dcd2f031ff22b7df2",
+ "schema": "ehgp.audit.transition.v1",
+ "scope": "Fraction exhaustive n<=6, vrais main ; aucun LiDAR, natif, GCP ou qualification FULL",
+ "script_sha256": "7f1fa460dd3e9bdde8e3f40a3e8d3173e73fc3944d0490f4b04ff35ae8e7942e",
+ "source_git_pin_and_before_after_equal": true,
+ "source_sha256": {
+  "morsehgp3D_v12/cmake/gates.cmake": "b67f964eb11b74e301fa73c2c741a7bd5040e33182f93ccd3ada1311a047021d",
+  "morsehgp3D_v12/docs/CONTRAT_CATALOGUE.md": "ef20a4ef06774e8663298e0c7a8738a27c130a538e671a4ac0a3943620fdc5a3",
+  "morsehgp3D_v12/microbancs/mes_m3_m4_tour/common/format.hpp": "cf1d640f567146660a5625688146df2eb79347383a2a9d92f277a4192d11e587",
+  "morsehgp3D_v12/reference/README.md": "d5d09107e93c8978f4381b0bd1e90edc0b54222e249f8e02acd5a50bb6d31afb",
+  "morsehgp3D_v12/reference/fixtures/transition_catalogue.json": "22966857321e7f67955018ba2a53a51ca0997969c1c9771cf9a7a9f8d594bf28",
+  "morsehgp3D_v12/reference/hgp12_ref/__init__.py": "e11719426ab6963caddaedf5e38b7f14f772ad06086a0b5aaacffdf080626ace",
+  "morsehgp3D_v12/reference/hgp12_ref/constructive.py": "14050f931660901282e74844f500f030ac11dab4dda867ead7d030d7b9a2fc0a",
+  "morsehgp3D_v12/reference/hgp12_ref/definition.py": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43",
+  "morsehgp3D_v12/reference/hgp12_ref/dumps.py": "2ece0b491430e314091de7b40a72233e299c543f236bcc00bbd5f84b38338373",
+  "morsehgp3D_v12/reference/hgp12_ref/families.py": "244b9b325a7c9f43c7086cc7e9674bdc04ec2307a01bf69e2b12d5f02e75d73a",
+  "morsehgp3D_v12/reference/hgp12_ref/intgeom.py": "d0f7b1cecbbb1b25c3091bc1e3d3d062b9ee0f16b1d81c7117bf60b0d13a3f4b",
+  "morsehgp3D_v12/reference/hgp12_ref/judge.py": "09e65a40f7ff33400c04eb91c442a430579bf020b115589b69ad8384529d6507",
+  "morsehgp3D_v12/reference/hgp12_ref/model.py": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c",
+  "morsehgp3D_v12/reference/hgp12_ref/supports.py": "970f645462a019639cead958cf8f45b1324cf3083bb61fc9a0891ddc523254ee",
+  "morsehgp3D_v12/reference/test_transition_catalogue.py": "30fe5b560cce11fb4116c873727f7540a1ee125c9bef5fcc9ccab72e74fd2672",
+  "morsehgp3D_v12/reference/tests.cmake": "0cefe86cef48fdaa5e8df88d1cc1abbfcac24844e6e341155603dd8c1fd27d16",
+  "morsehgp3D_v12/reference/transition_catalogue.py": "a5cf39b73a7169f9d2d4a1077fe745c4f457bbfb741192550a42dbb1229808a2",
+  "morsehgp3D_v12/reference/transition_temoins.py": "772ab5259d25661212189294ed4b16576265515683414b80a63433cd8c862642"
+ }
+}

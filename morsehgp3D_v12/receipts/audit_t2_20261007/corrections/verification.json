@@ -1,0 +1,19 @@
+{
+  "binary_artifacts_retained": false,
+  "gcp_used": false,
+  "normal_and_optimized": {
+    "evidence.json": {
+      "byte_identical": true,
+      "normal_sha256": "991327e86bbfdb93a51d6422e6a5e62b444b2b13a91e7902e5898ae945f947b3",
+      "optimized_sha256": "991327e86bbfdb93a51d6422e6a5e62b444b2b13a91e7902e5898ae945f947b3"
+    },
+    "normal.json": {
+      "byte_identical": true,
+      "normal_sha256": "9a73ea7c9417d6cbd36e520f5546b8a524c27228cf278d81be69a2dffe38dcae",
+      "optimized_sha256": "9a73ea7c9417d6cbd36e520f5546b8a524c27228cf278d81be69a2dffe38dcae"
+    }
+  },
+  "pin": "274592a30f6961cb7702125dcd2f031ff22b7df2",
+  "source_files_modified": false,
+  "witness_hashes_rechecked": true
+}

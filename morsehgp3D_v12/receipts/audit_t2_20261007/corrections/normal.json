@@ -1,0 +1,269 @@
+{
+  "before_after_unchanged": true,
+  "frozen_v10_single_thread": true,
+  "gcp_used": false,
+  "gpu_used": false,
+  "heavy_native_tests_run": false,
+  "pin": "274592a30f6961cb7702125dcd2f031ff22b7df2",
+  "provenance_historical_port_explicit": true,
+  "runs": {
+    "check_style_gate": {
+      "exit": 0,
+      "stdout": "check_style_ok controles=145"
+    },
+    "format": {
+      "before_after_unchanged": true,
+      "binary_sha256": "294b745516c58b7446b82471b5931e5ece4c6b53186ed71a7df9c241f66c9b2f",
+      "cases": {
+        "addition_overflow": {
+          "file_bytes": 88,
+          "probe_exit": 0,
+          "response": "refused"
+        },
+        "empty_valid": {
+          "file_bytes": 88,
+          "probe_exit": 0,
+          "response": "admitted 0"
+        },
+        "multiplication_overflow": {
+          "file_bytes": 88,
+          "probe_exit": 0,
+          "response": "refused"
+        },
+        "one_valid": {
+          "file_bytes": 96,
+          "probe_exit": 0,
+          "response": "admitted 1"
+        },
+        "ordinary_truncation": {
+          "file_bytes": 88,
+          "probe_exit": 0,
+          "response": "refused"
+        },
+        "trailing_bytes": {
+          "file_bytes": 96,
+          "probe_exit": 0,
+          "response": "refused"
+        },
+        "truncated_padding": {
+          "file_bytes": 92,
+          "probe_exit": 0,
+          "response": "refused"
+        },
+        "truncated_section": {
+          "file_bytes": 74,
+          "probe_exit": 0,
+          "response": "refused"
+        }
+      },
+      "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+      "gcp_used": false,
+      "gpu_used": false,
+      "huge_allocation": false,
+      "payload_read": false,
+      "pin": "274592a30f6961cb7702125dcd2f031ff22b7df2",
+      "schema": "audit.t2.corrections.format.v1",
+      "scope": "generic Reader admission, not full catalogue or M4 adoption",
+      "sources_sha256": {
+        "morsehgp3D_v12/docs/CONTRAT_CATALOGUE.md": "ef20a4ef06774e8663298e0c7a8738a27c130a538e671a4ac0a3943620fdc5a3",
+        "morsehgp3D_v12/microbancs/mes_m3_m4_tour/common/format.hpp": "cf1d640f567146660a5625688146df2eb79347383a2a9d92f277a4192d11e587",
+        "morsehgp3D_v12/microbancs/mes_m3_m4_tour/vidage/vidage_v11.cpp": "c4a353448fdb677549cf67f17ab7389836b010aeea324a01649c34fe56bc3f8d"
+      },
+      "witness_sha256": {
+        "format.py": "bb55262d18a148b9c05b0e9a9b22b2b9ee38eac0326f8b49573116b60bc0088c",
+        "reader.cpp": "7f633439996b5a4301d6018ecd4df4967e46b519b3b4d6d228559ad05d891ad9"
+      }
+    },
+    "g4_matrix": {
+      "exit": 0,
+      "stdout": "g4_matrix_ok controles=39"
+    },
+    "gate_properties": {
+      "exit": 0,
+      "stdout": "gate_properties_ok controles=69"
+    },
+    "publication": {
+      "before_after_unchanged": true,
+      "cases": {
+        "distinct_absent": {
+          "destination_exists": true,
+          "exception": null,
+          "has_manifest": true,
+          "input_unchanged": true,
+          "remaining_files": [
+            "SHA256SUMS",
+            "receipt.json",
+            "resultats/one.json",
+            "resultats/two.json"
+          ],
+          "return_code": 0
+        },
+        "distinct_existing_empty": {
+          "destination_exists": true,
+          "exception": null,
+          "has_manifest": true,
+          "input_unchanged": true,
+          "remaining_files": [
+            "SHA256SUMS",
+            "receipt.json",
+            "resultats/one.json",
+            "resultats/two.json"
+          ],
+          "return_code": 0
+        },
+        "file_directory_collision_absent": {
+          "destination_exists": false,
+          "exception": null,
+          "has_manifest": false,
+          "input_unchanged": true,
+          "remaining_files": null,
+          "return_code": 3
+        },
+        "file_directory_collision_existing_empty": {
+          "destination_exists": true,
+          "exception": null,
+          "has_manifest": false,
+          "input_unchanged": true,
+          "remaining_files": [],
+          "return_code": 3
+        },
+        "flat_collision_absent": {
+          "destination_exists": false,
+          "exception": null,
+          "has_manifest": false,
+          "input_unchanged": true,
+          "remaining_files": null,
+          "return_code": 3
+        },
+        "flat_collision_existing_empty": {
+          "destination_exists": true,
+          "exception": null,
+          "has_manifest": false,
+          "input_unchanged": true,
+          "remaining_files": [],
+          "return_code": 3
+        },
+        "nested_collision_absent": {
+          "destination_exists": false,
+          "exception": null,
+          "has_manifest": false,
+          "input_unchanged": true,
+          "remaining_files": null,
+          "return_code": 3
+        },
+        "nested_collision_existing_empty": {
+          "destination_exists": true,
+          "exception": null,
+          "has_manifest": false,
+          "input_unchanged": true,
+          "remaining_files": [],
+          "return_code": 3
+        },
+        "redacted_name_absent": {
+          "destination_exists": true,
+          "exception": null,
+          "has_manifest": true,
+          "input_unchanged": true,
+          "remaining_files": [
+            "SHA256SUMS",
+            "receipt.json",
+            "resultats/<compte>.json"
+          ],
+          "return_code": 0
+        },
+        "redacted_name_existing_empty": {
+          "destination_exists": true,
+          "exception": null,
+          "has_manifest": true,
+          "input_unchanged": true,
+          "remaining_files": [
+            "SHA256SUMS",
+            "receipt.json",
+            "resultats/<compte>.json"
+          ],
+          "return_code": 0
+        },
+        "write_failure_SHA256SUMS_absent": {
+          "destination_exists": false,
+          "exception": null,
+          "has_manifest": false,
+          "input_unchanged": true,
+          "partial_write_injected": true,
+          "remaining_files": null,
+          "return_code": 3
+        },
+        "write_failure_SHA256SUMS_existing_empty": {
+          "destination_exists": true,
+          "exception": null,
+          "has_manifest": false,
+          "input_unchanged": true,
+          "partial_write_injected": true,
+          "remaining_files": [],
+          "return_code": 3
+        },
+        "write_failure_receipt.json_absent": {
+          "destination_exists": false,
+          "exception": null,
+          "has_manifest": false,
+          "input_unchanged": true,
+          "partial_write_injected": true,
+          "remaining_files": null,
+          "return_code": 3
+        },
+        "write_failure_receipt.json_existing_empty": {
+          "destination_exists": true,
+          "exception": null,
+          "has_manifest": false,
+          "input_unchanged": true,
+          "partial_write_injected": true,
+          "remaining_files": [],
+          "return_code": 3
+        },
+        "write_failure_resultats/one.json_absent": {
+          "destination_exists": false,
+          "exception": null,
+          "has_manifest": false,
+          "input_unchanged": true,
+          "partial_write_injected": true,
+          "remaining_files": null,
+          "return_code": 3
+        },
+        "write_failure_resultats/one.json_existing_empty": {
+          "destination_exists": true,
+          "exception": null,
+          "has_manifest": false,
+          "input_unchanged": true,
+          "partial_write_injected": true,
+          "remaining_files": [],
+          "return_code": 3
+        }
+      },
+      "gcp_used": false,
+      "pin": "274592a30f6961cb7702125dcd2f031ff22b7df2",
+      "preexisting_nonempty_refusals": 5,
+      "schema": "audit.t2.corrections.publication.v1",
+      "scope": "temporary synthetic trees only; no historical partial receipt alleged",
+      "source_sha256": {
+        "morsehgp3D_v12/microbancs/outils/recu_session.py": "ce95c3393d01e11ec7c3a35eee03ac08715524891eb7baaac87a6e760b34d8f9"
+      },
+      "witness_sha256": "575a36cc707f1ef1d48e601c38adc70b7b1572ffeaa32b80655681f1e84033dc"
+    },
+    "style": {
+      "exit": 0,
+      "stdout": "style_ok fichiers=217"
+    }
+  },
+  "schema": "audit.t2.corrections.v1",
+  "sources_before_after": {
+    "content_manifest_sha256": "a4cbc2acd49c03ab71dd252234a9df076e3c1cbf8a0cb46615fff509ca71e61c",
+    "git_tree": "c8e97766a823ea750128680c81857b8a5c1008ea",
+    "tracked_files": 1059
+  },
+  "witness_sha256": {
+    "check.py": "1cca4b0944c5989f0cf7732fb93781c832d9e1f6fd4fb014f1582fb566345b57",
+    "evidence.py": "0c4f2d88440d838dfb85ea6d7aa01be6f02d0428b517eb8031a33ed893f845cc",
+    "format.py": "bb55262d18a148b9c05b0e9a9b22b2b9ee38eac0326f8b49573116b60bc0088c",
+    "publication.py": "575a36cc707f1ef1d48e601c38adc70b7b1572ffeaa32b80655681f1e84033dc",
+    "reader.cpp": "7f633439996b5a4301d6018ecd4df4967e46b519b3b4d6d228559ad05d891ad9"
+  }
+}

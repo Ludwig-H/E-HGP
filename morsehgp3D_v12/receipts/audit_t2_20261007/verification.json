@@ -1,0 +1,40 @@
+{
+  "binaries_retained": false,
+  "captures_and_witness_hashes_verified": true,
+  "corrections_closure_method": "Independent unchanged detached worktree, all tracked v12 blobs compared to pin; audit integration changes excluded from that worktree.",
+  "corrections_full_tree_closure": {
+    "content_manifest_sha256": "a4cbc2acd49c03ab71dd252234a9df076e3c1cbf8a0cb46615fff509ca71e61c",
+    "git_tree": "c8e97766a823ea750128680c81857b8a5c1008ea",
+    "tracked_files": 1059
+  },
+  "email_candidates": [
+    "audit@example.invalid"
+  ],
+  "gcp_used": false,
+  "licensed_data_retained": false,
+  "normal_optimized_equality": "Recorded by each subreceipt; retained math captures also compared byte for byte at integration.",
+  "pin": "274592a30f6961cb7702125dcd2f031ff22b7df2",
+  "product_files_modified": false,
+  "relative_markdown_links_verified": 20,
+  "scope": "Structural and hash closure only; does not requalify test semantics or historical source-to-build provenance.",
+  "source_files_individually_verified_against_pin_and_current_tree": 61,
+  "subreceipts": {
+    "corrections": {
+      "files": 9,
+      "manifest_sha256": "719e301c54000f226feb9c0b6db0a47928356630a05b045d7744160db2681f1b"
+    },
+    "mathematiques": {
+      "files": 5,
+      "manifest_sha256": "19c9beda390f70685394e843130b2af97421cd803dfd3603675d233c6a1fa555"
+    },
+    "mesures": {
+      "files": 7,
+      "manifest_sha256": "9bc7067a0c1e9e7566a8ce7f89a1cee08df8bb288a560dbc1ec2b470b30e25a9"
+    },
+    "transition": {
+      "files": 4,
+      "manifest_sha256": "dad4ed86b3be39c29dac30f69706e6a0777d711d45ba3de89a23085aca6c7d7e"
+    }
+  },
+  "text_utf8_no_nul_no_symlink": true
+}

@@ -1,0 +1,13 @@
+{
+  "files_sha256": {
+    "README.md": "ccc30acb32ce0cdb9ae1f13abbd023b8c46fc1626c948939ff5f5dcf8cdcba36",
+    "check.py": "be263b61aa8ad0f3053de7d6db4b6e3cc718e94b26cd059df15e10d3c1034ac0",
+    "normal.json": "ce35640088117a4ccf1b39774f14541acfac5f242a124877c8a2b10f60d0b541",
+    "optimized.json": "ce35640088117a4ccf1b39774f14541acfac5f242a124877c8a2b10f60d0b541"
+  },
+  "normal_optimized_byte_equal": true,
+  "normal_returncode": 0,
+  "optimized_returncode": 0,
+  "pin": "274592a30f6961cb7702125dcd2f031ff22b7df2",
+  "source_pin_and_before_after_verified": true
+}

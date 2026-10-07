@@ -1,0 +1,26 @@
+{
+  "g1_delivered_gate": {
+    "exit_code": 0,
+    "stdout_sha256": "4d4b036589a2c669757a8a9cc40f44abe0448672d337a3686599a69973be542a",
+    "summary": {
+      "ecarts": 0,
+      "mutant_cote_nul": false,
+      "porte": "mes_g1",
+      "temoins": 4
+    }
+  },
+  "gcp_used": false,
+  "gpu_used": false,
+  "historical_binaries_hashed": 2,
+  "historical_journals": 6,
+  "normal_optimized_byte_equal": {
+    "g1_result.json": true,
+    "result.json": true
+  },
+  "pin": "274592a30f6961cb7702125dcd2f031ff22b7df2",
+  "real_data_replayed": false,
+  "result_sha256": {
+    "g1_result.json": "df004983c96e5bf245e956389d69070233b69f926164c32441d71551f19c36e2",
+    "result.json": "4c5d312157585e455d7df8976fadf9ed93886f8050f165a7df78f3f8cf83ac39"
+  }
+}

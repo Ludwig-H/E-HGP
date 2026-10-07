@@ -1,0 +1,116 @@
+{
+  "g1": {
+    "ng00_k10": {
+      "certifiable": 1585555,
+      "changed_target_fraction": 0.17744701382165862,
+      "complete_in_catalogue": 18,
+      "fraction": 0.9574150750054798,
+      "saturated": 1656079
+    },
+    "ng00_k5": {
+      "certifiable": 184660,
+      "changed_target_fraction": 0.2870518791292105,
+      "complete_in_catalogue": 3,
+      "fraction": 0.8237388088663666,
+      "saturated": 224173
+    },
+    "ng01_k5": {
+      "certifiable": 140423,
+      "changed_target_fraction": 0.30371093054556586,
+      "complete_in_catalogue": 3,
+      "fraction": 0.8306939654407458,
+      "saturated": 169043
+    },
+    "ng02_k5": {
+      "certifiable": 131451,
+      "changed_target_fraction": 0.29436063628272136,
+      "complete_in_catalogue": 13,
+      "fraction": 0.8388329812963046,
+      "saturated": 156707
+    }
+  },
+  "historical_binary_sha256": {
+    "mhgp12_mes_g1": "5cabe11ce22e0bfc861ef7f82235ceb5259e699f7a659c4ee8666470c2bee091",
+    "mhgp12_vidage": "a3fcf6ebbb5ede9ac4e934130aeba26b6086194a3ea6c977ffd779c425dd0b5b"
+  },
+  "historical_journal_sha256": {
+    "G1/ng00_k10": "422832ddce1f026efabc94e6cae54a3bf273d9c19c6de33b4a42327ae40c71e7",
+    "G1/ng00_k5": "20bc01e5034caf53abb5572c17dc27d19e7fbc7e51828db6bb248e503b8a94dc",
+    "G1/ng01_k5": "be7b9efa81d1699700d1a9e74fd0dc4e19903246ef1fcd800ced6c606a6594d7",
+    "G1/ng02_k5": "d7f98e979fb3d78ceb378aee26a54a903d880715b80ee47d5d56b38519479081",
+    "M7/ng00_k10": "77c81fcae1a7eeefd8855ecc9afa7df9e86e656a135cee0cae91223da9eb73d7",
+    "M7/ng00_k5": "05d54f96e0303de09d613eeb6d5649e5e3ab99d6b471bf3a189ae28696e36034"
+  },
+  "k5_total": {
+    "certifiable": 456534,
+    "fraction": 0.8301780431078533,
+    "saturated": 549923
+  },
+  "limits": [
+    "No real-data replay",
+    "Dump hashes recorded but payloads not reread",
+    "Historical linked binary source closure not rebuilt",
+    "Raw instrumented local cycles, not G4 performance",
+    "G-L3 not adopted"
+  ],
+  "m7": {
+    "ng00_k10": {
+      "cycle_shares": {
+        "census_complet": 0.06866063482304949,
+        "census_sature": 0.1601706182912289,
+        "certificat": 0.034683268399459254,
+        "proposition_t1": 0.3131609048525151,
+        "repli": 0.0,
+        "reste": 0.07373738047128808,
+        "saut": 0.003249317692485194,
+        "sonde": 0.3291094706885339,
+        "trace_stricte": 0.01722840478144009
+      },
+      "empty_section_bias_cycles_range": [
+        60.5071,
+        60.5071
+      ],
+      "instrumented_uninstrumented_ratio_range": [
+        0.9668047194648184,
+        1.4616578569464387
+      ]
+    },
+    "ng00_k5": {
+      "cycle_shares": {
+        "census_complet": 0.06473898894875907,
+        "census_sature": 0.1435454872331581,
+        "certificat": 0.02347706129827599,
+        "proposition_t1": 0.232996209812802,
+        "repli": 0.0,
+        "reste": 0.10352133973636259,
+        "saut": 0.003103398983950877,
+        "sonde": 0.4159625782814517,
+        "trace_stricte": 0.012654935705239642
+      },
+      "empty_section_bias_cycles_range": [
+        62.2506,
+        62.2506
+      ],
+      "instrumented_uninstrumented_ratio_range": [
+        1.181913559477564,
+        1.280336228188989
+      ]
+    }
+  },
+  "pin": "274592a30f6961cb7702125dcd2f031ff22b7df2",
+  "schema": "ehgp.audit.t2.measure_receipts.v1",
+  "source_sha256": {
+    "morsehgp3D_v12/docs/CONTRAT_TOUR.md": "2cbd30a0cd8a2c018ab18162cfa8c017d9c19bf7e3e10661a82c9f72a1380a3b",
+    "morsehgp3D_v12/docs/PLAN.md": "27b4ff0bee5ac1f3146ee51caee308e4aa28bc57b23ef4d581bc9de97da3ca38",
+    "morsehgp3D_v12/microbancs/mes_g1_saut/mes_g1.cpp": "a2de755ea334c8d90d802035b7eb2faabf39fddaab18722d685026413f268652",
+    "morsehgp3D_v12/microbancs/mes_g1_saut/voisins.hpp": "69660da67d5e54e74963cdc65ddb5b90fedf882ee57c5b13c741068624a4275a",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/vidage/vidage_v11.cpp": "c4a353448fdb677549cf67f17ab7389836b010aeea324a01649c34fe56bc3f8d",
+    "morsehgp3D_v12/receipts/mes_g1_m7_local_20261007/README.md": "aef0b13651a0c9c2dee383f9f2a7b92fdc28b3d6fb83fe8b00e45ef8c374756c",
+    "morsehgp3D_v12/receipts/mes_g1_m7_local_20261007/mes_g1.json": "a6c58b3dd296237b1fdfe57d1c4a131aa444f17ae8ff9f833fbeb9b3b4a6c49d",
+    "morsehgp3D_v12/receipts/mes_g1_m7_local_20261007/mes_g1.md": "44bcb9c0b31d7c51f46879313dc3ef393c5805a7ed07d7542b3d0e0333aed694",
+    "morsehgp3D_v12/receipts/mes_g1_m7_local_20261007/mes_m7_local.json": "630feb4155720e24efbbb5c1ebe9c075f5f2588c9a72b0b09fb758274ade9cff",
+    "morsehgp3D_v12/receipts/mes_g1_m7_local_20261007/mes_m7_local.md": "aca727b6c65233f6551687a708590284662652af23f555286d81475cb7b43d1e"
+  },
+  "sources_before_after_unchanged": true,
+  "witness_sha256": "5ba2c4975b47b3e4f66575c09f6003175a6f57243b0aa49e04ccccc3ed332591"
+}
