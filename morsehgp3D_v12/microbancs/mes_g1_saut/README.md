@@ -25,7 +25,26 @@ la première moitié hors ligne, en comptes déterministes ; la seconde moitié 
 
 ## 2. Méthode
 
-Pour chaque partie de route 2 (k sites, `SiteIdx` croissants) :
+**Admission stricte du vidage**, avant tout calcul de proportions (résidu de `CST-0018`, reçu
+[`audit_t2_20261007/mesures`](../../receipts/audit_t2_20261007/mesures/README.md)) : la route annoncée par `PARTINF`
+n'est jamais crue. Catalogue vérifié (arité de S* dans 2..4, sites de S* et des populations dans le nuage, décalages
+cohérents avec p + m) ; chaque partie des ordres joués est recalculée en exact (`bounded_meb` et census de la v11) et
+confrontée au catalogue :
+
+- route 1 : boule présente, support local de `bounded_meb(F)` dans la table et désignant cette boule,
+  S*(b) ⊆ F ⊆ P_b (inclusions sur le catalogue), sphère de F égale à celle de b (centre et niveau exacts),
+  `sstar_in_f` = 1, action intérieure si et seulement si p(b) ≥ k ;
+- routes 2 et 3 : support local absent de la table, `sstar_in_f` = 0, census de seuil k du bon genre (saturé avec
+  exactement k intérieurs et action intérieure ; complet avec p < k et action trace ou terminale) ; boule annoncée au
+  catalogue vérifiée (S*(b) ⊄ F, F ⊆ P_b, même sphère, et même population pour la route 3) ; boule annoncée hors
+  catalogue vérifiée (route 2 : census de seuil K saturé, ou complet avec S* global absent de la table et
+  p + q ≥ K + 2 ; route 3 : de même sur la coquille complète) ; route 2 : la cible de la v11 est la partie suivante
+  de la trace, ou la trace finit par la table de populations.
+
+Toute incohérence est un refus explicite (code 3) avant toute ligne d'ordre. Un ordre choisi hors de 2..K est une
+erreur d'usage (code 2) ; un bilan sans partie de route 2 ni de route 3 dans les ordres joués est refusé (code 3).
+
+Puis, pour chaque partie de route 2 (k sites, `SiteIdx` croissants) :
 
 1. plus petite boule exacte de F par `bounded_meb` de la v11 (liée) ;
 2. **cible de la v11** par le census de la v11 (`CensusWorkspace`, seuil k) : saturé, il rend exactement les k plus
@@ -60,7 +79,7 @@ lemme) sont publiés à part, par ordre, et recoupés avec le catalogue (p, m, q
 cmake -S mes_g1_saut -B <build> -DCMAKE_BUILD_TYPE=Release \
       -DMHGP11_SOURCE=<sources>/morsehgp3D_v11 -DMHGP11_BUILD=<construction Release u21 de la v11>
 cmake --build <build> -j 3
-ctest --test-dir <build> --output-on-failure          # porte (0), mutant (1), usage (2), juge du pilote (0)
+ctest --test-dir <build> --output-on-failure          # porte (0), quatre mutants (1), usage (2), juge du pilote (0)
 <build>/mhgp12_mes_g1 <vidage complet> [--ordres k1,k2,...] [--echantillon N] > mes_g1_<cas>.jsonl
 ```
 
@@ -80,7 +99,7 @@ parties, hors catalogue, `census_complets_sphere_au_catalogue_s_etoile_hors_de_f
 (p, q_min) hors catalogue ; `lem_hors_cat` ; taille de la table de populations) ; `bilan` (sommes, sphères distinctes
 tous ordres confondus, code). Aucune coordonnée ni aucun vidage n'est publié : comptes et empreintes seulement.
 
-## 5. Porte et mutant
+## 5. Porte et mutants
 
 `mhgp12_mes_g1 --porte` : nuage gravé de 17 sites en trois grappes contiguës en `SiteIdx` (K = 3) : grappe 1, la
 sphère de diamètre A1 B1 a trois intérieurs (dont deux à égale distance de A1, départagés par `SiteIdx`) et les voisins
@@ -92,10 +111,23 @@ Voisins de l'arbre égaux à la force brute sur tous les sites, six listes de vo
 ng00 K5 il est aussi tué par le juge (209 951 écarts sur l'ensemble des voisins, 827 294 sur les quatre ensembles,
 code 1).
 
+**Témoins d'admission** (vidages écrits en exact dans un dossier temporaire, banc rejoué dans le processus, sortie
+capturée) : le témoin de l'auditeur, quatre sites alignés (0,0,0) à (3,0,0), K = 2, F = {0, 3} (boule hors
+catalogue, deux intérieurs) : vidage honnête conforme (code 0, une partie de route 2 certifiée par les voisins) ; la
+même partie changée de la route 2 en route 1 (`ball` restant `0xFFFFFFFF`) refusée (3) ; une route 1 forgée parmi des
+parties honnêtes refusée (3) ; `--ordres 9` et `--ordres 2,9` sur ce catalogue K2 refusés (2) ; un ordre sans partie
+refusé (3, bilan vide). Un mutant causal par garde, compilé à part, retire cette seule garde et doit être **tué**
+(code 1) parce que son témoin est alors admis : `mhgp12_mes_g1_mutant_sans_garde_route` (la partie forgée parmi des
+honnêtes rend 0 ; le témoin d'une seule partie forgée est déjà arrêté par la garde du bilan),
+`mhgp12_mes_g1_mutant_sans_garde_ordres` (`--ordres 2,9` rend 0), `mhgp12_mes_g1_mutant_sans_garde_bilan` (l'ordre
+vide rend 0). Ligne de fin de la porte :
+`{"porte":"mes_g1","mutant_cote_nul":false,"mutant_garde":"aucun","temoins":4,"admission":6,"ecarts":0}`.
+
 ## 6. Codes et limites
 
-Codes : 0 conforme ; 1 écart (juge, voisins contre force brute, contradiction) ; 2 usage ; 3 refus (section absente,
-vidage incohérent avec la v11, refus arithmétique, exception).
+Codes : 0 conforme ; 1 écart (juge, voisins contre force brute, contradiction) ; 2 usage (dont un ordre choisi hors de
+2..K) ; 3 refus (section absente, vidage incohérent avec la v11 ou le catalogue, route annoncée incohérente, bilan
+vide, refus arithmétique, exception).
 
 Limites : la mesure suit les chaînes de la **v11** ; quand la cible G1 diffère de celle de la v11, la suite de la chaîne
 diffère, et le nombre réel de censuses évités par une descente avec saut se mesure par un bras de résolution, pas ici.
@@ -115,8 +147,9 @@ forêt contre celle de la v11 à chaque ordre (écart : code 1) ; détail au § 
 (`tout`) :
 
 - `construire` : ce microbanc (quatre binaires), empreintes des binaires, de `libmhgp11.a` et des sources ;
-- `portes` : porte gravée et mutant « côté nul admis » ; quatrième bras sur le premier cas (forêt identique à chaque
-  ordre) et mutant des cibles décalées (tué par une forêt différente, jamais par un simple code) ;
+- `portes` : porte gravée (témoins géométriques et d'admission), mutant « côté nul admis » et un mutant par garde
+  d'admission ; quatrième bras sur le premier cas (forêt identique à chaque ordre) et mutant des cibles décalées (tué
+  par une forêt différente, jamais par un simple code) ;
 - `campagne` : `--processus` processus neufs par cas (5 par défaut), chacun avec `--passes` passes (minimum par bras et
   par ordre) ; journaux sous `<sortie>/<cas>/campagnes/<campagne>/p<i>/`, identifiant `c<date>_<hasard>`, jamais
   écrasés ; vidages hachés (mêmes entrées d'une prise à l'autre) puis effacés ;
@@ -134,6 +167,7 @@ prise à l'autre, sources inchangées pendant l'invocation). Le verdict est dans
 preuves (0 conforme, 1 écart, 2 usage, 3 refus).
 
 **Porte du juge** `test_pilote_g1.py` (CTest `mhgp12_mes_g1_pilote_juge`, sorties synthétiques) : validation d'une
-prise (conforme, ordre manquant, temps nul, forêt différente avec code 1 ou 0, contrôle non reproduit) et dix verdicts
+prise (conforme, ordre manquant, temps nul, forêt différente avec code 1 ou 0, contrôle non reproduit) et onze verdicts
 (adopté ; rejeté par la borne, la première moitié ou la forêt ; refusé pour quatre prises, un binaire différent, un
-journal modifié, un mutant de forêt absent, des comptes non déterministes, une construction absente).
+journal modifié, un mutant de forêt absent, un mutant de garde absent, des comptes non déterministes, une construction
+absente).

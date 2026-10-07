@@ -51,7 +51,14 @@ MICROBANCS = os.path.dirname(ICI)
 V12 = os.path.dirname(MICROBANCS)
 FICHIERS = {"ng00": "lidar_ng00", "ng01": "lidar_ng01", "ng02": "lidar_ng02",
             "u8000": "uniform_u18_n8000", "u16000": "uniform_u18_n16000", "u32000": "uniform_u18_n32000"}
-BINAIRES = ["mhgp12_mes_g1", "mhgp12_mes_g1_mutant_cote_nul", "mhgp12_vidage", "mhgp12_vidage_mutant_cibles_decalees"]
+# Porte gravee de mes_g1 et ses mutants : (nom de porte, binaire, mutant_cote_nul, mutant_garde, code attendu).
+PORTES_G1 = [("mes_g1", "mhgp12_mes_g1", False, "aucun", 0),
+             ("mes_g1_mutant_cote_nul", "mhgp12_mes_g1_mutant_cote_nul", True, "aucun", 1),
+             ("mes_g1_mutant_sans_garde_route", "mhgp12_mes_g1_mutant_sans_garde_route", False, "route", 1),
+             ("mes_g1_mutant_sans_garde_ordres", "mhgp12_mes_g1_mutant_sans_garde_ordres", False, "ordres", 1),
+             ("mes_g1_mutant_sans_garde_bilan", "mhgp12_mes_g1_mutant_sans_garde_bilan", False, "bilan", 1)]
+TEMOINS_G1 = {"temoins": 4, "admission": 6}  # temoins geometriques et temoins d'admission de la porte gravee
+BINAIRES = [p[1] for p in PORTES_G1] + ["mhgp12_vidage", "mhgp12_vidage_mutant_cibles_decalees"]
 # Sources dont dependent les binaires de ce microbanc (hors v11, hachee par sa bibliotheque) : hachees au debut et a la
 # fin de chaque invocation, et a la construction.
 SOURCES = [os.path.join(ICI, n) for n in ("CMakeLists.txt", "mes_g1.cpp", "voisins.hpp", "pilote_g1.py")] + [
@@ -337,19 +344,19 @@ def portes(args, rapport):
     pire = 0
     racine = os.path.join(args.sortie, "portes", args.campagne)
     os.makedirs(racine)
-    # 1, 2 : porte gravee et mutant « cote nul admis » (tue par ses ecarts, jamais par un simple code).
-    for nom, exe, attendu in (("mes_g1", "mhgp12_mes_g1", 0), ("mes_g1_mutant_cote_nul", "mhgp12_mes_g1_mutant_cote_nul",
-                                                                1)):
+    # Porte gravee (temoins geometriques et temoins d'admission) et ses mutants : « cote nul admis » et un mutant par
+    # garde d'admission (route, ordres, bilan), chacun tue par ses ecarts, jamais par un simple code.
+    for nom, exe, cote_nul, garde, attendu in PORTES_G1:
         journal = os.path.join(racine, nom + ".jsonl")
         code, lignes, duree, _, prov = lancer(args, rapport, exe, ["--porte"], journal)
         raisons = problemes_provenance(prov)
         resume = [l for l in lignes if l.get("porte") == "mes_g1"]
-        if len(resume) != 1 or resume[0].get("temoins") != 4:
-            raisons.append("resume de porte absent ou temoins manquants")
-        elif attendu == 0 and (code != 0 or resume[0].get("ecarts") != 0 or resume[0].get("mutant_cote_nul")):
+        if len(resume) != 1 or any(resume[0].get(c) != v for c, v in TEMOINS_G1.items()) or \
+                resume[0].get("mutant_cote_nul") is not cote_nul or resume[0].get("mutant_garde") != garde:
+            raisons.append("resume de porte absent, d'un autre binaire ou temoins manquants")
+        elif attendu == 0 and (code != 0 or resume[0].get("ecarts") != 0):
             raisons.append("porte en echec (code %d)" % code)
-        elif attendu == 1 and (code != 1 or not resume[0].get("mutant_cote_nul") or
-                               not entier(resume[0].get("ecarts")) or resume[0]["ecarts"] < 1):
+        elif attendu == 1 and (code != 1 or not entier(resume[0].get("ecarts")) or resume[0]["ecarts"] < 1):
             raisons.append("mutant survivant (code %d)" % code)
         ranger(rapport, "portes", nom, {"code": code, "attendu": attendu, "conforme": not raisons, "raisons": raisons,
                                         "binaire": prov, "journal": prov.get("journal"),
@@ -470,7 +477,7 @@ def juger(rapport, sortie):
         return os.path.isfile(complet) and sha256(complet) == empreinte
 
     portes_ = rapport.get("portes", {})
-    noms_portes = ["mes_g1", "mes_g1_mutant_cote_nul"]
+    noms_portes = [p[0] for p in PORTES_G1]
     noms_portes += [n for n in portes_ if n.startswith("bras_saut_")]
     if not any(n.startswith("bras_saut_mutant_") for n in noms_portes) or \
             not any(n.startswith("bras_saut_") and "mutant" not in n for n in noms_portes):

@@ -31,20 +31,30 @@
 // Les parties de route 2 ou 3 dont la sphere est DANS Cat_K (S*(b) hors de F) sont hors de l'hypothese du lemme :
 // comptees a part, et recoupees avec le catalogue (p, m, q, S*).
 //
+// Admission stricte (residu de CST-0018) : avant tout calcul de proportions, la route annoncee par PARTINF est
+// recalculee en exact pour chaque partie et confrontee au catalogue (detail avant admettre) ; un ordre choisi hors de
+// 2..K est une erreur d'usage (code 2) ; un bilan sans partie de route 2 ni de route 3 est refuse (code 3).
+//
 // Modes :
-//   mhgp12_mes_g1 --porte                                  nuage grave ; code 0 conforme, 1 ecart
+//   mhgp12_mes_g1 --porte                                  nuage grave et temoins d'admission ; code 0 conforme, 1 ecart
 //   mhgp12_mes_g1 <dossier> [--ordres k1,k2,...] [--echantillon N]
 //                                                          banc sur un vidage complet (cat.bin, ordre_<k>.bin)
-// Codes : 0 conforme ; 1 ecart (juge, voisins contre force brute, contradiction) ; 2 usage ; 3 refus (section
-// absente, vidage incoherent avec la v11, refus arithmetique, exception).
-// Mutant causal compile a part (jamais une branche du chemin mesure) : mhgp12_mes_g1_mutant_cote_nul
-// (MHGP12_MUTANT_G1_COTE_NUL) admet un site sur la sphere (cote nul) comme interieur ; la porte doit le tuer (code 1).
+// Codes : 0 conforme ; 1 ecart (juge, voisins contre force brute, contradiction) ; 2 usage (dont un ordre hors de
+// 2..K) ; 3 refus (section absente, vidage incoherent avec la v11 ou le catalogue, route annoncee incoherente, bilan
+// vide, refus arithmetique, exception).
+// Mutants causaux compiles a part (jamais une branche du chemin mesure), chacun tue par la porte (code 1) :
+// mhgp12_mes_g1_mutant_cote_nul (MHGP12_MUTANT_G1_COTE_NUL) admet un site sur la sphere (cote nul) comme interieur ;
+// mhgp12_mes_g1_mutant_sans_garde_route, _ordres, _bilan (MHGP12_MUTANT_G1_SANS_GARDE_ROUTE, _ORDRES, _BILAN) retirent
+// chacun une garde d'admission, et leur temoin est alors admis.
+#include <unistd.h>
+
 #include <algorithm>
 #include <array>
 #include <chrono>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <iterator>
@@ -52,6 +62,7 @@
 #include <memory>
 #include <optional>
 #include <span>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -72,6 +83,25 @@ constexpr bool kMutantCoteNul = true;
 #else
 constexpr bool kMutantCoteNul = false;
 #endif
+// Mutants causaux des gardes d'admission (copies compilees a part) : chacun retire une seule garde, et son temoin de la
+// porte est alors admis.
+#ifdef MHGP12_MUTANT_G1_SANS_GARDE_ROUTE
+constexpr bool kSansGardeRoute = true;  // la route annoncee par PARTINF est crue
+#else
+constexpr bool kSansGardeRoute = false;
+#endif
+#ifdef MHGP12_MUTANT_G1_SANS_GARDE_ORDRES
+constexpr bool kSansGardeOrdres = true;  // un ordre choisi hors de 2..K est ignore en silence
+#else
+constexpr bool kSansGardeOrdres = false;
+#endif
+#ifdef MHGP12_MUTANT_G1_SANS_GARDE_BILAN
+constexpr bool kSansGardeBilan = true;  // un bilan sans partie de census devient une preuve
+#else
+constexpr bool kSansGardeBilan = false;
+#endif
+constexpr const char* kMutantGarde = kSansGardeRoute ? "route" : kSansGardeOrdres ? "ordres"
+                                     : kSansGardeBilan ? "bilan" : "aucun";
 
 double secondes(Clock::time_point t) { return std::chrono::duration<double>(Clock::now() - t).count(); }
 
@@ -320,6 +350,113 @@ std::pair<u64, u64> spheres_distinctes(const std::vector<Sphere3>& v, bool hors_
   return {distinctes_centre, distinctes_sstar};
 }
 
+int banc_protege(const std::string& dir, const std::vector<u32>& seuls, u32 echantillon);
+
+// ---- Porte : temoins d'admission (vidages synthetiques, banc rejoue dans le processus) ----------------------------
+// Temoin de l'auditeur (recu audit_t2_20261007/mesures) : quatre sites alignes (0,0,0) a (3,0,0), K = 2 ; Cat_2 =
+// les trois paires adjacentes (p = 0) et les deux paires a distance 2 (p = 1) ; F = {0, 3} a pour plus petite boule
+// une sphere hors catalogue (p = 2, q = 2), census sature, cible {1, 2}, naissance de la boule 1 (graine de fin 2).
+// Six temoins : le vidage honnete (code 0, une partie de route 2 certifiee) ; la meme partie changee en route 1 (refus,
+// 3) ; une partie forgee parmi des parties honnetes (refus, 3 : seule la garde de route la voit) ; --ordres 9 et
+// --ordres 2,9 (usage, 2) ; un ordre sans partie (bilan vide, 3).
+struct Capture {  // sortie standard du banc, gardee pour la porte
+  std::ostringstream tampon;
+  std::streambuf* ancien;
+  Capture() : ancien(std::cout.rdbuf(tampon.rdbuf())) {}
+  ~Capture() { std::cout.rdbuf(ancien); }
+  Capture(const Capture&) = delete;
+  Capture& operator=(const Capture&) = delete;
+};
+
+void ecrire_catalogue_auditeur(const std::string& dir) {
+  d::Writer w(dir + "/cat.bin", d::kCatalogue, 21, 2, 0, 4, "audit");
+  std::vector<u32> xyz;
+  for (u32 x = 0; x < 4; ++x) xyz.insert(xyz.end(), {x, 0u, 0u});
+  w.raw("SITEXYZ", 12, xyz.data(), 4);
+  std::vector<d::BallRec> balls;
+  std::vector<u64> off{0};
+  std::vector<u32> val;
+  for (const auto& [a, b] : std::vector<std::pair<u32, u32>>{{0, 1}, {1, 2}, {2, 3}, {0, 2}, {1, 3}}) {
+    balls.push_back(d::BallRec{b - a, b - a - 1, 2, 2, {a, b, d::kNone, d::kNone}});
+    for (u32 s = a + 1; s < b; ++s) val.push_back(s);
+    val.push_back(a);
+    val.push_back(b);
+    off.push_back(val.size());
+  }
+  w.section("BALLS", balls);
+  w.section("POPOFF", off);
+  w.raw("POPVAL", 4, val.data(), val.size());
+  const u64 niveaux = 3;
+  w.section("NLEVELS", &niveaux, 1);
+  w.close();
+}
+
+// Ordre 2 : une partie {0, 3} par trace, de la route donnee (action interieure, boule hors catalogue).
+void ecrire_ordre_auditeur(const std::string& dir, const std::vector<u8>& routes) {
+  d::Writer w(dir + "/ordre_2.bin", d::kOrder, 21, 2, 2, 4, "audit");
+  std::vector<u32> parts;
+  std::vector<d::PartRec> infos;
+  std::vector<u64> off{0};
+  std::vector<d::SeedRec> seeds;
+  for (const u8 route : routes) {
+    parts.insert(parts.end(), {0u, 3u});
+    infos.push_back(d::PartRec{route, d::kActionInterior, 0, 0, d::kNone});
+    off.push_back(infos.size());
+    seeds.push_back(d::SeedRec{1, 0, 2, 1, 0});
+  }
+  w.raw("PARTS", 8, parts.data(), infos.size());
+  w.section("PARTINF", infos);
+  w.section("PARTOFF", off);
+  w.section("SEEDS", seeds);
+  w.close();
+}
+
+int temoins_admission(int& ecarts) {
+  namespace fs = std::filesystem;
+  static int serie = 0;
+  const fs::path dossier = fs::temp_directory_path() /
+                           ("mhgp12_g1_porte_" + std::to_string(::getpid()) + "_" + std::to_string(serie++));
+  fs::remove_all(dossier);
+  fs::create_directories(dossier);
+  const std::string dir = dossier.string();
+  ecrire_catalogue_auditeur(dir);
+  struct Cas {
+    const char* nom;
+    std::vector<u8> routes;
+    std::vector<u32> ordres;
+    int attendu;
+  };
+  const std::vector<Cas> cas = {
+      {"auditeur_route_2_honnete", {d::kRouteCensusSaturated}, {}, 0},
+      {"auditeur_route_2_changee_en_route_1", {d::kRouteCatalogue}, {}, 3},
+      {"route_1_forgee_parmi_des_parties_honnetes", {d::kRouteCensusSaturated, d::kRouteCatalogue}, {}, 3},
+      {"ordres_hors_de_2_K", {d::kRouteCensusSaturated}, {9}, 2},
+      {"ordres_en_partie_hors_de_2_K", {d::kRouteCensusSaturated}, {2, 9}, 2},
+      {"bilan_vide", {}, {}, 3}};
+  for (const auto& c : cas) {
+    ecrire_ordre_auditeur(dir, c.routes);
+    int code = 0;
+    std::string texte;
+    {
+      Capture capture;
+      code = banc_protege(dir, c.ordres, 512);
+      texte = capture.tampon.str();
+    }
+    bool ok = code == c.attendu;
+    if (ok && c.attendu == 0) {  // controle positif : la partie de route 2 est comptee et certifiee par les voisins
+      const std::size_t at = texte.find("{\"phase\":\"bilan\"");
+      const std::string bilan = at == std::string::npos ? "" : texte.substr(at, texte.find('\n', at) - at);
+      ok = bilan.find("\"route2\":{\"parties\":1,") != std::string::npos &&
+           bilan.find("\"voisins\":{\"certifiees\":1,") != std::string::npos;
+    }
+    if (!ok) ++ecarts;
+    std::cout << "{\"temoin_admission\":\"" << c.nom << "\",\"code\":" << code << ",\"attendu\":" << c.attendu
+              << ",\"conforme\":" << (ok ? "true" : "false") << "}\n";
+  }
+  fs::remove_all(dossier);
+  return static_cast<int>(cas.size());
+}
+
 // ---- Porte : nuage grave -------------------------------------------------------------------------------------------
 // Trois grappes separees en x (cle de Morton : grappe 1 < grappe 2 < grappe 3, chacune contigue en SiteIdx), K = 3 :
 //   grappe 1 : A1 B1 diametre de la sphere de centre C1 = (100, 100, 100), rayon carre 100 ; C1, D1, E1 strictement
@@ -454,8 +591,10 @@ int porte() {
     std::cout << ",\"conforme\":" << (ok ? "true" : "false") << "}\n";
     if (!ok) ++ecarts;
   }
+  const int admission = temoins_admission(ecarts);
   std::cout << "{\"porte\":\"mes_g1\",\"mutant_cote_nul\":" << (kMutantCoteNul ? "true" : "false")
-            << ",\"temoins\":" << temoins.size() << ",\"ecarts\":" << ecarts << "}\n";
+            << ",\"mutant_garde\":\"" << kMutantGarde << "\",\"temoins\":" << temoins.size()
+            << ",\"admission\":" << admission << ",\"ecarts\":" << ecarts << "}\n";
   return ecarts == 0 ? 0 : 1;
 }
 
@@ -481,12 +620,191 @@ struct Lem {
   std::exit(1);
 }
 
+// ---- Admission stricte du vidage, avant tout calcul de proportions (residu de CST-0018) ----------------------------
+// Catalogue : arite de S* dans 2..4, sites de S* et des populations dans le nuage, S* complete par kNone, decalages
+// coherents avec p + m. Parties : la route annoncee par PARTINF n'est jamais crue ; chaque partie est recalculee en
+// exact (bounded_meb de la v11, census de la v11) et confrontee au catalogue :
+//   route 1 (catalogue) : boule presente ; support local canonique de bounded_meb(F) dans la table et designant cette
+//     boule ; S*(b) dans F et F dans P_b (inclusions sur le catalogue) ; sphere de F = sphere de b (centre et niveau
+//     exacts) ; sstar_in_f = 1 ; action interieure si et seulement si p(b) >= k ;
+//   routes 2 et 3 (census) : support local absent de la table, sstar_in_f = 0 ; census de seuil k du bon genre (sature
+//     avec exactement k interieurs, action interieure ; complet avec p < k, action trace ou terminale) ; boule annoncee
+//     au catalogue : S*(b) hors de F, F dans P_b, meme sphere, et pour la route 3 meme population (p, m, q, S*) ; boule
+//     annoncee hors catalogue : verifiee (route 2 : census de seuil K sature, ou complet avec S* global absent de la
+//     table et p + q >= K + 2 ; route 3 : S* global absent de la table et p + q >= K + 2) ; route 2 : la cible de la
+//     v11 est la partie suivante de la trace, ou la trace finit par la table de populations (graine de fin 2).
+// Toute incoherence est un refus (code 3) avant toute ligne d'ordre. Garde retiree par MHGP12_MUTANT_G1_SANS_GARDE_ROUTE.
+void admettre_catalogue(const mebcert::Cat& cat) {
+  for (u32 b = 0; b < cat.balls; ++b) {
+    const auto& r = cat.rec[b];
+    if (r.q < 2 || r.q > 4 || r.m < r.q) refus("cat.bin : boule " + std::to_string(b) + " d'arite ou de coquille invalide");
+    for (u32 j = 0; j < 4; ++j)
+      if ((j < r.q) != (r.sstar[j] < cat.sites) || (j >= r.q && r.sstar[j] != d::kNone))
+        refus("cat.bin : S* de la boule " + std::to_string(b) + " hors du nuage ou mal complete");
+    if (cat.off[b + 1] < cat.off[b] || cat.off[b + 1] - cat.off[b] != u64{r.p} + r.m)
+      refus("cat.bin : population de la boule " + std::to_string(b) + " incoherente avec p + m");
+  }
+  for (u64 i = 0; i < cat.off[cat.balls]; ++i)
+    if (cat.val[i] >= cat.sites) refus("cat.bin : site de population hors du nuage");
+}
+
+bool dans_population(const mebcert::Cat& cat, u32 b, const u32* f, u32 k) {
+  const auto in = cat.interior(b), sh = cat.shell(b);
+  for (u32 i = 0; i < k; ++i)
+    if (!std::binary_search(in.begin(), in.end(), f[i]) && !std::binary_search(sh.begin(), sh.end(), f[i])) return false;
+  return true;
+}
+
+bool meme_sphere(const num::Sphere& a, const num::Sphere& b) {
+  return num::compare_centers(a, b) == 0 && num::compare(a.level(), b.level()) == 0;
+}
+
+num::Sphere sphere_de_boule(const mebcert::Ctx& ctx, u32 b) {
+  const auto& r = ctx.cat.rec[b];
+  auto s = mebcert::sphere_through(ctx, {r.sstar[0], r.sstar[1], r.sstar[2], r.sstar[3]}, static_cast<u8>(r.q));
+  if (!s.ok()) refus("cat.bin : sphere de la boule " + std::to_string(b) + " non constructible");
+  return s.value();
+}
+
+// S* global d'une coquille complete (support canonique de la coquille entiere) ; rend l'arite (2..4).
+int support_global(const num::Sphere& sphere, const Domaine& dom, const std::vector<u32>& coquille,
+                   std::array<u32, 4>& cle) {
+  std::vector<num::Point> zp(coquille.size());
+  for (std::size_t j = 0; j < coquille.size(); ++j) zp[j] = dom.points[coquille[j]];
+  cle = {d::kNone, d::kNone, d::kNone, d::kNone};
+  const int q = mebcert::canonical_support(sphere, coquille.data(), zp.data(), static_cast<u32>(coquille.size()), cle);
+  if (q < 2) refus("support canonique introuvable sur une coquille complete");
+  return q;
+}
+
+struct Admission {
+  u64 parties = 0, route1 = 0, route2 = 0, route3 = 0;
+};
+
+Admission admettre(const std::string& dir, const d::Reader& cat_file, const mebcert::Cat& cat, Domaine& dom,
+                   const mebcert::SupportTable& table, const mebcert::Ctx& ctx, u32 K, const std::vector<u32>& ordres) {
+  Admission a;
+  Recensement r, rk;
+  TablePop pop;
+  for (const u32 k : ordres) {
+    const std::string nom = "ordre_" + std::to_string(k) + ".bin";
+    const d::Reader ordre(dir + "/" + nom);
+    const auto& h = ordre.header();
+    if (h.kind != d::kOrder || h.order != k || h.kmax != K || h.sites != dom.n || ordre.frame() != cat_file.frame())
+      refus(nom + " : en-tete");
+    const auto [parts, np] = ordre.get<u32>("PARTS", 4 * k);
+    const auto [info, ni] = ordre.get<d::PartRec>("PARTINF");
+    const auto [part_off, npo] = ordre.get<u64>("PARTOFF");
+    const auto [seeds, ns] = ordre.get<d::SeedRec>("SEEDS");
+    if (ni != np || npo != ns + 1 || part_off[0] != 0 || part_off[ns] != np) refus(nom + " : sections incoherentes");
+    std::vector<u32> trace_de(np);
+    for (u64 t = 0; t < ns; ++t) {
+      if (part_off[t + 1] < part_off[t]) refus(nom + " : PARTOFF decroissant");
+      for (u64 i = part_off[t]; i < part_off[t + 1]; ++i) trace_de[i] = static_cast<u32>(t);
+    }
+    pop.construire(cat, k);
+    for (u64 i = 0; i < np; ++i) {
+      const u32* f = parts + i * k;
+      for (u32 j = 0; j < k; ++j)
+        if (f[j] >= dom.n || (j > 0 && f[j] <= f[j - 1])) refus(nom + " : partie non strictement croissante");
+      const auto& inf = info[i];
+      const std::string ou = nom + ", partie " + std::to_string(i) + " : ";
+      if (inf.route != d::kRouteCatalogue && inf.route != d::kRouteCensusSaturated &&
+          inf.route != d::kRouteCensusComplete)
+        refus(ou + "route inconnue");
+      ++a.parties;
+      ++(inf.route == d::kRouteCatalogue ? a.route1 : inf.route == d::kRouteCensusSaturated ? a.route2 : a.route3);
+      if constexpr (kSansGardeRoute) continue;  // mutant : la route annoncee est crue
+      if (inf.ball != d::kNone && inf.ball >= cat.balls) refus(ou + "boule hors du catalogue");
+      std::array<SiteIdx, kMaxMebSites> ids{};
+      for (u32 j = 0; j < k; ++j) ids[j] = SiteIdx{f[j]};
+      auto meb = bounded_meb(dom.cloud(), {ids.data(), k});
+      if (!meb.ok()) refus(ou + "bounded_meb refuse");
+      std::array<u32, 4> local{d::kNone, d::kNone, d::kNone, d::kNone};
+      const auto support = meb.value().support();
+      for (std::size_t j = 0; j < support.size(); ++j) local[j] = idx(support[j]);
+      const u32 trouvee = table.find(local);
+      const num::Sphere& sphere = meb.value().sphere();
+      if (inf.route == d::kRouteCatalogue) {
+        if (inf.ball == d::kNone || trouvee != inf.ball || inf.sstar_in_f != 1)
+          refus(ou + "route 1 sans support local dans la table, ou designant une autre boule");
+        const auto& b = cat.rec[inf.ball];
+        if (!mebcert::sorted_subset(b.sstar, b.q, f, k) || !dans_population(cat, inf.ball, f, k))
+          refus(ou + "route 1 : inclusions S*(b) dans F dans P_b en defaut");
+        if (!meme_sphere(sphere, sphere_de_boule(ctx, inf.ball)))
+          refus(ou + "route 1 : sphere de F differente de celle de la boule");
+        if ((b.p >= k) != (inf.action == d::kActionInterior)) refus(ou + "route 1 : action incoherente avec p(b)");
+        continue;
+      }
+      if (trouvee != d::kNone || inf.sstar_in_f != 0)
+        refus(ou + "route de census alors que le support local est dans la table");
+      recenser(dom, sphere, k, r);
+      const bool sature = inf.route == d::kRouteCensusSaturated;
+      if (sature && (r.complet || r.interieur.size() != k || inf.action != d::kActionInterior))
+        refus(ou + "route 2 : census de seuil k non sature, ou action non interieure");
+      if (!sature && (!r.complet || r.interieur.size() >= k ||
+                      (inf.action != d::kActionTrace && inf.action != d::kActionTerminal)))
+        refus(ou + "route 3 : census de seuil k non complet, ou action interieure");
+      if (inf.ball != d::kNone) {
+        const auto& b = cat.rec[inf.ball];
+        if (mebcert::sorted_subset(b.sstar, b.q, f, k) || !dans_population(cat, inf.ball, f, k) ||
+            !meme_sphere(sphere, sphere_de_boule(ctx, inf.ball)))
+          refus(ou + "boule au catalogue incoherente (S*(b) dans F, F hors de P_b, ou autre sphere)");
+        if (sature && b.p < k) refus(ou + "route 2 au catalogue avec p(b) < k");
+        if (!sature) {
+          std::array<u32, 4> cle{};
+          const int q = support_global(sphere, dom, r.coquille, cle);
+          if (b.p != r.interieur.size() || b.m != r.coquille.size() || b.q != static_cast<u32>(q) ||
+              !std::equal(cle.begin(), cle.end(), std::begin(b.sstar)))
+            refus(ou + "route 3 au catalogue : census et catalogue discordants");
+        }
+      } else {
+        const Recensement* complet = nullptr;
+        if (sature) {
+          recenser(dom, sphere, K, rk);
+          if (rk.complet) complet = &rk;
+        } else {
+          complet = &r;
+        }
+        if (complet != nullptr) {
+          std::array<u32, 4> cle{};
+          const int q = support_global(sphere, dom, complet->coquille, cle);
+          if (table.find(cle) != d::kNone || complet->interieur.size() + static_cast<u64>(q) < u64{K} + 2)
+            refus(ou + "boule annoncee hors catalogue alors que la sphere est dans Cat_K");
+        }
+      }
+      if (sature) {  // la cible de la v11 : partie suivante de la trace, ou fin par la table de populations
+        const u32* v11 = r.interieur.data();
+        const bool nait = pop.contient(v11);
+        const u32 t = trace_de[i];
+        if (i + 1 < part_off[t + 1]) {
+          if (!std::equal(v11, v11 + k, parts + (i + 1) * k) || nait)
+            refus(ou + "route 2 : cible de la v11 differente de la partie suivante du vidage");
+        } else if (seeds[t].end != 2 || !nait) {
+          refus(ou + "route 2 : fin de trace sans la table de populations");
+        }
+      }
+    }
+  }
+  return a;
+}
+
 int banc(const std::string& dir, const std::vector<u32>& seuls, u32 echantillon) {
   const auto t_debut = Clock::now();
   const d::Reader cat_file(dir + "/cat.bin");
   if (cat_file.header().kind != d::kCatalogue) refus("cat.bin : genre inattendu");
   const u32 K = cat_file.header().kmax;
   if (K < 2 || K > kMaxMebSites) refus("cat.bin : K hors domaine");
+  // Garde des ordres : une selection hors de 2..K est une erreur d'usage (code 2), jamais un ordre ignore en silence.
+  std::vector<u32> ordres;
+  for (u32 k = 2; k <= K; ++k)
+    if (seuls.empty() || std::find(seuls.begin(), seuls.end(), k) != seuls.end()) ordres.push_back(k);
+  for (const u32 k : seuls)
+    if (!kSansGardeOrdres && (k < 2 || k > K)) {
+      std::cout << "{\"phase\":\"refus\",\"raison\":\"ordre " << k << " hors de 2..K\",\"K\":" << K
+                << ",\"code\":2}\n" << std::flush;
+      return 2;
+    }
   mebcert::Cat cat;
   {
     const auto [xyz, n] = cat_file.get<u32>("SITEXYZ", 12);
@@ -515,11 +833,29 @@ int banc(const std::string& dir, const std::vector<u32>& seuls, u32 echantillon)
   }
   if (dom.n != cat.sites || !std::equal(dom.xyz.begin(), dom.xyz.end(), cat.xyz))
     refus("nuage : ordre des sites different du vidage (l'ordre de Morton refait doit etre l'identite)");
+  admettre_catalogue(cat);
   mebcert::SupportTable table;
   table.build(cat.rec, cat.balls);
+  const mebcert::Ctx ctx{dom.cloud(), cat, table, dom.points};
   std::cout << "{\"phase\":\"entree\",\"trame\":\"" << cat_file.frame() << "\",\"K\":" << K << ",\"sites\":" << dom.n
-            << ",\"boules\":" << cat.balls << ",\"mutant_cote_nul\":" << (kMutantCoteNul ? "true" : "false") << "}\n"
+            << ",\"boules\":" << cat.balls << ",\"mutant_cote_nul\":" << (kMutantCoteNul ? "true" : "false")
+            << ",\"mutant_garde\":\"" << kMutantGarde << "\"}\n"
             << std::flush;
+  // Admission stricte du vidage, avant tout calcul de proportions (refus : exception, code 3).
+  const auto t_adm = Clock::now();
+  const Admission adm = admettre(dir, cat_file, cat, dom, table, ctx, K, ordres);
+  std::cout << "{\"phase\":\"admission\",\"ordres\":[";
+  for (std::size_t i = 0; i < ordres.size(); ++i) std::cout << (i ? "," : "") << ordres[i];
+  std::cout << "],\"parties\":" << adm.parties << ",\"route1\":" << adm.route1 << ",\"route2\":" << adm.route2
+            << ",\"route3\":" << adm.route3 << ",\"garde_route\":" << (kSansGardeRoute ? "false" : "true")
+            << ",\"secondes\":" << secondes(t_adm) << "}\n"
+            << std::flush;
+  // Garde du bilan : sans partie de census (routes 2 et 3) dans les ordres joues, rien n'est mesure ; refus (code 3).
+  if (!kSansGardeBilan && (ordres.empty() || adm.route2 + adm.route3 == 0)) {
+    std::cout << "{\"phase\":\"refus\",\"raison\":\"bilan vide : aucune partie de route 2 ni de route 3 dans les "
+                 "ordres joues\",\"code\":3}\n" << std::flush;
+    return 3;
+  }
 
   // Voisins exacts de tous les sites, puis juge par force brute sur un echantillon deterministe.
   auto t0 = Clock::now();
@@ -550,8 +886,7 @@ int banc(const std::string& dir, const std::vector<u32>& seuls, u32 echantillon)
   Recensement r, r2;
   std::vector<u32> cand_v, cand_f8, cand_f16, cand_u;
   TablePop pop;
-  for (u32 k = 2; k <= K; ++k) {
-    if (!seuls.empty() && std::find(seuls.begin(), seuls.end(), k) == seuls.end()) continue;
+  for (const u32 k : ordres) {
     const auto tk = Clock::now();
     const d::Reader ordre(dir + "/ordre_" + std::to_string(k) + ".bin");
     const auto& h = ordre.header();
@@ -749,6 +1084,16 @@ int banc(const std::string& dir, const std::vector<u32>& seuls, u32 echantillon)
   return code;
 }
 
+// Banc avec ses refus explicites : une exception (vidage illisible ou incoherent, refus arithmetique) rend le code 3.
+int banc_protege(const std::string& dir, const std::vector<u32>& seuls, u32 echantillon) {
+  try {
+    return banc(dir, seuls, echantillon);
+  } catch (const std::exception& e) {
+    std::cout << "{\"phase\":\"exception\",\"message\":\"" << e.what() << "\"}\n" << std::flush;
+    return 3;
+  }
+}
+
 }  // namespace
 }  // namespace mhgp12
 
@@ -789,7 +1134,7 @@ int main(int argc, char** argv) {
         return 2;
       }
     }
-    return mhgp12::banc(argv[1], seuls, echantillon);
+    return mhgp12::banc_protege(argv[1], seuls, echantillon);
   } catch (const std::exception& e) {
     std::cout << "{\"phase\":\"exception\",\"message\":\"" << e.what() << "\"}\n";
     return 3;

@@ -45,6 +45,14 @@ add_executable(mhgp12_mes_g1_mutant_cote_nul mes_g1.cpp)
 target_link_libraries(mhgp12_mes_g1_mutant_cote_nul PRIVATE mhgp11_lie)
 target_compile_options(mhgp12_mes_g1_mutant_cote_nul PRIVATE ${mhgp12_warnings})
 target_compile_definitions(mhgp12_mes_g1_mutant_cote_nul PRIVATE MHGP12_MUTANT_G1_COTE_NUL)
+# Mutants causaux des gardes d'admission (residu de CST-0018) : chacun retire une seule garde, que la porte doit voir.
+foreach(garde ROUTE ORDRES BILAN)
+  string(TOLOWER ${garde} nom_garde)
+  add_executable(mhgp12_mes_g1_mutant_sans_garde_${nom_garde} mes_g1.cpp)
+  target_link_libraries(mhgp12_mes_g1_mutant_sans_garde_${nom_garde} PRIVATE mhgp11_lie)
+  target_compile_options(mhgp12_mes_g1_mutant_sans_garde_${nom_garde} PRIVATE ${mhgp12_warnings})
+  target_compile_definitions(mhgp12_mes_g1_mutant_sans_garde_${nom_garde} PRIVATE MHGP12_MUTANT_G1_SANS_GARDE_${garde})
+endforeach()
 
 # Seconde moitie de G-L3 : le vidage de la v11 (meme source que mes_m3_m4_tour, option --bras-saut : quatrieme bras
 # replique_v12_saut de la mesure de resolution), construit ici pour que le pilote de ce microbanc ne depende que de sa
@@ -64,7 +72,7 @@ enable_testing()
 set(mhgp12_run_expect "${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/run_expect.cmake")
 add_test(NAME mhgp12_mes_g1_porte
          COMMAND ${CMAKE_COMMAND} -DCMD=$<TARGET_FILE:mhgp12_mes_g1> -DNARGS=1 -DARG0=--porte -DEXPECTED=0
-                 "-DEXPECT_LINE={\"porte\":\"mes_g1\",\"mutant_cote_nul\":false,\"temoins\":4,\"ecarts\":0}"
+                 "-DEXPECT_LINE={\"porte\":\"mes_g1\",\"mutant_cote_nul\":false,\"mutant_garde\":\"aucun\",\"temoins\":4,\"admission\":6,\"ecarts\":0}"
                  -P ${mhgp12_run_expect})
 add_test(NAME mhgp12_mes_g1_porte_mutant_cote_nul
          COMMAND ${CMAKE_COMMAND} -DCMD=$<TARGET_FILE:mhgp12_mes_g1_mutant_cote_nul> -DNARGS=1 -DARG0=--porte
@@ -81,5 +89,11 @@ if(MHGP12_PYTHON3)
   set_tests_properties(mhgp12_mes_g1_pilote_juge PROPERTIES LABELS "gate;mes_g1" TIMEOUT 120
                        ENVIRONMENT "PYTHONDONTWRITEBYTECODE=1")
 endif()
+foreach(nom_garde route ordres bilan)
+  add_test(NAME mhgp12_mes_g1_porte_mutant_sans_garde_${nom_garde}
+           COMMAND ${CMAKE_COMMAND} -DCMD=$<TARGET_FILE:mhgp12_mes_g1_mutant_sans_garde_${nom_garde}> -DNARGS=1
+                   -DARG0=--porte -DEXPECTED=1 -P ${mhgp12_run_expect})
+  set_tests_properties(mhgp12_mes_g1_porte_mutant_sans_garde_${nom_garde} PROPERTIES LABELS "gate;mes_g1" TIMEOUT 60)
+endforeach()
 set_tests_properties(mhgp12_mes_g1_porte mhgp12_mes_g1_porte_mutant_cote_nul mhgp12_mes_g1_usage
                      PROPERTIES LABELS "gate;mes_g1" TIMEOUT 60)

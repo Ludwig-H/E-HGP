@@ -5,8 +5,8 @@ Partie A, validation d'une prise du vidage a quatre bras (valider_prise) : prise
 nul ; foret differente avec code 1 et sortie « ecart » (ecart, pas defaut de preuve) ; foret differente avec code 0
 (refus) ; controle de foret non reproduit sur la v11 (refus).
 Partie B, juge (REGLE_G1) : adopte ; rejete (borne haute >= 1 ; premiere moitie sous 50 % ; foret differente) ;
-refuse (quatre prises ; binaire different ; journal modifie ; porte du mutant de foret absente ; comptes differents
-d'une prise a l'autre ; construction absente).
+refuse (quatre prises ; binaire different ; journal modifie ; porte du mutant de foret absente ; porte d'un mutant de
+garde d'admission absente ; comptes differents d'une prise a l'autre ; construction absente).
 
 Usage : python3 -S -O test_pilote_g1.py. Bibliotheque standard ; aucune garde par assert.
 Codes : 0 conforme ; 1 ecart (detail en JSON).
@@ -76,9 +76,10 @@ def ecrire(sortie, chemin, texte):
 def rapport_base(sortie, rapports, part=0.8, foret=False):
     binaires = {n: "h-" + n for n in pg.BINAIRES}
     r = {"construction": {"binaires": dict(binaires)}, "portes": {}, "campagnes": {}}
-    for nom, exe in (("mes_g1", "mhgp12_mes_g1"), ("mes_g1_mutant_cote_nul", "mhgp12_mes_g1_mutant_cote_nul"),
-                     ("bras_saut_ng00_k5", "mhgp12_vidage"),
-                     ("bras_saut_mutant_cibles_decalees_ng00_k5", "mhgp12_vidage_mutant_cibles_decalees")):
+    portes = [(n, exe) for n, exe, _, _, _ in pg.PORTES_G1] + [
+        ("bras_saut_ng00_k5", "mhgp12_vidage"),
+        ("bras_saut_mutant_cibles_decalees_ng00_k5", "mhgp12_vidage_mutant_cibles_decalees")]
+    for nom, exe in portes:
         j = "portes/c1/%s.jsonl" % nom
         r["portes"][nom] = {"conforme": True, "binaire": {"binaire": exe, "sha256": binaires[exe]}, "journal": j,
                             "journal_sha256": ecrire(sortie, j, nom + "\n")}
@@ -124,6 +125,10 @@ def partie_b():
         r = rapport_base(d, bons)
         del r["portes"]["bras_saut_mutant_cibles_decalees_ng00_k5"]
         cas.append(("refuse_mutant_de_foret_absent", r, d, "refuse"))
+        d = os.path.join(tmp, "garde")
+        r = rapport_base(d, bons)
+        del r["portes"]["mes_g1_mutant_sans_garde_route"]
+        cas.append(("refuse_mutant_de_garde_absent", r, d, "refuse"))
         d = os.path.join(tmp, "comptes")
         r = rapport_base(d, bons)
         r["campagnes"]["ng00_k5"]["c1"]["prises"][3]["totaux"]["part_satures_evites"] = 0.79
