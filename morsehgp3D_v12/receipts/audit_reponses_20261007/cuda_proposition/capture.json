@@ -1,0 +1,61 @@
+{
+  "schema": "mhgp12.cuda_ownership_proposal.v1",
+  "created_utc": "2026-10-07T21:16:00+00:00",
+  "status": "proposition seulement ; non appliquée au prototype ni à main",
+  "source": {
+    "path": "morsehgp3D_v12/src/catalogue/device_cuda.cu",
+    "sha256": "620c840df6a8c3c9819bf1719754ba50f69a7d1ef7e710b031ecc0f9218fd131",
+    "bytes": 10919,
+    "lines": 262,
+    "source_stable_before_after": true
+  },
+  "proposed": {
+    "sha256": "ae110e2b9af4161c492cbfbcf1b1dc63dfa2b8a6179b96e78300224ad3164f41",
+    "bytes": 11458,
+    "lines": 271
+  },
+  "patch": {
+    "path": "ownership.patch",
+    "sha256": "1a18eebc7dd1ad11916cf7212fc798414aafc341784451eb8a84926d66a70f04",
+    "bytes": 2703
+  },
+  "verification": {
+    "unique_replacement_patterns": 3,
+    "git_apply_check_on_byte_identical_temporary_source": "pass",
+    "textual_apply_matches_proposed_hash": "pass",
+    "native_builds": 0,
+    "nvcc_builds": 0,
+    "native_tests": 0,
+    "cuda_calls": 0,
+    "cloud_calls": 0
+  },
+  "static_review": [
+    {
+      "path": "grow",
+      "failure_before_adoption": "Array<T> fresh possède le pointeur éventuel et sa réservation. Son destructeur tente cudaFree avant la destruction du membre BudgetReservation. L’ancien a reste propriétaire de son allocation et de sa réservation.",
+      "success": "Après sync réussi, swaps de pointeurs et u64 et BudgetReservation::swap noexcept : a prend le nouveau couple ; fresh prend l’ancien, détruit une seule fois à la sortie. Aucun release suivi d’une opération potentiellement levante."
+    },
+    {
+      "path": "stage",
+      "failure": "La politique ancienne est conservée : après sync réussi, l’ancien tampon est libéré puis sa réservation rendue avant la nouvelle réservation. Une réservation locale précède unique_ptr ; sur refus celui-ci tente cudaFreeHost si nécessaire avant la destruction de la réservation. Le membre reste vide.",
+      "success": "release du pointeur, écriture du nombre d’octets et swap noexcept de réservation : le membre détient le nouveau couple, les temporaires sont vides. Pas de coexistence ancienne/nouvelle ajoutée par ce patch."
+    },
+    {
+      "path": "destruction_and_broken",
+      "conclusion": "Impl déclare exec puis state : state (et ses Array) est détruit avant exec. Chaque Array appelle cudaFree dans le corps de son destructeur avant la libération du membre reservation. exec tente sync, libère le staging, détruit le stream, puis les membres rendent leurs réservations. check conserve la classification de l’erreur originelle et broken.",
+      "limit": "Les codes de retour des appels de nettoyage restent ignorés comme dans le prototype. En présence d’un pilote CUDA défaillant ou d’une erreur collante, le nettoyage est best effort : aucune garantie de libération matérielle ni de comptabilité physique après échec du nettoyage. Aucune preuve native/CUDA ni clôture globale mémoire."
+    }
+  ],
+  "dependencies": [
+    {
+      "path": "morsehgp3D_v12/src/core/buffer.hpp",
+      "sha256": "581ee5beadc61e01971c31200956acc17c6d6b64d4878c8950ae09ddafa9a2a0",
+      "bytes": 13015
+    },
+    {
+      "path": "morsehgp3D_v12/src/core/status.hpp",
+      "sha256": "d81b3e8aab647c97fe97fa7d91081efa28ab88cdac8706cafdd825b17e4046ea",
+      "bytes": 8153
+    }
+  ]
+}

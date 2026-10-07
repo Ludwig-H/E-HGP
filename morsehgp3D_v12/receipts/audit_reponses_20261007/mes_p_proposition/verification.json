@@ -1,0 +1,16 @@
+{
+  "audit_cases_per_mode": 5,
+  "before_strict_code": 1,
+  "capture_sha256": "74b0309925e44eac701475a119000b2fcb3c5500e85a8779f37b53658f914ab6",
+  "dependencies_unchanged": true,
+  "no_gcp": true,
+  "no_native_build": true,
+  "normal_code": 0,
+  "normal_optimized_identical": true,
+  "official_gate_cases_per_mode": 4,
+  "official_gate_errors": 0,
+  "optimized_code": 0,
+  "product_changed": false,
+  "proposed_strict_code": 0,
+  "published_base_pin": "59d604b873886d757aacea17297042a524b9963e"
+}

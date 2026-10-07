@@ -1,0 +1,33 @@
+--- a/morsehgp3D_v12/microbancs/mes_p_petits/analyse_p.py
++++ b/morsehgp3D_v12/microbancs/mes_p_petits/analyse_p.py
+@@ -81,16 +81,16 @@
+     out.append('')
+ 
+ 
+-def cohort_table(takes, k, out):
++def cohort_table(takes, good, k, out):
+     """Droites par nombre de fils sur les seuls nuages reels rendus a tous les nombres de fils joues pour K."""
+     threads = sorted(set(t['fils'] for t in takes if t['k'] == k))
+     if len(threads) < 2:
+         return
+-    common = set.intersection(*[set(t['nuage'] for t in real_rows(takes, k, f)) for f in threads])
++    common = set.intersection(*[set(t['nuage'] for t in real_rows(good, k, f)) for f in threads])
+     out.append('| cohorte commune, K = %d | nuages | ecartes (hors cohorte) | cout fixe (ms) | µs par site |' % k)
+     out.append('| --- | ---: | ---: | ---: | ---: |')
+     for f in threads:
+-        mine = real_rows(takes, k, f)
++        mine = real_rows(good, k, f)
+         line = fit([(t['sites'], t['chaud']) for t in mine if t['nuage'] in common])
+         cells = ('%.2f' % (line[0] * 1e3), '%.2f' % (line[1] * 1e6)) if line is not None else ('-', '-')
+         out.append('| %d fils | %d | %d | %s | %s |' % (f, len(common), len(mine) - len(common), cells[0], cells[1]))
+@@ -143,8 +143,8 @@
+         len(takes), len(good), len(failed)), '']
+     for k, threads in sorted(set((t['k'], t['fils']) for t in good)):
+         real_table(good, k, threads, out)
+-    for k in sorted(set(t['k'] for t in good)):
+-        cohort_table(good, k, out)
++    for k in sorted(set(t['k'] for t in takes)):
++        cohort_table(takes, good, k, out)
+     synthetic_table(good, brut, out)
+     if failed:
+         failure_table(failed, brut, out)

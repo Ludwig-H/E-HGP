@@ -1,0 +1,14 @@
+{
+  "patch_sha256": "c5af07c263f64b4d530e0640c083ac8bc9e77e8cc808862ea1722568372225e4",
+  "proposed_analyser_sha256": "aa64cdbff590931c8c21ce30ad2a8f5403ac94a4fdb1da6903255bca5e60b45e",
+  "published_base_pin": "59d604b873886d757aacea17297042a524b9963e",
+  "scope": "proposition auditeur, aucune livraison produit",
+  "shared_head_at_capture": "5682d00f585222b91b482b54952ed5030038622a",
+  "snapshot_origin": "capture initialement non commise, identique au pin publie",
+  "sources_sha256": {
+    "morsehgp3D_v12/microbancs/mes_p_petits/analyse_p.py": "ca8def8e8ae5cbdb55892bbf1bfc7284846c986e2ca70b327b623d3d0767d733",
+    "morsehgp3D_v12/microbancs/mes_p_petits/pilote_p.py": "68995f99efc653690484264b4e1bfbac76bb5cfbe50e8ecf2d9b9b7bf4050d4f",
+    "morsehgp3D_v12/microbancs/mes_p_petits/test_pilote_p.py": "6a808f52096571de229c0896d4653572fb4ba9b8e6e34509c1198292c5e7762d"
+  },
+  "uncommitted_snapshot": false
+}

@@ -1,0 +1,196 @@
+{
+  "audit_check_sha256": "996051cc6c33e2b4e0287844807a6aca2e29d8f8e46361ec5c661f9504f07ee5",
+  "before_code": 1,
+  "before_stdout_sha256": "274c2417b0a641a69eb34a839a003d6664d497eb362323531855ce064ea5593a",
+  "dependencies_sha256": {
+    "audit_mes_p_corrections_20261007/check.py": "996051cc6c33e2b4e0287844807a6aca2e29d8f8e46361ec5c661f9504f07ee5",
+    "audit_mes_p_corrections_20261007/snapshot/analyse_p.py": "ca8def8e8ae5cbdb55892bbf1bfc7284846c986e2ca70b327b623d3d0767d733",
+    "audit_mes_p_corrections_20261007/snapshot/pilote_p.py": "68995f99efc653690484264b4e1bfbac76bb5cfbe50e8ecf2d9b9b7bf4050d4f",
+    "audit_reponses_20261007/mes_p_proposition/check.py": "6ef92ba2196f5e7ddaafc975527c2bd9fa0ca785bbdee85d0e0159000d1e5f00",
+    "audit_reponses_20261007/mes_p_proposition/proposition.patch": "c5af07c263f64b4d530e0640c083ac8bc9e77e8cc808862ea1722568372225e4",
+    "audit_reponses_20261007/mes_p_proposition/sources.json": "1e0af1353631287717940ff1af6c43e20d817f642a53deb56da1e77e372a5630",
+    "audit_reponses_20261007/mes_p_proposition/test_pilote_p.snapshot.py": "6a808f52096571de229c0896d4653572fb4ba9b8e6e34509c1198292c5e7762d"
+  },
+  "dependencies_unchanged": true,
+  "official_gate": {
+    "cas": 4,
+    "ecarts": 0,
+    "porte": "mes_p"
+  },
+  "official_gate_code": 0,
+  "proposed_checks": {
+    "analyser": {
+      "all_failed": {
+        "cohorts": [
+          "| 1 fils | 0 | 0 | - | - |",
+          "| 4 fils | 0 | 0 | - | - |",
+          "| 48 fils | 0 | 0 | - | - |"
+        ],
+        "common_contract_pass": true,
+        "expected_cohorts": [
+          "| 1 fils | 0 | 0 | - | - |",
+          "| 4 fils | 0 | 0 | - | - |",
+          "| 48 fils | 0 | 0 | - | - |"
+        ],
+        "failures": [
+          "| bout_n100 | 5 | 1 | 100 | expire | - |",
+          "| bout_n200 | 5 | 1 | 200 | expire | - |",
+          "| bout_n100 | 5 | 4 | 100 | expire | - |",
+          "| bout_n200 | 5 | 4 | 200 | expire | - |",
+          "| bout_n100 | 5 | 48 | 100 | expire | - |",
+          "| bout_n200 | 5 | 48 | 200 | expire | - |"
+        ],
+        "slopes": [],
+        "stdout_sha256": "47a21ab2de64f4e906b2b2a77dfbd8d87df032952d53a40f108c20ffc0f3e456",
+        "synthetics": []
+      },
+      "all_good": {
+        "cohorts": [
+          "| 1 fils | 2 | 0 | -0.00 | 100.00 |",
+          "| 4 fils | 2 | 0 | 0.00 | 60.00 |",
+          "| 48 fils | 2 | 0 | 0.00 | 10.00 |"
+        ],
+        "failures": [],
+        "slopes": [
+          "Droite des moindres carres (familles reelles, K = 5, 1 fils) : cout fixe -0.00 ms, 100.00 µs par site.",
+          "Droite des moindres carres (familles reelles, K = 5, 4 fils) : cout fixe 0.00 ms, 60.00 µs par site.",
+          "Droite des moindres carres (familles reelles, K = 5, 48 fils) : cout fixe 0.00 ms, 10.00 µs par site."
+        ],
+        "stdout_sha256": "71a829d436438396b0d025a2e94e0264ceb82aa25aed26faf4415d5b631599c9",
+        "synthetics": []
+      },
+      "k_threads_family_isolation": {
+        "cohorts": [
+          "| 1 fils | 2 | 0 | -0.00 | 100.00 |",
+          "| 4 fils | 2 | 0 | 0.00 | 60.00 |",
+          "| 48 fils | 2 | 0 | 0.00 | 10.00 |"
+        ],
+        "failures": [],
+        "slopes": [
+          "Droite des moindres carres (familles reelles, K = 5, 1 fils) : cout fixe -0.00 ms, 100.00 µs par site.",
+          "Droite des moindres carres (familles reelles, K = 5, 4 fils) : cout fixe 0.00 ms, 60.00 µs par site.",
+          "Droite des moindres carres (familles reelles, K = 5, 48 fils) : cout fixe 0.00 ms, 10.00 µs par site.",
+          "Droite des moindres carres (familles reelles, K = 10, 4 fils) : cout fixe -0.00 ms, 800.00 µs par site."
+        ],
+        "stdout_sha256": "21c7cc75b32b2acbe2c985eb16d267b2b4e7d70c23f22e47d05c39d9b7309292",
+        "synthetics": [
+          "| synth_lattice | 5 | 1 | 100 : 200.0 |",
+          "| synth_lattice | 5 | 4 | 100 : 400.0 |",
+          "| synth_lattice | 10 | 4 | 100 : 800.0 |",
+          "| synth_sphere | 5 | 4 | 100 : 1200.0 |"
+        ]
+      },
+      "one_failed": {
+        "cohorts": [
+          "| 1 fils | 1 | 0 | - | - |",
+          "| 4 fils | 1 | 1 | - | - |",
+          "| 48 fils | 1 | 1 | - | - |"
+        ],
+        "failures": [
+          "| bout_n200 | 5 | 1 | 200 | expire | - |"
+        ],
+        "slopes": [
+          "Droite des moindres carres (familles reelles, K = 5, 4 fils) : cout fixe 0.00 ms, 60.00 µs par site.",
+          "Droite des moindres carres (familles reelles, K = 5, 48 fils) : cout fixe 0.00 ms, 10.00 µs par site."
+        ],
+        "stdout_sha256": "5214230e102b1894506d4a450d202ab9547c6835b67d1ba1dca668982b88bf57",
+        "synthetics": []
+      },
+      "whole_regime_failed": {
+        "cohorts": [
+          "| 1 fils | 0 | 0 | - | - |",
+          "| 4 fils | 0 | 2 | - | - |",
+          "| 48 fils | 0 | 2 | - | - |"
+        ],
+        "common_contract_pass": true,
+        "expected_cohorts": [
+          "| 1 fils | 0 | 0 | - | - |",
+          "| 4 fils | 0 | 2 | - | - |",
+          "| 48 fils | 0 | 2 | - | - |"
+        ],
+        "failures": [
+          "| bout_n100 | 5 | 1 | 100 | expire | - |",
+          "| bout_n200 | 5 | 1 | 200 | expire | - |"
+        ],
+        "slopes": [
+          "Droite des moindres carres (familles reelles, K = 5, 4 fils) : cout fixe 0.00 ms, 60.00 µs par site.",
+          "Droite des moindres carres (familles reelles, K = 5, 48 fils) : cout fixe 0.00 ms, 10.00 µs par site."
+        ],
+        "stdout_sha256": "2537df27762afc8a979b08a62c335d0187c4385a3fc67b80f466fb3b729029f5",
+        "synthetics": []
+      }
+    },
+    "cst_0238_common_cohort_contract_pass": true,
+    "pilot": {
+      "mocked_processes": [
+        {
+          "chaud": 0.0015,
+          "code": 0,
+          "fils": 4,
+          "froid": 0.003,
+          "k": 5,
+          "nuage": "success",
+          "passes": [
+            0.003,
+            0.001,
+            0.002
+          ],
+          "processus_secondes": 0.25,
+          "sites": 100
+        },
+        {
+          "chaud": null,
+          "code": 3,
+          "fils": 4,
+          "froid": 0.003,
+          "k": 5,
+          "nuage": "failure",
+          "passes": [
+            0.003,
+            0.001,
+            0.002
+          ],
+          "processus_secondes": 0.25,
+          "sites": 100
+        },
+        {
+          "chaud": null,
+          "code": "expire",
+          "fils": 4,
+          "froid": 0.003,
+          "k": 5,
+          "nuage": "timeout",
+          "passes": [
+            0.003,
+            0.001,
+            0.002
+          ],
+          "processus_secondes": 0.25,
+          "sites": 100
+        }
+      ],
+      "scope": "Popen/killpg doubles: controle du protocole, pas preuve systeme de terminaison",
+      "selection_empty_code": 2
+    },
+    "source_sha256": {
+      "analyse_p.py": "aa64cdbff590931c8c21ce30ad2a8f5403ac94a4fdb1da6903255bca5e60b45e",
+      "pilote_p.py": "68995f99efc653690484264b4e1bfbac76bb5cfbe50e8ecf2d9b9b7bf4050d4f"
+    }
+  },
+  "proposed_code": 0,
+  "scope": "patch temporaire ; aucun temps HGP ni livraison produit",
+  "sources": {
+    "patch_sha256": "c5af07c263f64b4d530e0640c083ac8bc9e77e8cc808862ea1722568372225e4",
+    "proposed_analyser_sha256": "aa64cdbff590931c8c21ce30ad2a8f5403ac94a4fdb1da6903255bca5e60b45e",
+    "published_base_pin": "59d604b873886d757aacea17297042a524b9963e",
+    "scope": "proposition auditeur, aucune livraison produit",
+    "shared_head_at_capture": "5682d00f585222b91b482b54952ed5030038622a",
+    "snapshot_origin": "capture initialement non commise, identique au pin publie",
+    "sources_sha256": {
+      "morsehgp3D_v12/microbancs/mes_p_petits/analyse_p.py": "ca8def8e8ae5cbdb55892bbf1bfc7284846c986e2ca70b327b623d3d0767d733",
+      "morsehgp3D_v12/microbancs/mes_p_petits/pilote_p.py": "68995f99efc653690484264b4e1bfbac76bb5cfbe50e8ecf2d9b9b7bf4050d4f",
+      "morsehgp3D_v12/microbancs/mes_p_petits/test_pilote_p.py": "6a808f52096571de229c0896d4653572fb4ba9b8e6e34509c1198292c5e7762d"
+    },
+    "uncommitted_snapshot": false
+  }
+}

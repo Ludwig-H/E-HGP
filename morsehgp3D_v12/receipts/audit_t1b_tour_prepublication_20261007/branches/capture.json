@@ -1,0 +1,13 @@
+{
+  "main_head_at_capture": "59d604b873886d757aacea17297042a524b9963e",
+  "main_sha256": {
+    "morsehgp3D_v12/docs/CONTRAT_TOUR.md": "262b3bb57f68f9deb3f4b6172419b4e4ba105ffc98ce8f9394e5343de4eb09af",
+    "morsehgp3D_v12/src/tower/tower.hpp": "3c22c52f03ec0d78227f390ca01872fa6f04279e219ca26c1e3481458a128607"
+  },
+  "main_tmv_sources_present": false,
+  "model_cases": 69,
+  "native_executions": 0,
+  "prior_capture": "morsehgp3D_v12/receipts/audit_t1b_tour_prepublication_20261007/tour/capture.json",
+  "prior_capture_commit": "f558ae6b9",
+  "status": "constructive_proposal_not_product_code_or_native_qualification"
+}

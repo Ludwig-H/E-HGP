@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-7 octobre 2026. Base publiée **`9428db65b`** ; correctifs et prototypes non commis capturés
+7 octobre 2026. Base publiée **`59d604b87`** ; correctifs et prototypes non commis capturés
 séparément par empreintes. Cadre : `exploration_v12_hors_registre`,
 `cpu_reference ; cuda_g4 pour le catalogue`, `full_pi0`, `quantized_u21_input_only`, `not_claimed`.
 États au [registre unique](CONSTATS.md). Aucun nouveau chrono CPU/GPU.
@@ -10,13 +10,15 @@ séparément par empreintes. Cadre : `exploration_v12_hors_registre`,
 - **Catalogue CUDA et finition en cours** : [contrelecture avant publication](../receipts/audit_t1b_tour_prepublication_20261007/README.md).
   Deux corrections ciblées : propriétaire temporaire des allocations CUDA jusqu'au succès
   (fuite après copie/synchronisation refusée ; réserve épinglée retenue sans allocation),
-  et compteur des feuilles réécrites, actuellement toujours nul. Effets établis par lecture,
-  aucune panne CUDA injectée. La finition commune réalise les rangs, tris stables, chaînes
+  et compteur des feuilles réécrites, actuellement toujours nul. [Patch de propriété prêt](../receipts/audit_reponses_20261007/cuda_proposition/README.md),
+  application textuelle vérifiée ; aucun test CUDA exécuté. La finition commune réalise les rangs, tris stables, chaînes
   exactes et CSR proposés pour `0233` ; qualification et gains encore à mesurer.
 - **Tour T/M/V en cours** : mêmes événements et forêt possibles pour deux hypergraphes
   dont les branches ouvertes diffèrent. La première forme de R perd cette information :
-  conserver les branches par cellule retenue, ou déclarer leur report à T3. Modèle abstrait
-  reproductible, aucun défaut géométrique ni pi0 faux établi. Plateaux et verticales cohérents
+  [collecte à coupe ouverte proposée](../receipts/audit_t1b_tour_prepublication_20261007/branches/README.md) dans T/M,
+  sans barrière par plateau ni nouvelle résolution G ; 69 modèles abstraits conformes.
+  Mémoire liée au nombre de branches : six événements peuvent en demander 27. Aucun défaut
+  géométrique ni pi0 faux établi ; report à T3 possible s’il est déclaré. Plateaux et verticales cohérents
   à lecture ; copies du socle à rebaser sur le correctif cache avant qualification livrée.
 - **Cache, `0007/0019`** : [correction et porte complétées](../receipts/audit_reponses_20261007/cache/README.md)
   sur `buffer.cpp` SHA `1844a7d6…`. Bras 300+300 et 300+200 Kio : 12 contrôles passent ;
@@ -31,11 +33,12 @@ séparément par empreintes. Cadre : `exploration_v12_hors_registre`,
   leurs [portées contre-jugées](../receipts/audit_reprise_20261007/README.md).
 - **Petits nuages, `0238`** : [pentes séparées, résidu de cohorte](../receipts/audit_mes_p_corrections_20261007/README.md).
   Reconstruire K et régimes depuis **toutes** les prises : un régime sans aucun succès
-  impose une cohorte commune vide. Il disparaît encore du calcul actuel. Cinq témoins JSON,
-  temps inventés, normal/−O identiques ; aucune nouvelle performance HGP.
-- **Documents, `0235/0236/0237`** : [réponse en cours](../receipts/audit_reponses_20261007/docs/README.md).
-  Budget complet non confirmé et sphère arrondie correctement décrits : clôtures documentaires
-  après publication. Voie large T1-c encore à livrer ; préciser « transferts du raccord
+  impose une cohorte commune vide. [Patch de cinq lignes prêt](../receipts/audit_reponses_20261007/mes_p_proposition/README.md) pour `59d604b87` :
+  les cinq témoins et les quatre cas officiels passent, normal/−O identiques. Hors produit ;
+  temps inventés, aucune nouvelle performance HGP.
+- **Documents, `0235/0236/0237`** : [réponse contre-lue](../receipts/audit_reponses_20261007/docs/README.md).
+  Documents livrés en `5682d00f5`, hashes identiques à la capture : corrections du budget
+  et de la sphère confirmées ; clôtures `0235/0236` à inscrire lors de la prochaine mise à jour du registre. Voie large T1-c encore à livrer ; préciser « transferts du raccord
   complet », car M5 comptait les siens. q_min≤4 ne borne ni coquille ni liste candidate.
 
 **Priorité performance maintenue.** Catalogue CPU K5 : **451,6 / 372,7 / 469,5 ms** sur

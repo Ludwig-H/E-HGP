@@ -1,0 +1,58 @@
+--- a/morsehgp3D_v12/src/catalogue/device_cuda.cu
++++ b/morsehgp3D_v12/src/catalogue/device_cuda.cu
+@@ -11,7 +11,9 @@
+ // rend le contexte inutilisable). Attente en mode yield (MES-M6).
+ #include <cuda_runtime.h>
+ 
++#include <memory>
+ #include <type_traits>
++#include <utility>
+ 
+ #include "catalogue/device_pipeline.hpp"
+ #include "catalogue/exec_host.hpp"
+@@ -89,17 +91,17 @@
+     if (a.cap >= n) return {};
+     const u64 cap = n > a.cap + a.cap / 2 + 1024 ? n : a.cap + a.cap / 2 + 1024;
+     if (cap > ~u64{0} / sizeof(T)) return fail(Reason::memory_budget);
+-    BudgetReservation reservation;
+-    MHGP12_TRY(reservation.reserve(cap * sizeof(T), budget));
+-    T* fresh = nullptr;
+-    MHGP12_TRY(check(cudaMalloc(reinterpret_cast<void**>(&fresh), cap * sizeof(T))));
+-    if (keep != 0) MHGP12_TRY(check(cudaMemcpyAsync(fresh, a.ptr, keep * sizeof(T), cudaMemcpyDeviceToDevice, stream)));
++    Array<T> fresh;  // sur tout refus : cudaFree avant de rendre sa reservation
++    MHGP12_TRY(fresh.reservation.reserve(cap * sizeof(T), budget));
++    MHGP12_TRY(check(cudaMalloc(reinterpret_cast<void**>(&fresh.ptr), cap * sizeof(T))));
++    fresh.cap = cap;
++    if (keep != 0)
++      MHGP12_TRY(check(cudaMemcpyAsync(fresh.ptr, a.ptr, keep * sizeof(T), cudaMemcpyDeviceToDevice, stream)));
+     MHGP12_TRY(sync());  // l'ancien tableau peut servir a des noyaux en file
+-    if (a.ptr != nullptr) cudaFree(a.ptr);
+     device_bytes += (cap - a.cap) * sizeof(T);
+-    a.ptr = fresh;
+-    a.cap = cap;
+-    a.reservation.swap(reservation);  // l'ancienne reservation est rendue en sortie
++    std::swap(a.ptr, fresh.ptr);  // adoption sans exception ; fresh detient ensuite l'ancien tableau
++    std::swap(a.cap, fresh.cap);
++    a.reservation.swap(fresh.reservation);
+     ++allocations;
+     return {};
+   }
+@@ -121,9 +123,16 @@
+     staging = nullptr;
+     staging_bytes = 0;
+     staging_reservation.reset();
+-    MHGP12_TRY(staging_reservation.reserve(bytes, budget));
+-    MHGP12_TRY(check(cudaMallocHost(reinterpret_cast<void**>(&staging), bytes)));
++    BudgetReservation reservation;
++    MHGP12_TRY(reservation.reserve(bytes, budget));
++    u8* fresh_ptr = nullptr;
++    const cudaError_t allocation = cudaMallocHost(reinterpret_cast<void**>(&fresh_ptr), bytes);
++    // Declare apres la reservation : liberation epinglee avant de rendre les octets, meme sur refus.
++    std::unique_ptr<u8, decltype(&cudaFreeHost)> fresh(fresh_ptr, &cudaFreeHost);
++    MHGP12_TRY(check(allocation));
++    staging = fresh.release();  // adoption sans exception ; aucune charge fantome sur refus
+     staging_bytes = bytes;
++    staging_reservation.swap(reservation);
+     ++allocations;
+     return {};
+   }
