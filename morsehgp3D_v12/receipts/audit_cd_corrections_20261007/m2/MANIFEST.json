@@ -1,0 +1,31 @@
+{
+  "artifacts_sha256": {
+    "README.md": "7526917f4cff102b8233080b6c11c205718b4050fe3d57980e98f0aaa6b87ec0",
+    "RESULT_O.json": "2df24b28c4fd1053db88264a49de1ae9427d18559e5eceb2ee568f8399ebcb5f",
+    "RESULT_normal.json": "77928ca8d5ee9524d9e01fcef9492f9aede139c36afc07270c56f424701633f0"
+  },
+  "audited_commit": "07ee13ef6bebc0b6b85da90207f3f067ffff1755",
+  "fix_commit": "320db4a125a21c0c71c7a6e18af21aaff9f72da5",
+  "schema": "audit.cd.m2.manifest.v1",
+  "sources_sha256": {
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/README.md": "be4c1ac0d91be8b961005af6f26dac4189b3c314885f5b67082de57d7930e2fc",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/cuda/leaf_bench.cu": "98bff9867c5049202c7ad00fd4c22ec18caee9df92fab6fbb06034f47d3cfad4",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/host/arena_selftest.cpp": "63ac5fa27e854b0f6ee6815e9fb080effbb329b55aee662bd3c5b7d367955142",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/host/leaf_identity.cpp": "abce9964e13a25ea891f1d58bc649ca4f43bc4267f275bff9d4bddee035a9a65",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/host/mes_s.cpp": "919f3380132b88fec4054f93340b20bcf3aa22c08ede7cd7123ebaec87e52200",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/dump_format.hpp": "4327b6788f2e7723995c1b20b820576ea762c31c864f2c042c59dc0d161117a0",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_coherent.hpp": "a928efb5092780f407284d7eff49a443ad2079162d00f52254ba7a86d2eddd7d",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_common.hpp": "db205b77a9b04180e6a74597b876744641b4e5220665851f492875fa9b540afb",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_j3.hpp": "8235004c799097815bbd48c15c806c9e4d4a7cb6d99934491617c29d7d28a5b5",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/predicates.hpp": "36144eff2d5ddf57bee5453d2e72b758a72b88dabf037d2323b0a10ad55f4be1",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/simt.hpp": "c7276ddb0aba9b196e1b3c8ad138f778afda04614a3d57e285b94f3cb6f07691",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/scripts/g4_leaf_bench.py": "e70ba38e4a5a40977c6f756a8a9540840190c9d426316663250f96b9a939fc17",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/tests/test_juge_m2.py": "be7465373c30cd994be2ecb9fe5cc2fadf688857786f059eb46d5948fdaf3207",
+    "morsehgp3D_v12/receipts/audit_socle_microbancs_20261007/feuille/probe.cpp": "edf32a7ad60e15bb7dd4aa236943d21e250e8cb52aa1c3f228b630269854b96e"
+  },
+  "witness_sha256": {
+    "judge_probe.py": "ef3fddc028a98c133c32f68a052508e9cec3149863a0330754b91085db5824df",
+    "reader_probe.cpp": "9e453c155d1f92283da74b138b998185c0abf4b33e0cc3a212c4accd7ae8f042",
+    "run.py": "b2dc36919aea5b513a66f2881295a1690f5dafbc7b2270e38125470bb03c6a27"
+  }
+}

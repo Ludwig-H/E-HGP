@@ -1,0 +1,87 @@
+{
+  "audit_hygiene_at_pinned_worktree": "OK: 60 constats, canal 40838 octets, cohérence structurelle seulement",
+  "closed_findings": [
+    "CST-0213",
+    "CST-0214",
+    "CST-0215",
+    "CST-0219",
+    "CST-0221"
+  ],
+  "date": "2026-10-07",
+  "gcp_used_by_audit": false,
+  "generic_judge_finding_CST0018_closed": false,
+  "gpu_used_by_audit": false,
+  "historical_provenance_CST0021_closed": false,
+  "identity_scan": "only explicit synthetic audit@example.invalid occurrences, including the run- filename prefix",
+  "integration_attempts": [
+    {
+      "correction": "allowed exactly the synthetic local parts audit and run-audit",
+      "initial_identity_scan": "rejected the synthetic filename run-audit@example.invalid.json",
+      "product_changed": false
+    }
+  ],
+  "later_commits_not_qualified": [
+    "6a38f7e4b",
+    "f4a11f49e"
+  ],
+  "markdown_links_exist": true,
+  "new_findings": [
+    "CST-0224"
+  ],
+  "normal_optimized": {
+    "campagnes": "byte identical per verified capture",
+    "m2": "identical except explicit python_optimized flag",
+    "m34": "byte identical",
+    "publication": "byte identical"
+  },
+  "pin": "07ee13ef6bebc0b6b85da90207f3f067ffff1755",
+  "receipt_utf8_no_symlinks_no_binary_artifacts": true,
+  "root_replay": {
+    "campaigns": "published-only under Python -O, code 0, identical to independently captured public-only result",
+    "sha256": "3b640d31b6785f96701812290e80fe1e0e17a1b2cdd50bd5c2afc12e3fdb464e"
+  },
+  "schema": "ehgp.v12.audit_cd_corrections.integration.v1",
+  "scope": "Bounded host witnesses and historical campaign receipts; no integrated catalogue, FULL or 100 ms qualification.",
+  "source_files_rechecked_against_worktree_and_git": 33,
+  "sources_sha256": {
+    "AGENTS.md": "d470ce3bc7ef835193c7ea2b491a0568160747539f99ff8866643d3c9eaa6a00",
+    "morsehgp3D_v12/docs/ARCHITECTURE.md": "8ead8ff20383b608ccf93e53fa108336bc281952695fd0f68a76c6b97e7d0351",
+    "morsehgp3D_v12/docs/CONTRAT_CATALOGUE.md": "d3f40ad315970290a0f245e935cf468a74a7833aa4530a9a2cc692c016702bf3",
+    "morsehgp3D_v12/docs/MESURE.md": "b2c02c948ef9d31e6fd2ac5951c551af419556ccd894edac401a69bccafb90c2",
+    "morsehgp3D_v12/docs/OBJET_ET_CONTRAT_MATHEMATIQUE.md": "ac32f72625aa9311e277f235c43c6c5a51c25c29161cce81b557e4745b19e3ad",
+    "morsehgp3D_v12/docs/PLAN.md": "a6be2b16d839485b6463288c37b2f7d517f6bae60c86220c159e6a7baea0fc98",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/README.md": "be4c1ac0d91be8b961005af6f26dac4189b3c314885f5b67082de57d7930e2fc",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/cuda/leaf_bench.cu": "98bff9867c5049202c7ad00fd4c22ec18caee9df92fab6fbb06034f47d3cfad4",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/host/arena_selftest.cpp": "63ac5fa27e854b0f6ee6815e9fb080effbb329b55aee662bd3c5b7d367955142",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/host/leaf_identity.cpp": "abce9964e13a25ea891f1d58bc649ca4f43bc4267f275bff9d4bddee035a9a65",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/host/mes_s.cpp": "919f3380132b88fec4054f93340b20bcf3aa22c08ede7cd7123ebaec87e52200",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/dump_format.hpp": "4327b6788f2e7723995c1b20b820576ea762c31c864f2c042c59dc0d161117a0",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_coherent.hpp": "a928efb5092780f407284d7eff49a443ad2079162d00f52254ba7a86d2eddd7d",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_common.hpp": "db205b77a9b04180e6a74597b876744641b4e5220665851f492875fa9b540afb",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_j3.hpp": "8235004c799097815bbd48c15c806c9e4d4a7cb6d99934491617c29d7d28a5b5",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/predicates.hpp": "36144eff2d5ddf57bee5453d2e72b758a72b88dabf037d2323b0a10ad55f4be1",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/simt.hpp": "c7276ddb0aba9b196e1b3c8ad138f778afda04614a3d57e285b94f3cb6f07691",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/scripts/g4_leaf_bench.py": "e70ba38e4a5a40977c6f756a8a9540840190c9d426316663250f96b9a939fc17",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/tests/test_juge_m2.py": "be7465373c30cd994be2ecb9fe5cc2fadf688857786f059eb46d5948fdaf3207",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/CMakeLists.txt": "6d34fae16f7386edfd458e51d2e27b96cbc8271b0338e9555061b31ce66134cc",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/README.md": "9081e88f3a378b6cfda93763a528599d48ed326c237d7bff2446d5d5a0365ed2",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/common/format.hpp": "b0ce982cf71f4e2f9438612221484c69d5e83d7c899c4aedbd1101d7b6f55a9c",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/mes_m3/meb_cert.hpp": "c3ccb3b6588d94a8854098f2f800352b2748ce804ec8188e2b03fa3a016f6934",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/mes_m3/mes_m3.cpp": "d69427c915d893c85810074b453fb8c460582689e1c0a8887e20f7bc1149487f",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/mes_m3/welzl_proposal.hpp": "3f7a0f113b5fe8a28b878c05be0c933e3e3eb28023e686e3fb0812900d863d62",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/mes_m4/mes_m4.cpp": "ac059b5ebbf5530c49cedc30bde2471cb6ade82fb8d3c5a106e3edca8958a9ea",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/pilote.py": "15ad8d3f25ae2fa33a2e6fb930e976aa566a3a6e7bcfc6527435a162aaf1abfc",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/tests/carre.py": "e42ea91b9790fadbbab260f95c8a9efa1c4394cf20cd96cfdfc06634eac2ff52",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/tests/test_m4_preuves.py": "a5d0127bcf5cd0dc0a438e031488e6e8410673b15f12ce1391ee80c07928f70d",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/tests/test_pilote.py": "c6c198d0b0c9d80d3aea0724e81a9175f807fc61e91ec5d1a2027a0e7c5dec56",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/vidage/vidage_v11.cpp": "c7e3d17cd658137e8dbc85ab51b915113bf2eb65675f45ff14ef989695285604",
+    "morsehgp3D_v12/microbancs/outils/recu_session.py": "72df2c6ed47220879bcf10bb17db472311ddc2f490a16849afe1950548c707d2",
+    "morsehgp3D_v12/receipts/audit_socle_microbancs_20261007/feuille/probe.cpp": "edf32a7ad60e15bb7dd4aa236943d21e250e8cb52aa1c3f228b630269854b96e"
+  },
+  "submanifests_checked": [
+    "publication/SHA256SUMS",
+    "m34/SHA256SUMS",
+    "campagnes/SHA256SUMS",
+    "m2/MANIFEST.json"
+  ]
+}

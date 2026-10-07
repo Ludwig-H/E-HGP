@@ -1,0 +1,18 @@
+{
+  "initial_normal_and_optimized": {
+    "exit_code": 1,
+    "error": "resolution did not use ten distinct processes",
+    "cause": "Erreur du script auditeur : son filtre comptait aussi le vidage initial avec --chrono-resolution 0, en plus des dix prises.",
+    "correction": "Selection des invocations avec --chrono-resolution strictement positif.",
+    "product_changed": false,
+    "product_finding": false
+  },
+  "second_normal": {
+    "exit_code": 1,
+    "error": "missing provenance refusal",
+    "cause": "Erreur du script auditeur : le refus effectif de changement pendant execution ne contient pas le mot provenance attendu par le filtre.",
+    "correction": "Controle des indicateurs construit/inchange et de la liste problemes_provenance, au lieu d'une sous-chaine.",
+    "product_changed": false,
+    "product_finding": false
+  }
+}

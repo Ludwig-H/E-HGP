@@ -1,0 +1,53 @@
+{
+  "before_after_unchanged": true,
+  "cases": {
+    "CST0219_fixed": {
+      "exit": 0,
+      "manifest_entries": 2,
+      "no_identity_in_paths_or_contents": true,
+      "renamed_payload_present": true
+    },
+    "CST0221_fixed": {
+      "exit": 2,
+      "preexisting_directory_and_all_bytes_preserved": true
+    },
+    "CST0224_collision": {
+      "actual_files_excluding_manifest": 2,
+      "exit": 0,
+      "input_files_unchanged": true,
+      "manifest_entries": 2,
+      "published": 1,
+      "reported_files_excluding_manifest": 3,
+      "selected": 2,
+      "surviving_payload_value": 1
+    },
+    "binary_leak_False": {
+      "exit": 3,
+      "no_created_file_left": true,
+      "preexisting_empty_directory_preserved": false
+    },
+    "binary_leak_True": {
+      "exit": 3,
+      "no_created_file_left": true,
+      "preexisting_empty_directory_preserved": true
+    },
+    "existing_file": {
+      "bytes_preserved": true,
+      "exit": 2
+    },
+    "two_distinct_files": {
+      "exit": 0,
+      "manifest_entries": 3,
+      "published": 2,
+      "selected": 2
+    }
+  },
+  "gcp_used": false,
+  "pin": "07ee13ef6bebc0b6b85da90207f3f067ffff1755",
+  "schema": "ehgp.v12.audit_publication_fixes.v1",
+  "scope": "temporary synthetic directories; no historical publication loss demonstrated",
+  "source_sha256": {
+    "morsehgp3D_v12/microbancs/outils/recu_session.py": "72df2c6ed47220879bcf10bb17db472311ddc2f490a16849afe1950548c707d2"
+  },
+  "witness_sha256": "451568a643d2d07e8903d355fee63e9e786bc478839bf82a9e14763ac491bff0"
+}

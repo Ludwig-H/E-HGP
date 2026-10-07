@@ -1,0 +1,22 @@
+{
+  "correction": "320db4a12",
+  "files": {
+    "AGENTS.md": "d470ce3bc7ef835193c7ea2b491a0568160747539f99ff8866643d3c9eaa6a00",
+    "morsehgp3D_v12/docs/MESURE.md": "b2c02c948ef9d31e6fd2ac5951c551af419556ccd894edac401a69bccafb90c2",
+    "morsehgp3D_v12/docs/OBJET_ET_CONTRAT_MATHEMATIQUE.md": "ac32f72625aa9311e277f235c43c6c5a51c25c29161cce81b557e4745b19e3ad",
+    "morsehgp3D_v12/docs/PLAN.md": "a6be2b16d839485b6463288c37b2f7d517f6bae60c86220c159e6a7baea0fc98",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/CMakeLists.txt": "6d34fae16f7386edfd458e51d2e27b96cbc8271b0338e9555061b31ce66134cc",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/README.md": "9081e88f3a378b6cfda93763a528599d48ed326c237d7bff2446d5d5a0365ed2",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/common/format.hpp": "b0ce982cf71f4e2f9438612221484c69d5e83d7c899c4aedbd1101d7b6f55a9c",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/mes_m3/meb_cert.hpp": "c3ccb3b6588d94a8854098f2f800352b2748ce804ec8188e2b03fa3a016f6934",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/mes_m3/mes_m3.cpp": "d69427c915d893c85810074b453fb8c460582689e1c0a8887e20f7bc1149487f",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/mes_m3/welzl_proposal.hpp": "3f7a0f113b5fe8a28b878c05be0c933e3e3eb28023e686e3fb0812900d863d62",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/mes_m4/mes_m4.cpp": "ac059b5ebbf5530c49cedc30bde2471cb6ade82fb8d3c5a106e3edca8958a9ea",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/pilote.py": "15ad8d3f25ae2fa33a2e6fb930e976aa566a3a6e7bcfc6527435a162aaf1abfc",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/tests/carre.py": "e42ea91b9790fadbbab260f95c8a9efa1c4394cf20cd96cfdfc06634eac2ff52",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/tests/test_m4_preuves.py": "a5d0127bcf5cd0dc0a438e031488e6e8410673b15f12ce1391ee80c07928f70d",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/tests/test_pilote.py": "c6c198d0b0c9d80d3aea0724e81a9175f807fc61e91ec5d1a2027a0e7c5dec56",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/vidage/vidage_v11.cpp": "c7e3d17cd658137e8dbc85ab51b915113bf2eb65675f45ff14ef989695285604"
+  },
+  "pin": "07ee13ef6bebc0b6b85da90207f3f067ffff1755"
+}

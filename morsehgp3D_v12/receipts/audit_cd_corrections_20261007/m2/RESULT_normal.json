@@ -1,0 +1,242 @@
+{
+  "audited_commit": "07ee13ef6bebc0b6b85da90207f3f067ffff1755",
+  "binary_sha256": "b82ef8c7343f5ea07c314c8ae23ffe30eef7a573044a7f0d35e4160bb8bfd099",
+  "compiled_dependencies": [
+    "morsehgp3D_v12/receipts/audit_cd_corrections_20261007/m2/reader_probe.cpp",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/host/leaf_identity.cpp",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/dump_format.hpp",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_coherent.hpp",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_common.hpp",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/predicates.hpp",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/simt.hpp",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_j3.hpp"
+  ],
+  "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "current_head": "07ee13ef6bebc0b6b85da90207f3f067ffff1755",
+  "gcp_calls": 0,
+  "gpu_calls": 0,
+  "judge_injections": {
+    "admission_failed": {
+      "choice": null,
+      "dumps": 9,
+      "injected_outputs": 0,
+      "injection_example": null,
+      "main_code": 0,
+      "ratio_gm": null,
+      "refusals_count": 8,
+      "refusals_first": [
+        "admission des vidages en echec ou non jouee : aucun noyau sur un vidage non admis",
+        "isolation GPU non certifiee (processus de calcul presents, nvidia-smi illisible ou releve absent)"
+      ],
+      "valid_takes": 0,
+      "verdict": "refuse"
+    },
+    "baseline": {
+      "choice": "j3",
+      "dumps": 9,
+      "injected_outputs": 0,
+      "injection_example": null,
+      "main_code": 0,
+      "ratio_gm": 0.10000000000000002,
+      "refusals_count": 0,
+      "refusals_first": [],
+      "valid_takes": 45,
+      "verdict": "adopte"
+    },
+    "binary_changed": {
+      "choice": null,
+      "dumps": 9,
+      "injected_outputs": 0,
+      "injection_example": null,
+      "main_code": 0,
+      "ratio_gm": 0.10000000000000002,
+      "refusals_count": 1,
+      "refusals_first": [
+        "binaire modifie pendant la session"
+      ],
+      "valid_takes": 45,
+      "verdict": "refuse"
+    },
+    "contradictory_mismatch": {
+      "choice": "j3",
+      "dumps": 9,
+      "injected_outputs": 49,
+      "injection_example": {
+        "identity": true,
+        "mismatched_counts": 1,
+        "overflow": true
+      },
+      "main_code": 0,
+      "ratio_gm": 0.10000000000000002,
+      "refusals_count": 0,
+      "refusals_first": [],
+      "valid_takes": 45,
+      "verdict": "adopte"
+    },
+    "discarded_exit_1": {
+      "choice": "j3",
+      "dumps": 9,
+      "injected_outputs": 0,
+      "injection_example": null,
+      "main_code": 0,
+      "ratio_gm": 0.10000000000000002,
+      "refusals_count": 0,
+      "refusals_first": [],
+      "valid_takes": 45,
+      "verdict": "adopte"
+    },
+    "host_exit_2": {
+      "choice": null,
+      "dumps": 9,
+      "injected_outputs": 0,
+      "injection_example": null,
+      "main_code": 0,
+      "ratio_gm": 0.10000000000000002,
+      "refusals_count": 1,
+      "refusals_first": [
+        "identite hote : code 2"
+      ],
+      "valid_takes": 45,
+      "verdict": "refuse"
+    },
+    "host_identity_error": {
+      "choice": null,
+      "dumps": 9,
+      "injected_outputs": 0,
+      "injection_example": null,
+      "main_code": 0,
+      "ratio_gm": 0.10000000000000002,
+      "refusals_count": 1,
+      "refusals_first": [
+        "identite hote : code 1; ng00_k5_l16.bin/j3 : identite, couverture ou empreinte en defaut; ng00_k5_l24.bin/j3 : identite, couverture ou empreinte en defaut; ng00_k10_l24.bin/j3 : identite, couverture ou empreinte en defaut; ng01_k5_l16.bin/j3 : identite, couverture ou empreinte en defaut; ng01_k5_l24.bin/j3 : identite, couverture ou empreinte en defaut"
+      ],
+      "valid_takes": 45,
+      "verdict": "refuse"
+    },
+    "missing_grid_frame": {
+      "choice": null,
+      "dumps": 6,
+      "injected_outputs": 0,
+      "injection_example": null,
+      "main_code": 0,
+      "ratio_gm": 0.10000000000000002,
+      "refusals_count": 3,
+      "refusals_first": [
+        "hors contrat : trames ng00,ng01 : le contrat exige ng00,ng01,ng02",
+        "cas qui decide du contrat sans prise : ng02_k5_l24"
+      ],
+      "valid_takes": 30,
+      "verdict": "refuse"
+    },
+    "nonfinite_times": {
+      "choice": null,
+      "dumps": 9,
+      "injected_outputs": 0,
+      "injection_example": null,
+      "main_code": 0,
+      "ratio_gm": null,
+      "refusals_count": 15,
+      "refusals_first": [
+        "ng00_k10_l24 : 5 processus en echec ou sans preuve (j3 : durees absentes, non finies, non positives ou en nombre faux)",
+        "ng00_k5_l16 : 5 processus en echec ou sans preuve (j3 : durees absentes, non finies, non positives ou en nombre faux)"
+      ],
+      "valid_takes": 0,
+      "verdict": "refuse"
+    },
+    "raw_times_override_median": {
+      "choice": null,
+      "dumps": 9,
+      "injected_outputs": 49,
+      "injection_example": {
+        "j3_declared_median": 6,
+        "j3_raw_median": 60
+      },
+      "main_code": 0,
+      "ratio_gm": 0.6,
+      "refusals_count": 0,
+      "refusals_first": [],
+      "valid_takes": 45,
+      "verdict": "rejete"
+    },
+    "sanitizer_empty_forms": {
+      "choice": "j3",
+      "dumps": 9,
+      "injected_outputs": 3,
+      "injection_example": {
+        "forms": 0,
+        "leaves": 0,
+        "stage": "sanitizer"
+      },
+      "main_code": 0,
+      "ratio_gm": 0.10000000000000002,
+      "refusals_count": 0,
+      "refusals_first": [],
+      "valid_takes": 45,
+      "verdict": "adopte"
+    },
+    "stale_file": {
+      "choice": null,
+      "dumps": 9,
+      "injected_outputs": 0,
+      "injection_example": null,
+      "main_code": 0,
+      "ratio_gm": null,
+      "refusals_count": 15,
+      "refusals_first": [
+        "ng00_k10_l24 : 5 processus en echec ou sans preuve (fichier de prise absent)",
+        "ng00_k5_l16 : 5 processus en echec ou sans preuve (fichier de prise absent)"
+      ],
+      "valid_takes": 0,
+      "verdict": "refuse"
+    },
+    "wrong_nonce": {
+      "choice": null,
+      "dumps": 9,
+      "injected_outputs": 0,
+      "injection_example": null,
+      "main_code": 0,
+      "ratio_gm": null,
+      "refusals_count": 19,
+      "refusals_first": [
+        "compute-sanitizer memcheck : code 0 ou prise sans preuve",
+        "compute-sanitizer racecheck : code 0 ou prise sans preuve"
+      ],
+      "valid_takes": 0,
+      "verdict": "refuse"
+    }
+  },
+  "largest_fixture_bytes": 352,
+  "limits": [
+    "One host Release TU; no sanitizer or GPU.",
+    "Original identity main included unmodified except symbol rename.",
+    "Judge external-tool factories imported from pinned test; assertions and injections independent.",
+    "No replay of historical real G4 measurements."
+  ],
+  "native_original_entrypoint_calls": 25,
+  "network_calls": 0,
+  "profile_bits": 21,
+  "python_optimized": false,
+  "reader_and_native_rows": [
+    "valid native_code=0 forms=j3,coherent identity=true",
+    "valid_pair reader=1",
+    "historical_site_out_of_cloud reader=0 native_code=2 mixed_code=2 result_lines=0",
+    "historical_wrapped_job_begin reader=0 native_code=2 mixed_code=2 result_lines=0",
+    "historical_zero_k reader=0 native_code=2 mixed_code=2 result_lines=0",
+    "historical_profile_mismatch reader=0 native_code=2 mixed_code=2 result_lines=0",
+    "historical_coordinate_out_of_profile reader=0 native_code=2 mixed_code=2 result_lines=0",
+    "historical_short_record_population reader=0 native_code=2 mixed_code=2 result_lines=0",
+    "causal_site_out_of_cloud reader=0 native_code=2 mixed_code=2 result_lines=0",
+    "causal_wrapped_job_begin reader=0 native_code=2 mixed_code=2 result_lines=0",
+    "causal_zero_k reader=0 native_code=2 mixed_code=2 result_lines=0",
+    "causal_profile_mismatch reader=0 native_code=2 mixed_code=2 result_lines=0",
+    "causal_coordinate_out_of_profile reader=0 native_code=2 mixed_code=2 result_lines=0",
+    "causal_short_record_population reader=0 native_code=2 mixed_code=2 result_lines=0",
+    "huge_header reader=0",
+    "status_without_reference reader=0",
+    "counter_mismatch reader=0",
+    "duplicate_population reader=0"
+  ],
+  "real_data_read": false,
+  "schema": "audit.cd.m2.v1",
+  "sources_before_after": "unchanged"
+}

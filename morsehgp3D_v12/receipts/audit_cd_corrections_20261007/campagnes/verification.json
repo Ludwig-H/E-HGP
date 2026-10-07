@@ -1,0 +1,46 @@
+{
+  "pin": "07ee13ef6bebc0b6b85da90207f3f067ffff1755",
+  "runs": [
+    {
+      "mode": "normal",
+      "command": [
+        "python3",
+        "morsehgp3D_v12/receipts/audit_cd_corrections_20261007/campagnes/check_campaigns.py"
+      ],
+      "code": 0,
+      "stderr_bytes": 0,
+      "stdout_sha256": "2067ecbce80eb049230dcbf6f30aeed477030c20a230a5d90e063aa19055d363",
+      "raw_available": true,
+      "D_journal_hashes_need_raw": 0
+    },
+    {
+      "mode": "optimized",
+      "command": [
+        "python3",
+        "-O",
+        "morsehgp3D_v12/receipts/audit_cd_corrections_20261007/campagnes/check_campaigns.py"
+      ],
+      "code": 0,
+      "stderr_bytes": 0,
+      "stdout_sha256": "2067ecbce80eb049230dcbf6f30aeed477030c20a230a5d90e063aa19055d363",
+      "raw_available": true,
+      "D_journal_hashes_need_raw": 0
+    },
+    {
+      "mode": "public_only",
+      "command": [
+        "python3",
+        "morsehgp3D_v12/receipts/audit_cd_corrections_20261007/campagnes/check_campaigns.py",
+        "--published-only"
+      ],
+      "code": 0,
+      "stderr_bytes": 0,
+      "stdout_sha256": "3b640d31b6785f96701812290e80fe1e0e17a1b2cdd50bd5c2afc12e3fdb464e",
+      "raw_available": false,
+      "D_journal_hashes_need_raw": 6
+    }
+  ],
+  "normal_optimized_byte_identical": true,
+  "script_sha256": "f8dbf23dd7dc70d8d19ce85318e8c55020dd00a9872a2e18d2d417415ddc2284",
+  "readme_links_checked": 4
+}

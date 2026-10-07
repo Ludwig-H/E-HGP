@@ -1,0 +1,373 @@
+{
+  "developer_part_b": [
+    {
+      "avant_correction": "codes 0, routes vraies, mutant tue",
+      "cas": "processus_silencieux",
+      "code_m3": 3,
+      "code_m4": 3,
+      "mutant_declare_tue": false,
+      "partie": "B",
+      "routes_declarees_identiques": false
+    },
+    {
+      "cas": "portes_muettes",
+      "code": 1,
+      "partie": "B",
+      "verdicts": {
+        "mes_m3": "ECHEC",
+        "mes_m3_mutant_sans_s_dans_f": "MUTANT_SURVIVANT",
+        "mes_m4": "ECHEC",
+        "mes_m4_mutant_sans_contraction": "MUTANT_SURVIVANT"
+      }
+    },
+    {
+      "avant_correction": "code 0, zero naissance jugee",
+      "cas": "m4_succes_sans_verticales_jugees",
+      "code": 3,
+      "ordres_refuses_par_processus": 3,
+      "partie": "B"
+    },
+    {
+      "avant_correction": "une commande pour cinq processus, seconde prise ecrasant la premiere",
+      "campagnes_conservees": 2,
+      "cas": "resolution_repliquee_sans_ecrasement",
+      "journaux_distincts": 10,
+      "partie": "B",
+      "processus_demandes": 5,
+      "vidages_lances_par_campagne": [
+        5,
+        5
+      ]
+    },
+    {
+      "cas": "prise_vidage_altere",
+      "code": 3,
+      "partie": "B",
+      "prises_valides": 0
+    },
+    {
+      "cas": "prise_ordre_manquant",
+      "code": 3,
+      "partie": "B",
+      "prises_valides": 0
+    },
+    {
+      "cas": "prise_graines_fausses",
+      "code": 3,
+      "partie": "B",
+      "prises_valides": 0
+    },
+    {
+      "cas": "prise_temps_non_fini",
+      "code": 3,
+      "partie": "B",
+      "prises_valides": 0
+    },
+    {
+      "cas": "binaire_remplace_apres_construire",
+      "code": 3,
+      "partie": "B"
+    },
+    {
+      "cas": "vidage_sans_flower",
+      "code_m4": 3,
+      "code_vider": 3,
+      "partie": "B",
+      "processus_m4_lances": 0
+    },
+    {
+      "cas": "vidages_modifies_avant_m4",
+      "code": 3,
+      "partie": "B"
+    },
+    {
+      "cas": "juge_m3_complet",
+      "partie": "B",
+      "verdict": "adopte"
+    },
+    {
+      "cas": "juge_m3_borne_haute_au_dela_de_0_60",
+      "partie": "B",
+      "verdict": "rejete"
+    },
+    {
+      "cas": "juge_m3_identite_mes_m3_en_defaut",
+      "partie": "B",
+      "verdict": "rejete"
+    },
+    {
+      "cas": "juge_m3_quatre_prises",
+      "partie": "B",
+      "verdict": "refuse"
+    },
+    {
+      "cas": "juge_m3_campagne_plus_recente_incomplete",
+      "partie": "B",
+      "verdict": "refuse"
+    },
+    {
+      "cas": "juge_m3_prise_d_un_autre_binaire",
+      "partie": "B",
+      "verdict": "refuse"
+    },
+    {
+      "cas": "juge_m3_vidages_de_reference_differents",
+      "partie": "B",
+      "verdict": "refuse"
+    },
+    {
+      "cas": "juge_m3_identite_mes_m3_absente",
+      "partie": "B",
+      "verdict": "refuse"
+    },
+    {
+      "cas": "juge_m3_mutant_de_porte_non_tue",
+      "partie": "B",
+      "verdict": "refuse"
+    },
+    {
+      "cas": "juge_m3_cas_qui_decide_sans_resolution",
+      "partie": "B",
+      "verdict": "refuse"
+    },
+    {
+      "cas": "juge_m3_prise_invalide_dans_la_campagne",
+      "partie": "B",
+      "verdict": "refuse"
+    }
+  ],
+  "developer_part_b_count": 22,
+  "independent": [
+    {
+      "campaigns": 2,
+      "distinct_journals": 10,
+      "distinct_pids": 10,
+      "duplicate_campaign_refused": true,
+      "performance_claim": false,
+      "previous_journals_unchanged": true,
+      "scenario": "simulated_resolution_processes",
+      "takes_per_campaign": [
+        5,
+        5
+      ]
+    },
+    {
+      "code": 3,
+      "conforme": false,
+      "provenance_refusal": true,
+      "scenario": "simulated_binary_changed_during_execution"
+    },
+    {
+      "expected_frame": "audit_square",
+      "expected_orders": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "finding": "CST-0018",
+      "injected_rows": [
+        {
+          "K": 1,
+          "mutant_sans_contraction": true,
+          "phase": "entree",
+          "trame": "autre_trame"
+        },
+        {
+          "identite": {
+            "identiques": false
+          },
+          "k": 1,
+          "phase": "ordre"
+        },
+        {
+          "code": 1,
+          "phase": "fin"
+        }
+      ],
+      "mutant_binary_hash_bound": true,
+      "mutant_declared_complete": true,
+      "mutant_declared_killed": true,
+      "native_normal_conforme": true,
+      "normal_births_checked": 6,
+      "pilot_step_code": 0,
+      "scenario": "incomplete_wrong_frame_simulated_mutant",
+      "status": "known_residual_gap"
+    }
+  ],
+  "native_binary_sha256": "cacd38d9aca461123838df2e0145931035dbb53a7e81502fac1e485af4b25995",
+  "native_binary_unchanged": true,
+  "native_gate": [
+    {
+      "attendu": 0,
+      "cas": "verticales_correctes",
+      "code": 0,
+      "naissances_jugees_lem_t6": 6,
+      "refus": null,
+      "vidages_sha256": {
+        "cat.bin": "ffd0d96e64ae4bac",
+        "foret_1.bin": "91cfda8eb7ad0434",
+        "foret_2.bin": "eb85aef53887a5f1",
+        "foret_3.bin": "2eaba04335d1db6e",
+        "foret_4.bin": "27cb118e4772eef1",
+        "ordre_1.bin": "ce1ffd2a89fd5273",
+        "ordre_2.bin": "454d3f1a4bfb7477",
+        "ordre_3.bin": "ef640c1e86a6724d",
+        "ordre_4.bin": "976b3f438c39ef2f"
+      }
+    },
+    {
+      "attendu": 1,
+      "cas": "image_fausse",
+      "code": 1,
+      "naissances_jugees_lem_t6": 6,
+      "refus": null,
+      "vidages_sha256": {
+        "cat.bin": "ffd0d96e64ae4bac",
+        "foret_1.bin": "91cfda8eb7ad0434",
+        "foret_2.bin": "80425005d12e0bf2",
+        "foret_3.bin": "2eaba04335d1db6e",
+        "foret_4.bin": "27cb118e4772eef1",
+        "ordre_1.bin": "ce1ffd2a89fd5273",
+        "ordre_2.bin": "454d3f1a4bfb7477",
+        "ordre_3.bin": "ef640c1e86a6724d",
+        "ordre_4.bin": "976b3f438c39ef2f"
+      }
+    },
+    {
+      "attendu": 3,
+      "cas": "flower_absente_ordres_2_a_4",
+      "code": 3,
+      "naissances_jugees_lem_t6": 0,
+      "refus": "section_absente FLOWER (verticales de l'ordre k)",
+      "vidages_sha256": {
+        "cat.bin": "ffd0d96e64ae4bac",
+        "foret_1.bin": "91cfda8eb7ad0434",
+        "foret_2.bin": "99821cb69d97f5fb",
+        "foret_3.bin": "91caa2975ff96567",
+        "foret_4.bin": "e8aa5697c3caa933",
+        "ordre_1.bin": "ce1ffd2a89fd5273",
+        "ordre_2.bin": "454d3f1a4bfb7477",
+        "ordre_3.bin": "ef640c1e86a6724d",
+        "ordre_4.bin": "976b3f438c39ef2f"
+      }
+    },
+    {
+      "attendu": 3,
+      "cas": "flower_absente_ordre_3",
+      "code": 3,
+      "naissances_jugees_lem_t6": 4,
+      "refus": "section_absente FLOWER (verticales de l'ordre k)",
+      "vidages_sha256": {
+        "cat.bin": "ffd0d96e64ae4bac",
+        "foret_1.bin": "91cfda8eb7ad0434",
+        "foret_2.bin": "eb85aef53887a5f1",
+        "foret_3.bin": "91caa2975ff96567",
+        "foret_4.bin": "27cb118e4772eef1",
+        "ordre_1.bin": "ce1ffd2a89fd5273",
+        "ordre_2.bin": "454d3f1a4bfb7477",
+        "ordre_3.bin": "ef640c1e86a6724d",
+        "ordre_4.bin": "976b3f438c39ef2f"
+      }
+    },
+    {
+      "attendu": 3,
+      "cas": "ordre_en_tete_faux",
+      "code": 3,
+      "naissances_jugees_lem_t6": 0,
+      "refus": "ordre_k.bin : genre, ordre, K, trame ou profil discordants",
+      "vidages_sha256": {
+        "cat.bin": "ffd0d96e64ae4bac",
+        "foret_1.bin": "91cfda8eb7ad0434",
+        "foret_2.bin": "eb85aef53887a5f1",
+        "foret_3.bin": "2eaba04335d1db6e",
+        "foret_4.bin": "27cb118e4772eef1",
+        "ordre_1.bin": "ce1ffd2a89fd5273",
+        "ordre_2.bin": "6ef04643716fb6ff",
+        "ordre_3.bin": "ef640c1e86a6724d",
+        "ordre_4.bin": "976b3f438c39ef2f"
+      }
+    },
+    {
+      "attendu": 3,
+      "cas": "genre_de_foret_faux",
+      "code": 3,
+      "naissances_jugees_lem_t6": 4,
+      "refus": "foret_k.bin : genre, ordre, K, trame ou profil discordants",
+      "vidages_sha256": {
+        "cat.bin": "ffd0d96e64ae4bac",
+        "foret_1.bin": "91cfda8eb7ad0434",
+        "foret_2.bin": "eb85aef53887a5f1",
+        "foret_3.bin": "8c0536fb134a9e77",
+        "foret_4.bin": "27cb118e4772eef1",
+        "ordre_1.bin": "ce1ffd2a89fd5273",
+        "ordre_2.bin": "454d3f1a4bfb7477",
+        "ordre_3.bin": "ef640c1e86a6724d",
+        "ordre_4.bin": "976b3f438c39ef2f"
+      }
+    },
+    {
+      "attendu": 3,
+      "cas": "cle_hors_catalogue",
+      "code": 3,
+      "naissances_jugees_lem_t6": 4,
+      "refus": "BIRTHS : cles hors domaine ou non strictement croissantes",
+      "vidages_sha256": {
+        "cat.bin": "ffd0d96e64ae4bac",
+        "foret_1.bin": "91cfda8eb7ad0434",
+        "foret_2.bin": "eb85aef53887a5f1",
+        "foret_3.bin": "2eaba04335d1db6e",
+        "foret_4.bin": "27cb118e4772eef1",
+        "ordre_1.bin": "ce1ffd2a89fd5273",
+        "ordre_2.bin": "454d3f1a4bfb7477",
+        "ordre_3.bin": "264159475f95ba60",
+        "ordre_4.bin": "976b3f438c39ef2f"
+      }
+    },
+    {
+      "attendu": 3,
+      "cas": "boule_de_cellule_hors_catalogue",
+      "code": 3,
+      "naissances_jugees_lem_t6": 0,
+      "refus": "CELLS : boule hors du catalogue",
+      "vidages_sha256": {
+        "cat.bin": "ffd0d96e64ae4bac",
+        "foret_1.bin": "91cfda8eb7ad0434",
+        "foret_2.bin": "eb85aef53887a5f1",
+        "foret_3.bin": "2eaba04335d1db6e",
+        "foret_4.bin": "27cb118e4772eef1",
+        "ordre_1.bin": "ce1ffd2a89fd5273",
+        "ordre_2.bin": "6e53f084187fb7cb",
+        "ordre_3.bin": "ef640c1e86a6724d",
+        "ordre_4.bin": "976b3f438c39ef2f"
+      }
+    },
+    {
+      "attendu": 3,
+      "cas": "decalages_decroissants",
+      "code": 3,
+      "naissances_jugees_lem_t6": 0,
+      "refus": "CELLOFF : decalages non croissants",
+      "vidages_sha256": {
+        "cat.bin": "ffd0d96e64ae4bac",
+        "foret_1.bin": "91cfda8eb7ad0434",
+        "foret_2.bin": "eb85aef53887a5f1",
+        "foret_3.bin": "2eaba04335d1db6e",
+        "foret_4.bin": "27cb118e4772eef1",
+        "ordre_1.bin": "86c9155e748ee32d",
+        "ordre_2.bin": "454d3f1a4bfb7477",
+        "ordre_3.bin": "ef640c1e86a6724d",
+        "ordre_4.bin": "976b3f438c39ef2f"
+      }
+    },
+    {
+      "binaire_sha256": "cacd38d9aca461123838df2e0145931035dbb53a7e81502fac1e485af4b25995",
+      "cas": 9,
+      "ecarts": [],
+      "porte": "m4_preuves"
+    }
+  ],
+  "pin": "07ee13ef6bebc0b6b85da90207f3f067ffff1755",
+  "sources_unchanged": true,
+  "status": "checks_passed_with_CST0018_residual_reproduced"
+}

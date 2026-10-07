@@ -1,0 +1,20 @@
+{
+  "binary_sha256": "cacd38d9aca461123838df2e0145931035dbb53a7e81502fac1e485af4b25995",
+  "command": [
+    "g++",
+    "-std=c++20",
+    "-O2",
+    "-DNDEBUG",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "morsehgp3D_v12/microbancs/mes_m3_m4_tour/mes_m4/mes_m4.cpp",
+    "-o",
+    "/tmp/ehgp-v12-audit-cd-fixes-math-bin-20261007/mhgp12_mes_m4"
+  ],
+  "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "exit_code": 0,
+  "source_manifest_sha256": "294acdffafdb435ea0cc414076acdadc976319ed423396e0fca45ab7edbc3067"
+}
