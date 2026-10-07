@@ -1,0 +1,7 @@
+[g4_matrix 03:34:36] gcc_asan_ubsan : lancement (8 fils ; en cours : gcc_asan_ubsan)
+[g4_matrix 03:34:36] gcc_tsan : lancement (8 fils ; en cours : gcc_asan_ubsan, gcc_tsan)
+[g4_matrix 03:39:31] gcc_asan_ubsan : ok (294.334 s)
+[g4_matrix 03:40:13] gcc_tsan : ok (336.767 s)
+gcc_asan_ubsan   ok                   portes 807/807
+gcc_tsan         ok                   portes 807/807
+[g4_matrix 03:40:13] code de sortie 0 ; resume : /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.FcNp82j5Ha/results/cmd/004_matrix/files/matrix/summary.json

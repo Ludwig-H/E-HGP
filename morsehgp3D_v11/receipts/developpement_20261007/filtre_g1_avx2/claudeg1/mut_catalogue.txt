@@ -1,0 +1,6 @@
+dominance_egalite_retiree                TUE      code
+g1_avx2_egalite_comptee                  TUE      code
+g1_avx2_arret_decale                     TUE      code
+g1_avx2_max_omis                         TUE      code
+g1_filtre_avx2_garde_inverse             TUE      code
+mutants_ok module=catalogue mutants=5 tues=5 dont_signal=0 dont_delai=0 dont_construction=0 plancher=5
