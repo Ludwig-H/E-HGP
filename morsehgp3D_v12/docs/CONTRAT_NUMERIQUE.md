@@ -111,7 +111,10 @@ a au plus 63 bits, `i128` si elle en a au plus 127.
 | dénominateur du niveau | $6s+8$ | $s\leq 9$ | $s\leq 19$ | niveaux |
 | comparaison de deux niveaux | $14s+20$ | $s\leq 3$ | $s\leq 7$ | tri des événements |
 | **côté d'un site gardé** (budget mixte) | $6s+11$ | $s\leq 8$ | $s\leq 19$ | recensement |
-| **orientation avec centre, sites de coquille** (budget mixte) | $7s+14$ | $s\leq 7$ | $s\leq 16$ | `LEM-T7`, support canonique |
+| **orientation avec centre, sites gardés** (budget mixte) | $7s+14$ | $s\leq 7$ | $s\leq 16$ | `LEM-T7`, support canonique |
+| orientation d'un quatrième site (`strictly_inside`, sites gardés, sans centre) | $3s+10$ | $s\leq 17$ | toujours | `LEM-T7` |
+| triangle strictement aigu (`strictly_acute`) | $2s+7$ | $s\leq 28$ | toujours | q3 |
+| **test du milieu** (support à deux sites, canonisation), forme locale | $5s+8$ (sites gardés), $5s+6$ (repère d'une feuille) | $s\leq 11$ | $s\leq 23$ | catalogue, hôte et appareil |
 
 **Budgets mixtes** (`CST-0111`). Le centre $c=o+N/D$ garde les bornes de son repère ($D<24M^{4}$,
 $\lvert N_j\rvert<24M^{5}$ pour q3, $M=2^{s}$) ; seuls les sites confrontés s'éloignent :
@@ -122,10 +125,17 @@ $\lvert N_j\rvert<24M^{5}$ pour q3, $M=2^{s}$) ; seuls les sites confrontés s'�
 - orientation de $c$ par rapport au plan de trois sites $p,q,r$ de la coquille (prédicats `orientation` et
   `strictly_inside` de `src/supports/enumerate.cpp`) : les sites sont sur la sphère, à moins de $2R<4M$ l'un de l'autre
   et de $o$, d'où un produit vectoriel $<32M^{2}$ par composante, $\lvert N+D(o-p)\rvert<120M^{5}$, et un total
-  $<11\,520M^{7}<2^{14}M^{7}$, soit $7s+14$ bits.
+  $<11\,520M^{7}<2^{14}M^{7}$, soit $7s+14$ bits ; pour trois sites gardés quelconques (écarts sous $5M$, normale sous
+  $50M^{2}$, $\lvert N_j+D(o_j-p_j)\rvert<96M^{5}$), le total reste sous $14\,400M^{7}<2^{14}M^{7}$ (addendum de
+  l'auditeur) ;
+- test du milieu d'un support à deux sites $a,b$ : la v11 calculait $2(Do_j+N_j)=D(a_j+b_j)$ en coordonnées
+  absolues ($5B+7$ bits, d'où $B\leq 24$ ; `src/catalogue/support.cpp`, `src/num/predicates.cpp`, et sur l'appareil
+  `src/catalogue/leaf_device_predicates.hpp`) ; forme locale $2N_j=D\,((a_j-o_j)+(b_j-o_j))$, de $5s+8$ bits pour des
+  sites gardés et $5s+6$ bits dans le repère d'une feuille (`CST-0114`).
 
 La règle grossière (tout au budget de $s+2$) donnerait $6s+20$ et $7s+23$, natifs seulement jusqu'à $s=17$ et $s=14$ ;
-les budgets mixtes gardent les seuils du repère ($s\leq 19$ et $s\leq 16$). À contre-lire.
+les budgets mixtes gardent les seuils du repère ($s\leq 19$ et $s\leq 16$). Contre-lus : addendum
+[`ADDENDUM_CONTRAT_NUMERIQUE_20261007.md`](../audits/ADDENDUM_CONTRAT_NUMERIQUE_20261007.md) (`f6f65a0d8`).
 
 Conséquences :
 
@@ -152,14 +162,18 @@ Conséquences :
 | lecture et contrôle de l'entrée | $B\leq 32$ | refus explicite au-delà |
 | clé de tri interne | 63 | ci-dessous ; ne décide rien de publié |
 | centre absolu $o+N/D$ (export des naissances) | $B+4s+6$ (v11 : $5B+6$ à $s=B$) | entiers larges, à l'export seulement |
-| comparaison de deux centres absolus (`compare_centers`, naissances de même rang, seul appelant de la v11) | $9B+11$ en v11 ; en v12, parties entières sur 64 bits puis parties fractionnaires sur $8s+10$ bits | en deux temps, sans entier de la taille de $B$ ; même ordre que la v11 |
+| comparaison de deux centres absolus (`compare_centers`, naissances de même rang, seul appelant de la v11) | $9B+11$ en v11 ; en v12, parties entières sur 64 bits (dividende $N_j$ de $5s+5$ bits) puis parties fractionnaires sur $8s+10$ bits | en deux temps, sans entier de la taille de $B$ ; même ordre que la v11 |
+| test du milieu de la canonisation (v11 : $2(Do_j+N_j)=D(a_j+b_j)$) | $5B+7$ en v11 ; $5s+8$ en forme locale | § 3 (`CST-0114`) |
 | export d'un niveau | numérateur $\leq 8s+12$, dénominateur $\leq 6s+8$ | mots de 64 bits, nombre de mots en tête |
 | distances carrées des requêtes à centre entier | $2B+2$ | `NUM-REQUETE` |
 
 **Comparaison de centres en deux temps.** L'ordre (niveau, centre) des naissances est invariant par translation ;
 seule sa largeur lisait $B$. Pour $c=o+N/D$ avec $D>0$, la partie entière $\lfloor c_j\rfloor=o_j+\lfloor N_j/D\rfloor$
 tient sur 64 bits ; deux centres de parties entières différentes sont ordonnés par elles, sinon par leurs parties
-fractionnaires $(N_j-\lfloor N_j/D\rfloor D)/D$, comparées par produits croisés de moins de $8s+10$ bits.
+fractionnaires $(N_j-\lfloor N_j/D\rfloor D)/D$, comparées par produits croisés de moins de $8s+10$ bits (natifs
+jusqu'à $s=14$, $s$ le plus grand des deux repères). Préconditions : $D>0$ (signe normalisé en q4) et plancher
+mathématique pour $N_j<0$. Le dividende $N_j$ du plancher a $5s+5$ bits en q3 : entier large au-delà de $s=24$, même
+quand le quotient est petit. Même ordre que `compare_centers` (contre-lu, `f6f65a0d8`).
 
 **Ce que la clé de Morton décidait dans la v11** (`CST-0113`). Le support canonique $S^{*}$ y est le support de
 cardinal minimal, puis le premier dans l'ordre lexicographique des `SiteIdx`, qui sont des rangs de Morton
@@ -235,7 +249,8 @@ avant admission, **en parallèle**, et comptée. Les paliers, les budgets et la 
 
 ## 9. Questions ouvertes
 
-1. Les budgets mixtes $6s+11$ et $7s+14$ du § 3 (à contre-lire).
-2. Les certificats de fabrique de la v11 (puissance q3, orientation), à relire au port.
-3. La comparaison de centres en deux temps du § 4 (même ordre que `compare_centers`, sans entier de la taille de
-   $B$).
+1. Les certificats de fabrique de la v11 (puissance q3, orientation), à relire au port.
+
+Les budgets mixtes du § 3 et la comparaison de centres en deux temps du § 4 sont contre-lus (addendum `f6f65a0d8`).
+Usages absolus de la v11 relevés et remplacés : `LatticeSphere` (`CST-0109`), `compare_centers` (§ 4), test du
+milieu (`CST-0114`) ; selon l'addendum, il n'en reste aucun autre dans `src/num` et `src/catalogue`.
