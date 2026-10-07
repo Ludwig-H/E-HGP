@@ -12,7 +12,9 @@ Usage : recu_session.py --session DOSSIER_DE_SESSION --dest DOSSIER_DU_RECU [--i
 Le dossier de destination doit etre absent ou vide : il n'est jamais efface s'il preexistait (CST-0221) ; en cas
 d'identite restante, seuls les fichiers crees par l'appel sont retires. Les noms de fichiers sont expurges comme les
 contenus, et le controle final porte sur les noms et sur tous les fichiers, SHA256SUMS compris (CST-0219).
-Bibliotheque standard seule. Codes : 0 conforme ; 2 usage ; 3 identite restante (fichiers crees retires).
+Deux fichiers dont les noms deviendraient identiques apres expurgation font refuser le recu (CST-0224).
+Bibliotheque standard seule. Codes : 0 conforme ; 2 usage ; 3 identite restante ou collision de noms (fichiers
+crees retires).
 """
 
 import argparse
@@ -40,6 +42,18 @@ def is_text(path):
   with open(path, 'rb') as handle:
     head = handle.read(4096)
   return b'\0' not in head
+
+
+def remove_created(dest, created_dest):
+  """Retire ce que l'appel a ecrit : tout le dossier s'il l'a cree, sinon seulement son contenu (prealablement vide)."""
+  if created_dest:
+    shutil.rmtree(dest)
+    return
+  for root, dirs, files in os.walk(dest, topdown=False):
+    for name in files:
+      os.remove(os.path.join(root, name))
+    for name in dirs:
+      os.rmdir(os.path.join(root, name))
 
 
 def main(argv):
@@ -90,13 +104,23 @@ def main(argv):
   with open(os.path.join(args.dest, 'receipt.json'), 'w', encoding='utf-8') as out:
     out.write(text + '\n')
   copied = 0
+  targets = {}
   for root, _, files in os.walk(results):
     for name in sorted(files):
       path = os.path.join(root, name)
       relative = os.path.relpath(path, results)
       if not any(fnmatch.fnmatch(relative, pattern) for pattern in args.include):
         continue
-      target = os.path.join(args.dest, 'resultats', redact_text(relative, account, user))
+      redacted = redact_text(relative, account, user)
+      if redacted in targets:
+        # Deux fichiers dont les noms deviennent identiques apres expurgation (CST-0224) : refus explicite, jamais
+        # d'ecrasement silencieux ; les fichiers deja ecrits sont retires comme pour une fuite.
+        print('recu_session : collision de noms apres expurgation (%d fichier(s)) ; rien n\'est publie' % 2,
+              file=sys.stderr)
+        remove_created(args.dest, created_dest)
+        return 3
+      targets[redacted] = relative
+      target = os.path.join(args.dest, 'resultats', redacted)
       os.makedirs(os.path.dirname(target), exist_ok=True)
       if is_text(path):
         with open(path, encoding='utf-8', errors='replace') as handle:
@@ -128,14 +152,7 @@ def main(argv):
       if any(n in relative for n in needles) or any(n.encode() in data for n in needles):
         leaks.append(relative)
   if leaks:
-    if created_dest:
-      shutil.rmtree(args.dest)
-    else:
-      for root, dirs, files in os.walk(args.dest, topdown=False):
-        for name in files:
-          os.remove(os.path.join(root, name))
-        for name in dirs:
-          os.rmdir(os.path.join(root, name))
+    remove_created(args.dest, created_dest)
     print('recu_session : identite restante dans %d fichier(s) ; fichiers crees retires' % len(leaks), file=sys.stderr)
     return 3
   print('recu_session_ok fichiers=%d' % (copied + 1))

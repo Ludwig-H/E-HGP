@@ -90,7 +90,8 @@ trame $t$ (CPU).
   distincts.
 - **Contrat R7 porté** : seuls les chemins `i128` prouvés décident sur l'appareil ; sinon `unresolved`, rejoué en exact
   avant admission, **en parallèle** (le repli de la v11 était en série).
-- **Référence CPU** : le même noyau en SIMD sur l'hôte, et le DFS exact pour les feuilles larges et les tests.
+- **Référence CPU** : le même noyau J3 sur l'hôte (warp simulé), rejoué en exact plus large pour les feuilles larges ;
+  le DFS de la v11, gelé, ne reste qu'un témoin de test ([contrat du catalogue](CONTRAT_CATALOGUE.md) § 2).
 - **Ce qui est porté** : contrat G1–G4, filtres de feuille (`LEM-CLIQUE`, `LEM-ZONO`, `LEM-R`, `LEM-DEFER`), $S^{*}$
   canonique (avec départage par coordonnées), admission $p+q\leq K+1$, clés F3/F4, budget transactionnel.
 - **Risques** : le gain d'une feuille data-parallèle (×3 sur le noyau un-fil) n'est pas établi ; la feuille coopérative
