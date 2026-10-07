@@ -52,6 +52,24 @@ son reçu. **Aucune tranche ne commence avant les décisions D1 à D7** de [`DEC
 **Sortie** : les microbancs sont jugés ; la forme de la feuille est choisie ; les budgets de [`ARCHITECTURE.md`](ARCHITECTURE.md)
 sont confirmés ou révisés **avant** tout port d'étage. Si un budget tombe, le plan se révise ici, pas en fin de tranche.
 
+**Bilan de sortie de T0 (7 octobre 2026)**, d'après quatre sessions G4 gardées (reçus `g4_t0a` à `g4_t0d`, toutes
+terminées par un arrêt certifié) :
+
+- **Feuille** : J3 par phases, variante `j3_r168`, adoptée (`MES-M2`) ; la forme cohérente est rejetée.
+- **Parcours** : en largeur sur le GPU, adopté (`MES-M5`) ; avec la feuille, environ 16 ms à K5 sur ng00 avant la fin
+  d'étage : le budget de l'étage C (35 à 45 ms) est confirmé.
+- **Plus petite boule** : proposée puis certifiée, adoptée définitivement (`MES-M3`, −45 à −46 % de résolution à
+  K10) ; à K5 le gain n'est que de 7 % : le budget de l'étage G (25 à 30 ms) **n'est pas atteignable sans le
+  recensement borné aux $k$ plus proches et le mémo de cellule** (`LEM-T3`), qui deviennent la priorité de T2.
+- **Forêt sans lots** : tenue à K5 (`MES-M4`) ; à K10, contraction de 3,2 à 4,3 ms au-dessus du seuil de 3 ms,
+  publiée ; le budget de l'étage T est confirmé à K5.
+- **Session** : coûts fixes mesurés (`MES-M6`) ; attente `yield`, graphes pour les suites de lancements.
+- **Non faits en T0** : `MES-M7` (profil par route contre la v10 R2, couvert en partie par la résolution à trois bras),
+  `MES-E` et `MES-P` (v11 gelée sur les scènes de plusieurs millions et sur les petits nuages), qui attendent les outils
+  de données corrigés (`CST-0216` à `CST-0218`) ; ils seront joués avant les objectifs des régimes (b) et (c).
+- **Outils de jugement** : les juges des microbancs ont été durcis après l'audit (`CST-0213` à `0215` clos) ; des résidus
+  de `CST-0018` restent à fermer avant toute nouvelle adoption.
+
 ## 2. T1 — catalogue
 
 **Entrée** : `MES-M2` et `MES-M5` jugés.
