@@ -1,0 +1,37 @@
+{
+  "artifacts_sha256": {
+    "README.md": "e642f2d23a02e8e5dc8ed13edad5ea4d72b2a993668963e89e745b2434596716",
+    "RESULT.json": "c1dac3b31f2e99eda63dcb50e8bd3c79fffe424c5c4c954b827aa2b95308ca2c"
+  },
+  "audited_commit": "4147c546000b198b5239646063bfb1e3ed6d28fc",
+  "closure_note": "Les empreintes des petits recus prives sont publiees, jamais leurs contenus ni identites.",
+  "historical_session": "v12.20261007.t0a",
+  "historical_session_sha256": {
+    "host/handoff.json": "4e568f97b5a8ae34c01a17a70d309c43ba09d41f36b74d48cffdb6ee5e6a8add",
+    "host/lifecycle.txt": "cb06d5139c4b6ee498cea990c4626a50bc08cc2792a5a1fa1d207875928d7fed",
+    "host/start_and_verify.sh": "73d76c674c71d997a803587a0b20186f668e7aa44f62d4c8b516e22e13469bc0",
+    "host/stop_and_verify.sh": "ddcad77aa995ebb334fd3f341f7bb81ac94f749593fec98f885fb1c4b7956f3c",
+    "preflight.json": "aeee8b76fda559f0d6fac9a118a38a2d3ba75716f929bdbe5e94385fe113e621",
+    "receipt.json": "fbc677bc51a934dd8e447603eac2a3660af95b290f303c8c381e97bd628835c1",
+    "results/results.tar.gz": "44594dc6f7e9b64b74693c9182f690b2a3eef2dfa4990b25deeeebe4ca26fa73"
+  },
+  "schema": "audit.session_t1.manifest.v1",
+  "sources_sha256": {
+    "gcp-migration/README_V12.md": "3a561f6cf4a7ef3ac46c81e7011bf42d19a103e44c94b49e8e3f60eb5ca8a2bb",
+    "gcp-migration/start_and_verify.sh": "73d76c674c71d997a803587a0b20186f668e7aa44f62d4c8b516e22e13469bc0",
+    "gcp-migration/stop_and_verify.sh": "ddcad77aa995ebb334fd3f341f7bb81ac94f749593fec98f885fb1c4b7956f3c",
+    "gcp-migration/v11_session.py": "b86e5ff85d8cad6c7bd9da4e0dfbe4febc6fb980a1048a26a5478bcfbd92461d",
+    "gcp-migration/v11_worker.sh": "d625f5866fa7f5b644d1ab3dfb0e52e5dd806a44f08d045b29cff0af5c049c66",
+    "gcp-migration/v12_session.py": "8ababf35a6e295749b446faacc0c6f2ca54d69362199131f2a40d8ac5c23d8aa",
+    "gcp-migration/v12_target_selftest.py": "9dc28b1172697eca463c234a9c0d0d9229a0b764d4e8fdcb45f485aaa891e2a6",
+    "gcp-migration/v12_worker.sh": "fa104794ae847a05cbba9ab8c3f945fcd43b0662ac79fcf4b543c9d706c59a5f",
+    "morsehgp3D_v12/bench/data_cache.py": "a1f8a07f2465f40e6336f50004964c5006f1cdd3a296f72ee5d5aa7c9404bf03",
+    "morsehgp3D_v12/microbancs/outils/recu_session.py": "2555e498b617c705a32311b28ca09038900280a66ebe81ede92b3e30735ad968",
+    "morsehgp3D_v12/receipts/g4_t0a_20261007/README.md": "b5da700966e2325bdeb72382d33a3ddd240b22cb9d3fd05bb3c7447d8272f2b4",
+    "morsehgp3D_v12/receipts/g4_t0a_20261007/SHA256SUMS": "469106fdb0d9b92e21bcff55ab21739d7a73e5976ebebcd7b961f70c6735d84d",
+    "morsehgp3D_v12/receipts/g4_t0a_20261007/receipt.json": "0eec5395619a32ecc9115092b10b7a54a78b6b58062ffe4acec4d1b6a714fc35"
+  },
+  "witness_sha256": {
+    "run.py": "a76e9fb8975ad8872a81990d1869701f81e978dc0687fa702e32306534e3593f"
+  }
+}

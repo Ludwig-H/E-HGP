@@ -1,0 +1,417 @@
+{
+  "before_after_unchanged": true,
+  "gcp_used": false,
+  "native_executed": false,
+  "orientation_budget_bits": {
+    "16": 121,
+    "17": 128
+  },
+  "schema": "ehgp.v12.catalogue_contract_witnesses.v1",
+  "source_closure": {
+    "checkout_head": "4147c546000b198b5239646063bfb1e3ed6d28fc",
+    "files_checked": 12,
+    "manifest_sha256": "68951291479a0a47b740f3f046f002658634f2db6b5b938046c79a896858b436",
+    "pin": "4147c546000b198b5239646063bfb1e3ed6d28fc",
+    "script_sha256": "33488f88fa6a34a8a23fcb460328707c809c1e15e323681af868ae4a19bcb2d1"
+  },
+  "traversal": {
+    "absolute": {
+      "filter_tests": 1044,
+      "leaf_sha256": "0480c15836caa770964b317b156039072c9307c73bbe22fbfa30d5563c030521",
+      "leaves": 34,
+      "witness_node": {
+        "distances": [
+          [
+            [
+              2,
+              5,
+              2
+            ],
+            114
+          ],
+          [
+            [
+              4,
+              7,
+              4
+            ],
+            18
+          ],
+          [
+            [
+              10,
+              8,
+              6
+            ],
+            134
+          ],
+          [
+            [
+              12,
+              10,
+              4
+            ],
+            230
+          ],
+          [
+            [
+              8,
+              10,
+              9
+            ],
+            134
+          ],
+          [
+            [
+              9,
+              12,
+              11
+            ],
+            286
+          ]
+        ],
+        "hi": [
+          7,
+          13,
+          7
+        ],
+        "kept": [
+          [
+            2,
+            5,
+            2
+          ],
+          [
+            4,
+            7,
+            4
+          ],
+          [
+            10,
+            8,
+            6
+          ],
+          [
+            12,
+            10,
+            4
+          ],
+          [
+            8,
+            10,
+            9
+          ],
+          [
+            9,
+            12,
+            11
+          ]
+        ],
+        "lo": [
+          2,
+          5,
+          2
+        ],
+        "parent": [
+          [
+            2,
+            5,
+            2
+          ],
+          [
+            4,
+            7,
+            4
+          ],
+          [
+            10,
+            8,
+            6
+          ],
+          [
+            12,
+            10,
+            4
+          ],
+          [
+            8,
+            10,
+            9
+          ],
+          [
+            9,
+            12,
+            11
+          ]
+        ],
+        "witnesses": [
+          [
+            4,
+            7,
+            4
+          ],
+          [
+            2,
+            5,
+            2
+          ],
+          [
+            10,
+            8,
+            6
+          ]
+        ]
+      }
+    },
+    "bfs_equals_dfs_at_fixed_order": true,
+    "k": 1,
+    "leaf_size": 3,
+    "min_strict_dominance_on_closed_box": 7,
+    "native_executed": false,
+    "normalized": {
+      "filter_tests": 1042,
+      "leaf_sha256": "6e16dcc38b967baf92252d901712a21eda19b912ac83d2eb86a56622444d9574",
+      "leaves": 34,
+      "witness_node": {
+        "distances": [
+          [
+            [
+              2,
+              5,
+              2
+            ],
+            114
+          ],
+          [
+            [
+              4,
+              7,
+              4
+            ],
+            18
+          ],
+          [
+            [
+              8,
+              10,
+              9
+            ],
+            134
+          ],
+          [
+            [
+              12,
+              10,
+              4
+            ],
+            230
+          ],
+          [
+            [
+              10,
+              8,
+              6
+            ],
+            134
+          ],
+          [
+            [
+              9,
+              12,
+              11
+            ],
+            286
+          ]
+        ],
+        "hi": [
+          7,
+          13,
+          7
+        ],
+        "kept": [
+          [
+            2,
+            5,
+            2
+          ],
+          [
+            4,
+            7,
+            4
+          ],
+          [
+            8,
+            10,
+            9
+          ],
+          [
+            12,
+            10,
+            4
+          ],
+          [
+            10,
+            8,
+            6
+          ]
+        ],
+        "lo": [
+          2,
+          5,
+          2
+        ],
+        "parent": [
+          [
+            2,
+            5,
+            2
+          ],
+          [
+            4,
+            7,
+            4
+          ],
+          [
+            8,
+            10,
+            9
+          ],
+          [
+            12,
+            10,
+            4
+          ],
+          [
+            10,
+            8,
+            6
+          ],
+          [
+            9,
+            12,
+            11
+          ]
+        ],
+        "witnesses": [
+          [
+            4,
+            7,
+            4
+          ],
+          [
+            2,
+            5,
+            2
+          ],
+          [
+            8,
+            10,
+            9
+          ]
+        ]
+      }
+    },
+    "points": [
+      [
+        2,
+        5,
+        2
+      ],
+      [
+        4,
+        7,
+        4
+      ],
+      [
+        8,
+        10,
+        9
+      ],
+      [
+        9,
+        12,
+        11
+      ],
+      [
+        10,
+        8,
+        6
+      ],
+      [
+        12,
+        10,
+        4
+      ]
+    ]
+  },
+  "triangle": {
+    "all_k1_balls_have_unique_support": true,
+    "edge_level": "1/2",
+    "morton": {
+      "ball_order": [
+        "BC",
+        "AC",
+        "AB"
+      ],
+      "cover_choice_k2": {
+        "A": "AC",
+        "B": "BC",
+        "C": "BC"
+      },
+      "kruskal_k1": [
+        "BC",
+        "AC"
+      ],
+      "site_order": [
+        "C",
+        "B",
+        "A"
+      ]
+    },
+    "points": {
+      "A": [
+        0,
+        1,
+        1
+      ],
+      "B": [
+        1,
+        0,
+        1
+      ],
+      "C": [
+        1,
+        1,
+        0
+      ]
+    },
+    "positions": {
+      "ball_order": [
+        "AB",
+        "AC",
+        "BC"
+      ],
+      "cover_choice_k2": {
+        "A": "AB",
+        "B": "AB",
+        "C": "AC"
+      },
+      "kruskal_k1": [
+        "AB",
+        "AC"
+      ],
+      "site_order": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    "triple_level": "2/3"
+  },
+  "verdicts": {
+    "bfs_dfs_same_with_identical_parent_order": true,
+    "normalized_morton_changes_reservoir_and_leaf_contents": true,
+    "s17_outside_proposed_s16_tier": true,
+    "transition_requires_more_than_multi_support_exception": true
+  }
+}

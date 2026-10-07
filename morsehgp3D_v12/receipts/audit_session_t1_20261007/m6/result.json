@@ -1,0 +1,154 @@
+{
+  "empty_driver_injection": {
+    "all_outputs_empty": true,
+    "exit": 0,
+    "runs": 9,
+    "scope": "external capture replaced; real main; no compiler or GPU launched",
+    "verdict": "mes_m6_ok"
+  },
+  "pin": "4147c546000b198b5239646063bfb1e3ed6d28fc",
+  "scope": "published G4 values re-read; no new GCP/GPU execution",
+  "sources_and_receipts": {
+    "morsehgp3D_v12/microbancs/mes_m6_session/run_m6.py": "b5e1541113707d59e7742c0a20da6b6457b18b2b01acac20ee0f88192f33af3c",
+    "morsehgp3D_v12/receipts/g4_t0a_20261007/resultats/cmd/002_m6/files/m6/m6_blocking_0.jsonl": "216bc06ca7166fe97293c6bd54d063233a5b22b8ff93197f32f53074a0d9d78a",
+    "morsehgp3D_v12/receipts/g4_t0a_20261007/resultats/cmd/002_m6/files/m6/m6_blocking_1.jsonl": "91931061bd1cf9e06082abc255df2141c9ead66f531094b0c36947222430b4b1",
+    "morsehgp3D_v12/receipts/g4_t0a_20261007/resultats/cmd/002_m6/files/m6/m6_blocking_2.jsonl": "5eb33c2f651f32e5321bd4f11843dea1f3896a2ab234fe94263f48838ad08bda",
+    "morsehgp3D_v12/receipts/g4_t0a_20261007/resultats/cmd/002_m6/files/m6/m6_report.json": "6a2d37be14d2e34e77f0bbcbe6f4203dd56e9f76eaa5acadefe238eec6086d9b",
+    "morsehgp3D_v12/receipts/g4_t0a_20261007/resultats/cmd/002_m6/files/m6/m6_spin_0.jsonl": "06bb274c73dd3e778a5ad96349cc55b4ce9cddd7b4c36b5f592330fdce05060b",
+    "morsehgp3D_v12/receipts/g4_t0a_20261007/resultats/cmd/002_m6/files/m6/m6_spin_1.jsonl": "9a2c7041479b8252b321401172d7c11eebe7d1834d48da6029ee714aef8d18c3",
+    "morsehgp3D_v12/receipts/g4_t0a_20261007/resultats/cmd/002_m6/files/m6/m6_spin_2.jsonl": "263d3f033797813c83a3f141a7ed8aff3819ec94823737e192c364997e139a18",
+    "morsehgp3D_v12/receipts/g4_t0a_20261007/resultats/cmd/002_m6/files/m6/m6_yield_0.jsonl": "3cf60069bb420c329eda44386a67f7dd541bbfba63d436b53f1e015570f7af19",
+    "morsehgp3D_v12/receipts/g4_t0a_20261007/resultats/cmd/002_m6/files/m6/m6_yield_1.jsonl": "b57c5c5be0bc10df4fbd84ee0b0209aabfebe78694e909cd134ddf074925f640",
+    "morsehgp3D_v12/receipts/g4_t0a_20261007/resultats/cmd/002_m6/files/m6/m6_yield_2.jsonl": "565d0a7753d082bf850fe931d2243a05d84758c985903ef41338fd2b7e50065e"
+  },
+  "summary": {
+    "blocking": {
+      "context_open": {
+        "median_across_processes_us": 116018.569,
+        "process_values_us": [
+          115958.108,
+          117281.358,
+          116018.569
+        ]
+      },
+      "empty_kernel_launch_sync": {
+        "median_across_processes_us": 12.995,
+        "process_values_us": [
+          12.995,
+          12.95,
+          13.14
+        ]
+      },
+      "first_launch": {
+        "median_across_processes_us": 124.76,
+        "process_values_us": [
+          127.66,
+          124.76,
+          124.43
+        ]
+      },
+      "graph_of_ten_sync": {
+        "median_across_processes_us": 24.36,
+        "process_values_us": [
+          24.51,
+          24.36,
+          24.28
+        ]
+      },
+      "touch_256mib": {
+        "median_across_processes_us": 403.075,
+        "process_values_us": [
+          402.725,
+          406.77,
+          403.075
+        ]
+      }
+    },
+    "spin": {
+      "context_open": {
+        "median_across_processes_us": 116767.598,
+        "process_values_us": [
+          357944.81,
+          115563.488,
+          116767.598
+        ]
+      },
+      "empty_kernel_launch_sync": {
+        "median_across_processes_us": 8.05,
+        "process_values_us": [
+          8.05,
+          8.04,
+          8.05
+        ]
+      },
+      "first_launch": {
+        "median_across_processes_us": 85.69,
+        "process_values_us": [
+          578.73,
+          85.69,
+          83.82
+        ]
+      },
+      "graph_of_ten_sync": {
+        "median_across_processes_us": 11.45,
+        "process_values_us": [
+          11.45,
+          11.4,
+          11.48
+        ]
+      },
+      "touch_256mib": {
+        "median_across_processes_us": 368.455,
+        "process_values_us": [
+          368.18,
+          368.455,
+          368.589
+        ]
+      }
+    },
+    "yield": {
+      "context_open": {
+        "median_across_processes_us": 116267.618,
+        "process_values_us": [
+          115927.883,
+          118290.788,
+          116267.618
+        ]
+      },
+      "empty_kernel_launch_sync": {
+        "median_across_processes_us": 8.12,
+        "process_values_us": [
+          8.13,
+          8.12,
+          8.11
+        ]
+      },
+      "first_launch": {
+        "median_across_processes_us": 86.72,
+        "process_values_us": [
+          86.83,
+          85.45,
+          86.72
+        ]
+      },
+      "graph_of_ten_sync": {
+        "median_across_processes_us": 11.53,
+        "process_values_us": [
+          11.53,
+          11.47,
+          11.55
+        ]
+      },
+      "touch_256mib": {
+        "median_across_processes_us": 368.5,
+        "process_values_us": [
+          368.5,
+          368.905,
+          368.45
+        ]
+      }
+    }
+  },
+  "validated_processes": 9,
+  "validated_rows": 585
+}

@@ -1,0 +1,80 @@
+{
+  "audited_commit": "4147c546000b198b5239646063bfb1e3ed6d28fc",
+  "checks": 81,
+  "cloud_calls": 0,
+  "current_head": "4147c546000b198b5239646063bfb1e3ed6d28fc",
+  "findings": {
+    "CST0219": {
+      "exit_code": 0,
+      "identity_in_SHA256SUMS": true,
+      "identity_in_filename": true
+    },
+    "CST0220": {
+      "disk_free_model": "0 avant et apres : inode encore reference",
+      "evicted_bytes": 6,
+      "large_allocation": false,
+      "live_hardlink_bytes": 6,
+      "refused": true
+    },
+    "CST0221": {
+      "exit_code": 3,
+      "preexisting_destination_removed": true,
+      "scope": "repertoire temporaire synthetique uniquement"
+    }
+  },
+  "gpu_calls": 0,
+  "historical_session": {
+    "after_status": "TERMINATED",
+    "closure": "stopped",
+    "keys_removed": true,
+    "mode": "lecture historique seulement",
+    "package_sha256": "a5d1ff2383b230eb4b89e7871335d5b0db8437ee86268ccca69ac0fbbfb6213c",
+    "protocol_matches_audited_sources": true,
+    "results_sha256": "44594dc6f7e9b64b74693c9182f690b2a3eef2dfa4990b25deeeebe4ca26fa73",
+    "same_generation_before_after": true,
+    "source_head": "26b53648ce7f0213ab6995a47afbb109cbf5c73f",
+    "source_kind": "worktree_snapshot",
+    "status": "completed",
+    "stop_attempts": 1
+  },
+  "port": {
+    "critical_functions_AST_identical_after_rename": [
+      "read_generation",
+      "recorded_target",
+      "stop_decision",
+      "stopped_after",
+      "close_by_generation",
+      "observe",
+      "session_processes",
+      "take_lock",
+      "runner_env",
+      "safe_extract",
+      "verify_manifest"
+    ],
+    "shell_syntax_checked": 3
+  },
+  "python_optimized": true,
+  "real_session_actions": 0,
+  "schema": "audit.session_t1.v1",
+  "secondary_observations": {
+    "cache_deadline": {
+      "clock": 20,
+      "deadline": 10,
+      "fetch_calls": 1,
+      "worker_external_deadline_tested": false
+    },
+    "results_destination_alias": {
+      "exit_code": 0,
+      "historical_publication_affected": "non etabli",
+      "linked_under_results": true
+    }
+  },
+  "source_hashes_before_after": "identiques aux empreintes du commit audite",
+  "target_selftest": {
+    "checks": 70,
+    "cloud": "double de test",
+    "exit_code": 0,
+    "native": 0,
+    "optimized": true
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "pin": "4147c546000b198b5239646063bfb1e3ed6d28fc",
+  "commands": [
+    {
+      "mode": "normal",
+      "command": [
+        "python3",
+        "morsehgp3D_v12/receipts/audit_session_t1_20261007/campagne/check_campaign.py"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "b2cb69a5610941ea716cadc85d917e409072d0d821e97aa62467970dfb171cb8",
+      "stderr_bytes": 0,
+      "choice": "j3_r168",
+      "raw_evidence_available": true
+    },
+    {
+      "mode": "optimized",
+      "command": [
+        "python3",
+        "-O",
+        "morsehgp3D_v12/receipts/audit_session_t1_20261007/campagne/check_campaign.py"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "b2cb69a5610941ea716cadc85d917e409072d0d821e97aa62467970dfb171cb8",
+      "stderr_bytes": 0,
+      "choice": "j3_r168",
+      "raw_evidence_available": true
+    },
+    {
+      "mode": "published_only",
+      "command": [
+        "python3",
+        "morsehgp3D_v12/receipts/audit_session_t1_20261007/campagne/check_campaign.py",
+        "--published-only"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "b93c7746d17b847b64afd8bd3c22df4886b614fb6cb14033b2014c4d711d6d4f",
+      "stderr_bytes": 0,
+      "choice": "j3_r168",
+      "raw_evidence_available": false
+    }
+  ],
+  "normal_optimized_byte_identical": true,
+  "script_sha256": "4d3464017593477e78a074abdde6171bbcfc8d48f549dc8ae9e35c1590ae8692",
+  "local_readme_links_checked": 5
+}

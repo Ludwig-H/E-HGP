@@ -1,0 +1,64 @@
+{
+  "crop": {
+    "entire_height_preserved": false,
+    "radius_xy": 0,
+    "selected_ids": [
+      0,
+      1
+    ],
+    "selected_sites": 2,
+    "sites_within_declared_horizontal_crop": 4,
+    "source_sites": 4
+  },
+  "numpy": "2.5.3",
+  "pin": "4147c546000b198b5239646063bfb1e3ed6d28fc",
+  "quantization": {
+    "mismatches": 0,
+    "values_checked": 28030
+  },
+  "replay": {
+    "exit": 2,
+    "missing_sibling_script": true
+  },
+  "representative_ids": {
+    "distinct_ids": [
+      9,
+      4
+    ],
+    "input_ids": [
+      9,
+      2,
+      4
+    ],
+    "minimal_ids_expected": [
+      2,
+      4
+    ],
+    "scope": "helper accepts unsorted external IDs; no current real scene mismatch shown"
+  },
+  "scope": "synthetic, no external data or network",
+  "sources": {
+    "morsehgp3D_v12/bench/data/crop_scenes.py": "a2b56597f8c6ad08074994fca4c45fb4dc604b5e6d24ef0a7e21fd46f2772b0a",
+    "morsehgp3D_v12/bench/data/replay_all.sh": "d9eaa9d406493ea15cdea1f94ea08728b0d7604fc6b635ba641c36485c84b67c",
+    "morsehgp3D_v12/bench/data/v12data/__init__.py": "166f500b08a37b3336cd50a7af8cd6ea69ebf15543358c9806a927763e25d9bd",
+    "morsehgp3D_v12/bench/data/v12data/common.py": "a1502097838f5b3e8a87f073dd605ed6185d14f96dba4a42a7928b666f9fa914",
+    "morsehgp3D_v12/bench/data/verify_inputs.py": "870a0bbeafbb12a33e2743cd04391e129a2a05425e941c56a175798c7e5fce43"
+  },
+  "verification": [
+    {
+      "case": "empty_manifest",
+      "exit": 0,
+      "has_no_gaps": true
+    },
+    {
+      "case": "null_coordinate_digest",
+      "exit": 0,
+      "has_no_gaps": true
+    },
+    {
+      "case": "wrong_coordinate_digest",
+      "exit": 1,
+      "has_no_gaps": false
+    }
+  ]
+}

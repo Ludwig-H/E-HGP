@@ -1,0 +1,65 @@
+{
+  "pin": "4147c546000b198b5239646063bfb1e3ed6d28fc",
+  "files": [
+    {
+      "path": "morsehgp3D_v12/docs/CONTRAT_CATALOGUE.md",
+      "sha256": "880896c4191fd411381943c9402c5d3b643f62e825e9f345892218839ce72539",
+      "blob": "77fc138a60f2ad631634a524b830001b66ba6953"
+    },
+    {
+      "path": "morsehgp3D_v12/docs/CONTRAT_NUMERIQUE.md",
+      "sha256": "703d9d90c83426adf78b2352cabdd0e6440be284a42806ee27ee79dcaae79f37",
+      "blob": "fe5c00607b01fd5a65f8185501b5df579381a6cc"
+    },
+    {
+      "path": "morsehgp3D_v12/docs/ARCHITECTURE.md",
+      "sha256": "aae55c07ad5fb790103fb5d176778378c53422fecc6a6768df41bd766808ae71",
+      "blob": "9602cc5cc78b39fb23555387e0dd5d41abde3269"
+    },
+    {
+      "path": "morsehgp3D_v12/docs/OBJET_ET_CONTRAT_MATHEMATIQUE.md",
+      "sha256": "ac32f72625aa9311e277f235c43c6c5a51c25c29161cce81b557e4745b19e3ad",
+      "blob": "193da13a25d4be474289832612fdcdc6db810e24"
+    },
+    {
+      "path": "morsehgp3D_v12/docs/PLAN.md",
+      "sha256": "b070bd7c7c7431c14a9186c366fd5d2cf39eab7396f2de6fb6d39d07af6ce3ae",
+      "blob": "fa02d5824bc87bea1ca3b1aa81cfec77274e111b"
+    },
+    {
+      "path": "morsehgp3D_v12/docs/DECISIONS.md",
+      "sha256": "73c5f5287bc5dc99e5baca9a1a943da20f33d1315b7d1410d7588788591b2171",
+      "blob": "81f8b08e6482240c6ca4d14ec1ae9170c674f479"
+    },
+    {
+      "path": "morsehgp3D_v12/docs/MESURE.md",
+      "sha256": "b2c02c948ef9d31e6fd2ac5951c551af419556ccd894edac401a69bccafb90c2",
+      "blob": "91f19cacafabfa1cf99fb4b51ca935dadbfa1819"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/boxes.cpp",
+      "sha256": "2fc06e5e781ef51891ceecb324ecc460b023ea8e15079a32d22eb7d159ecc5a2",
+      "blob": "8439634bbf6f80e6508593e72cf3e08597dbe896"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/leaf_device_predicates.hpp",
+      "sha256": "c638996b661c6fc690a9dff30d61a0c5294b882001bb806009d72120f6168472",
+      "blob": "9d111027c41957ff043ceb85f2b56824e6ad26ca"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/CATALOGUE.md",
+      "sha256": "0637512599e259f6f64997680e4ccb2f51e3d959fdc3a1abc46e7587d49184e2",
+      "blob": "fd0dcef1552eb223316984c3f228434832c0da25"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "sha256": "9cd42081357b1bb9840040035cbe2b36f1dd6c8688809ba22a984b99bf66a0b6",
+      "blob": "fc76c5840a0186fc32b896d175aceccd779e7e58"
+    },
+    {
+      "path": "morsehgp3D_v12/reference/hgp12_ref/dumps.py",
+      "sha256": "2ece0b491430e314091de7b40a72233e299c543f236bcc00bbd5f84b38338373",
+      "blob": "cac7e83ec1deb66d38bb604e9276d939a38831f1"
+    }
+  ]
+}
