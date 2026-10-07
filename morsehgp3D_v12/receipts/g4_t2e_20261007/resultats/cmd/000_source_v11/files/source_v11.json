@@ -1,0 +1,15 @@
+{
+ "archive_sha256": "6f3454ad9d9ad2f6bb0b846f1aaad7c1a4c509d14cd450a99381c72b04a57885",
+ "build": [
+  0,
+  4.52
+ ],
+ "configure": [
+  0,
+  0.76
+ ],
+ "expected_sha256": "6f3454ad9d9ad2f6bb0b846f1aaad7c1a4c509d14cd450a99381c72b04a57885",
+ "files": 644,
+ "libmhgp11_sha256": "8a27ce2f5bb34d72ec2e26cf744011bab31f09efc04bf494a9ec0ed4777d20d4",
+ "schema": "ehgp.v12.source_v11.v1"
+}

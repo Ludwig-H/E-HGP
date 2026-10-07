@@ -1,0 +1,62 @@
+{
+ "mesure": "MES-M7",
+ "prises": [
+  {
+   "cas": "ng00",
+   "code": 0,
+   "conforme": true,
+   "controles": 4,
+   "controles_conformes": 4,
+   "feuille": 16,
+   "fils": 48,
+   "k": 5,
+   "lignes_profil": 5,
+   "lignes_sha256": "18c38fef12e57113c46f4e5abba75a46a8865e7dbc3387cbfcd794cb0d89498b",
+   "passes": 3,
+   "secondes": 20.842
+  },
+  {
+   "cas": "ng01",
+   "code": 0,
+   "conforme": true,
+   "controles": 4,
+   "controles_conformes": 4,
+   "feuille": 16,
+   "fils": 48,
+   "k": 5,
+   "lignes_profil": 5,
+   "lignes_sha256": "904abee002fec1044f2ecc09e121cbe150ce6137d54f3a064ba4fd472e5898eb",
+   "passes": 3,
+   "secondes": 15.757
+  },
+  {
+   "cas": "ng02",
+   "code": 0,
+   "conforme": true,
+   "controles": 4,
+   "controles_conformes": 4,
+   "feuille": 16,
+   "fils": 48,
+   "k": 5,
+   "lignes_profil": 5,
+   "lignes_sha256": "dd8d2cf11f87c1be6ad2b18e8a87fe48d5251d584187796853d194d1922d824c",
+   "passes": 3,
+   "secondes": 18.732
+  },
+  {
+   "cas": "ng00",
+   "code": 0,
+   "conforme": true,
+   "controles": 9,
+   "controles_conformes": 9,
+   "feuille": 24,
+   "fils": 48,
+   "k": 10,
+   "lignes_profil": 10,
+   "lignes_sha256": "da14b77868e78036a2d8d8f1b7847293ebf3e9ea0d339151c2c1893b0193921f",
+   "passes": 3,
+   "secondes": 248.678
+  }
+ ],
+ "vidage_sha256": "00acddd5e997854c20cbeb2840329778326808c8aecfe725662492e26365343c"
+}

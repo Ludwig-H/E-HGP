@@ -1,0 +1,6573 @@
+{
+ "campagnes": {
+  "ng00_k5": {
+   "c20261007T184544Z_524695": {
+    "debut": "2026-10-07T18:46:05Z",
+    "fin": "2026-10-07T18:47:50Z",
+    "passes_par_processus": 3,
+    "prises": [
+     {
+      "binaire": {
+       "binaire": "mhgp12_vidage",
+       "commande": [
+        "mhgp12_vidage",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng00.u32le",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng00.ids.u32le",
+        "ng00",
+        "5",
+        "16",
+        "48",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/build/g1_k5/ng00_k5/campagnes/c20261007T184544Z_524695/p0",
+        "--journal",
+        "aucun",
+        "--chrono-resolution",
+        "3",
+        "--bras-saut"
+       ],
+       "construit": true,
+       "inchange": true,
+       "journal": "ng00_k5/campagnes/c20261007T184544Z_524695/p0/vidage.jsonl",
+       "journal_sha256": "6a754bd35a00b391ee5882ebc33fb67705327dee97d66ec83e531b0e8766249e",
+       "sha256": "00acddd5e997854c20cbeb2840329778326808c8aecfe725662492e26365343c"
+      },
+      "code": 0,
+      "erreur": "",
+      "foret_differente": false,
+      "journal": "ng00_k5/campagnes/c20261007T184544Z_524695/p0/vidage.jsonl",
+      "journal_sha256": "6a754bd35a00b391ee5882ebc33fb67705327dee97d66ec83e531b0e8766249e",
+      "ordres": {
+       "2": {
+        "census": {
+         "part_satures_evites": 0.749105,
+         "replique_v12": {
+          "complets": 0,
+          "satures": 2515
+         },
+         "replique_v12_saut": {
+          "complets": 0,
+          "satures": 631
+         },
+         "restants": 631,
+         "satures_evites": 1884
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           354229,
+           49542,
+           6423,
+           661,
+           80,
+           6,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 5,
+          "moyenne": 0.157495
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           354229,
+           49465,
+           6435,
+           725,
+           77,
+           9,
+           1,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 6,
+          "moyenne": 0.157855
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 77038,
+         "fusions_publiees": 77038,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 985,
+        "pas": {
+         "replique_v12": 475662,
+         "replique_v12_saut": 475810
+        },
+        "sauts": {
+         "candidats_testes": 19469,
+         "certifies": 2000,
+         "tentatives": 2631,
+         "tests_par_tentative": 7.39985
+        },
+        "secondes": {
+         "replique_v11": 0.0796067,
+         "replique_v12": 0.0766115,
+         "replique_v12_saut": 0.076324,
+         "v11": 0.141068
+        }
+       },
+       "3": {
+        "census": {
+         "part_satures_evites": 0.804929,
+         "replique_v12": {
+          "complets": 0,
+          "satures": 14000
+         },
+         "replique_v12_saut": {
+          "complets": 0,
+          "satures": 2731
+         },
+         "restants": 2731,
+         "satures_evites": 11269
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           525776,
+           115542,
+           25245,
+           5485,
+           1053,
+           174,
+           44,
+           4,
+           2,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 8,
+          "moyenne": 0.279029
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           525776,
+           115271,
+           25289,
+           5612,
+           1102,
+           215,
+           53,
+           7,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 7,
+          "moyenne": 0.280006
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 119682,
+         "fusions_publiees": 119682,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 4494,
+        "pas": {
+         "replique_v12": 861202,
+         "replique_v12_saut": 861860
+        },
+        "sauts": {
+         "candidats_testes": 135733,
+         "certifies": 11855,
+         "tentatives": 14586,
+         "tests_par_tentative": 9.3057
+        },
+        "secondes": {
+         "replique_v11": 0.198531,
+         "replique_v12": 0.20154,
+         "replique_v12_saut": 0.19945,
+         "v11": 0.321773
+        }
+       },
+       "4": {
+        "census": {
+         "part_satures_evites": 0.8008,
+         "replique_v12": {
+          "complets": 435,
+          "satures": 57239
+         },
+         "replique_v12_saut": {
+          "complets": 440,
+          "satures": 11402
+         },
+         "restants": 11842,
+         "satures_evites": 45837
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           729558,
+           185011,
+           50999,
+           14513,
+           3944,
+           1035,
+           239,
+           55,
+           19,
+           4,
+           0,
+           1,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 11,
+          "moyenne": 0.358763
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           729558,
+           184748,
+           50551,
+           14699,
+           4187,
+           1197,
+           324,
+           82,
+           27,
+           5,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 9,
+          "moyenne": 0.360734
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 172168,
+         "fusions_publiees": 172168,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 11307,
+        "pas": {
+         "replique_v12": 1338895,
+         "replique_v12_saut": 1340837
+        },
+        "sauts": {
+         "candidats_testes": 690879,
+         "certifies": 47280,
+         "tentatives": 59122,
+         "tests_par_tentative": 11.6857
+        },
+        "secondes": {
+         "replique_v11": 0.385113,
+         "replique_v12": 0.379844,
+         "replique_v12_saut": 0.37559,
+         "v11": 0.584046
+        }
+       },
+       "5": {
+        "census": {
+         "part_satures_evites": 0.816845,
+         "replique_v12": {
+          "complets": 66906,
+          "satures": 150419
+         },
+         "replique_v12_saut": {
+          "complets": 66954,
+          "satures": 27550
+         },
+         "restants": 94504,
+         "satures_evites": 122869
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           963244,
+           264858,
+           81714,
+           27223,
+           9099,
+           2853,
+           926,
+           269,
+           67,
+           25,
+           7,
+           3,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 11,
+          "moyenne": 0.421332
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           963244,
+           264540,
+           81322,
+           27032,
+           9375,
+           3224,
+           1044,
+           357,
+           97,
+           37,
+           15,
+           1,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 11,
+          "moyenne": 0.423564
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 235290,
+         "fusions_publiees": 235290,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 19838,
+        "pas": {
+         "replique_v12": 1919207,
+         "replique_v12_saut": 1922221
+        },
+        "sauts": {
+         "candidats_testes": 3267267,
+         "certifies": 125275,
+         "tentatives": 219779,
+         "tests_par_tentative": 14.8661
+        },
+        "secondes": {
+         "replique_v11": 0.795231,
+         "replique_v12": 0.757064,
+         "replique_v12_saut": 0.808405,
+         "v11": 1.08251
+        }
+       }
+      },
+      "processus": 0,
+      "raisons": [],
+      "secondes": 20.78,
+      "totaux": {
+       "complets_saut": 67394,
+       "complets_v12": 67341,
+       "part_satures_evites": 0.8112439945934613,
+       "rapport_total": 1.0315954912143273,
+       "replique_v12": 1.4150595,
+       "replique_v12_saut": 1.459769,
+       "satures_saut": 42314,
+       "satures_v12": 224173
+      },
+      "valide": true,
+      "vidages_sha256": {
+       "cat.bin": "c5738ac1cc8f4b1c813b942a36d03b1e75af64695c163f1b7e52094017d506c7",
+       "foret_1.bin": "6e1fc85a1fce8c6eda25e46482fcd52fadc24c1f28307d2abefb60e03956f69f",
+       "foret_2.bin": "cf85e397d11d4fc19c3c8809d5c6b422fc5149bbb7bc63591ced150ce690504b",
+       "foret_3.bin": "58f37ef02bc36f0e59ec0b1be3e1213f411898bef761bfddc2698a45ad7da1c3",
+       "foret_4.bin": "84044147b150279f5b1d312930b3bab3c6d2009e5e6592b32d05af3eca0d8ee8",
+       "foret_5.bin": "e3ff778c9cdd2da98c1fbe088432f8eda05c368571b816c1ca7127286ae3012c",
+       "ordre_1.bin": "5f5f59d88e0438503e4778eea30617c4de8809400f674ae0cd0ba0fda393b078",
+       "ordre_2.bin": "0d8faf0ff6a333081c8936e5c34caecc494d7f855b7cbe897fa9030ae85f1de4",
+       "ordre_3.bin": "3cdbb2989c42123630ea3c3d84d0ebc2cec7719e144b06606b7f55143a30700f",
+       "ordre_4.bin": "36cb6867d4bdcf5592a6d6827cf104a4498ea5808460837a00d2ef4892767367",
+       "ordre_5.bin": "aa65d1d466be5b13206827420299a938642d35f44d460e2a8951c857bbd8fe24"
+      }
+     },
+     {
+      "binaire": {
+       "binaire": "mhgp12_vidage",
+       "commande": [
+        "mhgp12_vidage",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng00.u32le",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng00.ids.u32le",
+        "ng00",
+        "5",
+        "16",
+        "48",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/build/g1_k5/ng00_k5/campagnes/c20261007T184544Z_524695/p1",
+        "--journal",
+        "aucun",
+        "--chrono-resolution",
+        "3",
+        "--bras-saut"
+       ],
+       "construit": true,
+       "inchange": true,
+       "journal": "ng00_k5/campagnes/c20261007T184544Z_524695/p1/vidage.jsonl",
+       "journal_sha256": "a924a47a6d688eb2602dcd5f8f4fc2130cb40274b1cf09443464e462d55d71ad",
+       "sha256": "00acddd5e997854c20cbeb2840329778326808c8aecfe725662492e26365343c"
+      },
+      "code": 0,
+      "erreur": "",
+      "foret_differente": false,
+      "journal": "ng00_k5/campagnes/c20261007T184544Z_524695/p1/vidage.jsonl",
+      "journal_sha256": "a924a47a6d688eb2602dcd5f8f4fc2130cb40274b1cf09443464e462d55d71ad",
+      "ordres": {
+       "2": {
+        "census": {
+         "part_satures_evites": 0.749105,
+         "replique_v12": {
+          "complets": 0,
+          "satures": 2515
+         },
+         "replique_v12_saut": {
+          "complets": 0,
+          "satures": 631
+         },
+         "restants": 631,
+         "satures_evites": 1884
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           354229,
+           49542,
+           6423,
+           661,
+           80,
+           6,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 5,
+          "moyenne": 0.157495
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           354229,
+           49465,
+           6435,
+           725,
+           77,
+           9,
+           1,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 6,
+          "moyenne": 0.157855
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 77038,
+         "fusions_publiees": 77038,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 985,
+        "pas": {
+         "replique_v12": 475662,
+         "replique_v12_saut": 475810
+        },
+        "sauts": {
+         "candidats_testes": 19469,
+         "certifies": 2000,
+         "tentatives": 2631,
+         "tests_par_tentative": 7.39985
+        },
+        "secondes": {
+         "replique_v11": 0.0813533,
+         "replique_v12": 0.0809712,
+         "replique_v12_saut": 0.0769578,
+         "v11": 0.139984
+        }
+       },
+       "3": {
+        "census": {
+         "part_satures_evites": 0.804929,
+         "replique_v12": {
+          "complets": 0,
+          "satures": 14000
+         },
+         "replique_v12_saut": {
+          "complets": 0,
+          "satures": 2731
+         },
+         "restants": 2731,
+         "satures_evites": 11269
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           525776,
+           115542,
+           25245,
+           5485,
+           1053,
+           174,
+           44,
+           4,
+           2,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 8,
+          "moyenne": 0.279029
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           525776,
+           115271,
+           25289,
+           5612,
+           1102,
+           215,
+           53,
+           7,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 7,
+          "moyenne": 0.280006
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 119682,
+         "fusions_publiees": 119682,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 4494,
+        "pas": {
+         "replique_v12": 861202,
+         "replique_v12_saut": 861860
+        },
+        "sauts": {
+         "candidats_testes": 135733,
+         "certifies": 11855,
+         "tentatives": 14586,
+         "tests_par_tentative": 9.3057
+        },
+        "secondes": {
+         "replique_v11": 0.197342,
+         "replique_v12": 0.199923,
+         "replique_v12_saut": 0.198394,
+         "v11": 0.31934
+        }
+       },
+       "4": {
+        "census": {
+         "part_satures_evites": 0.8008,
+         "replique_v12": {
+          "complets": 435,
+          "satures": 57239
+         },
+         "replique_v12_saut": {
+          "complets": 440,
+          "satures": 11402
+         },
+         "restants": 11842,
+         "satures_evites": 45837
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           729558,
+           185011,
+           50999,
+           14513,
+           3944,
+           1035,
+           239,
+           55,
+           19,
+           4,
+           0,
+           1,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 11,
+          "moyenne": 0.358763
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           729558,
+           184748,
+           50551,
+           14699,
+           4187,
+           1197,
+           324,
+           82,
+           27,
+           5,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 9,
+          "moyenne": 0.360734
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 172168,
+         "fusions_publiees": 172168,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 11307,
+        "pas": {
+         "replique_v12": 1338895,
+         "replique_v12_saut": 1340837
+        },
+        "sauts": {
+         "candidats_testes": 690879,
+         "certifies": 47280,
+         "tentatives": 59122,
+         "tests_par_tentative": 11.6857
+        },
+        "secondes": {
+         "replique_v11": 0.382205,
+         "replique_v12": 0.378588,
+         "replique_v12_saut": 0.373828,
+         "v11": 0.579639
+        }
+       },
+       "5": {
+        "census": {
+         "part_satures_evites": 0.816845,
+         "replique_v12": {
+          "complets": 66906,
+          "satures": 150419
+         },
+         "replique_v12_saut": {
+          "complets": 66954,
+          "satures": 27550
+         },
+         "restants": 94504,
+         "satures_evites": 122869
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           963244,
+           264858,
+           81714,
+           27223,
+           9099,
+           2853,
+           926,
+           269,
+           67,
+           25,
+           7,
+           3,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 11,
+          "moyenne": 0.421332
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           963244,
+           264540,
+           81322,
+           27032,
+           9375,
+           3224,
+           1044,
+           357,
+           97,
+           37,
+           15,
+           1,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 11,
+          "moyenne": 0.423564
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 235290,
+         "fusions_publiees": 235290,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 19838,
+        "pas": {
+         "replique_v12": 1919207,
+         "replique_v12_saut": 1922221
+        },
+        "sauts": {
+         "candidats_testes": 3267267,
+         "certifies": 125275,
+         "tentatives": 219779,
+         "tests_par_tentative": 14.8661
+        },
+        "secondes": {
+         "replique_v11": 0.788328,
+         "replique_v12": 0.750759,
+         "replique_v12_saut": 0.804697,
+         "v11": 1.07078
+        }
+       }
+      },
+      "processus": 1,
+      "raisons": [],
+      "secondes": 20.64,
+      "totaux": {
+       "complets_saut": 67394,
+       "complets_v12": 67341,
+       "part_satures_evites": 0.8112439945934613,
+       "rapport_total": 1.0309419409956255,
+       "replique_v12": 1.4102412,
+       "replique_v12_saut": 1.4538768,
+       "satures_saut": 42314,
+       "satures_v12": 224173
+      },
+      "valide": true,
+      "vidages_sha256": {
+       "cat.bin": "c5738ac1cc8f4b1c813b942a36d03b1e75af64695c163f1b7e52094017d506c7",
+       "foret_1.bin": "6e1fc85a1fce8c6eda25e46482fcd52fadc24c1f28307d2abefb60e03956f69f",
+       "foret_2.bin": "cf85e397d11d4fc19c3c8809d5c6b422fc5149bbb7bc63591ced150ce690504b",
+       "foret_3.bin": "58f37ef02bc36f0e59ec0b1be3e1213f411898bef761bfddc2698a45ad7da1c3",
+       "foret_4.bin": "84044147b150279f5b1d312930b3bab3c6d2009e5e6592b32d05af3eca0d8ee8",
+       "foret_5.bin": "e3ff778c9cdd2da98c1fbe088432f8eda05c368571b816c1ca7127286ae3012c",
+       "ordre_1.bin": "5f5f59d88e0438503e4778eea30617c4de8809400f674ae0cd0ba0fda393b078",
+       "ordre_2.bin": "0d8faf0ff6a333081c8936e5c34caecc494d7f855b7cbe897fa9030ae85f1de4",
+       "ordre_3.bin": "3cdbb2989c42123630ea3c3d84d0ebc2cec7719e144b06606b7f55143a30700f",
+       "ordre_4.bin": "36cb6867d4bdcf5592a6d6827cf104a4498ea5808460837a00d2ef4892767367",
+       "ordre_5.bin": "aa65d1d466be5b13206827420299a938642d35f44d460e2a8951c857bbd8fe24"
+      }
+     },
+     {
+      "binaire": {
+       "binaire": "mhgp12_vidage",
+       "commande": [
+        "mhgp12_vidage",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng00.u32le",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng00.ids.u32le",
+        "ng00",
+        "5",
+        "16",
+        "48",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/build/g1_k5/ng00_k5/campagnes/c20261007T184544Z_524695/p2",
+        "--journal",
+        "aucun",
+        "--chrono-resolution",
+        "3",
+        "--bras-saut"
+       ],
+       "construit": true,
+       "inchange": true,
+       "journal": "ng00_k5/campagnes/c20261007T184544Z_524695/p2/vidage.jsonl",
+       "journal_sha256": "99d0e9a540870a82e9524c1133e11e9b1979074b944d290ad57a10eb53906184",
+       "sha256": "00acddd5e997854c20cbeb2840329778326808c8aecfe725662492e26365343c"
+      },
+      "code": 0,
+      "erreur": "",
+      "foret_differente": false,
+      "journal": "ng00_k5/campagnes/c20261007T184544Z_524695/p2/vidage.jsonl",
+      "journal_sha256": "99d0e9a540870a82e9524c1133e11e9b1979074b944d290ad57a10eb53906184",
+      "ordres": {
+       "2": {
+        "census": {
+         "part_satures_evites": 0.749105,
+         "replique_v12": {
+          "complets": 0,
+          "satures": 2515
+         },
+         "replique_v12_saut": {
+          "complets": 0,
+          "satures": 631
+         },
+         "restants": 631,
+         "satures_evites": 1884
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           354229,
+           49542,
+           6423,
+           661,
+           80,
+           6,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 5,
+          "moyenne": 0.157495
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           354229,
+           49465,
+           6435,
+           725,
+           77,
+           9,
+           1,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 6,
+          "moyenne": 0.157855
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 77038,
+         "fusions_publiees": 77038,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 985,
+        "pas": {
+         "replique_v12": 475662,
+         "replique_v12_saut": 475810
+        },
+        "sauts": {
+         "candidats_testes": 19469,
+         "certifies": 2000,
+         "tentatives": 2631,
+         "tests_par_tentative": 7.39985
+        },
+        "secondes": {
+         "replique_v11": 0.0834653,
+         "replique_v12": 0.0827001,
+         "replique_v12_saut": 0.0783188,
+         "v11": 0.142965
+        }
+       },
+       "3": {
+        "census": {
+         "part_satures_evites": 0.804929,
+         "replique_v12": {
+          "complets": 0,
+          "satures": 14000
+         },
+         "replique_v12_saut": {
+          "complets": 0,
+          "satures": 2731
+         },
+         "restants": 2731,
+         "satures_evites": 11269
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           525776,
+           115542,
+           25245,
+           5485,
+           1053,
+           174,
+           44,
+           4,
+           2,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 8,
+          "moyenne": 0.279029
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           525776,
+           115271,
+           25289,
+           5612,
+           1102,
+           215,
+           53,
+           7,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 7,
+          "moyenne": 0.280006
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 119682,
+         "fusions_publiees": 119682,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 4494,
+        "pas": {
+         "replique_v12": 861202,
+         "replique_v12_saut": 861860
+        },
+        "sauts": {
+         "candidats_testes": 135733,
+         "certifies": 11855,
+         "tentatives": 14586,
+         "tests_par_tentative": 9.3057
+        },
+        "secondes": {
+         "replique_v11": 0.198829,
+         "replique_v12": 0.202146,
+         "replique_v12_saut": 0.200195,
+         "v11": 0.322547
+        }
+       },
+       "4": {
+        "census": {
+         "part_satures_evites": 0.8008,
+         "replique_v12": {
+          "complets": 435,
+          "satures": 57239
+         },
+         "replique_v12_saut": {
+          "complets": 440,
+          "satures": 11402
+         },
+         "restants": 11842,
+         "satures_evites": 45837
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           729558,
+           185011,
+           50999,
+           14513,
+           3944,
+           1035,
+           239,
+           55,
+           19,
+           4,
+           0,
+           1,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 11,
+          "moyenne": 0.358763
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           729558,
+           184748,
+           50551,
+           14699,
+           4187,
+           1197,
+           324,
+           82,
+           27,
+           5,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 9,
+          "moyenne": 0.360734
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 172168,
+         "fusions_publiees": 172168,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 11307,
+        "pas": {
+         "replique_v12": 1338895,
+         "replique_v12_saut": 1340837
+        },
+        "sauts": {
+         "candidats_testes": 690879,
+         "certifies": 47280,
+         "tentatives": 59122,
+         "tests_par_tentative": 11.6857
+        },
+        "secondes": {
+         "replique_v11": 0.384673,
+         "replique_v12": 0.380034,
+         "replique_v12_saut": 0.375932,
+         "v11": 0.583129
+        }
+       },
+       "5": {
+        "census": {
+         "part_satures_evites": 0.816845,
+         "replique_v12": {
+          "complets": 66906,
+          "satures": 150419
+         },
+         "replique_v12_saut": {
+          "complets": 66954,
+          "satures": 27550
+         },
+         "restants": 94504,
+         "satures_evites": 122869
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           963244,
+           264858,
+           81714,
+           27223,
+           9099,
+           2853,
+           926,
+           269,
+           67,
+           25,
+           7,
+           3,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 11,
+          "moyenne": 0.421332
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           963244,
+           264540,
+           81322,
+           27032,
+           9375,
+           3224,
+           1044,
+           357,
+           97,
+           37,
+           15,
+           1,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 11,
+          "moyenne": 0.423564
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 235290,
+         "fusions_publiees": 235290,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 19838,
+        "pas": {
+         "replique_v12": 1919207,
+         "replique_v12_saut": 1922221
+        },
+        "sauts": {
+         "candidats_testes": 3267267,
+         "certifies": 125275,
+         "tentatives": 219779,
+         "tests_par_tentative": 14.8661
+        },
+        "secondes": {
+         "replique_v11": 0.79163,
+         "replique_v12": 0.756542,
+         "replique_v12_saut": 0.808473,
+         "v11": 1.0763
+        }
+       }
+      },
+      "processus": 2,
+      "raisons": [],
+      "secondes": 20.81,
+      "totaux": {
+       "complets_saut": 67394,
+       "complets_v12": 67341,
+       "part_satures_evites": 0.8112439945934613,
+       "rapport_total": 1.0291937912038935,
+       "replique_v12": 1.4214221,
+       "replique_v12_saut": 1.4629188,
+       "satures_saut": 42314,
+       "satures_v12": 224173
+      },
+      "valide": true,
+      "vidages_sha256": {
+       "cat.bin": "c5738ac1cc8f4b1c813b942a36d03b1e75af64695c163f1b7e52094017d506c7",
+       "foret_1.bin": "6e1fc85a1fce8c6eda25e46482fcd52fadc24c1f28307d2abefb60e03956f69f",
+       "foret_2.bin": "cf85e397d11d4fc19c3c8809d5c6b422fc5149bbb7bc63591ced150ce690504b",
+       "foret_3.bin": "58f37ef02bc36f0e59ec0b1be3e1213f411898bef761bfddc2698a45ad7da1c3",
+       "foret_4.bin": "84044147b150279f5b1d312930b3bab3c6d2009e5e6592b32d05af3eca0d8ee8",
+       "foret_5.bin": "e3ff778c9cdd2da98c1fbe088432f8eda05c368571b816c1ca7127286ae3012c",
+       "ordre_1.bin": "5f5f59d88e0438503e4778eea30617c4de8809400f674ae0cd0ba0fda393b078",
+       "ordre_2.bin": "0d8faf0ff6a333081c8936e5c34caecc494d7f855b7cbe897fa9030ae85f1de4",
+       "ordre_3.bin": "3cdbb2989c42123630ea3c3d84d0ebc2cec7719e144b06606b7f55143a30700f",
+       "ordre_4.bin": "36cb6867d4bdcf5592a6d6827cf104a4498ea5808460837a00d2ef4892767367",
+       "ordre_5.bin": "aa65d1d466be5b13206827420299a938642d35f44d460e2a8951c857bbd8fe24"
+      }
+     },
+     {
+      "binaire": {
+       "binaire": "mhgp12_vidage",
+       "commande": [
+        "mhgp12_vidage",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng00.u32le",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng00.ids.u32le",
+        "ng00",
+        "5",
+        "16",
+        "48",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/build/g1_k5/ng00_k5/campagnes/c20261007T184544Z_524695/p3",
+        "--journal",
+        "aucun",
+        "--chrono-resolution",
+        "3",
+        "--bras-saut"
+       ],
+       "construit": true,
+       "inchange": true,
+       "journal": "ng00_k5/campagnes/c20261007T184544Z_524695/p3/vidage.jsonl",
+       "journal_sha256": "20828899490deb904a0f0cf65dff0a8570a38a41059a27272ddb7efa0deebb6f",
+       "sha256": "00acddd5e997854c20cbeb2840329778326808c8aecfe725662492e26365343c"
+      },
+      "code": 0,
+      "erreur": "",
+      "foret_differente": false,
+      "journal": "ng00_k5/campagnes/c20261007T184544Z_524695/p3/vidage.jsonl",
+      "journal_sha256": "20828899490deb904a0f0cf65dff0a8570a38a41059a27272ddb7efa0deebb6f",
+      "ordres": {
+       "2": {
+        "census": {
+         "part_satures_evites": 0.749105,
+         "replique_v12": {
+          "complets": 0,
+          "satures": 2515
+         },
+         "replique_v12_saut": {
+          "complets": 0,
+          "satures": 631
+         },
+         "restants": 631,
+         "satures_evites": 1884
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           354229,
+           49542,
+           6423,
+           661,
+           80,
+           6,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 5,
+          "moyenne": 0.157495
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           354229,
+           49465,
+           6435,
+           725,
+           77,
+           9,
+           1,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 6,
+          "moyenne": 0.157855
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 77038,
+         "fusions_publiees": 77038,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 985,
+        "pas": {
+         "replique_v12": 475662,
+         "replique_v12_saut": 475810
+        },
+        "sauts": {
+         "candidats_testes": 19469,
+         "certifies": 2000,
+         "tentatives": 2631,
+         "tests_par_tentative": 7.39985
+        },
+        "secondes": {
+         "replique_v11": 0.0777296,
+         "replique_v12": 0.0739802,
+         "replique_v12_saut": 0.0743471,
+         "v11": 0.13703
+        }
+       },
+       "3": {
+        "census": {
+         "part_satures_evites": 0.804929,
+         "replique_v12": {
+          "complets": 0,
+          "satures": 14000
+         },
+         "replique_v12_saut": {
+          "complets": 0,
+          "satures": 2731
+         },
+         "restants": 2731,
+         "satures_evites": 11269
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           525776,
+           115542,
+           25245,
+           5485,
+           1053,
+           174,
+           44,
+           4,
+           2,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 8,
+          "moyenne": 0.279029
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           525776,
+           115271,
+           25289,
+           5612,
+           1102,
+           215,
+           53,
+           7,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 7,
+          "moyenne": 0.280006
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 119682,
+         "fusions_publiees": 119682,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 4494,
+        "pas": {
+         "replique_v12": 861202,
+         "replique_v12_saut": 861860
+        },
+        "sauts": {
+         "candidats_testes": 135733,
+         "certifies": 11855,
+         "tentatives": 14586,
+         "tests_par_tentative": 9.3057
+        },
+        "secondes": {
+         "replique_v11": 0.196986,
+         "replique_v12": 0.199679,
+         "replique_v12_saut": 0.197829,
+         "v11": 0.318711
+        }
+       },
+       "4": {
+        "census": {
+         "part_satures_evites": 0.8008,
+         "replique_v12": {
+          "complets": 435,
+          "satures": 57239
+         },
+         "replique_v12_saut": {
+          "complets": 440,
+          "satures": 11402
+         },
+         "restants": 11842,
+         "satures_evites": 45837
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           729558,
+           185011,
+           50999,
+           14513,
+           3944,
+           1035,
+           239,
+           55,
+           19,
+           4,
+           0,
+           1,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 11,
+          "moyenne": 0.358763
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           729558,
+           184748,
+           50551,
+           14699,
+           4187,
+           1197,
+           324,
+           82,
+           27,
+           5,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 9,
+          "moyenne": 0.360734
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 172168,
+         "fusions_publiees": 172168,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 11307,
+        "pas": {
+         "replique_v12": 1338895,
+         "replique_v12_saut": 1340837
+        },
+        "sauts": {
+         "candidats_testes": 690879,
+         "certifies": 47280,
+         "tentatives": 59122,
+         "tests_par_tentative": 11.6857
+        },
+        "secondes": {
+         "replique_v11": 0.381279,
+         "replique_v12": 0.376794,
+         "replique_v12_saut": 0.373683,
+         "v11": 0.579266
+        }
+       },
+       "5": {
+        "census": {
+         "part_satures_evites": 0.816845,
+         "replique_v12": {
+          "complets": 66906,
+          "satures": 150419
+         },
+         "replique_v12_saut": {
+          "complets": 66954,
+          "satures": 27550
+         },
+         "restants": 94504,
+         "satures_evites": 122869
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           963244,
+           264858,
+           81714,
+           27223,
+           9099,
+           2853,
+           926,
+           269,
+           67,
+           25,
+           7,
+           3,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 11,
+          "moyenne": 0.421332
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           963244,
+           264540,
+           81322,
+           27032,
+           9375,
+           3224,
+           1044,
+           357,
+           97,
+           37,
+           15,
+           1,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 11,
+          "moyenne": 0.423564
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 235290,
+         "fusions_publiees": 235290,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 19838,
+        "pas": {
+         "replique_v12": 1919207,
+         "replique_v12_saut": 1922221
+        },
+        "sauts": {
+         "candidats_testes": 3267267,
+         "certifies": 125275,
+         "tentatives": 219779,
+         "tests_par_tentative": 14.8661
+        },
+        "secondes": {
+         "replique_v11": 0.790995,
+         "replique_v12": 0.762165,
+         "replique_v12_saut": 0.821012,
+         "v11": 1.07996
+        }
+       }
+      },
+      "processus": 3,
+      "raisons": [],
+      "secondes": 20.72,
+      "totaux": {
+       "complets_saut": 67394,
+       "complets_v12": 67341,
+       "part_satures_evites": 0.8112439945934613,
+       "rapport_total": 1.0384059188816908,
+       "replique_v12": 1.4126182,
+       "replique_v12_saut": 1.4668711,
+       "satures_saut": 42314,
+       "satures_v12": 224173
+      },
+      "valide": true,
+      "vidages_sha256": {
+       "cat.bin": "c5738ac1cc8f4b1c813b942a36d03b1e75af64695c163f1b7e52094017d506c7",
+       "foret_1.bin": "6e1fc85a1fce8c6eda25e46482fcd52fadc24c1f28307d2abefb60e03956f69f",
+       "foret_2.bin": "cf85e397d11d4fc19c3c8809d5c6b422fc5149bbb7bc63591ced150ce690504b",
+       "foret_3.bin": "58f37ef02bc36f0e59ec0b1be3e1213f411898bef761bfddc2698a45ad7da1c3",
+       "foret_4.bin": "84044147b150279f5b1d312930b3bab3c6d2009e5e6592b32d05af3eca0d8ee8",
+       "foret_5.bin": "e3ff778c9cdd2da98c1fbe088432f8eda05c368571b816c1ca7127286ae3012c",
+       "ordre_1.bin": "5f5f59d88e0438503e4778eea30617c4de8809400f674ae0cd0ba0fda393b078",
+       "ordre_2.bin": "0d8faf0ff6a333081c8936e5c34caecc494d7f855b7cbe897fa9030ae85f1de4",
+       "ordre_3.bin": "3cdbb2989c42123630ea3c3d84d0ebc2cec7719e144b06606b7f55143a30700f",
+       "ordre_4.bin": "36cb6867d4bdcf5592a6d6827cf104a4498ea5808460837a00d2ef4892767367",
+       "ordre_5.bin": "aa65d1d466be5b13206827420299a938642d35f44d460e2a8951c857bbd8fe24"
+      }
+     },
+     {
+      "binaire": {
+       "binaire": "mhgp12_vidage",
+       "commande": [
+        "mhgp12_vidage",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng00.u32le",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng00.ids.u32le",
+        "ng00",
+        "5",
+        "16",
+        "48",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/build/g1_k5/ng00_k5/campagnes/c20261007T184544Z_524695/p4",
+        "--journal",
+        "aucun",
+        "--chrono-resolution",
+        "3",
+        "--bras-saut"
+       ],
+       "construit": true,
+       "inchange": true,
+       "journal": "ng00_k5/campagnes/c20261007T184544Z_524695/p4/vidage.jsonl",
+       "journal_sha256": "e6fdcf84d7e251581470ec25b1b7828276c6ae628b7dce4da26432ecf390c435",
+       "sha256": "00acddd5e997854c20cbeb2840329778326808c8aecfe725662492e26365343c"
+      },
+      "code": 0,
+      "erreur": "",
+      "foret_differente": false,
+      "journal": "ng00_k5/campagnes/c20261007T184544Z_524695/p4/vidage.jsonl",
+      "journal_sha256": "e6fdcf84d7e251581470ec25b1b7828276c6ae628b7dce4da26432ecf390c435",
+      "ordres": {
+       "2": {
+        "census": {
+         "part_satures_evites": 0.749105,
+         "replique_v12": {
+          "complets": 0,
+          "satures": 2515
+         },
+         "replique_v12_saut": {
+          "complets": 0,
+          "satures": 631
+         },
+         "restants": 631,
+         "satures_evites": 1884
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           354229,
+           49542,
+           6423,
+           661,
+           80,
+           6,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 5,
+          "moyenne": 0.157495
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           354229,
+           49465,
+           6435,
+           725,
+           77,
+           9,
+           1,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 6,
+          "moyenne": 0.157855
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 77038,
+         "fusions_publiees": 77038,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 985,
+        "pas": {
+         "replique_v12": 475662,
+         "replique_v12_saut": 475810
+        },
+        "sauts": {
+         "candidats_testes": 19469,
+         "certifies": 2000,
+         "tentatives": 2631,
+         "tests_par_tentative": 7.39985
+        },
+        "secondes": {
+         "replique_v11": 0.0776257,
+         "replique_v12": 0.0726806,
+         "replique_v12_saut": 0.0727516,
+         "v11": 0.138533
+        }
+       },
+       "3": {
+        "census": {
+         "part_satures_evites": 0.804929,
+         "replique_v12": {
+          "complets": 0,
+          "satures": 14000
+         },
+         "replique_v12_saut": {
+          "complets": 0,
+          "satures": 2731
+         },
+         "restants": 2731,
+         "satures_evites": 11269
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           525776,
+           115542,
+           25245,
+           5485,
+           1053,
+           174,
+           44,
+           4,
+           2,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 8,
+          "moyenne": 0.279029
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           525776,
+           115271,
+           25289,
+           5612,
+           1102,
+           215,
+           53,
+           7,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 7,
+          "moyenne": 0.280006
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 119682,
+         "fusions_publiees": 119682,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 4494,
+        "pas": {
+         "replique_v12": 861202,
+         "replique_v12_saut": 861860
+        },
+        "sauts": {
+         "candidats_testes": 135733,
+         "certifies": 11855,
+         "tentatives": 14586,
+         "tests_par_tentative": 9.3057
+        },
+        "secondes": {
+         "replique_v11": 0.199552,
+         "replique_v12": 0.203637,
+         "replique_v12_saut": 0.202089,
+         "v11": 0.325375
+        }
+       },
+       "4": {
+        "census": {
+         "part_satures_evites": 0.8008,
+         "replique_v12": {
+          "complets": 435,
+          "satures": 57239
+         },
+         "replique_v12_saut": {
+          "complets": 440,
+          "satures": 11402
+         },
+         "restants": 11842,
+         "satures_evites": 45837
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           729558,
+           185011,
+           50999,
+           14513,
+           3944,
+           1035,
+           239,
+           55,
+           19,
+           4,
+           0,
+           1,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 11,
+          "moyenne": 0.358763
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           729558,
+           184748,
+           50551,
+           14699,
+           4187,
+           1197,
+           324,
+           82,
+           27,
+           5,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 9,
+          "moyenne": 0.360734
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 172168,
+         "fusions_publiees": 172168,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 11307,
+        "pas": {
+         "replique_v12": 1338895,
+         "replique_v12_saut": 1340837
+        },
+        "sauts": {
+         "candidats_testes": 690879,
+         "certifies": 47280,
+         "tentatives": 59122,
+         "tests_par_tentative": 11.6857
+        },
+        "secondes": {
+         "replique_v11": 0.386543,
+         "replique_v12": 0.38192,
+         "replique_v12_saut": 0.377301,
+         "v11": 0.587158
+        }
+       },
+       "5": {
+        "census": {
+         "part_satures_evites": 0.816845,
+         "replique_v12": {
+          "complets": 66906,
+          "satures": 150419
+         },
+         "replique_v12_saut": {
+          "complets": 66954,
+          "satures": 27550
+         },
+         "restants": 94504,
+         "satures_evites": 122869
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           963244,
+           264858,
+           81714,
+           27223,
+           9099,
+           2853,
+           926,
+           269,
+           67,
+           25,
+           7,
+           3,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 11,
+          "moyenne": 0.421332
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           963244,
+           264540,
+           81322,
+           27032,
+           9375,
+           3224,
+           1044,
+           357,
+           97,
+           37,
+           15,
+           1,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 11,
+          "moyenne": 0.423564
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 235290,
+         "fusions_publiees": 235290,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 19838,
+        "pas": {
+         "replique_v12": 1919207,
+         "replique_v12_saut": 1922221
+        },
+        "sauts": {
+         "candidats_testes": 3267267,
+         "certifies": 125275,
+         "tentatives": 219779,
+         "tests_par_tentative": 14.8661
+        },
+        "secondes": {
+         "replique_v11": 0.796936,
+         "replique_v12": 0.75699,
+         "replique_v12_saut": 0.807436,
+         "v11": 1.08472
+        }
+       }
+      },
+      "processus": 4,
+      "raisons": [],
+      "secondes": 20.84,
+      "totaux": {
+       "complets_saut": 67394,
+       "complets_v12": 67341,
+       "part_satures_evites": 0.8112439945934613,
+       "rapport_total": 1.0313377155730992,
+       "replique_v12": 1.4152276000000001,
+       "replique_v12_saut": 1.4595776,
+       "satures_saut": 42314,
+       "satures_v12": 224173
+      },
+      "valide": true,
+      "vidages_sha256": {
+       "cat.bin": "c5738ac1cc8f4b1c813b942a36d03b1e75af64695c163f1b7e52094017d506c7",
+       "foret_1.bin": "6e1fc85a1fce8c6eda25e46482fcd52fadc24c1f28307d2abefb60e03956f69f",
+       "foret_2.bin": "cf85e397d11d4fc19c3c8809d5c6b422fc5149bbb7bc63591ced150ce690504b",
+       "foret_3.bin": "58f37ef02bc36f0e59ec0b1be3e1213f411898bef761bfddc2698a45ad7da1c3",
+       "foret_4.bin": "84044147b150279f5b1d312930b3bab3c6d2009e5e6592b32d05af3eca0d8ee8",
+       "foret_5.bin": "e3ff778c9cdd2da98c1fbe088432f8eda05c368571b816c1ca7127286ae3012c",
+       "ordre_1.bin": "5f5f59d88e0438503e4778eea30617c4de8809400f674ae0cd0ba0fda393b078",
+       "ordre_2.bin": "0d8faf0ff6a333081c8936e5c34caecc494d7f855b7cbe897fa9030ae85f1de4",
+       "ordre_3.bin": "3cdbb2989c42123630ea3c3d84d0ebc2cec7719e144b06606b7f55143a30700f",
+       "ordre_4.bin": "36cb6867d4bdcf5592a6d6827cf104a4498ea5808460837a00d2ef4892767367",
+       "ordre_5.bin": "aa65d1d466be5b13206827420299a938642d35f44d460e2a8951c857bbd8fe24"
+      }
+     }
+    ],
+    "prises_valides": 5,
+    "processus_demandes": 5,
+    "refus": [],
+    "statistique_intra_processus": "minimum de 3 passe(s) dans le processus, par bras et par ordre",
+    "vidages_reference": {
+     "cat.bin": "c5738ac1cc8f4b1c813b942a36d03b1e75af64695c163f1b7e52094017d506c7",
+     "foret_1.bin": "6e1fc85a1fce8c6eda25e46482fcd52fadc24c1f28307d2abefb60e03956f69f",
+     "foret_2.bin": "cf85e397d11d4fc19c3c8809d5c6b422fc5149bbb7bc63591ced150ce690504b",
+     "foret_3.bin": "58f37ef02bc36f0e59ec0b1be3e1213f411898bef761bfddc2698a45ad7da1c3",
+     "foret_4.bin": "84044147b150279f5b1d312930b3bab3c6d2009e5e6592b32d05af3eca0d8ee8",
+     "foret_5.bin": "e3ff778c9cdd2da98c1fbe088432f8eda05c368571b816c1ca7127286ae3012c",
+     "ordre_1.bin": "5f5f59d88e0438503e4778eea30617c4de8809400f674ae0cd0ba0fda393b078",
+     "ordre_2.bin": "0d8faf0ff6a333081c8936e5c34caecc494d7f855b7cbe897fa9030ae85f1de4",
+     "ordre_3.bin": "3cdbb2989c42123630ea3c3d84d0ebc2cec7719e144b06606b7f55143a30700f",
+     "ordre_4.bin": "36cb6867d4bdcf5592a6d6827cf104a4498ea5808460837a00d2ef4892767367",
+     "ordre_5.bin": "aa65d1d466be5b13206827420299a938642d35f44d460e2a8951c857bbd8fe24"
+    }
+   }
+  },
+  "ng01_k5": {
+   "c20261007T184544Z_524695": {
+    "debut": "2026-10-07T18:47:50Z",
+    "fin": "2026-10-07T18:49:09Z",
+    "passes_par_processus": 3,
+    "prises": [
+     {
+      "binaire": {
+       "binaire": "mhgp12_vidage",
+       "commande": [
+        "mhgp12_vidage",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng01.u32le",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng01.ids.u32le",
+        "ng01",
+        "5",
+        "16",
+        "48",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/build/g1_k5/ng01_k5/campagnes/c20261007T184544Z_524695/p0",
+        "--journal",
+        "aucun",
+        "--chrono-resolution",
+        "3",
+        "--bras-saut"
+       ],
+       "construit": true,
+       "inchange": true,
+       "journal": "ng01_k5/campagnes/c20261007T184544Z_524695/p0/vidage.jsonl",
+       "journal_sha256": "7cf31514cc35f4550926c1c88891126d5e223cfd523e5365e3c8bc43fe3fc282",
+       "sha256": "00acddd5e997854c20cbeb2840329778326808c8aecfe725662492e26365343c"
+      },
+      "code": 0,
+      "erreur": "",
+      "foret_differente": false,
+      "journal": "ng01_k5/campagnes/c20261007T184544Z_524695/p0/vidage.jsonl",
+      "journal_sha256": "7cf31514cc35f4550926c1c88891126d5e223cfd523e5365e3c8bc43fe3fc282",
+      "ordres": {
+       "2": {
+        "census": {
+         "part_satures_evites": 0.735577,
+         "replique_v12": {
+          "complets": 0,
+          "satures": 2080
+         },
+         "replique_v12_saut": {
+          "complets": 0,
+          "satures": 550
+         },
+         "restants": 550,
+         "satures_evites": 1530
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           307013,
+           39589,
+           4890,
+           475,
+           40,
+           9,
+           2,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 6,
+          "moyenne": 0.14491
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           307013,
+           39534,
+           4889,
+           510,
+           56,
+           12,
+           4,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 6,
+          "moyenne": 0.145305
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 67139,
+         "fusions_publiees": 67139,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 833,
+        "pas": {
+         "replique_v12": 403029,
+         "replique_v12_saut": 403168
+        },
+        "sauts": {
+         "candidats_testes": 16534,
+         "certifies": 1664,
+         "tentatives": 2214,
+         "tests_par_tentative": 7.46793
+        },
+        "secondes": {
+         "replique_v11": 0.05939,
+         "replique_v12": 0.0545435,
+         "replique_v12_saut": 0.0541419,
+         "v11": 0.112207
+        }
+       },
+       "3": {
+        "census": {
+         "part_satures_evites": 0.801137,
+         "replique_v12": {
+          "complets": 0,
+          "satures": 11078
+         },
+         "replique_v12_saut": {
+          "complets": 0,
+          "satures": 2203
+         },
+         "restants": 2203,
+         "satures_evites": 8875
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           448036,
+           95290,
+           18484,
+           3951,
+           740,
+           130,
+           20,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 6,
+          "moyenne": 0.260903
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           448036,
+           94943,
+           18628,
+           4039,
+           788,
+           162,
+           39,
+           15,
+           1,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 8,
+          "moyenne": 0.262287
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 102279,
+         "fusions_publiees": 102279,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 3659,
+        "pas": {
+         "replique_v12": 714492,
+         "replique_v12_saut": 715276
+        },
+        "sauts": {
+         "candidats_testes": 106954,
+         "certifies": 9418,
+         "tentatives": 11621,
+         "tests_par_tentative": 9.20351
+        },
+        "secondes": {
+         "replique_v11": 0.152575,
+         "replique_v12": 0.154383,
+         "replique_v12_saut": 0.154394,
+         "v11": 0.252055
+        }
+       },
+       "4": {
+        "census": {
+         "part_satures_evites": 0.80599,
+         "replique_v12": {
+          "complets": 242,
+          "satures": 43008
+         },
+         "replique_v12_saut": {
+          "complets": 253,
+          "satures": 8344
+         },
+         "restants": 8597,
+         "satures_evites": 34664
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           611533,
+           149471,
+           37736,
+           10597,
+           2881,
+           766,
+           165,
+           60,
+           17,
+           6,
+           2,
+           3,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 11,
+          "moyenne": 0.336607
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           611533,
+           149142,
+           37533,
+           10726,
+           3100,
+           864,
+           240,
+           67,
+           20,
+           9,
+           2,
+           1,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 11,
+          "moyenne": 0.338508
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 145058,
+         "fusions_publiees": 145058,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 9017,
+        "pas": {
+         "replique_v12": 1086978,
+         "replique_v12_saut": 1088524
+        },
+        "sauts": {
+         "candidats_testes": 511764,
+         "certifies": 35976,
+         "tentatives": 44573,
+         "tests_par_tentative": 11.4815
+        },
+        "secondes": {
+         "replique_v11": 0.28611,
+         "replique_v12": 0.282792,
+         "replique_v12_saut": 0.281765,
+         "v11": 0.442267
+        }
+       },
+       "5": {
+        "census": {
+         "part_satures_evites": 0.821726,
+         "replique_v12": {
+          "complets": 48119,
+          "satures": 112877
+         },
+         "replique_v12_saut": {
+          "complets": 48142,
+          "satures": 20123
+         },
+         "restants": 68265,
+         "satures_evites": 92754
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           798081,
+           213748,
+           61028,
+           19852,
+           6651,
+           2169,
+           676,
+           223,
+           52,
+           11,
+           6,
+           3,
+           5,
+           0,
+           0,
+           0
+          ],
+          "max": 12,
+          "moyenne": 0.398269
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           798081,
+           213309,
+           60680,
+           19964,
+           6969,
+           2331,
+           776,
+           258,
+           100,
+           28,
+           1,
+           7,
+           0,
+           1,
+           0,
+           0
+          ],
+          "max": 13,
+          "moyenne": 0.400639
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 195058,
+         "fusions_publiees": 195058,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 16028,
+        "pas": {
+         "replique_v12": 1541599,
+         "replique_v12_saut": 1544211
+        },
+        "sauts": {
+         "candidats_testes": 2379150,
+         "certifies": 94988,
+         "tentatives": 163253,
+         "tests_par_tentative": 14.5734
+        },
+        "secondes": {
+         "replique_v11": 0.57274,
+         "replique_v12": 0.544186,
+         "replique_v12_saut": 0.59042,
+         "v11": 0.794133
+        }
+       }
+      },
+      "processus": 0,
+      "raisons": [],
+      "secondes": 15.5,
+      "totaux": {
+       "complets_saut": 48395,
+       "complets_v12": 48361,
+       "part_satures_evites": 0.8153132634891714,
+       "rapport_total": 1.043263061411549,
+       "replique_v12": 1.0359045,
+       "replique_v12_saut": 1.0807209,
+       "satures_saut": 31220,
+       "satures_v12": 169043
+      },
+      "valide": true,
+      "vidages_sha256": {
+       "cat.bin": "c63b58aba75fcc795f3b099859980c6f36b79145104a12b367a409c4b68a7459",
+       "foret_1.bin": "cabb249910ee43b0d777319b1afdb44ce5d528f3aec4fd8f1998ddf22b8a7a63",
+       "foret_2.bin": "4db1e29a046d02472bc068867131e14410f477f0f2ba769f181dfeb168661e44",
+       "foret_3.bin": "234d8cf91750156ec191b6c2b1561338709edcb4da27aee997ba03dda097e2ba",
+       "foret_4.bin": "32ea8b38378929a5024db54c02e45793b6f6801bade152695ce83663bd5a11ad",
+       "foret_5.bin": "ef7ac694d33fc816655815eccbae0af928097add042209cd81b713249755be6e",
+       "ordre_1.bin": "6881c2d8d78712157353eb8a86b2b5027484148b13fc54751de3ef2b5038f446",
+       "ordre_2.bin": "294d13ba4de7bb52bbab1f55fc44f985a5d858d7fa7f12eefed8bc022317e8fb",
+       "ordre_3.bin": "7c3deec065257de9fdc757b3c716845c8b552b82e63d855dfa6462ec6f3896cf",
+       "ordre_4.bin": "1cf8281788809e9c2f3edb1b52e3aedec262c293cb8b1da3063f1cebe724b0ca",
+       "ordre_5.bin": "723579f0f497bd8f4bef0671836156e366a5dea62ba03921ef3748442573897b"
+      }
+     },
+     {
+      "binaire": {
+       "binaire": "mhgp12_vidage",
+       "commande": [
+        "mhgp12_vidage",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng01.u32le",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng01.ids.u32le",
+        "ng01",
+        "5",
+        "16",
+        "48",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/build/g1_k5/ng01_k5/campagnes/c20261007T184544Z_524695/p1",
+        "--journal",
+        "aucun",
+        "--chrono-resolution",
+        "3",
+        "--bras-saut"
+       ],
+       "construit": true,
+       "inchange": true,
+       "journal": "ng01_k5/campagnes/c20261007T184544Z_524695/p1/vidage.jsonl",
+       "journal_sha256": "a31ef54e5f1db5eb395a678ced0e85c17b40903bbbd20e358dff11dc40c61b67",
+       "sha256": "00acddd5e997854c20cbeb2840329778326808c8aecfe725662492e26365343c"
+      },
+      "code": 0,
+      "erreur": "",
+      "foret_differente": false,
+      "journal": "ng01_k5/campagnes/c20261007T184544Z_524695/p1/vidage.jsonl",
+      "journal_sha256": "a31ef54e5f1db5eb395a678ced0e85c17b40903bbbd20e358dff11dc40c61b67",
+      "ordres": {
+       "2": {
+        "census": {
+         "part_satures_evites": 0.735577,
+         "replique_v12": {
+          "complets": 0,
+          "satures": 2080
+         },
+         "replique_v12_saut": {
+          "complets": 0,
+          "satures": 550
+         },
+         "restants": 550,
+         "satures_evites": 1530
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           307013,
+           39589,
+           4890,
+           475,
+           40,
+           9,
+           2,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 6,
+          "moyenne": 0.14491
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           307013,
+           39534,
+           4889,
+           510,
+           56,
+           12,
+           4,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 6,
+          "moyenne": 0.145305
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 67139,
+         "fusions_publiees": 67139,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 833,
+        "pas": {
+         "replique_v12": 403029,
+         "replique_v12_saut": 403168
+        },
+        "sauts": {
+         "candidats_testes": 16534,
+         "certifies": 1664,
+         "tentatives": 2214,
+         "tests_par_tentative": 7.46793
+        },
+        "secondes": {
+         "replique_v11": 0.0616287,
+         "replique_v12": 0.0577779,
+         "replique_v12_saut": 0.0573739,
+         "v11": 0.115573
+        }
+       },
+       "3": {
+        "census": {
+         "part_satures_evites": 0.801137,
+         "replique_v12": {
+          "complets": 0,
+          "satures": 11078
+         },
+         "replique_v12_saut": {
+          "complets": 0,
+          "satures": 2203
+         },
+         "restants": 2203,
+         "satures_evites": 8875
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           448036,
+           95290,
+           18484,
+           3951,
+           740,
+           130,
+           20,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 6,
+          "moyenne": 0.260903
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           448036,
+           94943,
+           18628,
+           4039,
+           788,
+           162,
+           39,
+           15,
+           1,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 8,
+          "moyenne": 0.262287
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 102279,
+         "fusions_publiees": 102279,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 3659,
+        "pas": {
+         "replique_v12": 714492,
+         "replique_v12_saut": 715276
+        },
+        "sauts": {
+         "candidats_testes": 106954,
+         "certifies": 9418,
+         "tentatives": 11621,
+         "tests_par_tentative": 9.20351
+        },
+        "secondes": {
+         "replique_v11": 0.154391,
+         "replique_v12": 0.156987,
+         "replique_v12_saut": 0.156615,
+         "v11": 0.253446
+        }
+       },
+       "4": {
+        "census": {
+         "part_satures_evites": 0.80599,
+         "replique_v12": {
+          "complets": 242,
+          "satures": 43008
+         },
+         "replique_v12_saut": {
+          "complets": 253,
+          "satures": 8344
+         },
+         "restants": 8597,
+         "satures_evites": 34664
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           611533,
+           149471,
+           37736,
+           10597,
+           2881,
+           766,
+           165,
+           60,
+           17,
+           6,
+           2,
+           3,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 11,
+          "moyenne": 0.336607
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           611533,
+           149142,
+           37533,
+           10726,
+           3100,
+           864,
+           240,
+           67,
+           20,
+           9,
+           2,
+           1,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 11,
+          "moyenne": 0.338508
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 145058,
+         "fusions_publiees": 145058,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 9017,
+        "pas": {
+         "replique_v12": 1086978,
+         "replique_v12_saut": 1088524
+        },
+        "sauts": {
+         "candidats_testes": 511764,
+         "certifies": 35976,
+         "tentatives": 44573,
+         "tests_par_tentative": 11.4815
+        },
+        "secondes": {
+         "replique_v11": 0.288357,
+         "replique_v12": 0.284834,
+         "replique_v12_saut": 0.284375,
+         "v11": 0.444109
+        }
+       },
+       "5": {
+        "census": {
+         "part_satures_evites": 0.821726,
+         "replique_v12": {
+          "complets": 48119,
+          "satures": 112877
+         },
+         "replique_v12_saut": {
+          "complets": 48142,
+          "satures": 20123
+         },
+         "restants": 68265,
+         "satures_evites": 92754
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           798081,
+           213748,
+           61028,
+           19852,
+           6651,
+           2169,
+           676,
+           223,
+           52,
+           11,
+           6,
+           3,
+           5,
+           0,
+           0,
+           0
+          ],
+          "max": 12,
+          "moyenne": 0.398269
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           798081,
+           213309,
+           60680,
+           19964,
+           6969,
+           2331,
+           776,
+           258,
+           100,
+           28,
+           1,
+           7,
+           0,
+           1,
+           0,
+           0
+          ],
+          "max": 13,
+          "moyenne": 0.400639
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 195058,
+         "fusions_publiees": 195058,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 16028,
+        "pas": {
+         "replique_v12": 1541599,
+         "replique_v12_saut": 1544211
+        },
+        "sauts": {
+         "candidats_testes": 2379150,
+         "certifies": 94988,
+         "tentatives": 163253,
+         "tests_par_tentative": 14.5734
+        },
+        "secondes": {
+         "replique_v11": 0.576909,
+         "replique_v12": 0.547582,
+         "replique_v12_saut": 0.593194,
+         "v11": 0.79795
+        }
+       }
+      },
+      "processus": 1,
+      "raisons": [],
+      "secondes": 15.64,
+      "totaux": {
+       "complets_saut": 48395,
+       "complets_v12": 48361,
+       "part_satures_evites": 0.8153132634891714,
+       "rapport_total": 1.042377587291747,
+       "replique_v12": 1.0471808999999999,
+       "replique_v12_saut": 1.0915579,
+       "satures_saut": 31220,
+       "satures_v12": 169043
+      },
+      "valide": true,
+      "vidages_sha256": {
+       "cat.bin": "c63b58aba75fcc795f3b099859980c6f36b79145104a12b367a409c4b68a7459",
+       "foret_1.bin": "cabb249910ee43b0d777319b1afdb44ce5d528f3aec4fd8f1998ddf22b8a7a63",
+       "foret_2.bin": "4db1e29a046d02472bc068867131e14410f477f0f2ba769f181dfeb168661e44",
+       "foret_3.bin": "234d8cf91750156ec191b6c2b1561338709edcb4da27aee997ba03dda097e2ba",
+       "foret_4.bin": "32ea8b38378929a5024db54c02e45793b6f6801bade152695ce83663bd5a11ad",
+       "foret_5.bin": "ef7ac694d33fc816655815eccbae0af928097add042209cd81b713249755be6e",
+       "ordre_1.bin": "6881c2d8d78712157353eb8a86b2b5027484148b13fc54751de3ef2b5038f446",
+       "ordre_2.bin": "294d13ba4de7bb52bbab1f55fc44f985a5d858d7fa7f12eefed8bc022317e8fb",
+       "ordre_3.bin": "7c3deec065257de9fdc757b3c716845c8b552b82e63d855dfa6462ec6f3896cf",
+       "ordre_4.bin": "1cf8281788809e9c2f3edb1b52e3aedec262c293cb8b1da3063f1cebe724b0ca",
+       "ordre_5.bin": "723579f0f497bd8f4bef0671836156e366a5dea62ba03921ef3748442573897b"
+      }
+     },
+     {
+      "binaire": {
+       "binaire": "mhgp12_vidage",
+       "commande": [
+        "mhgp12_vidage",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng01.u32le",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng01.ids.u32le",
+        "ng01",
+        "5",
+        "16",
+        "48",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/build/g1_k5/ng01_k5/campagnes/c20261007T184544Z_524695/p2",
+        "--journal",
+        "aucun",
+        "--chrono-resolution",
+        "3",
+        "--bras-saut"
+       ],
+       "construit": true,
+       "inchange": true,
+       "journal": "ng01_k5/campagnes/c20261007T184544Z_524695/p2/vidage.jsonl",
+       "journal_sha256": "1d8ac19b2a5c4e450a47e7cc65b7ca7839125d6719d1cf4b62e7566153cde6f5",
+       "sha256": "00acddd5e997854c20cbeb2840329778326808c8aecfe725662492e26365343c"
+      },
+      "code": 0,
+      "erreur": "",
+      "foret_differente": false,
+      "journal": "ng01_k5/campagnes/c20261007T184544Z_524695/p2/vidage.jsonl",
+      "journal_sha256": "1d8ac19b2a5c4e450a47e7cc65b7ca7839125d6719d1cf4b62e7566153cde6f5",
+      "ordres": {
+       "2": {
+        "census": {
+         "part_satures_evites": 0.735577,
+         "replique_v12": {
+          "complets": 0,
+          "satures": 2080
+         },
+         "replique_v12_saut": {
+          "complets": 0,
+          "satures": 550
+         },
+         "restants": 550,
+         "satures_evites": 1530
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           307013,
+           39589,
+           4890,
+           475,
+           40,
+           9,
+           2,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 6,
+          "moyenne": 0.14491
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           307013,
+           39534,
+           4889,
+           510,
+           56,
+           12,
+           4,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 6,
+          "moyenne": 0.145305
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 67139,
+         "fusions_publiees": 67139,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 833,
+        "pas": {
+         "replique_v12": 403029,
+         "replique_v12_saut": 403168
+        },
+        "sauts": {
+         "candidats_testes": 16534,
+         "certifies": 1664,
+         "tentatives": 2214,
+         "tests_par_tentative": 7.46793
+        },
+        "secondes": {
+         "replique_v11": 0.061873,
+         "replique_v12": 0.0565967,
+         "replique_v12_saut": 0.0561902,
+         "v11": 0.112259
+        }
+       },
+       "3": {
+        "census": {
+         "part_satures_evites": 0.801137,
+         "replique_v12": {
+          "complets": 0,
+          "satures": 11078
+         },
+         "replique_v12_saut": {
+          "complets": 0,
+          "satures": 2203
+         },
+         "restants": 2203,
+         "satures_evites": 8875
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           448036,
+           95290,
+           18484,
+           3951,
+           740,
+           130,
+           20,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 6,
+          "moyenne": 0.260903
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           448036,
+           94943,
+           18628,
+           4039,
+           788,
+           162,
+           39,
+           15,
+           1,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 8,
+          "moyenne": 0.262287
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 102279,
+         "fusions_publiees": 102279,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 3659,
+        "pas": {
+         "replique_v12": 714492,
+         "replique_v12_saut": 715276
+        },
+        "sauts": {
+         "candidats_testes": 106954,
+         "certifies": 9418,
+         "tentatives": 11621,
+         "tests_par_tentative": 9.20351
+        },
+        "secondes": {
+         "replique_v11": 0.155935,
+         "replique_v12": 0.158213,
+         "replique_v12_saut": 0.157256,
+         "v11": 0.254656
+        }
+       },
+       "4": {
+        "census": {
+         "part_satures_evites": 0.80599,
+         "replique_v12": {
+          "complets": 242,
+          "satures": 43008
+         },
+         "replique_v12_saut": {
+          "complets": 253,
+          "satures": 8344
+         },
+         "restants": 8597,
+         "satures_evites": 34664
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           611533,
+           149471,
+           37736,
+           10597,
+           2881,
+           766,
+           165,
+           60,
+           17,
+           6,
+           2,
+           3,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 11,
+          "moyenne": 0.336607
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           611533,
+           149142,
+           37533,
+           10726,
+           3100,
+           864,
+           240,
+           67,
+           20,
+           9,
+           2,
+           1,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 11,
+          "moyenne": 0.338508
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 145058,
+         "fusions_publiees": 145058,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 9017,
+        "pas": {
+         "replique_v12": 1086978,
+         "replique_v12_saut": 1088524
+        },
+        "sauts": {
+         "candidats_testes": 511764,
+         "certifies": 35976,
+         "tentatives": 44573,
+         "tests_par_tentative": 11.4815
+        },
+        "secondes": {
+         "replique_v11": 0.291365,
+         "replique_v12": 0.287402,
+         "replique_v12_saut": 0.28625,
+         "v11": 0.446055
+        }
+       },
+       "5": {
+        "census": {
+         "part_satures_evites": 0.821726,
+         "replique_v12": {
+          "complets": 48119,
+          "satures": 112877
+         },
+         "replique_v12_saut": {
+          "complets": 48142,
+          "satures": 20123
+         },
+         "restants": 68265,
+         "satures_evites": 92754
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           798081,
+           213748,
+           61028,
+           19852,
+           6651,
+           2169,
+           676,
+           223,
+           52,
+           11,
+           6,
+           3,
+           5,
+           0,
+           0,
+           0
+          ],
+          "max": 12,
+          "moyenne": 0.398269
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           798081,
+           213309,
+           60680,
+           19964,
+           6969,
+           2331,
+           776,
+           258,
+           100,
+           28,
+           1,
+           7,
+           0,
+           1,
+           0,
+           0
+          ],
+          "max": 13,
+          "moyenne": 0.400639
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 195058,
+         "fusions_publiees": 195058,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 16028,
+        "pas": {
+         "replique_v12": 1541599,
+         "replique_v12_saut": 1544211
+        },
+        "sauts": {
+         "candidats_testes": 2379150,
+         "certifies": 94988,
+         "tentatives": 163253,
+         "tests_par_tentative": 14.5734
+        },
+        "secondes": {
+         "replique_v11": 0.58157,
+         "replique_v12": 0.552466,
+         "replique_v12_saut": 0.59893,
+         "v11": 0.801464
+        }
+       }
+      },
+      "processus": 2,
+      "raisons": [],
+      "secondes": 15.74,
+      "totaux": {
+       "complets_saut": 48395,
+       "complets_v12": 48361,
+       "part_satures_evites": 0.8153132634891714,
+       "rapport_total": 1.0416700760810624,
+       "replique_v12": 1.0546777,
+       "replique_v12_saut": 1.0986262,
+       "satures_saut": 31220,
+       "satures_v12": 169043
+      },
+      "valide": true,
+      "vidages_sha256": {
+       "cat.bin": "c63b58aba75fcc795f3b099859980c6f36b79145104a12b367a409c4b68a7459",
+       "foret_1.bin": "cabb249910ee43b0d777319b1afdb44ce5d528f3aec4fd8f1998ddf22b8a7a63",
+       "foret_2.bin": "4db1e29a046d02472bc068867131e14410f477f0f2ba769f181dfeb168661e44",
+       "foret_3.bin": "234d8cf91750156ec191b6c2b1561338709edcb4da27aee997ba03dda097e2ba",
+       "foret_4.bin": "32ea8b38378929a5024db54c02e45793b6f6801bade152695ce83663bd5a11ad",
+       "foret_5.bin": "ef7ac694d33fc816655815eccbae0af928097add042209cd81b713249755be6e",
+       "ordre_1.bin": "6881c2d8d78712157353eb8a86b2b5027484148b13fc54751de3ef2b5038f446",
+       "ordre_2.bin": "294d13ba4de7bb52bbab1f55fc44f985a5d858d7fa7f12eefed8bc022317e8fb",
+       "ordre_3.bin": "7c3deec065257de9fdc757b3c716845c8b552b82e63d855dfa6462ec6f3896cf",
+       "ordre_4.bin": "1cf8281788809e9c2f3edb1b52e3aedec262c293cb8b1da3063f1cebe724b0ca",
+       "ordre_5.bin": "723579f0f497bd8f4bef0671836156e366a5dea62ba03921ef3748442573897b"
+      }
+     },
+     {
+      "binaire": {
+       "binaire": "mhgp12_vidage",
+       "commande": [
+        "mhgp12_vidage",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng01.u32le",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng01.ids.u32le",
+        "ng01",
+        "5",
+        "16",
+        "48",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/build/g1_k5/ng01_k5/campagnes/c20261007T184544Z_524695/p3",
+        "--journal",
+        "aucun",
+        "--chrono-resolution",
+        "3",
+        "--bras-saut"
+       ],
+       "construit": true,
+       "inchange": true,
+       "journal": "ng01_k5/campagnes/c20261007T184544Z_524695/p3/vidage.jsonl",
+       "journal_sha256": "c8b9d08f56f6958a78127bd0cac71a73347e8d7bd96863c907eb877b65b451d6",
+       "sha256": "00acddd5e997854c20cbeb2840329778326808c8aecfe725662492e26365343c"
+      },
+      "code": 0,
+      "erreur": "",
+      "foret_differente": false,
+      "journal": "ng01_k5/campagnes/c20261007T184544Z_524695/p3/vidage.jsonl",
+      "journal_sha256": "c8b9d08f56f6958a78127bd0cac71a73347e8d7bd96863c907eb877b65b451d6",
+      "ordres": {
+       "2": {
+        "census": {
+         "part_satures_evites": 0.735577,
+         "replique_v12": {
+          "complets": 0,
+          "satures": 2080
+         },
+         "replique_v12_saut": {
+          "complets": 0,
+          "satures": 550
+         },
+         "restants": 550,
+         "satures_evites": 1530
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           307013,
+           39589,
+           4890,
+           475,
+           40,
+           9,
+           2,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 6,
+          "moyenne": 0.14491
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           307013,
+           39534,
+           4889,
+           510,
+           56,
+           12,
+           4,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 6,
+          "moyenne": 0.145305
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 67139,
+         "fusions_publiees": 67139,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 833,
+        "pas": {
+         "replique_v12": 403029,
+         "replique_v12_saut": 403168
+        },
+        "sauts": {
+         "candidats_testes": 16534,
+         "certifies": 1664,
+         "tentatives": 2214,
+         "tests_par_tentative": 7.46793
+        },
+        "secondes": {
+         "replique_v11": 0.0610387,
+         "replique_v12": 0.0563722,
+         "replique_v12_saut": 0.0559633,
+         "v11": 0.114717
+        }
+       },
+       "3": {
+        "census": {
+         "part_satures_evites": 0.801137,
+         "replique_v12": {
+          "complets": 0,
+          "satures": 11078
+         },
+         "replique_v12_saut": {
+          "complets": 0,
+          "satures": 2203
+         },
+         "restants": 2203,
+         "satures_evites": 8875
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           448036,
+           95290,
+           18484,
+           3951,
+           740,
+           130,
+           20,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 6,
+          "moyenne": 0.260903
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           448036,
+           94943,
+           18628,
+           4039,
+           788,
+           162,
+           39,
+           15,
+           1,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 8,
+          "moyenne": 0.262287
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 102279,
+         "fusions_publiees": 102279,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 3659,
+        "pas": {
+         "replique_v12": 714492,
+         "replique_v12_saut": 715276
+        },
+        "sauts": {
+         "candidats_testes": 106954,
+         "certifies": 9418,
+         "tentatives": 11621,
+         "tests_par_tentative": 9.20351
+        },
+        "secondes": {
+         "replique_v11": 0.154236,
+         "replique_v12": 0.156322,
+         "replique_v12_saut": 0.155436,
+         "v11": 0.25359
+        }
+       },
+       "4": {
+        "census": {
+         "part_satures_evites": 0.80599,
+         "replique_v12": {
+          "complets": 242,
+          "satures": 43008
+         },
+         "replique_v12_saut": {
+          "complets": 253,
+          "satures": 8344
+         },
+         "restants": 8597,
+         "satures_evites": 34664
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           611533,
+           149471,
+           37736,
+           10597,
+           2881,
+           766,
+           165,
+           60,
+           17,
+           6,
+           2,
+           3,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 11,
+          "moyenne": 0.336607
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           611533,
+           149142,
+           37533,
+           10726,
+           3100,
+           864,
+           240,
+           67,
+           20,
+           9,
+           2,
+           1,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 11,
+          "moyenne": 0.338508
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 145058,
+         "fusions_publiees": 145058,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 9017,
+        "pas": {
+         "replique_v12": 1086978,
+         "replique_v12_saut": 1088524
+        },
+        "sauts": {
+         "candidats_testes": 511764,
+         "certifies": 35976,
+         "tentatives": 44573,
+         "tests_par_tentative": 11.4815
+        },
+        "secondes": {
+         "replique_v11": 0.288933,
+         "replique_v12": 0.286309,
+         "replique_v12_saut": 0.284681,
+         "v11": 0.445682
+        }
+       },
+       "5": {
+        "census": {
+         "part_satures_evites": 0.821726,
+         "replique_v12": {
+          "complets": 48119,
+          "satures": 112877
+         },
+         "replique_v12_saut": {
+          "complets": 48142,
+          "satures": 20123
+         },
+         "restants": 68265,
+         "satures_evites": 92754
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           798081,
+           213748,
+           61028,
+           19852,
+           6651,
+           2169,
+           676,
+           223,
+           52,
+           11,
+           6,
+           3,
+           5,
+           0,
+           0,
+           0
+          ],
+          "max": 12,
+          "moyenne": 0.398269
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           798081,
+           213309,
+           60680,
+           19964,
+           6969,
+           2331,
+           776,
+           258,
+           100,
+           28,
+           1,
+           7,
+           0,
+           1,
+           0,
+           0
+          ],
+          "max": 13,
+          "moyenne": 0.400639
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 195058,
+         "fusions_publiees": 195058,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 16028,
+        "pas": {
+         "replique_v12": 1541599,
+         "replique_v12_saut": 1544211
+        },
+        "sauts": {
+         "candidats_testes": 2379150,
+         "certifies": 94988,
+         "tentatives": 163253,
+         "tests_par_tentative": 14.5734
+        },
+        "secondes": {
+         "replique_v11": 0.576287,
+         "replique_v12": 0.548654,
+         "replique_v12_saut": 0.592451,
+         "v11": 0.796199
+        }
+       }
+      },
+      "processus": 3,
+      "raisons": [],
+      "secondes": 15.62,
+      "totaux": {
+       "complets_saut": 48395,
+       "complets_v12": 48361,
+       "part_satures_evites": 0.8153132634891714,
+       "rapport_total": 1.0390147655168123,
+       "replique_v12": 1.0476572,
+       "replique_v12_saut": 1.0885313,
+       "satures_saut": 31220,
+       "satures_v12": 169043
+      },
+      "valide": true,
+      "vidages_sha256": {
+       "cat.bin": "c63b58aba75fcc795f3b099859980c6f36b79145104a12b367a409c4b68a7459",
+       "foret_1.bin": "cabb249910ee43b0d777319b1afdb44ce5d528f3aec4fd8f1998ddf22b8a7a63",
+       "foret_2.bin": "4db1e29a046d02472bc068867131e14410f477f0f2ba769f181dfeb168661e44",
+       "foret_3.bin": "234d8cf91750156ec191b6c2b1561338709edcb4da27aee997ba03dda097e2ba",
+       "foret_4.bin": "32ea8b38378929a5024db54c02e45793b6f6801bade152695ce83663bd5a11ad",
+       "foret_5.bin": "ef7ac694d33fc816655815eccbae0af928097add042209cd81b713249755be6e",
+       "ordre_1.bin": "6881c2d8d78712157353eb8a86b2b5027484148b13fc54751de3ef2b5038f446",
+       "ordre_2.bin": "294d13ba4de7bb52bbab1f55fc44f985a5d858d7fa7f12eefed8bc022317e8fb",
+       "ordre_3.bin": "7c3deec065257de9fdc757b3c716845c8b552b82e63d855dfa6462ec6f3896cf",
+       "ordre_4.bin": "1cf8281788809e9c2f3edb1b52e3aedec262c293cb8b1da3063f1cebe724b0ca",
+       "ordre_5.bin": "723579f0f497bd8f4bef0671836156e366a5dea62ba03921ef3748442573897b"
+      }
+     },
+     {
+      "binaire": {
+       "binaire": "mhgp12_vidage",
+       "commande": [
+        "mhgp12_vidage",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng01.u32le",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng01.ids.u32le",
+        "ng01",
+        "5",
+        "16",
+        "48",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/build/g1_k5/ng01_k5/campagnes/c20261007T184544Z_524695/p4",
+        "--journal",
+        "aucun",
+        "--chrono-resolution",
+        "3",
+        "--bras-saut"
+       ],
+       "construit": true,
+       "inchange": true,
+       "journal": "ng01_k5/campagnes/c20261007T184544Z_524695/p4/vidage.jsonl",
+       "journal_sha256": "6db8ad2f89630fa8827044d8a1b74c777e6b460cc5de8069809b1213a95cb59d",
+       "sha256": "00acddd5e997854c20cbeb2840329778326808c8aecfe725662492e26365343c"
+      },
+      "code": 0,
+      "erreur": "",
+      "foret_differente": false,
+      "journal": "ng01_k5/campagnes/c20261007T184544Z_524695/p4/vidage.jsonl",
+      "journal_sha256": "6db8ad2f89630fa8827044d8a1b74c777e6b460cc5de8069809b1213a95cb59d",
+      "ordres": {
+       "2": {
+        "census": {
+         "part_satures_evites": 0.735577,
+         "replique_v12": {
+          "complets": 0,
+          "satures": 2080
+         },
+         "replique_v12_saut": {
+          "complets": 0,
+          "satures": 550
+         },
+         "restants": 550,
+         "satures_evites": 1530
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           307013,
+           39589,
+           4890,
+           475,
+           40,
+           9,
+           2,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 6,
+          "moyenne": 0.14491
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           307013,
+           39534,
+           4889,
+           510,
+           56,
+           12,
+           4,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 6,
+          "moyenne": 0.145305
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 67139,
+         "fusions_publiees": 67139,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 833,
+        "pas": {
+         "replique_v12": 403029,
+         "replique_v12_saut": 403168
+        },
+        "sauts": {
+         "candidats_testes": 16534,
+         "certifies": 1664,
+         "tentatives": 2214,
+         "tests_par_tentative": 7.46793
+        },
+        "secondes": {
+         "replique_v11": 0.058373,
+         "replique_v12": 0.053646,
+         "replique_v12_saut": 0.0534004,
+         "v11": 0.110681
+        }
+       },
+       "3": {
+        "census": {
+         "part_satures_evites": 0.801137,
+         "replique_v12": {
+          "complets": 0,
+          "satures": 11078
+         },
+         "replique_v12_saut": {
+          "complets": 0,
+          "satures": 2203
+         },
+         "restants": 2203,
+         "satures_evites": 8875
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           448036,
+           95290,
+           18484,
+           3951,
+           740,
+           130,
+           20,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 6,
+          "moyenne": 0.260903
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           448036,
+           94943,
+           18628,
+           4039,
+           788,
+           162,
+           39,
+           15,
+           1,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 8,
+          "moyenne": 0.262287
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 102279,
+         "fusions_publiees": 102279,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 3659,
+        "pas": {
+         "replique_v12": 714492,
+         "replique_v12_saut": 715276
+        },
+        "sauts": {
+         "candidats_testes": 106954,
+         "certifies": 9418,
+         "tentatives": 11621,
+         "tests_par_tentative": 9.20351
+        },
+        "secondes": {
+         "replique_v11": 0.152304,
+         "replique_v12": 0.154272,
+         "replique_v12_saut": 0.153883,
+         "v11": 0.251916
+        }
+       },
+       "4": {
+        "census": {
+         "part_satures_evites": 0.80599,
+         "replique_v12": {
+          "complets": 242,
+          "satures": 43008
+         },
+         "replique_v12_saut": {
+          "complets": 253,
+          "satures": 8344
+         },
+         "restants": 8597,
+         "satures_evites": 34664
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           611533,
+           149471,
+           37736,
+           10597,
+           2881,
+           766,
+           165,
+           60,
+           17,
+           6,
+           2,
+           3,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 11,
+          "moyenne": 0.336607
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           611533,
+           149142,
+           37533,
+           10726,
+           3100,
+           864,
+           240,
+           67,
+           20,
+           9,
+           2,
+           1,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 11,
+          "moyenne": 0.338508
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 145058,
+         "fusions_publiees": 145058,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 9017,
+        "pas": {
+         "replique_v12": 1086978,
+         "replique_v12_saut": 1088524
+        },
+        "sauts": {
+         "candidats_testes": 511764,
+         "certifies": 35976,
+         "tentatives": 44573,
+         "tests_par_tentative": 11.4815
+        },
+        "secondes": {
+         "replique_v11": 0.286265,
+         "replique_v12": 0.282989,
+         "replique_v12_saut": 0.281427,
+         "v11": 0.442489
+        }
+       },
+       "5": {
+        "census": {
+         "part_satures_evites": 0.821726,
+         "replique_v12": {
+          "complets": 48119,
+          "satures": 112877
+         },
+         "replique_v12_saut": {
+          "complets": 48142,
+          "satures": 20123
+         },
+         "restants": 68265,
+         "satures_evites": 92754
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           798081,
+           213748,
+           61028,
+           19852,
+           6651,
+           2169,
+           676,
+           223,
+           52,
+           11,
+           6,
+           3,
+           5,
+           0,
+           0,
+           0
+          ],
+          "max": 12,
+          "moyenne": 0.398269
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           798081,
+           213309,
+           60680,
+           19964,
+           6969,
+           2331,
+           776,
+           258,
+           100,
+           28,
+           1,
+           7,
+           0,
+           1,
+           0,
+           0
+          ],
+          "max": 13,
+          "moyenne": 0.400639
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 195058,
+         "fusions_publiees": 195058,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 16028,
+        "pas": {
+         "replique_v12": 1541599,
+         "replique_v12_saut": 1544211
+        },
+        "sauts": {
+         "candidats_testes": 2379150,
+         "certifies": 94988,
+         "tentatives": 163253,
+         "tests_par_tentative": 14.5734
+        },
+        "secondes": {
+         "replique_v11": 0.572409,
+         "replique_v12": 0.544031,
+         "replique_v12_saut": 0.585213,
+         "v11": 0.794168
+        }
+       }
+      },
+      "processus": 4,
+      "raisons": [],
+      "secondes": 15.47,
+      "totaux": {
+       "complets_saut": 48395,
+       "complets_v12": 48361,
+       "part_satures_evites": 0.8153132634891714,
+       "rapport_total": 1.0376693096591294,
+       "replique_v12": 1.034938,
+       "replique_v12_saut": 1.0739234,
+       "satures_saut": 31220,
+       "satures_v12": 169043
+      },
+      "valide": true,
+      "vidages_sha256": {
+       "cat.bin": "c63b58aba75fcc795f3b099859980c6f36b79145104a12b367a409c4b68a7459",
+       "foret_1.bin": "cabb249910ee43b0d777319b1afdb44ce5d528f3aec4fd8f1998ddf22b8a7a63",
+       "foret_2.bin": "4db1e29a046d02472bc068867131e14410f477f0f2ba769f181dfeb168661e44",
+       "foret_3.bin": "234d8cf91750156ec191b6c2b1561338709edcb4da27aee997ba03dda097e2ba",
+       "foret_4.bin": "32ea8b38378929a5024db54c02e45793b6f6801bade152695ce83663bd5a11ad",
+       "foret_5.bin": "ef7ac694d33fc816655815eccbae0af928097add042209cd81b713249755be6e",
+       "ordre_1.bin": "6881c2d8d78712157353eb8a86b2b5027484148b13fc54751de3ef2b5038f446",
+       "ordre_2.bin": "294d13ba4de7bb52bbab1f55fc44f985a5d858d7fa7f12eefed8bc022317e8fb",
+       "ordre_3.bin": "7c3deec065257de9fdc757b3c716845c8b552b82e63d855dfa6462ec6f3896cf",
+       "ordre_4.bin": "1cf8281788809e9c2f3edb1b52e3aedec262c293cb8b1da3063f1cebe724b0ca",
+       "ordre_5.bin": "723579f0f497bd8f4bef0671836156e366a5dea62ba03921ef3748442573897b"
+      }
+     }
+    ],
+    "prises_valides": 5,
+    "processus_demandes": 5,
+    "refus": [],
+    "statistique_intra_processus": "minimum de 3 passe(s) dans le processus, par bras et par ordre",
+    "vidages_reference": {
+     "cat.bin": "c63b58aba75fcc795f3b099859980c6f36b79145104a12b367a409c4b68a7459",
+     "foret_1.bin": "cabb249910ee43b0d777319b1afdb44ce5d528f3aec4fd8f1998ddf22b8a7a63",
+     "foret_2.bin": "4db1e29a046d02472bc068867131e14410f477f0f2ba769f181dfeb168661e44",
+     "foret_3.bin": "234d8cf91750156ec191b6c2b1561338709edcb4da27aee997ba03dda097e2ba",
+     "foret_4.bin": "32ea8b38378929a5024db54c02e45793b6f6801bade152695ce83663bd5a11ad",
+     "foret_5.bin": "ef7ac694d33fc816655815eccbae0af928097add042209cd81b713249755be6e",
+     "ordre_1.bin": "6881c2d8d78712157353eb8a86b2b5027484148b13fc54751de3ef2b5038f446",
+     "ordre_2.bin": "294d13ba4de7bb52bbab1f55fc44f985a5d858d7fa7f12eefed8bc022317e8fb",
+     "ordre_3.bin": "7c3deec065257de9fdc757b3c716845c8b552b82e63d855dfa6462ec6f3896cf",
+     "ordre_4.bin": "1cf8281788809e9c2f3edb1b52e3aedec262c293cb8b1da3063f1cebe724b0ca",
+     "ordre_5.bin": "723579f0f497bd8f4bef0671836156e366a5dea62ba03921ef3748442573897b"
+    }
+   }
+  },
+  "ng02_k5": {
+   "c20261007T184544Z_524695": {
+    "debut": "2026-10-07T18:49:09Z",
+    "fin": "2026-10-07T18:50:44Z",
+    "passes_par_processus": 3,
+    "prises": [
+     {
+      "binaire": {
+       "binaire": "mhgp12_vidage",
+       "commande": [
+        "mhgp12_vidage",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng02.u32le",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng02.ids.u32le",
+        "ng02",
+        "5",
+        "16",
+        "48",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/build/g1_k5/ng02_k5/campagnes/c20261007T184544Z_524695/p0",
+        "--journal",
+        "aucun",
+        "--chrono-resolution",
+        "3",
+        "--bras-saut"
+       ],
+       "construit": true,
+       "inchange": true,
+       "journal": "ng02_k5/campagnes/c20261007T184544Z_524695/p0/vidage.jsonl",
+       "journal_sha256": "c7c54b29559cbf1f8dbf958658cbc60beb7b38aeb96a22919cf58e4fa81ecef1",
+       "sha256": "00acddd5e997854c20cbeb2840329778326808c8aecfe725662492e26365343c"
+      },
+      "code": 0,
+      "erreur": "",
+      "foret_differente": false,
+      "journal": "ng02_k5/campagnes/c20261007T184544Z_524695/p0/vidage.jsonl",
+      "journal_sha256": "c7c54b29559cbf1f8dbf958658cbc60beb7b38aeb96a22919cf58e4fa81ecef1",
+      "ordres": {
+       "2": {
+        "census": {
+         "part_satures_evites": 0.725167,
+         "replique_v12": {
+          "complets": 0,
+          "satures": 1943
+         },
+         "replique_v12_saut": {
+          "complets": 0,
+          "satures": 534
+         },
+         "restants": 534,
+         "satures_evites": 1409
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           404240,
+           44954,
+           4930,
+           456,
+           43,
+           3,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 5,
+          "moyenne": 0.12399
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           404240,
+           44866,
+           4965,
+           495,
+           59,
+           1,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 5,
+          "moyenne": 0.124326
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 89087,
+         "fusions_publiees": 89087,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 828,
+        "pas": {
+         "replique_v12": 510995,
+         "replique_v12_saut": 511148
+        },
+        "sauts": {
+         "candidats_testes": 15718,
+         "certifies": 1555,
+         "tentatives": 2089,
+         "tests_par_tentative": 7.52417
+        },
+        "secondes": {
+         "replique_v11": 0.0831144,
+         "replique_v12": 0.0839487,
+         "replique_v12_saut": 0.0842496,
+         "v11": 0.143261
+        }
+       },
+       "3": {
+        "census": {
+         "part_satures_evites": 0.810952,
+         "replique_v12": {
+          "complets": 0,
+          "satures": 10172
+         },
+         "replique_v12_saut": {
+          "complets": 0,
+          "satures": 1923
+         },
+         "restants": 1923,
+         "satures_evites": 8249
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           583745,
+           120960,
+           19213,
+           3626,
+           671,
+           126,
+           17,
+           2,
+           2,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 8,
+          "moyenne": 0.238494
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           583745,
+           120754,
+           19168,
+           3741,
+           760,
+           157,
+           29,
+           5,
+           1,
+           2,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 9,
+          "moyenne": 0.239404
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 132038,
+         "fusions_publiees": 132038,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 3498,
+        "pas": {
+         "replique_v12": 902072,
+         "replique_v12_saut": 902735
+        },
+        "sauts": {
+         "candidats_testes": 98090,
+         "certifies": 8804,
+         "tentatives": 10727,
+         "tests_par_tentative": 9.14422
+        },
+        "secondes": {
+         "replique_v11": 0.189003,
+         "replique_v12": 0.192195,
+         "replique_v12_saut": 0.191608,
+         "v11": 0.312489
+        }
+       },
+       "4": {
+        "census": {
+         "part_satures_evites": 0.812494,
+         "replique_v12": {
+          "complets": 251,
+          "satures": 39012
+         },
+         "replique_v12_saut": {
+          "complets": 261,
+          "satures": 7315
+         },
+         "restants": 7576,
+         "satures_evites": 31697
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           794909,
+           188218,
+           39030,
+           9858,
+           2435,
+           582,
+           136,
+           42,
+           11,
+           1,
+           2,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 10,
+          "moyenne": 0.29919
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           794909,
+           187981,
+           38779,
+           9981,
+           2592,
+           700,
+           198,
+           60,
+           21,
+           2,
+           1,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 10,
+          "moyenne": 0.300567
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 185680,
+         "fusions_publiees": 185680,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 8314,
+        "pas": {
+         "replique_v12": 1344953,
+         "replique_v12_saut": 1346378
+        },
+        "sauts": {
+         "candidats_testes": 464549,
+         "certifies": 32963,
+         "tentatives": 40539,
+         "tests_par_tentative": 11.4593
+        },
+        "secondes": {
+         "replique_v11": 0.341364,
+         "replique_v12": 0.338045,
+         "replique_v12_saut": 0.337343,
+         "v11": 0.533288
+        }
+       },
+       "5": {
+        "census": {
+         "part_satures_evites": 0.83279,
+         "replique_v12": {
+          "complets": 51148,
+          "satures": 105580
+         },
+         "replique_v12_saut": {
+          "complets": 51293,
+          "satures": 17654
+         },
+         "restants": 68947,
+         "satures_evites": 87926
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           1025951,
+           275480,
+           65671,
+           18445,
+           5874,
+           1799,
+           527,
+           146,
+           37,
+           20,
+           2,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 10,
+          "moyenne": 0.35821
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           1025951,
+           275270,
+           65303,
+           18382,
+           6038,
+           1987,
+           692,
+           216,
+           72,
+           24,
+           13,
+           4,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 11,
+          "moyenne": 0.35994
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 248050,
+         "fusions_publiees": 248050,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 14351,
+        "pas": {
+         "replique_v12": 1893266,
+         "replique_v12_saut": 1895676
+        },
+        "sauts": {
+         "candidats_testes": 2335710,
+         "certifies": 90291,
+         "tentatives": 159238,
+         "tests_par_tentative": 14.668
+        },
+        "secondes": {
+         "replique_v11": 0.66596,
+         "replique_v12": 0.630473,
+         "replique_v12_saut": 0.677811,
+         "v11": 0.939431
+        }
+       }
+      },
+      "processus": 0,
+      "raisons": [],
+      "secondes": 18.65,
+      "totaux": {
+       "complets_saut": 51554,
+       "complets_v12": 51399,
+       "part_satures_evites": 0.8249854824608983,
+       "rapport_total": 1.0372389541672247,
+       "replique_v12": 1.2446617,
+       "replique_v12_saut": 1.2910116,
+       "satures_saut": 27426,
+       "satures_v12": 156707
+      },
+      "valide": true,
+      "vidages_sha256": {
+       "cat.bin": "37d45bb526062e2ba188e9abe5e5fa8c15c7c0f87819c0848ff1c212fff0303a",
+       "foret_1.bin": "80c0c63b4771c550add4a552c7babae4a120f9a6afa1d3218c413c8ac82346d2",
+       "foret_2.bin": "74a6706cb82286f5ff43b258a6b3a035a500b040656ddc83e47826a553db48c2",
+       "foret_3.bin": "20b169c10179984ddd9d38e50dcd32e328bab2892d7139a853ee4a8f44b4a488",
+       "foret_4.bin": "d7a8a7988af7d7f4ac3e8bddda1cf198b914326f61c4eb78abcd31c8f54ea213",
+       "foret_5.bin": "d75f254c10a6804e48d1ff7c5d95aa2dcca53dd1966de5a5e32a30581ed3fd8a",
+       "ordre_1.bin": "5863b41c1b883a2bc2f5247cf21251468f938f509dcc968d4eaa526c7e3ca4e6",
+       "ordre_2.bin": "d0180efe562371e84705c34b1772dba0595021bc800d199e58be9e80d14303b7",
+       "ordre_3.bin": "93d591df25fb277c05dd837989bcacd7f8f34c5e189db5739379d73d68bab01a",
+       "ordre_4.bin": "450d71665823fab606768debd71141895a88bc069cd80e58cfaff4e62aa61fbf",
+       "ordre_5.bin": "4cb41e088b109e99ff64880324525e0a515788054478e2147192d61c5b17ef68"
+      }
+     },
+     {
+      "binaire": {
+       "binaire": "mhgp12_vidage",
+       "commande": [
+        "mhgp12_vidage",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng02.u32le",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng02.ids.u32le",
+        "ng02",
+        "5",
+        "16",
+        "48",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/build/g1_k5/ng02_k5/campagnes/c20261007T184544Z_524695/p1",
+        "--journal",
+        "aucun",
+        "--chrono-resolution",
+        "3",
+        "--bras-saut"
+       ],
+       "construit": true,
+       "inchange": true,
+       "journal": "ng02_k5/campagnes/c20261007T184544Z_524695/p1/vidage.jsonl",
+       "journal_sha256": "9266c733962977aeea18dea6a7187f84834e19f913a11adb357eae7db7822fa4",
+       "sha256": "00acddd5e997854c20cbeb2840329778326808c8aecfe725662492e26365343c"
+      },
+      "code": 0,
+      "erreur": "",
+      "foret_differente": false,
+      "journal": "ng02_k5/campagnes/c20261007T184544Z_524695/p1/vidage.jsonl",
+      "journal_sha256": "9266c733962977aeea18dea6a7187f84834e19f913a11adb357eae7db7822fa4",
+      "ordres": {
+       "2": {
+        "census": {
+         "part_satures_evites": 0.725167,
+         "replique_v12": {
+          "complets": 0,
+          "satures": 1943
+         },
+         "replique_v12_saut": {
+          "complets": 0,
+          "satures": 534
+         },
+         "restants": 534,
+         "satures_evites": 1409
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           404240,
+           44954,
+           4930,
+           456,
+           43,
+           3,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 5,
+          "moyenne": 0.12399
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           404240,
+           44866,
+           4965,
+           495,
+           59,
+           1,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 5,
+          "moyenne": 0.124326
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 89087,
+         "fusions_publiees": 89087,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 828,
+        "pas": {
+         "replique_v12": 510995,
+         "replique_v12_saut": 511148
+        },
+        "sauts": {
+         "candidats_testes": 15718,
+         "certifies": 1555,
+         "tentatives": 2089,
+         "tests_par_tentative": 7.52417
+        },
+        "secondes": {
+         "replique_v11": 0.0854213,
+         "replique_v12": 0.0864093,
+         "replique_v12_saut": 0.0867429,
+         "v11": 0.146297
+        }
+       },
+       "3": {
+        "census": {
+         "part_satures_evites": 0.810952,
+         "replique_v12": {
+          "complets": 0,
+          "satures": 10172
+         },
+         "replique_v12_saut": {
+          "complets": 0,
+          "satures": 1923
+         },
+         "restants": 1923,
+         "satures_evites": 8249
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           583745,
+           120960,
+           19213,
+           3626,
+           671,
+           126,
+           17,
+           2,
+           2,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 8,
+          "moyenne": 0.238494
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           583745,
+           120754,
+           19168,
+           3741,
+           760,
+           157,
+           29,
+           5,
+           1,
+           2,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 9,
+          "moyenne": 0.239404
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 132038,
+         "fusions_publiees": 132038,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 3498,
+        "pas": {
+         "replique_v12": 902072,
+         "replique_v12_saut": 902735
+        },
+        "sauts": {
+         "candidats_testes": 98090,
+         "certifies": 8804,
+         "tentatives": 10727,
+         "tests_par_tentative": 9.14422
+        },
+        "secondes": {
+         "replique_v11": 0.192867,
+         "replique_v12": 0.196183,
+         "replique_v12_saut": 0.195351,
+         "v11": 0.317096
+        }
+       },
+       "4": {
+        "census": {
+         "part_satures_evites": 0.812494,
+         "replique_v12": {
+          "complets": 251,
+          "satures": 39012
+         },
+         "replique_v12_saut": {
+          "complets": 261,
+          "satures": 7315
+         },
+         "restants": 7576,
+         "satures_evites": 31697
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           794909,
+           188218,
+           39030,
+           9858,
+           2435,
+           582,
+           136,
+           42,
+           11,
+           1,
+           2,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 10,
+          "moyenne": 0.29919
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           794909,
+           187981,
+           38779,
+           9981,
+           2592,
+           700,
+           198,
+           60,
+           21,
+           2,
+           1,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 10,
+          "moyenne": 0.300567
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 185680,
+         "fusions_publiees": 185680,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 8314,
+        "pas": {
+         "replique_v12": 1344953,
+         "replique_v12_saut": 1346378
+        },
+        "sauts": {
+         "candidats_testes": 464549,
+         "certifies": 32963,
+         "tentatives": 40539,
+         "tests_par_tentative": 11.4593
+        },
+        "secondes": {
+         "replique_v11": 0.347715,
+         "replique_v12": 0.343662,
+         "replique_v12_saut": 0.34283,
+         "v11": 0.539402
+        }
+       },
+       "5": {
+        "census": {
+         "part_satures_evites": 0.83279,
+         "replique_v12": {
+          "complets": 51148,
+          "satures": 105580
+         },
+         "replique_v12_saut": {
+          "complets": 51293,
+          "satures": 17654
+         },
+         "restants": 68947,
+         "satures_evites": 87926
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           1025951,
+           275480,
+           65671,
+           18445,
+           5874,
+           1799,
+           527,
+           146,
+           37,
+           20,
+           2,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 10,
+          "moyenne": 0.35821
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           1025951,
+           275270,
+           65303,
+           18382,
+           6038,
+           1987,
+           692,
+           216,
+           72,
+           24,
+           13,
+           4,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 11,
+          "moyenne": 0.35994
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 248050,
+         "fusions_publiees": 248050,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 14351,
+        "pas": {
+         "replique_v12": 1893266,
+         "replique_v12_saut": 1895676
+        },
+        "sauts": {
+         "candidats_testes": 2335710,
+         "certifies": 90291,
+         "tentatives": 159238,
+         "tests_par_tentative": 14.668
+        },
+        "secondes": {
+         "replique_v11": 0.66931,
+         "replique_v12": 0.63631,
+         "replique_v12_saut": 0.682983,
+         "v11": 0.940887
+        }
+       }
+      },
+      "processus": 1,
+      "raisons": [],
+      "secondes": 18.86,
+      "totaux": {
+       "complets_saut": 51554,
+       "complets_v12": 51399,
+       "part_satures_evites": 0.8249854824608983,
+       "rapport_total": 1.0359131016139136,
+       "replique_v12": 1.2625643000000002,
+       "replique_v12_saut": 1.3079068999999999,
+       "satures_saut": 27426,
+       "satures_v12": 156707
+      },
+      "valide": true,
+      "vidages_sha256": {
+       "cat.bin": "37d45bb526062e2ba188e9abe5e5fa8c15c7c0f87819c0848ff1c212fff0303a",
+       "foret_1.bin": "80c0c63b4771c550add4a552c7babae4a120f9a6afa1d3218c413c8ac82346d2",
+       "foret_2.bin": "74a6706cb82286f5ff43b258a6b3a035a500b040656ddc83e47826a553db48c2",
+       "foret_3.bin": "20b169c10179984ddd9d38e50dcd32e328bab2892d7139a853ee4a8f44b4a488",
+       "foret_4.bin": "d7a8a7988af7d7f4ac3e8bddda1cf198b914326f61c4eb78abcd31c8f54ea213",
+       "foret_5.bin": "d75f254c10a6804e48d1ff7c5d95aa2dcca53dd1966de5a5e32a30581ed3fd8a",
+       "ordre_1.bin": "5863b41c1b883a2bc2f5247cf21251468f938f509dcc968d4eaa526c7e3ca4e6",
+       "ordre_2.bin": "d0180efe562371e84705c34b1772dba0595021bc800d199e58be9e80d14303b7",
+       "ordre_3.bin": "93d591df25fb277c05dd837989bcacd7f8f34c5e189db5739379d73d68bab01a",
+       "ordre_4.bin": "450d71665823fab606768debd71141895a88bc069cd80e58cfaff4e62aa61fbf",
+       "ordre_5.bin": "4cb41e088b109e99ff64880324525e0a515788054478e2147192d61c5b17ef68"
+      }
+     },
+     {
+      "binaire": {
+       "binaire": "mhgp12_vidage",
+       "commande": [
+        "mhgp12_vidage",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng02.u32le",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng02.ids.u32le",
+        "ng02",
+        "5",
+        "16",
+        "48",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/build/g1_k5/ng02_k5/campagnes/c20261007T184544Z_524695/p2",
+        "--journal",
+        "aucun",
+        "--chrono-resolution",
+        "3",
+        "--bras-saut"
+       ],
+       "construit": true,
+       "inchange": true,
+       "journal": "ng02_k5/campagnes/c20261007T184544Z_524695/p2/vidage.jsonl",
+       "journal_sha256": "fae40e195b9b014fe9ff9f1d26d62da681e16456fc6e33bc1a5f3a59da7528b1",
+       "sha256": "00acddd5e997854c20cbeb2840329778326808c8aecfe725662492e26365343c"
+      },
+      "code": 0,
+      "erreur": "",
+      "foret_differente": false,
+      "journal": "ng02_k5/campagnes/c20261007T184544Z_524695/p2/vidage.jsonl",
+      "journal_sha256": "fae40e195b9b014fe9ff9f1d26d62da681e16456fc6e33bc1a5f3a59da7528b1",
+      "ordres": {
+       "2": {
+        "census": {
+         "part_satures_evites": 0.725167,
+         "replique_v12": {
+          "complets": 0,
+          "satures": 1943
+         },
+         "replique_v12_saut": {
+          "complets": 0,
+          "satures": 534
+         },
+         "restants": 534,
+         "satures_evites": 1409
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           404240,
+           44954,
+           4930,
+           456,
+           43,
+           3,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 5,
+          "moyenne": 0.12399
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           404240,
+           44866,
+           4965,
+           495,
+           59,
+           1,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 5,
+          "moyenne": 0.124326
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 89087,
+         "fusions_publiees": 89087,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 828,
+        "pas": {
+         "replique_v12": 510995,
+         "replique_v12_saut": 511148
+        },
+        "sauts": {
+         "candidats_testes": 15718,
+         "certifies": 1555,
+         "tentatives": 2089,
+         "tests_par_tentative": 7.52417
+        },
+        "secondes": {
+         "replique_v11": 0.084532,
+         "replique_v12": 0.0863068,
+         "replique_v12_saut": 0.0854428,
+         "v11": 0.141593
+        }
+       },
+       "3": {
+        "census": {
+         "part_satures_evites": 0.810952,
+         "replique_v12": {
+          "complets": 0,
+          "satures": 10172
+         },
+         "replique_v12_saut": {
+          "complets": 0,
+          "satures": 1923
+         },
+         "restants": 1923,
+         "satures_evites": 8249
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           583745,
+           120960,
+           19213,
+           3626,
+           671,
+           126,
+           17,
+           2,
+           2,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 8,
+          "moyenne": 0.238494
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           583745,
+           120754,
+           19168,
+           3741,
+           760,
+           157,
+           29,
+           5,
+           1,
+           2,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 9,
+          "moyenne": 0.239404
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 132038,
+         "fusions_publiees": 132038,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 3498,
+        "pas": {
+         "replique_v12": 902072,
+         "replique_v12_saut": 902735
+        },
+        "sauts": {
+         "candidats_testes": 98090,
+         "certifies": 8804,
+         "tentatives": 10727,
+         "tests_par_tentative": 9.14422
+        },
+        "secondes": {
+         "replique_v11": 0.193778,
+         "replique_v12": 0.196314,
+         "replique_v12_saut": 0.195984,
+         "v11": 0.315638
+        }
+       },
+       "4": {
+        "census": {
+         "part_satures_evites": 0.812494,
+         "replique_v12": {
+          "complets": 251,
+          "satures": 39012
+         },
+         "replique_v12_saut": {
+          "complets": 261,
+          "satures": 7315
+         },
+         "restants": 7576,
+         "satures_evites": 31697
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           794909,
+           188218,
+           39030,
+           9858,
+           2435,
+           582,
+           136,
+           42,
+           11,
+           1,
+           2,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 10,
+          "moyenne": 0.29919
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           794909,
+           187981,
+           38779,
+           9981,
+           2592,
+           700,
+           198,
+           60,
+           21,
+           2,
+           1,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 10,
+          "moyenne": 0.300567
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 185680,
+         "fusions_publiees": 185680,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 8314,
+        "pas": {
+         "replique_v12": 1344953,
+         "replique_v12_saut": 1346378
+        },
+        "sauts": {
+         "candidats_testes": 464549,
+         "certifies": 32963,
+         "tentatives": 40539,
+         "tests_par_tentative": 11.4593
+        },
+        "secondes": {
+         "replique_v11": 0.349692,
+         "replique_v12": 0.345501,
+         "replique_v12_saut": 0.344437,
+         "v11": 0.539582
+        }
+       },
+       "5": {
+        "census": {
+         "part_satures_evites": 0.83279,
+         "replique_v12": {
+          "complets": 51148,
+          "satures": 105580
+         },
+         "replique_v12_saut": {
+          "complets": 51293,
+          "satures": 17654
+         },
+         "restants": 68947,
+         "satures_evites": 87926
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           1025951,
+           275480,
+           65671,
+           18445,
+           5874,
+           1799,
+           527,
+           146,
+           37,
+           20,
+           2,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 10,
+          "moyenne": 0.35821
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           1025951,
+           275270,
+           65303,
+           18382,
+           6038,
+           1987,
+           692,
+           216,
+           72,
+           24,
+           13,
+           4,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 11,
+          "moyenne": 0.35994
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 248050,
+         "fusions_publiees": 248050,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 14351,
+        "pas": {
+         "replique_v12": 1893266,
+         "replique_v12_saut": 1895676
+        },
+        "sauts": {
+         "candidats_testes": 2335710,
+         "certifies": 90291,
+         "tentatives": 159238,
+         "tests_par_tentative": 14.668
+        },
+        "secondes": {
+         "replique_v11": 0.66607,
+         "replique_v12": 0.629638,
+         "replique_v12_saut": 0.677219,
+         "v11": 0.938005
+        }
+       }
+      },
+      "processus": 2,
+      "raisons": [],
+      "secondes": 18.86,
+      "totaux": {
+       "complets_saut": 51554,
+       "complets_v12": 51399,
+       "part_satures_evites": 0.8249854824608983,
+       "rapport_total": 1.036034702333466,
+       "replique_v12": 1.2577598,
+       "replique_v12_saut": 1.3030827999999999,
+       "satures_saut": 27426,
+       "satures_v12": 156707
+      },
+      "valide": true,
+      "vidages_sha256": {
+       "cat.bin": "37d45bb526062e2ba188e9abe5e5fa8c15c7c0f87819c0848ff1c212fff0303a",
+       "foret_1.bin": "80c0c63b4771c550add4a552c7babae4a120f9a6afa1d3218c413c8ac82346d2",
+       "foret_2.bin": "74a6706cb82286f5ff43b258a6b3a035a500b040656ddc83e47826a553db48c2",
+       "foret_3.bin": "20b169c10179984ddd9d38e50dcd32e328bab2892d7139a853ee4a8f44b4a488",
+       "foret_4.bin": "d7a8a7988af7d7f4ac3e8bddda1cf198b914326f61c4eb78abcd31c8f54ea213",
+       "foret_5.bin": "d75f254c10a6804e48d1ff7c5d95aa2dcca53dd1966de5a5e32a30581ed3fd8a",
+       "ordre_1.bin": "5863b41c1b883a2bc2f5247cf21251468f938f509dcc968d4eaa526c7e3ca4e6",
+       "ordre_2.bin": "d0180efe562371e84705c34b1772dba0595021bc800d199e58be9e80d14303b7",
+       "ordre_3.bin": "93d591df25fb277c05dd837989bcacd7f8f34c5e189db5739379d73d68bab01a",
+       "ordre_4.bin": "450d71665823fab606768debd71141895a88bc069cd80e58cfaff4e62aa61fbf",
+       "ordre_5.bin": "4cb41e088b109e99ff64880324525e0a515788054478e2147192d61c5b17ef68"
+      }
+     },
+     {
+      "binaire": {
+       "binaire": "mhgp12_vidage",
+       "commande": [
+        "mhgp12_vidage",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng02.u32le",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng02.ids.u32le",
+        "ng02",
+        "5",
+        "16",
+        "48",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/build/g1_k5/ng02_k5/campagnes/c20261007T184544Z_524695/p3",
+        "--journal",
+        "aucun",
+        "--chrono-resolution",
+        "3",
+        "--bras-saut"
+       ],
+       "construit": true,
+       "inchange": true,
+       "journal": "ng02_k5/campagnes/c20261007T184544Z_524695/p3/vidage.jsonl",
+       "journal_sha256": "7f7f1e87790653d1316acbbfecb7025ae0b61d5dd324c642aebffa299906eaea",
+       "sha256": "00acddd5e997854c20cbeb2840329778326808c8aecfe725662492e26365343c"
+      },
+      "code": 0,
+      "erreur": "",
+      "foret_differente": false,
+      "journal": "ng02_k5/campagnes/c20261007T184544Z_524695/p3/vidage.jsonl",
+      "journal_sha256": "7f7f1e87790653d1316acbbfecb7025ae0b61d5dd324c642aebffa299906eaea",
+      "ordres": {
+       "2": {
+        "census": {
+         "part_satures_evites": 0.725167,
+         "replique_v12": {
+          "complets": 0,
+          "satures": 1943
+         },
+         "replique_v12_saut": {
+          "complets": 0,
+          "satures": 534
+         },
+         "restants": 534,
+         "satures_evites": 1409
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           404240,
+           44954,
+           4930,
+           456,
+           43,
+           3,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 5,
+          "moyenne": 0.12399
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           404240,
+           44866,
+           4965,
+           495,
+           59,
+           1,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 5,
+          "moyenne": 0.124326
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 89087,
+         "fusions_publiees": 89087,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 828,
+        "pas": {
+         "replique_v12": 510995,
+         "replique_v12_saut": 511148
+        },
+        "sauts": {
+         "candidats_testes": 15718,
+         "certifies": 1555,
+         "tentatives": 2089,
+         "tests_par_tentative": 7.52417
+        },
+        "secondes": {
+         "replique_v11": 0.0811543,
+         "replique_v12": 0.0825573,
+         "replique_v12_saut": 0.0778115,
+         "v11": 0.14057
+        }
+       },
+       "3": {
+        "census": {
+         "part_satures_evites": 0.810952,
+         "replique_v12": {
+          "complets": 0,
+          "satures": 10172
+         },
+         "replique_v12_saut": {
+          "complets": 0,
+          "satures": 1923
+         },
+         "restants": 1923,
+         "satures_evites": 8249
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           583745,
+           120960,
+           19213,
+           3626,
+           671,
+           126,
+           17,
+           2,
+           2,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 8,
+          "moyenne": 0.238494
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           583745,
+           120754,
+           19168,
+           3741,
+           760,
+           157,
+           29,
+           5,
+           1,
+           2,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 9,
+          "moyenne": 0.239404
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 132038,
+         "fusions_publiees": 132038,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 3498,
+        "pas": {
+         "replique_v12": 902072,
+         "replique_v12_saut": 902735
+        },
+        "sauts": {
+         "candidats_testes": 98090,
+         "certifies": 8804,
+         "tentatives": 10727,
+         "tests_par_tentative": 9.14422
+        },
+        "secondes": {
+         "replique_v11": 0.187439,
+         "replique_v12": 0.189793,
+         "replique_v12_saut": 0.189574,
+         "v11": 0.308923
+        }
+       },
+       "4": {
+        "census": {
+         "part_satures_evites": 0.812494,
+         "replique_v12": {
+          "complets": 251,
+          "satures": 39012
+         },
+         "replique_v12_saut": {
+          "complets": 261,
+          "satures": 7315
+         },
+         "restants": 7576,
+         "satures_evites": 31697
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           794909,
+           188218,
+           39030,
+           9858,
+           2435,
+           582,
+           136,
+           42,
+           11,
+           1,
+           2,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 10,
+          "moyenne": 0.29919
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           794909,
+           187981,
+           38779,
+           9981,
+           2592,
+           700,
+           198,
+           60,
+           21,
+           2,
+           1,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 10,
+          "moyenne": 0.300567
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 185680,
+         "fusions_publiees": 185680,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 8314,
+        "pas": {
+         "replique_v12": 1344953,
+         "replique_v12_saut": 1346378
+        },
+        "sauts": {
+         "candidats_testes": 464549,
+         "certifies": 32963,
+         "tentatives": 40539,
+         "tests_par_tentative": 11.4593
+        },
+        "secondes": {
+         "replique_v11": 0.339218,
+         "replique_v12": 0.334373,
+         "replique_v12_saut": 0.33354,
+         "v11": 0.530761
+        }
+       },
+       "5": {
+        "census": {
+         "part_satures_evites": 0.83279,
+         "replique_v12": {
+          "complets": 51148,
+          "satures": 105580
+         },
+         "replique_v12_saut": {
+          "complets": 51293,
+          "satures": 17654
+         },
+         "restants": 68947,
+         "satures_evites": 87926
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           1025951,
+           275480,
+           65671,
+           18445,
+           5874,
+           1799,
+           527,
+           146,
+           37,
+           20,
+           2,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 10,
+          "moyenne": 0.35821
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           1025951,
+           275270,
+           65303,
+           18382,
+           6038,
+           1987,
+           692,
+           216,
+           72,
+           24,
+           13,
+           4,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 11,
+          "moyenne": 0.35994
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 248050,
+         "fusions_publiees": 248050,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 14351,
+        "pas": {
+         "replique_v12": 1893266,
+         "replique_v12_saut": 1895676
+        },
+        "sauts": {
+         "candidats_testes": 2335710,
+         "certifies": 90291,
+         "tentatives": 159238,
+         "tests_par_tentative": 14.668
+        },
+        "secondes": {
+         "replique_v11": 0.656671,
+         "replique_v12": 0.620314,
+         "replique_v12_saut": 0.665345,
+         "v11": 0.92678
+        }
+       }
+      },
+      "processus": 3,
+      "raisons": [],
+      "secondes": 18.41,
+      "totaux": {
+       "complets_saut": 51554,
+       "complets_v12": 51399,
+       "part_satures_evites": 0.8249854824608983,
+       "rapport_total": 1.0319739261390015,
+       "replique_v12": 1.2270373,
+       "replique_v12_saut": 1.2662705,
+       "satures_saut": 27426,
+       "satures_v12": 156707
+      },
+      "valide": true,
+      "vidages_sha256": {
+       "cat.bin": "37d45bb526062e2ba188e9abe5e5fa8c15c7c0f87819c0848ff1c212fff0303a",
+       "foret_1.bin": "80c0c63b4771c550add4a552c7babae4a120f9a6afa1d3218c413c8ac82346d2",
+       "foret_2.bin": "74a6706cb82286f5ff43b258a6b3a035a500b040656ddc83e47826a553db48c2",
+       "foret_3.bin": "20b169c10179984ddd9d38e50dcd32e328bab2892d7139a853ee4a8f44b4a488",
+       "foret_4.bin": "d7a8a7988af7d7f4ac3e8bddda1cf198b914326f61c4eb78abcd31c8f54ea213",
+       "foret_5.bin": "d75f254c10a6804e48d1ff7c5d95aa2dcca53dd1966de5a5e32a30581ed3fd8a",
+       "ordre_1.bin": "5863b41c1b883a2bc2f5247cf21251468f938f509dcc968d4eaa526c7e3ca4e6",
+       "ordre_2.bin": "d0180efe562371e84705c34b1772dba0595021bc800d199e58be9e80d14303b7",
+       "ordre_3.bin": "93d591df25fb277c05dd837989bcacd7f8f34c5e189db5739379d73d68bab01a",
+       "ordre_4.bin": "450d71665823fab606768debd71141895a88bc069cd80e58cfaff4e62aa61fbf",
+       "ordre_5.bin": "4cb41e088b109e99ff64880324525e0a515788054478e2147192d61c5b17ef68"
+      }
+     },
+     {
+      "binaire": {
+       "binaire": "mhgp12_vidage",
+       "commande": [
+        "mhgp12_vidage",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng02.u32le",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng02.ids.u32le",
+        "ng02",
+        "5",
+        "16",
+        "48",
+        "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/build/g1_k5/ng02_k5/campagnes/c20261007T184544Z_524695/p4",
+        "--journal",
+        "aucun",
+        "--chrono-resolution",
+        "3",
+        "--bras-saut"
+       ],
+       "construit": true,
+       "inchange": true,
+       "journal": "ng02_k5/campagnes/c20261007T184544Z_524695/p4/vidage.jsonl",
+       "journal_sha256": "6ce929fc54b15223327e4e0909ebddb104c85f746be39be5e216dc5516043d1e",
+       "sha256": "00acddd5e997854c20cbeb2840329778326808c8aecfe725662492e26365343c"
+      },
+      "code": 0,
+      "erreur": "",
+      "foret_differente": false,
+      "journal": "ng02_k5/campagnes/c20261007T184544Z_524695/p4/vidage.jsonl",
+      "journal_sha256": "6ce929fc54b15223327e4e0909ebddb104c85f746be39be5e216dc5516043d1e",
+      "ordres": {
+       "2": {
+        "census": {
+         "part_satures_evites": 0.725167,
+         "replique_v12": {
+          "complets": 0,
+          "satures": 1943
+         },
+         "replique_v12_saut": {
+          "complets": 0,
+          "satures": 534
+         },
+         "restants": 534,
+         "satures_evites": 1409
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           404240,
+           44954,
+           4930,
+           456,
+           43,
+           3,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 5,
+          "moyenne": 0.12399
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           404240,
+           44866,
+           4965,
+           495,
+           59,
+           1,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 5,
+          "moyenne": 0.124326
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 89087,
+         "fusions_publiees": 89087,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 828,
+        "pas": {
+         "replique_v12": 510995,
+         "replique_v12_saut": 511148
+        },
+        "sauts": {
+         "candidats_testes": 15718,
+         "certifies": 1555,
+         "tentatives": 2089,
+         "tests_par_tentative": 7.52417
+        },
+        "secondes": {
+         "replique_v11": 0.0819088,
+         "replique_v12": 0.0819308,
+         "replique_v12_saut": 0.0792164,
+         "v11": 0.141862
+        }
+       },
+       "3": {
+        "census": {
+         "part_satures_evites": 0.810952,
+         "replique_v12": {
+          "complets": 0,
+          "satures": 10172
+         },
+         "replique_v12_saut": {
+          "complets": 0,
+          "satures": 1923
+         },
+         "restants": 1923,
+         "satures_evites": 8249
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           583745,
+           120960,
+           19213,
+           3626,
+           671,
+           126,
+           17,
+           2,
+           2,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 8,
+          "moyenne": 0.238494
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           583745,
+           120754,
+           19168,
+           3741,
+           760,
+           157,
+           29,
+           5,
+           1,
+           2,
+           0,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 9,
+          "moyenne": 0.239404
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 132038,
+         "fusions_publiees": 132038,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 3498,
+        "pas": {
+         "replique_v12": 902072,
+         "replique_v12_saut": 902735
+        },
+        "sauts": {
+         "candidats_testes": 98090,
+         "certifies": 8804,
+         "tentatives": 10727,
+         "tests_par_tentative": 9.14422
+        },
+        "secondes": {
+         "replique_v11": 0.191612,
+         "replique_v12": 0.194706,
+         "replique_v12_saut": 0.194486,
+         "v11": 0.316533
+        }
+       },
+       "4": {
+        "census": {
+         "part_satures_evites": 0.812494,
+         "replique_v12": {
+          "complets": 251,
+          "satures": 39012
+         },
+         "replique_v12_saut": {
+          "complets": 261,
+          "satures": 7315
+         },
+         "restants": 7576,
+         "satures_evites": 31697
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           794909,
+           188218,
+           39030,
+           9858,
+           2435,
+           582,
+           136,
+           42,
+           11,
+           1,
+           2,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 10,
+          "moyenne": 0.29919
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           794909,
+           187981,
+           38779,
+           9981,
+           2592,
+           700,
+           198,
+           60,
+           21,
+           2,
+           1,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 10,
+          "moyenne": 0.300567
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 185680,
+         "fusions_publiees": 185680,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 8314,
+        "pas": {
+         "replique_v12": 1344953,
+         "replique_v12_saut": 1346378
+        },
+        "sauts": {
+         "candidats_testes": 464549,
+         "certifies": 32963,
+         "tentatives": 40539,
+         "tests_par_tentative": 11.4593
+        },
+        "secondes": {
+         "replique_v11": 0.345016,
+         "replique_v12": 0.341412,
+         "replique_v12_saut": 0.340286,
+         "v11": 0.539633
+        }
+       },
+       "5": {
+        "census": {
+         "part_satures_evites": 0.83279,
+         "replique_v12": {
+          "complets": 51148,
+          "satures": 105580
+         },
+         "replique_v12_saut": {
+          "complets": 51293,
+          "satures": 17654
+         },
+         "restants": 68947,
+         "satures_evites": 87926
+        },
+        "chaines": {
+         "replique_v12": {
+          "histogramme": [
+           1025951,
+           275480,
+           65671,
+           18445,
+           5874,
+           1799,
+           527,
+           146,
+           37,
+           20,
+           2,
+           0,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 10,
+          "moyenne": 0.35821
+         },
+         "replique_v12_saut": {
+          "histogramme": [
+           1025951,
+           275270,
+           65303,
+           18382,
+           6038,
+           1987,
+           692,
+           216,
+           72,
+           24,
+           13,
+           4,
+           0,
+           0,
+           0,
+           0
+          ],
+          "max": 11,
+          "moyenne": 0.35994
+         }
+        },
+        "foret": {
+         "controle_v11_reproduit": true,
+         "ecarts_structure": 0,
+         "fusions_formees": 248050,
+         "fusions_publiees": 248050,
+         "identique": true,
+         "representants_hors_composante": 0
+        },
+        "graines_differentes_de_la_v11": 14351,
+        "pas": {
+         "replique_v12": 1893266,
+         "replique_v12_saut": 1895676
+        },
+        "sauts": {
+         "candidats_testes": 2335710,
+         "certifies": 90291,
+         "tentatives": 159238,
+         "tests_par_tentative": 14.668
+        },
+        "secondes": {
+         "replique_v11": 0.665647,
+         "replique_v12": 0.631156,
+         "replique_v12_saut": 0.676885,
+         "v11": 0.938747
+        }
+       }
+      },
+      "processus": 4,
+      "raisons": [],
+      "secondes": 18.76,
+      "totaux": {
+       "complets_saut": 51554,
+       "complets_v12": 51399,
+       "part_satures_evites": 0.8249854824608983,
+       "rapport_total": 1.0333560998164593,
+       "replique_v12": 1.2492048,
+       "replique_v12_saut": 1.2908734,
+       "satures_saut": 27426,
+       "satures_v12": 156707
+      },
+      "valide": true,
+      "vidages_sha256": {
+       "cat.bin": "37d45bb526062e2ba188e9abe5e5fa8c15c7c0f87819c0848ff1c212fff0303a",
+       "foret_1.bin": "80c0c63b4771c550add4a552c7babae4a120f9a6afa1d3218c413c8ac82346d2",
+       "foret_2.bin": "74a6706cb82286f5ff43b258a6b3a035a500b040656ddc83e47826a553db48c2",
+       "foret_3.bin": "20b169c10179984ddd9d38e50dcd32e328bab2892d7139a853ee4a8f44b4a488",
+       "foret_4.bin": "d7a8a7988af7d7f4ac3e8bddda1cf198b914326f61c4eb78abcd31c8f54ea213",
+       "foret_5.bin": "d75f254c10a6804e48d1ff7c5d95aa2dcca53dd1966de5a5e32a30581ed3fd8a",
+       "ordre_1.bin": "5863b41c1b883a2bc2f5247cf21251468f938f509dcc968d4eaa526c7e3ca4e6",
+       "ordre_2.bin": "d0180efe562371e84705c34b1772dba0595021bc800d199e58be9e80d14303b7",
+       "ordre_3.bin": "93d591df25fb277c05dd837989bcacd7f8f34c5e189db5739379d73d68bab01a",
+       "ordre_4.bin": "450d71665823fab606768debd71141895a88bc069cd80e58cfaff4e62aa61fbf",
+       "ordre_5.bin": "4cb41e088b109e99ff64880324525e0a515788054478e2147192d61c5b17ef68"
+      }
+     }
+    ],
+    "prises_valides": 5,
+    "processus_demandes": 5,
+    "refus": [],
+    "statistique_intra_processus": "minimum de 3 passe(s) dans le processus, par bras et par ordre",
+    "vidages_reference": {
+     "cat.bin": "37d45bb526062e2ba188e9abe5e5fa8c15c7c0f87819c0848ff1c212fff0303a",
+     "foret_1.bin": "80c0c63b4771c550add4a552c7babae4a120f9a6afa1d3218c413c8ac82346d2",
+     "foret_2.bin": "74a6706cb82286f5ff43b258a6b3a035a500b040656ddc83e47826a553db48c2",
+     "foret_3.bin": "20b169c10179984ddd9d38e50dcd32e328bab2892d7139a853ee4a8f44b4a488",
+     "foret_4.bin": "d7a8a7988af7d7f4ac3e8bddda1cf198b914326f61c4eb78abcd31c8f54ea213",
+     "foret_5.bin": "d75f254c10a6804e48d1ff7c5d95aa2dcca53dd1966de5a5e32a30581ed3fd8a",
+     "ordre_1.bin": "5863b41c1b883a2bc2f5247cf21251468f938f509dcc968d4eaa526c7e3ca4e6",
+     "ordre_2.bin": "d0180efe562371e84705c34b1772dba0595021bc800d199e58be9e80d14303b7",
+     "ordre_3.bin": "93d591df25fb277c05dd837989bcacd7f8f34c5e189db5739379d73d68bab01a",
+     "ordre_4.bin": "450d71665823fab606768debd71141895a88bc069cd80e58cfaff4e62aa61fbf",
+     "ordre_5.bin": "4cb41e088b109e99ff64880324525e0a515788054478e2147192d61c5b17ef68"
+    }
+   }
+  }
+ },
+ "construction": {
+  "binaires": {
+   "mhgp12_mes_g1": "47417ec7bd6f812960f39dbf81578cf16f703c2e20af165a0f4d83d6ba3e1065",
+   "mhgp12_mes_g1_mutant_cote_nul": "c8bc0c60cbfce3bc9a88658033be1ecf3fa63e2fe8969370d798cdc487eee84c",
+   "mhgp12_mes_g1_mutant_sans_garde_bilan": "0c59e7a11bd4d222ec494b6a79afbd0b712bb1857d61d3ba38dfa009205cef98",
+   "mhgp12_mes_g1_mutant_sans_garde_ordres": "feee609f2b92acbfe947e552a34620407de000acebd9cbbd9402c37799f47210",
+   "mhgp12_mes_g1_mutant_sans_garde_route": "6865cefff9101d00c22ab18aeb90d4152e4f1d74a4ff70a331d24d37ff0ed6b2",
+   "mhgp12_vidage": "00acddd5e997854c20cbeb2840329778326808c8aecfe725662492e26365343c",
+   "mhgp12_vidage_mutant_cibles_decalees": "582b690501a9185b4f7414eacd193ba289dc5dd598158c9540a5d7000bfd35ed"
+  },
+  "code": 0,
+  "date": "2026-10-07T18:45:49Z",
+  "dossier": "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/build/g1_build",
+  "erreur": "",
+  "etapes": [
+   {
+    "cmake": 0,
+    "secondes": 0.35
+   },
+   {
+    "build": 0,
+    "secondes": 4.67
+   }
+  ],
+  "libmhgp11_sha256": "8a27ce2f5bb34d72ec2e26cf744011bab31f09efc04bf494a9ec0ed4777d20d4",
+  "machine": {
+   "coeurs": 48,
+   "plateforme": "Linux-6.8.0-1070-gcp-x86_64-with-glibc2.35",
+   "processeur": "AMD EPYC 9B45",
+   "python": "3.10.12"
+  },
+  "sources": {
+   "../cmake/run_expect.cmake": "82be01f59abc38b2448cbe6844e02f4b0fa8d981497d57cc01c98bbc5b4e2b8b",
+   "mes_g1_saut/CMakeLists.txt": "6e02126796b8a6a59557b383e691f1d39aa365b41488cad4fda10fd9dfc4ad01",
+   "mes_g1_saut/mes_g1.cpp": "d1eff5544cf7b95b65a6b05b733125e4879716fc66a27425c74b7a0479548fe7",
+   "mes_g1_saut/pilote_g1.py": "34a5e22b99964aaab1100ca15fa5023397dadc5830dee402a85fbe80de03ebbb",
+   "mes_g1_saut/voisins.hpp": "69660da67d5e54e74963cdc65ddb5b90fedf882ee57c5b13c741068624a4275a",
+   "mes_m3_m4_tour/common/format.hpp": "cf1d640f567146660a5625688146df2eb79347383a2a9d92f277a4192d11e587",
+   "mes_m3_m4_tour/mes_m3/meb_cert.hpp": "2dc776d9297a6de1b309674676ff84b7ecbd7acf190134f118ee3505945db911",
+   "mes_m3_m4_tour/mes_m3/welzl_proposal.hpp": "3f7a0f113b5fe8a28b878c05be0c933e3e3eb28023e686e3fb0812900d863d62",
+   "mes_m3_m4_tour/vidage/vidage_v11.cpp": "eff7ffecccdf1e7324ba639b64bafeaa157d559fe2891e0d590facc005d5340d"
+  }
+ },
+ "invocations": [
+  {
+   "argv": [
+    "--v11-source",
+    "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/build/v11src/morsehgp3D_v11",
+    "--v11-build",
+    "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/build/v11build",
+    "--donnees",
+    "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data",
+    "--sortie",
+    "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/build/g1_k5",
+    "--construction",
+    "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/build/g1_build",
+    "--cas",
+    "ng00:5,ng01:5,ng02:5",
+    "--processus",
+    "5",
+    "--passes",
+    "3",
+    "--fils",
+    "48",
+    "--fils-construction",
+    "48",
+    "tout"
+   ],
+   "campagne": "c20261007T184544Z_524695",
+   "codes": {
+    "campagne": 0,
+    "construire": 0,
+    "portes": 0,
+    "rapport": 0
+   },
+   "debut": "2026-10-07T18:45:44Z",
+   "etapes": [
+    "construire",
+    "portes",
+    "campagne",
+    "rapport"
+   ],
+   "fin": "2026-10-07T18:50:44Z",
+   "sources_debut": {
+    "../cmake/run_expect.cmake": "82be01f59abc38b2448cbe6844e02f4b0fa8d981497d57cc01c98bbc5b4e2b8b",
+    "mes_g1_saut/CMakeLists.txt": "6e02126796b8a6a59557b383e691f1d39aa365b41488cad4fda10fd9dfc4ad01",
+    "mes_g1_saut/mes_g1.cpp": "d1eff5544cf7b95b65a6b05b733125e4879716fc66a27425c74b7a0479548fe7",
+    "mes_g1_saut/pilote_g1.py": "34a5e22b99964aaab1100ca15fa5023397dadc5830dee402a85fbe80de03ebbb",
+    "mes_g1_saut/voisins.hpp": "69660da67d5e54e74963cdc65ddb5b90fedf882ee57c5b13c741068624a4275a",
+    "mes_m3_m4_tour/common/format.hpp": "cf1d640f567146660a5625688146df2eb79347383a2a9d92f277a4192d11e587",
+    "mes_m3_m4_tour/mes_m3/meb_cert.hpp": "2dc776d9297a6de1b309674676ff84b7ecbd7acf190134f118ee3505945db911",
+    "mes_m3_m4_tour/mes_m3/welzl_proposal.hpp": "3f7a0f113b5fe8a28b878c05be0c933e3e3eb28023e686e3fb0812900d863d62",
+    "mes_m3_m4_tour/vidage/vidage_v11.cpp": "eff7ffecccdf1e7324ba639b64bafeaa157d559fe2891e0d590facc005d5340d"
+   },
+   "sources_fin": {
+    "../cmake/run_expect.cmake": "82be01f59abc38b2448cbe6844e02f4b0fa8d981497d57cc01c98bbc5b4e2b8b",
+    "mes_g1_saut/CMakeLists.txt": "6e02126796b8a6a59557b383e691f1d39aa365b41488cad4fda10fd9dfc4ad01",
+    "mes_g1_saut/mes_g1.cpp": "d1eff5544cf7b95b65a6b05b733125e4879716fc66a27425c74b7a0479548fe7",
+    "mes_g1_saut/pilote_g1.py": "34a5e22b99964aaab1100ca15fa5023397dadc5830dee402a85fbe80de03ebbb",
+    "mes_g1_saut/voisins.hpp": "69660da67d5e54e74963cdc65ddb5b90fedf882ee57c5b13c741068624a4275a",
+    "mes_m3_m4_tour/common/format.hpp": "cf1d640f567146660a5625688146df2eb79347383a2a9d92f277a4192d11e587",
+    "mes_m3_m4_tour/mes_m3/meb_cert.hpp": "2dc776d9297a6de1b309674676ff84b7ecbd7acf190134f118ee3505945db911",
+    "mes_m3_m4_tour/mes_m3/welzl_proposal.hpp": "3f7a0f113b5fe8a28b878c05be0c933e3e3eb28023e686e3fb0812900d863d62",
+    "mes_m3_m4_tour/vidage/vidage_v11.cpp": "eff7ffecccdf1e7324ba639b64bafeaa157d559fe2891e0d590facc005d5340d"
+   }
+  }
+ ],
+ "portes": {
+  "bras_saut_mutant_cibles_decalees_ng00_k5": {
+   "attendu": 1,
+   "binaire": {
+    "binaire": "mhgp12_vidage_mutant_cibles_decalees",
+    "commande": [
+     "mhgp12_vidage_mutant_cibles_decalees",
+     "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng00.u32le",
+     "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng00.ids.u32le",
+     "ng00",
+     "5",
+     "16",
+     "48",
+     "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/build/g1_k5/portes/c20261007T184544Z_524695/bras_saut_mutant_cibles_decalees_ng00_k5",
+     "--journal",
+     "aucun",
+     "--chrono-resolution",
+     "1",
+     "--bras-saut"
+    ],
+    "construit": true,
+    "inchange": true,
+    "journal": "portes/c20261007T184544Z_524695/bras_saut_mutant_cibles_decalees_ng00_k5/vidage.jsonl",
+    "journal_sha256": "328a6837a357628d737b2da50c8c3673864f18508c08cd2588f9114f461057d8",
+    "sha256": "582b690501a9185b4f7414eacd193ba289dc5dd598158c9540a5d7000bfd35ed"
+   },
+   "code": 1,
+   "conforme": true,
+   "erreur": "",
+   "journal": "portes/c20261007T184544Z_524695/bras_saut_mutant_cibles_decalees_ng00_k5/vidage.jsonl",
+   "journal_sha256": "328a6837a357628d737b2da50c8c3673864f18508c08cd2588f9114f461057d8",
+   "raisons": [],
+   "secondes": 7.77,
+   "vidages_sha256": {
+    "cat.bin": "c5738ac1cc8f4b1c813b942a36d03b1e75af64695c163f1b7e52094017d506c7",
+    "foret_1.bin": "6e1fc85a1fce8c6eda25e46482fcd52fadc24c1f28307d2abefb60e03956f69f",
+    "foret_2.bin": "cf85e397d11d4fc19c3c8809d5c6b422fc5149bbb7bc63591ced150ce690504b",
+    "foret_3.bin": "58f37ef02bc36f0e59ec0b1be3e1213f411898bef761bfddc2698a45ad7da1c3",
+    "foret_4.bin": "84044147b150279f5b1d312930b3bab3c6d2009e5e6592b32d05af3eca0d8ee8",
+    "foret_5.bin": "e3ff778c9cdd2da98c1fbe088432f8eda05c368571b816c1ca7127286ae3012c",
+    "ordre_1.bin": "5f5f59d88e0438503e4778eea30617c4de8809400f674ae0cd0ba0fda393b078",
+    "ordre_2.bin": "0d8faf0ff6a333081c8936e5c34caecc494d7f855b7cbe897fa9030ae85f1de4",
+    "ordre_3.bin": "3cdbb2989c42123630ea3c3d84d0ebc2cec7719e144b06606b7f55143a30700f",
+    "ordre_4.bin": "36cb6867d4bdcf5592a6d6827cf104a4498ea5808460837a00d2ef4892767367",
+    "ordre_5.bin": "aa65d1d466be5b13206827420299a938642d35f44d460e2a8951c857bbd8fe24"
+   }
+  },
+  "bras_saut_ng00_k5": {
+   "attendu": 0,
+   "binaire": {
+    "binaire": "mhgp12_vidage",
+    "commande": [
+     "mhgp12_vidage",
+     "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng00.u32le",
+     "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/data/lidar_ng00.ids.u32le",
+     "ng00",
+     "5",
+     "16",
+     "48",
+     "$HOME/ehgp-v12/ehgp-v12.ai861Qhfop/build/g1_k5/portes/c20261007T184544Z_524695/bras_saut_ng00_k5",
+     "--journal",
+     "aucun",
+     "--chrono-resolution",
+     "1",
+     "--bras-saut"
+    ],
+    "construit": true,
+    "inchange": true,
+    "journal": "portes/c20261007T184544Z_524695/bras_saut_ng00_k5/vidage.jsonl",
+    "journal_sha256": "ce0c52c6969544c080c547ca145437df95481d585cc04ccd647262ae17946bf7",
+    "sha256": "00acddd5e997854c20cbeb2840329778326808c8aecfe725662492e26365343c"
+   },
+   "code": 0,
+   "conforme": true,
+   "erreur": "",
+   "journal": "portes/c20261007T184544Z_524695/bras_saut_ng00_k5/vidage.jsonl",
+   "journal_sha256": "ce0c52c6969544c080c547ca145437df95481d585cc04ccd647262ae17946bf7",
+   "raisons": [],
+   "secondes": 7.8,
+   "vidages_sha256": {
+    "cat.bin": "c5738ac1cc8f4b1c813b942a36d03b1e75af64695c163f1b7e52094017d506c7",
+    "foret_1.bin": "6e1fc85a1fce8c6eda25e46482fcd52fadc24c1f28307d2abefb60e03956f69f",
+    "foret_2.bin": "cf85e397d11d4fc19c3c8809d5c6b422fc5149bbb7bc63591ced150ce690504b",
+    "foret_3.bin": "58f37ef02bc36f0e59ec0b1be3e1213f411898bef761bfddc2698a45ad7da1c3",
+    "foret_4.bin": "84044147b150279f5b1d312930b3bab3c6d2009e5e6592b32d05af3eca0d8ee8",
+    "foret_5.bin": "e3ff778c9cdd2da98c1fbe088432f8eda05c368571b816c1ca7127286ae3012c",
+    "ordre_1.bin": "5f5f59d88e0438503e4778eea30617c4de8809400f674ae0cd0ba0fda393b078",
+    "ordre_2.bin": "0d8faf0ff6a333081c8936e5c34caecc494d7f855b7cbe897fa9030ae85f1de4",
+    "ordre_3.bin": "3cdbb2989c42123630ea3c3d84d0ebc2cec7719e144b06606b7f55143a30700f",
+    "ordre_4.bin": "36cb6867d4bdcf5592a6d6827cf104a4498ea5808460837a00d2ef4892767367",
+    "ordre_5.bin": "aa65d1d466be5b13206827420299a938642d35f44d460e2a8951c857bbd8fe24"
+   }
+  },
+  "mes_g1": {
+   "attendu": 0,
+   "binaire": {
+    "binaire": "mhgp12_mes_g1",
+    "commande": [
+     "mhgp12_mes_g1",
+     "--porte"
+    ],
+    "construit": true,
+    "inchange": true,
+    "journal": "portes/c20261007T184544Z_524695/mes_g1.jsonl",
+    "journal_sha256": "f5ddca9b6a50c3e1975445faf1629dbb1951ffb23443d2dd5e4a7ba76b367e2f",
+    "sha256": "47417ec7bd6f812960f39dbf81578cf16f703c2e20af165a0f4d83d6ba3e1065"
+   },
+   "code": 0,
+   "conforme": true,
+   "journal": "portes/c20261007T184544Z_524695/mes_g1.jsonl",
+   "journal_sha256": "f5ddca9b6a50c3e1975445faf1629dbb1951ffb23443d2dd5e4a7ba76b367e2f",
+   "raisons": [],
+   "secondes": 0.0
+  },
+  "mes_g1_mutant_cote_nul": {
+   "attendu": 1,
+   "binaire": {
+    "binaire": "mhgp12_mes_g1_mutant_cote_nul",
+    "commande": [
+     "mhgp12_mes_g1_mutant_cote_nul",
+     "--porte"
+    ],
+    "construit": true,
+    "inchange": true,
+    "journal": "portes/c20261007T184544Z_524695/mes_g1_mutant_cote_nul.jsonl",
+    "journal_sha256": "c1373750dfe88d9535a7d4d74a61920e9e1d6bbcf0f26a4f4eaf92c46f4f3ec6",
+    "sha256": "c8bc0c60cbfce3bc9a88658033be1ecf3fa63e2fe8969370d798cdc487eee84c"
+   },
+   "code": 1,
+   "conforme": true,
+   "journal": "portes/c20261007T184544Z_524695/mes_g1_mutant_cote_nul.jsonl",
+   "journal_sha256": "c1373750dfe88d9535a7d4d74a61920e9e1d6bbcf0f26a4f4eaf92c46f4f3ec6",
+   "raisons": [],
+   "secondes": 0.0
+  },
+  "mes_g1_mutant_sans_garde_bilan": {
+   "attendu": 1,
+   "binaire": {
+    "binaire": "mhgp12_mes_g1_mutant_sans_garde_bilan",
+    "commande": [
+     "mhgp12_mes_g1_mutant_sans_garde_bilan",
+     "--porte"
+    ],
+    "construit": true,
+    "inchange": true,
+    "journal": "portes/c20261007T184544Z_524695/mes_g1_mutant_sans_garde_bilan.jsonl",
+    "journal_sha256": "beec22d33581ee43032090fef2fbfb161a1716f37c1b9ffa21e62dbf3c8053a8",
+    "sha256": "0c59e7a11bd4d222ec494b6a79afbd0b712bb1857d61d3ba38dfa009205cef98"
+   },
+   "code": 1,
+   "conforme": true,
+   "journal": "portes/c20261007T184544Z_524695/mes_g1_mutant_sans_garde_bilan.jsonl",
+   "journal_sha256": "beec22d33581ee43032090fef2fbfb161a1716f37c1b9ffa21e62dbf3c8053a8",
+   "raisons": [],
+   "secondes": 0.0
+  },
+  "mes_g1_mutant_sans_garde_ordres": {
+   "attendu": 1,
+   "binaire": {
+    "binaire": "mhgp12_mes_g1_mutant_sans_garde_ordres",
+    "commande": [
+     "mhgp12_mes_g1_mutant_sans_garde_ordres",
+     "--porte"
+    ],
+    "construit": true,
+    "inchange": true,
+    "journal": "portes/c20261007T184544Z_524695/mes_g1_mutant_sans_garde_ordres.jsonl",
+    "journal_sha256": "0202b5f8e7388170955c2640fbc1e2c1c3ad21adfc5484a126f976b578547172",
+    "sha256": "feee609f2b92acbfe947e552a34620407de000acebd9cbbd9402c37799f47210"
+   },
+   "code": 1,
+   "conforme": true,
+   "journal": "portes/c20261007T184544Z_524695/mes_g1_mutant_sans_garde_ordres.jsonl",
+   "journal_sha256": "0202b5f8e7388170955c2640fbc1e2c1c3ad21adfc5484a126f976b578547172",
+   "raisons": [],
+   "secondes": 0.0
+  },
+  "mes_g1_mutant_sans_garde_route": {
+   "attendu": 1,
+   "binaire": {
+    "binaire": "mhgp12_mes_g1_mutant_sans_garde_route",
+    "commande": [
+     "mhgp12_mes_g1_mutant_sans_garde_route",
+     "--porte"
+    ],
+    "construit": true,
+    "inchange": true,
+    "journal": "portes/c20261007T184544Z_524695/mes_g1_mutant_sans_garde_route.jsonl",
+    "journal_sha256": "34992160bc6febd33b6ee221960ba79f9e1a37b5417bdfcacf3cc140d3bc9d19",
+    "sha256": "6865cefff9101d00c22ab18aeb90d4152e4f1d74a4ff70a331d24d37ff0ed6b2"
+   },
+   "code": 1,
+   "conforme": true,
+   "journal": "portes/c20261007T184544Z_524695/mes_g1_mutant_sans_garde_route.jsonl",
+   "journal_sha256": "34992160bc6febd33b6ee221960ba79f9e1a37b5417bdfcacf3cc140d3bc9d19",
+   "raisons": [],
+   "secondes": 0.0
+  }
+ },
+ "regle": {
+  "adoption": "sur chaque cas qui decide (ng00, ng01, ng02 a K5) : au moins 50 % des censuses satures evites (ordres 2..K), foret identique a la v11 a chaque ordre de chaque prise, borne haute de l'IC sous 1, au moins 5 prises valides, portes conformes et mutants tues",
+  "bootstrap": 10000,
+  "cas_decisifs": [
+   "ng00_k5",
+   "ng01_k5",
+   "ng02_k5"
+  ],
+  "graine": 20261007,
+  "processus_min": 5,
+  "seuil_borne_haute": 1.0,
+  "seuil_satures_evites": 0.5,
+  "statistique": "par processus : somme sur les ordres 2..K du minimum de R passes du bras replique_v12_saut, rapportee a la meme somme pour le bras replique_v12 (quatre bras entrelaces, un fil) ; moyenne geometrique des rapports par processus, IC 95 % par bootstrap sur les processus (10 000 tirages, graine fixe)"
+ },
+ "schema": "ehgp.v12.mes_g1_pilote.v1",
+ "verdict": {
+  "binaires": {
+   "mhgp12_mes_g1": "47417ec7bd6f812960f39dbf81578cf16f703c2e20af165a0f4d83d6ba3e1065",
+   "mhgp12_mes_g1_mutant_cote_nul": "c8bc0c60cbfce3bc9a88658033be1ecf3fa63e2fe8969370d798cdc487eee84c",
+   "mhgp12_mes_g1_mutant_sans_garde_bilan": "0c59e7a11bd4d222ec494b6a79afbd0b712bb1857d61d3ba38dfa009205cef98",
+   "mhgp12_mes_g1_mutant_sans_garde_ordres": "feee609f2b92acbfe947e552a34620407de000acebd9cbbd9402c37799f47210",
+   "mhgp12_mes_g1_mutant_sans_garde_route": "6865cefff9101d00c22ab18aeb90d4152e4f1d74a4ff70a331d24d37ff0ed6b2",
+   "mhgp12_vidage": "00acddd5e997854c20cbeb2840329778326808c8aecfe725662492e26365343c",
+   "mhgp12_vidage_mutant_cibles_decalees": "582b690501a9185b4f7414eacd193ba289dc5dd598158c9540a5d7000bfd35ed"
+  },
+  "cas": {
+   "ng00_k5": {
+    "campagne": "c20261007T184544Z_524695",
+    "foret_differente": false,
+    "gain": -0.032290121007559014,
+    "ic95": [
+     1.030102311273705,
+     1.035545108624065
+    ],
+    "moyenne_geometrique": 1.032290121007559,
+    "part_satures_evites": 0.8112439945934613,
+    "passes_par_processus": 3,
+    "prises": 5,
+    "rapports": [
+     1.0315954912143273,
+     1.0309419409956255,
+     1.0291937912038935,
+     1.0384059188816908,
+     1.0313377155730992
+    ],
+    "satures_saut": 42314,
+    "satures_v12": 224173
+   },
+   "ng01_k5": {
+    "campagne": "c20261007T184544Z_524695",
+    "foret_differente": false,
+    "gain": -0.040796816296907235,
+    "ic95": [
+     1.0388784561136413,
+     1.0425900979605343
+    ],
+    "moyenne_geometrique": 1.0407968162969072,
+    "part_satures_evites": 0.8153132634891714,
+    "passes_par_processus": 3,
+    "prises": 5,
+    "rapports": [
+     1.043263061411549,
+     1.042377587291747,
+     1.0416700760810624,
+     1.0390147655168123,
+     1.0376693096591294
+    ],
+    "satures_saut": 31220,
+    "satures_v12": 169043
+   },
+   "ng02_k5": {
+    "campagne": "c20261007T184544Z_524695",
+    "foret_differente": false,
+    "gain": -0.03490154612094454,
+    "ic95": [
+     1.0330613099196615,
+     1.0364919026072694
+    ],
+    "moyenne_geometrique": 1.0349015461209445,
+    "part_satures_evites": 0.8249854824608983,
+    "passes_par_processus": 3,
+    "prises": 5,
+    "rapports": [
+     1.0372389541672247,
+     1.0359131016139136,
+     1.036034702333466,
+     1.0319739261390015,
+     1.0333560998164593
+    ],
+    "satures_saut": 27426,
+    "satures_v12": 156707
+   }
+  },
+  "cas_publies_sans_decision": {},
+  "preuves": {
+   "ng00_k5/campagnes/c20261007T184544Z_524695/p0/vidage.jsonl": "6a754bd35a00b391ee5882ebc33fb67705327dee97d66ec83e531b0e8766249e",
+   "ng00_k5/campagnes/c20261007T184544Z_524695/p1/vidage.jsonl": "a924a47a6d688eb2602dcd5f8f4fc2130cb40274b1cf09443464e462d55d71ad",
+   "ng00_k5/campagnes/c20261007T184544Z_524695/p2/vidage.jsonl": "99d0e9a540870a82e9524c1133e11e9b1979074b944d290ad57a10eb53906184",
+   "ng00_k5/campagnes/c20261007T184544Z_524695/p3/vidage.jsonl": "20828899490deb904a0f0cf65dff0a8570a38a41059a27272ddb7efa0deebb6f",
+   "ng00_k5/campagnes/c20261007T184544Z_524695/p4/vidage.jsonl": "e6fdcf84d7e251581470ec25b1b7828276c6ae628b7dce4da26432ecf390c435",
+   "ng01_k5/campagnes/c20261007T184544Z_524695/p0/vidage.jsonl": "7cf31514cc35f4550926c1c88891126d5e223cfd523e5365e3c8bc43fe3fc282",
+   "ng01_k5/campagnes/c20261007T184544Z_524695/p1/vidage.jsonl": "a31ef54e5f1db5eb395a678ced0e85c17b40903bbbd20e358dff11dc40c61b67",
+   "ng01_k5/campagnes/c20261007T184544Z_524695/p2/vidage.jsonl": "1d8ac19b2a5c4e450a47e7cc65b7ca7839125d6719d1cf4b62e7566153cde6f5",
+   "ng01_k5/campagnes/c20261007T184544Z_524695/p3/vidage.jsonl": "c8b9d08f56f6958a78127bd0cac71a73347e8d7bd96863c907eb877b65b451d6",
+   "ng01_k5/campagnes/c20261007T184544Z_524695/p4/vidage.jsonl": "6db8ad2f89630fa8827044d8a1b74c777e6b460cc5de8069809b1213a95cb59d",
+   "ng02_k5/campagnes/c20261007T184544Z_524695/p0/vidage.jsonl": "c7c54b29559cbf1f8dbf958658cbc60beb7b38aeb96a22919cf58e4fa81ecef1",
+   "ng02_k5/campagnes/c20261007T184544Z_524695/p1/vidage.jsonl": "9266c733962977aeea18dea6a7187f84834e19f913a11adb357eae7db7822fa4",
+   "ng02_k5/campagnes/c20261007T184544Z_524695/p2/vidage.jsonl": "fae40e195b9b014fe9ff9f1d26d62da681e16456fc6e33bc1a5f3a59da7528b1",
+   "ng02_k5/campagnes/c20261007T184544Z_524695/p3/vidage.jsonl": "7f7f1e87790653d1316acbbfecb7025ae0b61d5dd324c642aebffa299906eaea",
+   "ng02_k5/campagnes/c20261007T184544Z_524695/p4/vidage.jsonl": "6ce929fc54b15223327e4e0909ebddb104c85f746be39be5e216dc5516043d1e",
+   "portes/c20261007T184544Z_524695/bras_saut_mutant_cibles_decalees_ng00_k5/vidage.jsonl": "328a6837a357628d737b2da50c8c3673864f18508c08cd2588f9114f461057d8",
+   "portes/c20261007T184544Z_524695/bras_saut_ng00_k5/vidage.jsonl": "ce0c52c6969544c080c547ca145437df95481d585cc04ccd647262ae17946bf7",
+   "portes/c20261007T184544Z_524695/mes_g1.jsonl": "f5ddca9b6a50c3e1975445faf1629dbb1951ffb23443d2dd5e4a7ba76b367e2f",
+   "portes/c20261007T184544Z_524695/mes_g1_mutant_cote_nul.jsonl": "c1373750dfe88d9535a7d4d74a61920e9e1d6bbcf0f26a4f4eaf92c46f4f3ec6",
+   "portes/c20261007T184544Z_524695/mes_g1_mutant_sans_garde_bilan.jsonl": "beec22d33581ee43032090fef2fbfb161a1716f37c1b9ffa21e62dbf3c8053a8",
+   "portes/c20261007T184544Z_524695/mes_g1_mutant_sans_garde_ordres.jsonl": "0202b5f8e7388170955c2640fbc1e2c1c3ad21adfc5484a126f976b578547172",
+   "portes/c20261007T184544Z_524695/mes_g1_mutant_sans_garde_route.jsonl": "34992160bc6febd33b6ee221960ba79f9e1a37b5417bdfcacf3cc140d3bc9d19"
+  },
+  "refus": [],
+  "regle": {
+   "adoption": "sur chaque cas qui decide (ng00, ng01, ng02 a K5) : au moins 50 % des censuses satures evites (ordres 2..K), foret identique a la v11 a chaque ordre de chaque prise, borne haute de l'IC sous 1, au moins 5 prises valides, portes conformes et mutants tues",
+   "bootstrap": 10000,
+   "cas_decisifs": [
+    "ng00_k5",
+    "ng01_k5",
+    "ng02_k5"
+   ],
+   "graine": 20261007,
+   "processus_min": 5,
+   "seuil_borne_haute": 1.0,
+   "seuil_satures_evites": 0.5,
+   "statistique": "par processus : somme sur les ordres 2..K du minimum de R passes du bras replique_v12_saut, rapportee a la meme somme pour le bras replique_v12 (quatre bras entrelaces, un fil) ; moyenne geometrique des rapports par processus, IC 95 % par bootstrap sur les processus (10 000 tirages, graine fixe)"
+  },
+  "rejets": [
+   "ng00_k5 : borne haute 1.036 >= 1",
+   "ng01_k5 : borne haute 1.043 >= 1",
+   "ng02_k5 : borne haute 1.036 >= 1"
+  ],
+  "verdict": "rejete"
+ }
+}
