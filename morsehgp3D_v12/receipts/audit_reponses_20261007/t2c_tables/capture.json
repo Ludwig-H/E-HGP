@@ -1,0 +1,209 @@
+{
+  "captured_utc": "2026-10-07T22:29:59.406181+00:00",
+  "cloud_calls": 0,
+  "measurement_evidence": "../session_h_mesures/results.json",
+  "native_executions": 0,
+  "prototype_base_pin": "9c5809919fa4fcaa6303f9265aadbad60a7ddeea",
+  "prototype_bytes_stable_before_after": true,
+  "prototype_state": "copie en chantier, non qualifiee comme livraison",
+  "published_pin": "136e0762898ce8dd40c96dafba6b2d616f3b7b1f",
+  "schema": "mhgp12.audit.t2c_tables_static.v1",
+  "sources": [
+    {
+      "bytes": 13556,
+      "excerpts": [
+        {
+          "first_line": 226,
+          "text": "  MHGP12_TRY(check_catalogue(catalogue, n));\n  auto points = prepare_points(index.cloud(), budget);\n  if (!points.ok()) return points.outcome();\n  const Domain d{index, catalogue, points.value().span()};\n  Resolution out;\n  StageAccess::set_orders(out, kmax, static_cast<Order>(std::min<u32>(kmax, n)));\n  MHGP12_TRY(plan_and_fill(d, out, budget, pool, diag));\n"
+        },
+        {
+          "first_line": 240,
+          "text": "  const Stopwatch tabling;\n  struct Tables {\n    const Catalogue& catalogue;\n    const Resolution& out;\n    std::array<PopulationTable, kMaxPart>& tables;\n    MemoryBudget& budget;\n    static Outcome body(void* raw, u64 begin, u64 end, u32) noexcept {\n"
+        },
+        {
+          "first_line": 264,
+          "text": "  const Stopwatch resolving;\n  MHGP12_TRY(resolve_orders(d, out, tables, team, pool, diag));\n  diag.resolve_ns = resolving.nanoseconds();\n  diag.threads = workers;\n  diag.workspace_bytes = workers * u64{n} * sizeof(SiteIdx);\n  diag.table_bytes = table_bytes;\n  diag.peak_bytes = budget.peak();\n"
+        },
+        {
+          "first_line": 237,
+          "text": "    table_bytes += PopulationTable::capacity_for(population_entries(catalogue, out.order(k).birth_keys(), k)) * 8;\n  const u64 workers = pool.size();\n  MHGP12_TRY(budget.admit(table_bytes + workers * (u64{n} * sizeof(SiteIdx) + sizeof(OrderCounters))));\n  const Stopwatch tabling;\n  struct Tables {\n    const Catalogue& catalogue;\n    const Resolution& out;\n"
+        },
+        {
+          "first_line": 173,
+          "text": "  MHGP12_TRY(plan.counts.allocate(fields, budget));\n  MHGP12_TRY(plan.starts.allocate(fields, budget));\n  MHGP12_TRY(plan.windows.allocate(plan.blocks, budget));\n  MHGP12_TRY(plan.window_starts.allocate(plan.blocks, budget));\n  Buffer<u64> words;\n  Buffer<u32> parent;\n  MHGP12_TRY(words.allocate(workers * kScratchWordsPerWorker, budget));\n"
+        }
+      ],
+      "origin": "published_H",
+      "path": "morsehgp3D_v12/src/tower/stage.cpp",
+      "sha256": "2682f23922ad97464d2e4e40fb30ce0358510128cc0edcdcf695caf832b42721"
+    },
+    {
+      "bytes": 4894,
+      "excerpts": [],
+      "origin": "published_H",
+      "path": "morsehgp3D_v12/src/tower/populations.cpp",
+      "sha256": "f40b4b1b64d99df505f6c9dd280485648360996f6ddf87fdc08090f101e98aed"
+    },
+    {
+      "bytes": 2947,
+      "excerpts": [],
+      "origin": "published_H",
+      "path": "morsehgp3D_v12/src/catalogue/table.cpp",
+      "sha256": "a55ab9946cb8e3f67067f558b8443708a9a6262b3230b723d47cb04f94293fdd"
+    },
+    {
+      "bytes": 4979,
+      "excerpts": [
+        {
+          "first_line": 73,
+          "text": "Result<std::unique_ptr<CensusWorkspace>> CensusWorkspace::make(const GlobalIndex& index, MemoryBudget& budget) noexcept {\n  const u32 n = index.cloud().sites();\n  if (n == 0) return fail(Reason::empty_input);\n  MHGP12_TRY(budget.admit(u64{n} * sizeof(SiteIdx)));\n  std::unique_ptr<CensusWorkspace> made(new (std::nothrow) CensusWorkspace(index));\n  if (!made) return fail(Reason::memory_budget);\n  MHGP12_TRY(made->storage_.allocate(n, budget));\n"
+        }
+      ],
+      "origin": "published_H",
+      "path": "morsehgp3D_v12/src/index/census_workspace.cpp",
+      "sha256": "dc48110ce8f81094f1374de0f09c352181e71379808a40aec0af79998ba515f8"
+    },
+    {
+      "bytes": 14409,
+      "excerpts": [
+        {
+          "first_line": 21,
+          "text": "// Un Buffer n'initialise pas ses elements. Sous MHGP12_POISON chaque octet alloue vaut 0xA5 : une lecture avant\n// ecriture donne alors une valeur reconnaissable au lieu d'un zero accidentel.\n//\n// Concurrence : le compte d'un budget est sur entre fils (atomiques) ; un Buffer, lui, appartient a un fil a la fois.\n// Portee du compte : les Buffer seulement. L'audit de la v10 mesure que son budget ne voyait que 0,26 % du pic\n// resident apres le catalogue et 29 % apres la tour, le reste vivant dans des std::vector. Ce qui rend le compte\n// honnete est la regle de l'architecture (paragraphes 1 et 7.1) : tout tableau dont la taille depend de l'entree est\n"
+        }
+      ],
+      "origin": "published_H",
+      "path": "morsehgp3D_v12/src/core/buffer.hpp",
+      "sha256": "3c7fffc6ed97b6456f666ef849ddd6f4f3a1b3f2427c0fc875b7d5edcd14130b"
+    },
+    {
+      "bytes": 11232,
+      "excerpts": [
+        {
+          "first_line": 178,
+          "text": "  MemoryBudget budget(o.budget);\n  Result<io::InputFiles> input = io::InputFiles{};\n  if (o.xyz != nullptr) input = io::read_u32le(o.xyz, o.ids, budget);\n  else MHGP12_TRY(synthetic(o, budget, input.value()));\n  if (!input.ok()) return input.outcome();\n  auto cloud = prepare_cloud(input.value().x.span(), input.value().y.span(), input.value().z.span(),\n                             input.value().ids.span(), CoordWidth(), budget);\n"
+        },
+        {
+          "first_line": 193,
+          "text": "  for (u64 pass = 0; pass < o.passes; ++pass) {\n    ResolutionDiagnostics diag;\n    const Stopwatch watch;\n    auto r = resolve_tower(index.value(), catalogue.value(), budget, *pool.value(), &diag);\n    stage_json(pass, o, index.value().cloud().sites(), r.ok() ? Outcome{} : r.outcome(), watch.nanoseconds(), diag);\n    if (!r.ok()) return r.outcome();\n    if (pass + 1 < o.passes) continue;\n"
+        }
+      ],
+      "origin": "published_H",
+      "path": "morsehgp3D_v12/bench/tower_probe.cpp",
+      "sha256": "4a98efd16e70e8f05afcbb181bdfbf994387fd708a9161eef9585dca2c166643"
+    },
+    {
+      "bytes": 27713,
+      "excerpts": [],
+      "origin": "published_H",
+      "path": "morsehgp3D_v12/docs/CONTRAT_TOUR.md",
+      "sha256": "262b3bb57f68f9deb3f4b6172419b4e4ba105ffc98ce8f9394e5343de4eb09af"
+    },
+    {
+      "bytes": 8639,
+      "excerpts": [],
+      "origin": "prototype_Gc",
+      "path": "RAPPORT.md",
+      "sha256": "1ebcd4d126cb12cc7de2f50cf7c8be02fcc5e1dd9705c05c700bbfab32000acd"
+    },
+    {
+      "bytes": 17164,
+      "excerpts": [
+        {
+          "first_line": 187,
+          "text": "Outcome resolve_order(const Domain& d, Resolution& out, Order k, Workers& workers, MemoryBudget& budget,\n                      sched::Pool& pool, ResolutionDiagnostics& diag) noexcept {\n  ResolvedOrder& order = StageAccess::order(out, k);\n  PopulationTable table;\n  const Stopwatch tabling;\n  MHGP12_TRY(table.build(d.catalogue, order.birth_keys(), order.birth_ranks(), k, budget, pool));\n  diag.table_ns[k] = tabling.nanoseconds();\n  diag.table_bytes = std::max(diag.table_bytes, table.bytes());\n  const Stopwatch joining;\n  Buffer<u32> joined;\n"
+        },
+        {
+          "first_line": 194,
+          "text": "  diag.table_bytes = std::max(diag.table_bytes, table.bytes());\n  const Stopwatch joining;\n  Buffer<u32> joined;\n  MHGP12_TRY(joined.allocate(order.representatives(), budget));\n  MHGP12_TRY(first_probe_candidates(d, order, table, joined.span(), budget, pool));\n  const std::span<const u32> candidates = joined.span();\n  diag.join_ns[k] = joining.nanoseconds();\n  for (u32 w = 0; w < pool.size(); ++w) workers.counters[w] = OrderCounters{};\n  if constexpr (kProfile)\n    for (u32 w = 0; w < pool.size(); ++w) workers.profiles[w] = SectionCycles{};\n"
+        },
+        {
+          "first_line": 195,
+          "text": "  const Stopwatch joining;\n  Buffer<u32> joined;\n  MHGP12_TRY(joined.allocate(order.representatives(), budget));\n  MHGP12_TRY(first_probe_candidates(d, order, table, joined.span(), budget, pool));\n  const std::span<const u32> candidates = joined.span();\n  diag.join_ns[k] = joining.nanoseconds();\n  for (u32 w = 0; w < pool.size(); ++w) workers.counters[w] = OrderCounters{};\n  if constexpr (kProfile)\n    for (u32 w = 0; w < pool.size(); ++w) workers.profiles[w] = SectionCycles{};\n  const ResolveContext context{d, out, OrderView{k, order.birth_keys(), &table}};\n"
+        },
+        {
+          "first_line": 229,
+          "text": "    diag.order_ns[k] = watch.nanoseconds();\n    diag.tables_ns += diag.table_ns[k];\n  }\n  return {};\n}\n\nResult<Buffer<num::Point>> prepare_points(const Cloud& cloud, MemoryBudget& budget) noexcept {\n  Buffer<num::Point> points;\n  MHGP12_TRY(points.allocate(cloud.sites(), budget));\n  for (u32 s = 0; s < cloud.sites(); ++s) {\n"
+        },
+        {
+          "first_line": 344,
+          "text": "  const Stopwatch resolving;\n  MHGP12_TRY(resolve_orders(d, out, team, budget, pool, diag));\n  diag.resolve_ns = resolving.nanoseconds();\n  diag.threads = workers;\n  diag.profiled = kProfile;\n  diag.workspace_bytes = workers * u64{n} * sizeof(SiteIdx);\n  diag.peak_bytes = budget.peak();\n  return out;\n}\n\n"
+        }
+      ],
+      "origin": "prototype_Gc",
+      "path": "morsehgp3D_v12/src/tower/stage.cpp",
+      "sha256": "ac184501bbdc53121add29a6990018d66df4269b18dcbe266355d4371d1bb273"
+    },
+    {
+      "bytes": 10682,
+      "excerpts": [
+        {
+          "first_line": 192,
+          "text": "u32 PopulationTable::candidate(u64 key) const noexcept {\n  if (records_.empty()) return kNone;\n  const u64 bucket = bucket_of(key);\n  for (u64 pos = directory_[bucket], end = directory_[bucket + 1]; pos < end; ++pos)\n    if (key_at(pos) == key) return static_cast<u32>(pos);\n  return kNone;\n}\n\nvoid PopulationTable::prefetch(u32 candidate) const noexcept {\n  if (candidate == kNone) return;\n"
+        },
+        {
+          "first_line": 176,
+          "text": "std::optional<PopulationHit> PopulationTable::verify(u32 candidate, const Part& f) const noexcept {\n  if (row_equals(candidate, f)) return hit_at(candidate);\n  const u64 key = key_at(candidate), bucket = bucket_of(key), end = entries();\n  for (u64 pos = u64{candidate} + 1; pos < end && bucket_of(key_at(pos)) == bucket; ++pos)  // collision d'empreintes\n    if (key_at(pos) == key && row_equals(pos, f)) return hit_at(pos);\n  return std::nullopt;\n}\n\nstd::optional<PopulationHit> PopulationTable::find(const Part& f, u64 key) const noexcept {\n  if (records_.empty()) return std::nullopt;\n"
+        },
+        {
+          "first_line": 184,
+          "text": "std::optional<PopulationHit> PopulationTable::find(const Part& f, u64 key) const noexcept {\n  if (records_.empty()) return std::nullopt;\n  const u64 bucket = bucket_of(key);\n  for (u64 pos = directory_[bucket], end = directory_[bucket + 1]; pos < end; ++pos)\n    if (key_at(pos) == key && row_equals(pos, f)) return hit_at(pos);\n  return std::nullopt;\n}\n\nu32 PopulationTable::candidate(u64 key) const noexcept {\n  if (records_.empty()) return kNone;\n"
+        }
+      ],
+      "origin": "prototype_Gc",
+      "path": "morsehgp3D_v12/src/tower/populations.cpp",
+      "sha256": "c44fd2e594b7d3e6fd6bc2985e4818aba9d32a301fb8adb6c73d9df05ee85710"
+    },
+    {
+      "bytes": 4269,
+      "excerpts": [
+        {
+          "first_line": 50,
+          "text": "struct Merge {\n  const PopulationTable& table;\n  std::span<const KeyedEntry> sorted;\n  std::span<u32> candidates;\n  static Outcome body(void* raw, u64 begin, u64 end, u32) noexcept {\n    auto& s = *static_cast<Merge*>(raw);\n    const u64 hi = std::min<u64>(s.sorted.size(), end * kMergeGrain);\n    for (u64 t = begin * kMergeGrain; t < hi; ++t) s.candidates[s.sorted[t].index] = s.table.candidate(s.sorted[t].key);\n    return {};\n  }\n"
+        }
+      ],
+      "origin": "prototype_Gc",
+      "path": "morsehgp3D_v12/src/tower/first_probes.cpp",
+      "sha256": "2281a4813aa1220b753f46dc1363fcdb371c8613335bfaed391a049225a0dce8"
+    },
+    {
+      "bytes": 4210,
+      "excerpts": [],
+      "origin": "prototype_Gc",
+      "path": "morsehgp3D_v12/src/tower/radix.cpp",
+      "sha256": "823d10f9d86909b8993ac39a6f9b1c49e2c6484ad8ac1efb31bb52fb19de7158"
+    },
+    {
+      "bytes": 16368,
+      "excerpts": [],
+      "origin": "prototype_Gc",
+      "path": "morsehgp3D_v12/src/tower/internal.hpp",
+      "sha256": "4c04940ea2064c25740d06dc3167661e731db8ddd890dc64ccc7d4d695fd0d74"
+    },
+    {
+      "bytes": 12170,
+      "excerpts": [
+        {
+          "first_line": 147,
+          "text": "  u64 count_ns = 0, fill_ns = 0, tables_ns = 0, resolve_ns = 0;            // tables_ns : somme des index (dans resolve)\n  std::array<u64, 13> order_ns{};  // resolution de l'ordre k (indice k)\n  std::array<u64, 13> table_ns{};  // construction de l'index des naissances de l'ordre k\n  std::array<u64, 13> join_ns{};   // premieres sondes en masse de l'ordre k (G-L5)\n  bool profiled = false;           // construction MHGP12_TOWER_PROFILE\n  std::array<SectionCycles, 13> profile{};  // par ordre, sommes sur les fils\n};\n\n// Resultat de l'etage G : un ResolvedOrder par ordre 1..orders() (orders() = min(K, n)), et la table des cellules\n// de fenetre par boule : window_target(b, k) rend la cible de la cellule (b, k) de l'ordre k (naissance ou cellule),\n"
+        }
+      ],
+      "origin": "prototype_Gc",
+      "path": "morsehgp3D_v12/src/tower/tower.hpp",
+      "sha256": "1f2189c718e2573b16b6d149533f40d9634d7de9a3141d955ec849b7d730be3b"
+    },
+    {
+      "bytes": 14536,
+      "excerpts": [],
+      "origin": "prototype_Gc",
+      "path": "morsehgp3D_v12/src/tower/resolve.cpp",
+      "sha256": "583d9778d5b8f6c3f8972c7f19f62c3b8174d897f996461392bc6103be28740d"
+    },
+    {
+      "bytes": 14437,
+      "excerpts": [],
+      "origin": "prototype_Gc",
+      "path": "morsehgp3D_v12/bench/tower_probe.cpp",
+      "sha256": "66cc91d5437e700371177f4e43ec1f157503ca361abd7eb458686df6795db9cb"
+    }
+  ]
+}

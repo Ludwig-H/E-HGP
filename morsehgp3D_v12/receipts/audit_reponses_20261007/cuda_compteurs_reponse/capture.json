@@ -1,0 +1,51 @@
+{
+  "aggregate_inventory": {
+    "BatchStats_positional_initializers": [],
+    "BatchStats_zero_initializers": [
+      "src/catalogue/device_driver.hpp:101",
+      "src/catalogue/device_leaves.hpp:302",
+      "src/catalogue/device_leaves.hpp:351"
+    ],
+    "ReduceView_positional_initializers": [
+      "src/catalogue/device_driver.hpp:126"
+    ],
+    "search_scope": [
+      "src",
+      "tests",
+      "bench",
+      "microbancs"
+    ]
+  },
+  "buffer_cpp_matches_qualified_sha256": true,
+  "buffer_hpp_equals_main_plus_swap": true,
+  "cleanup_body_sha256": "340cc3cb8abab30d45b7cba821f278988ffe289cb0107451670076139586acb2",
+  "cuda_compilation": false,
+  "double_read_stable": true,
+  "gcp_used": false,
+  "grow_ensure_stage_bodies_equal_to_old_cuda": true,
+  "main_observed": "2d3f91983ef37f2a9f6667a50cda962288f22a5c",
+  "native_execution": false,
+  "old_cuda_sha256": "5e215fe211a2e9f404986debc600cba4938c40dfde65e615e3adeaa78c568ec7",
+  "phase": "exploration_v12_hors_registre",
+  "prototype_local_commit": "66c41ede461dcc7a235a2414079c916841c4fb46",
+  "public_status": "not_claimed",
+  "source_sha256": {
+    "morsehgp3D_v12/bench/catalogue_probe.cpp": "2db6c9ec12ea9b34cb9f697836e7a4cbb2e7338ebda9232f947d85bf4d3a2356",
+    "morsehgp3D_v12/src/catalogue/catalogue.hpp": "59c7370a1e6e3b90cf403e266343fdbfb1ae53244f7240f33298fbeba87bfc64",
+    "morsehgp3D_v12/src/catalogue/device_cuda.cu": "7a8cfe35d67afb5b181d4e2be7a4980db9940fc7efd1d4152dca60198e4dfe62",
+    "morsehgp3D_v12/src/catalogue/device_driver.hpp": "e87f947fd85d9e76447254faf67548a5861502d47b892e79c74749f15c83199d",
+    "morsehgp3D_v12/src/catalogue/device_leaves.hpp": "4131c38c13ee6c2d879ad145c8c62f59551d3c2bf6e032fa79351fd7c7c560fa",
+    "morsehgp3D_v12/src/catalogue/device_pipeline.hpp": "4a752fb766263363b1e6dcd24eed85a797c96e561ee97e725066e73afa12622b",
+    "morsehgp3D_v12/src/catalogue/internal.hpp": "d2bbad4c12a673f7c65f6a4fdc7769bfd9de49645319302c43fe3039f167a57e",
+    "morsehgp3D_v12/src/catalogue/leaves.cpp": "2172f739d7f3a5a49bfe748f4f8c3a38b4d6a4e6b393bbf22bf1b6396367fff8",
+    "morsehgp3D_v12/src/catalogue/transfer_meter.hpp": "cc63d7d9b89c6c81ec92394f93acfb9d9fdc17834a1ad0c47485b3ca4df13b3d",
+    "morsehgp3D_v12/src/core/buffer.cpp": "5c885dbf0e4813f1a8ee653115092536348877e6b93aa5b831d7490fe0d6e756",
+    "morsehgp3D_v12/src/core/buffer.hpp": "8e4d84665e90308ee9572a729731711bb419e3a565fd4dd11b5bd56ab6a92401",
+    "morsehgp3D_v12/tests/catalogue/device_pipeline_test.cpp": "4c0c773d31434fc4f9afc0ce12a093989be058d492397e104b4f0077686914a7",
+    "morsehgp3D_v12/tests/catalogue/device_support.hpp": "3e511ea080e2f4ebec6a9f497a83cd05fd9d66f3fbd37f4b79aafd4ea9ac9489",
+    "morsehgp3D_v12/tests/mutants/catalogue.json": "948e6388025ea4dc15edca79cc291da8a3a302866f441254f49004f04a5197dc",
+    "prototype/RAPPORT.md": "875595b09374ff583d753b149a8dfed7949d5ad3483d9b75d3212426fe1a627f",
+    "prototype/rapport_tete.md": "b01806acd4dd6b1c5bdbab25b6526758ac2ffbf4f416b66e6cc1037fa2a4ae8b"
+  },
+  "status": "prototype_actif_non_publie"
+}

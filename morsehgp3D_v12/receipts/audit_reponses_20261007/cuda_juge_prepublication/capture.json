@@ -1,0 +1,25 @@
+{
+  "gcp_used": false,
+  "main_observed": "136e0762898ce8dd40c96dafba6b2d616f3b7b1f",
+  "native_tests": false,
+  "prototype_local_commit": "3b445b763057adc405141a6650efa14bfd4e276a",
+  "public_status": "not_claimed",
+  "scripts_sha256": {
+    "g4_catalogue_device.py": "8fc661c2dbc9878dfcfe89c705db30d6790a4abc4cfd2d5dc829f6865fece6ce",
+    "g4_catalogue_judge.py": "eb2def75abb1d71bf2847564f0ca3d510ce9fe7c935e86be26f3256060897d32"
+  },
+  "source_sha256": {
+    "morsehgp3D_v12/bench/catalogue_probe.cpp": "2db6c9ec12ea9b34cb9f697836e7a4cbb2e7338ebda9232f947d85bf4d3a2356",
+    "morsehgp3D_v12/bench/g4_catalogue_device.py": "8fc661c2dbc9878dfcfe89c705db30d6790a4abc4cfd2d5dc829f6865fece6ce",
+    "morsehgp3D_v12/bench/g4_catalogue_judge.py": "eb2def75abb1d71bf2847564f0ca3d510ce9fe7c935e86be26f3256060897d32",
+    "morsehgp3D_v12/bench/g4_catalogue_mutants.json": "b265b86ea37864878005d47771f2187e667f5a810b3a04affc9d93647ec18883",
+    "morsehgp3D_v12/src/catalogue/device_cuda.cu": "7a8cfe35d67afb5b181d4e2be7a4980db9940fc7efd1d4152dca60198e4dfe62",
+    "morsehgp3D_v12/src/catalogue/device_leaves.hpp": "4131c38c13ee6c2d879ad145c8c62f59551d3c2bf6e032fa79351fd7c7c560fa",
+    "morsehgp3D_v12/src/catalogue/device_pipeline.hpp": "4a752fb766263363b1e6dcd24eed85a797c96e561ee97e725066e73afa12622b",
+    "morsehgp3D_v12/tests/catalogue/device_pipeline_test.cpp": "4c0c773d31434fc4f9afc0ce12a093989be058d492397e104b4f0077686914a7",
+    "prototype/plan_t1b_g4.json": "f2a7690bdb1eafc9a11ca0966486bbe8041639a392844eab0e636f8dc078f3c8",
+    "prototype/rapport_tete.md": "a6811c5207f8f02df7fc50f67b0f6782db886176eeda544f65139ac2f0061fe6"
+  },
+  "sources_stable_double_read": true,
+  "status": "prototype_non_publie"
+}

@@ -1,0 +1,68 @@
+{
+  "cases": {
+    "baseline": {
+      "refused": [],
+      "rejected": [],
+      "verdict": "adopte"
+    },
+    "budget_exactly_45ms": {
+      "refused": [],
+      "rejected": [],
+      "verdict": "adopte"
+    },
+    "cpu_one_digest_for_ten_passes": {
+      "refused": [],
+      "rejected": [],
+      "verdict": "adopte"
+    },
+    "duplicated_process_ids": {
+      "refused": [],
+      "rejected": [],
+      "verdict": "adopte"
+    },
+    "first_pass_rewrite_loss_discarded": {
+      "changed_pass": 0,
+      "physical_passes_kept": 1,
+      "summaries_identical": true
+    },
+    "gpu_busy_after": {
+      "refused": [],
+      "rejected": [],
+      "verdict": "adopte"
+    },
+    "missing_all_stages": {
+      "refused": [],
+      "rejected": [],
+      "verdict": "adopte"
+    },
+    "missing_identity_counts_ledger": {
+      "refused": [],
+      "rejected": [],
+      "verdict": "adopte"
+    },
+    "mutant_identity_relabelled_timeout": {
+      "refused": [],
+      "rejected": [],
+      "verdict": "adopte"
+    },
+    "negative_times": {
+      "refused": [],
+      "rejected": [],
+      "verdict": "adopte"
+    },
+    "one_process_median_45ms_plus_1ns": {
+      "refused": [],
+      "rejected": [
+        "budget de l etage C non tenu a K5"
+      ],
+      "verdict": "rejete"
+    }
+  },
+  "engine_run": false,
+  "gpu_run": false,
+  "scope": "JSON inventés ; fonctions du juge et du pilote capturés",
+  "scripts_sha256": {
+    "g4_catalogue_device.py": "8fc661c2dbc9878dfcfe89c705db30d6790a4abc4cfd2d5dc829f6865fece6ce",
+    "g4_catalogue_judge.py": "eb2def75abb1d71bf2847564f0ca3d510ce9fe7c935e86be26f3256060897d32"
+  }
+}
