@@ -209,12 +209,13 @@ les deux. Une tranche qui livre un module ajoute sa ligne ici et dans `cmake/mod
 | `io` | lecture `u32le`, SHA-256, écrivains, dossier transactionnel ; port v11 | `core`, `cloud` |
 | `index` | arbre radix de Morton, bornes et census exacts sur sites ; port v11 | `num`, `cloud` |
 | `catalogue` | parcours des boîtes en largeur (source de `MES-M5`), feuille J3 en source unique (source de `MES-M2`) jouée en flux sur le warp simulé, repli exact plus large, fin d'étage, table $S^{*}$ → boule, export `MHGP12DP` ; réécrit (§ 4.1), voie CPU de référence | `num`, `sched`, `cloud`, `io` |
+| `tower` | étage G (résolution) : cellules de fenêtre (naissance, jonction, inerte) et leurs traces strictes, table de populations (`LEM-POP`), résolution des représentants (`LEM-T1`, certificat exact, census gardé, arrêt `LEM-T3`), cibles de 4 octets ; réécrit (§ 4.2), voie CPU de référence | `core`, `num`, `sched`, `cloud`, `index`, `catalogue` |
 
 Modules prévus, ajoutés à la table ci-dessus par leur tranche :
 
 | Module prévu | Rôle | Origine |
 | --- | --- | --- |
-| `tower` | résolution, noyau, contraction, verticales | réécrit (§ 4.2, § 4.3) |
+| `tower` (suite) | noyau, contraction, verticales (étages T, M, V) | réécrit (§ 4.3) |
 | `registry` | registre d'événements | nouveau |
 | `views` | `full`, squelette, `points`, `condense`, `plat`, exports | port des règles v11, nouvelle structure |
 | `api`, `cli` | `Session`, un exécutable à sortie obligatoire | port v11 |
@@ -243,5 +244,7 @@ F1–F6 (§ 4), construction et portes (§ 5), contrats du budget mémoire, de l
   ([`CONTRAT_NUMERIQUE.md`](CONTRAT_NUMERIQUE.md)) ;
 - la table des modules est celle du § 5 ;
 - variables d'environnement : `MHGP12_DATA_DIR` (portes `lidar`), `MHGP12_V10_FROZEN_DIR` (portes `diff_v10` de
-  l'oracle), `MHGP12_V11_CATALOGUE_DIR` (vidages `cat.bin` de la v11 gelée par cas, portes `diff_v11` du catalogue) ;
+  l'oracle), `MHGP12_V11_CATALOGUE_DIR` (vidages `cat.bin` de la v11 gelée par cas, portes `diff_v11` du catalogue),
+  `MHGP12_V11_TOWER_DIR` (vidages `cat.bin`, `ordre_<k>.bin`, `foret_<k>.bin` de la v11 gelée par cas, portes
+  `diff_v11` de la tour) ;
 - l'option CUDA de la v11 n'est pas reprise : elle reviendra avec le catalogue.

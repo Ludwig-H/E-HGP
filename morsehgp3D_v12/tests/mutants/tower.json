@@ -1,0 +1,69 @@
+{
+  "module": "tower",
+  "plancher": 7,
+  "mutants": [
+    {
+      "id": "t1_sans_s_dans_f",
+      "fichier": "src/tower/resolve.cpp",
+      "cherche": "if (support.size() < 2 || support.size() > 4 || !sorted_subset(support, f)) return std::nullopt;",
+      "remplace": "if (support.size() < 2 || support.size() > 4) return std::nullopt;",
+      "porte": "mhgp12_tower_unit_witness_t1_square",
+      "note": "LEM-T1 sans l'inclusion S dans F (CST-0101, WIT-T1-CARRE) : la proposition S*(cercle) = AC certifie le cercle pour F = AB, alors que la plus petite boule de AB est celle du cote"
+    },
+    {
+      "id": "arret_sous_la_fenetre",
+      "fichier": "src/tower/resolve.cpp",
+      "cherche": "if (u32{k} + 2 <= data.p + data.qmin) {  // sous la fenetre : pas inerte",
+      "remplace": "if (u32{k} + 2 <= data.p + data.qmin && false) {  // sous la fenetre : pas inerte",
+      "porte": "mhgp12_tower_unit_inert_below_window",
+      "note": "arret sur une boule du catalogue SOUS sa fenetre (k <= p + q_min - 2), qui n'est pas une cellule de l'ordre : le triangle aigu a deux interieurs a l'ordre 3 n'a pas de cellule (fenetre [4, 4])"
+    },
+    {
+      "id": "decroissance_apres_le_saut",
+      "fichier": "src/tower/resolve.cpp",
+      "cherche": "      MHGP12_TRY(control_level(cat, prev, ball.sphere().level(), n, k));  // AVANT toute sortie par saut\n",
+      "remplace": "",
+      "aussi": [
+        {
+          "fichier": "src/tower/resolve.cpp",
+          "cherche": "      if (!step.catalogue) {",
+          "remplace": "      MHGP12_TRY(control_level(cat, prev, ball.sphere().level(), n, k));\n      if (!step.catalogue) {"
+        }
+      ],
+      "porte": "mhgp12_tower_unit_fact_saturated",
+      "note": "decroissance controlee apres la sortie par saut seulement (contre-lecture Codex du paragraphe 4.1) : la sortie par census sature echappe au controle ; le compte des controles (un par plus petite boule et par succes de sonde) le voit"
+    },
+    {
+      "id": "cible_cellule_prise_pour_naissance",
+      "fichier": "src/tower/resolve.cpp",
+      "cherche": "    return target;\n",
+      "remplace": "    return target & kTargetIndexMask;\n",
+      "porte": "mhgp12_tower_unit_witness_t1_square",
+      "note": "cible << cellule >> rendue sans son bit de genre : lue comme la naissance de meme indice (paragraphe 7) ; BD doit s'arreter sur la cellule (cercle, 2)"
+    },
+    {
+      "id": "census_sans_seuil",
+      "fichier": "src/tower/resolve.cpp",
+      "cherche": "MHGP12_TRY(workspace.query(d.index, ball, k, &step, &CensusStep::consume));",
+      "remplace": "MHGP12_TRY(workspace.query(d.index, ball, 1u << 30, &step, &CensusStep::consume));",
+      "porte": "mhgp12_tower_unit_fact_saturated",
+      "note": "census sans le seuil k : une sphere de p >= k n'est plus reconnue saturee (le saut exige exactement les k plus petits SiteIdx de I)"
+    },
+    {
+      "id": "table_s_etoile_muette",
+      "fichier": "src/tower/resolve.cpp",
+      "cherche": "if (const auto b = cat.find_support(std::span<const SiteIdx>(key.data(), q.value()))) {",
+      "remplace": "if (const auto b = std::optional<BallIdx>{}; b) {",
+      "porte": "mhgp12_tower_unit_witness_t1_square",
+      "note": "S* global d'un census complet jamais cherche dans la table : la sphere du carre (S* = AC), recensee pour F = BD a l'ordre 2, passe pour absente du catalogue alors que k > p + q - 2 : refus catalogue_missing_ball ((H2) lue comme violee)"
+    },
+    {
+      "id": "controle_croise_decale",
+      "fichier": "src/tower/resolve.cpp",
+      "cherche": "if (data.p != inner.size() || data.m != shell.size()",
+      "remplace": "if (data.p + 1 != inner.size() || data.m != shell.size()",
+      "porte": "mhgp12_tower_unit_witness_t1_square",
+      "note": "controle croise du census complet et de la boule du catalogue de meme S* fausse d'un site : refus census_mismatch sur le cercle du carre (F = BD, ordre 2)"
+    }
+  ]
+}

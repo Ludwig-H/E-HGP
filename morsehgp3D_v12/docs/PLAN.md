@@ -118,6 +118,17 @@ date terminale, contraction d'hyperarête entière).
 **Sortie** : empreintes FULL identiques à celles de la v11 à K5 et K10 (`MES-M0`) ; budget de la tour atteint ou écart
 publié.
 
+**État de T2 (7 octobre 2026, soir)** : **étage G livré** dans `src/tower/` (résolution du § 4.1 du contrat, politique
+`v12_indices` ; [rapport](../receipts/developpement_20261007/tour_G_RAPPORT.md),
+[interface](../receipts/developpement_20261007/tour_G_INTERFACE.md)) : oracle borné (21 225 cibles égales à
+`resolve_v12` sur 342 nuages), différentiel de la v11 sur ng00–02 à K5 (graine identique pour 100 % des
+représentants), déterminisme 1 contre 8 fils aux trois tailles d'intérêt et aux profils 21, 24 et 32, 7 mutants tués.
+Étages T, M, V, R et export `MHGP11FUL1` en cours (second agent ; chaîne complète déjà conforme à `MES-M0` sémantique
+sur les neuf cas en local). Suites déclarées (T2-c) : classification des cellules et table de populations
+reconstruites à chaque appel (37 ms à K5, 385 ms à K10 à 3 fils) à rendre résidentes ou parallèles ; coût par unité
+de travail au-dessus de la réplique de `MES-M7` (2,67 s contre 2,34 s à un fil sur ng00 K5), sonde de table d'abord ;
+leviers `G-L4` à `G-L7` non implantés ; aucun temps G4.
+
 ## 4. T3 — registre et vues
 
 **Entrée** : T2.

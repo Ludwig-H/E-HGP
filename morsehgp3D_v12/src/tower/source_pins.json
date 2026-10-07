@@ -1,0 +1,82 @@
+{
+  "note": "Ports explicites de l'etage G du module tower (tranche T2), empreintes SHA-256 des sources lues au HEAD 671072339 (microbancs, catalogue et oracle de la v12) et au moteur gele ac081a06f de la v11 ; chaque port est requalifie par les portes de tests/tower (temoins, oracle borne, differentiel v11 a K5 sur ng00-02, mutants), aucune qualification n'est heritee.",
+  "sources": [
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m3_m4_tour/mes_m3/welzl_proposal.hpp",
+      "commit": "671072339",
+      "sha256": "3f7a0f113b5fe8a28b878c05be0c933e3e3eb28023e686e3fb0812900d863d62",
+      "port": ["src/tower/proposal.hpp"],
+      "changes": "namespace tower_detail ; through decoupe en through3 et through4 ; bornes explicites dans small et run_support (meme resultat, sans faux positif -Warray-bounds de GCC)"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m3_m4_tour/mes_m3/meb_cert.hpp",
+      "commit": "671072339",
+      "sha256": "2dc776d9297a6de1b309674676ff84b7ecbd7acf190134f118ee3505945db911",
+      "port": ["src/tower/resolve.cpp", "src/tower/supports.cpp"],
+      "changes": "LEM-T1 (lem_t1 : S dans F, table S* -> boule du Catalogue, F dans P_b) ; certificat exact par num::CertifiedBall::certify (signes barycentriques) puis cotes des sites de F ; canonisation par POSITIONS (CST-0113) au lieu des SiteIdx ; repli exact ecrit dans le module (exact_support) au lieu de bounded_meb de la v11 liee"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/meb.cpp",
+      "commit": "ac081a06f",
+      "sha256": "a7b828ec6922554e6142fb38b9d7a359db22b59beee5e7250525b077cedd3d00",
+      "port": ["src/tower/supports.cpp"],
+      "changes": "exact_support : diametre (premiere paire de distance maximale), puis triangles strictement aigus, puis tetraedres strictement contenants, premier support contenant F ; sans grand livre de presentations"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/cells.cpp",
+      "commit": "ac081a06f",
+      "sha256": "e73b3d34b8145463aa4b4841add96fba4e9dc1094ead556508d2d79b399d89f0",
+      "port": ["src/tower/cells.cpp", "src/tower/internal.hpp", "src/tower/cells_stage.cpp"],
+      "changes": "traces strictes en masques sur U, ordre lexicographique conserve (voie reguliere analytique identique) ; separabilite par les supports de la sphere contenus dans U au lieu de bounded_meb par partie ; morceaux (jonction ou cellule inerte) ajoutes ; plafonds declares kMaxCellCombinations et kMaxShellWitnesses (cell_capacity)"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/cells_classify.cpp",
+      "commit": "ac081a06f",
+      "sha256": "e0fd9b4e075c3250504c94df542a13041fa4b5ede75318e5bf10749eb9ef25a5",
+      "port": ["src/tower/cells.cpp"],
+      "changes": "classification naissance / traces strictes fondue dans l'enumeration des traces (une seule source)"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/population_lookup.cpp",
+      "commit": "ac081a06f",
+      "sha256": "ccb6c4a3c902410f4e9550e4ceb073b3cc0d74257ea13fac31602308afa22197",
+      "port": ["src/tower/populations.cpp"],
+      "changes": "une table par ordre, valeur = indice de naissance de l'ordre ; cases a etiquette verifiees contre la CSR du catalogue (aucune ligne copiee) ; construction sequentielle par ordre (disposition deterministe) ; meme fonction de hachage"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/descent.cpp",
+      "commit": "ac081a06f",
+      "sha256": "bfbcca87c8beeddf9591510c64973de24b805e06098875b7ffe03ab6525b2745",
+      "port": ["src/tower/resolve.cpp"],
+      "changes": "regle de la v12 (CONTRAT_TOUR.md, paragraphe 4.1) : arret sur la premiere cellule de fenetre (LEM-T3) au lieu de la naissance ; pas inerte sous la fenetre ; saut aux k plus petits SiteIdx de I conserve ; decroissance controlee des le rang de la jonction"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/locate.cpp",
+      "commit": "ac081a06f",
+      "sha256": "50fc8119fdecf473891c250e4b2c6b30d9e0c84df20d2b5c47dd166e3f57114a",
+      "port": ["src/tower/resolve.cpp"],
+      "changes": "census GARDE d'une boule certifiee (CensusWorkspace::query, seuil k, une passe) ; S* global puis table, controle croise census_mismatch ; boule de fenetre absente : catalogue_missing_ball"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/canonical.cpp",
+      "commit": "ac081a06f",
+      "sha256": "d2c0c371c62dc003f447d0f13ab55a2ba87c18fb4e307471dd1fa8cbdfdeba97",
+      "port": ["src/tower/supports.cpp"],
+      "changes": "support canonique par positions (convention du catalogue de la v12, src/catalogue/leaf_census.hpp, canonical) ; coquille d'au plus 64 sites (shell_capacity)"
+    },
+    {
+      "path": "morsehgp3D_v12/src/catalogue/leaf_census.hpp",
+      "commit": "671072339",
+      "sha256": "b031a7a161dca9d3ff22e89c48d9ec2a9a029bc34c5a89952ac3d9e487b00277",
+      "port": ["src/tower/supports.cpp"],
+      "changes": "convention seule (rangement par positions, enumeration paires, triangles, tetraedres) ; predicats de num sur une Sphere certifiee"
+    },
+    {
+      "path": "morsehgp3D_v12/reference/hgp12_ref/constructive.py",
+      "commit": "671072339",
+      "sha256": "14050f931660901282e74844f500f030ac11dab4dda867ead7d030d7b9a2fc0a",
+      "port": ["src/tower/resolve.cpp"],
+      "changes": "regle de resolve_v12 et _forest_v12 (politique v12_indices) ; juge de la porte mhgp12_tower_oracle"
+    }
+  ]
+}

@@ -56,3 +56,12 @@ MHGP12_REASON(wide_leaf, unsupported_degeneracy, catalogue)
 MHGP12_REASON(shell_capacity, unsupported_degeneracy, catalogue)
 MHGP12_REASON(catalogue_invariant, invariant_violated, catalogue)
 MHGP12_REASON(catalogue_counter_overflow, resource_exhausted, catalogue)
+// tour (tranche T2, etage G) : catalogue incomplet ((H2) violee : boule de fenetre absente de Cat_K), census en
+// desaccord avec la boule du catalogue de meme S* (controle croise), capacite d'un ordre (2^31 - 1 naissances ou
+// cellules, cibles de 4 octets ; 2^32 - 1 representants), invariant de la tour (decroissance stricte, places, comptes),
+// cellule de coquille etendue au-dela des plafonds declares d'enumeration (kMaxCellCombinations, kMaxShellWitnesses)
+MHGP12_REASON(catalogue_missing_ball, invariant_violated, tower)
+MHGP12_REASON(census_mismatch, invariant_violated, tower)
+MHGP12_REASON(tower_capacity, resource_exhausted, tower)
+MHGP12_REASON(tower_invariant, invariant_violated, tower)
+MHGP12_REASON(cell_capacity, unsupported_degeneracy, tower)
