@@ -261,7 +261,11 @@ class Catalogue(object):
         if not 1 <= bits <= 32 or kmax < 1 or order != 0:
             raise Refus('%s : en-tete hors domaine (bits %d, K %d, ordre %d)' % (role, bits, kmax, order))
         self.bits, self.kmax = bits, kmax
-        self.frame = data[40:64].rstrip(b'\0').decode('ascii', 'replace')
+        name = data[40:64].rstrip(b'\0')
+        if any(not 0x20 <= byte <= 0x7e for byte in name):
+            # CST-0227 : un decodage avec remplacement confondait deux identites distinctes (audit+FF, audit+FE)
+            raise Refus('%s : nom de trame hors ASCII imprimable (%r)' % (role, name))
+        self.frame = name.decode('ascii')
         sections, at = {}, 64
         for _ in range(nsec):
             if at + 24 > len(data):

@@ -141,6 +141,43 @@ def fact_complete_census_in_catalogue(package):
     return [] if got == want else ['census complet du catalogue : %r au lieu de %r' % (got, want)]
 
 
+def fact_lemma_needs_two_sites(package):
+    """Fait grave de CST-0229 (auditeur Codex, 7 octobre 2026) : LEM-HORS-CAT exige k >= 2 (rayon positif). Le
+    catalogue Cat_K du moteur ne contient que des boules positives (q_min >= 2) ; trois sites (0,0,0), (2,0,0), (4,0,0),
+    K = 3 : la boule minimale du singleton {(0,0,0)} (k = 1) est le site lui-meme, de rayon nul, hors de Cat_3, avec
+    p = 0 < K - 2 = 1. L'oracle range les boules de rayon nul dans son catalogue interne : on filtre ici les boules
+    positives, comme T1. Rend la liste des ecarts."""
+    ref = package.Reference([(0, 0, 0), (2, 0, 0), (4, 0, 0)], 3)
+    first = ref.internal[0]
+    _anchor, _ctr, key = ref._meb((first,))
+    ball = ref._by_key.get(key)
+    positive = [b for b in ref.balls if b.level > 0]
+    got = (str(key[1]), ball is not None and ball.p, any((b.center, b.level) == key for b in positive), ref.kmax - 2)
+    want = ('0', 0, False, 1)
+    return [] if got == want else ['LEM-HORS-CAT a k = 1 : %r au lieu de %r' % (got, want)]
+
+
+def fact_saturated_in_catalogue(package):
+    """Fait grave du commentaire faux du contrat T2 (contre-lecture Codex, 7 octobre 2026) : un census sature ne
+    prouve pas que la sphere est hors du catalogue. Carre (0,0,0), (4,0,0), (4,4,0), (0,4,0), interieurs (2,2,0) et
+    (2,1,0), K = 5 ; F = la diagonale {(4,0,0), (0,4,0)}, k = 2 : boule de niveau 8, p = 2, q_min = 2, admise a Cat_5,
+    mais son S* est l'autre diagonale {(0,0,0), (4,4,0)} (premiere en Morton comme en positions) : la sonde par le
+    support local de F echoue et le census, de seuil k = 2, sature. Rend la liste des ecarts."""
+    pts = [(0, 0, 0), (4, 0, 0), (4, 4, 0), (0, 4, 0), (2, 2, 0), (2, 1, 0)]
+    ref = package.Reference(pts, 5)
+    ident = dict((ref.input[i], ref.internal[i]) for i in range(len(pts)))
+    part = tuple(sorted((ident[(4, 0, 0)], ident[(0, 4, 0)])))
+    _anchor, _ctr, key = ref._meb(part)
+    ball = ref._by_key.get(key)
+    if ball is None:
+        return ['census sature du catalogue : la sphere de la diagonale est absente du catalogue de reference']
+    support = sorted(ref.sites[x] for x in ball.support)
+    local = sorted(ref.sites[ref.site_of[x]] for x in part)
+    got = (str(ball.level), ball.p, ball.qmin, ball.p + ball.qmin <= ref.kmax + 1, support, support == local, ball.p >= 2)
+    want = ('8', 2, 2, True, [(0, 0, 0), (4, 4, 0)], False, True)
+    return [] if got == want else ['census sature du catalogue : %r au lieu de %r' % (got, want)]
+
+
 def same(a, b):
     return (a.nodes == b.nodes and a.lower == b.lower and a.core == b.core and a.cover == b.cover and
             a.cuts == b.cuts)
@@ -190,7 +227,8 @@ def main(argv):
     # l'invariant d'un paquet mute est la classe de SA copie de model.py
     invariants = (InvariantError, importlib.import_module(package.__name__ + '.model').InvariantError)
     try:
-        facts = fact_neighbour_fallback(package) + fact_complete_census_in_catalogue(package)
+        facts = (fact_neighbour_fallback(package) + fact_complete_census_in_catalogue(package) +
+                 fact_lemma_needs_two_sites(package) + fact_saturated_in_catalogue(package))
         gaps, totals, orders = run(package)
     except invariants as error:
         if inject is not None:
@@ -223,7 +261,7 @@ def main(argv):
             print(problem, file=sys.stderr)
         return FLOOR
     common = totals[POLICIES[0]]
-    print('resolution_v12_ok nuages=%d ordres=%d politiques=%d cibles=%d cellules=%d inertes=%d faits=2'
+    print('resolution_v12_ok nuages=%d ordres=%d politiques=%d cibles=%d cellules=%d inertes=%d faits=4'
           % (len(families.fast_suite()), orders, len(POLICIES), common['targets'], common['cells'],
              common['inert_cells']))
     return OK

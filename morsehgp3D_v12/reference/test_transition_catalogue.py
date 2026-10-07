@@ -166,6 +166,24 @@ def mutated_reader(name, directory):
     return load_reader(path, 'transition_catalogue_mutant_' + name)
 
 
+def check_frame_identity(reader, fixture, work):
+    """CST-0227 : l'identite de trame est comparee octet pour octet en ASCII imprimable. Deux vidages conformes du cas
+    'transl', dont seuls les noms de trame changent : 'audit' + 0xFF contre 'audit' + 0xFE (autrefois egaux apres
+    decodage avec remplacement, code 0) et deux noms ASCII distincts doivent rendre le refus (code 2)."""
+    case = [c for c in fixture['cases'] if c['name'] == 'transl'][0]
+    for left, right in ((b'audit\xff', b'audit\xfe'), (b'audita', b'auditb')):
+        directory = os.path.join(work, 'trame_%s' % left[-1])
+        os.makedirs(directory)
+        paths = temoins.case_files(fixture, case, directory)
+        for path, name in zip(paths, (left, right)):
+            with open(path, 'r+b') as handle:
+                handle.seek(40)
+                handle.write(name.ljust(24, b'\0'))
+        code, _report, message = judge_in_process(reader, paths, case)
+        if code != 2:
+            raise Violation('trames %r et %r : code %d au lieu du refus 2 (%s)' % (left, right, code, message))
+
+
 def judge_in_process(reader, paths, case):
     """(code, rapport, message) du lecteur charge, comme sa ligne de commande les rendrait."""
     try:
@@ -259,6 +277,7 @@ def run_suite(fixture):
                 wrong = expectation(case, cli_code, cli_first, categories_of(cli_first), err)
                 if wrong is not None:
                     raise Violation('cas %s par la ligne de commande : %s' % (case['name'], wrong))
+        check_frame_identity(reader, fixture, work)
     finally:
         shutil.rmtree(work, ignore_errors=True)
     print('transition_temoins_ok temoins=%d cas=%d conformes=%d desaccords=%d refus=%d boules=%d sstar_changes=%d'

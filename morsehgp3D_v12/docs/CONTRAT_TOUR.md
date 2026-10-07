@@ -68,14 +68,15 @@ resolve1(k, F) -> cible                 # F : k sites tries, representant d'une 
     S <- proposition(F)                                                      # flottant, ne decide rien
     si S ⊆ F, b <- supports.trouver(S) existe et F ⊆ P_b :                   # LEM-T1
       (p, q, m, I, U) <- catalogue(b)
+      exiger rang(b) < rang precedent (ou niveau exact precedent) ; precedent <- b
     sinon :
       boule <- certificat exact de S sur F, sinon repli exact ; S' <- support canonique parmi F ∩ sphere
+      exiger niveau(boule) < niveau precedent ; precedent <- boule           # AVANT toute sortie par saut
       si b <- supports.trouver(S') existe et F ⊆ P_b : (p, q, m, I, U) <- catalogue(b)
       sinon :
         R <- census_garde(boule, k)
-        si R sature : F <- saut(boule, k) ; continuer                          # p >= k, sphere hors de Cat_K
+        si R sature : F <- saut(boule, k) ; continuer                          # p >= k ; la sphere peut etre au catalogue
         (I, U) <- R ; b <- supports.trouver(S*(U)) ; si b existe : exiger (p, q, m) = catalogue(b), sinon census_mismatch
-    exiger rang(b) < rang de la boule precedente (catalogue) ou niveau exact strictement plus petit
     si p >= k : F <- saut(I, k) ; continuer
     si k <= p + q - 2 : F <- I ∪ (les k - p plus petits SiteIdx de U) ; continuer   # boule inerte, sous la fenetre
     si b absent : refus catalogue_missing_ball                                     # (H2) violee
@@ -86,7 +87,10 @@ resolve1(k, F) -> cible                 # F : k sites tries, representant d'une 
 **Pourquoi c'est juste.** Chaque pas est un pas valide du théorème D (L02) : une $k$-partie de $I$ quand $p\geq k$ ;
 $I\cup A$ avec $A$ séparable sinon, toute partie de $U$ de moins de $q_{\min}$ sites l'étant (lemme 3 de L02). Le niveau
 décroît strictement à chaque pas, contrôlé par les rangs entre deux boules du catalogue et par le niveau exact sinon
-(il est matérialisé pour le census) : la boucle termine sans plafond arbitraire. L'arrêt sur une cellule $(b',k)$ non
+(il est matérialisé pour le census) ; le contrôle et la mise à jour de la boule précédente précèdent **toute** sortie
+par saut, census saturé compris (contre-lecture Codex) : la boucle termine sans plafond arbitraire. Un census saturé
+prouve seulement $p\geq k$ : la sphère peut être au catalogue quand son $S^{*}$ n'est pas dans $F$ (fait gravé
+`fact_saturated_in_catalogue` : carré, deux sites intérieurs, $K=5$, $F$ la diagonale qui n'est pas $S^{*}$). L'arrêt sur une cellule $(b',k)$ non
 naissance rend une cible dont la valeur est celle de la jonction de $b'$, de rang strictement inférieur (`LEM-T3`).
 
 **Lecture des cibles.** Le noyau traite les jonctions par rang croissant ; une cible « cellule $(b',k)$ » se lit comme
@@ -98,12 +102,14 @@ d'une cellule ne vaut qu'à partir du niveau de $b'$ ; **aucune** garde $\beta(F
 
 ### 4.2 Un fait qui dimensionne le census
 
-**`LEM-HORS-CAT`.** Si la plus petite boule $b$ d'une $k$-partie ($k\leq K$) n'est pas dans $\mathrm{Cat}_K$, alors
-$p\geq K-2$ ; si de plus $p<k$, alors $k\geq K-1$, et $p=K-2$ exige $q_{\min}=4$. *Preuve.* Dans
+**`LEM-HORS-CAT`.** Si la plus petite boule $b$ d'une $k$-partie de sites distincts, $2\leq k\leq K$, n'est pas dans
+$\mathrm{Cat}_K$, alors $p\geq K-2$ ; si de plus $p<k$, alors $k\geq K-1$, et $p=K-2$ exige $q_{\min}=4$. *Preuve.* Dans
 $\mathbb{R}^{3}$, le centre d'une boule critique est dans l'enveloppe convexe d'au plus quatre sites de sa coquille
 (Carathéodory), donc $q_{\min}\leq 4$ ; hors de $\mathrm{Cat}_K$ signifie $p+q_{\min}\geq K+2$, d'où $p\geq K-2$, et
 $p<k\leq K$ donne $k\geq p+1\geq K-1$. $\square$ Aux ordres $k\leq K-3$, toute sphère hors du catalogue est donc
-saturée.
+saturée. **Il faut $k\geq 2$** (constat `CST-0229` de Codex) : $\mathrm{Cat}_K$ ne contient que des boules positives, et la
+boule d'un singleton est le site, de rayon nul, hors du catalogue avec $p=0$ (trois sites alignés, $K=3$ : $p=0<K-2$ ;
+fait gravé `fact_lemma_needs_two_sites`) ; le résolveur traite $k=1$ à part.
 
 **Portée** (correction du 7 octobre, données de `MES-G1`) : le lemme ne parle que des sphères **hors** du catalogue. Une
 sphère **du** catalogue dont $S^{*}$ n'est pas dans la partie (coquille à plusieurs supports minimaux, partie qui en
@@ -170,7 +176,8 @@ nombre de fils (§ 8).
 
 Tout le [contrat numérique](CONTRAT_NUMERIQUE.md) s'applique. Certificat de plus petite boule dans le repère local de
 la partie (supports mesurés à $s\leq 15$) ; census gardé au domaine $t=s+2$ du certificat ; tests des candidats de
-`G-L3` au budget mixte de la boule ($6s+11$) ; décroissance par rangs entre boules du catalogue, par niveaux exacts
+`G-L3` : **d'abord le rejet sans arithmétique de `NUM-GARDE`** (un voisin ou un site de fenêtre peut sortir du pavé de la
+boule certifiée : il est extérieur, jamais évalué), puis le prédicat mixte au budget de la boule ($6s+11$) ; décroissance par rangs entre boules du catalogue, par niveaux exacts
 (jusqu'à 512 bits) sinon ; centres des naissances comparés en deux temps. Aucune décision en flottant : la proposition
 de plus petite boule et les clés de tri ne décident rien.
 
@@ -178,6 +185,10 @@ de plus petite boule et les clés de tri ne décident rien.
 
 - **Domaines** : au plus $2^{31}-1$ naissances par ordre (opérandes à 31 bits utiles, `CST-0212`), refus avant
   allocation ; représentants, événements et nœuds en `u32` avec refus à la vraie limite ; décalages et compteurs en `u64`.
+- **Cibles de 4 octets** : bit 31 = genre (0 naissance, 1 cellule), 31 bits d'indice dans l'espace de son genre (nœud de
+  naissance de l'ordre, ou indice de cellule de fenêtre de l'ordre) ; au plus $2^{31}-1$ naissances **et** au plus
+  $2^{31}-1$ cellules par ordre, refus `tower_capacity` avant allocation ; `0xFFFFFFFF` réservé (aucune cible) et
+  exclu des deux domaines.
 - **Mémoire** : cibles (4 octets par représentant : 3,4 millions sur ng00 à K5, 17,4 millions à K10 dans la v10),
   événements (20 octets), historique d'attache, table de populations compacte (cases à étiquette vérifiées contre la
   CSR). Comptage puis réservation, publication transactionnelle ; jamais un préfixe publié.
@@ -187,17 +198,26 @@ de plus petite boule et les clés de tri ne décident rien.
 
 ## 8. Compteurs (contrat)
 
-**Logiques** : indépendants de l'ordre de visite, du découpage, du nombre de fils et de la voie (hôte ou appareil) ;
-ils entrent dans l'empreinte du grand livre. Par ordre : représentants ; arrêts à la première sonde ; sondes après des
-pas ; plus petites boules par route (`t1`, certificat puis table, certificat puis census, repli) ; censuses saturés et
-complets, sites examinés (somme, maximum) ; sauts (catalogue, census, candidats de `G-L3`) ; pas inertes ; arrêts sur
-cellule ; naissances atteintes ; histogramme des longueurs de chaîne. Noyau : événements, attaches, profondeur
-d'attache maximale (au plus $\log_2$ du nombre de naissances, `LEM-T5`). Contraction : classes, histogramme des arités.
-Verticales : naissances par `LEM-T6`, fusions par `LEM-T5`, profondeurs des requêtes d'ancêtre.
+Trois classes (correction du 7 octobre, constat `CST-0228` de Codex : la profondeur d'attache et les sites examinés par
+un census arrêté au $k$-ième témoin dépendent de l'ordre de visite à objet égal).
+
+**De l'objet** : fonctions de la tour seule, indépendantes de la politique, de l'ordre de visite, du découpage, du
+nombre de fils et de la voie ; elles entrent dans l'empreinte du grand livre. Par ordre : naissances, fusions, histogramme
+des arités, verticales, représentants (traces strictes des cellules de fenêtre), cellules inertes.
+
+**Du travail** : fonctions de la politique déclarée (règle de saut, leviers adoptés) **et** de l'ordre canonique fixé
+(jonctions par rang puis indice de cellule, sondes et parcours de l'index dans l'ordre préfixe) ; identiques à 1 et à
+48 fils et entre l'hôte et l'appareil pour une même politique (porte W1 contre W48), mais **hors** de l'empreinte de
+l'objet, publiées avec le nom de la politique. Par ordre : arrêts à la première sonde ; sondes après des pas ; plus
+petites boules par route (`t1`, certificat puis table, certificat puis census, repli) ; censuses saturés et complets,
+sites examinés (somme, maximum) ; sauts (catalogue, census, candidats de `G-L3`) ; pas inertes ; arrêts sur cellule ;
+naissances atteintes ; histogramme des longueurs de chaîne. Noyau : événements, attaches, profondeur d'attache maximale
+(au plus $\log_2$ du nombre de naissances, `LEM-T5`). Contraction : classes. Verticales : naissances par `LEM-T6`,
+fusions par `LEM-T5`, profondeurs des requêtes d'ancêtre.
 
 **Physiques** : temps par étage, fils, tranches, attentes du propriétaire, préchargements, passes sur l'appareil,
-tentatives et replis ; publiés à part, jamais dans une empreinte. Un compteur logique qui varie avec le nombre de fils
-est un défaut (porte W1 contre W48).
+tentatives et replis ; publiés à part, jamais dans une empreinte. Un compteur de l'objet ou du travail qui varie avec
+le nombre de fils est un défaut (porte W1 contre W48).
 
 ## 9. Portes
 
