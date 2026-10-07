@@ -165,6 +165,11 @@ struct ForestBuilder {
   const JobGate* gate = nullptr;
   u64 confirmed = 0;  // blocs [0,confirmed) deja vus resolus
   u64* wait_ns = nullptr;  // diagnostic : attente bloquee cumulee des blocs, mur, si non nul
+  // Profil echantillonne du publieur (pipeline chronometre, diagnostic du 7 octobre) : une cellule reguliere et une
+  // cloture de plateau sur kPublishSample sont chronometrees ; comptes complets. Aucune decision n'en depend.
+  bool sample_publish = false;
+  u64 cells_seen = 0, closes_seen = 0, cell_sample_ns = 0, close_sample_ns = 0;
+  u64 sample_clock_ns = 0;  // plus court intervalle vide mesure : cout d'une lecture d'horloge, a retrancher
   u32 unannounced = 0;
   bool abandoned = false;
   // Journal des graines (build_order, ou build_order_full sur l'ordre K de FULL : OrderLog ; seed_log.hpp), nul partout
@@ -201,6 +206,7 @@ struct ForestBuilder {
   Outcome publish(std::span<const BallIdx> jobs, std::span<const NodeIdx> seeds) noexcept;
   bool await_job(u64 job) noexcept;      // pipeline : false si le bloc porte un refus
   void announce(LevelRank closed, bool last) noexcept;
+  Outcome sampled_close(LevelRank level) noexcept;  // close, chronometree une fois sur kPublishSample si sample_publish
   Outcome cell(BallIdx) noexcept;
   Outcome regular_cell(BallIdx, std::span<const NodeIdx>) noexcept;
   // Prechargement des parents et etats DSU des graines du job donne : aucun effet sur une decision. Seulement dans

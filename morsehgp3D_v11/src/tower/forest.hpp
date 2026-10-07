@@ -38,6 +38,9 @@ struct OrderTimings {
   // inclut du CPU et la reprise : CPU + attente ne partitionne pas le mur de la tache.
   u64 publish_start_ns = 0, publish_end_ns = 0, publish_cpu_ns = 0, publish_wait_ns = 0;
   u64 vertical_start_ns = 0, vertical_end_ns = 0, vertical_cpu_ns = 0, vertical_wait_ns = 0;
+  // Profil echantillonne du publieur (1 sur 64) : cellules regulieres et clotures vues, sommes des temps echantillonnes.
+  u64 publish_cells = 0, publish_closes = 0, publish_cell_sample_ns = 0, publish_close_sample_ns = 0;
+  u64 publish_sample_clock_ns = 0;  // cout d'une lecture d'horloge (intervalle vide le plus court)
   friend bool operator==(const OrderTimings&, const OrderTimings&) = default;
 };
 struct FullParams {

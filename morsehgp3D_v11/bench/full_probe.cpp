@@ -311,7 +311,11 @@ Outcome full_pass(Cloud cloud_value, MemoryBudget& budget, sched::Pool& pool_ref
                 << ",\"publish_cpu_ns\":" << t.publish_cpu_ns << ",\"publish_wait_ns\":" << t.publish_wait_ns
                 << ",\"vertical_start_ns\":" << t.vertical_start_ns << ",\"vertical_end_ns\":" << t.vertical_end_ns
                 << ",\"vertical_cpu_ns\":" << t.vertical_cpu_ns
-                << ",\"vertical_wait_ns\":" << t.vertical_wait_ns << '}';
+                << ",\"vertical_wait_ns\":" << t.vertical_wait_ns << ",\"publish_cells\":" << t.publish_cells
+                << ",\"publish_closes\":" << t.publish_closes
+                << ",\"publish_cell_sample_ns\":" << t.publish_cell_sample_ns
+                << ",\"publish_close_sample_ns\":" << t.publish_close_sample_ns
+                << ",\"publish_sample_clock_ns\":" << t.publish_sample_clock_ns << '}';
     }
     std::cout << "]}";
     forests(tower.value(), forest_timings);

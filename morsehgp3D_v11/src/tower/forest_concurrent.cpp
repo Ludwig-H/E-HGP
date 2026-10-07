@@ -29,6 +29,16 @@ Outcome ForestBuilder::collect_jobs(std::span<BallIdx> jobs) const noexcept {
   return count == jobs.size() ? Outcome{} : fail(Reason::tower_invariant);
 }
 
+inline constexpr u64 kPublishSample = 64;
+
+Outcome ForestBuilder::sampled_close(LevelRank level) noexcept {
+  if (!sample_publish || closes_seen++ % kPublishSample != 0) return close(level);
+  const Stopwatch clock;
+  const Outcome outcome = close(level);
+  close_sample_ns += clock.nanoseconds();
+  return outcome;
+}
+
 Outcome ForestBuilder::publish(std::span<const BallIdx> jobs, std::span<const NodeIdx> seeds) noexcept {
   if (seeds.size() != 4 * jobs.size()) return fail(Reason::tower_invariant);
   const auto balls = domain.catalogue().balls_data();
@@ -40,7 +50,7 @@ Outcome ForestBuilder::publish(std::span<const BallIdx> jobs, std::span<const No
     const LevelRank level = balls[b].rank;
     if (active && *active != level) {
       if (idx(level) < idx(*active)) return fail(Reason::tower_invariant);
-      MHGP11_TRY(close(*active));
+      MHGP11_TRY(sampled_close(*active));
       announce(*active, false);
       active.reset();
     }
@@ -50,14 +60,20 @@ Outcome ForestBuilder::publish(std::span<const BallIdx> jobs, std::span<const No
       // Pipeline : les graines de ce bloc sont lues apres sa publication ; un bloc en refus arrete l'ordre.
       if (gate != nullptr && !await_job(job)) { abandoned = true; return {}; }
       prefetch_seeds(seeds, job + kSeedAhead);
-      MHGP11_TRY(regular_cell(BallIdx{b}, seeds.subspan(4 * job, balls[b].qmin)));
+      if (sample_publish && cells_seen++ % kPublishSample == 0) {
+        const Stopwatch clock;
+        MHGP11_TRY(regular_cell(BallIdx{b}, seeds.subspan(4 * job, balls[b].qmin)));
+        cell_sample_ns += clock.nanoseconds();
+      } else {
+        MHGP11_TRY(regular_cell(BallIdx{b}, seeds.subspan(4 * job, balls[b].qmin)));
+      }
       ++job;
     } else {
       MHGP11_TRY(cell(BallIdx{b}));  // Voie etendue complete, descentes sur l'espace census du worker.
     }
   }
   if (job != jobs.size()) return fail(Reason::tower_invariant);
-  if (active) { MHGP11_TRY(close(*active)); announce(*active, true); }
+  if (active) { MHGP11_TRY(sampled_close(*active)); announce(*active, true); }
   return {};
 }
 

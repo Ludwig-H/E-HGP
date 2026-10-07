@@ -218,7 +218,7 @@ mhgp11_python_gate(mhgp11_tower_full_paired_protocol 0 full_paired_protocol_test
 # Lecteur du diagnostic de pipeline : bornes par le mur des forets, aucun ordre entre departs et fins des voies
 # (audit du 4 octobre 2026, pin 66372e621) ; le temoin d'une voie finie avant le dernier depart est accepte.
 mhgp11_python_gate(mhgp11_tower_full_pipeline_reader 0 full_pipeline_reader_test.py
-                    LINE "full_pipeline_reader_verdict conforme checks20" LABELS fast TIMEOUT 30)
+                    LINE "full_pipeline_reader_verdict conforme checks21" LABELS fast TIMEOUT 30)
 # Pipeline des ordres concurrents : decisions du balayage suivi contre l'ordre sequentiel, puis memes forets,
 # verticales et compteurs que la voie par etages (W48 repete contre W1) ; abandon de l'ordre bas pendant l'attente.
 mhgp11_add_unit(mhgp11_tower_pipeline SOURCES forest_pipeline_test.cpp GROUPS decisions equivalence abandon

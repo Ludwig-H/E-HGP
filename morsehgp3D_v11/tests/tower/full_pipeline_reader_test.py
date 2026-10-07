@@ -38,9 +38,13 @@ def concurrent_full():
     tasks = dict(placement_cores=24, lanes_last_start_ns=55, lanes_first_finish_ns=40, lanes_last_finish_ns=90,
                  lanes_cpu_ns=300,
                  orders=[dict(k=1, publish_start_ns=2, publish_end_ns=95, publish_cpu_ns=30, publish_wait_ns=50,
-                              vertical_start_ns=0, vertical_end_ns=0, vertical_cpu_ns=0, vertical_wait_ns=0),
+                              vertical_start_ns=0, vertical_end_ns=0, vertical_cpu_ns=0, vertical_wait_ns=0,
+                              publish_cells=640, publish_closes=600, publish_cell_sample_ns=20,
+                              publish_close_sample_ns=9, publish_sample_clock_ns=1),
                          dict(k=2, publish_start_ns=3, publish_end_ns=97, publish_cpu_ns=31, publish_wait_ns=52,
-                              vertical_start_ns=4, vertical_end_ns=110, vertical_cpu_ns=20, vertical_wait_ns=70)])
+                              vertical_start_ns=4, vertical_end_ns=110, vertical_cpu_ns=20, vertical_wait_ns=70,
+                              publish_cells=700, publish_closes=650, publish_cell_sample_ns=22,
+                              publish_close_sample_ns=11, publish_sample_clock_ns=1)])
     return dict(optimizations=8 + 8192, kmax=2, forest_ns=120, population_lookup=False, concurrent_orders=True,
                 population_lookup_entries=0, population_lookup_reserved_bytes=0, reserved_after_bytes=10,
                 memo_reserved_bytes=0, parallel=dict(lane_memo_reserved_bytes=0), census_workspace_reserved_bytes=0,
@@ -86,6 +90,7 @@ def main():
         'negative_end': lambda f: tasks(f)['orders'][1].update(publish_end_ns=-1),
         'missing_placement': lambda f: tasks(f).pop('placement_cores'),
         'negative_placement': lambda f: tasks(f).update(placement_cores=-1),
+        'sample_exceeds_task': lambda f: tasks(f)['orders'][0].update(publish_cell_sample_ns=90),
     }
     for name, change in refusals.items():
         check(not accepted(mutated(change)), 'refus attendu : ' + name)
@@ -104,7 +109,7 @@ def main():
     check(not accepted(placed), 'voie sequentielle avec un placement de pipeline acceptee')
     sequential['pipeline_tasks']['orders'][1]['publish_end_ns'] = 1
     check(not accepted(sequential), 'voie sequentielle avec une fin de tache acceptee')
-    if CHECKS != 20:
+    if CHECKS != 21:
         raise ValueError('plancher : %d controles' % CHECKS)
     print('full_pipeline_reader_verdict conforme checks%d' % CHECKS)
 

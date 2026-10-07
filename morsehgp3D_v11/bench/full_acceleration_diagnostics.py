@@ -7,8 +7,12 @@ FIELDS = {'population_lookup', 'population_lookup_entries', 'population_lookup_r
 PHASES = {'classify_ns', 'births_ns', 'regular_ns', 'publish_ns', 'verticals_ns'}
 # Diagnostic T0 du pipeline (optionnel : absent des producteurs anterieurs a son ajout).
 PIPELINE_LANES = {'lanes_last_start_ns', 'lanes_first_finish_ns', 'lanes_last_finish_ns', 'lanes_cpu_ns'}
+# Profil echantillonne du publieur (une cellule et une cloture sur 64, diagnostic du 7 octobre) : comptes, sommes des
+# echantillons et cout d'une lecture d'horloge ; nuls hors du pipeline.
+PUBLISH_SAMPLE = {'publish_cells', 'publish_closes', 'publish_cell_sample_ns', 'publish_close_sample_ns',
+                  'publish_sample_clock_ns'}
 PIPELINE_ORDER = {'publish_start_ns', 'publish_end_ns', 'publish_cpu_ns', 'publish_wait_ns', 'vertical_start_ns',
-                  'vertical_end_ns', 'vertical_cpu_ns', 'vertical_wait_ns'}
+                  'vertical_end_ns', 'vertical_cpu_ns', 'vertical_wait_ns'} | PUBLISH_SAMPLE
 VERTICAL_TASK = ('vertical_start_ns', 'vertical_end_ns', 'vertical_cpu_ns', 'vertical_wait_ns')
 
 
@@ -70,6 +74,9 @@ def validate(full, need, unsigned):
             unsigned(row, PIPELINE_ORDER)
             need(concurrent or not any(row[key] for key in PIPELINE_ORDER), 'sequential orders have task timings')
             need(index != 0 or not any(row[key] for key in VERTICAL_TASK), 'order one has no vertical sweep')
+            # Les echantillons du publieur sont des intervalles de sa tache : leur somme tient dans sa duree.
+            need(row['publish_cell_sample_ns'] + row['publish_close_sample_ns'] <=
+                 max(0, row['publish_end_ns'] - row['publish_start_ns']), 'sampled publisher intervals exceed its task')
             # Debut et fin d'une meme tache, pris par le meme fil a la meme horloge, sous le mur des forets.
             need(row['publish_start_ns'] <= row['publish_end_ns'] <= full['forest_ns'] and
                  row['vertical_start_ns'] <= row['vertical_end_ns'] <= full['forest_ns'],

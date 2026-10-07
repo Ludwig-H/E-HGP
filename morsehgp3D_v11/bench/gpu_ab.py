@@ -119,10 +119,19 @@ def pipeline_summary(full):
     ms = lambda v: None if not isinstance(v, int) else round(v / 1e6, 3)  # noqa: E731
     keys = ('publish_start_ns', 'publish_end_ns', 'publish_cpu_ns', 'publish_wait_ns', 'vertical_start_ns',
             'vertical_end_ns', 'vertical_cpu_ns', 'vertical_wait_ns')
+    def sampled(o, kind):  # estimation du profil echantillonne (une sur 64) du publieur, ms ; None sans echantillon
+        seen, total = o.get('publish_' + kind + 's'), o.get('publish_' + kind + '_sample_ns')
+        clock = o.get('publish_sample_clock_ns') or 0  # lecture d'horloge comprise dans chaque echantillon
+        drawn = (seen + 63) // 64 if isinstance(seen, int) else 0
+        if not drawn or not isinstance(total, int):
+            return None
+        return round(max(0, total - drawn * clock) / drawn * seen / 1e6, 3)
     return dict(phases={k: ms(v) for k, v in phases.items()},
                 lanes={k: ms(tasks.get(k)) for k in ('lanes_last_start_ns', 'lanes_first_finish_ns',
                                                      'lanes_last_finish_ns', 'lanes_cpu_ns')},
-                orders=[dict(k=o.get('k'), **{key[:-3] + '_ms': ms(o.get(key)) for key in keys})
+                orders=[dict(k=o.get('k'), publish_cells=o.get('publish_cells'), publish_closes=o.get('publish_closes'),
+                             publish_cells_est_ms=sampled(o, 'cell'), publish_closes_est_ms=sampled(o, 'close'),
+                             **{key[:-3] + '_ms': ms(o.get(key)) for key in keys})
                         for o in tasks.get('orders', []) if isinstance(o, dict)])
 
 

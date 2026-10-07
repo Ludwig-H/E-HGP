@@ -87,6 +87,12 @@ struct Pipeline {
     builder.gate = &gates[order];
     builder.progress = &progress[order];
     builder.wait_ns = timed ? &waited[task] : nullptr;
+    builder.sample_publish = timed;
+    if (timed) {  // calibration : plus court de 16 intervalles vides
+      u64 least = ~u64{0};
+      for (int i = 0; i < 16; ++i) { const Stopwatch clock; least = std::min(least, clock.nanoseconds()); }
+      builder.sample_clock_ns = least;
+    }
     Outcome outcome = builder.publish(jobs[order], seeds[order]);
     if (outcome.ok() && !builder.abandoned) outcome = builder.finish();
     const bool complete = outcome.ok() && !builder.abandoned;
@@ -145,6 +151,10 @@ Outcome publish_timings(const Pipeline& pipeline, std::span<const u64> starts, s
       auto& o = timings.orders[t - lanes];
       o.plateaus_ns = end > resolved ? end - resolved : 0;
       o.publish_start_ns = starts[t]; o.publish_end_ns = end; o.publish_cpu_ns = cpus[t]; o.publish_wait_ns = waits[t];
+      const ForestBuilder& b = *pipeline.builders[t - lanes];
+      o.publish_cells = b.cells_seen; o.publish_closes = b.closes_seen;
+      o.publish_cell_sample_ns = b.cell_sample_ns; o.publish_close_sample_ns = b.close_sample_ns;
+      o.publish_sample_clock_ns = b.sample_clock_ns;
     } else {
       auto& o = timings.orders[t - lanes - kmax + 1];
       o.verticals_ns = end > publish_end ? end - publish_end : 0;
