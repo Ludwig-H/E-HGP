@@ -36,7 +36,7 @@ Hiérarchie des supports q2, q3, q4 au même ordre, 43 s : [thème sombre](06_00
 
 Points : les seuls points des objets du groupe (vérité terrain SemanticKITTI), 304 points (A 117, B 86, C 101) : ni sol, ni fond, ni autre objet.
 
-Meilleur IoU de chaque objet, même mesure que la campagne G4 (points void exclus) :
+Meilleur IoU de chaque objet (meilleur bloc ; seuls les points non étiquetés et aberrants, classes 0 et 1, sont exclus : « autre structure » et « autre objet » comptent comme du fond) :
 
 | k | HGP, meilleur IoU (A / B / C) | HDBSCAN, meilleur IoU | issue |
 | --- | --- | --- | --- |

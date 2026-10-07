@@ -11,7 +11,7 @@ Exemple vidéo HGP contre HDBSCAN ([liste](../README.md)) : SemanticKITTI, séqu
 | B | vélo | 63 | 41 | 22 |
 | C | vélo | 86 | 51 | 35 |
 
-Écarts (plus courte distance entre les points de deux objets) : A–B : 0,30 m, A–C : 0,43 m, B–C : 0,03 m. Dans la découpe sans sol : aucune autre instance ; 185 points void ; 990 points de sol retirés.
+Écarts (plus courte distance entre les points de deux objets) : A–B : 0,30 m, A–C : 0,43 m, B–C : 0,03 m. Dans la découpe sans sol : aucune autre instance ; 185 points des classes 0, 1, 52 et 99 (non étiqueté, aberrant, autre structure, autre objet) ; 990 points de sol retirés.
 
 | variante | k | HGP, meilleur IoU (A / B / C) | HDBSCAN, meilleur IoU | issue |
 | --- | --- | --- | --- | --- |
