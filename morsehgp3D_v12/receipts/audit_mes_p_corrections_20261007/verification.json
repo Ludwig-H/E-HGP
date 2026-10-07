@@ -1,0 +1,11 @@
+{
+  "analyser_cli_cases_per_mode": 5,
+  "capture_sha256": "274c2417b0a641a69eb34a839a003d6664d497eb362323531855ce064ea5593a",
+  "no_gcp": true,
+  "no_native_build": true,
+  "normal_code": 0,
+  "normal_optimized_identical": true,
+  "optimized_code": 0,
+  "pilot_process_doubles_per_mode": 3,
+  "strict_common_contract_code": 1
+}

@@ -1,0 +1,10 @@
+{
+  "base_head": "58761b36d69c83ff1893049cdfdc4b0061a34bdc",
+  "files": {
+    "morsehgp3D_v12/microbancs/mes_p_petits/analyse_p.py": "ca8def8e8ae5cbdb55892bbf1bfc7284846c986e2ca70b327b623d3d0767d733",
+    "morsehgp3D_v12/microbancs/mes_p_petits/pilote_p.py": "68995f99efc653690484264b4e1bfbac76bb5cfbe50e8ecf2d9b9b7bf4050d4f"
+  },
+  "patch_sha256": "4dc2cce8e3c4c8bc9990b0db2d0e19359131f54c4979712687c7e731f13c7853",
+  "scope": "provisional source snapshot, not product qualification",
+  "uncommitted_snapshot": true
+}

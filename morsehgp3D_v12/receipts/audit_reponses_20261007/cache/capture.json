@@ -1,0 +1,22 @@
+{
+  "base": "f601b36ace16bcc8f7ac9bc532e45ab5079f9667",
+  "previous_receipt_commit": "91b1a7ee2dae049895eb7889aeaa8262642bf72b",
+  "source_sha256": {
+    "morsehgp3D_v12/src/core/buffer.cpp": "1844a7d6e6d063347ace171be4ca9899669b08b30b2bf2106fa73d9b096c47cd",
+    "morsehgp3D_v12/src/core/buffer.hpp": "3c7fffc6ed97b6456f666ef849ddd6f4f3a1b3f2427c0fc875b7d5edcd14130b",
+    "morsehgp3D_v12/src/core/ledger.cpp": "54cebe7db58bd4f4155d543150b3870894c90f3b6db1032a07e6267c040838ab",
+    "morsehgp3D_v12/tests/core/alloc_fault.cpp": "1111d433910d1cc1ae05400721a0849eab43cfc58fccd9b752f7e56d6aaf227c",
+    "morsehgp3D_v12/tests/core/cache_poison_probe.cpp": "3848d1865fec74b05dd0a457bc1f0eeb654089bfcf5ce3293a9c3602d308aad6",
+    "morsehgp3D_v12/tests/support/test.hpp": "bc5b8c3a46e38678721192eb5a2212b9a0fe8a3fdd9cf4f45d6ac58d969ce722",
+    "morsehgp3D_v12/tests/core/tests.cmake": "75441d6f2a4f72efcd4d388c72d0e3bc761e82da36e6fb91956557404bf952b5",
+    "morsehgp3D_v12/tests/mutants/core.json": "09c58756f3b8bd86dc7b2bf588c9cebf72e2e06d5c2cbdd440bd767a8bcd9a41"
+  },
+  "mutant": {
+    "id": "refus_sans_relecture",
+    "fichier": "src/core/buffer.cpp",
+    "cherche": "    if (account.held.load(std::memory_order_relaxed) > account.limit - x) return false;",
+    "remplace": "    return false;",
+    "porte": "mhgp12_core_fault_eviction_admise",
+    "note": "CST-0007 (course d'eviction, contre-lecture du 7 octobre) : un fil refuserait sur une lecture de held anterieure a la fin d'une eviction, cache vide, alors que son etage a ete admis"
+  }
+}

@@ -1,7 +1,7 @@
 # Audit Codex — état courant v12
 
-7 octobre 2026. Reprise au pin **`f601b36ac`** : correctifs des juges, identités EMST,
-découpes LiDAR ; capture séparée du correctif mémoire non commis, identifiée par hashes.
+7 octobre 2026. Dernière base publiée **`91b1a7ee2`** ; contre-épreuves des corrections
+en cours conservées séparément, avec sources et empreintes. Aucun chrono nouveau.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`.
 [Contre-épreuves courantes](../receipts/audit_reprise_20261007/README.md) ;
@@ -9,22 +9,23 @@ Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalo
 
 **À corriger pendant le développement.**
 
-- **Cache, `0007/0019`** : le [nouveau correctif non commis](../receipts/audit_cache_concurrence_20261007/README.md)
-  (`buffer.cpp` SHA `1844a7d6…`) ferme la course d'éviction sur deux contre-épreuves.
-  Reprises/restitutions/évictions sont protégées ensemble, puis `held` est relu avant refus.
-  La porte du développeur doit encore exercer cette relecture : deux demandes de 300 Kio
-  laissent survivre son mutant ; une seconde demande de 200 Kio le tue causalement.
-  États formels en cours pendant la livraison ; acquis ASan de la capture précédente
-  [confirmé sous Clang/GCC](../receipts/audit_cache_poison_20261007/README.md), sans transfert
-  implicite au nouveau corps ni chrono produit nouveau.
+- **Cache, `0007/0019`** : [correction concurrente et porte complétées](../receipts/audit_reponses_20261007/cache/README.md)
+  sur `buffer.cpp` SHA `1844a7d6…`. Deux bras de 300+300 et 300+200 Kio : 12 contrôles
+  officiels passent ; retirer la relecture de `held` cause trois échecs dans le second bras.
+  ASan rejoué sur ce corps sous Clang/GCC : garde saine, restitution et dépassement de taille
+  détectés. Comptage physique et marge de 1/8 déjà contre-éprouvés ; clôture formelle après
+  publication du correctif, sans transfert à FULL, aux performances ni à TSan.
 - **Juges, `0018`** : contre-lecture M5/M6 du lot `2b2113264`. M6 laisse encore sortir
   `mes_m6_ok` avec moins de prises que demandé, voire zéro : indices `false`/`0.0`
   égaux aux entiers dans une première garde puis ignorés par la suivante. Un schéma inconnu
   emprunte aussi le chemin historique et évite les nouvelles gardes. Validation entière
   stricte, effectif réellement validé et liste fermée de schémas nécessaires.
-- **Petits nuages, `0238`** : l’analyseur fusionne 1/4/48 fils en une seule droite.
-  Témoin : 100/60/10 µs/site séparés, 56,67 réunis. Grouper par K, fils et famille,
-  afficher les échecs et comparer des cohortes communes avant de choisir le seuil CPU/GPU.
+- **Petits nuages, `0238`** : [séparation K/fils/famille corrigée](../receipts/audit_mes_p_corrections_20261007/README.md),
+  pentes témoins 100/60/10 µs/site retrouvées. Résidu : un régime entièrement en échec
+  disparaît de la cohorte commune ; si tous échouent, la table disparaît aussi. Reconstruire
+  K et les régimes depuis **toutes** les prises, puis intersecter leurs succès :
+  un régime sans succès impose une cohorte vide. Cinq témoins JSON, normal/−O identiques ;
+  temps inventés, aucune mesure HGP. Pilote vérifié par doubles de processus seulement.
 - **EMST, `0232` clos** : le témoin historique aux PointId 17/17 est désormais refusé
   avec et sans référence. 107 appels indépendants par mode, 141 contrôles officiels,
   six permutations d'identités et 24 nuages géométriques inchangés. Portée : ordre un,
@@ -54,6 +55,10 @@ Les propositions exactes sont dans le [reçu performance](../receipts/audit_perf
 - **`0236/0237`** : `synth_sphere` arrondie n'est pas exactement cosphérique ; distinguer
   liste candidate, coquille et présentations. Capacités 256/64 encore incompatibles avec
   l'objectif sans refus de largeur ; q_min≤4 ne borne aucune de ces tailles.
+  [Réponse documentaire en cours](../receipts/audit_reponses_20261007/docs/README.md) :
+  PLAN et erratum corrigent le budget et la sphère ; clôtures `0235/0236` après publication.
+  `0237` reste en cours : T1-c est prévu, la voie large manque encore. Préciser que les
+  transferts encore non mesurés sont ceux du raccord complet, M5 comptant déjà les siens.
 
 Mathématiques pour la suite : empreinte FULL par valeurs rationnelles exactes justifiée ;
 clés de supports par rang XYZ prouvées ; caches par coquille/population/partie complètes

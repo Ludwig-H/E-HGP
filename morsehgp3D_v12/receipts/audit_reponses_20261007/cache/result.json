@@ -1,0 +1,73 @@
+{
+  "compilers": {
+    "clang++": "Ubuntu clang version 18.1.3 (1ubuntu1)",
+    "g++": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
+  },
+  "observations": [
+    {
+      "kind": "unit",
+      "label": "official",
+      "returncode": 0,
+      "stdout": "test eviction_admise controles=12 echecs=0 plancher=12\nmhgp12_test_ok tests=1 controles=12\n"
+    },
+    {
+      "kind": "unit",
+      "label": "refus_sans_relecture",
+      "returncode": 1,
+      "stdout": "ECHEC alloc_fault.cpp:198: small_arm.second_ok\nECHEC alloc_fault.cpp:199: small_arm.used == kClass300 + k200\n      obtenu 315392, attendu 520192\nECHEC alloc_fault.cpp:200: small_arm.held == kClass300 + k200\n      obtenu 315392, attendu 520192\ntest eviction_admise controles=12 echecs=3 plancher=12\nECHECS 3\n"
+    },
+    {
+      "compiler": "clang++",
+      "kind": "poison",
+      "mode": "garde",
+      "returncode": 0,
+      "use_after_poison": false
+    },
+    {
+      "compiler": "clang++",
+      "kind": "poison",
+      "mode": "lecture_apres_restitution",
+      "returncode": -6,
+      "use_after_poison": true
+    },
+    {
+      "compiler": "clang++",
+      "kind": "poison",
+      "mode": "lecture_hors_taille",
+      "returncode": -6,
+      "use_after_poison": true
+    },
+    {
+      "compiler": "g++",
+      "kind": "poison",
+      "mode": "garde",
+      "returncode": 0,
+      "use_after_poison": false
+    },
+    {
+      "compiler": "g++",
+      "kind": "poison",
+      "mode": "lecture_apres_restitution",
+      "returncode": -6,
+      "use_after_poison": true
+    },
+    {
+      "compiler": "g++",
+      "kind": "poison",
+      "mode": "lecture_hors_taille",
+      "returncode": -6,
+      "use_after_poison": true
+    }
+  ],
+  "scope": "one_official_gate_one_mutant_six_poison_probes_no_pipeline_no_GCP",
+  "source_sha256": {
+    "morsehgp3D_v12/src/core/buffer.cpp": "1844a7d6e6d063347ace171be4ca9899669b08b30b2bf2106fa73d9b096c47cd",
+    "morsehgp3D_v12/src/core/buffer.hpp": "3c7fffc6ed97b6456f666ef849ddd6f4f3a1b3f2427c0fc875b7d5edcd14130b",
+    "morsehgp3D_v12/src/core/ledger.cpp": "54cebe7db58bd4f4155d543150b3870894c90f3b6db1032a07e6267c040838ab",
+    "morsehgp3D_v12/tests/core/alloc_fault.cpp": "1111d433910d1cc1ae05400721a0849eab43cfc58fccd9b752f7e56d6aaf227c",
+    "morsehgp3D_v12/tests/core/cache_poison_probe.cpp": "3848d1865fec74b05dd0a457bc1f0eeb654089bfcf5ce3293a9c3602d308aad6",
+    "morsehgp3D_v12/tests/core/tests.cmake": "75441d6f2a4f72efcd4d388c72d0e3bc761e82da36e6fb91956557404bf952b5",
+    "morsehgp3D_v12/tests/mutants/core.json": "09c58756f3b8bd86dc7b2bf588c9cebf72e2e06d5c2cbdd440bd767a8bcd9a41",
+    "morsehgp3D_v12/tests/support/test.hpp": "bc5b8c3a46e38678721192eb5a2212b9a0fe8a3fdd9cf4f45d6ac58d969ce722"
+  }
+}

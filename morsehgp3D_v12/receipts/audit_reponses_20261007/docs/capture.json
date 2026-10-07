@@ -1,0 +1,40 @@
+{
+  "base_commit": "91b1a7ee2dae049895eb7889aeaa8262642bf72b",
+  "base_files": {
+    "morsehgp3D_v12/docs/MESURE.md": {
+      "bytes": 10865,
+      "sha256": "50bd6005f8629009441a76b79f302d938e25467897e89086c68287b6dd49b890"
+    },
+    "morsehgp3D_v12/docs/PLAN.md": {
+      "bytes": 12341,
+      "sha256": "b11bfb681294ed31431af83f26833941ff1a5e8020b1740989d58882d712a82c"
+    }
+  },
+  "diff_sha256": "d98b4a8fd4bbbd53f4a15d0abd1a21397f319933ccd739ad415869c57779e6e4",
+  "patch_check": {
+    "base_commit": "91b1a7ee2dae049895eb7889aeaa8262642bf72b",
+    "command": "git apply --check morsehgp3D_v12/receipts/audit_reponses_20261007/docs/documents.diff",
+    "exit_code": 0
+  },
+  "registry_rows": [
+    "| `CST-0235` | bilan T0 annonce le budget C confirmé par M2+M5, alors qu'émission, finition et raccord intégré ne sont pas mesurés ; aval CPU inchangé déjà au-dessus de 100 ms | 2026-10-07 | auditeur (Codex) | mesure | majeure (portée d'adoption) | `58d384721`, `docs/PLAN.md` bilan T0 ; session F2 | [soustraction par passe : 145,1–201,7 ms K5 si parcours+feuilles gratuits, conditionnelle à l'aval conservé](../receipts/audit_performance_20261007/mesures/README.md) ; ni borne sur une autre implantation ni qualification GPU | ouvert | — |",
+    "| `CST-0236` | reçu MES-P attribue les refus de synth_sphere à des sites tous cosphériques ; l'arrondi entier du générateur détruit cette propriété | 2026-10-07 | auditeur (Codex) | document | mineure (diagnostic causal) | `5c5fc7109`, `g4_t0g_20261007/README.md`, `prepare_small.py` | [cinq points des trois graines, déterminants de cosphéricité non nuls ; génération publique reproduite](../receipts/audit_performance_20261007/mathematiques/COMPLEMENT_SESSION_G.md) ; refus wide_leaf non contestés | ouvert | — |",
+    "| `CST-0237` | nouvel objectif des petits nuages sans refus de largeur non couvert par T1 : max_leaf 256, coquille 64, m sur u8 ; q_min≤4 ne borne pas ces tailles | 2026-10-07 | auditeur (Codex) | document | majeure (capacité avant extension) | code `58d384721`, objectif `5c5fc7109` | [bornes effectives, liste candidate distincte de coquille, preuve et protocole d'extension](../receipts/audit_performance_20261007/mathematiques/COMPLEMENT_SESSION_G.md) ; aucun refus v12 de grand nuage rejoué | ouvert | — |"
+  ],
+  "registry_sha256": "7a3299bc98972203acc501233583798fb07cc038d932bb25c9019d6d0434484d",
+  "scope": "lecture documentaire de modifications non commises ; aucun test numerique ou moteur",
+  "working_files": {
+    "morsehgp3D_v12/docs/MESURE.md": {
+      "bytes": 10988,
+      "sha256": "b0ae883299163b783fbae40954a7fc22c15fe22bf7248f7caeee39e536a9213f"
+    },
+    "morsehgp3D_v12/docs/PLAN.md": {
+      "bytes": 14054,
+      "sha256": "a706039eb079bae4e097c0eca12d92e3d5910ddac7ee590c46b10ccbe8de75dc"
+    },
+    "morsehgp3D_v12/receipts/g4_t0g_20261007/ERRATUM_20261007.md": {
+      "bytes": 2231,
+      "sha256": "684e09e4480424f81f085c8446b4d1f86fab2153f55cb6bd7564468373e5a2f5"
+    }
+  }
+}

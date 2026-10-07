@@ -1,0 +1,160 @@
+--- a/morsehgp3D_v12/tests/core/alloc_fault.cpp
++++ b/morsehgp3D_v12/tests/core/alloc_fault.cpp
+@@ -8,10 +8,13 @@
+ //
+ // Les quatre formes scalaires sont remplacees ensemble (new, new sans exception, delete, delete avec taille) : sous
+ // un sanitizer, un bloc de malloc rendu par l'operator delete du runtime serait un desaccord d'allocateur.
++#include <atomic>
++#include <chrono>
+ #include <cstdlib>
+ #include <memory>
+ #include <new>
+ #include <string>
++#include <thread>
+ #include <vector>
+ 
+ #include "core/core.hpp"
+@@ -19,10 +22,24 @@
+ 
+ namespace {
+ 
+-// Etat de test, un seul fil.
+-bool fail_nothrow_new = false;
+-long throwing_countdown = -1;  // >= 0 : nombre d'allocations encore admises avant que new leve
+-unsigned long long allocations = 0;
++// Etat de test, pilote par un seul fil ; atomique parce que eviction_admise alloue depuis deux fils.
++std::atomic<bool> fail_nothrow_new{false};
++std::atomic<long> throwing_countdown{-1};  // >= 0 : nombre d'allocations encore admises avant que new leve
++std::atomic<unsigned long long> allocations{0};
++
++// Restitution lente d'un bloc designe (temoin de course de l'auditeur Codex, 7 octobre) : le delete de ce bloc attend
++// que le second fil ait commence sa demande, puis lui laisse 200 ms ; au plus 5 s d'attente en tout.
++std::atomic<void*> slow_delete{nullptr};
++std::atomic<bool> delete_paused{false}, second_started{false};
++
++void pause_if_slow(void* block) noexcept {
++  if (block == nullptr || block != slow_delete.load()) return;
++  delete_paused.store(true);
++  const auto limit = std::chrono::steady_clock::now() + std::chrono::seconds(5);
++  while (!second_started.load() && std::chrono::steady_clock::now() < limit) std::this_thread::yield();
++  const auto until = std::chrono::steady_clock::now() + std::chrono::milliseconds(200);
++  while (std::chrono::steady_clock::now() < until) std::this_thread::yield();
++}
+ 
+ }  // namespace
+ 
+@@ -39,8 +56,14 @@
+   if (fail_nothrow_new) return nullptr;
+   return std::malloc(size == 0 ? 1 : size);
+ }
+-[[gnu::noinline]] void operator delete(void* block) noexcept { std::free(block); }
+-[[gnu::noinline]] void operator delete(void* block, std::size_t) noexcept { std::free(block); }
++[[gnu::noinline]] void operator delete(void* block) noexcept {
++  pause_if_slow(block);
++  std::free(block);
++}
++[[gnu::noinline]] void operator delete(void* block, std::size_t) noexcept {
++  pause_if_slow(block);
++  std::free(block);
++}
+ 
+ using namespace mhgp12;
+ 
+@@ -86,6 +109,97 @@
+   CHECK(full.allocate(1 << 20, budget).ok());
+   CHECK_EQ(budget.used(), u64{1} << 20);
+   CHECK_EQ(budget.peak(), u64{1} << 20);
++}
++
++// Sous cache (CST-0007) : une allocation de classe en echec ne laisse ni reservation ni octets tenus ; les blocs
++// inactifs restent tenus sous la limite jusqu'a leur reprise ou leur restitution.
++MHGP12_TEST(alloc_fault_cache, 10) {
++  constexpr u64 kClass300 = 315392;  // classe de 300 Kio : 77 pages de 4 Kio
++  MemoryBudget budget(u64{1} << 22, u64{1} << 22);
++  Buffer<u8> a;
++  fail_nothrow_new = true;
++  const Outcome refused = a.allocate(300 * 1024, budget);
++  fail_nothrow_new = false;
++  CHECK_EQ(refused.reason, Reason::memory_budget);
++  CHECK_EQ(budget.used(), 0u);
++  CHECK_EQ(budget.cache_stats().held, 0u);
++  CHECK_EQ(budget.peak(), kClass300);  // la reservation a existe, a sa taille physique
++  REQUIRE(a.allocate(300 * 1024, budget).ok());
++  a.reset();
++  CHECK_EQ(budget.cache_stats().held, kClass300);  // bloc inactif, tenu
++  Buffer<u8> b;
++  fail_nothrow_new = true;
++  const Outcome refused_class = b.allocate(600 * 1024, budget);  // autre classe : bloc neuf, refuse
++  fail_nothrow_new = false;
++  CHECK_EQ(refused_class.reason, Reason::memory_budget);
++  CHECK_EQ(budget.used(), 0u);
++  CHECK_EQ(budget.cache_stats().held, kClass300);
++  CHECK_EQ(budget.cache_stats().idle, kClass300);
++}
++
++// Course d'eviction (CST-0007, contre-lectures du 7 octobre) : budget et cache de 1 Mio, un bloc inactif de 1 Mio
++// tenu, etage admis pour 300 Kio puis `second_bytes`. Le premier fil rend l'inactif au systeme, lentement ; le second
++// ne doit pas etre refuse pendant cette restitution (avant correction : refus memory_budget, cache vide et held encore
++// plein). Deux bras : 300 Kio (le second fil attend le verrou dans la reprise du cache) et 200 Kio (sous le seuil du
++// cache : il lit held plein, attend le verrou, puis la relecture de held decide ; seul ce bras tue le mutant qui la
++// retire, observation de l'auditeur Codex).
++namespace {
++
++struct RaceArm {
++  bool admitted = false, first_ok = false, second_ok = false, paused = false;
++  u64 used = 0, held = 0, evicted = 0, peak = 0, limit = 0;
++};
++
++RaceArm race_arm(u64 second_bytes) {
++  constexpr u64 kMib = u64{1} << 20, kRequest = 300 * 1024;
++  delete_paused.store(false);
++  second_started.store(false);
++  RaceArm arm;
++  MemoryBudget budget(kMib, kMib);
++  Buffer<u8> cached;
++  if (!cached.allocate(kMib, budget).ok()) return arm;
++  slow_delete.store(cached.data());
++  cached.reset();
++  arm.admitted = budget.admit(kRequest + second_bytes).ok();
++  Buffer<u8> first, second;
++  std::thread evicting([&] { arm.first_ok = first.allocate(kRequest, budget).ok(); });
++  const auto limit = std::chrono::steady_clock::now() + std::chrono::seconds(5);
++  while (!delete_paused.load() && std::chrono::steady_clock::now() < limit) std::this_thread::yield();
++  arm.paused = delete_paused.load();
++  std::thread waiting([&] {
++    second_started.store(true);
++    arm.second_ok = second.allocate(second_bytes, budget).ok();
++  });
++  waiting.join();
++  evicting.join();
++  slow_delete.store(nullptr);
++  const auto stats = budget.cache_stats();
++  arm.used = budget.used();
++  arm.held = stats.held;
++  arm.evicted = stats.evicted;
++  arm.peak = budget.peak();
++  arm.limit = budget.limit();
++  return arm;
++}
++
++}  // namespace
++
++MHGP12_TEST(eviction_admise, 12) {
++  constexpr u64 kClass300 = 315392, k200 = 200 * 1024;
++  const RaceArm cached_arm = race_arm(300 * 1024);
++  CHECK(cached_arm.admitted && cached_arm.first_ok && cached_arm.paused);
++  CHECK(cached_arm.second_ok);
++  CHECK_EQ(cached_arm.used, 2 * kClass300);
++  CHECK_EQ(cached_arm.held, 2 * kClass300);
++  CHECK_EQ(cached_arm.evicted, 1u);
++  CHECK(cached_arm.peak <= cached_arm.limit);
++  const RaceArm small_arm = race_arm(k200);
++  CHECK(small_arm.admitted && small_arm.first_ok && small_arm.paused);
++  CHECK(small_arm.second_ok);
++  CHECK_EQ(small_arm.used, kClass300 + k200);
++  CHECK_EQ(small_arm.held, kClass300 + k200);
++  CHECK_EQ(small_arm.evicted, 1u);
++  CHECK(small_arm.peak <= small_arm.limit);
+ }
+ 
+ MHGP12_TEST(refusal, 10) {
