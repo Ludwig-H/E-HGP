@@ -1,0 +1,283 @@
+{
+  "anciens_juges_sha256": {
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/scripts/g4_traversal_bench.py": "10dcdb99c627522866789614f8da71c15db63b1b32fff171ce603c95c80a26a5",
+    "morsehgp3D_v12/microbancs/mes_m6_session/run_m6.py": "36e93da3d39a9b81f028e653c3227b99e44cba8d3fc497cc333667153353bb3e"
+  },
+  "avant_correctif": "5c5fc710921ac03f6d4c2aca40f17e8442202a5c",
+  "m5_avant_apres": [
+    {
+      "cas": "temoin_complet",
+      "code": 0,
+      "refus": 0,
+      "verdict": "adopte",
+      "version": "before"
+    },
+    {
+      "cas": "auditeur_feuille_manquante_identite_vraie",
+      "code": 0,
+      "refus": 0,
+      "verdict": "adopte",
+      "version": "before"
+    },
+    {
+      "cas": "auditeur_empreinte_differente_identite_vraie",
+      "code": 0,
+      "refus": 0,
+      "verdict": "adopte",
+      "version": "before"
+    },
+    {
+      "cas": "auditeur_grands_livres_hote_absents",
+      "code": 0,
+      "refus": 0,
+      "verdict": "adopte",
+      "version": "before"
+    },
+    {
+      "cas": "auditeur_sanitizer_sans_mesures",
+      "code": 0,
+      "refus": 0,
+      "verdict": "adopte",
+      "version": "before"
+    },
+    {
+      "cas": "grand_livre_gpu_different_identite_vraie",
+      "code": 0,
+      "refus": 0,
+      "verdict": "adopte",
+      "version": "before"
+    },
+    {
+      "cas": "feuilles_de_reference_hors_vidage",
+      "code": 0,
+      "refus": 0,
+      "verdict": "adopte",
+      "version": "before"
+    },
+    {
+      "cas": "empreinte_de_reference_forgee",
+      "code": 0,
+      "refus": 0,
+      "verdict": "adopte",
+      "version": "before"
+    },
+    {
+      "cas": "empreintes_absentes_identite_vraie",
+      "code": 0,
+      "refus": 0,
+      "verdict": "adopte",
+      "version": "before"
+    },
+    {
+      "cas": "temoin_complet",
+      "code": 0,
+      "refus": 0,
+      "verdict": "adopte",
+      "version": "after"
+    },
+    {
+      "cas": "auditeur_feuille_manquante_identite_vraie",
+      "code": 0,
+      "refus": 7,
+      "verdict": "refuse",
+      "version": "after"
+    },
+    {
+      "cas": "auditeur_empreinte_differente_identite_vraie",
+      "code": 0,
+      "refus": 7,
+      "verdict": "refuse",
+      "version": "after"
+    },
+    {
+      "cas": "auditeur_grands_livres_hote_absents",
+      "code": 0,
+      "refus": 43,
+      "verdict": "refuse",
+      "version": "after"
+    },
+    {
+      "cas": "auditeur_sanitizer_sans_mesures",
+      "code": 0,
+      "refus": 3,
+      "verdict": "refuse",
+      "version": "after"
+    },
+    {
+      "cas": "grand_livre_gpu_different_identite_vraie",
+      "code": 0,
+      "refus": 7,
+      "verdict": "refuse",
+      "version": "after"
+    },
+    {
+      "cas": "feuilles_de_reference_hors_vidage",
+      "code": 0,
+      "refus": 7,
+      "verdict": "refuse",
+      "version": "after"
+    },
+    {
+      "cas": "empreinte_de_reference_forgee",
+      "code": 0,
+      "refus": 7,
+      "verdict": "refuse",
+      "version": "after"
+    },
+    {
+      "cas": "empreintes_absentes_identite_vraie",
+      "code": 0,
+      "refus": 7,
+      "verdict": "refuse",
+      "version": "after"
+    }
+  ],
+  "m6": [
+    {
+      "cas": "provenance_vide",
+      "code": 0,
+      "prises": 9,
+      "refus": 0,
+      "verdict": "mes_m6_ok",
+      "version": "before"
+    },
+    {
+      "cas": "isolation_contredite",
+      "code": 0,
+      "prises": 9,
+      "refus": 0,
+      "verdict": "mes_m6_ok",
+      "version": "before"
+    },
+    {
+      "cas": "refus_explicite",
+      "code": 0,
+      "prises": 9,
+      "refus": 0,
+      "verdict": "mes_m6_ok",
+      "version": "before"
+    },
+    {
+      "cas": "provenance_vide",
+      "code": 3,
+      "prises": 9,
+      "refus": 3,
+      "verdict": "mes_m6_echec",
+      "version": "after"
+    },
+    {
+      "cas": "isolation_contredite",
+      "code": 3,
+      "prises": 8,
+      "refus": 2,
+      "verdict": "mes_m6_echec",
+      "version": "after"
+    },
+    {
+      "cas": "refus_explicite",
+      "code": 3,
+      "prises": 9,
+      "refus": 2,
+      "verdict": "mes_m6_echec",
+      "version": "after"
+    },
+    {
+      "cas": "temoin_complet",
+      "code": 0,
+      "fichiers_jsonl_presents": 9,
+      "lignes": 585,
+      "limites_declarees": 0,
+      "mediane_context_open_spin_us": 116000.0,
+      "prises": 9,
+      "refus": [],
+      "verdict": "mes_m6_ok",
+      "version": "after"
+    },
+    {
+      "cas": "indice_false",
+      "code": 0,
+      "fichiers_jsonl_presents": 9,
+      "lignes": 520,
+      "limites_declarees": 0,
+      "mediane_context_open_spin_us": 116000.0,
+      "prises": 8,
+      "refus": [],
+      "verdict": "mes_m6_ok",
+      "version": "after"
+    },
+    {
+      "cas": "indice_float",
+      "code": 0,
+      "fichiers_jsonl_presents": 9,
+      "lignes": 520,
+      "limites_declarees": 0,
+      "mediane_context_open_spin_us": 116000.0,
+      "prises": 8,
+      "refus": [],
+      "verdict": "mes_m6_ok",
+      "version": "after"
+    },
+    {
+      "cas": "indices_float_sans_fichiers",
+      "code": 0,
+      "fichiers_jsonl_presents": 0,
+      "lignes": 0,
+      "limites_declarees": 0,
+      "mediane_context_open_spin_us": null,
+      "prises": 0,
+      "refus": [],
+      "verdict": "mes_m6_ok",
+      "version": "after"
+    },
+    {
+      "cas": "schema_inconnu_refus_explicite",
+      "code": 0,
+      "fichiers_jsonl_presents": 9,
+      "lignes": 585,
+      "limites_declarees": 3,
+      "mediane_context_open_spin_us": 116000.0,
+      "prises": 9,
+      "refus": [],
+      "verdict": "mes_m6_ok",
+      "version": "after"
+    },
+    {
+      "cas": "code_compilation_false",
+      "code": 0,
+      "fichiers_jsonl_presents": 9,
+      "lignes": 585,
+      "limites_declarees": 0,
+      "mediane_context_open_spin_us": 116000.0,
+      "prises": 9,
+      "refus": [],
+      "verdict": "mes_m6_ok",
+      "version": "after"
+    },
+    {
+      "cas": "code_prise_false",
+      "code": 0,
+      "fichiers_jsonl_presents": 9,
+      "lignes": 585,
+      "limites_declarees": 0,
+      "mediane_context_open_spin_us": 116000.0,
+      "prises": 9,
+      "refus": [],
+      "verdict": "mes_m6_ok",
+      "version": "after"
+    }
+  ],
+  "pin": "f601b36ace16bcc8f7ac9bc532e45ab5079f9667",
+  "scope": "preuves synthetiques des vrais pilotes ; aucune execution GPU ou mesure de vitesse",
+  "sources_sha256": {
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/scripts/g4_leaf_bench.py": "bce808ed126c302a4b3508b5b9d6ca496a5211cda540cf5e708fcf1e9848375b",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/tests/test_admission_m2.py": "527dac8d96c76ee6cf11e45def13c89734bbbd6d620d430dde1b9bb9046dd464",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/tests/test_juge_m2.py": "1e81f09d473231c1961ea8acf84573a5c6edf9f52a21f04ee09ddd627b763a86",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/fixtures/fixtures.py": "940207b052f459f463f65ce811f6f72b900ee638bf5f8bdb4b6f71885c052d9e",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/oracle/oracle_parcours.py": "89818cc365e83285f32043f5c2c6431c413d7e0a3ef8674e013be68d15bee253",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/scripts/g4_traversal_bench.py": "923166086f8a8789545b7853bddfe8006486decf1a87a79b3273d04c8e0e874f",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/tests/test_juge_m5.py": "6f49bc12200586cb99a867d37e123a8a7ada37d1e18eca898b9fc0281f6319f1",
+    "morsehgp3D_v12/microbancs/mes_m6_session/mes_m6_session_cost.cu": "49c6afc51d48e124c866e509700764a59150410d7664fabdadf14ee41887dff1",
+    "morsehgp3D_v12/microbancs/mes_m6_session/run_m6.py": "4a5b30fefdceba039b336ef2590013aaaec2a22b3fddea30c9f0a5bd650fa90e",
+    "morsehgp3D_v12/microbancs/mes_m6_session/tests/test_juge_m6.py": "949f6dfc872a46e9cdfe66cc3bf78cbf5f62696408a992797d27d9aab2d2b764"
+  }
+}

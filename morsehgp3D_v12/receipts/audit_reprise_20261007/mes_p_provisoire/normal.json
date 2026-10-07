@@ -1,0 +1,79 @@
+{
+  "all_calls_code_zero": true,
+  "analyser_sha256": "65cf25daab063aa37bec20432732cbf45f0e4d063cffd797aa27e18f58650b18",
+  "gcp_used": false,
+  "mixed_thread_counts_unreported": true,
+  "native_engine_executed": false,
+  "outputs": {
+    "f1": {
+      "code": 0,
+      "stdout": "# MES-P par famille de nuages\n\nPrises : 2 ; rendues : 2 ; en echec ou expirees : 0.\n\n| familles reelles, K = 5 | prises | sites (mediane) | chaud mediane (ms) | min | max | \u00b5s par site |\n| --- | ---: | ---: | ---: | ---: | ---: | ---: |\n| 100 a 299 sites | 2 | 150 | 15.0 | 10.0 | 20.0 | 100.0 |\n\nDroite des moindres carres (familles reelles, K = 5) : cout fixe -0.00 ms, 100.00 \u00b5s par site.\n\n| famille synthetique | K | sites : chaud (ms) [part de l'etage foret] |\n| --- | ---: | --- |\n\n"
+    },
+    "f4": {
+      "code": 0,
+      "stdout": "# MES-P par famille de nuages\n\nPrises : 2 ; rendues : 2 ; en echec ou expirees : 0.\n\n| familles reelles, K = 5 | prises | sites (mediane) | chaud mediane (ms) | min | max | \u00b5s par site |\n| --- | ---: | ---: | ---: | ---: | ---: | ---: |\n| 100 a 299 sites | 2 | 150 | 9.0 | 6.0 | 12.0 | 60.0 |\n\nDroite des moindres carres (familles reelles, K = 5) : cout fixe 0.00 ms, 60.00 \u00b5s par site.\n\n| famille synthetique | K | sites : chaud (ms) [part de l'etage foret] |\n| --- | ---: | --- |\n\n"
+    },
+    "f48": {
+      "code": 0,
+      "stdout": "# MES-P par famille de nuages\n\nPrises : 2 ; rendues : 2 ; en echec ou expirees : 0.\n\n| familles reelles, K = 5 | prises | sites (mediane) | chaud mediane (ms) | min | max | \u00b5s par site |\n| --- | ---: | ---: | ---: | ---: | ---: | ---: |\n| 100 a 299 sites | 2 | 150 | 1.5 | 1.0 | 2.0 | 10.0 |\n\nDroite des moindres carres (familles reelles, K = 5) : cout fixe 0.00 ms, 10.00 \u00b5s par site.\n\n| famille synthetique | K | sites : chaud (ms) [part de l'etage foret] |\n| --- | ---: | --- |\n\n"
+    },
+    "mixed": {
+      "code": 0,
+      "stdout": "# MES-P par famille de nuages\n\nPrises : 6 ; rendues : 6 ; en echec ou expirees : 0.\n\n| familles reelles, K = 5 | prises | sites (mediane) | chaud mediane (ms) | min | max | \u00b5s par site |\n| --- | ---: | ---: | ---: | ---: | ---: | ---: |\n| 100 a 299 sites | 6 | 150 | 8.0 | 1.0 | 20.0 | 60.0 |\n\nDroite des moindres carres (familles reelles, K = 5) : cout fixe 0.00 ms, 56.67 \u00b5s par site.\n\n| famille synthetique | K | sites : chaud (ms) [part de l'etage foret] |\n| --- | ---: | --- |\n\n"
+    }
+  },
+  "pin": "f601b36ace16bcc8f7ac9bc532e45ab5079f9667",
+  "schema": "ehgp.v12.audit_reprise.mes_p.v1",
+  "script_sha256": "bf497c0e1e962c4001defd5d136bb4f9387a02527bd8d3bfe55202d62e60a6fc",
+  "synthetic_timing_data": true,
+  "takes": [
+    {
+      "chaud": 0.01,
+      "code": 0,
+      "fils": 1,
+      "k": 5,
+      "nuage": "bout_n100",
+      "sites": 100
+    },
+    {
+      "chaud": 0.02,
+      "code": 0,
+      "fils": 1,
+      "k": 5,
+      "nuage": "bout_n200",
+      "sites": 200
+    },
+    {
+      "chaud": 0.006,
+      "code": 0,
+      "fils": 4,
+      "k": 5,
+      "nuage": "bout_n100",
+      "sites": 100
+    },
+    {
+      "chaud": 0.012,
+      "code": 0,
+      "fils": 4,
+      "k": 5,
+      "nuage": "bout_n200",
+      "sites": 200
+    },
+    {
+      "chaud": 0.001,
+      "code": 0,
+      "fils": 48,
+      "k": 5,
+      "nuage": "bout_n100",
+      "sites": 100
+    },
+    {
+      "chaud": 0.002,
+      "code": 0,
+      "fils": 48,
+      "k": 5,
+      "nuage": "bout_n200",
+      "sites": 200
+    }
+  ]
+}

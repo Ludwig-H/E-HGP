@@ -1,0 +1,13 @@
+{
+  "base": "f601b36ace16bcc8f7ac9bc532e45ab5079f9667",
+  "state": "non_commis_developpeur_capture_stable",
+  "sha256": {
+    "morsehgp3D_v12/src/core/buffer.hpp": "3c7fffc6ed97b6456f666ef849ddd6f4f3a1b3f2427c0fc875b7d5edcd14130b",
+    "morsehgp3D_v12/src/core/buffer.cpp": "fb3c52393cef9b31fe064995a94958b24edcbe3aeda0925dfa30ebf54f37664d",
+    "morsehgp3D_v12/tests/core/buffer_test.cpp": "2c36c17263cb1a34fa395ea0b48b6c97dfb2a34371a8384a8f856a0a7a4014b1",
+    "morsehgp3D_v12/tests/core/alloc_fault.cpp": "a80ad07442bc501a09d964d34922dc16c65f9ad2f44c7d4c0f36b7cdf70c22c9",
+    "morsehgp3D_v12/tests/core/cache_poison_probe.cpp": "3848d1865fec74b05dd0a457bc1f0eeb654089bfcf5ce3293a9c3602d308aad6",
+    "morsehgp3D_v12/tests/core/tests.cmake": "d55a89c4b7e9456e282b809f4b6b127072e0dd0d2845e0117da8cb6be4da8fc4",
+    "morsehgp3D_v12/tests/mutants/core.json": "2d51ae786e487817a4a765c7cea6fba3bd7e3bec6140e45a1b5e516f16606855"
+  }
+}

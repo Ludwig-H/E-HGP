@@ -1,0 +1,55 @@
+diff --git a/morsehgp3D_v12/microbancs/mes_p_petits/pilote_p.py b/morsehgp3D_v12/microbancs/mes_p_petits/pilote_p.py
+index 17f3f9348..2c496f6a5 100644
+--- a/morsehgp3D_v12/microbancs/mes_p_petits/pilote_p.py
++++ b/morsehgp3D_v12/microbancs/mes_p_petits/pilote_p.py
+@@ -10,7 +10,9 @@ Puis un ajustement par moindres carres, par K et par nombre de fils, du temps ch
+ b le cout par site.
+ 
+ Usage : pilote_p.py --v11-build DIR (--donnees DIR | --archive TAR --deballage DIR) --sortie DIR [--fils 1,48]
+-                    [--k 5,10] [--passes 6] [--delai 300] [--jobs 44] [--limite N]
++                    [--k 5,10] [--passes 6] [--delai 300] [--jobs 44] [--limite N] [--exclure PREFIXE,...]
++  --exclure : nuages dont le nom commence par l'un des prefixes ecartes (par exemple synth_lattice,synth_sphere : la
++  v11 y passe des dizaines de secondes par passe, session G du 7 octobre) ; les ecartes sont listes dans mes_p.json.
+   --archive : le paquet g4_small en une seule archive tar (le televersement d'une session paie chaque fichier : 320
+   petits fichiers depassent son delai) ; deballee dans --deballage apres controle de chaque membre (fichier simple, nom
+   simple, aucun chemin), puis lue comme --donnees.
+@@ -123,6 +125,7 @@ def main(argv):
+     parser.add_argument('--delai', type=int, default=300)
+     parser.add_argument('--jobs', type=int, default=44)
+     parser.add_argument('--limite', type=int, default=0)
++    parser.add_argument('--exclure', default='')
+     try:
+         args = parser.parse_args(argv[1:])
+         if (args.donnees is None) == (args.archive is None) or (args.archive is not None and args.deballage is None):
+@@ -139,6 +142,9 @@ def main(argv):
+         return 2
+     if args.passes < 2 or not threads or not orders or any(t < 1 for t in threads) or any(not 1 <= k <= 12 for k in orders):
+         return 2
++    prefixes = [x for x in args.exclure.split(',') if x]
++    excluded = [name for name in names if any(name.startswith(x) for x in prefixes)]
++    names = [name for name in names if name not in excluded]
+     if args.limite > 0:
+         names = names[:args.limite]
+     raw_dir = os.path.join(args.sortie, 'brut')
+@@ -152,8 +158,8 @@ def main(argv):
+             for t in threads:
+                 entries.append(run_cloud(binary, args.donnees, raw_dir, name, k, t, args.passes, args.delai))
+         with open(os.path.join(args.sortie, 'mes_p.json'), 'w', encoding='utf-8') as out:
+-            json.dump(dict(mesure='MES-P', masque=MASK, passes=args.passes, prises=entries), out, indent=1,
+-                      sort_keys=True)
++            json.dump(dict(mesure='MES-P', masque=MASK, passes=args.passes, prises=entries, exclus=excluded), out,
++                      indent=1, sort_keys=True)
+     fits = {}
+     for k in orders:
+         for t in threads:
+@@ -161,8 +167,8 @@ def main(argv):
+                       if e['k'] == k and e['fils'] == t and e['code'] == 0 and e['sites'] and e['chaud'] is not None]
+             fits['k%d_f%d' % (k, t)] = fit(points)
+     with open(os.path.join(args.sortie, 'mes_p.json'), 'w', encoding='utf-8') as out:
+-        json.dump(dict(mesure='MES-P', masque=MASK, passes=args.passes, prises=entries, ajustements=fits), out,
+-                  indent=1, sort_keys=True)
++        json.dump(dict(mesure='MES-P', masque=MASK, passes=args.passes, prises=entries, ajustements=fits,
++                       exclus=excluded), out, indent=1, sort_keys=True)
+     lines = ['# MES-P : v11 gelee sur les petits nuages, a chaud', '', '| K et fils | cout fixe (ms) | cout par site (µs) '
+              '| nuages |', '| --- | ---: | ---: | ---: |']
+     for key, value in sorted(fits.items()):

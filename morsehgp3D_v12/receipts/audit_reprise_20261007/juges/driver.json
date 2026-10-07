@@ -1,0 +1,207 @@
+{
+  "ancien_driver_sha256": "80cbef89f1f43917bb4e2afc40629d00ea71529fded8697f3a8c248526508d7a",
+  "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "flags": "-std=c++20 -O1 -Wall -Wextra -Wpedantic -Werror",
+  "pin": "f601b36ac",
+  "resultats": [
+    {
+      "cas": 29,
+      "cas_en_ecart": [],
+      "code": 0,
+      "ecarts": 0,
+      "version": "after"
+    },
+    {
+      "cas": 29,
+      "cas_en_ecart": [
+        {
+          "allocations_hote_apres_totaux": 1,
+          "cas": "refus_parents_profondeur_0",
+          "conforme": false,
+          "noyaux_apres_totaux": 0,
+          "reservations_apres_totaux": 0,
+          "statut": 3
+        },
+        {
+          "allocations_hote_apres_totaux": 1,
+          "cas": "refus_taches_profondeur_0",
+          "conforme": false,
+          "noyaux_apres_totaux": 0,
+          "reservations_apres_totaux": 0,
+          "statut": 3
+        },
+        {
+          "allocations_hote_apres_totaux": 1,
+          "cas": "refus_feuille_large_profondeur_0",
+          "conforme": false,
+          "noyaux_apres_totaux": 0,
+          "reservations_apres_totaux": 0,
+          "statut": 1
+        },
+        {
+          "allocations_hote_apres_totaux": 1,
+          "cas": "refus_parents_profondeur_1",
+          "conforme": false,
+          "noyaux_apres_totaux": 0,
+          "reservations_apres_totaux": 0,
+          "statut": 3
+        },
+        {
+          "allocations_hote_apres_totaux": 1,
+          "cas": "refus_taches_profondeur_1",
+          "conforme": false,
+          "noyaux_apres_totaux": 0,
+          "reservations_apres_totaux": 0,
+          "statut": 3
+        },
+        {
+          "allocations_hote_apres_totaux": 1,
+          "cas": "refus_feuille_large_profondeur_1",
+          "conforme": false,
+          "noyaux_apres_totaux": 0,
+          "reservations_apres_totaux": 0,
+          "statut": 1
+        },
+        {
+          "allocations_hote_apres_totaux": 1,
+          "cas": "refus_parents_profondeur_2",
+          "conforme": false,
+          "noyaux_apres_totaux": 0,
+          "reservations_apres_totaux": 0,
+          "statut": 3
+        },
+        {
+          "allocations_hote_apres_totaux": 1,
+          "cas": "refus_taches_profondeur_2",
+          "conforme": false,
+          "noyaux_apres_totaux": 0,
+          "reservations_apres_totaux": 0,
+          "statut": 3
+        },
+        {
+          "allocations_hote_apres_totaux": 1,
+          "cas": "refus_feuille_large_profondeur_2",
+          "conforme": false,
+          "noyaux_apres_totaux": 0,
+          "reservations_apres_totaux": 0,
+          "statut": 1
+        },
+        {
+          "allocations_hote_apres_totaux": 1,
+          "cas": "refus_parents_profondeur_4",
+          "conforme": false,
+          "noyaux_apres_totaux": 0,
+          "reservations_apres_totaux": 0,
+          "statut": 3
+        },
+        {
+          "allocations_hote_apres_totaux": 1,
+          "cas": "refus_taches_profondeur_4",
+          "conforme": false,
+          "noyaux_apres_totaux": 0,
+          "reservations_apres_totaux": 0,
+          "statut": 3
+        },
+        {
+          "allocations_hote_apres_totaux": 1,
+          "cas": "refus_feuille_large_profondeur_4",
+          "conforme": false,
+          "noyaux_apres_totaux": 0,
+          "reservations_apres_totaux": 0,
+          "statut": 1
+        },
+        {
+          "allocations_hote_apres_totaux": 1,
+          "cas": "refus_parents_profondeur_8",
+          "conforme": false,
+          "noyaux_apres_totaux": 0,
+          "reservations_apres_totaux": 0,
+          "statut": 3
+        },
+        {
+          "allocations_hote_apres_totaux": 1,
+          "cas": "refus_taches_profondeur_8",
+          "conforme": false,
+          "noyaux_apres_totaux": 0,
+          "reservations_apres_totaux": 0,
+          "statut": 3
+        },
+        {
+          "allocations_hote_apres_totaux": 1,
+          "cas": "refus_feuille_large_profondeur_8",
+          "conforme": false,
+          "noyaux_apres_totaux": 0,
+          "reservations_apres_totaux": 0,
+          "statut": 1
+        },
+        {
+          "allocations_hote_apres_totaux": 1,
+          "cas": "refus_parents_profondeur_16",
+          "conforme": false,
+          "noyaux_apres_totaux": 0,
+          "reservations_apres_totaux": 0,
+          "statut": 3
+        },
+        {
+          "allocations_hote_apres_totaux": 1,
+          "cas": "refus_taches_profondeur_16",
+          "conforme": false,
+          "noyaux_apres_totaux": 0,
+          "reservations_apres_totaux": 0,
+          "statut": 3
+        },
+        {
+          "allocations_hote_apres_totaux": 1,
+          "cas": "refus_feuille_large_profondeur_16",
+          "conforme": false,
+          "noyaux_apres_totaux": 0,
+          "reservations_apres_totaux": 0,
+          "statut": 1
+        },
+        {
+          "allocations_hote_apres_totaux": 1,
+          "cas": "refus_parents_profondeur_32",
+          "conforme": false,
+          "noyaux_apres_totaux": 0,
+          "reservations_apres_totaux": 0,
+          "statut": 3
+        },
+        {
+          "allocations_hote_apres_totaux": 1,
+          "cas": "refus_taches_profondeur_32",
+          "conforme": false,
+          "noyaux_apres_totaux": 0,
+          "reservations_apres_totaux": 0,
+          "statut": 3
+        },
+        {
+          "allocations_hote_apres_totaux": 1,
+          "cas": "refus_feuille_large_profondeur_32",
+          "conforme": false,
+          "noyaux_apres_totaux": 0,
+          "reservations_apres_totaux": 0,
+          "statut": 1
+        }
+      ],
+      "code": 1,
+      "ecarts": 21,
+      "version": "before"
+    }
+  ],
+  "sources_sha256": {
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/arena.hpp": "ca4b821b69c4724b8d4d9076802ba5efff1e040cf60bd7eef51b9eb1991cb78a",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/compare.hpp": "aa31b79d417452bc575246b506a45ca3fb0021f96fd349fabd851bfd31ceeae4",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/dump_format.hpp": "4327b6788f2e7723995c1b20b820576ea762c31c864f2c042c59dc0d161117a0",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_coherent.hpp": "a928efb5092780f407284d7eff49a443ad2079162d00f52254ba7a86d2eddd7d",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_common.hpp": "db205b77a9b04180e6a74597b876744641b4e5220665851f492875fa9b540afb",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/leaf_j3.hpp": "8235004c799097815bbd48c15c806c9e4d4a7cb6d99934491617c29d7d28a5b5",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/predicates.hpp": "36144eff2d5ddf57bee5453d2e72b758a72b88dabf037d2323b0a10ad55f4be1",
+    "morsehgp3D_v12/microbancs/mes_m2_feuille/include/mhgp12/leaf/simt.hpp": "c7276ddb0aba9b196e1b3c8ad138f778afda04614a3d57e285b94f3cb6f07691",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/host/driver_selftest.cpp": "02c0bafb7001f4a0dc7322121f55cb3c470a8cdeefcdd42a899c3f9aa7672c99",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/bfs.hpp": "5eaff1305f7d9c4fca78803eae7165fba10d89758342ed4e0337353634da2e8f",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/compare.hpp": "587fb54dd0158a7155b96d660acbb8d0a7fe74301d3ab16f2f0f62614ec99889",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/driver.hpp": "9964691e52549c887bf5c79c5d56b9e1e2f8a3a53c6355cffcb541f01ec3c92c",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/format.hpp": "a1259bf79734926c800186459d56d29c81cf97b81c7cd7e42ca3cfaf1a989725",
+    "morsehgp3D_v12/microbancs/mes_m5_parcours/include/mhgp12/traversal/warp.hpp": "919ba0a2f3c54e99919df7e9bb90e8be8528b2f8c0e2b581124c041f85de930a"
+  }
+}

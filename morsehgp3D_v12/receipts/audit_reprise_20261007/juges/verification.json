@@ -1,0 +1,49 @@
+{
+  "normal_exit_code": 0,
+  "normal_optimized_byte_identical": true,
+  "official_gates": [
+    {
+      "cases": 38,
+      "discrepancies": [],
+      "exit_code": 0,
+      "gate": "m5",
+      "mode": "normal",
+      "python": "3.12.1",
+      "stdout_sha256": "ab24ed1870c4a79bc1e3c10d5b00c33443ecc9e6956c6f62886627d00da976ef"
+    },
+    {
+      "cases": 38,
+      "discrepancies": [],
+      "exit_code": 0,
+      "gate": "m5",
+      "mode": "optimized",
+      "python": "3.12.1",
+      "stdout_sha256": "4f75cea4cf96b3f83c7484c30f871bf1079d92d3d46df1fdcd212a39b08c85dd"
+    },
+    {
+      "cases": 54,
+      "discrepancies": [],
+      "exit_code": 0,
+      "gate": "m6",
+      "mode": "normal",
+      "python": "3.12.1",
+      "stdout_sha256": "6d253e4638b5d09a8156fd4b4e08bc5fab1144aa29c0750fdb6a4aa84c97343f"
+    },
+    {
+      "cases": 54,
+      "discrepancies": [],
+      "exit_code": 0,
+      "gate": "m6",
+      "mode": "optimized",
+      "python": "3.12.1",
+      "stdout_sha256": "f73d7daf68f0060d52db5b6bb28181b32a5749b46f023f23e7976a3bfd522570"
+    }
+  ],
+  "official_gates_normalization": "optimise flag and generated /tmp directory name only",
+  "official_gates_normalized_identical": true,
+  "optimized_exit_code": 0,
+  "pin": "f601b36ac",
+  "python_observations_per_mode": 31,
+  "resultats_sha256": "1e4e46b30646506ddfa3de1fd66842a1469d1062e73f28c077b070737020837f",
+  "scope": "relecture, simulations causales et porte native bornee ; aucun GCP/GPU/chrono produit"
+}

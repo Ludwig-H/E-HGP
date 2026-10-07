@@ -1,0 +1,18 @@
+{
+  "additional_identity_cli_calls": 43,
+  "compiled_dependency_files": 7,
+  "gcp_used": false,
+  "harness_initial_failure": "official child created __pycache__; pinned-source guard rejected it; final child uses -B",
+  "historical_cloud_rows_identical": 24,
+  "historical_independent_cli_calls": 64,
+  "independent_cli_calls_per_mode": 107,
+  "normal_code": 0,
+  "normal_optimized_identical": true,
+  "normal_sha256": "49ebe19a6b11840b28d0c60e802ce5a966415477398c9182c7da2c63929362b3",
+  "official_controls_per_mode": 141,
+  "optimized_code": 0,
+  "optimized_sha256": "49ebe19a6b11840b28d0c60e802ce5a966415477398c9182c7da2c63929362b3",
+  "pin": "f601b36ace16bcc8f7ac9bc532e45ab5079f9667",
+  "private_data_read": false,
+  "sources_equal_pin_and_stable": true
+}

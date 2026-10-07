@@ -1,0 +1,406 @@
+diff --git a/morsehgp3D_v12/src/core/buffer.cpp b/morsehgp3D_v12/src/core/buffer.cpp
+index 2b8651eee..9f683b908 100644
+--- a/morsehgp3D_v12/src/core/buffer.cpp
++++ b/morsehgp3D_v12/src/core/buffer.cpp
+@@ -8,7 +8,16 @@
+ #include <mutex>
+ #include <new>
+ 
++// Empoisonnement ASan des blocs inactifs : GCC definit __SANITIZE_ADDRESS__, Clang (18 compris) ne le definit pas et
++// s'interroge par __has_feature (CST-0019 : sous Clang, l'empoisonnement etait muet).
+ #if defined(__SANITIZE_ADDRESS__)
++#define MHGP12_ASAN_POISON 1
++#elif defined(__has_feature)
++#if __has_feature(address_sanitizer)
++#define MHGP12_ASAN_POISON 1
++#endif
++#endif
++#if defined(MHGP12_ASAN_POISON)
+ #include <sanitizer/asan_interface.h>
+ #endif
+ 
+@@ -16,7 +25,7 @@ namespace mhgp12::detail {
+ 
+ namespace {
+ 
+-// Reserve `bytes` dans le compte si used + bytes <= limit, de facon atomique.
++// Reserve `bytes` dans le compte si used + bytes <= limit, de facon atomique (compte sans cache).
+ // Bornes : cur <= limit est l'invariant du compte ; quand bytes <= limit, limit - bytes ne deborde pas, et le test
+ // cur <= limit - bytes equivaut a cur + bytes <= limit sans jamais calculer une somme qui deborderait.
+ bool budget_reserve(BudgetAccount& account, u64 bytes) noexcept {
+@@ -41,6 +50,8 @@ inline constexpr u32 kCacheClasses = kCacheSteps * 26;  // jusqu'a 256 Kio * 2^2
+ inline constexpr u32 kCacheSlots = 32;                   // blocs inactifs par classe
+ inline constexpr std::array<u64, kCacheSteps> kStepNumerator{1024, 1117, 1218, 1328, 1448, 1579, 1722, 1878};
+ 
++// Strictement croissante en k (deux pas consecutifs ecartent les valeurs brutes de plus de 4 Kio) : la classe d'une
++// capacite est donc la classe elle-meme, ce que buffer_release lit pour reconnaitre un bloc de classe.
+ u64 class_capacity(u32 k) noexcept {
+   const u64 raw = ((kCacheMinBytes / 1024) * kStepNumerator[k % kCacheSteps]) << (k / kCacheSteps);  // < 2^45
+   return (raw + 4095) / 4096 * 4096;
+@@ -58,60 +69,57 @@ u32 class_of(u64 bytes) noexcept {
+ 
+ // Blocs inactifs empoisonnes pour ASan : tout usage apres restitution reste detecte, comme sans cache.
+ void poison(void* block, u64 bytes) noexcept {
+-#if defined(__SANITIZE_ADDRESS__)
++#if defined(MHGP12_ASAN_POISON)
+   ASAN_POISON_MEMORY_REGION(block, static_cast<std::size_t>(bytes));
+ #else
+   static_cast<void>(block); static_cast<void>(bytes);
+ #endif
+ }
+ void unpoison(void* block, u64 bytes) noexcept {
+-#if defined(__SANITIZE_ADDRESS__)
++#if defined(MHGP12_ASAN_POISON)
+   ASAN_UNPOISON_MEMORY_REGION(block, static_cast<std::size_t>(bytes));
+ #else
+   static_cast<void>(block); static_cast<void>(bytes);
+ #endif
+ }
+ 
++// Ajoute x octets vivants (apres retenue dans held sous cache) et tient le pic.
++void count_live(BudgetAccount& account, u64 x) noexcept {
++  const u64 reached = account.used.fetch_add(x, std::memory_order_relaxed) + x;
++  u64 peak = account.peak.load(std::memory_order_relaxed);
++  while (reached > peak && !account.peak.compare_exchange_weak(peak, reached, std::memory_order_relaxed)) {
++  }
++}
++
+ }  // namespace
+ 
+ struct BlockCache {
+   explicit BlockCache(u64 bytes) noexcept : capacity(bytes) {}
+   const u64 capacity;
+   std::mutex mutex;
+-  u64 idle = 0, idle_peak = 0, hits = 0, misses = 0, rejected = 0;
++  u64 idle = 0, idle_peak = 0, hits = 0, misses = 0, rejected = 0, evicted = 0, exact = 0;
+   std::array<u32, kCacheClasses> count{};
+   std::array<std::array<void*, kCacheSlots>, kCacheClasses> slots{};
+ };
+ 
+ namespace {
+ 
+-// Bloc d'une classe : repris du cache, sinon neuf a la capacite de la classe (reutilisable plus tard). La partie
+-// au-dela de bytes reste empoisonnee pour ASan.
+-void* cache_take(BlockCache& cache, u32 k, u64 bytes) noexcept {
+-  const u64 capacity = class_capacity(k);
+-  void* block = nullptr;
+-  {
+-    const std::lock_guard<std::mutex> lock(cache.mutex);
+-    if (cache.count[k] != 0) {
+-      block = cache.slots[k][--cache.count[k]];
+-      cache.idle -= capacity;
+-      ++cache.hits;
+-    } else {
+-      ++cache.misses;
+-    }
+-  }
+-  if (block != nullptr) {
+-    unpoison(block, bytes);
+-    return block;
++// Bloc inactif de la classe k, sinon nullptr (un echec compte un defaut de cache). Le bloc passe d'inactif a vivant :
++// held ne change pas.
++void* cache_pop(BlockCache& cache, u32 k) noexcept {
++  const std::lock_guard<std::mutex> lock(cache.mutex);
++  if (cache.count[k] == 0) {
++    ++cache.misses;
++    return nullptr;
+   }
+-  block = ::operator new(static_cast<std::size_t>(capacity), std::nothrow);
+-  if (block != nullptr) poison(static_cast<char*>(block) + bytes, capacity - bytes);
+-  return block;
++  cache.idle -= class_capacity(k);
++  ++cache.hits;
++  return cache.slots[k][--cache.count[k]];
+ }
+ 
+-// Garde un bloc de la classe k si la classe a une place et si les blocs inactifs restent sous la capacite ; sinon le
+-// rend au systeme. Le bloc est empoisonne avant d'etre visible des autres fils.
+-void cache_give(BlockCache& cache, u32 k, void* block) noexcept {
++// Garde un bloc de la classe k si la classe a une place et si les blocs inactifs restent sous la capacite du cache ;
++// false sinon (l'appelant le rend au systeme). Le bloc est empoisonne avant d'etre visible des autres fils.
++bool cache_push(BlockCache& cache, u32 k, void* block) noexcept {
+   const u64 capacity = class_capacity(k);
+   poison(block, capacity);
+   {
+@@ -120,12 +128,89 @@ void cache_give(BlockCache& cache, u32 k, void* block) noexcept {
+       cache.slots[k][cache.count[k]++] = block;
+       cache.idle += capacity;
+       cache.idle_peak = std::max(cache.idle_peak, cache.idle);
+-      return;
++      return true;
+     }
+     ++cache.rejected;
+   }
+   unpoison(block, capacity);
++  return false;
++}
++
++// Rend au systeme le plus grand bloc inactif et le retire de held ; false si le cache est vide.
++bool cache_evict(BudgetAccount& account) noexcept {
++  BlockCache& cache = *account.cache;
++  void* block = nullptr;
++  u64 capacity = 0;
++  {
++    const std::lock_guard<std::mutex> lock(cache.mutex);
++    for (u32 k = kCacheClasses; k-- > 0;) {
++      if (cache.count[k] == 0) continue;
++      capacity = class_capacity(k);
++      block = cache.slots[k][--cache.count[k]];
++      cache.idle -= capacity;
++      ++cache.evicted;
++      break;
++    }
++  }
++  if (block == nullptr) return false;
++  unpoison(block, capacity);
+   ::operator delete(block);
++  account.held.fetch_sub(capacity, std::memory_order_relaxed);
++  return true;
++}
++
++// Sous cache : retient x octets physiques dans held (held <= limit), en rendant des blocs inactifs au systeme tant que
++// x ne tient pas ; false si x ne tient pas meme cache vide (rien n'est alors retenu).
++bool hold(BudgetAccount& account, u64 x) noexcept {
++  u64 cur = account.held.load(std::memory_order_relaxed);
++  for (;;) {
++    if (x <= account.limit && cur <= account.limit - x) {
++      if (account.held.compare_exchange_weak(cur, cur + x, std::memory_order_relaxed)) return true;
++      continue;
++    }
++    if (!cache_evict(account)) return false;
++    cur = account.held.load(std::memory_order_relaxed);
++  }
++}
++
++// Bloc neuf de `x` octets retenus et comptes vivants ; nullptr (rien ne reste retenu) si l'allocation echoue.
++void* fresh_block(BudgetAccount& account, u64 x) noexcept {
++  count_live(account, x);
++  void* block = ::operator new(static_cast<std::size_t>(x), std::nothrow);
++  if (block == nullptr) {
++    account.used.fetch_sub(x, std::memory_order_relaxed);
++    account.held.fetch_sub(x, std::memory_order_relaxed);
++  }
++  return block;
++}
++
++// Acquisition sous cache : bloc inactif de la classe, sinon bloc neuf de la classe, sinon (la classe ne tient pas meme
++// cache vide) bloc a la taille exacte, jamais garde. La partie au-dela de bytes reste empoisonnee pour ASan.
++void* cached_acquire(BudgetAccount& account, u64 bytes, u64& reserved) noexcept {
++  BlockCache& cache = *account.cache;
++  const u32 k = class_of(bytes);
++  if (k < kCacheClasses) {
++    const u64 capacity = class_capacity(k);
++    if (void* block = cache_pop(cache, k); block != nullptr) {
++      count_live(account, capacity);
++      unpoison(block, bytes);
++      reserved = capacity;
++      return block;
++    }
++    if (hold(account, capacity)) {
++      void* block = fresh_block(account, capacity);
++      if (block != nullptr) {
++        poison(static_cast<char*>(block) + bytes, capacity - bytes);
++        reserved = capacity;
++      }
++      return block;
++    }
++    const std::lock_guard<std::mutex> lock(cache.mutex);
++    ++cache.exact;
++  }
++  if (!hold(account, bytes)) return nullptr;
++  reserved = bytes;
++  return fresh_block(account, bytes);
+ }
+ 
+ }  // namespace
+@@ -146,35 +231,59 @@ BlockCacheStats cache_stats(const BudgetAccount& account) noexcept {
+   if (account.cache == nullptr) return {};
+   const std::lock_guard<std::mutex> lock(account.cache->mutex);
+   const BlockCache& c = *account.cache;
+-  return {c.capacity, c.idle, c.idle_peak, c.hits, c.misses, c.rejected};
++  return {c.capacity, c.idle, c.idle_peak, c.hits, c.misses, c.rejected, c.evicted, c.exact,
++          account.held.load(std::memory_order_relaxed)};
+ }
+ 
+-void* buffer_acquire(BudgetAccount& account, u64 bytes) noexcept {
+-  if (!budget_reserve(account, bytes)) return nullptr;
+-  const u32 k = account.cache == nullptr ? kCacheClasses : class_of(bytes);
+-  void* block = k < kCacheClasses ? cache_take(*account.cache, k, bytes)
+-                                  : ::operator new(static_cast<std::size_t>(bytes), std::nothrow);
+-  if (block == nullptr) {
+-    account.used.fetch_sub(bytes, std::memory_order_relaxed);
+-    return nullptr;
++void* buffer_acquire(BudgetAccount& account, u64 bytes, u64& reserved) noexcept {
++  reserved = 0;
++  void* block = nullptr;
++  if (account.cache != nullptr) {
++    block = cached_acquire(account, bytes, reserved);
++  } else if (budget_reserve(account, bytes)) {
++    block = ::operator new(static_cast<std::size_t>(bytes), std::nothrow);
++    if (block == nullptr) account.used.fetch_sub(bytes, std::memory_order_relaxed);
++    else reserved = bytes;
+   }
++  if (block == nullptr) return nullptr;
+ #ifdef MHGP12_POISON
+   std::memset(block, 0xA5, static_cast<std::size_t>(bytes));
+ #endif
+   return block;
+ }
+ 
+-void buffer_release(BudgetAccount& account, void* block, u64 bytes) noexcept {
+-  const u32 k = account.cache == nullptr ? kCacheClasses : class_of(bytes);
+-  if (k < kCacheClasses) cache_give(*account.cache, k, block);  // meme classe qu'a l'acquisition (meme taille)
+-  else ::operator delete(block);
+-  account.used.fetch_sub(bytes, std::memory_order_relaxed);
++// Ordre des comptes : un bloc n'est retire de used qu'apres avoir quitte le vivant, et de held qu'apres sa
++// restitution au systeme ; used + inactifs <= held <= limit a tout instant.
++void buffer_release(BudgetAccount& account, void* block, u64 reserved) noexcept {
++  if (account.cache == nullptr) {
++    ::operator delete(block);
++    account.used.fetch_sub(reserved, std::memory_order_relaxed);
++    return;
++  }
++  // Un bloc de classe a pour taille reservee la capacite de sa classe ; un bloc exact n'est jamais garde.
++  const u32 k = class_of(reserved);
++  if (k < kCacheClasses && class_capacity(k) == reserved) {
++    account.used.fetch_sub(reserved, std::memory_order_relaxed);  // vivant -> inactif : held inchange
++    if (cache_push(*account.cache, k, block)) return;
++    ::operator delete(block);
++    account.held.fetch_sub(reserved, std::memory_order_relaxed);
++    return;
++  }
++  ::operator delete(block);
++  account.used.fetch_sub(reserved, std::memory_order_relaxed);
++  account.held.fetch_sub(reserved, std::memory_order_relaxed);
+ }
+ 
+-bool budget_reserve_only(BudgetAccount& account, u64 bytes) noexcept { return budget_reserve(account, bytes); }
++bool budget_reserve_only(BudgetAccount& account, u64 bytes) noexcept {
++  if (account.cache == nullptr) return budget_reserve(account, bytes);
++  if (!hold(account, bytes)) return false;
++  count_live(account, bytes);
++  return true;
++}
+ 
+ void budget_release_only(BudgetAccount& account, u64 bytes) noexcept {
+   account.used.fetch_sub(bytes, std::memory_order_relaxed);
++  if (account.cache != nullptr) account.held.fetch_sub(bytes, std::memory_order_relaxed);
+ }
+ 
+ }  // namespace mhgp12::detail
+diff --git a/morsehgp3D_v12/src/core/buffer.hpp b/morsehgp3D_v12/src/core/buffer.hpp
+index 76c0369f3..128435151 100644
+--- a/morsehgp3D_v12/src/core/buffer.hpp
++++ b/morsehgp3D_v12/src/core/buffer.hpp
+@@ -41,15 +41,19 @@ namespace mhgp12 {
+ 
+ namespace detail {
+ 
+-// Cache de blocs d'un compte (buffer.cpp) et ses compteurs, diagnostic seulement.
++// Cache de blocs d'un compte (buffer.cpp) et ses compteurs, diagnostic seulement. held : octets physiques tenus par
++// le compte (blocs vivants a leur taille physique et blocs inactifs) ; evicted : blocs inactifs rendus au systeme pour
++// faire place sous la limite ; exact : reservations servies a leur taille exacte, la classe ne tenant pas.
+ struct BlockCache;
+ struct BlockCacheStats {
+-  u64 capacity = 0, idle = 0, idle_peak = 0, hits = 0, misses = 0, rejected = 0;
++  u64 capacity = 0, idle = 0, idle_peak = 0, hits = 0, misses = 0, rejected = 0, evicted = 0, exact = 0, held = 0;
+ };
+ 
+ // Compte d'un budget. Invariant : used <= limit a tout instant ; peak = plus grande valeur prise par used, donc le
+ // maximum des reservations, y compris celle d'une allocation que le systeme refuse ensuite. Ce n'est pas la memoire
+ // residente du processus. cache : nul sauf capacite de cache non nulle ; ses blocs inactifs sont rendus avec le compte.
++// Avec cache (CST-0007, CST-0019) : used porte la taille PHYSIQUE des blocs vivants (classe arrondie), held la somme
++// des blocs vivants et inactifs, et l'invariant devient used <= held <= limit ; sans cache, held reste nul.
+ struct BudgetAccount {
+   BudgetAccount(u64 limit_bytes, u64 cache_bytes);
+   ~BudgetAccount();
+@@ -58,15 +62,17 @@ struct BudgetAccount {
+   const u64 limit;
+   std::atomic<u64> used{0};
+   std::atomic<u64> peak{0};
++  std::atomic<u64> held{0};
+   std::unique_ptr<BlockCache> cache;
+ };
+ [[nodiscard]] BlockCacheStats cache_stats(const BudgetAccount& account) noexcept;
+ 
+-// Reserve `bytes` octets dans le compte, puis les alloue. nullptr si le compte refuse ou si l'allocation echoue ;
+-// rien ne reste alors reserve. bytes > 0.
+-[[nodiscard]] void* buffer_acquire(BudgetAccount& account, u64 bytes) noexcept;
+-// Rend un bloc obtenu par buffer_acquire avec la meme taille, et sa reservation.
+-void buffer_release(BudgetAccount& account, void* block, u64 bytes) noexcept;
++// Reserve au moins `bytes` octets dans le compte, puis les alloue ; `reserved` recoit les octets reserves (taille
++// physique du bloc : `bytes`, ou la capacite de sa classe sous cache). nullptr si le compte refuse ou si l'allocation
++// echoue ; rien ne reste alors reserve. bytes > 0.
++[[nodiscard]] void* buffer_acquire(BudgetAccount& account, u64 bytes, u64& reserved) noexcept;
++// Rend un bloc obtenu par buffer_acquire avec les octets `reserved` qu'il a rendus, et sa reservation.
++void buffer_release(BudgetAccount& account, void* block, u64 reserved) noexcept;
+ // Reservation seule, sans bloc (BudgetReservation) : memes regles que buffer_acquire ; et son retour.
+ [[nodiscard]] bool budget_reserve_only(BudgetAccount& account, u64 bytes) noexcept;
+ void budget_release_only(BudgetAccount& account, u64 bytes) noexcept;
+@@ -79,9 +85,13 @@ void budget_release_only(BudgetAccount& account, u64 bytes) noexcept;
+ // Cache de blocs (7 octobre 2026, recu retention_tas) : avec cache_bytes > 0, les blocs d'au moins 256 Kio rendus par
+ // les Buffer de ce budget sont gardes, jusqu'a cache_bytes octets inactifs, et repris par la reservation suivante de
+ // la meme classe de taille (2^(1/8) par pas). Ils ne sont plus rendus au systeme (munmap, sur un seul fil) puis
+-// refaits page par page a la passe suivante. Le compte (used, peak, admit, released) ne change pas : il porte les
+-// Buffer vivants. Les blocs inactifs sont bornes par cache_bytes, seconde borne explicite, et rendus au systeme avec
++// refaits page par page a la passe suivante. Les blocs inactifs sont bornes par cache_bytes et rendus au systeme avec
+ // le compte. Aucune decision ni aucune sortie n'en depend. Sans cache (defaut), comportement inchange.
++// Le cache est compte comme une reserve (CST-0007, CST-0019, 7 octobre) : un bloc vivant de classe compte sa taille
++// physique (used, peak), les blocs inactifs comptent sous la meme limite (held = vivants + inactifs <= limit), et une
++// reservation qui ne tient pas rend d'abord des blocs inactifs au systeme ; si la classe ne tient pas meme cache vide,
++// le bloc est pris a sa taille exacte et ne sera pas garde. admit prend une marge de 1/8 (la classe arrondit au plus
++// de 2^(1/8) et d'une page de 4 Kio, soit moins de 10,7 % au-dessus de 256 Kio) : son engagement tient sous cache.
+ class MemoryBudget {
+  public:
+   static constexpr u64 kUnlimited = std::numeric_limits<u64>::max();
+@@ -102,8 +112,12 @@ class MemoryBudget {
+   // l'etage n'est refusee par le budget, quel que soit le nombre de fils ou leur entrelacement, et le refus, s'il a
+   // lieu, a lieu ici, avant tout calcul. Si la formule sous-estime, une allocation ulterieure refuse (memory_budget).
+   // Borne : used <= limit (invariant du compte), donc limit - used ne deborde pas.
++  // Sous cache, chaque tampon peut couter sa classe : la formule recoit une marge de bytes / 8.
+   [[nodiscard]] Outcome admit(u64 bytes) const noexcept {
+-    return bytes <= account_->limit - used() ? Outcome{} : fail(Reason::memory_budget);
++    const u64 room = account_->limit - used();
++    if (bytes > room) return fail(Reason::memory_budget);
++    if (account_->cache != nullptr && bytes / 8 > room - bytes) return fail(Reason::memory_budget);
++    return {};
+   }
+ 
+   // Pic par etage : remet le pic a la quantite en usage et rend l'ancien pic. Le pilote l'appelle entre deux etages,
+@@ -189,22 +203,26 @@ class Buffer {
+     reset();
+     if (n == 0) return {};
+     if (n > kMaxCount) return fail(Reason::memory_budget);
+-    void* block = detail::buffer_acquire(*budget.account_, n * sizeof(T));
++    u64 reserved = 0;
++    void* block = detail::buffer_acquire(*budget.account_, n * sizeof(T), reserved);
+     if (block == nullptr) return fail(Reason::memory_budget);
+     data_ = static_cast<T*>(block);
+     size_ = n;
++    reserved_ = reserved;
+     account_ = budget.account_;
+     return {};
+   }
+   void reset() noexcept {
+-    if (data_ != nullptr) detail::buffer_release(*account_, static_cast<void*>(data_), size_ * sizeof(T));
++    if (data_ != nullptr) detail::buffer_release(*account_, static_cast<void*>(data_), reserved_);
+     data_ = nullptr;
+     size_ = 0;
++    reserved_ = 0;
+     account_.reset();
+   }
+   void swap(Buffer& o) noexcept {
+     std::swap(data_, o.data_);
+     std::swap(size_, o.size_);
++    std::swap(reserved_, o.reserved_);
+     account_.swap(o.account_);
+   }
+ 
+@@ -225,6 +243,7 @@ class Buffer {
+  private:
+   T* data_ = nullptr;
+   u64 size_ = 0;
++  u64 reserved_ = 0;  // octets reserves dans le compte (taille physique du bloc)
+   std::shared_ptr<detail::BudgetAccount> account_;
+ };
+ 

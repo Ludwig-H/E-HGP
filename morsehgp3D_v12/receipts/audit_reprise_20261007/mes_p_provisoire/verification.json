@@ -1,0 +1,23 @@
+{
+  "cli_calls_per_mode": 4,
+  "gcp_used": false,
+  "native_engine_executed": false,
+  "normal_code": 0,
+  "normal_optimized_identical": true,
+  "normal_sha256": "ca0c01cca192db209bf164b862f5d2813aeab8e3fc53dcd29b0f4662e6ad97ee",
+  "optimized_code": 0,
+  "optimized_sha256": "ca0c01cca192db209bf164b862f5d2813aeab8e3fc53dcd29b0f4662e6ad97ee",
+  "pending_pilot": {
+    "base_head": "f601b36ace16bcc8f7ac9bc532e45ab5079f9667",
+    "committed": false,
+    "patch_sha256": "1f8faebb4dd3eebb63cd637f633f30fa3be85f0801aeff4507e08ea39b09f443",
+    "path": "morsehgp3D_v12/microbancs/mes_p_petits/pilote_p.py",
+    "qualification_claimed": false,
+    "sha256": "26c7d6c404cd8efdb242ac4cd3b728383247151e24bb63be56c68210be00726c"
+  },
+  "pin": "f601b36ace16bcc8f7ac9bc532e45ab5079f9667",
+  "stable_sources_sha256": {
+    "morsehgp3D_v11/bench/full_probe.cpp": "9d70956efddcef97be0a9153da5feb2417702402b46394ac778c6d78e2c49c2c",
+    "morsehgp3D_v12/microbancs/mes_p_petits/analyse_p.py": "65cf25daab063aa37bec20432732cbf45f0e4d063cffd797aa27e18f58650b18"
+  }
+}

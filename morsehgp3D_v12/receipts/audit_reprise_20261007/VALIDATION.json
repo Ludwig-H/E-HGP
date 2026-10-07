@@ -1,0 +1,41 @@
+{
+  "base_commit": "f601b36ace16bcc8f7ac9bc532e45ab5079f9667",
+  "channel_bytes": 62901,
+  "channel_files": 4,
+  "checks": {
+    "buffer": {
+      "independent_replay": "counterexample_reproduced",
+      "stdout_sha256": "b6d2ba6771e5460eff79a49ca9d58fc61ca26f81106787597508035225bf1842"
+    },
+    "donnees": {
+      "independent_replay": "pass",
+      "result_sha256": "c926b487b36a7a881ff1ef08a7eae71bd21ed1a914929ed190caacd1199c9ee6"
+    },
+    "emst": {
+      "independent_replay": "pass",
+      "result_sha256": "49ebe19a6b11840b28d0c60e802ce5a966415477398c9182c7da2c63929362b3"
+    },
+    "g1": {
+      "independent_replay": "pass",
+      "result_sha256": "b0c923a1dc6f582b35f436a7facb8733299c23a62c4dae0130dfc38313c7566f"
+    },
+    "juges": {
+      "independent_replay": "pass",
+      "result_sha256": "1e4e46b30646506ddfa3de1fd66842a1469d1062e73f28c077b070737020837f"
+    },
+    "mes_p_provisoire": {
+      "independent_replay": "pass",
+      "result_sha256": "ca0c01cca192db209bf164b862f5d2813aeab8e3fc53dcd29b0f4662e6ad97ee"
+    }
+  },
+  "constats": 73,
+  "date": "2026-10-07",
+  "gcp_used": false,
+  "limits": [
+    "buffer and pilote_p observations pin uncommitted snapshots separately",
+    "data payloads not rehashed, geometry not independently recomputed on real scenes",
+    "native checks bounded, no full product or GPU qualification"
+  ],
+  "new_performance_measurement": false,
+  "product_modified": false
+}

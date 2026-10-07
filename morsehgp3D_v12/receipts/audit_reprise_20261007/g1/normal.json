@@ -1,0 +1,1073 @@
+{
+  "baseline_binary_sha256": "a5e5dbb83e08d36cd7c78965a4fb4fc333e5d31e3acbc89a523bdf548f2bb1f8",
+  "baseline_results": [
+    {
+      "exit_code": 0,
+      "name": "valid",
+      "order_sha256": "2fba46c2355cd55179da137c3a37f904a67f721224aed976b866a1c746f088e7",
+      "stderr": "",
+      "stdout": [
+        {
+          "K": 2,
+          "boules": 5,
+          "mutant_cote_nul": false,
+          "phase": "entree",
+          "sites": 4,
+          "trame": "audit"
+        },
+        {
+          "K": 2,
+          "ecarts_force_brute": 0,
+          "echantillon_force_brute": 4,
+          "feuille_arbre": 16,
+          "phase": "voisins",
+          "sites": 4
+        },
+        {
+          "ecarts_juge": 0,
+          "k": 2,
+          "lem_hors_cat": {
+            "contre_exemples": 0,
+            "hors_hypothese": 0,
+            "route2_census_seuil_K_moins_2": 0,
+            "route2_triviales": 1,
+            "route3_verifiees": 0
+          },
+          "parties": 1,
+          "phase": "ordre",
+          "route1": 0,
+          "route2": {
+            "au_catalogue": 0,
+            "cible_v11_naissance": 1,
+            "cible_v11_partie_suivante": 0,
+            "ensembles": {
+              "fenetre_16": {
+                "candidats_max": 4,
+                "candidats_moyen": 4,
+                "certifiees": 1,
+                "cible_egale_v11": 1,
+                "cible_naissance": 1,
+                "cible_v11_naissance_sur_certifiees": 1,
+                "ecarts_juge": 0,
+                "part_certifiees": 1,
+                "part_cible_egale_v11": 1,
+                "part_cible_naissance": 1,
+                "part_cible_v11_naissance_sur_certifiees": 1,
+                "tests_max": 3,
+                "tests_moyen": 3
+              },
+              "fenetre_8": {
+                "candidats_max": 4,
+                "candidats_moyen": 4,
+                "certifiees": 1,
+                "cible_egale_v11": 1,
+                "cible_naissance": 1,
+                "cible_v11_naissance_sur_certifiees": 1,
+                "ecarts_juge": 0,
+                "part_certifiees": 1,
+                "part_cible_egale_v11": 1,
+                "part_cible_naissance": 1,
+                "part_cible_v11_naissance_sur_certifiees": 1,
+                "tests_max": 3,
+                "tests_moyen": 3
+              },
+              "voisins": {
+                "candidats_max": 4,
+                "candidats_moyen": 4,
+                "certifiees": 1,
+                "cible_egale_v11": 1,
+                "cible_naissance": 1,
+                "cible_v11_naissance_sur_certifiees": 1,
+                "ecarts_juge": 0,
+                "part_certifiees": 1,
+                "part_cible_egale_v11": 1,
+                "part_cible_naissance": 1,
+                "part_cible_v11_naissance_sur_certifiees": 1,
+                "tests_max": 3,
+                "tests_moyen": 3
+              },
+              "voisins_ou_fenetre_16": {
+                "candidats_max": 4,
+                "candidats_moyen": 4,
+                "certifiees": 1,
+                "cible_egale_v11": 1,
+                "cible_naissance": 1,
+                "cible_v11_naissance_sur_certifiees": 1,
+                "ecarts_juge": 0,
+                "part_certifiees": 1,
+                "part_cible_egale_v11": 1,
+                "part_cible_naissance": 1,
+                "part_cible_v11_naissance_sur_certifiees": 1,
+                "tests_max": 3,
+                "tests_moyen": 3
+              }
+            },
+            "hors_catalogue": 1,
+            "parties": 1
+          },
+          "route3": {
+            "au_catalogue": 0,
+            "census_complets_sphere_au_catalogue_s_etoile_hors_de_f": 0,
+            "hors_catalogue": 0,
+            "p_qmin_hors_catalogue": {},
+            "parties": 0,
+            "spheres_distinctes": 0,
+            "spheres_distinctes_hors_catalogue": 0
+          },
+          "table_populations": 3
+        },
+        {
+          "K": 2,
+          "code": 0,
+          "ecarts_juge": 0,
+          "ecarts_voisins": 0,
+          "lem_hors_cat": {
+            "contre_exemples": 0,
+            "hors_hypothese": 0,
+            "route2_census_seuil_K_moins_2": 0,
+            "route2_triviales": 1,
+            "route3_verifiees": 0
+          },
+          "phase": "bilan",
+          "route2": {
+            "cible_v11_naissance": 1,
+            "ensembles": {
+              "fenetre_16": {
+                "candidats_max": 4,
+                "candidats_moyen": 4,
+                "certifiees": 1,
+                "cible_egale_v11": 1,
+                "cible_naissance": 1,
+                "cible_v11_naissance_sur_certifiees": 1,
+                "ecarts_juge": 0,
+                "part_certifiees": 1,
+                "part_cible_egale_v11": 1,
+                "part_cible_naissance": 1,
+                "part_cible_v11_naissance_sur_certifiees": 1,
+                "tests_max": 3,
+                "tests_moyen": 3
+              },
+              "fenetre_8": {
+                "candidats_max": 4,
+                "candidats_moyen": 4,
+                "certifiees": 1,
+                "cible_egale_v11": 1,
+                "cible_naissance": 1,
+                "cible_v11_naissance_sur_certifiees": 1,
+                "ecarts_juge": 0,
+                "part_certifiees": 1,
+                "part_cible_egale_v11": 1,
+                "part_cible_naissance": 1,
+                "part_cible_v11_naissance_sur_certifiees": 1,
+                "tests_max": 3,
+                "tests_moyen": 3
+              },
+              "voisins": {
+                "candidats_max": 4,
+                "candidats_moyen": 4,
+                "certifiees": 1,
+                "cible_egale_v11": 1,
+                "cible_naissance": 1,
+                "cible_v11_naissance_sur_certifiees": 1,
+                "ecarts_juge": 0,
+                "part_certifiees": 1,
+                "part_cible_egale_v11": 1,
+                "part_cible_naissance": 1,
+                "part_cible_v11_naissance_sur_certifiees": 1,
+                "tests_max": 3,
+                "tests_moyen": 3
+              },
+              "voisins_ou_fenetre_16": {
+                "candidats_max": 4,
+                "candidats_moyen": 4,
+                "certifiees": 1,
+                "cible_egale_v11": 1,
+                "cible_naissance": 1,
+                "cible_v11_naissance_sur_certifiees": 1,
+                "ecarts_juge": 0,
+                "part_certifiees": 1,
+                "part_cible_egale_v11": 1,
+                "part_cible_naissance": 1,
+                "part_cible_v11_naissance_sur_certifiees": 1,
+                "tests_max": 3,
+                "tests_moyen": 3
+              }
+            },
+            "parties": 1
+          },
+          "route3": {
+            "census_complets_sphere_au_catalogue_s_etoile_hors_de_f": 0,
+            "parties": 0,
+            "spheres_distinctes_hors_catalogue_tous_ordres": 0,
+            "spheres_distinctes_tous_ordres": 0
+          },
+          "trame": "audit"
+        }
+      ]
+    },
+    {
+      "exit_code": 0,
+      "name": "forged_catalogue_route",
+      "order_sha256": "1df38a01ce3ead465bfe4597a7a063a95874fc62f18c654988a6f3c906a7d085",
+      "stderr": "",
+      "stdout": [
+        {
+          "K": 2,
+          "boules": 5,
+          "mutant_cote_nul": false,
+          "phase": "entree",
+          "sites": 4,
+          "trame": "audit"
+        },
+        {
+          "K": 2,
+          "ecarts_force_brute": 0,
+          "echantillon_force_brute": 4,
+          "feuille_arbre": 16,
+          "phase": "voisins",
+          "sites": 4
+        },
+        {
+          "ecarts_juge": 0,
+          "k": 2,
+          "lem_hors_cat": {
+            "contre_exemples": 0,
+            "hors_hypothese": 0,
+            "route2_census_seuil_K_moins_2": 0,
+            "route2_triviales": 0,
+            "route3_verifiees": 0
+          },
+          "parties": 1,
+          "phase": "ordre",
+          "route1": 1,
+          "route2": {
+            "au_catalogue": 0,
+            "cible_v11_naissance": 0,
+            "cible_v11_partie_suivante": 0,
+            "ensembles": {
+              "fenetre_16": {
+                "candidats_max": 0,
+                "candidats_moyen": 0,
+                "certifiees": 0,
+                "cible_egale_v11": 0,
+                "cible_naissance": 0,
+                "cible_v11_naissance_sur_certifiees": 0,
+                "ecarts_juge": 0,
+                "part_certifiees": 0,
+                "part_cible_egale_v11": 0,
+                "part_cible_naissance": 0,
+                "part_cible_v11_naissance_sur_certifiees": 0,
+                "tests_max": 0,
+                "tests_moyen": 0
+              },
+              "fenetre_8": {
+                "candidats_max": 0,
+                "candidats_moyen": 0,
+                "certifiees": 0,
+                "cible_egale_v11": 0,
+                "cible_naissance": 0,
+                "cible_v11_naissance_sur_certifiees": 0,
+                "ecarts_juge": 0,
+                "part_certifiees": 0,
+                "part_cible_egale_v11": 0,
+                "part_cible_naissance": 0,
+                "part_cible_v11_naissance_sur_certifiees": 0,
+                "tests_max": 0,
+                "tests_moyen": 0
+              },
+              "voisins": {
+                "candidats_max": 0,
+                "candidats_moyen": 0,
+                "certifiees": 0,
+                "cible_egale_v11": 0,
+                "cible_naissance": 0,
+                "cible_v11_naissance_sur_certifiees": 0,
+                "ecarts_juge": 0,
+                "part_certifiees": 0,
+                "part_cible_egale_v11": 0,
+                "part_cible_naissance": 0,
+                "part_cible_v11_naissance_sur_certifiees": 0,
+                "tests_max": 0,
+                "tests_moyen": 0
+              },
+              "voisins_ou_fenetre_16": {
+                "candidats_max": 0,
+                "candidats_moyen": 0,
+                "certifiees": 0,
+                "cible_egale_v11": 0,
+                "cible_naissance": 0,
+                "cible_v11_naissance_sur_certifiees": 0,
+                "ecarts_juge": 0,
+                "part_certifiees": 0,
+                "part_cible_egale_v11": 0,
+                "part_cible_naissance": 0,
+                "part_cible_v11_naissance_sur_certifiees": 0,
+                "tests_max": 0,
+                "tests_moyen": 0
+              }
+            },
+            "hors_catalogue": 0,
+            "parties": 0
+          },
+          "route3": {
+            "au_catalogue": 0,
+            "census_complets_sphere_au_catalogue_s_etoile_hors_de_f": 0,
+            "hors_catalogue": 0,
+            "p_qmin_hors_catalogue": {},
+            "parties": 0,
+            "spheres_distinctes": 0,
+            "spheres_distinctes_hors_catalogue": 0
+          },
+          "table_populations": 3
+        },
+        {
+          "K": 2,
+          "code": 0,
+          "ecarts_juge": 0,
+          "ecarts_voisins": 0,
+          "lem_hors_cat": {
+            "contre_exemples": 0,
+            "hors_hypothese": 0,
+            "route2_census_seuil_K_moins_2": 0,
+            "route2_triviales": 0,
+            "route3_verifiees": 0
+          },
+          "phase": "bilan",
+          "route2": {
+            "cible_v11_naissance": 0,
+            "ensembles": {
+              "fenetre_16": {
+                "candidats_max": 0,
+                "candidats_moyen": 0,
+                "certifiees": 0,
+                "cible_egale_v11": 0,
+                "cible_naissance": 0,
+                "cible_v11_naissance_sur_certifiees": 0,
+                "ecarts_juge": 0,
+                "part_certifiees": 0,
+                "part_cible_egale_v11": 0,
+                "part_cible_naissance": 0,
+                "part_cible_v11_naissance_sur_certifiees": 0,
+                "tests_max": 0,
+                "tests_moyen": 0
+              },
+              "fenetre_8": {
+                "candidats_max": 0,
+                "candidats_moyen": 0,
+                "certifiees": 0,
+                "cible_egale_v11": 0,
+                "cible_naissance": 0,
+                "cible_v11_naissance_sur_certifiees": 0,
+                "ecarts_juge": 0,
+                "part_certifiees": 0,
+                "part_cible_egale_v11": 0,
+                "part_cible_naissance": 0,
+                "part_cible_v11_naissance_sur_certifiees": 0,
+                "tests_max": 0,
+                "tests_moyen": 0
+              },
+              "voisins": {
+                "candidats_max": 0,
+                "candidats_moyen": 0,
+                "certifiees": 0,
+                "cible_egale_v11": 0,
+                "cible_naissance": 0,
+                "cible_v11_naissance_sur_certifiees": 0,
+                "ecarts_juge": 0,
+                "part_certifiees": 0,
+                "part_cible_egale_v11": 0,
+                "part_cible_naissance": 0,
+                "part_cible_v11_naissance_sur_certifiees": 0,
+                "tests_max": 0,
+                "tests_moyen": 0
+              },
+              "voisins_ou_fenetre_16": {
+                "candidats_max": 0,
+                "candidats_moyen": 0,
+                "certifiees": 0,
+                "cible_egale_v11": 0,
+                "cible_naissance": 0,
+                "cible_v11_naissance_sur_certifiees": 0,
+                "ecarts_juge": 0,
+                "part_certifiees": 0,
+                "part_cible_egale_v11": 0,
+                "part_cible_naissance": 0,
+                "part_cible_v11_naissance_sur_certifiees": 0,
+                "tests_max": 0,
+                "tests_moyen": 0
+              }
+            },
+            "parties": 0
+          },
+          "route3": {
+            "census_complets_sphere_au_catalogue_s_etoile_hors_de_f": 0,
+            "parties": 0,
+            "spheres_distinctes_hors_catalogue_tous_ordres": 0,
+            "spheres_distinctes_tous_ordres": 0
+          },
+          "trame": "audit"
+        }
+      ]
+    },
+    {
+      "exit_code": 0,
+      "name": "selected_order_absent",
+      "order_sha256": "2fba46c2355cd55179da137c3a37f904a67f721224aed976b866a1c746f088e7",
+      "stderr": "",
+      "stdout": [
+        {
+          "K": 2,
+          "boules": 5,
+          "mutant_cote_nul": false,
+          "phase": "entree",
+          "sites": 4,
+          "trame": "audit"
+        },
+        {
+          "K": 2,
+          "ecarts_force_brute": 0,
+          "echantillon_force_brute": 4,
+          "feuille_arbre": 16,
+          "phase": "voisins",
+          "sites": 4
+        },
+        {
+          "K": 2,
+          "code": 0,
+          "ecarts_juge": 0,
+          "ecarts_voisins": 0,
+          "lem_hors_cat": {
+            "contre_exemples": 0,
+            "hors_hypothese": 0,
+            "route2_census_seuil_K_moins_2": 0,
+            "route2_triviales": 0,
+            "route3_verifiees": 0
+          },
+          "phase": "bilan",
+          "route2": {
+            "cible_v11_naissance": 0,
+            "ensembles": {
+              "fenetre_16": {
+                "candidats_max": 0,
+                "candidats_moyen": 0,
+                "certifiees": 0,
+                "cible_egale_v11": 0,
+                "cible_naissance": 0,
+                "cible_v11_naissance_sur_certifiees": 0,
+                "ecarts_juge": 0,
+                "part_certifiees": 0,
+                "part_cible_egale_v11": 0,
+                "part_cible_naissance": 0,
+                "part_cible_v11_naissance_sur_certifiees": 0,
+                "tests_max": 0,
+                "tests_moyen": 0
+              },
+              "fenetre_8": {
+                "candidats_max": 0,
+                "candidats_moyen": 0,
+                "certifiees": 0,
+                "cible_egale_v11": 0,
+                "cible_naissance": 0,
+                "cible_v11_naissance_sur_certifiees": 0,
+                "ecarts_juge": 0,
+                "part_certifiees": 0,
+                "part_cible_egale_v11": 0,
+                "part_cible_naissance": 0,
+                "part_cible_v11_naissance_sur_certifiees": 0,
+                "tests_max": 0,
+                "tests_moyen": 0
+              },
+              "voisins": {
+                "candidats_max": 0,
+                "candidats_moyen": 0,
+                "certifiees": 0,
+                "cible_egale_v11": 0,
+                "cible_naissance": 0,
+                "cible_v11_naissance_sur_certifiees": 0,
+                "ecarts_juge": 0,
+                "part_certifiees": 0,
+                "part_cible_egale_v11": 0,
+                "part_cible_naissance": 0,
+                "part_cible_v11_naissance_sur_certifiees": 0,
+                "tests_max": 0,
+                "tests_moyen": 0
+              },
+              "voisins_ou_fenetre_16": {
+                "candidats_max": 0,
+                "candidats_moyen": 0,
+                "certifiees": 0,
+                "cible_egale_v11": 0,
+                "cible_naissance": 0,
+                "cible_v11_naissance_sur_certifiees": 0,
+                "ecarts_juge": 0,
+                "part_certifiees": 0,
+                "part_cible_egale_v11": 0,
+                "part_cible_naissance": 0,
+                "part_cible_v11_naissance_sur_certifiees": 0,
+                "tests_max": 0,
+                "tests_moyen": 0
+              }
+            },
+            "parties": 0
+          },
+          "route3": {
+            "census_complets_sphere_au_catalogue_s_etoile_hors_de_f": 0,
+            "parties": 0,
+            "spheres_distinctes_hors_catalogue_tous_ordres": 0,
+            "spheres_distinctes_tous_ordres": 0
+          },
+          "trame": "audit"
+        }
+      ]
+    }
+  ],
+  "build": {
+    "archive_rebuilt": false,
+    "binary_sha256": "e636ef2aba7aa7c8bddd419e8f143d3a81a302547896e0bcdde0af91c1c44961",
+    "compile_returncode": 0,
+    "compiler": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+    "flags": [
+      "-std=c++20",
+      "-O2",
+      "-DNDEBUG",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-DMHGP11_COORD_BITS=21",
+      "-pthread"
+    ],
+    "library_sha256": "050532a95c322cc2d064eef5bfcba74b3920227f98dc21d157a0d675732cf7ca",
+    "pin": "f601b36ace16bcc8f7ac9bc532e45ab5079f9667",
+    "source_sha256": {
+      "morsehgp3D_v11/src/catalogue/catalogue.hpp": "374d4b1b14db0ea6f049e7ee8d4dc7323baf5c14d5651885e0744e8359f7aaac",
+      "morsehgp3D_v11/src/cloud/cloud.hpp": "dd04b4f051cf356a0a12639d29c037594cacc4f9d9913a1238d94faafbbcfc68",
+      "morsehgp3D_v11/src/cloud/morton.hpp": "a58062c4fa9225558b2154faf176ad55b1ea4f638abce8242a4a6f99bc04ba71",
+      "morsehgp3D_v11/src/core/buffer.hpp": "921655c76a51e23d9ffe970c503caf6fb04098ce8c27b98100d15e39fa5892e8",
+      "morsehgp3D_v11/src/core/core.hpp": "5b3703641031c27e7bf907b2a8c05c79007ee1cae47da7d8e5f94ea435c563d3",
+      "morsehgp3D_v11/src/core/ledger.hpp": "5c14715e44557374d83639160825b87bd323e15fccba42d5461c219328d9e998",
+      "morsehgp3D_v11/src/core/reasons.def": "f89f4929ba0358a3db736dec1af9934a546ba33fed0333f97c8fe6f13116c27b",
+      "morsehgp3D_v11/src/core/status.hpp": "e6004beb5ec4e78fb2b582004f4122611602809d360ff9f1b3bf4679348f6594",
+      "morsehgp3D_v11/src/core/types.hpp": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954",
+      "morsehgp3D_v11/src/index/index.hpp": "e9669ee18520bebd309713eeb142f4936219e50d0969c56b28305710162940c1",
+      "morsehgp3D_v11/src/num/big.hpp": "162bea8d8bfd950f6e2fd039d8045d0a9211855daea10695e0e603c0217584e9",
+      "morsehgp3D_v11/src/num/budgets.hpp": "b86c7918573e473a9492b3c26c463f9cb340cec5e97d092e774a5c0af44c062e",
+      "morsehgp3D_v11/src/num/center_region.hpp": "22c06de8423871a5660db145683b67cb188c000c00c4deb1a5a10ddfcf199417",
+      "morsehgp3D_v11/src/num/geometry.hpp": "3f1baafbd9cbd8d7640cf49c19fe227d3a3a0d14fe642f3dd4531a42f8724c11",
+      "morsehgp3D_v11/src/num/integer.hpp": "8ccf2b24f49681cc8bba1494c982c64578c73337c228015e62de50696d5d529e",
+      "morsehgp3D_v11/src/num/lattice_bounds.hpp": "54cd871f7a4c5b6e4a646ec656b1d939af710a2708ac247f1f4a7dd70cbde95a",
+      "morsehgp3D_v11/src/num/level.hpp": "c769f20addcc11ef9e249031baee3ce79d538c7aff61d0035e069237d73193e9",
+      "morsehgp3D_v11/src/num/num.hpp": "b99a7e6d5b198105982dc7a0b3e05ac7ebf813e0b0639e12c213122e597d165f",
+      "morsehgp3D_v11/src/num/radical.hpp": "eb67776e81c8fb0d267d2c9d124c46117768d00418ba1aafeb03f9727c920708",
+      "morsehgp3D_v11/src/num/rational.hpp": "76a82aad8842a6f39c247aa9224d1f7e6dca16f5115de8a9ee36e829e9c721c6",
+      "morsehgp3D_v11/src/num/roots.hpp": "50c600c679470aeebd67aac00889aa5bf2a2aaf224901b1829d640abe535b4e5",
+      "morsehgp3D_v11/src/num/wide.hpp": "58478d10a1e2b526652e5f5b1aeb87f23325bfb515997808a65eae380a531fb1",
+      "morsehgp3D_v11/src/tower/full_domain.hpp": "662074316fe5d424141ab9400320bf3af85debd7c34f02945af449772164e604",
+      "morsehgp3D_v11/src/tower/meb.hpp": "fd307ad49e3f0aa807d080e2467a577697db01501732bdfd7b6502dec9760380",
+      "morsehgp3D_v12/microbancs/mes_g1_saut/mes_g1.cpp": "d1eff5544cf7b95b65a6b05b733125e4879716fc66a27425c74b7a0479548fe7",
+      "morsehgp3D_v12/microbancs/mes_g1_saut/voisins.hpp": "69660da67d5e54e74963cdc65ddb5b90fedf882ee57c5b13c741068624a4275a",
+      "morsehgp3D_v12/microbancs/mes_m3_m4_tour/common/format.hpp": "cf1d640f567146660a5625688146df2eb79347383a2a9d92f277a4192d11e587",
+      "morsehgp3D_v12/microbancs/mes_m3_m4_tour/mes_m3/meb_cert.hpp": "2dc776d9297a6de1b309674676ff84b7ecbd7acf190134f118ee3505945db911",
+      "morsehgp3D_v12/microbancs/mes_m3_m4_tour/mes_m3/welzl_proposal.hpp": "3f7a0f113b5fe8a28b878c05be0c933e3e3eb28023e686e3fb0812900d863d62"
+    },
+    "translation_units": 1
+  },
+  "catalogue_sha256": "60b44c67a55ce006ebd26edeb9a0e39b4540693db8230620f9d3f8921d44f93b",
+  "gcp_used": false,
+  "historical_lidar_dumps_replayed": false,
+  "historical_script_sha256": "a013654d9dce4e524e15b495c6170f1aafec4fd7af560b4b4e9416902a177206",
+  "native_gate": [
+    {
+      "conforme": true,
+      "controle": "voisins_arbre_egal_force_brute"
+    },
+    {
+      "conforme": true,
+      "controle": "voisins_A1"
+    },
+    {
+      "conforme": true,
+      "controle": "voisins_C1"
+    },
+    {
+      "conforme": true,
+      "controle": "voisins_A2"
+    },
+    {
+      "conforme": true,
+      "controle": "voisins_B2"
+    },
+    {
+      "conforme": true,
+      "controle": "voisins_A3"
+    },
+    {
+      "conforme": true,
+      "controle": "voisins_B3"
+    },
+    {
+      "conforme": true,
+      "controle": "E3_sur_la_sphere_et_candidat"
+    },
+    {
+      "census_sature": true,
+      "conforme": true,
+      "fenetre_16": {
+        "certifiee": true,
+        "cible": [
+          "C1",
+          "D1"
+        ],
+        "conforme": true
+      },
+      "fenetre_8": {
+        "certifiee": true,
+        "cible": [
+          "C1",
+          "D1"
+        ],
+        "conforme": true
+      },
+      "k": 2,
+      "temoin": "grappe1_k2_voisins_suffisent",
+      "voisins": {
+        "certifiee": true,
+        "cible": [
+          "C1",
+          "D1"
+        ],
+        "conforme": true
+      }
+    },
+    {
+      "census_sature": true,
+      "conforme": true,
+      "fenetre_16": {
+        "certifiee": true,
+        "cible": [
+          "C1",
+          "D1",
+          "E1"
+        ],
+        "conforme": true
+      },
+      "fenetre_8": {
+        "certifiee": true,
+        "cible": [
+          "C1",
+          "D1",
+          "E1"
+        ],
+        "conforme": true
+      },
+      "k": 3,
+      "temoin": "grappe1_k3_site_de_f_interieur",
+      "voisins": {
+        "certifiee": true,
+        "cible": [
+          "C1",
+          "D1",
+          "E1"
+        ],
+        "conforme": true
+      }
+    },
+    {
+      "census_sature": true,
+      "conforme": true,
+      "fenetre_16": {
+        "certifiee": true,
+        "cible": [
+          "M1",
+          "M2"
+        ],
+        "conforme": true
+      },
+      "fenetre_8": {
+        "certifiee": true,
+        "cible": [
+          "M1",
+          "M2"
+        ],
+        "conforme": true
+      },
+      "k": 2,
+      "temoin": "grappe2_voisins_ne_suffisent_pas",
+      "voisins": {
+        "certifiee": false,
+        "cible": [
+          "M1"
+        ],
+        "conforme": true
+      }
+    },
+    {
+      "census_sature": false,
+      "conforme": true,
+      "fenetre_16": {
+        "certifiee": false,
+        "cible": [
+          "C3"
+        ],
+        "conforme": true
+      },
+      "fenetre_8": {
+        "certifiee": false,
+        "cible": [
+          "C3"
+        ],
+        "conforme": true
+      },
+      "k": 2,
+      "temoin": "grappe3_site_sur_la_sphere",
+      "voisins": {
+        "certifiee": false,
+        "cible": [
+          "C3"
+        ],
+        "conforme": true
+      }
+    },
+    {
+      "attendu": 0,
+      "code": 0,
+      "conforme": true,
+      "temoin_admission": "auditeur_route_2_honnete"
+    },
+    {
+      "attendu": 3,
+      "code": 3,
+      "conforme": true,
+      "temoin_admission": "auditeur_route_2_changee_en_route_1"
+    },
+    {
+      "attendu": 3,
+      "code": 3,
+      "conforme": true,
+      "temoin_admission": "route_1_forgee_parmi_des_parties_honnetes"
+    },
+    {
+      "attendu": 2,
+      "code": 2,
+      "conforme": true,
+      "temoin_admission": "ordres_hors_de_2_K"
+    },
+    {
+      "attendu": 2,
+      "code": 2,
+      "conforme": true,
+      "temoin_admission": "ordres_en_partie_hors_de_2_K"
+    },
+    {
+      "attendu": 3,
+      "code": 3,
+      "conforme": true,
+      "temoin_admission": "bilan_vide"
+    },
+    {
+      "admission": 6,
+      "ecarts": 0,
+      "mutant_cote_nul": false,
+      "mutant_garde": "aucun",
+      "porte": "mes_g1",
+      "temoins": 4
+    }
+  ],
+  "native_gate_exit_code": 0,
+  "pin": "f601b36ace16bcc8f7ac9bc532e45ab5079f9667",
+  "private_data_read": false,
+  "results": [
+    {
+      "exit_code": 0,
+      "name": "valid",
+      "order_sha256": "2fba46c2355cd55179da137c3a37f904a67f721224aed976b866a1c746f088e7",
+      "stderr": "",
+      "stdout": [
+        {
+          "K": 2,
+          "boules": 5,
+          "mutant_cote_nul": false,
+          "mutant_garde": "aucun",
+          "phase": "entree",
+          "sites": 4,
+          "trame": "audit"
+        },
+        {
+          "garde_route": true,
+          "ordres": [
+            2
+          ],
+          "parties": 1,
+          "phase": "admission",
+          "route1": 0,
+          "route2": 1,
+          "route3": 0
+        },
+        {
+          "K": 2,
+          "ecarts_force_brute": 0,
+          "echantillon_force_brute": 4,
+          "feuille_arbre": 16,
+          "phase": "voisins",
+          "sites": 4
+        },
+        {
+          "ecarts_juge": 0,
+          "k": 2,
+          "lem_hors_cat": {
+            "contre_exemples": 0,
+            "hors_hypothese": 0,
+            "route2_census_seuil_K_moins_2": 0,
+            "route2_triviales": 1,
+            "route3_verifiees": 0
+          },
+          "parties": 1,
+          "phase": "ordre",
+          "route1": 0,
+          "route2": {
+            "au_catalogue": 0,
+            "cible_v11_naissance": 1,
+            "cible_v11_partie_suivante": 0,
+            "ensembles": {
+              "fenetre_16": {
+                "candidats_max": 4,
+                "candidats_moyen": 4,
+                "certifiees": 1,
+                "cible_egale_v11": 1,
+                "cible_naissance": 1,
+                "cible_v11_naissance_sur_certifiees": 1,
+                "ecarts_juge": 0,
+                "part_certifiees": 1,
+                "part_cible_egale_v11": 1,
+                "part_cible_naissance": 1,
+                "part_cible_v11_naissance_sur_certifiees": 1,
+                "tests_max": 3,
+                "tests_moyen": 3
+              },
+              "fenetre_8": {
+                "candidats_max": 4,
+                "candidats_moyen": 4,
+                "certifiees": 1,
+                "cible_egale_v11": 1,
+                "cible_naissance": 1,
+                "cible_v11_naissance_sur_certifiees": 1,
+                "ecarts_juge": 0,
+                "part_certifiees": 1,
+                "part_cible_egale_v11": 1,
+                "part_cible_naissance": 1,
+                "part_cible_v11_naissance_sur_certifiees": 1,
+                "tests_max": 3,
+                "tests_moyen": 3
+              },
+              "voisins": {
+                "candidats_max": 4,
+                "candidats_moyen": 4,
+                "certifiees": 1,
+                "cible_egale_v11": 1,
+                "cible_naissance": 1,
+                "cible_v11_naissance_sur_certifiees": 1,
+                "ecarts_juge": 0,
+                "part_certifiees": 1,
+                "part_cible_egale_v11": 1,
+                "part_cible_naissance": 1,
+                "part_cible_v11_naissance_sur_certifiees": 1,
+                "tests_max": 3,
+                "tests_moyen": 3
+              },
+              "voisins_ou_fenetre_16": {
+                "candidats_max": 4,
+                "candidats_moyen": 4,
+                "certifiees": 1,
+                "cible_egale_v11": 1,
+                "cible_naissance": 1,
+                "cible_v11_naissance_sur_certifiees": 1,
+                "ecarts_juge": 0,
+                "part_certifiees": 1,
+                "part_cible_egale_v11": 1,
+                "part_cible_naissance": 1,
+                "part_cible_v11_naissance_sur_certifiees": 1,
+                "tests_max": 3,
+                "tests_moyen": 3
+              }
+            },
+            "hors_catalogue": 1,
+            "parties": 1
+          },
+          "route3": {
+            "au_catalogue": 0,
+            "census_complets_sphere_au_catalogue_s_etoile_hors_de_f": 0,
+            "hors_catalogue": 0,
+            "p_qmin_hors_catalogue": {},
+            "parties": 0,
+            "spheres_distinctes": 0,
+            "spheres_distinctes_hors_catalogue": 0
+          },
+          "table_populations": 3
+        },
+        {
+          "K": 2,
+          "code": 0,
+          "ecarts_juge": 0,
+          "ecarts_voisins": 0,
+          "lem_hors_cat": {
+            "contre_exemples": 0,
+            "hors_hypothese": 0,
+            "route2_census_seuil_K_moins_2": 0,
+            "route2_triviales": 1,
+            "route3_verifiees": 0
+          },
+          "phase": "bilan",
+          "route2": {
+            "cible_v11_naissance": 1,
+            "ensembles": {
+              "fenetre_16": {
+                "candidats_max": 4,
+                "candidats_moyen": 4,
+                "certifiees": 1,
+                "cible_egale_v11": 1,
+                "cible_naissance": 1,
+                "cible_v11_naissance_sur_certifiees": 1,
+                "ecarts_juge": 0,
+                "part_certifiees": 1,
+                "part_cible_egale_v11": 1,
+                "part_cible_naissance": 1,
+                "part_cible_v11_naissance_sur_certifiees": 1,
+                "tests_max": 3,
+                "tests_moyen": 3
+              },
+              "fenetre_8": {
+                "candidats_max": 4,
+                "candidats_moyen": 4,
+                "certifiees": 1,
+                "cible_egale_v11": 1,
+                "cible_naissance": 1,
+                "cible_v11_naissance_sur_certifiees": 1,
+                "ecarts_juge": 0,
+                "part_certifiees": 1,
+                "part_cible_egale_v11": 1,
+                "part_cible_naissance": 1,
+                "part_cible_v11_naissance_sur_certifiees": 1,
+                "tests_max": 3,
+                "tests_moyen": 3
+              },
+              "voisins": {
+                "candidats_max": 4,
+                "candidats_moyen": 4,
+                "certifiees": 1,
+                "cible_egale_v11": 1,
+                "cible_naissance": 1,
+                "cible_v11_naissance_sur_certifiees": 1,
+                "ecarts_juge": 0,
+                "part_certifiees": 1,
+                "part_cible_egale_v11": 1,
+                "part_cible_naissance": 1,
+                "part_cible_v11_naissance_sur_certifiees": 1,
+                "tests_max": 3,
+                "tests_moyen": 3
+              },
+              "voisins_ou_fenetre_16": {
+                "candidats_max": 4,
+                "candidats_moyen": 4,
+                "certifiees": 1,
+                "cible_egale_v11": 1,
+                "cible_naissance": 1,
+                "cible_v11_naissance_sur_certifiees": 1,
+                "ecarts_juge": 0,
+                "part_certifiees": 1,
+                "part_cible_egale_v11": 1,
+                "part_cible_naissance": 1,
+                "part_cible_v11_naissance_sur_certifiees": 1,
+                "tests_max": 3,
+                "tests_moyen": 3
+              }
+            },
+            "parties": 1
+          },
+          "route3": {
+            "census_complets_sphere_au_catalogue_s_etoile_hors_de_f": 0,
+            "parties": 0,
+            "spheres_distinctes_hors_catalogue_tous_ordres": 0,
+            "spheres_distinctes_tous_ordres": 0
+          },
+          "trame": "audit"
+        }
+      ]
+    },
+    {
+      "exit_code": 3,
+      "name": "forged_catalogue_route",
+      "order_sha256": "1df38a01ce3ead465bfe4597a7a063a95874fc62f18c654988a6f3c906a7d085",
+      "stderr": "",
+      "stdout": [
+        {
+          "K": 2,
+          "boules": 5,
+          "mutant_cote_nul": false,
+          "mutant_garde": "aucun",
+          "phase": "entree",
+          "sites": 4,
+          "trame": "audit"
+        },
+        {
+          "message": "ordre_2.bin, partie 0 : route 1 sans support local dans la table, ou designant une autre boule",
+          "phase": "exception"
+        }
+      ]
+    },
+    {
+      "exit_code": 2,
+      "name": "selected_order_absent",
+      "order_sha256": "2fba46c2355cd55179da137c3a37f904a67f721224aed976b866a1c746f088e7",
+      "stderr": "",
+      "stdout": [
+        {
+          "K": 2,
+          "code": 2,
+          "phase": "refus",
+          "raison": "ordre 9 hors de 2..K"
+        }
+      ]
+    },
+    {
+      "exit_code": 2,
+      "name": "mixed_valid_and_absent_order",
+      "order_sha256": "2fba46c2355cd55179da137c3a37f904a67f721224aed976b866a1c746f088e7",
+      "stderr": "",
+      "stdout": [
+        {
+          "K": 2,
+          "code": 2,
+          "phase": "refus",
+          "raison": "ordre 9 hors de 2..K"
+        }
+      ]
+    },
+    {
+      "exit_code": 3,
+      "name": "route3_forged_for_saturated_census",
+      "order_sha256": "6c15c260c2c8cdf62310413bae86e0ed1c6ed1ce724c29f24216afc0b081cff6",
+      "stderr": "",
+      "stdout": [
+        {
+          "K": 2,
+          "boules": 5,
+          "mutant_cote_nul": false,
+          "mutant_garde": "aucun",
+          "phase": "entree",
+          "sites": 4,
+          "trame": "audit"
+        },
+        {
+          "message": "ordre_2.bin, partie 0 : route 3 : census de seuil k non complet, ou action interieure",
+          "phase": "exception"
+        }
+      ]
+    }
+  ],
+  "saut_timing_arm_replayed": false,
+  "schema": "ehgp.v12.audit_reprise.g1.v1",
+  "script_sha256": "0ce92eabe12cae64d93552bdafeb1d38621958611855b7e213bdd45519cd7368",
+  "source_binary_library_hashes_closed": true,
+  "transition_reader_exit_code": 0,
+  "transition_reader_sha256": "09ead04bd24a60733b56dbfc344e369df70ef149b677bfad158981807488e4f8"
+}

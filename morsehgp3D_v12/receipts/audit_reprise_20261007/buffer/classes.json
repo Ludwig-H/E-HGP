@@ -1,0 +1,10 @@
+{
+  "classes": 208,
+  "strictly_increasing": true,
+  "capacity_at_most_bytes_plus_floor_bytes_over_8": true,
+  "worst_ratio": "315392/286721",
+  "worst_class": 2,
+  "minimum_request": 286721,
+  "capacity": 315392,
+  "worst_overhead_percent": 9.999616351784487
+}

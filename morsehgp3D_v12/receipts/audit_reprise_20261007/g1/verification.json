@@ -1,0 +1,24 @@
+{
+  "archive_rebuilt": false,
+  "compiled_dependency_files": 29,
+  "compiled_translation_units": 1,
+  "current_direct_cases": 5,
+  "gcp_used": false,
+  "historical_causal_cases": 3,
+  "native_gate": {
+    "admission": 6,
+    "ecarts": 0,
+    "mutant_cote_nul": false,
+    "mutant_garde": "aucun",
+    "porte": "mes_g1",
+    "temoins": 4
+  },
+  "normal_code": 0,
+  "normal_optimized_identical": true,
+  "normal_sha256": "b0c923a1dc6f582b35f436a7facb8733299c23a62c4dae0130dfc38313c7566f",
+  "optimized_code": 0,
+  "optimized_sha256": "b0c923a1dc6f582b35f436a7facb8733299c23a62c4dae0130dfc38313c7566f",
+  "pin": "f601b36ace16bcc8f7ac9bc532e45ab5079f9667",
+  "private_data_read": false,
+  "source_binary_library_hashes_closed": true
+}
