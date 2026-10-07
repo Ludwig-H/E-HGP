@@ -30,10 +30,18 @@ Garanties :
   suivant (Range + If-Range) ; un serveur sans Range recommence a zero ; seule la verification finale fait foi ;
 - place : apres un telechargement il reste au moins --min-free-bytes (defaut 16 Gio) libres et le cache tient
   sous --max-cache-bytes (defaut 40 Gio) ; sinon les partiels puis les objets les moins recemment utilises,
-  non demandes par cet appel, sont evinces ; a defaut, refus explicite sans telechargement ;
+  non demandes par cet appel, sont evinces. Seul ce qui rend vraiment des blocs au disque compte pour le
+  plancher (CST-0220) : un partiel, ou un objet dont le seul lien dur est celui du cache ; un objet encore lie
+  ailleurs (--link) ne compte que pour le plafond, et n'est jamais evince pour le plancher. Si tout l'evincable
+  ne suffirait pas (tailles et liens observes avant toute eviction), refus explicite sans telechargement et
+  cache intact. Limite declaree : si l'espace libre baisse pendant l'eviction (autre processus, objet evince
+  encore ouvert), un refus apres eviction partielle reste possible ; chaque entree evincee est alors au rapport,
+  avec les octets reellement rendus au disque ;
 - --link DIR cree DIR/<nom> (lien dur ; copie si autre systeme de fichiers) : chemins stables pour les
   commandes suivantes (cwd = {build}) ; refus si DIR est dans les resultats rapatries de la session (sous
-  $V12_OUT/../.., exporte par le worker) : on lie dans {build}, jamais dans {out} ;
+  $V12_OUT/../.., exporte par le worker), chemins reels compris (un ancetre symbolique ne contourne pas le
+  refus) : on lie dans {build}, jamais dans {out} ;
+- --deadline-seconds : aucun essai, pas meme le premier, ne commence au-dela du delai ;
 - le rapport JSON ne contient aucun chemin absolu ni aucune identite (la racine y est notee $MHGP12_CACHE_DIR) ;
 - URL http ou https seulement, sans identifiants ; le contenu est authentifie par l'epingle, pas par le transport.
 Codes de sortie : 0 conforme ; 1 au moins une entree en echec (ou interruption) ; 2 usage ou manifeste
@@ -227,14 +235,18 @@ class Cache:
     def object_path(self, sha):
         return self.objects / sha
 
-    def object_list(self):
-        """[(sha, octets, date d'usage)] des objets reguliers ; tout autre nom est ignore."""
+    def object_entries(self):
+        """[(sha, octets, date d'usage, liens durs)] des objets reguliers ; tout autre nom est ignore."""
         items = []
         for path in self.objects.iterdir():
             info = os.lstat(path)
             if SHA_RE.fullmatch(path.name) and stat.S_ISREG(info.st_mode):
-                items.append((path.name, info.st_size, info.st_mtime))
+                items.append((path.name, info.st_size, info.st_mtime, info.st_nlink))
         return items
+
+    def object_list(self):
+        """[(sha, octets, date d'usage)] des objets reguliers ; tout autre nom est ignore."""
+        return [(sha, size, mtime) for sha, size, mtime, _ in self.object_entries()]
 
     def partial_list(self):
         items = []
@@ -264,35 +276,60 @@ class Cache:
             pass
 
     def make_room(self, need, protected_objects, protected_partials):
-        """Place pour `need` octets : partiels non proteges d'abord, puis objets les moins recemment utilises ;
-        refus si le plancher d'espace libre ou le plafond du cache restent violes. Rien n'est evince quand
-        evincer tout l'evincable ne suffirait pas (plancher impossible : refus, cache intact)."""
-        def short():
-            return self.free() - need < self.min_free or self.used() + need > self.max_bytes
-        if not short():
-            return
-        evictable = sum(size for key, size, _ in self.partial_list() if key not in protected_partials) + sum(
-            size for sha, size, _ in self.object_list() if sha not in protected_objects)
-        if self.free() + evictable - need < self.min_free or self.used() - evictable + need > self.max_bytes:
-            raise EntryFailure('place insuffisante, meme en evincant tout : %d octets demandes, %d libres '
-                               '(plancher %d), cache %d (plafond %d)' % (need, self.free(), self.min_free,
-                                                                         self.used(), self.max_bytes))
-        while short():
+        """Place pour `need` octets : plancher d'espace libre (min_free) et plafond logique du cache (max_bytes).
+
+        Ce que l'eviction rend vraiment (CST-0220) : retirer un partiel, ou un objet dont le seul lien dur est celui
+        du cache (st_nlink = 1), rend ses blocs au disque ; retirer un objet encore lie ailleurs (lien dur pose par
+        --link) ne rend rien au disque, seulement au plafond du cache. Le plancher ne compte donc que les premiers,
+        le plafond compte tout. La decision precede toute eviction, sur les tailles et les liens observes : si
+        evincer tout l'evincable ne suffirait pas, refus et cache intact. Sinon on evince le necessaire, partiels
+        d'abord puis objets les moins recemment utilises, et pour le plancher jamais un objet encore lie. Limite
+        declaree : si l'espace libre baisse pendant l'eviction (autre processus, objet evince encore ouvert), un
+        refus apres eviction partielle reste possible ; chaque entree evincee est au rapport, avec les octets
+        reellement rendus au disque (freed_disk_bytes)."""
+        def floor_short():
+            return self.free() - need < self.min_free
+
+        def cap_short():
+            return self.used() + need > self.max_bytes
+
+        def candidates():
             partials = sorted((mtime, key, size) for key, size, mtime in self.partial_list()
                               if key not in protected_partials)
-            objects = sorted((mtime, sha, size) for sha, size, mtime in self.object_list()
+            objects = sorted((mtime, sha, size, links) for sha, size, mtime, links in self.object_entries()
                              if sha not in protected_objects)
+            return partials, objects
+        if not floor_short() and not cap_short():
+            return
+        partials, objects = candidates()
+        freeable = sum(size for _, _, size in partials) + sum(size for _, _, size, links in objects if links == 1)
+        removable = sum(size for _, _, size in partials) + sum(size for _, _, size, _ in objects)
+        free, used = self.free(), self.used()
+        if free + freeable - need < self.min_free or used - removable + need > self.max_bytes:
+            raise EntryFailure('place insuffisante, meme en evincant tout l\'evincable : %d octets demandes, %d libres '
+                               '(plancher %d), %d liberables sur le disque, cache %d (plafond %d) ; rien n\'est '
+                               'evince' % (need, free, self.min_free, freeable, used, self.max_bytes))
+        while True:
+            floor = floor_short()
+            if not floor and not cap_short():
+                return
+            partials, objects = candidates()
+            if floor:  # pour le plancher, seul un objet sans autre lien dur rend des blocs
+                objects = [item for item in objects if item[3] == 1]
             if partials:
                 _, key, size = partials[0]
                 self.drop_partial(key)
-                self.evicted.append({'kind': 'partial', 'key': key, 'bytes': size})
+                self.evicted.append({'kind': 'partial', 'key': key, 'bytes': size, 'freed_disk_bytes': size})
             elif objects:
-                _, sha, size = objects[0]
+                _, sha, size, links = objects[0]
                 self.drop_object(sha)
-                self.evicted.append({'kind': 'object', 'sha256': sha, 'bytes': size})
+                self.evicted.append({'kind': 'object', 'sha256': sha, 'bytes': size, 'links': links,
+                                     'freed_disk_bytes': size if links == 1 else 0})
             else:
-                raise EntryFailure('place insuffisante : %d octets demandes, %d libres (plancher %d), cache %d '
-                                   '(plafond %d)' % (need, self.free(), self.min_free, self.used(), self.max_bytes))
+                raise EntryFailure('place insuffisante apres eviction partielle (espace libre change pendant '
+                                   'l\'eviction) : %d octets demandes, %d libres (plancher %d), cache %d '
+                                   '(plafond %d) ; entrees evincees au rapport'
+                                   % (need, self.free(), self.min_free, self.used(), self.max_bytes))
 
     def check_object(self, sha, size):
         """'absent', 'ok' (contenu exact, date d'usage rafraichie) ou 'altered' (objet retire)."""
@@ -320,12 +357,13 @@ class Cache:
         os.utime(self.object_path(sha))
 
     def status(self):
-        objects, partials = self.object_list(), self.partial_list()
+        objects, partials = self.object_entries(), self.partial_list()
         return {'objects': len(objects), 'object_bytes': sum(item[1] for item in objects),
+                'object_bytes_linked_elsewhere': sum(item[1] for item in objects if item[3] > 1),
                 'partials': len(partials), 'partial_bytes': sum(item[1] for item in partials),
                 'free_bytes': self.free(), 'max_cache_bytes': self.max_bytes, 'min_free_bytes': self.min_free,
-                'listing': [{'sha256': sha, 'bytes': size, 'last_used_utc': utc(mtime)}
-                            for sha, size, mtime in sorted(objects, key=lambda item: -item[2])[:1000]]}
+                'listing': [{'sha256': sha, 'bytes': size, 'last_used_utc': utc(mtime), 'links': links}
+                            for sha, size, mtime, links in sorted(objects, key=lambda item: -item[2])[:1000]]}
 
 
 def announced_total(response, offset):
@@ -450,9 +488,9 @@ def fetch_with_retries(cache, entry, cap, protected_objects, protected_partials,
     restarted = False
     delays = [0] + [args.retry_base_seconds * 3 ** i for i in range(args.retries)]
     for attempt, delay in enumerate(delays):
+        if deadline is not None and time.monotonic() + delay >= deadline:
+            break                        # aucun essai, pas meme le premier, au-dela du delai
         if delay:
-            if deadline is not None and time.monotonic() + delay > deadline:
-                break
             time.sleep(delay)
         stats['attempts'] = attempt + 1
         try:
@@ -473,6 +511,9 @@ def fetch_with_retries(cache, entry, cap, protected_objects, protected_partials,
                 raise EntryFailure('HTTP %d : %s' % (error.code, error.reason)) from error
         except (urllib.error.URLError, http.client.HTTPException, OSError, ValueError) as error:
             stats['last_error'] = reason(error)
+    if not stats.get('attempts'):
+        stats['attempts'] = 0
+        raise EntryFailure('delai (--deadline-seconds) atteint avant le premier essai : aucun telechargement')
     raise EntryFailure('echec apres %d essai(s) : %s' % (stats.get('attempts', 0), stats.get('last_error')))
 
 
@@ -586,22 +627,32 @@ def main(argv=None):
             if args.link:
                 link_dir = Path(args.link).absolute()
                 out = os.environ.get('V12_OUT')     # {out} de la commande, exporte par v12_worker.sh
+                results = None
                 if out and len(Path(out).absolute().parents) > 2:
                     results = Path(out).absolute().parents[2]          # $WORK/results : tout y est rapatrie
-                    if link_dir == results or results in link_dir.parents:
-                        raise Usage('--link dans les resultats rapatries ({out}) : interdit, lier dans {build}')
+
+                def inside_results(path):
+                    """Sous les resultats, lexicalement ou reellement (un ancetre symbolique ne contourne rien)."""
+                    if results is None:
+                        return False
+                    real, real_results = Path(os.path.realpath(path)), Path(os.path.realpath(results))
+                    return path == results or results in path.parents or real == real_results or \
+                        real_results in real.parents
+                if inside_results(link_dir):
+                    raise Usage('--link dans les resultats rapatries ({out}) : interdit, lier dans {build}')
                 link_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
-                if link_dir.is_symlink() or not link_dir.is_dir():
-                    raise Usage('--link : dossier reel attendu')
+                if link_dir.is_symlink() or not link_dir.is_dir() or inside_results(link_dir):
+                    raise Usage('--link : dossier reel attendu, hors des resultats rapatries ({out})')
                 report['link_dir_name'] = link_dir.name
             cache = Cache(Path(root).absolute(), args.max_cache_bytes, args.min_free_bytes, args.lock_wait)
             if args.purge:
-                for sha, size, _ in cache.object_list():
+                for sha, size, _, links in cache.object_entries():
                     cache.drop_object(sha)
-                    cache.evicted.append({'kind': 'object', 'sha256': sha, 'bytes': size})
+                    cache.evicted.append({'kind': 'object', 'sha256': sha, 'bytes': size, 'links': links,
+                                          'freed_disk_bytes': size if links == 1 else 0})
                 for key, size, _ in cache.partial_list():
                     cache.drop_partial(key)
-                    cache.evicted.append({'kind': 'partial', 'key': key, 'bytes': size})
+                    cache.evicted.append({'kind': 'partial', 'key': key, 'bytes': size, 'freed_disk_bytes': size})
             elif args.trim:
                 try:
                     cache.make_room(0, set(), set())

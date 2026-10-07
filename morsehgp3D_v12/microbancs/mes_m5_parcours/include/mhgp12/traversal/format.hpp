@@ -22,6 +22,11 @@
 // (enfants = moitiés de la boite ajustee, candidats = liste du parent, profondeur, chemins), feuilles = noeuds feuilles
 // dans l'ordre prefixe (meme boite d'entree contenant la boite ajustee, meme empreinte de liste), grand livre = sommes
 // des sections. Un FNV valide protege l'integrite du fichier, pas ces invariants : ils sont tous verifies.
+// Regles semantiques de la v11 (boxes.cpp) verifiables sans rejouer G1 (CST-0223) : tests G1 d'un noeud dans
+// [c min(c, K), c min(c, 3K)] (c candidats ; chacun examine au moins min(c, K) et au plus min(c, 3K) temoins du
+// reservoir), somme des tests controlee avant chaque addition (aucun debordement de u64) ; racine = enveloppe exacte
+// [min, max+1) de tous les sites ; boite d'une feuille = enveloppe exacte de ses sites inter boite d'entree de son
+// noeud ; feuille seulement si m <= taille de feuille ou largeur <= 1 (sinon la v11 aurait coupe).
 #pragma once
 
 #include <array>
@@ -144,6 +149,22 @@ inline bool fail(std::string& error, const std::string& what) {
   return false;
 }
 
+// Tests G1 d'un noeud a c candidats (filter de boxes.cpp, v11) : le reservoir garde min(c, 3K) temoins ; chaque
+// candidat en examine dans l'ordre jusqu'au K-ieme dominateur, donc au moins min(c, K) et au plus min(c, 3K).
+// c < 2^32, K <= 12 : produits < 2^38, exacts en u64.
+inline bool tests_in_bounds(u64 tests, u64 candidates, u64 kmax) {
+  const u64 low = candidates * (candidates < kmax ? candidates : kmax);
+  const u64 high = candidates * (candidates < 3 * kmax ? candidates : 3 * kmax);
+  return tests >= low && tests <= high;
+}
+
+// Somme controlee : faux (somme inchangee) si sum + value deborderait u64.
+inline bool checked_add(u64& sum, u64 value) {
+  if (value > ~u64{0} - sum) return false;
+  sum += value;
+  return true;
+}
+
 // Moities de la boite ajustee du parent (split_ready de la v11) : memes axes hors coupe, coupe au milieu.
 inline bool halves(const Node& left, const Node& right) {
   int axis = -1;
@@ -169,7 +190,9 @@ inline bool halves(const Node& left, const Node& right) {
 
 // Lecture stricte : rend faux et une raison au premier invariant viole, sans jamais allouer avant le controle de taille.
 inline bool read(const std::string& path, Dump& d, std::string& error) {
+  using detail::checked_add;
   using detail::fail;
+  using detail::tests_in_bounds;
   std::FILE* f = std::fopen(path.c_str(), "rb");
   if (f == nullptr) return fail(error, "ouverture en lecture impossible : " + path);
   if (std::fseek(f, 0, SEEK_END) != 0) {
@@ -228,6 +251,15 @@ inline bool read(const std::string& path, Dump& d, std::string& error) {
   const u64 bits = h.coord_bits, top = u64{1} << bits;  // coordonnees < top, bornes de boites <= top
   for (u64 i = 0; i < h.n_sites; ++i)
     if (d.x[i] >= top || d.y[i] >= top || d.z[i] >= top) return fail(error, "coordonnee hors du profil : " + path);
+  // Enveloppe exacte du nuage [min, max+1) : boite d'entree de la racine (v11 : envelope de la liste de la racine).
+  i64 cloud_lo[3] = {d.x[0], d.y[0], d.z[0]}, cloud_hi[3] = {d.x[0], d.y[0], d.z[0]};
+  for (u64 i = 1; i < h.n_sites; ++i) {
+    const i64 c[3] = {d.x[i], d.y[i], d.z[i]};
+    for (int a = 0; a < 3; ++a) {
+      cloud_lo[a] = c[a] < cloud_lo[a] ? c[a] : cloud_lo[a];
+      cloud_hi[a] = c[a] > cloud_hi[a] ? c[a] : cloud_hi[a];
+    }
+  }
   const u64 max_depth = 3 * bits;
   const auto box_ok = [&](const i64* lo, const i64* hi) {
     for (int a = 0; a < 3; ++a)
@@ -253,9 +285,14 @@ inline bool read(const std::string& path, Dump& d, std::string& error) {
     if ((n.count == 0) != (n.kind == kKindEmpty) || (n.count == 0 && n.list_fnv != 0))
       return fail(error, "noeud : genre incoherent : " + path);
     if (n.kind == kKindSplit && n.count <= h.leaf_size) return fail(error, "noeud coupe sous la taille de feuille : " + path);
+    if (!tests_in_bounds(n.tests, n.candidates, h.kmax))
+      return fail(error, "noeud : tests G1 hors de [c min(c, K), c min(c, 3K)] : " + path);
     if (i == 0) {
       if (n.depth != 0 || n.candidates != h.n_sites || n.path[0] != 0 || n.path[1] != 0)
         return fail(error, "racine invalide : " + path);
+      for (int a = 0; a < 3; ++a)
+        if (n.lo[a] != cloud_lo[a] || n.hi[a] != cloud_hi[a] + 1)
+          return fail(error, "racine : boite d'entree differente de l'enveloppe exacte du nuage : " + path);
     } else {
       // le parent est le sommet de pile qui attend encore un enfant
       while (!stack.empty() && stack.back().children == 2) stack.pop_back();
@@ -279,7 +316,7 @@ inline bool read(const std::string& path, Dump& d, std::string& error) {
     }
     if (n.kind == kKindSplit) stack.push_back({i, 0});
     if (n.kind == kKindLeaf) ++leaf_nodes;
-    tests += n.tests;
+    if (!checked_add(tests, n.tests)) return fail(error, "somme des tests G1 hors de u64 : " + path);
     deepest = n.depth > deepest ? n.depth : deepest;
   }
   while (!stack.empty() && stack.back().children == 2) stack.pop_back();
@@ -303,6 +340,25 @@ inline bool read(const std::string& path, Dump& d, std::string& error) {
     const u32* s = d.sites.data() + begin;
     for (u32 k = 0; k < l.m; ++k)
       if (s[k] >= h.n_sites || (k > 0 && s[k] <= s[k - 1])) return fail(error, "feuille : sites hors du nuage ou non croissants : " + path);
+    // Boite ajustee exacte (prepare_node de la v11) : enveloppe [min, max+1) des sites retenus, inter boite d'entree.
+    i64 env_lo[3] = {d.x[s[0]], d.y[s[0]], d.z[s[0]]}, env_hi[3] = {d.x[s[0]], d.y[s[0]], d.z[s[0]]};
+    for (u32 k = 1; k < l.m; ++k) {
+      const i64 c[3] = {d.x[s[k]], d.y[s[k]], d.z[s[k]]};
+      for (int a = 0; a < 3; ++a) {
+        env_lo[a] = c[a] < env_lo[a] ? c[a] : env_lo[a];
+        env_hi[a] = c[a] > env_hi[a] ? c[a] : env_hi[a];
+      }
+    }
+    i64 width = 0;
+    for (int a = 0; a < 3; ++a) {
+      const i64 lo = env_lo[a] > n.lo[a] ? env_lo[a] : n.lo[a];
+      const i64 hi = env_hi[a] + 1 < n.hi[a] ? env_hi[a] + 1 : n.hi[a];
+      if (l.lo[a] != lo || l.hi[a] != hi)
+        return fail(error, "feuille : boite differente de l'enveloppe de ses sites inter boite du noeud : " + path);
+      width = l.hi[a] - l.lo[a] > width ? l.hi[a] - l.lo[a] : width;
+    }
+    // Feuille seulement si m <= taille de feuille ou largeur <= 1 (run_ready de la v11) : sinon elle aurait ete coupee.
+    if (l.m > h.leaf_size && width > 1) return fail(error, "feuille qui devrait etre coupee (m et largeur) : " + path);
     if (l.m > widest) widest = l.m;
     begin += l.m;
   }

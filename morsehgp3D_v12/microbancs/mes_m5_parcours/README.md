@@ -29,10 +29,12 @@ v11 sur la même machine ? La règle d'adoption est écrite au § 6, avant toute
 | `vidage/traversal_dump.cpp` | vidage du parcours de la v11 gelée (nœuds, feuilles, grand livre), lié à `libmhgp11.a` |
 | `vidage/v11_timing.cpp` | chrono de la frontière et de la passe unique de la v11 (W fils, passes chaudes), et du `walk` séquentiel |
 | `host/traversal_identity.cpp` | identité sur l'hôte (warp simulé) contre les vidages, nœuds compris, mutants, portes unitaires |
+| `host/format_selftest.cpp` | porte du lecteur strict (`CST-0223`) : vidages synthétiques valides admis, invalides refusés (dont les quatre références de l'auditeur) |
 | `cuda/traversal_bench.cu` | banc CUDA : exécuteur appareil du même pilote, chrono, profil par niveau, identité, mutants |
 | `oracle/oracle_parcours.py` | oracle du parcours de la v11 en entiers Python exacts (arithmétique volontairement autre) |
 | `fixtures/fixtures.py` | six fixtures synthétiques (u21 et u32) et leurs vidages de référence |
-| `scripts/g4_traversal_bench.py` | session G4 complète (bibliothèque standard) : construit, vide, vérifie, mesure, juge ; `--selftest-judge` |
+| `scripts/g4_traversal_bench.py` | session G4 complète (bibliothèque standard) : construit, vide, vérifie, mesure, juge ; `--selftest-judge` ; `--rejudge` (sorties publiées d'une session) |
+| `tests/test_juge_m5.py` | porte du juge et du pilote (`CST-0018`) : injections de l'auditeur rejouées par le vrai `main`, rejugement de la session G4 C |
 | `CMakeLists.txt` | CMake ≥ 3.20 (3.22.1 de la VM), C++20, `-Wall -Wextra -Wpedantic -Werror` côté hôte, CUDA sm_120 |
 | `RAPPORT.md` | résultats locaux du 7 octobre |
 
@@ -83,7 +85,14 @@ du fichier contre les comptes, puis le profil, K, les tailles de feuille, les co
 dans $[0,2^{B}]$, l'arbre entier reconstruit par une pile (enfants = moitiés de la boîte ajustée du parent, axe de coupe
 au premier maximum, candidats = retenus du parent, profondeurs, chemins), les feuilles (= nœuds feuilles dans l'ordre,
 débuts contigus sans débordement, sites bornés et strictement croissants, empreinte de liste égale à celle du nœud) et
-le grand livre (= sommes des sections). Un refus (`wide_leaf`, profondeur) ne publie aucun préfixe.
+le grand livre (= sommes des sections). Un refus (`wide_leaf`, profondeur) ne publie aucun préfixe. Règles de la v11
+vérifiables sans rejouer G1 (`CST-0223`, 7 octobre) : tests G1 d'un nœud à $c$ candidats dans
+$[c \min(c, K), c \min(c, 3K)]$ (chaque candidat examine au moins $\min(c, K)$ et au plus $\min(c, 3K)$ témoins du
+réservoir), somme des tests contrôlée avant chaque addition, boîte d'entrée de la racine égale à l'enveloppe exacte
+$[\min, \max+1)$ du nuage, boîte de chaque feuille égale à l'enveloppe exacte de ses sites intersectée avec la boîte
+d'entrée de son nœud, et feuille seulement si $m$ ne dépasse pas la taille de feuille ou si sa largeur vaut au plus 1.
+La porte `mhgp12_traversal_format_selftest` les joue sur des vidages synthétiques à empreinte exacte, dont les quatre
+références de l'auditeur, et la session la joue avant tout vidage.
 
 `--crop N` garde les N premiers sites de l'ordre de Morton (une région compacte de la trame) : vidage de contrôle pour
 Compute Sanitizer.
@@ -158,7 +167,9 @@ l'appareil, un noyau générique lance un warp par indice (4 warps par bloc, mé
   reproduit la v11 sur les trois fixtures u21 avant de servir de référence aux fixtures u32.
 - **Portes unitaires** (`--unit`) : repère fermé de 33 bits pour les sites $(0,0,0)$ et $(2^{32}-1,0,0)$ ; clé du
   réservoir $3(2^{31}-3)^{2}$ au-delà d'`i64` pour la boîte $[0,1]^{3}$ et le site $(2^{30}-1)^{3}$, repère du parent à
-  30 bits (voie large) alors que la seule boîte en demande 1 ; borne $3B$.
+  30 bits (voie large) alors que la seule boîte en demande 1 ; borne $3B$ ; nombre de tâches émis par `EmitKernel` et
+  scanné par `child_fields` pour un enfant coupé aux bornes du domaine `u32` des comptes (`CST-0222` : huit petits
+  enregistrements, de 1 à $2^{32}-1$ sites, attendu écrit en dur ; un seul calcul `tasks_of` en `u64`).
 
 ## 6. Règle d'adoption, écrite d'avance
 
@@ -193,6 +204,21 @@ fige le comportement.
    finie ou nulle, réservation pendant les passes chronométrées, binaire modifié pendant la session, grand livre du
    chrono v11 différent du vidage, mutant non tué, Compute Sanitizer en erreur ou non joué, isolation du GPU non
    certifiée. Seul « adopté » permet l'adoption.
+
+**Preuves exigées par le juge** (`CST-0018`, 7 octobre ; la règle ci-dessus est inchangée, seules les preuves
+qu'elle suppose sont désormais exigées une à une, sur le modèle de `MES-M2`). « Adopté » seulement avec : le contrat
+complet (les neuf cas, les six qui décident, au moins cinq tours, 15 passes GPU après 3 d'échauffement, dix passes v11
+à 48 fils, découpe de 4 000 sites, CUDA et Compute Sanitizer joués ; tout écart est publié et refuse l'adoption) ; les
+outils d'identité hôte et appareil de code 0, une ligne valide par cas et par fixture, les six fixtures ; chaque tour
+de chaque cas valide (chrono v11 aux dix passes, banc GPU aux 15 durées brutes, médianes recalculées depuis ces durées
+et égales aux médianes déclarées, aucune réservation chronométrée, code et identité concordants) ; Compute Sanitizer de
+code 0 avec sa prise sur les trois cibles ; les mutants tués ; les portes unitaires et la porte du lecteur conformes ;
+l'isolation du GPU au début, avant et après les tours ; chaque prise fraîche (cible effacée avant la commande, jeton
+de la session répété par chaque outil) et rattachée à son vidage (chemin, profil, K, feuille, sites, statut, grand
+livre) ; binaires, sources, dépendances compilées et vidages rehachés égaux en fin de session. Une preuve manquante,
+périmée ou incohérente rend « refusé ». `--rejudge` rejuge les sorties publiées d'une session par les mêmes
+validateurs ; pour une session antérieure au jeton, ce qui n'existait pas (jeton, porte du lecteur, isolation avant et
+après les tours, rehachage des sources) est déclaré non rejouable, jamais supposé.
 
 **Pourquoi 1/4.** Le budget du catalogue à K5 est de 35 à 45 ms sur ng00 (`ARCHITECTURE.md` § 3). Il contient la
 feuille J3 adoptée par `MES-M2` (11,6 ms de noyau seul sur ng00 K5/24), la fin d'étage sur l'appareil (tri radix des
@@ -232,7 +258,8 @@ Données de `{data}` : `lidar_ng00`, `lidar_ng01`, `lidar_ng02` (`.u32le` et `.i
 aucun `publier.py` n'est nécessaire. Durée : 6 à 8 minutes sur le codespace sans GPU (4 fils, un tour) ; estimée à 12
 à 20 minutes sur G4 (constructions et vidages plus rapides, mais six tours, Compute Sanitizer et passes GPU). Codes : 0
 rapport écrit (quel que soit le verdict), 2 refus avant toute mesure. Avant la session : `python3 -S -O
-scripts/g4_traversal_bench.py --selftest-judge` (code 0).
+scripts/g4_traversal_bench.py --selftest-judge` et `python3 -S -O tests/test_juge_m5.py` (code 0 ; la seconde rejoue
+les injections de l'auditeur et rejuge la session C).
 
 ## 8. Prédiction, écrite avant G4
 
@@ -267,5 +294,5 @@ Voir `RAPPORT.md` § 6 (chiffrée à partir des statistiques par niveau mesurée
      montre coûteux, et le `Merge` en série des premiers niveaux si son temps compte ;
   6. budgéter la mémoire des niveaux et de l'arène des feuilles dans le budget de la Session (prévision, admission,
      réservation, `CST-0211`) ; refus transactionnel au-delà des indices 32 bits des tâches (déjà refusé ici, statut
-     `capacité`) ; régime de plusieurs millions de sites (lots de feuilles, `ARCHITECTURE.md` § 4.6) ;
+     `capacité`, admis désormais avant toute réservation du niveau suivant, `Scatter`, `Emit` ou conversion) ; régime de plusieurs millions de sites (lots de feuilles, `ARCHITECTURE.md` § 4.6) ;
   7. qualifier u24 puis u32 sur des données réelles : la voie large `i128` n'est exercée ici que par des fixtures.

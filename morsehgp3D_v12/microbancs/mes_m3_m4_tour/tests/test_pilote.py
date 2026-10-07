@@ -16,11 +16,21 @@ Partie B, injections de l'auditeur (recu audit_socle_microbancs_20261007/preuves
   - binaire remplace apres « construire », vidage sans FLOWER, vidages modifies avant MES-M4 : refus ;
   - juge de MES-M3 sur rapports synthetiques : adopte, rejete (borne, identite), refuse (4 prises, campagne
     incomplete plus recente, binaire different, vidages differents, preuve d'identite absente).
+  - mutant de MES-M4 (CST-0018, recu audit_cd_corrections_20261007/m34) : le journal de l'auditeur (entree d'une
+    autre trame a K1, un seul ordre, aucun compte, fin de code 1) est refuse (code 3), jamais declare tue ni complet ;
+    de meme, chacun seul, un journal complet d'une autre trame, un journal sans son dernier ordre et un journal aux
+    naissances differentes du vidage ; un mutant complet du carre est tue (code 0) ; un mutant complet sans ecart
+    survit (code 1) ;
 Partie C (--binaires DIR, binaires reels construits) : mhgp12_mes_m4 et son mutant dans le pilote, sur le carre :
   conforme avec six naissances jugees par LEM-T6, mutant tue ; mhgp12_mes_m3 sur le carre (zero partie) : refus pour
-  preuve vide.
+  preuve vide ; puis le temoin exact de l'auditeur (vrai M4 normal, faux mutant incomplet d'une autre trame) : refus.
+Partie D, sorties REELLES de la session G4 D (recu g4_t0d_20261007, lots K10 et K5) : les juges de MES-M3 et de
+  MES-M4 redonnent les verdicts publies (M3 adopte a K10, refuse dans le lot K5 ; M4 conforme), les statistiques
+  publiees de MES-M3 (a l'octet sous Python < 3.12) et celles de l'auditeur (9 decimales) ; les journaux reels des
+  mutants M4 sont tues et complets pour le validateur rattache au cas ; les journaux M4 normaux sont admis ; le meme
+  rapport falsifie (mutant tue mais incomplet, ou tue avec un refus) est refuse par le juge de MES-M4.
 
-Usage : python3 -S -O tests/test_pilote.py [--recu-g4 DOSSIER_g4_t0b] [--binaires DIR]
+Usage : python3 -S -O tests/test_pilote.py [--recu-g4 DOSSIER_g4_t0b] [--recu-g4-d DOSSIER_g4_t0d] [--binaires DIR]
 Bibliotheque standard ; aucune garde par assert. Codes : 0 conforme, 1 ecart (detail en JSON), 2 usage.
 """
 import contextlib
@@ -43,6 +53,13 @@ from carre import make  # noqa: E402  (generateur partage du carre de l'auditeur
 
 PILOTE = ICI.parent / "pilote.py"
 RECU_G4 = ICI.parents[2] / "receipts" / "g4_t0b_20261007"
+RECU_G4_D = ICI.parents[2] / "receipts" / "g4_t0d_20261007"
+LOTS_D = (("007_m34_k10_publier/files/m34_k10", 10, "adopte"), ("009_m34_k5_publier/files/m34_k5", 5, "refuse"))
+# Moyennes geometriques et IC 95 % de MES-M3 a K10 recalcules par l'auditeur (recu audit_cd_corrections_20261007,
+# campagnes/README.md), retrouves par le juge du pilote a 1e-12 selon l'auditeur.
+M3_D_AUDITEUR = {"ng00_k10": (0.545047666, 0.544368366, 0.545727813),
+                 "ng01_k10": (0.538794259, 0.537839936, 0.539661648),
+                 "ng02_k10": (0.547584358, 0.546439892, 0.548864926)}
 LOTS = (("002_m34_k5_publier/files/m34_k5", 5, ("ng00", "ng01", "ng02")),
         ("004_m34_k10_publier/files/m34_k10", 10, ("ng00", "ng01", "ng02")))
 
@@ -67,6 +84,32 @@ if nom == "mhgp12_mes_m4" and mode == "t6_vide":  # ancien comportement sans FLO
                               contraction_parallele=dict(fils=2, secondes=1e-6, identique=True))))
     print(json.dumps(dict(phase="fin", code=0)))
     sys.exit(0)
+CARRE = {1: (4, 5, 12, 5), 2: (4, 1, 4, 5), 3: (1, 0, 0, 1), 4: (1, 0, 0, 1)}
+if nom in ("mhgp12_mes_m4", "mhgp12_mes_m4_mutant_sans_contraction") and \
+        mode in ("conforme_carre", "complet_carre", "complet_sans_ecart", "complet_autre_trame", "tronque_carre",
+                 "comptes_faux"):
+    mutant = nom != "mhgp12_mes_m4"
+    ecart = mutant and mode != "complet_sans_ecart"
+    trame = "autre_trame" if mode == "complet_autre_trame" else "audit_square"
+    print(json.dumps(dict(phase="entree", trame=trame, K=4, repetitions=1, mutant_sans_contraction=mutant)))
+    for k, (nb, nc, ns, nn) in CARRE.items():
+        if mode == "tronque_carre" and k == 4:  # ordre 4 absent, tout le reste conforme
+            break
+        nb += 1 if mode == "comptes_faux" and k == 2 else 0  # naissances de l'ordre 2 differentes du vidage
+        print(json.dumps(dict(phase="ordre", k=k, naissances=nb, cellules=nc, representants=ns,
+                              noeuds=nn + (1 if ecart else 0), noeuds_v11=nn, fusions=nn - nb, racine_unique=True,
+                              identite=dict(identiques=not ecart, forme=not ecart, naissances_ecarts=0, graines_ecarts=0,
+                                            dates_ecarts=0, noeuds_ecarts=0, enfants_ecarts=0),
+                              lem_t6=dict(naissances_jugees=nb, ecarts=0, images_par_naissance_basse=0),
+                              temps_un_fil_s=dict(naissances=1e-6, noyau=1e-6, contraction=1e-6),
+                              contraction_parallele=dict(fils=1 if mutant else 2, secondes=1e-6, identique=True))))
+    print(json.dumps(dict(phase="fin", code=1 if ecart else 0)))
+    sys.exit(1 if ecart else 0)
+if nom == "mhgp12_mes_m4_mutant_sans_contraction" and mode == "incomplet_autre_trame":  # temoin de l'auditeur
+    for r in (dict(phase="entree", K=1, trame="autre_trame", mutant_sans_contraction=True),
+              dict(phase="ordre", k=1, identite=dict(identiques=False)), dict(phase="fin", code=1)):
+        print(json.dumps(r))
+    sys.exit(1)
 if nom != "mhgp12_vidage":
     sys.exit(0)
 a = sys.argv[1:]
@@ -179,8 +222,9 @@ def partie_a(m, recu):
         p, reponse, comptes, _ = m.valider_variante(nom, code, lire_jsonl(dossier5 / "ng00_k5" / (
             "mes_m3_mere_%s.jsonl" % nom)), 5, fichiers)
         exiger(not p and reponse, "variante reelle %s : %s" % (nom, p))
-    tue, geo, complete = m.valider_mutant_m4(1, lire_jsonl(dossier5 / "ng00_k5" / "mes_m4_mutant.jsonl"))
-    exiger(tue and geo and complete, "mutant reel de MES-M4 non reconnu tue")
+    p, tue, geo, complete = m.valider_mutant_m4(1, lire_jsonl(dossier5 / "ng00_k5" / "mes_m4_mutant.jsonl"), "ng00", 5,
+                                                fichiers)
+    exiger(not p and tue and geo and complete, "mutant reel de MES-M4 non reconnu tue : %s" % p)
     resultats.append({"partie": "A", "cas": "portes_variante_mutant_reels", "portes": 4, "variante": "conforme",
                       "mutant_m4_tue_par_ecart": True})
     # Juge de MES-M3 sur les sorties reelles K10 : prise unique (refus), puis rejeu x5 de cette prise (arithmetique).
@@ -466,6 +510,34 @@ def juge_m3_synthetique(m):
     return resultats
 
 
+def partie_b_mutant_m4(m):
+    """Mutant de MES-M4 rattache a son cas (CST-0018) : M4 normal simule conforme, trois mutants simules."""
+    resultats = []
+    cas = "audit_square_k4"
+    for mode, code_attendu, tue_attendu, complet_attendu, motif in (
+            ("incomplet_autre_trame", 3, False, False, "entree"), ("complet_autre_trame", 3, False, False, "entree"),
+            ("tronque_carre", 3, False, False, "ordres absents"), ("comptes_faux", 3, False, False, "naissances"),
+            ("complet_carre", 0, True, True, None), ("complet_sans_ecart", 1, False, True, None)):
+        with tempfile.TemporaryDirectory(prefix="pilote-") as tmp:
+            b = Banc(m, tmp)
+            exiger(b.etape("vider") == 0, "vidage simule refuse")
+            b.scenario_courant({"mhgp12_mes_m4": "conforme_carre", "mhgp12_mes_m4_mutant_sans_contraction": mode})
+            code = b.etape("m4")
+            normal, mutant = b.rapport["mes_m4"][cas], b.rapport["mes_m4"]["mutant_sans_contraction_" + cas]
+            exiger(normal["conforme"] and code == code_attendu and mutant["tue"] is tue_attendu and
+                   mutant["sortie_complete"] is complet_attendu and
+                   (motif is None or any(motif in r for r in mutant["refus"])),
+                   "mutant M4 %s : code %d, normal %s, tue %s, complet %s, refus %s" % (
+                       mode, code, normal["conforme"], mutant["tue"], mutant["sortie_complete"], mutant["refus"][:2]))
+            if mode == "incomplet_autre_trame":
+                exiger(any("entree" in r for r in mutant["refus"]) and any("ordres absents" in r for r in mutant["refus"])
+                       and m.juger_m4(b.rapport)["verdict"] == "refuse", "temoin de l'auditeur : refus incomplet")
+            resultats.append({"partie": "B", "cas": "mutant_m4_" + mode, "code": code, "tue": mutant["tue"],
+                              "sortie_complete": mutant["sortie_complete"], "refus": len(mutant["refus"]),
+                              "avant_correction": "tue et complet" if mode == "incomplet_autre_trame" else None})
+    return resultats
+
+
 # ---- Partie C : binaires reels dans le pilote ------------------------------------------------------------------------
 def partie_c(m, binaires):
     resultats = []
@@ -491,15 +563,91 @@ def partie_c(m, binaires):
             exiger(c3 == 3 and any("aucune partie" in r for r in refus), "M3 sur zero partie : code %d %s" % (c3, refus))
             resultats.append({"partie": "C", "cas": "mes_m3_reel_carre_zero_partie", "code": c3,
                               "refus": "preuve vide"})
+    with tempfile.TemporaryDirectory(prefix="pilote-") as tmp:  # temoin exact de l'auditeur (check.py, m34)
+        b = Banc(m, tmp, reels=binaires)
+        b.nouvelle_campagne(processus=1)
+        b.scenario_courant({"mhgp12_mes_m4_mutant_sans_contraction": "incomplet_autre_trame"})
+        faux = b.construction / "mhgp12_mes_m4_mutant_sans_contraction"
+        faux.write_text(FAUX)
+        b.rapport["construction"] = m.enregistrer_binaires(b.args, {"code": 0, "etapes": []})
+        exiger(b.etape("vider") == 0, "vidage simule refuse")
+        c4 = b.etape("m4")
+        normal, mutant = b.rapport["mes_m4"][cas], b.rapport["mes_m4"]["mutant_sans_contraction_" + cas]
+        exiger(c4 == 3 and normal["conforme"] and not mutant["tue"] and not mutant["sortie_complete"] and
+               mutant["binaire"]["construit"] and mutant["binaire"]["inchange"],
+               "temoin de l'auditeur avec M4 reel : code %d, mutant %s" % (c4, {k: mutant.get(k) for k in (
+                   "tue", "sortie_complete")}))
+        resultats.append({"partie": "C", "cas": "temoin_auditeur_mutant_incomplet_m4_reel", "code": c4,
+                          "normal_conforme": True, "mutant_tue": False, "avant_correction": "code 0, tue et complet"})
+    return resultats
+
+
+# ---- Partie D : sorties reelles de la session G4 D -------------------------------------------------------------------
+def partie_d(m, recu):
+    resultats = []
+    for lot, k_max, verdict_m3 in LOTS_D:
+        dossier = recu / "resultats" / "cmd" / lot
+        rapport = json.loads((dossier / "rapport_mes_m3_m4.json").read_text())
+        publies = rapport["verdicts"]
+        verdict = lambda x: x.get("verdict") if isinstance(x, dict) else x  # noqa: E731 (objet complet ou chaine)
+        v3, v4 = m.juger_m3(rapport), m.juger_m4(rapport)
+        exiger(v3["verdict"] == verdict(publies["mes_m3"]) == verdict_m3 and
+               v4["verdict"] == verdict(publies["mes_m4"]) == "conforme",
+               "session D %s : M3 %s / %s, M4 %s / %s (%s %s)" % (lot, v3["verdict"], verdict(publies["mes_m3"]),
+                                                               v4["verdict"], verdict(publies["mes_m4"]),
+                                                               v3["refus"][:2], v4["refus"][:2]))
+        identiques = None
+        if isinstance(publies["mes_m3"], dict):  # statistiques publiees : a l'octet sous Python < 3.12 (VM 3.10)
+            exact = sys.version_info < (3, 12)
+            egal = (lambda a, b: a == b) if exact else (lambda a, b: abs(a - b) <= 1e-12 * max(1.0, abs(b)))
+            for cas, c in publies["mes_m3"].get("cas", {}).items():
+                calc = v3["cas"][cas]
+                exiger(egal(calc["moyenne_geometrique"], c["moyenne_geometrique"]) and
+                       all(egal(a, b) for a, b in zip(calc["ic95"], c["ic95"])),
+                       "session D %s : statistique M3 differente du publie" % cas)
+            identiques = "a l'octet" if exact else "a 1e-12 pres"
+        if k_max == 10:
+            for cas, (gm, bas, haut) in M3_D_AUDITEUR.items():
+                c = v3["cas"][cas]
+                exiger(abs(c["moyenne_geometrique"] - gm) < 1e-9 and abs(c["ic95"][0] - bas) < 1e-9 and
+                       abs(c["ic95"][1] - haut) < 1e-9, "session D %s : statistique M3 differente de l'auditeur" % cas)
+        # Mutant M4 : journal reel relu par le validateur rattache au cas (trame, K, inventaire des vidages).
+        cas = "ng00_k%d" % k_max
+        bloc = rapport["mes_m4"]["mutant_sans_contraction_" + cas]
+        lignes = lire_jsonl(dossier / bloc["journal"])
+        p, tue, geo, complete = m.valider_mutant_m4(bloc["code"], lignes, "ng00", k_max,
+                                                    rapport["vidages"][cas]["fichiers"])
+        exiger(not p and tue and geo and complete, "session D : mutant reel %s refuse : %s" % (cas, p))
+        # Rapport falsifie : mutant declare tue mais incomplet, ou tue avec un refus : le juge de MES-M4 refuse.
+        for champ, valeur in (("sortie_complete", False), ("refus", ["sortie d'un autre cas"])):
+            faux = copy.deepcopy(rapport)
+            for c, b in faux["mes_m4"].items():
+                if c.startswith("mutant"):
+                    b[champ] = valeur
+            exiger(m.juger_m4(faux)["verdict"] == "refuse", "session D : mutant tue avec %s=%r admis" % (champ, valeur))
+        normaux = 0
+        for trame in ("ng00", "ng01", "ng02"):
+            c = "%s_k%d" % (trame, k_max)
+            for proc in rapport["mes_m4"][c]["processus"]:
+                p, ident = m.valider_m4(proc["lignes"], proc["code"], trame, k_max, rapport["vidages"][c]["fichiers"],
+                                        48)
+                exiger(not p and ident, "session D : M4 %s refuse : %s" % (c, p[:2]))
+                normaux += 1
+        resultats.append({"partie": "D", "cas": "recu_g4_t0d_" + lot.split("/")[-1], "mes_m3": v3["verdict"],
+                          "mes_m4": v4["verdict"], "mutant_m4_tue_et_complet": True, "processus_m4_admis": normaux,
+                          "statistiques_m3_identiques_au_publie": identiques,
+                          "moyennes_m3": {c: round(v["moyenne_geometrique"], 9) for c, v in v3["cas"].items()}})
     return resultats
 
 
 def main(argv):
-    recu, binaires = RECU_G4, None
+    recu, recu_d, binaires = RECU_G4, RECU_G4_D, None
     i = 1
     while i < len(argv):
         if argv[i] == "--recu-g4" and i + 1 < len(argv):
             recu = Path(argv[i + 1])
+        elif argv[i] == "--recu-g4-d" and i + 1 < len(argv):
+            recu_d = Path(argv[i + 1])
         elif argv[i] == "--binaires" and i + 1 < len(argv):
             binaires = Path(argv[i + 1])
         else:
@@ -515,10 +663,18 @@ def main(argv):
             ecarts.append(str(e))
     else:
         ecarts.append("recu G4 absent : %s (preuve positive non jouee)" % recu)
-    try:
-        resultats += partie_b(m)
-    except Ecart as e:
-        ecarts.append(str(e))
+    for partie in (partie_b, partie_b_mutant_m4):
+        try:
+            resultats += partie(m)
+        except Ecart as e:
+            ecarts.append(str(e))
+    if (recu_d / "resultats").is_dir():
+        try:
+            resultats += partie_d(m, recu_d)
+        except Ecart as e:
+            ecarts.append(str(e))
+    else:
+        ecarts.append("recu G4 D absent : %s (preuve positive non jouee)" % recu_d)
     if binaires is not None:
         try:
             resultats += partie_c(m, binaires)

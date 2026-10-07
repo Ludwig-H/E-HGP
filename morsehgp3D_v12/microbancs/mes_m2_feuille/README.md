@@ -34,7 +34,7 @@ de la v11 (témoin), et **identité** avec la feuille de référence `leaf.cpp`.
 | `host/mes_s.cpp` | mesure `MES-S` du contrat numérique (étendues locales) |
 | `cuda/leaf_bench.cu` | banc CUDA : témoin v11, formes J3 et cohérente, variantes de registres, chrono, identité |
 | `scripts/g4_leaf_bench.py` | session G4 complète (bibliothèque standard) : construit, vide, admet, vérifie, mesure, juge |
-| `tests/test_juge_m2.py` | porte du juge et du pilote (`CST-0018`, `CST-0215`) : 25 scénarios simulés (dont les six injections de l'auditeur), juge pur, rejugement des 45 prises réelles du reçu G4 |
+| `tests/test_juge_m2.py` | porte du juge et du pilote (`CST-0018`, `CST-0215`) : 32 scénarios simulés (dont les six injections du reçu `audit_socle_microbancs_20261007` et les quatre du reçu `audit_cd_corrections_20261007`), juge pur, rejugement des 45 prises réelles du reçu G4 et cohérence des compteurs de leurs 333 formes |
 | `tests/test_admission_m2.py` | porte native de l'admission : mutants rejoués par les vrais outils (code 2, aucun noyau), vidages réels admis |
 | `scripts/make_dumps_local.sh` | vidages locaux (hors dépôt) |
 | `CMakeLists.txt` | CMake ≥ 3.20 (3.22.1 de la VM), C++20, `-Wall -Wextra -Wpedantic -Werror` côté hôte |
@@ -228,10 +228,14 @@ fraîches ; toute absence rend « refusé », jamais « adopté » ni « rejeté
 - identité hôte de code 0, une ligne par cas et par forme de base, identité, couverture complète et empreinte du vidage ;
 - auto-test d'arène de code 0 sur le vidage cité, aucun mutant vivant ;
 - Compute Sanitizer trouvé et joué (memcheck, racecheck, synccheck) : aucun défaut (code 0, ou 1 si le banc constate
-  lui-même un écart d'identité), prise neuve de la session sur le bon vidage ;
+  lui-même un écart d'identité), prise neuve de la session sur le bon vidage, validée comme une prise du banc :
+  exactement les formes et la répétition de la commande, couverture des `--sanitizer-leaves` premières feuilles
+  (comptes de référence bornés par ceux du vidage), compteurs cohérents, code et identité concordants ;
 - prise d'échauffement et chaque prise du banc : fichier neuf (cible effacée avant), jeton de la session, vidage cité
   par son chemin, son empreinte et ses comptes, exactement les formes et répétitions demandées, durées finies
-  strictement positives, code cohérent avec l'identité, témoin identique à la référence ;
+  strictement positives, code cohérent avec l'identité, témoin identique à la référence ; une forme qui se déclare
+  identique n'a ni écart de comptes ou d'émissions ni débordement, et son arène égale celle de la référence quand
+  toutes ses feuilles sont résolues (reçu `audit_cd_corrections_20261007/m2`) ;
 - chaque cas attendu présent avec ses N processus valides ; isolation du GPU relevée au début, avant et après le banc.
 
 Le rapport cite ses preuves (`evidence` : jeton, empreintes des vidages, prises et journaux).

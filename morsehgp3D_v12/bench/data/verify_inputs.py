@@ -3,17 +3,40 @@
 
     python3 -S verify_inputs.py DOSSIER/manifest.json [--measure]
 
-Sans --measure : bibliotheque standard seule (Python 3.10 nu de la VM) : existence, tailles (12 octets par site,
-4 par identifiant) et SHA-256 de chaque fichier liste. Avec --measure (numpy requis) : recompte n, positions
+Admission du manifeste AVANT toute lecture de fichier (CST-0217) : objet JSON au schema mhgp12.benchmark_inputs.v1,
+liste `cases` non vide (et `crops`, facultative, en liste) ; pour chaque fichier liste (coordonnees, identifiants,
+multiplicites ; variante `distinct` comprise), un nom simple [A-Za-z0-9][A-Za-z0-9._-]* (jamais un chemin), une
+empreinte SHA-256 de 64 chiffres hexadecimaux minuscules et un compte de sites entier strictement positif ; une variante
+`distinct` porte toujours ses multiplicites et leur empreinte, une multiplicite listee porte toujours son empreinte ;
+`bundled` vaut `distinct` ou est absent ; un meme nom liste deux fois a la meme empreinte et la meme taille. Un
+manifeste vide, un fichier sans empreinte, une empreinte nulle ou mal formee rendent le code 2 sans qu'aucun fichier
+soit lu : jamais un code 0 sans preuve complete.
+Puis, bibliotheque standard seule (Python 3.10 nu de la VM) : existence, tailles (12 octets par site, 4 par
+identifiant ou multiplicite) et SHA-256 de chaque fichier liste. Avec --measure (numpy requis) : recompte n, positions
 distinctes, doublons, etendue et bits, et les compare au manifeste.
-Codes : 0 conforme ; 1 ecart ; 2 manifeste illisible.
+Codes : 0 conforme (au moins un fichier verifie) ; 1 ecart (fichier absent, taille, empreinte, mesure) ; 2 manifeste
+illisible ou non conforme, usage.
 """
 from __future__ import annotations
 
 import hashlib
 import json
+import re
 import sys
 from pathlib import Path
+
+SCHEMA = 'mhgp12.benchmark_inputs.v1'
+NAME = re.compile(r'[A-Za-z0-9][A-Za-z0-9._-]*')
+SHA256 = re.compile(r'[0-9a-f]{64}')
+
+
+class Refus(Exception):
+    """Manifeste non conforme : refus avant toute lecture de fichier (code 2)."""
+
+
+def need(condition, message):
+    if not condition:
+        raise Refus(message)
 
 
 def sha256_file(path: Path) -> str:
@@ -24,23 +47,65 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def files_of(case: dict):
-    if case.get('bundled') == 'distinct':  # paquet G4 : seule la variante distincte a ete envoyee
-        d = case['distinct']
-        yield d['coordinates'], d['sha256'], 12 * d['count']
-        yield d['point_ids'], d['ids_sha256'], 4 * d['count']
-        yield d['mult'], d.get('mult_sha256'), 4 * d['count']
-        return
-    yield case['coordinates'], case['sha256'], 12 * case['count']
-    yield case['point_ids'], case['ids_sha256'], 4 * case['count']
-    if case.get('mult') and case.get('mult_sha256'):  # decoupes : multiplicites de la source
-        yield case['mult'], case['mult_sha256'], 4 * case['count']
-    d = case.get('distinct')
-    if d:
-        yield d['coordinates'], d['sha256'], 12 * d['count']
-        yield d['point_ids'], d['ids_sha256'], 4 * d['count']
-        if d.get('mult'):
-            yield d['mult'], d.get('mult_sha256'), 4 * d['count']
+def file_entry(record: dict, name_key: str, digest_key: str, per_site: int, count: int, where: str):
+    name, digest = record.get(name_key), record.get(digest_key)
+    need(isinstance(name, str) and NAME.fullmatch(name) is not None,
+         '%s : %s doit etre un nom de fichier simple, pas %r' % (where, name_key, name))
+    need(isinstance(digest, str) and SHA256.fullmatch(digest) is not None,
+         '%s : %s doit etre une empreinte SHA-256 (64 chiffres hexadecimaux minuscules), pas %r'
+         % (where, digest_key, digest))
+    return name, digest, per_site * count
+
+
+def variant_files(record: dict, where: str, mult_required: bool) -> list:
+    """Fichiers d'une variante (cas, decoupe ou variante distincte) : coordonnees, identifiants, multiplicites."""
+    need(isinstance(record, dict), '%s : objet attendu' % where)
+    count = record.get('count')
+    need(type(count) is int and count > 0, '%s : count doit etre un entier strictement positif, pas %r'
+         % (where, count))
+    files = [file_entry(record, 'coordinates', 'sha256', 12, count, where),
+             file_entry(record, 'point_ids', 'ids_sha256', 4, count, where)]
+    if mult_required or 'mult' in record or 'mult_sha256' in record:
+        files.append(file_entry(record, 'mult', 'mult_sha256', 4, count, where))
+    return files
+
+
+def files_of(case, where: str) -> list:
+    need(isinstance(case, dict), '%s : objet attendu' % where)
+    name = case.get('name')
+    need(isinstance(name, str) and name != '', '%s : nom de cas absent' % where)
+    where = '%s %s' % (where, name)
+    bundled = case.get('bundled')
+    need(bundled in (None, 'distinct'), '%s : bundled inconnu %r' % (where, bundled))
+    if bundled == 'distinct':  # paquet G4 : seule la variante distincte a ete envoyee
+        need('distinct' in case, '%s : variante distincte annoncee mais absente' % where)
+        return variant_files(case['distinct'], where + ' (distinct)', True)
+    files = variant_files(case, where, False)
+    if 'distinct' in case:
+        files += variant_files(case['distinct'], where + ' (distinct)', True)
+    return files
+
+
+def admit(manifest) -> list:
+    """Admission : liste des (cas, fichiers) ; leve Refus au premier ecart de forme, avant toute lecture."""
+    need(isinstance(manifest, dict), 'manifeste : objet JSON attendu')
+    need(manifest.get('schema') == SCHEMA, 'manifeste : schema %r, attendu %s' % (manifest.get('schema'), SCHEMA))
+    cases = manifest.get('cases')
+    need(isinstance(cases, list) and len(cases) > 0, 'manifeste : liste cases absente ou vide')
+    crops = manifest.get('crops', [])
+    need(isinstance(crops, list), 'manifeste : crops doit etre une liste')
+    admitted, seen = [], {}
+    for where, items in (('cas', cases), ('decoupe', crops)):
+        for index, case in enumerate(items):
+            files = files_of(case, '%s %d' % (where, index))
+            for name, digest, size in files:
+                if name in seen:
+                    need(seen[name] == (digest, size), 'fichier %s liste deux fois avec deux empreintes ou tailles'
+                         % name)
+                seen[name] = (digest, size)
+            admitted.append((case, files))
+    need(len(seen) > 0, 'manifeste : aucun fichier a verifier')
+    return admitted
 
 
 def measure(path: Path, case: dict) -> list:
@@ -68,23 +133,37 @@ def measure(path: Path, case: dict) -> list:
 
 
 def main(argv) -> int:
-    if not argv:
+    options = [a for a in argv if a.startswith('-')]
+    paths = [a for a in argv if not a.startswith('-')]
+    if len(paths) != 1 or any(o != '--measure' for o in options):
         print(__doc__)
         return 2
-    manifest_path = Path(argv[0])
+    manifest_path = Path(paths[0])
     try:
         manifest = json.loads(manifest_path.read_text())
     except (OSError, ValueError) as error:
         print('manifeste illisible : %s' % error)
         return 2
+    try:
+        admitted = admit(manifest)
+    except Refus as error:
+        print('REFUS %s : %s (aucun fichier lu)' % (manifest_path, error))
+        return 2
+    if '--measure' in options:
+        try:
+            import numpy  # noqa: F401  (mesure seulement)
+        except ImportError:
+            print('--measure exige numpy')
+            return 2
     root = manifest_path.parent
     bad = 0
-    checked = 0
-    cases = list(manifest['cases']) + list(manifest.get('crops', []))
-    for case in cases:
-        for name, digest, size in files_of(case):
+    checked = set()
+    for case, files in admitted:
+        for name, digest, size in files:
+            if name in checked:
+                continue
+            checked.add(name)
             path = root / name
-            checked += 1
             if not path.is_file():
                 print('ABSENT %s' % name)
                 bad += 1
@@ -92,20 +171,21 @@ def main(argv) -> int:
             if path.stat().st_size != size:
                 print('TAILLE %s : %d au lieu de %d' % (name, path.stat().st_size, size))
                 bad += 1
-            elif digest is not None and sha256_file(path) != digest:
+            elif sha256_file(path) != digest:
                 print('EMPREINTE %s' % name)
                 bad += 1
-        if '--measure' in argv:
+        if '--measure' in options:
             if case.get('bundled') == 'distinct':
                 d = case['distinct']
                 probe = dict(name=case['name'], count=d['count'], duplicate_sites=0)
-                gaps = measure(root / d['coordinates'], probe)
+                target = root / d['coordinates']
             else:
-                gaps = measure(root / case['coordinates'], case)
+                probe, target = case, root / case['coordinates']
+            gaps = measure(target, probe) if target.is_file() else ['coordonnees absentes']
             if gaps:
                 print('MESURE %s : %s' % (case['name'], ', '.join(gaps)))
                 bad += 1
-    print('verify_inputs %s : %d cas, %d fichiers, %d ecarts' % (manifest_path, len(cases), checked, bad))
+    print('verify_inputs %s : %d cas, %d fichiers, %d ecarts' % (manifest_path, len(admitted), len(checked), bad))
     return 1 if bad else 0
 
 

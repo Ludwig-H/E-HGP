@@ -17,7 +17,9 @@
 // grand livre, ensemble des feuilles), et une passe par mutant demande (tue s'il differe).
 //
 // Usage : mhgp12_traversal_bench --dump F.bin [--dump G.bin ...] [--reps 15] [--warmup 3] [--mutants none|all|a,b]
-//                                [--json sortie.json] [--no-profile]
+//                                [--json sortie.json] [--no-profile] [--nonce JETON]
+// Le JSON repete le jeton --nonce du pilote (preuve fraiche de la session, juge du script) ; il est ecrit dans un
+// temporaire puis renomme (jamais un fichier partiel sous le nom attendu).
 // Codes : 0 identite partout, 1 ecart d'identite (sans mutant), 2 refus (arguments, vidage invalide, erreur CUDA,
 //         ecriture du JSON impossible). Les reservations pendant les passes chronometrees sont publiees
 //         (timed_allocations) et refusent le banc dans le juge du script.
@@ -378,13 +380,21 @@ int main(int argc, char** argv) {
   std::vector<int> mutants;
   int reps = 15, warmup = 3;
   bool profile = true;
-  std::string json_path;
+  std::string json_path, nonce;
   for (int i = 1; i < argc; ++i) {
     const std::string a = argv[i];
     if (a == "--dump" && i + 1 < argc) paths.push_back(argv[++i]);
     else if (a == "--reps" && i + 1 < argc) reps = std::atoi(argv[++i]);
     else if (a == "--warmup" && i + 1 < argc) warmup = std::atoi(argv[++i]);
     else if (a == "--json" && i + 1 < argc) json_path = argv[++i];
+    else if (a == "--nonce" && i + 1 < argc) {
+      nonce = argv[++i];  // jeton de la session : caracteres controles, recopie tel quel dans le JSON
+      if (nonce.empty() || nonce.size() > 64) return 2;
+      for (char c : nonce)
+        if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '-' || c == '_' ||
+              c == '.'))
+          return 2;
+    }
     else if (a == "--no-profile") profile = false;
     else if (a == "--mutants" && i + 1 < argc) {
       const std::string list = argv[++i];
@@ -415,7 +425,9 @@ int main(int argc, char** argv) {
   MHGP12_CUDA(cudaFree(nullptr));  // contexte
   const double context_ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
   std::ostringstream out;
-  out << "{\"bench\":\"mhgp12_traversal_bench\",\"device\":";
+  out << "{\"bench\":\"mhgp12_traversal_bench\",\"nonce\":";
+  json_string(out, nonce);
+  out << ",\"device\":";
   json_string(out, prop.name);
   out << ",\"sm\":" << prop.multiProcessorCount << ",\"cc\":\"" << prop.major << '.' << prop.minor
       << "\",\"context_ms\":" << context_ms << ",\"warps_per_block\":" << kWarpsPerBlock << ",\"chunk\":" << bfs::kChunk
@@ -439,7 +451,10 @@ int main(int argc, char** argv) {
       std::cerr << error << '\n';
       return 2;
     }
-    if (d.header.kmax > bfs::kMaxOrder) return 2;
+    if (d.header.kmax > bfs::kMaxOrder) {
+      std::cerr << "refus : K hors du parcours : " << paths[p] << '\n';
+      return 2;
+    }
     Case c(d);
     std::vector<PassTimes> times;
     RunResult last;
@@ -525,11 +540,15 @@ int main(int argc, char** argv) {
                  median(total), median(resident), prof.kernels_ms, identity ? "identite" : "ECART");
   }
   out << "],\"identity\":" << (all_ok ? "true" : "false") << "}\n";
-  if (!json_path.empty()) {
-    std::ofstream file(json_path);
+  if (!json_path.empty()) {  // temporaire puis renommage : jamais un resultat partiel sous le nom attendu
+    const std::string tmp = json_path + ".tmp";
+    std::ofstream file(tmp, std::ios::binary | std::ios::trunc);
     file << out.str();
+    file.flush();
+    const bool written = file.good();
     file.close();
-    if (!file) {
+    if (!written || file.fail() || std::rename(tmp.c_str(), json_path.c_str()) != 0) {
+      std::remove(tmp.c_str());
       std::fprintf(stderr, "ecriture impossible : %s\n", json_path.c_str());
       return 2;
     }

@@ -2,7 +2,9 @@
 #
 # Cibles :
 #   mhgp12_traversal_identity  identite sur l'hote (warp simule) du parcours en largeur contre les vidages MHGP12TR,
-#                              mutants, fixtures (C++ seul)
+#                              mutants, fixtures, portes unitaires (C++ seul)
+#   mhgp12_traversal_format_selftest  porte du lecteur strict MHGP12TR (CST-0223) : vidages synthetiques valides admis,
+#                              invalides refuses (C++ seul)
 #   mhgp12_traversal_dump      vidage du parcours de la v11 ; exige MHGP11_SOURCE_DIR et MHGP11_LIBRARY (libmhgp11.a, u21)
 #   mhgp12_v11_traversal_timing chrono de la frontiere et de la passe unique de la v11 (voie lot, W fils) et du walk
 #                              sequentiel ; memes exigences
@@ -66,6 +68,9 @@ find_package(Threads REQUIRED)
 add_executable(mhgp12_traversal_identity host/traversal_identity.cpp)
 mhgp12_host_target(mhgp12_traversal_identity)
 target_link_libraries(mhgp12_traversal_identity PRIVATE Threads::Threads)
+
+add_executable(mhgp12_traversal_format_selftest host/format_selftest.cpp)
+mhgp12_host_target(mhgp12_traversal_format_selftest)
 
 if(MHGP11_SOURCE_DIR AND MHGP11_LIBRARY)
   add_executable(mhgp12_traversal_dump vidage/traversal_dump.cpp)

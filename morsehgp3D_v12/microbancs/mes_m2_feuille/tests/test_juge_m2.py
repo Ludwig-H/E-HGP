@@ -10,7 +10,13 @@ synthetiques et valides (un site), ecrits ici avec leur empreinte FNV-1a. Attend
     d'arene en echec, banc de code 2 (les six cas de l'auditeur), et les autres preuves manquantes (sanitizers,
     isolation, jeton, empreinte, temoin, admission, options hors contrat, binaire modifie) : « refuse », jamais
     « adopte » ni « rejete », aucun choix ;
-  - identite du banc en defaut ou borne haute au-dela de 1/3 avec toutes les preuves : « rejete ».
+  - les trois preuves contradictoires du recu audit_cd_corrections_20261007/m2 (CST-0018) : prises Compute Sanitizer
+    sans formes ni feuilles, echauffement de code 1 aux identites vraies, formes d'identite vraie aux compteurs de
+    divergence non nuls et en debordement : « refuse » ; de meme, chacune seule, une prise Compute Sanitizer sans
+    formes, une prise a la couverture fausse, un sanitizer de code 1 aux identites vraies, un temoin faux dans les
+    seules prises du banc ou dans la seule prise d'echauffement ;
+  - identite du banc en defaut, borne haute au-dela de 1/3, ou mediane declaree contraire aux durees brutes (le juge
+    lit les durees brutes) avec toutes les preuves : « rejete ».
 Puis, sur des sorties REELLES (recu G4 g4_t0a_20261007, 45 prises de 9 cas) : le juge pur redonne a l'identique les
 verdicts, rapports et intervalles publies (statistique inchangee), et l'admission stricte refuse ces prises anciennes
 comme preuves d'une nouvelle session (sans jeton).
@@ -88,19 +94,27 @@ def valeur(cmd, option, defaut=None):
 
 
 def charge_banc(m, chemin_vidage, ident, formes, reps, warmup, jeton, scenario, feuilles=None):
+    """Prise telle que le vrai banc l'ecrit : --leaves borne la couverture aux premieres feuilles (leaf_bench.cu) ;
+    chaque forme publie ses compteurs, son arene et son debordement."""
     temps = scenario.get('ms', {})
     lignes = []
     for f in formes:
         ms = temps.get(f, 100.0 if f == 'witness' else 10.0)
         identite = scenario.get('identite_forme', {}).get(f, True)
-        lignes.append({'form': f, 'median_ms': ms, 'ms': [ms] * reps, 'identity': identite, 'unresolved': 0,
-                       'mismatched_counts': 0, 'mismatched_emissions': 0, 'overflow': False})
+        ligne = {'form': f, 'median_ms': ms, 'ms': [ms] * reps, 'identity': identite, 'unresolved': 0,
+                 'mismatched_counts': 0, 'mismatched_emissions': 0, 'overflow': False,
+                 'records': ident['n_records'], 'population': ident['n_population']}
+        if scenario.get('compteurs_contradictoires'):  # identite vraie mais ecarts et debordement (auditeur)
+            ligne.update(mismatched_counts=1, overflow=True)
+        if scenario.get('mediane_fausse') and f == 'j3':  # durees brutes de 60 ms, mediane declaree de 6 ms
+            ligne.update(ms=[60.0] * reps, median_ms=6.0)
+        lignes.append(ligne)
     return {'bench': 'mhgp12_leaf_bench', 'nonce': scenario.get('jeton_banc', jeton), 'device': 'SYNTHETIQUE',
             'context_ms': 1.0, 'reps': reps, 'warmup': warmup,
             'cases': [{'dump': str(chemin_vidage), 'dump_fnv1a': scenario.get('fnv_banc', ident['fnv1a']),
                        'coord_bits': ident['coord_bits'], 'sites': ident['n_sites'], 'dump_leaves': ident['n_leaves'],
                        'kmax': ident['kmax'], 'leaf_size': ident['leaf_size'],
-                       'leaves': ident['n_leaves'] if feuilles is None else feuilles,
+                       'leaves': ident['n_leaves'] if not feuilles else min(feuilles, ident['n_leaves']),
                        'reference_records': ident['n_records'], 'reference_population': ident['n_population'],
                        'forms': lignes}],
             'identity': all(x['identity'] for x in lignes)}
@@ -157,9 +171,21 @@ def simulation(m, scenario, journal):
             feuilles = int(valeur(cmd, '--leaves')) if '--leaves' in cmd else None
             ecrire = not (name.startswith('bench_') and name != 'bench_discarded' and scenario.get('banc_sans_ecrire'))
             if ecrire:
-                charge = charge_banc(m, chemin, ident, formes, reps, warmup, jeton, scenario, feuilles)
+                portee = dict(scenario)  # identites par forme limitees a l'echauffement ou aux prises du banc
+                if name == 'bench_discarded' and 'identite_forme_echauffement' in scenario:
+                    portee['identite_forme'] = scenario['identite_forme_echauffement']
+                elif name.startswith('bench_ng') and 'identite_forme_banc' in scenario:
+                    portee['identite_forme'] = scenario['identite_forme_banc']
+                charge = charge_banc(m, chemin, ident, formes, reps, warmup, jeton, portee, feuilles)
                 if scenario.get('ms_non_finies') and name.startswith('bench_ng'):
                     charge['cases'][0]['forms'][1]['ms'][0] = float('nan')
+                if scenario.get('sanitizer_vide') and name.startswith('sanitizer_'):  # auditeur : ni formes ni feuilles
+                    charge['cases'][0]['forms'] = []
+                    charge['cases'][0]['leaves'] = 0
+                if scenario.get('sanitizer_sans_formes') and name.startswith('sanitizer_'):  # formes seules absentes
+                    charge['cases'][0]['forms'] = []
+                if scenario.get('sanitizer_sans_feuilles') and name.startswith('sanitizer_'):  # couverture seule fausse
+                    charge['cases'][0]['leaves'] = 0
                 cible.write_text(json.dumps(charge))
                 code = 0 if charge['identity'] else 1
             if name.startswith('bench_ng') and scenario.get('modifier_binaire'):
@@ -246,6 +272,17 @@ INJECTIONS = [
     ('trames_hors_contrat', {}, ['--frames', 'ng00,ng01'], 'refuse'),
     ('binaire_modifie_pendant_la_session', {'modifier_binaire': True}, [], 'refuse'),
     ('admission_selftest_en_echec', {'commandes': {'admission_selftest': 3}}, [], 'refuse'),
+    # Recu audit_cd_corrections_20261007/m2 : trois preuves contradictoires (CST-0018), puis le controle positif.
+    ('auditeur_sanitizer_sans_formes_ni_feuilles', {'sanitizer_vide': True}, [], 'refuse'),
+    ('auditeur_echauffement_code_1', {'commandes': {'bench_discarded': 1}}, [], 'refuse'),
+    ('auditeur_compteurs_contradictoires', {'compteurs_contradictoires': True}, [], 'refuse'),
+    ('auditeur_mediane_declaree_contraire', {'mediane_fausse': True}, [], 'rejete'),
+    # Chaque garde seule (mutants de outils/mutants_juges.py) : formes seules, couverture seule, code du sanitizer.
+    ('sanitizer_sans_formes', {'sanitizer_sans_formes': True}, [], 'refuse'),
+    ('sanitizer_sans_feuilles', {'sanitizer_sans_feuilles': True}, [], 'refuse'),
+    ('sanitizer_code_1_identite_vraie', {'commandes': {'sanitizer_memcheck': 1}}, [], 'refuse'),
+    ('temoin_faux_hors_echauffement', {'identite_forme_banc': {'witness': False}}, [], 'refuse'),
+    ('temoin_faux_a_l_echauffement', {'identite_forme_echauffement': {'witness': False}}, [], 'refuse'),
     ('identite_du_banc_en_defaut', {'identite_forme': {'j3': False}}, [], 'rejete'),
     ('borne_haute_au_dela_du_tiers', {'ms': {'j3': 50.0}}, [], 'rejete'),
 ]
@@ -333,6 +370,23 @@ def porte_recu_reel(dossier):
             exiger(all(egal(a, b) for a, b in zip(calcule['ci95'], valeurs['ci95'])) and
                    egal(calcule['ratio_gm'], valeurs['ratio_gm']), '%s %s : intervalle' % (f, nom))
     exiger(choix == rapport['choice'] == 'j3_r168', 'choix %s' % choix)
+    # Regles de coherence des compteurs (CST-0018) sur les vraies prises : toutes les formes des 45 prises et des trois
+    # prises Compute Sanitizer (premieres feuilles, formes warp seulement) les respectent ; aucune vraie prise refusee.
+    contradictions, formes_jugees = [], 0
+    sanitizers = [json.loads((dossier / ('sanitizer_%s.json' % t)).read_text()) for t in ('memcheck', 'racecheck',
+                                                                                         'synccheck')]
+    for prise in [json.loads(c.read_text()) for c in sorted((dossier / 'runs').glob('ng*_p*.json'))] + sanitizers:
+        for c in prise['cases']:
+            for ligne in c['forms']:
+                formes_jugees += 1
+                raison = m.form_counters_consistent(ligne, c['reference_records'], c['reference_population'])
+                if raison is not None:
+                    contradictions.append('%s %s : %s' % (c['dump'], ligne['form'], raison))
+    exiger(not contradictions and formes_jugees == 45 * len(formes) + 3 * (len(formes) - 1),
+           'compteurs des vraies prises : %d formes, %s' % (formes_jugees, contradictions[:3]))
+    exiger(all(s['cases'][0]['leaves'] == rapport['args']['sanitizer_leaves'] and
+               [f['form'] for f in s['cases'][0]['forms']] == formes[1:] for s in sanitizers),
+           'couverture ou formes des prises Compute Sanitizer reelles')
     # Ces prises anciennes ne sont pas des preuves d'une nouvelle session : sans jeton, l'admission les refuse.
     ident = {'fnv1a': None, 'coord_bits': 21, 'kmax': 5, 'leaf_size': 24, 'n_leaves': 123581, 'n_sites': None,
              'n_records': 1306696, 'n_population': 6097121}
@@ -345,6 +399,7 @@ def porte_recu_reel(dossier):
              'moyenne_geometrique_j3_r168': round(verdicts['j3_r168']['ratio_gm_all_cases'], 6),
              'pire_borne_haute_j3_r168': round(pire['j3_r168'], 6),
              'identique_au_publie': 'a l\'octet' if exact else 'a 1e-12 pres (sum() compensee de Python >= 3.12)'},
+            {'cas': 'recu_g4_t0a_compteurs_coherents', 'formes': formes_jugees, 'contradictions': 0},
             {'cas': 'recu_g4_t0a_prise_ancienne_refusee', 'raison': raison}]
 
 

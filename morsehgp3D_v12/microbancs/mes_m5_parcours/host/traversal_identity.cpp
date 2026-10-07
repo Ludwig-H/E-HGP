@@ -6,15 +6,19 @@
 // des feuilles : boites, listes, profondeurs, chemins ; option --nodes : tous les noeuds visites, boite d'entree,
 // candidats, tests, liste retenue, genre), puis chaque mutant demande, qui est TUE s'il change le statut, le grand livre
 // ou l'ensemble des feuilles. Portes unitaires (--unit) : repere ferme a 33 bits (CST-0204), cle du reservoir au-dela
-// d'i64 a s = 30 (CST-0208), borne de profondeur 3B (CST-0205).
+// d'i64 a s = 30 (CST-0208), borne de profondeur 3B (CST-0205), nombre de taches emis et scanne aux bornes du domaine
+// u32 des comptes (CST-0222 : vrai EmitKernel et vrai scan sur huit petits enregistrements, aucun grand nuage).
 //
 // Usage : mhgp12_traversal_identity [--mutants all|none|n1,n2,...] [--threads N] [--nodes] [--unit] [--json F]
-//                                   <vidage.bin> [...]
-// Sortie : une ligne JSON par vidage (et une pour --unit). Codes : 0 identite sur tous les vidages (et portes unitaires
-// conformes), 1 ecart d'identite (sans mutant), 2 refus (arguments, vidage illisible ou invalide), 3 porte unitaire.
+//                                   [--nonce JETON] <vidage.bin> [...]
+// Sortie : une ligne JSON par vidage (et une pour --unit), chacune portant le jeton --nonce du pilote (preuve fraiche
+// de la session) ; --json est ecrit dans un temporaire puis renomme (jamais un fichier partiel). Codes : 0 identite sur
+// tous les vidages (et portes unitaires conformes), 1 ecart d'identite (sans mutant), 2 refus (arguments, vidage
+// illisible ou invalide, ecriture du JSON impossible), 3 porte unitaire.
 #include <algorithm>
 #include <atomic>
 #include <chrono>
+#include <cstdio>
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -184,8 +188,46 @@ void ledger_json(std::ostream& o, const Ledger& l) {
     << ",\"max_depth\":" << l.max_depth << ",\"max_leaf\":" << l.max_leaf << "}";
 }
 
+// CST-0222 : taches emises (EmitKernel) et scannees (child_fields) pour un enfant coupe de count sites retenus, aux
+// bornes du domaine u32 des comptes ; attendu plafond(count / 256), ecrit en dur. Le temoin de l'auditeur (sept petits
+// enregistrements, recu audit_b_m5_20261007/capacite) plus count = 2^32 - 1. Le noyau d'emission ne lit aucune
+// coordonnee : aucun tableau de sites n'est alloue.
+bool emit_tasks_gate(u32& failures) {
+  bfs::Parent parent{};
+  parent.sides = 1;
+  bfs::ChildOut child{};
+  child.kind = bfs::kKindSplit;
+  child.hi[0] = child.hi[1] = child.hi[2] = 2;
+  bfs::ChildScan offset{};
+  bfs::Parent emitted{};
+  u32 next = 0;
+  bfs::Level lv{};
+  lv.parents = &parent;
+  lv.child_out = &child;
+  lv.child_scan = &offset;
+  lv.next_parents = &emitted;
+  lv.next_task_begin = &next;
+  bfs::EmitKernel<bfs::kNone>::Shared shared;
+  struct Row {
+    u32 count;
+    u64 tasks;
+  };
+  const Row rows[] = {{1u, 1}, {256u, 1}, {257u, 2}, {0xFFFFFEFFu, 16777215}, {0xFFFFFF00u, 16777215},
+                      {0xFFFFFF01u, 16777216}, {0xFFFFFFFEu, 16777216}, {0xFFFFFFFFu, 16777216}};
+  failures = 0;
+  for (const Row& r : rows) {
+    child.count = r.count;
+    emitted = bfs::Parent{};
+    u64 f[bfs::kFields], tests = 0, leaf = 0;
+    bfs::child_fields(child, f, tests, leaf);
+    bfs::EmitKernel<bfs::kNone>{lv}(0, shared);
+    if (u64{emitted.tasks} != r.tasks || f[2] != 2 * r.tasks || bfs::tasks_of(r.count) != r.tasks) ++failures;
+  }
+  return failures == 0;
+}
+
 // Portes unitaires des constats du contrat numerique.
-bool unit_gates(std::ostream& o) {
+bool unit_gates(std::ostream& o, const std::string& nonce_json) {
   bool ok = true;
   // CST-0204 : sites (0,0,0) et (2^32-1,0,0) ; boite [0, 2^32) ; fermeture d'etendue 2^32 : s = 33.
   const i64 lo[3] = {0, 0, 0}, hi33[3] = {i64{1} << 32, 1, 1};
@@ -208,9 +250,13 @@ bool unit_gates(std::ostream& o) {
   // CST-0205 : profondeur au plus 3B ; aux profils 21, 24, 32 : 63, 72, 96 (le pilote refuse au-dela).
   const bool g3 = 3 * 21 == 63 && 3 * 24 == 72 && 3 * 32 == 96;
   ok = ok && g3;
-  o << "{\"phase\":\"unit\",\"closed_box_s33\":" << (g1 ? "true" : "false") << ",\"s33\":" << s33
+  u32 emit_failures = 0;
+  const bool g4 = emit_tasks_gate(emit_failures);
+  ok = ok && g4;
+  o << "{\"phase\":\"unit\"" << nonce_json << ",\"closed_box_s33\":" << (g1 ? "true" : "false") << ",\"s33\":" << s33
     << ",\"reservoir_s30_beyond_i64\":" << (g2 ? "true" : "false") << ",\"s30\":" << s30
-    << ",\"depth_bound\":" << (g3 ? "true" : "false") << ",\"ok\":" << (ok ? "true" : "false") << "}\n";
+    << ",\"depth_bound\":" << (g3 ? "true" : "false") << ",\"emit_tasks_u64\":" << (g4 ? "true" : "false")
+    << ",\"emit_tasks_failures\":" << emit_failures << ",\"ok\":" << (ok ? "true" : "false") << "}\n";
   return ok;
 }
 
@@ -221,7 +267,7 @@ int main(int argc, char** argv) {
   std::vector<int> mutants;
   bool all_mutants = true, nodes = false, unit = false;
   unsigned threads = 1;
-  std::string json_path;
+  std::string json_path, nonce;
   for (int i = 1; i < argc; ++i) {
     const std::string a = argv[i];
     if (a == "--mutants" && i + 1 < argc) {
@@ -248,6 +294,13 @@ int main(int argc, char** argv) {
       unit = true;
     } else if (a == "--json" && i + 1 < argc) {
       json_path = argv[++i];
+    } else if (a == "--nonce" && i + 1 < argc) {
+      nonce = argv[++i];  // jeton de la session : caracteres controles, recopie tel quel dans chaque ligne
+      if (nonce.empty() || nonce.size() > 64) return 2;
+      for (char c : nonce)
+        if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '-' || c == '_' ||
+              c == '.'))
+          return 2;
     } else if (!a.empty() && a[0] == '-') {
       return 2;
     } else {
@@ -258,8 +311,9 @@ int main(int argc, char** argv) {
     for (int m = 1; m < bfs::kMutantCount; ++m) mutants.push_back(m);
   if (paths.empty() && !unit) return 2;
   std::ostringstream out;
+  const std::string nonce_json = nonce.empty() ? std::string() : ",\"nonce\":\"" + nonce + "\"";
   int code = 0;
-  if (unit && !unit_gates(out)) code = 3;
+  if (unit && !unit_gates(out, nonce_json)) code = 3;
   // Tous les vidages d'abord (lecteur strict), puis un seul ensemble de travaux (vidage, mutant) pour tous les fils.
   std::vector<fmt::Dump> dumps(paths.size());
   for (size_t i = 0; i < paths.size(); ++i) {
@@ -269,7 +323,10 @@ int main(int argc, char** argv) {
       std::cout << out.str();
       return 2;
     }
-    if (dumps[i].header.coord_bits > 32 || dumps[i].header.kmax > bfs::kMaxOrder) return 2;
+    if (dumps[i].header.coord_bits > 32 || dumps[i].header.kmax > bfs::kMaxOrder) {
+      std::cerr << "refus : profil ou K hors du parcours : " << paths[i] << '\n';
+      return 2;
+    }
   }
   std::vector<int> jobs_of = {bfs::kNone};
   jobs_of.insert(jobs_of.end(), mutants.begin(), mutants.end());
@@ -294,7 +351,7 @@ int main(int argc, char** argv) {
       max_children = std::max<u64>(max_children, s.children);
       max_tasks = std::max<u64>(max_tasks, s.tasks);
     }
-    out << "{\"phase\":\"identity\",\"dump\":";
+    out << "{\"phase\":\"identity\"" << nonce_json << ",\"dump\":";
     json_string(out, path);
     out << ",\"producer\":" << h.producer << ",\"coord_bits\":" << h.coord_bits << ",\"kmax\":" << h.kmax
         << ",\"leaf_size\":" << h.leaf_size << ",\"max_leaf\":" << h.max_leaf << ",\"sites\":" << h.n_sites
@@ -333,11 +390,18 @@ int main(int argc, char** argv) {
            "\"leaves\"]}\n";
     std::cerr << path << " : " << (identity ? "identite" : "ECART") << " (" << base.ns / 1000000 << " ms hote)\n";
   }
-  if (!json_path.empty()) {
-    std::ofstream file(json_path);
+  if (!json_path.empty()) {  // temporaire puis renommage : jamais un resultat partiel sous le nom attendu
+    const std::string tmp = json_path + ".tmp";
+    std::ofstream file(tmp, std::ios::binary | std::ios::trunc);
     file << out.str();
+    file.flush();
+    const bool written = file.good();
     file.close();
-    if (!file) return 2;
+    if (!written || file.fail() || std::rename(tmp.c_str(), json_path.c_str()) != 0) {
+      std::remove(tmp.c_str());
+      std::cerr << "refus : ecriture du resultat impossible : " << json_path << '\n';
+      return 2;
+    }
   }
   std::cout << out.str();
   return code;

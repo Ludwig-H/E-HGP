@@ -2,7 +2,15 @@
 
 > **Versement dans le dépôt (7 octobre 2026).** Les scripts de préparation sont dans [`../bench/data/`](../bench/data/)
 > (empreintes dans `SHA256SUMS.txt`, chemins relatifs à ce dossier) ; les données restent hors dépôt et se rejouent par
-> `bash bench/data/replay_all.sh`. Les chemins `scripts/` et `/tmp/...` ci-dessous sont ceux de la préparation.
+> `ROOT=<dossier hors dépôt> bash morsehgp3D_v12/bench/data/replay_all.sh` (§ 7). Les chemins `scripts/` et `/tmp/...`
+> ci-dessous sont ceux de la préparation.
+>
+> **Correctifs du 7 octobre (constats `CST-0216` à `CST-0218` de l'auditeur Codex).** Le pilote de rejeu cherche ses
+> outils à côté de lui et se rejoue à blanc (`outils`) ; `verify_inputs.py` refuse un manifeste vide ou un fichier sans
+> empreinte valide ; les découpes sont des carrés fermés qui ne tranchent jamais une colonne (§ 3). **Les 69 découpes du
+> § 3 ont été produites par la règle antérieure (les N premiers sites, frontière tronquée) : elles sont à rejouer**
+> (étape `crops`, puis `bundles`) ; leurs comptes, retours couverts et empreintes changeront, pas les rayons ni les
+> côtés des carrés, ni les scènes entières.
 
 
 7 octobre 2026 (heures UTC lues par `date -u`). Dossier hors dépôt :
@@ -118,11 +126,26 @@ différents ; (5) au moins une scène de 2 à 10 millions et une de plus de 10 m
 ## 3. Scènes multi-millions préparées (famille b)
 
 Chaque scène existe en variante `tout` et, quand le producteur classe le sol ou qu'un filtre épinglé s'applique,
-`sans_sol` ; chaque variante est ensuite découpée en carrés horizontaux concentriques de **1, 2, 4 et 8 millions** de
-sites distincts (emboîtés, toute la hauteur, jamais de sous-échantillonnage), plus la scène entière. Colonnes :
+`sans_sol` ; chaque variante est ensuite découpée en carrés horizontaux concentriques visant **1, 2, 4 et 8 millions**
+de sites distincts (emboîtés, toute la hauteur, jamais de sous-échantillonnage), plus la scène entière. Colonnes :
 retours écrits (`<nom>.u32le`, ordre lexicographique), positions distinctes (`<nom>.distinct.u32le` quand il y a des
 doublons), étendue, bits, et les 16 premiers caractères des SHA-256 (empreintes complètes dans les manifestes). Les
 découpes sont écrites en sites distincts (`.mult.u32le` = retours couverts).
+
+**Règle exacte d'une découpe** (`crop_scenes.py`, `CST-0218`). Sur les positions distinctes de la scène, $d(s)$ est
+la distance de Tchebychev horizontale du site $s$ au centre entier $(c_x, c_y)$ de la boîte xy (plancher du milieu),
+en millimètres : $d(s) = \max(\lvert x_s - c_x \rvert, \lvert y_s - c_y \rvert)$. Pour une taille visée $N$, le
+rayon $r_N$ est la distance du $N$-ième site dans l'ordre croissant des distances, et la découpe garde **tous** les
+sites tels que $d(s) \leq r_N$ : le carré horizontal fermé de côté $2 r_N$, sur toute la hauteur. Une colonne de
+mêmes x et y est donc gardée entière ou pas du tout. Le nombre réel de sites (`count` du manifeste) vaut au moins $N$
+et le dépasse quand plusieurs sites sont à la distance $r_N$ ; $N$ est publié à part (`crop.target_sites`) et donne le
+nom (`_c1M`, …). Les rayons croissent avec $N$, donc les découpes restent emboîtées. Une découpe dont le carré
+couvrirait toute la scène est sautée. Le rayon publié (`crop.radius_chebyshev_mm`) est le même qu'avec la règle
+antérieure, qui gardait les $N$ premiers sites de l'ordre (distance, distance euclidienne horizontale, rang) et pouvait
+couper le dernier anneau, jusque dans une colonne. **Les tables de découpes ci-dessous ont été produites par cette
+règle antérieure** : la colonne « Sites distincts » y vaut exactement $N$ et les empreintes sont à remplacer après le
+rejeu ; les côtés des carrés ne changent pas. Mesuré en lecture seule sur les données préparées le 7 octobre : les 69
+découpes tronquaient leur anneau frontière (de 2 à 6 287 sites de plus selon la découpe) ; toutes changeront.
 
 ### 3.1 IGN LiDAR HD (aérien)
 
@@ -383,9 +406,13 @@ la voie B.
 **Voie A — préparer ici, envoyer des paquets plats, vérifier sur la VM (Python 3.10 nu suffit).**
 
 1. Sur le codespace (ou toute machine avec Internet, numpy, laspy + lazrs, py7zr, g++) :
-   `bash scripts/replay_all.sh` (12 min 27 s mesurées, téléchargements en cache ; idempotent ; sorties identiques
-   à l'octet, empreintes aux §§ 3–5). `/tmp` étant vidé à chaque redémarrage et `/workspaces` plein, rejouer juste
-   avant la session.
+   `ROOT=<dossier hors dépôt> PY=<python> bash morsehgp3D_v12/bench/data/replay_all.sh` (12 min 27 s mesurées,
+   téléchargements en cache ; idempotent ; sorties identiques à l'octet, empreintes aux §§ 3–5, découpes à rejouer
+   selon la règle du § 3). Les outils sont cherchés à côté de `replay_all.sh`, quel que soit le répertoire courant ;
+   `ROOT` est obligatoire et refusé dans l'arbre `morsehgp3D_v12` (code 2). Toute étape commence par le contrôle des
+   outils contre `SHA256SUMS.txt` (présence, empreinte, aucun script non épinglé ; code 1 sinon), qui se joue seul et à
+   blanc, sans donnée ni Python : `bash morsehgp3D_v12/bench/data/replay_all.sh outils`. `/tmp` étant vidé à chaque
+   redémarrage et `/workspaces` plein, rejouer juste avant la session.
 2. Les paquets `bundles/g4_kitti_v12set` (37 trames, avec étiquettes, 45 Mo), `g4_small` (159 petits nuages,
    6 Mo), `g4_ign_lidarhd` (3,2 Go), `g4_eth3d` (3,1 Go), `g4_forinstance` (1,4 Go) et `g4_boreas` (1,7 Go) —
    scènes entières en variante distincte et toutes les découpes — respectent les contraintes de `--data` du lanceur
@@ -394,8 +421,11 @@ la voie B.
    plusieurs petits réunis par `make_g4_bundle.py`, qui accepte plusieurs manifestes.
 3. Sur la VM, avant toute mesure : `python3 -S verify_inputs.py <dossier de données>/bundle_manifest.json`
    (`$MHGP11_DATA_DIR` dans le lanceur v11 ; bibliothèque standard seule : tailles et SHA-256 de chaque fichier
-   contre le manifeste ; code 0 conforme, 1 écart, 2 manifeste illisible). Avec numpy (Python portable), `--measure`
-   recompte n, positions distinctes, étendue et bits.
+   contre le manifeste ; code 0 conforme, 1 écart, 2 manifeste illisible ou non conforme). Le manifeste est admis avant
+   toute lecture : schéma `mhgp12.benchmark_inputs.v1`, au moins un cas, et pour chaque fichier listé un nom simple,
+   une empreinte SHA-256 bien formée et un compte positif (variante distincte et multiplicités comprises) ; un
+   manifeste vide, une empreinte absente, nulle ou mal formée rendent le code 2 sans qu'aucun fichier soit lu
+   (`CST-0217`). Avec numpy (Python portable), `--measure` recompte n, positions distinctes, étendue et bits.
 4. Les scènes avec doublons voyagent en variante `.distinct` (`--prefer-distinct`) : le moteur, qui refuse les
    doublons par défaut (D8), les lit sans option ; le manifeste du paquet déclare `bundled: distinct` et l'objet
    calculé (tour des positions distinctes).
@@ -408,7 +438,8 @@ SemanticKITTI, les trames brutes `.bin` + `.label` (environ 2,4 Mo par trame : 6
 90 Mo pour les 37 de `v12set` ; elles ne se retéléchargent pas sans l'outil de cache du projet) et les trois trames de
 contrôle 08/000000, 000100, 000200 ; pour les petits nuages, `bouts.json` et les fichiers des bouts de la v11
 (`build/v11-persist/bouts`, 36 Mo ; `--bouts` accepte un dossier plat). Puis
-`PY=<python portable> PATCHWORK_ARCHIVES=... KITTI_FRAMES=... KITTI_CONTROL=... BOUTS=... bash scripts/replay_all.sh`.
+`ROOT=... PY=<python portable> PATCHWORK_ARCHIVES=... KITTI_FRAMES=... KITTI_CONTROL=... BOUTS=... bash
+{src}/morsehgp3D_v12/bench/data/replay_all.sh`.
 La VM télécharge elle-même IGN, ETH3D, FOR-instance et Boreas (si elle a un accès sortant) ; les empreintes
 épinglées refusent tout octet différent. La sonde Patchwork++ y est compilée par GCC 11.4 (GCC 13 ici) : le contrôle
 du masque de 08/000000 (`9db3fe5c…`) et le contrôle bout à bout ng00–ng02 décident si la chaîne est la même (code 3

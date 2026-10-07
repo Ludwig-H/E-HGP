@@ -566,15 +566,48 @@ def valider_variante(nom, code, lignes, k_max, fichiers):
     return problemes, reponse, {"mere_ecartee_par_s_dans_f": ecartees, "ecarts_de_sphere": ecarts}, par
 
 
-def valider_mutant_m4(code, lignes):
-    """Mutant sans contraction sur un vidage : tue seulement par un ecart d'identite (code 1, sortie complete, aucun
-    refus ni exception). Rend (tue, reponse geometrique, sortie complete)."""
+ECARTS_IDENTITE_M4 = ("naissances_ecarts", "graines_ecarts", "dates_ecarts", "noeuds_ecarts", "enfants_ecarts")
+
+
+def valider_mutant_m4(code, lignes, trame, k_max, fichiers):
+    """Mutant sans contraction sur le vidage d'un cas : tue seulement par une reponse geometrique COMPLETE et rattachee
+    a ce cas (CST-0018, recu audit_cd_corrections_20261007/m34) : une entree de cette trame et de ce K marquee mutant,
+    exactement une ligne par ordre k = 1..K aux comptes egaux a l'inventaire du vidage (naissances, cellules,
+    representants, noeuds de la v11), une identite lisible par ordre (ecarts entiers, forme et identite booleennes,
+    noeuds entiers), au moins un ordre en ecart d'identite explique par un ecart de forme, de comptes ou de noeuds, et
+    la fin de code du processus sans refus ni exception. Rend (problemes, tue, reponse geometrique, sortie complete) ;
+    une sortie incomplete, d'un autre cas ou d'un autre K est un probleme (refus), jamais un mutant tue."""
+    problemes = []
     entrees = lignes_de(lignes, "entree")
-    geometrique = any(isinstance(l.get("identite"), dict) and l["identite"].get("identiques") is False
-                      for l in lignes_de(lignes, "ordre"))
-    complete = len(entrees) == 1 and entrees[0].get("mutant_sans_contraction") is True and \
-        not fin_conforme(lignes, code)
-    return code == 1 and geometrique and complete, geometrique, complete
+    if len(entrees) != 1 or entrees[0].get("K") != k_max or entrees[0].get("trame") != trame or \
+            entrees[0].get("mutant_sans_contraction") is not True:
+        problemes.append("entree absente, d'un autre cas ou non marquee mutant")
+    par, p = ordres_uniques(lignes, list(range(1, k_max + 1)))
+    problemes += p
+    geometrique = False
+    for k, l in par.items():
+        comptes = {"naissances": nombre(fichiers, "ordre_%d.bin" % k, "BIRTHS"),
+                   "cellules": nombre(fichiers, "ordre_%d.bin" % k, "CELLS"),
+                   "representants": nombre(fichiers, "ordre_%d.bin" % k, "SEEDS"),
+                   "noeuds_v11": nombre(fichiers, "foret_%d.bin" % k, "FNODES")}
+        for cle, attendu in comptes.items():
+            if l.get(cle) != attendu or attendu is None:
+                problemes.append("ordre %d : %s %s, vidage %s" % (k, cle, l.get(cle), attendu))
+        ident = l.get("identite")
+        if not isinstance(ident, dict) or not isinstance(ident.get("identiques"), bool) or \
+                not isinstance(ident.get("forme"), bool) or not all(entier(ident.get(c)) for c in ECARTS_IDENTITE_M4) \
+                or not entier(l.get("noeuds")):
+            problemes.append("ordre %d : identite ou noeuds illisibles" % k)
+            continue
+        if ident["identiques"] is False:
+            if ident["forme"] is False or any(ident[c] > 0 for c in ECARTS_IDENTITE_M4) or \
+                    l["noeuds"] != l.get("noeuds_v11"):
+                geometrique = True
+            else:
+                problemes.append("ordre %d : ecart d'identite sans ecart de forme, de comptes ni de noeuds" % k)
+    problemes += fin_conforme(lignes, code)
+    complete = not problemes
+    return problemes, code == 1 and geometrique and complete, geometrique, complete
 
 
 def valider_resolution(lignes, k_max):
@@ -926,11 +959,12 @@ def m4(args, rapport):
         journal = os.path.join(dossier, "mes_m4_mutant_%s.jsonl" % args.campagne)
         code, lignes, duree, _, prov = lancer(args, rapport, "mhgp12_mes_m4_mutant_sans_contraction",
                                               [dossier, "--repetitions", "1"], journal)
-        refus += problemes_provenance(prov)
-        tue, geometrique, complete = valider_mutant_m4(code, lignes)
+        problemes, tue, geometrique, complete = valider_mutant_m4(
+            code, lignes, trame, k, rapport.get("vidages", {}).get(cas, {}).get("fichiers", {}))
+        refus += problemes_provenance(prov) + ["mutant : %s" % x for x in problemes]
         bloc.update({"code": code, "reponse_geometrique": geometrique, "sortie_complete": complete, "binaire": prov,
                      "journal": prov.get("journal"), "journal_sha256": prov.get("journal_sha256"),
-                     "tue": tue and not refus})
+                     "problemes": problemes, "tue": tue and not refus})
     ranger(rapport, "mes_m4", "mutant_sans_contraction_" + cas, bloc)
     pire = max(pire, 3 if refus else (0 if bloc["tue"] else 1))
     return pire
@@ -1047,7 +1081,7 @@ def juger_m4(rapport):
     mutants = {}
     for c, b in rapport.get("mes_m4", {}).items():
         cas_mutant = c[len("mutant_sans_contraction_"):]
-        if c.startswith("mutant") and b.get("tue") and \
+        if c.startswith("mutant") and b.get("tue") and b.get("sortie_complete") is True and not b.get("refus") and \
                 b.get("binaire", {}).get("sha256") == binaires.get("mhgp12_mes_m4_mutant_sans_contraction") and \
                 b.get("vidages_sha256") == empreintes(rapport.get("vidages", {}).get(cas_mutant, {}).get("fichiers", {})):
             mutants[c] = b

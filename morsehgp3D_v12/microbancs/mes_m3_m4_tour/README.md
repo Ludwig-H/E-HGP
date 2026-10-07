@@ -29,7 +29,7 @@ dossier de sortie, jamais dans un dépôt. Seuls des comptes, des empreintes et 
 | `mes_m3/mes_m3.cpp` | `mhgp12_mes_m3` : porte (témoins gravés) et banc sur vidage |
 | `mes_m4/mes_m4.cpp` | `mhgp12_mes_m4` : noyau union-find sans lots, contraction `LEM-T4`, numérotation, juge, `LEM-T6` |
 | `pilote.py` | pilote (bibliothèque standard, Python ≥ 3.10, jouable sous `python3 -S`) : étapes, preuves, juges |
-| `tests/test_pilote.py` | porte du pilote (`CST-0018`, `0213`, `0214`) : sorties réelles du reçu G4, injections de l'auditeur par binaires simulés, juge de MES-M3, binaires réels sur le carré |
+| `tests/test_pilote.py` | porte du pilote (`CST-0018`, `0213`, `0214`) : sorties réelles des reçus G4 B et D (verdicts et statistiques publiés retrouvés), injections de l'auditeur par binaires simulés, mutant de MES-M4 rattaché à son cas, juge de MES-M3, binaires réels sur le carré |
 | `tests/test_m4_preuves.py`, `tests/carre.py` | porte native de MES-M4 sur le carré K1..4 de l'auditeur : verticales correctes, fausses, absentes ; entrées hors domaine |
 | `RAPPORT.md` | rapport des passages locaux et ce qui reste pour G4 |
 | `out/` | sorties (vidages, journaux JSON, `rapport_mes_m3_m4.json`) ; jamais versées |
@@ -57,7 +57,11 @@ les empreintes des vidages de `vider` avant et après, garde son journal sous un
 bon cas, une ligne par ordre (comptes égaux aux sections du vidage), une fin explicite au code du processus, ni
 exception ni refus. Un bloc remplacé passe dans `historique` ; les campagnes de résolution s'ajoutent. Les sources du
 microbanc sont hachées au début et à la fin de chaque invocation. Un mutant n'est tué que par sa réponse géométrique
-(témoin faux, écarts), jamais par un simple code. Les cas sont `trame:K` avec `trame` dans `ng00`, `ng01`, `ng02`,
+(témoin faux, écarts), jamais par un simple code, et seulement si cette réponse est **complète et rattachée à son cas**
+(reçu `audit_cd_corrections_20261007/m34`) : entrée de la même trame et du même K marquée mutant, une ligne par ordre
+1..K aux comptes du vidage, identité lisible, au moins un écart d'identité expliqué par la forme, les comptes ou les
+nœuds, fin au code du processus ; une sortie tronquée, d'une autre trame ou d'un autre K est un refus (code 3), jamais
+un mutant tué, et le juge de MES-M4 n'admet que les mutants tués, complets et sans refus. Les cas sont `trame:K` avec `trame` dans `ng00`, `ng01`, `ng02`,
 `u8000`, `u16000`, `u32000` (fichiers `lidar_ng0*.u32le` et `uniform_u18_n*.u32le` du dossier de données), ou tout
 autre nom `X` désignant `<données>/X.u32le` et `<données>/X.ids.u32le` (nouvelles trames de plusieurs séquences ; pas
 d'empreinte de référence, l'identité `MHGP11FUL1` est alors publiée « sans référence »). Le vidage

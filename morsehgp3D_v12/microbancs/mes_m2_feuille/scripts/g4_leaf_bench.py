@@ -418,9 +418,29 @@ def judge(cases, forms, processes_required, decide=CONTRACT['decide'], expected=
     return verdicts, choice
 
 
-def check_bench_json(path, nonce, case, ident, forms, reps, warmup):
+def form_counters_consistent(row, reference_records, reference_population):
+    """Compteurs d'une forme coherents avec son identite (definitions du banc, leaf_bench.cu : identite du temoin =
+    aucun ecart de compteurs ni d'emissions ; identite d'une forme warp = pas de debordement, aucun ecart, et, sans
+    feuille non resolue, arene de la taille exacte de reference). Rend None ou la raison du desaccord (CST-0018)."""
+    for key in ('mismatched_counts', 'mismatched_emissions', 'records', 'population'):
+        if not is_int(row.get(key)) or row[key] < 0:
+            return '%s illisible' % key
+    if not isinstance(row.get('overflow'), bool):
+        return 'debordement illisible'
+    if row['identity'] is True:
+        if row['mismatched_counts'] != 0 or row['mismatched_emissions'] != 0 or row['overflow']:
+            return 'identite declaree malgre des ecarts de compteurs ou un debordement'
+        if row['unresolved'] == 0 and (row['records'] != reference_records or
+                                       row['population'] != reference_population):
+            return 'identite declaree avec une arene de taille differente de la reference'
+    return None
+
+
+def check_bench_json(path, nonce, case, ident, forms, reps, warmup, leaves=None):
     """Prise du banc : fichier neuf de la session (jeton), rattache a son vidage (empreinte, profil, comptes), formes et
-    repetitions exactement celles de la commande, durees finies positives. Rend (prise, None) ou (None, raison)."""
+    repetitions exactement celles de la commande, durees finies positives, compteurs coherents avec l'identite de chaque
+    forme. leaves : couverture demandee par --leaves (Compute Sanitizer : premieres feuilles) ; None ou 0 = toutes les
+    feuilles, comptes de reference egaux a ceux du vidage. Rend (prise, None) ou (None, raison)."""
     if not path.is_file():
         return None, 'fichier de prise absent'
     try:
@@ -444,18 +464,29 @@ def check_bench_json(path, nonce, case, ident, forms, reps, warmup):
     for key, value in expect.items():
         if c.get(key) != value:
             return None, 'prise non rattachee a son vidage (%s)' % key
-    if c.get('leaves') != ident['n_leaves'] or c.get('reference_records') != ident['n_records'] or \
-            c.get('reference_population') != ident['n_population']:
-        return None, 'prise partielle ou comptes differents du vidage'
+    covered = ident['n_leaves'] if not leaves else min(leaves, ident['n_leaves'])
+    records, population = c.get('reference_records'), c.get('reference_population')
+    if covered < 1 or c.get('leaves') != covered:
+        return None, 'couverture de la prise (%r feuilles) differente de la commande (%d)' % (c.get('leaves'), covered)
+    if covered == ident['n_leaves']:
+        if records != ident['n_records'] or population != ident['n_population']:
+            return None, 'prise partielle ou comptes differents du vidage'
+    elif not (is_int(records) and is_int(population) and 0 <= records <= ident['n_records'] and
+              0 <= population <= ident['n_population']):
+        return None, 'comptes de reference de la couverture hors du vidage'
     rows = c.get('forms')
-    if not isinstance(rows, list) or [r.get('form') if isinstance(r, dict) else None for r in rows] != list(forms):
-        return None, 'formes differentes de la commande'
+    if not list(forms) or not isinstance(rows, list) or \
+            [r.get('form') if isinstance(r, dict) else None for r in rows] != list(forms):
+        return None, 'formes absentes ou differentes de la commande'
     out = {}
     for r in rows:
         if timings(r) is None or len(r['ms']) != reps:
             return None, '%s : durees absentes, non finies, non positives ou en nombre faux' % r['form']
         if not isinstance(r.get('identity'), bool) or not is_int(r.get('unresolved')) or r['unresolved'] < 0:
             return None, '%s : identite ou feuilles non resolues illisibles' % r['form']
+        why = form_counters_consistent(r, records, population)
+        if why is not None:
+            return None, '%s : %s' % (r['form'], why)
         out[r['form']] = r
     return {'result': result, 'forms': out, 'identity': all(r['identity'] for r in rows)}, None
 
@@ -755,23 +786,20 @@ def main():
                                            '0', '--leaves', str(args.sanitizer_leaves), '--json', target,
                                            '--nonce', nonce], target, 3600)
                 # Preuve : aucun defaut signale (code 0, ou 1 si le banc lui-meme constate un ecart d'identite, juge
-                # par les prises du banc ; 9 = defaut du sanitizer) et prise neuve de la session sur le bon vidage.
-                ok = code in (0, 1)
-                fresh = None
-                if ok:
-                    try:
-                        fresh = json.loads(target.read_text())
-                    except (OSError, ValueError):
-                        fresh = None
-                    ok = isinstance(fresh, dict) and fresh.get('nonce') == nonce and \
-                        isinstance(fresh.get('identity'), bool) and (code == 0) == fresh['identity'] and \
-                        isinstance(fresh.get('cases'), list) and len(fresh['cases']) == 1 and \
-                        fresh['cases'][0].get('dump_fnv1a') == idents[small[0].name]['fnv1a']
+                # par les prises du banc ; 9 = defaut du sanitizer) et prise neuve de la session sur le bon vidage,
+                # validee comme toute prise (CST-0018) : formes et repetitions de la commande, couverture des
+                # --sanitizer-leaves premieres feuilles, compteurs coherents, code et identite concordants.
+                taken, why = check_bench_json(target, nonce, small[0], idents[small[0].name], warp_forms, 1, 0,
+                                              leaves=args.sanitizer_leaves) if code in (0, 1) \
+                    else (None, 'code %s' % code)
+                if taken is not None and (code == 0) != taken['identity']:
+                    taken, why = None, 'code %s et identite discordants' % code
+                ok = taken is not None
                 report['sanitizer'][tool] = {'code': code, 'tail': ((out or '') + (err or ''))[-600:], 'proof': ok,
-                                             'identity': fresh.get('identity') if isinstance(fresh, dict) else None,
+                                             'reason': why, 'identity': taken['identity'] if ok else None,
                                              'json_sha256': sha256_file(target) if target.is_file() else None}
                 if not ok:
-                    s.refuse('compute-sanitizer %s : code %s ou prise sans preuve' % (tool, code))
+                    s.refuse('compute-sanitizer %s : code %s ou prise sans preuve (%s)' % (tool, code, why))
 
     # Banc : processus x cas, ordre des cas tournant ; prises neuves, rattachees a la session et a leur vidage.
     bench_cases = {}
@@ -789,6 +817,11 @@ def main():
                                                        '--nonce', nonce], target, 1800)
         taken, why = check_bench_json(target, nonce, smallest, idents[smallest.name], forms, 1, 1) \
             if code in (0, 1) else (None, 'code %s' % code)
+        # Memes preuves qu'une prise normale (CST-0018) : code et identite concordants, temoin identique.
+        if taken is not None and (code == 0) != taken['identity']:
+            taken, why = None, 'code %s et identite discordants' % code
+        elif taken is not None and taken['forms']['witness']['identity'] is not True:
+            taken, why = None, 'temoin different de la reference'
         report['bench_discarded'] = {'code': code, 'proof': taken is not None, 'reason': why}
         if taken is None:
             s.refuse('prise d echauffement en echec : %s' % why)

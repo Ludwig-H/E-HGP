@@ -99,7 +99,7 @@ struct Driver {
     root.list_begin = 0;
     root.count = static_cast<u32>(n);
     root.frame_bits = bfs::bit_length(span);
-    root.tasks = static_cast<u32>((n + bfs::kChunk - 1) / bfs::kChunk);
+    root.tasks = static_cast<u32>(bfs::tasks_of(n));  // n < 2^32 (lecteur) : au plus 2^24 taches
     root.sides = 1;
     const u32 zero = 0;
     int cur = 0;
@@ -175,6 +175,12 @@ struct Driver {
         res.status = kStatusWideLeaf;
         break;
       }
+      // Admission du niveau suivant AVANT toute reservation, Scatter, Emit ou conversion vers u32 (observation de
+      // l'auditeur jointe a CST-0222) : indices de taches et d'enfants sur 32 bits.
+      if (t.f[0] != 0 && (t.f[2] > 0xFFFFFFFFull || t.f[0] > 0x7FFFFFFFull)) {
+        res.status = kStatusCapacity;
+        break;
+      }
       const int nxt = cur ^ 1;
       res.allocations += b.ensure(list[nxt], t.f[1]) + b.ensure(parents[nxt], t.f[0]) +
                          b.ensure(task_begin[nxt], t.f[0]) + b.ensure_keep(leaves, leaf_count + t.f[3], leaf_count) +
@@ -193,10 +199,6 @@ struct Driver {
       leaf_count += t.f[3];
       site_count += t.f[4];
       if (t.f[0] == 0) break;
-      if (t.f[2] > 0xFFFFFFFFull || t.f[0] > 0x7FFFFFFFull) {  // indices de taches et d'enfants sur 32 bits
-        res.status = kStatusCapacity;
-        break;
-      }
       n_parents = t.f[0];
       n_tasks = t.f[2];
       cur = nxt;

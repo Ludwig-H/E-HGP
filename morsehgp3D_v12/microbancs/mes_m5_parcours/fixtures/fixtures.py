@@ -18,9 +18,10 @@ secondes. Deux familles :
                            parcours.
 Les sites d'une fixture u32 sont ranges dans l'ordre d'une cle de Morton exacte sur 96 bits (ordre SiteIdx du vidage).
 
-Usage : fixtures.py --out DOSSIER [--dump-tool mhgp12_traversal_dump] [--only nom,nom]
+Usage : fixtures.py --out DOSSIER [--dump-tool mhgp12_traversal_dump] [--only nom,nom] [--nonce JETON]
   ecrit <nom>.u32le / <nom>.ids.u32le, puis <nom>.bin (reference) et fixtures.json (manifeste : parametres, empreintes,
-  controles de l'oracle). Sans --dump-tool, les fixtures u21 sont sautees et declarees absentes au manifeste.
+  controles de l'oracle, jeton --nonce du pilote : preuve fraiche de la session). Sans --dump-tool, les fixtures u21
+  sont sautees et declarees absentes au manifeste.
 Bibliotheque standard seule (Python 3.10 nu), aucune garde par assert. Codes : 0 conforme, 1 controle en echec, 2 refus.
 """
 
@@ -108,6 +109,7 @@ def main(argv):
   ap.add_argument('--out', required=True)
   ap.add_argument('--dump-tool')
   ap.add_argument('--only')
+  ap.add_argument('--nonce')
   try:
     args = ap.parse_args(argv[1:])
   except SystemExit:
@@ -171,7 +173,8 @@ def main(argv):
       code = 1
     manifest.append(entry)
   with open(folder / 'fixtures.json', 'w', encoding='utf-8') as f:
-    json.dump({'schema': 'ehgp.v12.mes_m5.fixtures.v1', 'fixtures': manifest}, f, indent=1, sort_keys=True)
+    json.dump({'schema': 'ehgp.v12.mes_m5.fixtures.v1', 'nonce': args.nonce, 'fixtures': manifest}, f, indent=1,
+              sort_keys=True)
   print(json.dumps({'fixtures': len(manifest), 'present': sum(1 for e in manifest if e.get('present')),
                     'controls_ok': all(e.get('controls_ok', False) for e in manifest if e.get('present')),
                     'code': code}))

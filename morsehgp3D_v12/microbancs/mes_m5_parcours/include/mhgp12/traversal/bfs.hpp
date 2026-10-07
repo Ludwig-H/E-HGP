@@ -61,6 +61,16 @@ static_assert(2 * kNarrowBits + 4 <= 63, "voie native : cle du reservoir en i64 
 static_assert(2 * 33 + 4 <= 127, "voie large : cle du reservoir en i128 jusqu'a s = 33 (CST-0204)");
 static_assert(kChunk >= kMaxRes && kChunk % 32 == 0, "taches : un morceau complet contient un reservoir entier");
 
+// Taches d'une liste de count sites : plafond de count / kChunk, calcule en u64 avant toute conversion. Un seul calcul,
+// partage par le scan (child_fields), l'emission (EmitKernel) et la racine (driver.hpp) : CST-0222, ou la forme
+// (count + kChunk - 1) / kChunk en u32 debordait pour count >= 2^32 - 255 et emettait 0 tache. Pour un compte u32, le
+// resultat tient en u32 (au plus 2^24).
+MHGP12_HD constexpr u64 tasks_of(u64 count) { return count / kChunk + (count % kChunk != 0 ? 1 : 0); }
+static_assert(tasks_of(0) == 0 && tasks_of(1) == 1 && tasks_of(256) == 1 && tasks_of(257) == 2 &&
+                  tasks_of(0xFFFFFF00ull) == (u64{1} << 24) - 1 && tasks_of(0xFFFFFF01ull) == (u64{1} << 24) &&
+                  tasks_of(0xFFFFFFFFull) == (u64{1} << 24),
+              "taches : plafond exact sur tout le domaine u32 des comptes (CST-0222)");
+
 enum Mutant : int {
   kNone = 0,
   kLostWitness = 1,         // reservoir de 3K - 1 temoins
@@ -681,7 +691,7 @@ MHGP12_HD void child_fields(const ChildOut& o, u64* f, u64& tests, u64& leaf) {
   const bool split = o.kind == kKindSplit, is_leaf = o.kind == kKindLeaf;
   f[0] = split ? 1 : 0;
   f[1] = split ? o.count : 0;
-  f[2] = split ? 2 * ((u64{o.count} + kChunk - 1) / kChunk) : 0;
+  f[2] = split ? 2 * tasks_of(o.count) : 0;
   f[3] = is_leaf ? 1 : 0;
   f[4] = is_leaf ? o.count : 0;
   tests = o.tests;
@@ -857,7 +867,7 @@ struct EmitKernel {
       q.list_begin = s.f[1];
       q.count = o.count;
       q.frame_bits = o.frame_bits;
-      q.tasks = (o.count + kChunk - 1) / kChunk;
+      q.tasks = static_cast<u32>(tasks_of(o.count));  // <= 2^24 : exact en u32 (CST-0222)
       q.sides = 2;
       lv.next_parents[s.f[0]] = q;
       lv.next_task_begin[s.f[0]] = static_cast<u32>(s.f[2]);
