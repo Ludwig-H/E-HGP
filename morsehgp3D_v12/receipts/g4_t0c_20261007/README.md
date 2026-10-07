@@ -32,6 +32,13 @@ identité sur l'hôte, sur l'appareil et sur les fixtures, mutants tués, saniti
 au plus 1/4 du temps de la v11 (frontière et passe unique, 48 fils, passes chaudes) sur chaque cas à feuilles de 24.
 **Toutes les preuves sont présentes** (identité appareil sur les douze cas, isolation du GPU, aucun refus, aucun rejet).
 
+**Portée du verdict au regard du contre-audit Codex** (`bf70e8b99`, pin `e30000dec`, antérieur à cette session : le
+juge de M5 pouvait adopter malgré une identité en échec, des cas ou fixtures manquants, une seule passe de la v11 ou une
+médiane déclarée contraire aux durées brutes). Recalcul indépendant depuis `runs/` : les douze cas ont leurs cinq tours,
+l'identité sur l'appareil est vraie partout, la v11 a dix passes par tour (la première écartée), et les médianes
+recalculées depuis les durées brutes redonnent exactement les rapports publiés (écart nul). L'adoption tient ; le juge
+reste à durcir avant tout nouvel usage.
+
 Temps total sur le GPU (copie du nuage, tous les niveaux, rapatriement des feuilles ; médianes, millisecondes) :
 
 | Cas | GPU | v11 (48 fils) | Rapport (moyenne géométrique) | Borne haute | Sans transferts |

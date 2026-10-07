@@ -9,7 +9,10 @@ Usage : recu_session.py --session DOSSIER_DE_SESSION --dest DOSSIER_DU_RECU [--i
     compte gcloud (lue dans preflight.json, jamais ecrite) par <compte> ;
   - ecrit SHA256SUMS, puis verifie qu'aucun fichier du recu ne contient plus ni l'adresse, ni le nom POSIX, ni
     '/home/'. Jamais copies : preflight.json, host/, package/, results.tar.gz, session.stdout et session.stderr.
-Bibliotheque standard seule. Codes : 0 conforme ; 2 usage ; 3 identite restante (le recu est alors efface).
+Le dossier de destination doit etre absent ou vide : il n'est jamais efface s'il preexistait (CST-0221) ; en cas
+d'identite restante, seuls les fichiers crees par l'appel sont retires. Les noms de fichiers sont expurges comme les
+contenus, et le controle final porte sur les noms et sur tous les fichiers, SHA256SUMS compris (CST-0219).
+Bibliotheque standard seule. Codes : 0 conforme ; 2 usage ; 3 identite restante (fichiers crees retires).
 """
 
 import argparse
@@ -73,6 +76,10 @@ def main(argv):
       break
   if match:
     user = match.group(0).split('/')[2]
+  if os.path.exists(args.dest) and (not os.path.isdir(args.dest) or os.listdir(args.dest)):
+    print('recu_session : la destination existe et n\'est pas vide ; rien n\'est ecrit', file=sys.stderr)
+    return 2
+  created_dest = not os.path.exists(args.dest)
   os.makedirs(args.dest, exist_ok=True)
   with open(receipt_path, encoding='utf-8') as handle:
     receipt = json.load(handle)
@@ -89,7 +96,7 @@ def main(argv):
       relative = os.path.relpath(path, results)
       if not any(fnmatch.fnmatch(relative, pattern) for pattern in args.include):
         continue
-      target = os.path.join(args.dest, 'resultats', relative)
+      target = os.path.join(args.dest, 'resultats', redact_text(relative, account, user))
       os.makedirs(os.path.dirname(target), exist_ok=True)
       if is_text(path):
         with open(path, encoding='utf-8', errors='replace') as handle:
@@ -100,7 +107,6 @@ def main(argv):
         shutil.copyfile(path, target)
       copied += 1
   needles = [n for n in (account, user, '/home/') if n]
-  leaks = []
   sums = []
   for root, _, files in os.walk(args.dest):
     for name in sorted(files):
@@ -109,16 +115,29 @@ def main(argv):
       if relative == 'SHA256SUMS':
         continue
       with open(path, 'rb') as handle:
-        data = handle.read()
-      if any(n.encode() in data for n in needles):
-        leaks.append(relative)
-      sums.append('%s  %s' % (hashlib.sha256(data).hexdigest(), relative))
-  if leaks:
-    shutil.rmtree(args.dest)
-    print('recu_session : identite restante dans %s ; recu efface' % ', '.join(leaks[:10]), file=sys.stderr)
-    return 3
+        sums.append('%s  %s' % (hashlib.sha256(handle.read()).hexdigest(), relative))
   with open(os.path.join(args.dest, 'SHA256SUMS'), 'w', encoding='utf-8') as out:
     out.write('\n'.join(sorted(sums, key=lambda line: line.split('  ', 1)[1])) + '\n')
+  leaks = []
+  for root, _, files in os.walk(args.dest):
+    for name in sorted(files):
+      path = os.path.join(root, name)
+      relative = os.path.relpath(path, args.dest)
+      with open(path, 'rb') as handle:
+        data = handle.read()
+      if any(n in relative for n in needles) or any(n.encode() in data for n in needles):
+        leaks.append(relative)
+  if leaks:
+    if created_dest:
+      shutil.rmtree(args.dest)
+    else:
+      for root, dirs, files in os.walk(args.dest, topdown=False):
+        for name in files:
+          os.remove(os.path.join(root, name))
+        for name in dirs:
+          os.rmdir(os.path.join(root, name))
+    print('recu_session : identite restante dans %d fichier(s) ; fichiers crees retires' % len(leaks), file=sys.stderr)
+    return 3
   print('recu_session_ok fichiers=%d' % (copied + 1))
   return 0
 
