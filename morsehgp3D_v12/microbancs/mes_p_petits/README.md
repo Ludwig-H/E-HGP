@@ -23,5 +23,9 @@ python3 pilote_p.py --v11-build <construction de la v11> --donnees <paquet g4_sm
     --fils 1,48 --k 5,10 --passes 6
 ```
 
+Sur G4, le paquet voyage en **une seule archive tar** (`--archive g4_small.tar --deballage <dossier>`) : le
+téléversement d'une session paie chaque fichier, et les 320 petits fichiers ont dépassé son délai le 7 octobre
+(session `t1f`, VM arrêtée sans worker). L'archive est déballée après contrôle de chaque membre.
+
 Premier passage local (7 octobre, trois nuages de 1 000 sites, indicatif) : 0,45 s par passe chaude à K5 sur un fil ;
 les temps de la VM G4 font foi.

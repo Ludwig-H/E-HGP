@@ -9,8 +9,11 @@ nombre de fils et chaque K : temps de chaque passe (cle `pass`, champs de duree 
 Puis un ajustement par moindres carres, par K et par nombre de fils, du temps chaud t = a + b n : a est le cout fixe,
 b le cout par site.
 
-Usage : pilote_p.py --v11-build DIR --donnees DIR --sortie DIR [--fils 1,48] [--k 5,10] [--passes 6] [--delai 300]
-                    [--jobs 44] [--limite N]
+Usage : pilote_p.py --v11-build DIR (--donnees DIR | --archive TAR --deballage DIR) --sortie DIR [--fils 1,48]
+                    [--k 5,10] [--passes 6] [--delai 300] [--jobs 44] [--limite N]
+  --archive : le paquet g4_small en une seule archive tar (le televersement d'une session paie chaque fichier : 320
+  petits fichiers depassent son delai) ; deballee dans --deballage apres controle de chaque membre (fichier simple, nom
+  simple, aucun chemin), puis lue comme --donnees.
 Sorties : <sortie>/mes_p.json, <sortie>/mes_p.md, lignes brutes sous <sortie>/brut/. Codes : 0 rendu ; 2 usage ou
 manifeste illisible ; 3 construction impossible. Bibliotheque standard seule (Python 3.10 nu).
 """
@@ -20,9 +23,26 @@ import os
 import statistics
 import subprocess
 import sys
+import tarfile
 import time
 
 MASK = '802811'
+
+
+def unpack(archive, folder):
+    """Deballe une archive tar plate (fichiers simples a nom simple) ; rend le dossier, ou None si un membre est refuse."""
+    os.makedirs(folder, exist_ok=True)
+    with tarfile.open(archive) as tar:
+        members = tar.getmembers()
+        for member in members:
+            name = member.name
+            if not member.isfile() or '/' in name or name in ('', '.', '..') or name.startswith('.'):
+                return None
+        for member in members:
+            source = tar.extractfile(member)
+            with open(os.path.join(folder, member.name), 'wb') as out:
+                out.write(source.read())
+    return folder
 
 
 def build(v11_build, jobs):
@@ -93,7 +113,9 @@ def fit(points):
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument('--v11-build', required=True)
-    parser.add_argument('--donnees', required=True)
+    parser.add_argument('--donnees')
+    parser.add_argument('--archive')
+    parser.add_argument('--deballage')
     parser.add_argument('--sortie', required=True)
     parser.add_argument('--fils', default='1,48')
     parser.add_argument('--k', default='5,10')
@@ -103,6 +125,12 @@ def main(argv):
     parser.add_argument('--limite', type=int, default=0)
     try:
         args = parser.parse_args(argv[1:])
+        if (args.donnees is None) == (args.archive is None) or (args.archive is not None and args.deballage is None):
+            return 2
+        if args.archive is not None:
+            args.donnees = unpack(args.archive, args.deballage)
+            if args.donnees is None:
+                return 2
         threads = [int(x) for x in args.fils.split(',')]
         orders = [int(x) for x in args.k.split(',')]
         manifest = json.load(open(os.path.join(args.donnees, 'bundle_manifest.json'), encoding='utf-8'))
