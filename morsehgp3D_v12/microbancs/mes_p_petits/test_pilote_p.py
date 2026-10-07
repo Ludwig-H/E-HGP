@@ -4,6 +4,7 @@
   fils_separes   CST-0238 (temoin de l'auditeur Codex) : deux nuages a 1, 4 et 48 fils, pentes 100, 60 et 10 µs par
                  site ; le lecteur rend trois droites, jamais leur reunion (56,67 µs par site) ;
   cohorte        un nuage expire a 1 fil : la cohorte commune garde les deux autres, un ecarte a 4 et a 48 fils ;
+  regime_en_echec toutes les prises a 1 fil echouent : les trois regimes restent affiches, cohorte vide ;
   selection_vide le pilote refuse une selection vide (code 2) avant toute construction ;
   delai          une prise expiree tue tout son groupe de processus et n'a aucune valeur chaude.
 Codes : 0 conforme ; 1 ecart.
@@ -61,6 +62,17 @@ def check_cohort(errors):
         errors.append('cohorte : %s' % rows)
 
 
+def check_failed_regime(errors):
+    """Toutes les prises a 1 fil echouent : le regime reste affiche et la cohorte commune est vide (auditeur Codex)."""
+    takes = [take('knn_%d' % n, n, f, 1e-3 + b * n) for f, b in SLOPES.items() if f != 1 for n in (100, 200)]
+    takes += [take('knn_%d' % n, n, 1, None, code='expire') for n in (100, 200)]
+    code, text = analyse(takes)
+    rows = [line for line in text.splitlines() if line.startswith('| ') and ' fils | 0 | ' in line]
+    wanted = ['| 1 fils | 0 | 0 | - | - |', '| 4 fils | 0 | 2 | - | - |', '| 48 fils | 0 | 2 | - | - |']
+    if code != 0 or rows != wanted:
+        errors.append('regime_en_echec : %s' % rows)
+
+
 def check_empty(errors):
     with tempfile.TemporaryDirectory() as folder:
         data = os.path.join(folder, 'donnees')
@@ -103,11 +115,11 @@ def check_delay(errors):
 
 def main():
     errors = []
-    for check in (check_threads, check_cohort, check_empty, check_delay):
+    for check in (check_threads, check_cohort, check_failed_regime, check_empty, check_delay):
         check(errors)
     for error in errors:
         print(error, file=sys.stderr)
-    print(json.dumps(dict(porte='mes_p', cas=4, ecarts=len(errors))))
+    print(json.dumps(dict(porte='mes_p', cas=5, ecarts=len(errors))))
     return 1 if errors else 0
 
 

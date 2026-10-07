@@ -236,6 +236,8 @@ MUTANTS = [
      'm6'),
     ('m6_rejuge_doublons_admis', M6, [('      if (mode, index) in declared:', '      if False:')], 'm6'),
     ('m6_rejuge_effectif_non_valide', M6, [('    if sorted(takes) != sorted(expected):', '    if False:')], 'm6'),
+    ('m6_rejuge_rapport_null_admis', M6, [('  if not isinstance(report, dict):', '  if report is not None and not '
+                                          'isinstance(report, dict):')], 'm6'),
     ('m6_rejuge_schema_ouvert', M6, [('  if report is not None and not (isinstance(schema, str) and schema in '
                                       'KNOWN_SCHEMAS):', '  if False:')], 'm6'),
     ('m6_rejuge_v1_champs_libres', M6, [('  if report is not None and schema == SCHEMA_V1 and sorted(report) != '

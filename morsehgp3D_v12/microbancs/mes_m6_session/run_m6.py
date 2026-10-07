@@ -407,8 +407,10 @@ def rejudge(folder, args):
     report = json.loads((folder / 'm6_report.json').read_text(encoding='utf-8'))
   except (OSError, ValueError) as error:
     report, problems = None, ['rapport illisible : %s' % error]
-  if report is not None and not isinstance(report, dict):
-    report, problems = None, ['rapport hors schema']
+  if not isinstance(report, dict):
+    if not problems:
+      problems.append('rapport hors schema')
+    report = None
   schema = report.get('schema') if report is not None else None
   if report is not None and not (isinstance(schema, str) and schema in KNOWN_SCHEMAS):
     problems.append('schema %r inconnu : seuls %s (historique) et %s sont lus' % (schema, SCHEMA_V1, SCHEMA))

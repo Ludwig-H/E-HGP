@@ -346,7 +346,12 @@ def cas_relecture(tmp, recu):
                               ('v1_avec_refus_publie', lambda d: _rapport(d, lambda r: r.update(
                                   refusals=['binaire modifie pendant les prises'])), 'format historique'),
                               ('v1_prise_avec_champ_inconnu', lambda d: _rapport(d, lambda r: r['runs'][3].update(
-                                  sha256='0' * 64)), 'format historique')):
+                                  sha256='0' * 64)), 'format historique'),
+                              # Recu audit_reponses_20261007/m6_integration : un rapport JSON qui n'est pas un objet,
+                              # seul dans son dossier, rendait mes_m6_ok avec zero prise.
+                              ('rapport_null_seul', lambda d: _seul_rapport(d, 'null\n'), 'hors schema'),
+                              ('rapport_liste_seul', lambda d: _seul_rapport(d, '[]\n'), 'hors schema'),
+                              ('rapport_nombre_seul', lambda d: _seul_rapport(d, '0\n'), 'hors schema')):
     copie = Path(tmp) / ('session_a_' + nom)
     shutil.copytree(str(recu), str(copie))
     alterer(copie)
@@ -381,6 +386,13 @@ def cas_relecture(tmp, recu):
 
 def _medianes_fausses(rapport):
   rapport['summary_median_us']['spin']['context_open'] += 1.0
+
+
+def _seul_rapport(dossier, texte):
+  """Ne laisse dans le dossier qu'un rapport de texte donne (aucun fichier de prise)."""
+  for prise in dossier.glob('m6_*.jsonl'):
+    prise.unlink()
+  (dossier / 'm6_report.json').write_text(texte)
 
 
 def _rapport(dossier, falsifier):

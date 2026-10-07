@@ -41,6 +41,20 @@ mhgp12_python_gate(mhgp12_tower_determinism_lidar_ng00_k5 0 g_determinism.py ${t
                    LINE "g_determinism_ok cas=lidar_ng00_k5 fils=1,8 empreinte=231d826bb0d4fe57 naissances=897776 cellules=1306872 representants=3622258 cibles_cellule=650932"
                    LABELS lidar long TIMEOUT 1800)
 
+# Juge du determinisme contre ses faux succes (contre-lecture de l'auditeur Codex du 7 octobre, CST-0018) : la fausse
+# sonde g_fausse_sonde.py (hors produit) rejoue une sortie tronquee apres l'ordre 1 (ligne CTest imitee), un ordre
+# double, une empreinte courte et une sortie sans ligne exit ; le juge les refuse (code 2), le temoin conforme passe.
+# Le juge d'avant cette contre-lecture les admettait toutes (code 0).
+set(tower_fausse_sonde ${CMAKE_CURRENT_LIST_DIR}/g_fausse_sonde.py)
+mhgp12_python_gate(mhgp12_tower_juge_temoin 0 g_determinism.py ${tower_fausse_sonde} fausse --uniform=10,1,18 --k=5
+                   --threads=1,8 LABELS fast
+                   LINE "g_determinism_ok cas=fausse fils=1,8 empreinte=abababababababab naissances=22 cellules=5 representants=10 cibles_cellule=0"
+                   ENV MHGP12_FAUSSE_SONDE=ok)
+foreach(mode k1_seul ordre_double empreinte_courte sans_sortie)
+  mhgp12_python_gate(mhgp12_tower_juge_refus_${mode} 2 g_determinism.py ${tower_fausse_sonde} fausse
+                     --uniform=10,1,18 --k=5 --threads=1,8 LABELS fast ENV MHGP12_FAUSSE_SONDE=${mode})
+endforeach()
+
 # Differentiel contre la v11 gelee (MHGP12_V11_TOWER_DIR : <cas>_k5/ avec cat.bin, ordre_<k>.bin et foret_<k>.bin de
 # mhgp12_vidage, feuille 16, microbancs/mes_m3_m4_tour ; donnees MHGP12_DATA_DIR) : la sonde exporte l'etage G, le juge
 # g_diff_v11.py exige pour chaque representant la composante de la graine v11 a la coupe ouverte de sa jonction

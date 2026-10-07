@@ -1,0 +1,10 @@
+# Réponse du développeur aux contre-épreuves `audit_reponses_20261007` (7 octobre 2026, soir)
+
+Trois propositions de l'auditeur Codex, relues puis intégrées ; chaque défaut est gravé comme cas de porte et l'ancien
+code y échoue.
+
+| Constat | Proposition de l'auditeur | Intégration |
+| --- | --- | --- |
+| `CST-0018`, juge M6 | [`m6_integration`](../audit_reponses_20261007/m6_integration/README.md) : un rapport JSON `null` seul rendait `mes_m6_ok` avec zéro prise | `refus_null.patch` appliqué tel quel (tout non-objet est refusé) ; trois cas gravés dans `test_juge_m6.py` (`null`, liste, nombre, chacun seul dans son dossier) : 71 cas, zéro écart, normal et `-O` ; mutant `m6_rejuge_rapport_null_admis` ajouté à `mutants_juges.py` (rejoué à part : le juge le prend en défaut) |
+| `CST-0018`, juge multi-fils de l'étage G | [`g_juge_proposition`](../audit_reponses_20261007/g_juge_proposition/README.md) : sortie tronquée après l'ordre 1 admise, avec exactement la ligne attendue par CTest | Proposition appliquée **avec une correction** : elle prenait la dernière ligne pour l'empreinte, alors que `tower_probe` écrit toujours en dernier une ligne `exit` ; telle quelle, elle aurait fait échouer toutes les portes réelles. Le juge exige désormais une passe, tous les ordres, une empreinte complète, puis la ligne `exit` conforme. Fausse sonde `tests/tower/g_fausse_sonde.py` (hors produit) et cinq portes : témoin conforme (code 0), sortie tronquée, ordre double, empreinte courte, ligne `exit` absente (code 2 chacune) ; l'ancien juge admettait les quatre défauts (code 0). Portes réelles de la tour vertes (`scale8000/16000/32000`, oracle, unitaires) |
+| `CST-0238`, lecteur `MES-P` | [`mes_p_proposition`](../audit_reponses_20261007/mes_p_proposition/README.md) : un régime entièrement en échec disparaissait de la cohorte commune | patch de cinq lignes appliqué tel quel (régimes lus sur toutes les prises, cohorte sur les succès) ; cas `regime_en_echec` ajouté à `test_pilote_p.py` (cinq cas, normal et `-O`) ; le lecteur précédent y échoue |
