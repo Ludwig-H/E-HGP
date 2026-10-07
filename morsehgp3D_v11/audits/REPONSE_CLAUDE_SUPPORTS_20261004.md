@@ -917,3 +917,52 @@ publieurs passe à 10–22 ms ; K10 est neutre.
 préchargement (lecture d'un bloc non confirmé) n'y est pas jouable, d'où la passe TSan à sa place. Voyez-vous un moyen
 de rendre cette garde mutable sans sanitizer ? Par exemple, une porte qui empoisonne les graines d'un bloc non confirmé
 et vérifie qu'aucun préchargement n'en lit l'adresse.
+
+## Y. Lot de feuilles partagé adopté à K5 ; naissances par tranches gardées ; pages de 2 Mio rejetées (7 octobre, 00 h 49 UTC)
+
+Quatre sessions G4, toutes sur les trois trames LiDAR réelles, chacune avec une règle écrite dans son plan avant les
+données, toutes arrêtées `TERMINATED`.
+
+**Exécuteur partagé du lot de feuilles (`2045ec27c`).**
+- `claudesplit1`, reçu `receipts/developpement_20261006/lot_partage/` : la règle à froid n'admet aucune part (moyennes
+  géométriques 0,937, 0,977 et 0,916 pour 300, 400 et 500 ‰). À froid, l'ouverture de CUDA (environ 75 ms) domine
+  l'étage. Le lot de mutants n'a rien jugé : deux mutants du manifeste `catalogue` citaient la porte de la tour
+  `mhgp11_tower_full_leaf_lanes`, absente de cette campagne. Ils passent au manifeste `tower`.
+- `claudesplitconf`, reçu `lot_partage_confirmation/` : la statistique passe à chaud, et ce changement est déclaré dans
+  le plan avant les données. Les quatre mutants du partage sont tués. 400 ‰ est admis : moyenne géométrique 0,893, pire
+  rapport 0,907. **La voie GPU de référence à K5 devient `344059:400`.** Le défaut du banc reste à 0 pour que les plans
+  antérieurs gardent leur sens. Rien n'est adopté à K10 (250 ‰ y donne 0,96, à titre descriptif).
+
+**Naissances par blocs : tri des cohortes en (K−1) × 32 tranches (`5734ca6e8`, `claudebirths1`, reçu
+`receipts/developpement_20261007/cohortes_tranches/`).** La phase 2 formait une tâche par ordre, et l'ordre K la
+bornait. Les bornes des tranches tombent entre deux cohortes. Le pilote les lit avant toute écriture : mon premier jet
+les lisait dans les tâches, pendant que la tranche voisine réécrivait ses cohortes, une course que la relecture a
+arrêtée avant toute exécution. Un tampon de la plus longue cohorte par ouvrier (au plus 93 naissances), un registre par
+tranche. La porte `mhgp11_tower_pipeline_equivalence` compare désormais les présentations et les comparaisons de
+centres de la voie concurrente à celles de la voie séquentielle, avec un plancher de 600 ordres à cohortes. Jusqu'ici,
+elles étaient égales par construction ; avec des registres de tranche, la somme doit être contrôlée.
+- Exactitude : quatre mutants tués, dont un reciblé ; ASan+UBSan et TSan 803/803, TSan sur la trame ng00 13/13 ;
+  vidages des empreintes.
+- Règle tenue : naissances 6,8–11,6 → 4,0–5,3 ms (moyenne géométrique 0,529, seuil 0,80) ; `forest_ms` 0,942 (seuil
+  1,00). **Gardé.**
+
+**Pages de 2 Mio pour les tampons d'au moins 2 Mio (`claudethp1`, reçu `thp_exploration/`) : rejetées.** Le code
+alignait sur 2 Mio et conseillait `MADV_HUGEPAGE` sur les octets exacts, sans changer le budget. En local (8 cœurs), il
+gagnait environ 17 % sur les forêts et environ 30 ms de restitution des grands tampons sur un seul fil. Sur G4, il
+perd : mur à chaud 1,064 (seuil 0,95), voie CPU de +10 à +16 %, et pertes à froid comme à K10. Rien n'est commité ; le
+patch est gardé dans le reçu.
+
+**Profil à chaud après ces sessions** (K5, voie GPU de référence) : mur 240 à 290 ms ; `domain` 137 à 163 ms (lot de
+feuilles 48 à 58, passe unique 30 à 36, frontière 17 à 21, tri 9 à 12) ; forêts 101 à 126 ms. Côté publieurs, les
+cellules étendues sont négligeables (au plus 107 par ordre). Le coût va aux unions du DSU des cellules régulières, aux
+clôtures de plateaux (environ 20 ms à l'ordre 5) et au parcours de toutes les boules.
+
+**Questions.**
+1. Pages de 2 Mio : voyez-vous la cause de la perte sur 48 fils ? Je soupçonne la remise à zéro de pages entières
+   pour des tampons remplis en partie (arènes, réservoirs, capacités par excès), ou la contention sur l'allocation
+   d'ordre 9 avec compactage direct. Faut-il réserver le conseil aux tableaux entièrement écrits et lus au hasard
+   (parents et états du DSU, table de hachage du domaine), ou abandonner ?
+2. Réutiliser les grands blocs d'une passe à l'autre (régime à chaud d'un flux de trames) supprimerait fautes de page
+   et restitutions. Comment le compter honnêtement ? Ma proposition : un cache de blocs propre à la `Session`, compté
+   dans le budget comme réserve et rendu à la fermeture.
+3. La question de la section X sur la garde du préchargement reste ouverte.
