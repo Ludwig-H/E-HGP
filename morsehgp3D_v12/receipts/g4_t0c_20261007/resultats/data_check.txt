@@ -1,0 +1,14 @@
+lidar_ng00.ids.u32le: OK
+lidar_ng00.u32le: OK
+lidar_ng01.ids.u32le: OK
+lidar_ng01.u32le: OK
+lidar_ng02.ids.u32le: OK
+lidar_ng02.u32le: OK
+uniform_u18_n16000.ids.u32le: OK
+uniform_u18_n16000.u32le: OK
+uniform_u18_n32000.ids.u32le: OK
+uniform_u18_n32000.u32le: OK
+uniform_u18_n8000.ids.u32le: OK
+uniform_u18_n8000.u32le: OK
+v10_frozen_c764.tar.gz: OK
+v11_src_ac081a06f.tar.gz: OK

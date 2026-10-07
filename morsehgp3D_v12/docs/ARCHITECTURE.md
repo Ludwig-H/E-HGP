@@ -53,6 +53,21 @@ trame $t$ (CPU).
 
 À K = 10, l'objectif est de 0,3 à 0,5 s (catalogue résident 70–130 ms estimé ; résolution 150–250 ms ; noyau 20–35 ms).
 
+**Mesures de la tranche T0** (G4, microbancs hors produit, 7 octobre 2026 ; reçus
+[`g4_t0a`](../receipts/g4_t0a_20261007/README.md), [`g4_t0b`](../receipts/g4_t0b_20261007/README.md),
+[`g4_t0c`](../receipts/g4_t0c_20261007/README.md)), sur ng00 à K5 sauf mention :
+
+- **C** : parcours des boîtes en largeur 4,7 ms, transferts compris (`MES-M5`, contre 47,8 ms pour la frontière et la
+  passe unique de la v11) ; feuille J3 11,6 ms, noyau seul (`MES-M2`, contre 69,6 ms) ; soit environ 16 ms avant la
+  fin d'étage, dans le budget de 35 à 45 ms. À K10 : 10,9 et 37,2 ms.
+- **G** : résolution de toutes les descentes à un fil, 1,37 s avec la plus petite boule certifiée (`MES-M3`), contre
+  1,47 s pour la réplique de la v11 : à K5 le recensement domine, et le gain n'est que de 7 % (il est de 45 % à K10).
+  Même parallèle à 48 fils, cet étage dépassera son budget de 25 à 30 ms sans le recensement borné aux $k$ plus
+  proches et le mémo de cellule (`LEM-T3`) : **c'est le prochain verrou**, à traiter en T2.
+- **T, M** : noyau de l'ordre 5 en 8,8 ms à un fil, ordres indépendants ; contraction 1,7 ms à 48 fils (`MES-M4`). À
+  l'ordre 10 : 26,4 ms et 4,1 ms.
+- **Session** : 116 ms d'ouverture payées une fois ; quelques microsecondes de coûts fixes par trame (`MES-M6`).
+
 ## 4. Étage par étage
 
 ### 4.1 C — catalogue résident sur le GPU
