@@ -1,0 +1,3 @@
+t_lidar_cover noeuds 576371 fusions 235290 par nombre d enfants {2: 147275, 3: 70244, 4: 17767, 5: 4} part des fusions a 3 enfants ou plus : 37.4 %
+t_cover noeuds 25002 fusions 10413 par nombre d enfants {2: 6804, 3: 3043, 4: 566} part des fusions a 3 enfants ou plus : 34.7 %
+t_core noeuds 25002 fusions 10413 par nombre d enfants {2: 6804, 3: 3043, 4: 566} part des fusions a 3 enfants ou plus : 34.7 %

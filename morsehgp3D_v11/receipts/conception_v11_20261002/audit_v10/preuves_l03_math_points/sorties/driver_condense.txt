@@ -1,0 +1,13 @@
+validate ok=1
+allow_single=0 clusters_condenses=3
+  cluster 0 parent=-1 naissance_lambda=0.000000 stabilite=1.000000 masse=5
+  cluster 1 parent=0 naissance_lambda=0.200000 stabilite=1.233333 masse=3
+  cluster 2 parent=0 naissance_lambda=0.200000 stabilite=0.100000 masse=2
+  lambda de sortie des points : 1.000000 0.500000 0.333333 0.250000 0.250000
+  etiquettes : 0 0 0 1 1
+allow_single=1 clusters_condenses=3
+  cluster 0 parent=-1 naissance_lambda=0.000000 stabilite=1.000000 masse=5
+  cluster 1 parent=0 naissance_lambda=0.200000 stabilite=1.233333 masse=3
+  cluster 2 parent=0 naissance_lambda=0.200000 stabilite=0.100000 masse=2
+  lambda de sortie des points : 1.000000 0.500000 0.333333 0.250000 0.250000
+  etiquettes : 0 0 0 1 1

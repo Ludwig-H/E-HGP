@@ -1,0 +1,138 @@
+Internal ctest changing into directory: /tmp/claude-1000/-workspaces-E-HGP/6acaaf62-b44a-41e7-b5d6-81e4c7b6b7f1/scratchpad/agent_G/build-v11
+Test project /tmp/claude-1000/-workspaces-E-HGP/6acaaf62-b44a-41e7-b5d6-81e4c7b6b7f1/scratchpad/agent_G/build-v11
+      Start 731: mhgp11_tower_attach_export_lidar_ng00_k5
+ 1/60 Test #731: mhgp11_tower_attach_export_lidar_ng00_k5 .........   Passed    9.27 sec
+      Start 735: mhgp11_tower_attach_export_lidar_ng01_k5
+ 2/60 Test #735: mhgp11_tower_attach_export_lidar_ng01_k5 .........   Passed    9.06 sec
+      Start 739: mhgp11_tower_attach_export_lidar_ng02_k5
+ 3/60 Test #739: mhgp11_tower_attach_export_lidar_ng02_k5 .........   Passed   11.42 sec
+      Start 769: mhgp11_supports_sample_judge_lidar_ng00_k5
+ 4/60 Test #769: mhgp11_supports_sample_judge_lidar_ng00_k5 .......   Passed   18.93 sec
+      Start 779: mhgp11_supports_registers_lidar_ng00_k5
+ 5/60 Test #779: mhgp11_supports_registers_lidar_ng00_k5 ..........   Passed   21.38 sec
+      Start 781: mhgp11_supports_registers_lidar_ng01_k5
+ 6/60 Test #781: mhgp11_supports_registers_lidar_ng01_k5 ..........   Passed   16.27 sec
+      Start 783: mhgp11_supports_registers_lidar_ng02_k5
+ 7/60 Test #783: mhgp11_supports_registers_lidar_ng02_k5 ..........   Passed   20.72 sec
+      Start 829: mhgp11_points_lidar_ng00_k5
+ 8/60 Test #829: mhgp11_points_lidar_ng00_k5 ......................   Passed   33.87 sec
+      Start 831: mhgp11_points_lidar_ng01_k5
+ 9/60 Test #831: mhgp11_points_lidar_ng01_k5 ......................   Passed   27.23 sec
+      Start 833: mhgp11_points_lidar_ng02_k5
+10/60 Test #833: mhgp11_points_lidar_ng02_k5 ......................   Passed   33.43 sec
+      Start 853: mhgp11_plat_lidar_ng00_k5
+11/60 Test #853: mhgp11_plat_lidar_ng00_k5 ........................   Passed   19.86 sec
+      Start 855: mhgp11_plat_lidar_ng01_k5
+12/60 Test #855: mhgp11_plat_lidar_ng01_k5 ........................   Passed   15.89 sec
+      Start 857: mhgp11_plat_lidar_ng02_k5
+13/60 Test #857: mhgp11_plat_lidar_ng02_k5 ........................   Passed   19.37 sec
+      Start 913: mhgp11_cli_full_identity_lidar_ng00_k5
+14/60 Test #913: mhgp11_cli_full_identity_lidar_ng00_k5 ...........   Passed  115.14 sec
+      Start 915: mhgp11_cli_full_identity_lidar_ng01_k5
+15/60 Test #915: mhgp11_cli_full_identity_lidar_ng01_k5 ...........   Passed   95.10 sec
+      Start 917: mhgp11_cli_full_identity_lidar_ng02_k5
+16/60 Test #917: mhgp11_cli_full_identity_lidar_ng02_k5 ...........   Passed  123.51 sec
+      Start 930: mhgp11_cli_supports_lidar_ng00_k5
+17/60 Test #930: mhgp11_cli_supports_lidar_ng00_k5 ................   Passed   57.37 sec
+      Start 932: mhgp11_cli_supports_lidar_ng01_k5
+18/60 Test #932: mhgp11_cli_supports_lidar_ng01_k5 ................   Passed   46.60 sec
+      Start 934: mhgp11_cli_supports_lidar_ng02_k5
+19/60 Test #934: mhgp11_cli_supports_lidar_ng02_k5 ................   Passed   56.01 sec
+      Start  15: mhgp11_support_lidar_sentinel
+20/60 Test  #15: mhgp11_support_lidar_sentinel ....................   Passed    0.02 sec
+      Start 191: mhgp11_num_roots_cost_uniform_u18_n8000_k5
+21/60 Test #191: mhgp11_num_roots_cost_uniform_u18_n8000_k5 .......   Passed    1.86 sec
+      Start 192: mhgp11_num_roots_cost_uniform_u18_n16000_k5
+22/60 Test #192: mhgp11_num_roots_cost_uniform_u18_n16000_k5 ......   Passed    3.82 sec
+      Start 193: mhgp11_num_roots_cost_uniform_u18_n32000_k5
+23/60 Test #193: mhgp11_num_roots_cost_uniform_u18_n32000_k5 ......   Passed    7.61 sec
+      Start 194: mhgp11_num_roots_cost_lidar_ng00_k5
+24/60 Test #194: mhgp11_num_roots_cost_lidar_ng00_k5 ..............   Passed    4.65 sec
+      Start 195: mhgp11_num_roots_cost_lidar_ng01_k5
+25/60 Test #195: mhgp11_num_roots_cost_lidar_ng01_k5 ..............   Passed    3.94 sec
+      Start 196: mhgp11_num_roots_cost_lidar_ng02_k5
+26/60 Test #196: mhgp11_num_roots_cost_lidar_ng02_k5 ..............   Passed    4.56 sec
+      Start 427: mhgp11_catalogue_euler_lidar_ng00_k5
+27/60 Test #427: mhgp11_catalogue_euler_lidar_ng00_k5 .............   Passed   13.75 sec
+      Start 428: mhgp11_catalogue_euler_lidar_ng01_k5
+28/60 Test #428: mhgp11_catalogue_euler_lidar_ng01_k5 .............   Passed   11.00 sec
+      Start 429: mhgp11_catalogue_euler_lidar_ng02_k5
+29/60 Test #429: mhgp11_catalogue_euler_lidar_ng02_k5 .............   Passed   13.17 sec
+      Start 729: mhgp11_tower_order_identity_lidar_ng00_k5
+30/60 Test #729: mhgp11_tower_order_identity_lidar_ng00_k5 ........   Passed    8.19 sec
+      Start 730: mhgp11_tower_attach_e1e2_lidar_ng00_k5
+31/60 Test #730: mhgp11_tower_attach_e1e2_lidar_ng00_k5 ...........   Passed    4.08 sec
+      Start 732: mhgp11_tower_attach_export_lidar_ng00_k5_opt
+32/60 Test #732: mhgp11_tower_attach_export_lidar_ng00_k5_opt .....   Passed    9.28 sec
+      Start 733: mhgp11_tower_order_identity_lidar_ng01_k5
+33/60 Test #733: mhgp11_tower_order_identity_lidar_ng01_k5 ........   Passed    6.43 sec
+      Start 734: mhgp11_tower_attach_e1e2_lidar_ng01_k5
+34/60 Test #734: mhgp11_tower_attach_e1e2_lidar_ng01_k5 ...........   Passed    3.15 sec
+      Start 736: mhgp11_tower_attach_export_lidar_ng01_k5_opt
+35/60 Test #736: mhgp11_tower_attach_export_lidar_ng01_k5_opt .....   Passed    7.26 sec
+      Start 737: mhgp11_tower_order_identity_lidar_ng02_k5
+36/60 Test #737: mhgp11_tower_order_identity_lidar_ng02_k5 ........   Passed    7.65 sec
+      Start 738: mhgp11_tower_attach_e1e2_lidar_ng02_k5
+37/60 Test #738: mhgp11_tower_attach_e1e2_lidar_ng02_k5 ...........   Passed    3.82 sec
+      Start 740: mhgp11_tower_attach_export_lidar_ng02_k5_opt
+38/60 Test #740: mhgp11_tower_attach_export_lidar_ng02_k5_opt .....   Passed    8.95 sec
+      Start 770: mhgp11_supports_sample_judge_lidar_ng00_k5_opt
+39/60 Test #770: mhgp11_supports_sample_judge_lidar_ng00_k5_opt ...   Passed   16.13 sec
+      Start 780: mhgp11_supports_registers_lidar_ng00_k5_opt
+40/60 Test #780: mhgp11_supports_registers_lidar_ng00_k5_opt ......   Passed   19.89 sec
+      Start 782: mhgp11_supports_registers_lidar_ng01_k5_opt
+41/60 Test #782: mhgp11_supports_registers_lidar_ng01_k5_opt ......   Passed   15.75 sec
+      Start 784: mhgp11_supports_registers_lidar_ng02_k5_opt
+42/60 Test #784: mhgp11_supports_registers_lidar_ng02_k5_opt ......   Passed   19.05 sec
+      Start 805: mhgp11_supports_hierarchy_lidar_ng00_k5
+43/60 Test #805: mhgp11_supports_hierarchy_lidar_ng00_k5 ..........   Passed    4.60 sec
+      Start 806: mhgp11_supports_hierarchy_lidar_ng01_k5
+44/60 Test #806: mhgp11_supports_hierarchy_lidar_ng01_k5 ..........   Passed    3.76 sec
+      Start 807: mhgp11_supports_hierarchy_lidar_ng02_k5
+45/60 Test #807: mhgp11_supports_hierarchy_lidar_ng02_k5 ..........   Passed    4.55 sec
+      Start 830: mhgp11_points_lidar_ng00_k5_opt
+46/60 Test #830: mhgp11_points_lidar_ng00_k5_opt ..................   Passed   31.80 sec
+      Start 832: mhgp11_points_lidar_ng01_k5_opt
+47/60 Test #832: mhgp11_points_lidar_ng01_k5_opt ..................   Passed   25.34 sec
+      Start 834: mhgp11_points_lidar_ng02_k5_opt
+48/60 Test #834: mhgp11_points_lidar_ng02_k5_opt ..................   Passed   31.49 sec
+      Start 854: mhgp11_plat_lidar_ng00_k5_opt
+49/60 Test #854: mhgp11_plat_lidar_ng00_k5_opt ....................   Passed   19.20 sec
+      Start 856: mhgp11_plat_lidar_ng01_k5_opt
+50/60 Test #856: mhgp11_plat_lidar_ng01_k5_opt ....................   Passed   15.20 sec
+      Start 858: mhgp11_plat_lidar_ng02_k5_opt
+51/60 Test #858: mhgp11_plat_lidar_ng02_k5_opt ....................   Passed   18.62 sec
+      Start 891: mhgp11_api_supports_route_lidar_ng00_k5
+52/60 Test #891: mhgp11_api_supports_route_lidar_ng00_k5 ..........   Passed   44.82 sec
+      Start 892: mhgp11_api_supports_route_lidar_ng01_k5
+53/60 Test #892: mhgp11_api_supports_route_lidar_ng01_k5 ..........   Passed   35.55 sec
+      Start 893: mhgp11_api_supports_route_lidar_ng02_k5
+54/60 Test #893: mhgp11_api_supports_route_lidar_ng02_k5 ..........   Passed   42.71 sec
+      Start 914: mhgp11_cli_full_identity_lidar_ng00_k5_opt
+55/60 Test #914: mhgp11_cli_full_identity_lidar_ng00_k5_opt .......   Passed  111.67 sec
+      Start 916: mhgp11_cli_full_identity_lidar_ng01_k5_opt
+56/60 Test #916: mhgp11_cli_full_identity_lidar_ng01_k5_opt .......   Passed   94.08 sec
+      Start 918: mhgp11_cli_full_identity_lidar_ng02_k5_opt
+57/60 Test #918: mhgp11_cli_full_identity_lidar_ng02_k5_opt .......   Passed  117.96 sec
+      Start 931: mhgp11_cli_supports_lidar_ng00_k5_opt
+58/60 Test #931: mhgp11_cli_supports_lidar_ng00_k5_opt ............   Passed   55.32 sec
+      Start 933: mhgp11_cli_supports_lidar_ng01_k5_opt
+59/60 Test #933: mhgp11_cli_supports_lidar_ng01_k5_opt ............   Passed   45.59 sec
+      Start 935: mhgp11_cli_supports_lidar_ng02_k5_opt
+60/60 Test #935: mhgp11_cli_supports_lidar_ng02_k5_opt ............   Passed   54.77 sec
+
+100% tests passed, 0 tests failed out of 60
+
+Label Time Summary:
+fast          =   0.02 sec*proc (1 test)
+lidar         = 1701.50 sec*proc (60 tests)
+scale16000    =   3.82 sec*proc (1 test)
+scale32000    =   7.61 sec*proc (1 test)
+scale8000     =   1.86 sec*proc (1 test)
+
+Total Test time (real) = 1701.58 sec
+
+real	28m21.595s
+user	52m23.144s
+sys	1m36.686s
+rc=0

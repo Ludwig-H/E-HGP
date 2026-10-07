@@ -1,0 +1,11 @@
+m_frontier : n=8000 K+2=7 boules=1286421 etendues=0   ordre 1 : chi = 12   ordre 2 : chi = 23   ordre 3 : chi = 3   ordre 4 : chi = 14   ordre 5 : chi = 7 
+m_multiword : n=8000 K+2=7 boules=1300025 etendues=0   ordre 1 : chi = 1   ordre 2 : chi = 1   ordre 3 : chi = 1   ordre 4 : chi = 1   ordre 5 : chi = 1 
+m_band : n=8000 K+2=7 boules=1300025 etendues=0   ordre 1 : chi = 1   ordre 2 : chi = 1   ordre 3 : chi = 1   ordre 4 : chi = 1   ordre 5 : chi = 1 
+m_stag : n=8000 K+2=7 boules=1300025 etendues=0   ordre 1 : chi = 1   ordre 2 : chi = 1   ordre 3 : chi = 1   ordre 4 : chi = 1   ordre 5 : chi = 1 
+m_zono : n=8000 K+2=7 boules=1300025 etendues=0   ordre 1 : chi = 1   ordre 2 : chi = 1   ordre 3 : chi = 1   ordre 4 : chi = 1   ordre 5 : chi = 1 
+m_th3 : n=8000 K+2=7 boules=1107430 etendues=0   ordre 1 : chi = 1   ordre 2 : chi = 1   ordre 3 : chi = 1   ordre 4 : chi = 1   ordre 5 : chi = 1 
+m_th3 : syn_uniform_density_x1.u32le K=5 : cat(K) 464248 boules ; cat(K+2) 1107430 boules, restriction 594381 ; ECART (sha f4612fb99a28 / 146fbe1a4eeb)
+m_census : syn_uniform_density_x1.u32le K=5 : cat(K) 363827 boules ; cat(K+2) 903058 boules, restriction 594381 ; ECART (sha 066b04e3462e / 146fbe1a4eeb)
+m_frontier : syn_uniform_density_x1.u32le K=5 : cat(K) 588211 boules ; cat(K+2) 1286421 boules, restriction 588393 ; ECART (sha 35fe11a1a813 / d9bb6c1e3323)
+m_multiword : syn_uniform_density_x1.u32le K=5 : cat(K) 594381 boules ; cat(K+2) 1300025 boules, restriction 594381 ; EGALITE (sha 146fbe1a4eeb / 146fbe1a4eeb)
+m_band : syn_uniform_density_x1.u32le K=5 : cat(K) 594381 boules ; cat(K+2) 1300025 boules, restriction 594381 ; EGALITE (sha 146fbe1a4eeb / 146fbe1a4eeb)

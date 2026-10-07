@@ -1,0 +1,750 @@
+# Journal d'execution L04 (audit v10, fondations) -- 2026-10-02T06:33:46Z
+# sujet : /workspaces/E-HGP/build/v11-worktree/morsehgp3D_v10, fichiers de fondations identiques au commit afb081774 (git hash-object == git rev-parse afb081774:chemin)
+# machine : 8 coeurs, charge 13.89 15.32 15.21 ; g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0 ; Ubuntu clang version 18.1.3 (1ubuntu1)
+
+## 1. Portes unitaires, GCC Release
+site_tree_checks 6000
+site_tree_rational_checks 7155 shells 1099
+wide_checks 100000
+unit_ok
+code=0
+rank_search_checks 36047
+rank_search_ok
+code=0
+grille32_checks 212684 distances 10162 roundtrips 10203 refused_keys 64 duplicates 103
+grille32_ok
+code=0
+
+## 2. Portes unitaires, GCC ASan+UBSan+POISON
+site_tree_checks 6000
+site_tree_rational_checks 7155 shells 1099
+wide_checks 100000
+unit_ok
+code=0
+rank_search_checks 36047
+rank_search_ok
+code=0
+grille32_checks 212684 distances 10162 roundtrips 10203 refused_keys 64 duplicates 103
+grille32_ok
+code=0
+
+## 3. Portes unitaires, Clang 18 Release
+unit_ok
+code=0
+rank_search_ok
+code=0
+grille32_ok
+code=0
+
+## 4. Porte unitaire, GCC TSan (setarch -R)
+site_tree_checks 6000
+site_tree_rational_checks 7155 shells 1099
+wide_checks 100000
+unit_ok
+code=0
+
+## 5. Predicats exacts contre le juge independant (arith/oracle.py), 18 bits
+bits=18 configurations=18016 ubsan_reports=0
+  acute                                    controles=  18016 desaccords=      0
+  center2                                  controles=  18016 desaccords=      0
+  center3                                  controles=  17696 desaccords=      0
+  center3.refus                            controles=  18016 desaccords=      0
+  center4                                  controles=  15929 desaccords=      0
+  center4.refus                            controles=  18016 desaccords=      0
+  compare(L2,L3)                           controles=  17696 desaccords=      0
+  compare(L2,L4)                           controles=  15929 desaccords=      0
+  compare(L3,L4)                           controles=  15929 desaccords=      0
+  is_midpoint.q2                           controles=  18016 desaccords=      0
+  is_midpoint.q3                           controles=  17696 desaccords=      0
+  level2                                   controles=  18016 desaccords=      0
+  level3                                   controles=  17696 desaccords=      0
+  level4                                   controles=  15929 desaccords=      0
+  orient                                   controles=  18016 desaccords=      0
+  orient_center(i128).q4                   controles=  15929 desaccords=      0
+  orient_center_wide.q3                    controles=  17696 desaccords=      0
+  orient_center_wide.q4                    controles=  15929 desaccords=      0
+  side_key.q2                              controles=  18016 desaccords=      0
+  side_key.q3                              controles=  35392 desaccords=      0
+  side_key.q4                              controles=  15929 desaccords=      0
+  strictly_inside_tetra                    controles=  15929 desaccords=      0
+  longueurs binaires maximales observees (valeurs vraies, telles que le code les evalue) :
+    compare.produit_croise                224 bits
+    cross                                  36 bits
+    dot                                    38 bits
+    q3.D                                   75 bits
+    q3.N                                   92 bits
+    q3.N.produits                          91 bits
+    q3.is_midpoint                         94 bits
+    q3.level.den                           76 bits
+    q3.level.num                          111 bits
+    q3.level.uu*vv                         76 bits
+    q3.orient_center.cc                    92 bits
+    q3.orient_center.produits+somme       128 bits
+    q3.side.lhs                           113 bits
+    q3.side.rhs+partiels                  112 bits
+    q3.side_key                           110 bits
+    q3.t=uu*v-vv*u                         55 bits
+    q4.D                                   56 bits
+    q4.N                                   73 bits
+    q4.N.produits                          74 bits
+    q4.det                                 55 bits
+    q4.level.N_i^2                        146 bits
+    q4.level.den                          112 bits
+    q4.level.num                          148 bits
+    q4.orient_center.cc                    73 bits
+    q4.orient_center.produits+somme       110 bits
+    q4.side.lhs                            94 bits
+    q4.side.rhs+partiels                   94 bits
+    q4.side_key                            92 bits
+code=0
+
+## 6. Idem sous UBSan (signed-integer-overflow), 18 bits, contrat respecte puis orient_center i128 applique a une forme q3
+bits=18 configurations=14016 ubsan_reports=0
+  acute                                    controles=  14016 desaccords=      0
+code=0
+bits=18 configurations=14016 ubsan_reports=5
+  orient_center(i128).q3[hors contrat]     controles=  13768 desaccords=    103
+  sites UBSan (fichier:ligne -> occurrences) :
+    src/arith/geometry.hpp:120:14 -> 1
+    src/arith/geometry.hpp:120:21 -> 1
+    src/arith/geometry.hpp:120:26 -> 1
+    src/arith/geometry.hpp:120:31 -> 1
+    src/arith/geometry.hpp:120:41 -> 1
+code=1
+
+## 7. Largeurs 19, 20, 21, 24, 32 bits (lignes en desaccord seulement, UBSan)
+########## bits=19
+bits=19 configurations=12016 ubsan_reports=0
+  longueurs binaires maximales observees (valeurs vraies, telles que le code les evalue) :
+    compare.produit_croise                236 bits
+    cross                                  38 bits
+    dot                                    40 bits
+    q3.D                                   79 bits
+    q3.N                                   97 bits
+    q3.N.produits                          96 bits
+    q3.is_midpoint                         99 bits
+    q3.level.den                           80 bits
+    q3.level.num                          117 bits
+    q3.level.uu*vv                         80 bits
+    q3.orient_center.cc                    97 bits
+    q3.orient_center.produits+somme       135 bits
+    q3.side.lhs                           119 bits
+    q3.side.rhs+partiels                  118 bits
+    q3.side_key                           116 bits
+    q3.t=uu*v-vv*u                         59 bits
+    q4.D                                   59 bits
+    q4.N                                   77 bits
+    q4.N.produits                          78 bits
+    q4.det                                 58 bits
+    q4.level.N_i^2                        154 bits
+    q4.level.den                          118 bits
+    q4.level.num                          156 bits
+    q4.orient_center.cc                    77 bits
+    q4.orient_center.produits+somme       116 bits
+    q4.side.lhs                            99 bits
+    q4.side.rhs+partiels                   99 bits
+    q4.side_key                            97 bits
+########## bits=20
+bits=20 configurations=12016 ubsan_reports=0
+  longueurs binaires maximales observees (valeurs vraies, telles que le code les evalue) :
+    compare.produit_croise                248 bits
+    cross                                  40 bits
+    dot                                    42 bits
+    q3.D                                   83 bits
+    q3.N                                  102 bits
+    q3.N.produits                         101 bits
+    q3.is_midpoint                        104 bits
+    q3.level.den                           84 bits
+    q3.level.num                          123 bits
+    q3.level.uu*vv                         84 bits
+    q3.orient_center.cc                   102 bits
+    q3.orient_center.produits+somme       142 bits
+    q3.side.lhs                           125 bits
+    q3.side.rhs+partiels                  124 bits
+    q3.side_key                           122 bits
+    q3.t=uu*v-vv*u                         62 bits
+    q4.D                                   62 bits
+    q4.N                                   81 bits
+    q4.N.produits                          82 bits
+    q4.det                                 61 bits
+    q4.level.N_i^2                        162 bits
+    q4.level.den                          124 bits
+    q4.level.num                          164 bits
+    q4.orient_center.cc                    81 bits
+    q4.orient_center.produits+somme       122 bits
+    q4.side.lhs                           104 bits
+    q4.side.rhs+partiels                  104 bits
+    q4.side_key                           102 bits
+########## bits=21
+bits=21 configurations=12016 ubsan_reports=19
+  level4                                   controles=  10341 desaccords=     70
+  side_key.q3                              controles=  23642 desaccords=   1486
+  longueurs binaires maximales observees (valeurs vraies, telles que le code les evalue) :
+    compare.produit_croise                260 bits
+    cross                                  42 bits
+    dot                                    44 bits
+    q3.D                                   87 bits
+    q3.N                                  107 bits
+    q3.N.produits                         106 bits
+    q3.is_midpoint                        109 bits
+    q3.level.den                           88 bits
+    q3.level.num                          129 bits
+    q3.level.uu*vv                         88 bits
+    q3.orient_center.cc                   107 bits
+    q3.orient_center.produits+somme       149 bits
+    q3.side.lhs                           131 bits
+    q3.side.rhs+partiels                  130 bits
+    q3.side_key                           128 bits
+    q3.t=uu*v-vv*u                         65 bits
+    q4.D                                   65 bits
+    q4.N                                   85 bits
+    q4.N.produits                          86 bits
+    q4.det                                 64 bits
+    q4.level.N_i^2                        170 bits
+    q4.level.den                          130 bits
+    q4.level.num                          172 bits
+    q4.orient_center.cc                    85 bits
+    q4.orient_center.produits+somme       128 bits
+    q4.side.lhs                           109 bits
+    q4.side.rhs+partiels                  109 bits
+    q4.side_key                           107 bits
+  sites UBSan (fichier:ligne -> occurrences) :
+    src/arith/geometry.hpp:100:14 -> 1
+    src/arith/geometry.hpp:100:32 -> 1
+    src/arith/geometry.hpp:100:37 -> 1
+    src/arith/geometry.hpp:100:46 -> 1
+    src/arith/geometry.hpp:100:51 -> 1
+    src/arith/geometry.hpp:100:60 -> 1
+    src/arith/geometry.hpp:120:14 -> 2
+    src/arith/geometry.hpp:120:26 -> 2
+    src/arith/geometry.hpp:93:14 -> 1
+    src/arith/geometry.hpp:93:50 -> 1
+    src/arith/geometry.hpp:93:60 -> 1
+    src/arith/geometry.hpp:93:65 -> 1
+    src/arith/geometry.hpp:93:74 -> 1
+    src/arith/geometry.hpp:93:79 -> 1
+    src/arith/geometry.hpp:93:88 -> 1
+    src/arith/geometry.hpp:93:92 -> 1
+    src/arith/geometry.hpp:99:14 -> 1
+########## bits=24
+bits=24 configurations=12016 ubsan_reports=25
+  compare(L2,L4)                           controles=  10344 desaccords=    330
+  compare(L3,L4)                           controles=  10344 desaccords=    605
+  level4                                   controles=  10344 desaccords=   6421
+  orient_center(i128).q4                   controles=  10344 desaccords=   3261
+  side_key.q3                              controles=  23652 desaccords=  11385
+  strictly_inside_tetra                    controles=  10344 desaccords=    904
+  longueurs binaires maximales observees (valeurs vraies, telles que le code les evalue) :
+    compare.produit_croise                296 bits
+    cross                                  48 bits
+    dot                                    50 bits
+    q3.D                                   99 bits
+    q3.N                                  122 bits
+    q3.N.produits                         121 bits
+    q3.is_midpoint                        124 bits
+    q3.level.den                          100 bits
+    q3.level.num                          147 bits
+    q3.level.uu*vv                        100 bits
+    q3.orient_center.cc                   122 bits
+    q3.orient_center.produits+somme       170 bits
+    q3.side.lhs                           149 bits
+    q3.side.rhs+partiels                  148 bits
+    q3.side_key                           146 bits
+    q3.t=uu*v-vv*u                         73 bits
+    q4.D                                   74 bits
+    q4.N                                   97 bits
+    q4.N.produits                          98 bits
+    q4.det                                 73 bits
+    q4.level.N_i^2                        194 bits
+    q4.level.den                          148 bits
+    q4.level.num                          196 bits
+    q4.orient_center.cc                    97 bits
+    q4.orient_center.produits+somme       146 bits
+    q4.side.lhs                           124 bits
+    q4.side.rhs+partiels                  124 bits
+    q4.side_key                           122 bits
+  sites UBSan (fichier:ligne -> occurrences) :
+    src/arith/geometry.hpp:100:14 -> 1
+    src/arith/geometry.hpp:100:32 -> 1
+    src/arith/geometry.hpp:100:37 -> 1
+    src/arith/geometry.hpp:100:46 -> 1
+    src/arith/geometry.hpp:100:51 -> 1
+    src/arith/geometry.hpp:100:60 -> 1
+    src/arith/geometry.hpp:120:14 -> 2
+    src/arith/geometry.hpp:120:21 -> 2
+    src/arith/geometry.hpp:120:26 -> 2
+    src/arith/geometry.hpp:120:31 -> 2
+    src/arith/geometry.hpp:120:41 -> 2
+    src/arith/geometry.hpp:93:14 -> 1
+    src/arith/geometry.hpp:93:50 -> 1
+    src/arith/geometry.hpp:93:60 -> 1
+    src/arith/geometry.hpp:93:65 -> 1
+    src/arith/geometry.hpp:93:74 -> 1
+    src/arith/geometry.hpp:93:79 -> 1
+    src/arith/geometry.hpp:93:88 -> 1
+    src/arith/geometry.hpp:93:92 -> 1
+    src/arith/geometry.hpp:99:14 -> 1
+########## bits=32
+bits=32 configurations=12016 ubsan_reports=144
+  acute                                    controles=  12016 desaccords=   2588
+  center3                                  controles=  11818 desaccords=   9474
+  center4                                  controles=  10374 desaccords=   9639
+  compare(L2,L3)                           controles=  11818 desaccords=   8639
+  compare(L2,L4)                           controles=  10374 desaccords=   9584
+  compare(L3,L4)                           controles=  10374 desaccords=   9022
+  is_midpoint.q3                           controles=  11818 desaccords=     84
+  level2                                   controles=  12016 desaccords=   9263
+  level3                                   controles=  11818 desaccords=   9632
+  level4                                   controles=  10374 desaccords=  10273
+  orient_center(i128).q4                   controles=  10374 desaccords=   5235
+  orient_center_wide.q3                    controles=  11818 desaccords=   4277
+  orient_center_wide.q4                    controles=  10374 desaccords=   5281
+  side_key.q3                              controles=  23636 desaccords=  20097
+  side_key.q4                              controles=  10374 desaccords=  10029
+  strictly_inside_tetra                    controles=  10374 desaccords=   1028
+  longueurs binaires maximales observees (valeurs vraies, telles que le code les evalue) :
+    compare.produit_croise                392 bits
+    cross                                  64 bits
+    dot                                    66 bits
+    q3.D                                  131 bits
+    q3.N                                  162 bits
+    q3.N.produits                         162 bits
+    q3.is_midpoint                        164 bits
+    q3.level.den                          132 bits
+    q3.level.num                          195 bits
+    q3.level.uu*vv                        132 bits
+    q3.orient_center.cc                   162 bits
+    q3.orient_center.produits+somme       226 bits
+    q3.side.lhs                           197 bits
+    q3.side.rhs+partiels                  196 bits
+    q3.side_key                           194 bits
+    q3.t=uu*v-vv*u                         98 bits
+    q4.D                                   98 bits
+    q4.N                                  129 bits
+    q4.N.produits                         130 bits
+    q4.det                                 97 bits
+    q4.level.N_i^2                        258 bits
+    q4.level.den                          196 bits
+    q4.level.num                          260 bits
+    q4.orient_center.cc                   129 bits
+    q4.orient_center.produits+somme       194 bits
+    q4.side.lhs                           164 bits
+    q4.side.rhs+partiels                  164 bits
+    q4.side_key                           162 bits
+  sites UBSan (fichier:ligne -> occurrences) :
+    src/arith/geometry.cpp:41:102 -> 1
+    src/arith/geometry.cpp:41:30 -> 1
+    src/arith/geometry.cpp:41:36 -> 1
+    src/arith/geometry.cpp:41:63 -> 1
+    src/arith/geometry.cpp:41:69 -> 1
+    src/arith/geometry.cpp:41:96 -> 1
+    src/arith/geometry.cpp:64:71 -> 1
+    src/arith/geometry.hpp:100:14 -> 1
+    src/arith/geometry.hpp:100:32 -> 1
+    src/arith/geometry.hpp:100:37 -> 1
+    src/arith/geometry.hpp:100:46 -> 1
+    src/arith/geometry.hpp:100:51 -> 1
+    src/arith/geometry.hpp:100:60 -> 1
+    src/arith/geometry.hpp:118:14 -> 2
+    src/arith/geometry.hpp:118:32 -> 2
+    src/arith/geometry.hpp:118:52 -> 2
+    src/arith/geometry.hpp:118:70 -> 2
+    src/arith/geometry.hpp:119:14 -> 2
+    src/arith/geometry.hpp:119:32 -> 2
+    src/arith/geometry.hpp:120:14 -> 2
+    src/arith/geometry.hpp:120:21 -> 2
+    src/arith/geometry.hpp:120:26 -> 2
+    src/arith/geometry.hpp:120:31 -> 2
+    src/arith/geometry.hpp:120:41 -> 2
+    src/arith/geometry.hpp:142:12 -> 1
+    src/arith/geometry.hpp:142:24 -> 1
+    src/arith/geometry.hpp:142:30 -> 1
+    src/arith/geometry.hpp:142:61 -> 1
+    src/arith/geometry.hpp:143:12 -> 1
+    src/arith/geometry.hpp:21:55 -> 12
+    src/arith/geometry.hpp:21:61 -> 12
+    src/arith/geometry.hpp:21:67 -> 12
+    src/arith/geometry.hpp:21:79 -> 12
+    src/arith/geometry.hpp:21:83 -> 12
+    src/arith/geometry.hpp:23:15 -> 2
+    src/arith/geometry.hpp:23:21 -> 2
+    src/arith/geometry.hpp:23:27 -> 2
+    src/arith/geometry.hpp:23:38 -> 2
+    src/arith/geometry.hpp:23:44 -> 2
+    src/arith/geometry.hpp:23:50 -> 2
+    src/arith/geometry.hpp:23:61 -> 2
+    src/arith/geometry.hpp:23:67 -> 2
+    src/arith/geometry.hpp:23:73 -> 2
+    src/arith/geometry.hpp:48:17 -> 1
+    src/arith/geometry.hpp:48:23 -> 1
+    src/arith/geometry.hpp:48:28 -> 1
+    src/arith/geometry.hpp:49:17 -> 1
+    src/arith/geometry.hpp:49:23 -> 1
+    src/arith/geometry.hpp:49:28 -> 1
+    src/arith/geometry.hpp:50:17 -> 1
+    src/arith/geometry.hpp:50:23 -> 1
+    src/arith/geometry.hpp:50:28 -> 1
+    src/arith/geometry.hpp:51:13 -> 1
+    src/arith/geometry.hpp:51:50 -> 1
+    src/arith/geometry.hpp:69:22 -> 1
+    src/arith/geometry.hpp:69:45 -> 1
+    src/arith/geometry.hpp:69:59 -> 1
+    src/arith/geometry.hpp:69:8 -> 1
+    src/arith/geometry.hpp:69:82 -> 1
+    src/arith/geometry.hpp:69:96 -> 1
+    src/arith/geometry.hpp:93:14 -> 1
+    src/arith/geometry.hpp:93:50 -> 1
+    src/arith/geometry.hpp:93:60 -> 1
+    src/arith/geometry.hpp:93:65 -> 1
+    src/arith/geometry.hpp:93:74 -> 1
+    src/arith/geometry.hpp:93:79 -> 1
+    src/arith/geometry.hpp:93:88 -> 1
+    src/arith/geometry.hpp:93:92 -> 1
+
+## 8. Table des budgets (arith/budget_table.py)
+| quantite | borne | conteneur | B=18 | B=19 | B=20 | B=21 | B=24 | B=32 | plus grand B sur |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| dot(u, u) (i64) | 3 M^2 | i64 (63) | 37.6 | 39.6 | 41.6 | 43.6 | 49.6 | 65.6 **X** | 30 |
+| cross : w_i (i64) | 1 M^2 | i64 (63) | 36.0 | 38.0 | 40.0 | 42.0 | 48.0 | 64.0 **X** | 31 |
+| orient : det (i128) | 2 M^3 | i128 (127) | 55.0 | 58.0 | 61.0 | 64.0 | 73.0 | 97.0 | 41 |
+| center3 : t_i = uu v_i - vv u_i | 6 M^3 | i128 (127) | 56.6 | 59.6 | 62.6 | 65.6 | 74.6 | 98.6 | 41 |
+| center3 : N_i | 12 M^5 | i128 (127) | 93.6 | 98.6 | 103.6 | 108.6 | 123.6 | 163.6 **X** | 24 |
+| center3 : D = 2 |w|^2 | 6 M^4 | i128 (127) | 74.6 | 78.6 | 82.6 | 86.6 | 98.6 | 130.6 **X** | 31 |
+| center4 : N_i | 9 M^4 | i128 (127) | 75.2 | 79.2 | 83.2 | 87.2 | 99.2 | 131.2 **X** | 30 |
+| center4 : D = 2 |det| | 4 M^3 | i128 (127) | 56.0 | 59.0 | 62.0 | 65.0 | 74.0 | 98.0 | 41 |
+| side q3 : D |z-a|^2 | 18 M^6 | i128 (127) | 112.2 | 118.2 | 124.2 | 130.2 **X** | 148.2 **X** | 196.2 **X** | 20 |
+| side q3 : 2 N.(z-a) et partiels | 72 M^6 | i128 (127) | 114.2 | 120.2 | 126.2 | 132.2 **X** | 150.2 **X** | 198.2 **X** | 20 |
+| side_key q3 : difference | 90 M^6 | i128 (127) | 114.5 | 120.5 | 126.5 | 132.5 **X** | 150.5 **X** | 198.5 **X** | 20 |
+| side q4 : D |z-a|^2 | 12 M^5 | i128 (127) | 93.6 | 98.6 | 103.6 | 108.6 | 123.6 | 163.6 **X** | 24 |
+| side q4 : 2 N.(z-a) et partiels | 54 M^5 | i128 (127) | 95.8 | 100.8 | 105.8 | 110.8 | 125.8 | 165.8 **X** | 24 |
+| side_key q4 : difference | 66 M^5 | i128 (127) | 96.0 | 101.0 | 106.0 | 111.0 | 126.0 | 166.0 **X** | 24 |
+| orient_center q4 : cc_i = N_i + D (a_i - p_i) | 13 M^4 | i128 (127) | 75.7 | 79.7 | 83.7 | 87.7 | 99.7 | 131.7 **X** | 30 |
+| orient_center q4 : somme des w_i cc_i | 39 M^6 | i128 (127) | 113.3 | 119.3 | 125.3 | 131.3 **X** | 149.3 **X** | 197.3 **X** | 20 |
+| orient_center_wide q3 : cc_i | 18 M^5 | i128 (127) | 94.2 | 99.2 | 104.2 | 109.2 | 124.2 | 164.2 **X** | 24 |
+| orient_center_wide q3 : somme (Wide<4>) | 54 M^7 | Wide<4> (256) | 131.8 | 138.8 | 145.8 | 152.8 | 173.8 | 229.8 | 35 |
+| is_midpoint q3 : 2 (a_i D + N_i) | 36 M^5 | i128 (127) | 95.2 | 100.2 | 105.2 | 110.2 | 125.2 | 165.2 **X** | 24 |
+| level3 : uu * vv (u128) | 9 M^4 | u128 (128) | 75.2 | 79.2 | 83.2 | 87.2 | 99.2 | 131.2 **X** | 31 |
+| level3 : num = uu vv dd (I192) | 27 M^6 | I192 (192) | 112.8 | 118.8 | 124.8 | 130.8 | 148.8 | 196.8 **X** | 31 |
+| level3 : den = 4 |w|^2 (u128) | 12 M^4 | u128 (128) | 75.6 | 79.6 | 83.6 | 87.6 | 99.6 | 131.6 **X** | 31 |
+| level4 : num = |N|^2 (I192) | 243 M^8 | I192 (192) | 151.9 | 159.9 | 167.9 | 175.9 | 199.9 **X** | 263.9 **X** | 23 |
+| level4 : den = D^2 (u128) | 16 M^6 | u128 (128) | 112.0 | 118.0 | 124.0 | 130.0 **X** | 148.0 **X** | 196.0 **X** | 20 |
+| compare : num_a * den_b (Wide<5>), q4 contre q4 | 3888 M^14 | Wide<5> (320) | 263.9 | 277.9 | 291.9 | 305.9 | 347.9 **X** | 459.9 **X** | 22 |
+
+## 9. SiteTree : centre lointain (sitetree/far_center.cpp), HEAD afb081774
+sites 15561 sur_la_sphere_construits 24 proches_de_la_sphere 12534
+exact : interieur 6786 coquille 24 | closed_ball : interieur 6558 coquille 24
+coquille perdue 0 ; faux interieurs 0 ; interieurs perdus 228
+nearest count=1 : conforme
+nearest count=2 : FAUX
+nearest count=3 : conforme
+nearest count=7 : conforme
+nearest count=12 : conforme
+nearest count=30 : conforme
+far_center_FAUX
+code=1
+
+## 10. Idem contre SiteTree du raccord R2 (865f5e6, copie /tmp)
+sites 15561 sur_la_sphere_construits 24 proches_de_la_sphere 12534
+exact : interieur 6786 coquille 24 | closed_ball : interieur 6786 coquille 24
+coquille perdue 0 ; faux interieurs 0 ; interieurs perdus 0
+nearest count=1 : conforme
+nearest count=2 : conforme
+nearest count=3 : conforme
+nearest count=7 : conforme
+nearest count=12 : conforme
+nearest count=30 : conforme
+far_center_ok
+code=0
+
+## 11. Modele d'erreur flottante (sitetree/float_error_model.py)
+bits=18 centres_dans_la_boite=33850 erreur_abs_max=5.234e-05  (kMargin/2 = 1e-2 ; borne annoncee 1e-3) OK
+bits=19 centres_dans_la_boite=33650 erreur_abs_max=2.234e-04  (kMargin/2 = 1e-2 ; borne annoncee 1e-3) OK
+bits=20 centres_dans_la_boite=33770 erreur_abs_max=7.844e-04  (kMargin/2 = 1e-2 ; borne annoncee 1e-3) OK
+bits=21 centres_dans_la_boite=33656 erreur_abs_max=3.208e-03  (kMargin/2 = 1e-2 ; borne annoncee 1e-3) OK
+bits=24 centres_dans_la_boite=33832 erreur_abs_max=2.250e-01  (kMargin/2 = 1e-2 ; borne annoncee 1e-3) DEPASSE kMargin/2
+centres eloignes (u18), a=(0,0,0), b=(L,h,0), c=(2L,0,0), L=100000 :
+  h= 60000 rayon=1.133e+05 erreur_abs_max=2.713e-05 OK
+  h= 20000 rayon=2.600e+05 erreur_abs_max=0.000e+00 OK
+  h=  5000 rayon=1.002e+06 erreur_abs_max=2.441e-04 OK
+  h=  1000 rayon=5.000e+06 erreur_abs_max=0.000e+00 OK
+  h=   200 rayon=2.500e+07 erreur_abs_max=0.000e+00 OK
+  h=    50 rayon=1.000e+08 erreur_abs_max=3.000e+00 DEPASSE kMargin/2
+  h=    10 rayon=5.000e+08 erreur_abs_max=4.800e+01 DEPASSE kMargin/2
+  h=     1 rayon=5.000e+09 erreur_abs_max=5.663e+03 DEPASSE kMargin/2
+
+## 12. Juge d'echantillon SiteTree sur trames LiDAR entieres (sitetree/frame_judge.cpp)
+sites=39885 ; spheres jugees : q2=2993 q3=1267 q4=174 (coquilles etendues 1)
+closed_ball faux=0 nearest faux=0 kth_distance faux=0/3000 within faux=0/600
+real	0m3.403s
+rc=0
+sites=45845 ; spheres jugees : q2=3073 q3=1205 q4=138 (coquilles etendues 3)
+closed_ball faux=0 nearest faux=0 kth_distance faux=0/3000 within faux=0/600
+real	0m3.953s
+rc=0
+
+## 13. Pool : exceptions (pool/exc.cpp), HEAD
+--- mode none
+termine sans exception : 4000 tranches
+code=0
+--- mode worker
+terminate called recursively
+terminate called recursively
+timeout: the monitored command dumped core
+code=134
+--- mode caller
+timeout: the monitored command dumped core
+code=139
+--- mode caller, ASan
+==208662==ERROR: AddressSanitizer: stack-use-after-scope on address 0x7fe9b1f000a0 at pc 0x578841d09870 bp 0x7fe9b0bfe9b0 sp 0x7fe9b0bfe9a0
+SUMMARY: AddressSanitizer: stack-use-after-scope /tmp/v11-audit/l04_code_fondations/pool/exc.cpp:21 in operator()
+
+## 14. Pool : exceptions, raccord R2
+--- mode worker
+exception rattrapee par l'appelant apres 103 tranches ; in_parallel_region()=0
+second travail : 1000 tranches sur 1000, appels imbriques comptes = 0
+code=5
+--- mode caller
+exception rattrapee par l'appelant apres 107 tranches ; in_parallel_region()=0
+second travail : 1000 tranches sur 1000, appels imbriques comptes = 0
+code=5
+
+## 15. Pool : grain 2^63 (pool/grain.cpp), HEAD puis R2
+executions de la tranche [0, 2) dans un meme appel (max sur 2000 essais) : 2
+code=1
+executions de la tranche [0, 2) dans un meme appel (max sur 2000 essais) : 1
+code=0
+
+## 16. Tri parallele (sort/psort.cpp) : identite a std::sort, comparaisons
+P=2 n=400000 motif=0 : comparaisons parallele/sequentiel = 2.93
+P=2 n=400000 motif=1 : comparaisons parallele/sequentiel = 1.88
+P=2 n=400000 motif=2 : comparaisons parallele/sequentiel = 2.75
+P=2 n=400000 motif=3 : comparaisons parallele/sequentiel = 2.69
+P=2 n=400000 motif=4 : comparaisons parallele/sequentiel = 2.87
+P=2 n=400000 motif=5 : comparaisons parallele/sequentiel = 2.77
+P=8 n=400000 motif=0 : comparaisons parallele/sequentiel = 1.82
+P=8 n=400000 motif=1 : comparaisons parallele/sequentiel = 1.63
+P=8 n=400000 motif=2 : comparaisons parallele/sequentiel = 1.88
+P=8 n=400000 motif=3 : comparaisons parallele/sequentiel = 1.81
+P=8 n=400000 motif=4 : comparaisons parallele/sequentiel = 1.84
+P=8 n=400000 motif=5 : comparaisons parallele/sequentiel = 1.85
+ordre non total : P=2 identique a std::sort ? 0 ; P=8 identique a P=2 ? 0 (contrat : non garanti)
+psort_checks 180 failures 0
+code=0
+(TSan : psort_checks 180 failures 0 ; avertissements TSan = 0)
+
+## 17. Compteurs du Pool instrumente (copie /tmp), trame 02, K=5, 4 fils, --no-points
+L04POOL threads=4 calls=51 serial=0 nested=0 chunks=69789 items=10396011 one_chunk=1 fewer_chunks_than_threads=2 captured_by_workers=142 ms_in_parallel_for=3392.946 ms_waiting_stragglers=53.383
+wall=3.55s user=10.54s sys=0.62s maxrss=402220kB minflt=201826 majflt=0 volctx=197 invctx=3242
+
+## 18. Appels systeme d'une construction (strace -f -c), memes parametres
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 73.76    0.239909         458       523        40 futex
+ 17.57    0.057135        1360        42           munmap
+  6.82    0.022186         257        86           brk
+  1.56    0.005079          75        67           mmap
+  0.29    0.000935          13        68           mprotect
+  0.00    0.000006           2         3           madvise
+  0.00    0.000000           0         3           clone3
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.325250         410       792        40 total
+
+## 19. Defauts de page par passe chaude (--repeat=1,2,3)
+repeat=1 minflt=201159 maxrss=400844kB ; repeat=2 minflt=322014 maxrss=710964kB ; repeat=3 minflt=383108 maxrss=755852kB (sortie /usr/bin/time, execution du 2026-10-02)
+
+## 20. Memoire comptee par MemoryBudget contre memoire residente (budget/counted.cpp)
+n=45845 sites=45845 K=5 threads=4 balls=1407885
+temps_ms : prepare_cloud=13.41 pool=0.17 site_tree=18.01 catalogue=4272.6 tour=847.0
+octets COMPTES par MemoryBudget (pic) : apres nuage=1100284, apres catalogue=1100284, apres tour=121672902 ; en usage a la fin=1100284
+memoire resident REELLE (VmHWM, kio) : avant=4728 apres catalogue=412616 apres tour=412616
+part comptee = 29.13 % du pic resident ajoute
+
+## 21. Sous ulimit -v 300000 (HEAD)
+code de sortie=134
+terminate called after throwing an instance of 'std::bad_alloc'
+  what():  std::bad_alloc
+timeout: the monitored command dumped core
+
+## 22. Decomposition de la preparation (prep/prep_bench.cpp), min de 25, machine chargee
+n=39885 sites=39885 (min sur 25 repetitions, 1 fil)
+prepare_cloud total            :   4.699 ms
+  controle des PointId (tri)   :   0.590 ms
+  cles de Morton               :   0.433 ms
+  tri indirect (cle, PointId)  :   2.950 ms
+  [variante] tri de paires     :   2.556 ms
+SiteTree (construction)        :   6.675 ms
+preparation totale             :  11.375 ms
+n=35551 sites=35551 (min sur 25 repetitions, 1 fil)
+prepare_cloud total            :   4.190 ms
+  controle des PointId (tri)   :   0.542 ms
+  cles de Morton               :   0.307 ms
+  tri indirect (cle, PointId)  :   2.667 ms
+  [variante] tri de paires     :   2.386 ms
+SiteTree (construction)        :   6.826 ms
+preparation totale             :  11.016 ms
+n=45845 sites=45845 (min sur 25 repetitions, 1 fil)
+prepare_cloud total            :   6.013 ms
+  controle des PointId (tri)   :   0.702 ms
+  cles de Morton               :   0.478 ms
+  tri indirect (cle, PointId)  :   3.441 ms
+  [variante] tri de paires     :   2.570 ms
+SiteTree (construction)        :   8.005 ms
+preparation totale             :  14.018 ms
+
+## 23. Nuage : morton3 et invariants (cloud/morton.cpp)
+morton3 : 2000000 controles, 0 desaccords ; collision a 2^21 = 1 ; bits=22 refuse = 1 ; hors domaine refuse = 1
+trame : points=48137 (dont 2292 doublons ajoutes) sites=45845 poids max=3 ; invariants (permutation, CSR, ordre strict) : conformes
+code=0
+
+## 24. Mutants contre la porte unitaire seule (mutants/run_mutants.py)
+M0_temoin                    aucune mutation                                      SURVIT
+M1_side_facteur_2            side et side_key : facteur 2 -> 1                    tue (code 3)
+M2_center3_D                 center3 : D double                                   SURVIT
+M3_center4_signe             center4 : signe d'un terme de N0                     SURVIT
+M4_level3_den                level3 : denominateur                                SURVIT
+M5_orient_center_wide        orient_center_wide : signe inverse                   SURVIT
+M6_compare                   compare : produits non croises                       SURVIT
+M7_wide_mul_retenue          Wide::mul : retenue finale perdue                    tue (code 3)
+M8_wide_sub_emprunt          Wide::sub_mag : emprunt perdu                        tue (code 3)
+M9_tree_marge_nulle          SiteTree : marge flottante nulle                     tue (code 1)
+M10_tree_bande_inversee      closed_ball : bande exacte supprimee cote coquille   tue (code 3)
+M11_tree_sans_tri_exact      nearest : troncature avant le tri exact              tue (code 1)
+M12_kth_poids                kth_distance : multiplicites ignorees                tue (delai)
+M13_cloud_tri_sans_pid       prepare_cloud : departage par PointId supprime       tue (code 1)
+M14_morton_axes              morton3 : axes y et z echanges                       SURVIT
+M15_pool_grain               Pool : tranche debordant d'un indice                 tue (code 1)
+M16_budget_release           Buffer : liberation en elements au lieu d'octets     tue (code 1)
+M17_precedes                 Outcome::precedes : ordre inverse                    tue (code 1)
+
+## 25. Garde CMake contre fast-math (CMakeLists.txt:20-22) : configurations acceptees ou refusees
+(1) -DCMAKE_CXX_FLAGS=-ffast-math : REFUSE
+(2) -DCMAKE_CXX_FLAGS=-Ofast : ACCEPTE
+(3) -DCMAKE_CXX_FLAGS_RELEASE=-O3 -ffast-math : ACCEPTE
+(4) -DCMAKE_CXX_FLAGS=-funsafe-math-optimizations -ffinite-math-only : ACCEPTE
+(5) -DCMAKE_CXX_FLAGS=-march=native : ACCEPTE
+Sorties sous ces options : unit_ok pour -Ofast et -march=native ; dump de tour (quart x>=0,y>=0 de la trame 00, 7069 points, K=5, 3 fils) sha256 b59443ab6f3bb2de... identique au build de base (executions du 2026-10-02)
+
+## 26. Resultats de debordement ignores : [[nodiscard]] ajoute dans une copie /tmp (arith::add, sub, resize ; Outcome ; MemoryBudget::reserve)
+src/arith/geometry.cpp:46:15 : int L = 4]
+src/arith/geometry.cpp:69:16 : int To = 3; int From = 4]
+src/arith/geometry.cpp:81:18 : int To = 3; int From = 4]
+src/arith/geometry.cpp:83:15 : int L = 3]
+
+## 27. Determinisme et assainisseurs sur donnees reelles
+quart de trame 00 (7069 points, K=5) : dumps identiques a 1, 2, 3, 4 fils (sha256 b59443ab6f3bb2de...) ; identique sous ASan+UBSan+POISON, 0 rapport
+trame 01 entiere (35551 points, K=5, 3 fils, avec points) : dump Release sha256 6ebb1eb4255a0903... == dump ASan+UBSan+POISON, 0 rapport
+
+## 28. Avertissements masques
+GCC 13.3 jeu etendu (-Wconversion -Wsign-conversion -Wshadow -Wold-style-cast -Wcast-qual -Wuseless-cast -Wdouble-promotion -Wfloat-equal -Wnull-dereference -Wduplicated-cond -Wlogical-op -Wformat=2 ...) sur les fondations :
+src/arith/wide.hpp:17:15: warning: conversion to ‘long unsigned int’ from ‘int’ may change the sign of the result [-Wsign-conversion]
+Clang 18 -Weverything (hors c++98-compat, padded, unsafe-buffer-usage) sur les fondations :
+src/cloud/site_tree.cpp:111:27: warning: declaration requires a global destructor [-Wglobal-constructors]
+src/cloud/site_tree.cpp:111:27: warning: declaration requires an exit-time destructor [-Wexit-time-destructors]
+src/core/status.hpp:20:3: warning: 'switch' missing 'default' label [-Wswitch-default]
+src/core/status.hpp:31:3: warning: 'switch' missing 'default' label [-Wswitch-default]
+src/core/status.hpp:42:3: warning: 'switch' missing 'default' label [-Wswitch-default]
+src/sched/sort.hpp:27:55: warning: implicit conversion changes signedness: 'value_type' (aka 'unsigned long') to 'difference_type' (aka 'long') [-Wsign-conversion]
+src/sched/sort.hpp:27:77: warning: implicit conversion changes signedness: 'value_type' (aka 'unsigned long') to 'difference_type' (aka 'long') [-Wsign-conversion]
+src/sched/sort.hpp:42:103: warning: implicit conversion changes signedness: 'value_type' (aka 'unsigned long') to 'difference_type' (aka 'long') [-Wsign-conversion]
+src/sched/sort.hpp:42:65: warning: implicit conversion changes signedness: 'value_type' (aka 'unsigned long') to 'difference_type' (aka 'long') [-Wsign-conversion]
+src/sched/sort.hpp:58:114: warning: implicit conversion changes signedness: 'u64' (aka 'unsigned long') to 'difference_type' (aka 'long') [-Wsign-conversion]
+src/sched/sort.hpp:58:40: warning: implicit conversion changes signedness: 'value_type' (aka 'unsigned long') to 'difference_type' (aka 'long') [-Wsign-conversion]
+src/sched/sort.hpp:58:74: warning: implicit conversion changes signedness: 'value_type' (aka 'unsigned long') to 'difference_type' (aka 'long') [-Wsign-conversion]
+src/sched/sort.hpp:60:31: warning: implicit conversion changes signedness: 'value_type' (aka 'unsigned long') to 'difference_type' (aka 'long') [-Wsign-conversion]
+src/sched/sort.hpp:60:53: warning: implicit conversion changes signedness: 'value_type' (aka 'unsigned long') to 'difference_type' (aka 'long') [-Wsign-conversion]
+
+## 29. Raccord R2 (865f5e6) : porte unitaire reconstruite sous /tmp
+pool_participation fils 4 tours 64 tours_incomplets 0 attentes_expirees 0 tranches_d_attente_par_fil 64..64 fils_a_1pc 4 rafales 65536 par_fil 8923..24427
+pool_participation fils 8 tours 64 tours_incomplets 0 attentes_expirees 0 tranches_d_attente_par_fil 64..64 fils_a_1pc 8 rafales 65536 par_fil 394..21836
+unit_ok
+code=0
+
+## 30. Chaine complete mhgp10_tower sous TSan (setarch -R), quart de trame 00 (7069 points), K=5, 3 fils
+code=0 ; rapports TSan : 0 ; dump sha256 b59443ab6f3bb2de... (identique au build de base)
+
+## 31. Budgets mecaniques par B (arith/budget_mecanique.py)
+| quantite | borne mecanique | B=18 | B=21 | B=24 | B=32 |
+| --- | --- | --- | --- | --- | --- |
+| difference de coordonnees | 1 M^1 | 18.0 : i64 | 21.0 : i64 | 24.0 : i64 | 32.0 : i64 |
+| dot(u, v) | 3 M^2 | 37.6 : i64 | 43.6 : i64 | 49.6 : i64 | 65.6 : i128 |
+| cross : w_i | 2 M^2 | 37.0 : i64 | 43.0 : i64 | 49.0 : i64 | 65.0 : i128 |
+| orient : det (somme de 3 x 2 produits) | 6 M^3 | 56.6 : i64 | 65.6 : i128 | 74.6 : i128 | 98.6 : i128 |
+| q3 : N_i | 24 M^5 | 94.6 : i128 | 109.6 : i128 | 124.6 : i128 | 164.6 : Wide<3> |
+| q3 : D | 24 M^4 | 76.6 : i128 | 88.6 : i128 | 100.6 : i128 | 132.6 : Wide<3> |
+| q4 : N_i | 18 M^4 | 76.2 : i128 | 88.2 : i128 | 100.2 : i128 | 132.2 : Wide<3> |
+| q4 : D | 12 M^3 | 57.6 : i64 | 66.6 : i128 | 75.6 : i128 | 99.6 : i128 |
+| side_key q3 (lhs - rhs) | 216 M^6 | 115.8 : i128 | 133.8 : Wide<3> | 151.8 : Wide<3> | 199.8 : Wide<4> |
+| side_key q4 (lhs - rhs) | 144 M^5 | 97.2 : i128 | 112.2 : i128 | 127.2 : Wide<3> | 167.2 : Wide<3> |
+| orient_center q4 : somme | 180 M^6 | 115.5 : i128 | 133.5 : Wide<3> | 151.5 : Wide<3> | 199.5 : Wide<4> |
+| orient_center q3 : somme | 288 M^7 | 134.2 : Wide<3> | 155.2 : Wide<3> | 176.2 : Wide<3> | 232.2 : Wide<4> |
+| is_midpoint q3 | 96 M^5 | 96.6 : i128 | 111.6 : i128 | 126.6 : i128 | 166.6 : Wide<3> |
+| centre dans boite (T = 6), q3 | 3072 M^5 | 101.6 : i128 | 116.6 : i128 | 131.6 : Wide<3> | 171.6 : Wide<3> |
+| level3 : num | 27 M^6 | 112.8 : i128 | 130.8 : Wide<3> | 148.8 : Wide<3> | 196.8 : Wide<4> |
+| level3 : den | 48 M^4 | 77.6 : i128 | 89.6 : i128 | 101.6 : i128 | 133.6 : Wide<3> |
+| level4 : num | 972 M^8 | 153.9 : Wide<3> | 177.9 : Wide<3> | 201.9 : Wide<4> | 265.9 : Wide<5> |
+| level4 : den | 144 M^6 | 115.2 : i128 | 133.2 : Wide<3> | 151.2 : Wide<3> | 199.2 : Wide<4> |
+| compare : produit croise (q4, q4) | 139968 M^14 | 269.1 : Wide<5> | 311.1 : Wide<5> | 353.1 : Wide<6> | 465.1 : Wide<8> |
+
+## 32. Recus G4 relus (session 4, receipts/g4_session4_j2c_20260929/results/cmd/*/time.txt et stdout)
+cat_lidar02_k5_w1  : user 3.95 s, sys 0.09 s, wall 4.04 s, minflt 145264, commutations volontaires 3
+cat_lidar02_k5_w48 : user 6.04 s, sys 0.31 s, wall 0.18 s, minflt 144694, commutations volontaires 2785, maxrss 424676 kB
+tower_lidar02_k5_w48 (--repeat=3) : user 24.08 s, sys 0.91 s, wall 0.81 s, minflt 409217, maxrss 769172 kB
+etapes du catalogue K=5 trame 02 (s) : w1 frontier 0.0559 boxes 3.5085 order 0.1639 assemble 0.3071 sort 0.1096 ; w12 0.0166/0.2913/0.0270/0.0425/0.0172 ; w24 0.0216/0.1805/0.0214/0.0277/0.0126 ; w48 0.0266/0.1033/0.0138/0.0187/0.0072
+prepare_s : 0.0031-0.0037 (mhgp10_catalogue : nuage + pool) ; 0.0065-0.0083 (mhgp10_tower : nuage + pool + SiteTree)
+
+## 33. Mutants de geometrie contre les portes d'oracle reduites (mutants/run_mutants_oracle.sh : 10 nuages catalogue, 8 nuages tour ; code 124 = delai de 600 s)
+M0_temoin : oracle catalogue code=0 (catalogue_oracle_checks 41 fails 0 balls 2822) ; oracle tour code=0 (tower_oracle_checks 25 fails 0 cuts 8432)
+M2_center3_D : oracle catalogue code=1 (catalogue_oracle_checks 41 fails 31 balls 240) ; oracle tour code=124 ()
+M3_center4_signe : oracle catalogue code=1 (catalogue_oracle_checks 41 fails 15 balls 1022) ; oracle tour code=1 (tower_oracle_checks 25 fails 13 cuts 2126)
+M4_level3_den : oracle catalogue code=1 (catalogue_oracle_checks 41 fails 30 balls 240) ; oracle tour code=1 (tower_oracle_checks 25 fails 17 cuts 564)
+M5_orient_center_wide : oracle catalogue code=0 (catalogue_oracle_checks 41 fails 0 balls 2822) ; oracle tour code=1 (tower_oracle_checks 25 fails 4 cuts 6036)
+M6_compare : oracle catalogue code=1 (catalogue_oracle_checks 41 fails 31 balls 240) ; oracle tour code=1 (tower_oracle_checks 25 fails 17 cuts 472)
+M14_morton_axes : oracle catalogue code=0 (catalogue_oracle_checks 41 fails 0 balls 2822) ; oracle tour code=0 (tower_oracle_checks 25 fails 0 cuts 8432)
+FIN
+
+## 34. Pool du raccord R2 sous TSan (setarch -R) avec mes tests
+exc none code=0 ; exc worker code=5 ; exc caller code=5 ; psort 180 cas code=0 ; rapports TSan = 0 dans les quatre
+
+## 35. Cout structurel des requetes de SiteTree (treestats : copie instrumentee de site_tree.cpp, site_tree_stats.cpp)
+--- trame 00
+nearest centre=site k=5 : par requete noeuds 21.2 feuilles 3.5 sites balayes 34.5 candidats 11.2 cles exactes 5.0
+nearest centre=site k=10 : par requete noeuds 26.0 feuilles 5.4 sites balayes 52.3 candidats 19.7 cles exactes 10.0
+closed_ball spheres locales (25988) : interieur moyen 0.50 coquille moyenne 2.24
+  par sphere : noeuds 16.7 feuilles 2.1 sites balayes 20.1 cles exactes 2.24 raccourcis interieurs (sans cle exacte) 0.50
+--- trame 02
+nearest centre=site k=5 : par requete noeuds 24.3 feuilles 3.9 sites balayes 43.9 candidats 12.0 cles exactes 5.0
+nearest centre=site k=10 : par requete noeuds 29.3 feuilles 5.7 sites balayes 64.1 candidats 21.1 cles exactes 10.0
+closed_ball spheres locales (25527) : interieur moyen 0.45 coquille moyenne 2.23
+  par sphere : noeuds 18.5 feuilles 2.3 sites balayes 25.3 cles exactes 2.23 raccourcis interieurs (sans cle exacte) 0.45
+
+## 36. Appels futex par region parallele (pool/regions.cpp sous strace -f -c ; machine locale chargee, 48 fils sursouscrits : indicatif)
+P=4 : 4749 appels futex pour 2000 regions = 2.4 par region (dont 194 en erreur EAGAIN)
+P=8 : 6668 appels futex pour 2000 regions = 3.3 par region (dont 133 en erreur EAGAIN)
+P=48 : 142348 appels futex pour 2000 regions = 71.2 par region (dont 2250 en erreur EAGAIN)
+
+## 37. Erreur relative de Level::approx (arith/approx_error.py, modele exact binary64, 200000 tirages)
+erreur relative maximale observee : 2.843 * 2^-53 (2^-50 = 8 * 2^-53)
+
+## 38. Juge independant etendu : comparaison de deux niveaux q4 (produits croises jusqu'a 260 bits), 18 bits, HEAD
+bits=18 configurations=18016 ubsan_reports=0
+  compare(L2,L3)                           controles=  17696 desaccords=      0
+  compare(L2,L4)                           controles=  15929 desaccords=      0
+  compare(L3,L4)                           controles=  15929 desaccords=      0
+  compare(L4,L4)                           controles=  15928 desaccords=      0
+    compare.produit_croise                260 bits
+code=0
+
+## 39. Mutant M18 : cmp_mag ignore le mot haut des entiers de 5 mots et plus (wide.hpp:52)
+contre mhgp10_unit : unit_ok, code=0 (SURVIT)
+  compare(L4,L4)                           controles=  15928 desaccords=      1
+contre le juge independant : code=1 (tue)
+
+## 40. Tri par base contre tri indirect pour l'ordre de Morton (prep/radix_bench.cpp, min de 25, 1 fil, indicatif)
+n=39885 : tri indirect std::sort 4.446 ms ; tri par base (5 passes de 11 bits) 0.991 ms ; rapport 4.5 ; meme permutation : oui
+n=35551 : tri indirect std::sort 2.792 ms ; tri par base (5 passes de 11 bits) 0.894 ms ; rapport 3.1 ; meme permutation : oui
+n=45845 : tri indirect std::sort 3.470 ms ; tri par base (5 passes de 11 bits) 1.117 ms ; rapport 3.1 ; meme permutation : oui
+
+## 41. Mutant M18 contre les portes d'oracle reduites et sur un quart de trame (mutants/run_m18_oracle.sh)
+M18_cmp_mag_mot_haut : oracle catalogue code=0 (catalogue_oracle_checks 41 fails 0 balls 2822) ; oracle tour code=0 (tower_oracle_checks 25 fails 0 cuts 8432)
+M18 sur quart de trame (7069 points, K=5) : code=0 sha256=b59443ab6f3bb2de (base : b59443ab6f3bb2de)
+FIN

@@ -1,0 +1,17 @@
+Internal ctest changing into directory: /tmp/claude-1000/-workspaces-E-HGP/6acaaf62-b44a-41e7-b5d6-81e4c7b6b7f1/scratchpad/agent_G/build-v11
+Test project /tmp/claude-1000/-workspaces-E-HGP/6acaaf62-b44a-41e7-b5d6-81e4c7b6b7f1/scratchpad/agent_G/build-v11
+    Start 556: mhgp11_tower_full_campaign
+1/2 Test #556: mhgp11_tower_full_campaign .......   Passed   77.92 sec
+    Start 557: mhgp11_tower_full_campaign_opt
+2/2 Test #557: mhgp11_tower_full_campaign_opt ...   Passed   77.69 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Label Time Summary:
+fast    = 155.61 sec*proc (2 tests)
+
+Total Test time (real) = 155.66 sec
+
+real	2m35.671s
+user	2m35.048s
+sys	0m0.604s

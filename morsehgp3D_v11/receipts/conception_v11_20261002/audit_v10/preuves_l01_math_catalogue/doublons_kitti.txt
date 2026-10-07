@@ -1,0 +1,10 @@
+# Doublons a 1 mm (arrondi de 1000 x coordonnees) sur les trames brutes du cache des demos ; comptes seulement, aucune coordonnee.
+08_000000 points=123389 positions_distinctes=123389 doublons=0
+08_000048 points=119813 positions_distinctes=119813 doublons=0
+08_000882 points=109273 positions_distinctes=109273 doublons=0
+08_001176 points=126267 positions_distinctes=126267 doublons=0
+08_002554 points=116809 positions_distinctes=116809 doublons=0
+# Trames du contrat (sans sol, deja en grille 1 mm) : n == sites dans le JSON du catalogue
+lidar00_full points=39885 sites=39885 doublons=0
+lidar01_full points=35551 sites=35551 doublons=0
+lidar02_full points=45845 sites=45845 doublons=0

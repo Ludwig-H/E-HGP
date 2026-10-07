@@ -1,0 +1,5 @@
+graine 20261002 ; essais 3000 ; noeuds 5627 dont 3903 a trois enfants ou plus ; ecarts regle cartesienne 0 ; ecarts contraction 0
+
+real	0m0.638s
+user	0m0.616s
+sys	0m0.011s

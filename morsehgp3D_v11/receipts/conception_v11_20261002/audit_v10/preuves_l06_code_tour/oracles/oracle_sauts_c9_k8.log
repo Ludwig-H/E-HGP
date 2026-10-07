@@ -1,0 +1,5 @@
+famille noyau 9 + halo 5, K = 8 : 593 nuages sur 600 sautent aux ordres 7 ou 8
+noyau 9 K=8 : conforme (coupes 2024, sauts par ordre {1: 0, 2: 2, 3: 6, 4: 13, 5: 15, 6: 30, 7: 20, 8: 13}, 722 s)
+noyau 9 K=8 : conforme (coupes 2022, sauts par ordre {1: 0, 2: 2, 3: 5, 4: 13, 5: 19, 6: 22, 7: 20, 8: 12}, 1343 s)
+oracle_sauts c=9 K=8 juges 2 fails 0 cuts 4046
+exit=0

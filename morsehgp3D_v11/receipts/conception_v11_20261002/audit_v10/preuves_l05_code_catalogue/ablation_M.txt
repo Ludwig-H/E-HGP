@@ -1,0 +1,36 @@
+# Ablation de la taille de feuille M (--leaf), trame 02, HEAD afb081774 : compteurs deterministes par boule (catalogue identique pour tout M)
+K M | boules noeuds feuilles m_moy | filtre/boule | dom/boule paires/boule triplets/boule quads/boule juges/boule | candidats/boule | cout modele (cycles/boule, couts unitaires du § 6.2) | t_boxes local 4 fils (s, bruite)
+5 8 | 1407885 34377727 14910418 7.50 | 2451 | 260.9 85.8 26.6 2.1 1.24 | 289.7 | 35267 | 25.11
+5 10 | 1407885 5744119 2518500 9.18 | 787 | 68.0 33.0 20.9 2.9 1.48 | 91.8 | 14222 | 8.02
+5 12 | 1407885 2204985 970953 10.82 | 479 | 37.2 20.9 19.5 3.9 1.75 | 60.6 | 10747 | 4.39
+5 16 | 1407885 734083 323224 13.95 | 287 | 21.1 13.4 20.3 6.7 2.35 | 48.1 | 9783 | 4.66
+5 20 | 1407885 397389 174878 16.82 | 226 | 16.9 11.0 22.4 10.2 2.99 | 49.6 | 10823 | 4.34
+5 24 | 1407885 262671 115573 19.56 | 196 | 15.4 9.9 25.1 14.4 3.68 | 54.9 | 12542 | 4.85
+5 32 | 1407885 150445 66192 24.90 | 165 | 14.6 8.9 31.4 26.0 5.28 | 72.0 | 17443 | 6.33
+10 14 | 5483320 41397033 19228924 13.35 | 2120 | 290.3 69.9 40.1 6.3 1.19 | 336.7 | 34546 | 83.48
+10 16 | 5483320 11063197 5108981 15.04 | 850 | 98.9 33.8 31.4 7.5 1.34 | 137.8 | 17455 | 32.77
+10 20 | 5483320 2572841 1179338 18.34 | 365 | 34.5 15.9 25.7 10.3 1.64 | 70.4 | 11470 | 17.12
+10 24 | 5483320 1065585 485833 21.58 | 235 | 19.9 10.5 24.3 13.7 1.97 | 57.9 | 10796 | 18.55
+10 28 | 5483320 575647 261135 24.76 | 176 | 14.2 8.2 24.4 17.8 2.35 | 56.3 | 11400 | 16.74
+10 32 | 5483320 370771 167463 27.75 | 143 | 11.5 6.9 25.1 22.5 2.75 | 59.1 | 12584 | 47.57
+10 40 | 5483320 203377 91515 33.44 | 112 | 9.3 5.7 27.8 33.6 3.65 | 70.6 | 16019 | 30.16
+
+# Modele de cout par boule (cycles) selon M, sous deux jeux de couts unitaires : HEAD (mesures du § 6.2) et "leviers fondes"
+#   HEAD     : test du filtre 5,5/5,2 x 1,45 (reservoir et ajustement compris), dominance de paire 29, paire 33, triplet 145/135, quadruplet 271/248, juge 720/1020
+#   leviers  : filtre / 2, dominance / 1,3, paire / 1,2, triplet / 1,4, quadruplet / 8, juge / 1,6
+K=5 M=8 : HEAD  35267 | leviers  21340
+K=5 M=10 : HEAD  14222 | leviers   8490
+K=5 M=12 : HEAD  10747 | leviers   6257
+K=5 M=16 : HEAD   9783 <- minimum | leviers   5369 <- minimum
+K=5 M=20 : HEAD  10823 | leviers   5597
+K=5 M=24 : HEAD  12542 | leviers   6144
+K=5 M=32 : HEAD  17443 | leviers   7740
+K=5 : rapport HEAD(M par defaut) / leviers(M par defaut) = x1.82 ; / leviers(meilleur M) = x1.82
+K=10 M=14 : HEAD  34905 | leviers  21217
+K=10 M=16 : HEAD  17855 | leviers  10456
+K=10 M=20 : HEAD  11961 | leviers   6421
+K=10 M=24 : HEAD  11388 <- minimum | leviers   5646
+K=10 M=28 : HEAD  12105 | leviers   5603 <- minimum
+K=10 M=32 : HEAD  13409 | leviers   5859
+K=10 M=40 : HEAD  17113 | leviers   6832
+K=10 : rapport HEAD(M par defaut) / leviers(M par defaut) = x2.02 ; / leviers(meilleur M) = x2.03

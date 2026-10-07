@@ -1,0 +1,1 @@
+permutation de l ordre d entree : 24 configurations, 0 ecarts (etiquettes identiques, numerotation comprise)

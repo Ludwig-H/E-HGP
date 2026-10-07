@@ -1,0 +1,56 @@
+Q2 (K=2) x a b1 b2 --entry=core : hierarchie de points (blocs >= 2)
+    r =     8.0156 : (aucun)
+    r =    16.0312 : {b1,b2}
+    r =   100.0000 : {x,a,b1,b2}
+Q2 (K=2) x a b1 b2 --entry=cover : hierarchie de points (blocs >= 2)
+    r =     8.0156 : {b1,b2}
+    r =    50.0000 : {x,a} | {b1,b2}
+    r =    75.2600 : {x,a,b1,b2}
+Q2 (K=2) x a b1 b2 --entry=cover1 : hierarchie de points (blocs >= 2)
+    r =     8.0156 : (aucun)
+    r =    60.3600 : {x,b1,b2}
+    r =    75.1219 : {x,a,b1,b2}
+Q3 (K=2) filament/amas --entry=core : hierarchie de points (blocs >= 2)
+    r =    90.6918 : (aucun)
+    r =   181.3836 : {c5,c6,c7}
+    r =   200.0000 : {c0,c5,c6,c7}
+    r =   200.9975 : {c0,c1,c2,c3,c4,c5,c6,c7}
+    r =   698.0064 : {f4,f5} | {c0,c1,c2,c3,c4,c5,c6,c7}
+    r =   699.0258 : {f2,f3} | {f4,f5} | {c0,c1,c2,c3,c4,c5,c6,c7}
+    r =   700.0064 : {x,f1} | {f2,f3} | {f4,f5} | {c0,c1,c2,c3,c4,c5,c6,c7}
+    r =   700.5007 : {x,f1,f2,f3,f4,f5} | {c0,c1,c2,c3,c4,c5,c6,c7}
+    r =   796.1170 : {x,f1,f2,f3,f4,f5,c0,c1,c2,c3,c4,c5,c6,c7}
+Q3 (K=2) filament/amas --entry=cover : hierarchie de points (blocs >= 2)
+    r =    90.6918 : {c5,c7}
+    r =   128.1589 : {c0,c5,c6,c7}
+    r =   133.7049 : {c0,c1,c2,c5,c6,c7}
+    r =   141.4283 : {c0,c1,c2,c3,c4,c5,c6,c7}
+    r =   349.0032 : {f4,f5} | {c0,c1,c2,c3,c4,c5,c6,c7}
+    r =   349.5129 : {f2,f3} | {f4,f5} | {c0,c1,c2,c3,c4,c5,c6,c7}
+    r =   350.0032 : {x,f1} | {f2,f3} | {f4,f5} | {c0,c1,c2,c3,c4,c5,c6,c7}
+    r =   700.5007 : {x,f1,f2,f3,f4,f5} | {c0,c1,c2,c3,c4,c5,c6,c7}
+    r =   796.1170 : {x,f1,f2,f3,f4,f5,c0,c1,c2,c3,c4,c5,c6,c7}
+Q3 (K=2) filament/amas --entry=cover1 : hierarchie de points (blocs >= 2)
+    r =    90.6918 : (aucun)
+    r =   128.1589 : {c0,c5,c6,c7}
+    r =   133.7049 : {c0,c1,c2,c5,c6,c7}
+    r =   141.4283 : {c0,c1,c2,c3,c4,c5,c6,c7}
+    r =   453.4711 : {x,c0,c1,c2,c3,c4,c5,c6,c7}
+    r =   700.0002 : {x,c0,c1,c2,c3,c4,c5,c6,c7} | {f1,f2,f3}
+    r =   700.0087 : {x,c0,c1,c2,c3,c4,c5,c6,c7} | {f1,f2,f3} | {f4,f5}
+    r =   700.5007 : {x,c0,c1,c2,c3,c4,c5,c6,c7} | {f1,f2,f3,f4,f5}
+    r =   796.1170 : {x,f1,f2,f3,f4,f5,c0,c1,c2,c3,c4,c5,c6,c7}
+Q4 (K=3) chaine/tetraedres --entry=core : hierarchie de points (blocs >= 2)
+    r =   692.8203 : (aucun)
+    r =  1385.6406 : {C,m,D}
+    r =  1414.2136 : {C,P,Q,R,m,D,P2,Q2,R2}
+Q4 (K=3) chaine/tetraedres --entry=cover : hierarchie de points (blocs >= 2)
+    r =   692.8203 : {C,m,D}
+    r =   816.4966 : {C,m,D} | {P,Q} | {P2,Q2,R2}
+    r =   866.0254 : {C,m,D} | {P,Q,R} | {P2,Q2,R2}
+    r =  1334.1664 : {C,P,Q,R,m,D,P2,Q2,R2}
+Q4 (K=3) chaine/tetraedres --entry=cover1 : hierarchie de points (blocs >= 2)
+    r =   692.8203 : (aucun)
+    r =   866.0254 : {C,P,Q,R} | {D,P2,Q2,R2}
+    r =  1078.1735 : {C,P,Q,R} | {m,D,P2,Q2,R2}
+    r =  1334.1664 : {C,P,Q,R,m,D,P2,Q2,R2}

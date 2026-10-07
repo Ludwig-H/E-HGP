@@ -1,0 +1,534 @@
+diff -ru morsehgp3D_v10/src/catalogue/catalogue.hpp instr/morsehgp3D_v10/src/catalogue/catalogue.hpp
+--- morsehgp3D_v10/src/catalogue/catalogue.hpp	2026-10-02 06:11:28.000000000 +0000
++++ instr/morsehgp3D_v10/src/catalogue/catalogue.hpp	2026-10-02 07:19:28.340994699 +0000
+@@ -61,6 +61,7 @@
+   u64 filter_tests = 0, leaf_dominance_tests = 0;
+   u64 pair_tests = 0, triple_tests = 0, line_hits = 0, quad_tests = 0;
+   u64 judged = 0, emitted = 0, extended = 0, weighted = 0, max_shell = 0, stalled_leaves = 0;
++  u64 x[64] = {};  // L09 : instrumentation privee
+ };
+ 
+ struct Catalogue {
+diff -ru morsehgp3D_v10/src/catalogue/generator.cpp instr/morsehgp3D_v10/src/catalogue/generator.cpp
+--- morsehgp3D_v10/src/catalogue/generator.cpp	2026-10-02 06:11:28.000000000 +0000
++++ instr/morsehgp3D_v10/src/catalogue/generator.cpp	2026-10-02 07:47:31.063984033 +0000
+@@ -7,10 +7,12 @@
+ #include <algorithm>
+ #include <bit>
+ #include <chrono>
++#include <cstdio>
+ #include <cmath>
+ #include <memory>
+ #include <mutex>
+ #include <numeric>
++#include <x86intrin.h>
+ 
+ #include "catalogue/catalogue.hpp"
+ #include "sched/sort.hpp"
+@@ -51,6 +53,7 @@
+   std::vector<Rec> recs;
+   std::vector<u32> pop;
+   CatalogueLedger led;
++  int phase = 0;  // L09 : 0 frontiere, 1 taches
+   Outcome fail;
+   // tampons reutilises
+   std::vector<std::array<u32, 4>> memo;
+@@ -90,6 +93,7 @@
+   a.weighted += b.weighted;
+   a.max_shell = std::max(a.max_shell, b.max_shell);
+   a.stalled_leaves += b.stalled_leaves;
++  for (int i = 0; i < 64; ++i) a.x[i] += b.x[i];
+ }
+ 
+ // Centre rationnel (anchor + N/D) dans la boite demi-ouverte : lo D <= 2^T (a D + N) < hi D.
+@@ -227,6 +231,9 @@
+ void judge(const Ctx& C, Local& L, const std::vector<u32>& cand, u32 anchor_local, const geom::Center& ctr,
+            const std::array<u32, 4>& gen, u8 qgen, i64 theta) {
+   ++L.led.judged;
++#ifdef L09_TSC
++  struct TJ { Local& L; u64 t0; ~TJ() { L.led.x[6 + 20 * L.phase] += __rdtsc() - t0; } } tj{L, __rdtsc()};
++#endif
+   const P3 a = L.lp[anchor_local];
+   const u32 m = static_cast<u32>(cand.size());
+   u32 p = 0;
+@@ -291,6 +298,125 @@
+   return (x * 0x0101010101010101ull) >> 56;
+ }
+ 
++
++#ifdef L09_MOM
++// L09 (instrumentation, aucune decision) : certificat de moments de groupe sur une boite fermee [lo, hi].
++// Groupe Z (W sites de poids 1, M = somme des z', V = somme des |z'|^2, repere local z' = Z - lo), ancre a'.
++// sigma = max_c S(c) = V - W |a'|^2 + sum_i max(0, -2 (M_i - W a'_i) h_i) ; R2 = sum_i max(a'_i^2, (a'_i - h_i)^2).
++// Rejet pour le seuil theta ssi sigma + theta R2 < 0 (au moins theta + 1 sites de Z strictement plus proches que a
++// de tout centre de la boite fermee). Rend le plus grand theta certifie + 1 (nombre certifie), 0 si rien.
++struct L09Group {
++  i128 W = 0, M[3] = {0, 0, 0}, V = 0;
++};
++inline bool l09_rejects(const L09Group& g, const i64 a[3], const i64 h[3], i64 theta) {
++  if (theta < 0) return false;
++  i128 a2 = 0, sig = g.V, r2 = 0;
++  for (int i = 0; i < 3; ++i) {
++    a2 += i128(a[i]) * a[i];
++    const i128 coef = -2 * (g.M[i] - g.W * a[i]);
++    if (coef > 0) sig += coef * h[i];
++    const i128 d0 = i128(a[i]) * a[i], d1 = i128(a[i] - h[i]) * (a[i] - h[i]);
++    r2 += d0 > d1 ? d0 : d1;
++  }
++  sig -= g.W * a2;
++  if (r2 == 0) return false;
++  return sig + i128(theta) * r2 < 0;
++}
++inline void l09_moments_leaf(const Ctx&, Local& L, const P3* lx, u32 m, const Box& Q, const u64* Dm, u32 nw, i64 th2,
++                             i64 th3, i64 th4) {
++  const i64 h[3] = {Q.hi[0] - Q.lo[0], Q.hi[1] - Q.lo[1], Q.hi[2] - Q.lo[2]};
++  L09Group full;
++  std::vector<std::array<i64, 3>> loc(m);
++  int ext[6] = {0, 0, 0, 0, 0, 0};
++  for (u32 i = 0; i < m; ++i) {
++    loc[i] = {lx[i].x - Q.lo[0], lx[i].y - Q.lo[1], lx[i].z - Q.lo[2]};
++    full.W += 1;
++    for (int k = 0; k < 3; ++k) {
++      full.M[k] += loc[i][k];
++      full.V += i128(loc[i][k]) * loc[i][k];
++      if (loc[i][k] < loc[ext[2 * k]][k]) ext[2 * k] = int(i);
++      if (loc[i][k] > loc[ext[2 * k + 1]][k]) ext[2 * k + 1] = int(i);
++    }
++  }
++  L09Group grp[7];
++  grp[0] = full;
++  for (int e = 0; e < 6; ++e) {
++    grp[e + 1] = full;
++    grp[e + 1].W -= 1;
++    for (int k = 0; k < 3; ++k) {
++      grp[e + 1].M[k] -= loc[ext[e]][k];
++      grp[e + 1].V -= i128(loc[ext[e]][k]) * loc[ext[e]][k];
++    }
++  }
++  const i64 th[3] = {th2, th3, th4};
++  L.led.x[30] += m;
++  for (u32 i = 0; i < m; ++i) {
++    const i64 a[3] = {loc[i][0], loc[i][1], loc[i][2]};
++    const bool outside = a[0] < 0 || a[0] > h[0] || a[1] < 0 || a[1] > h[1] || a[2] < 0 || a[2] > h[2];
++    u64 d = 0;
++    for (u32 t = 0; t < nw; ++t) d += popcount64(Dm[size_t(i) * nw + t]);
++    if (outside) ++L.led.x[31];
++    for (int q = 0; q < 3; ++q) {
++      const bool dom = static_cast<i64>(d) > th[q];
++      if (dom) ++L.led.x[35 + q];
++      if (!outside) continue;
++      const bool r0 = l09_rejects(grp[0], a, h, th[q]);
++      bool r7 = r0;
++      for (int e = 1; e < 7 && !r7; ++e) r7 = l09_rejects(grp[e], a, h, th[q]);
++      if (r0) ++L.led.x[32 + q];
++      if (r0 && !dom) ++L.led.x[38 + q];
++      if (r7 && !dom) ++L.led.x[41 + q];
++    }
++  }
++  // groupes prefixes : les j sites les plus proches du centre de la boite (cle |2 z' - h|^2, puis rang), j = 1..m
++  std::vector<std::pair<i128, u32>> ord(m);
++  for (u32 i = 0; i < m; ++i) {
++    i128 dd = 0;
++    for (int k = 0; k < 3; ++k) dd += i128(2 * loc[i][k] - h[k]) * (2 * loc[i][k] - h[k]);
++    ord[i] = {dd, i};
++  }
++  std::sort(ord.begin(), ord.end());
++  std::vector<L09Group> pre(m);
++  {
++    L09Group g;
++    for (u32 j = 0; j < m; ++j) {
++      const auto& z = loc[ord[j].second];
++      g.W += 1;
++      for (int k = 0; k < 3; ++k) {
++        g.M[k] += z[k];
++        g.V += i128(z[k]) * z[k];
++      }
++      pre[j] = g;
++    }
++  }
++  for (u32 i = 0; i < m; ++i) {
++    const i64 a[3] = {loc[i][0], loc[i][1], loc[i][2]};
++    const bool outside = a[0] < 0 || a[0] > h[0] || a[1] < 0 || a[1] > h[1] || a[2] < 0 || a[2] > h[2];
++    if (!outside) continue;
++    u64 d = 0;
++    for (u32 t = 0; t < nw; ++t) d += popcount64(Dm[size_t(i) * nw + t]);
++    for (int q = 0; q < 3; ++q) {
++      if (th[q] < 0) continue;
++      bool r = false;
++      for (u32 j = static_cast<u32>(th[q]); j < m && !r; ++j) r = l09_rejects(pre[j], a, h, th[q]);  // au moins theta + 1 sites
++      if (r) ++L.led.x[50 + q];
++      if (r && !(static_cast<i64>(d) > th[q])) ++L.led.x[53 + q];
++    }
++    // credit maximal certifie par un prefixe, compare au compte de dominance individuelle
++    i64 best = 0;
++    for (i64 thv = 0; thv < i64(m); ++thv) {
++      bool r = false;
++      for (u32 j = static_cast<u32>(thv); j < m && !r; ++j) r = l09_rejects(pre[j], a, h, thv);
++      if (!r) break;
++      best = thv + 1;
++    }
++    L.led.x[56] += static_cast<u64>(best);
++    L.led.x[57] += d;
++    if (static_cast<u64>(best) > d) ++L.led.x[58];
++  }
++}
++#endif
++
+ // Feuille « v2 » (GEN_v1 § 2.6 et § 5.3) : on n'enumere que les presentations dont chaque partie peut
+ // appartenir au support canonique S* d'une boule admise de centre dans la feuille.
+ //
+@@ -320,6 +446,10 @@
+ void enumerate_leaf_masks(const Ctx& C, Local& L, const std::vector<u32>& c, const Box& Q, u32 nw_rt) {
+   const u32 m = static_cast<u32>(c.size());
+   const u32 nw = NW > 0 ? static_cast<u32>(NW) : nw_rt;
++#ifdef L09_TSC
++  u64 l09_t = __rdtsc();
++  auto l09_lap = [&](int idx) { const u64 t = __rdtsc(); L.led.x[idx + 20 * L.phase] += t - l09_t; l09_t = t; };
++#endif
+   L.memo.clear();
+   L.lp.resize(m);
+   L.lx.resize(m);
+@@ -373,6 +503,12 @@
+     }
+   }
+   L.led.leaf_dominance_tests += u64(m) * (m - 1) / 2;
++#ifdef L09_TSC
++  l09_lap(2);
++#endif
++#ifdef L09_MOM
++  l09_moments_leaf(C, L, lx, m, Q, Dm, nw, th2, th3, th4);
++#endif
+   geom::Center ctr;
+   // paires : q2 et paires vivantes
+   for (u32 i = 0; i < m; ++i) {
+@@ -393,6 +529,9 @@
+       judge(C, L, c, i, ctr, {c[i], c[j], kNone, kNone}, 2, th2);
+     }
+   }
++#ifdef L09_TSC
++  l09_lap(3);
++#endif
+   if (th3 < 0) return;  // aucune paire vivante
+   // triplets : q3 et triplets vivants
+   for (u32 i = 0; i < m; ++i) {
+@@ -428,6 +567,9 @@
+           }
+       }
+   }
++#ifdef L09_TSC
++  l09_lap(4);
++#endif
+   if (th4 < 0) return;  // aucun triplet vivant
+   // quadruplets : quatre triplets vivants (H[i, j] n'est non vide que si (i, j) est vivante)
+   for (u32 i = 0; i < m; ++i) {
+@@ -462,6 +604,9 @@
+           }
+       }
+   }
++#ifdef L09_TSC
++  l09_lap(5);
++#endif
+ }
+ 
+ void enumerate_leaf(const Ctx& C, Local& L, const std::vector<u32>& c, const Box& Q) {
+@@ -555,6 +700,56 @@
+     m += dom < C.K;
+   }
+   cand.resize(m);
++#ifdef L09_MOM
++  {
++    const i64 h[3] = {hx, hy, hz};
++    L09Group gy, gp;
++    for (u32 r = 0; r < ny; ++r) {
++      const P3& X = C.X[parent[kr[r]]];
++      const i64 z[3] = {X.x - Q.lo[0], X.y - Q.lo[1], X.z - Q.lo[2]};
++      gy.W += 1;
++      for (int k = 0; k < 3; ++k) {
++        gy.M[k] += z[k];
++        gy.V += i128(z[k]) * z[k];
++      }
++    }
++    for (u32 t = 0; t < np; ++t) {
++      const P3& X = C.X[parent[t]];
++      const i64 z[3] = {X.x - Q.lo[0], X.y - Q.lo[1], X.z - Q.lo[2]};
++      gp.W += 1;
++      for (int k = 0; k < 3; ++k) {
++        gp.M[k] += z[k];
++        gp.V += i128(z[k]) * z[k];
++      }
++    }
++    L.led.x[44] += m;
++    L.led.x[48] += np;
++    for (u32 t = 0; t < m; ++t) {
++      const P3& X = C.X[cand[t]];
++      const i64 a[3] = {X.x - Q.lo[0], X.y - Q.lo[1], X.z - Q.lo[2]};
++      const bool outside = a[0] < 0 || a[0] > h[0] || a[1] < 0 || a[1] > h[1] || a[2] < 0 || a[2] > h[2];
++      if (!outside) continue;
++      ++L.led.x[45];
++      if (l09_rejects(gy, a, h, i64(C.K) - 1)) ++L.led.x[46];
++      if (l09_rejects(gp, a, h, i64(C.K) - 1)) ++L.led.x[47];
++      {  // prefixes du reservoir Y (tries par distance au centre de la boite)
++        L09Group g;
++        bool r = false;
++        for (u32 rr = 0; rr < ny && !r; ++rr) {
++          const P3& Z = C.X[parent[kr[rr]]];
++          const i64 z[3] = {Z.x - Q.lo[0], Z.y - Q.lo[1], Z.z - Q.lo[2]};
++          g.W += 1;
++          for (int k = 0; k < 3; ++k) {
++            g.M[k] += z[k];
++            g.V += i128(z[k]) * z[k];
++          }
++          if (rr + 1 >= static_cast<u32>(C.K)) r = l09_rejects(g, a, h, i64(C.K) - 1);
++        }
++        if (r) ++L.led.x[49];
++      }
++    }
++  }
++#endif
+   L.led.filter_tests += tests;
+ }
+ 
+@@ -568,7 +763,13 @@
+              std::vector<Task>* spill) {
+   ++L.led.nodes;
+   std::vector<u32> cand;
++#ifdef L09_TSC
++  const u64 l09_f0 = __rdtsc();
++#endif
+   filter_node(C, L, Q, parent, cand);
++#ifdef L09_TSC
++  L.led.x[0 + 20 * L.phase] += __rdtsc() - l09_f0;
++#endif
+   // Lemme K : liste vide, ou boite ajustee vide sur un axe (l'enveloppe manque Q) : aucun centre possible dans Q.
+   if (cand.empty()) {
+     ++L.led.skipped_bbox;
+@@ -616,7 +817,13 @@
+     if (L.fail.ok()) L.fail = f;
+     return;
+   }
++#ifdef L09_TSC
++  const u64 l09_e0 = __rdtsc();
++#endif
+   enumerate_leaf(C, L, cand, S);
++#ifdef L09_TSC
++  L.led.x[1 + 20 * L.phase] += __rdtsc() - l09_e0;
++#endif
+ }
+ 
+ }  // namespace
+@@ -696,8 +903,14 @@
+   };
+   std::vector<Task> kept;
+   std::vector<u64> kept_load;
++#ifdef L09_ROUNDS
++  u64 l09_rounds = 0, l09_cuts = 0, l09_fnodes = 0;
++#endif
+   while (!frontier.empty()) {
+     if (frontier.size() >= target) {
++#ifdef L09_ROUNDS
++      ++l09_cuts;
++#endif
+       std::vector<u64> load(frontier.size());
+       pool.parallel_for(frontier.size(), 64, [&](u64 b, u64 e, unsigned) {
+         for (u64 i = b; i < e; ++i) load[i] = inside(frontier[i]);
+@@ -714,10 +927,18 @@
+       frontier.swap(heavy);
+       if (frontier.empty()) break;
+     }
++#ifdef L09_ROUNDS
++    ++l09_rounds;
++    l09_fnodes += frontier.size();
++#endif
+     std::vector<std::vector<Task>> spills(frontier.size());
+     pool.parallel_for(frontier.size(), 1, [&](u64 b, u64 e, unsigned wk) {
+-      for (u64 i = b; i < e; ++i)
++      for (u64 i = b; i < e; ++i) {
++        locals[wk].phase = 0;
++        const u64 l09_p0 = __rdtsc();
+         process(C, locals[wk], frontier[i].box, *frontier[i].parent, frontier[i].parent_stag, &spills[i]);
++        locals[wk].led.x[7] += __rdtsc() - l09_p0;
++      }
+     });
+     std::vector<Task> next;
+     for (auto& sp : spills)
+@@ -735,11 +956,17 @@
+   cat.tasks = kept.size();
+   cat.max_task_sites = kept_load.empty() ? 0 : kept_load[order[0]];
+   cat.t_frontier = since(t0);
++#ifdef L09_ROUNDS
++  std::fprintf(stderr, "l09_rounds tours=%llu coupes=%llu noeuds_frontiere=%llu taches=%zu fils=%u\n", (unsigned long long)l09_rounds, (unsigned long long)l09_cuts, (unsigned long long)l09_fnodes, kept.size(), pool.size());
++#endif
+   t0 = Clock::now();
+   pool.parallel_for(order.size(), 1, [&](u64 b, u64 e, unsigned wk) {
+     for (u64 i = b; i < e; ++i) {
+       const Task& t = kept[order[i]];
++      locals[wk].phase = 1;
++      const u64 l09_p0 = __rdtsc();
+       process(C, locals[wk], t.box, *t.parent, t.parent_stag, nullptr);
++      locals[wk].led.x[27] += __rdtsc() - l09_p0;
+     }
+   });
+   kept.clear();
+diff -ru morsehgp3D_v10/src/tower/tower.cpp instr/morsehgp3D_v10/src/tower/tower.cpp
+--- morsehgp3D_v10/src/tower/tower.cpp	2026-10-02 06:11:28.000000000 +0000
++++ instr/morsehgp3D_v10/src/tower/tower.cpp	2026-10-02 07:25:33.580992384 +0000
+@@ -6,6 +6,7 @@
+ #include <cmath>
+ #include <cstring>
+ #include <memory>
++#include <x86intrin.h>
+ 
+ #include "catalogue/support.hpp"
+ #include "tower/rank_search.hpp"
+@@ -767,6 +768,7 @@
+   std::vector<u32> buf;
+   std::vector<std::pair<u32, u32>> pairs;
+   u64 meb_fallbacks = 0;
++  u64 x[32] = {};  // L09
+   u64 walk[kOrders] = {};
+   ResolveCounters c[3][kOrders];  // 0 jonctions, 1 attaches, 2 verticales
+ };
+@@ -807,6 +809,11 @@
+   };
+   sc.pend.clear();
+   ++cnt.resolves;
++#ifdef L09_TTSC
++  struct TR { Scratch& s; u64 t0; ~TR() { s.x[0] += __rdtsc() - t0; } } tr{sc, __rdtsc()};
++  u64 l09_t = __rdtsc();
++  auto lap = [&](int i) { const u64 t = __rdtsc(); sc.x[i] += t - l09_t; l09_t = t; };
++#endif
+   Sphere prev;
+   bool has_prev = false;
+   u32 node = kNone;
+@@ -825,6 +832,9 @@
+           if (q[x] != F.s[x]) return false;
+         return true;
+       });
++#ifdef L09_TTSC
++      lap(1);
++#endif
+       if (seed != kNone) {  // semis : sommet de naissance
+         ++cnt.seed_hits;
+         node = seed;
+@@ -833,6 +843,9 @@
+     }
+     Sphere S = meb(g, F, sc.meb_fallbacks);
+     ++cnt.meb;
++#ifdef L09_TTSC
++    lap(2);
++#endif
+     // I3 : le niveau decroit strictement a chaque pas. Filtre : |r2a - r^2| < 1e-3 pour chaque sphere, donc
+     // r2a < r2a_prec - kApproxMargin prouve la decroissance ; sinon comparaison exacte des niveaux.
+     if (has_prev && !(S.r2a < prev.r2a - kApproxMargin)) {
+@@ -894,6 +907,9 @@
+         }
+       }
+     }
++#ifdef L09_TTSC
++    lap(3);
++#endif
+     if (!from_cat) {
+       g.tree.closed_ball(a, S.c, sc.I, sc.U);
+       ++cnt.closed_balls;
+@@ -902,6 +918,9 @@
+       p = static_cast<u32>(I.size());
+       m = static_cast<u32>(U.size());
+     }
++#ifdef L09_TTSC
++    lap(4);
++#endif
+     // Saut K-NN ssi au moins k sites strictement interieurs (cle < 0) ; ses k plus proches (cle exacte, indice)
+     // sont alors des sites interieurs.
+     if (p >= k) {
+@@ -910,6 +929,9 @@
+       F.n = k;
+       if (p == k) {  // exactement k interieurs : ce sont les k plus proches (I trie par indice)
+         for (u32 i = 0; i < k; ++i) F.s[i] = I[i];
++#ifdef L09_TTSC
++        lap(5);
++#endif
+         continue;
+       }
+       // Selection en double : si l'ecart entre la k-ieme et la (k+1)-ieme distance approchee depasse kApproxMargin
+@@ -930,6 +952,9 @@
+         for (u32 i = 0; i < k; ++i) F.s[i] = sc.near[i].second;
+       }
+       F.sort();
++#ifdef L09_TTSC
++      lap(5);
++#endif
+       continue;
+     }
+     if (!from_cat) {
+@@ -975,9 +1000,15 @@
+       I = cat.interior(b);
+       U = cat.shell(b);
+     }
++#ifdef L09_TTSC
++    lap(6);
++#endif
+     Facet rep;
+     const Local L = first_rep(g, I, U, S.anchor, S.c, k - p, m == q, rep);
+     ++cnt.local_calls;
++#ifdef L09_TTSC
++    lap(7);
++#endif
+     if (L == Local::refused) {
+       set_error(Reason::shell_quotient_budget);
+       return kNone;
+@@ -1445,6 +1476,9 @@
+       if (runs[k]->outcome.ok()) joins_flat.add(k, runs[k]->join_ball.size());
+     pool.parallel_for(joins_flat.total(), 32, [&](u64 b0, u64 e0, unsigned wk) {
+       Scratch& sc = scratch[wk];
++#ifdef L09_TTSC
++      struct TG { Scratch& s; u64 t0; ~TG() { s.x[10] += __rdtsc() - t0; } } tg{sc, __rdtsc()};
++#endif
+       // Lots de representants : facettes et hachages d'abord, emplacements des semis precharges, puis les
+       // populations candidates, puis les descentes (les defauts de cache des lots se recouvrent). L'ordre de
+       // traitement ne change aucun resultat : chaque descente est une fonction de (F, k).
+@@ -1747,6 +1781,8 @@
+   }
+   ts.t_vertical = seconds_since(tstage);
+   for (const Scratch& sc : scratch) ts.meb_fallbacks += sc.meb_fallbacks;
++  for (const Scratch& sc : scratch)
++    for (int i = 0; i < 32; ++i) ts.x[i] += sc.x[i];
+   return t;
+ }
+ 
+diff -ru morsehgp3D_v10/src/tower/tower.hpp instr/morsehgp3D_v10/src/tower/tower.hpp
+--- morsehgp3D_v10/src/tower/tower.hpp	2026-10-02 06:11:28.000000000 +0000
++++ instr/morsehgp3D_v10/src/tower/tower.hpp	2026-10-02 07:25:33.570992384 +0000
+@@ -95,6 +95,7 @@
+   double t_points = 0;    // attaches C n X
+   double t_vertical = 0;  // cartes verticales
+   u64 meb_fallbacks = 0;  // MEB dont la proposition flottante n'a pas ete certifiee (repli Welzl exact)
++  u64 x[32] = {};  // L09 : instrumentation privee (tics TSC)
+ };
+ 
+ struct OrderForest {
+diff -ru morsehgp3D_v10/cli/mhgp10_catalogue.cpp instr/morsehgp3D_v10/cli/mhgp10_catalogue.cpp
+--- morsehgp3D_v10/cli/mhgp10_catalogue.cpp	2026-10-02 06:11:28.000000000 +0000
++++ instr/morsehgp3D_v10/cli/mhgp10_catalogue.cpp	2026-10-02 07:19:28.353994699 +0000
+@@ -94,6 +94,9 @@
+               (unsigned long long)L.pair_tests, (unsigned long long)L.triple_tests, (unsigned long long)L.line_hits,
+               (unsigned long long)L.quad_tests, (unsigned long long)L.judged, (unsigned long long)L.extended,
+               (unsigned long long)L.weighted, (unsigned long long)L.max_shell, (unsigned long long)L.stalled_leaves);
++  std::printf("{\"l09\":[");
++  for (int i = 0; i < 64; ++i) std::printf("%s%llu", i ? "," : "", (unsigned long long)L.x[i]);
++  std::printf("]}\n");
+   if (!dump.empty()) {
+     FILE* o = std::fopen(dump.c_str(), "w");
+     if (!o) return 2;
+diff -ru morsehgp3D_v10/cli/mhgp10_tower.cpp instr/morsehgp3D_v10/cli/mhgp10_tower.cpp
+--- morsehgp3D_v10/cli/mhgp10_tower.cpp	2026-10-02 06:11:28.000000000 +0000
++++ instr/morsehgp3D_v10/cli/mhgp10_tower.cpp	2026-10-02 07:25:33.581992384 +0000
+@@ -168,6 +168,9 @@
+   counters("point", tp2);
+   counters("vertical", tv);
+   std::printf("}}\n");
++  std::printf("{\"l09t\":[");
++  for (int i = 0; i < 32; ++i) std::printf("%s%llu", i ? "," : "", (unsigned long long)ts.x[i]);
++  std::printf("]}\n");
+   if (!dump.empty()) {
+     FILE* o = std::fopen(dump.c_str(), "w");
+     if (!o) return 2;

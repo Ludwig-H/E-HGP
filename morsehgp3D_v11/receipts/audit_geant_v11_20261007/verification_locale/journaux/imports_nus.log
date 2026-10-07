@@ -1,0 +1,20 @@
+scripts 113
+modules introuvables (hors stdlib) 4
+hgp11_ref.Definition
+    reference/test_projection_contracts.py <- __main__
+    reference/test_ref.py <- __main__
+    tests/points/points_fixtures.py <- points_oracle_stdlib
+    tests/points/points_oracle_stdlib.py <- __main__
+hgp11_ref.Reference
+    reference/test_projection_contracts.py <- __main__
+    reference/test_ref.py <- __main__
+numpy
+    tests/head/head_vs_python.py <- points_flat,points_hierarchy,points_radius
+    tests/points/points_vs_python.py <- points_flat,points_hierarchy,points_radius
+sklearn.cluster
+    tests/head/head_vs_python.py <- points_hierarchy
+    tests/points/points_vs_python.py <- points_hierarchy
+
+real	4m35.668s
+user	4m11.610s
+sys	0m21.365s

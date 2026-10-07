@@ -1,0 +1,16 @@
+== temps_head.txt
+[head] duree=113.45 s maxrss=4096 kB
+[head] code=0
+== temps_final.txt
+[final] duree=180.15 s maxrss=4096 kB
+[final] code=0
+== temps_budget.txt
+Command exited with non-zero status 2
+[final max-nodes=1e6] duree=5.74 s
+[budget] code=2
+== sortie_head.txt
+{"status":"ok","n":13,"sites":13,"K":3,"threads":1,"balls":73,"levels":10,"prepare_s":0.0000,"catalogue_s":113.4465,"catalogue_stages":{"t_frontier":0.0004,"t_boxes":113.4460,"t_order":0.0000,"t_assemble":0.0000,"t_collect":0.0000,"t_sort":0.0000,"t_bands":0.0000,"t_compare":0.0000,"t_ranks":0.0000,"t_copy":0.0000,"bands":9,"band_members":72,"tasks":64,"max_task_sites":1},"by_q_p":{"q2":[25,12,12],"q3":[12,12,0],"q4":[0,0,0]},"nodes":26201025,"leaves":13100513,"sum_m":98004006,"max_m":13,"skipped_bbox":0,"filter_tests":2688288777,"leaf_dominance_tests":396262115,"pair_tests":295640071,"triple_tests":816752437,"line_hits":807321341,"quad_tests":2860,"judged":134,"extended":1,"weighted":0,"max_shell":13,"stalled_leaves":3669635}
+== sortie_final.txt
+{"status":"ok","n":13,"sites":13,"K":3,"threads":1,"balls":73,"levels":10,"prepare_s":0.0000,"catalogue_s":180.1424,"catalogue_stages":{"t_frontier":0.0003,"t_boxes":180.1420,"t_order":0.0000,"t_assemble":0.0000,"t_collect":0.0000,"t_sort":0.0000,"t_bands":0.0000,"t_compare":0.0000,"t_ranks":0.0000,"t_copy":0.0000,"bands":9,"band_members":72,"tasks":64,"max_task_sites":1},"by_q_p":{"q2":[25,12,12],"q3":[12,12,0],"q4":[0,0,0]},"nodes":26201025,"leaves":13100513,"sum_m":98004006,"max_m":13,"skipped_bbox":0,"filter_tests":2688288777,"leaf_dominance_tests":396262115,"pair_tests":295640071,"triple_tests":816752437,"line_hits":807321341,"quad_tests":2860,"judged":134,"extended":1,"weighted":0,"max_shell":13,"stalled_leaves":3669635}
+== sortie_budget.txt
+{"status":"resource_exhausted","reason":"node_budget"}

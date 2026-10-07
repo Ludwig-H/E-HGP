@@ -1,0 +1,6 @@
+Famille « noyau dense + halo epars » : n/2 points gaussiens (ecart-type 400) au centre, n/2 uniformes dans [0, 2^18)^3 ; K = 5 ; copie instrumentee, 2 fils.
+n boules | pas/boule MEB/boule | boules fermees par l arbre : appels, taille moyenne, taille max | sauts : p moyen, p max | chaine max (pas)
+4000 284264 | 3.54 0.90 | 39347 15.6 2007 | 14.1 2004 | 7
+8000 600955 | 3.55 0.91 | 83556 12.5 4006 | 10.5 4004 | 9
+16000 1245461 | 3.55 0.91 | 172189 8.8 7725 | 6.3 7723 | 7
+32000 2545335 | 3.56 0.92 | 351610 9.0 15881 | 6.5 15878 | 8

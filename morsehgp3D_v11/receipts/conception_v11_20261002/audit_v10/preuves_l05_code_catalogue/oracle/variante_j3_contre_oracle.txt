@@ -1,0 +1,9 @@
+J3 (build/v10-perf/feuille/timing_v3d/src) contre l'oracle brut independant : conformes 30, ecarts 0, boules comparees 180346 ; premier ecart : aucun
+ext_a.u32le K=5 : HEAD 44838c9b868b J3 44838c9b868b IDENTIQUES boules 213
+ext_a.u32le K=12 : HEAD 66720ab07cd8 J3 66720ab07cd8 IDENTIQUES boules 370
+ext_b.u32le K=5 : HEAD 0a416a9eaf1c J3 0a416a9eaf1c IDENTIQUES boules 7802
+ext_b.u32le K=12 : HEAD 968758b63dd9 J3 968758b63dd9 IDENTIQUES boules 44973
+ext_c.u32le K=5 : HEAD 02d85a850e16 J3 02d85a850e16 IDENTIQUES boules 211693
+ext_c.u32le K=12 : HEAD 3a1c37529257 J3 3a1c37529257 IDENTIQUES boules 1690156
+grid16.u32le K=10 : HEAD 6f3c5612b661 J3 6f3c5612b661 IDENTIQUES boules 593926
+sph89.u32le K=5 : HEAD 526d74a72a8f J3 526d74a72a8f IDENTIQUES boules 2169

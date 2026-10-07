@@ -1,0 +1,129 @@
+
+ARI_s moyen pondere par cellule :
+  tw_K1          0.7751
+  hdb_ms1        0.7220
+  tw_K2          0.7642
+  hdb_ms2        0.6719
+  tw_K3          0.7550
+  hdb_ms3        0.7056
+  hdb_lib        0.5139
+  hdb_these_K1   0.6885
+
+=== LOT A : tour (tete C inter X, zhat) contre sklearn regle sur dev, K = min_samples
+scenes 960 methodes 8
+paire                   moyenne  mediane  gains pertes   egal | sans shells / par famille
+K=1                     +0.0531  +0.0000    157     36    767 | sans shells +0.0607 (gains 157, pertes 36) | anis+0.092 brid+0.108 fila+0.060 hete+0.004 hier-0.111 shel+0.000 sphe+0.271 unba+0.001
+K=2                     +0.0923  +0.0074    674    283      3 | sans shells +0.0244 (gains 554, pertes 283) | anis-0.021 brid-0.106 fila+0.118 hete+0.001 hier+0.067 shel+0.568 sphe-0.048 unba+0.159
+K=3                     +0.0494  +0.0010    603    354      3 | sans shells -0.0181 (gains 483, pertes 354) | anis-0.068 brid-0.135 fila+0.053 hete-0.006 hier+0.088 shel+0.522 sphe-0.123 unba+0.065
+
+ARI_s moyen pondere par cellule :
+  cap_K10        0.7312
+  cap_K5         0.7479
+  cap_K8         0.7314
+  hdb_ms1        0.7202
+  hdb_ms10       0.7647
+  hdb_ms10_nf    0.6593
+  hdb_ms1_nf     0.6968
+  hdb_ms2        0.7202
+  hdb_ms2_nf     0.6968
+  hdb_ms3        0.7053
+  hdb_ms3_nf     0.6876
+  hdb_ms5        0.7366
+  hdb_ms5_nf     0.6747
+  hdb_ms8        0.7560
+  hdb_ms8_nf     0.6606
+  mrb_K10        0.7859
+  mrb_K2         0.7937
+  mrb_K3         0.7970
+  mrb_K5         0.7986
+  mrb_K8         0.7958
+  tw_K1          0.7952
+  tw_K10         0.7957
+  tw_K10_nf      0.7647
+  tw_K1_nf       0.7308
+  tw_K2          0.7932
+  tw_K2_nf       0.7380
+  tw_K3          0.7966
+  tw_K3_nf       0.7365
+  tw_K5          0.8001
+  tw_K5_nf       0.7521
+  tw_K8          0.7960
+  tw_K8_nf       0.7602
+
+=== LOT C principal : tour v10-b contre sklearn regle sur dev (avec remplissage)
+scenes 960 methodes 32
+paire                   moyenne  mediane  gains pertes   egal | sans shells / par famille
+K=1                     +0.0750  +0.0019    559    326     75 | sans shells +0.0873 (gains 558, pertes 258) | anis+0.149 brid+0.174 fila+0.105 hete-0.004 hier-0.127 shel-0.011 sphe+0.302 unba+0.012
+K=2                     +0.0730  +0.0027    595    287     78 | sans shells +0.0838 (gains 587, pertes 235) | anis+0.139 brid+0.176 fila+0.084 hete-0.006 hier-0.124 shel-0.003 sphe+0.301 unba+0.016
+K=3                     +0.0913  +0.0089    673    287      0 | sans shells +0.0310 (gains 553, pertes 287) | anis-0.011 brid+0.002 fila+0.102 hete+0.001 hier+0.006 shel+0.514 sphe+0.003 unba+0.114
+K=5                     +0.0635  +0.0029    639    315      6 | sans shells +0.0132 (gains 519, pertes 315) | anis-0.018 brid+0.000 fila+0.025 hete+0.016 hier+0.000 shel+0.416 sphe-0.000 unba+0.069
+K=8                     +0.0400  -0.0003    455    501      4 | sans shells -0.0009 (gains 335, pertes 501) | anis-0.038 brid-0.008 fila-0.032 hete+0.023 hier-0.007 shel+0.326 sphe-0.008 unba+0.063
+K=10                    +0.0311  -0.0003    454    498      8 | sans shells -0.0036 (gains 335, pertes 497) | anis-0.040 brid-0.008 fila-0.054 hete+0.023 hier-0.008 shel+0.273 sphe-0.009 unba+0.070
+
+=== LOT C descriptif : sans remplissage (tour EOM z dev ; sklearn EOM alpha=1)
+scenes 960 methodes 32
+paire                   moyenne  mediane  gains pertes   egal | sans shells / par famille
+K=1 nf                  +0.0340  +0.0000    153     44    763 | sans shells +0.0387 (gains 152, pertes 44) | anis+0.069 brid+0.082 fila+0.047 hete+0.001 hier-0.136 shel+0.001 sphe+0.209 unba-0.002
+K=2 nf                  +0.0412  +0.0019    600    282     78 | sans shells +0.0471 (gains 588, pertes 234) | anis+0.088 brid+0.113 fila+0.060 hete+0.005 hier-0.162 shel-0.000 sphe+0.227 unba-0.001
+K=3 nf                  +0.0489  +0.0112    722    163     75 | sans shells +0.0565 (gains 721, pertes 104) | anis+0.098 brid+0.097 fila+0.052 hete+0.016 hier-0.145 shel-0.004 sphe+0.249 unba+0.028
+K=5 nf                  +0.0774  +0.0329    735    156     69 | sans shells +0.0897 (gains 735, pertes 95) | anis+0.139 brid+0.162 fila+0.102 hete+0.029 hier-0.157 shel-0.009 sphe+0.286 unba+0.068
+K=8 nf                  +0.0995  +0.0447    731    163     66 | sans shells +0.1150 (gains 729, pertes 101) | anis+0.174 brid+0.188 fila+0.114 hete+0.037 hier-0.152 shel-0.009 sphe+0.351 unba+0.092
+K=10 nf                 +0.1054  +0.0527    740    166     54 | sans shells +0.1205 (gains 732, pertes 99) | anis+0.184 brid+0.200 fila+0.129 hete+0.040 hier-0.149 shel-0.000 sphe+0.344 unba+0.096
+
+=== LOT C objet : tour contre MR2-bord (meme entree, meme tete)
+scenes 960 methodes 32
+paire                   moyenne  mediane  gains pertes   egal | sans shells / par famille
+K=2 obj                 -0.0005  +0.0000    443    424     93 | sans shells -0.0009 (gains 403, pertes 404) | anis-0.007 brid+0.007 fila+0.003 hete-0.001 hier-0.001 shel+0.002 sphe+0.000 unba-0.007
+K=3 obj                 -0.0004  +0.0000    433    437     90 | sans shells -0.0008 (gains 392, pertes 418) | anis+0.001 brid-0.000 fila+0.000 hete+0.000 hier+0.000 shel+0.002 sphe+0.001 unba-0.007
+K=5 obj                 +0.0015  +0.0000    447    427     86 | sans shells +0.0008 (gains 400, pertes 406) | anis+0.003 brid+0.001 fila+0.008 hete-0.000 hier-0.001 shel+0.006 sphe+0.000 unba-0.007
+K=8 obj                 +0.0002  -0.0004    358    534     68 | sans shells -0.0015 (gains 304, pertes 507) | anis-0.001 brid-0.003 fila+0.004 hete-0.003 hier-0.002 shel+0.012 sphe-0.002 unba-0.003
+K=10 obj                +0.0098  -0.0004    372    538     50 | sans shells -0.0034 (gains 299, pertes 515) | anis-0.008 brid-0.003 fila-0.004 hete+0.001 hier-0.002 shel+0.103 sphe-0.003 unba-0.005
+
+=== LOT C lot B : tete C inter X du 28 septembre contre sklearn
+scenes 960 methodes 32
+paire                   moyenne  mediane  gains pertes   egal | sans shells / par famille
+K=5 capB                +0.0112  -0.0007    432    526      2 | sans shells -0.0489 (gains 312, pertes 526) | anis-0.097 brid-0.160 fila-0.059 hete+0.004 hier+0.094 shel+0.432 sphe-0.149 unba+0.025
+K=8 capB                -0.0246  -0.0005    427    526      7 | sans shells -0.0044 (gains 427, pertes 406) | anis-0.000 brid-0.001 fila-0.037 hete-0.001 hier-0.001 shel-0.166 sphe-0.001 unba+0.010
+K=10 capB               -0.0335  -0.0042    295    664      1 | sans shells -0.0095 (gains 295, pertes 544) | anis-0.015 brid-0.007 fila-0.055 hete+0.011 hier-0.009 shel-0.202 sphe-0.006 unba+0.014
+
+=== LOT C : tour a K contre le meilleur sklearn des six K testes (hdb_ms10)
+scenes 960 methodes 32
+paire                   moyenne  mediane  gains pertes   egal | sans shells / par famille
+K=1 vs hdb_ms10         +0.0306  -0.0008    398    556      6 | sans shells -0.0054 (gains 278, pertes 556) | anis-0.038 brid-0.006 fila-0.060 hete+0.015 hier-0.003 shel+0.283 sphe-0.006 unba+0.060
+K=2 vs hdb_ms10         +0.0285  -0.0003    435    519      6 | sans shells -0.0089 (gains 315, pertes 519) | anis-0.048 brid-0.004 fila-0.081 hete+0.013 hier-0.000 shel+0.290 sphe-0.006 unba+0.064
+K=3 vs hdb_ms10         +0.0319  -0.0002    448    505      7 | sans shells -0.0047 (gains 328, pertes 505) | anis-0.033 brid-0.004 fila-0.066 hete+0.014 hier-0.003 shel+0.288 sphe-0.006 unba+0.065
+K=5 vs hdb_ms10         +0.0355  +0.0002    509    443      8 | sans shells +0.0002 (gains 389, pertes 443) | anis-0.022 brid-0.004 fila-0.046 hete+0.015 hier-0.003 shel+0.282 sphe-0.006 unba+0.069
+K=8 vs hdb_ms10         +0.0313  -0.0004    440    513      7 | sans shells -0.0039 (gains 320, pertes 513) | anis-0.038 brid-0.009 fila-0.050 hete+0.023 hier-0.009 shel+0.278 sphe-0.010 unba+0.066
+K=10 vs hdb_ms10        +0.0311  -0.0003    454    498      8 | sans shells -0.0036 (gains 335, pertes 497) | anis-0.040 brid-0.008 fila-0.054 hete+0.023 hier-0.008 shel+0.273 sphe-0.009 unba+0.070
+
+=== LOT C : par famille, ARI_s moyen de tw_K, hdb_msK (regle dev, rempli), hdb_msK_nf (EOM alpha=1, non rempli)
+K=1  aniso 0.860/0.711/0.669 | bridg 0.905/0.731/0.700 | filam 0.764/0.660/0.641 | heter 0.693/0.697/0.687 | hiera 0.466/0.593/0.593 | shell 0.967/0.978/0.979 | spher 0.922/0.621/0.599 | unbal 0.783/0.771/0.707
+K=2  aniso 0.851/0.711/0.669 | bridg 0.907/0.731/0.700 | filam 0.744/0.660/0.641 | heter 0.691/0.697/0.687 | hiera 0.469/0.593/0.593 | shell 0.975/0.978/0.979 | spher 0.922/0.621/0.599 | unbal 0.787/0.771/0.707
+K=3  aniso 0.866/0.876/0.657 | bridg 0.907/0.904/0.686 | filam 0.758/0.656/0.637 | heter 0.692/0.691/0.678 | hiera 0.467/0.461/0.592 | shell 0.973/0.459/0.981 | spher 0.922/0.920/0.581 | unbal 0.788/0.674/0.689
+K=5  aniso 0.876/0.894/0.640 | bridg 0.907/0.906/0.674 | filam 0.778/0.753/0.621 | heter 0.693/0.678/0.669 | hiera 0.466/0.466/0.591 | shell 0.967/0.551/0.983 | spher 0.922/0.922/0.560 | unbal 0.792/0.723/0.661
+K=8  aniso 0.860/0.898/0.613 | bridg 0.902/0.910/0.662 | filam 0.775/0.806/0.619 | heter 0.701/0.678/0.664 | hiera 0.460/0.467/0.590 | shell 0.962/0.636/0.980 | spher 0.918/0.926/0.508 | unbal 0.789/0.727/0.649
+K=10 aniso 0.858/0.898/0.608 | bridg 0.903/0.911/0.657 | filam 0.771/0.824/0.616 | heter 0.702/0.678/0.664 | hiera 0.461/0.469/0.589 | shell 0.958/0.685/0.968 | spher 0.919/0.928/0.523 | unbal 0.794/0.723/0.649
+
+=== LOT C principal par n (ecart moyen tour - sklearn)
+K=1  8000:+0.071  16000:+0.070  32000:+0.084
+K=2  8000:+0.074  16000:+0.067  32000:+0.078
+K=3  8000:+0.063  16000:+0.090  32000:+0.120
+K=5  8000:+0.041  16000:+0.065  32000:+0.085
+K=8  8000:+0.020  16000:+0.042  32000:+0.058
+K=10 8000:+0.012  16000:+0.032  32000:+0.049
+
+=== LOT C principal par niveau (ecart moyen tour - sklearn)
+K=1  easy:-0.067  hard:+0.114  medium:+0.035  extreme:+0.218
+K=2  easy:-0.061  hard:+0.112  medium:+0.040  extreme:+0.201
+K=3  easy:+0.103  hard:+0.087  medium:+0.112  extreme:+0.062
+K=5  easy:+0.063  hard:+0.069  medium:+0.070  extreme:+0.052
+K=8  easy:+0.039  hard:+0.050  medium:+0.044  extreme:+0.026
+K=10 easy:+0.025  hard:+0.046  medium:+0.036  extreme:+0.017
+
+=== LOT C principal par bruit (ecart moyen tour - sklearn)
+K=1  0.0:+0.081  0.1:+0.069
+K=2  0.0:+0.082  0.1:+0.064
+K=3  0.0:+0.106  0.1:+0.077
+K=5  0.0:+0.076  0.1:+0.051
+K=8  0.0:+0.048  0.1:+0.032
+K=10 0.0:+0.039  0.1:+0.023

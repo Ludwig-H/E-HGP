@@ -1,0 +1,4 @@
+# tete reparee de l'auditeur (overlay cohort_repair, f79850f8...) liee au CLI, sur les cas reels du rapport
+six points K=2 core mcs=3 z=2 --allow-single : binaire publie [0, 0, 0, 1, 1, 1] ; tete de l auditeur [0, 0, 0, 0, 0, 0]
+neuf points K=2 core mcs=3 z=2  : binaire publie [1, 2, 1, 1, 2, 2, 0, 0, 0] ; tete de l auditeur [1, 1, 1, 1, 1, 1, 0, 0, 0]
+huit points K=3 cover mcs=4 z=2 --allow-single : binaire publie [0, 1, 0, 0, 0, 1, 1, 1] ; tete de l auditeur [0, 0, 0, 0, 0, 0, 0, 0]

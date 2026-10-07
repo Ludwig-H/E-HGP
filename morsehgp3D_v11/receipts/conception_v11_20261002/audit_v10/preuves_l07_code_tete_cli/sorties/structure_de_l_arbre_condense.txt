@@ -1,0 +1,1 @@
+cas 36000 ; meme structure (parents, masses, naissances bit pour bit) 36000 ; clusters 75325 ; stabilite changee : feuilles 39072, internes 0 ; points 1122831 : cluster de sortie change 0, lambda de sortie plus petit sous cohortes 126975, plus grand 0

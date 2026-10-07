@@ -1,0 +1,20 @@
+{
+ "cadre": "phase=exploration_v10_hors_registre backend=cpu_reference profile=quantized_u18_input_only mode=verdict_final public_status=not_claimed ; GCP non utilise",
+ "compteurs": {
+  "E1_viol": 0,
+  "E2_viol": 0,
+  "E3_viol": 0,
+  "E4_viol": 0,
+  "couples_scene_mcs": 408,
+  "points": 2956,
+  "points_retardes": 1918,
+  "rayons_compares": 2186,
+  "scenes": 71
+ },
+ "eta": "1",
+ "kappa": "12",
+ "mcs_max": 9,
+ "nmax": 9,
+ "optimize": 0,
+ "violations": []
+}

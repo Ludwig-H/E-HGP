@@ -1,0 +1,28 @@
+== mutants_pool_raccord MUTANTS = 48 list
+    22  src/sched/pool.cpp
+     6  tests/unit/fault_preload.cpp
+     4  tests/regression/test_worker_bad_alloc.py
+     3  tests/unit/fault_main.cpp
+     3  tests/head/mreach_cluster.cpp
+     2  cli/mhgp10_tower.cpp
+     2  cli/mhgp10_cluster.cpp
+     2  tests/regression/test_thread_creation_refusal.py
+     1  src/catalogue/generator.cpp
+     1  src/tower/tower.cpp
+     1  cli/mhgp10_catalogue.cpp
+     1  (aucun chemin reconnu dans la definition)
+== mutants_bancs_raccord MUTANTS = 115 list
+    55  bench/synthetic/decide.py
+    33  bench/g4/merge_sessions.py
+    27  bench/scaling/scale_run.py
+== mutants_juges_integres MUTANTS = 41 list
+    22  tests/oracle/test_tower_oracle.py
+    19  tests/oracle/test_catalogue_oracle.py
+== mutants_cli_juges MUTANTS = 8 list
+     3  cli/mhgp10_catalogue.cpp
+     3  cli/mhgp10_tower.cpp
+     2  src/catalogue/generator.cpp
+== float_filter_mutants MUTANTS = 125 list
+    38  cmake/fp_flags.cmake
+     3  CMakeLists.txt
+    84  (aucun chemin reconnu dans la definition)

@@ -1,0 +1,9 @@
+ee2b764cc6704f516055be2e4813f96d7ae6098bb50438743f22a65a2f662754  /tmp/v11-audit/l01_math_catalogue/euler/lidar00_full_k12_etendues.txt
+39a1ed3107fa07bca47c767207a9442077d0526be4b98f9bd66afe21fc146881  /tmp/v11-audit/l01_math_catalogue/euler/lidar01_full_k12_etendues.txt
+4a59206196aa768da3cede8ee68ae8f9653128939ef64cabc60809938efc53a1  /tmp/v11-audit/l01_math_catalogue/euler/lidar02_full_k12_etendues.txt
+31f662b94785387b7fc37f0830df0110385c175fecbedf690f0de3fb35858669  /tmp/v11-audit/l01_math_catalogue/j1/lidar02_k10_echantillon.txt
+    529 euler/lidar00_full_k12_etendues.txt
+    341 euler/lidar01_full_k12_etendues.txt
+   1559 euler/lidar02_full_k12_etendues.txt
+   2281 j1/lidar02_k10_echantillon.txt
+   4710 total

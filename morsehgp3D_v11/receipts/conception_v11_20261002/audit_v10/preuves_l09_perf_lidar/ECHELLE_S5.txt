@@ -1,0 +1,90 @@
+lignes ok: 169
+
+== octets par boule au pic (max_rss_kb*1024/balls), par famille et K, min/max et plus grande entree
+('lidar', 'lidar', '10'): n=21 o/boule min=338.8 max=367.7 | boules/site min=87.5 max=180.3 | plus grande: sites=45845 boules=5483320 o/boule=339.5 cat=0.63s tour=0.42s (lidar02_full.u32le)
+('lidar', 'lidar', '5'): n=21 o/boule min=299.8 max=416.5 | boules/site min=24.2 max=39.9 | plus grande: sites=45845 boules=1407885 o/boule=316.3 cat=0.17s tour=0.09s (lidar02_full.u32le)
+('synthetic', 'clusters', '10'): n=14 o/boule min=303.6 max=342.6 | boules/site min=339.3 max=467.3 | plus grande: sites=1024000 boules=478482791 o/boule=303.6 cat=41.34s tour=83.02s (syn_clusters_density_x128.u32le)
+('synthetic', 'clusters', '5'): n=14 o/boule min=287.0 max=350.8 | boules/site min=69.2 max=85.5 | plus grande: sites=1024000 boules=87574708 o/boule=287.0 cat=7.84s tour=13.00s (syn_clusters_density_x128.u32le)
+('synthetic', 'filaments', '10'): n=13 o/boule min=306.8 max=346.3 | boules/site min=213.3 max=434.8 | plus grande: sites=512000 boules=222622167 o/boule=306.8 cat=19.82s tour=35.72s (syn_filaments_density_x64.u32le)
+('synthetic', 'filaments', '5'): n=14 o/boule min=286.4 max=352.6 | boules/site min=51.1 max=83.3 | plus grande: sites=1024000 boules=85336197 o/boule=286.4 cat=7.68s tour=13.15s (syn_filaments_density_x128.u32le)
+('synthetic', 'shells', '10'): n=12 o/boule min=307.1 max=359.2 | boules/site min=75.4 max=271.7 | plus grande: sites=512000 boules=139108751 o/boule=307.1 cat=13.57s tour=21.24s (syn_shells_density_x64.u32le)
+('synthetic', 'shells', '5'): n=12 o/boule min=292.0 max=444.2 | boules/site min=22.8 max=60.2 | plus grande: sites=512000 boules=30837509 o/boule=292.8 cat=3.07s tour=3.90s (syn_shells_density_x64.u32le)
+('synthetic', 'terrain', '10'): n=11 o/boule min=314.9 max=351.9 | boules/site min=63.9 max=145.5 | plus grande: sites=512000 boules=74498705 o/boule=314.9 cat=7.71s tour=8.56s (syn_terrain_density_x64.u32le)
+('synthetic', 'terrain', '5'): n=11 o/boule min=288.0 max=441.8 | boules/site min=19.9 max=39.7 | plus grande: sites=512000 boules=20346304 o/boule=288.0 cat=2.07s tour=2.10s (syn_terrain_density_x64.u32le)
+('synthetic', 'uniform', '10'): n=13 o/boule min=307.4 max=349.6 | boules/site min=388.3 max=456.6 | plus grande: sites=512000 boules=233767498 o/boule=307.4 cat=19.87s tour=41.71s (syn_uniform_density_x64.u32le)
+('synthetic', 'uniform', '5'): n=13 o/boule min=297.1 max=346.4 | boules/site min=74.3 max=83.9 | plus grande: sites=512000 boules=42940121 o/boule=297.1 cat=3.80s tour=5.86s (syn_uniform_density_x64.u32le)
+
+== LiDAR : boules par site par secteur
+K=10 02 quarter_x_nonneg_y_nonneg    sites=  5286 boules=  574476 boules/site= 108.7 o/boule= 346.4 cat=   72.4ms tour=   38.3ms ns/boule cat= 126.0 tour=  66.7
+K=10 00 quarter_x_nonneg_y_nonneg    sites=  7069 boules=  811610 boules/site= 114.8 o/boule= 346.0 cat=  115.9ms tour=   57.3ms ns/boule cat= 142.8 tour=  70.6
+K=10 01 quarter_x_nonneg_y_nonneg    sites=  7311 boules=  954950 boules/site= 130.6 o/boule= 348.3 cat=  123.8ms tour=   70.9ms ns/boule cat= 129.6 tour=  74.2
+K=10 01 quarter_x_neg_y_neg          sites=  8074 boules=  767555 boules/site=  95.1 o/boule= 348.3 cat=  108.8ms tour=   49.7ms ns/boule cat= 141.7 tour=  64.8
+K=10 00 quarter_x_nonneg_y_neg       sites=  8225 boules=  719375 boules/site=  87.5 o/boule= 345.0 cat=   95.7ms tour=   46.5ms ns/boule cat= 133.0 tour=  64.6
+K=10 01 quarter_x_nonneg_y_neg       sites=  9221 boules= 1011360 boules/site= 109.7 o/boule= 346.9 cat=  135.3ms tour=   70.4ms ns/boule cat= 133.8 tour=  69.6
+K=10 02 quarter_x_neg_y_nonneg       sites=  9468 boules= 1347943 boules/site= 142.4 o/boule= 342.4 cat=  161.6ms tour=  102.5ms ns/boule cat= 119.9 tour=  76.0
+K=10 01 quarter_x_neg_y_nonneg       sites= 10945 boules= 1596452 boules/site= 145.9 o/boule= 367.7 cat=  238.7ms tour=  127.2ms ns/boule cat= 149.5 tour=  79.7
+K=10 00 quarter_x_neg_y_neg          sites= 11536 boules= 1580912 boules/site= 137.0 o/boule= 345.9 cat=  205.0ms tour=  122.9ms ns/boule cat= 129.7 tour=  77.7
+K=10 00 quarter_x_neg_y_nonneg       sites= 13055 boules= 2354410 boules/site= 180.3 o/boule= 346.6 cat=  287.7ms tour=  202.0ms ns/boule cat= 122.2 tour=  85.8
+K=10 02 quarter_x_nonneg_y_neg       sites= 14829 boules= 1639809 boules/site= 110.6 o/boule= 342.8 cat=  208.3ms tour=  122.4ms ns/boule cat= 127.0 tour=  74.6
+K=10 00 half_x_nonneg                sites= 15294 boules= 1537439 boules/site= 100.5 o/boule= 347.9 cat=  202.5ms tour=  115.9ms ns/boule cat= 131.7 tour=  75.4
+K=10 02 quarter_x_neg_y_neg          sites= 16262 boules= 1865046 boules/site= 114.7 o/boule= 341.4 cat=  218.5ms tour=  132.3ms ns/boule cat= 117.2 tour=  70.9
+K=10 01 half_x_nonneg                sites= 16532 boules= 1976831 boules/site= 119.6 o/boule= 345.4 cat=  247.3ms tour=  153.3ms ns/boule cat= 125.1 tour=  77.5
+K=10 01 half_x_neg                   sites= 19019 boules= 2377247 boules/site= 125.0 o/boule= 346.1 cat=  304.3ms tour=  184.1ms ns/boule cat= 128.0 tour=  77.4
+K=10 02 half_x_nonneg                sites= 20115 boules= 2220769 boules/site= 110.4 o/boule= 344.6 cat=  278.1ms tour=  163.0ms ns/boule cat= 125.2 tour=  73.4
+K=10 00 half_x_neg                   sites= 24591 boules= 3960491 boules/site= 161.1 o/boule= 343.9 cat=  476.5ms tour=  341.8ms ns/boule cat= 120.3 tour=  86.3
+K=10 02 half_x_neg                   sites= 25730 boules= 3226858 boules/site= 125.4 o/boule= 343.9 cat=  371.4ms tour=  242.7ms ns/boule cat= 115.1 tour=  75.2
+K=10 01 full                         sites= 35551 boules= 4383302 boules/site= 123.3 o/boule= 343.2 cat=  539.1ms tour=  344.7ms ns/boule cat= 123.0 tour=  78.6
+K=10 00 full                         sites= 39885 boules= 5512670 boules/site= 138.2 o/boule= 338.8 cat=  669.8ms tour=  459.0ms ns/boule cat= 121.5 tour=  83.3
+K=10 02 full                         sites= 45845 boules= 5483320 boules/site= 119.6 o/boule= 339.5 cat=  627.1ms tour=  424.3ms ns/boule cat= 114.4 tour=  77.4
+K= 5 02 quarter_x_nonneg_y_nonneg    sites=  5286 boules=  147666 boules/site=  27.9 o/boule= 375.5 cat=   26.5ms tour=   10.8ms ns/boule cat= 179.5 tour=  73.1
+K= 5 00 quarter_x_nonneg_y_nonneg    sites=  7069 boules=  202301 boules/site=  28.6 o/boule= 416.5 cat=   37.0ms tour=   13.7ms ns/boule cat= 182.9 tour=  67.7
+K= 5 01 quarter_x_nonneg_y_nonneg    sites=  7311 boules=  226498 boules/site=  31.0 o/boule= 395.1 cat=   40.3ms tour=   16.0ms ns/boule cat= 177.9 tour=  70.6
+K= 5 01 quarter_x_neg_y_neg          sites=  8074 boules=  210424 boules/site=  26.1 o/boule= 373.1 cat=   44.5ms tour=   14.9ms ns/boule cat= 211.5 tour=  70.8
+K= 5 00 quarter_x_nonneg_y_neg       sites=  8225 boules=  199112 boules/site=  24.2 o/boule= 350.5 cat=   32.4ms tour=   13.2ms ns/boule cat= 162.7 tour=  66.3
+K= 5 01 quarter_x_nonneg_y_neg       sites=  9221 boules=  275513 boules/site=  29.9 o/boule= 386.2 cat=   41.9ms tour=   19.0ms ns/boule cat= 152.1 tour=  69.0
+K= 5 02 quarter_x_neg_y_nonneg       sites=  9468 boules=  316200 boules/site=  33.4 o/boule= 370.2 cat=   55.4ms tour=   20.6ms ns/boule cat= 175.2 tour=  65.1
+K= 5 01 quarter_x_neg_y_nonneg       sites= 10945 boules=  375792 boules/site=  34.3 o/boule= 361.2 cat=   63.3ms tour=   24.3ms ns/boule cat= 168.4 tour=  64.7
+K= 5 00 quarter_x_neg_y_neg          sites= 11536 boules=  377758 boules/site=  32.7 o/boule= 366.6 cat=   69.7ms tour=   26.8ms ns/boule cat= 184.5 tour=  70.9
+K= 5 00 quarter_x_neg_y_nonneg       sites= 13055 boules=  521312 boules/site=  39.9 o/boule= 332.1 cat=   78.6ms tour=   35.7ms ns/boule cat= 150.8 tour=  68.5
+K= 5 02 quarter_x_nonneg_y_neg       sites= 14829 boules=  437793 boules/site=  29.5 o/boule= 345.1 cat=   65.3ms tour=   29.7ms ns/boule cat= 149.2 tour=  67.8
+K= 5 00 half_x_nonneg                sites= 15294 boules=  402412 boules/site=  26.3 o/boule= 353.5 cat=   59.7ms tour=   25.2ms ns/boule cat= 148.4 tour=  62.6
+K= 5 02 quarter_x_neg_y_neg          sites= 16262 boules=  497567 boules/site=  30.6 o/boule= 333.2 cat=   65.4ms tour=   32.1ms ns/boule cat= 131.4 tour=  64.5
+K= 5 01 half_x_nonneg                sites= 16532 boules=  503390 boules/site=  30.4 o/boule= 337.1 cat=   70.6ms tour=   31.7ms ns/boule cat= 140.2 tour=  63.0
+K= 5 01 half_x_neg                   sites= 19019 boules=  588155 boules/site=  30.9 o/boule= 336.5 cat=  104.9ms tour=   38.0ms ns/boule cat= 178.4 tour=  64.6
+K= 5 02 half_x_nonneg                sites= 20115 boules=  586382 boules/site=  29.2 o/boule= 330.2 cat=   86.0ms tour=   38.1ms ns/boule cat= 146.7 tour=  65.0
+K= 5 00 half_x_neg                   sites= 24591 boules=  902105 boules/site=  36.7 o/boule= 312.6 cat=  125.9ms tour=   59.8ms ns/boule cat= 139.6 tour=  66.3
+K= 5 02 half_x_neg                   sites= 25730 boules=  815715 boules/site=  31.7 o/boule= 352.0 cat=  102.0ms tour=   52.1ms ns/boule cat= 125.0 tour=  63.9
+K= 5 01 full                         sites= 35551 boules= 1095926 boules/site=  30.8 o/boule= 299.8 cat=  141.4ms tour=   72.3ms ns/boule cat= 129.0 tour=  66.0
+K= 5 00 full                         sites= 39885 boules= 1306696 boules/site=  32.8 o/boule= 300.1 cat=  170.5ms tour=   93.3ms ns/boule cat= 130.5 tour=  71.4
+K= 5 02 full                         sites= 45845 boules= 1407885 boules/site=  30.7 o/boule= 316.3 cat=  171.2ms tour=   93.8ms ns/boule cat= 121.6 tour=  66.6
+
+== entrees >= 256000 sites
+syn_clusters_density_x32.u32le           K=10 sites=256000 boules=115778754 b/site=452.3 cat=9.82 tour=14.78 rss=33.64Gio o/boule=312.0 ns/boule cat=84.8 tour=127.7
+syn_clusters_space_x32.u32le             K=10 sites=256000 boules=87971259 b/site=343.6 cat=8.09 tour=11.50 rss=26.10Gio o/boule=318.6 ns/boule cat=92.0 tour=130.7
+syn_filaments_density_x32.u32le          K=10 sites=256000 boules=106517291 b/site=416.1 cat=9.17 tour=14.34 rss=30.99Gio o/boule=312.4 ns/boule cat=86.1 tour=134.7
+syn_filaments_space_x32.u32le            K=10 sites=256000 boules=55213689 b/site=215.7 cat=5.75 tour=6.63 rss=16.71Gio o/boule=325.0 ns/boule cat=104.1 tour=120.0
+syn_shells_density_x32.u32le             K=10 sites=256000 boules=56184833 b/site=219.5 cat=5.74 tour=6.64 rss=16.96Gio o/boule=324.2 ns/boule cat=102.2 tour=118.2
+syn_terrain_density_x32.u32le            K=10 sites=256000 boules=28223112 b/site=110.2 cat=2.91 tour=2.35 rss=8.81Gio o/boule=335.3 ns/boule cat=103.3 tour=83.4
+syn_uniform_density_x32.u32le            K=10 sites=256000 boules=115361246 b/site=450.6 cat=9.58 tour=16.83 rss=33.85Gio o/boule=315.1 ns/boule cat=83.1 tour=145.9
+syn_uniform_space_x32.u32le              K=10 sites=256000 boules=115244715 b/site=450.2 cat=9.53 tour=16.91 rss=34.18Gio o/boule=318.5 ns/boule cat=82.7 tour=146.7
+syn_clusters_density_x32.u32le           K= 5 sites=256000 boules=21435657 b/site=83.7 cat=1.97 tour=2.29 rss=5.97Gio o/boule=299.2 ns/boule cat=91.7 tour=107.0
+syn_clusters_space_x32.u32le             K= 5 sites=256000 boules=17845919 b/site=69.7 cat=1.73 tour=1.83 rss=5.04Gio o/boule=303.2 ns/boule cat=96.7 tour=102.6
+syn_filaments_density_x32.u32le          K= 5 sites=256000 boules=20301013 b/site=79.3 cat=1.83 tour=2.26 rss=5.55Gio o/boule=293.5 ns/boule cat=90.4 tour=111.2
+syn_filaments_space_x32.u32le            K= 5 sites=256000 boules=13185226 b/site=51.5 cat=1.40 tour=1.27 rss=3.64Gio o/boule=296.7 ns/boule cat=106.5 tour=96.5
+syn_shells_density_x32.u32le             K= 5 sites=256000 boules=13428503 b/site=52.5 cat=1.39 tour=1.38 rss=3.65Gio o/boule=292.0 ns/boule cat=103.2 tour=102.6
+syn_terrain_density_x32.u32le            K= 5 sites=256000 boules=8297709 b/site=32.4 cat=0.86 tour=0.73 rss=2.28Gio o/boule=295.3 ns/boule cat=103.2 tour=87.7
+syn_uniform_density_x32.u32le            K= 5 sites=256000 boules=21271895 b/site=83.1 cat=1.88 tour=2.44 rss=5.95Gio o/boule=300.4 ns/boule cat=88.2 tour=114.6
+syn_uniform_space_x32.u32le              K= 5 sites=256000 boules=21246841 b/site=83.0 cat=1.85 tour=2.47 rss=6.02Gio o/boule=304.1 ns/boule cat=87.0 tour=116.1
+syn_clusters_density_x64.u32le           K=10 sites=512000 boules=236190221 b/site=461.3 cat=20.08 tour=35.94 rss=67.34Gio o/boule=306.1 ns/boule cat=85.0 tour=152.1
+syn_filaments_density_x64.u32le          K=10 sites=512000 boules=222622167 b/site=434.8 cat=19.82 tour=35.72 rss=63.61Gio o/boule=306.8 ns/boule cat=89.0 tour=160.4
+syn_shells_density_x64.u32le             K=10 sites=512000 boules=139108751 b/site=271.7 cat=13.57 tour=21.24 rss=39.78Gio o/boule=307.1 ns/boule cat=97.6 tour=152.7
+syn_terrain_density_x64.u32le            K=10 sites=512000 boules=74498705 b/site=145.5 cat=7.71 tour=8.56 rss=21.85Gio o/boule=314.9 ns/boule cat=103.4 tour=114.8
+syn_uniform_density_x64.u32le            K=10 sites=512000 boules=233767498 b/site=456.6 cat=19.87 tour=41.71 rss=66.93Gio o/boule=307.4 ns/boule cat=85.0 tour=178.4
+syn_clusters_density_x64.u32le           K= 5 sites=512000 boules=43400403 b/site=84.8 cat=3.85 tour=5.38 rss=11.95Gio o/boule=295.6 ns/boule cat=88.8 tour=124.0
+syn_filaments_density_x64.u32le          K= 5 sites=512000 boules=41786970 b/site=81.6 cat=3.81 tour=5.41 rss=11.41Gio o/boule=293.2 ns/boule cat=91.1 tour=129.6
+syn_shells_density_x64.u32le             K= 5 sites=512000 boules=30837509 b/site=60.2 cat=3.07 tour=3.90 rss=8.41Gio o/boule=292.8 ns/boule cat=99.5 tour=126.4
+syn_terrain_density_x64.u32le            K= 5 sites=512000 boules=20346304 b/site=39.7 cat=2.07 tour=2.10 rss=5.46Gio o/boule=288.0 ns/boule cat=101.8 tour=103.1
+syn_uniform_density_x64.u32le            K= 5 sites=512000 boules=42940121 b/site=83.9 cat=3.80 tour=5.86 rss=11.88Gio o/boule=297.1 ns/boule cat=88.4 tour=136.5
+syn_clusters_density_x128.u32le          K=10 sites=1024000 boules=478482791 b/site=467.3 cat=41.34 tour=83.02 rss=135.28Gio o/boule=303.6 ns/boule cat=86.4 tour=173.5
+syn_clusters_density_x128.u32le          K= 5 sites=1024000 boules=87574708 b/site=85.5 cat=7.84 tour=13.00 rss=23.41Gio o/boule=287.0 ns/boule cat=89.5 tour=148.5
+syn_filaments_density_x128.u32le         K= 5 sites=1024000 boules=85336197 b/site=83.3 cat=7.68 tour=13.15 rss=22.76Gio o/boule=286.4 ns/boule cat=90.0 tour=154.1

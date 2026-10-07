@@ -1,0 +1,5 @@
+m_bin: {'attach_alive_checks': 177755, 'attach_alive_bad': 0, 'point_vertical_checks': 142204, 'point_vertical_bad': 0, 'lower_alive_checks': 1452346, 'lower_alive_bad': 0, 'plateau_checks': 1523447, 'plateau_bad': 216726}
+m_seq: {'attach_alive_checks': 177755, 'attach_alive_bad': 0, 'point_vertical_checks': 142204, 'point_vertical_bad': 0, 'lower_alive_checks': 1235898, 'lower_alive_bad': 0, 'plateau_checks': 1306999, 'plateau_bad': 278}
+m_vopen: {'attach_alive_checks': 177755, 'attach_alive_bad': 0, 'point_vertical_checks': 142204, 'point_vertical_bad': 0, 'lower_alive_checks': 1235709, 'lower_alive_bad': 350834, 'plateau_checks': 1306721, 'plateau_bad': 0}
+m_vnoclimb: {'attach_alive_checks': 177755, 'attach_alive_bad': 0, 'point_vertical_checks': 142204, 'point_vertical_bad': 0, 'lower_alive_checks': 1235709, 'lower_alive_bad': 395796, 'plateau_checks': 1306721, 'plateau_bad': 0}
+m_strict: {'attach_alive_checks': 177755, 'attach_alive_bad': 133, 'point_vertical_checks': 142071, 'point_vertical_bad': 0, 'lower_alive_checks': 1235709, 'lower_alive_bad': 0, 'plateau_checks': 1306721, 'plateau_bad': 0}

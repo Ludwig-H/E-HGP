@@ -1,0 +1,4 @@
+K=5 q3 : 76385 boules ; toutes les aretes au catalogue q2 : 87.8 % ; aretes absentes : 4.7 % des aretes
+K=5 q4 : 15584 boules ; toutes les aretes au catalogue q2 : 82.2 % ; aretes absentes : 4.8 % des aretes ; quatre faces au catalogue q3 : 44.7 %
+K=10 q3 : 309518 boules ; toutes les aretes au catalogue q2 : 88.2 % ; aretes absentes : 4.4 % des aretes
+K=10 q4 : 159259 boules ; toutes les aretes au catalogue q2 : 82.5 % ; aretes absentes : 4.5 % des aretes ; quatre faces au catalogue q3 : 46.2 %

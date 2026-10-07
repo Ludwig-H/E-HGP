@@ -1,0 +1,12 @@
+# Fri Oct  2 06:57:32 UTC 2026 ; cout des amas cospheriques, 1 fil, charge 21.41 16.77 16.36
+sphere R2=9 m=30 K=2 : code=0 status=ok raison=None boules=195 feuilles_bloquees=8 m_max=30 quadruplets=0 juges=724 t=0.01s
+sphere R2=9 m=30 K=5 : code=0 status=ok raison=None boules=431 feuilles_bloquees=8 m_max=30 quadruplets=236616 juges=3667 t=0.03s
+sphere R2=26 m=72 K=2 : code=0 status=ok raison=None boules=339 feuilles_bloquees=8 m_max=72 quadruplets=0 juges=2058 t=0.04s
+sphere R2=26 m=72 K=5 : code=0 status=ok raison=None boules=933 feuilles_bloquees=8 m_max=72 quadruplets=8268058 juges=115575 t=1.02s
+sphere R2=41 m=96 K=2 : code=0 status=ok raison=None boules=579 feuilles_bloquees=8 m_max=96 quadruplets=0 juges=3850 t=0.13s
+sphere R2=41 m=96 K=5 : code=0 status=ok raison=None boules=1559 feuilles_bloquees=8 m_max=96 quadruplets=26628134 juges=394304 t=3.39s
+sphere R2=89 m=144 K=2 : code=0 status=ok raison=None boules=723 feuilles_bloquees=8 m_max=144 quadruplets=0 juges=5734 t=0.46s
+sphere R2=89 m=144 K=5 : code=0 status=ok raison=None boules=2169 feuilles_bloquees=8 m_max=144 quadruplets=137569088 juges=2065276 t=20.12s
+sphere R2=101 m=168 K=2 : code=0 status=ok raison=None boules=843 feuilles_bloquees=8 m_max=168 quadruplets=0 juges=9113 t=0.57s
+sphere R2=101 m=168 K=5 : code=0 status=ok raison=None boules=2757 feuilles_bloquees=8 m_max=168 quadruplets=256184636 juges=3870465 t=39.32s
+sphere R2=314 m=312 K=2 : code=2 status=resource_exhausted raison=wide_leaf boules=None feuilles_bloquees=None m_max=None quadruplets=None juges=None t=0.03s

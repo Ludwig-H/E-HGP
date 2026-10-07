@@ -1,0 +1,29 @@
+== 1. calibration des niveaux (ARI, bruit en classe, HDBSCAN(min_cluster_size=20), n=2000, g=8, 3 graines) : mesure [publie]
+   spherical        0.96 [0.96]  0.74 [0.73]  0.30 [0.32]  0.16 [0.16]
+   anisotropic      0.96 [0.95]  0.58 [0.66]  0.36 [0.43]  0.17 [0.23]
+   heteroscedastic  0.98 [0.97]  0.71 [0.72]  0.41 [0.42]  0.19 [0.18]
+   unbalanced       0.96 [0.96]  0.68 [0.70]  0.40 [0.40]  0.15 [0.16]
+   shells           1.00 [1.00]  1.00 [0.84]  0.45 [0.34]  0.18 [0.18]
+   bridge           0.95 [0.96]  0.72 [0.74]  0.48 [0.46]  0.15 [0.15]
+   hierarchical     1.00 [1.00]  0.63 [0.70]  0.47 [0.51]  0.46 [0.46]
+   filaments        1.00 [0.95]  0.71 [0.75]  0.31 [0.34]  0.14 [0.14]
+== 2. graines
+   dev 2048, test 960, test_v10b 960 ; intersections 0 / 0 / 0
+   CSV dev lus : 23 ; graines de test trouvees : 0
+== 3. lot C : hdb_ms1 contre hdb_ms2 (EOM, alpha = 1, meme remplissage)
+   hdb_ms1 = hdb_ms2 sur 960 scenes sur 960
+   hdb_ms1_nf = hdb_ms2_nf sur 960 scenes sur 960
+== 4. metriques et generateur
+   ARI_s([0,0,1,1], [0,0,-1,-1]) = 0.571429 (attendu 4/7 = 0.571429)
+   bridge : points de pont etiquetes -1 : 40 ; etiquetes -2 : 0
+   centres( 2) : voisins a la distance minimale, en moyenne 1.00
+   centres( 3) : voisins a la distance minimale, en moyenne 0.67
+   centres( 5) : voisins a la distance minimale, en moyenne 1.20
+   centres( 8) : voisins a la distance minimale, en moyenne 1.50
+   centres(12) : voisins a la distance minimale, en moyenne 0.33
+   centres(20) : voisins a la distance minimale, en moyenne 0.90
+== 5. sklearn cluster_selection_epsilon
+   eom epsilon 0 : ok, 2 amas
+   eom epsilon 500 : ok, 2 amas
+   leaf epsilon 0 : ok, 7 amas
+   leaf epsilon 500 : ECHEC TypeError : only 0-dimensional arrays can be converted to Python scalars

@@ -1,0 +1,11 @@
+--- src_pub/src/tower/tower.cpp	2026-10-02 08:03:12.896978063 +0000
++++ src_mut/src/tower/tower.cpp	2026-10-02 08:21:45.561971011 +0000
+@@ -996,7 +996,7 @@
+ inline bool level_at_most(const geom::Level& L, u64 e) {
+   arith::I192 ed;
+   if (!arith::resize(arith::mul(arith::Wide<1>::from_u128(e), L.den), ed)) return true;  // e * den >= 2^192 > num
+-  return arith::cmp(L.num, ed) <= 0;
++  return arith::cmp(L.num, ed) < 0;  // MUTANT AT1 (audit L12) : egalite stricte
+ }
+ 
+ // Plus grand rang r (decale : 0 = niveau nul) tel que niveau(r) <= e : nombre de niveaux <= e. Dichotomie a deux

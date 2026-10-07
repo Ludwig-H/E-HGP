@@ -1,0 +1,5 @@
+polyhedron order-k counterexamples: PASS (3 cases)
+
+real	0m0.077s
+user	0m0.056s
+sys	0m0.021s

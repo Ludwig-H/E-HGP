@@ -1,0 +1,35 @@
+| Predicat | Valeur | Degre | Coefficient | bits(e) | e max binaire64 | e max i64 | e max i128 | Exposition E |
+|---|---|---:|---:|---|---:|---:|---:|---:|
+| dominance (noeud, feuille) | A_i - A_j | 2 | 6 | 2 e + 2.58 | 25 | 30 | 62 | 4 |
+| dominance (noeud, feuille) | somme des max(0, P_i - P_j) | 2 | 12 | 2 e + 3.58 | 24 | 29 | 61 | 4 |
+| milieu dans la boite (q2) | y_i + y_j ; 2 h | 1 | 2 | 1 e + 1.00 | 52 | 62 | 126 | 1 |
+| triangle aigu (q3) | u.v, u.u, v.v | 2 | 3 | 2 e + 1.58 | 25 | 30 | 62 | 3 |
+| droite des equidistants (variante) | l = v_k P_0 - u_k P_1 | 3 | 36 | 3 e + 5.17 | 15 | 19 | 40 | 7 |
+| droite des equidistants (variante) | r = 2 somme h_j |c_kj| | 3 | 8 | 3 e + 3.00 | 16 | 20 | 41 | 4 |
+| centre q3 | w = u x v | 2 | 2 | 2 e + 1.00 | 26 | 31 | 63 | 2 |
+| centre q3 | t = uu v - vv u | 3 | 6 | 3 e + 2.58 | 16 | 20 | 41 | 5 |
+| centre q3 | N (numerateur) | 5 | 24 | 5 e + 4.58 | 9 | 11 | 24 | 9 |
+| centre q3 | D = 2 |w|^2 | 4 | 24 | 4 e + 4.58 | 12 | 14 | 30 | 7 |
+| centre q3 dans la boite | a D + N | 5 | 48 | 5 e + 5.58 | 9 | 11 | 24 | 10 |
+| centre q3 dans la boite | h D | 5 | 24 | 5 e + 4.58 | 9 | 11 | 24 | 8 |
+| centre q4 | det(u, v, s) | 3 | 6 | 3 e + 2.58 | 16 | 20 | 41 | 5 |
+| centre q4 | N (numerateur) | 4 | 18 | 4 e + 4.17 | 12 | 14 | 30 | 8 |
+| centre q4 dans la boite | a D + N | 4 | 30 | 4 e + 4.91 | 12 | 14 | 30 | 9 |
+| centre q4 dans la boite | h D | 4 | 12 | 4 e + 3.58 | 12 | 14 | 30 | 6 |
+| interieur strict du tetraedre (q4) | mineur de Gram | 4 | 18 | 4 e + 4.17 | 12 | 14 | 30 | 8 |
+| interieur strict du tetraedre (q4) | A (barycentrique x 2 det^2) | 6 | 162 | 6 e + 7.34 | 7 | 9 | 19 | 14 |
+| interieur strict du tetraedre (q4) | A + B + C | 6 | 486 | 6 e + 8.92 | 7 | 9 | 19 | 16 |
+| interieur strict du tetraedre (q4) | 2 det G | 6 | 324 | 6 e + 8.34 | 7 | 9 | 19 | 14 |
+| interieur strict du tetraedre (q4) | 2 det G - A - B - C (forme filtree) | 6 | 810 | 6 e + 9.66 | 7 | 8 | 19 | 17 |
+| recensement q2 | |d|^2 ; n.d | 2 | 3 | 2 e + 1.58 | 25 | 30 | 62 | 3 |
+| recensement q3 | D |d|^2 | 6 | 72 | 6 e + 6.17 | 7 | 9 | 20 | 11 |
+| recensement q3 | 2 N.d | 6 | 144 | 6 e + 7.17 | 7 | 9 | 19 | 12 |
+| recensement q3 | D |d|^2 - 2 N.d (forme filtree) | 6 | 216 | 6 e + 7.75 | 7 | 9 | 19 | 13 |
+| recensement q4 | D |d|^2 | 5 | 36 | 5 e + 5.17 | 9 | 11 | 24 | 9 |
+| recensement q4 | 2 N.d | 5 | 108 | 5 e + 6.75 | 9 | 11 | 24 | 11 |
+| recensement q4 | D |d|^2 - 2 N.d (forme filtree) | 5 | 144 | 5 e + 7.17 | 9 | 11 | 23 | 12 |
+| niveau q2 | |u|^2 (den 4) | 2 | 3 | 2 e + 1.58 | 25 | 30 | 62 | 3 |
+| niveau q3 | num = uu vv dd | 6 | 27 | 6 e + 4.75 | 8 | 9 | 20 | 11 |
+| niveau q3 | den = 4 |w|^2 | 4 | 48 | 4 e + 5.58 | 11 | 14 | 30 | 7 |
+| niveau q4 | num = |N|^2 | 8 | 972 | 8 e + 9.92 | 5 | 6 | 14 | 19 |
+| niveau q4 | den = D^2 | 6 | 144 | 6 e + 7.17 | 7 | 9 | 19 | 11 |

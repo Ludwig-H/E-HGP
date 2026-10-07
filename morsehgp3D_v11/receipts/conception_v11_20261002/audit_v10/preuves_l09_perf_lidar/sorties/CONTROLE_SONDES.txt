@@ -1,0 +1,14 @@
+mom_l00_k10_w3.json grand livre identique a la reference : True
+mom_l00_k5_w3.json grand livre identique a la reference : True
+mom_l01_k5_w3.json grand livre identique a la reference : True
+mom_l02_k5_w3.json grand livre identique a la reference : True
+tsc_l00_k10_w1.json grand livre identique a la reference : True
+tsc_l00_k5_w1.json grand livre identique a la reference : True
+tsc_l01_k5_w1.json grand livre identique a la reference : True
+tsc_l02_k10_w1.json grand livre identique a la reference : True
+tsc_l02_k5_w1.json grand livre identique a la reference : True
+ttsc_l00_k10_w1.json tour identique a la reference (noeuds, naissances, fusions, jonctions, descentes, MEB) : True
+ttsc_l00_k5_w1.json tour identique a la reference (noeuds, naissances, fusions, jonctions, descentes, MEB) : True
+ttsc_l01_k5_w1.json tour identique a la reference (noeuds, naissances, fusions, jonctions, descentes, MEB) : True
+ttsc_l02_k10_w1.json tour identique a la reference (noeuds, naissances, fusions, jonctions, descentes, MEB) : True
+ecarts : 0

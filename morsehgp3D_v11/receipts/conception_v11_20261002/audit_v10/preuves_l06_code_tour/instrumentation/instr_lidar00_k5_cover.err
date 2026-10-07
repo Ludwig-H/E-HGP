@@ -1,0 +1,18 @@
+L06_MEM_AFTER_G nballs=1306696 cells=2164763 lookup=16777216 atlas=26504167 ball_vnode=5226784 seeds=12582912 spop=13616956 runs=33597588 P=957240 total=109262863
+L06_CHAIN_JOIN steps_hist=0,2950521,584687,70581,13024,2306,371,66,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 jumps_hist=3390900,193126,31447,5251,724,93,19,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+L06_KRUSKAL k=4 births=249493 joins=341082 reps=985212 lots=329235 lots_multi=9381 merges2=105662 merges3=55709 merges4p=10797 max_children=5 max_lot_reps=20 find_steps=1059555 joins_no_union=168876
+L06_KRUSKAL k=5 births=341081 joins=448755 reps=1350122 lots=437973 lots_multi=8914 merges2=147275 merges3=70244 merges4p=17771 max_children=5 max_lot_reps=20 find_steps=1454626 joins_no_union=213448
+L06_KRUSKAL k=3 births=166228 joins=249493 reps=673223 lots=231610 lots_multi=12940 merges2=78055 merges3=36714 merges4p=4913 max_children=5 max_lot_reps=20 find_steps=713989 joins_no_union=129773
+L06_KRUSKAL k=1 births=39885 joins=101089 reps=202178 lots=57684 lots_multi=18222 merges2=39709 merges3=86 merges4p=1 max_children=4 max_lot_reps=48 find_steps=206656 joins_no_union=61205
+L06_KRUSKAL k=2 births=101089 joins=166228 reps=410825 lots=144401 lots_multi=14065 merges2=53048 merges3=23951 merges4p=39 max_children=5 max_lot_reps=28 find_steps=428601 joins_no_union=89095
+L06_COVER_TIES k=2 extra=0 sites=39885 tied_first_level=34 ambiguous_component=34
+L06_COVER_TIES k=3 extra=0 sites=39885 tied_first_level=53 ambiguous_component=53
+L06_COVER_TIES k=4 extra=0 sites=39885 tied_first_level=19 ambiguous_component=19
+L06_COVER_TIES k=5 extra=0 sites=39885 tied_first_level=20 ambiguous_component=20
+L06_MEM_FOREST nodes=1541750 forest_bytes=60621672 jumps_bytes=12334000
+L06_CB calls=432390 sum=4771483 max=1231 judge_calls=75472 judge_sum=368352 nonstrict=0 hist_log2=0,0,202611,198786,21958,4964,2301,1180,278,180,132,0,0,0,0,0,0,0,0,0,0,0,0,0
+L06_JUMP calls=792602 p_sum=4775385 p_max=1229 from_cat=438464
+L06_LOOKUP2 calls=78252 same_key_as_first=78250 hits=2 miss_in_window=0 below_window=78250
+L06_EXT balls=227 cells=523 max_m=5 refused=0
+L06_KRUSKAL_TOTAL lots=1200903 lots_multi=63522 merges2=423749 merges3=186704 merges4p=33521 max_children=5 max_lot_reps=48 find_steps=3863427 joins_no_union=662397
+L06_CHAIN_ALL steps_hist=0,6606300,1236615,133605,22205,3719,578,103,7,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0 jumps_hist=7299824,626234,66437,9265,1197,145,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0

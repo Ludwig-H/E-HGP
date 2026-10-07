@@ -1,0 +1,22 @@
+# Fri Oct  2 06:50:48 UTC 2026 ; extremes du domaine u18 contre l'oracle Fraction du depot
+conforme coins n=8 K=1 boules 19
+conforme coins n=8 K=2 boules 19
+conforme coins n=8 K=3 boules 27
+conforme coins n=8 K=5 boules 27
+conforme coins+centre n=10 K=1 boules 21
+conforme coins+centre n=10 K=2 boules 47
+conforme coins+centre n=10 K=3 boules 66
+conforme coins+centre n=10 K=5 boules 74
+conforme coins+quasi n=13 K=1 boules 26
+conforme coins+quasi n=13 K=2 boules 61
+conforme coins+quasi n=13 K=3 boules 101
+conforme coins+quasi n=13 K=5 boules 182
+conforme aleatoire_extreme n=18 K=1 boules 36
+conforme aleatoire_extreme n=18 K=2 boules 72
+conforme aleatoire_extreme n=18 K=3 boules 111
+conforme aleatoire_extreme n=18 K=5 boules 209
+conforme grand_triangle n=6 K=1 boules 10
+conforme grand_triangle n=6 K=2 boules 19
+conforme grand_triangle n=6 K=3 boules 25
+conforme grand_triangle n=6 K=5 boules 28
+extremes_u18 : controles 20, ecarts 0

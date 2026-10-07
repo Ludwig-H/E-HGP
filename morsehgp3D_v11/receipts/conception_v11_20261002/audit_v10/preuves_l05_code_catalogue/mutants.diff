@@ -1,0 +1,120 @@
+# mutant m_fit
+--- a/morsehgp3D_v10/src/catalogue/generator.cpp	2026-10-02 05:18:10.374040832 +0000
++++ b/morsehgp3D_v10/src/catalogue/generator.cpp	2026-10-02 06:13:01.270019972 +0000
+@@ -587,7 +587,7 @@
+   int ax = 0;  // axe du plus long cote de S (le premier en cas d'egalite)
+   for (int a = 0; a < 3; ++a) {
+     S.lo[a] = std::max(S.lo[a], Q.lo[a]);
+-    S.hi[a] = std::min(S.hi[a] + 1, Q.hi[a]);
++    S.hi[a] = std::min(S.hi[a], Q.hi[a]);
+     if (S.lo[a] >= S.hi[a]) {
+       ++L.led.skipped_bbox;
+       return;
+# mutant m_th3
+--- a/morsehgp3D_v10/src/catalogue/generator.cpp	2026-10-02 05:18:10.374040832 +0000
++++ b/morsehgp3D_v10/src/catalogue/generator.cpp	2026-10-02 06:13:01.286019972 +0000
+@@ -338,7 +338,7 @@
+   const i64* const lx2 = L.lx2.data();
+   const u32* const wl = L.wl.data();
+   const i64 K = C.K;
+-  const i64 th2 = K - 1, th3 = tight ? K - 2 : K - 1, th4 = tight ? K - 3 : K - 1;
++  const i64 th2 = K - 1, th3 = tight ? K - 3 : K - 1, th4 = tight ? K - 3 : K - 1;
+   L.dom.assign(size_t(m) * nw, 0);
+   L.live2.assign(size_t(m) * nw, 0);
+   // triplets vivants : ligne (a, b), a < b, au rang a m - a (a + 1) / 2 + b - a - 1 (triangle superieur)
+# mutant m_zono
+--- a/morsehgp3D_v10/src/catalogue/generator.cpp	2026-10-02 05:18:10.374040832 +0000
++++ b/morsehgp3D_v10/src/catalogue/generator.cpp	2026-10-02 06:13:01.300019972 +0000
+@@ -138,7 +138,7 @@
+     if (u[k] == 0 && v[k] == 0) continue;
+     i128 l = i128(v[k]) * p0 - i128(u[k]) * p1;
+     if (l < 0) l = -l;
+-    if (l > r[k]) return 0;
++    if (l >= r[k]) return 0;
+   }
+   return 1;
+ }
+# mutant m_dom
+--- a/morsehgp3D_v10/src/catalogue/generator.cpp	2026-10-02 05:18:10.374040832 +0000
++++ b/morsehgp3D_v10/src/catalogue/generator.cpp	2026-10-02 06:13:01.316019972 +0000
+@@ -368,7 +368,7 @@
+           (dx > 0 ? Q.lo[0] : Q.hi[0]) * dx + (dy > 0 ? Q.lo[1] : Q.hi[1]) * dy + (dz > 0 ? Q.lo[2] : Q.hi[2]) * dz;
+       const i64 cmax =
+           (dx > 0 ? Q.hi[0] : Q.lo[0]) * dx + (dy > 0 ? Q.hi[1] : Q.lo[1]) * dy + (dz > 0 ? Q.hi[2] : Q.lo[2]) * dz;
+-      if (base - 2 * cmin < 0) setbit(Dm + size_t(i) * nw, j);
++      if (base - 2 * cmin <= 0) setbit(Dm + size_t(i) * nw, j);
+       else if (base - 2 * cmax > 0) setbit(Dm + size_t(j) * nw, i);
+     }
+   }
+# mutant m_multiword
+--- a/morsehgp3D_v10/src/catalogue/generator.cpp	2026-10-02 05:18:10.374040832 +0000
++++ b/morsehgp3D_v10/src/catalogue/generator.cpp	2026-10-02 06:13:01.330019971 +0000
+@@ -281,7 +281,7 @@
+ }
+ 
+ // Bits d'indice global > b dans le mot t (t >= b / 64).
+-inline u64 bits_above(u32 b, u32 t) { return t > (b >> 6) ? ~u64(0) : ~((u64(2) << (b & 63)) - 1); }
++inline u64 bits_above(u32 b, u32 t) { return t > (b >> 6) + 1 ? ~u64(0) : ~((u64(2) << (b & 63)) - 1); }
+ 
+ // Population d'un mot (forme SWAR : le profil sans popcnt materiel appelait __popcountdi2).
+ inline u64 popcount64(u64 x) {
+# mutant m_census
+--- a/morsehgp3D_v10/src/catalogue/generator.cpp	2026-10-02 05:18:10.374040832 +0000
++++ b/morsehgp3D_v10/src/catalogue/generator.cpp	2026-10-02 06:13:01.342019971 +0000
+@@ -236,7 +236,7 @@
+     const int s = geom::side(ctr, a, L.lp[t]);
+     if (s < 0) {
+       p += L.wl[t];
+-      if (static_cast<i64>(p) > theta) return;  // toute admission de cette presentation exige p <= theta
++      if (static_cast<i64>(p) >= theta && theta > 0) return;
+       L.interior.push_back(cand[t]);
+     } else if (s == 0) {
+       L.shell.push_back(cand[t]);
+# mutant m_filterK
+--- a/morsehgp3D_v10/src/catalogue/generator.cpp	2026-10-02 05:18:10.374040832 +0000
++++ b/morsehgp3D_v10/src/catalogue/generator.cpp	2026-10-02 06:13:01.355019971 +0000
+@@ -552,7 +552,7 @@
+       tests += ny - s0;
+     }
+     cand[m] = s;
+-    m += dom < C.K;
++    m += dom < C.K - 1 || C.K == 1;
+   }
+   cand.resize(m);
+   L.led.filter_tests += tests;
+# mutant m_frontier
+--- a/morsehgp3D_v10/src/catalogue/generator.cpp	2026-10-02 05:18:10.374040832 +0000
++++ b/morsehgp3D_v10/src/catalogue/generator.cpp	2026-10-02 06:42:05.576008915 +0000
+@@ -706,7 +706,7 @@
+       for (size_t i = 0; i < frontier.size(); ++i) {
+         if (load[i] > cap) {
+           heavy.push_back(std::move(frontier[i]));
+-        } else {
++        } else if (load[i] > 0) {
+           kept.push_back(std::move(frontier[i]));
+           kept_load.push_back(load[i]);
+         }
+# mutant m_band
+--- a/morsehgp3D_v10/src/catalogue/generator.cpp	2026-10-02 05:18:10.374040832 +0000
++++ b/morsehgp3D_v10/src/catalogue/generator.cpp	2026-10-02 06:42:05.600008915 +0000
+@@ -781,7 +781,7 @@
+   std::vector<std::pair<u64, u64>> bands;
+   for (size_t i = 0; i < refs.size();) {
+     size_t j = i + 1;
+-    while (j < refs.size() && refs[j].approx - refs[j - 1].approx <= refs[j].approx * 0x1p-40) ++j;
++    while (j < refs.size() && refs[j].approx - refs[j - 1].approx < 0) ++j;
+     if (j - i > 1) {
+       bands.push_back({i, j});
+       cat.band_members += j - i;
+# mutant m_stag
+--- a/morsehgp3D_v10/src/catalogue/generator.cpp	2026-10-02 05:18:10.374040832 +0000
++++ b/morsehgp3D_v10/src/catalogue/generator.cpp	2026-10-02 06:42:05.624008915 +0000
+@@ -26,7 +26,7 @@
+ // garde les m sites a toute profondeur, alors qu'une configuration generique converge vers les K plus proches
+ // voisins (K < M). On arrete apres 9 niveaux binaires sans decroissance : volume divise par 2^9, soit chaque cote
+ // par 8, comme les 3 niveaux de l'octree precedent.
+-constexpr int kStagnationLimit = 9;
++constexpr int kStagnationLimit = 1;
+ // Reservoir des dominateurs d'un noeud : au plus 3 K sites.
+ constexpr u32 kPool = 3 * kMaxCatalogueOrder;
+ // Filtre des noeuds en i64 : la plus grande quantite est la cle du reservoir, < 27 2^(2 (B + T)).

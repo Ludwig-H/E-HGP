@@ -1,0 +1,8 @@
+nuage [0, 999, 2000]
+  oracle : u_core(gauche, milieu) = 999.000 ; u_cover(gauche, milieu) = 499.500 ; u_cover(milieu, droite) = 1000.000
+  binaire --entry=core : [(499.5, ()), (999.0, ((0, 1),)), (1001.0, ((0, 1, 2),))]
+  binaire --entry=cover : [(499.5, ((0, 1),)), (1000.0, ((0, 1, 2),))]
+nuage [0, 1001, 2000]
+  oracle : u_core(gauche, milieu) = 1001.000 ; u_cover(gauche, milieu) = 1000.000 ; u_cover(milieu, droite) = 499.500
+  binaire --entry=core : [(499.5, ()), (999.0, ((1, 2),)), (1001.0, ((0, 1, 2),))]
+  binaire --entry=cover : [(499.5, ((1, 2),)), (1000.0, ((0, 1, 2),))]

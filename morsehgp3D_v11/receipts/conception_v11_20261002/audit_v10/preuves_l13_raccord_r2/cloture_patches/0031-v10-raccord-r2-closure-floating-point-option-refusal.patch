@@ -1,0 +1,1697 @@
+From 35de8c088806ff59ed39924187acb2ad402e95c4 Mon Sep 17 00:00:00 2001
+From: Ludwig-H <158177790+Ludwig-H@users.noreply.github.com>
+Date: Fri, 2 Oct 2026 04:51:16 +0000
+Subject: [PATCH 31/32] v10 raccord r2 closure: floating-point option refusal
+ stated as a contract, four out-of-contract channels declared, permanent
+ contract gate
+
+Adversarial re-verification of the repaired tree 210b9fc (2 October 2026): finding B2 is closed for options written
+in clear, but the configure-time refusal was still bypassed, without refusal or warning, by three channels that
+nothing declared out of contract, plus a minor one. Decision of the developer: the refusal is a defence in depth
+against options written in clear in the judged sets, it cannot be complete against every way of altering code
+generation. No channel is closed here; every statement is made true and the contract is pinned as declared.
+No product code changes: comments only in src/ and cli/ (the 15 GCC binaries keep the sha256 of the final replay,
+checked on the frozen extraction of this closure).
+- cmake/fp_flags.cmake: header rewritten around nine statements E1 to E9: scope (defence in depth), judged token
+  sets and only them, probed compile sets and what the probe reads, channel A (payload of a linker token under LTO:
+  clang, -flto with -Wl,-plugin-opt=-fp-contract=fast, 64, 71 and 2 FMA instructions in tower, cluster and
+  catalogue, 81 gates of 81 green), channel B (flag set by add_definitions from a project include or a parent
+  project: -freciprocal-math under clang, -mno-ieee-fp under gcc), channel C (response or config file carrying
+  -cl-single-precision-constant under clang: the factor 1 + 1e-10 of DWelzl::contains folded to 1), channel D,
+  minor (-mdaz-ftz in a response file or crtfastmath.o at link under gcc: MXCSR 0x9fc0 at main), compile-time
+  hypotheses of the certified filters (no FMA contraction for kMargin) valid under the contract only,
+  -ffp-contract=off on every compile line and the #error carried by every unit but tests/unit/fault_preload.cpp.
+  Code lines untouched.
+- README.md and PASSATION.md: section "Contrat des options flottantes" with the same nine statements; rows
+  "filtres flottants" and "Raccord R2" no longer say every spelling, tokens of each option set, the probe also
+  sees a response file, #error in every unit; gate counts after the closure (84 under GCC and Clang, 82 under
+  sanitizers). PASSATION.md: open item 6, not implemented: behavioural self-test of the floating arithmetic at run
+  time in each unit that carries a certified filter (non-contracted product-sum, division against reciprocal,
+  double constant, rounding mode, DAZ and FTZ), refusing with numeric_failure, a status to add; it changes product
+  code and needs the full replay.
+- CMakeLists.txt, docs/conception/ARCH_v2.md, cmake/fp_probe.cpp, headers of site_tree.cpp, tower.cpp, tower.hpp,
+  fp_strict.hpp and types.hpp, headers of the fp gates and of the engraved campaign: same corrections, pointers
+  to the contract.
+- new gate mhgp10_regression_fp_contract (and _clang or _gnu), labels gate and regression, python, no build:
+  statements read word for word in the three living documents, pointers, retracted over-claims absent; judged and
+  probed sets read in the code of fp_flags.cmake and compared with the lists the statements name; one accepted
+  case per out-of-contract channel replayed at configure level (the option must reach the written compile or link
+  commands), refused twins written in clear and the seven spellings of finding B2; per-unit guard under
+  -ffast-math (23 units of 24). Mutants killed by their family: documents, code, and mutated trees where a channel
+  is closed, a refusal is left to the probe, the exempt unit gains the guard, the guard is not included, the
+  contraction option is not set. Codes 0, 1, 2, 3; exact floors; same output under python3 -O.
+  Lines: compilateur=GNU ... canaux=2/2 admis=4 refus=9 unites=23/24 mutants_tues=82/82 ; compilateur=Clang ...
+  canaux=3/3 admis=5 refus=4 unites=23/24 mutants_tues=83/83. Closing a channel fails the gate until the
+  documents change.
+- receipts/raccord_r2_20260930/cloture/README.md: placeholder, completed by the receipts commit.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ morsehgp3D_v10/CMakeLists.txt                 |  84 +-
+ morsehgp3D_v10/PASSATION.md                   |  42 +-
+ morsehgp3D_v10/README.md                      |  26 +-
+ morsehgp3D_v10/cmake/fp_flags.cmake           |  99 +-
+ morsehgp3D_v10/cmake/fp_probe.cpp             |   9 +-
+ morsehgp3D_v10/docs/conception/ARCH_v2.md     |  26 +-
+ .../raccord_r2_20260930/cloture/README.md     |   3 +
+ morsehgp3D_v10/src/cloud/site_tree.cpp        |  13 +-
+ morsehgp3D_v10/src/core/fp_strict.hpp         |  22 +-
+ morsehgp3D_v10/src/core/types.hpp             |   2 +-
+ morsehgp3D_v10/src/tower/tower.cpp            |   8 +-
+ morsehgp3D_v10/src/tower/tower.hpp            |   7 +-
+ .../tests/regression/float_filter_mutants.py  |  21 +-
+ .../tests/regression/fp_flags_configure.cmake |  12 +-
+ .../regression/site_tree_fast_math.cmake      |   3 +-
+ .../tests/regression/test_fp_contract.py      | 942 ++++++++++++++++++
+ 16 files changed, 1235 insertions(+), 84 deletions(-)
+ create mode 100644 morsehgp3D_v10/receipts/raccord_r2_20260930/cloture/README.md
+ create mode 100644 morsehgp3D_v10/tests/regression/test_fp_contract.py
+
+diff --git a/morsehgp3D_v10/CMakeLists.txt b/morsehgp3D_v10/CMakeLists.txt
+index 906cb4b..a8cfb6f 100644
+--- a/morsehgp3D_v10/CMakeLists.txt
++++ b/morsehgp3D_v10/CMakeLists.txt
+@@ -23,28 +23,38 @@ add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+ # sans division remplacee par un produit par l'inverse, sans contraction FMA (verification adverse du raccord R2,
+ # § 3.3 : -Ofast et CMAKE_CXX_FLAGS_RELEASE=-ffast-math passaient la configuration ; auditeur continu du 30 septembre
+ # 2026 : CMAKE_CXX_FLAGS="-freciprocal-math", option citee, passait le motif sur la chaine brute). Refus de -Ofast,
+-# -ffast-math et de ses composantes (cmake/fp_flags.cmake : liste, regles, decoupage) dans chaque ensemble d'options,
+-# decoupe comme le compilateur le lira : variables CMAKE_CXX_FLAGS* (cache compris : tous les types de build, actif ou
+-# non, et les valeurs _INIT venues de CXXFLAGS ou d'une chaine d'outils), CMAKE_CXX_COMPILER_ARG1, drapeaux d'edition
+-# de liens, options du repertoire, des cibles, des cibles importees et des sources. Le jugement a lieu en fin de
+-# configuration (cmake_language(DEFER)), une fois toutes les cibles creees. site_tree.cpp et tower.cpp refusent aussi
+-# -ffast-math a la compilation (#error). La contraction n'a pas de macro : -ffp-contract=off pour toutes les unites,
+-# quel que soit -march (sans effet sur le x86-64 de base, qui n'a pas de FMA).
++# -ffast-math et de ses composantes (cmake/fp_flags.cmake : liste, regles, decoupage) dans les ensembles d'options
++# juges, decoupes comme le compilateur les lira : variables CMAKE_CXX_FLAGS* (cache compris : tous les types de build,
++# actif ou non, et les valeurs _INIT venues de CXXFLAGS ou d'une chaine d'outils), CMAKE_CXX_COMPILER_ARG1, drapeaux
++# d'edition de liens, options du repertoire, des cibles, des cibles importees et des sources. Le jugement a lieu en fin
++# de configuration (cmake_language(DEFER)), une fois toutes les cibles creees. site_tree.cpp et tower.cpp refusent
++# aussi -ffast-math a la compilation (#error). La contraction n'a pas de macro : -ffp-contract=off est pose sur chaque
++# ligne de compilation, avec ou sans -march (sans effet sur le x86-64 de base, qui n'a pas de FMA).
+ # Reparation du raccord R2 (1er octobre 2026, constat B2 : le refus se contournait par -cl-unsafe-math-optimizations
+ # sous Clang, sans macro, et par les alias longs de GCC --finite-math-only, --no-signed-zeros, --no-trapping-math ;
+ # constat m1 : -DCMAKE_CXX_STANDARD_LIBRARIES=-ffast-math n'etait pas juge) : alias longs juges sous leur orthographe
+ # courte, options -cl-* refusees, tout nom d'option contenant « math » refuse hors liste blanche, variables
+ # CMAKE_CXX_STANDARD_LIBRARIES et CMAKE_CXX_LINK_FLAGS et bibliotheques liees jugees ; puis sonde des options
+ # effectives, ou le compilateur dit lui-meme ce que ses options produisent (macros ; etats de `g++ -Q
+-# --help=optimizers` ; drapeaux fast-math de l'IR de Clang), quelle que soit l'orthographe ou le canal (fichier de
+-# reponse compris). Le #error couvre desormais toute unite (core/fp_strict.hpp) et les macros de -ffinite-math-only,
+-# -fno-signed-zeros, -fno-trapping-math et __GCC_IEC_559.
++# --help=optimizers` ; drapeaux fast-math de l'IR de Clang), pour ce qu'il signale ainsi. Le #error de
++# core/fp_strict.hpp, inclus par core/types.hpp, couvre aussi les macros de -ffinite-math-only, -fno-signed-zeros,
++# -fno-trapping-math et __GCC_IEC_559.
+ # Complement (relecture de reprise) : -mno-ieee-fp (composante cible de -ffast-math, sans macro) et
+ # -fallow-store-data-races (composante de -Ofast) passaient encore. Refuses par jeton et par la sonde (etats de
+ # `g++ -Q --help=target` et --help=optimizers) ; l'inventaire des composantes de -Ofast est lu chez le compilateur par
+ # la porte de configuration, qui echoue si l'une d'elles n'est ni refusee ni argumentee (MHGP10_FP_OFAST_ARGUED).
++# Cloture du raccord R2 (2 octobre 2026 ; re-verification adverse : trois canaux, plus un mineur, passaient encore la
++# configuration sans etre declares hors contrat). Le refus a la configuration est une defense en profondeur contre les
++# options ecrites en clair dans les ensembles juges ; il n'est pas complet contre toute facon de changer la generation
++# de code. Contrat exact (ensembles juges, sonde, canaux hors contrat A a D) : en-tete de cmake/fp_flags.cmake. Les
++# hypotheses de compilation des preuves des filtres certifies, dont « ni contraction FMA » pour kMargin
++# (site_tree.cpp), ne tiennent que sous ce contrat. -ffp-contract=off est pose sur la ligne de compilation de chaque
++# unite ; il ne gouverne pas le code genere a l'edition de liens sous LTO. Le #error de core/fp_strict.hpp est porte
++# par toute unite sauf tests/unit/fault_preload.cpp, bibliotheque de prechargement des portes, hors produit, sans
++# en-tete du projet ni calcul flottant.
+ # Portes : mhgp10_regression_fp_flags_configure (et sa variante pour l'autre compilateur),
+-# mhgp10_regression_site_tree_fast_math, mhgp10_regression_tower_fast_math, mhgp10_regression_fp_strict_fast_math.
++# mhgp10_regression_site_tree_fast_math, mhgp10_regression_tower_fast_math, mhgp10_regression_fp_strict_fast_math,
++# mhgp10_regression_fp_contract (et sa variante pour l'autre compilateur).
+ include(cmake/fp_flags.cmake)
+ cmake_language(DEFER CALL mhgp10_fp_check)
+ set(MHGP10_FP_OPTIONS -ffp-contract=off)
+@@ -123,8 +133,10 @@ target_link_libraries(mhgp10_cluster PRIVATE mhgp10_core)
+ # balayage juge en entiers larges, domaine complet de filtered(), chemin pris par appel (SiteTree::path_counts).
+ # Aucune porte SiteTree n'a le label fast : les plans de la VM ne construisent que les cibles qu'ils listent, et une
+ # porte fast doit viser l'une d'elles ou etre en Python (porte mhgp10_fast_targets du groupe entrees_cli).
+-# Hypothese de la preuve de kMargin : aucune contraction FMA dans site_tree.cpp, quel que soit -march (y compris un
+-# -march passe hors de MHGP10_MARCH, dans CMAKE_CXX_FLAGS) ; controlee par la porte du refus de -ffast-math.
++# Hypothese de la preuve de kMargin : aucune contraction FMA dans site_tree.cpp. L'option du fichier est posee sur sa
++# ligne de compilation, avec ou sans -march (y compris un -march passe hors de MHGP10_MARCH, dans CMAKE_CXX_FLAGS),
++# ce que controle la porte du refus de -ffast-math ; l'hypothese ne tient que sous le contrat de cmake/fp_flags.cmake
++# (canal A : sous LTO, l'edition de liens genere le code).
+ set_source_files_properties(src/cloud/site_tree.cpp PROPERTIES COMPILE_OPTIONS -ffp-contract=off)
+ get_source_file_property(site_tree_fp_options src/cloud/site_tree.cpp COMPILE_OPTIONS)
+ add_executable(mhgp10_site_tree_far_center tests/regression/site_tree_far_center.cpp)
+@@ -159,7 +171,7 @@ set_tests_properties(mhgp10_regression_site_tree_old_api PROPERTIES LABELS "gate
+ # d'ordre, ball_node compris) identiques sous les quatre modes d'arrondi, filtres coupes hors FE_TONEAREST et observes
+ # par les compteurs fp_* (un fil, quatre fils, fils de modes differents) ; refus a la compilation et contraction
+ # coupee (meme script que SiteTree, UNIT=tower, options globales MHGP10_FP_OPTIONS) ; refus a la configuration dans
+-# chaque ensemble d'options (cmake/fp_flags.cmake) et -ffp-contract=off partout.
++# les ensembles d'options juges (cmake/fp_flags.cmake) et -ffp-contract=off sur chaque ligne de compilation.
+ add_executable(mhgp10_tower_rounding tests/regression/tower_rounding.cpp)
+ target_link_libraries(mhgp10_tower_rounding PRIVATE mhgp10_core)
+ target_compile_options(mhgp10_tower_rounding PRIVATE -frounding-math)
+@@ -184,9 +196,9 @@ add_test(NAME mhgp10_regression_tower_fast_math
+          COMMAND ${CMAKE_COMMAND} -DCMD=${CMAKE_COMMAND} "-DARGS=${tower_fast_math_args}" -DEXPECTED=0
+                  -DEXPECT_LINE=tower_fast_math_refuse -P ${PROJECT_SOURCE_DIR}/cmake/run_expect.cmake)
+ set_tests_properties(mhgp10_regression_tower_fast_math PROPERTIES LABELS "gate;regression" TIMEOUT 600)
+-# Garde commune a toutes les unites (core/fp_strict.hpp, reparation du raccord R2) : meme script, UNIT=fp_strict, sur
+-# une unite sans garde propre (head.cpp, dont la tete lit des NaN et des infinis ; son assembleur porte des FMA sous
+-# contraction : controle positif de l'etape 3).
++# Garde commune (core/fp_strict.hpp, reparation du raccord R2 ; portee par toute unite sauf
++# tests/unit/fault_preload.cpp) : meme script, UNIT=fp_strict, sur une unite sans garde propre (head.cpp, dont la tete
++# lit des NaN et des infinis ; son assembleur porte des FMA sous contraction : controle positif de l'etape 3).
+ set(fp_strict_fast_math_args -DCXX=${CMAKE_CXX_COMPILER} -DCXX_ID=${CMAKE_CXX_COMPILER_ID}
+     -DARCH=${CMAKE_SYSTEM_PROCESSOR} -DSRC_OPTIONS=${MHGP10_FP_OPTIONS} -DUNIT=fp_strict
+     -DSRC=${PROJECT_SOURCE_DIR}/src/head/head.cpp -DINC=${PROJECT_SOURCE_DIR}/src
+@@ -522,6 +534,44 @@ if(Python3_FOUND)
+                      -DEXPECTED=0 -P ${PROJECT_SOURCE_DIR}/cmake/run_expect.cmake)
+     set_tests_properties(mhgp10_regression_clang_sanitizer_harness PROPERTIES LABELS "gate;regression" TIMEOUT 3000)
+   endif()
++  # Cloture du raccord R2 (2 octobre 2026) : contrat des options flottantes, epingle tel qu'il est declare. La
++  # re-verification adverse de l'arbre repare montre trois canaux, plus un mineur, qui passent le refus a la
++  # configuration (charge d'un jeton passe a l'editeur de liens sous LTO, drapeau pose par add_definitions, fichier de
++  # reponse ou --config portant une option sans macro ni drapeau d'IR, sous-normaux mis a zero). Ils ne sont pas
++  # fermes : ils sont declares hors contrat (enonces E1 a E9, en-tete de cmake/fp_flags.cmake). La porte lit ces
++  # enonces mot pour mot dans les documents vivants, compare les ensembles juges du code a ceux qu'ils nomment, puis
++  # rejoue a la configuration seulement (aucun build) un cas admis par canal, les refus graves et la garde de chaque
++  # unite. Fermer un canal fait echouer la porte tant que les documents n'ont pas change. Une porte par compilateur
++  # de la paire, comme mhgp10_regression_fp_flags_configure ; ligne attendue propre au compilateur (canaux A, B, C
++  # sous Clang ; B, D sous GCC). Enregistree pour GCC et Clang seulement. Sans label fast : aucun Clang sur la VM G4,
++  # et les cas rejoues dependent des versions des compilateurs.
++  set(fp_contract_names)
++  if(CMAKE_CXX_COMPILER_ID MATCHES "^(GNU|Clang|AppleClang)$")
++    set(fp_contract_names mhgp10_regression_fp_contract)
++    if(MHGP10_OTHER_CXX)
++      string(REPLACE "fp_flags_configure" "fp_contract" fp_contract_other_name ${fp_flags_other_name})
++      list(APPEND fp_contract_names ${fp_contract_other_name})
++    endif()
++  endif()
++  set(fp_contract_line_gnu "compilateur=GNU familles=5/5 enonces=9 canaux=2/2 admis=4 refus=9 unites=23/24 mutants_tues=82/82 equivalents_acceptes=2/2")
++  set(fp_contract_line_clang "compilateur=Clang familles=5/5 enonces=9 canaux=3/3 admis=5 refus=4 unites=23/24 mutants_tues=83/83 equivalents_acceptes=2/2")
++  foreach(fp_contract_name fp_contract_cxx IN ZIP_LISTS fp_contract_names fp_flags_configure_compilers)
++    if(NOT fp_contract_name)
++      break()
++    endif()
++    if((fp_contract_name STREQUAL "mhgp10_regression_fp_contract" AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
++       OR fp_contract_name STREQUAL "mhgp10_regression_fp_contract_gnu")
++      set(fp_contract_line ${fp_contract_line_gnu})
++    else()
++      set(fp_contract_line ${fp_contract_line_clang})
++    endif()
++    add_test(NAME ${fp_contract_name}
++             COMMAND ${CMAKE_COMMAND} -DCMD=${Python3_EXECUTABLE}
++                     "-DARGS=${PROJECT_SOURCE_DIR}/tests/regression/test_fp_contract.py ${PROJECT_SOURCE_DIR} ${PROJECT_BINARY_DIR}/${fp_contract_name} ${fp_contract_cxx} --jobs=2"
++                     "-DEXPECT_LINE=fp_contract_ok ${fp_contract_line}"
++                     -DEXPECTED=0 -P ${PROJECT_SOURCE_DIR}/cmake/run_expect.cmake)
++    set_tests_properties(${fp_contract_name} PROPERTIES LABELS "gate;regression" TIMEOUT 1200)
++  endforeach()
+   # Frontieres d'entree et de sortie des sondes produit (catalogue, tour, cluster) : fins u32le incompletes et branche
+   # tube du lecteur, export sans attaches, --repeat, regle de feuille M >= K + 3 et diagnostic --allow-small-leaf /
+   # --max-nodes, max_leaf, parseur strict commun, ordres de cluster, sorties refusees output_unwritable ; code exact,
+diff --git a/morsehgp3D_v10/PASSATION.md b/morsehgp3D_v10/PASSATION.md
+index 29f14e9..33726ba 100644
+--- a/morsehgp3D_v10/PASSATION.md
++++ b/morsehgp3D_v10/PASSATION.md
+@@ -89,15 +89,40 @@ GCP : session 1 le 29 septembre (CPU seul, arrêt certifié TERMINATED), reçu `
+ | Hiérarchie de points, entrée `core` (C∩X) ou `cover` (première couverture : une laminarisation des amas discrets du théorème 2, un seul propriétaire par point, pas ces amas ; registre racine, section V10, et `mhgp10_regression_projection_facts`) ; en `cover`, seules les premières boules couvrantes sont résolues (au plus n par ordre) | `src/tower/tower.cpp` (attaches) | `mhgp10_tower_oracle`, `mhgp10_points_cover`, `mhgp10_regression_level_collision`, `mhgp10_regression_batch_equivalence` ; reçu `receipts/cover_attach_first_balls_20260929` |
+ | Appel groupé du banc : un catalogue par scène pour tous les K, les deux entrées et toutes les têtes | `cli/mhgp10_cluster.cpp` (`--k-list`, `--entry=core,cover`, `--configs`), `bench/synthetic/run_test.py` | `mhgp10_regression_batch_equivalence` (groupé = séparé, vote = arbre, 1 fil = 4 fils) |
+ | Condensation/EOM/feuilles et vote de couverture : porte MR bornée ; défaut de seuil des départs différés ouvert, généralité non acquise | `src/head/head.cpp`, `cli/mhgp10_cluster.cpp` | `mhgp10_head_condensation_vs_sklearn` ; [contre-exemple cover/API](receipts/audit_continu_20260929/point_condensation_20260930/README.md) |
+-| Filtres flottants à repli exact (`SiteTree`, tour) coupés hors `FE_TONEAREST`, mode lu dans le fil qui exécute ; objets exacts identiques sous les quatre modes, rendu en double du dendrogramme et tête dans le mode de l'appelant (contrat `FE_TONEAREST`) ; `-Ofast`, `-ffast-math` et composantes refusés à la configuration par deux défenses : jetons de chaque ensemble d'options découpé comme le compilateur le lira (options citées, cibles, sources, édition de liens, bibliothèques liées ; alias longs de GCC jugés sous leur forme courte, options `-cl-*` de Clang, tout nom d'option contenant « math » hors liste blanche, `-mno-ieee-fp` et `-fallow-store-data-races`), puis sonde des options effectives (macros, états de `g++ -Q --help=optimizers` et `--help=target`, drapeaux fast-math de l'IR de Clang), qui voit aussi un fichier de réponse ; inventaire des composantes de `-Ofast` lu chez le compilateur par la porte (toute composante est refusée, ou argumentée dans `MHGP10_FP_OFAST_ARGUED`) ; `#error` dans toute unité pour ce qu'une macro signale ; `-ffp-contract=off` pour toutes les unités (raccord R2, son addendum et sa réparation). Hors contrat : variables d'environnement lues par le compilateur à la construction, règles de compilation réécrites, MXCSR hors `cfenv` | `src/cloud/site_tree.cpp`, `src/tower/tower.cpp`, `src/core/fp_strict.hpp`, `CMakeLists.txt`, `cmake/fp_flags.cmake`, `cmake/fp_probe.cpp` | `mhgp10_regression_site_tree_far_center`, `mhgp10_regression_tower_rounding`, `mhgp10_regression_dendrogram_rounding`, `mhgp10_regression_*_fast_math` (dont `fp_strict`), `mhgp10_regression_fp_flags_configure` (et `_clang` ou `_gnu`), `mhgp10_regression_float_filter_mutants` (GCC et Clang) ; [reçu](receipts/raccord_r2_20260930/sitetree/README.md), [addendum](receipts/raccord_r2_20260930/sitetree/addendum/README.md), [réparation](receipts/raccord_r2_20260930/reparation/README.md) |
++| Filtres flottants à repli exact (`SiteTree`, tour) coupés hors `FE_TONEAREST`, mode lu dans le fil qui exécute ; objets exacts identiques sous les quatre modes, rendu en double du dendrogramme et tête dans le mode de l'appelant (contrat `FE_TONEAREST`) ; `-Ofast`, `-ffast-math` et composantes refusés à la configuration quand ils sont écrits en clair dans les ensembles jugés, par deux défenses : jetons de ces ensembles, découpés comme le compilateur les lira (options citées, cibles, sources, édition de liens, bibliothèques liées ; alias longs de GCC jugés sous leur forme courte, options `-cl-*` de Clang, tout nom d'option contenant « math » hors liste blanche, `-mno-ieee-fp` et `-fallow-store-data-races`), puis sonde des options effectives (macros, états de `g++ -Q --help=optimizers` et `--help=target`, drapeaux fast-math de l'IR de Clang), qui ne voit dans un fichier de réponse que ce qu'elle lit ; inventaire des composantes de `-Ofast` lu chez le compilateur par la porte (toute composante est refusée, ou argumentée dans `MHGP10_FP_OFAST_ARGUED`) ; `#error` de `core/fp_strict.hpp` pour ce qu'une macro signale ; `-ffp-contract=off` sur chaque ligne de compilation (raccord R2, son addendum et sa réparation). **Défense en profondeur, pas une clôture** (clôture du raccord R2, 2 octobre 2026) : quatre canaux sont déclarés hors contrat, A (édition de liens sous LTO), B (`add_definitions`), C (fichier de réponse ou `--config`) et D (sous-normaux mis à zéro, mineur), avec leurs commandes et leurs effets mesurés au [contrat des options flottantes](#contrat-des-options-flottantes) ; hors contrat aussi : variables d'environnement lues par le compilateur à la construction, règles de compilation réécrites, MXCSR hors `cfenv` | `src/cloud/site_tree.cpp`, `src/tower/tower.cpp`, `src/core/fp_strict.hpp`, `CMakeLists.txt`, `cmake/fp_flags.cmake`, `cmake/fp_probe.cpp`, `tests/regression/test_fp_contract.py` | `mhgp10_regression_site_tree_far_center`, `mhgp10_regression_tower_rounding`, `mhgp10_regression_dendrogram_rounding`, `mhgp10_regression_*_fast_math` (dont `fp_strict`), `mhgp10_regression_fp_flags_configure` et `mhgp10_regression_fp_contract` (chacune avec `_clang` ou `_gnu`), `mhgp10_regression_float_filter_mutants` (GCC et Clang) ; [reçu](receipts/raccord_r2_20260930/sitetree/README.md), [addendum](receipts/raccord_r2_20260930/sitetree/addendum/README.md), [réparation](receipts/raccord_r2_20260930/reparation/README.md), [clôture](receipts/raccord_r2_20260930/cloture/README.md) |
+ | Bancs sûrs : délai et signaux de `scale_run` (groupe de l'appel tué et récolté, signaux rapprochés différés jusqu'au groupe fermé, y compris sous Python 3.10 ; signal différé au lancement levé avant la fin de l'appel) ; `--out` et `--calls` sur un même fichier refusés avant toute troncature ; décision refusée hors du plan exact (complétude, épingle, domaine ARI_s [−1/2, 1] et AMI ≤ 1 à 1e−9, fichiers, plan dupliqué) et hors du schéma du préenregistrement (alpha fini dans (0 ; 0,05], paramètres requis, paires vers des méthodes enregistrées, noms distincts), colonnes ou clés JSON dupliquées refusées ; fusion sans scène hors plan, sans `__pycache__`, jamais écrite sur une session (raccord R2). Réparation du 1er octobre 2026 : JSON imbriqué sans fin refusé, plan borné à 10 000 scènes par couple (famille, niveau), fusion refusée sur un fichier régulier, une entrée du banc (`.u32le`, `MANIFEST.json`) jamais prise pour sortie par `scale_run` ; fichiers de sortie de la fusion jugés avant toute lecture (une sortie liée à une entrée par lien symbolique ou physique, alias croisés compris, ou deux sorties sur un même fichier : refus), sorties écrites par temporaire puis renommage (un inode partagé n'est jamais tronqué ; remplacement atomique par fichier, pas global) | `bench/scaling/scale_run.py`, `bench/synthetic/decide.py`, `bench/g4/merge_sessions.py` | `mhgp10_regression_scale_run_timeout`, `mhgp10_regression_decide_completeness` (label `fast`) ; [reçu](receipts/raccord_r2_20260930/bancs/README.md), [réparation](receipts/raccord_r2_20260930/reparation/README.md) |
+ | Pool sûr : tranches réclamées par échange compare saturant (aucune borne sur n ni sur grain, chaque tranche au plus une fois, série comprise) ; première exception capturée, relancée après la sortie de tous les fils, drapeau de région restauré, pool réutilisable ; un fil qui perd l'échange reste dans le travail ; `std::bad_alloc` aux points d'entrée → `memory_budget` ; fil refusé par le système ou allocation de la construction → `session_overhead` avant tout calcul, sans sortie (`sched::make_pool`, raccord R2) | `src/sched/pool.*`, `src/catalogue/generator.cpp`, `src/tower/tower.cpp`, `cli/*.cpp`, `tests/head/mreach_cluster.cpp` | `mhgp10_pool_*` (label `fast`, dont `mhgp10_pool_participation`), `mhgp10_fault_*` (dont `thread_creation`), `mhgp10_regression_worker_bad_alloc`, `mhgp10_regression_thread_creation_refusal`, `mhgp10_regression_clang_sanitizer_harness` (harnais sous Clang avec sanitizer : runtime partagé) ; [reçu](receipts/raccord_r2_20260930/pool/README.md), [réparation](receipts/raccord_r2_20260930/reparation/README.md) |
+ | Frontières des sondes : parseur strict commun (jeton entier, borne avant conversion, valeurs vides refusées ; z et `--configs` par les lecteurs uniques de la tête), entrée u32le lue en entier, paramètres jugés avant la lecture, feuille M ≥ K + 3 et diagnostic à budget obligatoire, garde des boules causale, ordres de cluster bornés ; sorties publiées en entier ou pas du tout (déclarées avant toute réservation, temporaire par sortie, renommage au `commit`, conflits et sortie sur une entrée refusés `output_conflict`, liens suivis, fichier préexistant jamais touché sur refus, garantie d'exception) ; portes `fast` alignées sur les plans G4, aucune porte Python n'écrit `__pycache__` (raccord R2, P2 et P4). Réparation du 1er octobre 2026 : aucune option sans effet (option répétée, option à la place d'un argument positionnel, `--k` avec `--k-list`, options du dump sans dump, `--cover-extra` ou `--label=vote` sans entrée de couverture : refus) ; `--z` mal formé refusé aussitôt ; entrée `coverE` bornée par K + E ≤ sites ; allocation qui échoue dans le fil principal, à toute étape : refus `memory_budget` (aides à `Result`, garde `cli::guarded`), jamais un signal ni un temporaire laissé ; étiquettes de la tête écrites une configuration à la fois (mémoire indépendante du nombre de configurations, jouée sous limite d'adressage) ; publication défaite sur échec tardif (sauvegarde de chaque original avant renommage, restauration, état de récupération écrit ; sortie standard en échec après la publication). Pas d'atomicité globale | `src/core/cli_options.hpp`, `src/core/cli_output.hpp`, `src/cloud/u32le_input.hpp`, `cli/*.cpp`, `tests/head/mreach_cluster.cpp`, `src/catalogue/generator.cpp` | `mhgp10_unit`, `mhgp10_fault_output_set`, `mhgp10_fault_output_commit`, `mhgp10_fault_cli_helpers`, `mhgp10_regression_cli_input_frontiers` (label `fast`) et `_mreach`, `mhgp10_regression_cli_allocation_frontier`, `mhgp10_regression_cli_output_transaction`, `mhgp10_fast_targets` ; [reçu](receipts/raccord_r2_20260930/entrees_cli/README.md), [réparation](receipts/raccord_r2_20260930/reparation/README.md) |
+ | Juges exacts du catalogue et de la tour : lignes publiées jugées avant normalisation (listes de Morton strictes, poids recalculés, ordre (niveau exact, S*), rang dense), plateaux atomiques et règle stricte des fusions (au moins deux enfants nés strictement avant ; naissance de durée nulle seulement sous une vraie fusion), attaches à la coupe fermée de l'entrée (convention fermée du juge exact ; `validate()` garde l'égalité), bloc d'attaches exigé, en-têtes et ordres 1..K effectif ; feuilles de la règle produit et diagnostic `--allow-small-leaf` à budget explicite ; options `--dump-levels` et `--dump-births` reportées dans le parseur strict, dump sans option inchangé (raccord R2). Réparation du 1er octobre 2026 : planchers exacts par famille de fixtures (boules jugées, contrôles) ; un, deux et quatre fils joués, nombre publié par le produit exigé, plancher par nombre de fils. Limites : entrée `core` seule ; feuille non observable sur les fixtures de 2 à 8 sites | `tests/oracle/test_catalogue_oracle.py`, `tests/oracle/test_tower_oracle.py`, `cli/mhgp10_catalogue.cpp`, `cli/mhgp10_tower.cpp` | `mhgp10_catalogue_oracle`, `mhgp10_tower_oracle`, `mhgp10_*_oracle_mutant_*` (28, label `fast`) ; [reçu](receipts/raccord_r2_20260930/oracles/README.md), [réparation](receipts/raccord_r2_20260930/reparation/README.md) |
+ | Tête sûre : domaine numérique conjoint vérifié avant tout calcul flottant (aucune fusion ni composante vivante née au niveau 0, −0 compris, vie lue sur la masse du sous-arbre ; λ fini et normal sur les rangs consommés ; M · λ_max < 2^1000 comparé exactement), `condense` et `cluster` auto-protégés (`outcome`, sorties vides sur refus), sélection et étiquetage linéaires ; frontière de tête unique dans `mhgp10_cluster` et le témoin (`parse_z`, `validate(ClusterParams)`, `read_configs` lecteur unique et exclusif des options de tête, issue lue avant toute étiquette, refus `numeric_domain` avec `"k"`) ; tout ou rien par appel, multi-K compris ; racine singleton au niveau 0 refusée (raccord R2). **Changement de sortie sur entrée valide par rapport à la tête `a8252527e`, déclaré le 1er octobre 2026** : sous `--allow-single`, quand la racine est le seul cluster retenu, un point ne garde l'étiquette 0 que si son λ de sortie atteint le plus haut λ des lignes de la racine (règle de `_do_labelling` de scikit-learn) ; les autres passent au bruit, là où la tête étiquetait 0 tous les points. Seules des transitions 0 → −1 ; sorties identiques quand la racine n'est pas retenue seule ; aucun lot préenregistré ne passe `allow_single` | `src/head/head.*`, `src/points/dendrogram.*`, `cli/mhgp10_cluster.cpp`, `tests/head/mreach_cluster.cpp` | `mhgp10_head_gate`, `mhgp10_head_complexity`, `mhgp10_head_frontier`, `mhgp10_head_allow_single_root` (les deux comportements gravés), `mhgp10_fault_read_configs`, `mhgp10_regression_cli_input_frontiers` ; [reçu](receipts/raccord_r2_20260930/tete/README.md), [réparation](receipts/raccord_r2_20260930/reparation/README.md) |
+-| Raccord R2 : sept groupes de correctifs intégrés en un seul arbre sur la tête `a8252527e`, vérifiés ensemble (V1 à V12), puis réparés après la vérification de l'arbre intégré (règle de la racine sous `--allow-single` déclarée, harnais d'injection sous Clang avec sanitizer, refus des drapeaux flottants sous toute orthographe et pour toute composante de `-Ofast`) ; les vérifications sont rejouées sur une seule extraction figée, résultats au reçu de réparation | tout `morsehgp3D_v10` | `ctest -L gate` : 82 portes enregistrées sous GCC et sous Clang, 80 sous sanitizer (GCC et Clang) ; [reçu d'intégration](receipts/raccord_r2_20260930/RECU_INTEGRATION.md), [réparation](receipts/raccord_r2_20260930/reparation/README.md) |
++| Raccord R2 : sept groupes de correctifs intégrés en un seul arbre sur la tête `a8252527e`, vérifiés ensemble (V1 à V12), puis réparés après la vérification de l'arbre intégré (règle de la racine sous `--allow-single` déclarée, harnais d'injection sous Clang avec sanitizer, refus des drapeaux flottants écrits en clair dans les ensembles jugés, sous leurs orthographes connues et pour toute composante de `-Ofast` que le compilateur déclare) ; les vérifications sont rejouées sur une seule extraction figée, résultats au reçu de réparation. Clôture du 2 octobre 2026, après la re-vérification adverse de l'arbre réparé : ce refus est déclaré défense en profondeur, quatre canaux hors contrat sont écrits avec leurs commandes et leurs effets mesurés, une porte épingle le contrat ; aucun code produit ne change (15 binaires GCC identiques à ceux du rejeu final) | tout `morsehgp3D_v10` | rejeu final : `ctest -L gate`, 82 portes enregistrées sous GCC et sous Clang, 80 sous sanitizer (GCC et Clang) ; depuis la clôture, 84 et 82, avec `mhgp10_regression_fp_contract` et sa variante pour l'autre compilateur ; [reçu d'intégration](receipts/raccord_r2_20260930/RECU_INTEGRATION.md), [réparation](receipts/raccord_r2_20260930/reparation/README.md), [clôture](receipts/raccord_r2_20260930/cloture/README.md) |
+ | Référence exacte Python | `reference/hgp10_ref.py` | `reference/test_ref.py` |
+ 
++## Contrat des options flottantes
++
++Clôture du raccord R2 (2 octobre 2026). La re-vérification adverse de l'arbre réparé a fermé le constat B2 pour les
++options écrites en clair ; elle montre trois canaux, plus un mineur, qui passaient encore la configuration sans que
++rien ne les déclare hors contrat. Décision : ces canaux ne sont pas fermés, ils sont déclarés. Les énoncés E1 à E9
++sont ceux de l'en-tête de `cmake/fp_flags.cmake`. La porte `mhgp10_regression_fp_contract` les lit mot pour mot ici,
++là et dans `README.md`, compare les ensembles jugés du code à ceux que E2 et E3 nomment, puis rejoue, à la
++configuration seulement, un cas admis par canal, les refus gravés et la garde de chaque unité. Fermer un canal fait
++échouer la porte tant que ces documents n'ont pas changé. Mesures du 2 octobre 2026 (GCC 13.3.0, Clang 18.1.3) sur
++l'arbre `210b9fc` du raccord : [reçu de clôture](receipts/raccord_r2_20260930/cloture/README.md).
++
++| énoncé | texte |
++| --- | --- |
++| E1 | Le refus à la configuration est une défense en profondeur contre les options écrites en clair dans les ensembles jugés ; il n'est pas complet contre toute façon de changer la génération de code. |
++| E2 | Jetons jugés, et eux seuls : variables dont le nom commence par `CMAKE_CXX_FLAGS`, `CMAKE_CXX_COMPILER_ARG1`, `CMAKE_CXX_LINK_FLAGS`, `CMAKE_CXX_STANDARD_LIBRARIES`, `CMAKE_EXE_LINKER_FLAGS`, `CMAKE_SHARED_LINKER_FLAGS` ou `CMAKE_MODULE_LINKER_FLAGS` ; propriétés `COMPILE_OPTIONS` et `LINK_OPTIONS` du répertoire ; propriétés `COMPILE_OPTIONS`, `INTERFACE_COMPILE_OPTIONS`, `LINK_OPTIONS`, `INTERFACE_LINK_OPTIONS`, `LINK_LIBRARIES`, `INTERFACE_LINK_LIBRARIES`, `COMPILE_FLAGS` et `LINK_FLAGS` des cibles du répertoire ; propriétés `COMPILE_OPTIONS` et `COMPILE_FLAGS` de leurs sources ; propriétés `INTERFACE_COMPILE_OPTIONS`, `INTERFACE_LINK_OPTIONS` et `INTERFACE_LINK_LIBRARIES` des cibles importées. |
++| E3 | Sonde des options effectives, sous GCC et Clang seulement, sur les options de compilation suivantes, et elles seules : `CMAKE_CXX_COMPILER_ARG1`, `CMAKE_CXX_FLAGS` et chaque `CMAKE_CXX_FLAGS_<CFG>` avec `COMPILE_OPTIONS` du répertoire ; `COMPILE_OPTIONS` et `COMPILE_FLAGS` de chaque cible et de chaque source. Elle lit les macros de `cmake/fp_probe.cpp` ; sous GCC, des états de `-Q --help=optimizers` et l'état de `-mieee-fp` dans `-Q --help=target` ; sous Clang, les drapeaux et attributs de l'IR de quatre opérations (division, produit, somme, différence). Une option sans macro, sans état lu et sans effet sur cet IR lui échappe. |
++| E4 | Hors contrat, canal A, édition de liens : une option de génération de code passée à l'éditeur de liens dans la charge d'un jeton n'est pas reconnue, et sous LTO c'est l'édition de liens qui génère le code. Commande reproduite sous Clang : `cmake -DCMAKE_CXX_COMPILER=clang++ -DMHGP10_MARCH=x86-64-v3 -DCMAKE_CXX_FLAGS=-flto -DCMAKE_EXE_LINKER_FLAGS=-Wl,-plugin-opt=-fp-contract=fast` : configuration et build code 0, aucun avertissement. Effet mesuré : 64 instructions FMA dans `mhgp10_tower`, 71 dans `mhgp10_cluster`, 2 dans `mhgp10_catalogue`, aucune dans `mhgp10_tower` ni `mhgp10_cluster` sans l'option ; 81 portes sur 81 vertes. |
++| E5 | Hors contrat, canal B, ensemble non jugé : un drapeau posé par `add_definitions` qui n'est pas une définition, venu d'un `CMAKE_PROJECT_INCLUDE` ou d'un projet parent qui fait `add_subdirectory`, arrive sur la ligne de compilation sans être jugé ni sondé. Commandes reproduites : `add_definitions(-freciprocal-math)` sous Clang : configuration et build code 0 ; effet mesuré : `divsd` de 17 à 6 et `mulsd` de 52 à 61 dans `tower.cpp.o`, `mulsd` de 21 à 23 dans `site_tree.cpp.o` ; 81 portes sur 81 vertes. `add_definitions(-mno-ieee-fp)` sous GCC : configuration code 0 ; effet mesuré : `site_tree`, `tower`, `head`, `dendrogram` et `generator` diffèrent du build normal. |
++| E6 | Hors contrat, canal C, fichier de réponse (`@fichier`) ou fichier `--config` : son contenu n'est pas lu par les jetons, et la sonde ne voit pas ce qui n'a ni macro, ni état lu, ni effet sur son IR. Commande reproduite sous Clang : `-DCMAKE_CXX_FLAGS=@fichier`, le fichier portant `-cl-single-precision-constant`, option refusée en clair : configuration et build code 0 ; `--config=fichier` : configuration code 0. Effet mesuré : dans `tower.cpp.o`, le facteur 1 + 1e-10 de `DWelzl::contains` est plié en 1 ; les 44 portes `fast` passent, `mhgp10_head_gate` échoue seule sur 81. |
++| E7 | Hors contrat, canal D, sous-normaux mis à zéro au démarrage (mineur) : `-mdaz-ftz` n'est refusé qu'écrit en clair. Commandes reproduites sous GCC : `-DCMAKE_CXX_FLAGS=@fichier`, le fichier portant `-mdaz-ftz`, ou le chemin de `crtfastmath.o` dans `CMAKE_EXE_LINKER_FLAGS` : configuration code 0. Effet mesuré : MXCSR 0x9fc0 (DAZ et FZ) à l'entrée de `main` de `mhgp10_cluster`, contre 0x1f80. |
++| E8 | Les hypothèses de compilation des preuves des filtres certifiés, dont « ni contraction FMA » pour `kMargin` (`site_tree.cpp`), ne tiennent que sous ce contrat. |
++| E9 | `-ffp-contract=off` est posé sur la ligne de compilation de chaque unité ; il ne gouverne pas le code généré à l'édition de liens sous LTO. Le `#error` de `core/fp_strict.hpp` est porté par toute unité sauf `tests/unit/fault_preload.cpp`, bibliothèque de préchargement des portes, hors produit, sans en-tête du projet ni calcul flottant. |
++
++La tranche qui fermerait ces canaux pour de bon est ouverte, non implémentée : chantier 6 ci-dessous.
++
+ ## Carte
+ 
+ - `src/core`, `src/sched` : statuts, tampons comptés, ordonnanceur unique.
+@@ -228,6 +253,19 @@ GCP : session 1 le 29 septembre (CPU seul, arrêt certifié TERMINATED), reçu `
+    de débit ×2,3 entre 128 et 64 bits n'est pas fiable : les boucles de débit débordaient en entiers signés.
+ 4. **Multiplicités** dans la tour, Euler pondéré, juges d'échelle (K = 1 contre EMST, Euler à kmax + 2).
+ 5. Verticales publiées : calculées par la tour, non exposées à la tête.
++6. **OPEN, non implémenté. Auto-test comportemental de l'arithmétique flottante à l'exécution** : la tranche qui
++   fermerait pour de bon la classe du constat B2 (canaux A à D du [contrat](#contrat-des-options-flottantes)).
++   - Où : dans chaque unité qui porte un filtre certifié (`site_tree.cpp`, `tower.cpp`), une fois par processus, avant
++     le premier filtre. Les options de compilation valent par unité, et sous LTO par édition de liens : le test doit
++     vivre dans l'unité qu'il garde.
++   - Quoi, sur des opérandes que le compilateur ne peut pas plier : produit-somme non contracté (deux arrondis, pas
++     un FMA), division contre produit par l'inverse, constante double telle que 1 + 1e-10 (distincte de 1), mode
++     d'arrondi, bits DAZ et FTZ de MXCSR.
++   - Refus `numeric_failure`. Ce statut est à ajouter : la v10 n'a aujourd'hui que `invalid_input`,
++     `unsupported_degeneracy`, `resource_exhausted` et `invariant_violated`.
++   - Coût : change le code produit. Exige le rejeu complet (binaires, portes, campagnes, différentiels contre la
++     tête). D'ici là, les quatre canaux restent hors contrat, et la porte `mhgp10_regression_fp_contract` fait
++     échouer toute fermeture qui ne change pas les documents.
+ 
+ ## Pièges
+ 
+diff --git a/morsehgp3D_v10/README.md b/morsehgp3D_v10/README.md
+index e4bfe3e..9310e36 100644
+--- a/morsehgp3D_v10/README.md
++++ b/morsehgp3D_v10/README.md
+@@ -48,13 +48,37 @@ primitives autonomes testées ; aucun raccord au moteur large n'est encore acqui
+ | pool | `src/sched/pool.*` : réclamation saturante des tranches, exceptions capturées puis relancées, participation des fils, création refusée proprement (`session_overhead`) ; harnais d'injection hors produit, opérants sous GCC et sous Clang, sanitizers compris | `mhgp10_pool_*` (label `fast`), `mhgp10_fault_*`, `mhgp10_regression_worker_bad_alloc`, `mhgp10_regression_thread_creation_refusal`, `mhgp10_regression_clang_sanitizer_harness` |
+ | nuage | `src/cloud` (sites Morton, index `SiteTree`) | `mhgp10_unit`, `mhgp10_regression_site_tree_*` |
+ | sondes | `cli/`, `src/core/cli_options.hpp` (parseur strict, aucune option sans effet, garde mémoire de haut niveau), `src/cloud/u32le_input.hpp` (entrée lue en entier), `src/core/cli_output.hpp` (sorties en entier ou pas du tout, conflits refusés, publication défaite sur échec tardif) | `mhgp10_unit`, `mhgp10_fault_output_set`, `mhgp10_fault_output_commit`, `mhgp10_fault_cli_helpers`, `mhgp10_regression_cli_input_frontiers` (label `fast`) et `_mreach`, `mhgp10_regression_cli_allocation_frontier`, `mhgp10_regression_cli_output_transaction`, `mhgp10_fast_targets` (label `fast`) |
+-| filtres flottants | `SiteTree` et tour : repli exact hors `FE_TONEAREST` ; `-Ofast`, `-ffast-math` et composantes refusés à la configuration (jetons de chaque ensemble d'options, alias longs de GCC et options `-cl-*` de Clang compris, puis sonde des options effectives par le compilateur lui-même ; inventaire des composantes de `-Ofast` lu chez le compilateur) et par `#error` dans toute unité ; `-ffp-contract=off` ; rendu en double du dendrogramme et tête : mode de l'appelant, contrat `FE_TONEAREST` | `mhgp10_regression_tower_rounding`, `mhgp10_regression_dendrogram_rounding`, `mhgp10_regression_*_fast_math`, `mhgp10_regression_fp_flags_configure` (et l'autre compilateur de la paire), `mhgp10_regression_float_filter_mutants` (label `mutation`, GCC et Clang) |
++| filtres flottants | `SiteTree` et tour : repli exact hors `FE_TONEAREST` ; `-Ofast`, `-ffast-math` et composantes refusés à la configuration quand ils sont écrits en clair dans les ensembles jugés (jetons, alias longs de GCC et options `-cl-*` de Clang compris, puis sonde des options effectives par le compilateur lui-même ; inventaire des composantes de `-Ofast` lu chez le compilateur) et par `#error` pour ce qu'une macro signale ; `-ffp-contract=off` sur chaque ligne de compilation ; défense en profondeur, pas une clôture : quatre canaux sont déclarés hors contrat ([contrat des options flottantes](#contrat-des-options-flottantes)) ; rendu en double du dendrogramme et tête : mode de l'appelant, contrat `FE_TONEAREST` | `mhgp10_regression_tower_rounding`, `mhgp10_regression_dendrogram_rounding`, `mhgp10_regression_*_fast_math`, `mhgp10_regression_fp_flags_configure` et `mhgp10_regression_fp_contract` (et l'autre compilateur de la paire), `mhgp10_regression_float_filter_mutants` (label `mutation`, GCC et Clang) |
+ | catalogue | `src/catalogue` (boîtes de centres, frontière pilotée par la charge, assemblage parallèle) | `mhgp10_catalogue_oracle` (listes publiées, ordre d'export, feuilles de la règle produit et diagnostic à budget), `mhgp10_catalogue_oracle_mutant_*` (13, label `fast`) |
+ | tour | `src/tower` (tous ordres, verticales, entrées `core` et `cover`) | `mhgp10_tower_oracle` (témoins de naissance, règle stricte des fusions, convention fermée des attaches, en-têtes), `mhgp10_tower_oracle_mutant_*` (15, label `fast`), `mhgp10_points_cover`, `mhgp10_regression_*` |
+ | tête | `src/points/dendrogram.*`, `src/head` (condensation exacte, EOM, feuilles, λ = r^(−z) ; domaine numérique conjoint vérifié avant tout calcul, `outcome` lu avant toute étiquette, lecteurs uniques `parse_z` et `read_configs` ; sous `--allow-single`, règle d'appartenance de la racine de scikit-learn : changement de sortie déclaré par rapport à la tête `a8252527e`, qui étiquetait 0 tous les points) | `mhgp10_head_gate`, `mhgp10_head_complexity`, `mhgp10_head_frontier`, `mhgp10_head_allow_single_root`, `mhgp10_head_condensation_vs_sklearn` |
+ | banc | `bench/synthetic` (préenregistrements, `run_test.py`, `decide.py`), `bench/scaling`, `bench/g4` | `mhgp10_regression_batch_equivalence`, `mhgp10_regression_mreach_border` |
+ | référence | `reference/hgp10_ref.py` (Γ_k, catalogue, tour, C∩X en Fraction) | `reference/test_ref.py` |
+ 
++## Contrat des options flottantes
++
++Clôture du raccord R2 (2 octobre 2026). Le refus des options flottantes à la configuration ne ferme pas tout : quatre
++canaux, dont un mineur, sont déclarés hors contrat. Les énoncés E1 à E9 sont ceux de l'en-tête de
++`cmake/fp_flags.cmake`. La porte `mhgp10_regression_fp_contract` les lit mot pour mot ici, là et dans `PASSATION.md` ;
++elle rejoue, à la configuration seulement, un cas admis par canal et les refus gravés. Mesures du 2 octobre 2026
++(GCC 13.3.0, Clang 18.1.3) sur l'arbre `210b9fc` du raccord :
++[reçu de clôture](receipts/raccord_r2_20260930/cloture/README.md).
++
++| énoncé | texte |
++| --- | --- |
++| E1 | Le refus à la configuration est une défense en profondeur contre les options écrites en clair dans les ensembles jugés ; il n'est pas complet contre toute façon de changer la génération de code. |
++| E2 | Jetons jugés, et eux seuls : variables dont le nom commence par `CMAKE_CXX_FLAGS`, `CMAKE_CXX_COMPILER_ARG1`, `CMAKE_CXX_LINK_FLAGS`, `CMAKE_CXX_STANDARD_LIBRARIES`, `CMAKE_EXE_LINKER_FLAGS`, `CMAKE_SHARED_LINKER_FLAGS` ou `CMAKE_MODULE_LINKER_FLAGS` ; propriétés `COMPILE_OPTIONS` et `LINK_OPTIONS` du répertoire ; propriétés `COMPILE_OPTIONS`, `INTERFACE_COMPILE_OPTIONS`, `LINK_OPTIONS`, `INTERFACE_LINK_OPTIONS`, `LINK_LIBRARIES`, `INTERFACE_LINK_LIBRARIES`, `COMPILE_FLAGS` et `LINK_FLAGS` des cibles du répertoire ; propriétés `COMPILE_OPTIONS` et `COMPILE_FLAGS` de leurs sources ; propriétés `INTERFACE_COMPILE_OPTIONS`, `INTERFACE_LINK_OPTIONS` et `INTERFACE_LINK_LIBRARIES` des cibles importées. |
++| E3 | Sonde des options effectives, sous GCC et Clang seulement, sur les options de compilation suivantes, et elles seules : `CMAKE_CXX_COMPILER_ARG1`, `CMAKE_CXX_FLAGS` et chaque `CMAKE_CXX_FLAGS_<CFG>` avec `COMPILE_OPTIONS` du répertoire ; `COMPILE_OPTIONS` et `COMPILE_FLAGS` de chaque cible et de chaque source. Elle lit les macros de `cmake/fp_probe.cpp` ; sous GCC, des états de `-Q --help=optimizers` et l'état de `-mieee-fp` dans `-Q --help=target` ; sous Clang, les drapeaux et attributs de l'IR de quatre opérations (division, produit, somme, différence). Une option sans macro, sans état lu et sans effet sur cet IR lui échappe. |
++| E4 | Hors contrat, canal A, édition de liens : une option de génération de code passée à l'éditeur de liens dans la charge d'un jeton n'est pas reconnue, et sous LTO c'est l'édition de liens qui génère le code. Commande reproduite sous Clang : `cmake -DCMAKE_CXX_COMPILER=clang++ -DMHGP10_MARCH=x86-64-v3 -DCMAKE_CXX_FLAGS=-flto -DCMAKE_EXE_LINKER_FLAGS=-Wl,-plugin-opt=-fp-contract=fast` : configuration et build code 0, aucun avertissement. Effet mesuré : 64 instructions FMA dans `mhgp10_tower`, 71 dans `mhgp10_cluster`, 2 dans `mhgp10_catalogue`, aucune dans `mhgp10_tower` ni `mhgp10_cluster` sans l'option ; 81 portes sur 81 vertes. |
++| E5 | Hors contrat, canal B, ensemble non jugé : un drapeau posé par `add_definitions` qui n'est pas une définition, venu d'un `CMAKE_PROJECT_INCLUDE` ou d'un projet parent qui fait `add_subdirectory`, arrive sur la ligne de compilation sans être jugé ni sondé. Commandes reproduites : `add_definitions(-freciprocal-math)` sous Clang : configuration et build code 0 ; effet mesuré : `divsd` de 17 à 6 et `mulsd` de 52 à 61 dans `tower.cpp.o`, `mulsd` de 21 à 23 dans `site_tree.cpp.o` ; 81 portes sur 81 vertes. `add_definitions(-mno-ieee-fp)` sous GCC : configuration code 0 ; effet mesuré : `site_tree`, `tower`, `head`, `dendrogram` et `generator` diffèrent du build normal. |
++| E6 | Hors contrat, canal C, fichier de réponse (`@fichier`) ou fichier `--config` : son contenu n'est pas lu par les jetons, et la sonde ne voit pas ce qui n'a ni macro, ni état lu, ni effet sur son IR. Commande reproduite sous Clang : `-DCMAKE_CXX_FLAGS=@fichier`, le fichier portant `-cl-single-precision-constant`, option refusée en clair : configuration et build code 0 ; `--config=fichier` : configuration code 0. Effet mesuré : dans `tower.cpp.o`, le facteur 1 + 1e-10 de `DWelzl::contains` est plié en 1 ; les 44 portes `fast` passent, `mhgp10_head_gate` échoue seule sur 81. |
++| E7 | Hors contrat, canal D, sous-normaux mis à zéro au démarrage (mineur) : `-mdaz-ftz` n'est refusé qu'écrit en clair. Commandes reproduites sous GCC : `-DCMAKE_CXX_FLAGS=@fichier`, le fichier portant `-mdaz-ftz`, ou le chemin de `crtfastmath.o` dans `CMAKE_EXE_LINKER_FLAGS` : configuration code 0. Effet mesuré : MXCSR 0x9fc0 (DAZ et FZ) à l'entrée de `main` de `mhgp10_cluster`, contre 0x1f80. |
++| E8 | Les hypothèses de compilation des preuves des filtres certifiés, dont « ni contraction FMA » pour `kMargin` (`site_tree.cpp`), ne tiennent que sous ce contrat. |
++| E9 | `-ffp-contract=off` est posé sur la ligne de compilation de chaque unité ; il ne gouverne pas le code généré à l'édition de liens sous LTO. Le `#error` de `core/fp_strict.hpp` est porté par toute unité sauf `tests/unit/fault_preload.cpp`, bibliothèque de préchargement des portes, hors produit, sans en-tête du projet ni calcul flottant. |
++
++Fermer ces canaux pour de bon demande un auto-test de l'arithmétique à l'exécution : tranche ouverte, non implémentée
++(`PASSATION.md`, chantiers ouverts).
++
+ ## Résultats (29 septembre 2026, `public_status=not_claimed`)
+ 
+ - **Clustering, tests préenregistrés** : à K = `min_samples`, la tour bat sklearn HDBSCAN.
+diff --git a/morsehgp3D_v10/cmake/fp_flags.cmake b/morsehgp3D_v10/cmake/fp_flags.cmake
+index 23f59e6..b91a1c0 100644
+--- a/morsehgp3D_v10/cmake/fp_flags.cmake
++++ b/morsehgp3D_v10/cmake/fp_flags.cmake
+@@ -11,7 +11,7 @@
+ #   1. jetons (ci-dessous) : alias longs de GCC juges sous leur orthographe courte, toute option -cl-* refusee, toute
+ #      option dont le NOM contient « math » refusee hors d'une liste blanche ;
+ #   2. sonde des options effectives (mhgp10_fp_probe) : le compilateur lui-meme dit ce que ses options produisent,
+-#      quelle que soit leur orthographe ou leur canal (fichier de reponse compris).
++#      pour ce qu'il signale par une macro, par un etat lu ou dans l'IR de la sonde (contrat ci-dessous, enonce E3).
+ #
+ # Complement de la reparation (meme jour, relecture de reprise) : la liste des composantes n'etait pas celle du
+ # compilateur. D'apres `g++ -Q --help=target`, -ffast-math (par -ffinite-math-only) coupe aussi -mieee-fp, et
+@@ -24,7 +24,7 @@
+ # cc1) doit etre refuse ici ou figurer, avec son argument, dans MHGP10_FP_OFAST_ARGUED. Une composante nouvelle d'un
+ # compilateur futur fait echouer la porte au lieu de passer en silence.
+ #
+-# Chaque ensemble d'options est decoupe comme le compilateur le recevra, puis compare jeton par jeton (egalite exacte) :
++# Chaque ensemble juge est decoupe comme le compilateur le recevra, puis compare jeton par jeton (egalite exacte) :
+ #   - chaines inserees telles quelles dans la ligne de commande et lues par le shell de la plateforme
+ #     (CMAKE_CXX_FLAGS*, CMAKE_CXX_COMPILER_ARG1, CMAKE_{EXE,SHARED,MODULE}_LINKER_FLAGS*, CMAKE_CXX_LINK_FLAGS,
+ #     CMAKE_CXX_STANDARD_LIBRARIES, proprietes COMPILE_FLAGS et LINK_FLAGS) : separate_arguments(NATIVE_COMMAND),
+@@ -33,19 +33,79 @@
+ #     cibles importees et des sources) : un element est un argument ; « SHELL: » est decoupe comme une chaine ; les
+ #     morceaux d'un element (separateurs $ < > : , ; et blancs, expressions generatrices comprises) sont aussi juges,
+ #     par prudence.
+-# Hors contrat (non vus a la configuration) : CCC_OVERRIDE_OPTIONS de Clang et toute variable d'environnement lue par le
+-# compilateur a la construction, regles de compilation et d'edition de liens reecrites (CMAKE_CXX_COMPILE_OBJECT,
+-# CMAKE_CXX_LINK_EXECUTABLE), lanceur du compilateur, fichier de specs, expressions generatrices qui fabriquent un jeton
+-# (JOIN, casse), fichier de reponse a l'edition de liens. Un fichier de reponse @fichier a la compilation echappe aux
+-# jetons mais pas a la sonde. -fno-math-errno n'est pas refuse : il ne change aucune valeur (sqrt reste correctement
+-# arrondi), seulement errno.
++# -fno-math-errno n'est pas refuse : il ne change aucune valeur (sqrt reste correctement arrondi), seulement errno.
++#
++# CONTRAT (cloture du raccord R2, 2 octobre 2026). La re-verification adverse de l'arbre repare a ferme le constat B2
++# pour les options ecrites en clair, et montre trois canaux, plus un mineur, qui passaient encore la configuration sans
++# que rien ne les declare hors contrat. Decision du developpeur : ces canaux ne sont pas fermes ici, ils sont declares.
++# Les enonces E1 a E9 sont lus mot pour mot par la porte mhgp10_regression_fp_contract, ici, dans README.md et dans
++# PASSATION.md ; elle rejoue aussi, a la configuration seulement, un cas admis par canal et les refus graves. Fermer
++# un canal ou changer un ensemble juge fait echouer la porte tant que ces documents n'ont pas change. Mesures du 2
++# octobre 2026 (GCC 13.3.0, Clang 18.1.3), sur l'arbre 210b9fc du raccord.
++#  E1. Le refus a la configuration est une defense en profondeur contre les options ecrites en clair dans les
++#      ensembles juges ; il n'est pas complet contre toute facon de changer la generation de code.
++#  E2. Jetons juges, et eux seuls : variables dont le nom commence par CMAKE_CXX_FLAGS, CMAKE_CXX_COMPILER_ARG1,
++#      CMAKE_CXX_LINK_FLAGS, CMAKE_CXX_STANDARD_LIBRARIES, CMAKE_EXE_LINKER_FLAGS, CMAKE_SHARED_LINKER_FLAGS ou
++#      CMAKE_MODULE_LINKER_FLAGS ; proprietes COMPILE_OPTIONS et LINK_OPTIONS du repertoire ; proprietes
++#      COMPILE_OPTIONS, INTERFACE_COMPILE_OPTIONS, LINK_OPTIONS, INTERFACE_LINK_OPTIONS, LINK_LIBRARIES,
++#      INTERFACE_LINK_LIBRARIES, COMPILE_FLAGS et LINK_FLAGS des cibles du repertoire ; proprietes COMPILE_OPTIONS et
++#      COMPILE_FLAGS de leurs sources ; proprietes INTERFACE_COMPILE_OPTIONS, INTERFACE_LINK_OPTIONS et
++#      INTERFACE_LINK_LIBRARIES des cibles importees.
++#  E3. Sonde des options effectives, sous GCC et Clang seulement, sur les options de compilation suivantes, et elles
++#      seules : CMAKE_CXX_COMPILER_ARG1, CMAKE_CXX_FLAGS et chaque CMAKE_CXX_FLAGS_<CFG> avec COMPILE_OPTIONS du
++#      repertoire ; COMPILE_OPTIONS et COMPILE_FLAGS de chaque cible et de chaque source. Elle lit les macros de
++#      cmake/fp_probe.cpp ; sous GCC, des etats de -Q --help=optimizers et l'etat de -mieee-fp dans -Q --help=target ;
++#      sous Clang, les drapeaux et attributs de l'IR de quatre operations (division, produit, somme, difference). Une
++#      option sans macro, sans etat lu et sans effet sur cet IR lui echappe.
++#  E4. Hors contrat, canal A, edition de liens : une option de generation de code passee a l'editeur de liens dans la
++#      charge d'un jeton n'est pas reconnue, et sous LTO c'est l'edition de liens qui genere le code. Commande
++#      reproduite sous Clang : cmake -DCMAKE_CXX_COMPILER=clang++ -DMHGP10_MARCH=x86-64-v3 -DCMAKE_CXX_FLAGS=-flto
++#      -DCMAKE_EXE_LINKER_FLAGS=-Wl,-plugin-opt=-fp-contract=fast : configuration et build code 0, aucun
++#      avertissement. Effet mesure : 64 instructions FMA dans mhgp10_tower, 71 dans mhgp10_cluster, 2 dans
++#      mhgp10_catalogue, aucune dans mhgp10_tower ni mhgp10_cluster sans l'option ; 81 portes sur 81 vertes.
++#  E5. Hors contrat, canal B, ensemble non juge : un drapeau pose par add_definitions qui n'est pas une definition,
++#      venu d'un CMAKE_PROJECT_INCLUDE ou d'un projet parent qui fait add_subdirectory, arrive sur la ligne de
++#      compilation sans etre juge ni sonde. Commandes reproduites : add_definitions(-freciprocal-math) sous Clang :
++#      configuration et build code 0 ; effet mesure : divsd de 17 a 6 et mulsd de 52 a 61 dans tower.cpp.o, mulsd de
++#      21 a 23 dans site_tree.cpp.o ; 81 portes sur 81 vertes. add_definitions(-mno-ieee-fp) sous GCC : configuration
++#      code 0 ; effet mesure : site_tree, tower, head, dendrogram et generator different du build normal.
++#  E6. Hors contrat, canal C, fichier de reponse (@fichier) ou fichier --config : son contenu n'est pas lu par les
++#      jetons, et la sonde ne voit pas ce qui n'a ni macro, ni etat lu, ni effet sur son IR. Commande reproduite sous
++#      Clang : -DCMAKE_CXX_FLAGS=@fichier, le fichier portant -cl-single-precision-constant, option refusee en clair :
++#      configuration et build code 0 ; --config=fichier : configuration code 0. Effet mesure : dans tower.cpp.o, le
++#      facteur 1 + 1e-10 de DWelzl::contains est plie en 1 ; les 44 portes fast passent, mhgp10_head_gate echoue seule
++#      sur 81.
++#  E7. Hors contrat, canal D, sous-normaux mis a zero au demarrage (mineur) : -mdaz-ftz n'est refuse qu'ecrit en
++#      clair. Commandes reproduites sous GCC : -DCMAKE_CXX_FLAGS=@fichier, le fichier portant -mdaz-ftz, ou le chemin
++#      de crtfastmath.o dans CMAKE_EXE_LINKER_FLAGS : configuration code 0. Effet mesure : MXCSR 0x9fc0 (DAZ et FZ) a
++#      l'entree de main de mhgp10_cluster, contre 0x1f80.
++#  E8. Les hypotheses de compilation des preuves des filtres certifies, dont « ni contraction FMA » pour kMargin
++#      (site_tree.cpp), ne tiennent que sous ce contrat.
++#  E9. -ffp-contract=off est pose sur la ligne de compilation de chaque unite ; il ne gouverne pas le code genere a
++#      l'edition de liens sous LTO. Le #error de core/fp_strict.hpp est porte par toute unite sauf
++#      tests/unit/fault_preload.cpp, bibliotheque de prechargement des portes, hors produit, sans en-tete du projet ni
++#      calcul flottant.
++# Precisions. Canal A : la meme option ecrite -ffp-contract=fast dans CMAKE_EXE_LINKER_FLAGS est refusee ; sous GCC,
++# une option flottante a l'edition de liens sous LTO ne change pas l'arithmetique (options gardees par fonction).
++# Canal B : aucune propriete ne donne ces drapeaux sous la politique CMP0059 du projet (DEFINITIONS est vide) ; le
++# meme drapeau pose par add_compile_options est refuse. Canal C : sous GCC, les options cachees essayees dans un
++# fichier de reponse sont refusees par la sonde, sauf -mdaz-ftz (canal D) et -ffp-contract=fast, inerte devant
++# -ffp-contract=off. Canal D : la preuve de kMargin etablit que FTZ et DAZ sont sans effet dans le domaine du filtre de
++# SiteTree (site_tree.cpp) ; l'etat de -mdaz-ftz existe dans -Q --help=target de GCC 13, la sonde ne le lit pas.
++# Hors contrat aussi, declares depuis la reparation : CCC_OVERRIDE_OPTIONS de Clang et toute variable d'environnement
++# lue par le compilateur a la construction, regles de compilation et d'edition de liens reecrites
++# (CMAKE_CXX_COMPILE_OBJECT, CMAKE_CXX_LINK_EXECUTABLE), lanceur du compilateur, fichier de specs, expressions
++# generatrices qui fabriquent un jeton (JOIN, casse), fichier de reponse a l'edition de liens, MXCSR pose hors de cfenv.
++# Fermer ces canaux pour de bon demande un auto-test comportemental de l'arithmetique flottante a l'execution (tranche
++# ouverte de PASSATION.md), pas une option de plus dans une liste.
+ 
+ # Jetons interdits, egalite exacte. GCC et Clang : -Ofast, -ffast-math et ses composantes (-fcx-limited-range compris,
+ # sans effet ici : le produit n'a pas d'arithmetique complexe). Clang : ses orthographes (pilote ; -Xclang pour cc1).
+-# GCC : -mdaz-ftz (lie crtfastmath.o : sous-normaux mis a zero des le demarrage), -fsingle-precision-constant (les
+-# constantes de marge deviendraient des float), -mno-ieee-fp (comparaisons sans le cas non ordonne : composante cible
+-# de -ffinite-math-only), -fallow-store-data-races (composante de -Ofast, hors arithmetique : le compilateur peut
+-# introduire des courses de donnees sur les ecritures, contre le contrat « memes sorties a tout nombre de fils »).
++# GCC : -mdaz-ftz (lie crtfastmath.o : sous-normaux mis a zero des le demarrage ; refuse ecrit en clair seulement,
++# enonce E7), -fsingle-precision-constant (les constantes de marge deviendraient des float), -mno-ieee-fp (comparaisons
++# sans le cas non ordonne : composante cible de -ffinite-math-only), -fallow-store-data-races (composante de -Ofast,
++# hors arithmetique : le compilateur peut introduire des courses de donnees sur les ecritures, contre le contrat
++# « memes sorties a tout nombre de fils »).
+ set(MHGP10_FP_FORBIDDEN
+     -Ofast -ffast-math -funsafe-math-optimizations -fassociative-math -freciprocal-math -fno-signed-zeros
+     -fno-trapping-math -ffinite-math-only -mdaz-ftz
+@@ -63,7 +123,8 @@ set(MHGP10_FP_VALUED "-ffp-contract=|off" "-ffp-model=|strict" "-fdenormal-fp-ma
+ #   -fno-math-errno             : ne change aucune valeur (sqrt reste correctement arrondi), seulement errno ;
+ #   -fno-semantic-interposition : edition de liens et inlining des symboles interposables, aucune arithmetique ;
+ #   -fexcess-precision=fast     : n'agit que si l'evaluation flottante a une precision etendue (x87), ce que
+-#                                 fp_strict.hpp refuse dans toute unite (__FLT_EVAL_METHOD__ non nul).
++#                                 fp_strict.hpp refuse dans toute unite qui l'inclut (__FLT_EVAL_METHOD__ non nul ;
++#                                 enonce E9 pour l'unite exemptee).
+ set(MHGP10_FP_OFAST_ARGUED -fno-math-errno -fno-semantic-interposition -fexcess-precision=fast)
+ # Options dont le nom (le jeton jusqu'au premier « = ») contient « math » : seules celles-ci passent (les deux
+ # dernieres sous leur seule valeur sure, regle precedente). Toute autre est refusee, connue ou non
+@@ -287,8 +348,8 @@ function(mhgp10_fp_probe_set where)
+   endif()
+ endfunction()
+ 
+-# Sonde de chaque ensemble d'options de compilation, sans doublon : par variante CMAKE_CXX_FLAGS_<CFG> (active ou non)
+-# avec les options du repertoire, puis par cible et par source (variante active).
++# Sonde des ensembles d'options de compilation de l'enonce E3, sans doublon : par variante CMAKE_CXX_FLAGS_<CFG>
++# (active ou non) avec les options du repertoire, puis par cible et par source (variante active).
+ function(mhgp10_fp_probe)
+   if(NOT CMAKE_CXX_COMPILER_ID MATCHES "^(GNU|Clang|AppleClang)$")
+     return()
+@@ -363,10 +424,10 @@ function(mhgp10_fp_probe)
+   endforeach()
+ endfunction()
+ 
+-# Toute la configuration, appelee en fin de traitement du repertoire (cmake_language(DEFER), apres la creation des
+-# cibles) : variables (cache compris, tous les types de build, actifs ou non, valeurs _INIT), options du repertoire,
+-# de chaque cible (options, interfaces, chaines, bibliotheques liees), des cibles importees et de chaque source des
+-# cibles ; puis la sonde des options effectives.
++# Jugement des ensembles de l'enonce E2, appele en fin de traitement du repertoire (cmake_language(DEFER), apres la
++# creation des cibles) : variables (cache compris, tous les types de build, actifs ou non, valeurs _INIT), options du
++# repertoire, de chaque cible (options, interfaces, chaines, bibliotheques liees), des cibles importees et de chaque
++# source des cibles ; puis la sonde des options effectives.
+ function(mhgp10_fp_check)
+   get_cmake_property(vars VARIABLES)
+   list(FILTER vars INCLUDE REGEX
+diff --git a/morsehgp3D_v10/cmake/fp_probe.cpp b/morsehgp3D_v10/cmake/fp_probe.cpp
+index 6c3a578..5950028 100644
+--- a/morsehgp3D_v10/cmake/fp_probe.cpp
++++ b/morsehgp3D_v10/cmake/fp_probe.cpp
+@@ -1,6 +1,9 @@
+-// Sonde de configuration (hors produit, jamais liee) : cmake/fp_flags.cmake la compile avec les options EFFECTIVES de
+-// chaque ensemble (variables, repertoire, cible, source), quelle que soit l'orthographe qui les a posees (alias longs
+-// de GCC, fichier de reponse @fichier, option propre a un compilateur). Reparation du raccord R2, constat B2.
++// Sonde de configuration (hors produit, jamais liee) : cmake/fp_flags.cmake la compile avec les options EFFECTIVES
++// des ensembles de compilation qu'il sonde (variables, repertoire, cible, source ; enonce E3 de son en-tete), sous
++// l'orthographe qui les a posees (alias longs de GCC, fichier de reponse @fichier, option propre a un compilateur).
++// Reparation du raccord R2, constat B2. Limite (cloture du raccord R2, 2 octobre 2026) : la sonde ne lit que ce qui
++// suit. Une option sans macro, sans etat lu et sans effet sur cet IR lui echappe : -cl-single-precision-constant sous
++// Clang (aucune constante flottante ici), -mdaz-ftz sous GCC (canaux C et D du contrat).
+ //   - macros : une erreur par macro, jeton grave mhgp10_fp_sonde_macro suivi du nom de la macro ;
+ //   - GCC : etat effectif des options lu dans `-Q --help=optimizers` (sans cette source) ;
+ //   - Clang : drapeaux fast-math des instructions flottantes de l'IR de la fonction ci-dessous (-S -emit-llvm).
+diff --git a/morsehgp3D_v10/docs/conception/ARCH_v2.md b/morsehgp3D_v10/docs/conception/ARCH_v2.md
+index ab0e878..855913c 100644
+--- a/morsehgp3D_v10/docs/conception/ARCH_v2.md
++++ b/morsehgp3D_v10/docs/conception/ARCH_v2.md
+@@ -1551,14 +1551,15 @@ numérateurs de ≤ 95,6 bits et un dénominateur de ≤ 76,9 bits. Elle est rem
+     hors d'une liste blanche (négations sûres, `-fno-math-errno`, `-frounding-math`) ; `-ffp-eval-method` et `-mfpmath`
+     n'admettent que `source` et `sse` ; `CMAKE_CXX_STANDARD_LIBRARIES`, `CMAKE_CXX_LINK_FLAGS` et les bibliothèques
+     liées des cibles sont aussi jugées ;
+-  - sonde des options effectives (`cmake/fp_probe.cpp`) : pour chaque ensemble d'options de compilation (variantes
+-    actives ou non, cibles, sources), le compilateur du build dit ce que ses options produisent : macros
++  - sonde des options effectives (`cmake/fp_probe.cpp`) : pour les ensembles d'options de compilation sondés
++    (variantes actives ou non, cibles, sources), le compilateur du build dit ce que ses options produisent : macros
+     (`__FAST_MATH__`, `__FINITE_MATH_ONLY__`, et chez GCC `__NO_SIGNED_ZEROS__`, `__NO_TRAPPING_MATH__`,
+     `__GCC_IEC_559`), états de `g++ -Q --help=optimizers` (contraction comprise), drapeaux fast-math des instructions
+-    de l'IR de Clang. Un fichier de réponse à la compilation n'échappe plus ;
+-  - `#error` : garde commune à toutes les unités (`core/fp_strict.hpp`, incluse par `core/types.hpp`), étendue aux
+-    macros de `-ffinite-math-only`, `-fno-signed-zeros`, `-fno-trapping-math` et à `__GCC_IEC_559` nul. Sous
+-    `-ffinite-math-only`, la tête admettait `--z=nan`.
++    de l'IR de Clang. Dans un fichier de réponse à la compilation, la sonde voit ce qu'elle lit ainsi, rien de plus
++    (clôture, ci-dessous) ;
++  - `#error` : garde commune (`core/fp_strict.hpp`, incluse par `core/types.hpp`, donc portée par toute unité sauf
++    `tests/unit/fault_preload.cpp`), étendue aux macros de `-ffinite-math-only`, `-fno-signed-zeros`,
++    `-fno-trapping-math` et à `__GCC_IEC_559` nul. Sous `-ffinite-math-only`, la tête admettait `--z=nan`.
+   Restent hors contrat : variables d'environnement lues par le compilateur à la construction (`CCC_OVERRIDE_OPTIONS`),
+   règles de compilation ou d'édition de liens réécrites, lanceur du compilateur, fichier de specs, fichier de réponse
+   à l'édition de liens, MXCSR hors `cfenv`. Clang ne publie aucune macro pour `-freciprocal-math`, `-fno-signed-zeros`
+@@ -1577,6 +1578,19 @@ numérateurs de ≤ 95,6 bits et un dénominateur de ≤ 76,9 bits. Elle est rem
+   `-fexcess-precision=fast` (sans effet quand `__FLT_EVAL_METHOD__` vaut 0, ce que `fp_strict.hpp` exige). Relevé
+   sous GCC 13.3 : 12 composantes, 9 refusées, 3 argumentées ; sous Clang 18 : 14, 13 refusées (dont
+   `-complex-range=limited` de `cc1`), 1 argumentée. Une composante nouvelle fait échouer la porte.
++- Clôture du raccord R2 (2 octobre 2026, re-vérification adverse de l'arbre réparé). Le constat B2 est fermé pour les
++  options écrites en clair. Trois canaux, plus un mineur, passaient encore la configuration sans être déclarés hors
++  contrat : charge d'un jeton passé à l'éditeur de liens sous LTO (A), drapeau posé par `add_definitions` (B),
++  fichier de réponse ou `--config` qui porte une option sans macro ni drapeau d'IR (C), sous-normaux mis à zéro au
++  démarrage (D, mineur). Décision : ils ne sont pas fermés, ils sont déclarés. Le refus à la configuration est une
++  défense en profondeur contre les options écrites en clair dans les ensembles jugés ; il n'est pas complet contre
++  toute façon de changer la génération de code. Contrat exact (ensembles jugés, sonde, canaux hors contrat A à D) :
++  en-tête de `cmake/fp_flags.cmake`, repris dans `README.md` et `PASSATION.md` avec les commandes reproduites et les
++  effets mesurés. La porte `mhgp10_regression_fp_contract` épingle ce contrat : énoncés lus mot pour mot, ensembles
++  jugés du code comparés à ceux que le contrat nomme, un cas admis par canal rejoué à la configuration, refus gravés,
++  garde de chaque unité. Fermer un canal fait échouer la porte tant que les documents n'ont pas changé. La tranche qui
++  les fermerait pour de bon, un auto-test de l'arithmétique à l'exécution, est ouverte dans `PASSATION.md` ; elle
++  change le code produit.
+ 
+ ---
+ 
+diff --git a/morsehgp3D_v10/receipts/raccord_r2_20260930/cloture/README.md b/morsehgp3D_v10/receipts/raccord_r2_20260930/cloture/README.md
+new file mode 100644
+index 0000000..67db387
+--- /dev/null
++++ b/morsehgp3D_v10/receipts/raccord_r2_20260930/cloture/README.md
+@@ -0,0 +1,3 @@
++# Raccord R2 : clôture du constat B2 par contrat (2 octobre 2026)
++
++Reçu en cours de rédaction : les résultats du rejeu sont ajoutés par le commit suivant.
+diff --git a/morsehgp3D_v10/src/cloud/site_tree.cpp b/morsehgp3D_v10/src/cloud/site_tree.cpp
+index 6ffe8b6..ff23707 100644
+--- a/morsehgp3D_v10/src/cloud/site_tree.cpp
++++ b/morsehgp3D_v10/src/cloud/site_tree.cpp
+@@ -16,10 +16,12 @@
+ // nul, quelle que soit l'orthographe de l'option. Clang 18 ne publie aucune macro pour -fassociative-math,
+ // -freciprocal-math, -fno-signed-zeros, -funsafe-math-optimizations et -cl-unsafe-math-optimizations : ces options
+ // passent ce refus et ne sont arretees qu'a la configuration (cmake/fp_flags.cmake : jetons, puis sonde des options
+-// effectives sur l'IR de Clang). La contraction FMA n'a pas de macro : CMakeLists.txt impose -ffp-contract=off a ce
+-// fichier, quel que soit -march (et, depuis le raccord R2, a toutes les unites). Meme refus pour toute unite dans
+-// core/fp_strict.hpp.
+-// Portes : mhgp10_regression_site_tree_fast_math, mhgp10_regression_fp_flags_configure.
++// effectives sur l'IR de Clang). La contraction FMA n'a pas de macro : CMakeLists.txt pose -ffp-contract=off sur la
++// ligne de compilation de ce fichier, avec ou sans -march (et, depuis le raccord R2, de chaque unite). Meme refus dans
++// core/fp_strict.hpp. Cloture du raccord R2 (2 octobre 2026) : ces hypotheses de compilation, dont « ni contraction
++// FMA », ne tiennent que sous le contrat de cmake/fp_flags.cmake (canaux hors contrat A a D : sous LTO, par exemple,
++// l'edition de liens genere le code et peut contracter).
++// Portes : mhgp10_regression_site_tree_fast_math, mhgp10_regression_fp_flags_configure, mhgp10_regression_fp_contract.
+ #if defined(__FAST_MATH__) || defined(__ASSOCIATIVE_MATH__) || defined(__RECIPROCAL_MATH__) || \
+     defined(__NO_SIGNED_ZEROS__) || defined(__NO_TRAPPING_MATH__) || \
+     (defined(__FINITE_MATH_ONLY__) && __FINITE_MATH_ONLY__ != 0) || (defined(__GCC_IEC_559) && __GCC_IEC_559 == 0)
+@@ -96,7 +98,8 @@ namespace {
+ // u = 2^-53 : hypothese verifiee a chaque requete par filtered (mode d'arrondi du fil appelant, repli exact hors
+ // FE_TONEAREST). Hypotheses de compilation (en-tete de ce fichier) : ni reassociation, ni produit par l'inverse, ni
+ // precision etendue (refus a la compilation, pour ce que le compilateur signale), ni contraction FMA
+-// (-ffp-contract=off impose a ce fichier par CMakeLists.txt) ; conversions i128 -> double correctement arrondies.
++// (-ffp-contract=off pose sur la ligne de compilation de ce fichier par CMakeLists.txt ; sous le contrat de
++// cmake/fp_flags.cmake seulement, voir l'en-tete) ; conversions i128 -> double correctement arrondies.
+ // Sous-normaux : dans le domaine, aucun resultat intermediaire n'en est un. |fl(N_i) / fl(D)| est nul ou >= 2^-82 ;
+ // centre approche et differences (sites, ancre et bornes des boites entiers) sont des multiples de 2^-134 (l'arrondi
+ // d'un multiple de 2^-134 en est un), nuls ou >= 2^-134 ; carres et sommes de carres nuls ou >= 2^-268 ; bornes a
+diff --git a/morsehgp3D_v10/src/core/fp_strict.hpp b/morsehgp3D_v10/src/core/fp_strict.hpp
+index 0fb5b35..33648ae 100644
+--- a/morsehgp3D_v10/src/core/fp_strict.hpp
++++ b/morsehgp3D_v10/src/core/fp_strict.hpp
+@@ -1,7 +1,8 @@
+-// Garde de compilation commune a toutes les unites (incluse par core/types.hpp) : le produit suppose IEEE-754 binaire64
+-// strict. Les filtres flottants certifies (SiteTree, tour) ont leurs preuves ; la tete et le dendrogramme lisent des NaN
+-// et des infinis (std::isfinite, comparaisons qui refusent un NaN) : sous -ffinite-math-only, mhgp10_cluster admettait
+-// --z=nan avec le code 0 (reparation du raccord R2, 1er octobre 2026, constat B2).
++// Garde de compilation commune (incluse par core/types.hpp, donc portee par toute unite sauf
++// tests/unit/fault_preload.cpp, bibliotheque de prechargement des portes, hors produit) : le produit suppose IEEE-754
++// binaire64 strict. Les filtres flottants certifies (SiteTree, tour) ont leurs preuves ; la tete et le dendrogramme
++// lisent des NaN et des infinis (std::isfinite, comparaisons qui refusent un NaN) : sous -ffinite-math-only,
++// mhgp10_cluster admettait --z=nan avec le code 0 (reparation du raccord R2, 1er octobre 2026, constat B2).
+ //
+ // Refus de ce que le compilateur signale par une macro, quelle que soit l'orthographe de l'option (alias longs de GCC
+ // --fast-math, --finite-math-only, --no-signed-zeros, --optimize=fast ; fichier de reponse ; options hors CMake) :
+@@ -14,12 +15,15 @@
+ // Clang 18 ne publie aucune macro pour -funsafe-math-optimizations, -fassociative-math, -freciprocal-math,
+ // -fno-signed-zeros, -fapprox-func et -cl-unsafe-math-optimizations : ces options ne sont refusees qu'a la
+ // configuration (cmake/fp_flags.cmake : jetons, puis sonde des options effectives sur l'IR de Clang). La contraction
+-// FMA n'a de macro chez aucun des deux : -ffp-contract=off pour toutes les unites (CMakeLists.txt). GCC ne publie aucune
+-// macro non plus pour -mno-ieee-fp (composante cible de -ffinite-math-only : comparaisons sans le cas non ordonne,
+-// std::isfinite(NaN) vrai) ni pour -fallow-store-data-races (composante de -Ofast) : refusees a la configuration
+-// seulement (jetons, puis etats lus par la sonde).
++// FMA n'a de macro chez aucun des deux : -ffp-contract=off sur chaque ligne de compilation (CMakeLists.txt). GCC ne
++// publie aucune macro non plus pour -mno-ieee-fp (composante cible de -ffinite-math-only : comparaisons sans le cas non
++// ordonne, std::isfinite(NaN) vrai) ni pour -fallow-store-data-races (composante de -Ofast) : refusees a la
++// configuration seulement (jetons, puis etats lus par la sonde).
+ // site_tree.cpp et tower.cpp gardent en plus leur propre refus, avec leur jeton grave.
+-// Porte : mhgp10_regression_fp_strict_fast_math.
++// Cloture du raccord R2 (2 octobre 2026) : cette garde ne voit que des macros, et le refus a la configuration est une
++// defense en profondeur ; les hypotheses de compilation du produit ne tiennent que sous le contrat de
++// cmake/fp_flags.cmake (enonces E1 a E9, canaux hors contrat A a D).
++// Portes : mhgp10_regression_fp_strict_fast_math, mhgp10_regression_fp_contract.
+ #pragma once
+ 
+ #if defined(__FAST_MATH__) || defined(__ASSOCIATIVE_MATH__) || defined(__RECIPROCAL_MATH__) || \
+diff --git a/morsehgp3D_v10/src/core/types.hpp b/morsehgp3D_v10/src/core/types.hpp
+index 4bbb27e..29efb8e 100644
+--- a/morsehgp3D_v10/src/core/types.hpp
++++ b/morsehgp3D_v10/src/core/types.hpp
+@@ -7,7 +7,7 @@
+ #include <cstddef>
+ #include <cstdint>
+ 
+-#include "core/fp_strict.hpp"  // IEEE-754 strict exige de toute unite (refus a la compilation)
++#include "core/fp_strict.hpp"  // IEEE-754 strict exige de toute unite qui inclut cet en-tete (refus a la compilation)
+ 
+ namespace mhgp10 {
+ 
+diff --git a/morsehgp3D_v10/src/tower/tower.cpp b/morsehgp3D_v10/src/tower/tower.cpp
+index c6a2b5d..b57130f 100644
+--- a/morsehgp3D_v10/src/tower/tower.cpp
++++ b/morsehgp3D_v10/src/tower/tower.cpp
+@@ -17,9 +17,11 @@
+ // division remplacee par un produit par l'inverse, sans precision etendue ni contraction FMA. Meme refus a la
+ // compilation que site_tree.cpp (memes macros, memes limites de clang ; reparation du raccord R2 : macros de
+ // -ffinite-math-only, -fno-signed-zeros, -fno-trapping-math et __GCC_IEC_559 comprises) ; la configuration refuse
+-// -Ofast, -ffast-math et ses composantes dans chaque ensemble d'options (cmake/fp_flags.cmake) et impose
+-// -ffp-contract=off a toutes les unites ; hors FE_TONEAREST, dans le fil qui execute la descente, les filtres sont
+-// coupes (resolve). Portes : mhgp10_regression_tower_fast_math, mhgp10_regression_tower_rounding.
++// -Ofast, -ffast-math et ses composantes dans les ensembles d'options juges (cmake/fp_flags.cmake) et pose
++// -ffp-contract=off sur chaque ligne de compilation ; hors FE_TONEAREST, dans le fil qui execute la descente, les
++// filtres sont coupes (resolve). Cloture du raccord R2 (2 octobre 2026) : ces hypotheses de compilation ne tiennent
++// que sous le contrat de cmake/fp_flags.cmake (canaux hors contrat A a D).
++// Portes : mhgp10_regression_tower_fast_math, mhgp10_regression_tower_rounding, mhgp10_regression_fp_contract.
+ #if defined(__FAST_MATH__) || defined(__ASSOCIATIVE_MATH__) || defined(__RECIPROCAL_MATH__) || \
+     defined(__NO_SIGNED_ZEROS__) || defined(__NO_TRAPPING_MATH__) || \
+     (defined(__FINITE_MATH_ONLY__) && __FINITE_MATH_ONLY__ != 0) || (defined(__GCC_IEC_559) && __GCC_IEC_559 == 0)
+diff --git a/morsehgp3D_v10/src/tower/tower.hpp b/morsehgp3D_v10/src/tower/tower.hpp
+index 1258700..586e8b9 100644
+--- a/morsehgp3D_v10/src/tower/tower.hpp
++++ b/morsehgp3D_v10/src/tower/tower.hpp
+@@ -30,9 +30,10 @@
+ // Tout filtre flottant a une marge prouvee et un repli exact ; aucune decision n'est prise en flottant. Les preuves
+ // des marges supposent l'arrondi au plus proche : hors FE_TONEAREST (fil qui execute la descente), les filtres sont
+ // coupes et la voie exacte decide ; -Ofast et -ffast-math sont refuses (configuration et compilation), sans contraction
+-// FMA (-ffp-contract=off). Objets exacts (catalogue, forets d'ordre, attaches, ball_node) identiques sous les quatre
+-// modes (porte mhgp10_regression_tower_rounding) ; le rendu en double de point_dendrogram, lui, suit le mode de
+-// l'appelant (voir sa declaration).
++// FMA (-ffp-contract=off) : hypotheses de compilation qui ne tiennent que sous le contrat de cmake/fp_flags.cmake
++// (cloture du raccord R2, canaux hors contrat A a D). Objets exacts (catalogue, forets d'ordre, attaches, ball_node)
++// identiques sous les quatre modes (porte mhgp10_regression_tower_rounding) ; le rendu en double de point_dendrogram,
++// lui, suit le mode de l'appelant (voir sa declaration).
+ #pragma once
+ 
+ #include <vector>
+diff --git a/morsehgp3D_v10/tests/regression/float_filter_mutants.py b/morsehgp3D_v10/tests/regression/float_filter_mutants.py
+index 9d9bc1b..48eaf6f 100644
+--- a/morsehgp3D_v10/tests/regression/float_filter_mutants.py
++++ b/morsehgp3D_v10/tests/regression/float_filter_mutants.py
+@@ -12,10 +12,11 @@ orientation semi-statique, garde I3, saut K-NN) sont coupes. Mutants : coupure r
+ fois (processus ou fil), mauvais mode, coupure inversee, mode force, compteurs de l'observable, refus a la compilation,
+ contraction.
+ 
+-Famille cmake : refus a la configuration (-Ofast, -ffast-math et composantes, dans chaque ensemble d'options decoupe
+-comme le compilateur le lira : variables CMAKE_CXX_FLAGS*, CMAKE_CXX_COMPILER_ARG1, edition de liens, options du
+-repertoire, des cibles, des cibles importees et des sources ; cmake/fp_flags.cmake) et -ffp-contract=off pour toutes
+-les unites ; chaque mutant modifie CMakeLists.txt ou cmake/fp_flags.cmake dans une copie du projet, jugee par
++Famille cmake : refus a la configuration (-Ofast, -ffast-math et composantes, dans les ensembles d'options juges,
++decoupes comme le compilateur les lira : variables CMAKE_CXX_FLAGS*, CMAKE_CXX_COMPILER_ARG1, edition de liens, options
++du repertoire, des cibles, des cibles importees et des sources ; cmake/fp_flags.cmake, dont l'en-tete dit le contrat
++et les canaux hors contrat) et -ffp-contract=off sur chaque ligne de compilation ; chaque mutant modifie
++CMakeLists.txt ou cmake/fp_flags.cmake dans une copie du projet, jugee par
+ tests/regression/fp_flags_configure.cmake (porte configure). Addendum du raccord R2 (auditeur continu du 30 septembre
+ 2026, option citee) : decoupage retire, SHELL: et morceaux ignores, ensembles oublies, jugement avant la creation des
+ cibles. Reparation du raccord R2 (1er octobre 2026, constat B2) : alias longs de GCC, options -cl-* de Clang, noms
+@@ -23,9 +24,9 @@ contenant « math », variables et bibliotheques d'edition de liens, sonde des o
+ reparation (relecture de reprise) : -mno-ieee-fp et -fallow-store-data-races, composantes de -Ofast d'apres le
+ compilateur, refuses par jeton et par la sonde ; -complex-range de cc1 admis sous sa seule valeur full ; cinq mutants.
+ 
+-Famille fp_strict (reparation du raccord R2) : garde de compilation commune a toutes les unites (core/fp_strict.hpp,
+-incluse par core/types.hpp), jugee sur src/head/head.cpp, qui n'a pas de garde propre (site_tree_fast_math.cmake,
+-UNIT=fp_strict).
++Famille fp_strict (reparation du raccord R2) : garde de compilation commune (core/fp_strict.hpp, incluse par
++core/types.hpp : toute unite sauf tests/unit/fault_preload.cpp), jugee sur src/head/head.cpp, qui n'a pas de garde
++propre (site_tree_fast_math.cmake, UNIT=fp_strict).
+ 
+ Compilateurs (reparation du raccord R2, constat de la verification globale § 9.1 : la campagne n'etait valide que sous
+ GCC) : aucun mutant n'ecrit plus « x || !x » (refuse par -Wtautological-negation-compare de Clang sous -Werror) ; le
+@@ -370,7 +371,7 @@ MUTANTS = [
+     ('tour_precision_etendue_sans_error', 'tower', 'raccord r2', 'tue', FM,
+      tw((TW_ERR_EVAL, TW_ERR_EVAL.replace("__FLT_EVAL_METHOD__ != 0", "__FLT_EVAL_METHOD__ != 0 && 0")))),
+     ('tour_contraction_sans_option', 'tower', 'raccord r2', 'tue', ('sans_option',), []),
+-    # Famille fp_strict (reparation du raccord R2) : garde commune a toutes les unites, jugee sur head.cpp.
++    # Famille fp_strict (reparation du raccord R2) : garde commune de core/fp_strict.hpp, jugee sur head.cpp.
+     ('commun_fast_math_sans_error', 'fp_strict', 'reparation r2', 'tue', FM,
+      fs((FS_ERR_FAST, "#if 0\n#error \"mhgp10_fp_strict_fast_math_interdit"))),
+     ('commun_fast_math_seul', 'fp_strict', 'reparation r2', 'tue', FM,
+@@ -386,8 +387,8 @@ MUTANTS = [
+     ('commun_garde_non_incluse', 'fp_strict', 'reparation r2', 'tue', FM,
+      [('core/types.hpp', '#include "core/fp_strict.hpp"', '// #include "core/fp_strict.hpp"')]),
+     ('commun_contraction_sans_option', 'fp_strict', 'reparation r2', 'tue', ('sans_option',), []),
+-    # Famille cmake : refus a la configuration et contraction coupee pour toutes les unites (raccord R2), puis ensembles
+-    # decoupes comme le compilateur les lira (addendum du raccord R2, option citee de l'auditeur continu).
++    # Famille cmake : refus a la configuration et -ffp-contract=off sur chaque ligne de compilation (raccord R2), puis
++    # ensembles decoupes comme le compilateur les lira (addendum du raccord R2, option citee de l'auditeur continu).
+     ('cmake_refus_cxx_flags_seul', 'cmake', 'raccord r2', 'tue', CF,
+      fp((VARS, vars_regex("^CMAKE_CXX_FLAGS$")))),
+     ('cmake_refus_variante_active_seule', 'cmake', 'raccord r2', 'tue', CF,
+diff --git a/morsehgp3D_v10/tests/regression/fp_flags_configure.cmake b/morsehgp3D_v10/tests/regression/fp_flags_configure.cmake
+index ebaa0ab..443afc6 100644
+--- a/morsehgp3D_v10/tests/regression/fp_flags_configure.cmake
++++ b/morsehgp3D_v10/tests/regression/fp_flags_configure.cmake
+@@ -1,6 +1,6 @@
+-# Porte : la configuration refuse -Ofast, -ffast-math et ses composantes dans chaque ensemble d'options, decoupe comme
+-# le compilateur le lira (cmake/fp_flags.cmake), et impose -ffp-contract=off a toutes les unites (raccord R2 du 30
+-# septembre 2026 ; verification adverse de la lentille raccord_r2, § 3.3 : -DCMAKE_CXX_FLAGS=-Ofast et
++# Porte : la configuration refuse -Ofast, -ffast-math et ses composantes dans les ensembles d'options juges, decoupes
++# comme le compilateur les lira (cmake/fp_flags.cmake), et pose -ffp-contract=off sur chaque ligne de compilation
++# (raccord R2 du 30 septembre 2026 ; verification adverse de la lentille raccord_r2, § 3.3 : -DCMAKE_CXX_FLAGS=-Ofast et
+ # -DCMAKE_CXX_FLAGS_RELEASE=-ffast-math configuraient avec le code 0 ; auditeur continu, meme jour :
+ # -DCMAKE_CXX_FLAGS="-freciprocal-math", guillemets compris, configurait avec le code 0 sous Clang 18, qui ne publie
+ # aucune macro de garde pour cette composante).
+@@ -9,7 +9,11 @@
+ # --no-trapping-math, --fast-math ; -DCMAKE_CXX_STANDARD_LIBRARIES=-ffast-math, constat m1). Alias longs juges sous leur
+ # orthographe courte, options -cl-* refusees, noms contenant « math » hors liste blanche refuses, ensembles
+ # CMAKE_CXX_STANDARD_LIBRARIES, CMAKE_CXX_LINK_FLAGS et *LINK_LIBRARIES juges, et sonde des options effectives
+-# (macros ; etats de GCC ; IR de Clang) qui voit ce que les jetons ne voient pas (fichier de reponse @fichier).
++# (macros ; etats de GCC ; IR de Clang) qui voit, dans un fichier de reponse @fichier, ce qu'elle lit et que les jetons
++# ne voient pas.
++# Cloture du raccord R2 (2 octobre 2026) : cette porte grave des refus ; elle ne dit pas que le refus est complet.
++# Contrat exact (ensembles juges, sonde, canaux hors contrat A a D) : en-tete de cmake/fp_flags.cmake ; les cas admis
++# hors contrat sont rejoues par la porte mhgp10_regression_fp_contract (tests/regression/test_fp_contract.py).
+ #
+ # Partie A, sans configuration : cmake/fp_flags.cmake est inclus tel quel et juge contre une specification ecrite ici.
+ #  - les listes (jetons interdits, liste blanche des noms contenant « math ») sont exactement la specification ;
+diff --git a/morsehgp3D_v10/tests/regression/site_tree_fast_math.cmake b/morsehgp3D_v10/tests/regression/site_tree_fast_math.cmake
+index 7efd325..61a3580 100644
+--- a/morsehgp3D_v10/tests/regression/site_tree_fast_math.cmake
++++ b/morsehgp3D_v10/tests/regression/site_tree_fast_math.cmake
+@@ -3,7 +3,8 @@
+ # et sa reparation). Meme porte pour tower.cpp avec -DUNIT=tower (raccord R2 : filtres flottants de la tour) ; UNIT
+ # fixe les jetons graves (mhgp10_<UNIT>_fast_math_interdit, mhgp10_<UNIT>_precision_etendue_interdite) et la ligne
+ # finale ; par defaut site_tree. Reparation du raccord R2 (1er octobre 2026, constat B2) : -DUNIT=fp_strict juge la
+-# garde commune a toutes les unites (core/fp_strict.hpp) sur une unite sans garde propre, src/head/head.cpp.
++# garde commune (core/fp_strict.hpp, portee par toute unite sauf tests/unit/fault_preload.cpp) sur une unite sans
++# garde propre, src/head/head.cpp.
+ #
+ # 1. Controle positif : la meme compilation sans drapeau flottant doit reussir (code 0), sinon un refus pour une autre
+ #    cause (inclusion absente, drapeau inconnu) rendrait la porte verte par vacuite.
+diff --git a/morsehgp3D_v10/tests/regression/test_fp_contract.py b/morsehgp3D_v10/tests/regression/test_fp_contract.py
+new file mode 100644
+index 0000000..0aae8ab
+--- /dev/null
++++ b/morsehgp3D_v10/tests/regression/test_fp_contract.py
+@@ -0,0 +1,942 @@
++"""Contrat des options flottantes, epingle tel qu'il est declare (cloture du raccord R2, 2 octobre 2026).
++
++La re-verification adverse de l'arbre repare du raccord R2 a ferme le constat B2 pour les options ecrites en clair,
++et montre trois canaux, plus un mineur, qui passaient encore le refus a la configuration (cmake/fp_flags.cmake) sans
++que rien ne les declare hors contrat : charge d'un jeton passe a l'editeur de liens sous LTO (A), drapeau pose par
++add_definitions (B), fichier de reponse ou --config qui porte une option sans macro ni drapeau d'IR (C), sous-normaux
++mis a zero au demarrage (D, mineur). Decision du developpeur : ce refus est une defense en profondeur, il ne peut pas
++etre complet contre toute facon de changer la generation de code. Les documents disent le contrat exact ; cette porte
++l'epingle tel qu'il est declare. Le jour ou quelqu'un ferme un canal, ou change un ensemble juge, elle echoue tant que
++les documents n'ont pas change.
++
++Familles de controles :
++  D  documents vivants. Les enonces E1 a E9 sont lus mot pour mot, une fois chacun, dans cmake/fp_flags.cmake,
++     README.md et PASSATION.md ; les renvois dans CMakeLists.txt, docs/conception/ARCH_v2.md et les en-tetes des
++     sources ; la tranche ouverte de PASSATION.md ; les surpromesses retirees ne reviennent pas (liste explicite,
++     fichier par fichier). Lecture apres normalisation : accents, casse, blancs, accents graves et asterisques de
++     Markdown, marqueurs de commentaire en debut de ligne.
++  C  code contre contrat, sans configuration : ensembles juges par les jetons et ensembles sondes lus dans le code de
++     cmake/fp_flags.cmake, egaux aux listes que E2 et E3 nomment ; etats lus chez GCC ; sonde a quatre operations
++     sans constante flottante ; -ffp-contract=off pose une fois pour tout le repertoire.
++  A  canaux hors contrat, rejoues a la configuration seulement (aucun build) : chaque cas admis configure avec le
++     code 0, sans refus flottant, et l'option arrive sur les commandes ecrites (compile_commands.json, commande
++     d'edition de liens). Clang : A (LTO et -Wl,-plugin-opt), B (add_definitions par CMAKE_PROJECT_INCLUDE et par
++     un projet parent), C (@fichier et --config). GCC : B, D (@fichier portant -mdaz-ftz, chemin de crtfastmath.o).
++  R  refus graves : la meme option ecrite en clair dans un ensemble juge est refusee (code non nul, jeton
++     mhgp10_fp_flags_interdits, << ensemble contient jeton >>), et les sept orthographes du constat B2 le sont (une
++     sous Clang, six sous GCC).
++  U  unites : -ffp-contract=off sur chaque commande de compile_commands.json ; sous -ffast-math, le pretraitement de
++     chaque unite s'arrete sur le #error de core/fp_strict.hpp, sauf tests/unit/fault_preload.cpp, qui compile
++     (-fsyntax-only) et ne porte ni en-tete du projet ni type flottant.
++Mutants, chacun tue par sa famille : textes normalises des documents (enonce tronque ou en double, mesure changee,
++renvoi retire, tranche retiree, surpromesse revenue) ; code mute en memoire (ensemble juge ajoute ou retire, etat lu
++ajoute, constante ajoutee a la sonde, contraction non posee) ; arbres mutes dans une copie du projet (CMakeLists.txt,
++cmake, src, cli, tests), rejoues a la configuration : canal ferme (A, B, C ou D), refus laisse a la sonde, garde
++ajoutee a l'unite exemptee, garde non incluse, contraction non posee (la sonde du produit refuse alors la
++configuration elle-meme). Equivalents acceptes : documents recoupes, casse changee.
++
++  python3 test_fp_contract.py <morsehgp3D_v10> <dossier de travail> <compilateur C++> [--jobs=N] [--keep]
++Codes : 0 conforme ; 1 constat (enonce absent ou en double, surpromesse revenue, code ou canal qui ne correspond plus
++au contrat declare, mutant survivant ou inapplicable, equivalent rejete) ; 2 refus avant calcul (usage, document ou
++source absent, compilateur ou cmake inutilisable, dossier de travail non reconnu) ; 3 plancher de controles non
++atteint. Ligne finale si conforme :
++  fp_contract_ok compilateur=<GNU|Clang> familles=5/5 enonces=9 canaux=<c>/<c> admis=<a> refus=<r> unites=<g>/<n>
++  mutants_tues=<m>/<m> equivalents_acceptes=<q>/<q>
++Aucun assert : meme comportement sous python3 -O. Aucun build : configurations, pretraitements et une analyse
++syntaxique.
++"""
++import concurrent.futures
++import json
++import os
++import re
++import shlex
++import shutil
++import subprocess
++import sys
++import unicodedata
++
++CONFIGURE_TIMEOUT = 600
++UNIT_TIMEOUT = 120
++FAMILIES = ('D', 'C', 'A', 'R', 'U')
++MARK = '.mhgp10_fp_contract'
++
++FLAGS = 'cmake/fp_flags.cmake'
++PROBE = 'cmake/fp_probe.cpp'
++CML = 'CMakeLists.txt'
++README = 'README.md'
++PASSATION = 'PASSATION.md'
++ARCH = 'docs/conception/ARCH_v2.md'
++STRICT = 'src/core/fp_strict.hpp'
++TYPES = 'src/core/types.hpp'
++SITE = 'src/cloud/site_tree.cpp'
++TOWER = 'src/tower/tower.cpp'
++CONFIGURE_GATE = 'tests/regression/fp_flags_configure.cmake'
++COMPILE_GATE = 'tests/regression/site_tree_fast_math.cmake'
++CAMPAIGN = 'tests/regression/float_filter_mutants.py'
++PRELOAD = 'tests/unit/fault_preload.cpp'
++DOCUMENTS = (FLAGS, PROBE, CML, README, PASSATION, ARCH, STRICT, TYPES, SITE, TOWER, CONFIGURE_GATE, COMPILE_GATE,
++             CAMPAIGN, PRELOAD)
++# canaux hors contrat declares, par compilateur (E4 a E7)
++CHANNELS = {'Clang': ('A', 'B', 'C'), 'GNU': ('B', 'D')}
++
++# ---------------------------------------------------------------- enonces du contrat, lus mot pour mot
++STATEMENTS = (
++    ('E1', "Le refus a la configuration est une defense en profondeur contre les options ecrites en clair dans les "
++           "ensembles juges ; il n'est pas complet contre toute facon de changer la generation de code."),
++    ('E2', "Jetons juges, et eux seuls : variables dont le nom commence par CMAKE_CXX_FLAGS, CMAKE_CXX_COMPILER_ARG1, "
++           "CMAKE_CXX_LINK_FLAGS, CMAKE_CXX_STANDARD_LIBRARIES, CMAKE_EXE_LINKER_FLAGS, CMAKE_SHARED_LINKER_FLAGS ou "
++           "CMAKE_MODULE_LINKER_FLAGS ; proprietes COMPILE_OPTIONS et LINK_OPTIONS du repertoire ; proprietes "
++           "COMPILE_OPTIONS, INTERFACE_COMPILE_OPTIONS, LINK_OPTIONS, INTERFACE_LINK_OPTIONS, LINK_LIBRARIES, "
++           "INTERFACE_LINK_LIBRARIES, COMPILE_FLAGS et LINK_FLAGS des cibles du repertoire ; proprietes "
++           "COMPILE_OPTIONS et COMPILE_FLAGS de leurs sources ; proprietes INTERFACE_COMPILE_OPTIONS, "
++           "INTERFACE_LINK_OPTIONS et INTERFACE_LINK_LIBRARIES des cibles importees."),
++    ('E3', "Sonde des options effectives, sous GCC et Clang seulement, sur les options de compilation suivantes, et "
++           "elles seules : CMAKE_CXX_COMPILER_ARG1, CMAKE_CXX_FLAGS et chaque CMAKE_CXX_FLAGS_<CFG> avec "
++           "COMPILE_OPTIONS du repertoire ; COMPILE_OPTIONS et COMPILE_FLAGS de chaque cible et de chaque source. "
++           "Elle lit les macros de cmake/fp_probe.cpp ; sous GCC, des etats de -Q --help=optimizers et l'etat de "
++           "-mieee-fp dans -Q --help=target ; sous Clang, les drapeaux et attributs de l'IR de quatre operations "
++           "(division, produit, somme, difference). Une option sans macro, sans etat lu et sans effet sur cet IR lui "
++           "echappe."),
++    ('E4', "Hors contrat, canal A, edition de liens : une option de generation de code passee a l'editeur de liens "
++           "dans la charge d'un jeton n'est pas reconnue, et sous LTO c'est l'edition de liens qui genere le code. "
++           "Commande reproduite sous Clang : cmake -DCMAKE_CXX_COMPILER=clang++ -DMHGP10_MARCH=x86-64-v3 "
++           "-DCMAKE_CXX_FLAGS=-flto -DCMAKE_EXE_LINKER_FLAGS=-Wl,-plugin-opt=-fp-contract=fast : configuration et "
++           "build code 0, aucun avertissement. Effet mesure : 64 instructions FMA dans mhgp10_tower, 71 dans "
++           "mhgp10_cluster, 2 dans mhgp10_catalogue, aucune dans mhgp10_tower ni mhgp10_cluster sans l'option ; 81 "
++           "portes sur 81 vertes."),
++    ('E5', "Hors contrat, canal B, ensemble non juge : un drapeau pose par add_definitions qui n'est pas une "
++           "definition, venu d'un CMAKE_PROJECT_INCLUDE ou d'un projet parent qui fait add_subdirectory, arrive sur "
++           "la ligne de compilation sans etre juge ni sonde. Commandes reproduites : "
++           "add_definitions(-freciprocal-math) sous Clang : configuration et build code 0 ; effet mesure : divsd de "
++           "17 a 6 et mulsd de 52 a 61 dans tower.cpp.o, mulsd de 21 a 23 dans site_tree.cpp.o ; 81 portes sur 81 "
++           "vertes. add_definitions(-mno-ieee-fp) sous GCC : configuration code 0 ; effet mesure : site_tree, tower, "
++           "head, dendrogram et generator different du build normal."),
++    ('E6', "Hors contrat, canal C, fichier de reponse (@fichier) ou fichier --config : son contenu n'est pas lu par "
++           "les jetons, et la sonde ne voit pas ce qui n'a ni macro, ni etat lu, ni effet sur son IR. Commande "
++           "reproduite sous Clang : -DCMAKE_CXX_FLAGS=@fichier, le fichier portant -cl-single-precision-constant, "
++           "option refusee en clair : configuration et build code 0 ; --config=fichier : configuration code 0. Effet "
++           "mesure : dans tower.cpp.o, le facteur 1 + 1e-10 de DWelzl::contains est plie en 1 ; les 44 portes fast "
++           "passent, mhgp10_head_gate echoue seule sur 81."),
++    ('E7', "Hors contrat, canal D, sous-normaux mis a zero au demarrage (mineur) : -mdaz-ftz n'est refuse qu'ecrit en "
++           "clair. Commandes reproduites sous GCC : -DCMAKE_CXX_FLAGS=@fichier, le fichier portant -mdaz-ftz, ou le "
++           "chemin de crtfastmath.o dans CMAKE_EXE_LINKER_FLAGS : configuration code 0. Effet mesure : MXCSR 0x9fc0 "
++           "(DAZ et FZ) a l'entree de main de mhgp10_cluster, contre 0x1f80."),
++    ('E8', "Les hypotheses de compilation des preuves des filtres certifies, dont « ni contraction FMA » pour "
++           "kMargin (site_tree.cpp), ne tiennent que sous ce contrat."),
++    ('E9', "-ffp-contract=off est pose sur la ligne de compilation de chaque unite ; il ne gouverne pas le code "
++           "genere a l'edition de liens sous LTO. Le #error de core/fp_strict.hpp est porte par toute unite sauf "
++           "tests/unit/fault_preload.cpp, bibliotheque de prechargement des portes, hors produit, sans en-tete du "
++           "projet ni calcul flottant."),
++)
++E = dict(STATEMENTS)
++FULL = (FLAGS, README, PASSATION)  # documents qui portent les neuf enonces
++POINTER = "Contrat exact (ensembles juges, sonde, canaux hors contrat A a D) : en-tete de cmake/fp_flags.cmake"
++UNDER_CONTRACT = "ne tiennent que sous le contrat de cmake/fp_flags.cmake"
++ALL_BUT = "toute unite sauf tests/unit/fault_preload.cpp"
++ESCAPES = "Une option sans macro, sans etat lu et sans effet sur cet IR lui echappe"
++OPEN_TRANCHE = "Auto-test comportemental de l'arithmetique flottante a l'execution"
++# (fichier, texte exige une fois au moins) : renvois au contrat hors des trois documents complets
++REFERENCES = (
++    (CML, E['E1']), (CML, POINTER), (CML, E['E8']), (CML, E['E9']),
++    (ARCH, E['E1']), (ARCH, POINTER),
++    (SITE, UNDER_CONTRACT), (TOWER, UNDER_CONTRACT), (STRICT, ALL_BUT), (STRICT, UNDER_CONTRACT),
++    (PROBE, ESCAPES), (CONFIGURE_GATE, POINTER), (PASSATION, OPEN_TRANCHE),
++)
++# surpromesses retirees a la cloture : (fichier, texte normalise) qui ne doit pas revenir
++RETRACTED = (
++    (FLAGS, "quelle que soit leur orthographe ou leur canal"),
++    (FLAGS, "echappe aux jetons mais pas a la sonde"),
++    (PROBE, "quelle que soit l'orthographe qui les a posees"),
++    (CML, "quelle que soit l'orthographe ou le canal"),
++    (CML, "le #error couvre desormais toute unite"),
++    (CML, "dans chaque ensemble d'options"),
++    (CML, "quel que soit -march"),
++    (CML, "garde commune a toutes les unites"),
++    (README, "jetons de chaque ensemble d'options"),
++    (README, "#error dans toute unite"),
++    (PASSATION, "jetons de chaque ensemble d'options"),
++    (PASSATION, "qui voit aussi un fichier de reponse"),
++    (PASSATION, "#error dans toute unite"),
++    (PASSATION, "sous toute orthographe"),
++    (ARCH, "un fichier de reponse a la compilation n'echappe plus"),
++    (ARCH, "garde commune a toutes les unites"),
++    (STRICT, "garde de compilation commune a toutes les unites"),
++    (TYPES, "exige de toute unite (refus a la compilation)"),
++    (SITE, "quel que soit -march"),
++    (TOWER, "dans chaque ensemble d'options"),
++    (CONFIGURE_GATE, "dans chaque ensemble d'options"),
++    (COMPILE_GATE, "garde commune a toutes les unites"),
++    (CAMPAIGN, "dans chaque ensemble d'options"),
++    (CAMPAIGN, "commune a toutes les unites"),
++)
++
++# ---------------------------------------------------------------- listes que E2 et E3 nomment (code contre contrat)
++JUDGED_VARIABLES = ('CMAKE_CXX_FLAGS', 'CMAKE_CXX_COMPILER_ARG1', 'CMAKE_CXX_LINK_FLAGS',
++                    'CMAKE_CXX_STANDARD_LIBRARIES', 'CMAKE_EXE_LINKER_FLAGS', 'CMAKE_SHARED_LINKER_FLAGS',
++                    'CMAKE_MODULE_LINKER_FLAGS')
++JUDGED_DIRECTORY = ('COMPILE_OPTIONS', 'LINK_OPTIONS')
++JUDGED_TARGET = ('COMPILE_OPTIONS', 'INTERFACE_COMPILE_OPTIONS', 'LINK_OPTIONS', 'INTERFACE_LINK_OPTIONS',
++                 'LINK_LIBRARIES', 'INTERFACE_LINK_LIBRARIES', 'COMPILE_FLAGS', 'LINK_FLAGS')
++JUDGED_SOURCE = ('COMPILE_OPTIONS', 'COMPILE_FLAGS')
++JUDGED_IMPORTED = ('INTERFACE_COMPILE_OPTIONS', 'INTERFACE_LINK_OPTIONS', 'INTERFACE_LINK_LIBRARIES')
++JUDGE_CALLS = 7  # variables, repertoire, cibles (listes, chaines), sources (liste, chaine), cibles importees
++PROBED_BASE = ('CMAKE_CXX_COMPILER_ARG1', 'CMAKE_CXX_FLAGS')
++PROBED_VARIANTS = '^CMAKE_CXX_FLAGS_[A-Za-z0-9_]+$'
++PROBED_TARGET = ('COMPILE_OPTIONS', 'COMPILE_FLAGS')
++PROBED_SOURCE = ('COMPILE_OPTIONS', 'COMPILE_FLAGS')
++PROBE_CALLS = 4  # variante active, autres variantes, cible, source
++GNU_STATES = ('-fassociative-math', '-freciprocal-math', '-ffinite-math-only', '-funsafe-math-optimizations',
++              '-fsingle-precision-constant', '-fcx-limited-range', '-fsigned-zeros', '-ftrapping-math',
++              '-fallow-store-data-races')
++GNU_TARGET_STATES = ('-mieee-fp|enabled',)
++PROBE_BODY = 'double mhgp10_fp_probe(double a, double b, double c) { return a / b + a * c - b; }'
++
++# planchers : comptes exacts sur l'arbre conforme (contre le vert par vacuite)
++FLOORS = {'D': 64, 'C': 26, 'A': {'GNU': 11, 'Clang': 12}, 'R': {'GNU': 27, 'Clang': 12}, 'U': 6}
++FLOOR_UNITS = 20
++STRICT_TOKEN = 'mhgp10_fp_strict_fast_math_interdit'
++REFUSAL_TOKEN = 'mhgp10_fp_flags_interdits'
++
++
++def normalize(text):
++    """Minuscules sans accents, apostrophes droites, marqueurs de commentaire (# ou //) et titres de debut de ligne
++    retires, accents graves et asterisques de Markdown retires, blancs reduits."""
++    text = text.replace('’', "'").replace('œ', 'oe').replace('Œ', 'oe')
++    text = unicodedata.normalize('NFKD', text)
++    text = ''.join(ch for ch in text if not unicodedata.combining(ch))
++    text = re.sub(r'(?m)^[ \t]*(?:#+|//+)', ' ', text)
++    text = text.replace('`', '').replace('*', '')
++    return ' '.join(text.lower().split())
++
++
++class Judge:
++    def __init__(self):
++        self.count = {f: 0 for f in FAMILIES}
++        self.failures = []
++
++    def ok(self, family, cond, what):
++        self.count[family] += 1
++        if not cond:
++            self.failures.append((family, what))
++        return bool(cond)
++
++    def dead(self, family):
++        return any(f == family for f, _w in self.failures)
++
++    def merge(self, other):
++        for f in FAMILIES:
++            self.count[f] += other.count[f]
++        self.failures += other.failures
++
++
++# ---------------------------------------------------------------- famille D : documents
++def judge_documents(norm):
++    """norm : fichier -> texte normalise (None si absent)."""
++    j = Judge()
++    for rel in FULL:
++        body = norm.get(rel)
++        for key, text in STATEMENTS:
++            n = body.count(normalize(text)) if body is not None else 0
++            j.ok('D', n == 1, 'D : %s porte %s mot pour mot, une fois (%d)' % (rel, key, n))
++    for rel, text in REFERENCES:
++        body = norm.get(rel)
++        j.ok('D', body is not None and normalize(text) in body, 'D : %s dit << %s >>' % (rel, text[:70]))
++    for rel, phrase in RETRACTED:
++        body = norm.get(rel)
++        j.ok('D', body is not None and phrase not in body, 'D : %s dit encore << %s >>' % (rel, phrase))
++    return j
++
++
++# ---------------------------------------------------------------- famille C : code contre contrat
++def code_lines(text):
++    """Lignes de code d'un fichier CMake : lignes de commentaire retirees."""
++    return '\n'.join(line for line in text.split('\n') if not line.lstrip().startswith('#'))
++
++
++def function_body(code, name):
++    """Texte de function(name ...) jusqu'a son endfunction() ; chaine vide si absente."""
++    m = re.search(r'(?m)^function\(%s[ )]' % re.escape(name), code)
++    if m is None:
++        return ''
++    end = code.find('\nendfunction()', m.start())
++    return code[m.start():end] if end != -1 else ''
++
++
++def expand_prefixes(alternation):
++    """Alternatives de tete d'une expression CMAKE_(A|B|(C|D)_E) -> noms complets ; None si la forme est autre."""
++    parts, depth, cur = [], 0, ''
++    for ch in alternation:
++        if ch == '(':
++            depth += 1
++        elif ch == ')':
++            depth -= 1
++        if ch == '|' and depth == 0:
++            parts.append(cur)
++            cur = ''
++        else:
++            cur += ch
++    parts.append(cur)
++    out = []
++    for part in parts:
++        m = re.fullmatch(r'\(([A-Z_|]+)\)([A-Z0-9_]+)', part)
++        if m:
++            out += ['CMAKE_%s%s' % (head, m.group(2)) for head in m.group(1).split('|')]
++        elif re.fullmatch(r'[A-Z0-9_]+', part):
++            out.append('CMAKE_' + part)
++        else:
++            return None
++    return out
++
++
++def loop_properties(text, getter):
++    """Listes de proprietes des boucles foreach(prop ...) dont le corps commence par l'appel `getter`."""
++    found = re.findall(r'foreach\(prop ([A-Z_\s]+)\)\s*' + re.escape(getter), text)
++    return [tuple(group.split()) for group in found]
++
++
++def judge_code(raw):
++    """raw : fichier -> texte brut. Listes lues dans le code, comparees a celles que E2 et E3 nomment."""
++    j = Judge()
++    code = code_lines(raw.get(FLAGS) or '')
++    check = function_body(code, 'mhgp10_fp_check')
++    probe = function_body(code, 'mhgp10_fp_probe')
++    probe_set = function_body(code, 'mhgp10_fp_probe_set')
++    j.ok('C', bool(check) and bool(probe) and bool(probe_set),
++         'C : fonctions mhgp10_fp_check, mhgp10_fp_probe et mhgp10_fp_probe_set lues')
++    # ensembles juges par les jetons
++    m = re.search(r'list\(FILTER vars INCLUDE REGEX\s+"\^CMAKE_\(([^"]+)\)"\)', check)
++    variables = expand_prefixes(m.group(1)) if m else None
++    j.ok('C', variables is not None and sorted(variables) == sorted(JUDGED_VARIABLES),
++         'C : variables jugees = liste de E2 (%s)' % variables)
++    before, _sep, after = check.partition('get_directory_property(imported IMPORTED_TARGETS)')
++    directory = loop_properties(before, 'get_directory_property(value ${prop})')
++    j.ok('C', directory == [JUDGED_DIRECTORY], 'C : proprietes jugees du repertoire = E2 (%s)' % directory)
++    target = loop_properties(before, 'get_target_property(value ${t} ${prop})')
++    flat = tuple(p for group in target for p in group)
++    j.ok('C', len(target) == 2 and flat == JUDGED_TARGET, 'C : proprietes jugees des cibles = E2 (%s)' % target)
++    source = tuple(re.findall(r'get_source_file_property\(value "\$\{s\}" ([A-Z_]+)\)', before))
++    j.ok('C', source == JUDGED_SOURCE, 'C : proprietes jugees des sources = E2 (%s)' % (source,))
++    imported = loop_properties(after, 'get_target_property(value ${t} ${prop})')
++    j.ok('C', bool(_sep) and imported == [JUDGED_IMPORTED],
++         'C : proprietes jugees des cibles importees = E2 (%s)' % imported)
++    calls = check.count('mhgp10_fp_judge(')
++    j.ok('C', calls == JUDGE_CALLS, 'C : %d appels de mhgp10_fp_judge dans mhgp10_fp_check, %d declares'
++         % (calls, JUDGE_CALLS))
++    named = set(re.findall(r'\b[A-Z][A-Z0-9_]{5,}\b', E['E2']))
++    declared = set(JUDGED_VARIABLES + JUDGED_DIRECTORY + JUDGED_TARGET + JUDGED_SOURCE + JUDGED_IMPORTED)
++    j.ok('C', named == declared, 'C : E2 nomme exactement les ensembles declares (%s)' % sorted(named ^ declared))
++    # ensembles sondes
++    j.ok('C', 'if(NOT CMAKE_CXX_COMPILER_ID MATCHES "^(GNU|Clang|AppleClang)$")' in probe,
++         'C : sonde sous GCC et Clang seulement')
++    m = re.search(r'mhgp10_fp_string_tokens\(base "([^"]*)"\)', probe)
++    base = tuple(re.findall(r'\$\{([A-Z0-9_]+)\}', m.group(1))) if m else None
++    j.ok('C', base == PROBED_BASE, 'C : base de la sonde = E3 (%s)' % (base,))
++    j.ok('C', 'get_directory_property(dir_options COMPILE_OPTIONS)' in probe
++         and 'list(FILTER vars INCLUDE REGEX "%s")' % PROBED_VARIANTS in probe,
++         'C : variantes CMAKE_CXX_FLAGS_<CFG> et options du repertoire sondees')
++    target = tuple(re.findall(r'get_target_property\(value \$\{t\} ([A-Z_]+)\)', probe))
++    j.ok('C', target == PROBED_TARGET, 'C : proprietes sondees des cibles = E3 (%s)' % (target,))
++    source = tuple(re.findall(r'get_source_file_property\(value "\$\{s\}" ([A-Z_]+)\)', probe))
++    j.ok('C', source == PROBED_SOURCE, 'C : proprietes sondees des sources = E3 (%s)' % (source,))
++    calls = probe.count('mhgp10_fp_probe_once(')  # la definition « macro(mhgp10_fp_probe_once where) » n'en est pas un
++    j.ok('C', calls == PROBE_CALLS, 'C : %d appels de mhgp10_fp_probe_once, %d declares' % (calls, PROBE_CALLS))
++    named = set(re.findall(r'\b[A-Z][A-Z0-9_]{5,}\b', E['E3'].replace('CMAKE_CXX_FLAGS_<CFG>', '')))
++    declared = set(PROBED_BASE + PROBED_TARGET + PROBED_SOURCE)
++    j.ok('C', named == declared, 'C : E3 nomme exactement les ensembles sondes (%s)' % sorted(named ^ declared))
++    for needle, what in (('-fsyntax-only "${source}"', 'macros'), ('-Q --help=optimizers', 'etats de GCC'),
++                         ('-Q --help=target', 'etats de la cible'), ('-S -emit-llvm', 'IR de Clang')):
++        j.ok('C', needle in probe_set, 'C : la sonde lit %s (%s)' % (what, needle))
++    # etats lus chez GCC
++    m = re.search(r'set\(MHGP10_FP_GNU_STATES\s+([^)]*)\)', code)
++    states = tuple(s.split('|')[0] for s in re.findall(r'"([^"]+)"', m.group(1))) if m else None
++    j.ok('C', states is not None and sorted(states) == sorted(GNU_STATES),
++         'C : etats lus dans -Q --help=optimizers (%s)' % (states,))
++    m = re.search(r'set\(MHGP10_FP_GNU_TARGET_STATES\s*([^)]*)\)', code)
++    states = tuple(re.findall(r'"([^"]+)"', m.group(1))) if m else None
++    j.ok('C', states == GNU_TARGET_STATES, 'C : etat lu dans -Q --help=target = -mieee-fp seul (%s)' % (states,))
++    # sonde : quatre operations, aucune constante flottante
++    lines = [line for line in (raw.get(PROBE) or '').split('\n')
++             if line.strip() and not line.lstrip().startswith(('//', '#'))]
++    j.ok('C', lines.count(PROBE_BODY) == 1 and len(lines) == 2,
++         'C : la sonde ne compile que sa fonction a quatre operations (%d lignes de code)' % len(lines))
++    j.ok('C', not any(re.search(r'\d\.\d|\d\.[ ;)]|\de[-+]?\d', line) for line in lines),
++         'C : aucune constante flottante dans la sonde')
++    # contraction posee une fois pour le repertoire, jugement differe
++    cml = code_lines(raw.get(CML) or '')
++    for needle in ('set(MHGP10_FP_OPTIONS -ffp-contract=off)', 'add_compile_options(${MHGP10_FP_OPTIONS})',
++                   'cmake_language(DEFER CALL mhgp10_fp_check)'):
++        n = cml.count(needle)
++        j.ok('C', n == 1, 'C : CMakeLists.txt porte une fois %s (%d)' % (needle, n))
++    return j
++
++
++# ---------------------------------------------------------------- configurations
++def run(argv, cwd=None, env=None, timeout=CONFIGURE_TIMEOUT):
++    """Code (entier, 'signalN', 'delai' ou 'oserror'), sortie standard, sortie d'erreur."""
++    try:
++        r = subprocess.run(argv, cwd=cwd, env=env, capture_output=True, text=True, errors='replace', timeout=timeout)
++    except subprocess.TimeoutExpired:
++        return 'delai', '', ''
++    except OSError as e:
++        return 'oserror', '', str(e)
++    code = r.returncode if r.returncode >= 0 else 'signal%d' % -r.returncode
++    return code, r.stdout, r.stderr
++
++
++class Context:
++    def __init__(self, src, work, cxx, cid, jobs, crt):
++        self.src, self.work, self.cxx, self.cid, self.jobs, self.crt = src, work, cxx, cid, jobs, crt
++        self.cmake = shutil.which('cmake') or 'cmake'
++        self.env = {k: v for k, v in os.environ.items() if k not in ('CXX', 'CXXFLAGS', 'LDFLAGS')}
++
++
++def configure(ctx, src, tag, args=(), inject=None, parent=None):
++    """Configuration neuve de src dans <work>/<tag>/b. inject : texte d'un CMAKE_PROJECT_INCLUDE ; parent : drapeau
++    pose par add_definitions dans un projet parent qui fait add_subdirectory. Rend (code, sorties, dossier de build)."""
++    case = os.path.join(ctx.work, tag)
++    os.makedirs(case)
++    build = os.path.join(case, 'b')
++    top = src
++    if parent is not None:
++        top = os.path.join(case, 'parent')
++        os.makedirs(top)
++        with open(os.path.join(top, 'CMakeLists.txt'), 'w') as f:
++            f.write('cmake_minimum_required(VERSION 3.22)\nproject(mhgp10_parent LANGUAGES CXX)\n'
++                    'add_definitions(%s)\nadd_subdirectory("%s" produit)\n' % (parent, src))
++    argv = [ctx.cmake, '-S', top, '-B', build, '-DCMAKE_BUILD_TYPE=Release', '-DCMAKE_CXX_COMPILER=' + ctx.cxx]
++    argv += list(args)
++    if inject is not None:
++        path = os.path.join(case, 'inject.cmake')
++        with open(path, 'w') as f:
++            f.write(inject)
++        argv.append('-DCMAKE_PROJECT_INCLUDE=' + path)
++    code, out, err = run(argv, env=ctx.env)
++    return code, out + err, build
++
++
++def compile_commands(build):
++    """Entrees de compile_commands.json : (fichier, dossier, arguments) ; liste vide si illisible."""
++    try:
++        with open(os.path.join(build, 'compile_commands.json')) as f:
++            entries = json.load(f)
++    except (OSError, ValueError):
++        return []
++    out = []
++    for e in entries if isinstance(entries, list) else []:
++        if isinstance(e, dict) and 'file' in e:
++            args = e['arguments'] if 'arguments' in e else shlex.split(e.get('command', ''))
++            out.append((e['file'], e.get('directory', build), list(args)))
++    return out
++
++
++def link_command(build, target):
++    """Commande d'edition de liens ecrite pour une cible : link.txt (Makefile) ou build.ninja ; '' si absente."""
++    for root, _dirs, files in os.walk(build):
++        if 'link.txt' in files and os.path.basename(root) == target + '.dir':
++            with open(os.path.join(root, 'link.txt'), errors='replace') as f:
++                return f.read()
++    ninja = os.path.join(build, 'build.ninja')
++    if os.path.isfile(ninja):
++        with open(ninja, errors='replace') as f:
++            return f.read()
++    return ''
++
++
++def response_file(ctx, tag, content):
++    path = os.path.join(ctx.work, tag + '.options')
++    with open(path, 'w') as f:
++        f.write(content)
++    return path
++
++
++def accepted_cases(ctx):
++    """(nom, canal, arguments de configure(), jetons exiges sur chaque compilation, jetons exiges a l'edition de
++    liens de mhgp10_tower)."""
++    if ctx.cid == 'Clang':
++        spc = response_file(ctx, 'canal_c', '-cl-single-precision-constant\n')
++        return [
++            ('A_lto_plugin_opt', 'A',
++             dict(args=['-DMHGP10_MARCH=x86-64-v3', '-DCMAKE_CXX_FLAGS=-flto',
++                        '-DCMAKE_EXE_LINKER_FLAGS=-Wl,-plugin-opt=-fp-contract=fast']),
++             ['-flto', '-march=x86-64-v3', '-ffp-contract=off'], ['-flto', '-Wl,-plugin-opt=-fp-contract=fast']),
++            ('B_add_definitions', 'B', dict(inject='add_definitions(-freciprocal-math)\n'),
++             ['-freciprocal-math', '-ffp-contract=off'], []),
++            ('B_projet_parent', 'B', dict(parent='-freciprocal-math'), ['-freciprocal-math', '-ffp-contract=off'], []),
++            ('C_fichier_de_reponse', 'C', dict(args=['-DCMAKE_CXX_FLAGS=@' + spc]),
++             ['@' + spc, '-ffp-contract=off'], []),
++            ('C_fichier_config', 'C', dict(args=['-DCMAKE_CXX_FLAGS=--config=' + spc]),
++             ['--config=' + spc, '-ffp-contract=off'], []),
++        ]
++    daz = response_file(ctx, 'canal_d', '-mdaz-ftz\n')
++    return [
++        ('B_add_definitions', 'B', dict(inject='add_definitions(-mno-ieee-fp)\n'),
++         ['-mno-ieee-fp', '-ffp-contract=off'], []),
++        ('B_projet_parent', 'B', dict(parent='-mno-ieee-fp'), ['-mno-ieee-fp', '-ffp-contract=off'], []),
++        ('D_fichier_de_reponse', 'D', dict(args=['-DCMAKE_CXX_FLAGS=@' + daz]),
++         ['@' + daz, '-ffp-contract=off'], ['@' + daz]),
++        ('D_chemin_de_crtfastmath', 'D', dict(args=['-DCMAKE_EXE_LINKER_FLAGS=' + ctx.crt]),
++         ['-ffp-contract=off'], [ctx.crt]),
++    ]
++
++
++def refused_cases(ctx):
++    """(nom, ensemble fautif attendu, jeton attendu, arguments de configure())."""
++    if ctx.cid == 'Clang':
++        return [
++            ('constat_cl_unsafe_math', 'CMAKE_CXX_FLAGS', '-cl-unsafe-math-optimizations',
++             dict(args=['-DCMAKE_CXX_FLAGS=-cl-unsafe-math-optimizations'])),
++            ('A_en_clair', 'CMAKE_EXE_LINKER_FLAGS', '-ffp-contract=fast',
++             dict(args=['-DMHGP10_MARCH=x86-64-v3', '-DCMAKE_CXX_FLAGS=-flto',
++                        '-DCMAKE_EXE_LINKER_FLAGS=-ffp-contract=fast'])),
++            ('B_en_clair', 'repertoire COMPILE_OPTIONS', '-freciprocal-math',
++             dict(inject='add_compile_options(-freciprocal-math)\n')),
++            ('C_en_clair', 'CMAKE_CXX_FLAGS', '-cl-single-precision-constant',
++             dict(args=['-DCMAKE_CXX_FLAGS=-cl-single-precision-constant'])),
++        ]
++    cases = [('constat_' + alias[2:].replace('-', '_'), 'CMAKE_CXX_FLAGS', alias,
++              dict(args=['-DCMAKE_CXX_FLAGS=' + alias]))
++             for alias in ('--finite-math-only', '--no-signed-zeros', '--no-trapping-math', '--fast-math',
++                           '--reciprocal-math', '--unsafe-math-optimizations')]
++    cases += [
++        ('B_en_clair', 'repertoire COMPILE_OPTIONS', '-mno-ieee-fp',
++         dict(inject='add_compile_options(-mno-ieee-fp)\n')),
++        ('D_en_clair', 'CMAKE_CXX_FLAGS', '-mdaz-ftz', dict(args=['-DCMAKE_CXX_FLAGS=-mdaz-ftz'])),
++        ('D_lien_en_clair', 'CMAKE_EXE_LINKER_FLAGS', '-mdaz-ftz', dict(args=['-DCMAKE_EXE_LINKER_FLAGS=-mdaz-ftz'])),
++    ]
++    return cases
++
++
++def judge_accepted(ctx, src, prefix, only=None, echo=True):
++    """Famille A : chaque canal hors contrat passe la configuration, et l'option arrive sur les commandes ecrites."""
++    j = Judge()
++    channels = {}
++    played = 0
++    for name, channel, how, on_compile, on_link in accepted_cases(ctx):
++        if only is not None and name not in only:
++            continue
++        before = len(j.failures)
++        code, output, build = configure(ctx, src, prefix + name, **how)
++        refused = sorted(set(re.findall(r'mhgp10_fp_[a-z_]+', output)))
++        j.ok('A', code == 0 and not refused,
++             'A : canal %s, cas %s : configuration code %s%s ; le contrat declare ce canal hors contrat (admis) : '
++             'mettre a jour cmake/fp_flags.cmake, README.md, PASSATION.md et cette porte'
++             % (channel, name, code, ', refus %s' % ' '.join(refused) if refused else ''))
++        commands = compile_commands(build) if code == 0 else []
++        carried = [all(tok in args for tok in on_compile) for _file, _dir, args in commands]
++        j.ok('A', len(commands) >= FLOOR_UNITS and all(carried),
++             'A : cas %s : %d commande(s) sur %d portent %s'
++             % (name, sum(carried), len(commands), ' '.join(on_compile)))
++        if on_link:
++            link = link_command(build, 'mhgp10_tower').split()
++            j.ok('A', all(tok in link for tok in on_link),
++                 'A : cas %s : l\'edition de liens de mhgp10_tower porte %s' % (name, ' '.join(on_link)))
++        channels[channel] = channels.get(channel, True) and len(j.failures) == before
++        played += 1
++        if echo:
++            print('admis %s canal=%s code=%s commandes=%d' % (name, channel, code, len(commands)))
++    return j, sorted(c for c, ok in channels.items() if ok), played
++
++
++def judge_refused(ctx, src, prefix, only=None, echo=True):
++    """Famille R : refus graves, par les jetons."""
++    j = Judge()
++    played = 0
++    for name, where, token, how in refused_cases(ctx):
++        if only is not None and name not in only:
++            continue
++        code, output, _build = configure(ctx, src, prefix + name, **how)
++        flat = ' '.join(output.split())
++        j.ok('R', isinstance(code, int) and code != 0,
++             'R : cas %s : configuration code %s, refus attendu' % (name, code))
++        j.ok('R', REFUSAL_TOKEN in flat, 'R : cas %s : refus sans le jeton grave %s' % (name, REFUSAL_TOKEN))
++        j.ok('R', '%s contient %s ' % (where, token) in flat,
++             'R : cas %s : refus sans << %s contient %s >>' % (name, where, token))
++        played += 1
++        if echo:
++            print('refus %s ensemble=[%s] jeton=%s code=%s' % (name, where, token, code))
++    return j, played
++
++
++def preprocess_args(args):
++    """Commande de compilation sans -o <objet>, sans -c et sans sortie de dependances (-MD, -MT, -MF, -MQ)."""
++    out, skip = [], False
++    for tok in args:
++        if skip:
++            skip = False
++        elif tok in ('-o', '-MT', '-MF', '-MQ'):
++            skip = True
++        elif tok not in ('-c', '-MD', '-MMD'):
++            out.append(tok)
++    return out
++
++
++def judge_units(ctx, src, prefix, echo=True):
++    """Famille U : contraction coupee sur chaque commande, garde de compilation dans toute unite sauf une."""
++    j = Judge()
++    code, _output, build = configure(ctx, src, prefix + 'defaut')
++    j.ok('U', code == 0, 'U : configuration par defaut code %s' % code)
++    commands = compile_commands(build) if code == 0 else []
++    contract = sum('-ffp-contract=off' in args for _file, _dir, args in commands)
++    j.ok('U', len(commands) >= FLOOR_UNITS and contract == len(commands),
++         'U : %d commande(s) sur %d portent -ffp-contract=off (plancher %d unites)'
++         % (contract, len(commands), FLOOR_UNITS))
++    root = os.path.realpath(src)
++
++    def preprocess(entry):
++        path, directory, args = entry
++        rc, _out, err = run(preprocess_args(args) + ['-E', '-o', os.devnull, '-ffast-math'], cwd=directory,
++                            env=ctx.env, timeout=UNIT_TIMEOUT)
++        return os.path.relpath(os.path.realpath(path), root), rc, STRICT_TOKEN in err
++
++    with concurrent.futures.ThreadPoolExecutor(max_workers=ctx.jobs) as pool:
++        results = list(pool.map(preprocess, commands))
++    guarded = sorted(rel for rel, rc, tok in results if isinstance(rc, int) and rc != 0 and tok)
++    admitted = sorted(rel for rel, rc, _tok in results if rc == 0)
++    other = sorted(rel for rel, rc, tok in results if rel not in guarded and rel not in admitted)
++    j.ok('U', admitted == [PRELOAD] and not other and len(guarded) == len(commands) - 1,
++         'U : sous -ffast-math, unites admises au pretraitement %s (declaree : %s seule), sans le jeton %s : %s'
++         % (admitted, PRELOAD, STRICT_TOKEN, other))
++    exempt = [e for e in commands if os.path.relpath(os.path.realpath(e[0]), root) == PRELOAD]
++    rc = None
++    if len(exempt) == 1:
++        rc, _out, _err = run(preprocess_args(exempt[0][2]) + ['-fsyntax-only', '-ffast-math'], cwd=exempt[0][1],
++                             env=ctx.env, timeout=UNIT_TIMEOUT)
++    j.ok('U', rc == 0, 'U : %s compile sous -ffast-math (-fsyntax-only, code %s)' % (PRELOAD, rc))
++    try:
++        with open(os.path.join(src, PRELOAD), encoding='utf-8') as f:
++            body = '\n'.join(line.split('//')[0] for line in f.read().split('\n'))
++    except (OSError, UnicodeDecodeError):
++        body = None
++    j.ok('U', body is not None and re.search(r'#\s*include\s*"', body) is None,
++         'U : %s n\'inclut aucun en-tete du projet' % PRELOAD)
++    j.ok('U', body is not None and re.search(r'\b(double|float)\b', body) is None,
++         'U : %s ne porte aucun type flottant' % PRELOAD)
++    if echo:
++        print('unites %d contraction_coupee=%d gardees=%d exemptee=%s'
++              % (len(commands), contract, len(guarded), ' '.join(admitted) or '-'))
++    return j, len(guarded), len(commands)
++
++
++# ---------------------------------------------------------------- mutants
++def replace_once(texts, rel, old, new):
++    """Remplacement exact d'une occurrence unique ; ValueError sinon (mutant inapplicable, jamais silencieux)."""
++    if texts.get(rel) is None or texts[rel].count(old) != 1:
++        raise ValueError('motif absent ou non unique dans %s : %r' % (rel, old[:60]))
++    texts[rel] = texts[rel].replace(old, new)
++
++
++def document_mutants():
++    """(nom, mutation du dictionnaire des textes normalises) : chacun doit etre tue par D."""
++    out = []
++    for rel in FULL:
++        short = os.path.basename(rel).split('.')[0]
++        for key, text in STATEMENTS:
++            words = normalize(text).split()
++            out.append(('enonce_%s_tronque_%s' % (key, short),
++                        lambda n, rel=rel, old=normalize(text), new=' '.join(words[:-1]):
++                        replace_once(n, rel, old, new)))
++    out.append(('enonce_E4_en_double_PASSATION',
++                lambda n: replace_once(n, PASSATION, normalize(E['E4']), 2 * (normalize(E['E4']) + ' '))))
++    for rel in FULL:
++        short = os.path.basename(rel).split('.')[0]
++        def measure(n, rel=rel):
++            if n.get(rel) is None or '64 instructions fma' not in n[rel]:
++                raise ValueError('mesure absente de %s' % rel)
++            n[rel] = n[rel].replace('64 instructions fma', '46 instructions fma')
++        out.append(('mesure_changee_%s' % short, measure))
++    for i, (rel, text) in enumerate(REFERENCES):
++        def drop(n, rel=rel, text=text):
++            if n.get(rel) is None or normalize(text) not in n[rel]:
++                raise ValueError('renvoi absent de %s' % rel)
++            n[rel] = n[rel].replace(normalize(text), '')
++        out.append(('renvoi_retire_%d_%s' % (i, os.path.basename(rel).split('.')[0]), drop))
++    for i, (rel, phrase) in enumerate(RETRACTED):
++        def back(n, rel=rel, phrase=phrase):
++            if n.get(rel) is None:
++                raise ValueError('document absent : %s' % rel)
++            n[rel] = n[rel] + ' ' + phrase
++        out.append(('surpromesse_revenue_%d_%s' % (i, os.path.basename(rel).split('.')[0]), back))
++    return out
++
++
++DIR_LOOP = ('  foreach(prop COMPILE_OPTIONS LINK_OPTIONS)\n    get_directory_property(value ${prop})\n'
++            '    mhgp10_fp_judge("repertoire ${prop}" liste ${value})\n  endforeach()\n')
++VARS_FILTER = ('  list(FILTER vars INCLUDE REGEX\n       "^CMAKE_(CXX_FLAGS|CXX_COMPILER_ARG1|CXX_LINK_FLAGS|'
++               'CXX_STANDARD_LIBRARIES|(EXE|SHARED|MODULE)_LINKER_FLAGS)")')
++IN_LIST = '  if(s IN_LIST MHGP10_FP_FORBIDDEN OR s MATCHES "^-cl-")\n'
++TARGET_STATES = 'set(MHGP10_FP_GNU_TARGET_STATES "-mieee-fp|enabled")'
++DEFINITIONS_JUDGED = (DIR_LOOP + '  cmake_policy(PUSH)\n  cmake_policy(SET CMP0059 OLD)\n'
++                      '  get_directory_property(value DEFINITIONS)\n  cmake_policy(POP)\n'
++                      '  mhgp10_fp_judge("repertoire DEFINITIONS" chaine "${value}")\n')
++CONTRACT_OPTION = 'add_compile_options(${MHGP10_FP_OPTIONS})\n'
++
++# (nom, mutation du dictionnaire des textes bruts) : chacun doit etre tue par C
++CODE_MUTANTS = (
++    ('code_repertoire_definitions_juge',
++     lambda r: replace_once(r, FLAGS, '  foreach(prop COMPILE_OPTIONS LINK_OPTIONS)\n    get_directory_property',
++                            '  foreach(prop COMPILE_OPTIONS LINK_OPTIONS DEFINITIONS)\n    get_directory_property')),
++    ('code_appel_de_jugement_ajoute', lambda r: replace_once(r, FLAGS, DIR_LOOP, DEFINITIONS_JUDGED)),
++    ('code_variable_non_jugee',
++     lambda r: replace_once(r, FLAGS, VARS_FILTER, VARS_FILTER.replace('CXX_STANDARD_LIBRARIES|', ''))),
++    ('code_bibliotheques_liees_non_jugees',
++     lambda r: replace_once(r, FLAGS, 'INTERFACE_LINK_OPTIONS LINK_LIBRARIES\n                 '
++                            'INTERFACE_LINK_LIBRARIES)', 'INTERFACE_LINK_OPTIONS)')),
++    ('code_etat_daz_ftz_lu',
++     lambda r: replace_once(r, FLAGS, TARGET_STATES, TARGET_STATES[:-1] + ' "-mdaz-ftz|disabled")')),
++    ('code_interface_sondee',
++     lambda r: replace_once(r, FLAGS, '    get_target_property(value ${t} COMPILE_FLAGS)\n    if(value)\n'
++                            '      mhgp10_fp_string_tokens(tokens "${value}")\n'
++                            '      list(APPEND target_options ${tokens})',
++                            '    get_target_property(value ${t} INTERFACE_COMPILE_OPTIONS)\n'
++                            '    get_target_property(value ${t} COMPILE_FLAGS)\n    if(value)\n'
++                            '      mhgp10_fp_string_tokens(tokens "${value}")\n'
++                            '      list(APPEND target_options ${tokens})')),
++    ('code_constante_dans_la_sonde',
++     lambda r: replace_once(r, PROBE, 'return a / b + a * c - b; }', 'return a / b + a * c - b * 1.0000000001; }')),
++    ('code_contraction_non_posee', lambda r: replace_once(r, CML, CONTRACT_OPTION, '')),
++)
++
++
++def tree_mutants(cid):
++    """(nom, famille qui doit le tuer, remplacements (fichier, ancien, nouveau), cas rejoues) : arbres mutes."""
++    first = 'constat_cl_unsafe_math' if cid == 'Clang' else 'constat_finite_math_only'
++    out = []
++    if cid == 'Clang':
++        out.append(('canal_A_ferme', 'A',
++                    [(FLAGS, IN_LIST, IN_LIST.replace(')\n', ' OR s MATCHES "plugin-opt")\n'))],
++                    ['A_lto_plugin_opt']))
++    out.append(('canal_B_ferme', 'A', [(FLAGS, DIR_LOOP, DEFINITIONS_JUDGED)], ['B_add_definitions']))
++    if cid == 'Clang':
++        out.append(('canal_C_ferme', 'A',
++                    [(FLAGS, IN_LIST, IN_LIST.replace(')\n', ' OR s MATCHES "^(@|-fconfig=)")\n'))],
++                    ['C_fichier_de_reponse', 'C_fichier_config']))
++    else:
++        out.append(('canal_D_ferme', 'A',
++                    [(FLAGS, IN_LIST, IN_LIST.replace(')\n', ' OR s MATCHES "^@" OR s MATCHES "crtfastmath")\n'))],
++                    ['D_fichier_de_reponse', 'D_chemin_de_crtfastmath']))
++    out.append(('refus_laisse_a_la_sonde', 'R',
++                [(FLAGS, VARS_FILTER, '  list(FILTER vars INCLUDE REGEX "^CMAKE_JAMAIS$")')], [first]))
++    out.append(('garde_dans_l_unite_exemptee', 'U',
++                [(PRELOAD, '#include <dlfcn.h>\n', '#include "../../src/core/fp_strict.hpp"\n#include <dlfcn.h>\n')],
++                None))
++    out.append(('garde_non_incluse', 'U',
++                [(TYPES, '#include "core/fp_strict.hpp"', '// #include "core/fp_strict.hpp"')], None))
++    out.append(('contraction_non_posee', 'U', [(CML, CONTRACT_OPTION, '')], None))
++    return out
++
++
++TREE_COPY = ('CMakeLists.txt', 'cmake', 'src', 'cli', 'tests')
++
++
++def mutated_tree(ctx, name, edits):
++    """Copie du projet sous <work>/mutant_<nom>/arbre, mutee ; ValueError si un motif n'est pas unique."""
++    root = os.path.join(ctx.work, 'mutant_' + name, 'arbre')
++    os.makedirs(root)
++    for item in TREE_COPY:
++        source = os.path.join(ctx.src, item)
++        if os.path.isdir(source):
++            shutil.copytree(source, os.path.join(root, item))
++        else:
++            shutil.copy2(source, os.path.join(root, item))
++    for rel, old, new in edits:
++        path = os.path.join(root, rel)
++        with open(path, encoding='utf-8') as f:
++            text = f.read()
++        if text.count(old) != 1:
++            raise ValueError('motif absent ou non unique dans %s : %r' % (rel, old[:60]))
++        with open(path, 'w', encoding='utf-8') as f:
++            f.write(text.replace(old, new))
++    return root
++
++
++def eq_rewrapped(raw):
++    """Equivalent : README.md et PASSATION.md recoupes a un mot par ligne (la normalisation reduit les blancs)."""
++    for rel in (README, PASSATION):
++        raw[rel] = raw[rel].replace(' ', '\n')
++
++
++def eq_uppercase(raw):
++    """Equivalent : README.md et PASSATION.md en capitales (la normalisation ignore la casse)."""
++    for rel in (README, PASSATION):
++        raw[rel] = raw[rel].upper()
++
++
++EQUIVALENTS = (('documents_recoupes', eq_rewrapped), ('casse_changee', eq_uppercase))
++
++
++# ---------------------------------------------------------------- principal
++def prepare_work(work):
++    """Dossier de travail vide et marque ; False s'il existe sans la marque de cette porte."""
++    if os.path.lexists(work):
++        if not os.path.isdir(work) or os.path.islink(work):
++            return False
++        entries = os.listdir(work)
++        if entries and MARK not in entries:
++            return False
++        for entry in entries:
++            path = os.path.join(work, entry)
++            if os.path.isdir(path) and not os.path.islink(path):
++                shutil.rmtree(path)
++            else:
++                os.unlink(path)
++    else:
++        os.makedirs(work)
++    with open(os.path.join(work, MARK), 'w') as f:
++        f.write('dossier de travail de test_fp_contract.py\n')
++    return True
++
++
++def main():
++    positional = [a for a in sys.argv[1:] if not a.startswith('--')]
++    options = [a for a in sys.argv[1:] if a.startswith('--')]
++    jobs, keep = 2, False
++    usage = len(positional) != 3
++    for opt in options:
++        if opt == '--keep':
++            keep = True
++        elif re.fullmatch(r'--jobs=[1-9][0-9]?', opt):
++            jobs = int(opt[7:])
++        else:
++            usage = True
++    if usage:
++        print(__doc__)
++        return 2
++    src, work, cxx = os.path.abspath(positional[0]), os.path.abspath(positional[1]), positional[2]
++    raw = {}
++    for rel in DOCUMENTS:
++        try:
++            with open(os.path.join(src, rel), encoding='utf-8') as f:
++                raw[rel] = f.read()
++        except (OSError, UnicodeDecodeError):
++            raw[rel] = None
++    missing = [rel for rel in DOCUMENTS if raw[rel] is None]
++    if missing:
++        print('REFUS documents ou sources absents sous %s : %s' % (src, ' '.join(missing)))
++        return 2
++    code, out, err = run([cxx, '--version'], timeout=60)
++    if code != 0:
++        print('REFUS compilateur inutilisable (%s --version : %s)' % (cxx, code))
++        return 2
++    version = (out + err).lower()
++    if 'clang' in version:
++        cid = 'Clang'
++    elif 'free software foundation' in version or 'gcc' in version or 'g++' in version:
++        cid = 'GNU'
++    else:
++        print('REFUS compilateur hors de la paire GCC / Clang : %s' % (out + err).split('\n')[0])
++        return 2
++    crt = ''
++    if cid == 'GNU':
++        code, out, _err = run([cxx, '-print-file-name=crtfastmath.o'], timeout=60)
++        crt = out.strip()
++        if code != 0 or not os.path.isabs(crt) or not os.path.isfile(crt):
++            print('REFUS crtfastmath.o introuvable chez %s (canal D non rejouable) : %r' % (cxx, crt))
++            return 2
++    if run([shutil.which('cmake') or 'cmake', '--version'], timeout=60)[0] != 0:
++        print('REFUS cmake inutilisable')
++        return 2
++    if not prepare_work(work):
++        print('REFUS dossier de travail non reconnu (ni vide, ni marque %s) : %s' % (MARK, work))
++        return 2
++    ctx = Context(src, work, cxx, cid, jobs, crt)
++
++    norm = {rel: normalize(text) for rel, text in raw.items()}
++    j = judge_documents(norm)
++    j.merge(judge_code(raw))
++    ja, channels, admitted = judge_accepted(ctx, src, 'admis_')
++    ja.ok('A', channels == sorted(CHANNELS[cid]),
++          'A : canaux hors contrat rejoues et admis %s, declares %s' % (channels, sorted(CHANNELS[cid])))
++    j.merge(ja)
++    jr, refused = judge_refused(ctx, src, 'refus_')
++    j.merge(jr)
++    ju, guarded, units = judge_units(ctx, src, 'unites_')
++    j.merge(ju)
++    failures = [what for _f, what in j.failures]
++    families_ok = sum(1 for fam in FAMILIES if not j.dead(fam))
++
++    killed = total = 0
++
++    def verdict(name, family, mj):
++        nonlocal killed, total
++        total += 1
++        if mj is None:
++            return
++        ok = mj.dead(family)
++        killed += ok
++        why = next((w for f, w in mj.failures if f == family), '')
++        print('mutant %s : %s' % (name, 'tue par %s (%s)' % (family, why[4:100]) if ok else 'SURVIVANT (%s)' % family))
++        if not ok:
++            failures.append('mutant %s survivant' % name)
++
++    def applied(name, mutate, texts):
++        """Copie des textes, mutee ; None (echec nomme) si le mutant ne s'applique pas."""
++        copy = dict(texts)
++        try:
++            mutate(copy)
++        except Exception as e:  # motif absent ou texte d'une forme inattendue : echec nomme, jamais un succes
++            print('mutant %s : INAPPLICABLE (%s : %s)' % (name, type(e).__name__, e))
++            failures.append('mutant %s inapplicable' % name)
++            return None
++        return copy
++
++    for name, mutate in document_mutants():
++        copy = applied(name, mutate, norm)
++        verdict(name, 'D', judge_documents(copy) if copy is not None else None)
++    for name, mutate in CODE_MUTANTS:
++        copy = applied(name, mutate, raw)
++        verdict(name, 'C', judge_code(copy) if copy is not None else None)
++    for name, family, edits, only in tree_mutants(cid):
++        try:
++            tree = mutated_tree(ctx, name, edits)
++        except (OSError, ValueError) as e:
++            print('mutant %s : INAPPLICABLE (%s : %s)' % (name, type(e).__name__, e))
++            failures.append('mutant %s inapplicable' % name)
++            total += 1
++            continue
++        prefix = 'mutant_%s/' % name
++        if family == 'A':
++            mj = judge_accepted(ctx, tree, prefix, only, echo=False)[0]
++        elif family == 'R':
++            mj = judge_refused(ctx, tree, prefix, only, echo=False)[0]
++        else:
++            mj = judge_units(ctx, tree, prefix, echo=False)[0]
++        verdict(name, family, mj)
++    accepted = 0
++    for name, mutate in EQUIVALENTS:
++        copy = applied(name, mutate, raw)
++        if copy is None:
++            continue
++        mj = judge_documents({rel: normalize(text) for rel, text in copy.items()})
++        accepted += not mj.failures
++        print('equivalent %s : %s' % (name, 'accepte' if not mj.failures else 'REJETE : %s' % mj.failures[0][1]))
++        if mj.failures:
++            failures.append('equivalent %s rejete' % name)
++
++    if not keep:
++        for entry in os.listdir(work):
++            path = os.path.join(work, entry)
++            if entry != MARK:
++                if os.path.isdir(path) and not os.path.islink(path):
++                    shutil.rmtree(path, ignore_errors=True)
++                else:
++                    os.unlink(path)
++    floors = {f: (FLOORS[f][cid] if isinstance(FLOORS[f], dict) else FLOORS[f]) for f in FAMILIES}
++    print('controles %s (planchers %s)' % (' '.join('%s=%d' % (f, j.count[f]) for f in FAMILIES),
++                                           ' '.join('%s=%d' % (f, floors[f]) for f in FAMILIES)))
++    for f in failures:
++        print('ECHEC', f)
++    if failures:
++        return 1
++    short = [f for f in FAMILIES if j.count[f] < floors[f]]
++    if short:
++        print('PLANCHER familles sous leur plancher : %s' % ' '.join(short))
++        return 3
++    print('fp_contract_ok compilateur=%s familles=%d/%d enonces=%d canaux=%d/%d admis=%d refus=%d unites=%d/%d '
++          'mutants_tues=%d/%d equivalents_acceptes=%d/%d'
++          % (cid, families_ok, len(FAMILIES), len(STATEMENTS), len(channels), len(CHANNELS[cid]), admitted, refused,
++             guarded, units, killed, total, accepted, len(EQUIVALENTS)))
++    return 0
++
++
++if __name__ == '__main__':
++    sys.exit(main())
+-- 
+2.53.0
+

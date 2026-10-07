@@ -1,0 +1,5 @@
+binaire v10 --entry=cover  : premier bloc >= 9 points : [(453.471, ['{x,c0,c1,c2,c3,c4,c5,c6,c7}']), (30440.01, ['{x,c0,c1,c2,c3,c4,c5,c6,c7,g0,g1,g2,g3}'])]
+binaire v10 --entry=cover1 : premier bloc >= 9 points : [(453.471, ['{x,c0,c1,c2,c3,c4,c5,c6,c7}']), (30440.01, ['{x,c0,c1,c2,c3,c4,c5,c6,c7,g0,g1,g2,g3}'])]
+binaire v10 --entry=core   : premier bloc >= 9 points : [(900.0, ['{x,c0,c1,c2,c3,c4,c5,c6,c7}']), (30440.01, ['{x,c0,c1,c2,c3,c4,c5,c6,c7,g0,g1,g2,g3}'])]
+ER0h(1,12) du juge, puis condensation a mcs = 9 : premier cluster a r = 453.471 : [['c0', 'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'x']]
+date d entree de x sous ER0h : 453.471

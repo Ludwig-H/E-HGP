@@ -1,0 +1,3 @@
+Command exited with non-zero status 124
+duree=420.00 s maxrss=3712 kB
+code=124

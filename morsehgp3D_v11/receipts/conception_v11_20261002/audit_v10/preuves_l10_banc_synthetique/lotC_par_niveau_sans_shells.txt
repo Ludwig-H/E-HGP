@@ -1,0 +1,15 @@
+Lot C, ecart moyen tour - sklearn par niveau, SANS shells (avec remplissage ; puis sans remplissage)
+K=1  rempli : easy -0.075  medium +0.040  hard +0.133  extreme +0.251   | non rempli : easy -0.073  medium +0.028  hard +0.084  extreme +0.116
+K=2  rempli : easy -0.069  medium +0.046  hard +0.128  extreme +0.230   | non rempli : easy -0.088  medium +0.033  hard +0.094  extreme +0.150
+K=3  rempli : easy +0.047  medium +0.052  hard +0.027  extreme -0.002   | non rempli : easy -0.077  medium +0.051  hard +0.116  extreme +0.136
+K=5  rempli : easy +0.013  medium +0.020  hard +0.021  extreme -0.002   | non rempli : easy -0.081  medium +0.070  hard +0.170  extreme +0.201
+K=8  rempli : easy +0.001  medium +0.002  hard +0.010  extreme -0.017   | non rempli : easy -0.079  medium +0.098  hard +0.215  extreme +0.227
+K=10 rempli : easy -0.006  medium +0.000  hard +0.013  extreme -0.021   | non rempli : easy -0.078  medium +0.097  hard +0.226  extreme +0.238
+
+Lot C, famille hierarchical (verite = groupes ; 3 sous-amas par groupe) : ARI_s tw / hdb / hdb_nf / mrb et nombre d amas tw
+K=1  0.466 / 0.593 / 0.593 ; amas tw 23.9, hdb 20.0, hdb_nf 20.0
+K=2  0.469 / 0.593 / 0.593 ; amas tw 23.9, hdb 20.0, hdb_nf 20.0
+K=3  0.467 / 0.461 / 0.592 ; amas tw 23.9, hdb 24.0, hdb_nf 20.0
+K=5  0.466 / 0.466 / 0.591 ; amas tw 24.0, hdb 23.9, hdb_nf 20.0
+K=8  0.460 / 0.467 / 0.590 ; amas tw 24.0, hdb 23.9, hdb_nf 20.0
+K=10 0.461 / 0.469 / 0.589 ; amas tw 24.0, hdb 23.8, hdb_nf 20.0

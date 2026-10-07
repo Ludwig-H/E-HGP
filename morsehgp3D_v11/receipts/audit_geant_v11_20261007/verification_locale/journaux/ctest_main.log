@@ -1,0 +1,2166 @@
+Internal ctest changing into directory: /tmp/claude-1000/-workspaces-E-HGP/6acaaf62-b44a-41e7-b5d6-81e4c7b6b7f1/scratchpad/agent_G/build-v11
+Test project /tmp/claude-1000/-workspaces-E-HGP/6acaaf62-b44a-41e7-b5d6-81e4c7b6b7f1/scratchpad/agent_G/build-v11
+          Start   17: mhgp11_support_abnormal_stop_code_0
+          Start   19: mhgp11_support_abnormal_stop_code_3
+          Start   21: mhgp11_support_abnormal_stop_forged
+          Start   23: mhgp11_support_abnormal_stop_launch_impossible
+   1/1038 Test   #23: mhgp11_support_abnormal_stop_launch_impossible .......................   Passed    0.07 sec
+          Start   25: mhgp11_support_abnormal_stop_bad_interpreter
+   2/1038 Test   #17: mhgp11_support_abnormal_stop_code_0 ..................................   Passed    0.08 sec
+          Start   42: mhgp11_support_gate_helper
+   3/1038 Test   #19: mhgp11_support_abnormal_stop_code_3 ..................................   Passed    0.08 sec
+          Start   44: mhgp11_support_check_style
+   4/1038 Test   #21: mhgp11_support_abnormal_stop_forged ..................................   Passed    0.09 sec
+          Start   46: mhgp11_support_run_mutants
+   5/1038 Test   #25: mhgp11_support_abnormal_stop_bad_interpreter .........................   Passed    0.07 sec
+          Start   48: mhgp11_support_gate_properties
+   6/1038 Test   #42: mhgp11_support_gate_helper ...........................................   Passed    1.65 sec
+          Start   66: mhgp11_support_g4_matrix
+   7/1038 Test   #48: mhgp11_support_gate_properties .......................................   Passed    1.84 sec
+          Start  129: mhgp11_num_fraction
+   8/1038 Test   #66: mhgp11_support_g4_matrix .............................................   Passed    0.55 sec
+          Start  131: mhgp11_num_bounds_fraction
+   9/1038 Test  #129: mhgp11_num_fraction ..................................................   Passed    0.64 sec
+          Start  133: mhgp11_num_bounds_model
+  10/1038 Test  #131: mhgp11_num_bounds_fraction ...........................................   Passed    0.35 sec
+          Start  135: mhgp11_num_center_region_fraction
+  11/1038 Test  #135: mhgp11_num_center_region_fraction ....................................   Passed    0.20 sec
+          Start  137: mhgp11_num_center_region_model
+  12/1038 Test  #137: mhgp11_num_center_region_model .......................................   Passed    0.45 sec
+          Start  140: mhgp11_num_centers_fraction
+  13/1038 Test  #133: mhgp11_num_bounds_model ..............................................   Passed    0.81 sec
+          Start  142: mhgp11_num_centers_model
+  14/1038 Test  #140: mhgp11_num_centers_fraction ..........................................   Passed    0.36 sec
+          Start  144: mhgp11_num_distance_fraction
+  15/1038 Test  #144: mhgp11_num_distance_fraction .........................................   Passed    0.24 sec
+          Start  146: mhgp11_num_distance_model
+  16/1038 Test  #146: mhgp11_num_distance_model ............................................   Passed    0.49 sec
+          Start  148: mhgp11_num_checked_power_fraction
+  17/1038 Test  #148: mhgp11_num_checked_power_fraction ....................................   Passed    0.38 sec
+          Start  150: mhgp11_num_checked_power_model
+  18/1038 Test  #142: mhgp11_num_centers_model .............................................   Passed    1.43 sec
+          Start  152: mhgp11_num_power_certificate_fraction
+  19/1038 Test  #152: mhgp11_num_power_certificate_fraction ................................   Passed    0.80 sec
+          Start  154: mhgp11_num_power_certificate_model
+  20/1038 Test  #150: mhgp11_num_checked_power_model .......................................   Passed    1.12 sec
+          Start  156: mhgp11_num_orientation_certificate_fraction
+  21/1038 Test   #44: mhgp11_support_check_style ...........................................   Passed    6.16 sec
+          Start  158: mhgp11_num_orientation_certificate_model
+  22/1038 Test  #156: mhgp11_num_orientation_certificate_fraction ..........................   Passed    0.63 sec
+          Start  164: mhgp11_num_q4_presentation_fraction
+  23/1038 Test  #164: mhgp11_num_q4_presentation_fraction ..................................   Passed    0.63 sec
+          Start  166: mhgp11_num_q4_presentation_model
+  24/1038 Test  #154: mhgp11_num_power_certificate_model ...................................   Passed    2.27 sec
+          Start  168: mhgp11_num_q4_presentation_process
+  25/1038 Test  #168: mhgp11_num_q4_presentation_process ...................................   Passed    0.26 sec
+          Start  173: mhgp11_num_triangle_kind_fraction
+  26/1038 Test  #173: mhgp11_num_triangle_kind_fraction ....................................   Passed    0.20 sec
+          Start  175: mhgp11_num_triangle_kind_model
+  27/1038 Test  #175: mhgp11_num_triangle_kind_model .......................................   Passed    0.35 sec
+          Start  185: mhgp11_num_big
+  28/1038 Test  #158: mhgp11_num_orientation_certificate_model .............................   Passed    2.61 sec
+          Start  187: mhgp11_num_radical
+  29/1038 Test  #166: mhgp11_num_q4_presentation_model .....................................   Passed    2.35 sec
+          Start  189: mhgp11_num_roots
+  30/1038 Test  #189: mhgp11_num_roots .....................................................   Passed    0.55 sec
+          Start  253: mhgp11_io_sha256
+  31/1038 Test  #187: mhgp11_num_radical ...................................................   Passed    1.44 sec
+          Start  265: mhgp11_index_fraction
+  32/1038 Test  #253: mhgp11_io_sha256 .....................................................   Passed    0.95 sec
+          Start  267: mhgp11_index_judge
+  33/1038 Test   #46: mhgp11_support_run_mutants ...........................................   Passed   11.11 sec
+          Start  269: mhgp11_index_bench_collector
+  34/1038 Test  #265: mhgp11_index_fraction ................................................   Passed    1.74 sec
+          Start  271: mhgp11_index_bench_io
+  35/1038 Test  #271: mhgp11_index_bench_io ................................................   Passed    0.19 sec
+          Start  281: mhgp11_index_borrowed_fraction
+  36/1038 Test  #185: mhgp11_num_big .......................................................   Passed    4.85 sec
+          Start  283: mhgp11_index_borrowed_model
+  37/1038 Test  #281: mhgp11_index_borrowed_fraction .......................................   Passed    3.55 sec
+          Start  293: mhgp11_catalogue_fraction
+  38/1038 Test  #293: mhgp11_catalogue_fraction ............................................   Passed    1.19 sec
+          Start  295: mhgp11_catalogue_judge
+  39/1038 Test  #295: mhgp11_catalogue_judge ...............................................   Passed    0.27 sec
+          Start  297: mhgp11_catalogue_bench_io
+  40/1038 Test  #297: mhgp11_catalogue_bench_io ............................................   Passed    0.28 sec
+          Start  299: mhgp11_catalogue_bench_collector
+  41/1038 Test  #267: mhgp11_index_judge ...................................................   Passed    7.99 sec
+          Start  301: mhgp11_catalogue_semantic
+  42/1038 Test  #301: mhgp11_catalogue_semantic ............................................   Passed    0.09 sec
+          Start  303: mhgp11_catalogue_profiles_io
+  43/1038 Test  #303: mhgp11_catalogue_profiles_io .........................................   Passed    0.13 sec
+          Start  305: mhgp11_catalogue_profiles_collector
+  44/1038 Test  #269: mhgp11_index_bench_collector .........................................   Passed    8.39 sec
+          Start  307: mhgp11_catalogue_semantic_cache
+  45/1038 Test  #299: mhgp11_catalogue_bench_collector .....................................   Passed    3.05 sec
+          Start  328: mhgp11_catalogue_parallel_fraction
+  46/1038 Test  #307: mhgp11_catalogue_semantic_cache ......................................   Passed    1.38 sec
+          Start  330: mhgp11_catalogue_parallel_judge
+  47/1038 Test  #330: mhgp11_catalogue_parallel_judge ......................................   Passed    0.24 sec
+          Start  332: mhgp11_catalogue_parallel_collector
+  48/1038 Test  #305: mhgp11_catalogue_profiles_collector ..................................   Passed    2.86 sec
+          Start  351: mhgp11_catalogue_cache_fraction
+  49/1038 Test  #328: mhgp11_catalogue_parallel_fraction ...................................   Passed    4.16 sec
+          Start  353: mhgp11_catalogue_sort_fraction
+  50/1038 Test  #351: mhgp11_catalogue_cache_fraction ......................................   Passed    2.69 sec
+          Start  355: mhgp11_catalogue_sort_cache_fraction
+  51/1038 Test  #283: mhgp11_index_borrowed_model ..........................................   Passed   12.78 sec
+          Start  357: mhgp11_catalogue_optimization_model
+  52/1038 Test  #357: mhgp11_catalogue_optimization_model ..................................   Passed    0.14 sec
+          Start  359: mhgp11_catalogue_optimizations_collector
+  53/1038 Test  #353: mhgp11_catalogue_sort_fraction .......................................   Passed    2.52 sec
+          Start  368: mhgp11_catalogue_adaptive_fraction
+  54/1038 Test  #355: mhgp11_catalogue_sort_cache_fraction .................................   Passed    2.51 sec
+          Start  370: mhgp11_catalogue_adaptive_combined_fraction
+  55/1038 Test  #332: mhgp11_catalogue_parallel_collector ..................................   Passed    6.39 sec
+          Start  372: mhgp11_catalogue_adaptive_judge
+  56/1038 Test  #372: mhgp11_catalogue_adaptive_judge ......................................   Passed    0.16 sec
+          Start  374: mhgp11_catalogue_adaptive_model
+  57/1038 Test  #374: mhgp11_catalogue_adaptive_model ......................................   Passed    0.20 sec
+          Start  376: mhgp11_catalogue_adaptive_bench_io
+  58/1038 Test  #376: mhgp11_catalogue_adaptive_bench_io ...................................   Passed    0.47 sec
+          Start  378: mhgp11_catalogue_adaptive_collector
+  59/1038 Test  #368: mhgp11_catalogue_adaptive_fraction ...................................   Passed    2.85 sec
+          Start  388: mhgp11_catalogue_assembly_collector
+  60/1038 Test  #370: mhgp11_catalogue_adaptive_combined_fraction ..........................   Passed    2.91 sec
+          Start  399: mhgp11_catalogue_single_fraction
+  61/1038 Test  #359: mhgp11_catalogue_optimizations_collector .............................   Passed    5.19 sec
+          Start  401: mhgp11_catalogue_single_model
+  62/1038 Test  #401: mhgp11_catalogue_single_model ........................................   Passed    0.17 sec
+          Start  416: mhgp11_catalogue_pair_graph_model
+  63/1038 Test  #399: mhgp11_catalogue_single_fraction .....................................   Passed    1.98 sec
+          Start  418: mhgp11_catalogue_support_contact_model
+  64/1038 Test  #418: mhgp11_catalogue_support_contact_model ...............................   Passed    0.92 sec
+          Start  420: mhgp11_catalogue_euler_oracle
+  65/1038 Test  #416: mhgp11_catalogue_pair_graph_model ....................................   Passed    3.03 sec
+          Start  422: mhgp11_catalogue_euler_limits
+  66/1038 Test  #422: mhgp11_catalogue_euler_limits ........................................   Passed    0.28 sec
+          Start  454: mhgp11_tower_fraction
+  67/1038 Test  #454: mhgp11_tower_fraction ................................................   Passed    1.63 sec
+          Start  456: mhgp11_tower_judge
+  68/1038 Test  #420: mhgp11_catalogue_euler_oracle ........................................   Passed    7.22 sec
+          Start  458: mhgp11_tower_bench_collector
+  69/1038 Test  #456: mhgp11_tower_judge ...................................................   Passed    3.55 sec
+          Start  460: mhgp11_tower_bench_io
+  70/1038 Test  #460: mhgp11_tower_bench_io ................................................   Passed    0.26 sec
+          Start  487: mhgp11_tower_cells_fraction
+  71/1038 Test  #388: mhgp11_catalogue_assembly_collector ..................................   Passed   10.64 sec
+          Start  489: mhgp11_tower_cells_model
+  72/1038 Test  #378: mhgp11_catalogue_adaptive_collector ..................................   Passed   13.92 sec
+          Start  509: mhgp11_tower_descent_fraction
+  73/1038 Test  #509: mhgp11_tower_descent_fraction ........................................   Passed    1.32 sec
+          Start  511: mhgp11_tower_descent_model
+  74/1038 Test  #511: mhgp11_tower_descent_model ...........................................   Passed    1.43 sec
+          Start  529: mhgp11_tower_forest_fraction
+  75/1038 Test  #487: mhgp11_tower_cells_fraction ..........................................   Passed    4.76 sec
+          Start  531: mhgp11_tower_forest_model
+  76/1038 Test  #489: mhgp11_tower_cells_model .............................................   Passed    5.95 sec
+          Start  540: mhgp11_tower_classification_fraction
+  77/1038 Test  #540: mhgp11_tower_classification_fraction .................................   Passed    1.22 sec
+          Start  542: mhgp11_tower_classification_oracle_model
+  78/1038 Test  #529: mhgp11_tower_forest_fraction .........................................   Passed    3.11 sec
+          Start  544: mhgp11_tower_classification_model
+  79/1038 Test  #542: mhgp11_tower_classification_oracle_model .............................   Passed    1.67 sec
+          Start  546: mhgp11_tower_points_flat_claims
+  80/1038 Test  #546: mhgp11_tower_points_flat_claims ......................................   Passed    0.13 sec
+          Start  548: mhgp11_tower_points_export_width
+  81/1038 Test  #531: mhgp11_tower_forest_model ............................................   Passed    4.36 sec
+          Start  550: mhgp11_tower_full_bench_io
+  82/1038 Test  #548: mhgp11_tower_points_export_width .....................................   Passed    0.20 sec
+          Start  552: mhgp11_tower_full_leaf_lanes
+  83/1038 Test  #544: mhgp11_tower_classification_model ....................................   Passed    1.90 sec
+          Start  554: mhgp11_tower_full_bench_semantic
+  84/1038 Test  #554: mhgp11_tower_full_bench_semantic .....................................   Passed    0.37 sec
+          Start  556: mhgp11_tower_full_campaign
+  85/1038 Test  #458: mhgp11_tower_bench_collector .........................................   Passed   11.54 sec
+          Start  558: mhgp11_tower_full_v10_model
+  86/1038 Test  #558: mhgp11_tower_full_v10_model ..........................................   Passed    1.65 sec
+          Start  574: mhgp11_tower_forest_memo_fraction
+  87/1038 Test  #574: mhgp11_tower_forest_memo_fraction ....................................   Passed    3.53 sec
+          Start  576: mhgp11_tower_full_memo_collector
+  88/1038 Test  #576: mhgp11_tower_full_memo_collector .....................................   Passed    3.84 sec
+          Start  578: mhgp11_tower_full_reuse_collector
+  89/1038 Test  #578: mhgp11_tower_full_reuse_collector ....................................   Passed    0.66 sec
+          Start  580: mhgp11_tower_full_parallel_collector
+  90/1038 Test  #580: mhgp11_tower_full_parallel_collector .................................   Passed    3.79 sec
+          Start  592: mhgp11_tower_forest_parallel_fraction
+  91/1038 Test  #550: mhgp11_tower_full_bench_io ...........................................   Passed   15.96 sec
+          Start  594: mhgp11_tower_forest_parallel_memo_fraction
+  92/1038 Test  #592: mhgp11_tower_forest_parallel_fraction ................................   Passed    3.61 sec
+          Start  596: mhgp11_tower_forest_parallel_model
+  93/1038 Test  #596: mhgp11_tower_forest_parallel_model ...................................   Passed    0.33 sec
+          Start  598: mhgp11_tower_full_catalogue_collector
+  94/1038 Test  #594: mhgp11_tower_forest_parallel_memo_fraction ...........................   Passed    3.70 sec
+          Start  609: mhgp11_tower_vertical_parallel_fraction
+  95/1038 Test  #609: mhgp11_tower_vertical_parallel_fraction ..............................   Passed    4.63 sec
+          Start  611: mhgp11_tower_vertical_parallel_model
+  96/1038 Test  #611: mhgp11_tower_vertical_parallel_model .................................   Passed    0.24 sec
+          Start  620: mhgp11_tower_birth_runs_model
+  97/1038 Test  #620: mhgp11_tower_birth_runs_model ........................................   Passed    0.55 sec
+          Start  622: mhgp11_tower_full_vertical_collector
+  98/1038 Test  #598: mhgp11_tower_full_catalogue_collector ................................   Passed    6.93 sec
+          Start  632: mhgp11_tower_census_reuse_fraction
+  99/1038 Test  #632: mhgp11_tower_census_reuse_fraction ...................................   Passed    2.11 sec
+          Start  634: mhgp11_tower_census_reuse_model
+ 100/1038 Test  #622: mhgp11_tower_full_vertical_collector .................................   Passed    4.12 sec
+          Start  636: mhgp11_tower_full_census_collector
+ 101/1038 Test  #634: mhgp11_tower_census_reuse_model ......................................   Passed    2.68 sec
+          Start  638: mhgp11_tower_regular_vertical_reuse_model
+ 102/1038 Test  #638: mhgp11_tower_regular_vertical_reuse_model ............................   Passed    0.96 sec
+          Start  660: mhgp11_tower_dense_lookup_model
+ 103/1038 Test  #660: mhgp11_tower_dense_lookup_model ......................................   Passed    1.53 sec
+          Start  662: mhgp11_tower_full_dense_collector
+ 104/1038 Test  #662: mhgp11_tower_full_dense_collector ....................................   Passed    5.43 sec
+          Start  664: mhgp11_tower_full_regular_vertical_collector
+ 105/1038 Test  #636: mhgp11_tower_full_census_collector ...................................   Passed   10.31 sec
+          Start  670: mhgp11_tower_regular_classification_model
+ 106/1038 Test  #670: mhgp11_tower_regular_classification_model ............................   Passed    1.30 sec
+          Start  672: mhgp11_tower_full_pair_graph_collector
+ 107/1038 Test  #672: mhgp11_tower_full_pair_graph_collector ...............................   Passed    6.53 sec
+          Start  677: mhgp11_tower_meb_deferred_model
+ 108/1038 Test  #552: mhgp11_tower_full_leaf_lanes .........................................   Passed   47.62 sec
+          Start  679: mhgp11_tower_full_march_collector
+ 109/1038 Test  #677: mhgp11_tower_meb_deferred_model ......................................   Passed    0.68 sec
+          Start  690: mhgp11_tower_full_paired_protocol
+ 110/1038 Test  #664: mhgp11_tower_full_regular_vertical_collector .........................   Passed    9.02 sec
+          Start  692: mhgp11_tower_full_pipeline_reader
+ 111/1038 Test  #692: mhgp11_tower_full_pipeline_reader ....................................   Passed    0.08 sec
+          Start  717: mhgp11_tower_attach_export
+ 112/1038 Test  #690: mhgp11_tower_full_paired_protocol ....................................   Passed    0.58 sec
+          Start  719: mhgp11_tower_attach_fraction
+ 113/1038 Test  #717: mhgp11_tower_attach_export ...........................................   Passed    8.13 sec
+          Start  761: mhgp11_supports_fraction
+ 114/1038 Test  #679: mhgp11_tower_full_march_collector ....................................   Passed   13.56 sec
+          Start  763: mhgp11_supports_judge_small
+ 115/1038 Test  #719: mhgp11_tower_attach_fraction .........................................   Passed   25.87 sec
+          Start  797: mhgp11_supports_hierarchy_fraction
+ 116/1038 Test  #763: mhgp11_supports_judge_small ..........................................   Passed   16.96 sec
+          Start  815: mhgp11_points_fixtures
+ 117/1038 Test  #815: mhgp11_points_fixtures ...............................................   Passed    1.52 sec
+          Start  817: mhgp11_points_oracle
+ 118/1038 Test  #761: mhgp11_supports_fraction .............................................   Passed   23.77 sec
+          Start  871: mhgp11_api_publish_reader
+ 119/1038 Test  #871: mhgp11_api_publish_reader ............................................   Passed    0.16 sec
+          Start  886: mhgp11_api_supports_route_oracle
+ 120/1038 Test  #886: mhgp11_api_supports_route_oracle .....................................   Passed   12.07 sec
+          Start  894: mhgp11_cli_contract
+ 121/1038 Test  #894: mhgp11_cli_contract ..................................................   Passed    0.37 sec
+          Start  896: mhgp11_cli_tree_signature
+ 122/1038 Test  #896: mhgp11_cli_tree_signature ............................................   Passed    0.22 sec
+          Start  898: mhgp11_cli_full_identity
+ 123/1038 Test  #817: mhgp11_points_oracle .................................................   Passed   17.80 sec
+          Start  900: mhgp11_cli_full_determinism
+ 124/1038 Test  #797: mhgp11_supports_hierarchy_fraction ...................................   Passed   28.07 sec
+          Start  902: mhgp11_cli_full_relabel
+ 125/1038 Test  #898: mhgp11_cli_full_identity .............................................   Passed   15.92 sec
+          Start  920: mhgp11_cli_supports_oracle
+ 126/1038 Test  #902: mhgp11_cli_full_relabel ..............................................   Passed   12.66 sec
+          Start  922: mhgp11_cli_supports_spanning_reader
+ 127/1038 Test  #922: mhgp11_cli_supports_spanning_reader ..................................   Passed    0.11 sec
+          Start  936: mhgp11_cli_points
+ 128/1038 Test  #936: mhgp11_cli_points ....................................................   Passed    2.65 sec
+          Start  938: mhgp11_cli_plat
+ 129/1038 Test  #938: mhgp11_cli_plat ......................................................   Passed    2.53 sec
+          Start  940: mhgp11_reference_projection_contracts
+ 130/1038 Test  #940: mhgp11_reference_projection_contracts ................................   Passed    0.20 sec
+          Start  942: mhgp11_reference_fast
+ 131/1038 Test  #556: mhgp11_tower_full_campaign ...........................................***Timeout 120.00 sec
+
+          Start  946: mhgp11_reference_refusal
+ 132/1038 Test  #946: mhgp11_reference_refusal .............................................   Passed    0.21 sec
+          Start  948: mhgp11_reference_mutant_admission_strict
+ 133/1038 Test  #948: mhgp11_reference_mutant_admission_strict .............................   Passed    0.34 sec
+          Start  950: mhgp11_reference_mutant_ancestor_open
+ 134/1038 Test  #950: mhgp11_reference_mutant_ancestor_open ................................   Passed    0.30 sec
+          Start  952: mhgp11_reference_mutant_binarize
+ 135/1038 Test  #952: mhgp11_reference_mutant_binarize .....................................   Passed    0.36 sec
+          Start  954: mhgp11_reference_mutant_core_next_neighbour
+ 136/1038 Test  #954: mhgp11_reference_mutant_core_next_neighbour ..........................   Passed    0.37 sec
+          Start  956: mhgp11_reference_mutant_cover_node_open
+ 137/1038 Test  #956: mhgp11_reference_mutant_cover_node_open ..............................   Passed    0.34 sec
+          Start  958: mhgp11_reference_mutant_cover_population
+ 138/1038 Test  #958: mhgp11_reference_mutant_cover_population .............................   Passed    0.38 sec
+          Start  960: mhgp11_reference_mutant_drop_last_rep
+ 139/1038 Test  #960: mhgp11_reference_mutant_drop_last_rep ................................   Passed    0.35 sec
+          Start  962: mhgp11_reference_mutant_edge_at_vertex_level
+ 140/1038 Test  #962: mhgp11_reference_mutant_edge_at_vertex_level .........................   Passed    0.34 sec
+          Start  964: mhgp11_reference_mutant_first_rep_last
+ 141/1038 Test  #964: mhgp11_reference_mutant_first_rep_last ...............................   Passed    0.59 sec
+          Start  966: mhgp11_reference_mutant_hull_no_pairs
+ 142/1038 Test  #966: mhgp11_reference_mutant_hull_no_pairs ................................   Passed    0.35 sec
+          Start  968: mhgp11_reference_mutant_hull_no_tetra
+ 143/1038 Test  #968: mhgp11_reference_mutant_hull_no_tetra ................................   Passed    0.30 sec
+          Start  970: mhgp11_reference_mutant_hull_strict_triangle
+ 144/1038 Test  #970: mhgp11_reference_mutant_hull_strict_triangle .........................   Passed    1.70 sec
+          Start  972: mhgp11_reference_mutant_join_missing
+ 145/1038 Test  #972: mhgp11_reference_mutant_join_missing .................................   Passed    0.30 sec
+          Start  974: mhgp11_reference_mutant_jump_any
+ 146/1038 Test  #974: mhgp11_reference_mutant_jump_any .....................................   Passed    0.56 sec
+          Start  976: mhgp11_reference_mutant_meb_largest
+ 147/1038 Test  #976: mhgp11_reference_mutant_meb_largest ..................................   Passed    0.39 sec
+          Start  978: mhgp11_reference_mutant_meb_three
+ 148/1038 Test  #978: mhgp11_reference_mutant_meb_three ....................................   Passed    0.48 sec
+          Start  980: mhgp11_reference_mutant_numbering_by_catalogue
+ 149/1038 Test  #980: mhgp11_reference_mutant_numbering_by_catalogue .......................   Passed    0.46 sec
+          Start  982: mhgp11_reference_mutant_numbering_by_sweep
+ 150/1038 Test  #982: mhgp11_reference_mutant_numbering_by_sweep ...........................   Passed    0.27 sec
+          Start  984: mhgp11_reference_mutant_plateau_split
+ 151/1038 Test  #984: mhgp11_reference_mutant_plateau_split ................................   Passed    0.22 sec
+          Start  986: mhgp11_reference_mutant_point_open
+ 152/1038 Test  #986: mhgp11_reference_mutant_point_open ...................................   Passed    0.37 sec
+          Start  988: mhgp11_reference_mutant_regular_join_pieces
+ 153/1038 Test  #988: mhgp11_reference_mutant_regular_join_pieces ..........................   Passed    0.32 sec
+          Start  990: mhgp11_reference_mutant_vertical_merge_child
+ 154/1038 Test  #990: mhgp11_reference_mutant_vertical_merge_child .........................   Passed    0.32 sec
+          Start  992: mhgp11_reference_mutant_vertical_open
+ 155/1038 Test  #992: mhgp11_reference_mutant_vertical_open ................................   Passed    0.31 sec
+          Start  994: mhgp11_reference_mutant_weighted_as_regular
+ 156/1038 Test  #994: mhgp11_reference_mutant_weighted_as_regular ..........................   Passed    0.32 sec
+          Start  996: mhgp11_reference_mutant_window_low
+ 157/1038 Test  #996: mhgp11_reference_mutant_window_low ...................................   Passed    0.31 sec
+          Start  998: mhgp11_reference_supports
+ 158/1038 Test  #942: mhgp11_reference_fast ................................................   Passed   17.98 sec
+          Start 1000: mhgp11_reference_supports_refusal
+ 159/1038 Test #1000: mhgp11_reference_supports_refusal ....................................   Passed    0.14 sec
+          Start 1002: mhgp11_reference_supports_primitives
+ 160/1038 Test  #900: mhgp11_cli_full_determinism ..........................................   Passed   45.16 sec
+          Start 1004: mhgp11_reference_supports_mutant_ant_coupe_fermee
+ 161/1038 Test #1002: mhgp11_reference_supports_primitives .................................   Passed    4.02 sec
+          Start 1006: mhgp11_reference_supports_mutant_att_coupe_ouverte
+ 162/1038 Test #1004: mhgp11_reference_supports_mutant_ant_coupe_fermee ....................   Passed    0.19 sec
+          Start 1008: mhgp11_reference_supports_mutant_c3_une_fusion
+ 163/1038 Test #1006: mhgp11_reference_supports_mutant_att_coupe_ouverte ...................   Passed    0.18 sec
+          Start 1010: mhgp11_reference_supports_mutant_cofaces_ordre_k
+ 164/1038 Test #1010: mhgp11_reference_supports_mutant_cofaces_ordre_k .....................   Passed    0.21 sec
+          Start 1012: mhgp11_reference_supports_mutant_fenetre_forte
+ 165/1038 Test #1008: mhgp11_reference_supports_mutant_c3_une_fusion .......................   Passed    0.25 sec
+          Start 1014: mhgp11_reference_supports_mutant_h_fortes_etroites
+ 166/1038 Test #1014: mhgp11_reference_supports_mutant_h_fortes_etroites ...................   Passed    0.26 sec
+          Start 1016: mhgp11_reference_supports_mutant_interne_vie_inversee
+ 167/1038 Test #1012: mhgp11_reference_supports_mutant_fenetre_forte .......................   Passed    0.27 sec
+          Start 1018: mhgp11_reference_supports_mutant_m1_support_inverse
+ 168/1038 Test #1016: mhgp11_reference_supports_mutant_interne_vie_inversee ................   Passed    0.23 sec
+          Start 1020: mhgp11_reference_supports_mutant_populations_naissances_seules
+ 169/1038 Test #1018: mhgp11_reference_supports_mutant_m1_support_inverse ..................   Passed    0.23 sec
+          Start 1022: mhgp11_reference_supports_mutant_premier_support_seul
+ 170/1038 Test #1020: mhgp11_reference_supports_mutant_populations_naissances_seules .......   Passed    0.20 sec
+          Start 1024: mhgp11_reference_supports_mutant_regle_parent_inversee
+ 171/1038 Test #1022: mhgp11_reference_supports_mutant_premier_support_seul ................   Passed    0.35 sec
+          Start 1026: mhgp11_reference_supports_mutant_triangle_droit_admis
+ 172/1038 Test #1024: mhgp11_reference_supports_mutant_regle_parent_inversee ...............   Passed    0.22 sec
+          Start 1028: mhgp11_reference_supports_mutant_w4_gabriel_juge
+ 173/1038 Test #1026: mhgp11_reference_supports_mutant_triangle_droit_admis ................   Passed    0.25 sec
+          Start 1047: mhgp11_style
+ 174/1038 Test #1028: mhgp11_reference_supports_mutant_w4_gabriel_juge .....................   Passed    0.27 sec
+          Start    1: mhgp11_support_code_exact
+ 175/1038 Test    #1: mhgp11_support_code_exact ............................................   Passed    0.06 sec
+          Start    2: mhgp11_support_line_present
+ 176/1038 Test    #2: mhgp11_support_line_present ..........................................   Passed    0.04 sec
+          Start    3: mhgp11_support_arguments
+ 177/1038 Test    #3: mhgp11_support_arguments .............................................   Passed    0.06 sec
+          Start    4: mhgp11_support_code_mismatch
+ 178/1038 Test    #4: mhgp11_support_code_mismatch .........................................   Passed    0.13 sec
+          Start    5: mhgp11_support_signal_refused
+ 179/1038 Test    #5: mhgp11_support_signal_refused ........................................   Passed    0.09 sec
+          Start    6: mhgp11_support_program_absent
+ 180/1038 Test    #6: mhgp11_support_program_absent ........................................   Passed    0.08 sec
+          Start    7: mhgp11_support_program_not_executable
+ 181/1038 Test    #7: mhgp11_support_program_not_executable ................................   Passed    0.07 sec
+          Start    8: mhgp11_support_program_bad_interpreter
+ 182/1038 Test    #8: mhgp11_support_program_bad_interpreter ...............................   Passed    0.08 sec
+          Start    9: mhgp11_support_program_relative
+ 183/1038 Test    #9: mhgp11_support_program_relative ......................................   Passed    0.07 sec
+          Start   10: mhgp11_support_line_absent
+ 184/1038 Test   #10: mhgp11_support_line_absent ...........................................   Passed    0.06 sec
+          Start   11: mhgp11_support_expected_out_of_range
+ 185/1038 Test   #11: mhgp11_support_expected_out_of_range .................................   Passed    0.04 sec
+          Start   12: mhgp11_support_skip_token
+ 186/1038 Test   #12: mhgp11_support_skip_token ............................................   Passed    0.08 sec
+          Start   13: mhgp11_support_data_present
+ 187/1038 Test   #13: mhgp11_support_data_present ..........................................   Passed    0.08 sec
+          Start   14: mhgp11_support_skip_token_forged
+ 188/1038 Test   #14: mhgp11_support_skip_token_forged .....................................   Passed    0.07 sec
+          Start   16: mhgp11_support_abnormal_stop
+ 189/1038 Test   #16: mhgp11_support_abnormal_stop .........................................   Passed    0.08 sec
+          Start   18: mhgp11_support_abnormal_stop_code_0_opt
+ 190/1038 Test   #18: mhgp11_support_abnormal_stop_code_0_opt ..............................   Passed    0.09 sec
+          Start   20: mhgp11_support_abnormal_stop_code_3_opt
+ 191/1038 Test   #20: mhgp11_support_abnormal_stop_code_3_opt ..............................   Passed    0.09 sec
+          Start   22: mhgp11_support_abnormal_stop_forged_opt
+ 192/1038 Test   #22: mhgp11_support_abnormal_stop_forged_opt ..............................   Passed    0.12 sec
+          Start   24: mhgp11_support_abnormal_stop_launch_impossible_opt
+ 193/1038 Test   #24: mhgp11_support_abnormal_stop_launch_impossible_opt ...................   Passed    0.10 sec
+          Start   26: mhgp11_support_abnormal_stop_bad_interpreter_opt
+ 194/1038 Test   #26: mhgp11_support_abnormal_stop_bad_interpreter_opt .....................   Passed    0.09 sec
+          Start   27: mhgp11_support_refusal_ok
+ 195/1038 Test   #27: mhgp11_support_refusal_ok ............................................   Passed    0.09 sec
+          Start   28: mhgp11_support_refusal_control_red
+ 196/1038 Test   #28: mhgp11_support_refusal_control_red ...................................   Passed    0.07 sec
+          Start   29: mhgp11_support_refusal_absent
+ 197/1038 Test   #29: mhgp11_support_refusal_absent ........................................   Passed    0.08 sec
+          Start   30: mhgp11_support_refusal_token_absent
+ 198/1038 Test   #30: mhgp11_support_refusal_token_absent ..................................   Passed    0.09 sec
+          Start   31: mhgp11_support_refusal_signal
+ 199/1038 Test   #31: mhgp11_support_refusal_signal ........................................   Passed    0.08 sec
+          Start   32: mhgp11_support_framework_pass
+ 200/1038 Test   #32: mhgp11_support_framework_pass ........................................   Passed    0.04 sec
+          Start   33: mhgp11_support_framework_fail
+ 201/1038 Test   #33: mhgp11_support_framework_fail ........................................   Passed    0.05 sec
+          Start   34: mhgp11_support_framework_require
+ 202/1038 Test   #34: mhgp11_support_framework_require .....................................   Passed    0.04 sec
+          Start   35: mhgp11_support_framework_floor
+ 203/1038 Test   #35: mhgp11_support_framework_floor .......................................   Passed    0.04 sec
+          Start   36: mhgp11_support_framework_throw
+ 204/1038 Test   #36: mhgp11_support_framework_throw .......................................   Passed    0.05 sec
+          Start   37: mhgp11_support_framework_unknown
+ 205/1038 Test   #37: mhgp11_support_framework_unknown .....................................   Passed    0.05 sec
+          Start   38: mhgp11_support_framework_repeated
+ 206/1038 Test   #38: mhgp11_support_framework_repeated ....................................   Passed    0.04 sec
+          Start   39: mhgp11_support_framework_all
+ 207/1038 Test   #39: mhgp11_support_framework_all .........................................   Passed    0.04 sec
+          Start   40: mhgp11_support_framework_inventory
+ 208/1038 Test   #40: mhgp11_support_framework_inventory ...................................   Passed    0.04 sec
+          Start   41: mhgp11_support_framework_inventory_missing
+ 209/1038 Test   #41: mhgp11_support_framework_inventory_missing ...........................   Passed    0.04 sec
+          Start   43: mhgp11_support_gate_helper_opt
+ 210/1038 Test   #43: mhgp11_support_gate_helper_opt .......................................   Passed    1.52 sec
+          Start   45: mhgp11_support_check_style_opt
+ 211/1038 Test #1047: mhgp11_style .........................................................   Passed    5.07 sec
+          Start   47: mhgp11_support_run_mutants_opt
+ 212/1038 Test   #45: mhgp11_support_check_style_opt .......................................   Passed    7.14 sec
+          Start   49: mhgp11_support_gate_properties_opt
+ 213/1038 Test   #49: mhgp11_support_gate_properties_opt ...................................   Passed    0.94 sec
+          Start   50: mhgp11_support_gates_refuse_label
+ 214/1038 Test   #50: mhgp11_support_gates_refuse_label ....................................   Passed    0.98 sec
+          Start   51: mhgp11_support_gates_refuse_no_label
+ 215/1038 Test   #51: mhgp11_support_gates_refuse_no_label .................................   Passed    0.80 sec
+          Start   52: mhgp11_support_gates_refuse_fast_long
+ 216/1038 Test   #52: mhgp11_support_gates_refuse_fast_long ................................   Passed    0.96 sec
+          Start   53: mhgp11_support_gates_refuse_name
+ 217/1038 Test  #920: mhgp11_cli_supports_oracle ...........................................   Passed   50.41 sec
+          Start   54: mhgp11_support_gates_refuse_code
+ 218/1038 Test   #53: mhgp11_support_gates_refuse_name .....................................   Passed    0.88 sec
+          Start   55: mhgp11_support_gates_refuse_duplicate
+ 219/1038 Test   #54: mhgp11_support_gates_refuse_code .....................................   Passed    0.82 sec
+          Start   56: mhgp11_support_gates_refuse_program
+ 220/1038 Test   #56: mhgp11_support_gates_refuse_program ..................................   Passed    0.81 sec
+          Start   57: mhgp11_support_gates_refuse_timeout
+ 221/1038 Test   #55: mhgp11_support_gates_refuse_duplicate ................................   Passed    0.84 sec
+          Start   58: mhgp11_support_gates_refuse_script
+ 222/1038 Test   #57: mhgp11_support_gates_refuse_timeout ..................................   Passed    0.66 sec
+          Start   59: mhgp11_support_gates_refuse_direct
+ 223/1038 Test   #58: mhgp11_support_gates_refuse_script ...................................   Passed    0.66 sec
+          Start   60: mhgp11_support_gates_refuse_subdirectory
+ 224/1038 Test   #60: mhgp11_support_gates_refuse_subdirectory .............................   Passed    0.75 sec
+          Start   61: mhgp11_support_gates_refuse_pass_regex
+ 225/1038 Test   #59: mhgp11_support_gates_refuse_direct ...................................   Passed    0.79 sec
+          Start   62: mhgp11_support_gates_refuse_will_fail
+ 226/1038 Test   #47: mhgp11_support_run_mutants_opt .......................................   Passed   13.53 sec
+          Start   63: mhgp11_support_gates_refuse_disabled
+ 227/1038 Test   #62: mhgp11_support_gates_refuse_will_fail ................................   Passed    0.73 sec
+          Start   64: mhgp11_support_gates_refuse_skip_regex
+ 228/1038 Test   #61: mhgp11_support_gates_refuse_pass_regex ...............................   Passed    0.78 sec
+          Start   65: mhgp11_support_gates_refuse_lidar_regex
+ 229/1038 Test   #63: mhgp11_support_gates_refuse_disabled .................................   Passed    0.65 sec
+          Start   67: mhgp11_support_g4_matrix_opt
+ 230/1038 Test   #65: mhgp11_support_gates_refuse_lidar_regex ..............................   Passed    0.69 sec
+          Start   68: mhgp11_support_configure_fast_math_cxx_flags
+ 231/1038 Test   #64: mhgp11_support_gates_refuse_skip_regex ...............................   Passed    0.72 sec
+          Start   69: mhgp11_support_configure_fast_math_release_ofast
+ 232/1038 Test   #67: mhgp11_support_g4_matrix_opt .........................................   Passed    0.23 sec
+          Start   70: mhgp11_core_unit_types
+ 233/1038 Test   #70: mhgp11_core_unit_types ...............................................   Passed    0.04 sec
+          Start   71: mhgp11_core_unit_reasons
+ 234/1038 Test   #71: mhgp11_core_unit_reasons .............................................   Passed    0.03 sec
+          Start   72: mhgp11_core_unit_outcome
+ 235/1038 Test   #72: mhgp11_core_unit_outcome .............................................   Passed    0.03 sec
+          Start   73: mhgp11_core_unit_macros
+ 236/1038 Test   #73: mhgp11_core_unit_macros ..............................................   Passed    0.03 sec
+          Start   74: mhgp11_core_unit_result
+ 237/1038 Test   #74: mhgp11_core_unit_result ..............................................   Passed    0.04 sec
+          Start   75: mhgp11_core_unit_guarded
+ 238/1038 Test   #75: mhgp11_core_unit_guarded .............................................   Passed    0.03 sec
+          Start   76: mhgp11_core_unit_budget
+ 239/1038 Test   #76: mhgp11_core_unit_budget ..............................................   Passed    0.03 sec
+          Start   77: mhgp11_core_unit_budget_threads
+ 240/1038 Test   #77: mhgp11_core_unit_budget_threads ......................................   Passed    0.04 sec
+          Start   78: mhgp11_core_unit_reservation
+ 241/1038 Test   #78: mhgp11_core_unit_reservation .........................................   Passed    0.04 sec
+          Start   79: mhgp11_core_unit_buffer
+ 242/1038 Test   #79: mhgp11_core_unit_buffer ..............................................   Passed    0.08 sec
+          Start   80: mhgp11_core_unit_csr
+ 243/1038 Test   #80: mhgp11_core_unit_csr .................................................   Passed    0.05 sec
+          Start   81: mhgp11_core_unit_ledger
+ 244/1038 Test   #81: mhgp11_core_unit_ledger ..............................................   Passed    0.07 sec
+          Start   82: mhgp11_core_unit_block_cache
+ 245/1038 Test  #998: mhgp11_reference_supports ............................................   Passed   33.04 sec
+          Start   83: mhgp11_core_unit_inventaire
+ 246/1038 Test   #83: mhgp11_core_unit_inventaire ..........................................   Passed    0.06 sec
+          Start   84: mhgp11_core_fault_alloc_fault
+ 247/1038 Test   #82: mhgp11_core_unit_block_cache .........................................   Passed    0.08 sec
+          Start   85: mhgp11_core_fault_refusal
+ 248/1038 Test   #84: mhgp11_core_fault_alloc_fault ........................................   Passed    0.04 sec
+          Start   86: mhgp11_core_fault_ledger
+ 249/1038 Test   #85: mhgp11_core_fault_refusal ............................................   Passed    0.04 sec
+          Start   87: mhgp11_core_fault_inventaire
+ 250/1038 Test   #86: mhgp11_core_fault_ledger .............................................   Passed    0.04 sec
+          Start   88: mhgp11_core_result_value_ok
+ 251/1038 Test   #87: mhgp11_core_fault_inventaire .........................................   Passed    0.03 sec
+          Start   89: mhgp11_core_result_value_on_refusal
+ 252/1038 Test   #88: mhgp11_core_result_value_ok ..........................................   Passed    0.05 sec
+          Start   90: mhgp11_core_result_const_value_on_refusal
+ 253/1038 Test   #68: mhgp11_support_configure_fast_math_cxx_flags .........................   Passed    1.18 sec
+          Start   91: mhgp11_core_result_take_on_refusal
+ 254/1038 Test   #69: mhgp11_support_configure_fast_math_release_ofast .....................   Passed    1.19 sec
+          Start   92: mhgp11_core_fast_math_refusal
+ 255/1038 Test   #89: mhgp11_core_result_value_on_refusal ..................................   Passed    0.53 sec
+          Start   93: mhgp11_core_ofast_refusal
+ 256/1038 Test   #90: mhgp11_core_result_const_value_on_refusal ............................   Passed    0.51 sec
+          Start   94: mhgp11_core_coord_bits_refusal
+ 257/1038 Test   #92: mhgp11_core_fast_math_refusal ........................................   Passed    0.25 sec
+          Start   95: mhgp11_core_coord_bits_absent
+ 258/1038 Test   #91: mhgp11_core_result_take_on_refusal ...................................   Passed    0.30 sec
+          Start   96: mhgp11_core_refusal_ignored
+ 259/1038 Test   #94: mhgp11_core_coord_bits_refusal .......................................   Passed    0.27 sec
+          Start   97: mhgp11_core_strong_id_naked
+ 260/1038 Test   #95: mhgp11_core_coord_bits_absent ........................................   Passed    0.26 sec
+          Start   98: mhgp11_core_buffer_trivial_only
+ 261/1038 Test   #93: mhgp11_core_ofast_refusal ............................................   Passed    4.07 sec
+          Start   99: mhgp11_core_strong_id_mixed
+ 262/1038 Test   #96: mhgp11_core_refusal_ignored ..........................................   Passed    3.93 sec
+          Start  100: mhgp11_core_result_throwing_move
+ 263/1038 Test   #97: mhgp11_core_strong_id_naked ..........................................   Passed    4.07 sec
+          Start  101: mhgp11_num_unit_wide
+ 264/1038 Test  #101: mhgp11_num_unit_wide .................................................   Passed    0.04 sec
+          Start  102: mhgp11_num_unit_budgets
+ 265/1038 Test  #102: mhgp11_num_unit_budgets ..............................................   Passed    0.04 sec
+          Start  103: mhgp11_num_unit_levels
+ 266/1038 Test  #103: mhgp11_num_unit_levels ...............................................   Passed    0.04 sec
+          Start  104: mhgp11_num_unit_domain
+ 267/1038 Test   #98: mhgp11_core_buffer_trivial_only ......................................   Passed    4.02 sec
+          Start  105: mhgp11_num_unit_geometry
+ 268/1038 Test  #104: mhgp11_num_unit_domain ...............................................   Passed    0.04 sec
+          Start  106: mhgp11_num_unit_extremes
+ 269/1038 Test  #105: mhgp11_num_unit_geometry .............................................   Passed    0.04 sec
+          Start  107: mhgp11_num_unit_power_paths
+ 270/1038 Test  #106: mhgp11_num_unit_extremes .............................................   Passed    0.04 sec
+          Start  108: mhgp11_num_unit_candidate
+ 271/1038 Test  #107: mhgp11_num_unit_power_paths ..........................................   Passed    0.04 sec
+          Start  109: mhgp11_num_unit_q3_candidate
+ 272/1038 Test  #108: mhgp11_num_unit_candidate ............................................   Passed    0.04 sec
+          Start  110: mhgp11_num_unit_bounds
+ 273/1038 Test  #109: mhgp11_num_unit_q3_candidate .........................................   Passed    0.04 sec
+          Start  111: mhgp11_num_unit_region_domain
+ 274/1038 Test  #110: mhgp11_num_unit_bounds ...............................................   Passed    0.04 sec
+          Start  112: mhgp11_num_unit_region_pair
+ 275/1038 Test  #111: mhgp11_num_unit_region_domain ........................................   Passed    0.04 sec
+          Start  113: mhgp11_num_unit_region_line
+ 276/1038 Test  #112: mhgp11_num_unit_region_pair ..........................................   Passed    0.04 sec
+          Start  114: mhgp11_num_unit_region_cubic_width
+ 277/1038 Test  #113: mhgp11_num_unit_region_line ..........................................   Passed    0.04 sec
+          Start  115: mhgp11_num_unit_centers
+ 278/1038 Test  #114: mhgp11_num_unit_region_cubic_width ...................................   Passed    0.04 sec
+          Start  116: mhgp11_num_unit_distance
+ 279/1038 Test  #115: mhgp11_num_unit_centers ..............................................   Passed    0.04 sec
+          Start  117: mhgp11_num_unit_checked_limits
+ 280/1038 Test  #116: mhgp11_num_unit_distance .............................................   Passed    0.04 sec
+          Start  118: mhgp11_num_unit_checked_public
+ 281/1038 Test  #117: mhgp11_num_unit_checked_limits .......................................   Passed    0.04 sec
+          Start  119: mhgp11_num_unit_certificate_limits
+ 282/1038 Test  #118: mhgp11_num_unit_checked_public .......................................   Passed    0.04 sec
+          Start  120: mhgp11_num_unit_certificate_public
+ 283/1038 Test  #119: mhgp11_num_unit_certificate_limits ...................................   Passed    0.04 sec
+          Start  121: mhgp11_num_unit_certificate_owners
+ 284/1038 Test  #120: mhgp11_num_unit_certificate_public ...................................   Passed    0.04 sec
+          Start  122: mhgp11_num_unit_orientation_limits
+ 285/1038 Test  #121: mhgp11_num_unit_certificate_owners ...................................   Passed    0.04 sec
+          Start  123: mhgp11_num_unit_orientation_public
+ 286/1038 Test  #122: mhgp11_num_unit_orientation_limits ...................................   Passed    0.04 sec
+          Start  124: mhgp11_num_unit_orientation_owners
+ 287/1038 Test  #123: mhgp11_num_unit_orientation_public ...................................   Passed    0.04 sec
+          Start  125: mhgp11_num_unit_inventaire
+ 288/1038 Test  #124: mhgp11_num_unit_orientation_owners ...................................   Passed    0.04 sec
+          Start  126: mhgp11_num_lattice_lattice_fixtures
+ 289/1038 Test  #125: mhgp11_num_unit_inventaire ...........................................   Passed    0.04 sec
+          Start  127: mhgp11_num_lattice_lattice_random
+ 290/1038 Test  #126: mhgp11_num_lattice_lattice_fixtures ..................................   Passed    0.06 sec
+          Start  128: mhgp11_num_lattice_inventaire
+ 291/1038 Test  #128: mhgp11_num_lattice_inventaire ........................................   Passed    0.06 sec
+          Start  130: mhgp11_num_fraction_opt
+ 292/1038 Test  #127: mhgp11_num_lattice_lattice_random ....................................   Passed    0.20 sec
+          Start  132: mhgp11_num_bounds_fraction_opt
+ 293/1038 Test  #132: mhgp11_num_bounds_fraction_opt .......................................   Passed    0.29 sec
+          Start  134: mhgp11_num_bounds_model_opt
+ 294/1038 Test  #130: mhgp11_num_fraction_opt ..............................................   Passed    0.77 sec
+          Start  136: mhgp11_num_center_region_fraction_opt
+ 295/1038 Test  #136: mhgp11_num_center_region_fraction_opt ................................   Passed    0.25 sec
+          Start  138: mhgp11_num_center_region_model_opt
+ 296/1038 Test  #134: mhgp11_num_bounds_model_opt ..........................................   Passed    1.09 sec
+          Start  139: mhgp11_num_budget_refusal
+ 297/1038 Test  #138: mhgp11_num_center_region_model_opt ...................................   Passed    0.56 sec
+          Start  141: mhgp11_num_centers_fraction_opt
+ 298/1038 Test  #141: mhgp11_num_centers_fraction_opt ......................................   Passed    0.49 sec
+          Start  143: mhgp11_num_centers_model_opt
+ 299/1038 Test   #99: mhgp11_core_strong_id_mixed ..........................................   Passed    4.00 sec
+          Start  145: mhgp11_num_distance_fraction_opt
+ 300/1038 Test  #100: mhgp11_core_result_throwing_move .....................................   Passed    4.02 sec
+          Start  147: mhgp11_num_distance_model_opt
+ 301/1038 Test  #145: mhgp11_num_distance_fraction_opt .....................................   Passed    0.48 sec
+          Start  149: mhgp11_num_checked_power_fraction_opt
+ 302/1038 Test  #149: mhgp11_num_checked_power_fraction_opt ................................   Passed    0.46 sec
+          Start  151: mhgp11_num_checked_power_model_opt
+ 303/1038 Test  #147: mhgp11_num_distance_model_opt ........................................   Passed    0.89 sec
+          Start  153: mhgp11_num_power_certificate_fraction_opt
+ 304/1038 Test  #143: mhgp11_num_centers_model_opt .........................................   Passed    1.99 sec
+          Start  155: mhgp11_num_power_certificate_model_opt
+ 305/1038 Test  #153: mhgp11_num_power_certificate_fraction_opt ............................   Passed    1.15 sec
+          Start  157: mhgp11_num_orientation_certificate_fraction_opt
+ 306/1038 Test  #151: mhgp11_num_checked_power_model_opt ...................................   Passed    1.49 sec
+          Start  159: mhgp11_num_orientation_certificate_model_opt
+ 307/1038 Test  #139: mhgp11_num_budget_refusal ............................................   Passed    4.34 sec
+          Start  160: mhgp11_num_q4_presentation_presentation
+ 308/1038 Test  #160: mhgp11_num_q4_presentation_presentation ..............................   Passed    0.05 sec
+          Start  161: mhgp11_num_q4_presentation_boundaries
+ 309/1038 Test  #161: mhgp11_num_q4_presentation_boundaries ................................   Passed    0.05 sec
+          Start  162: mhgp11_num_q4_presentation_foreign_and_owners
+ 310/1038 Test  #162: mhgp11_num_q4_presentation_foreign_and_owners ........................   Passed    0.05 sec
+          Start  163: mhgp11_num_q4_presentation_inventaire
+ 311/1038 Test  #163: mhgp11_num_q4_presentation_inventaire ................................   Passed    0.10 sec
+          Start  165: mhgp11_num_q4_presentation_fraction_opt
+ 312/1038 Test  #157: mhgp11_num_orientation_certificate_fraction_opt ......................   Passed    1.02 sec
+          Start  167: mhgp11_num_q4_presentation_model_opt
+ 313/1038 Test  #165: mhgp11_num_q4_presentation_fraction_opt ..............................   Passed    0.78 sec
+          Start  169: mhgp11_num_q4_presentation_process_opt
+ 314/1038 Test  #169: mhgp11_num_q4_presentation_process_opt ...............................   Passed    0.31 sec
+          Start  170: mhgp11_num_triangle_kind_kinds
+ 315/1038 Test  #170: mhgp11_num_triangle_kind_kinds .......................................   Passed    0.03 sec
+          Start  171: mhgp11_num_triangle_kind_extremes
+ 316/1038 Test  #171: mhgp11_num_triangle_kind_extremes ....................................   Passed    0.03 sec
+          Start  172: mhgp11_num_triangle_kind_inventaire
+ 317/1038 Test  #172: mhgp11_num_triangle_kind_inventaire ..................................   Passed    0.03 sec
+          Start  174: mhgp11_num_triangle_kind_fraction_opt
+ 318/1038 Test  #174: mhgp11_num_triangle_kind_fraction_opt ................................   Passed    0.19 sec
+          Start  176: mhgp11_num_triangle_kind_model_opt
+ 319/1038 Test  #155: mhgp11_num_power_certificate_model_opt ...............................   Passed    3.41 sec
+          Start  177: mhgp11_num_s8_unit_capacity
+ 320/1038 Test  #177: mhgp11_num_s8_unit_capacity ..........................................   Passed    0.04 sec
+          Start  178: mhgp11_num_s8_unit_aliasing
+ 321/1038 Test  #178: mhgp11_num_s8_unit_aliasing ..........................................   Passed    0.04 sec
+          Start  179: mhgp11_num_s8_unit_division
+ 322/1038 Test  #179: mhgp11_num_s8_unit_division ..........................................   Passed    0.04 sec
+          Start  180: mhgp11_num_s8_unit_rational_form
+ 323/1038 Test  #180: mhgp11_num_s8_unit_rational_form .....................................   Passed    0.05 sec
+          Start  181: mhgp11_num_s8_unit_square_signature
+ 324/1038 Test  #181: mhgp11_num_s8_unit_square_signature ..................................   Passed    0.04 sec
+          Start  182: mhgp11_num_s8_unit_radical_budget
+ 325/1038 Test  #176: mhgp11_num_triangle_kind_model_opt ...................................   Passed    0.27 sec
+          Start  183: mhgp11_num_s8_unit_roots_limits
+ 326/1038 Test  #182: mhgp11_num_s8_unit_radical_budget ....................................   Passed    0.05 sec
+          Start  184: mhgp11_num_s8_unit_inventaire
+ 327/1038 Test  #183: mhgp11_num_s8_unit_roots_limits ......................................   Passed    0.04 sec
+          Start  186: mhgp11_num_big_opt
+ 328/1038 Test  #184: mhgp11_num_s8_unit_inventaire ........................................   Passed    0.04 sec
+          Start  188: mhgp11_num_radical_opt
+ 329/1038 Test  #159: mhgp11_num_orientation_certificate_model_opt .........................   Passed    3.27 sec
+          Start  190: mhgp11_num_roots_opt
+ 330/1038 Test  #167: mhgp11_num_q4_presentation_model_opt .................................   Passed    2.87 sec
+          Start  198: mhgp11_sched_unit_domain
+ 331/1038 Test  #198: mhgp11_sched_unit_domain .............................................   Passed    0.04 sec
+          Start  199: mhgp11_sched_unit_coverage
+ 332/1038 Test  #199: mhgp11_sched_unit_coverage ...........................................   Passed    0.04 sec
+          Start  200: mhgp11_sched_unit_limits
+ 333/1038 Test  #200: mhgp11_sched_unit_limits .............................................   Passed    0.05 sec
+          Start  201: mhgp11_sched_unit_short_jobs
+ 334/1038 Test  #201: mhgp11_sched_unit_short_jobs .........................................   Passed    0.12 sec
+          Start  202: mhgp11_sched_unit_reentrant
+ 335/1038 Test  #202: mhgp11_sched_unit_reentrant ..........................................   Passed    0.04 sec
+          Start  203: mhgp11_sched_unit_concurrent
+ 336/1038 Test  #203: mhgp11_sched_unit_concurrent .........................................   Passed    0.05 sec
+          Start  204: mhgp11_sched_unit_outcomes
+ 337/1038 Test  #204: mhgp11_sched_unit_outcomes ...........................................   Passed    0.04 sec
+          Start  205: mhgp11_sched_unit_exceptions
+ 338/1038 Test  #205: mhgp11_sched_unit_exceptions .........................................   Passed    0.04 sec
+          Start  206: mhgp11_sched_unit_inventaire
+ 339/1038 Test  #206: mhgp11_sched_unit_inventaire .........................................   Passed    0.05 sec
+          Start  207: mhgp11_sched_fault_thread_creation
+ 340/1038 Test  #188: mhgp11_num_radical_opt ...............................................   Passed    1.79 sec
+          Start  208: mhgp11_sched_fault_allocation
+ 341/1038 Test  #207: mhgp11_sched_fault_thread_creation ...................................   Passed    0.04 sec
+          Start  209: mhgp11_sched_fault_allocation_free
+ 342/1038 Test  #208: mhgp11_sched_fault_allocation ........................................   Passed    0.04 sec
+          Start  210: mhgp11_sched_fault_inventaire
+ 343/1038 Test  #190: mhgp11_num_roots_opt .................................................   Passed    0.87 sec
+          Start  211: mhgp11_cloud_unit_morton
+ 344/1038 Test  #209: mhgp11_sched_fault_allocation_free ...................................   Passed    0.04 sec
+          Start  212: mhgp11_cloud_unit_width
+ 345/1038 Test  #210: mhgp11_sched_fault_inventaire ........................................   Passed    0.04 sec
+          Start  213: mhgp11_cloud_unit_sizes
+ 346/1038 Test  #211: mhgp11_cloud_unit_morton .............................................   Passed    0.06 sec
+          Start  214: mhgp11_cloud_unit_refusals
+ 347/1038 Test  #212: mhgp11_cloud_unit_width ..............................................   Passed    0.03 sec
+          Start  215: mhgp11_cloud_unit_fixture
+ 348/1038 Test  #213: mhgp11_cloud_unit_sizes ..............................................   Passed    0.04 sec
+          Start  216: mhgp11_cloud_unit_judge
+ 349/1038 Test  #214: mhgp11_cloud_unit_refusals ...........................................   Passed    0.04 sec
+          Start  217: mhgp11_cloud_unit_permutation
+ 350/1038 Test  #215: mhgp11_cloud_unit_fixture ............................................   Passed    0.04 sec
+          Start  218: mhgp11_cloud_unit_renumbering
+ 351/1038 Test  #216: mhgp11_cloud_unit_judge ..............................................   Passed    0.06 sec
+          Start  219: mhgp11_cloud_unit_budget
+ 352/1038 Test  #217: mhgp11_cloud_unit_permutation ........................................   Passed    0.04 sec
+          Start  220: mhgp11_cloud_unit_ownership
+ 353/1038 Test  #218: mhgp11_cloud_unit_renumbering ........................................   Passed    0.04 sec
+          Start  221: mhgp11_cloud_unit_refusal_priority
+ 354/1038 Test  #221: mhgp11_cloud_unit_refusal_priority ...................................   Passed    0.04 sec
+          Start  222: mhgp11_cloud_unit_shared_budget
+ 355/1038 Test  #219: mhgp11_cloud_unit_budget .............................................   Passed    0.06 sec
+          Start  223: mhgp11_cloud_unit_inventaire
+ 356/1038 Test  #220: mhgp11_cloud_unit_ownership ..........................................   Passed    0.06 sec
+          Start  224: mhgp11_cloud_fault_starvation
+ 357/1038 Test  #222: mhgp11_cloud_unit_shared_budget ......................................   Passed    0.04 sec
+          Start  225: mhgp11_cloud_fault_inventaire
+ 358/1038 Test  #224: mhgp11_cloud_fault_starvation ........................................   Passed    0.04 sec
+          Start  226: mhgp11_cloud_width_unrepresentable
+ 359/1038 Test  #223: mhgp11_cloud_unit_inventaire .........................................   Passed    0.05 sec
+          Start  227: mhgp11_cloud_factory_only
+ 360/1038 Test  #225: mhgp11_cloud_fault_inventaire ........................................   Passed    0.04 sec
+          Start  228: mhgp11_cloud_const_views
+ 361/1038 Test  #186: mhgp11_num_big_opt ...................................................   Passed    5.38 sec
+          Start  229: mhgp11_cloud_copy_refused
+ 362/1038 Test  #228: mhgp11_cloud_const_views .............................................   Passed    3.81 sec
+          Start  230: mhgp11_cloud_assignment_refused
+ 363/1038 Test  #227: mhgp11_cloud_factory_only ............................................   Passed    3.89 sec
+          Start  231: mhgp11_io_unit_sha256
+ 364/1038 Test  #226: mhgp11_cloud_width_unrepresentable ...................................   Passed    3.94 sec
+          Start  232: mhgp11_io_unit_hex
+ 365/1038 Test  #231: mhgp11_io_unit_sha256 ................................................   Passed    0.08 sec
+          Start  233: mhgp11_io_unit_input
+ 366/1038 Test  #232: mhgp11_io_unit_hex ...................................................   Passed    0.05 sec
+          Start  234: mhgp11_io_unit_input_sizes
+ 367/1038 Test  #233: mhgp11_io_unit_input .................................................   Passed    0.05 sec
+          Start  235: mhgp11_io_unit_input_unreadable
+ 368/1038 Test  #234: mhgp11_io_unit_input_sizes ...........................................   Passed    0.05 sec
+          Start  236: mhgp11_io_unit_input_budget
+ 369/1038 Test  #235: mhgp11_io_unit_input_unreadable ......................................   Passed    0.05 sec
+          Start  237: mhgp11_io_unit_inventaire
+ 370/1038 Test  #236: mhgp11_io_unit_input_budget ..........................................   Passed    0.05 sec
+          Start  238: mhgp11_io_transaction_plan_syntax
+ 371/1038 Test  #237: mhgp11_io_unit_inventaire ............................................   Passed    0.05 sec
+          Start  239: mhgp11_io_transaction_plan_parent
+ 372/1038 Test  #239: mhgp11_io_transaction_plan_parent ....................................   Passed    0.07 sec
+          Start  240: mhgp11_io_transaction_plan_conflicts
+ 373/1038 Test  #238: mhgp11_io_transaction_plan_syntax ....................................   Passed    0.09 sec
+          Start  241: mhgp11_io_transaction_plan_inputs
+ 374/1038 Test  #240: mhgp11_io_transaction_plan_conflicts .................................   Passed    0.05 sec
+          Start  242: mhgp11_io_transaction_create_names
+ 375/1038 Test  #241: mhgp11_io_transaction_plan_inputs ....................................   Passed    0.06 sec
+          Start  243: mhgp11_io_transaction_parent_unwritable
+ 376/1038 Test  #242: mhgp11_io_transaction_create_names ...................................   Passed    0.06 sec
+          Start  244: mhgp11_io_transaction_commit
+ 377/1038 Test  #243: mhgp11_io_transaction_parent_unwritable ..............................   Passed    0.06 sec
+          Start  245: mhgp11_io_transaction_noreplace
+ 378/1038 Test  #244: mhgp11_io_transaction_commit .........................................   Passed    0.06 sec
+          Start  246: mhgp11_io_transaction_orphan
+ 379/1038 Test  #245: mhgp11_io_transaction_noreplace ......................................   Passed    0.06 sec
+          Start  247: mhgp11_io_transaction_discard
+ 380/1038 Test  #246: mhgp11_io_transaction_orphan .........................................   Passed    0.05 sec
+          Start  248: mhgp11_io_transaction_retract
+ 381/1038 Test  #247: mhgp11_io_transaction_discard ........................................   Passed    0.05 sec
+          Start  249: mhgp11_io_transaction_write_failure
+ 382/1038 Test  #248: mhgp11_io_transaction_retract ........................................   Passed    0.04 sec
+          Start  250: mhgp11_io_transaction_inventaire
+ 383/1038 Test  #249: mhgp11_io_transaction_write_failure ..................................   Passed    0.04 sec
+          Start  251: mhgp11_io_fault_starvation
+ 384/1038 Test  #250: mhgp11_io_transaction_inventaire .....................................   Passed    0.04 sec
+          Start  252: mhgp11_io_fault_inventaire
+ 385/1038 Test  #251: mhgp11_io_fault_starvation ...........................................   Passed    0.05 sec
+          Start  254: mhgp11_io_sha256_opt
+ 386/1038 Test  #252: mhgp11_io_fault_inventaire ...........................................   Passed    0.04 sec
+          Start  255: mhgp11_index_unit_fixtures
+ 387/1038 Test  #255: mhgp11_index_unit_fixtures ...........................................   Passed    0.08 sec
+          Start  256: mhgp11_index_unit_structure
+ 388/1038 Test  #256: mhgp11_index_unit_structure ..........................................   Passed    0.06 sec
+          Start  257: mhgp11_index_unit_ownership
+ 389/1038 Test  #257: mhgp11_index_unit_ownership ..........................................   Passed    0.05 sec
+          Start  258: mhgp11_index_unit_budget
+ 390/1038 Test  #258: mhgp11_index_unit_budget .............................................   Passed    0.04 sec
+          Start  259: mhgp11_index_unit_blocks
+ 391/1038 Test  #259: mhgp11_index_unit_blocks .............................................   Passed    0.04 sec
+          Start  260: mhgp11_index_unit_lattice
+ 392/1038 Test  #260: mhgp11_index_unit_lattice ............................................   Passed    0.04 sec
+          Start  261: mhgp11_index_unit_concurrency
+ 393/1038 Test  #261: mhgp11_index_unit_concurrency ........................................   Passed    0.05 sec
+          Start  262: mhgp11_index_unit_inventaire
+ 394/1038 Test  #262: mhgp11_index_unit_inventaire .........................................   Passed    0.08 sec
+          Start  263: mhgp11_index_fault_starvation
+ 395/1038 Test  #263: mhgp11_index_fault_starvation ........................................   Passed    0.05 sec
+          Start  264: mhgp11_index_fault_inventaire
+ 396/1038 Test  #264: mhgp11_index_fault_inventaire ........................................   Passed    0.04 sec
+          Start  266: mhgp11_index_fraction_opt
+ 397/1038 Test  #254: mhgp11_io_sha256_opt .................................................   Passed    1.13 sec
+          Start  268: mhgp11_index_judge_opt
+ 398/1038 Test  #229: mhgp11_cloud_copy_refused ............................................   Passed    3.71 sec
+          Start  270: mhgp11_index_bench_collector_opt
+ 399/1038 Test  #266: mhgp11_index_fraction_opt ............................................   Passed    2.00 sec
+          Start  272: mhgp11_index_bench_io_opt
+ 400/1038 Test  #272: mhgp11_index_bench_io_opt ............................................   Passed    0.20 sec
+          Start  273: mhgp11_index_borrowed_fixtures
+ 401/1038 Test  #273: mhgp11_index_borrowed_fixtures .......................................   Passed    0.04 sec
+          Start  274: mhgp11_index_borrowed_lattice
+ 402/1038 Test  #274: mhgp11_index_borrowed_lattice ........................................   Passed    0.03 sec
+          Start  275: mhgp11_index_borrowed_ownership
+ 403/1038 Test  #275: mhgp11_index_borrowed_ownership ......................................   Passed    0.04 sec
+          Start  276: mhgp11_index_borrowed_callbacks
+ 404/1038 Test  #276: mhgp11_index_borrowed_callbacks ......................................   Passed    0.04 sec
+          Start  277: mhgp11_index_borrowed_concurrency
+ 405/1038 Test  #277: mhgp11_index_borrowed_concurrency ....................................   Passed    0.04 sec
+          Start  278: mhgp11_index_borrowed_inventaire
+ 406/1038 Test  #278: mhgp11_index_borrowed_inventaire .....................................   Passed    0.03 sec
+          Start  279: mhgp11_index_borrowed_fault_starvation
+ 407/1038 Test  #230: mhgp11_cloud_assignment_refused ......................................   Passed    3.63 sec
+          Start  280: mhgp11_index_borrowed_fault_inventaire
+ 408/1038 Test  #279: mhgp11_index_borrowed_fault_starvation ...............................   Passed    0.03 sec
+          Start  282: mhgp11_index_borrowed_fraction_opt
+ 409/1038 Test  #280: mhgp11_index_borrowed_fault_inventaire ...............................   Passed    0.03 sec
+          Start  284: mhgp11_index_borrowed_model_opt
+ 410/1038 Test  #282: mhgp11_index_borrowed_fraction_opt ...................................   Passed    3.42 sec
+          Start  285: mhgp11_catalogue_unit_fixtures
+ 411/1038 Test  #285: mhgp11_catalogue_unit_fixtures .......................................   Passed    0.04 sec
+          Start  286: mhgp11_catalogue_unit_refusals
+ 412/1038 Test  #286: mhgp11_catalogue_unit_refusals .......................................   Passed    0.04 sec
+          Start  287: mhgp11_catalogue_unit_transaction
+ 413/1038 Test  #287: mhgp11_catalogue_unit_transaction ....................................   Passed    0.04 sec
+          Start  288: mhgp11_catalogue_unit_obtuse_prefix
+ 414/1038 Test  #288: mhgp11_catalogue_unit_obtuse_prefix ..................................   Passed    0.04 sec
+          Start  289: mhgp11_catalogue_unit_q4_deferred
+ 415/1038 Test  #289: mhgp11_catalogue_unit_q4_deferred ....................................   Passed    0.04 sec
+          Start  290: mhgp11_catalogue_unit_inventaire
+ 416/1038 Test  #290: mhgp11_catalogue_unit_inventaire .....................................   Passed    0.04 sec
+          Start  291: mhgp11_catalogue_fault_starvation
+ 417/1038 Test  #291: mhgp11_catalogue_fault_starvation ....................................   Passed    0.04 sec
+          Start  292: mhgp11_catalogue_fault_inventaire
+ 418/1038 Test  #292: mhgp11_catalogue_fault_inventaire ....................................   Passed    0.03 sec
+          Start  294: mhgp11_catalogue_fraction_opt
+ 419/1038 Test  #294: mhgp11_catalogue_fraction_opt ........................................   Passed    1.60 sec
+          Start  296: mhgp11_catalogue_judge_opt
+ 420/1038 Test  #296: mhgp11_catalogue_judge_opt ...........................................   Passed    0.34 sec
+          Start  298: mhgp11_catalogue_bench_io_opt
+ 421/1038 Test  #298: mhgp11_catalogue_bench_io_opt ........................................   Passed    0.30 sec
+          Start  300: mhgp11_catalogue_bench_collector_opt
+ 422/1038 Test  #268: mhgp11_index_judge_opt ...............................................   Passed    9.30 sec
+          Start  302: mhgp11_catalogue_semantic_opt
+ 423/1038 Test  #302: mhgp11_catalogue_semantic_opt ........................................   Passed    0.12 sec
+          Start  304: mhgp11_catalogue_profiles_io_opt
+ 424/1038 Test  #304: mhgp11_catalogue_profiles_io_opt .....................................   Passed    0.13 sec
+          Start  306: mhgp11_catalogue_profiles_collector_opt
+ 425/1038 Test  #270: mhgp11_index_bench_collector_opt .....................................   Passed    8.50 sec
+          Start  308: mhgp11_catalogue_semantic_cache_opt
+ 426/1038 Test  #300: mhgp11_catalogue_bench_collector_opt .................................   Passed    2.53 sec
+          Start  309: mhgp11_catalogue_region_pair_region
+ 427/1038 Test  #309: mhgp11_catalogue_region_pair_region ..................................   Passed    0.04 sec
+          Start  310: mhgp11_catalogue_region_line_region
+ 428/1038 Test  #310: mhgp11_catalogue_region_line_region ..................................   Passed    0.04 sec
+          Start  311: mhgp11_catalogue_region_obtuse_region
+ 429/1038 Test  #311: mhgp11_catalogue_region_obtuse_region ................................   Passed    0.04 sec
+          Start  312: mhgp11_catalogue_region_median_envelope
+ 430/1038 Test  #312: mhgp11_catalogue_region_median_envelope ..............................   Passed    0.04 sec
+          Start  313: mhgp11_catalogue_region_inventaire
+ 431/1038 Test  #313: mhgp11_catalogue_region_inventaire ...................................   Passed    0.04 sec
+          Start  314: mhgp11_catalogue_leaf_counts_flush_overflow
+ 432/1038 Test  #314: mhgp11_catalogue_leaf_counts_flush_overflow ..........................   Passed    0.07 sec
+          Start  315: mhgp11_catalogue_leaf_counts_large_leaves
+ 433/1038 Test  #315: mhgp11_catalogue_leaf_counts_large_leaves ............................   Passed    0.05 sec
+          Start  316: mhgp11_catalogue_leaf_counts_engraved
+ 434/1038 Test  #316: mhgp11_catalogue_leaf_counts_engraved ................................   Passed    0.03 sec
+          Start  317: mhgp11_catalogue_leaf_counts_inventaire
+ 435/1038 Test  #317: mhgp11_catalogue_leaf_counts_inventaire ..............................   Passed    0.03 sec
+          Start  318: mhgp11_catalogue_parallel_equivalence
+ 436/1038 Test  #308: mhgp11_catalogue_semantic_cache_opt ..................................   Passed    0.94 sec
+          Start  319: mhgp11_catalogue_parallel_frontier_overlap
+ 437/1038 Test  #318: mhgp11_catalogue_parallel_equivalence ................................   Passed    0.07 sec
+          Start  320: mhgp11_catalogue_parallel_frontier_edges
+ 438/1038 Test  #319: mhgp11_catalogue_parallel_frontier_overlap ...........................   Passed    0.03 sec
+          Start  321: mhgp11_catalogue_parallel_frontier_deep
+ 439/1038 Test  #320: mhgp11_catalogue_parallel_frontier_edges .............................   Passed    0.03 sec
+          Start  322: mhgp11_catalogue_parallel_global_limits
+ 440/1038 Test  #321: mhgp11_catalogue_parallel_frontier_deep ..............................   Passed    0.03 sec
+          Start  323: mhgp11_catalogue_parallel_memory_and_refusals
+ 441/1038 Test  #323: mhgp11_catalogue_parallel_memory_and_refusals ........................   Passed    0.03 sec
+          Start  324: mhgp11_catalogue_parallel_timings
+ 442/1038 Test  #322: mhgp11_catalogue_parallel_global_limits ..............................   Passed    0.07 sec
+          Start  325: mhgp11_catalogue_parallel_inventaire
+ 443/1038 Test  #324: mhgp11_catalogue_parallel_timings ....................................   Passed    0.04 sec
+          Start  326: mhgp11_catalogue_parallel_fault_starvation
+ 444/1038 Test  #325: mhgp11_catalogue_parallel_inventaire .................................   Passed    0.05 sec
+          Start  327: mhgp11_catalogue_parallel_fault_inventaire
+ 445/1038 Test  #327: mhgp11_catalogue_parallel_fault_inventaire ...........................   Passed    0.06 sec
+          Start  329: mhgp11_catalogue_parallel_fraction_opt
+ 446/1038 Test  #326: mhgp11_catalogue_parallel_fault_starvation ...........................   Passed    0.09 sec
+          Start  331: mhgp11_catalogue_parallel_judge_opt
+ 447/1038 Test  #331: mhgp11_catalogue_parallel_judge_opt ..................................   Passed    0.22 sec
+          Start  333: mhgp11_catalogue_parallel_collector_opt
+ 448/1038 Test  #306: mhgp11_catalogue_profiles_collector_opt ..............................   Passed    2.63 sec
+          Start  334: mhgp11_catalogue_cache_ranks
+ 449/1038 Test  #334: mhgp11_catalogue_cache_ranks .........................................   Passed    0.04 sec
+          Start  335: mhgp11_catalogue_cache_relations_reset
+ 450/1038 Test  #335: mhgp11_catalogue_cache_relations_reset ...............................   Passed    0.04 sec
+          Start  336: mhgp11_catalogue_cache_capacity_fallback
+ 451/1038 Test  #336: mhgp11_catalogue_cache_capacity_fallback .............................   Passed    0.04 sec
+          Start  337: mhgp11_catalogue_cache_memory
+ 452/1038 Test  #337: mhgp11_catalogue_cache_memory ........................................   Passed    0.04 sec
+          Start  338: mhgp11_catalogue_cache_equivalence
+ 453/1038 Test  #338: mhgp11_catalogue_cache_equivalence ...................................   Passed    0.08 sec
+          Start  339: mhgp11_catalogue_cache_inventaire
+ 454/1038 Test  #339: mhgp11_catalogue_cache_inventaire ....................................   Passed    0.04 sec
+          Start  340: mhgp11_catalogue_cache_fault_allocation
+ 455/1038 Test  #340: mhgp11_catalogue_cache_fault_allocation ..............................   Passed    0.04 sec
+          Start  341: mhgp11_catalogue_cache_fault_inventaire
+ 456/1038 Test  #341: mhgp11_catalogue_cache_fault_inventaire ..............................   Passed    0.04 sec
+          Start  342: mhgp11_catalogue_sort_boundaries
+ 457/1038 Test  #342: mhgp11_catalogue_sort_boundaries .....................................   Passed    0.26 sec
+          Start  343: mhgp11_catalogue_sort_wide_levels
+ 458/1038 Test  #343: mhgp11_catalogue_sort_wide_levels ....................................   Passed    0.11 sec
+          Start  344: mhgp11_catalogue_sort_refusals
+ 459/1038 Test  #344: mhgp11_catalogue_sort_refusals .......................................   Passed    0.04 sec
+          Start  345: mhgp11_catalogue_sort_inventaire
+ 460/1038 Test  #345: mhgp11_catalogue_sort_inventaire .....................................   Passed    0.04 sec
+          Start  346: mhgp11_catalogue_sort_fault_allocations
+ 461/1038 Test  #346: mhgp11_catalogue_sort_fault_allocations ..............................   Passed    0.12 sec
+          Start  347: mhgp11_catalogue_sort_fault_inventaire
+ 462/1038 Test  #347: mhgp11_catalogue_sort_fault_inventaire ...............................   Passed    0.04 sec
+          Start  348: mhgp11_catalogue_sort_fenv_key_modes
+ 463/1038 Test  #348: mhgp11_catalogue_sort_fenv_key_modes .................................   Passed    0.04 sec
+          Start  349: mhgp11_catalogue_sort_fenv_permutations
+ 464/1038 Test  #349: mhgp11_catalogue_sort_fenv_permutations ..............................   Passed    0.21 sec
+          Start  350: mhgp11_catalogue_sort_fenv_inventaire
+ 465/1038 Test  #350: mhgp11_catalogue_sort_fenv_inventaire ................................   Passed    0.04 sec
+          Start  352: mhgp11_catalogue_cache_fraction_opt
+ 466/1038 Test  #284: mhgp11_index_borrowed_model_opt ......................................   Passed   12.96 sec
+          Start  354: mhgp11_catalogue_sort_fraction_opt
+ 467/1038 Test  #329: mhgp11_catalogue_parallel_fraction_opt ...............................   Passed    3.90 sec
+          Start  356: mhgp11_catalogue_sort_cache_fraction_opt
+ 468/1038 Test  #352: mhgp11_catalogue_cache_fraction_opt ..................................   Passed    2.40 sec
+          Start  358: mhgp11_catalogue_optimization_model_opt
+ 469/1038 Test  #358: mhgp11_catalogue_optimization_model_opt ..............................   Passed    0.17 sec
+          Start  360: mhgp11_catalogue_optimizations_collector_opt
+ 470/1038 Test  #333: mhgp11_catalogue_parallel_collector_opt ..............................   Passed    5.53 sec
+          Start  361: mhgp11_catalogue_adaptive_equivalence
+ 471/1038 Test  #361: mhgp11_catalogue_adaptive_equivalence ................................   Passed    0.12 sec
+          Start  362: mhgp11_catalogue_adaptive_round_memory
+ 472/1038 Test  #362: mhgp11_catalogue_adaptive_round_memory ...............................   Passed    0.04 sec
+          Start  363: mhgp11_catalogue_adaptive_plan_limits
+ 473/1038 Test  #363: mhgp11_catalogue_adaptive_plan_limits ................................   Passed    0.05 sec
+          Start  364: mhgp11_catalogue_adaptive_diagnostics_transaction
+ 474/1038 Test  #364: mhgp11_catalogue_adaptive_diagnostics_transaction ....................   Passed    0.04 sec
+          Start  365: mhgp11_catalogue_adaptive_inventaire
+ 475/1038 Test  #365: mhgp11_catalogue_adaptive_inventaire .................................   Passed    0.04 sec
+          Start  366: mhgp11_catalogue_adaptive_fault_allocations
+ 476/1038 Test  #366: mhgp11_catalogue_adaptive_fault_allocations ..........................   Passed    0.09 sec
+          Start  367: mhgp11_catalogue_adaptive_fault_inventaire
+ 477/1038 Test  #367: mhgp11_catalogue_adaptive_fault_inventaire ...........................   Passed    0.03 sec
+          Start  369: mhgp11_catalogue_adaptive_fraction_opt
+ 478/1038 Test  #354: mhgp11_catalogue_sort_fraction_opt ...................................   Passed    2.41 sec
+          Start  371: mhgp11_catalogue_adaptive_combined_fraction_opt
+ 479/1038 Test  #356: mhgp11_catalogue_sort_cache_fraction_opt .............................   Passed    2.69 sec
+          Start  373: mhgp11_catalogue_adaptive_judge_opt
+ 480/1038 Test  #373: mhgp11_catalogue_adaptive_judge_opt ..................................   Passed    0.15 sec
+          Start  375: mhgp11_catalogue_adaptive_model_opt
+ 481/1038 Test  #375: mhgp11_catalogue_adaptive_model_opt ..................................   Passed    0.16 sec
+          Start  377: mhgp11_catalogue_adaptive_bench_io_opt
+ 482/1038 Test  #377: mhgp11_catalogue_adaptive_bench_io_opt ...............................   Passed    0.49 sec
+          Start  379: mhgp11_catalogue_adaptive_collector_opt
+ 483/1038 Test  #369: mhgp11_catalogue_adaptive_fraction_opt ...............................   Passed    2.58 sec
+          Start  380: mhgp11_catalogue_assembly_boundaries
+ 484/1038 Test  #371: mhgp11_catalogue_adaptive_combined_fraction_opt ......................   Passed    2.60 sec
+          Start  381: mhgp11_catalogue_assembly_wide_levels
+ 485/1038 Test  #381: mhgp11_catalogue_assembly_wide_levels ................................   Passed    0.08 sec
+          Start  382: mhgp11_catalogue_assembly_refusals
+ 486/1038 Test  #382: mhgp11_catalogue_assembly_refusals ...................................   Passed    0.04 sec
+          Start  383: mhgp11_catalogue_assembly_memory_and_equivalence
+ 487/1038 Test  #383: mhgp11_catalogue_assembly_memory_and_equivalence .....................   Passed    0.05 sec
+          Start  384: mhgp11_catalogue_assembly_pool_and_limits
+ 488/1038 Test  #384: mhgp11_catalogue_assembly_pool_and_limits ............................   Passed    0.04 sec
+          Start  385: mhgp11_catalogue_assembly_inventaire
+ 489/1038 Test  #380: mhgp11_catalogue_assembly_boundaries .................................   Passed    0.31 sec
+          Start  386: mhgp11_catalogue_assembly_fault_allocations
+ 490/1038 Test  #385: mhgp11_catalogue_assembly_inventaire .................................   Passed    0.04 sec
+          Start  387: mhgp11_catalogue_assembly_fault_inventaire
+ 491/1038 Test  #387: mhgp11_catalogue_assembly_fault_inventaire ...........................   Passed    0.04 sec
+          Start  389: mhgp11_catalogue_assembly_collector_opt
+ 492/1038 Test  #360: mhgp11_catalogue_optimizations_collector_opt .........................   Passed    4.12 sec
+          Start  390: mhgp11_catalogue_single_pages
+ 493/1038 Test  #390: mhgp11_catalogue_single_pages ........................................   Passed    0.04 sec
+          Start  391: mhgp11_catalogue_single_equivalence
+ 494/1038 Test  #386: mhgp11_catalogue_assembly_fault_allocations ..........................   Passed    0.09 sec
+          Start  392: mhgp11_catalogue_single_refusals
+ 495/1038 Test  #392: mhgp11_catalogue_single_refusals .....................................   Passed    0.04 sec
+          Start  393: mhgp11_catalogue_single_pool_busy
+ 496/1038 Test  #391: mhgp11_catalogue_single_equivalence ..................................   Passed    0.07 sec
+          Start  394: mhgp11_catalogue_single_inventaire
+ 497/1038 Test  #393: mhgp11_catalogue_single_pool_busy ....................................   Passed    0.04 sec
+          Start  395: mhgp11_catalogue_single_fault_append_atomic
+ 498/1038 Test  #394: mhgp11_catalogue_single_inventaire ...................................   Passed    0.04 sec
+          Start  396: mhgp11_catalogue_single_fault_allocations
+ 499/1038 Test  #395: mhgp11_catalogue_single_fault_append_atomic ..........................   Passed    0.04 sec
+          Start  397: mhgp11_catalogue_single_fault_late_budget
+ 500/1038 Test  #397: mhgp11_catalogue_single_fault_late_budget ............................   Passed    0.06 sec
+          Start  398: mhgp11_catalogue_single_fault_inventaire
+ 501/1038 Test  #398: mhgp11_catalogue_single_fault_inventaire .............................   Passed    0.04 sec
+          Start  400: mhgp11_catalogue_single_fraction_opt
+ 502/1038 Test  #396: mhgp11_catalogue_single_fault_allocations ............................   Passed    0.17 sec
+          Start  402: mhgp11_catalogue_single_model_opt
+ 503/1038 Test  #402: mhgp11_catalogue_single_model_opt ....................................   Passed    0.17 sec
+          Start  403: mhgp11_catalogue_pair_graph_masks
+ 504/1038 Test  #403: mhgp11_catalogue_pair_graph_masks ....................................   Passed    0.04 sec
+          Start  404: mhgp11_catalogue_pair_graph_leaf_order
+ 505/1038 Test  #404: mhgp11_catalogue_pair_graph_leaf_order ...............................   Passed    0.21 sec
+          Start  405: mhgp11_catalogue_pair_graph_contacts_obtuse
+ 506/1038 Test  #405: mhgp11_catalogue_pair_graph_contacts_obtuse ..........................   Passed    0.04 sec
+          Start  406: mhgp11_catalogue_pair_graph_equivalence
+ 507/1038 Test  #406: mhgp11_catalogue_pair_graph_equivalence ..............................   Passed    0.10 sec
+          Start  407: mhgp11_catalogue_pair_graph_mixed_fallback
+ 508/1038 Test  #407: mhgp11_catalogue_pair_graph_mixed_fallback ...........................   Passed    0.04 sec
+          Start  408: mhgp11_catalogue_pair_graph_live_rows
+ 509/1038 Test  #400: mhgp11_catalogue_single_fraction_opt .................................   Passed    2.29 sec
+          Start  409: mhgp11_catalogue_pair_graph_frontier_identity
+ 510/1038 Test  #409: mhgp11_catalogue_pair_graph_frontier_identity ........................   Passed    0.04 sec
+          Start  410: mhgp11_catalogue_pair_graph_inventaire
+ 511/1038 Test  #410: mhgp11_catalogue_pair_graph_inventaire ...............................   Passed    0.04 sec
+          Start  411: mhgp11_catalogue_pair_graph_fault_memory
+ 512/1038 Test  #411: mhgp11_catalogue_pair_graph_fault_memory .............................   Passed    0.05 sec
+          Start  412: mhgp11_catalogue_pair_graph_fault_all_slots
+ 513/1038 Test  #412: mhgp11_catalogue_pair_graph_fault_all_slots ..........................   Passed    0.04 sec
+          Start  413: mhgp11_catalogue_pair_graph_fault_pair_allocation
+ 514/1038 Test  #413: mhgp11_catalogue_pair_graph_fault_pair_allocation ....................   Passed    0.06 sec
+          Start  414: mhgp11_catalogue_pair_graph_fault_starvation
+ 515/1038 Test  #414: mhgp11_catalogue_pair_graph_fault_starvation .........................   Passed    0.52 sec
+          Start  415: mhgp11_catalogue_pair_graph_fault_inventaire
+ 516/1038 Test  #415: mhgp11_catalogue_pair_graph_fault_inventaire .........................   Passed    0.07 sec
+          Start  417: mhgp11_catalogue_pair_graph_model_opt
+ 517/1038 Test  #408: mhgp11_catalogue_pair_graph_live_rows ................................   Passed    4.41 sec
+          Start  419: mhgp11_catalogue_support_contact_model_opt
+ 518/1038 Test  #417: mhgp11_catalogue_pair_graph_model_opt ................................   Passed    3.00 sec
+          Start  421: mhgp11_catalogue_euler_oracle_opt
+ 519/1038 Test  #419: mhgp11_catalogue_support_contact_model_opt ...........................   Passed    1.11 sec
+          Start  423: mhgp11_catalogue_euler_limits_opt
+ 520/1038 Test  #423: mhgp11_catalogue_euler_limits_opt ....................................   Passed    0.35 sec
+          Start  433: mhgp11_catalogue_leaf_narrow_line_reference
+ 521/1038 Test  #433: mhgp11_catalogue_leaf_narrow_line_reference ..........................   Passed    0.09 sec
+          Start  434: mhgp11_catalogue_leaf_narrow_acute_and_triple
+ 522/1038 Test  #434: mhgp11_catalogue_leaf_narrow_acute_and_triple ........................   Passed    0.04 sec
+          Start  435: mhgp11_catalogue_leaf_narrow_span_refusal
+ 523/1038 Test  #435: mhgp11_catalogue_leaf_narrow_span_refusal ............................   Passed    0.03 sec
+          Start  436: mhgp11_catalogue_leaf_narrow_inventaire
+ 524/1038 Test  #436: mhgp11_catalogue_leaf_narrow_inventaire ..............................   Passed    0.03 sec
+          Start  437: mhgp11_catalogue_leaf_split_select
+ 525/1038 Test  #437: mhgp11_catalogue_leaf_split_select ...................................   Passed    0.29 sec
+          Start  438: mhgp11_catalogue_leaf_split_refusals
+ 526/1038 Test  #438: mhgp11_catalogue_leaf_split_refusals .................................   Passed    0.03 sec
+          Start  439: mhgp11_catalogue_leaf_split_inventaire
+ 527/1038 Test  #439: mhgp11_catalogue_leaf_split_inventaire ...............................   Passed    0.03 sec
+          Start  440: mhgp11_tower_unit_geometry
+ 528/1038 Test  #440: mhgp11_tower_unit_geometry ...........................................   Passed    0.04 sec
+          Start  441: mhgp11_tower_unit_local_support
+ 529/1038 Test  #441: mhgp11_tower_unit_local_support ......................................   Passed    0.04 sec
+          Start  442: mhgp11_tower_unit_refusals
+ 530/1038 Test  #442: mhgp11_tower_unit_refusals ...........................................   Passed    0.04 sec
+          Start  443: mhgp11_tower_unit_ownership
+ 531/1038 Test  #443: mhgp11_tower_unit_ownership ..........................................   Passed    0.03 sec
+          Start  444: mhgp11_tower_unit_wrapper
+ 532/1038 Test  #444: mhgp11_tower_unit_wrapper ............................................   Passed    0.04 sec
+          Start  445: mhgp11_tower_unit_capacity
+ 533/1038 Test  #445: mhgp11_tower_unit_capacity ...........................................   Passed    0.04 sec
+          Start  446: mhgp11_tower_unit_shell
+ 534/1038 Test  #446: mhgp11_tower_unit_shell ..............................................   Passed    0.04 sec
+          Start  447: mhgp11_tower_unit_concurrency
+ 535/1038 Test  #447: mhgp11_tower_unit_concurrency ........................................   Passed    0.03 sec
+          Start  448: mhgp11_tower_unit_inventaire
+ 536/1038 Test  #448: mhgp11_tower_unit_inventaire .........................................   Passed    0.04 sec
+          Start  449: mhgp11_tower_fault_starvation
+ 537/1038 Test  #449: mhgp11_tower_fault_starvation ........................................   Passed    0.05 sec
+          Start  450: mhgp11_tower_fault_inventaire
+ 538/1038 Test  #450: mhgp11_tower_fault_inventaire ........................................   Passed    0.07 sec
+          Start  451: mhgp11_tower_diameter_canonical_pairs
+ 539/1038 Test  #451: mhgp11_tower_diameter_canonical_pairs ................................   Passed    0.04 sec
+          Start  452: mhgp11_tower_diameter_fallback
+ 540/1038 Test  #452: mhgp11_tower_diameter_fallback .......................................   Passed    0.05 sec
+          Start  453: mhgp11_tower_diameter_inventaire
+ 541/1038 Test  #453: mhgp11_tower_diameter_inventaire .....................................   Passed    0.04 sec
+          Start  455: mhgp11_tower_fraction_opt
+ 542/1038 Test  #455: mhgp11_tower_fraction_opt ............................................   Passed    1.93 sec
+          Start  457: mhgp11_tower_judge_opt
+ 543/1038 Test  #389: mhgp11_catalogue_assembly_collector_opt ..............................   Passed   10.22 sec
+          Start  459: mhgp11_tower_bench_collector_opt
+ 544/1038 Test  #379: mhgp11_catalogue_adaptive_collector_opt ..............................   Passed   14.81 sec
+          Start  461: mhgp11_tower_bench_io_opt
+ 545/1038 Test  #421: mhgp11_catalogue_euler_oracle_opt ....................................   Passed    6.92 sec
+          Start  462: mhgp11_tower_domain_context
+ 546/1038 Test  #461: mhgp11_tower_bench_io_opt ............................................   Passed    0.22 sec
+          Start  463: mhgp11_tower_domain_lookup
+ 547/1038 Test  #463: mhgp11_tower_domain_lookup ...........................................   Passed    0.04 sec
+          Start  464: mhgp11_tower_domain_global_support
+ 548/1038 Test  #462: mhgp11_tower_domain_context ..........................................   Passed    0.04 sec
+          Start  465: mhgp11_tower_domain_ownership
+ 549/1038 Test  #464: mhgp11_tower_domain_global_support ...................................   Passed    0.04 sec
+          Start  466: mhgp11_tower_domain_refusals
+ 550/1038 Test  #465: mhgp11_tower_domain_ownership ........................................   Passed    0.04 sec
+          Start  467: mhgp11_tower_domain_capacity
+ 551/1038 Test  #466: mhgp11_tower_domain_refusals .........................................   Passed    0.04 sec
+          Start  468: mhgp11_tower_domain_concurrency
+ 552/1038 Test  #467: mhgp11_tower_domain_capacity .........................................   Passed    0.05 sec
+          Start  469: mhgp11_tower_domain_permutation
+ 553/1038 Test  #468: mhgp11_tower_domain_concurrency ......................................   Passed    0.04 sec
+          Start  470: mhgp11_tower_domain_inventaire
+ 554/1038 Test  #469: mhgp11_tower_domain_permutation ......................................   Passed    0.04 sec
+          Start  471: mhgp11_tower_domain_fault_starvation
+ 555/1038 Test  #470: mhgp11_tower_domain_inventaire .......................................   Passed    0.04 sec
+          Start  472: mhgp11_tower_domain_fault_inventaire
+ 556/1038 Test  #471: mhgp11_tower_domain_fault_starvation .................................   Passed    0.06 sec
+          Start  473: mhgp11_tower_domain_parallel_equivalence
+ 557/1038 Test  #472: mhgp11_tower_domain_fault_inventaire .................................   Passed    0.04 sec
+          Start  474: mhgp11_tower_domain_parallel_refusals
+ 558/1038 Test  #474: mhgp11_tower_domain_parallel_refusals ................................   Passed    0.04 sec
+          Start  475: mhgp11_tower_domain_parallel_lookup_refusal
+ 559/1038 Test  #473: mhgp11_tower_domain_parallel_equivalence .............................   Passed    0.06 sec
+          Start  476: mhgp11_tower_domain_parallel_inventaire
+ 560/1038 Test  #476: mhgp11_tower_domain_parallel_inventaire ..............................   Passed    0.03 sec
+          Start  477: mhgp11_tower_cells_regular
+ 561/1038 Test  #457: mhgp11_tower_judge_opt ...............................................   Passed    3.78 sec
+          Start  478: mhgp11_tower_cells_extended
+ 562/1038 Test  #475: mhgp11_tower_domain_parallel_lookup_refusal ..........................   Passed    0.05 sec
+          Start  479: mhgp11_tower_cells_capacity
+ 563/1038 Test  #477: mhgp11_tower_cells_regular ...........................................   Passed    0.03 sec
+          Start  480: mhgp11_tower_cells_ownership
+ 564/1038 Test  #478: mhgp11_tower_cells_extended ..........................................   Passed    0.03 sec
+          Start  481: mhgp11_tower_cells_refusals
+ 565/1038 Test  #479: mhgp11_tower_cells_capacity ..........................................   Passed    0.04 sec
+          Start  482: mhgp11_tower_cells_extreme
+ 566/1038 Test  #480: mhgp11_tower_cells_ownership .........................................   Passed    0.03 sec
+          Start  483: mhgp11_tower_cells_concurrency
+ 567/1038 Test  #481: mhgp11_tower_cells_refusals ..........................................   Passed    0.03 sec
+          Start  484: mhgp11_tower_cells_inventaire
+ 568/1038 Test  #482: mhgp11_tower_cells_extreme ...........................................   Passed    0.03 sec
+          Start  485: mhgp11_tower_cells_fault_starvation
+ 569/1038 Test  #484: mhgp11_tower_cells_inventaire ........................................   Passed    0.03 sec
+          Start  486: mhgp11_tower_cells_fault_inventaire
+ 570/1038 Test  #483: mhgp11_tower_cells_concurrency .......................................   Passed    0.04 sec
+          Start  488: mhgp11_tower_cells_fraction_opt
+ 571/1038 Test  #485: mhgp11_tower_cells_fault_starvation ..................................   Passed    0.04 sec
+          Start  490: mhgp11_tower_cells_model_opt
+ 572/1038 Test  #486: mhgp11_tower_cells_fault_inventaire ..................................   Passed    0.04 sec
+          Start  491: mhgp11_tower_locate_lookup
+ 573/1038 Test  #491: mhgp11_tower_locate_lookup ...........................................   Passed    0.04 sec
+          Start  492: mhgp11_tower_locate_global_identity
+ 574/1038 Test  #492: mhgp11_tower_locate_global_identity ..................................   Passed    0.04 sec
+          Start  493: mhgp11_tower_locate_saturated
+ 575/1038 Test  #493: mhgp11_tower_locate_saturated ........................................   Passed    0.04 sec
+          Start  494: mhgp11_tower_locate_outside_catalogue
+ 576/1038 Test  #494: mhgp11_tower_locate_outside_catalogue ................................   Passed    0.04 sec
+          Start  495: mhgp11_tower_locate_inventaire
+ 577/1038 Test  #495: mhgp11_tower_locate_inventaire .......................................   Passed    0.04 sec
+          Start  496: mhgp11_tower_descent_interiors
+ 578/1038 Test  #496: mhgp11_tower_descent_interiors .......................................   Passed    0.04 sec
+          Start  497: mhgp11_tower_descent_outside
+ 579/1038 Test  #497: mhgp11_tower_descent_outside .........................................   Passed    0.04 sec
+          Start  498: mhgp11_tower_descent_traces
+ 580/1038 Test  #498: mhgp11_tower_descent_traces ..........................................   Passed    0.04 sec
+          Start  499: mhgp11_tower_descent_boundaries
+ 581/1038 Test  #499: mhgp11_tower_descent_boundaries ......................................   Passed    0.04 sec
+          Start  500: mhgp11_tower_descent_refusals
+ 582/1038 Test  #500: mhgp11_tower_descent_refusals ........................................   Passed    0.04 sec
+          Start  501: mhgp11_tower_descent_capacity
+ 583/1038 Test  #501: mhgp11_tower_descent_capacity ........................................   Passed    0.04 sec
+          Start  502: mhgp11_tower_descent_ownership
+ 584/1038 Test  #502: mhgp11_tower_descent_ownership .......................................   Passed    0.04 sec
+          Start  503: mhgp11_tower_descent_concurrency
+ 585/1038 Test  #503: mhgp11_tower_descent_concurrency .....................................   Passed    0.04 sec
+          Start  504: mhgp11_tower_descent_singleton
+ 586/1038 Test  #504: mhgp11_tower_descent_singleton .......................................   Passed    0.04 sec
+          Start  505: mhgp11_tower_descent_singleton_refusals
+ 587/1038 Test  #505: mhgp11_tower_descent_singleton_refusals ..............................   Passed    0.04 sec
+          Start  506: mhgp11_tower_descent_inventaire
+ 588/1038 Test  #506: mhgp11_tower_descent_inventaire ......................................   Passed    0.04 sec
+          Start  507: mhgp11_tower_descent_fault_starvation
+ 589/1038 Test  #507: mhgp11_tower_descent_fault_starvation ................................   Passed    0.04 sec
+          Start  508: mhgp11_tower_descent_fault_inventaire
+ 590/1038 Test  #508: mhgp11_tower_descent_fault_inventaire ................................   Passed    0.04 sec
+          Start  510: mhgp11_tower_descent_fraction_opt
+ 591/1038 Test  #510: mhgp11_tower_descent_fraction_opt ....................................   Passed    1.85 sec
+          Start  512: mhgp11_tower_descent_model_opt
+ 592/1038 Test  #512: mhgp11_tower_descent_model_opt .......................................   Passed    2.21 sec
+          Start  513: mhgp11_tower_forest_plateau
+ 593/1038 Test  #513: mhgp11_tower_forest_plateau ..........................................   Passed    0.04 sec
+          Start  514: mhgp11_tower_forest_multigroup
+ 594/1038 Test  #514: mhgp11_tower_forest_multigroup .......................................   Passed    0.03 sec
+          Start  515: mhgp11_tower_forest_verticals
+ 595/1038 Test  #515: mhgp11_tower_forest_verticals ........................................   Passed    0.03 sec
+          Start  516: mhgp11_tower_forest_canonical
+ 596/1038 Test  #516: mhgp11_tower_forest_canonical ........................................   Passed    0.03 sec
+          Start  517: mhgp11_tower_forest_ownership
+ 597/1038 Test  #517: mhgp11_tower_forest_ownership ........................................   Passed    0.03 sec
+          Start  518: mhgp11_tower_forest_refusals
+ 598/1038 Test  #518: mhgp11_tower_forest_refusals .........................................   Passed    0.03 sec
+          Start  519: mhgp11_tower_forest_concurrency
+ 599/1038 Test  #519: mhgp11_tower_forest_concurrency ......................................   Passed    0.04 sec
+          Start  520: mhgp11_tower_forest_inventaire
+ 600/1038 Test  #520: mhgp11_tower_forest_inventaire .......................................   Passed    0.04 sec
+          Start  521: mhgp11_tower_forest_fault_starvation
+ 601/1038 Test  #521: mhgp11_tower_forest_fault_starvation .................................   Passed    0.04 sec
+          Start  522: mhgp11_tower_forest_fault_direct_timings
+ 602/1038 Test  #488: mhgp11_tower_cells_fraction_opt ......................................   Passed    5.16 sec
+          Start  523: mhgp11_tower_forest_fault_inventaire
+ 603/1038 Test  #522: mhgp11_tower_forest_fault_direct_timings .............................   Passed    0.04 sec
+          Start  524: mhgp11_tower_forest_sweep_reference
+ 604/1038 Test  #523: mhgp11_tower_forest_fault_inventaire .................................   Passed    0.03 sec
+          Start  525: mhgp11_tower_forest_sweep_depth_and_memory
+ 605/1038 Test  #524: mhgp11_tower_forest_sweep_reference ..................................   Passed    0.03 sec
+          Start  526: mhgp11_tower_forest_sweep_timings
+ 606/1038 Test  #525: mhgp11_tower_forest_sweep_depth_and_memory ...........................   Passed    0.03 sec
+          Start  527: mhgp11_tower_forest_sweep_concurrency
+ 607/1038 Test  #526: mhgp11_tower_forest_sweep_timings ....................................   Passed    0.03 sec
+          Start  528: mhgp11_tower_forest_sweep_inventaire
+ 608/1038 Test  #527: mhgp11_tower_forest_sweep_concurrency ................................   Passed    0.04 sec
+          Start  530: mhgp11_tower_forest_fraction_opt
+ 609/1038 Test  #528: mhgp11_tower_forest_sweep_inventaire .................................   Passed    0.03 sec
+          Start  532: mhgp11_tower_forest_model_opt
+ 610/1038 Test  #490: mhgp11_tower_cells_model_opt .........................................   Passed    5.67 sec
+          Start  533: mhgp11_tower_classification_analytic
+ 611/1038 Test  #533: mhgp11_tower_classification_analytic .................................   Passed    0.03 sec
+          Start  534: mhgp11_tower_classification_prefix
+ 612/1038 Test  #534: mhgp11_tower_classification_prefix ...................................   Passed    0.03 sec
+          Start  535: mhgp11_tower_classification_refusals
+ 613/1038 Test  #535: mhgp11_tower_classification_refusals .................................   Passed    0.04 sec
+          Start  536: mhgp11_tower_classification_ownership_concurrency
+ 614/1038 Test  #536: mhgp11_tower_classification_ownership_concurrency ....................   Passed    0.04 sec
+          Start  537: mhgp11_tower_classification_inventaire
+ 615/1038 Test  #537: mhgp11_tower_classification_inventaire ...............................   Passed    0.03 sec
+          Start  538: mhgp11_tower_classification_fault_no_allocation
+ 616/1038 Test  #538: mhgp11_tower_classification_fault_no_allocation ......................   Passed    0.03 sec
+          Start  539: mhgp11_tower_classification_fault_inventaire
+ 617/1038 Test  #539: mhgp11_tower_classification_fault_inventaire .........................   Passed    0.02 sec
+          Start  541: mhgp11_tower_classification_fraction_opt
+ 618/1038 Test  #541: mhgp11_tower_classification_fraction_opt .............................   Passed    0.89 sec
+          Start  543: mhgp11_tower_classification_oracle_model_opt
+ 619/1038 Test  #530: mhgp11_tower_forest_fraction_opt .....................................   Passed    3.03 sec
+          Start  545: mhgp11_tower_classification_model_opt
+ 620/1038 Test  #459: mhgp11_tower_bench_collector_opt .....................................   Passed   12.05 sec
+          Start  547: mhgp11_tower_points_flat_claims_opt
+ 621/1038 Test  #543: mhgp11_tower_classification_oracle_model_opt .........................   Passed    1.77 sec
+          Start  549: mhgp11_tower_points_export_width_opt
+ 622/1038 Test  #547: mhgp11_tower_points_flat_claims_opt ..................................   Passed    0.09 sec
+          Start  551: mhgp11_tower_full_bench_io_opt
+ 623/1038 Test  #549: mhgp11_tower_points_export_width_opt .................................   Passed    0.16 sec
+          Start  553: mhgp11_tower_full_leaf_lanes_opt
+ 624/1038 Test  #532: mhgp11_tower_forest_model_opt ........................................   Passed    4.95 sec
+          Start  555: mhgp11_tower_full_bench_semantic_opt
+ 625/1038 Test  #555: mhgp11_tower_full_bench_semantic_opt .................................   Passed    0.28 sec
+          Start  557: mhgp11_tower_full_campaign_opt
+ 626/1038 Test  #545: mhgp11_tower_classification_model_opt ................................   Passed    2.51 sec
+          Start  559: mhgp11_tower_full_v10_model_opt
+ 627/1038 Test  #559: mhgp11_tower_full_v10_model_opt ......................................   Passed    1.76 sec
+          Start  560: mhgp11_tower_memo_dates
+ 628/1038 Test  #560: mhgp11_tower_memo_dates ..............................................   Passed    0.05 sec
+          Start  561: mhgp11_tower_memo_collisions_refusals
+ 629/1038 Test  #561: mhgp11_tower_memo_collisions_refusals ................................   Passed    0.05 sec
+          Start  562: mhgp11_tower_memo_differential
+ 630/1038 Test  #562: mhgp11_tower_memo_differential .......................................   Passed    0.06 sec
+          Start  563: mhgp11_tower_memo_capacity
+ 631/1038 Test  #563: mhgp11_tower_memo_capacity ...........................................   Passed    0.03 sec
+          Start  564: mhgp11_tower_memo_inventaire
+ 632/1038 Test  #564: mhgp11_tower_memo_inventaire .........................................   Passed    0.03 sec
+          Start  565: mhgp11_tower_memo_full_equivalence
+ 633/1038 Test  #565: mhgp11_tower_memo_full_equivalence ...................................   Passed    0.04 sec
+          Start  566: mhgp11_tower_memo_full_refusals
+ 634/1038 Test  #566: mhgp11_tower_memo_full_refusals ......................................   Passed    0.03 sec
+          Start  567: mhgp11_tower_memo_full_concurrency
+ 635/1038 Test  #567: mhgp11_tower_memo_full_concurrency ...................................   Passed    0.03 sec
+          Start  568: mhgp11_tower_memo_full_inventaire
+ 636/1038 Test  #568: mhgp11_tower_memo_full_inventaire ....................................   Passed    0.03 sec
+          Start  569: mhgp11_tower_memo_fault_starvation
+ 637/1038 Test  #569: mhgp11_tower_memo_fault_starvation ...................................   Passed    0.05 sec
+          Start  570: mhgp11_tower_memo_fault_inventaire
+ 638/1038 Test  #570: mhgp11_tower_memo_fault_inventaire ...................................   Passed    0.08 sec
+          Start  571: mhgp11_tower_public_header_umbrella
+ 639/1038 Test  #571: mhgp11_tower_public_header_umbrella ..................................   Passed    0.07 sec
+          Start  572: mhgp11_tower_public_header_order_tree
+ 640/1038 Test  #572: mhgp11_tower_public_header_order_tree ................................   Passed    0.05 sec
+          Start  573: mhgp11_tower_public_header_inventaire
+ 641/1038 Test  #573: mhgp11_tower_public_header_inventaire ................................   Passed    0.05 sec
+          Start  575: mhgp11_tower_forest_memo_fraction_opt
+ 642/1038 Test  #575: mhgp11_tower_forest_memo_fraction_opt ................................   Passed    3.39 sec
+          Start  577: mhgp11_tower_full_memo_collector_opt
+ 643/1038 Test  #577: mhgp11_tower_full_memo_collector_opt .................................   Passed    3.90 sec
+          Start  579: mhgp11_tower_full_reuse_collector_opt
+ 644/1038 Test  #579: mhgp11_tower_full_reuse_collector_opt ................................   Passed    0.50 sec
+          Start  581: mhgp11_tower_full_parallel_collector_opt
+ 645/1038 Test  #581: mhgp11_tower_full_parallel_collector_opt .............................   Passed    3.82 sec
+          Start  582: mhgp11_tower_forest_parallel_equivalence
+ 646/1038 Test  #582: mhgp11_tower_forest_parallel_equivalence .............................   Passed    0.10 sec
+          Start  583: mhgp11_tower_forest_parallel_plateaus
+ 647/1038 Test  #583: mhgp11_tower_forest_parallel_plateaus ................................   Passed    0.04 sec
+          Start  584: mhgp11_tower_forest_parallel_extended_merge
+ 648/1038 Test  #584: mhgp11_tower_forest_parallel_extended_merge ..........................   Passed    0.04 sec
+          Start  585: mhgp11_tower_forest_parallel_mixed_plateau
+ 649/1038 Test  #585: mhgp11_tower_forest_parallel_mixed_plateau ...........................   Passed    0.04 sec
+          Start  586: mhgp11_tower_forest_parallel_lanes48
+ 650/1038 Test  #586: mhgp11_tower_forest_parallel_lanes48 .................................   Passed    0.05 sec
+          Start  587: mhgp11_tower_forest_parallel_refusals
+ 651/1038 Test  #587: mhgp11_tower_forest_parallel_refusals ................................   Passed    0.04 sec
+          Start  588: mhgp11_tower_forest_parallel_pool_busy
+ 652/1038 Test  #588: mhgp11_tower_forest_parallel_pool_busy ...............................   Passed    0.04 sec
+          Start  589: mhgp11_tower_forest_parallel_inventaire
+ 653/1038 Test  #589: mhgp11_tower_forest_parallel_inventaire ..............................   Passed    0.04 sec
+          Start  590: mhgp11_tower_forest_parallel_fault_starvation
+ 654/1038 Test  #590: mhgp11_tower_forest_parallel_fault_starvation ........................   Passed    0.05 sec
+          Start  591: mhgp11_tower_forest_parallel_fault_inventaire
+ 655/1038 Test  #591: mhgp11_tower_forest_parallel_fault_inventaire ........................   Passed    0.04 sec
+          Start  593: mhgp11_tower_forest_parallel_fraction_opt
+ 656/1038 Test  #551: mhgp11_tower_full_bench_io_opt .......................................   Passed   16.78 sec
+          Start  595: mhgp11_tower_forest_parallel_memo_fraction_opt
+ 657/1038 Test  #595: mhgp11_tower_forest_parallel_memo_fraction_opt .......................   Passed    3.76 sec
+          Start  597: mhgp11_tower_forest_parallel_model_opt
+ 658/1038 Test  #597: mhgp11_tower_forest_parallel_model_opt ...............................   Passed    0.20 sec
+          Start  599: mhgp11_tower_full_catalogue_collector_opt
+ 659/1038 Test  #593: mhgp11_tower_forest_parallel_fraction_opt ............................   Passed    4.23 sec
+          Start  600: mhgp11_tower_vertical_parallel_equivalence
+ 660/1038 Test  #600: mhgp11_tower_vertical_parallel_equivalence ...........................   Passed    0.68 sec
+          Start  601: mhgp11_tower_vertical_parallel_closed_dates
+ 661/1038 Test  #601: mhgp11_tower_vertical_parallel_closed_dates ..........................   Passed    0.09 sec
+          Start  602: mhgp11_tower_vertical_parallel_lanes48
+ 662/1038 Test  #602: mhgp11_tower_vertical_parallel_lanes48 ...............................   Passed    0.19 sec
+          Start  603: mhgp11_tower_vertical_parallel_refusals
+ 663/1038 Test  #603: mhgp11_tower_vertical_parallel_refusals ..............................   Passed    0.07 sec
+          Start  604: mhgp11_tower_vertical_parallel_pool_busy
+ 664/1038 Test  #604: mhgp11_tower_vertical_parallel_pool_busy .............................   Passed    0.06 sec
+          Start  605: mhgp11_tower_vertical_parallel_inventaire
+ 665/1038 Test  #605: mhgp11_tower_vertical_parallel_inventaire ............................   Passed    0.05 sec
+          Start  606: mhgp11_tower_vertical_parallel_fault_starvation
+ 666/1038 Test  #606: mhgp11_tower_vertical_parallel_fault_starvation ......................   Passed    0.07 sec
+          Start  607: mhgp11_tower_vertical_parallel_fault_vertical_census_failure
+ 667/1038 Test  #607: mhgp11_tower_vertical_parallel_fault_vertical_census_failure .........   Passed    0.07 sec
+          Start  608: mhgp11_tower_vertical_parallel_fault_inventaire
+ 668/1038 Test  #608: mhgp11_tower_vertical_parallel_fault_inventaire ......................   Passed    0.07 sec
+          Start  610: mhgp11_tower_vertical_parallel_fraction_opt
+ 669/1038 Test  #610: mhgp11_tower_vertical_parallel_fraction_opt ..........................   Passed    4.38 sec
+          Start  612: mhgp11_tower_vertical_parallel_model_opt
+ 670/1038 Test  #612: mhgp11_tower_vertical_parallel_model_opt .............................   Passed    0.22 sec
+          Start  613: mhgp11_tower_birth_runs_points
+ 671/1038 Test  #613: mhgp11_tower_birth_runs_points .......................................   Passed    0.05 sec
+          Start  614: mhgp11_tower_birth_runs_cohorts
+ 672/1038 Test  #614: mhgp11_tower_birth_runs_cohorts ......................................   Passed    0.04 sec
+          Start  615: mhgp11_tower_birth_runs_extended
+ 673/1038 Test  #615: mhgp11_tower_birth_runs_extended .....................................   Passed    0.03 sec
+          Start  616: mhgp11_tower_birth_runs_memory
+ 674/1038 Test  #616: mhgp11_tower_birth_runs_memory .......................................   Passed    0.04 sec
+          Start  617: mhgp11_tower_birth_runs_parallel_memo
+ 675/1038 Test  #617: mhgp11_tower_birth_runs_parallel_memo ................................   Passed    0.06 sec
+          Start  618: mhgp11_tower_birth_runs_composition
+ 676/1038 Test  #618: mhgp11_tower_birth_runs_composition ..................................   Passed    0.03 sec
+          Start  619: mhgp11_tower_birth_runs_inventaire
+ 677/1038 Test  #619: mhgp11_tower_birth_runs_inventaire ...................................   Passed    0.05 sec
+          Start  621: mhgp11_tower_birth_runs_model_opt
+ 678/1038 Test  #599: mhgp11_tower_full_catalogue_collector_opt ............................   Passed    6.46 sec
+          Start  623: mhgp11_tower_full_vertical_collector_opt
+ 679/1038 Test  #621: mhgp11_tower_birth_runs_model_opt ....................................   Passed    0.70 sec
+          Start  624: mhgp11_tower_census_reuse_descents
+ 680/1038 Test  #624: mhgp11_tower_census_reuse_descents ...................................   Passed    0.06 sec
+          Start  625: mhgp11_tower_census_reuse_memo_identity
+ 681/1038 Test  #625: mhgp11_tower_census_reuse_memo_identity ..............................   Passed    0.06 sec
+          Start  626: mhgp11_tower_census_reuse_full
+ 682/1038 Test  #626: mhgp11_tower_census_reuse_full .......................................   Passed    0.78 sec
+          Start  627: mhgp11_tower_census_reuse_admission
+ 683/1038 Test  #627: mhgp11_tower_census_reuse_admission ..................................   Passed    0.11 sec
+          Start  628: mhgp11_tower_census_reuse_inventaire
+ 684/1038 Test  #628: mhgp11_tower_census_reuse_inventaire .................................   Passed    0.06 sec
+          Start  629: mhgp11_tower_census_reuse_fault_allocation_free
+ 685/1038 Test  #629: mhgp11_tower_census_reuse_fault_allocation_free ......................   Passed    0.06 sec
+          Start  630: mhgp11_tower_census_reuse_fault_starvation
+ 686/1038 Test  #630: mhgp11_tower_census_reuse_fault_starvation ...........................   Passed    0.09 sec
+          Start  631: mhgp11_tower_census_reuse_fault_inventaire
+ 687/1038 Test  #631: mhgp11_tower_census_reuse_fault_inventaire ...........................   Passed    0.07 sec
+          Start  633: mhgp11_tower_census_reuse_fraction_opt
+ 688/1038 Test  #633: mhgp11_tower_census_reuse_fraction_opt ...............................   Passed    1.96 sec
+          Start  635: mhgp11_tower_census_reuse_model_opt
+ 689/1038 Test  #623: mhgp11_tower_full_vertical_collector_opt .............................   Passed    4.28 sec
+          Start  637: mhgp11_tower_full_census_collector_opt
+ 690/1038 Test  #635: mhgp11_tower_census_reuse_model_opt ..................................   Passed    1.41 sec
+          Start  639: mhgp11_tower_regular_vertical_reuse_model_opt
+ 691/1038 Test  #639: mhgp11_tower_regular_vertical_reuse_model_opt ........................   Passed    0.27 sec
+          Start  640: mhgp11_tower_regular_vertical_reuse_equivalence
+ 692/1038 Test  #640: mhgp11_tower_regular_vertical_reuse_equivalence ......................   Passed    0.11 sec
+          Start  641: mhgp11_tower_regular_vertical_reuse_closed_dates
+ 693/1038 Test  #641: mhgp11_tower_regular_vertical_reuse_closed_dates .....................   Passed    0.03 sec
+          Start  642: mhgp11_tower_regular_vertical_reuse_extended
+ 694/1038 Test  #642: mhgp11_tower_regular_vertical_reuse_extended .........................   Passed    0.03 sec
+          Start  643: mhgp11_tower_regular_vertical_reuse_cache_contract
+ 695/1038 Test  #643: mhgp11_tower_regular_vertical_reuse_cache_contract ...................   Passed    0.03 sec
+          Start  644: mhgp11_tower_regular_vertical_reuse_inventaire
+ 696/1038 Test  #644: mhgp11_tower_regular_vertical_reuse_inventaire .......................   Passed    0.03 sec
+          Start  645: mhgp11_tower_regular_vertical_reuse_fault_factory
+ 697/1038 Test  #645: mhgp11_tower_regular_vertical_reuse_fault_factory ....................   Passed    0.03 sec
+          Start  646: mhgp11_tower_regular_vertical_reuse_fault_all_k_memory
+ 698/1038 Test  #646: mhgp11_tower_regular_vertical_reuse_fault_all_k_memory ...............   Passed    0.03 sec
+          Start  647: mhgp11_tower_regular_vertical_reuse_fault_starvation
+ 699/1038 Test  #647: mhgp11_tower_regular_vertical_reuse_fault_starvation .................   Passed    0.04 sec
+          Start  648: mhgp11_tower_regular_vertical_reuse_fault_inactive
+ 700/1038 Test  #648: mhgp11_tower_regular_vertical_reuse_fault_inactive ...................   Passed    0.03 sec
+          Start  649: mhgp11_tower_regular_vertical_reuse_fault_inventaire
+ 701/1038 Test  #649: mhgp11_tower_regular_vertical_reuse_fault_inventaire .................   Passed    0.03 sec
+          Start  650: mhgp11_tower_dense_lookup_test_lookup
+ 702/1038 Test  #650: mhgp11_tower_dense_lookup_test_lookup ................................   Passed    0.03 sec
+          Start  651: mhgp11_tower_dense_lookup_test_holes
+ 703/1038 Test  #651: mhgp11_tower_dense_lookup_test_holes .................................   Passed    0.03 sec
+          Start  652: mhgp11_tower_dense_lookup_test_full
+ 704/1038 Test  #652: mhgp11_tower_dense_lookup_test_full ..................................   Passed    0.06 sec
+          Start  653: mhgp11_tower_dense_lookup_test_prefix
+ 705/1038 Test  #653: mhgp11_tower_dense_lookup_test_prefix ................................   Passed    0.03 sec
+          Start  654: mhgp11_tower_dense_lookup_test_memory
+ 706/1038 Test  #654: mhgp11_tower_dense_lookup_test_memory ................................   Passed    0.03 sec
+          Start  655: mhgp11_tower_dense_lookup_test_inventaire
+ 707/1038 Test  #655: mhgp11_tower_dense_lookup_test_inventaire ............................   Passed    0.03 sec
+          Start  656: mhgp11_tower_dense_lookup_fault_allocation_free
+ 708/1038 Test  #656: mhgp11_tower_dense_lookup_fault_allocation_free ......................   Passed    0.04 sec
+          Start  657: mhgp11_tower_dense_lookup_fault_direct_timings
+ 709/1038 Test  #657: mhgp11_tower_dense_lookup_fault_direct_timings .......................   Passed    0.04 sec
+          Start  658: mhgp11_tower_dense_lookup_fault_starvation
+ 710/1038 Test  #658: mhgp11_tower_dense_lookup_fault_starvation ...........................   Passed    0.05 sec
+          Start  659: mhgp11_tower_dense_lookup_fault_inventaire
+ 711/1038 Test  #659: mhgp11_tower_dense_lookup_fault_inventaire ...........................   Passed    0.08 sec
+          Start  661: mhgp11_tower_dense_lookup_model_opt
+ 712/1038 Test  #661: mhgp11_tower_dense_lookup_model_opt ..................................   Passed    0.80 sec
+          Start  663: mhgp11_tower_full_dense_collector_opt
+ 713/1038 Test  #663: mhgp11_tower_full_dense_collector_opt ................................   Passed    4.17 sec
+          Start  665: mhgp11_tower_full_regular_vertical_collector_opt
+ 714/1038 Test  #637: mhgp11_tower_full_census_collector_opt ...............................   Passed    7.11 sec
+          Start  666: mhgp11_tower_regular_classification_classification
+ 715/1038 Test  #666: mhgp11_tower_regular_classification_classification ...................   Passed    0.03 sec
+          Start  667: mhgp11_tower_regular_classification_full_tables
+ 716/1038 Test  #667: mhgp11_tower_regular_classification_full_tables ......................   Passed    0.03 sec
+          Start  668: mhgp11_tower_regular_classification_options
+ 717/1038 Test  #668: mhgp11_tower_regular_classification_options ..........................   Passed    0.04 sec
+          Start  669: mhgp11_tower_regular_classification_inventaire
+ 718/1038 Test  #669: mhgp11_tower_regular_classification_inventaire .......................   Passed    0.04 sec
+          Start  671: mhgp11_tower_regular_classification_model_opt
+ 719/1038 Test  #671: mhgp11_tower_regular_classification_model_opt ........................   Passed    0.40 sec
+          Start  673: mhgp11_tower_full_pair_graph_collector_opt
+ 720/1038 Test  #553: mhgp11_tower_full_leaf_lanes_opt .....................................   Passed   40.32 sec
+          Start  674: mhgp11_tower_meb_deferred_eager_parity
+ 721/1038 Test  #674: mhgp11_tower_meb_deferred_eager_parity ...............................   Passed    0.08 sec
+          Start  675: mhgp11_tower_meb_deferred_q3_witness
+ 722/1038 Test  #675: mhgp11_tower_meb_deferred_q3_witness .................................   Passed    0.07 sec
+          Start  676: mhgp11_tower_meb_deferred_inventaire
+ 723/1038 Test  #676: mhgp11_tower_meb_deferred_inventaire .................................   Passed    0.05 sec
+          Start  678: mhgp11_tower_meb_deferred_model_opt
+ 724/1038 Test  #678: mhgp11_tower_meb_deferred_model_opt ..................................   Passed    0.98 sec
+          Start  680: mhgp11_tower_full_march_collector_opt
+ 725/1038 Test  #673: mhgp11_tower_full_pair_graph_collector_opt ...........................   Passed    4.67 sec
+          Start  681: mhgp11_tower_population_concurrent_lemma
+ 726/1038 Test  #681: mhgp11_tower_population_concurrent_lemma .............................   Passed    0.76 sec
+          Start  682: mhgp11_tower_population_concurrent_equivalence
+ 727/1038 Test  #665: mhgp11_tower_full_regular_vertical_collector_opt .....................   Passed    7.61 sec
+          Start  683: mhgp11_tower_population_concurrent_refusals
+ 728/1038 Test  #683: mhgp11_tower_population_concurrent_refusals ..........................   Passed    0.04 sec
+          Start  684: mhgp11_tower_population_concurrent_inventaire
+ 729/1038 Test  #684: mhgp11_tower_population_concurrent_inventaire ........................   Passed    0.04 sec
+          Start  685: mhgp11_tower_population_contract_contexts
+ 730/1038 Test  #685: mhgp11_tower_population_contract_contexts ............................   Passed    0.05 sec
+          Start  686: mhgp11_tower_population_contract_each_step
+ 731/1038 Test  #686: mhgp11_tower_population_contract_each_step ...........................   Passed    0.06 sec
+          Start  687: mhgp11_tower_population_contract_owned_admission
+ 732/1038 Test  #687: mhgp11_tower_population_contract_owned_admission .....................   Passed    0.05 sec
+          Start  688: mhgp11_tower_population_contract_ledger
+ 733/1038 Test  #688: mhgp11_tower_population_contract_ledger ..............................   Passed    0.04 sec
+          Start  689: mhgp11_tower_population_contract_inventaire
+ 734/1038 Test  #689: mhgp11_tower_population_contract_inventaire ..........................   Passed    0.04 sec
+          Start  691: mhgp11_tower_full_paired_protocol_opt
+ 735/1038 Test  #691: mhgp11_tower_full_paired_protocol_opt ................................   Passed    0.59 sec
+          Start  693: mhgp11_tower_full_pipeline_reader_opt
+ 736/1038 Test  #693: mhgp11_tower_full_pipeline_reader_opt ................................   Passed    0.08 sec
+          Start  694: mhgp11_tower_pipeline_decisions
+ 737/1038 Test  #694: mhgp11_tower_pipeline_decisions ......................................   Passed    0.04 sec
+          Start  695: mhgp11_tower_pipeline_equivalence
+ 738/1038 Test  #680: mhgp11_tower_full_march_collector_opt ................................   Passed   16.82 sec
+          Start  696: mhgp11_tower_pipeline_abandon
+ 739/1038 Test  #696: mhgp11_tower_pipeline_abandon ........................................   Passed    0.28 sec
+          Start  697: mhgp11_tower_pipeline_inventaire
+ 740/1038 Test  #697: mhgp11_tower_pipeline_inventaire .....................................   Passed    0.07 sec
+          Start  698: mhgp11_tower_placement_parse
+ 741/1038 Test  #698: mhgp11_tower_placement_parse .........................................   Passed    0.06 sec
+          Start  699: mhgp11_tower_placement_cores
+ 742/1038 Test  #699: mhgp11_tower_placement_cores .........................................   Passed    0.06 sec
+          Start  700: mhgp11_tower_placement_plan
+ 743/1038 Test  #700: mhgp11_tower_placement_plan ..........................................   Passed    0.06 sec
+          Start  701: mhgp11_tower_placement_validate
+ 744/1038 Test  #701: mhgp11_tower_placement_validate ......................................   Passed    0.07 sec
+          Start  702: mhgp11_tower_placement_affinity
+ 745/1038 Test  #702: mhgp11_tower_placement_affinity ......................................   Passed    0.09 sec
+          Start  703: mhgp11_tower_placement_inventaire
+ 746/1038 Test  #703: mhgp11_tower_placement_inventaire ....................................   Passed    0.07 sec
+          Start  704: mhgp11_tower_order_identity
+ 747/1038 Test  #704: mhgp11_tower_order_identity ..........................................   Passed   18.70 sec
+          Start  705: mhgp11_tower_order_same_params
+ 748/1038 Test  #682: mhgp11_tower_population_concurrent_equivalence .......................   Passed   34.74 sec
+          Start  706: mhgp11_tower_order_refusals
+ 749/1038 Test  #706: mhgp11_tower_order_refusals ..........................................   Passed    0.04 sec
+          Start  707: mhgp11_tower_order_inventaire
+ 750/1038 Test  #707: mhgp11_tower_order_inventaire ........................................   Passed    0.04 sec
+          Start  708: mhgp11_tower_attach_fixtures
+ 751/1038 Test  #708: mhgp11_tower_attach_fixtures .........................................   Passed    0.04 sec
+          Start  709: mhgp11_tower_attach_capacity
+ 752/1038 Test  #709: mhgp11_tower_attach_capacity .........................................   Passed    0.04 sec
+          Start  710: mhgp11_tower_attach_square_k10
+ 753/1038 Test  #710: mhgp11_tower_attach_square_k10 .......................................   Passed    0.04 sec
+          Start  711: mhgp11_tower_attach_e1e2
+ 754/1038 Test  #695: mhgp11_tower_pipeline_equivalence ....................................   Passed   36.89 sec
+          Start  712: mhgp11_tower_attach_inventaire
+ 755/1038 Test  #712: mhgp11_tower_attach_inventaire .......................................   Passed    0.08 sec
+          Start  713: mhgp11_tower_order_fault
+ 756/1038 Test  #713: mhgp11_tower_order_fault .............................................   Passed    0.21 sec
+          Start  714: mhgp11_tower_order_full_identity
+ 757/1038 Test  #711: mhgp11_tower_attach_e1e2 .............................................   Passed    5.79 sec
+          Start  715: mhgp11_tower_order_full_refusals
+ 758/1038 Test  #715: mhgp11_tower_order_full_refusals .....................................   Passed    0.06 sec
+          Start  716: mhgp11_tower_order_full_inventaire
+ 759/1038 Test  #716: mhgp11_tower_order_full_inventaire ...................................   Passed    0.03 sec
+          Start  718: mhgp11_tower_attach_export_opt
+ 760/1038 Test  #718: mhgp11_tower_attach_export_opt .......................................   Passed    6.80 sec
+          Start  720: mhgp11_tower_attach_fraction_opt
+ 761/1038 Test  #705: mhgp11_tower_order_same_params .......................................   Passed   15.06 sec
+          Start  742: mhgp11_supports_unit_square
+ 762/1038 Test  #742: mhgp11_supports_unit_square ..........................................   Passed    0.04 sec
+          Start  743: mhgp11_supports_unit_right_triangle
+ 763/1038 Test  #743: mhgp11_supports_unit_right_triangle ..................................   Passed    0.03 sec
+          Start  744: mhgp11_supports_unit_growth
+ 764/1038 Test  #744: mhgp11_supports_unit_growth ..........................................   Passed    0.03 sec
+          Start  745: mhgp11_supports_unit_cube
+ 765/1038 Test  #745: mhgp11_supports_unit_cube ............................................   Passed    0.03 sec
+          Start  746: mhgp11_supports_unit_octahedron
+ 766/1038 Test  #746: mhgp11_supports_unit_octahedron ......................................   Passed    0.03 sec
+          Start  747: mhgp11_supports_unit_circle
+ 767/1038 Test  #747: mhgp11_supports_unit_circle ..........................................   Passed    0.03 sec
+          Start  748: mhgp11_supports_unit_lines
+ 768/1038 Test  #748: mhgp11_supports_unit_lines ...........................................   Passed    0.03 sec
+          Start  749: mhgp11_supports_unit_mixed
+ 769/1038 Test  #749: mhgp11_supports_unit_mixed ...........................................   Passed    0.03 sec
+          Start  750: mhgp11_supports_unit_shell_bound
+ 770/1038 Test  #750: mhgp11_supports_unit_shell_bound .....................................   Passed    0.04 sec
+          Start  751: mhgp11_supports_unit_refusals
+ 771/1038 Test  #751: mhgp11_supports_unit_refusals ........................................   Passed    0.03 sec
+          Start  752: mhgp11_supports_unit_constants
+ 772/1038 Test  #752: mhgp11_supports_unit_constants .......................................   Passed    0.03 sec
+          Start  753: mhgp11_supports_unit_concurrency
+ 773/1038 Test  #753: mhgp11_supports_unit_concurrency .....................................   Passed    0.04 sec
+          Start  754: mhgp11_supports_unit_sphere5
+ 774/1038 Test  #754: mhgp11_supports_unit_sphere5 .........................................   Passed    0.04 sec
+          Start  755: mhgp11_supports_unit_sphere5_k12
+ 775/1038 Test  #755: mhgp11_supports_unit_sphere5_k12 .....................................   Passed    0.04 sec
+          Start  756: mhgp11_supports_unit_square_k10
+ 776/1038 Test  #756: mhgp11_supports_unit_square_k10 ......................................   Passed    0.03 sec
+          Start  757: mhgp11_supports_unit_sphere9_refus
+ 777/1038 Test  #757: mhgp11_supports_unit_sphere9_refus ...................................   Passed    0.03 sec
+          Start  758: mhgp11_supports_unit_impossible_arity
+ 778/1038 Test  #758: mhgp11_supports_unit_impossible_arity ................................   Passed    0.03 sec
+          Start  759: mhgp11_supports_unit_inventaire
+ 779/1038 Test  #759: mhgp11_supports_unit_inventaire ......................................   Passed    0.03 sec
+          Start  760: mhgp11_supports_shell_capacity
+ 780/1038 Test  #760: mhgp11_supports_shell_capacity .......................................   Passed    0.14 sec
+          Start  762: mhgp11_supports_fraction_opt
+ 781/1038 Test  #714: mhgp11_tower_order_full_identity .....................................   Passed   31.32 sec
+          Start  764: mhgp11_supports_judge_small_opt
+ 782/1038 Test  #557: mhgp11_tower_full_campaign_opt .......................................***Timeout 120.01 sec
+
+          Start  788: mhgp11_supports_hierarchy_fixtures
+ 783/1038 Test  #788: mhgp11_supports_hierarchy_fixtures ...................................   Passed    1.13 sec
+          Start  789: mhgp11_supports_hierarchy_determinism
+ 784/1038 Test  #720: mhgp11_tower_attach_fraction_opt .....................................   Passed   31.29 sec
+          Start  790: mhgp11_supports_hierarchy_permutation
+ 785/1038 Test  #789: mhgp11_supports_hierarchy_determinism ................................   Passed    1.48 sec
+          Start  791: mhgp11_supports_hierarchy_sphere5
+ 786/1038 Test  #790: mhgp11_supports_hierarchy_permutation ................................   Passed    1.07 sec
+          Start  792: mhgp11_supports_hierarchy_sphere9
+ 787/1038 Test  #792: mhgp11_supports_hierarchy_sphere9 ....................................   Passed    0.05 sec
+          Start  793: mhgp11_supports_hierarchy_admission
+ 788/1038 Test  #791: mhgp11_supports_hierarchy_sphere5 ....................................   Passed    0.20 sec
+          Start  794: mhgp11_supports_hierarchy_inventaire
+ 789/1038 Test  #794: mhgp11_supports_hierarchy_inventaire .................................   Passed    0.05 sec
+          Start  795: mhgp11_supports_hierarchy_fault_starvation
+ 790/1038 Test  #795: mhgp11_supports_hierarchy_fault_starvation ...........................   Passed    0.05 sec
+          Start  796: mhgp11_supports_hierarchy_fault_inventaire
+ 791/1038 Test  #796: mhgp11_supports_hierarchy_fault_inventaire ...........................   Passed    0.06 sec
+          Start  798: mhgp11_supports_hierarchy_fraction_opt
+ 792/1038 Test  #793: mhgp11_supports_hierarchy_admission ..................................   Passed    0.53 sec
+          Start  809: mhgp11_points_unit_ancestors
+ 793/1038 Test  #809: mhgp11_points_unit_ancestors .........................................   Passed    0.26 sec
+          Start  810: mhgp11_points_unit_determinism
+ 794/1038 Test  #810: mhgp11_points_unit_determinism .......................................   Passed    0.65 sec
+          Start  811: mhgp11_points_unit_sort_refusal
+ 795/1038 Test  #811: mhgp11_points_unit_sort_refusal ......................................   Passed    0.07 sec
+          Start  812: mhgp11_points_unit_refusals
+ 796/1038 Test  #812: mhgp11_points_unit_refusals ..........................................   Passed    0.17 sec
+          Start  813: mhgp11_points_unit_budget
+ 797/1038 Test  #813: mhgp11_points_unit_budget ............................................   Passed    0.17 sec
+          Start  814: mhgp11_points_unit_inventaire
+ 798/1038 Test  #814: mhgp11_points_unit_inventaire ........................................   Passed    0.08 sec
+          Start  816: mhgp11_points_fixtures_opt
+ 799/1038 Test  #762: mhgp11_supports_fraction_opt .........................................   Passed   32.97 sec
+          Start  818: mhgp11_points_oracle_opt
+ 800/1038 Test  #816: mhgp11_points_fixtures_opt ...........................................   Passed    2.22 sec
+          Start  835: mhgp11_head_unit_fixtures
+ 801/1038 Test  #835: mhgp11_head_unit_fixtures ............................................   Passed    0.04 sec
+          Start  836: mhgp11_head_unit_equalities
+ 802/1038 Test  #836: mhgp11_head_unit_equalities ..........................................   Passed    0.05 sec
+          Start  837: mhgp11_head_unit_huge
+ 803/1038 Test  #837: mhgp11_head_unit_huge ................................................   Passed    0.05 sec
+          Start  838: mhgp11_head_unit_dates
+ 804/1038 Test  #838: mhgp11_head_unit_dates ...............................................   Passed    0.04 sec
+          Start  839: mhgp11_head_unit_order
+ 805/1038 Test  #839: mhgp11_head_unit_order ...............................................   Passed    0.04 sec
+          Start  840: mhgp11_head_unit_refusals
+ 806/1038 Test  #840: mhgp11_head_unit_refusals ............................................   Passed    0.04 sec
+          Start  841: mhgp11_head_unit_budget
+ 807/1038 Test  #841: mhgp11_head_unit_budget ..............................................   Passed    0.05 sec
+          Start  842: mhgp11_head_unit_inventaire
+ 808/1038 Test  #842: mhgp11_head_unit_inventaire ..........................................   Passed    0.03 sec
+          Start  859: mhgp11_api_session_released
+ 809/1038 Test  #859: mhgp11_api_session_released ..........................................   Passed    0.10 sec
+          Start  860: mhgp11_api_session_product_alive
+ 810/1038 Test  #860: mhgp11_api_session_product_alive .....................................   Passed    0.04 sec
+          Start  861: mhgp11_api_session_refusals
+ 811/1038 Test  #861: mhgp11_api_session_refusals ..........................................   Passed    0.03 sec
+          Start  862: mhgp11_api_session_equivalence
+ 812/1038 Test  #862: mhgp11_api_session_equivalence .......................................   Passed    1.04 sec
+          Start  863: mhgp11_api_session_tree_digest
+ 813/1038 Test  #863: mhgp11_api_session_tree_digest .......................................   Passed    0.26 sec
+          Start  864: mhgp11_api_session_provenance
+ 814/1038 Test  #864: mhgp11_api_session_provenance ........................................   Passed    0.05 sec
+          Start  865: mhgp11_api_session_after_publish
+ 815/1038 Test  #865: mhgp11_api_session_after_publish .....................................   Passed    0.05 sec
+          Start  866: mhgp11_api_session_session_identity
+ 816/1038 Test  #866: mhgp11_api_session_session_identity ..................................   Passed    0.04 sec
+          Start  867: mhgp11_api_session_engine
+ 817/1038 Test  #867: mhgp11_api_session_engine ............................................   Passed    0.69 sec
+          Start  868: mhgp11_api_session_inventaire
+ 818/1038 Test  #868: mhgp11_api_session_inventaire ........................................   Passed    0.04 sec
+          Start  869: mhgp11_api_session_destroyed_live
+ 819/1038 Test  #869: mhgp11_api_session_destroyed_live ....................................   Passed    0.27 sec
+          Start  870: mhgp11_api_session_destroyed_released
+ 820/1038 Test  #870: mhgp11_api_session_destroyed_released ................................   Passed    0.05 sec
+          Start  872: mhgp11_api_publish_reader_opt
+ 821/1038 Test  #872: mhgp11_api_publish_reader_opt ........................................   Passed    0.21 sec
+          Start  873: mhgp11_api_session_fault_session
+ 822/1038 Test  #873: mhgp11_api_session_fault_session .....................................   Passed    0.04 sec
+          Start  874: mhgp11_api_session_fault_starvation
+ 823/1038 Test  #874: mhgp11_api_session_fault_starvation ..................................   Passed    0.05 sec
+          Start  875: mhgp11_api_session_fault_publication
+ 824/1038 Test  #875: mhgp11_api_session_fault_publication .................................   Passed    0.04 sec
+          Start  876: mhgp11_api_session_fault_inventaire
+ 825/1038 Test  #876: mhgp11_api_session_fault_inventaire ..................................   Passed    0.04 sec
+          Start  877: mhgp11_api_selftest_modes
+ 826/1038 Test  #877: mhgp11_api_selftest_modes ............................................   Passed    0.04 sec
+          Start  878: mhgp11_api_selftest_judge
+ 827/1038 Test  #878: mhgp11_api_selftest_judge ............................................   Passed    0.04 sec
+          Start  879: mhgp11_api_selftest_inventaire
+ 828/1038 Test  #879: mhgp11_api_selftest_inventaire .......................................   Passed    0.04 sec
+          Start  880: mhgp11_api_selftest_fault_none
+ 829/1038 Test  #880: mhgp11_api_selftest_fault_none .......................................   Passed    0.04 sec
+          Start  881: mhgp11_api_selftest_fault_upward
+ 830/1038 Test  #881: mhgp11_api_selftest_fault_upward .....................................   Passed    0.05 sec
+          Start  882: mhgp11_api_selftest_fault_ftz_daz
+ 831/1038 Test  #882: mhgp11_api_selftest_fault_ftz_daz ....................................   Passed    0.04 sec
+          Start  883: mhgp11_api_selftest_fault_inexact
+ 832/1038 Test  #883: mhgp11_api_selftest_fault_inexact ....................................   Passed    0.04 sec
+          Start  884: mhgp11_api_selftest_fault_underflow
+ 833/1038 Test  #884: mhgp11_api_selftest_fault_underflow ..................................   Passed    0.04 sec
+          Start  885: mhgp11_api_selftest_fault_denormal
+ 834/1038 Test  #885: mhgp11_api_selftest_fault_denormal ...................................   Passed    0.04 sec
+          Start  887: mhgp11_api_supports_route_oracle_opt
+ 835/1038 Test  #764: mhgp11_supports_judge_small_opt ......................................   Passed   23.80 sec
+          Start  895: mhgp11_cli_contract_opt
+ 836/1038 Test  #895: mhgp11_cli_contract_opt ..............................................   Passed    0.68 sec
+          Start  897: mhgp11_cli_tree_signature_opt
+ 837/1038 Test  #897: mhgp11_cli_tree_signature_opt ........................................   Passed    0.23 sec
+          Start  899: mhgp11_cli_full_identity_opt
+ 838/1038 Test  #818: mhgp11_points_oracle_opt .............................................   Passed   22.57 sec
+          Start  901: mhgp11_cli_full_determinism_opt
+ 839/1038 Test  #887: mhgp11_api_supports_route_oracle_opt .................................   Passed   17.60 sec
+          Start  903: mhgp11_cli_full_relabel_opt
+ 840/1038 Test  #798: mhgp11_supports_hierarchy_fraction_opt ...............................   Passed   35.93 sec
+          Start  921: mhgp11_cli_supports_oracle_opt
+ 841/1038 Test  #899: mhgp11_cli_full_identity_opt .........................................   Passed   22.39 sec
+          Start  923: mhgp11_cli_supports_spanning_reader_opt
+ 842/1038 Test  #923: mhgp11_cli_supports_spanning_reader_opt ..............................   Passed    0.16 sec
+          Start  937: mhgp11_cli_points_opt
+ 843/1038 Test  #937: mhgp11_cli_points_opt ................................................   Passed    4.08 sec
+          Start  939: mhgp11_cli_plat_opt
+ 844/1038 Test  #903: mhgp11_cli_full_relabel_opt ..........................................   Passed   17.99 sec
+          Start  941: mhgp11_reference_projection_contracts_opt
+ 845/1038 Test  #941: mhgp11_reference_projection_contracts_opt ............................   Passed    0.24 sec
+          Start  943: mhgp11_reference_fast_opt
+ 846/1038 Test  #939: mhgp11_cli_plat_opt ..................................................   Passed    2.76 sec
+          Start  947: mhgp11_reference_refusal_opt
+ 847/1038 Test  #947: mhgp11_reference_refusal_opt .........................................   Passed    0.23 sec
+          Start  949: mhgp11_reference_mutant_admission_strict_opt
+ 848/1038 Test  #949: mhgp11_reference_mutant_admission_strict_opt .........................   Passed    0.41 sec
+          Start  951: mhgp11_reference_mutant_ancestor_open_opt
+ 849/1038 Test  #951: mhgp11_reference_mutant_ancestor_open_opt ............................   Passed    0.29 sec
+          Start  953: mhgp11_reference_mutant_binarize_opt
+ 850/1038 Test  #953: mhgp11_reference_mutant_binarize_opt .................................   Passed    0.34 sec
+          Start  955: mhgp11_reference_mutant_core_next_neighbour_opt
+ 851/1038 Test  #955: mhgp11_reference_mutant_core_next_neighbour_opt ......................   Passed    0.41 sec
+          Start  957: mhgp11_reference_mutant_cover_node_open_opt
+ 852/1038 Test  #957: mhgp11_reference_mutant_cover_node_open_opt ..........................   Passed    0.30 sec
+          Start  959: mhgp11_reference_mutant_cover_population_opt
+ 853/1038 Test  #959: mhgp11_reference_mutant_cover_population_opt .........................   Passed    0.33 sec
+          Start  961: mhgp11_reference_mutant_drop_last_rep_opt
+ 854/1038 Test  #961: mhgp11_reference_mutant_drop_last_rep_opt ............................   Passed    0.55 sec
+          Start  963: mhgp11_reference_mutant_edge_at_vertex_level_opt
+ 855/1038 Test  #963: mhgp11_reference_mutant_edge_at_vertex_level_opt .....................   Passed    0.33 sec
+          Start  965: mhgp11_reference_mutant_first_rep_last_opt
+ 856/1038 Test  #965: mhgp11_reference_mutant_first_rep_last_opt ...........................   Passed    0.79 sec
+          Start  967: mhgp11_reference_mutant_hull_no_pairs_opt
+ 857/1038 Test  #967: mhgp11_reference_mutant_hull_no_pairs_opt ............................   Passed    0.42 sec
+          Start  969: mhgp11_reference_mutant_hull_no_tetra_opt
+ 858/1038 Test  #969: mhgp11_reference_mutant_hull_no_tetra_opt ............................   Passed    0.27 sec
+          Start  971: mhgp11_reference_mutant_hull_strict_triangle_opt
+ 859/1038 Test  #971: mhgp11_reference_mutant_hull_strict_triangle_opt .....................   Passed    1.39 sec
+          Start  973: mhgp11_reference_mutant_join_missing_opt
+ 860/1038 Test  #973: mhgp11_reference_mutant_join_missing_opt .............................   Passed    0.36 sec
+          Start  975: mhgp11_reference_mutant_jump_any_opt
+ 861/1038 Test  #975: mhgp11_reference_mutant_jump_any_opt .................................   Passed    0.37 sec
+          Start  977: mhgp11_reference_mutant_meb_largest_opt
+ 862/1038 Test  #977: mhgp11_reference_mutant_meb_largest_opt ..............................   Passed    0.23 sec
+          Start  979: mhgp11_reference_mutant_meb_three_opt
+ 863/1038 Test  #979: mhgp11_reference_mutant_meb_three_opt ................................   Passed    0.34 sec
+          Start  981: mhgp11_reference_mutant_numbering_by_catalogue_opt
+ 864/1038 Test  #981: mhgp11_reference_mutant_numbering_by_catalogue_opt ...................   Passed    0.34 sec
+          Start  983: mhgp11_reference_mutant_numbering_by_sweep_opt
+ 865/1038 Test  #983: mhgp11_reference_mutant_numbering_by_sweep_opt .......................   Passed    0.38 sec
+          Start  985: mhgp11_reference_mutant_plateau_split_opt
+ 866/1038 Test  #985: mhgp11_reference_mutant_plateau_split_opt ............................   Passed    0.40 sec
+          Start  987: mhgp11_reference_mutant_point_open_opt
+ 867/1038 Test  #987: mhgp11_reference_mutant_point_open_opt ...............................   Passed    0.30 sec
+          Start  989: mhgp11_reference_mutant_regular_join_pieces_opt
+ 868/1038 Test  #989: mhgp11_reference_mutant_regular_join_pieces_opt ......................   Passed    0.31 sec
+          Start  991: mhgp11_reference_mutant_vertical_merge_child_opt
+ 869/1038 Test  #991: mhgp11_reference_mutant_vertical_merge_child_opt .....................   Passed    0.32 sec
+          Start  993: mhgp11_reference_mutant_vertical_open_opt
+ 870/1038 Test  #993: mhgp11_reference_mutant_vertical_open_opt ............................   Passed    0.35 sec
+          Start  995: mhgp11_reference_mutant_weighted_as_regular_opt
+ 871/1038 Test  #995: mhgp11_reference_mutant_weighted_as_regular_opt ......................   Passed    0.36 sec
+          Start  997: mhgp11_reference_mutant_window_low_opt
+ 872/1038 Test  #997: mhgp11_reference_mutant_window_low_opt ...............................   Passed    0.29 sec
+          Start  999: mhgp11_reference_supports_opt
+ 873/1038 Test  #943: mhgp11_reference_fast_opt ............................................   Passed   19.46 sec
+          Start 1001: mhgp11_reference_supports_refusal_opt
+ 874/1038 Test #1001: mhgp11_reference_supports_refusal_opt ................................   Passed    0.15 sec
+          Start 1003: mhgp11_reference_supports_primitives_opt
+ 875/1038 Test #1003: mhgp11_reference_supports_primitives_opt .............................   Passed    3.67 sec
+          Start 1005: mhgp11_reference_supports_mutant_ant_coupe_fermee_opt
+ 876/1038 Test #1005: mhgp11_reference_supports_mutant_ant_coupe_fermee_opt ................   Passed    0.16 sec
+          Start 1007: mhgp11_reference_supports_mutant_att_coupe_ouverte_opt
+ 877/1038 Test #1007: mhgp11_reference_supports_mutant_att_coupe_ouverte_opt ...............   Passed    0.18 sec
+          Start 1009: mhgp11_reference_supports_mutant_c3_une_fusion_opt
+ 878/1038 Test #1009: mhgp11_reference_supports_mutant_c3_une_fusion_opt ...................   Passed    0.23 sec
+          Start 1011: mhgp11_reference_supports_mutant_cofaces_ordre_k_opt
+ 879/1038 Test #1011: mhgp11_reference_supports_mutant_cofaces_ordre_k_opt .................   Passed    0.21 sec
+          Start 1013: mhgp11_reference_supports_mutant_fenetre_forte_opt
+ 880/1038 Test #1013: mhgp11_reference_supports_mutant_fenetre_forte_opt ...................   Passed    0.18 sec
+          Start 1015: mhgp11_reference_supports_mutant_h_fortes_etroites_opt
+ 881/1038 Test #1015: mhgp11_reference_supports_mutant_h_fortes_etroites_opt ...............   Passed    0.26 sec
+          Start 1017: mhgp11_reference_supports_mutant_interne_vie_inversee_opt
+ 882/1038 Test #1017: mhgp11_reference_supports_mutant_interne_vie_inversee_opt ............   Passed    0.22 sec
+          Start 1019: mhgp11_reference_supports_mutant_m1_support_inverse_opt
+ 883/1038 Test #1019: mhgp11_reference_supports_mutant_m1_support_inverse_opt ..............   Passed    0.21 sec
+          Start 1021: mhgp11_reference_supports_mutant_populations_naissances_seules_opt
+ 884/1038 Test #1021: mhgp11_reference_supports_mutant_populations_naissances_seules_opt ...   Passed    0.23 sec
+          Start 1023: mhgp11_reference_supports_mutant_premier_support_seul_opt
+ 885/1038 Test #1023: mhgp11_reference_supports_mutant_premier_support_seul_opt ............   Passed    0.35 sec
+          Start 1025: mhgp11_reference_supports_mutant_regle_parent_inversee_opt
+ 886/1038 Test #1025: mhgp11_reference_supports_mutant_regle_parent_inversee_opt ...........   Passed    0.23 sec
+          Start 1027: mhgp11_reference_supports_mutant_triangle_droit_admis_opt
+ 887/1038 Test #1027: mhgp11_reference_supports_mutant_triangle_droit_admis_opt ............   Passed    0.19 sec
+          Start 1029: mhgp11_reference_supports_mutant_w4_gabriel_juge_opt
+ 888/1038 Test #1029: mhgp11_reference_supports_mutant_w4_gabriel_juge_opt .................   Passed    0.19 sec
+          Start 1048: mhgp11_style_opt
+ 889/1038 Test #1048: mhgp11_style_opt .....................................................   Passed    5.30 sec
+ 890/1038 Test  #901: mhgp11_cli_full_determinism_opt ......................................   Passed   51.83 sec
+ 891/1038 Test  #999: mhgp11_reference_supports_opt ........................................   Passed   29.41 sec
+          Start  944: mhgp11_reference_fast_split
+ 892/1038 Test  #921: mhgp11_cli_supports_oracle_opt .......................................   Passed   51.99 sec
+ 893/1038 Test  #944: mhgp11_reference_fast_split ..........................................   Passed   10.86 sec
+          Start  731: mhgp11_tower_attach_export_lidar_ng00_k5
+ 894/1038 Test  #731: mhgp11_tower_attach_export_lidar_ng00_k5 .............................***Skipped   0.04 sec
+          Start  735: mhgp11_tower_attach_export_lidar_ng01_k5
+ 895/1038 Test  #735: mhgp11_tower_attach_export_lidar_ng01_k5 .............................***Skipped   0.05 sec
+          Start  739: mhgp11_tower_attach_export_lidar_ng02_k5
+ 896/1038 Test  #739: mhgp11_tower_attach_export_lidar_ng02_k5 .............................***Skipped   0.04 sec
+          Start  765: mhgp11_supports_sample_judge_scale8000
+ 897/1038 Test  #765: mhgp11_supports_sample_judge_scale8000 ...............................   Passed    8.08 sec
+          Start  767: mhgp11_supports_sample_judge_grid8000
+ 898/1038 Test  #767: mhgp11_supports_sample_judge_grid8000 ................................   Passed    6.84 sec
+          Start  769: mhgp11_supports_sample_judge_lidar_ng00_k5
+ 899/1038 Test  #769: mhgp11_supports_sample_judge_lidar_ng00_k5 ...........................***Skipped   0.03 sec
+          Start  771: mhgp11_supports_registers_uniform8000_k5
+ 900/1038 Test  #771: mhgp11_supports_registers_uniform8000_k5 .............................   Passed   10.32 sec
+          Start  773: mhgp11_supports_registers_grid8000_k5
+ 901/1038 Test  #773: mhgp11_supports_registers_grid8000_k5 ................................   Passed   12.40 sec
+          Start  775: mhgp11_supports_registers_uniform16000_k5
+ 902/1038 Test  #775: mhgp11_supports_registers_uniform16000_k5 ............................   Passed   20.69 sec
+          Start  777: mhgp11_supports_registers_uniform32000_k5
+ 903/1038 Test  #777: mhgp11_supports_registers_uniform32000_k5 ............................   Passed   42.96 sec
+          Start  779: mhgp11_supports_registers_lidar_ng00_k5
+ 904/1038 Test  #779: mhgp11_supports_registers_lidar_ng00_k5 ..............................***Skipped   0.03 sec
+          Start  781: mhgp11_supports_registers_lidar_ng01_k5
+ 905/1038 Test  #781: mhgp11_supports_registers_lidar_ng01_k5 ..............................***Skipped   0.04 sec
+          Start  783: mhgp11_supports_registers_lidar_ng02_k5
+ 906/1038 Test  #783: mhgp11_supports_registers_lidar_ng02_k5 ..............................***Skipped   0.05 sec
+          Start  823: mhgp11_points_scale8000
+ 907/1038 Test  #823: mhgp11_points_scale8000 ..............................................   Passed   13.53 sec
+          Start  825: mhgp11_points_scale16000
+ 908/1038 Test  #825: mhgp11_points_scale16000 .............................................   Passed   30.48 sec
+          Start  827: mhgp11_points_scale32000
+ 909/1038 Test  #827: mhgp11_points_scale32000 .............................................   Passed   60.78 sec
+          Start  829: mhgp11_points_lidar_ng00_k5
+ 910/1038 Test  #829: mhgp11_points_lidar_ng00_k5 ..........................................***Skipped   0.03 sec
+          Start  831: mhgp11_points_lidar_ng01_k5
+ 911/1038 Test  #831: mhgp11_points_lidar_ng01_k5 ..........................................***Skipped   0.03 sec
+          Start  833: mhgp11_points_lidar_ng02_k5
+ 912/1038 Test  #833: mhgp11_points_lidar_ng02_k5 ..........................................***Skipped   0.03 sec
+          Start  847: mhgp11_plat_scale8000
+ 913/1038 Test  #847: mhgp11_plat_scale8000 ................................................   Passed    8.96 sec
+          Start  849: mhgp11_plat_scale16000
+ 914/1038 Test  #849: mhgp11_plat_scale16000 ...............................................   Passed   15.36 sec
+          Start  851: mhgp11_plat_scale32000
+ 915/1038 Test  #851: mhgp11_plat_scale32000 ...............................................   Passed   31.82 sec
+          Start  853: mhgp11_plat_lidar_ng00_k5
+ 916/1038 Test  #853: mhgp11_plat_lidar_ng00_k5 ............................................***Skipped   0.03 sec
+          Start  855: mhgp11_plat_lidar_ng01_k5
+ 917/1038 Test  #855: mhgp11_plat_lidar_ng01_k5 ............................................***Skipped   0.03 sec
+          Start  857: mhgp11_plat_lidar_ng02_k5
+ 918/1038 Test  #857: mhgp11_plat_lidar_ng02_k5 ............................................***Skipped   0.03 sec
+          Start  904: mhgp11_cli_full_identity_scale8000
+ 919/1038 Test  #904: mhgp11_cli_full_identity_scale8000 ...................................   Passed   49.01 sec
+          Start  906: mhgp11_cli_full_identity_scale16000
+ 920/1038 Test  #906: mhgp11_cli_full_identity_scale16000 ..................................   Passed  108.08 sec
+          Start  908: mhgp11_cli_full_identity_scale32000
+ 921/1038 Test  #908: mhgp11_cli_full_identity_scale32000 ..................................   Passed  208.74 sec
+          Start  911: mhgp11_cli_full_determinism_scale8000
+ 922/1038 Test  #911: mhgp11_cli_full_determinism_scale8000 ................................   Passed  121.05 sec
+          Start  913: mhgp11_cli_full_identity_lidar_ng00_k5
+ 923/1038 Test  #913: mhgp11_cli_full_identity_lidar_ng00_k5 ...............................***Skipped   0.03 sec
+          Start  915: mhgp11_cli_full_identity_lidar_ng01_k5
+ 924/1038 Test  #915: mhgp11_cli_full_identity_lidar_ng01_k5 ...............................***Skipped   0.03 sec
+          Start  917: mhgp11_cli_full_identity_lidar_ng02_k5
+ 925/1038 Test  #917: mhgp11_cli_full_identity_lidar_ng02_k5 ...............................***Skipped   0.03 sec
+          Start  924: mhgp11_cli_supports_scale8000
+ 926/1038 Test  #924: mhgp11_cli_supports_scale8000 ........................................   Passed   23.78 sec
+          Start  926: mhgp11_cli_supports_scale16000
+ 927/1038 Test  #926: mhgp11_cli_supports_scale16000 .......................................   Passed   48.26 sec
+          Start  928: mhgp11_cli_supports_scale32000
+ 928/1038 Test  #928: mhgp11_cli_supports_scale32000 .......................................   Passed  100.23 sec
+          Start  930: mhgp11_cli_supports_lidar_ng00_k5
+ 929/1038 Test  #930: mhgp11_cli_supports_lidar_ng00_k5 ....................................***Skipped   0.03 sec
+          Start  932: mhgp11_cli_supports_lidar_ng01_k5
+ 930/1038 Test  #932: mhgp11_cli_supports_lidar_ng01_k5 ....................................***Skipped   0.03 sec
+          Start  934: mhgp11_cli_supports_lidar_ng02_k5
+ 931/1038 Test  #934: mhgp11_cli_supports_lidar_ng02_k5 ....................................***Skipped   0.05 sec
+          Start 1049: mhgp11_mutants_core_manifest
+ 932/1038 Test #1049: mhgp11_mutants_core_manifest .........................................   Passed    0.11 sec
+          Start 1052: mhgp11_mutants_num_manifest
+ 933/1038 Test #1052: mhgp11_mutants_num_manifest ..........................................   Passed    0.10 sec
+          Start 1055: mhgp11_mutants_sched_manifest
+ 934/1038 Test #1055: mhgp11_mutants_sched_manifest ........................................   Passed    0.09 sec
+          Start 1058: mhgp11_mutants_cloud_manifest
+ 935/1038 Test #1058: mhgp11_mutants_cloud_manifest ........................................   Passed    0.09 sec
+          Start 1061: mhgp11_mutants_io_manifest
+ 936/1038 Test #1061: mhgp11_mutants_io_manifest ...........................................   Passed    0.09 sec
+          Start 1064: mhgp11_mutants_index_manifest
+ 937/1038 Test #1064: mhgp11_mutants_index_manifest ........................................   Passed    0.09 sec
+          Start 1067: mhgp11_mutants_catalogue_manifest
+ 938/1038 Test #1067: mhgp11_mutants_catalogue_manifest ....................................   Passed    0.10 sec
+          Start 1070: mhgp11_mutants_tower_manifest
+ 939/1038 Test #1070: mhgp11_mutants_tower_manifest ........................................   Passed    0.10 sec
+          Start 1073: mhgp11_mutants_supports_manifest
+ 940/1038 Test #1073: mhgp11_mutants_supports_manifest .....................................   Passed    0.09 sec
+          Start 1076: mhgp11_mutants_points_manifest
+ 941/1038 Test #1076: mhgp11_mutants_points_manifest .......................................   Passed    0.09 sec
+          Start 1079: mhgp11_mutants_head_manifest
+ 942/1038 Test #1079: mhgp11_mutants_head_manifest .........................................   Passed    0.09 sec
+          Start 1082: mhgp11_mutants_api_manifest
+ 943/1038 Test #1082: mhgp11_mutants_api_manifest ..........................................   Passed    0.09 sec
+          Start 1085: mhgp11_mutants_cli_manifest
+ 944/1038 Test #1085: mhgp11_mutants_cli_manifest ..........................................   Passed    0.09 sec
+          Start   15: mhgp11_support_lidar_sentinel
+ 945/1038 Test   #15: mhgp11_support_lidar_sentinel ........................................***Skipped   0.03 sec
+          Start  191: mhgp11_num_roots_cost_uniform_u18_n8000_k5
+ 946/1038 Test  #191: mhgp11_num_roots_cost_uniform_u18_n8000_k5 ...........................***Skipped   0.03 sec
+          Start  192: mhgp11_num_roots_cost_uniform_u18_n16000_k5
+ 947/1038 Test  #192: mhgp11_num_roots_cost_uniform_u18_n16000_k5 ..........................***Skipped   0.03 sec
+          Start  193: mhgp11_num_roots_cost_uniform_u18_n32000_k5
+ 948/1038 Test  #193: mhgp11_num_roots_cost_uniform_u18_n32000_k5 ..........................***Skipped   0.03 sec
+          Start  194: mhgp11_num_roots_cost_lidar_ng00_k5
+ 949/1038 Test  #194: mhgp11_num_roots_cost_lidar_ng00_k5 ..................................***Skipped   0.03 sec
+          Start  195: mhgp11_num_roots_cost_lidar_ng01_k5
+ 950/1038 Test  #195: mhgp11_num_roots_cost_lidar_ng01_k5 ..................................***Skipped   0.03 sec
+          Start  196: mhgp11_num_roots_cost_lidar_ng02_k5
+ 951/1038 Test  #196: mhgp11_num_roots_cost_lidar_ng02_k5 ..................................***Skipped   0.03 sec
+          Start  424: mhgp11_catalogue_euler_scale8000
+ 952/1038 Test  #424: mhgp11_catalogue_euler_scale8000 .....................................   Passed    4.89 sec
+          Start  425: mhgp11_catalogue_euler_scale16000
+ 953/1038 Test  #425: mhgp11_catalogue_euler_scale16000 ....................................   Passed   10.17 sec
+          Start  426: mhgp11_catalogue_euler_scale32000
+ 954/1038 Test  #426: mhgp11_catalogue_euler_scale32000 ....................................   Passed   21.98 sec
+          Start  427: mhgp11_catalogue_euler_lidar_ng00_k5
+ 955/1038 Test  #427: mhgp11_catalogue_euler_lidar_ng00_k5 .................................***Skipped   0.03 sec
+          Start  428: mhgp11_catalogue_euler_lidar_ng01_k5
+ 956/1038 Test  #428: mhgp11_catalogue_euler_lidar_ng01_k5 .................................***Skipped   0.03 sec
+          Start  429: mhgp11_catalogue_euler_lidar_ng02_k5
+ 957/1038 Test  #429: mhgp11_catalogue_euler_lidar_ng02_k5 .................................***Skipped   0.03 sec
+          Start  721: mhgp11_tower_order_identity_scale8000
+ 958/1038 Test  #721: mhgp11_tower_order_identity_scale8000 ................................   Passed    2.98 sec
+          Start  722: mhgp11_tower_attach_scale8000
+ 959/1038 Test  #722: mhgp11_tower_attach_scale8000 ........................................   Passed    4.64 sec
+          Start  723: mhgp11_tower_order_identity_scale16000
+ 960/1038 Test  #723: mhgp11_tower_order_identity_scale16000 ...............................   Passed    6.44 sec
+          Start  724: mhgp11_tower_attach_scale16000
+ 961/1038 Test  #724: mhgp11_tower_attach_scale16000 .......................................   Passed    9.95 sec
+          Start  725: mhgp11_tower_order_identity_scale32000
+ 962/1038 Test  #725: mhgp11_tower_order_identity_scale32000 ...............................   Passed   13.89 sec
+          Start  726: mhgp11_tower_attach_scale32000
+ 963/1038 Test  #726: mhgp11_tower_attach_scale32000 .......................................   Passed   23.23 sec
+          Start  727: mhgp11_tower_attach_e1e2_scale8000
+ 964/1038 Test  #727: mhgp11_tower_attach_e1e2_scale8000 ...................................   Passed   15.86 sec
+          Start  728: mhgp11_tower_attach_e1e2_scale32000
+ 965/1038 Test  #728: mhgp11_tower_attach_e1e2_scale32000 ..................................   Passed    7.80 sec
+          Start  729: mhgp11_tower_order_identity_lidar_ng00_k5
+ 966/1038 Test  #729: mhgp11_tower_order_identity_lidar_ng00_k5 ............................***Skipped   0.03 sec
+          Start  730: mhgp11_tower_attach_e1e2_lidar_ng00_k5
+ 967/1038 Test  #730: mhgp11_tower_attach_e1e2_lidar_ng00_k5 ...............................***Skipped   0.03 sec
+          Start  732: mhgp11_tower_attach_export_lidar_ng00_k5_opt
+ 968/1038 Test  #732: mhgp11_tower_attach_export_lidar_ng00_k5_opt .........................***Skipped   0.03 sec
+          Start  733: mhgp11_tower_order_identity_lidar_ng01_k5
+ 969/1038 Test  #733: mhgp11_tower_order_identity_lidar_ng01_k5 ............................***Skipped   0.03 sec
+          Start  734: mhgp11_tower_attach_e1e2_lidar_ng01_k5
+ 970/1038 Test  #734: mhgp11_tower_attach_e1e2_lidar_ng01_k5 ...............................***Skipped   0.03 sec
+          Start  736: mhgp11_tower_attach_export_lidar_ng01_k5_opt
+ 971/1038 Test  #736: mhgp11_tower_attach_export_lidar_ng01_k5_opt .........................***Skipped   0.03 sec
+          Start  737: mhgp11_tower_order_identity_lidar_ng02_k5
+ 972/1038 Test  #737: mhgp11_tower_order_identity_lidar_ng02_k5 ............................***Skipped   0.03 sec
+          Start  738: mhgp11_tower_attach_e1e2_lidar_ng02_k5
+ 973/1038 Test  #738: mhgp11_tower_attach_e1e2_lidar_ng02_k5 ...............................***Skipped   0.04 sec
+          Start  740: mhgp11_tower_attach_export_lidar_ng02_k5_opt
+ 974/1038 Test  #740: mhgp11_tower_attach_export_lidar_ng02_k5_opt .........................***Skipped   0.04 sec
+          Start  766: mhgp11_supports_sample_judge_scale8000_opt
+ 975/1038 Test  #766: mhgp11_supports_sample_judge_scale8000_opt ...........................   Passed    6.17 sec
+          Start  768: mhgp11_supports_sample_judge_grid8000_opt
+ 976/1038 Test  #768: mhgp11_supports_sample_judge_grid8000_opt ............................   Passed    5.38 sec
+          Start  770: mhgp11_supports_sample_judge_lidar_ng00_k5_opt
+ 977/1038 Test  #770: mhgp11_supports_sample_judge_lidar_ng00_k5_opt .......................***Skipped   0.03 sec
+          Start  772: mhgp11_supports_registers_uniform8000_k5_opt
+ 978/1038 Test  #772: mhgp11_supports_registers_uniform8000_k5_opt .........................   Passed    8.19 sec
+          Start  774: mhgp11_supports_registers_grid8000_k5_opt
+ 979/1038 Test  #774: mhgp11_supports_registers_grid8000_k5_opt ............................   Passed   10.80 sec
+          Start  776: mhgp11_supports_registers_uniform16000_k5_opt
+ 980/1038 Test  #776: mhgp11_supports_registers_uniform16000_k5_opt ........................   Passed   16.68 sec
+          Start  778: mhgp11_supports_registers_uniform32000_k5_opt
+ 981/1038 Test  #778: mhgp11_supports_registers_uniform32000_k5_opt ........................   Passed   38.45 sec
+          Start  780: mhgp11_supports_registers_lidar_ng00_k5_opt
+ 982/1038 Test  #780: mhgp11_supports_registers_lidar_ng00_k5_opt ..........................***Skipped   0.03 sec
+          Start  782: mhgp11_supports_registers_lidar_ng01_k5_opt
+ 983/1038 Test  #782: mhgp11_supports_registers_lidar_ng01_k5_opt ..........................***Skipped   0.03 sec
+          Start  784: mhgp11_supports_registers_lidar_ng02_k5_opt
+ 984/1038 Test  #784: mhgp11_supports_registers_lidar_ng02_k5_opt ..........................***Skipped   0.04 sec
+          Start  799: mhgp11_supports_hierarchy_scale8000
+ 985/1038 Test  #799: mhgp11_supports_hierarchy_scale8000 ..................................   Passed    1.95 sec
+          Start  800: mhgp11_supports_hierarchy_scale16000
+ 986/1038 Test  #800: mhgp11_supports_hierarchy_scale16000 .................................   Passed    4.49 sec
+          Start  801: mhgp11_supports_hierarchy_scale32000
+ 987/1038 Test  #801: mhgp11_supports_hierarchy_scale32000 .................................   Passed    8.76 sec
+          Start  802: mhgp11_supports_hierarchy_permutation_scale8000
+ 988/1038 Test  #802: mhgp11_supports_hierarchy_permutation_scale8000 ......................   Passed    1.71 sec
+          Start  803: mhgp11_supports_hierarchy_grid8000
+ 989/1038 Test  #803: mhgp11_supports_hierarchy_grid8000 ...................................   Passed    7.14 sec
+          Start  804: mhgp11_supports_hierarchy_permutation_grid8000
+ 990/1038 Test  #804: mhgp11_supports_hierarchy_permutation_grid8000 .......................   Passed    6.24 sec
+          Start  805: mhgp11_supports_hierarchy_lidar_ng00_k5
+ 991/1038 Test  #805: mhgp11_supports_hierarchy_lidar_ng00_k5 ..............................***Skipped   0.03 sec
+          Start  806: mhgp11_supports_hierarchy_lidar_ng01_k5
+ 992/1038 Test  #806: mhgp11_supports_hierarchy_lidar_ng01_k5 ..............................***Skipped   0.03 sec
+          Start  807: mhgp11_supports_hierarchy_lidar_ng02_k5
+ 993/1038 Test  #807: mhgp11_supports_hierarchy_lidar_ng02_k5 ..............................***Skipped   0.03 sec
+          Start  824: mhgp11_points_scale8000_opt
+ 994/1038 Test  #824: mhgp11_points_scale8000_opt ..........................................   Passed   13.52 sec
+          Start  826: mhgp11_points_scale16000_opt
+ 995/1038 Test  #826: mhgp11_points_scale16000_opt .........................................   Passed   28.86 sec
+          Start  828: mhgp11_points_scale32000_opt
+ 996/1038 Test  #828: mhgp11_points_scale32000_opt .........................................   Passed   62.49 sec
+          Start  830: mhgp11_points_lidar_ng00_k5_opt
+ 997/1038 Test  #830: mhgp11_points_lidar_ng00_k5_opt ......................................***Skipped   0.03 sec
+          Start  832: mhgp11_points_lidar_ng01_k5_opt
+ 998/1038 Test  #832: mhgp11_points_lidar_ng01_k5_opt ......................................***Skipped   0.03 sec
+          Start  834: mhgp11_points_lidar_ng02_k5_opt
+ 999/1038 Test  #834: mhgp11_points_lidar_ng02_k5_opt ......................................***Skipped   0.03 sec
+          Start  848: mhgp11_plat_scale8000_opt
+1000/1038 Test  #848: mhgp11_plat_scale8000_opt ............................................   Passed    7.41 sec
+          Start  850: mhgp11_plat_scale16000_opt
+1001/1038 Test  #850: mhgp11_plat_scale16000_opt ...........................................   Passed   15.91 sec
+          Start  852: mhgp11_plat_scale32000_opt
+1002/1038 Test  #852: mhgp11_plat_scale32000_opt ...........................................   Passed   34.69 sec
+          Start  854: mhgp11_plat_lidar_ng00_k5_opt
+1003/1038 Test  #854: mhgp11_plat_lidar_ng00_k5_opt ........................................***Skipped   0.04 sec
+          Start  856: mhgp11_plat_lidar_ng01_k5_opt
+1004/1038 Test  #856: mhgp11_plat_lidar_ng01_k5_opt ........................................***Skipped   0.03 sec
+          Start  858: mhgp11_plat_lidar_ng02_k5_opt
+1005/1038 Test  #858: mhgp11_plat_lidar_ng02_k5_opt ........................................***Skipped   0.04 sec
+          Start  888: mhgp11_api_supports_route_scale8000
+1006/1038 Test  #888: mhgp11_api_supports_route_scale8000 ..................................   Passed   16.86 sec
+          Start  889: mhgp11_api_supports_route_scale16000
+1007/1038 Test  #889: mhgp11_api_supports_route_scale16000 .................................   Passed   37.09 sec
+          Start  890: mhgp11_api_supports_route_scale32000
+1008/1038 Test  #890: mhgp11_api_supports_route_scale32000 .................................   Passed   76.62 sec
+          Start  891: mhgp11_api_supports_route_lidar_ng00_k5
+1009/1038 Test  #891: mhgp11_api_supports_route_lidar_ng00_k5 ..............................***Skipped   0.03 sec
+          Start  892: mhgp11_api_supports_route_lidar_ng01_k5
+1010/1038 Test  #892: mhgp11_api_supports_route_lidar_ng01_k5 ..............................***Skipped   0.03 sec
+          Start  893: mhgp11_api_supports_route_lidar_ng02_k5
+1011/1038 Test  #893: mhgp11_api_supports_route_lidar_ng02_k5 ..............................***Skipped   0.03 sec
+          Start  905: mhgp11_cli_full_identity_scale8000_opt
+1012/1038 Test  #905: mhgp11_cli_full_identity_scale8000_opt ...............................   Passed   46.73 sec
+          Start  907: mhgp11_cli_full_identity_scale16000_opt
+1013/1038 Test  #907: mhgp11_cli_full_identity_scale16000_opt ..............................   Passed   96.70 sec
+          Start  909: mhgp11_cli_full_identity_scale32000_opt
+1014/1038 Test  #909: mhgp11_cli_full_identity_scale32000_opt ..............................   Passed  199.39 sec
+          Start  912: mhgp11_cli_full_determinism_scale8000_opt
+1015/1038 Test  #912: mhgp11_cli_full_determinism_scale8000_opt ............................   Passed  116.51 sec
+          Start  914: mhgp11_cli_full_identity_lidar_ng00_k5_opt
+1016/1038 Test  #914: mhgp11_cli_full_identity_lidar_ng00_k5_opt ...........................***Skipped   0.03 sec
+          Start  916: mhgp11_cli_full_identity_lidar_ng01_k5_opt
+1017/1038 Test  #916: mhgp11_cli_full_identity_lidar_ng01_k5_opt ...........................***Skipped   0.03 sec
+          Start  918: mhgp11_cli_full_identity_lidar_ng02_k5_opt
+1018/1038 Test  #918: mhgp11_cli_full_identity_lidar_ng02_k5_opt ...........................***Skipped   0.03 sec
+          Start  925: mhgp11_cli_supports_scale8000_opt
+1019/1038 Test  #925: mhgp11_cli_supports_scale8000_opt ....................................   Passed   23.68 sec
+          Start  927: mhgp11_cli_supports_scale16000_opt
+1020/1038 Test  #927: mhgp11_cli_supports_scale16000_opt ...................................   Passed   47.89 sec
+          Start  929: mhgp11_cli_supports_scale32000_opt
+1021/1038 Test  #929: mhgp11_cli_supports_scale32000_opt ...................................   Passed  101.10 sec
+          Start  931: mhgp11_cli_supports_lidar_ng00_k5_opt
+1022/1038 Test  #931: mhgp11_cli_supports_lidar_ng00_k5_opt ................................***Skipped   0.03 sec
+          Start  933: mhgp11_cli_supports_lidar_ng01_k5_opt
+1023/1038 Test  #933: mhgp11_cli_supports_lidar_ng01_k5_opt ................................***Skipped   0.03 sec
+          Start  935: mhgp11_cli_supports_lidar_ng02_k5_opt
+1024/1038 Test  #935: mhgp11_cli_supports_lidar_ng02_k5_opt ................................***Skipped   0.03 sec
+          Start  945: mhgp11_reference_fast_split_opt
+1025/1038 Test  #945: mhgp11_reference_fast_split_opt ......................................   Passed    7.61 sec
+          Start 1050: mhgp11_mutants_core_manifest_opt
+1026/1038 Test #1050: mhgp11_mutants_core_manifest_opt .....................................   Passed    0.09 sec
+          Start 1053: mhgp11_mutants_num_manifest_opt
+1027/1038 Test #1053: mhgp11_mutants_num_manifest_opt ......................................   Passed    0.09 sec
+          Start 1056: mhgp11_mutants_sched_manifest_opt
+1028/1038 Test #1056: mhgp11_mutants_sched_manifest_opt ....................................   Passed    0.09 sec
+          Start 1059: mhgp11_mutants_cloud_manifest_opt
+1029/1038 Test #1059: mhgp11_mutants_cloud_manifest_opt ....................................   Passed    0.09 sec
+          Start 1062: mhgp11_mutants_io_manifest_opt
+1030/1038 Test #1062: mhgp11_mutants_io_manifest_opt .......................................   Passed    0.09 sec
+          Start 1065: mhgp11_mutants_index_manifest_opt
+1031/1038 Test #1065: mhgp11_mutants_index_manifest_opt ....................................   Passed    0.09 sec
+          Start 1068: mhgp11_mutants_catalogue_manifest_opt
+1032/1038 Test #1068: mhgp11_mutants_catalogue_manifest_opt ................................   Passed    0.09 sec
+          Start 1071: mhgp11_mutants_tower_manifest_opt
+1033/1038 Test #1071: mhgp11_mutants_tower_manifest_opt ....................................   Passed    0.10 sec
+          Start 1074: mhgp11_mutants_supports_manifest_opt
+1034/1038 Test #1074: mhgp11_mutants_supports_manifest_opt .................................   Passed    0.09 sec
+          Start 1077: mhgp11_mutants_points_manifest_opt
+1035/1038 Test #1077: mhgp11_mutants_points_manifest_opt ...................................   Passed    0.09 sec
+          Start 1080: mhgp11_mutants_head_manifest_opt
+1036/1038 Test #1080: mhgp11_mutants_head_manifest_opt .....................................   Passed    0.09 sec
+          Start 1083: mhgp11_mutants_api_manifest_opt
+1037/1038 Test #1083: mhgp11_mutants_api_manifest_opt ......................................   Passed    0.09 sec
+          Start 1086: mhgp11_mutants_cli_manifest_opt
+1038/1038 Test #1086: mhgp11_mutants_cli_manifest_opt ......................................   Passed    0.09 sec
+
+99% tests passed, 2 tests failed out of 1038
+
+Label Time Summary:
+fast          = 1991.88 sec*proc (921 tests)
+lidar         =   2.00 sec*proc (60 tests)
+mutant        =   2.38 sec*proc (26 tests)
+oracle        = 888.47 sec*proc (248 tests)
+scale16000    = 497.07 sec*proc (16 tests)
+scale32000    = 1032.96 sec*proc (17 tests)
+scale8000     = 554.67 sec*proc (28 tests)
+unit          = 291.52 sec*proc (552 tests)
+
+Total Test time (real) = 2595.11 sec
+
+The following tests did not run:
+	 15 - mhgp11_support_lidar_sentinel (Skipped)
+	191 - mhgp11_num_roots_cost_uniform_u18_n8000_k5 (Skipped)
+	192 - mhgp11_num_roots_cost_uniform_u18_n16000_k5 (Skipped)
+	193 - mhgp11_num_roots_cost_uniform_u18_n32000_k5 (Skipped)
+	194 - mhgp11_num_roots_cost_lidar_ng00_k5 (Skipped)
+	195 - mhgp11_num_roots_cost_lidar_ng01_k5 (Skipped)
+	196 - mhgp11_num_roots_cost_lidar_ng02_k5 (Skipped)
+	427 - mhgp11_catalogue_euler_lidar_ng00_k5 (Skipped)
+	428 - mhgp11_catalogue_euler_lidar_ng01_k5 (Skipped)
+	429 - mhgp11_catalogue_euler_lidar_ng02_k5 (Skipped)
+	729 - mhgp11_tower_order_identity_lidar_ng00_k5 (Skipped)
+	730 - mhgp11_tower_attach_e1e2_lidar_ng00_k5 (Skipped)
+	731 - mhgp11_tower_attach_export_lidar_ng00_k5 (Skipped)
+	732 - mhgp11_tower_attach_export_lidar_ng00_k5_opt (Skipped)
+	733 - mhgp11_tower_order_identity_lidar_ng01_k5 (Skipped)
+	734 - mhgp11_tower_attach_e1e2_lidar_ng01_k5 (Skipped)
+	735 - mhgp11_tower_attach_export_lidar_ng01_k5 (Skipped)
+	736 - mhgp11_tower_attach_export_lidar_ng01_k5_opt (Skipped)
+	737 - mhgp11_tower_order_identity_lidar_ng02_k5 (Skipped)
+	738 - mhgp11_tower_attach_e1e2_lidar_ng02_k5 (Skipped)
+	739 - mhgp11_tower_attach_export_lidar_ng02_k5 (Skipped)
+	740 - mhgp11_tower_attach_export_lidar_ng02_k5_opt (Skipped)
+	769 - mhgp11_supports_sample_judge_lidar_ng00_k5 (Skipped)
+	770 - mhgp11_supports_sample_judge_lidar_ng00_k5_opt (Skipped)
+	779 - mhgp11_supports_registers_lidar_ng00_k5 (Skipped)
+	780 - mhgp11_supports_registers_lidar_ng00_k5_opt (Skipped)
+	781 - mhgp11_supports_registers_lidar_ng01_k5 (Skipped)
+	782 - mhgp11_supports_registers_lidar_ng01_k5_opt (Skipped)
+	783 - mhgp11_supports_registers_lidar_ng02_k5 (Skipped)
+	784 - mhgp11_supports_registers_lidar_ng02_k5_opt (Skipped)
+	805 - mhgp11_supports_hierarchy_lidar_ng00_k5 (Skipped)
+	806 - mhgp11_supports_hierarchy_lidar_ng01_k5 (Skipped)
+	807 - mhgp11_supports_hierarchy_lidar_ng02_k5 (Skipped)
+	829 - mhgp11_points_lidar_ng00_k5 (Skipped)
+	830 - mhgp11_points_lidar_ng00_k5_opt (Skipped)
+	831 - mhgp11_points_lidar_ng01_k5 (Skipped)
+	832 - mhgp11_points_lidar_ng01_k5_opt (Skipped)
+	833 - mhgp11_points_lidar_ng02_k5 (Skipped)
+	834 - mhgp11_points_lidar_ng02_k5_opt (Skipped)
+	853 - mhgp11_plat_lidar_ng00_k5 (Skipped)
+	854 - mhgp11_plat_lidar_ng00_k5_opt (Skipped)
+	855 - mhgp11_plat_lidar_ng01_k5 (Skipped)
+	856 - mhgp11_plat_lidar_ng01_k5_opt (Skipped)
+	857 - mhgp11_plat_lidar_ng02_k5 (Skipped)
+	858 - mhgp11_plat_lidar_ng02_k5_opt (Skipped)
+	891 - mhgp11_api_supports_route_lidar_ng00_k5 (Skipped)
+	892 - mhgp11_api_supports_route_lidar_ng01_k5 (Skipped)
+	893 - mhgp11_api_supports_route_lidar_ng02_k5 (Skipped)
+	913 - mhgp11_cli_full_identity_lidar_ng00_k5 (Skipped)
+	914 - mhgp11_cli_full_identity_lidar_ng00_k5_opt (Skipped)
+	915 - mhgp11_cli_full_identity_lidar_ng01_k5 (Skipped)
+	916 - mhgp11_cli_full_identity_lidar_ng01_k5_opt (Skipped)
+	917 - mhgp11_cli_full_identity_lidar_ng02_k5 (Skipped)
+	918 - mhgp11_cli_full_identity_lidar_ng02_k5_opt (Skipped)
+	930 - mhgp11_cli_supports_lidar_ng00_k5 (Skipped)
+	931 - mhgp11_cli_supports_lidar_ng00_k5_opt (Skipped)
+	932 - mhgp11_cli_supports_lidar_ng01_k5 (Skipped)
+	933 - mhgp11_cli_supports_lidar_ng01_k5_opt (Skipped)
+	934 - mhgp11_cli_supports_lidar_ng02_k5 (Skipped)
+	935 - mhgp11_cli_supports_lidar_ng02_k5_opt (Skipped)
+
+The following tests FAILED:
+	556 - mhgp11_tower_full_campaign (Timeout)
+	557 - mhgp11_tower_full_campaign_opt (Timeout)
+Errors while running CTest
+
+real	43m15.183s
+user	81m11.940s
+sys	4m48.797s
+rc=8

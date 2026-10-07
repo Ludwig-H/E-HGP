@@ -1,0 +1,12 @@
+test_core_descendants_cross_between_orders (__main__.ProjectionContracts.test_core_descendants_cross_between_orders) ... ok
+test_cover_keeps_ab (__main__.ProjectionContracts.test_cover_keeps_ab) ... ok
+test_first_cover_lca_is_discontinuous (__main__.ProjectionContracts.test_first_cover_lca_is_discontinuous) ... ok
+test_memo_is_not_valid_at_open_merge (__main__.ProjectionContracts.test_memo_is_not_valid_at_open_merge) ... ok
+test_mr_border_has_no_intermediate_ab (__main__.ProjectionContracts.test_mr_border_has_no_intermediate_ab) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.053s
+
+OK
+projection_contracts_ok faits=5
+code=0

@@ -1,0 +1,13 @@
+# Second point de mesure : lidar01_quarter_x_neg_y_neg (8 074 sites), K = 5, 1 fil ; memes outils
+# variante boules dom paires triplets droites quads juges
+base 210424 4830317 2990385 4381541 3120787 1407243 474585
+noline 210424 4830317 2990385 4381541 3120787 3359794 474585
+order 205598 4830317 2926846 4339509 3094188 1404139 469759
+# sha256 des dumps (16 premiers caracteres) : reference v10 / base / sans droite
+414aa4d47ffe1c55 414aa4d47ffe1c55 414aa4d47ffe1c55
+r_k5.dump boules 210424 necessaires a l ordre 5 : 120992 empreinte 9473460ad8f8889b
+rp_order.dump boules 205598 necessaires a l ordre 5 : 120992 empreinte 9473460ad8f8889b
+X_COUNT triplets 4381541 aigus 1563080 aigus_et_enveloppe_mediane 704727 aigus_et_droite 1283774
+K=5 q3 : 109182 boules ; toutes les aretes au catalogue q2 : 91.0 % ; aretes absentes : 3.6 % des aretes
+K=5 q4 : 17408 boules ; toutes les aretes au catalogue q2 : 82.9 % ; aretes absentes : 5.1 % des aretes ; quatre faces au catalogue q3 : 45.0 %
+e115280415b11e080ec32ecef3f3cad6a1bb2b66799688083c29a02a9f36c15c  lidar01_quarter_x_neg_y_neg.u32le

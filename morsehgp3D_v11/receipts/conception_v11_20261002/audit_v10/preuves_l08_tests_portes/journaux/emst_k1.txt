@@ -1,0 +1,12 @@
+{"aretes_emst": 7999, "ecarts": 0, "entree": "uniforme_8000_g3.u32le", "fusions_emst_par_plateaux": 7999, "fusions_tour": 7999, "multifusions": 0, "noeuds_tour_k1": 15999, "sites": 8000, "verdict": "EMST_OK"}
+code=0
+{"aretes_emst": 15999, "ecarts": 0, "entree": "uniforme_16000_g3.u32le", "fusions_emst_par_plateaux": 15999, "fusions_tour": 15999, "multifusions": 0, "noeuds_tour_k1": 31999, "sites": 16000, "verdict": "EMST_OK"}
+code=0
+{"aretes_emst": 31999, "ecarts": 0, "entree": "uniforme_32000_g3.u32le", "fusions_emst_par_plateaux": 31999, "fusions_tour": 31999, "multifusions": 0, "noeuds_tour_k1": 63999, "sites": 32000, "verdict": "EMST_OK"}
+code=0
+{"aretes_emst": 39884, "ecarts": 0, "entree": "lidar00_full.u32le", "fusions_emst_par_plateaux": 39796, "fusions_tour": 39796, "multifusions": 87, "noeuds_tour_k1": 79681, "sites": 39885, "verdict": "EMST_OK"}
+code=0
+{"aretes_emst": 35550, "ecarts": 0, "entree": "lidar01_full.u32le", "fusions_emst_par_plateaux": 35461, "fusions_tour": 35461, "multifusions": 87, "noeuds_tour_k1": 71012, "sites": 35551, "verdict": "EMST_OK"}
+code=0
+{"aretes_emst": 45844, "ecarts": 0, "entree": "lidar02_full.u32le", "fusions_emst_par_plateaux": 45563, "fusions_tour": 45563, "multifusions": 272, "noeuds_tour_k1": 91408, "sites": 45845, "verdict": "EMST_OK"}
+code=0

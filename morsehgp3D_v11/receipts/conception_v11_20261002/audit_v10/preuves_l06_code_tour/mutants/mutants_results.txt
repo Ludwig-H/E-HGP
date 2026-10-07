@@ -1,0 +1,7 @@
+TEMOIN code=0 duree=180s : tower_oracle_checks 37 fails 0 cuts 12056 ; premier ecart : 
+BINARIZE code=0 duree=183s : tower_oracle_checks 37 fails 0 cuts 12056 ; premier ecart : 
+POINT_OPEN code=0 duree=168s : tower_oracle_checks 37 fails 0 cuts 12056 ; premier ecart : 
+VERT_OPEN code=0 duree=170s : tower_oracle_checks 37 fails 0 cuts 12056 ; premier ecart : 
+DROP_LAST_REP code=1 duree=1s : tower_oracle_checks 37 fails 25 cuts 650 ; premier ecart : ECART K=3 n=12 : code 3 {"status":"invariant_violated","reason":"root_count","order":2}
+JUMP_ANY code=0 duree=166s : tower_oracle_checks 37 fails 0 cuts 12056 ; premier ecart : 
+WINDOW_LO code=1 duree=0s : tower_oracle_checks 37 fails 37 cuts 0 ; premier ecart : ECART K=1 n=12 : code 3 {"status":"invariant_violated","reason":"root_count","order":1}

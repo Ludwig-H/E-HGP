@@ -1,0 +1,6 @@
+L06_CB calls=376213 sum=2809273 max=77 judge_calls=60254 judge_sum=317172 nonstrict=0 hist_log2=0,0,268534,106742,830,103,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+L06_KRUSKAL_TOTAL lots=2465027 lots_multi=9101 merges2=689825 merges3=300759 merges4p=85564 max_children=4 max_lot_reps=8 find_steps=7819708 joins_no_union=1398155
+L06_CHAIN_ALL steps_hist=0,5959585,1277628,93152,9004,978,99,11,1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0 jumps_hist=7036993,286044,16059,1234,114,14,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+L06_CB calls=752426 sum=5618546 max=77 judge_calls=120508 judge_sum=634344 nonstrict=0 hist_log2=0,0,537068,213484,1660,206,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+L06_KRUSKAL_TOTAL lots=4930054 lots_multi=18202 merges2=1379650 merges3=601518 merges4p=171128 max_children=4 max_lot_reps=8 find_steps=15639416 joins_no_union=2796310
+L06_CHAIN_ALL steps_hist=0,11919170,2555256,186304,18008,1956,198,22,2,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0 jumps_hist=14073986,572088,32118,2468,228,28,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0

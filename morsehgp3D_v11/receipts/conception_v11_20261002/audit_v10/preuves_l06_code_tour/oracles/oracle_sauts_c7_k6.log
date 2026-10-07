@@ -1,0 +1,6 @@
+famille noyau 7 + halo 7, K = 6 : 599 nuages sur 600 sautent aux ordres 5 ou 6
+noyau 7 K=6 : conforme (coupes 1884, sauts par ordre {1: 0, 2: 3, 3: 16, 4: 18, 5: 23, 6: 20}, 208 s)
+noyau 7 K=6 : conforme (coupes 1740, sauts par ordre {1: 0, 2: 6, 3: 23, 4: 17, 5: 24, 6: 19}, 433 s)
+noyau 7 K=6 : conforme (coupes 2064, sauts par ordre {1: 0, 2: 3, 3: 5, 4: 11, 5: 28, 6: 15}, 638 s)
+oracle_sauts c=7 K=6 juges 3 fails 0 cuts 5688
+exit=0

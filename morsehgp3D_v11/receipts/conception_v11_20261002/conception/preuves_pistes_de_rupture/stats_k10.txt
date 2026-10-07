@@ -1,0 +1,33 @@
+sites 5286 boules 574476 K 10 etendues 25
+  somme p+q=2 : 12153
+  somme p+q=3 : 19630
+  somme p+q=4 : 28542
+  somme p+q=5 : 38296
+  somme p+q=6 : 49045
+  somme p+q=7 : 60516
+  somme p+q=8 : 72459
+  somme p+q=9 : 84746
+  somme p+q=10 : 97810
+  somme p+q=11 : 111279
+morceaux k=1 (sites) 24298 ; morceaux k>=2 1752640 ; semis 1241845 (70.86 %) ; hors semis 510795
+hors semis analyses 127699 (pas d'echantillon 4)
+  pas de descente ideale : 194294 (1.521 par morceau hors semis) ; chaine max 12 ; non resolus 0
+  premier pas : cellule de jonction du catalogue 78419 (61.4 %) ; naissance 12 (0.0 %) ; saut 29925 (23.4 %) ; inerte 19343 (15.1 %)
+  tous pas : sauts 42414 ; inertes 24181 ; spheres hors catalogue (p+q>K+1) 31911 (16.4 % des pas) ; arrets naissance 32492 (dont hors table de semis 12) ; arrets cellule 95207 (dont coquille etendue 7)
+  premier pas certifie par N_K(c) : 44121 (34.6 %) ; par la condition r_u + |c-c_u| <= d_K(c) : 14917 (11.7 %)
+  deplacement |c - c_u| / r : moyenne 0.259 ; mediane 0.213 ; p90 0.521 ; p99 0.859
+  histogramme des longueurs de chaine : 1:78431 2:36736 3:9022 4:2569 5:694 6:180 7:49 8:11 9:4 10:2 12:1
+  par ordre k : morceaux / hors semis (%) / pas par hors-semis / premier pas certifie N_K (%)
+    k=2 : 47835 / 6675 (14.0 %) / 1.274 / 91.2 %
+    k=3 : 76193 / 15886 (20.8 %) / 1.325 / 87.6 %
+    k=4 : 108954 / 26744 (24.5 %) / 1.397 / 82.7 %
+    k=5 : 145585 / 39069 (26.8 %) / 1.435 / 78.5 %
+    k=6 : 185876 / 52867 (28.4 %) / 1.471 / 69.6 %
+    k=7 : 228266 / 67644 (29.6 %) / 1.511 / 56.3 %
+    k=8 : 272464 / 83058 (30.5 %) / 1.540 / 35.2 %
+    k=9 : 319274 / 100541 (31.5 %) / 1.571 / 0.0 %
+    k=10 : 368193 / 118311 (32.1 %) / 1.592 / 0.0 %
+
+real	0m26.212s
+user	0m16.942s
+sys	0m0.320s

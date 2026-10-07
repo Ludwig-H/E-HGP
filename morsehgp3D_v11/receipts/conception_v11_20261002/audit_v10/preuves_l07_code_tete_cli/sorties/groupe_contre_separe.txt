@@ -1,0 +1,11 @@
+# groupe contre separe : etiquettes et arbre exporte, octet pour octet (scene dev s0041, 2 000 points, mcs = 45, z = 1)
+core etiquettes_k-list_3,5 : IDENTIQUE (a8d3d07e1a2d704b)
+core arbre_k-list_3,5 : IDENTIQUE (1a30a491f4e22c48)
+core etiquettes_entrees_core,cover1 : IDENTIQUE (a8d3d07e1a2d704b)
+core arbre_entrees_core,cover1 : IDENTIQUE (1a30a491f4e22c48)
+cover etiquettes_k-list_3,5 : IDENTIQUE (6847da4581a9edef)
+cover arbre_k-list_3,5 : IDENTIQUE (a05cda404f58513c)
+cover etiquettes_entrees_cover,cover1 : IDENTIQUE (6847da4581a9edef)
+cover arbre_entrees_cover,cover1 : IDENTIQUE (a05cda404f58513c)
+JSON separe K=3  : {"status":"ok","n":2000,"kmax":3,"balls":45645,"clusters":6,"catalogue_s":0.277,"tower_s":0.029,"head_s":0.024}
+JSON groupe 3,5  : {"status":"ok","n":2000,"kmax":5,"balls":128720,"clusters":5,"catalogue_s":0.690,"tower_s":0.140,"head_s":0.078}

@@ -1,0 +1,66 @@
+Campagne dev PR du 1er octobre (lecture) : 96 scenes, 23040 lignes ; fill = none
+z par bras : {'hdb': ['0'], 'tw_cohort': ['4', '5', '6'], 'tw_cohort_z1': ['1'], 'tw_core_cohort': ['4', '5', '6'], 'tw_core_native': ['4', '5', '6'], 'tw_native': ['4', '5', '6']}
+niveaux ['easy', 'extreme', 'hard', 'medium'] tailles ['2000', '8000'] bruits ['0.0', '0.1']
+
+K mcs sel | ARI_s moyen : hdb, tw_cohort(cover), tw_native(cover), tw_core_cohort, tw_core_native | natif - cohortes (core) | TT1 agit (core) | cover - hdb | core_cohort - hdb
+K=2  mcs=K    eom  | 0.016 0.008 0.008 0.005 0.005 | +0.000 |   0/96 | -0.007 | -0.010
+K=2  mcs=K    leaf | 0.008 0.008 0.008 0.005 0.005 | +0.000 |   0/96 | -0.000 | -0.004
+K=2  mcs=10   eom  | 0.591 0.315 0.315 0.529 0.519 | -0.010 |  96/96 | -0.276 | -0.061
+K=2  mcs=10   leaf | 0.069 0.067 0.067 0.104 0.104 | +0.000 |  96/96 | -0.002 | +0.034
+K=2  mcs=20   eom  | 0.683 0.662 0.662 0.660 0.658 | -0.001 |  95/96 | -0.022 | -0.024
+K=2  mcs=20   leaf | 0.203 0.211 0.211 0.290 0.290 | +0.000 |  95/96 | +0.008 | +0.087
+K=2  mcs=sqrt eom  | 0.715 0.743 0.743 0.692 0.692 | +0.000 |  83/96 | +0.029 | -0.022
+K=2  mcs=sqrt leaf | 0.570 0.559 0.559 0.582 0.582 | +0.000 |  83/96 | -0.011 | +0.012
+K=3  mcs=K    eom  | 0.451 0.015 0.015 0.039 0.031 | -0.008 |  96/96 | -0.436 | -0.412
+K=3  mcs=K    leaf | 0.014 0.015 0.015 0.010 0.010 | +0.000 |  96/96 | +0.001 | -0.003
+K=3  mcs=10   eom  | 0.608 0.194 0.194 0.522 0.521 | -0.002 |  96/96 | -0.414 | -0.086
+K=3  mcs=10   leaf | 0.073 0.069 0.069 0.160 0.160 | +0.000 |  96/96 | -0.004 | +0.087
+K=3  mcs=20   eom  | 0.681 0.578 0.578 0.655 0.653 | -0.002 |  93/96 | -0.103 | -0.026
+K=3  mcs=20   leaf | 0.233 0.215 0.215 0.322 0.322 | +0.000 |  93/96 | -0.018 | +0.088
+K=3  mcs=sqrt eom  | 0.693 0.757 0.757 0.687 0.686 | -0.001 |  88/96 | +0.063 | -0.006
+K=3  mcs=sqrt leaf | 0.570 0.571 0.571 0.597 0.597 | +0.000 |  88/96 | +0.001 | +0.027
+K=5  mcs=K    eom  | 0.565 0.028 0.028 0.380 0.373 | -0.008 |  96/96 | -0.537 | -0.185
+K=5  mcs=K    leaf | 0.031 0.028 0.028 0.087 0.087 | +0.000 |  96/96 | -0.003 | +0.056
+K=5  mcs=10   eom  | 0.644 0.135 0.135 0.553 0.545 | -0.008 |  96/96 | -0.509 | -0.091
+K=5  mcs=10   leaf | 0.110 0.067 0.067 0.237 0.237 | +0.000 |  96/96 | -0.043 | +0.127
+K=5  mcs=20   eom  | 0.677 0.471 0.471 0.649 0.649 | -0.001 |  94/96 | -0.207 | -0.028
+K=5  mcs=20   leaf | 0.309 0.211 0.211 0.418 0.418 | +0.000 |  94/96 | -0.097 | +0.109
+K=5  mcs=sqrt eom  | 0.681 0.756 0.756 0.683 0.683 | +0.000 |  91/96 | +0.075 | +0.002
+K=5  mcs=sqrt leaf | 0.610 0.581 0.581 0.619 0.619 | +0.000 |  91/96 | -0.028 | +0.009
+K=10 mcs=K    eom  | 0.652 0.132 0.132 0.639 0.636 | -0.003 |  96/96 | -0.521 | -0.014
+K=10 mcs=K    leaf | 0.254 0.081 0.081 0.357 0.357 | +0.000 |  96/96 | -0.172 | +0.104
+K=10 mcs=10   eom  | 0.652 0.132 0.132 0.639 0.636 | -0.003 |  96/96 | -0.521 | -0.014
+K=10 mcs=10   leaf | 0.254 0.081 0.081 0.357 0.357 | +0.000 |  96/96 | -0.172 | +0.104
+K=10 mcs=20   eom  | 0.657 0.509 0.509 0.674 0.674 | +0.000 |  95/96 | -0.148 | +0.018
+K=10 mcs=20   leaf | 0.437 0.222 0.222 0.497 0.497 | +0.000 |  95/96 | -0.215 | +0.060
+K=10 mcs=sqrt eom  | 0.652 0.764 0.764 0.683 0.683 | +0.000 |  93/96 | +0.112 | +0.031
+K=10 mcs=sqrt leaf | 0.650 0.595 0.595 0.639 0.639 | +0.000 |  93/96 | -0.054 | -0.011
+
+EOM, sans remplissage : ARI_s moyen (96 scenes dev) de sklearn, cover z=1, cover z v10-b ; ecarts a sklearn ; F1 objet
+K=2  mcs=K    | hdb 0.016 | cover z=1 0.008 (-0.007) | cover z v10-b 0.008 (-0.007) | F1 objet hdb 0.000, z=1 0.000, v10-b 0.000 | amas moyens hdb 1100, z=1 1212, v10-b 1217
+K=2  mcs=10   | hdb 0.591 | cover z=1 0.594 (+0.003) | cover z v10-b 0.315 (-0.276) | F1 objet hdb 0.475, z=1 0.478, v10-b 0.130 | amas moyens hdb 19, z=1 16, v10-b 83
+K=2  mcs=20   | hdb 0.683 | cover z=1 0.690 (+0.006) | cover z v10-b 0.662 (-0.022) | F1 objet hdb 0.601, z=1 0.613, v10-b 0.470 | amas moyens hdb 10, z=1 10, v10-b 19
+K=2  mcs=sqrt | hdb 0.715 | cover z=1 0.726 (+0.011) | cover z v10-b 0.743 (+0.029) | F1 objet hdb 0.683, z=1 0.685, v10-b 0.707 | amas moyens hdb 8, z=1 8, v10-b 9
+K=3  mcs=K    | hdb 0.451 | cover z=1 0.124 (-0.327) | cover z v10-b 0.015 (-0.436) | F1 objet hdb 0.195, z=1 0.012, v10-b 0.000 | amas moyens hdb 217, z=1 593, v10-b 630
+K=3  mcs=10   | hdb 0.608 | cover z=1 0.609 (+0.001) | cover z v10-b 0.194 (-0.414) | F1 objet hdb 0.504, z=1 0.488, v10-b 0.048 | amas moyens hdb 13, z=1 16, v10-b 94
+K=3  mcs=20   | hdb 0.681 | cover z=1 0.693 (+0.013) | cover z v10-b 0.578 (-0.103) | F1 objet hdb 0.617, z=1 0.623, v10-b 0.370 | amas moyens hdb 9, z=1 9, v10-b 25
+K=3  mcs=sqrt | hdb 0.693 | cover z=1 0.730 (+0.037) | cover z v10-b 0.757 (+0.063) | F1 objet hdb 0.667, z=1 0.688, v10-b 0.690 | amas moyens hdb 8, z=1 8, v10-b 10
+K=5  mcs=K    | hdb 0.565 | cover z=1 0.434 (-0.131) | cover z v10-b 0.028 (-0.537) | F1 objet hdb 0.458, z=1 0.209, v10-b 0.000 | amas moyens hdb 15, z=1 151, v10-b 276
+K=5  mcs=10   | hdb 0.644 | cover z=1 0.606 (-0.038) | cover z v10-b 0.135 (-0.509) | F1 objet hdb 0.578, z=1 0.496, v10-b 0.023 | amas moyens hdb 9, z=1 17, v10-b 101
+K=5  mcs=20   | hdb 0.677 | cover z=1 0.697 (+0.019) | cover z v10-b 0.471 (-0.207) | F1 objet hdb 0.638, z=1 0.630, v10-b 0.270 | amas moyens hdb 8, z=1 9, v10-b 30
+K=5  mcs=sqrt | hdb 0.681 | cover z=1 0.738 (+0.057) | cover z v10-b 0.756 (+0.075) | F1 objet hdb 0.655, z=1 0.703, v10-b 0.685 | amas moyens hdb 8, z=1 8, v10-b 10
+K=10 mcs=K    | hdb 0.652 | cover z=1 0.571 (-0.082) | cover z v10-b 0.132 (-0.521) | F1 objet hdb 0.616, z=1 0.462, v10-b 0.021 | amas moyens hdb 8, z=1 16, v10-b 90
+K=10 mcs=10   | hdb 0.652 | cover z=1 0.571 (-0.082) | cover z v10-b 0.132 (-0.521) | F1 objet hdb 0.616, z=1 0.462, v10-b 0.021 | amas moyens hdb 8, z=1 16, v10-b 90
+K=10 mcs=20   | hdb 0.657 | cover z=1 0.621 (-0.036) | cover z v10-b 0.509 (-0.148) | F1 objet hdb 0.637, z=1 0.568, v10-b 0.322 | amas moyens hdb 8, z=1 9, v10-b 31
+K=10 mcs=sqrt | hdb 0.652 | cover z=1 0.665 (+0.013) | cover z v10-b 0.764 (+0.112) | F1 objet hdb 0.636, z=1 0.636, v10-b 0.680 | amas moyens hdb 8, z=1 8, v10-b 10
+
+Ligne a ligne : entree cover, natif = cohortes (ari_s, amas, couverture, F1 objet) sur 3072 lignes sur 3072 ; entree core : 2935 egales sur 3072, ecart max d ARI_s sur une ligne 0.3197
+Entree core, natif - cohortes, par (mcs, selection), toutes les K et les deux remplissages : lignes, differentes, |ecart| > 0,01, |ecart| max, ecart moyen
+   mcs=10   eom  :  384 lignes,  34 differentes,  17 au-dela de 0,01, max 0.3197, moyenne -0.00576
+   mcs=10   leaf :  384 lignes,   0 differentes,   0 au-dela de 0,01, max 0.0000, moyenne +0.00000
+   mcs=20   eom  :  384 lignes,   8 differentes,   6 au-dela de 0,01, max 0.0801, moyenne -0.00109
+   mcs=20   leaf :  384 lignes,   0 differentes,   0 au-dela de 0,01, max 0.0000, moyenne +0.00000
+   mcs=K    eom  :  384 lignes,  94 differentes,  25 au-dela de 0,01, max 0.1950, moyenne -0.00472
+   mcs=K    leaf :  384 lignes,   0 differentes,   0 au-dela de 0,01, max 0.0000, moyenne +0.00000
+   mcs=sqrt eom  :  384 lignes,   1 differentes,   1 au-dela de 0,01, max 0.0563, moyenne -0.00015
+   mcs=sqrt leaf :  384 lignes,   0 differentes,   0 au-dela de 0,01, max 0.0000, moyenne +0.00000

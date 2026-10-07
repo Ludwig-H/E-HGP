@@ -1,0 +1,352 @@
+{
+ "K": 2,
+ "cadre": "phase=exploration_v10_hors_registre backend=cpu_reference profile=quantized_u18_input_only mode=verification_tierce_er0h public_status=not_claimed ; GCP non utilise",
+ "en_delta": [
+  {
+   "a": 100000,
+   "delta": 1,
+   "loi": 387.298,
+   "saut": 385.297,
+   "w": 1549
+  },
+  {
+   "a": 100000,
+   "delta": 4,
+   "loi": 774.597,
+   "saut": 766.629,
+   "w": 3098
+  },
+  {
+   "a": 100000,
+   "delta": 16,
+   "loi": 1549.193,
+   "saut": 1518.019,
+   "w": 6197
+  },
+  {
+   "a": 100000,
+   "delta": 64,
+   "loi": 3098.387,
+   "saut": 2976.361,
+   "w": 12394
+  }
+ ],
+ "en_kappa": [
+  {
+   "a": 10000,
+   "kappa": 3,
+   "loi": 61.237,
+   "saut": 60.74,
+   "w": 245
+  },
+  {
+   "a": 10000,
+   "kappa": 6,
+   "loi": 86.603,
+   "saut": 85.849,
+   "w": 346
+  },
+  {
+   "a": 10000,
+   "kappa": 12,
+   "loi": 122.474,
+   "saut": 120.753,
+   "w": 490
+  },
+  {
+   "a": 10000,
+   "kappa": 24,
+   "loi": 173.205,
+   "saut": 169.304,
+   "w": 693
+  },
+  {
+   "a": 10000,
+   "kappa": 48,
+   "loi": 244.949,
+   "saut": 236.698,
+   "w": 980
+  }
+ ],
+ "eta": "1",
+ "kappa": "12",
+ "lecture": "saut ~ min(kappa a delta / (2 w), w / 4) ; maximum ~ sqrt(kappa a delta / 8) a w ~ sqrt(2 kappa a delta)",
+ "lignes": [
+  {
+   "a": 1000,
+   "loi_pente": 157.895,
+   "loi_plage": 9.5,
+   "paire": [
+    0,
+    2
+   ],
+   "saut_date_x": 19.272,
+   "saut_de_1_a_2": 0.257,
+   "saut_sur_racine_ka": 0.088,
+   "saut_unite": 9.645,
+   "w": 38,
+   "w_sur_racine_2ka": 0.245
+  },
+  {
+   "a": 1000,
+   "loi_pente": 77.922,
+   "loi_plage": 19.25,
+   "paire": [
+    0,
+    2
+   ],
+   "saut_date_x": 38.772,
+   "saut_de_1_a_2": 0.264,
+   "saut_sur_racine_ka": 0.1734,
+   "saut_unite": 18.99,
+   "w": 77,
+   "w_sur_racine_2ka": 0.497
+  },
+  {
+   "a": 1000,
+   "loi_pente": 60.0,
+   "loi_plage": 25.0,
+   "paire": [
+    0,
+    2
+   ],
+   "saut_date_x": 50.272,
+   "saut_de_1_a_2": 0.268,
+   "saut_sur_racine_ka": 0.2225,
+   "saut_unite": 24.375,
+   "w": 100,
+   "w_sur_racine_2ka": 0.645
+  },
+  {
+   "a": 1000,
+   "loi_pente": 38.71,
+   "loi_plage": 38.75,
+   "paire": [
+    0,
+    2
+   ],
+   "saut_date_x": 37.245,
+   "saut_de_1_a_2": 0.277,
+   "saut_sur_racine_ka": 0.3367,
+   "saut_unite": 36.882,
+   "w": 155,
+   "w_sur_racine_2ka": 1.001
+  },
+  {
+   "a": 1000,
+   "loi_pente": 19.355,
+   "loi_plage": 77.5,
+   "paire": [
+    0,
+    2
+   ],
+   "saut_date_x": 17.995,
+   "saut_de_1_a_2": 17.985,
+   "saut_sur_racine_ka": 0.1643,
+   "saut_unite": 17.995,
+   "w": 310,
+   "w_sur_racine_2ka": 2.001
+  },
+  {
+   "a": 1000,
+   "loi_pente": 9.677,
+   "loi_plage": 155.0,
+   "paire": [
+    2,
+    4
+   ],
+   "saut_date_x": 17.995,
+   "saut_de_1_a_2": 0.342,
+   "saut_sur_racine_ka": 0.0031,
+   "saut_unite": 0.342,
+   "w": 620,
+   "w_sur_racine_2ka": 4.002
+  },
+  {
+   "a": 10000,
+   "loi_pente": 491.803,
+   "loi_plage": 30.5,
+   "paire": [
+    0,
+    2
+   ],
+   "saut_date_x": 61.47,
+   "saut_de_1_a_2": 0.252,
+   "saut_sur_racine_ka": 0.089,
+   "saut_unite": 30.832,
+   "w": 122,
+   "w_sur_racine_2ka": 0.249
+  },
+  {
+   "a": 10000,
+   "loi_pente": 244.898,
+   "loi_plage": 61.25,
+   "paire": [
+    0,
+    2
+   ],
+   "saut_date_x": 122.97,
+   "saut_de_1_a_2": 0.255,
+   "saut_sur_racine_ka": 0.1766,
+   "saut_unite": 61.164,
+   "w": 245,
+   "w_sur_racine_2ka": 0.5
+  },
+  {
+   "a": 10000,
+   "loi_pente": 122.449,
+   "loi_plage": 122.5,
+   "paire": [
+    0,
+    2
+   ],
+   "saut_date_x": 120.854,
+   "saut_de_1_a_2": 0.259,
+   "saut_sur_racine_ka": 0.3486,
+   "saut_unite": 120.753,
+   "w": 490,
+   "w_sur_racine_2ka": 1.0
+  },
+  {
+   "a": 10000,
+   "loi_pente": 61.224,
+   "loi_plage": 245.0,
+   "paire": [
+    0,
+    2
+   ],
+   "saut_date_x": 59.731,
+   "saut_de_1_a_2": 59.728,
+   "saut_sur_racine_ka": 0.1724,
+   "saut_unite": 59.731,
+   "w": 980,
+   "w_sur_racine_2ka": 2.0
+  },
+  {
+   "a": 10000,
+   "loi_pente": 60.0,
+   "loi_plage": 250.0,
+   "paire": [
+    0,
+    2
+   ],
+   "saut_date_x": 58.509,
+   "saut_de_1_a_2": 58.506,
+   "saut_sur_racine_ka": 0.1689,
+   "saut_unite": 58.509,
+   "w": 1000,
+   "w_sur_racine_2ka": 2.041
+  },
+  {
+   "a": 10000,
+   "loi_pente": 30.612,
+   "loi_plage": 490.0,
+   "paire": [
+    0,
+    2
+   ],
+   "saut_date_x": 29.175,
+   "saut_de_1_a_2": 29.173,
+   "saut_sur_racine_ka": 0.0842,
+   "saut_unite": 29.175,
+   "w": 1960,
+   "w_sur_racine_2ka": 4.001
+  },
+  {
+   "a": 100000,
+   "loi_pente": 1550.388,
+   "loi_plage": 96.75,
+   "paire": [
+    0,
+    2
+   ],
+   "saut_date_x": 193.785,
+   "saut_de_1_a_2": 0.251,
+   "saut_sur_racine_ka": 0.0885,
+   "saut_unite": 96.895,
+   "w": 387,
+   "w_sur_racine_2ka": 0.25
+  },
+  {
+   "a": 100000,
+   "loi_pente": 775.194,
+   "loi_plage": 193.5,
+   "paire": [
+    0,
+    2
+   ],
+   "saut_date_x": 387.285,
+   "saut_de_1_a_2": 0.251,
+   "saut_sur_racine_ka": 0.1764,
+   "saut_unite": 193.226,
+   "w": 774,
+   "w_sur_racine_2ka": 0.5
+  },
+  {
+   "a": 100000,
+   "loi_pente": 387.347,
+   "loi_plage": 387.25,
+   "paire": [
+    0,
+    2
+   ],
+   "saut_date_x": 385.834,
+   "saut_de_1_a_2": 0.253,
+   "saut_sur_racine_ka": 0.3517,
+   "saut_unite": 385.297,
+   "w": 1549,
+   "w_sur_racine_2ka": 1.0
+  },
+  {
+   "a": 100000,
+   "loi_pente": 193.673,
+   "loi_plage": 774.5,
+   "paire": [
+    0,
+    2
+   ],
+   "saut_date_x": 192.18,
+   "saut_de_1_a_2": 192.179,
+   "saut_sur_racine_ka": 0.1754,
+   "saut_unite": 192.18,
+   "w": 3098,
+   "w_sur_racine_2ka": 2.0
+  },
+  {
+   "a": 100000,
+   "loi_pente": 96.837,
+   "loi_plage": 1549.0,
+   "paire": [
+    0,
+    2
+   ],
+   "saut_date_x": 95.358,
+   "saut_de_1_a_2": 95.358,
+   "saut_sur_racine_ka": 0.087,
+   "saut_unite": 95.358,
+   "w": 6196,
+   "w_sur_racine_2ka": 4.0
+  },
+  {
+   "a": 100000,
+   "loi_pente": 60.0,
+   "loi_plage": 2500.0,
+   "paire": [
+    0,
+    2
+   ],
+   "saut_date_x": 58.536,
+   "saut_de_1_a_2": 58.536,
+   "saut_sur_racine_ka": 0.0534,
+   "saut_unite": 58.536,
+   "w": 10000,
+   "w_sur_racine_2ka": 6.455
+  }
+ ],
+ "regle": "ER0h (er0h_texte.py)",
+ "saut_max_par_echelle": {
+  "1000": 36.882,
+  "10000": 120.753,
+  "100000": 385.297
+ }
+}

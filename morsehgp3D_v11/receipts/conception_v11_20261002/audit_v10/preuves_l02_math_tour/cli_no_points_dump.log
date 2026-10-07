@@ -1,0 +1,5 @@
+commande : build_ref/mhgp10_tower run/t4.u32le --k=1 --threads=1 --no-points --dump=run/crash.txt (4 points)
+/bin/bash: line 25: 317056 Segmentation fault      (core dumped) build_ref/mhgp10_tower run/t4.u32le --k=1 --threads=1 --no-points --dump=run/crash.txt > run/crash.out 2>&1
+code de retour du shell : 139 (139 = 128 + SIGSEGV)
+meme commande sans --no-points :
+code de retour : 0

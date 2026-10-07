@@ -1,0 +1,5 @@
+leaf=0 code=0 duree=0.03s boules=112 noeuds=1 feuilles=1 bloquees=0 max_m=14
+leaf=13 code=0 duree=13.54s boules=112 noeuds=3048725 feuilles=1524359 bloquees=0 max_m=13
+leaf=12 code=124 duree=60.02s pas de sortie (delai de 60 s atteint)
+leaf=11 code=124 duree=60.03s pas de sortie (delai de 60 s atteint)
+leaf=12 (delai 240 s) code=0 duree=65.30s boules=112 noeuds=27966119 feuilles=13638737 bloquees=39710 max_m=13

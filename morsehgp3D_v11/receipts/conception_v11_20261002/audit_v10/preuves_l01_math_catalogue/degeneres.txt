@@ -1,0 +1,17 @@
+catalogue sph_89 K=5 code=0 sites 144 boules 2169 etendues 249 coquille_max 144 noeuds 3061 feuilles 726 max_m 144 bloquees 8 t_catalogue=14.29s (local, indicatif)
+catalogue sph_89 K=10 code=0 sites 144 boules 6525 etendues 1173 coquille_max 144 noeuds 4039 feuilles 1230 max_m 144 bloquees 8 t_catalogue=12.87s (local, indicatif)
+catalogue sph_101 K=5 code=0 sites 168 boules 2757 etendues 549 coquille_max 168 noeuds 3413 feuilles 904 max_m 168 bloquees 8 t_catalogue=20.77s (local, indicatif)
+catalogue sph_101 K=10 code=0 sites 168 boules 7805 etendues 1421 coquille_max 168 noeuds 4085 feuilles 1103 max_m 168 bloquees 8 t_catalogue=29.16s (local, indicatif)
+catalogue sph_314 K=5 code=2 {'status': 'resource_exhausted', 'reason': 'wide_leaf'}
+catalogue sph_314 K=10 code=2 {'status': 'resource_exhausted', 'reason': 'wide_leaf'}
+catalogue plan_40 K=5 code=0 sites 1600 boules 16642 etendues 7598 coquille_max 8 noeuds 2163 feuilles 1082 max_m 16 bloquees 0 t_catalogue=0.05s (local, indicatif)
+catalogue plan_40 K=10 code=0 sites 1600 boules 42458 etendues 13726 coquille_max 8 noeuds 2123 feuilles 1062 max_m 24 bloquees 0 t_catalogue=0.12s (local, indicatif)
+catalogue grille_12 K=5 code=0 sites 1728 boules 45577 etendues 15657 coquille_max 8 noeuds 20611 feuilles 10306 max_m 16 bloquees 0 t_catalogue=0.23s (local, indicatif)
+catalogue grille_12 K=10 code=0 sites 1728 boules 227430 etendues 66870 coquille_max 24 noeuds 66691 feuilles 33346 max_m 32 bloquees 2527 t_catalogue=1.96s (local, indicatif)
+catalogue droite_2000 K=5 code=0 sites 2000 boules 9985 etendues 0 coquille_max 2 noeuds 11883 feuilles 2064 max_m 16 bloquees 0 t_catalogue=0.09s (local, indicatif)
+catalogue droite_2000 K=10 code=0 sites 2000 boules 19945 etendues 0 coquille_max 2 noeuds 7959 feuilles 1739 max_m 24 bloquees 0 t_catalogue=0.28s (local, indicatif)
+catalogue cercle_108 K=5 code=0 sites 108 boules 541 etendues 1 coquille_max 108 noeuds 307 feuilles 28 max_m 108 bloquees 4 t_catalogue=0.50s (local, indicatif)
+catalogue cercle_108 K=10 code=0 sites 108 boules 1081 etendues 1 coquille_max 108 noeuds 271 feuilles 20 max_m 108 bloquees 4 t_catalogue=0.69s (local, indicatif)
+tour sph_89 K=5 code=2 {"status":"unsupported_degeneracy","reason":"shell_quotient_budget","order":1}
+tour cercle_108 K=5 code=2 {"status":"unsupported_degeneracy","reason":"shell_quotient_budget","order":1}
+tour grille_12 K=5 code=0 {"status":"ok","n":1728,"K":5,"threads":2,"balls":45577,"prepare_s":0.0004,"catalogue_s":0.1617,"tower_s":0.26

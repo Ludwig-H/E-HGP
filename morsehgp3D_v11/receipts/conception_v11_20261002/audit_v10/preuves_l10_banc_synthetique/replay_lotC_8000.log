@@ -1,0 +1,14 @@
+check_pins : toutes les epingles conformes (binaires, 6 scripts, versions, manifeste)
+scenes rejouees : 8 taille 8000
+spherical_n8000_hard_nu0_s8971674921640015                   253 s
+anisotropic_n8000_hard_nu0_s14388762066298720                238 s
+heteroscedastic_n8000_hard_nu0_s156801548299167002           75 s
+unbalanced_n8000_hard_nu0_s515940611821313875                69 s
+shells_n8000_hard_nu0_s281978053882698542                    24 s
+bridge_n8000_hard_nu0_s92008150016173487                     102 s
+hierarchical_n8000_hard_nu0_s408273531158039835              129 s
+filaments_n8000_hard_nu0_s627146484807867567                 314 s
+tour     lignes 120, differentes du recu 0, ecart max ARI_s 0.000000
+sklearn  lignes 96, differentes du recu 47, ecart max ARI_s 0.035935
+mreach   lignes 40, differentes du recu 0, ecart max ARI_s 0.000000
+code=0

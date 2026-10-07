@@ -1,0 +1,97 @@
+nuage 0 n=12 : cumul {'BIN': '0/36 acceptes', 'SWAP': '0/160 acceptes', 'V_autre': '0/107 acceptes', 'V_desc': '0/164 acceptes'}
+nuage 1 n=12 : cumul {'ATT': '0/9 acceptes', 'BIN': '0/56 acceptes', 'SWAP': '0/279 acceptes', 'V_autre': '0/187 acceptes', 'V_desc': '0/277 acceptes'}
+nuage 2 n=7 : cumul {'ATT': '0/9 acceptes', 'BIN': '0/64 acceptes', 'SWAP': '0/303 acceptes', 'V_autre': '0/201 acceptes', 'V_desc': '0/319 acceptes'}
+nuage 3 n=12 : cumul {'ATT': '0/17 acceptes', 'BIN': '0/90 acceptes', 'SWAP': '0/384 acceptes', 'V_autre': '0/295 acceptes', 'V_desc': '0/469 acceptes'}
+nuage 4 n=11 : cumul {'ATT': '0/17 acceptes', 'BIN': '0/118 acceptes', 'SWAP': '0/514 acceptes', 'V_autre': '0/380 acceptes', 'V_desc': '0/634 acceptes'}
+nuage 5 n=12 : cumul {'ATT': '0/25 acceptes', 'BIN': '0/149 acceptes', 'SWAP': '0/649 acceptes', 'V_autre': '0/471 acceptes', 'V_desc': '0/779 acceptes'}
+{
+ "K": 5,
+ "acceptes_par_le_juge_R2": {
+  "ATT": 0,
+  "BIN": 0,
+  "SWAP": 0,
+  "V_autre": 0,
+  "V_desc": 0
+ },
+ "dumps_faux": {
+  "ATT": 25,
+  "BIN": 149,
+  "SWAP": 649,
+  "V_autre": 471,
+  "V_desc": 779
+ },
+ "nuages": 6,
+ "premiers_motifs_de_refus": {
+  "ATT": [
+   [
+    "k=2 point (1, 2, 3) ",
+    2
+   ],
+   [
+    "k=2 point (0, 1, 0) ",
+    1
+   ],
+   [
+    "k=2 point (1, 2, 0) ",
+    1
+   ]
+  ],
+  "BIN": [
+   [
+    "k=5 noeud 36 ",
+    5
+   ],
+   [
+    "k=2 noeud 23 ",
+    4
+   ],
+   [
+    "k=4 noeud 31 ",
+    4
+   ]
+  ],
+  "SWAP": [
+   [
+    "k=2 noeud 18 ",
+    25
+   ],
+   [
+    "k=3 a=5/4 fusion 19 ",
+    21
+   ],
+   [
+    "k=4 a=5/2 fusion 33 ",
+    18
+   ]
+  ],
+  "V_autre": [
+   [
+    "verticale k=2 noeud 0 a=1/4 ",
+    4
+   ],
+   [
+    "verticale k=2 noeud 1 a=1/4 ",
+    4
+   ],
+   [
+    "verticale k=2 noeud 2 a=1/4 ",
+    3
+   ]
+  ],
+  "V_desc": [
+   [
+    "verticale k=2 noeud 0 a=1/4 ",
+    4
+   ],
+   [
+    "verticale k=2 noeud 1 a=1/4 ",
+    4
+   ],
+   [
+    "verticale k=2 noeud 2 a=1/4 ",
+    3
+   ]
+  ]
+ }
+}
+exit=0

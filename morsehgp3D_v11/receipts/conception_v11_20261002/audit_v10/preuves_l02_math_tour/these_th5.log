@@ -1,0 +1,28 @@
+== E5 [(0, 0, 7), (0, 9, 6), (1, 4, 0), (0, 0, 1), (4, 1, 2)]
+   position generale (Def. 26), violations : []
+K=1 n=5 : 10 niveaux critiques, 7 simplexes de Gabriel sur 10, 0 niveaux en desaccord
+K=2 n=5 : 15 niveaux critiques, 5 simplexes de Gabriel sur 10, 1 niveaux en desaccord
+  r2=83886/3563 (=23.5436)
+     Cech    : ['ABCDE']
+     Gabriel : ['ABC', 'ACDE']
+  dernier niveau en desaccord r2=83886/3563 : Cech ['ABCDE'] ; Gabriel ['ABC', 'ACDE']
+K=3 n=5 : 10 niveaux critiques, 4 simplexes de Gabriel sur 5, 0 niveaux en desaccord
+K=4 n=5 : 5 niveaux critiques, 1 simplexes de Gabriel sur 1, 0 niveaux en desaccord
+== exemple plan a 5 points (A, C, z, y, w) [(-100, 0, 0), (100, 0, 0), (1, -90, 0), (30, -85, 0), (3, 300, 0)]
+   position generale (Def. 26), violations : []
+K=2 n=5 : 11 niveaux critiques, 3 simplexes de Gabriel sur 10, 3 niveaux en desaccord
+  r2=10001440081/360000 (=27781.7780)
+     Cech    : ['ACzyw']
+     Gabriel : ['ACzy', 'ACw']
+  r2=74477/2 (=37238.5000)
+     Cech    : ['ACzyw']
+     Gabriel : ['ACzy', 'ACw']
+  r2=38026 (=38026.0000)
+     Cech    : ['ACzyw']
+     Gabriel : ['ACzy', 'ACw']
+  dernier niveau en desaccord r2=38026 : Cech ['ACzyw'] ; Gabriel ['ACzy', 'ACw']
+aleatoire n=5 K=2 plan : 300 nuages en position generale (0 ecartes), 0 avec desaccord, 0 encore en desaccord au dernier niveau
+aleatoire n=6 K=2 plan : 300 nuages en position generale (0 ecartes), 2 avec desaccord, 0 encore en desaccord au dernier niveau
+aleatoire n=6 K=2 3D : 300 nuages en position generale (0 ecartes), 3 avec desaccord, 0 encore en desaccord au dernier niveau
+aleatoire n=7 K=3 3D : 300 nuages en position generale (0 ecartes), 4 avec desaccord, 0 encore en desaccord au dernier niveau
+aleatoire n=7 K=2 3D : 300 nuages en position generale (0 ecartes), 2 avec desaccord, 0 encore en desaccord au dernier niveau

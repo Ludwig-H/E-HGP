@@ -1,0 +1,17 @@
+metrique       voie     sd_d    ddl | n paires totales (bilateral 5 %, puissance 80 %) pour un effet de 1 / 2 / 3 / 5 %
+cells+closes5  cpu    0.1176     48 | 1076 / 267 / 118 / 42
+cells+closes5  gpu    0.0994     48 | 769 / 191 / 84 / 30
+cells5         cpu    0.0945     48 | 694 / 172 / 76 / 27
+cells5         gpu    0.0961     48 | 718 / 178 / 79 / 28
+domain         cpu    0.0955    156 | 710 / 176 / 78 / 28
+domain         gpu    0.0344    156 | 92 / 23 / 10 / 4
+forest         cpu    0.0818    156 | 521 / 129 / 57 / 20
+forest         gpu    0.0794    156 | 490 / 122 / 54 / 19
+prefix         cpu    0.0440    156 | 151 / 38 / 17 / 6
+prefix         gpu    0.0505    156 | 199 / 50 / 22 / 8
+pubcpu5        cpu    0.1200    132 | 1119 / 277 / 122 / 43
+pubcpu5        gpu    0.1157    132 | 1041 / 258 / 114 / 40
+sp+prefix      cpu    0.1105    156 | 949 / 235 / 104 / 37
+sp+prefix      gpu    0.0632    156 | 311 / 77 / 34 / 12
+wall           cpu    0.0703    156 | 384 / 96 / 42 / 15
+wall           gpu    0.0365    156 | 104 / 26 / 12 / 4

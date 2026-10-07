@@ -1,0 +1,6 @@
+lidar02_full.u32le K=5 : cat(K) 1407885 lignes sha256=4862717993711122 | restrict(cat(K+2)) 1407885 lignes sha256=4862717993711122 | EGAL
+lidar02_full.u32le K=10 : cat(K) 5483320 lignes sha256=1de9c6e6e3776b76 | restrict(cat(K+2)) 5483320 lignes sha256=1de9c6e6e3776b76 | EGAL
+lidar00_full.u32le K=5 : cat(K) 1306696 lignes sha256=c39f958638daafe3 | restrict(cat(K+2)) 1306696 lignes sha256=c39f958638daafe3 | EGAL
+lidar00_full.u32le K=10 : cat(K) 5512670 lignes sha256=a0113411efb7ae01 | restrict(cat(K+2)) 5512670 lignes sha256=a0113411efb7ae01 | EGAL
+lidar01_full.u32le K=5 : cat(K) 1095926 lignes sha256=2a04a7f11638cb36 | restrict(cat(K+2)) 1095926 lignes sha256=2a04a7f11638cb36 | EGAL
+lidar01_full.u32le K=10 : cat(K) 4383302 lignes sha256=bc36d7db0ae49b3c | restrict(cat(K+2)) 4383302 lignes sha256=bc36d7db0ae49b3c | EGAL

@@ -1,0 +1,54 @@
+== python3 -S  test_projection_contracts.py
+
+OK
+projection_contracts_ok faits=5
+0.12 s
+rc=0
+== python3 -S -O test_projection_contracts.py
+
+OK
+projection_contracts_ok faits=5
+0.18 s
+rc=0
+== python3 -S  test_ref.py --suite=fast
+OK
+reference_fast faits=15 ecarts=0 clouds=342 orders=1362 cuts=48234 levels=21771 nodes=13029 births=8205 merges=4824 nary_merges=1580 plateau_levels=142 mixed_levels=392 verticals=9641 core_entries=8232 core_at_node_level=3127 cover_entries=8232 cover_ties=595 balls=9318 extended_balls=760 weighted_balls=264 general_births=794 general_joins=954 general_inert=1113 jumps=145 descents=56405 steps=10501 adhoc_spheres=34 weighted_clouds=34
+reference_fast_ok nuages=342 ordres=1362 coupes=48234 noeuds=13029
+14.54 s
+rc=0
+== python3 -S -O test_ref.py --suite=fast
+OK
+reference_fast faits=15 ecarts=0 clouds=342 orders=1362 cuts=48234 levels=21771 nodes=13029 births=8205 merges=4824 nary_merges=1580 plateau_levels=142 mixed_levels=392 verticals=9641 core_entries=8232 core_at_node_level=3127 cover_entries=8232 cover_ties=595 balls=9318 extended_balls=760 weighted_balls=264 general_births=794 general_joins=954 general_inert=1113 jumps=145 descents=56405 steps=10501 adhoc_spheres=34 weighted_clouds=34
+reference_fast_ok nuages=342 ordres=1362 coupes=48234 noeuds=13029
+12.13 s
+rc=0
+== python3 -S  test_supports.py
+reference_supports faits=51 ecarts=0 clouds=210 orders=951 balls=15062 supports=16943 nodes=12441 cuts=48074 births=6558 merge_balls=5768 internal=2736 passing=271 merges=4428 nary_merges=1890 arity2=10158 arity3=5640 arity4=1145 extended=2551 multi_support=530 extended_higher_arity=226 strong=7584 weak=7478 kparties=54659 cofaces=20463 shared_cofaces=277 gabriel=17058 non_gabriel=40053 invariance=70 permuted=70 empreinte=9bddd8aa22694f013dd81e7e70c0f1f352fa2e7a893e0c0dd66bd440d95fc697
+reference_supports_ok nuages=210 ordres=951 boules=15062 supports=16943 noeuds=12441 coupes=48074
+18.00 s
+rc=0
+== python3 -S -O test_supports.py
+reference_supports faits=51 ecarts=0 clouds=210 orders=951 balls=15062 supports=16943 nodes=12441 cuts=48074 births=6558 merge_balls=5768 internal=2736 passing=271 merges=4428 nary_merges=1890 arity2=10158 arity3=5640 arity4=1145 extended=2551 multi_support=530 extended_higher_arity=226 strong=7584 weak=7478 kparties=54659 cofaces=20463 shared_cofaces=277 gabriel=17058 non_gabriel=40053 invariance=70 permuted=70 empreinte=9bddd8aa22694f013dd81e7e70c0f1f352fa2e7a893e0c0dd66bd440d95fc697
+reference_supports_ok nuages=210 ordres=951 boules=15062 supports=16943 noeuds=12441 coupes=48074
+20.07 s
+rc=0
+== python3 -S  test_supports.py --suite=primitives
+reference_supports_primitives_ok sites=24 supports=828 q2=12 q3=24 q4=792 N2=12 N3=288 N4=3906 refus=2
+2.56 s
+rc=0
+== python3 -S -O test_supports.py --suite=primitives
+reference_supports_primitives_ok sites=24 supports=828 q2=12 q3=24 q4=792 N2=12 N3=288 N4=3906 refus=2
+2.41 s
+rc=0
+== python3 -S  test_ref.py --suite=absente
+meme code sous python3 -O.
+
+Command exited with non-zero status 2
+0.10 s
+rc=2
+== python3 -S -O test_ref.py --suite=absente
+meme code sous python3 -O.
+
+Command exited with non-zero status 2
+0.10 s
+rc=2

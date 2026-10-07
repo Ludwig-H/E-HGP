@@ -1,0 +1,12 @@
+graine 20261003 ; 33 nuages ; 396 executions du modele ; 2299 boules attendues (somme sur K) ; 11780 noeuds, 5860 feuilles, 8955 recensements
+  GEN-DLOC = huit coins                                    2000
+  GEN-DLOC egalite en un coin : pas de dominance              6
+  GEN-E aucune boule emise deux fois                        396
+  GEN-G catalogue = definition                              396
+  GEN-Z = intersection exacte                              1500
+  GEN-Z contact au sommet : rencontre                      1500
+ecarts : 0
+
+real	0m40.855s
+user	0m37.948s
+sys	0m0.046s

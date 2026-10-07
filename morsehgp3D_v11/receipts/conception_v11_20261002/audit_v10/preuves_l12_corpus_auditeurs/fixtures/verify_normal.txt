@@ -1,0 +1,88 @@
+PASS F1 {0,2,4} K2 beta=1 : couvertures {0,2} et {2,4}
+PASS F1 fusion des deux composantes a beta=4 (rayon 2)
+PASS F2 m=999 : paire gauche-milieu nee a rayon 499,5
+PASS F2 m=1001 : paire milieu-droite nee a rayon 499,5 (milieu d'abord couvert a droite)
+PASS F2 m=1001 : paire gauche-milieu nee a 500,5
+PASS F2 fusion des deux composantes K2 au rayon 1000 (les deux nuages)
+PASS F2 core : d_2 du milieu = 999 puis 1001
+PASS F2 core : reunion gauche-milieu = d_2(gauche) = 999 puis 1001
+PASS F3 K1 rayon 10 : blocs {0,20,22} et {50,52}
+PASS F3 K2 rayon 15 : bloc core {20,22,50,52}, le site 0 non entre
+PASS F3bis K1 a=1/4 : bloc {0,1}
+PASS F3bis K4 a=36 : sites a d_4 <= 6 = {1,4}
+PASS LC K4 triangle + interieur : centre (2,5/6,0), rayon 13/6
+PASS LC K4 : p=1, q_min=3
+PASS LC carre K4 : q_min=2 et quatre sites sur la coquille
+PASS LC tetraedre + centre : boule q4 de rayon carre 12, p=1
+PASS LC tetraedre : faces q3 de rayon carre 32/3
+PASS LC {-2,0,2} K2 : boule de fusion p=1, q_min=2 (p+q_min = K+1, a ne pas amputer)
+PASS LC {0,2,6} K2 R=2 : le site 2 est couvert par DEUX composantes
+PASS LC {-2,0,4} K2 R=2 : le site 0 est couvert par deux composantes
+PASS M9 temoins propres beta = 1/4, 9801/4, 1/4
+PASS M9 fusion FULL des trois composantes a beta = 2500 (fusions : [(Fraction(2500, 1), 3)])
+PASS M9 univers fort p+q_min<=2 : exactement trois boules
+PASS S10 M=16 : fusion ABC a beta = 41 M^2 / 4
+PASS S10 M=16 : C deplace en (1,1,1), fusion ABC inchangee
+PASS S10 M=16 : paire C'A a beta = ((4M-1)^2+2)/4
+PASS S10 M=16 : AB, AD, BD passent a p=1, q_min=2 (hors univers fort K2)
+PASS S10 M=16 : avant deplacement, C est sur la coquille de AB, AD, BD (p=0)
+PASS S10 M=2048 : fusion ABC a beta = 41 M^2 / 4
+PASS S10 M=2048 : C deplace en (1,1,1), fusion ABC inchangee
+PASS S10 M=2048 : paire C'A a beta = ((4M-1)^2+2)/4
+PASS S10 M=2048 : AB, AD, BD passent a p=1, q_min=2 (hors univers fort K2)
+PASS S10 M=2048 : avant deplacement, C est sur la coquille de AB, AD, BD (p=0)
+PASS S11 K3 : x=(15,4,0) n'est couvert qu'a beta = 25
+PASS S11 K3 : quatre feuilles nees a beta = 13/2, 13, 13, 16
+PASS S11 K3 : toutes les feuilles ont fusionne a beta <= 169/9 (fusions : [(Fraction(33, 2), 3), (Fraction(169, 9), 2)])
+PASS S11 K3 : a beta=25, une seule composante et la boule couvrant x a pour coquille {x,a,b,c}, p=0, q_min=2
+PASS S11 K5 : sept sites sur la sphere de centre (325,325,325), rayon 325
+PASS S11 K5 : x n'entre qu'a beta = 105625
+PASS S11 K5 : trois feuilles fusionnent a beta = 116715625/3409 (vraies fusions : [(Fraction(116715625, 3409), 3)])
+PASS S11 K5 : trois feuilles (naissances de composantes)
+PASS S11 K5 : boule commune p=0, q_min=3, coquille de sept sites
+PASS Q7 eps=0 : feuilles a 1/4, (10+eps)^2/4, (10-eps)^2/4, 1/4
+PASS Q7 eps=0 : fusion finale des deux branches a beta = 100
+PASS Q7 eps=0 : la feuille frontiere gauche rejoint la branche dense a aL=(11+eps)^2/4
+PASS Q7 eps=1/10 : feuilles a 1/4, (10+eps)^2/4, (10-eps)^2/4, 1/4
+PASS Q7 eps=1/10 : fusion finale des deux branches a beta = 100
+PASS Q7 eps=1/10 : la feuille frontiere gauche rejoint la branche dense a aL=(11+eps)^2/4
+PASS Q7 eps=-1/10 : feuilles a 1/4, (10+eps)^2/4, (10-eps)^2/4, 1/4
+PASS Q7 eps=-1/10 : fusion finale des deux branches a beta = 100
+PASS Q7 eps=-1/10 : la feuille frontiere gauche rejoint la branche dense a aL=(11+eps)^2/4
+PASS 5S K2 : paire {0,1} nee a beta = 1/4
+PASS 5S K2 : fusion globale a beta = 5/4 (fusions : [(Fraction(2, 3), 5), (Fraction(5, 4), 2)])
+PASS 5S K2 : a beta = 2/3 une composante couvre {0,2,3,4}
+PASS Q13 carre K2 : quatre lentilles d'aretes nees a beta=1, fusion a beta=2
+PASS MS {0,1,2} K2 : le site 1 couvert deux fois a beta=1/4, fusion a beta=1
+PASS MS {0,1,10,11} K2 : composante nee dans le vide a beta=81/4
+PASS MS {0,1,10,11} K2 : fusion a beta=25 de trois parents
+PASS UM eps=0 : alpha_a^2 = 81/4 (paire a-y)
+PASS UM eps=0 : boule AB, p=0
+PASS UM eps=0 : evenement ABZ a beta=25 present dans Gamma_2
+PASS UM eps=0 : evenement AYZ a beta=(171-18eps+eps^2)/4
+PASS UM eps=1/100 : alpha_a^2 = 81/4 (paire a-y)
+PASS UM eps=1/100 : boule AB, p=1
+PASS UM eps=1/100 : evenement ABZ a beta=25 present dans Gamma_2
+PASS UM eps=1/100 : evenement AYZ a beta=(171-18eps+eps^2)/4
+PASS DP niveau de AB = 2239277041
+PASS DP niveau du triangle = 10028723337177985445/4478554084
+PASS DP duree exacte = 1/4478554084 > 0
+PASS DP la soustraction des deux doubles vaut 0
+PASS DP produit scalaire au sommet C = 1 (triangle strictement aigu)
+PASS DP u21 : duree exacte 2^-22
+PASS CR beta(AB) = 17045913601 et beta(ABC) - beta(AB) = 17045913601/17873935364259844
+PASS 2T aretes plus courtes : AC, BC, DE, DF a beta = 999956
+PASS 2T aretes plus courtes : AB, EF a beta = 1000000 ; CD a beta = 1000000
+PASS 2T aretes plus courtes : fusions des triangles a beta = 249978000484/187489
+PASS 2T aretes plus courtes : fusion globale a beta = 3731956
+PASS 2T aretes plus courtes : entre les fusions, FULL a ABC, CD, DEF (couvertures recouvrantes)
+PASS 2T aretes plus courtes : fusion globale = multifusion de TROIS composantes
+PASS 2T aretes plus courtes : entree core de C et D a d_2^2 >= fusion globale ? (C entre a 3999824)
+PASS 2T pont plus court : AC, BC, DE, DF a beta = 999956
+PASS 2T pont plus court : AB, EF a beta = 1000000 ; CD a beta = 998001
+PASS 2T pont plus court : fusions des triangles a beta = 249978000484/187489
+PASS 2T pont plus court : fusion globale a beta = 3728225
+PASS 2T pont plus court : entre les fusions, FULL a ABC, CD, DEF (couvertures recouvrantes)
+PASS 2T pont plus court : fusion globale = multifusion de TROIS composantes
+PASS 2T pont plus court : entree core de C et D a d_2^2 >= fusion globale ? (C entre a 3992004)
+controles=87 echecs=0

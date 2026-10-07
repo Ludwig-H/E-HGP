@@ -1,0 +1,2 @@
+j1 boules 2281 ecarts 0 q2=408 q3=1247 q4=626 etendues=0 sites_recenses=18479 pmax=9
+code=0

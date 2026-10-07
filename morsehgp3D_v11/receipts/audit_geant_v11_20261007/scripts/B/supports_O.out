@@ -1,0 +1,3 @@
+reference_supports faits=51 ecarts=0 clouds=210 orders=951 balls=15062 supports=16943 nodes=12441 cuts=48074 births=6558 merge_balls=5768 internal=2736 passing=271 merges=4428 nary_merges=1890 arity2=10158 arity3=5640 arity4=1145 extended=2551 multi_support=530 extended_higher_arity=226 strong=7584 weak=7478 kparties=54659 cofaces=20463 shared_cofaces=277 gabriel=17058 non_gabriel=40053 invariance=70 permuted=70 empreinte=9bddd8aa22694f013dd81e7e70c0f1f352fa2e7a893e0c0dd66bd440d95fc697
+reference_supports_ok nuages=210 ordres=951 boules=15062 supports=16943 noeuds=12441 coupes=48074
+code=0

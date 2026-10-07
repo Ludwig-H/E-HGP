@@ -1,0 +1,12 @@
+# Identite des dumps de la tour entre la base (construction neuve du HEAD) et la composition du juge, trame 01, K = 5, 3 fils
+# 1. --no-points --dump : les DEUX binaires meurent par SIGSEGV dans l'export (defaut connu) ; dumps tronques (70 918 lignes), empreintes egales mais sans valeur :
+5aa12cc31950ed49c767c8ddcaa33bb1c9d606624041877d296e454a68ad0ff1  /tmp/v11-audit/l09_perf_lidar/runs3/dump_base_l01_k5.txt
+5aa12cc31950ed49c767c8ddcaa33bb1c9d606624041877d296e454a68ad0ff1  /tmp/v11-audit/l09_perf_lidar/runs3/dump_comp_l01_k5.txt
+70918 /tmp/v11-audit/l09_perf_lidar/runs3/dump_base_l01_k5.txt
+# 2. avec attaches (--entry=cover puis --entry=core) : dumps complets (1 484 481 lignes, 5 ordres), identiques octet pour octet :
+e8b753d245d7cda9338b001e7a725807f28420d79960a8191953b1cc05c67911  runs3/dumpA_cover.txt
+e8b753d245d7cda9338b001e7a725807f28420d79960a8191953b1cc05c67911  runs3/dumpB_cover.txt
+1484481 runs3/dumpA_cover.txt
+6ebb1eb4255a0903a581d304c7d7194a7ef0c0cafae8bac0ad8701032f1bf0cd  runs3/dumpA_core.txt
+6ebb1eb4255a0903a581d304c7d7194a7ef0c0cafae8bac0ad8701032f1bf0cd  runs3/dumpB_core.txt
+1484481 runs3/dumpA_core.txt

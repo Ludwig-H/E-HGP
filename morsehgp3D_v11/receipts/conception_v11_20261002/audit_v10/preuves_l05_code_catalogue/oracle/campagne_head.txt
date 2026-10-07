@@ -1,0 +1,46 @@
+Fri Oct  2 06:02:00 UTC 2026
+sph26_plus.u32le   K=1  --threads=2                              code=0   1s CONFORME K=1 sites=86 poids=86 boules=222 niveaux=27 etendues=44 ponderees=0 | tests":8380,"pair_tests":6
+sph26_plus.u32le   K=2  --threads=2                              code=0   0s CONFORME K=2 sites=86 poids=86 boules=458 niveaux=63 etendues=120 ponderees=0 | 5,"pair_tests":9991,"trip
+sph26_plus.u32le   K=3  --threads=2                              code=0   1s CONFORME K=3 sites=86 poids=86 boules=726 niveaux=117 etendues=203 ponderees=0 | ests":17680,"triple_test
+sph26_plus.u32le   K=5  --threads=2                              code=0   1s CONFORME K=5 sites=86 poids=86 boules=1431 niveaux=277 etendues=443 ponderees=0 | ts":42170,"triple_tests
+sph26_plus.u32le   K=10 --threads=2                              code=0   2s CONFORME K=10 sites=86 poids=86 boules=4755 niveaux=1199 etendues=972 ponderees=0 | s":108620,"triple_tes
+sph26_plus.u32le   K=12 --threads=2                              code=0   2s CONFORME K=12 sites=86 poids=86 boules=6566 niveaux=1762 etendues=1343 ponderees=0 | ":119253,"triple_tes
+sph26_dup.u32le    K=1  --threads=2                              code=0   1s CONFORME K=1 sites=86 poids=92 boules=231 niveaux=33 etendues=47 ponderees=32 | tests":6330,"triple_tests
+sph26_dup.u32le    K=2  --threads=2                              code=0   1s CONFORME K=2 sites=86 poids=92 boules=468 niveaux=73 etendues=119 ponderees=62 | ests":9803,"triple_tests
+sph26_dup.u32le    K=3  --threads=2                              code=0   1s CONFORME K=3 sites=86 poids=92 boules=741 niveaux=134 etendues=208 ponderees=109 | ts":17159,"triple_test
+sph26_dup.u32le    K=5  --threads=2                              code=0   1s CONFORME K=5 sites=86 poids=92 boules=1445 niveaux=305 etendues=445 ponderees=236 | ":41120,"triple_tests
+sph26_dup.u32le    K=10 --threads=2                              code=0   1s CONFORME K=10 sites=86 poids=92 boules=4676 niveaux=1254 etendues=947 ponderees=775 | :101556,"triple_tes
+rnd90_s12.u32le    K=2  --threads=2                              code=0   2s CONFORME K=2 sites=90 poids=90 boules=729 niveaux=142 etendues=250 ponderees=0 | 0371,"pair_tests":8479,"
+rnd90_s12.u32le    K=5  --threads=2                              code=0   1s CONFORME K=5 sites=90 poids=90 boules=3420 niveaux=1167 etendues=681 ponderees=0 | air_tests":26658,"trip
+rnd90_s12.u32le    K=10 --threads=2                              code=0   3s CONFORME K=10 sites=90 poids=90 boules=13462 niveaux=6111 etendues=1522 ponderees=0 | ests":59588,"triple
+rnd90_s12.u32le    K=12 --threads=2                              code=0   4s CONFORME K=12 sites=90 poids=90 boules=19298 niveaux=9200 etendues=1929 ponderees=0 | ests":66089,"triple
+rnd110_s40.u32le   K=2  --threads=2                              code=0   3s CONFORME K=2 sites=110 poids=110 boules=897 niveaux=495 etendues=33 ponderees=0 | 728,"pair_tests":11263,
+rnd110_s40.u32le   K=5  --threads=2                              code=0   3s CONFORME K=5 sites=110 poids=110 boules=4712 niveaux=3680 etendues=97 ponderees=0 | air_tests":34571,"tri
+rnd110_s40.u32le   K=10 --threads=2                              code=0   6s CONFORME K=10 sites=110 poids=110 boules=18855 niveaux=16956 etendues=206 ponderees=0 | tests":76985,"tri
+rnd110_s40.u32le   K=12 --threads=2                              code=0   7s CONFORME K=12 sites=110 poids=110 boules=27189 niveaux=24994 etendues=256 ponderees=0 | tests":89425,"tri
+rnd140_s100.u32le  K=3  --threads=2                              code=0   9s CONFORME K=3 sites=140 poids=140 boules=2425 niveaux=2045 etendues=8 ponderees=0 | ,"pair_tests":24146,"t
+rnd140_s100.u32le  K=10 --threads=2                              code=0  13s CONFORME K=10 sites=140 poids=140 boules=26486 niveaux=25135 etendues=60 ponderees=0 | tests":104169,"tri
+rnd70_w.u32le      K=1  --threads=2                              code=0   1s CONFORME K=1 sites=70 poids=137 boules=471 niveaux=245 etendues=49 ponderees=471 | ,"pair_tests":2577,"tr
+rnd70_w.u32le      K=2  --threads=2                              code=0   0s CONFORME K=2 sites=70 poids=137 boules=504 niveaux=269 etendues=51 ponderees=504 | ,"pair_tests":2512,"tr
+rnd70_w.u32le      K=5  --threads=2                              code=0   1s CONFORME K=5 sites=70 poids=137 boules=1810 niveaux=1113 etendues=155 ponderees=1810 | r_tests":7306,"tri
+rnd70_w.u32le      K=10 --threads=2                              code=0   1s CONFORME K=10 sites=70 poids=137 boules=4069 niveaux=2815 etendues=276 ponderees=4069 | tests":10831,"tri
+rnd70_w.u32le      K=12 --threads=2                              code=0   1s CONFORME K=12 sites=70 poids=137 boules=5354 niveaux=3864 etendues=330 ponderees=5354 | tests":11339,"tri
+plan120.u32le      K=1  --threads=2                              code=0   2s CONFORME K=1 sites=153 poids=160 boules=357 niveaux=28 etendues=91 ponderees=53 | 309,"pair_tests":1531,"
+plan120.u32le      K=2  --threads=2                              code=0   1s CONFORME K=2 sites=153 poids=160 boules=715 niveaux=60 etendues=185 ponderees=122 | ,"pair_tests":2588,"t
+plan120.u32le      K=5  --threads=2                              code=0   2s CONFORME K=5 sites=153 poids=160 boules=2212 niveaux=145 etendues=536 ponderees=390 | pair_tests":5814,"t
+plan120.u32le      K=10 --threads=2                              code=0   3s CONFORME K=10 sites=153 poids=160 boules=5990 niveaux=401 etendues=1199 ponderees=972 | tests":11651,"tri
+droite40.u32le     K=1  --threads=2                              code=0   0s CONFORME K=1 sites=40 poids=40 boules=39 niveaux=1 etendues=0 ponderees=0 | ce_tests":1012,"pair_tests":3
+droite40.u32le     K=3  --threads=2                              code=0   0s CONFORME K=3 sites=40 poids=40 boules=114 niveaux=3 etendues=0 ponderees=0 | nce_tests":750,"pair_tests":
+rnd110_s40.u32le   K=5  --threads=2 --leaf=120                   code=0   5s CONFORME K=5 sites=110 poids=110 boules=4712 niveaux=3680 etendues=97 ponderees=0 | tests":5995,"triple_t
+rnd110_s40.u32le   K=10 --threads=2 --leaf=120                   code=0   9s CONFORME K=10 sites=110 poids=110 boules=18855 niveaux=16956 etendues=206 ponderees=0 | ests":5995,"tripl
+rnd200_s60.u32le   K=5  --threads=2 --leaf=250                   code=0  56s CONFORME K=5 sites=200 poids=200 boules=9784 niveaux=7667 etendues=137 ponderees=0 | :19900,"triple_tests
+rnd200_s60.u32le   K=10 --threads=2 --leaf=250                   code=0  64s CONFORME K=10 sites=200 poids=200 boules=40877 niveaux=36900 etendues=281 ponderees=0 | :19900,"triple_te
+rnd280_s100.u32le  K=3  --threads=2 --leaf=300 --max-leaf=1000   code=0 281s CONFORME K=3 sites=280 poids=280 boules=5329 niveaux=3698 etendues=47 ponderees=0 | 39060,"triple_tests":
+rnd280_s100.u32le  K=5  --threads=2 --leaf=300 --max-leaf=1000   code=0 259s CONFORME K=5 sites=280 poids=280 boules=14238 niveaux=11516 etendues=96 ponderees=0 | 39060,"triple_tests
+rnd280_s100.u32le  K=10 --threads=2 --leaf=300 --max-leaf=1000   code=0 248s CONFORME K=10 sites=280 poids=280 boules=63610 niveaux=58225 etendues=215 ponderees=0 | 9060,"triple_test
+rnd280_s100.u32le  K=10 --threads=2                              code=0 204s CONFORME K=10 sites=280 poids=280 boules=63610 niveaux=58225 etendues=215 ponderees=0 | sts":264588,"trip
+sph89.u32le        K=2  --threads=2                              code=0   4s CONFORME K=2 sites=144 poids=144 boules=723 niveaux=16 etendues=99 ponderees=0 | r_tests":101875,"triple_
+sph89_plus.u32le   K=3  --threads=2                              code=0  15s CONFORME K=3 sites=153 poids=154 boules=1170 niveaux=122 etendues=174 ponderees=27 | 6,"triple_tests":116
+sph314.u32le       K=2  --threads=2 --max-leaf=1000              code=0  55s CONFORME K=2 sites=312 poids=312 boules=1491 niveaux=24 etendues=195 ponderees=0 | sts":415560,"triple_te
+sph314.u32le       K=2  --threads=2                              code=2   0s REFUS catalogue {"status":"resource_exhausted","reason":"wide_leaf"}
+Fri Oct  2 06:23:15 UTC 2026

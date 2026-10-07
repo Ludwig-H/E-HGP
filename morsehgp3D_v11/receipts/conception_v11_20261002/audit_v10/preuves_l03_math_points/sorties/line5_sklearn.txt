@@ -1,0 +1,18 @@
+line5 ordre d origine  min_samples=1 brute     etiquettes (points 0,1,5,9,10) = [0, 0, 0, 1, 1] -> point du milieu : gauche
+line5 ordre d origine  min_samples=1 kd_tree   etiquettes (points 0,1,5,9,10) = [0, 0, 0, 1, 1] -> point du milieu : gauche
+line5 ordre d origine  min_samples=1 ball_tree etiquettes (points 0,1,5,9,10) = [0, 0, 0, 1, 1] -> point du milieu : gauche
+line5 ordre d origine  min_samples=2 brute     etiquettes (points 0,1,5,9,10) = [0, 0, 0, 1, 1] -> point du milieu : gauche
+line5 ordre d origine  min_samples=2 kd_tree   etiquettes (points 0,1,5,9,10) = [0, 0, 0, 1, 1] -> point du milieu : gauche
+line5 ordre d origine  min_samples=2 ball_tree etiquettes (points 0,1,5,9,10) = [0, 0, 0, 1, 1] -> point du milieu : gauche
+line5 ordre inverse    min_samples=1 brute     etiquettes (points 0,1,5,9,10) = [1, 1, 0, 0, 0] -> point du milieu : droite
+line5 ordre inverse    min_samples=1 kd_tree   etiquettes (points 0,1,5,9,10) = [1, 1, 0, 0, 0] -> point du milieu : droite
+line5 ordre inverse    min_samples=1 ball_tree etiquettes (points 0,1,5,9,10) = [1, 1, 0, 0, 0] -> point du milieu : droite
+line5 ordre inverse    min_samples=2 brute     etiquettes (points 0,1,5,9,10) = [1, 1, 0, 0, 0] -> point du milieu : droite
+line5 ordre inverse    min_samples=2 kd_tree   etiquettes (points 0,1,5,9,10) = [1, 1, 0, 0, 0] -> point du milieu : droite
+line5 ordre inverse    min_samples=2 ball_tree etiquettes (points 0,1,5,9,10) = [1, 1, 0, 0, 0] -> point du milieu : droite
+line5 milieu en tete   min_samples=1 brute     etiquettes (points 0,1,5,9,10) = [0, 0, 0, 1, 1] -> point du milieu : gauche
+line5 milieu en tete   min_samples=1 kd_tree   etiquettes (points 0,1,5,9,10) = [0, 0, 0, 1, 1] -> point du milieu : gauche
+line5 milieu en tete   min_samples=1 ball_tree etiquettes (points 0,1,5,9,10) = [0, 0, 0, 1, 1] -> point du milieu : gauche
+line5 milieu en tete   min_samples=2 brute     etiquettes (points 0,1,5,9,10) = [0, 0, 0, 1, 1] -> point du milieu : gauche
+line5 milieu en tete   min_samples=2 kd_tree   etiquettes (points 0,1,5,9,10) = [0, 0, 0, 1, 1] -> point du milieu : gauche
+line5 milieu en tete   min_samples=2 ball_tree etiquettes (points 0,1,5,9,10) = [0, 0, 0, 1, 1] -> point du milieu : gauche

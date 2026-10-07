@@ -1,0 +1,88 @@
+## tower --k=abc (entier mal forme)
+   tete publiee  : code=-6 | terminate called after throwing an instance of 'std::invalid_argument'
+   raccord final : code=2 | {"status":"invalid_input","reason":"parameter_out_of_range"}
+## tower --k=2abc (prefixe numerique)
+   tete publiee  : code=0 | {"status":"ok","n":40,"K":2,"threads":1,"balls":244,"prepare_s":0.0000,"catalogue_s":0.0059,"tower_s":0.0116,"points":true,"rss_kib":{"after_catalogue
+   raccord final : code=2 | {"status":"invalid_input","reason":"parameter_out_of_range"}
+## tower --k=0
+   tete publiee  : code=2 | {"status":"invalid_input","reason":"kmax_out_of_range"}
+   raccord final : code=2 | {"status":"invalid_input","reason":"kmax_out_of_range"}
+## tower option inconnue
+   tete publiee  : code=2
+   raccord final : code=2 | {"status":"invalid_input","reason":"parameter_out_of_range"}
+## tower entree absente
+   tete publiee  : code=2
+   raccord final : code=2 | {"status":"invalid_input","reason":"input_unreadable"}
+## tower entree tronquee (+5 octets)
+   tete publiee  : code=0 | {"status":"ok","n":40,"K":2,"threads":1,"balls":244,"prepare_s":0.0000,"catalogue_s":0.0010,"tower_s":0.0003,"points":true,"rss_kib":{"after_catalogue
+   raccord final : code=2 | {"status":"invalid_input","reason":"size_mismatch"}
+## tower --dump=ENTREE en succes
+   tete publiee  : code=0 | {"status":"ok","n":5,"K":2,"threads":1,"balls":16,"prepare_s":0.0000,"catalogue_s":0.0001,"tower_s":0.0002,"points":true,"rss_kib":{"after_catalogue": | five.u32le:60o:146668a0ef63->462o:97f267b3afff
+   raccord final : code=2 | {"status":"invalid_input","reason":"output_conflict"} | five.u32le:intact
+## tower --dump=precieux, refus k=13
+   tete publiee  : code=2 | {"status":"invalid_input","reason":"kmax_out_of_range"} | precieux.txt:intact
+   raccord final : code=2 | {"status":"invalid_input","reason":"kmax_out_of_range"} | precieux.txt:intact
+## tower --dump= (vide)
+   tete publiee  : code=0 | {"status":"ok","n":5,"K":2,"threads":1,"balls":16,"prepare_s":0.0000,"catalogue_s":0.0001,"tower_s":0.0002,"points":true,"rss_kib":{"after_catalogue":
+   raccord final : code=2 | {"status":"invalid_input","reason":"parameter_out_of_range"}
+## tower --threads=-1 (RLIMIT_AS 1 Gio)
+   tete publiee  : code=-6 | terminate called after throwing an instance of 'std::bad_alloc'
+   raccord final : code=2 | {"status":"invalid_input","reason":"parameter_out_of_range"}
+## tower --threads=1024 (RLIMIT_AS 1 Gio)
+   tete publiee  : code=-6 | terminate called after throwing an instance of 'std::system_error'
+   raccord final : code=2 | {"status":"resource_exhausted","reason":"session_overhead"}
+## tower sortie standard /dev/full avec dump
+   tete publiee  : code=0 |  | precieux.txt:9o:bb0b39cdd987->10697o:c0b0ea1a2660
+   raccord final : code=2 | refus output_unwritable (sortie standard) | precieux.txt:intact
+## catalogue --k=10 --leaf=11 (feuille K+1)
+   tete publiee  : code=DELAI
+   raccord final : code=2 | {"status":"invalid_input","reason":"parameter_out_of_range"}
+## catalogue --k=10 --leaf=13 (feuille K+3)
+   tete publiee  : code=0 | {"status":"ok","n":40,"sites":40,"K":10,"threads":1,"balls":4015,"levels":4015,"prepare_s":0.0000,"catalogue_s":0.1304,"catalogue_stages":{"t_frontier
+   raccord final : code=0 | {"status":"ok","n":40,"sites":40,"K":10,"threads":1,"balls":4015,"levels":4015,"prepare_s":0.0000,"catalogue_s":0.1013,"catalogue_stages":{"t_frontier
+## cluster --z=nan
+   tete publiee  : code=0 | {"status":"ok","n":40,"kmax":2,"balls":244,"clusters":2,"catalogue_s":0.004,"tower_s":0.000,"head_s":0.000} | out.i32le:ABSENT->160o:9aeb5054dbde
+   raccord final : code=2 | {"status":"invalid_input","reason":"parameter_out_of_range"} | out.i32le:intact
+## cluster --z=-1
+   tete publiee  : code=0 | {"status":"ok","n":40,"kmax":2,"balls":244,"clusters":4,"catalogue_s":0.001,"tower_s":0.000,"head_s":0.000} | out.i32le:ABSENT->160o:ad09582872d4
+   raccord final : code=2 | {"status":"invalid_input","reason":"parameter_out_of_range"} | out.i32le:intact
+## cluster --z=0
+   tete publiee  : code=0 | {"status":"ok","n":40,"kmax":2,"balls":244,"clusters":2,"catalogue_s":0.001,"tower_s":0.000,"head_s":0.000} | out.i32le:ABSENT->160o:9aeb5054dbde
+   raccord final : code=2 | {"status":"invalid_input","reason":"parameter_out_of_range"} | out.i32le:intact
+## cluster --z=17
+   tete publiee  : code=0 | {"status":"ok","n":40,"kmax":2,"balls":244,"clusters":9,"catalogue_s":0.004,"tower_s":0.000,"head_s":0.000} | out.i32le:ABSENT->160o:bc61aa3dc6cb
+   raccord final : code=2 | {"status":"invalid_input","reason":"parameter_out_of_range"} | out.i32le:intact
+## cluster --z=abc
+   tete publiee  : code=-6 | terminate called after throwing an instance of 'std::invalid_argument' | out.i32le:intact
+   raccord final : code=2 | {"status":"invalid_input","reason":"parameter_out_of_range"} | out.i32le:intact
+## cluster --z=1e
+   tete publiee  : code=0 | {"status":"ok","n":40,"kmax":2,"balls":244,"clusters":8,"catalogue_s":0.004,"tower_s":0.000,"head_s":0.000} | out.i32le:ABSENT->160o:731aefbbdc56
+   raccord final : code=2 | {"status":"invalid_input","reason":"parameter_out_of_range"} | out.i32le:intact
+## cluster --mcs=0
+   tete publiee  : code=0 | {"status":"ok","n":40,"kmax":2,"balls":244,"clusters":57,"catalogue_s":0.004,"tower_s":0.000,"head_s":0.000} | out.i32le:ABSENT->160o:7e7a0eb59185
+   raccord final : code=2 | {"status":"invalid_input","reason":"parameter_out_of_range"} | out.i32le:intact
+## cluster --mcs=-1
+   tete publiee  : code=0 | {"status":"ok","n":40,"kmax":2,"balls":244,"clusters":0,"catalogue_s":0.001,"tower_s":0.000,"head_s":0.000} | out.i32le:ABSENT->160o:0052516839b9
+   raccord final : code=2 | {"status":"invalid_input","reason":"parameter_out_of_range"} | out.i32le:intact
+## cluster --k=1 --mcs=1
+   tete publiee  : code=0 | {"status":"ok","n":40,"kmax":1,"balls":89,"clusters":40,"catalogue_s":0.000,"tower_s":0.000,"head_s":0.000} | out.i32le:ABSENT->160o:2e04002aed33
+   raccord final : code=2 | {"status":"unsupported_degeneracy","reason":"numeric_domain","k":1} | out.i32le:intact
+## cluster un point --k=1 --mcs=2
+   tete publiee  : code=0 | {"status":"ok","n":1,"kmax":1,"balls":0,"clusters":0,"catalogue_s":0.000,"tower_s":0.000,"head_s":0.000} | out.i32le:ABSENT->4o:ad95131bc0b7
+   raccord final : code=2 | {"status":"unsupported_degeneracy","reason":"numeric_domain","k":1} | out.i32le:intact
+## cluster collision etiquettes/--tree
+   tete publiee  : code=0 | {"status":"ok","n":40,"kmax":2,"balls":244,"clusters":8,"catalogue_s":0.001,"tower_s":0.000,"head_s":0.000} | out.i32le:ABSENT->4211o:53191384f7e6
+   raccord final : code=2 | {"status":"invalid_input","reason":"output_conflict"} | out.i32le:intact
+## cluster SORTIE = ENTREE
+   tete publiee  : code=0 | {"status":"ok","n":40,"kmax":2,"balls":244,"clusters":8,"catalogue_s":0.001,"tower_s":0.000,"head_s":0.000} | p40.u32le:480o:eb9a21613388->160o:731aefbbdc56
+   raccord final : code=2 | {"status":"invalid_input","reason":"output_conflict"} | p40.u32le:intact
+## cluster option prise pour la sortie
+   tete publiee  : code=0 | {"status":"ok","n":40,"kmax":2,"balls":244,"clusters":3,"catalogue_s":0.001,"tower_s":0.000,"head_s":0.000} | --k=5:ABSENT->160o:f8f845ad9c03
+   raccord final : code=2 | {"status":"invalid_input","reason":"parameter_out_of_range"} | --k=5:intact
+## cluster --entry=cover5 sur 5 sites (K+E > sites)
+   tete publiee  : code=3 | {"status":"invariant_violated","reason":"census_mismatch","k":2} | out.i32le:intact
+   raccord final : code=2 | {"status":"invalid_input","reason":"k_out_of_range"} | out.i32le:intact
+## cluster --allow-single --mcs=40 --k=5 --z=1 (regle de la racine)
+   tete publiee  : code=0 | {"status":"ok","n":40,"kmax":5,"balls":1142,"clusters":1,"catalogue_s":0.004,"tower_s":0.001,"head_s":0.000} | bruit=0
+   raccord final : code=0 | {"status":"ok","n":40,"kmax":5,"balls":1142,"clusters":1,"catalogue_s":0.004,"tower_s":0.001,"head_s":0.000} | bruit=11
+FIN sondes=29

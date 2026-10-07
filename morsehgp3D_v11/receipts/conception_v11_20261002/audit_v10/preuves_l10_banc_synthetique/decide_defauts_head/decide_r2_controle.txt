@@ -1,0 +1,17 @@
+decide.py R2 4d1265f0 : sorties
+== r2_decide_incomplet
+REFUS : run.json declare une campagne incomplete (complete=False, computed=4)
+REFUS : 30592 couples (scene prevue, methode) manquants, par exemple spherical_n8000_easy_nu0_s126073948912612625/tw_K1, spherical_n8000_easy_nu0_s126073948912612625/hdb_ms1, spherical_n8000_easy_nu0_s126073948912612625/tw_K1_nf
+
+== r2_ari125
+REFUS : run.json declare une campagne incomplete (complete=False, computed=4)
+REFUS : 30592 couples (scene prevue, methode) manquants, par exemple spherical_n8000_easy_nu0_s126073948912612625/tw_K1, spherical_n8000_easy_nu0_s126073948912612625/hdb_ms1, spherical_n8000_easy_nu0_s126073948912612625/tw_K1_nf
+REFUS : 24 lignes non refusees a score hors domaine (ARI_s hors [-1/2, 1] ou AMI_nc > 1, tolerance 1e-09), par exemple anisotropic_n32000_easy_nu0_s1004878333917440374/tw_K1, anisotropic_n32000_easy_nu0_s1004878333917440374/tw_K2, anisotropic_n32000_easy_nu0_s1004878333917440374/tw_K3
+
+== r2_alpha2
+REFUS : preenregistrement hors schema : decision.alpha = 2 : reel dans (0, 0.05] attendu
+REFUS : preenregistrement hors schema : decision.delta_min = -1 : reel dans [0, 1] attendu
+
+== r2_lotC
+lot_conforme_au_plan : 960 scenes x 32 methodes
+

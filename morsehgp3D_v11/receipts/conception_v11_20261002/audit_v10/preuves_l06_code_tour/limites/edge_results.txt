@@ -1,0 +1,28 @@
+grid6 K 5 code 0 mur 0.15 s statut ok  n 216 boules 4303 catalogue_s 0.055 tour_s 0.0777 t_local 0.0677 t_resolve 0.0056
+grid6 K 8 code 0 mur 0.33 s statut ok  n 216 boules 9715 catalogue_s 0.09 tour_s 0.2231 t_local 0.192 t_resolve 0.0249
+grid6 K 10 code 0 mur 0.77 s statut ok  n 216 boules 18486 catalogue_s 0.175 tour_s 0.5835 t_local 0.5174 t_resolve 0.0523
+grid6 K 11 code 0 mur 7.84 s statut ok  n 216 boules 28974 catalogue_s 0.3275 tour_s 7.4867 t_local 7.3457 t_resolve 0.1202
+grid6 K 12 code 124 mur 120.01 s (pas de JSON : delai ou signal)
+grid10 K 5 code 0 mur 0.37 s statut ok  n 1000 boules 24995 catalogue_s 0.1223 tour_s 0.2267 t_local 0.1844 t_resolve 0.0359
+sphere12 K 5 code 0 mur 0.03 s statut ok  n 12 boules 149 catalogue_s 0.0003 tour_s 0.0153 t_local 0.0149 t_resolve 0.0001
+sphere12 K 10 code 0 mur 0.03 s statut ok  n 12 boules 149 catalogue_s 0.0003 tour_s 0.0165 t_local 0.0161 t_resolve 0.0002
+sphere16 K 10 code 0 mur 3.67 s statut ok  n 16 boules 191 catalogue_s 0.0006 tour_s 3.6552 t_local 3.6547 t_resolve 0.0003
+sphere24 K 5 code 0 mur 56.53 s statut ok  n 24 boules 261 catalogue_s 0.0207 tour_s 56.4991 t_local 56.4949 t_resolve 0.0039
+circle65 K 5 code 0 mur 0.04 s statut ok  n 17 boules 129 catalogue_s 0.0009 tour_s 0.0214 t_local 0.0211 t_resolve 0.0
+circle325 K 5 code 0 mur 0.95 s statut ok  n 25 boules 241 catalogue_s 0.0032 tour_s 0.9248 t_local 0.9245 t_resolve 0.0001
+line20 K 5 code 0 mur 0.02 s statut ok  n 20 boules 85 catalogue_s 0.0002 tour_s 0.0002 t_local 0.0 t_resolve 0.0
+plane_grid12 K 5 code 0 mur 0.02 s statut ok  n 144 boules 1298 catalogue_s 0.0032 tour_s 0.0057 t_local 0.0011 t_resolve 0.004
+n1 K 5 code 0 mur 0.02 s statut ok  n 1 boules 0 catalogue_s 0.0 tour_s 0.0002 t_local 0.0 t_resolve 0.0
+n2 K 5 code 0 mur 0.01 s statut ok  n 2 boules 1 catalogue_s 0.0 tour_s 0.0001 t_local 0.0 t_resolve 0.0
+n3 K 5 code 0 mur 0.01 s statut ok  n 3 boules 3 catalogue_s 0.0 tour_s 0.0002 t_local 0.0 t_resolve 0.0
+--- plantages
+./run_edge.sh: line 21: 142313 Segmentation fault      (core dumped) $B/mhgp10_tower n3.u32le --k=2 --threads=1 --no-points --dump=n3_nopoints.dump > n3_nopoints.json 2> /dev/null
+mhgp10_tower n3 --k=2 --no-points --dump : code 139 ; octets ecrits sur stdout 0 ; dump 0 octets
+./run_edge.sh: line 22: 142376 Segmentation fault      (core dumped) $B/mhgp10_cluster n3.u32le out_n3.i32 --k=5 --mcs=2 --threads=1 > n3_cluster.json 2> /dev/null
+mhgp10_cluster n3 (3 points) --k=5 --mcs=2 : code 139
+./run_edge.sh: line 23: 142434 Segmentation fault      (core dumped) $B/mhgp10_cluster n2.u32le out_n2.i32 --k=3 --mcs=2 --threads=1 > n2_cluster.json 2> /dev/null
+mhgp10_cluster n2 (2 points) --k=3 --mcs=2 : code 139
+mhgp10_tower grid6 --k=13 : code 2 ; {"status":"invalid_input","reason":"kmax_out_of_range"}
+done
+--- ordre effectif
+mhgp10_tower n3 (3 points) --k=5 : statut ok ; champ "K" publie = 5 ; ordres construits = 3

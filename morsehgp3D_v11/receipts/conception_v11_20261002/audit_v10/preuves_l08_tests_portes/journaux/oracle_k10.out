@@ -1,0 +1,7 @@
+catalogue fini en 275 s {'catalogue_K8': 40, 'catalogue_boules_K8': 10227, 'catalogue_K10': 40, 'catalogue_boules_K10': 11920} ecarts 0
+tour nuage 0 n=12 : {'catalogue_K8': 40, 'catalogue_boules_K8': 10227, 'catalogue_K10': 40, 'catalogue_boules_K10': 11920, 'tour_K7': 1, 'tour_coupes_K7': 1420, 'tour_K10': 1, 'tour_coupes_K10': 1528} ecarts 0 (953 s)
+tour nuage 1 n=12 : {'catalogue_K8': 40, 'catalogue_boules_K8': 10227, 'catalogue_K10': 40, 'catalogue_boules_K10': 11920, 'tour_K7': 2, 'tour_coupes_K7': 2088, 'tour_K10': 2, 'tour_coupes_K10': 2278} ecarts 0 (1329 s)
+tour nuage 2 n=7 : {'catalogue_K8': 40, 'catalogue_boules_K8': 10227, 'catalogue_K10': 40, 'catalogue_boules_K10': 11920, 'tour_K7': 3, 'tour_coupes_K7': 2270, 'tour_K10': 3, 'tour_coupes_K10': 2460} ecarts 0 (1331 s)
+tour nuage 3 n=12 : {'catalogue_K8': 40, 'catalogue_boules_K8': 10227, 'catalogue_K10': 40, 'catalogue_boules_K10': 11920, 'tour_K7': 4, 'tour_coupes_K7': 3566, 'tour_K10': 4, 'tour_coupes_K10': 3920} ecarts 0 (1799 s)
+tour nuage 4 n=11 : {'catalogue_K8': 40, 'catalogue_boules_K8': 10227, 'catalogue_K10': 40, 'catalogue_boules_K10': 11920, 'tour_K7': 5, 'tour_coupes_K7': 4790, 'tour_K10': 5, 'tour_coupes_K10': 5214} ecarts 0 (2010 s)
+(arrete par l'auditeur apres 5 nuages : 08:31:38 UTC)

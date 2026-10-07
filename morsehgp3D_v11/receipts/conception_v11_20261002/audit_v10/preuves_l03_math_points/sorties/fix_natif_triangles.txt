@@ -1,0 +1,53 @@
+P1 --entry=core : hierarchie de points (blocs >= 2)
+    r =   999.9780 : (aucun)
+    r =  1999.9560 : ABCDEF
+    etiquettes EOM z=1 mcs=2 : [np.int32(-1), np.int32(-1), np.int32(-1), np.int32(-1), np.int32(-1), np.int32(-1)]
+    etiquettes EOM z=1 mcs=3 : [np.int32(-1), np.int32(-1), np.int32(-1), np.int32(-1), np.int32(-1), np.int32(-1)]
+P1 --entry=cover : hierarchie de points (blocs >= 2)
+    r =   999.9780 : BC | DF
+    r =  1154.6836 : ABC | DEF
+    r =  1931.8271 : ABCDEF
+    etiquettes EOM z=1 mcs=2 : [np.int32(0), np.int32(0), np.int32(0), np.int32(1), np.int32(1), np.int32(1)]
+    etiquettes EOM z=1 mcs=3 : [np.int32(0), np.int32(0), np.int32(0), np.int32(1), np.int32(1), np.int32(1)]
+P1 --entry=cover1 : hierarchie de points (blocs >= 2)
+    r =   999.9780 : (aucun)
+    r =  1154.6836 : ABC | DEF
+    r =  1931.8271 : ABCDEF
+    etiquettes EOM z=1 mcs=2 : [np.int32(0), np.int32(0), np.int32(0), np.int32(1), np.int32(1), np.int32(1)]
+    etiquettes EOM z=1 mcs=3 : [np.int32(0), np.int32(0), np.int32(0), np.int32(1), np.int32(1), np.int32(1)]
+P2 --entry=core : hierarchie de points (blocs >= 2)
+    r =   999.0000 : (aucun)
+    r =  1998.0000 : CD
+    r =  1999.9560 : ABCDEF
+    etiquettes EOM z=1 mcs=2 : [np.int32(-1), np.int32(-1), np.int32(-1), np.int32(-1), np.int32(-1), np.int32(-1)]
+    etiquettes EOM z=1 mcs=3 : [np.int32(-1), np.int32(-1), np.int32(-1), np.int32(-1), np.int32(-1), np.int32(-1)]
+P2 --entry=cover : hierarchie de points (blocs >= 2)
+    r =   999.0000 : CD
+    r =  1154.6836 : AB | CD | EF
+    r =  1930.8612 : ABCDEF
+    etiquettes EOM z=1 mcs=2 : [np.int32(1), np.int32(1), np.int32(0), np.int32(0), np.int32(2), np.int32(2)]
+    etiquettes EOM z=1 mcs=3 : [np.int32(-1), np.int32(-1), np.int32(-1), np.int32(-1), np.int32(-1), np.int32(-1)]
+P2 --entry=cover1 : hierarchie de points (blocs >= 2)
+    r =   999.0000 : (aucun)
+    r =  1154.6836 : ABC | DEF
+    r =  1930.8612 : ABCDEF
+    etiquettes EOM z=1 mcs=2 : [np.int32(0), np.int32(0), np.int32(0), np.int32(1), np.int32(1), np.int32(1)]
+    etiquettes EOM z=1 mcs=3 : [np.int32(0), np.int32(0), np.int32(0), np.int32(1), np.int32(1), np.int32(1)]
+T1_1700 --entry=core : hierarchie de points (blocs >= 2)
+    r =   850.0000 : (aucun)
+    r =  1700.0000 : CD
+    r =  1999.9560 : ABCDEF
+    etiquettes EOM z=1 mcs=2 : [np.int32(-1), np.int32(-1), np.int32(-1), np.int32(-1), np.int32(-1), np.int32(-1)]
+    etiquettes EOM z=1 mcs=3 : [np.int32(-1), np.int32(-1), np.int32(-1), np.int32(-1), np.int32(-1), np.int32(-1)]
+T1_1700 --entry=cover : hierarchie de points (blocs >= 2)
+    r =   850.0000 : CD
+    r =  1154.6836 : AB | CD | EF
+    r =  1787.3601 : ABCDEF
+    etiquettes EOM z=1 mcs=2 : [np.int32(1), np.int32(1), np.int32(0), np.int32(0), np.int32(2), np.int32(2)]
+    etiquettes EOM z=1 mcs=3 : [np.int32(-1), np.int32(-1), np.int32(-1), np.int32(-1), np.int32(-1), np.int32(-1)]
+T1_1700 --entry=cover1 : hierarchie de points (blocs >= 2)
+    r =   850.0000 : (aucun)
+    r =  1154.6836 : ABC | DEF
+    r =  1787.3601 : ABCDEF
+    etiquettes EOM z=1 mcs=2 : [np.int32(0), np.int32(0), np.int32(0), np.int32(1), np.int32(1), np.int32(1)]
+    etiquettes EOM z=1 mcs=3 : [np.int32(0), np.int32(0), np.int32(0), np.int32(1), np.int32(1), np.int32(1)]

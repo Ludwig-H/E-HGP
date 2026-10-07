@@ -1,0 +1,501 @@
+[  0%] Building CXX object CMakeFiles/mhgp11_cli_io_fault_preload.dir/tests/cli/io_fault_preload.cpp.o
+[  0%] Building CXX object CMakeFiles/mhgp11_support_framework_probe.dir/tests/support/framework_probe.cpp.o
+[  0%] Building CXX object CMakeFiles/mhgp11_support_exit_probe.dir/tests/support/exit_probe.cpp.o
+[  0%] Building CXX object CMakeFiles/mhgp11_cli_fenv_preload.dir/tests/cli/fenv_preload.cpp.o
+[  0%] Building CXX object CMakeFiles/mhgp11.dir/src/core/buffer.cpp.o
+[  0%] Building CXX object CMakeFiles/mhgp11.dir/src/core/ledger.cpp.o
+[  0%] Linking CXX shared library libmhgp11_cli_fenv_preload.so
+[  0%] Built target mhgp11_cli_fenv_preload
+[  0%] Building CXX object CMakeFiles/mhgp11.dir/src/num/sphere.cpp.o
+[  1%] Linking CXX executable mhgp11_support_exit_probe
+[  1%] Built target mhgp11_support_exit_probe
+[  2%] Building CXX object CMakeFiles/mhgp11.dir/src/num/predicates.cpp.o
+[  3%] Linking CXX shared library libmhgp11_cli_io_fault_preload.so
+[  3%] Built target mhgp11_cli_io_fault_preload
+[  3%] Building CXX object CMakeFiles/mhgp11.dir/src/num/center_region.cpp.o
+[  3%] Building CXX object CMakeFiles/mhgp11.dir/src/num/centers.cpp.o
+[  3%] Building CXX object CMakeFiles/mhgp11.dir/src/num/big.cpp.o
+[  4%] Building CXX object CMakeFiles/mhgp11.dir/src/num/rational.cpp.o
+[  4%] Linking CXX executable mhgp11_support_framework_probe
+[  4%] Built target mhgp11_support_framework_probe
+[  4%] Building CXX object CMakeFiles/mhgp11.dir/src/num/roots.cpp.o
+[  4%] Building CXX object CMakeFiles/mhgp11.dir/src/num/radical.cpp.o
+[  5%] Building CXX object CMakeFiles/mhgp11.dir/src/sched/pool.cpp.o
+[  5%] Building CXX object CMakeFiles/mhgp11.dir/src/cloud/cloud.cpp.o
+[  5%] Building CXX object CMakeFiles/mhgp11.dir/src/io/sha256.cpp.o
+[  5%] Building CXX object CMakeFiles/mhgp11.dir/src/io/input.cpp.o
+[  6%] Building CXX object CMakeFiles/mhgp11.dir/src/io/writer.cpp.o
+[  6%] Building CXX object CMakeFiles/mhgp11.dir/src/io/directory.cpp.o
+[  6%] Building CXX object CMakeFiles/mhgp11.dir/src/index/build.cpp.o
+[  6%] Building CXX object CMakeFiles/mhgp11.dir/src/index/census.cpp.o
+[  7%] Building CXX object CMakeFiles/mhgp11.dir/src/index/census_workspace.cpp.o
+[  7%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/catalogue.cpp.o
+[  7%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/boxes.cpp.o
+[  8%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/leaf.cpp.o
+[  8%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/support.cpp.o
+[  8%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/assemble.cpp.o
+[  8%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/assembly_parallel.cpp.o
+[  9%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/sort_indices.cpp.o
+[  9%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/frontier.cpp.o
+[  9%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/adaptive_frontier.cpp.o
+[ 10%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/adaptive_prepare.cpp.o
+[ 10%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/adaptive_replay.cpp.o
+[ 10%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/parallel.cpp.o
+[ 10%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/single_pass.cpp.o
+[ 11%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/single_pass_batch.cpp.o
+[ 11%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/leaf_batch.cpp.o
+[ 11%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/leaf_batch_split.cpp.o
+[ 11%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/meb.cpp.o
+[ 12%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/full_domain.cpp.o
+[ 12%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/cells.cpp.o
+[ 12%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/cells_classify.cpp.o
+[ 13%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/locate.cpp.o
+[ 13%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/canonical.cpp.o
+[ 13%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/descent.cpp.o
+[ 13%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/descent_memo.cpp.o
+[ 14%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/population_lookup.cpp.o
+[ 14%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/forest_build.cpp.o
+[ 14%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/forest_plateau.cpp.o
+[ 15%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/forest_vertical.cpp.o
+[ 15%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/forest_parallel.cpp.o
+[ 15%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/forest_vertical_parallel.cpp.o
+[ 15%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/forest_concurrent.cpp.o
+[ 16%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/forest_pipeline.cpp.o
+[ 16%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/forest_placement.cpp.o
+[ 16%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/order_tree.cpp.o
+[ 16%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/attachment.cpp.o
+[ 17%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/ancestor_index.cpp.o
+[ 17%] Building CXX object CMakeFiles/mhgp11.dir/src/supports/enumerate.cpp.o
+[ 17%] Building CXX object CMakeFiles/mhgp11.dir/src/supports/counts.cpp.o
+[ 18%] Building CXX object CMakeFiles/mhgp11.dir/src/supports/hierarchy.cpp.o
+[ 18%] Building CXX object CMakeFiles/mhgp11.dir/src/points/incidences.cpp.o
+[ 18%] Building CXX object CMakeFiles/mhgp11.dir/src/points/qualify.cpp.o
+[ 18%] Building CXX object CMakeFiles/mhgp11.dir/src/points/exact.cpp.o
+[ 19%] Building CXX object CMakeFiles/mhgp11.dir/src/points/hang.cpp.o
+[ 19%] Building CXX object CMakeFiles/mhgp11.dir/src/points/settle.cpp.o
+[ 19%] Building CXX object CMakeFiles/mhgp11.dir/src/points/point_tree.cpp.o
+[ 20%] Building CXX object CMakeFiles/mhgp11.dir/src/head/condense.cpp.o
+[ 20%] Building CXX object CMakeFiles/mhgp11.dir/src/head/score.cpp.o
+[ 20%] Building CXX object CMakeFiles/mhgp11.dir/src/head/select.cpp.o
+[ 20%] Building CXX object CMakeFiles/mhgp11.dir/src/api/session.cpp.o
+[ 21%] Building CXX object CMakeFiles/mhgp11.dir/src/api/selftest.cpp.o
+[ 21%] Building CXX object CMakeFiles/mhgp11.dir/src/api/compute.cpp.o
+[ 21%] Building CXX object CMakeFiles/mhgp11.dir/src/api/write_full.cpp.o
+[ 21%] Building CXX object CMakeFiles/mhgp11.dir/src/api/write_supports.cpp.o
+[ 22%] Building CXX object CMakeFiles/mhgp11.dir/src/api/write_points.cpp.o
+[ 22%] Building CXX object CMakeFiles/mhgp11.dir/src/api/write_flat.cpp.o
+[ 22%] Building CXX object CMakeFiles/mhgp11.dir/src/api/manifest.cpp.o
+[ 23%] Linking CXX static library libmhgp11.a
+[ 23%] Built target mhgp11
+[ 24%] Building CXX object CMakeFiles/mhgp11_core_unit.dir/tests/core/status_test.cpp.o
+[ 25%] Building CXX object CMakeFiles/mhgp11_core_fault.dir/tests/core/alloc_fault.cpp.o
+[ 25%] Building CXX object CMakeFiles/mhgp11_cli.dir/cli/mhgp11.cpp.o
+[ 25%] Building CXX object CMakeFiles/mhgp11_core_misuse_probe.dir/tests/core/misuse_probe.cpp.o
+[ 25%] Building CXX object CMakeFiles/mhgp11_num_unit.dir/tests/num/integer_test.cpp.o
+[ 25%] Building CXX object CMakeFiles/mhgp11_core_poison_probe.dir/tests/core/poison_test.cpp.o
+[ 25%] Linking CXX executable mhgp11_core_misuse_probe
+[ 25%] Built target mhgp11_core_misuse_probe
+[ 25%] Building CXX object CMakeFiles/mhgp11_num_lattice.dir/tests/num/lattice_bounds_test.cpp.o
+[ 26%] Linking CXX executable mhgp11
+[ 26%] Built target mhgp11_cli
+[ 26%] Building CXX object CMakeFiles/mhgp11_num_unit.dir/tests/num/geometry_test.cpp.o
+[ 26%] Linking CXX executable mhgp11_core_poison_probe
+[ 26%] Built target mhgp11_core_poison_probe
+[ 26%] Building CXX object CMakeFiles/mhgp11_num_probe.dir/tests/num/probe.cpp.o
+[ 27%] Building CXX object CMakeFiles/mhgp11_num_unit.dir/tests/num/power_test.cpp.o
+[ 27%] Building CXX object CMakeFiles/mhgp11_core_unit.dir/tests/core/buffer_test.cpp.o
+[ 27%] Linking CXX executable mhgp11_core_fault
+[ 27%] Built target mhgp11_core_fault
+[ 27%] Building CXX object CMakeFiles/mhgp11_core_unit.dir/tests/core/ledger_test.cpp.o
+[ 28%] Building CXX object CMakeFiles/mhgp11_num_bounds_probe.dir/tests/num/bounds_probe.cpp.o
+[ 28%] Linking CXX executable mhgp11_num_probe
+[ 28%] Building CXX object CMakeFiles/mhgp11_num_unit.dir/tests/num/candidate_test.cpp.o
+[ 29%] Linking CXX executable mhgp11_num_lattice
+[ 29%] Built target mhgp11_num_probe
+[ 29%] Building CXX object CMakeFiles/mhgp11_num_center_region_probe.dir/tests/num/center_region_probe.cpp.o
+[ 29%] Built target mhgp11_num_lattice
+[ 29%] Building CXX object CMakeFiles/mhgp11_num_centers_probe.dir/tests/num/centers_probe.cpp.o
+[ 29%] Building CXX object CMakeFiles/mhgp11_num_unit.dir/tests/num/q3_candidate_test.cpp.o
+[ 29%] Linking CXX executable mhgp11_num_bounds_probe
+[ 29%] Built target mhgp11_num_bounds_probe
+[ 29%] Building CXX object CMakeFiles/mhgp11_num_distance_probe.dir/tests/num/distance_probe.cpp.o
+[ 30%] Linking CXX executable mhgp11_num_center_region_probe
+[ 30%] Linking CXX executable mhgp11_num_centers_probe
+[ 30%] Built target mhgp11_num_center_region_probe
+[ 30%] Built target mhgp11_num_centers_probe
+[ 31%] Building CXX object CMakeFiles/mhgp11_num_power_certificate_probe.dir/tests/num/power_certificate_probe.cpp.o
+[ 31%] Building CXX object CMakeFiles/mhgp11_num_checked_power_probe.dir/tests/num/checked_power_probe.cpp.o
+[ 32%] Linking CXX executable mhgp11_core_unit
+[ 32%] Built target mhgp11_core_unit
+[ 32%] Building CXX object CMakeFiles/mhgp11_num_unit.dir/tests/num/bounds_test.cpp.o
+[ 33%] Building CXX object CMakeFiles/mhgp11_num_unit.dir/tests/num/center_region_test.cpp.o
+[ 33%] Linking CXX executable mhgp11_num_distance_probe
+[ 33%] Built target mhgp11_num_distance_probe
+[ 33%] Building CXX object CMakeFiles/mhgp11_num_unit.dir/tests/num/centers_test.cpp.o
+[ 34%] Linking CXX executable mhgp11_num_checked_power_probe
+[ 34%] Linking CXX executable mhgp11_num_power_certificate_probe
+[ 34%] Built target mhgp11_num_checked_power_probe
+[ 34%] Building CXX object CMakeFiles/mhgp11_num_unit.dir/tests/num/distance_test.cpp.o
+[ 34%] Built target mhgp11_num_power_certificate_probe
+[ 35%] Building CXX object CMakeFiles/mhgp11_num_unit.dir/tests/num/checked_power_test.cpp.o
+[ 35%] Building CXX object CMakeFiles/mhgp11_num_orientation_certificate_probe.dir/tests/num/orientation_certificate_probe.cpp.o
+[ 35%] Building CXX object CMakeFiles/mhgp11_num_unit.dir/tests/num/power_certificate_test.cpp.o
+[ 36%] Building CXX object CMakeFiles/mhgp11_num_q4_presentation.dir/tests/num/q4_presentation_test.cpp.o
+[ 36%] Building CXX object CMakeFiles/mhgp11_num_q4_presentation_probe.dir/tests/num/q4_presentation_probe.cpp.o
+[ 36%] Linking CXX executable mhgp11_num_orientation_certificate_probe
+[ 36%] Built target mhgp11_num_orientation_certificate_probe
+[ 36%] Building CXX object CMakeFiles/mhgp11_num_unit.dir/tests/num/orientation_certificate_test.cpp.o
+[ 36%] Building CXX object CMakeFiles/mhgp11_num_triangle_kind.dir/tests/num/triangle_kind_test.cpp.o
+[ 37%] Building CXX object CMakeFiles/mhgp11_num_triangle_kind_probe.dir/tests/num/triangle_kind_probe.cpp.o
+[ 38%] Linking CXX executable mhgp11_num_q4_presentation_probe
+[ 38%] Built target mhgp11_num_q4_presentation_probe
+[ 38%] Building CXX object CMakeFiles/mhgp11_num_s8_unit.dir/tests/num/big_test.cpp.o
+[ 38%] Building CXX object CMakeFiles/mhgp11_num_big_probe.dir/tests/num/big_probe.cpp.o
+[ 38%] Linking CXX executable mhgp11_num_triangle_kind_probe
+[ 38%] Built target mhgp11_num_triangle_kind_probe
+[ 38%] Building CXX object CMakeFiles/mhgp11_num_radical_probe.dir/tests/num/radical_probe.cpp.o
+[ 38%] Linking CXX executable mhgp11_num_unit
+[ 38%] Built target mhgp11_num_unit
+[ 38%] Building CXX object CMakeFiles/mhgp11_num_roots_probe.dir/tests/num/roots_probe.cpp.o
+[ 38%] Linking CXX executable mhgp11_num_q4_presentation
+[ 38%] Built target mhgp11_num_q4_presentation
+[ 38%] Building CXX object CMakeFiles/mhgp11_num_roots_cost.dir/bench/roots_cost.cpp.o
+[ 38%] Linking CXX executable mhgp11_num_big_probe
+[ 38%] Linking CXX executable mhgp11_num_triangle_kind
+[ 38%] Built target mhgp11_num_triangle_kind
+[ 38%] Building CXX object CMakeFiles/mhgp11_sched_unit.dir/tests/sched/unit.cpp.o
+[ 38%] Built target mhgp11_num_big_probe
+[ 38%] Building CXX object CMakeFiles/mhgp11_sched_fault.dir/tests/sched/fault.cpp.o
+[ 38%] Linking CXX executable mhgp11_num_radical_probe
+[ 38%] Built target mhgp11_num_radical_probe
+[ 38%] Building CXX object CMakeFiles/mhgp11_cloud_unit.dir/tests/cloud/cloud_test.cpp.o
+[ 39%] Linking CXX executable mhgp11_num_s8_unit
+[ 39%] Linking CXX executable mhgp11_num_roots_probe
+[ 39%] Built target mhgp11_num_s8_unit
+[ 39%] Built target mhgp11_num_roots_probe
+[ 39%] Building CXX object CMakeFiles/mhgp11_cloud_fault.dir/tests/cloud/cloud_fault.cpp.o
+[ 40%] Building CXX object CMakeFiles/mhgp11_io_unit.dir/tests/io/sha256_test.cpp.o
+[ 41%] Linking CXX executable mhgp11_num_roots_cost
+[ 41%] Built target mhgp11_num_roots_cost
+[ 41%] Building CXX object CMakeFiles/mhgp11_io_unit.dir/tests/io/input_test.cpp.o
+[ 42%] Linking CXX executable mhgp11_sched_fault
+[ 42%] Built target mhgp11_sched_fault
+[ 42%] Building CXX object CMakeFiles/mhgp11_io_transaction.dir/tests/io/plan_test.cpp.o
+[ 42%] Linking CXX executable mhgp11_sched_unit
+[ 42%] Built target mhgp11_sched_unit
+[ 42%] Building CXX object CMakeFiles/mhgp11_io_transaction.dir/tests/io/transaction_test.cpp.o
+[ 42%] Linking CXX executable mhgp11_cloud_fault
+[ 42%] Built target mhgp11_cloud_fault
+[ 42%] Building CXX object CMakeFiles/mhgp11_io_fault.dir/tests/io/fault.cpp.o
+[ 42%] Building CXX object CMakeFiles/mhgp11_io_sha256_probe.dir/tests/io/sha256_probe.cpp.o
+[ 43%] Linking CXX executable mhgp11_cloud_unit
+[ 43%] Built target mhgp11_cloud_unit
+[ 43%] Building CXX object CMakeFiles/mhgp11_index_unit.dir/tests/index/unit.cpp.o
+[ 43%] Linking CXX executable mhgp11_io_unit
+[ 43%] Built target mhgp11_io_unit
+[ 43%] Building CXX object CMakeFiles/mhgp11_index_fault.dir/tests/index/fault.cpp.o
+[ 44%] Linking CXX executable mhgp11_io_sha256_probe
+[ 44%] Built target mhgp11_io_sha256_probe
+[ 45%] Building CXX object CMakeFiles/mhgp11_index_probe.dir/tests/index/probe.cpp.o
+[ 45%] Building CXX object CMakeFiles/mhgp11_index_bench.dir/bench/index_probe.cpp.o
+[ 45%] Linking CXX executable mhgp11_io_transaction
+[ 45%] Built target mhgp11_io_transaction
+[ 45%] Building CXX object CMakeFiles/mhgp11_index_borrowed.dir/tests/index/borrowed_test.cpp.o
+[ 45%] Linking CXX executable mhgp11_io_fault
+[ 45%] Linking CXX executable mhgp11_index_probe
+[ 45%] Built target mhgp11_io_fault
+[ 45%] Built target mhgp11_index_probe
+[ 45%] Building CXX object CMakeFiles/mhgp11_index_borrowed_fault.dir/tests/index/borrowed_fault.cpp.o
+[ 46%] Building CXX object CMakeFiles/mhgp11_index_borrowed_probe.dir/tests/index/borrowed_probe.cpp.o
+[ 46%] Linking CXX executable mhgp11_index_bench
+[ 46%] Built target mhgp11_index_bench
+[ 47%] Building CXX object CMakeFiles/mhgp11_catalogue_unit.dir/tests/catalogue/unit.cpp.o
+[ 48%] Linking CXX executable mhgp11_index_unit
+[ 48%] Built target mhgp11_index_unit
+[ 48%] Linking CXX executable mhgp11_index_fault
+[ 48%] Building CXX object CMakeFiles/mhgp11_catalogue_fault.dir/tests/catalogue/fault.cpp.o
+[ 48%] Built target mhgp11_index_fault
+[ 48%] Building CXX object CMakeFiles/mhgp11_catalogue_probe.dir/tests/catalogue/probe.cpp.o
+[ 48%] Linking CXX executable mhgp11_index_borrowed_probe
+[ 48%] Built target mhgp11_index_borrowed_probe
+[ 48%] Building CXX object CMakeFiles/mhgp11_catalogue_bench.dir/bench/catalogue_probe.cpp.o
+[ 49%] Linking CXX executable mhgp11_index_borrowed
+[ 49%] Built target mhgp11_index_borrowed
+[ 49%] Building CXX object CMakeFiles/mhgp11_catalogue_region.dir/tests/catalogue/center_region.cpp.o
+[ 49%] Linking CXX executable mhgp11_catalogue_probe
+[ 49%] Built target mhgp11_catalogue_probe
+[ 49%] Building CXX object CMakeFiles/mhgp11_catalogue_leaf_counts.dir/tests/catalogue/leaf_counts_test.cpp.o
+[ 49%] Linking CXX executable mhgp11_index_borrowed_fault
+[ 49%] Built target mhgp11_index_borrowed_fault
+[ 50%] Building CXX object CMakeFiles/mhgp11_catalogue_parallel.dir/tests/catalogue/parallel.cpp.o
+[ 51%] Linking CXX executable mhgp11_catalogue_fault
+[ 51%] Built target mhgp11_catalogue_fault
+[ 51%] Building CXX object CMakeFiles/mhgp11_catalogue_parallel_fault.dir/tests/catalogue/parallel_fault.cpp.o
+[ 51%] Linking CXX executable mhgp11_catalogue_unit
+[ 51%] Built target mhgp11_catalogue_unit
+[ 52%] Building CXX object CMakeFiles/mhgp11_catalogue_cache.dir/tests/catalogue/center_line_cache.cpp.o
+[ 52%] Linking CXX executable mhgp11_catalogue_bench
+[ 52%] Built target mhgp11_catalogue_bench
+[ 52%] Building CXX object CMakeFiles/mhgp11_catalogue_cache_fault.dir/tests/catalogue/center_line_cache_fault.cpp.o
+[ 53%] Linking CXX executable mhgp11_catalogue_region
+[ 53%] Built target mhgp11_catalogue_region
+[ 53%] Building CXX object CMakeFiles/mhgp11_catalogue_sort.dir/tests/catalogue/sort_indices_test.cpp.o
+[ 53%] Linking CXX executable mhgp11_catalogue_leaf_counts
+[ 53%] Built target mhgp11_catalogue_leaf_counts
+[ 54%] Building CXX object CMakeFiles/mhgp11_catalogue_sort_fault.dir/tests/catalogue/sort_indices_fault.cpp.o
+[ 55%] Linking CXX executable mhgp11_catalogue_parallel_fault
+[ 55%] Linking CXX executable mhgp11_catalogue_parallel
+[ 55%] Built target mhgp11_catalogue_parallel_fault
+[ 55%] Building CXX object CMakeFiles/mhgp11_catalogue_sort_fenv.dir/tests/catalogue/sort_indices_fenv_test.cpp.o
+[ 55%] Built target mhgp11_catalogue_parallel
+[ 55%] Building CXX object CMakeFiles/mhgp11_catalogue_adaptive.dir/tests/catalogue/adaptive_frontier.cpp.o
+[ 56%] Linking CXX executable mhgp11_catalogue_cache_fault
+[ 56%] Built target mhgp11_catalogue_cache_fault
+[ 57%] Building CXX object CMakeFiles/mhgp11_catalogue_adaptive_fault.dir/tests/catalogue/adaptive_fault.cpp.o
+[ 57%] Linking CXX executable mhgp11_catalogue_cache
+[ 57%] Built target mhgp11_catalogue_cache
+[ 57%] Building CXX object CMakeFiles/mhgp11_catalogue_assembly.dir/tests/catalogue/assembly_parallel_test.cpp.o
+[ 57%] Linking CXX executable mhgp11_catalogue_sort_fault
+[ 57%] Built target mhgp11_catalogue_sort_fault
+[ 58%] Building CXX object CMakeFiles/mhgp11_catalogue_assembly_fault.dir/tests/catalogue/assembly_parallel_fault.cpp.o
+[ 58%] Linking CXX executable mhgp11_catalogue_sort
+[ 58%] Built target mhgp11_catalogue_sort
+[ 58%] Building CXX object CMakeFiles/mhgp11_catalogue_single.dir/tests/catalogue/single_pass_test.cpp.o
+[ 58%] Linking CXX executable mhgp11_catalogue_sort_fenv
+[ 58%] Built target mhgp11_catalogue_sort_fenv
+[ 59%] Building CXX object CMakeFiles/mhgp11_catalogue_single_fault.dir/tests/catalogue/single_pass_fault.cpp.o
+[ 59%] Linking CXX executable mhgp11_catalogue_adaptive_fault
+[ 59%] Built target mhgp11_catalogue_adaptive_fault
+[ 60%] Building CXX object CMakeFiles/mhgp11_catalogue_pair_graph.dir/tests/catalogue/small_pair_graph_test.cpp.o
+[ 60%] Linking CXX executable mhgp11_catalogue_adaptive
+[ 60%] Built target mhgp11_catalogue_adaptive
+[ 60%] Building CXX object CMakeFiles/mhgp11_catalogue_pair_graph_fault.dir/tests/catalogue/small_pair_graph_fault.cpp.o
+[ 60%] Linking CXX executable mhgp11_catalogue_assembly
+[ 60%] Built target mhgp11_catalogue_assembly
+[ 60%] Building CXX object CMakeFiles/mhgp11_catalogue_euler.dir/bench/catalogue_euler.cpp.o
+[ 60%] Linking CXX executable mhgp11_catalogue_assembly_fault
+[ 60%] Built target mhgp11_catalogue_assembly_fault
+[ 61%] Building CXX object CMakeFiles/mhgp11_catalogue_leaf_narrow.dir/tests/catalogue/leaf_device_narrow_test.cpp.o
+[ 61%] Linking CXX executable mhgp11_catalogue_single
+[ 61%] Built target mhgp11_catalogue_single
+[ 61%] Building CXX object CMakeFiles/mhgp11_catalogue_leaf_split.dir/tests/catalogue/leaf_split_test.cpp.o
+[ 61%] Linking CXX executable mhgp11_catalogue_single_fault
+[ 61%] Built target mhgp11_catalogue_single_fault
+[ 61%] Building CXX object CMakeFiles/mhgp11_tower_unit.dir/tests/tower/unit.cpp.o
+[ 61%] Linking CXX executable mhgp11_catalogue_pair_graph_fault
+[ 61%] Built target mhgp11_catalogue_pair_graph_fault
+[ 61%] Linking CXX executable mhgp11_catalogue_pair_graph
+[ 61%] Building CXX object CMakeFiles/mhgp11_tower_fault.dir/tests/tower/fault.cpp.o
+[ 61%] Built target mhgp11_catalogue_pair_graph
+[ 61%] Building CXX object CMakeFiles/mhgp11_tower_diameter.dir/tests/tower/diameter.cpp.o
+[ 61%] Linking CXX executable mhgp11_catalogue_euler
+[ 61%] Built target mhgp11_catalogue_euler
+[ 61%] Building CXX object CMakeFiles/mhgp11_tower_probe.dir/tests/tower/probe.cpp.o
+[ 61%] Linking CXX executable mhgp11_catalogue_leaf_split
+[ 61%] Built target mhgp11_catalogue_leaf_split
+[ 62%] Building CXX object CMakeFiles/mhgp11_meb_bench.dir/bench/meb_probe.cpp.o
+[ 62%] Linking CXX executable mhgp11_catalogue_leaf_narrow
+[ 63%] Linking CXX executable mhgp11_tower_fault
+[ 63%] Built target mhgp11_catalogue_leaf_narrow
+[ 64%] Building CXX object CMakeFiles/mhgp11_tower_domain.dir/tests/tower/domain.cpp.o
+[ 64%] Built target mhgp11_tower_fault
+[ 64%] Building CXX object CMakeFiles/mhgp11_tower_domain_fault.dir/tests/tower/domain_fault.cpp.o
+[ 64%] Linking CXX executable mhgp11_tower_unit
+[ 65%] Linking CXX executable mhgp11_tower_probe
+[ 65%] Built target mhgp11_tower_unit
+[ 66%] Building CXX object CMakeFiles/mhgp11_tower_domain_parallel.dir/tests/tower/domain_parallel.cpp.o
+[ 66%] Built target mhgp11_tower_probe
+[ 66%] Building CXX object CMakeFiles/mhgp11_tower_cells.dir/tests/tower/cells.cpp.o
+[ 66%] Linking CXX executable mhgp11_tower_diameter
+[ 66%] Built target mhgp11_tower_diameter
+[ 66%] Building CXX object CMakeFiles/mhgp11_tower_cells_fault.dir/tests/tower/cells_fault.cpp.o
+[ 66%] Linking CXX executable mhgp11_meb_bench
+[ 66%] Built target mhgp11_meb_bench
+[ 66%] Building CXX object CMakeFiles/mhgp11_tower_cells_probe.dir/tests/tower/cells_probe.cpp.o
+[ 66%] Linking CXX executable mhgp11_tower_domain_fault
+[ 66%] Built target mhgp11_tower_domain_fault
+[ 67%] Building CXX object CMakeFiles/mhgp11_tower_locate.dir/tests/tower/locate_test.cpp.o
+[ 67%] Linking CXX executable mhgp11_tower_domain
+[ 67%] Built target mhgp11_tower_domain
+[ 67%] Building CXX object CMakeFiles/mhgp11_tower_descent.dir/tests/tower/descent_test.cpp.o
+[ 67%] Linking CXX executable mhgp11_tower_domain_parallel
+[ 68%] Linking CXX executable mhgp11_tower_cells_fault
+[ 68%] Built target mhgp11_tower_domain_parallel
+[ 68%] Building CXX object CMakeFiles/mhgp11_tower_descent_fault.dir/tests/tower/descent_fault.cpp.o
+[ 68%] Built target mhgp11_tower_cells_fault
+[ 68%] Building CXX object CMakeFiles/mhgp11_tower_descent_probe.dir/tests/tower/descent_probe.cpp.o
+[ 68%] Linking CXX executable mhgp11_tower_cells
+[ 68%] Linking CXX executable mhgp11_tower_cells_probe
+[ 68%] Built target mhgp11_tower_cells
+[ 68%] Building CXX object CMakeFiles/mhgp11_tower_forest.dir/tests/tower/forest_test.cpp.o
+[ 68%] Built target mhgp11_tower_cells_probe
+[ 68%] Building CXX object CMakeFiles/mhgp11_tower_forest_fault.dir/tests/tower/forest_fault.cpp.o
+[ 69%] Linking CXX executable mhgp11_tower_descent_probe
+[ 69%] Built target mhgp11_tower_descent_probe
+[ 70%] Building CXX object CMakeFiles/mhgp11_tower_forest_probe.dir/tests/tower/forest_probe.cpp.o
+[ 70%] Linking CXX executable mhgp11_tower_locate
+[ 71%] Linking CXX executable mhgp11_tower_descent
+[ 71%] Built target mhgp11_tower_descent
+[ 71%] Building CXX object CMakeFiles/mhgp11_tower_forest_sweep.dir/tests/tower/forest_sweep_test.cpp.o
+[ 71%] Built target mhgp11_tower_locate
+[ 72%] Building CXX object CMakeFiles/mhgp11_tower_classification.dir/tests/tower/classification_test.cpp.o
+[ 72%] Linking CXX executable mhgp11_tower_forest
+[ 72%] Linking CXX executable mhgp11_tower_descent_fault
+[ 72%] Built target mhgp11_tower_forest
+[ 72%] Building CXX object CMakeFiles/mhgp11_tower_classification_fault.dir/tests/tower/classification_fault.cpp.o
+[ 72%] Built target mhgp11_tower_descent_fault
+[ 73%] Building CXX object CMakeFiles/mhgp11_tower_classification_probe.dir/tests/tower/classification_probe.cpp.o
+[ 74%] Linking CXX executable mhgp11_tower_forest_fault
+[ 74%] Built target mhgp11_tower_forest_fault
+[ 74%] Building CXX object CMakeFiles/mhgp11_full_bench.dir/bench/full_probe.cpp.o
+[ 74%] Linking CXX executable mhgp11_tower_forest_probe
+[ 74%] Built target mhgp11_tower_forest_probe
+[ 75%] Building CXX object CMakeFiles/mhgp11_points_export.dir/bench/points_export.cpp.o
+[ 75%] Linking CXX executable mhgp11_tower_classification_probe
+[ 75%] Built target mhgp11_tower_classification_probe
+[ 75%] Building CXX object CMakeFiles/mhgp11_tower_memo.dir/tests/tower/memo.cpp.o
+[ 75%] Linking CXX executable mhgp11_tower_forest_sweep
+[ 75%] Built target mhgp11_tower_forest_sweep
+[ 75%] Building CXX object CMakeFiles/mhgp11_tower_memo_full.dir/tests/tower/memo_full.cpp.o
+[ 75%] Linking CXX executable mhgp11_tower_classification
+[ 75%] Built target mhgp11_tower_classification
+[ 75%] Building CXX object CMakeFiles/mhgp11_tower_memo_fault.dir/tests/tower/memo_fault.cpp.o
+[ 75%] Linking CXX executable mhgp11_tower_classification_fault
+[ 75%] Linking CXX executable mhgp11_full_bench
+[ 75%] Built target mhgp11_tower_classification_fault
+[ 75%] Building CXX object CMakeFiles/mhgp11_tower_public_header.dir/tests/tower/public_header_test.cpp.o
+[ 75%] Built target mhgp11_full_bench
+[ 75%] Building CXX object CMakeFiles/mhgp11_tower_forest_parallel.dir/tests/tower/forest_parallel_test.cpp.o
+[ 75%] Linking CXX executable mhgp11_points_export
+[ 75%] Built target mhgp11_points_export
+[ 75%] Building CXX object CMakeFiles/mhgp11_tower_forest_parallel_fault.dir/tests/tower/forest_parallel_fault.cpp.o
+[ 75%] Linking CXX executable mhgp11_tower_memo
+[ 75%] Built target mhgp11_tower_memo
+[ 75%] Building CXX object CMakeFiles/mhgp11_tower_forest_parallel_probe.dir/tests/tower/forest_parallel_probe.cpp.o
+[ 76%] Linking CXX executable mhgp11_tower_memo_fault
+[ 76%] Built target mhgp11_tower_memo_fault
+[ 77%] Building CXX object CMakeFiles/mhgp11_tower_vertical_parallel.dir/tests/tower/forest_vertical_parallel_test.cpp.o
+[ 77%] Linking CXX executable mhgp11_tower_public_header
+[ 77%] Linking CXX executable mhgp11_tower_memo_full
+[ 77%] Built target mhgp11_tower_public_header
+[ 77%] Building CXX object CMakeFiles/mhgp11_tower_vertical_parallel_fault.dir/tests/tower/forest_vertical_parallel_fault.cpp.o
+[ 77%] Built target mhgp11_tower_memo_full
+[ 77%] Building CXX object CMakeFiles/mhgp11_tower_birth_runs.dir/tests/tower/forest_birth_runs_test.cpp.o
+[ 77%] Linking CXX executable mhgp11_tower_forest_parallel
+[ 77%] Built target mhgp11_tower_forest_parallel
+[ 78%] Building CXX object CMakeFiles/mhgp11_tower_census_reuse.dir/tests/tower/census_reuse_test.cpp.o
+[ 79%] Linking CXX executable mhgp11_tower_forest_parallel_fault
+[ 79%] Built target mhgp11_tower_forest_parallel_fault
+[ 79%] Building CXX object CMakeFiles/mhgp11_tower_census_reuse_fault.dir/tests/tower/census_reuse_fault.cpp.o
+[ 79%] Linking CXX executable mhgp11_tower_forest_parallel_probe
+[ 79%] Built target mhgp11_tower_forest_parallel_probe
+[ 79%] Building CXX object CMakeFiles/mhgp11_tower_regular_vertical_reuse.dir/tests/tower/regular_vertical_reuse_test.cpp.o
+[ 79%] Linking CXX executable mhgp11_tower_vertical_parallel
+[ 79%] Built target mhgp11_tower_vertical_parallel
+[ 80%] Building CXX object CMakeFiles/mhgp11_tower_regular_vertical_reuse_fault.dir/tests/tower/regular_vertical_reuse_fault.cpp.o
+[ 81%] Linking CXX executable mhgp11_tower_birth_runs
+[ 82%] Linking CXX executable mhgp11_tower_vertical_parallel_fault
+[ 82%] Built target mhgp11_tower_birth_runs
+[ 82%] Built target mhgp11_tower_vertical_parallel_fault
+[ 82%] Building CXX object CMakeFiles/mhgp11_tower_dense_lookup_test.dir/tests/tower/dense_lookup_test.cpp.o
+[ 82%] Building CXX object CMakeFiles/mhgp11_tower_dense_lookup_fault.dir/tests/tower/dense_lookup_fault.cpp.o
+[ 82%] Linking CXX executable mhgp11_tower_census_reuse
+[ 82%] Built target mhgp11_tower_census_reuse
+[ 82%] Building CXX object CMakeFiles/mhgp11_tower_regular_classification.dir/tests/tower/regular_classification_test.cpp.o
+[ 82%] Linking CXX executable mhgp11_tower_census_reuse_fault
+[ 82%] Built target mhgp11_tower_census_reuse_fault
+[ 82%] Building CXX object CMakeFiles/mhgp11_tower_meb_deferred.dir/tests/tower/meb_deferred_test.cpp.o
+[ 82%] Linking CXX executable mhgp11_tower_regular_vertical_reuse
+[ 82%] Built target mhgp11_tower_regular_vertical_reuse
+[ 82%] Building CXX object CMakeFiles/mhgp11_tower_population_concurrent.dir/tests/tower/population_concurrent_test.cpp.o
+[ 82%] Linking CXX executable mhgp11_tower_regular_vertical_reuse_fault
+[ 82%] Built target mhgp11_tower_regular_vertical_reuse_fault
+[ 82%] Building CXX object CMakeFiles/mhgp11_tower_population_contract.dir/tests/tower/population_contract_test.cpp.o
+[ 83%] Linking CXX executable mhgp11_tower_dense_lookup_fault
+[ 83%] Linking CXX executable mhgp11_tower_dense_lookup_test
+[ 83%] Built target mhgp11_tower_dense_lookup_fault
+[ 83%] Building CXX object CMakeFiles/mhgp11_tower_pipeline.dir/tests/tower/forest_pipeline_test.cpp.o
+[ 83%] Built target mhgp11_tower_dense_lookup_test
+[ 84%] Building CXX object CMakeFiles/mhgp11_tower_placement.dir/tests/tower/forest_placement_test.cpp.o
+[ 85%] Linking CXX executable mhgp11_tower_regular_classification
+[ 85%] Built target mhgp11_tower_regular_classification
+[ 85%] Building CXX object CMakeFiles/mhgp11_tower_order.dir/tests/tower/order_tree_test.cpp.o
+[ 86%] Linking CXX executable mhgp11_tower_meb_deferred
+[ 86%] Built target mhgp11_tower_meb_deferred
+[ 87%] Building CXX object CMakeFiles/mhgp11_tower_attach.dir/tests/tower/attach_test.cpp.o
+[ 88%] Linking CXX executable mhgp11_tower_population_concurrent
+[ 88%] Built target mhgp11_tower_population_concurrent
+[ 88%] Building CXX object CMakeFiles/mhgp11_tower_order_fault.dir/tests/tower/order_tree_fault.cpp.o
+[ 88%] Linking CXX executable mhgp11_tower_population_contract
+[ 88%] Built target mhgp11_tower_population_contract
+[ 89%] Building CXX object CMakeFiles/mhgp11_tower_order_full.dir/tests/tower/order_full_test.cpp.o
+[ 89%] Linking CXX executable mhgp11_tower_placement
+[ 89%] Built target mhgp11_tower_placement
+[ 90%] Building CXX object CMakeFiles/mhgp11_tower_attach_probe.dir/tests/tower/attach_probe.cpp.o
+[ 90%] Linking CXX executable mhgp11_tower_pipeline
+[ 91%] Linking CXX executable mhgp11_tower_order
+[ 91%] Built target mhgp11_tower_pipeline
+[ 91%] Built target mhgp11_tower_order
+[ 91%] Building CXX object CMakeFiles/mhgp11_tower_attach_judge.dir/tests/tower/attach_judge.cpp.o
+[ 91%] Building CXX object CMakeFiles/mhgp11_supports_unit.dir/tests/supports/supports_test.cpp.o
+[ 91%] Linking CXX executable mhgp11_tower_order_fault
+[ 91%] Linking CXX executable mhgp11_tower_order_full
+[ 91%] Built target mhgp11_tower_order_fault
+[ 91%] Building CXX object CMakeFiles/mhgp11_supports_probe.dir/tests/supports/supports_probe.cpp.o
+[ 91%] Built target mhgp11_tower_order_full
+[ 91%] Linking CXX executable mhgp11_tower_attach_probe
+[ 91%] Building CXX object CMakeFiles/mhgp11_supports_unit.dir/tests/supports/witness_test.cpp.o
+[ 91%] Built target mhgp11_tower_attach_probe
+[ 92%] Building CXX object CMakeFiles/mhgp11_supports_hierarchy.dir/tests/supports/hierarchy_test.cpp.o
+[ 92%] Linking CXX executable mhgp11_tower_attach_judge
+[ 92%] Built target mhgp11_tower_attach_judge
+[ 92%] Building CXX object CMakeFiles/mhgp11_supports_hierarchy_fault.dir/tests/supports/hierarchy_fault.cpp.o
+[ 92%] Linking CXX executable mhgp11_tower_attach
+[ 92%] Built target mhgp11_tower_attach
+[ 93%] Building CXX object CMakeFiles/mhgp11_supports_hierarchy_probe.dir/tests/supports/hierarchy_probe.cpp.o
+[ 93%] Building CXX object CMakeFiles/mhgp11_points_probe.dir/tests/points/points_probe.cpp.o
+[ 94%] Linking CXX executable mhgp11_supports_probe
+[ 94%] Built target mhgp11_supports_probe
+[ 94%] Building CXX object CMakeFiles/mhgp11_points_unit.dir/tests/points/points_test.cpp.o
+[ 94%] Linking CXX executable mhgp11_supports_unit
+[ 94%] Built target mhgp11_supports_unit
+[ 94%] Building CXX object CMakeFiles/mhgp11_head_unit.dir/tests/head/head_test.cpp.o
+[ 94%] Linking CXX executable mhgp11_supports_hierarchy
+[ 94%] Built target mhgp11_supports_hierarchy
+[ 94%] Building CXX object CMakeFiles/mhgp11_api_session.dir/tests/api/session_test.cpp.o
+[ 94%] Linking CXX executable mhgp11_supports_hierarchy_fault
+[ 94%] Built target mhgp11_supports_hierarchy_fault
+[ 95%] Building CXX object CMakeFiles/mhgp11_api_session.dir/tests/api/publish_test.cpp.o
+[ 95%] Linking CXX executable mhgp11_supports_hierarchy_probe
+[ 95%] Built target mhgp11_supports_hierarchy_probe
+[ 95%] Building CXX object CMakeFiles/mhgp11_api_session_misuse_probe.dir/tests/api/session_misuse.cpp.o
+[ 96%] Linking CXX executable mhgp11_points_probe
+[ 96%] Built target mhgp11_points_probe
+[ 96%] Building CXX object CMakeFiles/mhgp11_api_publish_probe.dir/tests/api/publish_probe.cpp.o
+[ 96%] Linking CXX executable mhgp11_api_session_misuse_probe
+[ 96%] Built target mhgp11_api_session_misuse_probe
+[ 96%] Building CXX object CMakeFiles/mhgp11_api_session_fault.dir/tests/api/session_fault.cpp.o
+[ 97%] Linking CXX executable mhgp11_head_unit
+[ 97%] Built target mhgp11_head_unit
+[ 97%] Building CXX object CMakeFiles/mhgp11_api_selftest.dir/tests/api/selftest_test.cpp.o
+[ 97%] Linking CXX executable mhgp11_points_unit
+[ 97%] Built target mhgp11_points_unit
+[ 97%] Building CXX object CMakeFiles/mhgp11_api_selftest_probe.dir/tests/api/selftest_fault.cpp.o
+[ 97%] Linking CXX executable mhgp11_api_publish_probe
+[ 97%] Built target mhgp11_api_publish_probe
+[ 97%] Building CXX object CMakeFiles/mhgp11_api_supports_route_probe.dir/tests/api/supports_route.cpp.o
+[ 97%] Linking CXX executable mhgp11_api_session
+[ 97%] Built target mhgp11_api_session
+[ 97%] Linking CXX executable mhgp11_api_selftest_probe
+[ 97%] Built target mhgp11_api_selftest_probe
+[ 98%] Linking CXX executable mhgp11_api_selftest
+[ 98%] Built target mhgp11_api_selftest
+[ 99%] Linking CXX executable mhgp11_api_supports_route_probe
+[100%] Linking CXX executable mhgp11_api_session_fault
+[100%] Built target mhgp11_api_supports_route_probe
+[100%] Built target mhgp11_api_session_fault
+
+real	3m25.933s
+user	14m21.236s
+sys	1m17.852s
+rc=0

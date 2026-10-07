@@ -1,0 +1,2430 @@
+{
+ "bilan": {
+  "ER0[1,12]": {
+   "ancree": [
+    8,
+    8,
+    110,
+    110,
+    0
+   ],
+   "ancree_1oct": [
+    2,
+    2,
+    15,
+    15,
+    0
+   ],
+   "derivee": [
+    4,
+    4,
+    15,
+    15,
+    0
+   ],
+   "derivee_1oct": [
+    3,
+    3,
+    6,
+    6,
+    0
+   ],
+   "forcee": [
+    15,
+    15,
+    146,
+    146,
+    0
+   ]
+  },
+  "ER0h[1,12]": {
+   "ancree": [
+    8,
+    8,
+    110,
+    110,
+    0
+   ],
+   "ancree_1oct": [
+    2,
+    2,
+    15,
+    15,
+    0
+   ],
+   "derivee": [
+    4,
+    4,
+    15,
+    15,
+    0
+   ],
+   "derivee_1oct": [
+    3,
+    3,
+    6,
+    6,
+    0
+   ],
+   "forcee": [
+    15,
+    15,
+    146,
+    146,
+    0
+   ]
+  },
+  "MMt[4,2/3]": {
+   "ancree": [
+    8,
+    6,
+    110,
+    95,
+    5
+   ],
+   "ancree_1oct": [
+    2,
+    1,
+    15,
+    5,
+    10
+   ],
+   "derivee": [
+    4,
+    4,
+    15,
+    15,
+    0
+   ],
+   "derivee_1oct": [
+    3,
+    3,
+    6,
+    6,
+    0
+   ],
+   "forcee": [
+    15,
+    15,
+    146,
+    146,
+    0
+   ]
+  },
+  "MMt[8,4/5]": {
+   "ancree": [
+    8,
+    6,
+    110,
+    95,
+    0
+   ],
+   "ancree_1oct": [
+    2,
+    2,
+    15,
+    15,
+    0
+   ],
+   "derivee": [
+    4,
+    4,
+    15,
+    15,
+    0
+   ],
+   "derivee_1oct": [
+    3,
+    3,
+    6,
+    6,
+    0
+   ],
+   "forcee": [
+    15,
+    15,
+    146,
+    146,
+    0
+   ]
+  }
+ },
+ "cadre": "phase=exploration_v10_hors_registre backend=cpu_reference profile=quantized_u18_input_only mode=verdict_final public_status=not_claimed ; GCP non utilise",
+ "cellules": [
+  {
+   "code": "T0",
+   "mcs": [
+    2,
+    3
+   ],
+   "mode": null,
+   "nom": "T0_P1_aretes_courtes@2-3",
+   "resultats": {
+    "ER0[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 10,
+     "passe": true,
+     "passes": 10,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "ER0h[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 10,
+     "passe": true,
+     "passes": 10,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[4,2/3]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 10,
+     "passe": true,
+     "passes": 10,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[8,4/5]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 10,
+     "passe": true,
+     "passes": 10,
+     "premier_viol": null,
+     "retard_max": 0.0
+    }
+   },
+   "statut": "ancree"
+  },
+  {
+   "code": "T0",
+   "mcs": [
+    4,
+    5,
+    6
+   ],
+   "mode": null,
+   "nom": "T0_P1_aretes_courtes@4-6",
+   "resultats": {
+    "ER0[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 15,
+     "passe": true,
+     "passes": 15,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "ER0h[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 15,
+     "passe": true,
+     "passes": 15,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[4,2/3]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 15,
+     "passe": true,
+     "passes": 15,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[8,4/5]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 15,
+     "passe": true,
+     "passes": 15,
+     "premier_viol": null,
+     "retard_max": 0.0
+    }
+   },
+   "statut": "forcee"
+  },
+  {
+   "code": "T0",
+   "mcs": [
+    2,
+    3
+   ],
+   "mode": null,
+   "nom": "T0_P2_pont_court@2-3",
+   "resultats": {
+    "ER0[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 10,
+     "passe": true,
+     "passes": 10,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "ER0h[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 10,
+     "passe": true,
+     "passes": 10,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[4,2/3]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 10,
+     "passe": true,
+     "passes": 10,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[8,4/5]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 10,
+     "passe": true,
+     "passes": 10,
+     "premier_viol": null,
+     "retard_max": 0.0
+    }
+   },
+   "statut": "ancree"
+  },
+  {
+   "code": "T0",
+   "mcs": [
+    4,
+    5,
+    6
+   ],
+   "mode": null,
+   "nom": "T0_P2_pont_court@4-6",
+   "resultats": {
+    "ER0[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 15,
+     "passe": true,
+     "passes": 15,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "ER0h[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 15,
+     "passe": true,
+     "passes": 15,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[4,2/3]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 15,
+     "passe": true,
+     "passes": 15,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[8,4/5]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 15,
+     "passe": true,
+     "passes": 15,
+     "premier_viol": null,
+     "retard_max": 0.0
+    }
+   },
+   "statut": "forcee"
+  },
+  {
+   "code": "T0",
+   "mcs": [
+    2,
+    3
+   ],
+   "mode": null,
+   "nom": "T0_S_plan_egalites@2-3",
+   "resultats": {
+    "ER0[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 10,
+     "passe": true,
+     "passes": 10,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "ER0h[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 10,
+     "passe": true,
+     "passes": 10,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[4,2/3]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 10,
+     "passe": true,
+     "passes": 10,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[8,4/5]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 10,
+     "passe": true,
+     "passes": 10,
+     "premier_viol": null,
+     "retard_max": 0.0
+    }
+   },
+   "statut": "ancree"
+  },
+  {
+   "code": "T0",
+   "mcs": [
+    4,
+    5,
+    6
+   ],
+   "mode": null,
+   "nom": "T0_S_plan_egalites@4-6",
+   "resultats": {
+    "ER0[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 15,
+     "passe": true,
+     "passes": 15,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "ER0h[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 15,
+     "passe": true,
+     "passes": 15,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[4,2/3]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 15,
+     "passe": true,
+     "passes": 15,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[8,4/5]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 15,
+     "passe": true,
+     "passes": 15,
+     "premier_viol": null,
+     "retard_max": 0.0
+    }
+   },
+   "statut": "forcee"
+  },
+  {
+   "code": "T0",
+   "mcs": [
+    2,
+    3
+   ],
+   "mode": null,
+   "nom": "T0_S_3D_equilateral@2-3",
+   "resultats": {
+    "ER0[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 10,
+     "passe": true,
+     "passes": 10,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "ER0h[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 10,
+     "passe": true,
+     "passes": 10,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[4,2/3]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 10,
+     "passe": true,
+     "passes": 10,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[8,4/5]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 10,
+     "passe": true,
+     "passes": 10,
+     "premier_viol": null,
+     "retard_max": 0.0
+    }
+   },
+   "statut": "ancree"
+  },
+  {
+   "code": "T0",
+   "mcs": [
+    4,
+    5,
+    6
+   ],
+   "mode": null,
+   "nom": "T0_S_3D_equilateral@4-6",
+   "resultats": {
+    "ER0[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 15,
+     "passe": true,
+     "passes": 15,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "ER0h[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 15,
+     "passe": true,
+     "passes": 15,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[4,2/3]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 15,
+     "passe": true,
+     "passes": 15,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[8,4/5]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 15,
+     "passe": true,
+     "passes": 15,
+     "premier_viol": null,
+     "retard_max": 0.0
+    }
+   },
+   "statut": "forcee"
+  },
+  {
+   "code": "Q1",
+   "mcs": [
+    3
+   ],
+   "mode": null,
+   "nom": "Q1@3",
+   "resultats": {
+    "ER0[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 10,
+     "passe": true,
+     "passes": 10,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "ER0h[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 10,
+     "passe": true,
+     "passes": 10,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[4,2/3]": {
+     "details": [
+      {
+       "borne_gauche": 1697.992,
+       "cible": 1,
+       "clusters": [],
+       "conforme_des": null,
+       "genre": "structure",
+       "mcs": 3,
+       "premier_viol_rayon": 1697.992,
+       "raison": "cluster obligatoire 0 absent ou incomplet",
+       "retard_relatif": null,
+       "variante": "base"
+      },
+      {
+       "borne_gauche": 1697.992,
+       "cible": 1,
+       "clusters": [],
+       "conforme_des": null,
+       "genre": "structure",
+       "mcs": 3,
+       "premier_viol_rayon": 1697.992,
+       "raison": "cluster obligatoire 0 absent ou incomplet",
+       "retard_relatif": null,
+       "variante": "D+1"
+      },
+      {
+       "borne_gauche": 1697.536,
+       "cible": 1,
+       "clusters": [],
+       "conforme_des": null,
+       "genre": "structure",
+       "mcs": 3,
+       "premier_viol_rayon": 1697.536,
+       "raison": "cluster obligatoire 0 absent ou incomplet",
+       "retard_relatif": null,
+       "variante": "D-1"
+      },
+      {
+       "borne_gauche": 1697.536,
+       "cible": 1,
+       "clusters": [],
+       "conforme_des": null,
+       "genre": "structure",
+       "mcs": 3,
+       "premier_viol_rayon": 1697.536,
+       "raison": "cluster obligatoire 0 absent ou incomplet",
+       "retard_relatif": null,
+       "variante": "C+1"
+      },
+      {
+       "borne_gauche": 1697.992,
+       "cible": 1,
+       "clusters": [],
+       "conforme_des": null,
+       "genre": "structure",
+       "mcs": 3,
+       "premier_viol_rayon": 1697.992,
+       "raison": "cluster obligatoire 0 absent ou incomplet",
+       "retard_relatif": null,
+       "variante": "C-1"
+      }
+     ],
+     "jamais": 5,
+     "jugements": 10,
+     "passe": false,
+     "passes": 5,
+     "premier_viol": {
+      "borne_gauche": 1697.992,
+      "cible": 1,
+      "clusters": [],
+      "conforme_des": null,
+      "genre": "structure",
+      "mcs": 3,
+      "premier_viol_rayon": 1697.992,
+      "raison": "cluster obligatoire 0 absent ou incomplet",
+      "retard_relatif": null,
+      "variante": "base"
+     },
+     "retard_max": 0.0
+    },
+    "MMt[8,4/5]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 10,
+     "passe": true,
+     "passes": 10,
+     "premier_viol": null,
+     "retard_max": 0.0
+    }
+   },
+   "statut": "ancree"
+  },
+  {
+   "code": "Q1bis",
+   "mcs": [
+    2
+   ],
+   "mode": "triangles",
+   "nom": "Q1bis@2",
+   "resultats": {
+    "ER0[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 10,
+     "passe": true,
+     "passes": 10,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "ER0h[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 10,
+     "passe": true,
+     "passes": 10,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[4,2/3]": {
+     "details": [
+      {
+       "borne_gauche": 1154.684,
+       "cible": 0,
+       "clusters": [
+        [
+         "A",
+         "B"
+        ],
+        [
+         "C",
+         "D"
+        ],
+        [
+         "E",
+         "F"
+        ]
+       ],
+       "conforme_des": null,
+       "genre": "structure",
+       "mcs": 2,
+       "premier_viol_rayon": 1507.574,
+       "raison": "clusters attendus reunis : [2, 3]",
+       "retard_relatif": null,
+       "variante": "base"
+      },
+      {
+       "borne_gauche": 1697.992,
+       "cible": 1,
+       "clusters": [
+        [
+         "A",
+         "B"
+        ],
+        [
+         "C",
+         "D"
+        ],
+        [
+         "E",
+         "F"
+        ]
+       ],
+       "conforme_des": null,
+       "genre": "structure",
+       "mcs": 2,
+       "premier_viol_rayon": 1697.992,
+       "raison": "clusters attendus reunis : [2, 3]",
+       "retard_relatif": null,
+       "variante": "base"
+      },
+      {
+       "borne_gauche": 1154.684,
+       "cible": 0,
+       "clusters": [
+        [
+         "A",
+         "B"
+        ],
+        [
+         "C",
+         "D"
+        ],
+        [
+         "E",
+         "F"
+        ]
+       ],
+       "conforme_des": null,
+       "genre": "structure",
+       "mcs": 2,
+       "premier_viol_rayon": 1524.211,
+       "raison": "clusters attendus reunis : [2, 3]",
+       "retard_relatif": null,
+       "variante": "D+1"
+      },
+      {
+       "borne_gauche": 1697.992,
+       "cible": 1,
+       "clusters": [
+        [
+         "A",
+         "B"
+        ],
+        [
+         "C",
+         "D"
+        ],
+        [
+         "E",
+         "F"
+        ]
+       ],
+       "conforme_des": null,
+       "genre": "structure",
+       "mcs": 2,
+       "premier_viol_rayon": 1697.992,
+       "raison": "clusters attendus reunis : [2, 3]",
+       "retard_relatif": null,
+       "variante": "D+1"
+      },
+      {
+       "borne_gauche": 1155.017,
+       "cible": 0,
+       "clusters": [
+        [
+         "A",
+         "B"
+        ],
+        [
+         "C",
+         "D"
+        ],
+        [
+         "E",
+         "F"
+        ]
+       ],
+       "conforme_des": null,
+       "genre": "structure",
+       "mcs": 2,
+       "premier_viol_rayon": 1497.503,
+       "raison": "clusters attendus reunis : [2, 3]",
+       "retard_relatif": null,
+       "variante": "D-1"
+      },
+      {
+       "borne_gauche": 1697.536,
+       "cible": 1,
+       "clusters": [
+        [
+         "A",
+         "B"
+        ],
+        [
+         "C",
+         "D"
+        ],
+        [
+         "E",
+         "F"
+        ]
+       ],
+       "conforme_des": null,
+       "genre": "structure",
+       "mcs": 2,
+       "premier_viol_rayon": 1697.536,
+       "raison": "clusters attendus reunis : [2, 3]",
+       "retard_relatif": null,
+       "variante": "D-1"
+      },
+      {
+       "borne_gauche": 1155.017,
+       "cible": 0,
+       "clusters": [
+        [
+         "A",
+         "B"
+        ],
+        [
+         "C",
+         "D"
+        ],
+        [
+         "E",
+         "F"
+        ]
+       ],
+       "conforme_des": null,
+       "genre": "structure",
+       "mcs": 2,
+       "premier_viol_rayon": 1497.503,
+       "raison": "clusters attendus reunis : [2, 3]",
+       "retard_relatif": null,
+       "variante": "C+1"
+      },
+      {
+       "borne_gauche": 1697.536,
+       "cible": 1,
+       "clusters": [
+        [
+         "A",
+         "B"
+        ],
+        [
+         "C",
+         "D"
+        ],
+        [
+         "E",
+         "F"
+        ]
+       ],
+       "conforme_des": null,
+       "genre": "structure",
+       "mcs": 2,
+       "premier_viol_rayon": 1697.536,
+       "raison": "clusters attendus reunis : [2, 3]",
+       "retard_relatif": null,
+       "variante": "C+1"
+      },
+      {
+       "borne_gauche": 1154.684,
+       "cible": 0,
+       "clusters": [
+        [
+         "A",
+         "B"
+        ],
+        [
+         "C",
+         "D"
+        ],
+        [
+         "E",
+         "F"
+        ]
+       ],
+       "conforme_des": null,
+       "genre": "structure",
+       "mcs": 2,
+       "premier_viol_rayon": 1524.211,
+       "raison": "clusters attendus reunis : [2, 3]",
+       "retard_relatif": null,
+       "variante": "C-1"
+      },
+      {
+       "borne_gauche": 1697.992,
+       "cible": 1,
+       "clusters": [
+        [
+         "A",
+         "B"
+        ],
+        [
+         "C",
+         "D"
+        ],
+        [
+         "E",
+         "F"
+        ]
+       ],
+       "conforme_des": null,
+       "genre": "structure",
+       "mcs": 2,
+       "premier_viol_rayon": 1697.992,
+       "raison": "clusters attendus reunis : [2, 3]",
+       "retard_relatif": null,
+       "variante": "C-1"
+      }
+     ],
+     "jamais": 10,
+     "jugements": 10,
+     "passe": false,
+     "passes": 0,
+     "premier_viol": {
+      "borne_gauche": 1154.684,
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B"
+       ],
+       [
+        "C",
+        "D"
+       ],
+       [
+        "E",
+        "F"
+       ]
+      ],
+      "conforme_des": null,
+      "genre": "structure",
+      "mcs": 2,
+      "premier_viol_rayon": 1507.574,
+      "raison": "clusters attendus reunis : [2, 3]",
+      "retard_relatif": null,
+      "variante": "base"
+     },
+     "retard_max": 0.0
+    },
+    "MMt[8,4/5]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 10,
+     "passe": true,
+     "passes": 10,
+     "premier_viol": null,
+     "retard_max": 0.0
+    }
+   },
+   "statut": "ancree_1oct"
+  },
+  {
+   "code": "Q1",
+   "mcs": [
+    4,
+    5,
+    6
+   ],
+   "mode": null,
+   "nom": "Q1@4-6",
+   "resultats": {
+    "ER0[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 15,
+     "passe": true,
+     "passes": 15,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "ER0h[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 15,
+     "passe": true,
+     "passes": 15,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[4,2/3]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 15,
+     "passe": true,
+     "passes": 15,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[8,4/5]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 15,
+     "passe": true,
+     "passes": 15,
+     "premier_viol": null,
+     "retard_max": 0.0
+    }
+   },
+   "statut": "forcee"
+  },
+  {
+   "code": "Q2",
+   "mcs": [
+    2
+   ],
+   "mode": null,
+   "nom": "Q2@2",
+   "resultats": {
+    "ER0[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 5,
+     "passe": true,
+     "passes": 5,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "ER0h[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 5,
+     "passe": true,
+     "passes": 5,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[4,2/3]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 5,
+     "passe": true,
+     "passes": 5,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[8,4/5]": {
+     "details": [
+      {
+       "borne_gauche": 61.0,
+       "cible": 0,
+       "clusters": [
+        [
+         "b1",
+         "b2"
+        ]
+       ],
+       "conforme_des": 62.806,
+       "genre": "retard",
+       "mcs": 2,
+       "premier_viol_rayon": 61.0,
+       "raison": "cluster obligatoire 0 absent ou incomplet",
+       "retard_relatif": 0.0296,
+       "variante": "base"
+      },
+      {
+       "borne_gauche": 61.0,
+       "cible": 0,
+       "clusters": [
+        [
+         "b1",
+         "b2"
+        ]
+       ],
+       "conforme_des": 63.719,
+       "genre": "retard",
+       "mcs": 2,
+       "premier_viol_rayon": 61.0,
+       "raison": "cluster obligatoire 0 absent ou incomplet",
+       "retard_relatif": 0.04457,
+       "variante": "a+1"
+      },
+      {
+       "borne_gauche": 61.0,
+       "cible": 0,
+       "clusters": [
+        [
+         "b1",
+         "b2"
+        ]
+       ],
+       "conforme_des": 61.888,
+       "genre": "retard",
+       "mcs": 2,
+       "premier_viol_rayon": 61.0,
+       "raison": "cluster obligatoire 0 absent ou incomplet",
+       "retard_relatif": 0.01456,
+       "variante": "a-1"
+      },
+      {
+       "borne_gauche": 61.0,
+       "cible": 0,
+       "clusters": [
+        [
+         "b1",
+         "b2"
+        ]
+       ],
+       "conforme_des": 63.042,
+       "genre": "retard",
+       "mcs": 2,
+       "premier_viol_rayon": 61.0,
+       "raison": "cluster obligatoire 0 absent ou incomplet",
+       "retard_relatif": 0.03348,
+       "variante": "b_vers_x"
+      },
+      {
+       "borne_gauche": 61.0,
+       "cible": 0,
+       "clusters": [
+        [
+         "b1",
+         "b2"
+        ]
+       ],
+       "conforme_des": 62.566,
+       "genre": "retard",
+       "mcs": 2,
+       "premier_viol_rayon": 61.0,
+       "raison": "cluster obligatoire 0 absent ou incomplet",
+       "retard_relatif": 0.02568,
+       "variante": "b_loin"
+      }
+     ],
+     "jamais": 0,
+     "jugements": 5,
+     "passe": false,
+     "passes": 0,
+     "premier_viol": {
+      "borne_gauche": 61.0,
+      "cible": 0,
+      "clusters": [
+       [
+        "b1",
+        "b2"
+       ]
+      ],
+      "conforme_des": 62.806,
+      "genre": "retard",
+      "mcs": 2,
+      "premier_viol_rayon": 61.0,
+      "raison": "cluster obligatoire 0 absent ou incomplet",
+      "retard_relatif": 0.0296,
+      "variante": "base"
+     },
+     "retard_max": 0.04457
+    }
+   },
+   "statut": "ancree"
+  },
+  {
+   "code": "Q2",
+   "mcs": [
+    4
+   ],
+   "mode": null,
+   "nom": "Q2@4",
+   "resultats": {
+    "ER0[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 5,
+     "passe": true,
+     "passes": 5,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "ER0h[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 5,
+     "passe": true,
+     "passes": 5,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[4,2/3]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 5,
+     "passe": true,
+     "passes": 5,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[8,4/5]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 5,
+     "passe": true,
+     "passes": 5,
+     "premier_viol": null,
+     "retard_max": 0.0
+    }
+   },
+   "statut": "forcee"
+  },
+  {
+   "code": "Q3",
+   "mcs": [
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
+   "mode": null,
+   "nom": "Q3@2-6",
+   "resultats": {
+    "ER0[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 25,
+     "passe": true,
+     "passes": 25,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "ER0h[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 25,
+     "passe": true,
+     "passes": 25,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[4,2/3]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 25,
+     "passe": true,
+     "passes": 25,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[8,4/5]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 25,
+     "passe": true,
+     "passes": 25,
+     "premier_viol": null,
+     "retard_max": 0.0
+    }
+   },
+   "statut": "ancree"
+  },
+  {
+   "code": "QPi2",
+   "mcs": [
+    9
+   ],
+   "mode": "aucun",
+   "nom": "Q-Pi2@9",
+   "resultats": {
+    "ER0[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 5,
+     "passe": true,
+     "passes": 5,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "ER0h[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 5,
+     "passe": true,
+     "passes": 5,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[4,2/3]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 5,
+     "passe": true,
+     "passes": 5,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[8,4/5]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 5,
+     "passe": true,
+     "passes": 5,
+     "premier_viol": null,
+     "retard_max": 0.0
+    }
+   },
+   "statut": "ancree_1oct"
+  },
+  {
+   "code": "Q3",
+   "mcs": [
+    10,
+    11,
+    12,
+    13,
+    14
+   ],
+   "mode": null,
+   "nom": "Q3@10-14",
+   "resultats": {
+    "ER0[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 25,
+     "passe": true,
+     "passes": 25,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "ER0h[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 25,
+     "passe": true,
+     "passes": 25,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[4,2/3]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 25,
+     "passe": true,
+     "passes": 25,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[8,4/5]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 25,
+     "passe": true,
+     "passes": 25,
+     "premier_viol": null,
+     "retard_max": 0.0
+    }
+   },
+   "statut": "forcee"
+  },
+  {
+   "code": "Q4",
+   "mcs": [
+    2,
+    3
+   ],
+   "mode": "q4strict",
+   "nom": "Q4@2-3",
+   "resultats": {
+    "ER0[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 30,
+     "passe": true,
+     "passes": 30,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "ER0h[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 30,
+     "passe": true,
+     "passes": 30,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[4,2/3]": {
+     "details": [
+      {
+       "borne_gauche": 866.025,
+       "cible": 0,
+       "clusters": [],
+       "conforme_des": 922.557,
+       "genre": "retard",
+       "mcs": 2,
+       "premier_viol_rayon": 866.025,
+       "raison": "cluster obligatoire 0 absent ou incomplet",
+       "retard_relatif": 0.06528,
+       "variante": "base"
+      },
+      {
+       "borne_gauche": 866.025,
+       "cible": 0,
+       "clusters": [],
+       "conforme_des": 922.557,
+       "genre": "retard",
+       "mcs": 3,
+       "premier_viol_rayon": 866.025,
+       "raison": "cluster obligatoire 0 absent ou incomplet",
+       "retard_relatif": 0.06528,
+       "variante": "base"
+      },
+      {
+       "borne_gauche": 866.025,
+       "cible": 0,
+       "clusters": [],
+       "conforme_des": 922.99,
+       "genre": "retard",
+       "mcs": 2,
+       "premier_viol_rayon": 866.025,
+       "raison": "cluster obligatoire 0 absent ou incomplet",
+       "retard_relatif": 0.06578,
+       "variante": "m_vers_C"
+      },
+      {
+       "borne_gauche": 866.025,
+       "cible": 0,
+       "clusters": [],
+       "conforme_des": 922.99,
+       "genre": "retard",
+       "mcs": 3,
+       "premier_viol_rayon": 866.025,
+       "raison": "cluster obligatoire 0 absent ou incomplet",
+       "retard_relatif": 0.06578,
+       "variante": "m_vers_C"
+      },
+      {
+       "borne_gauche": 866.025,
+       "cible": 0,
+       "clusters": [],
+       "conforme_des": 922.99,
+       "genre": "retard",
+       "mcs": 2,
+       "premier_viol_rayon": 866.025,
+       "raison": "cluster obligatoire 0 absent ou incomplet",
+       "retard_relatif": 0.06578,
+       "variante": "m_vers_D"
+      },
+      {
+       "borne_gauche": 866.025,
+       "cible": 0,
+       "clusters": [],
+       "conforme_des": 922.99,
+       "genre": "retard",
+       "mcs": 3,
+       "premier_viol_rayon": 866.025,
+       "raison": "cluster obligatoire 0 absent ou incomplet",
+       "retard_relatif": 0.06578,
+       "variante": "m_vers_D"
+      },
+      {
+       "borne_gauche": 866.459,
+       "cible": 0,
+       "clusters": [],
+       "conforme_des": 922.632,
+       "genre": "retard",
+       "mcs": 2,
+       "premier_viol_rayon": 866.459,
+       "raison": "cluster obligatoire 0 absent ou incomplet",
+       "retard_relatif": 0.06483,
+       "variante": "D_vers_m"
+      },
+      {
+       "borne_gauche": 866.459,
+       "cible": 0,
+       "clusters": [],
+       "conforme_des": 922.632,
+       "genre": "retard",
+       "mcs": 3,
+       "premier_viol_rayon": 866.459,
+       "raison": "cluster obligatoire 0 absent ou incomplet",
+       "retard_relatif": 0.06483,
+       "variante": "D_vers_m"
+      },
+      {
+       "borne_gauche": 866.025,
+       "cible": 0,
+       "clusters": [],
+       "conforme_des": 922.557,
+       "genre": "retard",
+       "mcs": 2,
+       "premier_viol_rayon": 866.025,
+       "raison": "cluster obligatoire 0 absent ou incomplet",
+       "retard_relatif": 0.06528,
+       "variante": "D_loin"
+      },
+      {
+       "borne_gauche": 866.025,
+       "cible": 0,
+       "clusters": [],
+       "conforme_des": 922.557,
+       "genre": "retard",
+       "mcs": 3,
+       "premier_viol_rayon": 866.025,
+       "raison": "cluster obligatoire 0 absent ou incomplet",
+       "retard_relatif": 0.06528,
+       "variante": "D_loin"
+      }
+     ],
+     "jamais": 0,
+     "jugements": 30,
+     "passe": false,
+     "passes": 20,
+     "premier_viol": {
+      "borne_gauche": 866.025,
+      "cible": 0,
+      "clusters": [],
+      "conforme_des": 922.557,
+      "genre": "retard",
+      "mcs": 2,
+      "premier_viol_rayon": 866.025,
+      "raison": "cluster obligatoire 0 absent ou incomplet",
+      "retard_relatif": 0.06528,
+      "variante": "base"
+     },
+     "retard_max": 0.06578
+    },
+    "MMt[8,4/5]": {
+     "details": [
+      {
+       "borne_gauche": 866.025,
+       "cible": 0,
+       "clusters": [],
+       "conforme_des": 959.807,
+       "genre": "retard",
+       "mcs": 2,
+       "premier_viol_rayon": 866.025,
+       "raison": "cluster obligatoire 0 absent ou incomplet",
+       "retard_relatif": 0.10829,
+       "variante": "base"
+      },
+      {
+       "borne_gauche": 866.025,
+       "cible": 0,
+       "clusters": [],
+       "conforme_des": 959.807,
+       "genre": "retard",
+       "mcs": 3,
+       "premier_viol_rayon": 866.025,
+       "raison": "cluster obligatoire 0 absent ou incomplet",
+       "retard_relatif": 0.10829,
+       "variante": "base"
+      },
+      {
+       "borne_gauche": 866.025,
+       "cible": 0,
+       "clusters": [],
+       "conforme_des": 959.815,
+       "genre": "retard",
+       "mcs": 2,
+       "premier_viol_rayon": 866.025,
+       "raison": "cluster obligatoire 0 absent ou incomplet",
+       "retard_relatif": 0.1083,
+       "variante": "m_vers_C"
+      },
+      {
+       "borne_gauche": 866.025,
+       "cible": 0,
+       "clusters": [],
+       "conforme_des": 959.815,
+       "genre": "retard",
+       "mcs": 3,
+       "premier_viol_rayon": 866.025,
+       "raison": "cluster obligatoire 0 absent ou incomplet",
+       "retard_relatif": 0.1083,
+       "variante": "m_vers_C"
+      },
+      {
+       "borne_gauche": 866.025,
+       "cible": 0,
+       "clusters": [],
+       "conforme_des": 959.815,
+       "genre": "retard",
+       "mcs": 2,
+       "premier_viol_rayon": 866.025,
+       "raison": "cluster obligatoire 0 absent ou incomplet",
+       "retard_relatif": 0.1083,
+       "variante": "m_vers_D"
+      },
+      {
+       "borne_gauche": 866.025,
+       "cible": 0,
+       "clusters": [],
+       "conforme_des": 959.815,
+       "genre": "retard",
+       "mcs": 3,
+       "premier_viol_rayon": 866.025,
+       "raison": "cluster obligatoire 0 absent ou incomplet",
+       "retard_relatif": 0.1083,
+       "variante": "m_vers_D"
+      },
+      {
+       "borne_gauche": 866.459,
+       "cible": 0,
+       "clusters": [],
+       "conforme_des": 959.879,
+       "genre": "retard",
+       "mcs": 2,
+       "premier_viol_rayon": 866.459,
+       "raison": "cluster obligatoire 0 absent ou incomplet",
+       "retard_relatif": 0.10782,
+       "variante": "D_vers_m"
+      },
+      {
+       "borne_gauche": 866.459,
+       "cible": 0,
+       "clusters": [],
+       "conforme_des": 959.879,
+       "genre": "retard",
+       "mcs": 3,
+       "premier_viol_rayon": 866.459,
+       "raison": "cluster obligatoire 0 absent ou incomplet",
+       "retard_relatif": 0.10782,
+       "variante": "D_vers_m"
+      },
+      {
+       "borne_gauche": 866.025,
+       "cible": 0,
+       "clusters": [],
+       "conforme_des": 959.807,
+       "genre": "retard",
+       "mcs": 2,
+       "premier_viol_rayon": 866.025,
+       "raison": "cluster obligatoire 0 absent ou incomplet",
+       "retard_relatif": 0.10829,
+       "variante": "D_loin"
+      },
+      {
+       "borne_gauche": 866.025,
+       "cible": 0,
+       "clusters": [],
+       "conforme_des": 959.807,
+       "genre": "retard",
+       "mcs": 3,
+       "premier_viol_rayon": 866.025,
+       "raison": "cluster obligatoire 0 absent ou incomplet",
+       "retard_relatif": 0.10829,
+       "variante": "D_loin"
+      }
+     ],
+     "jamais": 0,
+     "jugements": 30,
+     "passe": false,
+     "passes": 20,
+     "premier_viol": {
+      "borne_gauche": 866.025,
+      "cible": 0,
+      "clusters": [],
+      "conforme_des": 959.807,
+      "genre": "retard",
+      "mcs": 2,
+      "premier_viol_rayon": 866.025,
+      "raison": "cluster obligatoire 0 absent ou incomplet",
+      "retard_relatif": 0.10829,
+      "variante": "base"
+     },
+     "retard_max": 0.1083
+    }
+   },
+   "statut": "ancree"
+  },
+  {
+   "code": "Q4",
+   "mcs": [
+    5
+   ],
+   "mode": null,
+   "nom": "Q4@5",
+   "resultats": {
+    "ER0[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 9,
+     "passe": true,
+     "passes": 9,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "ER0h[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 9,
+     "passe": true,
+     "passes": 9,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[4,2/3]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 9,
+     "passe": true,
+     "passes": 9,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[8,4/5]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 9,
+     "passe": true,
+     "passes": 9,
+     "premier_viol": null,
+     "retard_max": 0.0
+    }
+   },
+   "statut": "derivee"
+  },
+  {
+   "code": "Q4",
+   "mcs": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "mode": null,
+   "nom": "Q4@6-9",
+   "resultats": {
+    "ER0[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 20,
+     "passe": true,
+     "passes": 20,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "ER0h[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 20,
+     "passe": true,
+     "passes": 20,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[4,2/3]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 20,
+     "passe": true,
+     "passes": 20,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[8,4/5]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 20,
+     "passe": true,
+     "passes": 20,
+     "premier_viol": null,
+     "retard_max": 0.0
+    }
+   },
+   "statut": "forcee"
+  },
+  {
+   "code": "T1",
+   "mcs": [
+    2
+   ],
+   "mode": "triangles",
+   "nom": "T1_1869@2",
+   "resultats": {
+    "ER0[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 2,
+     "passe": true,
+     "passes": 2,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "ER0h[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 2,
+     "passe": true,
+     "passes": 2,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[4,2/3]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 2,
+     "passe": true,
+     "passes": 2,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[8,4/5]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 2,
+     "passe": true,
+     "passes": 2,
+     "premier_viol": null,
+     "retard_max": 0.0
+    }
+   },
+   "statut": "derivee_1oct"
+  },
+  {
+   "code": "T1",
+   "mcs": [
+    3
+   ],
+   "mode": null,
+   "nom": "T1_1869@3",
+   "resultats": {
+    "ER0[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 2,
+     "passe": true,
+     "passes": 2,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "ER0h[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 2,
+     "passe": true,
+     "passes": 2,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[4,2/3]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 2,
+     "passe": true,
+     "passes": 2,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[8,4/5]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 2,
+     "passe": true,
+     "passes": 2,
+     "premier_viol": null,
+     "retard_max": 0.0
+    }
+   },
+   "statut": "derivee"
+  },
+  {
+   "code": "T1",
+   "mcs": [
+    4,
+    5,
+    6
+   ],
+   "mode": null,
+   "nom": "T1_1869@4-6",
+   "resultats": {
+    "ER0[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 3,
+     "passe": true,
+     "passes": 3,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "ER0h[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 3,
+     "passe": true,
+     "passes": 3,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[4,2/3]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 3,
+     "passe": true,
+     "passes": 3,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[8,4/5]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 3,
+     "passe": true,
+     "passes": 3,
+     "premier_viol": null,
+     "retard_max": 0.0
+    }
+   },
+   "statut": "forcee"
+  },
+  {
+   "code": "T1",
+   "mcs": [
+    2
+   ],
+   "mode": "triangles",
+   "nom": "T1_1868@2",
+   "resultats": {
+    "ER0[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 2,
+     "passe": true,
+     "passes": 2,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "ER0h[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 2,
+     "passe": true,
+     "passes": 2,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[4,2/3]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 2,
+     "passe": true,
+     "passes": 2,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[8,4/5]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 2,
+     "passe": true,
+     "passes": 2,
+     "premier_viol": null,
+     "retard_max": 0.0
+    }
+   },
+   "statut": "derivee_1oct"
+  },
+  {
+   "code": "T1",
+   "mcs": [
+    3
+   ],
+   "mode": null,
+   "nom": "T1_1868@3",
+   "resultats": {
+    "ER0[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 2,
+     "passe": true,
+     "passes": 2,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "ER0h[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 2,
+     "passe": true,
+     "passes": 2,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[4,2/3]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 2,
+     "passe": true,
+     "passes": 2,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[8,4/5]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 2,
+     "passe": true,
+     "passes": 2,
+     "premier_viol": null,
+     "retard_max": 0.0
+    }
+   },
+   "statut": "derivee"
+  },
+  {
+   "code": "T1",
+   "mcs": [
+    4,
+    5,
+    6
+   ],
+   "mode": null,
+   "nom": "T1_1868@4-6",
+   "resultats": {
+    "ER0[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 3,
+     "passe": true,
+     "passes": 3,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "ER0h[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 3,
+     "passe": true,
+     "passes": 3,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[4,2/3]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 3,
+     "passe": true,
+     "passes": 3,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[8,4/5]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 3,
+     "passe": true,
+     "passes": 3,
+     "premier_viol": null,
+     "retard_max": 0.0
+    }
+   },
+   "statut": "forcee"
+  },
+  {
+   "code": "T1",
+   "mcs": [
+    2
+   ],
+   "mode": "triangles",
+   "nom": "T1_1800@2",
+   "resultats": {
+    "ER0[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 2,
+     "passe": true,
+     "passes": 2,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "ER0h[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 2,
+     "passe": true,
+     "passes": 2,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[4,2/3]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 2,
+     "passe": true,
+     "passes": 2,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[8,4/5]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 2,
+     "passe": true,
+     "passes": 2,
+     "premier_viol": null,
+     "retard_max": 0.0
+    }
+   },
+   "statut": "derivee_1oct"
+  },
+  {
+   "code": "T1",
+   "mcs": [
+    3
+   ],
+   "mode": null,
+   "nom": "T1_1800@3",
+   "resultats": {
+    "ER0[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 2,
+     "passe": true,
+     "passes": 2,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "ER0h[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 2,
+     "passe": true,
+     "passes": 2,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[4,2/3]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 2,
+     "passe": true,
+     "passes": 2,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[8,4/5]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 2,
+     "passe": true,
+     "passes": 2,
+     "premier_viol": null,
+     "retard_max": 0.0
+    }
+   },
+   "statut": "derivee"
+  },
+  {
+   "code": "T1",
+   "mcs": [
+    4,
+    5,
+    6
+   ],
+   "mode": null,
+   "nom": "T1_1800@4-6",
+   "resultats": {
+    "ER0[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 3,
+     "passe": true,
+     "passes": 3,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "ER0h[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 3,
+     "passe": true,
+     "passes": 3,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[4,2/3]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 3,
+     "passe": true,
+     "passes": 3,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[8,4/5]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 3,
+     "passe": true,
+     "passes": 3,
+     "premier_viol": null,
+     "retard_max": 0.0
+    }
+   },
+   "statut": "forcee"
+  },
+  {
+   "code": "T1",
+   "mcs": [
+    4,
+    5,
+    6
+   ],
+   "mode": null,
+   "nom": "T1_1600@4-6",
+   "resultats": {
+    "ER0[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 3,
+     "passe": true,
+     "passes": 3,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "ER0h[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 3,
+     "passe": true,
+     "passes": 3,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[4,2/3]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 3,
+     "passe": true,
+     "passes": 3,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[8,4/5]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 3,
+     "passe": true,
+     "passes": 3,
+     "premier_viol": null,
+     "retard_max": 0.0
+    }
+   },
+   "statut": "forcee"
+  },
+  {
+   "code": "T1",
+   "mcs": [
+    4,
+    5,
+    6
+   ],
+   "mode": null,
+   "nom": "T1_1599@4-6",
+   "resultats": {
+    "ER0[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 3,
+     "passe": true,
+     "passes": 3,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "ER0h[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 3,
+     "passe": true,
+     "passes": 3,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[4,2/3]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 3,
+     "passe": true,
+     "passes": 3,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[8,4/5]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 3,
+     "passe": true,
+     "passes": 3,
+     "premier_viol": null,
+     "retard_max": 0.0
+    }
+   },
+   "statut": "forcee"
+  },
+  {
+   "code": "T1",
+   "mcs": [
+    4,
+    5,
+    6
+   ],
+   "mode": null,
+   "nom": "T1_1400@4-6",
+   "resultats": {
+    "ER0[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 3,
+     "passe": true,
+     "passes": 3,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "ER0h[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 3,
+     "passe": true,
+     "passes": 3,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[4,2/3]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 3,
+     "passe": true,
+     "passes": 3,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[8,4/5]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 3,
+     "passe": true,
+     "passes": 3,
+     "premier_viol": null,
+     "retard_max": 0.0
+    }
+   },
+   "statut": "forcee"
+  },
+  {
+   "code": "T1",
+   "mcs": [
+    4,
+    5,
+    6
+   ],
+   "mode": null,
+   "nom": "T1_1000@4-6",
+   "resultats": {
+    "ER0[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 3,
+     "passe": true,
+     "passes": 3,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "ER0h[1,12]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 3,
+     "passe": true,
+     "passes": 3,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[4,2/3]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 3,
+     "passe": true,
+     "passes": 3,
+     "premier_viol": null,
+     "retard_max": 0.0
+    },
+    "MMt[8,4/5]": {
+     "details": [],
+     "jamais": 0,
+     "jugements": 3,
+     "passe": true,
+     "passes": 3,
+     "premier_viol": null,
+     "retard_max": 0.0
+    }
+   },
+   "statut": "forcee"
+  }
+ ],
+ "empreinte": "97a9bd0ae8927981946df545af661d3825d26ba1dbfdf612379b659bb081c693",
+ "legende_bilan": [
+  "cellules",
+  "cellules passees",
+  "jugements",
+  "jugements passes",
+  "fenetres jamais conformes"
+ ],
+ "optimize": 0,
+ "regles": [
+  "ER0h[1,12]",
+  "ER0[1,12]",
+  "MMt[8,4/5]",
+  "MMt[4,2/3]"
+ ],
+ "sha_cellules": "a944c9d939a4e34b11bf5d6a4c907e413fc07bcbb07c384f2b00e4f99fb8d51c",
+ "sha_script": "734bffc831fadffe01581f9ec8642130477c13f5eb1c84326228216045b2eaa5",
+ "sha_v2": "a68b54ead709998e9331498648f7263624e92aa75e39e38d96e4da3acc63028f"
+}

@@ -1,0 +1,18 @@
+validate ok=1
+z=1 allow_single=0 clusters_condenses=5
+  cluster 0 parent=-1 naissance_lambda=0.000000 stabilite=0.175000 masse=7
+  cluster 1 parent=0 naissance_lambda=0.025000 stabilite=0.875000 masse=5
+  cluster 2 parent=0 naissance_lambda=0.025000 stabilite=0.150000 masse=2
+  cluster 3 parent=1 naissance_lambda=0.200000 stabilite=1.233333 masse=3
+  cluster 4 parent=1 naissance_lambda=0.200000 stabilite=0.100000 masse=2
+  etiquettes : 1 1 1 2 2 0 0
+z=2 allow_single=0 clusters_condenses=5
+  cluster 0 parent=-1 naissance_lambda=0.000000 stabilite=0.004375 masse=7
+  cluster 1 parent=0 naissance_lambda=0.000625 stabilite=0.196875 masse=5
+  cluster 2 parent=0 naissance_lambda=0.000625 stabilite=0.018750 masse=2
+  cluster 3 parent=1 naissance_lambda=0.040000 stabilite=1.241111 masse=3
+  cluster 4 parent=1 naissance_lambda=0.040000 stabilite=0.045000 masse=2
+  etiquettes : 1 1 1 2 2 0 0
+--- scikit-learn 1.9.1 sur la meme ultrametrique de points (metric=precomputed, min_samples=1, mcs=2, allow_single_cluster=False, distance = beta^(z/2)) :
+z = 1 : [0, 0, 0, 0, 0, 1, 1]   (R | C : la tete publiee rend A | B | C)
+z = 2 : [1, 1, 1, 2, 2, 0, 0]   (A | B | C : meme selection, stabilite de A fausse quand meme)

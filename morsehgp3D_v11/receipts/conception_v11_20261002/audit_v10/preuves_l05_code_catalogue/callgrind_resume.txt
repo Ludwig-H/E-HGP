@@ -1,0 +1,135 @@
+# callgrind 3.22 --branch-sim=yes, quart 01 (lidar01_quarter_x_neg_y_neg, 8 074 sites), K = 5, 1 fil, build -O3 -g
+## HEAD afb081774 (210 424 boules)
+==76897== I   refs:      6,939,424,075
+==76897== 
+==76897== Branches:        390,123,664  (388,760,079 cond + 1,363,585 ind)
+==76897== Mispredicts:      41,488,822  ( 41,487,490 cond +     1,332 ind)
+==76897== Mispred rate:           10.6% (       10.7%     +       0.1%   )
+## variante privee J3 v3d (build/v10-perf/feuille/timing_v3d/src, lecture seule) : dump et grand livre identiques a HEAD
+==81803== I   refs:      5,600,759,227
+==81803== 
+==81803== Branches:        275,817,051  (274,323,946 cond + 1,493,105 ind)
+==81803== Mispredicts:      24,732,680  ( 24,731,311 cond +     1,369 ind)
+==81803== Mispred rate:            9.0% (        9.0%     +       0.1%   )
+
+## HEAD : parts par fonction (Ir, Bcm)
+Ir                     Bcm                  file:function
+--------------------------------------------------------------------------------
+2,222,070,252 (32.02%) 23,763,788 (57.28%)  morsehgp3D_v10/src/catalogue/generator.cpp:void mhgp10::enumerate_leaf_masks<1>(mhgp10::Ctx const&, mhgp10::Local&, std::vector<unsigned int, std::allocator<unsigned int> > const&, mhgp1
+2,060,202,592 (29.69%)  8,572,120 (20.66%)  morsehgp3D_v10/src/catalogue/generator.cpp:mhgp10::filter_node(mhgp10::Ctx const&, mhgp10::Local&, mhgp10::Box const&, std::vector<unsigned int, std::allocator<unsigned int> > const&, st
+  913,946,309 (13.17%)  2,236,307 ( 5.39%)  morsehgp3D_v10/src/arith/geometry.hpp:void mhgp10::enumerate_leaf_masks<1>(mhgp10::Ctx const&, mhgp10::Local&, std::vector<unsigned int, std::allocator<unsigned int> > const&, mhgp10::Bo
+  366,967,422 ( 5.29%)    595,907 ( 1.44%)  morsehgp3D_v10/src/arith/geometry.hpp:mhgp10::geom::strictly_inside_tetra(mhgp10::geom::P3 const**, mhgp10::geom::P3 const&, mhgp10::geom::Center const&)
+  310,968,653 ( 4.48%)     14,503 ( 0.03%)  /usr/include/c++/13/bits/stl_algobase.h:mhgp10::filter_node(mhgp10::Ctx const&, mhgp10::Local&, mhgp10::Box const&, std::vector<unsigned int, std::allocator<unsigned int> > const&, std::
+  224,555,184 ( 3.24%)    822,263 ( 1.98%)  morsehgp3D_v10/src/arith/geometry.hpp:mhgp10::judge(mhgp10::Ctx const&, mhgp10::Local&, std::vector<unsigned int, std::allocator<unsigned int> > const&, unsigned int, mhgp10::geom::Cente
+  129,502,152 ( 1.87%)    468,667 ( 1.13%)  morsehgp3D_v10/src/arith/geometry.hpp:mhgp10::judge(mhgp10::Ctx const&, mhgp10::Local&, std::vector<unsigned int, std::allocator<unsigned int> > const&, unsigned int, mhgp10::geom::Cente
+   52,693,285 ( 0.76%)     63,788 ( 0.15%)  morsehgp3D_v10/src/arith/geometry.cpp:mhgp10::geom::strictly_inside_tetra(mhgp10::geom::P3 const**, mhgp10::geom::P3 const&, mhgp10::geom::Center const&) [/tmp/v11-audit/l05_code_catalog
+   45,962,842 ( 0.66%)          .           /usr/include/c++/13/bits/stl_algobase.h:mhgp10::process(mhgp10::Ctx const&, mhgp10::Local&, mhgp10::Box const&, std::vector<unsigned int, std::allocator<unsigned int> > const&, int, std:
+   44,353,512 ( 0.64%)    144,500 ( 0.35%)  morsehgp3D_v10/src/arith/geometry.hpp:mhgp10::judge(mhgp10::Ctx const&, mhgp10::Local&, std::vector<unsigned int, std::allocator<unsigned int> > const&, unsigned int, mhgp10::geom::Cente
+   44,333,969 ( 0.64%)    948,399 ( 2.29%)  morsehgp3D_v10/src/catalogue/generator.cpp:mhgp10::judge(mhgp10::Ctx const&, mhgp10::Local&, std::vector<unsigned int, std::allocator<unsigned int> > const&, unsigned int, mhgp10::geom::
+   37,686,728 ( 0.54%)         38 ( 0.00%)  morsehgp3D_v10/src/arith/wide.hpp:mhgp10::arith::Wide<(3)+(2)> mhgp10::arith::mul<3, 2>(mhgp10::arith::Wide<3> const&, mhgp10::arith::Wide<2> const&) [/tmp/v11-audit/l05_code_catalogue/b
+
+## HEAD : lignes de generator.cpp les plus couteuses en instructions (Ir, % du programme, mauvaises predictions)
+   494199920  7.12%         0  const i64 d = std::max<i64>(px - yx[r], 0) + std::max<i64>(py - yy[r], 0) + std::max<i64>(pz - yz[r], 0);
+   393197762  5.67%   3845035  for (u32 r = r0; r < r1; ++r) {
+   370773099  5.34%         0  w += -i64(pa - ya[r] > d) & yw[r];  // masque : sans branchement
+   186672658  2.69%   2919755  for (; j > 0 && kd[j - 1] > dd; --j) {
+   150388130  2.17%   1324919  if (v < i128(Q.lo[i]) * c.D || v >= i128(Q.hi[i]) * c.D) return false;
+   115514040  1.66%         0  i128 l = i128(v[k]) * p0 - i128(u[k]) * p1;
+    90565564  1.31%         0  const i128 v = (i128(av[i]) * c.D + c.N[i]) * (i128(1) << kT);
+    87630820  1.26%         0  const i128 r[3] = {2 * (i128(h[1]) * a01 + i128(h[2]) * a02), 2 * (i128(h[0]) * a01 + i128(h[2]) * a12),
+    84774359  1.22%         0  auto hrow = [&](u32 a, u32 b) { return H + (size_t(a) * m - size_t(a) * (a + 1) / 2 + (b - a - 1)) * nw; };
+    83981520  1.21%         0  const i64 da = 2 * (X.x - Q.lo[0]) - hx, db = 2 * (X.y - Q.lo[1]) - hy, dc = 2 * (X.z - Q.lo[2]) - hz;
+    74487030  1.07%         0  const i64 c01 = u[0] * v[1] - v[0] * u[1], c02 = u[0] * v[2] - v[0] * u[2], c12 = u[1] * v[2] - v[1] * u[2];
+    72890164  1.05%         0  auto setbit = [&](u64* row, u32 b) { row[b >> 6] |= u64(1) << (b & 63); };
+    67624438  0.97%   2954101  (dx > 0 ? Q.lo[0] : Q.hi[0]) * dx + (dy > 0 ? Q.lo[1] : Q.hi[1]) * dy + (dz > 0 ? Q.lo[2] : Q.hi[2]) * dz;
+    65318960  0.94%         0  const i64 px = 2 * hx * a, py = 2 * hy * b, pz = 2 * hz * c, pa = a * a + b * b + c * c;
+    64391010  0.93%         0  const int line = center_line_meets(lx[i], lx2[i], lx[j], lx2[j], lx[k], lx2[k], Q);
+    60254969  0.87%     64777  (dx > 0 ? Q.hi[0] : Q.lo[0]) * dx + (dy > 0 ? Q.hi[1] : Q.lo[1]) * dy + (dz > 0 ? Q.hi[2] : Q.lo[2]) * dz;
+    56226786  0.81%         0  x = (x & 0x3333333333333333ull) + ((x >> 2) & 0x3333333333333333ull);
+    52912682  0.76%   1387471  if (l > r[k]) return 0;
+    52579080  0.76%         0  const i64 u[3] = {A.x - B.x, A.y - B.y, A.z - B.z};
+    52578492  0.76%         0  2 * (i128(h[0]) * a02 + i128(h[1]) * a12)};
+    51508130  0.74%         0  x = (x + (x >> 4)) & 0x0F0F0F0F0F0F0F0Full;
+    51126906  0.74%         0  x -= (x >> 1) & 0x5555555555555555ull;
+
+## HEAD : lignes de generator.cpp aux plus nombreuses mauvaises predictions simulees (Bcm, % du programme)
+   3880660  9.35%  if (l < 0) l = -l;
+   3845035  9.27%  for (u32 r = r0; r < r1; ++r) {
+   2954101  7.12%  (dx > 0 ? Q.lo[0] : Q.hi[0]) * dx + (dy > 0 ? Q.lo[1] : Q.hi[1]) * dy + (dz > 0 ? Q.lo[2] : Q.hi[2]) * dz;
+   2919755  7.04%  for (; j > 0 && kd[j - 1] > dd; --j) {
+   2204245  5.31%  for (u64 ks = Pi[tk] & Pj[tk] & bits_above(j, tk); ks; ks &= ks - 1) {
+   1387471  3.34%  if (l > r[k]) return 0;
+   1365348  3.29%  if (x.approx != y.approx) return x.approx < y.approx;
+   1354446  3.26%  if (has(Di, j) || has(Dj, i)) continue;  // bissectrice disjointe de Qbar
+   1324919  3.19%  if (v < i128(Q.lo[i]) * c.D || v >= i128(Q.hi[i]) * c.D) return false;
+   1285243  3.10%  for (u64 ls = Hij[tl] & Hik[tl] & Hjk[tl] & bits_above(k, tl); ls; ls &= ls - 1) {
+   1071151  2.58%  for (u64 ks = Hij[tk] & bits_above(j, tk); ks; ks &= ks - 1) {
+   1042847  2.51%  } else if (s == 0) {
+    967825  2.33%  if (static_cast<i64>(d) <= th4) {
+    898838  2.17%  if (nb == cap && dd >= kd[nb - 1]) continue;
+    812500  1.96%  for (u32 j = i + 1; j < m; ++j) {
+    800381  1.93%  if (static_cast<i64>(d) <= th3) {
+    793947  1.91%  for (u32 j = i + 1; j < m; ++j) {
+    756734  1.82%  return 2 * Q.lo[0] <= A.x + B.x && A.x + B.x < 2 * Q.hi[0] && 2 * Q.lo[1] <= A.y + B.y && A.y + B.y < 2 * Q.hi[1] &&
+
+## HEAD : lignes de geometry.hpp les plus couteuses en instructions (Ir, % du programme, mauvaises predictions)
+   236948251  3.41%         0  inline P3 sub(const P3& a, const P3& b) { return {a.x - b.x, a.y - b.y, a.z - b.z}; }
+   188138456  2.71%         0  const i128 rhs = 2 * (c.N[0] * dx + c.N[1] * dy + c.N[2] * dz);
+   149128538  2.15%         0  i128 N0 = uu * vsx + vv * sux + ss * uvx, N1 = uu * vsy + vv * suy + ss * uvy, N2 = uu * vsz + vv * suz + ss * uvz;
+   130836294  1.89%         0  inline i64 dot(const P3& a, const P3& b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
+   121736648  1.75%         0  const i128 lhs = c.D * (dx * dx + dy * dy + dz * dz);
+    78697858  1.13%         0  const i128 v = i128(a.x) * (i128(b.y) * c.z - i128(b.z) * c.y) - i128(a.y) * (i128(b.x) * c.z - i128(b.z) * c.x) +
+    73176636  1.05%         0  const i128 det = i128(u.x) * (i128(v.y) * s.z - i128(v.z) * s.y) - i128(u.y) * (i128(v.x) * s.z - i128(v.z) * s.x) +
+    66401808  0.96%         0  const i128 dx = z.x - a.x, dy = z.y - a.y, dz = z.z - a.z;
+    59878805  0.86%         0  const i128 v = w0 * c0 + w1 * c1 + w2 * c2;
+    54746336  0.79%         0  const i128 c0 = c.N[0] + c.D * (anchor.x - p.x), c1 = c.N[1] + c.D * (anchor.y - p.y),
+    43648316  0.63%         0  out.N[0] = ty * w.z - tz * w.y;
+    37229446  0.54%         0  out.N[1] = tz * w.x - tx * w.z;
+    35181075  0.51%         0  i128(u.z) * (i128(v.x) * s.y - i128(v.y) * s.x);
+    34216460  0.49%         0  i128(a.z) * (i128(b.x) * c.y - i128(b.y) * c.x);
+    33378124  0.48%         0  const i128 tx = uu * v.x - vv * u.x, ty = uu * v.y - vv * u.y, tz = uu * v.z - vv * u.z;
+    29526802  0.43%         0  out.N[2] = tx * w.y - ty * w.x;
+    27373168  0.39%         0  const i128 w0 = i128(a.y) * b.z - i128(a.z) * b.y, w1 = i128(a.z) * b.x - i128(a.x) * b.z,
+    26029436  0.38%         0  return {a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x};
+    25662345  0.37%         0  c2 = c.N[2] + c.D * (anchor.z - p.z);
+    22509968  0.32%         0  const i128 uvx = i128(u.y) * v.z - i128(u.z) * v.y, uvy = i128(u.z) * v.x - i128(u.x) * v.z,
+    22509968  0.32%         0  const i128 sux = i128(s.y) * u.z - i128(s.z) * u.y, suy = i128(s.z) * u.x - i128(s.x) * u.z,
+    22133936  0.32%   1435430  return lhs < rhs ? -1 : (lhs == rhs ? 0 : 1);
+
+## HEAD : lignes de geometry.hpp aux plus nombreuses mauvaises predictions simulees (Bcm, % du programme)
+   1702294  4.10%  return dot(sub(b, a), sub(c, a)) > 0 && dot(sub(a, b), sub(c, b)) > 0 && dot(sub(a, c), sub(b, c)) > 0;
+   1435430  3.46%  return lhs < rhs ? -1 : (lhs == rhs ? 0 : 1);
+    530941  1.28%  if (D < 0) {
+    415961  1.00%  return v > 0 ? 1 : (v < 0 ? -1 : 0);
+    179946  0.43%  return v > 0 ? 1 : (v < 0 ? -1 : 0);
+      2685  0.01%  if (w.x == 0 && w.y == 0 && w.z == 0) return false;
+       387  0.00%  if (det == 0) return false;
+        25  0.00%  2 * (anchor.y * c.D + c.N[1]) == (i128(a.y) + b.y) * c.D &&
+         5  0.00%  return 2 * (anchor.x * c.D + c.N[0]) == (i128(a.x) + b.x) * c.D &&
+
+## HEAD construit avec -DMHGP10_MARCH=x86-64-v3 (meme entree) : dump identique
+==670394== I   refs:      5,811,260,592
+==670394== 
+==670394== Branches:        374,400,395  (373,036,810 cond + 1,363,585 ind)
+==670394== Mispredicts:      37,994,654  ( 37,993,322 cond +     1,332 ind)
+==670394== Mispred rate:           10.1% (       10.2%     +       0.1%   )
+Ir                     Bcm                  file:function
+--------------------------------------------------------------------------------
+3,018,369,116 (51.94%) 26,037,859 (68.53%)  ???:void mhgp10::enumerate_leaf_masks<1>(mhgp10::Ctx const&, mhgp10::Local&, vec const&, mhgp10::Box const&, unsigned int) [clone .constprop.0] [/tmp/v11-au
+1,467,897,937 (25.26%)  5,230,278 (13.77%)  ???:mhgp10::filter_node(mhgp10::Ctx const&, mhgp10::Local&, mhgp10::Box const&, vec const&, vec&) [/tmp/v11-audit/l05_code_catalogue/build-v3/mhgp10_catalog
+  395,709,185 ( 6.81%)    692,948 ( 1.82%)  ???:mhgp10::geom::strictly_inside_tetra(mhgp10::geom::P3 const**, mhgp10::geom::P3 const&, mhgp10::geom::Center const&) [/tmp/v11-audit/l05_code_catalogue/b
+  302,767,042 ( 5.21%)  1,733,277 ( 4.56%)  ???:mhgp10::judge(mhgp10::Ctx const&, mhgp10::Local&, vec const&, unsigned int, mhgp10::geom::Center const&, std::array<unsigned int, 4ul> const&, unsigned 
+  176,311,622 ( 3.03%)    976,417 ( 2.57%)  ???:mhgp10::judge(mhgp10::Ctx const&, mhgp10::Local&, vec const&, unsigned int, mhgp10::geom::Center const&, std::array<unsigned int, 4ul> const&, unsigned 
+filter_node : 2 406 M instructions (build par defaut, avec std::max) -> 1 468 M (x86-64-v3), soit -39 % ; la boucle vectorisee parcourt les dominateurs (5 puis 10 au plus), pas les sites
+
+## Essai « filtre a boucles interverties » (essai_filtre_boucles_interverties.diff : dominateur en boucle externe, sites en boucle
+## interne sur tableaux separes, sans sortie anticipee ; applique a la copie instrumentee) : dumps du quart 01 identiques a HEAD (K = 5 et 10)
+instructions de filter_node, quart 01, K = 5 (callgrind) :
+  HEAD, build par defaut            : 2 406 M (dont 311 M de std::max et 35 M de std::vector inlines)
+  HEAD, x86-64-v3                   : 1 468 M
+  variante B, build par defaut      : 2 596 M (scalaire, 14 % de tests en plus : 461 199 465 contre 403 800 945 sur la trame 02)
+  variante B, x86-64-v3             : 1 260 M
+temps du noyau (rdtsc, trame 02, K = 5, 1 fil, charge 17 a 24 : non concluants) :
+  tour 1 : A base 5,72 Gcyc ; A v3 3,54 ; B base 6,40 ; B v3 3,00
+  tour 2 : A base 6,62 ; A v3 4,88 ; B base 8,94 ; B v3 3,52
+  tour 3 : A base 9,42 ; A v3 3,64 ; B base 7,86 ; B v3 4,22

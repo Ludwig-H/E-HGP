@@ -1,0 +1,12 @@
+[head] cmake -DCMAKE_CXX_FLAGS=-ffast-math : code=1 est interdit
+[head] cmake -DCMAKE_CXX_FLAGS=-Ofast : code=0 
+[head] cmake -DCMAKE_CXX_FLAGS_RELEASE=-O3 -ffast-math : code=0 
+[head] cmake -DCMAKE_CXX_FLAGS=-freciprocal-math : code=0 
+[head] cmake -DCMAKE_CXX_FLAGS=-march=x86-64-v3 : code=0 
+[final] cmake -DCMAKE_CXX_FLAGS=-ffast-math : code=1 mhgp10_fp_flags_interdits)
+[final] cmake -DCMAKE_CXX_FLAGS=-Ofast : code=1 mhgp10_fp_flags_interdits)
+[final] cmake -DCMAKE_CXX_FLAGS_RELEASE=-O3 -ffast-math : code=1 mhgp10_fp_flags_interdits)
+[final] cmake -DCMAKE_CXX_FLAGS=-freciprocal-math : code=1 mhgp10_fp_flags_interdits)
+[final] cmake -DCMAKE_CXX_FLAGS=-march=x86-64-v3 : code=0 
+tete publiee, -DCMAKE_CXX_FLAGS=-march=x86-64-v3 : instructions FMA dans tower.cpp.o = 260, dans site_tree.cpp.o = 22 (objdump -d | grep -c vfmadd|vfmsub|vfnmadd|vfnmsub)
+arbre final, meme option : build code=0 ; FMA tower.cpp.o = 0 ; site_tree.cpp.o = 0

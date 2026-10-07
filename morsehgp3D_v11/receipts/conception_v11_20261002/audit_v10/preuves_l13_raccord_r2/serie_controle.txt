@@ -1,0 +1,57 @@
+# Controle de la serie sur un depot neuf (git init sous /tmp, git fetch du depot jetable, lecture seule de celui-ci)
+serie : /workspaces/E-HGP/build/v10-integration-r2/series (30 patchs) ; cloture : preuves_l13_raccord_r2/cloture_patches (2 patchs exportes par git format-patch 210b9fc..865f5e6)
+[keep-cr] arbre apres 30 patchs : a3f5769b1235557819585b48e9db240f5232cd4e ; attendu (210b9fc) : a3f5769b1235557819585b48e9db240f5232cd4e
+[keep-cr] arbre apres 32 patchs : 035c064b127365f7b3d47aca2d439f8ef0fd84aa ; attendu (865f5e6) : 035c064b127365f7b3d47aca2d439f8ef0fd84aa
+[sans keep-cr] arbre apres 32 patchs : 284c618eeb155416f0c14f03dcc534426a1bde7c ; fichiers differents de 865f5e6 : 16
+morsehgp3D_v10/receipts/raccord_r2_20260930/bancs/preuves/differentiels/scale_run/k10_integre.csv.txt
+morsehgp3D_v10/receipts/raccord_r2_20260930/bancs/preuves/differentiels/scale_run/k10_tete.csv.txt
+morsehgp3D_v10/receipts/raccord_r2_20260930/bancs/preuves/differentiels/scale_run/k5_integre.csv.txt
+morsehgp3D_v10/receipts/raccord_r2_20260930/bancs/preuves/differentiels/scale_run/k5_tete.csv.txt
+morsehgp3D_v10/receipts/raccord_r2_20260930/integration/preuves/v11b/scale/k10_integre.csv.txt
+morsehgp3D_v10/receipts/raccord_r2_20260930/integration/preuves/v11b/scale/k10_tete.csv.txt
+morsehgp3D_v10/receipts/raccord_r2_20260930/integration/preuves/v11b/scale/k10_tete_script_bin_integ.csv.txt
+morsehgp3D_v10/receipts/raccord_r2_20260930/integration/preuves/v11b/scale/k5_integre.csv.txt
+morsehgp3D_v10/receipts/raccord_r2_20260930/integration/preuves/v11b/scale/k5_tete.csv.txt
+morsehgp3D_v10/receipts/raccord_r2_20260930/integration/preuves/v11b/scale/k5_tete_script_bin_integ.csv.txt
+morsehgp3D_v10/receipts/raccord_r2_20260930/reparation/preuves/v11b/scale/k10_integre.csv.txt
+morsehgp3D_v10/receipts/raccord_r2_20260930/reparation/preuves/v11b/scale/k10_tete.csv.txt
+morsehgp3D_v10/receipts/raccord_r2_20260930/reparation/preuves/v11b/scale/k10_tete_script_bin_integ.csv.txt
+morsehgp3D_v10/receipts/raccord_r2_20260930/reparation/preuves/v11b/scale/k5_integre.csv.txt
+morsehgp3D_v10/receipts/raccord_r2_20260930/reparation/preuves/v11b/scale/k5_tete.csv.txt
+morsehgp3D_v10/receipts/raccord_r2_20260930/reparation/preuves/v11b/scale/k5_tete_script_bin_integ.csv.txt
+
+# Correspondance patch -> commit (premiere ligne de chaque patch)
+1 85c2c1d61797c426abdffef28c797f63361b6f22 conforme
+2 62c8e07efdc03be6eae22aaf8b0429059603b9ef conforme
+3 d303c88f549f107ad6b163e01d7d6b78dd337f1e conforme
+4 2d0a0c41c8997b7cc23a44e83587aa7d1024908c conforme
+5 d2640c8f89e5078f53a4fd4b2f925c44d16bfb77 conforme
+6 7edb91123be00796563f333feaca77d70e201163 conforme
+7 6d2d3bc5d1c34deca95f3ba6cc7929179517680c conforme
+8 4b457bdbb94bcad95557e8e4d18fb558bb6277e3 conforme
+9 36b8e9b823358708fa26627ade5c9d869c679954 conforme
+10 f42669a993c28e9b4bd1cdbc905518370f3eb1f8 conforme
+11 fad6f6826a43f4c1d9005e8dd7d45974b4479958 conforme
+12 83d6c0bb9c5d85119b723238b17545c2cb54df34 conforme
+13 71870a334f96a8948ebe385b341a280beea554b5 conforme
+14 1989cbb21e4cb6f953fd3a51f980f3e218feeb06 conforme
+15 a233c1446f7a46df64d1c2bebc75c731b770bb2f conforme
+16 164b7ed5e255fddacf59535a80cb6e91e52e0548 conforme
+17 b206848e73ce4f19cbade8e5171d4c1b62922df8 conforme
+18 6f4826290d915286c8b3ce922b118ab944a107a5 conforme
+19 f0d77a13573aa24ab2eb1b5f5a26fcefa6620e75 conforme
+20 268f02c69c8340d04d01abed1fcfbcc5ceebbda4 conforme
+21 247543c453347ec62650b2a211850e08b32e73fb conforme
+22 8c0e73e3efda72ded3fb13e1ebc76fa978c26430 conforme
+23 843369208290b88a9257ed21d50966eb10f93da3 conforme
+24 5c37c47ec7c3190e631273ffe5985c028d68ce5c conforme
+25 01f64f1af30445bed2960f98aa4359ba55b9c3b1 conforme
+26 56ac3dd368f937bb76374512fbcd159cb49895e1 conforme
+27 b8e795d5b960c8b132a9c33b4ac3bb1e3e6a2b1c conforme
+28 9408b100e52f87496377f313ee625610d772fa28 conforme
+29 5c2fe1f98f56904062ada6086ce02d5f0d54e9dd conforme
+30 210b9fca95e9266c32f478295e287d0dacdfd968 conforme
+31 35de8c088806ff59ed39924187acb2ad402e95c4 ABSENT DE LA SERIE
+32 865f5e64ddd08bedf6ab8f94e8bb94812e380e79 ABSENT DE LA SERIE
+
+final.patch : sha256 cc55cf409796b5380721b2c0c9d98476fe7629ba704deed451e90c3f2543be32 ; git diff --binary --full-index 5a06844 210b9fc : sha256 cc55cf409796b5380721b2c0c9d98476fe7629ba704deed451e90c3f2543be32

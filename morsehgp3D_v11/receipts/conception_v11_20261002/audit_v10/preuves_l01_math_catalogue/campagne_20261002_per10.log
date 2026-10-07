@@ -1,0 +1,2 @@
+oracle_indep_L01 clouds=220 runs=3960 records=432015 weighted_records=158121 extended_records=75666 fails=0 refus=0 delais=0
+par_famille amas_coins=35697 cellule_unite=42342 colineaire_plus=22776 coplanaire=26616 cube_centres=19200 extremes_u18=46737 generique_1000=61302 generique_u18=58383 grille_0_3=46845 rectangles=30606 sphere_R2_14=2652 sphere_R2_17=8931 sphere_R2_26=6993 sphere_R2_29=6987 sphere_R2_41=10629 sphere_R2_9=5319

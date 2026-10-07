@@ -1,0 +1,19 @@
+# Sonde de compteurs sur une copie du generateur v10 (quart lidar02_quarter_x_nonneg_y_nonneg, 5 286 sites, 1 fil)
+# colonnes : variante boules dom paires triplets droites quads juges t_boites_s (temps local indicatif, machine chargee)
+base_K5 147666 2980719 1924124 3015242 2128146 1026109 354382 0.9932
+noline_K5 147666 2980719 1924124 3015242 2128146 2473605 354382 1.1139
+order_K5 143591 2980719 1887652 2990215 2112948 1024353 350307 0.8665
+base_K10 574476 9679393 5308965 12877900 9007876 7548516 1137166 3.9443
+noline_K10 574476 9679393 5308965 12877900 9007876 18242729 1137166 6.1676
+order_K10 495599 9679393 4851750 12043526 8479171 7255412 1058289 4.6244
+# empreintes sha256 des dumps (16 premiers caracteres) : reference v10 / base / sans droite
+K=5 4939fead5753116e 4939fead5753116e 4939fead5753116e
+K=10 be5d19647049e109 be5d19647049e109 be5d19647049e109
+# boules dont la fenetre contient K (needed.py) : reference puis filtre un-seul-ordre
+q_k5.dump boules 147666 necessaires a l ordre 5 : 87342 empreinte 7dd37169bf933573
+p_order_k5.dump boules 143591 necessaires a l ordre 5 : 87342 empreinte 7dd37169bf933573
+q_k10.dump boules 574476 necessaires a l ordre 10 : 209092 empreinte bff436089f19af1d
+p_order_k10.dump boules 495599 necessaires a l ordre 10 : 209092 empreinte bff436089f19af1d
+# entonnoir q3 sans test de droite (MHGP_X_COUNT)
+K=5 X_COUNT triplets 3015242 aigus 1172146 aigus_et_enveloppe_mediane 566810 aigus_et_droite 949884
+K=10 X_COUNT triplets 12877900 aigus 4964883 aigus_et_enveloppe_mediane 2080607 aigus_et_droite 3922893

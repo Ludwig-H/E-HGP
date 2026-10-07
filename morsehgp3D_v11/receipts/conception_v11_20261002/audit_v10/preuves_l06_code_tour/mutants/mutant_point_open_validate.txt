@@ -1,0 +1,6 @@
+Controle complementaire du mutant POINT_OPEN par la validation du dendrogramme (mhgp10_cluster, nuage aleatoire de 1 500 points) :
+  POINT_OPEN mhgp10_cluster --k=1 : code 0 ; {"status":"ok","n":1500,"kmax":1,"balls":5303,"clusters":110,"catalogu
+  POINT_OPEN mhgp10_cluster --k=2 : code 3 ; {"status":"invariant_violated","reason":"rank_order"}
+  POINT_OPEN mhgp10_cluster --k=3 : code 3 ; {"status":"invariant_violated","reason":"rank_order"}
+  POINT_OPEN mhgp10_cluster --k=5 : code 3 ; {"status":"invariant_violated","reason":"rank_order"}
+  TEMOIN mhgp10_cluster --k=3 : code 0 ; {"status":"ok","n":1500,"kmax":3,"balls":34457,"clusters":38,"catalogu

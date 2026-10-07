@@ -1,0 +1,9 @@
+lignes en double : 20520  conflits de valeur : 0
+K=2  groupes=14400 scenes=1728 :  tour exacts=3000 >4/5=0.730 IoU=0.823  cover exacts=2958 >4/5=0.722 IoU=0.817  cover1 exacts=2991 >4/5=0.727 IoU=0.820  core exacts=2761 >4/5=0.637 IoU=0.770  hdbscan exacts=2908 >4/5=0.710 IoU=0.811
+      cover - HDBSCAN apparie par scene : +0.0053  IC95 bootstrap simple sur les scenes [+0.0042 ; +0.0064]  scenes +/=/- : 976/180/572
+K=3  groupes=14400 scenes=1728 :  tour exacts=2964 >4/5=0.742 IoU=0.830  cover exacts=2956 >4/5=0.734 IoU=0.822  cover1 exacts=2980 >4/5=0.739 IoU=0.824  core exacts=2798 >4/5=0.621 IoU=0.757  hdbscan exacts=2958 >4/5=0.687 IoU=0.797
+      cover - HDBSCAN apparie par scene : +0.0238  IC95 bootstrap simple sur les scenes [+0.0221 ; +0.0255]  scenes +/=/- : 1185/156/387
+K=5  groupes=14400 scenes=1728 :  tour exacts=2930 >4/5=0.756 IoU=0.839  cover exacts=2935 >4/5=0.747 IoU=0.827  cover1 exacts=2958 >4/5=0.751 IoU=0.828  core exacts=2745 >4/5=0.613 IoU=0.747  hdbscan exacts=2894 >4/5=0.656 IoU=0.776
+      cover - HDBSCAN apparie par scene : +0.0495  IC95 bootstrap simple sur les scenes [+0.0468 ; +0.0523]  scenes +/=/- : 1241/140/347
+K=10 groupes=14400 scenes=1728 :  tour exacts=2801 >4/5=0.763 IoU=0.847  cover exacts=2845 >4/5=0.761 IoU=0.830  cover1 exacts=2847 >4/5=0.762 IoU=0.831  core exacts=2472 >4/5=0.607 IoU=0.739  hdbscan exacts=2703 >4/5=0.626 IoU=0.751
+      cover - HDBSCAN apparie par scene : +0.0767  IC95 bootstrap simple sur les scenes [+0.0727 ; +0.0809]  scenes +/=/- : 1260/125/343

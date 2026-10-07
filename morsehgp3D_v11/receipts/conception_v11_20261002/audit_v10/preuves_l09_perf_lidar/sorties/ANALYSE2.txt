@@ -1,0 +1,55 @@
+== 1. Repartition TSC du catalogue a 1 fil (tics ; parts de l'etage des taches = t_boxes)
+l00 K=5: taches=33.33 Gtic filtre=23.1% feuilles=75.3% reste(ajustement, allocations)=1.6% | dans la feuille: masques=8.1% paires=15.3% triplets=49.6% quadruplets=26.9% ; dont jugements (recensement+emission)=21.9% de la feuille, 16.5% de l'etage | frontiere: process=0.42 Gtic dont filtre=96.4% feuilles=0.0% ; frontiere/taches=1.25% | t_boxes=13.63s cpu_user=8.62
+      tics par boule (etage des taches)=25504 ; par test de filtre=19.14 ; par feuille=71113 ; par jugement=1681
+l00 K=10: taches=293.64 Gtic filtre=14.2% feuilles=85.1% reste(ajustement, allocations)=0.7% | dans la feuille: masques=5.6% paires=8.2% triplets=45.3% quadruplets=40.9% ; dont jugements (recensement+emission)=21.1% de la feuille, 17.9% de l'etage | frontiere: process=0.84 Gtic dont filtre=97.2% feuilles=0.1% ; frontiere/taches=0.29% | t_boxes=120.08s cpu_user=37.15
+      tics par boule (etage des taches)=53267 ; par test de filtre=31.97 ; par feuille=471228 ; par jugement=4580
+l01 K=5: taches=55.37 Gtic filtre=23.4% feuilles=75.0% reste(ajustement, allocations)=1.6% | dans la feuille: masques=8.0% paires=13.8% triplets=49.3% quadruplets=28.7% ; dont jugements (recensement+emission)=22.8% de la feuille, 17.1% de l'etage | frontiere: process=0.39 Gtic dont filtre=91.8% feuilles=0.0% ; frontiere/taches=0.71% | t_boxes=22.64s cpu_user=6.78
+      tics par boule (etage des taches)=50519 ; par test de filtre=39.60 ; par feuille=145973 ; par jugement=3564
+l01 K10: manquant
+l02 K=5: taches=40.74 Gtic filtre=25.4% feuilles=72.5% reste(ajustement, allocations)=2.1% | dans la feuille: masques=9.1% paires=14.2% triplets=47.3% quadruplets=29.2% ; dont jugements (recensement+emission)=20.5% de la feuille, 14.9% de l'etage | frontiere: process=1.00 Gtic dont filtre=95.7% feuilles=0.0% ; frontiere/taches=2.47% | t_boxes=16.66s cpu_user=8.29
+      tics par boule (etage des taches)=28938 ; par test de filtre=25.61 ; par feuille=91407 ; par jugement=1832
+l02 K=10: taches=224.98 Gtic filtre=17.9% feuilles=81.4% reste(ajustement, allocations)=0.7% | dans la feuille: masques=6.2% paires=8.0% triplets=44.6% quadruplets=41.1% ; dont jugements (recensement+emission)=19.1% de la feuille, 15.6% de l'etage | frontiere: process=2.97 Gtic dont filtre=94.7% feuilles=0.0% ; frontiere/taches=1.32% | t_boxes=92.00s cpu_user=34.97
+      tics par boule (etage des taches)=41031 ; par test de filtre=31.31 ; par feuille=376920 ; par jugement=3238
+
+== 2. Certificat de moments de groupe (compteurs ; aucune decision modifiee)
+l00 K=5: boules=1306696 feuilles=352967 ancres=4921779 hors_boite_fermee=4881820 (99.2%)
+      rejets Dom individuelle (seuils th2,th3,th4)=51300,838139,1669414 | moments groupe entier=2,23,269 dont nouveaux=0,1,0 | meilleur de 7 groupes, nouveaux=0,1,0 | prefixes par distance=2,25,614 dont nouveaux=0,1,0
+      credit certifie total : prefixes=3213120 contre Dom=8708132 (rapport 0.369) ; ancres ou le prefixe depasse Dom=25894 (0.53% des ancres eligibles)
+      noeuds : sites lus=30605733 gardes=20793179 dont hors boite fermee=19867932 ; rejets moments Y=0 prefixes de Y=0 liste parente=85875 (0.413% des gardes)
+l00 K=10: boules=5512670 feuilles=530147 ancres=11451950 hors_boite_fermee=11411977 (99.7%)
+      rejets Dom individuelle (seuils th2,th3,th4)=41903,996575,1976681 | moments groupe entier=0,0,2 dont nouveaux=0,0,0 | meilleur de 7 groupes, nouveaux=0,0,0 | prefixes par distance=0,0,2 dont nouveaux=0,0,0
+      credit certifie total : prefixes=11834686 contre Dom=46777270 (rapport 0.253) ; ancres ou le prefixe depasse Dom=28524 (0.25% des ancres eligibles)
+      noeuds : sites lus=49124607 gardes=36903478 dont hors boite fermee=35975021 ; rejets moments Y=0 prefixes de Y=0 liste parente=65085 (0.176% des gardes)
+l01 K=5: boules=1095926 feuilles=284367 ancres=3961856 hors_boite_fermee=3926255 (99.1%)
+      rejets Dom individuelle (seuils th2,th3,th4)=42541,673998,1345034 | moments groupe entier=1,25,201 dont nouveaux=0,0,0 | meilleur de 7 groupes, nouveaux=0,0,0 | prefixes par distance=2,30,529 dont nouveaux=0,0,1
+      credit certifie total : prefixes=2544216 contre Dom=7006790 (rapport 0.363) ; ancres ou le prefixe depasse Dom=19714 (0.50% des ancres eligibles)
+      noeuds : sites lus=24864887 gardes=16908608 dont hors boite fermee=16116193 ; rejets moments Y=1 prefixes de Y=1 liste parente=54073 (0.320% des gardes)
+l01 K10: manquant
+l02 K=5: boules=1407885 feuilles=323224 ancres=4510019 hors_boite_fermee=4464062 (99.0%)
+      rejets Dom individuelle (seuils th2,th3,th4)=47168,764673,1527347 | moments groupe entier=0,8,356 dont nouveaux=0,0,0 | meilleur de 7 groupes, nouveaux=0,1,0 | prefixes par distance=0,11,712 dont nouveaux=0,0,0
+      credit certifie total : prefixes=2886461 contre Dom=7953194 (rapport 0.363) ; ancres ou le prefixe depasse Dom=21630 (0.48% des ancres eligibles)
+      noeuds : sites lus=30746631 gardes=20655450 dont hors boite fermee=19600309 ; rejets moments Y=0 prefixes de Y=0 liste parente=90623 (0.439% des gardes)
+l02 K10: manquant
+
+== 3. Repartition TSC de resolve (tour, 1 fil, sans attaches)
+l00 K=5: resolve=10.02 Gtic ; semis=16.8% MEB=22.5% recensement catalogue (+juge 1/32)=15.8% boule fermee (arbre)=28.9% saut K-NN=2.2% support/memo=4.6% premier representant=3.6% ; non attribue=5.4% | etage G (corps)=12.25 Gtic | tour=6.25s: prepare=6.3% local=3.6% seeds=1.9% resolve=80.1% kruskal=4.1% vertical=3.9%
+      tics par resolution=2767 ; par MEB=2079 ; par boule fermee=11174 (approx.) ; resolutions=3621560 MEB=1084548 boules_fermees=285207 recens_cat=825366
+l00 K=10: resolve=201.98 Gtic ; semis=14.2% MEB=27.9% recensement catalogue (+juge 1/32)=20.0% boule fermee (arbre)=21.5% saut K-NN=5.4% support/memo=3.9% premier representant=3.4% ; non attribue=3.9% | etage G (corps)=236.26 Gtic | tour=122.87s: prepare=2.4% local=1.3% seeds=6.4% resolve=78.7% kruskal=6.2% vertical=5.0%
+      tics par resolution=11616 ; par MEB=7347 ; par boule fermee=26347 (approx.) ; resolutions=17388593 MEB=7656889 boules_fermees=1832815 recens_cat=6012454
+l01 K=5: resolve=14.97 Gtic ; semis=18.6% MEB=20.4% recensement catalogue (+juge 1/32)=17.8% boule fermee (arbre)=26.1% saut K-NN=1.5% support/memo=6.0% premier representant=2.9% ; non attribue=6.7% | etage G (corps)=18.07 Gtic | tour=9.25s: prepare=4.1% local=0.8% seeds=1.1% resolve=79.9% kruskal=9.9% vertical=4.2%
+      tics par resolution=4970 ; par MEB=3629 ; par boule fermee=20394 (approx.) ; resolutions=3012404 MEB=841412 boules_fermees=212021 recens_cat=649889
+l01 K10: manquant
+l02 K5: manquant
+l02 K=10: resolve=63.55 Gtic ; semis=14.4% MEB=30.2% recensement catalogue (+juge 1/32)=18.6% boule fermee (arbre)=16.8% saut K-NN=4.6% support/memo=4.5% premier representant=5.2% ; non attribue=5.7% | etage G (corps)=76.08 Gtic | tour=40.19s: prepare=3.1% local=2.4% seeds=8.7% resolve=77.5% kruskal=3.4% vertical=5.0%
+      tics par resolution=3747 ; par MEB=3033 ; par boule fermee=9303 (approx.) ; resolutions=16958744 MEB=6338105 boules_fermees=1308654 recens_cat=5190179
+
+== 4. Scenes des demos (compteurs ; 3 fils, les noms de fichiers gardent le suffixe w4 du plan initial)
+03_pieton_contre_facade K=5: sites=44339 boules=1203625 (27.1/site) niveaux=974420 noeuds=820271 feuilles=352812 m_moyen=13.92 m_max=16 tests_filtre=428425555 juges=2867946 etendues=688 bloquees=0 | cpu_user=8.26 pic_rss=348672 kB (296.6 o/boule)
+01_velos_en_rang K=5: sites=67114 boules=2414668 (36.0/site) niveaux=1756614 noeuds=1246187 feuilles=560221 m_moyen=14.00 m_max=16 tests_filtre=670534960 juges=5916216 etendues=1011 bloquees=0 | cpu_user=14.53 pic_rss=673784 kB (285.7 o/boule)
+01_velos_en_rang K=10: sites=67114 boules=10000353 (149.0/site) niveaux=8753607 noeuds=1807553 feuilles=836205 m_moyen=21.67 m_max=24 tests_filtre=2160341456 juges=20688947 etendues=2037 bloquees=0 | cpu_user=64.03 pic_rss=2932580 kB (300.3 o/boule)
+05_temoin_voitures_en_file K=5: sites=72426 boules=2219193 (30.6/site) niveaux=1540426 noeuds=1184307 feuilles=515416 m_moyen=13.98 m_max=16 tests_filtre=697716710 juges=5218009 etendues=2310 bloquees=0 | cpu_user=13.56 pic_rss=613020 kB (282.9 o/boule)
+02_velos_contre_facade K=5: sites=76011 boules=2569157 (33.8/site) niveaux=1812738 noeuds=1440055 feuilles=633628 m_moyen=13.97 m_max=16 tests_filtre=803338505 juges=6223491 etendues=2062 bloquees=0 | cpu_user=16.28 pic_rss=717728 kB (286.1 o/boule)
+      tour: noeuds_tous_ordres=3025472 (1.18/boule) resolutions=7114056 cellules=4261993 | pic_rss=708792 kB (282.5 o/boule) cpu_user=21.06
+02_velos_contre_facade K=10: sites=76011 boules=10464519 (137.7/site) niveaux=9024618 noeuds=2096137 feuilles=955406 m_moyen=21.64 m_max=24 tests_filtre=2573236810 juges=21236852 etendues=4265 bloquees=0 | cpu_user=71.14 pic_rss=3065572 kB (300.0 o/boule)
+04_avec_sol K=5: sites=126267 boules=3654980 (28.9/site) niveaux=2441467 noeuds=2083473 feuilles=895232 m_moyen=13.92 m_max=16 tests_filtre=1184078055 juges=8779113 etendues=2021 bloquees=0 | cpu_user=22.89 pic_rss=997460 kB (279.5 o/boule)
+04_avec_sol K=10: sites=126267 boules=14919938 (118.2/site) niveaux=12502243 noeuds=3054593 feuilles=1374969 m_moyen=21.60 m_max=24 tests_filtre=3746682644 juges=29419852 etendues=4161 bloquees=0 | cpu_user=95.48 pic_rss=4314788 kB (296.1 o/boule)

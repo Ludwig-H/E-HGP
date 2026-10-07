@@ -1,0 +1,12 @@
+# Fri Oct  2 08:17:56 UTC 2026
+quotient_checks 5700 fails 0 births 1369 joins 1415 inert 2916 max_m 9
+quotient_large_checks 237 fails 0
+sphere_24 m 24 ensembles 116 morceaux_par_t 1,1,1,1,1,1,1,1,1,1,1,116,N,N,N,N,N,N,N,N,N,N,N,N cpu_s_python 0.054
+sphere_30 m 30 ensembles 176 morceaux_par_t 1,1,1,1,1,1,1,1,1,1,1,1,1,1,176,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N cpu_s_python 0.159
+cercle_12 m 12 ensembles 12 morceaux_par_t 1,1,1,1,1,12,N,N,N,N,N,N cpu_s_python 0.001
+cercle_16 m 16 ensembles 16 morceaux_par_t 1,1,1,1,1,1,1,16,N,N,N,N,N,N,N,N cpu_s_python 0.001
+cercle_24 m 24 ensembles 24 morceaux_par_t 1,1,1,1,1,1,1,1,1,1,1,24,N,N,N,N,N,N,N,N,N,N,N,N cpu_s_python 0.004
+foret_checks cases 3000 fails 0 nodes 76142 nary_merges 7634 equal_rank_neighbours 78496 queries 763616 junction_images 96857 max_attach_hops 4
+foret_checks cases 3000 fails 0 nodes 76273 nary_merges 8024 equal_rank_neighbours 77559 queries 824838 junction_images 97624 max_attach_hops 4
+# Fri Oct  2 08:40:51 UTC 2026 ; cover_temoins_check.py <reference v11> 3 60
+cover_temoins_checks entries 1317 ties 216 fails 0 regular_witnesses 1175 extended_witnesses 678 regular_not_birth 0

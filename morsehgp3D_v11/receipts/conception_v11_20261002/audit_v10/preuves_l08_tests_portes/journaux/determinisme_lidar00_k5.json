@@ -1,0 +1,25 @@
+{
+ "K": 5,
+ "catalogue_identique_selon_fils": true,
+ "catalogue_octets": 203430156,
+ "catalogue_permute_identique": true,
+ "catalogue_permute_sha256": "3982c3ab79c4a542cbd0bd88ea2b067cf248dc83c94402f97f5797c10a927676",
+ "catalogue_sha256_par_fils": {
+  "1": "3982c3ab79c4a542cbd0bd88ea2b067cf248dc83c94402f97f5797c10a927676",
+  "2": "3982c3ab79c4a542cbd0bd88ea2b067cf248dc83c94402f97f5797c10a927676",
+  "4": "3982c3ab79c4a542cbd0bd88ea2b067cf248dc83c94402f97f5797c10a927676"
+ },
+ "entree": "lidar00_full.u32le",
+ "n": 39885,
+ "points": true,
+ "tour_identique_selon_fils": true,
+ "tour_octets": 80270323,
+ "tour_permutee_identique": true,
+ "tour_permutee_sha256": "091f2620ae5be5c489b3ac481b6944cefd162c25e9aeb5b93e07a464b069d048",
+ "tour_sha256_par_fils": {
+  "1": "091f2620ae5be5c489b3ac481b6944cefd162c25e9aeb5b93e07a464b069d048",
+  "2": "091f2620ae5be5c489b3ac481b6944cefd162c25e9aeb5b93e07a464b069d048",
+  "4": "091f2620ae5be5c489b3ac481b6944cefd162c25e9aeb5b93e07a464b069d048"
+ }
+}
+exit=0

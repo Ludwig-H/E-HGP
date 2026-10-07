@@ -1,0 +1,13 @@
+# Porte permanente du depot (tests/oracle/test_catalogue_oracle.py, HEAD afb081774) jouee sur le binaire sain et sur les mutants de mutants.diff
+# code 0 = le mutant SURVIT a la porte ; code 1 = tue ; m_filterK : mutant mal concu par l'auditeur (ne termine pas a K = 1), execution interrompue par l'auditeur (code 143), non compte
+base : code=0 catalogue_oracle_checks 161 fails 0 balls 14132 (277 s)
+m_multiword : code=0 catalogue_oracle_checks 161 fails 0 balls 14132 (288 s)
+m_zono : code=1 catalogue_oracle_checks 161 fails 25 balls 10087 (275 s)
+m_dom : code=1 catalogue_oracle_checks 161 fails 63 balls 7923 (259 s)
+m_th3 : code=1 catalogue_oracle_checks 161 fails 118 balls 1339 (188 s)
+m_filterK : code=143  (560 s)
+m_fit : code=1 catalogue_oracle_checks 161 fails 120 balls 4535 (223 s)
+m_census : code=1 catalogue_oracle_checks 161 fails 119 balls 1296 (175 s)
+m_frontier : code=0 catalogue_oracle_checks 161 fails 0 balls 14132 (338 s)
+m_band : code=0 catalogue_oracle_checks 161 fails 0 balls 14132 (286 s)
+m_stag : code=0 catalogue_oracle_checks 161 fails 0 balls 14132 (309 s)

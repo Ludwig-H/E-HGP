@@ -1,0 +1,12 @@
+{"E_K": {"1": 1, "2": 1, "3": 1, "4": 1, "5": 1}, "balls": 2565656, "coquilles_etendues": 320, "entree": "lidar00_full.u32le", "etendues_par_taille": {"3": 313, "4": 2, "5": 5}, "kcat": 7, "lignes_du_dump": 2565656, "sites": 39885, "verdict": "EULER_OK"}
+code=0
+{"E_K": {"1": 1, "2": 1, "3": 1, "4": 1, "5": 1}, "balls": 2104698, "coquilles_etendues": 204, "entree": "lidar01_full.u32le", "etendues_par_taille": {"3": 202, "4": 1, "5": 1}, "kcat": 7, "lignes_du_dump": 2104698, "sites": 35551, "verdict": "EULER_OK"}
+code=0
+{"E_K": {"1": 1, "2": 1, "3": 1, "4": 1, "5": 1}, "balls": 2675990, "coquilles_etendues": 865, "entree": "lidar02_full.u32le", "etendues_par_taille": {"3": 848, "4": 8, "5": 9}, "kcat": 7, "lignes_du_dump": 2675990, "sites": 45845, "verdict": "EULER_OK"}
+code=0
+{"E_K": {"1": 1, "2": 1, "3": 1, "4": 1, "5": 1, "6": 1, "7": 1, "8": 1, "9": 1, "10": 1}, "balls": 8314472, "coquilles_etendues": 529, "entree": "lidar00_full.u32le", "etendues_par_taille": {"3": 519, "4": 2, "5": 8}, "kcat": 12, "lignes_du_dump": 8314472, "sites": 39885, "verdict": "EULER_OK"}
+code=0
+{"E_K": {"1": 1, "2": 1, "3": 1, "4": 1, "5": 1, "6": 1, "7": 1, "8": 1, "9": 1, "10": 1}, "balls": 6492748, "coquilles_etendues": 341, "entree": "lidar01_full.u32le", "etendues_par_taille": {"3": 339, "4": 1, "5": 1}, "kcat": 12, "lignes_du_dump": 6492748, "sites": 35551, "verdict": "EULER_OK"}
+code=0
+{"E_K": {"1": 1, "2": 1, "3": 1, "4": 1, "5": 1, "6": 1, "7": 1, "8": 1, "9": 1, "10": 1}, "balls": 8025829, "coquilles_etendues": 1559, "entree": "lidar02_full.u32le", "etendues_par_taille": {"3": 1534, "4": 11, "5": 14}, "kcat": 12, "lignes_du_dump": 8025829, "sites": 45845, "verdict": "EULER_OK"}
+code=0

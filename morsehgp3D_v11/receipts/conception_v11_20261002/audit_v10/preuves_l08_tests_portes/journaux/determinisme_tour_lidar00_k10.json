@@ -1,0 +1,43 @@
+{
+ "K": 10,
+ "compteurs_a_1_fil": {
+  "meb_fallbacks": 0,
+  "noeuds": [
+   79681,
+   178127,
+   285910,
+   421661,
+   576371,
+   753009,
+   945767,
+   1160571,
+   1386545,
+   1638573
+  ],
+  "replis": {
+   "join": {
+    "jump_exact": 157,
+    "level_exact": 7
+   },
+   "point": {
+    "jump_exact": 2,
+    "level_exact": 0
+   },
+   "vertical": {
+    "jump_exact": 0,
+    "level_exact": 0
+   }
+  }
+ },
+ "entree": "lidar00_full.u32le",
+ "n": 39885,
+ "tour_identique_selon_fils": true,
+ "tour_octets": 433672579,
+ "tour_permutee_identique": true,
+ "tour_permutee_sha256": "4de0a47882cc51a0dcb1841e1fe2a5e499df46802a427483ecd905edafc978c7",
+ "tour_sha256_par_fils": {
+  "1": "4de0a47882cc51a0dcb1841e1fe2a5e499df46802a427483ecd905edafc978c7",
+  "4": "4de0a47882cc51a0dcb1841e1fe2a5e499df46802a427483ecd905edafc978c7"
+ }
+}
+exit=0

@@ -1,0 +1,27 @@
+# Fri Oct  2 07:23:16 UTC 2026 ; ASan + UBSan (-DMHGP10_SANITIZE=ON, -fno-sanitize-recover=all), HEAD afb081774, 2 fils : sortie d'erreur vide = aucun rapport
+# ext_a : coins du cube u18 et points quasi extremes ; ext_b : 400 points dans trois bandes (0..40, 131000..131100, 262103..262143) ; ext_c : 3000 points uniformes sur [0, 262143]^3
+ext_a.u32le K=5 : {"status":"ok","n":15,"sites":15,"K":5,"threads":2,"balls":213,"levels":156,"pre | stderr 0 octets 
+ext_a.u32le K=12 : {"status":"ok","n":15,"sites":15,"K":12,"threads":2,"balls":370,"levels":297,"pr | stderr 0 octets 
+ext_b.u32le K=5 : {"status":"ok","n":400,"sites":400,"K":5,"threads":2,"balls":7802,"levels":6921, | stderr 0 octets 
+ext_b.u32le K=12 : {"status":"ok","n":400,"sites":400,"K":12,"threads":2,"balls":44973,"levels":437 | stderr 0 octets 
+ext_c.u32le K=5 : {"status":"ok","n":3000,"sites":3000,"K":5,"threads":2,"balls":211693,"levels":2 | stderr 0 octets 
+ext_c.u32le K=12 : {"status":"ok","n":3000,"sites":3000,"K":12,"threads":2,"balls":1690156,"levels" | stderr 0 octets 
+sph26_plus.u32le K=10 : {"status":"ok","n":86,"sites":86,"K":10,"threads":2,"balls":4755,"levels":1199," | stderr 0 octets 
+rnd140_s100.u32le K=10 : {"status":"ok","n":140,"sites":140,"K":10,"threads":2,"balls":26486,"levels":251 | stderr 0 octets 
+rnd70_w.u32le K=12 : {"status":"ok","n":137,"sites":70,"K":12,"threads":2,"balls":5354,"levels":3864, | stderr 0 octets 
+sph89.u32le K=2 : {"status":"ok","n":144,"sites":144,"K":2,"threads":2,"balls":723,"levels":16,"pr | stderr 0 octets 
+lidar01_quarter_x_neg_y_neg.u32le K=10 : {"status":"ok","n":8074,"sites":8074,"K":10,"threads":2,"balls":767555,"levels": | stderr 0 octets 
+
+# ext_c (3000 points sur tout le domaine u18), build normal : Euler a K + 2 = 12 et restriction a K = 10
+n=3000 K+2=12 boules=1690156 etendues=0
+  ordre 1 : chi = 1
+  ordre 2 : chi = 1
+  ordre 3 : chi = 1
+  ordre 4 : chi = 1
+  ordre 5 : chi = 1
+  ordre 6 : chi = 1
+  ordre 7 : chi = 1
+  ordre 8 : chi = 1
+  ordre 9 : chi = 1
+  ordre 10 : chi = 1
+ext_c.u32le K=10 : cat(K) 1073939 boules ; cat(K+2) 1690156 boules, restriction 1073939 ; EGALITE (sha c8ec41dbbc0f / c8ec41dbbc0f)

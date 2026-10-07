@@ -1,0 +1,10 @@
+{"E_K": {"1": 1, "2": 1, "3": 1, "4": 1, "5": 1}, "balls": 1306627, "catalogue_s": 11.766, "entree": "data/uniforme_8000_g3.u32le", "extended": 0, "formule_applicable": true, "kcat": 7, "max_shell": 4, "n": 8000, "sites": 8000, "verdict": "EULER_OK", "weighted": 0}
+code=0
+{"E_K": {"1": 1, "2": 1, "3": 1, "4": 1, "5": 1}, "balls": 2705608, "catalogue_s": 24.4887, "entree": "data/uniforme_16000_g3.u32le", "extended": 0, "formule_applicable": true, "kcat": 7, "max_shell": 4, "n": 16000, "sites": 16000, "verdict": "EULER_OK", "weighted": 0}
+code=0
+{"E_K": {"1": 1, "2": 1, "3": 1, "4": 1, "5": 1}, "balls": 5582288, "catalogue_s": 56.9086, "entree": "data/uniforme_32000_g3.u32le", "extended": 0, "formule_applicable": true, "kcat": 7, "max_shell": 4, "n": 32000, "sites": 32000, "verdict": "EULER_OK", "weighted": 0}
+code=0
+{"E_K": {"1": 1, "2": 1, "3": 1, "4": 1, "5": 1, "6": 1, "7": 1, "8": 1, "9": 1, "10": 1}, "balls": 4961747, "catalogue_s": 37.3004, "entree": "data/uniforme_8000_g3.u32le", "extended": 0, "formule_applicable": true, "kcat": 12, "max_shell": 4, "n": 8000, "sites": 8000, "verdict": "EULER_OK", "weighted": 0}
+code=0
+{"E_K": {"1": -48, "2": 61, "3": -6, "4": -22, "5": 22}, "balls": 2565656, "catalogue_s": 36.7301, "entree": "/workspaces/E-HGP/build/v10-g4-data-s1/lidar00_full.u32le", "extended": 320, "formule_applicable": false, "kcat": 7, "max_shell": 5, "n": 39885, "sites": 39885, "verdict": "NON_CONCLUANT_coquilles_etendues", "weighted": 0}
+code=0

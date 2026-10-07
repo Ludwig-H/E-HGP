@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/morsehgp3D_v11/receipts/audit_s10_root_guard_20261005/check.py", line 18, in <module>
+    blob = (HERE / 'snapshot' / path).read_bytes()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/codespace/.python/current/lib/python3.12/pathlib.py", line 1019, in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+  File "/home/codespace/.python/current/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/workspaces/E-HGP/morsehgp3D_v11/receipts/audit_s10_root_guard_20261005/snapshot/morsehgp3D_v11/src/head/internal.hpp'

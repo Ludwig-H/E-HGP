@@ -1,0 +1,7 @@
+m_fit : tue par 8/8 controles ; premier : sph26_plus.u32le K=5  : ECART : manquantes 7, en trop 0 ; ex. [(2, 0, 2), (2, 0, 2), (2, 0, 2)] []
+m_th3 : tue par 7/8 controles ; premier : sph26_plus.u32le K=5  : ECART : manquantes 226, en trop 0 ; ex. [(3, 3, 3), (3, 3, 3), (3, 3, 3)] []
+m_zono : tue par 6/8 controles ; premier : sph26_plus.u32le K=5  : ECART : manquantes 4, en trop 0 ; ex. [(3, 3, 3), (4, 1, 4), (3, 1, 3)] []
+m_dom : tue par 6/8 controles ; premier : sph26_plus.u32le K=5  : ECART : manquantes 5, en trop 0 ; ex. [(3, 3, 3), (2, 0, 2), (2, 2, 3)] []
+m_multiword : tue par 1/8 controles ; premier : rnd110_s40.u32le K=5 --leaf=120 : ECART : manquantes 1698, en trop 0 ; ex. [(4, 2, 4), (4, 2, 4), (4, 1, 4)] []
+m_census : tue par 8/8 controles ; premier : sph26_plus.u32le K=5  : ECART : manquantes 412, en trop 0 ; ex. [(2, 4, 4), (3, 3, 3), (3, 3, 3)] []
+m_filterK : tue par 6/8 controles ; premier : sph26_plus.u32le K=5  : ECART : manquantes 5, en trop 4 ; ex. [(2, 4, 8), (2, 4, 8), (2, 4, 3)] [(2, 4, 7), (2, 4,

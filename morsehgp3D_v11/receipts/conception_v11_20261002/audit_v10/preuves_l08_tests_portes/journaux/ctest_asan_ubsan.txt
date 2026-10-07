@@ -1,0 +1,37 @@
+debut 2026-10-02T07:35:08Z
+ 07:35:08 up  2:54,  0 user,  load average: 17.39, 21.32, 18.66
+1: site_tree_checks 6000
+1: site_tree_rational_checks 7155 shells 1099
+1: wide_checks 100000
+ 1/13 Test  #1: mhgp10_unit ..............................   Passed    7.36 sec
+2: rank_search_checks 36047
+ 2/13 Test  #2: mhgp10_rank_search .......................   Passed    0.20 sec
+3: grille32_checks 212684 distances 10162 roundtrips 10203 refused_keys 64 duplicates 103
+ 3/13 Test  #3: mhgp10_grid32_primitives .................   Passed    0.43 sec
+4: Ran 5 tests in 0.003s
+ 4/13 Test  #4: mhgp10_cover_band_structural .............   Passed    0.12 sec
+5: {"allocations": 642, "checks": 51886, "rejections": 19, "status": "PASS"}
+ 5/13 Test  #5: mhgp10_dev_quotas ........................   Passed    0.27 sec
+6: catalogue_oracle_checks 161 fails 0 balls 14132
+ 6/13 Test  #6: mhgp10_catalogue_oracle ..................   Passed  751.33 sec
+7: tower_oracle_checks 73 fails 0 cuts 23444
+ 7/13 Test  #7: mhgp10_tower_oracle ......................   Passed  795.69 sec
+8: hdbscan_checks 360 mismatches 0
+ 8/13 Test  #8: mhgp10_head_condensation_vs_sklearn ......   Passed   83.83 sec
+9: core : 509710 niveaux publies, statut ok
+9: ['--entry=cover'] : 502080 niveaux publies, statut ok
+ 9/13 Test  #9: mhgp10_regression_level_collision ........   Passed   98.68 sec
+10: controles 4584 ecarts 0
+10/13 Test #10: mhgp10_points_cover ......................   Passed   98.87 sec
+11: 136 controles, 0 ecarts
+11/13 Test #11: mhgp10_regression_batch_equivalence ......   Passed  649.78 sec
+12: 44 controles, 0 ecarts ; couverture bord >= coeur dans 98 % des cas
+12/13 Test #12: mhgp10_regression_mreach_border ..........   Passed   35.14 sec
+13: multiplicity_refusal_ok
+13/13 Test #13: mhgp10_regression_multiplicity_refusal ...   Passed    1.65 sec
+100% tests passed, 0 tests failed out of 13
+Total Test time (real) = 2523.36 sec
+exit=0
+fin 2026-10-02T08:17:12Z
+ 08:17:12 up  3:36,  0 user,  load average: 19.55, 18.98, 19.76
+rapports de sanitizers dans le journal complet : 0

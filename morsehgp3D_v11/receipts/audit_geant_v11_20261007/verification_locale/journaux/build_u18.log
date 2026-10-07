@@ -1,0 +1,84 @@
+[  0%] Building CXX object CMakeFiles/mhgp11.dir/src/core/ledger.cpp.o
+[  0%] Building CXX object CMakeFiles/mhgp11.dir/src/core/buffer.cpp.o
+[  0%] Building CXX object CMakeFiles/mhgp11.dir/src/num/sphere.cpp.o
+[  4%] Building CXX object CMakeFiles/mhgp11.dir/src/num/predicates.cpp.o
+[  4%] Building CXX object CMakeFiles/mhgp11.dir/src/num/center_region.cpp.o
+[  4%] Building CXX object CMakeFiles/mhgp11.dir/src/num/centers.cpp.o
+[  4%] Building CXX object CMakeFiles/mhgp11.dir/src/num/big.cpp.o
+[  9%] Building CXX object CMakeFiles/mhgp11.dir/src/num/rational.cpp.o
+[  9%] Building CXX object CMakeFiles/mhgp11.dir/src/num/roots.cpp.o
+[  9%] Building CXX object CMakeFiles/mhgp11.dir/src/num/radical.cpp.o
+[ 14%] Building CXX object CMakeFiles/mhgp11.dir/src/sched/pool.cpp.o
+[ 14%] Building CXX object CMakeFiles/mhgp11.dir/src/cloud/cloud.cpp.o
+[ 14%] Building CXX object CMakeFiles/mhgp11.dir/src/io/sha256.cpp.o
+[ 14%] Building CXX object CMakeFiles/mhgp11.dir/src/io/input.cpp.o
+[ 19%] Building CXX object CMakeFiles/mhgp11.dir/src/io/writer.cpp.o
+[ 19%] Building CXX object CMakeFiles/mhgp11.dir/src/io/directory.cpp.o
+[ 19%] Building CXX object CMakeFiles/mhgp11.dir/src/index/build.cpp.o
+[ 19%] Building CXX object CMakeFiles/mhgp11.dir/src/index/census.cpp.o
+[ 23%] Building CXX object CMakeFiles/mhgp11.dir/src/index/census_workspace.cpp.o
+[ 23%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/catalogue.cpp.o
+[ 23%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/boxes.cpp.o
+[ 28%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/leaf.cpp.o
+[ 28%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/support.cpp.o
+[ 28%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/assemble.cpp.o
+[ 28%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/assembly_parallel.cpp.o
+[ 33%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/sort_indices.cpp.o
+[ 33%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/frontier.cpp.o
+[ 33%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/adaptive_frontier.cpp.o
+[ 38%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/adaptive_prepare.cpp.o
+[ 38%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/adaptive_replay.cpp.o
+[ 38%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/parallel.cpp.o
+[ 38%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/single_pass.cpp.o
+[ 42%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/single_pass_batch.cpp.o
+[ 42%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/leaf_batch.cpp.o
+[ 42%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/leaf_batch_split.cpp.o
+[ 42%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/meb.cpp.o
+[ 47%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/full_domain.cpp.o
+[ 47%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/cells.cpp.o
+[ 47%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/cells_classify.cpp.o
+[ 52%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/locate.cpp.o
+[ 52%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/canonical.cpp.o
+[ 52%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/descent.cpp.o
+[ 52%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/descent_memo.cpp.o
+[ 57%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/population_lookup.cpp.o
+[ 57%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/forest_build.cpp.o
+[ 57%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/forest_plateau.cpp.o
+[ 61%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/forest_vertical.cpp.o
+[ 61%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/forest_parallel.cpp.o
+[ 61%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/forest_vertical_parallel.cpp.o
+[ 61%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/forest_concurrent.cpp.o
+[ 66%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/forest_pipeline.cpp.o
+[ 66%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/forest_placement.cpp.o
+[ 66%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/order_tree.cpp.o
+[ 66%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/attachment.cpp.o
+[ 71%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/ancestor_index.cpp.o
+[ 71%] Building CXX object CMakeFiles/mhgp11.dir/src/supports/enumerate.cpp.o
+[ 71%] Building CXX object CMakeFiles/mhgp11.dir/src/supports/counts.cpp.o
+[ 76%] Building CXX object CMakeFiles/mhgp11.dir/src/supports/hierarchy.cpp.o
+[ 76%] Building CXX object CMakeFiles/mhgp11.dir/src/points/incidences.cpp.o
+[ 76%] Building CXX object CMakeFiles/mhgp11.dir/src/points/qualify.cpp.o
+[ 76%] Building CXX object CMakeFiles/mhgp11.dir/src/points/exact.cpp.o
+[ 80%] Building CXX object CMakeFiles/mhgp11.dir/src/points/hang.cpp.o
+[ 80%] Building CXX object CMakeFiles/mhgp11.dir/src/points/settle.cpp.o
+[ 80%] Building CXX object CMakeFiles/mhgp11.dir/src/points/point_tree.cpp.o
+[ 85%] Building CXX object CMakeFiles/mhgp11.dir/src/head/condense.cpp.o
+[ 85%] Building CXX object CMakeFiles/mhgp11.dir/src/head/score.cpp.o
+[ 85%] Building CXX object CMakeFiles/mhgp11.dir/src/head/select.cpp.o
+[ 85%] Building CXX object CMakeFiles/mhgp11.dir/src/api/session.cpp.o
+[ 90%] Building CXX object CMakeFiles/mhgp11.dir/src/api/selftest.cpp.o
+[ 90%] Building CXX object CMakeFiles/mhgp11.dir/src/api/compute.cpp.o
+[ 90%] Building CXX object CMakeFiles/mhgp11.dir/src/api/write_full.cpp.o
+[ 90%] Building CXX object CMakeFiles/mhgp11.dir/src/api/write_supports.cpp.o
+[ 95%] Building CXX object CMakeFiles/mhgp11.dir/src/api/write_points.cpp.o
+[ 95%] Building CXX object CMakeFiles/mhgp11.dir/src/api/write_flat.cpp.o
+[ 95%] Building CXX object CMakeFiles/mhgp11.dir/src/api/manifest.cpp.o
+[100%] Linking CXX static library libmhgp11.a
+[100%] Built target mhgp11
+[100%] Building CXX object CMakeFiles/mhgp11_full_bench.dir/bench/full_probe.cpp.o
+[100%] Linking CXX executable mhgp11_full_bench
+[100%] Built target mhgp11_full_bench
+[ 95%] Built target mhgp11
+[ 95%] Building CXX object CMakeFiles/mhgp11_cli.dir/cli/mhgp11.cpp.o
+[100%] Linking CXX executable mhgp11
+[100%] Built target mhgp11_cli

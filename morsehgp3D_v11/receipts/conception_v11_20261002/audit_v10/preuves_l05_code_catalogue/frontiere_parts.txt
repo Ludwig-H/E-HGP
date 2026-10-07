@@ -1,0 +1,6 @@
+# Part de l'arbre traitee en largeur (frontiere) selon le nombre de fils, trame 02, K = 5 (comptes deterministes ; temps locaux non significatifs)
+W1 taches=366 site_max=689 noeuds=734083 noeuds_en_largeur=369 (0.1 %) visites_en_largeur=2947411 / 30746631 (9.6 %) tours=20 taches_developpees=735
+W4 taches=1843 site_max=175 noeuds=734083 noeuds_en_largeur=1938 (0.3 %) visites_en_largeur=4237796 / 30746631 (13.8 %) tours=26 taches_developpees=3781
+W24 taches=10287 site_max=29 noeuds=734083 noeuds_en_largeur=11316 (1.5 %) visites_en_largeur=6581533 / 30746631 (21.4 %) tours=28 taches_developpees=21603
+W48 taches=19482 site_max=14 noeuds=734083 noeuds_en_largeur=22441 (3.1 %) visites_en_largeur=7805259 / 30746631 (25.4 %) tours=29 taches_developpees=41923
+K=10 W48 taches=19843 site_max=14 noeuds=1065585 noeuds_en_largeur=22686 (2.1 %) visites_en_largeur=8014854 / 48329611 (16.6 %) tours=29

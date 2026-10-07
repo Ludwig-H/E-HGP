@@ -1,0 +1,82 @@
+Extraction (lecture seule) du recu morsehgp3D_v10/receipts/g4_session4_j2c_20260929/results/cmd/*/stdout
+Commit du recu : 777406b82 ; VM g4-standard-48, CPU seul. Temps en secondes, derniere passe chaude.
+
+008_tower_lidar00_k5_w48 n 39885 K 5 fils 48 boules 1306696
+  prepare_s 0.0072 catalogue_s 0.1635 tower_s 0.0885 passes_tower_s [0.0905, 0.0855, 0.0885]
+  etages {'t_prepare': 0.0028, 't_local': 0.0046, 't_seeds': 0.003, 't_resolve': 0.0286, 't_kruskal': 0.0317, 't_points': 0.0, 't_vertical': 0.0176}
+  kruskal par ordre [0.0045, 0.0084, 0.0196, 0.0186, 0.0316] max 0.0316
+  verticale par ordre [0.0, 0.0032, 0.0069, 0.0105, 0.0151] max 0.0151
+  plancher sequentiel (max kruskal + max verticale) = 0.0467 s, soit 53 % de la tour
+  rss_kib {'after_catalogue': 593520, 'peak_after_catalogue': 728204, 'after_tower': 665084, 'peak_after_tower': 728204}
+
+009_tower_lidar00_k10_w48 n 39885 K 10 fils 48 boules 5512670
+  prepare_s 0.0072 catalogue_s 0.6526 tower_s 0.472 passes_tower_s [0.4593, 0.4536, 0.472]
+  etages {'t_prepare': 0.0111, 't_local': 0.0299, 't_seeds': 0.0211, 't_resolve': 0.2429, 't_kruskal': 0.0904, 't_points': 0.0, 't_vertical': 0.0648}
+  kruskal par ordre [0.0056, 0.0119, 0.0168, 0.0315, 0.0356, 0.0504, 0.0593, 0.066, 0.0608, 0.0903] max 0.0903
+  verticale par ordre [0.0, 0.0033, 0.007, 0.0117, 0.0158, 0.0208, 0.0275, 0.0338, 0.0418, 0.0496] max 0.0496
+  plancher sequentiel (max kruskal + max verticale) = 0.1399 s, soit 30 % de la tour
+  rss_kib {'after_catalogue': 2463788, 'peak_after_catalogue': 3211272, 'after_tower': 2493828, 'peak_after_tower': 3211272}
+
+010_tower_lidar01_k5_w48 n 35551 K 5 fils 48 boules 1095926
+  prepare_s 0.0067 catalogue_s 0.1369 tower_s 0.0673 passes_tower_s [0.0739, 0.07, 0.0673]
+  etages {'t_prepare': 0.0023, 't_local': 0.0044, 't_seeds': 0.0026, 't_resolve': 0.0222, 't_kruskal': 0.0209, 't_points': 0.0, 't_vertical': 0.0148}
+  kruskal par ordre [0.0054, 0.0087, 0.0162, 0.0204, 0.0208] max 0.0208
+  verticale par ordre [0.0, 0.0028, 0.0061, 0.0089, 0.0125] max 0.0125
+  plancher sequentiel (max kruskal + max verticale) = 0.0333 s, soit 49 % de la tour
+  rss_kib {'after_catalogue': 547868, 'peak_after_catalogue': 626692, 'after_tower': 587412, 'peak_after_tower': 626692}
+
+011_tower_lidar01_k10_w48 n 35551 K 10 fils 48 boules 4383302
+  prepare_s 0.0066 catalogue_s 0.5275 tower_s 0.3339 passes_tower_s [0.3466, 0.3378, 0.3339]
+  etages {'t_prepare': 0.0083, 't_local': 0.0234, 't_seeds': 0.0163, 't_resolve': 0.1793, 't_kruskal': 0.0524, 't_points': 0.0, 't_vertical': 0.0475}
+  kruskal par ordre [0.0084, 0.01, 0.0123, 0.0162, 0.0201, 0.0281, 0.0308, 0.038, 0.0459, 0.0523] max 0.0523
+  verticale par ordre [0.0, 0.0028, 0.0061, 0.009, 0.0127, 0.0166, 0.0211, 0.0257, 0.0309, 0.0364] max 0.0364
+  plancher sequentiel (max kruskal + max verticale) = 0.0887 s, soit 27 % de la tour
+  rss_kib {'after_catalogue': 2137344, 'peak_after_catalogue': 2749896, 'after_tower': 2266988, 'peak_after_tower': 2749896}
+
+012_tower_lidar02_k5_w48 n 45845 K 5 fils 48 boules 1407885
+  prepare_s 0.0081 catalogue_s 0.1643 tower_s 0.0893 passes_tower_s [0.0958, 0.091, 0.0893]
+  etages {'t_prepare': 0.0033, 't_local': 0.005, 't_seeds': 0.0032, 't_resolve': 0.0271, 't_kruskal': 0.0275, 't_points': 0.0, 't_vertical': 0.0215}
+  kruskal par ordre [0.0053, 0.0098, 0.0147, 0.0194, 0.0275] max 0.0275
+  verticale par ordre [0.0, 0.0049, 0.0091, 0.0143, 0.0187] max 0.0187
+  plancher sequentiel (max kruskal + max verticale) = 0.0462 s, soit 52 % de la tour
+  rss_kib {'after_catalogue': 627032, 'peak_after_catalogue': 769172, 'after_tower': 702292, 'peak_after_tower': 769172}
+
+013_tower_lidar02_k10_w48 n 45845 K 10 fils 48 boules 5483320
+  prepare_s 0.0083 catalogue_s 0.6181 tower_s 0.4062 passes_tower_s [0.4141, 0.4205, 0.4062]
+  etages {'t_prepare': 0.011, 't_local': 0.0297, 't_seeds': 0.0207, 't_resolve': 0.2034, 't_kruskal': 0.0664, 't_points': 0.0, 't_vertical': 0.0641}
+  kruskal par ordre [0.0091, 0.0167, 0.0185, 0.0211, 0.0266, 0.0401, 0.041, 0.0551, 0.059, 0.0664] max 0.0664
+  verticale par ordre [0.0, 0.004, 0.0117, 0.0134, 0.021, 0.0239, 0.0369, 0.0432, 0.0437, 0.0497] max 0.0497
+  plancher sequentiel (max kruskal + max verticale) = 0.1161 s, soit 29 % de la tour
+  rss_kib {'after_catalogue': 2381436, 'peak_after_catalogue': 3194576, 'after_tower': 2480256, 'peak_after_tower': 3194576}
+
+014_tower_lidar00_k5_cover_w48 n 39885 K 5 fils 48 boules 1306696
+  prepare_s 0.0071 catalogue_s 0.1658 tower_s 0.1064 passes_tower_s [0.1177, 0.1145, 0.1064]
+  etages {'t_prepare': 0.0028, 't_local': 0.0047, 't_seeds': 0.0031, 't_resolve': 0.0286, 't_kruskal': 0.0255, 't_points': 0.0217, 't_vertical': 0.0199}
+  kruskal par ordre [0.0042, 0.0124, 0.017, 0.0186, 0.0254] max 0.0254
+  verticale par ordre [0.0, 0.0032, 0.0068, 0.0129, 0.0174] max 0.0174
+  plancher sequentiel (max kruskal + max verticale) = 0.0428 s, soit 40 % de la tour
+  rss_kib {'after_catalogue': 598740, 'peak_after_catalogue': 734004, 'after_tower': 672776, 'peak_after_tower': 734004}
+
+016_tower_lidar01_k5_cover_w48 n 35551 K 5 fils 48 boules 1095926
+  prepare_s 0.0065 catalogue_s 0.1358 tower_s 0.0848 passes_tower_s [0.0962, 0.0881, 0.0848]
+  etages {'t_prepare': 0.0023, 't_local': 0.0041, 't_seeds': 0.0026, 't_resolve': 0.0222, 't_kruskal': 0.0202, 't_points': 0.0187, 't_vertical': 0.0146}
+  kruskal par ordre [0.0037, 0.0068, 0.0106, 0.015, 0.0202] max 0.0202
+  verticale par ordre [0.0, 0.0028, 0.006, 0.0089, 0.0126] max 0.0126
+  plancher sequentiel (max kruskal + max verticale) = 0.0328 s, soit 39 % de la tour
+  rss_kib {'after_catalogue': 532500, 'peak_after_catalogue': 646244, 'after_tower': 590584, 'peak_after_tower': 646244}
+
+018_tower_lidar02_k5_cover_w48 n 45845 K 5 fils 48 boules 1407885
+  prepare_s 0.0082 catalogue_s 0.1648 tower_s 0.1132 passes_tower_s [0.1201, 0.1145, 0.1132]
+  etages {'t_prepare': 0.0039, 't_local': 0.0045, 't_seeds': 0.0033, 't_resolve': 0.0269, 't_kruskal': 0.028, 't_points': 0.0243, 't_vertical': 0.0211}
+  kruskal par ordre [0.0075, 0.0124, 0.0224, 0.028, 0.0279] max 0.028
+  verticale par ordre [0.0, 0.0039, 0.0092, 0.0132, 0.0185] max 0.0185
+  plancher sequentiel (max kruskal + max verticale) = 0.0465 s, soit 41 % de la tour
+  rss_kib {'after_catalogue': 622864, 'peak_after_catalogue': 766112, 'after_tower': 705224, 'peak_after_tower': 766112}
+
+020_tower_lidar02_k5_w24 n 45845 K 5 fils 24 boules 1407885
+  prepare_s 0.0078 catalogue_s 0.2284 tower_s 0.1098 passes_tower_s [0.1194, 0.1139, 0.1098]
+  etages {'t_prepare': 0.0036, 't_local': 0.0058, 't_seeds': 0.0048, 't_resolve': 0.0472, 't_kruskal': 0.0255, 't_points': 0.0, 't_vertical': 0.0228}
+  kruskal par ordre [0.0057, 0.0098, 0.014, 0.0185, 0.0254] max 0.0254
+  verticale par ordre [0.0, 0.0039, 0.0092, 0.0133, 0.0186] max 0.0186
+  plancher sequentiel (max kruskal + max verticale) = 0.0440 s, soit 40 % de la tour
+  rss_kib {'after_catalogue': 715404, 'peak_after_catalogue': 860796, 'after_tower': 766672, 'peak_after_tower': 860796}

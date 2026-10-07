@@ -1,0 +1,30 @@
+Internal ctest changing into directory: /tmp/v11-audit/l07_code_tete_cli/build
+Test project /tmp/v11-audit/l07_code_tete_cli/build
+    Start  4: mhgp10_cover_band_structural
+1/8 Test  #4: mhgp10_cover_band_structural .............   Passed    0.23 sec
+    Start  5: mhgp10_dev_quotas
+2/8 Test  #5: mhgp10_dev_quotas ........................   Passed    0.32 sec
+    Start  8: mhgp10_head_condensation_vs_sklearn
+3/8 Test  #8: mhgp10_head_condensation_vs_sklearn ......   Passed   41.99 sec
+    Start  9: mhgp10_regression_level_collision
+4/8 Test  #9: mhgp10_regression_level_collision ........   Passed   55.59 sec
+    Start 10: mhgp10_points_cover
+5/8 Test #10: mhgp10_points_cover ......................   Passed   75.43 sec
+    Start 11: mhgp10_regression_batch_equivalence
+6/8 Test #11: mhgp10_regression_batch_equivalence ......   Passed  135.28 sec
+    Start 12: mhgp10_regression_mreach_border
+7/8 Test #12: mhgp10_regression_mreach_border ..........   Passed   10.08 sec
+    Start 13: mhgp10_regression_multiplicity_refusal
+8/8 Test #13: mhgp10_regression_multiplicity_refusal ...   Passed    0.31 sec
+
+100% tests passed, 0 tests failed out of 8
+
+Label Time Summary:
+fast          =   0.87 sec*proc (3 tests)
+gate          = 319.25 sec*proc (8 tests)
+head          =  41.99 sec*proc (1 test)
+points        =  75.99 sec*proc (3 tests)
+regression    = 201.27 sec*proc (4 tests)
+
+Total Test time (real) = 319.25 sec
+CTEST_EXIT 0

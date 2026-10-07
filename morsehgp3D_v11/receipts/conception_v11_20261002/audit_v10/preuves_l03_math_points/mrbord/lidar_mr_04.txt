@@ -1,0 +1,14 @@
+Audit L03 (2 octobre 2026) : meilleur IoU (sens PQ, void exclu) des objets suivis dans la hierarchie d'atteignabilite mutuelle du depot (tests/head/mreach.cpp).
+mr1_coeur = hierarchie de HDBSCAN (min_samples = K point compte) ; bord = regle des points-bord ; mr2 = alpha 2. Fractions = intersection / union evaluee. Aucune coordonnee.
+Controles : demo 03 a K = 5 et demo 04 a K = 3 et 4, mr1_coeur = valeurs publiees dans Zoltan/demos (0,4444 / 1 / 0,9804 ; 0,29 / 0,2982 / 0,348 ; 0,2841 / 0,3108 / 0,3407).
+
+{"demo": "03_pieton_contre_facade", "K": 5, "source": "mr1_coeur", "sites": 44339, "iou": [0.4444, 1.0, 0.9804], "fractions": ["24/54", "70/70", "50/51"], "inter": [24, 70, 50], "taille_evaluee": [24, 70, 51]}
+{"demo": "03_pieton_contre_facade", "K": 5, "source": "mr2_bord", "sites": 44339, "iou": [0.4746, 1.0, 0.9804], "fractions": ["28/59", "70/70", "50/51"], "inter": [28, 70, 50], "taille_evaluee": [33, 70, 51]}
+{"demo": "04_velos_en_rang_avec_sol", "K": 3, "source": "mr1_coeur", "sites": 126267, "iou": [0.29, 0.2982, 0.348], "fractions": ["87/300", "65/218", "79/227"], "inter": [87, 65, 79], "taille_evaluee": [88, 65, 83]}
+{"demo": "04_velos_en_rang_avec_sol", "K": 3, "source": "mr1_bord", "sites": 126267, "iou": [0.3, 0.3073, 0.3612], "fractions": ["90/300", "67/218", "82/227"], "inter": [90, 67, 82], "taille_evaluee": [91, 67, 86]}
+{"demo": "04_velos_en_rang_avec_sol", "K": 3, "source": "mr2_bord", "sites": 126267, "iou": [0.311, 0.2706, 0.5677], "fractions": ["93/299", "59/218", "176/310"], "inter": [93, 59, 176], "taille_evaluee": [93, 59, 263]}
+{"demo": "04_velos_en_rang_avec_sol", "K": 4, "source": "mr1_coeur", "sites": 126267, "iou": [0.2841, 0.3108, 0.3407], "fractions": ["127/447", "69/222", "77/226"], "inter": [127, 69, 77], "taille_evaluee": [275, 73, 80]}
+{"demo": "04_velos_en_rang_avec_sol", "K": 4, "source": "mr1_bord", "sites": 126267, "iou": [0.3192, 0.3333, 0.3568], "fractions": ["143/448", "75/225", "81/227"], "inter": [143, 75, 81], "taille_evaluee": [292, 82, 85]}
+{"demo": "04_velos_en_rang_avec_sol", "K": 4, "source": "mr2_bord", "sites": 126267, "iou": [0.3144, 0.2752, 0.619], "fractions": ["94/299", "60/218", "169/273"], "inter": [94, 60, 169], "taille_evaluee": [94, 60, 219]}
+{"demo": "04_velos_en_rang_avec_sol", "K": 3, "source": "mr2_coeur", "sites": 126267, "iou": [0.2308, 0.2294, 0.4367], "fractions": ["69/299", "50/218", "131/300"], "inter": [69, 50, 131], "taille_evaluee": [69, 50, 208]}
+{"demo": "04_velos_en_rang_avec_sol", "K": 4, "source": "mr2_coeur", "sites": 126267, "iou": [0.2341, 0.2294, 0.3962], "fractions": ["70/299", "50/218", "105/265"], "inter": [70, 50, 105], "taille_evaluee": [70, 50, 147]}

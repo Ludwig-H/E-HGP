@@ -1,0 +1,15 @@
+ 1/13 Test  #2: mhgp10_rank_search .......................   Passed    0.05 sec
+ 2/13 Test  #3: mhgp10_grid32_primitives .................   Passed    0.40 sec
+ 3/13 Test  #4: mhgp10_cover_band_structural .............   Passed    0.38 sec
+ 4/13 Test  #5: mhgp10_dev_quotas ........................   Passed    0.41 sec
+ 5/13 Test  #1: mhgp10_unit ..............................   Passed    1.30 sec
+ 6/13 Test  #6: mhgp10_catalogue_oracle ..................   Passed  564.64 sec
+ 7/13 Test  #8: mhgp10_head_condensation_vs_sklearn ......   Passed   34.38 sec
+ 8/13 Test  #9: mhgp10_regression_level_collision ........   Passed   37.14 sec
+ 9/13 Test  #7: mhgp10_tower_oracle ......................   Passed  652.32 sec
+10/13 Test #10: mhgp10_points_cover ......................   Passed   47.38 sec
+11/13 Test #12: mhgp10_regression_mreach_border ..........   Passed    6.15 sec
+12/13 Test #13: mhgp10_regression_multiplicity_refusal ...   Passed    0.18 sec
+13/13 Test #11: mhgp10_regression_batch_equivalence ......   Passed   96.48 sec
+100% tests passed, 0 tests failed out of 13
+Total Test time (real) = 750.11 sec

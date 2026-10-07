@@ -1,0 +1,8 @@
+M0_temoin : oracle catalogue code=0 (catalogue_oracle_checks 41 fails 0 balls 2822) ; oracle tour code=0 (tower_oracle_checks 25 fails 0 cuts 8432)
+M2_center3_D : oracle catalogue code=1 (catalogue_oracle_checks 41 fails 31 balls 240) ; oracle tour code=124 ()
+M3_center4_signe : oracle catalogue code=1 (catalogue_oracle_checks 41 fails 15 balls 1022) ; oracle tour code=1 (tower_oracle_checks 25 fails 13 cuts 2126)
+M4_level3_den : oracle catalogue code=1 (catalogue_oracle_checks 41 fails 30 balls 240) ; oracle tour code=1 (tower_oracle_checks 25 fails 17 cuts 564)
+M5_orient_center_wide : oracle catalogue code=0 (catalogue_oracle_checks 41 fails 0 balls 2822) ; oracle tour code=1 (tower_oracle_checks 25 fails 4 cuts 6036)
+M6_compare : oracle catalogue code=1 (catalogue_oracle_checks 41 fails 31 balls 240) ; oracle tour code=1 (tower_oracle_checks 25 fails 17 cuts 472)
+M14_morton_axes : oracle catalogue code=0 (catalogue_oracle_checks 41 fails 0 balls 2822) ; oracle tour code=0 (tower_oracle_checks 25 fails 0 cuts 8432)
+FIN

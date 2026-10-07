@@ -1,0 +1,18 @@
+Mutants executes sur la trame 00 (lidar00_full.u32le), K = 5.
+
+JUMP_ANY (saut vers les k plus petits indices interieurs), 2 fils, entree core, dump complet :
+  sha256 du dump du mutant : 091f2620ae5be5c489b3ac481b6944cefd162c25e9aeb5b93e07a464b069d048
+  sha256 du dump du temoin : 091f2620ae5be5c489b3ac481b6944cefd162c25e9aeb5b93e07a464b069d048 (determinisme/determinism.txt)
+  resolves       temoin (1 fil)   3621560   JUMP_ANY (2 fils)   3621560   rapport 1.000
+  steps          temoin (1 fil)   4397929   JUMP_ANY (2 fils)   4421099   rapport 1.005
+  seed_hits      temoin (1 fil)   3111203   JUMP_ANY (2 fils)   3105798   rapport 0.998
+  memo_hits      temoin (1 fil)    307738   JUMP_ANY (2 fils)    313140   rapport 1.018
+  meb            temoin (1 fil)   1084548   JUMP_ANY (2 fils)   1113123   rapport 1.026
+  knn_jumps      temoin (1 fil)    275230   JUMP_ANY (2 fils)    293230   rapport 1.065
+  closed_balls   temoin (1 fil)    285207   JUMP_ANY (2 fils)    304034   rapport 1.066
+  lookups        temoin (1 fil)   1146128   JUMP_ANY (2 fils)   1177003   rapport 1.027
+  local_calls    temoin (1 fil)    501139   JUMP_ANY (2 fils)    506309   rapport 1.010
+
+BINARIZE (multifusions binarisees), 2 fils, sans attaches :
+  statut ok ; fusions par ordre [39884, 101088, 166227, 249492, 341080] ; noeuds par ordre [79769, 202177, 332455, 498985, 682161]
+  temoin : statut ok ; fusions par ordre [39796, 77038, 119682, 172168, 235290] ; noeuds par ordre [79681, 178127, 285910, 421661, 576371]

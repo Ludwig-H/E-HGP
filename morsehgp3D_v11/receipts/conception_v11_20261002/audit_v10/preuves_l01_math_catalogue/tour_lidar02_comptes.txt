@@ -1,0 +1,18 @@
+# Tour FULL v10 de la trame 08/000200 sans sol (45 845 sites), comptes par ordre rendus par mhgp10_tower --no-points.
+K=5 ordre=1 noeuds=91408 naissances=45845 fusions=45563 cellules_de_jonction=118797
+K=5 ordre=2 noeuds=207884 naissances=118797 fusions=89087 cellules_de_jonction=182823
+K=5 ordre=3 noeuds=314861 naissances=182823 fusions=132038 cellules_de_jonction=273879
+K=5 ordre=4 noeuds=459559 naissances=273879 fusions=185680 cellules_de_jonction=361329
+K=5 ordre=5 noeuds=609376 naissances=361326 fusions=248050 cellules_de_jonction=470939
+K=5 total boules=1407885 noeuds=1683088 naissances=982670 fusions=700418 ; par point : 36.7 noeuds
+K=10 ordre=1 noeuds=91408 naissances=45845 fusions=45563 cellules_de_jonction=118797
+K=10 ordre=2 noeuds=207884 naissances=118797 fusions=89087 cellules_de_jonction=182823
+K=10 ordre=3 noeuds=314861 naissances=182823 fusions=132038 cellules_de_jonction=273879
+K=10 ordre=4 noeuds=459559 naissances=273879 fusions=185680 cellules_de_jonction=361329
+K=10 ordre=5 noeuds=609376 naissances=361326 fusions=248050 cellules_de_jonction=470939
+K=10 ordre=6 noeuds=784536 naissances=470936 fusions=313600 cellules_de_jonction=574606
+K=10 ordre=7 noeuds=955748 naissances=574604 fusions=381144 cellules_de_jonction=693466
+K=10 ordre=8 noeuds=1149239 naissances=693464 fusions=455775 cellules_de_jonction=807800
+K=10 ordre=9 noeuds=1339988 naissances=807798 fusions=532190 cellules_de_jonction=937412
+K=10 ordre=10 noeuds=1555780 naissances=937412 fusions=618368 cellules_de_jonction=1062138
+K=10 total boules=5483320 noeuds=7468379 naissances=4466884 fusions=3001495 ; par point : 162.9 noeuds

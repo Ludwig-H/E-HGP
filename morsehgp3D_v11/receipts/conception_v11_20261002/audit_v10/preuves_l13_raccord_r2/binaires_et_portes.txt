@@ -1,0 +1,29 @@
+# Binaires GCC 13.3 Release : arbre de reparation 210b9fc contre arbre de cloture 865f5e6 (builds neufs, sources sous des chemins differents)
+./libmhgp10_core.a                 4a6979f8087ae0a191c16df1aa529bf10830d4f4c89505965f4f30d0ef55995d IDENTIQUE
+./libmhgp10_fault_preload.so       a9348065eb27f9b6df14b436895303181c8d1d75325f5f2e483866aed42f883a IDENTIQUE
+./mhgp10_catalogue                 22816c2e8387e616bddc6f8830b6ed39b70bdc9a6da25df1ba0ce286201758fc IDENTIQUE
+./mhgp10_cluster                   87e9ee04ba8c74b17e76fa8201423f14859fb5407fb4759ccb7ab6f21e51be59 IDENTIQUE
+./mhgp10_dendrogram_rounding       325905938761b15462b81b9c9bd2f0ffdc30c328918ee4514509317e8fcfac86 IDENTIQUE
+./mhgp10_fault                     bc2caf0a27c16b41873bee9f54ba50fee837583ef88f64a1779c3127b6361568 IDENTIQUE
+./mhgp10_grid32_primitives         8a2e823c224bc04f7b8c109f953e9aafdc163bdc5a0efc2d8fd4685bc18509ec IDENTIQUE
+./mhgp10_head_complexity           a03643472d57667df7226228978cae7250370f6f9eee8c9ba396608e64f1b157 IDENTIQUE
+./mhgp10_head_gate                 477bc8af760eb1bc62b13dc6e35aad211d80bd6ed0cf987a504208bda4a44cdb IDENTIQUE
+./mhgp10_mreach_cluster            4d1f0dc7f3825863aed8d03a2807955712ce11f55aa4170d7c18fd522a948550 IDENTIQUE
+./mhgp10_rank_search               0361f51d909529b70e340ebcb6e9b121865e6fe613ca9cba64cc469141ef6472 IDENTIQUE
+./mhgp10_site_tree_far_center      3a5665157f95fb1b838a2d1671efa9510dc9dcf4905265b34435a2b4887e21c4 IDENTIQUE
+./mhgp10_tower                     8b94706f62ac70b86dbd8dc8ea118c2ba9a45f013b66868a89def5838c74b847 IDENTIQUE
+./mhgp10_tower_rounding            ea95a21041caf843b6ef1f279b566dd5f226e9afbdeba0d2208413039b69401c IDENTIQUE
+./mhgp10_unit                      661d7ce73d6c515a0f7156105c96603e75d1e4104f41406b152c7d875d9ef06e IDENTIQUE
+
+# Tete publiee (code = 5a06844) : memes cibles
+libmhgp10_core.a                   d53abf19f8f9b3eac7b4d11e4d10ffeeb95029107acee9464ea0ae9e66b8bf5a
+mhgp10_catalogue                   a3bbad50b81b901c57cea7193bc48d58cce68126e44ae0a225ad678baa3af0cb
+mhgp10_tower                       3d55b8699b30abce635b27dea797468f229f95bfdb332468f42191ad9c0c9360
+mhgp10_cluster                     5df023bd685087a70c4015922f38177ea2480399136ace8f4e80f6536f72713d
+mhgp10_mreach_cluster              1dab9a4f9cd8ec3b3f51cd42d1f073f92ae3608d869792e8cb20a33ed5dfefac
+mhgp10_unit                        311f49996912bfeb7bf7d8fb24b8e7c66fae5625e5f9c77f7987f42a7b152eed
+
+# Portes enregistrees (ctest -N -L gate)
+head   Total Tests: 13
+r210   Total Tests: 82
+final  Total Tests: 84

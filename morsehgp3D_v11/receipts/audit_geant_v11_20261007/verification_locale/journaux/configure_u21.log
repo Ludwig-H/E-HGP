@@ -1,0 +1,20 @@
+-- The CXX compiler identification is GNU 13.3.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- mhgp11 : unites testees = core;num;sched;cloud;io;index;catalogue;tower;supports;points;head;api;cli;reference ; modules de la bibliotheque = core;num;sched;cloud;io;index;catalogue;tower;supports;points;head;api ; bits = 21
+-- Found Python3: /home/codespace/.python/current/bin/python3 (found suitable version "3.12.1", minimum required is "3.10") found components: Interpreter 
+-- mhgp11 : portes diff_v10 de la reference absentes (MHGP11_V10_FROZEN_DIR='' sans mhgp10_catalogue ni mhgp10_tower)
+-- mhgp11 : 1087 portes enregistrees
+-- Configuring done (4.4s)
+-- Generating done (0.3s)
+-- Build files have been written to: /tmp/claude-1000/-workspaces-E-HGP/6acaaf62-b44a-41e7-b5d6-81e4c7b6b7f1/scratchpad/agent_G/build-v11
+
+real	0m6.880s
+user	0m1.215s
+sys	0m0.554s

@@ -1,0 +1,25 @@
+stage2 : methodes ['hdb', 'tower'] ; configs sklearn : ['12_50_leaf_2.0', '12_sqrt_leaf_1.0', '12_sqrt_leaf_2.0', '20_50_leaf_1.0', '20_sqrt_leaf_1.0', '5_sqrt_leaf_2.0', '8_sqrt_leaf_1.0', '8_sqrt_leaf_2.0']
+
+DEV, n = 8000 seulement (128 scenes) : J = ARI_s moyen pondere par cellule
+-- sklearn HDBSCAN regle LIBREMENT (recu bench_dev_fill_20260928, stage2) : meilleure politique de bruit par configuration
+   0.7813  12_sqrt_leaf_2.0             b2.5   (128 scenes)
+   0.7788  12_sqrt_leaf_2.0             b2     (128 scenes)
+   0.7776  12_sqrt_leaf_2.0             b3     (128 scenes)
+   0.7731  8_sqrt_leaf_2.0              b2.5   (128 scenes)
+   0.7702  20_sqrt_leaf_1.0             b2     (128 scenes)
+   0.7701  8_sqrt_leaf_2.0              b3     (128 scenes)
+   0.7691  8_sqrt_leaf_2.0              b2     (128 scenes)
+   0.7690  20_sqrt_leaf_1.0             b2.5   (128 scenes)
+-- tour, entree cover, EOM z (recus kcover_dev_zgrid*, tete v10-b) : meilleure politique par (K, z)
+   0.7968  K=8  eom_z6     b2     (128 scenes)
+   0.7965  K=5  eom_z6     b2     (128 scenes)
+   0.7955  K=8  eom_z6     b1.5   (128 scenes)
+   0.7950  K=10 eom_z6     b2     (128 scenes)
+   0.7943  K=10 eom_z6     b1.5   (128 scenes)
+   0.7942  K=5  eom_z6     b1.5   (128 scenes)
+   0.7917  K=5  eom_z5     b2     (128 scenes)
+   0.7916  K=8  eom_z6     b2.5   (128 scenes)
+methodes dans zgrid : ['tower_cover']
+
+Apparie, n=8000, memes scenes dev (128) : tour K=5 cover eom_z6 b2 - sklearn libre (12_sqrt_leaf_2.0, b2.5) : moyenne +0.0153, mediane -0.0000, gains 62, pertes 64
+   par famille : aniso -0.020 bridg -0.006 filam -0.043 heter +0.014 hiera -0.005 shell +0.112 spher -0.009 unbal +0.080

@@ -1,0 +1,29 @@
+scenes synthetiques lues : 768
+
+mIoU pondere par cellule, memes scenes (768 par K) :
+K=2  hdb sqrt leaf e1 b2 0.6289 | hdb sqrt eom e0 b2 0.7111 | hdb m40 eom e0 b2 0.7042 | cover m40 eom z3 e0 b2 0.7583 | cover sqrt eom z3 e0 b2 0.7540  (scenes 768)
+K=3  hdb sqrt leaf e1 b2 0.6810 | hdb sqrt eom e0 b2 0.7031 | hdb m40 eom e0 b2 0.7024 | cover m40 eom z3 e0 b2 0.7589 | cover sqrt eom z3 e0 b2 0.7574  (scenes 768)
+K=5  hdb sqrt leaf e1 b2 0.7045 | hdb sqrt eom e0 b2 0.6875 | hdb m40 eom e0 b2 0.7006 | cover m40 eom z3 e0 b2 0.7598 | cover sqrt eom z3 e0 b2 0.7580  (scenes 768)
+K=10 hdb sqrt leaf e1 b2 0.7156 | hdb sqrt eom e0 b2 0.6757 | hdb m40 eom e0 b2 0.6833 | cover m40 eom z3 e0 b2 0.7597 | cover sqrt eom z3 e0 b2 0.7610  (scenes 768)
+
+EOM, sans epsilon ni remplissage : mIoU de HDBSCAN / cover z=1 / cover z=2 / cover z=3, par mcs
+K=2  mK     0.037 / 0.025 / 0.024 / 0.024
+K=2  m10    0.571 / 0.588 / 0.605 / 0.444
+K=2  m20    0.638 / 0.648 / 0.685 / 0.690
+K=2  m40    0.680 / 0.683 / 0.717 / 0.725
+K=2  msqrt  0.687 / 0.689 / 0.717 / 0.726
+K=3  mK     0.398 / 0.107 / 0.041 / 0.039
+K=3  m10    0.583 / 0.588 / 0.610 / 0.452
+K=3  m20    0.634 / 0.658 / 0.692 / 0.696
+K=3  m40    0.670 / 0.696 / 0.724 / 0.731
+K=3  msqrt  0.672 / 0.701 / 0.726 / 0.733
+K=5  mK     0.556 / 0.388 / 0.177 / 0.087
+K=5  m10    0.612 / 0.592 / 0.588 / 0.452
+K=5  m20    0.639 / 0.664 / 0.704 / 0.703
+K=5  m40    0.658 / 0.707 / 0.730 / 0.738
+K=5  msqrt  0.650 / 0.711 / 0.730 / 0.739
+K=10 mK     0.619 / 0.583 / 0.568 / 0.445
+K=10 m10    nan / nan / nan / nan
+K=10 m20    0.633 / 0.630 / 0.689 / 0.684
+K=10 m40    0.635 / 0.673 / 0.719 / 0.744
+K=10 msqrt  0.633 / 0.679 / 0.723 / 0.748

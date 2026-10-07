@@ -1,0 +1,17 @@
+Fri Oct  2 08:31:58 UTC 2026
+controles sans violation :
+  interieur q4 (Cramer), 2 det^2 - A' - B' - C' cas    4000  max |erreur| / tau = 6.511e-02  indecis (|approchee| <= tau) 4
+  interieur q4 (Cramer), A'              cas    4000  max |erreur| / tau = 1.314e-01  indecis (|approchee| <= tau) 3
+  interieur q4 (Cramer), B'              cas    4000  max |erreur| / tau = 1.374e-01  indecis (|approchee| <= tau) 6
+  interieur q4 (Cramer), C'              cas    4000  max |erreur| / tau = 1.246e-01  indecis (|approchee| <= tau) 4
+  interieur q4, 2 det G - A - B - C      cas    4000  max |erreur| / tau = 7.420e-03  indecis (|approchee| <= tau) 38
+  interieur q4, A                        cas    4000  max |erreur| / tau = 1.611e-03  indecis (|approchee| <= tau) 103
+  interieur q4, B                        cas    4000  max |erreur| / tau = 1.783e-03  indecis (|approchee| <= tau) 39
+  interieur q4, C                        cas    4000  max |erreur| / tau = 1.778e-03  indecis (|approchee| <= tau) 36
+  q3 boite, a D + N                      cas   11991  max |erreur| / tau = 1.414e-01  indecis (|approchee| <= tau) 0
+  q3 boite, h D - (a D + N)              cas   11991  max |erreur| / tau = 1.432e-01  indecis (|approchee| <= tau) 0
+  q4 boite, a D + N                      cas   11931  max |erreur| / tau = 1.164e-01  indecis (|approchee| <= tau) 0
+  q4 boite, h D - (a D + N)              cas   11931  max |erreur| / tau = 1.681e-01  indecis (|approchee| <= tau) 0
+  recensement q3                         cas   27979  max |erreur| / tau = 1.355e-01  indecis (|approchee| <= tau) 11999
+  recensement q4                         cas   31816  max |erreur| / tau = 1.378e-01  indecis (|approchee| <= tau) 15916
+Fri Oct  2 08:32:17 UTC 2026

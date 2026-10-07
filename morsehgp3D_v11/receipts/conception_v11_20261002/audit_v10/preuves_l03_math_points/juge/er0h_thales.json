@@ -1,0 +1,32 @@
+{
+ "attendu_juge": {
+  "ER0": [
+   50.683,
+   506.824,
+   5068.235
+  ],
+  "ER0h": [
+   0.5,
+   0.5,
+   0.5
+  ]
+ },
+ "cadre": "phase=exploration_v10_hors_registre backend=cpu_reference profile=quantized_u18_input_only mode=verification_tierce_er0h public_status=not_claimed ; GCP non utilise",
+ "fixture": "bascule_repli_thales : y(1000,1000,0), z(3000,1000,0), q(1200,1600,0), qp(1200,1604,0) ; q -> (1200,1601,0), K = 2",
+ "lecture": "temoin positif : ER0 saute (proportionnel a l echelle), ER0h non ; memes valeurs que le juge",
+ "optimize": 0,
+ "sauts": {
+  "ER0_x1": 50.683,
+  "ER0_x10": 506.824,
+  "ER0_x100": 5068.235,
+  "ER0h_x1": 0.5,
+  "ER0h_x10": 0.5,
+  "ER0h_x100": 0.5
+ },
+ "sha": {
+  "attaque": "a053fa47c141a986ead52003868f5cdc0a97fce137fb80b4659021df3b1c5da2",
+  "attaque_complements": "58293ecdb4a4b4e4c07298cd79199a144505697f1a1596584af8802b43251dd2",
+  "er0h_texte": "229a89d7e6eb7f3a08c84c1d424987c36086d4b99b84b3fa7221200b0e4b5139"
+ },
+ "temoin_positif_reproduit": true
+}

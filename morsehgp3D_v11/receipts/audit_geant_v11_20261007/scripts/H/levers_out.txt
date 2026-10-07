@@ -1,0 +1,390 @@
+--- G1_AVX2 : sp+prefix (seuil 0.85)
+   cpu  lidar_ng00 n=6 base 186.83 new 171.21 r_med 0.916 r_paire 0.926 sd_d 0.129 neg 4
+   cpu  lidar_ng01 n=6 base 148.72 new 146.30 r_med 0.984 r_paire 0.991 sd_d 0.082 neg 5
+   cpu  lidar_ng02 n=6 base 176.58 new 159.77 r_med 0.905 r_paire 0.907 sd_d 0.074 neg 6
+   gpu  lidar_ng00 n=6 base 59.86 new 49.53 r_med 0.827 r_paire 0.839 sd_d 0.070 neg 6
+   gpu  lidar_ng01 n=6 base 47.37 new 41.29 r_med 0.872 r_paire 0.865 sd_d 0.042 neg 6
+   gpu  lidar_ng02 n=6 base 56.03 new 49.08 r_med 0.876 r_paire 0.850 sd_d 0.042 neg 6
+   gm(medianes)=0.895 gm(paires)=0.895 IC95 cellules [0.838, 0.956] IC95 regroupe [0.871, 0.919]
+   sd paire (log)=0.0788 sd bras (log, entre processus)=0.0539  paires<0 : 33/36  p_signes=2.3e-07 p_perm=5e-05
+--- G1_AVX2 : domain (seuil 1.0)
+   cpu  lidar_ng00 n=6 base 217.86 new 200.56 r_med 0.921 r_paire 0.932 sd_d 0.114 neg 4
+   cpu  lidar_ng01 n=6 base 174.17 new 172.43 r_med 0.990 r_paire 0.993 sd_d 0.070 neg 5
+   cpu  lidar_ng02 n=6 base 211.15 new 193.78 r_med 0.918 r_paire 0.917 sd_d 0.061 neg 6
+   gpu  lidar_ng00 n=6 base 215.40 new 215.51 r_med 1.001 r_paire 1.138 sd_d 0.289 neg 2
+   gpu  lidar_ng01 n=6 base 204.88 new 202.97 r_med 0.991 r_paire 0.995 sd_d 0.020 neg 4
+   gpu  lidar_ng02 n=6 base 224.64 new 217.79 r_med 0.969 r_paire 0.969 sd_d 0.024 neg 5
+   gm(medianes)=0.964 gm(paires)=0.988 IC95 cellules [0.912, 1.071] IC95 regroupe [0.944, 1.034]
+   sd paire (log)=0.1332 sd bras (log, entre processus)=0.0981  paires<0 : 26/36  p_signes=0.011 p_perm=0.73
+--- G1_AVX2 : wall (seuil None)
+   cpu  lidar_ng00 n=6 base 338.86 new 319.97 r_med 0.944 r_paire 0.954 sd_d 0.083 neg 4
+   cpu  lidar_ng01 n=6 base 271.57 new 269.11 r_med 0.991 r_paire 0.992 sd_d 0.053 neg 4
+   cpu  lidar_ng02 n=6 base 327.68 new 313.78 r_med 0.958 r_paire 0.954 sd_d 0.035 neg 6
+   gpu  lidar_ng00 n=6 base 332.33 new 335.08 r_med 1.008 r_paire 1.095 sd_d 0.214 neg 2
+   gpu  lidar_ng01 n=6 base 300.54 new 300.37 r_med 0.999 r_paire 1.004 sd_d 0.014 neg 3
+   gpu  lidar_ng02 n=6 base 343.30 new 342.13 r_med 0.997 r_paire 0.992 sd_d 0.021 neg 2
+   gm(medianes)=0.983 gm(paires)=0.997 IC95 cellules [0.946, 1.052] IC95 regroupe [0.965, 1.031]
+   sd paire (log)=0.0977 sd bras (log, entre processus)=0.0684  paires<0 : 21/36  p_signes=0.41 p_perm=0.94
+--- G1_AVX2 : forest (seuil None)
+   cpu  lidar_ng00 n=6 base 117.18 new 117.82 r_med 1.005 r_paire 0.998 sd_d 0.047 neg 3
+   cpu  lidar_ng01 n=6 base 94.63 new 92.47 r_med 0.977 r_paire 0.986 sd_d 0.054 neg 5
+   cpu  lidar_ng02 n=6 base 115.88 new 118.11 r_med 1.019 r_paire 1.022 sd_d 0.030 neg 1
+   gpu  lidar_ng00 n=6 base 117.24 new 118.24 r_med 1.009 r_paire 0.992 sd_d 0.034 neg 3
+   gpu  lidar_ng01 n=6 base 93.72 new 96.00 r_med 1.024 r_paire 1.022 sd_d 0.033 neg 1
+   gpu  lidar_ng02 n=6 base 117.72 new 121.66 r_med 1.033 r_paire 1.036 sd_d 0.049 neg 2
+   gm(medianes)=1.011 gm(paires)=1.009 IC95 cellules [0.988, 1.030] IC95 regroupe [0.995, 1.024]
+   sd paire (log)=0.0423 sd bras (log, entre processus)=0.0314  paires<0 : 15/36  p_signes=0.41 p_perm=0.22
+--- frontiere : prefix (seuil 0.8)
+   cpu  lidar_ng00 n=6 base 20.74 new 17.72 r_med 0.855 r_paire 0.868 sd_d 0.031 neg 6
+   cpu  lidar_ng01 n=6 base 17.93 new 16.21 r_med 0.904 r_paire 0.904 sd_d 0.035 neg 6
+   cpu  lidar_ng02 n=6 base 21.29 new 17.52 r_med 0.823 r_paire 0.825 sd_d 0.034 neg 6
+   gpu  lidar_ng00 n=6 base 21.46 new 17.87 r_med 0.833 r_paire 0.843 sd_d 0.059 neg 6
+   gpu  lidar_ng01 n=6 base 18.59 new 17.41 r_med 0.937 r_paire 0.928 sd_d 0.028 neg 6
+   gpu  lidar_ng02 n=6 base 22.27 new 18.08 r_med 0.812 r_paire 0.818 sd_d 0.053 neg 6
+   gm(medianes)=0.859 gm(paires)=0.863 IC95 cellules [0.818, 0.911] IC95 regroupe [0.851, 0.876]
+   sd paire (log)=0.0417 sd bras (log, entre processus)=0.0295  paires<0 : 36/36  p_signes=2.9e-11 p_perm=5e-05
+--- frontiere : domain (seuil 1.0)
+   cpu  lidar_ng00 n=6 base 226.49 new 232.51 r_med 1.027 r_paire 1.007 sd_d 0.104 neg 2
+   cpu  lidar_ng01 n=6 base 198.32 new 179.63 r_med 0.906 r_paire 0.918 sd_d 0.046 neg 6
+   cpu  lidar_ng02 n=6 base 221.41 new 212.69 r_med 0.961 r_paire 0.963 sd_d 0.070 neg 4
+   gpu  lidar_ng00 n=6 base 233.79 new 234.60 r_med 1.003 r_paire 1.110 sd_d 0.310 neg 2
+   gpu  lidar_ng01 n=6 base 214.06 new 211.53 r_med 0.988 r_paire 0.982 sd_d 0.035 neg 4
+   gpu  lidar_ng02 n=6 base 237.01 new 236.56 r_med 0.998 r_paire 1.003 sd_d 0.030 neg 3
+   gm(medianes)=0.980 gm(paires)=0.995 IC95 cellules [0.932, 1.063] IC95 regroupe [0.949, 1.044]
+   sd paire (log)=0.1391 sd bras (log, entre processus)=0.0962  paires<0 : 21/36  p_signes=0.41 p_perm=0.93
+--- frontiere : wall (seuil None)
+   cpu  lidar_ng00 n=6 base 348.60 new 358.94 r_med 1.030 r_paire 1.033 sd_d 0.050 neg 2
+   cpu  lidar_ng01 n=6 base 295.96 new 276.39 r_med 0.934 r_paire 0.941 sd_d 0.046 neg 6
+   cpu  lidar_ng02 n=6 base 344.39 new 332.38 r_med 0.965 r_paire 0.960 sd_d 0.062 neg 5
+   gpu  lidar_ng00 n=6 base 357.25 new 356.90 r_med 0.999 r_paire 1.082 sd_d 0.217 neg 2
+   gpu  lidar_ng01 n=6 base 306.55 new 305.00 r_med 0.995 r_paire 0.979 sd_d 0.039 neg 4
+   gpu  lidar_ng02 n=6 base 362.48 new 358.02 r_med 0.988 r_paire 0.998 sd_d 0.038 neg 5
+   gm(medianes)=0.985 gm(paires)=0.998 IC95 cellules [0.946, 1.053] IC95 regroupe [0.965, 1.032]
+   sd paire (log)=0.0988 sd bras (log, entre processus)=0.0710  paires<0 : 24/36  p_signes=0.065 p_perm=0.93
+--- frontiere : forest (seuil None)
+   cpu  lidar_ng00 n=6 base 116.48 new 126.82 r_med 1.089 r_paire 1.086 sd_d 0.093 neg 2
+   cpu  lidar_ng01 n=6 base 97.86 new 96.27 r_med 0.984 r_paire 0.988 sd_d 0.094 neg 5
+   cpu  lidar_ng02 n=6 base 123.72 new 115.14 r_med 0.931 r_paire 0.953 sd_d 0.094 neg 5
+   gpu  lidar_ng00 n=6 base 119.46 new 116.88 r_med 0.978 r_paire 1.003 sd_d 0.087 neg 2
+   gpu  lidar_ng01 n=6 base 92.66 new 90.11 r_med 0.973 r_paire 0.970 sd_d 0.078 neg 4
+   gpu  lidar_ng02 n=6 base 124.34 new 118.88 r_med 0.956 r_paire 0.991 sd_d 0.068 neg 5
+   gm(medianes)=0.984 gm(paires)=0.997 IC95 cellules [0.951, 1.046] IC95 regroupe [0.969, 1.027]
+   sd paire (log)=0.0861 sd bras (log, entre processus)=0.0586  paires<0 : 23/36  p_signes=0.13 p_perm=0.87
+--- graines : cells5 (seuil 0.85)
+   cpu  lidar_ng00 n=6 base 65.96 new 58.27 r_med 0.883 r_paire 0.881 sd_d 0.083 neg 5
+   cpu  lidar_ng01 n=6 base 48.69 new 40.44 r_med 0.830 r_paire 0.808 sd_d 0.142 neg 6
+   cpu  lidar_ng02 n=6 base 63.74 new 51.37 r_med 0.806 r_paire 0.827 sd_d 0.123 neg 6
+   gpu  lidar_ng00 n=6 base 62.83 new 55.77 r_med 0.888 r_paire 0.915 sd_d 0.088 neg 5
+   gpu  lidar_ng01 n=6 base 50.57 new 46.40 r_med 0.918 r_paire 0.958 sd_d 0.075 neg 3
+   gpu  lidar_ng02 n=6 base 60.29 new 52.35 r_med 0.868 r_paire 0.841 sd_d 0.119 neg 6
+   gm(medianes)=0.865 gm(paires)=0.870 IC95 cellules [0.813, 0.932] IC95 regroupe [0.839, 0.903]
+   sd paire (log)=0.1078 sd bras (log, entre processus)=0.0888  paires<0 : 31/36  p_signes=1.3e-05 p_perm=5e-05
+--- graines : forest (seuil 1.0)
+   cpu  lidar_ng00 n=6 base 116.10 new 117.35 r_med 1.011 r_paire 1.008 sd_d 0.081 neg 2
+   cpu  lidar_ng01 n=6 base 95.87 new 91.66 r_med 0.956 r_paire 0.955 sd_d 0.036 neg 6
+   cpu  lidar_ng02 n=6 base 117.66 new 112.51 r_med 0.956 r_paire 0.972 sd_d 0.040 neg 4
+   gpu  lidar_ng00 n=6 base 116.56 new 112.41 r_med 0.964 r_paire 0.991 sd_d 0.073 neg 4
+   gpu  lidar_ng01 n=6 base 92.77 new 95.51 r_med 1.030 r_paire 1.032 sd_d 0.046 neg 2
+   gpu  lidar_ng02 n=6 base 116.43 new 116.37 r_med 0.999 r_paire 1.001 sd_d 0.032 neg 3
+   gm(medianes)=0.986 gm(paires)=0.993 IC95 cellules [0.965, 1.022] IC95 regroupe [0.975, 1.011]
+   sd paire (log)=0.0546 sd bras (log, entre processus)=0.0364  paires<0 : 21/36  p_signes=0.41 p_perm=0.45
+--- graines : wall (seuil None)
+   cpu  lidar_ng00 n=6 base 331.59 new 332.56 r_med 1.003 r_paire 1.014 sd_d 0.041 neg 3
+   cpu  lidar_ng01 n=6 base 270.14 new 278.54 r_med 1.031 r_paire 1.024 sd_d 0.085 neg 3
+   cpu  lidar_ng02 n=6 base 350.43 new 324.34 r_med 0.926 r_paire 0.958 sd_d 0.065 neg 4
+   gpu  lidar_ng00 n=6 base 333.21 new 339.94 r_med 1.020 r_paire 1.112 sd_d 0.216 neg 2
+   gpu  lidar_ng01 n=6 base 296.65 new 295.82 r_med 0.997 r_paire 1.005 sd_d 0.032 neg 3
+   gpu  lidar_ng02 n=6 base 336.32 new 341.38 r_med 1.015 r_paire 1.008 sd_d 0.018 neg 3
+   gm(medianes)=0.998 gm(paires)=1.019 IC95 cellules [0.968, 1.072] IC95 regroupe [0.985, 1.055]
+   sd paire (log)=0.1009 sd bras (log, entre processus)=0.0721  paires<0 : 18/36  p_signes=1 p_perm=0.32
+--- graines : domain (seuil None)
+   cpu  lidar_ng00 n=6 base 216.33 new 211.94 r_med 0.980 r_paire 1.016 sd_d 0.086 neg 3
+   cpu  lidar_ng01 n=6 base 172.90 new 184.61 r_med 1.068 r_paire 1.061 sd_d 0.127 neg 3
+   cpu  lidar_ng02 n=6 base 229.32 new 210.32 r_med 0.917 r_paire 0.951 sd_d 0.085 neg 3
+   gpu  lidar_ng00 n=6 base 214.20 new 226.33 r_med 1.057 r_paire 1.164 sd_d 0.302 neg 0
+   gpu  lidar_ng01 n=6 base 203.36 new 199.62 r_med 0.982 r_paire 0.993 sd_d 0.031 neg 4
+   gpu  lidar_ng02 n=6 base 220.15 new 223.46 r_med 1.015 r_paire 1.011 sd_d 0.017 neg 1
+   gm(medianes)=1.002 gm(paires)=1.031 IC95 cellules [0.958, 1.109] IC95 regroupe [0.982, 1.082]
+   sd paire (log)=0.1434 sd bras (log, entre processus)=0.1001  paires<0 : 14/36  p_signes=0.24 p_perm=0.24
+--- combines : cells+closes5 (seuil 0.9)
+   cpu  lidar_ng00 n=6 base 94.39 new 88.08 r_med 0.933 r_paire 0.964 sd_d 0.131 neg 4
+   cpu  lidar_ng01 n=6 base 70.22 new 69.69 r_med 0.992 r_paire 1.015 sd_d 0.119 neg 4
+   cpu  lidar_ng02 n=6 base 87.01 new 80.65 r_med 0.927 r_paire 0.953 sd_d 0.094 neg 4
+   gpu  lidar_ng00 n=6 base 88.73 new 87.71 r_med 0.988 r_paire 0.967 sd_d 0.101 neg 4
+   gpu  lidar_ng01 n=6 base 71.48 new 64.91 r_med 0.908 r_paire 0.931 sd_d 0.090 neg 5
+   gpu  lidar_ng02 n=6 base 91.19 new 87.17 r_med 0.956 r_paire 0.947 sd_d 0.156 neg 3
+   gm(medianes)=0.950 gm(paires)=0.962 IC95 cellules [0.933, 0.992] IC95 regroupe [0.925, 1.002]
+   sd paire (log)=0.1172 sd bras (log, entre processus)=0.0822  paires<0 : 24/36  p_signes=0.065 p_perm=0.049
+--- combines : forest (seuil 1.0)
+   cpu  lidar_ng00 n=6 base 120.18 new 117.58 r_med 0.978 r_paire 0.998 sd_d 0.061 neg 4
+   cpu  lidar_ng01 n=6 base 95.97 new 91.16 r_med 0.950 r_paire 0.959 sd_d 0.050 neg 4
+   cpu  lidar_ng02 n=6 base 117.93 new 115.61 r_med 0.980 r_paire 0.976 sd_d 0.065 neg 4
+   gpu  lidar_ng00 n=6 base 115.87 new 113.09 r_med 0.976 r_paire 0.965 sd_d 0.045 neg 5
+   gpu  lidar_ng01 n=6 base 93.29 new 93.15 r_med 0.999 r_paire 0.980 sd_d 0.073 neg 4
+   gpu  lidar_ng02 n=6 base 117.04 new 118.66 r_med 1.014 r_paire 1.016 sd_d 0.065 neg 3
+   gm(medianes)=0.983 gm(paires)=0.982 IC95 cellules [0.960, 1.005] IC95 regroupe [0.962, 1.003]
+   sd paire (log)=0.0607 sd bras (log, entre processus)=0.0463  paires<0 : 24/36  p_signes=0.065 p_perm=0.078
+--- combines : wall (seuil None)
+   cpu  lidar_ng00 n=6 base 332.00 new 329.42 r_med 0.992 r_paire 0.986 sd_d 0.025 neg 4
+   cpu  lidar_ng01 n=6 base 274.57 new 270.60 r_med 0.986 r_paire 0.974 sd_d 0.064 neg 3
+   cpu  lidar_ng02 n=6 base 329.04 new 338.76 r_med 1.030 r_paire 1.019 sd_d 0.040 neg 2
+   gpu  lidar_ng00 n=6 base 333.55 new 331.19 r_med 0.993 r_paire 1.073 sd_d 0.247 neg 3
+   gpu  lidar_ng01 n=6 base 299.18 new 298.07 r_med 0.996 r_paire 0.987 sd_d 0.016 neg 5
+   gpu  lidar_ng02 n=6 base 340.13 new 341.17 r_med 1.003 r_paire 1.004 sd_d 0.018 neg 2
+   gm(medianes)=1.000 gm(paires)=1.006 IC95 cellules [0.970, 1.044] IC95 regroupe [0.971, 1.043]
+   sd paire (log)=0.1063 sd bras (log, entre processus)=0.0732  paires<0 : 19/36  p_signes=0.87 p_perm=0.92
+--- combines : domain (seuil None)
+   cpu  lidar_ng00 n=6 base 214.10 new 206.39 r_med 0.964 r_paire 0.979 sd_d 0.018 neg 5
+   cpu  lidar_ng01 n=6 base 172.86 new 176.91 r_med 1.023 r_paire 0.982 sd_d 0.089 neg 3
+   cpu  lidar_ng02 n=6 base 210.33 new 222.04 r_med 1.056 r_paire 1.042 sd_d 0.046 neg 1
+   gpu  lidar_ng00 n=6 base 214.00 new 215.64 r_med 1.008 r_paire 1.118 sd_d 0.332 neg 2
+   gpu  lidar_ng01 n=6 base 203.83 new 200.73 r_med 0.985 r_paire 0.990 sd_d 0.029 neg 4
+   gpu  lidar_ng02 n=6 base 221.70 new 221.18 r_med 0.998 r_paire 0.997 sd_d 0.046 neg 4
+   gm(medianes)=1.005 gm(paires)=1.017 IC95 cellules [0.963, 1.073] IC95 regroupe [0.968, 1.068]
+   sd paire (log)=0.1433 sd bras (log, entre processus)=0.1009  paires<0 : 19/36  p_signes=0.87 p_perm=0.7
+--- annonces : pubcpu5 (seuil 0.9)
+   cpu  lidar_ng00 n=6 base 97.58 new 96.35 r_med 0.987 r_paire 1.001 sd_d 0.093 neg 2
+   cpu  lidar_ng01 n=6 base 72.64 new 80.27 r_med 1.105 r_paire 1.057 sd_d 0.203 neg 2
+   cpu  lidar_ng02 n=6 base 100.37 new 91.62 r_med 0.913 r_paire 0.942 sd_d 0.164 neg 3
+   gpu  lidar_ng00 n=6 base 105.45 new 94.45 r_med 0.896 r_paire 0.866 sd_d 0.121 neg 5
+   gpu  lidar_ng01 n=6 base 72.73 new 71.22 r_med 0.979 r_paire 0.976 sd_d 0.128 neg 3
+   gpu  lidar_ng02 n=6 base 102.55 new 95.59 r_med 0.932 r_paire 0.941 sd_d 0.089 neg 4
+   gm(medianes)=0.966 gm(paires)=0.962 IC95 cellules [0.896, 1.032] IC95 regroupe [0.918, 1.008]
+   sd paire (log)=0.1388 sd bras (log, entre processus)=0.0948  paires<0 : 19/36  p_signes=0.87 p_perm=0.11
+--- annonces : forest (seuil 1.0)
+   cpu  lidar_ng00 n=6 base 118.72 new 113.23 r_med 0.954 r_paire 0.979 sd_d 0.075 neg 3
+   cpu  lidar_ng01 n=6 base 88.30 new 96.97 r_med 1.098 r_paire 1.059 sd_d 0.136 neg 2
+   cpu  lidar_ng02 n=6 base 118.61 new 115.46 r_med 0.973 r_paire 0.971 sd_d 0.117 neg 3
+   gpu  lidar_ng00 n=6 base 122.89 new 115.08 r_med 0.936 r_paire 0.912 sd_d 0.088 neg 5
+   gpu  lidar_ng01 n=6 base 91.14 new 86.48 r_med 0.949 r_paire 0.961 sd_d 0.097 neg 3
+   gpu  lidar_ng02 n=6 base 127.14 new 118.85 r_med 0.935 r_paire 0.956 sd_d 0.084 neg 4
+   gm(medianes)=0.973 gm(paires)=0.972 IC95 cellules [0.923, 1.023] IC95 regroupe [0.939, 1.006]
+   sd paire (log)=0.1015 sd bras (log, entre processus)=0.0713  paires<0 : 20/36  p_signes=0.62 p_perm=0.11
+--- annonces : wall (seuil None)
+   cpu  lidar_ng00 n=6 base 358.10 new 333.69 r_med 0.932 r_paire 0.941 sd_d 0.091 neg 4
+   cpu  lidar_ng01 n=6 base 265.11 new 277.95 r_med 1.048 r_paire 1.049 sd_d 0.089 neg 1
+   cpu  lidar_ng02 n=6 base 331.57 new 326.09 r_med 0.983 r_paire 0.981 sd_d 0.039 neg 5
+   gpu  lidar_ng00 n=6 base 360.89 new 357.35 r_med 0.990 r_paire 1.063 sd_d 0.216 neg 3
+   gpu  lidar_ng01 n=6 base 309.37 new 300.95 r_med 0.973 r_paire 0.983 sd_d 0.025 neg 4
+   gpu  lidar_ng02 n=6 base 370.78 new 354.31 r_med 0.956 r_paire 0.970 sd_d 0.028 neg 5
+   gm(medianes)=0.980 gm(paires)=0.997 IC95 cellules [0.948, 1.048] IC95 regroupe [0.962, 1.033]
+   sd paire (log)=0.1046 sd bras (log, entre processus)=0.0751  paires<0 : 22/36  p_signes=0.24 p_perm=0.9
+--- annonces : domain (seuil None)
+   cpu  lidar_ng00 n=6 base 236.75 new 217.61 r_med 0.919 r_paire 0.922 sd_d 0.115 neg 4
+   cpu  lidar_ng01 n=6 base 176.53 new 188.33 r_med 1.067 r_paire 1.043 sd_d 0.081 neg 2
+   cpu  lidar_ng02 n=6 base 216.07 new 209.57 r_med 0.970 r_paire 0.987 sd_d 0.037 neg 4
+   gpu  lidar_ng00 n=6 base 237.41 new 238.46 r_med 1.004 r_paire 1.129 sd_d 0.308 neg 4
+   gpu  lidar_ng01 n=6 base 217.14 new 214.62 r_med 0.988 r_paire 0.992 sd_d 0.011 neg 5
+   gpu  lidar_ng02 n=6 base 242.51 new 235.23 r_med 0.970 r_paire 0.978 sd_d 0.026 neg 5
+   gm(medianes)=0.985 gm(paires)=1.007 IC95 cellules [0.936, 1.082] IC95 regroupe [0.960, 1.056]
+   sd paire (log)=0.1397 sd bras (log, entre processus)=0.0970  paires<0 : 24/36  p_signes=0.065 p_perm=0.9
+--- cohortes : births (seuil 0.8)
+   cpu  lidar_ng00 n=6 base 8.57 new 4.68 r_med 0.546 r_paire 0.537 sd_d 0.064 neg 6
+   cpu  lidar_ng01 n=6 base 6.79 new 4.03 r_med 0.593 r_paire 0.587 sd_d 0.029 neg 6
+   cpu  lidar_ng02 n=6 base 11.59 new 5.31 r_med 0.459 r_paire 0.447 sd_d 0.063 neg 6
+   gpu  lidar_ng00 n=6 base 8.70 new 4.63 r_med 0.532 r_paire 0.523 sd_d 0.075 neg 6
+   gpu  lidar_ng01 n=6 base 6.77 new 4.04 r_med 0.597 r_paire 0.597 sd_d 0.026 neg 6
+   gpu  lidar_ng02 n=6 base 11.40 new 5.28 r_med 0.463 r_paire 0.464 sd_d 0.022 neg 6
+   gm(medianes)=0.529 gm(paires)=0.523 IC95 cellules [0.462, 0.592] IC95 regroupe [0.514, 0.532]
+   sd paire (log)=0.0512 sd bras (log, entre processus)=0.0352  paires<0 : 36/36  p_signes=2.9e-11 p_perm=5e-05
+--- cohortes : forest (seuil 1.0)
+   cpu  lidar_ng00 n=6 base 122.26 new 115.59 r_med 0.945 r_paire 0.962 sd_d 0.083 neg 3
+   cpu  lidar_ng01 n=6 base 98.68 new 90.33 r_med 0.915 r_paire 0.935 sd_d 0.120 neg 3
+   cpu  lidar_ng02 n=6 base 131.71 new 121.70 r_med 0.924 r_paire 0.911 sd_d 0.088 neg 5
+   gpu  lidar_ng00 n=6 base 122.22 new 116.26 r_med 0.951 r_paire 0.961 sd_d 0.081 neg 4
+   gpu  lidar_ng01 n=6 base 93.94 new 91.65 r_med 0.976 r_paire 0.965 sd_d 0.114 neg 4
+   gpu  lidar_ng02 n=6 base 123.12 new 115.74 r_med 0.940 r_paire 0.941 sd_d 0.023 neg 6
+   gm(medianes)=0.942 gm(paires)=0.946 IC95 cellules [0.923, 0.968] IC95 regroupe [0.917, 0.975]
+   sd paire (log)=0.0903 sd bras (log, entre processus)=0.0677  paires<0 : 25/36  p_signes=0.029 p_perm=0.00035
+--- cohortes : wall (seuil None)
+   cpu  lidar_ng00 n=6 base 358.24 new 358.90 r_med 1.002 r_paire 0.994 sd_d 0.093 neg 4
+   cpu  lidar_ng01 n=6 base 298.74 new 293.80 r_med 0.983 r_paire 0.970 sd_d 0.115 neg 4
+   cpu  lidar_ng02 n=6 base 368.32 new 349.23 r_med 0.948 r_paire 0.957 sd_d 0.081 neg 4
+   gpu  lidar_ng00 n=6 base 350.67 new 359.16 r_med 1.024 r_paire 1.084 sd_d 0.244 neg 2
+   gpu  lidar_ng01 n=6 base 309.77 new 308.67 r_med 0.996 r_paire 0.997 sd_d 0.041 neg 5
+   gpu  lidar_ng02 n=6 base 366.00 new 365.73 r_med 0.999 r_paire 0.987 sd_d 0.032 neg 4
+   gm(medianes)=0.992 gm(paires)=0.997 IC95 cellules [0.953, 1.044] IC95 regroupe [0.956, 1.040]
+   sd paire (log)=0.1230 sd bras (log, entre processus)=0.0794  paires<0 : 23/36  p_signes=0.13 p_perm=0.92
+--- cohortes : domain (seuil None)
+   cpu  lidar_ng00 n=6 base 238.44 new 244.66 r_med 1.026 r_paire 1.009 sd_d 0.119 neg 4
+   cpu  lidar_ng01 n=6 base 196.60 new 205.26 r_med 1.044 r_paire 0.988 sd_d 0.149 neg 3
+   cpu  lidar_ng02 n=6 base 235.28 new 229.91 r_med 0.977 r_paire 0.982 sd_d 0.126 neg 4
+   gpu  lidar_ng00 n=6 base 230.01 new 239.33 r_med 1.041 r_paire 1.139 sd_d 0.305 neg 2
+   gpu  lidar_ng01 n=6 base 214.70 new 215.19 r_med 1.002 r_paire 1.010 sd_d 0.030 neg 2
+   gpu  lidar_ng02 n=6 base 239.34 new 243.56 r_med 1.018 r_paire 1.010 sd_d 0.047 neg 3
+   gm(medianes)=1.018 gm(paires)=1.022 IC95 cellules [0.965, 1.082] IC95 regroupe [0.968, 1.078]
+   sd paire (log)=0.1573 sd bras (log, entre processus)=0.1051  paires<0 : 18/36  p_signes=1 p_perm=0.47
+--- cache : wall (seuil 1.0)
+   cpu  lidar_ng00 n=6 base 337.87 new 326.07 r_med 0.965 r_paire 0.966 sd_d 0.029 neg 6
+   cpu  lidar_ng01 n=6 base 275.76 new 279.54 r_med 1.014 r_paire 1.010 sd_d 0.097 neg 2
+   cpu  lidar_ng02 n=6 base 349.09 new 327.18 r_med 0.937 r_paire 0.958 sd_d 0.051 neg 5
+   gpu  lidar_ng00 n=6 base 356.21 new 348.17 r_med 0.977 r_paire 0.900 sd_d 0.241 neg 4
+   gpu  lidar_ng01 n=6 base 310.83 new 299.79 r_med 0.964 r_paire 0.959 sd_d 0.015 neg 6
+   gpu  lidar_ng02 n=6 base 356.20 new 347.81 r_med 0.976 r_paire 0.965 sd_d 0.050 neg 5
+   gm(medianes)=0.972 gm(paires)=0.959 IC95 cellules [0.923, 0.997] IC95 regroupe [0.924, 0.996]
+   sd paire (log)=0.1107 sd bras (log, entre processus)=0.0717  paires<0 : 28/36  p_signes=0.0012 p_perm=0.0031
+--- thp : wall (seuil None)
+   cpu  lidar_ng00 n=6 base 341.83 new 371.94 r_med 1.088 r_paire 1.092 sd_d 0.056 neg 0
+   cpu  lidar_ng01 n=6 base 281.23 new 318.96 r_med 1.134 r_paire 1.112 sd_d 0.102 neg 2
+   cpu  lidar_ng02 n=6 base 335.08 new 368.97 r_med 1.101 r_paire 1.084 sd_d 0.064 neg 1
+   gpu  lidar_ng00 n=6 base 351.39 new 372.48 r_med 1.060 r_paire 0.983 sd_d 0.213 neg 1
+   gpu  lidar_ng01 n=6 base 309.35 new 326.39 r_med 1.055 r_paire 1.058 sd_d 0.048 neg 0
+   gpu  lidar_ng02 n=6 base 356.82 new 389.03 r_med 1.090 r_paire 1.067 sd_d 0.051 neg 0
+   gm(medianes)=1.088 gm(paires)=1.065 IC95 cellules [1.018, 1.114] IC95 regroupe [1.027, 1.104]
+   sd paire (log)=0.1062 sd bras (log, entre processus)=0.0745  paires<0 : 4/36  p_signes=1.9e-06 p_perm=0.0006
+--- tas : wall (seuil None)
+   cpu  lidar_ng00 n=6 base 320.37 new 322.06 r_med 1.005 r_paire 0.979 sd_d 0.040 neg 4
+   cpu  lidar_ng01 n=6 base 271.45 new 271.96 r_med 1.002 r_paire 0.993 sd_d 0.076 neg 2
+   cpu  lidar_ng02 n=6 base 336.86 new 339.20 r_med 1.007 r_paire 1.007 sd_d 0.085 neg 4
+   gpu  lidar_ng00 n=6 base 354.09 new 324.90 r_med 0.918 r_paire 0.847 sd_d 0.205 neg 5
+   gpu  lidar_ng01 n=6 base 308.36 new 289.20 r_med 0.938 r_paire 0.944 sd_d 0.052 neg 6
+   gpu  lidar_ng02 n=6 base 356.40 new 330.14 r_med 0.926 r_paire 0.932 sd_d 0.032 neg 6
+   gm(medianes)=0.965 gm(paires)=0.949 IC95 cellules [0.888, 1.013] IC95 regroupe [0.917, 0.981]
+   sd paire (log)=0.1001 sd bras (log, entre processus)=0.0740  paires<0 : 27/36  p_signes=0.0039 p_perm=0.00065
+--- o2 : forest (seuil None)
+   cpu  lidar_ng00 n=6 base 133.13 new 110.67 r_med 0.831 r_paire 0.862 sd_d 0.085 neg 6
+   cpu  lidar_ng01 n=6 base 105.97 new 102.27 r_med 0.965 r_paire 0.940 sd_d 0.068 neg 5
+   cpu  lidar_ng02 n=6 base 136.84 new 123.56 r_med 0.903 r_paire 0.890 sd_d 0.077 neg 6
+   gpu  lidar_ng00 n=6 base 128.57 new 118.34 r_med 0.920 r_paire 0.943 sd_d 0.061 neg 6
+   gpu  lidar_ng01 n=6 base 106.48 new 93.09 r_med 0.874 r_paire 0.881 sd_d 0.055 neg 6
+   gpu  lidar_ng02 n=6 base 133.30 new 124.54 r_med 0.934 r_paire 0.927 sd_d 0.094 neg 4
+   gm(medianes)=0.904 gm(paires)=0.907 IC95 cellules [0.872, 0.943] IC95 regroupe [0.884, 0.930]
+   sd paire (log)=0.0746 sd bras (log, entre processus)=0.0572  paires<0 : 33/36  p_signes=2.3e-07 p_perm=5e-05
+--- o2 : wall (seuil None)
+   cpu  lidar_ng00 n=6 base 359.87 new 338.29 r_med 0.940 r_paire 0.939 sd_d 0.021 neg 6
+   cpu  lidar_ng01 n=6 base 289.01 new 285.19 r_med 0.987 r_paire 1.002 sd_d 0.081 neg 3
+   cpu  lidar_ng02 n=6 base 357.13 new 353.18 r_med 0.989 r_paire 0.977 sd_d 0.048 neg 4
+   gpu  lidar_ng00 n=6 base 382.95 new 380.42 r_med 0.993 r_paire 1.073 sd_d 0.216 neg 4
+   gpu  lidar_ng01 n=6 base 343.78 new 331.24 r_med 0.964 r_paire 0.960 sd_d 0.022 neg 6
+   gpu  lidar_ng02 n=6 base 386.65 new 384.83 r_med 0.995 r_paire 0.980 sd_d 0.031 neg 5
+   gm(medianes)=0.978 gm(paires)=0.988 IC95 cellules [0.941, 1.037] IC95 regroupe [0.955, 1.021]
+   sd paire (log)=0.0979 sd bras (log, entre processus)=0.0669  paires<0 : 28/36  p_signes=0.0012 p_perm=0.59
+--- o2 : domain (seuil None)
+   cpu  lidar_ng00 n=6 base 222.91 new 219.69 r_med 0.986 r_paire 0.983 sd_d 0.066 neg 4
+   cpu  lidar_ng01 n=6 base 180.81 new 181.20 r_med 1.002 r_paire 1.036 sd_d 0.135 neg 3
+   cpu  lidar_ng02 n=6 base 217.11 new 229.28 r_med 1.056 r_paire 1.031 sd_d 0.082 neg 1
+   gpu  lidar_ng00 n=6 base 249.44 new 252.92 r_med 1.014 r_paire 1.130 sd_d 0.281 neg 2
+   gpu  lidar_ng01 n=6 base 236.22 new 236.80 r_med 1.002 r_paire 0.995 sd_d 0.013 neg 3
+   gpu  lidar_ng02 n=6 base 252.11 new 252.96 r_med 1.003 r_paire 1.007 sd_d 0.028 neg 2
+   gm(medianes)=1.010 gm(paires)=1.029 IC95 cellules [0.977, 1.085] IC95 regroupe [0.983, 1.078]
+   sd paire (log)=0.1348 sd bras (log, entre processus)=0.0906  paires<0 : 15/36  p_signes=0.41 p_perm=0.21
+--- constantes : forest (seuil None)
+   cpu  lidar_ng00 n=6 base 133.98 new 127.53 r_med 0.952 r_paire 0.943 sd_d 0.048 neg 6
+   cpu  lidar_ng01 n=6 base 108.92 new 104.17 r_med 0.956 r_paire 0.957 sd_d 0.059 neg 4
+   cpu  lidar_ng02 n=6 base 139.34 new 133.95 r_med 0.961 r_paire 0.983 sd_d 0.092 neg 4
+   gpu  lidar_ng00 n=6 base 133.23 new 130.85 r_med 0.982 r_paire 1.006 sd_d 0.032 neg 3
+   gpu  lidar_ng01 n=6 base 108.00 new 103.74 r_med 0.961 r_paire 0.974 sd_d 0.080 neg 3
+   gpu  lidar_ng02 n=6 base 132.66 new 130.74 r_med 0.986 r_paire 0.995 sd_d 0.037 neg 3
+   gm(medianes)=0.966 gm(paires)=0.976 IC95 cellules [0.952, 1.001] IC95 regroupe [0.956, 0.997]
+   sd paire (log)=0.0621 sd bras (log, entre processus)=0.0440  paires<0 : 23/36  p_signes=0.13 p_perm=0.025
+--- constantes : wall (seuil None)
+   cpu  lidar_ng00 n=6 base 361.27 new 346.88 r_med 0.960 r_paire 0.944 sd_d 0.067 neg 3
+   cpu  lidar_ng01 n=6 base 287.89 new 284.81 r_med 0.989 r_paire 1.000 sd_d 0.025 neg 3
+   cpu  lidar_ng02 n=6 base 355.10 new 365.74 r_med 1.030 r_paire 1.029 sd_d 0.075 neg 2
+   gpu  lidar_ng00 n=6 base 385.10 new 388.40 r_med 1.009 r_paire 1.087 sd_d 0.200 neg 3
+   gpu  lidar_ng01 n=6 base 345.01 new 341.46 r_med 0.990 r_paire 0.989 sd_d 0.032 neg 3
+   gpu  lidar_ng02 n=6 base 387.91 new 389.26 r_med 1.003 r_paire 0.999 sd_d 0.008 neg 4
+   gm(medianes)=0.997 gm(paires)=1.007 IC95 cellules [0.959, 1.058] IC95 regroupe [0.976, 1.040]
+   sd paire (log)=0.0930 sd bras (log, entre processus)=0.0668  paires<0 : 18/36  p_signes=1 p_perm=0.78
+--- constantes : domain (seuil None)
+   cpu  lidar_ng00 n=6 base 228.46 new 216.54 r_med 0.948 r_paire 0.945 sd_d 0.085 neg 3
+   cpu  lidar_ng01 n=6 base 179.65 new 181.81 r_med 1.012 r_paire 1.027 sd_d 0.030 neg 2
+   cpu  lidar_ng02 n=6 base 213.92 new 231.59 r_med 1.083 r_paire 1.059 sd_d 0.091 neg 2
+   gpu  lidar_ng00 n=6 base 250.67 new 250.31 r_med 0.999 r_paire 1.117 sd_d 0.275 neg 3
+   gpu  lidar_ng01 n=6 base 237.03 new 236.65 r_med 0.998 r_paire 0.997 sd_d 0.013 neg 4
+   gpu  lidar_ng02 n=6 base 253.62 new 254.29 r_med 1.003 r_paire 1.000 sd_d 0.022 neg 3
+   gm(medianes)=1.006 gm(paires)=1.023 IC95 cellules [0.963, 1.086] IC95 regroupe [0.980, 1.067]
+   sd paire (log)=0.1244 sd bras (log, entre processus)=0.0932  paires<0 : 17/36  p_signes=0.87 p_perm=0.36
+--- v3 : forest (seuil None)
+   cpu  lidar_ng00 n=6 base 146.01 new 132.26 r_med 0.906 r_paire 0.910 sd_d 0.038 neg 6
+   cpu  lidar_ng01 n=6 base 117.05 new 107.90 r_med 0.922 r_paire 0.940 sd_d 0.053 neg 4
+   cpu  lidar_ng02 n=6 base 141.84 new 133.45 r_med 0.941 r_paire 0.944 sd_d 0.036 neg 6
+   gpu  lidar_ng00 n=6 base 148.63 new 134.31 r_med 0.904 r_paire 0.924 sd_d 0.041 neg 6
+   gpu  lidar_ng01 n=6 base 111.63 new 105.94 r_med 0.949 r_paire 0.937 sd_d 0.045 neg 5
+   gpu  lidar_ng02 n=6 base 144.51 new 134.32 r_med 0.930 r_paire 0.926 sd_d 0.035 neg 6
+   gm(medianes)=0.925 gm(paires)=0.930 IC95 cellules [0.917, 0.944] IC95 regroupe [0.917, 0.944]
+   sd paire (log)=0.0417 sd bras (log, entre processus)=0.0373  paires<0 : 33/36  p_signes=2.3e-07 p_perm=5e-05
+--- v3 : wall (seuil None)
+   cpu  lidar_ng00 n=6 base 366.61 new 357.32 r_med 0.975 r_paire 0.945 sd_d 0.075 neg 5
+   cpu  lidar_ng01 n=6 base 308.02 new 315.14 r_med 1.023 r_paire 1.006 sd_d 0.101 neg 2
+   cpu  lidar_ng02 n=6 base 363.83 new 357.83 r_med 0.983 r_paire 0.941 sd_d 0.120 neg 4
+   gpu  lidar_ng00 n=6 base 397.60 new 387.02 r_med 0.973 r_paire 1.063 sd_d 0.205 neg 4
+   gpu  lidar_ng01 n=6 base 348.06 new 344.84 r_med 0.991 r_paire 0.984 sd_d 0.008 neg 6
+   gpu  lidar_ng02 n=6 base 395.88 new 388.10 r_med 0.980 r_paire 0.981 sd_d 0.014 neg 6
+   gm(medianes)=0.987 gm(paires)=0.986 IC95 cellules [0.941, 1.033] IC95 regroupe [0.950, 1.023]
+   sd paire (log)=0.1098 sd bras (log, entre processus)=0.0734  paires<0 : 27/36  p_signes=0.0039 p_perm=0.48
+--- v3 : domain (seuil None)
+   cpu  lidar_ng00 n=6 base 220.35 new 222.49 r_med 1.010 r_paire 0.965 sd_d 0.130 neg 4
+   cpu  lidar_ng01 n=6 base 190.60 new 204.80 r_med 1.075 r_paire 1.042 sd_d 0.144 neg 2
+   cpu  lidar_ng02 n=6 base 222.07 new 219.99 r_med 0.991 r_paire 0.939 sd_d 0.172 neg 3
+   gpu  lidar_ng00 n=6 base 249.36 new 251.93 r_med 1.010 r_paire 1.129 sd_d 0.290 neg 2
+   gpu  lidar_ng01 n=6 base 234.79 new 236.97 r_med 1.009 r_paire 1.004 sd_d 0.020 neg 2
+   gpu  lidar_ng02 n=6 base 250.79 new 252.72 r_med 1.008 r_paire 1.010 sd_d 0.016 neg 1
+   gm(medianes)=1.017 gm(paires)=1.013 IC95 cellules [0.947, 1.084] IC95 regroupe [0.960, 1.069]
+   sd paire (log)=0.1592 sd bras (log, entre processus)=0.1057  paires<0 : 14/36  p_signes=0.24 p_perm=0.67
+--- AA_o1place3 : wall (seuil None)
+   cpu  lidar_ng00 n=6 base 389.01 new 393.39 r_med 1.011 r_paire 1.012 sd_d 0.072 neg 2
+   cpu  lidar_ng01 n=6 base 319.89 new 312.16 r_med 0.976 r_paire 0.962 sd_d 0.077 neg 4
+   cpu  lidar_ng02 n=6 base 390.38 new 391.77 r_med 1.004 r_paire 1.006 sd_d 0.069 neg 2
+   gpu  lidar_ng00 n=6 base 421.44 new 417.51 r_med 0.991 r_paire 0.926 sd_d 0.200 neg 3
+   gpu  lidar_ng01 n=6 base 365.89 new 368.50 r_med 1.007 r_paire 1.012 sd_d 0.028 neg 2
+   gpu  lidar_ng02 n=6 base 412.80 new 421.67 r_med 1.021 r_paire 1.016 sd_d 0.052 neg 2
+   gm(medianes)=1.002 gm(paires)=0.988 IC95 cellules [0.950, 1.028] IC95 regroupe [0.956, 1.022]
+   sd paire (log)=0.0993 sd bras (log, entre processus)=0.0692  paires<0 : 15/36  p_signes=0.41 p_perm=0.56
+--- AA_o1place3 : domain (seuil None)
+   cpu  lidar_ng00 n=6 base 217.37 new 233.62 r_med 1.075 r_paire 1.071 sd_d 0.093 neg 2
+   cpu  lidar_ng01 n=6 base 183.42 new 185.36 r_med 1.011 r_paire 0.964 sd_d 0.087 neg 3
+   cpu  lidar_ng02 n=6 base 223.80 new 223.01 r_med 0.996 r_paire 0.996 sd_d 0.124 neg 2
+   gpu  lidar_ng00 n=6 base 255.09 new 252.47 r_med 0.990 r_paire 0.898 sd_d 0.290 neg 4
+   gpu  lidar_ng01 n=6 base 238.83 new 239.36 r_med 1.002 r_paire 1.007 sd_d 0.007 neg 2
+   gpu  lidar_ng02 n=6 base 261.14 new 255.99 r_med 0.980 r_paire 0.985 sd_d 0.024 neg 5
+   gm(medianes)=1.009 gm(paires)=0.985 IC95 cellules [0.927, 1.047] IC95 regroupe [0.940, 1.033]
+   sd paire (log)=0.1391 sd bras (log, entre processus)=0.0924  paires<0 : 18/36  p_signes=1 p_perm=0.64
+--- AA_o1place3 : forest (seuil None)
+   cpu  lidar_ng00 n=6 base 166.58 new 150.05 r_med 0.901 r_paire 0.932 sd_d 0.118 neg 4
+   cpu  lidar_ng01 n=6 base 135.76 new 128.11 r_med 0.944 r_paire 0.960 sd_d 0.101 neg 3
+   cpu  lidar_ng02 n=6 base 154.94 new 163.42 r_med 1.055 r_paire 1.020 sd_d 0.047 neg 2
+   gpu  lidar_ng00 n=6 base 166.17 new 164.76 r_med 0.992 r_paire 0.992 sd_d 0.110 neg 1
+   gpu  lidar_ng01 n=6 base 127.50 new 129.26 r_med 1.014 r_paire 1.020 sd_d 0.083 neg 3
+   gpu  lidar_ng02 n=6 base 153.97 new 164.51 r_med 1.068 r_paire 1.070 sd_d 0.102 neg 2
+   gm(medianes)=0.994 gm(paires)=0.998 IC95 cellules [0.948, 1.051] IC95 regroupe [0.966, 1.031]
+   sd paire (log)=0.0965 sd bras (log, entre processus)=0.0757  paires<0 : 15/36  p_signes=0.41 p_perm=0.9
+--- AA_o1place3 : single_pass (seuil None)
+   cpu  lidar_ng00 n=6 base 158.38 new 175.59 r_med 1.109 r_paire 1.103 sd_d 0.117 neg 2
+   cpu  lidar_ng01 n=6 base 134.33 new 133.22 r_med 0.992 r_paire 0.949 sd_d 0.113 neg 4
+   cpu  lidar_ng02 n=6 base 158.36 new 157.81 r_med 0.997 r_paire 0.997 sd_d 0.155 neg 2
+   gpu  lidar_ng00 n=6 base 35.66 new 36.43 r_med 1.022 r_paire 0.998 sd_d 0.125 neg 2
+   gpu  lidar_ng01 n=6 base 29.45 new 29.93 r_med 1.016 r_paire 0.998 sd_d 0.088 neg 3
+   gpu  lidar_ng02 n=6 base 37.19 new 35.63 r_med 0.958 r_paire 0.966 sd_d 0.064 neg 4
+   gm(medianes)=1.014 gm(paires)=1.001 IC95 cellules [0.948, 1.057] IC95 regroupe [0.963, 1.040]
+   sd paire (log)=0.1140 sd bras (log, entre processus)=0.0684  paires<0 : 17/36  p_signes=0.87 p_perm=0.97
+--- AA_o1place3 : prefix (seuil None)
+   cpu  lidar_ng00 n=6 base 20.63 new 20.81 r_med 1.009 r_paire 1.005 sd_d 0.046 neg 4
+   cpu  lidar_ng01 n=6 base 17.82 new 18.50 r_med 1.038 r_paire 1.023 sd_d 0.045 neg 2
+   cpu  lidar_ng02 n=6 base 21.91 new 21.61 r_med 0.986 r_paire 0.996 sd_d 0.085 neg 3
+   gpu  lidar_ng00 n=6 base 21.52 new 21.24 r_med 0.987 r_paire 1.005 sd_d 0.062 neg 3
+   gpu  lidar_ng01 n=6 base 18.53 new 18.43 r_med 0.995 r_paire 0.977 sd_d 0.042 neg 4
+   gpu  lidar_ng02 n=6 base 22.30 new 22.27 r_med 0.999 r_paire 1.000 sd_d 0.069 neg 3
+   gm(medianes)=1.002 gm(paires)=1.001 IC95 cellules [0.985, 1.017] IC95 regroupe [0.981, 1.022]
+   sd paire (log)=0.0602 sd bras (log, entre processus)=0.0368  paires<0 : 19/36  p_signes=0.87 p_perm=0.92
+ERREUR AA_o1place3 pubcpu5 KeyError('pipeline')
+ERREUR AA_o1place3 cells5 KeyError('pipeline')
+ERREUR AA_o1place3 births KeyError('pipeline')
+--- O1_place3 : wall (seuil None)
+   cpu  lidar_ng00 n=6 base 389.01 new 375.59 r_med 0.965 r_paire 0.974 sd_d 0.043 neg 5
+   cpu  lidar_ng01 n=6 base 319.89 new 308.65 r_med 0.965 r_paire 0.961 sd_d 0.094 neg 4
+   cpu  lidar_ng02 n=6 base 390.38 new 375.51 r_med 0.962 r_paire 0.965 sd_d 0.037 neg 4
+   gpu  lidar_ng00 n=6 base 421.44 new 404.20 r_med 0.959 r_paire 0.888 sd_d 0.182 neg 6
+   gpu  lidar_ng01 n=6 base 365.89 new 356.83 r_med 0.975 r_paire 0.976 sd_d 0.028 neg 5
+   gpu  lidar_ng02 n=6 base 412.80 new 400.21 r_med 0.970 r_paire 0.977 sd_d 0.038 neg 5
+   gm(medianes)=0.966 gm(paires)=0.956 IC95 cellules [0.920, 0.994] IC95 regroupe [0.928, 0.986]
+   sd paire (log)=0.0890 sd bras (log, entre processus)=0.0650  paires<0 : 29/36  p_signes=0.00031 p_perm=0.00025
+--- O1_place3 : forest (seuil None)
+   cpu  lidar_ng00 n=6 base 166.58 new 152.02 r_med 0.913 r_paire 0.898 sd_d 0.061 neg 6
+   cpu  lidar_ng01 n=6 base 135.76 new 116.84 r_med 0.861 r_paire 0.872 sd_d 0.043 neg 6
+   cpu  lidar_ng02 n=6 base 154.94 new 149.79 r_med 0.967 r_paire 0.931 sd_d 0.086 neg 4
+   gpu  lidar_ng00 n=6 base 166.17 new 149.47 r_med 0.899 r_paire 0.891 sd_d 0.076 neg 6
+   gpu  lidar_ng01 n=6 base 127.50 new 118.45 r_med 0.929 r_paire 0.926 sd_d 0.075 neg 5
+   gpu  lidar_ng02 n=6 base 153.97 new 144.58 r_med 0.939 r_paire 0.947 sd_d 0.105 neg 4
+   gm(medianes)=0.917 gm(paires)=0.911 IC95 cellules [0.881, 0.941] IC95 regroupe [0.887, 0.935]
+   sd paire (log)=0.0768 sd bras (log, entre processus)=0.0562  paires<0 : 31/36  p_signes=1.3e-05 p_perm=5e-05

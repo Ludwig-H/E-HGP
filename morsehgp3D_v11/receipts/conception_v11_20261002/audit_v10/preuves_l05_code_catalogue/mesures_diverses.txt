@@ -1,0 +1,56 @@
+# Mesures diverses de l'audit L05 (2 octobre 2026), HEAD afb081774, build Release sans -march sauf mention.
+
+## 1. Trame brute AVEC sol (08/000000, 123 389 points, quantifiee par l'auditeur a 1 mm sous /tmp ; aucun octet copie)
+positions distinctes 123 389, doublons 0 (08/001176 : 126 267 points, doublons 0)
+mhgp10_catalogue --k=5 --threads=4 : status ok, boules 2 822 052, niveaux 1 935 626, noeuds 1 759 813, feuilles 736 981, ignores 142 926,
+  sum_m 10 188 780, m_max 16, filter_tests 1 021 869 995, paires 41 130 494, triplets 60 125 277, droites 39 374 012, quads 16 173 937,
+  juges 6 660 547, etendues 1 243, feuilles bloquees 0 ; q2 [235454,235515,256020,263340,275116] q3 [131591,260240,411146,567375] q4 [19725,55990,110540]
+  (2 822 052 boules et 1 243 etendues = GEN_v2 § 11.2, « 00/000000 brute avec sol »)
+mhgp10_catalogue --k=10 --threads=4 : status ok, boules 11 387 391 (92,3 par site), niveaux 9 537 036, noeuds 2 567 193, feuilles 1 144 086,
+  m_max 24, etendues 2 399, feuilles bloquees 0 ; q2 2 598 083, q3 6 665 118, q4 2 124 190 ; RSS 3,21 Go (303 o par boule)
+  (11 387 391 boules, comptes par q_min et 2 399 etendues = GEN_v2 § 11.2)
+
+## 2. Mutant m_frontier (une tache sans site dans sa boite est abandonnee), quart 01, K = 5 : perte silencieuse, dependante du nombre de fils
+reference : 210 424 boules, dump 414aa4d47ffe1c55
+m_frontier --threads=1 : status ok, 208 290 boules, dump 0e796f0f74f52de9
+m_frontier --threads=4 : status ok, 200 901 boules, dump 62add3990e869846
+
+## 3. Mutant m_band (bandes flottantes jamais reparees), trame 02 entiere, K = 5
+reference : status ok, 1 407 885 boules, 1 099 581 niveaux, dump 8a850649ff103c1c (= recu catalogue_fitted_split_j2c_20260929)
+m_band    : status ok, 1 407 885 boules, 1 099 581 niveaux, dump c0f4a2bf1953964c ; 1 ligne du dump differe (ligne 807082) ; aucun refus
+sur le quart 01 et sur 8 entrees degenerees (rnd90_s12, sph26_plus, plan120, rnd110_s40 ; K = 5 et 10) : dumps identiques a la reference
+
+## 4. Essai « accumulateurs locaux » dans l'etage des rangs (essai_rangs_accumulateurs_locaux.diff), trame 02, K = 5, 8 fils, 7 passes alternees
+t_ranks reference : 0.0640 0.0640 0.0655 0.0672 0.0744 0.0747 0.0970  (mediane 0.0672 s)
+t_ranks essai     : 0.0474 0.0504 0.0539 0.0590 0.0594 0.0608 0.0662  (mediane 0.0590 s)
+t_copy  reference : 0.0554 0.0557 0.0580 0.0615 0.0680 0.0691 0.0737 ; essai : 0.0533 0.0537 0.0552 0.0608 0.0634 0.0651 0.0718 (temoin)
+
+## 5. Recu G4 session 4 (receipts/g4_session4_j2c_20260929/results/cmd/*/stdout et time.txt), trame 02, g++ 11.4 -O3 sans -march
+K=5  W1  : catalogue_s 4.0396 | frontiere 0.0559 boites 3.5085 ordre 0.1639 assemblage 0.3071 (cmp 0.1483 rangs 0.0771 copie 0.0818) | user 3.95 s sys 0.09 s RSS 369 608 ko
+K=5  W24 : catalogue_s 0.2588 | frontiere 0.0216 boites 0.1805 ordre 0.0214 assemblage 0.0277 | taches 10 287
+K=5  W48 : catalogue_s 0.1711 | frontiere 0.0266 boites 0.1033 ordre 0.0138 assemblage 0.0187 (cmp 0.0051 rangs 0.0096 copie 0.0040) hors etages 0.0087 | taches 19 482 | user 6.04 s sys 0.31 s RSS 424 676 ko
+K=10 W1  : catalogue_s 16.7617 | frontiere 0.0953 boites 14.7407 ordre 0.6216 assemblage 1.2858 (cmp 0.6056 rangs 0.3171 copie 0.3631) | user 16.36 s RSS 1 587 744 ko
+K=10 W24 : catalogue_s 0.9356 | frontiere 0.0312 boites 0.7130 ordre 0.0647 assemblage 0.1062
+K=10 W48 : catalogue_s 0.6279 | frontiere 0.0396 boites 0.4416 ordre 0.0481 assemblage 0.0757 (cmp 0.0197 rangs 0.0397 copie 0.0163) hors etages 0.0229 | user 25.61 s sys 1.12 s RSS 1 823 444 ko
+
+## 6. Allocations (callgrind, quart 01, K = 5) : malloc 124 982 appels pour 123 159 noeuds (un std::vector<u32> par noeud, generator.cpp:570)
+
+## 7. Vectorisation du noyau du filtre (objdump de filter_node)
+build par defaut (-O3, x86-64 de base) : aucune instruction xmm/ymm entiere ; 21 imul, cmov scalaires
+-march=x86-64-v3 : 80 vpcmpgtq, 80 vpsubq, 64 vpaddq, 60 vpblendvb (boucle auto-vectorisee AVX2)
+
+## 8. Passes alternees a 1 fil, trame 02, K = 5 (2 octobre, 07:05 UTC, charge 8 a 10) : t_boxes en secondes
+HEAD (build par defaut)                 : 6.244  6.812  6.051   (mediane 6.244)
+HEAD -march=x86-64-v3                   : 5.638  5.768  6.569   (mediane 5.768, x1.08)
+variante privee J3 v3d (build -O3 -g)   : 4.707  4.437  5.055   (mediane 4.707, x1.33) ; 1 407 885 boules, dump et grand livre identiques a HEAD sur le quart 01
+
+## 9. Contre-epreuve de l'oracle brut independant (oracle/campagne_head.txt)
+43 controles conformes, 385 226 boules comparees enregistrement par enregistrement (14 567 a coquille etendue, 14 986 a coquille ponderee),
+1 refus attendu (sphere de 312 points, wide_leaf, max_leaf par defaut 256)
+
+## 10. Composition du temps « hors etages » (catalogue_s moins la somme des etages), sonde, 4 fils, machine tres chargee (20 a 22)
+K=5  : hors etages 0.0272 s, dont preparation interne (avant le premier chronometre) 0.0020 s ; reste = retour de build_catalogue (destruction des tampons transitoires) 0.0252 s
+K=10 : hors etages 0.4591 s, dont preparation interne 0.0080 s ; reste 0.4511 s
+(valeurs absolues gonflees par la charge ; la part de la destruction, > 90 %, est le fait utile)
+
+## 11. Ablation de M et du reservoir : voir ablation_M.txt et ablation_reservoir.txt (dumps identiques pour R = 1, 2, 3, 4, 6 a K = 5 et 10)

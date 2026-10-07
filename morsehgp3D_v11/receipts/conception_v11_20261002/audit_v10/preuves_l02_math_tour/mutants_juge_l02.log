@@ -1,0 +1,36 @@
+=== m_bin (juge L02 : 64 nuages, n de 6 a 9, K = 4 ou 6)
+ECART famille=generic graine=1 t=0 n=8 K=6 : k=2 ensembles de feuilles differents : Gamma 26 noeuds, C++ 31, communs 26
+ECART famille=grid graine=1 t=1 n=9 K=4 : k=1 ensembles de feuilles differents : Gamma 13 noeuds, C++ 17, communs 13
+ECART famille=plane graine=1 t=2 n=8 K=4 : k=1 ensembles de feuilles differents : Gamma 14 noeuds, C++ 15, communs 14
+  [...]
+  bilan : nuages 64, ecarts du juge 64, refus du produit 0
+=== m_seq (juge L02 : 64 nuages, n de 6 a 9, K = 4 ou 6)
+ECART famille=grid graine=1 t=1 n=9 K=4 : k=1 ensembles de feuilles differents : Gamma 13 noeuds, C++ 17, communs 13
+ECART famille=plane graine=1 t=2 n=8 K=4 : k=1 ensembles de feuilles differents : Gamma 14 noeuds, C++ 15, communs 14
+ECART famille=sphere graine=1 t=4 n=8 K=4 : k=1 ensembles de feuilles differents : Gamma 14 noeuds, C++ 15, communs 14
+  [...]
+  bilan : nuages 64, ecarts du juge 45, refus du produit 0
+=== m_vopen (juge L02 : 64 nuages, n de 6 a 9, K = 4 ou 6)
+ECART famille=generic graine=1 t=0 n=8 K=6 : verticale k=2 noeud [0] (niveau 33053/2) : image C++ [1], Gamma [0, 1]
+ECART famille=grid graine=1 t=1 n=9 K=4 : verticale k=2 noeud [0] (niveau 1/4) : image C++ [4], Gamma [0, 4, 7]
+ECART famille=plane graine=1 t=2 n=8 K=4 : verticale k=2 noeud [0] (niveau 1/4) : image C++ [1], Gamma [1, 7]
+  [...]
+  bilan : nuages 64, ecarts du juge 64, refus du produit 0
+=== m_vnoclimb (juge L02 : 64 nuages, n de 6 a 9, K = 4 ou 6)
+ECART famille=generic graine=1 t=0 n=8 K=6 : verticale k=2 noeud [0, 2, 3] (niveau 798028731334826/13432054675) : image C++ [0, 1], Gamma [0, 1, 3, 4, 6]
+ECART famille=grid graine=1 t=1 n=9 K=4 : verticale k=2 noeud [2, 3] (niveau 1/2) : image C++ [3, 5, 6, 8], Gamma [0, 1, 3, 4, 5, 6, 7, 8]
+ECART famille=plane graine=1 t=2 n=8 K=4 : verticale k=2 noeud [0, 3] (niveau 5/4) : image C++ [1, 7], Gamma [0, 1, 2, 4, 6, 7]
+  [...]
+  bilan : nuages 64, ecarts du juge 64, refus du produit 0
+=== m_strict (juge L02 : 64 nuages, n de 6 a 9, K = 4 ou 6)
+ECART famille=grid graine=1 t=1 n=9 K=4 : k=2 site 4 : attache au noeud [0, 1, 2, 3, 6, 7], attendu [0, 1, 2, 3, 4, 6, 7]
+ECART famille=plane graine=1 t=2 n=8 K=4 : k=2 site 2 : attache au noeud [1], attendu [1, 2]
+ECART famille=sphere graine=1 t=4 n=8 K=4 : k=2 site 7 : attache au noeud [1], attendu [1, 4]
+  [...]
+  bilan : nuages 64, ecarts du juge 29, refus du produit 0
+=== m_onepiece (juge L02 : 64 nuages, n de 6 a 9, K = 4 ou 6)
+ECART famille=grid graine=1 t=1 n=9 K=4 : refus code 3 {"status":"ok","n":9,"sites":9,"K":4,"kcat":6,"threads":2,"balls":57,"levels":28,"catalogue_s":0.000,"euler_s":0.000,"ext_balls":21,"ext_skipped"
+ECART famille=plane graine=1 t=2 n=8 K=4 : refus code 3 {"status":"ok","n":8,"sites":8,"K":4,"kcat":6,"threads":2,"balls":39,"levels":26,"catalogue_s":0.000,"euler_s":0.000,"ext_balls":9,"ext_skipped"
+ECART famille=sphere graine=1 t=4 n=8 K=4 : refus code 3 {"status":"ok","n":8,"sites":8,"K":4,"kcat":6,"threads":2,"balls":37,"levels":28,"catalogue_s":0.000,"euler_s":0.000,"ext_balls":6,"ext_skipped
+  [...]
+  bilan : nuages 64, ecarts du juge 6, refus du produit 44

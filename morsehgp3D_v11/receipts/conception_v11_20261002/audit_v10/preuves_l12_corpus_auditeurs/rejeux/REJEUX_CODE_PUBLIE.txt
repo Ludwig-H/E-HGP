@@ -1,0 +1,109 @@
+== sources : 7eecd6757c03fa81  src/sched/pool.cpp;f583da400d00571a  src/head/head.cpp;3229681894194310  src/cloud/site_tree.cpp;d919bee049838ca9  src/tower/tower.cpp;f13e60f158ff99bb  cli/mhgp10_tower.cpp;e345022a524223a9  cli/mhgp10_catalogue.cpp;ddb1a9326e641f09  cli/mhgp10_cluster.cpp;
+== 1. CLI tour : export sans attaches (auditeur continu C3, independant I2)
+--- mhgp10_tower three.u32le --k=2 --threads=1 --no-points --dump=o_nopoints.txt
+timeout: the monitored command dumped core
+[code=139]
+--- mhgp10_tower four.u32le --k=2 --threads=1 --repeat=0
+timeout: the monitored command dumped core
+[code=139]
+== 2. Fins de fichier partielles acceptees (I1, C6)
+--- mhgp10_catalogue two_plus_1.u32le --k=2 --threads=1
+{"status":"ok","n":2,"sites":2,"K":2,"threads":1,"balls":1,"levels":1,"prepare_s":0.0000,"catalogue_s":0.0000,"catalogue_stages":{"t_frontier":0.0000,
+[code=0]
+--- mhgp10_catalogue two_plus_4.u32le --k=2 --threads=1
+{"status":"ok","n":2,"sites":2,"K":2,"threads":1,"balls":1,"levels":1,"prepare_s":0.0000,"catalogue_s":0.0000,"catalogue_stages":{"t_frontier":0.0000,
+[code=0]
+--- mhgp10_catalogue two_plus_8.u32le --k=2 --threads=1
+{"status":"ok","n":2,"sites":2,"K":2,"threads":1,"balls":1,"levels":1,"prepare_s":0.0000,"catalogue_s":0.0000,"catalogue_stages":{"t_frontier":0.0000,
+[code=0]
+--- mhgp10_catalogue two_plus_11.u32le --k=2 --threads=1
+{"status":"ok","n":2,"sites":2,"K":2,"threads":1,"balls":1,"levels":1,"prepare_s":0.0000,"catalogue_s":0.0000,"catalogue_stages":{"t_frontier":0.0000,
+[code=0]
+--- mhgp10_tower two_plus_11.u32le --k=2 --threads=1
+{"status":"ok","n":2,"K":2,"threads":1,"balls":1,"prepare_s":0.0000,"catalogue_s":0.0000,"tower_s":0.0001,"points":true,"rss_kib":{"after_catalogue":3
+[code=0]
+== 3. Options numeriques (CL1)
+--- mhgp10_catalogue four.u32le --k=abc --threads=1
+  what():  stoi
+timeout: the monitored command dumped core
+[code=134]
+--- mhgp10_catalogue four.u32le --k=2not_an_integer --threads=1
+{"status":"ok","n":4,"sites":4,"K":2,"threads":1,"balls":6,"levels":2,"prepare_s":0.0000,"catalogue_s":0.0000,"catalogue_stages":{"t_frontier":0.0000,
+[code=0]
+--- mhgp10_catalogue four.u32le --k=2 --threads=4294967297
+{"status":"ok","n":4,"sites":4,"K":2,"threads":1,"balls":6,"levels":2,"prepare_s":0.0000,"catalogue_s":0.0000,"catalogue_stages":{"t_frontier":0.0000,
+[code=0]
+--- mhgp10_catalogue four.u32le --k=2 --threads=1 --leaf=4294967304
+{"status":"ok","n":4,"sites":4,"K":2,"threads":1,"balls":6,"levels":2,"prepare_s":0.0000,"catalogue_s":0.0000,"catalogue_stages":{"t_frontier":0.0000,
+[code=0]
+== 4. Feuille plus petite que K (C9) : huit coins du cube u18, K5
+--- mhgp10_catalogue corners.u32le --k=5 --threads=1
+{"status":"ok","n":8,"sites":8,"K":5,"threads":1,"balls":27,"levels":4,"prepare_s":0.0000,"catalogue_s":0.0001,"catalogue_stages":{"t_frontier":0.0000
+[code=0]
+--- mhgp10_catalogue corners.u32le --k=5 --threads=1 --leaf=2 (delai 10 s)
+[code=124]
+== 5. CLI cluster : un point a K2 ; etiquettes et arbre vers le meme fichier ; z = 0 ; K1/mcs1
+--- mhgp10_cluster one.u32le o_one.lab --k=2 --mcs=2 --threads=1
+timeout: the monitored command dumped core
+[code=139]
+--- mhgp10_cluster five.u32le o_ctrl.lab --k=2 --mcs=2 --threads=1
+{"status":"ok","n":5,"kmax":2,"balls":9,"clusters":2,"catalogue_s":0.000,"tower_s":0.000,"head_s":0.000}
+[code=0]
+--- mhgp10_cluster five.u32le o_same.out --k=2 --mcs=2 --threads=1 --tree=o_same.out
+{"status":"ok","n":5,"kmax":2,"balls":9,"clusters":2,"catalogue_s":0.000,"tower_s":0.000,"head_s":0.000}
+[code=0]
+tailles : etiquettes de controle 20 octets ; fichier commun 138 octets ; debut : levels 6 
+--- mhgp10_cluster five.u32le o_z0.lab --k=2 --mcs=2 --threads=1 --z=0
+{"status":"ok","n":5,"kmax":2,"balls":9,"clusters":2,"catalogue_s":0.000,"tower_s":0.000,"head_s":0.000}
+[code=0]
+--- mhgp10_cluster five.u32le o_k1.lab --k=1 --mcs=1 --threads=1
+{"status":"ok","n":5,"kmax":1,"balls":6,"clusters":5,"catalogue_s":0.000,"tower_s":0.000,"head_s":0.000}
+[code=0]
+== 6. Pool : exception de l'appelant (ASan) et d'un ouvrier (C2, P1)
+[code=1]  ; ERROR: AddressSanitizer: stack-use-after-scope
+./rejeux_code_publie.sh: line 33: 962213 Aborted                 timeout 20 ./pool_worker_throw > o_poolw.out 2>&1
+[code=134] timeout: the monitored command dumped core
+== 7. Tete : departs de points, H3, zero (TT1, H3, addendum zero)
+cas1 validate_ok=1 clusters=3
+  cluster 0 parent=-1 birth=0 stability=1 mass=5
+  cluster 1 parent=0 birth=0.20000000000000001 stability=1.2333333333333334 mass=3
+  cluster 2 parent=0 birth=0.20000000000000001 stability=0.099999999999999978 mass=2
+  selected=2 labels=0 0 0 1 1 
+  attendu (condensation HDBSCAN des points) : stab(A)=11/15=0.73333333333333328 ; code publie : 37/30=1.2333333333333334
+cas2 w=1 validate_ok=1 stabilites: 2.22222e+299 8.88889e+299 8.88889e+299 | selection: 1 2 (0 = racine ; attendu analytique : les deux feuilles, car L_fusion > 2 L_feuille)
+cas2 w=4294967295 validate_ok=1 stabilites: inf inf inf | selection: 0 (0 = racine ; attendu analytique : les deux feuilles, car L_fusion > 2 L_feuille)
+cas3 validate_ok=1 stabilites: inf -nan -nan | NaN=2
+cas4 validate_ok=1 stabilite_racine=inf point_lambda=inf
+[code=0]
+== 8. Tete : validate trop faible (H1) sous ASan
+mode=rank code=1 :: mode=rank validate=ok :: ERROR: AddressSanitizer: heap-buffer-overflow
+mode=missing-edge code=0 :: mode=missing-edge validate=ok label=-1 stability=0 finite=1 :: 
+mode=nan-level code=0 :: mode=nan-level validate=ok label=0 stability=nan finite=0 :: 
+mode=nan-z code=0 :: mode=nan-z validate=ok label=0 stability=nan finite=0 :: 
+mode=negative-z code=0 :: mode=negative-z validate=ok label=0 stability=2 finite=1 :: 
+== 9. Tete : peigne (H4)
+n=2000 internal_ancestor_steps=1997001 best_s=0.011419507
+n=4000 internal_ancestor_steps=7994001 best_s=0.033164832
+n=8000 internal_ancestor_steps=31988001 best_s=0.057551239
+[code=0]
+== 10. SiteTree, centre hors enveloppe (G1)
+center=(225072.5,-25328815117.5,154615790175.5) strictly_inside=0 expected_shell=4 got_shell=3 got_interior=0
+site=0 point=(0,0,0) exact_side=0 approx_delta=0 in_shell=1 in_interior=0
+site=1 point=(152369,7,1) exact_side=0 approx_delta=4194304 in_shell=0 in_interior=0
+site=2 point=(225068,1,0) exact_side=0 approx_delta=0 in_shell=1 in_interior=0
+site=3 point=(225077,1,0) exact_side=0 approx_delta=0 in_shell=1 in_interior=0
+nearest_count=1 got=1 exact=1
+nearest_count=3 got=3 exact=0
+nearest_count=4 got=4 exact=1
+[code=1]
+== 11. Juge vertical publie : mutant survivant
+ "baseline_gate": [ null, 7-- "mutated_gate": [ null, 7-- "outcome": "wrong_vertical_survives_published_gate"}
+== 12. Rangs exacts coalesces dans le dendrogramme de points (trois sites)
+order 2 4 3;node 0 3 262145 4 3;node 1 3 68183392261 4 4;node 2 3 68183654404 4 4;node 3 -1 1218710231716127124734607380 71495741457039376 4;
+levels 3;65536.25;17045848065.25;17045913601;nodes 4;0 3;1 3;2 3;2 -1;points 3;0 0 0 1;2 0 0 1;1 1 1 1;
+== 13. Tete R2 privee (head.cpp a513aebd) : meme defaut des departs de points
+cluster 0 stability=1
+cluster 1 stability=1.2333333333333334
+cluster 2 stability=0.099999999999999978
+attendu correct stab(A)=0.73333333333333328 ; defaut=1.2333333333333334
+== fin 2026-10-02T08:25:10Z

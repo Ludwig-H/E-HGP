@@ -1,0 +1,5 @@
+# Echec d'allocation injecte dans un ouvrier du pool (MHGP10_FAULT_OFF_MAIN=0, bibliotheque de prechargement de l'arbre final), mhgp10_tower p40 --k=2 --threads=4, 30 essais par binaire
+[head] code=0 injection=0 : 11 essais
+[head] code=134 injection=1 : 19 essais
+[final] code=0 injection=0 : 6 essais
+[final] code=2 injection=1 : 24 essais

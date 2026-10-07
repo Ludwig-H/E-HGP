@@ -1,0 +1,11 @@
+test_degenerate_grids (test_ref.RefGates.test_degenerate_grids) ... ok
+test_e5 (test_ref.RefGates.test_e5) ... ok
+test_generic_random (test_ref.RefGates.test_generic_random) ... ok
+test_square_and_cube (test_ref.RefGates.test_square_and_cube) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 1511.482s
+
+OK
+wall=1512.48 s
+exit=0

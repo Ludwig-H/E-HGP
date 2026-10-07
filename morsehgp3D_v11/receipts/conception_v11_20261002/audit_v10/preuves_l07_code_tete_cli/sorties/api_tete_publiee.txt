@@ -1,0 +1,24 @@
+1_un_noeud_deux_points (exact : stabilite 1) : validate=ok mcs=2 z=1 single=1
+  publiee  : stabilites 1.5 ; retenus 0 ; etiquettes 0 0
+  cohortes : stabilites 1 ; retenus 0 ; etiquettes 0 0
+2_quatre_points_racine_permise (exact : un cluster, 0 0 0 0) : validate=ok mcs=2 z=1 single=1
+  publiee  : stabilites 0.80000000000000004 1.1000000000000001 0.099999999999999978 ; retenus 1 2 ; etiquettes 0 0 1 1
+  cohortes : stabilites 0.80000000000000004 0.59999999999999998 0.099999999999999978 ; retenus 0 ; etiquettes 0 0 0 0
+3_six_points_racine_exclue (exact : deux clusters, 0 0 0 0 1 1) : validate=ok mcs=2 z=1 single=0
+  publiee  : stabilites 0.15000000000000002 0.78888888888888886 0.15000000000000002 1.0555555555555556 0.05555555555555558 ; retenus 2 3 4 ; etiquettes 1 1 2 2 0 0
+  cohortes : stabilites 0.15000000000000002 0.78888888888888886 0.15000000000000002 0.55555555555555558 0.05555555555555558 ; retenus 1 2 ; etiquettes 0 0 0 0 1 1
+4_racine_de_masse_3_sous_mcs_5 (attendu : tout en bruit) : validate=ok mcs=5 z=1 single=1
+  publiee  : stabilites 3 ; retenus 0 ; etiquettes 0 0 0
+  cohortes : stabilites 3 ; retenus 0 ; etiquettes 0 0 0
+5a_point_rank_hors_table (racine) : validate=ok (level.size()=1, point_rank=7)
+5b_enfant_en_double : validate=ok
+5c_noeud_orphelin_du_csr : validate=ok ; etiquettes publiees 0 0 -1 -1 ; masse de la racine 2 (4 points)
+5d_niveaux_negatifs : validate=ok
+6_egalite_exacte a=2 b=5 s=6 mA=4 mB=5 : la tete retient les enfants ; S_parent=1.5 S_A=1.3333333333333335 S_B=0.16666666666666677
+6_egalite_exacte a=2 b=5 s=7 mA=2 mB=5 : la tete retient les enfants ; S_parent=0.99999999999999989 S_A=0.7142857142857143 S_B=0.28571428571428581
+6_egalite_exacte a=3 b=6 s=7 mA=5 mB=2 : la tete retient les enfants ; S_parent=0.99999999999999989 S_A=0.95238095238095233 S_B=0.047619047619047616
+6_egalites_exactes_EOM : 943 egalites construites ; parent retenu 855 fois, enfants 88 fois
+7_peigne m=2000 points=10005 clusters=4001 retenus=2 profondeur=2000 pas_etiquettes_clusters=4002001 pas_etiquettes_points=10015000 pas_desactivation=3996004 temps_cluster=0.037 s port_identique=1
+7_peigne m=4000 points=20005 clusters=8001 retenus=2 profondeur=4000 pas_etiquettes_clusters=16004001 pas_etiquettes_points=40030000 pas_desactivation=15996002 temps_cluster=0.153 s port_identique=1
+7_peigne m=8000 points=40005 clusters=16001 retenus=2 profondeur=8000 pas_etiquettes_clusters=64008001 pas_etiquettes_points=160060000 pas_desactivation=63992002 temps_cluster=0.698 s port_identique=1
+7_peigne m=16000 points=80005 clusters=32001 retenus=2 profondeur=16000 pas_etiquettes_clusters=256016001 pas_etiquettes_points=640120000 pas_desactivation=255968004 temps_cluster=2.280 s port_identique=1

@@ -1,0 +1,20 @@
+Audit L10, 2 octobre 2026 : epreuves de decide.py (lecture seule sur le depot ; tout est ecrit sous /tmp/v11-audit/l10_banc_synthetique).
+
+H  = /workspaces/E-HGP/build/v11-worktree/morsehgp3D_v10/bench/synthetic          (HEAD, decide.py sha256 d360ed0e...)
+R2 = /workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/bench/synthetic (copie R2, decide.py sha256 4d1265f0... ; copiee sous /tmp avant execution)
+W  = /tmp/v11-audit/l10_banc_synthetique
+
+1. Lot incomplet : W/decide_incomplet/results.csv = les 4 premieres scenes (128 lignes) du results.csv du lot C ;
+   run.json = celui du recu avec complete=false, computed=4.
+   PYTHONDONTWRITEBYTECODE=1 python3 H/decide.py --prereg H/prereg/PREREG_V10_COVER_C_20260929.json --run W/decide_incomplet
+   -> code 0, DECISION.json et DECISION.md ecrits (sortie : lot_incomplet_4_scenes_sur_960.stdout.txt)
+
+2. Valeur impossible : meme lot, ari_s = 1.25 sur les lignes tw_K* (hors _nf).
+   meme commande sur W/decide_mutants/ari125 -> code 0 (mutant_ari_1_25.stdout.txt)
+
+3. Schema : copie du preenregistrement avec decision.alpha = 2 et decision.delta_min = -1 ; run.json porte le sha256 de cette copie.
+   python3 H/decide.py --prereg W/decide_mutants/alpha2/PREREG_mut.json --run W/decide_mutants/alpha2
+   -> code 0, "La tour bat HDBSCAN pour K=5, K=8 et perd pour K=1, K=2, K=10" (mutant_alpha_2.stdout.txt)
+
+4. Copie R2 sur les trois memes lots : code 2 dans les trois cas ; sur le lot C complet avec --check-only : code 0,
+   "lot_conforme_au_plan : 960 scenes x 32 methodes" (decide_r2_controle.txt).

@@ -1,0 +1,22 @@
+generique n=10 : conforme
+generique n=10 : conforme
+generique n=10 : conforme
+generique n=10 : conforme
+grille n=10 : conforme
+grille n=10 : conforme
+grille n=10 : conforme
+grille n=10 : conforme
+coplanaire n=10 : conforme
+coplanaire n=10 : conforme
+coplanaire n=10 : conforme
+coplanaire n=10 : conforme
+grappes n=10 : conforme
+grappes n=10 : conforme
+grappes n=10 : conforme
+grappes n=10 : conforme
+petite_grille n=10 : conforme
+petite_grille n=10 : conforme
+petite_grille n=10 : conforme
+petite_grille n=10 : conforme
+oracle_cover checks 20 fails 0 niveaux 800 groupes 7821 attaches_ambigues 83
+exit=0

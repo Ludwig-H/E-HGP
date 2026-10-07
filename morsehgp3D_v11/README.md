@@ -96,7 +96,10 @@ ciblées se font aussi en local.
    attendues, plan proposé pour la v12.
 2. [Audit final](docs/AUDIT_FINAL_V11.md) : chronologie, bilan chiffré, comparaison à la v10, registre des leviers,
    causes racines, leçons.
-3. [Mathématiques](docs/MATHEMATIQUES.md), [architecture](docs/ARCHITECTURE.md), [provenance](docs/PROVENANCE.md).
-4. [Canal des audits](audits/README.md) et la [note de clôture](audits/NOTE_CLAUDE_CLOTURE_V11_20261007.md).
+3. [Audit géant](docs/AUDIT_GEANT_V11.md) : contre-audit du même jour. Il couvre le modèle mathématique de bout en bout,
+   la thèse, les enjeux et les applications, les contrats, la lignée v2 → v11 et la vérification par exécution. Il
+   corrige l'audit final (§ 8) et propose la v12 (§ 9).
+4. [Mathématiques](docs/MATHEMATIQUES.md), [architecture](docs/ARCHITECTURE.md), [provenance](docs/PROVENANCE.md).
+5. [Canal des audits](audits/README.md) et la [note de clôture](audits/NOTE_CLAUDE_CLOTURE_V11_20261007.md).
 
 `docs/DEVELOPPEMENT.md` est figé au 3 octobre ; la passation le remplace.

@@ -1,0 +1,4 @@
+{"schema": "ehgp.v11.full_semantic.v1", "sha256": "fcca94600524d0dc931d430f590ebb7177593f266f0af1a0a96013e4e55dd276", "raw_sha256": "6d84f9531623698e64fd53ee66f8f916ca4ad5700c6c5eecf563e442a5f11502", "bytes": 288549482, "coord_bits": 18, "kmax": 5, "sites": 39885, "points": 39885, "nodes": 1541750, "births": 897776, "merges": 643974, "edges": 1541745, "verticals": 1462069, "decode_s": 65.4}
+rc=0
+{"schema": "ehgp.v11.full_semantic.v1", "sha256": "fcca94600524d0dc931d430f590ebb7177593f266f0af1a0a96013e4e55dd276", "raw_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe", "bytes": 300883482, "coord_bits": 21, "kmax": 5, "sites": 39885, "points": 39885, "nodes": 1541750, "births": 897776, "merges": 643974, "edges": 1541745, "verticals": 1462069, "decode_s": 59.1}
+rc=0

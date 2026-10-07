@@ -1,0 +1,8 @@
+# Fri Oct  2 06:50:22 UTC 2026 ; invariance au nombre de fils : dump canonique du quart 01, K = 10 (reference du recu J2c : 7c46e50a72c08087)
+W1 dump 7c46e50a72c08087 boules 767555 noeuds 188013 feuilles 84052 filter_tests 208572435 juges 1450964 taches 362
+W3 dump 7c46e50a72c08087 boules 767555 noeuds 188013 feuilles 84052 filter_tests 208572435 juges 1450964 taches 1127
+W8 dump 7c46e50a72c08087 boules 767555 noeuds 188013 feuilles 84052 filter_tests 208572435 juges 1450964 taches 2672
+W48 dump 7c46e50a72c08087 boules 767555 noeuds 188013 feuilles 84052 filter_tests 208572435 juges 1450964 taches 9551
+# tailles des structures
+sizeof Level=56 I192=32 I128w=24 Rec=104 Ref=32 P3=24 Center=64 CatalogueLedger=136
+catalogue par boule (fixe) : rank 4 + support 16 + qmin 1 + p 4 + u 4 + flags 1 + pop_off 8 + n_interior 4 = 42 o ; + 4 o par identifiant ; + 56 o par niveau distinct

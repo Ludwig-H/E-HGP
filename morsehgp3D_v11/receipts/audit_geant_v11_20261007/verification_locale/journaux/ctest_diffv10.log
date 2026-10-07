@@ -1,0 +1,67 @@
+Internal ctest changing into directory: /tmp/claude-1000/-workspaces-E-HGP/6acaaf62-b44a-41e7-b5d6-81e4c7b6b7f1/scratchpad/agent_G/build-v11-ref
+Test project /tmp/claude-1000/-workspaces-E-HGP/6acaaf62-b44a-41e7-b5d6-81e4c7b6b7f1/scratchpad/agent_G/build-v11-ref
+      Start 108: mhgp11_reference_diff_v10
+      Start 110: mhgp11_reference_diff_v10_large
+ 1/26 Test #108: mhgp11_reference_diff_v10 ...................................   Passed    7.52 sec
+      Start 112: mhgp11_reference_diff_v10_refusal
+ 2/26 Test #112: mhgp11_reference_diff_v10_refusal ...........................   Passed    0.10 sec
+      Start 114: mhgp11_reference_diff_v10_mutant_admission_single
+ 3/26 Test #114: mhgp11_reference_diff_v10_mutant_admission_single ...........   Passed    0.16 sec
+      Start 116: mhgp11_reference_diff_v10_mutant_cover_last_ball
+ 4/26 Test #116: mhgp11_reference_diff_v10_mutant_cover_last_ball ............   Passed    0.24 sec
+      Start 118: mhgp11_reference_diff_v10_mutant_lexicographic_sites
+ 5/26 Test #118: mhgp11_reference_diff_v10_mutant_lexicographic_sites ........   Passed    0.30 sec
+      Start 120: mhgp11_reference_diff_v10_mutant_merge_numbering
+ 6/26 Test #120: mhgp11_reference_diff_v10_mutant_merge_numbering ............   Passed    0.22 sec
+      Start 122: mhgp11_reference_diff_v10_mutant_q3_form_from_support
+ 7/26 Test #122: mhgp11_reference_diff_v10_mutant_q3_form_from_support .......   Passed    0.20 sec
+      Start 124: mhgp11_reference_diff_v10_mutant_rank_by_double
+ 8/26 Test #124: mhgp11_reference_diff_v10_mutant_rank_by_double .............   Passed    0.18 sec
+      Start 126: mhgp11_reference_diff_v10_mutant_rank_last_ball
+ 9/26 Test #126: mhgp11_reference_diff_v10_mutant_rank_last_ball .............   Passed    0.18 sec
+      Start 128: mhgp11_reference_diff_v10_mutant_reduced_levels
+10/26 Test #128: mhgp11_reference_diff_v10_mutant_reduced_levels .............   Passed    0.43 sec
+      Start 130: mhgp11_reference_diff_v10_mutant_support_last
+11/26 Test #130: mhgp11_reference_diff_v10_mutant_support_last ...............   Passed    0.46 sec
+      Start 132: mhgp11_reference_diff_v10_mutant_weighted_flag_lost
+12/26 Test #132: mhgp11_reference_diff_v10_mutant_weighted_flag_lost .........   Passed    0.38 sec
+      Start 109: mhgp11_reference_diff_v10_opt
+13/26 Test #109: mhgp11_reference_diff_v10_opt ...............................   Passed    6.79 sec
+      Start 113: mhgp11_reference_diff_v10_refusal_opt
+14/26 Test #113: mhgp11_reference_diff_v10_refusal_opt .......................   Passed    0.14 sec
+      Start 115: mhgp11_reference_diff_v10_mutant_admission_single_opt
+15/26 Test #115: mhgp11_reference_diff_v10_mutant_admission_single_opt .......   Passed    0.21 sec
+      Start 117: mhgp11_reference_diff_v10_mutant_cover_last_ball_opt
+16/26 Test #117: mhgp11_reference_diff_v10_mutant_cover_last_ball_opt ........   Passed    0.28 sec
+      Start 119: mhgp11_reference_diff_v10_mutant_lexicographic_sites_opt
+17/26 Test #119: mhgp11_reference_diff_v10_mutant_lexicographic_sites_opt ....   Passed    0.26 sec
+      Start 121: mhgp11_reference_diff_v10_mutant_merge_numbering_opt
+18/26 Test #110: mhgp11_reference_diff_v10_large .............................   Passed   18.18 sec
+      Start 111: mhgp11_reference_diff_v10_large_opt
+19/26 Test #121: mhgp11_reference_diff_v10_mutant_merge_numbering_opt ........   Passed    0.23 sec
+      Start 123: mhgp11_reference_diff_v10_mutant_q3_form_from_support_opt
+20/26 Test #123: mhgp11_reference_diff_v10_mutant_q3_form_from_support_opt ...   Passed    0.20 sec
+      Start 125: mhgp11_reference_diff_v10_mutant_rank_by_double_opt
+21/26 Test #125: mhgp11_reference_diff_v10_mutant_rank_by_double_opt .........   Passed    0.22 sec
+      Start 127: mhgp11_reference_diff_v10_mutant_rank_last_ball_opt
+22/26 Test #127: mhgp11_reference_diff_v10_mutant_rank_last_ball_opt .........   Passed    0.21 sec
+      Start 129: mhgp11_reference_diff_v10_mutant_reduced_levels_opt
+23/26 Test #129: mhgp11_reference_diff_v10_mutant_reduced_levels_opt .........   Passed    0.23 sec
+      Start 131: mhgp11_reference_diff_v10_mutant_support_last_opt
+24/26 Test #131: mhgp11_reference_diff_v10_mutant_support_last_opt ...........   Passed    0.37 sec
+      Start 133: mhgp11_reference_diff_v10_mutant_weighted_flag_lost_opt
+25/26 Test #133: mhgp11_reference_diff_v10_mutant_weighted_flag_lost_opt .....   Passed    0.26 sec
+26/26 Test #111: mhgp11_reference_diff_v10_large_opt .........................   Passed   15.07 sec
+
+100% tests passed, 0 tests failed out of 26
+
+Label Time Summary:
+diff_v10    =  53.01 sec*proc (26 tests)
+fast        =  53.01 sec*proc (26 tests)
+
+Total Test time (real) =  33.26 sec
+
+real	0m33.281s
+user	0m47.806s
+sys	0m3.832s
+rc=0

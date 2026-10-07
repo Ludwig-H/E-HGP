@@ -11,6 +11,16 @@ public_status=not_claimed
 
 **Lire ensuite** : l'[audit final](docs/AUDIT_FINAL_V11.md), qui détaille tout ce qui suit, avec chiffres et sources.
 
+**Complément du même jour** : l'[audit géant](docs/AUDIT_GEANT_V11.md) a vérifié cette passation et l'audit final
+(huit lectures indépendantes, rejeu local des empreintes, réanalyse des mesures brutes). Il en corrige une trentaine
+de points, listés à son § 8. Les principaux portent sur trois points :
+- les mécanismes de la v10 à porter : la feuille J3 n'a jamais été dans la v10 et la partition T > 0 n'agit pas sur le
+  LiDAR, tandis que la plus petite boule proposée puis certifiée manque à la liste ;
+- l'état de la qualification au gel ;
+- la portée des comparaisons à HDBSCAN.
+
+Il établit aussi que la conception d'origine de la v11 n'a pas été implantée. Lire les deux documents ensemble.
+
 ## 0. Décision et portée
 
 **Demande de l'utilisateur** (7 octobre 2026) : « On va organiser plutôt une passation et tout reconstruire à neuf

@@ -1,0 +1,18 @@
+entree : /workspaces/E-HGP/build/v10-g4-data-s1/lidar00_full.u32le sha256 0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf
+commande : mhgp10_tower ENTREE --k=5 --threads=2 --dump=FICHIER (entree core par defaut), build publie puis build mutant
+sha256 dump publie : 091f2620ae5be5c489b3ac481b6944cefd162c25e9aeb5b93e07a464b069d048
+sha256 dump mutant : 3f71de7b30741f0f94e9c1e9162fe3df8bd739658da83e0ee6f762651c022d77
+lignes point du dump publie : 199425
+lignes differentes (toutes de type point) : 109
+repartition par ordre K des attaches changees :
+     65   ordre 2
+     10   ordre 3
+     13   ordre 4
+     21   ordre 5
+trois premiers ecarts :
+< 2 point 42886 50768 27317 169273 87269
+> 2 point 42886 50768 27317 169075 87269
+< 2 point 91487 56582 27971 135854 8282
+> 2 point 91487 56582 27971 125784 8282
+< 2 point 108616 53229 27997 152510 19204
+> 2 point 108616 53229 27997 148802 19204

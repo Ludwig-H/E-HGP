@@ -1,0 +1,18 @@
+M0_temoin                    aucune mutation                                      SURVIT
+M1_side_facteur_2            side et side_key : facteur 2 -> 1                    tue (code 3)
+M2_center3_D                 center3 : D double                                   SURVIT
+M3_center4_signe             center4 : signe d'un terme de N0                     SURVIT
+M4_level3_den                level3 : denominateur                                SURVIT
+M5_orient_center_wide        orient_center_wide : signe inverse                   SURVIT
+M6_compare                   compare : produits non croises                       SURVIT
+M7_wide_mul_retenue          Wide::mul : retenue finale perdue                    tue (code 3)
+M8_wide_sub_emprunt          Wide::sub_mag : emprunt perdu                        tue (code 3)
+M9_tree_marge_nulle          SiteTree : marge flottante nulle                     tue (code 1)
+M10_tree_bande_inversee      closed_ball : bande exacte supprimee cote coquille   tue (code 3)
+M11_tree_sans_tri_exact      nearest : troncature avant le tri exact              tue (code 1)
+M12_kth_poids                kth_distance : multiplicites ignorees                tue (delai)
+M13_cloud_tri_sans_pid       prepare_cloud : departage par PointId supprime       tue (code 1)
+M14_morton_axes              morton3 : axes y et z echanges                       SURVIT
+M15_pool_grain               Pool : tranche debordant d'un indice                 tue (code 1)
+M16_budget_release           Buffer : liberation en elements au lieu d'octets     tue (code 1)
+M17_precedes                 Outcome::precedes : ordre inverse                    tue (code 1)

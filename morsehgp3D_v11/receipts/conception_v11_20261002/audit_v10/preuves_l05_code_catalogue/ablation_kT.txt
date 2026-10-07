@@ -1,0 +1,17 @@
+# Ablation de kT (bits sous-unitaires des boites, generator.cpp:22), HEAD afb081774, seule ligne modifiee : constexpr int kT = {6, 3, 0}
+# dumps canoniques (12 premiers hexa du sha256) et compteurs deterministes ; t_boxes local a 3 fils (bruite)
+lidar02_full K=5  T=6 : dump 8a850649ff10 boules 1407885 noeuds 734083 feuilles 323224 m_moy 13.95 m_max 16 bloquees 0 filter_tests 403800945 triplets 28586816 quads 9380910 t_boxes 2.84
+lidar02_full K=5  T=3 : dump 8a850649ff10 boules 1407885 noeuds 734261 feuilles 323259 m_moy 13.95 m_max 16 bloquees 0 filter_tests 403878205 triplets 28596833 quads 9382696 t_boxes 2.80
+lidar02_full K=5  T=0 : dump 8a850649ff10 boules 1407885 noeuds 735601 feuilles 323879 m_moy 13.95 m_max 16 bloquees 0 filter_tests 404420535 triplets 28668830 quads 9407955 t_boxes 2.74
+lidar02_full K=10 T=6 : dump d6abe0dba4d9 boules 5483320 noeuds 1065585 feuilles 485833 m_moy 21.58 m_max 24 bloquees 0 filter_tests 1287951189 triplets 133332063 quads 75108960 t_boxes 12.70
+lidar02_full K=10 T=3 : dump d6abe0dba4d9 boules 5483320 noeuds 1065607 feuilles 485841 m_moy 21.58 m_max 24 bloquees 0 filter_tests 1288033696 triplets 133367975 quads 75130056 t_boxes 11.04
+lidar02_full K=10 T=0 : dump d6abe0dba4d9 boules 5483320 noeuds 1066917 feuilles 486530 m_moy 21.59 m_max 24 bloquees 0 filter_tests 1289854885 triplets 133639185 quads 75283929 t_boxes 11.41
+grille 16^3 pas 1 K=5  T=6 : dump ea9d122cc281 boules 115373 noeuds 53727 feuilles 26864 m_moy 14.05 m_max 16 bloquees 0 filter_tests 25335060 triplets 2196836 quads 1253330 t_boxes 0.29
+grille 16^3 pas 1 K=5  T=3 : dump ea9d122cc281 boules 115373 noeuds 61571 feuilles 30786 m_moy 14.63 m_max 16 bloquees 0 filter_tests 28085480 triplets 2927585 quads 1698608 t_boxes 0.56
+grille 16^3 pas 1 K=5  T=0 : dump ea9d122cc281 boules 115373 noeuds 8125 feuilles 4063 m_moy 37.77 m_max 48 bloquees 0 filter_tests 13699600 triplets 12621994 quads 13370596 t_boxes 1.19
+grille 16^3 pas 1 K=10 T=6 : dump 6f3c5612b661 boules 593926 noeuds 174095 feuilles 87048 m_moy 20.93 m_max 32 bloquees 6431 filter_tests 167699698 triplets 26731250 quads 9655450 t_boxes 2.50
+grille 16^3 pas 1 K=10 T=3 : dump 6f3c5612b661 boules 593926 noeuds 179509 feuilles 89755 m_moy 23.10 m_max 32 bloquees 0 filter_tests 177829973 triplets 63409919 quads 14613571 t_boxes 3.57
+grille 16^3 pas 1 K=10 T=0 : dump 6f3c5612b661 boules 593926 noeuds 8187 feuilles 4094 m_moy 48.09 m_max 56 bloquees 0 filter_tests 32485360 triplets 35487845 quads 105490330 t_boxes 7.05
+syn_uniform_density_x1 K=5 T=6 : dump f351a879c929 boules 594381 noeuds 157633 feuilles 78812 m_moy 14.13 m_max 16 bloquees 0 filter_tests 69485530 triplets 8678207 quads 3415648 t_boxes 0.99
+syn_uniform_density_x1 K=5 T=3 : dump f351a879c929 boules 594381 noeuds 157623 feuilles 78807 m_moy 14.13 m_max 16 bloquees 0 filter_tests 69482860 triplets 8678199 quads 3415780 t_boxes 1.01
+syn_uniform_density_x1 K=5 T=0 : dump f351a879c929 boules 594381 noeuds 157675 feuilles 78833 m_moy 14.13 m_max 16 bloquees 0 filter_tests 69495050 triplets 8680242 quads 3416955 t_boxes 0.89

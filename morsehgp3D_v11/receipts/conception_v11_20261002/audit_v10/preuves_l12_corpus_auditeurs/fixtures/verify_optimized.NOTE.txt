@@ -1,0 +1,1 @@
+verify_optimized.txt identique a verify_normal.txt (python3 -B -O)

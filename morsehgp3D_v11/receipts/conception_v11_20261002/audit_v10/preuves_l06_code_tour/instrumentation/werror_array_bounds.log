@@ -1,0 +1,17 @@
+In member function ‘mhgp10::{anonymous}::DBall mhgp10::{anonymous}::DWelzl::small(const int*, int, int*, int)’,
+    inlined from ‘mhgp10::{anonymous}::DBall mhgp10::{anonymous}::DWelzl::small(const int*, int, int*, int)’ at warr/src/tower/tower.cpp:393:20,
+    inlined from ‘mhgp10::{anonymous}::DBall mhgp10::{anonymous}::DWelzl::small(const int*, int, int*, int)’ at warr/src/tower/tower.cpp:396:17,
+    inlined from ‘mhgp10::{anonymous}::DBall mhgp10::{anonymous}::DWelzl::small(const int*, int, int*, int)’ at warr/src/tower/tower.cpp:393:20,
+    inlined from ‘mhgp10::{anonymous}::DBall mhgp10::{anonymous}::DWelzl::small(const int*, int, int*, int)’ at warr/src/tower/tower.cpp:396:17,
+    inlined from ‘mhgp10::{anonymous}::DBall mhgp10::{anonymous}::DWelzl::run_support(int)’ at warr/src/tower/tower.cpp:445:16,
+    inlined from ‘mhgp10::{anonymous}::DBall mhgp10::{anonymous}::DWelzl::run(int)’ at warr/src/tower/tower.cpp:452:34,
+    inlined from ‘mhgp10::{anonymous}::Sphere mhgp10::{anonymous}::meb(const Geo&, const Facet&, mhgp10::u64&)’ at warr/src/tower/tower.cpp:575:26:
+warr/src/tower/tower.cpp:394:24: error: array subscript [-2147483649, -6] is outside array bounds of ‘int [4]’ [-Werror=array-bounds=]
+  394 |     if (!ok || contains(B, T[n - 1])) return B;
+      |                ~~~~~~~~^~~~~~~~~~~~~
+warr/src/tower/tower.cpp: In function ‘mhgp10::{anonymous}::Sphere mhgp10::{anonymous}::meb(const Geo&, const Facet&, mhgp10::u64&)’:
+warr/src/tower/tower.cpp:441:11: note: at offset [-8589934596, -24] into object ‘T’ of size 16
+  441 |       int T[4];
+      |           ^
+cc1plus: all warnings being treated as errors
+rc=1

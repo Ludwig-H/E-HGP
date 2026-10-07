@@ -1,0 +1,46 @@
+sites distincts : nuages 40 (fixtures 13, aleatoires 27, n <= 8), graine 20261003
+  CAT-1 support present                                              1053
+  CAT-2 boule minimale                                              10882
+  CAT-2 niveau des k-parties                                         2499
+  INV-EULER                                                           225
+  INV-RACINE                                                          225
+  LOC-1 Johnson ferme                                                2499
+  LOC-2c meme morceau, meme composante                               2155
+  LOC-3 critere par paires = critere par faces                        958
+  LOC-3 morceaux = composantes induites sur P_b                       958
+  LOC-4 meme partition des parties separables                         958
+  LOC-4 nombre de morceaux                                            958
+  LOC-5 famille couvrante                                             958
+  LOC-5 membres separables                                            958
+  LOC-R coquille reguliere : m morceaux a t = m - 1                   725
+  LOC-W boule inerte : une composante                                 696
+  LOC-W toute t-partie separable                                      208
+  PTS-CORE composante independante du depart                         1341
+  PTS-COVER admission p+q<=k                                         1341
+  PTS-COVER niveau                                                   1341
+  PTS-ENC                                                            1341
+  PTS-MR M(rho) dans core(9 rho^2 / 4)                               1527
+  PTS-MR core(a) dans M(2 sqrt a)                                    1368
+  TOUR-B composantes rencontrees = celles des representants           958
+  TOUR-B naissance                                                    845
+  TOUR-B naissance ssi aucune t-partie separable                      845
+  TOUR-B naissances = composantes sans sommet ancien                 1933
+  TOUR-B niveau nul : une naissance par position de poids >= k         40
+  TOUR-C plateaux                                                    1933
+  TOUR-D decroissance stricte                                         935
+  TOUR-D meme composante au niveau de depart                          935
+  TOUR-G couverture par les boules p+q<=k                            1933
+  TOUR-G gain seulement si coquille etendue et t >= q                   5
+  cellules en fenetre a 1 morceaux                                    124
+  cellules en fenetre a >=2 morceaux                                  834
+  coupe ouverte = coupe fermee precedente                            1933
+  descentes                                                          1668
+  gains de couverture sans fusion                                       5
+  inertes                                                             696
+  naissances                                                          845
+  pas de descente                                                     935
+ecarts : 0
+
+real	0m8.182s
+user	0m8.042s
+sys	0m0.027s

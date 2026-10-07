@@ -1,0 +1,54 @@
+# Fri Oct  2 06:47:32 UTC 2026 ; charge 19.23 18.23 16.59 ; candidats reels de la trame 02 (vides par la sonde sonde_vidage_candidats.diff)
+## quadruplets K = 5 (9 380 910 candidats), build par defaut
+quadruplets 9380910, etendue max des 4 sites 30215 unites
+A HEAD (centre, boite, interieur ; i128)     :   324.8 cycles/quadruplet (min de 5) | degeneres 3684, classe1 4418170, classe2 4480470, juges 478586
+B exacte reordonnee (interieur d'abord)      :   126.1 cycles/quadruplet (min de 5) | degeneres 3684, classe1 212463, classe2 8686177, juges 478586
+C filtre double + repli exact                :    91.0 cycles/quadruplet (min de 5) | degeneres 3684, classe1 212463, classe2 8686177, juges 478586
+replis exacts de C : 3776 (0.0403 %)
+desaccords sur la decision de juger : A/B 0, A/C 0
+quadruplets 9380910 | rassemblement SoA 40.6 cyc | phase 1 (filtre, sans branchement) 20.6 cyc | phase 2 (exact sur 694825 survivants, 7.41 %) 18.5 cyc amortis | total hors rassemblement 39.1 cyc/quadruplet | juges 478586
+## quadruplets K = 5, -march=x86-64-v3
+quadruplets 9380910, etendue max des 4 sites 30215 unites
+A HEAD (centre, boite, interieur ; i128)     :   297.0 cycles/quadruplet (min de 5) | degeneres 3684, classe1 4418170, classe2 4480470, juges 478586
+B exacte reordonnee (interieur d'abord)      :   112.9 cycles/quadruplet (min de 5) | degeneres 3684, classe1 212463, classe2 8686177, juges 478586
+C filtre double + repli exact                :    70.5 cycles/quadruplet (min de 5) | degeneres 3684, classe1 212463, classe2 8686177, juges 478586
+replis exacts de C : 3776 (0.0403 %)
+desaccords sur la decision de juger : A/B 0, A/C 0
+quadruplets 9380910 | rassemblement SoA 38.4 cyc | phase 1 (filtre, sans branchement) 8.4 cyc | phase 2 (exact sur 694825 survivants, 7.41 %) 19.3 cyc amortis | total hors rassemblement 27.7 cyc/quadruplet | juges 478586
+## quadruplets K = 10 (1 candidat sur 8 : 9 388 620), build par defaut
+quadruplets 9388620, etendue max des 4 sites 31118 unites
+A HEAD (centre, boite, interieur ; i128)     :   308.3 cycles/quadruplet (min de 3) | degeneres 1259, classe1 4433182, classe2 4527930, juges 426249
+B exacte reordonnee (interieur d'abord)      :   120.2 cycles/quadruplet (min de 3) | degeneres 1259, classe1 211946, classe2 8749166, juges 426249
+C filtre double + repli exact                :    83.0 cycles/quadruplet (min de 3) | degeneres 1259, classe1 211946, classe2 8749166, juges 426249
+replis exacts de C : 1342 (0.0143 %)
+desaccords sur la decision de juger : A/B 0, A/C 0
+quadruplets 9388620 | rassemblement SoA 40.8 cyc | phase 1 (filtre, sans branchement) 19.9 cyc | phase 2 (exact sur 639537 survivants, 6.81 %) 17.0 cyc amortis | total hors rassemblement 36.9 cyc/quadruplet | juges 426249
+## quadruplets K = 10, -march=x86-64-v3
+quadruplets 9388620, etendue max des 4 sites 31118 unites
+A HEAD (centre, boite, interieur ; i128)     :   304.9 cycles/quadruplet (min de 3) | degeneres 1259, classe1 4433182, classe2 4527930, juges 426249
+B exacte reordonnee (interieur d'abord)      :   127.4 cycles/quadruplet (min de 3) | degeneres 1259, classe1 211946, classe2 8749166, juges 426249
+C filtre double + repli exact                :    79.6 cycles/quadruplet (min de 3) | degeneres 1259, classe1 211946, classe2 8749166, juges 426249
+replis exacts de C : 1342 (0.0143 %)
+desaccords sur la decision de juger : A/B 0, A/C 0
+quadruplets 9388620 | rassemblement SoA 40.1 cyc | phase 1 (filtre, sans branchement) 8.4 cyc | phase 2 (exact sur 639537 survivants, 6.81 %) 19.5 cyc amortis | total hors rassemblement 28.0 cyc/quadruplet | juges 426249
+## triplets K = 5 (28 587 237 candidats), build par defaut puis x86-64-v3
+triplets 28587237 | A HEAD 197.9 cyc/triplet (alignes 421, manque 8170806, touche sans juge 18512622, juge 1903388)
+D : rassemblement SoA 97.2 cyc | phase 1 (droite + aigu, double, sans branchement) 71.5 cyc | phase 2 (centre/boite double scalaire sur aigus touches + replis exacts) 62.8 cyc | total hors rassemblement 134.3 cyc/triplet
+replis exacts : droite 28869 (0.1010 %), boite 0 (0.0000 %) | desaccords A/D 0
+triplets 28587237 | A HEAD 163.3 cyc/triplet (alignes 421, manque 8170806, touche sans juge 18512622, juge 1903388)
+D : rassemblement SoA 84.1 cyc | phase 1 (droite + aigu, double, sans branchement) 28.3 cyc | phase 2 (centre/boite double scalaire sur aigus touches + replis exacts) 52.8 cyc | total hors rassemblement 81.0 cyc/triplet
+replis exacts : droite 28869 (0.1010 %), boite 0 (0.0000 %) | desaccords A/D 0
+## recensement K = 5, fenetres de 4000 juges en cache, build par defaut puis x86-64-v3
+juges 4000 | A HEAD : 347.5 cyc/juge, 30.0 cyc/site visite (11.6 sites/juge, sorties anticipees 2261)
+D double + repli : 332.5 cyc/juge, 22.8 cyc/site (14.6 sites/juge), replis exacts 0 (0.0000 par juge) | desaccords 0
+juges 4000 | A HEAD : 335.9 cyc/juge, 29.0 cyc/site visite (11.6 sites/juge, sorties anticipees 2261)
+D double + repli : 296.3 cyc/juge, 20.3 cyc/site (14.6 sites/juge), replis exacts 0 (0.0000 par juge) | desaccords 0
+juges 4000 | A HEAD : 354.8 cyc/juge, 31.0 cyc/site visite (11.5 sites/juge, sorties anticipees 2300)
+D double + repli : 322.8 cyc/juge, 21.7 cyc/site (14.9 sites/juge), replis exacts 0 (0.0000 par juge) | desaccords 0
+juges 4000 | A HEAD : 300.6 cyc/juge, 26.2 cyc/site visite (11.5 sites/juge, sorties anticipees 2300)
+D double + repli : 315.7 cyc/juge, 21.2 cyc/site (14.9 sites/juge), replis exacts 0 (0.0000 par juge) | desaccords 0
+juges 4000 | A HEAD : 277.4 cyc/juge, 23.9 cyc/site visite (11.6 sites/juge, sorties anticipees 2338)
+D double + repli : 323.2 cyc/juge, 21.5 cyc/site (15.0 sites/juge), replis exacts 2 (0.0005 par juge) | desaccords 0
+juges 4000 | A HEAD : 360.1 cyc/juge, 31.0 cyc/site visite (11.6 sites/juge, sorties anticipees 2338)
+D double + repli : 325.8 cyc/juge, 21.7 cyc/site (15.0 sites/juge), replis exacts 2 (0.0005 par juge) | desaccords 0
+# Fri Oct  2 06:49:32 UTC 2026 ; charge 16.50 17.57 16.55

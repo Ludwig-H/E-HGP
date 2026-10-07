@@ -1,0 +1,56 @@
+# Bilan des dix mutants joues contre la suite de HEAD (afb081774), 2026-10-02T08:27:05Z
+# Definitions : scripts/mutants.py. M01 : suite complete (13 portes). M02 : 11 portes hors oracles de la suite complete (arretee avant ses deux oracles) + differentiel. M03-M10 : ctest -LE oracle + differentiel exact des oracles (scripts/oracles_rapides.py).
+M01_core_strict
+  suite complete : 100% tests passed, 0 tests failed out of 13 ; passes 13 ; echecs aucun
+M02_cover_rank
+  suite complete : inachevee ; passes 11 ; echecs aucun
+  oracle catalogue : 160/160 dumps identiques a HEAD, 0 rejuges, ecarts 0, translation conforme
+  oracle tour : 73/73 dumps identiques a HEAD, 0 rejuges, ecarts 0
+  verdict oracles : VERTES (mutant survivant aux deux oracles)
+M03_vertical_birth_low
+  hors oracles : 100% tests passed, 0 tests failed out of 11 ; passes 11 ; echecs aucun
+  oracle catalogue : 160/160 dumps identiques a HEAD, 0 rejuges, ecarts 0, translation conforme
+  oracle tour : 24/73 dumps identiques a HEAD, 49 rejuges, ecarts 0
+  verdict oracles : VERTES (mutant survivant aux deux oracles)
+M04_refuse_k10
+  hors oracles : 100% tests passed, 0 tests failed out of 11 ; passes 11 ; echecs aucun
+  oracle catalogue : 160/160 dumps identiques a HEAD, 0 rejuges, ecarts 0, translation conforme
+  oracle tour : 73/73 dumps identiques a HEAD, 0 rejuges, ecarts 0
+  verdict oracles : VERTES (mutant survivant aux deux oracles)
+M05_head_mcs_strict
+  hors oracles : 91% tests passed, 1 tests failed out of 11 ; passes 10 ; echecs ['mhgp10_head_condensation_vs_sklearn']
+  oracle catalogue : 160/160 dumps identiques a HEAD, 0 rejuges, ecarts 0, translation conforme
+  oracle tour : 73/73 dumps identiques a HEAD, 0 rejuges, ecarts 0
+  verdict oracles : VERTES (mutant survivant aux deux oracles)
+M06_head_z_ignored
+  hors oracles : 100% tests passed, 0 tests failed out of 11 ; passes 11 ; echecs aucun
+  oracle catalogue : 160/160 dumps identiques a HEAD, 0 rejuges, ecarts 0, translation conforme
+  oracle tour : 73/73 dumps identiques a HEAD, 0 rejuges, ecarts 0
+  verdict oracles : VERTES (mutant survivant aux deux oracles)
+M07_catalogue_admission
+  hors oracles : 64% tests passed, 4 tests failed out of 11 ; passes 7 ; echecs ['mhgp10_regression_level_collision', 'mhgp10_points_cover', 'mhgp10_regression_batch_equivalence', 'mhgp10_regression_multiplicity_refusal']
+  oracle catalogue : 105/160 dumps identiques a HEAD, 55 rejuges, ecarts 55, translation conforme
+  oracle tour : 42/73 dumps identiques a HEAD, 31 rejuges, ecarts 31
+  verdict oracles : ROUGE (mutant tue par un oracle)
+    ex. catalogue : nuage 0 K=3 : manquantes 5 en trop 0 ex [(4, 0, frozenset(), frozenset({(343, 523, 837), (266, 685, 704), (807, 774, 854), (213, 876, 
+    ex. tour : cas 1 K=3 : k=3 a=10659201135535656386/103328383813249 ferme=True composantes 6 contre 3
+M08_level_collision_unfixed
+  hors oracles : 91% tests passed, 1 tests failed out of 11 ; passes 10 ; echecs ['mhgp10_regression_level_collision']
+  oracle catalogue : 160/160 dumps identiques a HEAD, 0 rejuges, ecarts 0, translation conforme
+  oracle tour : 73/73 dumps identiques a HEAD, 0 rejuges, ecarts 0
+  verdict oracles : VERTES (mutant survivant aux deux oracles)
+M09_last_layer_rare_drop
+  hors oracles : 91% tests passed, 1 tests failed out of 11 ; passes 10 ; echecs ['mhgp10_regression_batch_equivalence']
+  oracle catalogue : 160/160 dumps identiques a HEAD, 0 rejuges, ecarts 0, translation conforme
+  oracle tour : 73/73 dumps identiques a HEAD, 0 rejuges, ecarts 0
+  verdict oracles : VERTES (mutant survivant aux deux oracles)
+M10_any_layer_rare_drop
+  hors oracles : 82% tests passed, 2 tests failed out of 11 ; passes 9 ; echecs ['mhgp10_regression_level_collision', 'mhgp10_regression_batch_equivalence']
+  oracle catalogue : 160/160 dumps identiques a HEAD, 0 rejuges, ecarts 0, translation conforme
+  oracle tour : 73/73 dumps identiques a HEAD, 0 rejuges, ecarts 0
+  verdict oracles : VERTES (mutant survivant aux deux oracles)
+
+# Effets a l'echelle des mutants de perte rare (exp/mutants_rares_echelle.json)
+HEAD {"uniforme8000_balls_K5": 599711, "uniforme8000_balls_K7": 1306627, "euler_kcat7": {"1": 1, "2": 1, "3": 1, "4": 1, "5": 1}, "restriction_cat5_moins_cat7": {"q2": [0, 0, 0, 0, 0], "q3": [0, 0, 0, 0, -162021], "q4": [0, 0, 0, -119985, -177758]}, "tour_uniforme8000_K5": [0, "ok", "", [15999, 52862, 108874, 182183, 274144]], "tour_lidar00_K5": [0, "ok", "", [79681, 178127, 285910, 421661, 576371]], "catalogue_lidar00_K5_balls": 1306696}
+M09 {"uniforme8000_balls_K5": 599700, "uniforme8000_balls_K7": 1306610, "euler_kcat7": {"1": 1, "2": 1, "3": 1, "4": 1, "5": 1}, "restriction_cat5_moins_cat7": {"q2": [0, 0, 0, 0, -11], "q3": [0, 0, 0, 0, -162021], "q4": [0, 0, 0, -119985, -177758]}, "tour_uniforme8000_K5": [0, "ok", "", [15999, 52862, 108874, 182183, 274143]], "tour_lidar00_K5": [0, "ok", "", [79681, 178127, 285910, 421661, 576371]], "catalogue_lidar00_K5_balls": 1306695}
+M10 {"uniforme8000_balls_K5": 599621, "uniforme8000_balls_K7": 1306501, "euler_kcat7": {"1": 20, "2": -2, "3": 8, "4": -1, "5": -9}, "restriction_cat5_moins_cat7": {"q2": [0, 0, 0, 0, 0], "q3": [0, 0, 0, 0, -162021], "q4": [0, 0, 0, -119985, -177758]}, "tour_uniforme8000_K5": [3, "invariant_violated", "census_mismatch", []], "tour_lidar00_K5": [3, "invariant_violated", "census_mismatch", []], "catalogue_lidar00_K5_balls": 1306692}

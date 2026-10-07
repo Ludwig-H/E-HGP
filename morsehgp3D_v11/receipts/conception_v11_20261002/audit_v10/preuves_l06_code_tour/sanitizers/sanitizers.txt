@@ -1,0 +1,38 @@
+build asan+ubsan rc=0
+asan+ubsan mutants/rand1500 --k=5 --threads=4 : code 0 ; lignes stderr 0 ; {"status":"ok","n":1500,"K":5,"threads":4,"balls":99391,"pre
+asan+ubsan mutants/rand1500 --k=5 --threads=4 --entry=cover : code 0 ; lignes stderr 0 ; {"status":"ok","n":1500,"K":5,"threads":4,"balls":99391,"pre
+asan+ubsan mutants/rand1500 --k=10 --threads=2 --no-points : code 0 ; lignes stderr 0 ; {"status":"ok","n":1500,"K":10,"threads":2,"balls":490787,"p
+asan+ubsan edge/grid6 --k=5 --threads=4 : code 0 ; lignes stderr 0 ; {"status":"ok","n":216,"K":5,"threads":4,"balls":4303,"prepa
+asan+ubsan edge/grid6 --k=5 --threads=4 --entry=cover : code 0 ; lignes stderr 0 ; {"status":"ok","n":216,"K":5,"threads":4,"balls":4303,"prepa
+asan+ubsan edge/grid6 --k=10 --threads=2 --no-points : code 0 ; lignes stderr 0 ; {"status":"ok","n":216,"K":10,"threads":2,"balls":18486,"pre
+asan+ubsan edge/sphere12 --k=5 --threads=4 : code 0 ; lignes stderr 0 ; {"status":"ok","n":12,"K":5,"threads":4,"balls":149,"prepare
+asan+ubsan edge/sphere12 --k=5 --threads=4 --entry=cover : code 0 ; lignes stderr 0 ; {"status":"ok","n":12,"K":5,"threads":4,"balls":149,"prepare
+asan+ubsan edge/sphere12 --k=10 --threads=2 --no-points : code 0 ; lignes stderr 0 ; {"status":"ok","n":12,"K":10,"threads":2,"balls":149,"prepar
+asan+ubsan edge/plane_grid12 --k=5 --threads=4 : code 0 ; lignes stderr 0 ; {"status":"ok","n":144,"K":5,"threads":4,"balls":1298,"prepa
+asan+ubsan edge/plane_grid12 --k=5 --threads=4 --entry=cover : code 0 ; lignes stderr 0 ; {"status":"ok","n":144,"K":5,"threads":4,"balls":1298,"prepa
+asan+ubsan edge/plane_grid12 --k=10 --threads=2 --no-points : code 0 ; lignes stderr 0 ; {"status":"ok","n":144,"K":10,"threads":2,"balls":3034,"prep
+asan+ubsan edge/line20 --k=5 --threads=4 : code 0 ; lignes stderr 0 ; {"status":"ok","n":20,"K":5,"threads":4,"balls":85,"prepare_
+asan+ubsan edge/line20 --k=5 --threads=4 --entry=cover : code 0 ; lignes stderr 0 ; {"status":"ok","n":20,"K":5,"threads":4,"balls":85,"prepare_
+asan+ubsan edge/line20 --k=10 --threads=2 --no-points : code 0 ; lignes stderr 0 ; {"status":"ok","n":20,"K":10,"threads":2,"balls":145,"prepar
+asan+ubsan edge/n1 --k=5 --threads=4 : code 0 ; lignes stderr 0 ; {"status":"ok","n":1,"K":5,"threads":4,"balls":0,"prepare_s"
+asan+ubsan edge/n1 --k=5 --threads=4 --entry=cover : code 0 ; lignes stderr 0 ; {"status":"ok","n":1,"K":5,"threads":4,"balls":0,"prepare_s"
+asan+ubsan edge/n1 --k=10 --threads=2 --no-points : code 0 ; lignes stderr 0 ; {"status":"ok","n":1,"K":10,"threads":2,"balls":0,"prepare_s
+asan+ubsan edge/n2 --k=5 --threads=4 : code 0 ; lignes stderr 0 ; {"status":"ok","n":2,"K":5,"threads":4,"balls":1,"prepare_s"
+asan+ubsan edge/n2 --k=5 --threads=4 --entry=cover : code 0 ; lignes stderr 0 ; {"status":"ok","n":2,"K":5,"threads":4,"balls":1,"prepare_s"
+asan+ubsan edge/n2 --k=10 --threads=2 --no-points : code 0 ; lignes stderr 0 ; {"status":"ok","n":2,"K":10,"threads":2,"balls":1,"prepare_s
+asan+ubsan edge/n3 --k=5 --threads=4 : code 0 ; lignes stderr 0 ; {"status":"ok","n":3,"K":5,"threads":4,"balls":3,"prepare_s"
+asan+ubsan edge/n3 --k=5 --threads=4 --entry=cover : code 0 ; lignes stderr 0 ; {"status":"ok","n":3,"K":5,"threads":4,"balls":3,"prepare_s"
+asan+ubsan edge/n3 --k=10 --threads=2 --no-points : code 0 ; lignes stderr 0 ; {"status":"ok","n":3,"K":10,"threads":2,"balls":3,"prepare_s
+asan+ubsan edge/circle65 --k=5 --threads=4 : code 0 ; lignes stderr 0 ; {"status":"ok","n":17,"K":5,"threads":4,"balls":129,"prepare
+asan+ubsan edge/circle65 --k=5 --threads=4 --entry=cover : code 0 ; lignes stderr 0 ; {"status":"ok","n":17,"K":5,"threads":4,"balls":129,"prepare
+asan+ubsan edge/circle65 --k=10 --threads=2 --no-points : code 0 ; lignes stderr 0 ; {"status":"ok","n":17,"K":10,"threads":2,"balls":177,"prepar
+build tsan rc=0
+tsan mutants/rand1500 --k=5 --threads=4 : code 0 ; rapports 0 ; {"status":"ok","n":1500,"K":5,"threads":4,"balls":99391,"pre
+tsan mutants/rand1500 --k=5 --threads=4 --entry=cover : code 0 ; rapports 0 ; {"status":"ok","n":1500,"K":5,"threads":4,"balls":99391,"pre
+tsan mutants/rand1500 --k=10 --threads=4 : code 0 ; rapports 0 ; {"status":"ok","n":1500,"K":10,"threads":4,"balls":490787,"p
+tsan edge/grid6 --k=5 --threads=4 : code 0 ; rapports 0 ; {"status":"ok","n":216,"K":5,"threads":4,"balls":4303,"prepa
+tsan edge/grid6 --k=5 --threads=4 --entry=cover : code 0 ; rapports 0 ; {"status":"ok","n":216,"K":5,"threads":4,"balls":4303,"prepa
+tsan edge/grid6 --k=10 --threads=4 : code 0 ; rapports 0 ; {"status":"ok","n":216,"K":10,"threads":4,"balls":18486,"pre
+tsan edge/plane_grid12 --k=5 --threads=4 : code 0 ; rapports 0 ; {"status":"ok","n":144,"K":5,"threads":4,"balls":1298,"prepa
+tsan edge/plane_grid12 --k=5 --threads=4 --entry=cover : code 0 ; rapports 0 ; {"status":"ok","n":144,"K":5,"threads":4,"balls":1298,"prepa
+tsan edge/plane_grid12 --k=10 --threads=4 : code 0 ; rapports 0 ; {"status":"ok","n":144,"K":10,"threads":4,"balls":3034,"prep

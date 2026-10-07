@@ -1,0 +1,29 @@
+Lot C, famille shells : ARI_s moyen par taille ; tour (cover, EOM z dev, remplie) / sklearn regle sur dev (rempli) / sklearn EOM alpha=1 non rempli / MR2-bord
+K=1  n=8000: 0.947 / 0.974 / 0.975  n=16000: 0.974 / 0.977 / 0.977  n=32000: 0.981 / 0.983 / 0.984
+K=2  n=8000: 0.969 / 0.974 / 0.975 / 0.968  n=16000: 0.977 / 0.977 / 0.977 / 0.974  n=32000: 0.980 / 0.983 / 0.984 / 0.978
+K=3  n=8000: 0.966 / 0.556 / 0.977 / 0.963  n=16000: 0.973 / 0.464 / 0.979 / 0.972  n=32000: 0.979 / 0.357 / 0.985 / 0.977
+K=5  n=8000: 0.958 / 0.673 / 0.979 / 0.945  n=16000: 0.968 / 0.549 / 0.984 / 0.966  n=32000: 0.975 / 0.431 / 0.986 / 0.971
+K=8  n=8000: 0.947 / 0.771 / 0.973 / 0.925  n=16000: 0.967 / 0.632 / 0.984 / 0.958  n=32000: 0.974 / 0.505 / 0.984 / 0.969
+K=10 n=8000: 0.939 / 0.811 / 0.967 / 0.883  n=16000: 0.963 / 0.692 / 0.958 / 0.862  n=32000: 0.972 / 0.551 / 0.980 / 0.822
+
+shells : nombre moyen d amas (8 groupes vrais) et couverture
+K=1  tw 8.5 amas, couv 0.969 | hdb_ms 8.0 amas, couv 0.967 | hdb_ms_nf 8.0 amas, couv 0.967
+K=2  tw 8.0 amas, couv 0.970 | hdb_ms 8.0 amas, couv 0.967 | hdb_ms_nf 8.0 amas, couv 0.967
+K=3  tw 8.0 amas, couv 0.972 | hdb_ms 30.6 amas, couv 0.959 | hdb_ms_nf 8.0 amas, couv 0.965
+K=5  tw 8.1 amas, couv 0.975 | hdb_ms 23.9 amas, couv 0.960 | hdb_ms_nf 8.0 amas, couv 0.964
+K=8  tw 8.4 amas, couv 0.975 | hdb_ms 19.4 amas, couv 0.962 | hdb_ms_nf 8.0 amas, couv 0.963
+K=10 tw 8.6 amas, couv 0.976 | hdb_ms 17.3 amas, couv 0.964 | hdb_ms_nf 7.9 amas, couv 0.963
+
+shells par niveau, K=3 et K=10 : tw / hdb / hdb_nf
+K=3  easy: 0.970 / 0.476 / 0.981  medium: 0.974 / 0.441 / 0.977  hard: 0.973 / 0.461 / 0.982  extreme: 0.973 / 0.458 / 0.982
+K=10 easy: 0.966 / 0.720 / 0.984  medium: 0.962 / 0.675 / 0.976  hard: 0.955 / 0.677 / 0.975  extreme: 0.950 / 0.667 / 0.939
+
+Nombre moyen d amas par famille a K=10 : tw_K10 / hdb_ms10 / hdb_ms10_nf (8 groupes vrais)
+anisotropic      7.8 / 7.9 / 6.0
+bridge           8.0 / 8.0 / 6.7
+filaments        8.7 / 8.5 / 5.6
+heteroscedastic  6.5 / 6.0 / 5.8
+hierarchical     24.0 / 23.8 / 20.0
+shells           8.6 / 17.3 / 7.9
+spherical        8.0 / 8.0 / 5.4
+unbalanced       5.0 / 3.5 / 3.8

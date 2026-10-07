@@ -1,0 +1,14 @@
+Audit L03 (2 octobre 2026) : ou le defaut de condensation de la tete v10 (head.cpp, afb081774) se declenche-t-il ?
+8 scenes (spherical, unbalanced, filaments, bridge ; hard ; bruit 0 et 0,1), n = 2000, 8 groupes, graines d'audit 9020261002501 a 508.
+Par scene : K = 2 et 5, entrees core et cover, mcs = 10 et 45, z = 1 et 3 (EOM, racine exclue) : 128 configurations.
+Colonnes : entree | K | configurations | port Python de la semantique v10 = etiquettes du binaire | configurations ou une cohorte de departs fait passer un cluster sous mcs | configurations a stabilites changees | configurations a etiquettes changees | points dont l'etiquette change
+core | 2 | 32 | 32 | 28 | 27 | 0 | 0
+core | 5 | 32 | 32 | 32 | 18 | 0 | 0
+cover | 2 | 32 | 32 | 0 | 0 | 0 | 0
+cover | 5 | 32 | 32 | 0 | 0 | 0 | 0
+
+Controle du port Python sur la fixture A/B/C a racine globale exclue (mcs = 2) :
+z = 1 : mode v10      : stabilites [0.175, 0.875, 0.15, 1.233333, 0.1], etiquettes [1, 1, 1, 2, 2, 0, 0]   = tete publiee (driver_condense_racine_exclue)
+z = 1 : mode cohortes : stabilites [0.175, 0.875, 0.15, 0.733333, 0.1], etiquettes [0, 0, 0, 0, 0, 1, 1]   = scikit-learn 1.9.1
+z = 2 : mode v10      : stabilite de A 1.241111 ; mode cohortes : 0.491111 ; memes etiquettes [1, 1, 1, 2, 2, 0, 0] (= scikit-learn)
+Controle sur internal_k3 (cover, K = 3, mcs = 6) : v10 88/65 et 1294/4225, cohortes 6/5 et 6/25 (fix_cover_interne.txt).

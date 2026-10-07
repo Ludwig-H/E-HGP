@@ -1,0 +1,31 @@
+# environnement de l'audit L07 (2 octobre 2026)
+Fri Oct  2 08:27:12 UTC 2026
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+cmake version 3.28.3
+Python 3.12.1
+scikit-learn 1.9.1 numpy 2.5.3 scipy 1.18.1
+worktree HEAD : 986f75799e8b8112080ce61bc06200721e69391c
+git diff afb081774 HEAD -- morsehgp3D_v10/{src,cli,tests,bench,cmake,reference} : 0 ligne(s)
+## binaires construits
+5df023bd685087a70c4015922f38177ea2480399136ace8f4e80f6536f72713d  build/mhgp10_cluster
+1dab9a4f9cd8ec3b3f51cd42d1f073f92ae3608d869792e8cb20a33ed5dfefac  build/mhgp10_mreach_cluster
+d53abf19f8f9b3eac7b4d11e4d10ffeeb95029107acee9464ea0ae9e66b8bf5a  build/libmhgp10_core.a
+c5f3febe8f2d11bd074b6a86bd0b27b519c26e37cdaea9c37b0d6b37168d40a1  probe/l07_probe
+ded7149d6b612ef7c87c97b46e40e0898e510a424331179ca1053c03b9435cd2  probe/l07_api
+65f17890446a16b57607c8182d1402eddbb55c61b371f4f1de83a197d290857f  probe/l07_show
+301eaf134fa3319e4681b641a50d74e45c7050b634bc2cc5ee43084248d1edfb  probe/mhgp10_cluster_overlay_auditeur
+## sources du sujet
+f583da400d00571a547989a46b1690f2bb093e9e068a01897078363a92674578  src/head/head.cpp
+f2710f309a201bc1094dcb49af7acc418ca33b1887f8373d8934f965d072c5e9  src/head/head.hpp
+44711c93473cc31b675b5da29c07645d7c8a7cf686b540681a3da7e7b7c673d4  src/points/dendrogram.cpp
+3162508b979572a6a4da0b3f0c445b09baa5e2fd77ba826a8d57b25711c42d16  src/points/dendrogram.hpp
+ddb1a9326e641f0917746c858cf3d6a275813974c5a1f3d0aff6554439eefec2  cli/mhgp10_cluster.cpp
+3d5f52d05818c5f48c54ba821f633b224def9a4a4816b5f55d36e121be8dd424  tests/head/mreach.cpp
+2e4832c9f65377339abf29825428641760485450118e76be506a2ee7cea972e4  tests/head/mreach_cluster.cpp
+54f72eb41e877b3a0ee601fa37f39eda596f4b8d5b1b3aa55f11bb73c3336bd4  tests/head/test_condensation_vs_sklearn.py
+## tete de l'auditeur (privee)
+f79850f89e40abb55a3a3accf3e12f8bc578eefc760f857d99c584f326ff3d4b  /workspaces/E-HGP/build/v10-audit-full-hierarchy-20261002/morsehgp3D_v10/receipts/audit_full_hierarchie_20261002/cohort_repair/overlay/src/head/head.cpp
+## entrees LiDAR (non copiees)
+0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf  /workspaces/E-HGP/build/v10-g4-data-s1/lidar00_full.u32le
+ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f  /workspaces/E-HGP/build/v10-g4-data-s1/lidar01_full.u32le
+a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af  /workspaces/E-HGP/build/v10-g4-data-s1/lidar02_full.u32le

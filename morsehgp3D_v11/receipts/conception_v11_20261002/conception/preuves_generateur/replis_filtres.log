@@ -1,0 +1,15 @@
+Fri Oct  2 08:34:56 UTC 2026
+ 08:34:56 up  3:54,  0 user,  load average: 15.98, 17.45, 18.72
+## K = 5, un bloc de 4096 sur 6
+triplets echantillonnes 4767744 | aigus 1860668 | centre dans la boite 323122 | indecis du filtre de boite q3 12 (0.00064 % des aigus) | boite q3 exacte en binaire64 74.38 % des aigus
+quadruplets echantillonnes 1564672 | degeneres 761 | centre dans la boite 826338 | interieurs 114048 | juges 79082 | indecis boite q4 10 (0.00064 %) | boite q4 exacte en binaire64 98.69 % | indecis interieur seuil 2^-42 : 5 (0.0003 %), dont dans la boite 0 ; seuil 2^-44 : 5 (0.0003 %)
+interieur, forme retenue (centre de Cramer, seuils 2^-48 M et 2^-47 M) : indecis 0 (0.00000 %), dont centre dans la boite 0
+decisions certaines contredites par l'exact : 0
+code 0
+## K = 10 (vidage au pas 8), un bloc de 4096 sur 6
+triplets echantillonnes 2781171 | aigus 1044111 | centre dans la boite 118903 | indecis du filtre de boite q3 2 (0.00019 % des aigus) | boite q3 exacte en binaire64 65.94 % des aigus
+quadruplets echantillonnes 1565260 | degeneres 200 | centre dans la boite 828797 | interieurs 104994 | juges 69892 | indecis boite q4 3 (0.00019 %) | boite q4 exacte en binaire64 97.23 % | indecis interieur seuil 2^-42 : 0 (0.0000 %), dont dans la boite 0 ; seuil 2^-44 : 0 (0.0000 %)
+interieur, forme retenue (centre de Cramer, seuils 2^-48 M et 2^-47 M) : indecis 0 (0.00000 %), dont centre dans la boite 0
+decisions certaines contredites par l'exact : 0
+code 0
+Fri Oct  2 08:34:58 UTC 2026

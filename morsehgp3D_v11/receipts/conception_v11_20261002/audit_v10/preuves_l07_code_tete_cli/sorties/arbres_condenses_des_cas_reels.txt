@@ -1,0 +1,45 @@
+## six points, K=2, core, mcs=3, z=2, racine permise
+tete publiee :
+  cluster 0 parent -1 masse 6 naissance 0 stabilite 0.20689655172413793 retenu 0
+  cluster 1 parent 0 masse 3 naissance 0.034482758620689655 stabilite 0.061551724137931037 retenu 1
+  cluster 2 parent 0 masse 3 naissance 0.034482758620689655 stabilite 0.2220419202163624 retenu 1
+  etiquettes 0 0 0 1 1 1
+  lambda de sortie 0.0625 0.0625 0.04 0.0588235 0.133333 0.133333
+tete a cohortes :
+  cluster 0 parent -1 masse 6 naissance 0 stabilite 0.20689655172413793 retenu 1
+  cluster 1 parent 0 masse 3 naissance 0.034482758620689655 stabilite 0.016551724137931038 retenu 0
+  cluster 2 parent 0 masse 3 naissance 0.034482758620689655 stabilite 0.073022312373225151 retenu 0
+  etiquettes 0 0 0 0 0 0
+  lambda de sortie 0.04 0.04 0.04 0.0588235 0.0588235 0.0588235
+
+## neuf points, K=2, core, mcs=3, z=2, racine exclue (configuration par defaut)
+tete publiee :
+  cluster 0 parent -1 masse 9 naissance 0 stabilite 0.23225806451612904 retenu 0
+  cluster 1 parent 0 masse 3 naissance 0.025806451612903226 stabilite 0.12235181220934525 retenu 1
+  cluster 2 parent 0 masse 6 naissance 0.025806451612903226 stabilite 0.11482421167089524 retenu 0
+  cluster 3 parent 2 masse 3 naissance 0.0449438202247191 stabilite 0.088397343042451282 retenu 1
+  cluster 4 parent 2 masse 3 naissance 0.0449438202247191 stabilite 0.046832376337727244 retenu 1
+  etiquettes 1 2 1 1 2 2 0 0 0
+  lambda de sortie 0.047619 0.0645161 0.0878049 0.0878049 0.0645161 0.0526316 0.0263158 0.0867277 0.0867277
+tete a cohortes :
+  cluster 0 parent -1 masse 9 naissance 0 stabilite 0.23225806451612904 retenu 0
+  cluster 1 parent 0 masse 3 naissance 0.025806451612903226 stabilite 0.0015280135823429498 retenu 1
+  cluster 2 parent 0 masse 6 naissance 0.025806451612903226 stabilite 0.11482421167089524 retenu 1
+  cluster 3 parent 2 masse 3 naissance 0.0449438202247191 stabilite 0.0080256821829855496 retenu 0
+  cluster 4 parent 2 masse 3 naissance 0.0449438202247191 stabilite 0.023063276167947955 retenu 0
+  etiquettes 1 1 1 1 1 1 0 0 0
+  lambda de sortie 0.047619 0.0526316 0.047619 0.047619 0.0526316 0.0526316 0.0263158 0.0263158 0.0263158
+
+## huit points sur grille 6, K=3, cover, mcs=4, z=2, racine permise
+tete publiee :
+  cluster 0 parent -1 masse 8 naissance 0 stabilite 1.5238095238095237 retenu 0
+  cluster 1 parent 0 masse 4 naissance 0.19047619047619047 stabilite 1.6825396825396823 retenu 1
+  cluster 2 parent 0 masse 4 naissance 0.19047619047619047 stabilite 0.38095238095238093 retenu 1
+  etiquettes 0 1 0 0 0 1 1 1
+  lambda de sortie 0.444444 0.285714 0.666667 0.666667 0.666667 0.285714 0.285714 0.285714
+tete a cohortes :
+  cluster 0 parent -1 masse 8 naissance 0 stabilite 1.5238095238095237 retenu 1
+  cluster 1 parent 0 masse 4 naissance 0.19047619047619047 stabilite 1.0158730158730158 retenu 0
+  cluster 2 parent 0 masse 4 naissance 0.19047619047619047 stabilite 0.38095238095238093 retenu 0
+  etiquettes 0 0 0 0 0 0 0 0
+  lambda de sortie 0.444444 0.285714 0.444444 0.444444 0.444444 0.285714 0.285714 0.285714

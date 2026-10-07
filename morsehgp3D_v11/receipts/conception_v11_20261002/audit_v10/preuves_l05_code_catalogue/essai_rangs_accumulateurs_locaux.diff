@@ -1,0 +1,27 @@
+--- a/morsehgp3D_v10/src/catalogue/generator.cpp	2026-10-02 05:18:10.374040832 +0000
++++ b/morsehgp3D_v10/src/catalogue/generator.cpp	2026-10-02 06:45:15.636007711 +0000
+@@ -825,12 +825,19 @@
+   auto chunk_lo = [&](u64 c) { return u64(nb) * c / chunks; };
+   std::vector<u64> bad(chunks, u64(nb)), inc(chunks + 1, 0), pops(chunks + 1, 0);
+   pool.parallel_for(chunks, 1, [&](u64 c0, u64 c1, unsigned) {
+-    for (u64 c = c0; c < c1; ++c)
+-      for (u64 b = chunk_lo(c); b < chunk_lo(c + 1); ++b) {
+-        if (b > 0 && bad[c] == u64(nb) && (cmp[b] > 0 || (cmp[b] == 0 && refs[b - 1].sup == refs[b].sup))) bad[c] = b;
+-        if (b > 0 && cmp[b] < 0) ++inc[c + 1];
+-        pops[c + 1] += rec(refs[b]).pop_len;
++    for (u64 c = c0; c < c1; ++c) {
++      // AUDIT L05 (essai) : bornes sorties de la boucle, accumulateurs locaux (pas d'ecriture partagee par boule)
++      const u64 lo_b = chunk_lo(c), hi_b = chunk_lo(c + 1);
++      u64 lbad = u64(nb), linc = 0, lpops = 0;
++      for (u64 b = lo_b; b < hi_b; ++b) {
++        if (b > 0 && lbad == u64(nb) && (cmp[b] > 0 || (cmp[b] == 0 && refs[b - 1].sup == refs[b].sup))) lbad = b;
++        if (b > 0 && cmp[b] < 0) ++linc;
++        lpops += rec(refs[b]).pop_len;
+       }
++      bad[c] = lbad;
++      inc[c + 1] = linc;
++      pops[c + 1] = lpops;
++    }
+   });
+   for (u64 c = 0; c < chunks; ++c) {
+     if (bad[c] < nb) return fail(cmp[bad[c]] > 0 ? Reason::rank_order : Reason::census_mismatch);  // boule emise 2 fois

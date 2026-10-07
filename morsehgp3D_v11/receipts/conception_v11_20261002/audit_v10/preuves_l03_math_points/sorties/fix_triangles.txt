@@ -1,0 +1,91 @@
+====================================================================================================
+P1 (pont 2000)
+-- FULL_2 : composantes de Gamma_2 (amas discrets, ensembles de sites) aux niveaux critiques
+  r =   999.9780  r^2 = 999956                 : AC | BC | DE | DF
+  r =  1000.0000  r^2 = 1000000                : AB | AC | BC | CD | DE | DF | EF
+  r =  1154.6836  r^2 = 249978000484/187489    : ABC | CD | DEF
+  r =  1931.8271  r^2 = 3731956                : ABCDEF
+-- entrees core d_2(x) : {'A': 1999.956, 'B': 1999.956, 'C': 1999.956, 'D': 1999.956, 'E': 1999.956, 'F': 1999.956}
+-- entrees cover alpha_2(x), composantes a egalite :
+    A : alpha = 999.9780 ; premieres couvertures : ['AC'] ; composantes distinctes a alpha : 1
+    B : alpha = 999.9780 ; premieres couvertures : ['BC'] ; composantes distinctes a alpha : 1
+    C : alpha = 999.9780 ; premieres couvertures : ['AC', 'BC'] ; composantes distinctes a alpha : 2
+    D : alpha = 999.9780 ; premieres couvertures : ['DE', 'DF'] ; composantes distinctes a alpha : 2
+    E : alpha = 999.9780 ; premieres couvertures : ['DE'] ; composantes distinctes a alpha : 1
+    F : alpha = 999.9780 ; premieres couvertures : ['DF'] ; composantes distinctes a alpha : 1
+-- hierarchie cover (egalites tranchees par la plus petite K-partie), blocs >= 2 :
+  r =   999.9780  (r^2 = 999956) : AC | DE
+  r =  1154.6836  (r^2 = 249978000484/187489) : ABC | DEF
+  r =  1931.8271  (r^2 = 3731956) : ABCDEF
+-- hierarchie cover (egalites tranchees par la plus grande K-partie), blocs >= 2 :
+  r =   999.9780  (r^2 = 999956) : BC | DF
+  r =  1154.6836  (r^2 = 249978000484/187489) : ABC | DEF
+  r =  1931.8271  (r^2 = 3731956) : ABCDEF
+-- hierarchie core, blocs >= 2 :
+  r =   999.9780  (r^2 = 999956) : (aucun bloc)
+  r =  1999.9560  (r^2 = 3999824) : ABCDEF
+-- HDBSCAN (atteignabilite mutuelle, min_samples = 2 point compte), convention de la these (niveau = distance / 2), blocs >= 2 :
+  r =   999.9780  (r^2 = 999956) : ABC | DEF
+  r =  1000.0000  (r^2 = 1000000) : ABCDEF
+====================================================================================================
+P2 (pont 1998)
+-- FULL_2 : composantes de Gamma_2 (amas discrets, ensembles de sites) aux niveaux critiques
+  r =   999.0000  r^2 = 998001                 : CD
+  r =   999.9780  r^2 = 999956                 : AC | BC | CD | DE | DF
+  r =  1000.0000  r^2 = 1000000                : AB | AC | BC | CD | DE | DF | EF
+  r =  1154.6836  r^2 = 249978000484/187489    : ABC | CD | DEF
+  r =  1930.8612  r^2 = 3728225                : ABCDEF
+-- entrees core d_2(x) : {'A': 1999.956, 'B': 1999.956, 'C': 1998.0, 'D': 1998.0, 'E': 1999.956, 'F': 1999.956}
+-- entrees cover alpha_2(x), composantes a egalite :
+    A : alpha = 999.9780 ; premieres couvertures : ['AC'] ; composantes distinctes a alpha : 1
+    B : alpha = 999.9780 ; premieres couvertures : ['BC'] ; composantes distinctes a alpha : 1
+    C : alpha = 999.0000 ; premieres couvertures : ['CD'] ; composantes distinctes a alpha : 1
+    D : alpha = 999.0000 ; premieres couvertures : ['CD'] ; composantes distinctes a alpha : 1
+    E : alpha = 999.9780 ; premieres couvertures : ['DE'] ; composantes distinctes a alpha : 1
+    F : alpha = 999.9780 ; premieres couvertures : ['DF'] ; composantes distinctes a alpha : 1
+-- hierarchie cover (egalites tranchees par la plus petite K-partie), blocs >= 2 :
+  r =   999.0000  (r^2 = 998001) : CD
+  r =  1154.6836  (r^2 = 249978000484/187489) : AB | CD | EF
+  r =  1930.8612  (r^2 = 3728225) : ABCDEF
+-- hierarchie cover (egalites tranchees par la plus grande K-partie), blocs >= 2 :
+  r =   999.0000  (r^2 = 998001) : CD
+  r =  1154.6836  (r^2 = 249978000484/187489) : AB | CD | EF
+  r =  1930.8612  (r^2 = 3728225) : ABCDEF
+-- hierarchie core, blocs >= 2 :
+  r =   999.0000  (r^2 = 998001) : (aucun bloc)
+  r =  1998.0000  (r^2 = 3992004) : CD
+  r =  1999.9560  (r^2 = 3999824) : ABCDEF
+-- HDBSCAN (atteignabilite mutuelle, min_samples = 2 point compte), convention de la these (niveau = distance / 2), blocs >= 2 :
+  r =   999.0000  (r^2 = 998001) : CD
+  r =   999.9780  (r^2 = 999956) : ABCDEF
+====================================================================================================
+T1_1700 (pont 1700)
+-- FULL_2 : composantes de Gamma_2 (amas discrets, ensembles de sites) aux niveaux critiques
+  r =   850.0000  r^2 = 722500                 : CD
+  r =   999.9780  r^2 = 999956                 : AC | BC | CD | DE | DF
+  r =  1000.0000  r^2 = 1000000                : AB | AC | BC | CD | DE | DF | EF
+  r =  1154.6836  r^2 = 249978000484/187489    : ABC | CD | DEF
+  r =  1787.3601  r^2 = 3194656                : ABCDEF
+-- entrees core d_2(x) : {'A': 1999.956, 'B': 1999.956, 'C': 1700.0, 'D': 1700.0, 'E': 1999.956, 'F': 1999.956}
+-- entrees cover alpha_2(x), composantes a egalite :
+    A : alpha = 999.9780 ; premieres couvertures : ['AC'] ; composantes distinctes a alpha : 1
+    B : alpha = 999.9780 ; premieres couvertures : ['BC'] ; composantes distinctes a alpha : 1
+    C : alpha = 850.0000 ; premieres couvertures : ['CD'] ; composantes distinctes a alpha : 1
+    D : alpha = 850.0000 ; premieres couvertures : ['CD'] ; composantes distinctes a alpha : 1
+    E : alpha = 999.9780 ; premieres couvertures : ['DE'] ; composantes distinctes a alpha : 1
+    F : alpha = 999.9780 ; premieres couvertures : ['DF'] ; composantes distinctes a alpha : 1
+-- hierarchie cover (egalites tranchees par la plus petite K-partie), blocs >= 2 :
+  r =   850.0000  (r^2 = 722500) : CD
+  r =  1154.6836  (r^2 = 249978000484/187489) : AB | CD | EF
+  r =  1787.3601  (r^2 = 3194656) : ABCDEF
+-- hierarchie cover (egalites tranchees par la plus grande K-partie), blocs >= 2 :
+  r =   850.0000  (r^2 = 722500) : CD
+  r =  1154.6836  (r^2 = 249978000484/187489) : AB | CD | EF
+  r =  1787.3601  (r^2 = 3194656) : ABCDEF
+-- hierarchie core, blocs >= 2 :
+  r =   850.0000  (r^2 = 722500) : (aucun bloc)
+  r =  1700.0000  (r^2 = 2890000) : CD
+  r =  1999.9560  (r^2 = 3999824) : ABCDEF
+-- HDBSCAN (atteignabilite mutuelle, min_samples = 2 point compte), convention de la these (niveau = distance / 2), blocs >= 2 :
+  r =   850.0000  (r^2 = 722500) : CD
+  r =   999.9780  (r^2 = 999956) : ABCDEF

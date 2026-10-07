@@ -1,0 +1,3 @@
+sites 39885 ; aretes de Delaunay 297950 ; aretes EMST 39884 ; fusions d'ordre 1 : 39796 (dont 87 a plus de 2 enfants)
+multiensemble des niveaux de fusion (x4) == multiensemble des d^2 de l'EMST : True
+niveaux distincts 22511 ; somme des multiplicites 39884

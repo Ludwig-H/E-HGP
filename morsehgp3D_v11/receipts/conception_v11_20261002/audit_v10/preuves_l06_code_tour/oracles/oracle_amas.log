@@ -1,0 +1,6 @@
+deux amas n=14 K=6 : conforme (coupes 1042, sauts par ordre {1: 0, 2: 1, 3: 2, 4: 0, 5: 0, 6: 0}, 183 s)
+deux amas n=14 K=6 : conforme (coupes 992, sauts par ordre {1: 0, 2: 0, 3: 1, 4: 1, 5: 0, 6: 0}, 363 s)
+deux amas n=14 K=6 : conforme (coupes 986, sauts par ordre {1: 0, 2: 1, 3: 1, 4: 0, 5: 0, 6: 0}, 550 s)
+deux amas n=14 K=6 : conforme (coupes 1026, sauts par ordre {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}, 737 s)
+oracle_amas fails 0 cuts 4046 sauts par ordre {1: 0, 2: 2, 3: 4, 4: 1, 5: 0, 6: 0}
+exit=0

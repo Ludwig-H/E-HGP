@@ -1,0 +1,92 @@
+--- a/morsehgp3D_v10/src/catalogue/generator.cpp	2026-10-02 05:18:10.374040832 +0000
++++ b/morsehgp3D_v10/src/catalogue/generator.cpp	2026-10-02 06:20:41.696017053 +0000
+@@ -11,6 +11,10 @@
+ #include <memory>
+ #include <mutex>
+ #include <numeric>
++#include <string>
++
++#include <cstdio>
++#include <cstdlib>
+ 
+ #include "catalogue/catalogue.hpp"
+ #include "sched/sort.hpp"
+@@ -20,6 +24,11 @@
+ namespace {
+ 
+ constexpr int kT = 6;
++// AUDIT L05 : vidage des candidats (un fil), sous-echantillonne par MHGP10_DUMP_STEP.
++FILE* g_fq = nullptr;
++FILE* g_ft = nullptr;
++FILE* g_fj = nullptr;
++unsigned long long g_nq = 0, g_nt = 0, g_nj = 0, g_step = 1;
+ // Stagnation : sous l'echelle de la grille (plus long cote de la boite ajustee <= 2^kT, un millimetre en u18), une
+ // liste de plus de M sites qui ne decroit plus signale une degenerescence cospherique. Si le centre commun c de m
+ // sites cospheriques est dans la boite fermee, aucun d'eux n'en domine un autre (distances egales en c) : la liste
+@@ -229,6 +238,17 @@
+   ++L.led.judged;
+   const P3 a = L.lp[anchor_local];
+   const u32 m = static_cast<u32>(cand.size());
++  if (g_fj && (g_nj++ % g_step) == 0) {
++    // en-tete : m, qgen, theta, ancre locale ; generateurs (rangs locaux retrouves par indice de site) ; puis les m sites
++    int hdr[8] = {int(m), int(qgen), int(theta), int(anchor_local), -1, -1, -1, -1};
++    for (u32 t = 0, g = 0; t < m && g < qgen; ++t)
++      if (cand[t] == gen[g]) hdr[4 + g++] = int(t);
++    std::fwrite(hdr, sizeof hdr, 1, g_fj);
++    for (u32 t = 0; t < m; ++t) {
++      const int c3[3] = {int(L.lp[t].x), int(L.lp[t].y), int(L.lp[t].z)};
++      std::fwrite(c3, sizeof c3, 1, g_fj);
++    }
++  }
+   u32 p = 0;
+   L.shell.clear();
+   L.interior.clear();
+@@ -410,6 +430,11 @@
+             u64 d = 0;
+             for (u32 t = 0; t < nw; ++t) d += wword(Di[t] | Dj[t] | Dk[t], t);
+             if (static_cast<i64>(d) > th3) continue;
++            if (g_ft && (g_nt++ % g_step) == 0) {
++              const int rec[15] = {int(lp[i].x), int(lp[i].y), int(lp[i].z), int(lp[j].x), int(lp[j].y), int(lp[j].z), int(lp[k].x), int(lp[k].y), int(lp[k].z),
++                                   int(Q.lo[0]), int(Q.lo[1]), int(Q.lo[2]), int(Q.hi[0]), int(Q.hi[1]), int(Q.hi[2])};
++              std::fwrite(rec, sizeof rec, 1, g_ft);
++            }
+             const int line = center_line_meets(lx[i], lx2[i], lx[j], lx2[j], lx[k], lx2[k], Q);
+             if (line < 0) continue;  // alignes
+             ++L.led.triple_tests;
+@@ -453,6 +478,11 @@
+                 if (static_cast<i64>(d) > th4) continue;
+                 ++L.led.quad_tests;
+                 const P3 &a = lp[i], &b = lp[j], &e = lp[k], &f = lp[l];
++                if (g_fq && (g_nq++ % g_step) == 0) {
++                  const int rec[18] = {int(a.x), int(a.y), int(a.z), int(b.x), int(b.y), int(b.z), int(e.x), int(e.y), int(e.z),
++                                       int(f.x), int(f.y), int(f.z), int(Q.lo[0]), int(Q.lo[1]), int(Q.lo[2]), int(Q.hi[0]), int(Q.hi[1]), int(Q.hi[2])};
++                  std::fwrite(rec, sizeof rec, 1, g_fq);
++                }
+                 if (!geom::center4(a, b, e, f, ctr)) continue;
+                 if (!center_in_box(a, ctr, Q)) continue;
+                 const P3* t4[4] = {&a, &b, &e, &f};
+@@ -649,6 +679,13 @@
+     C.X2[s] = geom::dot(C.X[s], C.X[s]);
+     C.w[s] = cloud.w[s];
+   }
++  if (const char* d = std::getenv("MHGP10_DUMP_DIR")) {
++    const std::string base(d);
++    g_fq = std::fopen((base + "/quads.bin").c_str(), "wb");
++    g_ft = std::fopen((base + "/triples.bin").c_str(), "wb");
++    g_fj = std::fopen((base + "/judges.bin").c_str(), "wb");
++    if (const char* s = std::getenv("MHGP10_DUMP_STEP")) g_step = std::strtoull(s, nullptr, 10);
++  }
+   Catalogue cat;
+   cat.kmax = params.kmax;
+   if (n < 2) {
+@@ -870,6 +907,10 @@
+   });
+   cat.t_copy = since(t1);
+   cat.t_assemble = since(t0);
++  if (g_fq) std::fclose(g_fq);
++  if (g_ft) std::fclose(g_ft);
++  if (g_fj) std::fclose(g_fj);
++  g_fq = g_ft = g_fj = nullptr;
+   return cat;
+ }
+ 

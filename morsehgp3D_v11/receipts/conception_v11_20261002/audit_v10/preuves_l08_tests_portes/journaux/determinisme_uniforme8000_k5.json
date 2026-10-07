@@ -1,0 +1,25 @@
+{
+ "K": 5,
+ "catalogue_identique_selon_fils": true,
+ "catalogue_octets": 105261981,
+ "catalogue_permute_identique": true,
+ "catalogue_permute_sha256": "8d1f11fa222369611422d12b88825a2db348dc4a021bd8f88976c6649729dc27",
+ "catalogue_sha256_par_fils": {
+  "1": "8d1f11fa222369611422d12b88825a2db348dc4a021bd8f88976c6649729dc27",
+  "2": "8d1f11fa222369611422d12b88825a2db348dc4a021bd8f88976c6649729dc27",
+  "4": "8d1f11fa222369611422d12b88825a2db348dc4a021bd8f88976c6649729dc27"
+ },
+ "entree": "uniforme_8000_g3.u32le",
+ "n": 8000,
+ "points": true,
+ "tour_identique_selon_fils": true,
+ "tour_octets": 43721180,
+ "tour_permutee_identique": true,
+ "tour_permutee_sha256": "e5f41bbe163e13aa0bff78b3c89c7c71e1979201fc459d5a562d6634e4c9d3fe",
+ "tour_sha256_par_fils": {
+  "1": "e5f41bbe163e13aa0bff78b3c89c7c71e1979201fc459d5a562d6634e4c9d3fe",
+  "2": "e5f41bbe163e13aa0bff78b3c89c7c71e1979201fc459d5a562d6634e4c9d3fe",
+  "4": "e5f41bbe163e13aa0bff78b3c89c7c71e1979201fc459d5a562d6634e4c9d3fe"
+ }
+}
+exit=0

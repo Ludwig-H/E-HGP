@@ -1,0 +1,13 @@
+25 {'nuages': 25, 'cas_core': 75, 'ecarts_core': 0, 'cas_cover': 69, 'ecarts_cover': 0, 'cover_avec_egalites': 6, 'cover_egalites_ecart': 4, 'refus': 0}
+50 {'nuages': 50, 'cas_core': 150, 'ecarts_core': 0, 'cas_cover': 128, 'ecarts_cover': 0, 'cover_avec_egalites': 22, 'cover_egalites_ecart': 13, 'refus': 0}
+75 {'nuages': 75, 'cas_core': 225, 'ecarts_core': 0, 'cas_cover': 200, 'ecarts_cover': 0, 'cover_avec_egalites': 25, 'cover_egalites_ecart': 13, 'refus': 0}
+100 {'nuages': 100, 'cas_core': 300, 'ecarts_core': 0, 'cas_cover': 273, 'ecarts_cover': 0, 'cover_avec_egalites': 27, 'cover_egalites_ecart': 13, 'refus': 0}
+125 {'nuages': 125, 'cas_core': 375, 'ecarts_core': 0, 'cas_cover': 337, 'ecarts_cover': 0, 'cover_avec_egalites': 38, 'cover_egalites_ecart': 16, 'refus': 0}
+150 {'nuages': 150, 'cas_core': 450, 'ecarts_core': 0, 'cas_cover': 399, 'ecarts_cover': 0, 'cover_avec_egalites': 51, 'cover_egalites_ecart': 22, 'refus': 0}
+175 {'nuages': 175, 'cas_core': 525, 'ecarts_core': 0, 'cas_cover': 464, 'ecarts_cover': 0, 'cover_avec_egalites': 61, 'cover_egalites_ecart': 25, 'refus': 0}
+200 {'nuages': 200, 'cas_core': 600, 'ecarts_core': 0, 'cas_cover': 531, 'ecarts_cover': 0, 'cover_avec_egalites': 69, 'cover_egalites_ecart': 29, 'refus': 0}
+225 {'nuages': 225, 'cas_core': 675, 'ecarts_core': 0, 'cas_cover': 595, 'ecarts_cover': 0, 'cover_avec_egalites': 80, 'cover_egalites_ecart': 31, 'refus': 0}
+250 {'nuages': 250, 'cas_core': 750, 'ecarts_core': 0, 'cas_cover': 652, 'ecarts_cover': 0, 'cover_avec_egalites': 98, 'cover_egalites_ecart': 35, 'refus': 0}
+275 {'nuages': 275, 'cas_core': 825, 'ecarts_core': 0, 'cas_cover': 722, 'ecarts_cover': 0, 'cover_avec_egalites': 103, 'cover_egalites_ecart': 37, 'refus': 0}
+300 {'nuages': 300, 'cas_core': 900, 'ecarts_core': 0, 'cas_cover': 786, 'ecarts_cover': 0, 'cover_avec_egalites': 114, 'cover_egalites_ecart': 40, 'refus': 0}
+FIN {'nuages': 300, 'cas_core': 900, 'ecarts_core': 0, 'cas_cover': 786, 'ecarts_cover': 0, 'cover_avec_egalites': 114, 'cover_egalites_ecart': 40, 'refus': 0}

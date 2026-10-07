@@ -1,0 +1,378 @@
+--- a/morsehgp3D_v10/src/catalogue/generator.cpp	2026-10-02 05:18:10.374040832 +0000
++++ b/morsehgp3D_v10/src/catalogue/generator.cpp	2026-10-02 07:46:17.695984498 +0000
+@@ -12,6 +12,9 @@
+ #include <mutex>
+ #include <numeric>
+ 
++#include <x86intrin.h>
++#include <cstdio>
++
+ #include "catalogue/catalogue.hpp"
+ #include "sched/sort.hpp"
+ 
+@@ -20,6 +23,15 @@
+ namespace {
+ 
+ constexpr int kT = 6;
++enum { P_FILTER_RESERVOIR, P_FILTER_Y, P_FILTER_KERNEL, P_NODE_FIT, P_NODE_TOTAL, P_LEAF_SETUP, P_LEAF_DOM, P_LEAF_PAIRS, P_LEAF_TRIPLES, P_LEAF_QUADS, P_JUDGE2, P_JUDGE3, P_JUDGE4, P_CENSUS, P_SUPPORT, P_EMIT, P_LEAF_TOTAL, P_SPILL_COPY, P_N };
++enum { C_PAIR_CAND, C_PAIR_BIS, C_PAIR_INBOX, C_TRIP_CAND, C_TRIP_W, C_TRIP_ACUTE, C_C3_INBOX, C_QUAD_CAND, C_C4_OK, C_C4_INBOX, C_C4_INSIDE, C_CENSUS_SITES, C_CENSUS_EXITS, C_FILTER_SITES, C_FILTER_NODES_Y, C_NODE_ALLOCS, C_LEAF_BYTES_H, C_REGULAR, C_POP_IDS, C_BFS_NODES, C_BFS_SITES, C_N };
++u64 g_hist_ext[40], g_hist_side[40], g_hist_m[512];  // AUDIT L05 : histogrammes par feuille (1 fil)
++struct Tick {
++  u64& acc;
++  u64 t0;
++  explicit Tick(u64& a) : acc(a), t0(__rdtsc()) {}
++  ~Tick() { acc += __rdtsc() - t0; }
++};
+ // Stagnation : sous l'echelle de la grille (plus long cote de la boite ajustee <= 2^kT, un millimetre en u18), une
+ // liste de plus de M sites qui ne decroit plus signale une degenerescence cospherique. Si le centre commun c de m
+ // sites cospheriques est dans la boite fermee, aucun d'eux n'en domine un autre (distances egales en c) : la liste
+@@ -90,6 +102,8 @@
+   a.weighted += b.weighted;
+   a.max_shell = std::max(a.max_shell, b.max_shell);
+   a.stalled_leaves += b.stalled_leaves;
++  for (int i = 0; i < P_N; ++i) a.prof[i] += b.prof[i];
++  for (int i = 0; i < C_N; ++i) a.cnt[i] += b.cnt[i];
+ }
+ 
+ // Centre rationnel (anchor + N/D) dans la boite demi-ouverte : lo D <= 2^T (a D + N) < hi D.
+@@ -227,6 +241,8 @@
+ void judge(const Ctx& C, Local& L, const std::vector<u32>& cand, u32 anchor_local, const geom::Center& ctr,
+            const std::array<u32, 4>& gen, u8 qgen, i64 theta) {
+   ++L.led.judged;
++  Tick tj(L.led.prof[qgen == 2 ? P_JUDGE2 : (qgen == 3 ? P_JUDGE3 : P_JUDGE4)]);
++  const u64 tc0 = __rdtsc();
+   const P3 a = L.lp[anchor_local];
+   const u32 m = static_cast<u32>(cand.size());
+   u32 p = 0;
+@@ -236,19 +252,28 @@
+     const int s = geom::side(ctr, a, L.lp[t]);
+     if (s < 0) {
+       p += L.wl[t];
+-      if (static_cast<i64>(p) > theta) return;  // toute admission de cette presentation exige p <= theta
++      if (static_cast<i64>(p) > theta) {
++        L.led.cnt[C_CENSUS_SITES] += t + 1;
++        ++L.led.cnt[C_CENSUS_EXITS];
++        L.led.prof[P_CENSUS] += __rdtsc() - tc0;
++        return;
++      }
+       L.interior.push_back(cand[t]);
+     } else if (s == 0) {
+       L.shell.push_back(cand[t]);
+     }
+   }
++  L.led.cnt[C_CENSUS_SITES] += m;
++  L.led.prof[P_CENSUS] += __rdtsc() - tc0;
+   std::array<u32, 4> sup;
+   u8 q = qgen;
+   u8 flags = 0;
+   if (L.shell.size() == qgen) {
+     sup = gen;
++    ++L.led.cnt[C_REGULAR];
+   } else {
+     flags |= kExtendedShell;
++    Tick ts(L.led.prof[P_SUPPORT]);
+     canonical_support(C, L.shell, a, ctr, gen, qgen, sup, q);
+     for (const auto& mm : L.memo)
+       if (mm == sup) return;
+@@ -261,6 +286,8 @@
+   }
+   const bool admit = (flags & kWeightedShell) ? p + 1 <= static_cast<u32>(C.K) : p + q <= static_cast<u32>(C.K) + 1;
+   if (!admit) return;
++  Tick te(L.led.prof[P_EMIT]);
++  L.led.cnt[C_POP_IDS] += L.interior.size() + L.shell.size();
+   Rec r;
+   r.sup = sup;
+   r.q = q;
+@@ -320,6 +347,8 @@
+ void enumerate_leaf_masks(const Ctx& C, Local& L, const std::vector<u32>& c, const Box& Q, u32 nw_rt) {
+   const u32 m = static_cast<u32>(c.size());
+   const u32 nw = NW > 0 ? static_cast<u32>(NW) : nw_rt;
++  Tick tl(L.led.prof[P_LEAF_TOTAL]);
++  u64 ts0 = __rdtsc();
+   L.memo.clear();
+   L.lp.resize(m);
+   L.lx.resize(m);
+@@ -355,6 +384,9 @@
+     for (; x; x &= x - 1) s += wl[t * 64 + static_cast<u32>(std::countr_zero(x))];
+     return s;
+   };
++  L.led.cnt[C_LEAF_BYTES_H] += (size_t(m) * (m - 1) / 2 + 2 * size_t(m)) * nw * 8;
++  L.led.prof[P_LEAF_SETUP] += __rdtsc() - ts0;
++  ts0 = __rdtsc();
+   // masques de dominance (et bissectrices)
+   for (u32 i = 0; i < m; ++i) {
+     const P3 Xi = lx[i];
+@@ -373,6 +405,9 @@
+     }
+   }
+   L.led.leaf_dominance_tests += u64(m) * (m - 1) / 2;
++  L.led.prof[P_LEAF_DOM] += __rdtsc() - ts0;
++  ts0 = __rdtsc();
++  L.led.cnt[C_PAIR_CAND] += u64(m) * (m - 1) / 2;
+   geom::Center ctr;
+   // paires : q2 et paires vivantes
+   for (u32 i = 0; i < m; ++i) {
+@@ -380,6 +415,7 @@
+     for (u32 j = i + 1; j < m; ++j) {
+       const u64* Dj = Dm + size_t(j) * nw;
+       if (has(Di, j) || has(Dj, i)) continue;  // bissectrice disjointe de Qbar
++      ++L.led.cnt[C_PAIR_BIS];
+       u64 d = 0;
+       for (u32 t = 0; t < nw; ++t) d += wword(Di[t] | Dj[t], t);
+       if (static_cast<i64>(d) > th2) continue;
+@@ -389,10 +425,13 @@
+       }
+       ++L.led.pair_tests;
+       if (!midpoint_in_box(lx[i], lx[j], Q)) continue;
++      ++L.led.cnt[C_PAIR_INBOX];
+       geom::center2(lp[i], lp[j], ctr);
+       judge(C, L, c, i, ctr, {c[i], c[j], kNone, kNone}, 2, th2);
+     }
+   }
++  L.led.prof[P_LEAF_PAIRS] += __rdtsc() - ts0;
++  ts0 = __rdtsc();
+   if (th3 < 0) return;  // aucune paire vivante
+   // triplets : q3 et triplets vivants
+   for (u32 i = 0; i < m; ++i) {
+@@ -407,9 +446,11 @@
+           for (u64 ks = Pi[tk] & Pj[tk] & bits_above(j, tk); ks; ks &= ks - 1) {
+             const u32 k = tk * 64 + static_cast<u32>(std::countr_zero(ks));
+             const u64* Dk = Dm + size_t(k) * nw;
++            ++L.led.cnt[C_TRIP_CAND];
+             u64 d = 0;
+             for (u32 t = 0; t < nw; ++t) d += wword(Di[t] | Dj[t] | Dk[t], t);
+             if (static_cast<i64>(d) > th3) continue;
++            ++L.led.cnt[C_TRIP_W];
+             const int line = center_line_meets(lx[i], lx2[i], lx[j], lx2[j], lx[k], lx2[k], Q);
+             if (line < 0) continue;  // alignes
+             ++L.led.triple_tests;
+@@ -422,12 +463,18 @@
+             }
+             const P3 &a = lp[i], &b = lp[j], &e = lp[k];
+             if (geom::acute(a, b, e)) {
++              ++L.led.cnt[C_TRIP_ACUTE];
+               geom::center3(a, b, e, ctr);
+-              if (center_in_box(a, ctr, Q)) judge(C, L, c, i, ctr, {c[i], c[j], c[k], kNone}, 3, th3);
++              if (center_in_box(a, ctr, Q)) {
++                ++L.led.cnt[C_C3_INBOX];
++                judge(C, L, c, i, ctr, {c[i], c[j], c[k], kNone}, 3, th3);
++              }
+             }
+           }
+       }
+   }
++  L.led.prof[P_LEAF_TRIPLES] += __rdtsc() - ts0;
++  ts0 = __rdtsc();
+   if (th4 < 0) return;  // aucun triplet vivant
+   // quadruplets : quatre triplets vivants (H[i, j] n'est non vide que si (i, j) est vivante)
+   for (u32 i = 0; i < m; ++i) {
+@@ -448,24 +495,42 @@
+               for (u64 ls = Hij[tl] & Hik[tl] & Hjk[tl] & bits_above(k, tl); ls; ls &= ls - 1) {
+                 const u32 l = tl * 64 + static_cast<u32>(std::countr_zero(ls));
+                 const u64* Dl = Dm + size_t(l) * nw;
++                ++L.led.cnt[C_QUAD_CAND];
+                 u64 d = 0;
+                 for (u32 t = 0; t < nw; ++t) d += wword(Di[t] | Dj[t] | Dk[t] | Dl[t], t);
+                 if (static_cast<i64>(d) > th4) continue;
+                 ++L.led.quad_tests;
+                 const P3 &a = lp[i], &b = lp[j], &e = lp[k], &f = lp[l];
+                 if (!geom::center4(a, b, e, f, ctr)) continue;
++                ++L.led.cnt[C_C4_OK];
+                 if (!center_in_box(a, ctr, Q)) continue;
++                ++L.led.cnt[C_C4_INBOX];
+                 const P3* t4[4] = {&a, &b, &e, &f};
+                 if (!geom::strictly_inside_tetra(t4, a, ctr)) continue;
++                ++L.led.cnt[C_C4_INSIDE];
+                 judge(C, L, c, i, ctr, {c[i], c[j], c[k], c[l]}, 4, th4);
+               }
+           }
+       }
+   }
++  L.led.prof[P_LEAF_QUADS] += __rdtsc() - ts0;
+ }
+ 
+ void enumerate_leaf(const Ctx& C, Local& L, const std::vector<u32>& c, const Box& Q) {
+   const u32 m = static_cast<u32>(c.size());
++  {
++    i64 lo[3] = {INT64_MAX, INT64_MAX, INT64_MAX}, hi[3] = {INT64_MIN, INT64_MIN, INT64_MIN};
++    for (u32 s : c) {
++      const P3& p = C.P[s];
++      lo[0] = std::min(lo[0], p.x); lo[1] = std::min(lo[1], p.y); lo[2] = std::min(lo[2], p.z);
++      hi[0] = std::max(hi[0], p.x); hi[1] = std::max(hi[1], p.y); hi[2] = std::max(hi[2], p.z);
++    }
++    const u64 ext = u64(std::max({hi[0] - lo[0], hi[1] - lo[1], hi[2] - lo[2]}));            // etendue de la liste (unites d'entree, mm)
++    const u64 side = u64(std::max({Q.hi[0] - Q.lo[0], Q.hi[1] - Q.lo[1], Q.hi[2] - Q.lo[2]}));  // plus long cote de la boite (2^-6 mm)
++    ++g_hist_ext[std::bit_width(ext)];
++    ++g_hist_side[std::bit_width(side)];
++    ++g_hist_m[std::min<u32>(m, 511)];
++  }
+   if (m <= 64) enumerate_leaf_masks<1>(C, L, c, Q, 1);
+   else if (m <= 128) enumerate_leaf_masks<2>(C, L, c, Q, 2);
+   else if (m <= 256) enumerate_leaf_masks<4>(C, L, c, Q, 4);
+@@ -499,6 +564,7 @@
+   const i64 hx = Q.hi[0] - Q.lo[0], hy = Q.hi[1] - Q.lo[1], hz = Q.hi[2] - Q.lo[2];
+   // reservoir par insertion, cle (dd, rang)
+   const u32 cap = std::min<u32>(np, 3u * static_cast<u32>(C.K));
++  u64 tf0 = __rdtsc();
+   i64 kd[kPool];
+   u32 kr[kPool], nb = 0;
+   for (u32 t = 0; t < np; ++t) {
+@@ -514,6 +580,8 @@
+     kd[j] = dd;
+     kr[j] = t;
+   }
++  L.led.prof[P_FILTER_RESERVOIR] += __rdtsc() - tf0;
++  tf0 = __rdtsc();
+   // Y en SoA (2h_i x'_i, A, poids), S0 = ses s0 premiers
+   i64 yx[kPool], yy[kPool], yz[kPool], ya[kPool], yw[kPool];
+   u32 ny = 0, s0 = 0;
+@@ -529,6 +597,10 @@
+     if (s0 == 0 && acc >= u64(C.K)) s0 = ny + 1;
+   }
+   if (s0 == 0) s0 = ny;
++  L.led.prof[P_FILTER_Y] += __rdtsc() - tf0;
++  tf0 = __rdtsc();
++  L.led.cnt[C_FILTER_SITES] += np;
++  L.led.cnt[C_FILTER_NODES_Y] += ny;
+   // sortie sans branchement, dans l'ordre de la liste parente
+   cand.resize(np);
+   u32 m = 0;
+@@ -556,6 +628,7 @@
+   }
+   cand.resize(m);
+   L.led.filter_tests += tests;
++  L.led.prof[P_FILTER_KERNEL] += __rdtsc() - tf0;
+ }
+ 
+ // Noeud : liste certifiee de Q, puis boite ajustee S = Q inter [env.lo, env.hi + 1), env enveloppe fermee de la liste
+@@ -567,8 +640,13 @@
+ void process(const Ctx& C, Local& L, const Box& Q, const std::vector<u32>& parent, int parent_stag,
+              std::vector<Task>* spill) {
+   ++L.led.nodes;
++  if (spill) ++L.led.cnt[C_BFS_NODES];
++  const u64 tn0 = __rdtsc();
+   std::vector<u32> cand;
+   filter_node(C, L, Q, parent, cand);
++  ++L.led.cnt[C_NODE_ALLOCS];
++  if (spill) L.led.cnt[C_BFS_SITES] += parent.size();
++  const u64 tn1 = __rdtsc();
+   // Lemme K : liste vide, ou boite ajustee vide sur un axe (l'enveloppe manque Q) : aucun centre possible dans Q.
+   if (cand.empty()) {
+     ++L.led.skipped_bbox;
+@@ -594,11 +672,15 @@
+     }
+     if (S.hi[a] - S.lo[a] > S.hi[ax] - S.lo[ax]) ax = a;
+   }
++  L.led.prof[P_NODE_FIT] += __rdtsc() - tn1;
+   const i64 side = S.hi[ax] - S.lo[ax];
+   const int stag = (side <= (i64(1) << kT) && cand.size() == parent.size()) ? parent_stag + 1 : 0;
+   if (cand.size() > C.M && side > 1 && stag < kStagnationLimit) {
+     const i64 mid = (S.lo[ax] + S.hi[ax]) / 2;
++    const u64 tsp = __rdtsc();
+     auto shared = spill ? std::make_shared<const std::vector<u32>>(cand) : nullptr;
++    L.led.prof[P_SPILL_COPY] += __rdtsc() - tsp;
++    L.led.prof[P_NODE_TOTAL] += __rdtsc() - tn0;
+     for (int o = 0; o < 2; ++o) {
+       Box ch = S;
+       (o ? ch.lo[ax] : ch.hi[ax]) = mid;
+@@ -607,6 +689,7 @@
+     }
+     return;
+   }
++  L.led.prof[P_NODE_TOTAL] += __rdtsc() - tn0;
+   ++L.led.leaves;
+   if (stag >= kStagnationLimit) ++L.led.stalled_leaves;
+   L.led.sum_m += cand.size();
+@@ -632,6 +715,7 @@
+ }
+ 
+ Result<Catalogue> build_catalogue(const Cloud& cloud, const CatalogueParams& params, sched::Pool& pool) {
++  const auto t_entry = std::chrono::steady_clock::now();
+   if (params.kmax < 1 || params.kmax > kMaxCatalogueOrder) return fail(Reason::kmax_out_of_range);
+   if (cloud.bits > kCoordinateBits) return fail(Reason::parameter_out_of_range);
+   const u32 n = cloud.sites();
+@@ -675,6 +759,7 @@
+   using Clock = std::chrono::steady_clock;
+   auto since = [](Clock::time_point t) { return std::chrono::duration<double>(Clock::now() - t).count(); };
+   auto t0 = Clock::now();
++  std::fprintf(stderr, "{\"t_setup\":%.5f}\n", std::chrono::duration<double>(t0 - t_entry).count());
+   auto all = std::make_shared<std::vector<u32>>(n);
+   for (u32 s = 0; s < n; ++s) (*all)[s] = s;
+   std::vector<Task> frontier{Task{root, all, 0}};
+@@ -696,12 +781,19 @@
+   };
+   std::vector<Task> kept;
+   std::vector<u64> kept_load;
++  u64 bfs_rounds = 0, bfs_tasks = 0;
++  double t_serial = 0, t_par = 0, t_load = 0;
+   while (!frontier.empty()) {
++    ++bfs_rounds;
++    bfs_tasks += frontier.size();
++    auto ts = Clock::now();
+     if (frontier.size() >= target) {
+       std::vector<u64> load(frontier.size());
++      auto tl = Clock::now();
+       pool.parallel_for(frontier.size(), 64, [&](u64 b, u64 e, unsigned) {
+         for (u64 i = b; i < e; ++i) load[i] = inside(frontier[i]);
+       });
++      t_load += since(tl);
+       std::vector<Task> heavy;
+       for (size_t i = 0; i < frontier.size(); ++i) {
+         if (load[i] > cap) {
+@@ -715,15 +807,19 @@
+       if (frontier.empty()) break;
+     }
+     std::vector<std::vector<Task>> spills(frontier.size());
++    auto tp = Clock::now();
+     pool.parallel_for(frontier.size(), 1, [&](u64 b, u64 e, unsigned wk) {
+       for (u64 i = b; i < e; ++i)
+         process(C, locals[wk], frontier[i].box, *frontier[i].parent, frontier[i].parent_stag, &spills[i]);
+     });
++    t_par += since(tp);
+     std::vector<Task> next;
+     for (auto& sp : spills)
+       for (auto& t : sp) next.push_back(std::move(t));
+     frontier.swap(next);
++    t_serial += since(ts);
+   }
++  std::fprintf(stderr, "{\"bfs_rounds\":%llu,\"bfs_tasks\":%llu,\"t_bfs_total\":%.5f,\"t_bfs_process\":%.5f,\"t_bfs_load\":%.5f}\n", (unsigned long long)bfs_rounds, (unsigned long long)bfs_tasks, t_serial, t_par, t_load);
+   for (Task& t : frontier) {  // frontiere epuisee avant la cible (petits nuages)
+     kept_load.push_back(inside(t));
+     kept.push_back(std::move(t));
+@@ -870,6 +966,15 @@
+   });
+   cat.t_copy = since(t1);
+   cat.t_assemble = since(t0);
++  {
++    std::fprintf(stderr, "{\"hist_ext_bits\":[");
++    for (int i = 0; i < 24; ++i) std::fprintf(stderr, "%s%llu", i ? "," : "", (unsigned long long)g_hist_ext[i]);
++    std::fprintf(stderr, "],\"hist_side_bits\":[");
++    for (int i = 0; i < 28; ++i) std::fprintf(stderr, "%s%llu", i ? "," : "", (unsigned long long)g_hist_side[i]);
++    std::fprintf(stderr, "],\"hist_m\":[");
++    for (int i = 0; i < 40; ++i) std::fprintf(stderr, "%s%llu", i ? "," : "", (unsigned long long)g_hist_m[i]);
++    std::fprintf(stderr, "]}\n");
++  }
+   return cat;
+ }
+ 
+--- a/morsehgp3D_v10/src/catalogue/catalogue.hpp	2026-10-02 05:18:10.374040832 +0000
++++ b/morsehgp3D_v10/src/catalogue/catalogue.hpp	2026-10-02 05:46:44.751029965 +0000
+@@ -61,6 +61,8 @@
+   u64 filter_tests = 0, leaf_dominance_tests = 0;
+   u64 pair_tests = 0, triple_tests = 0, line_hits = 0, quad_tests = 0;
+   u64 judged = 0, emitted = 0, extended = 0, weighted = 0, max_shell = 0, stalled_leaves = 0;
++  u64 prof[18] = {};
++  u64 cnt[21] = {};
+ };
+ 
+ struct Catalogue {
+--- a/morsehgp3D_v10/cli/mhgp10_catalogue.cpp	2026-10-02 05:18:09.706040836 +0000
++++ b/morsehgp3D_v10/cli/mhgp10_catalogue.cpp	2026-10-02 05:46:44.751029965 +0000
+@@ -94,6 +94,7 @@
+               (unsigned long long)L.pair_tests, (unsigned long long)L.triple_tests, (unsigned long long)L.line_hits,
+               (unsigned long long)L.quad_tests, (unsigned long long)L.judged, (unsigned long long)L.extended,
+               (unsigned long long)L.weighted, (unsigned long long)L.max_shell, (unsigned long long)L.stalled_leaves);
++  std::printf("{\"prof_cycles\":{\"filter_reservoir\":%llu,\"filter_y\":%llu,\"filter_kernel\":%llu,\"node_fit\":%llu,\"node_total\":%llu,\"leaf_setup\":%llu,\"leaf_dom\":%llu,\"leaf_pairs\":%llu,\"leaf_triples\":%llu,\"leaf_quads\":%llu,\"judge2\":%llu,\"judge3\":%llu,\"judge4\":%llu,\"census\":%llu,\"support\":%llu,\"emit\":%llu,\"leaf_total\":%llu,\"spill_copy\":%llu},\"counters\":{\"pair_cand\":%llu,\"pair_bis\":%llu,\"pair_inbox\":%llu,\"trip_cand\":%llu,\"trip_w\":%llu,\"trip_acute\":%llu,\"c3_inbox\":%llu,\"quad_cand\":%llu,\"c4_ok\":%llu,\"c4_inbox\":%llu,\"c4_inside\":%llu,\"census_sites\":%llu,\"census_exits\":%llu,\"filter_sites\":%llu,\"filter_nodes_y\":%llu,\"node_allocs\":%llu,\"leaf_bytes_h\":%llu,\"regular\":%llu,\"pop_ids\":%llu,\"bfs_nodes\":%llu,\"bfs_sites\":%llu}}\n", (unsigned long long)L.prof[0], (unsigned long long)L.prof[1], (unsigned long long)L.prof[2], (unsigned long long)L.prof[3], (unsigned long long)L.prof[4], (unsigned long long)L.prof[5], (unsigned long long)L.prof[6], (unsigned long long)L.prof[7], (unsigned long long)L.prof[8], (unsigned long long)L.prof[9], (unsigned long long)L.prof[10], (unsigned long long)L.prof[11], (unsigned long long)L.prof[12], (unsigned long long)L.prof[13], (unsigned long long)L.prof[14], (unsigned long long)L.prof[15], (unsigned long long)L.prof[16], (unsigned long long)L.prof[17], (unsigned long long)L.cnt[0], (unsigned long long)L.cnt[1], (unsigned long long)L.cnt[2], (unsigned long long)L.cnt[3], (unsigned long long)L.cnt[4], (unsigned long long)L.cnt[5], (unsigned long long)L.cnt[6], (unsigned long long)L.cnt[7], (unsigned long long)L.cnt[8], (unsigned long long)L.cnt[9], (unsigned long long)L.cnt[10], (unsigned long long)L.cnt[11], (unsigned long long)L.cnt[12], (unsigned long long)L.cnt[13], (unsigned long long)L.cnt[14], (unsigned long long)L.cnt[15], (unsigned long long)L.cnt[16], (unsigned long long)L.cnt[17], (unsigned long long)L.cnt[18], (unsigned long long)L.cnt[19], (unsigned long long)L.cnt[20]);
+   if (!dump.empty()) {
+     FILE* o = std::fopen(dump.c_str(), "w");
+     if (!o) return 2;

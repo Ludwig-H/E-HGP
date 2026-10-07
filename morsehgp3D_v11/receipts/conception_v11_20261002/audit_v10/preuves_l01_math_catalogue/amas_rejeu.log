@@ -1,0 +1,16 @@
+c m a D = 2 20 16 262144       K= 5 code=0 sites=    40 boules=      807 (20.2/site) noeuds=      153 (3.8/site) feuilles=      75 sum_m=     1026 max_m= 16 bloquees=0 filter_tests=4.75e+04
+c m a D = 2 20 16 262144       K=10 code=0 sites=    40 boules=     1828 (45.7/site) noeuds=      211 (5.3/site) feuilles=     106 sum_m=     2315 max_m= 24 bloquees=0 filter_tests=1.52e+05
+c m a D = 2 50 16 262144       K= 5 code=0 sites=   100 boules=     3039 (30.4/site) noeuds=      705 (7.0/site) feuilles=     339 sum_m=     4805 max_m= 16 bloquees=0 filter_tests=2.59e+05
+c m a D = 2 50 16 262144       K=10 code=0 sites=   100 boules=    10022 (100.2/site) noeuds=     1347 (13.5/site) feuilles=     656 sum_m=    14044 max_m= 24 bloquees=0 filter_tests=1.08e+06
+c m a D = 2 200 32 262144      K= 5 code=0 sites=   400 boules=    19147 (47.9/site) noeuds=     5089 (12.7/site) feuilles=    2475 sum_m=    34779 max_m= 16 bloquees=0 filter_tests=2.11e+06
+c m a D = 2 200 32 262144      K=10 code=0 sites=   400 boules=    83510 (208.8/site) noeuds=     8475 (21.2/site) feuilles=    4056 sum_m=    87657 max_m= 24 bloquees=0 filter_tests=7.83e+06
+c m a D = 2 1000 64 262144     K= 5 code=0 sites=  2000 boules=   125949 (63.0/site) noeuds=    32247 (16.1/site) feuilles=   15980 sum_m=   226230 max_m= 16 bloquees=0 filter_tests=1.42e+07
+c m a D = 2 1000 64 262144     K=10 code=0 sites=  2000 boules=   612281 (306.1/site) noeuds=    44699 (22.3/site) feuilles=   22153 sum_m=   482517 max_m= 24 bloquees=0 filter_tests=4.63e+07
+c m a D = 2 4000 128 262144    K= 5 code=0 sites=  8000 boules=   574445 (71.8/site) noeuds=   149659 (18.7/site) feuilles=   74573 sum_m=  1053718 max_m= 16 bloquees=0 filter_tests=7.07e+07
+c m a D = 2 4000 128 262144    K=10 code=0 sites=  8000 boules=  2949390 (368.7/site) noeuds=   205199 (25.6/site) feuilles=  101982 sum_m=  2227670 max_m= 24 bloquees=0 filter_tests=2.26e+08
+c m a D = 8 1000 64 262144     K= 5 code=0 sites=  8000 boules=   510718 (63.8/site) noeuds=   129301 (16.2/site) feuilles=   63836 sum_m=   903276 max_m= 16 bloquees=0 filter_tests=5.38e+07
+c m a D = 8 1000 64 262144     K=10 code=0 sites=  8000 boules=  2489559 (311.2/site) noeuds=   170305 (21.3/site) feuilles=   83964 sum_m=  1829188 max_m= 24 bloquees=0 filter_tests=1.74e+08
+c m a D = 2 1000 64 4096       K= 5 code=0 sites=  2000 boules=   125949 (63.0/site) noeuds=    32271 (16.1/site) feuilles=   15994 sum_m=   226427 max_m= 16 bloquees=0 filter_tests=1.42e+07
+c m a D = 2 1000 64 4096       K=10 code=0 sites=  2000 boules=   612281 (306.1/site) noeuds=    44661 (22.3/site) feuilles=   22133 sum_m=   481898 max_m= 24 bloquees=0 filter_tests=4.63e+07
+c m a D = 2 1000 64 512        K= 5 code=0 sites=  2000 boules=   125949 (63.0/site) noeuds=    32579 (16.3/site) feuilles=   16087 sum_m=   227662 max_m= 16 bloquees=0 filter_tests=1.48e+07
+c m a D = 2 1000 64 512        K=10 code=0 sites=  2000 boules=   612284 (306.1/site) noeuds=    46165 (23.1/site) feuilles=   22718 sum_m=   494744 max_m= 24 bloquees=0 filter_tests=4.86e+07

@@ -1,0 +1,4 @@
+scenes regenerees ici : 200 ; empreinte flottante egale a celle de G4 : 83 ; differente : 117
+   exemple ('spherical', 'extreme', '1000', '12', '553874778435649744', '2023b6c3e5913b77594d871e344ab99a39b6e994d6171c6f4b8ddbb314a868c1', 'd6986eb9daa06e86f0d3e5dae648ee0875a5e30d9aaf513746d1230995ada1d1')
+   exemple ('spherical', 'extreme', '2000', '12', '902612925581532134', '91aeae97e061860b8ed55beed6590de44f3f9219521647cccaffb7bfb91652d7', 'af5cbde489328c5e2950107c0e39300ed7e395bf10cb9f953b762e2a7ed21175')
+   exemple ('spherical', 'extreme', '500', '12', '865920973513707256', '303867a5cf15ed087d96162204429f13373f4ca992a5fd4429b4ca9f4aea9dce', 'f1fedd0bb9c239e716e92ab9cc7598ff32bba0faf7e771bfd6996ac1560e2098')

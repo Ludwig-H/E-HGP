@@ -1,0 +1,203 @@
+Internal ctest changing into directory: /tmp/v11-audit/l13_raccord_r2/build-final
+Test project /tmp/v11-audit/l13_raccord_r2/build-final
+      Start  1: mhgp10_regression_site_tree_far_center
+      Start  2: mhgp10_regression_site_tree_fast_math
+      Start  3: mhgp10_regression_site_tree_old_api
+ 1/83 Test  #1: mhgp10_regression_site_tree_far_center ....................   Passed    1.33 sec
+      Start  4: mhgp10_regression_tower_rounding
+ 2/83 Test  #3: mhgp10_regression_site_tree_old_api .......................   Passed    9.87 sec
+      Start  5: mhgp10_regression_dendrogram_rounding
+ 3/83 Test  #5: mhgp10_regression_dendrogram_rounding .....................   Passed    0.40 sec
+      Start  6: mhgp10_regression_tower_fast_math
+ 4/83 Test  #4: mhgp10_regression_tower_rounding ..........................   Passed   15.54 sec
+      Start  7: mhgp10_regression_fp_strict_fast_math
+ 5/83 Test  #2: mhgp10_regression_site_tree_fast_math .....................   Passed   36.07 sec
+      Start  8: mhgp10_regression_fp_flags_configure
+ 6/83 Test  #7: mhgp10_regression_fp_strict_fast_math .....................   Passed   43.18 sec
+      Start  9: mhgp10_regression_fp_flags_configure_clang
+ 7/83 Test  #6: mhgp10_regression_tower_fast_math .........................   Passed  125.16 sec
+      Start 11: mhgp10_unit
+ 8/83 Test #11: mhgp10_unit ...............................................   Passed    6.03 sec
+      Start 12: mhgp10_pool_caller_exception
+ 9/83 Test #12: mhgp10_pool_caller_exception ..............................   Passed    0.36 sec
+      Start 13: mhgp10_pool_worker_exception
+10/83 Test #13: mhgp10_pool_worker_exception ..............................   Passed    0.13 sec
+      Start 14: mhgp10_pool_flag_restored
+11/83 Test #14: mhgp10_pool_flag_restored .................................   Passed    0.17 sec
+      Start 15: mhgp10_pool_cancel_and_reuse
+12/83 Test #15: mhgp10_pool_cancel_and_reuse ..............................   Passed    0.15 sec
+      Start 16: mhgp10_pool_claim_wrap
+13/83 Test #16: mhgp10_pool_claim_wrap ....................................   Passed    0.41 sec
+      Start 17: mhgp10_pool_short_jobs
+14/83 Test #17: mhgp10_pool_short_jobs ....................................   Passed    0.33 sec
+      Start 18: mhgp10_pool_participation
+15/83 Test #18: mhgp10_pool_participation .................................   Passed    1.14 sec
+      Start 19: mhgp10_fault_pool_construction
+16/83 Test #19: mhgp10_fault_pool_construction ............................   Passed    0.10 sec
+      Start 20: mhgp10_fault_entry_points
+17/83 Test #20: mhgp10_fault_entry_points .................................   Passed    1.73 sec
+      Start 21: mhgp10_fault_aligned_forms
+18/83 Test #21: mhgp10_fault_aligned_forms ................................   Passed    0.46 sec
+      Start 22: mhgp10_fault_thread_creation
+19/83 Test #22: mhgp10_fault_thread_creation ..............................   Passed    0.07 sec
+      Start 23: mhgp10_fault_output_set
+20/83 Test #23: mhgp10_fault_output_set ...................................   Passed    0.10 sec
+      Start 24: mhgp10_fault_read_configs
+21/83 Test #24: mhgp10_fault_read_configs .................................   Passed    0.04 sec
+      Start 25: mhgp10_fault_cli_helpers
+22/83 Test #25: mhgp10_fault_cli_helpers ..................................   Passed    0.05 sec
+      Start 26: mhgp10_fault_output_commit
+23/83 Test #26: mhgp10_fault_output_commit ................................   Passed    0.04 sec
+      Start 27: mhgp10_rank_search
+24/83 Test #27: mhgp10_rank_search ........................................   Passed    0.02 sec
+      Start 28: mhgp10_grid32_primitives
+25/83 Test #28: mhgp10_grid32_primitives ..................................   Passed    0.29 sec
+      Start 29: mhgp10_head_gate
+26/83 Test #29: mhgp10_head_gate ..........................................   Passed    0.98 sec
+      Start 30: mhgp10_head_complexity
+27/83 Test  #8: mhgp10_regression_fp_flags_configure ......................   Passed  112.00 sec
+      Start 31: mhgp10_cover_band_structural
+28/83 Test #31: mhgp10_cover_band_structural ..............................   Passed    0.34 sec
+      Start 32: mhgp10_dev_quotas
+29/83 Test #32: mhgp10_dev_quotas .........................................   Passed    0.61 sec
+      Start 33: mhgp10_catalogue_oracle
+30/83 Test #30: mhgp10_head_complexity ....................................   Passed    7.12 sec
+      Start 34: mhgp10_tower_oracle
+31/83 Test #34: mhgp10_tower_oracle .......................................   Passed   46.09 sec
+      Start 35: mhgp10_tower_oracle_mutant_vertical_audit
+32/83 Test #35: mhgp10_tower_oracle_mutant_vertical_audit .................   Passed    0.55 sec
+      Start 36: mhgp10_tower_oracle_mutant_vertical_descendant
+33/83 Test #36: mhgp10_tower_oracle_mutant_vertical_descendant ............   Passed    0.21 sec
+      Start 37: mhgp10_tower_oracle_mutant_vertical_later
+34/83 Test #37: mhgp10_tower_oracle_mutant_vertical_later .................   Passed    0.56 sec
+      Start 38: mhgp10_tower_oracle_mutant_vertical_fusion
+35/83 Test #38: mhgp10_tower_oracle_mutant_vertical_fusion ................   Passed    0.57 sec
+      Start 39: mhgp10_tower_oracle_mutant_vertical_missing
+36/83 Test #39: mhgp10_tower_oracle_mutant_vertical_missing ...............   Passed    0.49 sec
+      Start 40: mhgp10_tower_oracle_mutant_witness_level
+37/83 Test #40: mhgp10_tower_oracle_mutant_witness_level ..................   Passed    0.88 sec
+      Start 41: mhgp10_tower_oracle_mutant_witness_swap
+38/83 Test #41: mhgp10_tower_oracle_mutant_witness_swap ...................   Passed    0.28 sec
+      Start 42: mhgp10_tower_oracle_mutant_binarized_same_level
+39/83 Test #42: mhgp10_tower_oracle_mutant_binarized_same_level ...........   Passed    0.36 sec
+      Start 43: mhgp10_tower_oracle_mutant_attach_dead
+40/83 Test #43: mhgp10_tower_oracle_mutant_attach_dead ....................   Passed    0.71 sec
+      Start 44: mhgp10_tower_oracle_mutant_attach_absorbed_at_entry
+41/83 Test #44: mhgp10_tower_oracle_mutant_attach_absorbed_at_entry .......   Passed    0.38 sec
+      Start 45: mhgp10_tower_oracle_mutant_attach_block_missing
+42/83 Test #45: mhgp10_tower_oracle_mutant_attach_block_missing ...........   Passed    0.55 sec
+      Start 46: mhgp10_tower_oracle_mutant_phantom_fusion
+43/83 Test #46: mhgp10_tower_oracle_mutant_phantom_fusion .................   Passed    0.42 sec
+      Start 47: mhgp10_tower_oracle_mutant_phantom_birth
+44/83 Test #47: mhgp10_tower_oracle_mutant_phantom_birth ..................   Passed    0.52 sec
+      Start 48: mhgp10_tower_oracle_mutant_header_sizes
+45/83 Test #48: mhgp10_tower_oracle_mutant_header_sizes ...................   Passed    0.35 sec
+      Start 49: mhgp10_tower_oracle_mutant_order_missing
+46/83 Test #49: mhgp10_tower_oracle_mutant_order_missing ..................   Passed    0.24 sec
+      Start 50: mhgp10_catalogue_oracle_mutant_support_not_canonical
+47/83 Test #50: mhgp10_catalogue_oracle_mutant_support_not_canonical ......   Passed    0.45 sec
+      Start 51: mhgp10_catalogue_oracle_mutant_level_value
+48/83 Test #51: mhgp10_catalogue_oracle_mutant_level_value ................   Passed    0.30 sec
+      Start 52: mhgp10_catalogue_oracle_mutant_rank_offset
+49/83 Test #52: mhgp10_catalogue_oracle_mutant_rank_offset ................   Passed    0.33 sec
+      Start 53: mhgp10_catalogue_oracle_mutant_rank_gap
+50/83 Test #53: mhgp10_catalogue_oracle_mutant_rank_gap ...................   Passed    0.21 sec
+      Start 54: mhgp10_catalogue_oracle_mutant_flag_extended
+51/83 Test #54: mhgp10_catalogue_oracle_mutant_flag_extended ..............   Passed    0.49 sec
+      Start 55: mhgp10_catalogue_oracle_mutant_flag_weighted
+52/83 Test #55: mhgp10_catalogue_oracle_mutant_flag_weighted ..............   Passed    0.39 sec
+      Start 56: mhgp10_catalogue_oracle_mutant_weight_shell
+53/83 Test #56: mhgp10_catalogue_oracle_mutant_weight_shell ...............   Passed    0.53 sec
+      Start 57: mhgp10_catalogue_oracle_mutant_weighted_admission
+54/83 Test #57: mhgp10_catalogue_oracle_mutant_weighted_admission .........   Passed    0.22 sec
+      Start 58: mhgp10_catalogue_oracle_mutant_duplicate_interior
+55/83 Test #58: mhgp10_catalogue_oracle_mutant_duplicate_interior .........   Passed    0.15 sec
+      Start 59: mhgp10_catalogue_oracle_mutant_duplicate_shell_extended
+56/83 Test #59: mhgp10_catalogue_oracle_mutant_duplicate_shell_extended ...   Passed    0.23 sec
+      Start 60: mhgp10_catalogue_oracle_mutant_reversed_shell
+57/83 Test  #9: mhgp10_regression_fp_flags_configure_clang ................   Passed  151.63 sec
+      Start 61: mhgp10_catalogue_oracle_mutant_swap_same_level
+58/83 Test #60: mhgp10_catalogue_oracle_mutant_reversed_shell .............   Passed    0.20 sec
+      Start 62: mhgp10_catalogue_oracle_mutant_reverse_export
+59/83 Test #61: mhgp10_catalogue_oracle_mutant_swap_same_level ............   Passed    0.42 sec
+      Start 63: mhgp10_head_condensation_vs_sklearn
+60/83 Test #62: mhgp10_catalogue_oracle_mutant_reverse_export .............   Passed    0.34 sec
+      Start 64: mhgp10_head_frontier
+61/83 Test #64: mhgp10_head_frontier ......................................   Passed    1.18 sec
+      Start 65: mhgp10_head_allow_single_root
+62/83 Test #65: mhgp10_head_allow_single_root .............................   Passed    0.29 sec
+      Start 66: mhgp10_regression_level_collision
+63/83 Test #66: mhgp10_regression_level_collision .........................   Passed   28.72 sec
+      Start 67: mhgp10_points_cover
+64/83 Test #63: mhgp10_head_condensation_vs_sklearn .......................   Passed   33.79 sec
+      Start 68: mhgp10_regression_projection_facts
+65/83 Test #68: mhgp10_regression_projection_facts ........................   Passed    0.84 sec
+      Start 69: mhgp10_regression_projection_registry
+66/83 Test #69: mhgp10_regression_projection_registry .....................   Passed    2.66 sec
+      Start 70: mhgp10_regression_batch_equivalence
+67/83 Test #67: mhgp10_points_cover .......................................   Passed   65.78 sec
+      Start 71: mhgp10_regression_mreach_border
+68/83 Test #71: mhgp10_regression_mreach_border ...........................   Passed    8.46 sec
+      Start 72: mhgp10_regression_multiplicity_refusal
+69/83 Test #72: mhgp10_regression_multiplicity_refusal ....................   Passed    0.22 sec
+      Start 73: mhgp10_regression_scale_run_timeout
+70/83 Test #33: mhgp10_catalogue_oracle ...................................   Passed  173.59 sec
+      Start 74: mhgp10_regression_decide_completeness
+71/83 Test #73: mhgp10_regression_scale_run_timeout .......................   Passed   27.32 sec
+      Start 75: mhgp10_regression_worker_bad_alloc
+72/83 Test #75: mhgp10_regression_worker_bad_alloc ........................   Passed   18.26 sec
+      Start 76: mhgp10_regression_thread_creation_refusal
+73/83 Test #76: mhgp10_regression_thread_creation_refusal .................   Passed   15.17 sec
+      Start 77: mhgp10_regression_cli_allocation_frontier
+74/83 Test #70: mhgp10_regression_batch_equivalence .......................   Passed  140.08 sec
+      Start 78: mhgp10_regression_cli_output_transaction
+75/83 Test #78: mhgp10_regression_cli_output_transaction ..................   Passed    0.82 sec
+      Start 79: mhgp10_regression_clang_sanitizer_harness
+76/83 Test #74: mhgp10_regression_decide_completeness .....................   Passed  104.83 sec
+      Start 80: mhgp10_regression_fp_contract
+77/83 Test #77: mhgp10_regression_cli_allocation_frontier .................   Passed   69.52 sec
+      Start 81: mhgp10_regression_fp_contract_clang
+78/83 Test #80: mhgp10_regression_fp_contract .............................   Passed   80.85 sec
+      Start 82: mhgp10_regression_cli_input_frontiers
+79/83 Test #82: mhgp10_regression_cli_input_frontiers .....................   Passed    8.04 sec
+      Start 83: mhgp10_regression_cli_input_frontiers_mreach
+80/83 Test #83: mhgp10_regression_cli_input_frontiers_mreach ..............   Passed    1.40 sec
+      Start 84: mhgp10_fast_targets
+81/83 Test #81: mhgp10_regression_fp_contract_clang .......................   Passed  101.77 sec
+82/83 Test #79: mhgp10_regression_clang_sanitizer_harness .................   Passed  255.13 sec
+83/83 Test #84: mhgp10_fast_targets .......................................   Passed  135.92 sec
+
+100% tests passed, 0 tests failed out of 83
+
+Label Time Summary:
+fast          = 298.16 sec*proc (44 tests)
+gate          = 1847.88 sec*proc (83 tests)
+head          =  43.36 sec*proc (5 tests)
+oracle        = 231.00 sec*proc (30 tests)
+points        =  66.73 sec*proc (3 tests)
+regression    = 1502.24 sec*proc (46 tests)
+
+Total Test time (real) = 653.67 sec
+	Command being timed: "nice -n 10 ctest --test-dir build-final -L gate -LE mutation --output-on-failure -j3 --timeout 1800"
+	User time (seconds): 693.27
+	System time (seconds): 127.43
+	Percent of CPU this job got: 125%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 10:53.69
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 433400
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 373
+	Minor (reclaiming a frame) page faults: 18741276
+	Voluntary context switches: 256256
+	Involuntary context switches: 648064
+	Swaps: 0
+	File system inputs: 80696
+	File system outputs: 1357192
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

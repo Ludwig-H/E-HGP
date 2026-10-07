@@ -1,0 +1,26 @@
+Internal ctest changing into directory: /tmp/v11-audit/l06_code_tour/build-release
+Test project /tmp/v11-audit/l06_code_tour/build-release
+    Start  1: mhgp10_unit
+    Start  2: mhgp10_rank_search
+1/6 Test  #2: mhgp10_rank_search .......................   Passed    0.01 sec
+    Start  7: mhgp10_tower_oracle
+2/6 Test  #1: mhgp10_unit ..............................   Passed    1.08 sec
+    Start  9: mhgp10_regression_level_collision
+3/6 Test  #9: mhgp10_regression_level_collision ........   Passed   11.95 sec
+    Start 10: mhgp10_points_cover
+4/6 Test #10: mhgp10_points_cover ......................   Passed   15.55 sec
+    Start 13: mhgp10_regression_multiplicity_refusal
+5/6 Test #13: mhgp10_regression_multiplicity_refusal ...   Passed    0.12 sec
+6/6 Test  #7: mhgp10_tower_oracle ......................   Passed  271.63 sec
+
+100% tests passed, 0 tests failed out of 6
+
+Label Time Summary:
+fast          =   1.19 sec*proc (2 tests)
+gate          = 300.34 sec*proc (6 tests)
+oracle        = 271.63 sec*proc (1 test)
+points        =  15.55 sec*proc (1 test)
+regression    =  12.08 sec*proc (3 tests)
+
+Total Test time (real) = 271.65 sec
+ctest exit=0

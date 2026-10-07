@@ -1,0 +1,14 @@
+ECART K=3 n=12 : code 3 {"status":"invariant_violated","reason":"root_count","order":2}
+  [(2, 3, 1), (3, 0, 2), (3, 2, 2), (1, 2, 0), (1, 2, 3), (3, 0, 0), (0, 1, 0), (3, 2, 3), (2, 1, 3), (1, 2, 2), (0, 3, 1), (0, 3, 0)]
+ECART K=5 n=12 : code 3 {"status":"invariant_violated","reason":"root_count","order":2}
+  [(2, 3, 1), (3, 0, 2), (3, 2, 2), (1, 2, 0), (1, 2, 3), (3, 0, 0), (0, 1, 0), (3, 2, 3), (2, 1, 3), (1, 2, 2), (0, 3, 1), (0, 3, 0)]
+ECART K=3 n=7 : code 3 {"status":"invariant_violated","reason":"root_count","order":2}
+  [(5, 2, 0), (1, 1, 0), (6, 3, 0), (6, 0, 0), (1, 6, 0), (0, 6, 0), (0, 1, 0)]
+ECART K=5 n=7 : code 3 {"status":"invariant_violated","reason":"root_count","order":2}
+  [(5, 2, 0), (1, 1, 0), (6, 3, 0), (6, 0, 0), (1, 6, 0), (0, 6, 0), (0, 1, 0)]
+ECART K=3 n=12 : code 3 {"status":"invariant_violated","reason":"root_count","order":2}
+  [(4, 4, 1), (2, 5, 5), (2, 3, 5), (3, 0, 5), (0, 2, 5), (5, 0, 3), (2, 0, 5), (4, 3, 1), (1, 0, 5), (3, 4, 4), (0, 2, 0), (3, 1, 5)]
+tower_oracle_checks 73 fails 35 cuts 8580
+Command exited with non-zero status 1
+wall=161.70 s
+exit=1

@@ -1,0 +1,15 @@
+L06_MEM_AFTER_G nballs=1306696 cells=2164763 lookup=16777216 atlas=26504167 ball_vnode=5226784 seeds=12582912 spop=13616956 runs=33597588 P=957240 total=109262863
+L06_TSC_G t_resolve_s=2.8003 cycles_total=4999825926 seeds=751767098 meb=1424073832 lookup_census_cat=769202500 closed_ball=1312941196 jump_select=188313779 support_cell=309193948 first_rep=244333573
+L06_CHAIN_JOIN steps_hist=0,2950454,584840,70518,13012,2297,369,66,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 jumps_hist=3390910,193121,31445,5248,724,93,19,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+L06_KRUSKAL k=5 births=341081 joins=448755 reps=1350122 lots=437973 lots_multi=8914 merges2=147275 merges3=70244 merges4p=17771 max_children=5 max_lot_reps=20 find_steps=1454626 joins_no_union=213448
+L06_KRUSKAL k=4 births=249493 joins=341082 reps=985212 lots=329235 lots_multi=9381 merges2=105662 merges3=55709 merges4p=10797 max_children=5 max_lot_reps=20 find_steps=1059555 joins_no_union=168876
+L06_KRUSKAL k=3 births=166228 joins=249493 reps=673223 lots=231610 lots_multi=12940 merges2=78055 merges3=36714 merges4p=4913 max_children=5 max_lot_reps=20 find_steps=713989 joins_no_union=129773
+L06_KRUSKAL k=2 births=101089 joins=166228 reps=410825 lots=144401 lots_multi=14065 merges2=53048 merges3=23951 merges4p=39 max_children=5 max_lot_reps=28 find_steps=428601 joins_no_union=89095
+L06_KRUSKAL k=1 births=39885 joins=101089 reps=202178 lots=57684 lots_multi=18222 merges2=39709 merges3=86 merges4p=1 max_children=4 max_lot_reps=48 find_steps=206656 joins_no_union=61205
+L06_MEM_FOREST nodes=1541750 forest_bytes=36683276 jumps_bytes=12334000
+L06_CB calls=259183 sum=2616030 max=1201 judge_calls=26027 judge_sum=135693 nonstrict=0 hist_log2=0,0,127315,116679,10976,2502,964,510,165,43,29,0,0,0,0,0,0,0,0,0,0,0,0,0
+L06_JUMP calls=275233 p_sum=1987323 p_max=1199 from_cat=77630
+L06_LOOKUP2 calls=61580 same_key_as_first=61579 hits=1 miss_in_window=0 below_window=61579
+L06_EXT balls=227 cells=523 max_m=5 refused=0
+L06_KRUSKAL_TOTAL lots=1200903 lots_multi=63522 merges2=423749 merges3=186704 merges4p=33521 max_children=5 max_lot_reps=48 find_steps=3863427 joins_no_union=662397
+L06_CHAIN_ALL steps_hist=0,2950568,584846,70518,13012,2297,369,66,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 jumps_hist=3391027,193124,31445,5248,724,93,19,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0

@@ -1,0 +1,45 @@
+campagne;mutants;classes
+reparation;53;equivalent/SURVIT=3 tue/JUGE=50
+tete;58;equivalent/SURVIT=4 limite/SURVIT=1 tue/JUGE=52 tue/SIGNAL=1
+entrees_cli;63;equivalent/SURVIT=3 tue/JUGE=60
+pool;47;equivalent/SURVIT=3 juge_particulier/SURVIT=1 limite/SURVIT=1 tue/DELAI=1 tue/JUGE=37 tue/SIGNAL=4
+bancs_py312;115;equivalent/SURVIT=4 tue/JUGE=111
+bancs_py310;27;equivalent/SURVIT=2 tue/JUGE=25
+oracles_juges;41;equivalent/SURVIT=9 tue/JUGE=32
+oracles_cli;8;tue/JUGE=8
+oracles_lecteur;13;equivalent/SURVIT=1 tue/JUGE=12
+TOTAL;425;equivalent/SURVIT=29 juge_particulier/SURVIT=1 limite/SURVIT=2 tue/DELAI=1 tue/JUGE=387 tue/SIGNAL=5
+recouvrement bancs: py312=115 py310=27 communs=27 propres_py310=0
+mutants distincts (identifiants de bancs_py310 deja dans bancs_py312 comptes une fois) = 398
+identifiants presents dans plusieurs campagnes : ['R10_entree_comparee_par_chaine', 'R7_entree_du_banc_ecrasee', 'R8_journal_sur_entree_admis', 'R9_manifeste_hors_des_entrees', 'S1_drapeau_baisse_apres_le_report', 'S2_report_du_lancement_jamais_leve', 'S9_masque_sigterm_seul', 'T0', 'Z1_destinations_non_jugees', 'Z2_chemin_resolu_seul', 'Z3_chaine_egale_seule', 'm1_sans_drapeau_clause_exterieure', 'm2_sans_drapeau_clause_delai', 'm3_stop_sans_drapeau', 'm4_signal_differe_perdu_apres_delai', 'm5_drapeau_non_remis_apres_delai', 'm5b_drapeau_non_remis_apres_exception', 'm6_sans_masque_close_group', 'm7_clause_delai_plate', 'r1_sans_appels_natifs', 'r1_sans_controle_des_boules', 'r1_sans_gestionnaire_sigterm', 'r1_sans_killpg', 'r1_sans_nouvelle_session', 'r1_sans_recolte_du_groupe', 'r1_sans_report_des_signaux', 'v_delai_proc_kill', 'v_sans_subreaper']
+
+reparation_journal.jsonl 53
+    11  src/core/cli_output.hpp
+     8  cli/mhgp10_cluster.cpp
+     6  tests/oracle/test_catalogue_oracle.py
+     5  src/core/cli_options.hpp
+     5  cmake/fp_flags.cmake
+     4  src/head/head.cpp
+     3  cli/mhgp10_catalogue.cpp
+     3  cli/mhgp10_tower.cpp
+     3  tests/head/mreach_cluster.cpp
+     2  tests/oracle/test_tower_oracle.py
+     1  src/cloud/u32le_input.hpp
+     1  tests/unit/fault_main.cpp
+     1  CMakeLists.txt
+tete_journal.jsonl 58
+    40  src/head/head.cpp
+    11  cli/mhgp10_cluster.cpp
+     6  tests/head/mreach_cluster.cpp
+     1  src/core/cli_output.hpp
+ecli_journal.jsonl 63
+    17  src/core/cli_output.hpp
+    13  src/catalogue/generator.cpp
+    11  cli/mhgp10_cluster.cpp
+     6  src/core/cli_options.hpp
+     5  cli/mhgp10_catalogue.cpp
+     3  CMakeLists.txt
+     3  cli/mhgp10_tower.cpp
+     3  tests/head/mreach_cluster.cpp
+     1  src/cloud/u32le_input.hpp
+     1  tests/regression/test_fast_targets.py

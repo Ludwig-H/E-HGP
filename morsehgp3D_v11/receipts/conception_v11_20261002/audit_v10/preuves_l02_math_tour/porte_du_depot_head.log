@@ -1,0 +1,6 @@
+tower_oracle_checks 73 fails 0 cuts 23444
+
+real	4m54.310s
+user	4m8.933s
+sys	0m1.269s
+exit=0

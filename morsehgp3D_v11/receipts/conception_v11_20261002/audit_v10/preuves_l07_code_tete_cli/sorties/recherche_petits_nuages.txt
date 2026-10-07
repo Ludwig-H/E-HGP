@@ -1,0 +1,21 @@
+SEARCH n=4 grid=12 dim=3 k=2 entry=core trials=20000 built=20000 refused=0 port_bad=0 norm_nontrivial=0 trig_cases=0 stab_cases=0 flips=0 flips_root_excluded=0 cn_diff=0
+SEARCH n=5 grid=12 dim=3 k=2 entry=core trials=20000 built=20000 refused=0 port_bad=0 norm_nontrivial=0 trig_cases=0 stab_cases=0 flips=0 flips_root_excluded=0 cn_diff=0
+SEARCH n=6 grid=12 dim=3 k=2 entry=core trials=20000 built=20000 refused=0 port_bad=0 norm_nontrivial=0 trig_cases=0 stab_cases=0 flips=0 flips_root_excluded=0 cn_diff=0
+SEARCH n=5 grid=12 dim=3 k=2 entry=core trials=20000 built=20000 refused=0 port_bad=0 norm_nontrivial=0 trig_cases=66576 stab_cases=66576 flips=0 flips_root_excluded=0 cn_diff=0
+FLIP n=6 k=2 entry=core mcs=3 z=2 single=1 contracted=0 relocated=0 sel_v=2 sel_n=1 pts=(2,0,1),(2,0,4),(2,0,9),(9,10,5),(10,6,5),(11,5,6) V=0 0 0 1 1 1 N=0 0 0 0 0 0 
+FLIP n=6 k=2 entry=core mcs=3 z=2 single=1 contracted=0 relocated=0 sel_v=2 sel_n=1 pts=(0,2,5),(0,2,6),(4,3,7),(4,11,9),(5,8,11),(5,11,6) V=0 0 0 1 1 1 N=0 0 0 0 0 0 
+SEARCH n=6 grid=12 dim=3 k=2 entry=core trials=20000 built=20000 refused=0 port_bad=0 norm_nontrivial=0 trig_cases=61396 stab_cases=61396 flips=54 flips_root_excluded=0 cn_diff=0
+SEARCH n=8 grid=16 dim=3 k=2 entry=core trials=100000 built=100000 refused=0 port_bad=0 norm_nontrivial=0 trig_cases=290784 stab_cases=290784 flips=1404 flips_root_excluded=0 cn_diff=0
+FLIP n=9 k=2 entry=core mcs=3 z=2 single=0 contracted=0 relocated=0 sel_v=3 sel_n=2 pts=(1,12,11),(3,3,4),(3,6,10),(3,8,12),(4,1,4),(7,2,1),(9,6,13),(14,3,15),(15,3,12) V=1 2 1 1 2 2 0 0 0 N=1 1 1 1 1 1 0 0 0 
+SEARCH n=9 grid=16 dim=3 k=2 entry=core trials=100000 built=100000 refused=0 port_bad=0 norm_nontrivial=0 trig_cases=288648 stab_cases=288648 flips=1979 flips_root_excluded=5 cn_diff=0
+SEARCH n=8 grid=6 dim=3 k=2 entry=cover trials=20000 built=20000 refused=0 port_bad=0 norm_nontrivial=0 trig_cases=0 stab_cases=0 flips=0 flips_root_excluded=0 cn_diff=0
+SEARCH n=10 grid=6 dim=3 k=2 entry=cover trials=20000 built=20000 refused=0 port_bad=0 norm_nontrivial=0 trig_cases=0 stab_cases=0 flips=0 flips_root_excluded=0 cn_diff=0
+SEARCH n=12 grid=6 dim=3 k=2 entry=cover trials=20000 built=20000 refused=0 port_bad=0 norm_nontrivial=0 trig_cases=0 stab_cases=0 flips=0 flips_root_excluded=0 cn_diff=0
+FLIP n=8 k=3 entry=cover mcs=4 z=2 single=1 contracted=0 relocated=0 sel_v=2 sel_n=1 pts=(1,2,3),(2,2,0),(2,3,5),(3,4,3),(3,4,4),(4,2,0),(4,4,0),(5,4,1) V=0 1 0 0 0 1 1 1 N=0 0 0 0 0 0 0 0 
+SEARCH n=8 grid=6 dim=3 k=3 entry=cover trials=20000 built=20000 refused=0 port_bad=0 norm_nontrivial=0 trig_cases=132 stab_cases=132 flips=1 flips_root_excluded=0 cn_diff=0
+FLIP n=10 k=3 entry=cover mcs=4 z=2 single=1 contracted=0 relocated=0 sel_v=2 sel_n=1 pts=(0,5,3),(2,0,0),(3,0,4),(3,3,5),(3,4,0),(4,2,0),(4,2,4),(5,2,0),(5,4,5),(5,5,0) V=-1 1 0 0 1 1 0 1 0 1 N=0 0 0 0 0 0 0 0 0 0 
+SEARCH n=10 grid=6 dim=3 k=3 entry=cover trials=20000 built=20000 refused=0 port_bad=0 norm_nontrivial=0 trig_cases=144 stab_cases=144 flips=4 flips_root_excluded=0 cn_diff=0
+FLIP n=12 k=3 entry=cover mcs=4 z=2 single=1 contracted=0 relocated=0 sel_v=2 sel_n=1 pts=(0,5,1),(1,0,3),(2,4,3),(3,0,0),(3,1,2),(3,2,1),(5,0,0),(5,1,1),(5,3,4),(5,4,5),(5,5,2),(5,5,5) V=-1 1 1 1 1 1 1 1 0 0 0 0 N=0 0 0 0 0 0 0 0 0 0 0 0 
+SEARCH n=12 grid=6 dim=3 k=3 entry=cover trials=20000 built=20000 refused=0 port_bad=0 norm_nontrivial=0 trig_cases=188 stab_cases=188 flips=5 flips_root_excluded=0 cn_diff=0
+SEARCH n=12 grid=1000 dim=3 k=3 entry=cover trials=20000 built=20000 refused=0 port_bad=0 norm_nontrivial=0 trig_cases=0 stab_cases=0 flips=0 flips_root_excluded=0 cn_diff=0
+SEARCH n=12 grid=1000 dim=3 k=3 entry=core trials=20000 built=20000 refused=0 port_bad=0 norm_nontrivial=0 trig_cases=138992 stab_cases=138992 flips=188 flips_root_excluded=4 cn_diff=0

@@ -1,0 +1,31 @@
+nuage 0 n=12 : cumul {'BIN': '36/36 acceptes', 'SWAP': '160/160 acceptes', 'V_autre': '95/107 acceptes', 'V_desc': '164/164 acceptes'}
+nuage 1 n=12 : cumul {'ATT': '9/9 acceptes', 'BIN': '56/56 acceptes', 'SWAP': '279/279 acceptes', 'V_autre': '169/187 acceptes', 'V_desc': '277/277 acceptes'}
+nuage 2 n=7 : cumul {'ATT': '9/9 acceptes', 'BIN': '64/64 acceptes', 'SWAP': '303/303 acceptes', 'V_autre': '179/201 acceptes', 'V_desc': '319/319 acceptes'}
+nuage 3 n=12 : cumul {'ATT': '17/17 acceptes', 'BIN': '90/90 acceptes', 'SWAP': '384/384 acceptes', 'V_autre': '240/295 acceptes', 'V_desc': '469/469 acceptes'}
+nuage 4 n=11 : cumul {'ATT': '17/17 acceptes', 'BIN': '118/118 acceptes', 'SWAP': '514/514 acceptes', 'V_autre': '308/380 acceptes', 'V_desc': '634/634 acceptes'}
+nuage 5 n=12 : cumul {'ATT': '25/25 acceptes', 'BIN': '149/149 acceptes', 'SWAP': '649/649 acceptes', 'V_autre': '376/471 acceptes', 'V_desc': '779/779 acceptes'}
+{
+ "K": 5,
+ "acceptes_par_le_juge_HEAD": {
+  "ATT": 25,
+  "BIN": 149,
+  "SWAP": 649,
+  "V_autre": 376,
+  "V_desc": 779
+ },
+ "dumps_faux": {
+  "ATT": 25,
+  "BIN": 149,
+  "SWAP": 649,
+  "V_autre": 471,
+  "V_desc": 779
+ },
+ "exemples_acceptes": {
+  "ATT": "nuage 1 (grille 0..3, n=12) k=2 point=0",
+  "BIN": "nuage 0 (generique, n=12) k=2 fusion=22",
+  "SWAP": "nuage 0 (generique, n=12) k=2 feuilles=0,1",
+  "V_autre": "nuage 0 (generique, n=12) k=2 u=0",
+  "V_desc": "nuage 0 (generique, n=12) k=2 u=0"
+ },
+ "nuages": 6
+}

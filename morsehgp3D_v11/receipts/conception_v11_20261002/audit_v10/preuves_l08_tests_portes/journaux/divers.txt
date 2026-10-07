@@ -1,0 +1,92 @@
+# divers.txt — petites preuves L08 (rejouees le 2026-10-02T08:04:41Z)
+
+## 1. Labels CTest (build GCC)
+label fast : 4
+label gate : 13
+label oracle : 2
+label regression : 6
+label points : 3
+label head : 1
+  Test  #1: mhgp10_unit
+  Test  #4: mhgp10_cover_band_structural
+  Test  #5: mhgp10_dev_quotas
+  Test #13: mhgp10_regression_multiplicity_refusal
+
+## 2. Configuration sans Python (-DCMAKE_DISABLE_FIND_PACKAGE_Python3=TRUE)
+  Test #1: mhgp10_unit
+  Test #2: mhgp10_rank_search
+  Test #3: mhgp10_grid32_primitives
+
+Total Tests: 3
+
+## 3. Portes Python jouees avec /usr/bin/python3 (sans numpy)
+tests/head/test_condensation_vs_sklearn.py -> code 1 : ModuleNotFoundError: No module named 'numpy'
+tests/regression/test_level_collision.py -> code 1 : ModuleNotFoundError: No module named 'numpy'
+tests/points/test_cover_entry.py -> code 1 : ModuleNotFoundError: No module named 'numpy'
+tests/regression/test_batch_equivalence.py -> code 1 : ModuleNotFoundError: No module named 'numpy'
+tests/regression/test_mreach_border.py -> code 1 : ModuleNotFoundError: No module named 'numpy'
+tests/regression/test_multiplicity_refusal.py -> code 0 : multiplicity_refusal_ok
+
+## 4. Vert par vacuite : test_level_collision.py contre un faux mhgp10_cluster (exit 2, 'option inconnue')
+code de la porte = 0
+
+## 5. run_expect.cmake
+A attendu 0, rendu 0 -> code cmake 0 : 
+B attendu 0, rendu 1 -> code cmake 1 : code de sortie 1, attendu 0
+C attendu 2, rendu 2 -> code cmake 0 : 
+D SIGSEGV, attendu 0 -> code cmake 1 : termine par signal ou erreur d'execution : Segmentation fault
+E SIGSEGV, attendu 139 -> code cmake 1 : termine par signal ou erreur d'execution : Segmentation fault
+F ligne exacte presente -> code cmake 0 : 
+G ligne en sous-chaine seulement -> code cmake 1 : ligne attendue ABSENTE de stdout de la MEME execution : unit_ok
+H ligne sur stderr seulement -> code cmake 1 : ligne attendue ABSENTE de stdout de la MEME execution : unit_ok
+I binaire absent -> code cmake 1 : termine par signal ou erreur d'execution : No such file or directory
+J attendu 3, rendu 3 -> code cmake 0 : 
+K attendu 4, rendu 0 -> code cmake 1 : code de sortie 0, attendu 4
+
+## 6. Fixture d'egalite d'attache a 5 points (K=2 mcs=2 z=3 entree core)
+HEAD code 0 etiquettes [-1, -1, -1, -1, -1]
+M01_core_strict code 0 etiquettes [-1, 0, 0, 1, 1]
+
+## 7. 48 points exactement cospheriques ((+-3,+-5,+-7) et permutations, translates de 100)
+{"status":"unsupported_degeneracy","reason":"shell_quotient_budget","order":1}
+  -> mhgp10_tower K=1 code 2
+{"status":"unsupported_degeneracy","reason":"shell_quotient_budget","order":1}
+  -> mhgp10_tower K=5 code 2
+{"status":"unsupported_degeneracy","reason":"shell_quotient_budget","order":1}
+  -> mhgp10_tower K=10 code 2
+
+## 8. Compteurs du catalogue des trames du contrat (sha256 des entrees : 0baa4de1..., ba15adc6..., a4bbc86d...)
+lidar00 K=5 status ok sites 39885 balls 1306696 levels 1085775 extended 227 max_shell 5 by_q_p {"q2": [101138, 87848, 92416, 85945, 89572], "q3": [78369, 139909, 207265, 265740, 0], "q4": [17164, 47892, 93438, 0, 0]}
+lidar00 K=10 status ok sites 39885 balls 5512670 levels 5085985 extended 444 max_shell 5 by_q_p {"q2": [101138, 87848, 92416, 85945, 89572, 84647, 88058, 82707, 86306, 83271], "q3": [78369, 139909, 207265, 265740, 328451, 383983, 442529, 496749, 555223, 0], "q4": [17164, 47892, 93438, 151414, 222407, 304160, 396275, 499794, 0, 0]}
+lidar01 K=5 status ok sites 35551 balls 1095926 levels 941216 extended 135 max_shell 4 by_q_p {"q2": [89186, 75377, 81015, 73373, 77678], "q3": [67061, 116909, 172902, 221122, 0], "q4": [13452, 36924, 70927, 0, 0]}
+lidar01 K=10 status ok sites 35551 balls 4383302 levels 4094745 extended 280 max_shell 5 by_q_p {"q2": [89186, 75377, 81015, 73373, 77678, 71118, 74566, 69394, 73781, 69580], "q3": [67061, 116909, 172902, 221122, 269501, 312317, 356365, 397978, 443483, 0], "q4": [13452, 36924, 70927, 115317, 165953, 223843, 286756, 357424, 0, 0]}
+lidar02 K=5 status ok sites 45845 balls 1407885 levels 1099581 extended 572 max_shell 5 by_q_p {"q2": [118890, 94252, 109261, 92389, 103441], "q3": [88603, 148959, 225659, 283326, 0], "q4": [15649, 43278, 84178, 0, 0]}
+lidar02 K=10 status ok sites 45845 balls 5483320 levels 4908695 extended 1301 max_shell 5 by_q_p {"q2": [118890, 94252, 109261, 92389, 103441, 89169, 99014, 87643, 96490, 86985], "q3": [88603, 148959, 225659, 283326, 349250, 397937, 457891, 506126, 561442, 0], "q4": [15649, 43278, 84178, 136193, 196542, 262256, 334777, 413720, 0, 0]}
+
+## 9. Mutant M01 sur lidar00 K=5 : attaches differentes
+lignes node differentes : 0 ; lignes point differentes : 109 sur 199425
+
+## 10. mhgp10_unit rejoue 15 fois sous charge : 15 reussites, 0 echec (charge 16)
+## 11. CLI : arrets par signal sur options banales (piste CL1 de l'audit geant, rejouee)
+mhgp10_tower at1_5pts.u32le --k=3 --repeat=0 -> code 139 (SIGSEGV)
+mhgp10_tower at1_5pts.u32le --k=abc -> code 134 (SIGABRT, what(): stoi)
+mhgp10_cluster at1_5pts.u32le out --k=6 --mcs=2 -> code 139 (SIGSEGV, K > nombre de sites)
+mhgp10_tower at1_5pts.u32le --k=11 -> code 0, "K":11 publie
+mhgp10_tower at1_5pts.u32le --k=13 -> code 2 invalid_input/kmax_out_of_range
+mhgp10_catalogue at1_5pts.u32le --k=0 -> code 2 invalid_input/kmax_out_of_range
+## TSan (GCC 13.3, -DMHGP10_TSAN=ON, lance par setarch -R)
+configure exit=0
+build exit=0
+unit exit=0
+tower_k5_4fils exit=0
+occurrences de 'ThreadSanitizer' : unit 0, tour 0
+site_tree_rational_checks 7155 shells 1099
+wide_checks 100000
+unit_ok
+
+## 12. Mutant M06 (z ignore) sur lidar00, K=5 mcs=200 z=3 entree cover : HEAD 66 amas, M06 48 amas ; 32723 etiquettes differentes sur 39885 ; bruit 6037 contre 3401
+## 13. mhgp10_tower --no-points --dump : SIGSEGV apres la ligne JSON status ok (5 points K=2 : code 139 ; lidar00 K=10 a 1 et 4 fils : code -11 vu par subprocess). Cause lue : cli/mhgp10_tower.cpp:186-194 lit point_node/point_level, vides sans attaches.
+M02 lidar00 K=5 entree cover : lignes node differentes 0 ; lignes point differentes 0 sur 199425
+
+## 14. Fixture cover de 9 points [[0,2,1],[1,0,2],[2,0,1],[2,1,0],[3,0,0],[3,2,2],[3,2,3],[3,4,1],[4,2,0]], K=3 mcs=2 z=3 entree cover
+HEAD [0, 0, 0, 0, 0, 0, 1, 1, 0] ; M02_cover_rank [2, 2, 1, 1, 1, -1, 0, 0, -1] ; (lidar00 K=5 cover : 0 etiquette differente sur 39885)

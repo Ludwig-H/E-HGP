@@ -1,0 +1,22 @@
+generique n=12 K=10 : conforme (coupes 1840, 145 s)
+generique n=12 K=10 : conforme (coupes 1742, 308 s)
+grille n=12 K=10 : conforme (coupes 1036, 438 s)
+grille n=12 K=10 : conforme (coupes 810, 560 s)
+coplanaire n=12 K=10 : conforme (coupes 492, 636 s)
+coplanaire n=12 K=10 : conforme (coupes 582, 714 s)
+grappes n=12 K=10 : conforme (coupes 1222, 851 s)
+grappes n=12 K=10 : conforme (coupes 1710, 993 s)
+amas n=12 K=10 : conforme (coupes 772, 1164 s)
+amas n=12 K=10 : conforme (coupes 1448, 1343 s)
+oracle_k10 checks 10 fails 0 cuts 11654
+ordre 1 : {'resolves': 346, 'steps': 346, 'jumps': 0, 'merges': 82, 'births': 120, 'joins': 173, 'cells': 227}
+ordre 2 : {'resolves': 492, 'steps': 550, 'jumps': 5, 'merges': 110, 'births': 173, 'joins': 208, 'cells': 429}
+ordre 3 : {'resolves': 578, 'steps': 650, 'jumps': 8, 'merges': 132, 'births': 206, 'joins': 224, 'cells': 474}
+ordre 4 : {'resolves': 609, 'steps': 689, 'jumps': 3, 'merges': 132, 'births': 223, 'joins': 219, 'cells': 473}
+ordre 5 : {'resolves': 596, 'steps': 674, 'jumps': 5, 'merges': 129, 'births': 217, 'joins': 208, 'cells': 455}
+ordre 6 : {'resolves': 553, 'steps': 629, 'jumps': 0, 'merges': 120, 'births': 205, 'joins': 187, 'cells': 414}
+ordre 7 : {'resolves': 436, 'steps': 491, 'jumps': 1, 'merges': 107, 'births': 187, 'joins': 140, 'cells': 337}
+ordre 8 : {'resolves': 306, 'steps': 343, 'jumps': 1, 'merges': 71, 'births': 137, 'joins': 98, 'cells': 241}
+ordre 9 : {'resolves': 186, 'steps': 203, 'jumps': 0, 'merges': 47, 'births': 96, 'joins': 58, 'cells': 157}
+ordre 10 : {'resolves': 93, 'steps': 102, 'jumps': 0, 'merges': 25, 'births': 60, 'joins': 30, 'cells': 91}
+exit=0

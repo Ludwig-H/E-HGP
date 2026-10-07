@@ -1,0 +1,18 @@
+lignes sklearn rejouees 96 ; differentes 47
+|ecart| unite methode ARI_s local ARI_s G4 amas local amas G4
+0.035935 filaments_n8000_hard_nu0_s627146484807867567         hdb_ms3      0.867616 0.903551 10 9
+0.011149 shells_n8000_hard_nu0_s281978053882698542            hdb_ms5      0.624331 0.613182 18 19
+0.004321 filaments_n8000_hard_nu0_s627146484807867567         hdb_ms8      0.836585 0.832264 8 8
+0.003218 heteroscedastic_n8000_hard_nu0_s156801548299167002   hdb_ms8      0.614782 0.611564 6 6
+0.002735 spherical_n8000_hard_nu0_s8971674921640015           hdb_ms10     0.940392 0.937657 8 8
+0.002597 heteroscedastic_n8000_hard_nu0_s156801548299167002   hdb_ms3      0.642173 0.644770 6 6
+0.002556 filaments_n8000_hard_nu0_s627146484807867567         hdb_ms10     0.880243 0.882799 8 8
+0.001939 spherical_n8000_hard_nu0_s8971674921640015           hdb_ms5      0.936027 0.937966 8 8
+0.001808 anisotropic_n8000_hard_nu0_s14388762066298720        hdb_ms3      0.872180 0.870372 8 8
+0.001464 anisotropic_n8000_hard_nu0_s14388762066298720        hdb_ms10     0.862472 0.863936 8 8
+0.001202 heteroscedastic_n8000_hard_nu0_s156801548299167002   hdb_ms5      0.602858 0.604060 6 6
+0.001023 shells_n8000_hard_nu0_s281978053882698542            hdb_ms10     0.726733 0.725710 16 16
+0.000875 unbalanced_n8000_hard_nu0_s515940611821313875        hdb_ms5      0.694338 0.695213 3 3
+0.000860 anisotropic_n8000_hard_nu0_s14388762066298720        hdb_ms8      0.863202 0.862342 8 8
+ecart absolu moyen 0.000824 ; mediane 0.000000
+code=0

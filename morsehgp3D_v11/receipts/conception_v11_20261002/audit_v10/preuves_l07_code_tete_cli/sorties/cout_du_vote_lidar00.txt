@@ -1,0 +1,7 @@
+sans rep1 {"status":"ok","n":39885,"kmax":5,"balls":1306696,"clusters":345,"catalogue_s":7.790,"tower_s":1.492,"head_s":0.679}
+avec rep1 {"status":"ok","n":39885,"kmax":5,"balls":1306696,"clusters":345,"catalogue_s":14.624,"tower_s":2.546,"head_s":0.630}
+sans rep2 {"status":"ok","n":39885,"kmax":5,"balls":1306696,"clusters":345,"catalogue_s":13.310,"tower_s":1.945,"head_s":0.100}
+avec rep2 {"status":"ok","n":39885,"kmax":5,"balls":1306696,"clusters":345,"catalogue_s":10.445,"tower_s":3.023,"head_s":0.699}
+core rep1 {"status":"ok","n":39885,"kmax":5,"balls":1306696,"clusters":263,"catalogue_s":12.968,"tower_s":1.833,"head_s":0.209}
+etiquettes de l'arbre identiques avec et sans --label=vote
+lidar00 K=5 cover mcs=20 : bruit arbre 3002, bruit vote 2649, etiquettes non bruit changees 0

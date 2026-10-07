@@ -1,0 +1,8 @@
+l09_rounds tours=19 coupes=5 noeuds_frontiere=362 taches=359 fils=1
+l09_rounds tours=24 coupes=5 noeuds_frontiere=4658 taches=4513 fils=12
+l09_rounds tours=27 coupes=5 noeuds_frontiere=11364 taches=10387 fils=24
+l09_rounds tours=28 coupes=5 noeuds_frontiere=22686 taches=19843 fils=48
+l09_rounds tours=19 coupes=5 noeuds_frontiere=369 taches=366 fils=1
+l09_rounds tours=24 coupes=5 noeuds_frontiere=4661 taches=4496 fils=12
+l09_rounds tours=27 coupes=5 noeuds_frontiere=11316 taches=10287 fils=24
+l09_rounds tours=28 coupes=5 noeuds_frontiere=22441 taches=19482 fils=48

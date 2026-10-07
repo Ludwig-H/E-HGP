@@ -1,0 +1,11 @@
+k= 1 somme reguliere        1 + etendues      0 = 1
+k= 2 somme reguliere       28 + etendues    -27 = 1
+k= 3 somme reguliere        1 + etendues      0 = 1
+k= 4 somme reguliere        6 + etendues     -5 = 1
+k= 5 somme reguliere       -7 + etendues      8 = 1
+k= 6 somme reguliere        2 + etendues     -1 = 1
+k= 7 somme reguliere       12 + etendues    -11 = 1
+k= 8 somme reguliere       -2 + etendues      3 = 1
+k= 9 somme reguliere       -6 + etendues      7 = 1
+k=10 somme reguliere        2 + etendues     -1 = 1
+euler_echelle euler/lidar01_full_k12.json sites=35551 boules=6492748 etendues=341 kcat=12 ordres 1..10 : CONFORME

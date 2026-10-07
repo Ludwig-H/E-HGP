@@ -1,0 +1,54 @@
+# Fri Oct  2 06:49:32 UTC 2026 ; invariant de restriction cat(K) = restrict(cat(K+2)), HEAD afb081774
+lidar01_quarter_x_neg_y_neg.u32le K=3 : cat(K) 89437 boules ; cat(K+2) 210424 boules, restriction 89437 ; EGALITE (sha 0e609aef52c2 / 0e609aef52c2)
+lidar01_quarter_x_neg_y_neg.u32le K=5 : cat(K) 210424 boules ; cat(K+2) 388767 boules, restriction 210424 ; EGALITE (sha 3d1219be51c0 / 3d1219be51c0)
+lidar01_quarter_x_neg_y_neg.u32le K=10 : cat(K) 767555 boules ; cat(K+2) 1103905 boules, restriction 767555 ; EGALITE (sha 334fe5a3fb3c / 334fe5a3fb3c)
+syn_uniform_density_x1.u32le K=5 : cat(K) 594381 boules ; cat(K+2) 1300025 boules, restriction 594381 ; EGALITE (sha 146fbe1a4eeb / 146fbe1a4eeb)
+syn_clusters_density_x1.u32le K=3 : cat(K) 193549 boules ; cat(K+2) 555892 boules, restriction 193549 ; EGALITE (sha 450f22d55bcf / 450f22d55bcf)
+# identite d'Euler par ordre (multiplicites binomiales), sur les sorties JSON de mhgp10_catalogue --k=K+2
+## syn_uniform_density_x1_k7
+n=8000 K+2=7 boules=1300025 etendues=0
+  ordre 1 : chi = 1
+  ordre 2 : chi = 1
+  ordre 3 : chi = 1
+  ordre 4 : chi = 1
+  ordre 5 : chi = 1
+## syn_clusters_density_x1_k7
+n=8000 K+2=7 boules=1179086 etendues=0
+  ordre 1 : chi = 1
+  ordre 2 : chi = 1
+  ordre 3 : chi = 1
+  ordre 4 : chi = 1
+  ordre 5 : chi = 1
+## syn_uniform_density_x1_k12
+n=8000 K+2=12 boules=4947753 etendues=0
+  ordre 1 : chi = 1
+  ordre 2 : chi = 1
+  ordre 3 : chi = 1
+  ordre 4 : chi = 1
+  ordre 5 : chi = 1
+  ordre 6 : chi = 1
+  ordre 7 : chi = 1
+  ordre 8 : chi = 1
+  ordre 9 : chi = 1
+  ordre 10 : chi = 1
+## syn_uniform_density_x4_k7
+n=32000 K+2=7 boules=5573399 etendues=3
+  ordre 1 : chi = 1
+  ordre 2 : chi = 0
+  ordre 3 : chi = 3
+  ordre 4 : chi = -1
+  ordre 5 : chi = 2
+## syn_clusters_density_x4_k7
+n=32000 K+2=7 boules=5391678 etendues=7
+  ordre 1 : chi = 0
+  ordre 2 : chi = 2
+  ordre 3 : chi = 2
+  ordre 4 : chi = -1
+  ordre 5 : chi = 2
+## q01_k7
+n=8074 K+2=7 boules=388767 etendues=48
+  ordre 1 : chi = -3
+  ordre 2 : chi = 3
+  ordre 3 : chi = 4
+  ordre 4 : chi = -1
+  ordre 5 : chi = 1

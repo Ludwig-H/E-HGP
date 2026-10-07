@@ -1,0 +1,8 @@
+ensembles 2100 ; ecarts du repli Welzl exact 0 ; ecarts du chemin produit meb() 0 ; replis du chemin produit 0
+  cercle325            ensembles  300  ecarts repli   0  ecarts produit   0  replis    0
+  generique            ensembles  300  ecarts repli   0  ecarts produit   0  replis    0
+  grille               ensembles  300  ecarts repli   0  ecarts produit   0  replis    0
+  ligne                ensembles  300  ecarts repli   0  ecarts produit   0  replis    0
+  plan                 ensembles  300  ecarts repli   0  ecarts produit   0  replis    0
+  sphere24             ensembles  300  ecarts repli   0  ecarts produit   0  replis    0
+  sphere24+interieur   ensembles  300  ecarts repli   0  ecarts produit   0  replis    0

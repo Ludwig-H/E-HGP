@@ -1,0 +1,113 @@
+--- tour exacte (oracle Gamma_1), coupes fermees : niveau en unites de r = 1000 -> couvertures des composantes
+  r = 0.0000 : A | B | C | D | E | F
+  r = 1.0000 : ABC | DEF
+  r = 1.0000 : ABCDEF
+--- tour exacte (oracle Gamma_2), coupes fermees : niveau en unites de r = 1000 -> couvertures des composantes
+  r = 1.0000 : AC | BC | DE | DF
+  r = 1.0000 : AB | AC | BC | CD | DE | DF | EF
+  r = 1.1547 : ABC | CD | DEF
+  r = 1.9318 : ABCDEF
+--- tour exacte (oracle Gamma_3), coupes fermees : niveau en unites de r = 1000 -> couvertures des composantes
+  r = 1.1547 : ABC | DEF
+  r = 1.9318 : ABC | ACD | BCD | CDE | CDF | DEF
+  r = 2.0000 : ABCD | CDEF
+  r = 2.7320 : ABCDEF
+--- sklearn HDBSCAN min_samples = 1 : fusions (distance de lien / (2 r), taille) : 1.0000 (2), 1.0000 (3), 1.0000 (2), 1.0000 (3), 1.0000 (6)
+     etiquettes plates, mcs = 2, EOM : {'A': 0, 'B': 0, 'C': 0, 'D': 1, 'E': 1, 'F': 1}
+     etiquettes plates, mcs = 3, EOM : {'A': 0, 'B': 0, 'C': 0, 'D': 1, 'E': 1, 'F': 1}
+--- sklearn HDBSCAN min_samples = 2 : fusions (distance de lien / (2 r), taille) : 1.0000 (2), 1.0000 (3), 1.0000 (2), 1.0000 (3), 1.0000 (6)
+     etiquettes plates, mcs = 2, EOM : {'A': 0, 'B': 0, 'C': 0, 'D': 1, 'E': 1, 'F': 1}
+     etiquettes plates, mcs = 3, EOM : {'A': 0, 'B': 0, 'C': 0, 'D': 1, 'E': 1, 'F': 1}
+--- sklearn HDBSCAN min_samples = 3 : fusions (distance de lien / (2 r), taille) : 1.0000 (2), 1.0000 (3), 1.0000 (4), 1.0000 (5), 1.0000 (6)
+     etiquettes plates, mcs = 2, EOM : {'A': -1, 'B': -1, 'C': -1, 'D': -1, 'E': -1, 'F': -1}
+     etiquettes plates, mcs = 3, EOM : {'A': -1, 'B': -1, 'C': -1, 'D': -1, 'E': -1, 'F': -1}
+--- sklearn, deux triangles, les 720 ordres des six lignes : partitions plates distinctes (EOM, mcs = 2 et 3)
+min_samples=1 mcs=2 : 1 partitions distinctes sur 720 ordres
+      720 ordres -> ABC | DEF
+min_samples=1 mcs=3 : 1 partitions distinctes sur 720 ordres
+      720 ordres -> ABC | DEF
+min_samples=2 mcs=2 : 1 partitions distinctes sur 720 ordres
+      720 ordres -> ABC | DEF
+min_samples=2 mcs=3 : 1 partitions distinctes sur 720 ordres
+      720 ordres -> ABC | DEF
+
+=== Variante sans egalite parasite : CD = 1980 (cote des triangles 2000)
+--- tour exacte, oracle Gamma_2, coupes fermees
+  r = 0.9900 : CD
+  r = 1.0000 : AC | BC | CD | DE | DF
+  r = 1.0000 : AB | AC | BC | CD | DE | DF | EF
+  r = 1.1547 : ABC | CD | DEF
+  r = 1.9222 : ABCDEF
+--- tour exacte, oracle Gamma_3, coupes fermees
+  r = 1.1547 : ABC | DEF
+  r = 1.9222 : ABC | ACD | BCD | CDE | CDF | DEF
+  r = 1.9907 : ABCD | CDEF
+  r = 2.7220 : ABCDEF
+sklearn min_samples=1 mcs=2 : 1 partitions distinctes sur 720 ordres : 720 x [bruit:ABCDEF]
+sklearn min_samples=1 mcs=3 : 1 partitions distinctes sur 720 ordres : 720 x [bruit:ABCDEF]
+sklearn min_samples=2 mcs=2 : 1 partitions distinctes sur 720 ordres : 720 x [bruit:ABCDEF]
+sklearn min_samples=2 mcs=3 : 1 partitions distinctes sur 720 ordres : 720 x [bruit:ABCDEF]
+sklearn min_samples=3 mcs=2 : 3 partitions distinctes sur 720 ordres : 480 x [bruit:ABCDEF] ; 120 x [AB | CD | bruit:EF] ; 120 x [CD | EF | bruit:AB]
+sklearn min_samples=3 mcs=3 : 1 partitions distinctes sur 720 ordres : 720 x [bruit:ABCDEF]
+
+=== Tete v10 (binaire epingle du lot C, mhgp10_cluster) sur les deux fixtures
+--- deux triangles (CD = 2000)
+entry=core  K=1 mcs=2 z=1 : ABC | DEF
+entry=core  K=1 mcs=2 z=3 : ABC | DEF
+entry=core  K=1 mcs=3 z=1 : ABC | DEF
+entry=core  K=1 mcs=3 z=3 : ABC | DEF
+entry=core  K=2 mcs=2 z=1 : bruit:ABCDEF
+entry=core  K=2 mcs=2 z=3 : bruit:ABCDEF
+entry=core  K=2 mcs=3 z=1 : bruit:ABCDEF
+entry=core  K=2 mcs=3 z=3 : bruit:ABCDEF
+entry=core  K=3 mcs=2 z=1 : ABC | DEF
+entry=core  K=3 mcs=2 z=3 : ABC | DEF
+entry=core  K=3 mcs=3 z=1 : ABC | DEF
+entry=core  K=3 mcs=3 z=3 : ABC | DEF
+entry=cover K=1 mcs=2 z=1 : ABC | DEF
+entry=cover K=1 mcs=2 z=3 : ABC | DEF
+entry=cover K=1 mcs=3 z=1 : ABC | DEF
+entry=cover K=1 mcs=3 z=3 : ABC | DEF
+entry=cover K=2 mcs=2 z=1 : ABC | DEF
+entry=cover K=2 mcs=2 z=3 : ABC | DEF
+entry=cover K=2 mcs=3 z=1 : ABC | DEF
+entry=cover K=2 mcs=3 z=3 : ABC | DEF
+entry=cover K=3 mcs=2 z=1 : ABC | DEF
+entry=cover K=3 mcs=2 z=3 : ABC | DEF
+entry=cover K=3 mcs=3 z=1 : ABC | DEF
+entry=cover K=3 mcs=3 z=3 : ABC | DEF
+--- variante CD = 1980
+entry=core  K=1 mcs=2 z=1 : bruit:ABCDEF
+entry=core  K=1 mcs=2 z=3 : bruit:ABCDEF
+entry=core  K=1 mcs=3 z=1 : bruit:ABCDEF
+entry=core  K=1 mcs=3 z=3 : bruit:ABCDEF
+entry=core  K=2 mcs=2 z=1 : bruit:ABCDEF
+entry=core  K=2 mcs=2 z=3 : bruit:ABCDEF
+entry=core  K=2 mcs=3 z=1 : bruit:ABCDEF
+entry=core  K=2 mcs=3 z=3 : bruit:ABCDEF
+entry=core  K=3 mcs=2 z=1 : ABC | DEF
+entry=core  K=3 mcs=2 z=3 : ABC | DEF
+entry=core  K=3 mcs=3 z=1 : ABC | DEF
+entry=core  K=3 mcs=3 z=3 : ABC | DEF
+entry=cover K=1 mcs=2 z=1 : bruit:ABCDEF
+entry=cover K=1 mcs=2 z=3 : bruit:ABCDEF
+entry=cover K=1 mcs=3 z=1 : bruit:ABCDEF
+entry=cover K=1 mcs=3 z=3 : bruit:ABCDEF
+entry=cover K=2 mcs=2 z=1 : AB | CD | EF
+entry=cover K=2 mcs=2 z=3 : AB | CD | EF
+entry=cover K=2 mcs=3 z=1 : bruit:ABCDEF
+entry=cover K=2 mcs=3 z=3 : bruit:ABCDEF
+entry=cover K=3 mcs=2 z=1 : ABC | DEF
+entry=cover K=3 mcs=2 z=3 : ABC | DEF
+entry=cover K=3 mcs=3 z=1 : ABC | DEF
+entry=cover K=3 mcs=3 z=3 : ABC | DEF
+
+=== Temoin d atteignabilite mutuelle (mhgp10_mreach_cluster epingle, meme tete v10), variante CD = 1980
+K=2 alpha=1 entry=core   -> mcs=2 z=1 : bruit:ABCDEF ; mcs=3 z=1 : bruit:ABCDEF ; mcs=2 z=3 : bruit:ABCDEF ; mcs=3 z=3 : bruit:ABCDEF
+K=2 alpha=1 entry=border -> mcs=2 z=1 : bruit:ABCDEF ; mcs=3 z=1 : bruit:ABCDEF ; mcs=2 z=3 : bruit:ABCDEF ; mcs=3 z=3 : bruit:ABCDEF
+K=2 alpha=2 entry=core   -> mcs=2 z=1 : bruit:ABCDEF ; mcs=3 z=1 : bruit:ABCDEF ; mcs=2 z=3 : bruit:ABCDEF ; mcs=3 z=3 : bruit:ABCDEF
+K=2 alpha=2 entry=border -> mcs=2 z=1 : bruit:ABCDEF ; mcs=3 z=1 : bruit:ABCDEF ; mcs=2 z=3 : bruit:ABCDEF ; mcs=3 z=3 : bruit:ABCDEF
+K=3 alpha=1 entry=core   -> mcs=2 z=1 : bruit:ABCDEF ; mcs=3 z=1 : bruit:ABCDEF ; mcs=2 z=3 : bruit:ABCDEF ; mcs=3 z=3 : bruit:ABCDEF
+K=3 alpha=1 entry=border -> mcs=2 z=1 : bruit:ABCDEF ; mcs=3 z=1 : bruit:ABCDEF ; mcs=2 z=3 : bruit:ABCDEF ; mcs=3 z=3 : bruit:ABCDEF
+K=3 alpha=2 entry=core   -> mcs=2 z=1 : bruit:ABCDEF ; mcs=3 z=1 : bruit:ABCDEF ; mcs=2 z=3 : bruit:ABCDEF ; mcs=3 z=3 : bruit:ABCDEF
+K=3 alpha=2 entry=border -> mcs=2 z=1 : bruit:ABCDEF ; mcs=3 z=1 : bruit:ABCDEF ; mcs=2 z=3 : bruit:ABCDEF ; mcs=3 z=3 : bruit:ABCDEF

@@ -1,0 +1,12 @@
+{"entrees": 73, "dumps_identiques_HEAD_R2": 73, "differents": 0}
+exit=0
+tower_oracle_checks 73 fails 0 cuts 23444
+witness_checks bijections 12574 points 2252 witnesses 3271 verticals 3978 verticals_empty 2905 verticals_points 14292
+structure_checks fusion_links 1744 plateau_births 0 points_linked 1618 verticals_same_level 1973 admitted 1
+dump_checks headers 220 text_controls 6 admitted_plateau 118 flag_checks 9
+thread_checks fils_1 28 fils_2 28 fils_4 28
+mutants 1512 killed 1512 blind_to_old_judge 212
+mutant_classes attache_morte=526/526 attache_plateau=10/10 bloc_absent=30/30 entete=120/120 fantome_fusion=53/53 fantome_naissance=90/90 ordre_absent=30/30 ordre_hors_sequence=21/21 ordre_repete=30/30 plateau_binarise=369/369 verticale=233/233
+exit=0
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:37.39
+	Exit status: 0

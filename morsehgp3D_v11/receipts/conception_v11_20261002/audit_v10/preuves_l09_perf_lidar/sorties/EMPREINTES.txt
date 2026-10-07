@@ -1,0 +1,28 @@
+# Empreintes (sha256) des binaires et des entrees utilises par la lentille L09
+# releve le 2026-10-02T08:06:04Z
+# code extrait : 52687f8e532db49c9d7334b49111763a72246e1c ; empreinte de l'ensemble src+cli : 841bffefa081e9c6e4e3bc18287912cf77e676dd42267d7a46fb0afe6d02bd2c
+a3bbad50b81b901c57cea7193bc48d58cce68126e44ae0a225ad678baa3af0cb  build-rel/mhgp10_catalogue
+3d55b8699b30abce635b27dea797468f229f95bfdb332468f42191ad9c0c9360  build-rel/mhgp10_tower
+5df023bd685087a70c4015922f38177ea2480399136ace8f4e80f6536f72713d  build-rel/mhgp10_cluster
+3b2d050ebcc2729c97079a4764a5a74e2d07326fbe8f20ccce2d09b5fb01b827  build-v3/mhgp10_catalogue
+a014333aefb8919569cdb2b9c1ed9932d99993164db09ad2b274a9aeea705341  instr/build-tsc/mhgp10_catalogue
+2b23d54748ce41ceab5859adb19027db76fda1b0fbcede1d5af4f9b1dbe78388  instr/build-mom/mhgp10_catalogue
+c40d3627aad7c90f649cffb50e2355fef38f14f58f24827ae588e3396c7a0176  instr/build-ttsc/mhgp10_tower
+581cf9b2af435be294794554c1d2955d64d65cd75bd24c92170e378df16ee86f  instr/build-rounds/mhgp10_catalogue
+c1c6e51e3555f4272dcdbee24ad9656661d377a2edf954a8d49e71185506f0f0  /workspaces/E-HGP/build/v10-perf/juge/composition/bin/mhgp10_tower
+d00a0e993915fe3609fd8551e22f4a8622dfd65c025e7b24012e4d3b2666c729  /workspaces/E-HGP/build/v10-perf/juge/composition/bin/mhgp10_catalogue
+a3bbad50b81b901c57cea7193bc48d58cce68126e44ae0a225ad678baa3af0cb  /workspaces/E-HGP/build/v10-perf/juge/composition/bin/mhgp10_catalogue.base
+0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf  /workspaces/E-HGP/build/v10-g4-data-s1/lidar00_full.u32le
+ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f  /workspaces/E-HGP/build/v10-g4-data-s1/lidar01_full.u32le
+a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af  /workspaces/E-HGP/build/v10-g4-data-s1/lidar02_full.u32le
+e115280415b11e080ec32ecef3f3cad6a1bb2b66799688083c29a02a9f36c15c  /workspaces/E-HGP/build/v10-g4-data-s1/lidar01_quarter_x_neg_y_neg.u32le
+47f05b7845a8e9ecf1dfbd005eb9242ac41a8e8d6421b27d9c2b481992d2f9f7  /workspaces/E-HGP/build/v10-g4-data-s1/lidar02_quarter_x_nonneg_y_nonneg.u32le
+6bf52ade974020626dd985e3fd7e0189e5dc9f5ab6fbb798fdf9cf0b1c26f64b  /workspaces/E-HGP/build/v10-lidar-demos/_cache/scenes/01_velos_en_rang/sites.u32le
+eebac92997af328db682827751b3d7d7584ee6bf58d2bea15b35f87e88775edd  /workspaces/E-HGP/build/v10-lidar-demos/_cache/scenes/02_velos_contre_facade/sites.u32le
+ff5e48d5097928c05451379e00ada6dd2ee4b7b82a524cbdd1edff908fc9eab3  /workspaces/E-HGP/build/v10-lidar-demos/_cache/scenes/03_pieton_contre_facade/sites.u32le
+4e1f9702d9ed443d5fcfad6fcab67118820270f6233dc2e7ece2c1e93e112925  /workspaces/E-HGP/build/v10-lidar-demos/_cache/scenes/04_velos_en_rang_avec_sol/sites.u32le
+9db193d20ce544de03ec305cfe199edb107da73df20385a815369d8e4933e8f1  /workspaces/E-HGP/build/v10-lidar-demos/_cache/scenes/05_temoin_voitures_en_file/sites.u32le
+114fbe26150686a85d49fd6a3be481452c09bbe14bf455485350d6bfdcc82eb1  /workspaces/E-HGP/build/v11-worktree/Zoltan/demos/recherche/criblage_08.jsonl
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+cmake version 3.28.3
+model name	: AMD EPYC 7763 64-Core Processor

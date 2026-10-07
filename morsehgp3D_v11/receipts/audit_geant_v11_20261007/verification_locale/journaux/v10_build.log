@@ -1,0 +1,18 @@
+[  8%] Building CXX object CMakeFiles/mhgp10_core.dir/src/core/buffer.cpp.o
+[ 16%] Building CXX object CMakeFiles/mhgp10_core.dir/src/sched/pool.cpp.o
+[ 25%] Building CXX object CMakeFiles/mhgp10_core.dir/src/cloud/cloud.cpp.o
+[ 33%] Building CXX object CMakeFiles/mhgp10_core.dir/src/cloud/site_tree.cpp.o
+[ 41%] Building CXX object CMakeFiles/mhgp10_core.dir/src/arith/geometry.cpp.o
+[ 50%] Building CXX object CMakeFiles/mhgp10_core.dir/src/catalogue/generator.cpp.o
+[ 58%] Building CXX object CMakeFiles/mhgp10_core.dir/src/tower/tower.cpp.o
+[ 66%] Building CXX object CMakeFiles/mhgp10_core.dir/src/points/dendrogram.cpp.o
+[ 75%] Building CXX object CMakeFiles/mhgp10_core.dir/src/head/head.cpp.o
+[ 83%] Linking CXX static library libmhgp10_core.a
+[ 83%] Built target mhgp10_core
+[ 91%] Building CXX object CMakeFiles/mhgp10_catalogue.dir/cli/mhgp10_catalogue.cpp.o
+[100%] Linking CXX executable mhgp10_catalogue
+[100%] Built target mhgp10_catalogue
+[ 83%] Built target mhgp10_core
+[ 91%] Building CXX object CMakeFiles/mhgp10_tower.dir/cli/mhgp10_tower.cpp.o
+[100%] Linking CXX executable mhgp10_tower
+[100%] Built target mhgp10_tower

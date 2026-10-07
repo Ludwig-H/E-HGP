@@ -1,0 +1,26 @@
+# Fri Oct  2 06:56:46 UTC 2026 ; bords de l'entree, HEAD afb081774
+fichier de 2 points + 1 octets : code=0 status=ok n=2 boules=1
+fichier de 2 points + 4 octets : code=0 status=ok n=2 boules=1
+fichier de 2 points + 8 octets : code=0 status=ok n=2 boules=1
+fichier de 2 points + 11 octets : code=0 status=ok n=2 boules=1
+fichier vide : (2, {'status': 'invalid_input', 'reason': 'empty_input'})
+fichier absent : (2, {})
+8 coins u18, K=5, --leaf=0 : code=0 boules=27 noeuds=1 feuilles=1 t=0.00s
+8 coins u18, K=5, --leaf=8 : code=0 boules=27 noeuds=1 feuilles=1 t=0.01s
+8 coins u18, K=5, --leaf=6 : code=DELAI boules=None noeuds=None feuilles=None t=15.02s
+8 coins u18, K=5, --leaf=4 : code=DELAI boules=None noeuds=None feuilles=None t=15.02s
+8 coins u18, K=5, --leaf=2 : code=DELAI boules=None noeuds=None feuilles=None t=15.02s
+--k=0 : code=2 status=invalid_input raison=kmax_out_of_range boules=None
+--k=12 : code=0 status=ok raison=None boules=27
+--k=13 : code=2 status=invalid_input raison=kmax_out_of_range boules=None
+coordonnee 262144 : (2, {'status': 'invalid_input', 'reason': 'coordinate_out_of_domain'})
+doublons, K=1 : code=0 n=6 sites=4 boules=7 ponderees=5
+doublons, K=2 : code=0 n=6 sites=4 boules=8 ponderees=6
+doublons, K=3 : code=0 n=6 sites=4 boules=8 ponderees=6
+doublons, K=5 : code=0 n=6 sites=4 boules=8 ponderees=6
+n=1 : code=0 status=ok boules=0
+n=2 : code=0 status=ok boules=1 noeuds=1
+--k=abc : code=-6 status=None stderr=terminate called after throwing an instance of 'std::invalid_argument' |   what():  stoi
+--k=2x : code=0 status=ok stderr=
+--threads=x : code=-6 status=None stderr=terminate called after throwing an instance of 'std::invalid_argument' |   what():  stoul
+--leaf=-1 : code=0 status=ok stderr=

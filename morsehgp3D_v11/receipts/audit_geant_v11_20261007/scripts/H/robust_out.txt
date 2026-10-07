@@ -1,0 +1,61 @@
+=== (1) Leviers retires : statistique du juge (gm des medianes), complete / sans 1re prise GPU / sans rep 0
+G1_AVX2    sp+prefix      seuil 0.85  gm=0.895 | sans 1re GPU=0.891 | sans rep0=0.894 | paires(sans rep0) gm=0.899 IC95~[0.870,0.930] n=30 neg=27
+G1_AVX2    domain         seuil 1.0   gm=0.964 | sans 1re GPU=0.965 | sans rep0=0.965 | paires(sans rep0) gm=0.972 IC95~[0.951,0.993] n=30 neg=23
+G1_AVX2    wall           seuil None  gm=0.983 | sans 1re GPU=0.983 | sans rep0=0.985 | paires(sans rep0) gm=0.984 IC95~[0.970,0.999] n=30 neg=19
+frontiere  prefix         seuil 0.8   gm=0.859 | sans 1re GPU=0.860 | sans rep0=0.861 | paires(sans rep0) gm=0.863 IC95~[0.845,0.882] n=30 neg=30
+frontiere  domain         seuil 1.0   gm=0.980 | sans 1re GPU=0.979 | sans rep0=0.966 | paires(sans rep0) gm=0.967 IC95~[0.945,0.989] n=30 neg=19
+frontiere  wall           seuil None  gm=0.985 | sans 1re GPU=0.985 | sans rep0=0.976 | paires(sans rep0) gm=0.980 IC95~[0.960,1.000] n=30 neg=21
+graines    cells5         seuil 0.85  gm=0.865 | sans 1re GPU=0.862 | sans rep0=0.860 | paires(sans rep0) gm=0.872 IC95~[0.834,0.912] n=30 neg=25
+graines    forest         seuil 1.0   gm=0.986 | sans 1re GPU=0.985 | sans rep0=0.978 | paires(sans rep0) gm=0.992 IC95~[0.973,1.011] n=30 neg=18
+graines    wall           seuil None  gm=0.998 | sans 1re GPU=0.997 | sans rep0=0.995 | paires(sans rep0) gm=1.006 IC95~[0.987,1.025] n=30 neg=16
+combines   cells+closes5  seuil 0.9   gm=0.950 | sans 1re GPU=0.939 | sans rep0=0.950 | paires(sans rep0) gm=0.959 IC95~[0.919,1.000] n=30 neg=21
+combines   forest         seuil 1.0   gm=0.983 | sans 1re GPU=0.984 | sans rep0=0.984 | paires(sans rep0) gm=0.977 IC95~[0.957,0.998] n=30 neg=20
+combines   wall           seuil None  gm=1.000 | sans 1re GPU=0.997 | sans rep0=0.994 | paires(sans rep0) gm=0.989 IC95~[0.974,1.004] n=30 neg=17
+annonces   pubcpu5        seuil 0.9   gm=0.966 | sans 1re GPU=0.973 | sans rep0=0.967 | paires(sans rep0) gm=0.967 IC95~[0.920,1.016] n=30 neg=16
+annonces   forest         seuil 1.0   gm=0.973 | sans 1re GPU=0.975 | sans rep0=0.967 | paires(sans rep0) gm=0.974 IC95~[0.939,1.010] n=30 neg=16
+annonces   wall           seuil None  gm=0.980 | sans 1re GPU=0.980 | sans rep0=0.971 | paires(sans rep0) gm=0.978 IC95~[0.955,1.001] n=30 neg=20
+cohortes   births         seuil 0.8   gm=0.529 | sans 1re GPU=0.528 | sans rep0=0.526 | paires(sans rep0) gm=0.519 IC95~[0.497,0.542] n=30 neg=30
+cohortes   forest         seuil 1.0   gm=0.942 | sans 1re GPU=0.940 | sans rep0=0.955 | paires(sans rep0) gm=0.947 IC95~[0.917,0.977] n=30 neg=21
+cache      wall           seuil 1.0   gm=0.972 | sans 1re GPU=0.973 | sans rep0=0.973 | paires(sans rep0) gm=0.973 IC95~[0.955,0.992] n=30 neg=23
+tas        wall           seuil None  gm=0.965 | sans 1re GPU=0.966 | sans rep0=0.976 | paires(sans rep0) gm=0.961 IC95~[0.937,0.985] n=30 neg=22
+thp        wall           seuil None  gm=1.088 | sans 1re GPU=1.087 | sans rep0=1.090 | paires(sans rep0) gm=1.082 IC95~[1.059,1.106] n=30 neg=2
+
+=== (2) A/A : statistique gm(medianes 6 vs 6) sur metriques non touchees par le levier
+  G1_AVX2      forest       gm=1.0112 (sans rep0 1.0077) ratios cellule min 0.977 max 1.033
+  frontiere    forest       gm=0.9839 (sans rep0 0.9925) ratios cellule min 0.931 max 1.089
+  graines      domain       gm=1.0017 (sans rep0 0.9988) ratios cellule min 0.917 max 1.068
+  combines     domain       gm=1.0051 (sans rep0 0.9971) ratios cellule min 0.964 max 1.056
+  annonces     domain       gm=0.9855 (sans rep0 0.9843) ratios cellule min 0.919 max 1.067
+  cohortes     domain       gm=1.0177 (sans rep0 1.0142) ratios cellule min 0.977 max 1.044
+  o2           domain       gm=1.0103 (sans rep0 1.0139) ratios cellule min 0.986 max 1.056
+  constantes   domain       gm=1.0062 (sans rep0 0.9968) ratios cellule min 0.948 max 1.083
+  AA_o1place3  wall         gm=1.0015 (sans rep0 1.0029) ratios cellule min 0.976 max 1.021
+  AA_o1place3  domain       gm=1.0085 (sans rep0 1.0186) ratios cellule min 0.980 max 1.075
+  AA_o1place3  forest       gm=0.9937 (sans rep0 0.9908) ratios cellule min 0.901 max 1.068
+  AA_o1place3  prefix       gm=1.0020 (sans rep0 1.0023) ratios cellule min 0.986 max 1.038
+  AA_o1place3  single_pass  gm=1.0144 (sans rep0 1.0340) ratios cellule min 0.958 max 1.109
+  forest     n=3 moyenne log=-0.0038 sd log=0.0139 -> rms=0.0120
+  all_stage  n=11 moyenne log=0.0023 sd log=0.0107 -> rms=0.0104
+  domain     n=7 moyenne log=0.0050 sd log=0.0100 -> rms=0.0105
+
+=== (3) Bruit par prise (sans rep 0) : sd des log-rapports apparies par cellule, par metrique et voie
+  AA_o1place3  wall           sd_paire CPU=0.0744 GPU=0.0518 global=0.0641
+  AA_o1place3  domain         sd_paire CPU=0.0950 GPU=0.0296 global=0.0704
+  AA_o1place3  forest         sd_paire CPU=0.1031 GPU=0.1041 global=0.1036
+  AA_o1place3  prefix         sd_paire CPU=0.0571 GPU=0.0548 global=0.0559
+  AA_o1place3  single_pass    sd_paire CPU=0.1229 GPU=0.0749 global=0.1018
+  G1_AVX2      forest         sd_paire CPU=0.0384 GPU=0.0414 global=0.0399
+  frontiere    forest         sd_paire CPU=0.0988 GPU=0.0816 global=0.0906
+  graines      domain         sd_paire CPU=0.1091 GPU=0.0230 global=0.0789
+  combines     domain         sd_paire CPU=0.0636 GPU=0.0472 global=0.0560
+  annonces     domain         sd_paire CPU=0.0780 GPU=0.0235 global=0.0576
+  graines      cells5         sd_paire CPU=0.1200 GPU=0.0975 global=0.1093
+  combines     cells+closes5  sd_paire CPU=0.1176 GPU=0.1190 global=0.1183
+  annonces     pubcpu5        sd_paire CPU=0.1715 GPU=0.0916 global=0.1375
+  G1_AVX2      sp+prefix      sd_paire CPU=0.0808 GPU=0.0540 global=0.0687
+  frontiere    prefix         sd_paire CPU=0.0360 GPU=0.0458 global=0.0412
+  G1_AVX2      wall           sd_paire CPU=0.0482 GPU=0.0225 global=0.0376
+  annonces     wall           sd_paire CPU=0.0758 GPU=0.0290 global=0.0574
+  graines      wall           sd_paire CPU=0.0692 GPU=0.0219 global=0.0513
+  combines     wall           sd_paire CPU=0.0502 GPU=0.0312 global=0.0418
+  frontiere    wall           sd_paire CPU=0.0556 GPU=0.0475 global=0.0517

@@ -1,0 +1,10 @@
+head alpha_two code=0 | bat HDBSCAN pour tour_contre_hdb, sans perte significative ailleurs;bat HDBSCAN ; Δ = +0,700 [+0,700 ; +0,700], p_Holm = 0,33, 4 victoires / 0 défaites / 0 égalités ; non-infériorité de la tour à la marge 0,02 établie; | 
+head alpha_nan code=0 | pas de différence significative au sens préenregistré;pas de différence significative ; Δ = +0,700 [+0,700 ; +0,700], p_Holm = 0,11, 4 victoires / 0 défaites / 0 égalités ; non-infériorité de la tour à la marge 0,02 établie; | 
+head ari_125 code=0 | pas de différence significative au sens préenregistré;pas de différence significative ; Δ = +1,150 [+1,150 ; +1,150], p_Holm = 0,11, 4 victoires / 0 défaites / 0 égalités ; non-infériorité de la tour à la marge 0,02 établie; | 
+head duplicate_ari_header code=0 | pas de différence significative au sens préenregistré;pas de différence significative ; Δ = +0,700 [+0,700 ; +0,700], p_Holm = 0,11, 4 victoires / 0 défaites / 0 égalités ; non-infériorité de la tour à la marge 0,02 établie; | 
+head baseline code=0 | pas de différence significative au sens préenregistré;pas de différence significative ; Δ = +0,700 [+0,700 ; +0,700], p_Holm = 0,11, 4 victoires / 0 défaites / 0 égalités ; non-infériorité de la tour à la marge 0,02 établie; | 
+final alpha_two code=2 | REFUS : preenregistrement hors schema : decision.alpha = 2 : reel dans (0, 0.05] attendu; | 
+final alpha_nan code=2 | REFUS : preenregistrement hors schema : decision.alpha = nan : reel dans (0, 0.05] attendu; | 
+final ari_125 code=2 | REFUS : 4 lignes non refusees a score hors domaine (ARI_s hors [-1/2, 1] ou AMI_nc > 1, tolerance 1e-09), par exemple spherical_n8000_easy_nu0_s413782755028338216/tour, spherical_n8000_easy_nu0_s519455872935020925/tour, spherical_n8000_easy_nu0_s105448945945307736/tour; | 
+final duplicate_ari_header code=2 | REFUS : colonnes dupliquees dans l en-tete de results.csv : ari_s; | 
+final baseline code=0 | pas de différence significative au sens préenregistré;pas de différence significative ; Δ = +0,700 [+0,700 ; +0,700], p_Holm = 0,11, 4 victoires / 0 défaites / 0 égalités ; non-infériorité de la tour à la marge 0,02 établie; | 

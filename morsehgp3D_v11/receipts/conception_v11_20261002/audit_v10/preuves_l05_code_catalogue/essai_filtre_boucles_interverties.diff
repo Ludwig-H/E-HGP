@@ -1,0 +1,53 @@
+--- a(sonde)/morsehgp3D_v10/src/catalogue/generator.cpp	2026-10-02 07:46:17.695984498 +0000
++++ b(variante B)/morsehgp3D_v10/src/catalogue/generator.cpp	2026-10-02 07:54:40.443981312 +0000
+@@ -602,29 +602,33 @@
+   L.led.cnt[C_FILTER_SITES] += np;
+   L.led.cnt[C_FILTER_NODES_Y] += ny;
+   // sortie sans branchement, dans l'ordre de la liste parente
++  // AUDIT L05, variante B : dominateur en boucle externe, sites en boucle interne sur tableaux separes (ordre de
++  // GEN_v2 § 6.2), sans sortie anticipee ; meme decision que HEAD (le poids total des dominateurs dans Y).
+   cand.resize(np);
+   u32 m = 0;
+-  u64 tests = 0;
++  u64 tests = u64(np) * ny;
++  static thread_local std::vector<i64> bx, by, bz, ba, bw;
++  bx.resize(np); by.resize(np); bz.resize(np); ba.resize(np); bw.assign(np, 0);
++  i64* __restrict qx = bx.data();
++  i64* __restrict qy = by.data();
++  i64* __restrict qz = bz.data();
++  i64* __restrict qa = ba.data();
++  i64* __restrict qw = bw.data();
+   for (u32 t = 0; t < np; ++t) {
+     const u32 s = parent[t];
+     const i64 a = C.X[s].x - Q.lo[0], b = C.X[s].y - Q.lo[1], c = C.X[s].z - Q.lo[2];
+-    const i64 px = 2 * hx * a, py = 2 * hy * b, pz = 2 * hz * c, pa = a * a + b * b + c * c;
+-    auto weight = [&](u32 r0, u32 r1) {  // poids des dominateurs de x parmi Y[r0, r1)
+-      i64 w = 0;
+-      for (u32 r = r0; r < r1; ++r) {
+-        const i64 d = std::max<i64>(px - yx[r], 0) + std::max<i64>(py - yy[r], 0) + std::max<i64>(pz - yz[r], 0);
+-        w += -i64(pa - ya[r] > d) & yw[r];  // masque : sans branchement
+-      }
+-      return w;
+-    };
+-    i64 dom = weight(0, s0);
+-    tests += s0;
+-    if (dom < C.K) {
+-      dom += weight(s0, ny);
+-      tests += ny - s0;
++    qx[t] = 2 * hx * a; qy[t] = 2 * hy * b; qz[t] = 2 * hz * c; qa[t] = a * a + b * b + c * c;
++  }
++  for (u32 r = 0; r < ny; ++r) {
++    const i64 rx = yx[r], ry = yy[r], rz = yz[r], ra = ya[r], rw = yw[r];
++    for (u32 t = 0; t < np; ++t) {
++      const i64 d = std::max<i64>(qx[t] - rx, 0) + std::max<i64>(qy[t] - ry, 0) + std::max<i64>(qz[t] - rz, 0);
++      qw[t] += -i64(qa[t] - ra > d) & rw;
+     }
+-    cand[m] = s;
+-    m += dom < C.K;
++  }
++  for (u32 t = 0; t < np; ++t) {
++    cand[m] = parent[t];
++    m += qw[t] < C.K;
+   }
+   cand.resize(m);
+   L.led.filter_tests += tests;
