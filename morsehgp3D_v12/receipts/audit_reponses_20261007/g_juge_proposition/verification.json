@@ -1,0 +1,13 @@
+{
+  "capture_sha256": "570f7985a6f67334925bd8750f05c8ea6e49c3214545072f3d1994f679f9f257",
+  "cases_per_mode": 15,
+  "ctest_executed": false,
+  "native_execution": false,
+  "no_gcp": true,
+  "normal_code": 0,
+  "normal_optimized_identical": true,
+  "optimized_code": 0,
+  "pin": "99fa832466f65b3278bb62ad2156dae805efab5b",
+  "prior_cases_reused": 7,
+  "product_changed": false
+}

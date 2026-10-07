@@ -1,0 +1,32 @@
+--- a/morsehgp3D_v12/src/catalogue/device_cuda.cu
++++ b/morsehgp3D_v12/src/catalogue/device_cuda.cu
+@@ -93,8 +93,13 @@
+     MHGP12_TRY(reservation.reserve(cap * sizeof(T), budget));
+     T* fresh = nullptr;
+     MHGP12_TRY(check(cudaMalloc(reinterpret_cast<void**>(&fresh), cap * sizeof(T))));
+-    if (keep != 0) MHGP12_TRY(check(cudaMemcpyAsync(fresh, a.ptr, keep * sizeof(T), cudaMemcpyDeviceToDevice, stream)));
+-    MHGP12_TRY(sync());  // l'ancien tableau peut servir a des noyaux en file
++    Outcome moved{};
++    if (keep != 0) moved = check(cudaMemcpyAsync(fresh, a.ptr, keep * sizeof(T), cudaMemcpyDeviceToDevice, stream));
++    if (moved.ok()) moved = sync();  // l'ancien tableau peut servir a des noyaux en file
++    if (!moved.ok()) {
++      cudaFree(fresh);
++      return moved;
++    }
+     if (a.ptr != nullptr) cudaFree(a.ptr);
+     device_bytes += (cap - a.cap) * sizeof(T);
+     a.ptr = fresh;
+@@ -122,7 +127,12 @@
+     staging_bytes = 0;
+     staging_reservation.reset();
+     MHGP12_TRY(staging_reservation.reserve(bytes, budget));
+-    MHGP12_TRY(check(cudaMallocHost(reinterpret_cast<void**>(&staging), bytes)));
++    const Outcome made = check(cudaMallocHost(reinterpret_cast<void**>(&staging), bytes));
++    if (!made.ok()) {
++      staging = nullptr;
++      staging_reservation.reset();
++      return made;
++    }
+     staging_bytes = bytes;
+     ++allocations;
+     return {};

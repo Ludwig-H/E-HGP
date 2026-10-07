@@ -1,0 +1,152 @@
+--- a/morsehgp3D_v12/tests/tower/g_determinism.py
++++ b/morsehgp3D_v12/tests/tower/g_determinism.py
+@@ -4,6 +4,10 @@
+ compteurs de l'objet et du travail : bench/tower_export.hpp) et les lignes par ordre doivent etre identiques ; par
+ ordre, invariants globaux (jamais un juge exhaustif) : un controle de decroissance par plus petite boule et par succes
+ de sonde, une longueur de chaine par representant, chaque representant termine par une sonde ou un arret.
++Admission : une passe tour_g conforme a K/fils, tous les ordres 1..min(K,sites), naissances k1 = sites, compteurs
++entiers non negatifs, histogrammes de 16 cases et SHA-256 complet ; au moins deux nombres de fils distincts.
++Le generateur deduplique : --uniform=N borne les sites par N sans imposer leur egalite. Le digest complet est compare
++entre fils ; seul son affichage reste abrege pour conserver la ligne des wrappers existants.
+ 
+     g_determinism.py <mhgp12_tower_probe> <cas> (--uniform=N,GRAINE,BITS | --data=NOM) --k=K [--leaf=L]
+                      --threads=W1,W2,...
+@@ -15,22 +19,68 @@
+ """
+ import json
+ import os
++import re
+ import subprocess
+ import sys
+ 
+ 
+-def run(probe, source, options, threads):
++OBJECT_FIELDS = ('births', 'cells', 'inert_cells', 'extended_cells', 'representatives')
++WORK_FIELDS = ('probes', 'first_probe_hits', 'probe_hits_after_steps', 'route_t1', 'route_cert_table',
++               'route_cert_census', 'route_fallback_table', 'route_fallback_census', 'fallback_no_proposal',
++               'fallback_not_in_part', 'fallback_certificate', 'census_saturated', 'census_complete',
++               'census_sites', 'census_sites_max', 'census_nodes', 'jumps_catalogue', 'jumps_census',
++               'inert_steps', 'cell_stops', 'birth_stops', 'controls', 'max_chain')
++
++
++def natural(value):
++    return type(value) is int and value >= 0
++
++
++def decimal(text):
++    return re.fullmatch(r'[0-9]+', text) is not None
++
++
++def run(probe, source, options, threads, kmax, site_limit):
+     cmd = [probe] + source + options + ['--threads=%d' % threads, '--digest']
+-    done = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+-    if done.returncode != 0:
+-        return done.returncode, None, None
+-    orders, digest = [], None
+-    for line in done.stdout.decode('ascii', 'replace').splitlines():
+-        record = json.loads(line)
+-        if record.get('phase') == 'ordre':
+-            orders.append(record)
+-        elif record.get('phase') == 'digest':
+-            digest = record['resolution_sha256']
++    try:
++        done = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
++        if done.returncode != 0:
++            return done.returncode, None, None
++        rows = [json.loads(line) for line in done.stdout.decode('utf-8').splitlines()]
++    except (OSError, ValueError, UnicodeError):
++        return 2, None, None
++    if len(rows) < 3 or not all(isinstance(r, dict) for r in rows):
++        return 2, None, None
++    # Une passe, suivie de tous les ordres et d'une seule empreinte : schema actuel de tower_probe.cpp.
++    stage, orders, last = rows[0], rows[1:-1], rows[-1]
++    numeric = ('pass', 'order', 'coord_bits', 'kmax', 'threads', 'sites', 'wall_ns')
++    if stage.get('phase') != 'tour_g' or stage.get('status') != 'ok' or stage.get('reason') != 'none' or \
++            not all(natural(stage.get(field)) for field in numeric):
++        return 2, None, None
++    sites = stage['sites']
++    if stage['pass'] != 0 or stage['order'] != 0 or not 1 <= stage['coord_bits'] <= 32 or \
++            stage['kmax'] != kmax or stage['threads'] != threads or not 1 <= sites <= 0xFFFFFFFF or \
++            (site_limit is not None and sites > site_limit):
++        return 2, None, None
++    if [r.get('k') for r in orders] != list(range(1, min(kmax, sites) + 1)):
++        return 2, None, None
++    for record in orders:
++        obj, work = record.get('objet'), record.get('travail')
++        if record.get('phase') != 'ordre' or not natural(record.get('k')) or not isinstance(obj, dict) or \
++                not isinstance(work, dict) or set(obj) != set(OBJECT_FIELDS) or \
++                set(work) != set(WORK_FIELDS) | {'chaines'}:
++            return 2, None, None
++        chains = work['chaines']
++        if not all(natural(obj[key]) for key in OBJECT_FIELDS) or \
++                not all(natural(work[key]) for key in WORK_FIELDS) or not isinstance(chains, list) or \
++                len(chains) != 16 or not all(natural(value) for value in chains):
++            return 2, None, None
++    if orders[0]['objet']['births'] != sites:
++        return 2, None, None
++    digest = last.get('resolution_sha256')
++    if set(last) != {'phase', 'resolution_sha256'} or last.get('phase') != 'digest' or \
++            not isinstance(digest, str) or re.fullmatch(r'[0-9a-f]{64}', digest) is None:
++        return 2, None, None
+     return 0, orders, digest
+ 
+ 
+@@ -55,25 +105,48 @@
+         print('g_determinism_refus usage')
+         return 2
+     probe, case, source, options, threads = argv[1], argv[2], [], [], None
++    seen, kmax, site_limit = set(), None, None
+     for item in argv[3:]:
+-        if item.startswith('--uniform='):
+-            source = [item]
+-        elif item.startswith('--data='):
+-            stem = os.path.join(os.environ.get('MHGP12_DATA_DIR', ''), item[len('--data='):])
++        key, separator, value = item.partition('=')
++        if not separator or key in seen:
++            print('g_determinism_refus option %s' % item)
++            return 2
++        seen.add(key)
++        if key == '--uniform':
++            parts = value.split(',')
++            if source or len(parts) != 3 or not all(decimal(v) for v in parts):
++                return 2
++            count, seed, bits = map(int, parts)
++            if not 1 <= count <= 1 << 26 or seed > 0xFFFFFFFFFFFFFFFF or not 1 <= bits <= 32:
++                return 2
++            source, site_limit = [item], count  # sites distincts <= N : synthetic() supprime les doublons.
++        elif key == '--data':
++            if source or not value:
++                return 2
++            stem = os.path.join(os.environ.get('MHGP12_DATA_DIR', ''), value)
+             source = [stem + '.u32le', stem + '.ids.u32le']
+-        elif item.startswith('--threads='):
+-            threads = [int(v) for v in item[len('--threads='):].split(',') if v.isdigit()]
+-        elif item.startswith('--k=') or item.startswith('--leaf='):
++        elif key == '--threads':
++            parts = value.split(',')
++            if not all(decimal(v) for v in parts):
++                return 2
++            threads = [int(v) for v in parts]
++            if len(threads) < 2 or len(set(threads)) != len(threads) or any(v < 1 for v in threads):
++                return 2
++        elif key in ('--k', '--leaf'):
++            if not decimal(value) or not 1 <= int(value) <= (12 if key == '--k' else 1 << 20):
++                return 2
+             options.append(item)
++            if key == '--k':
++                kmax = int(value)
+         else:
+             print('g_determinism_refus option %s' % item)
+             return 2
+-    if not source or not threads or len(threads) < 2:
+-        print('g_determinism_refus source ou fils absents')
++    if not source or threads is None or kmax is None:
++        print('g_determinism_refus source, ordre ou fils absents')
+         return 2
+     first = None
+     for w in threads:
+-        code, orders, digest = run(probe, source, options, w)
++        code, orders, digest = run(probe, source, options, w, kmax, site_limit)
+         if code != 0 or digest is None or not orders:
+             print('g_determinism_refus sonde code %d a %d fils' % (code, w))
+             return 2

@@ -1,0 +1,12 @@
+{
+  "patch_sha256": "71c1a452512f48ac2d9ec9132f208e903f4c25df836ec6107b3106c266f051d5",
+  "pin": "99fa832466f65b3278bb62ad2156dae805efab5b",
+  "proposed_judge_sha256": "f7a301880d5e432592d5433cd3374451b1a7d83043fcbcef50225f147113c90b",
+  "scope": "proposition hors produit; meme CLI et ligne finale",
+  "sources_sha256": {
+    "morsehgp3D_v12/bench/tower_export.hpp": "b7f27e021ef935148d9a1962d1b6f7137d84d2d142d3555823a704f2c2e8bb73",
+    "morsehgp3D_v12/bench/tower_probe.cpp": "4a98efd16e70e8f05afcbb181bdfbf994387fd708a9161eef9585dca2c166643",
+    "morsehgp3D_v12/tests/tower/g_determinism.py": "beb8c3a1c873ebb14aaf81ee94d746ea0d6517ad8d6521f5c0131fd5f6ad977f",
+    "morsehgp3D_v12/tests/tower/tests.cmake": "a91e2db54ab086dbcba4a7ab19367acad3a8d7c9f8191c188ac53c09a427175f"
+  }
+}

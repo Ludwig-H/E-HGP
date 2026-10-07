@@ -1,0 +1,168 @@
+{
+  "schema": "mhgp12.cuda_integration_static.v1",
+  "captured_utc": "2026-10-07T21:40:16+00:00",
+  "published_main_commit": "9c5809919fa4fcaa6303f9265aadbad60a7ddeea",
+  "prototype_state": "local modifié, non publié au moment de la lecture",
+  "comparison": {
+    "before_sha256": "620c840df6a8c3c9819bf1719754ba50f69a7d1ef7e710b031ecc0f9218fd131",
+    "after_sha256": "5e215fe211a2e9f404986debc600cba4938c40dfde65e615e3adeaa78c568ec7",
+    "minimal_diff": "cleanup.diff",
+    "reconstructed_old_source_matches_full_hash": true,
+    "other_three_device_sources_unchanged": true
+  },
+  "verdicts": {
+    "grow": "Sorties identifiées corrigées statiquement : cudaFree(fresh) précède retour sur erreur copie/sync et destruction de la réservation.",
+    "stage": "Refus cudaMallocHost : staging=null et staging_reservation.reset() avant retour ; charge sans allocation identifiée supprimée.",
+    "runtime_limit": "Aucun build ni injection CUDA ; libérations toujours best effort si pilote défaillant. Pas de qualification globale mémoire.",
+    "rewrites": "Non corrigé : pipeline/driver/leaves inchangés ; leaves_rewritten absent de device_diagnostics et de DeviceTotals, malgré ReplayKernel."
+  },
+  "local_g": {
+    "attribution": "Chiffres du rapport développeur local, non rejoués ; codespace partagé, aucune nouvelle mesure G4.",
+    "ng00_k5_reported": {
+      "threads": 1,
+      "g_seconds": 2.83,
+      "resolve_seconds": 2.67,
+      "order5_seconds": 1.58
+    },
+    "ng00_k10_reported": {
+      "threads": 3,
+      "g_seconds": 10.1,
+      "resolve_seconds": 9.56,
+      "tables_seconds": 0.385,
+      "rss_gb_catalogue_included": 1.74
+    },
+    "clock_in": "resolve_tower : préparation/classification des cellules, tables, résolution et contrôles ; reconstruction à chaque appel.",
+    "clock_out": "Entrée, Cloud, index, Pool, catalogue, digest/export, destruction du résultat ; pas T/M/V/R ni FULL.",
+    "tables": "stage.cpp:240-256 distribue déjà les ordres 2..K sur le Pool. Chaque table reste séquentielle dans son ordre. 37/385 ms : valeurs historiques du rapport ; aucun nouveau gain déduit.",
+    "mes_m7_comparison": "Somme locale MES-M7 2.344 s : ordres 2..5 ; resolve_orders produit inclut ordre 1. Le ratio 2.67/2.344 ne prouve pas une régression appariée. À ordre 5 : 1.58 s contre 1.255 s, environ +26 %, mais prises locales historiques non appariées.",
+    "qualification": "342 nuages/21225 cibles et différentiels v11 K5 : portes annoncées par le rapport, non rejouées ici ; pas qualification FULL/G4."
+  },
+  "verification": {
+    "source_bytes_stable_before_after": true,
+    "native_builds": 0,
+    "native_tests": 0,
+    "cuda_calls": 0,
+    "cloud_calls": 0,
+    "licensed_payload_read": false
+  },
+  "sources": [
+    {
+      "origin": "prototype",
+      "path": "morsehgp3D_v12/src/catalogue/device_cuda.cu",
+      "sha256": "5e215fe211a2e9f404986debc600cba4938c40dfde65e615e3adeaa78c568ec7",
+      "bytes": 11136,
+      "lines": 272,
+      "excerpts": [
+        {
+          "first_line": 92,
+          "last_line": 110,
+          "text": "    BudgetReservation reservation;\n    MHGP12_TRY(reservation.reserve(cap * sizeof(T), budget));\n    T* fresh = nullptr;\n    MHGP12_TRY(check(cudaMalloc(reinterpret_cast<void**>(&fresh), cap * sizeof(T))));\n    Outcome moved{};\n    if (keep != 0) moved = check(cudaMemcpyAsync(fresh, a.ptr, keep * sizeof(T), cudaMemcpyDeviceToDevice, stream));\n    if (moved.ok()) moved = sync();  // l'ancien tableau peut servir a des noyaux en file\n    if (!moved.ok()) {\n      cudaFree(fresh);\n      return moved;\n    }\n    if (a.ptr != nullptr) cudaFree(a.ptr);\n    device_bytes += (cap - a.cap) * sizeof(T);\n    a.ptr = fresh;\n    a.cap = cap;\n    a.reservation.swap(reservation);  // l'ancienne reservation est rendue en sortie\n    ++allocations;\n    return {};\n  }\n"
+        },
+        {
+          "first_line": 121,
+          "last_line": 139,
+          "text": "  Outcome stage(u64 bytes) noexcept {\n    bytes = bytes < kStagingMin ? kStagingMin : bytes < kStagingMax ? bytes : kStagingMax;\n    if (staging_bytes >= bytes) return {};\n    MHGP12_TRY(sync());\n    if (staging != nullptr) cudaFreeHost(staging);\n    staging = nullptr;\n    staging_bytes = 0;\n    staging_reservation.reset();\n    MHGP12_TRY(staging_reservation.reserve(bytes, budget));\n    const Outcome made = check(cudaMallocHost(reinterpret_cast<void**>(&staging), bytes));\n    if (!made.ok()) {\n      staging = nullptr;\n      staging_reservation.reset();\n      return made;\n    }\n    staging_bytes = bytes;\n    ++allocations;\n    return {};\n  }\n"
+        }
+      ]
+    },
+    {
+      "origin": "prototype",
+      "path": "morsehgp3D_v12/src/catalogue/device_pipeline.hpp",
+      "sha256": "318fe91d450f7d5dce4ea15451ef396b16482a09da9ca4912dffd8ff5c1266db",
+      "bytes": 11020,
+      "lines": 220,
+      "excerpts": [
+        {
+          "first_line": 148,
+          "last_line": 172,
+          "text": "inline void device_diagnostics(const TraversalDiagnostics& front, const DeviceTotals& t, const fin::FinishStats& f,\n                               u64 traversal_ns, u64 upload_ns, CatalogueDiagnostics& d) noexcept {\n  d.levels = front.levels;\n  d.tasks = front.tasks;\n  d.candidates = front.candidates;\n  d.leaves_narrow = t.tiers[0];\n  d.leaves_medium = t.tiers[1];\n  d.leaves_wide = t.tiers[2];\n  d.leaves_exact = t.tiers[3];\n  d.leaves_virtual_warp = t.tiers[4];\n  d.max_leaf_span = t.max_span;\n  d.traversal_ns = traversal_ns - upload_ns - t.leaves_ns - t.emission_ns;  // parcours seul\n  d.count_ns = t.leaves_ns;                                                 // feuilles\n  d.fill_ns = t.emission_ns;                                                // emission\n  d.levels_ns = f.keys_ns;\n  d.sort_ns = f.sort_ns;\n  d.assemble_ns = f.check_ns + f.emit_ns;\n  d.transfer_ns = upload_ns + f.take_ns;\n  d.table_ns = f.table_ns;\n  d.chains_repaired = f.chains_repaired;\n  d.chain_elements = f.chain_elements;\n  d.batches = t.batches;\n  d.replayed_leaves = t.replayed_leaves;\n  d.replayed_balls = t.replayed_balls;\n}\n"
+        }
+      ]
+    },
+    {
+      "origin": "prototype",
+      "path": "morsehgp3D_v12/src/catalogue/device_driver.hpp",
+      "sha256": "dd04fcbf3060cd16eec3eb30865e8fd31def26dd5d4bad9acc3fc25369fd8792",
+      "bytes": 6446,
+      "lines": 132,
+      "excerpts": [
+        {
+          "first_line": 46,
+          "last_line": 51,
+          "text": "// Comptes et diagnostics accumules sur les lots.\nstruct DeviceTotals {\n  LeafCounts counts{};\n  u64 tiers[5] = {0, 0, 0, 0, 0};\n  u64 max_span = 0, batches = 0, replayed_leaves = 0, replayed_balls = 0;\n  u64 leaves_ns = 0, emission_ns = 0;  // feuilles (classement, comptage J3, decalages) ; emission (rejeu, ecriture)\n"
+        }
+      ]
+    },
+    {
+      "origin": "prototype",
+      "path": "morsehgp3D_v12/src/catalogue/device_leaves.hpp",
+      "sha256": "bb47089fd476387bb9df42a2f5e930a126d6809180299bad41b08f04d19718bd",
+      "bytes": 13748,
+      "lines": 369,
+      "excerpts": [
+        {
+          "first_line": 235,
+          "last_line": 247,
+          "text": "struct ReplayKernel {\n  LeafView v;\n  FillView f;\n  using Shared = LeafShared<32>;\n  MHGP12_HD void operator()(u64 i, Shared& shared) const {\n    const LeafClass c = f.cls[i];\n    if (c.cause != 0 || f.balls[i] <= kCase) return;\n    WriteSink sink{v.sites + v.leaves[i].begin, f.records + f.ball_at[i], f.population,\n                   f.population_base + f.population_at[i], f.balls[i], f.incidences[i]};\n    LeafCounts counts;\n    const u32 status = run_leaf<32, Narrow>(leaf_input(v, i, c), shared, counts, sink);\n    if (status != kLeafOk || sink.overflow || sink.balls != f.balls[i] || sink.incidences != f.incidences[i])\n      simt::global_or(f.fault, kFaultFill);\n"
+        }
+      ]
+    },
+    {
+      "origin": "main",
+      "path": "morsehgp3D_v12/receipts/developpement_20261007/tour_G_RAPPORT.md",
+      "sha256": "d0a464b3468c4cf75b53d436613c2973a912cab5fcc9dd575b740f64d9b7a256",
+      "bytes": 20487,
+      "lines": 152,
+      "excerpts": []
+    },
+    {
+      "origin": "main",
+      "path": "morsehgp3D_v12/receipts/developpement_20261007/tour_G_INTERFACE.md",
+      "sha256": "e9d5e8cba19193d849fe53249d6212ca6f8cd6408d54d6fd2a91f0b2ef0bd859",
+      "bytes": 7137,
+      "lines": 97,
+      "excerpts": []
+    },
+    {
+      "origin": "main",
+      "path": "morsehgp3D_v12/receipts/mes_g1_m7_local_20261007/mes_m7_local.md",
+      "sha256": "aca727b6c65233f6551687a708590284662652af23f555286d81475cb7b43d1e",
+      "bytes": 4927,
+      "lines": 33,
+      "excerpts": []
+    },
+    {
+      "origin": "main",
+      "path": "morsehgp3D_v12/bench/tower_probe.cpp",
+      "sha256": "4a98efd16e70e8f05afcbb181bdfbf994387fd708a9161eef9585dca2c166643",
+      "bytes": 11232,
+      "lines": 227,
+      "excerpts": [
+        {
+          "first_line": 187,
+          "last_line": 208,
+          "text": "  auto index = build_index(std::move(cloud.value()), IndexParams{}, budget);\n  if (!index.ok()) return index.outcome();\n  auto pool = sched::make_pool({static_cast<u32>(o.threads)});\n  if (!pool.ok()) return pool.outcome();\n  auto catalogue = build_catalogue(index.value().cloud(), o.params, budget, *pool.value());\n  if (!catalogue.ok()) return catalogue.outcome();\n  for (u64 pass = 0; pass < o.passes; ++pass) {\n    ResolutionDiagnostics diag;\n    const Stopwatch watch;\n    auto r = resolve_tower(index.value(), catalogue.value(), budget, *pool.value(), &diag);\n    stage_json(pass, o, index.value().cloud().sites(), r.ok() ? Outcome{} : r.outcome(), watch.nanoseconds(), diag);\n    if (!r.ok()) return r.outcome();\n    if (pass + 1 < o.passes) continue;\n    for (Order k = 1; k <= r.value().orders(); ++k) order_json(r.value().order(k));\n    if (o.digest) {\n      auto digest = probe::resolution_digest(index.value().cloud(), r.value(), o.frame);\n      if (!digest.ok()) return digest.outcome();\n      const auto hex = io::to_hex(digest.value());\n      std::printf(\"{\\\"phase\\\":\\\"digest\\\",\\\"resolution_sha256\\\":\\\"%s\\\"}\\n\", std::string(hex.data(), hex.size()).c_str());\n    }\n    if (o.out != nullptr) MHGP12_TRY(export_to(o, index.value().cloud(), catalogue.value(), r.value()));\n  }\n"
+        }
+      ]
+    },
+    {
+      "origin": "main",
+      "path": "morsehgp3D_v12/src/tower/stage.cpp",
+      "sha256": "2682f23922ad97464d2e4e40fb30ce0358510128cc0edcdcf695caf832b42721",
+      "bytes": 13556,
+      "lines": 285,
+      "excerpts": [
+        {
+          "first_line": 115,
+          "last_line": 120,
+          "text": "Outcome resolve_orders(const Domain& d, Resolution& out, const std::array<PopulationTable, kMaxPart>& tables,\n                       Workers& workers, sched::Pool& pool, ResolutionDiagnostics& diag) noexcept {\n  for (Order k = 1; k <= out.orders(); ++k) {\n    const Stopwatch watch;\n    ResolvedOrder& order = StageAccess::order(out, k);\n    if (k == 1) {\n"
+        },
+        {
+          "first_line": 240,
+          "last_line": 256,
+          "text": "  const Stopwatch tabling;\n  struct Tables {\n    const Catalogue& catalogue;\n    const Resolution& out;\n    std::array<PopulationTable, kMaxPart>& tables;\n    MemoryBudget& budget;\n    static Outcome body(void* raw, u64 begin, u64 end, u32) noexcept {\n      auto& self = *static_cast<Tables*>(raw);\n      for (u64 i = begin; i < end; ++i) {\n        const Order k = static_cast<Order>(i + 2);\n        MHGP12_TRY(self.tables[k - 1].build(self.catalogue, self.out.order(k).birth_keys(), k, self.budget));\n      }\n      return {};\n    }\n  } build{catalogue, out, tables, budget};\n  if (out.orders() >= 2) MHGP12_TRY(pool.parallel_for(out.orders() - 1u, 1, &build, &Tables::body));\n  diag.tables_ns = tabling.nanoseconds();\n"
+        }
+      ]
+    }
+  ]
+}

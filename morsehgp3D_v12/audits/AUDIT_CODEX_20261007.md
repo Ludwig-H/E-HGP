@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-7 octobre 2026. Base publiée **`99fa83246`** ; prototypes et correctifs non publiés épinglés par
+7 octobre 2026. Base publiée **`9c5809919`** ; prototypes et correctifs non publiés épinglés par
 hashes séparés. Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. États au [registre unique](CONSTATS.md).
 
@@ -12,12 +12,12 @@ hashes séparés. Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda
   [patch proposé](../receipts/audit_reponses_20261007/m6_proposition/README.md). Les 68 cas officiels et le reçu historique v1 passent.
 - **Juge multi-fils G livré en `99fa83246`, `0018`** : [sortie tronquée acceptée](../receipts/audit_t2g_prepublication_20261007/README.md),
   k1 seul pour K5, avec exactement la ligne attendue par CTest. Exiger tous les ordres,
-  k1 lié aux sites, types stricts, empreinte complète et régimes distincts. Sept témoins
-  JSON, normal/−O ; aucune erreur géométrique trouvée dans T1/T3/census/NUM-GARDE lus.
-- **Catalogue CUDA** : [deux défauts du prototype](../receipts/audit_t1b_tour_prepublication_20261007/cuda/README.md) :
-  propriété des allocations perdue sur erreur, et compteur des feuilles réécrites nul.
-  [Patch de propriété prêt](../receipts/audit_reponses_20261007/cuda_proposition/README.md), application textuelle vérifiée,
-  aucun test CUDA. Voie hybride : GPU ≤32 sites/16 bits locaux, sinon reprise CPU exacte.
+  k1 lié aux sites, types stricts, empreinte complète et régimes distincts. [Patch proposé](../receipts/audit_reponses_20261007/g_juge_proposition/README.md),
+  15 comparaisons JSON normal/−O ; empreinte historique complète encore à capturer.
+  Aucune erreur géométrique trouvée dans T1/T3/census/NUM-GARDE lus.
+- **Catalogue CUDA** : [nettoyage des erreurs corrigé dans le prototype](../receipts/audit_reponses_20261007/cuda_integration/README.md),
+  corps `5e215fe2…`, lecture statique seulement. Le compteur des feuilles réécrites reste
+  nul malgré leur rejeu. Voie hybride : GPU ≤32 sites/16 bits locaux, sinon reprise CPU exacte.
 - **Tour T/M/V et R** : la première forme du registre perd les branches ouvertes des
   hyperarêtes. [Collecte dans T/M proposée](../receipts/audit_t1b_tour_prepublication_20261007/branches/README.md), sans barrière
   par plateau ni nouvelle descente G ; 69 modèles abstraits conformes. Six événements
@@ -38,9 +38,12 @@ hashes séparés. Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda
   techniquement** : T1-c doit lever les capacités 256/64 ; q_min≤4 ne les borne pas.
   Préciser « transferts du raccord complet », M5 comptant déjà les siens.
 
-**Performance : aucun nouveau chrono.** Catalogue CPU K5 : **451,6 / 372,7 / 469,5 ms**
+**Performance.** Catalogue CPU G4 K5 inchangé : **451,6 / 372,7 / 469,5 ms**
 sur ng00/01/02, 48 fils, médiane de neuf passes chaudes ; historique v11 200 / 163 / 195 ms,
-rapport descriptif ≈2,3, pas A/B apparié. Aucun temps intégré catalogue GPU ou FULL v12 publié.
+rapport descriptif ≈2,3, pas A/B apparié. [Nouveaux temps locaux de G](../receipts/audit_reponses_20261007/cuda_integration/README.md) sur ng00 :
+K5 ≈2,83 s à un fil, 1,05 s à trois ; K10 ≈10,1 s à trois. G seul, codespace partagé,
+sans index/catalogue ni T/M/V : ne pas les additionner aux mesures G4. Aucun temps intégré
+catalogue GPU ou FULL v12 publié.
 
 La [finition commune en cours](../receipts/audit_t1b_tour_prepublication_20261007/finition/README.md) répond à `0233` : rangs,
 tris stables, chaînes exactes, CSR et table. Qualification et gains restent à mesurer.
