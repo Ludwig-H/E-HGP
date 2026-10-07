@@ -49,6 +49,11 @@ K5 ≈2,83 s à un fil, 1,05 s à trois ; K10 ≈10,1 s à trois. G seul, codesp
 sans index/catalogue ni T/M/V : ne pas les additionner aux mesures G4. Aucun temps intégré
 catalogue GPU ou FULL v12 publié.
 
+[Pistes concrètes pour G](../receipts/audit_g_pistes_20261007/README.md) : omettre les espaces census inutilisés
+à K1 ; proposer un stockage borné avec refus de coquille différé jusqu’au parcours complet ; éviter les tests
+sur le support déjà certifié. Patch textuel et modèles abstraits, aucun gain natif mesuré. Les sondes et la
+proposition restent les priorités de temps établies ; le certificat seul était minoritaire dans le profil lu.
+
 La [finition commune en cours](../receipts/audit_t1b_tour_prepublication_20261007/finition/README.md) répond à `0233` : rangs,
 tris stables, chaînes exactes, CSR et table. Qualification et gains restent à mesurer.
 Le [diagnostic performance](../receipts/audit_performance_20261007/README.md) maintient les priorités : finition série

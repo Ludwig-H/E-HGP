@@ -1,0 +1,71 @@
+{
+  "census": {
+    "complete_at_limit": {
+      "inner_size": 1,
+      "shell_size": 64,
+      "status": "complete",
+      "visited": 66
+    },
+    "complete_overflow": {
+      "inner_size": 0,
+      "shell_size": 0,
+      "status": "shell_capacity",
+      "visited": 67
+    },
+    "early_saturation": {
+      "inner_size": 2,
+      "shell_size": 0,
+      "status": "saturated",
+      "visited": 2
+    },
+    "late_saturation": {
+      "inner_size": 2,
+      "shell_size": 0,
+      "status": "saturated",
+      "visited": 67
+    }
+  },
+  "early_overflow_mutant": {
+    "disagrees_with": "late_saturation",
+    "status": "shell_capacity",
+    "visited": 65
+  },
+  "scope": "abstract_sign_streams_no_geometry_no_native",
+  "support_certificate": [
+    {
+      "accepted": true,
+      "arity": 2,
+      "calls_after": 2,
+      "calls_before": 4,
+      "saved": 2
+    },
+    {
+      "accepted": true,
+      "arity": 3,
+      "calls_after": 2,
+      "calls_before": 5,
+      "saved": 3
+    },
+    {
+      "accepted": true,
+      "arity": 4,
+      "calls_after": 1,
+      "calls_before": 5,
+      "saved": 4
+    },
+    {
+      "accepted": false,
+      "arity": 4,
+      "calls_after": 1,
+      "calls_before": 1,
+      "saved": 0
+    },
+    {
+      "accepted": false,
+      "arity": 4,
+      "calls_after": 1,
+      "calls_before": 2,
+      "saved": 1
+    }
+  ]
+}

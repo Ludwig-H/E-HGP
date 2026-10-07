@@ -1,0 +1,26 @@
+{
+  "base": "9b2747eff364d56215b589c782b1a4e51d59a576",
+  "proposed_supports_sha256": "0c24c3e91ca79029ac41f5e1725bbe65e332519cd6bf3779fba88e4f1a870230",
+  "source_sha256": {
+    "docs/CONTRAT_TOUR.md": "262b3bb57f68f9deb3f4b6172419b4e4ba105ffc98ce8f9394e5343de4eb09af",
+    "src/index/census_workspace.cpp": "dc48110ce8f81094f1374de0f09c352181e71379808a40aec0af79998ba515f8",
+    "src/index/index.hpp": "fbf64f625ff4d34061cf757796982a4369c6153dffdf9e11541530d9f7aa0530",
+    "src/num/guard.cpp": "459b99dfe154f32d8ab468d3a410a1bd74ca4c94363634244f37c8cdf7fc720b",
+    "src/num/guard.hpp": "8c2afab759cce1b7fe90336361a5fd7b653862378814c614c95f0b58086a2884",
+    "src/num/sphere.cpp": "26fc17965d0cea73763ee4cc63062c19ec601505355043b821c013c4ac6c1290",
+    "src/tower/internal.hpp": "041d7ebc1dde3e397d4b09d5cc0571f0456287420893458ff6d71f89d6071624",
+    "src/tower/resolve.cpp": "30abe334849164303a0e81623f7345de482ad6f56d523f6c0e94a7aca0621908",
+    "src/tower/stage.cpp": "2682f23922ad97464d2e4e40fb30ce0358510128cc0edcdcf695caf832b42721",
+    "src/tower/supports.cpp": "22d24174caf0c1c489ff7ad8caaf0343ef943080d2953b6ff616fbb79177c491",
+    "src/tower/tower.hpp": "3c22c52f03ec0d78227f390ca01872fa6f04279e219ca26c1e3481458a128607"
+  },
+  "status": "static_proposals_not_applied_not_native_tested",
+  "tmv_repo3_unpublished_sha256": {
+    "INTERFACE_TMV.md": "1107a0a7ee9558cade67c304fdb1999c921205b963af3aaa04e6e8e8c274ffa1",
+    "RAPPORT.md": "f1cdd86502b6e6978d489118528cdc9a4b8f66b0dc0efbe0a13e8a626be1ccab",
+    "forest.hpp": "bc6fd2918b93571b39b585cf70eb9fd8fcbacba8998e644acecf0e5c9cbf9557",
+    "forest_build.cpp": "fc7a866120c441dc6912b87fc50ed9382e74d6c62f393a8e7398d8d23f95f13b",
+    "forest_kernel.cpp": "9633c2b4e07ffb3f47c2f3b6f49f493b01cf75bbccd6dbf70b4bc86278f119b9"
+  },
+  "unchanged_main_sources_at_capture": true
+}
