@@ -1,0 +1,298 @@
+--- a/morsehgp3D_v12/microbancs/mes_t2c_g/pilote_t2c.py
++++ b/morsehgp3D_v12/microbancs/mes_t2c_g/pilote_t2c.py
+@@ -59,8 +59,8 @@
+ ICI = os.path.dirname(os.path.abspath(__file__))
+ SONDE = "mhgp12_tower_probe"
+ TRAMES = ("ng00", "ng01", "ng02")
+-EMPREINTE_NG00_K5 = "231d826bb0d4fe57"  # ligne gravee de mhgp12_tower_determinism_lidar_ng00_k5
+-UNIFORMES = {8000: "5304d1c8fe7c25ff", 16000: "fdd42b4e0fba5d08", 32000: "9fd0fd9e98fa5305"}  # mhgp12_tower_scale*
++EMPREINTE_NG00_K5 = "e5a81154fb1b15f1"  # ligne gravee de mhgp12_tower_determinism_lidar_ng00_k5
++UNIFORMES = {8000: "a40f1b2ef8547269", 16000: "cf7c7745fcb4ae6e", 32000: "d1f08fd0dbdf48eb"}  # mhgp12_tower_scale*
+ BRAS_JUGES = ("avant", "avant_bis", "sans_gl7", "apres", "gl5")
+ LEVIERS = (("lot_t2c", "avant", "apres"), ("G-L7", "sans_gl7", "apres"), ("index_et_corrections", "avant", "sans_gl7"),
+            ("G-L5_au_lieu_de_G-L7", "apres", "gl5"))
+@@ -115,11 +115,11 @@
+ def jouer(commande, journal, cwd=None):
+     """Execute une commande ; sortie brute dans journal ; rend (code, lignes JSON)."""
+     try:
+-        proc = subprocess.run(commande, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False)
++        proc = subprocess.run(commande, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8", errors="surrogateescape", check=False)
+         code, sortie, erreur = proc.returncode, proc.stdout, proc.stderr
+     except OSError as e:
+         code, sortie, erreur = 127, "", str(e)
+-    with open(journal, "w", encoding="utf-8") as f:
++    with open(journal, "w", encoding="utf-8", errors="surrogateescape") as f:
+         f.write(sortie)
+         if erreur:
+             f.write("\n# stderr\n" + erreur[-4000:])
+@@ -217,23 +217,169 @@
+     return [stem + ".u32le", stem + ".ids.u32le"]
+ 
+ 
+-def prise(args, binaire, trame, k, fils, passes, journal):
+-    """Un processus neuf de la sonde : passes de l'etage G, empreinte ; rend un dictionnaire de prise."""
++# Admission commune au direct et au rejeu. Schemas des producteurs epingles,
++# jamais une inference a partir de champs manquants.
++OBJET = frozenset("births cells inert_cells extended_cells representatives".split())
++TRAVAIL = frozenset(("probes first_probe_hits probe_hits_after_steps route_t1 route_cert_table route_cert_census "
++                    "route_fallback_table route_fallback_census fallback_no_proposal fallback_not_in_part "
++                    "fallback_certificate census_saturated census_complete census_sites census_sites_max "
++                    "census_nodes jumps_catalogue jumps_census inert_steps cell_stops birth_stops controls "
++                    "max_chain").split())
++DIAG_AVANT = frozenset("count_ns fill_ns tables_ns resolve_ns workspace_bytes table_bytes peak_bytes".split())
++DIAG_APRES = DIAG_AVANT | frozenset("prepare_ns setup_ns workspace_ns joins_ns orders_ns reste_ns".split())
++SECTIONS_PROFIL = frozenset("trace sonde proposition t1 certificat repli census_sature census_complet pas arret total".split())
++
++
++def exiger(condition, message):
++    if not condition:
++        raise ValueError(message)
++
++
++def naturel(value, maximum=(1 << 64) - 1, minimum=0):
++    exiger(type(value) is int and minimum <= value <= maximum, "entier hors domaine")
++    return value
++
++
++def champs(value, keys):
++    exiger(type(value) is dict and set(value) == set(keys), "champs absents ou inconnus")
++
++
++def hexadecimal(value):
++    exiger(type(value) is str and len(value) == 64 and all(c in "0123456789abcdef" for c in value),
++           "empreinte SHA-256 invalide")
++    return value
++
++
++def objet_unique(pairs):
++    out = {}
++    for key, value in pairs:
++        exiger(key not in out, "cle JSON repetee")
++        out[key] = value
++    return out
++
++
++def constante_interdite(value):
++    raise ValueError("constante JSON non finie : " + value)
++
++
++def diagnostics_valides(diag, k, schema):
++    exiger(schema in ("avant", "apres"), "schema de sonde inconnu")
++    scalars = DIAG_AVANT if schema == "avant" else DIAG_APRES
++    arrays = {"order_ns": k}
++    if schema == "apres":
++        arrays.update(table_ns=k - 1, join_ns=k - 1, pass_ns=k)
++    champs(diag, scalars | arrays.keys())
++    for key in scalars:
++        naturel(diag[key])
++    for key, size in arrays.items():
++        exiger(type(diag[key]) is list and len(diag[key]) == size, "taille diagnostic invalide")
++        for value in diag[key]:
++            naturel(value)
++
++
++def profil_valide(row, passe, k):
++    champs(row, ("phase", "pass", "k", "ghz_tsc", "biais_cycles", "table_ns", "join_ns", "sections", "reste"))
++    exiger(row["phase"] == "profil_g" and naturel(row["pass"]) == passe and naturel(row["k"]) == k,
++           "ordre du profil invalide")
++    def reel(value):
++        exiger(type(value) in (int, float) and math.isfinite(value) and value >= 0, "reel de profil invalide")
++    for key in ("ghz_tsc", "biais_cycles"):
++        reel(row[key])
++    naturel(row["table_ns"])
++    naturel(row["join_ns"])
++    champs(row["sections"], SECTIONS_PROFIL)
++    for section in row["sections"].values():
++        champs(section, ("cycles", "n", "part", "ns"))
++        naturel(section["cycles"])
++        naturel(section["n"])
++        reel(section["part"])
++        reel(section["ns"])
++    champs(row["reste"], ("cycles", "part"))
++    naturel(row["reste"]["cycles"])
++    reel(row["reste"]["part"])
++
++
++def lire_prise(journal, code, k, fils, passes, schema="apres", profil=False):
++    """Valide tout le journal de succes et recalcule les champs qui portent le verdict."""
++    exiger(type(code) is int and code == 0, "processus en echec")
++    naturel(k, 12, 1)
++    naturel(fils, 256, 1)
++    naturel(passes, 1000, 2)
++    exiger(type(profil) is bool and (not profil or schema == "apres"), "profil non declare")
++    with open(journal, encoding="utf-8", errors="strict") as f:
++        # Un journal de succes est entierement JSONL ; stderr annexe et texte
++        # inconnu sont refuses. Ne pas escamoter une ligne malformee.
++        lines = [json.loads(line, object_pairs_hook=objet_unique, parse_constant=constante_interdite)
++                 for line in f.read().splitlines()]
++    exiger(all(type(row) is dict for row in lines), "ligne JSON non objet")
++    cursor, murs, profiles, sites, last = 0, [], [], None, None
++    def take():
++        nonlocal cursor
++        exiger(cursor < len(lines), "journal tronque")
++        value = lines[cursor]
++        cursor += 1
++        return value
++    for p in range(passes):
++        row = take()
++        champs(row, ("phase", "pass", "status", "reason", "order", "coord_bits", "kmax", "threads", "sites",
++                     "wall_ns", "diagnostics"))
++        exiger(row["phase"] == "tour_g" and naturel(row["pass"]) == p, "passes absentes, repetees ou desordonnees")
++        exiger(row["status"] == "ok" and row["reason"] == "none" and naturel(row["order"]) == 0,
++               "statut de passe invalide")
++        exiger(naturel(row["coord_bits"]) == 21 and naturel(row["kmax"]) == k and naturel(row["threads"]) == fils,
++               "configuration differente de la commande")
++        current_sites = naturel(row["sites"], (1 << 32) - 1, 1)
++        exiger(sites is None or sites == current_sites, "sites variables entre passes")
++        sites = current_sites
++        murs.append(naturel(row["wall_ns"], minimum=1))
++        diagnostics_valides(row["diagnostics"], k, schema)
++        last = row["diagnostics"]
++        if profil:
++            for order in range(2, k + 1):
++                item = take()
++                profil_valide(item, p, order)
++                profiles.append(item)
++    for order in range(1, min(k, sites) + 1):
++        row = take()
++        champs(row, ("phase", "k", "objet", "travail"))
++        exiger(row["phase"] == "ordre" and naturel(row["k"]) == order, "ordres absents ou desordonnes")
++        champs(row["objet"], OBJET)
++        champs(row["travail"], TRAVAIL | {"chaines"})
++        for key in OBJET:
++            naturel(row["objet"][key])
++        for key in TRAVAIL:
++            naturel(row["travail"][key])
++        histogram = row["travail"]["chaines"]
++        exiger(type(histogram) is list and len(histogram) == 16, "histogramme incomplet")
++        for value in histogram:
++            naturel(value)
++    digest, end = take(), take()
++    champs(digest, ("phase", "resolution_sha256"))
++    exiger(digest["phase"] == "digest", "digest final absent")
++    empreinte = hexadecimal(digest["resolution_sha256"])
++    champs(end, ("phase", "status", "reason", "order"))
++    exiger(end["phase"] == "exit" and end["status"] == "ok" and end["reason"] == "none" and
++           naturel(end["order"]) == 0 and cursor == len(lines), "fin de journal invalide")
++    return {"valide": True, "murs_ns": murs, "empreinte": empreinte, "profil": profiles,
++            "g_ns": mediane(murs[1:]), "diagnostics": last, "sites": sites}
++
++
++def schema_bras(bras):
++    return "avant" if bras in ("avant", "avant_bis") else "apres"
++
++
++
++def prise(args, binaire, trame, k, fils, passes, journal, schema="apres", profil=False):
++    """Un processus neuf ; admission du journal complet selon le schema declare du bras."""
+     commande = [binaire] + entree(args, trame) + ["--k=%d" % k, "--threads=%d" % fils, "--passes=%d" % passes,
+                                                   "--digest", "--frame=%s" % trame]
+-    code, lignes = jouer(commande, journal)
+-    tours = [l for l in lignes if l.get("phase") == "tour_g"]
+-    empreinte = [l.get("resolution_sha256") for l in lignes if l.get("phase") == "digest"]
+-    fin = [l for l in lignes if l.get("phase") == "exit"]
+-    murs = [t.get("wall_ns") for t in tours if t.get("status") == "ok" and isinstance(t.get("wall_ns"), int)]
+-    valide = code == 0 and len(tours) == passes and len(murs) == passes and len(empreinte) == 1 and \
+-        len(fin) == 1 and fin[0].get("status") == "ok" and passes >= 2
++    code, _ = jouer(commande, journal)
+     out = {"journal": os.path.relpath(journal, args.sortie), "journal_sha256": sha256(journal), "code": code,
+-           "valide": valide, "murs_ns": murs, "empreinte": empreinte[0] if empreinte else None,
+-           "profil": [l for l in lignes if l.get("phase") == "profil_g"]}
+-    if valide:
+-        out["g_ns"] = mediane(murs[1:])
+-        out["diagnostics"] = tours[-1].get("diagnostics")
++           "valide": False, "murs_ns": [], "empreinte": None, "profil": []}
++    try:
++        out.update(lire_prise(journal, code, k, fils, passes, schema, profil))
++    except (ValueError, TypeError, KeyError, OSError, UnicodeError, OverflowError) as error:
++        out["admission"] = str(error)
+     return out
+ 
+ 
+@@ -254,7 +400,7 @@
+             for i in ligne:
+                 bras = BRAS_JUGES[i]
+                 journal = os.path.join(dossier, "%s_t%02d.jsonl" % (bras, t))
+-                tour[bras] = prise(args, binaires[bras], trame, 5, args.fils, args.passes, journal)
++                tour[bras] = prise(args, binaires[bras], trame, 5, args.fils, args.passes, journal, schema_bras(bras))
+             tours.append(tour)
+         camp["trames"][trame] = tours
+     camp["fin"] = maintenant()
+@@ -279,14 +425,14 @@
+             for t in range(tours):
+                 ordre = bras if t % 2 == 0 else tuple(reversed(bras))
+                 res[trame].append({b: prise(args, binaires[b], trame, k, fils, passes,
+-                                            os.path.join(dossier, "%s_t%02d.jsonl" % (b, t))) for b in ordre})
++                                            os.path.join(dossier, "%s_t%02d.jsonl" % (b, t)), schema_bras(b), b == "profil") for b in ordre})
+         info[nom] = {"k": k, "fils": fils, "passes": passes, "tours": res}
+     info["fin"] = maintenant()
+     rapport["informations"] = info
+ 
+ 
+ # ---- Juge ---------------------------------------------------------------------------------------------------------------
+-def juger(rapport, sortie, verifier_journaux=True):
++def _juger_admis(rapport, sortie, verifier_journaux=True):
+     """Verdicts de REGLE_T2C ; journaux re-haches (un journal modifie est refuse)."""
+     refus, cas, verdicts = [], {}, {}
+     construction = rapport.get("construction", {}).get("binaires", {})
+@@ -338,6 +484,60 @@
+     aa = [cas[t][CONTROLE_AA[0]]["moyenne_geometrique"] for t in cas if CONTROLE_AA[0] in cas[t]]
+     controle = {"moyennes": aa, "dans_la_fenetre": all(abs(x - 1) <= REGLE_T2C["fenetre_aa"] for x in aa)}
+     return {"verdicts": verdicts, "refus": refus, "regle": REGLE_T2C, "cas": cas, "controle_aa": controle}
++
++
++def juger(rapport, sortie, verifier_journaux=True):
++    """Le rejeu brut fait autorite ; la voie sans journaux est reservee a l'auto-test synthetique."""
++    if not verifier_journaux:
++        return _juger_admis(rapport, sortie, verifier_journaux=False)
++    try:
++        # Copie JSON sans mutation de l'archive soumise au juge.
++        admitted = json.loads(json.dumps(rapport, allow_nan=False))
++        camp = admitted["campagne_k5"]
++        fils = naturel(camp["fils"], 256, 1)
++        passes = naturel(camp["passes"], 1000, 2)
++        requested = naturel(camp["tours_demandes"], minimum=1)
++        exiger(set(camp["trames"]) == set(TRAMES), "cohorte de trames incomplete ou inconnue")
++        construction = admitted["construction"]["binaires"]
++        exiger(type(construction) is dict, "construction invalide")
++        exiger(set(BRAS_JUGES) <= set(construction), "bras absent")
++        for name, binary in construction.items():
++            exiger(hexadecimal(binary["sha256"]) == hexadecimal(camp["binaires_apres"][name]),
++                   "empreinte de binaire modifiee")
++        root, journals = os.path.realpath(sortie), set()
++        for frame in TRAMES:
++            turns = camp["trames"][frame]
++            exiger(type(turns) is list and len(turns) == requested, "nombre de tours different de la demande")
++            sizes = set()
++            for turn in turns:
++                champs(turn, BRAS_JUGES)
++                for arm in BRAS_JUGES:
++                    take = turn[arm]
++                    exiger(type(take) is dict and take.get("valide") is True, "prise declaree invalide")
++                    name = take["journal"]
++                    exiger(type(name) is str and name and not os.path.isabs(name), "chemin de journal invalide")
++                    path = os.path.realpath(os.path.join(root, name))
++                    exiger(os.path.commonpath((root, path)) == root and path not in journals,
++                           "journal externe ou reutilise")
++                    journals.add(path)
++                    before = sha256(path)
++                    exiger(before == hexadecimal(take["journal_sha256"]), "journal modifie")
++                    checked = lire_prise(path, take["code"], REGLE_T2C["k"], fils, passes, schema_bras(arm))
++                    exiger(sha256(path) == before, "journal modifie pendant la lecture")
++                    # Egalite JSON typee : True != 1 et 1.0 != 1 dans les compteurs.
++                    for key in ("murs_ns", "empreinte", "g_ns", "diagnostics", "profil"):
++                        exiger(json.dumps(take[key], sort_keys=True, allow_nan=False) ==
++                               json.dumps(checked[key], sort_keys=True, allow_nan=False),
++                               "resume different du brut : " + key)
++                    sizes.add(checked["sites"])
++                    take.update(checked)
++            exiger(len(sizes) == 1, "nombre de sites different entre bras ou tours")
++        # Memes statistiques, seuils et auto-tests ; valeurs recalculees ci-dessus.
++        return _juger_admis(admitted, sortie, verifier_journaux=False)
++    except (ValueError, TypeError, KeyError, OSError, UnicodeError, OverflowError) as error:
++        return {"verdicts": {name: "refuse" for name, _, _ in LEVIERS},
++                "refus": ["admission des journaux : " + str(error)], "regle": REGLE_T2C, "cas": {}}
++
+ 
+ 
+ def tableaux(rapport, jugement):

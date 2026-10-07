@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-7 octobre 2026. Base publiée **`0377684ec`** ; prototypes non publiés épinglés dans les reçus.
+7 octobre 2026. Base publiée **`b06cd1449`** ; prototypes non publiés épinglés dans les reçus.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. États et clôtures au [registre unique](CONSTATS.md).
 
@@ -14,7 +14,9 @@ Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalo
   ne sont intégrés. Référence u21 et sorties complètes requises avant décision D6.
 - **T2-c avant G4** : [pilote `fa1b7cd6` contre-éprouvé](../receipts/audit_reponses_20261007/t2c_pilote_admission/README.md).
   Changer le résumé seul fait adopter un gain malgré 120 journaux inchangés ; huit prises testent aussi
-  types, passes et configuration. Référence d'empreinte obsolète. Correction en préparation, rien de livré.
+  types, passes et configuration. [Correctif proposé](../receipts/audit_reponses_20261007/t2c_pilote_proposition/README.md) :
+  21 prises, trois jugements, cinq auto-tests et deux vrais formats admis ; références corrigées, rien d'intégré.
+  Identité finale seulement ; garde auto-test en mode `rapport` encore hors patch.
 - **G** : [couverture corrigée et erratum](../receipts/audit_reponses_20261007/g_juge_integration/README.md).
   Ma première proposition omettait `exit`, corrigé par le développeur avant livraison ; résidu `exit.order=False/0.0`.
   [Gc `c002345` contre-lu](../receipts/audit_reponses_20261007/gc_empreinte/README.md) : travail hors digest,
@@ -56,5 +58,5 @@ Les [petits nuages H](../receipts/audit_reponses_20261007/session_h_mes_p/README
 [préparation D6 hors chrono](../receipts/audit_d6_preparation_20261007/README.md) gardent leurs limites de portée.
 
 Canal à quatre fichiers, 73 constats ; clôtures cache `0007/0019`, documents `0235/0236`, cohorte MES-P `0238` conservées.
-Capacités 256/64 de `0237` encore ouvertes. Aucun GCP ni donnée sous licence dans cet audit ; seul nouveau contrôle
-natif antérieur : deux points CPU pour le format JSON, pas un benchmark.
+Capacités 256/64 de `0237` encore ouvertes. Aucun GCP ni donnée sous licence dans cet audit. Contrôles natifs limités aux formats CPU :
+deux points catalogue, puis deux sondes G à huit points synthétiques ; aucun benchmark.

@@ -1,0 +1,21 @@
+--- a/morsehgp3D_v12/microbancs/mes_t2c_g/pilote_t2c.py
++++ b/morsehgp3D_v12/microbancs/mes_t2c_g/pilote_t2c.py
+@@ -308,7 +308,8 @@
+         exigees = max(REGLE_T2C["processus_min"], camp.get("tours_demandes", 0))
+         if len(valides) != len(tours) or len(valides) < exigees:
+             refus.append("%s : %d tours valides sur %d exiges" % (trame, len(valides), exigees))
+-            continue
++            if len(valides) < 2:
++                continue  # rien a publier ; sinon les chiffres sont publies, le refus demeure
+         if verifier_journaux:
+             for t in valides:
+                 for b in BRAS_JUGES:
+@@ -346,7 +347,7 @@
+         out += ["Refus : " + " ; ".join(jugement["refus"]), ""]
+     out += ["| trame | " + " | ".join("G %s (ms)" % b for b in BRAS_JUGES) + " | " +
+             " | ".join("%s (IC 95 %%)" % l[0] for l in LEVIERS + (CONTROLE_AA,)) + " | empreinte |",
+-            "|" + " --- |" * (2 + len(BRAS_JUGES) + len(LEVIERS))]
++            "|" + " --- |" * (3 + len(BRAS_JUGES) + len(LEVIERS))]
+     for trame, c in jugement["cas"].items():
+         if "g_ms_median" not in c:
+             continue

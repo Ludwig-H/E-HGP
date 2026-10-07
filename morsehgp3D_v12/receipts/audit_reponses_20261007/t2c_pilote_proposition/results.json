@@ -1,0 +1,166 @@
+{
+ "auto_test": {
+  "code": 0,
+  "stdout": "pilote_t2c_auto_test_ok cas=5 verdicts=adopte,rejete,refuse"
+ },
+ "formats_natifs_root_et_derives": [
+  {
+   "fixture": "before",
+   "schema": "avant",
+   "sites": 8,
+   "valide": true
+  },
+  {
+   "fixture": "before_synthetic_sites2",
+   "schema": "avant",
+   "sites": 2,
+   "valide": true
+  },
+  {
+   "fixture": "after",
+   "schema": "apres",
+   "sites": 8,
+   "valide": true
+  },
+  {
+   "fixture": "after_synthetic_sites2",
+   "schema": "apres",
+   "sites": 2,
+   "valide": true
+  }
+ ],
+ "jugements": {
+  "brut_invalide_rehache": {
+   "G-L5_au_lieu_de_G-L7": "refuse",
+   "G-L7": "refuse",
+   "index_et_corrections": "refuse",
+   "lot_t2c": "refuse"
+  },
+  "brut_motif": [
+   "admission des journaux : Expecting value: line 1 column 1 (char 0)"
+  ],
+  "nominal": {
+   "G-L5_au_lieu_de_G-L7": "rejete",
+   "G-L7": "rejete",
+   "index_et_corrections": "rejete",
+   "lot_t2c": "rejete"
+  },
+  "resume_diverge": {
+   "G-L5_au_lieu_de_G-L7": "refuse",
+   "G-L7": "refuse",
+   "index_et_corrections": "refuse",
+   "lot_t2c": "refuse"
+  },
+  "resume_motif": [
+   "admission des journaux : resume different du brut : g_ns"
+  ]
+ },
+ "prises": [
+  {
+   "admission": null,
+   "case": "nominal_apres",
+   "valide": true
+  },
+  {
+   "admission": null,
+   "case": "nominal_avant",
+   "valide": true
+  },
+  {
+   "admission": null,
+   "case": "nominal_profil",
+   "valide": true
+  },
+  {
+   "admission": "champs absents ou inconnus",
+   "case": "schema_avant_sur_bras_apres",
+   "valide": false
+  },
+  {
+   "admission": "champs absents ou inconnus",
+   "case": "profil_non_declare",
+   "valide": false
+  },
+  {
+   "admission": "processus en echec",
+   "case": "code_nonzero",
+   "valide": false
+  },
+  {
+   "admission": "passes absentes, repetees ou desordonnees",
+   "case": "cinq_passes_pour_six",
+   "valide": false
+  },
+  {
+   "admission": "entier hors domaine",
+   "case": "wall_bool",
+   "valide": false
+  },
+  {
+   "admission": "entier hors domaine",
+   "case": "wall_negatif",
+   "valide": false
+  },
+  {
+   "admission": "passes absentes, repetees ou desordonnees",
+   "case": "indices_repetes",
+   "valide": false
+  },
+  {
+   "admission": "configuration differente de la commande",
+   "case": "configuration_autre",
+   "valide": false
+  },
+  {
+   "admission": "champs absents ou inconnus",
+   "case": "ordres_absents",
+   "valide": false
+  },
+  {
+   "admission": "entier hors domaine",
+   "case": "exit_bool",
+   "valide": false
+  },
+  {
+   "admission": "fin de journal invalide",
+   "case": "exit_reason",
+   "valide": false
+  },
+  {
+   "admission": "empreinte SHA-256 invalide",
+   "case": "digest_tronque",
+   "valide": false
+  },
+  {
+   "admission": "champs absents ou inconnus",
+   "case": "metadonnees_absentes",
+   "valide": false
+  },
+  {
+   "admission": "entier hors domaine",
+   "case": "compteur_bool",
+   "valide": false
+  },
+  {
+   "admission": "champs absents ou inconnus",
+   "case": "diagnostic_manquant",
+   "valide": false
+  },
+  {
+   "admission": "cle JSON repetee",
+   "case": "cle_json_repetee",
+   "valide": false
+  },
+  {
+   "admission": "Expecting value: line 1 column 1 (char 0)",
+   "case": "texte_suffixe",
+   "valide": false
+  },
+  {
+   "admission": "'utf-8' codec can't decode byte 0xff in position 6645: invalid start byte",
+   "case": "utf8_invalide",
+   "valide": false
+  }
+ ],
+ "scope": "proposition_non_appliquee_python_seul"
+}

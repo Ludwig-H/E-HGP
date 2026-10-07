@@ -1,0 +1,97 @@
+{
+ "inputs": [
+  {
+   "arm": "apres",
+   "bytes": 26492,
+   "path": "microbancs/mes_t2c_g/pilote_t2c.py",
+   "sha256": "323068ab824e5dcb8920de9ae3429e62c980e7d2608df62cccf5dd99d8c9c0e1"
+  },
+  {
+   "arm": "apres",
+   "bytes": 15326,
+   "path": "bench/tower_probe.cpp",
+   "sha256": "5c68d7225ac22d06dbb5a40bb45357c045ab0e7e48f530cfb4dbb87e425b3241"
+  },
+  {
+   "arm": "apres",
+   "bytes": 7561,
+   "path": "bench/tower_export.hpp",
+   "sha256": "9e903f724c54f3aad9462d3fd700d5227073a30bb90999b388a817f511cf739d"
+  },
+  {
+   "arm": "apres",
+   "bytes": 7883,
+   "path": "tests/tower/tests.cmake",
+   "sha256": "0360af4d6f717d2f8d38b81a75b9aadbc2594f7ec55811b7900b71093b0974ee"
+  },
+  {
+   "arm": "avant_patch1",
+   "bytes": 11417,
+   "path": "bench/tower_probe.cpp",
+   "sha256": "3b74d3c56f124a03388929bba0ff6fc0a144b976943e75719f70c4689a471d34"
+  },
+  {
+   "arm": "avant_patch1",
+   "bytes": 7561,
+   "path": "bench/tower_export.hpp",
+   "sha256": "9e903f724c54f3aad9462d3fd700d5227073a30bb90999b388a817f511cf739d"
+  },
+  {
+   "arm": "avant_patch1",
+   "bytes": 7104,
+   "path": "tests/tower/tests.cmake",
+   "sha256": "2ac0c89ed896096db50f14675751b857aeecea26b07d2689d40b29af7c6860df"
+  }
+ ],
+ "old_snapshot_sha256": "fa1b7cd6aa23609879d56594332aaf1eb91b4f8b5b61ab9bb4a4b31e79f6feac",
+ "proposed_sha256": "46005a26f7a3497495b83cffb93bb2540c071977eea60fa98314b780682e32b7",
+ "root_native_capture_manifest_sha256": "0f02bbbf1a39001b41947a3df5b239729f9529a02aaa38f5c937c4545cd1c0d1",
+ "root_native_format_fixtures": {
+  "after": {
+   "argv": [
+    "--uniform=8,20261007,10",
+    "--k=5",
+    "--threads=1",
+    "--passes=2",
+    "--digest",
+    "--frame=synthetic_u8_format",
+    "--budget=67108864"
+   ],
+   "binary_sha256_after": "83d2a779fcee528995a26ffc8d7f42acb917b070b19e17c8d4cf89c01d3ef013",
+   "binary_sha256_before": "83d2a779fcee528995a26ffc8d7f42acb917b070b19e17c8d4cf89c01d3ef013",
+   "build_label": "build_r2",
+   "code": 0,
+   "gpu_used": false,
+   "native_cpu_threads": 1,
+   "passes": 2,
+   "purpose": "format_only_not_build_provenance_or_geometry_qualification",
+   "stderr_bytes": 0,
+   "stdout_sha256": "82dd7a2922c630c1a800ea25020d6404ed422c59be12ed0e0da9b5337679b8fb",
+   "synthetic_sites": 8
+  },
+  "before": {
+   "argv": [
+    "--uniform=8,20261007,10",
+    "--k=5",
+    "--threads=1",
+    "--passes=2",
+    "--digest",
+    "--frame=synthetic_u8_format",
+    "--budget=67108864"
+   ],
+   "binary_sha256_after": "6595704090ceffe7634bc8929aac62645c5983d4e5376b38845cfd74c9acaa03",
+   "binary_sha256_before": "6595704090ceffe7634bc8929aac62645c5983d4e5376b38845cfd74c9acaa03",
+   "build_label": "build_p1b",
+   "code": 0,
+   "gpu_used": false,
+   "native_cpu_threads": 1,
+   "passes": 2,
+   "purpose": "format_only_not_build_provenance_or_geometry_qualification",
+   "stderr_bytes": 0,
+   "stdout_sha256": "613f36bf9383a789b890af1879464836654a740c838b985ee3478a5fbdb21572",
+   "synthetic_sites": 8
+  }
+ },
+ "scope": "prototype_non_publie_proposition_non_appliquee",
+ "sources_stable_after_replay": true
+}
