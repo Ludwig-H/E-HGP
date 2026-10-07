@@ -1,0 +1,20 @@
+{
+  "name": "WIT-T7-CERCLE25",
+  "labels": ["E", "G", "H", "J"],
+  "points": [[5, 0, 0], [4, 3, 0], [-3, 4, 0], [-3, -4, 0]],
+  "translation": [3, 4, 0],
+  "native_points": [[8, 4, 0], [7, 7, 0], [0, 8, 0], [0, 0, 0]],
+  "radius_squared": 25,
+  "p": 0,
+  "m": 4,
+  "q_min": 3,
+  "window_orders": [2, 3, 4],
+  "windows_both_orientations": ["EGH", "EGJ", "EJ", "GH", "HJ"],
+  "maximal_separable": ["EGH", "EGJ", "HJ"],
+  "partitions": {
+    "1": [["E", "G", "H", "J"]],
+    "2": [["EG", "EH", "EJ", "GH", "GJ"], ["HJ"]],
+    "3": [["EGH"], ["EGJ"]],
+    "4": []
+  }
+}

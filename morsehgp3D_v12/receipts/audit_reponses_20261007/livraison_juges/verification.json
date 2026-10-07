@@ -1,0 +1,79 @@
+{
+ "closure": "G exit.order type clos; admission CUDA stricte toujours ouverte, avant adoption de temps",
+ "commits": {
+  "cuda": "8ba7d728711995e73913487adb46dea9e7dcc2a6",
+  "g": "af0c2ecd78054965532b2ebcced40541bad24cc9"
+ },
+ "constat": "CST-0018",
+ "cuda": {
+  "normal_equals_optimized": true,
+  "output_sha256": "408db029b62a2a3ea1df774a4f6d83e2f54d120baba28a9d60ef49a94eaf3741",
+  "reader": "morsehgp3D_v12/receipts/audit_reponses_20261007/cuda_juge_prepublication/check.py",
+  "reader_sha256": "f36f66b0db1668ce8292ba6be85653281dd61266920314a70f85cb185c6e9437",
+  "results": {
+   "baseline": "adopte",
+   "budget_exactly_45ms": "adopte",
+   "cpu_one_digest_for_ten_passes": "adopte",
+   "duplicated_process_ids": "adopte",
+   "first_pass_rewrite_loss_discarded": {
+    "changed_pass": 0,
+    "physical_passes_kept": 1,
+    "summaries_identical": true
+   },
+   "gpu_busy_after": "adopte",
+   "missing_all_stages": "adopte",
+   "missing_identity_counts_ledger": "adopte",
+   "mutant_identity_relabelled_timeout": "adopte",
+   "negative_times": "adopte",
+   "one_process_median_45ms_plus_1ns": "rejete"
+  }
+ },
+ "cuda_schema_absent_from_commit": true,
+ "g": {
+  "cases_executed": 6,
+  "command": [
+   "python3",
+   "-B",
+   "-S",
+   "tests/tower/g_determinism.py",
+   "tests/tower/g_fausse_sonde.py",
+   "temoin",
+   "--uniform=10,20261007,18",
+   "--k=5",
+   "--threads=1,8"
+  ],
+  "delivered_equals_proposed_sha256": true,
+  "dirty_sources_stable_during_replay_and_identical_to_commit": true,
+  "environment_key": "MHGP12_FAUSSE_SONDE",
+  "normal_and_optimized_results": {
+   "": 0,
+   "sortie_ordre_booleen": 2,
+   "sortie_ordre_flottant": 2
+  },
+  "published_proposal": "morsehgp3D_v12/receipts/audit_reponses_20261007/g_juge_integration/exit_order_type.patch",
+  "published_reader": "morsehgp3D_v12/receipts/audit_reponses_20261007/g_juge_integration/check.py"
+ },
+ "scope": "livraison et rejeux Python; aucun moteur/GPU/GCP",
+ "sources": {
+  "morsehgp3D_v12/bench/g4_catalogue_device.py": {
+   "bytes": 20918,
+   "commit": "8ba7d728711995e73913487adb46dea9e7dcc2a6",
+   "sha256": "8fc661c2dbc9878dfcfe89c705db30d6790a4abc4cfd2d5dc829f6865fece6ce"
+  },
+  "morsehgp3D_v12/bench/g4_catalogue_judge.py": {
+   "bytes": 20629,
+   "commit": "8ba7d728711995e73913487adb46dea9e7dcc2a6",
+   "sha256": "eb2def75abb1d71bf2847564f0ca3d510ce9fe7c935e86be26f3256060897d32"
+  },
+  "morsehgp3D_v12/tests/tower/g_determinism.py": {
+   "bytes": 9161,
+   "commit": "af0c2ecd78054965532b2ebcced40541bad24cc9",
+   "sha256": "c88be31c7bdb1c24154eeb98c353163bc54c590664e71f5d9ab8475d00abb9b9"
+  },
+  "morsehgp3D_v12/tests/tower/g_fausse_sonde.py": {
+   "bytes": 2659,
+   "commit": "af0c2ecd78054965532b2ebcced40541bad24cc9",
+   "sha256": "9b52fd077d64295586dfa29492fe4c61d80ecd77f6eeeeac2422bc8ecaff9cc6"
+  }
+ }
+}

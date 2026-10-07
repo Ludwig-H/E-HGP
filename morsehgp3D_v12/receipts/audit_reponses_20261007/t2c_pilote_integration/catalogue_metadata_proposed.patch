@@ -1,0 +1,81 @@
+--- a/morsehgp3D_v12/microbancs/mes_t2c_g/pilote_t2c.py
++++ b/morsehgp3D_v12/microbancs/mes_t2c_g/pilote_t2c.py
+@@ -440,21 +440,57 @@
+     rapport["informations"] = info
+ 
+ 
++# Champs de la branche catalogue du lecteur strict D6 publie ; meme producteur.
++CAT_LEDGER = frozenset(('nodes leaves filter_tests max_depth max_leaf dominance_tests prefixes judged census_tests '
++                        'emitted incidences q4_candidates q4_levels region_pair_tests region_pair_rejects '
++                        'region_line_tests region_line_rejects region_line_evaluations region_line_cache_hits '
++                        'region_line_fallbacks').split())
++CAT_DIAG = frozenset(('levels tasks candidates leaves_narrow leaves_medium leaves_wide leaves_exact '
++                     'leaves_virtual_warp leaves_rewritten max_leaf_span traversal_ns count_ns fill_ns levels_ns '
++                     'sort_ns assemble_ns table_ns peak_bytes').split())
++
++
+ def prise_catalogue(binaire, entree_, fils, passes, journal):
+-    """Un processus neuf de la sonde du catalogue : passes ordonnees reussies, mur strictement positif, sortie ok ;
+-    temps du catalogue = mediane des passes 2..P (publie, jamais juge)."""
+-    code, lignes = jouer([binaire] + entree_ + ["--k=5", "--threads=%d" % fils, "--passes=%d" % passes], journal)
+-    murs = []
++    """Schema catalogue sans --digest, explicitement informatif ; aucune preuve d'identite ajoutee."""
++    code, _ = jouer([binaire] + entree_ + ["--k=5", "--threads=%d" % fils, "--passes=%d" % passes], journal)
++    out = {"valide": False, "journal_sha256": sha256(journal)}
+     try:
+-        exiger(code == 0 and len(lignes) == passes + 1, "processus en echec ou sortie incomplete")
++        exiger(type(code) is int and code == 0, "processus catalogue en echec")
++        naturel(passes, 1000, 2)
++        naturel(fils, 256, 1)
++        with open(journal, encoding="utf-8", errors="strict") as source:
++            lignes = [json.loads(line, object_pairs_hook=objet_unique, parse_constant=constante_interdite)
++                      for line in source.read().splitlines()]
++        exiger(len(lignes) == passes + 1, "sortie catalogue incomplete")
++        murs, identity = [], None
++        keys = ("phase pass status reason coord_bits kmax leaf threads sites wall_ns balls incidences levels "
++                "ledger diagnostics").split()
+         for p, row in enumerate(lignes[:passes]):
+-            exiger(type(row) is dict and row.get("phase") == "catalogue" and row.get("pass") == p and
+-                   row.get("status") == "ok", "passe du catalogue invalide")
+-            murs.append(naturel(row.get("wall_ns"), minimum=1))
+-        exiger(lignes[-1] == {"phase": "exit", "status": "ok", "reason": "none"}, "sortie du catalogue invalide")
+-    except ValueError as error:
+-        return {"valide": False, "admission": str(error), "journal_sha256": sha256(journal)}
+-    return {"valide": True, "catalogue_ns": mediane(murs[1:]), "murs_ns": murs, "journal_sha256": sha256(journal)}
++            champs(row, keys)
++            exiger(row["phase"] == "catalogue" and naturel(row["pass"]) == p and row["status"] == "ok" and
++                   row["reason"] == "none", "passe catalogue invalide")
++            exiger(naturel(row["coord_bits"]) == 21 and naturel(row["kmax"]) == 5 and
++                   naturel(row["leaf"]) == 24 and naturel(row["threads"]) == fils,
++                   "configuration catalogue differente de la commande")
++            naturel(row["sites"], (1 << 32) - 1, 1)
++            naturel(row["balls"], (1 << 32) - 1)
++            for name in ("incidences", "levels"):
++                naturel(row[name])
++            current = tuple(row[name] for name in ("sites", "balls", "incidences", "levels"))
++            exiger(identity is None or current == identity, "dimensions catalogue variables")
++            identity = current
++            for name, fields in (("ledger", CAT_LEDGER), ("diagnostics", CAT_DIAG)):
++                champs(row[name], fields)
++                for value in row[name].values():
++                    naturel(value)
++            murs.append(naturel(row["wall_ns"], minimum=1))
++        champs(lignes[-1], ("phase", "status", "reason"))
++        exiger(lignes[-1] == {"phase": "exit", "status": "ok", "reason": "none"}, "fin catalogue invalide")
++    except (ValueError, TypeError, KeyError, OSError, UnicodeError, OverflowError) as error:
++        out["admission"] = str(error)
++        return out
++    out.update(valide=True, catalogue_ns=mediane(murs[1:]), murs_ns=murs)
++    return out
+ 
+ 
+ def campagne_catalogue(args, binaires):
+@@ -668,7 +704,7 @@
+     p.add_argument("--avant-sha256")
+     p.add_argument("--fils", type=int, default=48)
+     p.add_argument("--jobs", type=int, default=8)
+-    p.add_argument("--processus", type=int, default=8)
++    p.add_argument("--processus", type=int, default=REGLE_T2C["processus_min"])
+     p.add_argument("--passes", type=int, default=10)
+     p.add_argument("--essai", action="store_true",
+                    help="essai local : moins de tours ou de passes admis ; le juge refuse alors (jamais decisif)")

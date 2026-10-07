@@ -1,0 +1,132 @@
+{
+ "catalogue_port_from": {
+  "path": "receipts/audit_reponses_20261007/d6_admission_proposition/proposition.patch",
+  "scope": "catalogue metadata and counters; no digest requested here",
+  "sha256": "0ae8653d0b0ecd62e5c02ee040fcbb8f6c10fb44f530adabf7830bd29e08ce53"
+ },
+ "catalogue_schema": {
+  "diagnostics": [
+   "levels",
+   "tasks",
+   "candidates",
+   "leaves_narrow",
+   "leaves_medium",
+   "leaves_wide",
+   "leaves_exact",
+   "leaves_virtual_warp",
+   "leaves_rewritten",
+   "max_leaf_span",
+   "traversal_ns",
+   "count_ns",
+   "fill_ns",
+   "levels_ns",
+   "sort_ns",
+   "assemble_ns",
+   "table_ns",
+   "peak_bytes"
+  ],
+  "ledger": [
+   "nodes",
+   "leaves",
+   "filter_tests",
+   "max_depth",
+   "max_leaf",
+   "dominance_tests",
+   "prefixes",
+   "judged",
+   "census_tests",
+   "emitted",
+   "incidences",
+   "q4_candidates",
+   "q4_levels",
+   "region_pair_tests",
+   "region_pair_rejects",
+   "region_line_tests",
+   "region_line_rejects",
+   "region_line_evaluations",
+   "region_line_cache_hits",
+   "region_line_fallbacks"
+  ]
+ },
+ "closure_pilot_delta": "a709eed5 changes only construire_bras: modules catalogue;tower when catalogue target requested; readers unchanged",
+ "inputs": [
+  {
+   "bytes": 39364,
+   "path": "repo2/morsehgp3D_v12/microbancs/mes_t2c_g/pilote_t2c.py",
+   "sha256": "08bdd59f03730da1468915c3c5d5dfa4429996e8998155931a6c26d2f867b74e"
+  },
+  {
+   "bytes": 2010,
+   "path": "plan_t2c_g.json",
+   "sha256": "8521c761bbd190fc9f5e9ef832202c2c28d50774582fb0517d124f49e58edceb"
+  },
+  {
+   "bytes": 17883,
+   "path": "RAPPORT.md",
+   "sha256": "f944a21134d54211c052c98b004018dd3d5b8a8aa25d7b1bfcc76b841f96ce6d"
+  },
+  {
+   "bytes": 16083,
+   "path": "audit_in/proposition_pilote.patch",
+   "sha256": "8ff7807653f98f049ad9fee17be9065c4d4705b1b997c329db69c311a30d7c1b"
+  },
+  {
+   "bytes": 11629,
+   "path": "repo2/morsehgp3D_v12/bench/catalogue_probe.cpp",
+   "sha256": "7dfb919813bc7c757946fabcd91149108890590b7639e042c5e31256a19786e9"
+  },
+  {
+   "bytes": 15326,
+   "path": "repo2/morsehgp3D_v12/bench/tower_probe.cpp",
+   "sha256": "5c68d7225ac22d06dbb5a40bb45357c045ab0e7e48f530cfb4dbb87e425b3241"
+  },
+  {
+   "bytes": 9869,
+   "path": "repo2/morsehgp3D_v12/src/tower/passes.cpp",
+   "sha256": "761c2fb8dd2706bebeb4c69dfdebebc4126de82aed7baa2796860920231565f8"
+  }
+ ],
+ "observed_deltas_at_closure": [
+  {
+   "after": "a709eed50c1a2c875aa1ede4505382f822cdf9675ad16e4af35952385f1fa7b5",
+   "before": "08bdd59f03730da1468915c3c5d5dfa4429996e8998155931a6c26d2f867b74e",
+   "bytes_after": 39488,
+   "path": "repo2/morsehgp3D_v12/microbancs/mes_t2c_g/pilote_t2c.py"
+  },
+  {
+   "after": "9921da4bf5db91bd3b5e2b25f9f4e2aceb165583e330d198d8c2ed23c1d1fed4",
+   "before": "f944a21134d54211c052c98b004018dd3d5b8a8aa25d7b1bfcc76b841f96ce6d",
+   "bytes_after": 20557,
+   "path": "RAPPORT.md"
+  }
+ ],
+ "plan_command": [
+  "python3",
+  "{src}/morsehgp3D_v12/microbancs/mes_t2c_g/pilote_t2c.py",
+  "tout",
+  "--src",
+  "{src}",
+  "--travail",
+  "{build}/t2c",
+  "--donnees",
+  "{data}",
+  "--sortie",
+  "{out}/t2c",
+  "--avant-archive",
+  "{data}/v12_src_avant_t2c.tar.gz",
+  "--avant-sha256",
+  "eaac2e539ab93d5e9e3e62f9ebf9f6eaef2128793cb853b11b997b71bfdf0a55",
+  "--fils",
+  "48",
+  "--jobs",
+  "44",
+  "--processus",
+  "10",
+  "--passes",
+  "10"
+ ],
+ "proposal_sha256": "46005a26f7a3497495b83cffb93bb2540c071977eea60fa98314b780682e32b7",
+ "prototype_sha256": "08bdd59f03730da1468915c3c5d5dfa4429996e8998155931a6c26d2f867b74e",
+ "replay_source": "08bdd59f03730da1468915c3c5d5dfa4429996e8998155931a6c26d2f867b74e reconstructed from immutable patches",
+ "scope": "prototype_non_publie_integration"
+}

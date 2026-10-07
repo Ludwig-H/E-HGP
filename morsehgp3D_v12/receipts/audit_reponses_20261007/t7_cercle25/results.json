@@ -1,0 +1,90 @@
+{
+  "all_windows_maximal": false,
+  "beta": {
+    "E": "0",
+    "EG": "5/2",
+    "EGH": "20",
+    "EGHJ": "25",
+    "EGJ": "49/2",
+    "EH": "20",
+    "EHJ": "25",
+    "EJ": "20",
+    "G": "0",
+    "GH": "25/2",
+    "GHJ": "25",
+    "GJ": "49/2",
+    "H": "0",
+    "HJ": "16",
+    "J": "0"
+  },
+  "geometry_subsets": 15,
+  "historical_crosscheck": "bounded four-site model agrees; full suite not invoked",
+  "maximal_separable": [
+    "EGH",
+    "EGJ",
+    "HJ"
+  ],
+  "partitions": {
+    "1": [
+      [
+        "E",
+        "G",
+        "H",
+        "J"
+      ]
+    ],
+    "2": [
+      [
+        "EG",
+        "EH",
+        "EJ",
+        "GH",
+        "GJ"
+      ],
+      [
+        "HJ"
+      ]
+    ],
+    "3": [
+      [
+        "EGH"
+      ],
+      [
+        "EGJ"
+      ]
+    ],
+    "4": []
+  },
+  "piece_counts": [
+    1,
+    2,
+    2,
+    0
+  ],
+  "q_min": 3,
+  "radius_squared": 25,
+  "status": "ok",
+  "strict_inclusion": [
+    "GH",
+    "EGH"
+  ],
+  "translations": 2,
+  "uncovered_sites": {
+    "1": "",
+    "2": "",
+    "3": "",
+    "4": "EGHJ"
+  },
+  "window_orders": [
+    2,
+    3,
+    4
+  ],
+  "windows": [
+    "EGH",
+    "EGJ",
+    "EJ",
+    "GH",
+    "HJ"
+  ]
+}

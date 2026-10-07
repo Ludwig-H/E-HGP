@@ -1,0 +1,83 @@
+{
+  "artifact_hashes_verified_before_after": 51,
+  "immutable_git_pin": "1b562defb3e77748693ea7cebecdfa1f3da72ac9",
+  "mutants": {
+    "control": "vert",
+    "killed_by_code": 18,
+    "precise_native_failed_check_archived": false,
+    "target_mutant": {
+      "detail": "code",
+      "id": "empreinte_de_file_sans_interieur",
+      "juge": "mhgp12_tower_index_weak_key_resolution",
+      "verdict": "TUE"
+    }
+  },
+  "native_executed_by_auditor": false,
+  "passes_sha256": "761c2fb8dd2706bebeb4c69dfdebebc4126de82aed7baa2796860920231565f8",
+  "profiles": [
+    {
+      "bits": 24,
+      "configured": 78,
+      "end": "End testing: Oct 07 23:33 UTC",
+      "excluded_long": [
+        "mhgp12_catalogue_lidar_ng00_k5",
+        "mhgp12_catalogue_lidar_ng01_k5",
+        "mhgp12_catalogue_lidar_ng02_k5",
+        "mhgp12_catalogue_euler_lidar_ng00_k5",
+        "mhgp12_tower_determinism_lidar_ng00_k5",
+        "mhgp12_mutants_catalogue",
+        "mhgp12_mutants_tower"
+      ],
+      "passed": 71,
+      "skipped_selected": 0
+    },
+    {
+      "bits": 32,
+      "configured": 78,
+      "end": "End testing: Oct 07 23:42 UTC",
+      "excluded_long": [
+        "mhgp12_catalogue_lidar_ng00_k5",
+        "mhgp12_catalogue_lidar_ng01_k5",
+        "mhgp12_catalogue_lidar_ng02_k5",
+        "mhgp12_catalogue_euler_lidar_ng00_k5",
+        "mhgp12_tower_determinism_lidar_ng00_k5",
+        "mhgp12_mutants_catalogue",
+        "mhgp12_mutants_tower"
+      ],
+      "passed": 71,
+      "skipped_selected": 0
+    }
+  ],
+  "source_tree_files": 340,
+  "source_tree_sha256": "5203f5a50b5350ef74232e9e12df8d8021a1f8c3e196ab4101c3252be0b8df44",
+  "status": "ok",
+  "tsan": {
+    "compiled_and_linked_with_tsan": true,
+    "external_exit_codes_archived": false,
+    "invocation_commands_archived": false,
+    "probes": [
+      {
+        "case": "u8000",
+        "digest": "a40f1b2ef8547269f937119e38c70997b688055507b911529cfa082b21ebabfa",
+        "sites": 8000,
+        "threads": 8
+      },
+      {
+        "case": "ng00",
+        "digest": "e5a81154fb1b15f1016590d0257b55de56a2fc52ae7265c730f779ed570a225c",
+        "sites": 39885,
+        "threads": 3
+      }
+    ],
+    "setarch_independently_attested": false,
+    "stderr_capture_independently_attested": false,
+    "unit_controls": {
+      "det": 62,
+      "duplicate_population": 5,
+      "index_reference": 63,
+      "radix_stable": 28,
+      "support_table": 4,
+      "weak_key_resolution": 50
+    }
+  }
+}

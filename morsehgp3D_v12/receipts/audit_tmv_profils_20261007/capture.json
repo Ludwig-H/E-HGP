@@ -1,0 +1,141 @@
+{
+  "baseline_tree_sha256": "c1950bb8826e0add0742da8d095664bc1a93d0494bc27b19dc46ac57701aaaf3",
+  "binary_hashes": "observes maintenant, provenance historique de compilation non reconstruite",
+  "critical_sources_sha256_before": {
+    "src/tower/export_full.cpp": "789f33fc68377ab9d1fcc72a2c8618f87b74af819e018b8cafbf404b3709595c",
+    "src/tower/export_full.hpp": "dd0817f33e90ea3214a3c95f9723d47ddcbf69f70bdd35f7492646d559fd1f29",
+    "src/tower/registry_branches.cpp": "9cc388d6afbed55f98e58ca84eb7948ee30762dbf4aca918a63a3814c2a6aa0b",
+    "tests/tower/full_reader.py": "af451c9cd0e1a45ac49a291704afe00747f34e2eb289223ced7de5c45b53e197",
+    "tests/tower/mes_m0.py": "65cfc64c4f06110ffd2bdd0139c98c8e01a0a4d6f6472a09c3dd2b0683026132",
+    "tests/tower/tower_dumps.cpp": "0e5685c22031ee9aa37814df7663a68d05018eaf91cc21b4a57115442971b82c"
+  },
+  "critical_sources_unchanged_after": true,
+  "files_sha256": {
+    "build24c/CMakeCache.txt": "1ea45e706a5f630083811e8ee39342ca977146d60df0666a4eab902412938ca8",
+    "build24c/mhgp12_tower_dumps": "5732b1bee9b3accdb88cd2c584fa72ca0f76aa20613a4782423a1b92cf181ada",
+    "build32c/CMakeCache.txt": "16a9b384a613dce8d71d386d55a3a41a78c71540486f5dba14193fd820eed98c",
+    "build32c/mhgp12_tower_dumps": "5386ca09fac61820f120702fbda7c696129d6a50bc281416fa24a5b5470a78a9",
+    "final/build24.log": "31f884ca666ca607fa2634f2d27c550fa36d5c997ba57bfe7700cab6606906f1",
+    "final/build32.log": "175c64f7a5cd5cc222af40b76c4ccb0b879997e3b971bf67424aae110f3621ed",
+    "final/ctest24.log": "2f16571a1490cb18445691b7fed936337eebc3962640682a296071c182b8b779",
+    "final/ctest32.log": "2bbcad8f8300339867e8d24964accf407858619e293d1a54b32de17a823f063a",
+    "final/m0_24_a.log": "14de9e237892edc6f76aaef7b52a0a467f3bc837d5b202c617f7e64b67f5aeef",
+    "final/m0_24_b.log": "d3e6816805aed735fbda8087da361953a76320a680533db9872f2fee22cb3a83",
+    "final/m0_24_c.log": "beb9e27896260093010deb5379bd06786895909a23348a0d25d9d9295d32e2b6",
+    "final/m0_24_v12.log": "d69a5c3cd300d93bfbd4d18501acbb852483c3cd7e4cadbb9a5ae87d36dfbea1",
+    "final/m0_32_a.log": "44544fee6b0887154076bb533fda0f485a31e197f3c95ae91a335a6361d30e1e",
+    "final/m0_32_b.log": "d05569a3eeea51c9699eb743bb24172fc7e4c2d7440dca16f3257c7aa13e6fdb",
+    "final/m0_32_c.log": "5b34682a55075cec248ea47c621e7574766a12cce9df158c0d3399e3ccbc0e64",
+    "final/m0_32_v12.log": "6207fe6081f118c1f0c79be93dc389824173b609de51200d7151fb941924b26a",
+    "outils/etape_final.sh": "0d3350e0e837a0b508eb8c281eb122bcc7690cbc7157aa4088407f34367fdebb",
+    "patch_tour_TMV.diff": "39622284eca0996150f08078a81c9f9dcdb079f5fd0f9e52ada57522ca71edc3",
+    "repo3/morsehgp3D_v12/src/tower/export_full.cpp": "789f33fc68377ab9d1fcc72a2c8618f87b74af819e018b8cafbf404b3709595c",
+    "repo3/morsehgp3D_v12/src/tower/export_full.hpp": "dd0817f33e90ea3214a3c95f9723d47ddcbf69f70bdd35f7492646d559fd1f29",
+    "repo3/morsehgp3D_v12/src/tower/forest.hpp": "eb14f804a7fe55d16e11b96c39ccbac037f887c998e68f6464495cb21938dd19",
+    "repo3/morsehgp3D_v12/src/tower/forest_births.cpp": "101184e078e18c45247689a94c3a451ee92387582fc95aa554f1194730c295c1",
+    "repo3/morsehgp3D_v12/src/tower/forest_build.cpp": "651b9f65c37e6c99ccbf64d83a182c7503750691554c92b4cd82eb5065c6a2c6",
+    "repo3/morsehgp3D_v12/src/tower/registry_branches.cpp": "9cc388d6afbed55f98e58ca84eb7948ee30762dbf4aca918a63a3814c2a6aa0b",
+    "repo3/morsehgp3D_v12/tests/tower/forest_unit.cpp": "1c308e53b8d37fa78438676208afcf0f06d47bb62d4052c0a0e832acb7aad42a",
+    "repo3/morsehgp3D_v12/tests/tower/full_reader.py": "af451c9cd0e1a45ac49a291704afe00747f34e2eb289223ced7de5c45b53e197",
+    "repo3/morsehgp3D_v12/tests/tower/mes_m0.py": "65cfc64c4f06110ffd2bdd0139c98c8e01a0a4d6f6472a09c3dd2b0683026132",
+    "repo3/morsehgp3D_v12/tests/tower/tower_dumps.cpp": "0e5685c22031ee9aa37814df7663a68d05018eaf91cc21b4a57115442971b82c"
+  },
+  "gcp_used": false,
+  "main_observed": "7e87b58d2fa0abb57d10f031bf39d6c9bd82764c",
+  "matrix_registry_commit": "b06cd1449",
+  "packaging": {
+    "main_index_apply_cached_check": {
+      "cached_diff_empty": true,
+      "commit": "7e87b58d2fa0abb57d10f031bf39d6c9bd82764c",
+      "exit_code": 0,
+      "index_modified": false
+    },
+    "native_replayed": false,
+    "previous_patch_sha256": "0968c5814899a7eddd58e11754d02269b85f980557ef47af1e7699d69703d25f",
+    "reason": "regeneration du patch de livraison, R inclus ; toutes autres empreintes capturees inchangees",
+    "remaining_csr_admission": "registry_branches.cpp reste 9cc388d6 ; admit(4 * output) omet les offsets CSR finaux",
+    "result": {
+      "applied_files_sha256": "f7658f19216ed72e700f3a3ddc7efd4599bddf1267940b6bca5913c8f0555b6a",
+      "apply": true,
+      "apply_check": true,
+      "baseline_commit": "7e87b58d2fa0abb57d10f031bf39d6c9bd82764c",
+      "different": {
+        "morsehgp3D_v12/tests/tower/tests.cmake": {
+          "prototype_sha256": "07f2fb677c39d4b0e547c22a7e6c65808b3818322402f997c0406ef4aec448e1",
+          "result_sha256": "9eec874916db58c9b7313de9066d44a88a4e6a449cd1237ede0fe68ab6bdfe39"
+        }
+      },
+      "equal_count": 30,
+      "file_count": 31,
+      "g_judge_not_in_patch": true,
+      "patch_sha256": "39622284eca0996150f08078a81c9f9dcdb079f5fd0f9e52ada57522ca71edc3",
+      "registry_in_patch": true
+    },
+    "tests_cmake_difference": "seules les cinq portes du juge G deja livrees sur main sont preservees en plus du prototype"
+  },
+  "prior_reader_sha256": "b1424b987d0c19b2f4eb966fd852e4e1284ebdc491f312dc0943d81694bd86b5",
+  "public_status": "not_claimed",
+  "result": {
+    "gcp_used": false,
+    "native_replayed": false,
+    "payloads_read": false,
+    "profiles": {
+      "24": {
+        "command_codes": {
+          "build24": 0,
+          "ctest24": 0,
+          "m0_semantique_24_a": 0,
+          "m0_semantique_24_b": 0,
+          "m0_semantique_24_c": 0,
+          "m0_semantique_24_v12": 0
+        },
+        "ctest_passed": 651,
+        "ctest_skipped": 1,
+        "seeds_cases": [
+          "ng00_k10",
+          "ng00_k5",
+          "ng01_k10",
+          "ng01_k5",
+          "ng02_k10",
+          "ng02_k5",
+          "u16000_k5",
+          "u32000_k5",
+          "u8000_k5"
+        ],
+        "v12_cases": [
+          "ng00_k5"
+        ]
+      },
+      "32": {
+        "command_codes": {
+          "build32": 0,
+          "ctest32": 0,
+          "m0_semantique_32_a": 0,
+          "m0_semantique_32_b": 0,
+          "m0_semantique_32_c": 0,
+          "m0_semantique_32_v12": 0
+        },
+        "ctest_passed": 651,
+        "ctest_skipped": 1,
+        "seeds_cases": [
+          "ng00_k10",
+          "ng00_k5",
+          "ng01_k10",
+          "ng01_k5",
+          "ng02_k10",
+          "ng02_k5",
+          "u16000_k5",
+          "u32000_k5",
+          "u8000_k5"
+        ],
+        "v12_cases": [
+          "ng00_k5"
+        ]
+      }
+    },
+    "source_files": 357,
+    "source_tree_sha256": "c1950bb8826e0add0742da8d095664bc1a93d0494bc27b19dc46ac57701aaaf3"
+  },
+  "scope": "memes fichiers declares et coordonnees des vidages v11 ; T/M/V/R et format large, sans nouvelle quantification ni nouveau catalogue/G",
+  "status": "traces_locales_prototype_repo3_non_integre"
+}

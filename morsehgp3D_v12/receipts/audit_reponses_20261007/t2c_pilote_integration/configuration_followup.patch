@@ -1,0 +1,12 @@
+--- a/morsehgp3D_v12/microbancs/mes_t2c_g/pilote_t2c.py
++++ b/morsehgp3D_v12/microbancs/mes_t2c_g/pilote_t2c.py
+@@ -172,7 +172,8 @@
+ def construire_bras(nom, source, travail, jobs, journaux, drapeaux=(), cibles=(SONDE,)):
+     build = os.path.join(travail, nom, "build")
+     os.makedirs(build, exist_ok=True)
+-    configure = ["cmake", "-S", source, "-B", build, "-DCMAKE_BUILD_TYPE=Release", "-DMHGP12_MODULES=tower"]
++    modules = "catalogue;tower" if SONDE_CATALOGUE in cibles else "tower"  # la sonde du catalogue vient de son module
++    configure = ["cmake", "-S", source, "-B", build, "-DCMAKE_BUILD_TYPE=Release", "-DMHGP12_MODULES=" + modules]
+     configure += list(drapeaux)
+     code, _ = jouer(configure, os.path.join(journaux, "configure_%s.txt" % nom))
+     if code == 0:

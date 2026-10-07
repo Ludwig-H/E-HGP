@@ -1,0 +1,25 @@
+{
+  "commands": [
+    "python3 check.py --repo /workspaces/E-HGP",
+    "python3 -O check.py --repo /workspaces/E-HGP"
+  ],
+  "main_pin": "7e87b58d2fa0abb57d10f031bf39d6c9bd82764c",
+  "native_executed": false,
+  "normal_exit_code": 0,
+  "normal_optimized_identical": true,
+  "optimized_exit_code": 0,
+  "prototype": "TMVR repo3 archive; file hashes are authority, no native execution",
+  "prototype_sources": {
+    "morsehgp3D_v12/src/tower/tower.hpp": "26234986ffec1db63ffd71c18e450adb6251e985e64d9919a771d1a6fb7def37",
+    "morsehgp3D_v12/tests/tower/oracle_tour.py": "5dc4ab74e23cfb1302c3adddc31fb662708c19b349e9614aa81a417ebcf79220"
+  },
+  "result_sha256": "f18139cada693ed7f4161d3397623f18a9a49903412452991fdf717e4197f01f",
+  "source_hashes_before_after_identical": true,
+  "sources": {
+    "morsehgp3D_v11/receipts/conception_v11_20261002/conception/CONCEPTION_TOUR.md": "01e217f03ad60187e2b2005ed12d16db0e04635725fafee880ae8cc52071c0e6",
+    "morsehgp3D_v11/receipts/conception_v11_20261002/conception/preuves_tour/quotient_check.py": "cc26f56f3b4843b6261495d3f21f212953670f7376dc6c4f59a5b2d135221feb",
+    "morsehgp3D_v12/docs/CONTRAT_TOUR.md": "262b3bb57f68f9deb3f4b6172419b4e4ba105ffc98ce8f9394e5343de4eb09af",
+    "morsehgp3D_v12/docs/OBJET_ET_CONTRAT_MATHEMATIQUE.md": "dd8f45c55a70ab50393ec91607d64f4d9048c81e5824977175ce415d49bcca04",
+    "morsehgp3D_v12/receipts/audit_canal_20261007/archives/AUDIT_CONTRE_LECTURE_LEMMES_T_20261007.md": "82eadfc540c19bcdfee3e39903c6d47e29781c348cb31ec9a2b2847b028abfe5"
+  }
+}
