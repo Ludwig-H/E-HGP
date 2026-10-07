@@ -190,7 +190,7 @@ Outcome generate_single(const Cloud& cloud, const CatalogueParams& params, Memor
   Collector unused_collector;
   NodeQuota quota(params.max_nodes);
   Run prelude{cloud, params, budget, unused, unused_collector, {}, &quota};
-  MHGP11_TRY(prepare_frontier(frontier, prelude, pool));
+  MHGP11_TRY(prepare_frontier(frontier, prelude, pool, timings));
   if (unused_collector.balls != 0 || unused_collector.incidences != 0) return fail(Reason::catalogue_invariant);
   if (timings != nullptr) { timings->prefix_ns = stage->nanoseconds(); timings->tasks = frontier.size(); stage.emplace(); }
   const u32 workers = std::min(pool.size(), frontier.size()), capacity = std::min(cloud.sites(), params.max_leaf);

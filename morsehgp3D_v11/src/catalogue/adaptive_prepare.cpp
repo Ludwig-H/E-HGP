@@ -7,6 +7,7 @@ struct Builder {
   AdaptiveFrontier& out;
   Run& run;
   sched::Pool& pool;
+  CatalogueTimings* timings = nullptr;  // diagnostic seulement : aucune decision ne le lit
 
   Outcome capture(u32 node, const ReadyNode& ready) noexcept {
     auto& value = out.plan_[node];
@@ -103,9 +104,19 @@ struct Builder {
     return {};
   }
 
+  // Duree depuis clock, ajoutee a *field si les chronos sont demandes ; clock repart.
+  void lap(std::optional<Stopwatch>& clock, u64 CatalogueTimings::*field) noexcept {
+    if (timings == nullptr) return;
+    timings->*field += clock->nanoseconds();
+    clock.emplace();
+  }
+
   Outcome build() noexcept {
+    std::optional<Stopwatch> clock;
+    if (timings != nullptr) clock.emplace();
     ReadyNode root;
     MHGP11_TRY(prepare_root(run, root));
+    lap(clock, &CatalogueTimings::prefix_root_ns);
     out.planning_.adaptive = true;
     out.planning_.plan_nodes = out.planning_.plan_leaves = 1;
     out.planning_.replay_bytes = 8 * u64(run.cloud.sites());
@@ -118,7 +129,9 @@ struct Builder {
     Children children;
     std::array<u32, kAdaptiveTasks> selected{};
     while (out.planning_.plan_leaves < kAdaptiveTasks) {
+      lap(clock, &CatalogueTimings::prefix_publish_ns);  // capture, publication et sortie de la ronde precedente
       const u32 count = select(selected);
+      lap(clock, &CatalogueTimings::prefix_select_ns);
       if (count == 0) break;
       const auto parents = std::span(selected).first(count);
       u64 extra = 0, simultaneous = 0;
@@ -128,11 +141,13 @@ struct Builder {
       MHGP11_TRY(checked_add(simultaneous, extra));
       out.planning_.replay_bytes = std::max(out.planning_.replay_bytes, simultaneous);
       MHGP11_TRY(run_round(run, pool, out.state_, parents, children));
+      lap(clock, &CatalogueTimings::prefix_rounds_ns);
       MHGP11_TRY(record(parents, children));
       MHGP11_TRY(publish_round(out.state_, parents,
                               std::span(out.plan_).first(out.planning_.plan_nodes), children));
     }
     MHGP11_TRY(enumerate(0, 0));
+    lap(clock, &CatalogueTimings::prefix_publish_ns);
     if (out.count_ != out.state_.count || out.count_ + out.planning_.empty_leaves != out.planning_.plan_leaves)
       return fail(Reason::catalogue_invariant);
     return {};
@@ -143,10 +158,10 @@ struct Builder {
 
 namespace mhgp11::catalogue_detail {
 
-Outcome AdaptiveFrontier::prepare(Run& run, sched::Pool& pool) noexcept {
+Outcome AdaptiveFrontier::prepare(Run& run, sched::Pool& pool, CatalogueTimings* timings) noexcept {
   if (prepared_ || run.ledger != CatalogueLedger{}) return fail(Reason::catalogue_invariant);
   clear();
-  const auto result = adaptive_detail::Builder{*this, run, pool}.build();
+  const auto result = adaptive_detail::Builder{*this, run, pool, timings}.build();
   if (!result.ok()) { clear(); return result; }
   cloud_ = &run.cloud; params_ = run.params; ledger_ = run.ledger; prepared_ = true;
   return {};

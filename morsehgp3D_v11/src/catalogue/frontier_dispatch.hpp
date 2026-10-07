@@ -7,14 +7,15 @@
 
 namespace mhgp11::catalogue_detail {
 
-inline Outcome prepare_frontier(Frontier& frontier, Run& run, sched::Pool&) noexcept {
+inline Outcome prepare_frontier(Frontier& frontier, Run& run, sched::Pool&, CatalogueTimings* = nullptr) noexcept {
   u64 bytes = 0;
   MHGP11_TRY(frontier_memory_bound(run.cloud.sites(), kFrontierDepth, bytes));
   MHGP11_TRY(run.budget.admit(bytes));
   return frontier.prepare(run);
 }
-inline Outcome prepare_frontier(AdaptiveFrontier& frontier, Run& run, sched::Pool& pool) noexcept {
-  return frontier.prepare(run, pool);
+inline Outcome prepare_frontier(AdaptiveFrontier& frontier, Run& run, sched::Pool& pool,
+                                CatalogueTimings* timings = nullptr) noexcept {
+  return frontier.prepare(run, pool, timings);
 }
 inline Outcome verify_frontier(const Frontier& frontier, Run& run, sched::Pool&) noexcept {
   return frontier.verify(run);

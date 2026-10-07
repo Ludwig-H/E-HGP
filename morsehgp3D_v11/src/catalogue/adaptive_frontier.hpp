@@ -31,7 +31,8 @@ class AdaptiveFrontier {
   AdaptiveFrontier() = default;
   AdaptiveFrontier(const AdaptiveFrontier&) = delete;
   AdaptiveFrontier& operator=(const AdaptiveFrontier&) = delete;
-  Outcome prepare(Run& run, sched::Pool& pool) noexcept;
+  // timings, si non nul : sous-chronos du pilote (prefix_root_ns ... prefix_publish_ns), diagnostic seulement.
+  Outcome prepare(Run& run, sched::Pool& pool, CatalogueTimings* timings = nullptr) noexcept;
   Outcome verify(Run& run, sched::Pool& pool) const noexcept;
   u32 size() const noexcept { return count_; }
   const ReadyNode& task(u32 i) const noexcept { return state_.live[tasks_[i]].ready; }

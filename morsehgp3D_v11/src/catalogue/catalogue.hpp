@@ -101,6 +101,9 @@ struct CatalogueTimings {
   // Diagnostic du 7 octobre : restitution des tampons de la passe unique (locaux de generate_single, puis entrees de
   // l'assemblage) et remplissage de la table support -> boule du domaine (prepare_full_domain, voie Pool).
   u64 release_ns = 0, lookup_ns = 0;
+  // Frontiere adaptative (diagnostic du 7 octobre, pilote seulement) : racine, rondes (Pool), selections et
+  // publications des rondes ; nuls pour la frontiere fixe.
+  u64 prefix_root_ns = 0, prefix_rounds_ns = 0, prefix_select_ns = 0, prefix_publish_ns = 0;
 };
 
 // Travail de stockage distinct de la geometrie ; valeurs de l'option une passe, zero sinon sauf passes=2.
