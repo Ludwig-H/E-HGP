@@ -5,7 +5,8 @@
 11:12:57 UTC, **arrêt certifié `TERMINATED` à 11:24:50 UTC** (`targeted_shutdown_certified = true`). Reçu de la session
 sans identité de compte : [`receipt.json`](receipt.json) (commandes de reprise masquées) ; résultats choisis sous
 `resultats/` (dossier personnel de la VM réécrit `$HOME`), fabriqués par `microbancs/outils/recu_session.py` ;
-empreintes : `SHA256SUMS`.
+empreintes : `SHA256SUMS`. Les journaux bruts du banc (`logs/*.log`, 118 fichiers) restent dans le dossier de session
+local : leurs résultats sont dans `report.json` et `runs/`.
 
 ```text
 phase=exploration_v12_hors_registre
