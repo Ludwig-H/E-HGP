@@ -1,0 +1,32 @@
+{
+  "checks": {
+    "header_and_official_test_match_prior_capture": true,
+    "stable_cpp_read": true,
+    "substitution_equals_entire_new_file": true,
+    "unique_substitutions_within_cached_acquire": true
+  },
+  "diff": "--- buffer.cpp@1844a7d6\n+++ buffer.cpp@5c885dbf\n@@ -194,7 +194,6 @@\n // Acquisition sous cache : bloc inactif de la classe, sinon bloc neuf de la classe, sinon (la classe ne tient pas meme\n // cache vide) bloc a la taille exacte, jamais garde. La partie au-dela de bytes reste empoisonnee pour ASan.\n void* cached_acquire(BudgetAccount& account, u64 bytes, u64& reserved) noexcept {\n-  BlockCache& cache = *account.cache;\n   const u32 k = class_of(bytes);\n   if (k < kCacheClasses) {\n     const u64 capacity = class_capacity(k);\n@@ -211,8 +210,8 @@\n       }\n       return block;\n     }\n-    const std::lock_guard<std::mutex> lock(cache.mutex);\n-    ++cache.exact;\n+    const std::lock_guard<std::mutex> lock(account.cache->mutex);\n+    ++account.cache->exact;\n   }\n   if (!hold(account, bytes)) return nullptr;\n   reserved = bytes;\n",
+  "main_head": "e545ebaaf38ac38c9faf03b78446eecff3708c0d",
+  "new_sha256": "5c885dbf0e4813f1a8ee653115092536348877e6b93aa5b831d7490fe0d6e756",
+  "old_sha256": "1844a7d6e6d063347ace171be4ca9899669b08b30b2bf2106fa73d9b096c47cd",
+  "replacements": [
+    [
+      "  BlockCache& cache = *account.cache;\n",
+      ""
+    ],
+    [
+      "lock(cache.mutex)",
+      "lock(account.cache->mutex)"
+    ],
+    [
+      "++cache.exact",
+      "++account.cache->exact"
+    ]
+  ],
+  "source": "morsehgp3D_v12/src/core/buffer.cpp",
+  "status": "uncommitted_source_equivalence_no_new_native_execution",
+  "unchanged_sha256": {
+    "morsehgp3D_v12/src/core/buffer.hpp": "3c7fffc6ed97b6456f666ef849ddd6f4f3a1b3f2427c0fc875b7d5edcd14130b",
+    "morsehgp3D_v12/tests/core/alloc_fault.cpp": "1111d433910d1cc1ae05400721a0849eab43cfc58fccd9b752f7e56d6aaf227c"
+  }
+}

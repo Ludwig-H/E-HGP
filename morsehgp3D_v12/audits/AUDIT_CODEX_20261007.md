@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-7 octobre 2026. Base publiée **`59d604b87`** ; correctifs et prototypes non commis capturés
+7 octobre 2026. Base publiée **`e545ebaaf`** ; correctifs et prototypes non commis capturés
 séparément par empreintes. Cadre : `exploration_v12_hors_registre`,
 `cpu_reference ; cuda_g4 pour le catalogue`, `full_pi0`, `quantized_u21_input_only`, `not_claimed`.
 États au [registre unique](CONSTATS.md). Aucun nouveau chrono CPU/GPU.
@@ -24,13 +24,18 @@ séparément par empreintes. Cadre : `exploration_v12_hors_registre`,
   sur `buffer.cpp` SHA `1844a7d6…`. Bras 300+300 et 300+200 Kio : 12 contrôles passent ;
   supprimer la relecture de `held` cause trois échecs du second bras. ASan rejoué sous
   Clang/GCC sur ce corps : garde saine, deux lectures interdites détectées. Clôture après
-  publication ; aucun transfert à FULL, performances ou TSan.
+  publication ; [alias remplacé en `5c885dbf…`](../receipts/audit_reponses_20261007/cache_equivalence/README.md) sans changement
+  logique ni nouveau rejeu. Aucun transfert à FULL, performances ou TSan.
 - **Juge M6, `0018`** : [patch minimal prêt](../receipts/audit_reponses_20261007/m6_proposition/README.md),
   hors produit : types/plages stricts, effectif validé, schémas v1/v2 fermés, refus conservés.
   Douze faux succès deviennent des refus ; porte officielle 54 cas verts, normal/−O identiques.
   Précision : le reçu G4 A porte explicitement v1 ; sa compatibilité est conservée.
-  Clôture après intégration et contre-épreuve du corps livré. M5 et G1 déjà corrigés dans
+  Clôture du résidu M6 après intégration et contre-épreuve. M5 et G1 déjà corrigés dans
   leurs [portées contre-jugées](../receipts/audit_reprise_20261007/README.md).
+- **Nouveau juge multi-fils G, `0018`** : [sortie tronquée acceptée](../receipts/audit_t2g_prepublication_20261007/README.md),
+  k1 seul pour K5, avec exactement la ligne attendue par CTest. Sept témoins JSON, normal/−O.
+  Exiger tous les ordres, k1 lié aux sites, types stricts et empreinte complète. Aucun défaut
+  géométrique trouvé dans T1/T3/census/NUM-GARDE lus ; aucune prise historique falsifiée établie.
 - **Petits nuages, `0238`** : [pentes séparées, résidu de cohorte](../receipts/audit_mes_p_corrections_20261007/README.md).
   Reconstruire K et régimes depuis **toutes** les prises : un régime sans aucun succès
   impose une cohorte commune vide. [Patch de cinq lignes prêt](../receipts/audit_reponses_20261007/mes_p_proposition/README.md) pour `59d604b87` :

@@ -1,0 +1,11 @@
+{
+  "capture_sha256": "850a17375f1e311bb0e29a01c133cda774ee7dfba6361274facde3ebd90de669",
+  "cases_per_mode": 7,
+  "ctest_executed": false,
+  "native_execution": false,
+  "no_gcp": true,
+  "normal_code": 0,
+  "normal_optimized_identical": true,
+  "optimized_code": 0,
+  "wrapper_exact_line_match": true
+}

@@ -1,0 +1,183 @@
+{
+  "native_execution": false,
+  "observations": [
+    {
+      "cas": "temoin_schema_complet",
+      "code": 0,
+      "command": [
+        "python3",
+        "-B",
+        "-S",
+        "g_determinism.snapshot.py",
+        "<sonde_json.py>",
+        "temoin_schema_complet",
+        "--uniform=10,20261007,18",
+        "--k=5",
+        "--threads=1,48"
+      ],
+      "json_input_sha256": "b58bc05a936fdb7c1a0a76b976fd389f0e075de65775a11559ff3484ed860964",
+      "ordres": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "stderr": "",
+      "stdout": "g_determinism_ok cas=temoin_schema_complet fils=1,48 empreinte=0000000000000000 naissances=14 cellules=0 representants=0 cibles_cellule=0"
+    },
+    {
+      "cas": "seul_k1",
+      "code": 0,
+      "command": [
+        "python3",
+        "-B",
+        "-S",
+        "g_determinism.snapshot.py",
+        "<sonde_json.py>",
+        "seul_k1",
+        "--uniform=10,20261007,18",
+        "--k=5",
+        "--threads=1,48"
+      ],
+      "json_input_sha256": "40b172753f410c2afba5f00af49fbec86ec79d690c5bf3332d2b9033675488d4",
+      "ordres": [
+        1
+      ],
+      "stderr": "",
+      "stdout": "g_determinism_ok cas=seul_k1 fils=1,48 empreinte=0000000000000000 naissances=10 cellules=0 representants=0 cibles_cellule=0"
+    },
+    {
+      "cas": "k3_absent",
+      "code": 0,
+      "command": [
+        "python3",
+        "-B",
+        "-S",
+        "g_determinism.snapshot.py",
+        "<sonde_json.py>",
+        "k3_absent",
+        "--uniform=10,20261007,18",
+        "--k=5",
+        "--threads=1,48"
+      ],
+      "json_input_sha256": "37f610b8c0890c7662da99a5c40bd14cfa098813f5490de3ea8888df8dc9c663",
+      "ordres": [
+        1,
+        2,
+        4,
+        5
+      ],
+      "stderr": "",
+      "stdout": "g_determinism_ok cas=k3_absent fils=1,48 empreinte=0000000000000000 naissances=13 cellules=0 representants=0 cibles_cellule=0"
+    },
+    {
+      "cas": "k2_duplique_k3_absent",
+      "code": 0,
+      "command": [
+        "python3",
+        "-B",
+        "-S",
+        "g_determinism.snapshot.py",
+        "<sonde_json.py>",
+        "k2_duplique_k3_absent",
+        "--uniform=10,20261007,18",
+        "--k=5",
+        "--threads=1,48"
+      ],
+      "json_input_sha256": "54214e84716f3b4e0472acf02d4743b272de3ce9fd38a504d33279a3c10467a7",
+      "ordres": [
+        1,
+        2,
+        2,
+        4,
+        5
+      ],
+      "stderr": "",
+      "stdout": "g_determinism_ok cas=k2_duplique_k3_absent fils=1,48 empreinte=0000000000000000 naissances=14 cellules=0 representants=0 cibles_cellule=0"
+    },
+    {
+      "cas": "digest_non_hexadecimal",
+      "code": 0,
+      "command": [
+        "python3",
+        "-B",
+        "-S",
+        "g_determinism.snapshot.py",
+        "<sonde_json.py>",
+        "digest_non_hexadecimal",
+        "--uniform=10,20261007,18",
+        "--k=5",
+        "--threads=1,48"
+      ],
+      "json_input_sha256": "2eeaceb2c8e0441383e025deff89a7f0df47e371184c640dba70889e9ef9301a",
+      "ordres": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "stderr": "",
+      "stdout": "g_determinism_ok cas=digest_non_hexadecimal fils=1,48 empreinte=xxxxxxxxxxxxxxxx naissances=14 cellules=0 representants=0 cibles_cellule=0"
+    },
+    {
+      "cas": "digest_liste",
+      "code": 0,
+      "command": [
+        "python3",
+        "-B",
+        "-S",
+        "g_determinism.snapshot.py",
+        "<sonde_json.py>",
+        "digest_liste",
+        "--uniform=10,20261007,18",
+        "--k=5",
+        "--threads=1,48"
+      ],
+      "json_input_sha256": "3229df09ef12dece1124750d588051e2e0c76029474d69c99aa9a3fd10658689",
+      "ordres": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "stderr": "",
+      "stdout": "g_determinism_ok cas=digest_liste fils=1,48 empreinte=[] naissances=14 cellules=0 representants=0 cibles_cellule=0"
+    },
+    {
+      "births_k1": 376649,
+      "cas": "k1_tronque_totaux_wrapper",
+      "code": 0,
+      "command": [
+        "python3",
+        "-B",
+        "-S",
+        "g_determinism.snapshot.py",
+        "<sonde_json.py>",
+        "synth_u8000_k5",
+        "--uniform=8000,20261007,18",
+        "--k=5",
+        "--threads=1,8"
+      ],
+      "json_input_sha256": "7ed207824b34b1e4ccf9d7eb0c99c4bea32a8aa9adfe8b82c20673a29d4b14bb",
+      "ordres": [
+        1
+      ],
+      "sites_announced": 8000,
+      "stderr": "",
+      "stdout": "g_determinism_ok cas=synth_u8000_k5 fils=1,8 empreinte=5304d1c8fe7c25ff naissances=376649 cellules=600630 representants=1780799 cibles_cellule=370896",
+      "wrapper_exact_line": "g_determinism_ok cas=synth_u8000_k5 fils=1,8 empreinte=5304d1c8fe7c25ff naissances=376649 cellules=600630 representants=1780799 cibles_cellule=370896",
+      "wrapper_line_match": true
+    }
+  ],
+  "scope": "validation du juge seulement; aucune prise moteur historique",
+  "source_sha256": {
+    "check.py": "f3d35950179115762234a7fad60fae2f9557d16df2638ba442a0e3fcf6a30cf3",
+    "g_determinism.snapshot.py": "beb8c3a1c873ebb14aaf81ee94d746ea0d6517ad8d6521f5c0131fd5f6ad977f",
+    "sources.json": "3c91622413735569d2dbad5389aedad2f7c391ec3423724f8e6447ece1f193e5",
+    "tests.cmake.snapshot": "a91e2db54ab086dbcba4a7ab19367acad3a8d7c9f8191c188ac53c09a427175f"
+  },
+  "stub_sha256": "b5b995e6696703bfeacc77608a71d29d1781a71bd47d7d547e78ca3b78ca0983"
+}
