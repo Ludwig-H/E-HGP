@@ -1,0 +1,2506 @@
+{
+ "schema": "ehgp.v12.mes_g1.v1",
+ "binaire_sha256": "5cabe11ce22e0bfc861ef7f82235ceb5259e699f7a659c4ee8666470c2bee091",
+ "cas": {
+  "ng00_k5": {
+   "journal_sha256": "20bc01e5034caf53abb5572c17dc27d19e7fbc7e51828db6bb248e503b8a94dc",
+   "vidages_sha256": {
+    "cat.bin": "c5738ac1cc8f4b1c813b942a36d03b1e75af64695c163f1b7e52094017d506c7",
+    "ordre_1.bin": "5f5f59d88e0438503e4778eea30617c4de8809400f674ae0cd0ba0fda393b078",
+    "ordre_2.bin": "0d8faf0ff6a333081c8936e5c34caecc494d7f855b7cbe897fa9030ae85f1de4",
+    "ordre_3.bin": "3cdbb2989c42123630ea3c3d84d0ebc2cec7719e144b06606b7f55143a30700f",
+    "ordre_4.bin": "36cb6867d4bdcf5592a6d6827cf104a4498ea5808460837a00d2ef4892767367",
+    "ordre_5.bin": "aa65d1d466be5b13206827420299a938642d35f44d460e2a8951c857bbd8fe24",
+    "foret_1.bin": "6e1fc85a1fce8c6eda25e46482fcd52fadc24c1f28307d2abefb60e03956f69f",
+    "foret_2.bin": "cf85e397d11d4fc19c3c8809d5c6b422fc5149bbb7bc63591ced150ce690504b",
+    "foret_3.bin": "58f37ef02bc36f0e59ec0b1be3e1213f411898bef761bfddc2698a45ad7da1c3",
+    "foret_4.bin": "84044147b150279f5b1d312930b3bab3c6d2009e5e6592b32d05af3eca0d8ee8",
+    "foret_5.bin": "e3ff778c9cdd2da98c1fbe088432f8eda05c368571b816c1ca7127286ae3012c"
+   },
+   "entree": {
+    "phase": "entree",
+    "trame": "ng00",
+    "K": 5,
+    "sites": 39885,
+    "boules": 1306696,
+    "mutant_cote_nul": false
+   },
+   "voisins": {
+    "phase": "voisins",
+    "K": 5,
+    "sites": 39885,
+    "feuille_arbre": 16,
+    "echantillon_force_brute": 512,
+    "ecarts_force_brute": 0,
+    "secondes": 0.0412095
+   },
+   "ordres": [
+    {
+     "phase": "ordre",
+     "k": 2,
+     "parties": 64721,
+     "route1": 62206,
+     "route2": {
+      "parties": 2515,
+      "hors_catalogue": 2515,
+      "au_catalogue": 0,
+      "cible_v11_naissance": 1757,
+      "cible_v11_partie_suivante": 758,
+      "ensembles": {
+       "voisins": {
+        "certifiees": 1923,
+        "part_certifiees": 0.764612,
+        "candidats_moyen": 11.8986,
+        "candidats_max": 12,
+        "tests_moyen": 7.36819,
+        "tests_max": 12,
+        "cible_egale_v11": 792,
+        "part_cible_egale_v11": 0.411856,
+        "cible_naissance": 1274,
+        "part_cible_naissance": 0.662507,
+        "cible_v11_naissance_sur_certifiees": 1370,
+        "part_cible_v11_naissance_sur_certifiees": 0.712428,
+        "ecarts_juge": 0
+       },
+       "fenetre_8": {
+        "certifiees": 1988,
+        "part_certifiees": 0.790457,
+        "candidats_moyen": 31.6911,
+        "candidats_max": 34,
+        "tests_moyen": 17.7101,
+        "tests_max": 34,
+        "cible_egale_v11": 1238,
+        "part_cible_egale_v11": 0.622736,
+        "cible_naissance": 1413,
+        "part_cible_naissance": 0.710765,
+        "cible_v11_naissance_sur_certifiees": 1427,
+        "part_cible_v11_naissance_sur_certifiees": 0.717807,
+        "ecarts_juge": 0
+       },
+       "fenetre_16": {
+        "certifiees": 2190,
+        "part_certifiees": 0.870775,
+        "candidats_moyen": 58.4183,
+        "candidats_max": 66,
+        "tests_moyen": 29.4203,
+        "tests_max": 66,
+        "cible_egale_v11": 1572,
+        "part_cible_egale_v11": 0.717808,
+        "cible_naissance": 1579,
+        "part_cible_naissance": 0.721005,
+        "cible_v11_naissance_sur_certifiees": 1562,
+        "part_cible_v11_naissance_sur_certifiees": 0.713242,
+        "ecarts_juge": 0
+       },
+       "voisins_ou_fenetre_16": {
+        "certifiees": 2352,
+        "part_certifiees": 0.935189,
+        "candidats_moyen": 60.6227,
+        "candidats_max": 76,
+        "tests_moyen": 27.9241,
+        "tests_max": 76,
+        "cible_egale_v11": 1726,
+        "part_cible_egale_v11": 0.733844,
+        "cible_naissance": 1622,
+        "part_cible_naissance": 0.689626,
+        "cible_v11_naissance_sur_certifiees": 1660,
+        "part_cible_v11_naissance_sur_certifiees": 0.705782,
+        "ecarts_juge": 0
+       }
+      }
+     },
+     "route3": {
+      "parties": 0,
+      "hors_catalogue": 0,
+      "au_catalogue": 0,
+      "census_complets_sphere_au_catalogue_s_etoile_hors_de_f": 0,
+      "spheres_distinctes": 0,
+      "spheres_distinctes_hors_catalogue": 0,
+      "p_qmin_hors_catalogue": {}
+     },
+     "lem_hors_cat": {
+      "route2_triviales": 0,
+      "route2_census_seuil_K_moins_2": 2515,
+      "route3_verifiees": 0,
+      "hors_hypothese": 0,
+      "contre_exemples": 0
+     },
+     "table_populations": 101089,
+     "ecarts_juge": 0,
+     "secondes": 0.0295952
+    },
+    {
+     "phase": "ordre",
+     "k": 3,
+     "parties": 187877,
+     "route1": 173877,
+     "route2": {
+      "parties": 14000,
+      "hors_catalogue": 14000,
+      "au_catalogue": 0,
+      "cible_v11_naissance": 6762,
+      "cible_v11_partie_suivante": 7238,
+      "ensembles": {
+       "voisins": {
+        "certifiees": 11498,
+        "part_certifiees": 0.821286,
+        "candidats_moyen": 14.4641,
+        "candidats_max": 18,
+        "tests_moyen": 9.29636,
+        "tests_max": 18,
+        "cible_egale_v11": 5792,
+        "part_cible_egale_v11": 0.50374,
+        "cible_naissance": 5468,
+        "part_cible_naissance": 0.475561,
+        "cible_v11_naissance_sur_certifiees": 5809,
+        "part_cible_v11_naissance_sur_certifiees": 0.505218,
+        "ecarts_juge": 0
+       },
+       "fenetre_8": {
+        "certifiees": 11558,
+        "part_certifiees": 0.825571,
+        "candidats_moyen": 37.6419,
+        "candidats_max": 51,
+        "tests_moyen": 22.8316,
+        "tests_max": 51,
+        "cible_egale_v11": 7838,
+        "part_cible_egale_v11": 0.678145,
+        "cible_naissance": 5623,
+        "part_cible_naissance": 0.486503,
+        "cible_v11_naissance_sur_certifiees": 5792,
+        "part_cible_v11_naissance_sur_certifiees": 0.501125,
+        "ecarts_juge": 0
+       },
+       "fenetre_16": {
+        "certifiees": 12522,
+        "part_certifiees": 0.894429,
+        "candidats_moyen": 66.3732,
+        "candidats_max": 99,
+        "tests_moyen": 36.691,
+        "tests_max": 99,
+        "cible_egale_v11": 9858,
+        "part_cible_egale_v11": 0.787254,
+        "cible_naissance": 6113,
+        "part_cible_naissance": 0.488181,
+        "cible_v11_naissance_sur_certifiees": 6181,
+        "part_cible_v11_naissance_sur_certifiees": 0.493611,
+        "ecarts_juge": 0
+       },
+       "voisins_ou_fenetre_16": {
+        "certifiees": 13345,
+        "part_certifiees": 0.953214,
+        "candidats_moyen": 68.7062,
+        "candidats_max": 112,
+        "tests_moyen": 35.6802,
+        "tests_max": 112,
+        "cible_egale_v11": 10865,
+        "part_cible_egale_v11": 0.814163,
+        "cible_naissance": 6411,
+        "part_cible_naissance": 0.480405,
+        "cible_v11_naissance_sur_certifiees": 6521,
+        "part_cible_v11_naissance_sur_certifiees": 0.488647,
+        "ecarts_juge": 0
+       }
+      }
+     },
+     "route3": {
+      "parties": 0,
+      "hors_catalogue": 0,
+      "au_catalogue": 0,
+      "census_complets_sphere_au_catalogue_s_etoile_hors_de_f": 0,
+      "spheres_distinctes": 0,
+      "spheres_distinctes_hors_catalogue": 0,
+      "p_qmin_hors_catalogue": {}
+     },
+     "lem_hors_cat": {
+      "route2_triviales": 14000,
+      "route2_census_seuil_K_moins_2": 0,
+      "route3_verifiees": 0,
+      "hors_hypothese": 0,
+      "contre_exemples": 0
+     },
+     "table_populations": 166228,
+     "ecarts_juge": 0,
+     "secondes": 0.0984105
+    },
+    {
+     "phase": "ordre",
+     "k": 4,
+     "parties": 353517,
+     "route1": 295843,
+     "route2": {
+      "parties": 57239,
+      "hors_catalogue": 57239,
+      "au_catalogue": 0,
+      "cible_v11_naissance": 25008,
+      "cible_v11_partie_suivante": 32231,
+      "ensembles": {
+       "voisins": {
+        "certifiees": 46638,
+        "part_certifiees": 0.814794,
+        "candidats_moyen": 16.2719,
+        "candidats_max": 24,
+        "tests_moyen": 11.6231,
+        "tests_max": 24,
+        "cible_egale_v11": 30648,
+        "part_cible_egale_v11": 0.657147,
+        "cible_naissance": 21007,
+        "part_cible_naissance": 0.450427,
+        "cible_v11_naissance_sur_certifiees": 21518,
+        "part_cible_v11_naissance_sur_certifiees": 0.461383,
+        "ecarts_juge": 0
+       },
+       "fenetre_8": {
+        "certifiees": 45957,
+        "part_certifiees": 0.802897,
+        "candidats_moyen": 41.6378,
+        "candidats_max": 68,
+        "tests_moyen": 28.3262,
+        "tests_max": 68,
+        "cible_egale_v11": 35886,
+        "part_cible_egale_v11": 0.78086,
+        "cible_naissance": 20329,
+        "part_cible_naissance": 0.442348,
+        "cible_v11_naissance_sur_certifiees": 20698,
+        "part_cible_v11_naissance_sur_certifiees": 0.450378,
+        "ecarts_juge": 0
+       },
+       "fenetre_16": {
+        "certifiees": 50155,
+        "part_certifiees": 0.876238,
+        "candidats_moyen": 71.146,
+        "candidats_max": 132,
+        "tests_moyen": 44.7402,
+        "tests_max": 132,
+        "cible_egale_v11": 43331,
+        "part_cible_egale_v11": 0.863942,
+        "cible_naissance": 22136,
+        "part_cible_naissance": 0.441352,
+        "cible_v11_naissance_sur_certifiees": 22314,
+        "part_cible_v11_naissance_sur_certifiees": 0.444901,
+        "ecarts_juge": 0
+       },
+       "voisins_ou_fenetre_16": {
+        "certifiees": 54386,
+        "part_certifiees": 0.950156,
+        "candidats_moyen": 73.5072,
+        "candidats_max": 146,
+        "tests_moyen": 44.1093,
+        "tests_max": 145,
+        "cible_egale_v11": 48539,
+        "part_cible_egale_v11": 0.892491,
+        "cible_naissance": 23909,
+        "part_cible_naissance": 0.439617,
+        "cible_v11_naissance_sur_certifiees": 24203,
+        "part_cible_v11_naissance_sur_certifiees": 0.445023,
+        "ecarts_juge": 0
+       }
+      }
+     },
+     "route3": {
+      "parties": 435,
+      "hors_catalogue": 435,
+      "au_catalogue": 0,
+      "census_complets_sphere_au_catalogue_s_etoile_hors_de_f": 0,
+      "spheres_distinctes": 337,
+      "spheres_distinctes_hors_catalogue": 337,
+      "p_qmin_hors_catalogue": {
+       "p3_q4": 435
+      }
+     },
+     "lem_hors_cat": {
+      "route2_triviales": 57239,
+      "route2_census_seuil_K_moins_2": 0,
+      "route3_verifiees": 435,
+      "hors_hypothese": 0,
+      "contre_exemples": 0
+     },
+     "table_populations": 249493,
+     "ecarts_juge": 0,
+     "secondes": 0.454499
+    },
+    {
+     "phase": "ordre",
+     "k": 5,
+     "parties": 568919,
+     "route1": 351594,
+     "route2": {
+      "parties": 150419,
+      "hors_catalogue": 150419,
+      "au_catalogue": 0,
+      "cible_v11_naissance": 69066,
+      "cible_v11_partie_suivante": 81353,
+      "ensembles": {
+       "voisins": {
+        "certifiees": 124601,
+        "part_certifiees": 0.828359,
+        "candidats_moyen": 17.5303,
+        "candidats_max": 30,
+        "tests_moyen": 13.4067,
+        "tests_max": 30,
+        "cible_egale_v11": 94421,
+        "part_cible_egale_v11": 0.757787,
+        "cible_naissance": 59034,
+        "part_cible_naissance": 0.473784,
+        "cible_v11_naissance_sur_certifiees": 59627,
+        "part_cible_v11_naissance_sur_certifiees": 0.478544,
+        "ecarts_juge": 0
+       },
+       "fenetre_8": {
+        "certifiees": 119446,
+        "part_certifiees": 0.794089,
+        "candidats_moyen": 44.6023,
+        "candidats_max": 85,
+        "tests_moyen": 32.8357,
+        "tests_max": 85,
+        "cible_egale_v11": 101110,
+        "part_cible_egale_v11": 0.846491,
+        "cible_naissance": 55034,
+        "part_cible_naissance": 0.460744,
+        "cible_v11_naissance_sur_certifiees": 55547,
+        "part_cible_v11_naissance_sur_certifiees": 0.465039,
+        "ecarts_juge": 0
+       },
+       "fenetre_16": {
+        "certifiees": 130576,
+        "part_certifiees": 0.868082,
+        "candidats_moyen": 74.6375,
+        "candidats_max": 165,
+        "tests_moyen": 51.259,
+        "tests_max": 165,
+        "cible_egale_v11": 118259,
+        "part_cible_egale_v11": 0.905672,
+        "cible_naissance": 60267,
+        "part_cible_naissance": 0.461547,
+        "cible_v11_naissance_sur_certifiees": 60386,
+        "part_cible_v11_naissance_sur_certifiees": 0.462459,
+        "ecarts_juge": 0
+       },
+       "voisins_ou_fenetre_16": {
+        "certifiees": 143783,
+        "part_certifiees": 0.955883,
+        "candidats_moyen": 76.9384,
+        "candidats_max": 182,
+        "tests_moyen": 50.9255,
+        "tests_max": 179,
+        "cible_egale_v11": 133592,
+        "part_cible_egale_v11": 0.929122,
+        "cible_naissance": 66502,
+        "part_cible_naissance": 0.462516,
+        "cible_v11_naissance_sur_certifiees": 66872,
+        "part_cible_v11_naissance_sur_certifiees": 0.46509,
+        "ecarts_juge": 0
+       }
+      }
+     },
+     "route3": {
+      "parties": 66906,
+      "hors_catalogue": 66903,
+      "au_catalogue": 3,
+      "census_complets_sphere_au_catalogue_s_etoile_hors_de_f": 3,
+      "spheres_distinctes": 43007,
+      "spheres_distinctes_hors_catalogue": 43006,
+      "p_qmin_hors_catalogue": {
+       "p3_q4": 6529,
+       "p4_q3": 58535,
+       "p4_q4": 1839
+      }
+     },
+     "lem_hors_cat": {
+      "route2_triviales": 150419,
+      "route2_census_seuil_K_moins_2": 0,
+      "route3_verifiees": 66903,
+      "hors_hypothese": 3,
+      "contre_exemples": 0
+     },
+     "table_populations": 341081,
+     "ecarts_juge": 0,
+     "secondes": 1.6868
+    }
+   ],
+   "bilan": {
+    "phase": "bilan",
+    "trame": "ng00",
+    "K": 5,
+    "route2": {
+     "parties": 224173,
+     "cible_v11_naissance": 102593,
+     "ensembles": {
+      "voisins": {
+       "certifiees": 184660,
+       "part_certifiees": 0.823739,
+       "candidats_moyen": 16.9543,
+       "candidats_max": 30,
+       "tests_moyen": 12.6268,
+       "tests_max": 30,
+       "cible_egale_v11": 131653,
+       "part_cible_egale_v11": 0.712948,
+       "cible_naissance": 86783,
+       "part_cible_naissance": 0.469961,
+       "cible_v11_naissance_sur_certifiees": 88324,
+       "part_cible_v11_naissance_sur_certifiees": 0.478306,
+       "ecarts_juge": 0
+      },
+      "fenetre_8": {
+       "certifiees": 178949,
+       "part_certifiees": 0.798263,
+       "candidats_moyen": 43.2658,
+       "candidats_max": 85,
+       "tests_moyen": 30.8898,
+       "tests_max": 85,
+       "cible_egale_v11": 146072,
+       "part_cible_egale_v11": 0.816277,
+       "cible_naissance": 82399,
+       "part_cible_naissance": 0.460461,
+       "cible_v11_naissance_sur_certifiees": 83464,
+       "part_cible_v11_naissance_sur_certifiees": 0.466412,
+       "ecarts_juge": 0
+      },
+      "fenetre_16": {
+       "certifiees": 195443,
+       "part_certifiees": 0.87184,
+       "candidats_moyen": 73.0479,
+       "candidats_max": 165,
+       "tests_moyen": 48.4397,
+       "tests_max": 165,
+       "cible_egale_v11": 173020,
+       "part_cible_egale_v11": 0.885271,
+       "cible_naissance": 90095,
+       "part_cible_naissance": 0.460978,
+       "cible_v11_naissance_sur_certifiees": 90443,
+       "part_cible_v11_naissance_sur_certifiees": 0.462759,
+       "ecarts_juge": 0
+      },
+      "voisins_ou_fenetre_16": {
+       "certifiees": 213866,
+       "part_certifiees": 0.954022,
+       "candidats_moyen": 75.3651,
+       "candidats_max": 182,
+       "tests_moyen": 47.975,
+       "tests_max": 179,
+       "cible_egale_v11": 194722,
+       "part_cible_egale_v11": 0.910486,
+       "cible_naissance": 98444,
+       "part_cible_naissance": 0.460307,
+       "cible_v11_naissance_sur_certifiees": 99256,
+       "part_cible_v11_naissance_sur_certifiees": 0.464104,
+       "ecarts_juge": 0
+      }
+     }
+    },
+    "route3": {
+     "parties": 67341,
+     "census_complets_sphere_au_catalogue_s_etoile_hors_de_f": 3,
+     "spheres_distinctes_tous_ordres": 43054,
+     "spheres_distinctes_hors_catalogue_tous_ordres": 43053
+    },
+    "lem_hors_cat": {
+     "route2_triviales": 221658,
+     "route2_census_seuil_K_moins_2": 2515,
+     "route3_verifiees": 67338,
+     "hors_hypothese": 3,
+     "contre_exemples": 0
+    },
+    "ecarts_voisins": 0,
+    "ecarts_juge": 0,
+    "secondes": 2.60325,
+    "code": 0
+   }
+  },
+  "ng01_k5": {
+   "journal_sha256": "be7b9efa81d1699700d1a9e74fd0dc4e19903246ef1fcd800ced6c606a6594d7",
+   "vidages_sha256": {
+    "cat.bin": "c63b58aba75fcc795f3b099859980c6f36b79145104a12b367a409c4b68a7459",
+    "ordre_1.bin": "6881c2d8d78712157353eb8a86b2b5027484148b13fc54751de3ef2b5038f446",
+    "ordre_2.bin": "294d13ba4de7bb52bbab1f55fc44f985a5d858d7fa7f12eefed8bc022317e8fb",
+    "ordre_3.bin": "7c3deec065257de9fdc757b3c716845c8b552b82e63d855dfa6462ec6f3896cf",
+    "ordre_4.bin": "1cf8281788809e9c2f3edb1b52e3aedec262c293cb8b1da3063f1cebe724b0ca",
+    "ordre_5.bin": "723579f0f497bd8f4bef0671836156e366a5dea62ba03921ef3748442573897b",
+    "foret_1.bin": "cabb249910ee43b0d777319b1afdb44ce5d528f3aec4fd8f1998ddf22b8a7a63",
+    "foret_2.bin": "4db1e29a046d02472bc068867131e14410f477f0f2ba769f181dfeb168661e44",
+    "foret_3.bin": "234d8cf91750156ec191b6c2b1561338709edcb4da27aee997ba03dda097e2ba",
+    "foret_4.bin": "32ea8b38378929a5024db54c02e45793b6f6801bade152695ce83663bd5a11ad",
+    "foret_5.bin": "ef7ac694d33fc816655815eccbae0af928097add042209cd81b713249755be6e"
+   },
+   "entree": {
+    "phase": "entree",
+    "trame": "ng01",
+    "K": 5,
+    "sites": 35551,
+    "boules": 1095926,
+    "mutant_cote_nul": false
+   },
+   "voisins": {
+    "phase": "voisins",
+    "K": 5,
+    "sites": 35551,
+    "feuille_arbre": 16,
+    "echantillon_force_brute": 512,
+    "ecarts_force_brute": 0,
+    "secondes": 0.0384024
+   },
+   "ordres": [
+    {
+     "phase": "ordre",
+     "k": 2,
+     "parties": 51011,
+     "route1": 48931,
+     "route2": {
+      "parties": 2080,
+      "hors_catalogue": 2080,
+      "au_catalogue": 0,
+      "cible_v11_naissance": 1433,
+      "cible_v11_partie_suivante": 647,
+      "ensembles": {
+       "voisins": {
+        "certifiees": 1570,
+        "part_certifiees": 0.754808,
+        "candidats_moyen": 11.9077,
+        "candidats_max": 12,
+        "tests_moyen": 7.44952,
+        "tests_max": 12,
+        "cible_egale_v11": 623,
+        "part_cible_egale_v11": 0.396815,
+        "cible_naissance": 1030,
+        "part_cible_naissance": 0.656051,
+        "cible_v11_naissance_sur_certifiees": 1106,
+        "part_cible_v11_naissance_sur_certifiees": 0.704459,
+        "ecarts_juge": 0
+       },
+       "fenetre_8": {
+        "certifiees": 1700,
+        "part_certifiees": 0.817308,
+        "candidats_moyen": 32.0346,
+        "candidats_max": 34,
+        "tests_moyen": 17.725,
+        "tests_max": 34,
+        "cible_egale_v11": 1025,
+        "part_cible_egale_v11": 0.602941,
+        "cible_naissance": 1132,
+        "part_cible_naissance": 0.665882,
+        "cible_v11_naissance_sur_certifiees": 1188,
+        "part_cible_v11_naissance_sur_certifiees": 0.698824,
+        "ecarts_juge": 0
+       },
+       "fenetre_16": {
+        "certifiees": 1834,
+        "part_certifiees": 0.881731,
+        "candidats_moyen": 59.0476,
+        "candidats_max": 66,
+        "tests_moyen": 29.524,
+        "tests_max": 66,
+        "cible_egale_v11": 1351,
+        "part_cible_egale_v11": 0.736641,
+        "cible_naissance": 1275,
+        "part_cible_naissance": 0.695202,
+        "cible_v11_naissance_sur_certifiees": 1271,
+        "part_cible_v11_naissance_sur_certifiees": 0.693021,
+        "ecarts_juge": 0
+       },
+       "voisins_ou_fenetre_16": {
+        "certifiees": 1952,
+        "part_certifiees": 0.938462,
+        "candidats_moyen": 61.2077,
+        "candidats_max": 76,
+        "tests_moyen": 28.0005,
+        "tests_max": 74,
+        "cible_egale_v11": 1440,
+        "part_cible_egale_v11": 0.737705,
+        "cible_naissance": 1326,
+        "part_cible_naissance": 0.679303,
+        "cible_v11_naissance_sur_certifiees": 1352,
+        "part_cible_v11_naissance_sur_certifiees": 0.692623,
+        "ecarts_juge": 0
+       }
+      }
+     },
+     "route3": {
+      "parties": 0,
+      "hors_catalogue": 0,
+      "au_catalogue": 0,
+      "census_complets_sphere_au_catalogue_s_etoile_hors_de_f": 0,
+      "spheres_distinctes": 0,
+      "spheres_distinctes_hors_catalogue": 0,
+      "p_qmin_hors_catalogue": {}
+     },
+     "lem_hors_cat": {
+      "route2_triviales": 0,
+      "route2_census_seuil_K_moins_2": 2080,
+      "route3_verifiees": 0,
+      "hors_hypothese": 0,
+      "contre_exemples": 0
+     },
+     "table_populations": 89159,
+     "ecarts_juge": 0,
+     "secondes": 0.0803752
+    },
+    {
+     "phase": "ordre",
+     "k": 3,
+     "parties": 147841,
+     "route1": 136763,
+     "route2": {
+      "parties": 11078,
+      "hors_catalogue": 11078,
+      "au_catalogue": 0,
+      "cible_v11_naissance": 5557,
+      "cible_v11_partie_suivante": 5521,
+      "ensembles": {
+       "voisins": {
+        "certifiees": 9098,
+        "part_certifiees": 0.821267,
+        "candidats_moyen": 14.3991,
+        "candidats_max": 18,
+        "tests_moyen": 9.16375,
+        "tests_max": 18,
+        "cible_egale_v11": 4459,
+        "part_cible_egale_v11": 0.490108,
+        "cible_naissance": 4400,
+        "part_cible_naissance": 0.483623,
+        "cible_v11_naissance_sur_certifiees": 4750,
+        "part_cible_v11_naissance_sur_certifiees": 0.522093,
+        "ecarts_juge": 0
+       },
+       "fenetre_8": {
+        "certifiees": 9198,
+        "part_certifiees": 0.830294,
+        "candidats_moyen": 37.3201,
+        "candidats_max": 51,
+        "tests_moyen": 21.9042,
+        "tests_max": 51,
+        "cible_egale_v11": 6184,
+        "part_cible_egale_v11": 0.67232,
+        "cible_naissance": 4659,
+        "part_cible_naissance": 0.506523,
+        "cible_v11_naissance_sur_certifiees": 4752,
+        "part_cible_v11_naissance_sur_certifiees": 0.516634,
+        "ecarts_juge": 0
+       },
+       "fenetre_16": {
+        "certifiees": 9898,
+        "part_certifiees": 0.893483,
+        "candidats_moyen": 65.681,
+        "candidats_max": 99,
+        "tests_moyen": 35.2595,
+        "tests_max": 99,
+        "cible_egale_v11": 7806,
+        "part_cible_egale_v11": 0.788644,
+        "cible_naissance": 5067,
+        "part_cible_naissance": 0.511922,
+        "cible_v11_naissance_sur_certifiees": 5069,
+        "part_cible_v11_naissance_sur_certifiees": 0.512124,
+        "ecarts_juge": 0
+       },
+       "voisins_ou_fenetre_16": {
+        "certifiees": 10541,
+        "part_certifiees": 0.951526,
+        "candidats_moyen": 67.9887,
+        "candidats_max": 112,
+        "tests_moyen": 34.2318,
+        "tests_max": 110,
+        "cible_egale_v11": 8504,
+        "part_cible_egale_v11": 0.806755,
+        "cible_naissance": 5234,
+        "part_cible_naissance": 0.496537,
+        "cible_v11_naissance_sur_certifiees": 5335,
+        "part_cible_v11_naissance_sur_certifiees": 0.506119,
+        "ecarts_juge": 0
+       }
+      }
+     },
+     "route3": {
+      "parties": 0,
+      "hors_catalogue": 0,
+      "au_catalogue": 0,
+      "census_complets_sphere_au_catalogue_s_etoile_hors_de_f": 0,
+      "spheres_distinctes": 0,
+      "spheres_distinctes_hors_catalogue": 0,
+      "p_qmin_hors_catalogue": {}
+     },
+     "lem_hors_cat": {
+      "route2_triviales": 11078,
+      "route2_census_seuil_K_moins_2": 0,
+      "route3_verifiees": 0,
+      "hors_hypothese": 0,
+      "contre_exemples": 0
+     },
+     "table_populations": 142438,
+     "ecarts_juge": 0,
+     "secondes": 0.0975857
+    },
+    {
+     "phase": "ordre",
+     "k": 4,
+     "parties": 273741,
+     "route1": 230491,
+     "route2": {
+      "parties": 43008,
+      "hors_catalogue": 43008,
+      "au_catalogue": 0,
+      "cible_v11_naissance": 18451,
+      "cible_v11_partie_suivante": 24557,
+      "ensembles": {
+       "voisins": {
+        "certifiees": 35346,
+        "part_certifiees": 0.821847,
+        "candidats_moyen": 16.2301,
+        "candidats_max": 24,
+        "tests_moyen": 11.4307,
+        "tests_max": 24,
+        "cible_egale_v11": 22517,
+        "part_cible_egale_v11": 0.637045,
+        "cible_naissance": 15605,
+        "part_cible_naissance": 0.441493,
+        "cible_v11_naissance_sur_certifiees": 15965,
+        "part_cible_v11_naissance_sur_certifiees": 0.451678,
+        "ecarts_juge": 0
+       },
+       "fenetre_8": {
+        "certifiees": 34982,
+        "part_certifiees": 0.813384,
+        "candidats_moyen": 41.3062,
+        "candidats_max": 68,
+        "tests_moyen": 27.3858,
+        "tests_max": 68,
+        "cible_egale_v11": 26754,
+        "part_cible_egale_v11": 0.764793,
+        "cible_naissance": 15418,
+        "part_cible_naissance": 0.440741,
+        "cible_v11_naissance_sur_certifiees": 15421,
+        "part_cible_v11_naissance_sur_certifiees": 0.440827,
+        "ecarts_juge": 0
+       },
+       "fenetre_16": {
+        "certifiees": 37969,
+        "part_certifiees": 0.882836,
+        "candidats_moyen": 70.4169,
+        "candidats_max": 132,
+        "tests_moyen": 43.1547,
+        "tests_max": 132,
+        "cible_egale_v11": 32391,
+        "part_cible_egale_v11": 0.853091,
+        "cible_naissance": 16744,
+        "part_cible_naissance": 0.440991,
+        "cible_v11_naissance_sur_certifiees": 16602,
+        "part_cible_v11_naissance_sur_certifiees": 0.437251,
+        "ecarts_juge": 0
+       },
+       "voisins_ou_fenetre_16": {
+        "certifiees": 40928,
+        "part_certifiees": 0.951637,
+        "candidats_moyen": 72.7166,
+        "candidats_max": 146,
+        "tests_moyen": 42.4092,
+        "tests_max": 142,
+        "cible_egale_v11": 36079,
+        "part_cible_egale_v11": 0.881524,
+        "cible_naissance": 17870,
+        "part_cible_naissance": 0.43662,
+        "cible_v11_naissance_sur_certifiees": 17905,
+        "part_cible_v11_naissance_sur_certifiees": 0.437476,
+        "ecarts_juge": 0
+       }
+      }
+     },
+     "route3": {
+      "parties": 242,
+      "hors_catalogue": 242,
+      "au_catalogue": 0,
+      "census_complets_sphere_au_catalogue_s_etoile_hors_de_f": 0,
+      "spheres_distinctes": 187,
+      "spheres_distinctes_hors_catalogue": 187,
+      "p_qmin_hors_catalogue": {
+       "p3_q4": 242
+      }
+     },
+     "lem_hors_cat": {
+      "route2_triviales": 43008,
+      "route2_census_seuil_K_moins_2": 0,
+      "route3_verifiees": 242,
+      "hors_hypothese": 0,
+      "contre_exemples": 0
+     },
+     "table_populations": 211371,
+     "ecarts_juge": 0,
+     "secondes": 0.314451
+    },
+    {
+     "phase": "ordre",
+     "k": 5,
+     "parties": 439094,
+     "route1": 278098,
+     "route2": {
+      "parties": 112877,
+      "hors_catalogue": 112877,
+      "au_catalogue": 0,
+      "cible_v11_naissance": 52341,
+      "cible_v11_partie_suivante": 60536,
+      "ensembles": {
+       "voisins": {
+        "certifiees": 94409,
+        "part_certifiees": 0.836388,
+        "candidats_moyen": 17.4022,
+        "candidats_max": 30,
+        "tests_moyen": 13.1686,
+        "tests_max": 30,
+        "cible_egale_v11": 70176,
+        "part_cible_egale_v11": 0.743319,
+        "cible_naissance": 44872,
+        "part_cible_naissance": 0.475294,
+        "cible_v11_naissance_sur_certifiees": 45553,
+        "part_cible_v11_naissance_sur_certifiees": 0.482507,
+        "ecarts_juge": 0
+       },
+       "fenetre_8": {
+        "certifiees": 90684,
+        "part_certifiees": 0.803388,
+        "candidats_moyen": 43.985,
+        "candidats_max": 85,
+        "tests_moyen": 31.6954,
+        "tests_max": 85,
+        "cible_egale_v11": 75700,
+        "part_cible_egale_v11": 0.834767,
+        "cible_naissance": 42087,
+        "part_cible_naissance": 0.464106,
+        "cible_v11_naissance_sur_certifiees": 42264,
+        "part_cible_v11_naissance_sur_certifiees": 0.466058,
+        "ecarts_juge": 0
+       },
+       "fenetre_16": {
+        "certifiees": 98884,
+        "part_certifiees": 0.876033,
+        "candidats_moyen": 73.3198,
+        "candidats_max": 165,
+        "tests_moyen": 49.1201,
+        "tests_max": 165,
+        "cible_egale_v11": 88986,
+        "part_cible_egale_v11": 0.899903,
+        "cible_naissance": 46043,
+        "part_cible_naissance": 0.465626,
+        "cible_v11_naissance_sur_certifiees": 46058,
+        "part_cible_v11_naissance_sur_certifiees": 0.465778,
+        "ecarts_juge": 0
+       },
+       "voisins_ou_fenetre_16": {
+        "certifiees": 108130,
+        "part_certifiees": 0.957945,
+        "candidats_moyen": 75.5219,
+        "candidats_max": 177,
+        "tests_moyen": 48.7263,
+        "tests_max": 175,
+        "cible_egale_v11": 99604,
+        "part_cible_egale_v11": 0.92115,
+        "cible_naissance": 50538,
+        "part_cible_naissance": 0.467382,
+        "cible_v11_naissance_sur_certifiees": 50762,
+        "part_cible_v11_naissance_sur_certifiees": 0.469453,
+        "ecarts_juge": 0
+       }
+      }
+     },
+     "route3": {
+      "parties": 48119,
+      "hors_catalogue": 48116,
+      "au_catalogue": 3,
+      "census_complets_sphere_au_catalogue_s_etoile_hors_de_f": 3,
+      "spheres_distinctes": 31404,
+      "spheres_distinctes_hors_catalogue": 31403,
+      "p_qmin_hors_catalogue": {
+       "p3_q4": 4590,
+       "p4_q3": 42272,
+       "p4_q4": 1254
+      }
+     },
+     "lem_hors_cat": {
+      "route2_triviales": 112877,
+      "route2_census_seuil_K_moins_2": 0,
+      "route3_verifiees": 48116,
+      "hors_hypothese": 3,
+      "contre_exemples": 0
+     },
+     "table_populations": 283207,
+     "ecarts_juge": 0,
+     "secondes": 1.25572
+    }
+   ],
+   "bilan": {
+    "phase": "bilan",
+    "trame": "ng01",
+    "K": 5,
+    "route2": {
+     "parties": 169043,
+     "cible_v11_naissance": 77782,
+     "ensembles": {
+      "voisins": {
+       "certifiees": 140423,
+       "part_certifiees": 0.830694,
+       "candidats_moyen": 16.8396,
+       "candidats_max": 30,
+       "tests_moyen": 12.3936,
+       "tests_max": 30,
+       "cible_egale_v11": 97775,
+       "part_cible_egale_v11": 0.696289,
+       "cible_naissance": 65907,
+       "part_cible_naissance": 0.469346,
+       "cible_v11_naissance_sur_certifiees": 67374,
+       "part_cible_v11_naissance_sur_certifiees": 0.479793,
+       "ecarts_juge": 0
+      },
+      "fenetre_8": {
+       "certifiees": 136564,
+       "part_certifiees": 0.807865,
+       "candidats_moyen": 42.7196,
+       "candidats_max": 85,
+       "tests_moyen": 29.7854,
+       "tests_max": 85,
+       "cible_egale_v11": 109663,
+       "part_cible_egale_v11": 0.803015,
+       "cible_naissance": 63296,
+       "part_cible_naissance": 0.46349,
+       "cible_v11_naissance_sur_certifiees": 63625,
+       "part_cible_v11_naissance_sur_certifiees": 0.465899,
+       "ecarts_juge": 0
+      },
+      "fenetre_16": {
+       "certifiees": 148585,
+       "part_certifiees": 0.878978,
+       "candidats_moyen": 71.905,
+       "candidats_max": 165,
+       "tests_moyen": 46.4529,
+       "tests_max": 165,
+       "cible_egale_v11": 130534,
+       "part_cible_egale_v11": 0.878514,
+       "cible_naissance": 69129,
+       "part_cible_naissance": 0.465249,
+       "cible_v11_naissance_sur_certifiees": 69000,
+       "part_cible_v11_naissance_sur_certifiees": 0.464381,
+       "ecarts_juge": 0
+      },
+      "voisins_ou_fenetre_16": {
+       "certifiees": 161551,
+       "part_certifiees": 0.95568,
+       "candidats_moyen": 74.1383,
+       "candidats_max": 177,
+       "tests_moyen": 45.9142,
+       "tests_max": 175,
+       "cible_egale_v11": 145627,
+       "part_cible_egale_v11": 0.901431,
+       "cible_naissance": 74968,
+       "part_cible_naissance": 0.464052,
+       "cible_v11_naissance_sur_certifiees": 75354,
+       "part_cible_v11_naissance_sur_certifiees": 0.466441,
+       "ecarts_juge": 0
+      }
+     }
+    },
+    "route3": {
+     "parties": 48361,
+     "census_complets_sphere_au_catalogue_s_etoile_hors_de_f": 3,
+     "spheres_distinctes_tous_ordres": 31432,
+     "spheres_distinctes_hors_catalogue_tous_ordres": 31431
+    },
+    "lem_hors_cat": {
+     "route2_triviales": 166963,
+     "route2_census_seuil_K_moins_2": 2080,
+     "route3_verifiees": 48358,
+     "hors_hypothese": 3,
+     "contre_exemples": 0
+    },
+    "ecarts_voisins": 0,
+    "ecarts_juge": 0,
+    "secondes": 2.04195,
+    "code": 0
+   }
+  },
+  "ng02_k5": {
+   "journal_sha256": "d7f98e979fb3d78ceb378aee26a54a903d880715b80ee47d5d56b38519479081",
+   "vidages_sha256": {
+    "cat.bin": "37d45bb526062e2ba188e9abe5e5fa8c15c7c0f87819c0848ff1c212fff0303a",
+    "ordre_1.bin": "5863b41c1b883a2bc2f5247cf21251468f938f509dcc968d4eaa526c7e3ca4e6",
+    "ordre_2.bin": "d0180efe562371e84705c34b1772dba0595021bc800d199e58be9e80d14303b7",
+    "ordre_3.bin": "93d591df25fb277c05dd837989bcacd7f8f34c5e189db5739379d73d68bab01a",
+    "ordre_4.bin": "450d71665823fab606768debd71141895a88bc069cd80e58cfaff4e62aa61fbf",
+    "ordre_5.bin": "4cb41e088b109e99ff64880324525e0a515788054478e2147192d61c5b17ef68",
+    "foret_1.bin": "80c0c63b4771c550add4a552c7babae4a120f9a6afa1d3218c413c8ac82346d2",
+    "foret_2.bin": "74a6706cb82286f5ff43b258a6b3a035a500b040656ddc83e47826a553db48c2",
+    "foret_3.bin": "20b169c10179984ddd9d38e50dcd32e328bab2892d7139a853ee4a8f44b4a488",
+    "foret_4.bin": "d7a8a7988af7d7f4ac3e8bddda1cf198b914326f61c4eb78abcd31c8f54ea213",
+    "foret_5.bin": "d75f254c10a6804e48d1ff7c5d95aa2dcca53dd1966de5a5e32a30581ed3fd8a"
+   },
+   "entree": {
+    "phase": "entree",
+    "trame": "ng02",
+    "K": 5,
+    "sites": 45845,
+    "boules": 1407885,
+    "mutant_cote_nul": false
+   },
+   "voisins": {
+    "phase": "voisins",
+    "K": 5,
+    "sites": 45845,
+    "feuille_arbre": 16,
+    "echantillon_force_brute": 512,
+    "ecarts_force_brute": 0,
+    "secondes": 0.058311
+   },
+   "ordres": [
+    {
+     "phase": "ordre",
+     "k": 2,
+     "parties": 56369,
+     "route1": 54426,
+     "route2": {
+      "parties": 1943,
+      "hors_catalogue": 1943,
+      "au_catalogue": 0,
+      "cible_v11_naissance": 1328,
+      "cible_v11_partie_suivante": 615,
+      "ensembles": {
+       "voisins": {
+        "certifiees": 1445,
+        "part_certifiees": 0.743695,
+        "candidats_moyen": 11.9295,
+        "candidats_max": 12,
+        "tests_moyen": 7.51724,
+        "tests_max": 12,
+        "cible_egale_v11": 503,
+        "part_cible_egale_v11": 0.348097,
+        "cible_naissance": 903,
+        "part_cible_naissance": 0.624913,
+        "cible_v11_naissance_sur_certifiees": 1014,
+        "part_cible_v11_naissance_sur_certifiees": 0.70173,
+        "ecarts_juge": 0
+       },
+       "fenetre_8": {
+        "certifiees": 1503,
+        "part_certifiees": 0.773546,
+        "candidats_moyen": 31.8374,
+        "candidats_max": 34,
+        "tests_moyen": 18.3814,
+        "tests_max": 34,
+        "cible_egale_v11": 841,
+        "part_cible_egale_v11": 0.559548,
+        "cible_naissance": 1038,
+        "part_cible_naissance": 0.690619,
+        "cible_v11_naissance_sur_certifiees": 1041,
+        "part_cible_v11_naissance_sur_certifiees": 0.692615,
+        "ecarts_juge": 0
+       },
+       "fenetre_16": {
+        "certifiees": 1664,
+        "part_certifiees": 0.856408,
+        "candidats_moyen": 58.9002,
+        "candidats_max": 66,
+        "tests_moyen": 30.0309,
+        "tests_max": 66,
+        "cible_egale_v11": 1137,
+        "part_cible_egale_v11": 0.683293,
+        "cible_naissance": 1186,
+        "part_cible_naissance": 0.71274,
+        "cible_v11_naissance_sur_certifiees": 1147,
+        "part_cible_v11_naissance_sur_certifiees": 0.689303,
+        "ecarts_juge": 0
+       },
+       "voisins_ou_fenetre_16": {
+        "certifiees": 1782,
+        "part_certifiees": 0.917138,
+        "candidats_moyen": 61.4421,
+        "candidats_max": 76,
+        "tests_moyen": 28.2928,
+        "tests_max": 75,
+        "cible_egale_v11": 1240,
+        "part_cible_egale_v11": 0.695847,
+        "cible_naissance": 1193,
+        "part_cible_naissance": 0.669473,
+        "cible_v11_naissance_sur_certifiees": 1230,
+        "part_cible_v11_naissance_sur_certifiees": 0.690236,
+        "ecarts_juge": 0
+       }
+      }
+     },
+     "route3": {
+      "parties": 0,
+      "hors_catalogue": 0,
+      "au_catalogue": 0,
+      "census_complets_sphere_au_catalogue_s_etoile_hors_de_f": 0,
+      "spheres_distinctes": 0,
+      "spheres_distinctes_hors_catalogue": 0,
+      "p_qmin_hors_catalogue": {}
+     },
+     "lem_hors_cat": {
+      "route2_triviales": 0,
+      "route2_census_seuil_K_moins_2": 1943,
+      "route3_verifiees": 0,
+      "hors_hypothese": 0,
+      "contre_exemples": 0
+     },
+     "table_populations": 118797,
+     "ecarts_juge": 0,
+     "secondes": 0.0713851
+    },
+    {
+     "phase": "ordre",
+     "k": 3,
+     "parties": 173710,
+     "route1": 163538,
+     "route2": {
+      "parties": 10172,
+      "hors_catalogue": 10172,
+      "au_catalogue": 0,
+      "cible_v11_naissance": 4971,
+      "cible_v11_partie_suivante": 5201,
+      "ensembles": {
+       "voisins": {
+        "certifiees": 8463,
+        "part_certifiees": 0.83199,
+        "candidats_moyen": 14.4865,
+        "candidats_max": 18,
+        "tests_moyen": 9.09094,
+        "tests_max": 18,
+        "cible_egale_v11": 4035,
+        "part_cible_egale_v11": 0.476781,
+        "cible_naissance": 4040,
+        "part_cible_naissance": 0.477372,
+        "cible_v11_naissance_sur_certifiees": 4350,
+        "part_cible_v11_naissance_sur_certifiees": 0.514002,
+        "ecarts_juge": 0
+       },
+       "fenetre_8": {
+        "certifiees": 8467,
+        "part_certifiees": 0.832383,
+        "candidats_moyen": 37.5915,
+        "candidats_max": 51,
+        "tests_moyen": 21.9013,
+        "tests_max": 51,
+        "cible_egale_v11": 5570,
+        "part_cible_egale_v11": 0.657848,
+        "cible_naissance": 4325,
+        "part_cible_naissance": 0.510807,
+        "cible_v11_naissance_sur_certifiees": 4277,
+        "part_cible_v11_naissance_sur_certifiees": 0.505138,
+        "ecarts_juge": 0
+       },
+       "fenetre_16": {
+        "certifiees": 9102,
+        "part_certifiees": 0.894809,
+        "candidats_moyen": 66.2774,
+        "candidats_max": 99,
+        "tests_moyen": 34.8618,
+        "tests_max": 99,
+        "cible_egale_v11": 6932,
+        "part_cible_egale_v11": 0.761591,
+        "cible_naissance": 4616,
+        "part_cible_naissance": 0.507141,
+        "cible_v11_naissance_sur_certifiees": 4559,
+        "part_cible_v11_naissance_sur_certifiees": 0.500879,
+        "ecarts_juge": 0
+       },
+       "voisins_ou_fenetre_16": {
+        "certifiees": 9665,
+        "part_certifiees": 0.950157,
+        "candidats_moyen": 68.6932,
+        "candidats_max": 113,
+        "tests_moyen": 34.0364,
+        "tests_max": 111,
+        "cible_egale_v11": 7620,
+        "part_cible_egale_v11": 0.788412,
+        "cible_naissance": 4712,
+        "part_cible_naissance": 0.487532,
+        "cible_v11_naissance_sur_certifiees": 4809,
+        "part_cible_v11_naissance_sur_certifiees": 0.497569,
+        "ecarts_juge": 0
+       }
+      }
+     },
+     "route3": {
+      "parties": 0,
+      "hors_catalogue": 0,
+      "au_catalogue": 0,
+      "census_complets_sphere_au_catalogue_s_etoile_hors_de_f": 0,
+      "spheres_distinctes": 0,
+      "spheres_distinctes_hors_catalogue": 0,
+      "p_qmin_hors_catalogue": {}
+     },
+     "lem_hors_cat": {
+      "route2_triviales": 10172,
+      "route2_census_seuil_K_moins_2": 0,
+      "route3_verifiees": 0,
+      "hors_hypothese": 0,
+      "contre_exemples": 0
+     },
+     "table_populations": 182823,
+     "ecarts_juge": 0,
+     "secondes": 0.108271
+    },
+    {
+     "phase": "ordre",
+     "k": 4,
+     "parties": 309729,
+     "route1": 270466,
+     "route2": {
+      "parties": 39012,
+      "hors_catalogue": 39012,
+      "au_catalogue": 0,
+      "cible_v11_naissance": 17145,
+      "cible_v11_partie_suivante": 21867,
+      "ensembles": {
+       "voisins": {
+        "certifiees": 32329,
+        "part_certifiees": 0.828694,
+        "candidats_moyen": 16.2822,
+        "candidats_max": 24,
+        "tests_moyen": 11.3937,
+        "tests_max": 24,
+        "cible_egale_v11": 20736,
+        "part_cible_egale_v11": 0.641406,
+        "cible_naissance": 14655,
+        "part_cible_naissance": 0.453308,
+        "cible_v11_naissance_sur_certifiees": 14990,
+        "part_cible_v11_naissance_sur_certifiees": 0.46367,
+        "ecarts_juge": 0
+       },
+       "fenetre_8": {
+        "certifiees": 31751,
+        "part_certifiees": 0.813878,
+        "candidats_moyen": 41.3234,
+        "candidats_max": 68,
+        "tests_moyen": 27.3564,
+        "tests_max": 68,
+        "cible_egale_v11": 24112,
+        "part_cible_egale_v11": 0.759409,
+        "cible_naissance": 14295,
+        "part_cible_naissance": 0.450222,
+        "cible_v11_naissance_sur_certifiees": 14357,
+        "part_cible_v11_naissance_sur_certifiees": 0.452175,
+        "ecarts_juge": 0
+       },
+       "fenetre_16": {
+        "certifiees": 34434,
+        "part_certifiees": 0.882651,
+        "candidats_moyen": 70.4335,
+        "candidats_max": 132,
+        "tests_moyen": 43.1101,
+        "tests_max": 132,
+        "cible_egale_v11": 29043,
+        "part_cible_egale_v11": 0.84344,
+        "cible_naissance": 15574,
+        "part_cible_naissance": 0.452286,
+        "cible_v11_naissance_sur_certifiees": 15452,
+        "part_cible_v11_naissance_sur_certifiees": 0.448743,
+        "ecarts_juge": 0
+       },
+       "voisins_ou_fenetre_16": {
+        "certifiees": 37169,
+        "part_certifiees": 0.952758,
+        "candidats_moyen": 72.7723,
+        "candidats_max": 146,
+        "tests_moyen": 42.5312,
+        "tests_max": 144,
+        "cible_egale_v11": 32373,
+        "part_cible_egale_v11": 0.870968,
+        "cible_naissance": 16614,
+        "part_cible_naissance": 0.446985,
+        "cible_v11_naissance_sur_certifiees": 16670,
+        "part_cible_v11_naissance_sur_certifiees": 0.448492,
+        "ecarts_juge": 0
+       }
+      }
+     },
+     "route3": {
+      "parties": 251,
+      "hors_catalogue": 249,
+      "au_catalogue": 2,
+      "census_complets_sphere_au_catalogue_s_etoile_hors_de_f": 2,
+      "spheres_distinctes": 212,
+      "spheres_distinctes_hors_catalogue": 211,
+      "p_qmin_hors_catalogue": {
+       "p3_q4": 249
+      }
+     },
+     "lem_hors_cat": {
+      "route2_triviales": 39012,
+      "route2_census_seuil_K_moins_2": 0,
+      "route3_verifiees": 249,
+      "hors_hypothese": 2,
+      "contre_exemples": 0
+     },
+     "table_populations": 273879,
+     "ecarts_juge": 0,
+     "secondes": 0.422882
+    },
+    {
+     "phase": "ordre",
+     "k": 5,
+     "parties": 499328,
+     "route1": 342600,
+     "route2": {
+      "parties": 105580,
+      "hors_catalogue": 105580,
+      "au_catalogue": 0,
+      "cible_v11_naissance": 51107,
+      "cible_v11_partie_suivante": 54473,
+      "ensembles": {
+       "voisins": {
+        "certifiees": 89214,
+        "part_certifiees": 0.84499,
+        "candidats_moyen": 17.4168,
+        "candidats_max": 30,
+        "tests_moyen": 13.1687,
+        "tests_max": 30,
+        "cible_egale_v11": 67483,
+        "part_cible_egale_v11": 0.756417,
+        "cible_naissance": 44566,
+        "part_cible_naissance": 0.49954,
+        "cible_v11_naissance_sur_certifiees": 44807,
+        "part_cible_v11_naissance_sur_certifiees": 0.502242,
+        "ecarts_juge": 0
+       },
+       "fenetre_8": {
+        "certifiees": 85375,
+        "part_certifiees": 0.808629,
+        "candidats_moyen": 43.8463,
+        "candidats_max": 85,
+        "tests_moyen": 31.8206,
+        "tests_max": 85,
+        "cible_egale_v11": 71607,
+        "part_cible_egale_v11": 0.838735,
+        "cible_naissance": 41455,
+        "part_cible_naissance": 0.485564,
+        "cible_v11_naissance_sur_certifiees": 41667,
+        "part_cible_v11_naissance_sur_certifiees": 0.488047,
+        "ecarts_juge": 0
+       },
+       "fenetre_16": {
+        "certifiees": 92765,
+        "part_certifiees": 0.878623,
+        "candidats_moyen": 73.0509,
+        "candidats_max": 165,
+        "tests_moyen": 49.4136,
+        "tests_max": 165,
+        "cible_egale_v11": 83111,
+        "part_cible_egale_v11": 0.895931,
+        "cible_naissance": 45194,
+        "part_cible_naissance": 0.487188,
+        "cible_v11_naissance_sur_certifiees": 45141,
+        "part_cible_v11_naissance_sur_certifiees": 0.486617,
+        "ecarts_juge": 0
+       },
+       "voisins_ou_fenetre_16": {
+        "certifiees": 101284,
+        "part_certifiees": 0.95931,
+        "candidats_moyen": 75.267,
+        "candidats_max": 179,
+        "tests_moyen": 49.1634,
+        "tests_max": 178,
+        "cible_egale_v11": 92979,
+        "part_cible_egale_v11": 0.918003,
+        "cible_naissance": 49631,
+        "part_cible_naissance": 0.490018,
+        "cible_v11_naissance_sur_certifiees": 49675,
+        "part_cible_v11_naissance_sur_certifiees": 0.490453,
+        "ecarts_juge": 0
+       }
+      }
+     },
+     "route3": {
+      "parties": 51148,
+      "hors_catalogue": 51137,
+      "au_catalogue": 11,
+      "census_complets_sphere_au_catalogue_s_etoile_hors_de_f": 11,
+      "spheres_distinctes": 34928,
+      "spheres_distinctes_hors_catalogue": 34924,
+      "p_qmin_hors_catalogue": {
+       "p3_q4": 5110,
+       "p4_q3": 44774,
+       "p4_q4": 1253
+      }
+     },
+     "lem_hors_cat": {
+      "route2_triviales": 105580,
+      "route2_census_seuil_K_moins_2": 0,
+      "route3_verifiees": 51137,
+      "hors_hypothese": 11,
+      "contre_exemples": 0
+     },
+     "table_populations": 361325,
+     "ecarts_juge": 0,
+     "secondes": 1.32064
+    }
+   ],
+   "bilan": {
+    "phase": "bilan",
+    "trame": "ng02",
+    "K": 5,
+    "route2": {
+     "parties": 156707,
+     "cible_v11_naissance": 74551,
+     "ensembles": {
+      "voisins": {
+       "certifiees": 131451,
+       "part_certifiees": 0.838833,
+       "candidats_moyen": 16.8761,
+       "candidats_max": 30,
+       "tests_moyen": 12.392,
+       "tests_max": 30,
+       "cible_egale_v11": 92757,
+       "part_cible_egale_v11": 0.705639,
+       "cible_naissance": 64164,
+       "part_cible_naissance": 0.488121,
+       "cible_v11_naissance_sur_certifiees": 65161,
+       "part_cible_v11_naissance_sur_certifiees": 0.495706,
+       "ecarts_juge": 0
+      },
+      "fenetre_8": {
+       "certifiees": 127096,
+       "part_certifiees": 0.811042,
+       "candidats_moyen": 42.6633,
+       "candidats_max": 85,
+       "tests_moyen": 29.8987,
+       "tests_max": 85,
+       "cible_egale_v11": 102130,
+       "part_cible_egale_v11": 0.803566,
+       "cible_naissance": 61113,
+       "part_cible_naissance": 0.480841,
+       "cible_v11_naissance_sur_certifiees": 61342,
+       "part_cible_v11_naissance_sur_certifiees": 0.482643,
+       "ecarts_juge": 0
+      },
+      "fenetre_16": {
+       "certifiees": 137965,
+       "part_certifiees": 0.880401,
+       "candidats_moyen": 71.7842,
+       "candidats_max": 165,
+       "tests_moyen": 46.6594,
+       "tests_max": 165,
+       "cible_egale_v11": 120223,
+       "part_cible_egale_v11": 0.871402,
+       "cible_naissance": 66570,
+       "part_cible_naissance": 0.482514,
+       "cible_v11_naissance_sur_certifiees": 66299,
+       "part_cible_v11_naissance_sur_certifiees": 0.480549,
+       "ecarts_juge": 0
+      },
+      "voisins_ou_fenetre_16": {
+       "certifiees": 149900,
+       "part_certifiees": 0.956562,
+       "candidats_moyen": 74.0478,
+       "candidats_max": 179,
+       "tests_moyen": 46.2717,
+       "tests_max": 178,
+       "cible_egale_v11": 134212,
+       "part_cible_egale_v11": 0.895344,
+       "cible_naissance": 72150,
+       "part_cible_naissance": 0.481321,
+       "cible_v11_naissance_sur_certifiees": 72384,
+       "part_cible_v11_naissance_sur_certifiees": 0.482882,
+       "ecarts_juge": 0
+      }
+     }
+    },
+    "route3": {
+     "parties": 51399,
+     "census_complets_sphere_au_catalogue_s_etoile_hors_de_f": 13,
+     "spheres_distinctes_tous_ordres": 34948,
+     "spheres_distinctes_hors_catalogue_tous_ordres": 34944
+    },
+    "lem_hors_cat": {
+     "route2_triviales": 154764,
+     "route2_census_seuil_K_moins_2": 1943,
+     "route3_verifiees": 51386,
+     "hors_hypothese": 13,
+     "contre_exemples": 0
+    },
+    "ecarts_voisins": 0,
+    "ecarts_juge": 0,
+    "secondes": 2.32718,
+    "code": 0
+   }
+  },
+  "ng00_k10": {
+   "journal_sha256": "422832ddce1f026efabc94e6cae54a3bf273d9c19c6de33b4a42327ae40c71e7",
+   "vidages_sha256": {
+    "cat.bin": "8442579133075992593c8318996839472b6cd04ff0c1578d6435f1e9886c0e31",
+    "ordre_1.bin": "74f190b8cae8dd3c9846fe70c42a85d46d5e5bad513c23b9b062b0d0273b0877",
+    "ordre_10.bin": "a6bc2f5b075b0ea72733562d24380d8edd1a836dcf4233b8dbc9158bc598291a",
+    "ordre_2.bin": "b3131bc19d886c392bf30b2f5bde54cdc542294634f64a32fabe0135bd5bc28b",
+    "ordre_3.bin": "fef0dfe5f3cf03f6b151caf171db8917e51f1e88309fe86e4cabcd541b663113",
+    "ordre_4.bin": "09cb871ebfef613a86389d0ed441560905f3211a5d68369b686ef03ce5194caf",
+    "ordre_5.bin": "a314f4836aac683edd1f0fdd7e73e981a2a9d3b6ddec0cd67f1e77d4d3857797",
+    "ordre_6.bin": "200d8a59b49d2cac4125bbfaa44ab83cbc5bce075b44a60cfebde0cfadd506e7",
+    "ordre_7.bin": "125b721c625561dabe653900545fd0dfb49491345b92b8e73affa110f76c2680",
+    "ordre_8.bin": "57c0c36bb0f4ce283a9056901d7d83db7fb2f8d32064eeed105bb5bde10cad0e",
+    "ordre_9.bin": "8ea3c60af90ff6a532e41ab61b43fe41c9f674d206d5aa039894178fc12a57e3",
+    "foret_1.bin": "943a558ba3cd163c2397ea5fedb100c37172cc910289c7326b42824f72f95df4",
+    "foret_10.bin": "0b4cd5bac57b0710915250292c7dce2d715d5d9d2f2f7acec1cde4f410c860f2",
+    "foret_2.bin": "70969a931b5ebbae9d3fb1eb7ef73c70ac2f78947274127bcfc312ea17eb0c77",
+    "foret_3.bin": "5544c26519a9bbaae93eb1020e2a93994a337d6896054fcfc4ad7533130c4b38",
+    "foret_4.bin": "811c3f6800163d9006ccc13d8b9bdb0b8415b190947910f5c32865318516e748",
+    "foret_5.bin": "5e790882a2ada85afb75ba7bd1aee7b577c73ef302b416cd90eff88ef1f0e887",
+    "foret_6.bin": "435a73d72698d3dcb5efb613c8cb28d7fe2f4da82d2a82126bc07985d418c0ea",
+    "foret_7.bin": "742030de3ee1420f9d6920d745f72667756e9a96d7b34096fc86334a2623525a",
+    "foret_8.bin": "f20eb56f1dc727ecd4e92d3549d191dddb18f8914e5a0845ea34fec4e82dd371",
+    "foret_9.bin": "4ce6aa3b6b4ebcf90fb56ba2b3d745124087dcd1aa15aaf96c995830f7ca4c94"
+   },
+   "entree": {
+    "phase": "entree",
+    "trame": "ng00",
+    "K": 10,
+    "sites": 39885,
+    "boules": 5512670,
+    "mutant_cote_nul": false
+   },
+   "voisins": {
+    "phase": "voisins",
+    "K": 10,
+    "sites": 39885,
+    "feuille_arbre": 16,
+    "echantillon_force_brute": 512,
+    "ecarts_force_brute": 0,
+    "secondes": 0.0860897
+   },
+   "ordres": [
+    {
+     "phase": "ordre",
+     "k": 2,
+     "parties": 64721,
+     "route1": 63916,
+     "route2": {
+      "parties": 805,
+      "hors_catalogue": 805,
+      "au_catalogue": 0,
+      "cible_v11_naissance": 519,
+      "cible_v11_partie_suivante": 286,
+      "ensembles": {
+       "voisins": {
+        "certifiees": 701,
+        "part_certifiees": 0.870807,
+        "candidats_moyen": 21.8621,
+        "candidats_max": 22,
+        "tests_moyen": 9.78012,
+        "tests_max": 22,
+        "cible_egale_v11": 310,
+        "part_cible_egale_v11": 0.442225,
+        "cible_naissance": 454,
+        "part_cible_naissance": 0.647646,
+        "cible_v11_naissance_sur_certifiees": 465,
+        "part_cible_v11_naissance_sur_certifiees": 0.663338,
+        "ecarts_juge": 0
+       },
+       "fenetre_8": {
+        "certifiees": 658,
+        "part_certifiees": 0.817391,
+        "candidats_moyen": 32.7453,
+        "candidats_max": 34,
+        "tests_moyen": 16.1913,
+        "tests_max": 34,
+        "cible_egale_v11": 304,
+        "part_cible_egale_v11": 0.462006,
+        "cible_naissance": 434,
+        "part_cible_naissance": 0.659574,
+        "cible_v11_naissance_sur_certifiees": 429,
+        "part_cible_v11_naissance_sur_certifiees": 0.651976,
+        "ecarts_juge": 0
+       },
+       "fenetre_16": {
+        "certifiees": 716,
+        "part_certifiees": 0.889441,
+        "candidats_moyen": 61.3404,
+        "candidats_max": 66,
+        "tests_moyen": 26.7342,
+        "tests_max": 66,
+        "cible_egale_v11": 403,
+        "part_cible_egale_v11": 0.562849,
+        "cible_naissance": 482,
+        "part_cible_naissance": 0.673184,
+        "cible_v11_naissance_sur_certifiees": 468,
+        "part_cible_v11_naissance_sur_certifiees": 0.653631,
+        "ecarts_juge": 0
+       },
+       "voisins_ou_fenetre_16": {
+        "certifiees": 759,
+        "part_certifiees": 0.942857,
+        "candidats_moyen": 67.4186,
+        "candidats_max": 85,
+        "tests_moyen": 25.5888,
+        "tests_max": 83,
+        "cible_egale_v11": 477,
+        "part_cible_egale_v11": 0.628458,
+        "cible_naissance": 480,
+        "part_cible_naissance": 0.632411,
+        "cible_v11_naissance_sur_certifiees": 496,
+        "part_cible_v11_naissance_sur_certifiees": 0.653491,
+        "ecarts_juge": 0
+       }
+      }
+     },
+     "route3": {
+      "parties": 0,
+      "hors_catalogue": 0,
+      "au_catalogue": 0,
+      "census_complets_sphere_au_catalogue_s_etoile_hors_de_f": 0,
+      "spheres_distinctes": 0,
+      "spheres_distinctes_hors_catalogue": 0,
+      "p_qmin_hors_catalogue": {}
+     },
+     "lem_hors_cat": {
+      "route2_triviales": 0,
+      "route2_census_seuil_K_moins_2": 805,
+      "route3_verifiees": 0,
+      "hors_hypothese": 0,
+      "contre_exemples": 0
+     },
+     "table_populations": 101089,
+     "ecarts_juge": 0,
+     "secondes": 0.0604559
+    },
+    {
+     "phase": "ordre",
+     "k": 3,
+     "parties": 187877,
+     "route1": 184586,
+     "route2": {
+      "parties": 3291,
+      "hors_catalogue": 3291,
+      "au_catalogue": 0,
+      "cible_v11_naissance": 1309,
+      "cible_v11_partie_suivante": 1982,
+      "ensembles": {
+       "voisins": {
+        "certifiees": 3078,
+        "part_certifiees": 0.935278,
+        "candidats_moyen": 25.9095,
+        "candidats_max": 33,
+        "tests_moyen": 11.4452,
+        "tests_max": 33,
+        "cible_egale_v11": 1431,
+        "part_cible_egale_v11": 0.464912,
+        "cible_naissance": 1262,
+        "part_cible_naissance": 0.410006,
+        "cible_v11_naissance_sur_certifiees": 1247,
+        "part_cible_v11_naissance_sur_certifiees": 0.405133,
+        "ecarts_juge": 0
+       },
+       "fenetre_8": {
+        "certifiees": 2847,
+        "part_certifiees": 0.865087,
+        "candidats_moyen": 39.2689,
+        "candidats_max": 51,
+        "tests_moyen": 20.0696,
+        "tests_max": 51,
+        "cible_egale_v11": 1340,
+        "part_cible_egale_v11": 0.470671,
+        "cible_naissance": 1097,
+        "part_cible_naissance": 0.385318,
+        "cible_v11_naissance_sur_certifiees": 1188,
+        "part_cible_v11_naissance_sur_certifiees": 0.417281,
+        "ecarts_juge": 0
+       },
+       "fenetre_16": {
+        "certifiees": 3018,
+        "part_certifiees": 0.917046,
+        "candidats_moyen": 70.2574,
+        "candidats_max": 99,
+        "tests_moyen": 32.2416,
+        "tests_max": 99,
+        "cible_egale_v11": 1832,
+        "part_cible_egale_v11": 0.607025,
+        "cible_naissance": 1225,
+        "part_cible_naissance": 0.405898,
+        "cible_v11_naissance_sur_certifiees": 1236,
+        "part_cible_v11_naissance_sur_certifiees": 0.409543,
+        "ecarts_juge": 0
+       },
+       "voisins_ou_fenetre_16": {
+        "certifiees": 3189,
+        "part_certifiees": 0.969006,
+        "candidats_moyen": 76.7284,
+        "candidats_max": 121,
+        "tests_moyen": 30.9225,
+        "tests_max": 118,
+        "cible_egale_v11": 2187,
+        "part_cible_egale_v11": 0.685795,
+        "cible_naissance": 1276,
+        "part_cible_naissance": 0.400125,
+        "cible_v11_naissance_sur_certifiees": 1275,
+        "part_cible_v11_naissance_sur_certifiees": 0.399812,
+        "ecarts_juge": 0
+       }
+      }
+     },
+     "route3": {
+      "parties": 0,
+      "hors_catalogue": 0,
+      "au_catalogue": 0,
+      "census_complets_sphere_au_catalogue_s_etoile_hors_de_f": 0,
+      "spheres_distinctes": 0,
+      "spheres_distinctes_hors_catalogue": 0,
+      "p_qmin_hors_catalogue": {}
+     },
+     "lem_hors_cat": {
+      "route2_triviales": 0,
+      "route2_census_seuil_K_moins_2": 3291,
+      "route3_verifiees": 0,
+      "hors_hypothese": 0,
+      "contre_exemples": 0
+     },
+     "table_populations": 166228,
+     "ecarts_juge": 0,
+     "secondes": 0.099423
+    },
+    {
+     "phase": "ordre",
+     "k": 4,
+     "parties": 353517,
+     "route1": 344201,
+     "route2": {
+      "parties": 9316,
+      "hors_catalogue": 9316,
+      "au_catalogue": 0,
+      "cible_v11_naissance": 2515,
+      "cible_v11_partie_suivante": 6801,
+      "ensembles": {
+       "voisins": {
+        "certifiees": 8874,
+        "part_certifiees": 0.952555,
+        "candidats_moyen": 28.8537,
+        "candidats_max": 44,
+        "tests_moyen": 13.4105,
+        "tests_max": 44,
+        "cible_egale_v11": 4509,
+        "part_cible_egale_v11": 0.508114,
+        "cible_naissance": 2320,
+        "part_cible_naissance": 0.261438,
+        "cible_v11_naissance_sur_certifiees": 2428,
+        "part_cible_v11_naissance_sur_certifiees": 0.273608,
+        "ecarts_juge": 0
+       },
+       "fenetre_8": {
+        "certifiees": 8356,
+        "part_certifiees": 0.896951,
+        "candidats_moyen": 44.4891,
+        "candidats_max": 68,
+        "tests_moyen": 23.6554,
+        "tests_max": 68,
+        "cible_egale_v11": 4349,
+        "part_cible_egale_v11": 0.520464,
+        "cible_naissance": 2157,
+        "part_cible_naissance": 0.258138,
+        "cible_v11_naissance_sur_certifiees": 2341,
+        "part_cible_v11_naissance_sur_certifiees": 0.280158,
+        "ecarts_juge": 0
+       },
+       "fenetre_16": {
+        "certifiees": 8756,
+        "part_certifiees": 0.939888,
+        "candidats_moyen": 77.1702,
+        "candidats_max": 132,
+        "tests_moyen": 37.2149,
+        "tests_max": 132,
+        "cible_egale_v11": 5847,
+        "part_cible_egale_v11": 0.667771,
+        "cible_naissance": 2325,
+        "part_cible_naissance": 0.265532,
+        "cible_v11_naissance_sur_certifiees": 2404,
+        "part_cible_v11_naissance_sur_certifiees": 0.274555,
+        "ecarts_juge": 0
+       },
+       "voisins_ou_fenetre_16": {
+        "certifiees": 9136,
+        "part_certifiees": 0.980678,
+        "candidats_moyen": 83.7914,
+        "candidats_max": 156,
+        "tests_moyen": 36.429,
+        "tests_max": 140,
+        "cible_egale_v11": 6805,
+        "part_cible_egale_v11": 0.744856,
+        "cible_naissance": 2360,
+        "part_cible_naissance": 0.258319,
+        "cible_v11_naissance_sur_certifiees": 2480,
+        "part_cible_v11_naissance_sur_certifiees": 0.271454,
+        "ecarts_juge": 0
+       }
+      }
+     },
+     "route3": {
+      "parties": 0,
+      "hors_catalogue": 0,
+      "au_catalogue": 0,
+      "census_complets_sphere_au_catalogue_s_etoile_hors_de_f": 0,
+      "spheres_distinctes": 0,
+      "spheres_distinctes_hors_catalogue": 0,
+      "p_qmin_hors_catalogue": {}
+     },
+     "lem_hors_cat": {
+      "route2_triviales": 0,
+      "route2_census_seuil_K_moins_2": 9316,
+      "route3_verifiees": 0,
+      "hors_hypothese": 0,
+      "contre_exemples": 0
+     },
+     "table_populations": 249493,
+     "ecarts_juge": 0,
+     "secondes": 0.193986
+    },
+    {
+     "phase": "ordre",
+     "k": 5,
+     "parties": 568919,
+     "route1": 545714,
+     "route2": {
+      "parties": 23202,
+      "hors_catalogue": 23202,
+      "au_catalogue": 0,
+      "cible_v11_naissance": 4642,
+      "cible_v11_partie_suivante": 18560,
+      "ensembles": {
+       "voisins": {
+        "certifiees": 22337,
+        "part_certifiees": 0.962719,
+        "candidats_moyen": 31.3131,
+        "candidats_max": 55,
+        "tests_moyen": 15.561,
+        "tests_max": 53,
+        "cible_egale_v11": 13034,
+        "part_cible_egale_v11": 0.583516,
+        "cible_naissance": 4400,
+        "part_cible_naissance": 0.196983,
+        "cible_v11_naissance_sur_certifiees": 4523,
+        "part_cible_v11_naissance_sur_certifiees": 0.202489,
+        "ecarts_juge": 0
+       },
+       "fenetre_8": {
+        "certifiees": 20964,
+        "part_certifiees": 0.903543,
+        "candidats_moyen": 48.471,
+        "candidats_max": 85,
+        "tests_moyen": 27.4327,
+        "tests_max": 85,
+        "cible_egale_v11": 11855,
+        "part_cible_egale_v11": 0.565493,
+        "cible_naissance": 4053,
+        "part_cible_naissance": 0.193331,
+        "cible_v11_naissance_sur_certifiees": 4311,
+        "part_cible_v11_naissance_sur_certifiees": 0.205638,
+        "ecarts_juge": 0
+       },
+       "fenetre_16": {
+        "certifiees": 21813,
+        "part_certifiees": 0.940134,
+        "candidats_moyen": 82.1227,
+        "candidats_max": 165,
+        "tests_moyen": 42.6558,
+        "tests_max": 165,
+        "cible_egale_v11": 15403,
+        "part_cible_egale_v11": 0.706139,
+        "cible_naissance": 4352,
+        "part_cible_naissance": 0.199514,
+        "cible_v11_naissance_sur_certifiees": 4417,
+        "part_cible_v11_naissance_sur_certifiees": 0.202494,
+        "ecarts_juge": 0
+       },
+       "voisins_ou_fenetre_16": {
+        "certifiees": 22875,
+        "part_certifiees": 0.985906,
+        "candidats_moyen": 89.0263,
+        "candidats_max": 188,
+        "tests_moyen": 42.3695,
+        "tests_max": 183,
+        "cible_egale_v11": 18243,
+        "part_cible_egale_v11": 0.797508,
+        "cible_naissance": 4410,
+        "part_cible_naissance": 0.192787,
+        "cible_v11_naissance_sur_certifiees": 4583,
+        "part_cible_v11_naissance_sur_certifiees": 0.20035,
+        "ecarts_juge": 0
+       }
+      }
+     },
+     "route3": {
+      "parties": 3,
+      "hors_catalogue": 0,
+      "au_catalogue": 3,
+      "census_complets_sphere_au_catalogue_s_etoile_hors_de_f": 3,
+      "spheres_distinctes": 1,
+      "spheres_distinctes_hors_catalogue": 0,
+      "p_qmin_hors_catalogue": {}
+     },
+     "lem_hors_cat": {
+      "route2_triviales": 0,
+      "route2_census_seuil_K_moins_2": 23202,
+      "route3_verifiees": 0,
+      "hors_hypothese": 3,
+      "contre_exemples": 0
+     },
+     "table_populations": 341081,
+     "ecarts_juge": 0,
+     "secondes": 0.408453
+    },
+    {
+     "phase": "ordre",
+     "k": 6,
+     "parties": 824192,
+     "route1": 771469,
+     "route2": {
+      "parties": 52719,
+      "hors_catalogue": 52719,
+      "au_catalogue": 0,
+      "cible_v11_naissance": 8343,
+      "cible_v11_partie_suivante": 44376,
+      "ensembles": {
+       "voisins": {
+        "certifiees": 51243,
+        "part_certifiees": 0.972003,
+        "candidats_moyen": 33.3124,
+        "candidats_max": 66,
+        "tests_moyen": 17.882,
+        "tests_max": 63,
+        "cible_egale_v11": 33582,
+        "part_cible_egale_v11": 0.655348,
+        "cible_naissance": 8430,
+        "part_cible_naissance": 0.16451,
+        "cible_v11_naissance_sur_certifiees": 8241,
+        "part_cible_v11_naissance_sur_certifiees": 0.160822,
+        "ecarts_juge": 0
+       },
+       "fenetre_8": {
+        "certifiees": 47915,
+        "part_certifiees": 0.908875,
+        "candidats_moyen": 51.8667,
+        "candidats_max": 102,
+        "tests_moyen": 31.5074,
+        "tests_max": 102,
+        "cible_egale_v11": 28969,
+        "part_cible_egale_v11": 0.604591,
+        "cible_naissance": 7733,
+        "part_cible_naissance": 0.16139,
+        "cible_v11_naissance_sur_certifiees": 7864,
+        "part_cible_v11_naissance_sur_certifiees": 0.164124,
+        "ecarts_juge": 0
+       },
+       "fenetre_16": {
+        "certifiees": 49878,
+        "part_certifiees": 0.946111,
+        "candidats_moyen": 86.1762,
+        "candidats_max": 198,
+        "tests_moyen": 48.4095,
+        "tests_max": 198,
+        "cible_egale_v11": 37012,
+        "part_cible_egale_v11": 0.742051,
+        "cible_naissance": 8182,
+        "part_cible_naissance": 0.16404,
+        "cible_v11_naissance_sur_certifiees": 8064,
+        "part_cible_v11_naissance_sur_certifiees": 0.161674,
+        "ecarts_juge": 0
+       },
+       "voisins_ou_fenetre_16": {
+        "certifiees": 52208,
+        "part_certifiees": 0.990307,
+        "candidats_moyen": 93.2031,
+        "candidats_max": 220,
+        "tests_moyen": 48.5938,
+        "tests_max": 207,
+        "cible_egale_v11": 44001,
+        "part_cible_egale_v11": 0.842802,
+        "cible_naissance": 8230,
+        "part_cible_naissance": 0.157639,
+        "cible_v11_naissance_sur_certifiees": 8301,
+        "part_cible_v11_naissance_sur_certifiees": 0.158999,
+        "ecarts_juge": 0
+       }
+      }
+     },
+     "route3": {
+      "parties": 4,
+      "hors_catalogue": 0,
+      "au_catalogue": 4,
+      "census_complets_sphere_au_catalogue_s_etoile_hors_de_f": 4,
+      "spheres_distinctes": 2,
+      "spheres_distinctes_hors_catalogue": 0,
+      "p_qmin_hors_catalogue": {}
+     },
+     "lem_hors_cat": {
+      "route2_triviales": 0,
+      "route2_census_seuil_K_moins_2": 52719,
+      "route3_verifiees": 0,
+      "hors_hypothese": 4,
+      "contre_exemples": 0
+     },
+     "table_populations": 448753,
+     "ecarts_juge": 0,
+     "secondes": 0.751267
+    },
+    {
+     "phase": "ordre",
+     "k": 7,
+     "parties": 1132112,
+     "route1": 1018614,
+     "route2": {
+      "parties": 113495,
+      "hors_catalogue": 113495,
+      "au_catalogue": 0,
+      "cible_v11_naissance": 16490,
+      "cible_v11_partie_suivante": 97005,
+      "ensembles": {
+       "voisins": {
+        "certifiees": 110263,
+        "part_certifiees": 0.971523,
+        "candidats_moyen": 35.1163,
+        "candidats_max": 77,
+        "tests_moyen": 20.6715,
+        "tests_max": 68,
+        "cible_egale_v11": 79237,
+        "part_cible_egale_v11": 0.718618,
+        "cible_naissance": 16076,
+        "part_cible_naissance": 0.145797,
+        "cible_v11_naissance_sur_certifiees": 16266,
+        "part_cible_v11_naissance_sur_certifiees": 0.14752,
+        "ecarts_juge": 0
+       },
+       "fenetre_8": {
+        "certifiees": 101437,
+        "part_certifiees": 0.893757,
+        "candidats_moyen": 54.9982,
+        "candidats_max": 119,
+        "tests_moyen": 36.1862,
+        "tests_max": 119,
+        "cible_egale_v11": 65737,
+        "part_cible_egale_v11": 0.648057,
+        "cible_naissance": 14607,
+        "part_cible_naissance": 0.144001,
+        "cible_v11_naissance_sur_certifiees": 15129,
+        "part_cible_v11_naissance_sur_certifiees": 0.149147,
+        "ecarts_juge": 0
+       },
+       "fenetre_16": {
+        "certifiees": 106107,
+        "part_certifiees": 0.934905,
+        "candidats_moyen": 89.9193,
+        "candidats_max": 231,
+        "tests_moyen": 55.1051,
+        "tests_max": 210,
+        "cible_egale_v11": 82435,
+        "part_cible_egale_v11": 0.776904,
+        "cible_naissance": 15738,
+        "part_cible_naissance": 0.148322,
+        "cible_v11_naissance_sur_certifiees": 15623,
+        "part_cible_v11_naissance_sur_certifiees": 0.147238,
+        "ecarts_juge": 0
+       },
+       "voisins_ou_fenetre_16": {
+        "certifiees": 112313,
+        "part_certifiees": 0.989585,
+        "candidats_moyen": 96.9754,
+        "candidats_max": 246,
+        "tests_moyen": 55.634,
+        "tests_max": 221,
+        "cible_egale_v11": 99005,
+        "part_cible_egale_v11": 0.88151,
+        "cible_naissance": 16263,
+        "part_cible_naissance": 0.144801,
+        "cible_v11_naissance_sur_certifiees": 16409,
+        "part_cible_v11_naissance_sur_certifiees": 0.146101,
+        "ecarts_juge": 0
+       }
+      }
+     },
+     "route3": {
+      "parties": 3,
+      "hors_catalogue": 0,
+      "au_catalogue": 3,
+      "census_complets_sphere_au_catalogue_s_etoile_hors_de_f": 3,
+      "spheres_distinctes": 2,
+      "spheres_distinctes_hors_catalogue": 0,
+      "p_qmin_hors_catalogue": {}
+     },
+     "lem_hors_cat": {
+      "route2_triviales": 0,
+      "route2_census_seuil_K_moins_2": 113495,
+      "route3_verifiees": 0,
+      "hors_hypothese": 3,
+      "contre_exemples": 0
+     },
+     "table_populations": 564515,
+     "ecarts_juge": 0,
+     "secondes": 1.73421
+    },
+    {
+     "phase": "ordre",
+     "k": 8,
+     "parties": 1482422,
+     "route1": 1241301,
+     "route2": {
+      "parties": 241115,
+      "hors_catalogue": 241115,
+      "au_catalogue": 0,
+      "cible_v11_naissance": 39533,
+      "cible_v11_partie_suivante": 201582,
+      "ensembles": {
+       "voisins": {
+        "certifiees": 232838,
+        "part_certifiees": 0.965672,
+        "candidats_moyen": 36.7907,
+        "candidats_max": 88,
+        "tests_moyen": 23.9235,
+        "tests_max": 81,
+        "cible_egale_v11": 182208,
+        "part_cible_egale_v11": 0.782553,
+        "cible_naissance": 38030,
+        "part_cible_naissance": 0.163332,
+        "cible_v11_naissance_sur_certifiees": 38471,
+        "part_cible_v11_naissance_sur_certifiees": 0.165226,
+        "ecarts_juge": 0
+       },
+       "fenetre_8": {
+        "certifiees": 208437,
+        "part_certifiees": 0.864471,
+        "candidats_moyen": 58.0759,
+        "candidats_max": 136,
+        "tests_moyen": 41.5183,
+        "tests_max": 134,
+        "cible_egale_v11": 146773,
+        "part_cible_egale_v11": 0.70416,
+        "cible_naissance": 33440,
+        "part_cible_naissance": 0.160432,
+        "cible_v11_naissance_sur_certifiees": 34343,
+        "part_cible_v11_naissance_sur_certifiees": 0.164764,
+        "ecarts_juge": 0
+       },
+       "fenetre_16": {
+        "certifiees": 220815,
+        "part_certifiees": 0.915808,
+        "candidats_moyen": 93.6336,
+        "candidats_max": 264,
+        "tests_moyen": 62.6854,
+        "tests_max": 229,
+        "cible_egale_v11": 180640,
+        "part_cible_egale_v11": 0.81806,
+        "cible_naissance": 36090,
+        "part_cible_naissance": 0.16344,
+        "cible_v11_naissance_sur_certifiees": 36384,
+        "part_cible_v11_naissance_sur_certifiees": 0.164771,
+        "ecarts_juge": 0
+       },
+       "voisins_ou_fenetre_16": {
+        "certifiees": 238092,
+        "part_certifiees": 0.987462,
+        "candidats_moyen": 100.674,
+        "candidats_max": 268,
+        "tests_moyen": 63.721,
+        "tests_max": 248,
+        "cible_egale_v11": 217302,
+        "part_cible_egale_v11": 0.912681,
+        "cible_naissance": 38744,
+        "part_cible_naissance": 0.162727,
+        "cible_v11_naissance_sur_certifiees": 39186,
+        "part_cible_v11_naissance_sur_certifiees": 0.164583,
+        "ecarts_juge": 0
+       }
+      }
+     },
+     "route3": {
+      "parties": 6,
+      "hors_catalogue": 0,
+      "au_catalogue": 6,
+      "census_complets_sphere_au_catalogue_s_etoile_hors_de_f": 6,
+      "spheres_distinctes": 3,
+      "spheres_distinctes_hors_catalogue": 0,
+      "p_qmin_hors_catalogue": {}
+     },
+     "lem_hors_cat": {
+      "route2_triviales": 241115,
+      "route2_census_seuil_K_moins_2": 0,
+      "route3_verifiees": 0,
+      "hors_hypothese": 6,
+      "contre_exemples": 0
+     },
+     "table_populations": 694453,
+     "ecarts_juge": 0,
+     "secondes": 4.45101
+    },
+    {
+     "phase": "ordre",
+     "k": 9,
+     "parties": 1890183,
+     "route1": 1374752,
+     "route2": {
+      "parties": 487757,
+      "hors_catalogue": 487757,
+      "au_catalogue": 0,
+      "cible_v11_naissance": 114359,
+      "cible_v11_partie_suivante": 373398,
+      "ensembles": {
+       "voisins": {
+        "certifiees": 465183,
+        "part_certifiees": 0.953719,
+        "candidats_moyen": 38.1136,
+        "candidats_max": 93,
+        "tests_moyen": 27.1985,
+        "tests_max": 89,
+        "cible_egale_v11": 393783,
+        "part_cible_egale_v11": 0.846512,
+        "cible_naissance": 109002,
+        "part_cible_naissance": 0.234321,
+        "cible_v11_naissance_sur_certifiees": 109050,
+        "part_cible_v11_naissance_sur_certifiees": 0.234424,
+        "ecarts_juge": 0
+       },
+       "fenetre_8": {
+        "certifiees": 400644,
+        "part_certifiees": 0.821401,
+        "candidats_moyen": 60.7785,
+        "candidats_max": 150,
+        "tests_moyen": 46.9605,
+        "tests_max": 142,
+        "cible_egale_v11": 311768,
+        "part_cible_egale_v11": 0.778167,
+        "cible_naissance": 89870,
+        "part_cible_naissance": 0.224314,
+        "cible_v11_naissance_sur_certifiees": 90165,
+        "part_cible_v11_naissance_sur_certifiees": 0.22505,
+        "ecarts_juge": 0
+       },
+       "fenetre_16": {
+        "certifiees": 432673,
+        "part_certifiees": 0.887067,
+        "candidats_moyen": 96.8212,
+        "candidats_max": 278,
+        "tests_moyen": 70.5112,
+        "tests_max": 262,
+        "cible_egale_v11": 374952,
+        "part_cible_egale_v11": 0.866594,
+        "cible_naissance": 99415,
+        "part_cible_naissance": 0.229769,
+        "cible_v11_naissance_sur_certifiees": 99088,
+        "part_cible_v11_naissance_sur_certifiees": 0.229014,
+        "ecarts_juge": 0
+       },
+       "voisins_ou_fenetre_16": {
+        "certifiees": 479884,
+        "part_certifiees": 0.983859,
+        "candidats_moyen": 103.703,
+        "candidats_max": 288,
+        "tests_moyen": 71.9903,
+        "tests_max": 266,
+        "cible_egale_v11": 451334,
+        "part_cible_egale_v11": 0.940506,
+        "cible_naissance": 112543,
+        "part_cible_naissance": 0.234521,
+        "cible_v11_naissance_sur_certifiees": 112670,
+        "part_cible_v11_naissance_sur_certifiees": 0.234786,
+        "ecarts_juge": 0
+       }
+      }
+     },
+     "route3": {
+      "parties": 27674,
+      "hors_catalogue": 27672,
+      "au_catalogue": 2,
+      "census_complets_sphere_au_catalogue_s_etoile_hors_de_f": 2,
+      "spheres_distinctes": 16279,
+      "spheres_distinctes_hors_catalogue": 16278,
+      "p_qmin_hors_catalogue": {
+       "p8_q4": 27672
+      }
+     },
+     "lem_hors_cat": {
+      "route2_triviales": 487757,
+      "route2_census_seuil_K_moins_2": 0,
+      "route3_verifiees": 27672,
+      "hors_hypothese": 2,
+      "contre_exemples": 0
+     },
+     "table_populations": 829383,
+     "ecarts_juge": 0,
+     "secondes": 8.1385
+    },
+    {
+     "phase": "ordre",
+     "k": 10,
+     "parties": 2352191,
+     "route1": 1193824,
+     "route2": {
+      "parties": 724379,
+      "hors_catalogue": 724379,
+      "au_catalogue": 0,
+      "cible_v11_naissance": 191790,
+      "cible_v11_partie_suivante": 532589,
+      "ensembles": {
+       "voisins": {
+        "certifiees": 691038,
+        "part_certifiees": 0.953973,
+        "candidats_moyen": 39.5333,
+        "candidats_max": 98,
+        "tests_moyen": 29.1358,
+        "tests_max": 98,
+        "cible_egale_v11": 596109,
+        "part_cible_egale_v11": 0.862628,
+        "cible_naissance": 182920,
+        "part_cible_naissance": 0.264703,
+        "cible_v11_naissance_sur_certifiees": 182803,
+        "part_cible_v11_naissance_sur_certifiees": 0.264534,
+        "ecarts_juge": 0
+       },
+       "fenetre_8": {
+        "certifiees": 593053,
+        "part_certifiees": 0.818705,
+        "candidats_moyen": 63.3655,
+        "candidats_max": 159,
+        "tests_moyen": 50.3365,
+        "tests_max": 158,
+        "cible_egale_v11": 475066,
+        "part_cible_egale_v11": 0.801052,
+        "cible_naissance": 150061,
+        "part_cible_naissance": 0.253031,
+        "cible_v11_naissance_sur_certifiees": 150394,
+        "part_cible_v11_naissance_sur_certifiees": 0.253593,
+        "ecarts_juge": 0
+       },
+       "fenetre_16": {
+        "certifiees": 640413,
+        "part_certifiees": 0.884086,
+        "candidats_moyen": 100.014,
+        "candidats_max": 286,
+        "tests_moyen": 75.0812,
+        "tests_max": 270,
+        "cible_egale_v11": 564438,
+        "part_cible_egale_v11": 0.881366,
+        "cible_naissance": 165570,
+        "part_cible_naissance": 0.258536,
+        "cible_v11_naissance_sur_certifiees": 165436,
+        "part_cible_v11_naissance_sur_certifiees": 0.258327,
+        "ecarts_juge": 0
+       },
+       "voisins_ou_fenetre_16": {
+        "certifiees": 712219,
+        "part_certifiees": 0.983213,
+        "candidats_moyen": 106.864,
+        "candidats_max": 304,
+        "tests_moyen": 76.7631,
+        "tests_max": 286,
+        "cible_egale_v11": 675489,
+        "part_cible_egale_v11": 0.948429,
+        "cible_naissance": 188396,
+        "part_cible_naissance": 0.26452,
+        "cible_v11_naissance_sur_certifiees": 188585,
+        "part_cible_v11_naissance_sur_certifiees": 0.264785,
+        "ecarts_juge": 0
+       }
+      }
+     },
+     "route3": {
+      "parties": 433988,
+      "hors_catalogue": 433988,
+      "au_catalogue": 0,
+      "census_complets_sphere_au_catalogue_s_etoile_hors_de_f": 0,
+      "spheres_distinctes": 221491,
+      "spheres_distinctes_hors_catalogue": 221491,
+      "p_qmin_hors_catalogue": {
+       "p8_q4": 107485,
+       "p9_q3": 285388,
+       "p9_q4": 41115
+      }
+     },
+     "lem_hors_cat": {
+      "route2_triviales": 724379,
+      "route2_census_seuil_K_moins_2": 0,
+      "route3_verifiees": 433988,
+      "hors_hypothese": 0,
+      "contre_exemples": 0
+     },
+     "table_populations": 979350,
+     "ecarts_juge": 0,
+     "secondes": 20.0556
+    }
+   ],
+   "bilan": {
+    "phase": "bilan",
+    "trame": "ng00",
+    "K": 10,
+    "route2": {
+     "parties": 1656079,
+     "cible_v11_naissance": 379500,
+     "ensembles": {
+      "voisins": {
+       "certifiees": 1585555,
+       "part_certifiees": 0.957415,
+       "candidats_moyen": 38.0042,
+       "candidats_max": 98,
+       "tests_moyen": 26.5448,
+       "tests_max": 98,
+       "cible_egale_v11": 1304203,
+       "part_cible_egale_v11": 0.822553,
+       "cible_naissance": 362894,
+       "part_cible_naissance": 0.228875,
+       "cible_v11_naissance_sur_certifiees": 363494,
+       "part_cible_v11_naissance_sur_certifiees": 0.229253,
+       "ecarts_juge": 0
+      },
+      "fenetre_8": {
+       "certifiees": 1384311,
+       "part_certifiees": 0.835897,
+       "candidats_moyen": 60.5163,
+       "candidats_max": 159,
+       "tests_moyen": 45.9414,
+       "tests_max": 158,
+       "cible_egale_v11": 1046161,
+       "part_cible_egale_v11": 0.755727,
+       "cible_naissance": 303452,
+       "part_cible_naissance": 0.219208,
+       "cible_v11_naissance_sur_certifiees": 306164,
+       "part_cible_v11_naissance_sur_certifiees": 0.221167,
+       "ecarts_juge": 0
+      },
+      "fenetre_16": {
+       "certifiees": 1484189,
+       "part_certifiees": 0.896207,
+       "candidats_moyen": 96.5551,
+       "candidats_max": 286,
+       "tests_moyen": 68.9365,
+       "tests_max": 270,
+       "cible_egale_v11": 1262962,
+       "part_cible_egale_v11": 0.850944,
+       "cible_naissance": 333379,
+       "part_cible_naissance": 0.22462,
+       "cible_v11_naissance_sur_certifiees": 333120,
+       "part_cible_v11_naissance_sur_certifiees": 0.224446,
+       "ecarts_juge": 0
+      },
+      "voisins_ou_fenetre_16": {
+       "certifiees": 1630675,
+       "part_certifiees": 0.98466,
+       "candidats_moyen": 103.46,
+       "candidats_max": 304,
+       "tests_moyen": 70.2891,
+       "tests_max": 286,
+       "cible_egale_v11": 1514843,
+       "part_cible_egale_v11": 0.928967,
+       "cible_naissance": 372702,
+       "part_cible_naissance": 0.228557,
+       "cible_v11_naissance_sur_certifiees": 373985,
+       "part_cible_v11_naissance_sur_certifiees": 0.229344,
+       "ecarts_juge": 0
+      }
+     }
+    },
+    "route3": {
+     "parties": 461678,
+     "census_complets_sphere_au_catalogue_s_etoile_hors_de_f": 18,
+     "spheres_distinctes_tous_ordres": 223592,
+     "spheres_distinctes_hors_catalogue_tous_ordres": 223585
+    },
+    "lem_hors_cat": {
+     "route2_triviales": 1453251,
+     "route2_census_seuil_K_moins_2": 202828,
+     "route3_verifiees": 461660,
+     "hors_hypothese": 18,
+     "contre_exemples": 0
+    },
+    "ecarts_voisins": 0,
+    "ecarts_juge": 0,
+    "secondes": 37.7616,
+    "code": 0
+   }
+  }
+ }
+}

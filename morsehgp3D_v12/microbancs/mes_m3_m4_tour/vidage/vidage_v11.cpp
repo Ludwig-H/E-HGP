@@ -16,6 +16,11 @@
 // Controles internes (refus, code 3, jamais en silence) : graines rejouees = journal de graines de la v11
 // (ForestBuilder::seed_log, voie serie) cellule par cellule ; foret de la voie serie = foret publiee (voie des ordres
 // concurrents) ; route catalogue <=> support local present dans la table ; naissances de la foret = classification.
+//
+// Option --profil-resolution (MES-M7) : apres toutes les mesures existantes, sans changer leurs sorties, une passe de
+// plus du bras replique_v12 a un fil, instrumentee au compteur de cycles par composante (README.md, paragraphe 5.5).
+#include <x86intrin.h>
+
 #include <algorithm>
 #include <atomic>
 #include <chrono>
@@ -51,13 +56,14 @@ struct Args {
   u32 kmax = 5, leaf = 16, threads = 3;
   u64 budget = u64{16} << 30;
   u32 chrono = 0;             // repetitions de la mesure de resolution a un fil (0 : pas de mesure)
+  bool profile = false;       // profil de la resolution par composante (MES-M7), apres les mesures existantes
   std::vector<bool> journal;  // ordres dont le journal de graines v11 est rejoue et compare (1..K)
 };
 
 [[noreturn]] void usage() {
   std::cerr << "usage : mhgp12_vidage <xyz.u32le> <ids.u32le> <trame> <K> <feuille> <fils> <dossier>"
                " [--ful1 <chemin>] [--journal tous|aucun|k1,k2,...] [--budget <octets>]"
-               " [--chrono-resolution R]\n";
+               " [--chrono-resolution R] [--profil-resolution]\n";
   std::exit(2);
 }
 
@@ -86,6 +92,8 @@ Args parse_args(int argc, char** argv) {
       a.chrono = static_cast<u32>(v);
     } else if (opt == "--budget" && i + 1 < argc) {
       if (!bench::parse(argv[++i], a.budget)) usage();
+    } else if (opt == "--profil-resolution") {
+      a.profile = true;
     } else if (opt == "--journal" && i + 1 < argc) {
       const std::string list = argv[++i];
       std::fill(a.journal.begin(), a.journal.end(), list == "tous");
@@ -863,6 +871,360 @@ Outcome measure_resolution(const Args& a, const FullDomain& domain, const Popula
   return {};
 }
 
+// ---- Profil de la resolution par composante (MES-M7, option --profil-resolution) ------------------------------------
+// Une passe de plus du bras replique_v12, a un fil, apres les mesures existantes (dont elle ne change ni les sorties ni
+// le protocole), instrumentee au compteur de cycles (__rdtsc) ; frequence du compteur estimee par steady_clock sur la
+// passe. Composantes : sonde de la table de populations ; proposition + LEM-T1 (DWelzl, S dans F, table S*, F dans
+// P_b) ; certificat exact (route certificat : centre, barycentre, cotes de F, canonisation, table, niveau) ; repli
+// (bounded_meb) ; census sature et census complet (sphere du support, census de seuil k, et pour le complet le S*
+// global de la coquille puis la table) ; partie suivante par saut (p >= k) ou par trace stricte (p < k, terminal
+// compris) ; reste = cycles de la passe moins la somme des sections (boucle, parties, appels, lectures du compteur).
+// Deux passes de controle non chronometrees la precedent : le bras replique_v12 lui-meme (resolve_replica<true>, qui
+// appelle mebcert::new_path) et la copie instrumentee sans lecture du compteur ; graines identiques trace par trace
+// entre elles et au vidage, memes routes et memes nombres de plus petites boules et de censuses. Puis les occurrences
+// de la passe chronometree doivent egaler celles du controle et les comptes de routes du vidage (sinon refus
+// tower_invariant, code 3).
+enum Comp : int { kSonde = 0, kPropositionT1, kCertificat, kRepli, kCensusSature, kCensusComplet, kSaut, kTraceStricte,
+                  kComps };
+const char* const kCompNames[kComps] = {"sonde", "proposition_t1", "certificat", "repli", "census_sature",
+                                        "census_complet", "saut", "trace_stricte"};
+
+struct Profile {
+  std::array<u64, kComps> cycles{}, count{};
+  std::array<u64, mebcert::kRouteCount> routes{};
+};
+
+// Lecture du compteur encadree par lfence : les instructions et chargements anterieurs sont termines avant la lecture,
+// les suivants ne commencent qu'apres ; la latence d'une sonde (acces memoire) reste dans sa section au lieu de deborder
+// sur la suivante, au prix d'un recouvrement perdu entre composantes (passe plus lente que le bras non instrumente).
+template <bool Timed>
+inline u64 tsc() noexcept {
+  if constexpr (Timed) {
+    _mm_lfence();
+    const u64 t = __rdtsc();
+    _mm_lfence();
+    return t;
+  } else {
+    return 0;
+  }
+}
+
+template <bool Timed>
+inline void charge(Profile& pr, Comp c, u64 from, u64 to) noexcept {
+  ++pr.count[c];
+  if constexpr (Timed) pr.cycles[c] += to - from;
+}
+
+// Seconde moitie de mebcert::certify (meb_cert.hpp) : certificat exact du support propose S (trie, dans F).
+void certify_exact(const mebcert::Ctx& c, const mebcert::Part& f, const num::Point* fp, const std::array<u32, 4>& s,
+                   int q, mebcert::NewOut& out) {
+  using namespace mebcert;
+  std::array<num::Point, 4> sp{};
+  for (int i = 0; i < q; ++i) sp[i] = c.points[s[i]];
+  if (q == 2) {
+    auto sphere = num::Sphere::through(sp[0], sp[1]);
+    if (!sphere.ok()) { out.why = kCertArith; return; }
+    if (!sphere.value()) { out.why = kCertDegenerate; return; }
+    finish_certificate(c, f, fp, *sphere.value(), s, q, out);
+    return;
+  }
+  if (q == 3) {
+    const auto kind = num::classify_triangle(sp[0], sp[1], sp[2]);
+    if (kind == num::TriangleKind::degenerate) { out.why = kCertDegenerate; return; }
+    if (kind == num::TriangleKind::non_strict) { out.why = kCertNotStrict; return; }
+    auto candidate = num::Q3Candidate::through(sp[0], sp[1], sp[2]);
+    if (!candidate.ok()) { out.why = kCertArith; return; }
+    if (!candidate.value()) { out.why = kCertDegenerate; return; }
+    finish_certificate(c, f, fp, *candidate.value(), s, q, out);
+    return;
+  }
+  auto candidate = num::Q4Candidate::through(sp[0], sp[1], sp[2], sp[3]);
+  if (!candidate.ok()) { out.why = kCertArith; return; }
+  if (!candidate.value()) { out.why = kCertDegenerate; return; }
+  if (!candidate.value()->q4_presentation_strictly_inside()) { out.why = kCertNotStrict; return; }
+  finish_certificate(c, f, fp, *candidate.value(), s, q, out);
+}
+
+// Copie instrumentee de mebcert::new_path : proposition et LEM-T1 (premiere moitie de certify), certificat exact, repli.
+template <bool Timed>
+mebcert::NewOut profiled_new_path(const mebcert::Ctx& c, const mebcert::Part& f, Profile& pr) {
+  using namespace mebcert;
+  const u64 t0 = tsc<Timed>();
+  std::array<num::Point, kMaxPart> fp{};
+  for (u32 i = 0; i < f.k; ++i) fp[i] = c.points[f.id[i]];
+  const Proposal p = propose(c, f);
+  NewOut out;
+  std::array<u32, 4> s = p.s;
+  const int q = p.q;
+  bool exact = false;  // support propose valide et dans F, sans succes de LEM-T1 : le certificat exact s'applique
+  if (!p.ok) {
+    out.why = kProposalFailed;
+  } else if (q < 2 || q > 4) {
+    out.why = kCertDegenerate;
+  } else {
+    std::sort(s.begin(), s.begin() + q);
+    for (int i = q; i < 4; ++i) s[i] = d::kNone;
+    if (!sorted_subset(s.data(), static_cast<u32>(q), f.id.data(), f.k)) {
+      out.why = kSNotInF;
+    } else {
+      const u32 b = c.table.find(s);
+      if (b != d::kNone && part_in_population(c, f, b)) {
+        out.route = kT1;
+        out.ball = b;
+        out.support = s;
+        out.arity = static_cast<u8>(q);
+      } else {
+        exact = true;
+      }
+    }
+  }
+  u64 t1 = tsc<Timed>();
+  charge<Timed>(pr, kPropositionT1, t0, t1);
+  if (out.route == kT1) return out;
+  if (exact) {
+    certify_exact(c, f, fp.data(), s, q, out);
+    const u64 t2 = tsc<Timed>();
+    charge<Timed>(pr, kCertificat, t1, t2);
+    if (out.route != kNeedsFallback) return out;
+    t1 = t2;
+  }
+  const u8 why = out.why;
+  out = fallback(c, f, why);
+  charge<Timed>(pr, kRepli, t1, tsc<Timed>());
+  return out;
+}
+
+// Meme descente que resolve_replica<true>, sections chronometrees (Timed) ou seulement comptees (passe de controle).
+template <bool Timed>
+Result<u32> resolve_profiled(Replica& r, Profile& pr, CensusWorkspace* ws, const SiteIdx* trace, u32 k) {
+  const auto& cat = r.domain.catalogue();
+  const auto& cloud = r.domain.index().cloud();
+  std::array<SiteIdx, kMaxMebSites> cur{};
+  std::copy(trace, trace + k, cur.begin());
+  for (;;) {
+    u64 t0 = tsc<Timed>();
+    auto hit = r.population.hit({cur.data(), k}, k);
+    charge<Timed>(pr, kSonde, t0, tsc<Timed>());
+    if (!hit.ok()) return hit.outcome();
+    if (hit.value()) {
+      const auto& seed = hit.value()->seed;
+      return seed.ball() ? idx(*seed.ball()) : idx(*seed.site());
+    }
+    mebcert::Part part;
+    part.k = k;
+    for (u32 i = 0; i < k; ++i) part.id[i] = idx(cur[i]);
+    const mebcert::NewOut n = profiled_new_path<Timed>(r.ctx, part, pr);
+    ++pr.routes[n.route];
+    u32 ball = n.ball;
+    std::optional<num::Sphere> sphere;
+    const u32* inner;
+    const u32* shell;
+    u32 p, m, q = 0;
+    bool complete = true;
+    const num::Level* level;
+    if (ball != kNone) {
+      const auto& rec = r.ctx.cat.rec[ball];
+      inner = r.ctx.cat.val + r.ctx.cat.off[ball];
+      shell = inner + rec.p;
+      p = rec.p;
+      m = rec.m;
+      q = rec.q;
+      level = &cat.levels()[rec.rank];
+    } else {
+      t0 = tsc<Timed>();
+      auto made = mebcert::sphere_through(r.ctx, n.support, n.arity);
+      if (!made.ok()) return made.outcome();
+      sphere.emplace(made.value());
+      ++r.census;
+      CensusCopy copy{&r.interior, &r.shell, false};
+      MHGP11_TRY(ws->query(r.domain.index(), *sphere, k, &copy, CensusCopy::consume));
+      complete = copy.complete;
+      inner = r.interior.data();
+      shell = r.shell.data();
+      p = static_cast<u32>(r.interior.size());
+      m = static_cast<u32>(r.shell.size());
+      level = &sphere->level();
+      if (complete) {  // S* global sur la coquille entiere, puis table (comme la replique)
+        std::vector<num::Point> zp(m);
+        for (u32 i = 0; i < m; ++i) zp[i] = r.ctx.points[shell[i]];
+        std::array<u32, 4> key{kNone, kNone, kNone, kNone};
+        const int arity = mebcert::canonical_support(*sphere, shell, zp.data(), m, key);
+        if (arity < 2) return fail(Reason::tower_invariant);
+        q = static_cast<u32>(arity);
+        ball = r.ctx.table.find(key);
+        if (ball == kNone && u64{p} + q <= u64{r.kmax} + 1) return fail(Reason::tower_invariant);
+      }
+      charge<Timed>(pr, complete ? kCensusComplet : kCensusSature, t0, tsc<Timed>());
+    }
+    if (p >= k) {
+      t0 = tsc<Timed>();
+      for (u32 i = 0; i < k; ++i) cur[i] = SiteIdx{inner[i]};
+      charge<Timed>(pr, kSaut, t0, tsc<Timed>());
+      continue;
+    }
+    t0 = tsc<Timed>();
+    if (!complete || q == 0) return fail(Reason::tower_invariant);
+    const u32 t = k - p;
+    if (t > m) return fail(Reason::tower_invariant);
+    if (t == m) {
+      if (ball == kNone) return fail(Reason::tower_invariant);
+      charge<Timed>(pr, kTraceStricte, t0, tsc<Timed>());
+      return ball;
+    }
+    std::array<u32, kMaxMebSites> tuple{};
+    std::array<SiteIdx, kMaxMebSites> selected{};
+    for (u32 i = 0; i < t; ++i) tuple[i] = i;
+    bool found = false;
+    for (;;) {
+      for (u32 i = 0; i < t; ++i) selected[i] = SiteIdx{shell[tuple[i]]};
+      bool strict = t < q;
+      if (!strict) {
+        auto meb = bounded_meb(cloud, {selected.data(), t});
+        if (!meb.ok()) return meb.outcome();
+        const int side = num::compare(meb.value().sphere().level(), *level);
+        if (side > 0) return fail(Reason::tower_invariant);
+        strict = side < 0;
+      }
+      if (strict) {
+        found = true;
+        u32 a = 0, b = 0, w = 0;
+        while (a < p || b < t) {
+          if (b == t || (a < p && inner[a] < idx(selected[b]))) cur[w++] = SiteIdx{inner[a++]};
+          else cur[w++] = selected[b++];
+        }
+        break;
+      }
+      u32 j = t;
+      for (; j != 0; --j) {
+        const u32 i = j - 1;
+        if (tuple[i] == m - t + i) continue;
+        ++tuple[i];
+        for (u32 x = i + 1; x < t; ++x) tuple[x] = tuple[x - 1] + 1;
+        break;
+      }
+      if (j == 0) break;
+    }
+    charge<Timed>(pr, kTraceStricte, t0, tsc<Timed>());
+    if (!found) {
+      if (ball == kNone) return fail(Reason::tower_invariant);
+      return ball;
+    }
+  }
+}
+
+// Biais d'une section : ecart moyen de deux lectures consecutives du compteur (meilleur de cinq series).
+double tsc_section_bias() {
+  constexpr u64 kReads = 1u << 18;
+  u64 best = ~u64{0};
+  for (int rep = 0; rep < 5; ++rep) {
+    u64 sum = 0;
+    for (u64 i = 0; i < kReads; ++i) {
+      const u64 a = tsc<true>();
+      const u64 b = tsc<true>();
+      sum += b - a;
+    }
+    best = std::min(best, sum);
+  }
+  return double(best) / double(kReads);
+}
+
+Outcome profile_resolution(const Args& a, const FullDomain& domain, const PopulationLookup& population,
+                           const mebcert::Ctx& ctx, MemoryBudget& budget, CensusWorkspace* ws,
+                           const std::vector<OrderCounters>& dumped, const std::vector<std::vector<u32>>& dumped_seeds) {
+  const auto& cat = domain.catalogue();
+  const double bias = tsc_section_bias();
+  for (u32 k = 2; k <= a.kmax; ++k) {
+    std::vector<u8> kinds(cat.balls(), 0);
+    ClassifyCounts counts;
+    MHGP11_TRY(classify_range(domain, k, std::span<u8>(kinds), 0, cat.balls(), counts));
+    std::vector<SiteIdx> traces;  // traces de toutes les cellules, a plat (meme construction que measure_resolution)
+    for (u32 b = 0; b < cat.balls(); ++b) {
+      if (kinds[b] != 2) continue;
+      auto made = build_cell(domain, BallIdx{b}, static_cast<Order>(k), budget);
+      if (!made.ok()) return made.outcome();
+      for (const auto& tr : made.value().traces()) traces.insert(traces.end(), tr.part().begin(), tr.part().end());
+    }
+    const u64 nt = traces.size() / k;
+    if (nt != dumped[k].traces || dumped_seeds[k].size() != nt) return fail(Reason::tower_invariant, static_cast<Order>(k));
+    // Passes de controle (non chronometrees) : le bras replique_v12, puis la copie instrumentee sans compteur.
+    Replica rr{domain, population, ctx, a.kmax, {}, {}, {}, 0, 0};
+    rr.interior.reserve(64);
+    rr.shell.reserve(64);
+    const auto r0 = Clock::now();
+    for (u64 i = 0; i < nt; ++i) {
+      auto seed = resolve_replica<true>(rr, ws, traces.data() + i * k, k);
+      if (!seed.ok()) return seed.outcome();
+      if (seed.value() != dumped_seeds[k][i]) return fail(Reason::tower_invariant, static_cast<Order>(k));
+    }
+    const double replica_secs = seconds_since(r0);  // informatif : une passe du bras non instrumente (avec controle)
+    Replica rc{domain, population, ctx, a.kmax, {}, {}, {}, 0, 0};
+    rc.interior.reserve(64);
+    rc.shell.reserve(64);
+    Profile control;
+    for (u64 i = 0; i < nt; ++i) {
+      auto seed = resolve_profiled<false>(rc, control, ws, traces.data() + i * k, k);
+      if (!seed.ok()) return seed.outcome();
+      if (seed.value() != dumped_seeds[k][i]) return fail(Reason::tower_invariant, static_cast<Order>(k));
+    }
+    if (control.routes != rr.routes || control.count[kPropositionT1] != rr.meb_steps ||
+        control.count[kCensusSature] + control.count[kCensusComplet] != rr.census || rc.census != rr.census)
+      return fail(Reason::tower_invariant, static_cast<Order>(k));
+    // Passe chronometree, un fil.
+    Replica rt{domain, population, ctx, a.kmax, {}, {}, {}, 0, 0};
+    rt.interior.reserve(64);
+    rt.shell.reserve(64);
+    Profile prof;
+    std::vector<u32> seeds(nt);
+    const auto w0 = Clock::now();
+    const u64 c0 = tsc<true>();
+    for (u64 i = 0; i < nt; ++i) {
+      auto seed = resolve_profiled<true>(rt, prof, ws, traces.data() + i * k, k);
+      if (!seed.ok()) return seed.outcome();
+      seeds[i] = seed.value();
+    }
+    const u64 total = tsc<true>() - c0;
+    const double secs = seconds_since(w0);
+    const OrderCounters& n = dumped[k];
+    const u64 catalogue = prof.routes[mebcert::kT1] + prof.routes[mebcert::kCertTable] +
+                          prof.routes[mebcert::kFallbackTable];
+    const u64 fallbacks = prof.routes[mebcert::kFallbackTable] + prof.routes[mebcert::kFallbackCensus];
+    const bool same = seeds == dumped_seeds[k] && prof.count == control.count && prof.routes == control.routes &&
+                      prof.count[kSonde] == n.steps && prof.count[kPropositionT1] == n.parts &&
+                      catalogue == n.route_catalogue && prof.count[kCensusSature] == n.route_saturated &&
+                      prof.count[kCensusComplet] == n.route_complete && prof.count[kSaut] == n.action_interior &&
+                      prof.count[kTraceStricte] == n.action_trace + n.action_terminal && prof.count[kRepli] == fallbacks;
+    u64 sections = 0, measured = 0;
+    for (int cp = 0; cp < kComps; ++cp) {
+      sections += prof.count[cp];
+      measured += prof.cycles[cp];
+    }
+    const double hz = secs > 0 ? double(total) / secs : 0.0;
+    std::cout << "{\"phase\":\"profil_resolution\",\"k\":" << k << ",\"traces\":" << nt << ",\"fils\":1"
+              << ",\"cycles_total\":" << total << ",\"secondes_total\":" << secs
+              << ",\"secondes_replique_v12_non_instrumentee\":" << replica_secs << ",\"ghz_tsc_estimee\":" << hz / 1e9
+              << ",\"cycles_par_section_vide\":" << bias << ",\"sections\":" << sections << ",\"composantes\":{";
+    for (int cp = 0; cp < kComps; ++cp)
+      std::cout << (cp ? "," : "") << '"' << kCompNames[cp] << "\":{\"cycles\":" << prof.cycles[cp]
+                << ",\"occurrences\":" << prof.count[cp] << ",\"secondes\":" << (hz > 0 ? prof.cycles[cp] / hz : 0.0)
+                << ",\"part\":" << (total ? double(prof.cycles[cp]) / double(total) : 0.0) << ",\"ns_par_occurrence\":"
+                << (hz > 0 && prof.count[cp] ? 1e9 * prof.cycles[cp] / hz / double(prof.count[cp]) : 0.0) << "}";
+    const u64 rest = total >= measured ? total - measured : 0;
+    std::cout << ",\"reste\":{\"cycles\":" << rest << ",\"secondes\":" << (hz > 0 ? rest / hz : 0.0) << ",\"part\":"
+              << (total ? double(rest) / double(total) : 0.0) << "}},\"routes_v12\":{";
+    for (u32 rt_i = 0; rt_i < mebcert::kRouteCount; ++rt_i)
+      std::cout << (rt_i ? "," : "") << '"' << mebcert::kRouteNames[rt_i] << "\":" << prof.routes[rt_i];
+    std::cout << "},\"controle_vidage\":{\"sondes\":" << n.steps << ",\"parties\":" << n.parts
+              << ",\"route_catalogue\":" << n.route_catalogue << ",\"route_census_saturated\":" << n.route_saturated
+              << ",\"route_census_complete\":" << n.route_complete << ",\"action_interior\":" << n.action_interior
+              << ",\"action_trace_ou_terminal\":" << n.action_trace + n.action_terminal
+              << ",\"graines_identiques\":" << (seeds == dumped_seeds[k] ? "true" : "false")
+              << ",\"conforme\":" << (same ? "true" : "false") << "}}\n"
+              << std::flush;
+    if (!same) return fail(Reason::tower_invariant, static_cast<Order>(k));
+  }
+  return {};
+}
+
 Outcome run(const Args& a) {
   const auto t_start = Clock::now();
   MemoryBudget budget(a.budget);
@@ -953,6 +1315,9 @@ Outcome run(const Args& a) {
             << ",\"forets_serie_identiques\":true}\n" << std::flush;
   serial.clear();
 
+  // Comptes et graines du vidage par ordre, gardes pour le controle du profil (--profil-resolution seulement).
+  std::vector<OrderCounters> dumped(kmax + 1);
+  std::vector<std::vector<u32>> dumped_seeds(kmax + 1);
   for (u32 k = 1; k <= kmax; ++k) {
     const auto tk = Clock::now();
     const OrderForest& forest = *orders[k - 1];
@@ -996,6 +1361,11 @@ Outcome run(const Args& a) {
       }
       if (s != log.seeds()) return fail(Reason::tower_invariant, static_cast<Order>(k));
     }
+    if (a.profile) {
+      dumped[k] = total;
+      for (const auto& b : blocks)
+        for (const auto& s : b.seeds) dumped_seeds[k].push_back(s.key);
+    }
     MHGP11_TRY(dump_order(a, k, domain, forest, kinds, cells, blocks, total.traces, total.parts));
     print_counters(k, total, forest.ledger(), seconds_since(tk));
     std::cout << "{\"phase\":\"graines\",\"k\":" << k << ",\"journal_v11_compare\":"
@@ -1003,7 +1373,7 @@ Outcome run(const Args& a) {
               << "}\n" << std::flush;
     logs[k].reset();
   }
-  if (a.chrono > 0) {
+  if (a.chrono > 0 || a.profile) {
     const auto& cat = domain.catalogue();
     std::vector<d::BallRec> recs(cat.balls());
     for (u32 b = 0; b < cat.balls(); ++b) {
@@ -1029,9 +1399,17 @@ Outcome run(const Args& a) {
       points[s] = point.value();
     }
     const mebcert::Ctx ctx{cloud, view, table, points};
-    const auto t0 = Clock::now();
-    MHGP11_TRY(measure_resolution(a, domain, population.value(), ctx, budget, workspaces[0].get()));
-    std::cout << "{\"phase\":\"resolution_fin\",\"seconds\":" << seconds_since(t0) << "}\n" << std::flush;
+    if (a.chrono > 0) {
+      const auto t0 = Clock::now();
+      MHGP11_TRY(measure_resolution(a, domain, population.value(), ctx, budget, workspaces[0].get()));
+      std::cout << "{\"phase\":\"resolution_fin\",\"seconds\":" << seconds_since(t0) << "}\n" << std::flush;
+    }
+    if (a.profile) {  // MES-M7 : apres les mesures existantes, sans changer leurs sorties
+      const auto t0 = Clock::now();
+      MHGP11_TRY(profile_resolution(a, domain, population.value(), ctx, budget, workspaces[0].get(), dumped,
+                                    dumped_seeds));
+      std::cout << "{\"phase\":\"profil_resolution_fin\",\"seconds\":" << seconds_since(t0) << "}\n" << std::flush;
+    }
   }
   std::cout << "{\"phase\":\"fin\",\"seconds\":" << seconds_since(t_start) << ",\"pic_budget\":" << budget.peak()
             << "}\n" << std::flush;

@@ -121,9 +121,11 @@ Session D, ng00 K5, résolution à un fil sur G4 : **1,376 s** avec la plus peti
 1,477 s ; v11 elle-même : 2,146 s), dont 0,741 s à l'ordre 5. À l'ordre 5 : 1 350 288 représentants, dont 963 244
 (71 %) s'arrêtent à la première sonde de la table de populations ; 568 919 plus petites boules, dont 351 594 certifiées
 par `LEM-T1` (62 %) et 217 325 par un census ; chaîne la plus longue : 11 pas. Un ajustement linéaire sur les ordres 2 à
-5 (coût par partie de `MES-M3` imposé) donne environ **140 ns par représentant** (sonde, construction des parties) et
-**1,6 µs par census** : à l'ordre 5, environ 48 % pour le census, 25 % pour les sondes, 27 % pour les plus petites
-boules ; sur les ordres 2 à 5, environ un tiers chacun. Estimation à confirmer par `MES-M7` (§ 11). Au facteur de
+5 donnait environ 140 ns par représentant et 1,6 µs par census, soit près de la moitié de l'ordre 5 pour le census ;
+**le profil mesuré le corrige** (`MES-M7` en local, compteur de cycles, [reçu](../receipts/mes_g1_m7_local_20261007/README.md)) :
+sur les ordres 2 à 5 de ng00 à K5, **sondes de la table de populations 41,6 %** (285 ns par sonde à l'ordre 5),
+proposition et `LEM-T1` 23,3 %, census saturé 14,4 % et complet 6,5 % (2,0 et 2,8 µs à l'ordre 5), certificat
+2,3 %, reste 10,4 % ; à K10, sondes 32,9 %, proposition 31,3 %, census 22,9 %. Parts locales, à confirmer sur G4. Au facteur de
 parallélisme de la v11 (sa propre résolution, 2,146 s à un fil sur ng00, prenait 63 à 83 ms sur ng00–02 avec 39
 résolveurs à 48 fils, soit ×26 à ×34 ; `AUDIT_GEANT_V11.md` § 7.4), 1,376 s donnerait 40 à 53 ms : il faut **diviser le
 coût à un fil par 1,5 à 2**, ou mieux paralléliser, pour tenir 25 à 30 ms.
@@ -132,13 +134,15 @@ coût à un fil par 1,5 à 2**, ou mieux paralléliser, pour tenir 25 à 30 ms.
 | --- | --- | --- | --- |
 | `G-L1` | plus petite boule certifiée (`LEM-T1`) | `MES-M3` | **adopté** |
 | `G-L2` | mémo de cellule (`LEM-T3`) | structurel ; parties et censuses évités publiés (`MES-M7`) | déclaré |
-| `G-L3` | **saut certifié sans census** : tester exactement des candidats locaux contre la boule certifiée ; $k$ sites strictement intérieurs exhibés prouvent $p\geq k$, et les $k$ plus petits `SiteIdx` d'entre eux font le saut (pas valide) ; sinon census | `MES-G1` : part des censuses saturés évités, hors ligne sur les vidages (deux ensembles de candidats : $K$ plus proches voisins des sites de $F$, calculés en P et utiles aussi à `points` ; fenêtre de Morton autour de $F$) ; adopté si au moins la moitié des censuses saturés disparaissent à K5 sur ng00–02 **et** si le temps de G à un fil baisse (borne haute de l'IC 95 % du rapport sous 1) | à mesurer |
+| `G-L3` | **saut certifié sans census** : tester exactement des candidats locaux contre la boule certifiée ; $k$ sites strictement intérieurs exhibés prouvent $p\geq k$, et les $k$ plus petits `SiteIdx` d'entre eux font le saut (pas valide) ; sinon census | `MES-G1` : part des censuses saturés évités, hors ligne sur les vidages (deux ensembles de candidats : $K$ plus proches voisins des sites de $F$, calculés en P et utiles aussi à `points` ; fenêtre de Morton autour de $F$) ; adopté si au moins la moitié des censuses saturés disparaissent à K5 sur ng00–02 **et** si le temps de G à un fil baisse (borne haute de l'IC 95 % du rapport sous 1) | première moitié tenue hors ligne (`MES-G1`, 7 octobre : les voisins certifient 83,0 % des censuses saturés à K5 sur ng00–02, 95,7 % à K10) ; temps à mesurer sur G4 |
 | `G-L4` | catalogue **hors fenêtre** : par `LEM-HORS-CAT`, les censuses complets des sphères hors du catalogue ne visent que des boules de $\mathrm{Cat}_{K+2}$ à $p\in\lbrace K-2,K-1\rbrace$ ; le catalogue les émettrait marquées, sans cellule, et `LEM-T1` les trouverait | `MES-G2` : nombre de boules distinctes concernées, puis coût du catalogue élargi contre census évités, sur G4 ; adopté si le gain net est positif | à mesurer |
 | `G-L5` | **premières sondes sur l'appareil** : la table de populations y est construite ; 71 % des représentants s'arrêtent à la première sonde | `MES-G3` : passe de sondes sur le GPU et rapatriement des échecs contre sondes sur l'hôte, de bout en bout ; adopté si G baisse (IC) | à mesurer |
 | `G-L6` | politique de saut : $k$ plus petits `SiteIdx` (v11) ou $k$ plus proches du centre (comparateur exact) | `MES-G4` : temps de G à un fil et histogramme des chaînes ; le moins cher est retenu | à mesurer |
 | `G-L7` | localité : travail trié par clé de Morton de la partie, sondes préchargées par lots de 32 (v10), census partant de la feuille du premier site | publié avec `MES-M7` | à mesurer |
 
-Chaque levier change le travail, jamais la sortie : la porte `MES-M0` (§ 9) le vérifie à chaque adoption.
+Chaque levier change le travail, jamais la sortie : la porte `MES-M0` (§ 9) le vérifie à chaque adoption. **Ordre
+de travail déduit du profil** : les sondes (`G-L5`, `G-L7` : disposition de la table, population dans l'entrée,
+préchargement par lots) puis la proposition, avant le census (`G-L3`, `G-L4`).
 
 ### 4.4 Parallélisme
 

@@ -23,7 +23,7 @@ dossier de sortie, jamais dans un dépôt. Seuls des comptes, des empreintes et 
 | `CMakeLists.txt` | construction (CMake ≥ 3.22, C++20 sans extensions, `-Wall -Wextra -Wpedantic -Werror`, GCC 11.4 visé) |
 | `common/format.hpp` | format binaire des vidages (écriture, lecture par projection en mémoire), comparaison exacte de centres ; chaque avancée de la lecture est contrôlée contre la place restante (`CST-0225`) |
 | `tests/format_reader_test.cpp` | `mhgp12_format_test <dossier>` : porte de l'admission du lecteur, neuf fichiers synthétiques dont le témoin de 88 octets de l'auditeur (code 0 conforme, 1 écart) |
-| `vidage/vidage_v11.cpp` | `mhgp12_vidage` : vidage de la tour v11, lié à `libmhgp11.a` ; mesure de résolution à trois bras |
+| `vidage/vidage_v11.cpp` | `mhgp12_vidage` : vidage de la tour v11, lié à `libmhgp11.a` ; mesure de résolution à trois bras ; profil par composante (`MES-M7`) |
 | `mes_m3/welzl_proposal.hpp` | port de `DWelzl` de la v10 (proposition flottante, ne décide rien) |
 | `mes_m3/meb_cert.hpp` | cœur de `LEV-MEB-CERT` : `LEM-T1` corrigé, certificat exact, canonisation, repli, juge |
 | `mes_m3/mes_m3.cpp` | `mhgp12_mes_m3` : porte (témoins gravés) et banc sur vidage |
@@ -74,6 +74,7 @@ d'adoption de MES-M3 est dans le rapport et ne change pas ce code.
 ```text
 mhgp12_vidage <xyz.u32le> <ids.u32le> <trame> <K> <feuille> <fils> <dossier>
               [--ful1 <chemin>] [--journal tous|aucun|k1,k2,...] [--chrono-resolution R] [--budget <octets>]
+              [--profil-resolution]
 ```
 
 Il reproduit la sonde `mhgp11_full_bench` au masque `802811` (voie CPU de référence des empreintes ; feuilles 16 à
@@ -92,6 +93,7 @@ n'est réimplantée dans le vidage.
    populations (`hit`), sinon `descent_step` (plus petite boule `bounded_meb`, puis catalogue ou census), pas suivant,
    jusqu'à la naissance. Chaque partie dont la v11 calcule une plus petite boule est vidée avec sa route et B(F).
 5. Option `--chrono-resolution R` : mesure de résolution à **un fil**, trois bras sur les mêmes traces (§ 5.4).
+6. Option `--profil-resolution` : profil par composante du bras `replique_v12` (`MES-M7`, § 5.5), après tout le reste.
 
 Le vidage refuse, jamais en silence : code 3 (invariant) si la forêt série ≠ la forêt publiée, si une graine rejouée ≠
 le journal v11, si les naissances ≠ la classification, si une route « catalogue » n'a pas son support local dans la
@@ -244,6 +246,35 @@ ng02 à K10, avec au moins 5 prises valides par cas dans la dernière campagne, 
 (`WIT-T1-CARRE`, mutant tué) rattachées aux mêmes binaires et vidages ; **rejeté** si une borne haute dépasse 0,60 ou
 si l'identité est en défaut ; **refusé** si une preuve manque. Le verdict cite ses journaux et empreintes. La prise de
 `vider` (`--chrono-vidage oui`) reste informative.
+
+### 5.5 Profil de la résolution par composante (`MES-M7`, option `--profil-resolution`)
+
+`mhgp12_vidage … --profil-resolution` joue, **après** toutes les mesures existantes (vidages, journaux,
+`--chrono-resolution`), dont il ne change ni les sorties ni le protocole, une passe de plus du bras `replique_v12` à
+**un fil**, instrumentée au compteur de cycles (`__rdtsc` encadré par `lfence`) ; la fréquence du compteur est estimée
+par `steady_clock` sur la passe. Le pilote ne passe pas cette option. Composantes, par ordre k = 2..K :
+
+| Composante | Contenu |
+| --- | --- |
+| `sonde` | table de populations (`PopulationLookup::hit`) |
+| `proposition_t1` | proposition DWelzl puis `LEM-T1` (arité, S ⊆ F, table S* → boule, F ⊆ P_b) |
+| `certificat` | route certificat : centre exact, barycentre strict, côtés des sites de F, canonisation, table, niveau |
+| `repli` | `bounded_meb` et table |
+| `census_sature`, `census_complet` | sphère du support, census de seuil k ; pour le complet, S* global de la coquille puis table |
+| `saut`, `trace_stricte` | construction de la partie suivante : p ≥ k ; p < k (terminal compris) |
+| `reste` | cycles de la passe moins la somme des sections (boucle, parties, lecture du catalogue, appels) |
+
+Sortie : une ligne `profil_resolution` par ordre (cycles, occurrences, secondes, part du total et nanosecondes par
+occurrence de chaque composante ; `cycles_par_section_vide`, biais d'une section, à retrancher par occurrence ;
+`secondes_replique_v12_non_instrumentee`, une passe du bras sans compteur, informative), puis `profil_resolution_fin`.
+**Contrôles** (refus `tower_invariant`, code 3) : deux passes non chronométrées précèdent, le bras `replique_v12`
+lui-même et la copie instrumentée sans lecture du compteur ; leurs graines doivent égaler celles du vidage trace par
+trace, avec les mêmes routes et les mêmes nombres de plus petites boules et de censuses ; les occurrences de la passe
+chronométrée doivent égaler celles du contrôle et les comptes du vidage (`controle_vidage` : sondes, parties, routes
+catalogue, census saturé et complet, sauts, traces ou terminaux). Les lectures encadrées gardent la latence d'une sonde
+dans sa section, mais suppriment le recouvrement entre composantes : la passe instrumentée est plus lente que le bras
+(de 18 à 28 % en local sur ng00 K5) ; ce sont les parts qui se mesurent. Les temps locaux ne décident rien : `MES-M7` se
+joue sur G4, K5 et K10, ng00–02 et une trame d'une autre séquence.
 
 ## 6. MES-M4 : forêt sans lots
 

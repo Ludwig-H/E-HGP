@@ -1,0 +1,1225 @@
+{
+ "schema": "ehgp.v12.mes_m7_local.v1",
+ "binaire_sha256": "a3fcf6ebbb5ede9ac4e934130aeba26b6086194a3ea6c977ffd779c425dd0b5b",
+ "cas": {
+  "ng00_k5": {
+   "journal_sha256": "05d54f96e0303de09d613eeb6d5649e5e3ab99d6b471bf3a189ae28696e36034",
+   "ordres": [
+    {
+     "phase": "profil_resolution",
+     "k": 2,
+     "traces": 410941,
+     "fils": 1,
+     "cycles_total": 454118917,
+     "secondes_total": 0.185703,
+     "secondes_replique_v12_non_instrumentee": 0.154094,
+     "ghz_tsc_estimee": 2.4454,
+     "cycles_par_section_vide": 62.2506,
+     "sections": 610134,
+     "composantes": {
+      "sonde": {
+       "cycles": 295385536,
+       "occurrences": 475662,
+       "secondes": 0.120792,
+       "part": 0.650459,
+       "ns_par_occurrence": 253.945
+      },
+      "proposition_t1": {
+       "cycles": 80988210,
+       "occurrences": 64721,
+       "secondes": 0.0331185,
+       "part": 0.178341,
+       "ns_par_occurrence": 511.712
+      },
+      "certificat": {
+       "cycles": 752358,
+       "occurrences": 2515,
+       "secondes": 0.000307662,
+       "part": 0.00165674,
+       "ns_par_occurrence": 122.331
+      },
+      "repli": {
+       "cycles": 0,
+       "occurrences": 0,
+       "secondes": 0,
+       "part": 0,
+       "ns_par_occurrence": 0
+      },
+      "census_sature": {
+       "cycles": 8258466,
+       "occurrences": 2515,
+       "secondes": 0.00337714,
+       "part": 0.0181857,
+       "ns_par_occurrence": 1342.8
+      },
+      "census_complet": {
+       "cycles": 0,
+       "occurrences": 0,
+       "secondes": 0,
+       "part": 0,
+       "ns_par_occurrence": 0
+      },
+      "saut": {
+       "cycles": 1252319,
+       "occurrences": 17109,
+       "secondes": 0.000512111,
+       "part": 0.00275769,
+       "ns_par_occurrence": 29.9323
+      },
+      "trace_stricte": {
+       "cycles": 4315858,
+       "occurrences": 47612,
+       "secondes": 0.00176488,
+       "part": 0.00950381,
+       "ns_par_occurrence": 37.0681
+      },
+      "reste": {
+       "cycles": 63166170,
+       "secondes": 0.0258306,
+       "part": 0.139096
+      }
+     },
+     "routes_v12": {
+      "t1": 62206,
+      "cert_table": 0,
+      "cert_census": 2515,
+      "repli_table": 0,
+      "repli_census": 0
+     },
+     "controle_vidage": {
+      "sondes": 475662,
+      "parties": 64721,
+      "route_catalogue": 62206,
+      "route_census_saturated": 2515,
+      "route_census_complete": 0,
+      "action_interior": 17109,
+      "action_trace_ou_terminal": 47612,
+      "graines_identiques": true,
+      "conforme": true
+     }
+    },
+    {
+     "phase": "profil_resolution",
+     "k": 3,
+     "traces": 673325,
+     "fils": 1,
+     "cycles_total": 944917299,
+     "secondes_total": 0.386403,
+     "secondes_replique_v12_non_instrumentee": 0.32693,
+     "ghz_tsc_estimee": 2.44542,
+     "cycles_par_section_vide": 62.2506,
+     "sections": 1264956,
+     "composantes": {
+      "sonde": {
+       "cycles": 511217842,
+       "occurrences": 861202,
+       "secondes": 0.209051,
+       "part": 0.541019,
+       "ns_par_occurrence": 242.744
+      },
+      "proposition_t1": {
+       "cycles": 235016196,
+       "occurrences": 187877,
+       "secondes": 0.0961048,
+       "part": 0.248716,
+       "ns_par_occurrence": 511.53
+      },
+      "certificat": {
+       "cycles": 5429072,
+       "occurrences": 14000,
+       "secondes": 0.0022201,
+       "part": 0.00574555,
+       "ns_par_occurrence": 158.579
+      },
+      "repli": {
+       "cycles": 0,
+       "occurrences": 0,
+       "secondes": 0,
+       "part": 0,
+       "ns_par_occurrence": 0
+      },
+      "census_sature": {
+       "cycles": 49916173,
+       "occurrences": 14000,
+       "secondes": 0.0204121,
+       "part": 0.052826,
+       "ns_par_occurrence": 1458.01
+      },
+      "census_complet": {
+       "cycles": 0,
+       "occurrences": 0,
+       "secondes": 0,
+       "part": 0,
+       "ns_par_occurrence": 0
+      },
+      "saut": {
+       "cycles": 3295492,
+       "occurrences": 47084,
+       "secondes": 0.00134762,
+       "part": 0.0034876,
+       "ns_par_occurrence": 28.6216
+      },
+      "trace_stricte": {
+       "cycles": 12736627,
+       "occurrences": 140793,
+       "secondes": 0.00520837,
+       "part": 0.0134791,
+       "ns_par_occurrence": 36.9931
+      },
+      "reste": {
+       "cycles": 127305897,
+       "secondes": 0.052059,
+       "part": 0.134727
+      }
+     },
+     "routes_v12": {
+      "t1": 173877,
+      "cert_table": 0,
+      "cert_census": 14000,
+      "repli_table": 0,
+      "repli_census": 0
+     },
+     "controle_vidage": {
+      "sondes": 861202,
+      "parties": 187877,
+      "route_catalogue": 173877,
+      "route_census_saturated": 14000,
+      "route_census_complete": 0,
+      "action_interior": 47084,
+      "action_trace_ou_terminal": 140793,
+      "graines_identiques": true,
+      "conforme": true
+     }
+    },
+    {
+     "phase": "profil_resolution",
+     "k": 4,
+     "traces": 985378,
+     "fils": 1,
+     "cycles_total": 1777866779,
+     "secondes_total": 0.727018,
+     "secondes_replique_v12_non_instrumentee": 0.608143,
+     "ghz_tsc_estimee": 2.44542,
+     "cycles_par_section_vide": 62.2506,
+     "sections": 2161277,
+     "composantes": {
+      "sonde": {
+       "cycles": 811023620,
+       "occurrences": 1338895,
+       "secondes": 0.33165,
+       "part": 0.456178,
+       "ns_par_occurrence": 247.704
+      },
+      "proposition_t1": {
+       "cycles": 471602273,
+       "occurrences": 353517,
+       "secondes": 0.192851,
+       "part": 0.265263,
+       "ns_par_occurrence": 545.521
+      },
+      "certificat": {
+       "cycles": 26152829,
+       "occurrences": 57674,
+       "secondes": 0.0106946,
+       "part": 0.0147102,
+       "ns_par_occurrence": 185.432
+      },
+      "repli": {
+       "cycles": 0,
+       "occurrences": 0,
+       "secondes": 0,
+       "part": 0,
+       "ns_par_occurrence": 0
+      },
+      "census_sature": {
+       "cycles": 226070642,
+       "occurrences": 57239,
+       "secondes": 0.0924464,
+       "part": 0.127158,
+       "ns_par_occurrence": 1615.1
+      },
+      "census_complet": {
+       "cycles": 3564514,
+       "occurrences": 435,
+       "secondes": 0.00145763,
+       "part": 0.00200494,
+       "ns_par_occurrence": 3350.87
+      },
+      "saut": {
+       "cycles": 6400360,
+       "occurrences": 92312,
+       "secondes": 0.00261728,
+       "part": 0.00360002,
+       "ns_par_occurrence": 28.3526
+      },
+      "trace_stricte": {
+       "cycles": 24894884,
+       "occurrences": 261205,
+       "secondes": 0.0101802,
+       "part": 0.0140027,
+       "ns_par_occurrence": 38.974
+      },
+      "reste": {
+       "cycles": 208157657,
+       "secondes": 0.0851213,
+       "part": 0.117083
+      }
+     },
+     "routes_v12": {
+      "t1": 295843,
+      "cert_table": 0,
+      "cert_census": 57674,
+      "repli_table": 0,
+      "repli_census": 0
+     },
+     "controle_vidage": {
+      "sondes": 1338895,
+      "parties": 353517,
+      "route_catalogue": 295843,
+      "route_census_saturated": 57239,
+      "route_census_complete": 435,
+      "action_interior": 92312,
+      "action_trace_ou_terminal": 261205,
+      "graines_identiques": true,
+      "conforme": true
+     }
+    },
+    {
+     "phase": "profil_resolution",
+     "k": 5,
+     "traces": 1350288,
+     "fils": 1,
+     "cycles_total": 3929683723,
+     "secondes_total": 1.60695,
+     "secondes_replique_v12_non_instrumentee": 1.2551,
+     "ghz_tsc_estimee": 2.44542,
+     "cycles_par_section_vide": 62.2506,
+     "sections": 3491695,
+     "composantes": {
+      "sonde": {
+       "cycles": 1338447136,
+       "occurrences": 1919207,
+       "secondes": 0.547327,
+       "part": 0.340599,
+       "ns_par_occurrence": 285.184
+      },
+      "proposition_t1": {
+       "cycles": 868201091,
+       "occurrences": 568919,
+       "secondes": 0.355031,
+       "part": 0.220934,
+       "ns_par_occurrence": 624.045
+      },
+      "certificat": {
+       "cycles": 134507513,
+       "occurrences": 217325,
+       "secondes": 0.0550037,
+       "part": 0.0342286,
+       "ns_par_occurrence": 253.094
+      },
+      "repli": {
+       "cycles": 0,
+       "occurrences": 0,
+       "secondes": 0,
+       "part": 0,
+       "ns_par_occurrence": 0
+      },
+      "census_sature": {
+       "cycles": 735873172,
+       "occurrences": 150419,
+       "secondes": 0.300918,
+       "part": 0.18726,
+       "ns_par_occurrence": 2000.53
+      },
+      "census_complet": {
+       "cycles": 456508725,
+       "occurrences": 66906,
+       "secondes": 0.186679,
+       "part": 0.116169,
+       "ns_par_occurrence": 2790.16
+      },
+      "saut": {
+       "cycles": 11106403,
+       "occurrences": 150419,
+       "secondes": 0.00454171,
+       "part": 0.00282628,
+       "ns_par_occurrence": 30.1937
+      },
+      "trace_stricte": {
+       "cycles": 47986029,
+       "occurrences": 418500,
+       "secondes": 0.0196228,
+       "part": 0.0122112,
+       "ns_par_occurrence": 46.8884
+      },
+      "reste": {
+       "cycles": 337053654,
+       "secondes": 0.13783,
+       "part": 0.0857712
+      }
+     },
+     "routes_v12": {
+      "t1": 351594,
+      "cert_table": 0,
+      "cert_census": 217325,
+      "repli_table": 0,
+      "repli_census": 0
+     },
+     "controle_vidage": {
+      "sondes": 1919207,
+      "parties": 568919,
+      "route_catalogue": 351594,
+      "route_census_saturated": 150419,
+      "route_census_complete": 66906,
+      "action_interior": 150419,
+      "action_trace_ou_terminal": 418500,
+      "graines_identiques": true,
+      "conforme": true
+     }
+    }
+   ]
+  },
+  "ng00_k10": {
+   "journal_sha256": "77c81fcae1a7eeefd8855ecc9afa7df9e86e656a135cee0cae91223da9eb73d7",
+   "ordres": [
+    {
+     "phase": "profil_resolution",
+     "k": 2,
+     "traces": 410941,
+     "fils": 1,
+     "cycles_total": 584923652,
+     "secondes_total": 0.239193,
+     "secondes_replique_v12_non_instrumentee": 0.163645,
+     "ghz_tsc_estimee": 2.44541,
+     "cycles_par_section_vide": 60.5071,
+     "sections": 606714,
+     "composantes": {
+      "sonde": {
+       "cycles": 390982991,
+       "occurrences": 475662,
+       "secondes": 0.159884,
+       "part": 0.668434,
+       "ns_par_occurrence": 336.13
+      },
+      "proposition_t1": {
+       "cycles": 105680069,
+       "occurrences": 64721,
+       "secondes": 0.0432157,
+       "part": 0.180673,
+       "ns_par_occurrence": 667.723
+      },
+      "certificat": {
+       "cycles": 350853,
+       "occurrences": 805,
+       "secondes": 0.000143474,
+       "part": 0.000599827,
+       "ns_par_occurrence": 178.229
+      },
+      "repli": {
+       "cycles": 0,
+       "occurrences": 0,
+       "secondes": 0,
+       "part": 0,
+       "ns_par_occurrence": 0
+      },
+      "census_sature": {
+       "cycles": 3821952,
+       "occurrences": 805,
+       "secondes": 0.00156291,
+       "part": 0.0065341,
+       "ns_par_occurrence": 1941.5
+      },
+      "census_complet": {
+       "cycles": 0,
+       "occurrences": 0,
+       "secondes": 0,
+       "part": 0,
+       "ns_par_occurrence": 0
+      },
+      "saut": {
+       "cycles": 1354256,
+       "occurrences": 17109,
+       "secondes": 0.000553795,
+       "part": 0.00231527,
+       "ns_par_occurrence": 32.3687
+      },
+      "trace_stricte": {
+       "cycles": 5141483,
+       "occurrences": 47612,
+       "secondes": 0.0021025,
+       "part": 0.00879001,
+       "ns_par_occurrence": 44.1591
+      },
+      "reste": {
+       "cycles": 77592048,
+       "secondes": 0.0317297,
+       "part": 0.132653
+      }
+     },
+     "routes_v12": {
+      "t1": 63916,
+      "cert_table": 0,
+      "cert_census": 805,
+      "repli_table": 0,
+      "repli_census": 0
+     },
+     "controle_vidage": {
+      "sondes": 475662,
+      "parties": 64721,
+      "route_catalogue": 63916,
+      "route_census_saturated": 805,
+      "route_census_complete": 0,
+      "action_interior": 17109,
+      "action_trace_ou_terminal": 47612,
+      "graines_identiques": true,
+      "conforme": true
+     }
+    },
+    {
+     "phase": "profil_resolution",
+     "k": 3,
+     "traces": 673325,
+     "fils": 1,
+     "cycles_total": 1593577431,
+     "secondes_total": 0.651658,
+     "secondes_replique_v12_non_instrumentee": 0.470175,
+     "ghz_tsc_estimee": 2.44542,
+     "cycles_par_section_vide": 60.5071,
+     "sections": 1243538,
+     "composantes": {
+      "sonde": {
+       "cycles": 922724774,
+       "occurrences": 861202,
+       "secondes": 0.377328,
+       "part": 0.579027,
+       "ns_par_occurrence": 438.141
+      },
+      "proposition_t1": {
+       "cycles": 445254345,
+       "occurrences": 187877,
+       "secondes": 0.182077,
+       "part": 0.279406,
+       "ns_par_occurrence": 969.128
+      },
+      "certificat": {
+       "cycles": 2064770,
+       "occurrences": 3291,
+       "secondes": 0.000844342,
+       "part": 0.00129568,
+       "ns_par_occurrence": 256.561
+      },
+      "repli": {
+       "cycles": 0,
+       "occurrences": 0,
+       "secondes": 0,
+       "part": 0,
+       "ns_par_occurrence": 0
+      },
+      "census_sature": {
+       "cycles": 28376361,
+       "occurrences": 3291,
+       "secondes": 0.0116039,
+       "part": 0.0178067,
+       "ns_par_occurrence": 3525.94
+      },
+      "census_complet": {
+       "cycles": 0,
+       "occurrences": 0,
+       "secondes": 0,
+       "part": 0,
+       "ns_par_occurrence": 0
+      },
+      "saut": {
+       "cycles": 3829573,
+       "occurrences": 47084,
+       "secondes": 0.00156602,
+       "part": 0.00240313,
+       "ns_par_occurrence": 33.2601
+      },
+      "trace_stricte": {
+       "cycles": 17287300,
+       "occurrences": 140793,
+       "secondes": 0.00706926,
+       "part": 0.0108481,
+       "ns_par_occurrence": 50.2103
+      },
+      "reste": {
+       "cycles": 174040308,
+       "secondes": 0.0711699,
+       "part": 0.109214
+      }
+     },
+     "routes_v12": {
+      "t1": 184586,
+      "cert_table": 0,
+      "cert_census": 3291,
+      "repli_table": 0,
+      "repli_census": 0
+     },
+     "controle_vidage": {
+      "sondes": 861202,
+      "parties": 187877,
+      "route_catalogue": 184586,
+      "route_census_saturated": 3291,
+      "route_census_complete": 0,
+      "action_interior": 47084,
+      "action_trace_ou_terminal": 140793,
+      "graines_identiques": true,
+      "conforme": true
+     }
+    },
+    {
+     "phase": "profil_resolution",
+     "k": 4,
+     "traces": 985378,
+     "fils": 1,
+     "cycles_total": 2759633083,
+     "secondes_total": 1.12849,
+     "secondes_replique_v12_non_instrumentee": 1.06223,
+     "ghz_tsc_estimee": 2.44542,
+     "cycles_par_section_vide": 60.5071,
+     "sections": 2064561,
+     "composantes": {
+      "sonde": {
+       "cycles": 1435325287,
+       "occurrences": 1338895,
+       "secondes": 0.586944,
+       "part": 0.520115,
+       "ns_par_occurrence": 438.379
+      },
+      "proposition_t1": {
+       "cycles": 835203982,
+       "occurrences": 353517,
+       "secondes": 0.341538,
+       "part": 0.30265,
+       "ns_par_occurrence": 966.114
+      },
+      "certificat": {
+       "cycles": 6350237,
+       "occurrences": 9316,
+       "secondes": 0.00259678,
+       "part": 0.00230112,
+       "ns_par_occurrence": 278.745
+      },
+      "repli": {
+       "cycles": 0,
+       "occurrences": 0,
+       "secondes": 0,
+       "part": 0,
+       "ns_par_occurrence": 0
+      },
+      "census_sature": {
+       "cycles": 48526829,
+       "occurrences": 9316,
+       "secondes": 0.0198439,
+       "part": 0.0175845,
+       "ns_par_occurrence": 2130.09
+      },
+      "census_complet": {
+       "cycles": 0,
+       "occurrences": 0,
+       "secondes": 0,
+       "part": 0,
+       "ns_par_occurrence": 0
+      },
+      "saut": {
+       "cycles": 29248546,
+       "occurrences": 92312,
+       "secondes": 0.0119605,
+       "part": 0.0105987,
+       "ns_par_occurrence": 129.566
+      },
+      "trace_stricte": {
+       "cycles": 84779546,
+       "occurrences": 261205,
+       "secondes": 0.0346687,
+       "part": 0.0307213,
+       "ns_par_occurrence": 132.726
+      },
+      "reste": {
+       "cycles": 320198656,
+       "secondes": 0.130938,
+       "part": 0.116029
+      }
+     },
+     "routes_v12": {
+      "t1": 344201,
+      "cert_table": 0,
+      "cert_census": 9316,
+      "repli_table": 0,
+      "repli_census": 0
+     },
+     "controle_vidage": {
+      "sondes": 1338895,
+      "parties": 353517,
+      "route_catalogue": 344201,
+      "route_census_saturated": 9316,
+      "route_census_complete": 0,
+      "action_interior": 92312,
+      "action_trace_ou_terminal": 261205,
+      "graines_identiques": true,
+      "conforme": true
+     }
+    },
+    {
+     "phase": "profil_resolution",
+     "k": 5,
+     "traces": 1350288,
+     "fils": 1,
+     "cycles_total": 3921941845,
+     "secondes_total": 1.60379,
+     "secondes_replique_v12_non_instrumentee": 1.26148,
+     "ghz_tsc_estimee": 2.44542,
+     "cycles_par_section_vide": 60.5071,
+     "sections": 3103455,
+     "composantes": {
+      "sonde": {
+       "cycles": 1845259540,
+       "occurrences": 1919207,
+       "secondes": 0.754576,
+       "part": 0.470496,
+       "ns_par_occurrence": 393.171
+      },
+      "proposition_t1": {
+       "cycles": 1408142146,
+       "occurrences": 568919,
+       "secondes": 0.575827,
+       "part": 0.359042,
+       "ns_par_occurrence": 1012.14
+      },
+      "certificat": {
+       "cycles": 19676547,
+       "occurrences": 23205,
+       "secondes": 0.00804627,
+       "part": 0.00501704,
+       "ns_par_occurrence": 346.747
+      },
+      "repli": {
+       "cycles": 0,
+       "occurrences": 0,
+       "secondes": 0,
+       "part": 0,
+       "ns_par_occurrence": 0
+      },
+      "census_sature": {
+       "cycles": 141399821,
+       "occurrences": 23202,
+       "secondes": 0.0578222,
+       "part": 0.0360535,
+       "ns_par_occurrence": 2492.12
+      },
+      "census_complet": {
+       "cycles": 65317,
+       "occurrences": 3,
+       "secondes": 2.67099e-05,
+       "part": 1.66543e-05,
+       "ns_par_occurrence": 8903.29
+      },
+      "saut": {
+       "cycles": 16924872,
+       "occurrences": 150419,
+       "secondes": 0.00692104,
+       "part": 0.00431543,
+       "ns_par_occurrence": 46.0117
+      },
+      "trace_stricte": {
+       "cycles": 80904753,
+       "occurrences": 418500,
+       "secondes": 0.0330841,
+       "part": 0.0206287,
+       "ns_par_occurrence": 79.0541
+      },
+      "reste": {
+       "cycles": 409568849,
+       "secondes": 0.167484,
+       "part": 0.10443
+      }
+     },
+     "routes_v12": {
+      "t1": 545714,
+      "cert_table": 0,
+      "cert_census": 23205,
+      "repli_table": 0,
+      "repli_census": 0
+     },
+     "controle_vidage": {
+      "sondes": 1919207,
+      "parties": 568919,
+      "route_catalogue": 545714,
+      "route_census_saturated": 23202,
+      "route_census_complete": 3,
+      "action_interior": 150419,
+      "action_trace_ou_terminal": 418500,
+      "graines_identiques": true,
+      "conforme": true
+     }
+    },
+    {
+     "phase": "profil_resolution",
+     "k": 6,
+     "traces": 1760463,
+     "fils": 1,
+     "cycles_total": 5798863270,
+     "secondes_total": 2.37131,
+     "secondes_replique_v12_non_instrumentee": 2.08737,
+     "ghz_tsc_estimee": 2.44543,
+     "cycles_par_section_vide": 60.5071,
+     "sections": 4338485,
+     "composantes": {
+      "sonde": {
+       "cycles": 2509012791,
+       "occurrences": 2584655,
+       "secondes": 1.026,
+       "part": 0.432673,
+       "ns_par_occurrence": 396.959
+      },
+      "proposition_t1": {
+       "cycles": 2172556285,
+       "occurrences": 824192,
+       "secondes": 0.888417,
+       "part": 0.374652,
+       "ns_par_occurrence": 1077.92
+      },
+      "certificat": {
+       "cycles": 49813057,
+       "occurrences": 52723,
+       "secondes": 0.0203699,
+       "part": 0.00859014,
+       "ns_par_occurrence": 386.357
+      },
+      "repli": {
+       "cycles": 0,
+       "occurrences": 0,
+       "secondes": 0,
+       "part": 0,
+       "ns_par_occurrence": 0
+      },
+      "census_sature": {
+       "cycles": 363526061,
+       "occurrences": 52719,
+       "secondes": 0.148656,
+       "part": 0.0626892,
+       "ns_par_occurrence": 2819.77
+      },
+      "census_complet": {
+       "cycles": 175004,
+       "occurrences": 4,
+       "secondes": 7.15638e-05,
+       "part": 3.0179e-05,
+       "ns_par_occurrence": 17891
+      },
+      "saut": {
+       "cycles": 19965978,
+       "occurrences": 226573,
+       "secondes": 0.00816462,
+       "part": 0.00344308,
+       "ns_par_occurrence": 36.0353
+      },
+      "trace_stricte": {
+       "cycles": 113905392,
+       "occurrences": 597619,
+       "secondes": 0.046579,
+       "part": 0.0196427,
+       "ns_par_occurrence": 77.9409
+      },
+      "reste": {
+       "cycles": 569908702,
+       "secondes": 0.233051,
+       "part": 0.0982794
+      }
+     },
+     "routes_v12": {
+      "t1": 771469,
+      "cert_table": 0,
+      "cert_census": 52723,
+      "repli_table": 0,
+      "repli_census": 0
+     },
+     "controle_vidage": {
+      "sondes": 2584655,
+      "parties": 824192,
+      "route_catalogue": 771469,
+      "route_census_saturated": 52719,
+      "route_census_complete": 4,
+      "action_interior": 226573,
+      "action_trace_ou_terminal": 597619,
+      "graines_identiques": true,
+      "conforme": true
+     }
+    },
+    {
+     "phase": "profil_resolution",
+     "k": 7,
+     "traces": 2217846,
+     "fils": 1,
+     "cycles_total": 7552419362,
+     "secondes_total": 3.08839,
+     "secondes_replique_v12_non_instrumentee": 3.19443,
+     "ghz_tsc_estimee": 2.44543,
+     "cycles_par_section_vide": 60.5071,
+     "sections": 5841178,
+     "composantes": {
+      "sonde": {
+       "cycles": 2989318926,
+       "occurrences": 3349958,
+       "secondes": 1.22241,
+       "part": 0.395809,
+       "ns_par_occurrence": 364.904
+      },
+      "proposition_t1": {
+       "cycles": 2815397064,
+       "occurrences": 1132112,
+       "secondes": 1.15129,
+       "part": 0.372781,
+       "ns_par_occurrence": 1016.94
+      },
+      "certificat": {
+       "cycles": 115049873,
+       "occurrences": 113498,
+       "secondes": 0.047047,
+       "part": 0.0152335,
+       "ns_par_occurrence": 414.518
+      },
+      "repli": {
+       "cycles": 0,
+       "occurrences": 0,
+       "secondes": 0,
+       "part": 0,
+       "ns_par_occurrence": 0
+      },
+      "census_sature": {
+       "cycles": 743754700,
+       "occurrences": 113495,
+       "secondes": 0.304141,
+       "part": 0.098479,
+       "ns_par_occurrence": 2679.78
+      },
+      "census_complet": {
+       "cycles": 73916,
+       "occurrences": 3,
+       "secondes": 3.02262e-05,
+       "part": 9.78706e-06,
+       "ns_par_occurrence": 10075.4
+      },
+      "saut": {
+       "cycles": 26970440,
+       "occurrences": 318590,
+       "secondes": 0.0110289,
+       "part": 0.0035711,
+       "ns_par_occurrence": 34.618
+      },
+      "trace_stricte": {
+       "cycles": 157193057,
+       "occurrences": 813522,
+       "secondes": 0.0642804,
+       "part": 0.0208136,
+       "ns_par_occurrence": 79.015
+      },
+      "reste": {
+       "cycles": 704661386,
+       "secondes": 0.288155,
+       "part": 0.0933027
+      }
+     },
+     "routes_v12": {
+      "t1": 1018614,
+      "cert_table": 0,
+      "cert_census": 113498,
+      "repli_table": 0,
+      "repli_census": 0
+     },
+     "controle_vidage": {
+      "sondes": 3349958,
+      "parties": 1132112,
+      "route_catalogue": 1018614,
+      "route_census_saturated": 113495,
+      "route_census_complete": 3,
+      "action_interior": 318590,
+      "action_trace_ou_terminal": 813522,
+      "graines_identiques": true,
+      "conforme": true
+     }
+    },
+    {
+     "phase": "profil_resolution",
+     "k": 8,
+     "traces": 2709793,
+     "fils": 1,
+     "cycles_total": 11979766990,
+     "secondes_total": 4.89885,
+     "secondes_replique_v12_non_instrumentee": 3.9847,
+     "ghz_tsc_estimee": 2.44543,
+     "cycles_par_section_vide": 60.5071,
+     "sections": 7639303,
+     "composantes": {
+      "sonde": {
+       "cycles": 4183828864,
+       "occurrences": 4192215,
+       "secondes": 1.71088,
+       "part": 0.349241,
+       "ns_par_occurrence": 408.109
+      },
+      "proposition_t1": {
+       "cycles": 4437627435,
+       "occurrences": 1482422,
+       "secondes": 1.81466,
+       "part": 0.370427,
+       "ns_par_occurrence": 1224.12
+      },
+      "certificat": {
+       "cycles": 295400656,
+       "occurrences": 241123,
+       "secondes": 0.120797,
+       "part": 0.0246583,
+       "ns_par_occurrence": 500.978
+      },
+      "repli": {
+       "cycles": 0,
+       "occurrences": 0,
+       "secondes": 0,
+       "part": 0,
+       "ns_par_occurrence": 0
+      },
+      "census_sature": {
+       "cycles": 1841386319,
+       "occurrences": 241115,
+       "secondes": 0.752992,
+       "part": 0.153708,
+       "ns_par_occurrence": 3122.96
+      },
+      "census_complet": {
+       "cycles": 94104,
+       "occurrences": 6,
+       "secondes": 3.84816e-05,
+       "part": 7.85524e-06,
+       "ns_par_occurrence": 6413.61
+      },
+      "saut": {
+       "cycles": 37751653,
+       "occurrences": 434799,
+       "secondes": 0.0154377,
+       "part": 0.00315128,
+       "ns_par_occurrence": 35.5053
+      },
+      "trace_stricte": {
+       "cycles": 219877953,
+       "occurrences": 1047623,
+       "secondes": 0.089914,
+       "part": 0.0183541,
+       "ns_par_occurrence": 85.8266
+      },
+      "reste": {
+       "cycles": 963800006,
+       "secondes": 0.394124,
+       "part": 0.0804523
+      }
+     },
+     "routes_v12": {
+      "t1": 1241299,
+      "cert_table": 2,
+      "cert_census": 241121,
+      "repli_table": 0,
+      "repli_census": 0
+     },
+     "controle_vidage": {
+      "sondes": 4192215,
+      "parties": 1482422,
+      "route_catalogue": 1241301,
+      "route_census_saturated": 241115,
+      "route_census_complete": 6,
+      "action_interior": 434799,
+      "action_trace_ou_terminal": 1047623,
+      "graines_identiques": true,
+      "conforme": true
+     }
+    },
+    {
+     "phase": "profil_resolution",
+     "k": 9,
+     "traces": 3248111,
+     "fils": 1,
+     "cycles_total": 14825104179,
+     "secondes_total": 6.06238,
+     "secondes_replique_v12_non_instrumentee": 5.59498,
+     "ghz_tsc_estimee": 2.44543,
+     "cycles_par_section_vide": 60.5071,
+     "sections": 9949522,
+     "composantes": {
+      "sonde": {
+       "cycles": 4382001804,
+       "occurrences": 5138294,
+       "secondes": 1.79192,
+       "part": 0.29558,
+       "ns_par_occurrence": 348.738
+      },
+      "proposition_t1": {
+       "cycles": 4657782004,
+       "occurrences": 1890183,
+       "secondes": 1.90469,
+       "part": 0.314182,
+       "ns_par_occurrence": 1007.68
+      },
+      "certificat": {
+       "cycles": 611239355,
+       "occurrences": 515431,
+       "secondes": 0.249952,
+       "part": 0.04123,
+       "ns_par_occurrence": 484.938
+      },
+      "repli": {
+       "cycles": 0,
+       "occurrences": 0,
+       "secondes": 0,
+       "part": 0,
+       "ns_par_occurrence": 0
+      },
+      "census_sature": {
+       "cycles": 3524771348,
+       "occurrences": 487757,
+       "secondes": 1.44137,
+       "part": 0.237757,
+       "ns_par_occurrence": 2955.1
+      },
+      "census_complet": {
+       "cycles": 309882513,
+       "occurrences": 27674,
+       "secondes": 0.126719,
+       "part": 0.0209026,
+       "ns_par_occurrence": 4579
+      },
+      "saut": {
+       "cycles": 48434481,
+       "occurrences": 567500,
+       "secondes": 0.0198062,
+       "part": 0.00326706,
+       "ns_par_occurrence": 34.9007
+      },
+      "trace_stricte": {
+       "cycles": 252504775,
+       "occurrences": 1322683,
+       "secondes": 0.103256,
+       "part": 0.0170322,
+       "ns_par_occurrence": 78.0655
+      },
+      "reste": {
+       "cycles": 1038487899,
+       "secondes": 0.424665,
+       "part": 0.0700493
+      }
+     },
+     "routes_v12": {
+      "t1": 1374752,
+      "cert_table": 0,
+      "cert_census": 515431,
+      "repli_table": 0,
+      "repli_census": 0
+     },
+     "controle_vidage": {
+      "sondes": 5138294,
+      "parties": 1890183,
+      "route_catalogue": 1374752,
+      "route_census_saturated": 487757,
+      "route_census_complete": 27674,
+      "action_interior": 567500,
+      "action_trace_ou_terminal": 1322683,
+      "graines_identiques": true,
+      "conforme": true
+     }
+    },
+    {
+     "phase": "profil_resolution",
+     "k": 10,
+     "traces": 3831491,
+     "fils": 1,
+     "cycles_total": 29217343528,
+     "secondes_total": 11.9477,
+     "secondes_replique_v12_non_instrumentee": 10.2916,
+     "ghz_tsc_estimee": 2.44543,
+     "cycles_par_section_vide": 60.5071,
+     "sections": 13204798,
+     "composantes": {
+      "sonde": {
+       "cycles": 7088954935,
+       "occurrences": 6183682,
+       "secondes": 2.89886,
+       "part": 0.242628,
+       "ns_par_occurrence": 468.792
+      },
+      "proposition_t1": {
+       "cycles": 7622053287,
+       "occurrences": 2352191,
+       "secondes": 3.11686,
+       "part": 0.260874,
+       "ns_par_occurrence": 1325.09
+      },
+      "certificat": {
+       "cycles": 1613450674,
+       "occurrences": 1158367,
+       "secondes": 0.659783,
+       "part": 0.0552224,
+       "ns_par_occurrence": 569.58
+      },
+      "repli": {
+       "cycles": 0,
+       "occurrences": 0,
+       "secondes": 0,
+       "part": 0,
+       "ns_par_occurrence": 0
+      },
+      "census_sature": {
+       "cycles": 5835156422,
+       "occurrences": 724379,
+       "secondes": 2.38615,
+       "part": 0.199716,
+       "ns_par_occurrence": 3294.06
+      },
+      "census_complet": {
+       "cycles": 5061275956,
+       "occurrences": 433988,
+       "secondes": 2.06969,
+       "part": 0.173228,
+       "ns_par_occurrence": 4769
+      },
+      "saut": {
+       "cycles": 69725935,
+       "occurrences": 724379,
+       "secondes": 0.0285128,
+       "part": 0.00238646,
+       "ns_par_occurrence": 39.3617
+      },
+      "trace_stricte": {
+       "cycles": 416245410,
+       "occurrences": 1627812,
+       "secondes": 0.170214,
+       "part": 0.0142465,
+       "ns_par_occurrence": 104.566
+      },
+      "reste": {
+       "cycles": 1510480909,
+       "secondes": 0.617676,
+       "part": 0.0516981
+      }
+     },
+     "routes_v12": {
+      "t1": 1193824,
+      "cert_table": 0,
+      "cert_census": 1158367,
+      "repli_table": 0,
+      "repli_census": 0
+     },
+     "controle_vidage": {
+      "sondes": 6183682,
+      "parties": 2352191,
+      "route_catalogue": 1193824,
+      "route_census_saturated": 724379,
+      "route_census_complete": 433988,
+      "action_interior": 724379,
+      "action_trace_ou_terminal": 1627812,
+      "graines_identiques": true,
+      "conforme": true
+     }
+    }
+   ]
+  }
+ }
+}
