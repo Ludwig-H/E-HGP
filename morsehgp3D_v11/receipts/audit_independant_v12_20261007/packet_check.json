@@ -1,0 +1,13 @@
+{
+  "schema": "ehgp.audit.v12.packet_check.v1",
+  "verdict": "pass",
+  "issues": [],
+  "markdown_files": 7,
+  "findings": 19,
+  "ctest_passed": 920,
+  "ctest_skipped": 1,
+  "ctest_failed": 0,
+  "math_normal_opt_equal": true,
+  "cache_normal_opt_equal": true,
+  "evidence_normal_opt_equal": true
+}

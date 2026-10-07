@@ -1,0 +1,218 @@
+{
+  "schema": "ehgp.audit.independent_v12.findings.v1",
+  "date": "2026-10-07",
+  "source_commit": "33c2ae3c8b66d12ef5b2405f1b0f807d7e57aeae",
+  "public_status": "not_claimed",
+  "scope": "Risques de port et de revendication; aucune nouvelle fausse FULL etablie. P1 ne signifie pas bogue geometrique.",
+  "findings": [
+    {
+      "id": "A12-MEM-01",
+      "priority": "P2",
+      "class": "memoire",
+      "history": "connu, nouveau temoin",
+      "title": "Arrondi des blocs vivants hors du compteur logique",
+      "state": "open_for_v12_review",
+      "evidence": "verification/cache_normal.json",
+      "closure_required": "Port avec reservation de capacite physique et tests a limite finie.",
+      "closure_commit": null
+    },
+    {
+      "id": "A12-MEM-02",
+      "priority": "P2",
+      "class": "outillage",
+      "history": "nouveau",
+      "title": "Empoisonnement du cache inactif absent sous Clang ASan",
+      "state": "open_for_v12_review",
+      "evidence": "verification/cache_normal.json",
+      "closure_required": "Detection Clang et portes positives de cache sous GCC/Clang ASan.",
+      "closure_commit": null
+    },
+    {
+      "id": "A12-NAT-01",
+      "priority": "P2",
+      "class": "memoire",
+      "history": "nouveau",
+      "title": "Scratch de cohorte multiplie par W sans travail concurrent",
+      "state": "open_for_v12_review",
+      "evidence": "native/COHORT_MEMORY_RELEASE_U21.json",
+      "closure_required": "Allocation par tache utile et meme FULL sous budget serre W1/W8/W48.",
+      "closure_commit": null
+    },
+    {
+      "id": "A12-NAT-02",
+      "priority": "P2",
+      "class": "concurrence",
+      "history": "lecture nouvelle",
+      "title": "Propriete globale du contexte et pool CUDA",
+      "state": "open_for_v12_review",
+      "evidence": "native/README.md",
+      "closure_required": "Proprietaire et exclusivite declares, tests device de cycle de vie et concurrence.",
+      "closure_commit": null
+    },
+    {
+      "id": "A12-NAT-03",
+      "priority": "P3",
+      "class": "document",
+      "history": "nouveau temoin",
+      "title": "Index radix decrit comme equilibre",
+      "state": "open_for_v12_review",
+      "evidence": "native/INDEX_RADIX_RELEASE_U21.json",
+      "closure_required": "Contrat de profondeur radix et audit des formules de capacite au port.",
+      "closure_commit": null
+    },
+    {
+      "id": "A12-NAT-04",
+      "priority": "P3",
+      "class": "document",
+      "history": "correction audit",
+      "title": "MEB q2 presente seulement la paire de diametre",
+      "state": "open_for_v12_review",
+      "evidence": "native/README.md",
+      "closure_required": "Distinguer distances de paires et presentations dans le diagnostic de cout.",
+      "closure_commit": null
+    },
+    {
+      "id": "A12-EVD-01",
+      "priority": "P2",
+      "class": "document",
+      "history": "correction audit",
+      "title": "3303 tentatives mais 3285 SHA de sortie",
+      "state": "open_for_v12_review",
+      "evidence": "evidence/recomputed.json",
+      "closure_required": "Comptages de tentatives/refus/vidages distincts dans les syntheses futures.",
+      "closure_commit": null
+    },
+    {
+      "id": "A12-EVD-02",
+      "priority": "P1",
+      "class": "outillage",
+      "history": "nouveau",
+      "title": "Sept juges adoptent apres un verdict de banc non conforme",
+      "state": "open_for_v12_review",
+      "evidence": "evidence/runner_probes.json",
+      "closure_required": "Juge unique refusant verdict invalide, prise absente, provenance incertaine; mutants causaux.",
+      "closure_commit": null
+    },
+    {
+      "id": "A12-EVD-03",
+      "priority": "P2",
+      "class": "mesure",
+      "history": "precision nouvelle",
+      "title": "Chaud processus neuf distinct de chaud resident",
+      "state": "open_for_v12_review",
+      "evidence": "evidence/RAPPORT.md",
+      "closure_required": "Regime et frontieres chronometriques declares par resultat.",
+      "closure_commit": null
+    },
+    {
+      "id": "A12-EVD-04",
+      "priority": "P2",
+      "class": "provenance",
+      "history": "nouveau temoin",
+      "title": "Binaire b_cuda repris sans lien verifie aux sources new",
+      "state": "open_for_v12_review",
+      "evidence": "evidence/runner_probes.json",
+      "closure_required": "Cache lie a source/configuration/compilateur ou artefact neuf.",
+      "closure_commit": null
+    },
+    {
+      "id": "MATH-01",
+      "priority": "P1",
+      "class": "mathematiques",
+      "history": "connu, ouvert",
+      "title": "Entrelacement FULL et stabilite des labels sont distincts",
+      "state": "open_for_v12_review",
+      "evidence": "math/README.md",
+      "closure_required": "Voir critere de port et hypotheses dans math/README.md.",
+      "closure_commit": null
+    },
+    {
+      "id": "MATH-02",
+      "priority": "P1",
+      "class": "mathematiques",
+      "history": "connu, ouvert",
+      "title": "Image en chaine dun noeud long, sans identifiant de noeud stable",
+      "state": "open_for_v12_review",
+      "evidence": "math/README.md",
+      "closure_required": "Voir critere de port et hypotheses dans math/README.md.",
+      "closure_commit": null
+    },
+    {
+      "id": "MATH-03",
+      "priority": "P2",
+      "class": "mathematiques",
+      "history": "precision nouvelle",
+      "title": "Kruskal hypergraphique peut conserver un cycle dincidence",
+      "state": "open_for_v12_review",
+      "evidence": "math/README.md",
+      "closure_required": "Voir critere de port et hypotheses dans math/README.md.",
+      "closure_commit": null
+    },
+    {
+      "id": "MATH-04",
+      "priority": "P1",
+      "class": "mathematiques",
+      "history": "connu, ouvert",
+      "title": "Squelette ne reconstruit pas les populations dynamiques",
+      "state": "open_for_v12_review",
+      "evidence": "math/README.md",
+      "closure_required": "Voir critere de port et hypotheses dans math/README.md.",
+      "closure_commit": null
+    },
+    {
+      "id": "MATH-05",
+      "priority": "P2",
+      "class": "mathematiques",
+      "history": "connu, ouvert",
+      "title": "Qualification des points et optimalite geometrique restent des choix ouverts",
+      "state": "open_for_v12_review",
+      "evidence": "math/README.md",
+      "closure_required": "Voir critere de port et hypotheses dans math/README.md.",
+      "closure_commit": null
+    },
+    {
+      "id": "MATH-06",
+      "priority": "P2",
+      "class": "mathematiques",
+      "history": "connu, ouvert",
+      "title": "EOM exacte ne certifie pas pertinence ni continuite des etiquettes",
+      "state": "open_for_v12_review",
+      "evidence": "math/README.md",
+      "closure_required": "Voir critere de port et hypotheses dans math/README.md.",
+      "closure_commit": null
+    },
+    {
+      "id": "MATH-07",
+      "priority": "P2",
+      "class": "mathematiques",
+      "history": "connu, ouvert",
+      "title": "Certificat kappa : hypotheses, calcul et utilite a qualifier",
+      "state": "open_for_v12_review",
+      "evidence": "math/README.md",
+      "closure_required": "Voir critere de port et hypotheses dans math/README.md.",
+      "closure_commit": null
+    },
+    {
+      "id": "MATH-08",
+      "priority": "P2",
+      "class": "mathematiques",
+      "history": "connu, ouvert",
+      "title": "Notes historiques refutees et identifiants de lemmes ambigus",
+      "state": "open_for_v12_review",
+      "evidence": "math/README.md",
+      "closure_required": "Voir critere de port et hypotheses dans math/README.md.",
+      "closure_commit": null
+    },
+    {
+      "id": "MATH-09",
+      "priority": "P2",
+      "class": "mathematiques",
+      "history": "connu, ouvert",
+      "title": "Independance et couverture des oracles bornees",
+      "state": "open_for_v12_review",
+      "evidence": "math/README.md",
+      "closure_required": "Voir critere de port et hypotheses dans math/README.md.",
+      "closure_commit": null
+    }
+  ]
+}

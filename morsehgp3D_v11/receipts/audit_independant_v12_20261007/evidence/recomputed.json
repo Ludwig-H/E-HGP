@@ -1,0 +1,2241 @@
+{
+  "dump_inventory": {
+    "available_dumps_by_k_frame": {
+      "10|lidar_ng00": 293,
+      "10|lidar_ng01": 293,
+      "10|lidar_ng02": 293,
+      "5|lidar_ng00": 802,
+      "5|lidar_ng01": 802,
+      "5|lidar_ng02": 802
+    },
+    "counts": {
+      "cold": 2706,
+      "cpu_or_host_batch_cold": 1089,
+      "cpu_or_host_batch_warm": 216,
+      "dump_cold": 2691,
+      "dump_cpu_or_host_batch_cold": 1089,
+      "dump_cpu_or_host_batch_warm": 216,
+      "dump_gpu_cold": 1602,
+      "dump_gpu_warm": 378,
+      "dump_warm": 594,
+      "gpu_cold": 1617,
+      "gpu_warm": 381,
+      "warm": 597
+    },
+    "digests_by_k_frame": {
+      "10|lidar_ng00": [
+        "61a4245b91d9a4fdad012f0a2e26a63c3e48db1d46a180db756f2c4e4aa77295"
+      ],
+      "10|lidar_ng01": [
+        "838a447e0b92e13e42f7f69a84fd536d5d46d26463d3f4cc7c688475878fe0de"
+      ],
+      "10|lidar_ng02": [
+        "81f89995eaccb497cfe92abb81213bebd0d4ce5076210570d86aa9456cf7ff2e"
+      ],
+      "5|lidar_ng00": [
+        null,
+        "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe"
+      ],
+      "5|lidar_ng01": [
+        null,
+        "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091"
+      ],
+      "5|lidar_ng02": [
+        null,
+        "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207"
+      ]
+    },
+    "invalid_rows": [
+      {
+        "code": 3,
+        "exit": "invariant_violated",
+        "frame": "lidar_ng00",
+        "regime": "cold",
+        "report_verdict": "refus",
+        "source": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu2/gpu_k5_report.json"
+      },
+      {
+        "code": 3,
+        "exit": "invariant_violated",
+        "frame": "lidar_ng01",
+        "regime": "cold",
+        "report_verdict": "refus",
+        "source": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu2/gpu_k5_report.json"
+      },
+      {
+        "code": 3,
+        "exit": "invariant_violated",
+        "frame": "lidar_ng02",
+        "regime": "cold",
+        "report_verdict": "refus",
+        "source": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu2/gpu_k5_report.json"
+      },
+      {
+        "code": 3,
+        "exit": "invariant_violated",
+        "frame": "lidar_ng00",
+        "regime": "cold",
+        "report_verdict": "refus",
+        "source": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu2/gpu_k5_report.json"
+      },
+      {
+        "code": 3,
+        "exit": "invariant_violated",
+        "frame": "lidar_ng01",
+        "regime": "cold",
+        "report_verdict": "refus",
+        "source": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu2/gpu_k5_report.json"
+      },
+      {
+        "code": 3,
+        "exit": "invariant_violated",
+        "frame": "lidar_ng02",
+        "regime": "cold",
+        "report_verdict": "refus",
+        "source": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu2/gpu_k5_report.json"
+      },
+      {
+        "code": 3,
+        "exit": "invariant_violated",
+        "frame": "lidar_ng00",
+        "regime": "cold",
+        "report_verdict": "refus",
+        "source": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu2/gpu_k5_report.json"
+      },
+      {
+        "code": 3,
+        "exit": "invariant_violated",
+        "frame": "lidar_ng01",
+        "regime": "cold",
+        "report_verdict": "refus",
+        "source": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu2/gpu_k5_report.json"
+      },
+      {
+        "code": 3,
+        "exit": "invariant_violated",
+        "frame": "lidar_ng02",
+        "regime": "cold",
+        "report_verdict": "refus",
+        "source": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu2/gpu_k5_report.json"
+      },
+      {
+        "code": 3,
+        "exit": "invariant_violated",
+        "frame": "lidar_ng00",
+        "regime": "cold",
+        "report_verdict": "refus",
+        "source": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu2/gpu_k5_report.json"
+      },
+      {
+        "code": 3,
+        "exit": "invariant_violated",
+        "frame": "lidar_ng01",
+        "regime": "cold",
+        "report_verdict": "refus",
+        "source": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu2/gpu_k5_report.json"
+      },
+      {
+        "code": 3,
+        "exit": "invariant_violated",
+        "frame": "lidar_ng02",
+        "regime": "cold",
+        "report_verdict": "refus",
+        "source": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu2/gpu_k5_report.json"
+      },
+      {
+        "code": 3,
+        "exit": "invariant_violated",
+        "frame": "lidar_ng00",
+        "regime": "cold",
+        "report_verdict": "refus",
+        "source": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu2/gpu_k5_report.json"
+      },
+      {
+        "code": 3,
+        "exit": "invariant_violated",
+        "frame": "lidar_ng01",
+        "regime": "cold",
+        "report_verdict": "refus",
+        "source": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu2/gpu_k5_report.json"
+      },
+      {
+        "code": 3,
+        "exit": "invariant_violated",
+        "frame": "lidar_ng02",
+        "regime": "cold",
+        "report_verdict": "refus",
+        "source": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu2/gpu_k5_report.json"
+      },
+      {
+        "code": 3,
+        "exit": "invariant_violated",
+        "frame": "lidar_ng00",
+        "regime": "warm",
+        "report_verdict": "refus",
+        "source": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu2/gpu_k5_report.json"
+      },
+      {
+        "code": 3,
+        "exit": "invariant_violated",
+        "frame": "lidar_ng01",
+        "regime": "warm",
+        "report_verdict": "refus",
+        "source": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu2/gpu_k5_report.json"
+      },
+      {
+        "code": 3,
+        "exit": "invariant_violated",
+        "frame": "lidar_ng02",
+        "regime": "warm",
+        "report_verdict": "refus",
+        "source": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu2/gpu_k5_report.json"
+      }
+    ],
+    "report_count": 81,
+    "reports": [
+      "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu2/gpu_k5_report.json",
+      "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu3/gpu_k10_leaf24_report.json",
+      "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu3/gpu_k10_report.json",
+      "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu3/gpu_k5_report.json",
+      "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu4/gpu_k10_leaf24_report.json",
+      "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu4/gpu_k10_leaf32_report.json",
+      "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu4/gpu_k5_leaf24_report.json",
+      "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu4/gpu_k5_report.json",
+      "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu5/gpu_k10_report.json",
+      "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu5/gpu_k5_report.json",
+      "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu6/gpu_k10_report.json",
+      "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu6/gpu_k5_report.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/constantes_pas_descente/claudev3c/gpu_ab_report_k10_24_gpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/constantes_pas_descente/claudev3c/gpu_ab_report_k5_16_cpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/constantes_pas_descente/claudev3c/gpu_ab_report_k5_24_gpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/coop1_feuille_cooperative/gpu_ab_report_k10.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/coop1_feuille_cooperative/gpu_ab_report_k5.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/coop2_correction_mesuree/gpu_ab_report_k10.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/coop2_correction_mesuree/gpu_ab_report_k5.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/coop3_reconvergence/gpu_ab_report_k10.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/coop3_reconvergence/gpu_ab_report_k5.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/domain_diagnostic/claudedom1/gpu_ab_report_k10_24.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/domain_diagnostic/claudedom1/gpu_ab_report_k5_16.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/domain_diagnostic/claudedom1/gpu_ab_report_k5_24.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/j2memo_rangs_locaux/gpu_ab_report_k10.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/j2memo_rangs_locaux/gpu_ab_report_k5.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/l4_recouvrement/gpu_ab_report_k10.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/l4_recouvrement/gpu_ab_report_k5.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/lot_partage/claudesplit1/gpu_ab_report_k10_24.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/lot_partage/claudesplit1/gpu_ab_report_k5_24.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/lot_partage_confirmation/claudesplitconf/gpu_ab_report_k10_24.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/lot_partage_confirmation/claudesplitconf/gpu_ab_report_k5_24.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/o1_placement/claudeo1place/gpu_ab_report_k5_16_cpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/o1_placement/claudeo1place/gpu_ab_report_k5_24_gpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/o1_placement/claudeo1place2/gpu_ab_report_k5_16_cpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/o1_placement/claudeo1place2/gpu_ab_report_k5_24_gpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/o1_placement/claudeo1place3/gpu_ab_report_k5_16_cpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/o1_placement/claudeo1place3/gpu_ab_report_k5_24_gpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/o2_publieur/claudeo2a/gpu_ab_report_k10_24_gpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/o2_publieur/claudeo2a/gpu_ab_report_k5_16_cpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/o2_publieur/claudeo2a/gpu_ab_report_k5_24_gpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/reservoir3_chemin_chaud/gpu_ab_report_k10.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/reservoir3_chemin_chaud/gpu_ab_report_k5.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/reservoir3_chemin_chaud/gpu_ab_report_k5_feuilles24.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/reservoir_cases_chainees/gpu_ab_report_k10.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/reservoir_cases_chainees/gpu_ab_report_k5.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/v3_census/claudev3ab/gpu_ab_report_k10_24_gpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/v3_census/claudev3ab/gpu_ab_report_k5_16_cpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/v3_census/claudev3ab/gpu_ab_report_k5_24_gpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/wfgpu1_leviers/session/gpu_ab_report_k10_24.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/wfgpu1_leviers/session/gpu_ab_report_k5_16.json",
+      "morsehgp3D_v11/receipts/developpement_20261006/wfgpu1_leviers/session/gpu_ab_report_k5_24.json",
+      "morsehgp3D_v11/receipts/developpement_20261007/annonces_publieurs/claudeann1/gpu_ab_report_ab_k10_24_gpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261007/annonces_publieurs/claudeann1/gpu_ab_report_ab_k5_16_cpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261007/annonces_publieurs/claudeann1/gpu_ab_report_ab_k5_24_gpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261007/cache_blocs/claudecache1/gpu_ab_report_ab_k10_24_gpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261007/cache_blocs/claudecache1/gpu_ab_report_ab_k5_16_cpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261007/cache_blocs/claudecache1/gpu_ab_report_ab_k5_24_gpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261007/cohortes_tranches/claudebirths1/gpu_ab_report_ab_k10_24_gpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261007/cohortes_tranches/claudebirths1/gpu_ab_report_ab_k5_16_cpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261007/cohortes_tranches/claudebirths1/gpu_ab_report_ab_k5_24_gpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261007/diagnostic_domaine/claudediag1/gpu_ab_report_diag_k5_16_cpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261007/diagnostic_domaine/claudediag1/gpu_ab_report_diag_k5_24_gpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/claudeg1/gpu_ab_report_ab_k10_24_gpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/claudeg1/gpu_ab_report_ab_k5_16_cpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/claudeg1/gpu_ab_report_ab_k5_24_gpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261007/frontiere_tranches/claudefront1/gpu_ab_report_ab_k10_24_gpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261007/frontiere_tranches/claudefront1/gpu_ab_report_ab_k5_16_cpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261007/frontiere_tranches/claudefront1/gpu_ab_report_ab_k5_24_gpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261007/prechargement_graines/claudepref1/gpu_ab_report_ab_k10_24_gpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261007/prechargement_graines/claudepref1/gpu_ab_report_ab_k5_16_cpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261007/prechargement_graines/claudepref1/gpu_ab_report_ab_k5_24_gpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261007/prechargements_publieurs/claudepref2/gpu_ab_report_ab_k10_24_gpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261007/prechargements_publieurs/claudepref2/gpu_ab_report_ab_k5_16_cpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261007/prechargements_publieurs/claudepref2/gpu_ab_report_ab_k5_24_gpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261007/retention_tas/claudetas1/gpu_ab_report_ab_k10_24_gpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261007/retention_tas/claudetas1/gpu_ab_report_ab_k5_16_cpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261007/retention_tas/claudetas1/gpu_ab_report_ab_k5_24_gpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261007/thp_exploration/claudethp1/gpu_ab_report_ab_k10_24_gpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261007/thp_exploration/claudethp1/gpu_ab_report_ab_k5_16_cpu.json",
+      "morsehgp3D_v11/receipts/developpement_20261007/thp_exploration/claudethp1/gpu_ab_report_ab_k5_24_gpu.json"
+    ]
+  },
+  "final_base_timings": [
+    {
+      "cold_external_process_median_ms": 919.5,
+      "cold_median_ms": 338.862,
+      "cold_processes": 6,
+      "cold_upper_median_ms": 343.273,
+      "digest": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+      "frame": "lidar_ng00",
+      "k": 5,
+      "leaf": 16,
+      "mode": "802811",
+      "source": "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/claudeg1/gpu_ab_report_ab_k5_16_cpu.json",
+      "warm_domain_median_ms": 199.514896,
+      "warm_forest_median_ms": 113.282649,
+      "warm_processes": 1,
+      "warm_timed_passes": 9,
+      "warm_wall_median_ms": 313.547224
+    },
+    {
+      "cold_external_process_median_ms": 765.5,
+      "cold_median_ms": 271.5665,
+      "cold_processes": 6,
+      "cold_upper_median_ms": 272.5,
+      "digest": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+      "frame": "lidar_ng01",
+      "k": 5,
+      "leaf": 16,
+      "mode": "802811",
+      "source": "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/claudeg1/gpu_ab_report_ab_k5_16_cpu.json",
+      "warm_domain_median_ms": 162.8088,
+      "warm_forest_median_ms": 91.721296,
+      "warm_processes": 1,
+      "warm_timed_passes": 9,
+      "warm_wall_median_ms": 255.092866
+    },
+    {
+      "cold_external_process_median_ms": 957.5,
+      "cold_median_ms": 327.676,
+      "cold_processes": 6,
+      "cold_upper_median_ms": 328.881,
+      "digest": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+      "frame": "lidar_ng02",
+      "k": 5,
+      "leaf": 16,
+      "mode": "802811",
+      "source": "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/claudeg1/gpu_ab_report_ab_k5_16_cpu.json",
+      "warm_domain_median_ms": 194.903388,
+      "warm_forest_median_ms": 116.077847,
+      "warm_processes": 1,
+      "warm_timed_passes": 9,
+      "warm_wall_median_ms": 313.152265
+    },
+    {
+      "cold_external_process_median_ms": 990.5,
+      "cold_median_ms": 332.329,
+      "cold_processes": 6,
+      "cold_upper_median_ms": 335.164,
+      "digest": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+      "frame": "lidar_ng00",
+      "k": 5,
+      "leaf": 24,
+      "mode": "868347:400",
+      "source": "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/claudeg1/gpu_ab_report_ab_k5_24_gpu.json",
+      "warm_domain_median_ms": 137.690482,
+      "warm_forest_median_ms": 113.692743,
+      "warm_processes": 1,
+      "warm_timed_passes": 9,
+      "warm_wall_median_ms": 251.287606
+    },
+    {
+      "cold_external_process_median_ms": 882.5,
+      "cold_median_ms": 300.54,
+      "cold_processes": 6,
+      "cold_upper_median_ms": 300.658,
+      "digest": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+      "frame": "lidar_ng01",
+      "k": 5,
+      "leaf": 24,
+      "mode": "868347:400",
+      "source": "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/claudeg1/gpu_ab_report_ab_k5_24_gpu.json",
+      "warm_domain_median_ms": 120.090211,
+      "warm_forest_median_ms": 90.776735,
+      "warm_processes": 1,
+      "warm_timed_passes": 9,
+      "warm_wall_median_ms": 212.160575
+    },
+    {
+      "cold_external_process_median_ms": 1042.0,
+      "cold_median_ms": 343.297,
+      "cold_processes": 6,
+      "cold_upper_median_ms": 345.149,
+      "digest": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+      "frame": "lidar_ng02",
+      "k": 5,
+      "leaf": 24,
+      "mode": "868347:400",
+      "source": "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/claudeg1/gpu_ab_report_ab_k5_24_gpu.json",
+      "warm_domain_median_ms": 140.69065,
+      "warm_forest_median_ms": 113.610144,
+      "warm_processes": 1,
+      "warm_timed_passes": 9,
+      "warm_wall_median_ms": 255.385814
+    },
+    {
+      "cold_external_process_median_ms": 5306.0,
+      "cold_median_ms": 1824.23,
+      "cold_processes": 3,
+      "cold_upper_median_ms": 1824.23,
+      "digest": "61a4245b91d9a4fdad012f0a2e26a63c3e48db1d46a180db756f2c4e4aa77295",
+      "frame": "lidar_ng00",
+      "k": 10,
+      "leaf": 24,
+      "mode": "868347",
+      "source": "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/claudeg1/gpu_ab_report_ab_k10_24_gpu.json",
+      "warm_domain_median_ms": 488.948951,
+      "warm_forest_median_ms": 1293.351011,
+      "warm_processes": 1,
+      "warm_timed_passes": 9,
+      "warm_wall_median_ms": 1782.208072
+    },
+    {
+      "cold_external_process_median_ms": 4237.0,
+      "cold_median_ms": 1395.494,
+      "cold_processes": 3,
+      "cold_upper_median_ms": 1395.494,
+      "digest": "838a447e0b92e13e42f7f69a84fd536d5d46d26463d3f4cc7c688475878fe0de",
+      "frame": "lidar_ng01",
+      "k": 10,
+      "leaf": 24,
+      "mode": "868347",
+      "source": "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/claudeg1/gpu_ab_report_ab_k10_24_gpu.json",
+      "warm_domain_median_ms": 397.77487,
+      "warm_forest_median_ms": 938.685019,
+      "warm_processes": 1,
+      "warm_timed_passes": 9,
+      "warm_wall_median_ms": 1335.963269
+    },
+    {
+      "cold_external_process_median_ms": 5065.0,
+      "cold_median_ms": 1601.638,
+      "cold_processes": 3,
+      "cold_upper_median_ms": 1601.638,
+      "digest": "81f89995eaccb497cfe92abb81213bebd0d4ce5076210570d86aa9456cf7ff2e",
+      "frame": "lidar_ng02",
+      "k": 10,
+      "leaf": 24,
+      "mode": "868347",
+      "source": "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/claudeg1/gpu_ab_report_ab_k10_24_gpu.json",
+      "warm_domain_median_ms": 471.114944,
+      "warm_forest_median_ms": 1064.808585,
+      "warm_processes": 1,
+      "warm_timed_passes": 9,
+      "warm_wall_median_ms": 1536.380608
+    }
+  ],
+  "gcp_used": false,
+  "hdbscan_flat_conditional_table": {
+    "10": {
+      "A_eom1": 0.7624,
+      "R0_eom": 0.7652,
+      "T_eom1": 0.779,
+      "T_eom2": 0.4862
+    },
+    "2": {
+      "A_eom1": 0.418,
+      "R0_eom": 0.418,
+      "T_eom1": 0.6038,
+      "T_eom2": 0.3552
+    },
+    "3": {
+      "A_eom1": 0.4454,
+      "R0_eom": 0.4481,
+      "T_eom1": 0.6503,
+      "T_eom2": 0.3962
+    },
+    "5": {
+      "A_eom1": 0.6304,
+      "R0_eom": 0.6359,
+      "T_eom1": 0.7092,
+      "T_eom2": 0.4185
+    },
+    "all": {
+      "A_eom1": 0.5636,
+      "R0_eom": 0.5663,
+      "T_eom1": 0.6854,
+      "T_eom2": 0.4138
+    }
+  },
+  "hdbscan_synthetic_level_b": [
+    {
+      "k": 2,
+      "mean_best_iou_difference": -0.04585561653645834,
+      "n": 2000,
+      "rule": "core",
+      "scenes": 64,
+      "scenes_at_least_as_good": 13,
+      "session": "claudepts4"
+    },
+    {
+      "k": 2,
+      "mean_best_iou_difference": 0.01116989518229167,
+      "n": 2000,
+      "rule": "cover",
+      "scenes": 64,
+      "scenes_at_least_as_good": 43,
+      "session": "claudepts4"
+    },
+    {
+      "k": 2,
+      "mean_best_iou_difference": 0.014170142578125001,
+      "n": 2000,
+      "rule": "first",
+      "scenes": 64,
+      "scenes_at_least_as_good": 45,
+      "session": "claudepts4"
+    },
+    {
+      "k": 2,
+      "mean_best_iou_difference": 0.012758853515624991,
+      "n": 2000,
+      "rule": "margin_r",
+      "scenes": 64,
+      "scenes_at_least_as_good": 47,
+      "session": "claudepts4"
+    },
+    {
+      "k": 3,
+      "mean_best_iou_difference": -0.04330610221354166,
+      "n": 2000,
+      "rule": "core",
+      "scenes": 64,
+      "scenes_at_least_as_good": 17,
+      "session": "claudepts4"
+    },
+    {
+      "k": 3,
+      "mean_best_iou_difference": 0.031993893880208325,
+      "n": 2000,
+      "rule": "cover",
+      "scenes": 64,
+      "scenes_at_least_as_good": 46,
+      "session": "claudepts4"
+    },
+    {
+      "k": 3,
+      "mean_best_iou_difference": 0.03558536458333332,
+      "n": 2000,
+      "rule": "first",
+      "scenes": 64,
+      "scenes_at_least_as_good": 47,
+      "session": "claudepts4"
+    },
+    {
+      "k": 3,
+      "mean_best_iou_difference": 0.03289775260416666,
+      "n": 2000,
+      "rule": "margin_r",
+      "scenes": 64,
+      "scenes_at_least_as_good": 47,
+      "session": "claudepts4"
+    },
+    {
+      "k": 5,
+      "mean_best_iou_difference": -0.02892344596354166,
+      "n": 2000,
+      "rule": "core",
+      "scenes": 64,
+      "scenes_at_least_as_good": 18,
+      "session": "claudepts4"
+    },
+    {
+      "k": 5,
+      "mean_best_iou_difference": 0.06113846549479167,
+      "n": 2000,
+      "rule": "cover",
+      "scenes": 64,
+      "scenes_at_least_as_good": 48,
+      "session": "claudepts4"
+    },
+    {
+      "k": 5,
+      "mean_best_iou_difference": 0.06326784375,
+      "n": 2000,
+      "rule": "first",
+      "scenes": 64,
+      "scenes_at_least_as_good": 48,
+      "session": "claudepts4"
+    },
+    {
+      "k": 5,
+      "mean_best_iou_difference": 0.05930218489583333,
+      "n": 2000,
+      "rule": "margin_r",
+      "scenes": 64,
+      "scenes_at_least_as_good": 48,
+      "session": "claudepts4"
+    },
+    {
+      "k": 10,
+      "mean_best_iou_difference": -0.015272503255208337,
+      "n": 2000,
+      "rule": "core",
+      "scenes": 64,
+      "scenes_at_least_as_good": 12,
+      "session": "claudepts4"
+    },
+    {
+      "k": 10,
+      "mean_best_iou_difference": 0.08684439583333331,
+      "n": 2000,
+      "rule": "cover",
+      "scenes": 64,
+      "scenes_at_least_as_good": 48,
+      "session": "claudepts4"
+    },
+    {
+      "k": 10,
+      "mean_best_iou_difference": 0.08791824153645833,
+      "n": 2000,
+      "rule": "first",
+      "scenes": 64,
+      "scenes_at_least_as_good": 48,
+      "session": "claudepts4"
+    },
+    {
+      "k": 10,
+      "mean_best_iou_difference": 0.08423972721354166,
+      "n": 2000,
+      "rule": "margin_r",
+      "scenes": 64,
+      "scenes_at_least_as_good": 48,
+      "session": "claudepts4"
+    },
+    {
+      "k": 2,
+      "mean_best_iou_difference": -0.04683138867187501,
+      "n": 8000,
+      "rule": "core",
+      "scenes": 64,
+      "scenes_at_least_as_good": 12,
+      "session": "claudepts4"
+    },
+    {
+      "k": 2,
+      "mean_best_iou_difference": 0.006681170572916659,
+      "n": 8000,
+      "rule": "cover",
+      "scenes": 64,
+      "scenes_at_least_as_good": 38,
+      "session": "claudepts4"
+    },
+    {
+      "k": 2,
+      "mean_best_iou_difference": 0.009958061848958331,
+      "n": 8000,
+      "rule": "first",
+      "scenes": 64,
+      "scenes_at_least_as_good": 44,
+      "session": "claudepts4"
+    },
+    {
+      "k": 2,
+      "mean_best_iou_difference": 0.008241921875000007,
+      "n": 8000,
+      "rule": "margin_r",
+      "scenes": 64,
+      "scenes_at_least_as_good": 41,
+      "session": "claudepts4"
+    },
+    {
+      "k": 3,
+      "mean_best_iou_difference": -0.04698740624999998,
+      "n": 8000,
+      "rule": "core",
+      "scenes": 64,
+      "scenes_at_least_as_good": 14,
+      "session": "claudepts4"
+    },
+    {
+      "k": 3,
+      "mean_best_iou_difference": 0.02611641145833335,
+      "n": 8000,
+      "rule": "cover",
+      "scenes": 64,
+      "scenes_at_least_as_good": 47,
+      "session": "claudepts4"
+    },
+    {
+      "k": 3,
+      "mean_best_iou_difference": 0.029785689453125014,
+      "n": 8000,
+      "rule": "first",
+      "scenes": 64,
+      "scenes_at_least_as_good": 48,
+      "session": "claudepts4"
+    },
+    {
+      "k": 3,
+      "mean_best_iou_difference": 0.02623606445312502,
+      "n": 8000,
+      "rule": "margin_r",
+      "scenes": 64,
+      "scenes_at_least_as_good": 47,
+      "session": "claudepts4"
+    },
+    {
+      "k": 5,
+      "mean_best_iou_difference": -0.03263324348958334,
+      "n": 8000,
+      "rule": "core",
+      "scenes": 64,
+      "scenes_at_least_as_good": 10,
+      "session": "claudepts4"
+    },
+    {
+      "k": 5,
+      "mean_best_iou_difference": 0.052212356119791664,
+      "n": 8000,
+      "rule": "cover",
+      "scenes": 64,
+      "scenes_at_least_as_good": 48,
+      "session": "claudepts4"
+    },
+    {
+      "k": 5,
+      "mean_best_iou_difference": 0.055223257812499996,
+      "n": 8000,
+      "rule": "first",
+      "scenes": 64,
+      "scenes_at_least_as_good": 48,
+      "session": "claudepts4"
+    },
+    {
+      "k": 5,
+      "mean_best_iou_difference": 0.050012927083333325,
+      "n": 8000,
+      "rule": "margin_r",
+      "scenes": 64,
+      "scenes_at_least_as_good": 48,
+      "session": "claudepts4"
+    },
+    {
+      "k": 10,
+      "mean_best_iou_difference": -0.017230117187499994,
+      "n": 8000,
+      "rule": "core",
+      "scenes": 64,
+      "scenes_at_least_as_good": 11,
+      "session": "claudepts4"
+    },
+    {
+      "k": 10,
+      "mean_best_iou_difference": 0.08277781966145834,
+      "n": 8000,
+      "rule": "cover",
+      "scenes": 64,
+      "scenes_at_least_as_good": 48,
+      "session": "claudepts4"
+    },
+    {
+      "k": 10,
+      "mean_best_iou_difference": 0.08423371549479168,
+      "n": 8000,
+      "rule": "first",
+      "scenes": 64,
+      "scenes_at_least_as_good": 48,
+      "session": "claudepts4"
+    },
+    {
+      "k": 10,
+      "mean_best_iou_difference": 0.07833365950520835,
+      "n": 8000,
+      "rule": "margin_r",
+      "scenes": 64,
+      "scenes_at_least_as_good": 48,
+      "session": "claudepts4"
+    },
+    {
+      "k": 2,
+      "mean_best_iou_difference": -0.04585561653645834,
+      "n": 2000,
+      "rule": "core",
+      "scenes": 64,
+      "scenes_at_least_as_good": 13,
+      "session": "claudepts6"
+    },
+    {
+      "k": 2,
+      "mean_best_iou_difference": 0.01116989518229167,
+      "n": 2000,
+      "rule": "cover",
+      "scenes": 64,
+      "scenes_at_least_as_good": 43,
+      "session": "claudepts6"
+    },
+    {
+      "k": 2,
+      "mean_best_iou_difference": 0.014170142578125001,
+      "n": 2000,
+      "rule": "first",
+      "scenes": 64,
+      "scenes_at_least_as_good": 45,
+      "session": "claudepts6"
+    },
+    {
+      "k": 2,
+      "mean_best_iou_difference": 0.012758853515624991,
+      "n": 2000,
+      "rule": "margin_r",
+      "scenes": 64,
+      "scenes_at_least_as_good": 47,
+      "session": "claudepts6"
+    },
+    {
+      "k": 3,
+      "mean_best_iou_difference": -0.04330610221354166,
+      "n": 2000,
+      "rule": "core",
+      "scenes": 64,
+      "scenes_at_least_as_good": 17,
+      "session": "claudepts6"
+    },
+    {
+      "k": 3,
+      "mean_best_iou_difference": 0.031993893880208325,
+      "n": 2000,
+      "rule": "cover",
+      "scenes": 64,
+      "scenes_at_least_as_good": 46,
+      "session": "claudepts6"
+    },
+    {
+      "k": 3,
+      "mean_best_iou_difference": 0.03558536458333332,
+      "n": 2000,
+      "rule": "first",
+      "scenes": 64,
+      "scenes_at_least_as_good": 47,
+      "session": "claudepts6"
+    },
+    {
+      "k": 3,
+      "mean_best_iou_difference": 0.03289775260416666,
+      "n": 2000,
+      "rule": "margin_r",
+      "scenes": 64,
+      "scenes_at_least_as_good": 47,
+      "session": "claudepts6"
+    },
+    {
+      "k": 5,
+      "mean_best_iou_difference": -0.02892344596354166,
+      "n": 2000,
+      "rule": "core",
+      "scenes": 64,
+      "scenes_at_least_as_good": 18,
+      "session": "claudepts6"
+    },
+    {
+      "k": 5,
+      "mean_best_iou_difference": 0.06113846549479167,
+      "n": 2000,
+      "rule": "cover",
+      "scenes": 64,
+      "scenes_at_least_as_good": 48,
+      "session": "claudepts6"
+    },
+    {
+      "k": 5,
+      "mean_best_iou_difference": 0.06326784375,
+      "n": 2000,
+      "rule": "first",
+      "scenes": 64,
+      "scenes_at_least_as_good": 48,
+      "session": "claudepts6"
+    },
+    {
+      "k": 5,
+      "mean_best_iou_difference": 0.05930218489583333,
+      "n": 2000,
+      "rule": "margin_r",
+      "scenes": 64,
+      "scenes_at_least_as_good": 48,
+      "session": "claudepts6"
+    },
+    {
+      "k": 10,
+      "mean_best_iou_difference": -0.015272503255208337,
+      "n": 2000,
+      "rule": "core",
+      "scenes": 64,
+      "scenes_at_least_as_good": 12,
+      "session": "claudepts6"
+    },
+    {
+      "k": 10,
+      "mean_best_iou_difference": 0.08684439583333331,
+      "n": 2000,
+      "rule": "cover",
+      "scenes": 64,
+      "scenes_at_least_as_good": 48,
+      "session": "claudepts6"
+    },
+    {
+      "k": 10,
+      "mean_best_iou_difference": 0.08791824153645833,
+      "n": 2000,
+      "rule": "first",
+      "scenes": 64,
+      "scenes_at_least_as_good": 48,
+      "session": "claudepts6"
+    },
+    {
+      "k": 10,
+      "mean_best_iou_difference": 0.08423972721354166,
+      "n": 2000,
+      "rule": "margin_r",
+      "scenes": 64,
+      "scenes_at_least_as_good": 48,
+      "session": "claudepts6"
+    },
+    {
+      "k": 2,
+      "mean_best_iou_difference": -0.04683138867187501,
+      "n": 8000,
+      "rule": "core",
+      "scenes": 64,
+      "scenes_at_least_as_good": 12,
+      "session": "claudepts6"
+    },
+    {
+      "k": 2,
+      "mean_best_iou_difference": 0.006681170572916659,
+      "n": 8000,
+      "rule": "cover",
+      "scenes": 64,
+      "scenes_at_least_as_good": 38,
+      "session": "claudepts6"
+    },
+    {
+      "k": 2,
+      "mean_best_iou_difference": 0.009958061848958331,
+      "n": 8000,
+      "rule": "first",
+      "scenes": 64,
+      "scenes_at_least_as_good": 44,
+      "session": "claudepts6"
+    },
+    {
+      "k": 2,
+      "mean_best_iou_difference": 0.008241921875000007,
+      "n": 8000,
+      "rule": "margin_r",
+      "scenes": 64,
+      "scenes_at_least_as_good": 41,
+      "session": "claudepts6"
+    },
+    {
+      "k": 3,
+      "mean_best_iou_difference": -0.04698740624999998,
+      "n": 8000,
+      "rule": "core",
+      "scenes": 64,
+      "scenes_at_least_as_good": 14,
+      "session": "claudepts6"
+    },
+    {
+      "k": 3,
+      "mean_best_iou_difference": 0.02611641145833335,
+      "n": 8000,
+      "rule": "cover",
+      "scenes": 64,
+      "scenes_at_least_as_good": 47,
+      "session": "claudepts6"
+    },
+    {
+      "k": 3,
+      "mean_best_iou_difference": 0.029785689453125014,
+      "n": 8000,
+      "rule": "first",
+      "scenes": 64,
+      "scenes_at_least_as_good": 48,
+      "session": "claudepts6"
+    },
+    {
+      "k": 3,
+      "mean_best_iou_difference": 0.02623606445312502,
+      "n": 8000,
+      "rule": "margin_r",
+      "scenes": 64,
+      "scenes_at_least_as_good": 47,
+      "session": "claudepts6"
+    },
+    {
+      "k": 5,
+      "mean_best_iou_difference": -0.03263324348958334,
+      "n": 8000,
+      "rule": "core",
+      "scenes": 64,
+      "scenes_at_least_as_good": 10,
+      "session": "claudepts6"
+    },
+    {
+      "k": 5,
+      "mean_best_iou_difference": 0.052212356119791664,
+      "n": 8000,
+      "rule": "cover",
+      "scenes": 64,
+      "scenes_at_least_as_good": 48,
+      "session": "claudepts6"
+    },
+    {
+      "k": 5,
+      "mean_best_iou_difference": 0.055223257812499996,
+      "n": 8000,
+      "rule": "first",
+      "scenes": 64,
+      "scenes_at_least_as_good": 48,
+      "session": "claudepts6"
+    },
+    {
+      "k": 5,
+      "mean_best_iou_difference": 0.050012927083333325,
+      "n": 8000,
+      "rule": "margin_r",
+      "scenes": 64,
+      "scenes_at_least_as_good": 48,
+      "session": "claudepts6"
+    },
+    {
+      "k": 10,
+      "mean_best_iou_difference": -0.017230117187499994,
+      "n": 8000,
+      "rule": "core",
+      "scenes": 64,
+      "scenes_at_least_as_good": 11,
+      "session": "claudepts6"
+    },
+    {
+      "k": 10,
+      "mean_best_iou_difference": 0.08277781966145834,
+      "n": 8000,
+      "rule": "cover",
+      "scenes": 64,
+      "scenes_at_least_as_good": 48,
+      "session": "claudepts6"
+    },
+    {
+      "k": 10,
+      "mean_best_iou_difference": 0.08423371549479168,
+      "n": 8000,
+      "rule": "first",
+      "scenes": 64,
+      "scenes_at_least_as_good": 48,
+      "session": "claudepts6"
+    },
+    {
+      "k": 10,
+      "mean_best_iou_difference": 0.07833365950520835,
+      "n": 8000,
+      "rule": "margin_r",
+      "scenes": 64,
+      "scenes_at_least_as_good": 48,
+      "session": "claudepts6"
+    }
+  ],
+  "inputs_sha256": {
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/README.md": "066412771f77f00a00a6263397c4181a7fcf74920cc633500081c8d7f63181d9",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/SHA256SUMS": "34c23ffae8f25a21d0a1c528c24f9d2dfab446a129dacd2b8a8f100ac4f1d3e5",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/notes_F/fork_A_NOTES.md": "7505e5bd75f7c5aeddbe661d2b032a04c38fa4547eee72315ca81ab01d4cf19d",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/notes_F/fork_B_NOTES.md": "fad936624839f4cc8858e7775b3881bbc29092a985de80f760caeca1b671ab5d",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/notes_F/fork_C_NOTES.md": "2d3c1bd46cf1c4dd606c88000c7ea910dd8ca508dd1a54447ad5a44f6b82e83c",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/notes_F/fork_D_NOTES.md": "6870c6b757fc772eb1807610d85852758f865c3505c12e64d4acfd7818da7632",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/rapports/A_these_et_objet.md": "f7da211da4fe69b84a16c54d034bfc20a95e848f722817abc70518ed004592c4",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/rapports/B_contrat_et_preuves.md": "3aedc81b60e5dd35f6fd2ad3fb8f4aa464af31edd10da23880855d16bb95c69b",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/rapports/C_catalogue_index_gpu.md": "033bcc4f06c0748113020b7ff76fca23b82d61caf97b57f888b0540b81ea9beb",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/rapports/D_tour_et_v10.md": "708aa7800ed638df1caa159f3b92bcc491e9faef63cde3e2db581cbf1d7ae949",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/rapports/E_sorties_hdbscan_applications.md": "33d5299f1c8971c97b730c9262e3b89d61aab5d6904aa8ef5fe74f7bd7e7fc2c",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/rapports/F_lignee_v2_v10.md": "e036b0dd487877545989a2235fb11097159c2a6caae2881b716fb595df3e21c8",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/rapports/G_verification_locale.md": "2f21ab132426c83ea843fd99362039edb7330652957aaf6cd451cc6e47c54350",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/rapports/H_chiffres_qualification_mesure.md": "5910f12104e8c18d8c7be0f7dc98be98b49a5aaef7985a9e92eecae5e34ad1e2",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/A/e5.py": "bd0b6075eba2b6b1f5eaafc96ac3947bb815b80887e2a30c2c15e10bef7d63c0",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/A/gab.py": "f5de6f50c2da562bd07c8006b1e4daa81de0c1f85ca7ce7d6ffe903852d51861",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/A/mass91.py": "2511c4e868bb7f28ae7e1768d9626689415760f3ff829c715279605b19e7d581",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/A/meb.py": "cdb6f0d01cc555ee1b49ae47c88541b463b87ec53e14ae31aa3401537721d78e",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/A/six.py": "78621f94184ee57323c8eed1897fb2c78fc2ed958c52c254610b44944ba05242",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/B/check_math.json": "3559a3a5664ca2f86214e598ef91801174575a6b81cfb4b959ef3f8ada8f453e",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/B/circle_roles.py": "fc3e670eb3e20bb0c05b66587f4e72f27b0ae7f6d0709db1d060269fa348adba",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/B/f3.json": "4ae1ee463a50e05f31079af20849342bd01e7e616f6a359f1b3b252b0b1d2e0b",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/B/leaves80.json": "9fbddf85749a7b57ea0ba588230410e69939e5b8ec5bc92fc4a3e7b073fbf3f4",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/B/locks.json": "ee802c16230d917bd9e233e93a7997c5e36cc43786b6361918f77da5fffaea10",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/B/mutant_list.txt": "3966a2c7a293987b2a0bb56e32c96e858b1520befa3048a234f9af67fdc38dfb",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/B/mutants.out": "d6fcde320c425d31c0a51f692a1aa6b23bd13666b406bd19dcfeb6a95f9d3633",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/B/poly_check.out": "fdd2690d062bbe6bd412936e157933e5515f6d0eccdc2e305bfb5d5b946c31ab",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/B/proj_O.out": "190ec20f96591f6459ffafe1b2690516d30024e391e27008902703aeda0768e5",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/B/ref_fast.out": "0aa76085612663e9bc4b244136b94ebe9100d16bd6dae496e04108815251e6a1",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/B/ref_fast.time": "1244e08508daa59d1642177befe3d5ac4ef6ca69c13389980f18f793e986eedc",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/B/ref_fast_O.out": "8cabe0e7a63ea86b3d4c9b6552480233155292a324ea159909b902458b701b37",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/B/ref_fast_split.out": "284dcd3e9d8cd93cff819ae1e2ccda60d5b423c149c73885d9649a520a685d58",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/B/root_guard.json": "faf136b8fdad85aca2e78a9f500facc81d72e2275b961babfeb2c2e7a3fc2920",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/B/run_mutants.sh": "2fdecff018c74fab1c67f475755f39e9701909151b77ea89825b68c0a0bd8a5d",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/B/run_opt.sh": "dafe99a2d49ab1ee55bbdc4e70794d000b4c9e5af50d891efa5a7c33919d3e82",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/B/run_ref.sh": "3d5dc19bf6048fed4ade1988385364698aea4687a6ef42f9e481ff06755d9100",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/B/spv2_translation.py": "86da0730384b751a8f5dfa6ce1047bfcf642520063d08ff493f979b3c4dbd890",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/B/sstar_circle.py": "415453789c66c41f5175f59f4c66737092e4d92ce0381371010f2cc02cdea773",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/B/supports.out": "e8ddf7d78059a33acbdb84e42f7929d6ac769bd2caf87b0a5d22197e7f25aebd",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/B/supports_O.out": "51dab0985db5bee70c4776ad1e7471bc0f44574f8cb1ac4edb83d69023f6da85",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/B/supports_prim.out": "4fb647778b7fa71ae82460d18ec8a71a6b1228118fcecc8dbdd2e972eb4313b5",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/D/find_k10.py": "dba00f780866b1641078485edfd51878cbe3384f5ab56c360089ae15f2e74efe",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/D/pipe.py": "540c2936cd56b6cb80f62d9ad1f18ba748722053e4aaccfcae076d22a8e2f25c",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/E/recompute_points_g4.py": "22a7073e58abf869b4dd0edf82aa696a263dbbc5c4044c605ee19a9cea3ffff6",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/E/recount_bouts_e1.py": "567a28131be3871f72f4c72107108162fa22e07bcc75417c1e998488cc71373f",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/H/aa_phase.py": "04756ae93b0b0bc4e25a1de69bf4278383679217442098fd67841f8ef24b90d6",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/H/boot.py": "a232683c9f808d99b4eb4e9b05a8e8c7949c23f7fa24c126720a08c51f6560a2",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/H/boot_out.json": "ad94e5ad5b969091f875bc909d22f0eb4cdeec9b30c0b68794a842fb9a8c5792",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/H/boot_out.txt": "58fccd8098f63900829a719059febb88cad3d8cd58cf79850b9d4f99cf4c33f0",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/H/first_take.py": "1a54cd96a83f1c7c59590ce23f4ed5ab31b2511f37eed40eacb854964765d1ed",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/H/inventory.py": "d225c6f3c1551393bdfce3cc22a76fce37972aa19718d501a385a8a005f35a05",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/H/levers.py": "b13d27abd3e014407b73c0b4b2612a630fb2e7749d1480235bd4da4a89020b5d",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/H/levers_out.json": "5fa20e7aec85495370842a64c4eddf335546882651a7e61fe316dc968554e965",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/H/levers_out.txt": "ff26a51ded4df8009540fc2d2a827903884fa1920927c8d1a3e9412d64473971",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/H/perm.py": "6478e660d105cfb71ddba810ef14f1805cb66c30d70b69febdc2a904aa88b076",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/H/perm_out.json": "0917b073172854c14d6e9e45a154fbbfc3b2b675d1166a77b1f6ae44c1c6692a",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/H/perm_out.txt": "5daf152cb71ef1b7b95a5a1a8f27a6e8269f6eb84cb6f94266924126269e99d9",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/H/position.py": "1be88b5cf8e764595a17ba0044d8cf857f2f59335162be4b934490f2b889c029",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/H/power.py": "d6dd5987ab57ffd5fab7d65ffd8abd00b43092622e120638acaa7598d219f3e8",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/H/power_out.txt": "8da884e5ff4949e3fa2a68cf5b2953995d439135b94f7a5546b1fff38e6b12fc",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/H/robust.py": "5f47f2df044635c4c39eb3f796db7a529c0b267d14d9e74c1a3e68b2d3bcd2d9",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/H/robust_out.txt": "e4ea62f21372cb2e08f4d3f9fba2d686f2c785e6339c1d3f0d78536d9f1b538c",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/scripts/H/warm.py": "8ba1372206feceae47fb2fc62573bce011b1920f0c4cedd883cb36d4135edd27",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/cli/full_ng00_k10.stderr": "802f5022fff20e9084acc4987af1b9f1a832015945030f7190658a44556cd063",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/cli/full_ng00_k10.stdout": "54143d5c1ca9c1f66cb67b69b4e8a6e977039e975cf23cee61d57fa7eab20b4a",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/cli/full_ng00_k10_manifeste.json": "41cf379c59d99aabec0112cc1347c77e63cc554a11aa6f4bd575f14e8286d220",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/cli/full_ng00_k5.stderr": "94a7e5acd845ea54b812ed75ee42511958cafc6f54c91c89c8a57aac0d989a99",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/cli/full_ng00_k5.stdout": "9b883bf9c9725dc8a46dd57fd00cad4625c19326f3ceb314035b75acd688c4ca",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/cli/full_ng00_k5_manifeste.json": "aabd6491db9904bca6c4a6fed47a6b6a10e4a5376a8a88861ed1e63818c3dda5",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/cli/plat_ng00_k5.stderr": "33f9cd64c75ff96bdeb935b45d1fc5b9587bd10c681f4d5d940a6ca10f644e7d",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/cli/plat_ng00_k5.stdout": "39fe2cbdfd58f2fbdf3d01bc1c0691c746304df556652cd0209eb04e99e10500",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/cli/plat_ng00_k5_manifeste.json": "aefd87d65b0831319d4614065d9d82c088d14e83103e1c4d58b9bc83a0cb5d03",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/cli/points_ng00_k5.stderr": "3fa872b0c01691e97d8f46c767c73a59ae91878428dc843005faf3e8782d3c10",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/cli/points_ng00_k5.stdout": "76b19a52ef91efadc135456ab7e13bd63eff95a1c77c53eb3f83aa351084e4d7",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/cli/points_ng00_k5_manifeste.json": "363ffdb549fb1bb38fbe102ee68124c65a4bb9cd91be5db309f303670826fa21",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/cli/supports_ng00_k5.stderr": "c46cfc4e8c7a9fb7939ac4c80600457621c87aaaa7d5de37516ddba946bf47ce",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/cli/supports_ng00_k5.stdout": "e31d6ab3c4786e911dd2ba80da0d63bdf8a92bcd04b4c1de098c0766c1b13246",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/cli/supports_ng00_k5_manifeste.json": "c544ce72ba95cf5ab99c82107b9080f5b33034bbe62f58c1d2c45934e5f19797",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/empreintes/records_u18.jsonl": "2b8e83afa0ad13fc85cd5acde8657586dfd8eaebc012f3dd0951c1e6769031bc",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/empreintes/records_u21.jsonl": "26a8d7e3cc5619a8f9ab93923f8993a6295f602cb68bcb5af26bd27faeca6518",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/empreintes/records_u21_extra.jsonl": "2d2c54e2dcfc75d03d09857d1c1b709a183d9ac9102e03c9971052705fcc6505",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/empreintes/records_warm.jsonl": "4b56943ff0984b52e6f91122cd6246b1b5d9db39ad3d16e69898cba5dc16b50a",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/empreintes/semantic_ng00.log": "daae1659a08fdbc629bc5b3906d05d7ca58ede7ec381ac10c02896d6a3d2e8cc",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/empreintes/semantic_u8000.log": "de77ea56eee51d982a1c7477c444afe5bbba14c83f5937b8f26ad793928fd71f",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/journaux/build_u18.log": "e0c47cde074f823907cfd68f524888f502647d14378667b95f8fb24ca5d3cd19",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/journaux/build_u21.log": "8886eca4ce5961549f01741d4480e43ecea956098eba9ddca2a6575d5bc69d5f",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/journaux/check_docs.log": "f9a76f0dad5be17d86f41967eee9ca63bae4ae9f0a7ec11a5bf4117af8350ae9",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/journaux/check_poly.log": "f5e951fe3405c2646ffd5978c3d88f646979a075f9566a033acb97d5dbbf6a4f",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/journaux/configure_ref.log": "8f536b167070a16929f876687dcc3180ee8fdac840d625e6caaa0960f630b6e5",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/journaux/configure_u18.log": "5023d3405362790649c23e4d71d2492ba856a7f0fe9fca85522f9f6613071ea1",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/journaux/configure_u21.log": "b1f81e8d4b3133d28e20b5c81edecb71e6a6c0efd193ab664dd8960c28dd7063",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/journaux/ctest_campaign_rerun.log": "f5a8553ae36337e08df7e211ace030e790f407336203f7705ce561fe40c9947f",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/journaux/ctest_diffv10.log": "ac894f6239de75c0ce55366151b7f2c5db3fc88d3b9ae866076539894e3717bd",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/journaux/ctest_lidar.log": "1f844a327610aca56abc1e4f568900519985ec209ae715ae8283a33ffdadf642",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/journaux/ctest_main.log": "9ccf6ef5279b0f7c9656306faaf07ff34187dab01490c4fe7ec77dbaa97792ba",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/journaux/full_campaign_direct.log": "89857959750f6ecba35a418f07bdf480bc2a921d8e0fedf1317e8376e181cbf5",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/journaux/imports_nus.log": "5b75c85fc2af18e8ff08be13efab69f4b61846fc882208ba4d05b9409b968f5c",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/journaux/v10_build.log": "0a74112cd5f0803bcd360e864be18f27db0830f4c7fde06842108edafe52f97f",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/journaux/v10_configure.log": "fad043d5b557c13f519348c8f7f9ff4484869c44d1c16dfedaba779b0d4b39c6",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/outils/imports_nus.py": "0cb97fa138d7271909e3366888ce3f1c95b39da8e562530a787dae3bfca494ab",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/outils/run_probe.py": "9fac47cb0d56fd1e7dd03d7295662d76274e79a561cbad0eb720c89a51013e65",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/outils/semantic.py": "f28e01ea9090f5a2a8cba587a2e671ebcfd7fdcfc49bb49fb7b4889e83db1ca3",
+    "morsehgp3D_v11/receipts/audit_geant_v11_20261007/verification_locale/python/reference_S.log": "bf4ea85735cc06b3f9d2a02e70bd802b1939b1b316daba878a1678d97f6e7826",
+    "morsehgp3D_v11/receipts/developpement_20261003/points_g4/sessions/claudepts4/results.tar.gz": "0d99afadd5b5c5cfdc8952274aaa3217b065e0b2e15fd963f00afde34dee6f9b",
+    "morsehgp3D_v11/receipts/developpement_20261003/points_g4/sessions/claudepts6/results.tar.gz": "7de09fd998274443f01e0813d542495b85e509833fe76713ae66a763529e107d",
+    "morsehgp3D_v11/receipts/developpement_20261004/e1_sortie_plate/etude/etude_table.json": "92ecf5fcff35d4367ddf3e169e1edfad1dc320f4d32ae43ca232ca5073afcfb5",
+    "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu2/gpu_k5_report.json": "69c20d2cd33f5693faa77d9ab51429d66a4db290f3ac0bdf8b17797e99c30132",
+    "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu3/gpu_k10_leaf24_report.json": "332bc3ec64674e1ac9831b9b03053b39efd559760005708c487265089f4299b9",
+    "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu3/gpu_k10_report.json": "d133a60f2d816a58b89df0af59d970cd713e620820e896da5ee0336b162a6c99",
+    "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu3/gpu_k5_report.json": "36a08f46c5b3979cbe6728fdfbd16aa664ac4edf0fa2014ad0c484bc9bc08a5d",
+    "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu4/gpu_k10_leaf24_report.json": "ffd012ef61765222d7fb187256c194f48327adda845a21f3d038be68392ab042",
+    "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu4/gpu_k10_leaf32_report.json": "5c950964c5f8ea3fc33dd08c88f9dc4c65ab16bfa6b9d145caf3022424344f69",
+    "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu4/gpu_k5_leaf24_report.json": "906aa2b9883eac2a936932f793249b92683ee4c34e194381e66aa4036918fd0a",
+    "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu4/gpu_k5_report.json": "ceb94c62519e82c1bf03a0dd49d0381bb1de40de4b14d68e2b12b360a94258dc",
+    "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu5/gpu_k10_report.json": "c2d3a67c64aa8957f9586b97b469decb23e522ee70f788cda2e0d00d06060b8e",
+    "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu5/gpu_k5_report.json": "5a2b81cb359b177c59e9c3ca087995b616fd314ba6f7c9bb5f9eb1eded58bf27",
+    "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu6/gpu_k10_report.json": "d4bda87e23acba4cb235ea4f16257b3270ec59c82e2af42601be1a54080979e5",
+    "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu6/gpu_k5_report.json": "2c021dbee8c3250d83c73bbfbf65a00d5c67b60f88b6dc233e545c5eb152890f",
+    "morsehgp3D_v11/receipts/developpement_20261004/mesures_g4_ab8_diag1/sessions/claudeab8/ab_report.json": "4dd71edc64bb3f5e5a3de263dd9fc5207a2a2c081dc3b8ac6a1c3c9d54a54cde",
+    "morsehgp3D_v11/receipts/developpement_20261004/mesures_g4_ab8_diag1/sessions/claudediag1/ab_report.json": "0b77b22853192e72fab8b0b46d6e295e322a34423ccd573a49abaf71a6eeafcc",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/README.md": "98ebbfb6c5f37de6f36b722433e50decc36046825c66a3ec7975fa28c9e697f5",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/SHA256SUMS": "2a29b20c8dd534613d0b952ae51ab5e43d9d2c1c0309ddcdfebe8e5f41884012",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefina2/launch.json": "1f432cb332de09bded2e961a3369023f1b003496179be4a45fece695f1b89eec",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefina2/matrix_summary.json": "d6623760128f76eae3699daae227e888fadab8707f8e354721096e0becac794e",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefina2/receipt.json": "2d716c0f0c27d2fe7d56f7c2f38bad4b4d08b00be78a3a20177477698ae49436",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefina2/result_bits21.json": "93bc19f209df6a6f65173e4025e2e89e319be0de06f5a7586fdd8cd9134281de",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefina2/result_bits24.json": "74ff3f4a05de82fd98553c0e203ce31aee16169499954d4ee4ba0dc872637864",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefina2/result_gcc_release.json": "e3b34b4883fc46f64dc5b4f391864cf0787c12c5fd195e89a04189cd6e1d9287",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefina2/result_poison.json": "1e9c3f36ab6747736fcae3bce7ee7aae40b5014e38c1609f36d4be8f383ac825",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefinb/launch.json": "d6db280b1c38a1672dc9d4d5c9e21df243fcd60f805c50405952865f0de09a92",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefinb/matrix_summary.json": "a37a7f23de3979f81bd2bbadc737b732d428585cd1707040e0dd1e669fb50f2e",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefinb/receipt.json": "198a52113784bc5b01c8f763c354b47ed9f805648877e6b34eeb343ad1bb894b",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefinb/result_gcc_asan_ubsan.json": "0cce324382bb8112204c52ab6468e53316b419f9b4e025bf6073fb204605984b",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefinb/result_gcc_tsan.json": "48c25a9c522758dc5372c1934af44833b7b3844b8584e241898a2284a3882f05",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefinl/launch.json": "1aa64ed70d0f77a73926ae4f8db3599df69c324374f59c3f7fb8c5c5f7d0bbfe",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefinl/matrix_summary.json": "42d1ac78c8bd5a3d86b7dae4de2154dcd44ea2aa4bc8457f0d7debf66d2822f4",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefinl/receipt.json": "804675855249286a4dab091c6183c527fdd92010b1d2c06cc1e559dae30064dc",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefinl/result_release_long.json": "3c6bbc5d01ed16b470e08a2786c2d1d0cf4342a0dbf9905ca97f350f4d61864e",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefinm/launch.json": "2aa3c44bc2d4fbe91dad11bb050f7afd20de6cc5b1cae25b364ba508b3480048",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefinm/matrix_summary.json": "287bd83a2bc9fc8fa80ca91eb8eb710c196e91febedc4fea423dbd1a676334ae",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefinm/receipt.json": "71fb62f64689a99691f86fd0fc2f0c715d57330816c8dae102ff354ea2434634",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefinm/result_mutants.json": "67dd6418347b141a0437d0909e8342a9adbc092c28d1fefb0521e7195309194e",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefinmesure/launch.json": "cc2ecb6bff5f6415b5df4045e663f3aaf43758d4fa996b443dc531e7b626ce9a",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefinmesure/receipt.json": "46061521da1ebc1069ba74e897d1dae8fb4ca88faec8ef18fc9cda89b33e7027",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefinmesure/sorties_g4.json": "510e9d33449b686974c9b2df27e4ca9b057ae9fea64de5b5783b1a3dc809d5c8",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefinmesure/stdout_000_mesure_l2.txt": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefinmesure/stdout_001_supports_w48_ng02.txt": "a3cedb38cc5d2d821e6ef99d8bd0542b9b17bd2f2084543974b143c27c6dfc8f",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefinmesure/stdout_002_supports_w48_ng00.txt": "3a60ca57bfc9f9d3c2b579ffd9e7c6fe3a3bc56c2fd2f5e0518b03b23bce76ee",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefinp10/launch.json": "5d9223ec25b47b5eb4d409d2ff9a7b48a9bddd4cdd2f1c37d9484e9e8c0d3fa1",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefinp10/receipt.json": "3785031a70dc53838087215fd3879410e02325014a6902c66d3d0c104046efa8",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefinp10/stdout_000_head_python_synthetique.txt": "5f3daf789bae0956f801fa93a91f523ebb09b3a8986ccff9ab25cf473c329933",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefinp10/stdout_001_head_python_ng00.txt": "716fa4a1a737a8da99e48020978cf42876f989d081ffdbc3ce8ecc3a8715851b",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefinp10/stdout_002_head_python_ng01.txt": "4bd06fceb3003738700b1e13b8bad0ff37dc42fce056c31cb2c955cd19ec0396",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefinp10/stdout_003_head_python_ng02.txt": "34f722437d405c0a257b3567aa725ca933615d0922b9e47163e5150b2489cef0",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefinp9/launch.json": "74ddd4e14c087ab96c149d0769d9f8ab4f17c59f310f710efb953896b38ca60c",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefinp9/receipt.json": "8ebaf46b6a2159c742745c66d041fe4320bafbe2e30d1436bbd0ee2e2d05fa1f",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefinp9/stdout_000_points_python_synthetique.txt": "a054013e7b17373b00e004c2559666f0042ad8221cc86b474e6fb1b305fbd186",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefinp9/stdout_001_points_python_ng00.txt": "0fcf861dbdd8e0eeb2370ed8f246b7b823fc63877e745a2b8ff853e8adcb47ba",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefinp9/stdout_002_points_python_ng01.txt": "35dbe90092fa61a19832fe4e6efd91cafd36a1026fee6a8e75c13c3e26f45da5",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefinp9/stdout_003_points_python_ng02.txt": "968693123b5252cf3fd1a76d605ca40f347fc88ccf7ab665f2639a93f25e5e16",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefins/launch.json": "823add37ec232872002f4a7f0bb7b2287d968c5b223852c31bf88e216cfa74fb",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefins/matrix_summary.json": "6b5e15737a4201d10d4d06a060746a8f970b697cfbc7685ef07f1b072ac69ae4",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefins/receipt.json": "83ad0b3439c1a934a8db57e41f584f07e991c00cfb05d438a449fdca577cdb43",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefins/result_gcc_asan_lidar_ng01_ng02.json": "36488bf8e1c5a4767725af4d1bb5d4d0f652728412d24b7d95cbce31fc9fc9f7",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefins/result_gcc_asan_scale16000.json": "e11b7cf362a8ac93598c83407b23810aebfe3016c91f2a5cb79ffd78c5cee786",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefins/result_gcc_asan_scale32000.json": "6c8a32a9f1628af2dfa54f51bc23c5c3c39c6adebc62dd02492b23721f487ce1",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefins/result_gcc_asan_scale_rest.json": "d9efb9fa97ea04c5bc6db010bade1db8f739f2b6e2c8c8c427081ea9155e6450",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefins/result_gcc_tsan_lidar_ng00.json": "e01487aecd2640614f4bcc038c7a7488494f9db615e7c948319089bf5562dc0a",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefins/result_gcc_tsan_lidar_ng01.json": "cce28412fc9ba5be75fe075a8c7243f26a61c96aacdf88f08f9d4612e1458c53",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefins/result_gcc_tsan_lidar_ng02.json": "d04cfe19baf3d17f0cf38f05352b689f3cb293a054b6781e17c9620b544d22f8",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefins/result_gcc_tsan_scale16000.json": "c32c8a36a8fa626702eeaab107f5edbf6141e45d5e0afca0edd38ff9d1281725",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefins/result_gcc_tsan_scale32000.json": "6ecec369676e8deced178c1feb644c09f37f9ecc94f34bf0f1bb00f0bc6847d5",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefins/result_gcc_tsan_scale32000_cli.json": "fbea2c69a3032ca412b34947ac44d1e1c37066546117aa0384dd853cbb2e519b",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/claudefins/result_gcc_tsan_scale_rest.json": "0462e4f73b330719e19c6ee99ee5bc97d8a2a9c9b41a9e3c4db47ce685402784",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/clauderepriser1/launch.json": "80cd00613fece0207a3dbb5853614ca2f3247d3a4be2d760306a8f527a775814",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/clauderepriser1/matrix_summary.json": "267f7c11e49bb9e9c9b04cfb269a3219bb5a41f5de4a4de8a421fe73d927d2cb",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/clauderepriser1/receipt.json": "4b9555c579ee8ac1455c51dd63605edca093d77490017dd138fd919ad9d72210",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/clauderepriser1/result_bits21.json": "8ce073345b499bd8573550edbf809ed06f9c8f869ac948cc6c8273114a9814b3",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/clauderepriser1/result_bits24.json": "3c8e91da9c9da7f60e8bc669bae1f34191b3e063d154011dffa44f3fd5ef0683",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/clauderepriser1/result_gcc_release.json": "98b843f285c9399fb70a8e8e51d160ab3e4688fd815e5e14c0beb6ab537b1f88",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/clauderepriser1/result_poison.json": "7f5bba695c20988e9c9bd4064a2ef0d4be9ad7324f23759a4259073a6d900537",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/clauderepriser2/launch.json": "d3f07593fde16f11ea5035adbcd12842822f2586db8909724799db2163e2f31f",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/clauderepriser2/matrix_summary.json": "f3bcda36ea487ec8131c70983bddf9c55a6739845a69363b128c2d8dab5ad01f",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/clauderepriser2/receipt.json": "621bca3ab0281e6f745fb993c7c33445c5d77e9744d2aa67b6ddf38f1a3c714f",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/clauderepriser2/result_bits21_echelle_gros.json": "675271180e8c014c9ac8df8e0910dab7eb05da2cfae38c754505641b6b456943",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/clauderepriser2/result_bits21_echelle_reste.json": "fa43e1e67988432b258a072bedea8b2ed62565d7ff80d9b2ce3bc8672138db56",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/clauderepriser2/result_bits24_echelle_gros.json": "90c04936450c22924a33c0ee5d66bd49458575d9e7df96de658831b4000bc4c1",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/clauderepriser2/result_bits24_echelle_reste.json": "1990e5a9e7321ab058e54967d56ca2aa063e116c09a0514e1a0499c4b12fa0e5",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/clauderepriser2/result_gcc_release_echelle_gros.json": "563b1fe396e3fa0a3a7969330d02d782509cf8c201e4bf09c3f2b7620028caf9",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/clauderepriser2/result_gcc_release_echelle_reste.json": "88942783e5944e0805901bed3c39ef9780faed4b9583c66eaf7ad98d6339cd03",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/clauderepriser2/result_poison_echelle_gros.json": "9e71e6994f59fa858dca9f74e52ddb770a8acf4b437da1f604fbc34aa961d4ae",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/clauderepriser2/result_poison_echelle_reste.json": "4a6012c806422519de1d237cf086f4e9756c0841559daaf17676b3d44a386602",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/clauderepriser3/launch.json": "fadd888b4723369bdf49f6d7d8fbfe227d1f120316104c40635424c274bc5fd9",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/clauderepriser3/matrix_summary.json": "f4e5d30909219b33d7f30282562129fb40e332eef7b728e55be0f6c1968abf85",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/clauderepriser3/receipt.json": "b876d52c07a2e3913a0fa8f95a87b39bf626657642d07398130eea24b42f942a",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/clauderepriser3/result_mutants.json": "be3b12b4155c63cebaa49f45bec5ff74188bc2e84baa1ea2d3db2b787c2589cc",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/clauderepriser4/launch.json": "6e8d7a8003974b5949d418338321395d9a9d5816ea49d371a724d485c8db9cc2",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/clauderepriser4/matrix_summary.json": "816a8aecb16445a1e21b764769bf39b1722f63a996edf6df4c294de9994c141f",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/clauderepriser4/receipt.json": "c798eeef87926e4d828293bf8b94d497eb03061e48922f6d4573da0268596de3",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/clauderepriser4/result_gcc_asan_lidar_ng01_ng02.json": "dbf3d32ea51c5605601ea5478e5c709d00db0a5ca806828efc7b33a74c05c372",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/clauderepriser4/result_gcc_asan_scale16000.json": "68228b4824162354cb89749d59977033b23ce9a18a5a560c5e81c456535df245",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/clauderepriser4/result_gcc_asan_scale32000.json": "bc85facc69d3cf2380b9b68ab33e782d037f2a064db3aec8639d4bef441d1ca5",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/clauderepriser4/result_gcc_asan_scale_rest.json": "d7efbc46b74b20bc93112576d717eb2b81ff4d3cdaa9b13437a27d1f6c4c701d",
+    "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/summary.json": "09cbaff0a01252bb3aeb8a42016847903c2f70ffeb794826902cbeede0517dcd",
+    "morsehgp3D_v11/receipts/developpement_20261006/constantes_pas_descente/claudev3c/gpu_ab_report_k10_24_gpu.json": "9e643f17bbf3457d092fd352bd3f59851da4f447ab79deacb9bd51ae4627bf4f",
+    "morsehgp3D_v11/receipts/developpement_20261006/constantes_pas_descente/claudev3c/gpu_ab_report_k5_16_cpu.json": "a98c2c960bbbf5e5670bce405162f521d2cdd2c03aa77516e25bd29ee4bc55c5",
+    "morsehgp3D_v11/receipts/developpement_20261006/constantes_pas_descente/claudev3c/gpu_ab_report_k5_24_gpu.json": "fc850b2f609117e976a0667453d1619ebe2a28f15a8702d2c91d52d8311f5a4a",
+    "morsehgp3D_v11/receipts/developpement_20261006/coop1_feuille_cooperative/gpu_ab_report_k10.json": "474e3fe43fd172dcb18ee94cb0e4b12a362b1fe8762f41aa9dd3686e61efc0b9",
+    "morsehgp3D_v11/receipts/developpement_20261006/coop1_feuille_cooperative/gpu_ab_report_k5.json": "4787834c2aa4ea70fee7a1919284012cf5cb5252d9880a6566d4a9fce2dde844",
+    "morsehgp3D_v11/receipts/developpement_20261006/coop2_correction_mesuree/gpu_ab_report_k10.json": "dda73bdb4c4dbe98c1800f41f94bdfd6fc13c801f8143bb6a7c4a1ac45aa7f7d",
+    "morsehgp3D_v11/receipts/developpement_20261006/coop2_correction_mesuree/gpu_ab_report_k5.json": "f4e3a21f388bbc4ed54814b8d20322b1ac891d662feee602fefa3738f348a411",
+    "morsehgp3D_v11/receipts/developpement_20261006/coop3_reconvergence/gpu_ab_report_k10.json": "28096901a078b46cc639f46e969e84a00b6f75018e0ade8c1bf4bf3b2eb1993e",
+    "morsehgp3D_v11/receipts/developpement_20261006/coop3_reconvergence/gpu_ab_report_k5.json": "7ad30845a759cca2e38c92da698d7115e18afdf072377c6c85b89f58913c7254",
+    "morsehgp3D_v11/receipts/developpement_20261006/domain_diagnostic/claudedom1/gpu_ab_report_k10_24.json": "260ab01b4e68d0ee0d1e8a501bd1988e0f0ae4d84ac5d0dc4eab78124d49874e",
+    "morsehgp3D_v11/receipts/developpement_20261006/domain_diagnostic/claudedom1/gpu_ab_report_k5_16.json": "99e1bcba07f25b4cd594c645b1c717bfe3c2bc9d8b749c9bec3cefd9158f40a8",
+    "morsehgp3D_v11/receipts/developpement_20261006/domain_diagnostic/claudedom1/gpu_ab_report_k5_24.json": "b8387a161f20eae50cb357c020eccdf88d1c945682f4b9d7c89a35a7f59b5f5b",
+    "morsehgp3D_v11/receipts/developpement_20261006/j2memo_rangs_locaux/gpu_ab_report_k10.json": "07d2e25a7eac011eca24eed8600629c83bbce2a5b44deaf92965a0abd24e7d01",
+    "morsehgp3D_v11/receipts/developpement_20261006/j2memo_rangs_locaux/gpu_ab_report_k5.json": "d217c03bfa43c7df8655dfc298634dd7ea6d25cd2276333b2436e549a35ceb05",
+    "morsehgp3D_v11/receipts/developpement_20261006/l4_recouvrement/gpu_ab_report_k10.json": "eac9115ef7b28cddcbcde0283b84036f42b574e5d2b8dd86db921724a77e34f8",
+    "morsehgp3D_v11/receipts/developpement_20261006/l4_recouvrement/gpu_ab_report_k5.json": "522452ebbc23a2ca18b965eaaaad6b2b8acdf533dcbcc55434367186c7c36b24",
+    "morsehgp3D_v11/receipts/developpement_20261006/lot_partage/claudesplit1/gpu_ab_report_k10_24.json": "10a6566d83ee47f0963cf6d27994604800d073ef68e701ee96e0e4ebf61b4d21",
+    "morsehgp3D_v11/receipts/developpement_20261006/lot_partage/claudesplit1/gpu_ab_report_k5_24.json": "d4f608aa624e7929a64dd8f02bbcb0c9bb3029c92208a881f0b71f7fa6936188",
+    "morsehgp3D_v11/receipts/developpement_20261006/lot_partage_confirmation/claudesplitconf/gpu_ab_report_k10_24.json": "fee0fbb4df4d6fcb7c9cf2ffdbb6bf38380f6cf2bca812c38ba302a5233474b5",
+    "morsehgp3D_v11/receipts/developpement_20261006/lot_partage_confirmation/claudesplitconf/gpu_ab_report_k5_24.json": "83a013b847842c608221db78a53d06ec449e8f3fef58cc1504b85bf214c43eb6",
+    "morsehgp3D_v11/receipts/developpement_20261006/n1_ab/ab_report.json": "6fa6ee054aa474d19d30cd92f2796ff25e34b6fde407caba2f4d02ac3c6801dc",
+    "morsehgp3D_v11/receipts/developpement_20261006/o1_placement/claudeo1place/gpu_ab_report_k5_16_cpu.json": "979e47fd79645928a4f6a2a1efa3227b0f4d09e4537b72c1a359fb3152035b4e",
+    "morsehgp3D_v11/receipts/developpement_20261006/o1_placement/claudeo1place/gpu_ab_report_k5_24_gpu.json": "a46281fd70a6f13c3cf6c328d8213d1fc500455702f6bef10b0eefe9804fb262",
+    "morsehgp3D_v11/receipts/developpement_20261006/o1_placement/claudeo1place2/gpu_ab_report_k5_16_cpu.json": "973fb5216d800f9e5f67b24f32788bc98fa0631d3c7fb8606a3cfd9fcba6c5ad",
+    "morsehgp3D_v11/receipts/developpement_20261006/o1_placement/claudeo1place2/gpu_ab_report_k5_24_gpu.json": "cce8223af97c50e8c9e6e13eb761fd4f5911c3a8cc61235bbdf643a267f5a205",
+    "morsehgp3D_v11/receipts/developpement_20261006/o1_placement/claudeo1place3/gpu_ab_report_k5_16_cpu.json": "0c0eb0b1f6a3833437f4bfde491e946af65b297cf5a652e6d2f328d9f5692492",
+    "morsehgp3D_v11/receipts/developpement_20261006/o1_placement/claudeo1place3/gpu_ab_report_k5_24_gpu.json": "5853a5fe523659b52318deff2b3f1622365a3142b15b9fd5b9b621563d9f582e",
+    "morsehgp3D_v11/receipts/developpement_20261006/o2_publieur/claudeo2a/gpu_ab_report_k10_24_gpu.json": "d9a0e66e7f81fa6a980de5923d5748bcd9a82766f54732fbb3c3a4cbca5e47a9",
+    "morsehgp3D_v11/receipts/developpement_20261006/o2_publieur/claudeo2a/gpu_ab_report_k5_16_cpu.json": "fa74e206b4dca82c18b862a0627d48240b954a3190c3f61f74cdd4b01d8edf18",
+    "morsehgp3D_v11/receipts/developpement_20261006/o2_publieur/claudeo2a/gpu_ab_report_k5_24_gpu.json": "ea3ff009679365ac847c56f185cfa112108b8e8fb925f09c2f1de0b4d711f4c0",
+    "morsehgp3D_v11/receipts/developpement_20261006/reservoir3_chemin_chaud/gpu_ab_report_k10.json": "e9b3228d5fe270aa7206e3f9ca8d911248af76bfaef8cc7dbe4e3edc1cfc7a9c",
+    "morsehgp3D_v11/receipts/developpement_20261006/reservoir3_chemin_chaud/gpu_ab_report_k5.json": "715a825369bb5ea9e42d45743ec50bbb25249eeb08d34317c485acc673621724",
+    "morsehgp3D_v11/receipts/developpement_20261006/reservoir3_chemin_chaud/gpu_ab_report_k5_feuilles24.json": "72604d95c5e7833ee4e2c4c3342eb2c314a34c7472eb337de9b71b42b36b5040",
+    "morsehgp3D_v11/receipts/developpement_20261006/reservoir_cases_chainees/gpu_ab_report_k10.json": "f2dbd219b0cc307895ec279ca380021c45e604d42f32a0ffa3499c09fdfd5724",
+    "morsehgp3D_v11/receipts/developpement_20261006/reservoir_cases_chainees/gpu_ab_report_k5.json": "041630eb56933897ceb90f50fd5aa230dd2ffc1188741bb89698ada7b9432160",
+    "morsehgp3D_v11/receipts/developpement_20261006/v3_census/claudev3ab/gpu_ab_report_k10_24_gpu.json": "849bcb2d147b769b2e12165fd93f27fb8a63c3e79d5204515af30c3d13ca16ed",
+    "morsehgp3D_v11/receipts/developpement_20261006/v3_census/claudev3ab/gpu_ab_report_k5_16_cpu.json": "ec84baf17b7b4b979b36fdc36a1cd45a507a82773b77e37189bb26b11235d75f",
+    "morsehgp3D_v11/receipts/developpement_20261006/v3_census/claudev3ab/gpu_ab_report_k5_24_gpu.json": "99998495934ebee10afd43d64f9230d5bb32df59549582c8642b16802da3138d",
+    "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/README.md": "af5e2119c67c7ac89724abf8c45d003661106d99316bdf36bc960cdcc6998a3e",
+    "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/SHA256SUMS": "dee874825dd03a3a5f54d5ac7d706c0b7052130d1e29d9cf0e218f81d7d976d9",
+    "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/claudev3q1/launch.json": "71e97652a850b8168d1030703339780f9254fd2d06368f03594af000e6f8ef09",
+    "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/claudev3q1/matrix_summary.json": "d25fc4cdc9d20432dfa7c570a466d32e8fe14f0bea19e08156764e363cae011f",
+    "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/claudev3q1/mut_catalogue.json": "1a016d917b21b53a63836448890b5e7a4a4d0cacde83da7ed3d2b4a1f85684fa",
+    "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/claudev3q1/mut_catalogue.txt": "e86b88c7c5a926db07f6c3afc47883c32c2341b64f5919268d5852697eb9f35e",
+    "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/claudev3q1/mut_head.json": "06688ca3cdde41c33324d915fa4720f18f9de7176f8793502a2aa61892e656e5",
+    "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/claudev3q1/mut_head.txt": "31b7e1fbc5cd978c6b8c708636176df1f62358f0c5ddf5fa1c8f173bf9de4c32",
+    "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/claudev3q1/plan.json": "3fa19b15b9de034192a91370e5d250e8c38f15c3e6eb39f08ad19075dd23b454",
+    "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/claudev3q1/receipt.json": "2c34ff2d516c983e476e63d616affe358770b770e9c208fd8ec7881dcac7186e",
+    "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/claudev3q1/result_bits21.json": "c44395f56b748857c4dd67d5a31a11bfa9f13eef61053a04bbc752fcb6fdc51f",
+    "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/claudev3q1/result_bits24.json": "821bde9219a3830777203a2dd136b60a34191a6133be213f5704b829110f9ea2",
+    "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/claudev3q1/result_gcc_asan_ubsan.json": "50604d12abf33a09d644c5dc5b970268a15d91bde7621fb9ddfa445553af79f2",
+    "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/claudev3q1/result_gcc_release.json": "5d1362be8ad32a52ea8a7ed4eb5e6d6d33d2244c1aad2fb3bf509713eb6802d3",
+    "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/claudev3q2/launch.json": "a87246d0924761f0dc4e9f7840a2409869bfe7ac0ddc47e486686a0edcde483c",
+    "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/claudev3q2/matrix_summary.json": "53992c64220932cf6e69414e31ef9da7ce83844a32c877b5f27a178ce999f434",
+    "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/claudev3q2/plan.json": "ea985b2e2015715b668ad9a6e2534763e384252eacbe689c0dae7c3f73a09ad4",
+    "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/claudev3q2/receipt.json": "79e3fb69319f420166ad6701082748efa65d2b9b2de37534409a1ee7cd8fea76",
+    "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/claudev3q2/result_bits21_echelle_gros.json": "e5b90f882761d8fe1628ac8ba8580c616d212017f4fe0b2c7c155909645c1e41",
+    "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/claudev3q2/result_bits21_echelle_reste.json": "e7680ceef2272d8b3b76f33708a17b6dc15f323d73a7a5d5fd1c37b079f608eb",
+    "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/claudev3q2/result_bits24_echelle_gros.json": "997a52155b6b06ef7fc47e3d4918084c4b2c70354e2bb8a6085a6a83d6c15285",
+    "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/claudev3q2/result_bits24_echelle_reste.json": "59c380549dc629eb4d50e8ab0a1d0dcf2802e3e35faaf3b7b7dddbae23160a17",
+    "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/claudev3q2/result_gcc_release_echelle_gros.json": "02f076e7def50429d5640024c3da02e8965f17db420d655ae7cec4e84030b74b",
+    "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/claudev3q2/result_gcc_release_echelle_reste.json": "e4b5499920b147efdc767a2ea53fb400cfc16173914494cf35ed11fcf25b2aec",
+    "morsehgp3D_v11/receipts/developpement_20261006/wfgpu1_leviers/session/gpu_ab_report_k10_24.json": "5febb40348ca8ea43685bf6b8f8e1e74bc85b81cf5154ccf891eeec8a422969e",
+    "morsehgp3D_v11/receipts/developpement_20261006/wfgpu1_leviers/session/gpu_ab_report_k5_16.json": "f7d3c73347e44043eab449f3e0011f2241f695a77150ec0d63e36806678c9fcc",
+    "morsehgp3D_v11/receipts/developpement_20261006/wfgpu1_leviers/session/gpu_ab_report_k5_24.json": "ec5c014c77ce796ace8926b7d3c4cb279d02874e0f173c5f7b0d15f70102be90",
+    "morsehgp3D_v11/receipts/developpement_20261007/annonces_publieurs/claudeann1/gpu_ab_report_ab_k10_24_gpu.json": "6c282e549726d9592026caa5fe16e751003c8bf6bc2178aa322a57ab9a3fadf7",
+    "morsehgp3D_v11/receipts/developpement_20261007/annonces_publieurs/claudeann1/gpu_ab_report_ab_k5_16_cpu.json": "eabe9e49c9e573c1395001967c48b0a822df4e05f2bd2198f642a8a58656a3e6",
+    "morsehgp3D_v11/receipts/developpement_20261007/annonces_publieurs/claudeann1/gpu_ab_report_ab_k5_24_gpu.json": "6c0efef74dca935a0f549ebe8a43e13b87a7536a4298250303492777706ba2ea",
+    "morsehgp3D_v11/receipts/developpement_20261007/cache_blocs/claudecache1/gpu_ab_report_ab_k10_24_gpu.json": "51b33d98b56dd7db14e0bb67b2fb9bf670d1a81ff12d1d351e5ee7fb12be0c05",
+    "morsehgp3D_v11/receipts/developpement_20261007/cache_blocs/claudecache1/gpu_ab_report_ab_k5_16_cpu.json": "73f8a76a5be5acfb3fccdf4e8ee18016ee34b392894555848acb8d37bcee5b2f",
+    "morsehgp3D_v11/receipts/developpement_20261007/cache_blocs/claudecache1/gpu_ab_report_ab_k5_24_gpu.json": "3ef161df73fd23c0dac631132a5e8e3182b94d10f0bb17ee15fd6f8a60348a12",
+    "morsehgp3D_v11/receipts/developpement_20261007/cohortes_tranches/claudebirths1/gpu_ab_report_ab_k10_24_gpu.json": "eec4d11fe332f0a1d0b2cdda4f687bdf176d2df1f5cb3c88cbabff9fd6c0a9cc",
+    "morsehgp3D_v11/receipts/developpement_20261007/cohortes_tranches/claudebirths1/gpu_ab_report_ab_k5_16_cpu.json": "d36e0ff493a6c9ffe7783382d45d563c904c3434ed7932bb36b2e8c52af92ac5",
+    "morsehgp3D_v11/receipts/developpement_20261007/cohortes_tranches/claudebirths1/gpu_ab_report_ab_k5_24_gpu.json": "f307a81515ffae1542eb54a26f97d75c6f475c0e15c6b3b197a18f5a27eede2e",
+    "morsehgp3D_v11/receipts/developpement_20261007/diagnostic_domaine/claudediag1/gpu_ab_report_diag_k5_16_cpu.json": "1396384066af80fdf01be145847c015f47564bf0b5a803186860518bf521e800",
+    "morsehgp3D_v11/receipts/developpement_20261007/diagnostic_domaine/claudediag1/gpu_ab_report_diag_k5_24_gpu.json": "eca5676d40ab988c92122a00e1e0ce74cec8ce4bf8242fcc969317b469a11c3b",
+    "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/README.md": "4ade3edb1df2b4e7e4b56451feb3dd4f26d9540ace240e6b3f45d59091921392",
+    "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/SHA256SUMS": "20450748509d1bf888c9265c9507540361e8e474958834b62ff0f018bf7f6cdc",
+    "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/claudeg1/gpu_ab_report_ab_k10_24_gpu.json": "14b5a2b4c8458716bd16577d4b2b013151bfcefd079332ac10ce801bfff2ab3b",
+    "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/claudeg1/gpu_ab_report_ab_k5_16_cpu.json": "52c3a1d1329fb8442a0dfecb157366361246c0433ff7ae3520e4d54352118a56",
+    "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/claudeg1/gpu_ab_report_ab_k5_24_gpu.json": "40c141831cdce70f5764814b6b5cadfff1d1d9014b95b72b586f5b7ea9044b28",
+    "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/claudeg1/judge.py": "2810ed44f945e950218c7118ec6d78cc3100c84473e18f2867e5ccb638bfbf1a",
+    "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/claudeg1/launch.json": "88096640fb19f86449a0a387552b980f01678003678e2c32896bbfb4ba899b5e",
+    "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/claudeg1/matrix_stdout.txt": "22eb269f51a2b17cddd55ab857e907ed140c5fd8bddec83f21daf593ac44290e",
+    "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/claudeg1/matrix_summary.json": "4078c875058195242110eb73a7ce4ecae46e63cbc2a9d6361793a75aba3cf8de",
+    "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/claudeg1/mut_catalogue.txt": "a625a3aa83554f42d32d517d30121769c061942b9f4e7c8e38781706063053d1",
+    "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/claudeg1/plan.json": "70d1ff0d24e3ba9cb3d1f2d98df7fb9ba6d757c1a73e7d084dc1e47a16d2cc17",
+    "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/claudeg1/receipt.json": "20ebaad91efb5336612e013e9c08ab4a53dc8fc4172dc4dcefd37d2be5b4064e",
+    "morsehgp3D_v11/receipts/developpement_20261007/frontiere_tranches/claudefront1/gpu_ab_report_ab_k10_24_gpu.json": "3335d3d0cfd71301443fc6df73132865c401aa0146673eb3373f8a59350738cf",
+    "morsehgp3D_v11/receipts/developpement_20261007/frontiere_tranches/claudefront1/gpu_ab_report_ab_k5_16_cpu.json": "9daaa48fcf0fd0698c1d531a729eb058354210df8d494d0dca64a96a7b8d8f83",
+    "morsehgp3D_v11/receipts/developpement_20261007/frontiere_tranches/claudefront1/gpu_ab_report_ab_k5_24_gpu.json": "451f2a734027bf97d041c21a6769c52a64ddccc9694b50e58fa595511c07e88f",
+    "morsehgp3D_v11/receipts/developpement_20261007/prechargement_graines/claudepref1/gpu_ab_report_ab_k10_24_gpu.json": "c67feb9ce492da7f138cce606386332e5cb93c76b19a9740c7575e5f6ba6febd",
+    "morsehgp3D_v11/receipts/developpement_20261007/prechargement_graines/claudepref1/gpu_ab_report_ab_k5_16_cpu.json": "83c753d90e1a8a159935ba1ac50f1237e623ea3713392c8a62b7241bf52f9598",
+    "morsehgp3D_v11/receipts/developpement_20261007/prechargement_graines/claudepref1/gpu_ab_report_ab_k5_24_gpu.json": "40e94d65a7dca6a2f269bb8e978bf744341671c852642192ef1b749c0025bf11",
+    "morsehgp3D_v11/receipts/developpement_20261007/prechargements_publieurs/claudepref2/gpu_ab_report_ab_k10_24_gpu.json": "f21d3296d779c2c8ef11b838a5d8ca06fb8a88c5617e71a84c4381c4f1fa7229",
+    "morsehgp3D_v11/receipts/developpement_20261007/prechargements_publieurs/claudepref2/gpu_ab_report_ab_k5_16_cpu.json": "cfb2d5e11588f9bbbc0f5bb3f3288b3a0928697c2828f5ef64d615fa4c8b9565",
+    "morsehgp3D_v11/receipts/developpement_20261007/prechargements_publieurs/claudepref2/gpu_ab_report_ab_k5_24_gpu.json": "5f18486ae0760f997d54d582a704cbfdff6b5e5ca2cde0f2cccde9914e71463f",
+    "morsehgp3D_v11/receipts/developpement_20261007/retention_tas/claudetas1/gpu_ab_report_ab_k10_24_gpu.json": "8834aa89909f30745c079716ca2628d9d0e4ed0eabd612edd31c6684d523c9f8",
+    "morsehgp3D_v11/receipts/developpement_20261007/retention_tas/claudetas1/gpu_ab_report_ab_k5_16_cpu.json": "56474e6904dc5a66c906ee56ce14061e24ce0223a17ca3412e79c4378dcda618",
+    "morsehgp3D_v11/receipts/developpement_20261007/retention_tas/claudetas1/gpu_ab_report_ab_k5_24_gpu.json": "8c75bd5dee3228e3dac778e247cf1fc4642c04955cdab7fdb49d78c80d562e50",
+    "morsehgp3D_v11/receipts/developpement_20261007/thp_exploration/claudethp1/gpu_ab_report_ab_k10_24_gpu.json": "930050856be97cff7b62c89d1b13fbe96ba158ca91c11e20b97212c9eaadf137",
+    "morsehgp3D_v11/receipts/developpement_20261007/thp_exploration/claudethp1/gpu_ab_report_ab_k5_16_cpu.json": "3d8885a21f2f02d98242ca1025cfe23fd9f547698ada2ca5cd2e2211b53d0377",
+    "morsehgp3D_v11/receipts/developpement_20261007/thp_exploration/claudethp1/gpu_ab_report_ab_k5_24_gpu.json": "6fd7966b4822a71c174959a904592d49e6079d2586a588e746fbb363272b5dee",
+    "morsehgp3D_v11/tests/mutants/api.json": "6afcbd72c3679413066311ff9dcd5d623ec5c3f0717da0deadfe3fca4e07674e",
+    "morsehgp3D_v11/tests/mutants/catalogue.json": "b0c2a4325f0ae2e862ba861d4cd3ccfa38754bc0ff0dbc5d84620fcac53d938c",
+    "morsehgp3D_v11/tests/mutants/cli.json": "b553ec9120b2a2e26d391097eceeb37f38d7b1a851a502cf065904ae76251630",
+    "morsehgp3D_v11/tests/mutants/cloud.json": "a5c652eac13075e49ce61ce1038af603fe859d1f353f338ead8d47024fa77b3b",
+    "morsehgp3D_v11/tests/mutants/core.json": "7a79c8aa03699fab866edf3f2791e3b815a596996e9aec71fe8410eb28ce7338",
+    "morsehgp3D_v11/tests/mutants/head.json": "e6817b4dacc5420d495f6e37381911da6f746904d7135703eeb80578aa0e51cb",
+    "morsehgp3D_v11/tests/mutants/index.json": "017a3842e9c5665d30d09ade65b1443514c8867913dfa4122f18103224459f89",
+    "morsehgp3D_v11/tests/mutants/io.json": "e65db98361afb0fbb25a6013a6315288ac8ebe3ac67d5699e44d33f512a8d2dd",
+    "morsehgp3D_v11/tests/mutants/num.json": "f684f481aecc26bfbd0df1f59ace863bad93318e62aae0a315119e1cf17c1f9d",
+    "morsehgp3D_v11/tests/mutants/points.json": "22acd15eec68311c7e3ffc290f2ea790f8e8f2dd36c97475f0678380a48cdfd9",
+    "morsehgp3D_v11/tests/mutants/sched.json": "77bef38960dd139ac8895474dd67ab3773dd5ba4a442265bf8deffb57d638d39",
+    "morsehgp3D_v11/tests/mutants/supports.json": "f4e60589b33f41e46533343fd21c06659902e8f266e67df3adc61a985b69dfe8",
+    "morsehgp3D_v11/tests/mutants/tower.json": "d443e12606a155e88a96d8cc140da9e3fdbd6f5a0260b6a623bf8c7c4c7be16b"
+  },
+  "mutant_manifest_counts": {
+    "api": 24,
+    "catalogue": 74,
+    "cli": 32,
+    "cloud": 16,
+    "core": 82,
+    "head": 12,
+    "index": 15,
+    "io": 22,
+    "num": 61,
+    "points": 6,
+    "sched": 8,
+    "supports": 15,
+    "tower": 163
+  },
+  "qualification_union": [
+    {
+      "certified": true,
+      "commit": "38b76701b",
+      "configs": [
+        {
+          "failures": 6,
+          "name": "gcc_release",
+          "not_run": 8,
+          "seconds": 2100,
+          "status": "timeout",
+          "tests": {
+            "ctest_failed": null,
+            "ctest_total": null,
+            "failed": 6,
+            "not_run": 8,
+            "passed": 977,
+            "selected": 991
+          }
+        },
+        {
+          "failures": 0,
+          "name": "bits21",
+          "not_run": 11,
+          "seconds": 2100,
+          "status": "timeout",
+          "tests": {
+            "ctest_failed": null,
+            "ctest_total": null,
+            "failed": 0,
+            "not_run": 11,
+            "passed": 890,
+            "selected": 901
+          }
+        },
+        {
+          "failures": 6,
+          "name": "bits24",
+          "not_run": 11,
+          "seconds": 2100,
+          "status": "timeout",
+          "tests": {
+            "ctest_failed": null,
+            "ctest_total": null,
+            "failed": 6,
+            "not_run": 11,
+            "passed": 884,
+            "selected": 901
+          }
+        },
+        {
+          "failures": 0,
+          "name": "poison",
+          "not_run": 11,
+          "seconds": 2100,
+          "status": "timeout",
+          "tests": {
+            "ctest_failed": null,
+            "ctest_total": null,
+            "failed": 0,
+            "not_run": 11,
+            "passed": 891,
+            "selected": 902
+          }
+        }
+      ],
+      "session": "claudefina2",
+      "status": "failed_remote"
+    },
+    {
+      "certified": true,
+      "commit": "38b76701b",
+      "configs": [
+        {
+          "failures": 2,
+          "name": "mutants",
+          "not_run": 0,
+          "seconds": 1644,
+          "status": "failed",
+          "tests": {
+            "ctest_failed": 2,
+            "ctest_total": 39,
+            "failed": 2,
+            "not_run": 0,
+            "passed": 37,
+            "selected": 39
+          }
+        }
+      ],
+      "session": "claudefinm",
+      "status": "failed_remote"
+    },
+    {
+      "certified": true,
+      "commit": "38b76701b",
+      "configs": [
+        {
+          "failures": 1,
+          "name": "gcc_asan_scale32000",
+          "not_run": 0,
+          "seconds": 1425,
+          "status": "failed",
+          "tests": {
+            "ctest_failed": 1,
+            "ctest_total": 11,
+            "failed": 1,
+            "not_run": 0,
+            "passed": 10,
+            "selected": 11
+          }
+        },
+        {
+          "failures": 2,
+          "name": "gcc_asan_lidar_ng01_ng02",
+          "not_run": 0,
+          "seconds": 1499,
+          "status": "failed",
+          "tests": {
+            "ctest_failed": 2,
+            "ctest_total": 24,
+            "failed": 2,
+            "not_run": 0,
+            "passed": 22,
+            "selected": 24
+          }
+        },
+        {
+          "failures": 1,
+          "name": "gcc_asan_scale16000",
+          "not_run": 0,
+          "seconds": 836,
+          "status": "failed",
+          "tests": {
+            "ctest_failed": 1,
+            "ctest_total": 10,
+            "failed": 1,
+            "not_run": 0,
+            "passed": 9,
+            "selected": 10
+          }
+        },
+        {
+          "failures": 2,
+          "name": "gcc_asan_scale_rest",
+          "not_run": 0,
+          "seconds": 1519,
+          "status": "failed",
+          "tests": {
+            "ctest_failed": 2,
+            "ctest_total": 35,
+            "failed": 2,
+            "not_run": 0,
+            "passed": 33,
+            "selected": 35
+          }
+        },
+        {
+          "failures": 0,
+          "name": "gcc_tsan_scale32000_cli",
+          "not_run": 0,
+          "seconds": 900,
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 2,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 2,
+            "selected": 2
+          }
+        },
+        {
+          "failures": 0,
+          "name": "gcc_tsan_scale32000",
+          "not_run": 0,
+          "seconds": 2030,
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 9,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 9,
+            "selected": 9
+          }
+        },
+        {
+          "failures": 0,
+          "name": "gcc_tsan_lidar_ng00",
+          "not_run": 0,
+          "seconds": 1774,
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 13,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 13,
+            "selected": 13
+          }
+        },
+        {
+          "failures": 0,
+          "name": "gcc_tsan_lidar_ng01",
+          "not_run": 0,
+          "seconds": 1392,
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 12,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 12,
+            "selected": 12
+          }
+        },
+        {
+          "failures": 0,
+          "name": "gcc_tsan_lidar_ng02",
+          "not_run": 0,
+          "seconds": 1594,
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 12,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 12,
+            "selected": 12
+          }
+        },
+        {
+          "failures": 0,
+          "name": "gcc_tsan_scale16000",
+          "not_run": 0,
+          "seconds": 1398,
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 10,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 10,
+            "selected": 10
+          }
+        },
+        {
+          "failures": 0,
+          "name": "gcc_tsan_scale_rest",
+          "not_run": 0,
+          "seconds": 1413,
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 22,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 22,
+            "selected": 22
+          }
+        }
+      ],
+      "session": "claudefins",
+      "status": "failed_remote"
+    },
+    {
+      "certified": true,
+      "commit": "38b76701b",
+      "configs": [
+        {
+          "failures": 0,
+          "name": "gcc_asan_ubsan",
+          "not_run": 0,
+          "seconds": 280,
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 783,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 783,
+            "selected": 783
+          }
+        },
+        {
+          "failures": 0,
+          "name": "gcc_tsan",
+          "not_run": 0,
+          "seconds": 273,
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 783,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 783,
+            "selected": 783
+          }
+        }
+      ],
+      "session": "claudefinb",
+      "status": "completed"
+    },
+    {
+      "certified": true,
+      "commit": "38b76701b",
+      "configs": [
+        {
+          "failures": 0,
+          "name": "release_long",
+          "not_run": 6,
+          "seconds": 2100,
+          "status": "timeout",
+          "tests": {
+            "ctest_failed": null,
+            "ctest_total": null,
+            "failed": 0,
+            "not_run": 6,
+            "passed": 35,
+            "selected": 41
+          }
+        }
+      ],
+      "session": "claudefinl",
+      "status": "failed_remote"
+    },
+    {
+      "certified": true,
+      "commit": "38b76701b",
+      "configs": [],
+      "session": "claudefinp10",
+      "status": "completed"
+    },
+    {
+      "certified": true,
+      "commit": "38b76701b",
+      "configs": [],
+      "session": "claudefinp9",
+      "status": "completed"
+    },
+    {
+      "certified": true,
+      "commit": "38b76701b",
+      "configs": [],
+      "session": "claudefinmesure",
+      "status": "completed"
+    },
+    {
+      "certified": true,
+      "commit": "98a009550",
+      "configs": [
+        {
+          "failures": 0,
+          "name": "gcc_release",
+          "not_run": 0,
+          "seconds": 113,
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 873,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 873,
+            "selected": 873
+          }
+        },
+        {
+          "failures": 0,
+          "name": "bits21",
+          "not_run": 0,
+          "seconds": 257,
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 783,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 783,
+            "selected": 783
+          }
+        },
+        {
+          "failures": 0,
+          "name": "bits24",
+          "not_run": 0,
+          "seconds": 258,
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 783,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 783,
+            "selected": 783
+          }
+        },
+        {
+          "failures": 0,
+          "name": "poison",
+          "not_run": 0,
+          "seconds": 257,
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 784,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 784,
+            "selected": 784
+          }
+        }
+      ],
+      "session": "clauderepriser1",
+      "status": "completed"
+    },
+    {
+      "certified": true,
+      "commit": "98a009550",
+      "configs": [
+        {
+          "failures": 0,
+          "name": "gcc_release_echelle_gros",
+          "not_run": 0,
+          "seconds": 1403,
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 52,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 52,
+            "selected": 52
+          }
+        },
+        {
+          "failures": 0,
+          "name": "gcc_release_echelle_reste",
+          "not_run": 0,
+          "seconds": 1119,
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 66,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 66,
+            "selected": 66
+          }
+        },
+        {
+          "failures": 0,
+          "name": "bits21_echelle_gros",
+          "not_run": 0,
+          "seconds": 1438,
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 52,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 52,
+            "selected": 52
+          }
+        },
+        {
+          "failures": 0,
+          "name": "bits21_echelle_reste",
+          "not_run": 0,
+          "seconds": 1145,
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 66,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 66,
+            "selected": 66
+          }
+        },
+        {
+          "failures": 0,
+          "name": "bits24_echelle_gros",
+          "not_run": 0,
+          "seconds": 1455,
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 52,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 52,
+            "selected": 52
+          }
+        },
+        {
+          "failures": 0,
+          "name": "bits24_echelle_reste",
+          "not_run": 0,
+          "seconds": 1162,
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 66,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 66,
+            "selected": 66
+          }
+        },
+        {
+          "failures": 0,
+          "name": "poison_echelle_gros",
+          "not_run": 0,
+          "seconds": 1455,
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 52,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 52,
+            "selected": 52
+          }
+        },
+        {
+          "failures": 0,
+          "name": "poison_echelle_reste",
+          "not_run": 0,
+          "seconds": 1162,
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 66,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 66,
+            "selected": 66
+          }
+        }
+      ],
+      "session": "clauderepriser2",
+      "status": "completed"
+    },
+    {
+      "certified": true,
+      "commit": "98a009550",
+      "configs": [
+        {
+          "failures": 0,
+          "name": "mutants",
+          "not_run": 0,
+          "seconds": 1729,
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 39,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 39,
+            "selected": 39
+          }
+        }
+      ],
+      "session": "clauderepriser3",
+      "status": "completed"
+    },
+    {
+      "certified": true,
+      "commit": "98a009550",
+      "configs": [
+        {
+          "failures": 0,
+          "name": "gcc_asan_scale32000",
+          "not_run": 0,
+          "seconds": 1264,
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 11,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 11,
+            "selected": 11
+          }
+        },
+        {
+          "failures": 0,
+          "name": "gcc_asan_lidar_ng01_ng02",
+          "not_run": 0,
+          "seconds": 1329,
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 24,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 24,
+            "selected": 24
+          }
+        },
+        {
+          "failures": 0,
+          "name": "gcc_asan_scale16000",
+          "not_run": 0,
+          "seconds": 693,
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 10,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 10,
+            "selected": 10
+          }
+        },
+        {
+          "failures": 0,
+          "name": "gcc_asan_scale_rest",
+          "not_run": 0,
+          "seconds": 1368,
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 35,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 35,
+            "selected": 35
+          }
+        }
+      ],
+      "session": "clauderepriser4",
+      "status": "completed"
+    }
+  ],
+  "qualification_v3": [
+    {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "name": "bits21",
+      "source": "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/claudev3q1/result_bits21.json",
+      "status": "ok",
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 800,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 800,
+        "selected": 800
+      }
+    },
+    {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "name": "bits24",
+      "source": "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/claudev3q1/result_bits24.json",
+      "status": "ok",
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 800,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 800,
+        "selected": 800
+      }
+    },
+    {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_SANITIZE=ON",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "name": "gcc_asan_ubsan",
+      "source": "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/claudev3q1/result_gcc_asan_ubsan.json",
+      "status": "ok",
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 800,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 800,
+        "selected": 800
+      }
+    },
+    {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=18"
+      ],
+      "name": "gcc_release",
+      "source": "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/claudev3q1/result_gcc_release.json",
+      "status": "ok",
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 890,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 890,
+        "selected": 890
+      }
+    },
+    {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "name": "bits21_echelle_gros",
+      "source": "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/claudev3q2/result_bits21_echelle_gros.json",
+      "status": "ok",
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 52,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 52,
+        "selected": 52
+      }
+    },
+    {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "name": "bits21_echelle_reste",
+      "source": "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/claudev3q2/result_bits21_echelle_reste.json",
+      "status": "ok",
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 66,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 66,
+        "selected": 66
+      }
+    },
+    {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "name": "bits24_echelle_gros",
+      "source": "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/claudev3q2/result_bits24_echelle_gros.json",
+      "status": "ok",
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 52,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 52,
+        "selected": 52
+      }
+    },
+    {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "name": "bits24_echelle_reste",
+      "source": "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/claudev3q2/result_bits24_echelle_reste.json",
+      "status": "ok",
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 66,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 66,
+        "selected": 66
+      }
+    },
+    {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=18"
+      ],
+      "name": "gcc_release_echelle_gros",
+      "source": "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/claudev3q2/result_gcc_release_echelle_gros.json",
+      "status": "ok",
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 52,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 52,
+        "selected": 52
+      }
+    },
+    {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=18"
+      ],
+      "name": "gcc_release_echelle_reste",
+      "source": "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/claudev3q2/result_gcc_release_echelle_reste.json",
+      "status": "ok",
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 66,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 66,
+        "selected": 66
+      }
+    }
+  ],
+  "raw_clouds_read": false,
+  "release_poison_3695_recount": 3695,
+  "schema": "audit.v11.evidence.v1",
+  "sha256_manifests": [
+    {
+      "folder": "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/",
+      "mismatches": [],
+      "verified": 83
+    },
+    {
+      "folder": "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/",
+      "mismatches": [],
+      "verified": 23
+    },
+    {
+      "folder": "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/",
+      "mismatches": [],
+      "verified": 11
+    },
+    {
+      "folder": "morsehgp3D_v11/receipts/audit_geant_v11_20261007/",
+      "mismatches": [],
+      "verified": 102
+    }
+  ],
+  "snapshot": "33c2ae3c8b66d12ef5b2405f1b0f807d7e57aeae",
+  "source_diffs": [
+    {
+      "changed": [
+        "morsehgp3D_v11/bench/sorties_g4.py",
+        "morsehgp3D_v11/tests/api/tests.cmake",
+        "morsehgp3D_v11/tests/mutants/cli.json",
+        "morsehgp3D_v11/tools/g4_matrix.json"
+      ],
+      "engine_changed": [],
+      "from": "38b76701b",
+      "to": "98a009550"
+    },
+    {
+      "changed": [],
+      "engine_changed": [],
+      "from": "733912e65",
+      "to": "ac081a06f"
+    },
+    {
+      "changed": [],
+      "engine_changed": [],
+      "from": "ac081a06f",
+      "to": "33c2ae3c8b66d12ef5b2405f1b0f807d7e57aeae"
+    }
+  ]
+}

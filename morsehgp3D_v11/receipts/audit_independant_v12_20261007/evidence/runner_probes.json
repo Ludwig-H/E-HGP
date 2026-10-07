@@ -1,0 +1,458 @@
+{
+  "gcp_used": false,
+  "gpu_build_reuse": {
+    "build_log": [
+      {
+        "sha256": "5c575410305302b299401cc4f9088d7d529ad293d7f28d99b43a6e53fdd920db",
+        "step": "reuse"
+      }
+    ],
+    "nonexistent_source": true,
+    "reused_existing_file": true
+  },
+  "judge_cases": [
+    {
+      "adoption_printed": true,
+      "case": "valid_six_takes",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/annonces_publieurs/claudeann1/judge.py",
+      "last_line": "gm publieur5 0.100 (<= 0,90 : True) ; gm forest 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": false,
+      "stderr": "",
+      "warned_invalid": false
+    },
+    {
+      "adoption_printed": true,
+      "case": "valid_six_takes",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/annonces_publieurs/claudeann1/judge.py",
+      "last_line": "gm publieur5 0.100 (<= 0,90 : True) ; gm forest 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": true,
+      "stderr": "",
+      "warned_invalid": false
+    },
+    {
+      "adoption_printed": true,
+      "case": "valid_six_takes",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/cache_blocs/claudecache1/judge.py",
+      "last_line": "gm chaud 0.100 (<= 0,95 : True) ; gm froid 0.100 (<= 1,00 : True) ; verdict adopte",
+      "optimized": false,
+      "stderr": "",
+      "warned_invalid": false
+    },
+    {
+      "adoption_printed": true,
+      "case": "valid_six_takes",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/cache_blocs/claudecache1/judge.py",
+      "last_line": "gm chaud 0.100 (<= 0,95 : True) ; gm froid 0.100 (<= 1,00 : True) ; verdict adopte",
+      "optimized": true,
+      "stderr": "",
+      "warned_invalid": false
+    },
+    {
+      "adoption_printed": true,
+      "case": "valid_six_takes",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/cohortes_tranches/claudebirths1/judge.py",
+      "last_line": "gm naissances 0.100 (<= 0,80 : True) ; gm forest 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": false,
+      "stderr": "",
+      "warned_invalid": false
+    },
+    {
+      "adoption_printed": true,
+      "case": "valid_six_takes",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/cohortes_tranches/claudebirths1/judge.py",
+      "last_line": "gm naissances 0.100 (<= 0,80 : True) ; gm forest 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": true,
+      "stderr": "",
+      "warned_invalid": false
+    },
+    {
+      "adoption_printed": true,
+      "case": "valid_six_takes",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/claudeg1/judge.py",
+      "last_line": "gm passe+frontiere 0.100 (<= 0,85 : True) ; gm domain 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": false,
+      "stderr": "",
+      "warned_invalid": false
+    },
+    {
+      "adoption_printed": true,
+      "case": "valid_six_takes",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/claudeg1/judge.py",
+      "last_line": "gm passe+frontiere 0.100 (<= 0,85 : True) ; gm domain 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": true,
+      "stderr": "",
+      "warned_invalid": false
+    },
+    {
+      "adoption_printed": true,
+      "case": "valid_six_takes",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/frontiere_tranches/claudefront1/judge.py",
+      "last_line": "gm frontiere 0.100 (<= 0,80 : True) ; gm domain 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": false,
+      "stderr": "",
+      "warned_invalid": false
+    },
+    {
+      "adoption_printed": true,
+      "case": "valid_six_takes",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/frontiere_tranches/claudefront1/judge.py",
+      "last_line": "gm frontiere 0.100 (<= 0,80 : True) ; gm domain 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": true,
+      "stderr": "",
+      "warned_invalid": false
+    },
+    {
+      "adoption_printed": true,
+      "case": "valid_six_takes",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/prechargement_graines/claudepref1/judge.py",
+      "last_line": "gm cellules5 0.100 (<= 0,85 : True) ; gm forest 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": false,
+      "stderr": "",
+      "warned_invalid": false
+    },
+    {
+      "adoption_printed": true,
+      "case": "valid_six_takes",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/prechargement_graines/claudepref1/judge.py",
+      "last_line": "gm cellules5 0.100 (<= 0,85 : True) ; gm forest 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": true,
+      "stderr": "",
+      "warned_invalid": false
+    },
+    {
+      "adoption_printed": true,
+      "case": "valid_six_takes",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/prechargements_publieurs/claudepref2/judge.py",
+      "last_line": "gm cellules+clotures5 0.100 (<= 0,90 : True) ; gm forest 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": false,
+      "stderr": "",
+      "warned_invalid": false
+    },
+    {
+      "adoption_printed": true,
+      "case": "valid_six_takes",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/prechargements_publieurs/claudepref2/judge.py",
+      "last_line": "gm cellules+clotures5 0.100 (<= 0,90 : True) ; gm forest 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": true,
+      "stderr": "",
+      "warned_invalid": false
+    },
+    {
+      "adoption_printed": true,
+      "case": "invalid_benchmark_six_takes",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/annonces_publieurs/claudeann1/judge.py",
+      "last_line": "gm publieur5 0.100 (<= 0,90 : True) ; gm forest 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": false,
+      "stderr": "",
+      "warned_invalid": true
+    },
+    {
+      "adoption_printed": true,
+      "case": "invalid_benchmark_six_takes",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/annonces_publieurs/claudeann1/judge.py",
+      "last_line": "gm publieur5 0.100 (<= 0,90 : True) ; gm forest 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": true,
+      "stderr": "",
+      "warned_invalid": true
+    },
+    {
+      "adoption_printed": true,
+      "case": "invalid_benchmark_six_takes",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/cache_blocs/claudecache1/judge.py",
+      "last_line": "gm chaud 0.100 (<= 0,95 : True) ; gm froid 0.100 (<= 1,00 : True) ; verdict adopte",
+      "optimized": false,
+      "stderr": "",
+      "warned_invalid": true
+    },
+    {
+      "adoption_printed": true,
+      "case": "invalid_benchmark_six_takes",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/cache_blocs/claudecache1/judge.py",
+      "last_line": "gm chaud 0.100 (<= 0,95 : True) ; gm froid 0.100 (<= 1,00 : True) ; verdict adopte",
+      "optimized": true,
+      "stderr": "",
+      "warned_invalid": true
+    },
+    {
+      "adoption_printed": true,
+      "case": "invalid_benchmark_six_takes",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/cohortes_tranches/claudebirths1/judge.py",
+      "last_line": "gm naissances 0.100 (<= 0,80 : True) ; gm forest 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": false,
+      "stderr": "",
+      "warned_invalid": true
+    },
+    {
+      "adoption_printed": true,
+      "case": "invalid_benchmark_six_takes",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/cohortes_tranches/claudebirths1/judge.py",
+      "last_line": "gm naissances 0.100 (<= 0,80 : True) ; gm forest 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": true,
+      "stderr": "",
+      "warned_invalid": true
+    },
+    {
+      "adoption_printed": true,
+      "case": "invalid_benchmark_six_takes",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/claudeg1/judge.py",
+      "last_line": "gm passe+frontiere 0.100 (<= 0,85 : True) ; gm domain 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": false,
+      "stderr": "",
+      "warned_invalid": true
+    },
+    {
+      "adoption_printed": true,
+      "case": "invalid_benchmark_six_takes",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/claudeg1/judge.py",
+      "last_line": "gm passe+frontiere 0.100 (<= 0,85 : True) ; gm domain 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": true,
+      "stderr": "",
+      "warned_invalid": true
+    },
+    {
+      "adoption_printed": true,
+      "case": "invalid_benchmark_six_takes",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/frontiere_tranches/claudefront1/judge.py",
+      "last_line": "gm frontiere 0.100 (<= 0,80 : True) ; gm domain 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": false,
+      "stderr": "",
+      "warned_invalid": true
+    },
+    {
+      "adoption_printed": true,
+      "case": "invalid_benchmark_six_takes",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/frontiere_tranches/claudefront1/judge.py",
+      "last_line": "gm frontiere 0.100 (<= 0,80 : True) ; gm domain 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": true,
+      "stderr": "",
+      "warned_invalid": true
+    },
+    {
+      "adoption_printed": true,
+      "case": "invalid_benchmark_six_takes",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/prechargement_graines/claudepref1/judge.py",
+      "last_line": "gm cellules5 0.100 (<= 0,85 : True) ; gm forest 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": false,
+      "stderr": "",
+      "warned_invalid": true
+    },
+    {
+      "adoption_printed": true,
+      "case": "invalid_benchmark_six_takes",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/prechargement_graines/claudepref1/judge.py",
+      "last_line": "gm cellules5 0.100 (<= 0,85 : True) ; gm forest 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": true,
+      "stderr": "",
+      "warned_invalid": true
+    },
+    {
+      "adoption_printed": true,
+      "case": "invalid_benchmark_six_takes",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/prechargements_publieurs/claudepref2/judge.py",
+      "last_line": "gm cellules+clotures5 0.100 (<= 0,90 : True) ; gm forest 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": false,
+      "stderr": "",
+      "warned_invalid": true
+    },
+    {
+      "adoption_printed": true,
+      "case": "invalid_benchmark_six_takes",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/prechargements_publieurs/claudepref2/judge.py",
+      "last_line": "gm cellules+clotures5 0.100 (<= 0,90 : True) ; gm forest 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": true,
+      "stderr": "",
+      "warned_invalid": true
+    },
+    {
+      "adoption_printed": true,
+      "case": "only_one_take_instead_of_six",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/annonces_publieurs/claudeann1/judge.py",
+      "last_line": "gm publieur5 0.100 (<= 0,90 : True) ; gm forest 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": false,
+      "stderr": "",
+      "warned_invalid": false
+    },
+    {
+      "adoption_printed": true,
+      "case": "only_one_take_instead_of_six",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/annonces_publieurs/claudeann1/judge.py",
+      "last_line": "gm publieur5 0.100 (<= 0,90 : True) ; gm forest 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": true,
+      "stderr": "",
+      "warned_invalid": false
+    },
+    {
+      "adoption_printed": true,
+      "case": "only_one_take_instead_of_six",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/cache_blocs/claudecache1/judge.py",
+      "last_line": "gm chaud 0.100 (<= 0,95 : True) ; gm froid 0.100 (<= 1,00 : True) ; verdict adopte",
+      "optimized": false,
+      "stderr": "",
+      "warned_invalid": false
+    },
+    {
+      "adoption_printed": true,
+      "case": "only_one_take_instead_of_six",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/cache_blocs/claudecache1/judge.py",
+      "last_line": "gm chaud 0.100 (<= 0,95 : True) ; gm froid 0.100 (<= 1,00 : True) ; verdict adopte",
+      "optimized": true,
+      "stderr": "",
+      "warned_invalid": false
+    },
+    {
+      "adoption_printed": true,
+      "case": "only_one_take_instead_of_six",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/cohortes_tranches/claudebirths1/judge.py",
+      "last_line": "gm naissances 0.100 (<= 0,80 : True) ; gm forest 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": false,
+      "stderr": "",
+      "warned_invalid": false
+    },
+    {
+      "adoption_printed": true,
+      "case": "only_one_take_instead_of_six",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/cohortes_tranches/claudebirths1/judge.py",
+      "last_line": "gm naissances 0.100 (<= 0,80 : True) ; gm forest 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": true,
+      "stderr": "",
+      "warned_invalid": false
+    },
+    {
+      "adoption_printed": true,
+      "case": "only_one_take_instead_of_six",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/claudeg1/judge.py",
+      "last_line": "gm passe+frontiere 0.100 (<= 0,85 : True) ; gm domain 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": false,
+      "stderr": "",
+      "warned_invalid": false
+    },
+    {
+      "adoption_printed": true,
+      "case": "only_one_take_instead_of_six",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/claudeg1/judge.py",
+      "last_line": "gm passe+frontiere 0.100 (<= 0,85 : True) ; gm domain 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": true,
+      "stderr": "",
+      "warned_invalid": false
+    },
+    {
+      "adoption_printed": true,
+      "case": "only_one_take_instead_of_six",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/frontiere_tranches/claudefront1/judge.py",
+      "last_line": "gm frontiere 0.100 (<= 0,80 : True) ; gm domain 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": false,
+      "stderr": "",
+      "warned_invalid": false
+    },
+    {
+      "adoption_printed": true,
+      "case": "only_one_take_instead_of_six",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/frontiere_tranches/claudefront1/judge.py",
+      "last_line": "gm frontiere 0.100 (<= 0,80 : True) ; gm domain 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": true,
+      "stderr": "",
+      "warned_invalid": false
+    },
+    {
+      "adoption_printed": true,
+      "case": "only_one_take_instead_of_six",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/prechargement_graines/claudepref1/judge.py",
+      "last_line": "gm cellules5 0.100 (<= 0,85 : True) ; gm forest 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": false,
+      "stderr": "",
+      "warned_invalid": false
+    },
+    {
+      "adoption_printed": true,
+      "case": "only_one_take_instead_of_six",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/prechargement_graines/claudepref1/judge.py",
+      "last_line": "gm cellules5 0.100 (<= 0,85 : True) ; gm forest 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": true,
+      "stderr": "",
+      "warned_invalid": false
+    },
+    {
+      "adoption_printed": true,
+      "case": "only_one_take_instead_of_six",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/prechargements_publieurs/claudepref2/judge.py",
+      "last_line": "gm cellules+clotures5 0.100 (<= 0,90 : True) ; gm forest 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": false,
+      "stderr": "",
+      "warned_invalid": false
+    },
+    {
+      "adoption_printed": true,
+      "case": "only_one_take_instead_of_six",
+      "code": 0,
+      "judge": "morsehgp3D_v11/receipts/developpement_20261007/prechargements_publieurs/claudepref2/judge.py",
+      "last_line": "gm cellules+clotures5 0.100 (<= 0,90 : True) ; gm forest 0.100 (<= 1,00 : True) ; verdict garde",
+      "optimized": true,
+      "stderr": "",
+      "warned_invalid": false
+    }
+  ],
+  "matrix_exit_codes": {
+    "absent_only": 3,
+    "empty": 3,
+    "ok_and_absent": 0,
+    "ok_and_failure": 1
+  },
+  "matrix_judge_states": {
+    "junit_contradiction": "failed",
+    "no_result": "vacuous",
+    "valid": "ok"
+  },
+  "source_sha256": {
+    "morsehgp3D_v11/bench/gpu_ab.py": "cb3a8b70e45408cf29a06af0691d1e115991008178cc5f8d77b9aa1802ccfd05",
+    "morsehgp3D_v11/receipts/developpement_20261007/annonces_publieurs/claudeann1/judge.py": "b6c9487aa60d7725ec62534be1b67ada2842590e1363f8f02eb50d1881d3282a",
+    "morsehgp3D_v11/receipts/developpement_20261007/cache_blocs/claudecache1/judge.py": "324b553fd9950baba8945148aedfcd7315d2c73febaa88853a88f22d724d5dfe",
+    "morsehgp3D_v11/receipts/developpement_20261007/cohortes_tranches/claudebirths1/judge.py": "6df8a8508fc1e263b6dde72b72fa3268f28716df93ffa2df8d3c5ec60224541f",
+    "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/claudeg1/judge.py": "2810ed44f945e950218c7118ec6d78cc3100c84473e18f2867e5ccb638bfbf1a",
+    "morsehgp3D_v11/receipts/developpement_20261007/frontiere_tranches/claudefront1/judge.py": "a3fc0a21b42a625124844bdb4a510efc06520799431080b6533ed1b7b33d0c93",
+    "morsehgp3D_v11/receipts/developpement_20261007/prechargement_graines/claudepref1/judge.py": "9d3e3bbbb40fc30493d0fca95228500e02fae7c6e71992b797f5f4d3a7b4e252",
+    "morsehgp3D_v11/receipts/developpement_20261007/prechargements_publieurs/claudepref2/judge.py": "29a354da101706c3fa7c53bdd30857ac99f3d3482c2bd4ef12efdb386c6313fa",
+    "morsehgp3D_v11/tools/g4_matrix.py": "2c41d275732618539fc483962139c8a844c10636628b827dfd74cb2705dd9c21"
+  },
+  "synthetic_only": true
+}

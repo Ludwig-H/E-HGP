@@ -1,0 +1,77 @@
+{
+  "schema": "audit.v11.events.v1",
+  "snapshot": "33c2ae3c8b66d12ef5b2405f1b0f807d7e57aeae",
+  "engine_pin": "ac081a06f",
+  "gcp_used": false,
+  "events": [
+    {
+      "id": "EV-01",
+      "kind": "new_reproduced_harness_defect",
+      "severity": "medium",
+      "claim": "Sept juges de performance acceptent une adoption apres verdict de banc invalide et sans plancher de six prises.",
+      "witness": "runner_probes.json#judge_cases",
+      "reproduce": "python3 -B probe_runners.py",
+      "observed": {"judges": 7, "normal_and_optimized_cases": 42, "invalid_benchmark_adoptions": 14, "single_take_adoptions": 14},
+      "not_established": "Aucune adoption historique erronee ni erreur geometrique moteur etablie par ce test.",
+      "v12_closure": "Refus structure avec code non nul avant decision si banc invalide, sortie non jugee, prise manquante ou pin different ; mutants de chaque condition."
+    },
+    {
+      "id": "EV-02",
+      "kind": "new_correction_to_prior_audit",
+      "severity": "low",
+      "claim": "3303 est le nombre de tentatives, 3285 celui des vidages disponibles sur les 81 rapports.",
+      "witness": "recomputed.json#dump_inventory",
+      "observed": {"attempts": 3303, "dumps": 3285, "missing": 18, "geometric_hash_disagreements": 0},
+      "cause": "claudegpu2, code3 invariant_violated, garde feuilles<=sites erronee, aucun dump publie.",
+      "v12_closure": "Compter tentatives, refus, sorties et comparaisons distinctement ; aucune sortie absente parmi les concordances."
+    },
+    {
+      "id": "EV-03",
+      "kind": "new_protocol_scope_clarification",
+      "severity": "medium",
+      "claim": "Les prises chaudes sorties_g4 sont des processus neufs ; celles gpu_ab conservent le processus. Le FULL de la sonde exclut cloud/read/Pool/serialize.",
+      "source": ["bench/sorties_g4.py:84", "bench/sorties_g4.py:117", "bench/full_probe.cpp:202", "bench/full_probe.cpp:341"],
+      "witness": "recomputed.json#final_base_timings",
+      "v12_closure": "Schema avec frontieres du chrono et regime resident_process/fresh_process distincts, chemin produit mesure."
+    },
+    {
+      "id": "EV-04",
+      "kind": "new_reproduced_provenance_risk",
+      "severity": "low",
+      "claim": "gpu_ab.build reutilise b_cuda sans verifier les sources new, meme inexistantes.",
+      "witness": "runner_probes.json#gpu_build_reuse",
+      "not_established": "Aucune campagne historique mal epinglee demontree ; sessions gardees neuves et SHA du binaire conserves.",
+      "v12_closure": "Cache source/configuration/compilateur adresse par empreinte ou build neuf certifie."
+    },
+    {
+      "id": "EV-05",
+      "kind": "known_qualification_debt_independently_checked",
+      "claim": "3695 portes Release/poison sommees ; moteur identique entre les deux pins de qualification finale ; 530 mutants declares au gel.",
+      "witness": "recomputed.json#qualification_union",
+      "secondary_witness": "recomputed.json#source_diffs",
+      "v12_closure": "Registre commit par commit de couverture par profil, sans transfert implicite au HEAD."
+    },
+    {
+      "id": "EV-06",
+      "kind": "known_integrity_positive_rechecked",
+      "claim": "219 fichiers agrees par quatre manifestes SHA256 sans divergence.",
+      "witness": "recomputed.json#sha256_manifests",
+      "not_established": "Ce ne sont ni des signatures externes ni des preuves de verite des calculs."
+    },
+    {
+      "id": "EV-07",
+      "kind": "known_hdbscan_result_independently_recomputed",
+      "claim": "Gain moyen du meilleur bloc synthetique n8000 : 0.00824/0.02624/0.05001/0.07833 a K2/3/5/10, identique D/F.",
+      "witness": "recomputed.json#hdbscan_synthetic_level_b",
+      "not_established": "Aucune superiorite generale ni qualite d'une selection autonome sur LiDAR.",
+      "v12_closure": "Campagne preenregistree : correction, meilleur bloc et partition choisie separes ; population et unite statistique fixees."
+    },
+    {
+      "id": "EV-08",
+      "kind": "harness_control_passed",
+      "claim": "Matrice : vide ou seulement absent -> code3 ; ok+failed -> code1 ; contradiction JUnit -> failed.",
+      "witness": "runner_probes.json#matrix_judge_states",
+      "not_established": "ok+absent peut rendre0 selon contrat des compilateurs optionnels ; ne qualifie pas les outils absents."
+    }
+  ]
+}

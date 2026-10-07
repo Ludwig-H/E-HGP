@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/tmp/ehgp-audit-v12-evidence-20261007/morsehgp3D_v11/receipts/audit_independant_v12_20261007/evidence/recompute.py", line 153, in <module>
+    main()
+  File "/tmp/ehgp-audit-v12-evidence-20261007/morsehgp3D_v11/receipts/audit_independant_v12_20261007/evidence/recompute.py", line 94, in main
+    "digests_by_k_frame": {k: sorted(v) for k, v in sorted(digests.items())}}
+                              ^^^^^^^^^
+TypeError: '<' not supported between instances of 'str' and 'NoneType'

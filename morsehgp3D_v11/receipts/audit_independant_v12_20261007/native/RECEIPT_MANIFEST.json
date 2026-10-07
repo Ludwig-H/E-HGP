@@ -1,0 +1,36 @@
+{
+  "snapshot": "33c2ae3c8b66d12ef5b2405f1b0f807d7e57aeae",
+  "gcp_used": false,
+  "files": [
+    {
+      "path": "COHORT_MEMORY_RELEASE_U21.json",
+      "bytes": 70557,
+      "sha256": "b4a942e88b701c2c7b4f3c113304ee960639a27a5959ee760703315b917127a9"
+    },
+    {
+      "path": "INDEX_RADIX_RELEASE_U21.json",
+      "bytes": 9364,
+      "sha256": "4a7dbe7cd34d0626d8fd103e2e4eb7975a533d9cf1544a1e2292c9b159971d48"
+    },
+    {
+      "path": "NARROW_RELEASE_U21.json",
+      "bytes": 1194,
+      "sha256": "7a8728e4ee16aafe4c5fa97831d97ec9f7952eb8b5deeb06d4013021544160e6"
+    },
+    {
+      "path": "README.md",
+      "bytes": 22105,
+      "sha256": "ed35ce31c466e9001252d6b79c859aa4a710b5a89d9c35a1b2ef2c394d72540f"
+    },
+    {
+      "path": "SOURCE_MANIFEST.json",
+      "bytes": 20804,
+      "sha256": "008690f44663f1eb2b9fcc671ea897bd4ea7c903e4bc9cc1c7a2af101f833f44"
+    },
+    {
+      "path": "cohort_memory_witness.py",
+      "bytes": 4318,
+      "sha256": "8f24288fc9a0c2c9e352e383c6ef93d9fb76d1b2ebb889bb936f4a13b41232af"
+    }
+  ]
+}

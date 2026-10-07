@@ -1,0 +1,10 @@
+{
+  "schema": "ehgp.audit.v12.failed_attempt.v1",
+  "operation": "Compilation du temoin cache, premiere execution de check_cache.py",
+  "exit_code": 1,
+  "compiler_exit_code": 1,
+  "diagnostic": "mhgp11_coord_bits_absent : MHGP11_COORD_BITS (18, 21 ou 24) doit etre defini par la construction",
+  "cause": "Le script d'audit omettait -DMHGP11_COORD_BITS=21.",
+  "classification": "Erreur du temoin d'audit, aucune execution du moteur et aucun defaut produit deduit.",
+  "correction": "Profil explicite ajoute a la compilation et au pretraitement. Sources produit inchangees."
+}

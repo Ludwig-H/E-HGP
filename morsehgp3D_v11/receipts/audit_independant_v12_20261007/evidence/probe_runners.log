@@ -1,0 +1,27 @@
+{
+  "judges": 7,
+  "cases": 42,
+  "invalid_benchmark_adoptions": 14,
+  "single_take_adoptions": 14,
+  "gpu_build_reuse": {
+    "nonexistent_source": true,
+    "reused_existing_file": true,
+    "build_log": [
+      {
+        "step": "reuse",
+        "sha256": "5c575410305302b299401cc4f9088d7d529ad293d7f28d99b43a6e53fdd920db"
+      }
+    ]
+  },
+  "matrix_exit_codes": {
+    "empty": 3,
+    "absent_only": 3,
+    "ok_and_absent": 0,
+    "ok_and_failure": 1
+  },
+  "matrix_judge_states": {
+    "valid": "ok",
+    "no_result": "vacuous",
+    "junit_contradiction": "failed"
+  }
+}

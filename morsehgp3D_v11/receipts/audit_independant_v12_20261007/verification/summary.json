@@ -1,0 +1,43 @@
+{
+  "schema": "ehgp.audit.v12.verification.v1",
+  "source_commit": "33c2ae3c8b66d12ef5b2405f1b0f807d7e57aeae",
+  "profile": "quantized_u21_input_only",
+  "build": "Release",
+  "cuda": false,
+  "gcp_used": false,
+  "ctest_exit_code": 0,
+  "selected": 921,
+  "passed": 920,
+  "failed": [],
+  "skipped": [
+    "mhgp11_support_lidar_sentinel"
+  ],
+  "wall_seconds": 656.5,
+  "command": [
+    "ctest",
+    "--test-dir",
+    "/tmp/ehgp-v11-audit-build-20261007",
+    "-L",
+    "fast",
+    "-LE",
+    "long|diff_v10",
+    "-j2",
+    "--no-tests=error",
+    "--output-on-failure",
+    "--output-junit",
+    "/tmp/ehgp-audit-v12-root-20261007/morsehgp3D_v11/receipts/audit_independant_v12_20261007/verification/fast_junit.xml"
+  ],
+  "source_files_checked_after": 644,
+  "source_files_changed": [],
+  "artifacts_sha256": {
+    "configure.log": "2f089a36b8816e87b628431f5065e0f34ec20931b74ca4763a4dac6a80ab9b8e",
+    "build.log": "5a702c8dcc0e93aa9fe5e4eeca6e58a8f0c26a3f5c7780fb91053cc1c649c762",
+    "fast_ctest.log": "3b92ab7bc5f89da772afebef18c8b0f7da6efd16439cce24fac9bcf72fcb90f4",
+    "fast_junit.xml": "2ef103d249bd16e77d4fee84ec219c467bca30adf34d8a5adeeeddb2046aabc8"
+  },
+  "binary_sha256": {
+    "mhgp11": "b25cf6f6ccff1bbc2f90a151f9ff3a8b82618f1821923fa9623d058fb5ec43f7",
+    "mhgp11_full_bench": "a12d9503bdd9768008ea7052ee6ec85e5c890a92851ff44079522722c1ce5aa0",
+    "libmhgp11.a": "050532a95c322cc2d064eef5bfcba74b3920227f98dc21d157a0d675732cf7ca"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "snapshot": "33c2ae3c8b66d12ef5b2405f1b0f807d7e57aeae",
+  "performance_rows": 9,
+  "reports": 81,
+  "dump_counts": {
+    "cold": 2706,
+    "cpu_or_host_batch_cold": 1089,
+    "dump_cold": 2691,
+    "dump_cpu_or_host_batch_cold": 1089,
+    "gpu_cold": 1617,
+    "warm": 597,
+    "cpu_or_host_batch_warm": 216,
+    "dump_warm": 594,
+    "dump_cpu_or_host_batch_warm": 216,
+    "gpu_warm": 381,
+    "dump_gpu_cold": 1602,
+    "dump_gpu_warm": 378
+  },
+  "qualification_recount": 3695,
+  "manifests": [
+    {
+      "folder": "morsehgp3D_v11/receipts/developpement_20261005/qualification_finale/",
+      "verified": 83,
+      "mismatches": []
+    },
+    {
+      "folder": "morsehgp3D_v11/receipts/developpement_20261006/v3_qualification/",
+      "verified": 23,
+      "mismatches": []
+    },
+    {
+      "folder": "morsehgp3D_v11/receipts/developpement_20261007/filtre_g1_avx2/",
+      "verified": 11,
+      "mismatches": []
+    },
+    {
+      "folder": "morsehgp3D_v11/receipts/audit_geant_v11_20261007/",
+      "verified": 102,
+      "mismatches": []
+    }
+  ]
+}

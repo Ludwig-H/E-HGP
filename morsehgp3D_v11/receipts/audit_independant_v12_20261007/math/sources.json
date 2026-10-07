@@ -1,0 +1,30 @@
+{
+  "snapshot": "33c2ae3c8b66d12ef5b2405f1b0f807d7e57aeae",
+  "sources": {
+    "README.md": "8ae307ad828582bc2728b759c418ec0f9469bad63c923d1c0fbb50ecb28d6129",
+    "audits/README.md": "cb2d0806a0e10ef31e166f08aa4b94597c77d67d2ece3056b8214fd5fc7e30c7",
+    "audits/REPONSE_CLAUDE_POLYEDRE_ORDRE_K_RESULTATS_20261007.md": "fb1e927dda3f6dee819a040ec44cf2c0163c44a33826d4c868f54da0a55ca509",
+    "audits/REPONSE_CLAUDE_SUPPORTS_20261004.md": "988d4c53b4eb15403c8f5920cc2e7b56853c637e22ddf944c664b4792710c1cd",
+    "docs/ARCHITECTURE.md": "e3fac28a583f576d74b4c7d77950c3de050770fcca361d06ad45c28e7340719b",
+    "docs/AUDIT_GEANT_V11.md": "8ae88849e7e64f3f3a24aef8fecda3fbb1363378073d0b03e139e96cf93da788",
+    "docs/HIERARCHIE_POINTS.md": "0868879cfdbf5b828f318e3df56b03ab3d7fc7261fa41c7a467952072a0b6e03",
+    "docs/MATHEMATIQUES.md": "9cd42081357b1bb9840040035cbe2b36f1dd6c8688809ba22a984b99bf66a0b6",
+    "docs/PROVENANCE.md": "17e0fcdab67adf3ee425051746bbaca14ebef43ec4ded59c85a7efdc5e7f72c8",
+    "docs/SORTIE_PLATE.md": "4fb8af8b0dfaa9c1fbb063346598cb7d56847eb504c3af36637f1c7b2629e98d",
+    "receipts/polyedre_ordre_k_20261007/SYNTHESE.md": "93ce2bfa6b1ab7ae7453b93e51a2e54a7bfdcf570e8b6f8c1607f8f611d9f151",
+    "receipts/polyedre_ordre_k_20261007/notes/theorie_reduction.md": "98ef66686e9cb2d5a8a40b686345bda0af637c713f2c8c933f4e472302624b46",
+    "receipts/polyedre_ordre_k_20261007/notes/theorie_robustesse.md": "c2a3cd0f342ba94f49bc311b61357043f15436193c2d6deb7d5401a41a51febf",
+    "reference/README.md": "bd2159adc845e21aaa4fda75330f5ec7da49ecdb235adffdb4a8b29a5b560ced",
+    "reference/hgp11_ref/constructive.py": "7e97f89789cafb4f241903e6d0f0e636425cdf3d526697e4e891d483f868fedc",
+    "reference/hgp11_ref/definition.py": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43",
+    "reference/hgp11_ref/judge.py": "09e65a40f7ff33400c04eb91c442a430579bf020b115589b69ad8384529d6507",
+    "reference/hgp11_ref/model.py": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c",
+    "reference/hgp11_ref/supports.py": "970f645462a019639cead958cf8f45b1324cf3083bb61fc9a0891ddc523254ee",
+    "src/head/select.cpp": "60b14166a925f2304ecacedbbcf1b7fb382be271d5083cce03e206e862f510c6",
+    "src/points/hang.cpp": "5776a6ef5d621adb4f177b1094a5271eff4a087b6bfabe5cd618c2a23067599c",
+    "src/points/qualify.cpp": "41b323547e342be86f4eecc88901172645617b844e055bb05a1f312d43e0e593",
+    "src/points/settle.cpp": "a7d7c6c32f9ca369d9b1f515a4add1dcb73ae8abc3a06efa7a1da0ba3ea9617d",
+    "src/supports/hierarchy.cpp": "b19b04f136e8a3654e65de5b5172601b3f66b41e3126e9a6a13dc6958c5b8697",
+    "src/tower/forest_plateau.cpp": "98847c655d9081d20ad2b6839cdf7715b4fef52bafc9ba5698a716895563fafe"
+  }
+}
