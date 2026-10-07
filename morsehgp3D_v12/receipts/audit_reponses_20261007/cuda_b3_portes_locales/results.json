@@ -1,0 +1,78 @@
+{
+  "active_block_cache": false,
+  "asan": {
+    "cuda_enabled": false,
+    "device_open": "device_unavailable",
+    "native_control_counts": {
+      "counter_overflow": 3,
+      "depth_witnesses": 11,
+      "determinism": 16,
+      "device_open": 1,
+      "device_reasons": 2,
+      "finish_plateau": 22,
+      "finish_random": 19,
+      "finish_ties": 22,
+      "level_words": 11224,
+      "pipeline_resident": 27,
+      "pipeline_witnesses": 146,
+      "radix_and_scan": 82,
+      "refusals": 25,
+      "tiers": 9,
+      "wide_traversal": 2,
+      "witness_leaves": 5,
+      "witness_long_triangle": 7,
+      "witness_rectangle": 7,
+      "witness_sphere50": 5,
+      "witness_square": 14,
+      "witness_transl": 14
+    },
+    "passed": 44,
+    "sanitizer": "address,undefined",
+    "skipped_in_selected_tests": 0,
+    "unselected_long": [
+      "mhgp12_catalogue_euler_lidar_ng00_k5",
+      "mhgp12_catalogue_lidar_ng00_k5",
+      "mhgp12_catalogue_lidar_ng01_k5",
+      "mhgp12_catalogue_lidar_ng02_k5"
+    ]
+  },
+  "budgets_without_cache_argument": 22,
+  "mutants": {
+    "code": 0,
+    "count": 15,
+    "killed_by": {
+      "code": 14,
+      "signal": 1
+    },
+    "witness": "vert"
+  },
+  "native_executed_by_auditor": false,
+  "setarch_R": "declared_in_RAPPORT_only",
+  "source_files": 352,
+  "source_tree_sha256": "eac084e268618e38e0e9ca6e0dcacd97d7a9b76b00730a8349352bcb9c3275be",
+  "tsan": {
+    "cuda_enabled": false,
+    "device_open": "device_unavailable",
+    "native_control_counts": {
+      "determinism": 16,
+      "device_open": 1,
+      "device_reasons": 2,
+      "finish_plateau": 22,
+      "finish_random": 19,
+      "finish_ties": 22,
+      "level_words": 11224,
+      "pipeline_resident": 27,
+      "pipeline_witnesses": 146,
+      "radix_and_scan": 82
+    },
+    "passed": 12,
+    "sanitizer": "thread",
+    "skipped_in_selected_tests": 0,
+    "unselected_long": [
+      "mhgp12_catalogue_euler_lidar_ng00_k5",
+      "mhgp12_catalogue_lidar_ng00_k5",
+      "mhgp12_catalogue_lidar_ng01_k5",
+      "mhgp12_catalogue_lidar_ng02_k5"
+    ]
+  }
+}
