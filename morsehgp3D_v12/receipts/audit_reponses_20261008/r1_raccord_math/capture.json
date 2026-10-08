@@ -1,0 +1,66 @@
+{
+  "pin": "47feedc96ee4b4cb85b5a7c590f38c874bb04855",
+  "parent": "c31beaf2200d1a7f8eed09b0c1c7c0f6af3b74f3",
+  "scope": "relecture statique et preuve du raccord R1 ; aucune qualification native ni mesure nouvelle",
+  "sources": {
+    "morsehgp3D_v12/src/tower/registry_branches.cpp": {
+      "sha256": "a0a8e045a696124dcc36175fec818e3cad6fa9720dc0bbb0061ca2b4aa125411",
+      "bytes": 12019
+    },
+    "morsehgp3D_v12/src/tower/forest_kernel.cpp": {
+      "sha256": "2d12b4bd459a0c1ec710117bb94580f84f723ba7cf06d648e353613682c7fcf0",
+      "bytes": 9495
+    },
+    "morsehgp3D_v12/src/tower/forest_contract.cpp": {
+      "sha256": "5dacf8cef8a7827ba50c01b3a4908e264b946b5caccc0dda0abf5ad83117870d",
+      "bytes": 5414
+    },
+    "morsehgp3D_v12/src/tower/forest_stages.cpp": {
+      "sha256": "5ed33d69bb63fcfa2a7c65c0a9fbed41dc00762e9052446fb9b6ef61f0eb2d6f",
+      "bytes": 12408
+    },
+    "morsehgp3D_v12/src/tower/vertical_images.cpp": {
+      "sha256": "b0543caf0adb031cf58f59d7eb337aa79c41ad226f28da527456e22f6b0df8eb",
+      "bytes": 5117
+    },
+    "morsehgp3D_v12/src/tower/pipeline.cpp": {
+      "sha256": "ccfab018c6bbee9d6f104f0dc7895d64277b92031238840121ff95c7f087f3c9",
+      "bytes": 11792
+    },
+    "morsehgp3D_v12/src/tower/pipeline_run.cpp": {
+      "sha256": "15b49b5f0309f546912c8c9571f616c32fdf4136df7bdb888b2ff736a65aaf5a",
+      "bytes": 20427
+    },
+    "morsehgp3D_v12/src/tower/forest_internal.hpp": {
+      "sha256": "455b3c98ac7e5f89af8041f33841f3904eaa0e3181f3d823bde3b60e55a3947c",
+      "bytes": 12577
+    },
+    "morsehgp3D_v12/tests/tower/registry_unit.cpp": {
+      "sha256": "919ab2a1240afdabc0777f5f26ed3bfe52dc45557fac567cb2478dd52ab2209e",
+      "bytes": 14716
+    },
+    "morsehgp3D_v12/tests/tower/forest_support.hpp": {
+      "sha256": "f2c5bf16ffaad87baeab6609d43a5d2e16c3c05d38f960606aeb9472062bdaf2",
+      "bytes": 11306
+    },
+    "morsehgp3D_v12/tests/tower/tests.cmake": {
+      "sha256": "f9d8229e718cbe1423f6ad3fd230baaef2d0a835ee328c3aaf14b828f78c9215",
+      "bytes": 18052
+    },
+    "morsehgp3D_v12/tests/mutants/tower.json": {
+      "sha256": "43dc6d2b640f7a462c44d639e66b8c3fbc491d7acd529251ad080f96e407e459",
+      "bytes": 28935
+    },
+    "morsehgp3D_v12/receipts/audit_reponses_20261008/registre_classe_unique/README.md": {
+      "sha256": "82b614d6f9817c560119d5e4ffb1dc7601b8a926f8901154fd5ace74da69cec4",
+      "bytes": 9331
+    },
+    "morsehgp3D_v12/receipts/audit_reponses_20261008/registre_classe_unique_patch/proposition.patch": {
+      "sha256": "abb614ebb23420237a7b8730e2e05182d5fa134634879726b219f34d2dd26476",
+      "bytes": 6515
+    }
+  },
+  "native_delta": [
+    "morsehgp3D_v12/src/tower/registry_branches.cpp"
+  ]
+}

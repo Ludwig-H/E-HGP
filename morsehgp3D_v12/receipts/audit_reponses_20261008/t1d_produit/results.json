@@ -1,0 +1,13 @@
+{
+  "anchors": 9,
+  "commit": "5f8e777cffbeddfe90e92fc616a920c28c1b985c",
+  "device_peak": "cumulative_separate_budget_or_zero_if_shared",
+  "findings": [
+    "variable_metadata_outside_budget",
+    "sliced_device_host_work_missing_from_stage_detail"
+  ],
+  "gpu_qualified": false,
+  "native_executed": false,
+  "source_files": 17,
+  "status": "source_anchors_verified"
+}

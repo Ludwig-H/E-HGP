@@ -1,0 +1,72 @@
+{
+  "captured_utc": "2026-10-08T14:38:52.100735+00:00",
+  "commit": "5f8e777cffbeddfe90e92fc616a920c28c1b985c",
+  "base": "4171b2653fa5cb903102a3fc44572bcb3330b3e8",
+  "method": "immutable_git_objects_read_only",
+  "sources": {
+    "morsehgp3D_v12/src/catalogue/slices.hpp": "f6d1ad7bd4c7b8717100efe0f13b84dfbe2424385754f93892f1b6665eba5c04",
+    "morsehgp3D_v12/src/catalogue/slices.cpp": "080ccaddfb0c5666af7ce9e8a0ae2093849c4d92be19a17c05dc2b80f583bae5",
+    "morsehgp3D_v12/src/catalogue/finish_slices.hpp": "4a37dd5d1fb3c77c876b15a26dd4446e3d01f22cf36bd3547f159c80340c9f97",
+    "morsehgp3D_v12/src/catalogue/finish_level.hpp": "d5dd177a787367330ef6a35e4e949a9e997681dcf2267b392e1bf19d44fa7ecb",
+    "morsehgp3D_v12/src/catalogue/finish_kernels.hpp": "96b1afe896fcbd65afce3cc119a3db4d9149c059e5e8251f53605c2f3f059426",
+    "morsehgp3D_v12/src/catalogue/finish_driver.hpp": "db5a12b480f58c41761b8acc3e16e3d8b0a52718c7c7b180141733916516fd92",
+    "morsehgp3D_v12/src/catalogue/device_pipeline.hpp": "91c756a6b3c177c70d235d0a6f104ff9077ad56136bebb5ddd76907b92af94ac",
+    "morsehgp3D_v12/src/catalogue/device_cuda.cu": "c0e9db1178011940dc93db30b21656c39f91b2d495998a68c3edef1dfeb4b2df",
+    "morsehgp3D_v12/src/catalogue/assemble.cpp": "d529959860f4da8748b84db7c6c44611d40705101f2173ccf4f4a87987e3c053",
+    "morsehgp3D_v12/src/catalogue/finish_outputs.hpp": "0c4fd7551fe4198f81ba59b17b14a6c6fb5549de6913bd66dfe1dfa21df8e5ee",
+    "morsehgp3D_v12/src/catalogue/exec_host.hpp": "e84a22ad4fbce26c067735cfb3086565ad955e7f2b5e7258a2b5f07ac63d5f13",
+    "morsehgp3D_v12/src/catalogue/internal.hpp": "7af114b6a4a56b9f389e537440f1efdd64fc0e4b40d3de91b77e3db6373a6b1f",
+    "morsehgp3D_v12/src/core/buffer.hpp": "8e4d84665e90308ee9572a729731711bb419e3a565fd4dd11b5bd56ab6a92401",
+    "morsehgp3D_v12/bench/catalogue_probe.cpp": "96ce739d53b6622e9bd367031968a8a7ddad00573daa4f7dd843f2c568d97347",
+    "morsehgp3D_v12/docs/CONTRAT_CATALOGUE.md": "7a8a1ded9a2842aef8de6cedf05c9a5591a1c47b6af53f5ea266fc23facd5fae",
+    "morsehgp3D_v12/tests/catalogue/slices_test.cpp": "bbd15639b7b0e1bdd3b0d6268ccf910f556d02a1244e58dd7df90fe360d8786e",
+    "morsehgp3D_v12/tests/catalogue/device_budget_test.cpp": "ab8bcf3120cd3af42879b8af629e2a5802f04c7d0cb6c7a225630b85e03331a5"
+  },
+  "anchors": [
+    {
+      "name": "budget_rule",
+      "source": "morsehgp3D_v12/src/core/buffer.hpp",
+      "text": "tout tableau dont la taille depend de l'entree est\n// un Buffer"
+    },
+    {
+      "name": "plan_metadata",
+      "source": "morsehgp3D_v12/src/catalogue/slices.cpp",
+      "text": "std::vector<Bin> slices{};"
+    },
+    {
+      "name": "words_metadata",
+      "source": "morsehgp3D_v12/src/catalogue/finish_slices.hpp",
+      "text": "std::vector<Buffer<LevelWords>> words;"
+    },
+    {
+      "name": "arena_metadata",
+      "source": "morsehgp3D_v12/src/catalogue/device_pipeline.hpp",
+      "text": "std::vector<Chunk> arena;"
+    },
+    {
+      "name": "certain_cut",
+      "source": "morsehgp3D_v12/src/catalogue/slices.cpp",
+      "text": "if (unit.balls != 0 && key_order(unit.hi, b.lo) < 0)"
+    },
+    {
+      "name": "rank_guard",
+      "source": "morsehgp3D_v12/src/catalogue/finish_slices.hpp",
+      "text": "if (distinct.value() >= kNone - base.ranks)"
+    },
+    {
+      "name": "word_transfer_not_publication",
+      "source": "morsehgp3D_v12/src/catalogue/finish_slices.hpp",
+      "text": "{a.level_of_rank.data(), sizeof(LevelWords), distinct, &CopyChunk::consume, &copies[3], false}"
+    },
+    {
+      "name": "peak_or_zero",
+      "source": "morsehgp3D_v12/bench/catalogue_probe.cpp",
+      "text": "device != nullptr ? device->peak() : 0"
+    },
+    {
+      "name": "own_budget",
+      "source": "morsehgp3D_v12/bench/catalogue_probe.cpp",
+      "text": "return passes(o, cloud.value(), *pool.value(), budget, &device.value(), own.get());"
+    }
+  ]
+}

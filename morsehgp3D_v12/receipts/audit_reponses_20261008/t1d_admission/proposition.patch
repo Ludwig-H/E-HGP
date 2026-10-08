@@ -1,0 +1,355 @@
+diff --git a/morsehgp3D_v12/bench/g4_catalogue_flux_lecteur.py b/morsehgp3D_v12/bench/g4_catalogue_flux_lecteur.py
+index 41b332865..db8ebeb6c 100644
+--- a/morsehgp3D_v12/bench/g4_catalogue_flux_lecteur.py
++++ b/morsehgp3D_v12/bench/g4_catalogue_flux_lecteur.py
+@@ -9,6 +9,11 @@ de chaque bloc (grand livre, diagnostics, appareil) ; entiers u64 hors booleens.
+ mesure nulle. Bibliotheque standard, Python 3.10 nu, aucun assert.
+ """
+ import re
++import sys
++from pathlib import Path
++
++sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'microbancs' / 'outils'))
++import lecteur_full as LF  # noqa: E402
+ 
+ COORD_BITS = 21
+ LEAF = 24
+@@ -145,7 +150,10 @@ def read_passes(rows, i, parsed, spec):
+             return i, ''
+         if row.get('status') != 'ok':
+             if set(row) != CAT_BASE_KEYS or row['pass'] != p or type(row['reason']) is not str or \
+-                    type(row['status']) is not str or row['reason'] == 'none':
++                    type(row['status']) is not str or row['reason'] == 'none' or \
++                    not all(is_int(row[x]) for x in CAT_INTS) or row['path'] != spec['path'] or \
++                    row['coord_bits'] != COORD_BITS or row['kmax'] != spec['k'] or row['leaf'] != spec['leaf'] or \
++                    row['threads'] != spec['threads']:
+                 return i, 'passe %d en echec hors schema' % p
+             parsed['failed'] = row
+             return i + 1, ''
+@@ -178,7 +186,8 @@ def read_catalogue(run, spec):
+     code = run.get('code')
+     if type(code) is int and code < 0:
+         return 'signal', 'signal %d' % -code, parsed
+-    if type(code) is not int or run.get('bad_lines') != 0 or run.get('options') != catalogue_options(spec):
++    if type(code) is not int or run.get('timeout') is not False or type(run.get('bad_lines')) is not int or \
++            run.get('bad_lines') != 0 or run.get('options') != catalogue_options(spec):
+         return 'illisible', 'code, lignes illisibles ou options differentes de la commande', parsed
+     rows, i = run.get('rows'), 0
+     if type(rows) is not list or not rows:
+@@ -233,6 +242,13 @@ def check_full_row(row, case, k, threads, p, sites=None):
+     """'' si la ligne full de la passe p est conforme et liee a la commande (memes regles que le lecteur partage de
+     main, microbancs/outils/lecteur_full.py, a partir de a2c2fccfd ; cpu_ns et rss_max_octets peuvent etre null,
+     jamais lus ici) ; sites : nombre attendu (identite), ou None."""
++    if type(row) is dict and row.get('etapes_schema') == 'recouvert':
++        if row.get('phase') != 'full':
++            return 'phase FULL attendue'
++        expected = dict(voie='appareil', k=k, fils=threads, passes=1, empreinte=True,
++                        trames=[(case, sites if sites is not None else row.get('sites'))],
++                        budget_appareil='partage', bits=COORD_BITS, schema='recouvert')
++        return LF.check_full(row, p, expected)
+     if type(row) is not dict or set(row) != FULL_KEYS or not all(is_int(row[x]) for x in FULL_INTS):
+         return 'ligne full hors schema (passe %d)' % p
+     if row['phase'] != 'full' or row['pass'] != p or row['status'] != 'ok' or row['trame'] != case or \
+@@ -261,7 +277,8 @@ def check_full_row(row, case, k, threads, p, sites=None):
+ def read_full(run, case, k, threads, passes, sites=None):
+     """(etat, raison, empreintes, murs, C) d'une sonde FULL : open, (full, liberation) par passe, exit."""
+     bad = ('illisible', None, [], [], [])
+-    if type(run) is not dict or run.get('timeout') is True or run.get('code') != 0 or run.get('bad_lines') != 0 or \
++    if type(run) is not dict or run.get('timeout') is not False or type(run.get('code')) is not int or \
++            run.get('code') != 0 or type(run.get('bad_lines')) is not int or run.get('bad_lines') != 0 or \
+             run.get('options') != full_options(k, threads, passes) or type(run.get('rows')) is not list:
+         return ('illisible', 'execution FULL absente ou hors commande') + bad[2:]
+     rows = run['rows']
+@@ -281,7 +298,7 @@ def read_full(run, case, k, threads, passes, sites=None):
+         if why:
+             return ('illisible', why) + bad[2:]
+         if type(free) is not dict or set(free) != {'phase', 'pass', 'liberation_ns'} or free['phase'] != 'liberation' \
+-                or free['pass'] != p or not is_int(free['liberation_ns']):
++                or not is_int(free['pass']) or free['pass'] != p or not is_int(free['liberation_ns']):
+             return ('illisible', 'ligne liberation (passe %d)' % p) + bad[2:]
+         digests.append(full['full_sha256'])
+         walls.append(full['wall_ns'])
+diff --git a/morsehgp3D_v12/bench/g4_catalogue_t1d_judge.py b/morsehgp3D_v12/bench/g4_catalogue_t1d_judge.py
+index 47f352ca4..b6f30ae88 100644
+--- a/morsehgp3D_v12/bench/g4_catalogue_t1d_judge.py
++++ b/morsehgp3D_v12/bench/g4_catalogue_t1d_judge.py
+@@ -50,13 +50,44 @@ def spec_budget(k, threads, budget):
+     return L.catalogue_spec('device', k, threads, 2, digest=True, tranches=True, device_budget=budget)
+ 
+ 
+-def check_slices(steps, out, threads):
++def exact_entries(entries, fields, expected=None):
++    """Types des cles, unicite et ensemble ferme ; aucune observation ignoree."""
++    if type(entries) is not list:
++        return None
++    for e in entries:
++        if type(e) is not dict or any(
++                not L.is_int(e.get(f)) if f in ('round', 'k', 'budget') else type(e.get(f)) is not str
++                for f in fields):
++            return None
++    indexed = J.by_key(entries, *fields)
++    if indexed is None or (expected is not None and set(indexed) != set(expected)):
++        return None
++    return indexed
++
++
++def memory_ok(parsed, budget):
++    """Pic appareil propre cumulatif ; sans budget propre, pic publie nul par contrat de la sonde."""
++    previous = 0
++    for row, t in zip(parsed['passes'], parsed['tranches']):
++        if t['device_bytes'] != row['device']['device_bytes']:
++            return False
++        if budget:
++            if not (t['device_bytes'] <= t['device_peak'] <= budget) or t['device_peak'] < previous:
++                return False
++        elif t['device_peak'] != 0:
++            return False
++        previous = t['device_peak']
++    return True
++
++
++def check_slices(steps, out, threads, refs):
+     """Voie en flux sur l'appareil reel : budgets derives de la prise sans budget, F2 ou refus, tranches."""
+-    entries = J.by_key(steps.get('slices'), 'case', 'k', 'budget')
++    entries = exact_entries(steps.get('slices'), ('case', 'k', 'budget'))
+     if entries is None:
+         out['refused'].append('flux : etape illisible ou prise en double')
+         return
+     stats, streamed_k10 = {}, 0
++    expected = {(case, k, 0) for case, k in SLICE_CASES}
+     for case, k in SLICE_CASES:
+         key, reference = '%s:%d' % (case, k), J.F2_DIGESTS['%s:%d' % (case, k)]
+         state, why, free = L.read_catalogue((entries.get((case, k, 0)) or {}).get('run'), spec_free(k, threads))
+@@ -64,20 +95,38 @@ def check_slices(steps, out, threads):
+             out['refused' if state != 'ok' else 'rejected'].append('flux sans budget : %s (%s)' % (key, why or state))
+             continue
+         held = free['tranches'][-1]['device_bytes']
++        ref = refs.get(key)
++        if not memory_ok(free, 0) or not held or ref is None or any(
++                row[f] != ref[f] for row in free['passes'] for f in L.COUNTS):
++            out['refused'].append('flux sans budget : memoire ou comptes incoherents sur ' + key)
++            continue
++        budgets = [held * num // den for num, den in FRACTIONS]
++        if 0 in budgets or len(set(budgets)) != len(budgets):
++            out['refused'].append('flux : budgets non distincts ou nuls sur ' + key)
++            continue
++        expected.update((case, k, budget) for budget in budgets)
+         best = 0
+         for num, den in FRACTIONS:
+             budget = held * num // den
+             state, why, got = L.read_catalogue((entries.get((case, k, budget)) or {}).get('run'),
+                                                spec_budget(k, threads, budget))
+-            if state == 'refus' and why.endswith('/memory_budget'):
++            if not memory_ok(got, budget):
++                out['refused'].append('flux : budget appareil ou pic incoherent sur ' + key)
++                continue
++            # Une passe deja emise ne devient pas neutre si la suivante refuse.
++            if state in ('ok', 'refus'):
++                if any(row[f] != ref[f] for row in got['passes'] for f in L.COUNTS):
++                    out['refused'].append('flux : comptes differents de l identite sur ' + key)
++                    continue
++                if any(d['catalogue_sha256'] != reference for d in got['digests']):
++                    out['rejected'].append('flux en defaut : %s budget %d/%d' % (key, num, den))
++                    continue
++            if state == 'refus' and why == 'resource_exhausted/memory_budget':
+                 continue
+             if state != 'ok':
+                 out['refused' if state != 'invariant' else 'rejected'].append(
+                     'flux %s budget %d/%d : %s' % (key, num, den, why or state))
+                 continue
+-            if any(d['catalogue_sha256'] != reference for d in got['digests']):
+-                out['rejected'].append('flux en defaut : %s budget %d/%d' % (key, num, den))
+-                continue
+             t = got['tranches'][-1]
+             if t['arena_streamed'] >= 1 and t['finish_slices'] >= 2:
+                 best = max(best, t['finish_slices'])
+@@ -89,6 +138,8 @@ def check_slices(steps, out, threads):
+     stats['lots_rapatries_k10'] = streamed_k10
+     if streamed_k10 < 2:
+         out['rejected'].append('flux : aucune arene rapatriee lot par lot a K10 (%d)' % streamed_k10)
++    if set(entries) != expected:
++        out['refused'].append('flux : cohorte differente des budgets commandes')
+     out['stats']['tranches'] = stats
+ 
+ 
+@@ -99,7 +150,8 @@ def stage_total(row, sorties):
+ 
+ 
+ def campaign_table(steps, out, rounds, passes, threads, refs):
+-    table, entries = {}, J.by_key(steps.get('campaign'), 'round', 'frame', 'arm')
++    expected = {(r, f, a) for r in range(rounds) for f in FRAMES for a in ARMS}
++    table, entries = {}, exact_entries(steps.get('campaign'), ('round', 'frame', 'arm'), expected)
+     if entries is None:
+         out['refused'].append('campagne illisible ou prise en double')
+         return table
+@@ -158,7 +210,7 @@ def judge(report):
+         out['refused'].append('outil absent (nvcc ou GPU)')
+     rounds, passes, threads = opts.get('rounds'), opts.get('passes'), opts.get('threads')
+     if not L.is_int(rounds) or not L.is_int(passes) or rounds < RULE['rounds_min'] or passes < RULE['passes_min'] or \
+-            threads != RULE['threads']:
++            not L.is_int(threads) or threads != RULE['threads']:
+         out['refused'].append('contrat de mesure non respecte')
+         rounds, passes, threads = RULE['rounds_min'], RULE['passes_min'], RULE['threads']
+     builds = steps.get('builds') or {}
+@@ -172,9 +224,23 @@ def judge(report):
+     J.check_gates(steps, out)
+     if steps.get('gpu_quiet_before') is not True or steps.get('gpu_quiet_after') is not True:
+         out['refused'].append('GPU non isole avant ou apres les temps')
+-    refs = J.check_identity(steps, out, threads)
+-    check_slices(steps, out, threads)
+-    J.check_ful1(steps, out, threads, refs)
++    identity = exact_entries(steps.get('identity'), ('case', 'k'), J.IDENTITY_CASES)
++    ful1 = exact_entries(steps.get('ful1'), ('arm', 'case', 'k'),
++                         ((a, c, k) for a in BUILT_ARMS for c, k in J.FUL1_CASES))
++    if identity is None or ful1 is None:
++        out['refused'].append('identite ou FUL1 : cohorte non fermee')
++        refs = {}
++    else:
++        refs = J.check_identity(steps, out, threads)
++        # Les deux sources T1-d utilisent la Session recouverte par defaut.
++        for e in ful1.values():
++            run = e.get('run')
++            rows = run.get('rows') if type(run) is dict else None
++            if type(rows) is not list or any(type(r) is not dict or
++                    (r.get('phase') == 'full' and r.get('etapes_schema') != 'recouvert') for r in rows):
++                out['refused'].append('FUL1 : schema recouvert attendu')
++        J.check_ful1(steps, out, threads, refs)
++    check_slices(steps, out, threads, refs)
+     table = campaign_table(steps, out, rounds, passes, threads, refs)
+     judge_cost(table, rounds, out)
+     out['verdict'] = 'refuse' if out['refused'] else 'rejete' if out['rejected'] else 'adopte'
+diff --git a/morsehgp3D_v12/bench/g4_catalogue_t1d_selftest.py b/morsehgp3D_v12/bench/g4_catalogue_t1d_selftest.py
+index 665110346..7ac7a92cc 100644
+--- a/morsehgp3D_v12/bench/g4_catalogue_t1d_selftest.py
++++ b/morsehgp3D_v12/bench/g4_catalogue_t1d_selftest.py
+@@ -17,14 +17,15 @@ import g4_catalogue_t1d_judge as T  # noqa: E402
+ HELD = 8 << 30  # octets de l'appareil gardes par la voie complete (synthetique)
+ 
+ 
+-def tranches_rows(run, slices, streamed):
++def tranches_rows(run, slices, streamed, budget=0):
+     """Ajoute la ligne << tranches >> apres chaque ligne catalogue (et sa ligne sorties s'il y en a)."""
+     rows, out = run['rows'], []
+     for row in rows:
+         out.append(row)
+         if row.get('phase') == 'catalogue':
++            row['device']['device_bytes'] = budget or HELD
+             out.append({'phase': 'tranches', 'pass': row['pass'], 'finish_slices': slices,
+-                        'arena_streamed': streamed, 'device_bytes': HELD, 'device_peak': HELD})
++                        'arena_streamed': streamed, 'device_bytes': budget or HELD, 'device_peak': budget})
+     run['rows'] = out
+     return run
+ 
+@@ -39,10 +40,27 @@ def slices_step(threads, best=12):
+             budget = HELD * num // den
+             run = S.catalogue_run(T.spec_budget(k, threads, budget), [10, 10], counts, digest)
+             entries.append({'case': case, 'k': k, 'budget': budget,
+-                            'run': tranches_rows(run, 2 + (best - 2) * i // (len(T.FRACTIONS) - 1), 1 + i)})
++                            'run': tranches_rows(run, 2 + (best - 2) * i // (len(T.FRACTIONS) - 1), 1 + i, budget)})
+     return entries
+ 
+ 
++def overlap(run):
++    """Lignes conformes de la Session recouverte ; aucune execution native."""
++    for row in run['rows']:
++        if row.get('phase') != 'full':
++            continue
++        k = row['kmax']
++        row.update(etapes_schema='recouvert', cpu_ns=600,
++                   etapes_ns=dict(P=1, C=1, G=10, raccord=0, TMVR=10),
++                   fenetres_ns=dict(G=10, foret=10, foret_apres_g=10, T=1, M=1, V=1, R=1),
++                   g_ns=dict(ouverture=1, tables=1),
++                   memoire_octets={s: [1, 8] for s in ('P', 'C', 'tour')},
++                   recouvrement=dict(tour_ns=20, ouverture_ns=1, fin_g_ns=10, fin_ns=20, queue_ns=10,
++                                     noyau_reprises=1, noyau_arrets=0, admis_octets=8),
++                   fins_par_ordre_ns=[[10, 12, 14, 0 if i == 0 else 16, 18] for i in range(k)])
++    return run
++
++
+ def synthetic_report(ratio=0.999, aa=1.0, constant=False):
+     base = S.synthetic_report(constant=constant)
+     rounds, passes, threads = 10, 10, 48
+@@ -58,6 +76,8 @@ def synthetic_report(ratio=0.999, aa=1.0, constant=False):
+                                  'run': S.catalogue_run(T.spec_campaign(threads, passes), [wall] * passes,
+                                                         S.counts_of(frame, 5))})
+     steps = base['steps']
++    for e in steps['ful1']:
++        overlap(e['run'])
+     shas = {a: 'd' * 64 for a in T.BUILT_ARMS}
+     steps.update(campaign=campaign, slices=slices_step(threads), builds={a: {'ok': True} for a in T.BUILT_ARMS},
+                  binaries=dict(shas), binaries_after=dict(shas))
+@@ -92,12 +112,74 @@ def edit_digest(report, case, k, index):
+             row['catalogue_sha256'] = '1' * 64
+ 
+ 
++def tranche(report, index=0, p=0):
++    return next(row for row in slice_entry(report, 'ng00', 5, index)['run']['rows']
++                if row.get('phase') == 'tranches' and row['pass'] == p)
++
++
++def one_refusal(report, foreign=False):
++    e = slice_entry(report, 'ng00', 5, 0)
++    first = {key: v for key, v in e['run']['rows'][1].items() if key in L.CAT_BASE_KEYS}
++    first.update(status='resource_exhausted', reason='memory_budget')
++    if foreign:
++        first['threads'] = 1
++    e['run']['code'] = 2
++    e['run']['rows'] = [e['run']['rows'][0], first,
++                       dict(phase='exit', status='resource_exhausted', reason='memory_budget')]
++
++
++def extra(report, step, **change):
++    e = copy.deepcopy(report['steps'][step][0])
++    e.update(change)
++    report['steps'][step].append(e)
++
++
++def partial_refusal(report, bad_digest=False, bad_counts=False):
++    e = slice_entry(report, 'ng00', 5, 0)
++    first = {key: v for key, v in e['run']['rows'][4].items() if key in L.CAT_BASE_KEYS}
++    first.update(status='resource_exhausted', reason='memory_budget')
++    e['run']['code'] = 2
++    e['run']['rows'] = e['run']['rows'][:4] + [first,
++                        dict(phase='exit', status='resource_exhausted', reason='memory_budget')]
++    if bad_digest:
++        e['run']['rows'][3]['catalogue_sha256'] = '0' * 64
++    if bad_counts:
++        e['run']['rows'][1]['sites'] = 1
++
++
++def full_row(report):
++    return report['steps']['ful1'][0]['run']['rows'][1]
++
++
+ def cases():
+     out = [('conforme', synthetic_report(), 'adopte'), ('apres_paie', synthetic_report(ratio=1.02), 'rejete'),
+            ('borne_1_00999', synthetic_report(ratio=1.00999, constant=True), 'adopte'),
+            ('borne_1_0101', synthetic_report(ratio=1.0101, constant=True), 'rejete'),
+            ('aa_hors_fenetre', synthetic_report(aa=1.02), 'refuse')]
+     edits = (
++        ('flux_prefixe_refus_valide', 'adopte', lambda r: partial_refusal(r)),
++        ('flux_prefixe_refus_faux', 'rejete', lambda r: partial_refusal(r, bad_digest=True)),
++        ('flux_prefixe_refus_comptes', 'refuse', lambda r: partial_refusal(r, bad_counts=True)),
++        ('flux_refus_valide', 'adopte', lambda r: one_refusal(r)),
++        ('flux_refus_hors_commande', 'refuse', lambda r: one_refusal(r, True)),
++        ('flux_pic_depasse', 'refuse', lambda r: tranche(r).update(device_peak=HELD)),
++        ('flux_pic_nul', 'refuse', lambda r: tranche(r).update(device_peak=0)),
++        ('flux_usage_non_raccorde', 'refuse', lambda r: tranche(r).update(device_bytes=1)),
++        ('flux_pic_decroissant', 'refuse', lambda r: [tranche(r, p=1).update(device_bytes=1, device_peak=1),
++            slice_entry(r, 'ng00', 5, 0)['run']['rows'][4]['device'].update(device_bytes=1)]),
++        ('flux_partage_pic', 'refuse', lambda r: tranche(r, index=-1).update(device_peak=1)),
++        ('flux_budget_surplus', 'refuse', lambda r: extra(r, 'slices', budget=7)),
++        ('campagne_tour_surplus', 'refuse', lambda r: extra(r, 'campaign', round=10)),
++        ('campagne_bras_surplus', 'refuse', lambda r: extra(r, 'campaign', arm='inconnu')),
++        ('campagne_tour_booleen', 'refuse', lambda r: r['steps']['campaign'][0].update(round=False)),
++        ('identite_surplus', 'refuse', lambda r: extra(r, 'identity', case='inconnu')),
++        ('ful1_surplus', 'refuse', lambda r: extra(r, 'ful1', case='inconnu')),
++        ('fils_flottants', 'refuse', lambda r: r['options'].update(threads=48.0)),
++        ('ful1_code_booleen', 'refuse', lambda r: r['steps']['ful1'][0]['run'].update(code=False)),
++        ('ful1_queue_incoherente', 'refuse', lambda r: full_row(r)['recouvrement'].update(queue_ns=11)),
++        ('ful1_prefixe_incoherent', 'refuse', lambda r: full_row(r)['fins_par_ordre_ns'][0].__setitem__(0, 11)),
++        ('ful1_schema_sequentiel', 'refuse', lambda r: r['steps']['ful1'][0].update(
++            run=S.full_run('ng00', 5, 48, 2, J.FUL1_SESSION_K['ng00:5']))),
+         ('flux_en_defaut', 'rejete', lambda r: edit_digest(r, 'ng01', 5, 1)),
+         ('flux_tout_refuse', 'rejete', lambda r: refuse_all(r, 'ng02', 10)),
+         ('flux_une_seule_tranche', 'rejete', lambda r: [

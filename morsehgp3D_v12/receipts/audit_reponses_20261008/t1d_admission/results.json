@@ -1,0 +1,62 @@
+{
+  "avant": {
+    "auto_test_nominal": "adopte",
+    "controles": {
+      "bras_surplus": "admis",
+      "budget_surplus": "admis",
+      "campagne_nominale": "admis",
+      "capacite_hors_catalogue": "admis",
+      "memoire_nominale": "admis",
+      "pic_decroissant": "admis",
+      "pic_depasse_budget": "admis",
+      "prefixe_refuse_comptes": "admis",
+      "prefixe_refuse_faux": "admis",
+      "prefixe_refuse_valide": "admis",
+      "refus_memoire_W1_hors_commande": "admis",
+      "refus_memoire_valide": "admis",
+      "tour_surplus": "admis",
+      "usage_superieur_pic": "admis"
+    },
+    "full_reel": {
+      "etat": "illisible",
+      "passes": 0,
+      "raison": "ligne full hors schema (passe 0)",
+      "sha256": "1daef5e8811c94753af078520c178bb44a1884b5fc8c7c0a2e638792562578b6"
+    }
+  },
+  "conforme": true,
+  "pin": "5f8e777cffbeddfe90e92fc616a920c28c1b985c",
+  "proposition": {
+    "auto_test_nominal": "adopte",
+    "controles": {
+      "bras_surplus": "refuse",
+      "budget_surplus": "refuse",
+      "campagne_nominale": "admis",
+      "capacite_hors_catalogue": "refuse",
+      "memoire_nominale": "admis",
+      "pic_decroissant": "refuse",
+      "pic_depasse_budget": "refuse",
+      "prefixe_refuse_comptes": "refuse",
+      "prefixe_refuse_faux": "rejete",
+      "prefixe_refuse_valide": "admis",
+      "refus_memoire_W1_hors_commande": "refuse",
+      "refus_memoire_valide": "admis",
+      "tour_surplus": "refuse",
+      "usage_superieur_pic": "refuse"
+    },
+    "full_reel": {
+      "etat": "ok",
+      "passes": 2,
+      "raison": "",
+      "sha256": "1daef5e8811c94753af078520c178bb44a1884b5fc8c7c0a2e638792562578b6"
+    }
+  },
+  "sources": {
+    "morsehgp3D_v12/bench/g4_catalogue_flux_judge.py": "805d8303dabc753e810b3e0c42e7df2b19e23eceb3b41a73c05a382fa44a93be",
+    "morsehgp3D_v12/bench/g4_catalogue_flux_lecteur.py": "19b16fa0f95ccc4da83d5c2bd95d1bfa4f1165e01f83432b7743dc785103856e",
+    "morsehgp3D_v12/bench/g4_catalogue_flux_selftest.py": "551179ceb8166122efd0cb70f91509049d84266997ade32dfc2cdca4d1ae4b48",
+    "morsehgp3D_v12/bench/g4_catalogue_t1d_judge.py": "a8eb9d48d0ffa8516186e1539181d14bdbe9f7da5b16d38ff01a81e4460e2399",
+    "morsehgp3D_v12/bench/g4_catalogue_t1d_selftest.py": "86c827af4baa15cdd7ece65278f0cc948bbf2be95d31099d2b270d497d8f2a28",
+    "morsehgp3D_v12/microbancs/outils/lecteur_full.py": "15437e5f09408d5fbdc6288e33a2452490489f13bf9a3b3a24c99f5d109b6554"
+  }
+}

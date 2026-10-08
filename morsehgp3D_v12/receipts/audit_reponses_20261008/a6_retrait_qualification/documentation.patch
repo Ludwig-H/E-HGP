@@ -1,0 +1,22 @@
+--- a/morsehgp3D_v12/receipts/g4_t2da6_20261008/README.md
++++ b/morsehgp3D_v12/receipts/g4_t2da6_20261008/README.md
+@@ -64,7 +64,7 @@
+ 
+ - **`v12.20261008.t2da6`** (commit `30a69104a`, VM de 11:54:59 à 12:22:51 UTC, arrêt certifié) : première mesure,
+   **avant le pont** de publication. Même verdict, rejeté : grandes 0,911 (0,906 – 0,915), ng00 1,040, ng01 1,037,
+-  ng02 1,000. Le pont ne change donc pas les temps
++  ng02 1,000. Ces campagnes séparées aboutissent au même rejet, sans mesurer causalement le coût isolé du pont
+   ([tableaux](premiere_mesure_t2da6/tableaux_t2d_a6.md), [commandes](premiere_mesure_t2da6/commands_t2da6.tsv)).
+   La campagne de mutants avait échoué (code 8) : deux mutants A6 ne compilaient pas sous `-Werror`. Ils ont été
+   remplacés dans `fd84039c0`. Le rapatriement avait été refusé faute de place locale ; l'archive (SHA-256
+@@ -77,8 +77,8 @@
+ 
+ Les fichiers de `src/tower/`, `tests/tower/` et `tests/mutants/tower.json` touchés par `30a69104a`, `fd84039c0` et
+ `6497ed3b5` reviennent à leur état de `bdfca8fb1` (plancher des mutants de la tour : 40). Le pilote
+-`microbancs/mes_t2d_a6/` reste comme banc. Le pont `CST-0242` n'a plus d'objet dans le produit ; il reste acquis pour
+-une A6b qui reprendrait la tâche d'aide.
++`microbancs/mes_t2d_a6/` reste comme banc. Le pont `CST-0242` n'a plus d'objet dans le produit ; son lemme reste conditionné aux préconditions relues.
++Une A6b qui reprendrait la tâche d'aide devra être relue et qualifiée dans son propre périmètre.
+ 
+ ## Ce que ces sessions n'établissent pas
+ 
