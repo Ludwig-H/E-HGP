@@ -1,0 +1,65 @@
+{
+  "schema": "a6b-retrait-ctest-capture-v1",
+  "lecture_utc": "2026-10-08T17:59:57.226170+00:00",
+  "retrait_git": "8a0716e7470197c95953b38d79f26b8d8f2379fc",
+  "source_base_r1": "47feedc96ee4b4cb85b5a7c590f38c874bb04855",
+  "source_inventory_receipt": "../a6b_retrait_r1/capture.json",
+  "source_inventory_sha256": "68b8bc902817dd2c2ff7240e7452e57657110c8f2639fe5ff89dd3e2b2a70ed3",
+  "primary": {
+    "logs_main/ra6b_ctest.log": {
+      "sha256": "32ef07c295d56c7e88be8df41109f7d74db3c6415f68d974b6ce8b644686fe2c",
+      "bytes": 126392,
+      "mtime_utc": "2026-10-08T17:53:41.654688+00:00"
+    },
+    "logs_main/ra6b_build.log": {
+      "sha256": "525ea2fecf80ed77f610d5dbd87cac11d208bc6998e4712ae6a57338fe7aa85c",
+      "bytes": 17194,
+      "mtime_utc": "2026-10-08T17:43:53.871692+00:00"
+    },
+    "build_v12_u21/Testing/Temporary/LastTest.log": {
+      "sha256": "fb74dc033d50c1e41be2580a9092e6ca8943f10537495b664984c5363913ea80",
+      "bytes": 879842,
+      "mtime_utc": "2026-10-08T17:53:41.654688+00:00"
+    },
+    "build_v12_u21/CMakeCache.txt": {
+      "sha256": "2c8a70f226d9626a3bf5a6f0a758bd119f9b77b0e3d4b9275c6b88ab4b5e4521",
+      "bytes": 17189,
+      "mtime_utc": "2026-10-08T17:40:17.534693+00:00"
+    },
+    "logs_main/ra6b.etat": {
+      "sha256": "a38ce8fa2c6d7abd4d3e94359d85c5339cfacab5615f7001098e33ad14ed2966",
+      "bytes": 17,
+      "mtime_utc": "2026-10-08T17:53:41.659688+00:00"
+    },
+    "logs_main/ra6b_conf.log": {
+      "sha256": "e2b821506770afec3210839ba446e80aa794b4eff16e228e6f0651d4eba87479",
+      "bytes": 1204,
+      "mtime_utc": "2026-10-08T17:40:17.739693+00:00"
+    }
+  },
+  "configuration": {
+    "build_type": "Release",
+    "coord_bits": 21,
+    "cuda": false,
+    "source_tree": "main morsehgp3D_v12"
+  },
+  "artefacts_exclus": [
+    {
+      "name": "mhgp12_tower_region",
+      "mtime_utc": "2026-10-08T17:58:06.205687+00:00"
+    },
+    {
+      "name": "mhgp12_tower_unit",
+      "mtime_utc": "2026-10-08T17:57:31.298687+00:00"
+    },
+    {
+      "name": "mhgp12_catalogue_device_unit",
+      "mtime_utc": "2026-10-08T17:57:55.277687+00:00"
+    },
+    {
+      "name": "mhgp12_tower_region.map",
+      "mtime_utc": "2026-10-08T17:58:06.205687+00:00"
+    }
+  ],
+  "limite": "journaux et source déclarée fermés ; ELF courants postérieurs aux tests et exclus ; aucune attestation continue des sources ou binaires"
+}

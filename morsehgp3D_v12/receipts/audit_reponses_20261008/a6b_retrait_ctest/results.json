@@ -1,0 +1,33 @@
+{
+  "schema": "a6b-retrait-ctest-result-v1",
+  "retrait_git": "8a0716e7470197c95953b38d79f26b8d8f2379fc",
+  "traces_primaire_fermees": 6,
+  "sources_raccordees": 163,
+  "selected": 747,
+  "passed": 746,
+  "skipped": [
+    "mhgp12_support_lidar_sentinel"
+  ],
+  "failed": 0,
+  "driver_ctest_code": 0,
+  "wall_seconds": 587.74,
+  "configuration": {
+    "build_type": "Release",
+    "coord_bits": 21,
+    "cuda": false,
+    "source_tree": "main morsehgp3D_v12"
+  },
+  "portes_terminaison_et_carte": [
+    "mhgp12_tower_pipeline_terminaison",
+    "mhgp12_tower_pipeline_terminaison_opt",
+    "mhgp12_tower_region_carte",
+    "mhgp12_tower_region_carte_juge",
+    "mhgp12_tower_region_carte_juge_opt",
+    "mhgp12_tower_region_carte_opt",
+    "mhgp12_tower_region_inventaire",
+    "mhgp12_tower_region_terminaison"
+  ],
+  "elf_qualifies_par_ce_recu": [],
+  "nouveaux_mutants_qualifies": 0,
+  "natif_execute_par_auditeur": false
+}

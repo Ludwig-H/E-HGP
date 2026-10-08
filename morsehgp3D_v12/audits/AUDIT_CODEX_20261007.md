@@ -1,8 +1,15 @@
 # Audit Codex — état courant v12
 
-8 octobre 2026, 17:59 UTC. R1 `47feedc96` reste la référence admise ; A6b `f2c106d93` rejeté.
+8 octobre 2026, 18:11 UTC. R1 `47feedc96` reste la référence admise ; A6b `f2c106d93` rejeté.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
+
+**B3 livré `545ed987e`, non adopté.** [Prélecture mathématique](../receipts/audit_reponses_20261008/b3_supports_math/README.md) :
+clés et appartenance équivalentes sur catalogues produit réussis ; 957 requêtes Python, aucun natif.
+Surcoût hôte **16 octets/boule**, copie Pool et transfert GPU ; gain à mesurer.
+**[CST-0018 reproduit sur le juge B3](../receipts/audit_reponses_20261008/b3_identite_admission/README.md)** :
+les trois leviers restent « adoptés » après suppression des 35 journaux d'identité, en mode strict.
+Les temps sont relus, les identités seulement résumées. Correctif en préparation ; aucune mesure G4 B3 admise.
 
 **Le contrat FULL multi-séquences à 100 ms reste non tenu.**
 [Deux campagnes A6b relues](../receipts/audit_reponses_20261008/session_a6b_admission/README.md) :
@@ -40,7 +47,8 @@ Une garde acquire sur `g_end_ns` est une expérience proposée, avec limites d'�
 
 [Retrait A6b contrôlé](../receipts/audit_reponses_20261008/a6b_retrait_r1/README.md), puis rejoué contre **`8a0716e74` livré** :
 163 fichiers exacts R1 dont tout `src/`, CST-0241 conservé ; 66 → 55 mutants, onze suppressions et une relocalisation.
-Aucune nouvelle qualification native du retrait par cette comparaison.
+[Portes locales après retrait](../receipts/audit_reponses_20261008/a6b_retrait_ctest/README.md) : 746 passées / une sentinelle sautée,
+Release/u21 sans CUDA ; ELF déjà reconstruits pour B3, exclus de cette clôture de journaux.
 [Corrections documentaires proposées](../receipts/audit_reponses_20261008/a6b_documentation/README.md) : agrégats, IC et priorité G.
 
 **Pas de nouveau FULL CPU sur ng00–02.** [Protocole](../receipts/audit_reponses_20261008/full_cpu_actualisation_protocole/README.md)
@@ -49,17 +57,10 @@ finition déjà parallèle, feuille16 sans gain global face à24. Comparaison v1
 FULL exclut lecture, masque, validation, FUL1 et libération. `cpu_ns` n'est pas une latence CPU seule ;
 `--sequentiel` conserve le catalogue GPU.
 
-**[T1-d2 admis](../receipts/audit_reponses_20261008/session_t1d_admission/README.md)** : C GPU K5 26,23 / 23,20 / 26,46 ms,
-IC95 hauts 1,0034 / 1,0063 / 1,0082 ; seuil 1 % sur C seul. Port strict intégré150392, attendu36 corrigé8b9eab.
-12 succès / 24 refus ; MHGP12DP omet niveaux/table, FUL1 sans ces budgets.
-[Identité complémentaire](../receipts/audit_reponses_20261008/t1d_identite_flux_proposition/README.md) proposée : 46 injections,
-avec [CTest46 requis](../receipts/audit_reponses_20261008/t1d_identite_flux_ctest/README.md).
-[Mémoire proposée](../receipts/audit_reponses_20261008/t1d_metadonnees_proposition/README.md) : plan compté/coexistence réservée,
-propriétaires en pseudocode ; niveaux/rassemblement inclus dans C, omis du détail appareil.
-
-**Petits LiDAR** : [C3](../receipts/audit_reponses_20261008/session_c3_admission/README.md), 132 réels W48/cache8 Gio,
-K5 CPU/GPU 25,003/7,856 ms ; K10 46,420/14,571 ms. Huit refus `wide_leaf` ; W1 absent, W48 pénalise ≤150 sites.
-[Deux campagnes cache](../receipts/audit_reponses_20261008/session_c3_apparies/README.md) refusées A/A : aucune absence d'effet conclue.
+**T1-d2 / petits LiDAR** : [T1-d2 admis](../receipts/audit_reponses_20261008/session_t1d_admission/README.md),
+C GPU K5 26,23 / 23,20 / 26,46 ms ; preuve niveaux/table et mémoire encore à compléter (registre).
+[C3](../receipts/audit_reponses_20261008/session_c3_admission/README.md) : 132 réels W48, K5 CPU/GPU 25,003/7,856 ms ;
+K10 46,420/14,571 ms. Huit refus `wide_leaf`, W1 absent ; deux comparaisons cache refusées A/A.
 
 **Massifs — record GPU : Paris sans sol, 9 111 422 sites, FULL K5 en 46,453 s à froid.**
 [L2t admis](../receipts/audit_reponses_20261008/session_l2t_admission/README.md), catalogue GPU/tour CPU W48, u21 :
@@ -68,8 +69,8 @@ Source 8b9 identique à R1 ; archive/arrêt clos, ELF initial seul. Paris brut 1
 Record [CPU L2](../receipts/audit_reponses_20261008/session_l2_admission/README.md) : Paris brut 14,552M en 165,789 s froid.
 
 [L1t admis](../receipts/audit_reponses_20261008/session_b1t_admission/README.md) : K5 GPU chaud Boreas 1,513M 7,185 s,
-Marseille sans sol 2,465M 8,095 s, Meadow 6,181M 29,621 s ; une chaude par cas.
-K10 GPU froid : Boreas 38,620 s, Marseille 38,521 s. 14 succès / 5 refus ; FUL1 jusqu'à1,6M, ELF final absent.
+Marseille sans sol 2,465M 8,095 s, Meadow 6,181M 29,621 s ; une chaude par cas. K10 froid : 38,620 / 38,521 s
+sur Boreas/Marseille. FUL1 limité à 1,6M, ELF final absent ; aucune série statistique.
 
 **CST-0243 ouvert** : TU Wien sans sol 5,200M réussit 32,856 s à froid puis refuse la passe1.
 [Diagnostic](../receipts/audit_reponses_20261008/b1t_tuwien_memoire/README.md) : 79,99 Gio CUDA gardés, 8,012 Gio de marge ; stade inconnu.
