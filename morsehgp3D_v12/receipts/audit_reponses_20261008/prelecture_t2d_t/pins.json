@@ -1,0 +1,148 @@
+{
+  "observed_utc": "2026-10-08 03:19:26 UTC",
+  "base_commit": "7398aed7d8dd5595c880aa8a8677ecf05a8f2a32",
+  "comparison_commit": "039b2657e8b1deb0c6538a408499d38a5f79d081",
+  "native_executed": false,
+  "new_timings": false,
+  "sources": [
+    {
+      "path": "morsehgp3D_v12/src/tower/forest_births.cpp",
+      "sha256": "bde6fd96337017565a70de1e660c0353df63cd719540bd0e60a281c3e5f617ae",
+      "bytes": 5748,
+      "identical_at_comparison_commit": true
+    },
+    {
+      "path": "morsehgp3D_v12/src/tower/forest_kernel.cpp",
+      "sha256": "9633c2b4e07ffb3f47c2f3b6f49f493b01cf75bbccd6dbf70b4bc86278f119b9",
+      "bytes": 7965,
+      "identical_at_comparison_commit": true
+    },
+    {
+      "path": "morsehgp3D_v12/src/tower/forest_build.cpp",
+      "sha256": "8cbe7fee1e1285dfab43d4b28fc9735cfff4be8b918dfaa578ed8b2d40a5df81",
+      "bytes": 8757,
+      "identical_at_comparison_commit": true
+    },
+    {
+      "path": "morsehgp3D_v12/src/tower/forest_stages.cpp",
+      "sha256": "7cf04367594b33873096ec3c10cba517e09195eeb1e2d8d4cc6026f9ff2aa5f5",
+      "bytes": 11479,
+      "identical_at_comparison_commit": true
+    },
+    {
+      "path": "morsehgp3D_v12/src/tower/registry_branches.cpp",
+      "sha256": "63a86cde27fe8108cf1e2e6753bcf6a4e49dd2b3ac5b7dcad9da179e48865e5a",
+      "bytes": 8563,
+      "identical_at_comparison_commit": true
+    },
+    {
+      "path": "morsehgp3D_v12/src/tower/vertical_images.cpp",
+      "sha256": "b0543caf0adb031cf58f59d7eb337aa79c41ad226f28da527456e22f6b0df8eb",
+      "bytes": 5117,
+      "identical_at_comparison_commit": true
+    },
+    {
+      "path": "morsehgp3D_v12/src/sched/sched.hpp",
+      "sha256": "de9bbd3b67cc701c19ba46ee627c4212ca8e324fc52f35a9fce466bb923a80f1",
+      "bytes": 3246,
+      "identical_at_comparison_commit": true
+    },
+    {
+      "path": "morsehgp3D_v12/src/core/buffer.hpp",
+      "sha256": "8e4d84665e90308ee9572a729731711bb419e3a565fd4dd11b5bd56ab6a92401",
+      "bytes": 14629,
+      "identical_at_comparison_commit": true
+    },
+    {
+      "path": "morsehgp3D_v12/tests/tower/tower_dumps.cpp",
+      "sha256": "0e5685c22031ee9aa37814df7663a68d05018eaf91cc21b4a57115442971b82c",
+      "bytes": 18010,
+      "identical_at_comparison_commit": true
+    }
+  ],
+  "historical_traces": [
+    {
+      "label": "v12_tour_TMV/temps6_f1/ng00_k5.v12.json",
+      "sha256": "9df9f003c39e678536d1d84ecfff8635cba94566c9053433f8ad9a39e66f897a",
+      "bytes": 3799,
+      "mtime_ns": 1791425457301819596,
+      "K": 5,
+      "fils": 1,
+      "repetitions": 3,
+      "T_wall_min_ns": 121981084,
+      "order_minima_ns": [
+        {
+          "k": 2,
+          "births": 13517361,
+          "leaves": 1805342,
+          "kernel": 4987941,
+          "history": 1367803,
+          "cohorts": 18222,
+          "max_cohort": 24
+        },
+        {
+          "k": 5,
+          "births": 5420618,
+          "leaves": 6327114,
+          "kernel": 20033995,
+          "history": 6125954,
+          "cohorts": 9381,
+          "max_cohort": 10
+        }
+      ]
+    },
+    {
+      "label": "v12_tour_TMV/temps6_f1/ng00_k10.v12.json",
+      "sha256": "a3810a4751ca80cfee15f65ff93db916fb897fba84c531bf19bf60c4f02b6822",
+      "bytes": 7258,
+      "mtime_ns": 1791425476855819948,
+      "K": 10,
+      "fils": 1,
+      "repetitions": 3,
+      "T_wall_min_ns": 492431076,
+      "order_minima_ns": [
+        {
+          "k": 2,
+          "births": 14252413,
+          "leaves": 1716138,
+          "kernel": 5073991,
+          "history": 1447082,
+          "cohorts": 18222,
+          "max_cohort": 24
+        },
+        {
+          "k": 10,
+          "births": 6234918,
+          "leaves": 18891501,
+          "kernel": 55898588,
+          "history": 21976039,
+          "cohorts": 5454,
+          "max_cohort": 6
+        }
+      ]
+    }
+  ],
+  "planning_documents": [
+    {
+      "label": "v12_tour_TMV/outils/temps6.sh",
+      "sha256": "e17410c1b2598accc3de3bd9d6305d39d3db6ef9134e40339247795523bbed7e",
+      "bytes": 886
+    },
+    {
+      "label": "v12_t2d_A/RAPPORT.md",
+      "sha256": "83288f573454013a0dbf19c2f20ce457d1d18ecb7c69755d1f9a222807b0de44",
+      "bytes": 616
+    },
+    {
+      "label": "consignes_t2d_A.md",
+      "sha256": "020aba956d1eddea90595f18dfff6c1dc0aeb97e1c4dbe1f3b11535eed9ed59b",
+      "bytes": 2629
+    },
+    {
+      "label": "consignes_t2d_commun.md",
+      "sha256": "2b834a5204e2cc1ca64b42608a035bf2b118b58b8d52faa64e9ab475e6a85854",
+      "bytes": 3948
+    }
+  ],
+  "readme_sha256": "243096f4ab208da8f18d35d1b76b8db5585ffbec6ea5fd02b04d6d458849f199"
+}

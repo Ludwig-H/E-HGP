@@ -1,0 +1,25 @@
+{
+  "bytes": 2435921,
+  "commit": "c9ac60f20c741d9d493f4900fd8aec4590aaa5c5",
+  "files": 342,
+  "package_sha256": "aa75b3162d783d6889a8d23fd7c439e39e089a962fb8e2f25704602fe847f3db",
+  "receipt_artifacts_sha256": {
+    "README.md": "b621265898e4b38a7dd96189ff1bb99e5a5cf377dc7343dd4eb17e44db8790b0",
+    "check.py": "a5625551d6ed39e7a762c3d5f686629ef5b2f16c5a4fa45146fb1a6abf5304b8"
+  },
+  "roots": [
+    "morsehgp3D_v12/src",
+    "morsehgp3D_v12/bench",
+    "morsehgp3D_v12/tests",
+    "morsehgp3D_v12/cmake",
+    "morsehgp3D_v12/CMakeLists.txt"
+  ],
+  "scope_files": {
+    "morsehgp3D_v12/CMakeLists.txt": 1,
+    "morsehgp3D_v12/bench": 41,
+    "morsehgp3D_v12/cmake": 4,
+    "morsehgp3D_v12/src": 128,
+    "morsehgp3D_v12/tests": 168
+  },
+  "source_manifest_sha256": "752316d452c96ff26fc3bb5d3cd4b53528a08a8e834c8b8a7632a556ce0bf128"
+}

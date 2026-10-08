@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-8 octobre 2026, base publiée **`cffe3e0da`**.
+8 octobre 2026, base publiée **`039b2657e`**.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
 
@@ -18,7 +18,8 @@ GPU K5 : maxima des médianes de processus 160,76 / 127,80 / 164,64 ms ; maxima 
 33 179–99 099 sites. Aucune trame sous le maximum de 100 ms. Les 610 passes et leurs empreintes concordent.
 Mur de Cloud/index à T/M/V/R ; segmentation, lecture, validation, FUL1 et libération hors mur.
 [Sources/commandes et arrêt ciblé vérifiés](../receipts/audit_reponses_20261008/session_k_provenance/README.md),
-03:03:03 UTC ; **snapshot, sans hash binaire ni journal de compilation rapatrié**. Aucun CPU·s par trame.
+03:03:03 UTC ; [342 sources/configurations identiques à `c9ac60f20`](../receipts/audit_reponses_20261008/session_k_sources/README.md).
+**Snapshot, sans hash binaire ni journal de compilation rapatrié**. Aucun CPU·s par trame.
 
 Face aux mesures historiques v11 : GPU désormais plus rapide, CPU toujours plus lent ; comparaison descriptive,
 pas A/B apparié. **Catalogue CPU : 274–329 ms**. Côté GPU, G coûte 44–57 ms, T 26–38 ms, R 12–15 ms.
@@ -42,6 +43,10 @@ GPU u24/u32, petits nuages et millions restent à qualifier ; aucun CPU K10 jou�
 
 **Aide au développeur et prochains contrôles.**
 
+- **T2-d actif** : [prélecture du recouvrement](../receipts/audit_reponses_20261008/prelecture_t2d_t/README.md) :
+  Pool non réentrant, admission commune des coexistences, dépendances V/R et nouvelle enveloppe de temps à déclarer.
+  [Protocole G](../receipts/audit_reponses_20261008/t2d_g_prelecture/README.md) : les deux bras sont désormais Gc ;
+  séparer garde, index exact et changement déclaré de sauts. Aucun défaut du futur prototype présumé.
 - **MES-FULL `0018`** : [lacunes d’admission](../receipts/audit_reponses_20261008/mes_full_admission/README.md),
   [pilote livré `c9ac60f20` aux mêmes octets](../receipts/audit_reponses_20261008/mes_full_livraison/README.md), présent
   dans K : GPU inconnu, contreflux de temps/métadonnées et cohortes incomplètes admis. Bruts à contre-juger ;

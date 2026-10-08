@@ -1,0 +1,14 @@
+{
+  "commit": "039b2657e8b1deb0c6538a408499d38a5f79d081",
+  "receipt_artifacts_sha256": {
+    "README.md": "b07d9cf54b1c0df6301f410bcd49ad920b198a6a76b14dec53330e987f6ddf02",
+    "check.py": "d0719a314d9ec42f9fbaa01000bea060b70ac2d2af692ee3665a94ea19c3269c"
+  },
+  "source_sha256": {
+    "morsehgp3D_v12/bench/full_probe.cpp": "815cb33f4f560943497644031759e25d9dd8b60d86b8aa377e54db53a9099e0d",
+    "morsehgp3D_v12/bench/tower_probe.cpp": "5c68d7225ac22d06dbb5a40bb45357c045ab0e7e48f530cfb4dbb87e425b3241",
+    "morsehgp3D_v12/microbancs/mes_t2c_g/pilote_t2c.py": "06f10189651b1f9d42c563c4cc07bc674f1df780630a17a469598aa968fa0e96",
+    "morsehgp3D_v12/src/num/guard.cpp": "459b99dfe154f32d8ab468d3a410a1bd74ca4c94363634244f37c8cdf7fc720b",
+    "morsehgp3D_v12/src/num/guard.hpp": "8c2afab759cce1b7fe90336361a5fd7b653862378814c614c95f0b58086a2884"
+  }
+}
