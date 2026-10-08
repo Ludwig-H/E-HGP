@@ -234,6 +234,8 @@ def check_full(row, i, case, sites, label):
         return 'cles de la passe %d : %s' % (i, sorted(set(row) ^ keys))
     if any(not is_int(row[k]) for k in INT_KEYS):
         return 'entier attendu (passe %d)' % i
+    if row['wall_ns'] == 0 or row['sites'] == 0:
+        return 'mur ou nombre de sites nul (passe %d)' % i  # mur nul : refuse avant toute statistique (auditeur)
     if row['pass'] != i or row['status'] != 'ok' or row['trame'] != label or \
             row['voie'] != VOIES[case['voie']] or row['kmax'] != case['k'] or row['threads'] != case['fils'] or \
             row['coord_bits'] != BITS_EXPECTED or row['sites'] != sites:
@@ -352,7 +354,10 @@ def warm_pass(passes):
 
 
 def slope(points):
-    """Pente des moindres carres de log(y) contre log(x) ; None sous deux points distincts."""
+    """Pente des moindres carres de log(y) contre log(x) ; None sous deux points distincts ou si une valeur n'est pas
+    strictement positive (garde : la lecture refuse deja les murs nuls)."""
+    if any(x <= 0 or y <= 0 for x, y in points):
+        return None
     xs = [math.log(x) for x, _ in points]
     ys = [math.log(y) for _, y in points]
     if len(set(xs)) < 2:

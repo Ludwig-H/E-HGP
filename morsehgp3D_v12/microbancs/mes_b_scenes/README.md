@@ -94,13 +94,20 @@ python3 pilote_b.py --essai --sonde <mhgp12_full_probe> ...   # essai local, voi
 
 Sorties : `rapport_b.json`, `tableaux_b.md`, `brut/` (sorties de chaque cas), `construction.log`.
 
-**Porte** : [`test_pilote_b.py`](test_pilote_b.py) (Python 3.10 nu, aussi sous `-O`) : lecture stricte (une sortie
-conforme admise ; vingt et une mutations du schéma, dont quatre de la mémoire par étage, et les cinq corruptions de la
-[contrelecture de l'auditeur](../../receipts/audit_reponses_20261008/mes_b_prelecture/README.md) refusées), refus et
-échecs publiés comme résultats, verdicts B1 à B4 aux seuils, empreintes entre passes et entre voies, étiquettes
-uniques, pilote complet sur une sonde simulée (délai et seuil d'empreinte) ;
-[`mutants_pilote_b.py`](mutants_pilote_b.py) : vingt-deux mutants du pilote, tous tués (un mutant équivalent écarté,
-dit dans le fichier).
+**Porte** : [`test_pilote_b.py`](test_pilote_b.py) (Python 3.10 nu, aussi sous `-O`). Elle vérifie :
+
+- la lecture stricte : une sortie conforme admise ; vingt-deux mutations du schéma refusées, dont quatre de la
+  mémoire par étage et le mur nul de la
+  [contre-lecture de livraison](../../receipts/audit_reponses_20261008/mes_b_livraison/README.md) ; les cinq
+  corruptions de la [prélecture de l'auditeur](../../receipts/audit_reponses_20261008/mes_b_prelecture/README.md)
+  refusées ;
+- les refus et échecs publiés comme résultats ;
+- les verdicts B1 à B4 aux seuils ;
+- les empreintes entre passes et entre voies, et les étiquettes uniques ;
+- le pilote complet sur une sonde simulée (délai et seuil d'empreinte).
+
+[`mutants_pilote_b.py`](mutants_pilote_b.py) : vingt-quatre mutants du pilote, tous tués ; un mutant équivalent est
+écarté, et le fichier dit pourquoi.
 
 ## Premier essai local (8 octobre, indicatif)
 

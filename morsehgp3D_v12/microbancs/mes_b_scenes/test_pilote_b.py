@@ -2,8 +2,9 @@
 """Porte de MES-B (lecteur, verdicts et pilote), sans sonde ni donnees reelles. Python 3.10 nu, aucun assert (tient
 sous -O).
 
-  lecture        une sortie appareil conforme est admise ; vingt et une mutations du schema (dont quatre de la
-                 memoire par etage : etage absent, pic incoherent avec pic_octets, usage au-dela du pic, booleen) et
+  lecture        une sortie appareil conforme est admise ; vingt-deux mutations du schema (dont quatre de la
+                 memoire par etage : etage absent, pic incoherent avec pic_octets, usage au-dela du pic, booleen ;
+                 et le mur nul de la contrelecture de livraison, refuse avant toute statistique) et
                  les cinq corruptions de la contrelecture de l'auditeur (cle repetee, booleen, ouverture, 2^64, NaN)
                  sont refusees comme sorties illisibles (controle manquant), jamais comme resultats ;
   issues         refus de la sonde (code 2, ressources ou degenerescence) publie comme resultat, avec ses passes deja
@@ -88,6 +89,8 @@ def check_reading(errors):
         'memoire_pic_incoherent': lambda r: r['memoire_octets'].update(C=[4, 9]),
         'memoire_usage_sup_pic': lambda r: r['memoire_octets'].update(TMVR=[9, 8]),
         'memoire_booleen': lambda r: r['memoire_octets'].update(P=[True, 2]),
+        'mur_nul': lambda r: (r.update(wall_ns=0), r['etapes_ns'].update({k: 0 for k in r['etapes_ns']}),
+                              r['g_ns'].update(tables=0, resolution=0)),
     }
     for name, mutate in mutations.items():
         state = pilote_b.parse_output(0, device_output(mutate=mutate), CASE, SITES, LABEL)
@@ -171,6 +174,8 @@ def check_verdicts(errors):
     k10_refused = linear + [result('i', 1_000_000, 0, k=10, etat='refus', passes=0)]
     if pilote_b.verdicts(k10_refused, series)['B4']['etat'] != 'non tenu':
         errors.append('verdicts : refus a K10 ignore par B4')
+    if pilote_b.slope([(1_000_000, 0.0), (2_000_000, 1.0)]) is not None:
+        errors.append('verdicts : pente calculee sur un mur nul')
     partial = [result('a', 1_000_000, 1.5), result('b', 2_000_000, 3.0)]
     if pilote_b.verdicts(partial, series)['B3']['etat'] != 'non evalue':
         errors.append('verdicts : serie incomplete evaluee')
@@ -273,7 +278,7 @@ def main():
         print(error, file=sys.stderr)
     if errors:
         return 1
-    print('test_pilote_b_ok lecture=27 issues=7 verdicts=8 empreintes=3 etiquettes=12 pilote=2')
+    print('test_pilote_b_ok lecture=28 issues=7 verdicts=9 empreintes=3 etiquettes=12 pilote=2')
     return 0
 
 

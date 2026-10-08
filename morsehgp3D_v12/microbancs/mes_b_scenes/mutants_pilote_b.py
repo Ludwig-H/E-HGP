@@ -48,6 +48,8 @@ MUTANTS = {
                                "row['pic_octets']:", "mem[k][0] > mem[k][1] for k in MEM_STAGES):"),
     'memoire_usage_libre': ("                mem[k][0] > mem[k][1] for k in MEM_STAGES)",
                             "                False for k in MEM_STAGES)"),
+    'mur_nul_admis': ("    if row['wall_ns'] == 0 or row['sites'] == 0:", "    if False:"),
+    'pente_sans_garde': ("    if any(x <= 0 or y <= 0 for x, y in points):\n        return None\n", ""),
 }
 
 
