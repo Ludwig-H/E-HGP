@@ -1,0 +1,47 @@
+{
+  "pin": "8dc66863fc8cb89690384d462a2a9b010a87ca7c",
+  "observed_utc": "2026-10-08T09:15:08Z",
+  "sources": {
+    "morsehgp3D_v12/src/tower/pipeline_run.cpp": "f7e077d847d060c0830591496cf8ded03b8e534f0533420e42fb21d1862377bc",
+    "morsehgp3D_v12/tests/tower/pipeline_terminaison.py": "32009948f1899b65ad79e0343c2d99c11c08709e4a24f7dfad50b15f2987b08f",
+    "morsehgp3D_v12/tests/tower/tests.cmake": "810bb4674fcbaeff87df46e52ca7e9b6245df9a7e7c55410bae398d493dfdcbb",
+    "morsehgp3D_v12/tests/mutants/tower.json": "6021fa1e932037d2843a1781bbdf8f3779806688ae3fe3eb1fb03458bc7b8673"
+  },
+  "initial_model_sha256": "da26d0e8eb54b34fb5150504276f53781e080ecaade8016c819035d5c0aef1d3",
+  "ast_functions_equal_modulo_exception_and_docstring": [
+    "transitions",
+    "graph",
+    "components",
+    "fair_cycles",
+    "abandoned"
+  ],
+  "commands": [
+    {
+      "mode": "normal",
+      "code": 0,
+      "stdout": "pipeline_terminaison_ok cas=6 periode_ancienne=16 source=conforme",
+      "stderr": ""
+    },
+    {
+      "mode": "-O",
+      "code": 0,
+      "stdout": "pipeline_terminaison_ok cas=6 periode_ancienne=16 source=conforme",
+      "stderr": ""
+    },
+    {
+      "mode": "mutant normal",
+      "code": 1,
+      "stdout": "",
+      "stderr": "pipeline_terminaison : source : retrait qui garde son passage par zero absent ou repete"
+    },
+    {
+      "mode": "mutant -O",
+      "code": 1,
+      "stdout": "",
+      "stderr": "pipeline_terminaison : source : retrait qui garde son passage par zero absent ou repete"
+    }
+  ],
+  "native": false,
+  "sources_stable": true,
+  "source_commit": "e78904c49b6d30860c89cb182d534f56c12a0c52"
+}

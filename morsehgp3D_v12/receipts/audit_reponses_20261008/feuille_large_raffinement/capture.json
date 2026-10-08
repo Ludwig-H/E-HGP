@@ -1,0 +1,11 @@
+{
+  "pin": "8dc66863fc8cb89690384d462a2a9b010a87ca7c",
+  "sources": {
+    "morsehgp3D_v12/src/catalogue/traversal_kernels.hpp": "3570a441e91ad60bb2863cfa6c0c83c77081a151edfcf0c8069278677e6d2477",
+    "morsehgp3D_v12/src/catalogue/traversal_records.hpp": "76e5c7712a4c6f172c3c23d8296b7f11145be5fc339a4b5b969e5d0f8c27aea6",
+    "morsehgp3D_v12/src/catalogue/traversal_driver.hpp": "971c47dfe40394398d1dc42fb5c14b47031940b9db031be4dc500daa46f5eae9",
+    "morsehgp3D_v12/src/catalogue/leaf_common.hpp": "a52cca4a03d663e452422e82fcf6395e4733857877e0818921256b7bf7dfe860",
+    "morsehgp3D_v12/receipts/audit_reponses_20261008/feuille_large_proposition/README.md": "819afc369d52cd3de251c0612963c9277f7b5c6769939d1caedfc379540b441d",
+    "morsehgp3D_v12/receipts/audit_reponses_20261008/session_c2_admission/README.md": "945a8d64e10c5903d9741e11f6a2af1a9762108f5d4d6989ac92605452ec4c97"
+  }
+}

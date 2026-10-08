@@ -4,11 +4,15 @@
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
 
-**Priorité : [CST-0241, terminaison de A](../receipts/audit_reponses_20261008/a_terminaison/README.md).**
-Deux fils peuvent se réannoncer indéfiniment après tout travail fini : cycle SC équitable de 16 transitions.
-Correctif minimal proposé (`last = fetch_sub(...) == 1`) ; six modèles bornés sans cycle après correction.
-[Preuve pour N fils et protocole de porte déterministe](../receipts/audit_reponses_20261008/a_terminaison_porte/README.md).
-Aucun incident natif observé ni lien avec MES-M0 ; intégration et porte native à faire.
+**CST-0241 : [correctif livré e78904c49](../receipts/audit_reponses_20261008/a_terminaison_raccord/README.md).**
+Postimage exacte du patch `last = fetch_sub(...) == 1` ; port des cinq fonctions du modèle fidèle.
+Porte Python normale/−O passée ; mutant refusé par le contrôle textuel, **pas par un entrelacement natif**.
+[Preuve pour N et protocole natif déterministe](../receipts/audit_reponses_20261008/a_terminaison_porte/README.md) transmis ;
+porte native encore ouverte. Aucun incident natif observé, aucun lien avec MES-M0.
+
+**[FULL M en cours, source957](../receipts/audit_reponses_20261008/session_m_protocole/README.md)** : FULL GPU K5/K10, CPU K5,
+37 trames et apparié cache8G/recouvert/séquentiel. Ce paquet précède le correctif0241 et nos lecteurs proposés.
+Aucun chrono M admis ; cohortes, identité, ressources et fermeture seront contre-lues au retour.
 
 **Derniers temps G4 : A adopté, contrat FULL 100 ms non tenu.**
 [Campagne admise](../receipts/audit_reponses_20261008/session_t2da_admission/README.md), u21/W48,
@@ -34,10 +38,8 @@ FULL englobe Cloud/index→T/M/V/R ; lecture, masque, validation, FUL1 et libér
 A était mesuré avec `--recouvert` ; cette route est devenue le défaut en `86d7e39d`.
 Les prises CPU, petits nuages, K10 et massifs ci-dessous précèdent cette bascule.
 
-**[Session B close et arrêt certifié](../receipts/audit_reponses_20261008/session_b_provenance/README.md)** :
-724 portes socle, **7/7 LiDAR dont MES-M0**, trois CTests mutants passés au code41d4, aucun skip.
-Cela ajoute la preuve LiDAR manquante ; l'[ancienne session A](../receipts/audit_reponses_20261008/session_a_timeout/README.md)
-reste interrompue au plafond externe180s, sans deadlock A établi.
+[Session B close, arrêt certifié](../receipts/audit_reponses_20261008/session_b_provenance/README.md) :
+724 portes socle, 7/7 LiDAR dont MES-M0, trois CTests mutants passés au code41d4.
 
 **Priorité développeur : distinguer les fins observées et les durées.** [Diagnostic A](../receipts/audit_reponses_20261008/session_a_diagnostic/README.md) :
 R5 est le dernier marqueur **43/45 fois sur ng02 et 94/111 sur les 37 trames** ; ordres1/2 surtout sur ng00/ng01.
@@ -66,7 +68,8 @@ ETH3D `wide_leaf`, Lyon `memory_budget`. Sans chaud/GPU/K10/digest L2 ; aucun pl
 quatre fausses admissions, dont preuves FUL1 absentes et ressources forgées.
 [Cohorte](../receipts/audit_reponses_20261008/apparie_cohorte/README.md) : quatre autres, dont cohorte vide adoptant même
 un bras plus lent ; deux minima relâchés aussi refusés par la proposition. Huit auto-tests et positif simulé conservés.
-[Patch combiné applicable sur0e62](../receipts/audit_reponses_20261008/apparie_livraison/README.md),
+[Composition des trois correctifs](../receipts/audit_reponses_20261008/apparie_composition_triple/README.md),
+avec [fermeture du binaire](../receipts/audit_reponses_20261008/apparie_fermeture/README.md) et
 [fixtures LF corrigées](../receipts/audit_reponses_20261008/pilotes_fixtures_recouvert/README.md) ; aucune mesure réelle invalidée. [Pilotes de bascule](../receipts/audit_reponses_20261008/pilotes_bascule/README.md)
 compatibles avec86d ; séparateur de tableau MES-FULL à corriger d'une colonne.
 
@@ -81,9 +84,9 @@ G CPU K5 W48 : **53,092→48,576 / 42,023→38,885 / 48,222→45,007 ms** ; gain
 Lot, report, témoins et census combiné adoptés ; garde et proposition seules rejetées.
 [Retrait L4 livré957e9784f](../receipts/audit_reponses_20261008/b_census_raccord/README.md) : dix fichiers du census retenu exacts ;
 son G mesuré vaut **49,037 /39,199 /45,323 ms**, avec les réserves de base902 ci-dessous.
-FULL GPU **séquentiel informatif** du lot : **157,181 /126,940 /164,279 ms**.
 Ce sont902 et902+B, sans A/C/pool récent ; **aucun transfert au FULL recouvert actuel** ni au lot après retrait de L4.
 K5 garde ses compteurs ; K10 change deux routes d'une unité avec objets identiques. B ne traite pas le catalogue CPU dominant.
-[Raccord B/A](../receipts/audit_reponses_20261008/t2d_b_raccord_a/README.md) favorable sur emprunts et espaces privés, sans temps déduit.
-[Extension de feuille](../receipts/audit_reponses_20261008/feuille_large_proposition/README.md) proposée ; compteurs et coût combinatoire ouverts.
+[Extension de feuille](../receipts/audit_reponses_20261008/feuille_large_proposition/README.md) et
+[raffinement certifié des centres](../receipts/audit_reponses_20261008/feuille_large_raffinement/README.md) proposés :
+réduction locale possible, égalités massives persistantes ; pas de borne globale ni gain acquis.
 Dépendances A, pool, C et autres propositions CPU/S*/T/K1/R : registre. Audit sources/Python, aucun moteur ni GCP lancé.

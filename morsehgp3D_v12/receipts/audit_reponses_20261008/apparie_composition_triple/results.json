@@ -1,0 +1,12 @@
+{
+  "ast_composition_exact": true,
+  "results": {
+    "absent_identity": "refuse",
+    "changed_probe": "refuse",
+    "empty_cohort": "refuse",
+    "missing_closure": "refuse",
+    "positive": "juge"
+  },
+  "scope": "two fake Python campaigns, LF guards and repaired fixtures; no native engine",
+  "triple_sha256": "1e2f1ea8c2ab8b98ac602b78ae9454a06034a8244b945292be61832586e81d70"
+}

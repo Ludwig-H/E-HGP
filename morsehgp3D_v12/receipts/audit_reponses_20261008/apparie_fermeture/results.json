@@ -1,0 +1,74 @@
+{
+  "candidate_sha256": "5f293df6ad03cfe103c43e49b842acd4914ecefceef3f2d18353250493b5f542",
+  "result": {
+    "missing_final_hash": "refuse",
+    "proposed": {
+      "changed_after_first_identity": {
+        "calculated_verdict": "refuse",
+        "events": [
+          "comment appended after first identity call"
+        ],
+        "final_sha256": "6ef0061f21b01625f701651f6f0e20ad7780d4682d09ffe4c42f89f3d0adaaf7",
+        "information_refusals": 0,
+        "opening_equals_final_bytes": false,
+        "probe_calls": 64,
+        "reported_final_sha256": "6ef0061f21b01625f701651f6f0e20ad7780d4682d09ffe4c42f89f3d0adaaf7"
+      },
+      "deleted_after_last_information": {
+        "calculated_verdict": "refuse",
+        "events": [
+          "probe deleted after last information call"
+        ],
+        "final_sha256": null,
+        "information_refusals": 0,
+        "opening_equals_final_bytes": false,
+        "probe_calls": 64,
+        "reported_final_sha256": null
+      },
+      "positive": {
+        "calculated_verdict": "juge",
+        "events": [],
+        "final_sha256": "f93c8119533e12124207304adc9c7200b947baa941a590170f14ac3b6c270801",
+        "information_refusals": 0,
+        "opening_equals_final_bytes": true,
+        "probe_calls": 64,
+        "reported_final_sha256": "f93c8119533e12124207304adc9c7200b947baa941a590170f14ac3b6c270801"
+      }
+    },
+    "published": {
+      "changed_after_first_identity": {
+        "calculated_verdict": "juge",
+        "events": [
+          "comment appended after first identity call"
+        ],
+        "final_sha256": "6ef0061f21b01625f701651f6f0e20ad7780d4682d09ffe4c42f89f3d0adaaf7",
+        "information_refusals": 0,
+        "opening_equals_final_bytes": false,
+        "probe_calls": 64,
+        "reported_final_sha256": null
+      },
+      "deleted_after_last_information": {
+        "calculated_verdict": "juge",
+        "events": [
+          "probe deleted after last information call"
+        ],
+        "final_sha256": null,
+        "information_refusals": 0,
+        "opening_equals_final_bytes": false,
+        "probe_calls": 64,
+        "reported_final_sha256": null
+      },
+      "positive": {
+        "calculated_verdict": "juge",
+        "events": [],
+        "final_sha256": "f93c8119533e12124207304adc9c7200b947baa941a590170f14ac3b6c270801",
+        "information_refusals": 0,
+        "opening_equals_final_bytes": true,
+        "probe_calls": 64,
+        "reported_final_sha256": null
+      }
+    }
+  },
+  "scope": "fake Python probe only; endpoint byte identity, not continuous immutability",
+  "source_commit": "0e62a723202732d69e430349c0b2a7b498cbb49c"
+}

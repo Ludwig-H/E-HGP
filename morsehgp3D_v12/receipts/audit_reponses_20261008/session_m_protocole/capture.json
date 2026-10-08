@@ -1,0 +1,224 @@
+{
+  "observed_utc": "2026-10-08T09:19:35.751043+00:00",
+  "state": "preparation_no_results_no_stop_proof",
+  "package_bytes": 9277035,
+  "package_sha256": "b257b2110ba7e1d75283ad343ace7f5bbfb230bb63b8879b63622f9ba3d64ac5",
+  "plan_sha256": "15a3787556a3216b9036e694ee3962fdf262745b4a83207d3e7f6417a570e04e",
+  "source_git": "957e9784fb19ccd2d6348e779ed8b7affadc1f3d",
+  "scopes": [
+    "morsehgp3D_v12/src/",
+    "morsehgp3D_v12/bench/",
+    "morsehgp3D_v12/tests/",
+    "morsehgp3D_v12/cmake/",
+    "morsehgp3D_v12/CMakeLists.txt"
+  ],
+  "files_exact": 356,
+  "source_inventory_sha256": "6de97025dd870b5dae2eed3a3d9dc779d51028c353a316774f6d4db28e635c85",
+  "source_files": {
+    "morsehgp3D_v12/bench/full_probe.cpp": {
+      "sha256": "00668cb9da02effaaea07eee3e7609e0a02221f4bff6773d9024c330bf656b42",
+      "bytes": 27501
+    },
+    "morsehgp3D_v12/microbancs/mes_apparie/pilote_apparie.py": {
+      "sha256": "fe22a6813ebb4f801de011fb06dc7cc6af754494c9c4e2b1148aa87dfb4925d1",
+      "bytes": 28664
+    },
+    "morsehgp3D_v12/microbancs/mes_d6_profils/pilote_d6.py": {
+      "sha256": "bb1de862175814467664ae83b377238771511c264eca4150905fbec5ffe5db4f",
+      "bytes": 26780
+    },
+    "morsehgp3D_v12/microbancs/mes_full/pilote_full.py": {
+      "sha256": "407e412bf4f91f4a81d25c27c1a4cd4f34cf83fcd2934890d5bce8aba5eb4432",
+      "bytes": 20084
+    },
+    "morsehgp3D_v12/microbancs/outils/banc_full.py": {
+      "sha256": "7d7f0661b49adf094df51d41268470571d47c51fc7795bb5b34c791a4a539904",
+      "bytes": 5350
+    },
+    "morsehgp3D_v12/microbancs/outils/lecteur_full.py": {
+      "sha256": "c3e9e0f4adbbfda60203c70c902dcd4cc0a04336d5679bce372f157988805e8f",
+      "bytes": 12821
+    },
+    "morsehgp3D_v12/src/tower/pipeline_run.cpp": {
+      "sha256": "f3d260ae51159c5c039082f8b1442434123bdb59114d4364c4d0a4e7ef8f09a6",
+      "bytes": 19556
+    }
+  },
+  "commands": [
+    {
+      "name": "socle_ctest",
+      "timeout_seconds": 900,
+      "selected_options": []
+    },
+    {
+      "name": "mes_full",
+      "timeout_seconds": 2400,
+      "selected_options": [
+        [
+          "--fils",
+          "48"
+        ],
+        [
+          "--processus",
+          "5"
+        ],
+        [
+          "--passes",
+          "10"
+        ],
+        [
+          "--jobs",
+          "44"
+        ],
+        [
+          "--delai",
+          "900"
+        ]
+      ]
+    },
+    {
+      "name": "apparie_cache_as",
+      "timeout_seconds": 1500,
+      "selected_options": [
+        [
+          "--reference",
+          "ref"
+        ],
+        [
+          "--aa",
+          "aa"
+        ],
+        [
+          "--bras",
+          "ref="
+        ],
+        [
+          "--bras",
+          "aa="
+        ],
+        [
+          "--bras",
+          "cache=--cache=8589934592"
+        ],
+        [
+          "--bras",
+          "seq=--sequentiel"
+        ],
+        [
+          "--trames",
+          "ng00,ng01,ng02"
+        ],
+        [
+          "--voie",
+          "appareil"
+        ],
+        [
+          "--k",
+          "5"
+        ],
+        [
+          "--fils",
+          "48"
+        ],
+        [
+          "--tours",
+          "10"
+        ],
+        [
+          "--passes",
+          "10"
+        ],
+        [
+          "--session-tours",
+          "2"
+        ],
+        [
+          "--jobs",
+          "44"
+        ],
+        [
+          "--delai",
+          "900"
+        ]
+      ]
+    },
+    {
+      "name": "mutants_tour",
+      "timeout_seconds": 600,
+      "selected_options": []
+    },
+    {
+      "name": "mes_d6_profils",
+      "timeout_seconds": 1800,
+      "selected_options": [
+        [
+          "--cas",
+          "ng00,ng01,ng02"
+        ],
+        [
+          "--profils",
+          "21,24,32"
+        ],
+        [
+          "--k",
+          "5"
+        ],
+        [
+          "--fils",
+          "48"
+        ],
+        [
+          "--passes",
+          "5"
+        ],
+        [
+          "--tours",
+          "3"
+        ],
+        [
+          "--jobs",
+          "44"
+        ],
+        [
+          "--delai",
+          "900"
+        ]
+      ]
+    }
+  ],
+  "relations": {
+    "mes_full_build_basename": "full/b21cuda",
+    "apparie_build_basename": "apparie",
+    "builds_distinct": true,
+    "d6_build_root_distinct": true,
+    "ng_input_same": true,
+    "session_archive_same": true
+  },
+  "limits": {
+    "max_run_seconds": 4200,
+    "guest_shutdown_minutes": 55,
+    "default_build": true,
+    "build_timeout_seconds": 1500,
+    "results_cap_bytes": 67108864
+  },
+  "data_manifest_sha256": "c04343f5242db2e47ee6c24b385dd522efc69f4b5bdd48a58671cfe271bf6025",
+  "worker_plan_sha256": "56af130e6bc194098484c22300d9db6706e96edb38a100297f445c9dc2efabd3",
+  "source_kind": "commit",
+  "evidence_grade": "pushed_commit",
+  "helper": {
+    "path": "morsehgp3D_v12/receipts/audit_reponses_20261008/session_mes_c_provenance/source_check.py",
+    "sha256": "1d863609d8f6b019cb39753232cf34e0bc3facb7e1ee27971c5941773ba4e070"
+  },
+  "native_execution_by_audit": false,
+  "replay_modes": [
+    "normal",
+    "-O"
+  ],
+  "replay_result": {
+    "sources_exactes": 356,
+    "fichiers_cibles": 7,
+    "commandes": 5,
+    "builds_isoles": true,
+    "qualification_resultats": false
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "base_composition_patch_sha256": "3119d4cea05b4b14f7fbcdda0bdebd25ec6fe3da0c270d50e8af7821064bbaa8",
+  "base_composition_sha256": "a0f59585fbeea2cbb6de1a2abbdc4ae6b422dcb514f081ac7fb369de3d6d3dc8",
+  "closure_patch_sha256": "c3fd09341a9e5a65f4bf810b66bae6996d0854208cf6d0b2a8f73af10d07cae4",
+  "incremental_patch_sha256": "9a58967712626fcd0062b58aabfbc239562d86a5e81ed7bd0688fc13aa9a5d22",
+  "source_commit": "0e62a723202732d69e430349c0b2a7b498cbb49c",
+  "triple_sha256": "1e2f1ea8c2ab8b98ac602b78ae9454a06034a8244b945292be61832586e81d70"
+}

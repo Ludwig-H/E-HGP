@@ -1,0 +1,35 @@
+--- a/morsehgp3D_v12/microbancs/mes_apparie/pilote_apparie.py
++++ b/morsehgp3D_v12/microbancs/mes_apparie/pilote_apparie.py
+@@ -168,6 +168,12 @@
+ 
+ def judge(report, folder=None):
+     """Jugement par REGLE_APPARIEE ; folder=None (auto-test seulement) saute le rejeu brut."""
++    provenance = report.get('provenance')
++    if folder is not None and (type(provenance) is not dict or
++            type(provenance.get('sonde_sha256')) is not str or
++            re.fullmatch(r'[0-9a-f]{64}', provenance['sonde_sha256']) is None or
++            provenance.get('sonde_fin_sha256') != provenance['sonde_sha256']):
++        return dict(verdict='refuse', refus=['sonde absente, modifiee ou fermeture non prouvee'], cas={})
+     cfg, rule = report['parametres'], REGLE_APPARIEE
+     arms, reference, aa = dict(report['regle_bras']), cfg['reference'], cfg.get('aa')
+     refusals, cases = [], {}
+@@ -462,14 +468,15 @@
+         report['ordres'][label] = orders
+     report['duree_campagne_s'] = round(time.monotonic() - t_start, 1)
+     report['environnement']['apres'] = bf.environment(nvcc, with_gpu)
++    if args.archive_v12set:
++        frames_v = session_frames(args.archive_v12set, os.path.join(args.travail or out_dir, 'v12set'))
++        report['session_v12set'] = None if frames_v is None else play_session_info(args, probe, arms, frames_v,
++                                                                                    out_dir)
++    report['provenance']['sonde_fin_sha256'] = file_sha(probe)
+     verdict = judge(report, out_dir)
+     if args.essai:
+         verdict = dict(verdict, verdict_calcule=verdict['verdict'], verdict='essai')
+     report['jugement'] = verdict
+-    if args.archive_v12set:
+-        frames_v = session_frames(args.archive_v12set, os.path.join(args.travail or out_dir, 'v12set'))
+-        report['session_v12set'] = None if frames_v is None else play_session_info(args, probe, arms, frames_v,
+-                                                                                    out_dir)
+     report['duree_s'] = round(time.monotonic() - t_start, 1)
+     with open(os.path.join(out_dir, 'rapport_apparie.json'), 'w', encoding='utf-8') as handle:
+         json.dump(report, handle, indent=1, sort_keys=True)

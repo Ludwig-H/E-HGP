@@ -1,0 +1,14 @@
+{
+  "carre_contacts": 4,
+  "cas_filtre": 54,
+  "comparaisons_affines": 1464,
+  "grilles": 1458,
+  "mesure_mesc2": false,
+  "mutations_refusees": 2,
+  "natif_execute": false,
+  "pins": 6,
+  "rectangle_candidats": [
+    3,
+    2
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "commandes": [
+    {
+      "code": 0,
+      "mode": "normal",
+      "stderr": "",
+      "stdout": "pipeline_terminaison_ok cas=6 periode_ancienne=16 source=conforme"
+    },
+    {
+      "code": 0,
+      "mode": "-O",
+      "stderr": "",
+      "stdout": "pipeline_terminaison_ok cas=6 periode_ancienne=16 source=conforme"
+    },
+    {
+      "code": 1,
+      "mode": "mutant normal",
+      "stderr": "pipeline_terminaison : source : retrait qui garde son passage par zero absent ou repete",
+      "stdout": ""
+    },
+    {
+      "code": 1,
+      "mode": "mutant -O",
+      "stderr": "pipeline_terminaison : source : retrait qui garde son passage par zero absent ou repete",
+      "stdout": ""
+    }
+  ],
+  "correctif_exact": true,
+  "fonctions_modele_identiques": 5,
+  "mutant_tue_par": "contrôle textuel du source, avant le modèle",
+  "qualification_native": false,
+  "raccord_mutant_cmake": true
+}
