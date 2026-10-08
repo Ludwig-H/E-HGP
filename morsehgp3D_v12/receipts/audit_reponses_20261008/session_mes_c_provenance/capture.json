@@ -1,0 +1,185 @@
+{
+  "launch_started_utc": "2026-10-08T06:02:16Z",
+  "launch_sha256": "bff9acf1baa5ff66f9c73d5fd9bb5d056d8fd251be92828efa7be22c698c5937",
+  "preflight_sha256": "9169f90735ffa40a4bd41e6e99a2fafdadea1fbcd22fc9cd6ac1bfaf5e860fff",
+  "plan_sha256": "71ef953a4f75d030c666a54308f97522a9ce782fb54035048b05af40a57a0ebd",
+  "package_sha256": "86eb55226a2c65c53feaa997abc0de71ffa185a527ceb7c21e7c151a66c2be25",
+  "package_bytes": 5238177,
+  "source_git": "83ed7620d0b243343688a45473aa479240129725",
+  "source_kind": "commit",
+  "scopes": [
+    "morsehgp3D_v12/src/",
+    "morsehgp3D_v12/bench/",
+    "morsehgp3D_v12/tests/",
+    "morsehgp3D_v12/cmake/",
+    "morsehgp3D_v12/CMakeLists.txt"
+  ],
+  "files_exact": 342,
+  "source_inventory_sha256": "6c80a1313eefce1794d414c117be3dc87cf6459b81e47f98f89a5ac565248bd7",
+  "scope_counts": {
+    "morsehgp3D_v12/src/": 128,
+    "morsehgp3D_v12/bench/": 41,
+    "morsehgp3D_v12/tests/": 168,
+    "morsehgp3D_v12/cmake/": 4,
+    "morsehgp3D_v12/CMakeLists.txt": 1
+  },
+  "budget": {
+    "build_and_setup_seconds": 120,
+    "closing_reserve_seconds": 660,
+    "command_timeouts_sum_seconds": 2150,
+    "guest_seconds": 3300,
+    "oversubscribed": false,
+    "ssh_cutoff_before_guest_seconds": 360,
+    "upload_estimate_seconds": 182,
+    "worker_window_seconds": 2338
+  },
+  "data_declared": [
+    {
+      "name": "g4_small.tar",
+      "sha256": "1b11650dfbf82d2a339443853192b5c363ddfb42e3763b1effdd8fbdb6290d87",
+      "size": 6010880
+    }
+  ],
+  "licensed_payload_read": false,
+  "remote_access": false,
+  "source_review_observed_utc": "2026-10-08T06:30:00.310046+00:00",
+  "local_files": {
+    "receipt.json": {
+      "bytes": 25485,
+      "sha256": "4eebfcde16f244a180850365cf418d2ba734485456cf2bc62cc3188ae41ebaa0"
+    },
+    "DONE": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "package/plan.json": {
+      "bytes": 1153,
+      "sha256": "71ef953a4f75d030c666a54308f97522a9ce782fb54035048b05af40a57a0ebd"
+    },
+    "package/plan.sh": {
+      "bytes": 530,
+      "sha256": "16cb8af8246ee0851cd6bed2a54f1dbf9edfcbc5d4d682bae105d6fb73c6ef39"
+    },
+    "package/package.tar.gz": {
+      "bytes": 5238177,
+      "sha256": "86eb55226a2c65c53feaa997abc0de71ffa185a527ceb7c21e7c151a66c2be25"
+    },
+    "results/results.tar.gz": {
+      "bytes": 1101322,
+      "sha256": "3667572879eb8849bc2d235adb6c8759cd91a64c86093d956c926c4636b4a78c"
+    }
+  },
+  "closure": {
+    "status": "completed",
+    "worker_exit_code": 0,
+    "results_verified": true,
+    "results_bytes": 1101322,
+    "results_sha256": "3667572879eb8849bc2d235adb6c8759cd91a64c86093d956c926c4636b4a78c",
+    "retrieval": "downloaded",
+    "closure": "stopped",
+    "targeted_shutdown_certified": true,
+    "stop_exit_code": 0,
+    "stop_attempts": 1,
+    "reserve_released": true,
+    "guest_guard_intact": true,
+    "errors_count": 0,
+    "done": 0,
+    "before_status": "RUNNING",
+    "after_status": "TERMINATED"
+  },
+  "archive_files": {
+    "results/MANIFEST.sha256": {
+      "bytes": 7422,
+      "sha256": "b118d733c68dd61141a3d39dca93478f97d96c358e3eeefe68e920baa343816d"
+    },
+    "results/plan.sh": {
+      "bytes": 530,
+      "sha256": "16cb8af8246ee0851cd6bed2a54f1dbf9edfcbc5d4d682bae105d6fb73c6ef39"
+    },
+    "results/worker.txt": {
+      "bytes": 699,
+      "sha256": "1d31af467c4b4f2070e70c41fcbb4c66b325c5663dd068ccdb7f84f9627f7104"
+    },
+    "results/commands.tsv": {
+      "bytes": 103,
+      "sha256": "3db02f12e1334bf8f1c9a935195170e1c8cefec1c462034b01da5cf7bdea7dd5"
+    },
+    "results/cmd/000_mes_c/argv.txt": {
+      "bytes": 541,
+      "sha256": "4d5a54a111d469958d0ba3f485b124d4cf7b1501cad02645d507aa5ef8490a9d"
+    },
+    "results/cmd/000_mes_c/time.txt": {
+      "bytes": 1474,
+      "sha256": "3d439c8da73d03e516de6d07efa612c11c855f2ed2e34372ff942a3bae8a151e"
+    },
+    "results/cmd/000_mes_c/meta.txt": {
+      "bytes": 390,
+      "sha256": "937f805477c06be6aea59fb0406f9609dfe9f2dc3d699ca963589d497cb613f1"
+    },
+    "results/cmd/000_mes_c/files/c/rapport_c.json": {
+      "bytes": 387032,
+      "sha256": "14f421338943c8877d7b3a74d441bbf6f0bcea4a6cae7b717fbc51bf0d14e628"
+    }
+  },
+  "manifest_count": 70,
+  "commands": [
+    {
+      "index": "0",
+      "name": "mes_c",
+      "status": "ok",
+      "exit_code": "0",
+      "timeout_seconds": "2150",
+      "wall_seconds": "2050.154",
+      "max_rss_kb": "2768648"
+    }
+  ],
+  "report_provenance": {
+    "sonde_sha256": "b08f9bb87f2a942cd5de512f076fcf1208870bef8ae41ccb13db977ccbf59ca9",
+    "pilote_sha256": "6309ac7ee8344f966e82bd05af1966e5c23b92515b289a653574af2f0f988899",
+    "lecteur_sha256": "3594c5d36ed831b39d679b504234505d5b4b0a5b08e85cc55a21c9af74c621a4",
+    "archive_sha256": "1b11650dfbf82d2a339443853192b5c363ddfb42e3763b1effdd8fbdb6290d87"
+  },
+  "reported_cmake_fields": [
+    "CMAKE_BUILD_TYPE:STRING=Release",
+    "MHGP12_COORD_BITS:STRING=21",
+    "MHGP12_ENABLE_CUDA:BOOL=ON"
+  ],
+  "reported_outcome": {
+    "verdict": "refuse",
+    "controls_count": 1,
+    "criteria": {
+      "C1": "non tenu",
+      "C2": "non tenu",
+      "C3": "non tenu"
+    }
+  },
+  "raw_jsonl_count": 34,
+  "source_files": {
+    "morsehgp3D_v12/bench/full_probe.cpp": {
+      "bytes": 18119,
+      "sha256": "201119a78a52ccbe5c8e2ce128a165e9b3774800d55ed8a0935c91e587858d61"
+    },
+    "morsehgp3D_v12/microbancs/mes_c_petits/pilote_c.py": {
+      "bytes": 17713,
+      "sha256": "6309ac7ee8344f966e82bd05af1966e5c23b92515b289a653574af2f0f988899"
+    },
+    "morsehgp3D_v12/microbancs/outils/lecteur_full.py": {
+      "bytes": 9114,
+      "sha256": "3594c5d36ed831b39d679b504234505d5b4b0a5b08e85cc55a21c9af74c621a4"
+    }
+  },
+  "reused_archive_reader": {
+    "bytes": 4311,
+    "sha256": "8a80b809106399443ab6dce697e62c083e59241f6a6d1908b36bf087e755d30b"
+  },
+  "source_checker": {
+    "bytes": 2964,
+    "sha256": "1d863609d8f6b019cb39753232cf34e0bc3facb7e1ee27971c5941773ba4e070"
+  },
+  "replay": {
+    "normal_exit_code": 0,
+    "optimized_exit_code": 0,
+    "native_execution": false,
+    "remote_access": false
+  }
+}

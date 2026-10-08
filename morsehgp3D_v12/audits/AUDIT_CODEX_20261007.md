@@ -1,10 +1,10 @@
 # Audit Codex — état courant v12
 
-8 octobre 2026. Mesures K `c9ac60f20`, L1r `ea62cd691`, L2 `a2c2fccfd` ; pilote MES-C `83ed7620d`.
+8 octobre 2026. Mesures K `c9ac60f20`, L1r `ea62cd691`, L2 `a2c2fccfd`, MES-C `83ed7620d`.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
 
-**SemanticKITTI : contrat de 100 ms non tenu.** [Session K contre-validée](../receipts/audit_reponses_20261008/session_k_full/README.md),
+**SemanticKITTI : contrat de 100 ms non tenu.** [Session K admise](../receipts/audit_reponses_20261008/session_k_full/README.md),
 u21/W48, ng00–02 : 39 885 / 35 551 / 45 845 sites.
 
 | Médiane chaude FULL, ms | ng00 | ng01 | ng02 |
@@ -15,18 +15,33 @@ u21/W48, ng00–02 : 39 885 / 35 551 / 45 845 sites.
 
 **37 trames, six séquences : médiane 241,31 ms, maximum contractuel 467,92 ms** (185 passes chaudes).
 610 passes admises, empreintes concordantes. Mur Cloud/index→T/M/V/R ; lecture, masque, validation,
-FUL1 et libération exclus. [342 sources identiques au pin](../receipts/audit_reponses_20261008/session_k_sources/README.md),
-[arrêt vérifié](../receipts/audit_reponses_20261008/session_k_provenance/README.md) ; hash binaire/journal de compilation,
-CPU·s et CPU K10 absents. Face à la v11 : GPU plus rapide, CPU plus lent (historique non apparié).
+FUL1 et libération exclus. [Sources](../receipts/audit_reponses_20261008/session_k_sources/README.md),
+[arrêt](../receipts/audit_reponses_20261008/session_k_provenance/README.md) vérifiés ; hash ELF/compilation, CPU·s et CPU K10 absents.
+Face à la v11 : GPU plus rapide, CPU plus lent (historique non apparié).
 [Recouvrement parfait à coûts inchangés](../receipts/audit_reponses_20261008/session_k_recouvrement_modele/README.md) :
 31/37 maxima resteraient >100 ms ; scénario comptable, aucune borne sur A refondu.
 
-**LiDAR massifs : derniers murs FULL K5, u21/W48.** L1r : une seule passe chaude par ligne ci-dessous ;
-L2 : une seule passe initiale, donc froide. Aucun gain causal entre L1 et L1r.
+**Petits nuages : dernière campagne MES-C admise, critères non tenus.**
+[Médianes chaudes FULL](../receipts/audit_reponses_20261008/session_c_admission/README.md) des 147 médianes par nuage,
+u21, deux visites chaudes/nuage, une Session/configuration :
+
+| ms | 1 fil | 4 fils | 48 fils |
+| --- | ---: | ---: | ---: |
+| CPU K5 | 136,21 | 45,83 | **32,65** |
+| GPU K5 | 21,68 | **13,07** | 13,44 |
+| CPU K10 | 507,44 | 152,80 | 62,95 |
+
+Sur les 132 réels seuls, CPU/GPU K5 W48 : **32,24/13,06 ms**. C1/C2 CPU : ordonnée OLS 20,34 ms,
+pente 11,75 µs/site ; seuils 2 ms et 3,727 µs/site. Quasi-sphères 3 000/10 000 sites : quatre refus `wide_leaf`, C3 non tenu.
+34/60 processus tentés, 4 009 passes complètes dont 2 666 chaudes. GPU K10/W1 interrompu au délai global restant ;
+aucune statistique GPU K10 complète. Verdict refusé. [Provenance/arrêt certifiés](../receipts/audit_reponses_20261008/session_mes_c_provenance/README.md).
+[Correction du juge 24dec](../receipts/audit_reponses_20261008/mes_c_correction_24dec/README.md) vérifiée : cohorte/verdict clos,
+11 mutants détectés ; aucun transfert de pin à la campagne 83ed. [Comparabilité v11 limitée](../receipts/audit_reponses_20261008/mes_c_statistique/README.md).
+
+**LiDAR massifs : derniers murs FULL K5, u21/W48.** L1r : une passe chaude ; L2 : une passe initiale froide.
 
 | Scène | Sites | GPU, s | CPU, s | Prise |
 | --- | ---: | ---: | ---: | --- |
-| Boreas n1 sans sol | 146 316 | 0,519 | — | L1r chaude |
 | Boreas n10 sans sol | 1 513 483 | **10,025** | **22,344** | L1r chaude |
 | Marseille sans sol | 2 465 285 | 10,955 | — | L1r chaude |
 | Scion sans sol | 3 439 371 | 41,951 | — | L1r chaude |
@@ -34,39 +49,22 @@ L2 : une seule passe initiale, donc froide. Aucun gain causal entre L1 et L1r.
 | Paris sans sol | 9 111 422 | — | **112,866** | L2 froide |
 | Paris brut | 14 551 520 | — | **165,789** | L2 froide |
 
-[L1r admise](../receipts/audit_reponses_20261008/session_l1r_admission/README.md) : 10 succès/8 refus mémoire,
+[L1r](../receipts/audit_reponses_20261008/session_l1r_admission/README.md) : 10 succès/8 refus mémoire,
 18/30 passes dont huit chaudes ; B1/B2/B4 non tenus, B3 non évalué. Boreas n10 CPU/GPU : FUL1 identique.
-Succès à 6,71 M et refus à 5,20 M : aucun plafond universel en sites.
-[L2 admise](../receipts/audit_reponses_20261008/session_l2_admission/README.md) : deux succès CPU, trois refus ;
-ETH3D 16,83 M [wide_leaf](../receipts/audit_reponses_20261008/wide_leaf_semantique/README.md), Lyon 24,02/32,41 M `memory_budget`. Aucun chaud, GPU, K10 ni digest FULL.
-B1–B4 non évalués. [Provenance/arrêt L2](../receipts/audit_reponses_20261008/session_l2_provenance/README.md).
-[Errata L1r](../receipts/audit_reponses_20261008/l1r_documentation/README.md) et
-[L2](../receipts/audit_reponses_20261008/session_l2_documentation/README.md) proposés : conversions RSS, enveloppes
-chronométriques, poste des refus et projections ; les chronos réels restent inchangés.
+[L2](../receipts/audit_reponses_20261008/session_l2_admission/README.md) : deux succès CPU, ETH3D 16,83 M `wide_leaf`,
+Lyon 24,02/32,41 M `memory_budget` ; aucun chaud, GPU, K10 ni digest. B1–B4 non évalués.
+Succès à 6,71 M et refus à 5,20 M : aucun plafond universel en sites, aucun gain causal L1/L1r.
 
-**Aide au développeur — priorités ouvertes.**
-
-- **CPU/C** : [symétrie et garde redondante](../receipts/audit_reponses_20261008/cpu_live/README.md),
-  [réemploi du tri S*](../receipts/audit_reponses_20261008/catalogue_radix_reuse/README.md) proposés, sans gain natif qualifié.
-- **T/K1** : [réutiliser les rangs C](../receipts/audit_reponses_20261008/t_naissances_reutilisees/README.md) évite un tri XYZ.
-  Preuve et modèle ; export possédé de 4N octets à compter, `births_ns` à mesurer avant raccord.
-- **A** : [schéma 902](../receipts/audit_reponses_20261008/t2d_a_schema902/README.md), cohorte/queue/mémoire à renforcer ;
-  [patch des instants des feuilles](../receipts/audit_reponses_20261008/t2d_a_fenetre_patch/README.md) proposé, sans modifier le mur FULL.
-- **B** : [proposition entière prouvée](../receipts/audit_reponses_20261008/t2d_b_proposition/README.md), bornes B≤32 ;
-  [39 mutants clos](../receipts/audit_reponses_20261008/t2d_b_mutants/README.md).
-  [Pilote corrigé](../receipts/audit_reponses_20261008/t2d_b_admission_reprise/README.md) : mur G/device conformes, veto A/A et
-  positions rééquilibrées ; quatre incohérences FULL informatives encore admises.
-- **C** : [suivi local](../receipts/audit_reponses_20261008/t2d_c_suivi/README.md), 705 portes + une sautée, modules CUDA u21/u24
-  56/56 sans GPU, neuf paires FUL1 CPU. Huit gardes ajoutées ; refus/cohorte encore permissifs.
-  Libération avant croissance : capacités après refus modifiées ; reprise sur le même contexte GPU à qualifier.
-- **Lecteurs FULL/MES-C** : [lecteur commun a2](../receipts/audit_reponses_20261008/lecteur_full_commun/README.md), types/mémoire/raisons
-  encore permissifs ; [MES-C livré](../receipts/audit_reponses_20261008/mes_c_livraison/README.md), cohorte incomplète tenue,
-  patch avec porte adaptée proposé. [C1/C2 et chaud](../receipts/audit_reponses_20261008/mes_c_statistique/README.md) :
-  coefficients descriptifs, tournée de 147 nuages ; comparaison v11 non appariée.
-  [Contrelecteur prêt](../receipts/audit_reponses_20261008/mes_c_contrelecture/README.md) : 33 contre-JSON/six mutants ; résultat réel attendu.
-- **R** : [raccourci classe unique](../receipts/audit_reponses_20261008/registre_classe_unique_patch/README.md) proposé,
-  différé après A ; comparer aussi les CSR absents de FUL1.
-
-[SHA matériel](../receipts/audit_reponses_20261008/sha256_voies/README.md) : trace de 136 contrôles positifs,
-accélération de l'empreinte hors mur ; aucun gain FULL déduit. Autres statuts et preuves au registre.
-Audit : Python, sources et assembleur ; aucun moteur, GCP ni donnée sous licence.
+**Travail développeur et prochaine contrelecture.**
+CPU/C : [symétrie et garde redondante](../receipts/audit_reponses_20261008/cpu_live/README.md) proposées ;
+[réemploi S*](../receipts/audit_reponses_20261008/catalogue_radix_reuse/README.md),
+[rangs C→T/K1](../receipts/audit_reponses_20261008/t_naissances_reutilisees/README.md),
+[R classe unique](../receipts/audit_reponses_20261008/registre_classe_unique_patch/README.md) à qualifier.
+A : [fenêtre des feuilles](../receipts/audit_reponses_20261008/t2d_a_fenetre_patch/README.md) à corriger.
+B : [pilote corrigé](../receipts/audit_reponses_20261008/t2d_b_admission_reprise/README.md), quatre blocs FULL informatifs permissifs.
+C : intégration `02b735d6b` du transfert par morceaux et réparation compacte en cours d'audit ; aucune mesure G4 de cette livraison.
+[Diagnostic MES-C](../receipts/audit_reponses_20261008/session_c_diagnostic/README.md) : C porte l’écart CPU/GPU ;
+41/41 réels de 100–300 sites ralentis à W48/W4 sur les deux voies, surtout G/TMVR quand C est sur GPU.
+Pool : équipe limitée aux tranches en développement, synchronisation à relire ; causalité et gains à mesurer.
+[Grande feuille](../receipts/audit_reponses_20261008/wide_leaf_semantique/README.md) : liste candidate ≥257, pas une coquille ; repli global ouvert.
+Autres états, preuves et limites dans le registre. Audit : Python et sources ; aucun moteur, GCP ni donnée sous licence.

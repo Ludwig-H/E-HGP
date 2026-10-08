@@ -1,0 +1,41 @@
+{
+  "cohorte_ast_proposition_identique": true,
+  "mutants_diagnostics": {
+    "archive_admise": "usage : archive a chemin admise (code 0)",
+    "c1_seuil": "criteres : {'C1': {'detail': 'cout fixe 1.000 ms', 'etat': 'non tenu'}, 'C2': {'detail': '2.000 us par site (limite 3.727)', 'etat': 'tenu'}, 'C3': {'detail': ['cohorte C3 incomplete ou hors configuration'], 'etat': 'non evalue'}}, controles []",
+    "c2_seuil": "criteres : {'C1': {'detail': 'cout fixe 1.000 ms', 'etat': 'tenu'}, 'C2': {'detail': '2.000 us par site (limite 1.465)', 'etat': 'non tenu'}, 'C3': {'detail': ['cohorte C3 incomplete ou hors configuration'], 'etat': 'non evalue'}}, controles []",
+    "c3_cohorte_ouverte": "cohorte non_joue : non tenu au lieu de non evalue",
+    "c3_fils_libres": "cohorte un_fil : tenu au lieu de non evalue",
+    "c3_refus_ignores": "cohorte refus : tenu au lieu de non tenu",
+    "chaud_avec_froid": "droites : code 0, droites {'reel': {'fixe_ns': 3500000.0, 'nuages': 3, 'par_site_ns': 1999.9999999999995}, 'uniform': {'fixe_ns': 7500000.0, 'nuages': 2, 'par_site_ns': 9000.0}}",
+    "difficile_dans_session": "droites : code 0, droites {'lattice': None, 'line': None, 'reel': {'fixe_ns': 1000000.0, 'nuages': 3, 'par_site_ns': 2000.0}, 'sphere': None, 'uniform': {'fixe_ns': 5000000.0, 'nuages': 2, 'par_site_ns': 9000.0}}",
+    "droite_melangee": "droites : code 0, droites {'reel': {'fixe_ns': 5040270.848182466, 'nuages': 5, 'par_site_ns': 1134.3549536707055}}",
+    "empreinte_non_controlee": "empreintes : controles ['K5 objet_a : empreintes differentes entre voies ou fils', 'K5 objet_b : empreintes differentes entre voies ou fils', 'K5 objet_c : empreintes differentes entre voies ou fils', 'K5 uni_1 : empreintes differentes entre voies ou fils', 'K5 uni_2 : empreintes differentes entre voies ou fils', 'K5 lat_1 : empreintes differentes entre voies ou fils', 'K5 sph_1 : empreintes differentes entre voies ou fils', 'K5 lin_1 : empreintes differentes entre voies ou fils']",
+    "non_evalue_admis": "verdict : non tenu au lieu de refuse"
+  },
+  "native_execution": false,
+  "porte_normal": {
+    "code": 0,
+    "stderr": "",
+    "stdout": "test_pilote_c_ok cohorte=9 verdict=5 droites=1 criteres=1 difficiles=1 empreintes=1 usage=1"
+  },
+  "porte_optimized": {
+    "code": 0,
+    "stderr": "",
+    "stdout": "test_pilote_c_ok cohorte=9 verdict=5 droites=1 criteres=1 difficiles=1 empreintes=1 usage=1"
+  },
+  "refactor_verdict_cas": 108,
+  "remote_execution": false,
+  "runner_officiel": {
+    "code": 0,
+    "stderr": "",
+    "stdout": "mutants_pilote_c_ok tues=11"
+  },
+  "seuils_et_fonctions_inchanges": [
+    "fit",
+    "session_values",
+    "fits_of",
+    "probe_argv",
+    "expected"
+  ]
+}

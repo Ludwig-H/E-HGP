@@ -1,0 +1,132 @@
+{
+  "source_git": "83ed7620d0b243343688a45473aa479240129725",
+  "reader": {
+    "bytes": 17093,
+    "sha256": "55ca24fe400954e24062fc8b9c0c0bf7968fc624f7a34104007600c9535c4dc2"
+  },
+  "reader_capture": {
+    "bytes": 13650,
+    "sha256": "affc23170740e06b099202a30646d7d250ff5b48bd1d3fb96e10efa697a01c42"
+  },
+  "raws": {
+    "session_cpu_5_1.jsonl": {
+      "bytes": 395706,
+      "sha256": "f565a61ee0e6729491833309624cfcd4aa430a747ca3afe1e2d9e5e103e4a614"
+    },
+    "session_cpu_5_4.jsonl": {
+      "bytes": 394353,
+      "sha256": "01bb72ec8cc759ccfa10e45c874f59879c08580e3bb0b5c4d7c01d6663512173"
+    },
+    "session_cpu_5_48.jsonl": {
+      "bytes": 395382,
+      "sha256": "1b2ab067908d0dd9022f3d803fe3eda48d81d413c393e8494dbf5066e923bbc7"
+    },
+    "session_appareil_5_1.jsonl": {
+      "bytes": 411147,
+      "sha256": "3b95e1c5fe3d0d43b2b5ed7ce134663ed5884e7de88766bde93af387479a3cfb"
+    },
+    "session_appareil_5_4.jsonl": {
+      "bytes": 410812,
+      "sha256": "dfefb0eee7e9abda52a6b65328dca0f58a7e17a05a592d73747cc0bb01bd69e6"
+    },
+    "session_appareil_5_48.jsonl": {
+      "bytes": 411907,
+      "sha256": "189e9fdc3e9b9de9f9c62281fcbe971ebf389e82bbbca3a428659086fc23a4d4"
+    }
+  },
+  "sources": {
+    "bench/full_probe.cpp": {
+      "bytes": 18119,
+      "sha256": "201119a78a52ccbe5c8e2ce128a165e9b3774800d55ed8a0935c91e587858d61",
+      "lines": [
+        [
+          192,
+          235
+        ],
+        [
+          237,
+          252
+        ],
+        [
+          255,
+          289
+        ],
+        [
+          310,
+          338
+        ]
+      ]
+    },
+    "src/catalogue/catalogue.cpp": {
+      "bytes": 3998,
+      "sha256": "799abaf8ee815df58c40a44c74d1ba9b9dfc40fdd05488d1e214efe9b1009e49",
+      "lines": [
+        [
+          35,
+          71
+        ]
+      ]
+    },
+    "src/catalogue/leaves.cpp": {
+      "bytes": 13102,
+      "sha256": "2172f739d7f3a5a49bfe748f4f8c3a38b4d6a4e6b393bbf22bf1b6396367fff8",
+      "lines": [
+        [
+          249,
+          303
+        ]
+      ]
+    },
+    "src/catalogue/assemble.cpp": {
+      "bytes": 6263,
+      "sha256": "7c00cc574fc194cfa49dd23942cfa657b91e69163d71ff1a574ef350a7a3e4cd",
+      "lines": [
+        [
+          93,
+          138
+        ]
+      ]
+    },
+    "src/catalogue/device_pipeline.hpp": {
+      "bytes": 12073,
+      "sha256": "4a752fb766263363b1e6dcd24eed85a797c96e561ee97e725066e73afa12622b",
+      "lines": [
+        [
+          148,
+          173
+        ],
+        [
+          225,
+          230
+        ]
+      ]
+    },
+    "src/catalogue/exec_host.hpp": {
+      "bytes": 5044,
+      "sha256": "93985cfe09c271d8e709b019ca9e2c8c1a3208c35961a78f26718cb9c2e6d1c4",
+      "lines": [
+        [
+          124,
+          129
+        ]
+      ]
+    },
+    "src/sched/pool.cpp": {
+      "bytes": 3711,
+      "sha256": "eed86be4c20f4812032616b639a009b513c12e3106cc808c66f5ec38d4da176f",
+      "lines": [
+        [
+          88,
+          115
+        ]
+      ]
+    }
+  },
+  "codes": "inferred zero from pinned pilot and report, not separately archived",
+  "checks": {
+    "normal_exit_code": 0,
+    "optimized_exit_code": 0,
+    "independent_paired_medians_matched": 66,
+    "independent_results_sha256": "b307f78e2e70c1e224142702da9e1a9dd0c7e3e7f459cd6915f50cc301157719"
+  }
+}

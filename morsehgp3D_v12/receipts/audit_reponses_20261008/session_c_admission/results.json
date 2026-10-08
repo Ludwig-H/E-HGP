@@ -1,0 +1,676 @@
+{
+  "archive_sha256": "3667572879eb8849bc2d235adb6c8759cd91a64c86093d956c926c4636b4a78c",
+  "codes": "inferes du rapport et du pilote epingle",
+  "cohorte_complete": false,
+  "configurations": {
+    "appareil:5:1": {
+      "droites": {
+        "clusters8": {
+          "cout_individuel_max_ns_par_site": 205849.55,
+          "fixe_ns": -21268406.52832663,
+          "nuages": 5,
+          "par_site_ns": 92456.58459316897,
+          "residu_abs_max_ns": 62603024.251180276
+        },
+        "reel": {
+          "cout_individuel_max_ns_par_site": 62090.0,
+          "fixe_ns": -4161520.030812267,
+          "nuages": 132,
+          "par_site_ns": 30855.430396455933,
+          "residu_abs_max_ns": 237615964.56625295
+        },
+        "slab": {
+          "cout_individuel_max_ns_par_site": 36624.85,
+          "fixe_ns": 1517488.3310019234,
+          "nuages": 5,
+          "par_site_ns": 11724.370926735442,
+          "residu_abs_max_ns": 1630641.1112082533
+        },
+        "uniform": {
+          "cout_individuel_max_ns_par_site": 1036684.817,
+          "fixe_ns": 375237169.4758699,
+          "nuages": 5,
+          "par_site_ns": 57587.05625837851,
+          "residu_abs_max_ns": 603860591.2657516
+        }
+      },
+      "groupes": {
+        "clusters8": {
+          "maximum_ns": 922099869.0,
+          "mediane_cpu_ns": 61433500.0,
+          "mediane_ns": 61425519.5,
+          "nuages": 5
+        },
+        "reel": {
+          "maximum_ns": 542008748.5,
+          "mediane_cpu_ns": 18662250.0,
+          "mediane_ns": 18659954.75,
+          "nuages": 132
+        },
+        "slab": {
+          "maximum_ns": 119244768.0,
+          "mediane_cpu_ns": 13087000.0,
+          "mediane_ns": 13108445.0,
+          "nuages": 5
+        },
+        "tous": {
+          "maximum_ns": 1036684817.0,
+          "mediane_cpu_ns": 21683500.0,
+          "mediane_ns": 21682430.0,
+          "nuages": 147
+        },
+        "uniform": {
+          "maximum_ns": 1036684817.0,
+          "mediane_cpu_ns": 352526000.0,
+          "mediane_ns": 352494411.0,
+          "nuages": 5
+        }
+      }
+    },
+    "appareil:5:4": {
+      "droites": {
+        "clusters8": {
+          "cout_individuel_max_ns_par_site": 139456.75,
+          "fixe_ns": 1390848.5836684734,
+          "nuages": 5,
+          "par_site_ns": 28881.01299178178,
+          "residu_abs_max_ns": 16434433.059013814
+        },
+        "reel": {
+          "cout_individuel_max_ns_par_site": 56761.595,
+          "fixe_ns": 3501032.2380714207,
+          "nuages": 132,
+          "par_site_ns": 10535.73395767415,
+          "residu_abs_max_ns": 65671861.18518708
+        },
+        "slab": {
+          "cout_individuel_max_ns_par_site": 40852.25,
+          "fixe_ns": 3880361.80730897,
+          "nuages": 5,
+          "par_site_ns": 4629.937428017719,
+          "residu_abs_max_ns": 391060.2646733112
+        },
+        "uniform": {
+          "cout_individuel_max_ns_par_site": 326388.2783333333,
+          "fixe_ns": 115916302.8830215,
+          "nuages": 5,
+          "par_site_ns": 18325.513165617533,
+          "residu_abs_max_ns": 162047835.45136097
+        }
+      },
+      "groupes": {
+        "clusters8": {
+          "maximum_ns": 295176231.0,
+          "mediane_cpu_ns": 74289000.0,
+          "mediane_ns": 27480954.5,
+          "nuages": 5
+        },
+        "reel": {
+          "maximum_ns": 174530233.0,
+          "mediane_cpu_ns": 23528500.0,
+          "mediane_ns": 11781582.5,
+          "nuages": 132
+        },
+        "slab": {
+          "maximum_ns": 50058934.0,
+          "mediane_cpu_ns": 17486500.0,
+          "mediane_ns": 8901359.5,
+          "nuages": 5
+        },
+        "tous": {
+          "maximum_ns": 300684311.0,
+          "mediane_cpu_ns": 27113000.0,
+          "mediane_ns": 13073580.0,
+          "nuages": 147
+        },
+        "uniform": {
+          "maximum_ns": 300684311.0,
+          "mediane_cpu_ns": 395294500.0,
+          "mediane_ns": 117058003.0,
+          "nuages": 5
+        }
+      }
+    },
+    "appareil:5:48": {
+      "droites": {
+        "clusters8": {
+          "cout_individuel_max_ns_par_site": 191217.7,
+          "fixe_ns": 15786373.97246022,
+          "nuages": 5,
+          "par_site_ns": 6927.023030395757,
+          "residu_abs_max_ns": 2698284.063647491
+        },
+        "reel": {
+          "cout_individuel_max_ns_par_site": 94908.1,
+          "fixe_ns": 9671755.592197016,
+          "nuages": 132,
+          "par_site_ns": 3605.484969086731,
+          "residu_abs_max_ns": 11054379.216935676
+        },
+        "slab": {
+          "cout_individuel_max_ns_par_site": 77647.6,
+          "fixe_ns": 8474721.452176955,
+          "nuages": 5,
+          "par_site_ns": 1796.3702596607798,
+          "residu_abs_max_ns": 889598.4781430319
+        },
+        "uniform": {
+          "cout_individuel_max_ns_par_site": 302516.55,
+          "fixe_ns": 52523641.96310544,
+          "nuages": 5,
+          "par_site_ns": 3065.2188322550564,
+          "residu_abs_max_ns": 27287303.204639506
+        }
+      },
+      "groupes": {
+        "clusters8": {
+          "maximum_ns": 85892458.0,
+          "mediane_cpu_ns": 115699000.0,
+          "mediane_ns": 22293575.0,
+          "nuages": 5
+        },
+        "reel": {
+          "maximum_ns": 56780984.5,
+          "mediane_cpu_ns": 43374000.0,
+          "mediane_ns": 13062097.25,
+          "nuages": 132
+        },
+        "slab": {
+          "maximum_ns": 26163125.0,
+          "mediane_cpu_ns": 35330000.0,
+          "mediane_ns": 10752979.5,
+          "nuages": 5
+        },
+        "tous": {
+          "maximum_ns": 85892458.0,
+          "mediane_cpu_ns": 48600500.0,
+          "mediane_ns": 13442655.0,
+          "nuages": 147
+        },
+        "uniform": {
+          "maximum_ns": 83563343.0,
+          "mediane_cpu_ns": 545334500.0,
+          "mediane_ns": 58486044.0,
+          "nuages": 5
+        }
+      }
+    },
+    "cpu:10:1": {
+      "droites": {
+        "clusters8": {
+          "cout_individuel_max_ns_par_site": 2146680.4975,
+          "fixe_ns": -747972795.2796818,
+          "nuages": 5,
+          "par_site_ns": 2188203.0590901673,
+          "residu_abs_max_ns": 1073225042.99082
+        },
+        "reel": {
+          "cout_individuel_max_ns_par_site": 1443009.792,
+          "fixe_ns": -172395459.08912152,
+          "nuages": 132,
+          "par_site_ns": 892846.4286410654,
+          "residu_abs_max_ns": 5331984115.178468
+        },
+        "slab": {
+          "cout_individuel_max_ns_par_site": 177305.01,
+          "fixe_ns": -34908014.27767092,
+          "nuages": 5,
+          "par_site_ns": 179247.06454085797,
+          "residu_abs_max_ns": 51368104.344902955
+        },
+        "uniform": {
+          "cout_individuel_max_ns_par_site": 4356258.579,
+          "fixe_ns": 512105716.20248294,
+          "nuages": 5,
+          "par_site_ns": 2194010.4111796934,
+          "residu_abs_max_ns": 1650142451.6178236
+        }
+      },
+      "groupes": {
+        "clusters8": {
+          "maximum_ns": 21466804975.0,
+          "mediane_cpu_ns": 1148318000.0,
+          "mediane_ns": 1148425140.5,
+          "nuages": 5
+        },
+        "reel": {
+          "maximum_ns": 14088052942.5,
+          "mediane_cpu_ns": 482085000.0,
+          "mediane_ns": 482209878.0,
+          "nuages": 132
+        },
+        "slab": {
+          "maximum_ns": 1773050100.0,
+          "mediane_cpu_ns": 135536500.0,
+          "mediane_ns": 135575503.5,
+          "nuages": 5
+        },
+        "tous": {
+          "maximum_ns": 22654351950.0,
+          "mediane_cpu_ns": 507256000.0,
+          "mediane_ns": 507442080.5,
+          "nuages": 147
+        },
+        "uniform": {
+          "maximum_ns": 22654351950.0,
+          "mediane_cpu_ns": 4355755000.0,
+          "mediane_ns": 4356258579.0,
+          "nuages": 5
+        }
+      }
+    },
+    "cpu:10:4": {
+      "droites": {
+        "clusters8": {
+          "cout_individuel_max_ns_par_site": 581640.7442,
+          "fixe_ns": -185814132.31727573,
+          "nuages": 5,
+          "par_site_ns": 591553.963200443,
+          "residu_abs_max_ns": 279042483.78405315
+        },
+        "reel": {
+          "cout_individuel_max_ns_par_site": 396298.40366666665,
+          "fixe_ns": -33800835.118631594,
+          "nuages": 132,
+          "par_site_ns": 242599.48959456975,
+          "residu_abs_max_ns": 1417416514.672934
+        },
+        "slab": {
+          "cout_individuel_max_ns_par_site": 72671.55,
+          "fixe_ns": -1079129.2468088826,
+          "nuages": 5,
+          "par_site_ns": 51909.45935653086,
+          "residu_abs_max_ns": 9242705.822783703
+        },
+        "uniform": {
+          "cout_individuel_max_ns_par_site": 1165531.006,
+          "fixe_ns": 156147519.94955412,
+          "nuages": 5,
+          "par_site_ns": 587519.2504689049,
+          "residu_abs_max_ns": 421864235.58154106
+        }
+      },
+      "groupes": {
+        "clusters8": {
+          "maximum_ns": 5816407442.0,
+          "mediane_cpu_ns": 1255290500.0,
+          "mediane_ns": 328200775.0,
+          "nuages": 5
+        },
+        "reel": {
+          "maximum_ns": 3809610575.5,
+          "mediane_cpu_ns": 539507500.0,
+          "mediane_ns": 145469694.75,
+          "nuages": 132
+        },
+        "slab": {
+          "maximum_ns": 520568766.5,
+          "mediane_cpu_ns": 177580500.0,
+          "mediane_ns": 52000819.0,
+          "nuages": 5
+        },
+        "tous": {
+          "maximum_ns": 6080307462.0,
+          "mediane_cpu_ns": 566174500.0,
+          "mediane_ns": 152797972.0,
+          "nuages": 147
+        },
+        "uniform": {
+          "maximum_ns": 6080307462.0,
+          "mediane_cpu_ns": 4556087000.0,
+          "mediane_ns": 1165531006.0,
+          "nuages": 5
+        }
+      }
+    },
+    "cpu:10:48": {
+      "droites": {
+        "clusters8": {
+          "cout_individuel_max_ns_par_site": 424529.2,
+          "fixe_ns": 12657611.918080084,
+          "nuages": 5,
+          "par_site_ns": 90186.62631316663,
+          "residu_abs_max_ns": 32747044.857579995
+        },
+        "reel": {
+          "cout_individuel_max_ns_par_site": 304213.7,
+          "fixe_ns": 28370921.413805358,
+          "nuages": 132,
+          "par_site_ns": 40759.171814802416,
+          "residu_abs_max_ns": 192668415.43817052
+        },
+        "slab": {
+          "cout_individuel_max_ns_par_site": 173326.795,
+          "fixe_ns": 20110953.575013116,
+          "nuages": 5,
+          "par_site_ns": 11724.496015620447,
+          "residu_abs_max_ns": 3950723.6765751587
+        },
+        "uniform": {
+          "cout_individuel_max_ns_par_site": 560124.54,
+          "fixe_ns": 71455433.4498164,
+          "nuages": 5,
+          "par_site_ns": 89262.88661464708,
+          "residu_abs_max_ns": 50211606.93553652
+        }
+      },
+      "groupes": {
+        "clusters8": {
+          "maximum_ns": 924875555.5,
+          "mediane_cpu_ns": 2359687500.0,
+          "mediane_ns": 91645738.0,
+          "nuages": 5
+        },
+        "reel": {
+          "maximum_ns": 628631055.0,
+          "mediane_cpu_ns": 1126861000.0,
+          "mediane_ns": 62917156.25,
+          "nuages": 132
+        },
+        "slab": {
+          "maximum_ns": 136631083.0,
+          "mediane_cpu_ns": 455883500.0,
+          "mediane_ns": 34247814.5,
+          "nuages": 5
+        },
+        "tous": {
+          "maximum_ns": 967608225.0,
+          "mediane_cpu_ns": 1190903000.0,
+          "mediane_ns": 62946948.5,
+          "nuages": 147
+        },
+        "uniform": {
+          "maximum_ns": 967608225.0,
+          "mediane_cpu_ns": 6703830000.0,
+          "mediane_ns": 210929927.0,
+          "nuages": 5
+        }
+      }
+    },
+    "cpu:5:1": {
+      "droites": {
+        "clusters8": {
+          "cout_individuel_max_ns_par_site": 369684.33285,
+          "fixe_ns": -88876506.87060675,
+          "nuages": 5,
+          "par_site_ns": 374828.61689951626,
+          "residu_abs_max_ns": 121800402.32794195
+        },
+        "reel": {
+          "cout_individuel_max_ns_par_site": 272990.2165,
+          "fixe_ns": -26617384.29294282,
+          "nuages": 132,
+          "par_site_ns": 195700.9028125556,
+          "residu_abs_max_ns": 765901402.1673868
+        },
+        "slab": {
+          "cout_individuel_max_ns_par_site": 50226.08435,
+          "fixe_ns": -1784749.7969924812,
+          "nuages": 5,
+          "par_site_ns": 50369.76430451128,
+          "residu_abs_max_ns": 1107192.6165413533
+        },
+        "uniform": {
+          "cout_individuel_max_ns_par_site": 1082301.1955,
+          "fixe_ns": 268154935.94054905,
+          "nuages": 5,
+          "par_site_ns": 332897.4427984205,
+          "residu_abs_max_ns": 481248816.7610305
+        }
+      },
+      "groupes": {
+        "clusters8": {
+          "maximum_ns": 3696843328.5,
+          "mediane_cpu_ns": 257493500.0,
+          "mediane_ns": 257554872.0,
+          "nuages": 5
+        },
+        "reel": {
+          "maximum_ns": 2696293046.0,
+          "mediane_cpu_ns": 117738000.0,
+          "mediane_ns": 117748759.0,
+          "nuages": 132
+        },
+        "slab": {
+          "maximum_ns": 502260843.5,
+          "mediane_cpu_ns": 48342000.0,
+          "mediane_ns": 48341093.5,
+          "nuages": 5
+        },
+        "tous": {
+          "maximum_ns": 3696843328.5,
+          "mediane_cpu_ns": 136207500.0,
+          "mediane_ns": 136206759.0,
+          "nuages": 147
+        },
+        "uniform": {
+          "maximum_ns": 3611522971.0,
+          "mediane_cpu_ns": 1073521500.0,
+          "mediane_ns": 1073544451.0,
+          "nuages": 5
+        }
+      }
+    },
+    "cpu:5:4": {
+      "droites": {
+        "clusters8": {
+          "cout_individuel_max_ns_par_site": 126423.755,
+          "fixe_ns": -15498818.384420354,
+          "nuages": 5,
+          "par_site_ns": 104025.3365570904,
+          "residu_abs_max_ns": 29976628.786850847
+        },
+        "reel": {
+          "cout_individuel_max_ns_par_site": 87717.2,
+          "fixe_ns": -374372.3194555495,
+          "nuages": 132,
+          "par_site_ns": 54856.552698262516,
+          "residu_abs_max_ns": 203954746.83683038
+        },
+        "slab": {
+          "cout_individuel_max_ns_par_site": 39704.05,
+          "fixe_ns": 3873493.156408463,
+          "nuages": 5,
+          "par_site_ns": 15663.361577635951,
+          "residu_abs_max_ns": 3699603.610683686
+        },
+        "uniform": {
+          "cout_individuel_max_ns_par_site": 331701.4083333333,
+          "fixe_ns": 86949907.89840882,
+          "nuages": 5,
+          "par_site_ns": 91585.9770491636,
+          "residu_abs_max_ns": 128261033.55242757
+        }
+      },
+      "groupes": {
+        "clusters8": {
+          "maximum_ns": 1033907008.5,
+          "mediane_cpu_ns": 296963500.0,
+          "mediane_ns": 82391882.5,
+          "nuages": 5
+        },
+        "reel": {
+          "maximum_ns": 752145901.5,
+          "mediane_cpu_ns": 139569250.0,
+          "mediane_ns": 40228860.0,
+          "nuages": 132
+        },
+        "slab": {
+          "maximum_ns": 159438519.5,
+          "mediane_cpu_ns": 64308000.0,
+          "mediane_ns": 19654716.0,
+          "nuages": 5
+        },
+        "tous": {
+          "maximum_ns": 1033907008.5,
+          "mediane_cpu_ns": 158717500.0,
+          "mediane_ns": 45834836.0,
+          "nuages": 147
+        },
+        "uniform": {
+          "maximum_ns": 1006767013.0,
+          "mediane_cpu_ns": 1142536000.0,
+          "mediane_ns": 306796918.5,
+          "nuages": 5
+        }
+      }
+    },
+    "cpu:5:48": {
+      "droites": {
+        "clusters8": {
+          "cout_individuel_max_ns_par_site": 230847.85,
+          "fixe_ns": 23264893.46432943,
+          "nuages": 5,
+          "par_site_ns": 18839.657512385616,
+          "residu_abs_max_ns": 2089774.2819548873
+        },
+        "reel": {
+          "cout_individuel_max_ns_par_site": 174684.2,
+          "fixe_ns": 20337337.742439803,
+          "nuages": 132,
+          "par_site_ns": 11747.235245448082,
+          "residu_abs_max_ns": 21406080.30307937
+        },
+        "slab": {
+          "cout_individuel_max_ns_par_site": 105011.35,
+          "fixe_ns": 13216473.779506907,
+          "nuages": 5,
+          "par_site_ns": 4666.61847933788,
+          "residu_abs_max_ns": 3182000.6274406947
+        },
+        "uniform": {
+          "cout_individuel_max_ns_par_site": 341678.75,
+          "fixe_ns": 53136580.99536632,
+          "nuages": 5,
+          "par_site_ns": 15141.44725855336,
+          "residu_abs_max_ns": 23648156.746080317
+        }
+      },
+      "groupes": {
+        "clusters8": {
+          "maximum_ns": 211610130.5,
+          "mediane_cpu_ns": 743878000.0,
+          "mediane_ns": 42096580.0,
+          "nuages": 5
+        },
+        "reel": {
+          "maximum_ns": 159215770.5,
+          "mediane_cpu_ns": 434227750.0,
+          "mediane_ns": 32237905.25,
+          "nuages": 132
+        },
+        "slab": {
+          "maximum_ns": 58936715.0,
+          "mediane_cpu_ns": 231803500.0,
+          "mediane_ns": 20174545.0,
+          "nuages": 5
+        },
+        "tous": {
+          "maximum_ns": 211610130.5,
+          "mediane_cpu_ns": 459197000.0,
+          "mediane_ns": 32646935.0,
+          "nuages": 147
+        },
+        "uniform": {
+          "maximum_ns": 206656370.5,
+          "mediane_cpu_ns": 1717350000.0,
+          "mediane_ns": 83349125.0,
+          "nuages": 5
+        }
+      }
+    }
+  },
+  "controles_declares": [
+    "Session appareil:10:1 : echec (expire)"
+  ],
+  "criteres": {
+    "C1": "non tenu",
+    "C2": "non tenu",
+    "C3": "non tenu"
+  },
+  "differences": [],
+  "empreintes_instables": 0,
+  "etats": {
+    "echec": 1,
+    "non_joue": 26,
+    "ok": 29,
+    "refus": 4
+  },
+  "expiration": {
+    "configuration": "appareil:10:1",
+    "derniere_passe_full": 392,
+    "limite": "solde du delai global, pas le delai des cas difficiles",
+    "passes_admises": 0,
+    "phases": {
+      "full": 393,
+      "liberation": 392,
+      "open": 1
+    },
+    "secondes": 324.2
+  },
+  "native_calls": 0,
+  "non_joues": [
+    "appareil:10:4",
+    "appareil:10:48",
+    "synth_sphere_n100_k10_cpu",
+    "synth_sphere_n300_k10_cpu",
+    "synth_sphere_n1000_k10_cpu",
+    "synth_sphere_n3000_k10_cpu",
+    "synth_sphere_n10000_k10_cpu",
+    "synth_line_n100_k10_cpu",
+    "synth_line_n1000_k10_cpu",
+    "synth_lattice_n100_k10_cpu",
+    "synth_lattice_n300_k10_cpu",
+    "synth_lattice_n1000_k10_cpu",
+    "synth_lattice_n3000_k10_cpu",
+    "synth_lattice_n10000_k10_cpu",
+    "synth_sphere_n100_k10_appareil",
+    "synth_sphere_n300_k10_appareil",
+    "synth_sphere_n1000_k10_appareil",
+    "synth_sphere_n3000_k10_appareil",
+    "synth_sphere_n10000_k10_appareil",
+    "synth_line_n100_k10_appareil",
+    "synth_line_n1000_k10_appareil",
+    "synth_lattice_n100_k10_appareil",
+    "synth_lattice_n300_k10_appareil",
+    "synth_lattice_n1000_k10_appareil",
+    "synth_lattice_n3000_k10_appareil",
+    "synth_lattice_n10000_k10_appareil"
+  ],
+  "passes_chaudes": 2666,
+  "passes_completes": 4009,
+  "processus_joues": 34,
+  "processus_prevus": 60,
+  "refus_difficiles": [
+    {
+      "etat": "refus",
+      "k": 5,
+      "nom": "synth_sphere_n3000",
+      "raison": "unsupported_degeneracy/wide_leaf",
+      "voie": "cpu"
+    },
+    {
+      "etat": "refus",
+      "k": 5,
+      "nom": "synth_sphere_n10000",
+      "raison": "unsupported_degeneracy/wide_leaf",
+      "voie": "cpu"
+    },
+    {
+      "etat": "refus",
+      "k": 5,
+      "nom": "synth_sphere_n3000",
+      "raison": "unsupported_degeneracy/wide_leaf",
+      "voie": "appareil"
+    },
+    {
+      "etat": "refus",
+      "k": 5,
+      "nom": "synth_sphere_n10000",
+      "raison": "unsupported_degeneracy/wide_leaf",
+      "voie": "appareil"
+    }
+  ],
+  "source_commit": "83ed7620d0b243343688a45473aa479240129725",
+  "verdict": "refuse"
+}

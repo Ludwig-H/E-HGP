@@ -1,0 +1,35 @@
+{
+  "pins": {
+    "avant": "83ed7620d0b243343688a45473aa479240129725",
+    "livre": "24dec7b855fe321d886acd9d938b2b97e8fe4643"
+  },
+  "sources": {
+    "avant": {
+      "morsehgp3D_v12/microbancs/mes_c_petits/pilote_c.py": "6309ac7ee8344f966e82bd05af1966e5c23b92515b289a653574af2f0f988899",
+      "morsehgp3D_v12/microbancs/mes_c_petits/test_pilote_c.py": "91cf72876cefd038481f8fdd58eca15b2657c432a2cf3fb693ee4992afcb7f74"
+    },
+    "livre": {
+      "morsehgp3D_v12/microbancs/mes_c_petits/pilote_c.py": "a0b3e9b916a62f4f6c1c6acfb46c3eeff48e66cd963559656edff7800cb94c7d",
+      "morsehgp3D_v12/microbancs/mes_c_petits/test_pilote_c.py": "4280e3a38371575e138dc7d13585810165c30638717471b9c8344c6a76706a0a",
+      "morsehgp3D_v12/microbancs/mes_c_petits/mutants_pilote_c.py": "68057d926206e39bd8d7b274e8c0050c87e991e8ced73e3ea2bbecde3b859847",
+      "morsehgp3D_v12/microbancs/mes_c_petits/README.md": "c424e3390869796afc3eda7c20565736defd760c5379e67555a88e5c881f8389",
+      "morsehgp3D_v12/microbancs/outils/banc_full.py": "7d7f0661b49adf094df51d41268470571d47c51fc7795bb5b34c791a4a539904",
+      "morsehgp3D_v12/microbancs/outils/lecteur_full.py": "3594c5d36ed831b39d679b504234505d5b4b0a5b08e85cc55a21c9af74c621a4",
+      "morsehgp3D_v12/receipts/audit_reponses_20261008/mes_c_livraison/cohorte_et_porte.patch": "ac5aea625ccbf03446ba9d397dc2fdce0a603142dc53e62433ba82215379846c"
+    }
+  },
+  "capture_utc": "2026-10-08T06:46:57.044325+00:00",
+  "campagne_lancee": {
+    "launch_started_utc": "2026-10-08T06:02:16Z",
+    "source_git": "83ed7620d0b243343688a45473aa479240129725",
+    "source_kind": "commit",
+    "package_sha256": "86eb55226a2c65c53feaa997abc0de71ffa185a527ceb7c21e7c151a66c2be25",
+    "plan_sha256": "71ef953a4f75d030c666a54308f97522a9ce782fb54035048b05af40a57a0ebd",
+    "files_exact": 342,
+    "source_inventory_sha256": "6c80a1313eefce1794d414c117be3dc87cf6459b81e47f98f89a5ac565248bd7"
+  },
+  "campaign_metadata_snapshot_sha256": "78d9a917b4f7716d9f1a617d317dff92465b6f41f47850ba40fcf57408dd3295",
+  "native_execution": false,
+  "rule_moved": false,
+  "setup_retry": "premier chemin relatif du fichier capture incorrect, refus avant les portes ; corrig\u00e9 avant rejeu"
+}
