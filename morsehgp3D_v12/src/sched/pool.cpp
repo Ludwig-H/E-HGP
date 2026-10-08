@@ -1,4 +1,8 @@
-// Reclamation saturante et barriere d'epoque ; aucune file asynchrone, aucune allocation par travail.
+// Reclamation saturante ; equipe dimensionnee par le nombre de tranches (8 octobre 2026) : chaque ouvrier engage est
+// reveille par son propre semaphore et acquitte par un compteur atomique ; le dernier libere l'appelant. Une seule
+// tranche s'execute dans l'appelant sans reveil. Aucune file asynchrone, aucune allocation par travail. Remplace
+// l'epoque booleenne et le reveil de TOUS les ouvriers sous un mutex commun, dont le cout dominait les petits nuages
+// a 48 fils (session C, receipts/g4_mesc_20261008 : 15,6 ms vers 150 sites a 48 fils contre 6,8 ms a 4 fils).
 #include "sched/sched.hpp"
 
 #include <algorithm>
@@ -30,7 +34,7 @@ Outcome invoke(Pool::Body body, void* context, u64 begin, u64 end, u32 worker) n
 
 }  // namespace
 
-Pool::Pool(u32 workers) {
+Pool::Pool(u32 workers) : wake_(new Wake[workers]) {
   workers_.reserve(workers - 1);
   try {
     for (u32 worker = 1; worker < workers; ++worker)
@@ -44,11 +48,8 @@ Pool::Pool(u32 workers) {
 Pool::~Pool() { shutdown(); }
 
 void Pool::shutdown() noexcept {
-  {
-    std::lock_guard<std::mutex> lock(mutex_);
-    stop_ = true;
-  }
-  wake_.notify_all();
+  stop_.store(true, std::memory_order_release);
+  for (std::size_t w = 0; w < workers_.size(); ++w) wake_[w].go.release();
   for (auto& worker : workers_) worker.join();
 }
 
@@ -66,22 +67,12 @@ void Pool::run_chunks(Job& job, u32 worker) noexcept {
 }
 
 void Pool::worker_loop(u32 worker) {
-  bool seen = false;
   for (;;) {
-    Job* job;
-    {
-      std::unique_lock<std::mutex> lock(mutex_);
-      wake_.wait(lock, [&] { return stop_ || (current_ != nullptr && epoch_ != seen); });
-      if (stop_) return;
-      seen = epoch_;
-      job = current_;
-    }
-    run_chunks(*job, worker);
-    {
-      std::lock_guard<std::mutex> lock(mutex_);
-      --job->remaining;
-      if (job->remaining == 0) done_.notify_all();
-    }
+    wake_[worker - 1].go.acquire();  // un jeton par invocation qui engage cet ouvrier
+    if (stop_.load(std::memory_order_acquire)) return;
+    Job& job = *current_;
+    run_chunks(job, worker);
+    if (job.remaining.fetch_sub(1, std::memory_order_acq_rel) == 1) done_.release();
   }
 }
 
@@ -90,26 +81,26 @@ Outcome Pool::parallel_for(u64 n, u64 grain, void* context, Body body) noexcept 
   const ActiveCall active(active_);
   if (grain == 0 || body == nullptr) return fail(Reason::parameter_out_of_range);
   if (n == 0) return {};
+  const u64 chunks = (n - 1) / grain + 1;  // n >= 1 : aucun debordement
+  if (chunks == 1) return invoke(body, context, 0, n, 0);  // une tranche [0, n) : dans l'appelant, sans reveil
+  const u32 team = static_cast<u32>(std::min<u64>(workers_.size(), chunks - 1));
   Job job;
   job.n = n;
   job.grain = grain;
   job.context = context;
   job.body = body;
-  job.remaining = static_cast<u32>(workers_.size());
-  {
-    std::lock_guard<std::mutex> lock(mutex_);
+  job.remaining.store(team, std::memory_order_relaxed);
+  if (team != 0) {
     current_ = &job;
-    epoch_ = !epoch_;
+    for (u32 w = 0; w < team; ++w) wake_[w].go.release();  // publie current_ et job (release)
   }
-  wake_.notify_all();
   run_chunks(job, 0);
-  {
-    std::unique_lock<std::mutex> lock(mutex_);
-    done_.wait(lock, [&] { return job.remaining == 0; });
+  if (team != 0) {
+    done_.acquire();  // le dernier ouvrier engage a acquitte : toutes les cases de job.outcomes sont ecrites
     current_ = nullptr;
   }
   Outcome outcome;
-  for (u32 worker = 0; worker < size(); ++worker) outcome = merge(outcome, job.outcomes[worker]);
+  for (u32 worker = 0; worker <= team; ++worker) outcome = merge(outcome, job.outcomes[worker]);
   return outcome;
 }
 

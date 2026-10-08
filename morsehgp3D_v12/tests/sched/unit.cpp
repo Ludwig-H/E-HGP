@@ -287,4 +287,53 @@ MHGP12_TEST(exceptions, 26) {
   }
 }
 
+// Equipe dimensionnee par le nombre de tranches (8 octobre 2026) : une tranche s'execute dans l'appelant (ouvrier
+// 0, sans reveil) ; c tranches n'engagent que les ouvriers 0..min(W-1, c-1) ; au-dela, tous. Les tranches restent
+// toutes executees une fois, avec les memes bornes.
+struct Team {
+  std::array<std::atomic<u32>, kMaxWorkers> by_worker{};
+  std::atomic<u64> chunks{0};
+  std::thread::id caller;
+  std::atomic<bool> foreign{false};  // une tranche d'une invocation a une seule tranche hors du fil appelant
+};
+
+Outcome team_body(void* pointer, u64, u64, u32 worker) {
+  auto& t = *static_cast<Team*>(pointer);
+  t.by_worker[worker].fetch_add(1);
+  t.chunks.fetch_add(1);
+  return {};
+}
+
+Outcome single_body(void* pointer, u64 begin, u64 end, u32 worker) {
+  auto& t = *static_cast<Team*>(pointer);
+  if (std::this_thread::get_id() != t.caller || worker != 0) t.foreign.store(true);
+  t.chunks.fetch_add(end - begin);
+  return {};
+}
+
+MHGP12_TEST(team, 100) {
+  for (u32 workers : {1u, 2u, 8u, 48u}) {
+    auto pool = make_pool({workers});
+    REQUIRE(pool.ok());
+    // Une tranche (n <= grain) : dans l'appelant, ouvrier 0, une seule invocation de body sur [0, n).
+    for (u64 n : {1u, 5u, 64u}) {
+      Team t;
+      t.caller = std::this_thread::get_id();
+      CHECK(pool.value()->parallel_for(n, 64, &t, single_body).ok());
+      CHECK(!t.foreign.load());
+      CHECK_EQ(t.chunks.load(), n);
+    }
+    // c tranches : ouvriers engages dans 0..min(W-1, c-1), toutes les tranches jouees une fois.
+    for (u64 c : {2u, 3u, 7u, 47u, 200u}) {
+      Team t;
+      CHECK(pool.value()->parallel_for(c, 1, &t, team_body).ok());
+      const u64 limit = std::min<u64>(workers - 1, c - 1);
+      bool inside = true;
+      for (u32 w = 0; w < kMaxWorkers; ++w) inside = inside && (w <= limit || t.by_worker[w].load() == 0);
+      CHECK(inside);
+      CHECK_EQ(t.chunks.load(), c);
+    }
+  }
+}
+
 MHGP12_TEST_MAIN()

@@ -28,6 +28,7 @@
     "Generation u64 remplacee par epoque booleenne : tous les workers acquittent chaque invocation, y compris ceux sans tranche ; impossible de manquer deux changements d'epoque.",
     "Tests reecrits avec cadre v11 : reference u128 des tranches, W1/2/4/8, travaux courts, reentrance/concurrence, participation, refus et reemploi.",
     "Injection pthread_create/join et new/delete adaptee des portes R2, sans crochet produit ; refus de chaque creation/allocation, jointure, allocation nulle par appel.",
-    "Aucun parallel_sort ni code catalogue importe, aucune qualification native R2 heritee. Qualification G4 v11 requise."
+    "Aucun parallel_sort ni code catalogue importe, aucune qualification native R2 heritee. Qualification G4 v11 requise.",
+    "v12 (8 octobre 2026) : epoque booleenne et reveil de tous sous mutex remplaces par une equipe dimensionnee par le nombre de tranches (min(W-1, c-1) ouvriers, un semaphore binaire chacun, compteur atomique d'acquittement, une tranche dans l'appelant sans reveil) ; porte team."
   ]
 }

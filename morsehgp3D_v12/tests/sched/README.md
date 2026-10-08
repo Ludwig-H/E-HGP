@@ -29,12 +29,19 @@ même pour n=UINT64_MAX. Un CAS échoué actualise b et réessaie. Chaque CAS
 réussi donne une tranche distincte ; le compteur finit à n. Le juge des
 frontières utilise des additions u128, avec grain maximal et n aux limites.
 
-L’époque booléenne bascule sous mutex. Chaque worker conserve son époque vue,
-capture le Job sous le même mutex, écrit sa case d’Outcome puis acquitte.
-Le pilote attend **tous** les W−1 acquittements, même si certains workers n’ont
-réclamé aucune tranche. Tous ont donc vu la même époque avant la bascule
-suivante : aucun compteur de génération, aucune ambiguïté après deux appels.
-Ce mutex établit aussi la visibilité des cases Outcome avant réduction.
+**Équipe dimensionnée (8 octobre 2026, changement de la v12).** L’époque booléenne sous mutex, qui réveillait et
+attendait **tous** les W−1 ouvriers à chaque appel, est remplacée. Pour c = ⌈n/grain⌉ tranches, seuls les
+min(W−1, c−1) premiers ouvriers sont engagés, chacun réveillé par son propre sémaphore binaire. Une seule tranche
+s’exécute dans l’appelant, sans réveil. Chaque ouvrier engagé écrit sa case d’Outcome puis décrémente un compteur
+atomique (acq_rel) ; le dernier libère le sémaphore de l’appelant. Cette chaîne établit la visibilité des cases
+Outcome avant la réduction, et le Job reste vivant jusqu’à cet acquittement. Un ouvrier ne reçoit un jeton que
+lorsqu’il attend, puisque l’appel précédent l’a attendu : aucun jeton ne déborde le sémaphore binaire.
+
+Motif : à 48 fils, le réveil de tous sous un même mutex dominait les petits nuages
+([session C](../../receipts/g4_mesc_20261008/README.md) :
+15,6 ms vers 150 sites à 48 fils contre 6,8 ms à 4). En local, à 8 fils, un nuage réel de 102 sites passe de 16,1 à
+13,6 ms par passe. La porte `team` vérifie les deux régimes à 1, 2, 8 et 48 fils : une tranche dans l’appelant, et
+des ouvriers engagés dans 0..min(W−1, c−1) pour c tranches. TSan est muet sur la porte unitaire, rejouée trois fois.
 
 Toutes les tranches sont appelées, même après un refus ou une exception.
 Chaque exception est convertie sur place : `bad_alloc` en `memory_budget`,
