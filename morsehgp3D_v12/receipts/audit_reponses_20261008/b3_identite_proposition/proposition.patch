@@ -1,0 +1,196 @@
+--- a/morsehgp3D_v12/microbancs/mes_t2d_b3/pilote_t2d_b3.py
++++ b/morsehgp3D_v12/microbancs/mes_t2d_b3/pilote_t2d_b3.py
+@@ -324,8 +324,9 @@
+             "--threads=%d" % args.fils, "--passes=%d" % passes, "--device"] + (["--digest"] if digest else []) + \
+         (["--sequentiel"] if schema == "sequentiel" else [])
+-    code, sortie, _err, _s = bf.run(argv, args.delai, raw_out=journal)
++    code, sortie, _err, _s = bf.run(argv, args.delai, raw_out=journal, raw_err=journal + '.err')
+     lu = lf.parse_output(code, sortie, attendu(trame, info["sites"], k, args.fils, passes, digest, schema))
+     out = {"journal": os.path.relpath(journal, args.sortie), "journal_sha256": bf.sha256_file(journal),
+-           "code": code if type(code) is int else str(code), "etat": lu["etat"], "raison": lu["raison"],
++           "code": code if type(code) is int else str(code), "stderr_sha256": bf.sha256_file(journal + ".err"),
++           "etat": lu["etat"], "raison": lu["raison"],
+            "valide": lu["etat"] == "ok"}
+     if out["valide"] and schema == "sequentiel":
+@@ -368,34 +369,110 @@
+             argv = [sondes[b], infos[t]["xyz"], infos[t]["ids"], "--k=5", "--threads=%d" % args.fils, "--passes=1",
+                     "--digest"]
+-            code, sortie, _err, _s = bf.run(argv, args.delai, raw_out=journal)
+-            res["trames"][t][b] = lire_resolution(code, sortie)
++            code, sortie, _err, _s = bf.run(argv, args.delai, raw_out=journal, raw_err=journal + '.err')
++            res["trames"][t][b] = lire_resolution(code, sortie, infos[t]["sites"], args.fils)
+             res["trames"][t][b].update({"journal": os.path.relpath(journal, args.sortie),
+-                                        "journal_sha256": bf.sha256_file(journal)})
++                                        "journal_sha256": bf.sha256_file(journal),
++                                        "code": code if type(code) is int else str(code),
++                                        "stderr_sha256": bf.sha256_file(journal + ".err")})
+     res["fin"] = maintenant()
+     rapport["resolution"] = res
+ 
+ 
+-def lire_resolution(code, sortie):
+-    """Une passe tour_g ok et une seule ligne digest (resolution_sha256 de 64 chiffres hexadecimaux), sinon invalide."""
+-    if code != 0:
+-        return {"valide": False, "raison": "code %s" % code}
+-    passes, empreintes = 0, []
+-    for ligne in sortie.splitlines():
+-        if not ligne.startswith("{"):
+-            continue
+-        try:
+-            d = json.loads(ligne)
+-        except ValueError:
+-            return {"valide": False, "raison": "ligne illisible"}
+-        if d.get("phase") == "tour_g":
+-            if d.get("status") != "ok":
+-                return {"valide": False, "raison": "passe en echec"}
+-            passes += 1
+-        elif d.get("phase") == "digest":
+-            empreintes.append(d.get("resolution_sha256"))
+-    e = empreintes[0] if len(empreintes) == 1 else None
+-    if passes != 1 or type(e) is not str or len(e) != 64 or any(c not in "0123456789abcdef" for c in e):
+-        return {"valide": False, "raison": "passe ou empreinte de la resolution absente"}
+-    return {"valide": True, "resolution": e}
++def lire_resolution(code, sortie, sites, fils):
++    """Une passe G liee a sa commande, ordres 1..K, digest et exit ; schema de bench/tower_probe.cpp."""
++    try:
++        exiger(type(code) is int and code == 0, "code de resolution non nul ou non entier")
++        exiger(lf.is_int(sites) and 0 < sites < 1 << 32 and lf.is_int(fils) and fils > 0,
++               "configuration de resolution invalide")
++        lignes = [json.loads(x, object_pairs_hook=lf.unique_object, parse_constant=lf.reject_constant)
++                  for x in sortie.splitlines()]
++        kmax, ordres = 5, min(5, sites)
++        exiger(len(lignes) == ordres + 3 and all(type(x) is dict for x in lignes),
++               "nombre ou type des lignes de resolution")
++        row = lignes[0]
++        entiers = ('pass', 'order', 'coord_bits', 'kmax', 'threads', 'sites', 'wall_ns')
++        exiger(set(row) == set(entiers) | {'phase', 'status', 'reason', 'diagnostics'} and
++               all(lf.is_int(row[x]) for x in entiers) and row['phase'] == 'tour_g' and
++               row['status'] == 'ok' and row['reason'] == 'none' and row['wall_ns'] > 0 and
++               (row['pass'], row['order'], row['coord_bits'], row['kmax'], row['threads'], row['sites']) ==
++               (0, 0, 21, kmax, fils, sites), "passe de resolution hors commande")
++        scalaire = ('prepare_ns', 'count_ns', 'setup_ns', 'fill_ns', 'workspace_ns', 'tables_ns', 'joins_ns',
++                    'resolve_ns', 'orders_ns', 'reste_ns', 'workspace_bytes', 'table_bytes', 'peak_bytes')
++        tableaux = {'order_ns': kmax, 'pass_ns': kmax, 'table_ns': kmax - 1, 'join_ns': kmax - 1}
++        diag = row['diagnostics']
++        exiger(type(diag) is dict and set(diag) == set(scalaire) | set(tableaux) and
++               all(lf.is_int(diag[x]) for x in scalaire) and all(
++                   type(diag[x]) is list and len(diag[x]) == n and all(lf.is_int(v) for v in diag[x])
++                   for x, n in tableaux.items()), "diagnostics de resolution incomplets")
++        objet = ('births', 'cells', 'inert_cells', 'extended_cells', 'representatives')
++        travail = ('probes first_probe_hits probe_hits_after_steps route_t1 route_cert_table route_cert_census '
++                   'route_fallback_table route_fallback_census fallback_no_proposal fallback_not_in_part '
++                   'fallback_certificate census_saturated census_complete census_sites census_sites_max census_nodes '
++                   'jumps_catalogue jumps_census inert_steps cell_stops birth_stops controls max_chain').split()
++        for k, row in enumerate(lignes[1:1 + ordres], 1):
++            exiger(set(row) == {'phase', 'k', 'objet', 'travail'} and row['phase'] == 'ordre' and
++                   lf.is_int(row['k']) and row['k'] == k and lf.int_block(row['objet'], objet),
++                   "ordre de resolution absent ou mal forme")
++            work = row['travail']
++            exiger(type(work) is dict and set(work) == set(travail) | {'chaines'} and
++                   all(lf.is_int(work[x]) for x in travail) and type(work['chaines']) is list and
++                   len(work['chaines']) == 16 and all(lf.is_int(x) for x in work['chaines']),
++                   "compteurs de travail de resolution mal formes")
++        exiger(lignes[1]['objet']['births'] == sites, "sites et naissances K1 incoherents")
++        digest, end = lignes[-2:]
++        e = digest.get('resolution_sha256')
++        exiger(set(digest) == {'phase', 'resolution_sha256'} and digest['phase'] == 'digest' and
++               type(e) is str and len(e) == 64 and all(c in '0123456789abcdef' for c in e),
++               "empreinte de resolution absente ou mal formee")
++        exiger(end == dict(phase='exit', status='ok', reason='none', order=0) and
++               lf.is_int(end.get('order')), "fin de resolution absente ou en echec")
++        return {'valide': True, 'resolution': e}
++    except (ValueError, TypeError, KeyError, UnicodeError) as erreur:
++        return {'valide': False, 'raison': str(erreur)}
++
++
++def relire_preuve(prise, sortie, vus):
++    """Fichier local distinct, SHA et code exacts, stderr vide ferme ; aucun resume ne vaut preuve."""
++    exiger(type(prise) is dict and prise.get('valide') is True and type(prise.get('code')) is int and
++           prise['code'] == 0 and type(prise.get('journal')) is str, "preuve ou code absent/invalide")
++    racine = os.path.realpath(sortie)
++    chemin = os.path.realpath(os.path.join(racine, prise['journal']))
++    err = os.path.realpath(chemin + '.err')
++    exiger(os.path.commonpath((racine, chemin)) == racine and chemin not in vus and
++           os.path.commonpath((racine, err)) == racine and err not in vus and err != chemin,
++           "journal externe ou reutilise")
++    vus.update((chemin, err))
++    exiger(bf.sha256_file(chemin) == prise.get('journal_sha256') and
++           bf.sha256_file(err) == prise.get('stderr_sha256'), "preuve absente ou empreinte differente")
++    with open(err, 'rb') as f:
++        exiger(f.read() == b'', "stderr non vide")
++    with open(chemin, encoding='utf-8') as f:
++        return f.read()
++
++
++def readmettre_identites(rapport, sortie, vus):
++    """25 FULL de deux passes et 10 resolutions d'une passe, attendus selon leur place."""
++    fils = rapport['campagne_k5']['fils']
++    for phase, trames_attendues in (('identite', TRAMES), ('resolution', RES_TRAMES)):
++        trames_lues = rapport[phase]['trames']
++        exiger(set(trames_lues) == set(trames_attendues), "cohorte d'identite incomplete ou inconnue")
++        for t in trames_attendues:
++            sites = rapport['trames'][t]['sites']
++            groupe = trames_lues[t]
++            exiger(set(groupe) == set(BRAS_CONSTRUITS), "bras d'identite incomplets ou inconnus")
++            for p in groupe.values():
++                texte = relire_preuve(p, sortie, vus)
++                if phase == 'identite':
++                    lu = lf.parse_output(p['code'], texte, attendu(t, sites, 5, fils, 2, True))
++                    exiger(lu['etat'] == 'ok', "FULL d'identite illisible : " + lu['raison'])
++                    r = resume(lu['passes'])
++                    exiger(all(p.get(k) == v for k, v in r.items()) and
++                           p.get('mur_ns') == mediane(r['murs_ns'][1:]), "resume FULL different du brut")
++                    p.update(r)
++                else:
++                    r = lire_resolution(p['code'], texte, sites, fils)
++                    exiger(r['valide'], "resolution d'identite illisible : " + r.get('raison', ''))
++                    exiger(p.get('resolution') == r['resolution'], "resume de resolution different du brut")
++                    p.update(r)
+ 
+ 
+@@ -593,4 +670,5 @@
+     try:
+         admis = json.loads(json.dumps(rapport, allow_nan=False))
++        exiger(admis.get("schema") == "ehgp.v12.t2d_b3_pilote.v2", "schema sans fermeture stdout/stderr")
+         camp = admis["campagne_k5"]
+         fils, passes = camp["fils"], camp["passes"]
+@@ -598,5 +676,6 @@
+         exiger(set(camp["trames"]) == set(TRAMES), "cohorte de trames incomplete ou inconnue")
+         exiger(admis["construction"]["bras_sha256"] == bf.sha256_file(BRAS_FICHIER), "bras_t2d_b3.json change")
+-        racine, vus = os.path.realpath(sortie), set()
++        vus = set()
++        readmettre_identites(admis, sortie, vus)
+         for t in TRAMES:
+             sites = admis["trames"][t]["sites"]
+@@ -605,19 +684,11 @@
+                 for b in BRAS_JUGES:
+                     p = tour[b]
+-                    if not p.get("valide"):
+-                        continue
+-                    chemin = os.path.realpath(os.path.join(racine, p["journal"]))
+-                    exiger(os.path.commonpath((racine, chemin)) == racine and chemin not in vus,
+-                           "journal externe ou reutilise")
+-                    vus.add(chemin)
+-                    exiger(bf.sha256_file(chemin) == p["journal_sha256"], "journal modifie")
+-                    with open(chemin, encoding="utf-8", errors="replace") as f:
+-                        texte = f.read()
+-                    code = int(p["code"]) if str(p["code"]).lstrip("-").isdigit() else p["code"]
+-                    lu = lf.parse_output(code, texte, attendu(t, sites, 5, fils, passes, False))
++                    texte = relire_preuve(p, sortie, vus)
++                    lu = lf.parse_output(p["code"], texte, attendu(t, sites, 5, fils, passes, False))
+                     exiger(lu["etat"] == "ok", "prise relue illisible : " + lu["raison"])
+                     r = resume(lu["passes"])
+-                    exiger(r["murs_ns"] == p["murs_ns"] and mediane(r["murs_ns"][1:]) == p["mur_ns"],
+-                           "resume different du brut")
++                    exiger(all(p.get(k) == v for k, v in r.items()) and
++                           mediane(r["murs_ns"][1:]) == p["mur_ns"], "resume different du brut")
++                    p.update(r)
+         return _juger_admis(admis, sortie, verifier_journaux=True)
+     except (ValueError, TypeError, KeyError, OSError, UnicodeError, OverflowError) as erreur:
+@@ -803,5 +874,5 @@
+     os.makedirs(args.sortie, exist_ok=True)
+     chemin = os.path.join(args.sortie, "rapport_t2d_b3.json")
+-    rapport = {"schema": "ehgp.v12.t2d_b3_pilote.v1", "regle": REGLE_T2D_B3}
++    rapport = {"schema": "ehgp.v12.t2d_b3_pilote.v2", "regle": REGLE_T2D_B3}
+     if os.path.isfile(chemin):
+         with open(chemin, encoding="utf-8") as f:

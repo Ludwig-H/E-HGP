@@ -1,0 +1,44 @@
+{
+  "source_git": "545ed987e0f5a06dbb518fe42ed6c5f100f32770",
+  "sources_fermees": 17,
+  "traces_fermees": 13,
+  "ctest": {
+    "lot": {
+      "selected": 754,
+      "passed": 754,
+      "skipped": 0,
+      "failed": 0,
+      "wall_seconds": 749.31
+    },
+    "cles": {
+      "selected": 82,
+      "passed": 82,
+      "skipped": 0,
+      "failed": 0,
+      "wall_seconds": 214.17
+    },
+    "main": {
+      "selected": 747,
+      "passed": 746,
+      "skipped": 1,
+      "failed": 0,
+      "wall_seconds": 584.67
+    }
+  },
+  "mutants_prepares_verifies": [
+    "cles_case_absente_nulle",
+    "cles_bits_decales",
+    "cles_non_transmises",
+    "cles_tranches_case_fausse",
+    "cles_garde_hors_nuage",
+    "balayage_dernier_oublie"
+  ],
+  "mutants_natifs_admis": 0,
+  "elf_postrun_uniquement": [
+    "mhgp12_catalogue_device_unit",
+    "mhgp12_tower_unit"
+  ],
+  "postimages_patch": 3,
+  "patch_compile": false,
+  "natif_execute_par_auditeur": false
+}

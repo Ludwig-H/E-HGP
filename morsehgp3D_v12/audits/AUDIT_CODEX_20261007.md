@@ -1,15 +1,18 @@
 # Audit Codex — état courant v12
 
-8 octobre 2026, 18:11 UTC. R1 `47feedc96` reste la référence admise ; A6b `f2c106d93` rejeté.
+8 octobre 2026, 18:32 UTC. R1 `47feedc96` reste la référence admise ; A6b `f2c106d93` rejeté.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
 
 **B3 livré `545ed987e`, non adopté.** [Prélecture mathématique](../receipts/audit_reponses_20261008/b3_supports_math/README.md) :
 clés et appartenance équivalentes sur catalogues produit réussis ; 957 requêtes Python, aucun natif.
 Surcoût hôte **16 octets/boule**, copie Pool et transfert GPU ; gain à mesurer.
+[Portes B3 relues](../receipts/audit_reponses_20261008/b3_portes_prelecture/README.md) : 746 passées / une sautée sur R1+B3,
+preuves distinctes des prototypes A6b. Six mutants préparés, exécutions non admises ; deux portes négatives proposées.
 **[CST-0018 reproduit sur le juge B3](../receipts/audit_reponses_20261008/b3_identite_admission/README.md)** :
 les trois leviers restent « adoptés » après suppression des 35 journaux d'identité, en mode strict.
-Les temps sont relus, les identités seulement résumées. Correctif en préparation ; aucune mesure G4 B3 admise.
+[Correctif proposé](../receipts/audit_reponses_20261008/b3_identite_proposition/README.md) : 27 cas et 21 contrôles indépendants,
+schéma futur v2, seuils inchangés. À intégrer avec sa porte ; aucune mesure G4 B3 admise.
 
 **Le contrat FULL multi-séquences à 100 ms reste non tenu.**
 [Deux campagnes A6b relues](../receipts/audit_reponses_20261008/session_a6b_admission/README.md) :
@@ -35,14 +38,10 @@ Ce quotient de médianes ne donne pas le gain géométrique apparié de 15,09 %.
 celui de [R1 adopté](../receipts/audit_reponses_20261008/session_r1_admission/README.md), trois processus × quatre chaudes/trame.
 FUL1 ne sérialise pas RCSR ; [six mutants R1](../receipts/audit_reponses_20261008/r1_mutants_execution/README.md) qualifiés séparément.
 
-**Aide au développeur : suivre K2/K3 et le mur entier.**
-[Diagnostic apparié](../receipts/audit_reponses_20261008/a6b_etages/README.md), 261 paires : grandes,
-ΔFULL moyen −25,688 ms = notamment ΔG régional +4,393 et Δqueue −30,658 ms.
-Dernière fin publiée : R(K5) avant dans 126/126 prises ; après, R(K2/K3) dans 123/126.
-Les pertes ng00/01 touchent aussi préparation/catalogue/ouverture ; N/H et aides ne sont pas chronométrés séparément.
-Fenêtres de tâches ≠ temps CPU ; cause non isolée.
-Priorité des aides A6b = toutes les tranches G **réclamées**, pas achevées ; le compte rendu doit le préciser.
-Une garde acquire sur `g_end_ns` est une expérience proposée, avec limites d'épilogues explicites ; gain inconnu.
+**Suite d'A6b : suivre K2/K3 et le mur entier.** [Diagnostic apparié](../receipts/audit_reponses_20261008/a6b_etages/README.md) :
+sur les grandes, dernière fin publiée R(K5) avant dans 126/126 prises ; après, R(K2/K3) dans 123/126.
+Les pertes ng00/01 touchent G mais aussi préparation/catalogue/ouverture ; causalité non isolée.
+Priorité des aides = tranches G réclamées, pas achevées. Garde acquire sur `g_end_ns` proposée, avec limites d'épilogues.
 [Borne scratch N](../receipts/audit_reponses_20261008/a6_admission_n/README.md) non implantée : somme des W plus grands maxima par tâche.
 
 [Retrait A6b contrôlé](../receipts/audit_reponses_20261008/a6b_retrait_r1/README.md), puis rejoué contre **`8a0716e74` livré** :
@@ -51,16 +50,14 @@ Une garde acquire sur `g_end_ns` est une expérience proposée, avec limites d'�
 Release/u21 sans CUDA ; ELF déjà reconstruits pour B3, exclus de cette clôture de journaux.
 [Corrections documentaires proposées](../receipts/audit_reponses_20261008/a6b_documentation/README.md) : agrégats, IC et priorité G.
 
-**Pas de nouveau FULL CPU sur ng00–02.** [Protocole](../receipts/audit_reponses_20261008/full_cpu_actualisation_protocole/README.md)
-non exécuté : sans `--device`, K5/K10, 39 processus / 312 passes, pin à fixer. C domine 83–84 % du FULL CPU M ;
-finition déjà parallèle, feuille16 sans gain global face à24. Comparaison v11 non appariée.
+**Nouvelles prises CPU/GPU R1 reçues, admission en cours.** FULL-N, source `8a0716e74` :
+CPU ng00–02 K5, trois processus × cinq passes, cache 8 Gio ; pas de K10 CPU sur ces trames.
+GPU K5/K10 et 37 trames K5 également prévus. Le tableau ci-dessus reste celui des dernières preuves admises.
 FULL exclut lecture, masque, validation, FUL1 et libération. `cpu_ns` n'est pas une latence CPU seule ;
 `--sequentiel` conserve le catalogue GPU.
 
-**T1-d2 / petits LiDAR** : [T1-d2 admis](../receipts/audit_reponses_20261008/session_t1d_admission/README.md),
-C GPU K5 26,23 / 23,20 / 26,46 ms ; preuve niveaux/table et mémoire encore à compléter (registre).
-[C3](../receipts/audit_reponses_20261008/session_c3_admission/README.md) : 132 réels W48, K5 CPU/GPU 25,003/7,856 ms ;
-K10 46,420/14,571 ms. Huit refus `wide_leaf`, W1 absent ; deux comparaisons cache refusées A/A.
+[T1-d2](../receipts/audit_reponses_20261008/session_t1d_admission/README.md) et [petits LiDAR C3](../receipts/audit_reponses_20261008/session_c3_admission/README.md) :
+mesures antérieures inchangées ; compléments de preuve et limites au registre.
 
 **Massifs — record GPU : Paris sans sol, 9 111 422 sites, FULL K5 en 46,453 s à froid.**
 [L2t admis](../receipts/audit_reponses_20261008/session_l2t_admission/README.md), catalogue GPU/tour CPU W48, u21 :
@@ -68,9 +65,8 @@ un succès, trois refus mémoire sans stade ni budget nommé ; aucun FUL1 ni chr
 Source 8b9 identique à R1 ; archive/arrêt clos, ELF initial seul. Paris brut 14,552M et Lyon 24,017/32,413M refusent.
 Record [CPU L2](../receipts/audit_reponses_20261008/session_l2_admission/README.md) : Paris brut 14,552M en 165,789 s froid.
 
-[L1t admis](../receipts/audit_reponses_20261008/session_b1t_admission/README.md) : K5 GPU chaud Boreas 1,513M 7,185 s,
-Marseille sans sol 2,465M 8,095 s, Meadow 6,181M 29,621 s ; une chaude par cas. K10 froid : 38,620 / 38,521 s
-sur Boreas/Marseille. FUL1 limité à 1,6M, ELF final absent ; aucune série statistique.
+[L1t](../receipts/audit_reponses_20261008/session_b1t_admission/README.md) : mesures antérieures conservées,
+FUL1 limité à 1,6M, ELF final absent ; aucune série statistique.
 
 **CST-0243 ouvert** : TU Wien sans sol 5,200M réussit 32,856 s à froid puis refuse la passe1.
 [Diagnostic](../receipts/audit_reponses_20261008/b1t_tuwien_memoire/README.md) : 79,99 Gio CUDA gardés, 8,012 Gio de marge ; stade inconnu.
