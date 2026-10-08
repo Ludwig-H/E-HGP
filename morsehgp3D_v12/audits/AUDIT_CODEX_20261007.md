@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-8 octobre 2026, reprise après coupure, base publiée **`403736300`**.
+8 octobre 2026, reprise après coupure, base publiée **`9feadf927`**.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
 
@@ -24,6 +24,8 @@ Snapshot sans hash binaire ni journal de compilation rapatrié ; aucun CPU·s pa
 Face aux mesures historiques v11 : GPU plus rapide, CPU plus lent ; comparaison descriptive, pas A/B apparié.
 Catalogue CPU : 274–329 ms. Sur GPU, G : 44–57 ms ; T : 26–38 ms ; R : 12–15 ms.
 Retirer R par passe laisse 116–148 ms médians : ce seul poste ne suffit pas à 100 ms.
+[Campagnes L1/L2 préparées](../receipts/audit_reponses_20261008/session_l_preparation/README.md) : L1 lancée à
+04:39:17 UTC ; à 04:44:40, aucun résultat ni arrêt rapatrié. K10 prévu à froid ; aucune empreinte FUL1 sur L2.
 
 **Contre-lectures courantes et aide au développeur.**
 
@@ -34,7 +36,7 @@ Retirer R par passe laisse 116–148 ms médians : ce seul poste ne suffit pas �
   Aucun gain temps ni objet produit corrigé qualifié. Cette piste concerne le catalogue, pas l'étage G.
 - **MES-B `8da450ab7`** : [livraison contre-jugée](../receipts/audit_reponses_20261008/mes_b_livraison/README.md).
   Étiquettes, refus K10 et JSON corrigés ; tests Python normal/−O et 20 mutants passent.
-  Résidu synthétique : mur nul admis puis `log(0)` dans B3 ; refuser ce mur avant les statistiques.
+  Résidu mur nul→`log(0)` corrigé en `9feadf927` ; nouveau schéma mémoire par étage et tests en contre-lecture.
   B1 tolère explicitement les refus K5 ≥10 M sites : « tenu » ne signifie pas achèvement de toutes ces scènes.
   CPU/RSS et budgets séparés ajoutés ; aucune mesure massive nouvelle contre-certifiée.
 - **T2-d-A, recouvrement G/TMVR** : [conditions de concurrence](../receipts/audit_reponses_20261008/prelecture_t2d_t/README.md),
@@ -45,10 +47,11 @@ Retirer R par passe laisse 116–148 ms médians : ce seul poste ne suffit pas �
   [témoins de frontière](../receipts/audit_reponses_20261008/census_temoins/README.md) : 1 288 requêtes du modèle
   gardent résultats/parcours ; supports certifiés transportés par valeur dans le prototype.
   Proposition entière puis Welzl amorcé en préparation ; nouveau corps et gain G4 à qualifier.
-- **T2-d-C, catalogue GPU** : [prélecture du flux](../receipts/audit_reponses_20261008/t2d_c_prelecture/README.md) :
-  staging 16 Mio, mémoire anticipée et réparation compacte à compter. Treize tests Pool relus ; aucun CUDA exécuté.
-  [Juge à renforcer](../receipts/audit_reponses_20261008/t2d_c_admission/README.md) : métadonnées incompatibles admises,
-  mutant code 0 sans empreinte déclaré tué ; témoins rejoués après coupure et patch partiel fournis.
+- **T2-d-C, catalogue GPU** : [copie fusionnée relue](../receipts/audit_reponses_20261008/t2d_c_reprise/README.md) :
+  staging adapté au plus grand segment, plancher forcé de 16 Mio corrigé ; ablation de l'anticipation complétée.
+  Budget de la sonde catalogue encore commun ; deux bras conservent une réparation différente de celle annoncée.
+  [Juge à renforcer](../receipts/audit_reponses_20261008/t2d_c_admission/README.md) : métadonnées incompatibles et
+  mutant sans empreinte toujours admis aux fonctions épinglées. Aucun nouveau CUDA ni gain acquis.
 - **R** : [raccourci des classes à cellule unique](../receipts/audit_reponses_20261008/registre_classe_unique_patch/README.md)
   fourni, non compilé, sans gain acquis ; comparer aussi les lignes/CSR, absentes de FUL1.
   Le développeur le garde pour après T2-d-A dans sa [réponse publiée](../receipts/developpement_20261008/reponse_audit_k_mes_b.md).

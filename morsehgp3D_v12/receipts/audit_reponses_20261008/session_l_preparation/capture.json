@@ -1,0 +1,93 @@
+{
+  "evidence_grade": "pushed_commit",
+  "initial_l_refusal_primary_trace_found": false,
+  "launch": {
+    "sha256": "78da33fd967e019bc1d5945ba759e27e382bb06ad233da7ea618cc3de2e9e680",
+    "started_utc": "2026-10-08T04:39:17Z",
+    "status": "launched"
+  },
+  "lifecycle_observation": {
+    "generation_utc": "2026-10-08T04:40:05.285000+00:00",
+    "sha256": "1312849709ac27c213be246f344f38a7020879ac352048a280baf482b6479a0d",
+    "state": "targeted_running"
+  },
+  "manifests": {
+    "g4_scenes_l1": {
+      "bits_max": 20,
+      "bytes_declared": 1440403536,
+      "cases": {
+        "boreas_202011261358_f4500_n1": 215665,
+        "boreas_202011261358_f4500_n10": 2153342,
+        "boreas_202011261358_f4500_n10_sans_sol": 1513483,
+        "boreas_202011261358_f4500_n1_sans_sol": 146316,
+        "boreas_202011261358_f4500_n50": 10766998,
+        "boreas_202011261358_f4500_n50_sans_sol": 7857268,
+        "eth3d_meadow_scan1": 6181091,
+        "forinst_nibio_plot12": 7825857,
+        "forinst_nibio_plot12_sans_sol": 7793680,
+        "forinst_scion_plot61": 3589247,
+        "forinst_scion_plot61_sans_sol": 3439371,
+        "forinst_tuwien_train": 6236167,
+        "forinst_tuwien_train_sans_sol": 5199758,
+        "ign_marseille_0891_6248": 6709045,
+        "ign_marseille_0891_6248_sans_sol": 2465285
+      },
+      "profiles": [
+        "u21"
+      ],
+      "sha256": "f57f3d0b67924ed8808eb4d69f0b2e521d3b4480b336b63306e8d8e865cec333"
+    },
+    "g4_scenes_l2": {
+      "bits_max": 20,
+      "bytes_declared": 1938421180,
+      "cases": {
+        "eth3d_courtyard_scan1": 16828368,
+        "ign_lyon_0842_6521": 32412887,
+        "ign_lyon_0842_6521_sans_sol": 24016862,
+        "ign_paris_0651_6863": 14551520,
+        "ign_paris_0651_6863_sans_sol": 9111422
+      },
+      "profiles": [
+        "u21"
+      ],
+      "sha256": "fa7d1544fc8e6a88ab8d51e2f4de596f5dcbd2d6f6defebeaece00f6af20883f"
+    }
+  },
+  "no_campaign_result_observed": true,
+  "no_l_or_l2_session_observed": true,
+  "no_receipt_observed": true,
+  "observed_utc": "2026-10-08T04:44:40.985848+00:00",
+  "plan_sha256": {
+    "plan_b_l.json": "9274637aef8563941a7d781b0ed64e5376ff29505ba88f3c6f027d5a3b7c656a",
+    "plan_b_l1.json": "cdc81d109096955fac64f8a822eeac43c7c25e825aa108676b8e53d4b2f8cf11",
+    "plan_b_l2.json": "460c48d7ab8316a5473caa5b135608aad7b300dd5c81f7eedf2656adb64775a8"
+  },
+  "preflight": {
+    "budget": {
+      "build_and_setup_seconds": 120,
+      "closing_reserve_seconds": 660,
+      "command_timeouts_sum_seconds": 2000,
+      "guest_seconds": 3300,
+      "oversubscribed": false,
+      "ssh_cutoff_before_guest_seconds": 360,
+      "upload_estimate_seconds": 318,
+      "worker_window_seconds": 2202
+    },
+    "data_bytes": 1440427786,
+    "data_manifest_sha256": "c41cb3b19ae38fa6e2568d17465080e0c39b07732bad9152c79eeb1ef97a9d43",
+    "max_run_seconds": 4200,
+    "package_bytes": 5007961,
+    "package_sha256": "e547240a3c2afdbf7473e86fa4055cdd5baf56f27217134d58304feadd09f134",
+    "plan_sha256": "cdc81d109096955fac64f8a822eeac43c7c25e825aa108676b8e53d4b2f8cf11",
+    "sha256": "35fe029980ef8fe57cee9626cc8d2e51ca5cf9da59ffc4a602b99be9a637c712",
+    "worker_plan_sha256": "11bf866d67ffacffd1355268553bdeb1229d9ffbdf204136ab505bd06768881d"
+  },
+  "remote_calls_by_auditor": false,
+  "source_kind": "commit",
+  "source_pin": "403736300900a709b82316721eeb589fbc4a5350",
+  "source_sha256": {
+    "gcp-migration/v12_session.py": "8ababf35a6e295749b446faacc0c6f2ca54d69362199131f2a40d8ac5c23d8aa",
+    "morsehgp3D_v12/bench/full_probe.cpp": "0b1b6b45e6483f21df203fab3a99b7d1d49b15edb2f7b3cbf31a24526bca0e91",
+    "morsehgp3D_v12/microbancs/mes_b_scenes/pilote_b.py": "84777f19bdf3fdb380207c813ed3253a2f35961c6e28b45eca32466977c165f7"
+  }
+}
