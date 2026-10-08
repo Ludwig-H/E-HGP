@@ -1,0 +1,255 @@
+{
+ "D6": {
+  "diagnostic_projection_causal_only": true,
+  "extra_diagnostics": [
+   "join_ns",
+   "joins_ns",
+   "orders_ns",
+   "pass_ns",
+   "prepare_ns",
+   "reste_ns",
+   "setup_ns",
+   "table_ns",
+   "workspace_ns"
+  ],
+  "gc_native_admitted_live": false,
+  "old_native_admitted": true,
+  "patched_sha256": "24a2d07b0dbb8fd7c75746258776fd5d2647287f9bd579448800217a05a069ff",
+  "proposed_native_before_after": [
+   true,
+   true
+  ],
+  "refused_mutations": [
+   "missing_join_ns",
+   "bool_join_ns",
+   "length_join_ns",
+   "missing_joins_ns",
+   "bool_joins_ns",
+   "missing_orders_ns",
+   "bool_orders_ns",
+   "missing_pass_ns",
+   "bool_pass_ns",
+   "length_pass_ns",
+   "missing_prepare_ns",
+   "bool_prepare_ns",
+   "missing_reste_ns",
+   "bool_reste_ns",
+   "missing_setup_ns",
+   "bool_setup_ns",
+   "missing_table_ns",
+   "bool_table_ns",
+   "length_table_ns",
+   "missing_workspace_ns",
+   "bool_workspace_ns",
+   "unknown",
+   "mix_after_before",
+   "mix_before_after",
+   "negative",
+   "float",
+   "overflow"
+  ],
+  "synthetic_K1_admitted": true
+ },
+ "core_catalogue_unchanged": true,
+ "juge_G": [
+  [
+   "nominal",
+   0
+  ],
+  [
+   "k1_seul",
+   2
+  ],
+  [
+   "ordre_double",
+   2
+  ],
+  [
+   "empreinte_courte",
+   2
+  ],
+  [
+   "sans_sortie",
+   2
+  ],
+  [
+   "sortie_ordre_booleen",
+   2
+  ],
+  [
+   "sortie_ordre_flottant",
+   2
+  ],
+  [
+   "travail_8",
+   1
+  ],
+  [
+   "objet_8",
+   1
+  ]
+ ],
+ "native_runs": 0,
+ "pilote": {
+  "auto_test": 0,
+  "campaigns": {
+   "brut_invalide_rehache": {
+    "G-L5_au_lieu_de_G-L7": "refuse",
+    "G-L7": "refuse",
+    "index_et_corrections": "refuse",
+    "lot_t2c": "refuse"
+   },
+   "brut_motif": [
+    "admission des journaux : Expecting value: line 1 column 1 (char 0)"
+   ],
+   "nominal": {
+    "G-L5_au_lieu_de_G-L7": "rejete",
+    "G-L7": "rejete",
+    "index_et_corrections": "rejete",
+    "lot_t2c": "rejete"
+   },
+   "resume_diverge": {
+    "G-L5_au_lieu_de_G-L7": "refuse",
+    "G-L7": "refuse",
+    "index_et_corrections": "refuse",
+    "lot_t2c": "refuse"
+   },
+   "resume_motif": [
+    "admission des journaux : resume different du brut : g_ns"
+   ]
+  },
+  "collecte_catalogue": false,
+  "default_cli": 2,
+  "formats": [
+   {
+    "fixture": "before",
+    "schema": "avant",
+    "sites": 8,
+    "valide": true
+   },
+   {
+    "fixture": "before_synthetic_sites2",
+    "schema": "avant",
+    "sites": 2,
+    "valide": true
+   },
+   {
+    "fixture": "after",
+    "schema": "apres",
+    "sites": 8,
+    "valide": true
+   },
+   {
+    "fixture": "after_synthetic_sites2",
+    "schema": "apres",
+    "sites": 2,
+    "valide": true
+   }
+  ],
+  "minimum_tours": 10,
+  "report_guards": [
+   [
+    0,
+    0,
+    [
+     "auto",
+     "rapport"
+    ]
+   ],
+   [
+    1,
+    1,
+    [
+     "auto"
+    ]
+   ]
+  ],
+  "takes": [
+   [
+    "nominal_apres",
+    true
+   ],
+   [
+    "nominal_avant",
+    true
+   ],
+   [
+    "nominal_profil",
+    true
+   ],
+   [
+    "schema_avant_sur_bras_apres",
+    false
+   ],
+   [
+    "profil_non_declare",
+    false
+   ],
+   [
+    "code_nonzero",
+    false
+   ],
+   [
+    "cinq_passes_pour_six",
+    false
+   ],
+   [
+    "wall_bool",
+    false
+   ],
+   [
+    "wall_negatif",
+    false
+   ],
+   [
+    "indices_repetes",
+    false
+   ],
+   [
+    "configuration_autre",
+    false
+   ],
+   [
+    "ordres_absents",
+    false
+   ],
+   [
+    "exit_bool",
+    false
+   ],
+   [
+    "exit_reason",
+    false
+   ],
+   [
+    "digest_tronque",
+    false
+   ],
+   [
+    "metadonnees_absentes",
+    false
+   ],
+   [
+    "compteur_bool",
+    false
+   ],
+   [
+    "diagnostic_manquant",
+    false
+   ],
+   [
+    "cle_json_repetee",
+    false
+   ],
+   [
+    "texte_suffixe",
+    false
+   ],
+   [
+    "utf8_invalide",
+    false
+   ]
+  ]
+ },
+ "tower_sources_match_captured_45976": 16
+}

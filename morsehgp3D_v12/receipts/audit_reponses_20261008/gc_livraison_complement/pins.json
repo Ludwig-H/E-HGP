@@ -1,0 +1,73 @@
+{
+ "artifacts": {
+  "build_v12_u21.build_gc2.log": {
+   "bytes": 5504,
+   "sha256": "fcb23433c535fc6cb7c0b0695a4ee38edad80b257239d14bd8f72f0607a5fde6"
+  },
+  "build_v12_u21.conf_gc2.log": {
+   "bytes": 551,
+   "sha256": "a165515e96944e81ecaba325641a4caebdaeb9df5d24efa755c1423256bcb8ca"
+  },
+  "build_v12_u21.ctest_gc2.log": {
+   "bytes": 119215,
+   "sha256": "b6e258343400c934c6ed983bb13aad63ae9239c54f5340a40cc991055b24454c"
+  },
+  "build_v12_u21/CMakeCache.txt": {
+   "bytes": 17086,
+   "sha256": "0753b819c8088d6b08209a0ba75ff09e2b3ea307112d90d43bcd31d10ddc2a53"
+  },
+  "build_v12_u21/Testing/Temporary/LastTest.log": {
+   "bytes": 837634,
+   "sha256": "24f29a64dbbb4451a7e3fb69a193336bdfd2c9a0574894090682245a8453233a"
+  }
+ },
+ "base": "d2f39fe8293d31508697b6db113a7954a7fd0d9e",
+ "combined_sha256": "bb1de862175814467664ae83b377238771511c264eca4150905fbec5ffe5db4f",
+ "ctest": {
+  "failed": 0,
+  "passed": 700,
+  "registered": 731,
+  "selected": 701,
+  "skipped": 1,
+  "skipped_name": "mhgp12_support_lidar_sentinel"
+ },
+ "harness": {
+  "path": "morsehgp3D_v12/receipts/audit_d6_20261007/pilotage/check.py",
+  "sha256": "44ca5e392b7c0c0d5b8de7069d36b19d52e150f9958fa01ae2a3faaa0d9c38a9"
+ },
+ "native_runs_by_auditor": 0,
+ "patches": [
+  {
+   "path": "morsehgp3D_v12/receipts/audit_reponses_20261008/gc_livraison/d6_g_schemas_proposed.patch",
+   "sha256": "2b63d983b73bfd70153d51336517e0428e483ae8ba2092d41d3591a677879e95"
+  },
+  {
+   "path": "morsehgp3D_v12/receipts/audit_d6_20261007/pilotage/proposition.patch",
+   "sha256": "e18e46a7535cbaec74acbb2b973e74753316c30bf4508155ac2327101685496a"
+  }
+ ],
+ "recorded_plan_cases": [
+  "reference_present",
+  "u21_absent_u24_present",
+  "all_combinations_absent",
+  "duplicate_profile",
+  "duplicate_case"
+ ],
+ "recorded_plan_codes": [
+  0,
+  2,
+  2,
+  2,
+  2
+ ],
+ "recorded_plan_takes": [
+  6,
+  0,
+  0,
+  0,
+  0
+ ],
+ "source": "morsehgp3D_v12/microbancs/mes_d6_profils/pilote_d6.py",
+ "source_closure": "not_available_in_read_artifacts",
+ "source_sha256": "48f40fd6107f75dea52c0b9f40a2d88ff6a40eb18d2ba1683035a0444231173e"
+}

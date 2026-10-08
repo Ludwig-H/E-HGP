@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-8 octobre 2026. Base publiée **`10050a96e`** ; prototypes distingués des livraisons.
+8 octobre 2026. Base publiée **`485fb68ea`** ; prototypes distingués des livraisons.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
 
@@ -29,7 +29,9 @@ Trois trames d'une seule séquence ; les 100 ms, u24/u32 GPU et les autres régi
 - **Gc livré `4df326cc8` + `10050a96e`** : empreinte de l'objet séparée du travail, index des naissances,
   file de sondes, préparation parallèle. [Prototype rebasé](../receipts/audit_reponses_20261007/gc_rebase_portes/README.md) :
   675 portes rapides + 6 LiDAR, 680 distinctes sans saut ; [18 mutants finaux](../receipts/audit_reponses_20261007/gc_mutants_finaux/README.md)
-  tués par code. La contrelecture de livraison reste distincte de ces campagnes. Aucun nouveau temps G4 de Gc.
+  tués par code. [Livraison contre-vérifiée](../receipts/audit_reponses_20261008/gc_livraison/README.md) :
+  16 sources tour identiques au prototype, cœur/catalogue inchangés. [Journal local](../receipts/audit_reponses_20261008/gc_livraison_complement/README.md) :
+  700 Passed + une sentinelle sautée sur 701, sans clôture des sources ; aucun nouveau temps G4.
 - **Pilote T2-c** : [essai relu](../receipts/audit_reponses_20261008/gc_pilote_essai/README.md), 68 prises/308 passes,
   jugement identique, refus attendu de deux tours sur dix. **Erratum** : le conducteur perd le statut externe après
   `date` ; les bilans primaires CTest/mutants restent acquis. Le défaut CLI huit subsiste ; plan G4 explicite dix.
@@ -39,7 +41,9 @@ Trois trames d'une seule séquence ; les 100 ms, u24/u32 GPU et les autres régi
   profil u32 en cours ; TMVR non livré.
   `0105/0107` attendent l'intégration ; `0212` clos au microbanc seulement.
 - **Juges `0018`** : CUDA strict utilisé en I ; MES-P et D6 livrés et contre-jugés dans les reçus du registre.
-  Plan D6 encore ouvert : u21, doublons, combinaison vide. Nouveau schéma Gc à raccorder au lecteur D6.
+  Plan D6 encore ouvert : u21, doublons, combinaison vide. [Schéma Gc](../receipts/audit_reponses_20261008/gc_livraison/README.md)
+  refusé par D6 ; patch proposé, deux formats réels admis et 27 corruptions refusées.
+  Composition avec le correctif du plan vérifiée, quatre plans invalides refusés avant toute prise.
 
 [Raccord Gc + TMVR proposé](../receipts/composition_gc_tmvr_20261008/README.md) : deux conflits résolus,
 19 sources, 27 mutants conservés ; aucune qualification native de la combinaison.
