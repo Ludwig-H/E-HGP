@@ -1,0 +1,27 @@
+{
+  "schema": "b3-memory-paths-v1",
+  "base_git": "8a0716e7470197c95953b38d79f26b8d8f2379fc",
+  "b3_git": "545ed987e0f5a06dbb518fe42ed6c5f100f32770",
+  "source_pins_under_morsehgp3D_v12": {
+    "src/catalogue/catalogue.hpp": "b3dbc0ba16449dd660f296eb30cf99f9e4997d629aec3412b1e39b9701a61d1e",
+    "src/catalogue/finish_driver.hpp": "20e91d27704543c4fd0b92685e53e6badc90ad68a463a7bf1590078c76fc4fed",
+    "src/catalogue/finish_outputs.hpp": "df1db2b70d8014cff5e382d796ad6184935c2ed0ae1777f4f6662566f37752d3",
+    "src/catalogue/finish_slices.hpp": "e00e49075d7454cc98556cd82c9225a5d6fbbbd156dff31420d8c540d08cb273",
+    "src/catalogue/slices.cpp": "72cf315f6325e8873947131357691b9efacd9cdc085f64f9570bb635ef638eef",
+    "src/catalogue/slices.hpp": "4cc8b0c6e7e66f24602c0d55bdefac2bd506e976eda0b3da0b79960d2c2574fb",
+    "src/catalogue/exec_host.hpp": "e84a22ad4fbce26c067735cfb3086565ad955e7f2b5e7258a2b5f07ac63d5f13",
+    "src/catalogue/assemble.cpp": "a74d9434b721a51db1eb1d1e878636fffb342a0147664f033ac67a88c2c18d02",
+    "src/catalogue/table.cpp": "92aa455563bae4dc10a2c5496b5207f0afed6771b1a52d787f1537f10857a258",
+    "src/core/buffer.hpp": "8e4d84665e90308ee9572a729731711bb419e3a565fd4dd11b5bd56ab6a92401",
+    "microbancs/mes_t2d_b3/bras_t2d_b3.json": "01b7896c2c894e27ffb95ec112e3acfacc2a984c0b5d122a915ebeb7f308ca61",
+    "microbancs/mes_t2d_b3/pilote_t2d_b3.py": "6a798b312bfb59e14bfc65df209b57ab13ed2bd6fd247ce7d530d4d2953c60f2",
+    "bench/full_probe.cpp": "1068940a06e386cb80a4802b3dd61e2df87eed69574f08c821c34dabb017179b"
+  },
+  "public_result_roots": [
+    "morsehgp3D_v12/receipts/g4_mesb1t_20261008/resultats",
+    "morsehgp3D_v12/receipts/g4_mesb2t_20261008/resultats"
+  ],
+  "public_result_files": 26,
+  "public_result_inventory_sha256": "5270a62933dfd91d272dbfb92170a8f9f6e6d80a270b8e603c1828e7f9e4ef41",
+  "scope": "source and public metadata only; no native execution, licensed payload or capacity measurement"
+}

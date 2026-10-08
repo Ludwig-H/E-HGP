@@ -1,0 +1,21 @@
+{
+  "schema": "b3-memory-paths-result-v1",
+  "source_git": "545ed987e0f5a06dbb518fe42ed6c5f100f32770",
+  "source_files": 13,
+  "arm_files": 25,
+  "exact_substitutions": 46,
+  "transfer_common_files": 7,
+  "transfer_sliced_reconstruction": true,
+  "transfer_direct_lookup": false,
+  "key_storage_bytes_per_ball": 16,
+  "complete_device_extra_key_D2H_bytes_per_ball": 16,
+  "sliced_device_extra_key_D2H_bytes_per_ball": 0,
+  "cpu_complete_key_copy": true,
+  "total_peak_delta_inferred": false,
+  "public_metadata_files": 26,
+  "public_raw_files": 23,
+  "public_full_rows": 24,
+  "catalogue_count_fields": [],
+  "per_scene_overhead_computed": false,
+  "native_runs": 0
+}

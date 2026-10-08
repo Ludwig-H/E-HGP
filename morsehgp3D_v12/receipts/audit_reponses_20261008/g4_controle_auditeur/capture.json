@@ -1,0 +1,25 @@
+{
+  "schema": "audit-g4-final-check-v1",
+  "observed_utc": "2026-10-08T19:11:32.441012+00:00",
+  "source_session": "v12.20261008.t2db3",
+  "before": "TERMINATED",
+  "after": "TERMINATED",
+  "same_generation": true,
+  "stop_requested": false,
+  "guard_exit_code": 0,
+  "active_ehgp_instances": 0,
+  "target_sha256": "015481e451dd2ca91fb5a8b91216be5686ac6ab1beb18954bf443e1585c4e06c",
+  "generation_sha256": "e563eb1b30f06987ced223e65acced7e10f5cc988ab307b044b0100dd35a1a7b",
+  "raw_files": {
+    "after.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "after.stdout": "c0e02c2b9cea7ca1372e2e049d37567937adce04008e9ed7b4558d6fdac1109e",
+    "before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "before.stdout": "c0e02c2b9cea7ca1372e2e049d37567937adce04008e9ed7b4558d6fdac1109e",
+    "guard.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "guard.stdout": "5b33041244ff369315fb529f1c3321ee83b3a7accce183797ee30c1d07f3b662",
+    "inventory.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "inventory.stdout": "58897e4c3ace61b8cd6e213b2b4afd8a2679eeaf71a292687a3932ac763da885"
+  },
+  "check_script_sha256": "353575936f1eea168313db102489fb6c10df2bbd9c61ef3f70f4c84c1ec5d991",
+  "scope": "Direct GCP read and guarded targeted closure on explicit user request; no benchmark or engine execution."
+}
