@@ -12,6 +12,8 @@ import copy
 import statistics
 import sys
 
+from g4_catalogue_schema import DEVICE, DIAGNOSTICS, LEDGER, validate_report
+
 BUDGET_NS = 45_000_000  # etage C a K5, borne haute du budget de 35 a 45 ms (CONTRAT_CATALOGUE.md, paragraphe 7)
 
 CONTRACT = {
@@ -90,7 +92,7 @@ def check_identity(steps, out):
             continue
         ref = cpu['passes'][0]
         same = all(d == cpu['digests'][0] for d in dev['digests']) and all(
-            p.get(f) == ref.get(f) for p in dev['passes'] for f in ('balls', 'incidences', 'levels', 'ledger'))
+            p.get(f) == ref.get(f) for p in dev['passes'] for f in ('sites', 'balls', 'incidences', 'levels', 'ledger'))
         if not same:
             out['rejected'].append('identite en defaut ' + key)
         if not physical_ok(cpu, dev):
@@ -107,6 +109,10 @@ HYBRID = ('replayed_leaves', 'replayed_wide', 'replayed_span', 'rewritten_device
 
 
 def physical_ok(cpu, dev):
+    return all(physical_row_ok(cpu['passes'][0], row) for row in dev['passes'])
+
+
+def physical_row_ok(cpu, dev):
     cd, dd, dv = cpu.get('diagnostics') or {}, dev.get('diagnostics') or {}, dev.get('device') or {}
     if not all(is_int(cd.get(f)) and cd.get(f) == dd.get(f) for f in PHYSICAL):
         return False
@@ -187,11 +193,21 @@ def frame_stats(runs, frame, processes, passes):
             'held': statistics.median(warm) <= BUDGET_NS and max(medians) <= BUDGET_NS}
 
 
-def check_device_timing(steps, out):
+def check_device_timing(steps, out, options):
     budget = True
-    for k, processes, passes in ((5, CONTRACT['processes'], CONTRACT['passes']),
+    references = {(e['case'], e['k']): e['cpu']['passes'][0] for e in steps['identity']
+                  if e.get('cpu_code') == 0}
+    for k, processes, passes in ((5, options['processes'], options['passes']),
                                  (10, CONTRACT['k10_processes'], CONTRACT['k10_passes'])):
         runs = steps.get('device_timing_k%d' % k) or []
+        for entry in runs:
+            ref = references.get((entry['frame'], k))
+            if ref is not None and any(
+                    not physical_row_ok(ref, row) or any(row[field] != ref[field] for field in
+                                                        ('sites', 'balls', 'incidences', 'levels', 'ledger'))
+                    for row in entry['run']['passes']):
+                out['rejected'].append('temps appareil : comptes ou diagnostics en defaut K%d %s processus %d' %
+                                       (k, entry['frame'], entry['process']))
         stats = {}
         for frame in CONTRACT['frames']:
             st = frame_stats(runs, frame, processes, passes)
@@ -258,6 +274,11 @@ def reference_digest(report):
 
 def judge(report):
     out = {'refused': [], 'rejected': [], 'stats': {}}
+    error = validate_report(report, CONTRACT)
+    if error is not None:
+        out['refused'].append(error)
+        out['verdict'] = 'refuse'
+        return out
     steps = report.get('steps') or {}
     env = steps.get('environment') or {}
     if not env.get('nvcc') or not env.get('gpu'):
@@ -275,11 +296,11 @@ def judge(report):
         out['rejected'].append('portes rapides en echec (code %s)' % gates.get('code'))
     if gates.get('device_open_code') != 0:
         out['rejected' if is_int(gates.get('device_open_code')) else 'refused'].append('device_open en echec')
-    elif 'voie appareil jouee' not in (gates.get('device_open_stdout') or ''):
+    elif 'device_open : voie appareil jouee sur 9 temoins' not in (gates.get('device_open_stdout') or '').splitlines():
         out['refused'].append('device_open sans voie appareil jouee')
     check_identity(steps, out)
     check_cpu_timing(steps, out)
-    budget = check_device_timing(steps, out)
+    budget = check_device_timing(steps, out, opts)
     check_mutants(report, out)
     if out['refused']:
         verdict = 'refuse'
@@ -300,18 +321,36 @@ FAKE_DEVICE = {'replayed_leaves': 3, 'replayed_wide': 2, 'replayed_span': 1, 're
                'rewritten_host': 2}
 
 
-def fake_run(passes, wall_ns, digest, ledger=None):
+def fake_run(passes, wall_ns, digest, ledger=None, *, path='device', k=5, leaf=24, with_digest=True):
+    # Fixture du schema REEL emis par catalogue_probe.cpp, sans execution du moteur.
     stages = {'traversal_ns': 2_000_000, 'count_ns': 8_000_000, 'fill_ns': 3_000_000, 'levels_ns': 1_000_000,
               'sort_ns': 2_000_000, 'assemble_ns': 2_000_000, 'table_ns': 1_000_000, 'transfer_ns': 6_000_000,
               'publish_ns': 1_000_000}
-    rows = [{'status': 'ok', 'reason': 'none', 'wall_ns': wall_ns, 'balls': 10, 'incidences': 40, 'levels': 9,
-             'ledger': ledger or {'nodes': 5}, 'stages': dict(stages)} for _ in range(passes)]
-    return {'passes': rows, 'digests': [digest] * passes, 'unreadable': 0, 'diagnostics': dict(FAKE_DIAG),
-            'device': dict(FAKE_DEVICE)}
+    counts = dict.fromkeys(LEDGER, 0)
+    counts.update(nodes=5, leaves=3, emitted=10, incidences=40)
+    if ledger is not None:
+        counts.update(ledger)
+    diag = dict.fromkeys(DIAGNOSTICS, 0)
+    diag.update(FAKE_DIAG)
+    dev = dict.fromkeys(DEVICE, 0)
+    if path == 'device':
+        dev.update(FAKE_DEVICE)
+    else:
+        stages['transfer_ns'] = stages['publish_ns'] = 0
+    for key, value in stages.items():
+        (dev if key in ('transfer_ns', 'publish_ns') else diag)[key] = value
+    rows = [dict(phase='catalogue', path=path, **{'pass': index}, coord_bits=21, kmax=k, leaf=leaf, threads=48,
+                 sites=100, status='ok', reason='none', wall_ns=wall_ns, balls=10, incidences=40, levels=9,
+                 ledger=dict(counts), diagnostics=dict(diag), device=dict(dev), stages=dict(stages))
+            for index in range(passes)]
+    return {'passes': rows, 'digests': [digest] * passes if with_digest else [], 'unreadable': 0,
+            'open': dict(phase='open', status='ok', reason='none', open_ns=1) if path == 'device' else None,
+            'exit': dict(phase='exit', status='ok', reason='none'), 'diagnostics': diag, 'device': dev}
 
 
 def good_report():
-    steps = {'environment': {'nvcc': 'nvcc 12.9', 'gpu': 'RTX PRO 6000'}, 'build': {'ok': True},
+    steps = {'environment': {'nvcc': 'nvcc 12.9', 'gpu': 'RTX PRO 6000'},
+             'build': {'ok': True, 'configure': 0, 'build': 0, 'binaries': {'mhgp12_catalogue_probe': '1'*64, 'mhgp12_catalogue_device_unit': '2'*64}},
              'gates': {'code': 0, 'timeout': False, 'device_open_code': 0,
                        'device_open_stdout': 'device_open : voie appareil jouee sur 9 temoins'},
              'gpu_quiet_before': True, 'gpu_quiet_after': True}
@@ -319,22 +358,27 @@ def good_report():
     for case, k, leaf in CONTRACT['identity_cases']:
         d = F2_DIGESTS['%s:%d' % (case, k)]
         identity.append({'case': case, 'k': k, 'leaf': leaf, 'cpu_code': 0, 'device_code': 0,
-                         'cpu': fake_run(1, 400_000_000, d), 'device': fake_run(3, 30_000_000, d)})
+                         'cpu': fake_run(1, 400_000_000, d, path='cpu', k=k, leaf=leaf),
+                         'device': fake_run(3, 30_000_000, d, k=k, leaf=leaf)})
     steps['identity'] = identity
-    steps['cpu_timing'] = [{'case': c, 'k': k, 'leaf': f, 'code': 0, 'run': fake_run(10, 200_000_000,
-                                                                                      F2_DIGESTS['%s:%d' % (c, k)])}
-                           for c, k, f in CONTRACT['f2_cases']]
+    steps['cpu_timing'] = [{'case': c, 'k': k, 'leaf': f, 'code': 0,
+                           'run': fake_run(10, 200_000_000, F2_DIGESTS['%s:%d' % (c, k)], path='cpu', k=k, leaf=f)}
+                          for c, k, f in CONTRACT['f2_cases']]
     for k, processes, passes, t in ((5, 5, 10, 38_000_000), (10, 3, 5, 150_000_000)):
-        steps['device_timing_k%d' % k] = [{'frame': f, 'process': p, 'code': 0, 'run': fake_run(passes, t, 'x')}
-                                          for p in range(processes) for f in CONTRACT['frames']]
+        steps['device_timing_k%d' % k] = [{'frame': f, 'process': p, 'code': 0,
+                                          'run': fake_run(passes, t, '', k=k, with_digest=False)}
+                                         for p in range(processes) for f in CONTRACT['frames']]
     steps['mutants'] = [
         {'id': 'feuille_non_resolue_admise_sans_rejeu', 'critere': 'identite', 'applied': True, 'build': {'ok': True},
-         'unit_code': 1, 'ng00_code': 0, 'ng00_digest': 'autre'},
+         'unit_code': 1, 'unit_timeout': False, 'ng00_code': 0, 'ng00_digest': '0'*64,
+         'ng00': fake_run(1, 30_000_000, '0'*64)},
         {'id': 'fin_sans_departage_exact', 'critere': 'identite', 'applied': True, 'build': {'ok': True},
-         'unit_code': 1, 'ng00_code': 0, 'ng00_digest': F2_DIGESTS['ng00:5']},
-        {'id': 'un_fil_par_feuille', 'critere': 'temps', 'applied': True, 'build': {'ok': True}, 'code': 0,
+         'unit_code': 1, 'unit_timeout': False, 'ng00_code': 0, 'ng00_digest': F2_DIGESTS['ng00:5'],
+         'ng00': fake_run(1, 30_000_000, F2_DIGESTS['ng00:5'])},
+        {'id': 'un_fil_par_feuille', 'critere': 'temps', 'applied': True, 'build': {'ok': True}, 'code': 0, 'timeout': False,
          'run': fake_run(4, 300_000_000, F2_DIGESTS['ng00:5'])}]
-    return {'options': {'processes': 5, 'passes': 10, 'threads': 48, 'skip_mutants': False}, 'steps': steps}
+    return {'schema': 'mhgp12_g4_catalogue_device_v1', 'contract': copy.deepcopy(CONTRACT),
+            'budget_ns': BUDGET_NS, 'options': {'processes': 5, 'passes': 10, 'threads': 48, 'skip_mutants': False}, 'steps': steps}
 
 
 def injections():
@@ -350,20 +394,20 @@ def injections():
             p['wall_ns'] = 60_000_000
 
     def digest_u16000(r):
-        r['steps']['identity'][7]['device']['digests'][1] = 'ecart'
+        r['steps']['identity'][7]['device']['digests'][1] = '0'*64
 
     def ledger_ng02(r):
-        r['steps']['identity'][4]['device']['passes'][2]['ledger'] = {'nodes': 6}
+        r['steps']['identity'][4]['device']['passes'][2]['ledger']['nodes'] = 6
 
     def missing_case(r):
         del r['steps']['identity'][5]
 
     def survivor(r):
-        r['steps']['mutants'][2]['run'] = fake_run(4, 30_000_000, 'x')
+        r['steps']['mutants'][2]['run'] = fake_run(4, 30_000_000, F2_DIGESTS['ng00:5'])
 
     def cpu_changed(r):
-        r['steps']['identity'][0]['cpu']['digests'][0] = 'autre'
-        r['steps']['identity'][0]['device']['digests'] = ['autre'] * 3
+        r['steps']['identity'][0]['cpu']['digests'][0] = '0'*64
+        r['steps']['identity'][0]['device']['digests'] = ['0'*64] * 3
 
     def gates_red(r):
         r['steps']['gates']['code'] = 8
@@ -390,7 +434,7 @@ def injections():
         r['steps']['device_timing_k5'][0]['run']['passes'].pop()
 
     def rewrites_lost(r):
-        r['steps']['identity'][1]['device']['device']['rewritten_device'] = 0
+        r['steps']['identity'][1]['device']['passes'][0]['device']['rewritten_device'] = 0
 
     def stages_overlap(r):
         r['steps']['device_timing_k5'][3]['run']['passes'][4]['stages']['transfer_ns'] = 30_000_000

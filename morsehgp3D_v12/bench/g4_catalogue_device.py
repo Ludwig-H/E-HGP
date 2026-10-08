@@ -27,15 +27,16 @@ Regle (ecrite le 7 octobre 2026, avant toute session, completee le meme jour ver
 l'auditeur : diagnostics physiques et reprises comptes, etapes disjointes ; CONTRAT_CATALOGUE.md, paragraphes 6, 7
 et 10) :
   << refuse >> si une preuve manque ou est incoherente : outil absent (nvcc, GPU), construction en echec, execution
-     d'une sonde en echec (code inattendu, delai, sortie illisible), cas ou passe manquants, GPU non isole avant les
-     temps, contrat de mesure non respecte (moins de 5 processus ou de 10 passes, mutants sautes), etapes d'une passe
+     d'une sonde en echec (code inattendu, delai, sortie illisible), cas ou passe manquants, GPU non isole avant
+     et apres les temps, porte device_open sans marqueur positif, contrat de mesure non respecte
+     (moins de 5 processus ou de 10 passes, mutants sautes), etapes d'une passe
      chaude dont la somme depasse le total (durees non disjointes) ;
-  << rejete >> si les preuves sont completes mais qu'une condition tombe : une porte rapide en echec ; device_open sans
-     voie appareil jouee ; une identite (empreinte, grand livre, comptes, diagnostics physiques, reprises et
+  << rejete >> si les preuves sont completes mais qu'une condition tombe : une porte rapide en echec ; une identite (empreinte, grand livre, comptes, diagnostics physiques, reprises et
      reecritures comptees) ou le determinisme en defaut sur un cas ; une empreinte de la voie CPU differente de F2 ; un
      mutant non tue ; le budget non tenu ;
   << adopte >> seulement si tout tient et que le budget est tenu : pour CHACUNE de ng00, ng01, ng02 a K5, la mediane
-     des passes chaudes (passes 2 a 10 des 5 processus, 45 valeurs) ET le maximum des medianes par processus sont au
+     des passes chaudes de la cohorte configuree (processes * (passes - 1), soit 45 valeurs pour le plan 5 x 10)
+     ET le maximum des medianes par processus sont au
      plus 45 ms (borne haute du budget de 35 a 45 ms, CONTRAT_CATALOGUE.md, paragraphe 7).
   Les temps a K10, de la voie CPU et a froid sont publies sans decider.
 
@@ -165,24 +166,53 @@ def build(s, src, bdir, cmake, nvcc, jobs, name, targets=None):
     return {'ok': b['code'] == 0, 'configure': c['code'], 'build': b['code'], 'seconds': c['seconds'] + b['seconds']}
 
 
+def unique_object(pairs):
+    obj = {}
+    for key, value in pairs:
+        if key in obj:
+            raise ValueError('cle JSON dupliquee')
+        obj[key] = value
+    return obj
+
+
+def reject_constant(value):
+    raise ValueError('constante JSON non standard : ' + value)
+
+
 def parse_probe(text):
     out = {'passes': [], 'digests': [], 'open': None, 'exit': None, 'unreadable': 0}
+    if not text.isascii():  # emetteur natif ASCII ; inclut le refus du remplacement UTF-8 U+FFFD
+        out['unreadable'] = 1
+        return out
     for line in text.splitlines():
         line = line.strip()
-        if not line.startswith('{'):
+        if not line:
             continue
         try:
-            obj = json.loads(line)
-        except ValueError:
+            obj = json.loads(line, object_pairs_hook=unique_object, parse_constant=reject_constant)
+        except (ValueError, RecursionError):
+            out['unreadable'] += 1
+            continue
+        if not isinstance(obj, dict) or not json.dumps(obj, ensure_ascii=False).isascii():
             out['unreadable'] += 1
             continue
         phase = obj.get('phase')
+        if out['exit'] is not None:
+            out['unreadable'] += 1
         if phase == 'catalogue':
+            if out['digests'] and len(out['digests']) != len(out['passes']):
+                out['unreadable'] += 1
             out['passes'].append(obj)
         elif phase == 'digest':
+            if len(out['digests']) != len(out['passes']) - 1:
+                out['unreadable'] += 1
             out['digests'].append(obj.get('catalogue_sha256'))
         elif phase in ('open', 'exit'):
+            if out[phase] is not None or (phase == 'open' and out['passes']):
+                out['unreadable'] += 1
             out[phase] = obj
+        else:
+            out['unreadable'] += 1
     return out
 
 
@@ -198,15 +228,16 @@ DEVICE_STAGE_KEYS = ('transfer_ns', 'publish_ns')
 
 def summary(parsed):
     """Comptes, grand livre, duree et durees par etape (diagnostics disjoints) de chaque passe ; diagnostics complets
-    de la derniere passe."""
+    de chaque passe (copie finale conservee pour compatibilite)."""
     rows = []
     for p in parsed['passes']:
-        diag, dev = p.get('diagnostics') or {}, p.get('device') or {}
+        diag = p.get('diagnostics') if isinstance(p.get('diagnostics'), dict) else {}
+        dev = p.get('device') if isinstance(p.get('device'), dict) else {}
         stages = {k: diag.get(k) for k in STAGE_KEYS}
         stages.update({k: dev.get(k) for k in DEVICE_STAGE_KEYS})
-        rows.append({'status': p.get('status'), 'reason': p.get('reason'), 'wall_ns': p.get('wall_ns'),
-                     'balls': p.get('balls'), 'incidences': p.get('incidences'), 'levels': p.get('levels'),
-                     'ledger': p.get('ledger'), 'stages': stages})
+        row = dict(p)  # metadonnees et diagnostics de CHAQUE passe, sans perte avant le juge
+        row['stages'] = stages
+        rows.append(row)
     last = parsed['passes'][-1] if parsed['passes'] else {}
     return {'passes': rows, 'digests': parsed['digests'], 'diagnostics': last.get('diagnostics'),
             'device': last.get('device'), 'open': parsed['open'], 'exit': parsed['exit'],
@@ -282,7 +313,7 @@ def mutant_run(s, args, nvcc, cmake, mutant, reference_digest):
                                                                  ['--digest', '--device']), 1200)
         parsed = parse_probe(dev['stdout'])
         out.update({'unit_code': unit['code'], 'unit_timeout': unit['timeout'], 'ng00_code': dev['code'],
-                    'ng00_digest': parsed['digests'][0] if parsed['digests'] else None,
+                    'ng00_digest': parsed['digests'][0] if parsed['digests'] else None, 'ng00': summary(parsed),
                     'reference_digest': reference_digest})
     else:
         dev = s.run('mutant_%s_temps' % mutant['id'], probe_args(probe, args.data, 'ng00', 5, 24, args.threads,

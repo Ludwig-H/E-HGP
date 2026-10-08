@@ -168,12 +168,15 @@ MHGP12_TEST(device_open, 1) {
   for (const Case& c : witnesses()) {
     auto cloud = make_cloud(c.points, budget);
     REQUIRE(cloud.ok());
-    auto ref = cpu(cloud.value(), params_of(c.k, c.leaf), 4, budget);
-    auto first = build_catalogue_device(cloud.value(), params_of(c.k, c.leaf), device.value(), *pool.value());
-    auto second = build_catalogue_device(cloud.value(), params_of(c.k, c.leaf), device.value(), *pool.value());
+    CatalogueDiagnostics ref_diag, first_diag, second_diag;
+    auto ref = cpu(cloud.value(), params_of(c.k, c.leaf), 4, budget, &ref_diag);
+    auto first = build_catalogue_device(cloud.value(), params_of(c.k, c.leaf), device.value(), *pool.value(), &first_diag);
+    auto second = build_catalogue_device(cloud.value(), params_of(c.k, c.leaf), device.value(), *pool.value(), &second_diag);
     REQUIRE(ref.ok() && first.ok() && second.ok());
     if (!CHECK(same(cloud.value(), ref.value(), first.value()))) std::fprintf(stderr, "ecart appareil : %s\n", c.name);
     CHECK(same(cloud.value(), first.value(), second.value()));
+    check_physical(first_diag, ref_diag);
+    check_physical(second_diag, ref_diag);  // etat resident : compteurs de chaque appel, jamais cumules
   }
   std::printf("device_open : voie appareil jouee sur %zu temoins\n", witnesses().size());
 }
