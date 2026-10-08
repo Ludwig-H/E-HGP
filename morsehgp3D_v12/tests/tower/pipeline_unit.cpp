@@ -16,77 +16,13 @@
 #include <bit>
 #include <random>
 
-#include "catalogue/catalogue.hpp"
-#include "forest_support.hpp"
-#include "index/index.hpp"
-#include "io/io.hpp"
+#include "pipeline_support.hpp"
 #include "tower/pipeline.hpp"
 
 namespace mhgp12::tower_test {
 namespace {
 
 using tower::detail::Step;
-
-struct Points {
-  std::vector<u32> x, y, z;
-};
-
-Points random_points(std::mt19937_64& rng, u32 n, u32 side) {
-  Points p;
-  std::vector<std::array<u32, 3>> seen;
-  while (p.x.size() < n) {
-    const std::array<u32, 3> c{static_cast<u32>(rng() % side), static_cast<u32>(rng() % side),
-                               static_cast<u32>(rng() % side)};
-    if (std::find(seen.begin(), seen.end(), c) != seen.end()) continue;
-    seen.push_back(c);
-    p.x.push_back(c[0]);
-    p.y.push_back(c[1]);
-    p.z.push_back(c[2]);
-  }
-  return p;
-}
-
-Points grid_points(u32 a, u32 b, u32 c, u32 step) {
-  Points p;
-  for (u32 i = 0; i < a; ++i)
-    for (u32 j = 0; j < b; ++j)
-      for (u32 k = 0; k < c; ++k) {
-        p.x.push_back(1000 + i * step);
-        p.y.push_back(2000 + j * step);
-        p.z.push_back(3000 + k * step);
-      }
-  return p;
-}
-
-// Index et catalogue d'un nuage (PointId = rang d'entree) ; nullopt si le catalogue refuse.
-struct Chain {
-  std::optional<GlobalIndex> index;
-  std::optional<Catalogue> catalogue;
-};
-Chain make_chain(const Points& p, int kmax, MemoryBudget& budget, sched::Pool& pool) {
-  std::vector<PointId> ids(p.x.size());
-  for (u32 i = 0; i < ids.size(); ++i) ids[i] = make_id<PointId>(i);
-  Chain c;
-  auto cloud = prepare_cloud(p.x, p.y, p.z, ids, CoordWidth(), budget);
-  if (!cloud.ok()) return c;
-  auto index = build_index(std::move(cloud).take(), IndexParams{}, budget);
-  if (!index.ok()) return c;
-  c.index.emplace(std::move(index).take());
-  CatalogueParams params;
-  params.kmax = kmax;
-  auto catalogue = build_catalogue(c.index->cloud(), params, budget, pool);
-  if (catalogue.ok()) c.catalogue.emplace(std::move(catalogue).take());
-  return c;
-}
-
-std::string digest_of(const Chain& c, const tower::TowerForests& forests) {
-  const tower::BallSource balls = tower::catalogue_balls(*c.catalogue);
-  const tower::FullSource source{&c.index->cloud(), c.catalogue->levels(), balls, &forests};
-  auto d = tower::full_digest(source);
-  if (!d.ok()) return "refus";
-  const auto hex = io::to_hex(d.value());
-  return std::string(hex.data(), hex.size());
-}
 
 // Voie sequentielle de reference : resolve_tower puis build_forests.
 struct Sequential {
@@ -158,10 +94,15 @@ struct Need {
   bool below;
 };
 constexpr Need kNeeds[] = {
-    {tower::detail::kNumber, tower::detail::kCheck, false},     // entree controlee
-    {tower::detail::kKernel, tower::detail::kNumber, false},    // birth_node, feuilles, union-find ouvert
-    {tower::detail::kHistory, tower::detail::kKernel, false},   // evenements, attaches
-    {tower::detail::kSlices, tower::detail::kKernel, false},    // evenements
+    {tower::detail::kNumberOpen, tower::detail::kCheck, false},     // entree controlee
+    {tower::detail::kNumber, tower::detail::kNumberOpen, false},    // tampon de l'ordre, naissances de l'ordre
+    {tower::detail::kNumberClose, tower::detail::kNumber, false},   // ordre canonique complet
+    {tower::detail::kKernelOpen, tower::detail::kNumberClose, false},  // birth_node (feuilles de G), naissances
+    {tower::detail::kKernel, tower::detail::kKernelOpen, false},    // feuilles, union-find ouvert
+    {tower::detail::kHistoryCheck, tower::detail::kKernel, false},  // evenements, attaches
+    {tower::detail::kDepth, tower::detail::kKernel, false},         // attaches
+    {tower::detail::kHistory, tower::detail::kHistoryCheck, false},  // evenements controles
+    {tower::detail::kSlices, tower::detail::kKernel, false},        // evenements
     {tower::detail::kClasses, tower::detail::kSlices, false},
     {tower::detail::kNodes0, tower::detail::kClasses, false},   // classes de toutes les tranches
     {tower::detail::kNodes, tower::detail::kNodes0, false},     // premiers noeuds
@@ -171,13 +112,14 @@ constexpr Need kNeeds[] = {
     {tower::detail::kFinish, tower::detail::kChildren, false},
     {tower::detail::kLower, tower::detail::kFinish, false},     // nombre de noeuds
     {tower::detail::kBirths, tower::detail::kFinish, true},     // cell_node, parent, rang de l'ordre inferieur
-    {tower::detail::kBirths, tower::detail::kNumber, true},     // birth_node de l'ordre inferieur
+    {tower::detail::kBirths, tower::detail::kNumberClose, true},  // birth_node de l'ordre inferieur
     {tower::detail::kBirths, tower::detail::kLower, false},
     {tower::detail::kMerges, tower::detail::kBirths, false},    // verticales des naissances
     {tower::detail::kMerges, tower::detail::kHistory, true},    // survivor_events de l'ordre inferieur
     {tower::detail::kMerges, tower::detail::kFinish, true},     // event_node, event_rank, minleaf inferieurs
     {tower::detail::kRows, tower::detail::kFinish, false},      // cell_node, minleaf ; evenements liberes
     {tower::detail::kRows, tower::detail::kHistory, false},     // survivor_events ; evenements liberes
+    {tower::detail::kRows, tower::detail::kHistoryCheck, false},  // evenements lus par le controle, liberes
     {tower::detail::kCollect, tower::detail::kRows, false},
     {tower::detail::kPlaceRows, tower::detail::kCollect, false},
     {tower::detail::kFill, tower::detail::kPlaceRows, false},

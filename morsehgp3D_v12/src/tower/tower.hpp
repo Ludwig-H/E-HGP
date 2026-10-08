@@ -235,6 +235,7 @@ struct TowerDiagnostics {
   u64 open_ns = 0, g_end_ns = 0, end_ns = 0;
   u64 g_thread_ns = 0, forest_thread_ns = 0, forest_after_g_ns = 0;
   u64 kernel_jobs = 0, kernel_stops = 0, admitted_bytes = 0;
+  u64 hint_jobs = 0, hinted_reps = 0;  // taches d'indices de racine (levier I de T2-d-A6), feuilles indicees
   u32 threads = 0;
   std::array<u64, 12> order_g_end_ns{}, order_kernel_end_ns{}, order_m_end_ns{}, order_v_end_ns{}, order_r_end_ns{};
 };

@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 40,
+  "plancher": 48,
   "mutants": [
     {
       "id": "t1_sans_s_dans_f",
@@ -235,7 +235,7 @@
     },
     {
       "id": "phases_sans_tranches",
-      "fichier": "src/tower/pipeline_run.cpp",
+      "fichier": "src/tower/pipeline_steps.cpp",
       "cherche": "      for (const Step phase : {kClasses, kNodes, kParents, kChildren}) set_items(p, i, phase, work.slices.size());",
       "remplace": "",
       "porte": "mhgp12_tower_pipeline_determinisme",
@@ -279,6 +279,70 @@
       "remplace": "  return [](auto run) { return run(); }([&]() -> Result<Tower> {",
       "porte": "mhgp12_tower_pipeline_fault_allocation",
       "note": "Session recouverte : build_tower sans guarded : le std::bad_alloc de l'allocation de SessionRun sort de la frontiere noexcept et termine le processus au lieu d'un refus memory_budget"
+    },
+    {
+      "id": "numerotation_cohorte_coupee",
+      "fichier": "src/tower/forest_births.cpp",
+      "cherche": "  while (first > 0 && first < end && input.birth_rank[first] == input.birth_rank[first - 1]) ++first;",
+      "remplace": "",
+      "porte": "mhgp12_tower_levers_numerotation",
+      "note": "levier N de T2-d-A6 : un morceau reprend la suite d'une cohorte commencee avant lui (la cohorte n'a plus un seul proprietaire) : ordre canonique faux selon l'ordre des morceaux"
+    },
+    {
+      "id": "numerotation_sans_controle_de_rang",
+      "fichier": "src/tower/forest_births.cpp",
+      "cherche": "  if (hi < nb && input.birth_rank[hi] < input.birth_rank[lo]) return fail(Reason::tower_invariant);\n  return hi;",
+      "remplace": "  return hi;",
+      "porte": "mhgp12_tower_levers_numerotation",
+      "note": "levier N : rangs decroissants admis par le morceau qui possede la cohorte fautive, la ou number_births refuse"
+    },
+    {
+      "id": "indice_sans_borne_du_noyau",
+      "fichier": "src/tower/forest_kernel.cpp",
+      "cherche": "      if (target_index(code) >= processed) continue;  // cellule cible pas encore traitee : feuille gardee",
+      "remplace": "",
+      "porte": "mhgp12_tower_levers_indices",
+      "note": "levier I : une cible cellule pas encore traitee par le noyau est lue dans les elements (valeur d'un autre passage ou non initialisee)"
+    },
+    {
+      "id": "indice_de_la_naissance_zero",
+      "fichier": "src/tower/forest_kernel.cpp",
+      "cherche": "    std::atomic_ref<u32>(leaves[p]).store(find_read(c, node), std::memory_order_relaxed);",
+      "remplace": "    std::atomic_ref<u32>(leaves[p]).store(find_read(c, 0), std::memory_order_relaxed);",
+      "porte": "mhgp12_tower_levers_indices",
+      "note": "levier I : l'indice ecrit est la racine d'une autre composante (celle de la naissance 0) : unions fausses"
+    },
+    {
+      "id": "profondeur_decalee",
+      "fichier": "src/tower/forest_kernel.cpp",
+      "cherche": "    u64 d = 0;\n    for (u32 x = static_cast<u32>(v);",
+      "remplace": "    u64 d = 1;\n    for (u32 x = static_cast<u32>(v);",
+      "porte": "mhgp12_tower_levers_historique",
+      "note": "levier H : profondeur d'attache comptee d'un maillon de trop : compteur max_attach_depth different de build_history"
+    },
+    {
+      "id": "csr_sans_controle",
+      "fichier": "src/tower/pipeline_run.cpp",
+      "cherche": "    case kHistory: return {1, {{kHistoryCheck, false}}};",
+      "remplace": "    case kHistory: return {1, {{kKernel, false}}};",
+      "porte": "mhgp12_tower_pipeline_graphe",
+      "note": "levier H : la CSR par survivant (lue par R et par V de l'ordre suivant) n'attend plus le controle des evenements"
+    },
+    {
+      "id": "noyau_ouvert_avant_numerotation",
+      "fichier": "src/tower/pipeline_run.cpp",
+      "cherche": "    case kKernelOpen: return {1, {{kNumberClose, false}}};",
+      "remplace": "    case kKernelOpen: return {1, {{kNumber, false}}};",
+      "porte": "mhgp12_tower_pipeline_graphe",
+      "note": "levier N : feuilles et noyau ouverts avant que le noeud de chaque naissance soit ecrit (cloture par morceaux)"
+    },
+    {
+      "id": "cloture_numerotation_partielle",
+      "fichier": "src/tower/pipeline_steps.cpp",
+      "cherche": "      close_numbering(b, i, item * kNumberItems, piece_end(item, kNumberItems, f.births));",
+      "remplace": "      close_numbering(b, i, item * kNumberItems, std::min<u64>(f.births, item * kNumberItems + 1));",
+      "porte": "mhgp12_tower_pipeline_identite",
+      "note": "levier N : un morceau de la cloture n'ecrit que sa premiere position (noeuds et cles des naissances faux)"
     },
     {
       "id": "naissances_par_cle",
