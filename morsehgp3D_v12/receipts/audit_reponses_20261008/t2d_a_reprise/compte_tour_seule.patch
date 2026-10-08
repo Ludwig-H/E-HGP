@@ -1,0 +1,16 @@
+diff --git a/morsehgp3D_v12/tests/tower/pipeline_fault.cpp b/morsehgp3D_v12/tests/tower/pipeline_fault.cpp
+--- a/morsehgp3D_v12/tests/tower/pipeline_fault.cpp
++++ b/morsehgp3D_v12/tests/tower/pipeline_fault.cpp
+@@ -127,10 +127,11 @@
+   const u64 base = budget.used();
+   std::string expected;
+   const unsigned long long before = throwing_calls.load();
+-  REQUIRE(attempt(c, budget, *pool, &expected).ok());
++  REQUIRE(attempt(c, budget, *pool, nullptr).ok());  // compter la tour seule, sans les allocations du digest
+   const unsigned long long throwing = throwing_calls.load() - before;
+   CHECK_EQ(throwing, 3ull);  // SessionRun, BuildState, Pipeline
+   CHECK_EQ(budget.used(), base);
++  REQUIRE(attempt(c, budget, *pool, &expected).ok());  // empreinte hors de la fenetre de comptage
+   for (unsigned long long k = 0; k < throwing; ++k) {
+     throwing_left.store(static_cast<long long>(k));
+     const Outcome o = attempt(c, budget, *pool, nullptr);

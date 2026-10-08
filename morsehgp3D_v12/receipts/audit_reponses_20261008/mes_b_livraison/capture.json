@@ -1,0 +1,49 @@
+{
+  "gate_results": [
+    {
+      "code": 0,
+      "command": [
+        "python3",
+        "-B",
+        "microbancs/mes_b_scenes/test_pilote_b.py"
+      ],
+      "stdout": "test_pilote_b_ok lecture=23 issues=7 verdicts=8 empreintes=3 etiquettes=12 pilote=2\n"
+    },
+    {
+      "code": 0,
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "microbancs/mes_b_scenes/test_pilote_b.py"
+      ],
+      "stdout": "test_pilote_b_ok lecture=23 issues=7 verdicts=8 empreintes=3 etiquettes=12 pilote=2\n"
+    },
+    {
+      "code": 0,
+      "command": [
+        "python3",
+        "-B",
+        "microbancs/mes_b_scenes/mutants_pilote_b.py"
+      ],
+      "environment": {
+        "PYTHONDONTWRITEBYTECODE": "1"
+      },
+      "stdout": "mutants_pilote_b_ok tues=20\n"
+    }
+  ],
+  "gcp_used": false,
+  "native_executed": false,
+  "pin": "8da450ab751017a77928cb5c33e284b0fd0371e8",
+  "preliminary_review_sha256": "ba067191a444811dc96e0634770135b8dba4ca179cd75d518605b082e9a52bd0",
+  "same_pilot_as_preliminary": true,
+  "source_note": "Detached persistent worktree; Python fake probes only, environment executes cmake --version without construction.",
+  "sources_sha256": {
+    "morsehgp3D_v12/bench/full_probe.cpp": "0b1b6b45e6483f21df203fab3a99b7d1d49b15edb2f7b3cbf31a24526bca0e91",
+    "morsehgp3D_v12/docs/MESURE.md": "c0a8966ced7d00db60f8ba1b95b50ed5a4c23a2e8afa89be1e38ca1527f204c6",
+    "morsehgp3D_v12/microbancs/mes_b_scenes/README.md": "99ec6c0a1f1cdee99aa63d646548678360dd62edf5ed9dce9a8dfe2dae64ea2b",
+    "morsehgp3D_v12/microbancs/mes_b_scenes/mutants_pilote_b.py": "cdbc03321b44ebe808ea098eedfb44b89deb6c1877b7487ecfa37724d84716a1",
+    "morsehgp3D_v12/microbancs/mes_b_scenes/pilote_b.py": "84777f19bdf3fdb380207c813ed3253a2f35961c6e28b45eca32466977c165f7",
+    "morsehgp3D_v12/microbancs/mes_b_scenes/test_pilote_b.py": "5d85e22efe0d5756fe9d63748a2f4af1d5472ad65902751802a8eb02bf290006"
+  }
+}

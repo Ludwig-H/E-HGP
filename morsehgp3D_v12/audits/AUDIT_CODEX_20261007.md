@@ -1,14 +1,10 @@
 # Audit Codex — état courant v12
 
-8 octobre 2026, reprise après coupure, base publiée **`8da450ab7`**.
+8 octobre 2026, reprise après coupure, base publiée **`403736300`**.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
 
-**Reprise A : trois sources à récupérer.** Le [secours vérifié et son patch](../receipts/audit_reponses_20261008/reprise_sources/README.md)
-conservent le retrait de `open_session noexcept` et un test d'injection mémoire absents de la copie restaurée.
-Patch ciblant A/work ; test non enregistré ni qualifié. Les 1 199 sources sauvegardées ne remplacent pas les builds perdus.
-
-**Derniers temps G4 : FULL mesuré, 100 ms non tenu.** [Session K contre-jugée](../receipts/audit_reponses_20261008/session_k_full/README.md),
+**Derniers temps G4 : session K, 100 ms non tenu.** [Contre-lecture FULL](../receipts/audit_reponses_20261008/session_k_full/README.md),
 u21, W48, trames ng00–02 de 39 885 / 35 551 / 45 845 sites :
 
 | Médiane chaude FULL, ms | ng00 | ng01 | ng02 |
@@ -23,64 +19,51 @@ GPU K5 : maxima des médianes de processus 160,76 / 127,80 / 164,64 ms ; maxima 
 Mur de Cloud/index à T/M/V/R ; segmentation, lecture, validation, FUL1 et libération hors mur.
 [Sources/commandes et arrêt ciblé vérifiés](../receipts/audit_reponses_20261008/session_k_provenance/README.md),
 03:03:03 UTC ; [342 sources/configurations identiques à `c9ac60f20`](../receipts/audit_reponses_20261008/session_k_sources/README.md).
-**Snapshot, sans hash binaire ni journal de compilation rapatrié**. Aucun CPU·s par trame.
+Snapshot sans hash binaire ni journal de compilation rapatrié ; aucun CPU·s par trame, aucun CPU K10.
 
-Face aux mesures historiques v11 : GPU désormais plus rapide, CPU toujours plus lent ; comparaison descriptive,
-pas A/B apparié. **Catalogue CPU : 274–329 ms**. Côté GPU, G coûte 44–57 ms, T 26–38 ms, R 12–15 ms.
-Retirer comptablement R par passe laisse 116–148 ms médians : R seul ne suffit pas à 100 ms.
-GPU u24/u32, petits nuages et millions restent à qualifier ; aucun CPU K10 joué dans K.
+Face aux mesures historiques v11 : GPU plus rapide, CPU plus lent ; comparaison descriptive, pas A/B apparié.
+Catalogue CPU : 274–329 ms. Sur GPU, G : 44–57 ms ; T : 26–38 ms ; R : 12–15 ms.
+Retirer R par passe laisse 116–148 ms médians : ce seul poste ne suffit pas à 100 ms.
 
-**Livraisons et qualifications.**
+**Contre-lectures courantes et aide au développeur.**
 
-- **Gc `4df326cc8` + `10050a96e`** : [sources livrées vérifiées](../receipts/audit_reponses_20261008/gc_livraison/README.md).
-  J valide index parallèle et file G-L7 ; G-L5 rejeté. CLI huit et collecte C ouverts.
-- **TMVR `7398aed7d`** : [livraison identique au prototype](../receipts/audit_reponses_20261008/tmvr_livraison/README.md).
-  MES-M0, neuf chaînes CPU/v11, W1/W8 et EMST ; 716 portes, une LiDAR sautée,
-  [27 mutants](../receipts/audit_tmv_repo6_mutants_20261008/README.md), 685 contrôles du pic.
-  Budget fini/cache et u24/u32 restent ouverts ; construction repo6 u24 interrompue.
-- **D6 `0018/0207`** : [livraison `e37fd8935` vérifiée](../receipts/audit_reponses_20261008/d6_livraison_stricte/README.md),
-  [K rejoué hors ligne](../receipts/audit_reponses_20261008/d6_session_k/README.md) :
-  ancien lecteur → 66 alertes ; corrigé → 126 sorties/630 passes admises, ratios recalculés.
-  C u24/u32 ×1 : +0,04–1,04 % ; G u32 : +4,3–11,2 %. ×2048 : C ×2,9, mais coordonnées **<2²⁹**, pas «32 bits pleins».
-  Homothétie d'entiers déjà quantifiés, sans détail physique nouveau ; seuil D6 produit <3 % encore ouvert.
+- **CPU, catalogue** : finition déjà parallèle depuis `8ba7d7287` ; feuilles = 45–48 % de C.
+  [Patch popcount explicite depuis v11](../receipts/audit_reponses_20261008/cpu_popcount/README.md),
+  puis [assembleur vérifié](../receipts/audit_reponses_20261008/cpu_popcount_asm/README.md) : cinq appels logiciels
+  deviennent zéro dans les deux wrappers génériques ; avec `-mpopcnt`, assembleurs identiques.
+  Aucun gain temps ni objet produit corrigé qualifié. Cette piste concerne le catalogue, pas l'étage G.
+- **MES-B `8da450ab7`** : [livraison contre-jugée](../receipts/audit_reponses_20261008/mes_b_livraison/README.md).
+  Étiquettes, refus K10 et JSON corrigés ; tests Python normal/−O et 20 mutants passent.
+  Résidu synthétique : mur nul admis puis `log(0)` dans B3 ; refuser ce mur avant les statistiques.
+  B1 tolère explicitement les refus K5 ≥10 M sites : « tenu » ne signifie pas achèvement de toutes ces scènes.
+  CPU/RSS et budgets séparés ajoutés ; aucune mesure massive nouvelle contre-certifiée.
+- **T2-d-A, recouvrement G/TMVR** : [conditions de concurrence](../receipts/audit_reponses_20261008/prelecture_t2d_t/README.md),
+  [copie reprise sur 8da](../receipts/audit_reponses_20261008/t2d_a_reprise/README.md) : `noexcept` retiré et fin G
+  mesurée avant les feuilles. Test mémoire récupéré : le digest pollue son compteur ; patch ciblé fourni.
+  Nouvelle qualification native attendue. T/M/V/R recouverts sont des sommes de fenêtres, pas du temps CPU.
+- **T2-d-B, census G** : [garde resserrée et preuve](../receipts/audit_reponses_20261008/garde_census/README.md),
+  [témoins de frontière](../receipts/audit_reponses_20261008/census_temoins/README.md) : 1 288 requêtes du modèle
+  gardent résultats/parcours ; supports certifiés transportés par valeur dans le prototype.
+  Proposition entière puis Welzl amorcé en préparation ; nouveau corps et gain G4 à qualifier.
+- **T2-d-C, catalogue GPU** : [prélecture du flux](../receipts/audit_reponses_20261008/t2d_c_prelecture/README.md) :
+  staging 16 Mio, mémoire anticipée et réparation compacte à compter. Treize tests Pool relus ; aucun CUDA exécuté.
+  [Juge à renforcer](../receipts/audit_reponses_20261008/t2d_c_admission/README.md) : métadonnées incompatibles admises,
+  mutant code 0 sans empreinte déclaré tué ; témoins rejoués après coupure et patch partiel fournis.
+- **R** : [raccourci des classes à cellule unique](../receipts/audit_reponses_20261008/registre_classe_unique_patch/README.md)
+  fourni, non compilé, sans gain acquis ; comparer aussi les lignes/CSR, absentes de FUL1.
+  Le développeur le garde pour après T2-d-A dans sa [réponse publiée](../receipts/developpement_20261008/reponse_audit_k_mes_b.md).
 
-**Aide au développeur et prochains contrôles.**
+**Qualifications et portes restantes.** Gc/TMVR livrés : détails et limites au registre ; dernière qualification
+TMVR u21, 716 portes et une sentinelle LiDAR sautée, 27 mutants, 685 contrôles du pic ; pas de transfert à T2-d.
+[D6 rejoué](../receipts/audit_reponses_20261008/d6_session_k/README.md) : 126 sorties/630 passes admises ;
+C u24/u32 ×1 : +0,04–1,04 %, G u32 : +4,3–11,2 %. ×2048 reste <2²⁹, sans précision physique nouvelle ;
+[erratum accepté](../receipts/g4_fullk_20261008/ERRATUM_20261008.md). Seuil D6 produit <3 % ouvert.
+[Contre-lecteur FULL strict](../receipts/audit_reponses_20261008/mes_full_contrelecture/README.md) :
+53 corruptions refusées, K admis ; intégration au pilote promise avant sa prochaine session, pas encore livrée.
+`0239` (_GLIBCXX_DEBUG), `0240` (historique non contrôlé, aucune sortie produit fausse démontrée), `0104`
+(mutant de date Gc), T7, capacités 256/64, profils élargis et massif restent ouverts. `0105/0107` clos u21 ;
+`0009` clos, `0008` ouvert. Toutes les preuves de clôture et réserves sont conservées au registre.
 
-- **T2-d actif** : [prélecture du recouvrement](../receipts/audit_reponses_20261008/prelecture_t2d_t/README.md) :
-  Pool non réentrant, admission commune des coexistences, dépendances V/R et nouvelle enveloppe de temps à déclarer.
-  [Protocole G](../receipts/audit_reponses_20261008/t2d_g_prelecture/README.md) : les deux bras sont désormais Gc ;
-  séparer garde, index exact et changement déclaré de sauts.
-  [Premiers corps A](../receipts/audit_reponses_20261008/prelecture_t2d_corps/README.md) : correction d'exception à récupérer
-  ci-dessus ; numérotation doublée déjà corrigée, frontière `g_end` à préciser.
-  [Flux C](../receipts/audit_reponses_20261008/t2d_c_prelecture/README.md) : lecture favorable, 13 tests Pool relus ;
-  staging demandé à 16 Mio, allocation anticipée et quatrième levier à distinguer. CUDA exécuté : non.
-  [Juge C : admission à renforcer](../receipts/audit_reponses_20261008/t2d_c_admission/README.md) : métadonnées
-  incompatibles admises ; mutant code 0 sans empreinte déclaré tué. Témoins rejoués après coupure et patch partiel fournis.
-- **CPU `0233/0234`** : [finition déjà parallèle et piste popcount](../receipts/audit_reponses_20261008/cpu_popcount/README.md).
-  Feuilles = 45–48 % de C ; appels logiciels dans l'objet local, pas de preuve binaire K.
-  Patch SWAR explicite depuis v11 proposé ; instructions puis gain CPU à qualifier.
-- **MES-FULL `0018`** : [lacunes d’admission](../receipts/audit_reponses_20261008/mes_full_admission/README.md),
-  pilote `c9ac60f20` présent dans K : GPU inconnu, incohérences et cohortes incomplètes admis.
-  [Contre-lecteur strict](../receipts/audit_reponses_20261008/mes_full_contrelecture/README.md) :
-  53 corruptions refusées, 38 processus/610 passes K admis ; verdict « non tenu ». Pilote produit encore à renforcer.
-- **MES-B livré `8da450ab7`, `0018`** : [blocages antérieurs](../receipts/audit_reponses_20261008/mes_b_prelecture/README.md)
-  corrigés dans les sources : étiquettes, refus K10 et lecture JSON. Tests finaux en contre-lecture.
-  B1 tolère désormais explicitement les refus K5 ≥10 M sites ; « tenu » ne signifie pas achèvement de toutes ces scènes.
-  CPU/RSS et budgets séparés ajoutés ; aucune nouvelle mesure massive acquise.
-- **R** : [classes à cellule unique](../receipts/audit_reponses_20261008/registre_classe_unique/README.md) :
-  `q=d+1` autorise la copie des enfants sans recherche historique ni tri, mémoire temporaire réduite.
-  Preuve et modèle ; sur les comptes ng00, au moins 78,81 % des requêtes K5 et 71,95 % K10 évitables.
-  [Patch minimal fourni](../receipts/audit_reponses_20261008/registre_classe_unique_patch/README.md), non compilé,
-  sans gain temps acquis. Comparer aussi les lignes/CSR de R :
-  [FUL1](../src/tower/export_full.cpp) ne les encode pas ; la porte native `branches` les compare à la coupe ouverte.
-- **Census G** : [garde resserrée proposée](../receipts/audit_reponses_20261008/garde_census/README.md),
-  preuve MEB et témoin de débordement ; voies du patch conservées, promotions séparées.
-  [Témoins de frontière](../receipts/audit_reponses_20261008/census_temoins/README.md) : 1 288 requêtes du modèle
-  gardent résultats/parcours ; ≤4 supports certifiés du même Cloud à transporter. Intégration/G4 à qualifier.
-Autres portes ouvertes : `0239` (_GLIBCXX_DEBUG non joué), `0240` (historique non certifié par le validateur,
-aucune sortie produit fausse démontrée), `0104` (mutant de date adapté à Gc non joué). Preuves, propositions et
-périmètres dans le [registre](CONSTATS.md). `0105/0107` clos sur u21 ; aucune extension automatique à `0240`.
-`0009` clos ; `0008` ouvert. T7 natif, capacités 256/64, profils élargis et massif restent à qualifier.
-
-Quatre fichiers actifs, 75 constats ; détails historiques dans `receipts/`. Aucun GCP lancé ni donnée sous licence
-par cet audit. Contrôles récents : sources, archives et Python ; natifs antérieurs limités aux formats synthétiques.
+Quatre fichiers actifs, 75 constats ; détails dans `receipts/`. Worktrees d'audit désormais persistants sous
+`/workspaces`. Aucun GCP ni donnée sous licence par cet audit ; contrôles récents Python, sources et assembleur
+seul, sans exécution du moteur. Les qualifications perdues dans `/tmp` ne sont pas recréées par la sauvegarde des sources.

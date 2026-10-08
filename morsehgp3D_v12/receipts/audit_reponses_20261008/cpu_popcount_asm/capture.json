@@ -1,0 +1,258 @@
+{
+  "format": "mhgp12_audit_cpu_popcount_asm_v1",
+  "fresh_capture_utc_start": "2026-10-08T04:37:14.473445+00:00",
+  "fresh_capture_utc_end": "2026-10-08T04:37:21.148717+00:00",
+  "repository_head": "8da450ab751017a77928cb5c33e284b0fd0371e8",
+  "source_pins": {
+    "morsehgp3D_v12/src/catalogue/simt.hpp": "acda01afa5e114234be2e22b17815d5b7fe32c5fe5a0ae184675ea6ef5f57122",
+    "morsehgp3D_v12/src/core/buffer.hpp": "8e4d84665e90308ee9572a729731711bb419e3a565fd4dd11b5bd56ab6a92401",
+    "morsehgp3D_v12/src/core/core.hpp": "5b3703641031c27e7bf907b2a8c05c79007ee1cae47da7d8e5f94ea435c563d3",
+    "morsehgp3D_v12/src/core/ledger.hpp": "f6f81e2670ce8f9114d4b31b782b94534963b93439642c4b587ff4a822a44c24",
+    "morsehgp3D_v12/src/core/status.hpp": "d81b3e8aab647c97fe97fa7d91081efa28ab88cdac8706cafdd825b17e4046ea",
+    "morsehgp3D_v12/src/core/types.hpp": "c6d91808b0fa82364a48bc049b2097b31db7bd46cae0b4ca7d313b4e3f7d0835",
+    "morsehgp3D_v12/src/core/reasons.def": "6950b85dc15ed3ebfc51e4597ef06b4ed0b08c1833e83df09579dcb94e9e8cfd",
+    "morsehgp3D_v12/receipts/audit_reponses_20261008/cpu_popcount/proposition.patch": "d2168db65cd280b4f987c127914dd2b295b7ef13d6ef4ec3e2d94b0618d4c325"
+  },
+  "candidate_header_sha256": "d32fa18d22a23fc1e56ffe5451265eacf326b32630562bab1f22b68dcd243cf2",
+  "wrapper_sha256": "77de14421dcba0b729fd429b8f04878b5c5d62e9ce5543845def3f842b92b6df",
+  "compiler": {
+    "executable": "/usr/bin/x86_64-linux-gnu-g++-13",
+    "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+    "cc1plus": "/usr/libexec/gcc/x86_64-linux-gnu/13/cc1plus",
+    "cc1plus_sha256": "840b332fb62ec6f694ac77d91fe69ef7f80b0d69512ed89374af0ee7a506255d",
+    "version": "x86_64-linux-gnu-g++-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+    "target": "x86_64-linux-gnu"
+  },
+  "runs": [
+    {
+      "arm": "base_generic",
+      "flags": [
+        "-O3",
+        "-DNDEBUG",
+        "-std=c++20",
+        "-DMHGP12_COORD_BITS=21",
+        "-S"
+      ],
+      "dependency_flags": [
+        "-MMD",
+        "-MF",
+        "<TEMP>/dependencies.d"
+      ],
+      "include": "<SNAPSHOT>/morsehgp3D_v12/src",
+      "source": "wrappers.cpp",
+      "code": 0,
+      "stdout": "",
+      "stderr": "",
+      "assembly_sha256": "89924124254ddfdda567e5f283aa61be50b722a7ea741f926622c884836a244f",
+      "repository_headers": [
+        "morsehgp3D_v12/src/catalogue/simt.hpp",
+        "morsehgp3D_v12/src/core/buffer.hpp",
+        "morsehgp3D_v12/src/core/core.hpp",
+        "morsehgp3D_v12/src/core/ledger.hpp",
+        "morsehgp3D_v12/src/core/reasons.def",
+        "morsehgp3D_v12/src/core/status.hpp",
+        "morsehgp3D_v12/src/core/types.hpp"
+      ],
+      "stored_assembly": "base_generic.s"
+    },
+    {
+      "arm": "candidate_generic",
+      "flags": [
+        "-O3",
+        "-DNDEBUG",
+        "-std=c++20",
+        "-DMHGP12_COORD_BITS=21",
+        "-S"
+      ],
+      "dependency_flags": [
+        "-MMD",
+        "-MF",
+        "<TEMP>/dependencies.d"
+      ],
+      "include": "<SNAPSHOT>/morsehgp3D_v12/src",
+      "source": "wrappers.cpp",
+      "code": 0,
+      "stdout": "",
+      "stderr": "",
+      "assembly_sha256": "22e3b78dbc43fdab38f725541bde9bfad78dd4282429f32c47ae2421f0272b7f",
+      "repository_headers": [
+        "morsehgp3D_v12/src/catalogue/simt.hpp",
+        "morsehgp3D_v12/src/core/buffer.hpp",
+        "morsehgp3D_v12/src/core/core.hpp",
+        "morsehgp3D_v12/src/core/ledger.hpp",
+        "morsehgp3D_v12/src/core/reasons.def",
+        "morsehgp3D_v12/src/core/status.hpp",
+        "morsehgp3D_v12/src/core/types.hpp"
+      ],
+      "stored_assembly": "candidate_generic.s"
+    },
+    {
+      "arm": "base_popcnt",
+      "flags": [
+        "-O3",
+        "-DNDEBUG",
+        "-std=c++20",
+        "-DMHGP12_COORD_BITS=21",
+        "-S",
+        "-mpopcnt"
+      ],
+      "dependency_flags": [
+        "-MMD",
+        "-MF",
+        "<TEMP>/dependencies.d"
+      ],
+      "include": "<SNAPSHOT>/morsehgp3D_v12/src",
+      "source": "wrappers.cpp",
+      "code": 0,
+      "stdout": "",
+      "stderr": "",
+      "assembly_sha256": "7c9e7c662ea956c71dc20d8c5e0266b0b2dfb223ab191e4747e9c5cbf43b8d08",
+      "repository_headers": [
+        "morsehgp3D_v12/src/catalogue/simt.hpp",
+        "morsehgp3D_v12/src/core/buffer.hpp",
+        "morsehgp3D_v12/src/core/core.hpp",
+        "morsehgp3D_v12/src/core/ledger.hpp",
+        "morsehgp3D_v12/src/core/reasons.def",
+        "morsehgp3D_v12/src/core/status.hpp",
+        "morsehgp3D_v12/src/core/types.hpp"
+      ],
+      "stored_assembly": "popcnt.s"
+    },
+    {
+      "arm": "candidate_popcnt",
+      "flags": [
+        "-O3",
+        "-DNDEBUG",
+        "-std=c++20",
+        "-DMHGP12_COORD_BITS=21",
+        "-S",
+        "-mpopcnt"
+      ],
+      "dependency_flags": [
+        "-MMD",
+        "-MF",
+        "<TEMP>/dependencies.d"
+      ],
+      "include": "<SNAPSHOT>/morsehgp3D_v12/src",
+      "source": "wrappers.cpp",
+      "code": 0,
+      "stdout": "",
+      "stderr": "",
+      "assembly_sha256": "7c9e7c662ea956c71dc20d8c5e0266b0b2dfb223ab191e4747e9c5cbf43b8d08",
+      "repository_headers": [
+        "morsehgp3D_v12/src/catalogue/simt.hpp",
+        "morsehgp3D_v12/src/core/buffer.hpp",
+        "morsehgp3D_v12/src/core/core.hpp",
+        "morsehgp3D_v12/src/core/ledger.hpp",
+        "morsehgp3D_v12/src/core/reasons.def",
+        "morsehgp3D_v12/src/core/status.hpp",
+        "morsehgp3D_v12/src/core/types.hpp"
+      ],
+      "stored_assembly": "popcnt.s"
+    }
+  ],
+  "preparation_failure": {
+    "before_capture": true,
+    "arm": "base_generic",
+    "code": 1,
+    "diagnostic": "core/status.hpp:34:10: fatal error: core/reasons.def: No such file or directory",
+    "cause": "La premiere copie temporaire omettait core/reasons.def. Copie completee avant les quatre captures, aucun produit modifie.",
+    "assembly_kept": false
+  },
+  "scope": {
+    "translation_units": 1,
+    "wrappers": 2,
+    "successful_compiler_invocations": 4,
+    "failed_preparation_invocations": 1,
+    "assembly_only": true,
+    "objects_or_executables_created": false,
+    "engine_executed": false,
+    "gpu_or_gcp_used": false,
+    "system_headers_pinned": false,
+    "old_logs_reconstructed": false
+  },
+  "result": {
+    "arms": {
+      "base_generic": {
+        "assembly_sha256": "89924124254ddfdda567e5f283aa61be50b722a7ea741f926622c884836a244f",
+        "software_popcount_call_sites": 5,
+        "popcnt_instructions": 0,
+        "all_call_sites": 5,
+        "functions": {
+          "audit_popc32": {
+            "software_popcount_call_sites": 1,
+            "popcnt_instructions": 0,
+            "all_call_sites": 1
+          },
+          "audit_popc256": {
+            "software_popcount_call_sites": 4,
+            "popcnt_instructions": 0,
+            "all_call_sites": 4
+          }
+        }
+      },
+      "candidate_generic": {
+        "assembly_sha256": "22e3b78dbc43fdab38f725541bde9bfad78dd4282429f32c47ae2421f0272b7f",
+        "software_popcount_call_sites": 0,
+        "popcnt_instructions": 0,
+        "all_call_sites": 0,
+        "functions": {
+          "audit_popc32": {
+            "software_popcount_call_sites": 0,
+            "popcnt_instructions": 0,
+            "all_call_sites": 0
+          },
+          "audit_popc256": {
+            "software_popcount_call_sites": 0,
+            "popcnt_instructions": 0,
+            "all_call_sites": 0
+          }
+        }
+      },
+      "base_popcnt": {
+        "assembly_sha256": "7c9e7c662ea956c71dc20d8c5e0266b0b2dfb223ab191e4747e9c5cbf43b8d08",
+        "software_popcount_call_sites": 0,
+        "popcnt_instructions": 5,
+        "all_call_sites": 0,
+        "functions": {
+          "audit_popc32": {
+            "software_popcount_call_sites": 0,
+            "popcnt_instructions": 1,
+            "all_call_sites": 0
+          },
+          "audit_popc256": {
+            "software_popcount_call_sites": 0,
+            "popcnt_instructions": 4,
+            "all_call_sites": 0
+          }
+        }
+      },
+      "candidate_popcnt": {
+        "assembly_sha256": "7c9e7c662ea956c71dc20d8c5e0266b0b2dfb223ab191e4747e9c5cbf43b8d08",
+        "software_popcount_call_sites": 0,
+        "popcnt_instructions": 5,
+        "all_call_sites": 0,
+        "functions": {
+          "audit_popc32": {
+            "software_popcount_call_sites": 0,
+            "popcnt_instructions": 1,
+            "all_call_sites": 0
+          },
+          "audit_popc256": {
+            "software_popcount_call_sites": 0,
+            "popcnt_instructions": 4,
+            "all_call_sites": 0
+          }
+        }
+      }
+    },
+    "unique_assemblies": 3,
+    "popcnt_arms_byte_identical": true
+  },
+  "python_replay": {
+    "normal_exit_code": 0,
+    "optimized_exit_code": 0,
+    "stdout_equal": true,
+    "stdout_sha256": "7109ebfa24076ca34e961548a39f8a1403d4cd81a103305e5253a0e5e85074d8"
+  }
+}

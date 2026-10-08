@@ -1,0 +1,80 @@
+{
+  "utc": "2026-10-08T04:41:43.946265+00:00",
+  "scope": "uncommitted A/w8da prototype; archived unfinished test",
+  "declared_base": "8da450ab751017a77928cb5c33e284b0fd0371e8",
+  "current_sources": [
+    {
+      "path": "morsehgp3D_v12/src/tower/pipeline.cpp",
+      "bytes": 10723,
+      "sha256": "44e83374113a860519744f4a34dab854e32e50d50febc0e0f905a8aa7f8e437b"
+    },
+    {
+      "path": "morsehgp3D_v12/src/tower/pipeline.hpp",
+      "bytes": 9781,
+      "sha256": "22247870f74e66814b9339c7977df58ff5510592803ed4995f38d02531ede99f"
+    },
+    {
+      "path": "morsehgp3D_v12/src/tower/pipeline_run.cpp",
+      "bytes": 19334,
+      "sha256": "08b385e624db1eda20cd214e378e1bd7cd50d2a77c9832c485a66ff564847d02"
+    },
+    {
+      "path": "morsehgp3D_v12/bench/full_probe.cpp",
+      "bytes": 19785,
+      "sha256": "50d628000026c7628ba34fe8382599167b16f4a04e2e0ae0620e80a8eb630f9f"
+    },
+    {
+      "path": "morsehgp3D_v12/tests/tower/pipeline_fault.cpp",
+      "bytes": 7838,
+      "sha256": "c92e6dbeb1dff67f8aca2dedc6b834c4189de1f899288768b98c9318d960aca5"
+    },
+    {
+      "path": "morsehgp3D_v12/tests/tower/tests.cmake",
+      "bytes": 14006,
+      "sha256": "b26c505b1cd14f232baf3b9351a26ab99c280e9e17856d89ee71c44e9d6c09df"
+    },
+    {
+      "path": "morsehgp3D_v12/src/tower/export_full.cpp",
+      "bytes": 6328,
+      "sha256": "789f33fc68377ab9d1fcc72a2c8618f87b74af819e018b8cafbf404b3709595c"
+    }
+  ],
+  "test_patch": {
+    "path": "morsehgp3D_v12/tests/tower/pipeline_fault.cpp",
+    "archive_member": "A/morsehgp3D_v12/tests/tower/pipeline_fault.cpp",
+    "before_sha256": "c92e6dbeb1dff67f8aca2dedc6b834c4189de1f899288768b98c9318d960aca5",
+    "after_sha256": "26c0a87477235e7455f682354188c3c48653d579e2a2993386a194627cc336b5",
+    "before_bytes": 7838,
+    "after_bytes": 7993,
+    "edits": "baseline attempt gets nullptr; digest baseline created only after counter snapshot"
+  },
+  "archive": {
+    "sha256": "bedaf467e2d62736820510c83653293da43f6d5af997d27bd02f460cc635e517",
+    "name": "sources_t2d.tar.gz"
+  },
+  "causal_lines": {
+    "tests/tower/pipeline_fault.cpp": [
+      106,
+      113,
+      116,
+      129,
+      130,
+      131,
+      132,
+      134,
+      136,
+      137
+    ],
+    "src/tower/export_full.cpp": [
+      168,
+      171
+    ]
+  },
+  "checks": {
+    "current_sources_stable_before_after": true,
+    "native_build_or_test": false,
+    "developer_sources_modified": false,
+    "python_normal_apply_and_hash_and_reverse": true,
+    "python_optimized_apply_and_hash_and_reverse": true
+  }
+}
