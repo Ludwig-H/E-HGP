@@ -1,0 +1,22 @@
+diff --git a/morsehgp3D_v12/src/tower/forest_births.cpp b/morsehgp3D_v12/src/tower/forest_births.cpp
+--- a/morsehgp3D_v12/src/tower/forest_births.cpp
++++ b/morsehgp3D_v12/src/tower/forest_births.cpp
+@@ -63,13 +63,11 @@
+     spheres[j] = sphere.value();
+     local[j] = j;
+   }
+-  bool equal = false;
+-  std::sort(local.begin(), local.begin() + n, [&](u32 a, u32 b) {
+-    const int s = num::compare_centers(spheres[a], spheres[b]);
+-    equal = equal || s == 0;
+-    return s < 0;
+-  });
+-  if (equal) return fail(Reason::tower_invariant);
++  std::sort(local.begin(), local.begin() + n,
++            [&](u32 a, u32 b) { return num::compare_centers(spheres[a], spheres[b]) < 0; });
++  for (u32 j = 1; j < n; ++j)
++    if (num::compare_centers(spheres[local[j - 1]], spheres[local[j]]) == 0)
++      return fail(Reason::tower_invariant);
+   // Les indices d'entree de la cohorte sont croissants : position locale j -> indice cohort[0] + j.
+   const u32 first = cohort[0];
+   for (u32 j = 0; j < n; ++j) cohort[j] = first + local[j];

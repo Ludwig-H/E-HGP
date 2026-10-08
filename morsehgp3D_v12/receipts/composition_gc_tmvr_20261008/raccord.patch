@@ -1,0 +1,98 @@
+--- a/morsehgp3D_v12/src/tower/module.cmake
++++ b/morsehgp3D_v12/src/tower/module.cmake
+@@ -2,3 +2,6 @@
+ # populations, resolution des representants. Les etages T, M, V et R ajoutent leurs sources ici.
+ mhgp12_module_sources(supports.cpp cells.cpp cells_stage.cpp populations.cpp radix.cpp first_probes.cpp resolve.cpp
+                       passes.cpp stage.cpp)
++# Etages T, M, V, R et export FUL1.
++mhgp12_module_sources(forest_births.cpp forest_kernel.cpp forest_contract.cpp forest_build.cpp forest_stages.cpp
++                      forest_validate.cpp forest_sources.cpp vertical_images.cpp registry_branches.cpp export_full.cpp)
+--- a/morsehgp3D_v12/tests/mutants/tower.json
++++ b/morsehgp3D_v12/tests/mutants/tower.json
+@@ -1,6 +1,6 @@
+ {
+   "module": "tower",
+-  "plancher": 18,
++  "plancher": 27,
+   "mutants": [
+     {
+       "id": "t1_sans_s_dans_f",
+@@ -152,6 +152,78 @@
+       "remplace": "        (void)inner;",
+       "porte": "mhgp12_tower_index_weak_key_resolution",
+       "note": "file G-L7 (voie produit) dont l'empreinte des traces oublie les sites interieurs : les premieres sondes manquent leur naissance ; les cibles restent celles de l'objet (resolution pas a pas), mais les compteurs du travail de l'etage different de la resolution rejouee : seul le travail le voit, hors empreinte"
++    },
++    {
++      "id": "plateau_non_atomique",
++      "fichier": "src/tower/forest_contract.cpp",
++      "cherche": "if (x != y) work.local[lo + x] = y;",
++      "remplace": "(void)x, (void)y;",
++      "porte": "mhgp12_tower_forest_temoins",
++      "note": "aucun lien entre evenements de meme rang : chaque evenement binaire devient un noeud, les multifusions du plateau (WIT-SIX, WIT-TRI-EQ) sont binarisees"
++    },
++    {
++      "id": "etoile_entiere",
++      "fichier": "src/tower/forest_contract.cpp",
++      "cherche": "ev[op & kEventIndex].rank == ev[e].rank;",
++      "remplace": "ev[op & kEventIndex].rank <= ev[e].rank;",
++      "porte": "mhgp12_tower_forest_temoins",
++      "note": "REG:238 : la classe d'un evenement absorbe toute l'etoile des sommets qu'il touche, de rang inferieur compris, au lieu du seul lien choisi de meme rang ; les partitions intermediaires disparaissent (fixture des cinq naissances s0..s3)"
++    },
++    {
++      "id": "union_par_indice",
++      "fichier": "src/tower/forest_kernel.cpp",
++      "cherche": "if (c[x].size < c[y].size) s = y, l = x;  // union par TAILLE",
++      "remplace": "if (y < x) s = y, l = x;  // union par TAILLE",
++      "porte": "mhgp12_tower_forest_attache",
++      "note": "union par indice : meme foret (LEM-T4) mais l'historique d'attache depasse floor(log2(naissances)) sur la chaine (LEM-T5 (i))"
++    },
++    {
++      "id": "t6_sans_remontee",
++      "fichier": "src/tower/vertical_images.cpp",
++      "cherche": "image = up;  // remontee d'un cran : le plateau du rang de la boule contient la jonction",
++      "remplace": "(void)up;  // remontee d'un cran : le plateau du rang de la boule contient la jonction",
++      "porte": "mhgp12_tower_forest_verticales",
++      "note": "LEM-T6 sans la remontee d'un cran : l'image d'une naissance reste le sommet laisse par la jonction, mort a la coupe fermee quand le plateau du rang l'absorbe"
++    },
++    {
++      "id": "element_sans_racine",
++      "fichier": "src/tower/forest_kernel.cpp",
++      "cherche": "const u32 y = find(c, leaf);",
++      "remplace": "const u32 y = target_is_cell(leaves[p]) ? leaf : find(c, leaf);",
++      "porte": "mhgp12_tower_forest_temoins",
++      "note": "cible << cellule >> lue comme l'element de la cellule sans le relire a sa racine courante : sommet perime d'une composante absorbee"
++    },
++    {
++      "id": "naissances_par_cle",
++      "fichier": "src/tower/forest_births.cpp",
++      "cherche": "else MHGP12_TRY(sort_balls(cloud, balls, input, cohort, spheres.span(), local.span()));",
++      "remplace": "else if (cohort.size() == 0) MHGP12_TRY(sort_balls(cloud, balls, input, cohort, spheres.span(), local.span()));",
++      "porte": "mhgp12_tower_forest_verticales",
++      "note": "cohortes de naissances de meme rang laissees dans l'ordre des cles (BallIdx) au lieu des centres exacts : numerotation non canonique (CST-0107)"
++    },
++    {
++      "id": "cible_de_meme_rang",
++      "fichier": "src/tower/forest_kernel.cpp",
++      "cherche": "if (index >= nc || idx(in.cell_rank[index]) >= r) return fail(Reason::tower_invariant);",
++      "remplace": "if (index >= nc || idx(in.cell_rank[index]) > r) return fail(Reason::tower_invariant);",
++      "porte": "mhgp12_tower_forest_refus",
++      "note": "cible << cellule >> admise au meme rang que sa jonction : la date de LEM-T3 (cellule deja traitee, de rang strictement inferieur) n'est plus exigee"
++    },
++    {
++      "id": "branches_coupe_fermee",
++      "fichier": "src/tower/registry_branches.cpp",
++      "cherche": "auto open = component_at(f, witness, r - 1);",
++      "remplace": "auto open = component_at(f, witness, r);",
++      "porte": "mhgp12_tower_forest_branches",
++      "note": "branches lues a la coupe FERMEE du rang de la cellule : le plateau les a deja reunies (une seule branche), les composantes ouvertes ant(b) sont perdues"
++    },
++    {
++      "id": "admission_r_sans_decalages",
++      "fichier": "src/tower/registry_branches.cpp",
++      "cherche": "    output_offsets += 8 * (s.forests.orders[i].retained_cell.size() + 1);",
++      "remplace": "    output_offsets += 0 * (s.forests.orders[i].retained_cell.size() + 1);",
++      "porte": "mhgp12_tower_forest_admission",
++      "note": "decalages de la CSR des branches retires de l'admission de la sortie de R (recu audit_registre_branches_20261007) : le pic mesure de l'etage R depasse ses octets admis de 8 (R_k + 1) par ordre"
+     }
+   ]
+ }

@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-8 octobre 2026. Base publiée **`0a5ebf29f`** ; prototypes distingués des livraisons.
+8 octobre 2026. Base publiée **`d6057f976`** ; prototypes distingués des livraisons.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
 
@@ -41,14 +41,21 @@ Trois trames d'une seule séquence ; les 100 ms, u24/u32 GPU et les autres régi
 - **Gc `45976be8`** : [table 16 octets retirée](../receipts/audit_reponses_20261007/gc_support_domain_delta/README.md),
   catalogue A/B conservé ; garde de tous les SiteIdx proposée, aucun défaut FULL valide déduit.
   [Nouvelles portes](../receipts/audit_reponses_20261007/gc_rebase_portes/README.md) : 675 rapides + 6 LiDAR,
-  680 distinctes, sans saut, CPU/u21 ; nouveaux mutants en cours. Anciennes mesures non transférables.
+  680 distinctes, sans saut, CPU/u21 ; [18 mutants finaux](../receipts/audit_reponses_20261007/gc_mutants_finaux/README.md)
+  tués par code sur les mêmes sources. Anciennes mesures non transférables.
+
+[Raccord Gc + TMVR proposé](../receipts/composition_gc_tmvr_20261008/README.md) : deux conflits résolus,
+19 sources, 27 mutants conservés ; aucune qualification native de la combinaison.
+**`0239`, mineur** : [comparateur des naissances](../receipts/audit_reponses_20261007/comparateur_naissances/README.md)
+à rendre sans effet de bord ; auto-comparaison prise pour un doublon sous `_GLIBCXX_DEBUG`, configuration non jouée.
 
 **Aide mathématique et coût.** Gc : recherche exacte logarithmique sous collisions ; gain du hash par cellule
 conditionnel, identité G liée à la politique. Les preuves détaillées restent liées au registre.
 [Témoin T7](../receipts/audit_reponses_20261007/t7_cercle25/README.md) prêt ; porte native absente.
 En I, ng02 répare 9/16 éléments mais rapatrie 22,5/87,7 Mo de tableaux complets à K5/K10 :
-compactage des chaînes entières à étudier après G, sans gain temps présumé.
+[compactage exact proposé](../receipts/audit_reponses_20261008/chaines_compactes/README.md), 10 449 cas et huit mutants ;
+travail GPU O(C), seuls les éléments sélectionnés sont transférés. À mesurer après G, aucun gain temps acquis.
 
-Quatre fichiers actifs, 73 constats ; clôtures cache/documents/cohorte conservées, capacités 256/64 de `0237` ouvertes.
+Quatre fichiers actifs, 74 constats ; clôtures cache/documents/cohorte conservées, capacités 256/64 de `0237` ouvertes.
 Aucun GCP lancé ni donnée sous licence dans cet audit. Natifs antérieurs limités aux formats CPU synthétiques
 (deux points catalogue, deux sondes G à huit points). Derniers contrôles : archives et Python, aucun benchmark.

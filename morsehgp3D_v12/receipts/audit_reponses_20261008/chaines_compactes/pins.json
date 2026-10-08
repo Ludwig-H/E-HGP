@@ -1,0 +1,28 @@
+{
+ "sources": [
+  {
+   "bytes": 14331,
+   "path": "morsehgp3D_v12/src/catalogue/finish_driver.hpp",
+   "pin": "d2f39fe8293d31508697b6db113a7954a7fd0d9e",
+   "sha256": "4d15554c30d8db4332fafc3d62c4a90996e421e579326960c681693db149e59f"
+  },
+  {
+   "bytes": 10794,
+   "path": "morsehgp3D_v12/src/catalogue/finish_kernels.hpp",
+   "pin": "d2f39fe8293d31508697b6db113a7954a7fd0d9e",
+   "sha256": "96b1afe896fcbd65afce3cc119a3db4d9149c059e5e8251f53605c2f3f059426"
+  },
+  {
+   "bytes": 9591,
+   "path": "morsehgp3D_v12/src/catalogue/finish_level.hpp",
+   "pin": "d2f39fe8293d31508697b6db113a7954a7fd0d9e",
+   "sha256": "d5dd177a787367330ef6a35e4e949a9e997681dcf2267b392e1bf19d44fa7ecb"
+  },
+  {
+   "bytes": 994412,
+   "path": "morsehgp3D_v12/receipts/g4_t1bi_20261008/resultats/cmd/000_t1b_catalogue_appareil/files/t1b/report.json",
+   "pin": "0a5ebf29f0eb6abaa738e4a29e42b71344e03664",
+   "sha256": "bdcd097828565136788ccee2e528c8d03e5e413c33dcdae0e6bdfb72d8ea3bbb"
+  }
+ ]
+}

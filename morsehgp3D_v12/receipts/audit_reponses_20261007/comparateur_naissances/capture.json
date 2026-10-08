@@ -1,0 +1,55 @@
+{
+  "scope": "static_and_python_only",
+  "captured_utc": "2026-10-08T00:34:14.381381+00:00",
+  "main_pin": "8fe509df9dff9fe3bee5b171a2f39cd67d803f0e",
+  "prototype_base": "c903774b1d16c3b18c15b86fa2a55d11d44b8bc8",
+  "prototype": "TMVR repo5; uncommitted patch pinned by SHA256",
+  "source_path": "morsehgp3D_v12/src/tower/forest_births.cpp",
+  "artifacts": [
+    {
+      "root": "tmv",
+      "path": "repo5/morsehgp3D_v12/src/tower/forest_births.cpp",
+      "sha256": "101184e078e18c45247689a94c3a451ee92387582fc95aa554f1194730c295c1"
+    },
+    {
+      "root": "tmv",
+      "path": "patch_tour_TMV.diff",
+      "sha256": "6f0643acca9d6c27755f1e3dde15b166c810371eb88662a32360f6d5c2136de9"
+    },
+    {
+      "root": "tmv",
+      "path": "build21e/CMakeFiles/mhgp12.dir/flags.make",
+      "sha256": "dc0ac700f49120eea7b112ee688112c5f95672f95d3f6841296f8166c1982937"
+    },
+    {
+      "root": "tmv",
+      "path": "build24c/CMakeFiles/mhgp12.dir/flags.make",
+      "sha256": "3f9b36045ca8ff3fd2bc32c4acbc5cc1b0920f49dafb5ed649c1d399d8cf9c91"
+    },
+    {
+      "root": "tmv",
+      "path": "build32c/CMakeFiles/mhgp12.dir/flags.make",
+      "sha256": "97bd4d46479187383cb8a8fa3972db1d2af9da0d98210ff08e035bec5c4d88f5"
+    },
+    {
+      "root": "headers",
+      "path": "bits/stl_algo.h",
+      "sha256": "5d171b391df65fc178718d793f121c997942d0bdc4e713110bba08464c81b6bc"
+    },
+    {
+      "root": "headers",
+      "path": "debug/debug.h",
+      "sha256": "ec1c0515a071a56a025a845430b2dfe1e3163f3b19c2b6b5f3123bdbb0211af5"
+    },
+    {
+      "root": "headers",
+      "path": "debug/macros.h",
+      "sha256": "087239b8cfc8299650a2c69543bf9f982c5d9e146c68b3a0e28704ebfe910912"
+    },
+    {
+      "root": "receipt",
+      "path": "proposition.patch",
+      "sha256": "07db1cdbd286228c4793f6e5206cf19df03975faaca4a08556a32fdc555d9c8e"
+    }
+  ]
+}

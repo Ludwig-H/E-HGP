@@ -1,0 +1,58 @@
+{
+ "boundary_cases": 7,
+ "exhaustive_max_vertices": 9,
+ "killed_mutants": {
+  "cross_certain_boundaries": "exhaustive_n4_202",
+  "drop_left_endpoint": "exhaustive_n2_2",
+  "drop_right_endpoint": "exhaustive_n2_2",
+  "first_component_only": "exhaustive_n4_202",
+  "pairs_only": "exhaustive_n3_12",
+  "repeat_component_per_inversion": "exhaustive_n3_22",
+  "reverse_packed_payload": "exhaustive_n2_2",
+  "select_ordered_uncertainty": "exhaustive_n2_1"
+ },
+ "max_scan_operations_seen": 40956,
+ "native_or_gpu_execution": false,
+ "payload_estimates_only": [
+  {
+   "C": 1407885,
+   "Q": 1,
+   "R": 9,
+   "k": 5,
+   "old_bytes": 22526160,
+   "proposed_bytes": 140
+  },
+  {
+   "C": 5483320,
+   "Q": 2,
+   "R": 16,
+   "k": 10,
+   "old_bytes": 87733120,
+   "proposed_bytes": 240
+  }
+ ],
+ "random_cases": 600,
+ "refusals": {
+  "bool_count": "count_type_or_overflow",
+  "bool_verdict": "verdict",
+  "certain_inversion": "inversion_on_certain_boundary",
+  "chain_capacity": "capacity",
+  "duplicate_id": "order_permutation",
+  "duplicate_verdict": "verdict",
+  "element_capacity": "capacity",
+  "fault_duplicate": "fault",
+  "fault_missing": "fault_consistency",
+  "first_verdict": "first_verdict",
+  "length": "length",
+  "nonfinite": "positive_finite_key",
+  "payload_budget": "memory_budget",
+  "too_many_chains": "counts",
+  "u32_sentinel": "index_overflow_u32",
+  "u64_overflow": "count_type_or_overflow",
+  "unknown_verdict": "verdict",
+  "unsorted_keys": "initial_F3_order"
+ },
+ "scan_associativity_cases": 64,
+ "scan_operation_bound": "<=20*C",
+ "valid_cases": 10449
+}

@@ -1,0 +1,43 @@
+{
+  "base": "8fe509df9dff9fe3bee5b171a2f39cd67d803f0e",
+  "patches": [
+    {
+      "name": "patch_tour_Gc_1_empreinte.diff",
+      "sha256": "499a2588bebcd8f5986f69a4b3044f114db4472160be230d960abbf7b97dc0c8"
+    },
+    {
+      "name": "patch_tour_Gc_2_leviers.diff",
+      "sha256": "89d7b4f4383dace6c294e8513458469f8fa3e51ef11db92254b2ef4150d93f1e"
+    },
+    {
+      "name": "patch_tour_TMV.diff",
+      "sha256": "6f0643acca9d6c27755f1e3dde15b166c810371eb88662a32360f6d5c2136de9"
+    }
+  ],
+  "public_status": "not_claimed",
+  "result": {
+    "base": "8fe509df9dff9fe3bee5b171a2f39cd67d803f0e",
+    "builds": 0,
+    "combined_files_sha256": "f2507298d7187cb0983443871537de1afebfdbfc04eba316bd6034c7625962fe",
+    "common_mutants": 7,
+    "gates_declared": 14,
+    "gc_only_mutants": 11,
+    "gcp_used": false,
+    "manifest_sha256": "75fa8a676129710045b79e1a0d5543fcb2e76b39548cc61075fe475724127f9b",
+    "module_sha256": "12219c37b88fc900fe3949354a54432fa3bced5b892289a6517fde759cc5a378",
+    "module_sources": 19,
+    "mutants": 27,
+    "native_qualified": false,
+    "native_runs": 0,
+    "patched_files": 48,
+    "source_lines_preserved": true,
+    "tmvr_only_mutants": 9,
+    "unique_mutation_locations": 28,
+    "unmodified_dependencies_sha256": {
+      "morsehgp3D_v12/src/catalogue/table.cpp": "cb76b465e6453f09684efb747ca8bf2de55f3d1788a15df3181e6f38723f0396",
+      "morsehgp3D_v12/src/tower/cells.cpp": "67720e8d3ac7eb71eabb7bb957f9c2256537d89fde27cbdc1e740fad6e6d24d2",
+      "morsehgp3D_v12/src/tower/cells_stage.cpp": "ee8c0294de73f95096f571db5f0fd0718ba99ad17c036e42e84d703f8c9fd720"
+    }
+  },
+  "status": "proposition_textuelle_non_appliquee_au_produit"
+}

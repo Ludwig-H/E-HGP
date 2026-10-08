@@ -1,0 +1,18 @@
+{
+  "prototype_pin": "45976be8ddc489f14494937b13e43d0ca5fa0a55",
+  "source_tree_sha256": "334101284e02c3519bc9d2f8b94ae89a2ebc8c5ff2386916f00df591cf8ad4e1",
+  "completed_utc": "2026-10-08 00:33:54 UTC",
+  "artifact_hashes": {
+    "runs/mutants_tower_final.json": "8b415047627100012331a5504737eb2eac869a55493b82b424802d073c4687ff",
+    "runs/mutants_tower_final.log": "6e568322be96a2c92201bdc06dcb29185154fab81bde897f4d9741f9af3c8792",
+    "final_checks.sh": "ce7dbd5017bf954036ce60d3749c2e8ed1b07de10f393384b99b3491238af8a9",
+    "repo3/morsehgp3D_v12/tests/mutants/tower.json": "60ee75e6e57e03a6d2300ad0dbbc44481bb49ac67560b1372294d2b4d01c7fcf",
+    "repo3/morsehgp3D_v12/tests/mutants/run_mutants.py": "5ffa023440ab8b47e98b1f31186d0ef8e4f3f1fcdcd6a77671fe3f5ba51b3bec",
+    "repo3/morsehgp3D_v12/tests/tower/index_unit.cpp": "78e0e6fa959252012c82e1d49a17c4444298d8175ac648f20d58c7114d38bad8",
+    "repo3/morsehgp3D_v12/src/tower/passes.cpp": "761c2fb8dd2706bebeb4c69dfdebebc4126de82aed7baa2796860920231565f8",
+    "repo3/morsehgp3D_v12/src/catalogue/table.cpp": "cb76b465e6453f09684efb747ca8bf2de55f3d1788a15df3181e6f38723f0396"
+  },
+  "driver_prefix_sha256": "c3b67fac369c6bf94b03a73404e951aca28667bc1026f8c7619d9766f61f1eb1",
+  "tree_reader_sha256": "204110f5b41a00663e085e6c365cbba517105795c8d7864195dfff29021403e4",
+  "terminal_line": "mutants_ok module=tower mutants=18 tues=18 dont_signal=0 dont_delai=0 dont_construction=0 plancher=18"
+}
