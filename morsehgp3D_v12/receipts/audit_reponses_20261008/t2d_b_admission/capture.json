@@ -1,0 +1,82 @@
+{
+  "captured_utc": "2026-10-08T05:18:24.727717+00:00",
+  "scope": "prototype T2d-B/git8da4, base 902041f66 ; sources observees, pas livraison ni binaire certifie",
+  "prototype_head": "aeedcd5ff68a6d25b4ff2a90be935a7837f5dd60",
+  "sources": {
+    "bras_t2d_b.json": {
+      "bytes": 96675,
+      "sha256": "3b387221ecd3654ac2ffdc8698f8db28e371732793798f73287d17315d36503e"
+    },
+    "pilote_t2d_b.py": {
+      "bytes": 46954,
+      "sha256": "4785dd767af3f9437981d22dd3dff431dffcc2dc82cc47649d0d0c1fab93f1de"
+    }
+  },
+  "producer": {
+    "src/tower/passes.cpp": {
+      "commit": "902041f66",
+      "bytes": 9869,
+      "sha256": "761c2fb8dd2706bebeb4c69dfdebebc4126de82aed7baa2796860920231565f8"
+    },
+    "bench/tower_probe.cpp": {
+      "commit": "902041f66",
+      "bytes": 15326,
+      "sha256": "5c68d7225ac22d06dbb5a40bb45357c045ab0e7e48f530cfb4dbb87e425b3241"
+    },
+    "bench/full_probe.cpp": {
+      "commit": "902041f66",
+      "bytes": 18119,
+      "sha256": "201119a78a52ccbe5c8e2ce128a165e9b3774800d55ed8a0935c91e587858d61"
+    },
+    "src/tower/stage.cpp": {
+      "commit": "902041f66",
+      "bytes": 10446,
+      "sha256": "35295ecedaf485eb414b8621e0c78f6264882aa3a86299d4ba287c3db068f009"
+    },
+    "src/tower/tower.hpp": {
+      "commit": "902041f66",
+      "bytes": 13360,
+      "sha256": "79efaae5e4c772ac265b11e504cf7a49b3d2f002d56acab9d6a7f66cc4215c06"
+    },
+    "bench/tower_export.hpp": {
+      "commit": "902041f66",
+      "bytes": 7561,
+      "sha256": "9e903f724c54f3aad9462d3fd700d5227073a30bb90999b388a817f511cf739d"
+    },
+    "tests/tower/tests.cmake": {
+      "commit": "902041f66",
+      "bytes": 12653,
+      "sha256": "f31c8d69638ad4eaaaa7f6e6de02a0e9f687e56ad44f7f82fe9467c03905205b"
+    }
+  },
+  "fixture": {
+    "path": "morsehgp3D_v12/receipts/audit_reponses_20261007/t2c_pilote_proposition/after.jsonl",
+    "sha256": "82dd7a2922c630c1a800ea25020d6404ed422c59be12ed0e0da9b5337679b8fb"
+  },
+  "arms": {
+    "count": 6,
+    "file_transformations": 31,
+    "unique_apres_files": 10,
+    "all_hashes_before_and_after_verified": true,
+    "apres_equals_live_at_capture": true
+  },
+  "patch": {
+    "target": "morsehgp3D_v12/microbancs/mes_t2d_b/pilote_t2d_b.py",
+    "sha256_after": "9f9549bed35bd4080313ccb6625848442618ed5458aa7941e85dfddd87e96332",
+    "git_apply_check_and_exact_result": true,
+    "scope": "litteral FULL seulement ; admission complete non corrigee"
+  },
+  "verification": {
+    "normal_optimized_same": true,
+    "campaign_processes": 240,
+    "campaign_passes": 2400,
+    "G_judgements": 7,
+    "FULL_inputs": 3,
+    "native": false,
+    "GCP": false,
+    "live_stable_after_replays_utc": "2026-10-08T05:27:31.093404+00:00",
+    "developer_auto_test_python_S_O_cases": 5,
+    "live_stable_at_closure": true,
+    "closed_utc": "2026-10-08T05:29:48.851734+00:00"
+  }
+}

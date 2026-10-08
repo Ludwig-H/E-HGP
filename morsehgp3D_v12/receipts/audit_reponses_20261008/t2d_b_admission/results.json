@@ -1,0 +1,160 @@
+{
+  "campaign": [
+    {
+      "aa": {
+        "dans_la_fenetre": true,
+        "moyennes": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "case": "nominal",
+      "refus": [],
+      "verdicts": {
+        "census_combine": "adopte",
+        "garde_seule": "adopte",
+        "lot_t2d_b": "adopte",
+        "proposition": "adopte",
+        "report_seul": "adopte",
+        "temoins_seuls": "adopte"
+      }
+    },
+    {
+      "aa": null,
+      "case": "bad_threads",
+      "refus": [
+        "admission des journaux : configuration differente de la commande"
+      ],
+      "verdicts": {
+        "census_combine": "refuse",
+        "garde_seule": "refuse",
+        "lot_t2d_b": "refuse",
+        "proposition": "refuse",
+        "report_seul": "refuse",
+        "temoins_seuls": "refuse"
+      }
+    },
+    {
+      "aa": null,
+      "case": "duplicate_journal",
+      "refus": [
+        "admission des journaux : journal externe ou reutilise"
+      ],
+      "verdicts": {
+        "census_combine": "refuse",
+        "garde_seule": "refuse",
+        "lot_t2d_b": "refuse",
+        "proposition": "refuse",
+        "report_seul": "refuse",
+        "temoins_seuls": "refuse"
+      }
+    },
+    {
+      "aa": null,
+      "case": "missing_frame",
+      "refus": [
+        "admission des journaux : cohorte de trames incomplete ou inconnue"
+      ],
+      "verdicts": {
+        "census_combine": "refuse",
+        "garde_seule": "refuse",
+        "lot_t2d_b": "refuse",
+        "proposition": "refuse",
+        "report_seul": "refuse",
+        "temoins_seuls": "refuse"
+      }
+    },
+    {
+      "aa": {
+        "dans_la_fenetre": true,
+        "moyennes": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "case": "different_identity",
+      "refus": [],
+      "verdicts": {
+        "census_combine": "rejete",
+        "garde_seule": "rejete",
+        "lot_t2d_b": "rejete",
+        "proposition": "rejete",
+        "report_seul": "rejete",
+        "temoins_seuls": "rejete"
+      }
+    },
+    {
+      "aa": {
+        "dans_la_fenetre": true,
+        "moyennes": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "case": "stage_exceeds_wall",
+      "first_diag_count_ns": 8165,
+      "mutated_wall_ns": 1,
+      "refus": [],
+      "verdicts": {
+        "census_combine": "adopte",
+        "garde_seule": "adopte",
+        "lot_t2d_b": "adopte",
+        "proposition": "adopte",
+        "report_seul": "adopte",
+        "temoins_seuls": "adopte"
+      }
+    },
+    {
+      "aa": {
+        "dans_la_fenetre": false,
+        "moyennes": [
+          1.2,
+          1.2,
+          1.2
+        ]
+      },
+      "case": "aa_outside",
+      "refus": [],
+      "verdicts": {
+        "census_combine": "adopte",
+        "garde_seule": "adopte",
+        "lot_t2d_b": "adopte",
+        "proposition": "adopte",
+        "report_seul": "adopte",
+        "temoins_seuls": "adopte"
+      }
+    }
+  ],
+  "fixture_sha256": "82dd7a2922c630c1a800ea25020d6404ed422c59be12ed0e0da9b5337679b8fb",
+  "full": {
+    "missing_configuration_and_release": {
+      "admitted": true,
+      "summary": {
+        "ful1": [
+          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        ],
+        "g_ns": 1,
+        "mur_ns": 1000,
+        "valide": true
+      }
+    },
+    "only_literal_changed": {
+      "admitted": true,
+      "summary": {
+        "ful1": [
+          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        ],
+        "g_ns": 1,
+        "mur_ns": 1000,
+        "valide": true
+      }
+    },
+    "producer_device": {
+      "admitted": false,
+      "reason": "passe hors de la voie appareil"
+    }
+  }
+}

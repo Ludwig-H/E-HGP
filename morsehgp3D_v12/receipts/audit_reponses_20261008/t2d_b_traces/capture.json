@@ -1,0 +1,99 @@
+{
+  "capture_start_utc": "2026-10-08T05:27:41.483203+00:00",
+  "capture_end_utc": "2026-10-08T05:27:42.191405+00:00",
+  "prototype_head": "aeedcd5ff68a6d25b4ff2a90be935a7837f5dd60",
+  "base": "902041f66",
+  "identity_base_binary_source": "8da450ab7 (source src equal to 902041f66; probe has prior schema)",
+  "scope": "read_only_logs_and_sources; no native/build/GCP replay",
+  "files": {
+    "RAPPORT.md": {
+      "bytes": 20586,
+      "sha256": "69f78acd2ff5371da98a398aba26405b3de85e44404a1148fa0723e18593cb0b"
+    },
+    "logs/ctest_lot9020.log": {
+      "bytes": 118397,
+      "sha256": "e48a18a1b3a6d0eb246de619e7935ed8d11a5b9d7fb83d72d2f7418327c006cc"
+    },
+    "logs/ctest_lot9020.etat": {
+      "bytes": 33,
+      "sha256": "68a82298f21abef32406eea43f0c01ab63482ad08965c8c626c04d7882036453"
+    },
+    "logs/b_lot.build3.log": {
+      "bytes": 13973,
+      "sha256": "5a400652861207ba11aa28e8f1ff20b3673e4f5aa65c65cc3d89d42bda8321e2"
+    },
+    "logs/identite_ful1.log": {
+      "bytes": 977,
+      "sha256": "5f715147d368c6c0e6090419c0a5e5f1b90a13cb120073e1c75167cde1e0137c"
+    },
+    "logs/mutants_index.log": {
+      "bytes": 1312,
+      "sha256": "39b613dd2f1d43b1bdd89cbf8f7b3be1ebcf3c7e4bdb0fb3ad1f655c523d80b0"
+    },
+    "logs/mutants_locaux.log": {
+      "bytes": 37,
+      "sha256": "d8f525ff7944d09bd37cdafd5a9d5fd9832693529914b82d7b211f93b7807d27"
+    },
+    "outils/identite_ful1.py": {
+      "bytes": 2126,
+      "sha256": "10a73037972dab70283f6fc3b20e9f622c7bf672e44b445f2bf5b99e6c987189"
+    },
+    "outils/mutants_locaux.sh": {
+      "bytes": 1808,
+      "sha256": "75d83ded52b9398fb35a434bfa370fc2e20491a70147a8268d1f40ff23baa9da"
+    },
+    "runs/identite_ful1_w3_902041f66.json": {
+      "bytes": 4147,
+      "sha256": "d02910488a10bdf236f517aa65b3b4f870f9ec8063d8f84657939899266e3fe7"
+    },
+    "runs/mutants_index.json": {
+      "bytes": 3485,
+      "sha256": "d2007b9d194e7b09b28d5407bd1d4dde205c39e173d24a8a89d211854b1a077a"
+    },
+    "b_lot/CMakeCache.txt": {
+      "bytes": 17363,
+      "sha256": "604b55b95ed4ad56e7f9f35b8183513615edb80f823d9afcfd87e7501e6a7620"
+    },
+    "b_base/CMakeCache.txt": {
+      "bytes": 17371,
+      "sha256": "04a61236d52f6810787cab4e9ad7c1a07ade47ddfeaba49f927c265358786a51"
+    },
+    "b_lot/mhgp12_full_probe": {
+      "bytes": 984776,
+      "sha256": "744735f0a05846c4e2f8e1249064fbf7cfca17142a47d41620674ae865f3eb99"
+    },
+    "b_base/mhgp12_full_probe": {
+      "bytes": 984464,
+      "sha256": "c41ff5204f42e9ef70294d8d37596244ed5aadd6c449d6c877a0b8b9123bafc7"
+    },
+    "b_lot/CMakeFiles/mhgp12_full_probe.dir/flags.make": {
+      "bytes": 378,
+      "sha256": "31f0866578f82886223fa8b8ec992aa4dc9817b841d0640edbac9159a7bcc9d5"
+    }
+  },
+  "result": {
+    "ctest": {
+      "passed": 698,
+      "skipped": [
+        "mhgp12_support_lidar_sentinel"
+      ],
+      "failed": 0,
+      "wall_seconds": 618.6
+    },
+    "ful1_summary_equal_pairs": 9,
+    "ful1_processes_code_zero": 18,
+    "index_mutants_code_killed": 22,
+    "tree": {
+      "files": 385,
+      "sha256": "845776efa2f4ed75c9baef96e80e8ab8122c451f363c15684b6ff3ef9cf27693"
+    },
+    "base_src_equal_files": 128,
+    "num_tower": "not_qualified_in_this_capture"
+  },
+  "qualification_limits": [
+    "summary FUL1 only; original native JSON not retained by script",
+    "index mutant individual logs/builds removed by runner",
+    "no complete prebuild source or binary attestation",
+    "num active and tower pending at earlier observation; neither qualified here"
+  ]
+}

@@ -1,0 +1,11 @@
+--- a/morsehgp3D_v12/microbancs/mes_t2d_b/pilote_t2d_b.py
++++ b/morsehgp3D_v12/microbancs/mes_t2d_b/pilote_t2d_b.py
+@@ -442,7 +442,7 @@
+     exiger(len(full) == passes and [r.get("pass") for r in full] == list(range(passes)), "passes absentes")
+     murs, g, ful1 = [], [], set()
+     for r in full:
+-        exiger(r.get("status") == "ok" and r.get("voie") == "appareil", "passe hors de la voie appareil")
++        exiger(r.get("status") == "ok" and r.get("voie") == "device", "passe hors de la voie appareil")
+         murs.append(naturel(r["wall_ns"], minimum=1))
+         g.append(naturel(r["etapes_ns"]["G"]))
+         ful1.add(hexadecimal(r["full_sha256"]))
