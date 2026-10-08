@@ -1,0 +1,45 @@
+{
+  "captured_utc": "2026-10-08T10:59:03.715727+00:00",
+  "source_commit": "389b5e453cdc1e70839a8e5a37eea7c42ff93a8d",
+  "delivery_commit": "c648b3857c83ec1ed174139eef36106b187d2cf0",
+  "scope": "lecture de sources Git uniquement, aucun moteur ni mesure rejoue",
+  "sources": {
+    "microbancs/mes_g_appareil/README.md": "515b044e148f21d7a33d1262075347bd04b8700a6af8002603f93d305e01f23a",
+    "microbancs/mes_g_appareil/mes_g_app.cpp": "cbef723c272828047aa385096c132d7558e4f315bc4f60f9c38f92fe3b99b01d",
+    "microbancs/mes_g_appareil/noyau_g.hpp": "c5c45d590ebf1cec405b5cec10e637260de20baf440ba1a76e7a05faa3d04266",
+    "microbancs/mes_g_appareil/appareil.cu": "095934568fcbe7f33aefe254a5502c3f4ed84591f91cf3679aa0f2cb7582b59b",
+    "microbancs/mes_g_appareil/appareil.hpp": "118e76928f405724060d3a9b4fbb01e8412d3e740d1c96ad5d3c3e78b908d64e",
+    "src/index/index.hpp": "a984c29ee8866f8742ac1e637ff2d3c487092e8e541537350c44ac7a278cfe7e",
+    "src/index/bounds.hpp": "d877fe59756a0686cc825a35bbfca9c1d50cc5d5c595e398767281c802f5a869",
+    "src/index/census_workspace.cpp": "bee79fd409488e710660aa788e83001bb68cd918c0f6852187cf0fe868f58fb4",
+    "src/num/guard.cpp": "5a5fc29b65e21b1b74f642986614eb1fb0801cc084ae7ec50bc3aedc7e5655fc",
+    "src/tower/resolve.cpp": "3d2bd04e02e60b6bab1d27b77a488112f80791f69395805273f539c6773dc1af",
+    "src/tower/passes.cpp": "d1f850445a0970628691e0812d1c8c630a0e19294c9b862d6bddef8ffc865ef1",
+    "src/tower/proposal.hpp": "92495aa67223577c8acef74967f89853c0dab3c5881afe1fb2c7826327f28c18"
+  },
+  "unchanged_at_delivery": [
+    "microbancs/mes_g_appareil/README.md",
+    "microbancs/mes_g_appareil/mes_g_app.cpp",
+    "microbancs/mes_g_appareil/noyau_g.hpp",
+    "microbancs/mes_g_appareil/appareil.cu",
+    "microbancs/mes_g_appareil/appareil.hpp",
+    "src/index/index.hpp",
+    "src/index/bounds.hpp",
+    "src/index/census_workspace.cpp",
+    "src/num/guard.cpp",
+    "src/tower/resolve.cpp",
+    "src/tower/passes.cpp",
+    "src/tower/proposal.hpp"
+  ],
+  "result": {
+    "sources_verified": 12,
+    "same_at_delivery": 12,
+    "native_run": false,
+    "memory_formula_bytes_per_request": {
+      "request": 144,
+      "result": 52,
+      "site_output": 304,
+      "total_input_and_output": 500
+    }
+  }
+}

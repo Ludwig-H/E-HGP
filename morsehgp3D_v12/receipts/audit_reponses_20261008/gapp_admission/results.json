@@ -1,0 +1,185 @@
+{
+  "aa_max": 1.0031458965767888,
+  "aa_min": 0.9796048990459775,
+  "counts": {
+    "max": {
+      "distinctes": 462107,
+      "parties": 2481101,
+      "representants": 9998189,
+      "requetes": 646621,
+      "sites": 99099
+    },
+    "mediane": {
+      "distinctes": 211461,
+      "parties": 1253601,
+      "representants": 5477969,
+      "requetes": 290357,
+      "sites": 64740
+    },
+    "ng00": {
+      "distinctes": 177863,
+      "parties": 847125,
+      "representants": 3419932,
+      "requetes": 252152,
+      "sites": 39885
+    }
+  },
+  "identity_differences": 0,
+  "isolated_endpoints": 32,
+  "manifest_entries": 87,
+  "mutant_differences": 232162,
+  "mutant_processes": 1,
+  "native_calls_by_audit": 0,
+  "nominal_processes": 15,
+  "passes_nominal": 90,
+  "report_float_differences": [
+    {
+      "path": "/trames/ng00/mesures/sondes/rapport",
+      "replay": 0.05259544550272675,
+      "report": 0.052595445502726726,
+      "ulps": 3.0
+    },
+    {
+      "path": "/trames/ng00/informations/census_hd_sur_produit",
+      "replay": 0.5698841259372345,
+      "report": 0.5698841259372346,
+      "ulps": 1.0
+    },
+    {
+      "path": "/trames/mediane/mesures/sondes/rapport",
+      "replay": 0.05093172340253441,
+      "report": 0.05093172340253438,
+      "ulps": 4.0
+    },
+    {
+      "path": "/trames/mediane/informations/census_hd_sur_produit",
+      "replay": 0.5814759506877939,
+      "report": 0.5814759506877938,
+      "ulps": 1.0
+    }
+  ],
+  "source": "389b5e453cdc1e70839a8e5a37eea7c42ff93a8d",
+  "sources": 366,
+  "table": {
+    "max": {
+      "census": {
+        "aa_cpu": 0.9979351460507473,
+        "aa_gpu": 0.9931886976806498,
+        "cpu_hd_ms": 12.3006,
+        "cpu_produit_ms": 20.9761,
+        "gpu_noyau_ms": 1.9175,
+        "ic95": [
+          0.08985486061357323,
+          0.09275023478942747
+        ],
+        "ratio_gpu_cpu": 0.09132671662022193,
+        "ratio_hd_produit": 0.5847111063961004
+      },
+      "propositions": {
+        "aa_cpu": 0.9967641564107765,
+        "aa_gpu": 0.9991883213107663,
+        "cpu_hd_ms": 7.299,
+        "cpu_produit_ms": 7.4507,
+        "gpu_noyau_ms": 5.4947,
+        "ic95": [
+          0.7368065927066695,
+          0.7386398395353997
+        ],
+        "ratio_gpu_cpu": 0.7377136111138343,
+        "ratio_hd_produit": 0.9798588476933888
+      },
+      "sondes": {
+        "aa_cpu": 0.9897679655035885,
+        "aa_gpu": 0.9995254874158104,
+        "cpu_produit_ms": 16.4895,
+        "gpu_noyau_ms": 0.7627,
+        "ic95": [
+          0.04610709799744155,
+          0.046543222238345824
+        ],
+        "ratio_gpu_cpu": 0.046324646883274916
+      }
+    },
+    "mediane": {
+      "census": {
+        "aa_cpu": 0.9975200003512649,
+        "aa_gpu": 0.9991454384903016,
+        "cpu_hd_ms": 5.0844,
+        "cpu_produit_ms": 8.7407,
+        "gpu_noyau_ms": 0.9231,
+        "ic95": [
+          0.10514787499736644,
+          0.10602551757914117
+        ],
+        "ratio_gpu_cpu": 0.10557857102264004,
+        "ratio_hd_produit": 0.5814759506877939
+      },
+      "propositions": {
+        "aa_cpu": 0.9940090606165245,
+        "aa_gpu": 0.9969894767145755,
+        "cpu_hd_ms": 3.6094,
+        "cpu_produit_ms": 3.701,
+        "gpu_noyau_ms": 2.7309,
+        "ic95": [
+          0.7366563615764978,
+          0.7396639412969799
+        ],
+        "ratio_gpu_cpu": 0.737851981030296,
+        "ratio_hd_produit": 0.9743610953163344
+      },
+      "sondes": {
+        "aa_cpu": 0.9879693986218183,
+        "aa_gpu": 0.9974033763539052,
+        "cpu_produit_ms": 8.7985,
+        "gpu_noyau_ms": 0.4483,
+        "ic95": [
+          0.05080344596691235,
+          0.05103712979982514
+        ],
+        "ratio_gpu_cpu": 0.05093172340253441
+      }
+    },
+    "ng00": {
+      "census": {
+        "aa_cpu": 0.9978411765915297,
+        "aa_gpu": 1.0031458965767888,
+        "cpu_hd_ms": 4.4242,
+        "cpu_produit_ms": 7.8165,
+        "gpu_noyau_ms": 0.8342,
+        "ic95": [
+          0.10373610685657332,
+          0.11037572539673154
+        ],
+        "ratio_gpu_cpu": 0.10700443002103764,
+        "ratio_hd_produit": 0.5698841259372345
+      },
+      "propositions": {
+        "aa_cpu": 0.9928684463747964,
+        "aa_gpu": 0.9983134346728805,
+        "cpu_hd_ms": 2.4369,
+        "cpu_produit_ms": 2.4999,
+        "gpu_noyau_ms": 1.8924,
+        "ic95": [
+          0.7542027648769675,
+          0.7619271073889397
+        ],
+        "ratio_gpu_cpu": 0.7575530994752186,
+        "ratio_hd_produit": 0.9746515168251138
+      },
+      "sondes": {
+        "aa_cpu": 0.9796048990459775,
+        "aa_gpu": 0.9966254518799142,
+        "cpu_produit_ms": 5.6491,
+        "gpu_noyau_ms": 0.2971,
+        "ic95": [
+          0.05244613248233273,
+          0.052745183614104685
+        ],
+        "ratio_gpu_cpu": 0.05259544550272675
+      }
+    }
+  },
+  "unresolved": 0,
+  "verdict": "rejete",
+  "warm": 75
+}

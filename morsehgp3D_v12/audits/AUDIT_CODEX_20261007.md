@@ -58,31 +58,36 @@ Paires uniques et arrêt census intégrés ; feuille16/24 déjà comparée dans 
 sous-postes et mesurer le coût total. V11 historique : GPU plus rapide, CPU encore plus lent, comparaison non appariée.
 [Noyau](../receipts/audit_reponses_20261008/a6_noyau_raccord/README.md) : R5 dernier sur99 099 sites ; les fins ne
 sont pas des durées propres. À P/C/G inchangés, queue gratuite laisse238,32 ms et22/37 médianes>100 ms.
-Notre variante MSF/rejeu conserve l'objet dans le modèle, mais le développeur l'écarte du prochain A6 pour garder
-le recouvrement. [Brouillon A6 N/I](../receipts/audit_reponses_20261008/a6_indices_concurrence/README.md) : propriété des
+La variante MSF/rejeu reste une alternative écartée du prochain A6 pour garder le recouvrement. [Brouillon A6 N/I](../receipts/audit_reponses_20261008/a6_indices_concurrence/README.md) : propriété des
 cohortes et durée de vie relues ; pont `release/acquire` proposé pour rattacher les indices au préfixe courant
 (CST-0242). Aucun échec natif démontré ni gain qualifié.
 
-**CST-0241 clos : correctif e789 et porte native bdf contre-vérifiés.** [Modèle et raccord](../receipts/audit_reponses_20261008/a_terminaison_raccord/README.md),
-[preuve pour N](../receipts/audit_reponses_20261008/a_terminaison_porte/README.md),
-[preuves natives](../receipts/audit_reponses_20261008/a_terminaison_native/README.md) : témoin11 contrôles, mutant
-causal code1 sur l'attente indue après nettoyage,12 portes ciblées,313 sources raccordées. Portée CPU/u21,
-sans preuve de toute la concurrence. Les730 portes sur G4 sont attestées séparément par cache2b ; aucun lien avec MES-M0.
+**[G-APP admis, poursuite GPU rejetée](../receipts/audit_reponses_20261008/gapp_admission/README.md).**
+Source389,15 processus/90 passes : census GPU/CPU0,091–0,107, sondes0,046–0,053 ; propositions0,738–0,758
+échouent au seuil0,50. Ce sont des lots préparés résidents, pas G ni FULL intégrés.
+[Lecture native et aide CPU](../receipts/audit_reponses_20261008/g_appareil_natif/README.md) : census partagé CPU
+à0,570–0,585 du produit ; validations, formats, sorties et verrou changent ensemble. Proposer un parcours interne
+spécialisé sous l'API actuelle, puis mesurer G/FULL ; préserver réentrance, coquilles, replis et compteurs.
 
-**Juges.** [Livraison85 contre-vérifiée](../receipts/audit_reponses_20261008/lecteurs_livraison_85db/README.md) :
-postimages, cohortes, horloges, résumés et hash final ; cinq portes Python,27/17 mutants normal/−O.
-[Dernière garde de code processus proposée](../receipts/audit_reponses_20261008/lf_code_processus/README.md) :
-False/0.0/−0.0/2.0 ne doivent pas être pris pour des entiers. Quatre témoins causaux, positif préservé.
-CST-0018 reste partiel ; aucun chrono réel déclaré faux. Les reçus anciens restent immuables.
+**CST-0241 clos : correctif e789 et porte native bdf contre-vérifiés.**
+[Preuve pour N](../receipts/audit_reponses_20261008/a_terminaison_porte/README.md) et
+[primaires natives](../receipts/audit_reponses_20261008/a_terminaison_native/README.md) : mutant causal après
+nettoyage,12 portes ciblées,313 sources. Clôture du défaut de retrait CPU/u21, pas de toute la concurrence.
+Les730 portes sur G4 sont attestées séparément par cache2b ; aucun lien établi avec MES-M0.
 
-**[D6 M](../receipts/audit_reponses_20261008/session_m_d6/README.md)** : C u24/u32 +0,8–2,5 %, G jusqu'à+13,6 %,
-étages CPU séparés. Seuil FULL<3 % ouvert. ×2048 reste sous2²⁹, sans précision physique nouvelle ;
-[erratum proposé](../receipts/audit_reponses_20261008/d6_m_erratum/README.md) : étendues min/max, pas IC.
+**Juges.** [Livraison85 vérifiée](../receipts/audit_reponses_20261008/lecteurs_livraison_85db/README.md) ;
+[garde de code processus LF proposée](../receipts/audit_reponses_20261008/lf_code_processus/README.md) :
+False/0.0/−0.0/2.0 doivent être refusés, quatre témoins causaux et positif conservé.
+[GAPP strict proposé](../receipts/audit_reponses_20261008/gapp_journal_strict/README.md) : phases, cohorte et codes,
+28 cas/8 mutants Python ; jugement réel conservé. CST-0018 reste partiel, aucun chrono réel déclaré faux.
 
-**Massifs, mesures antérieures à M :** [L1r](../receipts/audit_reponses_20261008/session_l1r_admission/README.md),
+**[D6 M](../receipts/audit_reponses_20261008/session_m_d6/README.md)** : étages CPU séparés, C u24/u32 +0,8–2,5 %,
+G jusqu'à+13,6 %. Seuil FULL<3 % ouvert. ×2048 reste sous2²⁹, sans précision physique nouvelle ;
+[erratum](../receipts/audit_reponses_20261008/d6_m_erratum/README.md) : étendues min/max, pas IC.
+
+**Massifs, antérieurs à M :** [L1r](../receipts/audit_reponses_20261008/session_l1r_admission/README.md),
 Boreas sans sol1,51M : GPU10,025s / CPU22,344s, une chaude ; dix succès/huit refus mémoire.
 [L2 CPU froide](../receipts/audit_reponses_20261008/session_l2_admission/README.md) : Paris9,11M112,866s,
-14,55M165,789s ; ETH3D `wide_leaf`, Lyon `memory_budget`. Pas de plafond universel en sites.
-[Extension](../receipts/audit_reponses_20261008/feuille_large_proposition/README.md) et
-[raffinement certifié](../receipts/audit_reponses_20261008/feuille_large_raffinement/README.md) proposés,
+14,55M165,789s ; ETH3D `wide_leaf`, Lyon `memory_budget`. Nouveau L1p sourcec648 en cours, aucun temps admis.
+Pas de plafond universel en sites. [Raffinement certifié proposé](../receipts/audit_reponses_20261008/feuille_large_raffinement/README.md),
 égalités massives persistantes ; aucune borne globale ni accélération acquise.

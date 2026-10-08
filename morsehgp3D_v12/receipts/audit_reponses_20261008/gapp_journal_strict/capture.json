@@ -1,0 +1,41 @@
+{
+  "campaign_sha256": "75f4bad0871fc76b148a2919f9ac766790cf25dd3d3d32acd3e2d754ee308db9",
+  "emitter_sha256": "cbef723c272828047aa385096c132d7558e4f315bc4f60f9c38f92fe3b99b01d",
+  "native_receipt": "../gapp_admission/README.md",
+  "official_test": "morsehgp3D_v12/microbancs/mes_g_appareil/test_pilote_g_appareil.py",
+  "official_test_after_sha256": "4c4e9bb216d15314115417ef4a48ce0abc0d53c9beee1f25d84e0e49e77fafe8",
+  "official_test_before_sha256": "48da31d9884f3712c0170f0ea9ab16200f1a40e07e79e061b03fbd040266bd6d",
+  "patch_sha256": "f496aeb78efa7a0db73bd77db413fb4b40fc52eddd31c3db7e70bc1a3b48854d",
+  "pilot": "morsehgp3D_v12/microbancs/mes_g_appareil/pilote_g_appareil.py",
+  "pilot_after_sha256": "3d8b92170b5f0b85284e40aa8b093086d6290f658e39491b7297733385382140",
+  "pilot_before_sha256": "291c7f3a8d9e5cc0f11258a194602a5fa7e75f5967143696018aed2b8a39b160",
+  "published_float_differences": [
+    {
+      "local": 0.05259544550272675,
+      "path": "/trames/ng00/mesures/sondes/rapport",
+      "published": 0.052595445502726726
+    },
+    {
+      "local": 0.5698841259372345,
+      "path": "/trames/ng00/informations/census_hd_sur_produit",
+      "published": 0.5698841259372346
+    },
+    {
+      "local": 0.05093172340253441,
+      "path": "/trames/mediane/mesures/sondes/rapport",
+      "published": 0.05093172340253438
+    },
+    {
+      "local": 0.5814759506877939,
+      "path": "/trames/mediane/informations/census_hd_sur_produit",
+      "published": 0.5814759506877938
+    }
+  ],
+  "report_sha256": "4c7c487661ad7cb59f5fb186353ab3bb8811d0817f00e21156293623b9375050",
+  "returned_files": 18,
+  "returned_inventory_sha256": "dee3925bada771320a8e371711afb0820c2a8d53e761ab2a4dacf03aaaaf4326",
+  "scope": "strict phase envelope, process cohort and types/code; no new adoption criterion",
+  "source_pin": "c648b3857c83ec1ed174139eef36106b187d2cf0",
+  "test": "morsehgp3D_v12/microbancs/mes_g_appareil/test_journal_strict.py",
+  "test_after_sha256": "87734322c019db820181e0033ba808650047daf27f0802305eb496b4ccb7dcac"
+}

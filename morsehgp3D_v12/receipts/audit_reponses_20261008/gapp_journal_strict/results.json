@@ -1,0 +1,429 @@
+{
+  "auto_tests_officiels_avant_apres": true,
+  "moteur_execute": false,
+  "mutants_causaux": [
+    {
+      "avec_garde": "refuse",
+      "mutant": "phases",
+      "sans_garde": "adopte",
+      "temoin": "identite_ecrasee"
+    },
+    {
+      "avec_garde": "refuse",
+      "mutant": "cle_unique",
+      "sans_garde": "adopte",
+      "temoin": "cle_json_repetee"
+    },
+    {
+      "avec_garde": "refuse",
+      "mutant": "code_entier",
+      "sans_garde": "adopte",
+      "temoin": "code_bool"
+    },
+    {
+      "avec_garde": "refuse",
+      "mutant": "passe_entiere",
+      "sans_garde": "adopte",
+      "temoin": "passe_bool"
+    },
+    {
+      "avec_garde": "refuse",
+      "mutant": "cohorte_exacte",
+      "sans_garde": "adopte",
+      "temoin": "surplus_processus"
+    },
+    {
+      "avec_garde": "refuse",
+      "mutant": "code_identite",
+      "sans_garde": "adopte",
+      "temoin": "code1_identite_vraie"
+    },
+    {
+      "avec_garde": "refuse",
+      "mutant": "drapeau_identite",
+      "sans_garde": "adopte",
+      "temoin": "drapeau_incoherent"
+    },
+    {
+      "avec_garde": "refuse",
+      "mutant": "mutant_entier",
+      "sans_garde": "adopte",
+      "temoin": "mutant_code_bool"
+    }
+  ],
+  "patch_applique_seulement_en_copie": true,
+  "reel": {
+    "ecarts_arithmetiques_rapport": [
+      {
+        "local": 0.05259544550272675,
+        "path": "/trames/ng00/mesures/sondes/rapport",
+        "published": 0.052595445502726726
+      },
+      {
+        "local": 0.5698841259372345,
+        "path": "/trames/ng00/informations/census_hd_sur_produit",
+        "published": 0.5698841259372346
+      },
+      {
+        "local": 0.05093172340253441,
+        "path": "/trames/mediane/mesures/sondes/rapport",
+        "published": 0.05093172340253438
+      },
+      {
+        "local": 0.5814759506877939,
+        "path": "/trames/mediane/informations/census_hd_sur_produit",
+        "published": 0.5814759506877938
+      }
+    ],
+    "jugement_sha256": "85aea7228865c9616324184ae187c62c87a2b030a571ca2e9e04da4298658e5b",
+    "jugement_strictement_identique": true,
+    "passes_par_prise": 6,
+    "prises": 15,
+    "refus": [],
+    "rejets": [
+      "ng00 : propositions, borne haute 0.7619 au-dessus du seuil 0.50",
+      "mediane : propositions, borne haute 0.7397 au-dessus du seuil 0.50",
+      "max : propositions, borne haute 0.7386 au-dessus du seuil 0.50"
+    ],
+    "verdict": "rejete"
+  },
+  "synthetiques": {
+    "apres": [
+      {
+        "attendu": "adopte",
+        "cas": "nominal",
+        "ok": true,
+        "rendu": "adopte"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "identite_ecrasee",
+        "ok": true,
+        "rendu": "refuse"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "double_recolte",
+        "ok": true,
+        "rendu": "refuse"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "double_appareil",
+        "ok": true,
+        "rendu": "refuse"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "double_transferts",
+        "ok": true,
+        "rendu": "refuse"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "phase_inconnue",
+        "ok": true,
+        "rendu": "refuse"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "phases_inversees",
+        "ok": true,
+        "rendu": "refuse"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "transferts_manquants",
+        "ok": true,
+        "rendu": "refuse"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "contenu_apres_identite",
+        "ok": true,
+        "rendu": "refuse"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "code_bool",
+        "ok": true,
+        "rendu": "refuse"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "code_float",
+        "ok": true,
+        "rendu": "refuse"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "passe_bool",
+        "ok": true,
+        "rendu": "refuse"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "passe_float",
+        "ok": true,
+        "rendu": "refuse"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "surplus_processus",
+        "ok": true,
+        "rendu": "refuse"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "trame_inconnue",
+        "ok": true,
+        "rendu": "refuse"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "effectif_bool",
+        "ok": true,
+        "rendu": "refuse"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "passes_float",
+        "ok": true,
+        "rendu": "refuse"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "code1_identite_vraie",
+        "ok": true,
+        "rendu": "refuse"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "drapeau_incoherent",
+        "ok": true,
+        "rendu": "refuse"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "mutant_code_bool",
+        "ok": true,
+        "rendu": "refuse"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "cle_json_repetee",
+        "ok": true,
+        "rendu": "refuse"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "constante_non_json",
+        "ok": true,
+        "rendu": "refuse"
+      },
+      {
+        "attendu": "rejete",
+        "cas": "ecart_mesure",
+        "ok": true,
+        "rendu": "rejete"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "code0_identite_fausse",
+        "ok": true,
+        "rendu": "refuse"
+      },
+      {
+        "attendu": "rejete",
+        "cas": "temps_rejete",
+        "ok": true,
+        "rendu": "rejete"
+      },
+      {
+        "cas": "journal_hote_seul",
+        "ok": true
+      },
+      {
+        "attendu": "adopte",
+        "cas": "mutant_collecte_nominal",
+        "ok": true,
+        "rendu": "adopte"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "mutant_collecte_ambigu",
+        "ok": true,
+        "rendu": "refuse"
+      }
+    ],
+    "avant": [
+      {
+        "attendu": "adopte",
+        "cas": "nominal",
+        "ok": true,
+        "rendu": "adopte"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "identite_ecrasee",
+        "ok": false,
+        "rendu": "adopte"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "double_recolte",
+        "ok": false,
+        "rendu": "adopte"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "double_appareil",
+        "ok": false,
+        "rendu": "adopte"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "double_transferts",
+        "ok": false,
+        "rendu": "adopte"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "phase_inconnue",
+        "ok": false,
+        "rendu": "adopte"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "phases_inversees",
+        "ok": false,
+        "rendu": "adopte"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "transferts_manquants",
+        "ok": false,
+        "rendu": "adopte"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "contenu_apres_identite",
+        "ok": false,
+        "rendu": "adopte"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "code_bool",
+        "ok": false,
+        "rendu": "adopte"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "code_float",
+        "ok": false,
+        "rendu": "adopte"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "passe_bool",
+        "ok": false,
+        "rendu": "adopte"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "passe_float",
+        "ok": false,
+        "rendu": "adopte"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "surplus_processus",
+        "ok": false,
+        "rendu": "adopte"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "trame_inconnue",
+        "ok": false,
+        "rendu": "adopte"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "effectif_bool",
+        "ok": false,
+        "rendu": "adopte"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "passes_float",
+        "ok": false,
+        "rendu": "exception:TypeError"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "code1_identite_vraie",
+        "ok": false,
+        "rendu": "adopte"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "drapeau_incoherent",
+        "ok": false,
+        "rendu": "rejete"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "mutant_code_bool",
+        "ok": false,
+        "rendu": "adopte"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "cle_json_repetee",
+        "ok": false,
+        "rendu": "adopte"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "constante_non_json",
+        "ok": false,
+        "rendu": "adopte"
+      },
+      {
+        "attendu": "rejete",
+        "cas": "ecart_mesure",
+        "ok": true,
+        "rendu": "rejete"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "code0_identite_fausse",
+        "ok": false,
+        "rendu": "rejete"
+      },
+      {
+        "attendu": "rejete",
+        "cas": "temps_rejete",
+        "ok": true,
+        "rendu": "rejete"
+      },
+      {
+        "cas": "journal_hote_seul",
+        "ok": true
+      },
+      {
+        "attendu": "adopte",
+        "cas": "mutant_collecte_nominal",
+        "ok": true,
+        "rendu": "adopte"
+      },
+      {
+        "attendu": "refuse",
+        "cas": "mutant_collecte_ambigu",
+        "ok": false,
+        "rendu": "adopte"
+      }
+    ],
+    "portes_passees": 28
+  }
+}
