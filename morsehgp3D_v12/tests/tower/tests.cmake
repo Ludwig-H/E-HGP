@@ -18,6 +18,13 @@ mhgp12_add_unit(mhgp12_tower_unit SOURCES unit.cpp
                        capacity_refusals budget determinism
                 LABELS fast TIMEOUT 300)
 
+# Proposition de l'etage G (T2-d) : voie entiere exacte juste partout ou elle conclut (certify_part, support canonique
+# par positions, departage des diagonales ex aequo), renoncement seulement si la boule n'est pas diametrale (repli
+# exact), DWelzl amorce par la paire la plus eloignee certifie sur des parties en position generale ; integration dans
+# le resolveur (routes : triangle aigu resolu par LEM-T1 sans repli, six permutations des axes).
+mhgp12_add_unit(mhgp12_tower_proposal SOURCES proposal_unit.cpp GROUPS witnesses random routes
+                LABELS fast TIMEOUT 300)
+
 # Index des naissances et premieres sondes (T2-c) : tri par base stable et deterministe (1 et 8 fils), index contre une
 # reference independante avec l'empreinte du produit et des masques faibles (collisions : dichotomie dans le seau,
 # jamais de produit de deux groupes egaux), candidats de la jointure triee (G-L5) egaux a ceux d'une sonde par

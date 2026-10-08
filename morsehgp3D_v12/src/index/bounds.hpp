@@ -1,6 +1,7 @@
 // Bornes d'un parcours de census, interne au module index : voie generique (num::LatticeSphere, toute sphere, aucune
 // garde) ou voie gardee (num::GuardedSphere, boule certifiee seulement, NUM-GARDE). Une preparation par parcours ; les
-// compteurs de voies et de garde sont reportes dans le registre du census a chaque evaluation.
+// compteurs de voies vont au registre du census a chaque evaluation (voie generique), ou s'accumulent dans la garde et
+// sont reportes une fois a la fin du parcours par flush (voie gardee, T2-d : plus de registre temporaire par appel).
 #pragma once
 
 #include "index/index.hpp"
@@ -17,6 +18,7 @@ class GenericBounds {
     return lattice_.bound_signs(box, &ledger.lanes);  // minorant sur sites entiers, majorant continu
   }
   Result<int> side(num::Point point, CensusLedger& ledger) const noexcept { return lattice_.side(point, &ledger.lanes); }
+  void flush(CensusLedger&) const noexcept {}
 
  private:
   const num::Sphere& sphere_;
@@ -29,17 +31,14 @@ class GuardedBounds {
   GuardedBounds(const GuardedBounds&) = delete;
   GuardedBounds& operator=(const GuardedBounds&) = delete;
   const num::Sphere& sphere() const noexcept { return ball_.sphere(); }
-  Result<num::PowerBoundSigns> bound_signs(const num::Box& box, CensusLedger& ledger) const noexcept {
-    num::GuardLedger guard;
-    auto signs = guard_.bound_signs(box, &guard);
-    absorb(guard, ledger);
-    return signs;
+  Result<num::PowerBoundSigns> bound_signs(const num::Box& box, CensusLedger&) const noexcept {
+    return guard_.bound_signs(box, &guard_ledger_);
   }
-  Result<int> side(num::Point point, CensusLedger& ledger) const noexcept {
-    num::GuardLedger guard;
-    auto value = guard_.side(point, &guard);
-    absorb(guard, ledger);
-    return value;
+  Result<int> side(num::Point point, CensusLedger&) const noexcept { return guard_.side(point, &guard_ledger_); }
+  // Report des compteurs de la garde dans le registre du census, une fois a la fin du parcours.
+  void flush(CensusLedger& ledger) const noexcept {
+    absorb(guard_ledger_, ledger);
+    guard_ledger_ = {};
   }
 
  private:
@@ -54,6 +53,7 @@ class GuardedBounds {
   }
   const num::CertifiedBall& ball_;
   num::GuardedSphere guard_;
+  mutable num::GuardLedger guard_ledger_;  // compteurs du parcours en cours, reportes par flush
 };
 
 }  // namespace mhgp12::index_detail

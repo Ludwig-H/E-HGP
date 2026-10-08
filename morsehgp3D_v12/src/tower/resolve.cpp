@@ -87,15 +87,27 @@ struct Proposal {
   u32 q = 0;
 };
 
-// DWelzl dans le repere local de la partie (translation par son premier site) ; ne decide rien.
+// Proposition dans le repere local de la partie (translation par son premier site) ; ne decide rien. D'abord la voie
+// entiere (paire diametrale, triangle aigu : proposal.hpp), sinon DWelzl sur les memes ecarts.
 Proposal propose(const Domain& d, const Part& f) noexcept {
-  DWelzl w;
+  i64 local[kMaxPart][3];
   const auto& origin = d.points[f.id[0]].coordinates();
   for (u32 i = 0; i < f.k; ++i)
-    for (int a = 0; a < 3; ++a)
-      w.p[i][a] = static_cast<double>(d.points[f.id[i]].coordinates()[a]) - static_cast<double>(origin[a]);
-  const DBall ball = w.run(static_cast<int>(f.k));
+    for (int a = 0; a < 3; ++a) local[i][a] = i64{d.points[f.id[i]].coordinates()[a]} - i64{origin[a]};
   Proposal out;
+  int exact[3] = {0, 0, 0};
+  const auto position = [&](int i) noexcept { return d.points[f.id[i]].coordinates(); };
+  if (const int q = f.k >= 2 ? exact_small_support(local, static_cast<int>(f.k), position, exact) : 0; q > 0) {
+    out.ok = true;
+    out.q = static_cast<u32>(q);
+    for (int i = 0; i < q; ++i) out.s[i] = f.id[exact[i]];
+    std::sort(out.s.begin(), out.s.begin() + q);
+    return out;
+  }
+  DWelzl w;
+  for (u32 i = 0; i < f.k; ++i)
+    for (int a = 0; a < 3; ++a) w.p[i][a] = static_cast<double>(local[i][a]);
+  const DBall ball = w.run(static_cast<int>(f.k), exact[0], exact[1]);  // depart sur la paire la plus eloignee
   if (!w.ok || ball.nr < 2 || ball.nr > 4) return out;
   out.ok = true;
   out.q = static_cast<u32>(ball.nr);
@@ -104,10 +116,13 @@ Proposal propose(const Domain& d, const Part& f) noexcept {
   return out;
 }
 
-// Plus petite boule de F : boule du catalogue (ball), ou boule certifiee hors de la table (certified).
+// Plus petite boule de F : boule du catalogue (ball), ou boule certifiee hors de la table (certified) avec son support
+// canonique parmi les sites de F sur la sphere (temoins du census, T2-d : ces sites sont SUR la sphere).
 struct Located {
   u32 ball = kNone;
   std::optional<num::CertifiedBall> certified;
+  std::array<SiteIdx, 4> support{};
+  u8 arity = 0;
   Route route = kT1;
 };
 
@@ -157,6 +172,8 @@ Result<Located> locate(const Domain& d, const Part& f, OrderCounters& n, Section
   }
   ++(fallback ? n.route_fallback_census : n.route_cert_census);
   out.certified.emplace(cert->ball);
+  out.support = key;
+  out.arity = cert->arity;
   out.route = fallback ? kFallbackCensus : kCertCensus;
   return out;
 }
@@ -173,6 +190,9 @@ struct CensusStep {
 
   static Outcome consume(void* raw, const BorrowedCensus& census) noexcept {
     auto& s = *static_cast<CensusStep*>(raw);
+    // Census a temoins (T2-d) : la racine contient toujours le support, temoin sur la sphere ; aucune decision par
+    // temoin signifie que le support n'a pas ete transmis (travail perdu, resultat inchange).
+    if (census.ledger().guard_witness == 0) return fail(Reason::tower_invariant, s.k);
     s.counters.census_sites += census.ledger().point_tests;
     s.counters.census_sites_max = std::max(s.counters.census_sites_max, census.ledger().point_tests);
     s.counters.census_nodes += census.ledger().nodes;
@@ -290,7 +310,8 @@ Result<u32> resolve_part(const ResolveContext& c, Part f, LevelRank junction_ran
       const num::CertifiedBall& ball = *located.value().certified;
       MHGP12_TRY(control_level(cat, prev, ball.sphere().level(), n, k));  // AVANT toute sortie par saut
       CensusStep step{d, k, n, ball.sphere(), false, false, kNone, Part{}};
-      MHGP12_TRY(workspace.query(d.index, ball, k, &step, &CensusStep::consume));
+      const std::span<const SiteIdx> witnesses(located.value().support.data(), located.value().arity);
+      MHGP12_TRY(workspace.query(d.index, ball, k, witnesses, &step, &CensusStep::consume));  // census a temoins
       clock.lap(step.saturated ? kProfileCensusSaturated : kProfileCensusComplete);
       if (step.saturated) {
         ++n.jumps_census;

@@ -596,7 +596,7 @@
       "cherche": "else if (native_coefficients_ && sphere.power_domain() >= s + 2) lane_ = Lane::certified;",
       "remplace": "else if (native_coefficients_ && sphere.power_domain() >= s) lane_ = Lane::certified;",
       "porte": "mhgp12_num_local_guard_certificate",
-      "note": "CST-0201 : certificat construit pour le seul support (domaine s) applique aux requetes gardees (|v| < 3M < 2^(s+2)) ; le temoin s=20 de l'auditeur deborde au premier produit, le compteur de voies le voit (la valeur finale, juste par arithmetique modulaire, ne le verrait pas)"
+      "note": "CST-0201 : certificat construit pour le seul support (domaine s) applique aux requetes gardees. Depuis le pave resserre de NUM-GARDE (|v| < 2M, preuve de l'auditeur du 8 octobre), c'est un ECART DE POLITIQUE (la politique des voies garde le domaine s+2), plus un debordement demontre : le compteur de voies le voit (supports d'etendue 20 certifies a 20 ou 21 mais pas a 22)"
     },
     {
       "id": "garde_un_bit_trop_etroite",
@@ -604,7 +604,7 @@
       "cherche": "else if (native_coefficients_ && sphere.power_domain() >= s + 2) lane_ = Lane::certified;",
       "remplace": "else if (native_coefficients_ && sphere.power_domain() >= s + 1) lane_ = Lane::certified;",
       "porte": "mhgp12_num_local_guard_certificate",
-      "note": "domaine de la garde pris a 2^(s+1) au lieu de 2^(s+2) : le support d'etendue 20 certifie a 21 mais pas a 22 passerait en voie native"
+      "note": "domaine de la garde pris a 2^(s+1) au lieu de 2^(s+2) : ECART DE POLITIQUE (le domaine s+1 etait deja sur avec l'ancien pave, et le reste avec le pave resserre, contre-lecture de l'auditeur du 8 octobre) ; le support d'etendue 20 certifie a 21 mais pas a 22 passerait en voie certifiee, le compteur de voies le voit"
     },
     {
       "id": "recensement_avant_certificat",
@@ -625,18 +625,18 @@
     {
       "id": "pave_haut_trop_court",
       "fichier": "src/num/guard.cpp",
-      "cherche": "guard_hi_[j] = i64{ball.corner()[j]} + 3 * m;",
+      "cherche": "guard_hi_[j] = i64{ball.corner()[j]} + 2 * m;",
       "remplace": "guard_hi_[j] = i64{ball.corner()[j]} + m;",
       "porte": "mhgp12_num_local_guard_sites",
-      "note": "pave borne au coin du support : la boule (100..107)^3 deborde en x = 109"
+      "note": "pave (resserre : m - M, m + 2M) borne au coin du support : la boule (100..107)^3 deborde en x = 109"
     },
     {
       "id": "pave_bas_trop_court",
       "fichier": "src/num/guard.cpp",
-      "cherche": "guard_lo_[j] = i64{ball.corner()[j]} - 2 * m;",
+      "cherche": "guard_lo_[j] = i64{ball.corner()[j]} - m;",
       "remplace": "guard_lo_[j] = i64{ball.corner()[j]} - 1;",
       "porte": "mhgp12_num_local_guard_sites",
-      "note": "pave borne sous le coin du support : la boule (100..107)^3 deborde en x = 98"
+      "note": "pave (resserre : m - M, m + 2M) borne sous le coin du support : la boule (100..107)^3 deborde en x = 98"
     },
     {
       "id": "garde_plancher_au_lieu_du_plus_proche",

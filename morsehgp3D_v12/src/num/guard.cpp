@@ -74,8 +74,8 @@ GuardedSphere::GuardedSphere(const CertifiedBall& ball) noexcept : ball_(ball) {
   const i64 m = i64{1} << s;
   for (int j = 0; j < 3; ++j) {
     anchor_[j] = sphere.anchor().coordinates()[j];
-    guard_lo_[j] = i64{ball.corner()[j]} - 2 * m;
-    guard_hi_[j] = i64{ball.corner()[j]} + 3 * m;
+    guard_lo_[j] = i64{ball.corner()[j]} - m;
+    guard_hi_[j] = i64{ball.corner()[j]} + 2 * m;
   }
   native_coefficients_ = view.native_coefficients();
   // Voie uniforme : palier etroit (6s+11 <= 107), sinon certificat au domaine des requetes gardees, t = s+2.
@@ -107,7 +107,7 @@ GuardedSphere::GuardedSphere(const CertifiedBall& ball) noexcept : ball_(ball) {
   }
 }
 
-// Precondition : |v_j| < 3M, ecart a l'ancre d'un point du pave.
+// Precondition : |v_j| < 2M, ecart a l'ancre d'un point du pave resserre ; les budgets restent ceux de |v_j| < 3M.
 Result<int> GuardedSphere::power_sign(const std::array<i64, 3>& v, GuardLedger* ledger) const noexcept {
   if (broken_) return fail(Reason::arithmetic_invariant);
   LaneCount* lanes = ledger == nullptr ? nullptr : &ledger->lanes;

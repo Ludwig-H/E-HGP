@@ -7,11 +7,78 @@
 // (degenerescence flottante, tours epuises) rend ok = false. Repere local : coordonnees translatees par le premier site
 // de la partie (differences entieres < 2^32, exactes en binaire64) ; tolerances et constantes de la v10 inchangees
 // (1e-9, 1e-10, 8 tours) ; au plus 12 sites (K <= 12).
+//
+// Voie entiere (T2-d, avant le flottant) : en entiers exacts dans le repere local, la paire la plus eloignee (a, b) et
+// le test de la boule diametrale fermee, (x - a).(x - b) <= 0 pour chaque autre site x. Si tous y sont, la plus petite
+// boule de la partie est cette boule (son rayon est au moins le demi-diametre), et (a, b) son support ; parmi des
+// paires les plus eloignees ex aequo (toutes diametrales de la meme boule), la plus petite liste triee des positions,
+// canonique parmi les sites de F (pas necessairement S* de la coquille globale ; CST-0113).
+// Sinon, pour trois sites, le triangle est aigu (l'angle oppose au plus grand cote est aigu) :
+// le support est la partie entiere. Sinon (quatre sites ou plus) : la proposition flottante, amorcee sur la paire la
+// plus eloignee exacte au lieu de la paire heuristique (barycentre, puis le plus loin). Cette voie ne decide rien non
+// plus : son support est certifie comme l'autre (LEM-T1, certificat exact) ; elle evite le flottant pour 56 % des
+// parties de ng00 a K5 (paires, triangles, et parties dont la boule est diametrale). Propositions identiques a celles
+// de DWelzl seul sur les 2 719 521 parties de ng00-02 a K5 (microbanc du chantier T2-d-B).
 #pragma once
 
 #include <array>
+#include <type_traits>
+
+#include "core/core.hpp"
 
 namespace mhgp12::tower_detail {
+
+// Entier assez large pour une somme de trois carres d'ecarts de coordonnees (|ecart| < 2^B) : i64 jusqu'a B = 30.
+using ExactSquare = std::conditional_t<(kCoordBits <= 30), i64, i128>;
+
+// Voie entiere de la proposition sur n sites (2 <= n <= 12) : ecarts a l'origine de la partie (local) ; position(i)
+// rend la position absolue du site i (departage des paires ex aequo, rare). Rend l'arite (2 ou 3) et le support en
+// indices de la partie, ou 0 si elle ne conclut pas.
+template <class Position>
+int exact_small_support(const i64 (*local)[3], int n, Position&& position, int support[3]) noexcept {
+  support[0] = 0;
+  support[1] = 1;
+  if (n == 2) return 2;
+  auto square = [&](int i, int j) {
+    ExactSquare s = 0;
+    for (int a = 0; a < 3; ++a) {
+      const ExactSquare d = static_cast<ExactSquare>(local[i][a] - local[j][a]);
+      s += d * d;
+    }
+    return s;
+  };
+  // Liste triee des positions de la paire (i, j), pour le departage des paires ex aequo.
+  auto ordered = [&](int i, int j) {
+    const std::array<u32, 3> x = position(i), y = position(j);
+    return x < y ? std::array<std::array<u32, 3>, 2>{x, y} : std::array<std::array<u32, 3>, 2>{y, x};
+  };
+  int a = 0, b = 1;
+  ExactSquare best = square(0, 1);
+  for (int i = 0; i < n; ++i)
+    for (int j = i + 1; j < n; ++j) {
+      if (i == 0 && j == 1) continue;
+      const ExactSquare s = square(i, j);
+      if (s > best || (s == best && ordered(i, j) < ordered(a, b))) {
+        best = s;
+        a = i;
+        b = j;
+      }
+    }
+  int outside = -1;
+  for (int x = 0; x < n && outside < 0; ++x) {
+    if (x == a || x == b) continue;
+    ExactSquare dot = 0;
+    for (int c = 0; c < 3; ++c)
+      dot += static_cast<ExactSquare>(local[x][c] - local[a][c]) * static_cast<ExactSquare>(local[x][c] - local[b][c]);
+    if (dot > 0) outside = x;  // hors de la boule diametrale fermee de (a, b)
+  }
+  support[0] = a;
+  support[1] = b;
+  if (outside < 0) return 2;
+  if (n != 3) return 0;
+  support[2] = outside;  // angle aigu en face du plus grand cote : triangle aigu, cercle circonscrit
+  return 3;
+}
 
 struct DBall {
   double c[3] = {0, 0, 0};
@@ -26,9 +93,9 @@ class DWelzl {
   double p[kCapacity][3];
   bool ok = true;
 
-  DBall run(int n) {
+  DBall run(int n, int seed_a = -1, int seed_b = -1) {
     {
-      const DBall B = run_support(n);
+      const DBall B = seed_a >= 0 ? run_pair(n, seed_a, seed_b) : run_support(n);
       if (ok) return B;
       ok = true;
     }
@@ -188,6 +255,9 @@ class DWelzl {
     for (int a = 0; a < 3; ++a) gc[a] /= n;
     const int ia = farthest(n, gc);
     const int ib = farthest(n, p[ia]);
+    return run_pair(n, ia, ib);
+  }
+  DBall run_pair(int n, int ia, int ib) {
     if (ia == ib) {
       ok = false;
       return DBall{};

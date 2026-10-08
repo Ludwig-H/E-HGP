@@ -15,8 +15,10 @@ mhgp12_python_gate(mhgp12_index_guarded_fraction 0 guarded_oracle.py $<TARGET_FI
 # aux deux bords du domaine du profil, census generique et garde.
 mhgp12_python_gate(mhgp12_index_translation 0 translation_oracle.py $<TARGET_FILE:mhgp12_index_probe>
                     LABELS oracle fast TIMEOUT 180)
+# Census a temoins sur la sphere (T2-d) : memes resultats, noeuds et sites testes que sans temoins ; faux temoins sans
+# effet sur I et U ; refus au-dela de quatre temoins ou hors du nuage.
 mhgp12_add_unit(mhgp12_index_guarded SOURCES guarded_test.cpp
-                GROUPS fixtures uncertified witnesses LABELS fast)
+                GROUPS fixtures uncertified witnesses witness_census LABELS fast)
 # Sonde de banc de l'index (bench/index_probe.cpp) et sa porte d'entrees-sorties. Le pilote G4 de la v11
 # (bench/index_g4.py) et sa porte mhgp11_index_bench_collector ne sont pas portes : ils exigeaient les constructions
 # qualifiees aux profils 18, 21 et 24 et le complement ASan 18 bits (index_asan18_matrix.json).

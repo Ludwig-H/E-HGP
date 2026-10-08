@@ -61,12 +61,15 @@ enum class CensusKind : u8 { complete, saturated };
 // Travail reel CUMULE des parcours executes : deux pour census possede (compte puis remplissage),
 // un pour CensusWorkspace. `passes` rend ce nombre ; jamais une estimation de passe logique.
 // `lanes` compte les voies numeriques des evaluations (repere local, docs/CONTRAT_NUMERIQUE.md, paragraphe 3) ;
-// les trois compteurs `guard_*` comptent les decisions que la garde (census d'une boule certifiee) prend sans
-// arithmetique : boites disjointes du pave, boites partielles a raffiner, sites hors du pave.
+// les compteurs `guard_*` comptent les decisions que la garde (census d'une boule certifiee) prend sans
+// arithmetique : boites disjointes du pave, boites partielles a raffiner, sites hors du pave, et noeuds raffines par
+// un temoin sur la sphere (census a temoins, CensusWorkspace::query). `bounds` compte les noeuds interroges (bornes
+// decidees par arithmetique, par la garde ou par un temoin), pas les appels a bound_signs : guard_witness compte les
+// appels evites (contre-lecture de l'auditeur Codex du 8 octobre, receipts/audit_reponses_20261008/census_temoins).
 struct CensusLedger {
   u64 nodes = 0, bounds = 0, point_tests = 0, inside_blocks = 0, outside_blocks = 0, passes = 0;
   num::LaneCount lanes;
-  u64 guard_disjoint = 0, guard_partial = 0, guard_outside = 0;
+  u64 guard_disjoint = 0, guard_partial = 0, guard_outside = 0, guard_witness = 0;
   friend bool operator==(const CensusLedger&, const CensusLedger&) = default;
 };
 
@@ -157,11 +160,22 @@ class CensusWorkspace {
   // Meme requete pour une boule certifiee : census garde, une passe.
   [[nodiscard]] Outcome query(const GlobalIndex&, const num::CertifiedBall&, u32 threshold,
                                void* context, Callback) noexcept;
+  // Census garde A TEMOINS (T2-d) : witnesses donne au plus kMaxWitnesses SiteIdx de sites SUR la sphere (le support
+  // de la boule certifiee). Un noeud dont la plage contient un temoin a un minorant entier <= 0 (le temoin est un point
+  // entier de sa boite, de puissance nulle) et un majorant >= 0 : il n'est ni exterieur ni interieur, il est raffine
+  // (ses sites testes s'il est une feuille) SANS evaluer ses bornes. Memes resultats, memes noeuds et memes sites
+  // testes que query sans temoins quand les temoins sont sur la sphere ; un faux temoin ne change que le travail (des
+  // noeuds raffines au lieu d'etre tranches), jamais I ni U, car tout site reste teste exactement. Refus
+  // parameter_out_of_range au-dela de kMaxWitnesses temoins ou pour un temoin hors du nuage.
+  static constexpr std::size_t kMaxWitnesses = 4;
+  [[nodiscard]] Outcome query(const GlobalIndex&, const num::CertifiedBall&, u32 threshold,
+                               std::span<const SiteIdx> witnesses, void* context, Callback) noexcept;
 
  private:
   explicit CensusWorkspace(const GlobalIndex& index) noexcept : index_(&index) {}
   template <class Bounds, class Ball>
-  Outcome run(const GlobalIndex&, const Ball&, u32 threshold, void* context, Callback) noexcept;
+  Outcome run(const GlobalIndex&, const Ball&, u32 threshold, std::span<const SiteIdx> witnesses, void* context,
+              Callback) noexcept;
   const GlobalIndex* index_;
   Buffer<SiteIdx> storage_;
   std::atomic_flag active_ = ATOMIC_FLAG_INIT;

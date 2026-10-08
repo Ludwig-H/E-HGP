@@ -50,7 +50,7 @@ MHGP12_TEST(certify, 19) {
   CHECK_EQ(candidate.support_span(), 5);
   REQUIRE(side(candidate, point(0, 479, 0)).ok());
   CHECK_EQ(side(candidate, point(0, 479, 0)).value(), 0);
-  CHECK(!(419 - 64 < 0 && 0 < 419 + 96));  // x = 0 sort du pave (419 - 2*32, 419 + 3*32) qu'aurait cette candidate
+  CHECK(!(419 - 32 < 0 && 0 < 419 + 64));  // x = 0 sort du pave (419 - 32, 419 + 2*32) qu'aurait cette candidate
   // q4 : centre strictement interieur certifie ; poids nul (centre sur une face) refuse.
   CHECK(certify({point(0, 0, 0), point(2, 2, 0), point(2, 0, 2), point(0, 2, 2)}).has_value());
   CHECK(!certify({point(0, 0, 0), point(4, 0, 0), point(2, 3, 0), point(2, 0, 2)}).has_value());
@@ -66,8 +66,10 @@ MHGP12_TEST(certify, 19) {
 }
 
 // Sites : contact a la sphere et contact au pave sont deux temoins distincts (la sphere est strictement dans le pave).
-MHGP12_TEST(guard_sites, 37) {
-  // q2 (100,100,100)-(104,100,100) : c=(102,100,100), R=2, s=3, M=8, pave ouvert (84,124) sur chaque axe.
+// Pave resserre de NUM-GARDE (m - M, m + 2M ; preuve de l'auditeur Codex du 8 octobre, propriete de minimum de la boule
+// certifiee) ; les anciens bords (m - 2M, m + 3M) sont graves : meme reponse geometrique, sans arithmetique.
+MHGP12_TEST(guard_sites, 43) {
+  // q2 (100,100,100)-(104,100,100) : c=(102,100,100), R=2, s=3, M=8, pave ouvert (92,116) sur chaque axe.
   const auto ball = certified({point(100, 100, 100), point(104, 100, 100)});
   const GuardedSphere guard(ball);
   CHECK(guard.lane() == Lane::native);
@@ -84,14 +86,20 @@ MHGP12_TEST(guard_sites, 37) {
   CHECK_EQ(sided(102, 102, 101), 1);   // juste dehors, dans le pave
   CHECK_EQ(ledger.outside_sites, 0u);
   CHECK_EQ(ledger.lanes.native, 3u);
-  CHECK_EQ(sided(123, 100, 100), 1);   // bord interieur du pave, hors de la sphere : arithmetique
+  CHECK_EQ(sided(115, 100, 100), 1);   // bord interieur du pave, hors de la sphere : arithmetique
   CHECK_EQ(ledger.outside_sites, 0u);
-  CHECK_EQ(sided(124, 100, 100), 1);   // juste hors du pave : sans arithmetique
-  CHECK_EQ(sided(84, 100, 100), 1);
-  CHECK_EQ(sided(100, 100, 85), 1);    // bord interieur bas du pave
+  CHECK_EQ(sided(116, 100, 100), 1);   // juste hors du pave : sans arithmetique
+  CHECK_EQ(sided(92, 100, 100), 1);
+  CHECK_EQ(sided(100, 100, 93), 1);    // bord interieur bas du pave
   CHECK_EQ(ledger.outside_sites, 2u);
   CHECK_EQ(ledger.lanes.native, 5u);
-  CHECK(guard.in_guard({85, 85, 85}) && !guard.in_guard({84, 100, 100}) && !guard.in_guard({100, 124, 100}));
+  CHECK(guard.in_guard({93, 93, 93}) && !guard.in_guard({92, 100, 100}) && !guard.in_guard({100, 116, 100}));
+  // Anciens bords interieurs (123 et 85, pave (84,124) d'avant le resserrement) : hors du pave, sans arithmetique.
+  CHECK_EQ(sided(123, 100, 100), 1);
+  CHECK_EQ(sided(100, 85, 100), 1);
+  CHECK_EQ(ledger.outside_sites, 4u);
+  CHECK_EQ(ledger.lanes.native, 5u);
+  CHECK(!guard.in_guard({123, 100, 100}) && !guard.in_guard({100, 85, 100}));
   // Ecart local hors du domaine des Point, refus au-dela de 2^34.
   CHECK_EQ(guard.side_offset({-100, 0, 0}, &ledger).value(), 1);
   CHECK_EQ(guard.side_offset({i64{1} << 35, 0, 0}).outcome().reason, Reason::parameter_out_of_range);
@@ -114,7 +122,7 @@ MHGP12_TEST(guard_sites, 37) {
 // Boites : disjointe du pave rejetee, contact du pave par un coin, boite partielle raffinee et jamais rejetee, boite
 // contenue et interieure ; minimum entier contre minimum continu.
 MHGP12_TEST(guard_boxes, 60) {
-  const auto ball = certified({point(100, 100, 100), point(104, 100, 100)});  // pave (84,124)^3
+  const auto ball = certified({point(100, 100, 100), point(104, 100, 100)});  // pave (92,116)^3
   const GuardedSphere guard(ball);
   GuardLedger ledger;
   auto signs = guard.bound_signs(box({124, 100, 100}, {130, 101, 101}), &ledger);
@@ -122,11 +130,18 @@ MHGP12_TEST(guard_boxes, 60) {
   CHECK(signs.value().lower == 1 && signs.value().upper == 1);
   CHECK_EQ(ledger.disjoint_boxes, 1u);
   CHECK_EQ(ledger.lanes.total(), 0u);  // sans arithmetique
-  // Contact du pave par un coin : non disjointe, minorant au point (123,123,123), dehors.
-  signs = guard.bound_signs(box({123, 123, 123}, {130, 130, 130}), &ledger);
+  // Contact du pave par un coin : non disjointe, minorant au point (115,115,115), dehors.
+  signs = guard.bound_signs(box({115, 115, 115}, {130, 130, 130}), &ledger);
   REQUIRE(signs.ok());
   CHECK(signs.value().lower == 1 && signs.value().upper == 1);
   CHECK_EQ(ledger.disjoint_boxes, 1u);
+  CHECK_EQ(ledger.lanes.total(), 1u);
+  // Ancien contact par un coin (123,123,123), pave (84,124) d'avant le resserrement : desormais disjointe, sans
+  // arithmetique, meme reponse.
+  signs = guard.bound_signs(box({123, 123, 123}, {130, 130, 130}), &ledger);
+  REQUIRE(signs.ok());
+  CHECK(signs.value().lower == 1 && signs.value().upper == 1);
+  CHECK_EQ(ledger.disjoint_boxes, 2u);
   CHECK_EQ(ledger.lanes.total(), 1u);
   // Boite partielle qui contient tout le support et le centre (temoin de l'auditeur) : raffinee, jamais rejetee.
   const auto pair = certified({point(100, 100, 100), point(102, 100, 100)});
@@ -180,11 +195,14 @@ MHGP12_TEST(guard_boxes, 60) {
   }
 }
 
-// Certificats lies a leur domaine (CST-0201) : support aigu d'etendue 20 et requete au coin du pave, premier produit
-// D|q|^2 >= 2^127 alors que le resultat tient ; le certificat construit pour s l'accepte, celui pour s+2 le refuse. La
-// voie gardee ne peut donc pas etre native : le compteur le prouve (une voie i128 non controlee rendrait ici, par
-// arithmetique modulaire, la bonne valeur finale ; seuls les intermediaires la condamnent).
-MHGP12_TEST(guard_certificate, 29) {
+// Certificats lies a leur domaine (CST-0201) : support aigu d'etendue 20 et requete au coin (3M-1)^3 de l'ANCIEN pave,
+// premier produit D|q|^2 >= 2^127 alors que le resultat tient ; le certificat construit pour s l'accepte, celui pour
+// s+2 le refuse. Depuis le pave resserre (m - M, m + 2M), ce coin est hors du pave : la garde le rejette sans
+// arithmetique (meme reponse) ; le debordement intermediaire est garde par le temoin de l'auditeur, support aigu
+// d'etendue 21 (h = 2^21 - 1) et requete (h,h,h) DANS le pave : D|v|^2 = 18 h^6 a 131 bits, puissance finale 2 h^6 a
+// 127 bits, essai controle en echec et repli large. La politique des voies (domaine s+2) est inchangee : les mutants qui
+// la relachent (domaine s ou s+1) sont des ecarts de politique, vus par le compteur de voies.
+MHGP12_TEST(guard_certificate, 40) {
   const i64 m = i64{1} << 20, h = m - 1;
   const auto p = acute_corner(20);
   const auto ball = certified({p[0], p[1], p[2]});
@@ -200,9 +218,9 @@ MHGP12_TEST(guard_certificate, 29) {
   CHECK(s.power_domain() >= 20 && s.power_domain() < 22);
   const GuardedSphere guard(ball);
   CHECK(guard.lane() == Lane::checked);
-  // Requete au coin du pave : q = (3M-1)^3, dans le pave ouvert (-2M, 3M).
+  // Requete au coin de l'ancien pave : q = (3M-1)^3, hors du pave resserre (-M, 2M) ; faits arithmetiques conserves.
   const std::array<i64, 3> q{3 * m - 1, 3 * m - 1, 3 * m - 1};
-  CHECK(guard.in_guard(q));
+  CHECK(!guard.in_guard(q));
   const auto first = local_test::product(d, local_test::widen(i128{3} * q[0] * q[0]));
   CHECK_EQ(first.bit_length(), 128);  // 215333976975021689807285368499032031250 >= 2^127
   const auto exact = local_test::power(s, q);
@@ -211,8 +229,33 @@ MHGP12_TEST(guard_certificate, 29) {
   GuardLedger ledger;
   const auto got = guard.side_offset(q, &ledger);
   REQUIRE(got.ok());
-  CHECK_EQ(got.value(), 1);
-  CHECK(ledger.lanes == (LaneCount{0, 0, 0, 1}));  // essai controle en echec au premier produit, repli large
+  CHECK_EQ(got.value(), 1);  // meme reponse geometrique, sans arithmetique
+  CHECK(ledger.lanes == (LaneCount{0, 0, 0, 0}));
+  CHECK_EQ(ledger.outside_sites, 1u);
+  // Temoin de l'auditeur (receipts/audit_reponses_20261008/garde_census) : etendue 21, requete (h,h,h) dans le pave.
+  {
+    const i64 h21 = (i64{1} << 21) - 1;
+    const auto p21 = acute_corner(21);
+    const auto ball21 = certified({p21[0], p21[1], p21[2]});
+    const Sphere& s21 = ball21.sphere();
+    CHECK_EQ(ball21.span(), 21);
+    CHECK_EQ(s21.power_domain(), 17);
+    const auto d21 = local_test::widen(s21.denominator());
+    CHECK(compare(d21, local_test::widen(6 * i128{h21} * h21 * h21 * h21)) == 0);
+    const GuardedSphere g21(ball21);
+    CHECK(g21.lane() == Lane::checked);
+    const std::array<i64, 3> v{h21, h21, h21};
+    CHECK(g21.in_guard(v));
+    CHECK_EQ(local_test::product(d21, local_test::widen(i128{3} * h21 * h21)).bit_length(), 131);  // 18 h^6
+    const auto power21 = local_test::power(s21, v);  // 2 h^6
+    CHECK_EQ(power21.bit_length(), 127);
+    CHECK_EQ(power21.sign(), 1);
+    GuardLedger wide;
+    const auto side21 = g21.side_offset(v, &wide);
+    REQUIRE(side21.ok());
+    CHECK_EQ(side21.value(), 1);
+    CHECK(wide.lanes == (LaneCount{0, 0, 0, 1}));  // essai controle en echec au premier produit, repli large
+  }
   // Dans le pave, mais pres du support : l'essai controle tient.
   GuardLedger near;
   CHECK_EQ(guard.side_offset({h, h, h}, &near).value(), local_test::power(s, {h, h, h}).sign());
@@ -223,13 +266,15 @@ MHGP12_TEST(guard_certificate, 29) {
   CHECK_EQ(other.span(), 20);
   CHECK_EQ(other.sphere().power_domain(), 21);
   CHECK(GuardedSphere(other).lane() == Lane::checked);
-  // Paliers de la garde : s* = 16 natif ; s = 17 et 19 certifies (le pire support y tient au domaine s+2).
+  // Paliers de la garde : s* = 16 natif ; s = 17 et 19 certifies (le pire support y tient au domaine s+2). Requete au
+  // coin du pave resserre (2M - 1 par axe).
   for (const int span : {16, 17, 19}) {
     const auto corner = acute_corner(span);
     const auto worst = certified({corner[0], corner[1], corner[2]});
     const GuardedSphere g(worst);
     CHECK(g.lane() == (span == 16 ? Lane::native : Lane::certified));
-    const i64 edge = 3 * (i64{1} << span) - 1;
+    const i64 edge = 2 * (i64{1} << span) - 1;
+    CHECK(g.in_guard({edge, edge, edge}));
     GuardLedger l;
     CHECK_EQ(g.side_offset({edge, edge, edge}, &l).value(), local_test::power(worst.sphere(), {edge, edge, edge}).sign());
     CHECK(l.lanes == (span == 16 ? LaneCount{1, 0, 0, 0} : LaneCount{0, 1, 0, 0}));

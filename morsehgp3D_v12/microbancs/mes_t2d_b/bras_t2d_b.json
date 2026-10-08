@@ -1,0 +1,522 @@
+{
+ "base": "902041f66",
+ "bras": {
+  "apres": {
+   "branche_locale": "lot",
+   "fichiers": {
+    "src/index/bounds.hpp": {
+     "sha256_apres": "d877fe59756a0686cc825a35bbfca9c1d50cc5d5c595e398767281c802f5a869",
+     "sha256_avant": "61a1d54a2c1386a1cb76ded2af235e99ae69ec10aa17d20e1b8dc33ddf7f2ac4",
+     "substitutions": [
+      {
+       "cherche": "// Bornes d'un parcours de census, interne au module index : voie generique (num::LatticeSphere, toute sphere, aucune\n// garde) ou voie gardee (num::GuardedSphere, boule certifiee seulement, NUM-GARDE). Une preparation par parcours ; les\n// compteurs de voies et de garde sont reportes dans le registre du census a chaque evaluation.\n#pragma once\n\n#include \"index/index.hpp\"\n",
+       "remplace": "// Bornes d'un parcours de census, interne au module index : voie generique (num::LatticeSphere, toute sphere, aucune\n// garde) ou voie gardee (num::GuardedSphere, boule certifiee seulement, NUM-GARDE). Une preparation par parcours ; les\n// compteurs de voies vont au registre du census a chaque evaluation (voie generique), ou s'accumulent dans la garde et\n// sont reportes une fois a la fin du parcours par flush (voie gardee, T2-d : plus de registre temporaire par appel).\n#pragma once\n\n#include \"index/index.hpp\"\n"
+      },
+      {
+       "cherche": "    return lattice_.bound_signs(box, &ledger.lanes);  // minorant sur sites entiers, majorant continu\n  }\n  Result<int> side(num::Point point, CensusLedger& ledger) const noexcept { return lattice_.side(point, &ledger.lanes); }\n\n private:\n  const num::Sphere& sphere_;\n",
+       "remplace": "    return lattice_.bound_signs(box, &ledger.lanes);  // minorant sur sites entiers, majorant continu\n  }\n  Result<int> side(num::Point point, CensusLedger& ledger) const noexcept { return lattice_.side(point, &ledger.lanes); }\n  void flush(CensusLedger&) const noexcept {}\n\n private:\n  const num::Sphere& sphere_;\n"
+      },
+      {
+       "cherche": "  GuardedBounds(const GuardedBounds&) = delete;\n  GuardedBounds& operator=(const GuardedBounds&) = delete;\n  const num::Sphere& sphere() const noexcept { return ball_.sphere(); }\n  Result<num::PowerBoundSigns> bound_signs(const num::Box& box, CensusLedger& ledger) const noexcept {\n    num::GuardLedger guard;\n    auto signs = guard_.bound_signs(box, &guard);\n    absorb(guard, ledger);\n    return signs;\n  }\n  Result<int> side(num::Point point, CensusLedger& ledger) const noexcept {\n    num::GuardLedger guard;\n    auto value = guard_.side(point, &guard);\n    absorb(guard, ledger);\n    return value;\n  }\n\n private:\n",
+       "remplace": "  GuardedBounds(const GuardedBounds&) = delete;\n  GuardedBounds& operator=(const GuardedBounds&) = delete;\n  const num::Sphere& sphere() const noexcept { return ball_.sphere(); }\n  Result<num::PowerBoundSigns> bound_signs(const num::Box& box, CensusLedger&) const noexcept {\n    return guard_.bound_signs(box, &guard_ledger_);\n  }\n  Result<int> side(num::Point point, CensusLedger&) const noexcept { return guard_.side(point, &guard_ledger_); }\n  // Report des compteurs de la garde dans le registre du census, une fois a la fin du parcours.\n  void flush(CensusLedger& ledger) const noexcept {\n    absorb(guard_ledger_, ledger);\n    guard_ledger_ = {};\n  }\n\n private:\n"
+      },
+      {
+       "cherche": "  }\n  const num::CertifiedBall& ball_;\n  num::GuardedSphere guard_;\n};\n\n}  // namespace mhgp12::index_detail\n",
+       "remplace": "  }\n  const num::CertifiedBall& ball_;\n  num::GuardedSphere guard_;\n  mutable num::GuardLedger guard_ledger_;  // compteurs du parcours en cours, reportes par flush\n};\n\n}  // namespace mhgp12::index_detail\n"
+      }
+     ]
+    },
+    "src/index/census.cpp": {
+     "sha256_apres": "ca588e5db2bbb4a549f7a599d186029bc44be9a386b8529561fcc439312908b2",
+     "sha256_avant": "4f3d6f9819f592da0f911482e20f01c11b6e21e58af94ac2a4239dcd521aaa9d",
+     "substitutions": [
+      {
+       "cherche": "  {\n    const Bounds lattice(ball);\n    MHGP12_TRY(count.walk(index, lattice));\n  }\n  const bool saturated = count.p == threshold;\n  const u64 shell_size = saturated ? 0 : count.m;\n",
+       "remplace": "  {\n    const Bounds lattice(ball);\n    MHGP12_TRY(count.walk(index, lattice));\n    lattice.flush(ledger);\n  }\n  const bool saturated = count.p == threshold;\n  const u64 shell_size = saturated ? 0 : count.m;\n"
+      },
+      {
+       "cherche": "  {\n    const Bounds lattice(ball);\n    MHGP12_TRY(fill.walk(index, lattice));\n  }\n  return saturated ? CensusKind::saturated : CensusKind::complete;\n}\n",
+       "remplace": "  {\n    const Bounds lattice(ball);\n    MHGP12_TRY(fill.walk(index, lattice));\n    lattice.flush(ledger);\n  }\n  return saturated ? CensusKind::saturated : CensusKind::complete;\n}\n"
+      }
+     ]
+    },
+    "src/index/census_workspace.cpp": {
+     "sha256_apres": "bee79fd409488e710660aa788e83001bb68cd918c0f6852187cf0fe868f58fb4",
+     "sha256_avant": "dc48110ce8f81094f1374de0f09c352181e71379808a40aec0af79998ba515f8",
+     "substitutions": [
+      {
+       "cherche": "// Un seul parcours : I croissant a gauche, U empilee a droite puis inversee. Aucune allocation par requete.\n// Le meme parcours sert le census generique (LatticeSphere) et le census garde d'une boule certifiee (GuardedSphere).\n#include \"index/access.hpp\"\n#include \"index/bounds.hpp\"\n#include <algorithm>\n",
+       "remplace": "// Un seul parcours : I croissant a gauche, U empilee a droite puis inversee. Aucune allocation par requete.\n// Le meme parcours sert le census generique (LatticeSphere) et le census garde d'une boule certifiee (GuardedSphere),\n// avec ou sans temoins sur la sphere (index.hpp : un noeud qui contient un temoin est raffine sans bornes evaluees).\n#include \"index/access.hpp\"\n#include \"index/bounds.hpp\"\n#include <algorithm>\n"
+      },
+      {
+       "cherche": "struct BorrowedPass {\n  std::span<SiteIdx> storage;\n  u32 threshold;\n  CensusLedger ledger;\n  u64 p = 0, m = 0;\n\n  Outcome inside(u32 begin, u32 end) noexcept {\n    const u64 count = std::min<u64>(end - begin, threshold - p);\n",
+       "remplace": "struct BorrowedPass {\n  std::span<SiteIdx> storage;\n  u32 threshold;\n  std::span<const SiteIdx> witnesses;  // sites sur la sphere : leurs noeuds sont raffines sans bornes evaluees\n  CensusLedger ledger;\n  u64 p = 0, m = 0;\n\n  bool holds_witness(const index_detail::Node& node) const noexcept {\n    for (const SiteIdx w : witnesses)\n      if (idx(w) >= node.begin && idx(w) < node.end) return true;\n    return false;\n  }\n\n  Outcome inside(u32 begin, u32 end) noexcept {\n    const u64 count = std::min<u64>(end - begin, threshold - p);\n"
+      },
+      {
+       "cherche": "    for (u64 cursor = 0; cursor < nodes.size() && p < threshold;) {\n      const auto& node = nodes[cursor];\n      ++ledger.nodes; ++ledger.bounds;\n      auto signs = lattice.bound_signs(node.box, ledger);\n      if (!signs.ok()) return signs.outcome();\n      if (signs.value().lower > 0) {\n",
+       "remplace": "    for (u64 cursor = 0; cursor < nodes.size() && p < threshold;) {\n      const auto& node = nodes[cursor];\n      ++ledger.nodes; ++ledger.bounds;\n      if (holds_witness(node)) {  // minorant <= 0 et majorant >= 0 au temoin : ni exterieur ni interieur\n        ++ledger.guard_witness;\n        if (node.end - node.begin <= index.leaf_size()) {\n          MHGP12_TRY(points(index.cloud(), node.begin, node.end, lattice)); cursor = node.escape;\n        } else { ++cursor; }\n        continue;\n      }\n      auto signs = lattice.bound_signs(node.box, ledger);\n      if (!signs.ok()) return signs.outcome();\n      if (signs.value().lower > 0) {\n"
+      },
+      {
+       "cherche": "}\n\ntemplate <class Bounds, class Ball>\nOutcome CensusWorkspace::run(const GlobalIndex& index, const Ball& sphere, u32 threshold, void* context,\n                             Callback callback) noexcept {\n  if (active_.test_and_set(std::memory_order_acquire)) return fail(Reason::parameter_out_of_range);\n  const ActiveQuery active(active_);\n  if (&index != index_ || index.cloud().sites() != storage_.size() || threshold == 0 || callback == nullptr)\n    return fail(Reason::parameter_out_of_range);\n  BorrowedPass<Bounds> pass{storage_.span(), threshold, {}};\n  {\n    const Bounds lattice(sphere);\n    MHGP12_TRY(pass.walk(index, lattice));\n  }\n  const bool saturated = pass.p == threshold;\n  auto shell = storage_.span().last(saturated ? 0 : pass.m);\n",
+       "remplace": "}\n\ntemplate <class Bounds, class Ball>\nOutcome CensusWorkspace::run(const GlobalIndex& index, const Ball& sphere, u32 threshold,\n                             std::span<const SiteIdx> witnesses, void* context, Callback callback) noexcept {\n  if (active_.test_and_set(std::memory_order_acquire)) return fail(Reason::parameter_out_of_range);\n  const ActiveQuery active(active_);\n  if (&index != index_ || index.cloud().sites() != storage_.size() || threshold == 0 || callback == nullptr ||\n      witnesses.size() > kMaxWitnesses)\n    return fail(Reason::parameter_out_of_range);\n  for (const SiteIdx w : witnesses)\n    if (idx(w) >= storage_.size()) return fail(Reason::parameter_out_of_range);\n  BorrowedPass<Bounds> pass{storage_.span(), threshold, witnesses, {}};\n  {\n    const Bounds lattice(sphere);\n    MHGP12_TRY(pass.walk(index, lattice));\n    lattice.flush(pass.ledger);\n  }\n  const bool saturated = pass.p == threshold;\n  auto shell = storage_.span().last(saturated ? 0 : pass.m);\n"
+      },
+      {
+       "cherche": "\nOutcome CensusWorkspace::query(const GlobalIndex& index, const num::Sphere& sphere, u32 threshold,\n                               void* context, Callback callback) noexcept {\n  return run<index_detail::GenericBounds>(index, sphere, threshold, context, callback);\n}\n\nOutcome CensusWorkspace::query(const GlobalIndex& index, const num::CertifiedBall& ball, u32 threshold,\n                               void* context, Callback callback) noexcept {\n  return run<index_detail::GuardedBounds>(index, ball, threshold, context, callback);\n}\n}  // namespace mhgp12\n",
+       "remplace": "\nOutcome CensusWorkspace::query(const GlobalIndex& index, const num::Sphere& sphere, u32 threshold,\n                               void* context, Callback callback) noexcept {\n  return run<index_detail::GenericBounds>(index, sphere, threshold, {}, context, callback);\n}\n\nOutcome CensusWorkspace::query(const GlobalIndex& index, const num::CertifiedBall& ball, u32 threshold,\n                               void* context, Callback callback) noexcept {\n  return run<index_detail::GuardedBounds>(index, ball, threshold, {}, context, callback);\n}\n\nOutcome CensusWorkspace::query(const GlobalIndex& index, const num::CertifiedBall& ball, u32 threshold,\n                               std::span<const SiteIdx> witnesses, void* context, Callback callback) noexcept {\n  return run<index_detail::GuardedBounds>(index, ball, threshold, witnesses, context, callback);\n}\n}  // namespace mhgp12\n"
+      }
+     ]
+    },
+    "src/index/index.hpp": {
+     "sha256_apres": "a984c29ee8866f8742ac1e637ff2d3c487092e8e541537350c44ac7a278cfe7e",
+     "sha256_avant": "fbf64f625ff4d34061cf757796982a4369c6153dffdf9e11541530d9f7aa0530",
+     "substitutions": [
+      {
+       "cherche": "// Travail reel CUMULE des parcours executes : deux pour census possede (compte puis remplissage),\n// un pour CensusWorkspace. `passes` rend ce nombre ; jamais une estimation de passe logique.\n// `lanes` compte les voies numeriques des evaluations (repere local, docs/CONTRAT_NUMERIQUE.md, paragraphe 3) ;\n// les trois compteurs `guard_*` comptent les decisions que la garde (census d'une boule certifiee) prend sans\n// arithmetique : boites disjointes du pave, boites partielles a raffiner, sites hors du pave.\nstruct CensusLedger {\n  u64 nodes = 0, bounds = 0, point_tests = 0, inside_blocks = 0, outside_blocks = 0, passes = 0;\n  num::LaneCount lanes;\n  u64 guard_disjoint = 0, guard_partial = 0, guard_outside = 0;\n  friend bool operator==(const CensusLedger&, const CensusLedger&) = default;\n};\n\n",
+       "remplace": "// Travail reel CUMULE des parcours executes : deux pour census possede (compte puis remplissage),\n// un pour CensusWorkspace. `passes` rend ce nombre ; jamais une estimation de passe logique.\n// `lanes` compte les voies numeriques des evaluations (repere local, docs/CONTRAT_NUMERIQUE.md, paragraphe 3) ;\n// les compteurs `guard_*` comptent les decisions que la garde (census d'une boule certifiee) prend sans\n// arithmetique : boites disjointes du pave, boites partielles a raffiner, sites hors du pave, et noeuds raffines par\n// un temoin sur la sphere (census a temoins, CensusWorkspace::query). `bounds` compte les noeuds interroges (bornes\n// decidees par arithmetique, par la garde ou par un temoin), pas les appels a bound_signs : guard_witness compte les\n// appels evites (contre-lecture de l'auditeur Codex du 8 octobre, receipts/audit_reponses_20261008/census_temoins).\nstruct CensusLedger {\n  u64 nodes = 0, bounds = 0, point_tests = 0, inside_blocks = 0, outside_blocks = 0, passes = 0;\n  num::LaneCount lanes;\n  u64 guard_disjoint = 0, guard_partial = 0, guard_outside = 0, guard_witness = 0;\n  friend bool operator==(const CensusLedger&, const CensusLedger&) = default;\n};\n\n"
+      },
+      {
+       "cherche": "  // Meme requete pour une boule certifiee : census garde, une passe.\n  [[nodiscard]] Outcome query(const GlobalIndex&, const num::CertifiedBall&, u32 threshold,\n                               void* context, Callback) noexcept;\n\n private:\n  explicit CensusWorkspace(const GlobalIndex& index) noexcept : index_(&index) {}\n  template <class Bounds, class Ball>\n  Outcome run(const GlobalIndex&, const Ball&, u32 threshold, void* context, Callback) noexcept;\n  const GlobalIndex* index_;\n  Buffer<SiteIdx> storage_;\n  std::atomic_flag active_ = ATOMIC_FLAG_INIT;\n",
+       "remplace": "  // Meme requete pour une boule certifiee : census garde, une passe.\n  [[nodiscard]] Outcome query(const GlobalIndex&, const num::CertifiedBall&, u32 threshold,\n                               void* context, Callback) noexcept;\n  // Census garde A TEMOINS (T2-d) : witnesses donne au plus kMaxWitnesses SiteIdx de sites SUR la sphere (le support\n  // de la boule certifiee). Un noeud dont la plage contient un temoin a un minorant entier <= 0 (le temoin est un point\n  // entier de sa boite, de puissance nulle) et un majorant >= 0 : il n'est ni exterieur ni interieur, il est raffine\n  // (ses sites testes s'il est une feuille) SANS evaluer ses bornes. Memes resultats, memes noeuds et memes sites\n  // testes que query sans temoins quand les temoins sont sur la sphere ; un faux temoin ne change que le travail (des\n  // noeuds raffines au lieu d'etre tranches), jamais I ni U, car tout site reste teste exactement. Refus\n  // parameter_out_of_range au-dela de kMaxWitnesses temoins ou pour un temoin hors du nuage.\n  static constexpr std::size_t kMaxWitnesses = 4;\n  [[nodiscard]] Outcome query(const GlobalIndex&, const num::CertifiedBall&, u32 threshold,\n                               std::span<const SiteIdx> witnesses, void* context, Callback) noexcept;\n\n private:\n  explicit CensusWorkspace(const GlobalIndex& index) noexcept : index_(&index) {}\n  template <class Bounds, class Ball>\n  Outcome run(const GlobalIndex&, const Ball&, u32 threshold, std::span<const SiteIdx> witnesses, void* context,\n              Callback) noexcept;\n  const GlobalIndex* index_;\n  Buffer<SiteIdx> storage_;\n  std::atomic_flag active_ = ATOMIC_FLAG_INIT;\n"
+      }
+     ]
+    },
+    "src/num/budgets.hpp": {
+     "sha256_apres": "d3f3fe22d7bfd3bbab1b377d983aa08897f1bfd320625879527fcaf0be61424f",
+     "sha256_avant": "133096e348bcc8790dbd86cc4b5238ad5d8ea7dbac5d24679c7c0bda7fdff104",
+     "substitutions": [
+      {
+       "cherche": "  static constexpr int level_numerator = 8 * S + 12;  // q4 : 3*(18 M^4)^2 < 1024 M^8\n  static constexpr int level_denominator = 6 * S + 8;  // q4 : (12 M^3)^2 < 256 M^6\n  static constexpr int level_comparison = level_numerator + level_denominator;  // 14 S + 20\n  // Budgets mixtes (CST-0111) : centre au budget du support, sites confrontes dans la garde (|z_j-o_j| < 3M).\n  static constexpr int guarded_side = 6 * S + 11;     // < 648 M^6 + 432 M^6 < 2^11 M^6\n  static constexpr int guarded_orientation = 7 * S + 14;  // < 14 400 M^7 < 2^14 M^7\n  static constexpr int guarded_vertex_orientation = 3 * S + 10;\n",
+       "remplace": "  static constexpr int level_numerator = 8 * S + 12;  // q4 : 3*(18 M^4)^2 < 1024 M^8\n  static constexpr int level_denominator = 6 * S + 8;  // q4 : (12 M^3)^2 < 256 M^6\n  static constexpr int level_comparison = level_numerator + level_denominator;  // 14 S + 20\n  // Budgets mixtes (CST-0111) : centre au budget du support, sites confrontes dans la garde (|z_j-o_j| < 3M ;\n  // majorant conserve depuis le pave resserre de NUM-GARDE, qui donne |z_j-o_j| < 2M).\n  static constexpr int guarded_side = 6 * S + 11;     // < 648 M^6 + 432 M^6 < 2^11 M^6\n  static constexpr int guarded_orientation = 7 * S + 14;  // < 14 400 M^7 < 2^14 M^7\n  static constexpr int guarded_vertex_orientation = 3 * S + 10;\n"
+      }
+     ]
+    },
+    "src/num/guard.cpp": {
+     "sha256_apres": "5a5fc29b65e21b1b74f642986614eb1fb0801cc084ae7ec50bc3aedc7e5655fc",
+     "sha256_avant": "459b99dfe154f32d8ab468d3a410a1bd74ca4c94363634244f37c8cdf7fc720b",
+     "substitutions": [
+      {
+       "cherche": "  const i64 m = i64{1} << s;\n  for (int j = 0; j < 3; ++j) {\n    anchor_[j] = sphere.anchor().coordinates()[j];\n    guard_lo_[j] = i64{ball.corner()[j]} - 2 * m;\n    guard_hi_[j] = i64{ball.corner()[j]} + 3 * m;\n  }\n  native_coefficients_ = view.native_coefficients();\n  // Voie uniforme : palier etroit (6s+11 <= 107), sinon certificat au domaine des requetes gardees, t = s+2.\n",
+       "remplace": "  const i64 m = i64{1} << s;\n  for (int j = 0; j < 3; ++j) {\n    anchor_[j] = sphere.anchor().coordinates()[j];\n    guard_lo_[j] = i64{ball.corner()[j]} - m;\n    guard_hi_[j] = i64{ball.corner()[j]} + 2 * m;\n  }\n  native_coefficients_ = view.native_coefficients();\n  // Voie uniforme : palier etroit (6s+11 <= 107), sinon certificat au domaine des requetes gardees, t = s+2.\n"
+      },
+      {
+       "cherche": "  }\n}\n\n// Precondition : |v_j| < 3M, ecart a l'ancre d'un point du pave.\nResult<int> GuardedSphere::power_sign(const std::array<i64, 3>& v, GuardLedger* ledger) const noexcept {\n  if (broken_) return fail(Reason::arithmetic_invariant);\n  LaneCount* lanes = ledger == nullptr ? nullptr : &ledger->lanes;\n",
+       "remplace": "  }\n}\n\n// Precondition : |v_j| < 2M, ecart a l'ancre d'un point du pave resserre ; les budgets restent ceux de |v_j| < 3M.\nResult<int> GuardedSphere::power_sign(const std::array<i64, 3>& v, GuardLedger* ledger) const noexcept {\n  if (broken_) return fail(Reason::arithmetic_invariant);\n  LaneCount* lanes = ledger == nullptr ? nullptr : &ledger->lanes;\n"
+      }
+     ]
+    },
+    "src/num/guard.hpp": {
+     "sha256_apres": "6c73d770688b2e35036940e1524ac479f71b41f79d84c6b80fdbfb664d566b48",
+     "sha256_avant": "8c2afab759cce1b7fe90336361a5fd7b653862378814c614c95f0b58086a2884",
+     "substitutions": [
+      {
+       "cherche": "// conv(S) en exact par les signes barycentriques (q1, q2 toujours ; q3 strictement aigu ; q4 poids de presentation\n// strictement positifs). Une candidate refusee reste dans la voie generique (LatticeSphere), sans garde.\n//\n// NUM-GARDE. Soit s l'etendue du support S, m son coin minimal, M = 2^s. Le centre est dans [m, m+M-1] par axe et\n// R <= diam(S) < 2M ; tout point x de la boule fermee verifie m_j - 2M < x_j < m_j + 3M : c'est le PAVE (ouvert).\n//   - site hors du pave : exterieur, sans arithmetique ; site dans le pave : |x_j - o_j| < 3M < 2^(s+2) pour l'ancre\n//     o de S, d'ou le budget mixte 6s+11 (CST-0111) et le certificat de puissance au domaine t = s+2, jamais s ;\n//   - boite DISJOINTE du pave : exterieure ; sinon minorant au point entier de la boite le plus proche du centre,\n//     calcule en local (plancher de N_j/D, + o_j, saturation a la boite), qui est dans le pave ;\n//   - boite NON CONTENUE dans le pave : majorant positif sans arithmetique (elle n'est pas dans la boule) ; une\n",
+       "remplace": "// conv(S) en exact par les signes barycentriques (q1, q2 toujours ; q3 strictement aigu ; q4 poids de presentation\n// strictement positifs). Une candidate refusee reste dans la voie generique (LatticeSphere), sans garde.\n//\n// NUM-GARDE. Soit s l'etendue du support S, m son coin minimal, M = 2^s. Le centre est dans [m, m+M-1] par axe.\n// Avec c dans conv(S) et S sur la sphere, la boule est MEB(S). La boule au milieu de la boite du support contient S,\n// donc R^2 <= (wx^2+wy^2+wz^2)/4 <= 3(M-1)^2/4 < M^2. Tout point x de la boule fermee verifie ainsi\n// m_j - M < x_j < m_j + 2M : c'est le PAVE (ouvert), y compris s=0.\n//   - site hors du pave : exterieur, sans arithmetique ; site dans le pave : |x_j - o_j| < 2M pour l'ancre o de S.\n//     On conserve ici les budgets anterieurs plus larges : 6s+11 (CST-0111), domaine t = s+2 et voies inchangees ;\n//   - boite DISJOINTE du pave : exterieure ; sinon minorant au point entier de la boite le plus proche du centre,\n//     calcule en local (plancher de N_j/D, + o_j, saturation a la boite), qui est dans le pave ;\n//   - boite NON CONTENUE dans le pave : majorant positif sans arithmetique (elle n'est pas dans la boule) ; une\n"
+      }
+     ]
+    },
+    "src/num/power_certificate.hpp": {
+     "sha256_apres": "f5071c6dfe33c14df1911852cf79ac645e85cb6affc05474adf56b5fbffc9ef1",
+     "sha256_avant": "36151714489a9b73dbac6645fd08476451f771d167702bfadb86eaec100e55c0",
+     "substitutions": [
+      {
+       "cherche": "// chacun des trois termes lineaires 2|N_j v_j| par 2^125 ; la somme des magnitudes, < 15*2^123 < 2^127, borne chaque\n// produit ET chaque somme partielle en i128. La preuve ne lit ni l'arite ni l'etendue du support : seulement t et les\n// coefficients. Le certificat de la v11 (q3_global_power_i128) est le cas t = B, domaine de tous les Point du profil ;\n// le recensement garde exige t = s+2 (NUM-GARDE : |v_j| < 3M < 2^(s+2)), jamais s.\n// Aucun coefficient public forgeable : les fabriques de num calculent le domaine une fois.\n#pragma once\n#include <array>\n",
+       "remplace": "// chacun des trois termes lineaires 2|N_j v_j| par 2^125 ; la somme des magnitudes, < 15*2^123 < 2^127, borne chaque\n// produit ET chaque somme partielle en i128. La preuve ne lit ni l'arite ni l'etendue du support : seulement t et les\n// coefficients. Le certificat de la v11 (q3_global_power_i128) est le cas t = B, domaine de tous les Point du profil ;\n// le recensement garde conserve t = s+2 : cette politique reste suffisante apres le resserrement du pave.\n// Les bornes plus fines exploitant CertifiedBall se qualifient separement ; ce certificat generique reste inchange.\n// Aucun coefficient public forgeable : les fabriques de num calculent le domaine une fois.\n#pragma once\n#include <array>\n"
+      }
+     ]
+    },
+    "src/tower/proposal.hpp": {
+     "sha256_apres": "a82de524758fe65a70cd08251530b77e2a44479ff4828e2d827440b69f86eff0",
+     "sha256_avant": "92495aa67223577c8acef74967f89853c0dab3c5881afe1fb2c7826327f28c18",
+     "substitutions": [
+      {
+       "cherche": "// (degenerescence flottante, tours epuises) rend ok = false. Repere local : coordonnees translatees par le premier site\n// de la partie (differences entieres < 2^32, exactes en binaire64) ; tolerances et constantes de la v10 inchangees\n// (1e-9, 1e-10, 8 tours) ; au plus 12 sites (K <= 12).\n#pragma once\n\n#include <array>\n\nnamespace mhgp12::tower_detail {\n\nstruct DBall {\n  double c[3] = {0, 0, 0};\n",
+       "remplace": "// (degenerescence flottante, tours epuises) rend ok = false. Repere local : coordonnees translatees par le premier site\n// de la partie (differences entieres < 2^32, exactes en binaire64) ; tolerances et constantes de la v10 inchangees\n// (1e-9, 1e-10, 8 tours) ; au plus 12 sites (K <= 12).\n//\n// Voie entiere (T2-d, avant le flottant) : en entiers exacts dans le repere local, la paire la plus eloignee (a, b) et\n// le test de la boule diametrale fermee, (x - a).(x - b) <= 0 pour chaque autre site x. Si tous y sont, la plus petite\n// boule de la partie est cette boule (son rayon est au moins le demi-diametre), et (a, b) son support ; parmi des\n// paires les plus eloignees ex aequo (toutes diametrales de la meme boule), la plus petite liste triee des positions,\n// canonique parmi les sites de F (pas necessairement S* de la coquille globale ; CST-0113).\n// Sinon, pour trois sites, le triangle est aigu (l'angle oppose au plus grand cote est aigu) :\n// le support est la partie entiere. Sinon (quatre sites ou plus) : la proposition flottante, amorcee sur la paire la\n// plus eloignee exacte au lieu de la paire heuristique (barycentre, puis le plus loin). Cette voie ne decide rien non\n// plus : son support est certifie comme l'autre (LEM-T1, certificat exact) ; elle evite le flottant pour 56 % des\n// parties de ng00 a K5 (paires, triangles, et parties dont la boule est diametrale). Propositions identiques a celles\n// de DWelzl seul sur les 2 719 521 parties de ng00-02 a K5 (microbanc du chantier T2-d-B).\n#pragma once\n\n#include <array>\n#include <type_traits>\n\n#include \"core/core.hpp\"\n\nnamespace mhgp12::tower_detail {\n\n// Entier assez large pour une somme de trois carres d'ecarts de coordonnees (|ecart| < 2^B) : i64 jusqu'a B = 30.\nusing ExactSquare = std::conditional_t<(kCoordBits <= 30), i64, i128>;\n\n// Voie entiere de la proposition sur n sites (2 <= n <= 12) : ecarts a l'origine de la partie (local) ; position(i)\n// rend la position absolue du site i (departage des paires ex aequo, rare). Rend l'arite (2 ou 3) et le support en\n// indices de la partie, ou 0 si elle ne conclut pas.\ntemplate <class Position>\nint exact_small_support(const i64 (*local)[3], int n, Position&& position, int support[3]) noexcept {\n  support[0] = 0;\n  support[1] = 1;\n  if (n == 2) return 2;\n  auto square = [&](int i, int j) {\n    ExactSquare s = 0;\n    for (int a = 0; a < 3; ++a) {\n      const ExactSquare d = static_cast<ExactSquare>(local[i][a] - local[j][a]);\n      s += d * d;\n    }\n    return s;\n  };\n  // Liste triee des positions de la paire (i, j), pour le departage des paires ex aequo.\n  auto ordered = [&](int i, int j) {\n    const std::array<u32, 3> x = position(i), y = position(j);\n    return x < y ? std::array<std::array<u32, 3>, 2>{x, y} : std::array<std::array<u32, 3>, 2>{y, x};\n  };\n  int a = 0, b = 1;\n  ExactSquare best = square(0, 1);\n  for (int i = 0; i < n; ++i)\n    for (int j = i + 1; j < n; ++j) {\n      if (i == 0 && j == 1) continue;\n      const ExactSquare s = square(i, j);\n      if (s > best || (s == best && ordered(i, j) < ordered(a, b))) {\n        best = s;\n        a = i;\n        b = j;\n      }\n    }\n  int outside = -1;\n  for (int x = 0; x < n && outside < 0; ++x) {\n    if (x == a || x == b) continue;\n    ExactSquare dot = 0;\n    for (int c = 0; c < 3; ++c)\n      dot += static_cast<ExactSquare>(local[x][c] - local[a][c]) * static_cast<ExactSquare>(local[x][c] - local[b][c]);\n    if (dot > 0) outside = x;  // hors de la boule diametrale fermee de (a, b)\n  }\n  support[0] = a;\n  support[1] = b;\n  if (outside < 0) return 2;\n  if (n != 3) return 0;\n  support[2] = outside;  // angle aigu en face du plus grand cote : triangle aigu, cercle circonscrit\n  return 3;\n}\n\nstruct DBall {\n  double c[3] = {0, 0, 0};\n"
+      },
+      {
+       "cherche": "  double p[kCapacity][3];\n  bool ok = true;\n\n  DBall run(int n) {\n    {\n      const DBall B = run_support(n);\n      if (ok) return B;\n      ok = true;\n    }\n",
+       "remplace": "  double p[kCapacity][3];\n  bool ok = true;\n\n  DBall run(int n, int seed_a = -1, int seed_b = -1) {\n    {\n      const DBall B = seed_a >= 0 ? run_pair(n, seed_a, seed_b) : run_support(n);\n      if (ok) return B;\n      ok = true;\n    }\n"
+      },
+      {
+       "cherche": "    for (int a = 0; a < 3; ++a) gc[a] /= n;\n    const int ia = farthest(n, gc);\n    const int ib = farthest(n, p[ia]);\n    if (ia == ib) {\n      ok = false;\n      return DBall{};\n",
+       "remplace": "    for (int a = 0; a < 3; ++a) gc[a] /= n;\n    const int ia = farthest(n, gc);\n    const int ib = farthest(n, p[ia]);\n    return run_pair(n, ia, ib);\n  }\n  DBall run_pair(int n, int ia, int ib) {\n    if (ia == ib) {\n      ok = false;\n      return DBall{};\n"
+      }
+     ]
+    },
+    "src/tower/resolve.cpp": {
+     "sha256_apres": "58a78573b5ed04a2266bf004eae86c9ef5ae157ba28a95766ce0ff2dd768bb57",
+     "sha256_avant": "583d9778d5b8f6c3f8972c7f19f62c3b8174d897f996461392bc6103be28740d",
+     "substitutions": [
+      {
+       "cherche": "  u32 q = 0;\n};\n\n// DWelzl dans le repere local de la partie (translation par son premier site) ; ne decide rien.\nProposal propose(const Domain& d, const Part& f) noexcept {\n  DWelzl w;\n  const auto& origin = d.points[f.id[0]].coordinates();\n  for (u32 i = 0; i < f.k; ++i)\n    for (int a = 0; a < 3; ++a)\n      w.p[i][a] = static_cast<double>(d.points[f.id[i]].coordinates()[a]) - static_cast<double>(origin[a]);\n  const DBall ball = w.run(static_cast<int>(f.k));\n  Proposal out;\n  if (!w.ok || ball.nr < 2 || ball.nr > 4) return out;\n  out.ok = true;\n  out.q = static_cast<u32>(ball.nr);\n",
+       "remplace": "  u32 q = 0;\n};\n\n// Proposition dans le repere local de la partie (translation par son premier site) ; ne decide rien. D'abord la voie\n// entiere (paire diametrale, triangle aigu : proposal.hpp), sinon DWelzl sur les memes ecarts.\nProposal propose(const Domain& d, const Part& f) noexcept {\n  i64 local[kMaxPart][3];\n  const auto& origin = d.points[f.id[0]].coordinates();\n  for (u32 i = 0; i < f.k; ++i)\n    for (int a = 0; a < 3; ++a) local[i][a] = i64{d.points[f.id[i]].coordinates()[a]} - i64{origin[a]};\n  Proposal out;\n  int exact[3] = {0, 0, 0};\n  const auto position = [&](int i) noexcept { return d.points[f.id[i]].coordinates(); };\n  if (const int q = f.k >= 2 ? exact_small_support(local, static_cast<int>(f.k), position, exact) : 0; q > 0) {\n    out.ok = true;\n    out.q = static_cast<u32>(q);\n    for (int i = 0; i < q; ++i) out.s[i] = f.id[exact[i]];\n    std::sort(out.s.begin(), out.s.begin() + q);\n    return out;\n  }\n  DWelzl w;\n  for (u32 i = 0; i < f.k; ++i)\n    for (int a = 0; a < 3; ++a) w.p[i][a] = static_cast<double>(local[i][a]);\n  const DBall ball = w.run(static_cast<int>(f.k), exact[0], exact[1]);  // depart sur la paire la plus eloignee\n  if (!w.ok || ball.nr < 2 || ball.nr > 4) return out;\n  out.ok = true;\n  out.q = static_cast<u32>(ball.nr);\n"
+      },
+      {
+       "cherche": "  return out;\n}\n\n// Plus petite boule de F : boule du catalogue (ball), ou boule certifiee hors de la table (certified).\nstruct Located {\n  u32 ball = kNone;\n  std::optional<num::CertifiedBall> certified;\n  Route route = kT1;\n};\n\n",
+       "remplace": "  return out;\n}\n\n// Plus petite boule de F : boule du catalogue (ball), ou boule certifiee hors de la table (certified) avec son support\n// canonique parmi les sites de F sur la sphere (temoins du census, T2-d : ces sites sont SUR la sphere).\nstruct Located {\n  u32 ball = kNone;\n  std::optional<num::CertifiedBall> certified;\n  std::array<SiteIdx, 4> support{};\n  u8 arity = 0;\n  Route route = kT1;\n};\n\n"
+      },
+      {
+       "cherche": "  }\n  ++(fallback ? n.route_fallback_census : n.route_cert_census);\n  out.certified.emplace(cert->ball);\n  out.route = fallback ? kFallbackCensus : kCertCensus;\n  return out;\n}\n",
+       "remplace": "  }\n  ++(fallback ? n.route_fallback_census : n.route_cert_census);\n  out.certified.emplace(cert->ball);\n  out.support = key;\n  out.arity = cert->arity;\n  out.route = fallback ? kFallbackCensus : kCertCensus;\n  return out;\n}\n"
+      },
+      {
+       "cherche": "\n  static Outcome consume(void* raw, const BorrowedCensus& census) noexcept {\n    auto& s = *static_cast<CensusStep*>(raw);\n    s.counters.census_sites += census.ledger().point_tests;\n    s.counters.census_sites_max = std::max(s.counters.census_sites_max, census.ledger().point_tests);\n    s.counters.census_nodes += census.ledger().nodes;\n",
+       "remplace": "\n  static Outcome consume(void* raw, const BorrowedCensus& census) noexcept {\n    auto& s = *static_cast<CensusStep*>(raw);\n    // Census a temoins (T2-d) : la racine contient toujours le support, temoin sur la sphere ; aucune decision par\n    // temoin signifie que le support n'a pas ete transmis (travail perdu, resultat inchange).\n    if (census.ledger().guard_witness == 0) return fail(Reason::tower_invariant, s.k);\n    s.counters.census_sites += census.ledger().point_tests;\n    s.counters.census_sites_max = std::max(s.counters.census_sites_max, census.ledger().point_tests);\n    s.counters.census_nodes += census.ledger().nodes;\n"
+      },
+      {
+       "cherche": "      const num::CertifiedBall& ball = *located.value().certified;\n      MHGP12_TRY(control_level(cat, prev, ball.sphere().level(), n, k));  // AVANT toute sortie par saut\n      CensusStep step{d, k, n, ball.sphere(), false, false, kNone, Part{}};\n      MHGP12_TRY(workspace.query(d.index, ball, k, &step, &CensusStep::consume));\n      clock.lap(step.saturated ? kProfileCensusSaturated : kProfileCensusComplete);\n      if (step.saturated) {\n        ++n.jumps_census;\n",
+       "remplace": "      const num::CertifiedBall& ball = *located.value().certified;\n      MHGP12_TRY(control_level(cat, prev, ball.sphere().level(), n, k));  // AVANT toute sortie par saut\n      CensusStep step{d, k, n, ball.sphere(), false, false, kNone, Part{}};\n      const std::span<const SiteIdx> witnesses(located.value().support.data(), located.value().arity);\n      MHGP12_TRY(workspace.query(d.index, ball, k, witnesses, &step, &CensusStep::consume));  // census a temoins\n      clock.lap(step.saturated ? kProfileCensusSaturated : kProfileCensusComplete);\n      if (step.saturated) {\n        ++n.jumps_census;\n"
+      }
+     ]
+    }
+   }
+  },
+  "census": {
+   "branche_locale": "census",
+   "fichiers": {
+    "src/index/bounds.hpp": {
+     "sha256_apres": "d877fe59756a0686cc825a35bbfca9c1d50cc5d5c595e398767281c802f5a869",
+     "sha256_avant": "61a1d54a2c1386a1cb76ded2af235e99ae69ec10aa17d20e1b8dc33ddf7f2ac4",
+     "substitutions": [
+      {
+       "cherche": "// Bornes d'un parcours de census, interne au module index : voie generique (num::LatticeSphere, toute sphere, aucune\n// garde) ou voie gardee (num::GuardedSphere, boule certifiee seulement, NUM-GARDE). Une preparation par parcours ; les\n// compteurs de voies et de garde sont reportes dans le registre du census a chaque evaluation.\n#pragma once\n\n#include \"index/index.hpp\"\n",
+       "remplace": "// Bornes d'un parcours de census, interne au module index : voie generique (num::LatticeSphere, toute sphere, aucune\n// garde) ou voie gardee (num::GuardedSphere, boule certifiee seulement, NUM-GARDE). Une preparation par parcours ; les\n// compteurs de voies vont au registre du census a chaque evaluation (voie generique), ou s'accumulent dans la garde et\n// sont reportes une fois a la fin du parcours par flush (voie gardee, T2-d : plus de registre temporaire par appel).\n#pragma once\n\n#include \"index/index.hpp\"\n"
+      },
+      {
+       "cherche": "    return lattice_.bound_signs(box, &ledger.lanes);  // minorant sur sites entiers, majorant continu\n  }\n  Result<int> side(num::Point point, CensusLedger& ledger) const noexcept { return lattice_.side(point, &ledger.lanes); }\n\n private:\n  const num::Sphere& sphere_;\n",
+       "remplace": "    return lattice_.bound_signs(box, &ledger.lanes);  // minorant sur sites entiers, majorant continu\n  }\n  Result<int> side(num::Point point, CensusLedger& ledger) const noexcept { return lattice_.side(point, &ledger.lanes); }\n  void flush(CensusLedger&) const noexcept {}\n\n private:\n  const num::Sphere& sphere_;\n"
+      },
+      {
+       "cherche": "  GuardedBounds(const GuardedBounds&) = delete;\n  GuardedBounds& operator=(const GuardedBounds&) = delete;\n  const num::Sphere& sphere() const noexcept { return ball_.sphere(); }\n  Result<num::PowerBoundSigns> bound_signs(const num::Box& box, CensusLedger& ledger) const noexcept {\n    num::GuardLedger guard;\n    auto signs = guard_.bound_signs(box, &guard);\n    absorb(guard, ledger);\n    return signs;\n  }\n  Result<int> side(num::Point point, CensusLedger& ledger) const noexcept {\n    num::GuardLedger guard;\n    auto value = guard_.side(point, &guard);\n    absorb(guard, ledger);\n    return value;\n  }\n\n private:\n",
+       "remplace": "  GuardedBounds(const GuardedBounds&) = delete;\n  GuardedBounds& operator=(const GuardedBounds&) = delete;\n  const num::Sphere& sphere() const noexcept { return ball_.sphere(); }\n  Result<num::PowerBoundSigns> bound_signs(const num::Box& box, CensusLedger&) const noexcept {\n    return guard_.bound_signs(box, &guard_ledger_);\n  }\n  Result<int> side(num::Point point, CensusLedger&) const noexcept { return guard_.side(point, &guard_ledger_); }\n  // Report des compteurs de la garde dans le registre du census, une fois a la fin du parcours.\n  void flush(CensusLedger& ledger) const noexcept {\n    absorb(guard_ledger_, ledger);\n    guard_ledger_ = {};\n  }\n\n private:\n"
+      },
+      {
+       "cherche": "  }\n  const num::CertifiedBall& ball_;\n  num::GuardedSphere guard_;\n};\n\n}  // namespace mhgp12::index_detail\n",
+       "remplace": "  }\n  const num::CertifiedBall& ball_;\n  num::GuardedSphere guard_;\n  mutable num::GuardLedger guard_ledger_;  // compteurs du parcours en cours, reportes par flush\n};\n\n}  // namespace mhgp12::index_detail\n"
+      }
+     ]
+    },
+    "src/index/census.cpp": {
+     "sha256_apres": "ca588e5db2bbb4a549f7a599d186029bc44be9a386b8529561fcc439312908b2",
+     "sha256_avant": "4f3d6f9819f592da0f911482e20f01c11b6e21e58af94ac2a4239dcd521aaa9d",
+     "substitutions": [
+      {
+       "cherche": "  {\n    const Bounds lattice(ball);\n    MHGP12_TRY(count.walk(index, lattice));\n  }\n  const bool saturated = count.p == threshold;\n  const u64 shell_size = saturated ? 0 : count.m;\n",
+       "remplace": "  {\n    const Bounds lattice(ball);\n    MHGP12_TRY(count.walk(index, lattice));\n    lattice.flush(ledger);\n  }\n  const bool saturated = count.p == threshold;\n  const u64 shell_size = saturated ? 0 : count.m;\n"
+      },
+      {
+       "cherche": "  {\n    const Bounds lattice(ball);\n    MHGP12_TRY(fill.walk(index, lattice));\n  }\n  return saturated ? CensusKind::saturated : CensusKind::complete;\n}\n",
+       "remplace": "  {\n    const Bounds lattice(ball);\n    MHGP12_TRY(fill.walk(index, lattice));\n    lattice.flush(ledger);\n  }\n  return saturated ? CensusKind::saturated : CensusKind::complete;\n}\n"
+      }
+     ]
+    },
+    "src/index/census_workspace.cpp": {
+     "sha256_apres": "bee79fd409488e710660aa788e83001bb68cd918c0f6852187cf0fe868f58fb4",
+     "sha256_avant": "dc48110ce8f81094f1374de0f09c352181e71379808a40aec0af79998ba515f8",
+     "substitutions": [
+      {
+       "cherche": "// Un seul parcours : I croissant a gauche, U empilee a droite puis inversee. Aucune allocation par requete.\n// Le meme parcours sert le census generique (LatticeSphere) et le census garde d'une boule certifiee (GuardedSphere).\n#include \"index/access.hpp\"\n#include \"index/bounds.hpp\"\n#include <algorithm>\n",
+       "remplace": "// Un seul parcours : I croissant a gauche, U empilee a droite puis inversee. Aucune allocation par requete.\n// Le meme parcours sert le census generique (LatticeSphere) et le census garde d'une boule certifiee (GuardedSphere),\n// avec ou sans temoins sur la sphere (index.hpp : un noeud qui contient un temoin est raffine sans bornes evaluees).\n#include \"index/access.hpp\"\n#include \"index/bounds.hpp\"\n#include <algorithm>\n"
+      },
+      {
+       "cherche": "struct BorrowedPass {\n  std::span<SiteIdx> storage;\n  u32 threshold;\n  CensusLedger ledger;\n  u64 p = 0, m = 0;\n\n  Outcome inside(u32 begin, u32 end) noexcept {\n    const u64 count = std::min<u64>(end - begin, threshold - p);\n",
+       "remplace": "struct BorrowedPass {\n  std::span<SiteIdx> storage;\n  u32 threshold;\n  std::span<const SiteIdx> witnesses;  // sites sur la sphere : leurs noeuds sont raffines sans bornes evaluees\n  CensusLedger ledger;\n  u64 p = 0, m = 0;\n\n  bool holds_witness(const index_detail::Node& node) const noexcept {\n    for (const SiteIdx w : witnesses)\n      if (idx(w) >= node.begin && idx(w) < node.end) return true;\n    return false;\n  }\n\n  Outcome inside(u32 begin, u32 end) noexcept {\n    const u64 count = std::min<u64>(end - begin, threshold - p);\n"
+      },
+      {
+       "cherche": "    for (u64 cursor = 0; cursor < nodes.size() && p < threshold;) {\n      const auto& node = nodes[cursor];\n      ++ledger.nodes; ++ledger.bounds;\n      auto signs = lattice.bound_signs(node.box, ledger);\n      if (!signs.ok()) return signs.outcome();\n      if (signs.value().lower > 0) {\n",
+       "remplace": "    for (u64 cursor = 0; cursor < nodes.size() && p < threshold;) {\n      const auto& node = nodes[cursor];\n      ++ledger.nodes; ++ledger.bounds;\n      if (holds_witness(node)) {  // minorant <= 0 et majorant >= 0 au temoin : ni exterieur ni interieur\n        ++ledger.guard_witness;\n        if (node.end - node.begin <= index.leaf_size()) {\n          MHGP12_TRY(points(index.cloud(), node.begin, node.end, lattice)); cursor = node.escape;\n        } else { ++cursor; }\n        continue;\n      }\n      auto signs = lattice.bound_signs(node.box, ledger);\n      if (!signs.ok()) return signs.outcome();\n      if (signs.value().lower > 0) {\n"
+      },
+      {
+       "cherche": "}\n\ntemplate <class Bounds, class Ball>\nOutcome CensusWorkspace::run(const GlobalIndex& index, const Ball& sphere, u32 threshold, void* context,\n                             Callback callback) noexcept {\n  if (active_.test_and_set(std::memory_order_acquire)) return fail(Reason::parameter_out_of_range);\n  const ActiveQuery active(active_);\n  if (&index != index_ || index.cloud().sites() != storage_.size() || threshold == 0 || callback == nullptr)\n    return fail(Reason::parameter_out_of_range);\n  BorrowedPass<Bounds> pass{storage_.span(), threshold, {}};\n  {\n    const Bounds lattice(sphere);\n    MHGP12_TRY(pass.walk(index, lattice));\n  }\n  const bool saturated = pass.p == threshold;\n  auto shell = storage_.span().last(saturated ? 0 : pass.m);\n",
+       "remplace": "}\n\ntemplate <class Bounds, class Ball>\nOutcome CensusWorkspace::run(const GlobalIndex& index, const Ball& sphere, u32 threshold,\n                             std::span<const SiteIdx> witnesses, void* context, Callback callback) noexcept {\n  if (active_.test_and_set(std::memory_order_acquire)) return fail(Reason::parameter_out_of_range);\n  const ActiveQuery active(active_);\n  if (&index != index_ || index.cloud().sites() != storage_.size() || threshold == 0 || callback == nullptr ||\n      witnesses.size() > kMaxWitnesses)\n    return fail(Reason::parameter_out_of_range);\n  for (const SiteIdx w : witnesses)\n    if (idx(w) >= storage_.size()) return fail(Reason::parameter_out_of_range);\n  BorrowedPass<Bounds> pass{storage_.span(), threshold, witnesses, {}};\n  {\n    const Bounds lattice(sphere);\n    MHGP12_TRY(pass.walk(index, lattice));\n    lattice.flush(pass.ledger);\n  }\n  const bool saturated = pass.p == threshold;\n  auto shell = storage_.span().last(saturated ? 0 : pass.m);\n"
+      },
+      {
+       "cherche": "\nOutcome CensusWorkspace::query(const GlobalIndex& index, const num::Sphere& sphere, u32 threshold,\n                               void* context, Callback callback) noexcept {\n  return run<index_detail::GenericBounds>(index, sphere, threshold, context, callback);\n}\n\nOutcome CensusWorkspace::query(const GlobalIndex& index, const num::CertifiedBall& ball, u32 threshold,\n                               void* context, Callback callback) noexcept {\n  return run<index_detail::GuardedBounds>(index, ball, threshold, context, callback);\n}\n}  // namespace mhgp12\n",
+       "remplace": "\nOutcome CensusWorkspace::query(const GlobalIndex& index, const num::Sphere& sphere, u32 threshold,\n                               void* context, Callback callback) noexcept {\n  return run<index_detail::GenericBounds>(index, sphere, threshold, {}, context, callback);\n}\n\nOutcome CensusWorkspace::query(const GlobalIndex& index, const num::CertifiedBall& ball, u32 threshold,\n                               void* context, Callback callback) noexcept {\n  return run<index_detail::GuardedBounds>(index, ball, threshold, {}, context, callback);\n}\n\nOutcome CensusWorkspace::query(const GlobalIndex& index, const num::CertifiedBall& ball, u32 threshold,\n                               std::span<const SiteIdx> witnesses, void* context, Callback callback) noexcept {\n  return run<index_detail::GuardedBounds>(index, ball, threshold, witnesses, context, callback);\n}\n}  // namespace mhgp12\n"
+      }
+     ]
+    },
+    "src/index/index.hpp": {
+     "sha256_apres": "a984c29ee8866f8742ac1e637ff2d3c487092e8e541537350c44ac7a278cfe7e",
+     "sha256_avant": "fbf64f625ff4d34061cf757796982a4369c6153dffdf9e11541530d9f7aa0530",
+     "substitutions": [
+      {
+       "cherche": "// Travail reel CUMULE des parcours executes : deux pour census possede (compte puis remplissage),\n// un pour CensusWorkspace. `passes` rend ce nombre ; jamais une estimation de passe logique.\n// `lanes` compte les voies numeriques des evaluations (repere local, docs/CONTRAT_NUMERIQUE.md, paragraphe 3) ;\n// les trois compteurs `guard_*` comptent les decisions que la garde (census d'une boule certifiee) prend sans\n// arithmetique : boites disjointes du pave, boites partielles a raffiner, sites hors du pave.\nstruct CensusLedger {\n  u64 nodes = 0, bounds = 0, point_tests = 0, inside_blocks = 0, outside_blocks = 0, passes = 0;\n  num::LaneCount lanes;\n  u64 guard_disjoint = 0, guard_partial = 0, guard_outside = 0;\n  friend bool operator==(const CensusLedger&, const CensusLedger&) = default;\n};\n\n",
+       "remplace": "// Travail reel CUMULE des parcours executes : deux pour census possede (compte puis remplissage),\n// un pour CensusWorkspace. `passes` rend ce nombre ; jamais une estimation de passe logique.\n// `lanes` compte les voies numeriques des evaluations (repere local, docs/CONTRAT_NUMERIQUE.md, paragraphe 3) ;\n// les compteurs `guard_*` comptent les decisions que la garde (census d'une boule certifiee) prend sans\n// arithmetique : boites disjointes du pave, boites partielles a raffiner, sites hors du pave, et noeuds raffines par\n// un temoin sur la sphere (census a temoins, CensusWorkspace::query). `bounds` compte les noeuds interroges (bornes\n// decidees par arithmetique, par la garde ou par un temoin), pas les appels a bound_signs : guard_witness compte les\n// appels evites (contre-lecture de l'auditeur Codex du 8 octobre, receipts/audit_reponses_20261008/census_temoins).\nstruct CensusLedger {\n  u64 nodes = 0, bounds = 0, point_tests = 0, inside_blocks = 0, outside_blocks = 0, passes = 0;\n  num::LaneCount lanes;\n  u64 guard_disjoint = 0, guard_partial = 0, guard_outside = 0, guard_witness = 0;\n  friend bool operator==(const CensusLedger&, const CensusLedger&) = default;\n};\n\n"
+      },
+      {
+       "cherche": "  // Meme requete pour une boule certifiee : census garde, une passe.\n  [[nodiscard]] Outcome query(const GlobalIndex&, const num::CertifiedBall&, u32 threshold,\n                               void* context, Callback) noexcept;\n\n private:\n  explicit CensusWorkspace(const GlobalIndex& index) noexcept : index_(&index) {}\n  template <class Bounds, class Ball>\n  Outcome run(const GlobalIndex&, const Ball&, u32 threshold, void* context, Callback) noexcept;\n  const GlobalIndex* index_;\n  Buffer<SiteIdx> storage_;\n  std::atomic_flag active_ = ATOMIC_FLAG_INIT;\n",
+       "remplace": "  // Meme requete pour une boule certifiee : census garde, une passe.\n  [[nodiscard]] Outcome query(const GlobalIndex&, const num::CertifiedBall&, u32 threshold,\n                               void* context, Callback) noexcept;\n  // Census garde A TEMOINS (T2-d) : witnesses donne au plus kMaxWitnesses SiteIdx de sites SUR la sphere (le support\n  // de la boule certifiee). Un noeud dont la plage contient un temoin a un minorant entier <= 0 (le temoin est un point\n  // entier de sa boite, de puissance nulle) et un majorant >= 0 : il n'est ni exterieur ni interieur, il est raffine\n  // (ses sites testes s'il est une feuille) SANS evaluer ses bornes. Memes resultats, memes noeuds et memes sites\n  // testes que query sans temoins quand les temoins sont sur la sphere ; un faux temoin ne change que le travail (des\n  // noeuds raffines au lieu d'etre tranches), jamais I ni U, car tout site reste teste exactement. Refus\n  // parameter_out_of_range au-dela de kMaxWitnesses temoins ou pour un temoin hors du nuage.\n  static constexpr std::size_t kMaxWitnesses = 4;\n  [[nodiscard]] Outcome query(const GlobalIndex&, const num::CertifiedBall&, u32 threshold,\n                               std::span<const SiteIdx> witnesses, void* context, Callback) noexcept;\n\n private:\n  explicit CensusWorkspace(const GlobalIndex& index) noexcept : index_(&index) {}\n  template <class Bounds, class Ball>\n  Outcome run(const GlobalIndex&, const Ball&, u32 threshold, std::span<const SiteIdx> witnesses, void* context,\n              Callback) noexcept;\n  const GlobalIndex* index_;\n  Buffer<SiteIdx> storage_;\n  std::atomic_flag active_ = ATOMIC_FLAG_INIT;\n"
+      }
+     ]
+    },
+    "src/num/budgets.hpp": {
+     "sha256_apres": "d3f3fe22d7bfd3bbab1b377d983aa08897f1bfd320625879527fcaf0be61424f",
+     "sha256_avant": "133096e348bcc8790dbd86cc4b5238ad5d8ea7dbac5d24679c7c0bda7fdff104",
+     "substitutions": [
+      {
+       "cherche": "  static constexpr int level_numerator = 8 * S + 12;  // q4 : 3*(18 M^4)^2 < 1024 M^8\n  static constexpr int level_denominator = 6 * S + 8;  // q4 : (12 M^3)^2 < 256 M^6\n  static constexpr int level_comparison = level_numerator + level_denominator;  // 14 S + 20\n  // Budgets mixtes (CST-0111) : centre au budget du support, sites confrontes dans la garde (|z_j-o_j| < 3M).\n  static constexpr int guarded_side = 6 * S + 11;     // < 648 M^6 + 432 M^6 < 2^11 M^6\n  static constexpr int guarded_orientation = 7 * S + 14;  // < 14 400 M^7 < 2^14 M^7\n  static constexpr int guarded_vertex_orientation = 3 * S + 10;\n",
+       "remplace": "  static constexpr int level_numerator = 8 * S + 12;  // q4 : 3*(18 M^4)^2 < 1024 M^8\n  static constexpr int level_denominator = 6 * S + 8;  // q4 : (12 M^3)^2 < 256 M^6\n  static constexpr int level_comparison = level_numerator + level_denominator;  // 14 S + 20\n  // Budgets mixtes (CST-0111) : centre au budget du support, sites confrontes dans la garde (|z_j-o_j| < 3M ;\n  // majorant conserve depuis le pave resserre de NUM-GARDE, qui donne |z_j-o_j| < 2M).\n  static constexpr int guarded_side = 6 * S + 11;     // < 648 M^6 + 432 M^6 < 2^11 M^6\n  static constexpr int guarded_orientation = 7 * S + 14;  // < 14 400 M^7 < 2^14 M^7\n  static constexpr int guarded_vertex_orientation = 3 * S + 10;\n"
+      }
+     ]
+    },
+    "src/num/guard.cpp": {
+     "sha256_apres": "5a5fc29b65e21b1b74f642986614eb1fb0801cc084ae7ec50bc3aedc7e5655fc",
+     "sha256_avant": "459b99dfe154f32d8ab468d3a410a1bd74ca4c94363634244f37c8cdf7fc720b",
+     "substitutions": [
+      {
+       "cherche": "  const i64 m = i64{1} << s;\n  for (int j = 0; j < 3; ++j) {\n    anchor_[j] = sphere.anchor().coordinates()[j];\n    guard_lo_[j] = i64{ball.corner()[j]} - 2 * m;\n    guard_hi_[j] = i64{ball.corner()[j]} + 3 * m;\n  }\n  native_coefficients_ = view.native_coefficients();\n  // Voie uniforme : palier etroit (6s+11 <= 107), sinon certificat au domaine des requetes gardees, t = s+2.\n",
+       "remplace": "  const i64 m = i64{1} << s;\n  for (int j = 0; j < 3; ++j) {\n    anchor_[j] = sphere.anchor().coordinates()[j];\n    guard_lo_[j] = i64{ball.corner()[j]} - m;\n    guard_hi_[j] = i64{ball.corner()[j]} + 2 * m;\n  }\n  native_coefficients_ = view.native_coefficients();\n  // Voie uniforme : palier etroit (6s+11 <= 107), sinon certificat au domaine des requetes gardees, t = s+2.\n"
+      },
+      {
+       "cherche": "  }\n}\n\n// Precondition : |v_j| < 3M, ecart a l'ancre d'un point du pave.\nResult<int> GuardedSphere::power_sign(const std::array<i64, 3>& v, GuardLedger* ledger) const noexcept {\n  if (broken_) return fail(Reason::arithmetic_invariant);\n  LaneCount* lanes = ledger == nullptr ? nullptr : &ledger->lanes;\n",
+       "remplace": "  }\n}\n\n// Precondition : |v_j| < 2M, ecart a l'ancre d'un point du pave resserre ; les budgets restent ceux de |v_j| < 3M.\nResult<int> GuardedSphere::power_sign(const std::array<i64, 3>& v, GuardLedger* ledger) const noexcept {\n  if (broken_) return fail(Reason::arithmetic_invariant);\n  LaneCount* lanes = ledger == nullptr ? nullptr : &ledger->lanes;\n"
+      }
+     ]
+    },
+    "src/num/guard.hpp": {
+     "sha256_apres": "6c73d770688b2e35036940e1524ac479f71b41f79d84c6b80fdbfb664d566b48",
+     "sha256_avant": "8c2afab759cce1b7fe90336361a5fd7b653862378814c614c95f0b58086a2884",
+     "substitutions": [
+      {
+       "cherche": "// conv(S) en exact par les signes barycentriques (q1, q2 toujours ; q3 strictement aigu ; q4 poids de presentation\n// strictement positifs). Une candidate refusee reste dans la voie generique (LatticeSphere), sans garde.\n//\n// NUM-GARDE. Soit s l'etendue du support S, m son coin minimal, M = 2^s. Le centre est dans [m, m+M-1] par axe et\n// R <= diam(S) < 2M ; tout point x de la boule fermee verifie m_j - 2M < x_j < m_j + 3M : c'est le PAVE (ouvert).\n//   - site hors du pave : exterieur, sans arithmetique ; site dans le pave : |x_j - o_j| < 3M < 2^(s+2) pour l'ancre\n//     o de S, d'ou le budget mixte 6s+11 (CST-0111) et le certificat de puissance au domaine t = s+2, jamais s ;\n//   - boite DISJOINTE du pave : exterieure ; sinon minorant au point entier de la boite le plus proche du centre,\n//     calcule en local (plancher de N_j/D, + o_j, saturation a la boite), qui est dans le pave ;\n//   - boite NON CONTENUE dans le pave : majorant positif sans arithmetique (elle n'est pas dans la boule) ; une\n",
+       "remplace": "// conv(S) en exact par les signes barycentriques (q1, q2 toujours ; q3 strictement aigu ; q4 poids de presentation\n// strictement positifs). Une candidate refusee reste dans la voie generique (LatticeSphere), sans garde.\n//\n// NUM-GARDE. Soit s l'etendue du support S, m son coin minimal, M = 2^s. Le centre est dans [m, m+M-1] par axe.\n// Avec c dans conv(S) et S sur la sphere, la boule est MEB(S). La boule au milieu de la boite du support contient S,\n// donc R^2 <= (wx^2+wy^2+wz^2)/4 <= 3(M-1)^2/4 < M^2. Tout point x de la boule fermee verifie ainsi\n// m_j - M < x_j < m_j + 2M : c'est le PAVE (ouvert), y compris s=0.\n//   - site hors du pave : exterieur, sans arithmetique ; site dans le pave : |x_j - o_j| < 2M pour l'ancre o de S.\n//     On conserve ici les budgets anterieurs plus larges : 6s+11 (CST-0111), domaine t = s+2 et voies inchangees ;\n//   - boite DISJOINTE du pave : exterieure ; sinon minorant au point entier de la boite le plus proche du centre,\n//     calcule en local (plancher de N_j/D, + o_j, saturation a la boite), qui est dans le pave ;\n//   - boite NON CONTENUE dans le pave : majorant positif sans arithmetique (elle n'est pas dans la boule) ; une\n"
+      }
+     ]
+    },
+    "src/num/power_certificate.hpp": {
+     "sha256_apres": "f5071c6dfe33c14df1911852cf79ac645e85cb6affc05474adf56b5fbffc9ef1",
+     "sha256_avant": "36151714489a9b73dbac6645fd08476451f771d167702bfadb86eaec100e55c0",
+     "substitutions": [
+      {
+       "cherche": "// chacun des trois termes lineaires 2|N_j v_j| par 2^125 ; la somme des magnitudes, < 15*2^123 < 2^127, borne chaque\n// produit ET chaque somme partielle en i128. La preuve ne lit ni l'arite ni l'etendue du support : seulement t et les\n// coefficients. Le certificat de la v11 (q3_global_power_i128) est le cas t = B, domaine de tous les Point du profil ;\n// le recensement garde exige t = s+2 (NUM-GARDE : |v_j| < 3M < 2^(s+2)), jamais s.\n// Aucun coefficient public forgeable : les fabriques de num calculent le domaine une fois.\n#pragma once\n#include <array>\n",
+       "remplace": "// chacun des trois termes lineaires 2|N_j v_j| par 2^125 ; la somme des magnitudes, < 15*2^123 < 2^127, borne chaque\n// produit ET chaque somme partielle en i128. La preuve ne lit ni l'arite ni l'etendue du support : seulement t et les\n// coefficients. Le certificat de la v11 (q3_global_power_i128) est le cas t = B, domaine de tous les Point du profil ;\n// le recensement garde conserve t = s+2 : cette politique reste suffisante apres le resserrement du pave.\n// Les bornes plus fines exploitant CertifiedBall se qualifient separement ; ce certificat generique reste inchange.\n// Aucun coefficient public forgeable : les fabriques de num calculent le domaine une fois.\n#pragma once\n#include <array>\n"
+      }
+     ]
+    },
+    "src/tower/resolve.cpp": {
+     "sha256_apres": "3d2bd04e02e60b6bab1d27b77a488112f80791f69395805273f539c6773dc1af",
+     "sha256_avant": "583d9778d5b8f6c3f8972c7f19f62c3b8174d897f996461392bc6103be28740d",
+     "substitutions": [
+      {
+       "cherche": "  return out;\n}\n\n// Plus petite boule de F : boule du catalogue (ball), ou boule certifiee hors de la table (certified).\nstruct Located {\n  u32 ball = kNone;\n  std::optional<num::CertifiedBall> certified;\n  Route route = kT1;\n};\n\n",
+       "remplace": "  return out;\n}\n\n// Plus petite boule de F : boule du catalogue (ball), ou boule certifiee hors de la table (certified) avec son support\n// canonique parmi les sites de F sur la sphere (temoins du census, T2-d : ces sites sont SUR la sphere).\nstruct Located {\n  u32 ball = kNone;\n  std::optional<num::CertifiedBall> certified;\n  std::array<SiteIdx, 4> support{};\n  u8 arity = 0;\n  Route route = kT1;\n};\n\n"
+      },
+      {
+       "cherche": "  }\n  ++(fallback ? n.route_fallback_census : n.route_cert_census);\n  out.certified.emplace(cert->ball);\n  out.route = fallback ? kFallbackCensus : kCertCensus;\n  return out;\n}\n",
+       "remplace": "  }\n  ++(fallback ? n.route_fallback_census : n.route_cert_census);\n  out.certified.emplace(cert->ball);\n  out.support = key;\n  out.arity = cert->arity;\n  out.route = fallback ? kFallbackCensus : kCertCensus;\n  return out;\n}\n"
+      },
+      {
+       "cherche": "\n  static Outcome consume(void* raw, const BorrowedCensus& census) noexcept {\n    auto& s = *static_cast<CensusStep*>(raw);\n    s.counters.census_sites += census.ledger().point_tests;\n    s.counters.census_sites_max = std::max(s.counters.census_sites_max, census.ledger().point_tests);\n    s.counters.census_nodes += census.ledger().nodes;\n",
+       "remplace": "\n  static Outcome consume(void* raw, const BorrowedCensus& census) noexcept {\n    auto& s = *static_cast<CensusStep*>(raw);\n    // Census a temoins (T2-d) : la racine contient toujours le support, temoin sur la sphere ; aucune decision par\n    // temoin signifie que le support n'a pas ete transmis (travail perdu, resultat inchange).\n    if (census.ledger().guard_witness == 0) return fail(Reason::tower_invariant, s.k);\n    s.counters.census_sites += census.ledger().point_tests;\n    s.counters.census_sites_max = std::max(s.counters.census_sites_max, census.ledger().point_tests);\n    s.counters.census_nodes += census.ledger().nodes;\n"
+      },
+      {
+       "cherche": "      const num::CertifiedBall& ball = *located.value().certified;\n      MHGP12_TRY(control_level(cat, prev, ball.sphere().level(), n, k));  // AVANT toute sortie par saut\n      CensusStep step{d, k, n, ball.sphere(), false, false, kNone, Part{}};\n      MHGP12_TRY(workspace.query(d.index, ball, k, &step, &CensusStep::consume));\n      clock.lap(step.saturated ? kProfileCensusSaturated : kProfileCensusComplete);\n      if (step.saturated) {\n        ++n.jumps_census;\n",
+       "remplace": "      const num::CertifiedBall& ball = *located.value().certified;\n      MHGP12_TRY(control_level(cat, prev, ball.sphere().level(), n, k));  // AVANT toute sortie par saut\n      CensusStep step{d, k, n, ball.sphere(), false, false, kNone, Part{}};\n      const std::span<const SiteIdx> witnesses(located.value().support.data(), located.value().arity);\n      MHGP12_TRY(workspace.query(d.index, ball, k, witnesses, &step, &CensusStep::consume));  // census a temoins\n      clock.lap(step.saturated ? kProfileCensusSaturated : kProfileCensusComplete);\n      if (step.saturated) {\n        ++n.jumps_census;\n"
+      }
+     ]
+    }
+   }
+  },
+  "garde": {
+   "branche_locale": "l1_garde",
+   "fichiers": {
+    "src/num/budgets.hpp": {
+     "sha256_apres": "d3f3fe22d7bfd3bbab1b377d983aa08897f1bfd320625879527fcaf0be61424f",
+     "sha256_avant": "133096e348bcc8790dbd86cc4b5238ad5d8ea7dbac5d24679c7c0bda7fdff104",
+     "substitutions": [
+      {
+       "cherche": "  static constexpr int level_numerator = 8 * S + 12;  // q4 : 3*(18 M^4)^2 < 1024 M^8\n  static constexpr int level_denominator = 6 * S + 8;  // q4 : (12 M^3)^2 < 256 M^6\n  static constexpr int level_comparison = level_numerator + level_denominator;  // 14 S + 20\n  // Budgets mixtes (CST-0111) : centre au budget du support, sites confrontes dans la garde (|z_j-o_j| < 3M).\n  static constexpr int guarded_side = 6 * S + 11;     // < 648 M^6 + 432 M^6 < 2^11 M^6\n  static constexpr int guarded_orientation = 7 * S + 14;  // < 14 400 M^7 < 2^14 M^7\n  static constexpr int guarded_vertex_orientation = 3 * S + 10;\n",
+       "remplace": "  static constexpr int level_numerator = 8 * S + 12;  // q4 : 3*(18 M^4)^2 < 1024 M^8\n  static constexpr int level_denominator = 6 * S + 8;  // q4 : (12 M^3)^2 < 256 M^6\n  static constexpr int level_comparison = level_numerator + level_denominator;  // 14 S + 20\n  // Budgets mixtes (CST-0111) : centre au budget du support, sites confrontes dans la garde (|z_j-o_j| < 3M ;\n  // majorant conserve depuis le pave resserre de NUM-GARDE, qui donne |z_j-o_j| < 2M).\n  static constexpr int guarded_side = 6 * S + 11;     // < 648 M^6 + 432 M^6 < 2^11 M^6\n  static constexpr int guarded_orientation = 7 * S + 14;  // < 14 400 M^7 < 2^14 M^7\n  static constexpr int guarded_vertex_orientation = 3 * S + 10;\n"
+      }
+     ]
+    },
+    "src/num/guard.cpp": {
+     "sha256_apres": "5a5fc29b65e21b1b74f642986614eb1fb0801cc084ae7ec50bc3aedc7e5655fc",
+     "sha256_avant": "459b99dfe154f32d8ab468d3a410a1bd74ca4c94363634244f37c8cdf7fc720b",
+     "substitutions": [
+      {
+       "cherche": "  const i64 m = i64{1} << s;\n  for (int j = 0; j < 3; ++j) {\n    anchor_[j] = sphere.anchor().coordinates()[j];\n    guard_lo_[j] = i64{ball.corner()[j]} - 2 * m;\n    guard_hi_[j] = i64{ball.corner()[j]} + 3 * m;\n  }\n  native_coefficients_ = view.native_coefficients();\n  // Voie uniforme : palier etroit (6s+11 <= 107), sinon certificat au domaine des requetes gardees, t = s+2.\n",
+       "remplace": "  const i64 m = i64{1} << s;\n  for (int j = 0; j < 3; ++j) {\n    anchor_[j] = sphere.anchor().coordinates()[j];\n    guard_lo_[j] = i64{ball.corner()[j]} - m;\n    guard_hi_[j] = i64{ball.corner()[j]} + 2 * m;\n  }\n  native_coefficients_ = view.native_coefficients();\n  // Voie uniforme : palier etroit (6s+11 <= 107), sinon certificat au domaine des requetes gardees, t = s+2.\n"
+      },
+      {
+       "cherche": "  }\n}\n\n// Precondition : |v_j| < 3M, ecart a l'ancre d'un point du pave.\nResult<int> GuardedSphere::power_sign(const std::array<i64, 3>& v, GuardLedger* ledger) const noexcept {\n  if (broken_) return fail(Reason::arithmetic_invariant);\n  LaneCount* lanes = ledger == nullptr ? nullptr : &ledger->lanes;\n",
+       "remplace": "  }\n}\n\n// Precondition : |v_j| < 2M, ecart a l'ancre d'un point du pave resserre ; les budgets restent ceux de |v_j| < 3M.\nResult<int> GuardedSphere::power_sign(const std::array<i64, 3>& v, GuardLedger* ledger) const noexcept {\n  if (broken_) return fail(Reason::arithmetic_invariant);\n  LaneCount* lanes = ledger == nullptr ? nullptr : &ledger->lanes;\n"
+      }
+     ]
+    },
+    "src/num/guard.hpp": {
+     "sha256_apres": "6c73d770688b2e35036940e1524ac479f71b41f79d84c6b80fdbfb664d566b48",
+     "sha256_avant": "8c2afab759cce1b7fe90336361a5fd7b653862378814c614c95f0b58086a2884",
+     "substitutions": [
+      {
+       "cherche": "// conv(S) en exact par les signes barycentriques (q1, q2 toujours ; q3 strictement aigu ; q4 poids de presentation\n// strictement positifs). Une candidate refusee reste dans la voie generique (LatticeSphere), sans garde.\n//\n// NUM-GARDE. Soit s l'etendue du support S, m son coin minimal, M = 2^s. Le centre est dans [m, m+M-1] par axe et\n// R <= diam(S) < 2M ; tout point x de la boule fermee verifie m_j - 2M < x_j < m_j + 3M : c'est le PAVE (ouvert).\n//   - site hors du pave : exterieur, sans arithmetique ; site dans le pave : |x_j - o_j| < 3M < 2^(s+2) pour l'ancre\n//     o de S, d'ou le budget mixte 6s+11 (CST-0111) et le certificat de puissance au domaine t = s+2, jamais s ;\n//   - boite DISJOINTE du pave : exterieure ; sinon minorant au point entier de la boite le plus proche du centre,\n//     calcule en local (plancher de N_j/D, + o_j, saturation a la boite), qui est dans le pave ;\n//   - boite NON CONTENUE dans le pave : majorant positif sans arithmetique (elle n'est pas dans la boule) ; une\n",
+       "remplace": "// conv(S) en exact par les signes barycentriques (q1, q2 toujours ; q3 strictement aigu ; q4 poids de presentation\n// strictement positifs). Une candidate refusee reste dans la voie generique (LatticeSphere), sans garde.\n//\n// NUM-GARDE. Soit s l'etendue du support S, m son coin minimal, M = 2^s. Le centre est dans [m, m+M-1] par axe.\n// Avec c dans conv(S) et S sur la sphere, la boule est MEB(S). La boule au milieu de la boite du support contient S,\n// donc R^2 <= (wx^2+wy^2+wz^2)/4 <= 3(M-1)^2/4 < M^2. Tout point x de la boule fermee verifie ainsi\n// m_j - M < x_j < m_j + 2M : c'est le PAVE (ouvert), y compris s=0.\n//   - site hors du pave : exterieur, sans arithmetique ; site dans le pave : |x_j - o_j| < 2M pour l'ancre o de S.\n//     On conserve ici les budgets anterieurs plus larges : 6s+11 (CST-0111), domaine t = s+2 et voies inchangees ;\n//   - boite DISJOINTE du pave : exterieure ; sinon minorant au point entier de la boite le plus proche du centre,\n//     calcule en local (plancher de N_j/D, + o_j, saturation a la boite), qui est dans le pave ;\n//   - boite NON CONTENUE dans le pave : majorant positif sans arithmetique (elle n'est pas dans la boule) ; une\n"
+      }
+     ]
+    },
+    "src/num/power_certificate.hpp": {
+     "sha256_apres": "f5071c6dfe33c14df1911852cf79ac645e85cb6affc05474adf56b5fbffc9ef1",
+     "sha256_avant": "36151714489a9b73dbac6645fd08476451f771d167702bfadb86eaec100e55c0",
+     "substitutions": [
+      {
+       "cherche": "// chacun des trois termes lineaires 2|N_j v_j| par 2^125 ; la somme des magnitudes, < 15*2^123 < 2^127, borne chaque\n// produit ET chaque somme partielle en i128. La preuve ne lit ni l'arite ni l'etendue du support : seulement t et les\n// coefficients. Le certificat de la v11 (q3_global_power_i128) est le cas t = B, domaine de tous les Point du profil ;\n// le recensement garde exige t = s+2 (NUM-GARDE : |v_j| < 3M < 2^(s+2)), jamais s.\n// Aucun coefficient public forgeable : les fabriques de num calculent le domaine une fois.\n#pragma once\n#include <array>\n",
+       "remplace": "// chacun des trois termes lineaires 2|N_j v_j| par 2^125 ; la somme des magnitudes, < 15*2^123 < 2^127, borne chaque\n// produit ET chaque somme partielle en i128. La preuve ne lit ni l'arite ni l'etendue du support : seulement t et les\n// coefficients. Le certificat de la v11 (q3_global_power_i128) est le cas t = B, domaine de tous les Point du profil ;\n// le recensement garde conserve t = s+2 : cette politique reste suffisante apres le resserrement du pave.\n// Les bornes plus fines exploitant CertifiedBall se qualifient separement ; ce certificat generique reste inchange.\n// Aucun coefficient public forgeable : les fabriques de num calculent le domaine une fois.\n#pragma once\n#include <array>\n"
+      }
+     ]
+    }
+   }
+  },
+  "proposition": {
+   "branche_locale": "l4_proposition",
+   "fichiers": {
+    "src/tower/proposal.hpp": {
+     "sha256_apres": "a82de524758fe65a70cd08251530b77e2a44479ff4828e2d827440b69f86eff0",
+     "sha256_avant": "92495aa67223577c8acef74967f89853c0dab3c5881afe1fb2c7826327f28c18",
+     "substitutions": [
+      {
+       "cherche": "// (degenerescence flottante, tours epuises) rend ok = false. Repere local : coordonnees translatees par le premier site\n// de la partie (differences entieres < 2^32, exactes en binaire64) ; tolerances et constantes de la v10 inchangees\n// (1e-9, 1e-10, 8 tours) ; au plus 12 sites (K <= 12).\n#pragma once\n\n#include <array>\n\nnamespace mhgp12::tower_detail {\n\nstruct DBall {\n  double c[3] = {0, 0, 0};\n",
+       "remplace": "// (degenerescence flottante, tours epuises) rend ok = false. Repere local : coordonnees translatees par le premier site\n// de la partie (differences entieres < 2^32, exactes en binaire64) ; tolerances et constantes de la v10 inchangees\n// (1e-9, 1e-10, 8 tours) ; au plus 12 sites (K <= 12).\n//\n// Voie entiere (T2-d, avant le flottant) : en entiers exacts dans le repere local, la paire la plus eloignee (a, b) et\n// le test de la boule diametrale fermee, (x - a).(x - b) <= 0 pour chaque autre site x. Si tous y sont, la plus petite\n// boule de la partie est cette boule (son rayon est au moins le demi-diametre), et (a, b) son support ; parmi des\n// paires les plus eloignees ex aequo (toutes diametrales de la meme boule), la plus petite liste triee des positions,\n// canonique parmi les sites de F (pas necessairement S* de la coquille globale ; CST-0113).\n// Sinon, pour trois sites, le triangle est aigu (l'angle oppose au plus grand cote est aigu) :\n// le support est la partie entiere. Sinon (quatre sites ou plus) : la proposition flottante, amorcee sur la paire la\n// plus eloignee exacte au lieu de la paire heuristique (barycentre, puis le plus loin). Cette voie ne decide rien non\n// plus : son support est certifie comme l'autre (LEM-T1, certificat exact) ; elle evite le flottant pour 56 % des\n// parties de ng00 a K5 (paires, triangles, et parties dont la boule est diametrale). Propositions identiques a celles\n// de DWelzl seul sur les 2 719 521 parties de ng00-02 a K5 (microbanc du chantier T2-d-B).\n#pragma once\n\n#include <array>\n#include <type_traits>\n\n#include \"core/core.hpp\"\n\nnamespace mhgp12::tower_detail {\n\n// Entier assez large pour une somme de trois carres d'ecarts de coordonnees (|ecart| < 2^B) : i64 jusqu'a B = 30.\nusing ExactSquare = std::conditional_t<(kCoordBits <= 30), i64, i128>;\n\n// Voie entiere de la proposition sur n sites (2 <= n <= 12) : ecarts a l'origine de la partie (local) ; position(i)\n// rend la position absolue du site i (departage des paires ex aequo, rare). Rend l'arite (2 ou 3) et le support en\n// indices de la partie, ou 0 si elle ne conclut pas.\ntemplate <class Position>\nint exact_small_support(const i64 (*local)[3], int n, Position&& position, int support[3]) noexcept {\n  support[0] = 0;\n  support[1] = 1;\n  if (n == 2) return 2;\n  auto square = [&](int i, int j) {\n    ExactSquare s = 0;\n    for (int a = 0; a < 3; ++a) {\n      const ExactSquare d = static_cast<ExactSquare>(local[i][a] - local[j][a]);\n      s += d * d;\n    }\n    return s;\n  };\n  // Liste triee des positions de la paire (i, j), pour le departage des paires ex aequo.\n  auto ordered = [&](int i, int j) {\n    const std::array<u32, 3> x = position(i), y = position(j);\n    return x < y ? std::array<std::array<u32, 3>, 2>{x, y} : std::array<std::array<u32, 3>, 2>{y, x};\n  };\n  int a = 0, b = 1;\n  ExactSquare best = square(0, 1);\n  for (int i = 0; i < n; ++i)\n    for (int j = i + 1; j < n; ++j) {\n      if (i == 0 && j == 1) continue;\n      const ExactSquare s = square(i, j);\n      if (s > best || (s == best && ordered(i, j) < ordered(a, b))) {\n        best = s;\n        a = i;\n        b = j;\n      }\n    }\n  int outside = -1;\n  for (int x = 0; x < n && outside < 0; ++x) {\n    if (x == a || x == b) continue;\n    ExactSquare dot = 0;\n    for (int c = 0; c < 3; ++c)\n      dot += static_cast<ExactSquare>(local[x][c] - local[a][c]) * static_cast<ExactSquare>(local[x][c] - local[b][c]);\n    if (dot > 0) outside = x;  // hors de la boule diametrale fermee de (a, b)\n  }\n  support[0] = a;\n  support[1] = b;\n  if (outside < 0) return 2;\n  if (n != 3) return 0;\n  support[2] = outside;  // angle aigu en face du plus grand cote : triangle aigu, cercle circonscrit\n  return 3;\n}\n\nstruct DBall {\n  double c[3] = {0, 0, 0};\n"
+      },
+      {
+       "cherche": "  double p[kCapacity][3];\n  bool ok = true;\n\n  DBall run(int n) {\n    {\n      const DBall B = run_support(n);\n      if (ok) return B;\n      ok = true;\n    }\n",
+       "remplace": "  double p[kCapacity][3];\n  bool ok = true;\n\n  DBall run(int n, int seed_a = -1, int seed_b = -1) {\n    {\n      const DBall B = seed_a >= 0 ? run_pair(n, seed_a, seed_b) : run_support(n);\n      if (ok) return B;\n      ok = true;\n    }\n"
+      },
+      {
+       "cherche": "    for (int a = 0; a < 3; ++a) gc[a] /= n;\n    const int ia = farthest(n, gc);\n    const int ib = farthest(n, p[ia]);\n    if (ia == ib) {\n      ok = false;\n      return DBall{};\n",
+       "remplace": "    for (int a = 0; a < 3; ++a) gc[a] /= n;\n    const int ia = farthest(n, gc);\n    const int ib = farthest(n, p[ia]);\n    return run_pair(n, ia, ib);\n  }\n  DBall run_pair(int n, int ia, int ib) {\n    if (ia == ib) {\n      ok = false;\n      return DBall{};\n"
+      }
+     ]
+    },
+    "src/tower/resolve.cpp": {
+     "sha256_apres": "102b1011dc1ccc6eecb4baf34cb6108cd9dc61b3cd1d53bf5b80eaff02041a57",
+     "sha256_avant": "583d9778d5b8f6c3f8972c7f19f62c3b8174d897f996461392bc6103be28740d",
+     "substitutions": [
+      {
+       "cherche": "  u32 q = 0;\n};\n\n// DWelzl dans le repere local de la partie (translation par son premier site) ; ne decide rien.\nProposal propose(const Domain& d, const Part& f) noexcept {\n  DWelzl w;\n  const auto& origin = d.points[f.id[0]].coordinates();\n  for (u32 i = 0; i < f.k; ++i)\n    for (int a = 0; a < 3; ++a)\n      w.p[i][a] = static_cast<double>(d.points[f.id[i]].coordinates()[a]) - static_cast<double>(origin[a]);\n  const DBall ball = w.run(static_cast<int>(f.k));\n  Proposal out;\n  if (!w.ok || ball.nr < 2 || ball.nr > 4) return out;\n  out.ok = true;\n  out.q = static_cast<u32>(ball.nr);\n",
+       "remplace": "  u32 q = 0;\n};\n\n// Proposition dans le repere local de la partie (translation par son premier site) ; ne decide rien. D'abord la voie\n// entiere (paire diametrale, triangle aigu : proposal.hpp), sinon DWelzl sur les memes ecarts.\nProposal propose(const Domain& d, const Part& f) noexcept {\n  i64 local[kMaxPart][3];\n  const auto& origin = d.points[f.id[0]].coordinates();\n  for (u32 i = 0; i < f.k; ++i)\n    for (int a = 0; a < 3; ++a) local[i][a] = i64{d.points[f.id[i]].coordinates()[a]} - i64{origin[a]};\n  Proposal out;\n  int exact[3] = {0, 0, 0};\n  const auto position = [&](int i) noexcept { return d.points[f.id[i]].coordinates(); };\n  if (const int q = f.k >= 2 ? exact_small_support(local, static_cast<int>(f.k), position, exact) : 0; q > 0) {\n    out.ok = true;\n    out.q = static_cast<u32>(q);\n    for (int i = 0; i < q; ++i) out.s[i] = f.id[exact[i]];\n    std::sort(out.s.begin(), out.s.begin() + q);\n    return out;\n  }\n  DWelzl w;\n  for (u32 i = 0; i < f.k; ++i)\n    for (int a = 0; a < 3; ++a) w.p[i][a] = static_cast<double>(local[i][a]);\n  const DBall ball = w.run(static_cast<int>(f.k), exact[0], exact[1]);  // depart sur la paire la plus eloignee\n  if (!w.ok || ball.nr < 2 || ball.nr > 4) return out;\n  out.ok = true;\n  out.q = static_cast<u32>(ball.nr);\n"
+      }
+     ]
+    }
+   }
+  },
+  "report": {
+   "branche_locale": "l2_report",
+   "fichiers": {
+    "src/index/bounds.hpp": {
+     "sha256_apres": "d877fe59756a0686cc825a35bbfca9c1d50cc5d5c595e398767281c802f5a869",
+     "sha256_avant": "61a1d54a2c1386a1cb76ded2af235e99ae69ec10aa17d20e1b8dc33ddf7f2ac4",
+     "substitutions": [
+      {
+       "cherche": "// Bornes d'un parcours de census, interne au module index : voie generique (num::LatticeSphere, toute sphere, aucune\n// garde) ou voie gardee (num::GuardedSphere, boule certifiee seulement, NUM-GARDE). Une preparation par parcours ; les\n// compteurs de voies et de garde sont reportes dans le registre du census a chaque evaluation.\n#pragma once\n\n#include \"index/index.hpp\"\n",
+       "remplace": "// Bornes d'un parcours de census, interne au module index : voie generique (num::LatticeSphere, toute sphere, aucune\n// garde) ou voie gardee (num::GuardedSphere, boule certifiee seulement, NUM-GARDE). Une preparation par parcours ; les\n// compteurs de voies vont au registre du census a chaque evaluation (voie generique), ou s'accumulent dans la garde et\n// sont reportes une fois a la fin du parcours par flush (voie gardee, T2-d : plus de registre temporaire par appel).\n#pragma once\n\n#include \"index/index.hpp\"\n"
+      },
+      {
+       "cherche": "    return lattice_.bound_signs(box, &ledger.lanes);  // minorant sur sites entiers, majorant continu\n  }\n  Result<int> side(num::Point point, CensusLedger& ledger) const noexcept { return lattice_.side(point, &ledger.lanes); }\n\n private:\n  const num::Sphere& sphere_;\n",
+       "remplace": "    return lattice_.bound_signs(box, &ledger.lanes);  // minorant sur sites entiers, majorant continu\n  }\n  Result<int> side(num::Point point, CensusLedger& ledger) const noexcept { return lattice_.side(point, &ledger.lanes); }\n  void flush(CensusLedger&) const noexcept {}\n\n private:\n  const num::Sphere& sphere_;\n"
+      },
+      {
+       "cherche": "  GuardedBounds(const GuardedBounds&) = delete;\n  GuardedBounds& operator=(const GuardedBounds&) = delete;\n  const num::Sphere& sphere() const noexcept { return ball_.sphere(); }\n  Result<num::PowerBoundSigns> bound_signs(const num::Box& box, CensusLedger& ledger) const noexcept {\n    num::GuardLedger guard;\n    auto signs = guard_.bound_signs(box, &guard);\n    absorb(guard, ledger);\n    return signs;\n  }\n  Result<int> side(num::Point point, CensusLedger& ledger) const noexcept {\n    num::GuardLedger guard;\n    auto value = guard_.side(point, &guard);\n    absorb(guard, ledger);\n    return value;\n  }\n\n private:\n",
+       "remplace": "  GuardedBounds(const GuardedBounds&) = delete;\n  GuardedBounds& operator=(const GuardedBounds&) = delete;\n  const num::Sphere& sphere() const noexcept { return ball_.sphere(); }\n  Result<num::PowerBoundSigns> bound_signs(const num::Box& box, CensusLedger&) const noexcept {\n    return guard_.bound_signs(box, &guard_ledger_);\n  }\n  Result<int> side(num::Point point, CensusLedger&) const noexcept { return guard_.side(point, &guard_ledger_); }\n  // Report des compteurs de la garde dans le registre du census, une fois a la fin du parcours.\n  void flush(CensusLedger& ledger) const noexcept {\n    absorb(guard_ledger_, ledger);\n    guard_ledger_ = {};\n  }\n\n private:\n"
+      },
+      {
+       "cherche": "  }\n  const num::CertifiedBall& ball_;\n  num::GuardedSphere guard_;\n};\n\n}  // namespace mhgp12::index_detail\n",
+       "remplace": "  }\n  const num::CertifiedBall& ball_;\n  num::GuardedSphere guard_;\n  mutable num::GuardLedger guard_ledger_;  // compteurs du parcours en cours, reportes par flush\n};\n\n}  // namespace mhgp12::index_detail\n"
+      }
+     ]
+    },
+    "src/index/census.cpp": {
+     "sha256_apres": "ca588e5db2bbb4a549f7a599d186029bc44be9a386b8529561fcc439312908b2",
+     "sha256_avant": "4f3d6f9819f592da0f911482e20f01c11b6e21e58af94ac2a4239dcd521aaa9d",
+     "substitutions": [
+      {
+       "cherche": "  {\n    const Bounds lattice(ball);\n    MHGP12_TRY(count.walk(index, lattice));\n  }\n  const bool saturated = count.p == threshold;\n  const u64 shell_size = saturated ? 0 : count.m;\n",
+       "remplace": "  {\n    const Bounds lattice(ball);\n    MHGP12_TRY(count.walk(index, lattice));\n    lattice.flush(ledger);\n  }\n  const bool saturated = count.p == threshold;\n  const u64 shell_size = saturated ? 0 : count.m;\n"
+      },
+      {
+       "cherche": "  {\n    const Bounds lattice(ball);\n    MHGP12_TRY(fill.walk(index, lattice));\n  }\n  return saturated ? CensusKind::saturated : CensusKind::complete;\n}\n",
+       "remplace": "  {\n    const Bounds lattice(ball);\n    MHGP12_TRY(fill.walk(index, lattice));\n    lattice.flush(ledger);\n  }\n  return saturated ? CensusKind::saturated : CensusKind::complete;\n}\n"
+      }
+     ]
+    },
+    "src/index/census_workspace.cpp": {
+     "sha256_apres": "81ceb083a4761b8203163b5e496a0e85c4f8001cd414f93ad5d65a7a4d60cee1",
+     "sha256_avant": "dc48110ce8f81094f1374de0f09c352181e71379808a40aec0af79998ba515f8",
+     "substitutions": [
+      {
+       "cherche": "  {\n    const Bounds lattice(sphere);\n    MHGP12_TRY(pass.walk(index, lattice));\n  }\n  const bool saturated = pass.p == threshold;\n  auto shell = storage_.span().last(saturated ? 0 : pass.m);\n",
+       "remplace": "  {\n    const Bounds lattice(sphere);\n    MHGP12_TRY(pass.walk(index, lattice));\n    lattice.flush(pass.ledger);\n  }\n  const bool saturated = pass.p == threshold;\n  auto shell = storage_.span().last(saturated ? 0 : pass.m);\n"
+      }
+     ]
+    }
+   }
+  },
+  "temoins": {
+   "branche_locale": "l3_temoins",
+   "fichiers": {
+    "src/index/census_workspace.cpp": {
+     "sha256_apres": "d86b01208daee73abfff2e6638ac94f7cc5cec4b6543fffa50d1fa88c97607d8",
+     "sha256_avant": "dc48110ce8f81094f1374de0f09c352181e71379808a40aec0af79998ba515f8",
+     "substitutions": [
+      {
+       "cherche": "// Un seul parcours : I croissant a gauche, U empilee a droite puis inversee. Aucune allocation par requete.\n// Le meme parcours sert le census generique (LatticeSphere) et le census garde d'une boule certifiee (GuardedSphere).\n#include \"index/access.hpp\"\n#include \"index/bounds.hpp\"\n#include <algorithm>\n",
+       "remplace": "// Un seul parcours : I croissant a gauche, U empilee a droite puis inversee. Aucune allocation par requete.\n// Le meme parcours sert le census generique (LatticeSphere) et le census garde d'une boule certifiee (GuardedSphere),\n// avec ou sans temoins sur la sphere (index.hpp : un noeud qui contient un temoin est raffine sans bornes evaluees).\n#include \"index/access.hpp\"\n#include \"index/bounds.hpp\"\n#include <algorithm>\n"
+      },
+      {
+       "cherche": "struct BorrowedPass {\n  std::span<SiteIdx> storage;\n  u32 threshold;\n  CensusLedger ledger;\n  u64 p = 0, m = 0;\n\n  Outcome inside(u32 begin, u32 end) noexcept {\n    const u64 count = std::min<u64>(end - begin, threshold - p);\n",
+       "remplace": "struct BorrowedPass {\n  std::span<SiteIdx> storage;\n  u32 threshold;\n  std::span<const SiteIdx> witnesses;  // sites sur la sphere : leurs noeuds sont raffines sans bornes evaluees\n  CensusLedger ledger;\n  u64 p = 0, m = 0;\n\n  bool holds_witness(const index_detail::Node& node) const noexcept {\n    for (const SiteIdx w : witnesses)\n      if (idx(w) >= node.begin && idx(w) < node.end) return true;\n    return false;\n  }\n\n  Outcome inside(u32 begin, u32 end) noexcept {\n    const u64 count = std::min<u64>(end - begin, threshold - p);\n"
+      },
+      {
+       "cherche": "    for (u64 cursor = 0; cursor < nodes.size() && p < threshold;) {\n      const auto& node = nodes[cursor];\n      ++ledger.nodes; ++ledger.bounds;\n      auto signs = lattice.bound_signs(node.box, ledger);\n      if (!signs.ok()) return signs.outcome();\n      if (signs.value().lower > 0) {\n",
+       "remplace": "    for (u64 cursor = 0; cursor < nodes.size() && p < threshold;) {\n      const auto& node = nodes[cursor];\n      ++ledger.nodes; ++ledger.bounds;\n      if (holds_witness(node)) {  // minorant <= 0 et majorant >= 0 au temoin : ni exterieur ni interieur\n        ++ledger.guard_witness;\n        if (node.end - node.begin <= index.leaf_size()) {\n          MHGP12_TRY(points(index.cloud(), node.begin, node.end, lattice)); cursor = node.escape;\n        } else { ++cursor; }\n        continue;\n      }\n      auto signs = lattice.bound_signs(node.box, ledger);\n      if (!signs.ok()) return signs.outcome();\n      if (signs.value().lower > 0) {\n"
+      },
+      {
+       "cherche": "}\n\ntemplate <class Bounds, class Ball>\nOutcome CensusWorkspace::run(const GlobalIndex& index, const Ball& sphere, u32 threshold, void* context,\n                             Callback callback) noexcept {\n  if (active_.test_and_set(std::memory_order_acquire)) return fail(Reason::parameter_out_of_range);\n  const ActiveQuery active(active_);\n  if (&index != index_ || index.cloud().sites() != storage_.size() || threshold == 0 || callback == nullptr)\n    return fail(Reason::parameter_out_of_range);\n  BorrowedPass<Bounds> pass{storage_.span(), threshold, {}};\n  {\n    const Bounds lattice(sphere);\n    MHGP12_TRY(pass.walk(index, lattice));\n",
+       "remplace": "}\n\ntemplate <class Bounds, class Ball>\nOutcome CensusWorkspace::run(const GlobalIndex& index, const Ball& sphere, u32 threshold,\n                             std::span<const SiteIdx> witnesses, void* context, Callback callback) noexcept {\n  if (active_.test_and_set(std::memory_order_acquire)) return fail(Reason::parameter_out_of_range);\n  const ActiveQuery active(active_);\n  if (&index != index_ || index.cloud().sites() != storage_.size() || threshold == 0 || callback == nullptr ||\n      witnesses.size() > kMaxWitnesses)\n    return fail(Reason::parameter_out_of_range);\n  for (const SiteIdx w : witnesses)\n    if (idx(w) >= storage_.size()) return fail(Reason::parameter_out_of_range);\n  BorrowedPass<Bounds> pass{storage_.span(), threshold, witnesses, {}};\n  {\n    const Bounds lattice(sphere);\n    MHGP12_TRY(pass.walk(index, lattice));\n"
+      },
+      {
+       "cherche": "\nOutcome CensusWorkspace::query(const GlobalIndex& index, const num::Sphere& sphere, u32 threshold,\n                               void* context, Callback callback) noexcept {\n  return run<index_detail::GenericBounds>(index, sphere, threshold, context, callback);\n}\n\nOutcome CensusWorkspace::query(const GlobalIndex& index, const num::CertifiedBall& ball, u32 threshold,\n                               void* context, Callback callback) noexcept {\n  return run<index_detail::GuardedBounds>(index, ball, threshold, context, callback);\n}\n}  // namespace mhgp12\n",
+       "remplace": "\nOutcome CensusWorkspace::query(const GlobalIndex& index, const num::Sphere& sphere, u32 threshold,\n                               void* context, Callback callback) noexcept {\n  return run<index_detail::GenericBounds>(index, sphere, threshold, {}, context, callback);\n}\n\nOutcome CensusWorkspace::query(const GlobalIndex& index, const num::CertifiedBall& ball, u32 threshold,\n                               void* context, Callback callback) noexcept {\n  return run<index_detail::GuardedBounds>(index, ball, threshold, {}, context, callback);\n}\n\nOutcome CensusWorkspace::query(const GlobalIndex& index, const num::CertifiedBall& ball, u32 threshold,\n                               std::span<const SiteIdx> witnesses, void* context, Callback callback) noexcept {\n  return run<index_detail::GuardedBounds>(index, ball, threshold, witnesses, context, callback);\n}\n}  // namespace mhgp12\n"
+      }
+     ]
+    },
+    "src/index/index.hpp": {
+     "sha256_apres": "a984c29ee8866f8742ac1e637ff2d3c487092e8e541537350c44ac7a278cfe7e",
+     "sha256_avant": "fbf64f625ff4d34061cf757796982a4369c6153dffdf9e11541530d9f7aa0530",
+     "substitutions": [
+      {
+       "cherche": "// Travail reel CUMULE des parcours executes : deux pour census possede (compte puis remplissage),\n// un pour CensusWorkspace. `passes` rend ce nombre ; jamais une estimation de passe logique.\n// `lanes` compte les voies numeriques des evaluations (repere local, docs/CONTRAT_NUMERIQUE.md, paragraphe 3) ;\n// les trois compteurs `guard_*` comptent les decisions que la garde (census d'une boule certifiee) prend sans\n// arithmetique : boites disjointes du pave, boites partielles a raffiner, sites hors du pave.\nstruct CensusLedger {\n  u64 nodes = 0, bounds = 0, point_tests = 0, inside_blocks = 0, outside_blocks = 0, passes = 0;\n  num::LaneCount lanes;\n  u64 guard_disjoint = 0, guard_partial = 0, guard_outside = 0;\n  friend bool operator==(const CensusLedger&, const CensusLedger&) = default;\n};\n\n",
+       "remplace": "// Travail reel CUMULE des parcours executes : deux pour census possede (compte puis remplissage),\n// un pour CensusWorkspace. `passes` rend ce nombre ; jamais une estimation de passe logique.\n// `lanes` compte les voies numeriques des evaluations (repere local, docs/CONTRAT_NUMERIQUE.md, paragraphe 3) ;\n// les compteurs `guard_*` comptent les decisions que la garde (census d'une boule certifiee) prend sans\n// arithmetique : boites disjointes du pave, boites partielles a raffiner, sites hors du pave, et noeuds raffines par\n// un temoin sur la sphere (census a temoins, CensusWorkspace::query). `bounds` compte les noeuds interroges (bornes\n// decidees par arithmetique, par la garde ou par un temoin), pas les appels a bound_signs : guard_witness compte les\n// appels evites (contre-lecture de l'auditeur Codex du 8 octobre, receipts/audit_reponses_20261008/census_temoins).\nstruct CensusLedger {\n  u64 nodes = 0, bounds = 0, point_tests = 0, inside_blocks = 0, outside_blocks = 0, passes = 0;\n  num::LaneCount lanes;\n  u64 guard_disjoint = 0, guard_partial = 0, guard_outside = 0, guard_witness = 0;\n  friend bool operator==(const CensusLedger&, const CensusLedger&) = default;\n};\n\n"
+      },
+      {
+       "cherche": "  // Meme requete pour une boule certifiee : census garde, une passe.\n  [[nodiscard]] Outcome query(const GlobalIndex&, const num::CertifiedBall&, u32 threshold,\n                               void* context, Callback) noexcept;\n\n private:\n  explicit CensusWorkspace(const GlobalIndex& index) noexcept : index_(&index) {}\n  template <class Bounds, class Ball>\n  Outcome run(const GlobalIndex&, const Ball&, u32 threshold, void* context, Callback) noexcept;\n  const GlobalIndex* index_;\n  Buffer<SiteIdx> storage_;\n  std::atomic_flag active_ = ATOMIC_FLAG_INIT;\n",
+       "remplace": "  // Meme requete pour une boule certifiee : census garde, une passe.\n  [[nodiscard]] Outcome query(const GlobalIndex&, const num::CertifiedBall&, u32 threshold,\n                               void* context, Callback) noexcept;\n  // Census garde A TEMOINS (T2-d) : witnesses donne au plus kMaxWitnesses SiteIdx de sites SUR la sphere (le support\n  // de la boule certifiee). Un noeud dont la plage contient un temoin a un minorant entier <= 0 (le temoin est un point\n  // entier de sa boite, de puissance nulle) et un majorant >= 0 : il n'est ni exterieur ni interieur, il est raffine\n  // (ses sites testes s'il est une feuille) SANS evaluer ses bornes. Memes resultats, memes noeuds et memes sites\n  // testes que query sans temoins quand les temoins sont sur la sphere ; un faux temoin ne change que le travail (des\n  // noeuds raffines au lieu d'etre tranches), jamais I ni U, car tout site reste teste exactement. Refus\n  // parameter_out_of_range au-dela de kMaxWitnesses temoins ou pour un temoin hors du nuage.\n  static constexpr std::size_t kMaxWitnesses = 4;\n  [[nodiscard]] Outcome query(const GlobalIndex&, const num::CertifiedBall&, u32 threshold,\n                               std::span<const SiteIdx> witnesses, void* context, Callback) noexcept;\n\n private:\n  explicit CensusWorkspace(const GlobalIndex& index) noexcept : index_(&index) {}\n  template <class Bounds, class Ball>\n  Outcome run(const GlobalIndex&, const Ball&, u32 threshold, std::span<const SiteIdx> witnesses, void* context,\n              Callback) noexcept;\n  const GlobalIndex* index_;\n  Buffer<SiteIdx> storage_;\n  std::atomic_flag active_ = ATOMIC_FLAG_INIT;\n"
+      }
+     ]
+    },
+    "src/tower/resolve.cpp": {
+     "sha256_apres": "3d2bd04e02e60b6bab1d27b77a488112f80791f69395805273f539c6773dc1af",
+     "sha256_avant": "583d9778d5b8f6c3f8972c7f19f62c3b8174d897f996461392bc6103be28740d",
+     "substitutions": [
+      {
+       "cherche": "  return out;\n}\n\n// Plus petite boule de F : boule du catalogue (ball), ou boule certifiee hors de la table (certified).\nstruct Located {\n  u32 ball = kNone;\n  std::optional<num::CertifiedBall> certified;\n  Route route = kT1;\n};\n\n",
+       "remplace": "  return out;\n}\n\n// Plus petite boule de F : boule du catalogue (ball), ou boule certifiee hors de la table (certified) avec son support\n// canonique parmi les sites de F sur la sphere (temoins du census, T2-d : ces sites sont SUR la sphere).\nstruct Located {\n  u32 ball = kNone;\n  std::optional<num::CertifiedBall> certified;\n  std::array<SiteIdx, 4> support{};\n  u8 arity = 0;\n  Route route = kT1;\n};\n\n"
+      },
+      {
+       "cherche": "  }\n  ++(fallback ? n.route_fallback_census : n.route_cert_census);\n  out.certified.emplace(cert->ball);\n  out.route = fallback ? kFallbackCensus : kCertCensus;\n  return out;\n}\n",
+       "remplace": "  }\n  ++(fallback ? n.route_fallback_census : n.route_cert_census);\n  out.certified.emplace(cert->ball);\n  out.support = key;\n  out.arity = cert->arity;\n  out.route = fallback ? kFallbackCensus : kCertCensus;\n  return out;\n}\n"
+      },
+      {
+       "cherche": "\n  static Outcome consume(void* raw, const BorrowedCensus& census) noexcept {\n    auto& s = *static_cast<CensusStep*>(raw);\n    s.counters.census_sites += census.ledger().point_tests;\n    s.counters.census_sites_max = std::max(s.counters.census_sites_max, census.ledger().point_tests);\n    s.counters.census_nodes += census.ledger().nodes;\n",
+       "remplace": "\n  static Outcome consume(void* raw, const BorrowedCensus& census) noexcept {\n    auto& s = *static_cast<CensusStep*>(raw);\n    // Census a temoins (T2-d) : la racine contient toujours le support, temoin sur la sphere ; aucune decision par\n    // temoin signifie que le support n'a pas ete transmis (travail perdu, resultat inchange).\n    if (census.ledger().guard_witness == 0) return fail(Reason::tower_invariant, s.k);\n    s.counters.census_sites += census.ledger().point_tests;\n    s.counters.census_sites_max = std::max(s.counters.census_sites_max, census.ledger().point_tests);\n    s.counters.census_nodes += census.ledger().nodes;\n"
+      },
+      {
+       "cherche": "      const num::CertifiedBall& ball = *located.value().certified;\n      MHGP12_TRY(control_level(cat, prev, ball.sphere().level(), n, k));  // AVANT toute sortie par saut\n      CensusStep step{d, k, n, ball.sphere(), false, false, kNone, Part{}};\n      MHGP12_TRY(workspace.query(d.index, ball, k, &step, &CensusStep::consume));\n      clock.lap(step.saturated ? kProfileCensusSaturated : kProfileCensusComplete);\n      if (step.saturated) {\n        ++n.jumps_census;\n",
+       "remplace": "      const num::CertifiedBall& ball = *located.value().certified;\n      MHGP12_TRY(control_level(cat, prev, ball.sphere().level(), n, k));  // AVANT toute sortie par saut\n      CensusStep step{d, k, n, ball.sphere(), false, false, kNone, Part{}};\n      const std::span<const SiteIdx> witnesses(located.value().support.data(), located.value().arity);\n      MHGP12_TRY(workspace.query(d.index, ball, k, witnesses, &step, &CensusStep::consume));  // census a temoins\n      clock.lap(step.saturated ? kProfileCensusSaturated : kProfileCensusComplete);\n      if (step.saturated) {\n        ++n.jumps_census;\n"
+      }
+     ]
+    }
+   }
+  }
+ },
+ "schema": "ehgp.v12.t2d_b_bras.v1"
+}

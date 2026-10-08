@@ -48,7 +48,8 @@ struct SpanBudgets {
   static constexpr int level_numerator = 8 * S + 12;  // q4 : 3*(18 M^4)^2 < 1024 M^8
   static constexpr int level_denominator = 6 * S + 8;  // q4 : (12 M^3)^2 < 256 M^6
   static constexpr int level_comparison = level_numerator + level_denominator;  // 14 S + 20
-  // Budgets mixtes (CST-0111) : centre au budget du support, sites confrontes dans la garde (|z_j-o_j| < 3M).
+  // Budgets mixtes (CST-0111) : centre au budget du support, sites confrontes dans la garde (|z_j-o_j| < 3M ;
+  // majorant conserve depuis le pave resserre de NUM-GARDE, qui donne |z_j-o_j| < 2M).
   static constexpr int guarded_side = 6 * S + 11;     // < 648 M^6 + 432 M^6 < 2^11 M^6
   static constexpr int guarded_orientation = 7 * S + 14;  // < 14 400 M^7 < 2^14 M^7
   static constexpr int guarded_vertex_orientation = 3 * S + 10;

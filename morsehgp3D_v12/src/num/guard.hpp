@@ -7,10 +7,12 @@
 // conv(S) en exact par les signes barycentriques (q1, q2 toujours ; q3 strictement aigu ; q4 poids de presentation
 // strictement positifs). Une candidate refusee reste dans la voie generique (LatticeSphere), sans garde.
 //
-// NUM-GARDE. Soit s l'etendue du support S, m son coin minimal, M = 2^s. Le centre est dans [m, m+M-1] par axe et
-// R <= diam(S) < 2M ; tout point x de la boule fermee verifie m_j - 2M < x_j < m_j + 3M : c'est le PAVE (ouvert).
-//   - site hors du pave : exterieur, sans arithmetique ; site dans le pave : |x_j - o_j| < 3M < 2^(s+2) pour l'ancre
-//     o de S, d'ou le budget mixte 6s+11 (CST-0111) et le certificat de puissance au domaine t = s+2, jamais s ;
+// NUM-GARDE. Soit s l'etendue du support S, m son coin minimal, M = 2^s. Le centre est dans [m, m+M-1] par axe.
+// Avec c dans conv(S) et S sur la sphere, la boule est MEB(S). La boule au milieu de la boite du support contient S,
+// donc R^2 <= (wx^2+wy^2+wz^2)/4 <= 3(M-1)^2/4 < M^2. Tout point x de la boule fermee verifie ainsi
+// m_j - M < x_j < m_j + 2M : c'est le PAVE (ouvert), y compris s=0.
+//   - site hors du pave : exterieur, sans arithmetique ; site dans le pave : |x_j - o_j| < 2M pour l'ancre o de S.
+//     On conserve ici les budgets anterieurs plus larges : 6s+11 (CST-0111), domaine t = s+2 et voies inchangees ;
 //   - boite DISJOINTE du pave : exterieure ; sinon minorant au point entier de la boite le plus proche du centre,
 //     calcule en local (plancher de N_j/D, + o_j, saturation a la boite), qui est dans le pave ;
 //   - boite NON CONTENUE dans le pave : majorant positif sans arithmetique (elle n'est pas dans la boule) ; une

@@ -3,7 +3,8 @@
 // chacun des trois termes lineaires 2|N_j v_j| par 2^125 ; la somme des magnitudes, < 15*2^123 < 2^127, borne chaque
 // produit ET chaque somme partielle en i128. La preuve ne lit ni l'arite ni l'etendue du support : seulement t et les
 // coefficients. Le certificat de la v11 (q3_global_power_i128) est le cas t = B, domaine de tous les Point du profil ;
-// le recensement garde exige t = s+2 (NUM-GARDE : |v_j| < 3M < 2^(s+2)), jamais s.
+// le recensement garde conserve t = s+2 : cette politique reste suffisante apres le resserrement du pave.
+// Les bornes plus fines exploitant CertifiedBall se qualifient separement ; ce certificat generique reste inchange.
 // Aucun coefficient public forgeable : les fabriques de num calculent le domaine une fois.
 #pragma once
 #include <array>

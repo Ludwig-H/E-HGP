@@ -1,6 +1,6 @@
 {
   "module": "index",
-  "plancher": 18,
+  "plancher": 22,
   "mutants": [
     {
       "id": "contact_exterieur",
@@ -133,8 +133,8 @@
     {
       "id": "census_garde_emprunte_sans_garde",
       "fichier": "src/index/census_workspace.cpp",
-      "cherche": "return run<index_detail::GuardedBounds>(index, ball, threshold, context, callback);",
-      "remplace": "return run<index_detail::GenericBounds>(index, ball.sphere(), threshold, context, callback);",
+      "cherche": "return run<index_detail::GuardedBounds>(index, ball, threshold, {}, context, callback);",
+      "remplace": "return run<index_detail::GenericBounds>(index, ball.sphere(), threshold, {}, context, callback);",
       "porte": "mhgp12_index_guarded_fixtures",
       "note": "requete empruntee d'une boule certifiee servie sans garde"
     },
@@ -145,6 +145,38 @@
       "remplace": "ledger.guard_partial += 0;",
       "porte": "mhgp12_index_guarded_witnesses",
       "note": "boites partielles raffinees non comptees au registre du census"
+    },
+    {
+      "id": "temoin_accepte_en_bloc",
+      "fichier": "src/index/census_workspace.cpp",
+      "cherche": "        if (node.end - node.begin <= index.leaf_size()) {\n          MHGP12_TRY(points(index.cloud(), node.begin, node.end, lattice)); cursor = node.escape;\n        } else { ++cursor; }\n        continue;",
+      "remplace": "        MHGP12_TRY(inside(node.begin, node.end)); cursor = node.escape;\n        continue;",
+      "porte": "mhgp12_index_guarded_witness_census",
+      "note": "T2-d : un noeud qui contient un temoin serait pris pour interieur (majorant suppose negatif) : sa plage entre dans I sans test, alors que le temoin est sur la sphere"
+    },
+    {
+      "id": "temoin_tranche",
+      "fichier": "src/index/census_workspace.cpp",
+      "cherche": "        if (node.end - node.begin <= index.leaf_size()) {\n          MHGP12_TRY(points(index.cloud(), node.begin, node.end, lattice)); cursor = node.escape;\n        } else { ++cursor; }\n        continue;",
+      "remplace": "        cursor = node.escape;\n        continue;",
+      "porte": "mhgp12_index_guarded_witness_census",
+      "note": "T2-d : un noeud qui contient un temoin serait tranche comme exterieur : le support et ses voisins sortent de U et de I"
+    },
+    {
+      "id": "temoin_feuille_non_testee",
+      "fichier": "src/index/census_workspace.cpp",
+      "cherche": "          MHGP12_TRY(points(index.cloud(), node.begin, node.end, lattice)); cursor = node.escape;\n        } else { ++cursor; }\n        continue;",
+      "remplace": "          cursor = node.escape;\n        } else { ++cursor; }\n        continue;",
+      "porte": "mhgp12_index_guarded_witness_census",
+      "note": "T2-d : la feuille du temoin serait sautee au lieu d'etre testee site par site"
+    },
+    {
+      "id": "temoin_borne_incluse",
+      "fichier": "src/index/census_workspace.cpp",
+      "cherche": "      if (idx(w) >= node.begin && idx(w) < node.end) return true;",
+      "remplace": "      if (idx(w) >= node.begin && idx(w) <= node.end) return true;",
+      "porte": "mhgp12_index_guarded_witness_census",
+      "note": "T2-d : plage du noeud lue fermee a droite : un noeud voisin sans temoin serait raffine sans bornes (noeuds et sites testes differents de ceux du census sans temoins, resultats egaux)"
     }
   ]
 }

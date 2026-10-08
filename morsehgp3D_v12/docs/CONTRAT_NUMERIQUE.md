@@ -80,13 +80,16 @@ d'une séquence, au millimètre ; ni autres séquences, ni dixième de millimèt
   sur la sphère mais hors du pavé (témoin de l'auditeur Codex). Ces candidates restent dans une voie générique exacte,
   sans la garde.
 - **`NUM-GARDE` (garde entière d'une boule certifiée).** Soit $b$ une boule certifiée de support $S$, de coin minimal
-  $m$ et d'étendue $s$. Son centre $c$ est dans l'enveloppe convexe de $S$, donc $m_i\leq c_i\leq m_i+2^{s}-1$, et
-  $R\leq\mathrm{diam}(S)<\sqrt{3}\cdot 2^{s}<2^{s+1}$. Tout point $x$ de la boule fermée vérifie donc
-  $m_i-2^{s+1}<x_i<m_i+3\cdot 2^{s}$ pour chaque axe (le **pavé** de $b$). Conséquences :
+  $m$, de largeurs $w_i$ et d'étendue $s$ ; posons $M=2^s$. Son centre $c$ est dans l'enveloppe convexe de $S$, donc
+  $m_i\leq c_i\leq m_i+M-1$. Comme tous les sites de $S$ sont sur la sphère, $b$ est la plus petite boule de $S$.
+  La boule au milieu de la boîte du support contient $S$, d'où
+  $R^2\leq(w_1^2+w_2^2+w_3^2)/4\leq3(M-1)^2/4<M^2$.
+  Tout point $x$ de la boule fermée vérifie donc $m_i-M<x_i<m_i+2M$ pour chaque axe (le **pavé ouvert**).
+  Cette preuve inclut $s=0$, $M=1$, $R=0$. Conséquences :
   - un **site** hors du pavé est extérieur à la boule fermée, sans arithmétique ; un site dans le pavé est à moins de
-    $3\cdot 2^{s}$ de chaque site de $S$ par axe. Le repère d'une requête gardée est celui du support (ancre conservée)
-    et la preuve se fait **par requête** : deux requêtes gardées peuvent différer de près de $5\cdot 2^{s}$, et le pavé
-    entier a une étendue de $s+3$ bits ; aucun repère commun à toutes les requêtes n'est construit ;
+    $2M$ de chaque site de $S$ par axe. Le repère d'une requête gardée est celui du support (ancre conservée), sans
+    repère commun à toutes les requêtes. Cette réduction du pavé conserve les budgets antérieurs plus larges
+    $6s+11$, le certificat au domaine $t=s+2$ et les voies numériques ; leur réduction serait une autre tranche ;
   - une **boîte** de l'index **disjointe** du pavé est extérieure ; pour une boîte qui touche le pavé, le minorant
     (`LEM-LATTICE`) se calcule sur le point **entier** de la boîte le plus proche du centre : plancher et plafond de
     $N_j/D$ (en local), puis $+o_j$, puis saturation à la boîte ; ce point est dans le pavé, jamais calculé depuis le
@@ -97,11 +100,13 @@ d'une séquence, au millimètre ; ni autres séquences, ni dixième de millimèt
     Une boîte partiellement dans le pavé peut contenir tout le support et le centre (support
     $\lbrace(100,100,100),(102,100,100)\rbrace$, boîte $[0,200]^{3}$) : elle n'est jamais rejetée, elle est raffinée.
 
-  Preuve des deux faits : $c=\sum\lambda_j s_j$ avec $\lambda_j\geq 0$ et $\sum\lambda_j=1$, d'où $c$ dans le pavé de
-  $S$ et $\lvert c-s_k\rvert\leq\sum\lambda_j\lvert s_j-s_k\rvert\leq\mathrm{diam}(S)$ ; et $R=\lvert c-s_k\rvert$ pour
-  tout $s_k\in S$. Toute boule certifiée est la plus petite boule de son support, de centre dans son enveloppe convexe
-  (q2 milieu, q3 triangle aigu, q4 centre intérieur au tétraèdre), coquilles étendues de `LEM-T7` comprises ; tous les
-  sites de la coquille $U$ sont sur la sphère, donc dans le pavé. Contre-lu (`2a7a5f346`).
+  Preuve du minimum : $c=\sum\lambda_j s_j$, $\lambda_j\geq0$, $\sum\lambda_j=1$ et $\|s_j-c\|^2=R^2$ donnent,
+  pour tout centre $y$, $\sum\lambda_j\|s_j-y\|^2=R^2+\|c-y\|^2$. Une boule de centre $y$ contenant $S$ a donc un
+  rayon au moins égal à $R$. La boule du milieu de la boîte fournit alors la borne de demi-diagonale ci-dessus.
+  Cette preuve utilise la positivité certifiée, pas seulement une sphère passant par $S$ ; les candidates génériques
+  restent exclues. Tous les sites de la coquille étendue $U$ sont sur la sphère, donc strictement dans le pavé.
+  Les signes des bornes entières et les résultats de census sont inchangés ; les compteurs de garde et de voies
+  peuvent changer. Aucun gain de temps ni de complexité du census ne découle du seul resserrement du pavé.
 
   Ce correctif remplace deux usages de la v11 hors garde (`CST-0109`) : `LatticeSphere` (`src/index/census.cpp`,
   chemin chaud) calculait le centre absolu $o_jD+N_j$ ($5B+6$ bits, d'où $B\leq 24$) et évaluait la puissance au coin
@@ -144,7 +149,8 @@ a au plus 63 bits, `i128` si elle en a au plus 127.
 **Budgets mixtes** (`CST-0111`). Le centre $c=o+N/D$ garde les bornes de son repère ($D<24M^{4}$,
 $\lvert N_j\rvert<24M^{5}$ pour q3, $M=2^{s}$) ; seuls les sites confrontés s'éloignent :
 
-- côté d'un site gardé $z$ : $\lvert z_j-o_j\rvert<3M$ (garde), d'où
+- côté d'un site gardé $z$ : $\lvert z_j-o_j\rvert<3M$ (garde ; majorant conservé, le pavé resserré de `NUM-GARDE` donne
+  $\lvert z_j-o_j\rvert<2M$), d'où
   $\lvert D\lvert z-o\rvert^{2}-2N\cdot(z-o)\rvert<648M^{6}+432M^{6}<2^{11}M^{6}$, soit $6s+11$ bits (q4 et q2 en
   dessous) ;
 - orientation de $c$ par rapport au plan de trois sites $p,q,r$ de la coquille (prédicats `orientation` et

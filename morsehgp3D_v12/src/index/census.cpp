@@ -81,6 +81,7 @@ Result<CensusKind> run_census(const GlobalIndex& index, const Ball& ball, u32 th
   {
     const Bounds lattice(ball);
     MHGP12_TRY(count.walk(index, lattice));
+    lattice.flush(ledger);
   }
   const bool saturated = count.p == threshold;
   const u64 shell_size = saturated ? 0 : count.m;
@@ -92,6 +93,7 @@ Result<CensusKind> run_census(const GlobalIndex& index, const Ball& ball, u32 th
   {
     const Bounds lattice(ball);
     MHGP12_TRY(fill.walk(index, lattice));
+    lattice.flush(ledger);
   }
   return saturated ? CensusKind::saturated : CensusKind::complete;
 }
