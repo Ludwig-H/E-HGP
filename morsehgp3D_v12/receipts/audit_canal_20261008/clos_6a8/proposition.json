@@ -1,0 +1,20 @@
+{
+  "CST-0004": "[274592a30](../receipts/audit_t2_20261007/corrections/README.md) : output-on-failure, 39 contrôles simulés. [Fil](../receipts/audit_canal_20261008/clos_6a8/README.md#cst-0004).",
+  "CST-0007": "[7b7d025b3](../receipts/audit_clotures_20261007/README.md) : budget physique/cache et poison clos. [Fil](../receipts/audit_canal_20261008/clos_6a8/README.md#cst-0007).",
+  "CST-0009": "[9c5656029](../receipts/audit_reponses_20261008/repli_unresolved_0009/README.md) : repli Pool/GPU budgété ; gain isolé exclu. [Fil](../receipts/audit_canal_20261008/clos_6a8/README.md#cst-0009).",
+  "CST-0024": "[8e3b76245](../receipts/audit_t2_20261007/corrections/README.md) : oracle v10 mono ; stress non rejoué. [Fil](../receipts/audit_canal_20261008/clos_6a8/README.md#cst-0024).",
+  "CST-0105": "[a0e31abfe→7398aed7d](../receipts/audit_reponses_20261008/tmvr_livraison/README.md) : domaine u21 ; 0240 distinct. [Fil](../receipts/audit_canal_20261008/clos_6a8/README.md#cst-0105).",
+  "CST-0107": "[a0e31abfe→7398aed7d](../receipts/audit_reponses_20261008/tmvr_livraison/README.md) : numérotation u21 ; hors G4/profils larges. [Fil](../receipts/audit_canal_20261008/clos_6a8/README.md#cst-0107).",
+  "CST-0115": "[95247cf4b](../receipts/audit_u32_20261007/qualification/README.md) : classes T0 corrigées ; 0226 distinct. [Fil](../receipts/audit_canal_20261008/clos_6a8/README.md#cst-0115).",
+  "CST-0202": "[6a38f7e4b/c3de9d73d](../receipts/audit_u32_20261007/index/README.md) : identité Cloud u32 ; D8 distinct. [Fil](../receipts/audit_canal_20261008/clos_6a8/README.md#cst-0202).",
+  "CST-0212": "[d8407e374/7398aed7d](../receipts/audit_reponses_20261008/tmvr_livraison/README.md) : domaine 31 bits, produit u21. [Fil](../receipts/audit_canal_20261008/clos_6a8/README.md#cst-0212).",
+  "CST-0213": "[320db4a12](../receipts/audit_cd_corrections_20261007/m34/README.md) : cinq PID/cas ; D vérifiée, B historique. [Fil](../receipts/audit_canal_20261008/clos_6a8/README.md#cst-0213).",
+  "CST-0216": "[1b40c0411](../receipts/audit_juges_emst_20261007/donnees/README.md) : raccord corrigé, préparation réelle non rejouée. [Fil](../receipts/audit_canal_20261008/clos_6a8/README.md#cst-0216).",
+  "CST-0218": "[1b40c0411/f601b36ac](../receipts/audit_reprise_20261007/donnees/README.md) : outil/régénération ; payloads non rehashés. [Fil](../receipts/audit_canal_20261008/clos_6a8/README.md#cst-0218).",
+  "CST-0220": "[1b40c0411](../receipts/audit_juges_emst_20261007/donnees/README.md) : refus avant éviction ; libération physique non certifiée. [Fil](../receipts/audit_canal_20261008/clos_6a8/README.md#cst-0220).",
+  "CST-0222": "[1b40c0411](../receipts/audit_juges_emst_20261007/m5/README.md) : bornes CPU ; CUDA/budget Session exclus. [Fil](../receipts/audit_canal_20261008/clos_6a8/README.md#cst-0222).",
+  "CST-0223": "[1b40c0411](../receipts/audit_juges_emst_20261007/m5/README.md) : format strict ; pas de recalcul autonome G1. [Fil](../receipts/audit_canal_20261008/clos_6a8/README.md#cst-0223).",
+  "CST-0228": "[76adb8fa9](../receipts/audit_juges_emst_20261007/t2_corrections/README.md) : énoncé corrigé, natif non qualifié. [Fil](../receipts/audit_canal_20261008/clos_6a8/README.md#cst-0228).",
+  "CST-0232": "[98ca07556](../receipts/audit_reprise_20261007/emst/README.md) : IDs/ordre 1 ; grands vidages exclus. [Fil](../receipts/audit_canal_20261008/clos_6a8/README.md#cst-0232).",
+  "CST-0238": "[28cf75cd1](../receipts/audit_reponses_20261007/mes_p_integration/README.md) : séparation/cohorte ; coût fixe H limité. [Fil](../receipts/audit_canal_20261008/clos_6a8/README.md#cst-0238)."
+}

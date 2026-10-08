@@ -1,0 +1,14 @@
+{
+  "before_archive_sha256": "0f91cda2c6b1304c1eafd404ff77870fd218db72d32f8bd09c06cf09cbd67045",
+  "captured_utc": "2026-10-08T08:47:57.278845+00:00",
+  "journal_count": 272,
+  "journal_inventory_sha256": "6f3019c7c07020ba89d1296b66aab1dd389ad78f4d615bdec422c3ef60418f84",
+  "report_sha256": "2aaf0f9ef7f28ebeb5fb49ef51786ead7ab091635c15b2c90f3c447296cd4fec",
+  "scope": "Only source Git, report and JSONL; no engine, payload or cloud action. Source reconstruction and closure in sibling provenance receipt.",
+  "source_commit": "41d4d828b70ad033f8bf392aca20a4af13cea242",
+  "source_sha256": {
+    "microbancs/mes_t2d_b/bras_t2d_b.json": "3999a137f3002ca6fcf2a477457dbd9d118023da31f8490d0656350ab826b025",
+    "microbancs/mes_t2d_b/pilote_t2d_b.py": "f374a89ba704340b8b9b11c23787c46cfb1bec83c225a014879ddb7d8fa0f5d6",
+    "microbancs/outils/lecteur_full.py": "3594c5d36ed831b39d679b504234505d5b4b0a5b08e85cc55a21c9af74c621a4"
+  }
+}

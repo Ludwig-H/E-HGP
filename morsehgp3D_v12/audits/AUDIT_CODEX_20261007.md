@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-8 octobre 2026. Code relu : bascule `86d7e39d`, B `41d4d828b`. Mesures : A `5f5c` contre `27eca`, MES-C2 `27eca`.
+8 octobre 2026. Code relu : bascule `86d7e39d`, B `41d4d828b`. Mesures : A `5f5c` contre `27eca`, B sur902, MES-C2 `27eca`.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
 
@@ -34,10 +34,10 @@ FULL englobe Cloud/index→T/M/V/R ; lecture, masque, validation, FUL1 et libér
 A était mesuré avec `--recouvert` ; cette route est devenue le défaut en `86d7e39d`.
 Les prises CPU, petits nuages, K10 et massifs ci-dessous précèdent cette bascule.
 
-[Session G4 arrêtée](../receipts/audit_reponses_20261008/session_a_provenance/README.md), mais **`failed_remote`** :
-719/719 portes rapides et CTest mutants passés ; LiDAR six portes passées, puis MES-M0 interrompu au plafond externe180s.
-[Diagnostic du timeout](../receipts/audit_reponses_20261008/session_a_timeout/README.md) : chaîne séquentielle,
-limite propre7200s, environ131s restants après les six portes ; pas de deadlock A établi, gate à rejouer.
+**[Session B close et arrêt certifié](../receipts/audit_reponses_20261008/session_b_provenance/README.md)** :
+724 portes socle, **7/7 LiDAR dont MES-M0**, trois CTests mutants passés au code41d4, aucun skip.
+Cela ajoute la preuve LiDAR manquante ; l'[ancienne session A](../receipts/audit_reponses_20261008/session_a_timeout/README.md)
+reste interrompue au plafond externe180s, sans deadlock A établi.
 
 **Priorité développeur : distinguer les fins observées et les durées.** [Diagnostic A](../receipts/audit_reponses_20261008/session_a_diagnostic/README.md) :
 R5 est le dernier marqueur **43/45 fois sur ng02 et 94/111 sur les 37 trames** ; ordres1/2 surtout sur ng00/ng01.
@@ -71,9 +71,12 @@ Patch fourni pour demander `--sequentiel` sur le bras après du pilote A, néces
 [Lecteur recouvert](../receipts/audit_reponses_20261008/lf_recouvert_gardes/README.md) : neuf corruptions d'horloges encore admises en86d ;
 correctif proposé, 61 journaux/850 passes A préservés, quatre mutants causaux. Pas d'ordre imposé entre V et R.
 
-**B : intégré, campagne G4 en contrelecture.** [Quatre résidus FULL corrigés](../receipts/audit_reponses_20261008/t2db_raccord/README.md) ;
-[raccord B/A](../receipts/audit_reponses_20261008/t2d_b_raccord_a/README.md) favorable sur emprunts, espaces privés et admission ;
-aucun temps déduit. [Protocole effectif](../receipts/audit_reponses_20261008/session_b_protocole/README.md) : bras reconstruits depuis902,
-G isolé et FULL séquentiel informatif ; aucun transfert au FULL recouvert actuel. B ne traite pas directement le catalogue CPU dominant.
+**[B admis sur902](../receipts/audit_reponses_20261008/session_b_admission/README.md)** : 272 journaux/2 616 passes, 2 344 chaudes.
+G CPU K5 W48 : **53,092→48,576 / 42,023→38,885 / 48,222→45,007 ms** ; gains géométriques6,8–8,4 %.
+Lot, report, témoins et census combiné adoptés ; garde et proposition seules rejetées selon la règle préannoncée.
+FULL GPU **séquentiel informatif** : 161,899→157,181 /129,755→126,940 /165,756→164,279 ms.
+Ce sont902 et902+B, sans A/C/pool récent ; **aucun transfert au FULL recouvert actuel** ni au lot après retrait de L4.
+K5 garde ses compteurs ; K10 change deux routes d'une unité avec objets identiques. B ne traite pas le catalogue CPU dominant.
+[Raccord B/A](../receipts/audit_reponses_20261008/t2d_b_raccord_a/README.md) favorable sur emprunts et espaces privés, sans temps déduit.
 [Extension de feuille](../receipts/audit_reponses_20261008/feuille_large_proposition/README.md) proposée ; compteurs et coût combinatoire ouverts.
 Dépendances A, pool, C et autres propositions CPU/S*/T/K1/R : registre. Audit sources/Python, aucun moteur ni GCP lancé.

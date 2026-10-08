@@ -1,0 +1,30 @@
+{
+  "first_nine_columns_unchanged": true,
+  "isolated_patch_applies": true,
+  "links_preserved": 25,
+  "main_or_product_modified": false,
+  "proposed_channel_bytes": 62084,
+  "rows": [
+    "CST-0004",
+    "CST-0007",
+    "CST-0009",
+    "CST-0024",
+    "CST-0105",
+    "CST-0107",
+    "CST-0115",
+    "CST-0202",
+    "CST-0212",
+    "CST-0213",
+    "CST-0216",
+    "CST-0218",
+    "CST-0220",
+    "CST-0222",
+    "CST-0223",
+    "CST-0228",
+    "CST-0232",
+    "CST-0238"
+  ],
+  "saved_bytes": 3377,
+  "source_channel_bytes": 65461,
+  "states_changed": 0
+}
