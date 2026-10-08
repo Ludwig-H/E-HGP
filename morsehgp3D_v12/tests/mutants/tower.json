@@ -300,7 +300,7 @@
       "id": "indice_sans_borne_du_noyau",
       "fichier": "src/tower/forest_kernel.cpp",
       "cherche": "      if (target_index(code) >= processed) continue;  // cellule cible pas encore traitee : feuille gardee",
-      "remplace": "",
+      "remplace": "      if (target_index(code) >= processed + input.cell_ball.size()) continue;  // jamais vrai : aucune borne",
       "porte": "mhgp12_tower_levers_indices",
       "note": "levier I : une cible cellule pas encore traitee par le noyau est lue dans les elements (valeur d'un autre passage ou non initialisee)"
     },
@@ -308,7 +308,7 @@
       "id": "indice_de_la_naissance_zero",
       "fichier": "src/tower/forest_kernel.cpp",
       "cherche": "    std::atomic_ref<u32>(leaves[p]).store(find_read(c, node), std::memory_order_relaxed);",
-      "remplace": "    std::atomic_ref<u32>(leaves[p]).store(find_read(c, 0), std::memory_order_relaxed);",
+      "remplace": "    std::atomic_ref<u32>(leaves[p]).store(find_read(c, node * 0), std::memory_order_relaxed);",
       "porte": "mhgp12_tower_levers_indices",
       "note": "levier I : l'indice ecrit est la racine d'une autre composante (celle de la naissance 0) : unions fausses"
     },
