@@ -86,6 +86,10 @@ class Appareil {
   bool charger_propositions(const DonneesPropositions& d, Transferts& t, std::string& erreur);
   bool jouer_propositions(float& noyau_ms, std::string& erreur);
   bool lire_propositions(Proposition* sortie, Transferts& t, std::string& erreur);
+  // Proposition L4 (etape 2) sur les memes parties : voie entiere pour toutes, puis DWelzl amorce sur la file compactee
+  // des parties qu'elle ne conclut pas, en binaire64 (f32 = false) ou binaire32 (f32 = true) ; duree des noyaux.
+  bool jouer_l4(bool f32, float& noyau_ms, std::string& erreur);
+  bool lire_l4(bool f32, Proposition* sortie, Transferts& t, std::string& erreur);
 
   struct Etat;
 

@@ -48,6 +48,43 @@ __global__ void __launch_bounds__(kFilsPropositions) noyau_propositions(DonneesP
   proposer(d.parties + i * d.pas, d.tailles[i], x, y, z, sortie[i]);
 }
 
+// L4, premier noyau : voie entiere pour toutes les parties ; une partie non conclue entre dans la file avec sa graine.
+// Compactage agrege par warp (un atomique par warp, places par rang dans le masque) : l'ordre de la file entre warps
+// n'est pas deterministe, sans effet sur les sorties (chaque partie ecrit sa propre case). Aucun retour avant le vote :
+// les 32 voies de chaque warp y participent (blocs multiples de 32).
+__global__ void __launch_bounds__(kFilsPropositions) noyau_l4_entier(DonneesPropositions d, const u32* x, const u32* y,
+                                                                     const u32* z, Proposition* sortie, u32* file,
+                                                                     u32* graines, u32* compte) {
+  const u64 i = u64{blockIdx.x} * blockDim.x + threadIdx.x;
+  const bool actif = i < d.n;
+  int graine[2] = {0, 1};
+  const bool conclu = !actif || proposer_l4_entier(d.parties + i * d.pas, d.tailles[i], x, y, z, sortie[i], graine);
+  const bool besoin = actif && !conclu;
+  const u32 voie = threadIdx.x & 31u;
+  const u32 masque = __ballot_sync(0xFFFFFFFFu, besoin);
+  if (masque == 0) return;  // uniforme sur le warp
+  const u32 chef = static_cast<u32>(__ffs(static_cast<int>(masque)) - 1);
+  u32 base = 0;
+  if (voie == chef) base = atomicAdd(compte, static_cast<u32>(__popc(static_cast<int>(masque))));
+  base = __shfl_sync(0xFFFFFFFFu, base, static_cast<int>(chef));
+  if (!besoin) return;
+  graines[i] = static_cast<u32>(graine[0]) | (static_cast<u32>(graine[1]) << 8);
+  file[base + static_cast<u32>(__popc(static_cast<int>(masque & ((1u << voie) - 1u))))] = static_cast<u32>(i);
+}
+
+// L4, second noyau : DWelzl amorce sur la file compactee (warps pleins de parties difficiles).
+template <class W, class T>
+__global__ void __launch_bounds__(kFilsPropositions) noyau_l4_flottant(DonneesPropositions d, const u32* x,
+                                                                       const u32* y, const u32* z, Proposition* sortie,
+                                                                       const u32* file, const u32* graines,
+                                                                       const u32* compte) {
+  const u64 j = u64{blockIdx.x} * blockDim.x + threadIdx.x;
+  if (j >= *compte) return;
+  const u32 i = file[j];
+  const int graine[2] = {static_cast<int>(graines[i] & 0xFFu), static_cast<int>((graines[i] >> 8) & 0xFFu)};
+  proposer_l4_flottant<W, T>(d.parties + u64{i} * d.pas, d.tailles[i], x, y, z, graine, sortie[i]);
+}
+
 double depuis(std::chrono::steady_clock::time_point t0) {
   return std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
 }
@@ -65,6 +102,8 @@ struct Appareil::Etat {
   std::vector<OrdreAppareil> ordres;
   DonneesPropositions propositions{};
   Proposition* sorties_propositions = nullptr;
+  Proposition *sorties_l4 = nullptr, *sorties_l4f32 = nullptr;
+  u32 *file_l4 = nullptr, *graines_l4 = nullptr, *compte_l4 = nullptr;
   bool ouvert = false;
 
   bool verifier(cudaError_t e, const char* quoi, std::string& erreur) {
@@ -264,7 +303,9 @@ bool Appareil::charger_propositions(const DonneesPropositions& d, Transferts& t,
   }
   u32 *parties = nullptr, *tailles = nullptr;
   if (!e.copier_vers(d.parties, d.n * d.pas, parties, t, erreur) || !e.copier_vers(d.tailles, d.n, tailles, t, erreur) ||
-      !e.allouer(d.n, e.sorties_propositions, erreur))
+      !e.allouer(d.n, e.sorties_propositions, erreur) || !e.allouer(d.n, e.sorties_l4, erreur) ||
+      !e.allouer(d.n, e.sorties_l4f32, erreur) || !e.allouer(d.n, e.file_l4, erreur) ||
+      !e.allouer(d.n, e.graines_l4, erreur) || !e.allouer(1, e.compte_l4, erreur))
     return false;
   e.propositions = DonneesPropositions{parties, tailles, d.pas, d.n};
   return true;
@@ -288,6 +329,35 @@ bool Appareil::jouer_propositions(float& noyau_ms, std::string& erreur) {
 bool Appareil::lire_propositions(Proposition* sortie, Transferts& t, std::string& erreur) {
   Etat& e = *etat_;
   return e.copier_depuis(sortie, e.sorties_propositions, e.propositions.n, t, erreur);
+}
+
+bool Appareil::jouer_l4(bool f32, float& noyau_ms, std::string& erreur) {
+  Etat& e = *etat_;
+  noyau_ms = 0;
+  const u64 n = e.propositions.n;
+  if (n == 0) return true;
+  const unsigned blocs = static_cast<unsigned>((n + kFilsPropositions - 1) / kFilsPropositions);
+  Proposition* sortie = f32 ? e.sorties_l4f32 : e.sorties_l4;
+  if (!e.verifier(cudaEventRecord(e.debut, e.flux), "cudaEventRecord", erreur)) return false;
+  if (!e.verifier(cudaMemsetAsync(e.compte_l4, 0, sizeof(u32), e.flux), "cudaMemsetAsync", erreur)) return false;
+  noyau_l4_entier<<<blocs, kFilsPropositions, 0, e.flux>>>(e.propositions, e.census.x, e.census.y, e.census.z, sortie,
+                                                           e.file_l4, e.graines_l4, e.compte_l4);
+  if (!e.verifier(cudaGetLastError(), "noyau_l4_entier", erreur)) return false;
+  if (f32)
+    noyau_l4_flottant<DWelzlL4F32HD, float><<<blocs, kFilsPropositions, 0, e.flux>>>(
+        e.propositions, e.census.x, e.census.y, e.census.z, sortie, e.file_l4, e.graines_l4, e.compte_l4);
+  else
+    noyau_l4_flottant<DWelzlL4HD, double><<<blocs, kFilsPropositions, 0, e.flux>>>(
+        e.propositions, e.census.x, e.census.y, e.census.z, sortie, e.file_l4, e.graines_l4, e.compte_l4);
+  if (!e.verifier(cudaGetLastError(), "noyau_l4_flottant", erreur)) return false;
+  if (!e.verifier(cudaEventRecord(e.fin, e.flux), "cudaEventRecord", erreur)) return false;
+  if (!e.verifier(cudaEventSynchronize(e.fin), "cudaEventSynchronize", erreur)) return false;
+  return e.verifier(cudaEventElapsedTime(&noyau_ms, e.debut, e.fin), "cudaEventElapsedTime", erreur);
+}
+
+bool Appareil::lire_l4(bool f32, Proposition* sortie, Transferts& t, std::string& erreur) {
+  Etat& e = *etat_;
+  return e.copier_depuis(sortie, f32 ? e.sorties_l4f32 : e.sorties_l4, e.propositions.n, t, erreur);
 }
 
 }  // namespace mesg

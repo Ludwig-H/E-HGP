@@ -334,20 +334,32 @@ struct LotSondesProduit {
 };
 
 // Propositions : DWelzl du produit (resolve.cpp, propose, sans le tri final des SiteIdx) et noyau en source unique.
+// Modes : DWelzl binaire64 du produit (tower/proposal.hpp), sa copie en source unique, L4 binaire64 et L4 binaire32
+// en source unique (executeurs de l'hote des politiques jouees sur l'appareil).
+enum ModeProposition : int { kModeProduit = 0, kModeHd = 1, kModeL4 = 2, kModeL4F32 = 3 };
+
 struct LotPropositions {
   const std::vector<u32>& parties;
   const std::vector<u32>& tailles;
   u32 pas;
   std::span<const u32> x, y, z;
   std::vector<mesg::Proposition>& sortie;
-  bool produit;
+  int mode;
   static Outcome corps(void* brut, u64 debut, u64 fin, u32) noexcept {
     auto& s = *static_cast<LotPropositions*>(brut);
     for (u64 i = debut; i < fin; ++i) {
       const u32* f = s.parties.data() + i * s.pas;
       const u32 k = s.tailles[i];
-      if (!s.produit) {
+      if (s.mode == kModeHd) {
         mesg::proposer(f, k, s.x.data(), s.y.data(), s.z.data(), s.sortie[i]);
+        continue;
+      }
+      if (s.mode == kModeL4) {
+        mesg::proposer_l4<mesg::DWelzlL4HD, double>(f, k, s.x.data(), s.y.data(), s.z.data(), s.sortie[i]);
+        continue;
+      }
+      if (s.mode == kModeL4F32) {
+        mesg::proposer_l4<mesg::DWelzlL4F32HD, float>(f, k, s.x.data(), s.y.data(), s.z.data(), s.sortie[i]);
         continue;
       }
       tower_detail::DWelzl w;
@@ -374,6 +386,119 @@ bool memes_bits(const mesg::Proposition& a, const mesg::Proposition& b) {
   for (int j = 0; j < 4; ++j)
     if (a.r[j] != b.r[j]) return false;
   return std::memcmp(a.c, b.c, sizeof(a.c)) == 0 && std::memcmp(&a.r2, &b.r2, sizeof(a.r2)) == 0;
+}
+
+// Issue d'une proposition, par les fonctions exactes du produit (resolve.cpp, locate) : MECANISME (LEM-T1 sans
+// arithmetique, certificat du support propose, repli exact sans proposition ou apres un certificat en echec) et ISSUE
+// (boule de la table : S* dans F et F dans P_b ; census : support canonique parmi les sites de F sur la sphere). L'issue
+// ne depend que de F (plus petite boule unique, support canonique) ; le mecanisme depend de la proposition.
+enum Mecanisme : u8 { kMecT1 = 0, kMecCertificat = 1, kMecReplisSansProposition = 2, kMecReplisCertificat = 3 };
+enum GenreIssue : u8 { kIssueTable = 0, kIssueCensus = 1, kIssueRefus = 2 };
+struct Issue {
+  u8 mecanisme = 0, genre = kIssueRefus, arite = 0;
+  u32 boule = mesg::kAucun;
+  std::array<u32, 4> support{};
+};
+
+bool memes_issues(const Issue& a, const Issue& b) {
+  if (a.genre != b.genre) return false;
+  if (a.genre == kIssueTable) return a.boule == b.boule;
+  return a.arite == b.arite && a.support == b.support;
+}
+
+Issue conclure(const tower_detail::Domain& d, const tower_detail::Part& f, const tower_detail::Certified& c, u8 mec) {
+  Issue out;
+  out.mecanisme = mec;
+  if (const auto b = tower_detail::lem_t1(d, f, std::span<const u32>(c.support.data(), c.arity))) {
+    out.genre = kIssueTable;
+    out.boule = *b;
+    return out;
+  }
+  std::array<SiteIdx, 4> cle{};
+  for (u32 i = 0; i < c.arity; ++i) cle[i] = make_id<SiteIdx>(c.support[i]);
+  if (d.catalogue.find_support(std::span<const SiteIdx>(cle.data(), c.arity))) return out;  // F hors de P_b : refus
+  out.genre = kIssueCensus;
+  out.arite = c.arity;
+  out.support = c.support;
+  return out;
+}
+
+Issue classer(const tower_detail::Domain& d, const tower_detail::Part& f, const mesg::Proposition& p) {
+  const bool aboutie = (p.ok & mesg::kPropOk) != 0 && p.nr >= 2 && p.nr <= 4;
+  u8 mec = kMecReplisSansProposition;
+  if (aboutie) {
+    std::array<u32, 4> s{};
+    const u32 q = p.nr < 4 ? p.nr : 4;
+    for (u32 i = 0; i < q; ++i) s[i] = f.id[p.r[i] < f.k ? p.r[i] : 0];
+    for (u32 i = 1; i < q; ++i)  // tri par insertion (au plus quatre SiteIdx)
+      for (u32 j = i; j > 0 && s[j] < s[j - 1]; --j) std::swap(s[j], s[j - 1]);
+    const std::span<const u32> sp(s.data(), q);
+    if (const auto b = tower_detail::lem_t1(d, f, sp)) {
+      Issue out;
+      out.mecanisme = kMecT1;
+      out.genre = kIssueTable;
+      out.boule = *b;
+      return out;
+    }
+    const auto c = tower_detail::certify_part(d, f, sp);
+    if (c.ok() && c.value()) return conclure(d, f, *c.value(), kMecCertificat);
+    mec = kMecReplisCertificat;
+  }
+  std::array<u32, 4> sup{};
+  const auto q = tower_detail::exact_support(d, f, sup);
+  Issue refus;
+  refus.mecanisme = mec;
+  if (!q.ok()) return refus;
+  const auto c = tower_detail::certify_part(d, f, std::span<const u32>(sup.data(), q.value()));
+  if (!c.ok() || !c.value()) return refus;
+  return conclure(d, f, *c.value(), mec);
+}
+
+struct LotIssues {
+  const tower_detail::Domain& d;
+  const std::vector<u32>& parties;
+  const std::vector<u32>& tailles;
+  u32 pas;
+  const std::vector<mesg::Proposition>& props;
+  std::vector<Issue>& issues;
+  static Outcome corps(void* brut, u64 debut, u64 fin, u32) noexcept {
+    auto& s = *static_cast<LotIssues*>(brut);
+    for (u64 i = debut; i < fin; ++i) {
+      tower_detail::Part f;
+      f.k = s.tailles[i];
+      for (u32 j = 0; j < f.k; ++j) f.id[j] = s.parties[i * s.pas + j];
+      s.issues[i] = classer(s.d, f, s.props[i]);
+    }
+    return {};
+  }
+};
+
+// Comptes d'une politique : mecanismes, issues, ecarts d'issue a la reference.
+struct BilanIssues {
+  std::array<u64, 4> mecanismes{};
+  std::array<u64, 3> genres{};
+  u64 ecarts_reference = 0;
+};
+BilanIssues bilan(const std::vector<Issue>& issues, const std::vector<Issue>* reference) {
+  BilanIssues b;
+  for (u64 i = 0; i < issues.size(); ++i) {
+    ++b.mecanismes[issues[i].mecanisme];
+    ++b.genres[issues[i].genre];
+    if (reference != nullptr && !memes_issues(issues[i], (*reference)[i])) ++b.ecarts_reference;
+  }
+  return b;
+}
+std::string json_bilan(const BilanIssues& b) {
+  char tampon[512];
+  std::snprintf(tampon, sizeof(tampon),
+                "\"mecanismes\":{\"t1\":%llu,\"certificat\":%llu,\"repli_sans_proposition\":%llu,"
+                "\"repli_certificat\":%llu},\"issues\":{\"table\":%llu,\"census\":%llu,\"refus\":%llu},"
+                "\"issues_differentes_p64\":%llu",
+                (unsigned long long)b.mecanismes[0], (unsigned long long)b.mecanismes[1],
+                (unsigned long long)b.mecanismes[2], (unsigned long long)b.mecanismes[3],
+                (unsigned long long)b.genres[0], (unsigned long long)b.genres[1], (unsigned long long)b.genres[2],
+                (unsigned long long)b.ecarts_reference);
+  return tampon;
 }
 
 // Table des naissances au format de l'appareil (noyau_g.hpp : fiches de 3 + k mots dans l'ordre canonique
@@ -615,9 +740,12 @@ int executer(const Options& o) {
       }
     }
   }
-  std::vector<mesg::Proposition> prop_produit(tailles.size()), prop_hd(tailles.size());
-  LotPropositions lot_prop{parties, tailles, pas, cloud.x(), cloud.y(), cloud.z(), prop_produit, true};
-  LotPropositions lot_prop_hd{parties, tailles, pas, cloud.x(), cloud.y(), cloud.z(), prop_hd, false};
+  std::vector<mesg::Proposition> prop_produit(tailles.size()), prop_hd(tailles.size()), prop_l4(tailles.size()),
+      prop_l4f32(tailles.size());
+  LotPropositions lot_prop{parties, tailles, pas, cloud.x(), cloud.y(), cloud.z(), prop_produit, kModeProduit};
+  LotPropositions lot_prop_hd{parties, tailles, pas, cloud.x(), cloud.y(), cloud.z(), prop_hd, kModeHd};
+  LotPropositions lot_l4{parties, tailles, pas, cloud.x(), cloud.y(), cloud.z(), prop_l4, kModeL4};
+  LotPropositions lot_l4f32{parties, tailles, pas, cloud.x(), cloud.y(), cloud.z(), prop_l4f32, kModeL4F32};
   auto jouer_propositions_hote = [&](LotPropositions& lot) {
     const auto t0 = Clock::now();
     const Outcome r = pool.value()->parallel_for(tailles.size(), 256, &lot, &LotPropositions::corps);
@@ -692,14 +820,17 @@ int executer(const Options& o) {
   // 2-4. Passes : echauffement (0) puis o.passes passes chronometrees, deux prises par mesure (A/A).
   for (u32 passe = 0; passe <= o.passes; ++passe) {
     double c_cpu[2] = {0, 0}, s_cpu[2] = {0, 0}, p_cpu[2] = {0, 0}, c_hd = -1, p_hd = -1;
-    float c_gpu[2] = {0, 0}, s_gpu[2] = {0, 0}, p_gpu[2] = {0, 0};
+    double l4_cpu[2] = {0, 0}, l4f32_cpu[2] = {0, 0};
+    float c_gpu[2] = {0, 0}, s_gpu[2] = {0, 0}, p_gpu[2] = {0, 0}, l4_gpu[2] = {0, 0}, l4f32_gpu[2] = {0, 0};
     bool ok = true;
     auto hote = [&]() {
       for (int a = 0; a < 2; ++a) {
         c_cpu[a] = jouer_census_hote();
         s_cpu[a] = jouer_sondes_hote();
         p_cpu[a] = jouer_propositions_hote(lot_prop);
-        ok = ok && c_cpu[a] >= 0 && s_cpu[a] >= 0 && p_cpu[a] >= 0;
+        l4_cpu[a] = jouer_propositions_hote(lot_l4);
+        l4f32_cpu[a] = jouer_propositions_hote(lot_l4f32);
+        ok = ok && c_cpu[a] >= 0 && s_cpu[a] >= 0 && p_cpu[a] >= 0 && l4_cpu[a] >= 0 && l4f32_cpu[a] >= 0;
       }
       if (o.hote_hd) {
         c_hd = jouer_census_hd();
@@ -712,7 +843,8 @@ int executer(const Options& o) {
       if (!avec_appareil) return;
       for (int a = 0; a < 2; ++a) {
         ok = ok && appareil.jouer_census(c_gpu[a], erreur) && appareil.jouer_sondes(s_gpu[a], erreur) &&
-             appareil.jouer_propositions(p_gpu[a], erreur);
+             appareil.jouer_propositions(p_gpu[a], erreur) && appareil.jouer_l4(false, l4_gpu[a], erreur) &&
+             appareil.jouer_l4(true, l4f32_gpu[a], erreur);
       }
 #endif
     };
@@ -726,9 +858,12 @@ int executer(const Options& o) {
     std::printf("{\"phase\":\"passe\",\"passe\":%u,\"echauffement\":%s,\"ok\":%s,\"census\":{\"hote_ms\":[%.4f,%.4f],"
                 "\"hote_hd_ms\":%.4f,\"appareil_ms\":[%.4f,%.4f]},\"sondes\":{\"hote_ms\":[%.4f,%.4f],"
                 "\"appareil_ms\":[%.4f,%.4f]},\"propositions\":{\"hote_ms\":[%.4f,%.4f],\"hote_hd_ms\":%.4f,"
+                "\"appareil_ms\":[%.4f,%.4f]},\"propositions_l4\":{\"hote_ms\":[%.4f,%.4f],"
+                "\"appareil_ms\":[%.4f,%.4f]},\"propositions_l4f32\":{\"hote_ms\":[%.4f,%.4f],"
                 "\"appareil_ms\":[%.4f,%.4f]}}\n",
                 passe, passe == 0 ? "true" : "false", ok ? "true" : "false", c_cpu[0], c_cpu[1], c_hd, c_gpu[0],
-                c_gpu[1], s_cpu[0], s_cpu[1], s_gpu[0], s_gpu[1], p_cpu[0], p_cpu[1], p_hd, p_gpu[0], p_gpu[1]);
+                c_gpu[1], s_cpu[0], s_cpu[1], s_gpu[0], s_gpu[1], p_cpu[0], p_cpu[1], p_hd, p_gpu[0], p_gpu[1],
+                l4_cpu[0], l4_cpu[1], l4_gpu[0], l4_gpu[1], l4f32_cpu[0], l4f32_cpu[1], l4f32_gpu[0], l4f32_gpu[1]);
     std::fflush(stdout);
     if (!ok) return 2;
   }
@@ -758,7 +893,8 @@ int executer(const Options& o) {
     if (o.hote_hd) ecarts_prop_hd += !memes_bits(prop_produit[i], prop_hd[i]);
   }
   u64 ecarts_gpu = 0, comparees_gpu = 0, ecarts_sondes = 0, comparees_sondes = 0, reussies_gpu = 0,
-      reussies_produit = 0;
+      reussies_produit = 0, ecarts_l4 = 0, ecarts_l4f32 = 0;
+  std::vector<mesg::Proposition> l4_dev, l4f32_dev;  // sorties de l'appareil (vides sans appareil)
 #if defined(MESG_APPAREIL)
   if (avec_appareil) {
     std::vector<Resultat> res_gpu(recs.size());
@@ -786,6 +922,15 @@ int executer(const Options& o) {
     std::vector<mesg::Proposition> prop_gpu(tailles.size());
     if (!appareil.lire_propositions(prop_gpu.data(), tr_props, erreur)) return 2;
     for (u64 i = 0; i < tailles.size(); ++i) ecarts_prop_gpu += !memes_bits(prop_produit[i], prop_gpu[i]);
+    l4_dev.resize(tailles.size());
+    l4f32_dev.resize(tailles.size());
+    if (!appareil.lire_l4(false, l4_dev.data(), tr_props, erreur) || !appareil.lire_l4(true, l4f32_dev.data(), tr_props,
+                                                                                         erreur))
+      return 2;
+    for (u64 i = 0; i < tailles.size(); ++i) {
+      ecarts_l4 += !memes_bits(prop_l4[i], l4_dev[i]);
+      ecarts_l4f32 += !memes_bits(prop_l4f32[i], l4f32_dev[i]);
+    }
     std::printf("{\"phase\":\"transferts\",\"census_d2h_ms\":%.3f,\"census_d2h_octets\":%llu,\"sondes_d2h_ms\":%.3f,"
                 "\"sondes_d2h_octets\":%llu,\"propositions_d2h_ms\":%.3f,\"propositions_d2h_octets\":%llu}\n",
                 tr_census.d2h_ms, (unsigned long long)tr_census.d2h_octets, tr_sondes.d2h_ms,
@@ -796,21 +941,49 @@ int executer(const Options& o) {
     for (auto& ord : ordres)
       for (const u32 v : ord->attendu) reussies_produit += v != mesg::kAucun;
   const bool sondes_coherentes = reussies_produit == premieres;
+  // Issues des propositions par les fonctions exactes du produit : P64 (produit, hote), L4 et L4F32 (appareil s'il est
+  // la, sinon l'executeur de l'hote de la meme source).
+  std::vector<num::Point> points_exacts(cloud.sites());
+  for (u32 i = 0; i < cloud.sites(); ++i) {
+    auto pt = num::Point::make(cloud.x()[i], cloud.y()[i], cloud.z()[i]);
+    if (!pt.ok()) return 3;
+    points_exacts[i] = pt.value();
+  }
+  const tower_detail::Domain domaine{ix, cat, std::span<const num::Point>(points_exacts)};
+  const std::vector<mesg::Proposition>& l4_jugees = l4_dev.empty() ? prop_l4 : l4_dev;
+  const std::vector<mesg::Proposition>& l4f32_jugees = l4f32_dev.empty() ? prop_l4f32 : l4f32_dev;
+  std::vector<Issue> issues_p64(tailles.size()), issues_l4(tailles.size()), issues_l4f32(tailles.size());
+  {
+    LotIssues a{domaine, parties, tailles, pas, prop_produit, issues_p64};
+    LotIssues b{domaine, parties, tailles, pas, l4_jugees, issues_l4};
+    LotIssues c{domaine, parties, tailles, pas, l4f32_jugees, issues_l4f32};
+    for (LotIssues* lot : {&a, &b, &c})
+      if (!pool.value()->parallel_for(tailles.size(), 1024, lot, &LotIssues::corps).ok()) return 3;
+  }
+  const BilanIssues b_p64 = bilan(issues_p64, nullptr), b_l4 = bilan(issues_l4, &issues_p64),
+                    b_l4f32 = bilan(issues_l4f32, &issues_p64);
+  u64 entieres = 0;
+  for (const auto& x : l4_jugees) entieres += (x.ok & mesg::kPropEntiere) != 0;
   const bool identite = ecarts_hd == 0 && ecarts_gpu == 0 && ecarts_sondes == 0 && ecarts_produit == 0 &&
-                        sondes_coherentes && coquilles_larges == 0 && ecarts_prop_hd == 0 && ecarts_prop_gpu == 0;
+                        sondes_coherentes && coquilles_larges == 0 && ecarts_prop_hd == 0 && ecarts_prop_gpu == 0 &&
+                        ecarts_l4 == 0 && ecarts_l4f32 == 0 && b_l4.ecarts_reference == 0 &&
+                        b_l4f32.ecarts_reference == 0 && b_p64.genres[kIssueRefus] == 0;
   std::printf("{\"phase\":\"identite\",\"census\":{\"requetes\":%llu,\"non_resolues\":%llu,\"comparees_hote_hd\":%llu,"
               "\"ecarts_hote_hd\":%llu,\"comparees_appareil\":%llu,\"ecarts_appareil\":%llu,\"ecarts_lot_produit\":%llu,"
               "\"coquilles_larges\":%llu},\"sondes\":{\"comparees_appareil\":%llu,\"ecarts_appareil\":%llu,"
               "\"reussies_produit\":%llu,\"reussies_appareil\":%llu,\"premieres_sondes_reussies_g\":%llu,"
               "\"coherentes\":%s},\"propositions\":{\"parties\":%llu,\"abouties\":%llu,\"ecarts_hote_hd\":%llu,"
-              "\"ecarts_appareil\":%llu},\"appareil\":%s,\"identite\":%s}\n",
+              "\"ecarts_appareil\":%llu,%s},\"propositions_l4\":{\"ecarts_hote_appareil\":%llu,\"entieres\":%llu,%s},"
+              "\"propositions_l4f32\":{\"ecarts_hote_appareil\":%llu,%s},\"appareil\":%s,\"identite\":%s}\n",
               (unsigned long long)recs.size(), (unsigned long long)non_resolues, (unsigned long long)comparees_hd,
               (unsigned long long)ecarts_hd, (unsigned long long)comparees_gpu, (unsigned long long)ecarts_gpu,
               (unsigned long long)ecarts_produit, (unsigned long long)coquilles_larges,
               (unsigned long long)comparees_sondes, (unsigned long long)ecarts_sondes,
               (unsigned long long)reussies_produit, (unsigned long long)reussies_gpu, (unsigned long long)premieres,
               sondes_coherentes ? "true" : "false", (unsigned long long)tailles.size(), (unsigned long long)prop_ok,
-              (unsigned long long)ecarts_prop_hd, (unsigned long long)ecarts_prop_gpu, avec_appareil ? "true" : "false",
+              (unsigned long long)ecarts_prop_hd, (unsigned long long)ecarts_prop_gpu, json_bilan(b_p64).c_str(),
+              (unsigned long long)ecarts_l4, (unsigned long long)entieres, json_bilan(b_l4).c_str(),
+              (unsigned long long)ecarts_l4f32, json_bilan(b_l4f32).c_str(), avec_appareil ? "true" : "false",
               identite ? "true" : "false");
   std::fflush(stdout);
   return identite ? 0 : 1;

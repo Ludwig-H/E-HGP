@@ -584,4 +584,545 @@ MESG_HD void proposer(const u32* partie, u32 k, const u32* x, const u32* y, cons
   for (int i = 0; i < 4; ++i) out.r[i] = static_cast<u32>(b.R[i]);
 }
 
+// ---------------------------------------------------------------------------------------- proposition L4 (etape 2)
+// Bras L4 de T2-d-B (voie entiere, puis DWelzl amorce sur la paire la plus eloignee exacte), en source unique. Classes
+// DWelzl : copie textuelle du texte du bras (src/tower/proposal.hpp du produit 92495aa6 + substitutions exactes de
+// microbancs/mes_t2d_b/bras_t2d_b.json, empreinte a82de524), generee par generer_l4_hd.py : DWelzlL4HD en binaire64,
+// DWelzlL4F32HD en binaire32 (double -> float, constantes suffixees f). Voie entiere : exact_small_support du bras,
+// reecrite sans std::array (departage des paires ex aequo par la liste triee des positions, comparaison explicite).
+// Bits du drapeau ok d'une Proposition : bit 0, proposition aboutie (w.ok, ou voie entiere) ; bit 1, voie entiere.
+inline constexpr u32 kPropOk = 1u, kPropEntiere = 2u;
+
+MESG_HD int cmp3(const u32* a, const u32* b) {
+  for (int c = 0; c < 3; ++c)
+    if (a[c] != b[c]) return a[c] < b[c] ? -1 : 1;
+  return 0;
+}
+
+// ordered(i, j) < ordered(a, b) du bras : paires triees par positions, puis comparees lexicographiquement.
+MESG_HD bool paire_avant(const u32 (*pos)[3], int i, int j, int a, int b) {
+  const u32 *p0 = pos[i], *p1 = pos[j], *q0 = pos[a], *q1 = pos[b];
+  if (cmp3(p1, p0) < 0) {
+    const u32* t = p0;
+    p0 = p1;
+    p1 = t;
+  }
+  if (cmp3(q1, q0) < 0) {
+    const u32* t = q0;
+    q0 = q1;
+    q1 = t;
+  }
+  const int c = cmp3(p0, q0);
+  return c != 0 ? c < 0 : cmp3(p1, q1) < 0;
+}
+
+// exact_small_support du bras L4 (n sites, ecarts locaux exacts en i64, profil <= 30 bits) : arite 2 (paire la plus
+// eloignee dont la boule diametrale fermee contient tout), 3 (triangle aigu) ou 0 (la voie entiere ne conclut pas) ;
+// support[0..1] porte toujours la paire la plus eloignee (graine du flottant).
+MESG_HD int entier_l4(const i64 (*local)[3], const u32 (*pos)[3], int n, int support[3]) {
+  support[0] = 0;
+  support[1] = 1;
+  if (n == 2) return 2;
+  int a = 0, b = 1;
+  i64 best = 0;
+  for (int c = 0; c < 3; ++c) best += (local[0][c] - local[1][c]) * (local[0][c] - local[1][c]);
+  for (int i = 0; i < n; ++i)
+    for (int j = i + 1; j < n; ++j) {
+      if (i == 0 && j == 1) continue;
+      i64 s = 0;
+      for (int c = 0; c < 3; ++c) s += (local[i][c] - local[j][c]) * (local[i][c] - local[j][c]);
+      if (s > best || (s == best && paire_avant(pos, i, j, a, b))) {
+        best = s;
+        a = i;
+        b = j;
+      }
+    }
+  int dehors = -1;
+#if !defined(MESG_MUTANT_L4_SANS_DIAMETRE)
+  for (int x = 0; x < n && dehors < 0; ++x) {
+    if (x == a || x == b) continue;
+    i64 dot = 0;
+    for (int c = 0; c < 3; ++c) dot += (local[x][c] - local[a][c]) * (local[x][c] - local[b][c]);
+    if (dot > 0) dehors = x;  // hors de la boule diametrale fermee de (a, b)
+  }
+#endif
+  support[0] = a;
+  support[1] = b;
+  if (dehors < 0) return 2;
+  if (n != 3) return 0;
+  support[2] = dehors;  // angle aigu en face du plus grand cote : triangle aigu
+  return 3;
+}
+
+struct DBallL4HD {
+  double c[3] = {0, 0, 0};
+  double r2 = -1;
+  int R[4] = {0, 0, 0, 0};
+  int nr = 0;
+};
+
+class DWelzlL4HD {
+ public:
+  static constexpr int kCapacity = 12;
+  double p[kCapacity][3];
+  bool ok = true;
+
+  MESG_HD_MEMBRE DBallL4HD run(int n, int seed_a = -1, int seed_b = -1) {
+    {
+      const DBallL4HD B = seed_a >= 0 ? run_pair(n, seed_a, seed_b) : run_support(n);
+      if (ok) return B;
+      ok = true;
+    }
+    // repli : Welzl a deplacement en tete, du plus loin au plus proche du barycentre
+    double g[3] = {0, 0, 0};
+    for (int i = 0; i < n; ++i)
+      for (int a = 0; a < 3; ++a) g[a] += p[i][a];
+    for (int a = 0; a < 3; ++a) g[a] /= n;
+    double key[kCapacity];
+    for (int i = 0; i < n; ++i) {
+      double d = 0;
+      for (int a = 0; a < 3; ++a) d += (p[i][a] - g[a]) * (p[i][a] - g[a]);
+      int j = i;
+      while (j > 0 && key[j - 1] < d) {
+        key[j] = key[j - 1];
+        L[j] = L[j - 1];
+        --j;
+      }
+      key[j] = d;
+      L[j] = i;
+    }
+    ns = 0;
+    mtf(n);
+    return ball;
+  }
+
+ private:
+  MESG_HD_MEMBRE DBallL4HD through(const int* R, int nr) {
+    DBallL4HD B;
+    B.nr = nr;
+    for (int i = 0; i < nr; ++i) B.R[i] = R[i];
+    if (nr == 0) return B;
+    const double* a = p[R[0]];
+    if (nr == 1) {
+      for (int i = 0; i < 3; ++i) B.c[i] = a[i];
+      B.r2 = 0;
+      return B;
+    }
+    if (nr == 2) {
+      const double* b = p[R[1]];
+      double r2 = 0;
+      for (int i = 0; i < 3; ++i) {
+        B.c[i] = 0.5 * (a[i] + b[i]);
+        const double d = b[i] - a[i];
+        r2 += d * d;
+      }
+      B.r2 = 0.25 * r2;
+      return B;
+    }
+    if (nr == 3) return through3(B, a, p[R[1]], p[R[2]]);
+    return through4(B, a, p[R[1]], p[R[2]], p[R[3]]);
+  }
+  MESG_HD_MEMBRE DBallL4HD through3(DBallL4HD B, const double* a, const double* b, const double* d) {
+    const double u[3] = {b[0] - a[0], b[1] - a[1], b[2] - a[2]};
+    const double v[3] = {d[0] - a[0], d[1] - a[1], d[2] - a[2]};
+    const double w[3] = {u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]};
+    const double uu = u[0] * u[0] + u[1] * u[1] + u[2] * u[2], vv = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
+    const double ww = w[0] * w[0] + w[1] * w[1] + w[2] * w[2];
+    if (!(ww > 1e-9 * uu * vv)) {
+      ok = false;
+      return B;
+    }
+    const double t[3] = {uu * v[0] - vv * u[0], uu * v[1] - vv * u[1], uu * v[2] - vv * u[2]};
+    const double n[3] = {t[1] * w[2] - t[2] * w[1], t[2] * w[0] - t[0] * w[2], t[0] * w[1] - t[1] * w[0]};
+    const double D = 2 * ww;
+    double r2 = 0;
+    for (int i = 0; i < 3; ++i) {
+      const double o = n[i] / D;
+      B.c[i] = a[i] + o;
+      r2 += o * o;
+    }
+    B.r2 = r2;
+    return B;
+  }
+  MESG_HD_MEMBRE DBallL4HD through4(DBallL4HD B, const double* a, const double* b, const double* d, const double* e) {
+    const double u[3] = {b[0] - a[0], b[1] - a[1], b[2] - a[2]};
+    const double v[3] = {d[0] - a[0], d[1] - a[1], d[2] - a[2]};
+    const double s[3] = {e[0] - a[0], e[1] - a[1], e[2] - a[2]};
+    const double vs[3] = {v[1] * s[2] - v[2] * s[1], v[2] * s[0] - v[0] * s[2], v[0] * s[1] - v[1] * s[0]};
+    const double su[3] = {s[1] * u[2] - s[2] * u[1], s[2] * u[0] - s[0] * u[2], s[0] * u[1] - s[1] * u[0]};
+    const double uv[3] = {u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]};
+    const double det = u[0] * vs[0] + u[1] * vs[1] + u[2] * vs[2];
+    const double uu = u[0] * u[0] + u[1] * u[1] + u[2] * u[2], vv = v[0] * v[0] + v[1] * v[1] + v[2] * v[2],
+                 ss = s[0] * s[0] + s[1] * s[1] + s[2] * s[2];
+    if (!(det * det > 1e-9 * uu * vv * ss)) {
+      ok = false;
+      return B;
+    }
+    const double D = 2 * det;
+    double r2 = 0;
+    for (int i = 0; i < 3; ++i) {
+      const double o = (uu * vs[i] + vv * su[i] + ss * uv[i]) / D;
+      B.c[i] = a[i] + o;
+      r2 += o * o;
+    }
+    B.r2 = r2;
+    return B;
+  }
+  MESG_HD_MEMBRE bool contains(const DBallL4HD& B, int i) const {
+    if (B.r2 < 0) return false;
+    double d2 = 0;
+    for (int a = 0; a < 3; ++a) {
+      const double t = p[i][a] - B.c[a];
+      d2 += t * t;
+    }
+    return d2 <= B.r2 * (1 + 1e-10) + 1e-9;
+  }
+  // Welzl a deplacement en tete (Gaertner) : L est la liste des points, S le support courant.
+  int L[kCapacity];
+  int S[4];
+  int ns = 0;
+  DBallL4HD ball;
+  MESG_HD_MEMBRE void mtf(int end) {
+    ball = through(S, ns);
+    if (!ok || ns == 4) return;
+    for (int i = 0; i < end; ++i) {
+      if (contains(ball, L[i])) continue;
+      S[ns++] = L[i];
+      mtf(i);
+      --ns;
+      if (!ok) return;
+      const int v = L[i];
+      for (int j = i; j > 0; --j) L[j] = L[j - 1];
+      L[0] = v;
+    }
+  }
+  // Welzl recursif sur T[0..n) avec R au bord (petits ensembles : |T| <= 4).
+  // Bornes explicites (n <= 4, nr < 4 avant ecriture) : meme resultat, sans le faux positif -Warray-bounds de GCC
+  // une fois la recursion expansee dans run_support.
+  MESG_HD_MEMBRE DBallL4HD small(const int* T, int n, int* R, int nr) {
+    if (!ok) return DBallL4HD{};
+    if (n <= 0 || n > 4 || nr < 0 || nr >= 4) return through(R, nr < 0 ? 0 : nr > 4 ? 4 : nr);
+    DBallL4HD B = small(T, n - 1, R, nr);
+    if (!ok || contains(B, T[n - 1])) return B;
+    R[nr] = T[n - 1];
+    return small(T, n - 1, R, nr + 1);
+  }
+  MESG_HD_MEMBRE int farthest(int n, const double* q) const {
+    int best = 0;
+    double bd = -1;
+    for (int i = 0; i < n; ++i) {
+      double d = 0;
+      for (int a = 0; a < 3; ++a) d += (p[i][a] - q[a]) * (p[i][a] - q[a]);
+      if (d > bd) {
+        bd = d;
+        best = i;
+      }
+    }
+    return best;
+  }
+  // Depart sur une paire eloignee (le plus loin du barycentre, puis le plus loin de lui), puis, tant qu'un point sort
+  // de la boule, plus petite boule du support et du pire point, ce point au bord (lemme de Welzl). Cout seulement.
+  MESG_HD_MEMBRE DBallL4HD run_support(int n) {
+    double gc[3] = {0, 0, 0};
+    for (int i = 0; i < n; ++i)
+      for (int a = 0; a < 3; ++a) gc[a] += p[i][a];
+    for (int a = 0; a < 3; ++a) gc[a] /= n;
+    const int ia = farthest(n, gc);
+    const int ib = farthest(n, p[ia]);
+    return run_pair(n, ia, ib);
+  }
+  MESG_HD_MEMBRE DBallL4HD run_pair(int n, int ia, int ib) {
+    if (ia == ib) {
+      ok = false;
+      return DBallL4HD{};
+    }
+    int S2[4] = {ia, ib, 0, 0};
+    DBallL4HD B = through(S2, 2);
+    for (int iter = 0; iter < 8 && ok; ++iter) {
+      int v = -1;
+      double worst = 0;
+      for (int i = 0; i < n; ++i) {
+        if (contains(B, i)) continue;
+        double d = 0;
+        for (int a = 0; a < 3; ++a) d += (p[i][a] - B.c[a]) * (p[i][a] - B.c[a]);
+        if (d - B.r2 > worst) {
+          worst = d - B.r2;
+          v = i;
+        }
+      }
+      if (v < 0) return B;
+      int T[4];
+      const int nt = B.nr < 0 ? 0 : B.nr > 4 ? 4 : B.nr;
+      for (int i = 0; i < nt; ++i) T[i] = B.R[i];
+      int R[4] = {v, 0, 0, 0};
+      B = small(T, nt, R, 1);
+    }
+    ok = false;
+    return DBallL4HD{};
+  }
+};
+
+struct DBallL4F32HD {
+  float c[3] = {0, 0, 0};
+  float r2 = -1;
+  int R[4] = {0, 0, 0, 0};
+  int nr = 0;
+};
+
+class DWelzlL4F32HD {
+ public:
+  static constexpr int kCapacity = 12;
+  float p[kCapacity][3];
+  bool ok = true;
+
+  MESG_HD_MEMBRE DBallL4F32HD run(int n, int seed_a = -1, int seed_b = -1) {
+    {
+      const DBallL4F32HD B = seed_a >= 0 ? run_pair(n, seed_a, seed_b) : run_support(n);
+      if (ok) return B;
+      ok = true;
+    }
+    // repli : Welzl a deplacement en tete, du plus loin au plus proche du barycentre
+    float g[3] = {0, 0, 0};
+    for (int i = 0; i < n; ++i)
+      for (int a = 0; a < 3; ++a) g[a] += p[i][a];
+    for (int a = 0; a < 3; ++a) g[a] /= n;
+    float key[kCapacity];
+    for (int i = 0; i < n; ++i) {
+      float d = 0;
+      for (int a = 0; a < 3; ++a) d += (p[i][a] - g[a]) * (p[i][a] - g[a]);
+      int j = i;
+      while (j > 0 && key[j - 1] < d) {
+        key[j] = key[j - 1];
+        L[j] = L[j - 1];
+        --j;
+      }
+      key[j] = d;
+      L[j] = i;
+    }
+    ns = 0;
+    mtf(n);
+    return ball;
+  }
+
+ private:
+  MESG_HD_MEMBRE DBallL4F32HD through(const int* R, int nr) {
+    DBallL4F32HD B;
+    B.nr = nr;
+    for (int i = 0; i < nr; ++i) B.R[i] = R[i];
+    if (nr == 0) return B;
+    const float* a = p[R[0]];
+    if (nr == 1) {
+      for (int i = 0; i < 3; ++i) B.c[i] = a[i];
+      B.r2 = 0;
+      return B;
+    }
+    if (nr == 2) {
+      const float* b = p[R[1]];
+      float r2 = 0;
+      for (int i = 0; i < 3; ++i) {
+        B.c[i] = 0.5f * (a[i] + b[i]);
+        const float d = b[i] - a[i];
+        r2 += d * d;
+      }
+      B.r2 = 0.25f * r2;
+      return B;
+    }
+    if (nr == 3) return through3(B, a, p[R[1]], p[R[2]]);
+    return through4(B, a, p[R[1]], p[R[2]], p[R[3]]);
+  }
+  MESG_HD_MEMBRE DBallL4F32HD through3(DBallL4F32HD B, const float* a, const float* b, const float* d) {
+    const float u[3] = {b[0] - a[0], b[1] - a[1], b[2] - a[2]};
+    const float v[3] = {d[0] - a[0], d[1] - a[1], d[2] - a[2]};
+    const float w[3] = {u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]};
+    const float uu = u[0] * u[0] + u[1] * u[1] + u[2] * u[2], vv = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
+    const float ww = w[0] * w[0] + w[1] * w[1] + w[2] * w[2];
+    if (!(ww > 1e-9f * uu * vv)) {
+      ok = false;
+      return B;
+    }
+    const float t[3] = {uu * v[0] - vv * u[0], uu * v[1] - vv * u[1], uu * v[2] - vv * u[2]};
+    const float n[3] = {t[1] * w[2] - t[2] * w[1], t[2] * w[0] - t[0] * w[2], t[0] * w[1] - t[1] * w[0]};
+    const float D = 2 * ww;
+    float r2 = 0;
+    for (int i = 0; i < 3; ++i) {
+      const float o = n[i] / D;
+      B.c[i] = a[i] + o;
+      r2 += o * o;
+    }
+    B.r2 = r2;
+    return B;
+  }
+  MESG_HD_MEMBRE DBallL4F32HD through4(DBallL4F32HD B, const float* a, const float* b, const float* d, const float* e) {
+    const float u[3] = {b[0] - a[0], b[1] - a[1], b[2] - a[2]};
+    const float v[3] = {d[0] - a[0], d[1] - a[1], d[2] - a[2]};
+    const float s[3] = {e[0] - a[0], e[1] - a[1], e[2] - a[2]};
+    const float vs[3] = {v[1] * s[2] - v[2] * s[1], v[2] * s[0] - v[0] * s[2], v[0] * s[1] - v[1] * s[0]};
+    const float su[3] = {s[1] * u[2] - s[2] * u[1], s[2] * u[0] - s[0] * u[2], s[0] * u[1] - s[1] * u[0]};
+    const float uv[3] = {u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]};
+    const float det = u[0] * vs[0] + u[1] * vs[1] + u[2] * vs[2];
+    const float uu = u[0] * u[0] + u[1] * u[1] + u[2] * u[2], vv = v[0] * v[0] + v[1] * v[1] + v[2] * v[2],
+                 ss = s[0] * s[0] + s[1] * s[1] + s[2] * s[2];
+    if (!(det * det > 1e-9f * uu * vv * ss)) {
+      ok = false;
+      return B;
+    }
+    const float D = 2 * det;
+    float r2 = 0;
+    for (int i = 0; i < 3; ++i) {
+      const float o = (uu * vs[i] + vv * su[i] + ss * uv[i]) / D;
+      B.c[i] = a[i] + o;
+      r2 += o * o;
+    }
+    B.r2 = r2;
+    return B;
+  }
+  MESG_HD_MEMBRE bool contains(const DBallL4F32HD& B, int i) const {
+    if (B.r2 < 0) return false;
+    float d2 = 0;
+    for (int a = 0; a < 3; ++a) {
+      const float t = p[i][a] - B.c[a];
+      d2 += t * t;
+    }
+    return d2 <= B.r2 * (1 + 1e-10f) + 1e-9f;
+  }
+  // Welzl a deplacement en tete (Gaertner) : L est la liste des points, S le support courant.
+  int L[kCapacity];
+  int S[4];
+  int ns = 0;
+  DBallL4F32HD ball;
+  MESG_HD_MEMBRE void mtf(int end) {
+    ball = through(S, ns);
+    if (!ok || ns == 4) return;
+    for (int i = 0; i < end; ++i) {
+      if (contains(ball, L[i])) continue;
+      S[ns++] = L[i];
+      mtf(i);
+      --ns;
+      if (!ok) return;
+      const int v = L[i];
+      for (int j = i; j > 0; --j) L[j] = L[j - 1];
+      L[0] = v;
+    }
+  }
+  // Welzl recursif sur T[0..n) avec R au bord (petits ensembles : |T| <= 4).
+  // Bornes explicites (n <= 4, nr < 4 avant ecriture) : meme resultat, sans le faux positif -Warray-bounds de GCC
+  // une fois la recursion expansee dans run_support.
+  MESG_HD_MEMBRE DBallL4F32HD small(const int* T, int n, int* R, int nr) {
+    if (!ok) return DBallL4F32HD{};
+    if (n <= 0 || n > 4 || nr < 0 || nr >= 4) return through(R, nr < 0 ? 0 : nr > 4 ? 4 : nr);
+    DBallL4F32HD B = small(T, n - 1, R, nr);
+    if (!ok || contains(B, T[n - 1])) return B;
+    R[nr] = T[n - 1];
+    return small(T, n - 1, R, nr + 1);
+  }
+  MESG_HD_MEMBRE int farthest(int n, const float* q) const {
+    int best = 0;
+    float bd = -1;
+    for (int i = 0; i < n; ++i) {
+      float d = 0;
+      for (int a = 0; a < 3; ++a) d += (p[i][a] - q[a]) * (p[i][a] - q[a]);
+      if (d > bd) {
+        bd = d;
+        best = i;
+      }
+    }
+    return best;
+  }
+  // Depart sur une paire eloignee (le plus loin du barycentre, puis le plus loin de lui), puis, tant qu'un point sort
+  // de la boule, plus petite boule du support et du pire point, ce point au bord (lemme de Welzl). Cout seulement.
+  MESG_HD_MEMBRE DBallL4F32HD run_support(int n) {
+    float gc[3] = {0, 0, 0};
+    for (int i = 0; i < n; ++i)
+      for (int a = 0; a < 3; ++a) gc[a] += p[i][a];
+    for (int a = 0; a < 3; ++a) gc[a] /= n;
+    const int ia = farthest(n, gc);
+    const int ib = farthest(n, p[ia]);
+    return run_pair(n, ia, ib);
+  }
+  MESG_HD_MEMBRE DBallL4F32HD run_pair(int n, int ia, int ib) {
+    if (ia == ib) {
+      ok = false;
+      return DBallL4F32HD{};
+    }
+    int S2[4] = {ia, ib, 0, 0};
+    DBallL4F32HD B = through(S2, 2);
+    for (int iter = 0; iter < 8 && ok; ++iter) {
+      int v = -1;
+      float worst = 0;
+      for (int i = 0; i < n; ++i) {
+        if (contains(B, i)) continue;
+        float d = 0;
+        for (int a = 0; a < 3; ++a) d += (p[i][a] - B.c[a]) * (p[i][a] - B.c[a]);
+        if (d - B.r2 > worst) {
+          worst = d - B.r2;
+          v = i;
+        }
+      }
+      if (v < 0) return B;
+      int T[4];
+      const int nt = B.nr < 0 ? 0 : B.nr > 4 ? 4 : B.nr;
+      for (int i = 0; i < nt; ++i) T[i] = B.R[i];
+      int R[4] = {v, 0, 0, 0};
+      B = small(T, nt, R, 1);
+    }
+    ok = false;
+    return DBallL4F32HD{};
+  }
+};
+
+
+// Voie entiere d'une partie : vrai si elle conclut (proposition ecrite) ; sinon la graine (paire la plus eloignee).
+MESG_HD bool proposer_l4_entier(const u32* partie, u32 k, const u32* x, const u32* y, const u32* z, Proposition& out,
+                                int graine[2]) {
+  i64 local[kMaxPartie][3];
+  u32 pos[kMaxPartie][3];
+  const u32 o = partie[0];
+  for (u32 i = 0; i < k; ++i) {
+    pos[i][0] = x[partie[i]];
+    pos[i][1] = y[partie[i]];
+    pos[i][2] = z[partie[i]];
+    local[i][0] = i64{pos[i][0]} - i64{x[o]};
+    local[i][1] = i64{pos[i][1]} - i64{y[o]};
+    local[i][2] = i64{pos[i][2]} - i64{z[o]};
+  }
+  int s[3] = {0, 0, 0};
+  const int q = k >= 2 ? entier_l4(local, pos, static_cast<int>(k), s) : 0;
+  graine[0] = s[0];
+  graine[1] = s[1];
+  if (q <= 0) return false;
+  for (int a = 0; a < 3; ++a) out.c[a] = 0;
+  out.r2 = 0;
+  out.ok = kPropOk | kPropEntiere;
+  out.nr = static_cast<u32>(q);
+  for (int i = 0; i < 4; ++i) out.r[i] = i < q ? static_cast<u32>(s[i]) : 0u;
+  return true;
+}
+
+// DWelzl amorce (W : DWelzlL4HD en binaire64, DWelzlL4F32HD en binaire32), memes ecarts que la voie entiere.
+template <class W, class T>
+MESG_HD void proposer_l4_flottant(const u32* partie, u32 k, const u32* x, const u32* y, const u32* z,
+                                  const int graine[2], Proposition& out) {
+  W w;
+  const u32 o = partie[0];
+  for (u32 i = 0; i < k; ++i) {
+    w.p[i][0] = static_cast<T>(i64{x[partie[i]]} - i64{x[o]});
+    w.p[i][1] = static_cast<T>(i64{y[partie[i]]} - i64{y[o]});
+    w.p[i][2] = static_cast<T>(i64{z[partie[i]]} - i64{z[o]});
+  }
+  const auto b = w.run(static_cast<int>(k), graine[0], graine[1]);
+  for (int a = 0; a < 3; ++a) out.c[a] = static_cast<double>(b.c[a]);
+  out.r2 = static_cast<double>(b.r2);
+  out.ok = w.ok ? kPropOk : 0u;
+  out.nr = static_cast<u32>(b.nr);
+  for (int i = 0; i < 4; ++i) out.r[i] = static_cast<u32>(b.R[i]);
+}
+
+// Proposition L4 complete (executeur de l'hote ; l'appareil la joue en deux noyaux, voie entiere puis flottant compacte).
+template <class W, class T>
+MESG_HD void proposer_l4(const u32* partie, u32 k, const u32* x, const u32* y, const u32* z, Proposition& out) {
+  int graine[2] = {0, 1};
+  if (proposer_l4_entier(partie, k, x, y, z, out, graine)) return;
+  proposer_l4_flottant<W, T>(partie, k, x, y, z, graine, out);
+}
+
 }  // namespace mesg
