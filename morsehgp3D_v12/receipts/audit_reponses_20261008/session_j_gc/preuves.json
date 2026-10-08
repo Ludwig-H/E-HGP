@@ -1,0 +1,48 @@
+{
+ "checksummed_committed_files": 211,
+ "commands_ok": 4,
+ "ctest": {
+  "000_socle_ctest": 675,
+  "002_lidar_ctest": 6,
+  "003_mutants_tour": 1
+ },
+ "gcp_calls_by_auditor": 0,
+ "journal_groups": {
+  "k10_w48": 18,
+  "k5": 150,
+  "k5_w1_ng00": 12,
+  "profil_k5": 1,
+  "profil_k5_w48": 1,
+  "uniformes_k5_w48": 6
+ },
+ "journals": 188,
+ "last_stop": "2026-10-07T18:27:51.429-07:00",
+ "native_runs_by_auditor": 0,
+ "positions_per_arm": [
+  2,
+  2,
+  2,
+  2,
+  2
+ ],
+ "shutdown": "TERMINATED",
+ "source_before_files_captured": 338,
+ "source_code_test_files": 344,
+ "statistics_agree_within_4_ulp": true,
+ "strict_summaries_equal": true,
+ "verdicts": {
+  "G-L5_au_lieu_de_G-L7": "rejete",
+  "G-L7": "adopte",
+  "index_et_corrections": "adopte",
+  "lot_t2c": "adopte"
+ },
+ "warm_passes_by_group": {
+  "k10_w48": 36,
+  "k5": 1350,
+  "k5_w1_ng00": 24,
+  "profil_k5": 2,
+  "profil_k5_w48": 4,
+  "uniformes_k5_w48": 24
+ },
+ "worker_exit_code": 0
+}

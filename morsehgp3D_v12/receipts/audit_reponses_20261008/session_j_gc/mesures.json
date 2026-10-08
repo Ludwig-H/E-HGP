@@ -1,0 +1,152 @@
+{
+  "k10_w48": {
+    "ng00": {
+      "apres": {
+        "max_all_warm_ns": 444489743,
+        "max_process_median_ns": 442901312.5,
+        "median_all_warm_ns": 440824437.5,
+        "median_process_medians_ns": 440898247.5,
+        "processes": 3,
+        "warm_passes": 6
+      },
+      "avant": {
+        "max_all_warm_ns": 626189314,
+        "max_process_median_ns": 623392548.0,
+        "median_all_warm_ns": 620530847.0,
+        "median_process_medians_ns": 619457636.5,
+        "processes": 3,
+        "warm_passes": 6
+      }
+    },
+    "ng01": {
+      "apres": {
+        "max_all_warm_ns": 321713509,
+        "max_process_median_ns": 321573749.5,
+        "median_all_warm_ns": 321174529.5,
+        "median_process_medians_ns": 321281109.0,
+        "processes": 3,
+        "warm_passes": 6
+      },
+      "avant": {
+        "max_all_warm_ns": 458824027,
+        "max_process_median_ns": 454041050.5,
+        "median_all_warm_ns": 452118540.0,
+        "median_process_medians_ns": 452537985.5,
+        "processes": 3,
+        "warm_passes": 6
+      }
+    },
+    "ng02": {
+      "apres": {
+        "max_all_warm_ns": 357794649,
+        "max_process_median_ns": 355898593.5,
+        "median_all_warm_ns": 354315431.5,
+        "median_process_medians_ns": 354649746.0,
+        "processes": 3,
+        "warm_passes": 6
+      },
+      "avant": {
+        "max_all_warm_ns": 522959235,
+        "max_process_median_ns": 522713034.5,
+        "median_all_warm_ns": 521407304.5,
+        "median_process_medians_ns": 521407304.5,
+        "processes": 3,
+        "warm_passes": 6
+      }
+    }
+  },
+  "k5": {
+    "ng00": {
+      "apres": {
+        "max_all_warm_ns": 54757798,
+        "max_process_median_ns": 53747988,
+        "median_all_warm_ns": 53180656.0,
+        "median_process_medians_ns": 53062552.5,
+        "processes": 10,
+        "warm_passes": 90
+      },
+      "avant": {
+        "max_all_warm_ns": 85387114,
+        "max_process_median_ns": 81003419,
+        "median_all_warm_ns": 79083480.5,
+        "median_process_medians_ns": 79142928.5,
+        "processes": 10,
+        "warm_passes": 90
+      }
+    },
+    "ng01": {
+      "apres": {
+        "max_all_warm_ns": 42945057,
+        "max_process_median_ns": 42308837,
+        "median_all_warm_ns": 42123207.0,
+        "median_process_medians_ns": 42113162.0,
+        "processes": 10,
+        "warm_passes": 90
+      },
+      "avant": {
+        "max_all_warm_ns": 71060975,
+        "max_process_median_ns": 63704775,
+        "median_all_warm_ns": 62985072.5,
+        "median_process_medians_ns": 62849863.0,
+        "processes": 10,
+        "warm_passes": 90
+      }
+    },
+    "ng02": {
+      "apres": {
+        "max_all_warm_ns": 50176869,
+        "max_process_median_ns": 48644619,
+        "median_all_warm_ns": 48211291.0,
+        "median_process_medians_ns": 48198216.0,
+        "processes": 10,
+        "warm_passes": 90
+      },
+      "avant": {
+        "max_all_warm_ns": 84742639,
+        "max_process_median_ns": 77950219,
+        "median_all_warm_ns": 76329479.0,
+        "median_process_medians_ns": 76655849.0,
+        "processes": 10,
+        "warm_passes": 90
+      }
+    }
+  },
+  "profile_ng00_warm": {
+    "profil_k5": {
+      "census_fraction": 0.2928108972213548,
+      "cycles": {
+        "arret": 533168244,
+        "census_complet": 775440000,
+        "census_sature": 1646265627,
+        "certificat": 325052973,
+        "pas": 28347678,
+        "proposition": 884287908,
+        "repli": 0,
+        "sonde": 1084339899,
+        "t1": 1566652590,
+        "total": 8270544744,
+        "trace": 1425757248
+      },
+      "instrumented_wall_ns": 1638159502.0,
+      "warm_passes": 2
+    },
+    "profil_k5_w48": {
+      "census_fraction": 0.2874883809643503,
+      "cycles": {
+        "arret": 1751948946,
+        "census_complet": 2238156765,
+        "census_sature": 4743204912,
+        "certificat": 848740086,
+        "pas": 101088594,
+        "proposition": 2123374932,
+        "repli": 0,
+        "sonde": 3001931253,
+        "t1": 5228580483,
+        "total": 24283978551,
+        "trace": 4243347243
+      },
+      "instrumented_wall_ns": 61100034.0,
+      "warm_passes": 4
+    }
+  }
+}

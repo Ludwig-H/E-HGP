@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-8 octobre 2026, base publiée **`d8c6f7164`**.
+8 octobre 2026, base publiée **`169f36b69`**.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
 
@@ -17,10 +17,10 @@ catalogue C hybride u21, W48, transferts compris :
 K5 GPU : cinq processus × neuf passes chaudes ; maxima 36,92 / 32,30 / 38,51 ms.
 K10 GPU : trois × quatre ; CPU : un × neuf. **Budget C de 45 ms tenu**, identité dédiée sur neuf cas,
 juge strict, mutants et arrêt certifié vérifiés. Gain du lot A/B, sans attribution isolée.
-[G CPU, session J](../receipts/g4_t2cj_20261008/README.md), W48 : **53,06 / 42,11 / 48,20 ms K5**,
+[G CPU, session J](../receipts/audit_reponses_20261008/session_j_gc/README.md), W48 : **53,06 / 42,11 / 48,20 ms K5**,
 maxima 54,76 / 42,95 / 50,18 ms ; médiane des dix médianes de processus, neuf passes chaudes chacun.
 K10 informatif : 440,90 / 321,28 / 354,65 ms, trois processus × deux passes chaudes.
-Chiffres recalculés sur les journaux ; contrelecture complète du reçu J en cours.
+188 journaux stricts, sources et arrêt archivé contre-vérifiés ; gains appariés K5 de 33–37 %.
 **Aucun temps FULL v12 acquis** ; une somme de médianes I+J ne le remplace pas. Trois trames d'une seule séquence.
 Priorité : chaîne entière ; 100 ms, GPU u24/u32, petits nuages et millions restent à qualifier.
 
@@ -29,7 +29,8 @@ Priorité : chaîne entière ; 100 ms, GPU u24/u32, petits nuages et millions re
 - **Gc `4df326cc8` + `10050a96e`** : [16 sources tour identiques au prototype](../receipts/audit_reponses_20261008/gc_livraison/README.md),
   cœur/catalogue inchangés. Empreinte objet et contrôle du travail séparés ; index parallèle, file de sondes G-L7.
   [Journal local](../receipts/audit_reponses_20261008/gc_livraison_complement/README.md) : 700 Passed + une sentinelle
-  sautée sur 701, sans clôture des sources. Session J : gain apparié K5 de 33–37 %, contrôles d'archive en cours.
+  sautée sur 701, sans clôture des sources. J : 675 portes, dont la sentinelle, et six LiDAR passées ; les 26
+  différentielles v10 locales sont absentes sur G4. G-L7 et index adoptés, G-L5 rejeté.
 - **Pilote T2-c** : [68 prises/308 passes relues](../receipts/audit_reponses_20261008/gc_pilote_essai/README.md),
   refus attendu de deux tours sur dix. Erratum du conducteur : statut externe perdu après `date`, bilans primaires
   conservés. Défaut CLI huit encore présent ; plan G4 explicite dix. Aucune adoption de performance locale.
