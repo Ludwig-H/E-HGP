@@ -1,0 +1,4 @@
+index	name	status	exit_code	wall_seconds	timeout_seconds	max_rss_kb
+0	socle_ctest	ok	0	141.635	600	1062804
+1	mes_full	ok	0	530.319	1500	3997608
+2	mes_c	ok	0	813.311	2150	6872952
