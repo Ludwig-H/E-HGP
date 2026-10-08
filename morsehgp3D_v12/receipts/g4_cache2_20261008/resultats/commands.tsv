@@ -1,0 +1,3 @@
+index	name	status	exit_code	wall_seconds	timeout_seconds	max_rss_kb
+0	socle_ctest	ok	0	141.168	900	1062664
+1	apparie_cache_ferme	ok	0	262.105	1500	3999820

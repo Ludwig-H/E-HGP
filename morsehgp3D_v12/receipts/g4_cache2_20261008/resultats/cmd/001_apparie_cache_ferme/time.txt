@@ -1,0 +1,23 @@
+	Command being timed: "timeout --foreground --kill-after=10s 1500s python3 $HOME/ehgp-v12/ehgp-v12.We8IUpsYAl/src/morsehgp3D_v12/microbancs/mes_apparie/pilote_apparie.py --src $HOME/ehgp-v12/ehgp-v12.We8IUpsYAl/src --travail $HOME/ehgp-v12/ehgp-v12.We8IUpsYAl/build/apparie --donnees $HOME/ehgp-v12/ehgp-v12.We8IUpsYAl/data --sortie $HOME/ehgp-v12/ehgp-v12.We8IUpsYAl/results/cmd/001_apparie_cache_ferme/files/apparie --reference ref --aa aa --bras ref=--cache=0 --bras aa=--cache=0 --bras cache= --trames ng00,ng01,ng02 --voie appareil --k 5 --fils 48 --tours 10 --passes 10 --archive-v12set $HOME/ehgp-v12/ehgp-v12.We8IUpsYAl/data/g4_kitti_v12set_xyz.tar --session-tours 2 --jobs 44 --delai 900"
+	User time (seconds): 3837.73
+	System time (seconds): 391.59
+	Percent of CPU this job got: 1613%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:22.10
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 3999820
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 882
+	Minor (reclaiming a frame) page faults: 94966072
+	Voluntary context switches: 10421603
+	Involuntary context switches: 439677
+	Swaps: 0
+	File system inputs: 228440
+	File system outputs: 218576
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
