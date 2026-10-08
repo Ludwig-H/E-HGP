@@ -1,0 +1,27 @@
+{
+  "pin": "caf9585e4a89ba101ba86d2d46e77cb340be15bf",
+  "raw_path": "brut/forinst_tuwien_train_sans_sol_k5_appareil.jsonl",
+  "raw_sha256": "7ef6037a0220b8ac80e669295b6d10b1bb1a8d68519668cecd5ef68f99c9a222",
+  "report_path": "rapport_b.json",
+  "report_sha256": "d67cfe79f7d0f4012ef5bff5e46ddd2baeefb19f1a5016950e991492218c5da9",
+  "source_sha256": {
+    "morsehgp3D_v12/bench/full_probe.cpp": "1068940a06e386cb80a4802b3dd61e2df87eed69574f08c821c34dabb017179b",
+    "morsehgp3D_v12/src/core/buffer.hpp": "8e4d84665e90308ee9572a729731711bb419e3a565fd4dd11b5bd56ab6a92401",
+    "morsehgp3D_v12/src/core/buffer.cpp": "5c885dbf0e4813f1a8ee653115092536348877e6b93aa5b831d7490fe0d6e756",
+    "morsehgp3D_v12/src/catalogue/device_cuda.cu": "c0e9db1178011940dc93db30b21656c39f91b2d495998a68c3edef1dfeb4b2df",
+    "morsehgp3D_v12/src/catalogue/device_driver.hpp": "d0cb88f1bd252a0766c454775c2166b510da54b7e3d77c6cfd509ecafd362fbb",
+    "morsehgp3D_v12/src/catalogue/device_pipeline.hpp": "91c756a6b3c177c70d235d0a6f104ff9077ad56136bebb5ddd76907b92af94ac",
+    "morsehgp3D_v12/src/catalogue/traversal_driver.hpp": "971c47dfe40394398d1dc42fb5c14b47031940b9db031be4dc500daa46f5eae9",
+    "morsehgp3D_v12/src/catalogue/traversal_records.hpp": "76e5c7712a4c6f172c3c23d8296b7f11145be5fc339a4b5b969e5d0f8c27aea6",
+    "morsehgp3D_v12/src/catalogue/finish_driver.hpp": "db5a12b480f58c41761b8acc3e16e3d8b0a52718c7c7b180141733916516fd92",
+    "morsehgp3D_v12/src/catalogue/finish_sort.hpp": "c7355b1e5b2b278dccb62a726bf20deb92b89ceed39cb9635db7a6763d47d5ce",
+    "morsehgp3D_v12/src/catalogue/finish_slices.hpp": "4a37dd5d1fb3c77c876b15a26dd4446e3d01f22cf36bd3547f159c80340c9f97",
+    "morsehgp3D_v12/src/catalogue/transfer_meter.hpp": "418350e795394c1c6f1c9107a31c47883d49bc951672702baff8e2e59a99b2c3",
+    "morsehgp3D_v12/src/catalogue/slices.hpp": "f6d1ad7bd4c7b8717100efe0f13b84dfbe2424385754f93892f1b6665eba5c04",
+    "morsehgp3D_v12/src/catalogue/catalogue.hpp": "639dc07a3629f113e92d84a6154ce2a0db9f9826ad60406a04a669eeff170e7a",
+    "morsehgp3D_v12/src/catalogue/assemble.cpp": "d529959860f4da8748b84db7c6c44611d40705101f2173ccf4f4a87987e3c053"
+  },
+  "instrumented_probe_sha256": "fe0ecffe3a25e0de7dbcacdd378094be679cf4ddcf16039eb25ab7e3eadc7027",
+  "native_execution": false,
+  "origin": "developer MES-B1t primary metadata; source-only auditor diagnosis"
+}

@@ -1,0 +1,119 @@
+--- a/morsehgp3D_v12/bench/full_probe.cpp
++++ b/morsehgp3D_v12/bench/full_probe.cpp
+@@ -201,6 +201,7 @@
+ inline constexpr std::array<const char*, kMemStages> kMemStageNames = {"P", "C", "G", "raccord", "TMVR"};
+ 
+ struct PassTimes {
++  const char* failure_stage = "P";  // sonde de diagnostic : stade en cours, aucune allocation
+   u64 wall = 0, p = 0, c = 0, g = 0, junction = 0, tmvr = 0, tower = 0;
+   u64 validation = 0, digest = 0, peak = 0, device_peak = 0;
+   std::array<std::array<u64, 2>, kMemStages> mem{};  // par etage : octets en usage a la fin, pic pendant l'etage
+@@ -239,6 +240,7 @@
+   if (!index.ok()) return index.outcome();
+   s.index.emplace(std::move(index).take());
+   t.p = since(t0);
++  t.failure_stage = "C";
+   mark(0);
+   CatalogueParams params;
+   params.kmax = o.kmax;
+@@ -251,18 +253,21 @@
+   t.c = since(c0);
+   mark(1);
+   c0 = Clock::now();
++  t.failure_stage = "G";
+   auto resolution = resolve_tower(*s.index, *s.catalogue, budget, pool, &s.res_diag);
+   if (!resolution.ok()) return resolution.outcome();
+   s.resolution.emplace(std::move(resolution).take());
+   t.g = since(c0);
+   mark(2);
+   c0 = Clock::now();
++  t.failure_stage = "raccord";
+   for (Order k = 1; k <= s.resolution->orders(); ++k) s.inputs.push_back(tower::forest_input(s.resolution->order(k)));
+   const tower::BallSource balls = tower::catalogue_balls(*s.catalogue);
+   t.junction = since(c0);
+   mark(3);
+   c0 = Clock::now();
+   tower::ForestParams forest_params;
++  t.failure_stage = "TMVR";
+   auto forests = tower::build_forests(s.index->cloud(), balls, s.inputs, forest_params, budget, pool, &s.ledger);
+   if (!forests.ok()) return forests.outcome();
+   s.forests.emplace(std::move(forests).take());
+@@ -284,6 +289,7 @@
+   if (!index.ok()) return index.outcome();
+   s.index.emplace(std::move(index).take());
+   t.p = since(t0);
++  t.failure_stage = "C";
+   t.mem[0] = mark();
+   CatalogueParams params;
+   params.kmax = o.kmax;
+@@ -296,6 +302,7 @@
+   t.c = since(c0);
+   t.mem[1] = mark();
+   c0 = Clock::now();
++  t.failure_stage = "tour";
+   auto tower = build_tower(*s.index, *s.catalogue, budget, pool, &s.tower_diag);
+   if (!tower.ok()) return tower.outcome();
+   s.tower.emplace(std::move(tower).take());
+@@ -310,6 +317,7 @@
+ // Hors du mur : validation, empreinte FUL1 facultative.
+ Outcome after_wall(const Options& o, MemoryBudget& budget, PassState& s, PassTimes& t, std::string& digest) {
+   auto c0 = Clock::now();
++  t.failure_stage = "validation";
+   MHGP12_TRY(tower::validate_forests(s.tower_forests(), budget));
+   t.validation = since(c0);
+   if (!o.digest) return {};
+@@ -317,6 +325,7 @@
+   const tower::BallSource balls = tower::catalogue_balls(*s.catalogue);
+   const tower::FullSource source{&s.index->cloud(), s.catalogue->levels(), balls, &s.tower_forests()};
+   u64 bytes = 0;
++  t.failure_stage = "empreinte";
+   auto d = tower::full_digest(source, &bytes);
+   if (!d.ok()) return d.outcome();
+   const auto hex = io::to_hex(d.value());
+@@ -409,6 +418,21 @@
+   std::fflush(stdout);
+ }
+ 
++// Diagnostic stderr seulement, a la frontiere du refus : des temporaires du sous-appel peuvent deja etre rendus.
++void trace_failure(u64 pass, const PassTimes& t, const MemoryBudget& budget,
++                          const MemoryBudget* device_budget) noexcept {
++  const auto h = budget.cache_stats();
++  const MemoryBudget& d = device_budget != nullptr ? *device_budget : budget;
++  std::fprintf(stderr, "{\"audit\":\"full_failure\",\"pass\":%llu,\"stage\":\"%s\","
++                       "\"host_used\":%llu,\"host_peak\":%llu,\"host_limit\":%llu,"
++                       "\"host_held\":%llu,\"host_idle\":%llu,\"device_budget_separate\":%s,"
++                       "\"device_used\":%llu,\"device_peak\":%llu,\"device_limit\":%llu}\n",
++               (unsigned long long)pass, t.failure_stage, (unsigned long long)budget.used(),
++               (unsigned long long)budget.peak(), (unsigned long long)budget.limit(), (unsigned long long)h.held,
++               (unsigned long long)h.idle, device_budget != nullptr ? "true" : "false",
++               (unsigned long long)d.used(), (unsigned long long)d.peak(), (unsigned long long)d.limit());
++}
++
+ Outcome passes(const Options& o, std::vector<Frame>& frames, MemoryBudget& budget, sched::Pool& pool,
+                CatalogueDevice* device, MemoryBudget* device_budget) {
+   for (u64 pass = 0; pass < o.passes; ++pass) {
+@@ -419,14 +443,22 @@
+     if (device_budget != nullptr) device_budget->restart_peak();
+     auto s = std::make_unique<PassState>();
+     const std::optional<u64> cpu0 = process_cpu_ns();
+-    MHGP12_TRY(run_wall(o, f, budget, pool, device, *s, t));
++    const Outcome wall_outcome = run_wall(o, f, budget, pool, device, *s, t);
++    if (!wall_outcome.ok()) {
++      trace_failure(pass, t, budget, device_budget);
++      return wall_outcome;
++    }
+     const std::optional<u64> cpu1 = process_cpu_ns();
+     if (cpu0 && cpu1 && *cpu1 >= *cpu0) t.cpu = *cpu1 - *cpu0;
+     t.rss = process_rss_max_bytes();
+     for (const auto& m : t.mem) t.peak = std::max(t.peak, m[1]);  // pic du mur : le plus haut des pics d'etage
+     t.peak = std::max(t.peak, t.mem_tower[1]);                    // --recouvert : P, C et la tour
+     if (device_budget != nullptr) t.device_peak = device_budget->peak();
+-    MHGP12_TRY(after_wall(o, budget, *s, t, digest));
++    const Outcome after_outcome = after_wall(o, budget, *s, t, digest);
++    if (!after_outcome.ok()) {
++      trace_failure(pass, t, budget, device_budget);
++      return after_outcome;
++    }
+     print_pass(o, pass, f, *s, t, digest);
+     const auto r0 = Clock::now();
+     s.reset();  // liberation, hors du mur, publiee sur sa propre ligne

@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-8 octobre 2026, 15:50 UTC. Dernier FULL admis : R1 `47feedc96`, livraison `150392f99`.
+8 octobre 2026, 16:12 UTC. Dernier FULL admis : R1 `47feedc96`, livraison `150392f99`.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
 
@@ -24,62 +24,52 @@ Sur les **21 grandes trames** de 61 198 à 99 099 sites, médiane des 21 médian
 Toutes les 126 chaudes après dépassent100 ms. Gain agrégé 2,66%, IC95 haut 0,97696<0,99 ;
 chaque ng respecte son garde-fou 2%, A/A conforme. Les 37 trames servent ici à l'identité,
 pas à un nouveau tableau de temps des 37 trames. [Raccord R1](../receipts/audit_reponses_20261008/r1_raccord_math/README.md) :
-q=d+1 conserve lignes/ordre des enfants ; FUL1 ne sérialise pas RCSR, les portes R1 restent nécessaires.
+q=d+1 conserve lignes/ordre des enfants ; FUL1 ne sérialise pas RCSR. [Six mutants locaux](../receipts/audit_reponses_20261008/r1_mutants_execution/README.md)
+tués par code et six portes G4 relues, preuves distinctes ; assertions/ELF locaux non archivés.
 
-**Aucun FULL CPU pur récent.** `cpu_ns` est le travail CPU du processus hybride ;
-`--sequentiel` conserve le catalogue GPU. [Protocole CPU prêt](../receipts/audit_reponses_20261008/full_cpu_actualisation_protocole/README.md) :
-sonde sans `--device`, K5 prioritaire/K10 informatif, 39 processus/312 passes annoncés,
-un seul W48 à la fois ; pin à fixer avant campagne. Plan déclaratif, non exécuté.
-[Diagnostic CPU](../receipts/audit_reponses_20261008/cpu_feuilles_finition/README.md) : C représente 83–84% du FULL M ;
-finition déjà parallèle, feuille 16 sans gain global face à 24. Comparaison v11 non appariée : GPU plus rapide,
-CPU encore plus lent. FULL couvre Cloud/index→T/M/V/R ; lecture, masque, validation, FUL1 et libération exclus.
-Fenêtres recouvertes : ne pas sommer leurs médianes. Budget actif, cache inactif et RSS distincts.
+**Pas de nouveau FULL CPU pour ng00–02.** [Protocole prêt](../receipts/audit_reponses_20261008/full_cpu_actualisation_protocole/README.md),
+non exécuté : sonde sans `--device`, K5/K10,39 processus/312 passes, pin à fixer. C domine83–84% du FULL CPU M ;
+finition déjà parallèle, feuille16 sans gain global face à24. Comparaison v11 non appariée, CPU encore plus lent.
+FULL exclut lecture, masque, validation, FUL1 et libération. Fenêtres recouvertes non additionnables ;
+`cpu_ns` n’est pas une latence CPU seule, `--sequentiel` conserve le catalogue GPU.
 
-**A6b en prélecture, aucun gain encore admis.** [Produit capturé à 15:25](../receipts/audit_reponses_20261008/a6b_produit/README.md) :
-19 fichiers non commis, pont leaf release/acquire favorable sous les préconditions écrivain unique/ancêtres
-stricts ; fermeture SC protégeant les tampons. Lecture ciblée, aucune qualification native générale.
-[Portes v2](../receipts/audit_reponses_20261008/a6b_portes_v2/README.md) : attente/aide tardive et 83 programmes de préfixe
-relus favorablement ; appels directs, oracle séquentiel et sémaphores ajoutant HB. Quatre blocs locaux clos,
-suite complète encore ouverte au relevé ; ces portes ne qualifient pas tous les entrelacements C++.
-La priorité G attend la **réclamation** de toutes les tranches, pas leur achèvement : les aides peuvent
-concurrencer les dernières tranches G en vol. Compteur zéro ≠ absence de concurrence.
-[Borne N](../receipts/audit_reponses_20261008/a6_admission_n/README.md) toujours applicable : somme des W plus grands
-maxima par tâche, cohortes entières ; doublon à retirer seulement dans `region_bytes`. Non implantée.
-[Pilote A6b](../receipts/audit_reponses_20261008/a6b_pilote_prelecture/README.md) : fermeture héritée, huit autotests Python ;
-référence R1, règle préalable IC haut grandes<0,95 et chaque ng<1,01, A/A±1,5%.
-Aucun transfert des anciens résultats A6 ni garantie de gain pour chaque grande trame.
-[A6 retiré](../receipts/audit_reponses_20261008/a6_retrait_qualification/README.md), CST-0242 clos par retrait ;
-CST-0241 [clos séparément](../receipts/audit_reponses_20261008/a_terminaison_native/README.md).
+**A6b livré `f2c106d93`, aucun gain encore admis.** [Pont et durée de vie](../receipts/audit_reponses_20261008/a6b_produit/README.md)
+relus favorablement sous préconditions écrivain unique/ancêtres stricts.
+[Portes v2](../receipts/audit_reponses_20261008/a6b_portes_v2/README.md) : attente/garde et83 programmes de préfixe ;
+appels directs, oracle séquentiel, sémaphores ajoutant HB, aucune qualification générale C++.
+[Clôture locale](../receipts/audit_reponses_20261008/a6b_cloture_locale/README.md) :753 Passed/1Skipped, deux mutants tués par code ;
+src/tour raccordés à Git, cinq écarts hors produit natif. Correction documentaire prête.
+Priorité G = toutes les tranches **réclamées**, pas terminées : les aides peuvent encore concurrencer G.
+[Borne N](../receipts/audit_reponses_20261008/a6_admission_n/README.md) applicable, non implantée : somme des W plus grands maxima par tâche.
+[Pilote](../receipts/audit_reponses_20261008/a6b_pilote_prelecture/README.md) : référence R1, IC haut agrégat grandes<0,95,
+chaque ng<1,01, A/A±1,5%. Aucun transfert des anciens résultats A6.
 
-**[T1-d2 admis](../receipts/audit_reponses_20261008/session_t1d_admission/README.md), coût C stable à1% près.**
-C GPU K5 **26,23/23,20/26,46 ms** ; IC95 hauts1,0034/1,0063/1,0082. T1-d1 reste refusé pour format FULL ;
-T1-d2 emploie FUL1 séquentiel. [Port strict c31](../receipts/audit_reponses_20261008/t1d_admission/README.md)
-intégré tel quel 150392 ; attendu CTest 36 corrigé 8b9eab. Sous budgets : 12 succès/24 refus initiaux,
-jusqu'à 3 tranches K5, 7 tranches et 7 lots K10. MHGP12DP omet niveaux et table ; FUL1 joué sans ces budgets.
-[Complément d'identité prêt](../receipts/audit_reponses_20261008/t1d_identite_flux_proposition/README.md) :
-CPU→libre→budgets, préfixes avant refus inclus, 46 injections/6 mutations Python ; hors mur.
-Appliquer aussi le [complément CTest46](../receipts/audit_reponses_20261008/t1d_identite_flux_ctest/README.md) :
-l’attendu resté36 ferait refuser les deux portes malgré le succès Python ; raccord corrigé dans ce complément.
-Couvre niveaux exacts et requêtes positives S*, pas tous les octets internes ni les requêtes négatives.
-[Correction mémoire proposée](../receipts/audit_reponses_20261008/t1d_metadonnees_proposition/README.md) :
-plan compté, coexistence ancien/nouveau réservée ; descripteurs propriétaires encore en pseudocode.
-Publication des niveaux et rassemblement manquent au détail appareil, mais restent dans le mur C.
-Aucun nouveau FULL CPU ou massif dans T1-d ; seuil 1% sur C seul.
-
-[B2 admis](../receipts/audit_reponses_20261008/session_b2_admission/README.md), chronos remplacés ici par R1.
-[G-APP2](../receipts/audit_reponses_20261008/gapp2_admission/README.md) rejeté D1/D2, aucun gain FULL acquis.
-[Fixtures u32](../receipts/audit_reponses_20261008/b2_norme_u32/README.md) proposées : étendues 30/32, norme i128,
-Fraction conforme ; aucun défaut actuel trouvé, porte native u32 encore à exécuter.
+**[T1-d2 admis](../receipts/audit_reponses_20261008/session_t1d_admission/README.md)** : C GPU K5 **26,23/23,20/26,46 ms**,
+IC95 hauts1,0034/1,0063/1,0082, seuil1% C seul. Port strict intégré150392, attendu36 corrigé8b9eab.
+Budgets :12 succès/24 refus ; MHGP12DP omet niveaux/table, FUL1 joué sans ces budgets.
+[Identité complémentaire proposée](../receipts/audit_reponses_20261008/t1d_identite_flux_proposition/README.md),46 injections,
+avec [complément CTest46 requis](../receipts/audit_reponses_20261008/t1d_identite_flux_ctest/README.md).
+[Mémoire proposée](../receipts/audit_reponses_20261008/t1d_metadonnees_proposition/README.md) : plan compté/coexistence réservée,
+propriétaires en pseudocode. Publication niveaux/rassemblement absents du détail appareil, inclus dans C.
 
 **Petits LiDAR** : [C3](../receipts/audit_reponses_20261008/session_c3_admission/README.md), 132 réels W48/cache8 Gio,
 K5 CPU/GPU25,003/7,856 ms ; K10 46,420/14,571 ms. Huit refus `wide_leaf` difficiles ; W1 absent,
 W48 pénalise≤150 sites. [Deux campagnes cache](../receipts/audit_reponses_20261008/session_c3_apparies/README.md)
 refusées A/A : aucune absence d'effet conclue.
 
-**Massifs, derniers résultats clos** : [L1p](../receipts/audit_reponses_20261008/session_l1p_admission/README.md),
-Boreas sans sol 1,513M : GPU 7,298s/CPU 20,056s ; Meadow 6,181M : GPU 30,565s, une chaude par cas.
-Plus grands succès FULL K5 : **GPU Marseille brut 6,709M en 26,602s à froid** ;
-[CPU L2](../receipts/audit_reponses_20261008/session_l2_admission/README.md), **Paris brut 14,552M en 165,789s à froid**.
-L1p : 10 succès/8 refus mémoire ; FUL1 seulement jusqu'à 1,6M. Aucun plafond universel ni contrat 100 ms massif.
+**[Massifs L1t admis](../receipts/audit_reponses_20261008/session_b1t_admission/README.md)** :19 processus,23 FULL complètes,
+14 succès/5 refus ; huit chaudes uniques, aucune répétition statistique par scène. Source `caf9585e4` inclut R1 ;
+archives/sources/arrêt clos, même ELF initial aux deux commandes, **hash ELF final absent**.
+K5 GPU chaud : Boreas sans sol1,513M **7,185 s**, Marseille sans sol2,465M **8,095 s**, Meadow6,181M **29,621 s**.
+Nouveaux K10 GPU **froids** : Boreas1,513M **38,620 s**, Marseille2,465M **38,521 s**.
+Boreas K5 sous8 Gio : GPU8,201s chaud, CPU19,484s froid ; comparaison non appariée, FUL1 égaux.
+Plus grand succès K5 GPU : **Marseille brut6,709M en25,076s à froid**. Record [CPU L2](../receipts/audit_reponses_20261008/session_l2_admission/README.md)
+inchangé : **Paris brut14,552M en165,789s à froid**. TU Wien brut6,236M réussit en45,544s à froid.
+**TU Wien sans sol5,200M :32,856s à froid, puis refus mémoire en passe1** ; aucune chaude réussie.
+[CST-0243, diagnostic](../receipts/audit_reponses_20261008/b1t_tuwien_memoire/README.md) :79,99Gio CUDA gardés,8,012Gio libres au budget suivant ;
+stade inconnu, instrumentation proposée sous protocole distinct. NIBIO/Boreas50 refusent sans FULL.
+FUL1 demandé seulement jusqu’à1,6M ; aucune identité différentielle massive nouvelle au-delà.
+Pics de budget, capacités gardées et SMI échantillonné sont distincts. [Correction documentaire](../receipts/audit_reponses_20261008/session_b1t_admission/README.md#mémoire-et-correction-documentaire-proposée)
+prête : pas de plafond universel L1p à5M, ni de cause hôte déduite du seul SMI. B1/B2/B4 non tenus, B3 non évalué.
 
 Sources, métadonnées et vérifications Python uniquement ; aucun moteur lancé par l'auditeur.

@@ -1,0 +1,67 @@
+--- a/morsehgp3D_v12/src/tower/forest_kernel.cpp
++++ b/morsehgp3D_v12/src/tower/forest_kernel.cpp
+@@ -15,8 +15,8 @@
+ // tranches a venir par la racine de leur composante dans l'union-find VIVANT (hint_leaves). Une composante ne fait que
+ // grossir : la racine lue est, quand le noyau traite la cellule, dans la meme composante que la feuille d'origine ; le
+ // noyau ne lit d'une feuille que sa racine courante (find), donc sa sortie ne change pas, quel que soit
+-// l'entrelacement. D'ou les acces atomiques relaches au champ up et aux feuilles (les autres champs ne sont lus que par
+-// le noyau).
++// l'entrelacement, avec le pont de publication decrit dans load_leaf : up est atomique relache ; les feuilles
++// sont publiees en release et lues en acquire (les autres champs ne sont lus que par le noyau).
+ #include <algorithm>
+ #include <atomic>
+ 
+--- a/morsehgp3D_v12/src/tower/pipeline_run.cpp
++++ b/morsehgp3D_v12/src/tower/pipeline_run.cpp
+@@ -227,9 +227,9 @@
+ }
+ 
+ // Ordre de preference (A6b, apres le rejet d'A6 sur G4) : noyau, etapes, tranches de G, puis seulement taches
+-// d'indices. Une aide ne prend donc jamais un fil quand une tranche de G ou une etape est reclamable : quand G est le
+-// chemin critique (petites trames), il garde tous les fils ; quand le noyau d'un ordre est en retard apres G (grandes
+-// trames), les fils liberes l'aident. Les sorties ne dependent pas de cet ordre (feuilles indicees : pont CST-0242).
++// d'indices. La recherche d'une aide vient apres celles des etapes et de G : toutes les tranches de G sont alors
++// deja reclamees, mais certaines peuvent encore etre en cours. Cette priorite ne garantit donc pas l'absence de
++// contention avec G. Les sorties ne dependent pas de cet ordre (feuilles indicees : pont CST-0242).
+ bool find_job(Pipeline& p, bool claim, Job& job) noexcept {
+   const bool live = !p.g_failed.load(std::memory_order_relaxed);
+   if (live && (find_kernel(p, claim, job) || find_step(p, claim, job))) return true;
+--- a/morsehgp3D_v12/tests/tower/pipeline_levers.cpp
++++ b/morsehgp3D_v12/tests/tower/pipeline_levers.cpp
+@@ -432,9 +432,9 @@
+               static_cast<unsigned long long>(runs), static_cast<unsigned long long>(hinted));
+ }
+ 
+-// Priorite d'A6b : les aides passent apres G. Le compteur est nul par construction (une tache d'indices n'est
+-// reclamee que si aucune tranche de G ne l'est plus, et g_next ne fait que croitre) ; l'ancien ordre d'A6 (aides avant
+-// les etapes et G) le rend positif des qu'une tranche indexable precede la fin de G.
++// Priorite d'A6b : les aides passent apres la reclamation de toutes les tranches G. Le compteur est nul : une aide
++// n'est reclamee que si aucune tranche de G ne l'est plus, et g_next ne fait que croitre. L'ancien ordre d'A6 (aides
++// avant les etapes et G) peut le rendre positif tant que des tranches restent a reclamer.
+ MHGP12_TEST(priorite, 18) {
+   std::mt19937_64 rng(808);
+   u64 hints = 0, sessions = 0;
+@@ -453,8 +453,8 @@
+       ++sessions;
+     }
+   }
+-  std::printf("priorite sessions=%llu taches_indices=%llu (toutes apres G)\n", static_cast<unsigned long long>(sessions),
+-              static_cast<unsigned long long>(hints));
++  std::printf("priorite sessions=%llu taches_indices=%llu (apres reclamation de toutes les tranches G)\n",
++              static_cast<unsigned long long>(sessions), static_cast<unsigned long long>(hints));
+ }
+ 
+ }  // namespace
+--- a/morsehgp3D_v12/microbancs/mes_t2d_a6b/README.md
++++ b/morsehgp3D_v12/microbancs/mes_t2d_a6b/README.md
+@@ -8,7 +8,9 @@
+ CST-0242, et change seulement l'ordre de réclamation des travaux : noyau, étapes, tranches de G, puis seulement tâches
+ d'indices. Une aide ne prend donc jamais un fil tant qu'une tranche de G reste à réclamer (porte
+ `mhgp12_tower_levers_priorite` : compteur `hint_jobs_during_g` nul ; mutant `aide_avant_g`, l'ordre d'A6, tué). Sorties
+-identiques quel que soit l'ordre (feuilles indicées : même preuve qu'A6). Deux portes de plus reprennent les résidus de
++identiques quel que soit l'ordre (feuilles indicées : même preuve qu'A6). Ce compteur porte sur les tranches
++réclamées, pas sur les calculs achevés : une aide peut encore partager les ressources avec G en cours. La campagne
++doit mesurer l'effet sur son temps de fin. Deux portes de plus reprennent les résidus de
+ CST-0242 : `mhgp12_tower_levers_tranches`, la fixture de l'auditeur Codex (`a6_prefixe_tranches` : 513 cellules aux
+ tranches réelles du produit, historique du noyau contre un oracle par ensembles sous 83 dates légales d'indice ;
+ l'indice futur que le pont de publication exclut donne un historique faux, détecté, ou un refus) ;

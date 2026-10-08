@@ -1,0 +1,31 @@
+--- a/morsehgp3D_v12/receipts/g4_mesb1t_20261008/README.md
++++ b/morsehgp3D_v12/receipts/g4_mesb1t_20261008/README.md
+@@ -29,5 +29,7 @@
+ voie complète. Le pic de l'appareil tombe à 5,0 Gio et le mur chaud vaut 8,2 s, contre 7,2 s pour la voie complète. Son
+ empreinte FUL1 `49f90d23…` est celle de la voie complète (sessions L1, L1r et L1p) et de la voie CPU jouée ici
+-(19,5 s) : l'identité est établie entre passes et entre voies.
++(19,5 s, une seule passe froide) : l'identité FUL1 est établie entre les passes et voies jouées. Cette empreinte ne couvre pas la CSR des branches R ni les octets internes du catalogue.
++
++Le pic ci-dessus et ceux du tableau sont les maxima échantillonnés par `nvidia-smi` toutes les 250 ms sur le processus ; ils ne sont pas les compteurs du budget de l'appareil pendant le mur FULL. Le maximum `pic_appareil_octets` de la prise sous 8 Gio vaut 6 203 669 056 octets (5,78 Gio). Les pics du budget sont remis à zéro à chaque passe ; sur un refus sans FULL, ils ne sont pas publiés.
+ 
+ ## Scènes entières ([tableaux](resultats/cmd/001_mes_b_l1/files/b/tableaux_b.md))
+@@ -51,8 +53,5 @@
+ | IGN Marseille, sans sol | 2 465 285 | 10 | **ok (nouveau)** | 38,52 (froid) | 15,6 | 45,8 |
+ 
+-**Ce que T1-d change.** Dans la [session L1p](../g4_mesb1p_20261008/README.md), la mémoire de l'appareil refusait :
+-
+-- toute scène de plus de 5 M de sites à K5 ;
+-- K10 dès 1,5 M de sites.
++**Résultats nouveaux par rapport à L1p.** La [session L1p](../g4_mesb1p_20261008/README.md) refusait TUWIEN entière à K5 et les deux scènes K10 jouées ici. Elle calculait déjà ETH3D meadow (6,18 M sites, 30,57 s à chaud) et Marseille entière (6,71 M, 26,60 s à froid) : aucun plafond universel à 5 M n'est établi. La source actuelle contient B2, T1-d et R1 ; cette comparaison n'isole pas l'effet de T1-d.
+ 
+ Ici, plusieurs de ces cas passent :
+@@ -62,8 +61,5 @@
+ - K10 sur Marseille sans sol (2,47 M).
+ 
+-Les refus de NIBIO 12 et de Boreas 50 trames tombent en passe 0 avec un pic de l'appareil de 46 à 49 Gio : ce n'est
+-plus la carte qui limite. Sur ces scènes denses, la tour coûte 15 à 22 Ko par site à l'hôte, ce qui dépasse le budget
+-de 160 Gio vers 7 à 10 M de sites. C'est l'hypothèse retenue, à confirmer : les journaux ne nomment pas le budget du
+-refus.
++Les refus de NIBIO 12 et de Boreas 50 trames surviennent sans FULL publiée, avec des maxima `nvidia-smi` échantillonnés de 46 à 49 Gio. Ces observations n'identifient ni le budget ni l'étage en cause et n'excluent pas une allocation de l'appareil refusée avant de devenir résidente. Une limite du budget hôte reste une hypothèse à instrumenter, sans extrapoler les Ko par site des seuls cas réussis.
+ 
+ **Défaut ouvert.** TUWIEN sans sol réussit sa passe 0 par la voie complète, en gardant 80 Gio de l'appareil. Puis la

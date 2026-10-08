@@ -1,0 +1,34 @@
+{
+  "arithmetic": {
+    "next_pass_device_headroom": 8603087124,
+    "sliced_endpoint_if_taken": 62401192
+  },
+  "causal_fix_qualified": false,
+  "failure_stage": "unknown",
+  "native_execution": false,
+  "observed": {
+    "device_capacity_and_peak": 85886193388,
+    "device_limit": 94489280512,
+    "exit_code": 2,
+    "full_digest": false,
+    "host_limit": 171798691840,
+    "host_peak": 80067741265,
+    "liberation_ns": 1818896782,
+    "reason": "memory_budget",
+    "rss_max_bytes": 82278236160,
+    "sites": 5199758,
+    "successful_passes": [
+      0
+    ],
+    "wall_ns": 32855789464
+  },
+  "patch_applies_in_copy": true,
+  "pin": "caf9585e4a89ba101ba86d2d46e77cb340be15bf",
+  "postimage_sha256": "fe0ecffe3a25e0de7dbcacdd378094be679cf4ddcf16039eb25ab7e3eadc7027",
+  "raw_sha256": "7ef6037a0220b8ac80e669295b6d10b1bb1a8d68519668cecd5ef68f99c9a222",
+  "report_sha256": "d67cfe79f7d0f4012ef5bff5e46ddd2baeefb19f1a5016950e991492218c5da9",
+  "source_R1_identical": true,
+  "source_inference": "first_finish_complete_resident; front_retention_unknown",
+  "source_pins_verified": 15,
+  "stdout_block_unchanged": true
+}

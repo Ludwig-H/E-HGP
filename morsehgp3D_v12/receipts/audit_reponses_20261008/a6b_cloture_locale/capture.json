@@ -1,0 +1,141 @@
+{
+  "captured_utc": "2026-10-08T15:52:51.845712+00:00",
+  "source_pins": {
+    "src/tower/forest_kernel.cpp": "3ed611027fb936a7f2f476f24b5540bd3af675af859c24663f1382e87c54393f",
+    "src/tower/forest_births.cpp": "0cd7b8350d43d57bd4d375e33b869e9528bbf849acf2832c6b8e8558fb927bdc",
+    "src/tower/forest_build.cpp": "675593396ec74c3ba1bd3b68024769ccaecf498597cb4b61d813ff547db9ba02",
+    "src/tower/pipeline.cpp": "93eede367c92958e286d2434721de25d63615d49e3e402d62cbb1e3222f5c7c8",
+    "src/tower/pipeline.hpp": "f43f19c15d2f0451f0b632511dc03f4914482f4c1fc6bae6964612556412c447",
+    "src/tower/pipeline_run.cpp": "60ca4cabbc554e051d7997f71d9c353eb502490585c0e733b216766ccad9e6c5",
+    "src/tower/pipeline_steps.cpp": "fe0295e5e6500ee8d2325df052dacd129c85e9e65fe5a62ea2ecd23bbb1626bf",
+    "src/tower/registry_branches.cpp": "a0a8e045a696124dcc36175fec818e3cad6fa9720dc0bbb0061ca2b4aa125411",
+    "tests/tower/region_unit.cpp": "4962091891af42fb045e84126b4605a6f30c569b01ec7ad6d6a358607a83c966",
+    "tests/tower/region_map_check.py": "4b99bbcb7cc3fc0fad766e8ca4004392827ceda1ddbbcc18a55ac6041811f69b",
+    "tests/tower/pipeline_levers.cpp": "992170c8d5dcc587302cbbbc1731d6937b0e3b065c833662dc5310000b57da2f",
+    "tests/tower/tests.cmake": "594c8324d131baeb7c829d455ea66d92d24deaa51b7acc08149ca5af7fb287ff",
+    "tests/mutants/tower.json": "9d1a2170f4384c58350b913973709bd0003b1988936a58ce6bc979a75cf503a5",
+    "microbancs/mes_t2d_a6b/README.md": "7a524696c5b99dcd31ad0bbf3bdcb34ff2706784da894d760c5c927e2016a037"
+  },
+  "sources_changed": [],
+  "traces": {
+    "ctest2.log": {
+      "bytes": 127526,
+      "sha256": "4c69588331672f3db0bd95170c08318d071c0c3f51d361ea1d827a786a1bd0a9"
+    },
+    "build2.log": {
+      "bytes": 13078,
+      "sha256": "d8de29ea7c9e8f4c655f115c37e9036b951aa8262a62776889441fb8f2318449"
+    },
+    "build2/Testing/Temporary/LastTest.log": {
+      "bytes": 1011627,
+      "sha256": "2ddad85ca071d1981cd74402dca4f6637aa69deac6b76fb05f49c8e6cb9ef669"
+    },
+    "build2/CMakeCache.txt": {
+      "bytes": 17381,
+      "sha256": "403992a04026be114c532fcd190f1861d97dcbf8be574317e833cecdace4a6ea"
+    }
+  },
+  "postrun_artifacts": {
+    "build2/mhgp12_tower_region": {
+      "bytes": 1123384,
+      "sha256": "22cea0273777831d84a1b7e5d24dc52f409047b6c06e5da3551c4ec9e027c9e4",
+      "postrun_only": true
+    },
+    "build2/mhgp12_tower_levers": {
+      "bytes": 1145944,
+      "sha256": "3b3fa27a4ee57e3549030df039b8044b265f3e2d309cade7fce3cf9ace8c1d8b",
+      "postrun_only": true
+    },
+    "build2/mhgp12_tower_region.map": {
+      "bytes": 258562,
+      "sha256": "54772cba36f25b0889a26e57e73e1ff5f1febb1b77c2f9a5c11d47a950e34ea0",
+      "postrun_only": true
+    }
+  },
+  "ctest": {
+    "passed": 753,
+    "skipped": 1,
+    "selected": 754,
+    "failed": 0
+  },
+  "ctest_driver_code": 0,
+  "ctest_finished_utc": "2026-10-08T15:52:15Z",
+  "limitation": "postrun hashes and CMake declared source; no independent rebuild or continuous source/build attestation",
+  "git_commit": "f2c106d93f1c835f129cef60e4e5e65ae185bd65",
+  "git_comparison": {
+    "count": 413,
+    "tree_digest": "9eed9388f8117b93e52fede7d5fb6609fa8582f27e20e7102665b1a2b9f6ce6a",
+    "changed_git": [
+      "bench/g4_catalogue_flux_lecteur.py",
+      "bench/g4_catalogue_t1d_judge.py",
+      "bench/g4_catalogue_t1d_selftest.py",
+      "tests/catalogue/tests.cmake",
+      "docs/PLAN.md"
+    ],
+    "missing_git": [],
+    "git_only": [],
+    "git_count": 413
+  },
+  "source_inventory_sha256": "df05ccfc0aaa505e6177f2380c9525963c75acbe74d59755405c708d407cf0ee",
+  "mutant_primary": {
+    "mut3.json": {
+      "bytes": 587,
+      "sha256": "93b4a9fd8a9452393b7b53fd5e0839b3a8821ef3e592d0161c9f62f8f5b6ec7f"
+    },
+    "mut3.log": {
+      "bytes": 209,
+      "sha256": "ddf5bbb4641208af450d52ba4ff4744e3239f5a2024e3c0d519e69704ae7fcaa"
+    },
+    "verif2.log": {
+      "bytes": 239,
+      "sha256": "3f5c7116f9fafe14263a3e0495e1a3b17c5ea9576b326e4ec9dbdc97d5b282ad"
+    },
+    "verif2.sh": {
+      "bytes": 1007,
+      "sha256": "cacd02e1f92c1ed5b566d5c1ba8c15a2f768c39134d80c4fbe283c2e7b5ce554"
+    }
+  },
+  "final_observed_utc": "2026-10-08T16:05:28.995788+00:00",
+  "mutants": {
+    "code": 0,
+    "manifeste_sha256": "9d1a2170f4384c58350b913973709bd0003b1988936a58ce6bc979a75cf503a5",
+    "module": "tower",
+    "mutants": [
+      {
+        "detail": "code",
+        "id": "fermeture_sans_attente",
+        "juge": "mhgp12_tower_region_fermeture",
+        "verdict": "TUE"
+      },
+      {
+        "detail": "code",
+        "id": "aide_sans_garde",
+        "juge": "mhgp12_tower_region_fermeture",
+        "verdict": "TUE"
+      }
+    ],
+    "plancher": 2,
+    "schema": "mhgp12.mutants.v1",
+    "sources_sha256": "9eed9388f8117b93e52fede7d5fb6609fa8582f27e20e7102665b1a2b9f6ce6a",
+    "temoin": "vert"
+  },
+  "mutants_finished_utc": "2026-10-08T16:00:33Z",
+  "documentary_patch": {
+    "src/tower/forest_kernel.cpp": {
+      "before": "3ed611027fb936a7f2f476f24b5540bd3af675af859c24663f1382e87c54393f",
+      "after": "bf05b489c0c4beee8be4650950b66547cfe03d70b80de8353f6af14c86198e72"
+    },
+    "src/tower/pipeline_run.cpp": {
+      "before": "60ca4cabbc554e051d7997f71d9c353eb502490585c0e733b216766ccad9e6c5",
+      "after": "812fad2990b2381f97c13a29101beb0862e31301e447be5aa57db096c6ef740c"
+    },
+    "tests/tower/pipeline_levers.cpp": {
+      "before": "992170c8d5dcc587302cbbbc1731d6937b0e3b065c833662dc5310000b57da2f",
+      "after": "527fd6b4bbf88efff69c8ac16944cc52c86b428cfb3e0255f9b444201342f4af"
+    },
+    "microbancs/mes_t2d_a6b/README.md": {
+      "before": "7a524696c5b99dcd31ad0bbf3bdcb34ff2706784da894d760c5c927e2016a037",
+      "after": "b469f2e10afa6e23ac2930b3a48fc1acca11d1f03c742b3edfefde36a9abbfdb"
+    }
+  }
+}
