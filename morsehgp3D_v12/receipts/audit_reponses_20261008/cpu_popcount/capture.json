@@ -1,0 +1,159 @@
+{
+  "archive_sha256": "5f8d64c1fb9dc2d49b98ae96b759b473533e29d13149a2a7513cfa4c346435da",
+  "local_artifacts": {
+    "CMakeCache.txt": "01e0413211bcdaa52f0ad825c81e21841fcc95f74b482d4efc35b0183a51a16c",
+    "CMakeFiles/mhgp12.dir/flags.make": "bcd4b1fc82e0aa3bb1afcb466cff3929e7745d04be7b77805d889cfbcaf69527",
+    "CMakeFiles/mhgp12.dir/src/catalogue/leaves.cpp.o": "14223a07f34488d5bf2fd70b7756b8891abe5195deaf232bf21c0f172ad0d6b7",
+    "mhgp12_catalogue_probe": "4c06155f19398fd32c7d5004fbe5f5248fc6fa4bdc1b17ceb403b16886a4cc29",
+    "mhgp12_full_probe": "1ee019821d07ac287d595c8f8852d7c5a875b21467a1700009855b192b7a1368"
+  },
+  "local_build_is_not_session_k_binary": true,
+  "native_executed": false,
+  "proposal_compiled": false,
+  "proposal_sha256": "d32fa18d22a23fc1e56ffe5451265eacf326b32630562bab1f22b68dcd243cf2",
+  "reader_modes_equal": [
+    "normal",
+    "-O"
+  ],
+  "result": {
+    "compilation_executed": false,
+    "count_body_relocations": 18,
+    "flags": "-O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror",
+    "functions_with_relocations": 24,
+    "g3_example": {
+      "function": "void mhgp12::catalogue_detail::phase<2, 32u, mhgp12::catalogue_detail::Narrow, mhgp12::catalogue_detail::(anonymous namespace)::WriteSink<32u> >(mhgp12::catalogue_detail::LeafCtx<32u, mhgp12::catalogue_detail::Narrow>&, mhgp12::catalogue_detail::LaneAccumulators<32u>&, mhgp12::catalogue_detail::(anonymous namespace)::WriteSink<32u>&, mhgp12::simt::Lanes<mhgp12::simt::Width<32u>::Mask, 32u> const&)",
+      "instructions": [
+        "2189:\t89 44 24 20          \tmov    %eax,0x20(%rsp)",
+        "218d:\t43 0b bc b8 80 01 00 00 \tor     0x180(%r8,%r15,4),%edi",
+        "2195:\te8 00 00 00 00       \tcall   219a <cible>\t2196: R_X86_64_PLT32\t__popcountdi2-0x4",
+        "219a:\t4c 8b 44 24 08       \tmov    0x8(%rsp),%r8",
+        "219f:\t48 8b 74 24 10       \tmov    0x10(%rsp),%rsi",
+        "21a4:\t41 39 c6             \tcmp    %eax,%r14d",
+        "21a7:\t48 8b 54 24 18       \tmov    0x18(%rsp),%rdx",
+        "21ac:\t0f 8e 6e 01 00 00    \tjle    2320 <cible>",
+        "21b2:\t41 83 fe 01          \tcmp    $0x1,%r14d",
+        "21b6:\t0f 84 e2 00 00 00    \tje     229e <cible>",
+        "21bc:\t0f b6 4c 24 20       \tmovzbl 0x20(%rsp),%ecx",
+        "21c1:\tb8 ff ff ff ff       \tmov    $0xffffffff,%eax"
+      ]
+    },
+    "local_only": true,
+    "native_executed": false,
+    "patch_application": true,
+    "session_k_cpu": {
+      "ng00": {
+        "catalogue_ns": 326091956.0,
+        "if_finish_free_ns": 259665285.5,
+        "median_shares_percent": {
+          "emission": 7.701677378827071,
+          "feuilles": 47.91377977814844,
+          "fin_etage": 20.374493891622862,
+          "parcours": 22.84846600391176
+        },
+        "stages_ns": {
+          "emission": 25047466.0,
+          "feuilles": 156071390.0,
+          "fin_etage": 66381105.5,
+          "parcours": 74523671.0
+        },
+        "unassigned_ns": 3924995.0,
+        "warm_passes": 12
+      },
+      "ng01": {
+        "catalogue_ns": 274070972.5,
+        "if_finish_free_ns": 215381223.0,
+        "median_shares_percent": {
+          "emission": 8.809468098775408,
+          "feuilles": 46.00333995529394,
+          "fin_etage": 21.446749525598843,
+          "parcours": 22.909243994549687
+        },
+        "stages_ns": {
+          "emission": 24119818.5,
+          "feuilles": 126045136.0,
+          "fin_etage": 58802404.0,
+          "parcours": 62781466.5
+        },
+        "unassigned_ns": 2467865.0,
+        "warm_passes": 12
+      },
+      "ng02": {
+        "catalogue_ns": 329246151.0,
+        "if_finish_free_ns": 257255350.5,
+        "median_shares_percent": {
+          "emission": 8.765783314738194,
+          "feuilles": 44.91098884034345,
+          "fin_etage": 21.76814926777099,
+          "parcours": 23.2773881830989
+        },
+        "stages_ns": {
+          "emission": 28855513.5,
+          "feuilles": 147660193.5,
+          "fin_etage": 71654172.5,
+          "parcours": 76596877.0
+        },
+        "unassigned_ns": 4141791.0,
+        "warm_passes": 12
+      }
+    },
+    "settings": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "MHGP12_COORD_BITS": "21",
+      "MHGP12_ENABLE_CUDA": "OFF",
+      "MHGP12_MARCH": ""
+    },
+    "static_popcount_relocations": 496
+  },
+  "sources": [
+    {
+      "commit": "c9ac60f20c741d9d493f4900fd8aec4590aaa5c5",
+      "path": "morsehgp3D_v12/src/catalogue/simt.hpp",
+      "sha256": "acda01afa5e114234be2e22b17815d5b7fe32c5fe5a0ae184675ea6ef5f57122"
+    },
+    {
+      "commit": "c9ac60f20c741d9d493f4900fd8aec4590aaa5c5",
+      "path": "morsehgp3D_v12/src/catalogue/assemble.cpp",
+      "sha256": "7c00cc574fc194cfa49dd23942cfa657b91e69163d71ff1a574ef350a7a3e4cd"
+    },
+    {
+      "commit": "c9ac60f20c741d9d493f4900fd8aec4590aaa5c5",
+      "path": "morsehgp3D_v12/src/catalogue/catalogue.cpp",
+      "sha256": "799abaf8ee815df58c40a44c74d1ba9b9dfc40fdd05488d1e214efe9b1009e49"
+    },
+    {
+      "commit": "c9ac60f20c741d9d493f4900fd8aec4590aaa5c5",
+      "path": "morsehgp3D_v12/src/catalogue/leaf_j3.hpp",
+      "sha256": "8329fc3fb251ad739ddfacd0174711a64dd22b6a9adf2d9798020f939fe54922"
+    },
+    {
+      "commit": "c9ac60f20c741d9d493f4900fd8aec4590aaa5c5",
+      "path": "morsehgp3D_v12/src/catalogue/leaf_census.hpp",
+      "sha256": "829ba84ab6522a364d4985b5fb6d6571c14f8c72fd8e44bb45c97900b2125b6b"
+    },
+    {
+      "commit": "c9ac60f20c741d9d493f4900fd8aec4590aaa5c5",
+      "path": "morsehgp3D_v12/src/catalogue/leaf_common.hpp",
+      "sha256": "a52cca4a03d663e452422e82fcf6395e4733857877e0818921256b7bf7dfe860"
+    },
+    {
+      "commit": "c9ac60f20c741d9d493f4900fd8aec4590aaa5c5",
+      "path": "morsehgp3D_v12/src/catalogue/leaves.cpp",
+      "sha256": "2172f739d7f3a5a49bfe748f4f8c3a38b4d6a4e6b393bbf22bf1b6396367fff8"
+    },
+    {
+      "commit": "c9ac60f20c741d9d493f4900fd8aec4590aaa5c5",
+      "path": "morsehgp3D_v12/CMakeLists.txt",
+      "sha256": "88db9fccd74b7042c35479226090fd8c7049968de13d481bb2bdf2e8d673311c"
+    },
+    {
+      "commit": "c9ac60f20c741d9d493f4900fd8aec4590aaa5c5",
+      "path": "morsehgp3D_v12/microbancs/mes_full/pilote_full.py",
+      "sha256": "a89ceec92f76c642a508a0c76d5a0a8a31400cab15a7d27141bc37c557b9f92c"
+    },
+    {
+      "commit": "ac081a06fd684fdcd3b11c2b1faa4679f2ad287c",
+      "path": "morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "sha256": "1cb484cb2768b5e9ce4a73198ca18c042811a9adf324712a654a723f5ca5f897"
+    }
+  ]
+}

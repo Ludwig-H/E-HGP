@@ -1,0 +1,36 @@
+--- a/morsehgp3D_v12/src/catalogue/simt.hpp
++++ b/morsehgp3D_v12/src/catalogue/simt.hpp
+@@ -105,6 +105,13 @@
+ MHGP12_HD u32 popc(u32 x) {
+ #if defined(__CUDA_ARCH__)
+   return static_cast<u32>(__popc(x));
++#elif defined(__x86_64__) && !defined(__POPCNT__)
++  // Proposition : adaptation u32 du popcount_word SWAR de la v11 gelee ac081a06f (leaf.cpp).
++  // Le compilateur x86 de base peut abaisser le builtin en appel __popcountdi2.
++  x -= (x >> 1) & 0x55555555u;
++  x = (x & 0x33333333u) + ((x >> 2) & 0x33333333u);
++  x = (x + (x >> 4)) & 0x0F0F0F0Fu;
++  return (x * 0x01010101u) >> 24;
+ #else
+   return static_cast<u32>(__builtin_popcount(x));
+ #endif
+@@ -123,7 +130,18 @@
+ template <u32 W>
+ inline u32 popc(const Bits<W>& x) {
+   u32 n = 0;
+-  for (u32 i = 0; i < W; ++i) n += static_cast<u32>(__builtin_popcountll(x.w[i]));
++  for (u32 i = 0; i < W; ++i) {
++#if defined(__x86_64__) && !defined(__POPCNT__)
++    // Port explicite du popcount_word u64 de v11/ac081a06f/src/catalogue/leaf.cpp.
++    u64 word = x.w[i];
++    word -= (word >> 1) & 0x5555555555555555ull;
++    word = (word & 0x3333333333333333ull) + ((word >> 2) & 0x3333333333333333ull);
++    word = (word + (word >> 4)) & 0x0F0F0F0F0F0F0F0Full;
++    n += static_cast<u32>((word * 0x0101010101010101ull) >> 56);
++#else
++    n += static_cast<u32>(__builtin_popcountll(x.w[i]));
++#endif
++  }
+   return n;
+ }
+ template <u32 W>

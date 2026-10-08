@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-8 octobre 2026, base publiée **`039b2657e`**.
+8 octobre 2026, base publiée **`23e9e9a49`**.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
 
@@ -47,6 +47,9 @@ GPU u24/u32, petits nuages et millions restent à qualifier ; aucun CPU K10 jou�
   Pool non réentrant, admission commune des coexistences, dépendances V/R et nouvelle enveloppe de temps à déclarer.
   [Protocole G](../receipts/audit_reponses_20261008/t2d_g_prelecture/README.md) : les deux bras sont désormais Gc ;
   séparer garde, index exact et changement déclaré de sauts. Aucun défaut du futur prototype présumé.
+- **CPU `0233/0234`** : [finition déjà parallèle et piste popcount](../receipts/audit_reponses_20261008/cpu_popcount/README.md).
+  Feuilles = 45–48 % de C ; appels logiciels dans l'objet local, pas de preuve binaire K.
+  Patch SWAR explicite depuis v11 proposé ; instructions puis gain CPU à qualifier.
 - **MES-FULL `0018`** : [lacunes d’admission](../receipts/audit_reponses_20261008/mes_full_admission/README.md),
   [pilote livré `c9ac60f20` aux mêmes octets](../receipts/audit_reponses_20261008/mes_full_livraison/README.md), présent
   dans K : GPU inconnu, contreflux de temps/métadonnées et cohortes incomplètes admis. Bruts à contre-juger ;
