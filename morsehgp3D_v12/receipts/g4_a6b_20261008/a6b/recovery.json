@@ -1,0 +1,64 @@
+{
+ "closing_generation": "2026-10-08T09:01:05.430-07:00",
+ "closure": "already_terminated",
+ "errors": [],
+ "generation": null,
+ "host_commands": [
+  {
+   "argv": [
+    "$HOME/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "instances",
+    "describe",
+    "ehgp-v7-3b1d496aed430749ea7e049f",
+    "--project=devpod-gpu-exploration",
+    "--zone=us-central1-c",
+    "--format=json"
+   ],
+   "elapsed_seconds": 2.27,
+   "exit_code": 0,
+   "name": "describe_before_stop_1",
+   "pid": 12011,
+   "started_epoch": 1791478984.748,
+   "timeout_seconds": 90
+  },
+  {
+   "argv": [
+    "$HOME/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "os-login",
+    "ssh-keys",
+    "remove",
+    "--project=devpod-gpu-exploration",
+    "--key-file=/workspaces/.ehgp-sessions/v12.20261008.a6b/key.pub",
+    "--quiet"
+   ],
+   "elapsed_seconds": 1.768,
+   "exit_code": 0,
+   "name": "oslogin_remove",
+   "pid": 12029,
+   "started_epoch": 1791478987.019,
+   "timeout_seconds": 120
+  }
+ ],
+ "ignored_processes": [],
+ "observed_before_stop": {
+  "lastStartTimestamp": "2026-10-08T09:01:05.430-07:00",
+  "lastStopTimestamp": "2026-10-08T09:58:04.480-07:00",
+  "name": "ehgp-v7-3b1d496aed430749ea7e049f",
+  "status": "TERMINATED"
+ },
+ "oslogin_key_removed": true,
+ "schema": "ehgp.v12.recovery_receipt.v1",
+ "session": "/workspaces/.ehgp-sessions/v12.20261008.a6b",
+ "start_may_have_been_requested": true,
+ "started_utc": "2026-10-08T17:03:04Z",
+ "status": "stopped",
+ "target": {
+  "instance": "ehgp-v7-3b1d496aed430749ea7e049f",
+  "project": "devpod-gpu-exploration",
+  "zone": "us-central1-c"
+ },
+ "targeted_shutdown_certified": true,
+ "warnings": []
+}

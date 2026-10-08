@@ -1,0 +1,5 @@
+index	name	status	exit_code	wall_seconds	timeout_seconds	max_rss_kb
+0	socle_ctest	ok	0	141.588	400	1062800
+1	t2da6b_pilote	failed	3	366.948	1500	4011228
+2	lidar_ctest	ok	0	761.438	1200	2429584
+3	mutants_tour	ok	0	208.830	600	356180

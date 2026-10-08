@@ -6,4 +6,4 @@ mhgp12_module_sources(supports.cpp cells.cpp cells_stage.cpp populations.cpp rad
 mhgp12_module_sources(forest_births.cpp forest_kernel.cpp forest_contract.cpp forest_build.cpp forest_stages.cpp
                       forest_validate.cpp forest_sources.cpp vertical_images.cpp registry_branches.cpp export_full.cpp)
 # Session recouverte (decision D-F2) : G et T, M, V, R dans une seule region du Pool.
-mhgp12_module_sources(pipeline.cpp pipeline_run.cpp pipeline_steps.cpp)
+mhgp12_module_sources(pipeline.cpp pipeline_run.cpp)

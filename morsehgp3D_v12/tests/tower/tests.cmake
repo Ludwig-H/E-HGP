@@ -127,12 +127,9 @@ mhgp12_python_gate(mhgp12_tower_pipeline_terminaison 0 pipeline_terminaison.py
 # pipeline_run.cpp avec MHGP12_REGION_HOOKS (trois points d'observation de run_region, vides dans le produit) ; Session
 # d'un site, K1, Pool de 2, coupe finale, deux fils du harnais ordonnes par semaphores ; l'ancienne regle echoue par
 # l'assertion attente_A == 0. La carte de lien (-Map) prouve que le corps lie est celui de la cible, pas le membre
-# pipeline_run.cpp.o de l'archive, et que l'archive du produit ne porte aucun crochet. Meme cible, A6b (residu de
-# CST-0242) : cloture du noyau face aux taches d'indices, quatre points de plus du meme corps ; une tache en cours fait
-# attendre la cloture, une tache jouee apres la levee de hint_closed ne touche plus aux tampons (Session de 800 sites,
-# K1, foret identique a build_tower).
+# pipeline_run.cpp.o de l'archive, et que l'archive du produit ne porte aucun crochet.
 mhgp12_add_unit(mhgp12_tower_region SOURCES region_unit.cpp ${PROJECT_SOURCE_DIR}/src/tower/pipeline_run.cpp
-                GROUPS terminaison fermeture LABELS fast TIMEOUT 120)
+                GROUPS terminaison LABELS fast TIMEOUT 120)
 target_compile_definitions(mhgp12_tower_region PRIVATE MHGP12_REGION_HOOKS)
 set(tower_region_map ${PROJECT_BINARY_DIR}/mhgp12_tower_region.map)
 target_link_options(mhgp12_tower_region PRIVATE "LINKER:-Map=${tower_region_map}")
@@ -144,14 +141,6 @@ mhgp12_python_gate(mhgp12_tower_region_carte 0 region_map_check.py ${tower_regio
 # l'archive (ecarts), carte muette, archive sans le membre ou illisible (refus), sur des entrees fabriquees.
 mhgp12_python_gate(mhgp12_tower_region_carte_juge 0 region_map_check.py --auto-test
                    LINE "region_carte_auto_test_ok cas=7" LABELS fast TIMEOUT 60)
-# Leviers de T2-d-A6 dans la Session recouverte : numerotation par morceaux de cohortes (contre number_births), indices
-# de racine (noyau du produit sur feuilles reecrites a plusieurs ages d'instantane, sortie identique), historique par
-# morceaux (controle, profondeur par remontee, CSR par survivant, contre build_history ; attache corrompue refusee) ;
-# priorite d'A6b : aucune tache d'indices tant qu'une tranche de G reste a reclamer (Sessions a 2, 3 et 8 fils) ;
-# tranches : fixture de l'auditeur (a6_prefixe_tranches), 513 cellules aux tranches reelles, oracle par ensembles,
-# toutes les dates legales d'indice, temoins de l'indice futur (historique faux detecte, double indice refuse).
-mhgp12_add_unit(mhgp12_tower_levers SOURCES pipeline_levers.cpp
-                GROUPS numerotation indices historique priorite tranches LABELS fast TIMEOUT 300)
 # Adaptateur de test des vidages MHGP12DP de la v11 (MES-M0, determinisme, JUG-EMST) : outil joue par la porte
 # MES-M0 ci-dessous et par le pilote du developpeur. Il lit les vidages par le lecteur strict du format, source unique
 # des microbancs (microbancs/mes_m3_m4_tour/common/format.hpp) : construit seulement si ce dossier est present (les

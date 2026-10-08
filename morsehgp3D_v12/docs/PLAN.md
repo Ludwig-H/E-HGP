@@ -167,7 +167,9 @@ sur deux trames moyennes ; B2-T (tables) adopté seul, B2-S et B2-C rejetés seu
 médiane. Profil de G à 48 fils sur G4 : LEM-T1 27 %, traces 22 %, sonde 14 %, census 15 %, proposition 10 % ; LEM-T1 est
 le levier suivant. **R1 (raccourci du registre, classes à cellule unique) adopté sur G4 le 8 octobre**
 ([session R1](../receipts/g4_r1_20261008/README.md)) : grandes trames 0,973, ng00–02 0,963 à 0,970, K10 0,95 en
-information. Suites déclarées (T2-c) : classification des cellules et table de populations
+information. **A6b (aides après G) rejeté sur G4 le 8 octobre**
+([sessions A6b](../receipts/g4_a6b_20261008/README.md)) : grandes trames 0,849 (médiane 144 → 125 ms, maximum 281 → 239 ms),
+mais ng00 1,009 et ng01 1,013 au-dessus du seuil de 1,01 ; retiré de `main`, A6c à concevoir sans cette perte. Suites déclarées (T2-c) : classification des cellules et table de populations
 reconstruites à chaque appel (37 ms à K5, 385 ms à K10 à 3 fils) à rendre résidentes ou parallèles ; coût par unité
 de travail au-dessus de la réplique de `MES-M7` (2,67 s contre 2,34 s à un fil sur ng00 K5), sonde de table d'abord ;
 leviers `G-L4` à `G-L7` non implantés. **Premiers temps G4** ([session H](../receipts/g4_t2h_20261007/README.md), 48 fils) : étage G 80 / 63 / 76 ms à K5 sur ng00–02 (tables 15 à 19 ms, à peine parallèles ; résolution 37 à 49 ms, ×30 de 1 à 48 fils), 450 à 634 ms à K10 : 2,5 à 3 fois le budget à K5 ; chantier T2-c en cours (tables, `G-L5`, recherche des supports). **T2-c adopté sur G4 le 8 octobre** ([session J](../receipts/g4_t2cj_20261008/README.md)) : index des naissances parallèle et file de sondes `G-L7`, étage G **53,1 / 42,1 / 48,2 ms à K5** (rapport 0,63 à 0,67, IC 95 % serré, A/A ≈ 1), 443 ms à K10 sur ng00 ; `G-L5` rejeté. Reste 1,6 à 1,8 fois le budget : census gardé, puis `LEM-T1` et proposition.
