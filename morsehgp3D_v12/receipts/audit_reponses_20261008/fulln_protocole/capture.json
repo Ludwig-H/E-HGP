@@ -1,0 +1,67 @@
+{
+  "schema": "fulln-protocole-capture-v1",
+  "source_git": "8a0716e7470197c95953b38d79f26b8d8f2379fc",
+  "source_files": 488,
+  "source_inventory_sha256": "a7044e68015f8c827d3f73a5d8feb6f562d56cbfbc9f4c96f3347516ecb0998c",
+  "source_pins": {
+    "morsehgp3D_v12/microbancs/mes_full/pilote_full.py": "7fd5a628b77ba930a03f52d7dec4dfc8ed869309dc11659b00b1f95be6edd19b",
+    "morsehgp3D_v12/microbancs/mes_c_petits/pilote_c.py": "6b435ca48af54e289393a72980625f9e1005a71798b961b13859969d53785df0",
+    "morsehgp3D_v12/microbancs/outils/lecteur_full.py": "15437e5f09408d5fbdc6288e33a2452490489f13bf9a3b3a24c99f5d109b6554",
+    "morsehgp3D_v12/microbancs/outils/banc_full.py": "7d7f0661b49adf094df51d41268470571d47c51fc7795bb5b34c791a4a539904",
+    "morsehgp3D_v12/bench/full_probe.cpp": "1068940a06e386cb80a4802b3dd61e2df87eed69574f08c821c34dabb017179b",
+    "morsehgp3D_v12/bench/data/prepare_small.py": "bae06a7a09f67c65934d5df96d0618fe81e7fee482220c4589f169ae27e72f3d"
+  },
+  "package": {
+    "sha256": "23746526164959e0775e3a2b5c5b4acb9d97c54b9c9366c20d074f46b127e66e",
+    "bytes": 16790224
+  },
+  "plan_sha256": "9ed65139972af1041b588b1be9251d52dd7383af821ad059ea04eb1b27ecd9b4",
+  "plan_bytes": 2019,
+  "etat_local_sha256": "a234589bce35f71fee19b4678131a4ce603cebff557d8866b8ace551e2a5bcbf",
+  "etat_local": {
+    "observed_utc": "2026-10-08T18:30:21.896799+00:00",
+    "session_name": "v12.20261008.fulln",
+    "launch_status": "launched",
+    "started_utc": "2026-10-08T17:54:39Z",
+    "done_present": true,
+    "receipt_final_present": true,
+    "results_file_count": 160
+  },
+  "commands": [
+    {
+      "name": "socle_ctest",
+      "timeout_seconds": 600,
+      "options_publiques": {}
+    },
+    {
+      "name": "mes_full",
+      "timeout_seconds": 1500,
+      "options_publiques": {
+        "--fils": "48",
+        "--processus": "5",
+        "--passes": "10",
+        "--jobs": "44",
+        "--delai": "900"
+      }
+    },
+    {
+      "name": "mes_c",
+      "timeout_seconds": 2150,
+      "options_publiques": {
+        "--voies": "cpu,appareil",
+        "--k": "5,10",
+        "--fils": "4,48",
+        "--tours": "3",
+        "--tours-difficiles": "2",
+        "--fils-difficiles": "48",
+        "--delai-global": "2050",
+        "--delai-cas": "120",
+        "--jobs": "44"
+      }
+    }
+  ],
+  "default_build": true,
+  "build_timeout_seconds": 1500,
+  "qualification": "protocole et source du paquet uniquement ; resultats arrives mais non admis dans ce recu",
+  "b3_inclus": false
+}

@@ -1,0 +1,31 @@
+{
+  "schema": "cpu-census-reduction-v1",
+  "commits": {
+    "fulln": "8a0716e7470197c95953b38d79f26b8d8f2379fc",
+    "b3": "545ed987e0f5a06dbb518fe42ed6c5f100f32770",
+    "head": "0e16aaa3a75e211f05f9f251df0f13c17583df8c"
+  },
+  "sources_equal_at_three_pins": {
+    "morsehgp3D_v12/src/catalogue/leaf_census.hpp": "829ba84ab6522a364d4985b5fb6d6571c14f8c72fd8e44bb45c97900b2125b6b",
+    "morsehgp3D_v12/src/catalogue/simt.hpp": "acda01afa5e114234be2e22b17815d5b7fe32c5fe5a0ae184675ea6ef5f57122",
+    "morsehgp3D_v12/src/catalogue/leaf_predicates.hpp": "03498f29bb135cfb1c969d952d93e43c784aae54f6aef53f5e5b0d40c57bfd9e",
+    "morsehgp3D_v12/src/catalogue/leaf_j3.hpp": "8329fc3fb251ad739ddfacd0174711a64dd22b6a9adf2d9798020f939fe54922",
+    "morsehgp3D_v12/src/catalogue/leaf_common.hpp": "a52cca4a03d663e452422e82fcf6395e4733857877e0818921256b7bf7dfe860",
+    "morsehgp3D_v12/src/catalogue/traversal_driver.hpp": "971c47dfe40394398d1dc42fb5c14b47031940b9db031be4dc500daa46f5eae9",
+    "morsehgp3D_v12/src/catalogue/traversal_records.hpp": "76e5c7712a4c6f172c3c23d8296b7f11145be5fc339a4b5b969e5d0f8c27aea6",
+    "morsehgp3D_v12/src/catalogue/leaves.cpp": "2172f739d7f3a5a49bfe748f4f8c3a38b4d6a4e6b393bbf22bf1b6396367fff8",
+    "morsehgp3D_v12/src/catalogue/catalogue.cpp": "799abaf8ee815df58c40a44c74d1ba9b9dfc40fdd05488d1e214efe9b1009e49"
+  },
+  "fulln_report": {
+    "path": "morsehgp3D_v12/receipts/g4_fulln_20261008/resultats/cmd/001_mes_full/files/full/rapport_full.json",
+    "sha256": "24a6a2c415b3604dea27e6c8e1fd7f2b5776e180487e28b24d9b0c8cc0f9637f",
+    "git": "bc47b6057ca045e0b22cc7e2e30331b6883d6495",
+    "ng00_cpu_k5_w48_published_ns": {
+      "wall": 354359489.5,
+      "C": 298598825.0,
+      "count": 154818052.0,
+      "fill": 23489468.5
+    }
+  },
+  "scope": "CPU category/vote reduction only; no native run, geometry proof, GPU equivalence or gain claim"
+}

@@ -1,0 +1,70 @@
+{
+  "schema": "fulln-protocole-result-v1",
+  "source_git": "8a0716e7470197c95953b38d79f26b8d8f2379fc",
+  "source_files_equal": 488,
+  "plan_sha256": "9ed65139972af1041b588b1be9251d52dd7383af821ad059ea04eb1b27ecd9b4",
+  "b3": false,
+  "cache_octets": 8589934592,
+  "full": {
+    "ng_gpu_k5": {
+      "processes": 15,
+      "passes": 150,
+      "hot": 135
+    },
+    "ng_gpu_k10": {
+      "processes": 9,
+      "passes": 45,
+      "hot": 36
+    },
+    "ng_cpu_k5": {
+      "processes": 9,
+      "passes": 45,
+      "hot": 36
+    },
+    "v12set_gpu_k5": {
+      "processes": 5,
+      "passes": 370,
+      "hot": 185
+    },
+    "threads": 48,
+    "cpu_ng_k10": false,
+    "cpu_v12set": false,
+    "total_processes": 38,
+    "total_passes": 610,
+    "total_hot": 392
+  },
+  "small_expected": {
+    "real": 132,
+    "sound": 15,
+    "hard": 12,
+    "k": [
+      5,
+      10
+    ],
+    "ways": [
+      "cpu",
+      "appareil"
+    ],
+    "threads": [
+      4,
+      48
+    ],
+    "cycles": 3,
+    "hard_threads": 48,
+    "hard_passes": 2,
+    "processes_if_complete": 56,
+    "passes_if_all_succeed": 3624,
+    "input_manifest_newly_qualified": false
+  },
+  "etat_local_capture": {
+    "observed_utc": "2026-10-08T18:30:21.896799+00:00",
+    "session_name": "v12.20261008.fulln",
+    "launch_status": "launched",
+    "started_utc": "2026-10-08T17:54:39Z",
+    "done_present": true,
+    "receipt_final_present": true,
+    "results_file_count": 160
+  },
+  "resultats_admis_par_ce_recu": false,
+  "natif_execute_par_auditeur": false
+}

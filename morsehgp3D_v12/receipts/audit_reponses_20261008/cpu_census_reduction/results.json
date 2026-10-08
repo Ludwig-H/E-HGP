@@ -1,0 +1,34 @@
+{
+  "schema": "cpu-census-reduction-result-v1",
+  "source_files": 9,
+  "immutable_commits": {
+    "fulln": "8a0716e7470197c95953b38d79f26b8d8f2379fc",
+    "b3": "545ed987e0f5a06dbb518fe42ed6c5f100f32770",
+    "head": "0e16aaa3a75e211f05f9f251df0f13c17583df8c"
+  },
+  "model": {
+    "exhaustive_cases": 72818,
+    "directed_cases": 31266,
+    "valid_K_q_pairs": 33,
+    "widths": [
+      32,
+      256
+    ],
+    "alphabet": "I interior / O exterior / U shell / F arithmetic fault",
+    "killed_model_mutants": [
+      "cutoff_one_early",
+      "read_after_cutoff",
+      "rejection_before_fault",
+      "return_at_first_fault",
+      "early_success",
+      "truncate_mask32",
+      "padding_is_shell",
+      "reverse_ranks"
+    ],
+    "shell_65_preserved_for_unchanged_downstream": true
+  },
+  "native_runs": 0,
+  "geometry_qualified": false,
+  "speedup_qualified": false,
+  "engine_patch": false
+}
