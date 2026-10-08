@@ -1,0 +1,15 @@
+{
+  "historical_capture_path": "morsehgp3D_v12/receipts/audit_reponses_20261008/mes_full_admission/capture.json",
+  "historical_capture_sha256": "838b7d2ac7484692616fc4dcda0f4e3989b0a131ebf782c10769288b18003239",
+  "historical_receipt_commit": "f6eaa4a6615f46088cebcc02b5cb64b08252f7d0",
+  "pilot_commit": "c9ac60f20c741d9d493f4900fd8aec4590aaa5c5",
+  "pilot_path": "morsehgp3D_v12/microbancs/mes_full/pilote_full.py",
+  "pilot_sha256": "a89ceec92f76c642a508a0c76d5a0a8a31400cab15a7d27141bc37c557b9f92c",
+  "result": {
+    "CST_0018_transfers": true,
+    "campaign_verdict_requalified": false,
+    "native_executed": false,
+    "pilot_bytes_identical": true,
+    "raw_times_invalidated": false
+  }
+}

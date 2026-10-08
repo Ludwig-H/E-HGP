@@ -1,0 +1,122 @@
+{
+  "corruptions_refused": [
+    "missing_join_ns",
+    "bool_join_ns",
+    "length_join_ns",
+    "missing_joins_ns",
+    "bool_joins_ns",
+    "missing_orders_ns",
+    "bool_orders_ns",
+    "missing_pass_ns",
+    "bool_pass_ns",
+    "length_pass_ns",
+    "missing_prepare_ns",
+    "bool_prepare_ns",
+    "missing_reste_ns",
+    "bool_reste_ns",
+    "missing_setup_ns",
+    "bool_setup_ns",
+    "missing_table_ns",
+    "bool_table_ns",
+    "length_table_ns",
+    "missing_workspace_ns",
+    "bool_workspace_ns",
+    "unknown",
+    "mix_after_before",
+    "mix_before_after",
+    "negative",
+    "float",
+    "overflow"
+  ],
+  "local": {
+    "external_return_codes_verified": false,
+    "factors": [
+      1,
+      8
+    ],
+    "journals_admitted": 8,
+    "kmax": 3,
+    "passes": 2,
+    "payloads_read": false,
+    "process_combinations": 4,
+    "profiles": [
+      21,
+      24
+    ],
+    "report_controls": [],
+    "stage_passes": 16,
+    "summaries_recomputed": true,
+    "threads": 3
+  },
+  "native_executed": false,
+  "native_formats_admitted": [
+    "G",
+    "Gc"
+  ],
+  "patches_byte_identical_to_delivery": true,
+  "plans": [
+    {
+      "case": "reference_present",
+      "result": {
+        "baseline_takes": 1,
+        "code": 0,
+        "duplicate_tags": 0,
+        "issues": [],
+        "ratios": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "takes": 6
+      }
+    },
+    {
+      "case": "u21_absent_u24_present",
+      "result": {
+        "baseline_takes": 0,
+        "code": 2,
+        "duplicate_tags": 0,
+        "issues": null,
+        "ratios": [],
+        "takes": 0
+      }
+    },
+    {
+      "case": "all_combinations_absent",
+      "result": {
+        "baseline_takes": 0,
+        "code": 2,
+        "duplicate_tags": 0,
+        "issues": null,
+        "ratios": [],
+        "takes": 0
+      }
+    },
+    {
+      "case": "duplicate_profile",
+      "result": {
+        "baseline_takes": 0,
+        "code": 2,
+        "duplicate_tags": 0,
+        "issues": null,
+        "ratios": [],
+        "takes": 0
+      }
+    },
+    {
+      "case": "duplicate_case",
+      "result": {
+        "baseline_takes": 0,
+        "code": 2,
+        "duplicate_tags": 0,
+        "issues": null,
+        "ratios": [],
+        "takes": 0
+      }
+    }
+  ],
+  "synthetic_K1_admitted": true
+}

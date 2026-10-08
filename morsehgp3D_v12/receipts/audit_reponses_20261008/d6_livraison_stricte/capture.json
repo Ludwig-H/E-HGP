@@ -1,0 +1,33 @@
+{
+  "commit": "e37fd8935e2dd320b4249f4347443c87d45ca34b",
+  "base_commit": "d2f39fe8293d31508697b6db113a7954a7fd0d9e",
+  "source_path": "morsehgp3D_v12/microbancs/mes_d6_profils/pilote_d6.py",
+  "source_sha256": "bb1de862175814467664ae83b377238771511c264eca4150905fbec5ffe5db4f",
+  "base_sha256": "48f40fd6107f75dea52c0b9f40a2d88ff6a40eb18d2ba1683035a0444231173e",
+  "patches": [
+    "morsehgp3D_v12/receipts/audit_reponses_20261008/gc_livraison/d6_g_schemas_proposed.patch",
+    "morsehgp3D_v12/receipts/audit_d6_20261007/pilotage/proposition.patch"
+  ],
+  "dependencies": {
+    "morsehgp3D_v12/receipts/audit_reponses_20261008/gc_livraison/d6_g_schemas_proposed.patch": "2b63d983b73bfd70153d51336517e0428e483ae8ba2092d41d3591a677879e95",
+    "morsehgp3D_v12/receipts/audit_d6_20261007/pilotage/proposition.patch": "e18e46a7535cbaec74acbb2b973e74753316c30bf4508155ac2327101685496a",
+    "morsehgp3D_v12/receipts/audit_d6_20261007/pilotage/check.py": "44ca5e392b7c0c0d5b8de7069d36b19d52e150f9958fa01ae2a3faaa0d9c38a9",
+    "morsehgp3D_v12/receipts/audit_reponses_20261007/t2c_pilote_proposition/before.jsonl": "613f36bf9383a789b890af1879464836654a740c838b985ee3478a5fbdb21572",
+    "morsehgp3D_v12/receipts/audit_reponses_20261007/t2c_pilote_proposition/after.jsonl": "82dd7a2922c630c1a800ea25020d6404ed422c59be12ed0e0da9b5337679b8fb"
+  },
+  "local_files": {
+    "mes_d6.json": "4504654a6b8acc673ae8247ec59fb24cfa8418da786050898ee0d7681e5142ff",
+    "brut/ng00_p21_x1_t0_catalogue.jsonl": "c547a06815cfb6f5fbbf9ad2de0eb8295d258fc3dc5042deb5da40167b9e4aaa",
+    "brut/ng00_p21_x1_t0_tour.jsonl": "5f681fcd4ede85cb2fd0089ec8392e02bf83880f23b59c14031b181e9cca7910",
+    "brut/ng00_p21_x8_t0_catalogue.jsonl": "28558215825df9610c4b2f0b6b522f58ca1f82cfed2db7186c68b8934e64364f",
+    "brut/ng00_p21_x8_t0_tour.jsonl": "aa8ce86a76fc31aa565e84c5a1faa4a902a67984869ae95baf16a56bf296643a",
+    "brut/ng00_p24_x1_t0_catalogue.jsonl": "7bf7ef00659298999a3ac316417e27257dd728564b33bb525be43a0581f6c74a",
+    "brut/ng00_p24_x1_t0_tour.jsonl": "c8bba04026d2dce01c54229656296917fa9bc26fa0cd5171d7c9c66cb7e99ac2",
+    "brut/ng00_p24_x8_t0_catalogue.jsonl": "aa3dc879f514306208b1a392d8aa8bd7b1202390ed6eba712e8509c97636527b",
+    "brut/ng00_p24_x8_t0_tour.jsonl": "b851844c40b917dae596a4a4fba9700db05734fa746754081690523ca998d44f"
+  },
+  "reader_modes_equal": [
+    "normal",
+    "-O"
+  ]
+}

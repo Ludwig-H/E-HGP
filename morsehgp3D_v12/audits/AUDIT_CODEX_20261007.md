@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-8 octobre 2026, base publiée **`4707f6203`**.
+8 octobre 2026, base publiée **`f6eaa4a66`**.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
 
@@ -23,7 +23,9 @@ K10 informatif : 440,90 / 321,28 / 354,65 ms, trois processus × deux passes cha
 188 journaux stricts, sources et arrêt archivé contre-vérifiés ; gains appariés K5 de 33–37 %.
 **Aucun temps FULL v12 acquis** ; une somme de médianes I+J ne le remplace pas. Trois trames d'une seule séquence.
 La sonde FULL `c40318ebd` reprend la [frontière proposée](../receipts/audit_reponses_20261008/frontiere_full_proposee/README.md),
-de Cloud/index à T/M/V/R en mémoire ; admission de la future campagne en contre-lecture. 100 ms, GPU u24/u32, petits nuages et millions restent à qualifier.
+de Cloud/index à T/M/V/R en mémoire. [Paquet K vérifié](../receipts/audit_reponses_20261008/session_k_snapshot/README.md) :
+FULL puis D6 ; aucun résultat rapatrié au constat du 8 octobre 02:36:54 UTC.
+100 ms, GPU u24/u32, petits nuages et millions restent à qualifier.
 
 **Livraisons et qualifications.**
 
@@ -40,15 +42,16 @@ de Cloud/index à T/M/V/R en mémoire ; admission de la future campagne en contr
   Source qualifiée transférée explicitement ; binaire vivant non rétro-certifié. Budget fini/cache et FULL GPU ouverts.
   Campagne repo6 arrêtée au début de u24, profils larges non qualifiés. [Repo5 historique](../receipts/audit_tmv_repo5_profils_20261008/README.md) :
   u24 clos, u32 interrompu ; aucune qualification transférée à l'assemblage.
-- **D6 `0018`** : [schéma Gc refusé, patch strict proposé](../receipts/audit_reponses_20261008/gc_livraison/README.md),
-  deux formats réels admis et 27 corruptions refusées. Composition avec le correctif du plan vérifiée ; quatre plans
-  invalides refusés avant toute prise. Corrections livrées en `e37fd8935`, contre-lecture de livraison en cours.
+- **D6 `0018/0207`** : [livraison `e37fd8935` vérifiée](../receipts/audit_reponses_20261008/d6_livraison_stricte/README.md),
+  deux schémas exacts et admission du plan ; 27 corruptions et quatre plans fautifs refusés. Essai local ng00 K3 :
+  huit journaux/seize passes relus, sans qualification de temps. **K conserve l’ancien lecteur**, sans transfert.
 
 **Aide au développeur et prochains contrôles.**
 
-- **MES-FULL `0018`** : [prélecture du pilote](../receipts/audit_reponses_20261008/mes_full_admission/README.md),
-  capture non commise `a89ceec9` : isolation GPU inconnue, durées/métadonnées incohérentes et cohortes incomplètes
-  encore admises. Contreflux Python reproduits ; correctifs ciblés proposés avant toute déclaration de contrat.
+- **MES-FULL `0018`** : [lacunes d’admission](../receipts/audit_reponses_20261008/mes_full_admission/README.md),
+  [pilote livré `c9ac60f20` aux mêmes octets](../receipts/audit_reponses_20261008/mes_full_livraison/README.md), présent
+  dans K : GPU inconnu, contreflux de temps/métadonnées et cohortes incomplètes admis. Bruts à contre-juger ;
+  code de commande zéro insuffisant. Aucun temps brut déclaré faux ; contre-lecteur strict en préparation.
 - **R** : [classes à cellule unique](../receipts/audit_reponses_20261008/registre_classe_unique/README.md) :
   `q=d+1` autorise la copie des enfants sans recherche historique ni tri, mémoire temporaire réduite.
   Preuve, 147 cas et neuf fixtures ; sur les comptes ng00 existants, au moins 78,81 % des requêtes R K5

@@ -1,0 +1,55 @@
+{
+  "session": "v12.20261008.fullk",
+  "observed_utc": "2026-10-08T02:36:54+00:00",
+  "launched_utc": "2026-10-08T02:31:09Z",
+  "snapshot_head": "c9ac60f20c741d9d493f4900fd8aec4590aaa5c5",
+  "source_kind": "worktree_snapshot",
+  "evidence_grade": "dev_snapshot",
+  "public_status": "not_claimed",
+  "snapshot_status_entries": 34,
+  "source_files": 2262,
+  "source_sha256": {
+    "morsehgp3D_v12/microbancs/mes_d6_profils/pilote_d6.py": "48f40fd6107f75dea52c0b9f40a2d88ff6a40eb18d2ba1683035a0444231173e",
+    "morsehgp3D_v12/microbancs/mes_full/pilote_full.py": "a89ceec92f76c642a508a0c76d5a0a8a31400cab15a7d27141bc37c557b9f92c",
+    "morsehgp3D_v12/bench/full_probe.cpp": "815cb33f4f560943497644031759e25d9dd8b60d86b8aa377e54db53a9099e0d",
+    "morsehgp3D_v12/tests/tower/full_probe_check.py": "a179dc45695b6ab99184883c4e3e7231e2234d9baf36a6ebd1d614e501a9d365"
+  },
+  "d6_fix_commit": "e37fd8935e2dd320b4249f4347443c87d45ca34b",
+  "package_artifacts_sha256": {
+    "package/plan.json": "24cdb3e52c9b70ce85e897e643dac325d101b918dea0e50ffb4cd6a8b9392371",
+    "package/plan.sh": "13c13f1fa1c5c9064453acf0769882b26ab9c8f7d9b968ec2a970738534e732f",
+    "package/package.tar.gz": "aa75b3162d783d6889a8d23fd7c439e39e089a962fb8e2f25704602fe847f3db",
+    "package/SNAPSHOT_MANIFEST.sha256": "3b59aacc1765738e5df345a47c6eb388b79f3df1d3ad7a7adb1728a68b1da525"
+  },
+  "max_run_seconds": 4200,
+  "plan_steps": [
+    {
+      "name": "mes_full",
+      "timeout_seconds": 2400
+    },
+    {
+      "name": "mes_d6_profils",
+      "timeout_seconds": 1800
+    }
+  ],
+  "historical_observation": {
+    "launch_worker_exit_code": 0,
+    "lifecycle_state": "targeted_running",
+    "receipt_present": false,
+    "results_entries": 0,
+    "stop_certified": false,
+    "subcampaign_progress_observed": false
+  },
+  "action_limits": {
+    "gcp_called": false,
+    "controller_contacted": false,
+    "native_executed": false,
+    "new_measurements": false
+  },
+  "admission_receipt_pin": "f6eaa4a6615f46088cebcc02b5cb64b08252f7d0",
+  "admission_capture_path": "morsehgp3D_v12/receipts/audit_reponses_20261008/mes_full_admission/capture.json",
+  "artifact_sha256": {
+    "README.md": "cb5736e8e81181afd7d2754d2d8b299a2faac0e1009ae6a5daccfc4059ed7f22",
+    "check.py": "e960a32b99b0f65640462f2daa106a3e75c386727a48151a0f3351f10c5790cb"
+  }
+}
