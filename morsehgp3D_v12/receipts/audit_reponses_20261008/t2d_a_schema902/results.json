@@ -1,0 +1,23 @@
+{
+  "cpu_absent": "admis",
+  "fils_bool": "admis",
+  "fin_fausse": "admis",
+  "identite_tronquee": {
+    "identite_ok": true,
+    "refus": [],
+    "verdict": "adopte"
+  },
+  "liberation_bool": "admis",
+  "memoire_absente": "admis",
+  "mur_impossible": {
+    "refus": [
+      "admission des journaux : partition murale au-dela du mur"
+    ],
+    "verdict": "refuse"
+  },
+  "nominal": {
+    "identite_ok": true,
+    "refus": [],
+    "verdict": "adopte"
+  }
+}

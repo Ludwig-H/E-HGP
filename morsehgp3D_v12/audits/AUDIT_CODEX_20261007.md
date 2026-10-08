@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-8 octobre 2026, 05:09 UTC, base publiée **`7bcf9665e`**.
+8 octobre 2026, 05:13 UTC, base publiée **`0347e3675`**.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
 
@@ -13,25 +13,24 @@ u21, W48, trames ng00–02 de 39 885 / 35 551 / 45 845 sites :
 | CPU K5, 3 × 4 | **441,07** | **368,33** | **447,08** |
 | GPU K10, 3 × 4, informatif | 793,44 | 603,34 | 715,31 |
 
-GPU K5 : maxima des médianes de processus 160,76 / 127,80 / 164,64 ms ; maxima bruts 164,46 / 132,95 / 173,55 ms.
 **37 trames de six séquences : médiane 241,31 ms, maximum contractuel 467,92 ms**, 185 passes chaudes,
 33 179–99 099 sites. Aucune trame sous le maximum de 100 ms. Les 610 passes et leurs empreintes concordent.
 Mur de Cloud/index à T/M/V/R ; segmentation, lecture, validation, FUL1 et libération hors mur.
 [Sources/commandes et arrêt ciblé vérifiés](../receipts/audit_reponses_20261008/session_k_provenance/README.md),
 03:03:03 UTC ; [342 sources/configurations identiques à `c9ac60f20`](../receipts/audit_reponses_20261008/session_k_sources/README.md).
-Snapshot sans hash binaire ni journal de compilation rapatrié ; aucun CPU·s par trame, aucun CPU K10.
+K : ni hash binaire/journal de compilation rapatrié, ni CPU·s, ni CPU K10.
 
 Face aux mesures historiques v11 : GPU plus rapide, CPU plus lent ; comparaison descriptive, pas A/B apparié.
 Catalogue CPU : 274–329 ms. Sur GPU, G : 44–57 ms ; T : 26–38 ms ; R : 12–15 ms.
 Retirer R par passe laisse 116–148 ms médians : ce seul poste ne suffit pas à 100 ms.
-[Campagnes L1/L2 préparées](../receipts/audit_reponses_20261008/session_l_preparation/README.md) : L1 lancée à
-04:39:17 UTC ; à 04:44:40, aucun résultat ni arrêt rapatrié. K10 prévu à froid ; aucune empreinte FUL1 sur L2.
+[L1](../receipts/audit_reponses_20261008/session_l1_diagnostic/README.md) : worker code 0, mais récupération
+refusée par la réserve disque locale ; arrêt TERMINATED certifié. Aucun brut disponible au relevé 05:10:53.
+[Plans L1/L2](../receipts/audit_reponses_20261008/session_l_preparation/README.md) : K10 à froid, pas de FUL1 sur L2.
 
 **Contre-lectures courantes et aide au développeur.**
 
 - **CPU, catalogue** : finition déjà parallèle ; feuilles = 45–48 % de C.
-  [Popcount, assembleur vérifié](../receipts/audit_reponses_20261008/cpu_popcount_asm/README.md) : cinq appels
-  logiciels deviennent zéro ; avec `-mpopcnt`, assembleurs identiques. Deux nouveaux
+  [Popcount vérifié en assembleur](../receipts/audit_reponses_20261008/cpu_popcount_asm/README.md) ; deux nouveaux
   [patches séparés](../receipts/audit_reponses_20261008/cpu_live/README.md) : calcul symétrique des masques
   (2E→E unions/popcounts), retrait du garde Q2 déjà garanti par le générateur. Modèle : 17 628 cas,
   dix mutants, aucun tableau ajouté. Corps warp produit conservé ; qualification native et chronos attendus.
@@ -45,9 +44,9 @@ Retirer R par passe laisse 116–148 ms médians : ce seul poste ne suffit pas �
 - **T2-d-A, recouvrement G/TMVR** : [concurrence](../receipts/audit_reponses_20261008/prelecture_t2d_t/README.md),
   [reprise](../receipts/audit_reponses_20261008/t2d_a_reprise/README.md) : `noexcept` et fin G corrigés ;
   pollution du compteur d'allocations par le digest signalée, test ensuite réécrit dans le prototype.
-  [Pilote épinglé avant refonte](../receipts/audit_reponses_20261008/t2d_a_admission/README.md) : mur impossible
-  ou cohorte d'identité tronquée permettent encore « adopte ». Corriger avant campagne ; T/M/V/R recouverts
-  sont des fenêtres de tâches, pas une partition du mur. Schéma suivant à contre-lire explicitement.
+  [Nouveau schéma 902 relu](../receipts/audit_reponses_20261008/t2d_a_schema902/README.md) : mur impossible
+  désormais refusé, fenêtres séparées ; cohorte d'identité tronquée encore « adopte », fin−G≠queue et mémoire
+  absente admises. Journal local clos : 705 portes vertes, sans preuve G4 ni chaîne complète de compilation.
 - **T2-d-B, census G** : [garde resserrée et preuve](../receipts/audit_reponses_20261008/garde_census/README.md),
   [témoins de frontière](../receipts/audit_reponses_20261008/census_temoins/README.md) : 1 288 requêtes du modèle
   gardent résultats/parcours ; supports certifiés transportés par valeur dans le prototype.
@@ -62,16 +61,14 @@ Retirer R par passe laisse 116–148 ms médians : ce seul poste ne suffit pas �
   Le développeur le garde pour après T2-d-A dans sa [réponse publiée](../receipts/developpement_20261008/reponse_audit_k_mes_b.md).
 
 **Qualifications et portes restantes.** Gc/TMVR livrés : détails et limites au registre ; dernière qualification
-TMVR u21, 716 portes et une sentinelle LiDAR sautée, 27 mutants, 685 contrôles du pic ; pas de transfert à T2-d.
+TMVR u21 : 716 portes, une sautée, 27 mutants, 685 contrôles du pic ; pas de transfert à T2-d.
 [D6 rejoué](../receipts/audit_reponses_20261008/d6_session_k/README.md) : 126 sorties/630 passes admises ;
 C u24/u32 ×1 : +0,04–1,04 %, G u32 : +4,3–11,2 %. ×2048 reste <2²⁹, sans précision physique nouvelle ;
 [erratum accepté](../receipts/g4_fullk_20261008/ERRATUM_20261008.md). Seuil D6 produit <3 % ouvert.
 [Contre-lecteur FULL strict](../receipts/audit_reponses_20261008/mes_full_contrelecture/README.md) :
 53 corruptions refusées, K admis ; intégration au pilote promise avant sa prochaine session, pas encore livrée.
-`0239` (_GLIBCXX_DEBUG), `0240` (historique non contrôlé, aucune sortie produit fausse démontrée), `0104`
-(mutant de date Gc), T7, capacités 256/64, profils élargis et massif restent ouverts. `0105/0107` clos u21 ;
-`0009` clos, `0008` ouvert. Toutes les preuves de clôture et réserves sont conservées au registre.
+Restent ouverts : `0239`, `0240`, `0104`, T7, capacités 256/64, profils élargis et massif ; `0105/0107` clos u21,
+`0009` clos, `0008` ouvert. Portées et preuves de clôture au registre.
 
-Quatre fichiers actifs, 75 constats ; détails dans `receipts/`. Worktrees d'audit désormais persistants sous
-`/workspaces`. Aucun GCP ni donnée sous licence par cet audit ; contrôles récents Python, sources et assembleur
-seul, sans exécution du moteur. Les qualifications perdues dans `/tmp` ne sont pas recréées par la sauvegarde des sources.
+Quatre fichiers actifs, 75 constats ; reçus séparés, worktrees persistants. Audit récent : Python, sources et
+assembleur seulement, aucun moteur, GCP ni donnée sous licence. Sources sauvées ≠ qualifications restaurées.

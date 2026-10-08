@@ -1,0 +1,160 @@
+{
+  "captured_utc": "2026-10-08T05:10:53.267540+00:00",
+  "scope": "lecture locale uniquement ; aucune action cloud, aucun moteur exécuté",
+  "source_commit": "403736300900a709b82316721eeb589fbc4a5350",
+  "receipt": {
+    "pin": {
+      "bytes": 36056,
+      "sha256": "ac38bde806b7bdba68717e48f599ae1f0768a500b250f45095485dab8bd65ef9"
+    },
+    "fields": {
+      "schema": "ehgp.v12.session_receipt.v1",
+      "status": "failed_remote",
+      "worker_exit_code": 0,
+      "worker_outcome": "exited",
+      "worker_launched": true,
+      "worker_log_retrieved": true,
+      "results_verified": false,
+      "results_bytes": 23176,
+      "results_cap_bytes": 67108864,
+      "results_archive": "worker",
+      "retrieval": "failed",
+      "closure": "stopped",
+      "targeted_shutdown_certified": true,
+      "stop_exit_code": 0,
+      "stop_attempts": 1,
+      "data_verified_remote": true,
+      "reserve_released": true,
+      "guest_guard_intact": true,
+      "public_status": "not_claimed",
+      "evidence_grade": "pushed_commit"
+    }
+  },
+  "done": 3,
+  "failure": {
+    "phase": "retrieve_phase1 avant scp",
+    "kind": "reserve_disque_locale",
+    "archive_bytes": 23176,
+    "observed_free_bytes": 878231552,
+    "margin_bytes": 1073741824,
+    "required_free_bytes": 1073788176,
+    "shortfall_bytes": 195556624
+  },
+  "archive_metadata_only": {
+    "name": "results.tar.gz",
+    "sha256_reported_twice": "3497c745a7e01e8c8b573268eb89a0da96974ef26e93b4844811f97070db573b",
+    "bytes": 23176,
+    "hash_command_exit_code": 0,
+    "downloaded_or_local_hash_verified": false
+  },
+  "stop_local_evidence": {
+    "before": "RUNNING",
+    "stop_exit_code": 0,
+    "after": "TERMINATED",
+    "both_describe_exit_codes": 0,
+    "new_cloud_verification_by_audit": false
+  },
+  "local_results": [
+    {
+      "name": "worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "controller": {
+    "path": "gcp-migration/v12_session.py",
+    "commit": "7bcf9665ed325c1292144e765650cdffefe94882",
+    "equals_git_object": true,
+    "bytes": 138559,
+    "sha256": "8ababf35a6e295749b446faacc0c6f2ca54d69362199131f2a40d8ac5c23d8aa",
+    "lines": {
+      "margin": 143,
+      "archive_metadata": 1915,
+      "archive_label": 1932,
+      "free_space_gate": 1935,
+      "download_after_gate": 1937,
+      "phase2": 1951
+    }
+  },
+  "package": {
+    "bytes": 5007961,
+    "sha256": "e547240a3c2afdbf7473e86fa4055cdd5baf56f27217134d58304feadd09f134"
+  },
+  "plan": {
+    "bytes": 2159,
+    "sha256": "cdc81d109096955fac64f8a822eeac43c7c25e825aa108676b8e53d4b2f8cf11"
+  },
+  "worker_plan": {
+    "bytes": 1455,
+    "sha256": "11bf866d67ffacffd1355268553bdeb1229d9ffbdf204136ab505bd06768881d"
+  },
+  "plan_scope": {
+    "default_build": false,
+    "command": "mes_b",
+    "timeout_seconds": 2000,
+    "threads": 48,
+    "host_budget_gib": 160,
+    "device_budget_gib": 88,
+    "global_timeout_seconds": 1930,
+    "build_jobs": 44
+  },
+  "packaged_source_files": {
+    "morsehgp3D_v12/bench/full_probe.cpp": {
+      "bytes": 17006,
+      "sha256": "0b1b6b45e6483f21df203fab3a99b7d1d49b15edb2f7b3cbf31a24526bca0e91",
+      "equals_git_object": true
+    },
+    "morsehgp3D_v12/microbancs/mes_b_scenes/README.md": {
+      "bytes": 6791,
+      "sha256": "99ec6c0a1f1cdee99aa63d646548678360dd62edf5ed9dce9a8dfe2dae64ea2b",
+      "equals_git_object": true
+    },
+    "morsehgp3D_v12/microbancs/mes_b_scenes/pilote_b.py": {
+      "bytes": 31455,
+      "sha256": "84777f19bdf3fdb380207c813ed3253a2f35961c6e28b45eca32466977c165f7",
+      "equals_git_object": true
+    },
+    "morsehgp3D_v12/microbancs/mes_b_scenes/test_pilote_b.py": {
+      "bytes": 15365,
+      "sha256": "5d85e22efe0d5756fe9d63748a2f4af1d5472ad65902751802a8eb02bf290006",
+      "equals_git_object": true
+    },
+    "morsehgp3D_v12/microbancs/mes_b_scenes/mutants_pilote_b.py": {
+      "bytes": 4497,
+      "sha256": "cdbc03321b44ebe808ea098eedfb44b89deb6c1877b7487ecfa37724d84716a1",
+      "equals_git_object": true
+    }
+  },
+  "local_proof_pins": {
+    "DONE": {
+      "bytes": 2,
+      "sha256": "1121cfccd5913f0a63fec40a6ffd44ea64f9dc135c66634ba001d10bcf4302a2"
+    },
+    "host/logs/019_results_hash.stdout": {
+      "bytes": 173,
+      "sha256": "878d3a6464afb6640f4ea0268c492d067734f66bce7d996518587392ef411bbc"
+    },
+    "host/logs/019_results_hash.json": {
+      "bytes": 840,
+      "sha256": "681ea3187a6ad028f71553667f2e8511662fe7aca48883c22d3f37805ce97c1c"
+    },
+    "host/logs/020_describe_before_stop_1.stdout": {
+      "bytes": 6978,
+      "sha256": "0f3c976c01424b6097ce34c3ca231cccaf7debc81a03584459b1459756f72d8d"
+    },
+    "host/logs/021_guarded_stop.json": {
+      "bytes": 336,
+      "sha256": "ca3a13502ae1b9dc863b0bb4d6106e2e304492fd3d2689ace6eaac7663a44465"
+    },
+    "host/logs/022_describe_after_stop1_1.stdout": {
+      "bytes": 6869,
+      "sha256": "fac254ea803523faeb0d36f62e8a10f02e1649f750aee93c4f2eea357923046f"
+    }
+  },
+  "missing": [
+    "archive locale et manifeste intérieur",
+    "journaux de compilation et empreinte du binaire",
+    "journaux FULL et statistiques de temps",
+    "validation géométrique ou qualification de performance nouvelle"
+  ]
+}
