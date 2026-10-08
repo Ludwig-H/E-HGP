@@ -1,0 +1,110 @@
+--- a/morsehgp3D_v12/microbancs/mes_c_petits/pilote_c.py
++++ b/morsehgp3D_v12/microbancs/mes_c_petits/pilote_c.py
+@@ -131,7 +131,7 @@
+     return out
+ 
+ 
+-def verdicts(configs, hard):
++def verdicts(configs, hard, hard_names):
+     out = {}
+     ref = configs.get('cpu:5:48')
+     line = ref and ref.get('droites', {}).get('reel')
+@@ -140,10 +140,17 @@
+     out['C2'] = dict(etat='non evalue' if not line else 'tenu' if line['par_site_ns'] <= MAIN_REGIME_NS_PER_SITE
+                      else 'non tenu', detail='%.3f us par site (limite %.3f)' % (
+                          line['par_site_ns'] / 1e3, MAIN_REGIME_NS_PER_SITE / 1e3) if line else '')
+-    k5 = [h for h in hard if h['k'] == 5 and h['etat'] != 'non_joue']
++    # C3 porte sur tous les nuages difficiles, les deux voies, K5 et 48 fils.
++    # Un sous-ensemble joue ne remplace jamais cette cohorte.
++    k5 = [h for h in hard if h['k'] == 5]
++    wanted = {(name, voie) for name in hard_names for voie in ('cpu', 'appareil')}
++    keys = [(h['nom'], h['voie']) for h in k5]
++    complete = bool(wanted) and len(keys) == len(wanted) and set(keys) == wanted and all(
++        h['fils'] == 48 and h['etat'] != 'non_joue' for h in k5)
+     bad = ['%s %s : %s (%s)' % (h['nom'], h['voie'], h['etat'], h['raison']) for h in k5 if h['etat'] != 'ok']
+-    out['C3'] = dict(etat='non evalue' if not k5 else 'non tenu' if bad else 'tenu',
+-                     detail=bad or ['%d nuages difficiles a K5 calcules' % len(k5)])
++    out['C3'] = dict(etat='non evalue' if not complete else 'non tenu' if bad else 'tenu',
++                     detail=['cohorte C3 incomplete ou hors configuration'] if not complete else
++                     bad or ['%d executions difficiles a K5 calculees' % len(k5)])
+     return out
+ 
+ 
+@@ -269,13 +276,13 @@
+         for when in ('avant', 'apres'):
+             if not bf.environment_ok(report['environnement'][when]):
+                 controls.append('environnement %s incomplet ou GPU occupe' % when)
+-    report.update(configurations=configs, difficiles=hard, criteres=verdicts(configs, hard),
++    report.update(configurations=configs, difficiles=hard, criteres=verdicts(configs, hard, [c['nom'] for c in hard_clouds]),
+                   parametres=dict(argv=argv[1:], tours=args.tours, budget_octets=budget),
+                   duree_s=round(time.monotonic() - t_start, 1))
+     crit = report['criteres']
+     if args.essai:
+         report['verdict'] = 'essai'
+-    elif controls:
++    elif controls or any(crit[c]['etat'] == 'non evalue' for c in ('C1', 'C2', 'C3')):
+         report['verdict'] = 'refuse'
+     elif all(crit[c]['etat'] == 'tenu' for c in ('C1', 'C2', 'C3')):
+         report['verdict'] = 'tenu'
+--- a/morsehgp3D_v12/microbancs/mes_c_petits/test_pilote_c.py
++++ b/morsehgp3D_v12/microbancs/mes_c_petits/test_pilote_c.py
+@@ -6,8 +6,8 @@
+                  pilote retrouve a et b sur le tour chaud pour le groupe reel
+                  et pour une famille synthetique, sans jamais les melanger ; C1 et C2 jugent la droite reelle de
+                  cpu:5:48 aux seuils ecrits (2 ms, 3,727 us par site) ;
+-  difficiles     un refus wide_leaf sur la quasi-sphere a K5 rend C3 non tenu et reste un resultat publie (pas un
+-                 controle manquant) ; sans refus, C3 est tenu ;
++  difficiles     un refus wide_leaf sur la quasi-sphere a K5 reste un resultat publie (pas un
++                 controle manquant) ; la cohorte complete exige aussi la voie appareil ;
+   empreintes     une empreinte qui change d'un tour a l'autre (deux tours) fait manquer un controle ;
+   usage          archive refusee (membre a chemin) : code 2 avant toute construction.
+ Codes : 0 conforme ; 1 ecart.
+@@ -113,8 +113,32 @@
+     return abs(x - y) <= 1e-6 * max(1.0, abs(y))
+ 
+ 
++def check_cohort(errors):
++    # Critere complet : deux voies, K5/W48 ; les essais CPU seuls ne le qualifient pas.
++    config = {'cpu:5:48': {'droites': {'reel': {'fixe_ns': 1e6, 'par_site_ns': 2000}}}}
++    names = ['reseau_fictif', 'sphere_fictive']
++    full = [dict(nom=n, voie=v, k=5, fils=48, etat='ok', raison='')
++            for n in names for v in ('cpu', 'appareil')]
++    scenarios = [
++        ('complet', full, 'tenu'),
++        ('non_joue', full[:-1] + [dict(full[-1], etat='non_joue')], 'non evalue'),
++        ('absent', full[:-1], 'non evalue'),
++        ('cpu_seul', [r for r in full if r['voie'] == 'cpu'], 'non evalue'),
++        ('un_fil', [dict(r, fils=1) for r in full], 'non evalue'),
++        ('double', full + [full[0]], 'non evalue'),
++        ('refus', full[:-1] + [dict(full[-1], etat='refus', raison='wide_leaf')], 'non tenu'),
++        ('expire', full[:-1] + [dict(full[-1], etat='echec', raison='expire')], 'non tenu'),
++        ('vide', [], 'non evalue'),
++    ]
++    for name, rows, wanted in scenarios:
++        actual = pilote_c.verdicts(config, rows, names)['C3']['etat']
++        if actual != wanted:
++            errors.append('cohorte %s : %s au lieu de %s' % (name, actual, wanted))
++
++
+ def main():
+     errors = []
++    check_cohort(errors)
+     with tempfile.TemporaryDirectory() as folder:
+         code, report = campaign(folder, 'ok')
+         lines = (report or {}).get('configurations', {}).get('cpu:5:48', {}).get('droites', {})
+@@ -124,13 +148,13 @@
+                 not near(uni['par_site_ns'], 9000) or reel['nuages'] != 3 or set(lines) != {'reel', 'uniform'}:
+             errors.append('droites : code %s, droites %s' % (code, lines))
+         crit = (report or {}).get('criteres', {})
+-        if [crit.get(c, {}).get('etat') for c in ('C1', 'C2', 'C3')] != ['tenu', 'tenu', 'tenu'] or \
++        if [crit.get(c, {}).get('etat') for c in ('C1', 'C2', 'C3')] != ['tenu', 'tenu', 'non evalue'] or \
+                 (report or {}).get('controles'):
+             errors.append('criteres : %s, controles %s' % (crit, (report or {}).get('controles')))
+         code, report = campaign(folder, 'refus_sphere')
+         crit = (report or {}).get('criteres', {})
+         sphere = [h for h in (report or {}).get('difficiles', []) if h['nom'] == 'sph_1']
+-        if code != 0 or crit.get('C3', {}).get('etat') != 'non tenu' or not sphere or sphere[0]['etat'] != 'refus' \
++        if code != 0 or crit.get('C3', {}).get('etat') != 'non evalue' or not sphere or sphere[0]['etat'] != 'refus' \
+                 or (report or {}).get('controles'):
+             errors.append('difficiles : C3 %s, sphere %s, controles %s' % (crit.get('C3'), sphere,
+                                                                             (report or {}).get('controles')))

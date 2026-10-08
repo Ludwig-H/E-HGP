@@ -1,0 +1,81 @@
+{
+  "base_commit": "e1f91d3b6fe0a7953edb119e3bbe990908092bda",
+  "source_commit": "a2c2fccfd65f89a4bb874b8bf5e1bd2c737856b1",
+  "files": {
+    "morsehgp3D_v12/receipts/g4_mesb2_20261008/README.md": {
+      "commit": "e1f91d3b6fe0a7953edb119e3bbe990908092bda",
+      "sha256_before": "ea04e5c7966fe7ab045d84688c02cc8ed7899c570f9c5db667ee99c88fb32d9b",
+      "sha256_proposed": "f6ebba8b10be7dba7c4da43020d843a267cafb292eef6ca2462c9d793d7e5a2d"
+    },
+    "morsehgp3D_v12/docs/PLAN.md": {
+      "commit": "e1f91d3b6fe0a7953edb119e3bbe990908092bda",
+      "sha256_before": "e198dfc90611903196c2bfa541ba5de4f0eb6fd65e56520909d5fb5a9e40c38b",
+      "sha256_proposed": "e899ad89af7771685492edfce7bba3a78dc7f2a553306bf75af25f9644afaf0c"
+    },
+    "morsehgp3D_v12/receipts/g4_mesb2_20261008/resultats/cmd/000_mes_b/files/b/brut/ign_paris_0651_6863_sans_sol_k5_cpu.jsonl": {
+      "commit": "e1f91d3b6fe0a7953edb119e3bbe990908092bda",
+      "sha256": "45304e5da8d7ceb69a19e1cfbde0b7f5bf7d0015717a35f057a2229329c40861"
+    },
+    "morsehgp3D_v12/receipts/g4_mesb2_20261008/resultats/cmd/000_mes_b/files/b/brut/ign_paris_0651_6863_k5_cpu.jsonl": {
+      "commit": "e1f91d3b6fe0a7953edb119e3bbe990908092bda",
+      "sha256": "9bb8795d80166a52b8673b87386df65532fbbcac18e492012b53b8ab1724645c"
+    },
+    "morsehgp3D_v12/receipts/g4_mesb2_20261008/resultats/cmd/000_mes_b/files/b/brut/ign_lyon_0842_6521_sans_sol_k5_cpu.jsonl": {
+      "commit": "e1f91d3b6fe0a7953edb119e3bbe990908092bda",
+      "sha256": "70009d22024609f2e2d65c6b8338e05199d42f9d3d7c27ecb4b973e7a6db0dc1"
+    },
+    "morsehgp3D_v12/receipts/g4_mesb2_20261008/resultats/cmd/000_mes_b/files/b/brut/ign_lyon_0842_6521_k5_cpu.jsonl": {
+      "commit": "e1f91d3b6fe0a7953edb119e3bbe990908092bda",
+      "sha256": "70009d22024609f2e2d65c6b8338e05199d42f9d3d7c27ecb4b973e7a6db0dc1"
+    },
+    "morsehgp3D_v12/receipts/g4_mesb2_20261008/resultats/cmd/000_mes_b/files/b/brut/eth3d_courtyard_scan1_k5_cpu.jsonl": {
+      "commit": "e1f91d3b6fe0a7953edb119e3bbe990908092bda",
+      "sha256": "ca759c4fef546012dc464952ff7391c3978433a0b34937966c83c35a346edd4e"
+    },
+    "morsehgp3D_v12/bench/full_probe.cpp": {
+      "commit": "a2c2fccfd65f89a4bb874b8bf5e1bd2c737856b1",
+      "sha256": "201119a78a52ccbe5c8e2ce128a165e9b3774800d55ed8a0935c91e587858d61"
+    },
+    "morsehgp3D_v12/src/catalogue/catalogue.hpp": {
+      "commit": "a2c2fccfd65f89a4bb874b8bf5e1bd2c737856b1",
+      "sha256": "9c8c5ccec389c50bd2858d67d7de29560dc2b9e7304017f70e6bc81cdf6cfc41"
+    },
+    "morsehgp3D_v12/src/catalogue/traversal_driver.hpp": {
+      "commit": "a2c2fccfd65f89a4bb874b8bf5e1bd2c737856b1",
+      "sha256": "971c47dfe40394398d1dc42fb5c14b47031940b9db031be4dc500daa46f5eae9"
+    }
+  },
+  "checks": {
+    "patch_applies_and_matches": true,
+    "native_executions": 0,
+    "payload_reads": 0
+  },
+  "paris": [
+    {
+      "name": "ign_paris_0651_6863_sans_sol",
+      "sites": 9111422,
+      "used_end_C": 26819742820,
+      "peak_during_C": 99987683104,
+      "ratio_peak_to_usage": 3.728137282115817
+    },
+    {
+      "name": "ign_paris_0651_6863",
+      "sites": 14551520,
+      "used_end_C": 38327850820,
+      "peak_during_C": 147151303928,
+      "ratio_peak_to_usage": 3.8392787693489567
+    }
+  ],
+  "conditional_arithmetic": {
+    "replace_only_C_by_0_6_to_0_7_s_per_million": [
+      80.31143625700001,
+      81.76658825700001
+    ],
+    "then_divide_G_T_only_by_3": [
+      42.94187168900001,
+      44.39702368900001
+    ],
+    "target_2_s_per_million": 29.10304,
+    "scope": "algebraic substitution only, no speedup or scaling inference"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "captured_utc": "2026-10-08T06:13:12.601754+00:00",
+  "session": "L2",
+  "source_git": "a2c2fccfd65f89a4bb874b8bf5e1bd2c737856b1",
+  "command_index": 0,
+  "schema": "FULL_902_memoire_octets",
+  "reader_sha256": "201a05e79f50921a30ada4682a3af506af5cc9a8983b91e43aece95c3685dbc9",
+  "reader_capture_sha256": "c04d79f8f4337a8e946186b7093bc8dd37f5495dc56c808ecda30c8889953eda",
+  "archive_sha256": "52f1ddedba0bc7ec3341c57402ae10b41e67eb00f5ca48be164483ee4f1f1b2a",
+  "archive_bytes": 13110,
+  "plan_sha256": "1f9e459939a8ab5db995cf1df5a357ddde1b40d75a74f69e1254a6eb80d1ae60",
+  "report_sha256": "c1e55eae1f29059ecea3751f820f8655a3e62a06b699245f6e88e36100b53ed0",
+  "raw_inventory_sha256": "00b5cac66340cf5d6ae6adf5c42b0764ce1c8119f8601293329d248b2718c8f4",
+  "raw_files": 10,
+  "raw_bytes": 2180,
+  "normal_optimized_equal": true,
+  "synthetic_tests_before_admission": true,
+  "native_execution": false,
+  "remote_access": false,
+  "licensed_payload_read": false,
+  "full_digests_present": false,
+  "campaign_qualification_by_this_reader": false,
+  "summary_replay_normal_optimized_equal": true,
+  "summary_replay_exit_codes": [
+    0,
+    0
+  ]
+}

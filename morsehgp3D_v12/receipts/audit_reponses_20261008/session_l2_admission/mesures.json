@@ -1,0 +1,207 @@
+{
+  "bruts_admis": true,
+  "conditions": [],
+  "criteres": {
+    "B1": "non evalue",
+    "B2": "non evalue",
+    "B3": "non evalue",
+    "B4": "non evalue"
+  },
+  "verdict": "non tenu",
+  "empreintes": {},
+  "codes": "declares par le rapport du pilote epingle",
+  "qualification_campagne": false,
+  "processus": 5,
+  "scenes": 5,
+  "succes": 2,
+  "refus": 3,
+  "passes_demandees": 5,
+  "passes_completes": 2,
+  "passes_chaudes": 0,
+  "cpu_null": 0,
+  "rss_null": 0,
+  "cas": [
+    {
+      "nom": "ign_paris_0651_6863_sans_sol",
+      "etiquette": "aris_0651_6863_sans_sol",
+      "fils": 48,
+      "k": 5,
+      "voie": "cpu",
+      "sites": 9111422,
+      "expected": 1,
+      "etat": "ok",
+      "issue": "none",
+      "raison": "",
+      "empreinte": false,
+      "statistiques": {
+        "cpu_derniere_ns": 4020513234000,
+        "derniere_ns": 112865790359,
+        "device_capacity_last_octets": 0,
+        "device_peak_octets": 0,
+        "hote_peak_octets": 99987683104,
+        "max_chaud_ns": null,
+        "mediane_chaude_ns": null,
+        "passes": 1,
+        "pinned_capacity_last_octets": 0,
+        "premiere_ns": 112865790359,
+        "regime_derniere": "froide",
+        "rss_max_octets": 100025561088
+      },
+      "passes_completes": 1,
+      "open_ns": null,
+      "etapes_derniere_ns": {
+        "C": 67681448314,
+        "G": 14903743646,
+        "M": 2115782319,
+        "P": 645019598,
+        "R": 5133212097,
+        "T": 20302690137,
+        "TMVR": 29635574971,
+        "V": 1211398051,
+        "raccord": 2890
+      },
+      "memoire_derniere_octets": {
+        "C": [
+          26819742820,
+          99987683104
+        ],
+        "G": [
+          45246223574,
+          53663206898
+        ],
+        "P": [
+          548608056,
+          548608056
+        ],
+        "TMVR": [
+          66163552034,
+          70033924870
+        ],
+        "raccord": [
+          45246223574,
+          45246223574
+        ]
+      },
+      "hors_mur_derniere_ns": {
+        "empreinte": 0,
+        "validation": 20882962901,
+        "liberation": 2000671344
+      }
+    },
+    {
+      "nom": "ign_paris_0651_6863",
+      "etiquette": "ign_paris_0651_6863",
+      "fils": 48,
+      "k": 5,
+      "voie": "cpu",
+      "sites": 14551520,
+      "expected": 1,
+      "etat": "ok",
+      "issue": "none",
+      "raison": "",
+      "empreinte": false,
+      "statistiques": {
+        "cpu_derniere_ns": 5674656369000,
+        "derniere_ns": 165789026728,
+        "device_capacity_last_octets": 0,
+        "device_peak_octets": 0,
+        "hote_peak_octets": 147151303928,
+        "max_chaud_ns": null,
+        "mediane_chaude_ns": null,
+        "passes": 1,
+        "pinned_capacity_last_octets": 0,
+        "premiere_ns": 165789026728,
+        "regime_derniere": "froide",
+        "rss_max_octets": 148233908224
+      },
+      "passes_completes": 1,
+      "open_ns": null,
+      "etapes_derniere_ns": {
+        "C": 94208502471,
+        "G": 20971437969,
+        "M": 3347101656,
+        "P": 1031903874,
+        "R": 7889083493,
+        "T": 35082908883,
+        "TMVR": 49577178674,
+        "V": 1879161693,
+        "raccord": 2700
+      },
+      "memoire_derniere_octets": {
+        "C": [
+          38327850820,
+          147151303928
+        ],
+        "G": [
+          66004695848,
+          78555660980
+        ],
+        "P": [
+          866001248,
+          873091208
+        ],
+        "TMVR": [
+          97886185644,
+          103764966640
+        ],
+        "raccord": [
+          66004695848,
+          66004695848
+        ]
+      },
+      "hors_mur_derniere_ns": {
+        "empreinte": 0,
+        "validation": 38970474723,
+        "liberation": 3046016603
+      }
+    },
+    {
+      "nom": "eth3d_courtyard_scan1",
+      "etiquette": "eth3d_courtyard_scan1",
+      "fils": 48,
+      "k": 5,
+      "voie": "cpu",
+      "sites": 16828368,
+      "expected": 1,
+      "etat": "refus",
+      "issue": "wide_leaf",
+      "raison": "unsupported_degeneracy/wide_leaf",
+      "empreinte": false,
+      "statistiques": null,
+      "passes_completes": 0,
+      "open_ns": null
+    },
+    {
+      "nom": "ign_lyon_0842_6521_sans_sol",
+      "etiquette": "lyon_0842_6521_sans_sol",
+      "fils": 48,
+      "k": 5,
+      "voie": "cpu",
+      "sites": 24016862,
+      "expected": 1,
+      "etat": "refus",
+      "issue": "memory_budget",
+      "raison": "resource_exhausted/memory_budget",
+      "empreinte": false,
+      "statistiques": null,
+      "passes_completes": 0,
+      "open_ns": null
+    },
+    {
+      "nom": "ign_lyon_0842_6521",
+      "etiquette": "ign_lyon_0842_6521",
+      "fils": 48,
+      "k": 5,
+      "voie": "cpu",
+      "sites": 32412887,
+      "expected": 1,
+      "etat": "refus",
+      "issue": "memory_budget",
+      "raison": "resource_exhausted/memory_budget",
+      "empreinte": false,
+      "statistiques": null,
+      "passes_completes": 0,
+      "open_ns": null
+    }
+  ]
+}

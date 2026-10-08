@@ -1,0 +1,94 @@
+{
+  "schema": "audit_sha256_voies_v1",
+  "commit": "3d1d172db8789539b605b12c68bb5de0b34eb31f",
+  "captured_start_utc": "2026-10-08T06:11:16.303806+00:00",
+  "sources": {
+    "src/io/io.hpp": "452917c7aa7a54244502934bb6c06f6ae65064232714b99356748ddaabc5660f",
+    "src/io/sha256.cpp": "872eb3624fd933cd26ed7d7b82311a22021f216b35f7fcd1629c224b607c0f73",
+    "tests/io/sha256_test.cpp": "34023952a38ef9591cd014304a46ce9989deda75d55b969a813e1db3f7d6ec89",
+    "tests/io/tests.cmake": "63f0a32f700a8b46aece950aacabaf763edcbf7433808ca10bed32c285ee7225",
+    "tests/mutants/io.json": "1ee29fbfe68ddc61991da08eb2d694d24ce777a25174690db46a5e92eb7d1abe",
+    "bench/full_probe.cpp": "201119a78a52ccbe5c8e2ce128a165e9b3774800d55ed8a0935c91e587858d61",
+    "tests/io/sha256_oracle.py": "05b7765a97ccd120427caef578cf9eed2b3f365968cb6c4b2bd4045511ab12c2",
+    "tests/support/test.hpp": "bc5b8c3a46e38678721192eb5a2212b9a0fe8a3fdd9cf4f45d6ac58d969ce722"
+  },
+  "logs": {
+    "last_test": {
+      "sha256": "4837dd156c3000cff3fa5cf7274b3a2f0d79334f2d8e048b9cbcb8e395722d19",
+      "bytes": 803219
+    },
+    "ctest_fast": {
+      "sha256": "d501aba6f4f31cd397c91ac3dfcc154aaca77a2876bc5281fa466a00b408f184",
+      "bytes": 115245
+    },
+    "cmake_cache": {
+      "sha256": "2c8a70f226d9626a3bf5a6f0a758bd119f9b77b0e3d4b9275c6b88ab4b5e4521",
+      "bytes": 17189
+    }
+  },
+  "gates": {
+    "mhgp12_io_unit_sha256": {
+      "output": "test sha256 controles=27 echecs=0 plancher=27\nmhgp12_test_ok tests=1 controles=27\nrun_expect_verdict conforme",
+      "passed": true,
+      "start": "Oct 08 05:46 UTC",
+      "block_sha256": "a14ba6c562f8623eb0b49ce7d5b5336e528b3cc93a22a6fd8ebf95a350e5f4a4"
+    },
+    "mhgp12_io_unit_sha256_voies": {
+      "output": "sha256_voies : voie materielle presente\ntest sha256_voies controles=136 echecs=0 plancher=136\nmhgp12_test_ok tests=1 controles=136\nrun_expect_verdict conforme",
+      "passed": true,
+      "start": "Oct 08 05:46 UTC",
+      "block_sha256": "0997ee28be85b04c40ad77446e0ceebebc1c08b5a9ffc22db935630680ec19a9"
+    },
+    "mhgp12_io_sha256": {
+      "output": "io_sha256 comparaisons=1242\nmhgp12_io_sha256_ok controles=1244\nrun_expect_verdict conforme",
+      "passed": true,
+      "start": "Oct 08 05:45 UTC",
+      "block_sha256": "803a5d24723ad4cb189fbfb67705ff3a66b5398da8c4de224f87c0e8bef3c40e"
+    },
+    "mhgp12_io_sha256_opt": {
+      "output": "io_sha256 comparaisons=1242\nmhgp12_io_sha256_ok controles=1244\nrun_expect_verdict conforme",
+      "passed": true,
+      "start": "Oct 08 05:46 UTC",
+      "block_sha256": "f0268d0151637f666d99170ea640013fe0b5f79055f402c05749db58b7cbae48"
+    }
+  },
+  "fast_counts": {
+    "passed": 680,
+    "skipped": 1,
+    "failed": 0
+  },
+  "cache": {
+    "CMAKE_BUILD_TYPE": "Release",
+    "CMAKE_CXX_COMPILER": "/usr/bin/c++",
+    "MHGP12_COORD_BITS": "21",
+    "MHGP12_ENABLE_CUDA": "OFF",
+    "source_is_main_v12": true
+  },
+  "mutants": [
+    {
+      "id": "sha_materiel_masque",
+      "gate": "mhgp12_io_unit_sha256",
+      "needle_count": 1
+    },
+    {
+      "id": "sha_materiel_sans_report",
+      "gate": "mhgp12_io_unit_sha256",
+      "needle_count": 1
+    },
+    {
+      "id": "sha_materiel_ordonnancement",
+      "gate": "mhgp12_io_unit_sha256",
+      "needle_count": 1
+    },
+    {
+      "id": "sha_voie_portable_seule",
+      "gate": "mhgp12_io_unit_sha256_voies",
+      "needle_count": 1
+    }
+  ],
+  "mutant_execution_independently_observed": false,
+  "timing_independently_observed": false,
+  "live_sources_equal_git": true,
+  "logs_stable": true,
+  "captured_end_utc": "2026-10-08T06:11:16.375627+00:00"
+}

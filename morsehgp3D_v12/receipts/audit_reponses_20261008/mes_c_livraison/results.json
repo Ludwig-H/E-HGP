@@ -1,0 +1,45 @@
+{
+  "baseline_normal_optimized": [
+    0,
+    0
+  ],
+  "mutants_after_patch": {
+    "archive_admise": {
+      "code": 1,
+      "diagnostic": "usage : archive a chemin admise (code 0)"
+    },
+    "c1_seuil": {
+      "code": 1,
+      "diagnostic": "criteres : {'C1': {'detail': 'cout fixe 1.000 ms', 'etat': 'non tenu'}, 'C2': {'detail': '2.000 us par site (limite 3.727)', 'etat': 'tenu'}, 'C3': {'detail': ['cohorte C3 incomplete ou hors configuration'], 'etat': 'non evalue'}}, controles []"
+    },
+    "c2_seuil": {
+      "code": 1,
+      "diagnostic": "criteres : {'C1': {'detail': 'cout fixe 1.000 ms', 'etat': 'tenu'}, 'C2': {'detail': '2.000 us par site (limite 1.465)', 'etat': 'non tenu'}, 'C3': {'detail': ['cohorte C3 incomplete ou hors configuration'], 'etat': 'non evalue'}}, controles []"
+    },
+    "c3_refus_ignores": {
+      "code": 1,
+      "diagnostic": "cohorte refus : tenu au lieu de non tenu"
+    },
+    "chaud_avec_froid": {
+      "code": 1,
+      "diagnostic": "droites : code 0, droites {'reel': {'fixe_ns': 3500000.0, 'nuages': 3, 'par_site_ns': 1999.9999999999995}, 'uniform': {'fixe_ns': 7500000.0, 'nuages': 2, 'par_site_ns': 9000.0}}\ncriteres : {'C1': {'detail': 'cout fixe 3.500 ms', 'etat': 'non tenu'}, 'C2': {'detail': '2.000 us par site (limite 3.727)', 'etat': 'tenu'}, 'C3': {'detail': ['cohorte C3 incomplete ou hors configuration'], 'etat': 'non evalue'}}, controles []"
+    },
+    "difficile_dans_session": {
+      "code": 1,
+      "diagnostic": "droites : code 0, droites {'lattice': None, 'line': None, 'reel': {'fixe_ns': 1000000.0, 'nuages': 3, 'par_site_ns': 2000.0}, 'sphere': None, 'uniform': {'fixe_ns': 5000000.0, 'nuages': 2, 'par_site_ns': 9000.0}}"
+    },
+    "droite_melangee": {
+      "code": 1,
+      "diagnostic": "droites : code 0, droites {'reel': {'fixe_ns': 5040270.848182466, 'nuages': 5, 'par_site_ns': 1134.3549536707055}}\ncriteres : {'C1': {'detail': 'cout fixe 5.040 ms', 'etat': 'non tenu'}, 'C2': {'detail': '1.134 us par site (limite 3.727)', 'etat': 'tenu'}, 'C3': {'detail': ['cohorte C3 incomplete ou hors configuration'], 'etat': 'non evalue'}}, controles []"
+    },
+    "empreinte_non_controlee": {
+      "code": 1,
+      "diagnostic": "empreintes : controles ['K5 objet_a : empreintes differentes entre voies ou fils', 'K5 objet_b : empreintes differentes entre voies ou fils', 'K5 objet_c : empreintes differentes entre voies ou fils', 'K5 uni_1 : empreintes differentes entre voies ou fils', 'K5 uni_2 : empreintes differentes entre voies ou fils', 'K5 lat_1 : empreintes differentes entre voies ou fils', 'K5 sph_1 : empreintes differentes entre voies ou fils', 'K5 lin_1 : empreintes differentes entre voies ou fils']"
+    }
+  },
+  "native_execution": false,
+  "proposed_normal_optimized": [
+    0,
+    0
+  ]
+}

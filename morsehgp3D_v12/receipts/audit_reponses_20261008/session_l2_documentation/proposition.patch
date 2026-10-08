@@ -1,0 +1,52 @@
+--- a/morsehgp3D_v12/receipts/g4_mesb2_20261008/README.md
++++ b/morsehgp3D_v12/receipts/g4_mesb2_20261008/README.md
+@@ -14,8 +14,10 @@
+ ```
+ 
+-La voie appareil refuse dès 5 M de sites faute de mémoire de la carte ([sessions L1](../g4_mesb1r_20261008/README.md)).
++Les [sessions L1](../g4_mesb1r_20261008/README.md) ont enregistré des refus de mémoire sur certaines prises appareil
++à partir de 5 M de sites ; ce n’est pas un seuil universel en fonction du nombre de sites.
+ Cette session joue donc les grandes captations entières sur la **voie CPU**, une passe chacune, avec un budget de
+ l'hôte de 160 Gio. Elle mesure G, T, M, V, R et la mémoire de l'hôte au-delà de 10 M de sites. Les critères B1 à B4
+-portent sur la voie appareil : ils sont « non évalués » ici.
++portent sur la voie appareil : ils sont « non évalués » ici. Les durées entre parenthèses des refus ci-dessous
++sont celles des processus ; aucune ligne de mur FULL n’est émise pour ces refus.
+ 
+ | Scène entière | sites | issue | mur | s par million | CPU·s | hôte (budget, pic) |
+@@ -41,13 +43,19 @@
+ 
+ 1. **La tour passe 14,6 M de sites réels en une passe**, sans refus ni échec, avec 137 Gio sur l'hôte. Le pic est celui
+-   de la construction du catalogue CPU (10 à 11 Ko par site, 3,7 à 3,8 fois sa taille finale) ; la tour complète occupe
+-   6,7 à 7,3 Ko par site. Les refus de Lyon (24 et 32 M) viennent de ce pic.
++   du budget pendant la construction du catalogue CPU sur les deux cas Paris (10 à 11 Ko par site). Le rapport
++   pic / usage du budget en fin de C vaut 3,73 et 3,84 ; cet usage inclut aussi les entrées, le nuage et l’index,
++   ce n’est pas la taille isolée du catalogue. La tour complète occupe 6,7 à 7,3 Ko par site. Lyon (24 et 32 M)
++   refuse le budget hôte, mais ses lignes `exit` seules ne localisent ni l’étage fautif ni son pic : l’attribution
++   au catalogue reste une hypothèse, à instrumenter séparément.
+ 2. **Au-delà du catalogue**, à 14,6 M de sites : G 21 s (1,4 µs par site), T 35 s (2,4 µs par site, contre 0,8 vers
+-   40 000 sites), R 7,9 s. Avec un catalogue sur l'appareil en flux, au coût mesuré en L1 sur l'IGN (0,6 à 0,7 s par
+-   million), cette scène coûterait environ 80 s, soit 5,5 s par million : G et T doivent encore gagner un facteur 3
+-   pour l'objectif de 2 s par million.
+-3. **ETH3D courtyard refuse `wide_leaf`** : près de la station du scanner, la densité sous-millimétrique met plus de 256
+-   sites dans une feuille. Ce n'est donc pas seulement une affaire de nuages synthétiques dégénérés : la voie large
+-   (T1-c, `CST-0237`) est nécessaire pour des captations réelles telles quelles.
++   40 000 sites sur d’autres entrées), R 7,9 s. Remplacer seulement C, dans un modèle comptable, par le coût
++   de 0,6 à 0,7 s par million observé sur d’autres scènes IGN de L1 donnerait 80,31 à 81,77 s. Ce calcul ne mesure
++   ni un catalogue en flux ni son effet sur cette scène. Même dans cette hypothèse, diviser seulement G et T
++   par trois laisserait 42,94 à 44,40 s, au-dessus de 29,10 s (2 s par million). Aucune loi de croissance ne
++   découle de ces comparaisons entre entrées différentes.
++3. **ETH3D courtyard refuse `wide_leaf`** sur cette entrée réelle quantifiée u21 de 16,8 M de sites : le code
++   signale une feuille dépassant la capacité 256. Le journal ne publie ni sa position, ni son effectif exact,
++   ni une mesure de densité ; la proximité du scanner n’est pas établie ici. La voie large (T1-c, `CST-0237`)
++   reste nécessaire pour traiter cette entrée, au-delà des seuls témoins synthétiques.
+ 4. La validation hors du mur coûte 21 à 39 s ; l'empreinte n'est pas calculée au-delà de 1,6 M de sites.
+ 
+--- a/morsehgp3D_v12/docs/PLAN.md
++++ b/morsehgp3D_v12/docs/PLAN.md
+@@ -48,5 +48,5 @@
+ | `MES-S` | étendues locales (feuilles, supports, parties de descente) et part de chaque voie numérique ([`CONTRAT_NUMERIQUE.md`](CONTRAT_NUMERIQUE.md) § 8) | publié ; fixe les paliers |
+ | `MES-E` | v11 gelée sur des découpes de 1, 2, 4 et 8 millions de sites d'une scène réelle, K5 puis K10 : volumes par site, pic mémoire, temps, point de rupture | publié ; fixe les objectifs du régime (b) et la taille des lots. **Mesuré sur G4 le 7 octobre** ([session E](../receipts/g4_t2e_20261007/README.md)) : à K5, 16 à 25 µs et 7 à 17 Ko résidents par site (8 M en 155 à 203 s, 54 à 75 Gio) ; à K10, 28 à 43 Ko par site, rupture vers 4 M ; étage forêt superlinéaire sur ETH3D |
+-| `MES-B` | la tour FULL de la v12 sur des scènes LiDAR réelles **entières** (captations telles quelles), K5 voie appareil, bras CPU, K10 : mur, étages, CPU·s, pics de mémoire de l'hôte et de l'appareil, refus, exposant sur les séries emboîtées de Boreas | préparé le 8 octobre ([pilote](../microbancs/mes_b_scenes/README.md), verdicts B1 à B4 écrits d'avance). **Mesuré sur G4** ([sessions L1 et L1 rejouée](../receipts/g4_mesb1r_20261008/README.md)) : non tenu ; neuf scènes entières calculées de 0,15 à 6,7 M de sites, 3,2 à 12,2 s par million à K5 ; refus de l'appareil dès 5 M de sites (8 à 25 Ko d'appareil par site) et à K10 dès 1,5 M ; T superlinéaire (3,2 µs par site à 6,2 M) ; le catalogue en flux (§ 4.6 d'ARCHITECTURE) est la condition du régime (b). [Session L2](../receipts/g4_mesb2_20261008/README.md), voie CPU : IGN Paris entier (14,6 M de sites) en 166 s et 137 Gio (G 21 s, T 35 s) ; Lyon (24 et 32 M) refusé par le pic du catalogue CPU (10 à 11 Ko par site) ; ETH3D courtyard (16,8 M) refusé `wide_leaf` : la voie large T1-c sert aussi le réel |
++| `MES-B` | la tour FULL de la v12 sur des scènes LiDAR réelles **entières** (captations telles quelles), K5 voie appareil, bras CPU, K10 : mur, étages, CPU·s, pics de mémoire de l'hôte et de l'appareil, refus, exposant sur les séries emboîtées de Boreas | préparé le 8 octobre ([pilote](../microbancs/mes_b_scenes/README.md), verdicts B1 à B4 écrits d'avance). **Mesuré sur G4** ([sessions L1 et L1 rejouée](../receipts/g4_mesb1r_20261008/README.md)) : non tenu ; neuf scènes entières calculées de 0,15 à 6,7 M de sites, 3,2 à 12,2 s par million à K5 ; refus de l'appareil dès 5 M de sites (8 à 25 Ko d'appareil par site) et à K10 dès 1,5 M ; T superlinéaire (3,2 µs par site à 6,2 M) ; le catalogue en flux (§ 4.6 d'ARCHITECTURE) est la condition du régime (b). [Session L2](../receipts/g4_mesb2_20261008/README.md), voie CPU : IGN Paris entier (14,6 M de sites) en 166 s et 137 Gio (G 21 s, T 35 s) ; deux succès CPU froids à Paris ; Lyon (24 et 32 M) refuse le budget hôte sans étage publié (les 10 à 11 Ko par site du pic C concernent Paris) ; ETH3D courtyard (16,8 M, u21) refuse `wide_leaf` : cette entrée réelle requiert aussi la voie large T1-c |
+ | `MES-P` | v11 gelée sur 100 à 10 000 sites, voie CPU et voie GPU, à chaud : coût fixe et coût par site | publié ; fixe le seuil de la voie CPU des petits nuages. **Mesuré sur G4 le 7 octobre** ([session G](../receipts/g4_t0g_20261007/README.md), 48 fils) : morceaux de trames réels, K5 6,9 ms + 7,4 µs par site, K10 5,5 ms + 42 µs par site ; la v11 s'effondre sur le réseau entier (étage forêt 92 à 99 %, 8,4 s à 10 000 sites à K5, prise expirée à K10) et refuse la sphère dès 3 000 sites (`wide_leaf`) ; régime à un fil non mesuré |
+ 

@@ -1,0 +1,172 @@
+{
+  "source_commit": "a2c2fccfd65f89a4bb874b8bf5e1bd2c737856b1",
+  "local_files": {
+    "receipt.json": {
+      "bytes": 30149,
+      "sha256": "98cee62ca06780a5cdca86a3351bb61fdc8e91389fc4303da783ebdd8d198fb5"
+    },
+    "package/plan.json": {
+      "bytes": 1304,
+      "sha256": "1f9e459939a8ab5db995cf1df5a357ddde1b40d75a74f69e1254a6eb80d1ae60"
+    },
+    "package/plan.sh": {
+      "bytes": 621,
+      "sha256": "eccb62f9a29106e868d1ccda6e3044a4ad4948fb8890c7b1be513fe8fe948efc"
+    },
+    "package/package.tar.gz": {
+      "bytes": 5096260,
+      "sha256": "e81527e1a13437ff1b74d73aae218100ba97f994593a76b4ba5a69f842daf927"
+    },
+    "results/results.tar.gz": {
+      "bytes": 13110,
+      "sha256": "52f1ddedba0bc7ec3341c57402ae10b41e67eb00f5ca48be164483ee4f1f1b2a"
+    }
+  },
+  "closure": {
+    "status": "completed",
+    "worker_exit_code": 0,
+    "results_verified": true,
+    "results_sha256": "52f1ddedba0bc7ec3341c57402ae10b41e67eb00f5ca48be164483ee4f1f1b2a",
+    "retrieval": "downloaded",
+    "closure": "stopped",
+    "targeted_shutdown_certified": true,
+    "stop_exit_code": 0,
+    "stop_attempts": 1,
+    "reserve_released": true,
+    "guest_guard_intact": true,
+    "errors_count": 0,
+    "done": 0,
+    "before_status": "RUNNING",
+    "after_status": "TERMINATED"
+  },
+  "manifest_count": 46,
+  "commands": [
+    {
+      "exit_code": "0",
+      "index": "0",
+      "max_rss_kb": "144759676",
+      "name": "mes_b",
+      "status": "ok",
+      "timeout_seconds": "1950",
+      "wall_seconds": "747.634"
+    }
+  ],
+  "archive_files": {
+    "results/MANIFEST.sha256": {
+      "bytes": 4427,
+      "sha256": "91253bd2c9eddbb43b10a0af5e49195cf338b6da4ab578390ee46e5678287efd"
+    },
+    "results/cmd/000_mes_b/files/b/rapport_b.json": {
+      "bytes": 7940,
+      "sha256": "c1e55eae1f29059ecea3751f820f8655a3e62a06b699245f6e88e36100b53ed0"
+    },
+    "results/plan.sh": {
+      "bytes": 621,
+      "sha256": "eccb62f9a29106e868d1ccda6e3044a4ad4948fb8890c7b1be513fe8fe948efc"
+    },
+    "results/worker.txt": {
+      "bytes": 697,
+      "sha256": "4beed1c5d320cbf80c59f0e7ed68461029ba13175db2597fbfb549a2102bd764"
+    }
+  },
+  "report_provenance": {
+    "manifeste_sha256": "fa7d1544fc8e6a88ab8d51e2f4de596f5dcbd2d6f6defebeaece00f6af20883f",
+    "pilote_sha256": "e10a9cd4e1b0043bfbfd463ea370350a2e534411f4b67a35f3f89d0c80d66681",
+    "sonde_sha256": "c95c1e1e945cf0b66220eaa05db399daa0d2d9242582415fdee5114d63d66cae"
+  },
+  "case_overview": [
+    {
+      "nom": "ign_paris_0651_6863_sans_sol",
+      "etiquette": "aris_0651_6863_sans_sol",
+      "voie": "cpu",
+      "k": 5,
+      "fils": 48,
+      "code": 0,
+      "etat": "ok",
+      "sites": 9111422,
+      "raison": "",
+      "complete_passes": 1,
+      "hot_passes": 0
+    },
+    {
+      "nom": "ign_paris_0651_6863",
+      "etiquette": "ign_paris_0651_6863",
+      "voie": "cpu",
+      "k": 5,
+      "fils": 48,
+      "code": 0,
+      "etat": "ok",
+      "sites": 14551520,
+      "raison": "",
+      "complete_passes": 1,
+      "hot_passes": 0
+    },
+    {
+      "nom": "eth3d_courtyard_scan1",
+      "etiquette": "eth3d_courtyard_scan1",
+      "voie": "cpu",
+      "k": 5,
+      "fils": 48,
+      "code": 2,
+      "etat": "refus",
+      "sites": 16828368,
+      "raison": "unsupported_degeneracy/wide_leaf",
+      "complete_passes": 0,
+      "hot_passes": 0
+    },
+    {
+      "nom": "ign_lyon_0842_6521_sans_sol",
+      "etiquette": "lyon_0842_6521_sans_sol",
+      "voie": "cpu",
+      "k": 5,
+      "fils": 48,
+      "code": 2,
+      "etat": "refus",
+      "sites": 24016862,
+      "raison": "resource_exhausted/memory_budget",
+      "complete_passes": 0,
+      "hot_passes": 0
+    },
+    {
+      "nom": "ign_lyon_0842_6521",
+      "etiquette": "ign_lyon_0842_6521",
+      "voie": "cpu",
+      "k": 5,
+      "fils": 48,
+      "code": 2,
+      "etat": "refus",
+      "sites": 32412887,
+      "raison": "resource_exhausted/memory_budget",
+      "complete_passes": 0,
+      "hot_passes": 0
+    }
+  ],
+  "scope": {
+    "cases": 5,
+    "ok": 2,
+    "refused": 3,
+    "full_passes": 2,
+    "hot_passes": 0,
+    "gpu_runs": 0,
+    "full_digests": 0,
+    "verdict": "non tenu"
+  },
+  "source_files": {
+    "morsehgp3D_v12/bench/full_probe.cpp": {
+      "bytes": 18119,
+      "sha256": "201119a78a52ccbe5c8e2ce128a165e9b3774800d55ed8a0935c91e587858d61"
+    },
+    "morsehgp3D_v12/microbancs/outils/lecteur_full.py": {
+      "bytes": 9114,
+      "sha256": "3594c5d36ed831b39d679b504234505d5b4b0a5b08e85cc55a21c9af74c621a4"
+    },
+    "morsehgp3D_v12/microbancs/mes_b_scenes/pilote_b.py": {
+      "bytes": 25997,
+      "sha256": "e10a9cd4e1b0043bfbfd463ea370350a2e534411f4b67a35f3f89d0c80d66681"
+    }
+  },
+  "reused_reader": {
+    "bytes": 4311,
+    "sha256": "8a80b809106399443ab6dce697e62c083e59241f6a6d1908b36bf087e755d30b"
+  }
+}

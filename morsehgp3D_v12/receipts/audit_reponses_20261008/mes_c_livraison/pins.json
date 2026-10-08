@@ -1,0 +1,14 @@
+{
+  "commit": "83ed7620d",
+  "sources": {
+    "microbancs/mes_c_petits/pilote_c.py": "6309ac7ee8344f966e82bd05af1966e5c23b92515b289a653574af2f0f988899",
+    "microbancs/mes_c_petits/test_pilote_c.py": "91cf72876cefd038481f8fdd58eca15b2657c432a2cf3fb693ee4992afcb7f74",
+    "microbancs/mes_c_petits/mutants_pilote_c.py": "39d5a302cfd964ec94d9f2381ae2030c05b9b009198756e321c5ac8898b08960",
+    "microbancs/outils/banc_full.py": "7d7f0661b49adf094df51d41268470571d47c51fc7795bb5b34c791a4a539904",
+    "microbancs/outils/lecteur_full.py": "3594c5d36ed831b39d679b504234505d5b4b0a5b08e85cc55a21c9af74c621a4"
+  },
+  "postimages": {
+    "morsehgp3D_v12/microbancs/mes_c_petits/pilote_c.py": "da025dcd904da7960e3ed340aebd2aeb0ff8b9befb85e79392c8f5e73706ebe0",
+    "morsehgp3D_v12/microbancs/mes_c_petits/test_pilote_c.py": "d41ae0b2e98432d4b8e4087f141b880e14d783556ee57e6457c945637970296d"
+  }
+}
