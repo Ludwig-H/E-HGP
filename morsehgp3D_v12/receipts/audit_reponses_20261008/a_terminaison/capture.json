@@ -1,0 +1,15 @@
+{
+  "pin": "86d7e39d834cae86768d49a23d83bf53454ec2a3",
+  "captured_utc": "2026-10-08T08:40:19.767925+00:00",
+  "sources": {
+    "src/tower/pipeline_run.cpp": "f3d260ae51159c5c039082f8b1442434123bdb59114d4364c4d0a4e7ef8f09a6",
+    "src/tower/pipeline.hpp": "22247870f74e66814b9339c7977df58ff5510592803ed4995f38d02531ede99f",
+    "src/tower/pipeline.cpp": "44e83374113a860519744f4a34dab854e32e50d50febc0e0f905a8aa7f8e437b",
+    "src/sched/pool.cpp": "3d3985debc8db6c4513c9ed2d8e87cd1ad1ec02a231a7776595da05a8f3b4368",
+    "src/sched/sched.hpp": "87f723febab0f12652ff01be6ed87128ceefb07cbe0d6e1cc0334d7666185cbf"
+  },
+  "patch_sha256": "1eb06b86bf655a891f7bf74e01d46f11902549f56d73f9b1af46d1da6f0836a9",
+  "proposed_sha256": "f7e077d847d060c0830591496cf8ded03b8e534f0533420e42fb21d1862377bc",
+  "scope": "lecture C++ + modele SC abstrait, aucune execution native",
+  "independent_review": "latest_perf_e confirme le cycle et le raisonnement du correctif en lecture seulement"
+}

@@ -4,6 +4,11 @@
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
 
+**Priorité : [CST-0241, terminaison de A](../receipts/audit_reponses_20261008/a_terminaison/README.md).**
+Deux fils peuvent se réannoncer indéfiniment après tout travail fini : cycle SC équitable de 16 transitions.
+Correctif minimal proposé (`last = fetch_sub(...) == 1`) ; six modèles bornés sans cycle après correction.
+Aucun incident natif observé ni lien avec MES-M0 ; intégration et porte native à faire.
+
 **Derniers temps G4 : A adopté, contrat FULL 100 ms non tenu.**
 [Campagne admise](../receipts/audit_reponses_20261008/session_t2da_admission/README.md), u21/W48,
 ng00–02 : 39 885 / 35 551 / 45 845 sites. FULL GPU K5 ; cinq processus × neuf chaudes par bras/trame :
@@ -55,12 +60,10 @@ seuils 2 ms et 3,727 µs/site. Huit refus quasi-sphères 3k/10k aux deux K/voies
 Comparaison MES-C descriptive : 882 empreintes communes égales ; C et pool changés ensemble,
 aucun gain isolé du pool. W1 absent du plan C2 ; ses temps antérieurs restent dans le reçu MES-C.
 
-**Massifs : dernières prises FULL K5.** [L1r](../receipts/audit_reponses_20261008/session_l1r_admission/README.md),
-une chaude : Boreas n10 sans sol, 1,51 M sites, **GPU 10,025 s / CPU 22,344 s** ;
-Marseille sans sol 2,47 M : GPU 10,955 s ; Scion sans sol 3,44 M : 41,951 s ; Meadow 6,18 M : 35,325 s.
-10 succès/8 refus mémoire, B1/B2/B4 non tenus, B3 non évalué. [L2 CPU froide](../receipts/audit_reponses_20261008/session_l2_admission/README.md) :
-Paris sans sol 9,11 M **112,866 s**, brut 14,55 M **165,789 s** ; ETH3D 16,83 M `wide_leaf`, Lyon 24,02/32,41 M `memory_budget`.
-Aucun chaud/GPU/K10/digest en L2. Aucun plafond universel en sites ni gain causal L1/L1r.
+**Massifs, prises antérieures à A :** [L1r](../receipts/audit_reponses_20261008/session_l1r_admission/README.md),
+Boreas sans sol 1,51M : GPU **10,025s** / CPU **22,344s**, une chaude. Dix succès/huit refus mémoire ; critères non tenus/non évalués.
+[L2 CPU froide](../receipts/audit_reponses_20261008/session_l2_admission/README.md) : Paris9,11M **112,866s**,14,55M **165,789s** ;
+ETH3D `wide_leaf`, Lyon `memory_budget`. Sans chaud/GPU/K10/digest L2 ; aucun plafond universel en sites.
 
 **Corrections et suite immédiate.** [Bascule A contre-vérifiée](../receipts/audit_reponses_20261008/t2d_a_bascule_cloture/README.md) :
 fenêtre réelle des feuilles et cohorte du juge intégrées exactement ; nominal accepté, trois contre-exemples refusés.
@@ -68,10 +71,9 @@ Patch fourni pour demander `--sequentiel` sur le bras après du pilote A, néces
 [Lecteur recouvert](../receipts/audit_reponses_20261008/lf_recouvert_gardes/README.md) : neuf corruptions d'horloges encore admises en86d ;
 correctif proposé, 61 journaux/850 passes A préservés, quatre mutants causaux. Pas d'ordre imposé entre V et R.
 
-**B : intégré, campagne G4 en cours.** [Quatre résidus FULL corrigés](../receipts/audit_reponses_20261008/t2db_raccord/README.md) ;
+**B : intégré, campagne G4 en contrelecture.** [Quatre résidus FULL corrigés](../receipts/audit_reponses_20261008/t2db_raccord/README.md) ;
 [raccord B/A](../receipts/audit_reponses_20261008/t2d_b_raccord_a/README.md) favorable sur emprunts, espaces privés et admission ;
 aucun temps déduit. [Protocole effectif](../receipts/audit_reponses_20261008/session_b_protocole/README.md) : bras reconstruits depuis902,
-G isolé et FULL séquentiel informatif ; aucun transfert au FULL recouvert actuel. À coûts A inchangés, enlever toute la queue
-laisse 23/37 médianes >100ms : scénario, pas borne globale. B ne traite pas directement le catalogue CPU dominant.
+G isolé et FULL séquentiel informatif ; aucun transfert au FULL recouvert actuel. B ne traite pas directement le catalogue CPU dominant.
 [Extension de feuille](../receipts/audit_reponses_20261008/feuille_large_proposition/README.md) proposée ; compteurs et coût combinatoire ouverts.
 Dépendances A, pool, C et autres propositions CPU/S*/T/K1/R : registre. Audit sources/Python, aucun moteur ni GCP lancé.
