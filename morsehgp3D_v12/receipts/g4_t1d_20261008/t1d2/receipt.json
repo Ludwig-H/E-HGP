@@ -1,0 +1,1788 @@
+{
+ "backend": "reference_cpu",
+ "closing_generation": "2026-10-08T07:35:10.568-07:00",
+ "closure": "stopped",
+ "commands": [
+  {
+   "exit_code": "0",
+   "index": "0",
+   "max_rss_kb": "2401836",
+   "name": "t1d_flux",
+   "status": "ok",
+   "timeout_seconds": "1800",
+   "wall_seconds": "348.640"
+  }
+ ],
+ "commit": "c31beaf2200d1a7f8eed09b0c1c7c0f6af3b74f3",
+ "comparability": "Versions effectives relevees dans env/vm_facts.txt et la provenance des builds ; aucune version de l'ancienne VM n'est supposee sur une nouvelle cible. Python nu sauf plan python_packages = pinned. Temps et versions NON comparables entre VM et codespace.",
+ "console_write_failures": 0,
+ "data_files": [
+  {
+   "name": "lidar_ng00.ids.u32le",
+   "sha256": "c73a41965f6f2e1042b5f3ba876d12ae0811b7f24aa73c886aa07830974e33c6",
+   "size": 159540
+  },
+  {
+   "name": "lidar_ng00.u32le",
+   "sha256": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf",
+   "size": 478620
+  },
+  {
+   "name": "lidar_ng01.ids.u32le",
+   "sha256": "bb699c2511a87618813a32657399539fe90e8f1e4f1187656ac88c03f2fee6a4",
+   "size": 142204
+  },
+  {
+   "name": "lidar_ng01.u32le",
+   "sha256": "ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f",
+   "size": 426612
+  },
+  {
+   "name": "lidar_ng02.ids.u32le",
+   "sha256": "121e76f3ef1fcedb05cb65da9a95bfb84fe4b8305076a7485483fff113d128cc",
+   "size": 183380
+  },
+  {
+   "name": "lidar_ng02.u32le",
+   "sha256": "a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af",
+   "size": 550140
+  },
+  {
+   "name": "uniform_u18_n16000.ids.u32le",
+   "sha256": "5fd0363db4cb908208a445c1b0c80e0a3a1f427d7153593efbf3b0d5abe5657a",
+   "size": 64000
+  },
+  {
+   "name": "uniform_u18_n16000.u32le",
+   "sha256": "184c9d62e4a7d00dd407a96b5e5d0d76ba5e9680516f5dc75461d23eca26d4db",
+   "size": 192000
+  },
+  {
+   "name": "uniform_u18_n32000.ids.u32le",
+   "sha256": "4e29eabcb1c72af6e4569317cd6b367a5bc506a46ac5ef80275ee22dda19b576",
+   "size": 128000
+  },
+  {
+   "name": "uniform_u18_n32000.u32le",
+   "sha256": "08b66f9c6b7ec4142303b9f86e4da1230d175b5391640069828a3a23c15144e9",
+   "size": 384000
+  },
+  {
+   "name": "uniform_u18_n8000.ids.u32le",
+   "sha256": "564d7ad84a134f7cee7cb2c85c8d0b6c82301bd2abccd203979350c384ec014b",
+   "size": 32000
+  },
+  {
+   "name": "uniform_u18_n8000.u32le",
+   "sha256": "038662b2cb241ce2920705f127acc8d5e2eae73d41d15cb35613467e1642049d",
+   "size": 96000
+  },
+  {
+   "name": "v12_src_4171b2653.tar.gz",
+   "sha256": "048a965d526d2cd4468d8cee369885cc056008548767de4353844149ee0e30ee",
+   "size": 13716347
+  }
+ ],
+ "data_manifest_sha256": "172a37197596820697167b8df7c7e67e1f529b20117bbcaaffe423aebb8e8b0c",
+ "data_verified_remote": true,
+ "errors": [],
+ "evidence_grade": "pushed_commit",
+ "gcp_mutation_phase_entered": true,
+ "generation": "2026-10-08T07:35:10.568-07:00",
+ "guest_deadline_epoch": 1791473462,
+ "guest_guard_intact": true,
+ "guest_schedule": {
+  "MODE": "poweroff",
+  "USEC": "1791473462970655"
+ },
+ "guest_shutdown_minutes": 55,
+ "host_commands": [
+  {
+   "argv": [
+    "$HOME/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "os-login",
+    "ssh-keys",
+    "add",
+    "--project=devpod-gpu-exploration",
+    "--key-file=/workspaces/.ehgp-sessions/v12.20261008.t1d2/key.pub",
+    "--ttl=75m",
+    "--format=json",
+    "--quiet"
+   ],
+   "elapsed_seconds": 1.568,
+   "exit_code": 0,
+   "name": "oslogin_add",
+   "pid": 2018844,
+   "started_epoch": 1791470078.173,
+   "timeout_seconds": 120
+  },
+  {
+   "argv": [
+    "/workspaces/.ehgp-sessions/v12.20261008.t1d2/host/start_and_verify.sh",
+    "--yes",
+    "--guest-shutdown-minutes",
+    "55",
+    "--handoff-file",
+    "/workspaces/.ehgp-sessions/v12.20261008.t1d2/host/handoff.json",
+    "--lifecycle-state-file",
+    "/workspaces/.ehgp-sessions/v12.20261008.t1d2/host/lifecycle.txt",
+    "--guard-mark-dir",
+    "/workspaces/.ehgp-sessions/v12.20261008.t1d2/host/guardmarks"
+   ],
+   "elapsed_seconds": 110.217,
+   "exit_code": 0,
+   "name": "guarded_start",
+   "pid": 2018909,
+   "started_epoch": 1791470079.742,
+   "timeout_seconds": 2400
+  },
+  {
+   "argv": [
+    "$HOME/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "instances",
+    "describe",
+    "ehgp-v7-3b1d496aed430749ea7e049f",
+    "--project=devpod-gpu-exploration",
+    "--zone=us-central1-c",
+    "--format=json"
+   ],
+   "elapsed_seconds": 2.586,
+   "exit_code": 0,
+   "name": "recertify_running_1",
+   "pid": 2024992,
+   "started_epoch": 1791470189.964,
+   "timeout_seconds": 90
+  },
+  {
+   "argv": [
+    "$HOME/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "ssh",
+    "ehgp-v7-3b1d496aed430749ea7e049f",
+    "--project=devpod-gpu-exploration",
+    "--zone=us-central1-c",
+    "--quiet",
+    "--ssh-key-file=/workspaces/.ehgp-sessions/v12.20261008.t1d2/key",
+    "--ssh-key-expiration=2026-10-08T15:49:38.677413Z",
+    "--ssh-flag=-n",
+    "--ssh-flag=-o BatchMode=yes",
+    "--ssh-flag=-o ConnectTimeout=15",
+    "--ssh-flag=-o ServerAliveInterval=15",
+    "--ssh-flag=-o ServerAliveCountMax=4",
+    "--command=sudo -n cat /run/systemd/shutdown/scheduled"
+   ],
+   "elapsed_seconds": 5.838,
+   "exit_code": 0,
+   "name": "guest_schedule",
+   "pid": 2025118,
+   "started_epoch": 1791470192.551,
+   "timeout_seconds": 90
+  },
+  {
+   "argv": [
+    "$HOME/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "ssh",
+    "ehgp-v7-3b1d496aed430749ea7e049f",
+    "--project=devpod-gpu-exploration",
+    "--zone=us-central1-c",
+    "--quiet",
+    "--ssh-key-file=/workspaces/.ehgp-sessions/v12.20261008.t1d2/key",
+    "--ssh-key-expiration=2026-10-08T15:49:38.677413Z",
+    "--ssh-flag=-n",
+    "--ssh-flag=-o BatchMode=yes",
+    "--ssh-flag=-o ConnectTimeout=15",
+    "--ssh-flag=-o ServerAliveInterval=15",
+    "--ssh-flag=-o ServerAliveCountMax=4",
+    "--command=umask 077; mkdir -p \"$HOME/ehgp-v12\" && chmod 700 \"$HOME/ehgp-v12\" && for o in \"$HOME\"/ehgp-v12/ehgp-v12.*; do if [ -d \"$o\" ] && [ ! -L \"$o\" ]; then rm -rf \"$o/build\" \"$o/src\" \"$o/data\" \"$o/joblib\" \"$o/pyuser\" \"$o/overflow\" \"$o/package.tar.gz\" \"$o/salvage.tar.gz\"; if [ -f \"$o/results.tar.gz\" ]; then rm -rf \"$o/results\"; fi; fi; done; d=$(mktemp -d \"$HOME/ehgp-v12/ehgp-v12.XXXXXXXXXX\") && mkdir \"$d/data\" && printf \"DIR=%s\\n\" \"$d\" && df -Pk \"$d\" | awk 'NR==2 {print \"AVAIL_KB=\" $4}' && du -sk \"$HOME/ehgp-v12\" | awk '{print \"USED_KB=\" $1}'"
+   ],
+   "elapsed_seconds": 6.936,
+   "exit_code": 0,
+   "name": "remote_mkdir",
+   "pid": 2025507,
+   "started_epoch": 1791470198.391,
+   "timeout_seconds": 90
+  },
+  {
+   "argv": [
+    "$HOME/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "scp",
+    "--project=devpod-gpu-exploration",
+    "--zone=us-central1-c",
+    "--quiet",
+    "--ssh-key-file=/workspaces/.ehgp-sessions/v12.20261008.t1d2/key",
+    "--ssh-key-expiration=2026-10-08T15:49:38.677413Z",
+    "--scp-flag=-o BatchMode=yes",
+    "--scp-flag=-o ConnectTimeout=15",
+    "--scp-flag=-o ServerAliveInterval=15",
+    "--scp-flag=-o ServerAliveCountMax=4",
+    "/workspaces/.ehgp-sessions/v12.20261008.t1d2/package/package.tar.gz",
+    "/workspaces/.ehgp-sessions/v12.20261008.t1d2/package/plan.sh",
+    "/workspaces/.ehgp-sessions/v12.20261008.t1d2/package/plan.json",
+    "ehgp-v7-3b1d496aed430749ea7e049f:$HOME/ehgp-v12/ehgp-v12.cG86f81oug/"
+   ],
+   "elapsed_seconds": 13.809,
+   "exit_code": 0,
+   "name": "upload_package",
+   "pid": 2025917,
+   "started_epoch": 1791470205.332,
+   "timeout_seconds": 127
+  },
+  {
+   "argv": [
+    "$HOME/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "ssh",
+    "ehgp-v7-3b1d496aed430749ea7e049f",
+    "--project=devpod-gpu-exploration",
+    "--zone=us-central1-c",
+    "--quiet",
+    "--ssh-key-file=/workspaces/.ehgp-sessions/v12.20261008.t1d2/key",
+    "--ssh-key-expiration=2026-10-08T15:49:38.677413Z",
+    "--ssh-flag=-n",
+    "--ssh-flag=-o BatchMode=yes",
+    "--ssh-flag=-o ConnectTimeout=15",
+    "--ssh-flag=-o ServerAliveInterval=15",
+    "--ssh-flag=-o ServerAliveCountMax=4",
+    "--command=umask 077; cd $HOME/ehgp-v12/ehgp-v12.cG86f81oug && test \"$(sha256sum package.tar.gz | cut -d \" \" -f 1)\" = ce2e29949125b5d2640704a233e201367faa7ce9f46323bcfdda3090962b29ff && test \"$(sha256sum plan.sh | cut -d \" \" -f 1)\" = 6f36db2f0c1a060d171a487bf55ca0a99b69a0029bc8434f821c67e93a6a703f && test \"$(sha256sum plan.json | cut -d \" \" -f 1)\" = d43b915aae0f86a8997233f7297af535c17c4b122aa7d9b767330807bd5b253d && mkdir -m 700 src && tar --no-same-owner --no-same-permissions -xzf package.tar.gz -C src && test -f src/morsehgp3D_v12/CMakeLists.txt && test -f src/gcp-migration/v12_worker.sh && echo UNPACKED"
+   ],
+   "elapsed_seconds": 6.274,
+   "exit_code": 0,
+   "name": "verify_unpack",
+   "pid": 2026304,
+   "started_epoch": 1791470219.142,
+   "timeout_seconds": 300
+  },
+  {
+   "argv": [
+    "$HOME/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "scp",
+    "--project=devpod-gpu-exploration",
+    "--zone=us-central1-c",
+    "--quiet",
+    "--ssh-key-file=/workspaces/.ehgp-sessions/v12.20261008.t1d2/key",
+    "--ssh-key-expiration=2026-10-08T15:49:38.677413Z",
+    "--scp-flag=-o BatchMode=yes",
+    "--scp-flag=-o ConnectTimeout=15",
+    "--scp-flag=-o ServerAliveInterval=15",
+    "--scp-flag=-o ServerAliveCountMax=4",
+    "/workspaces/E-HGP/build/v12-data-20261007/g4data_t1d/lidar_ng00.ids.u32le",
+    "/workspaces/E-HGP/build/v12-data-20261007/g4data_t1d/lidar_ng00.u32le",
+    "/workspaces/E-HGP/build/v12-data-20261007/g4data_t1d/lidar_ng01.ids.u32le",
+    "/workspaces/E-HGP/build/v12-data-20261007/g4data_t1d/lidar_ng01.u32le",
+    "/workspaces/E-HGP/build/v12-data-20261007/g4data_t1d/lidar_ng02.ids.u32le",
+    "/workspaces/E-HGP/build/v12-data-20261007/g4data_t1d/lidar_ng02.u32le",
+    "/workspaces/E-HGP/build/v12-data-20261007/g4data_t1d/uniform_u18_n16000.ids.u32le",
+    "/workspaces/E-HGP/build/v12-data-20261007/g4data_t1d/uniform_u18_n16000.u32le",
+    "/workspaces/E-HGP/build/v12-data-20261007/g4data_t1d/uniform_u18_n32000.ids.u32le",
+    "/workspaces/E-HGP/build/v12-data-20261007/g4data_t1d/uniform_u18_n32000.u32le",
+    "/workspaces/E-HGP/build/v12-data-20261007/g4data_t1d/uniform_u18_n8000.ids.u32le",
+    "/workspaces/E-HGP/build/v12-data-20261007/g4data_t1d/uniform_u18_n8000.u32le",
+    "/workspaces/E-HGP/build/v12-data-20261007/g4data_t1d/v12_src_4171b2653.tar.gz",
+    "/workspaces/.ehgp-sessions/v12.20261008.t1d2/package/data/SHA256SUMS",
+    "ehgp-v7-3b1d496aed430749ea7e049f:$HOME/ehgp-v12/ehgp-v12.cG86f81oug/data/"
+   ],
+   "elapsed_seconds": 16.304,
+   "exit_code": 0,
+   "name": "upload_data",
+   "pid": 2026554,
+   "started_epoch": 1791470225.417,
+   "timeout_seconds": 127
+  },
+  {
+   "argv": [
+    "$HOME/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "ssh",
+    "ehgp-v7-3b1d496aed430749ea7e049f",
+    "--project=devpod-gpu-exploration",
+    "--zone=us-central1-c",
+    "--quiet",
+    "--ssh-key-file=/workspaces/.ehgp-sessions/v12.20261008.t1d2/key",
+    "--ssh-key-expiration=2026-10-08T15:49:38.677413Z",
+    "--ssh-flag=-n",
+    "--ssh-flag=-o BatchMode=yes",
+    "--ssh-flag=-o ConnectTimeout=15",
+    "--ssh-flag=-o ServerAliveInterval=15",
+    "--ssh-flag=-o ServerAliveCountMax=4",
+    "--command=cd $HOME/ehgp-v12/ehgp-v12.cG86f81oug/data && test \"$(sha256sum SHA256SUMS | cut -d \" \" -f 1)\" = 172a37197596820697167b8df7c7e67e1f529b20117bbcaaffe423aebb8e8b0c && test \"$(ls -A | wc -l)\" = 14 && sha256sum -c --strict --quiet SHA256SUMS && echo DATA_OK"
+   ],
+   "elapsed_seconds": 5.21,
+   "exit_code": 0,
+   "name": "verify_data",
+   "pid": 2027082,
+   "started_epoch": 1791470241.722,
+   "timeout_seconds": 120
+  },
+  {
+   "argv": [
+    "$HOME/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "instances",
+    "describe",
+    "ehgp-v7-3b1d496aed430749ea7e049f",
+    "--project=devpod-gpu-exploration",
+    "--zone=us-central1-c",
+    "--format=json"
+   ],
+   "elapsed_seconds": 2.326,
+   "exit_code": 0,
+   "name": "recertify_before_worker_1",
+   "pid": 2027215,
+   "started_epoch": 1791470246.933,
+   "timeout_seconds": 90
+  },
+  {
+   "argv": [
+    "$HOME/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "ssh",
+    "ehgp-v7-3b1d496aed430749ea7e049f",
+    "--project=devpod-gpu-exploration",
+    "--zone=us-central1-c",
+    "--quiet",
+    "--ssh-key-file=/workspaces/.ehgp-sessions/v12.20261008.t1d2/key",
+    "--ssh-key-expiration=2026-10-08T15:49:38.677413Z",
+    "--ssh-flag=-n",
+    "--ssh-flag=-o BatchMode=yes",
+    "--ssh-flag=-o ConnectTimeout=15",
+    "--ssh-flag=-o ServerAliveInterval=15",
+    "--ssh-flag=-o ServerAliveCountMax=4",
+    "--command=umask 077; cd $HOME/ehgp-v12/ehgp-v12.cG86f81oug || exit 1; setsid nohup bash $HOME/ehgp-v12/ehgp-v12.cG86f81oug/src/gcp-migration/v12_worker.sh --src $HOME/ehgp-v12/ehgp-v12.cG86f81oug/src --data $HOME/ehgp-v12/ehgp-v12.cG86f81oug/data --plan $HOME/ehgp-v12/ehgp-v12.cG86f81oug/plan.sh --work $HOME/ehgp-v12/ehgp-v12.cG86f81oug --deadline-epoch 1791472802 --source commit:c31beaf2200d1a7f8eed09b0c1c7c0f6af3b74f3 --plan-sha256 6f36db2f0c1a060d171a487bf55ca0a99b69a0029bc8434f821c67e93a6a703f --package-sha256 ce2e29949125b5d2640704a233e201367faa7ce9f46323bcfdda3090962b29ff --generation 2026-10-08T07:35:10.568-07:00 > $HOME/ehgp-v12/ehgp-v12.cG86f81oug/worker.log 2>&1 < /dev/null & i=0; while [ ! -s $HOME/ehgp-v12/ehgp-v12.cG86f81oug/worker.pid ] && [ \"$i\" -lt 100 ]; do sleep 0.1; i=$((i + 1)); done; printf \"LAUNCHED=%s\\n\" \"$(cat $HOME/ehgp-v12/ehgp-v12.cG86f81oug/worker.pid 2>/dev/null)\""
+   ],
+   "elapsed_seconds": 5.615,
+   "exit_code": 0,
+   "name": "launch_worker",
+   "pid": 2027275,
+   "started_epoch": 1791470249.261,
+   "timeout_seconds": 90
+  },
+  {
+   "argv": [
+    "$HOME/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "instances",
+    "describe",
+    "ehgp-v7-3b1d496aed430749ea7e049f",
+    "--project=devpod-gpu-exploration",
+    "--zone=us-central1-c",
+    "--format=json"
+   ],
+   "elapsed_seconds": 2.541,
+   "exit_code": 0,
+   "name": "recertify_before_retrieve_1",
+   "pid": 2046176,
+   "started_epoch": 1791470605.038,
+   "timeout_seconds": 90
+  },
+  {
+   "argv": [
+    "$HOME/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "ssh",
+    "ehgp-v7-3b1d496aed430749ea7e049f",
+    "--project=devpod-gpu-exploration",
+    "--zone=us-central1-c",
+    "--quiet",
+    "--ssh-key-file=/workspaces/.ehgp-sessions/v12.20261008.t1d2/key",
+    "--ssh-key-expiration=2026-10-08T15:49:38.677413Z",
+    "--ssh-flag=-n",
+    "--ssh-flag=-o BatchMode=yes",
+    "--ssh-flag=-o ConnectTimeout=15",
+    "--ssh-flag=-o ServerAliveInterval=15",
+    "--ssh-flag=-o ServerAliveCountMax=4",
+    "--command=sudo -n cat /run/systemd/shutdown/scheduled"
+   ],
+   "elapsed_seconds": 6.779,
+   "exit_code": 0,
+   "name": "guest_schedule_reread",
+   "pid": 2046310,
+   "started_epoch": 1791470607.581,
+   "timeout_seconds": 60
+  },
+  {
+   "argv": [
+    "$HOME/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "scp",
+    "--project=devpod-gpu-exploration",
+    "--zone=us-central1-c",
+    "--quiet",
+    "--ssh-key-file=/workspaces/.ehgp-sessions/v12.20261008.t1d2/key",
+    "--ssh-key-expiration=2026-10-08T15:49:38.677413Z",
+    "--scp-flag=-o BatchMode=yes",
+    "--scp-flag=-o ConnectTimeout=15",
+    "--scp-flag=-o ServerAliveInterval=15",
+    "--scp-flag=-o ServerAliveCountMax=4",
+    "ehgp-v7-3b1d496aed430749ea7e049f:$HOME/ehgp-v12/ehgp-v12.cG86f81oug/worker.log",
+    "/workspaces/.ehgp-sessions/v12.20261008.t1d2/results/"
+   ],
+   "elapsed_seconds": 6.511,
+   "exit_code": 0,
+   "name": "download_worker_log",
+   "pid": 2046575,
+   "started_epoch": 1791470614.361,
+   "timeout_seconds": 60
+  },
+  {
+   "argv": [
+    "$HOME/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "instances",
+    "describe",
+    "ehgp-v7-3b1d496aed430749ea7e049f",
+    "--project=devpod-gpu-exploration",
+    "--zone=us-central1-c",
+    "--format=json"
+   ],
+   "elapsed_seconds": 2.483,
+   "exit_code": 0,
+   "name": "recertify_before_results_1",
+   "pid": 2046968,
+   "started_epoch": 1791470620.873,
+   "timeout_seconds": 90
+  },
+  {
+   "argv": [
+    "$HOME/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "ssh",
+    "ehgp-v7-3b1d496aed430749ea7e049f",
+    "--project=devpod-gpu-exploration",
+    "--zone=us-central1-c",
+    "--quiet",
+    "--ssh-key-file=/workspaces/.ehgp-sessions/v12.20261008.t1d2/key",
+    "--ssh-key-expiration=2026-10-08T15:49:38.677413Z",
+    "--ssh-flag=-n",
+    "--ssh-flag=-o BatchMode=yes",
+    "--ssh-flag=-o ConnectTimeout=15",
+    "--ssh-flag=-o ServerAliveInterval=15",
+    "--ssh-flag=-o ServerAliveCountMax=4",
+    "--command=cd $HOME/ehgp-v12/ehgp-v12.cG86f81oug && cat SHA256SUMS && sha256sum results.tar.gz && stat -c \"SIZE=%s\" results.tar.gz"
+   ],
+   "elapsed_seconds": 6.201,
+   "exit_code": 0,
+   "name": "results_hash",
+   "pid": 2047056,
+   "started_epoch": 1791470623.368,
+   "timeout_seconds": 90
+  },
+  {
+   "argv": [
+    "$HOME/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "instances",
+    "describe",
+    "ehgp-v7-3b1d496aed430749ea7e049f",
+    "--project=devpod-gpu-exploration",
+    "--zone=us-central1-c",
+    "--format=json"
+   ],
+   "elapsed_seconds": 2.994,
+   "exit_code": 0,
+   "name": "recertify_before_download_1",
+   "pid": 2047423,
+   "started_epoch": 1791470629.577,
+   "timeout_seconds": 90
+  },
+  {
+   "argv": [
+    "$HOME/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "scp",
+    "--project=devpod-gpu-exploration",
+    "--zone=us-central1-c",
+    "--quiet",
+    "--ssh-key-file=/workspaces/.ehgp-sessions/v12.20261008.t1d2/key",
+    "--ssh-key-expiration=2026-10-08T15:49:38.677413Z",
+    "--scp-flag=-o BatchMode=yes",
+    "--scp-flag=-o ConnectTimeout=15",
+    "--scp-flag=-o ServerAliveInterval=15",
+    "--scp-flag=-o ServerAliveCountMax=4",
+    "ehgp-v7-3b1d496aed430749ea7e049f:$HOME/ehgp-v12/ehgp-v12.cG86f81oug/results.tar.gz",
+    "ehgp-v7-3b1d496aed430749ea7e049f:$HOME/ehgp-v12/ehgp-v12.cG86f81oug/SHA256SUMS",
+    "/workspaces/.ehgp-sessions/v12.20261008.t1d2/results/"
+   ],
+   "elapsed_seconds": 10.481,
+   "exit_code": 0,
+   "name": "download",
+   "pid": 2047546,
+   "started_epoch": 1791470632.576,
+   "timeout_seconds": 212.46221229399816
+  },
+  {
+   "argv": [
+    "$HOME/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "instances",
+    "describe",
+    "ehgp-v7-3b1d496aed430749ea7e049f",
+    "--project=devpod-gpu-exploration",
+    "--zone=us-central1-c",
+    "--format=json"
+   ],
+   "elapsed_seconds": 3.438,
+   "exit_code": 0,
+   "name": "describe_before_stop_1",
+   "pid": 2048058,
+   "started_epoch": 1791470643.063,
+   "timeout_seconds": 90
+  },
+  {
+   "argv": [
+    "/workspaces/.ehgp-sessions/v12.20261008.t1d2/host/stop_and_verify.sh",
+    "--yes",
+    "--expected-last-start-timestamp",
+    "2026-10-08T07:35:10.568-07:00"
+   ],
+   "elapsed_seconds": 83.346,
+   "exit_code": 0,
+   "name": "guarded_stop",
+   "pid": 2048425,
+   "started_epoch": 1791470646.502,
+   "timeout_seconds": 1200
+  },
+  {
+   "argv": [
+    "$HOME/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "instances",
+    "describe",
+    "ehgp-v7-3b1d496aed430749ea7e049f",
+    "--project=devpod-gpu-exploration",
+    "--zone=us-central1-c",
+    "--format=json"
+   ],
+   "elapsed_seconds": 1.874,
+   "exit_code": 0,
+   "name": "describe_after_stop1_1",
+   "pid": 2053853,
+   "started_epoch": 1791470729.849,
+   "timeout_seconds": 90
+  },
+  {
+   "argv": [
+    "$HOME/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "os-login",
+    "ssh-keys",
+    "remove",
+    "--project=devpod-gpu-exploration",
+    "--key-file=/workspaces/.ehgp-sessions/v12.20261008.t1d2/key.pub",
+    "--quiet"
+   ],
+   "elapsed_seconds": 1.669,
+   "exit_code": 0,
+   "name": "oslogin_remove",
+   "pid": 2053927,
+   "started_epoch": 1791470731.724,
+   "timeout_seconds": 120
+  }
+ ],
+ "last_poll": {
+  "exit_code": 0,
+  "output": "EXIT=0"
+ },
+ "max_run_seconds": 4200,
+ "observed_after": {
+  "lastStartTimestamp": "2026-10-08T07:35:10.568-07:00",
+  "lastStopTimestamp": "2026-10-08T07:45:17.489-07:00",
+  "name": "ehgp-v7-3b1d496aed430749ea7e049f",
+  "status": "TERMINATED"
+ },
+ "observed_before_stop": {
+  "lastStartTimestamp": "2026-10-08T07:35:10.568-07:00",
+  "lastStopTimestamp": "2026-10-08T07:30:43.571-07:00",
+  "name": "ehgp-v7-3b1d496aed430749ea7e049f",
+  "status": "RUNNING"
+ },
+ "os_login_ttl_minutes": 75,
+ "oslogin_key_maybe_added": true,
+ "oslogin_key_removed": true,
+ "overflow": {
+  "evicted": [],
+  "truncated_streams": []
+ },
+ "package_sha256": "ce2e29949125b5d2640704a233e201367faa7ce9f46323bcfdda3090962b29ff",
+ "plan_sha256": "d43b915aae0f86a8997233f7297af535c17c4b122aa7d9b767330807bd5b253d",
+ "polls": 1,
+ "pre_start_generation": "2026-10-08T07:20:55.986-07:00",
+ "private_key_deleted": true,
+ "provenance": {
+  "binaries_sha256": {},
+  "cmakecache": [],
+  "compiler": []
+ },
+ "public_status": "not_claimed",
+ "python_pins": null,
+ "receipt_path": "/workspaces/.ehgp-sessions/v12.20261008.t1d2/receipt.json",
+ "recovery_command": "<masque : porte l'adresse du compte>",
+ "remote_directory": "$HOME/ehgp-v12/ehgp-v12.cG86f81oug",
+ "remote_summary": {
+  "failed_commands": [],
+  "overflow": {
+   "evicted": [],
+   "truncated_streams": []
+  },
+  "overflow_files": "0",
+  "overflow_unresolved": "0",
+  "truncated_streams": "0",
+  "worker_build": "not_requested",
+  "worker_data": "ok",
+  "worker_fatal": null,
+  "worker_pip": "not_requested",
+  "worker_status": "completed"
+ },
+ "remote_used_kb": "16288",
+ "reserve_released": true,
+ "results_archive": "worker",
+ "results_bytes": 262219,
+ "results_cap_bytes": 67108864,
+ "results_expanded_bytes": 4269969,
+ "results_identity_scan": {
+  "complete": true,
+  "files": [
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/apres_build.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/apres_configure.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/avant_build.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/avant_configure.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r0_ng00_apres.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r0_ng00_avant.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r0_ng00_avant_bis.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r0_ng01_apres.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r0_ng01_avant.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r0_ng01_avant_bis.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r0_ng02_apres.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r0_ng02_avant.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r0_ng02_avant_bis.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r1_ng00_apres.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r1_ng00_avant.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r1_ng00_avant_bis.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r1_ng01_apres.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r1_ng01_avant.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r1_ng01_avant_bis.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r1_ng02_apres.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r1_ng02_avant.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r1_ng02_avant_bis.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r2_ng00_apres.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r2_ng00_avant.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r2_ng00_avant_bis.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r2_ng01_apres.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r2_ng01_avant.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r2_ng01_avant_bis.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r2_ng02_apres.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r2_ng02_avant.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r2_ng02_avant_bis.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r3_ng00_apres.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r3_ng00_avant.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r3_ng00_avant_bis.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r3_ng01_apres.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r3_ng01_avant.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r3_ng01_avant_bis.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r3_ng02_apres.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r3_ng02_avant.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r3_ng02_avant_bis.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r4_ng00_apres.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r4_ng00_avant.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r4_ng00_avant_bis.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r4_ng01_apres.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r4_ng01_avant.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r4_ng01_avant_bis.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r4_ng02_apres.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r4_ng02_avant.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r4_ng02_avant_bis.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r5_ng00_apres.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r5_ng00_avant.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r5_ng00_avant_bis.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r5_ng01_apres.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r5_ng01_avant.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r5_ng01_avant_bis.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r5_ng02_apres.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r5_ng02_avant.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r5_ng02_avant_bis.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r6_ng00_apres.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r6_ng00_avant.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r6_ng00_avant_bis.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r6_ng01_apres.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r6_ng01_avant.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r6_ng01_avant_bis.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r6_ng02_apres.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r6_ng02_avant.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r6_ng02_avant_bis.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r7_ng00_apres.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r7_ng00_avant.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r7_ng00_avant_bis.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r7_ng01_apres.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r7_ng01_avant.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r7_ng01_avant_bis.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r7_ng02_apres.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r7_ng02_avant.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r7_ng02_avant_bis.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r8_ng00_apres.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r8_ng00_avant.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r8_ng00_avant_bis.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r8_ng01_apres.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r8_ng01_avant.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r8_ng01_avant_bis.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r8_ng02_apres.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r8_ng02_avant.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r8_ng02_avant_bis.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r9_ng00_apres.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r9_ng00_avant.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r9_ng00_avant_bis.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r9_ng01_apres.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r9_ng01_avant.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r9_ng01_avant_bis.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r9_ng02_apres.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r9_ng02_avant.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/c_r9_ng02_avant_bis.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/ctest.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/device_open.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/device_open_budget.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng00_k10_1_2.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng00_k10_1_3.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng00_k10_1_32.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng00_k10_1_4.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng00_k10_1_6.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng00_k10_1_8.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng00_k10_libre.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng00_k5_1_2.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng00_k5_1_3.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng00_k5_1_32.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng00_k5_1_4.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng00_k5_1_6.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng00_k5_1_8.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng00_k5_libre.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng01_k10_1_2.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng01_k10_1_3.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng01_k10_1_32.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng01_k10_1_4.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng01_k10_1_6.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng01_k10_1_8.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng01_k10_libre.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng01_k5_1_2.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng01_k5_1_3.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng01_k5_1_32.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng01_k5_1_4.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng01_k5_1_6.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng01_k5_1_8.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng01_k5_libre.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng02_k10_1_2.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng02_k10_1_3.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng02_k10_1_32.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng02_k10_1_4.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng02_k10_1_6.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng02_k10_1_8.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng02_k10_libre.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng02_k5_1_2.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng02_k5_1_3.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng02_k5_1_32.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng02_k5_1_4.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng02_k5_1_6.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng02_k5_1_8.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/flux_ng02_k5_libre.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/ful1_apres_ng00_k10.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/ful1_apres_ng00_k5.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/ful1_apres_ng01_k10.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/ful1_apres_ng01_k5.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/ful1_apres_ng02_k10.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/ful1_apres_ng02_k5.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/ful1_apres_u16000_k5.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/ful1_apres_u32000_k5.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/ful1_apres_u8000_k5.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/ful1_avant_ng00_k10.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/ful1_avant_ng00_k5.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/ful1_avant_ng01_k10.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/ful1_avant_ng01_k5.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/ful1_avant_ng02_k10.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/ful1_avant_ng02_k5.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/ful1_avant_u16000_k5.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/ful1_avant_u32000_k5.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/ful1_avant_u8000_k5.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/id_ng00_k10_cpu.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/id_ng00_k10_dev.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/id_ng00_k5_cpu.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/id_ng00_k5_dev.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/id_ng01_k10_cpu.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/id_ng01_k10_dev.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/id_ng01_k5_cpu.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/id_ng01_k5_dev.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/id_ng02_k10_cpu.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/id_ng02_k10_dev.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/id_ng02_k5_cpu.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/id_ng02_k5_dev.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/id_u16000_k5_cpu.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/id_u16000_k5_dev.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/id_u32000_k5_cpu.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/id_u32000_k5_dev.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/id_u8000_k5_cpu.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/files/t1d/logs/id_u8000_k5_dev.log"
+   },
+   {
+    "kinds": [
+     "vm_home"
+    ],
+    "path": "extracted/results/cmd/000_t1d_flux/time.txt"
+   }
+  ],
+  "files_count": 176,
+  "kinds": [
+   "account",
+   "vm_home"
+  ],
+  "scanned_bytes": 4270050,
+  "scanned_files": 222
+ },
+ "results_manifest_files": 219,
+ "results_sha256": "8752c70a7d9d00c8d6595c5fc3547c4a0831ce7aa10d3cc9ccb2960874b6e045",
+ "results_skipped_members": [],
+ "results_verified": true,
+ "retrieval": "downloaded",
+ "run_dir": "/tmp/ehgp-v12-runs/v12.20261008.t1d2-c40a25e7efdf",
+ "schema": "ehgp.v12.session_receipt.v1",
+ "source": null,
+ "source_kind": "commit",
+ "ssh_cutoff_epoch": 1791473102,
+ "ssh_key_expiration": "2026-10-08T15:49:38.677413Z",
+ "start_certified": true,
+ "start_may_have_been_requested": true,
+ "status": "completed",
+ "stop_attempts": 1,
+ "stop_exit_code": 0,
+ "target": {
+  "instance": "ehgp-v7-3b1d496aed430749ea7e049f",
+  "project": "devpod-gpu-exploration",
+  "zone": "us-central1-c"
+ },
+ "targeted_shutdown_certified": true,
+ "vm_facts": {
+  "clangxx": "absent",
+  "cmake": "cmake version 3.22.1",
+  "cpu_avx2": "1",
+  "cpu_avx512dq": "1",
+  "cpu_avx512f": "1",
+  "cpu_avx512vl": "1",
+  "cpu_bmi2": "1",
+  "ctest": "ctest version 3.22.1",
+  "gxx": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+  "mem_total_kb": "185463736",
+  "nproc": "48",
+  "python3": "Python 3.10.12",
+  "sanitizer_address_undefined": "ok",
+  "sanitizer_thread": "ok_setarch"
+ },
+ "warnings": [],
+ "worker": {
+  "build": "not_requested",
+  "cache_dir": "$HOME/ehgp-v12/cache",
+  "commands_ok": "1",
+  "commands_total": "1",
+  "data": "ok",
+  "deadline_epoch": "1791472802",
+  "ended_epoch": "1791470603",
+  "fatal": "",
+  "generation": "2026-10-08T07:35:10.568-07:00",
+  "interrupted": "0",
+  "nproc": "48",
+  "overflow_files": "0",
+  "overflow_unresolved": "0",
+  "package_sha256": "ce2e29949125b5d2640704a233e201367faa7ce9f46323bcfdda3090962b29ff",
+  "pip": "not_requested",
+  "plan_sha256": "6f36db2f0c1a060d171a487bf55ca0a99b69a0029bc8434f821c67e93a6a703f",
+  "python_user_base": "$HOME/ehgp-v12/ehgp-v12.cG86f81oug/pyuser",
+  "python_versions": "",
+  "results_bytes": "4293098",
+  "results_cap_bytes": "67108864",
+  "schema": "ehgp.v12.worker_result.v1",
+  "source": "commit:c31beaf2200d1a7f8eed09b0c1c7c0f6af3b74f3",
+  "started_epoch": "1791470254",
+  "status": "completed",
+  "truncated_streams": "0"
+ },
+ "worker_deadline_epoch": 1791472802,
+ "worker_exit_code": 0,
+ "worker_launched": true,
+ "worker_log_retrieved": true,
+ "worker_outcome": "exited",
+ "worker_pid": 2122,
+ "worker_plan_sha256": "6f36db2f0c1a060d171a487bf55ca0a99b69a0029bc8434f821c67e93a6a703f",
+ "worker_source": "commit:c31beaf2200d1a7f8eed09b0c1c7c0f6af3b74f3"
+}

@@ -1,4 +1,4 @@
-# Sessions G4 T1-d : catalogue en flux pour les scènes de plusieurs millions de sites
+# Sessions G4 T1-d : catalogue en flux pour les scènes de plusieurs millions de sites — adopté
 
 8 octobre 2026. Cible `us-central1-c` / `ehgp-v7-3b1d496aed430749ea7e049f`, `--max-run-seconds 4200`, lanceur gardé
 `gcp-migration/v12_session.py`, preuve `pushed_commit`. Reçus sans identité de compte, un dossier par session, chacun
@@ -44,3 +44,26 @@ une mesure dont une preuve manque, elle ne la juge pas.
 ce lecteur connaît. L'empreinte FUL1 est la même sur les deux voies : portes `mhgp12_full_probe_cpu` et
 `mhgp12_full_probe_cpu_sequentiel`. Localement, la ligne `full` de la voie séquentielle a exactement les clés du
 lecteur. La règle et les seuils ne changent pas. La session est rejouée sur le commit du correctif.
+
+## Session `v12.20261008.t1d2` (commit `c31beaf22`, correctif de l'étape FUL1) : **T1-d adopté**
+
+VM de 14:35:10 à 14:45:17 UTC, **arrêt certifié `TERMINATED`** par le lanceur, relu indépendamment à 14:45:38 UTC.
+Commande unique `t1d_flux` : ok, 349 s. Détails dans [`t1d2/`](t1d2/), dont les
+[tableaux](t1d2/resultats/cmd/000_t1d_flux/files/t1d/tableaux_t1d.md). Verdict de `REGLE_T1D` : **adopté**, aucun
+refus, aucun rejet.
+
+- **Identités** : les empreintes sont identiques partout. Voie appareil = voie CPU = F2 ; voie en flux sous chaque
+  budget de l'appareil ; FUL1 avant = après = session K ; portes `device_open` et `device_open_budget` jouées sur
+  l'appareil.
+- **Coût pour la trame** (catalogue K5, rapport après / avant, 10 tours × 10 passes) : ng00 0,9998 (0,9963–1,0034),
+  ng01 1,0024 (0,9988–1,0063), ng02 1,0024 (0,9970–1,0082). Toutes les bornes sont sous 1,01 : le contrat ne paie rien.
+  A/A de 1,0002 à 1,0022.
+- **Voie en flux sur l'appareil réel** : à K5, 3 tranches ; à K10, 6 à 7 tranches et 7 lots d'arène rapatriés un à
+  un. Sur les 36 prises sous budget de l'appareil (de 1/2 à 1/32 de ses octets), 12 rendent F2 et 24 refusent
+  proprement (`memory_budget`) ; aucune autre issue.
+
+**Conséquence.** T1-d reste dans le produit (`5f8e777cf`). Le régime (b), scènes LiDAR entières de plusieurs
+millions de sites, se rejoue sur ce produit (plans `MES-B` L1 et L2 de l'agent du chantier C). La session L1p
+refusait au budget de l'appareil toute scène de plus de 5 M de sites à K5, et K10 dès 1,5 M.
+
+GCP utilisé pour ces deux sessions seulement, arrêts certifiés.
