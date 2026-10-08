@@ -1,0 +1,34 @@
+{
+  "source_commit": "85db49890e063e9818e4b49d6cd9f968a2db2a9b",
+  "base_commit": "0e62a723202732d69e430349c0b2a7b498cbb49c",
+  "source_hashes": {
+    "morsehgp3D_v12/microbancs/mes_apparie/mutants_pilote_apparie.py": "f3229f84b42033da9d3d4cabda4953c7a1ad5b320e52b5491f7992a6a88ee892",
+    "morsehgp3D_v12/microbancs/mes_apparie/pilote_apparie.py": "c795dae5cf30bfa94fb98c94680ffc983dad973574c9185b60bf250f3eedb173",
+    "morsehgp3D_v12/microbancs/mes_apparie/test_pilote_apparie.py": "ddd79dc88ec4ce8ce6bb528e0f320d61cdd8156c87fc9479b3115d011f87e669",
+    "morsehgp3D_v12/microbancs/mes_b_scenes/mutants_pilote_b.py": "bffb688e436458c6d3008e2fb7fcc96c48d288ab009038e4c326747b95758600",
+    "morsehgp3D_v12/microbancs/mes_b_scenes/pilote_b.py": "9eb044087bfd95443eb5149bd25a12170158769d4bba07ad47681d9f07a25f32",
+    "morsehgp3D_v12/microbancs/mes_b_scenes/test_pilote_b.py": "1f562d3d6c7390eee31467244be0e90e4cda32bc2eed8142e31163f9a38b2a10",
+    "morsehgp3D_v12/microbancs/mes_c_petits/mutants_pilote_c.py": "6eab93b6dbaf0bd0cdf9eda563d3738be2abee93e22ba206baab1856440de613",
+    "morsehgp3D_v12/microbancs/mes_c_petits/pilote_c.py": "6b435ca48af54e289393a72980625f9e1005a71798b961b13859969d53785df0",
+    "morsehgp3D_v12/microbancs/mes_c_petits/test_pilote_c.py": "a507b0e8ab054575fbbf312ecb57cf07ebb35846e756f27713c125f7b82ef8d0",
+    "morsehgp3D_v12/microbancs/mes_full/pilote_full.py": "7fd5a628b77ba930a03f52d7dec4dfc8ed869309dc11659b00b1f95be6edd19b",
+    "morsehgp3D_v12/microbancs/mes_full/test_pilote_full.py": "b16e6a7c5579461f7dce014f0e495c0a88fcf7d30e45618f3605f03712e2628b",
+    "morsehgp3D_v12/microbancs/outils/archives_vm.py": "9db211bc825988be9893f9e8af805a9924470df096e17ce5f7f43ab773a4a928",
+    "morsehgp3D_v12/microbancs/outils/banc_full.py": "7d7f0661b49adf094df51d41268470571d47c51fc7795bb5b34c791a4a539904",
+    "morsehgp3D_v12/microbancs/outils/lecteur_full.py": "15437e5f09408d5fbdc6288e33a2452490489f13bf9a3b3a24c99f5d109b6554",
+    "morsehgp3D_v12/microbancs/outils/mutants_juges.py": "b1c8ccd13a637de71d1acf89b1ea61138a040bb78e2a843f539025ce8111fdd8",
+    "morsehgp3D_v12/microbancs/outils/mutants_lecteur_full.py": "3ad07be51a73a2fb5c3b3e06ac0774d4cc474a891616c3b1716a40f575d8799b",
+    "morsehgp3D_v12/microbancs/outils/publier.py": "934c8b8c170df53c66cce7994b8e08e22dc831543784ce8942df1fcd82231241",
+    "morsehgp3D_v12/microbancs/outils/recu_session.py": "ce95c3393d01e11ec7c3a35eee03ac08715524891eb7baaac87a6e760b34d8f9",
+    "morsehgp3D_v12/microbancs/outils/source_v11.py": "246db434e83e13e22aca7b247b5e0b173b3c38a062dd4960827e5364cf7583df",
+    "morsehgp3D_v12/microbancs/outils/test_lecteur_full.py": "8eed4403670ced0640e43b1010e07422fef105fe6da242ba1db730643f7a371f",
+    "morsehgp3D_v12/microbancs/outils/test_recu_session.py": "3e74bc3d3f5240a26b2642f56b43b0aec946df991cd2cfa1a3edc622ec2e2531"
+  },
+  "patches": {
+    "morsehgp3D_v12/receipts/audit_reponses_20261008/lf_recouvert_gardes/proposition.patch": "0a64e44b77169b4e747599f1117290d92255bdea24a1c9c0024b5dc8674d61b0",
+    "morsehgp3D_v12/receipts/audit_reponses_20261008/apparie_livraison/composition.patch": "3119d4cea05b4b14f7fbcdda0bdebd25ec6fe3da0c270d50e8af7821064bbaa8",
+    "morsehgp3D_v12/receipts/audit_reponses_20261008/apparie_composition_triple/fermeture.patch": "9a58967712626fcd0062b58aabfbc239562d86a5e81ed7bd0688fc13aa9a5d22",
+    "morsehgp3D_v12/receipts/audit_reponses_20261008/pilotes_fixtures_recouvert/proposition.patch": "fb20dea2d8172d985f941225b16cec193bab4f7d9fe1da61ce55ae34fcfc9ef4",
+    "morsehgp3D_v12/receipts/audit_reponses_20261008/pilotes_bascule/tableau.patch": "602bbfa36543d4c2d5f3b2a52246575dc439fafef83444d8c5bbb0d2507fd8b6"
+  }
+}

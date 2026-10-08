@@ -1,0 +1,80 @@
+{
+  "apparie_ast_delta": "suppression seule du second contr\u00f4le du nombre de tours",
+  "code_false_residuel": "ok",
+  "fixture_appariee_fake_exacte": true,
+  "gates": [],
+  "mutants_apparies_causaux": {
+    "cohorte_vide_admise": {
+      "livre": "refuse",
+      "mutant": "juge"
+    },
+    "identite_non_relue": {
+      "livre": "refuse",
+      "mutant": "juge"
+    },
+    "resume_non_compare": {
+      "livre": "refuse",
+      "mutant": "juge"
+    },
+    "sans_fermeture_binaire": {
+      "livre": "refuse",
+      "mutant": "juge"
+    }
+  },
+  "mutants_horloges_causaux": {
+    "sans_chaine_par_ordre": "noyau_avant_g",
+    "sans_dependance_m_inferieur": "v_avant_m_ordre_inferieur",
+    "sans_egalite_ouvertures": "ouvertures_differentes",
+    "sans_enveloppe_tour": "tour_hors_du_mur",
+    "sans_maximum_g": "maximum_g_faux"
+  },
+  "native_execution": false,
+  "neuf_horloges": {
+    "fins_g_avant_ouverture": [
+      "ok",
+      "illisible"
+    ],
+    "m_avant_noyau": [
+      "ok",
+      "illisible"
+    ],
+    "maximum_g_faux": [
+      "ok",
+      "illisible"
+    ],
+    "noyau_avant_g": [
+      "ok",
+      "illisible"
+    ],
+    "ouvertures_differentes": [
+      "ok",
+      "illisible"
+    ],
+    "r_avant_m": [
+      "ok",
+      "illisible"
+    ],
+    "tour_hors_du_mur": [
+      "ok",
+      "illisible"
+    ],
+    "v_avant_m": [
+      "ok",
+      "illisible"
+    ],
+    "v_avant_m_ordre_inferieur": [
+      "ok",
+      "illisible"
+    ]
+  },
+  "postimages_exactes": [
+    "outils/lecteur_full.py",
+    "mes_full/pilote_full.py",
+    "mes_full/test_pilote_full.py",
+    "mes_b_scenes/test_pilote_b.py",
+    "mes_c_petits/test_pilote_c.py"
+  ],
+  "sentinelle_1ns": "ok",
+  "source_commit": "85db49890e063e9818e4b49d6cd9f968a2db2a9b",
+  "source_files": 21
+}

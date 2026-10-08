@@ -1,0 +1,107 @@
+{
+  "sources": "capture.json",
+  "tests": [
+    {
+      "script": "outils/test_lecteur_full.py",
+      "mode": "normal",
+      "code": 0,
+      "stdout": "test_lecteur_full_ok lecture=29 issues=7 session=6 recouvert=28",
+      "stderr": ""
+    },
+    {
+      "script": "outils/test_lecteur_full.py",
+      "mode": "-O",
+      "code": 0,
+      "stdout": "test_lecteur_full_ok lecture=29 issues=7 session=6 recouvert=28",
+      "stderr": ""
+    },
+    {
+      "script": "mes_full/test_pilote_full.py",
+      "mode": "normal",
+      "code": 0,
+      "stdout": "test_pilote_full_ok essai=1 sites_faux=1 empreinte=1 sequentiel=1 schema_croise=1",
+      "stderr": ""
+    },
+    {
+      "script": "mes_full/test_pilote_full.py",
+      "mode": "-O",
+      "code": 0,
+      "stdout": "test_pilote_full_ok essai=1 sites_faux=1 empreinte=1 sequentiel=1 schema_croise=1",
+      "stderr": ""
+    },
+    {
+      "script": "mes_apparie/test_pilote_apparie.py",
+      "mode": "normal",
+      "code": 0,
+      "stdout": "test_pilote_apparie_ok auto_test=1 usage=3 campagne=1 fermetures=4 journal_change=1 schema_croise=1 empreinte=1",
+      "stderr": ""
+    },
+    {
+      "script": "mes_apparie/test_pilote_apparie.py",
+      "mode": "-O",
+      "code": 0,
+      "stdout": "test_pilote_apparie_ok auto_test=1 usage=3 campagne=1 fermetures=4 journal_change=1 schema_croise=1 empreinte=1",
+      "stderr": ""
+    },
+    {
+      "script": "mes_b_scenes/test_pilote_b.py",
+      "mode": "normal",
+      "code": 0,
+      "stdout": "test_pilote_b_ok verdicts=9 empreintes=3 attendu=1 etiquettes=12 pilote=5",
+      "stderr": ""
+    },
+    {
+      "script": "mes_b_scenes/test_pilote_b.py",
+      "mode": "-O",
+      "code": 0,
+      "stdout": "test_pilote_b_ok verdicts=9 empreintes=3 attendu=1 etiquettes=12 pilote=5",
+      "stderr": ""
+    },
+    {
+      "script": "mes_c_petits/test_pilote_c.py",
+      "mode": "normal",
+      "code": 0,
+      "stdout": "test_pilote_c_ok cohorte=9 verdict=5 droites=3 criteres=3 schema_croise=1 difficiles=1 empreintes=1 usage=1",
+      "stderr": ""
+    },
+    {
+      "script": "mes_c_petits/test_pilote_c.py",
+      "mode": "-O",
+      "code": 0,
+      "stdout": "test_pilote_c_ok cohorte=9 verdict=5 droites=3 criteres=3 schema_croise=1 difficiles=1 empreintes=1 usage=1",
+      "stderr": ""
+    }
+  ],
+  "mutants": [
+    {
+      "script": "outils/mutants_lecteur_full.py",
+      "mode": "normal",
+      "code": 0,
+      "stdout": "mutants_lecteur_full_ok tues=27",
+      "stderr": ""
+    },
+    {
+      "script": "outils/mutants_lecteur_full.py",
+      "mode": "-O",
+      "code": 0,
+      "stdout": "mutants_lecteur_full_ok tues=27",
+      "stderr": ""
+    },
+    {
+      "script": "mes_apparie/mutants_pilote_apparie.py",
+      "mode": "normal",
+      "code": 0,
+      "stdout": "mutants_pilote_apparie_ok tues=17",
+      "stderr": ""
+    },
+    {
+      "script": "mes_apparie/mutants_pilote_apparie.py",
+      "mode": "-O",
+      "code": 0,
+      "stdout": "mutants_pilote_apparie_ok tues=17",
+      "stderr": ""
+    }
+  ],
+  "native_execution": false,
+  "mutants_O_children": "PYTHONOPTIMIZE=1"
+}

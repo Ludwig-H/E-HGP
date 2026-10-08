@@ -1,0 +1,37 @@
+{
+  "changed_m_read": [
+    "src/tower/pipeline_run.cpp",
+    "bench/full_probe.cpp",
+    "docs/ARCHITECTURE.md"
+  ],
+  "jsonl_sha256": {
+    "v12set_r0.jsonl": "9b8b077e92e43ab6635ef7a788d621ef3b58903ace09029ef3ecb88eb5669a2a",
+    "v12set_r1.jsonl": "d64037d354d5b1c7023c148585d4ae0a42ac9f626856d8c26512e80319f28e01",
+    "v12set_r2.jsonl": "d087c056b2b6d5e6c2cc2a380438cb975d0ee3045e4990f1f09149396f14d969",
+    "v12set_r3.jsonl": "c64dd05f885ffb4f4187bd737ea5f488f1e26b61338992dbfdf35a58dc1c90a7",
+    "v12set_r4.jsonl": "d94398b5adf9122ab62c8906d34c1960800ff8e4cc9890b68b5f8dfaf6a0ac16"
+  },
+  "same_m_read": [
+    "src/tower/forest_kernel.cpp",
+    "src/tower/forest_contract.cpp",
+    "src/tower/forest.hpp",
+    "src/tower/pipeline.cpp",
+    "docs/OBJET_ET_CONTRAT_MATHEMATIQUE.md",
+    "src/tower/forest_internal.hpp",
+    "src/tower/registry_branches.cpp"
+  ],
+  "source_measurement": "957e9784fb19ccd2d6348e779ed8b7affadc1f3d",
+  "source_read": "72f622a556130e25afdadbef84984619417286e2",
+  "sources": {
+    "bench/full_probe.cpp": "1068940a06e386cb80a4802b3dd61e2df87eed69574f08c821c34dabb017179b",
+    "docs/ARCHITECTURE.md": "faea44189d076f05cb22f1f7aa9159ba75f75244dcf397de74c0004509c50d81",
+    "docs/OBJET_ET_CONTRAT_MATHEMATIQUE.md": "dd8f45c55a70ab50393ec91607d64f4d9048c81e5824977175ce415d49bcca04",
+    "src/tower/forest.hpp": "1f21cdeb598da5492bfa0708551a2bb319685c7d74d197b1d764512ebe6478fb",
+    "src/tower/forest_contract.cpp": "5dacf8cef8a7827ba50c01b3a4908e264b946b5caccc0dda0abf5ad83117870d",
+    "src/tower/forest_internal.hpp": "455b3c98ac7e5f89af8041f33841f3904eaa0e3181f3d823bde3b60e55a3947c",
+    "src/tower/forest_kernel.cpp": "2d12b4bd459a0c1ec710117bb94580f84f723ba7cf06d648e353613682c7fcf0",
+    "src/tower/pipeline.cpp": "44e83374113a860519744f4a34dab854e32e50d50febc0e0f905a8aa7f8e437b",
+    "src/tower/pipeline_run.cpp": "f7e077d847d060c0830591496cf8ded03b8e534f0533420e42fb21d1862377bc",
+    "src/tower/registry_branches.cpp": "b9063de6472f72761d8ec8b64ce84df955aa3858c3f0ae7cf2e8ceddbf7a0cf7"
+  }
+}

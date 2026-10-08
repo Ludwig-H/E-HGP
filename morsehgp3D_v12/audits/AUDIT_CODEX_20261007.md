@@ -44,25 +44,34 @@ Feuille16 contre24 a déjà été mesurée dans I : C légèrement plus lent, pa
 aux feuilles. Priorité : ventiler levels/sort/assemble/table avec les diagnostics existants, puis mesurer FULL.
 Comparaison historique v11 non appariée : GPU plus rapide, CPU toujours plus lent ; aucune causalité déduite.
 
+**[Noyau : diagnostic et alternative mathématique](../receipts/audit_reponses_20261008/a6_noyau_raccord/README.md).**
+Sur99 099 sites, R5 finit dernier dans5/5 chaudes ; les fins ne sont pas des durées propres.
+À P/C/G inchangés, une queue gratuite laisserait238,32 ms sur cette trame, et22/37 médianes>100 ms.
+Alternative MSF à ordre total puis rejeu : événements/attaches/cellules préservés par induction, Prim sur100 modèles.
+Le développeur écarte cette voie pour son prochain lot A6 afin de garder le recouvrement ; la proposition reste
+un lemme de raccord, aucun gain acquis. `g_end_ns` ne publie pas encore toutes les pré-passes.
+
 **CST-0241 : [correctif livré](../receipts/audit_reponses_20261008/a_terminaison_raccord/README.md).**
 Postimage exacte `last = fetch_sub(...) == 1` ; cinq fonctions du modèle portées fidèlement.
 Python normal/−O passé ; mutant refusé par contrôle textuel, **pas par entrelacement natif**.
 [Preuve pour N et protocole natif déterministe](../receipts/audit_reponses_20261008/a_terminaison_porte/README.md)
-transmis ; porte native ouverte. Aucun incident natif observé, aucun lien établi avec MES-M0.
+transmis ; **porte native livrée bdfca8fb1**, source conforme au protocole, preuves d’exécution en contrelecture.
+Aucun incident natif observé, aucun lien établi avec MES-M0.
 
 **[D6 M admise](../receipts/audit_reponses_20261008/session_m_d6/README.md)** : 126 journaux/630 passes,
 504 chaudes. Sur mêmes coordonnées, C u24/u32 +0,8–2,5 % ; G jusqu'à+13,6 %. C et G CPU séparés, pas FULL/GPU :
 seuil produit<3 % non qualifié. ×2048 triple presque C et change les classes de feuilles ; coordonnées<2²⁹,
 pas tout le domaine u32 ni une précision physique nouvelle. Les corps exportés sont seulement déclarés, puis effacés.
 
-**Lecteurs : raccord livré85db49890, contrelecture en cours.** [Triple correctif apparié](../receipts/audit_reponses_20261008/apparie_composition_triple/README.md) :
+**[Lecteurs : raccord85 contre-vérifié](../receipts/audit_reponses_20261008/lecteurs_livraison_85db/README.md).** [Triple correctif apparié](../receipts/audit_reponses_20261008/apparie_composition_triple/README.md) :
 identité/résumés, cohorte/minima et fermeture ELF ; les contre-exemples sont refusés, positif simulé conservé.
 [Gardes LF recouvert](../receipts/audit_reponses_20261008/lf_recouvert_gardes/README.md) : neuf horloges fausses admises
 par le lecteur mesuré957, quatre mutants causaux ; vraies passes A et M compatibles.
 [Fixtures corrigées](../receipts/audit_reponses_20261008/pilotes_fixtures_recouvert/README.md),
 [bascule des commandes A](../receipts/audit_reponses_20261008/t2d_a_bascule_cloture/README.md)
 et [présentation MES-FULL](../receipts/audit_reponses_20261008/pilotes_bascule/README.md).
-Le nouveau juge exige le hash ELF final absent de M ; les prises sont relues sans inventer cette fermeture.
+Cinq portes Python et27/17 mutants LF/apparié passés normal/−O ; neuf horloges et quatre fermetures refusées
+causalement. Le juge85 refuse M sans hash ELF final ; aucune fermeture inventée. `code=False` partagé reste ouvert.
 
 **Autres régimes : dernières campagnes antérieures à M.**
 [Petits nuages C2](../receipts/audit_reponses_20261008/session_c2_admission/README.md),147 nuages, deux chaudes :
