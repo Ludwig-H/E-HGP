@@ -9,15 +9,18 @@ Deux petits nuages deterministes ecrits au format u32le (coordonnees de 0 a 2^14
      pic_octets ;
   2. deux trames en alternance, quatre passes : empreintes alternees (passe 0 = passe 2, passe 1 = passe 3), differentes
      d'une trame a l'autre.
-Voie par defaut : aucun champ du schema recouvert (etapes_schema, recouvrement, fenetres_ns). Avec --recouvert, la
-sonde joue build_tower (Session recouverte, decision D-F2) et chaque ligne "full" doit suivre son schema (en-tete de
-bench/full_probe.cpp) : etapes_schema = "recouvert" ; partition murale P, C, G, raccord (nul), TMVR, de somme au plus le
-mur ; fenetres_ns (sommes de fenetres murales des taches) avec T + M + V + R et foret_apres_g au plus foret ;
+Trois modes (8 octobre 2026 : la Session recouverte est la voie par defaut de la sonde depuis l'adoption de T2-d-A) :
+sans option, la sonde est lancee sans option et doit jouer build_tower (Session recouverte, decision D-F2) ; avec
+--recouvert, elle est lancee avec --recouvert, meme attente ; avec --sequentiel, elle est lancee avec --sequentiel et
+ne doit porter aucun champ du schema recouvert (etapes_schema, recouvrement, fenetres_ns). Sur la Session recouverte,
+chaque ligne "full" doit suivre son schema (en-tete de bench/full_probe.cpp) : etapes_schema = "recouvert" ;
+partition murale P, C, G, raccord (nul), TMVR, de somme au plus le mur ; fenetres_ns (sommes de fenetres murales des
+taches) avec T + M + V + R et foret_apres_g au plus foret ;
 memoire_octets P, C, tour, usage au plus le pic, plus haut pic egal a pic_octets ; recouvrement coherent (fin_g_ns = G,
 queue_ns = TMVR = fin_ns - fin_g_ns, fin_ns au plus tour_ns, arrets au plus reprises) ; fins par ordre dans [0, fin_ns],
 celles de G au plus fin_g_ns, V nulle a l'ordre 1 ; et la MEME empreinte FUL1 que mhgp12_tower_chain (voie sequentielle).
-Usage : full_probe_check.py <mhgp12_full_probe> <mhgp12_tower_chain> [--recouvert]. Codes : 0 conforme ; 1 ecart ;
-2 usage. Python 3.10 nu, aucun assert (tient sous -O).
+Usage : full_probe_check.py <mhgp12_full_probe> <mhgp12_tower_chain> [--recouvert | --sequentiel].
+Codes : 0 conforme ; 1 ecart ; 2 usage. Python 3.10 nu, aucun assert (tient sous -O).
 """
 import json
 import os
@@ -118,7 +121,7 @@ def check_passes(rows, passes, errors, label, overlapped=False):
                 errors.append('%s : passe %d non conforme' % (label, i))
             continue
         if any(key in r for key in ('etapes_schema', 'recouvrement', 'fenetres_ns', 'fins_par_ordre_ns')):
-            errors.append('%s : passe %d, champ du schema recouvert dans la voie par defaut' % (label, i))
+            errors.append('%s : passe %d, champ du schema recouvert dans la voie sequentielle' % (label, i))
         stages = r.get('etapes_ns', {})
         disjoint = sum(stages.get(key, 0) for key in ('P', 'C', 'G', 'raccord', 'TMVR'))
         mem = r.get('memoire_octets')
@@ -134,13 +137,14 @@ def check_passes(rows, passes, errors, label, overlapped=False):
 
 
 def main(argv):
-    overlapped = len(argv) == 4 and argv[3] == '--recouvert'
-    if len(argv) not in (3, 4) or (len(argv) == 4 and not overlapped) or \
+    option = argv[3] if len(argv) == 4 else None
+    if len(argv) not in (3, 4) or option not in (None, '--recouvert', '--sequentiel') or \
             not all(os.path.isfile(p) for p in argv[1:3]):
         print('full_probe_check : usage', file=sys.stderr)
         return 2
     probe, chain = argv[1], argv[2]
-    mode = ['--recouvert'] if overlapped else []
+    overlapped = option != '--sequentiel'  # la voie par defaut est la Session recouverte
+    mode = [option] if option else []
     errors = []
     with tempfile.TemporaryDirectory() as folder:
         xyz_a, ids_a = write_cloud(folder, 'a', 600, 7)
@@ -164,7 +168,8 @@ def main(argv):
         print(error, file=sys.stderr)
     if errors:
         return 1
-    print('full_probe_ok passes=7 trames=2 identite_chaine=oui' + (' schema=recouvert' if overlapped else ''))
+    print('full_probe_ok passes=7 trames=2 identite_chaine=oui' + (' schema=recouvert' if overlapped else
+                                                                   ' schema=sequentiel'))
     return 0
 
 

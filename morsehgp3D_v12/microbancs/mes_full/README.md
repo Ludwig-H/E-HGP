@@ -22,7 +22,13 @@ une empreinte par trame et par K, identique sur toutes les passes, tous les proc
 **Verdict du contrat, écrit d'avance** : « tenu » si, sur ng00–02 et sur les 37 trames, la médiane et le maximum (sur
 les trames, des maximums des médianes par processus) sont au plus 100 ms ; « non tenu » sinon ; « refusé » si un
 contrôle manque. Aucune règle d'adoption : c'est la mesure du contrat, publiée telle quelle avec les étages P, C
-(transferts compris), G, T, M, V, R.
+(transferts compris), G et la queue.
+
+**Voie jouée : la Session recouverte** (`T2-d-A`, adoptée par la
+[session T2-d-A](../../receipts/g4_t2da_20261008/README.md)), voie par défaut de la sonde depuis la bascule du
+8 octobre. Son mur se partage en P, C, G jusqu'au dernier calcul de G, puis la queue (la forêt qui n'a pas pu passer
+sous G). L'option `--sequentiel` joue l'ancienne voie (`resolve_tower` puis `build_forests`, étages P, C, G, T, M, V,
+R), transmet le drapeau à la sonde et lit son schéma.
 
 Mode `--essai --sonde <binaire>` : logique jouée en local sur la voie CPU (minima relâchés, deux trames `v12set`),
 verdict « essai », jamais publié comme mesure. Essai du 8 octobre : aucun refus, empreintes identiques.
@@ -34,7 +40,11 @@ partagé avec `MES-B`, [`microbancs/outils/lecteur_full.py`](../outils/lecteur_f
 - la séquence `open` / `full` / `liberation` / sortie ;
 - à chaque passe, la trame et les sites attendus (taille du fichier / 12 ; la passe p joue la trame p modulo n) ;
 - le budget de l'appareil « partagé », des étages inclus dans le mur, une mémoire par étage cohérente avec `pic_octets`
-  et un mur non nul.
+  et un mur non nul ;
+- le schéma de la voie jouée : pour la Session recouverte, `etapes_schema` = `recouvert`, un raccord nul, des fenêtres
+  des tâches cohérentes, la mémoire P, C, tour, une fin de G égale à l'étage G et une queue égale à la fin de la tour
+  moins la fin de G, une fin par ordre (mêmes gardes que `tests/tower/full_probe_check.py`). Une sortie de l'autre
+  schéma est illisible.
 
 Un processus non conforme est un refus. La campagne exige un environnement complet et un GPU connu vide avant et après
 (chaîne vide, jamais absente), comme le
@@ -43,6 +53,7 @@ publie le journal de construction, les empreintes SHA-256 de la sonde, du pilote
 `CMakeCache` et le temps CPU médian par trame (`cpu_ns`).
 
 **Portes** : [`test_pilote_full.py`](test_pilote_full.py) (sonde simulée : campagne d'essai conforme, sites faux sur
-une trame refusés, empreinte instable refusée) et [`../outils/test_lecteur_full.py`](../outils/test_lecteur_full.py)
-(lecture, issues, Session à plusieurs trames ; seize mutants du lecteur tués par
+une trame refusés, empreinte instable refusée, `--sequentiel` transmis et lu, schéma croisé illisible) et
+[`../outils/test_lecteur_full.py`](../outils/test_lecteur_full.py) (lecture, issues, Session à plusieurs trames, schéma
+recouvert ; vingt-deux mutants du lecteur tués par
 [`../outils/mutants_lecteur_full.py`](../outils/mutants_lecteur_full.py)).

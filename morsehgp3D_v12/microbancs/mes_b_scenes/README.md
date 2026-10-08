@@ -41,15 +41,19 @@ L'« itinéraire » Boreas (une trame sur 200) n'est pas une captation telle que
 3. joue chaque cas `NOM:K:VOIE:PASSES` dans un processus neuf.
 
 Pour chaque cas, la sonde [`bench/full_probe.cpp`](../../bench/full_probe.cpp) mesure le même mur que `MES-FULL`
-(de l'entrée quantifiée en mémoire à la tour complète en mémoire). Elle publie par passe :
+(de l'entrée quantifiée en mémoire à la tour complète en mémoire), sur la Session recouverte, voie par défaut de la
+sonde depuis la bascule du 8 octobre (`--sequentiel` joue l'ancienne voie et la transmet à la sonde). Elle publie par
+passe :
 
-- les étages P, C (dont transferts), G, T, M, V, R ;
+- les étages P, C (dont transferts), G jusqu'au dernier calcul de G, puis la queue (avec `--sequentiel` : G, T, M, V,
+  R) ;
 - le temps CPU du processus pendant le mur ;
 - le pic du budget de l'hôte et le pic de mémoire résidente ;
 - la mémoire de l'appareil gardée par le contexte, et le pic de son budget propre (`--budget-appareil`, nouveau : la
   carte et l'hôte sont deux ressources, un manque de l'une rend `memory_budget` sans faux refus de l'autre) ;
-- la mémoire du budget de l'hôte par étage (`memoire_octets`) : pour P, C, G, raccord et TMVR, l'usage à la fin de
-  l'étage et le pic pendant l'étage ; le plus haut de ces pics est `pic_octets`, ce que le lecteur vérifie.
+- la mémoire du budget de l'hôte par étage (`memoire_octets`) : pour P, C et la tour (avec `--sequentiel` : P, C, G,
+  raccord et TMVR), l'usage à la fin de l'étage et le pic pendant l'étage ; le plus haut de ces pics est `pic_octets`,
+  ce que le lecteur vérifie.
 
 Le pilote échantillonne aussi `memory.used` de nvidia-smi toutes les 250 ms pendant le cas ; l'échantillon peut manquer
 un pic bref. Capacité gardée, pic des réservations, RSS et `memory.used` sont quatre mesures différentes.
@@ -98,18 +102,21 @@ Sorties : `rapport_b.json`, `tableaux_b.md`, `brut/` (sorties de chaque cas), `c
 [`microbancs/outils/lecteur_full.py`](../outils/lecteur_full.py). Sa porte
 [`test_lecteur_full.py`](../outils/test_lecteur_full.py) (Python 3.10 nu, aussi sous `-O`) vérifie :
 
-- une sortie conforme admise ; vingt-deux mutations du schéma refusées, dont quatre de la mémoire par étage et le mur
+- une sortie conforme admise ; vingt-trois mutations du schéma refusées, dont cinq de la mémoire par étage et le mur
   nul de la [contre-lecture de livraison](../../receipts/audit_reponses_20261008/mes_b_livraison/README.md) ; les
   cinq corruptions de la [prélecture de l'auditeur](../../receipts/audit_reponses_20261008/mes_b_prelecture/README.md)
   refusées ;
 - les refus et échecs publiés comme résultats ;
-- les Sessions à plusieurs trames, le budget de l'appareil attendu et l'empreinte demandée ou non.
+- les Sessions à plusieurs trames, le budget de l'appareil attendu et l'empreinte demandée ou non ;
+- le schéma de la Session recouverte : une sortie conforme admise, seize incohérences refusées (schéma, raccord,
+  partition, fenêtres, ouverture de G, mémoire, recouvrement, fins par ordre), et les deux schémas jamais mêlés.
 
-[`mutants_lecteur_full.py`](../outils/mutants_lecteur_full.py) tue seize mutants du lecteur ; un mutant équivalent
-est écarté, et le fichier dit pourquoi. La porte du pilote, [`test_pilote_b.py`](test_pilote_b.py), vérifie les
-verdicts B1 à B4 aux seuils, les empreintes entre passes et entre voies, ce que le pilote demande au lecteur, les
-étiquettes uniques et le pilote complet sur une sonde simulée (délai et seuil d'empreinte) ;
-[`mutants_pilote_b.py`](mutants_pilote_b.py) tue douze mutants du pilote.
+[`mutants_lecteur_full.py`](../outils/mutants_lecteur_full.py) tue vingt-deux mutants du lecteur ; un mutant
+équivalent est écarté, et le fichier dit pourquoi. La porte du pilote, [`test_pilote_b.py`](test_pilote_b.py), vérifie
+les verdicts B1 à B4 aux seuils, les empreintes entre passes et entre voies, ce que le pilote demande au lecteur, les
+étiquettes uniques et le pilote complet sur une sonde simulée (délai, seuil d'empreinte, schéma recouvert par défaut,
+`--sequentiel` transmis et lu, schéma croisé illisible, colonnes des tableaux) ;
+[`mutants_pilote_b.py`](mutants_pilote_b.py) tue dix-sept mutants du pilote.
 
 ## Premier essai local (8 octobre, indicatif)
 

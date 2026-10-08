@@ -14,6 +14,7 @@ import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 MUTANTS = {
+    'pics_successifs_ignores': (" and \\\n        all(mem[b][1] >= mem[a][0] for a, b in zip(stages, stages[1:]))", ""),
     'sans_cles_exactes': ("    if set(row) != keys:\n", "    if not set(row) >= keys:\n"),
     'booleen_admis': ("    return type(value) is int and 0 <= value < (1 << 64)",
                       "    return isinstance(value, int) and 0 <= value < (1 << 64)"),
@@ -31,16 +32,26 @@ MUTANTS = {
     'liberation_rang': ("not is_int(free['pass']) or free['pass'] != i", "free['pass'] != i"),
     'ouverture_raison': ("if open_row['status'] != 'ok' or open_row['reason'] != 'none':",
                          "if open_row['status'] != 'ok':"),
-    'memoire_sans_coherence': ("mem[k][0] > mem[k][1] for k in MEM_STAGES) or max(mem[k][1] for k in MEM_STAGES) != "
-                               "row['pic_octets']:", "mem[k][0] > mem[k][1] for k in MEM_STAGES):"),
-    'memoire_usage_libre': ("                mem[k][0] > mem[k][1] for k in MEM_STAGES)",
-                            "                False for k in MEM_STAGES)"),
+    'memoire_sans_coherence': ("            for k in stages) and max(mem[k][1] for k in stages) == peak",
+                               "            for k in stages)"),
+    'memoire_usage_libre': ("all(is_int(v) for v in mem[k]) and mem[k][0] <= mem[k][1]",
+                            "all(is_int(v) for v in mem[k])"),
     'mur_nul_admis': ("    if row['wall_ns'] == 0 or row['sites'] == 0:", "    if False:"),
     'trame_ignoree': ("row['status'] != 'ok' or row['trame'] != label or", "row['status'] != 'ok' or"),
     'trame_unique': ("    label, sites = attendu['trames'][i % len(attendu['trames'])]",
                      "    label, sites = attendu['trames'][0]"),
-    'empreinte_toujours': ("    keys = FULL_KEYS | {'full_sha256'} if attendu['empreinte'] else FULL_KEYS",
-                           "    keys = FULL_KEYS | {'full_sha256'}"),
+    'empreinte_toujours': ("    keys = base | {'full_sha256'} if attendu['empreinte'] else base",
+                           "    keys = base | {'full_sha256'}"),
+    'recouvert_raccord_libre': ("not int_block(st, WALL_STAGES) or st['raccord'] != 0 or",
+                                "not int_block(st, WALL_STAGES) or"),
+    'recouvert_queue_libre': ("rec['fin_g_ns'] != st['G'] or rec['queue_ns'] != st['TMVR'] or",
+                              "rec['fin_g_ns'] != st['G'] or"),
+    'recouvert_ordre1_libre': ("or any(e[0] > rec['fin_g_ns'] for e in ends) or ends[0][3] != 0:",
+                               "or any(e[0] > rec['fin_g_ns'] for e in ends):"),
+    'recouvert_fenetres_libres': ("win['T'] + win['M'] + win['V'] + win['R'] > win['foret'] or",
+                                  "False or"),
+    'schema_ignore': ("    overlapped = attendu.get('schema', 'sequentiel') == 'recouvert'",
+                      "    overlapped = False"),
 }
 
 

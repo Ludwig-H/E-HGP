@@ -175,12 +175,19 @@ bool find_job(Pipeline& p, bool claim, Job& job) noexcept {
   return true;
 }
 
-// Feuilles d'une tranche (pre-passe de T) ; compteurs et duree du fil (ajoutee a ns).
-Outcome slice_leaves(Pipeline& p, u32 i, u32 w, u64 begin, u64 end, u64& ns) noexcept {
+struct LeafWindow {
+  u64 begin = 0, end = 0;
+};
+
+// Feuilles d'une tranche ; ns et, pour la seule pre-passe de G, sa vraie fenetre murale.
+Outcome slice_leaves(Pipeline& p, u32 i, u32 w, u64 begin, u64 end, u64& ns,
+                     LeafWindow* window = nullptr) noexcept {
   const u64 t0 = now_ns(p);
   const Outcome o = resolve_leaves(p.forest.inputs[i], p.forest.forests.orders[i], p.forest.work[i].leaves.span(),
                                    begin, end, work_of(p, i, w));
-  const u64 spent = now_ns(p) - t0;
+  const u64 t1 = now_ns(p);
+  const u64 spent = t1 - t0;
+  if (window != nullptr) *window = LeafWindow{t0, t1};
   physical_of(p, i, w).leaves_ns += spent;
   ns += spent;
   return o;
@@ -240,10 +247,11 @@ void run_g(Pipeline& p, u32 w, u32 i, u64 slice) noexcept {
     flag = kSliceFailed;
   } else if (!p.g_failed.load(std::memory_order_relaxed) && step_done(p, i, kNumber)) {
     u64 spent = 0;
-    const Outcome leaves = slice_leaves(p, i, w, begin, end, spent);
+    LeafWindow window;
+    const Outcome leaves = slice_leaves(p, i, w, begin, end, spent, &window);
     if (leaves.ok()) flag |= kSliceLeaves;
     else record(p, w, 2, leaves);
-    charge_forest(p, w, t1, t1 + spent);
+    charge_forest(p, w, window.begin, window.end);
   }
   std::atomic_ref<u8>(p.g_flags[i][slice]).store(flag, std::memory_order_release);
   p.epoch.fetch_add(1, std::memory_order_release);

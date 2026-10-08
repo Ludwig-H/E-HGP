@@ -2,13 +2,18 @@
 """Porte du lecteur partage des sorties de la sonde FULL (lecteur_full.py, MES-B et MES-FULL), sans sonde ni donnees
 reelles. Python 3.10 nu, aucun assert (tient sous -O).
 
-  lecture        une sortie appareil conforme est admise ; vingt-deux mutations du schema (dont quatre de la
-                 memoire par etage : etage absent, pic incoherent avec pic_octets, usage au-dela du pic, booleen ;
+  lecture        une sortie appareil conforme est admise ; vingt-trois mutations du schema (dont cinq de la
+                 memoire par etage : etage absent, pic incoherent avec pic_octets, usage au-dela du pic, booleen, pic
+                 d'un etage sous l'usage a la fin du precedent ;
                  et le mur nul de la contrelecture de livraison de MES-B, refuse avant toute statistique) et les cinq
                  corruptions de la prelecture de l'auditeur (cle repetee, booleen, ouverture, 2^64, NaN) sont
                  refusees comme sorties illisibles (controle manquant), jamais comme resultats ;
   issues         refus de la sonde (code 2, ressources ou degenerescence) publie comme resultat, avec ses passes deja
                  jouees ; invariant viole (codes 2 et 3), signal et expiration publies comme echecs du cas ;
+  recouvert      schema de la Session recouverte (voie par defaut de la sonde depuis T2-d-A) : sortie conforme admise,
+                 seize incoherences refusees (schema, raccord, partition, fenetres, ouverture, memoire dont le pic
+                 de la tour sous l'usage a la fin de C, recouvrement, fins par ordre), et aucun melange des deux
+                 schemas ;
   session        plusieurs trames en alternance (passe p = trame p modulo n, comme la Session de MES-FULL) : admises
                  dans l'ordre, refusees permutees ; budget de l'appareil attendu « partage » (MES-FULL) ou « separe »
                  (MES-B), l'autre refuse ; empreinte absente quand elle n'est pas demandee, refusee si elle l'est.
@@ -82,6 +87,7 @@ def check_reading(errors):
         'memoire_pic_incoherent': lambda r: r['memoire_octets'].update(C=[4, 9]),
         'memoire_usage_sup_pic': lambda r: r['memoire_octets'].update(TMVR=[9, 8]),
         'memoire_booleen': lambda r: r['memoire_octets'].update(P=[True, 2]),
+        'memoire_pic_sous_usage_precedent': lambda r: r['memoire_octets'].update(C=[8, 10]),
         'mur_nul': lambda r: (r.update(wall_ns=0), r['etapes_ns'].update({k: 0 for k in r['etapes_ns']}),
                               r['g_ns'].update(tables=0, resolution=0)),
     }
@@ -167,15 +173,75 @@ def check_session(errors):
         errors.append('session : empreinte absente admise quand elle est demandee')
 
 
+def overlapped_row(i, wall=4_000_000_000):
+    """Ligne "full" du schema recouvert (voie par defaut de la sonde depuis T2-d-A), K = 5."""
+    g, queue = wall // 2, wall // 10
+    return dict(phase='full', pass_=i, trame=LABEL, voie='device', status='ok', etapes_schema='recouvert',
+                coord_bits=21, kmax=5, threads=48, sites=SITES, wall_ns=wall,
+                etapes_ns=dict(P=1, C=wall // 4, G=g, raccord=0, TMVR=queue),
+                fenetres_ns=dict(G=5 * g, foret=4 * g, foret_apres_g=queue, T=g, M=g // 2, V=g // 4, R=g),
+                c_ns={k: 1 for k in lf.C_KEYS}, g_ns=dict(ouverture=g // 10, tables=g // 20),
+                hors_mur_ns=dict(validation=1, empreinte=1), pic_octets=12, cpu_ns=5, rss_max_octets=10,
+                appareil_octets=7, epinglee_octets=3, pic_appareil_octets=8, full_sha256=SHA,
+                memoire_octets=dict(P=[1, 2], C=[4, 10], tour=[8, 12]),
+                recouvrement=dict(tour_ns=g + queue + 1, ouverture_ns=g // 10, fin_g_ns=g, fin_ns=g + queue,
+                                  queue_ns=queue, noyau_reprises=18, noyau_arrets=13, admis_octets=99),
+                fins_par_ordre_ns=[[g, g + 1, g + 2, 0, g + 3]] + [[g - 10 * k, g, g + 1, g + 2, g + 3]
+                                                                   for k in range(1, 5)])
+
+
+def check_overlapped(errors):
+    """Schema recouvert : sortie conforme admise, coherences du recouvrement exigees, schemas non melanges."""
+    attendu = dict(ATTENDU, schema='recouvert')
+    def output(mutate=None, row_maker=overlapped_row):
+        rows = [dict(phase='open', status='ok', reason='none', wall_ns=5, budget_appareil='separe')]
+        for i in range(2):
+            row = row_maker(i)
+            if mutate is not None and i == 1:
+                mutate(row)
+            rows += [row, dict(phase='liberation', pass_=i, liberation_ns=3)]
+        rows.append(dict(phase='exit', status='ok', reason='none'))
+        return dump(rows)
+    state = lf.parse_output(0, output(), attendu)
+    if state['etat'] != 'ok':
+        errors.append('recouvert : sortie conforme refusee (%s)' % state['raison'])
+    mutations = {
+        'schema_absent': lambda r: r.pop('etapes_schema'),
+        'raccord_non_nul': lambda r: r['etapes_ns'].update(raccord=1),
+        'partition_hors_mur': lambda r: r['etapes_ns'].update(P=r['wall_ns']),
+        'fenetres_hors_foret': lambda r: r['fenetres_ns'].update(T=r['fenetres_ns']['foret']),
+        'ouverture_hors_g': lambda r: r['g_ns'].update(ouverture=r['etapes_ns']['G'] + 1),
+        'memoire_tour_absente': lambda r: r['memoire_octets'].pop('tour'),
+        'memoire_pic_incoherent': lambda r: r['memoire_octets'].update(tour=[8, 11]),
+        'memoire_pic_sous_usage_precedent': lambda r: r['memoire_octets'].update(P=[11, 11]),
+        'queue_incoherente': lambda r: r['recouvrement'].update(queue_ns=r['recouvrement']['queue_ns'] + 1),
+        'tmvr_hors_queue': lambda r: r['etapes_ns'].update(TMVR=r['etapes_ns']['TMVR'] + 1),
+        'fin_g_incoherente': lambda r: r['recouvrement'].update(fin_g_ns=r['recouvrement']['fin_g_ns'] + 1),
+        'arrets_sup_reprises': lambda r: r['recouvrement'].update(noyau_arrets=19),
+        'admission_nulle': lambda r: r['recouvrement'].update(admis_octets=0),
+        'fins_ordres_manquants': lambda r: r['fins_par_ordre_ns'].pop(),
+        'verticales_ordre_1': lambda r: r['fins_par_ordre_ns'][0].__setitem__(3, 1),
+        'fin_g_ordre_tardive': lambda r: r['fins_par_ordre_ns'][2].__setitem__(0, r['recouvrement']['fin_g_ns'] + 1),
+    }
+    for name, mutate in mutations.items():
+        state = lf.parse_output(0, output(mutate), attendu)
+        if state['etat'] != 'illisible':
+            errors.append('recouvert : mutation %s rendue %s' % (name, state['etat']))
+    if lf.parse_output(0, output(row_maker=full_row), attendu)['etat'] != 'illisible':
+        errors.append('recouvert : ligne sequentielle admise quand le schema recouvert est attendu')
+    if lf.parse_output(0, output(), ATTENDU)['etat'] != 'illisible':
+        errors.append('recouvert : ligne recouverte admise quand le schema sequentiel est attendu')
+
+
 def main():
     errors = []
-    for check in (check_reading, check_outcomes, check_session):
+    for check in (check_reading, check_outcomes, check_session, check_overlapped):
         check(errors)
     for error in errors:
         print(error, file=sys.stderr)
     if errors:
         return 1
-    print('test_lecteur_full_ok lecture=28 issues=7 session=6')
+    print('test_lecteur_full_ok lecture=29 issues=7 session=6 recouvert=19')
     return 0
 
 

@@ -31,6 +31,12 @@ MUTANTS = {
                          "    if controls:"),
     'archive_admise': ("        print('pilote_c : archive ou manifeste refuses', file=sys.stderr)\n        return 2",
                        "        clouds = []"),
+    'schema_sequentiel_attendu': ("trames=[(c['etiquette'], c['sites']) for c in clouds], schema=MODE['schema'])",
+                                  "trames=[(c['etiquette'], c['sites']) for c in clouds], schema='sequentiel')"),
+    'drapeau_perdu': ("    argv += MODE['flags']\n", ""),
+    'mode_colle': ("    MODE.update(dict(schema='sequentiel', flags=['--sequentiel']) if args.sequentiel else\n"
+                   "                dict(schema='recouvert', flags=[]))",
+                   "    if args.sequentiel:\n        MODE.update(schema='sequentiel', flags=['--sequentiel'])"),
 }
 
 

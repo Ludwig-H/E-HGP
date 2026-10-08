@@ -143,7 +143,9 @@ sorties anticipées, repli compact ; étage C **26,9 / 23,8 / 26,8 ms à K5** (r
 mur FULL 154 / 123 / 156 ms (−4 à −6 %), G et T, M, V, R restant en série. **T2-d-A adopté sur G4 le 8 octobre**
 ([session T2-d-A](../receipts/g4_t2da_20261008/README.md), bras avant = `27eca166b`) : Session recouverte, mur FULL K5
 **99,7 / 81,0 / 97,8 ms** sur ng00–02 (rapport 0,65 à 0,69) ; 37 trames `v12set` : médiane 160,6 ms, maximum 327,3 ms ;
-queue de 5 à 14 ms, G devient le chemin critique. **T2-d-B intégré le 8 octobre, à qualifier sur G4** (coût interne
+queue de 5 à 14 ms, G devient le chemin critique ; la Session recouverte est depuis la voie par défaut de la sonde
+FULL et de ses pilotes (`--sequentiel` garde l'ancienne voie comme témoin,
+[bascule](../receipts/developpement_20261008/reponse_audit_t2d_bascule.md)). **T2-d-B intégré le 8 octobre, à qualifier sur G4** (coût interne
 de G, [pilote](../microbancs/mes_t2d_b/pilote_t2d_b.py), règle `REGLE_T2D_B` écrite d'avance, bras construits par
 substitution sur `902041f66`) : garde du census resserrée (L1), compteurs de la garde reportés (L2), census à témoins
 sur la sphère (L3), proposition par la voie entière exacte puis DWelzl amorcé (L4) ; même objet (FUL1 identique sur

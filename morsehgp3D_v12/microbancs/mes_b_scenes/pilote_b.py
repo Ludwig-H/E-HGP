@@ -22,6 +22,9 @@ Un refus de la sonde (code 2 : memory_budget, index_overflow_u32, ...) est un RE
 une mort par signal, une expiration ou un invariant viole est un ECHEC du cas, publie ; une sortie hors schema ou un
 appareil indisponible font manquer un controle.
 
+Voie jouee : la Session recouverte (schema "recouvert" de la sonde, voie par defaut depuis l'adoption de T2-d-A :
+etages P, C, G jusqu'au dernier calcul de G, puis la queue ; memoire P, C, tour) ; --sequentiel joue l'ancienne voie
+(etages P, C, G, T, M, V, R ; memoire P, C, G, raccord, TMVR) et transmet le drapeau a la sonde.
 Lecture stricte de chaque sortie par le lecteur partage microbancs/outils/lecteur_full.py (schema exact, entiers u64
 non booleens, sequence open/full/liberation/sortie, etages inclus dans le mur, memoire par etage coherente avec
 pic_octets, mur non nul) ; sites = compte du manifeste ; budget de l'appareil « separe » attendu sur la voie appareil.
@@ -72,6 +75,8 @@ CMAKE_KEYS = re.compile(r'^(CMAKE_BUILD_TYPE|CMAKE_CXX_COMPILER|CMAKE_CUDA_COMPI
                         r'CMAKE_CXX_FLAGS|CMAKE_CXX_FLAGS_RELEASE|CMAKE_CUDA_FLAGS|CMAKE_CUDA_FLAGS_RELEASE|'
                         r'MHGP12_[A-Z0-9_]+)(:[A-Z]+)?=')
 BITS_EXPECTED = 21
+# Voie jouee (fixee par main) : la Session recouverte par defaut ; --sequentiel joue l'ancienne voie et son schema.
+MODE = dict(schema='recouvert', flags=[])
 
 
 def sha256_file(path):
@@ -201,7 +206,7 @@ def label_of(name, used):
 def expected(case, label, sites):
     """Ce que le lecteur partage doit trouver dans la sortie d'un cas : une trame, budget de l'appareil separe."""
     return dict(voie=case['voie'], k=case['k'], fils=case['fils'], passes=case['passes'], empreinte=case['empreinte'],
-                trames=[(label, sites)], budget_appareil='separe', bits=BITS_EXPECTED)
+                trames=[(label, sites)], budget_appareil='separe', bits=BITS_EXPECTED, schema=MODE['schema'])
 
 
 class GpuSampler:
@@ -336,28 +341,33 @@ def tables(report):
             '%.1f' % (smi / 1024) if smi is not None else '—',
             '%.1f' % (warm['pic_octets'] / r['sites'] / 1e3) if warm else '—',
             ('`%s`' % warm['full_sha256'][:12]) if warm and 'full_sha256' in warm else '—'))
+    overlapped = MODE['schema'] == 'recouvert'
+    stages = lf.MEM_OVERLAP if overlapped else lf.MEM_STAGES
     lines += ['', 'Memoire du budget de l\'hote par etage, passe chaude (Ko par site : en usage a la fin de '
               'l\'etage / pic pendant l\'etage) :', '',
-              '| Scene | K | voie | ' + ' | '.join(lf.MEM_STAGES) + ' |',
-              '| --- | ---: | --- |' + ' ---: |' * len(lf.MEM_STAGES)]
+              '| Scene | K | voie | ' + ' | '.join(stages) + ' |',
+              '| --- | ---: | --- |' + ' ---: |' * len(stages)]
     for r in report['cas']:
         warm, _kind = warm_pass(r['passes'])
         if warm is None:
             continue
         mem = warm['memoire_octets']
         lines.append('| `%s` | %d | %s | %s |' % (r['nom'], r['k'], r['voie'], ' | '.join(
-            '%.2f / %.2f' % (mem[k][0] / r['sites'] / 1e3, mem[k][1] / r['sites'] / 1e3) for k in lf.MEM_STAGES)))
-    lines += ['', 'Etages de la passe chaude (secondes) :', '',
-              '| Scene | K | voie | P | C | dont transferts | G | T | M | V | R | validation | empreinte '
-              '| liberation |',
-              '| --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |']
+            '%.2f / %.2f' % (mem[k][0] / r['sites'] / 1e3, mem[k][1] / r['sites'] / 1e3) for k in stages)))
+    tail = ('queue',) if overlapped else ('T', 'M', 'V', 'R')
+    lines += ['', 'Etages de la passe chaude (secondes%s) :' % (
+                  ' ; G jusqu\'au dernier calcul de G, queue = foret non recouverte' if overlapped else ''), '',
+              '| Scene | K | voie | P | C | dont transferts | G | ' + ' | '.join(tail) +
+              ' | validation | empreinte | liberation |',
+              '| --- | ---: | --- |' + ' ---: |' * (7 + len(tail))]
     for r in report['cas']:
         warm, _kind = warm_pass(r['passes'])
         if warm is None:
             continue
         st = warm['etapes_ns']
+        rest = (st['TMVR'],) if overlapped else (st['T'], st['M'], st['V'], st['R'])
         lines.append('| `%s` | %d | %s | %s |' % (r['nom'], r['k'], r['voie'], ' | '.join('%.2f' % (v / 1e9) for v in (
-            st['P'], st['C'], warm['c_ns']['transferts'], st['G'], st['T'], st['M'], st['V'], st['R'],
+            st['P'], st['C'], warm['c_ns']['transferts'], st['G']) + rest + (
             warm['hors_mur_ns']['validation'], warm['hors_mur_ns']['empreinte'], warm['liberation_ns']))))
     return '\n'.join(lines) + '\n'
 
@@ -378,8 +388,11 @@ def main(argv):
     parser.add_argument('--jobs', type=int, default=44)
     parser.add_argument('--nvcc', default=None)
     parser.add_argument('--essai', action='store_true')
+    parser.add_argument('--sequentiel', action='store_true')
     parser.add_argument('--sonde')
     args = parser.parse_args(argv[1:])
+    MODE.update(dict(schema='sequentiel', flags=['--sequentiel']) if args.sequentiel else
+                dict(schema='recouvert', flags=[]))
     t_start = time.monotonic()
     cases = parse_cases(args.cas)
     series = [s.split(',') for s in args.series.split(';') if s]
@@ -430,7 +443,8 @@ def main(argv):
             results.append(entry)
             continue
         cmd = [probe, '--trame=%s,%s,%s' % (xyz, ids, label), '--k=%d' % c['k'], '--threads=%d' % args.fils,
-               '--passes=%d' % c['passes'], '--budget=%d' % budget] + (['--digest'] if c['empreinte'] else [])
+               '--passes=%d' % c['passes'], '--budget=%d' % budget] + (['--digest'] if c['empreinte'] else []) + \
+            MODE['flags']
         if c['voie'] == 'appareil':
             cmd += ['--device', '--budget-appareil=%d' % device_budget]
         tag = '%s_k%d_%s' % (c['nom'], c['k'], c['voie'])
@@ -466,7 +480,8 @@ def main(argv):
     report = dict(mesure='MES-B', regime='b', verdict=verdict, criteres=criteria, controles=controls,
                   environnement=dict(avant=env_before, apres=env_after), provenance=provenance,
                   parametres=dict(fils=args.fils, budget_octets=budget, budget_appareil_octets=device_budget,
-                                  delai_global_s=args.delai_global, series=series, argv=argv[1:]),
+                                  delai_global_s=args.delai_global, series=series, schema=MODE['schema'],
+                                  argv=argv[1:]),
                   empreintes=digests, cas=results, duree_s=round(time.monotonic() - t_start, 1))
     with open(os.path.join(out_dir, 'rapport_b.json'), 'w', encoding='utf-8') as handle:
         json.dump(report, handle, indent=1, sort_keys=True)

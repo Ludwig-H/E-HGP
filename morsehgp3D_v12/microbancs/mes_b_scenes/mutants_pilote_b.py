@@ -28,8 +28,19 @@ MUTANTS = {
                          "            if r['etat'] in ('echec', 'refus')]"),
     'b4_sans_refus': ("for r in k10 if r['etat'] != 'ok']", "for r in k10 if r['etat'] == 'echec']"),
     'pente_sans_garde': ("    if any(x <= 0 or y <= 0 for x, y in points):\n        return None\n", ""),
-    'budget_partage_attendu': ("trames=[(label, sites)], budget_appareil='separe', bits=BITS_EXPECTED)",
-                               "trames=[(label, sites)], budget_appareil='partage', bits=BITS_EXPECTED)"),
+    'budget_partage_attendu': ("trames=[(label, sites)], budget_appareil='separe', bits=BITS_EXPECTED,",
+                               "trames=[(label, sites)], budget_appareil='partage', bits=BITS_EXPECTED,"),
+    'schema_sequentiel_attendu': ("bits=BITS_EXPECTED, schema=MODE['schema'])",
+                                  "bits=BITS_EXPECTED, schema='sequentiel')"),
+    'drapeau_perdu': ("(['--digest'] if c['empreinte'] else []) + \\\n            MODE['flags']",
+                      "(['--digest'] if c['empreinte'] else [])"),
+    'mode_colle': ("    MODE.update(dict(schema='sequentiel', flags=['--sequentiel']) if args.sequentiel else\n"
+                   "                dict(schema='recouvert', flags=[]))",
+                   "    if args.sequentiel:\n        MODE.update(schema='sequentiel', flags=['--sequentiel'])"),
+    'colonnes_sequentielles': ("    tail = ('queue',) if overlapped else ('T', 'M', 'V', 'R')",
+                               "    tail = ('T', 'M', 'V', 'R')"),
+    'memoire_sequentielle': ("    stages = lf.MEM_OVERLAP if overlapped else lf.MEM_STAGES",
+                             "    stages = lf.MEM_STAGES"),
 }
 
 

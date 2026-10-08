@@ -20,10 +20,12 @@
 // La passe p joue la trame p mod n (--trame repete : Session qui enchaine des trames successives). Une ligne JSON par
 // passe ; la premiere est publiee comme les autres (aucun prechauffage cache).
 //
-// --recouvert : la tour par build_tower (Session recouverte, decision D-F2 : G et T, M, V, R dans une seule region du
-// Pool) au lieu de resolve_tower puis build_forests ; meme objet (empreinte FUL1 egale, porte
-// mhgp12_full_probe_cpu_recouvert), autre schema, annonce par "etapes_schema" : "recouvert" (absent de la voie par
-// defaut, dont les lignes et les gardes, dont T + M + V + R <= TMVR et tables + resolution <= G, restent inchangees) :
+// Voie par defaut depuis l'adoption de T2-d-A sur G4 (receipts/g4_t2da_20261008, 8 octobre 2026) : la tour par
+// build_tower (Session recouverte, decision D-F2 : G et T, M, V, R dans une seule region du Pool) ; --recouvert la
+// demande explicitement ; --sequentiel garde resolve_tower puis build_forests (ancienne voie, temoin et ablation).
+// Meme objet (empreinte FUL1 egale, portes mhgp12_full_probe_cpu et mhgp12_full_probe_cpu_recouvert) ; schema de la
+// Session recouverte annonce par "etapes_schema" : "recouvert" (absent des lignes de la voie sequentielle, dont les
+// gardes, dont T + M + V + R <= TMVR et tables + resolution <= G, restent inchangees) :
 //   - etapes_ns, partition murale seule : P et C comme ci-dessus ; G = du debut de build_tower a la fin du DERNIER
 //     CALCUL de G (ouverture de l'etage, admission et index des naissances compris, taches de la foret jouees pendant G
 //     comprises ; la pre-passe des feuilles qu'un fil de G enchaine sur sa tranche est un travail de la foret) ;
@@ -45,7 +47,7 @@
 //
 //   mhgp12_full_probe (--trame=<xyz.u32le>,<ids.u32le>[,NOM] ... | --uniform=N,GRAINE,BITS) [--k=K] [--leaf=L]
 //                     [--threads=W] [--passes=P] [--device] [--digest] [--budget=OCTETS] [--cache=OCTETS]
-//                     [--budget-appareil=OCTETS] [--recouvert]
+//                     [--budget-appareil=OCTETS] [--recouvert | --sequentiel]
 //
 // Codes : 0 conforme ; 2 refus (usage, entree, ressources, appareil indisponible, degenerescence) ; 3 invariant viole.
 #include <algorithm>
@@ -82,7 +84,7 @@ struct Options {
   int kmax = 5;
   u32 leaf = 24, threads = 1;
   u64 passes = 1, budget = MemoryBudget::kUnlimited, cache = 0, device_budget = 0;
-  bool device = false, digest = false, overlapped = false;
+  bool device = false, digest = false, overlapped = true;  // voie par defaut : Session recouverte (T2-d-A adopte)
 };
 
 struct Frame {
@@ -154,7 +156,8 @@ bool parse(int argc, char** argv, Options& o) {
     else if (a.substr(0, 18) == "--budget-appareil=" && parse_u64(a.substr(18), v) && v > 0) o.device_budget = v;
     else if (a == "--device") o.device = true;
     else if (a == "--digest") o.digest = true;
-    else if (a == "--recouvert") o.overlapped = true;
+    else if (a == "--recouvert") o.overlapped = true;  // explicite, egal au defaut
+    else if (a == "--sequentiel") o.overlapped = false;
     else return false;
   }
   return (o.uniform == 0) != o.frames.empty() && (o.device_budget == 0 || o.device);
@@ -464,7 +467,7 @@ int main(int argc, char** argv) {
   if (!parse(argc, argv, o)) {
     std::fprintf(stderr, "usage : mhgp12_full_probe (--trame=<xyz>,<ids>[,NOM] ... | --uniform=N,GRAINE,BITS) "
                          "[--k=K] [--leaf=L] [--threads=W] [--passes=P] [--device] [--digest] [--budget=OCTETS] "
-                         "[--cache=OCTETS] [--budget-appareil=OCTETS (avec --device)] [--recouvert]\n");
+                         "[--cache=OCTETS] [--budget-appareil=OCTETS (avec --device)] [--recouvert | --sequentiel]\n");
     return 2;
   }
   const Outcome outcome = guarded([&]() { return run(o); });

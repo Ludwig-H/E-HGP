@@ -15,9 +15,11 @@ Etapes : environnement et GPU vide avant et apres ; construction Release au prof
      delai propre --delai-cas : un refus, un echec ou une expiration y est un resultat publie.
 Ordre : K5 en entier (Sessions, puis nuages difficiles), puis K10 : les criteres ne dependent que de K5.
 Delai global --delai-global : une etape dont la prevision depasse le temps restant n'est pas lancee (non jouee).
+Voie jouee : la Session recouverte (schema "recouvert" de la sonde, voie par defaut depuis l'adoption de T2-d-A) ;
+--sequentiel joue l'ancienne voie, transmet le drapeau a la sonde et lit son schema.
 Lecture stricte de chaque sortie par le lecteur partage microbancs/outils/lecteur_full.py (trame et sites attendus a
-chaque passe, budget de l'appareil separe). Empreinte FUL1 identique sur toutes les passes d'un nuage, et entre les
-voies a K egal ; sinon controle manquant.
+chaque passe, budget de l'appareil separe, schema de la voie jouee). Empreinte FUL1 identique sur toutes les passes
+d'un nuage, et entre les voies a K egal ; sinon controle manquant.
 
 Ajustements : par configuration et par groupe (reel ; chaque famille synthetique), moindres carres t = a + b n sur les
 valeurs chaudes (a : cout fixe, b : cout par site) ; jamais une droite qui melange des groupes ou des nombres de fils
@@ -38,7 +40,7 @@ un critere n'est pas evalue.
 
 Usage : pilote_c.py --src SRC --travail DOSSIER --archive TAR --deballage DOSSIER --sortie DOSSIER
                     [--voies cpu,appareil] [--k 5,10] [--fils 1,4,48] [--tours 3] [--tours-difficiles 2]
-                    [--fils-difficiles 48] [--delai-global 1800] [--delai-cas 120] [--jobs 44]
+                    [--fils-difficiles 48] [--delai-global 1800] [--delai-cas 120] [--jobs 44] [--sequentiel]
                     [--essai --sonde BINAIRE]   essai local : sonde existante, voie CPU, verdict « essai »
 Sorties : <sortie>/rapport_c.json, <sortie>/tableaux_c.md, <sortie>/brut/, <sortie>/construction.log.
 Codes : 0 rendu (quel que soit le verdict) ; 2 usage ou donnees ; 3 construction impossible. Python 3.10 nu, aucun
@@ -62,6 +64,8 @@ SOUND = ('uniform', 'clusters8', 'slab')
 HARD = ('lattice', 'line', 'sphere')
 MAIN_REGIME_NS_PER_SITE = 241.3e6 / 64740  # session K, mediane de v12set, voie appareil, K5
 FIXED_LIMIT_NS = 2e6
+# Voie jouee (fixee par main) : la Session recouverte par defaut ; --sequentiel joue l'ancienne voie et son schema.
+MODE = dict(schema='recouvert', flags=[])
 
 
 def group_of(case):
@@ -100,6 +104,7 @@ def fit(points):
 def probe_argv(probe, clouds, voie, k, fils, passes, budget):
     argv = [probe] + ['--trame=%s,%s,%s' % (c['xyz'], c['ids'], c['etiquette']) for c in clouds]
     argv += ['--k=%d' % k, '--threads=%d' % fils, '--passes=%d' % passes, '--digest', '--budget=%d' % budget]
+    argv += MODE['flags']
     if voie == 'appareil':
         argv += ['--device', '--budget-appareil=%d' % budget]
     return argv
@@ -107,7 +112,7 @@ def probe_argv(probe, clouds, voie, k, fils, passes, budget):
 
 def expected(clouds, voie, k, fils, passes):
     return dict(voie=voie, k=k, fils=fils, passes=passes, empreinte=True, budget_appareil='separe', bits=21,
-                trames=[(c['etiquette'], c['sites']) for c in clouds])
+                trames=[(c['etiquette'], c['sites']) for c in clouds], schema=MODE['schema'])
 
 
 def session_values(passes, clouds):
@@ -223,7 +228,10 @@ def main(argv):
     parser.add_argument('--budget-gio', type=float, default=64.0)
     parser.add_argument('--jobs', type=int, default=44)
     parser.add_argument('--essai', action='store_true')
+    parser.add_argument('--sequentiel', action='store_true')
     args = parser.parse_args(argv[1:])
+    MODE.update(dict(schema='sequentiel', flags=['--sequentiel']) if args.sequentiel else
+                dict(schema='recouvert', flags=[]))
     t_start = time.monotonic()
     try:
         voies = args.voies.split(',')
@@ -293,7 +301,7 @@ def main(argv):
                 controls.append('environnement %s incomplet ou GPU occupe' % when)
     criteria = verdicts(configs, hard, [c['nom'] for c in hard_clouds])
     report.update(configurations=configs, difficiles=hard, criteres=criteria,
-                  parametres=dict(argv=argv[1:], tours=args.tours, budget_octets=budget),
+                  parametres=dict(argv=argv[1:], tours=args.tours, budget_octets=budget, schema=MODE['schema']),
                   duree_s=round(time.monotonic() - t_start, 1))
     report['verdict'] = overall(args.essai, controls, report['criteres'])
     with open(os.path.join(args.sortie, 'rapport_c.json'), 'w', encoding='utf-8') as handle:

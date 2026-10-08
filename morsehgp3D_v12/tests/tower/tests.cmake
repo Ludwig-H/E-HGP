@@ -171,8 +171,13 @@ add_executable(mhgp12_full_probe ${PROJECT_SOURCE_DIR}/bench/full_probe.cpp)
 target_link_libraries(mhgp12_full_probe PRIVATE mhgp12)
 mhgp12_expect_code(mhgp12_full_probe_usage 2 mhgp12_full_probe --k=5 LABELS fast)
 mhgp12_python_gate(mhgp12_full_probe_cpu 0 full_probe_check.py $<TARGET_FILE:mhgp12_full_probe>
-                   $<TARGET_FILE:mhgp12_tower_chain> LINE "full_probe_ok passes=7 trames=2 identite_chaine=oui"
-                   LABELS fast TIMEOUT 600)
+                   $<TARGET_FILE:mhgp12_tower_chain>
+                   LINE "full_probe_ok passes=7 trames=2 identite_chaine=oui schema=recouvert" LABELS fast TIMEOUT 600)
+# Voie sequentielle (--sequentiel : resolve_tower puis build_forests, temoin et ablation depuis que la Session
+# recouverte est la voie par defaut) : schema d'origine, gardes T + M + V + R <= TMVR et tables + resolution <= G.
+mhgp12_python_gate(mhgp12_full_probe_cpu_sequentiel 0 full_probe_check.py $<TARGET_FILE:mhgp12_full_probe>
+                   $<TARGET_FILE:mhgp12_tower_chain> --sequentiel
+                   LINE "full_probe_ok passes=7 trames=2 identite_chaine=oui schema=sequentiel" LABELS fast TIMEOUT 600)
 # Meme porte sur la Session recouverte (--recouvert, build_tower, decision D-F2) : schema "recouvert" (partition murale,
 # fenetres murales des taches, memoire P, C, tour, recouvrement et fins par ordre coherents) et empreinte FUL1 EGALE a
 # celle de mhgp12_tower_chain (voie sequentielle).

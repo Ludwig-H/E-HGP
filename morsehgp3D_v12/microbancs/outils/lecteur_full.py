@@ -14,8 +14,15 @@ Issues : 'ok' ; 'refus' (code 2 de la sonde et ligne de sortie conforme d'un ref
 (expiration, signal, invariant viole ou sortie inattendue : un resultat du cas) ; 'illisible' (sortie hors schema ou
 appareil indisponible : un controle manque).
 
+Deux schemas de ligne "full" (attendu['schema']) : 'recouvert', la Session recouverte, voie par defaut de la sonde
+depuis l'adoption de T2-d-A (etapes_ns = partition murale P, C, G, raccord nul, TMVR = queue ; fenetres_ns = sommes de
+fenetres murales des taches, ni murs ni temps CPU ; g_ns ouverture et tables ; memoire_octets P, C, tour ;
+recouvrement et fins_par_ordre_ns coherents, memes gardes que tests/tower/full_probe_check.py) ; 'sequentiel', la voie
+--sequentiel (etapes P..R, T + M + V + R <= TMVR, tables + resolution <= G, memoire_octets P, C, G, raccord, TMVR).
+
 attendu : dict(voie='appareil'|'cpu', k, fils, passes, empreinte (bool), trames=[(etiquette, sites), ...],
-budget_appareil='separe'|'partage' (voie appareil), bits=21 par defaut).
+budget_appareil='separe'|'partage' (voie appareil), bits=21 par defaut, schema='recouvert'|'sequentiel' (defaut
+'sequentiel', le schema des archives anterieures)).
 Python 3.10 nu, aucun assert. Bibliotheque seulement (aucun point d'entree).
 """
 import json
@@ -32,6 +39,14 @@ FULL_KEYS = frozenset(('phase', 'pass', 'trame', 'voie', 'status', 'coord_bits',
                        'memoire_octets'))
 INT_KEYS = ('pass', 'coord_bits', 'kmax', 'threads', 'sites', 'wall_ns', 'pic_octets', 'cpu_ns', 'rss_max_octets',
             'appareil_octets', 'epinglee_octets', 'pic_appareil_octets')
+# Schema de la Session recouverte (en-tete de bench/full_probe.cpp).
+WALL_STAGES = ('P', 'C', 'G', 'raccord', 'TMVR')
+WINDOWS = ('G', 'foret', 'foret_apres_g', 'T', 'M', 'V', 'R')
+G_OPEN = ('ouverture', 'tables')
+MEM_OVERLAP = ('P', 'C', 'tour')
+OVERLAP = ('tour_ns', 'ouverture_ns', 'fin_g_ns', 'fin_ns', 'queue_ns', 'noyau_reprises', 'noyau_arrets',
+           'admis_octets')
+FULL_KEYS_OVERLAP = FULL_KEYS | frozenset(('etapes_schema', 'fenetres_ns', 'recouvrement', 'fins_par_ordre_ns'))
 OPEN_KEYS = frozenset(('phase', 'status', 'reason', 'wall_ns', 'budget_appareil'))
 VOIES = {'appareil': 'device', 'cpu': 'cpu'}
 REFUSALS = ('invalid_input', 'unsupported_degeneracy', 'resource_exhausted')  # code 2 de la sonde : refus publies
@@ -55,10 +70,52 @@ def reject_constant(value):
     raise ValueError('constante JSON non finie : ' + value)
 
 
+def int_block(block, keys):
+    """Bloc objet aux cles exactes `keys`, entiers u64 non booleens."""
+    return type(block) is dict and set(block) == set(keys) and all(is_int(block[k]) for k in keys)
+
+
+def mem_ok(mem, stages, peak):
+    """Memoire par etage, dans l'ordre des etages : [usage a la fin, pic pendant] par etage, usage au plus le pic, plus
+    haut pic = pic_octets ; le pic d'un etage repart de l'usage a la fin du precedent (restart_peak de la sonde, entre
+    deux etages, sans travail en cours) : il ne lui est pas inferieur (auditeur, t2da_integration)."""
+    return type(mem) is dict and set(mem) == set(stages) and \
+        all(type(mem[k]) is list and len(mem[k]) == 2 and all(is_int(v) for v in mem[k]) and mem[k][0] <= mem[k][1]
+            for k in stages) and max(mem[k][1] for k in stages) == peak and \
+        all(mem[b][1] >= mem[a][0] for a, b in zip(stages, stages[1:]))
+
+
+def check_overlapped(row, i, kmax):
+    """'' si les blocs du schema recouvert de la passe i sont coherents, sinon la raison."""
+    st, win, rec, g = row['etapes_ns'], row['fenetres_ns'], row['recouvrement'], row['g_ns']
+    if row['etapes_schema'] != 'recouvert' or not int_block(st, WALL_STAGES) or st['raccord'] != 0 or \
+            sum(st.values()) > row['wall_ns']:
+        return 'partition murale du schema recouvert (passe %d)' % i
+    if not int_block(win, WINDOWS) or win['T'] + win['M'] + win['V'] + win['R'] > win['foret'] or \
+            win['foret_apres_g'] > win['foret']:
+        return 'fenetres murales (passe %d)' % i
+    if not int_block(g, G_OPEN) or g['tables'] > g['ouverture'] or g['ouverture'] > st['G']:
+        return 'ouverture de G (passe %d)' % i
+    if not mem_ok(row['memoire_octets'], MEM_OVERLAP, row['pic_octets']):
+        return 'memoire P, C, tour mal formee ou incoherente avec pic_octets (passe %d)' % i
+    if not int_block(rec, OVERLAP) or rec['fin_g_ns'] != st['G'] or rec['queue_ns'] != st['TMVR'] or \
+            rec['queue_ns'] != rec['fin_ns'] - rec['fin_g_ns'] or rec['fin_ns'] > rec['tour_ns'] or \
+            rec['noyau_arrets'] > rec['noyau_reprises'] or rec['admis_octets'] == 0:
+        return 'recouvrement incoherent (passe %d)' % i
+    ends = row['fins_par_ordre_ns']
+    if type(ends) is not list or len(ends) != kmax or \
+            any(type(e) is not list or len(e) != 5 or any(not is_int(x) or x > rec['fin_ns'] for x in e)
+                for e in ends) or any(e[0] > rec['fin_g_ns'] for e in ends) or ends[0][3] != 0:
+        return 'fins par ordre (passe %d)' % i
+    return ''
+
+
 def check_full(row, i, attendu):
     """'' si la ligne full de la passe i est conforme, sinon la raison."""
     label, sites = attendu['trames'][i % len(attendu['trames'])]
-    keys = FULL_KEYS | {'full_sha256'} if attendu['empreinte'] else FULL_KEYS
+    overlapped = attendu.get('schema', 'sequentiel') == 'recouvert'
+    base = FULL_KEYS_OVERLAP if overlapped else FULL_KEYS
+    keys = base | {'full_sha256'} if attendu['empreinte'] else base
     if set(row) != keys:
         return 'cles de la passe %d : %s' % (i, sorted(set(row) ^ keys))
     if any(not is_int(row[k]) for k in INT_KEYS):
@@ -69,19 +126,21 @@ def check_full(row, i, attendu):
             row['kmax'] != attendu['k'] or row['threads'] != attendu['fils'] or \
             row['coord_bits'] != attendu.get('bits', 21) or row['sites'] != sites:
         return 'passe %d hors contrat (passe, statut, trame, voie, K, fils, profil ou sites)' % i
-    blocks = ((row['etapes_ns'], STAGES), (row['c_ns'], C_KEYS), (row['g_ns'], G_KEYS), (row['hors_mur_ns'], OUT_KEYS))
-    for block, names in blocks:
-        if type(block) is not dict or set(block) != set(names) or any(not is_int(block[k]) for k in names):
+    if not int_block(row['c_ns'], C_KEYS) or not int_block(row['hors_mur_ns'], OUT_KEYS):
+        return 'bloc de durees mal forme (passe %d)' % i
+    if overlapped:
+        why = check_overlapped(row, i, attendu['k'])
+        if why:
+            return why
+    else:
+        if not int_block(row['etapes_ns'], STAGES) or not int_block(row['g_ns'], G_KEYS):
             return 'bloc de durees mal forme (passe %d)' % i
-    mem = row['memoire_octets']
-    if type(mem) is not dict or set(mem) != set(MEM_STAGES) or \
-            any(type(mem[k]) is not list or len(mem[k]) != 2 or not all(is_int(v) for v in mem[k]) or
-                mem[k][0] > mem[k][1] for k in MEM_STAGES) or max(mem[k][1] for k in MEM_STAGES) != row['pic_octets']:
-        return 'memoire par etage mal formee ou incoherente avec pic_octets (passe %d)' % i
-    st, g = row['etapes_ns'], row['g_ns']
-    if sum(st[k] for k in ('P', 'C', 'G', 'raccord', 'TMVR')) > row['wall_ns'] or \
-            sum(st[k] for k in ('T', 'M', 'V', 'R')) > st['TMVR'] or g['tables'] + g['resolution'] > st['G']:
-        return 'etages non inclus dans le mur (passe %d)' % i
+        if not mem_ok(row['memoire_octets'], MEM_STAGES, row['pic_octets']):
+            return 'memoire par etage mal formee ou incoherente avec pic_octets (passe %d)' % i
+        st, g = row['etapes_ns'], row['g_ns']
+        if sum(st[k] for k in ('P', 'C', 'G', 'raccord', 'TMVR')) > row['wall_ns'] or \
+                sum(st[k] for k in ('T', 'M', 'V', 'R')) > st['TMVR'] or g['tables'] + g['resolution'] > st['G']:
+            return 'etages non inclus dans le mur (passe %d)' % i
     if attendu['empreinte'] and (type(row['full_sha256']) is not str or
                                  not re.fullmatch(r'[0-9a-f]{64}', row['full_sha256'])):
         return 'empreinte FUL1 mal formee (passe %d)' % i

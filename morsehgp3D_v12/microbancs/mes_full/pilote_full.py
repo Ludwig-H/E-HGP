@@ -52,6 +52,9 @@ import lecteur_full as lf  # noqa: E402  lecteur strict partage avec MES-B
 BUDGET_NS = 100_000_000
 FRAMES = ('ng00', 'ng01', 'ng02')
 STAGES = ('P', 'C', 'G', 'raccord', 'TMVR', 'T', 'M', 'V', 'R')
+# Voie jouee : la Session recouverte, voie par defaut de la sonde depuis l'adoption de T2-d-A (schema "recouvert") ;
+# --sequentiel joue l'ancienne voie (resolve_tower puis build_forests) avec son schema. Fixe une fois par main.
+MODE = dict(schema='recouvert', flags=[])
 
 
 def run(argv, delay, raw_path=None):
@@ -158,7 +161,7 @@ def parse_process(code, text, passes, kmax, device, threads, frames):
     """Passes 'full' d'un processus lues par le lecteur partage ; rend (passes, refus) ; refus non vide si un controle
     manque ou si le processus n'aboutit pas (frames : [(etiquette, sites)], la passe p joue la trame p modulo n)."""
     expected = dict(voie='appareil' if device else 'cpu', k=kmax, fils=threads, passes=passes, empreinte=True,
-                    trames=frames, budget_appareil='partage', bits=21)
+                    trames=frames, budget_appareil='partage', bits=21, schema=MODE['schema'])
     state = lf.parse_output(code, text, expected)
     if state['etat'] != 'ok':
         return [], '%s : %s' % (state['etat'], state['raison'])
@@ -172,7 +175,7 @@ def campaign_frames(probe, data, frames, kmax, processes, passes, threads, devic
         for f in frames[rep % len(frames):] + frames[:rep % len(frames)]:
             argv = [probe, '--trame=%s,%s,%s' % (os.path.join(data, 'lidar_%s.u32le' % f),
                                                 os.path.join(data, 'lidar_%s.ids.u32le' % f), f),
-                    '--k=%d' % kmax, '--threads=%d' % threads, '--passes=%d' % passes, '--digest']
+                    '--k=%d' % kmax, '--threads=%d' % threads, '--passes=%d' % passes, '--digest'] + MODE['flags']
             if device:
                 argv.append('--device')
             code, out, _err = run(argv, delay, os.path.join(raw_dir, '%s_%s_r%d.jsonl' % (tag, f, rep)))
@@ -192,7 +195,7 @@ def campaign_sequence(probe, folder, names, processes, threads, delay, raw_dir, 
         order = names[rep % len(names):] + names[:rep % len(names)]
         argv = [probe] + ['--trame=%s,%s,%s' % (os.path.join(folder, n + '.u32le'),
                                                os.path.join(folder, n + '.ids.u32le'), n[-23:]) for n in order]
-        argv += ['--k=5', '--threads=%d' % threads, '--passes=%d' % (2 * len(order)), '--digest']
+        argv += ['--k=5', '--threads=%d' % threads, '--passes=%d' % (2 * len(order)), '--digest'] + MODE['flags']
         if device:
             argv.append('--device')
         code, out, _err = run(argv, delay, os.path.join(raw_dir, 'v12set_r%d.jsonl' % rep))
@@ -215,7 +218,7 @@ def frame_stats(runs, warm_from):
         return None
     return dict(mediane_ns=statistics.median(p['wall_ns'] for p in warm), max_medianes_ns=max(medians),
                 max_ns=max(p['wall_ns'] for p in warm), premiere_ns=statistics.median(r[0]['wall_ns'] for r in runs),
-                etapes_ns={s: statistics.median(p['etapes_ns'][s] for p in warm) for s in STAGES},
+                etapes_ns={s: statistics.median(p['etapes_ns'][s] for p in warm) for s in warm[0]['etapes_ns']},
                 c_ns={k: statistics.median(p['c_ns'][k] for p in warm) for k in warm[0]['c_ns']},
                 cpu_ns=statistics.median(p['cpu_ns'] for p in warm) if all(type(p['cpu_ns']) is int for p in warm)
                 else None,
@@ -244,16 +247,21 @@ def contract(stats):
 
 
 def table(title, stats):
+    """Tableau d'un bras ; colonnes d'etages selon le schema joue (recouvert : G jusqu'au dernier calcul de G, puis la
+    queue ; sequentiel : G, puis T, M, V, R)."""
+    tail = ('queue',) if MODE['schema'] == 'recouvert' else ('T', 'M', 'V', 'R')
     head = ('| trame | sites | chaud mediane (ms) | max des medianes par processus | max | 1re passe | P | C | '
-            'transferts | G | T | M | V | R | pic (Mo) |')
-    lines = ['## ' + title, '', head, '| --- ' + '| ---: ' * 14 + '|']
+            'transferts | G | ' + ' | '.join(tail) + ' | pic (Mo) |')
+    columns = 11 + len(tail)
+    lines = ['## ' + title, '', head, '| --- ' + '| ---: ' * columns + '|']
     for frame, v in sorted(stats.items()):
         if v is None:
-            lines.append('| %s | - | - | - | - | - | - | - | - | - | - | - | - | - | - |' % frame)
+            lines.append('| %s |' % frame + ' - |' * columns)
             continue
         e = v['etapes_ns']
+        rest = (e['TMVR'],) if MODE['schema'] == 'recouvert' else (e['T'], e['M'], e['V'], e['R'])
         values = (v['mediane_ns'], v['max_medianes_ns'], v['max_ns'], v['premiere_ns'], e['P'], e['C'],
-                  v['c_ns'].get('transferts', 0), e['G'], e['T'], e['M'], e['V'], e['R'])
+                  v['c_ns'].get('transferts', 0), e['G']) + rest
         lines.append('| %s | %d | ' % (frame, v['sites']) + ' | '.join('%.1f' % (x / 1e6) for x in values) +
                      ' | %.0f |' % (v['pic_octets'] / 1e6))
     return lines + ['']
@@ -266,6 +274,7 @@ def main(argv):
     for name, default in (('--fils', 48), ('--processus', 5), ('--passes', 10), ('--jobs', 44), ('--delai', 900)):
         parser.add_argument(name, type=int, default=default)
     parser.add_argument('--essai', action='store_true')
+    parser.add_argument('--sequentiel', action='store_true')
     parser.add_argument('--sonde')
     try:
         args = parser.parse_args(argv[1:])
@@ -275,6 +284,8 @@ def main(argv):
             (not args.essai and (args.processus < 5 or args.passes < 10)) or args.processus < 1 or args.passes < 2:
         return 2
     device = not args.essai
+    MODE.update(dict(schema='sequentiel', flags=['--sequentiel']) if args.sequentiel else
+                dict(schema='recouvert', flags=[]))
     raw_dir = os.path.join(args.sortie, 'brut')
     os.makedirs(raw_dir, exist_ok=True)
     nvcc = shutil.which('nvcc') or ('/usr/local/cuda/bin/nvcc' if os.path.isfile('/usr/local/cuda/bin/nvcc') else None)

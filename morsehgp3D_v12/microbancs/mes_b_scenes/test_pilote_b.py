@@ -10,7 +10,9 @@ lecteur partage, eprouve par microbancs/outils/test_lecteur_full.py. Python 3.10
                  l'appareil separe ;
   etiquettes     un meme nom long repete rend des etiquettes distinctes d'au plus 23 octets (boucle sans fin corrigee) ;
   pilote         le pilote complet sur une sonde simulee : verdict d'essai, un cas non joue faute de delai, empreinte
-                 calculee seulement sous le seuil de sites.
+                 calculee seulement sous le seuil de sites ; --sequentiel transmis a la sonde et son schema lu ; une
+                 sonde au schema sequentiel quand le schema recouvert (defaut) est attendu : sorties illisibles,
+                 controles manquants ; retour au schema recouvert apres une campagne --sequentiel.
 Codes : 0 conforme ; 1 ecart.
 """
 import io
@@ -32,13 +34,20 @@ SHA = 'ab' * 32
 
 
 def full_row(i, wall=4_000_000_000):
-    return dict(phase='full', pass_=i, trame=LABEL, voie='device', status='ok', coord_bits=21, kmax=5, threads=48,
-                sites=SITES, wall_ns=wall,
-                etapes_ns=dict(P=1, C=wall // 4, G=wall // 4, raccord=1, TMVR=wall // 4, T=wall // 8, M=1, V=1, R=1),
-                c_ns={k: 1 for k in lf.C_KEYS}, g_ns=dict(tables=1, resolution=wall // 8),
+    """Ligne "full" du schema recouvert (voie par defaut), K = 5."""
+    g, queue = wall // 2, wall // 10
+    return dict(phase='full', pass_=i, trame=LABEL, voie='device', status='ok', etapes_schema='recouvert',
+                coord_bits=21, kmax=5, threads=48, sites=SITES, wall_ns=wall,
+                etapes_ns=dict(P=1, C=wall // 4, G=g, raccord=0, TMVR=queue),
+                fenetres_ns=dict(G=5 * g, foret=4 * g, foret_apres_g=queue, T=g, M=g // 2, V=g // 4, R=g),
+                c_ns={k: 1 for k in lf.C_KEYS}, g_ns=dict(ouverture=g // 10, tables=g // 20),
                 hors_mur_ns=dict(validation=1, empreinte=1), pic_octets=10, cpu_ns=5, rss_max_octets=10,
                 appareil_octets=7, epinglee_octets=3, pic_appareil_octets=8, full_sha256=SHA,
-                memoire_octets=dict(P=[1, 2], C=[4, 10], G=[6, 7], raccord=[6, 6], TMVR=[8, 9]))
+                memoire_octets=dict(P=[1, 2], C=[4, 10], tour=[8, 9]),
+                recouvrement=dict(tour_ns=g + queue + 1, ouverture_ns=g // 10, fin_g_ns=g, fin_ns=g + queue,
+                                  queue_ns=queue, noyau_reprises=18, noyau_arrets=13, admis_octets=99),
+                fins_par_ordre_ns=[[g, g + 1, g + 2, 0, g + 3]] + [[g - 10 * k, g, g + 1, g + 2, g + 3]
+                                                                   for k in range(1, 5)])
 
 
 def result(name, sites, wall_s, k=5, voie='appareil', etat='ok', passes=2):
@@ -98,10 +107,11 @@ def check_digests(errors):
 
 
 def check_expected(errors):
-    """Le pilote demande au lecteur un budget de l'appareil separe et la trame, les sites et K du cas."""
+    """Le pilote demande au lecteur un budget de l'appareil separe, le schema recouvert (voie par defaut) et la trame,
+    les sites et K du cas."""
     case = dict(nom='x', k=10, voie='appareil', passes=2, fils=48, empreinte=False)
     want = dict(voie='appareil', k=10, fils=48, passes=2, empreinte=False, trames=[('lbl', 123)],
-                budget_appareil='separe', bits=21)
+                budget_appareil='separe', bits=21, schema='recouvert')
     if pilote_b.expected(case, 'lbl', 123) != want:
         errors.append('attendu : %s' % pilote_b.expected(case, 'lbl', 123))
 
@@ -115,18 +125,30 @@ def check_labels(errors):
 
 FAKE = r'''#!/usr/bin/env python3
 import json, sys
+MODE = %r
 args = dict(a.split('=', 1) for a in sys.argv[1:] if '=' in a)
 label = args['--trame'].split(',')[2]
 passes, k, fils = int(args['--passes']), int(args['--k']), int(args['--threads'])
 digest = '--digest' in sys.argv
+sequential = '--sequentiel' in sys.argv or MODE == 'schema_croise'
 sites = 1000 if 'petite' in label else 5000
 for i in range(passes):
     row = dict(phase='full', trame=label, voie='cpu', status='ok', coord_bits=21, kmax=k, threads=fils,
-               sites=sites, wall_ns=2000, etapes_ns=dict(P=1, C=1, G=4, raccord=1, TMVR=4, T=1, M=1, V=1, R=1),
+               sites=sites, wall_ns=2000,
                c_ns=dict(parcours=1, feuilles=1, emission=1, fin_etage=1, transferts=0, publication=0),
-               g_ns=dict(tables=1, resolution=1), hors_mur_ns=dict(validation=1, empreinte=1), pic_octets=9,
-               cpu_ns=3, rss_max_octets=9, appareil_octets=0, epinglee_octets=0, pic_appareil_octets=0,
-               memoire_octets=dict(P=[1, 2], C=[3, 9], G=[4, 5], raccord=[4, 4], TMVR=[6, 7]))
+               hors_mur_ns=dict(validation=1, empreinte=1), pic_octets=9,
+               cpu_ns=3, rss_max_octets=9, appareil_octets=0, epinglee_octets=0, pic_appareil_octets=0)
+    if sequential:
+        row.update(etapes_ns=dict(P=1, C=1, G=4, raccord=1, TMVR=4, T=1, M=1, V=1, R=1),
+                   g_ns=dict(tables=1, resolution=1),
+                   memoire_octets=dict(P=[1, 2], C=[3, 9], G=[4, 5], raccord=[4, 4], TMVR=[6, 7]))
+    else:
+        row.update(etapes_schema='recouvert', etapes_ns=dict(P=1, C=1, G=4, raccord=0, TMVR=2),
+                   fenetres_ns=dict(G=8, foret=6, foret_apres_g=2, T=1, M=1, V=1, R=1),
+                   g_ns=dict(ouverture=2, tables=1), memoire_octets=dict(P=[1, 2], C=[3, 9], tour=[4, 5]),
+                   recouvrement=dict(tour_ns=7, ouverture_ns=2, fin_g_ns=4, fin_ns=6, queue_ns=2, noyau_reprises=3,
+                                     noyau_arrets=1, admis_octets=9),
+                   fins_par_ordre_ns=[[4, 5, 6, 0, 6]] + [[3, 4, 5, 5, 6]] * (k - 1))
     row['pass'] = i
     if digest:
         row['full_sha256'] = '0f' * 32
@@ -136,12 +158,30 @@ print(json.dumps(dict(phase='exit', status='ok', reason='none')))
 '''
 
 
+def play(folder, data, mode, extra=()):
+    """Campagne d'essai du pilote sur la sonde simulee `mode` ; rend (code, rapport ou None)."""
+    probe = os.path.join(folder, 'sonde_%s.py' % mode)
+    with open(probe, 'w', encoding='utf-8') as out:
+        out.write(FAKE % mode)
+    os.chmod(probe, os.stat(probe).st_mode | stat.S_IXUSR)
+    sortie = os.path.join(folder, 'sortie_%s%s' % (mode, ''.join(extra)))
+    argv = ['pilote_b.py', '--essai', '--sonde', probe, '--donnees', data, '--sortie', sortie,
+            '--cas', 'petite:5:appareil:2,enorme:5:appareil:1,grande:5:cpu:1', '--fils', '3',
+            '--delai-global', '120', '--empreinte-max-sites', '2000'] + list(extra)
+    with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+        code = pilote_b.main(argv)
+    try:
+        with open(os.path.join(sortie, 'rapport_b.json'), encoding='utf-8') as handle:
+            report = json.load(handle)
+        with open(os.path.join(sortie, 'tableaux_b.md'), encoding='utf-8') as handle:
+            report['tableaux'] = handle.read()
+        return code, report
+    except (OSError, ValueError):
+        return code, None
+
+
 def check_pilot(errors):
     with tempfile.TemporaryDirectory() as folder:
-        probe = os.path.join(folder, 'sonde.py')
-        with open(probe, 'w', encoding='utf-8') as out:
-            out.write(FAKE)
-        os.chmod(probe, os.stat(probe).st_mode | stat.S_IXUSR)
         data = os.path.join(folder, 'donnees')
         os.makedirs(data)
         cases = []
@@ -152,29 +192,33 @@ def check_pilot(errors):
             cases.append(dict(name=name, coordinates=name + '.u32le', point_ids=name + '.ids.u32le', count=count))
         with open(os.path.join(data, 'bundle_manifest.json'), 'w', encoding='utf-8') as out:
             json.dump(dict(cases=cases), out)
-        sortie = os.path.join(folder, 'sortie')
-        argv = ['pilote_b.py', '--essai', '--sonde', probe, '--donnees', data, '--sortie', sortie,
-                '--cas', 'petite:5:appareil:2,enorme:5:appareil:1,grande:5:cpu:1', '--fils', '3',
-                '--delai-global', '120', '--empreinte-max-sites', '2000']
-        text = io.StringIO()
-        with redirect_stdout(text), redirect_stderr(io.StringIO()):
-            code = pilote_b.main(argv)
-        try:
-            with open(os.path.join(sortie, 'rapport_b.json'), encoding='utf-8') as handle:
-                report = json.load(handle)
-        except (OSError, ValueError):
-            errors.append('pilote : rapport absent (code %s)' % code)
-            return
-        states = [(r['nom'], r['etat'], len(r['passes']), r['empreinte']) for r in report['cas']]
         expected = [('petite', 'ok', 2, True), ('enorme', 'non_joue', 0, False), ('grande', 'ok', 1, False)]
-        if code != 0 or report['verdict'] != 'essai' or states != expected or report['controles']:
-            errors.append('pilote : code %s, verdict %s, cas %s, controles %s' % (code, report['verdict'], states,
-                                                                                report['controles']))
-        if 'petite:K5' not in report['empreintes'] or 'grande:K5' in report['empreintes']:
-            errors.append('pilote : empreintes %s' % sorted(report['empreintes']))
+        heads = {'recouvert': ('| P | C | tour |', '| G | queue | validation |'),
+                 'sequentiel': ('| P | C | G | raccord | TMVR |', '| G | T | M | V | R | validation |')}
+        for mode, extra, schema in (('ok', (), 'recouvert'), ('ok', ('--sequentiel',), 'sequentiel'),
+                                    ('ok', (), 'recouvert')):
+            code, report = play(folder, data, mode, extra)
+            if report is None:
+                errors.append('pilote %s : rapport absent (code %s)' % (' '.join(extra), code))
+                return
+            states = [(r['nom'], r['etat'], len(r['passes']), r['empreinte']) for r in report['cas']]
+            if code != 0 or report['verdict'] != 'essai' or states != expected or report['controles'] or \
+                    report['parametres']['schema'] != schema:
+                errors.append('pilote %s : code %s, verdict %s, cas %s, controles %s' % (
+                    ' '.join(extra), code, report['verdict'], states, report['controles']))
+            if 'petite:K5' not in report['empreintes'] or 'grande:K5' in report['empreintes']:
+                errors.append('pilote %s : empreintes %s' % (' '.join(extra), sorted(report['empreintes'])))
+            if any(head not in report['tableaux'] for head in heads[schema]):
+                errors.append('pilote %s : colonnes des tableaux hors schema %s' % (' '.join(extra), schema))
+        code, report = play(folder, data, 'schema_croise')
+        unreadable = [r for r in (report or {}).get('cas', []) if r['etat'] == 'illisible']
+        if code != 0 or report is None or len(unreadable) != 2 or len(report['controles']) < 2:
+            errors.append('pilote schema_croise : cas %s, controles %s' % (
+                [(r['nom'], r['etat']) for r in (report or {}).get('cas', [])], (report or {}).get('controles')))
+        probe = os.path.join(folder, 'sonde_ok.py')
         with redirect_stderr(io.StringIO()):
-            bad = pilote_b.main(['pilote_b.py', '--essai', '--sonde', probe, '--donnees', data, '--sortie', sortie,
-                                 '--cas', 'absente:5:cpu:1'])
+            bad = pilote_b.main(['pilote_b.py', '--essai', '--sonde', probe, '--donnees', data, '--sortie',
+                                 os.path.join(folder, 'sortie_absente'), '--cas', 'absente:5:cpu:1'])
         if bad != 2:
             errors.append('pilote : cas absent du manifeste admis (code %s)' % bad)
 
@@ -187,7 +231,7 @@ def main():
         print(error, file=sys.stderr)
     if errors:
         return 1
-    print('test_pilote_b_ok verdicts=9 empreintes=3 attendu=1 etiquettes=12 pilote=2')
+    print('test_pilote_b_ok verdicts=9 empreintes=3 attendu=1 etiquettes=12 pilote=5')
     return 0
 
 

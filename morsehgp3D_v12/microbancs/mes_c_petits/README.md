@@ -72,9 +72,13 @@ contrôle manque ou si un critère n'est pas évalué.
 - C1 et C2 aux seuils ;
 - un refus `wide_leaf` de la quasi-sphère publié comme résultat (C3 non tenu), pas comme contrôle manquant ;
 - une empreinte instable qui fait manquer un contrôle ;
-- une archive à chemin refusée.
+- une archive à chemin refusée ;
+- le schéma de la voie jouée : la Session recouverte par défaut (voie par défaut de la sonde depuis la bascule du
+  8 octobre), `--sequentiel` transmis à la sonde et son schéma lu (mêmes droites), une sonde au schéma séquentiel
+  quand le schéma recouvert est attendu (Session et nuages difficiles illisibles, contrôles manquants), et le retour
+  au schéma recouvert après une campagne `--sequentiel`.
 
-[`mutants_pilote_c.py`](mutants_pilote_c.py) : onze mutants du pilote, tous tués.
+[`mutants_pilote_c.py`](mutants_pilote_c.py) : quatorze mutants du pilote, tous tués.
 
 ## Premier essai local (8 octobre, indicatif)
 
