@@ -5,8 +5,9 @@
 répond à deux besoins :
 
 - décider d'un levier sous drapeau, d'abord le **cache de blocs** de la Session (`--cache=OCTETS`). Ce cache garde les
-  blocs rendus et évite de refaire les pages à chaque trame. Il est éteint par défaut. Localement, sur ng00 à 6 fils,
-  il retire environ 9 % à G (indicatif, codespace) ;
+  blocs rendus et évite de refaire les pages à chaque trame. Il était éteint par défaut. Il a été adopté par la
+  [session M](../../receipts/g4_fullm_20261008/README.md) (mur FULL 0,92 à 0,93) et vaut depuis 8 Gio par défaut ;
+  `--cache=0` l'éteint ;
 - jouer la comparaison A/S demandée par l'auditeur
   ([`t2d_a_comparaison`](../../receipts/audit_reponses_20261008/t2d_a_comparaison/README.md)) : la Session recouverte
   contre la voie `--sequentiel` du **même binaire**.

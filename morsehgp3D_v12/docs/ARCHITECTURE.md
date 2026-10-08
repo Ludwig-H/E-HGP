@@ -35,7 +35,9 @@ chargés. Elle reçoit des trames successives. Le temps à froid (ouverture comp
 Mesures de `MES-M6` sur G4 ([reçu](../receipts/g4_t0a_20261007/README.md)) : contexte 116 ms, payés une fois ; puis
 8 µs par lancement synchronisé, 11 µs pour un graphe de dix noyaux, 20 µs pour copier une trame de 60 000 sites ;
 la Session attend en mode `yield` (l'attente bloquante double le coût des petites copies) et groupe ses suites de
-lancements en graphes.
+lancements en graphes. Ses arènes d'hôte sont le cache de blocs du budget (8 Gio par défaut) : les blocs rendus par une
+trame sont repris par la suivante, au lieu d'être refaits page par page. Ce cache est adopté sur G4 le 8 octobre
+([session M](../receipts/g4_fullm_20261008/README.md), pilote apparié : mur FULL 0,92 à 0,93 sur ng00–02).
 Si la décision D2 retient la cadence, la Session peut recouvrir le catalogue de la trame $t+1$ (GPU) et la tour de la
 trame $t$ (CPU).
 

@@ -1,0 +1,6 @@
+index	name	status	exit_code	wall_seconds	timeout_seconds	max_rss_kb
+0	socle_ctest	ok	0	141.284	900	1062928
+1	mes_full	ok	0	555.383	2400	3558244
+2	apparie_cache_as	ok	0	371.816	1500	3993984
+3	mutants_tour	ok	0	99.626	600	350848
+4	mes_d6_profils	ok	0	230.401	1800	640180

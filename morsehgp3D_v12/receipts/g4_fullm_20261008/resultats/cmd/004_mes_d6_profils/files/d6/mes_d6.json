@@ -1,0 +1,6512 @@
+{
+ "controles": [],
+ "mesure": "MES-D6",
+ "prises": [
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 319.098044,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": "b9ba7709b5296b9be38ac20e084e699c2a738b6f86638c47f3abb731c8ab66ae",
+    "empreinte": "2d4c8340018653f625ab5d39dbf0b39c780333a0f182e771d514bb1cf7465ba1",
+    "export": {
+     "bytes": 77135152,
+     "cat_bin_sha256": "2d4c8340018653f625ab5d39dbf0b39c780333a0f182e771d514bb1cf7465ba1",
+     "phase": "export"
+    },
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     337.303934,
+     319.404124,
+     320.351424,
+     318.791964,
+     318.139095
+    ],
+    "sites": 39885
+   },
+   "facteur": 1,
+   "profil": 21,
+   "tour": 0,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 47.7949745,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "e5a81154fb1b15f1016590d0257b55de56a2fc52ae7265c730f779ed570a225c",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 39885,
+      "cells": 101138,
+      "extended_cells": 49,
+      "inert_cells": 49,
+      "representatives": 202326
+     },
+     "2": {
+      "births": 101089,
+      "cells": 166266,
+      "extended_cells": 86,
+      "inert_cells": 38,
+      "representatives": 410941
+     },
+     "3": {
+      "births": 166228,
+      "cells": 249527,
+      "extended_cells": 72,
+      "inert_cells": 34,
+      "representatives": 673325
+     },
+     "4": {
+      "births": 249493,
+      "cells": 341136,
+      "extended_cells": 89,
+      "inert_cells": 54,
+      "representatives": 985378
+     },
+     "5": {
+      "births": 341081,
+      "cells": 448805,
+      "extended_cells": 107,
+      "inert_cells": 50,
+      "representatives": 1350288
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     48.077329,
+     47.895249,
+     47.6947,
+     48.238139,
+     47.472409
+    ],
+    "sites": 39885
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 334.899524,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "7e2be02d24b7c982a208e46dc1116d19a9a0c15964bd027c29b2e6ce8cc90e48",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     353.360853,
+     335.071844,
+     334.752364,
+     335.046684,
+     333.575364
+    ],
+    "sites": 39885
+   },
+   "facteur": 8,
+   "profil": 21,
+   "tour": 0,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 48.020894,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "e5a81154fb1b15f1016590d0257b55de56a2fc52ae7265c730f779ed570a225c",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 39885,
+      "cells": 101138,
+      "extended_cells": 49,
+      "inert_cells": 49,
+      "representatives": 202326
+     },
+     "2": {
+      "births": 101089,
+      "cells": 166266,
+      "extended_cells": 86,
+      "inert_cells": 38,
+      "representatives": 410941
+     },
+     "3": {
+      "births": 166228,
+      "cells": 249527,
+      "extended_cells": 72,
+      "inert_cells": 34,
+      "representatives": 673325
+     },
+     "4": {
+      "births": 249493,
+      "cells": 341136,
+      "extended_cells": 89,
+      "inert_cells": 54,
+      "representatives": 985378
+     },
+     "5": {
+      "births": 341081,
+      "cells": 448805,
+      "extended_cells": 107,
+      "inert_cells": 50,
+      "representatives": 1350288
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     48.071059,
+     47.894269,
+     47.816199,
+     48.554869,
+     48.147519
+    ],
+    "sites": 39885
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 323.778064,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": "b9ba7709b5296b9be38ac20e084e699c2a738b6f86638c47f3abb731c8ab66ae",
+    "empreinte": "e76f6414f64ed3277e642fb7a9629c82dffda6776f082fa57f0115c5bce28770",
+    "export": {
+     "bytes": 77135152,
+     "cat_bin_sha256": "e76f6414f64ed3277e642fb7a9629c82dffda6776f082fa57f0115c5bce28770",
+     "phase": "export"
+    },
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     329.682834,
+     322.062434,
+     322.774534,
+     324.781594,
+     347.835834
+    ],
+    "sites": 39885
+   },
+   "facteur": 1,
+   "profil": 24,
+   "tour": 0,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 51.198909,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "e5a81154fb1b15f1016590d0257b55de56a2fc52ae7265c730f779ed570a225c",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 39885,
+      "cells": 101138,
+      "extended_cells": 49,
+      "inert_cells": 49,
+      "representatives": 202326
+     },
+     "2": {
+      "births": 101089,
+      "cells": 166266,
+      "extended_cells": 86,
+      "inert_cells": 38,
+      "representatives": 410941
+     },
+     "3": {
+      "births": 166228,
+      "cells": 249527,
+      "extended_cells": 72,
+      "inert_cells": 34,
+      "representatives": 673325
+     },
+     "4": {
+      "births": 249493,
+      "cells": 341136,
+      "extended_cells": 89,
+      "inert_cells": 54,
+      "representatives": 985378
+     },
+     "5": {
+      "births": 341081,
+      "cells": 448805,
+      "extended_cells": 107,
+      "inert_cells": 50,
+      "representatives": 1350288
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     50.66261,
+     50.320389,
+     50.905129,
+     52.738309,
+     51.492689
+    ],
+    "sites": 39885
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 357.4128985,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "7a8ecd3980c65a581fb0af9d933e8c32308dff2243fdf4bfdf8dede1c2c3454f",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     362.768653,
+     356.821114,
+     360.158484,
+     358.004683,
+     333.230484
+    ],
+    "sites": 39885
+   },
+   "facteur": 8,
+   "profil": 24,
+   "tour": 0,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 47.861364,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "e5a81154fb1b15f1016590d0257b55de56a2fc52ae7265c730f779ed570a225c",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 39885,
+      "cells": 101138,
+      "extended_cells": 49,
+      "inert_cells": 49,
+      "representatives": 202326
+     },
+     "2": {
+      "births": 101089,
+      "cells": 166266,
+      "extended_cells": 86,
+      "inert_cells": 38,
+      "representatives": 410941
+     },
+     "3": {
+      "births": 166228,
+      "cells": 249527,
+      "extended_cells": 72,
+      "inert_cells": 34,
+      "representatives": 673325
+     },
+     "4": {
+      "births": 249493,
+      "cells": 341136,
+      "extended_cells": 89,
+      "inert_cells": 54,
+      "representatives": 985378
+     },
+     "5": {
+      "births": 341081,
+      "cells": 448805,
+      "extended_cells": 107,
+      "inert_cells": 50,
+      "representatives": 1350288
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     48.388699,
+     47.816899,
+     47.905829,
+     47.92339,
+     47.625169
+    ],
+    "sites": 39885
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 323.640364,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": "b9ba7709b5296b9be38ac20e084e699c2a738b6f86638c47f3abb731c8ab66ae",
+    "empreinte": "4955063ac816bf55e478c6414fdde5d42e9f00ba2b3b75c7e277887dea2ed3db",
+    "export": {
+     "bytes": 77135152,
+     "cat_bin_sha256": "4955063ac816bf55e478c6414fdde5d42e9f00ba2b3b75c7e277887dea2ed3db",
+     "phase": "export"
+    },
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     330.972054,
+     324.061554,
+     324.311474,
+     322.485594,
+     323.219174
+    ],
+    "sites": 39885
+   },
+   "facteur": 1,
+   "profil": 32,
+   "tour": 0,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 49.6383945,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "e5a81154fb1b15f1016590d0257b55de56a2fc52ae7265c730f779ed570a225c",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 39885,
+      "cells": 101138,
+      "extended_cells": 49,
+      "inert_cells": 49,
+      "representatives": 202326
+     },
+     "2": {
+      "births": 101089,
+      "cells": 166266,
+      "extended_cells": 86,
+      "inert_cells": 38,
+      "representatives": 410941
+     },
+     "3": {
+      "births": 166228,
+      "cells": 249527,
+      "extended_cells": 72,
+      "inert_cells": 34,
+      "representatives": 673325
+     },
+     "4": {
+      "births": 249493,
+      "cells": 341136,
+      "extended_cells": 89,
+      "inert_cells": 54,
+      "representatives": 985378
+     },
+     "5": {
+      "births": 341081,
+      "cells": 448805,
+      "extended_cells": 107,
+      "inert_cells": 50,
+      "representatives": 1350288
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     50.296209,
+     49.991679,
+     49.9073,
+     49.367979,
+     49.369489
+    ],
+    "sites": 39885
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 338.778399,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "241402b8b1fd49ca85424f22a0552f7305cd0c35899966fb0af5ef1cbd653f97",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     356.205533,
+     338.452214,
+     336.527104,
+     339.104584,
+     339.249244
+    ],
+    "sites": 39885
+   },
+   "facteur": 8,
+   "profil": 32,
+   "tour": 0,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 50.4090345,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "e5a81154fb1b15f1016590d0257b55de56a2fc52ae7265c730f779ed570a225c",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 39885,
+      "cells": 101138,
+      "extended_cells": 49,
+      "inert_cells": 49,
+      "representatives": 202326
+     },
+     "2": {
+      "births": 101089,
+      "cells": 166266,
+      "extended_cells": 86,
+      "inert_cells": 38,
+      "representatives": 410941
+     },
+     "3": {
+      "births": 166228,
+      "cells": 249527,
+      "extended_cells": 72,
+      "inert_cells": 34,
+      "representatives": 673325
+     },
+     "4": {
+      "births": 249493,
+      "cells": 341136,
+      "extended_cells": 89,
+      "inert_cells": 54,
+      "representatives": 985378
+     },
+     "5": {
+      "births": 341081,
+      "cells": 448805,
+      "extended_cells": 107,
+      "inert_cells": 50,
+      "representatives": 1350288
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     51.012199,
+     50.596409,
+     50.282489,
+     50.381439,
+     50.43663
+    ],
+    "sites": 39885
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 955.3041525,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "890061efa8253772ca62639ffd1b19d505fd75e1248337f5722842a2aa4b8a37",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     959.384733,
+     959.016383,
+     956.193982,
+     954.414323,
+     952.466213
+    ],
+    "sites": 39885
+   },
+   "facteur": 2048,
+   "profil": 32,
+   "tour": 0,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 53.7262945,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "e5a81154fb1b15f1016590d0257b55de56a2fc52ae7265c730f779ed570a225c",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 39885,
+      "cells": 101138,
+      "extended_cells": 49,
+      "inert_cells": 49,
+      "representatives": 202326
+     },
+     "2": {
+      "births": 101089,
+      "cells": 166266,
+      "extended_cells": 86,
+      "inert_cells": 38,
+      "representatives": 410941
+     },
+     "3": {
+      "births": 166228,
+      "cells": 249527,
+      "extended_cells": 72,
+      "inert_cells": 34,
+      "representatives": 673325
+     },
+     "4": {
+      "births": 249493,
+      "cells": 341136,
+      "extended_cells": 89,
+      "inert_cells": 54,
+      "representatives": 985378
+     },
+     "5": {
+      "births": 341081,
+      "cells": 448805,
+      "extended_cells": 107,
+      "inert_cells": 50,
+      "representatives": 1350288
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     53.296179,
+     53.272289,
+     53.704909,
+     54.566919,
+     53.74768
+    ],
+    "sites": 39885
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 331.419159,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "7e2be02d24b7c982a208e46dc1116d19a9a0c15964bd027c29b2e6ce8cc90e48",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     337.137254,
+     331.923254,
+     330.915064,
+     330.803274,
+     332.913084
+    ],
+    "sites": 39885
+   },
+   "facteur": 8,
+   "profil": 21,
+   "tour": 1,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 47.4661295,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "e5a81154fb1b15f1016590d0257b55de56a2fc52ae7265c730f779ed570a225c",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 39885,
+      "cells": 101138,
+      "extended_cells": 49,
+      "inert_cells": 49,
+      "representatives": 202326
+     },
+     "2": {
+      "births": 101089,
+      "cells": 166266,
+      "extended_cells": 86,
+      "inert_cells": 38,
+      "representatives": 410941
+     },
+     "3": {
+      "births": 166228,
+      "cells": 249527,
+      "extended_cells": 72,
+      "inert_cells": 34,
+      "representatives": 673325
+     },
+     "4": {
+      "births": 249493,
+      "cells": 341136,
+      "extended_cells": 89,
+      "inert_cells": 54,
+      "representatives": 985378
+     },
+     "5": {
+      "births": 341081,
+      "cells": 448805,
+      "extended_cells": 107,
+      "inert_cells": 50,
+      "representatives": 1350288
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     48.090799,
+     47.545849,
+     47.480159,
+     47.344899,
+     47.4521
+    ],
+    "sites": 39885
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 321.765179,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "0ce73502aec2c17ae21f47c4a24d3b7799a52f99ce0dbdd9d348888607ccca4c",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     328.564314,
+     322.551585,
+     321.877214,
+     320.986244,
+     321.653144
+    ],
+    "sites": 39885
+   },
+   "facteur": 1,
+   "profil": 24,
+   "tour": 1,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 48.5229995,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "e5a81154fb1b15f1016590d0257b55de56a2fc52ae7265c730f779ed570a225c",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 39885,
+      "cells": 101138,
+      "extended_cells": 49,
+      "inert_cells": 49,
+      "representatives": 202326
+     },
+     "2": {
+      "births": 101089,
+      "cells": 166266,
+      "extended_cells": 86,
+      "inert_cells": 38,
+      "representatives": 410941
+     },
+     "3": {
+      "births": 166228,
+      "cells": 249527,
+      "extended_cells": 72,
+      "inert_cells": 34,
+      "representatives": 673325
+     },
+     "4": {
+      "births": 249493,
+      "cells": 341136,
+      "extended_cells": 89,
+      "inert_cells": 54,
+      "representatives": 985378
+     },
+     "5": {
+      "births": 341081,
+      "cells": 448805,
+      "extended_cells": 107,
+      "inert_cells": 50,
+      "representatives": 1350288
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     48.508899,
+     48.669969,
+     48.299809,
+     48.37603,
+     48.821399
+    ],
+    "sites": 39885
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 334.191859,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "7a8ecd3980c65a581fb0af9d933e8c32308dff2243fdf4bfdf8dede1c2c3454f",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     338.317873,
+     330.301044,
+     334.178344,
+     334.849834,
+     334.205374
+    ],
+    "sites": 39885
+   },
+   "facteur": 8,
+   "profil": 24,
+   "tour": 1,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 48.329149,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "e5a81154fb1b15f1016590d0257b55de56a2fc52ae7265c730f779ed570a225c",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 39885,
+      "cells": 101138,
+      "extended_cells": 49,
+      "inert_cells": 49,
+      "representatives": 202326
+     },
+     "2": {
+      "births": 101089,
+      "cells": 166266,
+      "extended_cells": 86,
+      "inert_cells": 38,
+      "representatives": 410941
+     },
+     "3": {
+      "births": 166228,
+      "cells": 249527,
+      "extended_cells": 72,
+      "inert_cells": 34,
+      "representatives": 673325
+     },
+     "4": {
+      "births": 249493,
+      "cells": 341136,
+      "extended_cells": 89,
+      "inert_cells": 54,
+      "representatives": 985378
+     },
+     "5": {
+      "births": 341081,
+      "cells": 448805,
+      "extended_cells": 107,
+      "inert_cells": 50,
+      "representatives": 1350288
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     48.628589,
+     48.434099,
+     48.480889,
+     48.224199,
+     47.948739
+    ],
+    "sites": 39885
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 324.9145345,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "478ac1de3e96fffc7321a71629544abf85db34de4e958399b93ed76270f8814c",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     329.919374,
+     324.477404,
+     325.351665,
+     326.306144,
+     323.674264
+    ],
+    "sites": 39885
+   },
+   "facteur": 1,
+   "profil": 32,
+   "tour": 1,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 49.330264,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "e5a81154fb1b15f1016590d0257b55de56a2fc52ae7265c730f779ed570a225c",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 39885,
+      "cells": 101138,
+      "extended_cells": 49,
+      "inert_cells": 49,
+      "representatives": 202326
+     },
+     "2": {
+      "births": 101089,
+      "cells": 166266,
+      "extended_cells": 86,
+      "inert_cells": 38,
+      "representatives": 410941
+     },
+     "3": {
+      "births": 166228,
+      "cells": 249527,
+      "extended_cells": 72,
+      "inert_cells": 34,
+      "representatives": 673325
+     },
+     "4": {
+      "births": 249493,
+      "cells": 341136,
+      "extended_cells": 89,
+      "inert_cells": 54,
+      "representatives": 985378
+     },
+     "5": {
+      "births": 341081,
+      "cells": 448805,
+      "extended_cells": 107,
+      "inert_cells": 50,
+      "representatives": 1350288
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     50.063059,
+     49.371169,
+     49.289359,
+     49.251819,
+     49.387149
+    ],
+    "sites": 39885
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 335.376599,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "241402b8b1fd49ca85424f22a0552f7305cd0c35899966fb0af5ef1cbd653f97",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     360.391123,
+     335.854584,
+     334.898614,
+     336.042834,
+     334.792684
+    ],
+    "sites": 39885
+   },
+   "facteur": 8,
+   "profil": 32,
+   "tour": 1,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 50.119244,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "e5a81154fb1b15f1016590d0257b55de56a2fc52ae7265c730f779ed570a225c",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 39885,
+      "cells": 101138,
+      "extended_cells": 49,
+      "inert_cells": 49,
+      "representatives": 202326
+     },
+     "2": {
+      "births": 101089,
+      "cells": 166266,
+      "extended_cells": 86,
+      "inert_cells": 38,
+      "representatives": 410941
+     },
+     "3": {
+      "births": 166228,
+      "cells": 249527,
+      "extended_cells": 72,
+      "inert_cells": 34,
+      "representatives": 673325
+     },
+     "4": {
+      "births": 249493,
+      "cells": 341136,
+      "extended_cells": 89,
+      "inert_cells": 54,
+      "representatives": 985378
+     },
+     "5": {
+      "births": 341081,
+      "cells": 448805,
+      "extended_cells": 107,
+      "inert_cells": 50,
+      "representatives": 1350288
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     50.552349,
+     49.937999,
+     50.211349,
+     50.027139,
+     50.493199
+    ],
+    "sites": 39885
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 950.6420515,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "890061efa8253772ca62639ffd1b19d505fd75e1248337f5722842a2aa4b8a37",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     956.138653,
+     950.073952,
+     950.166116,
+     951.117987,
+     951.713066
+    ],
+    "sites": 39885
+   },
+   "facteur": 2048,
+   "profil": 32,
+   "tour": 1,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 52.6863635,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "e5a81154fb1b15f1016590d0257b55de56a2fc52ae7265c730f779ed570a225c",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 39885,
+      "cells": 101138,
+      "extended_cells": 49,
+      "inert_cells": 49,
+      "representatives": 202326
+     },
+     "2": {
+      "births": 101089,
+      "cells": 166266,
+      "extended_cells": 86,
+      "inert_cells": 38,
+      "representatives": 410941
+     },
+     "3": {
+      "births": 166228,
+      "cells": 249527,
+      "extended_cells": 72,
+      "inert_cells": 34,
+      "representatives": 673325
+     },
+     "4": {
+      "births": 249493,
+      "cells": 341136,
+      "extended_cells": 89,
+      "inert_cells": 54,
+      "representatives": 985378
+     },
+     "5": {
+      "births": 341081,
+      "cells": 448805,
+      "extended_cells": 107,
+      "inert_cells": 50,
+      "representatives": 1350288
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     53.083809,
+     52.669558,
+     52.565329,
+     53.058049,
+     52.703169
+    ],
+    "sites": 39885
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 321.689522,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "698efd3d46e2d9c24363dca26eb76d293d78ddb46e4594d1fcb16eef2f1dd977",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     330.011382,
+     321.505592,
+     321.873452,
+     319.418592,
+     322.904502
+    ],
+    "sites": 39885
+   },
+   "facteur": 1,
+   "profil": 21,
+   "tour": 1,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 47.871339,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "e5a81154fb1b15f1016590d0257b55de56a2fc52ae7265c730f779ed570a225c",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 39885,
+      "cells": 101138,
+      "extended_cells": 49,
+      "inert_cells": 49,
+      "representatives": 202326
+     },
+     "2": {
+      "births": 101089,
+      "cells": 166266,
+      "extended_cells": 86,
+      "inert_cells": 38,
+      "representatives": 410941
+     },
+     "3": {
+      "births": 166228,
+      "cells": 249527,
+      "extended_cells": 72,
+      "inert_cells": 34,
+      "representatives": 673325
+     },
+     "4": {
+      "births": 249493,
+      "cells": 341136,
+      "extended_cells": 89,
+      "inert_cells": 54,
+      "representatives": 985378
+     },
+     "5": {
+      "births": 341081,
+      "cells": 448805,
+      "extended_cells": 107,
+      "inert_cells": 50,
+      "representatives": 1350288
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     48.203448,
+     48.183129,
+     47.759349,
+     47.983329,
+     47.676269
+    ],
+    "sites": 39885
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 323.5966875,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "0ce73502aec2c17ae21f47c4a24d3b7799a52f99ce0dbdd9d348888607ccca4c",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     328.724522,
+     323.686913,
+     323.506462,
+     323.753882,
+     323.396842
+    ],
+    "sites": 39885
+   },
+   "facteur": 1,
+   "profil": 24,
+   "tour": 2,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 47.8560985,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "e5a81154fb1b15f1016590d0257b55de56a2fc52ae7265c730f779ed570a225c",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 39885,
+      "cells": 101138,
+      "extended_cells": 49,
+      "inert_cells": 49,
+      "representatives": 202326
+     },
+     "2": {
+      "births": 101089,
+      "cells": 166266,
+      "extended_cells": 86,
+      "inert_cells": 38,
+      "representatives": 410941
+     },
+     "3": {
+      "births": 166228,
+      "cells": 249527,
+      "extended_cells": 72,
+      "inert_cells": 34,
+      "representatives": 673325
+     },
+     "4": {
+      "births": 249493,
+      "cells": 341136,
+      "extended_cells": 89,
+      "inert_cells": 54,
+      "representatives": 985378
+     },
+     "5": {
+      "births": 341081,
+      "cells": 448805,
+      "extended_cells": 107,
+      "inert_cells": 50,
+      "representatives": 1350288
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     48.612009,
+     47.844658,
+     48.068599,
+     47.867539,
+     47.828669
+    ],
+    "sites": 39885
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 335.949827,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "7a8ecd3980c65a581fb0af9d933e8c32308dff2243fdf4bfdf8dede1c2c3454f",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     344.496842,
+     336.097082,
+     333.711432,
+     337.909462,
+     335.802572
+    ],
+    "sites": 39885
+   },
+   "facteur": 8,
+   "profil": 24,
+   "tour": 2,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 48.0189535,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "e5a81154fb1b15f1016590d0257b55de56a2fc52ae7265c730f779ed570a225c",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 39885,
+      "cells": 101138,
+      "extended_cells": 49,
+      "inert_cells": 49,
+      "representatives": 202326
+     },
+     "2": {
+      "births": 101089,
+      "cells": 166266,
+      "extended_cells": 86,
+      "inert_cells": 38,
+      "representatives": 410941
+     },
+     "3": {
+      "births": 166228,
+      "cells": 249527,
+      "extended_cells": 72,
+      "inert_cells": 34,
+      "representatives": 673325
+     },
+     "4": {
+      "births": 249493,
+      "cells": 341136,
+      "extended_cells": 89,
+      "inert_cells": 54,
+      "representatives": 985378
+     },
+     "5": {
+      "births": 341081,
+      "cells": 448805,
+      "extended_cells": 107,
+      "inert_cells": 50,
+      "representatives": 1350288
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     48.375649,
+     48.130589,
+     47.907318,
+     47.865479,
+     48.508279
+    ],
+    "sites": 39885
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 327.409877,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "478ac1de3e96fffc7321a71629544abf85db34de4e958399b93ed76270f8814c",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     332.033892,
+     327.640102,
+     327.179652,
+     327.100782,
+     328.576382
+    ],
+    "sites": 39885
+   },
+   "facteur": 1,
+   "profil": 32,
+   "tour": 2,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 49.8093485,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "e5a81154fb1b15f1016590d0257b55de56a2fc52ae7265c730f779ed570a225c",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 39885,
+      "cells": 101138,
+      "extended_cells": 49,
+      "inert_cells": 49,
+      "representatives": 202326
+     },
+     "2": {
+      "births": 101089,
+      "cells": 166266,
+      "extended_cells": 86,
+      "inert_cells": 38,
+      "representatives": 410941
+     },
+     "3": {
+      "births": 166228,
+      "cells": 249527,
+      "extended_cells": 72,
+      "inert_cells": 34,
+      "representatives": 673325
+     },
+     "4": {
+      "births": 249493,
+      "cells": 341136,
+      "extended_cells": 89,
+      "inert_cells": 54,
+      "representatives": 985378
+     },
+     "5": {
+      "births": 341081,
+      "cells": 448805,
+      "extended_cells": 107,
+      "inert_cells": 50,
+      "representatives": 1350288
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     49.653269,
+     49.785589,
+     50.176509,
+     49.833108,
+     49.634919
+    ],
+    "sites": 39885
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 338.1779915,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "241402b8b1fd49ca85424f22a0552f7305cd0c35899966fb0af5ef1cbd653f97",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     342.778802,
+     338.727832,
+     338.162352,
+     338.193631,
+     337.297991
+    ],
+    "sites": 39885
+   },
+   "facteur": 8,
+   "profil": 32,
+   "tour": 2,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 50.0996335,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "e5a81154fb1b15f1016590d0257b55de56a2fc52ae7265c730f779ed570a225c",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 39885,
+      "cells": 101138,
+      "extended_cells": 49,
+      "inert_cells": 49,
+      "representatives": 202326
+     },
+     "2": {
+      "births": 101089,
+      "cells": 166266,
+      "extended_cells": 86,
+      "inert_cells": 38,
+      "representatives": 410941
+     },
+     "3": {
+      "births": 166228,
+      "cells": 249527,
+      "extended_cells": 72,
+      "inert_cells": 34,
+      "representatives": 673325
+     },
+     "4": {
+      "births": 249493,
+      "cells": 341136,
+      "extended_cells": 89,
+      "inert_cells": 54,
+      "representatives": 985378
+     },
+     "5": {
+      "births": 341081,
+      "cells": 448805,
+      "extended_cells": 107,
+      "inert_cells": 50,
+      "representatives": 1350288
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     50.475389,
+     49.971548,
+     49.962599,
+     50.227719,
+     50.529709
+    ],
+    "sites": 39885
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 956.1074665,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "890061efa8253772ca62639ffd1b19d505fd75e1248337f5722842a2aa4b8a37",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     965.950807,
+     954.957247,
+     954.624876,
+     957.257686,
+     958.032686
+    ],
+    "sites": 39885
+   },
+   "facteur": 2048,
+   "profil": 32,
+   "tour": 2,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 52.970609,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "e5a81154fb1b15f1016590d0257b55de56a2fc52ae7265c730f779ed570a225c",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 39885,
+      "cells": 101138,
+      "extended_cells": 49,
+      "inert_cells": 49,
+      "representatives": 202326
+     },
+     "2": {
+      "births": 101089,
+      "cells": 166266,
+      "extended_cells": 86,
+      "inert_cells": 38,
+      "representatives": 410941
+     },
+     "3": {
+      "births": 166228,
+      "cells": 249527,
+      "extended_cells": 72,
+      "inert_cells": 34,
+      "representatives": 673325
+     },
+     "4": {
+      "births": 249493,
+      "cells": 341136,
+      "extended_cells": 89,
+      "inert_cells": 54,
+      "representatives": 985378
+     },
+     "5": {
+      "births": 341081,
+      "cells": 448805,
+      "extended_cells": 107,
+      "inert_cells": 50,
+      "representatives": 1350288
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     53.170289,
+     53.128758,
+     52.968909,
+     52.972309,
+     52.940508
+    ],
+    "sites": 39885
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 320.050887,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "698efd3d46e2d9c24363dca26eb76d293d78ddb46e4594d1fcb16eef2f1dd977",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     333.304052,
+     319.838812,
+     321.843582,
+     319.718202,
+     320.262962
+    ],
+    "sites": 39885
+   },
+   "facteur": 1,
+   "profil": 21,
+   "tour": 2,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 47.9649535,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "e5a81154fb1b15f1016590d0257b55de56a2fc52ae7265c730f779ed570a225c",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 39885,
+      "cells": 101138,
+      "extended_cells": 49,
+      "inert_cells": 49,
+      "representatives": 202326
+     },
+     "2": {
+      "births": 101089,
+      "cells": 166266,
+      "extended_cells": 86,
+      "inert_cells": 38,
+      "representatives": 410941
+     },
+     "3": {
+      "births": 166228,
+      "cells": 249527,
+      "extended_cells": 72,
+      "inert_cells": 34,
+      "representatives": 673325
+     },
+     "4": {
+      "births": 249493,
+      "cells": 341136,
+      "extended_cells": 89,
+      "inert_cells": 54,
+      "representatives": 985378
+     },
+     "5": {
+      "births": 341081,
+      "cells": 448805,
+      "extended_cells": 107,
+      "inert_cells": 50,
+      "representatives": 1350288
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     48.805349,
+     48.124799,
+     47.989519,
+     47.940388,
+     47.704269
+    ],
+    "sites": 39885
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 333.849087,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "7e2be02d24b7c982a208e46dc1116d19a9a0c15964bd027c29b2e6ce8cc90e48",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     340.109551,
+     333.950062,
+     333.748112,
+     333.071592,
+     334.210442
+    ],
+    "sites": 39885
+   },
+   "facteur": 8,
+   "profil": 21,
+   "tour": 2,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 48.025969,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "e5a81154fb1b15f1016590d0257b55de56a2fc52ae7265c730f779ed570a225c",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 39885,
+      "cells": 101138,
+      "extended_cells": 49,
+      "inert_cells": 49,
+      "representatives": 202326
+     },
+     "2": {
+      "births": 101089,
+      "cells": 166266,
+      "extended_cells": 86,
+      "inert_cells": 38,
+      "representatives": 410941
+     },
+     "3": {
+      "births": 166228,
+      "cells": 249527,
+      "extended_cells": 72,
+      "inert_cells": 34,
+      "representatives": 673325
+     },
+     "4": {
+      "births": 249493,
+      "cells": 341136,
+      "extended_cells": 89,
+      "inert_cells": 54,
+      "representatives": 985378
+     },
+     "5": {
+      "births": 341081,
+      "cells": 448805,
+      "extended_cells": 107,
+      "inert_cells": 50,
+      "representatives": 1350288
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     48.060488,
+     47.989459,
+     48.062479,
+     49.032109,
+     47.771269
+    ],
+    "sites": 39885
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 274.174994,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": "73e113808ddec54fa351f57ed456e0414220b0276e6bb7d10983c7a81cefe566",
+    "empreinte": "d4eb565d386824f379843bbb97515580fe107d8d860d99fec2a4c77dc51537b9",
+    "export": {
+     "bytes": 64606592,
+     "cat_bin_sha256": "d4eb565d386824f379843bbb97515580fe107d8d860d99fec2a4c77dc51537b9",
+     "phase": "export"
+    },
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     290.067473,
+     272.194014,
+     275.000424,
+     275.691484,
+     273.349564
+    ],
+    "sites": 35551
+   },
+   "facteur": 1,
+   "profil": 21,
+   "tour": 0,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 38.5916345,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "10bb4c6d14096b2d073a719d5577ad53cc58f6d9800090c04ad8232edba7eaa3",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 35551,
+      "cells": 89186,
+      "extended_cells": 27,
+      "inert_cells": 27,
+      "representatives": 178399
+     },
+     "2": {
+      "births": 89159,
+      "cells": 142465,
+      "extended_cells": 54,
+      "inert_cells": 27,
+      "representatives": 352018
+     },
+     "3": {
+      "births": 142438,
+      "cells": 211403,
+      "extended_cells": 59,
+      "inert_cells": 32,
+      "representatives": 566651
+     },
+     "4": {
+      "births": 211371,
+      "cells": 283231,
+      "extended_cells": 56,
+      "inert_cells": 24,
+      "representatives": 813237
+     },
+     "5": {
+      "births": 283207,
+      "cells": 369751,
+      "extended_cells": 49,
+      "inert_cells": 25,
+      "representatives": 1102505
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     39.420459,
+     39.296309,
+     38.79487,
+     38.388399,
+     37.798899
+    ],
+    "sites": 35551
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 289.551663,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "ad0f0ded42223c60ddc00c64a02e58d4720589a5ec845a1ede122018b001a86c",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     312.811183,
+     289.785713,
+     289.317613,
+     290.205943,
+     288.155103
+    ],
+    "sites": 35551
+   },
+   "facteur": 8,
+   "profil": 21,
+   "tour": 0,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 37.942004,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "10bb4c6d14096b2d073a719d5577ad53cc58f6d9800090c04ad8232edba7eaa3",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 35551,
+      "cells": 89186,
+      "extended_cells": 27,
+      "inert_cells": 27,
+      "representatives": 178399
+     },
+     "2": {
+      "births": 89159,
+      "cells": 142465,
+      "extended_cells": 54,
+      "inert_cells": 27,
+      "representatives": 352018
+     },
+     "3": {
+      "births": 142438,
+      "cells": 211403,
+      "extended_cells": 59,
+      "inert_cells": 32,
+      "representatives": 566651
+     },
+     "4": {
+      "births": 211371,
+      "cells": 283231,
+      "extended_cells": 56,
+      "inert_cells": 24,
+      "representatives": 813237
+     },
+     "5": {
+      "births": 283207,
+      "cells": 369751,
+      "extended_cells": 49,
+      "inert_cells": 25,
+      "representatives": 1102505
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     38.116499,
+     38.21414,
+     38.009059,
+     37.874949,
+     37.874289
+    ],
+    "sites": 35551
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 298.5018725,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": "73e113808ddec54fa351f57ed456e0414220b0276e6bb7d10983c7a81cefe566",
+    "empreinte": "133c63671a7855c54485d1bb6d19ef8a24662d7e020b04e773c2b2a5313fa29b",
+    "export": {
+     "bytes": 64606592,
+     "cat_bin_sha256": "133c63671a7855c54485d1bb6d19ef8a24662d7e020b04e773c2b2a5313fa29b",
+     "phase": "export"
+    },
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     290.978303,
+     298.607443,
+     295.179633,
+     298.396302,
+     300.248122
+    ],
+    "sites": 35551
+   },
+   "facteur": 1,
+   "profil": 24,
+   "tour": 0,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 41.602769,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "10bb4c6d14096b2d073a719d5577ad53cc58f6d9800090c04ad8232edba7eaa3",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 35551,
+      "cells": 89186,
+      "extended_cells": 27,
+      "inert_cells": 27,
+      "representatives": 178399
+     },
+     "2": {
+      "births": 89159,
+      "cells": 142465,
+      "extended_cells": 54,
+      "inert_cells": 27,
+      "representatives": 352018
+     },
+     "3": {
+      "births": 142438,
+      "cells": 211403,
+      "extended_cells": 59,
+      "inert_cells": 32,
+      "representatives": 566651
+     },
+     "4": {
+      "births": 211371,
+      "cells": 283231,
+      "extended_cells": 56,
+      "inert_cells": 24,
+      "representatives": 813237
+     },
+     "5": {
+      "births": 283207,
+      "cells": 369751,
+      "extended_cells": 49,
+      "inert_cells": 25,
+      "representatives": 1102505
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     40.702879,
+     42.092959,
+     41.437959,
+     41.767579,
+     39.594229
+    ],
+    "sites": 35551
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 309.2660925,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "32fdaf329cd8ef343e14516b891471fd38e7c23d1109a752d166f11127d88f62",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     331.328042,
+     320.772222,
+     321.131333,
+     297.759963,
+     296.547522
+    ],
+    "sites": 35551
+   },
+   "facteur": 8,
+   "profil": 24,
+   "tour": 0,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 38.386884,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "10bb4c6d14096b2d073a719d5577ad53cc58f6d9800090c04ad8232edba7eaa3",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 35551,
+      "cells": 89186,
+      "extended_cells": 27,
+      "inert_cells": 27,
+      "representatives": 178399
+     },
+     "2": {
+      "births": 89159,
+      "cells": 142465,
+      "extended_cells": 54,
+      "inert_cells": 27,
+      "representatives": 352018
+     },
+     "3": {
+      "births": 142438,
+      "cells": 211403,
+      "extended_cells": 59,
+      "inert_cells": 32,
+      "representatives": 566651
+     },
+     "4": {
+      "births": 211371,
+      "cells": 283231,
+      "extended_cells": 56,
+      "inert_cells": 24,
+      "representatives": 813237
+     },
+     "5": {
+      "births": 283207,
+      "cells": 369751,
+      "extended_cells": 49,
+      "inert_cells": 25,
+      "representatives": 1102505
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     38.420129,
+     38.389999,
+     38.389559,
+     38.384209,
+     38.314959
+    ],
+    "sites": 35551
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 278.377588,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": "73e113808ddec54fa351f57ed456e0414220b0276e6bb7d10983c7a81cefe566",
+    "empreinte": "2e49ac81f71a955560fb3cf46545848a2afa10c4eb4bf7379d3208298a9952f4",
+    "export": {
+     "bytes": 64606592,
+     "cat_bin_sha256": "2e49ac81f71a955560fb3cf46545848a2afa10c4eb4bf7379d3208298a9952f4",
+     "phase": "export"
+    },
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     289.859633,
+     277.832163,
+     279.040913,
+     276.725843,
+     278.923013
+    ],
+    "sites": 35551
+   },
+   "facteur": 1,
+   "profil": 32,
+   "tour": 0,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 40.159394,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "10bb4c6d14096b2d073a719d5577ad53cc58f6d9800090c04ad8232edba7eaa3",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 35551,
+      "cells": 89186,
+      "extended_cells": 27,
+      "inert_cells": 27,
+      "representatives": 178399
+     },
+     "2": {
+      "births": 89159,
+      "cells": 142465,
+      "extended_cells": 54,
+      "inert_cells": 27,
+      "representatives": 352018
+     },
+     "3": {
+      "births": 142438,
+      "cells": 211403,
+      "extended_cells": 59,
+      "inert_cells": 32,
+      "representatives": 566651
+     },
+     "4": {
+      "births": 211371,
+      "cells": 283231,
+      "extended_cells": 56,
+      "inert_cells": 24,
+      "representatives": 813237
+     },
+     "5": {
+      "births": 283207,
+      "cells": 369751,
+      "extended_cells": 49,
+      "inert_cells": 25,
+      "representatives": 1102505
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     40.447229,
+     40.126339,
+     40.284099,
+     40.192449,
+     40.110499
+    ],
+    "sites": 35551
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 292.8303425,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "d8c967b492ce8c3eed4ab937f69ffe8af988b047e3b71417e13563927bac7de5",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     305.071203,
+     292.540643,
+     292.849353,
+     292.811332,
+     294.506983
+    ],
+    "sites": 35551
+   },
+   "facteur": 8,
+   "profil": 32,
+   "tour": 0,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 40.045514,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "10bb4c6d14096b2d073a719d5577ad53cc58f6d9800090c04ad8232edba7eaa3",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 35551,
+      "cells": 89186,
+      "extended_cells": 27,
+      "inert_cells": 27,
+      "representatives": 178399
+     },
+     "2": {
+      "births": 89159,
+      "cells": 142465,
+      "extended_cells": 54,
+      "inert_cells": 27,
+      "representatives": 352018
+     },
+     "3": {
+      "births": 142438,
+      "cells": 211403,
+      "extended_cells": 59,
+      "inert_cells": 32,
+      "representatives": 566651
+     },
+     "4": {
+      "births": 211371,
+      "cells": 283231,
+      "extended_cells": 56,
+      "inert_cells": 24,
+      "representatives": 813237
+     },
+     "5": {
+      "births": 283207,
+      "cells": 369751,
+      "extended_cells": 49,
+      "inert_cells": 25,
+      "representatives": 1102505
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     41.110079,
+     40.109639,
+     39.981389,
+     40.241779,
+     39.841509
+    ],
+    "sites": 35551
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 802.57434,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "506784a97390eeefe4a45ba8fc3d838960e72487cdf43e1dbc53e43ff4b8010b",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     810.9771,
+     802.03273,
+     803.40914,
+     801.57791,
+     803.11595
+    ],
+    "sites": 35551
+   },
+   "facteur": 2048,
+   "profil": 32,
+   "tour": 0,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 43.0198985,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "10bb4c6d14096b2d073a719d5577ad53cc58f6d9800090c04ad8232edba7eaa3",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 35551,
+      "cells": 89186,
+      "extended_cells": 27,
+      "inert_cells": 27,
+      "representatives": 178399
+     },
+     "2": {
+      "births": 89159,
+      "cells": 142465,
+      "extended_cells": 54,
+      "inert_cells": 27,
+      "representatives": 352018
+     },
+     "3": {
+      "births": 142438,
+      "cells": 211403,
+      "extended_cells": 59,
+      "inert_cells": 32,
+      "representatives": 566651
+     },
+     "4": {
+      "births": 211371,
+      "cells": 283231,
+      "extended_cells": 56,
+      "inert_cells": 24,
+      "representatives": 813237
+     },
+     "5": {
+      "births": 283207,
+      "cells": 369751,
+      "extended_cells": 49,
+      "inert_cells": 25,
+      "representatives": 1102505
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     43.064079,
+     43.134909,
+     43.050099,
+     42.989698,
+     42.790789
+    ],
+    "sites": 35551
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 288.681718,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "ad0f0ded42223c60ddc00c64a02e58d4720589a5ec845a1ede122018b001a86c",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     302.936943,
+     287.365572,
+     288.770103,
+     288.593333,
+     288.848453
+    ],
+    "sites": 35551
+   },
+   "facteur": 8,
+   "profil": 21,
+   "tour": 1,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 38.045539,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "10bb4c6d14096b2d073a719d5577ad53cc58f6d9800090c04ad8232edba7eaa3",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 35551,
+      "cells": 89186,
+      "extended_cells": 27,
+      "inert_cells": 27,
+      "representatives": 178399
+     },
+     "2": {
+      "births": 89159,
+      "cells": 142465,
+      "extended_cells": 54,
+      "inert_cells": 27,
+      "representatives": 352018
+     },
+     "3": {
+      "births": 142438,
+      "cells": 211403,
+      "extended_cells": 59,
+      "inert_cells": 32,
+      "representatives": 566651
+     },
+     "4": {
+      "births": 211371,
+      "cells": 283231,
+      "extended_cells": 56,
+      "inert_cells": 24,
+      "representatives": 813237
+     },
+     "5": {
+      "births": 283207,
+      "cells": 369751,
+      "extended_cells": 49,
+      "inert_cells": 25,
+      "representatives": 1102505
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     38.266149,
+     38.24459,
+     37.980129,
+     38.110949,
+     37.872159
+    ],
+    "sites": 35551
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 275.716238,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "092105ba5cdfd0aa7c6b27cfe308da4a86609d865d8a39b9b37a7e9389a5acb7",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     287.974943,
+     277.115773,
+     274.856673,
+     276.134893,
+     275.297583
+    ],
+    "sites": 35551
+   },
+   "facteur": 1,
+   "profil": 24,
+   "tour": 1,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 38.406329,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "10bb4c6d14096b2d073a719d5577ad53cc58f6d9800090c04ad8232edba7eaa3",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 35551,
+      "cells": 89186,
+      "extended_cells": 27,
+      "inert_cells": 27,
+      "representatives": 178399
+     },
+     "2": {
+      "births": 89159,
+      "cells": 142465,
+      "extended_cells": 54,
+      "inert_cells": 27,
+      "representatives": 352018
+     },
+     "3": {
+      "births": 142438,
+      "cells": 211403,
+      "extended_cells": 59,
+      "inert_cells": 32,
+      "representatives": 566651
+     },
+     "4": {
+      "births": 211371,
+      "cells": 283231,
+      "extended_cells": 56,
+      "inert_cells": 24,
+      "representatives": 813237
+     },
+     "5": {
+      "births": 283207,
+      "cells": 369751,
+      "extended_cells": 49,
+      "inert_cells": 25,
+      "representatives": 1102505
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     38.938159,
+     38.498269,
+     38.269349,
+     38.748659,
+     38.314389
+    ],
+    "sites": 35551
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 291.703668,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "32fdaf329cd8ef343e14516b891471fd38e7c23d1109a752d166f11127d88f62",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     305.939023,
+     292.013003,
+     291.394333,
+     290.819183,
+     292.143193
+    ],
+    "sites": 35551
+   },
+   "facteur": 8,
+   "profil": 24,
+   "tour": 1,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 37.9327545,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "10bb4c6d14096b2d073a719d5577ad53cc58f6d9800090c04ad8232edba7eaa3",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 35551,
+      "cells": 89186,
+      "extended_cells": 27,
+      "inert_cells": 27,
+      "representatives": 178399
+     },
+     "2": {
+      "births": 89159,
+      "cells": 142465,
+      "extended_cells": 54,
+      "inert_cells": 27,
+      "representatives": 352018
+     },
+     "3": {
+      "births": 142438,
+      "cells": 211403,
+      "extended_cells": 59,
+      "inert_cells": 32,
+      "representatives": 566651
+     },
+     "4": {
+      "births": 211371,
+      "cells": 283231,
+      "extended_cells": 56,
+      "inert_cells": 24,
+      "representatives": 813237
+     },
+     "5": {
+      "births": 283207,
+      "cells": 369751,
+      "extended_cells": 49,
+      "inert_cells": 25,
+      "representatives": 1102505
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     38.660799,
+     37.91013,
+     37.955379,
+     38.314749,
+     37.891579
+    ],
+    "sites": 35551
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 275.680563,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "f336ab88cd33d529e9adb520f19db57fa4c2be658bfe9994de5528737fb30298",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     292.124543,
+     278.937473,
+     275.582443,
+     275.778683,
+     274.544263
+    ],
+    "sites": 35551
+   },
+   "facteur": 1,
+   "profil": 32,
+   "tour": 1,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 40.159094,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "10bb4c6d14096b2d073a719d5577ad53cc58f6d9800090c04ad8232edba7eaa3",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 35551,
+      "cells": 89186,
+      "extended_cells": 27,
+      "inert_cells": 27,
+      "representatives": 178399
+     },
+     "2": {
+      "births": 89159,
+      "cells": 142465,
+      "extended_cells": 54,
+      "inert_cells": 27,
+      "representatives": 352018
+     },
+     "3": {
+      "births": 142438,
+      "cells": 211403,
+      "extended_cells": 59,
+      "inert_cells": 32,
+      "representatives": 566651
+     },
+     "4": {
+      "births": 211371,
+      "cells": 283231,
+      "extended_cells": 56,
+      "inert_cells": 24,
+      "representatives": 813237
+     },
+     "5": {
+      "births": 283207,
+      "cells": 369751,
+      "extended_cells": 49,
+      "inert_cells": 25,
+      "representatives": 1102505
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     40.727379,
+     40.355579,
+     40.048929,
+     40.269259,
+     40.024409
+    ],
+    "sites": 35551
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 293.8819725,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "d8c967b492ce8c3eed4ab937f69ffe8af988b047e3b71417e13563927bac7de5",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     306.346113,
+     293.932962,
+     293.122503,
+     297.874642,
+     293.830983
+    ],
+    "sites": 35551
+   },
+   "facteur": 8,
+   "profil": 32,
+   "tour": 1,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 40.189489,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "10bb4c6d14096b2d073a719d5577ad53cc58f6d9800090c04ad8232edba7eaa3",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 35551,
+      "cells": 89186,
+      "extended_cells": 27,
+      "inert_cells": 27,
+      "representatives": 178399
+     },
+     "2": {
+      "births": 89159,
+      "cells": 142465,
+      "extended_cells": 54,
+      "inert_cells": 27,
+      "representatives": 352018
+     },
+     "3": {
+      "births": 142438,
+      "cells": 211403,
+      "extended_cells": 59,
+      "inert_cells": 32,
+      "representatives": 566651
+     },
+     "4": {
+      "births": 211371,
+      "cells": 283231,
+      "extended_cells": 56,
+      "inert_cells": 24,
+      "representatives": 813237
+     },
+     "5": {
+      "births": 283207,
+      "cells": 369751,
+      "extended_cells": 49,
+      "inert_cells": 25,
+      "representatives": 1102505
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     40.609169,
+     40.335249,
+     40.122619,
+     40.256359,
+     40.105229
+    ],
+    "sites": 35551
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 801.765655,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "506784a97390eeefe4a45ba8fc3d838960e72487cdf43e1dbc53e43ff4b8010b",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     809.650521,
+     799.916491,
+     802.0834,
+     804.53388,
+     801.44791
+    ],
+    "sites": 35551
+   },
+   "facteur": 2048,
+   "profil": 32,
+   "tour": 1,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 43.301669,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "10bb4c6d14096b2d073a719d5577ad53cc58f6d9800090c04ad8232edba7eaa3",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 35551,
+      "cells": 89186,
+      "extended_cells": 27,
+      "inert_cells": 27,
+      "representatives": 178399
+     },
+     "2": {
+      "births": 89159,
+      "cells": 142465,
+      "extended_cells": 54,
+      "inert_cells": 27,
+      "representatives": 352018
+     },
+     "3": {
+      "births": 142438,
+      "cells": 211403,
+      "extended_cells": 59,
+      "inert_cells": 32,
+      "representatives": 566651
+     },
+     "4": {
+      "births": 211371,
+      "cells": 283231,
+      "extended_cells": 56,
+      "inert_cells": 24,
+      "representatives": 813237
+     },
+     "5": {
+      "births": 283207,
+      "cells": 369751,
+      "extended_cells": 49,
+      "inert_cells": 25,
+      "representatives": 1102505
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     43.332619,
+     43.302899,
+     43.425019,
+     43.300439,
+     43.251519
+    ],
+    "sites": 35551
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 273.551563,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "12e7684173191378e43dcf306b87259111fbea427c5381829a447a563ce4d309",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     285.497793,
+     273.678373,
+     275.144883,
+     273.424753,
+     272.844753
+    ],
+    "sites": 35551
+   },
+   "facteur": 1,
+   "profil": 21,
+   "tour": 1,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 38.447574,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "10bb4c6d14096b2d073a719d5577ad53cc58f6d9800090c04ad8232edba7eaa3",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 35551,
+      "cells": 89186,
+      "extended_cells": 27,
+      "inert_cells": 27,
+      "representatives": 178399
+     },
+     "2": {
+      "births": 89159,
+      "cells": 142465,
+      "extended_cells": 54,
+      "inert_cells": 27,
+      "representatives": 352018
+     },
+     "3": {
+      "births": 142438,
+      "cells": 211403,
+      "extended_cells": 59,
+      "inert_cells": 32,
+      "representatives": 566651
+     },
+     "4": {
+      "births": 211371,
+      "cells": 283231,
+      "extended_cells": 56,
+      "inert_cells": 24,
+      "representatives": 813237
+     },
+     "5": {
+      "births": 283207,
+      "cells": 369751,
+      "extended_cells": 49,
+      "inert_cells": 25,
+      "representatives": 1102505
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     38.664489,
+     38.064259,
+     38.574269,
+     38.635689,
+     38.320879
+    ],
+    "sites": 35551
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 272.022469,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "092105ba5cdfd0aa7c6b27cfe308da4a86609d865d8a39b9b37a7e9389a5acb7",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     290.327803,
+     271.962414,
+     271.983504,
+     272.061434,
+     273.367734
+    ],
+    "sites": 35551
+   },
+   "facteur": 1,
+   "profil": 24,
+   "tour": 2,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 38.115754,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "10bb4c6d14096b2d073a719d5577ad53cc58f6d9800090c04ad8232edba7eaa3",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 35551,
+      "cells": 89186,
+      "extended_cells": 27,
+      "inert_cells": 27,
+      "representatives": 178399
+     },
+     "2": {
+      "births": 89159,
+      "cells": 142465,
+      "extended_cells": 54,
+      "inert_cells": 27,
+      "representatives": 352018
+     },
+     "3": {
+      "births": 142438,
+      "cells": 211403,
+      "extended_cells": 59,
+      "inert_cells": 32,
+      "representatives": 566651
+     },
+     "4": {
+      "births": 211371,
+      "cells": 283231,
+      "extended_cells": 56,
+      "inert_cells": 24,
+      "representatives": 813237
+     },
+     "5": {
+      "births": 283207,
+      "cells": 369751,
+      "extended_cells": 49,
+      "inert_cells": 25,
+      "representatives": 1102505
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     38.280049,
+     38.039989,
+     38.468719,
+     38.093919,
+     38.137589
+    ],
+    "sites": 35551
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 293.159318,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "32fdaf329cd8ef343e14516b891471fd38e7c23d1109a752d166f11127d88f62",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     306.481693,
+     292.739823,
+     293.118353,
+     294.680502,
+     293.200283
+    ],
+    "sites": 35551
+   },
+   "facteur": 8,
+   "profil": 24,
+   "tour": 2,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 37.958984,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "10bb4c6d14096b2d073a719d5577ad53cc58f6d9800090c04ad8232edba7eaa3",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 35551,
+      "cells": 89186,
+      "extended_cells": 27,
+      "inert_cells": 27,
+      "representatives": 178399
+     },
+     "2": {
+      "births": 89159,
+      "cells": 142465,
+      "extended_cells": 54,
+      "inert_cells": 27,
+      "representatives": 352018
+     },
+     "3": {
+      "births": 142438,
+      "cells": 211403,
+      "extended_cells": 59,
+      "inert_cells": 32,
+      "representatives": 566651
+     },
+     "4": {
+      "births": 211371,
+      "cells": 283231,
+      "extended_cells": 56,
+      "inert_cells": 24,
+      "representatives": 813237
+     },
+     "5": {
+      "births": 283207,
+      "cells": 369751,
+      "extended_cells": 49,
+      "inert_cells": 25,
+      "representatives": 1102505
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     38.105079,
+     37.972129,
+     37.945839,
+     37.909949,
+     38.423049
+    ],
+    "sites": 35551
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 275.6779535,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "f336ab88cd33d529e9adb520f19db57fa4c2be658bfe9994de5528737fb30298",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     287.245033,
+     276.263223,
+     274.867314,
+     276.594334,
+     275.092684
+    ],
+    "sites": 35551
+   },
+   "facteur": 1,
+   "profil": 32,
+   "tour": 2,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 40.177444,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "10bb4c6d14096b2d073a719d5577ad53cc58f6d9800090c04ad8232edba7eaa3",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 35551,
+      "cells": 89186,
+      "extended_cells": 27,
+      "inert_cells": 27,
+      "representatives": 178399
+     },
+     "2": {
+      "births": 89159,
+      "cells": 142465,
+      "extended_cells": 54,
+      "inert_cells": 27,
+      "representatives": 352018
+     },
+     "3": {
+      "births": 142438,
+      "cells": 211403,
+      "extended_cells": 59,
+      "inert_cells": 32,
+      "representatives": 566651
+     },
+     "4": {
+      "births": 211371,
+      "cells": 283231,
+      "extended_cells": 56,
+      "inert_cells": 24,
+      "representatives": 813237
+     },
+     "5": {
+      "births": 283207,
+      "cells": 369751,
+      "extended_cells": 49,
+      "inert_cells": 25,
+      "representatives": 1102505
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     39.968949,
+     40.106369,
+     40.248519,
+     40.060269,
+     40.260769
+    ],
+    "sites": 35551
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 293.4571225,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "d8c967b492ce8c3eed4ab937f69ffe8af988b047e3b71417e13563927bac7de5",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     307.139852,
+     294.593353,
+     293.468773,
+     292.020133,
+     293.445472
+    ],
+    "sites": 35551
+   },
+   "facteur": 8,
+   "profil": 32,
+   "tour": 2,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 39.964579,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "10bb4c6d14096b2d073a719d5577ad53cc58f6d9800090c04ad8232edba7eaa3",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 35551,
+      "cells": 89186,
+      "extended_cells": 27,
+      "inert_cells": 27,
+      "representatives": 178399
+     },
+     "2": {
+      "births": 89159,
+      "cells": 142465,
+      "extended_cells": 54,
+      "inert_cells": 27,
+      "representatives": 352018
+     },
+     "3": {
+      "births": 142438,
+      "cells": 211403,
+      "extended_cells": 59,
+      "inert_cells": 32,
+      "representatives": 566651
+     },
+     "4": {
+      "births": 211371,
+      "cells": 283231,
+      "extended_cells": 56,
+      "inert_cells": 24,
+      "representatives": 813237
+     },
+     "5": {
+      "births": 283207,
+      "cells": 369751,
+      "extended_cells": 49,
+      "inert_cells": 25,
+      "representatives": 1102505
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     39.957119,
+     39.890309,
+     40.088329,
+     39.779719,
+     40.038849
+    ],
+    "sites": 35551
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 808.672435,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "506784a97390eeefe4a45ba8fc3d838960e72487cdf43e1dbc53e43ff4b8010b",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     813.41368,
+     809.2065,
+     807.98494,
+     809.37293,
+     808.13837
+    ],
+    "sites": 35551
+   },
+   "facteur": 2048,
+   "profil": 32,
+   "tour": 2,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 42.692439,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "10bb4c6d14096b2d073a719d5577ad53cc58f6d9800090c04ad8232edba7eaa3",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 35551,
+      "cells": 89186,
+      "extended_cells": 27,
+      "inert_cells": 27,
+      "representatives": 178399
+     },
+     "2": {
+      "births": 89159,
+      "cells": 142465,
+      "extended_cells": 54,
+      "inert_cells": 27,
+      "representatives": 352018
+     },
+     "3": {
+      "births": 142438,
+      "cells": 211403,
+      "extended_cells": 59,
+      "inert_cells": 32,
+      "representatives": 566651
+     },
+     "4": {
+      "births": 211371,
+      "cells": 283231,
+      "extended_cells": 56,
+      "inert_cells": 24,
+      "representatives": 813237
+     },
+     "5": {
+      "births": 283207,
+      "cells": 369751,
+      "extended_cells": 49,
+      "inert_cells": 25,
+      "representatives": 1102505
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     42.647659,
+     43.043149,
+     42.666089,
+     42.718789,
+     42.299369
+    ],
+    "sites": 35551
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 273.852598,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "12e7684173191378e43dcf306b87259111fbea427c5381829a447a563ce4d309",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     286.398933,
+     274.020063,
+     273.121163,
+     273.685133,
+     274.380553
+    ],
+    "sites": 35551
+   },
+   "facteur": 1,
+   "profil": 21,
+   "tour": 2,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 37.938059,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "10bb4c6d14096b2d073a719d5577ad53cc58f6d9800090c04ad8232edba7eaa3",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 35551,
+      "cells": 89186,
+      "extended_cells": 27,
+      "inert_cells": 27,
+      "representatives": 178399
+     },
+     "2": {
+      "births": 89159,
+      "cells": 142465,
+      "extended_cells": 54,
+      "inert_cells": 27,
+      "representatives": 352018
+     },
+     "3": {
+      "births": 142438,
+      "cells": 211403,
+      "extended_cells": 59,
+      "inert_cells": 32,
+      "representatives": 566651
+     },
+     "4": {
+      "births": 211371,
+      "cells": 283231,
+      "extended_cells": 56,
+      "inert_cells": 24,
+      "representatives": 813237
+     },
+     "5": {
+      "births": 283207,
+      "cells": 369751,
+      "extended_cells": 49,
+      "inert_cells": 25,
+      "representatives": 1102505
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     38.112079,
+     37.993909,
+     37.882209,
+     38.097049,
+     37.826909
+    ],
+    "sites": 35551
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 289.484233,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "ad0f0ded42223c60ddc00c64a02e58d4720589a5ec845a1ede122018b001a86c",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     309.364902,
+     289.023273,
+     289.303283,
+     289.665183,
+     289.700523
+    ],
+    "sites": 35551
+   },
+   "facteur": 8,
+   "profil": 21,
+   "tour": 2,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 38.4352545,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "10bb4c6d14096b2d073a719d5577ad53cc58f6d9800090c04ad8232edba7eaa3",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 35551,
+      "cells": 89186,
+      "extended_cells": 27,
+      "inert_cells": 27,
+      "representatives": 178399
+     },
+     "2": {
+      "births": 89159,
+      "cells": 142465,
+      "extended_cells": 54,
+      "inert_cells": 27,
+      "representatives": 352018
+     },
+     "3": {
+      "births": 142438,
+      "cells": 211403,
+      "extended_cells": 59,
+      "inert_cells": 32,
+      "representatives": 566651
+     },
+     "4": {
+      "births": 211371,
+      "cells": 283231,
+      "extended_cells": 56,
+      "inert_cells": 24,
+      "representatives": 813237
+     },
+     "5": {
+      "births": 283207,
+      "cells": 369751,
+      "extended_cells": 49,
+      "inert_cells": 25,
+      "representatives": 1102505
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     38.357409,
+     38.668809,
+     38.48802,
+     38.382489,
+     38.047549
+    ],
+    "sites": 35551
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 318.940912,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": "e9c5effab396e36d570184e6e758bf223b433fe6874429254beb69d1d6776227",
+    "empreinte": "1db70a320e272a8755ed17a1250fae344898f16676ea295bb14c332108ef027d",
+    "export": {
+     "bytes": 82924536,
+     "cat_bin_sha256": "1db70a320e272a8755ed17a1250fae344898f16676ea295bb14c332108ef027d",
+     "phase": "export"
+    },
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     332.432422,
+     318.710242,
+     319.420782,
+     319.171582,
+     317.766103
+    ],
+    "sites": 45845
+   },
+   "facteur": 1,
+   "profil": 21,
+   "tour": 0,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 43.572299,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "d66647a043f682dab4ebbc638517c9013e931142864d08bcafc00be61702310d",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 45845,
+      "cells": 118890,
+      "extended_cells": 93,
+      "inert_cells": 93,
+      "representatives": 237873
+     },
+     "2": {
+      "births": 118797,
+      "cells": 182948,
+      "extended_cells": 218,
+      "inert_cells": 125,
+      "representatives": 454626
+     },
+     "3": {
+      "births": 182823,
+      "cells": 273994,
+      "extended_cells": 240,
+      "inert_cells": 115,
+      "representatives": 728362
+     },
+     "4": {
+      "births": 273879,
+      "cells": 361441,
+      "extended_cells": 230,
+      "inert_cells": 112,
+      "representatives": 1035224
+     },
+     "5": {
+      "births": 361326,
+      "cells": 471060,
+      "extended_cells": 239,
+      "inert_cells": 121,
+      "representatives": 1393952
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     43.794159,
+     43.764219,
+     43.625019,
+     43.519579,
+     43.512069
+    ],
+    "sites": 45845
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 328.834472,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "b65df88d760abb5bde97192ae4f7ba5961172431986814691ffc07c4b2a5b633",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     358.977532,
+     328.758762,
+     328.910182,
+     328.272882,
+     330.331302
+    ],
+    "sites": 45845
+   },
+   "facteur": 8,
+   "profil": 21,
+   "tour": 0,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 47.8361385,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "d66647a043f682dab4ebbc638517c9013e931142864d08bcafc00be61702310d",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 45845,
+      "cells": 118890,
+      "extended_cells": 93,
+      "inert_cells": 93,
+      "representatives": 237873
+     },
+     "2": {
+      "births": 118797,
+      "cells": 182948,
+      "extended_cells": 218,
+      "inert_cells": 125,
+      "representatives": 454626
+     },
+     "3": {
+      "births": 182823,
+      "cells": 273994,
+      "extended_cells": 240,
+      "inert_cells": 115,
+      "representatives": 728362
+     },
+     "4": {
+      "births": 273879,
+      "cells": 361441,
+      "extended_cells": 230,
+      "inert_cells": 112,
+      "representatives": 1035224
+     },
+     "5": {
+      "births": 361326,
+      "cells": 471060,
+      "extended_cells": 239,
+      "inert_cells": 121,
+      "representatives": 1393952
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     47.828599,
+     47.822878,
+     48.260709,
+     47.849399,
+     47.595909
+    ],
+    "sites": 45845
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 323.437852,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": "e9c5effab396e36d570184e6e758bf223b433fe6874429254beb69d1d6776227",
+    "empreinte": "35bf930d186006d3368867012efb696fcce30c2bc82c3b23714de385bf35cddf",
+    "export": {
+     "bytes": 82924536,
+     "cat_bin_sha256": "35bf930d186006d3368867012efb696fcce30c2bc82c3b23714de385bf35cddf",
+     "phase": "export"
+    },
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     343.242882,
+     322.837492,
+     323.984512,
+     322.891192,
+     324.893732
+    ],
+    "sites": 45845
+   },
+   "facteur": 1,
+   "profil": 24,
+   "tour": 0,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 50.3783135,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "d66647a043f682dab4ebbc638517c9013e931142864d08bcafc00be61702310d",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 45845,
+      "cells": 118890,
+      "extended_cells": 93,
+      "inert_cells": 93,
+      "representatives": 237873
+     },
+     "2": {
+      "births": 118797,
+      "cells": 182948,
+      "extended_cells": 218,
+      "inert_cells": 125,
+      "representatives": 454626
+     },
+     "3": {
+      "births": 182823,
+      "cells": 273994,
+      "extended_cells": 240,
+      "inert_cells": 115,
+      "representatives": 728362
+     },
+     "4": {
+      "births": 273879,
+      "cells": 361441,
+      "extended_cells": 230,
+      "inert_cells": 112,
+      "representatives": 1035224
+     },
+     "5": {
+      "births": 361326,
+      "cells": 471060,
+      "extended_cells": 239,
+      "inert_cells": 121,
+      "representatives": 1393952
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     50.537369,
+     50.007809,
+     50.748818,
+     50.821479,
+     50.002639
+    ],
+    "sites": 45845
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 351.4991715,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "61775322fb059e934fe69cc6e46702896bff6b1288b55feea2528899e97dc70d",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     368.728031,
+     345.171102,
+     352.127031,
+     354.518271,
+     350.871312
+    ],
+    "sites": 45845
+   },
+   "facteur": 8,
+   "profil": 24,
+   "tour": 0,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 44.530784,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "d66647a043f682dab4ebbc638517c9013e931142864d08bcafc00be61702310d",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 45845,
+      "cells": 118890,
+      "extended_cells": 93,
+      "inert_cells": 93,
+      "representatives": 237873
+     },
+     "2": {
+      "births": 118797,
+      "cells": 182948,
+      "extended_cells": 218,
+      "inert_cells": 125,
+      "representatives": 454626
+     },
+     "3": {
+      "births": 182823,
+      "cells": 273994,
+      "extended_cells": 240,
+      "inert_cells": 115,
+      "representatives": 728362
+     },
+     "4": {
+      "births": 273879,
+      "cells": 361441,
+      "extended_cells": 230,
+      "inert_cells": 112,
+      "representatives": 1035224
+     },
+     "5": {
+      "births": 361326,
+      "cells": 471060,
+      "extended_cells": 239,
+      "inert_cells": 121,
+      "representatives": 1393952
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     44.971089,
+     44.421369,
+     44.717799,
+     44.640199,
+     44.374169
+    ],
+    "sites": 45845
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 327.581732,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": "e9c5effab396e36d570184e6e758bf223b433fe6874429254beb69d1d6776227",
+    "empreinte": "b82e2277f9c2363310bcbb18e0f2e1b545bf9930f7c6830cca3b8c3a6b0e62d7",
+    "export": {
+     "bytes": 82924536,
+     "cat_bin_sha256": "b82e2277f9c2363310bcbb18e0f2e1b545bf9930f7c6830cca3b8c3a6b0e62d7",
+     "phase": "export"
+    },
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     344.854132,
+     326.195012,
+     327.966092,
+     328.273282,
+     327.197372
+    ],
+    "sites": 45845
+   },
+   "facteur": 1,
+   "profil": 32,
+   "tour": 0,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 49.5108985,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "d66647a043f682dab4ebbc638517c9013e931142864d08bcafc00be61702310d",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 45845,
+      "cells": 118890,
+      "extended_cells": 93,
+      "inert_cells": 93,
+      "representatives": 237873
+     },
+     "2": {
+      "births": 118797,
+      "cells": 182948,
+      "extended_cells": 218,
+      "inert_cells": 125,
+      "representatives": 454626
+     },
+     "3": {
+      "births": 182823,
+      "cells": 273994,
+      "extended_cells": 240,
+      "inert_cells": 115,
+      "representatives": 728362
+     },
+     "4": {
+      "births": 273879,
+      "cells": 361441,
+      "extended_cells": 230,
+      "inert_cells": 112,
+      "representatives": 1035224
+     },
+     "5": {
+      "births": 361326,
+      "cells": 471060,
+      "extended_cells": 239,
+      "inert_cells": 121,
+      "representatives": 1393952
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     49.444298,
+     49.799199,
+     49.209149,
+     51.520349,
+     49.222598
+    ],
+    "sites": 45845
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 331.678982,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "a57bdcf2cc0ff412bfe3aad633e3daf51ecf489ecb29df362b7ac7e3e4cb4bb7",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     364.935131,
+     328.892512,
+     331.757362,
+     331.600602,
+     332.289462
+    ],
+    "sites": 45845
+   },
+   "facteur": 8,
+   "profil": 32,
+   "tour": 0,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 45.931569,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "d66647a043f682dab4ebbc638517c9013e931142864d08bcafc00be61702310d",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 45845,
+      "cells": 118890,
+      "extended_cells": 93,
+      "inert_cells": 93,
+      "representatives": 237873
+     },
+     "2": {
+      "births": 118797,
+      "cells": 182948,
+      "extended_cells": 218,
+      "inert_cells": 125,
+      "representatives": 454626
+     },
+     "3": {
+      "births": 182823,
+      "cells": 273994,
+      "extended_cells": 240,
+      "inert_cells": 115,
+      "representatives": 728362
+     },
+     "4": {
+      "births": 273879,
+      "cells": 361441,
+      "extended_cells": 230,
+      "inert_cells": 112,
+      "representatives": 1035224
+     },
+     "5": {
+      "births": 361326,
+      "cells": 471060,
+      "extended_cells": 239,
+      "inert_cells": 121,
+      "representatives": 1393952
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     46.141348,
+     45.743269,
+     46.091099,
+     45.772039,
+     46.170969
+    ],
+    "sites": 45845
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 945.998137,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "e73e3245f35873937c5d029fc028071fb1d37fe03b63521b6f35417825216821",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     969.615696,
+     943.094017,
+     944.952157,
+     947.044117,
+     947.732257
+    ],
+    "sites": 45845
+   },
+   "facteur": 2048,
+   "profil": 32,
+   "tour": 0,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 48.1015485,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "d66647a043f682dab4ebbc638517c9013e931142864d08bcafc00be61702310d",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 45845,
+      "cells": 118890,
+      "extended_cells": 93,
+      "inert_cells": 93,
+      "representatives": 237873
+     },
+     "2": {
+      "births": 118797,
+      "cells": 182948,
+      "extended_cells": 218,
+      "inert_cells": 125,
+      "representatives": 454626
+     },
+     "3": {
+      "births": 182823,
+      "cells": 273994,
+      "extended_cells": 240,
+      "inert_cells": 115,
+      "representatives": 728362
+     },
+     "4": {
+      "births": 273879,
+      "cells": 361441,
+      "extended_cells": 230,
+      "inert_cells": 112,
+      "representatives": 1035224
+     },
+     "5": {
+      "births": 361326,
+      "cells": 471060,
+      "extended_cells": 239,
+      "inert_cells": 121,
+      "representatives": 1393952
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     49.199389,
+     47.738699,
+     47.983499,
+     48.543579,
+     48.219598
+    ],
+    "sites": 45845
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 329.461902,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "b65df88d760abb5bde97192ae4f7ba5961172431986814691ffc07c4b2a5b633",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     353.888121,
+     329.113342,
+     328.852422,
+     329.810462,
+     332.796142
+    ],
+    "sites": 45845
+   },
+   "facteur": 8,
+   "profil": 21,
+   "tour": 1,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 48.0855085,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "d66647a043f682dab4ebbc638517c9013e931142864d08bcafc00be61702310d",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 45845,
+      "cells": 118890,
+      "extended_cells": 93,
+      "inert_cells": 93,
+      "representatives": 237873
+     },
+     "2": {
+      "births": 118797,
+      "cells": 182948,
+      "extended_cells": 218,
+      "inert_cells": 125,
+      "representatives": 454626
+     },
+     "3": {
+      "births": 182823,
+      "cells": 273994,
+      "extended_cells": 240,
+      "inert_cells": 115,
+      "representatives": 728362
+     },
+     "4": {
+      "births": 273879,
+      "cells": 361441,
+      "extended_cells": 230,
+      "inert_cells": 112,
+      "representatives": 1035224
+     },
+     "5": {
+      "births": 361326,
+      "cells": 471060,
+      "extended_cells": 239,
+      "inert_cells": 121,
+      "representatives": 1393952
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     48.170369,
+     48.150088,
+     48.020929,
+     47.907059,
+     48.299279
+    ],
+    "sites": 45845
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 329.855447,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "f02025c588a05d2cb85640770fa6946b93d40d97c71669cc16a6515f8a8caf5c",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     348.535902,
+     329.502302,
+     331.290202,
+     330.208592,
+     327.269242
+    ],
+    "sites": 45845
+   },
+   "facteur": 1,
+   "profil": 24,
+   "tour": 1,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 48.666184,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "d66647a043f682dab4ebbc638517c9013e931142864d08bcafc00be61702310d",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 45845,
+      "cells": 118890,
+      "extended_cells": 93,
+      "inert_cells": 93,
+      "representatives": 237873
+     },
+     "2": {
+      "births": 118797,
+      "cells": 182948,
+      "extended_cells": 218,
+      "inert_cells": 125,
+      "representatives": 454626
+     },
+     "3": {
+      "births": 182823,
+      "cells": 273994,
+      "extended_cells": 240,
+      "inert_cells": 115,
+      "representatives": 728362
+     },
+     "4": {
+      "births": 273879,
+      "cells": 361441,
+      "extended_cells": 230,
+      "inert_cells": 112,
+      "representatives": 1035224
+     },
+     "5": {
+      "births": 361326,
+      "cells": 471060,
+      "extended_cells": 239,
+      "inert_cells": 121,
+      "representatives": 1393952
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     48.442999,
+     48.779379,
+     48.639809,
+     48.692559,
+     48.538648
+    ],
+    "sites": 45845
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 332.5105465,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "61775322fb059e934fe69cc6e46702896bff6b1288b55feea2528899e97dc70d",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     345.681201,
+     334.153902,
+     332.220781,
+     332.800312,
+     330.059442
+    ],
+    "sites": 45845
+   },
+   "facteur": 8,
+   "profil": 24,
+   "tour": 1,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 44.823819,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "d66647a043f682dab4ebbc638517c9013e931142864d08bcafc00be61702310d",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 45845,
+      "cells": 118890,
+      "extended_cells": 93,
+      "inert_cells": 93,
+      "representatives": 237873
+     },
+     "2": {
+      "births": 118797,
+      "cells": 182948,
+      "extended_cells": 218,
+      "inert_cells": 125,
+      "representatives": 454626
+     },
+     "3": {
+      "births": 182823,
+      "cells": 273994,
+      "extended_cells": 240,
+      "inert_cells": 115,
+      "representatives": 728362
+     },
+     "4": {
+      "births": 273879,
+      "cells": 361441,
+      "extended_cells": 230,
+      "inert_cells": 112,
+      "representatives": 1035224
+     },
+     "5": {
+      "births": 361326,
+      "cells": 471060,
+      "extended_cells": 239,
+      "inert_cells": 121,
+      "representatives": 1393952
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     45.213349,
+     44.873709,
+     44.876819,
+     44.773929,
+     44.637099
+    ],
+    "sites": 45845
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 325.57499,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "995ced9ed6e21598651f7a2d66e003dd62533e7b0ba772f2ba32ed8e8f39c62c",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     345.909882,
+     323.313011,
+     325.187725,
+     325.962255,
+     327.980575
+    ],
+    "sites": 45845
+   },
+   "facteur": 1,
+   "profil": 32,
+   "tour": 1,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 49.928432,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "d66647a043f682dab4ebbc638517c9013e931142864d08bcafc00be61702310d",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 45845,
+      "cells": 118890,
+      "extended_cells": 93,
+      "inert_cells": 93,
+      "representatives": 237873
+     },
+     "2": {
+      "births": 118797,
+      "cells": 182948,
+      "extended_cells": 218,
+      "inert_cells": 125,
+      "representatives": 454626
+     },
+     "3": {
+      "births": 182823,
+      "cells": 273994,
+      "extended_cells": 240,
+      "inert_cells": 115,
+      "representatives": 728362
+     },
+     "4": {
+      "births": 273879,
+      "cells": 361441,
+      "extended_cells": 230,
+      "inert_cells": 112,
+      "representatives": 1035224
+     },
+     "5": {
+      "births": 361326,
+      "cells": 471060,
+      "extended_cells": 239,
+      "inert_cells": 121,
+      "representatives": 1393952
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     50.124468,
+     50.077277,
+     50.166868,
+     49.609958,
+     49.779587
+    ],
+    "sites": 45845
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 333.0544495,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "a57bdcf2cc0ff412bfe3aad633e3daf51ecf489ecb29df362b7ac7e3e4cb4bb7",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     343.367074,
+     332.275145,
+     333.358735,
+     334.458724,
+     332.750164
+    ],
+    "sites": 45845
+   },
+   "facteur": 8,
+   "profil": 32,
+   "tour": 1,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 45.944603,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "d66647a043f682dab4ebbc638517c9013e931142864d08bcafc00be61702310d",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 45845,
+      "cells": 118890,
+      "extended_cells": 93,
+      "inert_cells": 93,
+      "representatives": 237873
+     },
+     "2": {
+      "births": 118797,
+      "cells": 182948,
+      "extended_cells": 218,
+      "inert_cells": 125,
+      "representatives": 454626
+     },
+     "3": {
+      "births": 182823,
+      "cells": 273994,
+      "extended_cells": 240,
+      "inert_cells": 115,
+      "representatives": 728362
+     },
+     "4": {
+      "births": 273879,
+      "cells": 361441,
+      "extended_cells": 230,
+      "inert_cells": 112,
+      "representatives": 1035224
+     },
+     "5": {
+      "births": 361326,
+      "cells": 471060,
+      "extended_cells": 239,
+      "inert_cells": 121,
+      "representatives": 1393952
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     46.212478,
+     46.261588,
+     46.085988,
+     45.803218,
+     45.769958
+    ],
+    "sites": 45845
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 945.7795115,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "e73e3245f35873937c5d029fc028071fb1d37fe03b63521b6f35417825216821",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     964.494145,
+     944.883776,
+     945.166336,
+     946.392687,
+     946.795916
+    ],
+    "sites": 45845
+   },
+   "facteur": 2048,
+   "profil": 32,
+   "tour": 1,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 47.704963,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "d66647a043f682dab4ebbc638517c9013e931142864d08bcafc00be61702310d",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 45845,
+      "cells": 118890,
+      "extended_cells": 93,
+      "inert_cells": 93,
+      "representatives": 237873
+     },
+     "2": {
+      "births": 118797,
+      "cells": 182948,
+      "extended_cells": 218,
+      "inert_cells": 125,
+      "representatives": 454626
+     },
+     "3": {
+      "births": 182823,
+      "cells": 273994,
+      "extended_cells": 240,
+      "inert_cells": 115,
+      "representatives": 728362
+     },
+     "4": {
+      "births": 273879,
+      "cells": 361441,
+      "extended_cells": 230,
+      "inert_cells": 112,
+      "representatives": 1035224
+     },
+     "5": {
+      "births": 361326,
+      "cells": 471060,
+      "extended_cells": 239,
+      "inert_cells": 121,
+      "representatives": 1393952
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     49.082157,
+     47.680168,
+     47.946068,
+     47.729758,
+     47.671648
+    ],
+    "sites": 45845
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 317.770395,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "d0578a530bd4247b873fbb99efac3038f2b9eb3f9c52da3a2de9e44821046c7c",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     340.026875,
+     318.842486,
+     317.683255,
+     317.389875,
+     317.857535
+    ],
+    "sites": 45845
+   },
+   "facteur": 1,
+   "profil": 21,
+   "tour": 1,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 43.9245375,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "d66647a043f682dab4ebbc638517c9013e931142864d08bcafc00be61702310d",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 45845,
+      "cells": 118890,
+      "extended_cells": 93,
+      "inert_cells": 93,
+      "representatives": 237873
+     },
+     "2": {
+      "births": 118797,
+      "cells": 182948,
+      "extended_cells": 218,
+      "inert_cells": 125,
+      "representatives": 454626
+     },
+     "3": {
+      "births": 182823,
+      "cells": 273994,
+      "extended_cells": 240,
+      "inert_cells": 115,
+      "representatives": 728362
+     },
+     "4": {
+      "births": 273879,
+      "cells": 361441,
+      "extended_cells": 230,
+      "inert_cells": 112,
+      "representatives": 1035224
+     },
+     "5": {
+      "births": 361326,
+      "cells": 471060,
+      "extended_cells": 239,
+      "inert_cells": 121,
+      "representatives": 1393952
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     43.924248,
+     43.921158,
+     43.988428,
+     43.927917,
+     43.780098
+    ],
+    "sites": 45845
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 327.9626495,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "f02025c588a05d2cb85640770fa6946b93d40d97c71669cc16a6515f8a8caf5c",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     347.216724,
+     325.851585,
+     328.472725,
+     328.410304,
+     327.514995
+    ],
+    "sites": 45845
+   },
+   "facteur": 1,
+   "profil": 24,
+   "tour": 2,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 48.2518425,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "d66647a043f682dab4ebbc638517c9013e931142864d08bcafc00be61702310d",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 45845,
+      "cells": 118890,
+      "extended_cells": 93,
+      "inert_cells": 93,
+      "representatives": 237873
+     },
+     "2": {
+      "births": 118797,
+      "cells": 182948,
+      "extended_cells": 218,
+      "inert_cells": 125,
+      "representatives": 454626
+     },
+     "3": {
+      "births": 182823,
+      "cells": 273994,
+      "extended_cells": 240,
+      "inert_cells": 115,
+      "representatives": 728362
+     },
+     "4": {
+      "births": 273879,
+      "cells": 361441,
+      "extended_cells": 230,
+      "inert_cells": 112,
+      "representatives": 1035224
+     },
+     "5": {
+      "births": 361326,
+      "cells": 471060,
+      "extended_cells": 239,
+      "inert_cells": 121,
+      "representatives": 1393952
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     47.848348,
+     48.378198,
+     48.333538,
+     48.170147,
+     47.755568
+    ],
+    "sites": 45845
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 332.9073845,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "61775322fb059e934fe69cc6e46702896bff6b1288b55feea2528899e97dc70d",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     345.657254,
+     331.725015,
+     332.422815,
+     333.726924,
+     333.391954
+    ],
+    "sites": 45845
+   },
+   "facteur": 8,
+   "profil": 24,
+   "tour": 2,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 44.288203,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "d66647a043f682dab4ebbc638517c9013e931142864d08bcafc00be61702310d",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 45845,
+      "cells": 118890,
+      "extended_cells": 93,
+      "inert_cells": 93,
+      "representatives": 237873
+     },
+     "2": {
+      "births": 118797,
+      "cells": 182948,
+      "extended_cells": 218,
+      "inert_cells": 125,
+      "representatives": 454626
+     },
+     "3": {
+      "births": 182823,
+      "cells": 273994,
+      "extended_cells": 240,
+      "inert_cells": 115,
+      "representatives": 728362
+     },
+     "4": {
+      "births": 273879,
+      "cells": 361441,
+      "extended_cells": 230,
+      "inert_cells": 112,
+      "representatives": 1035224
+     },
+     "5": {
+      "births": 361326,
+      "cells": 471060,
+      "extended_cells": 239,
+      "inert_cells": 121,
+      "representatives": 1393952
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     44.607608,
+     44.256768,
+     44.299218,
+     44.734078,
+     44.277188
+    ],
+    "sites": 45845
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 326.24304,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "995ced9ed6e21598651f7a2d66e003dd62533e7b0ba772f2ba32ed8e8f39c62c",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     363.840403,
+     326.159265,
+     325.570795,
+     326.326815,
+     326.993055
+    ],
+    "sites": 45845
+   },
+   "facteur": 1,
+   "profil": 32,
+   "tour": 2,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 49.7446875,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "d66647a043f682dab4ebbc638517c9013e931142864d08bcafc00be61702310d",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 45845,
+      "cells": 118890,
+      "extended_cells": 93,
+      "inert_cells": 93,
+      "representatives": 237873
+     },
+     "2": {
+      "births": 118797,
+      "cells": 182948,
+      "extended_cells": 218,
+      "inert_cells": 125,
+      "representatives": 454626
+     },
+     "3": {
+      "births": 182823,
+      "cells": 273994,
+      "extended_cells": 240,
+      "inert_cells": 115,
+      "representatives": 728362
+     },
+     "4": {
+      "births": 273879,
+      "cells": 361441,
+      "extended_cells": 230,
+      "inert_cells": 112,
+      "representatives": 1035224
+     },
+     "5": {
+      "births": 361326,
+      "cells": 471060,
+      "extended_cells": 239,
+      "inert_cells": 121,
+      "representatives": 1393952
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     49.552458,
+     50.018138,
+     49.980158,
+     49.509217,
+     48.589338
+    ],
+    "sites": 45845
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 334.075034,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "a57bdcf2cc0ff412bfe3aad633e3daf51ecf489ecb29df362b7ac7e3e4cb4bb7",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     349.234594,
+     336.191655,
+     333.952314,
+     334.197754,
+     333.280724
+    ],
+    "sites": 45845
+   },
+   "facteur": 8,
+   "profil": 32,
+   "tour": 2,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 46.604353,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "d66647a043f682dab4ebbc638517c9013e931142864d08bcafc00be61702310d",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 45845,
+      "cells": 118890,
+      "extended_cells": 93,
+      "inert_cells": 93,
+      "representatives": 237873
+     },
+     "2": {
+      "births": 118797,
+      "cells": 182948,
+      "extended_cells": 218,
+      "inert_cells": 125,
+      "representatives": 454626
+     },
+     "3": {
+      "births": 182823,
+      "cells": 273994,
+      "extended_cells": 240,
+      "inert_cells": 115,
+      "representatives": 728362
+     },
+     "4": {
+      "births": 273879,
+      "cells": 361441,
+      "extended_cells": 230,
+      "inert_cells": 112,
+      "representatives": 1035224
+     },
+     "5": {
+      "births": 361326,
+      "cells": 471060,
+      "extended_cells": 239,
+      "inert_cells": 121,
+      "representatives": 1393952
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     47.112947,
+     46.428888,
+     46.836728,
+     46.626988,
+     46.581718
+    ],
+    "sites": 45845
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 946.603396,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "e73e3245f35873937c5d029fc028071fb1d37fe03b63521b6f35417825216821",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     963.268795,
+     946.223546,
+     945.764777,
+     948.005197,
+     946.983246
+    ],
+    "sites": 45845
+   },
+   "facteur": 2048,
+   "profil": 32,
+   "tour": 2,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 48.110058,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "d66647a043f682dab4ebbc638517c9013e931142864d08bcafc00be61702310d",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 45845,
+      "cells": 118890,
+      "extended_cells": 93,
+      "inert_cells": 93,
+      "representatives": 237873
+     },
+     "2": {
+      "births": 118797,
+      "cells": 182948,
+      "extended_cells": 218,
+      "inert_cells": 125,
+      "representatives": 454626
+     },
+     "3": {
+      "births": 182823,
+      "cells": 273994,
+      "extended_cells": 240,
+      "inert_cells": 115,
+      "representatives": 728362
+     },
+     "4": {
+      "births": 273879,
+      "cells": 361441,
+      "extended_cells": 230,
+      "inert_cells": 112,
+      "representatives": 1035224
+     },
+     "5": {
+      "births": 361326,
+      "cells": 471060,
+      "extended_cells": 239,
+      "inert_cells": 121,
+      "representatives": 1393952
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     49.234877,
+     48.342098,
+     48.081348,
+     48.138768,
+     47.734257
+    ],
+    "sites": 45845
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 321.099125,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "d0578a530bd4247b873fbb99efac3038f2b9eb3f9c52da3a2de9e44821046c7c",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     335.921375,
+     320.515515,
+     320.328695,
+     321.682735,
+     321.692326
+    ],
+    "sites": 45845
+   },
+   "facteur": 1,
+   "profil": 21,
+   "tour": 2,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 44.036308,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "d66647a043f682dab4ebbc638517c9013e931142864d08bcafc00be61702310d",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 45845,
+      "cells": 118890,
+      "extended_cells": 93,
+      "inert_cells": 93,
+      "representatives": 237873
+     },
+     "2": {
+      "births": 118797,
+      "cells": 182948,
+      "extended_cells": 218,
+      "inert_cells": 125,
+      "representatives": 454626
+     },
+     "3": {
+      "births": 182823,
+      "cells": 273994,
+      "extended_cells": 240,
+      "inert_cells": 115,
+      "representatives": 728362
+     },
+     "4": {
+      "births": 273879,
+      "cells": 361441,
+      "extended_cells": 230,
+      "inert_cells": 112,
+      "representatives": 1035224
+     },
+     "5": {
+      "births": 361326,
+      "cells": 471060,
+      "extended_cells": 239,
+      "inert_cells": 121,
+      "representatives": 1393952
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     45.038508,
+     44.579108,
+     44.260508,
+     43.812108,
+     43.756248
+    ],
+    "sites": 45845
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 331.43239,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "b65df88d760abb5bde97192ae4f7ba5961172431986814691ffc07c4b2a5b633",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     351.483113,
+     330.731485,
+     332.038205,
+     334.147195,
+     330.826575
+    ],
+    "sites": 45845
+   },
+   "facteur": 8,
+   "profil": 21,
+   "tour": 2,
+   "tour_g": {
+    "admission": "conforme",
+    "boules": null,
+    "chaud_ms": 51.413592,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": "d66647a043f682dab4ebbc638517c9013e931142864d08bcafc00be61702310d",
+    "export": null,
+    "incidences": null,
+    "niveaux": null,
+    "objet": {
+     "1": {
+      "births": 45845,
+      "cells": 118890,
+      "extended_cells": 93,
+      "inert_cells": 93,
+      "representatives": 237873
+     },
+     "2": {
+      "births": 118797,
+      "cells": 182948,
+      "extended_cells": 218,
+      "inert_cells": 125,
+      "representatives": 454626
+     },
+     "3": {
+      "births": 182823,
+      "cells": 273994,
+      "extended_cells": 240,
+      "inert_cells": 115,
+      "representatives": 728362
+     },
+     "4": {
+      "births": 273879,
+      "cells": 361441,
+      "extended_cells": 230,
+      "inert_cells": 112,
+      "representatives": 1035224
+     },
+     "5": {
+      "births": 361326,
+      "cells": 471060,
+      "extended_cells": 239,
+      "inert_cells": 121,
+      "representatives": 1393952
+     }
+    },
+    "ok": true,
+    "passes_ms": [
+     48.050938,
+     50.029558,
+     51.809577,
+     53.089718,
+     51.017607
+    ],
+    "sites": 45845
+   }
+  }
+ ],
+ "rapports": [
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "chaud_ms": 320.050887,
+    "rapport": 1.0,
+    "rapport_max": 1.0,
+    "rapport_min": 1.0
+   },
+   "facteur": 1,
+   "profil": 21,
+   "tour_g": {
+    "chaud_ms": 47.871339,
+    "rapport": 1.0,
+    "rapport_max": 1.0,
+    "rapport_min": 1.0
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "chaud_ms": 333.849087,
+    "rapport": 1.0431125191663662,
+    "rapport_max": 1.0495192004373426,
+    "rapport_min": 1.030245427142013
+   },
+   "facteur": 8,
+   "profil": 21,
+   "tour_g": {
+    "chaud_ms": 48.020894,
+    "rapport": 1.001272085044344,
+    "rapport_max": 1.004726846334022,
+    "rapport_min": 0.9915354467106091
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "chaud_ms": 323.5966875,
+    "rapport": 1.0110788647806497,
+    "rapport_max": 1.0146664014023226,
+    "rapport_min": 1.0002351863981445
+   },
+   "facteur": 1,
+   "profil": 24,
+   "tour_g": {
+    "chaud_ms": 48.5229995,
+    "rapport": 1.0136127485383268,
+    "rapport_max": 1.0712195065613017,
+    "rapport_min": 0.9977305304799264
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "chaud_ms": 335.949827,
+    "rapport": 1.049676287883558,
+    "rapport_max": 1.1200723577609895,
+    "rapport_min": 1.0388646074708023
+   },
+   "facteur": 8,
+   "profil": 24,
+   "tour_g": {
+    "chaud_ms": 48.0189535,
+    "rapport": 1.0013890477125371,
+    "rapport_max": 1.0095633422745915,
+    "rapport_min": 1.001125822002517
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "chaud_ms": 324.9145345,
+    "rapport": 1.0142348725898174,
+    "rapport_max": 1.0229931873302385,
+    "rapport_min": 1.0100252332744615
+   },
+   "facteur": 1,
+   "profil": 32,
+   "tour_g": {
+    "chaud_ms": 49.6383945,
+    "rapport": 1.0384529717098547,
+    "rapport_max": 1.038569326990644,
+    "rapport_min": 1.0304759597386655
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "chaud_ms": 338.1779915,
+    "rapport": 1.0566381948505583,
+    "rapport_max": 1.0616749471519793,
+    "rapport_min": 1.0425474753262247
+   },
+   "facteur": 8,
+   "profil": 32,
+   "tour_g": {
+    "chaud_ms": 50.119244,
+    "rapport": 1.046957220060212,
+    "rapport_max": 1.054693197921886,
+    "rapport_min": 1.0445049946728293
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "chaud_ms": 955.3041525,
+    "rapport": 2.9873607771004242,
+    "rapport_max": 2.9937637364521104,
+    "rapport_min": 2.955153918566238
+   },
+   "facteur": 2048,
+   "profil": 32,
+   "tour_g": {
+    "chaud_ms": 52.970609,
+    "rapport": 1.1043606870170322,
+    "rapport_max": 1.124099239764214,
+    "rapport_min": 1.100582615831991
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "chaud_ms": 273.852598,
+    "rapport": 1.0,
+    "rapport_max": 1.0,
+    "rapport_min": 1.0
+   },
+   "facteur": 1,
+   "profil": 21,
+   "tour_g": {
+    "chaud_ms": 38.447574,
+    "rapport": 1.0,
+    "rapport_max": 1.0,
+    "rapport_min": 1.0
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "chaud_ms": 289.484233,
+    "rapport": 1.056083411458012,
+    "rapport_max": 1.057080469983345,
+    "rapport_min": 1.0553100659856218
+   },
+   "facteur": 8,
+   "profil": 21,
+   "tour_g": {
+    "chaud_ms": 38.045539,
+    "rapport": 0.9895432934208019,
+    "rapport_max": 1.0131054543407187,
+    "rapport_min": 0.9831665461072917
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "chaud_ms": 275.716238,
+    "rapport": 1.0079132247546325,
+    "rapport_max": 1.0887275609824576,
+    "rapport_min": 0.993317101925029
+   },
+   "facteur": 1,
+   "profil": 24,
+   "tour_g": {
+    "chaud_ms": 38.406329,
+    "rapport": 1.0046838189586873,
+    "rapport_max": 1.0780255757241897,
+    "rapport_min": 0.9989272405067742
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "chaud_ms": 293.159318,
+    "rapport": 1.0705004083985357,
+    "rapport_max": 1.1279879612215837,
+    "rapport_min": 1.0663571606059512
+   },
+   "facteur": 8,
+   "profil": 24,
+   "tour_g": {
+    "chaud_ms": 37.958984,
+    "rapport": 0.9946944330642437,
+    "rapport_max": 1.000551556947075,
+    "rapport_min": 0.9866098313511276
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "chaud_ms": 275.680563,
+    "rapport": 1.007782810584782,
+    "rapport_max": 1.0153281447687383,
+    "rapport_min": 1.0066654671649309
+   },
+   "facteur": 1,
+   "profil": 32,
+   "tour_g": {
+    "chaud_ms": 40.159394,
+    "rapport": 1.044515682575967,
+    "rapport_max": 1.0590274004265743,
+    "rapport_min": 1.0406243353076947
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "chaud_ms": 293.4571225,
+    "rapport": 1.0715878711510345,
+    "rapport_max": 1.0743202096052364,
+    "rapport_min": 1.0680417576666381
+   },
+   "facteur": 8,
+   "profil": 32,
+   "tour_g": {
+    "chaud_ms": 40.045514,
+    "rapport": 1.045306239608252,
+    "rapport_max": 1.0534165440567214,
+    "rapport_min": 1.0376734367133373
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "chaud_ms": 802.57434,
+    "rapport": 2.9309489085244236,
+    "rapport_max": 2.952947829985531,
+    "rapport_min": 2.9272339110546306
+   },
+   "facteur": 2048,
+   "profil": 32,
+   "tour_g": {
+    "chaud_ms": 43.0198985,
+    "rapport": 1.1253195373015787,
+    "rapport_max": 1.126252309183409,
+    "rapport_min": 1.1147467335181152
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "chaud_ms": 318.940912,
+    "rapport": 1.0,
+    "rapport_max": 1.0,
+    "rapport_min": 1.0
+   },
+   "facteur": 1,
+   "profil": 21,
+   "tour_g": {
+    "chaud_ms": 43.9245375,
+    "rapport": 1.0,
+    "rapport_max": 1.0,
+    "rapport_min": 1.0
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "chaud_ms": 329.461902,
+    "rapport": 1.0321809192099167,
+    "rapport_max": 1.0367923103723995,
+    "rapport_min": 1.0310200404769645
+   },
+   "facteur": 8,
+   "profil": 21,
+   "tour_g": {
+    "chaud_ms": 48.0855085,
+    "rapport": 1.0978566565881684,
+    "rapport_max": 1.1675273049684365,
+    "rapport_min": 1.0947299900425815
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "chaud_ms": 327.9626495,
+    "rapport": 1.0213750956188372,
+    "rapport_max": 1.038030767466554,
+    "rapport_min": 1.014099602248582
+   },
+   "facteur": 1,
+   "profil": 24,
+   "tour_g": {
+    "chaud_ms": 48.666184,
+    "rapport": 1.1079498332794055,
+    "rapport_max": 1.1562004910505181,
+    "rapport_min": 1.0957286087652944
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "chaud_ms": 332.9073845,
+    "rapport": 1.0463861698003678,
+    "rapport_max": 1.1020824180122741,
+    "rapport_min": 1.0367744991519363
+   },
+   "facteur": 8,
+   "profil": 24,
+   "tour_g": {
+    "chaud_ms": 44.530784,
+    "rapport": 1.020473328831294,
+    "rapport_max": 1.021997576946766,
+    "rapport_min": 1.0057201661865023
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "chaud_ms": 326.24304,
+    "rapport": 1.02456048493756,
+    "rapport_max": 1.027092228293371,
+    "rapport_min": 1.016019710424312
+   },
+   "facteur": 1,
+   "profil": 32,
+   "tour_g": {
+    "chaud_ms": 49.7446875,
+    "rapport": 1.1362930034974745,
+    "rapport_max": 1.1366865729661924,
+    "rapport_min": 1.1296289302908864
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "chaud_ms": 333.0544495,
+    "rapport": 1.0404109136080641,
+    "rapport_max": 1.0480977924328034,
+    "rapport_min": 1.0399386517086275
+   },
+   "facteur": 8,
+   "profil": 32,
+   "tour_g": {
+    "chaud_ms": 45.944603,
+    "rapport": 1.0541460986485933,
+    "rapport_max": 1.058316537344593,
+    "rapport_min": 1.0459894540722257
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "chaud_ms": 945.998137,
+    "rapport": 2.9660608012558765,
+    "rapport_max": 2.976298378897128,
+    "rapport_min": 2.94800988946949
+   },
+   "facteur": 2048,
+   "profil": 32,
+   "tour_g": {
+    "chaud_ms": 48.1015485,
+    "rapport": 1.092508890618169,
+    "rapport_max": 1.1039479119520408,
+    "rapport_min": 1.0860663700784556
+   }
+  }
+ ]
+}

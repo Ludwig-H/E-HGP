@@ -1,0 +1,11 @@
+Test project $HOME/ehgp-v12/ehgp-v12.agOiSaQ2sB/build
+    Start 753: mhgp12_mutants_tower
+1/1 Test #753: mhgp12_mutants_tower .............   Passed   99.60 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Label Time Summary:
+long      =  99.60 sec*proc (1 test)
+mutant    =  99.60 sec*proc (1 test)
+
+Total Test time (real) =  99.62 sec

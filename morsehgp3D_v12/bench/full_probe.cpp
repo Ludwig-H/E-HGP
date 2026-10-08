@@ -1,7 +1,7 @@
 // Sonde FULL residente de la tour (contrat de la v12 : FULL K1..K en memoire, verticales comprises, a chaud). Frontiere
 // du mur proposee par l'auditeur Codex le 8 octobre (receipts/audit_reponses_20261008/frontiere_full_proposee) :
 //   - hors du mur, une fois : lecture des entrees (trames deja quantifiees, buffers u32le en memoire), ouverture de la
-//     Session (budget, cache de blocs facultatif, Pool, contexte de l'appareil avec --device : ligne "open", a froid) ;
+//     Session (budget, cache de blocs, Pool, contexte de l'appareil avec --device : ligne "open", a froid) ;
 //   - mur d'une passe : de l'entree en memoire (avant nuage, tri de Morton et index) a la tour complete en memoire :
 //     P (nuage, index), C (catalogue, appareil ou CPU, transferts et fin d'etage compris), G (resolution), raccord des
 //     entrees de foret, T, M, V et R (noyau, contraction, verticales, registre) ; allocations comprises ;
@@ -17,6 +17,10 @@
 // dans celui de la Session ("partage", pic_appareil_octets nul). Memoire par etage (memoire_octets) : pour P, C, G,
 // raccord et TMVR, les octets du budget de la Session en usage a la fin de l'etage et le pic pendant l'etage (entrees
 // residentes comprises) ; pic_octets est le maximum de ces pics.
+// Cache de blocs de la Session (src/core/buffer.hpp) : 8 Gio par defaut, depuis son adoption sur G4 le 8 octobre 2026
+// (session M, pilote apparie, REGLE_APPARIEE : mur FULL 0,92 a 0,93 sur ng00-02) ; les blocs d'au moins 256 Kio rendus
+// par une trame sont repris par la suivante au lieu d'etre refaits page par page (arenes de la Session residente,
+// ARCHITECTURE.md paragraphe 2) ; compte dans le budget comme une reserve ; --cache=0 l'eteint (temoin, ablation).
 // La passe p joue la trame p mod n (--trame repete : Session qui enchaine des trames successives). Une ligne JSON par
 // passe ; la premiere est publiee comme les autres (aucun prechauffage cache).
 //
@@ -83,7 +87,7 @@ struct Options {
   u64 uniform = 0, seed = 0, bits = 0;
   int kmax = 5;
   u32 leaf = 24, threads = 1;
-  u64 passes = 1, budget = MemoryBudget::kUnlimited, cache = 0, device_budget = 0;
+  u64 passes = 1, budget = MemoryBudget::kUnlimited, cache = u64{8} << 30, device_budget = 0;  // cache : 8 Gio
   bool device = false, digest = false, overlapped = true;  // voie par defaut : Session recouverte (T2-d-A adopte)
 };
 
