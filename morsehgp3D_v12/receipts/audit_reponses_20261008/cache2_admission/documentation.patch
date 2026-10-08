@@ -1,0 +1,18 @@
+--- a/morsehgp3D_v12/receipts/g4_cache2_20261008/README.md
++++ b/morsehgp3D_v12/receipts/g4_cache2_20261008/README.md
+@@ -39,10 +39,13 @@
+ passe −9 %. Session `v12set`, information : médiane 160,2 → 147,8 ms, maximum 318,9 → 297,5 ms.
+ 
+ La [session M](../g4_fullm_20261008/README.md) donnait 0,929 / 0,924 / 0,918 : l'adoption est reproduite, cette fois
+-avec toutes les preuves. Le cache reste le défaut de la Session (`72f622a55`).
++avec une empreinte ELF finale relevée après les Sessions informatives et égale à l’initiale. Les observations GPU
++« avant/après » encadrent la campagne décisive ; « après » précède les Sessions informatives et ne prouve pas leur
++isolation continue. Le cache reste le défaut de la Session (`72f622a55`).
+ 
+ ## Ce que cette session n'établit pas
+ 
+ Ni le contrat FULL (le cache retire 7 à 9 % du mur ; la médiane des 37 trames reste vers 148 ms en information), ni
+-l'effet du cache sur les petits nuages, mesuré sans effet dans la [session C3](../g4_mesc3_20261008/README.md). GCP
++l'effet du cache sur les petits nuages : les deux comparaisons de la [session C3](../g4_mesc3_20261008/README.md)
++sont refusées par leur contrôle A/A, sans conclure à une absence d'effet. GCP
+ utilisé pour cette seule session, arrêt certifié.

@@ -1,0 +1,290 @@
+{
+  "source_git": "bdfca8fb198e6711626c6506b816a2a656315c83",
+  "package_sha256": "c2c9d19a628418c440b7dfa3f3f23233bbf7cb5e2ee6664433bd6001519f644a",
+  "package_bytes": 12451687,
+  "plan_sha256": "e242791190532004d392e43714b10530dda16eb6d52413ff423fa04a290e744b",
+  "scopes": [
+    "morsehgp3D_v12/src/",
+    "morsehgp3D_v12/bench/",
+    "morsehgp3D_v12/tests/",
+    "morsehgp3D_v12/cmake/",
+    "morsehgp3D_v12/CMakeLists.txt"
+  ],
+  "files_exact": 359,
+  "source_inventory_sha256": "61f9bf7f4038ce4c64db57181c8c20640c2adaf232f8236866b4b036a0d4b7fc",
+  "helpers": {
+    "morsehgp3D_v12/receipts/audit_reponses_20261008/session_l1_recuperation/check.py": {
+      "bytes": 4311,
+      "sha256": "8a80b809106399443ab6dce697e62c083e59241f6a6d1908b36bf087e755d30b"
+    },
+    "morsehgp3D_v12/receipts/audit_reponses_20261008/session_mes_c_provenance/source_check.py": {
+      "bytes": 2964,
+      "sha256": "1d863609d8f6b019cb39753232cf34e0bc3facb7e1ee27971c5941773ba4e070"
+    }
+  },
+  "local_files": {
+    "receipt.json": {
+      "bytes": 33010,
+      "sha256": "c00582e19eefcd6dbb9a3790e453e8e6859f7afb8e39a0278c33aa79b494a0b1"
+    },
+    "DONE": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "package/plan.json": {
+      "bytes": 1712,
+      "sha256": "e242791190532004d392e43714b10530dda16eb6d52413ff423fa04a290e744b"
+    },
+    "package/package.tar.gz": {
+      "bytes": 12451687,
+      "sha256": "c2c9d19a628418c440b7dfa3f3f23233bbf7cb5e2ee6664433bd6001519f644a"
+    },
+    "package/data/SHA256SUMS": {
+      "bytes": 600,
+      "sha256": "c04343f5242db2e47ee6c24b385dd522efc69f4b5bdd48a58671cfe271bf6025"
+    },
+    "results/results.tar.gz": {
+      "bytes": 488774,
+      "sha256": "daeb2bd9aab5b16452bf78ca6011bd5e6bed5b94f08a96ec035434869f7a8e1a"
+    }
+  },
+  "manifest_count": 264,
+  "source_files": {
+    "morsehgp3D_v12/bench/full_probe.cpp": {
+      "bytes": 27989,
+      "sha256": "1068940a06e386cb80a4802b3dd61e2df87eed69574f08c821c34dabb017179b"
+    },
+    "morsehgp3D_v12/microbancs/mes_apparie/pilote_apparie.py": {
+      "bytes": 32840,
+      "sha256": "c795dae5cf30bfa94fb98c94680ffc983dad973574c9185b60bf250f3eedb173"
+    },
+    "morsehgp3D_v12/microbancs/outils/lecteur_full.py": {
+      "bytes": 13663,
+      "sha256": "15437e5f09408d5fbdc6288e33a2452490489f13bf9a3b3a24c99f5d109b6554"
+    },
+    "morsehgp3D_v12/microbancs/outils/banc_full.py": {
+      "bytes": 5350,
+      "sha256": "7d7f0661b49adf094df51d41268470571d47c51fc7795bb5b34c791a4a539904"
+    },
+    "morsehgp3D_v12/src/core/buffer.hpp": {
+      "bytes": 14629,
+      "sha256": "8e4d84665e90308ee9572a729731711bb419e3a565fd4dd11b5bd56ab6a92401"
+    },
+    "morsehgp3D_v12/src/tower/pipeline_run.cpp": {
+      "bytes": 20427,
+      "sha256": "15b49b5f0309f546912c8c9571f616c32fdf4136df7bdb888b2ff736a65aaf5a"
+    },
+    "morsehgp3D_v12/tests/tower/region_unit.cpp": {
+      "bytes": 7663,
+      "sha256": "af4b2bc8617b1b90f00f4f6d7563d70a61f479c7ea9ac79ff62973214e5dcb3f"
+    },
+    "morsehgp3D_v12/tests/tower/region_map_check.py": {
+      "bytes": 8073,
+      "sha256": "4b99bbcb7cc3fc0fad766e8ca4004392827ceda1ddbbcc18a55ac6041811f69b"
+    }
+  },
+  "commands": [
+    {
+      "index": "0",
+      "name": "socle_ctest",
+      "status": "ok",
+      "exit_code": "0",
+      "wall_seconds": "141.168",
+      "timeout_seconds": "900",
+      "max_rss_kb": "1062664"
+    },
+    {
+      "index": "1",
+      "name": "apparie_cache_ferme",
+      "status": "ok",
+      "exit_code": "0",
+      "wall_seconds": "262.105",
+      "timeout_seconds": "1500",
+      "max_rss_kb": "3999820"
+    }
+  ],
+  "archive_files": {
+    "results/MANIFEST.sha256": {
+      "bytes": 36131,
+      "sha256": "ca57085872571d676a8413b602c1f71c2cde3ee3623186458dc9fb9ac6ec739e"
+    },
+    "results/commands.tsv": {
+      "bytes": 155,
+      "sha256": "86a966813c83e0cfb6d3a93ecc51cdd3d3dc6f4e98a1b809751e9b2c9affe2c3"
+    },
+    "results/cmd/000_socle_ctest/stdout": {
+      "bytes": 123313,
+      "sha256": "b0b0f1678cce427ea4bf84acdc127f6b918827f6a42cecb062f562482cdfdd60"
+    },
+    "results/cmd/001_apparie_cache_ferme/files/apparie/rapport_apparie.json": {
+      "bytes": 59529,
+      "sha256": "a4ec5d57aa515c225af3267a8ecaa74141441e5a320bdb326bbccd223eef8937"
+    },
+    "results/cmd/000_socle_ctest/meta.txt": {
+      "bytes": 388,
+      "sha256": "03592b695f106eaa1ca8e78f6137f855e676e66f4895b5618d6223ba165324e1"
+    },
+    "results/cmd/001_apparie_cache_ferme/meta.txt": {
+      "bytes": 392,
+      "sha256": "29d4b0147ab8ddab28b59cf83aedd048758b6ae32af54ab86e091a5c04352e54"
+    },
+    "results/build/configure/stdout": {
+      "bytes": 1217,
+      "sha256": "461c699aeaf6b5fa7d08cd1e0cd331c9bd445bef75bbe90655d3fee2126c8237"
+    },
+    "results/cmd/001_apparie_cache_ferme/files/apparie/construction.log": {
+      "bytes": 6111,
+      "sha256": "48f997217f4ab11bfa710eb7b7892581fa6d9cd700bef74560faf4191d0f4ebc"
+    },
+    "results/build/configure/argv.txt": {
+      "bytes": 135,
+      "sha256": "7006d936d8911b769380d847bb5d7f174622f64536be0f8fb5cb2e721df25c56"
+    }
+  },
+  "command_meta": {
+    "socle_ctest": {
+      "status": "ok",
+      "exit_code": "0",
+      "wall_seconds": "141.168",
+      "requested_timeout_seconds": "900",
+      "effective_timeout_seconds": "900",
+      "group_closed": "1",
+      "residual_group_killed": "0",
+      "streams_truncated": "0"
+    },
+    "apparie_cache_ferme": {
+      "status": "ok",
+      "exit_code": "0",
+      "wall_seconds": "262.105",
+      "requested_timeout_seconds": "1500",
+      "effective_timeout_seconds": "1500",
+      "group_closed": "1",
+      "residual_group_killed": "0",
+      "streams_truncated": "0"
+    }
+  },
+  "closure": {
+    "status": "completed",
+    "worker_exit_code": 0,
+    "results_verified": true,
+    "results_sha256": "daeb2bd9aab5b16452bf78ca6011bd5e6bed5b94f08a96ec035434869f7a8e1a",
+    "retrieval": "downloaded",
+    "closure": "stopped",
+    "targeted_shutdown_certified": true,
+    "stop_exit_code": 0,
+    "stop_attempts": 1,
+    "reserve_released": true,
+    "guest_guard_intact": true,
+    "data_verified_remote": true,
+    "errors_count": 0,
+    "done": 0,
+    "before_status": "RUNNING",
+    "after_status": "TERMINATED"
+  },
+  "data_declared": [
+    {
+      "name": "g4_kitti_v12set_xyz.tar",
+      "size": 36116480,
+      "sha256": "0f94df1969ebacbaa863367bff4b686487006c98a755cbfb3263d4968f369255"
+    },
+    {
+      "name": "lidar_ng00.ids.u32le",
+      "size": 159540,
+      "sha256": "c73a41965f6f2e1042b5f3ba876d12ae0811b7f24aa73c886aa07830974e33c6"
+    },
+    {
+      "name": "lidar_ng00.u32le",
+      "size": 478620,
+      "sha256": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf"
+    },
+    {
+      "name": "lidar_ng01.ids.u32le",
+      "size": 142204,
+      "sha256": "bb699c2511a87618813a32657399539fe90e8f1e4f1187656ac88c03f2fee6a4"
+    },
+    {
+      "name": "lidar_ng01.u32le",
+      "size": 426612,
+      "sha256": "ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f"
+    },
+    {
+      "name": "lidar_ng02.ids.u32le",
+      "size": 183380,
+      "sha256": "121e76f3ef1fcedb05cb65da9a95bfb84fe4b8305076a7485483fff113d128cc"
+    },
+    {
+      "name": "lidar_ng02.u32le",
+      "size": 550140,
+      "sha256": "a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af"
+    }
+  ],
+  "data_manifest_sha256": "c04343f5242db2e47ee6c24b385dd522efc69f4b5bdd48a58671cfe271bf6025",
+  "paired_configuration": {
+    "--fils": "48",
+    "--passes": "10",
+    "--tours": "10",
+    "--k": "5",
+    "--voie": "appareil",
+    "--trames": "ng00,ng01,ng02"
+  },
+  "paired_arms": [
+    "ref=--cache=0",
+    "aa=--cache=0",
+    "cache="
+  ],
+  "report_provenance": {
+    "lecteur_sha256": "15437e5f09408d5fbdc6288e33a2452490489f13bf9a3b3a24c99f5d109b6554",
+    "pilote_sha256": "c795dae5cf30bfa94fb98c94680ffc983dad973574c9185b60bf250f3eedb173",
+    "sonde_fin_sha256": "a72884f5a4d25078c8192f2dabc698ed6490567931b4ffca8d2509b0c402d903",
+    "sonde_sha256": "a72884f5a4d25078c8192f2dabc698ed6490567931b4ffca8d2509b0c402d903"
+  },
+  "ctest": {
+    "selected": 730,
+    "passed": 730,
+    "skipped": 0,
+    "failed": 0
+  },
+  "snapshot": {
+    "files": 213,
+    "jsonl_count": 105,
+    "bytes": 1928663
+  },
+  "region_tests_passed": [
+    "mhgp12_tower_region_carte",
+    "mhgp12_tower_region_carte_juge",
+    "mhgp12_tower_region_terminaison",
+    "mhgp12_tower_region_inventaire",
+    "mhgp12_tower_region_carte_opt",
+    "mhgp12_tower_region_carte_juge_opt"
+  ],
+  "M_data_reference": {
+    "path": "morsehgp3D_v12/receipts/audit_reponses_20261008/session_m_provenance/capture.json",
+    "sha256": "b4325c387d00bd721e1dac47b7375d7a489b0d5f3dc7b0e0b33381212fa113d3",
+    "exact_same_declarations": true
+  },
+  "construction_fields": {
+    "CMAKE_BUILD_TYPE": [
+      "Release"
+    ],
+    "MHGP12_COORD_BITS": [
+      "21"
+    ],
+    "MHGP12_ENABLE_CUDA": [
+      "ON"
+    ]
+  },
+  "first_attempt": {
+    "session": "v12.20261008.cache2",
+    "developer_statement_commit": "389b5e453",
+    "statement": "refus pré-démarrage pour manque de disque local",
+    "primary_metadata_available": false,
+    "no_vm_start_independently_certified": false,
+    "declaration_readme_path": "morsehgp3D_v12/receipts/g4_cache2_20261008/README.md",
+    "declaration_readme_sha256": "81221be89e9768f69ea6af137189a2bf5d88ba80e81604b924ac6c6cfea3ed72"
+  },
+  "socle_configuration_explicit": {
+    "CMAKE_BUILD_TYPE": "Release",
+    "coordinate_option_present": false,
+    "cuda_option_present": false
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "documentation": {
+    "after_sha256": "c67ec702ae9da2277feb4d30b5bfa3d023d68a2526c39e8bb61641b11105d13b",
+    "before_sha256": "81221be89e9768f69ea6af137189a2bf5d88ba80e81604b924ac6c6cfea3ed72",
+    "patch_sha256": "ba1317e80d6b55c78494104e90c5a19d00acd9ff0a96b730a35299118002289a",
+    "path": "morsehgp3D_v12/receipts/g4_cache2_20261008/README.md",
+    "pin": "389b5e453cdc1e70839a8e5a37eea7c42ff93a8d"
+  },
+  "external_provenance_receipt": "../cache2_provenance/README.md",
+  "journal_inventory_sha256": "f064299725e47bdc87b8847963fe0f54c3f1ec387c69c19dbf67f2b32a4d9ad9",
+  "metadata_sha256": "c75ec292bc744a9f3042623b3bda66451cd413bfb8832b00b5df3b1e1cfbb7be",
+  "plan_sha256": "e242791190532004d392e43714b10530dda16eb6d52413ff423fa04a290e744b",
+  "port_from": "../session_m_apparie/check.py",
+  "port_from_sha256": "bf7aceeceb6026b68021f484ba5f9c21eb554aa383461fd419425a5c29ab4b92",
+  "report_sha256": "a4ec5d57aa515c225af3267a8ecaa74141441e5a320bdb326bbccd223eef8937",
+  "scope": "105 returned JSON journals; source-qualified beginning/end ELF closure after information Sessions, no engine run",
+  "source_files": {
+    "morsehgp3D_v12/bench/full_probe.cpp": "1068940a06e386cb80a4802b3dd61e2df87eed69574f08c821c34dabb017179b",
+    "morsehgp3D_v12/microbancs/mes_apparie/pilote_apparie.py": "c795dae5cf30bfa94fb98c94680ffc983dad973574c9185b60bf250f3eedb173",
+    "morsehgp3D_v12/microbancs/outils/banc_full.py": "7d7f0661b49adf094df51d41268470571d47c51fc7795bb5b34c791a4a539904",
+    "morsehgp3D_v12/microbancs/outils/lecteur_full.py": "15437e5f09408d5fbdc6288e33a2452490489f13bf9a3b3a24c99f5d109b6554"
+  },
+  "source_pin": "bdfca8fb198e6711626c6506b816a2a656315c83"
+}

@@ -1,0 +1,468 @@
+{
+  "ELF_debut_fin_concordants": true,
+  "ELF_final_declare": "a72884f5a4d25078c8192f2dabc698ed6490567931b4ffca8d2509b0c402d903",
+  "ELF_initial_declare": "a72884f5a4d25078c8192f2dabc698ed6490567931b4ffca8d2509b0c402d903",
+  "admission_conditions": [],
+  "admission_decisive_complete": true,
+  "identites": {
+    "ng00": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+    "ng01": "2d58a72a623ab293a05f30c215cd65fcb455419a0a118f6d301bb17600645e26",
+    "ng02": "27d7650add157cdd582d55f50305f0b8f9319865c8ffd0737cf12b76ac2197f0"
+  },
+  "information_conditions": [],
+  "information_isolation_apres_non_certifiee": true,
+  "journal_inventory_sha256": "f064299725e47bdc87b8847963fe0f54c3f1ec387c69c19dbf67f2b32a4d9ad9",
+  "journaux_admis": {
+    "campagne": 90,
+    "identite": 9,
+    "session": 6
+  },
+  "limits": [
+    "environment after precedes informative Sessions",
+    "information process codes inferred conditionally from pinned pilot",
+    "active shared budget excludes inactive cached blocks; RSS cumulative process and not GPU VRAM",
+    "external source/build/binary/shutdown provenance separate"
+  ],
+  "metadata_sha256": "c75ec292bc744a9f3042623b3bda66451cd413bfb8832b00b5df3b1e1cfbb7be",
+  "passes_admises": {
+    "campagne": 900,
+    "identite": 18,
+    "session": 444
+  },
+  "report_sha256": "a4ec5d57aa515c225af3267a8ecaa74141441e5a320bdb326bbccd223eef8937",
+  "ressources_decisives": {
+    "ng00": {
+      "aa": {
+        "capacite_appareil_max_octets": 737091392,
+        "capacite_epinglee_max_octets": 16777216,
+        "cpu_chaud_total_ns": 254570267000,
+        "cpu_mediane_medianes_ns": 2821924500.0,
+        "etapes_medianes_medianes_ns": {
+          "C": 27489140.5,
+          "G": 57390152.0,
+          "P": 2020465.0,
+          "TMVR": 6025950.5,
+          "raccord": 0.0
+        },
+        "mur_mediane_medianes_ns": 94056128.0,
+        "passes_chaudes": 90,
+        "pic_budget_actif_max_octets": 1200333150,
+        "rss_processus_max_octets": 1066029056
+      },
+      "cache": {
+        "capacite_appareil_max_octets": 737091392,
+        "capacite_epinglee_max_octets": 16777216,
+        "cpu_chaud_total_ns": 232368570000,
+        "cpu_mediane_medianes_ns": 2575580000.0,
+        "etapes_medianes_medianes_ns": {
+          "C": 25469061.0,
+          "G": 54329377.0,
+          "P": 2015085.0,
+          "TMVR": 5351745.5,
+          "raccord": 0.0
+        },
+        "mur_mediane_medianes_ns": 87163653.0,
+        "passes_chaudes": 90,
+        "pic_budget_actif_max_octets": 1218799401,
+        "rss_processus_max_octets": 647716864
+      },
+      "ref": {
+        "capacite_appareil_max_octets": 737091392,
+        "capacite_epinglee_max_octets": 16777216,
+        "cpu_chaud_total_ns": 254435419000,
+        "cpu_mediane_medianes_ns": 2824740000.0,
+        "etapes_medianes_medianes_ns": {
+          "C": 27550071.0,
+          "G": 57882866.5,
+          "P": 2024485.0,
+          "TMVR": 5367930.0,
+          "raccord": 0.0
+        },
+        "mur_mediane_medianes_ns": 94743048.0,
+        "passes_chaudes": 90,
+        "pic_budget_actif_max_octets": 1200892685,
+        "rss_processus_max_octets": 1032232960
+      }
+    },
+    "ng01": {
+      "aa": {
+        "capacite_appareil_max_octets": 607239920,
+        "capacite_epinglee_max_octets": 16777216,
+        "cpu_chaud_total_ns": 197056202000,
+        "cpu_mediane_medianes_ns": 2185801000.0,
+        "etapes_medianes_medianes_ns": {
+          "C": 24000900.0,
+          "G": 44995210.0,
+          "P": 1746750.0,
+          "TMVR": 5553390.0,
+          "raccord": 0.0
+        },
+        "mur_mediane_medianes_ns": 77879551.5,
+        "passes_chaudes": 90,
+        "pic_budget_actif_max_octets": 1003829217,
+        "rss_processus_max_octets": 905207808
+      },
+      "cache": {
+        "capacite_appareil_max_octets": 607239920,
+        "capacite_epinglee_max_octets": 16777216,
+        "cpu_chaud_total_ns": 178066133000,
+        "cpu_mediane_medianes_ns": 1981400000.0,
+        "etapes_medianes_medianes_ns": {
+          "C": 22379730.5,
+          "G": 39983590.5,
+          "P": 1915534.5,
+          "TMVR": 7559170.0,
+          "raccord": 0.0
+        },
+        "mur_mediane_medianes_ns": 71796756.5,
+        "passes_chaudes": 90,
+        "pic_budget_actif_max_octets": 1015525487,
+        "rss_processus_max_octets": 569131008
+      },
+      "ref": {
+        "capacite_appareil_max_octets": 607239920,
+        "capacite_epinglee_max_octets": 16777216,
+        "cpu_chaud_total_ns": 196442662000,
+        "cpu_mediane_medianes_ns": 2179536500.0,
+        "etapes_medianes_medianes_ns": {
+          "C": 23877990.0,
+          "G": 44922966.5,
+          "P": 1707245.0,
+          "TMVR": 5581375.0,
+          "raccord": 0.0
+        },
+        "mur_mediane_medianes_ns": 77779745.0,
+        "passes_chaudes": 90,
+        "pic_budget_actif_max_octets": 1004588773,
+        "rss_processus_max_octets": 920059904
+      }
+    },
+    "ng02": {
+      "aa": {
+        "capacite_appareil_max_octets": 744876104,
+        "capacite_epinglee_max_octets": 16777216,
+        "cpu_chaud_total_ns": 239498629000,
+        "cpu_mediane_medianes_ns": 2656322000.0,
+        "etapes_medianes_medianes_ns": {
+          "C": 28072935.0,
+          "G": 49535570.5,
+          "P": 1929280.0,
+          "TMVR": 14589310.0,
+          "raccord": 0.0
+        },
+        "mur_mediane_medianes_ns": 96396575.0,
+        "passes_chaudes": 90,
+        "pic_budget_actif_max_octets": 1247433972,
+        "rss_processus_max_octets": 1148813312
+      },
+      "cache": {
+        "capacite_appareil_max_octets": 744876104,
+        "capacite_epinglee_max_octets": 16777216,
+        "cpu_chaud_total_ns": 218194033000,
+        "cpu_mediane_medianes_ns": 2424690500.0,
+        "etapes_medianes_medianes_ns": {
+          "C": 25638695.0,
+          "G": 46201765.0,
+          "P": 1942300.0,
+          "TMVR": 14295800.0,
+          "raccord": 0.0
+        },
+        "mur_mediane_medianes_ns": 88117145.0,
+        "passes_chaudes": 90,
+        "pic_budget_actif_max_octets": 1261672917,
+        "rss_processus_max_octets": 680718336
+      },
+      "ref": {
+        "capacite_appareil_max_octets": 744876104,
+        "capacite_epinglee_max_octets": 16777216,
+        "cpu_chaud_total_ns": 239585870000,
+        "cpu_mediane_medianes_ns": 2662061000.0,
+        "etapes_medianes_medianes_ns": {
+          "C": 28196335.0,
+          "G": 49260885.0,
+          "P": 1890220.5,
+          "TMVR": 15027450.0,
+          "raccord": 0.0
+        },
+        "mur_mediane_medianes_ns": 96413295.0,
+        "passes_chaudes": 90,
+        "pic_budget_actif_max_octets": 1246301543,
+        "rss_processus_max_octets": 1159143424
+      }
+    }
+  },
+  "ressources_sessions": {
+    "aa": [
+      {
+        "capacite_appareil_max_octets": 1986801724,
+        "capacite_epinglee_max_octets": 16777216,
+        "cpu_secondes_visites_total_ns": 150221019000,
+        "passes": 74,
+        "passes_chaudes": 37,
+        "pic_budget_actif_max_octets": 3306507216,
+        "rss_derniere_passe_octets": 2812436480,
+        "rss_processus_max_octets": 2812436480,
+        "tour": 0
+      },
+      {
+        "capacite_appareil_max_octets": 1986801724,
+        "capacite_epinglee_max_octets": 16777216,
+        "cpu_secondes_visites_total_ns": 151865868000,
+        "passes": 74,
+        "passes_chaudes": 37,
+        "pic_budget_actif_max_octets": 3306507216,
+        "rss_derniere_passe_octets": 2774953984,
+        "rss_processus_max_octets": 2774953984,
+        "tour": 1
+      }
+    ],
+    "cache": [
+      {
+        "capacite_appareil_max_octets": 1986801724,
+        "capacite_epinglee_max_octets": 16777216,
+        "cpu_secondes_visites_total_ns": 137646306000,
+        "passes": 74,
+        "passes_chaudes": 37,
+        "pic_budget_actif_max_octets": 3368338953,
+        "rss_derniere_passe_octets": 4095815680,
+        "rss_processus_max_octets": 4095815680,
+        "tour": 0
+      },
+      {
+        "capacite_appareil_max_octets": 1986801724,
+        "capacite_epinglee_max_octets": 16777216,
+        "cpu_secondes_visites_total_ns": 137583828000,
+        "passes": 74,
+        "passes_chaudes": 37,
+        "pic_budget_actif_max_octets": 3368338953,
+        "rss_derniere_passe_octets": 4095406080,
+        "rss_processus_max_octets": 4095406080,
+        "tour": 1
+      }
+    ],
+    "ref": [
+      {
+        "capacite_appareil_max_octets": 1986801724,
+        "capacite_epinglee_max_octets": 16777216,
+        "cpu_secondes_visites_total_ns": 152222953000,
+        "passes": 74,
+        "passes_chaudes": 37,
+        "pic_budget_actif_max_octets": 3306507216,
+        "rss_derniere_passe_octets": 2845663232,
+        "rss_processus_max_octets": 2845663232,
+        "tour": 0
+      },
+      {
+        "capacite_appareil_max_octets": 1986801724,
+        "capacite_epinglee_max_octets": 16777216,
+        "cpu_secondes_visites_total_ns": 151017234000,
+        "passes": 74,
+        "passes_chaudes": 37,
+        "pic_budget_actif_max_octets": 3306507216,
+        "rss_derniere_passe_octets": 2776203264,
+        "rss_processus_max_octets": 2776203264,
+        "tour": 1
+      }
+    ]
+  },
+  "session_informative": {
+    "aa": {
+      "maximum_ns": 324978573.5,
+      "mediane_ns": 161298079.0,
+      "refus": [],
+      "trames": {
+        "kitti_ng_00_000648": 162788699.0,
+        "kitti_ng_00_000660": 164217245.0,
+        "kitti_ng_00_001464": 170292989.5,
+        "kitti_ng_00_001502": 143000445.0,
+        "kitti_ng_00_001880": 225939234.0,
+        "kitti_ng_00_001896": 324978573.5,
+        "kitti_ng_00_003612": 159481684.0,
+        "kitti_ng_00_003624": 161298079.0,
+        "kitti_ng_02_000620": 138188464.5,
+        "kitti_ng_02_001600": 162447564.0,
+        "kitti_ng_02_001604": 171271109.0,
+        "kitti_ng_02_001606": 161300259.0,
+        "kitti_ng_02_001610": 165077254.0,
+        "kitti_ng_05_002060": 184779859.5,
+        "kitti_ng_05_002064": 177634404.5,
+        "kitti_ng_05_002748": 108018159.5,
+        "kitti_ng_06_000770": 84955280.0,
+        "kitti_ng_06_000772": 93826929.5,
+        "kitti_ng_06_000774": 106484529.5,
+        "kitti_ng_06_000780": 91141504.5,
+        "kitti_ng_06_000798": 62225599.5,
+        "kitti_ng_06_000800": 65554749.5,
+        "kitti_ng_06_000804": 88009420.0,
+        "kitti_ng_06_000806": 98314019.0,
+        "kitti_ng_08_000000": 93809524.5,
+        "kitti_ng_08_000100": 76164694.0,
+        "kitti_ng_08_000200": 93100749.5,
+        "kitti_ng_08_000246": 94977379.5,
+        "kitti_ng_08_000691": 162652290.0,
+        "kitti_ng_08_001176": 189575394.5,
+        "kitti_ng_08_001193": 247260814.0,
+        "kitti_ng_08_001302": 117273919.5,
+        "kitti_ng_08_001847": 64415675.0,
+        "kitti_ng_08_002119": 316185754.0,
+        "kitti_ng_08_002554": 170871514.5,
+        "kitti_ng_10_000424": 174930414.0,
+        "kitti_ng_10_000430": 203559439.0
+      }
+    },
+    "cache": {
+      "maximum_ns": 297526333.5,
+      "mediane_ns": 147772249.5,
+      "refus": [],
+      "trames": {
+        "kitti_ng_00_000648": 155915584.0,
+        "kitti_ng_00_000660": 154617834.0,
+        "kitti_ng_00_001464": 162834919.0,
+        "kitti_ng_00_001502": 134177424.0,
+        "kitti_ng_00_001880": 207896809.5,
+        "kitti_ng_00_001896": 297526333.5,
+        "kitti_ng_00_003612": 147584904.0,
+        "kitti_ng_00_003624": 147772249.5,
+        "kitti_ng_02_000620": 126636904.5,
+        "kitti_ng_02_001600": 153534594.5,
+        "kitti_ng_02_001604": 160243674.0,
+        "kitti_ng_02_001606": 150818589.0,
+        "kitti_ng_02_001610": 155550559.0,
+        "kitti_ng_05_002060": 173358999.5,
+        "kitti_ng_05_002064": 165950694.5,
+        "kitti_ng_05_002748": 97930144.5,
+        "kitti_ng_06_000770": 79396664.5,
+        "kitti_ng_06_000772": 86936154.5,
+        "kitti_ng_06_000774": 96836039.0,
+        "kitti_ng_06_000780": 85520569.0,
+        "kitti_ng_06_000798": 58059664.5,
+        "kitti_ng_06_000800": 61453230.0,
+        "kitti_ng_06_000804": 81569790.0,
+        "kitti_ng_06_000806": 91052935.0,
+        "kitti_ng_08_000000": 86857780.0,
+        "kitti_ng_08_000100": 71411810.0,
+        "kitti_ng_08_000200": 88472990.0,
+        "kitti_ng_08_000246": 86522845.0,
+        "kitti_ng_08_000691": 154332519.5,
+        "kitti_ng_08_001176": 175927109.5,
+        "kitti_ng_08_001193": 226261104.0,
+        "kitti_ng_08_001302": 106574604.5,
+        "kitti_ng_08_001847": 59354895.5,
+        "kitti_ng_08_002119": 289359173.5,
+        "kitti_ng_08_002554": 160042739.0,
+        "kitti_ng_10_000424": 161632789.0,
+        "kitti_ng_10_000430": 187980019.5
+      }
+    },
+    "ref": {
+      "maximum_ns": 318927718.5,
+      "mediane_ns": 160232419.0,
+      "refus": [],
+      "trames": {
+        "kitti_ng_00_000648": 167211939.0,
+        "kitti_ng_00_000660": 165406209.0,
+        "kitti_ng_00_001464": 171569294.0,
+        "kitti_ng_00_001502": 147025329.0,
+        "kitti_ng_00_001880": 225961024.0,
+        "kitti_ng_00_001896": 318927718.5,
+        "kitti_ng_00_003612": 157245369.5,
+        "kitti_ng_00_003624": 160232419.0,
+        "kitti_ng_02_000620": 137626089.5,
+        "kitti_ng_02_001600": 162599134.5,
+        "kitti_ng_02_001604": 175192749.5,
+        "kitti_ng_02_001606": 163208529.0,
+        "kitti_ng_02_001610": 164086289.0,
+        "kitti_ng_05_002060": 184812664.0,
+        "kitti_ng_05_002064": 178289979.0,
+        "kitti_ng_05_002748": 105613170.0,
+        "kitti_ng_06_000770": 87094975.0,
+        "kitti_ng_06_000772": 94505854.5,
+        "kitti_ng_06_000774": 105426329.5,
+        "kitti_ng_06_000780": 92744104.5,
+        "kitti_ng_06_000798": 62056990.0,
+        "kitti_ng_06_000800": 65223845.0,
+        "kitti_ng_06_000804": 87423174.5,
+        "kitti_ng_06_000806": 96604194.5,
+        "kitti_ng_08_000000": 92211180.0,
+        "kitti_ng_08_000100": 75245184.0,
+        "kitti_ng_08_000200": 95784749.0,
+        "kitti_ng_08_000246": 93870799.5,
+        "kitti_ng_08_000691": 163427844.0,
+        "kitti_ng_08_001176": 187781659.5,
+        "kitti_ng_08_001193": 248173673.5,
+        "kitti_ng_08_001302": 114415404.5,
+        "kitti_ng_08_001847": 63862354.5,
+        "kitti_ng_08_002119": 318545773.0,
+        "kitti_ng_08_002554": 173064344.5,
+        "kitti_ng_10_000424": 176194559.0,
+        "kitti_ng_10_000430": 203532393.5
+      }
+    }
+  },
+  "source_pin": "bdfca8fb198e6711626c6506b816a2a656315c83",
+  "statistic_crosscheck_roundoff": [],
+  "statistique": {
+    "aa_hors": [],
+    "cas": {
+      "aa": {
+        "trames": {
+          "ng00": {
+            "ic95": [
+              0.984870712942028,
+              1.0045043388615063
+            ],
+            "rapport": 0.9951388774240038,
+            "tours": 10
+          },
+          "ng01": {
+            "ic95": [
+              1.0014742891379915,
+              1.0143752375746073
+            ],
+            "rapport": 1.0079033509256599,
+            "tours": 10
+          },
+          "ng02": {
+            "ic95": [
+              0.9874734199107166,
+              1.0020772698246008
+            ],
+            "rapport": 0.9952597118900762,
+            "tours": 10
+          }
+        },
+        "verdict": "controle A/A"
+      },
+      "cache": {
+        "trames": {
+          "ng00": {
+            "ic95": [
+              0.9168585564370398,
+              0.9272693224239946
+            ],
+            "rapport": 0.9220888959667982,
+            "tours": 10
+          },
+          "ng01": {
+            "ic95": [
+              0.9202464118535262,
+              0.931022973793007
+            ],
+            "rapport": 0.9253660618931463,
+            "tours": 10
+          },
+          "ng02": {
+            "ic95": [
+              0.9061593827130596,
+              0.9173347196149784
+            ],
+            "rapport": 0.9120359966395168,
+            "tours": 10
+          }
+        },
+        "verdict": "adopte"
+      }
+    },
+    "verdict": "juge"
+  }
+}

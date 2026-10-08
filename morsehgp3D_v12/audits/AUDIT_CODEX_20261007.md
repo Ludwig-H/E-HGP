@@ -1,36 +1,39 @@
 # Audit Codex — état courant v12
 
-8 octobre 2026. Mesures M : `957e9784f` ; petits C3 : `72f622a55` ; lecteurs `85db49890`, porte native `bdfca8fb1`.
+8 octobre 2026. Cache2b : `bdfca8fb1` ; M : `957e9784f` ; petits C3 : `72f622a55`.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
 
 **LiDAR sans sol : les trois ng passent, le contrat multi-séquences 100 ms reste non tenu.**
-[FULL M](../receipts/audit_reponses_20261008/session_m_admission/README.md), u21/W48 à chaud,
+[FULL M](../receipts/audit_reponses_20261008/session_m_admission/README.md) et [cache2b](../receipts/audit_reponses_20261008/cache2_admission/README.md), u21/W48 à chaud,
 ng00/01/02 : 39 885 / 35 551 / 45 845 sites. Médianes des médianes par processus, en ms :
 
 | FULL | ng00 | ng01 | ng02 |
 | --- | ---: | ---: | ---: |
-| GPU K5, cache désactivé | **94,66** | **78,26** | **94,76** |
-| GPU K5, cache 8 Gio, bras apparié | **87,46** | **71,97** | **88,39** |
+| GPU K5, cache désactivé, dernier apparié cache2b | **94,74** | **77,78** | **96,41** |
+| GPU K5, cache 8 Gio, dernier apparié cache2b | **87,16** | **71,80** | **88,12** |
 | CPU K5, cache désactivé | **381,80** | **323,10** | **385,94** |
 | GPU K10, cache désactivé | **593,26** | **442,82** | **504,79** |
 
-Sans cache, maximum des médianes processus K5 **95,99 ms** : sous-contrat ng tenu selon la règle fixée.
+FULL M sans cache, maximum des médianes processus K5 **95,99 ms** : sous-contrat ng tenu selon la règle fixée.
 Trois des135 prises chaudes dépassent néanmoins100 ms (maximum brut101,61).
 **37 trames, six séquences : médiane160,64 ms, pire médiane par trame319,78 ms** ;
 maximum contractuel **358,86 ms**, ici aussi maximum des185 chaudes. 25/37 médianes par trame dépassent100 ms.
 Voie GPU : catalogue CUDA puis tour CPU. FULL couvre Cloud/index→T/M/V/R ; lecture, masque, validation, FUL1
 et libération hors mur. G est une fenêtre recouverte, TMVR la queue après G ; ne pas sommer les médianes.
 
-**[Cache apparié M](../receipts/audit_reponses_20261008/session_m_apparie/README.md)** : A/A conforme,
-rapports géométriques0,929/0,924/0,918, IC95 supérieurs<1 ; séquentiel rejeté1,515/1,465/1,529.
-Sur37 trames, cache : médiane152,62 ms, pire médiane305,89 ms (deux secondes visites/trame, bloc informatif).
-RSS maximal environ3,81 Gio, contre2,56–2,63 sans cache ; le budget actif n'inclut pas les blocs inactifs.
-Le [défaut72](../receipts/audit_reponses_20261008/cache_defaut_raccord/README.md) correspond au bras mesuré,
-mais **CPU/K10 avec cache sur ng00–02 restent non mesurés**. Future ablation : ref/A-A explicitement cache0.
-Le pilote joué n'archivait pas l'ELF final : le juge85 refuse cette fermeture, sans invalidation inventée des temps.
-M précède le correctif0241 ; ses [sources et arrêt](../receipts/audit_reponses_20261008/session_m_provenance/README.md)
-sont contre-vérifiés (304 journaux FULL/apparié/D6,3 056 passes ; aucun moteur exécuté par l'audit).
+**[Dernier cache apparié : cache2b](../receipts/audit_reponses_20261008/cache2_admission/README.md), admis.**
+Référence explicite sans cache94,743/77,780/96,413 ms ; A/A conforme à la règle sur les GM.
+Rapports cache/ref0,9221/0,9254/0,9120, bornes IC95 supérieures0,9273/0,9310/0,9173 : cache adopté.
+**37 trames informatives avec cache : médiane147,77 ms, pire médiane297,53 ms**, contre160,23/318,93 sans cache.
+Deux secondes visites par trame ; ce bloc ne remplace pas le protocole contractuel M ci-dessus.
+[Provenance et arrêt clos](../receipts/audit_reponses_20261008/cache2_provenance/README.md) :105 journaux/1 362 passes,
+ELF initial/final identique, fermeture après les six Sessions. L'environnement « après » précède ces Sessions ;
+codes informatifs inférés du pilote clos.730 portes CPU/u21 passantes sur G4, sonde CUDA construite séparément.
+RSS cache maximal3,81 Gio ; le pic budgété actif exclut le cache inactif. **Aucun nouveau CPU/K10 dans ce lot.**
+[Défaut8 Gio](../receipts/audit_reponses_20261008/cache_defaut_raccord/README.md) aussi CPU/K10 : ng00–02 encore non mesurés ainsi.
+[M apparié](../receipts/audit_reponses_20261008/session_m_apparie/README.md) reste historique sans ELF final ;
+son bras séquentiel rejeté1,515/1,465/1,529. M précède le correctif0241, contrairement à cache2b.
 
 **Petits LiDAR : [MES-C3 admise](../receipts/audit_reponses_20261008/session_c3_admission/README.md), critères C1–C3 non tenus.**
 132 réels seuls, cache8 Gio, W48 ; médiane des deux chaudes par nuage, puis médiane des132, en ms :
@@ -64,7 +67,7 @@ cohortes et durée de vie relues ; pont `release/acquire` proposé pour rattache
 [preuve pour N](../receipts/audit_reponses_20261008/a_terminaison_porte/README.md),
 [preuves natives](../receipts/audit_reponses_20261008/a_terminaison_native/README.md) : témoin11 contrôles, mutant
 causal code1 sur l'attente indue après nettoyage,12 portes ciblées,313 sources raccordées. Portée CPU/u21,
-sans preuve de toute la concurrence ni transfert de730 portes/20 répétitions. Aucun lien établi avec MES-M0.
+sans preuve de toute la concurrence. Les730 portes sur G4 sont attestées séparément par cache2b ; aucun lien avec MES-M0.
 
 **Juges.** [Livraison85 contre-vérifiée](../receipts/audit_reponses_20261008/lecteurs_livraison_85db/README.md) :
 postimages, cohortes, horloges, résumés et hash final ; cinq portes Python,27/17 mutants normal/−O.
