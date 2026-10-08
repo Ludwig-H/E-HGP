@@ -1,0 +1,283 @@
+{
+  "cohort": [
+    {
+      "name": "kitti_ng_00_000648",
+      "sites": 77965
+    },
+    {
+      "name": "kitti_ng_00_000660",
+      "sites": 71483
+    },
+    {
+      "name": "kitti_ng_00_001464",
+      "sites": 74736
+    },
+    {
+      "name": "kitti_ng_00_001502",
+      "sites": 64995
+    },
+    {
+      "name": "kitti_ng_00_001880",
+      "sites": 80607
+    },
+    {
+      "name": "kitti_ng_00_001896",
+      "sites": 95586
+    },
+    {
+      "name": "kitti_ng_00_003612",
+      "sites": 70537
+    },
+    {
+      "name": "kitti_ng_00_003624",
+      "sites": 72836
+    },
+    {
+      "name": "kitti_ng_02_000620",
+      "sites": 52403
+    },
+    {
+      "name": "kitti_ng_02_001600",
+      "sites": 67585
+    },
+    {
+      "name": "kitti_ng_02_001604",
+      "sites": 67805
+    },
+    {
+      "name": "kitti_ng_02_001606",
+      "sites": 64740
+    },
+    {
+      "name": "kitti_ng_02_001610",
+      "sites": 67864
+    },
+    {
+      "name": "kitti_ng_05_002060",
+      "sites": 66456
+    },
+    {
+      "name": "kitti_ng_05_002064",
+      "sites": 62859
+    },
+    {
+      "name": "kitti_ng_05_002748",
+      "sites": 50136
+    },
+    {
+      "name": "kitti_ng_06_000770",
+      "sites": 46561
+    },
+    {
+      "name": "kitti_ng_06_000772",
+      "sites": 49668
+    },
+    {
+      "name": "kitti_ng_06_000774",
+      "sites": 53754
+    },
+    {
+      "name": "kitti_ng_06_000780",
+      "sites": 49628
+    },
+    {
+      "name": "kitti_ng_06_000798",
+      "sites": 37543
+    },
+    {
+      "name": "kitti_ng_06_000800",
+      "sites": 38341
+    },
+    {
+      "name": "kitti_ng_06_000804",
+      "sites": 47658
+    },
+    {
+      "name": "kitti_ng_06_000806",
+      "sites": 50884
+    },
+    {
+      "name": "kitti_ng_08_000000",
+      "sites": 39885
+    },
+    {
+      "name": "kitti_ng_08_000100",
+      "sites": 35551
+    },
+    {
+      "name": "kitti_ng_08_000200",
+      "sites": 45845
+    },
+    {
+      "name": "kitti_ng_08_000246",
+      "sites": 41691
+    },
+    {
+      "name": "kitti_ng_08_000691",
+      "sites": 61198
+    },
+    {
+      "name": "kitti_ng_08_001176",
+      "sites": 67114
+    },
+    {
+      "name": "kitti_ng_08_001193",
+      "sites": 80433
+    },
+    {
+      "name": "kitti_ng_08_001302",
+      "sites": 48925
+    },
+    {
+      "name": "kitti_ng_08_001847",
+      "sites": 33179
+    },
+    {
+      "name": "kitti_ng_08_002119",
+      "sites": 99099
+    },
+    {
+      "name": "kitti_ng_08_002554",
+      "sites": 72426
+    },
+    {
+      "name": "kitti_ng_10_000424",
+      "sites": 69106
+    },
+    {
+      "name": "kitti_ng_10_000430",
+      "sites": 73576
+    }
+  ],
+  "manifest_bytes": 42084,
+  "manifest_member": "bundle_manifest.json",
+  "manifest_sha256": "a1323fa263b735e72e12959453353443fd3e3ac222f80e8def5148943e5daecf",
+  "native_executed": false,
+  "ng_sites": {
+    "ng00": 39885,
+    "ng01": 35551,
+    "ng02": 45845
+  },
+  "payload_read": false,
+  "plan_sha256": "24cdb3e52c9b70ce85e897e643dac325d101b918dea0e50ffb4cd6a8b9392371",
+  "preflight_archive": {
+    "bytes": 36116480,
+    "independently_rehashed": false,
+    "name": "g4_kitti_v12set_xyz.tar",
+    "sha256_declared": "0f94df1969ebacbaa863367bff4b686487006c98a755cbfb3263d4968f369255"
+  },
+  "replay_normal_equals_optimized": true,
+  "result": {
+    "max_brut_gt_100ms_admis": true,
+    "max_mediane_processus_gt_100ms": "non tenu",
+    "mutations": 53,
+    "mutations_refusees": [
+      "cle_dupliquee",
+      "code_externe_non_nul",
+      "cohorte_36",
+      "cohorte_dupliquee",
+      "collision_etiquette",
+      "configuration_differente",
+      "configuration_float",
+      "cumul_g_hors_enveloppe",
+      "diagnostics_scalaire",
+      "empreinte_divergente",
+      "essai",
+      "etages_absents",
+      "etages_hors_mur",
+      "exit_absent",
+      "gpu_apres_occupe",
+      "gpu_avant_inconnu",
+      "gpu_identite_absente",
+      "liberation_absente",
+      "liberation_mauvaise_passe",
+      "liberation_negative",
+      "ligne_vide",
+      "liste",
+      "mauvais_fils",
+      "mauvais_k",
+      "mauvais_profil",
+      "mauvais_sites",
+      "mauvaise_trame",
+      "mauvaise_voie",
+      "mur_bool",
+      "mur_float",
+      "mur_negatif",
+      "mur_u64_depasse",
+      "nan",
+      "null",
+      "open_absent",
+      "open_refuse",
+      "ordre_pass_bool",
+      "pic_negatif",
+      "pic_nul",
+      "pic_sous_entree",
+      "pic_sous_somme_37_entrees",
+      "processus_absent",
+      "processus_extra",
+      "refus_non_vide",
+      "sha_non_hex",
+      "statistiques_falsifiees",
+      "statut_refus",
+      "table_g_hors_enveloppe",
+      "tenu_entier",
+      "texte",
+      "tmvr_hors_enveloppe",
+      "utf8_invalide",
+      "verdict_falsifie"
+    ],
+    "native_executed": false,
+    "passes": 610,
+    "positive": "tenu",
+    "processes": 38,
+    "statistiques_identiques_pilote": true,
+    "synthetic_only": true,
+    "warm_passes": 392
+  },
+  "review_addition": {
+    "guards": [
+      "g_ns.tables + g_ns.resolution <= etapes_ns.G",
+      "pic_octets >= 16 * somme sites des entrees distinctes chargees"
+    ],
+    "previous_unpublished_sha256sums": "f0e0d63c0ee1a99cb51a40e3b1ddf323de24de570881e46cc5cfd042d61ace12",
+    "reason": "Deux gardes source-justifiees manquaient au premier lecteur non publie."
+  },
+  "schema": "audit_mes_full_contrelecture_v1",
+  "sources": [
+    {
+      "commit": "c40318ebdab87dbd1ec0509411603ab1ee060247",
+      "path": "morsehgp3D_v12/bench/full_probe.cpp",
+      "sha256": "815cb33f4f560943497644031759e25d9dd8b60d86b8aa377e54db53a9099e0d"
+    },
+    {
+      "commit": "c9ac60f20c741d9d493f4900fd8aec4590aaa5c5",
+      "path": "morsehgp3D_v12/microbancs/mes_full/pilote_full.py",
+      "sha256": "a89ceec92f76c642a508a0c76d5a0a8a31400cab15a7d27141bc37c557b9f92c"
+    },
+    {
+      "commit": "c40318ebdab87dbd1ec0509411603ab1ee060247",
+      "path": "morsehgp3D_v12/src/tower/passes.cpp",
+      "sha256": "761c2fb8dd2706bebeb4c69dfdebebc4126de82aed7baa2796860920231565f8"
+    },
+    {
+      "commit": "c40318ebdab87dbd1ec0509411603ab1ee060247",
+      "path": "morsehgp3D_v12/src/io/io.hpp",
+      "sha256": "53c05dccf838583b7226af624d1d8df5e770cbc9b248ce67207fb3dc823901ce"
+    },
+    {
+      "commit": "c40318ebdab87dbd1ec0509411603ab1ee060247",
+      "path": "morsehgp3D_v12/src/io/input.cpp",
+      "sha256": "36d842ec4e844d91d9fd29f17eeaeee2aaa4b99b7c59cdcc384631847db30f99"
+    },
+    {
+      "commit": "c40318ebdab87dbd1ec0509411603ab1ee060247",
+      "path": "morsehgp3D_v12/src/core/buffer.hpp",
+      "sha256": "8e4d84665e90308ee9572a729731711bb419e3a565fd4dd11b5bd56ab6a92401"
+    },
+    {
+      "commit": "c40318ebdab87dbd1ec0509411603ab1ee060247",
+      "path": "morsehgp3D_v12/src/core/types.hpp",
+      "sha256": "c6d91808b0fa82364a48bc049b2097b31db7bd46cae0b4ca7d313b4e3f7d0835"
+    }
+  ]
+}

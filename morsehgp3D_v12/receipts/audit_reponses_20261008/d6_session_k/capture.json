@@ -1,0 +1,555 @@
+{
+  "archive_bytes": 229876,
+  "archive_sha256": "5f8d64c1fb9dc2d49b98ae96b759b473533e29d13149a2a7513cfa4c346435da",
+  "bench_sources": [
+    {
+      "commit": "c9ac60f20c741d9d493f4900fd8aec4590aaa5c5",
+      "path": "morsehgp3D_v12/bench/catalogue_probe.cpp",
+      "sha256": "2db6c9ec12ea9b34cb9f697836e7a4cbb2e7338ebda9232f947d85bf4d3a2356"
+    },
+    {
+      "commit": "c9ac60f20c741d9d493f4900fd8aec4590aaa5c5",
+      "path": "morsehgp3D_v12/bench/tower_probe.cpp",
+      "sha256": "5c68d7225ac22d06dbb5a40bb45357c045ab0e7e48f530cfb4dbb87e425b3241"
+    },
+    {
+      "commit": "c9ac60f20c741d9d493f4900fd8aec4590aaa5c5",
+      "path": "morsehgp3D_v12/src/cloud/cloud.cpp",
+      "sha256": "26c82a1bfc1411606fbe1189541925539cb3c48a4cd1c1c3fe3a5d6a43a5684b"
+    }
+  ],
+  "payload_read": false,
+  "plan_sha256": "24cdb3e52c9b70ce85e897e643dac325d101b918dea0e50ffb4cd6a8b9392371",
+  "reader_modes_equal": [
+    "normal",
+    "-O"
+  ],
+  "readers": [
+    {
+      "commit": "c9ac60f20c741d9d493f4900fd8aec4590aaa5c5",
+      "path": "morsehgp3D_v12/microbancs/mes_d6_profils/pilote_d6.py",
+      "sha256": "48f40fd6107f75dea52c0b9f40a2d88ff6a40eb18d2ba1683035a0444231173e"
+    },
+    {
+      "commit": "e37fd8935e2dd320b4249f4347443c87d45ca34b",
+      "path": "morsehgp3D_v12/microbancs/mes_d6_profils/pilote_d6.py",
+      "sha256": "bb1de862175814467664ae83b377238771511c264eca4150905fbec5ffe5db4f"
+    }
+  ],
+  "receipt_scope": "Relecture D6 uniquement ; provenance/fermeture Session controlees dans le recu distinct session_k_snapshot.",
+  "report_sha256": "9e65e5e24e626efcbdd9c0c7a51f74cb128258b9cd57d9d81e0c6f01ed8f16c6",
+  "result": {
+    "admission": {
+      "new_catalogue": 63,
+      "new_tour_g": 63,
+      "old_catalogue": 63,
+      "old_tour_g": 0
+    },
+    "body_hashes_independently_recomputed": false,
+    "corrected_alerts": 0,
+    "external_command_code": 1,
+    "narrow_broad_profiles_only": true,
+    "native_executed": false,
+    "old_summaries_equal": 126,
+    "original_alerts": 66,
+    "original_body_alerts_cascade": 3,
+    "passes": 630,
+    "physical_samples": [
+      {
+        "cas": "ng00",
+        "facteur": 1,
+        "leaves_exact": 1,
+        "leaves_medium": 1,
+        "leaves_narrow": 123580,
+        "leaves_wide": 0,
+        "profil": 21,
+        "region_line_fallbacks": 0
+      },
+      {
+        "cas": "ng00",
+        "facteur": 1,
+        "leaves_exact": 1,
+        "leaves_medium": 1,
+        "leaves_narrow": 123580,
+        "leaves_wide": 0,
+        "profil": 32,
+        "region_line_fallbacks": 0
+      },
+      {
+        "cas": "ng00",
+        "facteur": 2048,
+        "leaves_exact": 123497,
+        "leaves_medium": 119408,
+        "leaves_narrow": 0,
+        "leaves_wide": 4089,
+        "profil": 32,
+        "region_line_fallbacks": 0
+      },
+      {
+        "cas": "ng01",
+        "facteur": 1,
+        "leaves_exact": 3,
+        "leaves_medium": 3,
+        "leaves_narrow": 99765,
+        "leaves_wide": 0,
+        "profil": 21,
+        "region_line_fallbacks": 0
+      },
+      {
+        "cas": "ng01",
+        "facteur": 1,
+        "leaves_exact": 3,
+        "leaves_medium": 3,
+        "leaves_narrow": 99765,
+        "leaves_wide": 0,
+        "profil": 32,
+        "region_line_fallbacks": 0
+      },
+      {
+        "cas": "ng01",
+        "facteur": 2048,
+        "leaves_exact": 99671,
+        "leaves_medium": 95720,
+        "leaves_narrow": 0,
+        "leaves_wide": 3951,
+        "profil": 32,
+        "region_line_fallbacks": 0
+      },
+      {
+        "cas": "ng02",
+        "facteur": 1,
+        "leaves_exact": 0,
+        "leaves_medium": 0,
+        "leaves_narrow": 115657,
+        "leaves_wide": 0,
+        "profil": 21,
+        "region_line_fallbacks": 0
+      },
+      {
+        "cas": "ng02",
+        "facteur": 1,
+        "leaves_exact": 0,
+        "leaves_medium": 0,
+        "leaves_narrow": 115657,
+        "leaves_wide": 0,
+        "profil": 32,
+        "region_line_fallbacks": 0
+      },
+      {
+        "cas": "ng02",
+        "facteur": 2048,
+        "leaves_exact": 115572,
+        "leaves_medium": 113373,
+        "leaves_narrow": 0,
+        "leaves_wide": 2199,
+        "profil": 32,
+        "region_line_fallbacks": 0
+      }
+    ],
+    "prises": 63,
+    "processes": 126,
+    "ratios": [
+      {
+        "cas": "ng00",
+        "catalogue": {
+          "chaud_ms": 325.201115,
+          "rapport": 1.0,
+          "rapport_max": 1.0,
+          "rapport_min": 1.0
+        },
+        "facteur": 1,
+        "profil": 21,
+        "tour_g": {
+          "chaud_ms": 53.2010365,
+          "rapport": 1.0,
+          "rapport_max": 1.0,
+          "rapport_min": 1.0
+        }
+      },
+      {
+        "cas": "ng00",
+        "catalogue": {
+          "chaud_ms": 336.271887,
+          "rapport": 1.0352311399670324,
+          "rapport_max": 1.0369234394247577,
+          "rapport_min": 1.0280277127213489
+        },
+        "facteur": 8,
+        "profil": 21,
+        "tour_g": {
+          "chaud_ms": 53.327632,
+          "rapport": 1.0022395240363409,
+          "rapport_max": 1.00674256568815,
+          "rapport_min": 0.9924119082732474
+        }
+      },
+      {
+        "cas": "ng00",
+        "catalogue": {
+          "chaud_ms": 326.682655,
+          "rapport": 1.0044633764555204,
+          "rapport_max": 1.0095672294167253,
+          "rapport_min": 1.00083856465451
+        },
+        "facteur": 1,
+        "profil": 24,
+        "tour_g": {
+          "chaud_ms": 53.5640415,
+          "rapport": 1.0032145050407053,
+          "rapport_max": 1.00976910890509,
+          "rapport_min": 0.9986203875617818
+        }
+      },
+      {
+        "cas": "ng00",
+        "catalogue": {
+          "chaud_ms": 335.875726,
+          "rapport": 1.03220978414378,
+          "rapport_max": 1.0357018427270654,
+          "rapport_min": 1.0309639036754223
+        },
+        "facteur": 8,
+        "profil": 24,
+        "tour_g": {
+          "chaud_ms": 53.495716,
+          "rapport": 1.0005093885717808,
+          "rapport_max": 1.00985166958738,
+          "rapport_min": 0.995539903215723
+        }
+      },
+      {
+        "cas": "ng00",
+        "catalogue": {
+          "chaud_ms": 328.3262255,
+          "rapport": 1.010391808189833,
+          "rapport_max": 1.0121244064615214,
+          "rapport_min": 1.005873875574609
+        },
+        "facteur": 1,
+        "profil": 32,
+        "tour_g": {
+          "chaud_ms": 55.881892,
+          "rapport": 1.050391038903913,
+          "rapport_max": 1.0560376931412385,
+          "rapport_min": 1.0380410627403946
+        }
+      },
+      {
+        "cas": "ng00",
+        "catalogue": {
+          "chaud_ms": 338.786037,
+          "rapport": 1.0417739096620255,
+          "rapport_max": 1.0440406776797357,
+          "rapport_min": 1.0384226639135559
+        },
+        "facteur": 8,
+        "profil": 32,
+        "tour_g": {
+          "chaud_ms": 55.984007,
+          "rapport": 1.0523104563949615,
+          "rapport_max": 1.055327363992092,
+          "rapport_min": 1.047997538158332
+        }
+      },
+      {
+        "cas": "ng00",
+        "catalogue": {
+          "chaud_ms": 958.1893225,
+          "rapport": 2.9464515289254156,
+          "rapport_max": 2.9464764307619764,
+          "rapport_min": 2.9458377781497713
+        },
+        "facteur": 2048,
+        "profil": 32,
+        "tour_g": {
+          "chaud_ms": 59.081382,
+          "rapport": 1.113010213626195,
+          "rapport_max": 1.1137799311693317,
+          "rapport_min": 1.0972460025918491
+        }
+      },
+      {
+        "cas": "ng01",
+        "catalogue": {
+          "chaud_ms": 279.140392,
+          "rapport": 1.0,
+          "rapport_max": 1.0,
+          "rapport_min": 1.0
+        },
+        "facteur": 1,
+        "profil": 21,
+        "tour_g": {
+          "chaud_ms": 42.3556,
+          "rapport": 1.0,
+          "rapport_max": 1.0,
+          "rapport_min": 1.0
+        }
+      },
+      {
+        "cas": "ng01",
+        "catalogue": {
+          "chaud_ms": 295.7864685,
+          "rapport": 1.0602537814880768,
+          "rapport_max": 1.062242000446607,
+          "rapport_min": 1.0567478568275421
+        },
+        "facteur": 8,
+        "profil": 21,
+        "tour_g": {
+          "chaud_ms": 42.084525,
+          "rapport": 0.9936000198320882,
+          "rapport_max": 1.0102838097353373,
+          "rapport_min": 0.9858031339220497
+        }
+      },
+      {
+        "cas": "ng01",
+        "catalogue": {
+          "chaud_ms": 279.2369615,
+          "rapport": 1.0003921969128708,
+          "rapport_max": 1.0009316716312717,
+          "rapport_min": 0.9965308702610101
+        },
+        "facteur": 1,
+        "profil": 24,
+        "tour_g": {
+          "chaud_ms": 42.38564,
+          "rapport": 1.0007092332536902,
+          "rapport_max": 1.007249646862951,
+          "rapport_min": 0.9925266487094879
+        }
+      },
+      {
+        "cas": "ng01",
+        "catalogue": {
+          "chaud_ms": 296.1484915,
+          "rapport": 1.060880133639982,
+          "rapport_max": 1.0616139583983961,
+          "rapport_min": 1.0577124792236268
+        },
+        "facteur": 8,
+        "profil": 24,
+        "tour_g": {
+          "chaud_ms": 42.4026405,
+          "rapport": 1.0032974388274514,
+          "rapport_max": 1.006068302018224,
+          "rapport_min": 0.9947575712121153
+        }
+      },
+      {
+        "cas": "ng01",
+        "catalogue": {
+          "chaud_ms": 280.6405345,
+          "rapport": 1.0056054091891033,
+          "rapport_max": 1.006221216919787,
+          "rapport_min": 1.0053741505815468
+        },
+        "facteur": 1,
+        "profil": 32,
+        "tour_g": {
+          "chaud_ms": 44.1669905,
+          "rapport": 1.0433733791989726,
+          "rapport_max": 1.0479302376839015,
+          "rapport_min": 1.0374823084183362
+        }
+      },
+      {
+        "cas": "ng01",
+        "catalogue": {
+          "chaud_ms": 297.5821035,
+          "rapport": 1.0666902787645651,
+          "rapport_max": 1.06786872320506,
+          "rapport_min": 1.0641103966625052
+        },
+        "facteur": 8,
+        "profil": 32,
+        "tour_g": {
+          "chaud_ms": 44.4830355,
+          "rapport": 1.050227962772337,
+          "rapport_max": 1.0555033960342568,
+          "rapport_min": 1.0414601980578317
+        }
+      },
+      {
+        "cas": "ng01",
+        "catalogue": {
+          "chaud_ms": 810.6140245,
+          "rapport": 2.9038281109799398,
+          "rapport_max": 2.9105249381152944,
+          "rapport_min": 2.9024807918160405
+        },
+        "facteur": 2048,
+        "profil": 32,
+        "tour_g": {
+          "chaud_ms": 48.092746,
+          "rapport": 1.1327433255052115,
+          "rapport_max": 1.1410748655526237,
+          "rapport_min": 1.1313311817091483
+        }
+      },
+      {
+        "cas": "ng02",
+        "catalogue": {
+          "chaud_ms": 328.4267075,
+          "rapport": 1.0,
+          "rapport_max": 1.0,
+          "rapport_min": 1.0
+        },
+        "facteur": 1,
+        "profil": 21,
+        "tour_g": {
+          "chaud_ms": 48.444391,
+          "rapport": 1.0,
+          "rapport_max": 1.0,
+          "rapport_min": 1.0
+        }
+      },
+      {
+        "cas": "ng02",
+        "catalogue": {
+          "chaud_ms": 336.215849,
+          "rapport": 1.023716528900135,
+          "rapport_max": 1.0243483801967443,
+          "rapport_min": 1.0217052016205896
+        },
+        "facteur": 8,
+        "profil": 21,
+        "tour_g": {
+          "chaud_ms": 51.960012,
+          "rapport": 1.0719847274808523,
+          "rapport_max": 1.077052594179582,
+          "rapport_min": 1.0707760345026638
+        }
+      },
+      {
+        "cas": "ng02",
+        "catalogue": {
+          "chaud_ms": 329.079263,
+          "rapport": 1.0018386178416474,
+          "rapport_max": 1.0019922816582132,
+          "rapport_min": 1.0000860176695585
+        },
+        "facteur": 1,
+        "profil": 24,
+        "tour_g": {
+          "chaud_ms": 51.6078215,
+          "rapport": 1.0679560025768604,
+          "rapport_max": 1.0684850285350889,
+          "rapport_min": 1.0606505959633348
+        }
+      },
+      {
+        "cas": "ng02",
+        "catalogue": {
+          "chaud_ms": 335.4223185,
+          "rapport": 1.021305843367295,
+          "rapport_max": 1.0216578960771634,
+          "rapport_min": 1.019324479084981
+        },
+        "facteur": 8,
+        "profil": 24,
+        "tour_g": {
+          "chaud_ms": 48.3642265,
+          "rapport": 1.0008340693214859,
+          "rapport_max": 1.0050456924930689,
+          "rapport_min": 0.9939570897981551
+        }
+      },
+      {
+        "cas": "ng02",
+        "catalogue": {
+          "chaud_ms": 331.331013,
+          "rapport": 1.008843085637303,
+          "rapport_max": 1.0146369818409777,
+          "rapport_min": 1.0077041358856291
+        },
+        "facteur": 1,
+        "profil": 32,
+        "tour_g": {
+          "chaud_ms": 53.8578765,
+          "rapport": 1.1117463836009416,
+          "rapport_max": 1.118606572432574,
+          "rapport_min": 1.1074150419209567
+        }
+      },
+      {
+        "cas": "ng02",
+        "catalogue": {
+          "chaud_ms": 338.388759,
+          "rapport": 1.030332647353291,
+          "rapport_max": 1.0308963617465505,
+          "rapport_min": 1.0296207998594398
+        },
+        "facteur": 8,
+        "profil": 32,
+        "tour_g": {
+          "chaud_ms": 50.189922,
+          "rapport": 1.0361122496661643,
+          "rapport_max": 1.0399263972582502,
+          "rapport_min": 1.0354660783653251
+        }
+      },
+      {
+        "cas": "ng02",
+        "catalogue": {
+          "chaud_ms": 954.4616995,
+          "rapport": 2.9061634687550493,
+          "rapport_max": 2.9144537585832633,
+          "rapport_min": 2.903394581644267
+        },
+        "facteur": 2048,
+        "profil": 32,
+        "tour_g": {
+          "chaud_ms": 52.841997,
+          "rapport": 1.091924546569236,
+          "rapport_max": 1.0934956416305706,
+          "rapport_min": 1.0843862605270442
+        }
+      }
+    ],
+    "raw_tree_sha256": "ac9071faf79e59fc763c0c8d9e15188fdc21bd1b545f36a52d7faf92521ff93f",
+    "shapes": {
+      "ng00": {
+        "catalogue_balls": 1306696,
+        "corps_x1_declares": [
+          "b9ba7709b5296b9be38ac20e084e699c2a738b6f86638c47f3abb731c8ab66ae"
+        ],
+        "incidences": 6097121,
+        "levels": 1085776,
+        "resolution_x1": [
+          "e5a81154fb1b15f1016590d0257b55de56a2fc52ae7265c730f779ed570a225c"
+        ]
+      },
+      "ng01": {
+        "catalogue_balls": 1095926,
+        "corps_x1_declares": [
+          "73e113808ddec54fa351f57ed456e0414220b0276e6bb7d10983c7a81cefe566"
+        ],
+        "incidences": 5085683,
+        "levels": 941217,
+        "resolution_x1": [
+          "10bb4c6d14096b2d073a719d5577ad53cc58f6d9800090c04ad8232edba7eaa3"
+        ]
+      },
+      "ng02": {
+        "catalogue_balls": 1407885,
+        "corps_x1_declares": [
+          "e9c5effab396e36d570184e6e758bf223b433fe6874429254beb69d1d6776227"
+        ],
+        "incidences": 6514697,
+        "levels": 1099582,
+        "resolution_x1": [
+          "d66647a043f682dab4ebbc638517c9013e931142864d08bcafc00be61702310d"
+        ]
+      }
+    },
+    "source_sonde_codes": "126 zeros declares par le rapport",
+    "warm_passes": 504
+  },
+  "scope": "CPU C et G distincts, pas FULL",
+  "sites": {
+    "ng00": 39885,
+    "ng01": 35551,
+    "ng02": 45845
+  }
+}

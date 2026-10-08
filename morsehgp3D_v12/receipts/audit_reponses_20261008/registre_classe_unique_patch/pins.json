@@ -1,0 +1,93 @@
+{
+  "base_commit": "7398aed7d8dd5595c880aa8a8677ecf05a8f2a32",
+  "comparison_commit": "bebb8609d6a0ef6f1fbc6fe553bcf81e039d941d",
+  "patch_path": "morsehgp3D_v12/src/tower/registry_branches.cpp",
+  "before_sha256": "63a86cde27fe8108cf1e2e6753bcf6a4e49dd2b3ac5b7dcad9da179e48865e5a",
+  "after_sha256": "ab93317256db33ef99effab8fbb6c50b3af085c7f76befe4fa312977d21bf9a7",
+  "patch_sha256": "abb614ebb23420237a7b8730e2e05182d5fa134634879726b219f34d2dd26476",
+  "patch_bytes": 6515,
+  "sources": [
+    {
+      "path": "morsehgp3D_v12/src/tower/registry_branches.cpp",
+      "sha256": "63a86cde27fe8108cf1e2e6753bcf6a4e49dd2b3ac5b7dcad9da179e48865e5a",
+      "bytes": 8563,
+      "equal_at_comparison_commit": true,
+      "comparison_sha256": "63a86cde27fe8108cf1e2e6753bcf6a4e49dd2b3ac5b7dcad9da179e48865e5a"
+    },
+    {
+      "path": "morsehgp3D_v12/src/tower/forest_internal.hpp",
+      "sha256": "7566f35c0d7e44d6756d76f4e61086b3141313142974577277d7178bbe517c69",
+      "bytes": 9037,
+      "equal_at_comparison_commit": true,
+      "comparison_sha256": "7566f35c0d7e44d6756d76f4e61086b3141313142974577277d7178bbe517c69"
+    },
+    {
+      "path": "morsehgp3D_v12/src/tower/forest_contract.cpp",
+      "sha256": "5dacf8cef8a7827ba50c01b3a4908e264b946b5caccc0dda0abf5ad83117870d",
+      "bytes": 5414,
+      "equal_at_comparison_commit": true,
+      "comparison_sha256": "5dacf8cef8a7827ba50c01b3a4908e264b946b5caccc0dda0abf5ad83117870d"
+    },
+    {
+      "path": "morsehgp3D_v12/src/tower/forest_stages.cpp",
+      "sha256": "7cf04367594b33873096ec3c10cba517e09195eeb1e2d8d4cc6026f9ff2aa5f5",
+      "bytes": 11479,
+      "equal_at_comparison_commit": true,
+      "comparison_sha256": "7cf04367594b33873096ec3c10cba517e09195eeb1e2d8d4cc6026f9ff2aa5f5"
+    },
+    {
+      "path": "morsehgp3D_v12/src/tower/forest_build.cpp",
+      "sha256": "8cbe7fee1e1285dfab43d4b28fc9735cfff4be8b918dfaa578ed8b2d40a5df81",
+      "bytes": 8757,
+      "equal_at_comparison_commit": true,
+      "comparison_sha256": "8cbe7fee1e1285dfab43d4b28fc9735cfff4be8b918dfaa578ed8b2d40a5df81"
+    },
+    {
+      "path": "morsehgp3D_v12/src/tower/forest.hpp",
+      "sha256": "1f21cdeb598da5492bfa0708551a2bb319685c7d74d197b1d764512ebe6478fb",
+      "bytes": 11997,
+      "equal_at_comparison_commit": true,
+      "comparison_sha256": "1f21cdeb598da5492bfa0708551a2bb319685c7d74d197b1d764512ebe6478fb"
+    },
+    {
+      "path": "morsehgp3D_v12/tests/tower/forest_unit.cpp",
+      "sha256": "21bc9b9936459a49e60f0600bfa5eef869b2c26af7c3c059ff64bf48a22d36e4",
+      "bytes": 29334,
+      "equal_at_comparison_commit": true,
+      "comparison_sha256": "21bc9b9936459a49e60f0600bfa5eef869b2c26af7c3c059ff64bf48a22d36e4"
+    },
+    {
+      "path": "morsehgp3D_v12/tests/tower/forest_support.hpp",
+      "sha256": "4b9c4bf0976a07230e4c971d20ff031516a604c2da3a7d5f8c855d9f0a269485",
+      "bytes": 7551,
+      "equal_at_comparison_commit": true,
+      "comparison_sha256": "4b9c4bf0976a07230e4c971d20ff031516a604c2da3a7d5f8c855d9f0a269485"
+    },
+    {
+      "path": "morsehgp3D_v12/tests/tower/tests.cmake",
+      "sha256": "af6ff8e7b6fd5bffd7b8c84aa5e62485de8209db951d86feb6bcdcbd8a21f009",
+      "bytes": 11739,
+      "equal_at_comparison_commit": false,
+      "comparison_sha256": "f31c8d69638ad4eaaaa7f6e6de02a0e9f687e56ad44f7f82fe9467c03905205b"
+    },
+    {
+      "path": "morsehgp3D_v12/src/tower/export_full.cpp",
+      "sha256": "789f33fc68377ab9d1fcc72a2c8618f87b74af819e018b8cafbf404b3709595c",
+      "bytes": 6328,
+      "equal_at_comparison_commit": true,
+      "comparison_sha256": "789f33fc68377ab9d1fcc72a2c8618f87b74af819e018b8cafbf404b3709595c"
+    },
+    {
+      "path": "morsehgp3D_v12/src/core/buffer.hpp",
+      "sha256": "8e4d84665e90308ee9572a729731711bb419e3a565fd4dd11b5bd56ab6a92401",
+      "bytes": 14629,
+      "equal_at_comparison_commit": true,
+      "comparison_sha256": "8e4d84665e90308ee9572a729731711bb419e3a565fd4dd11b5bd56ab6a92401"
+    }
+  ],
+  "proof": {
+    "commit": "4707f6203ac6100ee2c7142eb90ce27080177c44",
+    "path": "morsehgp3D_v12/receipts/audit_reponses_20261008/registre_classe_unique/README.md",
+    "sha256": "82b614d6f9817c560119d5e4ffb1dc7601b8a926f8901154fd5ace74da69cec4"
+  }
+}
