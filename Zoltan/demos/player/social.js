@@ -94,7 +94,9 @@
       const m = scene.methods[p.key];
       S.methods[p.key] = { m, levels: Float64Array.from(m.levels), evP: Int32Array.from(m.ev_plateau), evK: Int8Array.from(m.ev_kind),
         evA: Int32Array.from(m.ev_a), evB: Int32Array.from(m.ev_b), state: null,
-        bestSet: m.best_sites.map((list) => new Set(list)) };
+        bestSet: m.best_sites.map((list) => new Set(list)),
+        // tous les objets retrouvés : la hiérarchie se fige au dernier de leurs maxima (elle a réussi)
+        freeze: m.best.every((v) => v > 0.5) ? Math.max(...m.best_level) : Infinity };
     }
     S.cam = camera(scene.view || { az: 0, el: 30 });
     fit();
@@ -346,7 +348,8 @@
       if (phase !== 'intro') {
         const fin = phase === 'final' ? smooth((t - SWEEP1) / T_FINAL_IN) : 0;
         if (fin < 1) {
-          const st = stylesAt(M, r);
+          const rp = Math.min(r, M.freeze);
+          const st = stylesAt(M, rp);
           ctx.globalAlpha = mix * (1 - fin); drawPoints(ctx, P, 'sweep', st); ctx.globalAlpha = 1;
           if (mix > 0.5) { ctx.globalAlpha = (1 - fin); drawLabels(ctx, P, 'sweep', st.marks); ctx.globalAlpha = 1; }
         }
@@ -366,6 +369,11 @@
       } else drawLabels(ctx, P, 'truth', null);
       ctx.restore();
       text(ctx, P.name, P.x + 26, P.y + 60, 48, C.text, { bold: true });
+      if (phase === 'sweep' && r > M.freeze) {
+        ctx.globalAlpha = smooth((r / M.freeze - 1) / 0.03);
+        text(ctx, `ε = ${(100 * M.freeze).toFixed(1)} cm`, P.x + P.w - 26, P.y + 58, 36, C.dim, { bold: true, align: 'right' });
+        ctx.globalAlpha = 1;
+      }
     }
     // fondu d'entrée et de sortie de la scène
     const fade = Math.max(1 - smooth(t / T_FADE), 1 - smooth((DURATION - t) / T_FADE));

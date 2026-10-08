@@ -16,7 +16,8 @@ Chaque scène : les objets, puis HGP (en haut) et HDBSCAN (en bas) balaient l'é
 et un bandeau d'une ligne aux événements importants (« A found ✓ », « A, B found ✓ » quand tous sont retrouvés et
 encore séparés, « A + B merged too early ✗ » quand des objets fusionnent avant d'avoir été retrouvés), puis le
 meilleur nœud de chaque hiérarchie pour chaque objet, encadré en vert s'il retrouve l'objet (IoU > 0,5), en rouge
-sinon. Seuls textes : HGP, HDBSCAN, $\varepsilon$ et les clusters. Mêmes données et mêmes meilleurs nœuds que les vidéos longues
+sinon. Une hiérarchie qui a retrouvé tous ses objets se fige au dernier de leurs maxima (son
+panneau affiche cet $\varepsilon$) pendant que l'autre continue. Seuls textes : HGP, HDBSCAN, $\varepsilon$ et les clusters. Mêmes données et mêmes meilleurs nœuds que les vidéos longues
 (scènes `data/duel_k<k>_en.js`, `best_sites` de `tools/duel_scene.py`).
 
 Lecteur : `player/social.html` et `player/social.js` ; rendu :
