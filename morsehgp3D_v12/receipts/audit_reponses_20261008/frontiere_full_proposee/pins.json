@@ -1,0 +1,91 @@
+{
+  "kind": "frontiere_proposee_non_executee",
+  "contract_commit": "77693bb05b27d54d9827c4c895f497c634d8ac45",
+  "prototype": {
+    "name": "repo6",
+    "base_commit": "a5e0dbc776f2817f4e7e3a23fc791f1035948b47",
+    "patch_sha256": "b3c78ae365a99568457bc6cd5d894a1b73d02b7b19ae3d774f9fdfa094a58bab"
+  },
+  "sources": [
+    {
+      "source": "repo6",
+      "path": "morsehgp3D_v12/tests/tower/tower_chain.cpp",
+      "sha256": "37c014369c5c5b046cd006c7ec0cbabd7b4d5dd4ec5cbc23e4e57bc29152010a",
+      "bytes": 7240,
+      "relevant_lines": [
+        97,
+        102,
+        115,
+        119,
+        122,
+        129,
+        134,
+        137,
+        142
+      ]
+    },
+    {
+      "source": "repo6",
+      "path": "morsehgp3D_v12/src/tower/forest_build.cpp",
+      "sha256": "8cbe7fee1e1285dfab43d4b28fc9735cfff4be8b918dfaa578ed8b2d40a5df81",
+      "bytes": 8757,
+      "relevant_lines": [
+        182,
+        191,
+        194,
+        195,
+        196,
+        197
+      ]
+    },
+    {
+      "source": "git",
+      "path": "morsehgp3D_v12/docs/ARCHITECTURE.md",
+      "sha256": "d2deef8555382b56fcd90c21de90ba36b932c9e79c9f6c8eda8623163b98f497",
+      "bytes": 21226,
+      "relevant_lines": [
+        30,
+        32,
+        42,
+        73,
+        121,
+        136
+      ]
+    },
+    {
+      "source": "git",
+      "path": "morsehgp3D_v12/docs/MESURE.md",
+      "sha256": "b0ae883299163b783fbae40954a7fc22c15fe22bf7248f7caeee39e536a9213f",
+      "bytes": 10988,
+      "relevant_lines": [
+        8,
+        12,
+        13,
+        14,
+        17,
+        24,
+        137,
+        141,
+        151
+      ]
+    },
+    {
+      "source": "git",
+      "path": "morsehgp3D_v12/docs/DONNEES.md",
+      "sha256": "4173bcc94b4d32fb9fd859ea64fea1abf52f607ba0f3d3f036c99a713814fc5a",
+      "bytes": 53112,
+      "relevant_lines": [
+        295,
+        301,
+        303,
+        307,
+        461,
+        466
+      ]
+    }
+  ],
+  "stable_before_after": true,
+  "product_modified": false,
+  "native_executed": false,
+  "cloud_used": false
+}

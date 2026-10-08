@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-8 octobre 2026, base publiée **`4cbcd3852`**.
+8 octobre 2026, base publiée **`77693bb05`**.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
 
@@ -22,7 +22,8 @@ maxima 54,76 / 42,95 / 50,18 ms ; médiane des dix médianes de processus, neuf 
 K10 informatif : 440,90 / 321,28 / 354,65 ms, trois processus × deux passes chaudes.
 188 journaux stricts, sources et arrêt archivé contre-vérifiés ; gains appariés K5 de 33–37 %.
 **Aucun temps FULL v12 acquis** ; une somme de médianes I+J ne le remplace pas. Trois trames d'une seule séquence.
-Priorité : chaîne entière ; 100 ms, GPU u24/u32, petits nuages et millions restent à qualifier.
+Priorité : [chrono FULL résident proposé](../receipts/audit_reponses_20261008/frontiere_full_proposee/README.md),
+de Cloud/index à T/M/V/R en mémoire. 100 ms, GPU u24/u32, petits nuages et millions restent à qualifier.
 
 **Livraisons et qualifications.**
 
