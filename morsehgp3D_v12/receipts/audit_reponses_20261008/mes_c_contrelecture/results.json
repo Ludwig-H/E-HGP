@@ -1,0 +1,86 @@
+{
+  "test_reader.py": {
+    "stdout_sha256": "67d7cd052bbccbdae19e821b6bb1ac64663b76bf563168f3e67412e5e00d5190",
+    "normal_optimized_equal": true,
+    "result": {
+      "K10_hard_expired": "criteres K5 tenus",
+      "K10_non_joue": "criteres K5 tenus, cohorte partielle",
+      "K5_W1_non_joue": "criteres W48 tenus, cohorte partielle",
+      "K_hashes_separate": true,
+      "codes_inferes": "tenu",
+      "cold_removed_per_frame": true,
+      "mutations": {
+        "C1_measured_failure": "non tenu",
+        "C2_measured_failure": "non tenu",
+        "C3_duplicate": "refuse/incomplet",
+        "C3_missing": "refuse/incomplet",
+        "C3_non_joue": "refuse/incomplet",
+        "C3_threads": "refuse/incomplet",
+        "G_overlap": "refuse",
+        "K": "refuse",
+        "K10_row_missing": "refuse",
+        "K10_session_expired": "refuse",
+        "OLS": "difference publiee detectee, bruts inchanges",
+        "bool": "refuse",
+        "code_bool_float": "refuse",
+        "cold_summary": "difference publiee detectee, bruts inchanges",
+        "cpu_null": "refuse/metrique manquante",
+        "device_peak": "refuse",
+        "digest": "refuse",
+        "duplicate": "refuse",
+        "expiration": "non tenu",
+        "gpu_unknown": "refuse",
+        "label": "refuse",
+        "memory_continuity": "refuse",
+        "memory_floor": "refuse",
+        "nan": "refuse",
+        "nonobject": "refuse",
+        "pinned_peak": "refuse",
+        "plan_threads": "refuse",
+        "refus_memory_budget": "non tenu",
+        "refus_unknown": "refuse",
+        "sites": "refuse",
+        "threads": "refuse",
+        "u64": "refuse",
+        "zero_wall": "refuse"
+      },
+      "nominal": "tenu"
+    }
+  },
+  "mutants.py": {
+    "stdout_sha256": "97c7b9d23459a445c85a41b31ec76c5e5bd266ef2627d8d933d160e99b5d5d4d",
+    "normal_optimized_equal": true,
+    "result": {
+      "C3_sans_completude": {
+        "diagnostic": "missing",
+        "syntax_valid": true,
+        "verdict": "tue"
+      },
+      "K_melanges": {
+        "diagnostic": "nominal",
+        "syntax_valid": true,
+        "verdict": "tue"
+      },
+      "code_sans_type": {
+        "diagnostic": "code exact",
+        "syntax_valid": true,
+        "verdict": "tue"
+      },
+      "empreinte_ignoree": {
+        "diagnostic": "digest",
+        "syntax_valid": true,
+        "verdict": "tue"
+      },
+      "froid_conserve": {
+        "diagnostic": "nominal",
+        "syntax_valid": true,
+        "verdict": "tue"
+      },
+      "groupes_melanges": {
+        "diagnostic": "nominal",
+        "syntax_valid": true,
+        "verdict": "tue"
+      }
+    }
+  }
+}

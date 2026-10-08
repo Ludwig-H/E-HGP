@@ -38,7 +38,7 @@ L2 : une seule passe initiale, donc froide. Aucun gain causal entre L1 et L1r.
 18/30 passes dont huit chaudes ; B1/B2/B4 non tenus, B3 non évalué. Boreas n10 CPU/GPU : FUL1 identique.
 Succès à 6,71 M et refus à 5,20 M : aucun plafond universel en sites.
 [L2 admise](../receipts/audit_reponses_20261008/session_l2_admission/README.md) : deux succès CPU, trois refus ;
-ETH3D 16,83 M `wide_leaf`, Lyon 24,02/32,41 M `memory_budget`. Aucun chaud, GPU, K10 ni digest FULL.
+ETH3D 16,83 M [wide_leaf](../receipts/audit_reponses_20261008/wide_leaf_semantique/README.md), Lyon 24,02/32,41 M `memory_budget`. Aucun chaud, GPU, K10 ni digest FULL.
 B1–B4 non évalués. [Provenance/arrêt L2](../receipts/audit_reponses_20261008/session_l2_provenance/README.md).
 [Errata L1r](../receipts/audit_reponses_20261008/l1r_documentation/README.md) et
 [L2](../receipts/audit_reponses_20261008/session_l2_documentation/README.md) proposés : conversions RSS, enveloppes
@@ -46,15 +46,14 @@ chronométriques, poste des refus et projections ; les chronos réels restent in
 
 **Aide au développeur — priorités ouvertes.**
 
-- **CPU/C** : feuilles = 45–48 % du catalogue CPU. [Symétrie des paires et garde redondante](../receipts/audit_reponses_20261008/cpu_live/README.md),
-  [popcount](../receipts/audit_reponses_20261008/cpu_popcount_asm/README.md), [réemploi du tri pour S*](../receipts/audit_reponses_20261008/catalogue_radix_reuse/README.md) :
-  propositions sans gain natif qualifié. Finition déjà parallèle.
+- **CPU/C** : [symétrie et garde redondante](../receipts/audit_reponses_20261008/cpu_live/README.md),
+  [réemploi du tri S*](../receipts/audit_reponses_20261008/catalogue_radix_reuse/README.md) proposés, sans gain natif qualifié.
 - **T/K1** : [réutiliser les rangs C](../receipts/audit_reponses_20261008/t_naissances_reutilisees/README.md) évite un tri XYZ.
   Preuve et modèle ; export possédé de 4N octets à compter, `births_ns` à mesurer avant raccord.
 - **A** : [schéma 902](../receipts/audit_reponses_20261008/t2d_a_schema902/README.md), cohorte/queue/mémoire à renforcer ;
   [patch des instants des feuilles](../receipts/audit_reponses_20261008/t2d_a_fenetre_patch/README.md) proposé, sans modifier le mur FULL.
 - **B** : [proposition entière prouvée](../receipts/audit_reponses_20261008/t2d_b_proposition/README.md), bornes B≤32 ;
-  [698 portes + une sautée](../receipts/audit_reponses_20261008/t2d_b_traces/README.md), [39 mutants clos](../receipts/audit_reponses_20261008/t2d_b_mutants/README.md).
+  [39 mutants clos](../receipts/audit_reponses_20261008/t2d_b_mutants/README.md).
   [Pilote corrigé](../receipts/audit_reponses_20261008/t2d_b_admission_reprise/README.md) : mur G/device conformes, veto A/A et
   positions rééquilibrées ; quatre incohérences FULL informatives encore admises.
 - **C** : [suivi local](../receipts/audit_reponses_20261008/t2d_c_suivi/README.md), 705 portes + une sautée, modules CUDA u21/u24
@@ -63,7 +62,8 @@ chronométriques, poste des refus et projections ; les chronos réels restent in
 - **Lecteurs FULL/MES-C** : [lecteur commun a2](../receipts/audit_reponses_20261008/lecteur_full_commun/README.md), types/mémoire/raisons
   encore permissifs ; [MES-C livré](../receipts/audit_reponses_20261008/mes_c_livraison/README.md), cohorte incomplète tenue,
   patch avec porte adaptée proposé. [C1/C2 et chaud](../receipts/audit_reponses_20261008/mes_c_statistique/README.md) :
-  coefficients descriptifs, tournée de 147 nuages ; comparaison v11 non appariée. Aucun résultat MES-C admis ici.
+  coefficients descriptifs, tournée de 147 nuages ; comparaison v11 non appariée.
+  [Contrelecteur prêt](../receipts/audit_reponses_20261008/mes_c_contrelecture/README.md) : 33 contre-JSON/six mutants ; résultat réel attendu.
 - **R** : [raccourci classe unique](../receipts/audit_reponses_20261008/registre_classe_unique_patch/README.md) proposé,
   différé après A ; comparer aussi les CSR absents de FUL1.
 

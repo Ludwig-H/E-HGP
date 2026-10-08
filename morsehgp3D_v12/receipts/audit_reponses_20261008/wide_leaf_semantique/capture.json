@@ -1,0 +1,43 @@
+{
+  "pins": [
+    "a2c2fccfd65f89a4bb874b8bf5e1bd2c737856b1",
+    "83ed7620d0b243343688a45473aa479240129725"
+  ],
+  "sources": {
+    "morsehgp3D_v12/src/catalogue/catalogue.hpp": "9c8c5ccec389c50bd2858d67d7de29560dc2b9e7304017f70e6bc81cdf6cfc41",
+    "morsehgp3D_v12/src/catalogue/catalogue.cpp": "799abaf8ee815df58c40a44c74d1ba9b9dfc40fdd05488d1e214efe9b1009e49",
+    "morsehgp3D_v12/src/catalogue/traversal_driver.hpp": "971c47dfe40394398d1dc42fb5c14b47031940b9db031be4dc500daa46f5eae9",
+    "morsehgp3D_v12/src/catalogue/traversal_records.hpp": "76e5c7712a4c6f172c3c23d8296b7f11145be5fc339a4b5b969e5d0f8c27aea6",
+    "morsehgp3D_v12/src/catalogue/traversal_kernels.hpp": "3570a441e91ad60bb2863cfa6c0c83c77081a151edfcf0c8069278677e6d2477",
+    "morsehgp3D_v12/src/catalogue/traversal_scan.hpp": "7f23062661efb896afbfe7ee71cb44a44a1cc86d5eca2ac9ee0cf28d05478a22",
+    "morsehgp3D_v12/src/catalogue/leaf_census.hpp": "829ba84ab6522a364d4985b5fb6d6571c14f8c72fd8e44bb45c97900b2125b6b",
+    "morsehgp3D_v12/src/catalogue/leaves.cpp": "2172f739d7f3a5a49bfe748f4f8c3a38b4d6a4e6b393bbf22bf1b6396367fff8",
+    "morsehgp3D_v12/src/index/index.hpp": "fbf64f625ff4d34061cf757796982a4369c6153dffdf9e11541530d9f7aa0530",
+    "morsehgp3D_v12/bench/full_probe.cpp": "201119a78a52ccbe5c8e2ce128a165e9b3774800d55ed8a0935c91e587858d61",
+    "morsehgp3D_v12/src/core/reasons.def": "6950b85dc15ed3ebfc51e4597ef06b4ed0b08c1833e83df09579dcb94e9e8cfd",
+    "morsehgp3D_v12/tests/catalogue/unit.cpp": "c96e44362c00d5332b2a66d1d295ba7d63c3a291b12a6a2783caba75a17517d7"
+  },
+  "captured_utc": "2026-10-08T06:40:03.832261+00:00",
+  "native_execution": false,
+  "raw_coordinates_read": false,
+  "proof": {
+    "belongs_to_Cat1_mathematically": true,
+    "global_support": [
+      0,
+      3
+    ],
+    "integer_square": true,
+    "interior": 0,
+    "local_blocks_lose_ball": true,
+    "native_execution": false,
+    "qmin": 2,
+    "shell": 4,
+    "source_a2_83_identical": true,
+    "source_files": 12
+  },
+  "normal_optimized_equal": true,
+  "replay_codes": [
+    0,
+    0
+  ]
+}
