@@ -1,0 +1,15 @@
+{
+  "schema": "audit-resident-reemploi-couverture-result-v1",
+  "source_commit": "95d927da08d499930f37040e572bd1c182af81ec",
+  "sources_verifiees": 12,
+  "sources_identiques_l1t": 11,
+  "device_open": "deux appels par témoin, contexte conservé, budget illimité",
+  "device_open_budget": "14 appels, contextes neufs",
+  "slices_device_reuse": "gros par tranches / petit complet / gros par tranches",
+  "capacites_pool_cuda_identiques": false,
+  "diagnostic_contextes_bornes": 16,
+  "diagnostic_passes_bornees_demandees": 48,
+  "native_execute_par_auditeur": false,
+  "correctif_qualifie": false,
+  "CST-0243": "ouvert"
+}

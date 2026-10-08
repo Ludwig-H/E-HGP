@@ -1,0 +1,115 @@
+{
+  "schema": "proposition-reemploi-resident-v1",
+  "statut": "proposé, non exécuté, pas de seuil qualifié",
+  "objet": "même catalogue exact après un succès complet ayant rendu le front",
+  "diagnostic": {
+    "fixtures_publiques": [
+      {
+        "nom": "nuage2500",
+        "generateur": "device_test::scatter",
+        "n": 2500,
+        "side": 65535,
+        "seed": 7,
+        "k": 5,
+        "leaf": 24
+      },
+      {
+        "nom": "nuage1500",
+        "generateur": "device_test::scatter",
+        "n": 1500,
+        "side": 32767,
+        "seed": 5,
+        "k": 5,
+        "leaf": 24
+      }
+    ],
+    "threads": 3,
+    "passes_par_contexte": 3,
+    "ordre": [
+      "calibration illimitée sur contexte neuf",
+      "par fixture, fractions dans l’ordre déclaré, contexte neuf par fraction",
+      "trois appels consécutifs sur le même état ; chaque résultat détruit avant le suivant"
+    ],
+    "budget_appareil_fractions_pic_froid": [
+      [
+        1,
+        1
+      ],
+      [
+        15,
+        16
+      ],
+      [
+        7,
+        8
+      ],
+      [
+        3,
+        4
+      ],
+      [
+        5,
+        8
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        3,
+        8
+      ],
+      [
+        1,
+        3
+      ]
+    ],
+    "budget_hote": "illimité pour isoler le budget appareil",
+    "cache_hote_octets": 0,
+    "seuil": "floor(pic_froid * num / den), calcul entier vérifié",
+    "route_requise_passe0": {
+      "succes": true,
+      "finish_slices": 0,
+      "arena_streamed": 0,
+      "front_rendu": true,
+      "finish_resident_octets_strictement_positif": true
+    },
+    "choix_fixture": "première fixture et première fraction atteignant la route requise ; toute la matrice reste conservée",
+    "absence_route": "diagnostic non couvrant, aucun verdict favorable de réemploi"
+  },
+  "porte_figee": {
+    "source_pin": "à fixer après diagnostic et avant qualification",
+    "fixture_et_limite": "reprendre exactement le témoin observé ; ne pas recalibrer la limite au pin corrigé",
+    "passes": 3,
+    "meme_pool_executeur_etat_budgets": true,
+    "resultats_detruits_entre_passes": true,
+    "aucun_petit_nuage_intercale": true,
+    "aucune_purge_appelant": true,
+    "identite_chaque_passe": [
+      "catalogue_digest",
+      "grand livre",
+      "niveaux rationnels non réduits",
+      "find_support pour chaque support"
+    ],
+    "succes_exige_chaque_passe": true,
+    "routes_suivantes": "publiées ; autoriser une adaptation si la règle produit la permet, exiger la route complète seulement si cette politique est annoncée",
+    "limites": "pic <= limite et usage <= pic ; distinguer hôte/appareil ; budgets rendus après toutes destructions"
+  },
+  "gpu": {
+    "qualification_distincte": true,
+    "capacites": "CUDA max(n, cap+floor(cap/2)+1024), contenu conservé ou non déclaré",
+    "calibration": "seuil indépendant du Pool ; même matrice diagnostique ou témoin CUDA déjà figé",
+    "temoin_front_rendu": "compteur ou booléen de diagnostic, jamais déduit du seul finish_slices=0"
+  },
+  "full_tuwien": {
+    "cadre": "reprise séparée, source/ELF/configuration fermés, pas de moteur par l’auditeur",
+    "appels": 3,
+    "meme_session": true,
+    "budget_hote_gio": 160,
+    "budget_appareil_gio": 88,
+    "cache_hote_gio": 8,
+    "resultats_full": "trois FULL et libérations ; toutes les issues/stades conservés",
+    "chronometrie": "purges éventuelles dans C/FULL ; lecture/ouverture/digest/libération affichés séparément",
+    "identite": "FUL1 complète si activée et budgétée ; le seuil historique 1,6 M ne donne aucune identité massive"
+  }
+}

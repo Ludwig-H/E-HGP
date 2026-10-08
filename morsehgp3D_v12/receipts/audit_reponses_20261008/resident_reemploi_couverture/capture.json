@@ -1,0 +1,70 @@
+{
+  "schema": "audit-resident-reemploi-couverture-v1",
+  "capture_utc": "2026-10-08T17:08:57.338090+00:00",
+  "source_commit": "95d927da08d499930f37040e572bd1c182af81ec",
+  "source_l1t": "caf9585e4a89ba101ba86d2d46e77cb340be15bf",
+  "sources": [
+    {
+      "path": "morsehgp3D_v12/src/catalogue/device_pipeline.hpp",
+      "sha256": "91c756a6b3c177c70d235d0a6f104ff9077ad56136bebb5ddd76907b92af94ac",
+      "identique_caf9585e4": true
+    },
+    {
+      "path": "morsehgp3D_v12/src/catalogue/device_driver.hpp",
+      "sha256": "d0cb88f1bd252a0766c454775c2166b510da54b7e3d77c6cfd509ecafd362fbb",
+      "identique_caf9585e4": true
+    },
+    {
+      "path": "morsehgp3D_v12/src/catalogue/device_cuda.cu",
+      "sha256": "c0e9db1178011940dc93db30b21656c39f91b2d495998a68c3edef1dfeb4b2df",
+      "identique_caf9585e4": true
+    },
+    {
+      "path": "morsehgp3D_v12/src/catalogue/exec_host.hpp",
+      "sha256": "e84a22ad4fbce26c067735cfb3086565ad955e7f2b5e7258a2b5f07ac63d5f13",
+      "identique_caf9585e4": true
+    },
+    {
+      "path": "morsehgp3D_v12/src/catalogue/traversal.hpp",
+      "sha256": "68cd6dba36f0d77df6e5064a09fd4d68d038e3e20b078ddaf4e3deb3be8627b7",
+      "identique_caf9585e4": true
+    },
+    {
+      "path": "morsehgp3D_v12/src/catalogue/slices.hpp",
+      "sha256": "f6d1ad7bd4c7b8717100efe0f13b84dfbe2424385754f93892f1b6665eba5c04",
+      "identique_caf9585e4": true
+    },
+    {
+      "path": "morsehgp3D_v12/tests/catalogue/device_support.hpp",
+      "sha256": "bdf181cd6e08216800e7ffe1e15ae671ee313edcce00ca87fc71e53cfda5bdcc",
+      "identique_caf9585e4": true
+    },
+    {
+      "path": "morsehgp3D_v12/tests/catalogue/device_budget_test.cpp",
+      "sha256": "ab8bcf3120cd3af42879b8af629e2a5802f04c7d0cb6c7a225630b85e03331a5",
+      "identique_caf9585e4": true
+    },
+    {
+      "path": "morsehgp3D_v12/tests/catalogue/device_pipeline_test.cpp",
+      "sha256": "25853982afc95fbcdec28914d5132d78ea715ceeeb1dec163d8d3f964e5426b0",
+      "identique_caf9585e4": true
+    },
+    {
+      "path": "morsehgp3D_v12/tests/catalogue/slices_test.cpp",
+      "sha256": "bbd15639b7b0e1bdd3b0d6268ccf910f556d02a1244e58dd7df90fe360d8786e",
+      "identique_caf9585e4": true
+    },
+    {
+      "path": "morsehgp3D_v12/tests/catalogue/tests.cmake",
+      "sha256": "70d5935ac424f504dc5fbddd65f4ccdfe15d0625718f5cf9906b92173cd4bbbc",
+      "identique_caf9585e4": false
+    },
+    {
+      "path": "morsehgp3D_v12/bench/full_probe.cpp",
+      "sha256": "1068940a06e386cb80a4802b3dd61e2df87eed69574f08c821c34dabb017179b",
+      "identique_caf9585e4": true
+    }
+  ],
+  "nature": "lecture source uniquement ; aucun moteur ni compilation par l’auditeur",
+  "nouveaux_resultats_natifs": false
+}

@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-8 octobre 2026, 16:12 UTC. Dernier FULL admis : R1 `47feedc96`, livraison `150392f99`.
+8 octobre 2026, 17:16 UTC. Dernier FULL admis : R1 `47feedc96`, livraison `150392f99`.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
 
@@ -33,16 +33,14 @@ finition déjà parallèle, feuille16 sans gain global face à24. Comparaison v1
 FULL exclut lecture, masque, validation, FUL1 et libération. Fenêtres recouvertes non additionnables ;
 `cpu_ns` n’est pas une latence CPU seule, `--sequentiel` conserve le catalogue GPU.
 
-**A6b livré `f2c106d93`, aucun gain encore admis.** [Pont et durée de vie](../receipts/audit_reponses_20261008/a6b_produit/README.md)
-relus favorablement sous préconditions écrivain unique/ancêtres stricts.
-[Portes v2](../receipts/audit_reponses_20261008/a6b_portes_v2/README.md) : attente/garde et83 programmes de préfixe ;
-appels directs, oracle séquentiel, sémaphores ajoutant HB, aucune qualification générale C++.
-[Clôture locale](../receipts/audit_reponses_20261008/a6b_cloture_locale/README.md) :753 Passed/1Skipped, deux mutants tués par code ;
-src/tour raccordés à Git, cinq écarts hors produit natif. Correction documentaire prête.
-Priorité G = toutes les tranches **réclamées**, pas terminées : les aides peuvent encore concurrencer G.
-[Borne N](../receipts/audit_reponses_20261008/a6_admission_n/README.md) applicable, non implantée : somme des W plus grands maxima par tâche.
-[Pilote](../receipts/audit_reponses_20261008/a6b_pilote_prelecture/README.md) : référence R1, IC haut agrégat grandes<0,95,
-chaque ng<1,01, A/A±1,5%. Aucun transfert des anciens résultats A6.
+**A6b livré `f2c106d93`, verdict indisponible.** [Reprise du 8 octobre](../receipts/audit_reponses_20261008/a6b_reprise_sans_resultats/README.md) :
+arrêt certifié, machine déjà arrêtée à 17:03 ; aucun reçu final, code worker ni résultat local à 17:08.
+Sources/protocole clos, **aucun nouveau chrono A6b**. Récupérer les primaires avant toute adoption/rejet.
+[Clôture locale](../receipts/audit_reponses_20261008/a6b_cloture_locale/README.md) : 753 Passed/1 Skipped, deux mutants tués par code ;
+src/tour raccordés à Git, cinq écarts hors produit natif. Pont release/acquire favorable sous préconditions ;
+portes ciblées, aucune qualification générale C++. Priorité G = tranches **réclamées**, pas terminées.
+[Borne N](../receipts/audit_reponses_20261008/a6_admission_n/README.md) non implantée : somme des W plus grands maxima par tâche.
+Règle inchangée : IC haut agrégat grandes<0,95, chaque ng<1,01, A/A±1,5% ; aucun transfert des anciens résultats A6.
 
 **[T1-d2 admis](../receipts/audit_reponses_20261008/session_t1d_admission/README.md)** : C GPU K5 **26,23/23,20/26,46 ms**,
 IC95 hauts1,0034/1,0063/1,0082, seuil1% C seul. Port strict intégré150392, attendu36 corrigé8b9eab.
@@ -57,19 +55,23 @@ K5 CPU/GPU25,003/7,856 ms ; K10 46,420/14,571 ms. Huit refus `wide_leaf` diffici
 W48 pénalise≤150 sites. [Deux campagnes cache](../receipts/audit_reponses_20261008/session_c3_apparies/README.md)
 refusées A/A : aucune absence d'effet conclue.
 
-**[Massifs L1t admis](../receipts/audit_reponses_20261008/session_b1t_admission/README.md)** :19 processus,23 FULL complètes,
-14 succès/5 refus ; huit chaudes uniques, aucune répétition statistique par scène. Source `caf9585e4` inclut R1 ;
-archives/sources/arrêt clos, même ELF initial aux deux commandes, **hash ELF final absent**.
-K5 GPU chaud : Boreas sans sol1,513M **7,185 s**, Marseille sans sol2,465M **8,095 s**, Meadow6,181M **29,621 s**.
-Nouveaux K10 GPU **froids** : Boreas1,513M **38,620 s**, Marseille2,465M **38,521 s**.
-Boreas K5 sous8 Gio : GPU8,201s chaud, CPU19,484s froid ; comparaison non appariée, FUL1 égaux.
-Plus grand succès K5 GPU : **Marseille brut6,709M en25,076s à froid**. Record [CPU L2](../receipts/audit_reponses_20261008/session_l2_admission/README.md)
-inchangé : **Paris brut14,552M en165,789s à froid**. TU Wien brut6,236M réussit en45,544s à froid.
-**TU Wien sans sol5,200M :32,856s à froid, puis refus mémoire en passe1** ; aucune chaude réussie.
-[CST-0243, diagnostic](../receipts/audit_reponses_20261008/b1t_tuwien_memoire/README.md) :79,99Gio CUDA gardés,8,012Gio libres au budget suivant ;
-stade inconnu, instrumentation proposée sous protocole distinct. NIBIO/Boreas50 refusent sans FULL.
-FUL1 demandé seulement jusqu’à1,6M ; aucune identité différentielle massive nouvelle au-delà.
-Pics de budget, capacités gardées et SMI échantillonné sont distincts. [Correction documentaire](../receipts/audit_reponses_20261008/session_b1t_admission/README.md#mémoire-et-correction-documentaire-proposée)
-prête : pas de plafond universel L1p à5M, ni de cause hôte déduite du seul SMI. B1/B2/B4 non tenus, B3 non évalué.
+**Massifs — record GPU actualisé.** [L2t admis](../receipts/audit_reponses_20261008/session_l2t_admission/README.md) :
+**Paris sans sol, 9 111 422 sites, FULL K5 en 46,453s à froid**, catalogue GPU/tour CPU W48, u21.
+Quatre cas : un succès, trois refus mémoire sans stade ni budget nommé ; aucun FUL1 ni chrono chaud.
+Source 8b9 identique à R1 ; archive/arrêt clos, ELF initial seul. Capacité GPU gardée après finition :109,3 Mo.
+Paris brut 14,552M et Lyon 24,017/32,413M refusent ; SMI ne prouve pas une cause hôte.
+Record [CPU L2](../receipts/audit_reponses_20261008/session_l2_admission/README.md) : **Paris brut 14,552M en 165,789s froid**.
+
+[L1t admis](../receipts/audit_reponses_20261008/session_b1t_admission/README.md) : K5 GPU chaud Boreas 1,513M **7,185s**,
+Marseille sans sol 2,465M **8,095s**, Meadow 6,181M **29,621s** ; une chaude par cas, aucune série statistique.
+K10 GPU **froid** : Boreas 1,513M **38,620s**, Marseille 2,465M **38,521s**. Marseille brut 6,709M K5 **25,076s froid**.
+Sous 8 Gio sur Boreas K5 : GPU 8,201s chaud, CPU 19,484s froid ; comparaison non appariée, FUL1 égaux.
+L1t : 19 processus/23 FULL, 14 succès/5 refus ; FUL1 seulement jusqu’à1,6M, hash ELF final absent.
+
+**CST-0243 ouvert** : TU Wien sans sol 5,200M réussit 32,856s à froid puis refuse la passe 1.
+[Diagnostic](../receipts/audit_reponses_20261008/b1t_tuwien_memoire/README.md) : 79,99Gio CUDA gardés, 8,012Gio de marge au budget suivant ;
+stade inconnu, instrumentation proposée sous protocole distinct. [Porte à qualifier](../receipts/audit_reponses_20261008/resident_reemploi_couverture/README.md) :
+trois succès immédiats après finition complète/front rendu, budget figé ; seuil Pool non transférable à CUDA.
+Les corrections documentaires L1t/L2t restent proposées : budgets, SMI et RSS distincts, aucun plafond universel en sites.
 
 Sources, métadonnées et vérifications Python uniquement ; aucun moteur lancé par l'auditeur.

@@ -1,0 +1,46 @@
+--- a/morsehgp3D_v12/receipts/g4_mesb2t_20261008/README.md
++++ b/morsehgp3D_v12/receipts/g4_mesb2t_20261008/README.md
+@@ -22,12 +22,12 @@
+ | --- | --- | ---: |
+ | `mes_b_l2` | ok, 1 calculée, 3 refus `memory_budget` | 217 s |
+
+-| Scène entière | sites | état | mur (froid) | s par million | appareil gardé / pic | hôte (budget, pic) |
++| Scène entière | sites | état | mur (froid) | s par million | appareil gardé / pic budgété ; pic SMI échantillonné | hôte (budget, pic) |
+ | --- | ---: | --- | ---: | ---: | --- | ---: |
+-| IGN Paris, sans sol | 9 111 422 | **ok** | **46,5 s** | 5,1 | 0,1 / 45,6 Gio (voie en flux) | 82,1 Gio |
+-| IGN Paris | 14 551 520 | refus `memory_budget` | — | — | — / 46,9 Gio | — |
+-| IGN Lyon, sans sol | 24 016 862 | refus `memory_budget` | — | — | — / 65,8 Gio | — |
+-| IGN Lyon | 32 412 887 | refus `memory_budget` | — | — | — / 71,1 Gio | — |
++| IGN Paris, sans sol | 9 111 422 | **ok** | **46,5 s** | 5,1 | 0,102 / 45,004 Gio ; SMI 45,581 Gio (voie en flux) | 82,1 Gio |
++| IGN Paris | 14 551 520 | refus `memory_budget` | — | — | non publié ; SMI 46,9 Gio | — |
++| IGN Lyon, sans sol | 24 016 862 | refus `memory_budget` | — | — | non publié ; SMI 65,8 Gio | — |
++| IGN Lyon | 32 412 887 | refus `memory_budget` | — | — | non publié ; SMI 71,1 Gio | — |
+
+ Étages de Paris sans sol, en secondes ([tableaux](resultats/cmd/000_mes_b_l2/files/b/tableaux_b.md)) :
+
+@@ -37,11 +37,10 @@
+
+ **Lecture.**
+
+-- **Gain sur Paris sans sol.** Le catalogue en flux sur l'appareil calcule la scène en 46,5 s, contre 112,9 s ce
+-  matin sur la voie CPU (×2,4). La queue après G (17,4 s) est le premier poste, objet de A6b.
++- **Comparaison descriptive sur Paris sans sol.** Le catalogue en flux sur l'appareil calcule la scène en 46,5 s, contre 112,9 s ce
++  matin sur la voie CPU (rapport ×2,4 ; sources et protocole différents, pas une mesure causale du seul T1-d). La queue après G (17,4 s) est le premier poste, objet de A6b.
+-- **Régression sur Paris entière.** Ce matin, la voie CPU (sonde séquentielle de l'époque) la calculait sous le même
++- **Différence de capacité sur Paris entière.** Ce matin, la voie CPU (sonde séquentielle de l'époque) la calculait sous le même
+-  budget de 160 Gio, en 165,8 s, avec un pic de l'hôte de 137,0 Gio. Ici, elle est refusée, avec un pic de
+-  l'appareil de 46,9 Gio seulement : c'est donc le budget de l'hôte qui refuse, plus tôt. Trois explications
++  budget de 160 Gio, en 165,8 s, avec un pic de l'hôte de 137,0 Gio. Ici, elle est refusée, avec un pic nvidia-smi échantillonné de 46,9 Gio : aucun compteur budgétaire ni stade de refus n'est publié. L'origine hôte ou appareil reste à établir. Trois explications
+   possibles :
+   - la Session recouverte, voie par défaut depuis `86d7e39d8`, admettrait plus que son pic ; c'est un constat de
+     l'agent du chantier C ;
+@@ -49,8 +48,7 @@
+   - les tableaux de la voie en flux s'ajoutent sur l'hôte.
+
+   Le diagnostic est confié au chantier C, avec le refus de seconde passe de la [session L1t](../g4_mesb1t_20261008/README.md).
+-- **Lyon** refuse comme ce matin sur la voie CPU (au-delà de 10 M de sites, refus toléré par B1). La limite du régime
+-  (b) est désormais la mémoire de l'hôte pendant la tour, pas la carte : 8 à 22 Ko par site à K5.
++- **Lyon** refuse comme ce matin sur la voie CPU (au-delà de 10 M de sites, refus toléré par B1). Ces refus ne localisent pas la ressource limitante. Le pic actif de l'hôte sur Paris sans sol réussi vaut 9 675 octets par site ; cela ne borne pas les besoins des scènes refusées.
+
+ Verdicts `MES-B` : B1 non tenu, B2 tenu (une scène jouée sous 10 M de sites), B3 et B4 non évalués.
+
