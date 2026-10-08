@@ -1,0 +1,22 @@
+--- a/bench/g4_catalogue_flux_judge.py
++++ b/bench/g4_catalogue_flux_judge.py
+@@ -272,6 +272,19 @@
+         out['refused'].append('mutant appareil sans preuve')
+         return
+     reference = m.get('reference') or {}
++    if not isinstance(reference, dict) or not all(is_hex(reference.get(f)) for f in
++            ('digest', 'niveaux_sha256', 'table_sha256')):
++        out['refused'].append('mutant appareil : reference incomplete')
++        return
++    if code == 0:
++        ds, fs = run.get('digests'), run.get('complets')
++        if not isinstance(ds, list) or not ds or not all(is_hex(d) for d in ds) or \
++                not isinstance(fs, list) or len(fs) != len(ds) or any(
++                    not isinstance(f, dict) or not is_hex(f.get('niveaux_sha256')) or
++                    not is_hex(f.get('table_sha256')) or not is_int(f.get('table_ecarts')) or
++                    not 0 <= f['table_ecarts'] < 2 ** 64 for f in fs):
++            out['refused'].append('mutant appareil : comparaison incomplete')
++            return
+     differs = code != 0 or any(d != reference.get('digest') for d in run.get('digests') or []) or any(
+         f.get('niveaux_sha256') != reference.get('niveaux_sha256') or f.get('table_sha256') !=
+         reference.get('table_sha256') for f in run.get('complets') or []) or not run.get('digests')

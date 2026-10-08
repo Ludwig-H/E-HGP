@@ -1,8 +1,12 @@
 # Audit Codex — état courant v12
 
-8 octobre 2026, base publiée **`bec107f7d`**.
+8 octobre 2026, reprise après coupure, base publiée **`8da450ab7`**.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
+
+**Reprise A : trois sources à récupérer.** Le [secours vérifié et son patch](../receipts/audit_reponses_20261008/reprise_sources/README.md)
+conservent le retrait de `open_session noexcept` et un test d'injection mémoire absents de la copie restaurée.
+Patch ciblant A/work ; test non enregistré ni qualifié. Les 1 199 sources sauvegardées ne remplacent pas les builds perdus.
 
 **Derniers temps G4 : FULL mesuré, 100 ms non tenu.** [Session K contre-jugée](../receipts/audit_reponses_20261008/session_k_full/README.md),
 u21, W48, trames ng00–02 de 39 885 / 35 551 / 45 845 sites :
@@ -46,10 +50,12 @@ GPU u24/u32, petits nuages et millions restent à qualifier ; aucun CPU K10 jou�
   Pool non réentrant, admission commune des coexistences, dépendances V/R et nouvelle enveloppe de temps à déclarer.
   [Protocole G](../receipts/audit_reponses_20261008/t2d_g_prelecture/README.md) : les deux bras sont désormais Gc ;
   séparer garde, index exact et changement déclaré de sauts.
-  [Premiers corps A](../receipts/audit_reponses_20261008/prelecture_t2d_corps/README.md) : `open_session noexcept`
-  peut terminer sur allocation ; numérotation doublée déjà corrigée, frontière `g_end` à préciser.
+  [Premiers corps A](../receipts/audit_reponses_20261008/prelecture_t2d_corps/README.md) : correction d'exception à récupérer
+  ci-dessus ; numérotation doublée déjà corrigée, frontière `g_end` à préciser.
   [Flux C](../receipts/audit_reponses_20261008/t2d_c_prelecture/README.md) : lecture favorable, 13 tests Pool relus ;
   staging demandé à 16 Mio, allocation anticipée et quatrième levier à distinguer. CUDA exécuté : non.
+  [Juge C : admission à renforcer](../receipts/audit_reponses_20261008/t2d_c_admission/README.md) : métadonnées
+  incompatibles admises ; mutant code 0 sans empreinte déclaré tué. Témoins rejoués après coupure et patch partiel fournis.
 - **CPU `0233/0234`** : [finition déjà parallèle et piste popcount](../receipts/audit_reponses_20261008/cpu_popcount/README.md).
   Feuilles = 45–48 % de C ; appels logiciels dans l'objet local, pas de preuve binaire K.
   Patch SWAR explicite depuis v11 proposé ; instructions puis gain CPU à qualifier.
@@ -57,9 +63,10 @@ GPU u24/u32, petits nuages et millions restent à qualifier ; aucun CPU K10 jou�
   pilote `c9ac60f20` présent dans K : GPU inconnu, incohérences et cohortes incomplètes admis.
   [Contre-lecteur strict](../receipts/audit_reponses_20261008/mes_full_contrelecture/README.md) :
   53 corruptions refusées, 38 processus/610 passes K admis ; verdict « non tenu ». Pilote produit encore à renforcer.
-- **MES-B en construction `0018`** : [blocages reproduits et patch](../receipts/audit_reponses_20261008/mes_b_prelecture/README.md) :
-  étiquette longue répétée → boucle ; refus K10 sans passe oublié → bilan tenu ; quatre corruptions JSON admises.
-  Correctifs Python vérifiés ; aucun lancement massif par cet audit. CPU/RSS et budgets séparés relus.
+- **MES-B livré `8da450ab7`, `0018`** : [blocages antérieurs](../receipts/audit_reponses_20261008/mes_b_prelecture/README.md)
+  corrigés dans les sources : étiquettes, refus K10 et lecture JSON. Tests finaux en contre-lecture.
+  B1 tolère désormais explicitement les refus K5 ≥10 M sites ; « tenu » ne signifie pas achèvement de toutes ces scènes.
+  CPU/RSS et budgets séparés ajoutés ; aucune nouvelle mesure massive acquise.
 - **R** : [classes à cellule unique](../receipts/audit_reponses_20261008/registre_classe_unique/README.md) :
   `q=d+1` autorise la copie des enfants sans recherche historique ni tri, mémoire temporaire réduite.
   Preuve et modèle ; sur les comptes ng00, au moins 78,81 % des requêtes K5 et 71,95 % K10 évitables.

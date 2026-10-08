@@ -1,0 +1,166 @@
+{
+  "causal_source_excerpts": {
+    "14eb_stage_values": {
+      "stage_values": "def stage_values(row):\n    \"\"\"Etapes d'une passe et leur somme ; None si une etape manque ou n'est pas un entier.\"\"\"\n    st = row.get('stages') or {}\n    if not all(is_int(st.get(k)) for keys in STAGES.values() for k in keys):\n        return None\n    parts = {name: sum(st[k] for k in keys) for name, keys in STAGES.items()}\n    return parts, sum(parts.values())"
+    },
+    "c8dd": {
+      "check_mutant": "def check_mutant(steps, out):\n    m = steps.get('mutant') or {}\n    if not m.get('applied') or not m.get('built'):\n        out['refused'].append('mutant appareil non juge')\n        return\n    run = m.get('run') or {}\n    code = run.get('code')\n    if code not in (0, 2, 3) or run.get('timeout'):\n        out['refused'].append('mutant appareil sans preuve')\n        return\n    reference = m.get('reference') or {}\n    differs = code != 0 or any(d != reference.get('digest') for d in run.get('digests') or []) or any(\n        f.get('niveaux_sha256') != reference.get('niveaux_sha256') or f.get('table_sha256') !=\n        reference.get('table_sha256') for f in run.get('complets') or []) or not run.get('digests')\n    out['stats']['mutant'] = 'tue' if differs else 'survivant'\n    if not differs:\n        out['rejected'].append('mutant appareil survivant (flux_sans_attente_appareil)')",
+      "run_complete": "def run_complete(run, passes, digests):\n    \"\"\"Sonde jouee en entier : passes attendues conformes, temps entiers ; si digests : une empreinte complete par\n    passe (MHGP12DP, niveaux, table sans ecart).\"\"\"\n    if not isinstance(run, dict) or run.get('unreadable', 1) != 0 or run.get('code') != 0:\n        return False\n    rows = run.get('passes') or []\n    if len(rows) != passes or any(r.get('status') != 'ok' or not is_int(r.get('wall_ns')) for r in rows):\n        return False\n    if digests:\n        full = run.get('complets') or []\n        if len(run.get('digests') or []) != passes or len(full) != passes:\n            return False\n        if not all(is_hex(d) for d in run['digests']) or any(\n                not isinstance(f, dict) or not is_hex(f.get('niveaux_sha256')) or not is_hex(f.get('table_sha256'))\n                or f.get('table_ecarts') != 0 for f in full):\n            return False\n    return True",
+      "stage_values": "def stage_values(row):\n    st = row.get('stages') or {}\n    parts = {name: sum(st.get(k, 0) for k in keys) for name, keys in STAGES.items()}\n    return parts, sum(parts.values())"
+    },
+    "pilot": {
+      "parse": "def parse(text):\n    \"\"\"Lignes d'une sonde du catalogue : passes (et leur ligne << sorties >>), empreintes, empreintes completes.\"\"\"\n    out = {'passes': [], 'digests': [], 'complets': [], 'open': None, 'exit': None, 'unreadable': 0}\n    if not text.isascii():\n        out['unreadable'] = 1\n        return out\n    for line in text.splitlines():\n        line = line.strip()\n        if not line:\n            continue\n        try:\n            obj = json.loads(line, object_pairs_hook=base.unique_object, parse_constant=base.reject_constant)\n        except (ValueError, RecursionError):\n            out['unreadable'] += 1\n            continue\n        phase = obj.get('phase') if isinstance(obj, dict) else None\n        if out['exit'] is not None or phase is None:\n            out['unreadable'] += 1\n        elif phase == 'catalogue':\n            out['passes'].append(obj)\n        elif phase == 'sorties' and out['passes'] and obj.get('pass') == out['passes'][-1].get('pass'):\n            out['passes'][-1]['sorties'] = obj\n        elif phase == 'digest':\n            out['digests'].append(obj.get('catalogue_sha256'))\n        elif phase == 'digest_complet':\n            out['complets'].append({k: obj.get(k) for k in ('niveaux_sha256', 'table_sha256', 'table_ecarts')})\n        elif phase in ('open', 'exit') and out[phase] is None:\n            out[phase] = obj\n        else:\n            out['unreadable'] += 1\n    for p in out['passes']:\n        diag, dev, sorties = p.get('diagnostics') or {}, p.get('device') or {}, p.get('sorties') or {}\n        p['stages'] = {k: diag.get(k) for k in STAGE_DIAG}\n        p['stages'].update(transfer_ns=dev.get('transfer_ns'), publish_ns=dev.get('publish_ns'),\n                           outputs_ns=sorties.get('outputs_ns', 0))\n    return out",
+      "probe_run": "def probe_run(s, name, probe, case, k, threads, extra, timeout=600):\n    stem = Path(s.data) / DATA[case]\n    r = s.run(name, [probe, str(stem) + '.u32le', str(stem) + '.ids.u32le', '--k=%d' % k, '--leaf=24',\n                     '--threads=%d' % threads] + extra, timeout)\n    out = parse(r['stdout'])\n    out.update(code=r['code'], timeout=r['timeout'], seconds=r['seconds'])\n    return out"
+    }
+  },
+  "result": {
+    "campaign_passes": 2100,
+    "campaign_processes": 210,
+    "gcp_used": false,
+    "native_executed": false,
+    "partial_fix_against_14eb": [
+      {
+        "case": "nominal_du_juge",
+        "first_refusal": null,
+        "mutant": "tue",
+        "refused_count": 0,
+        "rejected_count": 0,
+        "verdict": "adopte"
+      },
+      {
+        "case": "mutant_code0_sans_empreinte",
+        "first_refusal": "mutant appareil : comparaison incomplete",
+        "mutant": null,
+        "refused_count": 1,
+        "rejected_count": 0,
+        "verdict": "refuse"
+      }
+    ],
+    "patched_sha256": "0414e727d5ad9e932d426fc1345f18c26e41acc55228222d482d2b601ba0cccc",
+    "pins": {
+      "14eb": {
+        "bytes": 22903,
+        "file": "audit-t2dc-judge-new.py",
+        "sha256": "14eb9c8a15428fb7da0dc9f15daef49412caf72384360c4ec6697e562a687463"
+      },
+      "base": {
+        "bytes": 22097,
+        "file": "audit-t2dc-base-c477ffd8.py",
+        "sha256": "c477ffd80533a7e770ae382b9062ca1372699b6ea07a4db4178a4a934e7ae677"
+      },
+      "c8dd": {
+        "bytes": 22393,
+        "file": "audit-t2dc-judge-c8dd9bc9.py",
+        "sha256": "c8dd9bc9f236d7b292859b8fcb3c47c6685e125616025db07c8eaa3626286ff2"
+      },
+      "fixture": {
+        "bytes": 4010,
+        "file": "cpu_synthetic_stdout.jsonl",
+        "sha256": "3b6c4261acd93fff79018706d9bd2c9b91e4a1d5fdc519dcf392b1982c9b365e"
+      },
+      "pilot": {
+        "bytes": 24224,
+        "file": "audit-t2dc-pilot-cdde6f84.py",
+        "sha256": "cdde6f84ff260bcf3717ab2c599588d80e8b0d407e1833e474b3f05c1a830199"
+      }
+    },
+    "pure_judge": {
+      "14eb": [
+        {
+          "case": "nominal_du_juge",
+          "first_refusal": null,
+          "mutant": "tue",
+          "refused_count": 0,
+          "rejected_count": 0,
+          "verdict": "adopte"
+        },
+        {
+          "case": "toutes_etapes_absentes",
+          "first_refusal": "etapes illisibles : tour 0 ng00 avant",
+          "mutant": "tue",
+          "refused_count": 231,
+          "rejected_count": 0,
+          "verdict": "refuse"
+        },
+        {
+          "case": "voie_et_metadonnees_incompatibles",
+          "first_refusal": null,
+          "mutant": "tue",
+          "refused_count": 0,
+          "rejected_count": 0,
+          "verdict": "adopte"
+        },
+        {
+          "case": "mutant_code0_sans_empreinte",
+          "first_refusal": null,
+          "mutant": "tue",
+          "refused_count": 0,
+          "rejected_count": 0,
+          "verdict": "adopte"
+        }
+      ],
+      "c8dd": [
+        {
+          "case": "nominal_du_juge",
+          "first_refusal": null,
+          "mutant": "tue",
+          "refused_count": 0,
+          "rejected_count": 0,
+          "verdict": "adopte"
+        },
+        {
+          "case": "toutes_etapes_absentes",
+          "first_refusal": null,
+          "mutant": "tue",
+          "refused_count": 0,
+          "rejected_count": 0,
+          "verdict": "adopte"
+        },
+        {
+          "case": "voie_et_metadonnees_incompatibles",
+          "first_refusal": null,
+          "mutant": "tue",
+          "refused_count": 0,
+          "rejected_count": 0,
+          "verdict": "adopte"
+        },
+        {
+          "case": "mutant_code0_sans_empreinte",
+          "first_refusal": null,
+          "mutant": "tue",
+          "refused_count": 0,
+          "rejected_count": 0,
+          "verdict": "adopte"
+        }
+      ]
+    },
+    "upstream": {
+      "cpu_fixture_as_device": {
+        "actual_paths": [
+          "cpu"
+        ],
+        "actual_threads": [
+          1
+        ],
+        "passes": 3,
+        "requested_path": "device",
+        "requested_threads": 48,
+        "run_complete": true,
+        "unreadable": 0
+      },
+      "empty_stdout": {
+        "code": 0,
+        "complets": [],
+        "digests": [],
+        "judge": {
+          "refused": [],
+          "rejected": [],
+          "stats": {
+            "mutant": "tue"
+          }
+        },
+        "unreadable": 0
+      }
+    }
+  }
+}

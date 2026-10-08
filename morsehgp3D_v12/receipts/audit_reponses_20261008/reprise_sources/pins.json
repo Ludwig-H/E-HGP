@@ -1,0 +1,78 @@
+{
+  "utc": "2026-10-08T04:33:41.712874+00:00",
+  "auditor_worktree_base": "8da450ab751017a77928cb5c33e284b0fd0371e8",
+  "prototype_base": "8dc5d6b1697393616d89d651871d18083f1f1eb7",
+  "source_labels": {
+    "restored": "A/work",
+    "archived": "sources_t2d.tar.gz:A/morsehgp3D_v12"
+  },
+  "archive": {
+    "name": "sources_t2d.tar.gz",
+    "bytes": 3471291,
+    "sha256": "bedaf467e2d62736820510c83653293da43f6d5af997d27bd02f460cc635e517"
+  },
+  "manifest": {
+    "name": "manifest.json",
+    "utc": "2026-10-08T04:08:29.922422+00:00",
+    "bytes": 169581,
+    "sha256": "e43ce573213287b6b883c33d510e074881143d39e18dc258b100d9e5120ea4c3"
+  },
+  "archive_verification": {
+    "files": 1199,
+    "A": 402,
+    "B": 396,
+    "C": 401,
+    "all_sizes_and_hashes": true,
+    "unique_regular_relative_members": true,
+    "missing_or_extra": 0,
+    "stable_before_after": true
+  },
+  "sources": [
+    {
+      "path": "morsehgp3D_v12/src/tower/pipeline.cpp",
+      "restored": {
+        "bytes": 10687,
+        "sha256": "6291a100374d3c7fb6ef1456c8e8b13a794e359f6062f87ec69d45db2a3f78e6"
+      },
+      "archived": {
+        "bytes": 10723,
+        "sha256": "44e83374113a860519744f4a34dab854e32e50d50febc0e0f905a8aa7f8e437b"
+      }
+    },
+    {
+      "path": "morsehgp3D_v12/src/tower/pipeline.hpp",
+      "restored": {
+        "bytes": 8858,
+        "sha256": "bf379d8d8a8e01c756d33769d6ec642a59cd63ee1ca85f24ae700a76ae3357fb"
+      },
+      "archived": {
+        "bytes": 9177,
+        "sha256": "6b279ea85988b2a014a136e9642e300dfc67cdb185abaf70a58e17496892e82d"
+      }
+    },
+    {
+      "path": "morsehgp3D_v12/tests/tower/pipeline_fault.cpp",
+      "restored": null,
+      "archived": {
+        "bytes": 7838,
+        "sha256": "c92e6dbeb1dff67f8aca2dedc6b834c4189de1f899288768b98c9318d960aca5"
+      }
+    }
+  ],
+  "cmake_registration": {
+    "path": "morsehgp3D_v12/tests/tower/tests.cmake",
+    "bytes": 13313,
+    "sha256": "af1ba26245fa77d17e6bf10b9bb69989812dd8efd03bfad52191ea65cd391be8",
+    "restored_equals_archive": true,
+    "pipeline_fault_registered": false
+  },
+  "checks": {
+    "git_apply_check": true,
+    "git_apply_only_in_temporary_copy": true,
+    "all_three_outputs_equal_archived_bytes": true,
+    "reverse_check": true,
+    "live_sources_stable_before_after": true,
+    "developer_sources_modified": false,
+    "native_build_or_test": false
+  }
+}
