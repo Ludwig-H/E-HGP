@@ -1,0 +1,136 @@
+{
+ "appareil": true,
+ "bibliotheque": "190539c8180184f673f580d6ca92414a8c1ed37c3e0947e3fc35c4a1a3f32ce7",
+ "binaires": {
+  "mes_g_app": "c19a3fdbe35b9b4ab45cf3db53ae0e6cf36cbbf7f248953438423cd6133d8bad",
+  "mes_g_app_mutant": "24b559d04b07d2bb3ebf594da584f597e911c29d9484a02cef6c285588e2afdb"
+ },
+ "bits": "21",
+ "commandes": [
+  {
+   "argv": [
+    "/usr/local/cuda/bin/nvcc",
+    "-std=c++20",
+    "-O3",
+    "-arch=sm_120",
+    "-fmad=false",
+    "-Werror=all-warnings",
+    "-Xcompiler=-Wall,-Wextra,-Werror",
+    "-Xptxas=-v",
+    "-I$HOME/ehgp-v12/ehgp-v12.KLE3HbeDVO/src/morsehgp3D_v12/microbancs/mes_g_appareil",
+    "-c",
+    "$HOME/ehgp-v12/ehgp-v12.KLE3HbeDVO/src/morsehgp3D_v12/microbancs/mes_g_appareil/appareil.cu",
+    "-o",
+    "$HOME/ehgp-v12/ehgp-v12.KLE3HbeDVO/build/g_app/mes_g_app_appareil.o"
+   ],
+   "code": 0,
+   "nom": "mes_g_app_nvcc",
+   "stderr": "ptxas info    : 0 bytes gmem\nptxas info    : Compiling entry function '_ZN4mesg44_GLOBAL__N__102ac067_11_appareil_cu_2418e78918noyau_propositionsENS_19DonneesPropositionsEPKjS3_S3_PNS_11PropositionE' for 'sm_120'\nptxas info    : Function properties for _ZN4mesg44_GLOBAL__N__102ac067_11_appareil_cu_2418e78918noyau_propositionsENS_19DonneesPropositionsEPKjS3_S3_PNS_11PropositionE\n    608 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 72 registers, used 0 barriers, 608 bytes cumulative stack size\nptxas info    : Compile time = 227.339 ms\nptxas info    : Function properties for _ZN4mesg8DWelzlHD3mtfEi\n    288 bytes stack frame, 184 bytes spill stores, 184 bytes spill loads\nptxas info    : Function properties for _ZN4mesg8DWelzlHD5smallEPKiiPii\n    280 bytes stack frame, 172 bytes spill stores, 172 bytes spill loads\nptxas info    : Compiling entry function '_ZN4mesg44_GLOBAL__N__102ac067_11_appareil_cu_2418e78912noyau_sondesENS0_13OrdreAppareilENS_16DonneesCatalogueE' for 'sm_120'\nptxas info    : Function properties for _ZN4mesg44_GLOBAL__N__102ac067_11_appareil_cu_2418e78912noyau_sondesENS0_13OrdreAppareilENS_16DonneesCatalogueE\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 42 registers, used 0 barriers\nptxas info    : Compile time = 23.934 ms\nptxas info    : Compiling entry function '_ZN4mesg44_GLOBAL__N__102ac067_11_appareil_cu_2418e78912noyau_censusENS_13DonneesCensusEPNS_8ResultatEPj' for 'sm_120'\nptxas info    : Function properties for _ZN4mesg44_GLOBAL__N__102ac067_11_appareil_cu_2418e78912noyau_censusENS_13DonneesCensusEPNS_8ResultatEPj\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 96 registers, used 0 barriers\nptxas info    : Compile time = 46.874 ms\n"
+  },
+  {
+   "argv": [
+    "/usr/bin/g++",
+    "-DMESG_APPAREIL",
+    "-I/usr/local/cuda-12.9/include",
+    "-std=c++20",
+    "-O3",
+    "-DNDEBUG",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-DMHGP12_COORD_BITS=21",
+    "-I$HOME/ehgp-v12/ehgp-v12.KLE3HbeDVO/src/morsehgp3D_v12/src",
+    "-I$HOME/ehgp-v12/ehgp-v12.KLE3HbeDVO/src/morsehgp3D_v12/microbancs/mes_g_appareil",
+    "$HOME/ehgp-v12/ehgp-v12.KLE3HbeDVO/src/morsehgp3D_v12/microbancs/mes_g_appareil/mes_g_app.cpp",
+    "$HOME/ehgp-v12/ehgp-v12.KLE3HbeDVO/build/g_app/mes_g_app_appareil.o",
+    "$HOME/ehgp-v12/ehgp-v12.KLE3HbeDVO/build/libmhgp12.a",
+    "-lpthread",
+    "-Wl,--wrap=_ZN6mhgp1215CensusWorkspace5queryERKNS_11GlobalIndexERKNS_3num13CertifiedBallEjSt4spanIKNS_7SiteIdxELm18446744073709551615EEPvPFNS_7OutcomeESC_RKNS_14BorrowedCensusEE",
+    "-L/usr/local/cuda-12.9/lib64",
+    "-lcudart",
+    "-Wl,-rpath,/usr/local/cuda-12.9/lib64",
+    "-o",
+    "$HOME/ehgp-v12/ehgp-v12.KLE3HbeDVO/build/g_app/mes_g_app"
+   ],
+   "code": 0,
+   "nom": "mes_g_app_lien",
+   "stderr": ""
+  },
+  {
+   "argv": [
+    "/usr/local/cuda/bin/nvcc",
+    "-std=c++20",
+    "-O3",
+    "-arch=sm_120",
+    "-fmad=false",
+    "-Werror=all-warnings",
+    "-Xcompiler=-Wall,-Wextra,-Werror",
+    "-Xptxas=-v",
+    "-I$HOME/ehgp-v12/ehgp-v12.KLE3HbeDVO/src/morsehgp3D_v12/microbancs/mes_g_appareil",
+    "-DMESG_MUTANT_COTE_NUL",
+    "-c",
+    "$HOME/ehgp-v12/ehgp-v12.KLE3HbeDVO/src/morsehgp3D_v12/microbancs/mes_g_appareil/appareil.cu",
+    "-o",
+    "$HOME/ehgp-v12/ehgp-v12.KLE3HbeDVO/build/g_app/mes_g_app_mutant_appareil.o"
+   ],
+   "code": 0,
+   "nom": "mes_g_app_mutant_nvcc",
+   "stderr": "ptxas info    : 0 bytes gmem\nptxas info    : Compiling entry function '_ZN4mesg44_GLOBAL__N__102ac067_11_appareil_cu_2418e78918noyau_propositionsENS_19DonneesPropositionsEPKjS3_S3_PNS_11PropositionE' for 'sm_120'\nptxas info    : Function properties for _ZN4mesg44_GLOBAL__N__102ac067_11_appareil_cu_2418e78918noyau_propositionsENS_19DonneesPropositionsEPKjS3_S3_PNS_11PropositionE\n    608 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 72 registers, used 0 barriers, 608 bytes cumulative stack size\nptxas info    : Compile time = 164.519 ms\nptxas info    : Function properties for _ZN4mesg8DWelzlHD3mtfEi\n    288 bytes stack frame, 184 bytes spill stores, 184 bytes spill loads\nptxas info    : Function properties for _ZN4mesg8DWelzlHD5smallEPKiiPii\n    280 bytes stack frame, 172 bytes spill stores, 172 bytes spill loads\nptxas info    : Compiling entry function '_ZN4mesg44_GLOBAL__N__102ac067_11_appareil_cu_2418e78912noyau_sondesENS0_13OrdreAppareilENS_16DonneesCatalogueE' for 'sm_120'\nptxas info    : Function properties for _ZN4mesg44_GLOBAL__N__102ac067_11_appareil_cu_2418e78912noyau_sondesENS0_13OrdreAppareilENS_16DonneesCatalogueE\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 42 registers, used 0 barriers\nptxas info    : Compile time = 23.217 ms\nptxas info    : Compiling entry function '_ZN4mesg44_GLOBAL__N__102ac067_11_appareil_cu_2418e78912noyau_censusENS_13DonneesCensusEPNS_8ResultatEPj' for 'sm_120'\nptxas info    : Function properties for _ZN4mesg44_GLOBAL__N__102ac067_11_appareil_cu_2418e78912noyau_censusENS_13DonneesCensusEPNS_8ResultatEPj\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 96 registers, used 0 barriers\nptxas info    : Compile time = 45.383 ms\n"
+  },
+  {
+   "argv": [
+    "/usr/bin/g++",
+    "-DMESG_MUTANT_COTE_NUL",
+    "-DMESG_APPAREIL",
+    "-I/usr/local/cuda-12.9/include",
+    "-std=c++20",
+    "-O3",
+    "-DNDEBUG",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-DMHGP12_COORD_BITS=21",
+    "-I$HOME/ehgp-v12/ehgp-v12.KLE3HbeDVO/src/morsehgp3D_v12/src",
+    "-I$HOME/ehgp-v12/ehgp-v12.KLE3HbeDVO/src/morsehgp3D_v12/microbancs/mes_g_appareil",
+    "$HOME/ehgp-v12/ehgp-v12.KLE3HbeDVO/src/morsehgp3D_v12/microbancs/mes_g_appareil/mes_g_app.cpp",
+    "$HOME/ehgp-v12/ehgp-v12.KLE3HbeDVO/build/g_app/mes_g_app_mutant_appareil.o",
+    "$HOME/ehgp-v12/ehgp-v12.KLE3HbeDVO/build/libmhgp12.a",
+    "-lpthread",
+    "-Wl,--wrap=_ZN6mhgp1215CensusWorkspace5queryERKNS_11GlobalIndexERKNS_3num13CertifiedBallEjSt4spanIKNS_7SiteIdxELm18446744073709551615EEPvPFNS_7OutcomeESC_RKNS_14BorrowedCensusEE",
+    "-L/usr/local/cuda-12.9/lib64",
+    "-lcudart",
+    "-Wl,-rpath,/usr/local/cuda-12.9/lib64",
+    "-o",
+    "$HOME/ehgp-v12/ehgp-v12.KLE3HbeDVO/build/g_app/mes_g_app_mutant"
+   ],
+   "code": 0,
+   "nom": "mes_g_app_mutant_lien",
+   "stderr": ""
+  }
+ ],
+ "date_utc": "2026-10-08T10:41:59Z",
+ "gxx": [
+  "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0"
+ ],
+ "nvcc": [
+  "Cuda compilation tools, release 12.9, V12.9.41",
+  "Build cuda_12.9.r12.9/compiler.35813241_0"
+ ],
+ "portees": {
+  "src/index/census_workspace.cpp": "bee79fd409488e710660aa788e83001bb68cd918c0f6852187cf0fe868f58fb4",
+  "src/num/guard.cpp": "5a5fc29b65e21b1b74f642986614eb1fb0801cc084ae7ec50bc3aedc7e5655fc",
+  "src/tower/passes.cpp": "d1f850445a0970628691e0812d1c8c630a0e19294c9b862d6bddef8ffc865ef1",
+  "src/tower/populations.cpp": "0c002ae82ff48a0640a4e856632cc2fed665d6218c6567e3400b47bc4bcfdef6",
+  "src/tower/proposal.hpp": "92495aa67223577c8acef74967f89853c0dab3c5881afe1fb2c7826327f28c18",
+  "src/tower/resolve.cpp": "3d2bd04e02e60b6bab1d27b77a488112f80791f69395805273f539c6773dc1af"
+ },
+ "sources": {
+  "appareil.cu": "095934568fcbe7f33aefe254a5502c3f4ed84591f91cf3679aa0f2cb7582b59b",
+  "appareil.hpp": "118e76928f405724060d3a9b4fbb01e8412d3e740d1c96ad5d3c3e78b908d64e",
+  "mes_g_app.cpp": "cbef723c272828047aa385096c132d7558e4f315bc4f60f9c38f92fe3b99b01d",
+  "noyau_g.hpp": "c5c45d590ebf1cec405b5cec10e637260de20baf440ba1a76e7a05faa3d04266",
+  "pilote_g_appareil.py": "291c7f3a8d9e5cc0f11258a194602a5fa7e75f5967143696018aed2b8a39b160"
+ }
+}

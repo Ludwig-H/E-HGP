@@ -1,0 +1,293 @@
+{
+ "construction": {
+  "appareil": true,
+  "bibliotheque": "190539c8180184f673f580d6ca92414a8c1ed37c3e0947e3fc35c4a1a3f32ce7",
+  "binaires": {
+   "mes_g_app": "c19a3fdbe35b9b4ab45cf3db53ae0e6cf36cbbf7f248953438423cd6133d8bad",
+   "mes_g_app_mutant": "24b559d04b07d2bb3ebf594da584f597e911c29d9484a02cef6c285588e2afdb"
+  },
+  "bits": "21",
+  "gxx": [
+   "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0"
+  ],
+  "nvcc": [
+   "Cuda compilation tools, release 12.9, V12.9.41",
+   "Build cuda_12.9.r12.9/compiler.35813241_0"
+  ],
+  "portees": {
+   "src/index/census_workspace.cpp": "bee79fd409488e710660aa788e83001bb68cd918c0f6852187cf0fe868f58fb4",
+   "src/num/guard.cpp": "5a5fc29b65e21b1b74f642986614eb1fb0801cc084ae7ec50bc3aedc7e5655fc",
+   "src/tower/passes.cpp": "d1f850445a0970628691e0812d1c8c630a0e19294c9b862d6bddef8ffc865ef1",
+   "src/tower/populations.cpp": "0c002ae82ff48a0640a4e856632cc2fed665d6218c6567e3400b47bc4bcfdef6",
+   "src/tower/proposal.hpp": "92495aa67223577c8acef74967f89853c0dab3c5881afe1fb2c7826327f28c18",
+   "src/tower/resolve.cpp": "3d2bd04e02e60b6bab1d27b77a488112f80791f69395805273f539c6773dc1af"
+  },
+  "sources": {
+   "appareil.cu": "095934568fcbe7f33aefe254a5502c3f4ed84591f91cf3679aa0f2cb7582b59b",
+   "appareil.hpp": "118e76928f405724060d3a9b4fbb01e8412d3e740d1c96ad5d3c3e78b908d64e",
+   "mes_g_app.cpp": "cbef723c272828047aa385096c132d7558e4f315bc4f60f9c38f92fe3b99b01d",
+   "noyau_g.hpp": "c5c45d590ebf1cec405b5cec10e637260de20baf440ba1a76e7a05faa3d04266",
+   "pilote_g_appareil.py": "291c7f3a8d9e5cc0f11258a194602a5fa7e75f5967143696018aed2b8a39b160"
+  }
+ },
+ "date_utc": "2026-10-08T10:42:41Z",
+ "fenetre_aa": [
+  0.9,
+  1.1
+ ],
+ "fils": 48,
+ "graine": 20261008,
+ "refus": [],
+ "regle": "REGLE_G_APPAREIL",
+ "rejets": [
+  "ng00 : propositions, borne haute 0.7619 au-dessus du seuil 0.50",
+  "mediane : propositions, borne haute 0.7397 au-dessus du seuil 0.50",
+  "max : propositions, borne haute 0.7386 au-dessus du seuil 0.50"
+ ],
+ "seuils": {
+  "census": 0.2,
+  "propositions": 0.5,
+  "sondes": 0.2
+ },
+ "tirages": 10000,
+ "trames": {
+  "max": {
+   "informations": {
+    "appareil": {
+     "bus_bits": 512,
+     "cc": "12.0",
+     "census_h2d_ms": 3.744,
+     "census_h2d_octets": 95914412,
+     "execution": 12090,
+     "horloge_khz": 2430000,
+     "horloge_memoire_khz": 12481000,
+     "l2": 134217728,
+     "memoire": 101973819392,
+     "nom": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+     "phase": "appareil",
+     "pilote": 13000,
+     "propositions_h2d_ms": 2.221,
+     "propositions_h2d_octets": 59546424,
+     "sm": 188,
+     "sondes_h2d_ms": 11.975,
+     "sondes_h2d_octets": 317992556
+    },
+    "census_hd_sur_produit": 0.5847111063961004,
+    "distinctes": 462107,
+    "non_resolues": 0,
+    "parties": 2481101,
+    "propositions_hd_sur_produit": 0.9798588476933888,
+    "representants": 9998189,
+    "requetes": 646621,
+    "sites": 99099,
+    "transferts": {
+     "census_d2h_ms": 7.208,
+     "census_d2h_octets": 230197076,
+     "phase": "transferts",
+     "propositions_d2h_ms": 5.105,
+     "propositions_d2h_octets": 138941656,
+     "sondes_d2h_ms": 1.726,
+     "sondes_d2h_octets": 39992756
+    }
+   },
+   "mesures": {
+    "census": {
+     "aa_app": 0.9931886976806498,
+     "aa_hote": 0.9979351460507473,
+     "ic95": [
+      0.08985486061357323,
+      0.09275023478942747
+     ],
+     "rapport": 0.09132671662022193,
+     "seuil": 0.2,
+     "t_app_ms": 1.9175,
+     "t_hote_ms": 20.9761
+    },
+    "propositions": {
+     "aa_app": 0.9991883213107663,
+     "aa_hote": 0.9967641564107765,
+     "ic95": [
+      0.7368065927066695,
+      0.7386398395353997
+     ],
+     "rapport": 0.7377136111138343,
+     "seuil": 0.5,
+     "t_app_ms": 5.4947,
+     "t_hote_ms": 7.4507
+    },
+    "sondes": {
+     "aa_app": 0.9995254874158104,
+     "aa_hote": 0.9897679655035885,
+     "ic95": [
+      0.04610709799744155,
+      0.046543222238345824
+     ],
+     "rapport": 0.046324646883274916,
+     "seuil": 0.2,
+     "t_app_ms": 0.7627,
+     "t_hote_ms": 16.4895
+    }
+   },
+   "processus": 5
+  },
+  "mediane": {
+   "informations": {
+    "appareil": {
+     "bus_bits": 512,
+     "cc": "12.0",
+     "census_h2d_ms": 1.742,
+     "census_h2d_octets": 43630488,
+     "execution": 12090,
+     "horloge_khz": 2430000,
+     "horloge_memoire_khz": 12481000,
+     "l2": 134217728,
+     "memoire": 101973819392,
+     "nom": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+     "phase": "appareil",
+     "pilote": 13000,
+     "propositions_h2d_ms": 1.091,
+     "propositions_h2d_octets": 30086424,
+     "sm": 188,
+     "sondes_h2d_ms": 6.804,
+     "sondes_h2d_octets": 179834980
+    },
+    "census_hd_sur_produit": 0.5814759506877938,
+    "distinctes": 211461,
+    "non_resolues": 0,
+    "parties": 1253601,
+    "propositions_hd_sur_produit": 0.9743610953163344,
+    "representants": 5477969,
+    "requetes": 290357,
+    "sites": 64740,
+    "transferts": {
+     "census_d2h_ms": 3.691,
+     "census_d2h_octets": 103367092,
+     "phase": "transferts",
+     "propositions_d2h_ms": 2.726,
+     "propositions_d2h_octets": 70201656,
+     "sondes_d2h_ms": 0.987,
+     "sondes_d2h_octets": 21911876
+    }
+   },
+   "mesures": {
+    "census": {
+     "aa_app": 0.9991454384903016,
+     "aa_hote": 0.9975200003512649,
+     "ic95": [
+      0.1051478749973664,
+      0.10602551757914117
+     ],
+     "rapport": 0.10557857102264004,
+     "seuil": 0.2,
+     "t_app_ms": 0.9231,
+     "t_hote_ms": 8.7407
+    },
+    "propositions": {
+     "aa_app": 0.9969894767145755,
+     "aa_hote": 0.9940090606165245,
+     "ic95": [
+      0.7366563615764978,
+      0.7396639412969799
+     ],
+     "rapport": 0.737851981030296,
+     "seuil": 0.5,
+     "t_app_ms": 2.7309,
+     "t_hote_ms": 3.701
+    },
+    "sondes": {
+     "aa_app": 0.9974033763539052,
+     "aa_hote": 0.9879693986218183,
+     "ic95": [
+      0.05080344596691233,
+      0.05103712979982516
+     ],
+     "rapport": 0.05093172340253438,
+     "seuil": 0.2,
+     "t_app_ms": 0.4483,
+     "t_hote_ms": 8.7985
+    }
+   },
+   "processus": 5
+  },
+  "ng00": {
+   "informations": {
+    "appareil": {
+     "bus_bits": 512,
+     "cc": "12.0",
+     "census_h2d_ms": 2.338,
+     "census_h2d_octets": 37449428,
+     "execution": 12090,
+     "horloge_khz": 2430000,
+     "horloge_memoire_khz": 12481000,
+     "l2": 134217728,
+     "memoire": 101973819392,
+     "nom": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+     "phase": "appareil",
+     "pilote": 13000,
+     "propositions_h2d_ms": 0.748,
+     "propositions_h2d_octets": 20331000,
+     "sm": 188,
+     "sondes_h2d_ms": 4.279,
+     "sondes_h2d_octets": 110527396
+    },
+    "census_hd_sur_produit": 0.5698841259372346,
+    "distinctes": 177863,
+    "non_resolues": 0,
+    "parties": 847125,
+    "propositions_hd_sur_produit": 0.9746515168251138,
+    "representants": 3419932,
+    "requetes": 252152,
+    "sites": 39885,
+    "transferts": {
+     "census_d2h_ms": 3.019,
+     "census_d2h_octets": 89766112,
+     "phase": "transferts",
+     "propositions_d2h_ms": 1.838,
+     "propositions_d2h_octets": 47439000,
+     "sondes_d2h_ms": 0.647,
+     "sondes_d2h_octets": 13679728
+    }
+   },
+   "mesures": {
+    "census": {
+     "aa_app": 1.0031458965767888,
+     "aa_hote": 0.9978411765915297,
+     "ic95": [
+      0.10373610685657336,
+      0.11037572539673154
+     ],
+     "rapport": 0.10700443002103764,
+     "seuil": 0.2,
+     "t_app_ms": 0.8342,
+     "t_hote_ms": 7.8165
+    },
+    "propositions": {
+     "aa_app": 0.9983134346728805,
+     "aa_hote": 0.9928684463747964,
+     "ic95": [
+      0.7542027648769675,
+      0.7619271073889395
+     ],
+     "rapport": 0.7575530994752186,
+     "seuil": 0.5,
+     "t_app_ms": 1.8924,
+     "t_hote_ms": 2.4999
+    },
+    "sondes": {
+     "aa_app": 0.9966254518799142,
+     "aa_hote": 0.9796048990459775,
+     "ic95": [
+      0.0524461324823327,
+      0.052745183614104706
+     ],
+     "rapport": 0.052595445502726726,
+     "seuil": 0.2,
+     "t_app_ms": 0.2971,
+     "t_hote_ms": 5.6491
+    }
+   },
+   "processus": 5
+  }
+ },
+ "verdict": "rejete"
+}

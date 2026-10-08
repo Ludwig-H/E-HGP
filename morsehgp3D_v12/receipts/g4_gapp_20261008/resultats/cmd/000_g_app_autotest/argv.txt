@@ -1,0 +1,1 @@
+python3 $HOME/ehgp-v12/ehgp-v12.KLE3HbeDVO/src/morsehgp3D_v12/microbancs/mes_g_appareil/pilote_g_appareil.py auto-test 

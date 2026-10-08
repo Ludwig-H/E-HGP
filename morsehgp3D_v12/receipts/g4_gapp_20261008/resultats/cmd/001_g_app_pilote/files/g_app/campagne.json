@@ -1,0 +1,359 @@
+{
+ "appareil": true,
+ "debut_utc": "2026-10-08T10:42:07Z",
+ "empreintes_stables": true,
+ "fin_utc": "2026-10-08T10:42:41Z",
+ "isolation": [
+  {
+   "apres": "",
+   "avant": "",
+   "prise": "ng00_p0"
+  },
+  {
+   "apres": "",
+   "avant": "",
+   "prise": "mediane_p0"
+  },
+  {
+   "apres": "",
+   "avant": "",
+   "prise": "max_p0"
+  },
+  {
+   "apres": "",
+   "avant": "",
+   "prise": "ng00_p1"
+  },
+  {
+   "apres": "",
+   "avant": "",
+   "prise": "mediane_p1"
+  },
+  {
+   "apres": "",
+   "avant": "",
+   "prise": "max_p1"
+  },
+  {
+   "apres": "",
+   "avant": "",
+   "prise": "ng00_p2"
+  },
+  {
+   "apres": "",
+   "avant": "",
+   "prise": "mediane_p2"
+  },
+  {
+   "apres": "",
+   "avant": "",
+   "prise": "max_p2"
+  },
+  {
+   "apres": "",
+   "avant": "",
+   "prise": "ng00_p3"
+  },
+  {
+   "apres": "",
+   "avant": "",
+   "prise": "mediane_p3"
+  },
+  {
+   "apres": "",
+   "avant": "",
+   "prise": "max_p3"
+  },
+  {
+   "apres": "",
+   "avant": "",
+   "prise": "ng00_p4"
+  },
+  {
+   "apres": "",
+   "avant": "",
+   "prise": "mediane_p4"
+  },
+  {
+   "apres": "",
+   "avant": "",
+   "prise": "max_p4"
+  },
+  {
+   "apres": "",
+   "avant": "",
+   "prise": "mutant_cote_nul"
+  }
+ ],
+ "isolation_ok": true,
+ "mutant": {
+  "code": 1,
+  "identite": false,
+  "journal": "mutant_cote_nul.jsonl"
+ },
+ "passes": 5,
+ "processus": 5,
+ "trames": {
+  "max": [
+   {
+    "code": 0,
+    "journal": "max_p0.jsonl",
+    "journal_sha256": "dc451985f051273445326b4373463a67c65b770e432260a3e9355a8a4b88d5e8",
+    "lignes": [
+     "{\"phase\":\"recolte\",\"trame\":\"max\",\"sites\":99099,\"k\":5,\"fils\":48,\"g_ms\":151.982,\"requetes\":646621,\"distinctes\":462107,\"saturees\":470539,\"attendues\":646621,\"sites_testes\":13421517,\"noeuds\":37093201,\"voies\":{\"native\":646621,\"certifiee\":0,\"controlee\":0,\"large\":0},\"representants\":9998189,\"premieres_sondes_reussies\":7517088,\"boules\":3748751,\"noeuds_index\":40295,\"incidences\":17628379,\"niveaux\":2653048,\"octets_niveau\":64,\"octets_boule\":32,\"recolte_ok\":true}",
+     "{\"phase\":\"appareil\",\"nom\":\"NVIDIA RTX PRO 6000 Blackwell Server Edition\",\"sm\":188,\"cc\":\"12.0\",\"memoire\":101973819392,\"l2\":134217728,\"horloge_khz\":2430000,\"horloge_memoire_khz\":12481000,\"bus_bits\":512,\"pilote\":13000,\"execution\":12090,\"census_h2d_ms\":3.744,\"census_h2d_octets\":95914412,\"sondes_h2d_ms\":11.975,\"sondes_h2d_octets\":317992556,\"propositions_h2d_ms\":2.221,\"propositions_h2d_octets\":59546424}",
+     "{\"phase\":\"passe\",\"passe\":0,\"echauffement\":true,\"ok\":true,\"census\":{\"hote_ms\":[21.6787,20.9221],\"hote_hd_ms\":12.3240,\"appareil_ms\":[2.1145,1.8816]},\"sondes\":{\"hote_ms\":[16.4994,16.3690],\"appareil_ms\":[0.7772,0.7585]},\"propositions\":{\"hote_ms\":[7.4247,7.4159],\"hote_hd_ms\":7.3177,\"appareil_ms\":[5.5575,5.4863]}}",
+     "{\"phase\":\"passe\",\"passe\":1,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[20.9761,20.9140],\"hote_hd_ms\":12.3130,\"appareil_ms\":[1.8957,1.8780]},\"sondes\":{\"hote_ms\":[16.6027,16.3736],\"appareil_ms\":[0.7586,0.7688]},\"propositions\":{\"hote_ms\":[7.4732,7.4168],\"hote_hd_ms\":7.3193,\"appareil_ms\":[5.4947,5.5013]}}",
+     "{\"phase\":\"passe\",\"passe\":2,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[20.9071,20.9034],\"hote_hd_ms\":12.3664,\"appareil_ms\":[1.9422,1.9025]},\"sondes\":{\"hote_ms\":[16.3458,16.3302],\"appareil_ms\":[0.7707,0.7557]},\"propositions\":{\"hote_ms\":[7.4217,7.4112],\"hote_hd_ms\":7.2844,\"appareil_ms\":[5.4770,5.5276]}}",
+     "{\"phase\":\"passe\",\"passe\":3,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[21.0068,20.9235],\"hote_hd_ms\":12.3342,\"appareil_ms\":[1.8892,1.8882]},\"sondes\":{\"hote_ms\":[16.5497,16.3555],\"appareil_ms\":[0.7588,0.7567]},\"propositions\":{\"hote_ms\":[7.4507,7.4441],\"hote_hd_ms\":7.3175,\"appareil_ms\":[5.4907,5.5213]}}",
+     "{\"phase\":\"passe\",\"passe\":4,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[20.9199,20.9257],\"hote_hd_ms\":12.3287,\"appareil_ms\":[1.9175,1.9286]},\"sondes\":{\"hote_ms\":[16.3789,16.3727],\"appareil_ms\":[0.7697,0.7648]},\"propositions\":{\"hote_ms\":[7.4127,7.4203],\"hote_hd_ms\":7.2929,\"appareil_ms\":[5.5058,5.5008]}}",
+     "{\"phase\":\"passe\",\"passe\":5,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[20.9967,20.9463],\"hote_hd_ms\":12.3191,\"appareil_ms\":[1.9237,1.9250]},\"sondes\":{\"hote_ms\":[16.5041,16.3435],\"appareil_ms\":[0.7717,0.7558]},\"propositions\":{\"hote_ms\":[7.4588,7.4153],\"hote_hd_ms\":7.3069,\"appareil_ms\":[5.5090,5.4915]}}",
+     "{\"phase\":\"transferts\",\"census_d2h_ms\":7.208,\"census_d2h_octets\":230197076,\"sondes_d2h_ms\":1.726,\"sondes_d2h_octets\":39992756,\"propositions_d2h_ms\":5.105,\"propositions_d2h_octets\":138941656}",
+     "{\"phase\":\"identite\",\"census\":{\"requetes\":646621,\"non_resolues\":0,\"comparees_hote_hd\":646621,\"ecarts_hote_hd\":0,\"comparees_appareil\":646621,\"ecarts_appareil\":0,\"ecarts_lot_produit\":0,\"coquilles_larges\":0},\"sondes\":{\"comparees_appareil\":9998189,\"ecarts_appareil\":0,\"reussies_produit\":7517088,\"reussies_appareil\":7517088,\"premieres_sondes_reussies_g\":7517088,\"coherentes\":true},\"propositions\":{\"parties\":2481101,\"abouties\":2481101,\"ecarts_hote_hd\":0,\"ecarts_appareil\":0},\"appareil\":true,\"identite\":true}"
+    ]
+   },
+   {
+    "code": 0,
+    "journal": "max_p1.jsonl",
+    "journal_sha256": "cf7d8690fe04d33837f38e6ab8bc45e63d39e8a68608f70950852a4d80c2c5d8",
+    "lignes": [
+     "{\"phase\":\"recolte\",\"trame\":\"max\",\"sites\":99099,\"k\":5,\"fils\":48,\"g_ms\":156.902,\"requetes\":646621,\"distinctes\":462107,\"saturees\":470539,\"attendues\":646621,\"sites_testes\":13421517,\"noeuds\":37093201,\"voies\":{\"native\":646621,\"certifiee\":0,\"controlee\":0,\"large\":0},\"representants\":9998189,\"premieres_sondes_reussies\":7517088,\"boules\":3748751,\"noeuds_index\":40295,\"incidences\":17628379,\"niveaux\":2653048,\"octets_niveau\":64,\"octets_boule\":32,\"recolte_ok\":true}",
+     "{\"phase\":\"appareil\",\"nom\":\"NVIDIA RTX PRO 6000 Blackwell Server Edition\",\"sm\":188,\"cc\":\"12.0\",\"memoire\":101973819392,\"l2\":134217728,\"horloge_khz\":2430000,\"horloge_memoire_khz\":12481000,\"bus_bits\":512,\"pilote\":13000,\"execution\":12090,\"census_h2d_ms\":3.774,\"census_h2d_octets\":95914412,\"sondes_h2d_ms\":12.091,\"sondes_h2d_octets\":317992556,\"propositions_h2d_ms\":2.232,\"propositions_h2d_octets\":59546424}",
+     "{\"phase\":\"passe\",\"passe\":0,\"echauffement\":true,\"ok\":true,\"census\":{\"hote_ms\":[22.1976,20.7646],\"hote_hd_ms\":12.2820,\"appareil_ms\":[2.0616,1.8970]},\"sondes\":{\"hote_ms\":[16.6353,16.4970],\"appareil_ms\":[0.7743,0.7628]},\"propositions\":{\"hote_ms\":[7.4347,7.4462],\"hote_hd_ms\":7.3103,\"appareil_ms\":[5.5527,5.4967]}}",
+     "{\"phase\":\"passe\",\"passe\":1,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[20.8868,20.7657],\"hote_hd_ms\":12.2747,\"appareil_ms\":[1.9510,1.8554]},\"sondes\":{\"hote_ms\":[16.6965,16.4610],\"appareil_ms\":[0.7627,0.7628]},\"propositions\":{\"hote_ms\":[7.4625,7.4603],\"hote_hd_ms\":7.3247,\"appareil_ms\":[5.4968,5.4823]}}",
+     "{\"phase\":\"passe\",\"passe\":2,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[20.7324,20.7485],\"hote_hd_ms\":12.2822,\"appareil_ms\":[1.9698,1.9136]},\"sondes\":{\"hote_ms\":[16.5719,16.3777],\"appareil_ms\":[0.7658,0.7524]},\"propositions\":{\"hote_ms\":[7.4169,7.4385],\"hote_hd_ms\":7.2891,\"appareil_ms\":[5.5188,5.4620]}}",
+     "{\"phase\":\"passe\",\"passe\":3,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[20.7992,20.7579],\"hote_hd_ms\":12.2908,\"appareil_ms\":[1.9034,1.8676]},\"sondes\":{\"hote_ms\":[16.5839,16.3614],\"appareil_ms\":[0.7608,0.7588]},\"propositions\":{\"hote_ms\":[7.4447,7.4205],\"hote_hd_ms\":7.3092,\"appareil_ms\":[5.4905,5.4618]}}",
+     "{\"phase\":\"passe\",\"passe\":4,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[20.7322,20.7046],\"hote_hd_ms\":12.2717,\"appareil_ms\":[1.9361,1.9848]},\"sondes\":{\"hote_ms\":[16.3677,16.3616],\"appareil_ms\":[0.7593,0.7526]},\"propositions\":{\"hote_ms\":[7.4174,7.4059],\"hote_hd_ms\":7.2959,\"appareil_ms\":[5.4854,5.5007]}}",
+     "{\"phase\":\"passe\",\"passe\":5,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[20.8530,20.7620],\"hote_hd_ms\":12.2739,\"appareil_ms\":[1.9400,1.8961]},\"sondes\":{\"hote_ms\":[16.5553,16.3888],\"appareil_ms\":[0.7635,0.7688]},\"propositions\":{\"hote_ms\":[7.4518,7.4280],\"hote_hd_ms\":7.3079,\"appareil_ms\":[5.5121,5.5193]}}",
+     "{\"phase\":\"transferts\",\"census_d2h_ms\":7.286,\"census_d2h_octets\":230197076,\"sondes_d2h_ms\":1.608,\"sondes_d2h_octets\":39992756,\"propositions_d2h_ms\":4.863,\"propositions_d2h_octets\":138941656}",
+     "{\"phase\":\"identite\",\"census\":{\"requetes\":646621,\"non_resolues\":0,\"comparees_hote_hd\":646621,\"ecarts_hote_hd\":0,\"comparees_appareil\":646621,\"ecarts_appareil\":0,\"ecarts_lot_produit\":0,\"coquilles_larges\":0},\"sondes\":{\"comparees_appareil\":9998189,\"ecarts_appareil\":0,\"reussies_produit\":7517088,\"reussies_appareil\":7517088,\"premieres_sondes_reussies_g\":7517088,\"coherentes\":true},\"propositions\":{\"parties\":2481101,\"abouties\":2481101,\"ecarts_hote_hd\":0,\"ecarts_appareil\":0},\"appareil\":true,\"identite\":true}"
+    ]
+   },
+   {
+    "code": 0,
+    "journal": "max_p2.jsonl",
+    "journal_sha256": "d4e8f1e93467a87d73eb4ad23c3c692adfb6c753b7511688115e94c7847702ea",
+    "lignes": [
+     "{\"phase\":\"recolte\",\"trame\":\"max\",\"sites\":99099,\"k\":5,\"fils\":48,\"g_ms\":153.433,\"requetes\":646621,\"distinctes\":462107,\"saturees\":470539,\"attendues\":646621,\"sites_testes\":13421517,\"noeuds\":37093201,\"voies\":{\"native\":646621,\"certifiee\":0,\"controlee\":0,\"large\":0},\"representants\":9998189,\"premieres_sondes_reussies\":7517088,\"boules\":3748751,\"noeuds_index\":40295,\"incidences\":17628379,\"niveaux\":2653048,\"octets_niveau\":64,\"octets_boule\":32,\"recolte_ok\":true}",
+     "{\"phase\":\"appareil\",\"nom\":\"NVIDIA RTX PRO 6000 Blackwell Server Edition\",\"sm\":188,\"cc\":\"12.0\",\"memoire\":101973819392,\"l2\":134217728,\"horloge_khz\":2430000,\"horloge_memoire_khz\":12481000,\"bus_bits\":512,\"pilote\":13000,\"execution\":12090,\"census_h2d_ms\":3.735,\"census_h2d_octets\":95914412,\"sondes_h2d_ms\":11.996,\"sondes_h2d_octets\":317992556,\"propositions_h2d_ms\":2.184,\"propositions_h2d_octets\":59546424}",
+     "{\"phase\":\"passe\",\"passe\":0,\"echauffement\":true,\"ok\":true,\"census\":{\"hote_ms\":[22.3160,21.5204],\"hote_hd_ms\":12.3036,\"appareil_ms\":[2.0468,1.9057]},\"sondes\":{\"hote_ms\":[16.5628,16.4065],\"appareil_ms\":[0.7745,0.7669]},\"propositions\":{\"hote_ms\":[7.4271,7.4065],\"hote_hd_ms\":7.3126,\"appareil_ms\":[5.5097,5.5316]}}",
+     "{\"phase\":\"passe\",\"passe\":1,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[21.5379,21.5590],\"hote_hd_ms\":12.3114,\"appareil_ms\":[1.8866,1.8717]},\"sondes\":{\"hote_ms\":[16.5639,16.3299],\"appareil_ms\":[0.7588,0.7621]},\"propositions\":{\"hote_ms\":[7.4452,7.4026],\"hote_hd_ms\":7.3033,\"appareil_ms\":[5.4886,5.5070]}}",
+     "{\"phase\":\"passe\",\"passe\":2,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[21.5056,21.4981],\"hote_hd_ms\":12.3121,\"appareil_ms\":[1.8809,1.9749]},\"sondes\":{\"hote_ms\":[16.2926,16.2788],\"appareil_ms\":[0.7566,0.7648]},\"propositions\":{\"hote_ms\":[7.4020,7.4032],\"hote_hd_ms\":7.2957,\"appareil_ms\":[5.4915,5.4835]}}",
+     "{\"phase\":\"passe\",\"passe\":3,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[21.5843,21.5190],\"hote_hd_ms\":12.3135,\"appareil_ms\":[1.9098,1.9331]},\"sondes\":{\"hote_ms\":[16.4895,16.3002],\"appareil_ms\":[0.7608,0.7628]},\"propositions\":{\"hote_ms\":[7.4511,7.4363],\"hote_hd_ms\":7.2967,\"appareil_ms\":[5.4927,5.4887]}}",
+     "{\"phase\":\"passe\",\"passe\":4,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[21.5400,21.4952],\"hote_hd_ms\":12.3155,\"appareil_ms\":[1.9378,1.8756]},\"sondes\":{\"hote_ms\":[16.2892,16.3098],\"appareil_ms\":[0.7619,0.7628]},\"propositions\":{\"hote_ms\":[7.4127,7.4184],\"hote_hd_ms\":7.2928,\"appareil_ms\":[5.4751,5.5314]}}",
+     "{\"phase\":\"passe\",\"passe\":5,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[21.5756,21.5435],\"hote_hd_ms\":12.3160,\"appareil_ms\":[1.9382,1.9066]},\"sondes\":{\"hote_ms\":[16.5629,16.3554],\"appareil_ms\":[0.7659,0.7772]},\"propositions\":{\"hote_ms\":[7.4557,7.4040],\"hote_hd_ms\":7.3013,\"appareil_ms\":[5.5009,5.4802]}}",
+     "{\"phase\":\"transferts\",\"census_d2h_ms\":7.504,\"census_d2h_octets\":230197076,\"sondes_d2h_ms\":1.712,\"sondes_d2h_octets\":39992756,\"propositions_d2h_ms\":5.088,\"propositions_d2h_octets\":138941656}",
+     "{\"phase\":\"identite\",\"census\":{\"requetes\":646621,\"non_resolues\":0,\"comparees_hote_hd\":646621,\"ecarts_hote_hd\":0,\"comparees_appareil\":646621,\"ecarts_appareil\":0,\"ecarts_lot_produit\":0,\"coquilles_larges\":0},\"sondes\":{\"comparees_appareil\":9998189,\"ecarts_appareil\":0,\"reussies_produit\":7517088,\"reussies_appareil\":7517088,\"premieres_sondes_reussies_g\":7517088,\"coherentes\":true},\"propositions\":{\"parties\":2481101,\"abouties\":2481101,\"ecarts_hote_hd\":0,\"ecarts_appareil\":0},\"appareil\":true,\"identite\":true}"
+    ]
+   },
+   {
+    "code": 0,
+    "journal": "max_p3.jsonl",
+    "journal_sha256": "c68b2c66693d253eb5653c97a8ac8b8874c2b3b36ecb44fe7c83e21883ec0525",
+    "lignes": [
+     "{\"phase\":\"recolte\",\"trame\":\"max\",\"sites\":99099,\"k\":5,\"fils\":48,\"g_ms\":152.446,\"requetes\":646621,\"distinctes\":462107,\"saturees\":470539,\"attendues\":646621,\"sites_testes\":13421517,\"noeuds\":37093201,\"voies\":{\"native\":646621,\"certifiee\":0,\"controlee\":0,\"large\":0},\"representants\":9998189,\"premieres_sondes_reussies\":7517088,\"boules\":3748751,\"noeuds_index\":40295,\"incidences\":17628379,\"niveaux\":2653048,\"octets_niveau\":64,\"octets_boule\":32,\"recolte_ok\":true}",
+     "{\"phase\":\"appareil\",\"nom\":\"NVIDIA RTX PRO 6000 Blackwell Server Edition\",\"sm\":188,\"cc\":\"12.0\",\"memoire\":101973819392,\"l2\":134217728,\"horloge_khz\":2430000,\"horloge_memoire_khz\":12481000,\"bus_bits\":512,\"pilote\":13000,\"execution\":12090,\"census_h2d_ms\":3.718,\"census_h2d_octets\":95914412,\"sondes_h2d_ms\":12.009,\"sondes_h2d_octets\":317992556,\"propositions_h2d_ms\":2.200,\"propositions_h2d_octets\":59546424}",
+     "{\"phase\":\"passe\",\"passe\":0,\"echauffement\":true,\"ok\":true,\"census\":{\"hote_ms\":[21.8499,20.6732],\"hote_hd_ms\":12.2681,\"appareil_ms\":[2.0746,1.8903]},\"sondes\":{\"hote_ms\":[16.4481,16.2723],\"appareil_ms\":[0.7788,0.7628]},\"propositions\":{\"hote_ms\":[7.4178,7.4143],\"hote_hd_ms\":7.3094,\"appareil_ms\":[5.5588,5.4928]}}",
+     "{\"phase\":\"passe\",\"passe\":1,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[20.7508,20.7569],\"hote_hd_ms\":12.2899,\"appareil_ms\":[1.8969,1.8983]},\"sondes\":{\"hote_ms\":[16.5722,16.2613],\"appareil_ms\":[0.7688,0.7751]},\"propositions\":{\"hote_ms\":[7.4507,7.4151],\"hote_hd_ms\":7.2990,\"appareil_ms\":[5.5070,5.4988]}}",
+     "{\"phase\":\"passe\",\"passe\":2,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[20.6539,20.6560],\"hote_hd_ms\":12.2688,\"appareil_ms\":[1.8988,1.9023]},\"sondes\":{\"hote_ms\":[16.2656,16.2436],\"appareil_ms\":[0.7606,0.7547]},\"propositions\":{\"hote_ms\":[7.3961,7.4063],\"hote_hd_ms\":7.2915,\"appareil_ms\":[5.5088,5.5008]}}",
+     "{\"phase\":\"passe\",\"passe\":3,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[20.8029,20.7339],\"hote_hd_ms\":12.2747,\"appareil_ms\":[1.9855,1.9353]},\"sondes\":{\"hote_ms\":[16.4656,16.2754],\"appareil_ms\":[0.7689,0.7628]},\"propositions\":{\"hote_ms\":[7.4638,7.4224],\"hote_hd_ms\":7.2947,\"appareil_ms\":[5.4866,5.4927]}}",
+     "{\"phase\":\"passe\",\"passe\":4,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[20.6577,20.6533],\"hote_hd_ms\":12.2837,\"appareil_ms\":[1.9356,1.9468]},\"sondes\":{\"hote_ms\":[16.2610,16.2296],\"appareil_ms\":[0.7609,0.7587]},\"propositions\":{\"hote_ms\":[7.4108,7.4400],\"hote_hd_ms\":7.3049,\"appareil_ms\":[5.5313,5.4907]}}",
+     "{\"phase\":\"passe\",\"passe\":5,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[20.7857,20.7117],\"hote_hd_ms\":12.2667,\"appareil_ms\":[1.9278,1.9394]},\"sondes\":{\"hote_ms\":[16.4720,16.2994],\"appareil_ms\":[0.7598,0.7588]},\"propositions\":{\"hote_ms\":[7.4637,7.4099],\"hote_hd_ms\":7.3116,\"appareil_ms\":[5.4928,5.4784]}}",
+     "{\"phase\":\"transferts\",\"census_d2h_ms\":7.268,\"census_d2h_octets\":230197076,\"sondes_d2h_ms\":1.602,\"sondes_d2h_octets\":39992756,\"propositions_d2h_ms\":4.804,\"propositions_d2h_octets\":138941656}",
+     "{\"phase\":\"identite\",\"census\":{\"requetes\":646621,\"non_resolues\":0,\"comparees_hote_hd\":646621,\"ecarts_hote_hd\":0,\"comparees_appareil\":646621,\"ecarts_appareil\":0,\"ecarts_lot_produit\":0,\"coquilles_larges\":0},\"sondes\":{\"comparees_appareil\":9998189,\"ecarts_appareil\":0,\"reussies_produit\":7517088,\"reussies_appareil\":7517088,\"premieres_sondes_reussies_g\":7517088,\"coherentes\":true},\"propositions\":{\"parties\":2481101,\"abouties\":2481101,\"ecarts_hote_hd\":0,\"ecarts_appareil\":0},\"appareil\":true,\"identite\":true}"
+    ]
+   },
+   {
+    "code": 0,
+    "journal": "max_p4.jsonl",
+    "journal_sha256": "53d3f7861741cb6da63d4b6b208212616a4f82b6d56a35a790a2925ca3d8adaf",
+    "lignes": [
+     "{\"phase\":\"recolte\",\"trame\":\"max\",\"sites\":99099,\"k\":5,\"fils\":48,\"g_ms\":153.336,\"requetes\":646621,\"distinctes\":462107,\"saturees\":470539,\"attendues\":646621,\"sites_testes\":13421517,\"noeuds\":37093201,\"voies\":{\"native\":646621,\"certifiee\":0,\"controlee\":0,\"large\":0},\"representants\":9998189,\"premieres_sondes_reussies\":7517088,\"boules\":3748751,\"noeuds_index\":40295,\"incidences\":17628379,\"niveaux\":2653048,\"octets_niveau\":64,\"octets_boule\":32,\"recolte_ok\":true}",
+     "{\"phase\":\"appareil\",\"nom\":\"NVIDIA RTX PRO 6000 Blackwell Server Edition\",\"sm\":188,\"cc\":\"12.0\",\"memoire\":101973819392,\"l2\":134217728,\"horloge_khz\":2430000,\"horloge_memoire_khz\":12481000,\"bus_bits\":512,\"pilote\":13000,\"execution\":12090,\"census_h2d_ms\":3.713,\"census_h2d_octets\":95914412,\"sondes_h2d_ms\":11.978,\"sondes_h2d_octets\":317992556,\"propositions_h2d_ms\":2.180,\"propositions_h2d_octets\":59546424}",
+     "{\"phase\":\"passe\",\"passe\":0,\"echauffement\":true,\"ok\":true,\"census\":{\"hote_ms\":[22.2250,20.9637],\"hote_hd_ms\":12.2745,\"appareil_ms\":[2.0750,1.9806]},\"sondes\":{\"hote_ms\":[16.4335,16.2761],\"appareil_ms\":[0.7708,0.7565]},\"propositions\":{\"hote_ms\":[7.4425,7.4251],\"hote_hd_ms\":7.3641,\"appareil_ms\":[5.5516,5.4926]}}",
+     "{\"phase\":\"passe\",\"passe\":1,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[21.0954,21.0061],\"hote_hd_ms\":12.3006,\"appareil_ms\":[1.9114,1.9025]},\"sondes\":{\"hote_ms\":[16.4360,16.2912],\"appareil_ms\":[0.7662,0.7721]},\"propositions\":{\"hote_ms\":[7.4653,7.4045],\"hote_hd_ms\":7.2966,\"appareil_ms\":[5.4947,5.4925]}}",
+     "{\"phase\":\"passe\",\"passe\":2,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[21.1863,20.9844],\"hote_hd_ms\":12.3096,\"appareil_ms\":[1.8937,1.8963]},\"sondes\":{\"hote_ms\":[16.3444,16.2952],\"appareil_ms\":[0.7670,0.7710]},\"propositions\":{\"hote_ms\":[7.4187,7.3916],\"hote_hd_ms\":7.2904,\"appareil_ms\":[5.4854,5.5255]}}",
+     "{\"phase\":\"passe\",\"passe\":3,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[21.3921,21.0616],\"hote_hd_ms\":12.2535,\"appareil_ms\":[1.9096,1.9165]},\"sondes\":{\"hote_ms\":[16.7962,16.2895],\"appareil_ms\":[0.7607,0.7710]},\"propositions\":{\"hote_ms\":[7.4851,7.4369],\"hote_hd_ms\":7.2949,\"appareil_ms\":[5.5131,5.4763]}}",
+     "{\"phase\":\"passe\",\"passe\":4,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[21.0100,20.9942],\"hote_hd_ms\":12.3023,\"appareil_ms\":[1.9385,1.9292]},\"sondes\":{\"hote_ms\":[16.2743,16.3024],\"appareil_ms\":[0.7654,0.7668]},\"propositions\":{\"hote_ms\":[7.4134,7.3961],\"hote_hd_ms\":7.2962,\"appareil_ms\":[5.5272,5.5029]}}",
+     "{\"phase\":\"passe\",\"passe\":5,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[21.1100,21.0382],\"hote_hd_ms\":12.2958,\"appareil_ms\":[1.8868,1.8554]},\"sondes\":{\"hote_ms\":[16.4192,16.2920],\"appareil_ms\":[0.7638,0.7639]},\"propositions\":{\"hote_ms\":[7.4713,7.4088],\"hote_hd_ms\":7.2957,\"appareil_ms\":[5.4864,5.5111]}}",
+     "{\"phase\":\"transferts\",\"census_d2h_ms\":7.091,\"census_d2h_octets\":230197076,\"sondes_d2h_ms\":1.700,\"sondes_d2h_octets\":39992756,\"propositions_d2h_ms\":5.011,\"propositions_d2h_octets\":138941656}",
+     "{\"phase\":\"identite\",\"census\":{\"requetes\":646621,\"non_resolues\":0,\"comparees_hote_hd\":646621,\"ecarts_hote_hd\":0,\"comparees_appareil\":646621,\"ecarts_appareil\":0,\"ecarts_lot_produit\":0,\"coquilles_larges\":0},\"sondes\":{\"comparees_appareil\":9998189,\"ecarts_appareil\":0,\"reussies_produit\":7517088,\"reussies_appareil\":7517088,\"premieres_sondes_reussies_g\":7517088,\"coherentes\":true},\"propositions\":{\"parties\":2481101,\"abouties\":2481101,\"ecarts_hote_hd\":0,\"ecarts_appareil\":0},\"appareil\":true,\"identite\":true}"
+    ]
+   }
+  ],
+  "mediane": [
+   {
+    "code": 0,
+    "journal": "mediane_p0.jsonl",
+    "journal_sha256": "f5f74efe7ed890afbff429884e327f94a5f87d2e7df6b9d9e8996bf9983b340f",
+    "lignes": [
+     "{\"phase\":\"recolte\",\"trame\":\"mediane\",\"sites\":64740,\"k\":5,\"fils\":48,\"g_ms\":76.678,\"requetes\":290357,\"distinctes\":211461,\"saturees\":212553,\"attendues\":290357,\"sites_testes\":5655676,\"noeuds\":14618914,\"voies\":{\"native\":290357,\"certifiee\":0,\"controlee\":0,\"large\":0},\"representants\":5477969,\"premieres_sondes_reussies\":4224368,\"boules\":2107012,\"noeuds_index\":26055,\"incidences\":9799191,\"niveaux\":1521557,\"octets_niveau\":64,\"octets_boule\":32,\"recolte_ok\":true}",
+     "{\"phase\":\"appareil\",\"nom\":\"NVIDIA RTX PRO 6000 Blackwell Server Edition\",\"sm\":188,\"cc\":\"12.0\",\"memoire\":101973819392,\"l2\":134217728,\"horloge_khz\":2430000,\"horloge_memoire_khz\":12481000,\"bus_bits\":512,\"pilote\":13000,\"execution\":12090,\"census_h2d_ms\":1.742,\"census_h2d_octets\":43630488,\"sondes_h2d_ms\":6.804,\"sondes_h2d_octets\":179834980,\"propositions_h2d_ms\":1.091,\"propositions_h2d_octets\":30086424}",
+     "{\"phase\":\"passe\",\"passe\":0,\"echauffement\":true,\"ok\":true,\"census\":{\"hote_ms\":[8.7250,8.6640],\"hote_hd_ms\":5.0841,\"appareil_ms\":[1.0756,0.8988]},\"sondes\":{\"hote_ms\":[8.8147,8.7003],\"appareil_ms\":[0.4608,0.4535]},\"propositions\":{\"hote_ms\":[3.6864,3.6784],\"hote_hd_ms\":3.6221,\"appareil_ms\":[2.7531,2.7371]}}",
+     "{\"phase\":\"passe\",\"passe\":1,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[8.6899,8.6818],\"hote_hd_ms\":5.0844,\"appareil_ms\":[0.9085,0.9285]},\"sondes\":{\"hote_ms\":[8.7985,8.6894],\"appareil_ms\":[0.4484,0.4431]},\"propositions\":{\"hote_ms\":[3.7090,3.6815],\"hote_hd_ms\":3.6105,\"appareil_ms\":[2.7267,2.7228]}}",
+     "{\"phase\":\"passe\",\"passe\":2,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[8.6448,8.6411],\"hote_hd_ms\":5.0842,\"appareil_ms\":[0.9188,0.9295]},\"sondes\":{\"hote_ms\":[8.7156,8.7148],\"appareil_ms\":[0.4502,0.4473]},\"propositions\":{\"hote_ms\":[3.6854,3.6876],\"hote_hd_ms\":3.6048,\"appareil_ms\":[2.7234,2.7390]}}",
+     "{\"phase\":\"passe\",\"passe\":3,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[8.7083,8.6910],\"hote_hd_ms\":5.0861,\"appareil_ms\":[0.9165,0.9172]},\"sondes\":{\"hote_ms\":[8.8042,8.6746],\"appareil_ms\":[0.4451,0.4494]},\"propositions\":{\"hote_ms\":[3.7132,3.6725],\"hote_hd_ms\":3.6094,\"appareil_ms\":[2.7350,2.7105]}}",
+     "{\"phase\":\"passe\",\"passe\":4,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[8.6383,8.6434],\"hote_hd_ms\":5.0730,\"appareil_ms\":[0.9375,0.9602]},\"sondes\":{\"hote_ms\":[8.6870,8.6851],\"appareil_ms\":[0.4451,0.4514]},\"propositions\":{\"hote_ms\":[3.6853,3.6802],\"hote_hd_ms\":3.6185,\"appareil_ms\":[2.7340,2.7389]}}",
+     "{\"phase\":\"passe\",\"passe\":5,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[8.7097,8.7057],\"hote_hd_ms\":5.0894,\"appareil_ms\":[0.9558,0.9254]},\"sondes\":{\"hote_ms\":[8.8087,8.6698],\"appareil_ms\":[0.4485,0.4495]},\"propositions\":{\"hote_ms\":[3.7020,3.6817],\"hote_hd_ms\":3.5976,\"appareil_ms\":[2.7137,2.7227]}}",
+     "{\"phase\":\"transferts\",\"census_d2h_ms\":3.691,\"census_d2h_octets\":103367092,\"sondes_d2h_ms\":0.987,\"sondes_d2h_octets\":21911876,\"propositions_d2h_ms\":2.726,\"propositions_d2h_octets\":70201656}",
+     "{\"phase\":\"identite\",\"census\":{\"requetes\":290357,\"non_resolues\":0,\"comparees_hote_hd\":290357,\"ecarts_hote_hd\":0,\"comparees_appareil\":290357,\"ecarts_appareil\":0,\"ecarts_lot_produit\":0,\"coquilles_larges\":0},\"sondes\":{\"comparees_appareil\":5477969,\"ecarts_appareil\":0,\"reussies_produit\":4224368,\"reussies_appareil\":4224368,\"premieres_sondes_reussies_g\":4224368,\"coherentes\":true},\"propositions\":{\"parties\":1253601,\"abouties\":1253601,\"ecarts_hote_hd\":0,\"ecarts_appareil\":0},\"appareil\":true,\"identite\":true}"
+    ]
+   },
+   {
+    "code": 0,
+    "journal": "mediane_p1.jsonl",
+    "journal_sha256": "c0386c14fc377b0c7811198d350e1c1dbb6220bea746e559f3df13835588f9fb",
+    "lignes": [
+     "{\"phase\":\"recolte\",\"trame\":\"mediane\",\"sites\":64740,\"k\":5,\"fils\":48,\"g_ms\":77.234,\"requetes\":290357,\"distinctes\":211461,\"saturees\":212553,\"attendues\":290357,\"sites_testes\":5655676,\"noeuds\":14618914,\"voies\":{\"native\":290357,\"certifiee\":0,\"controlee\":0,\"large\":0},\"representants\":5477969,\"premieres_sondes_reussies\":4224368,\"boules\":2107012,\"noeuds_index\":26055,\"incidences\":9799191,\"niveaux\":1521557,\"octets_niveau\":64,\"octets_boule\":32,\"recolte_ok\":true}",
+     "{\"phase\":\"appareil\",\"nom\":\"NVIDIA RTX PRO 6000 Blackwell Server Edition\",\"sm\":188,\"cc\":\"12.0\",\"memoire\":101973819392,\"l2\":134217728,\"horloge_khz\":2430000,\"horloge_memoire_khz\":12481000,\"bus_bits\":512,\"pilote\":13000,\"execution\":12090,\"census_h2d_ms\":1.740,\"census_h2d_octets\":43630488,\"sondes_h2d_ms\":6.725,\"sondes_h2d_octets\":179834980,\"propositions_h2d_ms\":1.094,\"propositions_h2d_octets\":30086424}",
+     "{\"phase\":\"passe\",\"passe\":0,\"echauffement\":true,\"ok\":true,\"census\":{\"hote_ms\":[8.7735,8.6799],\"hote_hd_ms\":5.0811,\"appareil_ms\":[1.1219,0.9365]},\"sondes\":{\"hote_ms\":[8.8175,8.6838],\"appareil_ms\":[0.4531,0.4433]},\"propositions\":{\"hote_ms\":[3.7207,3.6904],\"hote_hd_ms\":3.6150,\"appareil_ms\":[2.7666,2.7228]}}",
+     "{\"phase\":\"passe\",\"passe\":1,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[8.7504,8.7066],\"hote_hd_ms\":5.0757,\"appareil_ms\":[0.8940,0.9010]},\"sondes\":{\"hote_ms\":[8.7762,8.7058],\"appareil_ms\":[0.4475,0.4475]},\"propositions\":{\"hote_ms\":[3.7004,3.6714],\"hote_hd_ms\":3.6072,\"appareil_ms\":[2.7268,2.7043]}}",
+     "{\"phase\":\"passe\",\"passe\":2,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[8.7882,8.6694],\"hote_hd_ms\":5.0721,\"appareil_ms\":[0.9367,0.9173]},\"sondes\":{\"hote_ms\":[8.6794,8.6662],\"appareil_ms\":[0.4519,0.4473]},\"propositions\":{\"hote_ms\":[3.6734,3.6772],\"hote_hd_ms\":3.6040,\"appareil_ms\":[2.7280,2.7330]}}",
+     "{\"phase\":\"passe\",\"passe\":3,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[8.7407,8.6975],\"hote_hd_ms\":5.0979,\"appareil_ms\":[0.9584,0.9030]},\"sondes\":{\"hote_ms\":[8.7904,8.6888],\"appareil_ms\":[0.4414,0.4494]},\"propositions\":{\"hote_ms\":[3.7099,3.6836],\"hote_hd_ms\":3.5895,\"appareil_ms\":[2.7535,2.7225]}}",
+     "{\"phase\":\"passe\",\"passe\":4,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[8.6868,8.6852],\"hote_hd_ms\":5.0742,\"appareil_ms\":[0.9293,0.9297]},\"sondes\":{\"hote_ms\":[8.7035,8.6813],\"appareil_ms\":[0.4494,0.4493]},\"propositions\":{\"hote_ms\":[3.6928,3.6852],\"hote_hd_ms\":3.5929,\"appareil_ms\":[2.6999,2.7368]}}",
+     "{\"phase\":\"passe\",\"passe\":5,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[8.7364,8.7135],\"hote_hd_ms\":5.0668,\"appareil_ms\":[0.9267,0.9152]},\"sondes\":{\"hote_ms\":[8.7835,8.6304],\"appareil_ms\":[0.4465,0.4490]},\"propositions\":{\"hote_ms\":[3.7132,3.6716],\"hote_hd_ms\":3.6016,\"appareil_ms\":[2.7238,2.7198]}}",
+     "{\"phase\":\"transferts\",\"census_d2h_ms\":3.569,\"census_d2h_octets\":103367092,\"sondes_d2h_ms\":0.967,\"sondes_d2h_octets\":21911876,\"propositions_d2h_ms\":2.647,\"propositions_d2h_octets\":70201656}",
+     "{\"phase\":\"identite\",\"census\":{\"requetes\":290357,\"non_resolues\":0,\"comparees_hote_hd\":290357,\"ecarts_hote_hd\":0,\"comparees_appareil\":290357,\"ecarts_appareil\":0,\"ecarts_lot_produit\":0,\"coquilles_larges\":0},\"sondes\":{\"comparees_appareil\":5477969,\"ecarts_appareil\":0,\"reussies_produit\":4224368,\"reussies_appareil\":4224368,\"premieres_sondes_reussies_g\":4224368,\"coherentes\":true},\"propositions\":{\"parties\":1253601,\"abouties\":1253601,\"ecarts_hote_hd\":0,\"ecarts_appareil\":0},\"appareil\":true,\"identite\":true}"
+    ]
+   },
+   {
+    "code": 0,
+    "journal": "mediane_p2.jsonl",
+    "journal_sha256": "05f16a4bb75f9eb08f69fb00999c4f86cdc44f790dd609b60728bfb94d2c2e45",
+    "lignes": [
+     "{\"phase\":\"recolte\",\"trame\":\"mediane\",\"sites\":64740,\"k\":5,\"fils\":48,\"g_ms\":76.395,\"requetes\":290357,\"distinctes\":211461,\"saturees\":212553,\"attendues\":290357,\"sites_testes\":5655676,\"noeuds\":14618914,\"voies\":{\"native\":290357,\"certifiee\":0,\"controlee\":0,\"large\":0},\"representants\":5477969,\"premieres_sondes_reussies\":4224368,\"boules\":2107012,\"noeuds_index\":26055,\"incidences\":9799191,\"niveaux\":1521557,\"octets_niveau\":64,\"octets_boule\":32,\"recolte_ok\":true}",
+     "{\"phase\":\"appareil\",\"nom\":\"NVIDIA RTX PRO 6000 Blackwell Server Edition\",\"sm\":188,\"cc\":\"12.0\",\"memoire\":101973819392,\"l2\":134217728,\"horloge_khz\":2430000,\"horloge_memoire_khz\":12481000,\"bus_bits\":512,\"pilote\":13000,\"execution\":12090,\"census_h2d_ms\":1.686,\"census_h2d_octets\":43630488,\"sondes_h2d_ms\":6.739,\"sondes_h2d_octets\":179834980,\"propositions_h2d_ms\":1.114,\"propositions_h2d_octets\":30086424}",
+     "{\"phase\":\"passe\",\"passe\":0,\"echauffement\":true,\"ok\":true,\"census\":{\"hote_ms\":[8.8547,8.7823],\"hote_hd_ms\":5.1254,\"appareil_ms\":[1.0910,0.9132]},\"sondes\":{\"hote_ms\":[8.8515,8.7030],\"appareil_ms\":[0.4557,0.4433]},\"propositions\":{\"hote_ms\":[3.7059,3.7101],\"hote_hd_ms\":3.6276,\"appareil_ms\":[2.7489,2.7227]}}",
+     "{\"phase\":\"passe\",\"passe\":1,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[8.8168,8.7791],\"hote_hd_ms\":5.1030,\"appareil_ms\":[0.9274,0.9216]},\"sondes\":{\"hote_ms\":[8.8265,8.7145],\"appareil_ms\":[0.4474,0.4434]},\"propositions\":{\"hote_ms\":[3.7125,3.6956],\"hote_hd_ms\":3.6151,\"appareil_ms\":[2.7240,2.7451]}}",
+     "{\"phase\":\"passe\",\"passe\":2,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[8.7839,8.7589],\"hote_hd_ms\":5.1040,\"appareil_ms\":[0.9256,0.9161]},\"sondes\":{\"hote_ms\":[8.7135,8.7043],\"appareil_ms\":[0.4480,0.4424]},\"propositions\":{\"hote_ms\":[3.6998,3.6784],\"hote_hd_ms\":3.6127,\"appareil_ms\":[2.7423,2.7002]}}",
+     "{\"phase\":\"passe\",\"passe\":3,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[8.8031,8.8100],\"hote_hd_ms\":5.1019,\"appareil_ms\":[0.9082,0.9461]},\"sondes\":{\"hote_ms\":[8.8428,8.7027],\"appareil_ms\":[0.4504,0.4411]},\"propositions\":{\"hote_ms\":[3.7362,3.6949],\"hote_hd_ms\":3.6188,\"appareil_ms\":[2.7267,2.7287]}}",
+     "{\"phase\":\"passe\",\"passe\":4,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[8.7557,8.7692],\"hote_hd_ms\":5.1070,\"appareil_ms\":[0.9113,0.9316]},\"sondes\":{\"hote_ms\":[8.7382,8.6945],\"appareil_ms\":[0.4420,0.4516]},\"propositions\":{\"hote_ms\":[3.6947,3.7260],\"hote_hd_ms\":3.6153,\"appareil_ms\":[2.7348,2.7187]}}",
+     "{\"phase\":\"passe\",\"passe\":5,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[8.8160,8.7976],\"hote_hd_ms\":5.0963,\"appareil_ms\":[0.9231,0.9339]},\"sondes\":{\"hote_ms\":[8.8604,8.6929],\"appareil_ms\":[0.4464,0.4495]},\"propositions\":{\"hote_ms\":[3.7255,3.6959],\"hote_hd_ms\":3.6133,\"appareil_ms\":[2.7637,2.7432]}}",
+     "{\"phase\":\"transferts\",\"census_d2h_ms\":3.313,\"census_d2h_octets\":103367092,\"sondes_d2h_ms\":0.958,\"sondes_d2h_octets\":21911876,\"propositions_d2h_ms\":2.623,\"propositions_d2h_octets\":70201656}",
+     "{\"phase\":\"identite\",\"census\":{\"requetes\":290357,\"non_resolues\":0,\"comparees_hote_hd\":290357,\"ecarts_hote_hd\":0,\"comparees_appareil\":290357,\"ecarts_appareil\":0,\"ecarts_lot_produit\":0,\"coquilles_larges\":0},\"sondes\":{\"comparees_appareil\":5477969,\"ecarts_appareil\":0,\"reussies_produit\":4224368,\"reussies_appareil\":4224368,\"premieres_sondes_reussies_g\":4224368,\"coherentes\":true},\"propositions\":{\"parties\":1253601,\"abouties\":1253601,\"ecarts_hote_hd\":0,\"ecarts_appareil\":0},\"appareil\":true,\"identite\":true}"
+    ]
+   },
+   {
+    "code": 0,
+    "journal": "mediane_p3.jsonl",
+    "journal_sha256": "ec9f3fc44cde8d86709d0fc5c07be5dd8aac0fe0d035cf419513c8600767fb5f",
+    "lignes": [
+     "{\"phase\":\"recolte\",\"trame\":\"mediane\",\"sites\":64740,\"k\":5,\"fils\":48,\"g_ms\":78.467,\"requetes\":290357,\"distinctes\":211461,\"saturees\":212553,\"attendues\":290357,\"sites_testes\":5655676,\"noeuds\":14618914,\"voies\":{\"native\":290357,\"certifiee\":0,\"controlee\":0,\"large\":0},\"representants\":5477969,\"premieres_sondes_reussies\":4224368,\"boules\":2107012,\"noeuds_index\":26055,\"incidences\":9799191,\"niveaux\":1521557,\"octets_niveau\":64,\"octets_boule\":32,\"recolte_ok\":true}",
+     "{\"phase\":\"appareil\",\"nom\":\"NVIDIA RTX PRO 6000 Blackwell Server Edition\",\"sm\":188,\"cc\":\"12.0\",\"memoire\":101973819392,\"l2\":134217728,\"horloge_khz\":2430000,\"horloge_memoire_khz\":12481000,\"bus_bits\":512,\"pilote\":13000,\"execution\":12090,\"census_h2d_ms\":1.734,\"census_h2d_octets\":43630488,\"sondes_h2d_ms\":6.798,\"sondes_h2d_octets\":179834980,\"propositions_h2d_ms\":1.112,\"propositions_h2d_octets\":30086424}",
+     "{\"phase\":\"passe\",\"passe\":0,\"echauffement\":true,\"ok\":true,\"census\":{\"hote_ms\":[8.8212,8.7531],\"hote_hd_ms\":5.0854,\"appareil_ms\":[1.0687,0.9485]},\"sondes\":{\"hote_ms\":[8.8469,8.7260],\"appareil_ms\":[0.4547,0.4492]},\"propositions\":{\"hote_ms\":[3.7154,3.6842],\"hote_hd_ms\":3.6240,\"appareil_ms\":[2.7420,2.7308]}}",
+     "{\"phase\":\"passe\",\"passe\":1,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[8.7883,8.7696],\"hote_hd_ms\":5.0799,\"appareil_ms\":[0.9299,0.9093]},\"sondes\":{\"hote_ms\":[8.8213,8.6847],\"appareil_ms\":[0.4473,0.4494]},\"propositions\":{\"hote_ms\":[3.7100,3.6902],\"hote_hd_ms\":3.6213,\"appareil_ms\":[2.7309,2.7308]}}",
+     "{\"phase\":\"passe\",\"passe\":2,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[8.7272,8.7312],\"hote_hd_ms\":5.0732,\"appareil_ms\":[0.9265,0.9357]},\"sondes\":{\"hote_ms\":[8.6992,8.6923],\"appareil_ms\":[0.4488,0.4474]},\"propositions\":{\"hote_ms\":[3.6870,3.6918],\"hote_hd_ms\":3.6094,\"appareil_ms\":[2.7299,2.7076]}}",
+     "{\"phase\":\"passe\",\"passe\":3,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[8.7856,8.7651],\"hote_hd_ms\":5.0777,\"appareil_ms\":[0.9288,0.9093]},\"sondes\":{\"hote_ms\":[8.8048,8.6957],\"appareil_ms\":[0.4431,0.4452]},\"propositions\":{\"hote_ms\":[3.7010,3.6843],\"hote_hd_ms\":3.6040,\"appareil_ms\":[2.7308,2.7187]}}",
+     "{\"phase\":\"passe\",\"passe\":4,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[8.7367,8.7303],\"hote_hd_ms\":5.0789,\"appareil_ms\":[0.9481,0.9370]},\"sondes\":{\"hote_ms\":[8.6842,8.6748],\"appareil_ms\":[0.4487,0.4434]},\"propositions\":{\"hote_ms\":[3.6714,3.6646],\"hote_hd_ms\":3.6083,\"appareil_ms\":[2.7550,2.7371]}}",
+     "{\"phase\":\"passe\",\"passe\":5,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[8.8049,8.7528],\"hote_hd_ms\":5.0824,\"appareil_ms\":[0.9615,0.9215]},\"sondes\":{\"hote_ms\":[8.8175,8.6711],\"appareil_ms\":[0.4483,0.4475]},\"propositions\":{\"hote_ms\":[3.7115,3.6796],\"hote_hd_ms\":3.6143,\"appareil_ms\":[2.7330,2.7125]}}",
+     "{\"phase\":\"transferts\",\"census_d2h_ms\":3.432,\"census_d2h_octets\":103367092,\"sondes_d2h_ms\":0.987,\"sondes_d2h_octets\":21911876,\"propositions_d2h_ms\":2.711,\"propositions_d2h_octets\":70201656}",
+     "{\"phase\":\"identite\",\"census\":{\"requetes\":290357,\"non_resolues\":0,\"comparees_hote_hd\":290357,\"ecarts_hote_hd\":0,\"comparees_appareil\":290357,\"ecarts_appareil\":0,\"ecarts_lot_produit\":0,\"coquilles_larges\":0},\"sondes\":{\"comparees_appareil\":5477969,\"ecarts_appareil\":0,\"reussies_produit\":4224368,\"reussies_appareil\":4224368,\"premieres_sondes_reussies_g\":4224368,\"coherentes\":true},\"propositions\":{\"parties\":1253601,\"abouties\":1253601,\"ecarts_hote_hd\":0,\"ecarts_appareil\":0},\"appareil\":true,\"identite\":true}"
+    ]
+   },
+   {
+    "code": 0,
+    "journal": "mediane_p4.jsonl",
+    "journal_sha256": "5f3308efb9cf9d6f42c5c8ae36a40b90fa95b25c85ad9e0fcbea5a43f099b773",
+    "lignes": [
+     "{\"phase\":\"recolte\",\"trame\":\"mediane\",\"sites\":64740,\"k\":5,\"fils\":48,\"g_ms\":78.330,\"requetes\":290357,\"distinctes\":211461,\"saturees\":212553,\"attendues\":290357,\"sites_testes\":5655676,\"noeuds\":14618914,\"voies\":{\"native\":290357,\"certifiee\":0,\"controlee\":0,\"large\":0},\"representants\":5477969,\"premieres_sondes_reussies\":4224368,\"boules\":2107012,\"noeuds_index\":26055,\"incidences\":9799191,\"niveaux\":1521557,\"octets_niveau\":64,\"octets_boule\":32,\"recolte_ok\":true}",
+     "{\"phase\":\"appareil\",\"nom\":\"NVIDIA RTX PRO 6000 Blackwell Server Edition\",\"sm\":188,\"cc\":\"12.0\",\"memoire\":101973819392,\"l2\":134217728,\"horloge_khz\":2430000,\"horloge_memoire_khz\":12481000,\"bus_bits\":512,\"pilote\":13000,\"execution\":12090,\"census_h2d_ms\":1.729,\"census_h2d_octets\":43630488,\"sondes_h2d_ms\":6.855,\"sondes_h2d_octets\":179834980,\"propositions_h2d_ms\":1.127,\"propositions_h2d_octets\":30086424}",
+     "{\"phase\":\"passe\",\"passe\":0,\"echauffement\":true,\"ok\":true,\"census\":{\"hote_ms\":[8.7273,8.6629],\"hote_hd_ms\":5.0877,\"appareil_ms\":[1.1225,0.9100]},\"sondes\":{\"hote_ms\":[8.8501,8.6833],\"appareil_ms\":[0.4537,0.4474]},\"propositions\":{\"hote_ms\":[3.7345,3.6915],\"hote_hd_ms\":3.6110,\"appareil_ms\":[2.7645,2.7411]}}",
+     "{\"phase\":\"passe\",\"passe\":1,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[8.7020,8.6655],\"hote_hd_ms\":5.0897,\"appareil_ms\":[0.9347,0.9073]},\"sondes\":{\"hote_ms\":[8.8124,8.6678],\"appareil_ms\":[0.4535,0.4466]},\"propositions\":{\"hote_ms\":[3.7300,3.6906],\"hote_hd_ms\":3.6130,\"appareil_ms\":[2.7227,2.7371]}}",
+     "{\"phase\":\"passe\",\"passe\":2,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[8.7235,8.6335],\"hote_hd_ms\":5.0704,\"appareil_ms\":[0.9159,0.9235]},\"sondes\":{\"hote_ms\":[8.7243,8.6604],\"appareil_ms\":[0.4494,0.4474]},\"propositions\":{\"hote_ms\":[3.6934,3.6931],\"hote_hd_ms\":3.5930,\"appareil_ms\":[2.7420,2.7309]}}",
+     "{\"phase\":\"passe\",\"passe\":3,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[8.7109,8.6867],\"hote_hd_ms\":5.0763,\"appareil_ms\":[0.8974,0.9030]},\"sondes\":{\"hote_ms\":[8.7941,8.6393],\"appareil_ms\":[0.4467,0.4516]},\"propositions\":{\"hote_ms\":[3.7145,3.6796],\"hote_hd_ms\":3.6228,\"appareil_ms\":[2.7619,2.7537]}}",
+     "{\"phase\":\"passe\",\"passe\":4,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[8.6226,8.6533],\"hote_hd_ms\":5.0873,\"appareil_ms\":[0.9198,0.8948]},\"sondes\":{\"hote_ms\":[8.6935,8.6822],\"appareil_ms\":[0.4496,0.4454]},\"propositions\":{\"hote_ms\":[3.6816,3.6852],\"hote_hd_ms\":3.6038,\"appareil_ms\":[2.7320,2.7412]}}",
+     "{\"phase\":\"passe\",\"passe\":5,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[8.7112,8.6899],\"hote_hd_ms\":5.0885,\"appareil_ms\":[0.9004,0.9317]},\"sondes\":{\"hote_ms\":[8.7981,8.6693],\"appareil_ms\":[0.4487,0.4468]},\"propositions\":{\"hote_ms\":[3.6989,3.6727],\"hote_hd_ms\":3.6046,\"appareil_ms\":[2.7637,2.7085]}}",
+     "{\"phase\":\"transferts\",\"census_d2h_ms\":3.374,\"census_d2h_octets\":103367092,\"sondes_d2h_ms\":0.969,\"sondes_d2h_octets\":21911876,\"propositions_d2h_ms\":2.653,\"propositions_d2h_octets\":70201656}",
+     "{\"phase\":\"identite\",\"census\":{\"requetes\":290357,\"non_resolues\":0,\"comparees_hote_hd\":290357,\"ecarts_hote_hd\":0,\"comparees_appareil\":290357,\"ecarts_appareil\":0,\"ecarts_lot_produit\":0,\"coquilles_larges\":0},\"sondes\":{\"comparees_appareil\":5477969,\"ecarts_appareil\":0,\"reussies_produit\":4224368,\"reussies_appareil\":4224368,\"premieres_sondes_reussies_g\":4224368,\"coherentes\":true},\"propositions\":{\"parties\":1253601,\"abouties\":1253601,\"ecarts_hote_hd\":0,\"ecarts_appareil\":0},\"appareil\":true,\"identite\":true}"
+    ]
+   }
+  ],
+  "ng00": [
+   {
+    "code": 0,
+    "journal": "ng00_p0.jsonl",
+    "journal_sha256": "398670d6d3a4521205a818870360d9c81479772c8a5f5ea4cf40882d8005cf3e",
+    "lignes": [
+     "{\"phase\":\"recolte\",\"trame\":\"ng00\",\"sites\":39885,\"k\":5,\"fils\":48,\"g_ms\":51.649,\"requetes\":252152,\"distinctes\":177863,\"saturees\":194136,\"attendues\":252152,\"sites_testes\":4865484,\"noeuds\":12604355,\"voies\":{\"native\":252152,\"certifiee\":0,\"controlee\":0,\"large\":0},\"representants\":3419932,\"premieres_sondes_reussies\":2572807,\"boules\":1306696,\"noeuds_index\":16523,\"incidences\":6097121,\"niveaux\":1085776,\"octets_niveau\":64,\"octets_boule\":32,\"recolte_ok\":true}",
+     "{\"phase\":\"appareil\",\"nom\":\"NVIDIA RTX PRO 6000 Blackwell Server Edition\",\"sm\":188,\"cc\":\"12.0\",\"memoire\":101973819392,\"l2\":134217728,\"horloge_khz\":2430000,\"horloge_memoire_khz\":12481000,\"bus_bits\":512,\"pilote\":13000,\"execution\":12090,\"census_h2d_ms\":2.338,\"census_h2d_octets\":37449428,\"sondes_h2d_ms\":4.279,\"sondes_h2d_octets\":110527396,\"propositions_h2d_ms\":0.748,\"propositions_h2d_octets\":20331000}",
+     "{\"phase\":\"passe\",\"passe\":0,\"echauffement\":true,\"ok\":true,\"census\":{\"hote_ms\":[8.5946,7.7729],\"hote_hd_ms\":4.4272,\"appareil_ms\":[1.6822,0.8188]},\"sondes\":{\"hote_ms\":[5.6622,5.5385],\"appareil_ms\":[0.3051,0.2918]},\"propositions\":{\"hote_ms\":[2.5135,2.4733],\"hote_hd_ms\":2.4310,\"appareil_ms\":[1.9148,1.8703]}}",
+     "{\"phase\":\"passe\",\"passe\":1,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[7.8165,7.8120],\"hote_hd_ms\":4.4256,\"appareil_ms\":[0.8264,0.8272]},\"sondes\":{\"hote_ms\":[5.6881,5.5010],\"appareil_ms\":[0.2978,0.3020]},\"propositions\":{\"hote_ms\":[2.5106,2.4697],\"hote_hd_ms\":2.4380,\"appareil_ms\":[1.8928,1.8846]}}",
+     "{\"phase\":\"passe\",\"passe\":2,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[7.7710,7.7692],\"hote_hd_ms\":4.4216,\"appareil_ms\":[0.8401,0.8192]},\"sondes\":{\"hote_ms\":[5.5222,5.5108],\"appareil_ms\":[0.2986,0.2959]},\"propositions\":{\"hote_ms\":[2.5151,2.4973],\"hote_hd_ms\":2.4369,\"appareil_ms\":[1.8761,1.8742]}}",
+     "{\"phase\":\"passe\",\"passe\":3,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[7.8325,7.8004],\"hote_hd_ms\":4.4215,\"appareil_ms\":[0.8347,0.8784]},\"sondes\":{\"hote_ms\":[5.6491,5.5363],\"appareil_ms\":[0.2959,0.2939]},\"propositions\":{\"hote_ms\":[2.5133,2.4871],\"hote_hd_ms\":2.4242,\"appareil_ms\":[1.9008,1.9037]}}",
+     "{\"phase\":\"passe\",\"passe\":4,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[7.7581,7.7644],\"hote_hd_ms\":4.4187,\"appareil_ms\":[0.8465,0.8150]},\"sondes\":{\"hote_ms\":[5.5347,5.4940],\"appareil_ms\":[0.2989,0.2935]},\"propositions\":{\"hote_ms\":[2.4805,2.4742],\"hote_hd_ms\":2.4349,\"appareil_ms\":[1.8916,1.8886]}}",
+     "{\"phase\":\"passe\",\"passe\":5,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[7.8277,7.7904],\"hote_hd_ms\":4.4162,\"appareil_ms\":[0.8058,0.8148]},\"sondes\":{\"hote_ms\":[5.6630,5.5028],\"appareil_ms\":[0.3007,0.2897]},\"propositions\":{\"hote_ms\":[2.5129,2.4781],\"hote_hd_ms\":2.4478,\"appareil_ms\":[1.8927,1.8887]}}",
+     "{\"phase\":\"transferts\",\"census_d2h_ms\":3.019,\"census_d2h_octets\":89766112,\"sondes_d2h_ms\":0.647,\"sondes_d2h_octets\":13679728,\"propositions_d2h_ms\":1.838,\"propositions_d2h_octets\":47439000}",
+     "{\"phase\":\"identite\",\"census\":{\"requetes\":252152,\"non_resolues\":0,\"comparees_hote_hd\":252152,\"ecarts_hote_hd\":0,\"comparees_appareil\":252152,\"ecarts_appareil\":0,\"ecarts_lot_produit\":0,\"coquilles_larges\":0},\"sondes\":{\"comparees_appareil\":3419932,\"ecarts_appareil\":0,\"reussies_produit\":2572807,\"reussies_appareil\":2572807,\"premieres_sondes_reussies_g\":2572807,\"coherentes\":true},\"propositions\":{\"parties\":847125,\"abouties\":847125,\"ecarts_hote_hd\":0,\"ecarts_appareil\":0},\"appareil\":true,\"identite\":true}"
+    ]
+   },
+   {
+    "code": 0,
+    "journal": "ng00_p1.jsonl",
+    "journal_sha256": "e61bca9452c75bfafdfa03c4d5cb6c57969d0ce522440d93845e17242b9e43d7",
+    "lignes": [
+     "{\"phase\":\"recolte\",\"trame\":\"ng00\",\"sites\":39885,\"k\":5,\"fils\":48,\"g_ms\":51.144,\"requetes\":252152,\"distinctes\":177863,\"saturees\":194136,\"attendues\":252152,\"sites_testes\":4865484,\"noeuds\":12604355,\"voies\":{\"native\":252152,\"certifiee\":0,\"controlee\":0,\"large\":0},\"representants\":3419932,\"premieres_sondes_reussies\":2572807,\"boules\":1306696,\"noeuds_index\":16523,\"incidences\":6097121,\"niveaux\":1085776,\"octets_niveau\":64,\"octets_boule\":32,\"recolte_ok\":true}",
+     "{\"phase\":\"appareil\",\"nom\":\"NVIDIA RTX PRO 6000 Blackwell Server Edition\",\"sm\":188,\"cc\":\"12.0\",\"memoire\":101973819392,\"l2\":134217728,\"horloge_khz\":2430000,\"horloge_memoire_khz\":12481000,\"bus_bits\":512,\"pilote\":13000,\"execution\":12090,\"census_h2d_ms\":1.464,\"census_h2d_octets\":37449428,\"sondes_h2d_ms\":4.213,\"sondes_h2d_octets\":110527396,\"propositions_h2d_ms\":0.761,\"propositions_h2d_octets\":20331000}",
+     "{\"phase\":\"passe\",\"passe\":0,\"echauffement\":true,\"ok\":true,\"census\":{\"hote_ms\":[7.5613,7.4938],\"hote_hd_ms\":4.4570,\"appareil_ms\":[0.9807,0.8271]},\"sondes\":{\"hote_ms\":[5.6842,5.5479],\"appareil_ms\":[0.3054,0.2976]},\"propositions\":{\"hote_ms\":[2.5207,2.4897],\"hote_hd_ms\":2.4882,\"appareil_ms\":[1.9012,1.8744]}}",
+     "{\"phase\":\"passe\",\"passe\":1,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[7.6220,7.6345],\"hote_hd_ms\":4.4297,\"appareil_ms\":[0.8550,0.8498]},\"sondes\":{\"hote_ms\":[5.7213,5.5508],\"appareil_ms\":[0.2971,0.2980]},\"propositions\":{\"hote_ms\":[2.5494,2.4945],\"hote_hd_ms\":2.4601,\"appareil_ms\":[1.8949,1.9131]}}",
+     "{\"phase\":\"passe\",\"passe\":2,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[7.6070,7.5571],\"hote_hd_ms\":4.4169,\"appareil_ms\":[0.8410,0.8281]},\"sondes\":{\"hote_ms\":[5.6162,5.5093],\"appareil_ms\":[0.2969,0.2976]},\"propositions\":{\"hote_ms\":[2.4825,2.4890],\"hote_hd_ms\":2.4435,\"appareil_ms\":[1.9037,1.8842]}}",
+     "{\"phase\":\"passe\",\"passe\":3,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[7.6160,7.5716],\"hote_hd_ms\":4.4286,\"appareil_ms\":[0.8532,0.8314]},\"sondes\":{\"hote_ms\":[5.6406,5.5194],\"appareil_ms\":[0.2979,0.2959]},\"propositions\":{\"hote_ms\":[2.5187,2.4754],\"hote_hd_ms\":2.4265,\"appareil_ms\":[1.8887,1.8948]}}",
+     "{\"phase\":\"passe\",\"passe\":4,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[7.5557,7.5384],\"hote_hd_ms\":4.4301,\"appareil_ms\":[0.8961,0.8026]},\"sondes\":{\"hote_ms\":[5.5222,5.5237],\"appareil_ms\":[0.3011,0.2938]},\"propositions\":{\"hote_ms\":[2.4841,2.4700],\"hote_hd_ms\":2.4269,\"appareil_ms\":[1.8794,1.9072]}}",
+     "{\"phase\":\"passe\",\"passe\":5,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[7.5879,7.5720],\"hote_hd_ms\":4.4088,\"appareil_ms\":[0.8083,0.8314]},\"sondes\":{\"hote_ms\":[5.6615,5.5101],\"appareil_ms\":[0.2949,0.2932]},\"propositions\":{\"hote_ms\":[2.5055,2.4831],\"hote_hd_ms\":2.4459,\"appareil_ms\":[1.8845,1.8580]}}",
+     "{\"phase\":\"transferts\",\"census_d2h_ms\":3.040,\"census_d2h_octets\":89766112,\"sondes_d2h_ms\":0.642,\"sondes_d2h_octets\":13679728,\"propositions_d2h_ms\":1.853,\"propositions_d2h_octets\":47439000}",
+     "{\"phase\":\"identite\",\"census\":{\"requetes\":252152,\"non_resolues\":0,\"comparees_hote_hd\":252152,\"ecarts_hote_hd\":0,\"comparees_appareil\":252152,\"ecarts_appareil\":0,\"ecarts_lot_produit\":0,\"coquilles_larges\":0},\"sondes\":{\"comparees_appareil\":3419932,\"ecarts_appareil\":0,\"reussies_produit\":2572807,\"reussies_appareil\":2572807,\"premieres_sondes_reussies_g\":2572807,\"coherentes\":true},\"propositions\":{\"parties\":847125,\"abouties\":847125,\"ecarts_hote_hd\":0,\"ecarts_appareil\":0},\"appareil\":true,\"identite\":true}"
+    ]
+   },
+   {
+    "code": 0,
+    "journal": "ng00_p2.jsonl",
+    "journal_sha256": "ecdaa69f332daad7694e890e2dffae2ddeae495af5176cc25b08a62e8ecc535c",
+    "lignes": [
+     "{\"phase\":\"recolte\",\"trame\":\"ng00\",\"sites\":39885,\"k\":5,\"fils\":48,\"g_ms\":51.804,\"requetes\":252152,\"distinctes\":177863,\"saturees\":194136,\"attendues\":252152,\"sites_testes\":4865484,\"noeuds\":12604355,\"voies\":{\"native\":252152,\"certifiee\":0,\"controlee\":0,\"large\":0},\"representants\":3419932,\"premieres_sondes_reussies\":2572807,\"boules\":1306696,\"noeuds_index\":16523,\"incidences\":6097121,\"niveaux\":1085776,\"octets_niveau\":64,\"octets_boule\":32,\"recolte_ok\":true}",
+     "{\"phase\":\"appareil\",\"nom\":\"NVIDIA RTX PRO 6000 Blackwell Server Edition\",\"sm\":188,\"cc\":\"12.0\",\"memoire\":101973819392,\"l2\":134217728,\"horloge_khz\":2430000,\"horloge_memoire_khz\":12481000,\"bus_bits\":512,\"pilote\":13000,\"execution\":12090,\"census_h2d_ms\":1.470,\"census_h2d_octets\":37449428,\"sondes_h2d_ms\":4.225,\"sondes_h2d_octets\":110527396,\"propositions_h2d_ms\":0.774,\"propositions_h2d_octets\":20331000}",
+     "{\"phase\":\"passe\",\"passe\":0,\"echauffement\":true,\"ok\":true,\"census\":{\"hote_ms\":[7.9220,7.7993],\"hote_hd_ms\":4.4276,\"appareil_ms\":[0.9891,0.8237]},\"sondes\":{\"hote_ms\":[5.6075,5.5421],\"appareil_ms\":[0.2982,0.2936]},\"propositions\":{\"hote_ms\":[2.4787,2.4808],\"hote_hd_ms\":2.4319,\"appareil_ms\":[1.9452,1.8723]}}",
+     "{\"phase\":\"passe\",\"passe\":1,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[7.8772,7.8207],\"hote_hd_ms\":4.4246,\"appareil_ms\":[0.8177,0.8519]},\"sondes\":{\"hote_ms\":[5.6725,5.5417],\"appareil_ms\":[0.3010,0.3020]},\"propositions\":{\"hote_ms\":[2.5107,2.4666],\"hote_hd_ms\":2.4304,\"appareil_ms\":[1.8823,1.9011]}}",
+     "{\"phase\":\"passe\",\"passe\":2,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[7.8031,7.7968],\"hote_hd_ms\":4.4319,\"appareil_ms\":[0.8261,0.8073]},\"sondes\":{\"hote_ms\":[5.5123,5.5563],\"appareil_ms\":[0.2997,0.2913]},\"propositions\":{\"hote_ms\":[2.4999,2.4837],\"hote_hd_ms\":2.4507,\"appareil_ms\":[1.9038,1.8743]}}",
+     "{\"phase\":\"passe\",\"passe\":3,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[7.9307,7.8080],\"hote_hd_ms\":4.4113,\"appareil_ms\":[0.8305,0.8046]},\"sondes\":{\"hote_ms\":[5.6525,5.5525],\"appareil_ms\":[0.2977,0.2979]},\"propositions\":{\"hote_ms\":[2.5093,2.4862],\"hote_hd_ms\":2.4338,\"appareil_ms\":[1.8885,1.8722]}}",
+     "{\"phase\":\"passe\",\"passe\":4,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[7.7696,7.7796],\"hote_hd_ms\":4.4252,\"appareil_ms\":[0.8094,0.8208]},\"sondes\":{\"hote_ms\":[5.5671,5.5594],\"appareil_ms\":[0.2974,0.2938]},\"propositions\":{\"hote_ms\":[2.4808,2.4782],\"hote_hd_ms\":2.4147,\"appareil_ms\":[1.8924,1.8763]}}",
+     "{\"phase\":\"passe\",\"passe\":5,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[7.8569,7.8261],\"hote_hd_ms\":4.4193,\"appareil_ms\":[0.8163,0.8456]},\"sondes\":{\"hote_ms\":[5.6972,5.5498],\"appareil_ms\":[0.2948,0.2958]},\"propositions\":{\"hote_ms\":[2.4978,2.4781],\"hote_hd_ms\":2.4361,\"appareil_ms\":[1.8988,1.8866]}}",
+     "{\"phase\":\"transferts\",\"census_d2h_ms\":3.326,\"census_d2h_octets\":89766112,\"sondes_d2h_ms\":0.640,\"sondes_d2h_octets\":13679728,\"propositions_d2h_ms\":1.863,\"propositions_d2h_octets\":47439000}",
+     "{\"phase\":\"identite\",\"census\":{\"requetes\":252152,\"non_resolues\":0,\"comparees_hote_hd\":252152,\"ecarts_hote_hd\":0,\"comparees_appareil\":252152,\"ecarts_appareil\":0,\"ecarts_lot_produit\":0,\"coquilles_larges\":0},\"sondes\":{\"comparees_appareil\":3419932,\"ecarts_appareil\":0,\"reussies_produit\":2572807,\"reussies_appareil\":2572807,\"premieres_sondes_reussies_g\":2572807,\"coherentes\":true},\"propositions\":{\"parties\":847125,\"abouties\":847125,\"ecarts_hote_hd\":0,\"ecarts_appareil\":0},\"appareil\":true,\"identite\":true}"
+    ]
+   },
+   {
+    "code": 0,
+    "journal": "ng00_p3.jsonl",
+    "journal_sha256": "02d6757be7244f10daa03fe9095720a92ffeb8f2def25f8cc52ffac4c1d9d0ff",
+    "lignes": [
+     "{\"phase\":\"recolte\",\"trame\":\"ng00\",\"sites\":39885,\"k\":5,\"fils\":48,\"g_ms\":51.401,\"requetes\":252152,\"distinctes\":177863,\"saturees\":194136,\"attendues\":252152,\"sites_testes\":4865484,\"noeuds\":12604355,\"voies\":{\"native\":252152,\"certifiee\":0,\"controlee\":0,\"large\":0},\"representants\":3419932,\"premieres_sondes_reussies\":2572807,\"boules\":1306696,\"noeuds_index\":16523,\"incidences\":6097121,\"niveaux\":1085776,\"octets_niveau\":64,\"octets_boule\":32,\"recolte_ok\":true}",
+     "{\"phase\":\"appareil\",\"nom\":\"NVIDIA RTX PRO 6000 Blackwell Server Edition\",\"sm\":188,\"cc\":\"12.0\",\"memoire\":101973819392,\"l2\":134217728,\"horloge_khz\":2430000,\"horloge_memoire_khz\":12481000,\"bus_bits\":512,\"pilote\":13000,\"execution\":12090,\"census_h2d_ms\":1.498,\"census_h2d_octets\":37449428,\"sondes_h2d_ms\":4.263,\"sondes_h2d_octets\":110527396,\"propositions_h2d_ms\":0.773,\"propositions_h2d_octets\":20331000}",
+     "{\"phase\":\"passe\",\"passe\":0,\"echauffement\":true,\"ok\":true,\"census\":{\"hote_ms\":[7.5799,7.4904],\"hote_hd_ms\":4.4319,\"appareil_ms\":[1.0053,0.8126]},\"sondes\":{\"hote_ms\":[5.6678,5.5442],\"appareil_ms\":[0.3062,0.2977]},\"propositions\":{\"hote_ms\":[2.5113,2.4845],\"hote_hd_ms\":2.4404,\"appareil_ms\":[1.9165,1.8822]}}",
+     "{\"phase\":\"passe\",\"passe\":1,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[7.5385,7.5314],\"hote_hd_ms\":4.4127,\"appareil_ms\":[0.8467,0.8028]},\"sondes\":{\"hote_ms\":[5.7162,5.5692],\"appareil_ms\":[0.2958,0.3000]},\"propositions\":{\"hote_ms\":[2.4805,2.4837],\"hote_hd_ms\":2.4479,\"appareil_ms\":[1.9051,1.9048]}}",
+     "{\"phase\":\"passe\",\"passe\":2,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[7.5543,7.5101],\"hote_hd_ms\":4.4242,\"appareil_ms\":[0.8223,0.8497]},\"sondes\":{\"hote_ms\":[5.5573,5.5199],\"appareil_ms\":[0.2977,0.2956]},\"propositions\":{\"hote_ms\":[2.4850,2.4923],\"hote_hd_ms\":2.4374,\"appareil_ms\":[1.9036,1.8906]}}",
+     "{\"phase\":\"passe\",\"passe\":3,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[7.5541,7.5250],\"hote_hd_ms\":4.4148,\"appareil_ms\":[0.8080,0.8272]},\"sondes\":{\"hote_ms\":[5.6502,5.5146],\"appareil_ms\":[0.2959,0.2959]},\"propositions\":{\"hote_ms\":[2.5217,2.4674],\"hote_hd_ms\":2.4479,\"appareil_ms\":[1.8948,1.8990]}}",
+     "{\"phase\":\"passe\",\"passe\":4,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[7.5050,7.5103],\"hote_hd_ms\":4.4249,\"appareil_ms\":[0.8588,0.8191]},\"sondes\":{\"hote_ms\":[5.5487,5.5182],\"appareil_ms\":[0.3014,0.2957]},\"propositions\":{\"hote_ms\":[2.4755,2.4828],\"hote_hd_ms\":2.4362,\"appareil_ms\":[1.8700,1.8919]}}",
+     "{\"phase\":\"passe\",\"passe\":5,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[7.5707,7.5193],\"hote_hd_ms\":4.4270,\"appareil_ms\":[0.8342,0.8311]},\"sondes\":{\"hote_ms\":[5.6443,5.5255],\"appareil_ms\":[0.2948,0.2998]},\"propositions\":{\"hote_ms\":[2.5080,2.4794],\"hote_hd_ms\":2.4339,\"appareil_ms\":[1.9108,1.8844]}}",
+     "{\"phase\":\"transferts\",\"census_d2h_ms\":3.082,\"census_d2h_octets\":89766112,\"sondes_d2h_ms\":0.639,\"sondes_d2h_octets\":13679728,\"propositions_d2h_ms\":1.856,\"propositions_d2h_octets\":47439000}",
+     "{\"phase\":\"identite\",\"census\":{\"requetes\":252152,\"non_resolues\":0,\"comparees_hote_hd\":252152,\"ecarts_hote_hd\":0,\"comparees_appareil\":252152,\"ecarts_appareil\":0,\"ecarts_lot_produit\":0,\"coquilles_larges\":0},\"sondes\":{\"comparees_appareil\":3419932,\"ecarts_appareil\":0,\"reussies_produit\":2572807,\"reussies_appareil\":2572807,\"premieres_sondes_reussies_g\":2572807,\"coherentes\":true},\"propositions\":{\"parties\":847125,\"abouties\":847125,\"ecarts_hote_hd\":0,\"ecarts_appareil\":0},\"appareil\":true,\"identite\":true}"
+    ]
+   },
+   {
+    "code": 0,
+    "journal": "ng00_p4.jsonl",
+    "journal_sha256": "b47355bd20356c6135af9cc068150d75c967868a7a6661bbfe5f7ee77c8a5e71",
+    "lignes": [
+     "{\"phase\":\"recolte\",\"trame\":\"ng00\",\"sites\":39885,\"k\":5,\"fils\":48,\"g_ms\":51.968,\"requetes\":252152,\"distinctes\":177863,\"saturees\":194136,\"attendues\":252152,\"sites_testes\":4865484,\"noeuds\":12604355,\"voies\":{\"native\":252152,\"certifiee\":0,\"controlee\":0,\"large\":0},\"representants\":3419932,\"premieres_sondes_reussies\":2572807,\"boules\":1306696,\"noeuds_index\":16523,\"incidences\":6097121,\"niveaux\":1085776,\"octets_niveau\":64,\"octets_boule\":32,\"recolte_ok\":true}",
+     "{\"phase\":\"appareil\",\"nom\":\"NVIDIA RTX PRO 6000 Blackwell Server Edition\",\"sm\":188,\"cc\":\"12.0\",\"memoire\":101973819392,\"l2\":134217728,\"horloge_khz\":2430000,\"horloge_memoire_khz\":12481000,\"bus_bits\":512,\"pilote\":13000,\"execution\":12090,\"census_h2d_ms\":1.591,\"census_h2d_octets\":37449428,\"sondes_h2d_ms\":4.251,\"sondes_h2d_octets\":110527396,\"propositions_h2d_ms\":0.769,\"propositions_h2d_octets\":20331000}",
+     "{\"phase\":\"passe\",\"passe\":0,\"echauffement\":true,\"ok\":true,\"census\":{\"hote_ms\":[8.0045,7.9477],\"hote_hd_ms\":4.4164,\"appareil_ms\":[0.9954,0.8189]},\"sondes\":{\"hote_ms\":[5.6388,5.5116],\"appareil_ms\":[0.3060,0.2979]},\"propositions\":{\"hote_ms\":[2.4926,2.4861],\"hote_hd_ms\":2.4500,\"appareil_ms\":[1.9299,1.8724]}}",
+     "{\"phase\":\"passe\",\"passe\":1,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[7.9926,7.9914],\"hote_hd_ms\":4.4328,\"appareil_ms\":[0.7954,0.8395]},\"sondes\":{\"hote_ms\":[5.6668,5.5434],\"appareil_ms\":[0.2958,0.2950]},\"propositions\":{\"hote_ms\":[2.5078,2.4836],\"hote_hd_ms\":2.4306,\"appareil_ms\":[1.8967,1.8866]}}",
+     "{\"phase\":\"passe\",\"passe\":2,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[7.9269,7.9400],\"hote_hd_ms\":4.4175,\"appareil_ms\":[0.8605,0.8750]},\"sondes\":{\"hote_ms\":[5.5400,5.5242],\"appareil_ms\":[0.2967,0.2950]},\"propositions\":{\"hote_ms\":[2.4754,2.4741],\"hote_hd_ms\":2.4474,\"appareil_ms\":[1.8913,1.8887]}}",
+     "{\"phase\":\"passe\",\"passe\":3,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[7.9834,7.9524],\"hote_hd_ms\":4.4181,\"appareil_ms\":[0.8136,0.8352]},\"sondes\":{\"hote_ms\":[5.6841,5.5466],\"appareil_ms\":[0.2977,0.2939]},\"propositions\":{\"hote_ms\":[2.4958,2.4664],\"hote_hd_ms\":2.4300,\"appareil_ms\":[1.8803,1.8866]}}",
+     "{\"phase\":\"passe\",\"passe\":4,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[7.9293,7.9311],\"hote_hd_ms\":4.4102,\"appareil_ms\":[0.8047,0.8209]},\"sondes\":{\"hote_ms\":[5.5460,5.5643],\"appareil_ms\":[0.2986,0.2979]},\"propositions\":{\"hote_ms\":[2.4677,2.4726],\"hote_hd_ms\":2.4383,\"appareil_ms\":[1.8917,1.8743]}}",
+     "{\"phase\":\"passe\",\"passe\":5,\"echauffement\":false,\"ok\":true,\"census\":{\"hote_ms\":[7.9994,7.9772],\"hote_hd_ms\":4.4185,\"appareil_ms\":[0.8246,0.8375]},\"sondes\":{\"hote_ms\":[5.6836,5.5455],\"appareil_ms\":[0.2930,0.2999]},\"propositions\":{\"hote_ms\":[2.4983,2.4662],\"hote_hd_ms\":2.4268,\"appareil_ms\":[1.8743,1.8867]}}",
+     "{\"phase\":\"transferts\",\"census_d2h_ms\":3.060,\"census_d2h_octets\":89766112,\"sondes_d2h_ms\":0.641,\"sondes_d2h_octets\":13679728,\"propositions_d2h_ms\":1.811,\"propositions_d2h_octets\":47439000}",
+     "{\"phase\":\"identite\",\"census\":{\"requetes\":252152,\"non_resolues\":0,\"comparees_hote_hd\":252152,\"ecarts_hote_hd\":0,\"comparees_appareil\":252152,\"ecarts_appareil\":0,\"ecarts_lot_produit\":0,\"coquilles_larges\":0},\"sondes\":{\"comparees_appareil\":3419932,\"ecarts_appareil\":0,\"reussies_produit\":2572807,\"reussies_appareil\":2572807,\"premieres_sondes_reussies_g\":2572807,\"coherentes\":true},\"propositions\":{\"parties\":847125,\"abouties\":847125,\"ecarts_hote_hd\":0,\"ecarts_appareil\":0},\"appareil\":true,\"identite\":true}"
+    ]
+   }
+  ]
+ }
+}
