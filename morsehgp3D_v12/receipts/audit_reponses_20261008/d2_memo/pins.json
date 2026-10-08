@@ -1,0 +1,106 @@
+{
+ "delivery_commit": "99fa832466f65b3278bb62ad2156dae805efab5b",
+ "delivery_utc": "2026-10-07T21:32:15Z",
+ "external_reviewed": [
+  {
+   "bytes": 1359,
+   "count": 7,
+   "kind": "report",
+   "path": "v12_tour_G/runs/mutants_tower_7.json",
+   "sha256": "17f54643edb6b8a4d5497b1d6c95c3a1d4d9a4d924e704f7ff0fdc680b271304"
+  },
+  {
+   "bytes": 3046,
+   "count": 18,
+   "kind": "report",
+   "path": "v12_tour_Gc/runs/mutants_tower_final.json",
+   "sha256": "8b415047627100012331a5504737eb2eac869a55493b82b424802d073c4687ff"
+  },
+  {
+   "bytes": 9778,
+   "count": 18,
+   "kind": "manifest",
+   "path": "v12_tour_Gc/repo3/morsehgp3D_v12/tests/mutants/tower.json",
+   "sha256": "60ee75e6e57e03a6d2300ad0dbbc44481bb49ac67560b1372294d2b4d01c7fcf"
+  }
+ ],
+ "git_inputs": [
+  {
+   "name": "unit",
+   "path": "morsehgp3D_v12/tests/tower/unit.cpp",
+   "pin": "d2f39fe8293d31508697b6db113a7954a7fd0d9e",
+   "session_source": true,
+   "sha256": "1d163f132ec417b1ada51922733ba37a5bf0b21a4a7af2149c5fee4af79b1ecd"
+  },
+  {
+   "name": "support",
+   "path": "morsehgp3D_v12/tests/tower/unit_support.hpp",
+   "pin": "d2f39fe8293d31508697b6db113a7954a7fd0d9e",
+   "session_source": true,
+   "sha256": "c77b98dc0f2f05359526e2ab3c4c797bead5bae720c7d0ac25bf6c9f2606065e"
+  },
+  {
+   "name": "tests",
+   "path": "morsehgp3D_v12/tests/tower/tests.cmake",
+   "pin": "d2f39fe8293d31508697b6db113a7954a7fd0d9e",
+   "session_source": true,
+   "sha256": "e253885ae24c1331725d4c6c3c81af11473adc6a9ccb8f37d3b8a24a150ddbc6"
+  },
+  {
+   "name": "framework",
+   "path": "morsehgp3D_v12/tests/support/test.hpp",
+   "pin": "d2f39fe8293d31508697b6db113a7954a7fd0d9e",
+   "session_source": true,
+   "sha256": "bc5b8c3a46e38678721192eb5a2212b9a0fe8a3fdd9cf4f45d6ac58d969ce722"
+  },
+  {
+   "name": "gates",
+   "path": "morsehgp3D_v12/cmake/gates.cmake",
+   "pin": "d2f39fe8293d31508697b6db113a7954a7fd0d9e",
+   "session_source": true,
+   "sha256": "b67f964eb11b74e301fa73c2c741a7bd5040e33182f93ccd3ada1311a047021d"
+  },
+  {
+   "name": "resolve",
+   "path": "morsehgp3D_v12/src/tower/resolve.cpp",
+   "pin": "d2f39fe8293d31508697b6db113a7954a7fd0d9e",
+   "session_source": true,
+   "sha256": "30abe334849164303a0e81623f7345de482ad6f56d523f6c0e94a7aca0621908"
+  },
+  {
+   "name": "contract",
+   "path": "morsehgp3D_v12/docs/CONTRAT_TOUR.md",
+   "pin": "d2f39fe8293d31508697b6db113a7954a7fd0d9e",
+   "session_source": true,
+   "sha256": "262b3bb57f68f9deb3f4b6172419b4e4ba105ffc98ce8f9394e5343de4eb09af"
+  },
+  {
+   "name": "mutant_base",
+   "path": "morsehgp3D_v12/tests/mutants/tower.json",
+   "pin": "d2f39fe8293d31508697b6db113a7954a7fd0d9e",
+   "session_source": true,
+   "sha256": "03a635135f82b4c11affb3d5b03879503e676d358da30d92e936e18e5d3e248c"
+  },
+  {
+   "name": "session_receipt",
+   "path": "morsehgp3D_v12/receipts/g4_t1bi_20261008/receipt.json",
+   "pin": "0a5ebf29f0eb6abaa738e4a29e42b71344e03664",
+   "session_source": false,
+   "sha256": "47c8d5d75116bdfe5bb6de441572a0e60d5c79f20e089e58df589b704c04259a"
+  },
+  {
+   "name": "ctest",
+   "path": "morsehgp3D_v12/receipts/g4_t1bi_20261008/resultats/cmd/000_t1b_catalogue_appareil/files/t1b/logs/ctest.log",
+   "pin": "0a5ebf29f0eb6abaa738e4a29e42b71344e03664",
+   "session_source": false,
+   "sha256": "9e9cfda832a2dc155a31f03ce8b889219ab2212e5a8d742bbf33bbac242a6e5f"
+  },
+  {
+   "name": "gc_audit",
+   "path": "morsehgp3D_v12/receipts/audit_reponses_20261007/gc_mutants_finaux/capture.json",
+   "pin": "9c565602913f401e8c479e30839971fbafddb302",
+   "session_source": false,
+   "sha256": "6725af8878fa0ff53cd8eb140de7acd75e8754f1c9ef837f2a001666f683ee25"
+  }
+ ]
+}

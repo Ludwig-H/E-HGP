@@ -1,0 +1,31 @@
+{
+ "closure_scope": "native_G_D2_MEMO_gates_only; no_future_TMVR_transfer",
+ "d2": {
+  "AB_in_Cat2": false,
+  "AB_p": 2,
+  "AB_qmin": 2,
+  "catalogue_predecessor": "41",
+  "initial": "64",
+  "junction": "1681/25",
+  "legitimate_initial_date": true,
+  "predecessor_guard": false,
+  "terminal": "1"
+ },
+ "floors": {
+  "witness_d2": 15,
+  "witness_memo": 12
+ },
+ "memo": {
+  "calling": "4",
+  "initial": "9",
+  "initial_date_admits": false,
+  "terminal": "1",
+  "terminal_date_would_admit": true
+ },
+ "native_date_mutant_proven": false,
+ "native_gates": {
+  "witness_d2": "403/665 Test #355: mhgp12_tower_unit_witness_d2 .........................................   Passed    0.02 sec",
+  "witness_memo": "404/665 Test #356: mhgp12_tower_unit_witness_memo .......................................   Passed    0.02 sec"
+ },
+ "native_run_by_auditor": false
+}

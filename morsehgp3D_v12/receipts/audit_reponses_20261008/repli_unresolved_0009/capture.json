@@ -1,0 +1,30 @@
+{
+  "main_pin": "9c565602913f401e8c479e30839971fbafddb302",
+  "session_source_pin": "d2f39fe8293d31508697b6db113a7954a7fd0d9e",
+  "v11_pin": "ac081a06fd684fdcd3b11c2b1faa4679f2ad287c",
+  "v11_source_sha256": "76453f7109914a554c32c334466b1747fc6aebc1f2d0618d3d2f2bf692c481f3",
+  "sources": [
+    "src/catalogue/device_driver.hpp",
+    "src/catalogue/device_pipeline.hpp",
+    "src/catalogue/leaves.cpp",
+    "src/catalogue/device_leaves.hpp",
+    "tests/catalogue/device_pipeline_test.cpp",
+    "tests/catalogue/device_support.hpp",
+    "src/sched/pool.cpp"
+  ],
+  "session_receipt": "receipts/g4_t1bi_20261008/receipt.json",
+  "device_log": "receipts/g4_t1bi_20261008/resultats/cmd/000_t1b_catalogue_appareil/files/t1b/logs/device_open.log",
+  "ctest_log": "receipts/g4_t1bi_20261008/resultats/cmd/000_t1b_catalogue_appareil/files/t1b/logs/ctest.log",
+  "artifact_hashes": {
+    "src/catalogue/device_driver.hpp": "e87f947fd85d9e76447254faf67548a5861502d47b892e79c74749f15c83199d",
+    "src/catalogue/device_pipeline.hpp": "4a752fb766263363b1e6dcd24eed85a797c96e561ee97e725066e73afa12622b",
+    "src/catalogue/leaves.cpp": "2172f739d7f3a5a49bfe748f4f8c3a38b4d6a4e6b393bbf22bf1b6396367fff8",
+    "src/catalogue/device_leaves.hpp": "4131c38c13ee6c2d879ad145c8c62f59551d3c2bf6e032fa79351fd7c7c560fa",
+    "tests/catalogue/device_pipeline_test.cpp": "10647f43df275b39f573035f33aef072354f642aa0c926803b22fc5d149ff128",
+    "tests/catalogue/device_support.hpp": "3e511ea080e2f4ebec6a9f497a83cd05fd9d66f3fbd37f4b79aafd4ea9ac9489",
+    "src/sched/pool.cpp": "eed86be4c20f4812032616b639a009b513c12e3106cc808c66f5ec38d4da176f",
+    "receipts/g4_t1bi_20261008/receipt.json": "47c8d5d75116bdfe5bb6de441572a0e60d5c79f20e089e58df589b704c04259a",
+    "receipts/g4_t1bi_20261008/resultats/cmd/000_t1b_catalogue_appareil/files/t1b/logs/device_open.log": "25a9a56c5ee17e6ef34cdf259dd026a7a87e8651896ee892d83f2a01c14b052a",
+    "receipts/g4_t1bi_20261008/resultats/cmd/000_t1b_catalogue_appareil/files/t1b/logs/ctest.log": "9e9cfda832a2dc155a31f03ce8b889219ab2212e5a8d742bbf33bbac242a6e5f"
+  }
+}

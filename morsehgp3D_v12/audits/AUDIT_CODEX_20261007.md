@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-8 octobre 2026. Base publiée **`d6057f976`** ; prototypes distingués des livraisons.
+8 octobre 2026. Base publiée **`9c5656029`** ; prototypes distingués des livraisons.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
 
@@ -51,6 +51,11 @@ Trois trames d'une seule séquence ; les 100 ms, u24/u32 GPU et les autres régi
 
 **Aide mathématique et coût.** Gc : recherche exacte logarithmique sous collisions ; gain du hash par cellule
 conditionnel, identité G liée à la politique. Les preuves détaillées restent liées au registre.
+[D2/MEMO `0104`](../receipts/audit_reponses_20261008/d2_memo/README.md) : portes natives livrées et passées
+en I, niveaux rationnels confirmés ; reste le mutant de date terminale, sans transfert aux lecteurs TMVR.
+[Repli `0009` clos](../receipts/audit_reponses_20261008/repli_unresolved_0009/README.md) : lots de feuilles
+distribués sur le Pool, tampons comptés, portes CPU/GPU acquises ; aucun gain isolé revendiqué.
+`0008` reste ouvert : l'admission exige un seul pilote, contrairement à l'architecture annoncée.
 [Témoin T7](../receipts/audit_reponses_20261007/t7_cercle25/README.md) prêt ; porte native absente.
 En I, ng02 répare 9/16 éléments mais rapatrie 22,5/87,7 Mo de tableaux complets à K5/K10 :
 [compactage exact proposé](../receipts/audit_reponses_20261008/chaines_compactes/README.md), 10 449 cas et huit mutants ;
