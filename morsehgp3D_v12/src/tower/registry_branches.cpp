@@ -10,11 +10,19 @@
 // ouverte r, et rang(l) <= r - 1 tient par la date de LEM-T3. Aucune barriere par plateau, aucune descente de G.
 // Comptage puis reservation exacte : la sortie A (somme des branches) n'est pas bornee par naissances - 1 (sept
 // naissances au meme plateau, cellules {0,1}, {0,1,2}, ..., {0,..,6} : six evenements, 27 branches) ; elle est
-// bornee par les representants relus. Deux passes paralleles par morceaux de lignes, ecritures disjointes. Deux
-// admissions : le travail et les lignes avant la premiere passe, puis la sortie (branches ET decalages de leur CSR,
-// recu audit_registre_branches_20261007) apres le comptage, quand tout le reste de l'etage est deja alloue. Etapes
-// par ordre (lignes, passe 1 par morceaux, decalages et sortie, passe 2, liberation) partagees par run_registry et la
-// Session recouverte (pipeline.cpp, admission unique bornee par registry_bytes_bound).
+// bornee par les representants des cellules retenues. Raccourci (levier R1, critere prouve par l'auditeur Codex,
+// recu registre_classe_unique du 8 octobre) : si la classe M de la cellule retenue t n'a que t pour contributrice,
+// ses branches sont exactement les enfants (tries, distincts) de cette classe ; c'est le cas si et seulement si
+// q == d + 1, ou d est le nombre d'evenements de t (son bloc de event_cell) et q l'arite de sa classe z = cell_node[t].
+// Ces lignes directes ne relisent aucun representant (longueur de travail nulle, aucun pointeur dans branch_nodes,
+// alloue seulement si une ligne generale existe) ; les autres gardent les requetes, le tri et l'unicite. branch_reads
+// compte les representants reellement relus (Q_g, lignes generales).
+//
+// Deux passes paralleles par morceaux de lignes, ecritures disjointes. Deux admissions : le travail et les lignes
+// avant la premiere passe (12 R + 8 (R + 1) + 4 Q_g + 4 R), puis la sortie (branches ET decalages de leur CSR,
+// 4 A + 8 (R + 1), recu audit_registre_branches_20261007) apres le comptage, quand tout le reste de l'etage est
+// deja alloue. Etapes par ordre (lignes, passe 1 par morceaux, decalages et sortie, passe 2, liberation) partagees
+// par run_registry et la Session recouverte (pipeline.cpp, admission unique bornee par registry_bytes_bound).
 #include <algorithm>
 
 #include "sched/sched.hpp"
@@ -23,10 +31,36 @@
 namespace mhgp12::tower::detail {
 namespace {
 
+// Bloc d'evenements [begin, end) de la cellule retenue t = event_cell[begin] (blocs consecutifs) ; reads : nombre de
+// representants a relire, 0 pour une ligne directe (q == d + 1). Le meme calcul sert a l'admission de run_registry et
+// aux decalages de prepare_rows. Controles locaux (ne remplacent pas la validation de T et M) : cellule et noeud dans
+// leur domaine, noeud de fusion, arite entre 2 et naissances, au moins deux representants.
+Outcome plan_row(const ForestInput& in, const OrderForest& f, u64 begin, u64& end, u64& reads) noexcept {
+  const u32 t = f.event_cell[begin];
+  end = begin + 1;
+  while (end < f.event_cell.size() && f.event_cell[end] == t) ++end;
+  if (t >= in.cell_ball.size() || t >= f.cell_node.size()) return fail(Reason::tower_invariant);
+  const u32 z = f.cell_node[t];
+  if (z < f.births || z >= f.nodes()) return fail(Reason::tower_invariant);
+  const u64 q = f.children.off[u64{z} + 1] - f.children.off[z];
+  const u64 n = in.rep_offsets[u64{t} + 1] - in.rep_offsets[t];
+  if (q < 2 || q > f.births || n < 2) return fail(Reason::tower_invariant);
+  reads = q == end - begin + 1 ? 0 : n;
+  return {};
+}
+
 // Passe 1 d'une ligne : noeud a la coupe ouverte de chaque representant, tri, doublons retires ; nombre de branches.
+// Ligne directe (longueur de travail nulle) : arite de sa classe, sans relire de representant ni former de pointeur
+// dans branch_nodes.
 Outcome collect_row(const ForestInput& in, const OrderForest& f, OrderWork& w, u64 j, ForestWork& c) noexcept {
   const u32 t = f.retained_cell[j], r = f.retained_rank[j];
   if (r == 0) return fail(Reason::tower_invariant);
+  if (w.branch_off[j + 1] == w.branch_off[j]) {
+    const u32 z = f.cell_node[t];
+    w.branch_count[j] = static_cast<u32>(f.children.off[u64{z} + 1] - f.children.off[z]);  // q <= naissances (plan_row)
+    c.branches += w.branch_count[j];
+    return {};
+  }
   u32* row = w.branch_nodes.data() + w.branch_off[j];
   u64 n = 0;
   for (u64 p = in.rep_offsets[t]; p < in.rep_offsets[t + 1]; ++p) {
@@ -47,7 +81,8 @@ Outcome collect_row(const ForestInput& in, const OrderForest& f, OrderWork& w, u
 
 }  // namespace
 
-// Lignes de l'ordre i : cellules retenues (blocs consecutifs de event_cell) ; decalages de leurs representants.
+// Lignes de l'ordre i : cellules retenues (blocs consecutifs de event_cell) ; decalages des seuls representants a
+// relire (longueur nulle : ligne directe) ; branch_nodes alloue seulement si une ligne generale existe.
 Outcome prepare_rows(BuildState& s, u32 i, u64& reads) noexcept {
   OrderForest& f = s.forests.orders[i];
   OrderWork& w = s.work[i];
@@ -59,21 +94,20 @@ Outcome prepare_rows(BuildState& s, u32 i, u64& reads) noexcept {
   MHGP12_TRY(f.retained_rank.allocate(rows, s.budget));
   MHGP12_TRY(w.branch_off.allocate(rows + 1, s.budget));
   w.branch_off[0] = 0;
-  for (u64 e = 0, j = 0; e < f.event_cell.size(); ++e) {
-    if (e > 0 && f.event_cell[e] == f.event_cell[e - 1]) continue;
+  for (u64 e = 0, j = 0; e < f.event_cell.size(); ++j) {
+    u64 end = 0, count = 0;
+    MHGP12_TRY(plan_row(in, f, e, end, count));
     const u32 t = f.event_cell[e];
-    if (t >= in.cell_ball.size() || (j > 0 && t <= f.retained_cell[j - 1])) return fail(Reason::tower_invariant);
+    if (j > 0 && t <= f.retained_cell[j - 1]) return fail(Reason::tower_invariant);
     f.retained_cell[j] = t;
     f.retained_ball[j] = idx(in.cell_ball[t]);
     f.retained_rank[j] = idx(in.cell_rank[t]);
-    w.branch_off[j + 1] = w.branch_off[j] + (in.rep_offsets[t + 1] - in.rep_offsets[t]);
-    ++j;
+    w.branch_off[j + 1] = w.branch_off[j] + count;
+    e = end;
   }
   reads = w.branch_off[rows];
-  if (rows > 0) {
-    MHGP12_TRY(w.branch_nodes.allocate(reads, s.budget));
-    MHGP12_TRY(w.branch_count.allocate(rows, s.budget));
-  }
+  if (reads > 0) MHGP12_TRY(w.branch_nodes.allocate(reads, s.budget));
+  if (rows > 0) MHGP12_TRY(w.branch_count.allocate(rows, s.budget));
   return {};
 }
 
@@ -99,7 +133,13 @@ void fill_rows(BuildState& s, u32 i, u64 begin, u64 end) noexcept {
   OrderForest& f = s.forests.orders[i];
   const OrderWork& w = s.work[i];
   for (u64 j = begin; j < end; ++j) {
-    const u32* from = w.branch_nodes.data() + w.branch_off[j];
+    const u32* from = nullptr;
+    if (w.branch_off[j + 1] == w.branch_off[j]) {  // ligne directe : enfants tries de la classe (ordre canonique)
+      const u32 z = f.cell_node[f.retained_cell[j]];
+      from = f.children.val.data() + f.children.off[z];
+    } else {
+      from = w.branch_nodes.data() + w.branch_off[j];
+    }
     std::copy(from, from + w.branch_count[j], f.branches.val.data() + f.branches.off[j]);
   }
 }
@@ -151,14 +191,16 @@ Outcome run_registry(BuildState& s, sched::Pool& pool) noexcept {
   Stopwatch watch;
   u64 bytes = 0, tasks_count = 0;
   for (u64 i = 0; i < s.inputs.size(); ++i) {
-    u64 rows = 0;
+    u64 rows = 0, reads = 0;
     const OrderForest& f = s.forests.orders[i];
-    for (u64 e = 0; e < f.event_cell.size(); ++e) rows += e == 0 || f.event_cell[e] != f.event_cell[e - 1];
-    u64 reads = 0;
-    for (u64 e = 0; e < f.event_cell.size(); ++e)
-      if (e == 0 || f.event_cell[e] != f.event_cell[e - 1])
-        reads += s.inputs[i].rep_offsets[f.event_cell[e] + 1] - s.inputs[i].rep_offsets[f.event_cell[e]];
-    bytes += 12 * rows + 8 * (rows + 1) + 4 * reads + 4 * rows;  // lignes, decalages, noeuds relus, comptes
+    for (u64 e = 0; e < f.event_cell.size();) {
+      u64 end = 0, count = 0;
+      MHGP12_TRY(plan_row(s.inputs[i], f, e, end, count));
+      ++rows;
+      reads += count;
+      e = end;
+    }
+    bytes += 12 * rows + 8 * (rows + 1) + 4 * reads + 4 * rows;  // lignes, decalages, noeuds relus (Q_g), comptes
     tasks_count += (rows + kBranchChunk - 1) / kBranchChunk;
   }
   MHGP12_TRY(admit_stage(s, kStageR, bytes + tasks_count * (sizeof(BranchTask) + sizeof(ForestWork))));

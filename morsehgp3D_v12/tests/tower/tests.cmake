@@ -97,6 +97,13 @@ mhgp12_add_unit(mhgp12_tower_forest SOURCES forest_unit.cpp
                 GROUPS admission attache branches catalogue determinisme domaine hypergraphes refus requetes temoins
                        verticales
                 LABELS fast)
+# Raccourci du registre R (levier R1 ; critere q = d + 1 de l'auditeur, recu registre_classe_unique) : lignes
+# directes et generales decidees independamment du produit (contributrices de chaque classe de la foret de
+# reference), branches contre la coupe ouverte, representants relus Q_g et branches A ; fixtures et 147 cas bornes
+# du modele de l'auditeur, hypergraphes aleatoires a 1, 3 et 8 fils, plus de 2 048 lignes, etapes de R une a une
+# (aucun tampon de travail si tout est direct) et pic de l'etage contre ses octets admis.
+mhgp12_add_unit(mhgp12_tower_registry SOURCES registry_unit.cpp
+                GROUPS fixtures exhaustif aleatoire grand etapes LABELS fast TIMEOUT 300)
 # Session recouverte (build_tower, decision D-F2 ; src/tower/pipeline.hpp) : graphe des etapes contre les lectures de
 # chacune, identite avec la voie sequentielle (resolve_tower puis build_forests : empreinte FUL1, registres, compteurs
 # de l'objet et du travail, cibles) a 1, 2, 3 et 8 fils sur nuages aleatoires, grilles et droites, determinisme sur

@@ -4,9 +4,11 @@
 #pragma once
 
 #include <algorithm>
+#include <array>
 #include <initializer_list>
 #include <memory>
 #include <numeric>
+#include <random>
 #include <vector>
 
 #include "sched/sched.hpp"
@@ -177,6 +179,86 @@ inline bool same_registry(const OrderForest& a, const OrderForest& b) {
          same_buffer(a.retained_cell, b.retained_cell) && same_buffer(a.retained_ball, b.retained_ball) &&
          same_buffer(a.retained_rank, b.retained_rank) && same_buffer(a.branches.off, b.branches.off) &&
          same_buffer(a.branches.val, b.branches.val);
+}
+
+// Construction d'un ou plusieurs ordres par build_forests (voie sequentielle), avec son grand livre.
+struct Run {
+  Result<TowerForests> forests;
+  tower::ForestLedger ledger;
+};
+
+inline Run run(const Cloud& cloud, const std::vector<OrderData>& orders, MemoryBudget& budget, sched::Pool& pool,
+               const tower::BallSource& balls = {}, tower::ForestParams params = {}) {
+  std::vector<ForestInput> inputs;
+  for (const OrderData& d : orders) inputs.push_back(d.view());
+  tower::ForestLedger ledger;
+  auto forests = tower::build_forests(cloud, balls, inputs, params, budget, pool, &ledger);
+  return Run{std::move(forests), ledger};
+}
+
+// Hypergraphe aleatoire connexe d'un ordre : naissances de rang nul, cellules a rangs repetes, un quart des cibles sur
+// une cellule anterieure de rang strictement inferieur ; une cellule de fermeture relie tout au rang le plus haut.
+inline OrderData random_order(std::mt19937_64& rng, u32 nb, u32 joins) {
+  OrderData d;
+  d.births(nb);
+  const u32 ranks = std::array<u32, 6>{1, 2, 3, 5, 12, 40}[rng() % 6];
+  std::vector<std::pair<u32, u32>> cells;  // (rang, arite)
+  for (u32 j = 0; j < joins; ++j)
+    cells.push_back({1 + static_cast<u32>(rng() % ranks), std::array<u32, 6>{1, 2, 2, 3, 4, 5}[rng() % 6]});
+  std::stable_sort(cells.begin(), cells.end(), [](const auto& a, const auto& b) { return a.first < b.first; });
+  u32 below = 0;  // cellules de rang strictement inferieur au rang courant
+  for (u32 j = 0; j < cells.size(); ++j) {
+    if (j > 0 && cells[j].first != cells[j - 1].first) below = j;
+    std::vector<u32> targets;
+    for (u32 r = 0; r < cells[j].second; ++r)
+      targets.push_back(below > 0 && rng() % 4 == 0 ? cell_target(static_cast<u32>(rng() % below))
+                                                    : static_cast<u32>(rng() % nb));
+    d.cell(cells[j].first, targets);
+  }
+  std::vector<u32> all(nb);
+  std::iota(all.begin(), all.end(), 0u);
+  d.cell(ranks + 1, all);
+  return d;
+}
+
+// Coupe ouverte de la foret de reference (remontee parent par parent) et controle independant des lignes du registre :
+// cellules retenues (union-find independant) et branches attendues de chacune ; rend le nombre d'ecarts.
+inline u32 open_cut(const Reference& ref, u32 leaf, u32 below) {
+  u32 v = leaf;
+  while (ref.parent[v] != kNone && ref.rank[ref.parent[v]] <= below) v = ref.parent[v];
+  return v;
+}
+
+inline u64 check_rows(const OrderData& d, const OrderForest& f) {
+  const u32 nb = static_cast<u32>(d.birth_key.size());
+  const Reference ref = kruskal_lots(d);
+  std::vector<u32> dsu(nb);
+  std::iota(dsu.begin(), dsu.end(), 0u);
+  auto find = [&dsu](u32 x) {
+    while (dsu[x] != x) x = dsu[x] = dsu[dsu[x]];
+    return x;
+  };
+  u64 j = 0, bad = 0;
+  for (u64 t = 0; t < d.cell_ball.size(); ++t) {
+    const u32 r = idx(d.cell_rank[t]);
+    std::vector<u32> leaves, expected;
+    for (u64 p = d.rep_offsets[t]; p < d.rep_offsets[t + 1]; ++p) leaves.push_back(reference_leaf(d, d.targets[p]));
+    bool retained = false;
+    for (u32 l : leaves) {
+      const u32 x = find(leaves[0]), y = find(l);
+      if (x != y) dsu[y] = x, retained = true;
+    }
+    if (!retained) continue;
+    for (u32 l : leaves) expected.push_back(open_cut(ref, l, r - 1));
+    std::sort(expected.begin(), expected.end());
+    expected.erase(std::unique(expected.begin(), expected.end()), expected.end());
+    const bool same = j < f.retained_cell.size() && f.retained_cell[j] == t &&
+                      f.branches.off[j + 1] - f.branches.off[j] == expected.size() &&
+                      std::equal(expected.begin(), expected.end(), f.branches.val.data() + f.branches.off[j]);
+    bad += !same;
+    ++j;
+  }
+  return bad + (j != f.retained_cell.size());
 }
 
 }  // namespace mhgp12::tower_test

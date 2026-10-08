@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 49,
+  "plancher": 55,
   "mutants": [
     {
       "id": "t1_sans_s_dans_f",
@@ -421,6 +421,54 @@
       "remplace": "    jobs[j].sorted = from[j];",
       "porte": "mhgp12_tower_index_radix_stable",
       "note": "T2-d-B2, defaut trouve par les portes existantes le 8 octobre : un tableau inactif (moins de deux entrees, low_bit = 64) recevrait un resultat vide (rien a trier, rien rendu) ; aussi tue par duplicate_population et build_all"
+    },
+    {
+      "id": "r1_copie_de_tous_les_enfants",
+      "fichier": "src/tower/registry_branches.cpp",
+      "cherche": "  reads = q == end - begin + 1 ? 0 : n;",
+      "remplace": "  reads = 0;",
+      "porte": "mhgp12_tower_registry_fixtures",
+      "note": "levier R1 : toute ligne copiee depuis les enfants de sa classe (le raccourci global que le modele de l'auditeur refute) : les sous-aretes partagees {0,1} puis {0,2} donnent une ligne a trois branches au lieu de deux"
+    },
+    {
+      "id": "r1_critere_d_sans_un",
+      "fichier": "src/tower/registry_branches.cpp",
+      "cherche": "  reads = q == end - begin + 1 ? 0 : n;",
+      "remplace": "  reads = q == end - begin ? 0 : n;",
+      "porte": "mhgp12_tower_registry_fixtures",
+      "note": "levier R1 : critere q == d au lieu de q == d + 1 : plus aucune ligne directe ; branches justes mais representants relus Q_R au lieu de Q_g (compteur physique)"
+    },
+    {
+      "id": "r1_copie_directe_du_tampon",
+      "fichier": "src/tower/registry_branches.cpp",
+      "cherche": "    if (w.branch_off[j + 1] == w.branch_off[j]) {  // ligne directe : enfants tries de la classe (ordre canonique)",
+      "remplace": "    if (false) {  // ligne directe : enfants tries de la classe (ordre canonique)",
+      "porte": "mhgp12_tower_registry_grand",
+      "note": "levier R1 : la passe 2 copie une ligne directe depuis branch_nodes, ou elle n'a rien ecrit (decalage de la ligne generale suivante) : branches fausses"
+    },
+    {
+      "id": "r1_admission_sans_q_g",
+      "fichier": "src/tower/registry_branches.cpp",
+      "cherche": "    bytes += 12 * rows + 8 * (rows + 1) + 4 * reads + 4 * rows;  // lignes, decalages, noeuds relus (Q_g), comptes",
+      "remplace": "    bytes += 12 * rows + 8 * (rows + 1) + 0 * reads + 4 * rows;  // lignes, decalages, noeuds relus (Q_g), comptes",
+      "porte": "mhgp12_tower_registry_etapes",
+      "note": "levier R1 : tampon des representants des lignes generales (4 Q_g) retire de la premiere admission de R : le pic de l'etage depasse ses octets admis"
+    },
+    {
+      "id": "r1_branches_directes_non_comptees",
+      "fichier": "src/tower/registry_branches.cpp",
+      "cherche": "    c.branches += w.branch_count[j];",
+      "remplace": "    c.branches += 0;",
+      "porte": "mhgp12_tower_registry_fixtures",
+      "note": "levier R1 : branches des lignes directes absentes du compteur du travail branches (A)"
+    },
+    {
+      "id": "r1_admission_en_q_r",
+      "fichier": "src/tower/registry_branches.cpp",
+      "cherche": "      reads += count;",
+      "remplace": "      reads += s.inputs[i].rep_offsets[f.event_cell[e] + 1] - s.inputs[i].rep_offsets[f.event_cell[e]];",
+      "porte": "mhgp12_tower_registry_etapes",
+      "note": "levier R1 : premiere admission de R calculee en Q_R (tous les representants des lignes retenues) au lieu de Q_g : sur-admission, le reste des octets admis varie d'une entree a l'autre"
     }
   ]
 }
