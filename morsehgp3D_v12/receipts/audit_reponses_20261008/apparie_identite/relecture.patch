@@ -1,0 +1,74 @@
+--- a/morsehgp3D_v12/microbancs/mes_apparie/pilote_apparie.py
++++ b/morsehgp3D_v12/microbancs/mes_apparie/pilote_apparie.py
+@@ -138,9 +138,45 @@
+ 
+ # ---- Juge -----------------------------------------------------------------------------------------------------------
+ def reread(report, folder, refusals):
+-    """Rejeu brut de la campagne : chaque journal re-hache, relu avec l'attendu de SA PLACE, mur chaud recalcule."""
++    """Relit les preuves d'identite et les campagnes ; recalcule tous les champs utilises par les tableaux."""
+     cfg = report['parametres']
+     arms = dict(report['regle_bras'])
++
++    def one(take, path, attendu, label):
++        actual_sha = file_sha(path)
++        if type(take) is not dict or actual_sha is None or take.get('journal') != os.path.basename(path) or \
++                actual_sha != take.get('journal_sha256'):
++            refusals.append('journal manquant ou change : ' + label)
++            return
++        if type(take.get('code')) is not int or take['code'] != 0:
++            refusals.append('code de processus non conforme : ' + label)
++            return
++        try:
++            with open(path, encoding='utf-8') as handle:
++                text = handle.read()
++        except (OSError, UnicodeError):
++            refusals.append('journal illisible : ' + label)
++            return
++        state = lf.parse_output(take['code'], text, attendu)
++        if state['etat'] != 'ok' or take.get('etat') != 'ok':
++            refusals.append('prise relue non conforme : ' + label)
++            return
++        summary = take_summary(state)
++        summary['empreintes'] = sorted({p['full_sha256'] for p in state['passes']}) if attendu['empreinte'] else []
++        # JSON canonique preserve aussi les types : False n'est pas le nombre 0, 0.0 n'est pas 0.
++        dumped = lambda x: json.dumps(x, sort_keys=True, allow_nan=False)
++        if any(dumped(take.get(key)) != dumped(value) for key, value in summary.items()):
++            refusals.append('resume different du journal : ' + label)
++
++    for label in cfg['trames']:
++        frame = report['trames'].get(label)
++        if frame is None:
++            refusals.append("trame d'identite inconnue : " + label)
++            continue
++        for arm in arms:
++            path = os.path.join(folder, 'journaux', 'identite', '%s_%s.jsonl' % (label, arm))
++            attendu = expected(arms[arm], cfg['voie'], cfg['k'], cfg['fils'], 2, [(label, frame['sites'])], True)
++            one(report.get('identite', {}).get(label, {}).get(arm), path, attendu, 'identite %s %s' % (label, arm))
+     for label, rounds in report['campagne'].items():
+         frame = report['trames'].get(label)
+         if frame is None:
+@@ -148,22 +184,13 @@
+             continue
+         for t, row in enumerate(rounds):
+             for arm, take in row.items():
+-                if arm not in arms or type(take) is not dict:
++                if arm not in arms:
+                     refusals.append('bras inconnu dans la campagne : %s' % arm)
+                     continue
+                 path = os.path.join(folder, 'journaux', 'campagne', label, '%s_t%02d.jsonl' % (arm, t))
+-                if take.get('journal') != os.path.basename(path) or file_sha(path) != take.get('journal_sha256'):
+-                    refusals.append('journal manquant ou change : %s %s tour %d' % (label, arm, t))
+-                    continue
+-                with open(path, encoding='utf-8', errors='replace') as handle:
+-                    text = handle.read()
+                 attendu = expected(arms[arm], cfg['voie'], cfg['k'], cfg['fils'], cfg['passes'],
+                                    [(label, frame['sites'])], False)
+-                state = lf.parse_output(take.get('code'), text, attendu)
+-                if state['etat'] != 'ok' or take.get('etat') != 'ok' or \
+-                        warm_wall(state['passes']) != take.get('mur_chaud_ns'):
+-                    refusals.append('prise relue non conforme : %s %s tour %d (%s)' % (label, arm, t,
+-                                                                                        state['raison']))
++                one(take, path, attendu, 'campagne %s %s tour %d' % (label, arm, t))
+ 
+ 
+ def judge(report, folder=None):

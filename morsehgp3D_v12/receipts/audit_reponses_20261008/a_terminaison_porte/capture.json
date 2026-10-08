@@ -1,0 +1,16 @@
+{
+  "pin": "a785b9ef33aad30a825999c02bcd5fcf13f3846b",
+  "initial_pin": "86d7e39d834cae86768d49a23d83bf53454ec2a3",
+  "observed_utc": "2026-10-08T09:06:30Z",
+  "sources": {
+    "morsehgp3D_v12/src/tower/pipeline_run.cpp": "f3d260ae51159c5c039082f8b1442434123bdb59114d4364c4d0a4e7ef8f09a6",
+    "morsehgp3D_v12/src/tower/pipeline.hpp": "22247870f74e66814b9339c7977df58ff5510592803ed4995f38d02531ede99f",
+    "morsehgp3D_v12/src/tower/pipeline.cpp": "44e83374113a860519744f4a34dab854e32e50d50febc0e0f905a8aa7f8e437b",
+    "morsehgp3D_v12/tests/tower/pipeline_unit.cpp": "d87638c109aa19a45ec5f480e8c7e7ebb52e210d051cba8acc1615ff168f5647",
+    "morsehgp3D_v12/tests/tower/pipeline_fault.cpp": "4331a1d4d16317fa55ebfeaee899264826c2e4f7cfe80f0b6f2548af0e630199",
+    "morsehgp3D_v12/cmake/gates.cmake": "b67f964eb11b74e301fa73c2c741a7bd5040e33182f93ccd3ada1311a047021d",
+    "morsehgp3D_v12/CMakeLists.txt": "88db9fccd74b7042c35479226090fd8c7049968de13d481bb2bdf2e8d673311c"
+  },
+  "live_equal_at_capture": true,
+  "native_run": false
+}

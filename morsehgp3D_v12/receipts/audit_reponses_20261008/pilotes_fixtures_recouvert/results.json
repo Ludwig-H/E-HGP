@@ -1,0 +1,84 @@
+{
+  "fixtures": {
+    "morsehgp3D_v12/microbancs/mes_apparie/test_pilote_apparie.py": {
+      "before": {
+        "legacy": "ok",
+        "reason": "dependances des fins par ordre (passe 0)",
+        "sequential_sha256": "052663f84ce8b734cfc3f3eb7c7e21b4561b4a23f81cb26ecda4187b717b6e1c",
+        "strengthened": "illisible"
+      },
+      "proposed": {
+        "legacy": "ok",
+        "reason": "",
+        "sequential_sha256": "052663f84ce8b734cfc3f3eb7c7e21b4561b4a23f81cb26ecda4187b717b6e1c",
+        "strengthened": "ok"
+      }
+    },
+    "morsehgp3D_v12/microbancs/mes_b_scenes/test_pilote_b.py": {
+      "before": {
+        "legacy": "ok",
+        "reason": "dependances des fins par ordre (passe 0)",
+        "sequential_sha256": "96bcbc2224a9f19b917c0eee3a0405bc77a1eb65e222e9965ba34de6f61a39b2",
+        "strengthened": "illisible"
+      },
+      "proposed": {
+        "legacy": "ok",
+        "reason": "",
+        "sequential_sha256": "96bcbc2224a9f19b917c0eee3a0405bc77a1eb65e222e9965ba34de6f61a39b2",
+        "strengthened": "ok"
+      }
+    },
+    "morsehgp3D_v12/microbancs/mes_c_petits/test_pilote_c.py": {
+      "before": {
+        "legacy": "ok",
+        "reason": "dependances des fins par ordre (passe 0)",
+        "sequential_sha256": "502f1876f9df8486d8760f60924bad4ee4ce5afcadaf2743607bb64650b32cf7",
+        "strengthened": "illisible"
+      },
+      "proposed": {
+        "legacy": "ok",
+        "reason": "",
+        "sequential_sha256": "502f1876f9df8486d8760f60924bad4ee4ce5afcadaf2743607bb64650b32cf7",
+        "strengthened": "ok"
+      }
+    },
+    "morsehgp3D_v12/microbancs/mes_full/test_pilote_full.py": {
+      "before": {
+        "legacy": "ok",
+        "reason": "dependances des fins par ordre (passe 0)",
+        "sequential_sha256": "b9dd2e94c8745be305022529682d81c802337e3e3c84d7d030d92d527558447c",
+        "strengthened": "illisible"
+      },
+      "proposed": {
+        "legacy": "ok",
+        "reason": "",
+        "sequential_sha256": "b9dd2e94c8745be305022529682d81c802337e3e3c84d7d030d92d527558447c",
+        "strengthened": "ok"
+      }
+    }
+  },
+  "official_python_gates": {
+    "morsehgp3D_v12/microbancs/mes_apparie/test_pilote_apparie.py": {
+      "code": 0,
+      "stderr": "",
+      "stdout": "test_pilote_apparie_ok auto_test=1 usage=3 campagne=1 journal_change=1 schema_croise=1 empreinte=1"
+    },
+    "morsehgp3D_v12/microbancs/mes_b_scenes/test_pilote_b.py": {
+      "code": 0,
+      "stderr": "",
+      "stdout": "test_pilote_b_ok verdicts=9 empreintes=3 attendu=1 etiquettes=12 pilote=5"
+    },
+    "morsehgp3D_v12/microbancs/mes_c_petits/test_pilote_c.py": {
+      "code": 0,
+      "stderr": "",
+      "stdout": "test_pilote_c_ok cohorte=9 verdict=5 droites=3 criteres=3 schema_croise=1 difficiles=1 empreintes=1 usage=1"
+    },
+    "morsehgp3D_v12/microbancs/mes_full/test_pilote_full.py": {
+      "code": 0,
+      "stderr": "",
+      "stdout": "test_pilote_full_ok essai=1 sites_faux=1 empreinte=1 sequentiel=1 schema_croise=1"
+    }
+  },
+  "scope": "simulated Python probes, synthetic zeros only; no engine, CUDA, real data or campaign",
+  "source_commit": "0e62a723202732d69e430349c0b2a7b498cbb49c"
+}

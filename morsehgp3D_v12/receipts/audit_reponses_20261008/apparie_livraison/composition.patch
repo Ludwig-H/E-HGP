@@ -1,0 +1,118 @@
+--- a/morsehgp3D_v12/microbancs/mes_apparie/pilote_apparie.py
++++ b/morsehgp3D_v12/microbancs/mes_apparie/pilote_apparie.py
+@@ -138,9 +138,45 @@
+ 
+ # ---- Juge -----------------------------------------------------------------------------------------------------------
+ def reread(report, folder, refusals):
+-    """Rejeu brut de la campagne : chaque journal re-hache, relu avec l'attendu de SA PLACE, mur chaud recalcule."""
++    """Relit les preuves d'identite et les campagnes ; recalcule tous les champs utilises par les tableaux."""
+     cfg = report['parametres']
+     arms = dict(report['regle_bras'])
++
++    def one(take, path, attendu, label):
++        actual_sha = file_sha(path)
++        if type(take) is not dict or actual_sha is None or take.get('journal') != os.path.basename(path) or \
++                actual_sha != take.get('journal_sha256'):
++            refusals.append('journal manquant ou change : ' + label)
++            return
++        if type(take.get('code')) is not int or take['code'] != 0:
++            refusals.append('code de processus non conforme : ' + label)
++            return
++        try:
++            with open(path, encoding='utf-8') as handle:
++                text = handle.read()
++        except (OSError, UnicodeError):
++            refusals.append('journal illisible : ' + label)
++            return
++        state = lf.parse_output(take['code'], text, attendu)
++        if state['etat'] != 'ok' or take.get('etat') != 'ok':
++            refusals.append('prise relue non conforme : ' + label)
++            return
++        summary = take_summary(state)
++        summary['empreintes'] = sorted({p['full_sha256'] for p in state['passes']}) if attendu['empreinte'] else []
++        # JSON canonique preserve aussi les types : False n'est pas le nombre 0, 0.0 n'est pas 0.
++        dumped = lambda x: json.dumps(x, sort_keys=True, allow_nan=False)
++        if any(dumped(take.get(key)) != dumped(value) for key, value in summary.items()):
++            refusals.append('resume different du journal : ' + label)
++
++    for label in cfg['trames']:
++        frame = report['trames'].get(label)
++        if frame is None:
++            refusals.append("trame d'identite inconnue : " + label)
++            continue
++        for arm in arms:
++            path = os.path.join(folder, 'journaux', 'identite', '%s_%s.jsonl' % (label, arm))
++            attendu = expected(arms[arm], cfg['voie'], cfg['k'], cfg['fils'], 2, [(label, frame['sites'])], True)
++            one(report.get('identite', {}).get(label, {}).get(arm), path, attendu, 'identite %s %s' % (label, arm))
+     for label, rounds in report['campagne'].items():
+         frame = report['trames'].get(label)
+         if frame is None:
+@@ -148,26 +184,57 @@
+             continue
+         for t, row in enumerate(rounds):
+             for arm, take in row.items():
+-                if arm not in arms or type(take) is not dict:
++                if arm not in arms:
+                     refusals.append('bras inconnu dans la campagne : %s' % arm)
+                     continue
+                 path = os.path.join(folder, 'journaux', 'campagne', label, '%s_t%02d.jsonl' % (arm, t))
+-                if take.get('journal') != os.path.basename(path) or file_sha(path) != take.get('journal_sha256'):
+-                    refusals.append('journal manquant ou change : %s %s tour %d' % (label, arm, t))
+-                    continue
+-                with open(path, encoding='utf-8', errors='replace') as handle:
+-                    text = handle.read()
+                 attendu = expected(arms[arm], cfg['voie'], cfg['k'], cfg['fils'], cfg['passes'],
+                                    [(label, frame['sites'])], False)
+-                state = lf.parse_output(take.get('code'), text, attendu)
+-                if state['etat'] != 'ok' or take.get('etat') != 'ok' or \
+-                        warm_wall(state['passes']) != take.get('mur_chaud_ns'):
+-                    refusals.append('prise relue non conforme : %s %s tour %d (%s)' % (label, arm, t,
+-                                                                                        state['raison']))
++                one(take, path, attendu, 'campagne %s %s tour %d' % (label, arm, t))
++
++
++def validate_campaign(report, raw_replay):
++    """Fermer la configuration et les cohortes avant toute statistique ou relecture."""
++    if type(report) is not dict or type(report.get('parametres')) is not dict or \
++            type(report.get('regle_bras')) is not dict:
++        return 'configuration absente ou mal formee'
++    cfg, arms = report['parametres'], report['regle_bras']
++    if len(arms) < 2 or any(type(name) is not str or type(opts) is not list or
++            any(type(o) is not str for o in opts) or parse_arm(name + '=' + ' '.join(opts)) != (name, opts)
++            for name, opts in arms.items()):
++        return 'bras mal formes'
++    ref, aa = cfg.get('reference'), cfg.get('aa')
++    if type(ref) is not str or ref not in arms or (aa is not None and
++            (type(aa) is not str or aa not in arms or aa == ref or arms[aa] != arms[ref])):
++        return 'reference ou controle A/A incoherent'
++    trial = cfg.get('essai', False)
++    if type(trial) is not bool or cfg.get('voie') not in ('cpu', 'appareil') or \
++            any(type(cfg.get(k)) is not int for k in ('k', 'fils', 'passes', 'tours')) or \
++            not 1 <= cfg['k'] <= 12 or cfg['fils'] < 1 or \
++            cfg['passes'] < (2 if trial else REGLE_APPARIEE['passes_min']) or \
++            cfg['tours'] < (1 if trial else REGLE_APPARIEE['tours_min']):
++        return 'regime ou minima de campagne invalides'
++    labels = cfg.get('trames')
++    if type(labels) is not list or not labels or any(type(x) is not str or not x for x in labels) or \
++            len(set(labels)) != len(labels):
++        return 'cohorte decisive vide ou mal formee'
++    for key in ('identite', 'campagne'):
++        if type(report.get(key)) is not dict or set(report[key]) != set(labels):
++            return 'cohorte ' + key + ' differente de la configuration'
++    if raw_replay and (type(report.get('trames')) is not dict or set(report['trames']) != set(labels) or
++            any(type(x) is not dict or type(x.get('sites')) is not int or not 0 < x['sites'] < 2**32
++                for x in report['trames'].values())):
++        return 'metadonnees de trames invalides'
++    if any(type(tours) is not list or len(tours) != cfg['tours'] for tours in report['campagne'].values()):
++        return 'nombre de tours different de la configuration'
++    return ''
+ 
+ 
+ def judge(report, folder=None):
+     """Jugement par REGLE_APPARIEE ; folder=None (auto-test seulement) saute le rejeu brut."""
++    invalid = validate_campaign(report, folder is not None)
++    if invalid:
++        return dict(verdict='refuse', refus=[invalid], cas={})
+     cfg, rule = report['parametres'], REGLE_APPARIEE
+     arms, reference, aa = dict(report['regle_bras']), cfg['reference'], cfg.get('aa')
+     refusals, cases = [], {}

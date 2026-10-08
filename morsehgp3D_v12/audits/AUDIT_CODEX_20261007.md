@@ -1,12 +1,13 @@
 # Audit Codex — état courant v12
 
-8 octobre 2026. Code relu : bascule `86d7e39d`, B `41d4d828b`. Mesures : A `5f5c` contre `27eca`, B sur902, MES-C2 `27eca`.
+8 octobre 2026. Code relu : bascule `86d7e39d`, B sans L4 `957e9784f`. Mesures : A `5f5c` contre `27eca`, B sur902, MES-C2 `27eca`.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
 
 **Priorité : [CST-0241, terminaison de A](../receipts/audit_reponses_20261008/a_terminaison/README.md).**
 Deux fils peuvent se réannoncer indéfiniment après tout travail fini : cycle SC équitable de 16 transitions.
 Correctif minimal proposé (`last = fetch_sub(...) == 1`) ; six modèles bornés sans cycle après correction.
+[Preuve pour N fils et protocole de porte déterministe](../receipts/audit_reponses_20261008/a_terminaison_porte/README.md).
 Aucun incident natif observé ni lien avec MES-M0 ; intégration et porte native à faire.
 
 **Derniers temps G4 : A adopté, contrat FULL 100 ms non tenu.**
@@ -19,9 +20,8 @@ ng00–02 : 39 885 / 35 551 / 45 845 sites. FULL GPU K5 ; cinq processus × neuf
 | Après A | **99,74** | **81,03** | **97,80** |
 
 ng00 atteint **101,68 ms au maximum des médianes processus** ; aucune garantie 100 ms déduite des trois médianes.
-61 processus/850 passes admises, 46 objets FUL1 comparés identiques. Catalogue C et pool communs aux deux bras.
-[Correction de notre lecture du bras avant](../receipts/audit_reponses_20261008/session_a_provenance/README.md) :
-archive réelle **27eca**, pas le 902 d'un ancien commentaire ; aucun gain C/pool indu ne doit être imputé à cette comparaison.
+850 passes admises, objets identiques. [Avant réel27eca, erratum902](../receipts/audit_reponses_20261008/session_a_provenance/README.md) :
+catalogue C et pool communs ; aucun de leurs gains imputé à A.
 
 **37 trames, six séquences : FULL 230,79→160,57 ms de médiane des médianes par trame**,
 maximum de ces médianes **440,29→319,74 ms** ; pire passe chaude **448,21→327,27 ms**.
@@ -41,9 +41,8 @@ reste interrompue au plafond externe180s, sans deadlock A établi.
 
 **Priorité développeur : distinguer les fins observées et les durées.** [Diagnostic A](../receipts/audit_reponses_20261008/session_a_diagnostic/README.md) :
 R5 est le dernier marqueur **43/45 fois sur ng02 et 94/111 sur les 37 trames** ; ordres1/2 surtout sur ng00/ng01.
-Ces marqueurs ne prouvent pas seuls le chemin critique causal. G inclut du travail forêt concurrent ;
-P+C+G+queue n'épuise pas le mur (résidu médian ng00/ng02 : 2,39/1,78 ms).
-Tracer les attentes et descendants de R5 avant d'écarter le noyau K5 ou de tout attribuer aux ordres1/2.
+Ce ne sont pas des chemins critiques prouvés. G inclut du travail forêt concurrent ; P+C+G+queue
+laisse un résidu médian ng00/ng02 de2,39/1,78 ms. Tracer les attentes et descendants de R5.
 
 **Petits nuages MES-C2 : trois critères non tenus, campagne complète.** [Admission indépendante](../receipts/audit_reponses_20261008/session_c2_admission/README.md),
 source `27eca166b`, u21, 147 nuages ; médiane des médianes par nuage, deux visites chaudes :
@@ -55,26 +54,34 @@ source `27eca166b`, u21, 147 nuages ; médiane des médianes par nuage, deux vis
 
 132 réels seuls CPU/GPU K5 W48 : 28,02/9,68 ms. C1/C2 CPU OLS : 16,45 ms + 11,57 µs/site,
 seuils 2 ms et 3,727 µs/site. Huit refus quasi-sphères 3k/10k aux deux K/voies, tous `wide_leaf`.
-56 processus joués, 3 608 passes complètes/2 392 chaudes ; aucune expiration ni prise manquante.
-[Sources et arrêt certifiés](../receipts/audit_reponses_20261008/session_c2_provenance/README.md).
-Comparaison MES-C descriptive : 882 empreintes communes égales ; C et pool changés ensemble,
-aucun gain isolé du pool. W1 absent du plan C2 ; ses temps antérieurs restent dans le reçu MES-C.
+56 processus, 2 392 chaudes ; [sources/arrêt certifiés](../receipts/audit_reponses_20261008/session_c2_provenance/README.md).
+882 empreintes communes égales à MES-C ; C/pool changés ensemble, aucun gain isolé. W1 absent du plan C2.
 
 **Massifs, prises antérieures à A :** [L1r](../receipts/audit_reponses_20261008/session_l1r_admission/README.md),
 Boreas sans sol 1,51M : GPU **10,025s** / CPU **22,344s**, une chaude. Dix succès/huit refus mémoire ; critères non tenus/non évalués.
 [L2 CPU froide](../receipts/audit_reponses_20261008/session_l2_admission/README.md) : Paris9,11M **112,866s**,14,55M **165,789s** ;
 ETH3D `wide_leaf`, Lyon `memory_budget`. Sans chaud/GPU/K10/digest L2 ; aucun plafond universel en sites.
 
+**Pilote apparié : fermer les preuves avant G4.** [Identité/résumés](../receipts/audit_reponses_20261008/apparie_identite/README.md) :
+quatre fausses admissions, dont preuves FUL1 absentes et ressources forgées.
+[Cohorte](../receipts/audit_reponses_20261008/apparie_cohorte/README.md) : quatre autres, dont cohorte vide adoptant même
+un bras plus lent ; deux minima relâchés aussi refusés par la proposition. Huit auto-tests et positif simulé conservés.
+[Patch combiné applicable sur0e62](../receipts/audit_reponses_20261008/apparie_livraison/README.md),
+[fixtures LF corrigées](../receipts/audit_reponses_20261008/pilotes_fixtures_recouvert/README.md) ; aucune mesure réelle invalidée. [Pilotes de bascule](../receipts/audit_reponses_20261008/pilotes_bascule/README.md)
+compatibles avec86d ; séparateur de tableau MES-FULL à corriger d'une colonne.
+
 **Corrections et suite immédiate.** [Bascule A contre-vérifiée](../receipts/audit_reponses_20261008/t2d_a_bascule_cloture/README.md) :
-fenêtre réelle des feuilles et cohorte du juge intégrées exactement ; nominal accepté, trois contre-exemples refusés.
+fenêtre des feuilles et cohorte du juge intégrées exactement ; trois contre-exemples refusés.
 Patch fourni pour demander `--sequentiel` sur le bras après du pilote A, nécessaire depuis le nouveau défaut.
 [Lecteur recouvert](../receipts/audit_reponses_20261008/lf_recouvert_gardes/README.md) : neuf corruptions d'horloges encore admises en86d ;
 correctif proposé, 61 journaux/850 passes A préservés, quatre mutants causaux. Pas d'ordre imposé entre V et R.
 
 **[B admis sur902](../receipts/audit_reponses_20261008/session_b_admission/README.md)** : 272 journaux/2 616 passes, 2 344 chaudes.
 G CPU K5 W48 : **53,092→48,576 / 42,023→38,885 / 48,222→45,007 ms** ; gains géométriques6,8–8,4 %.
-Lot, report, témoins et census combiné adoptés ; garde et proposition seules rejetées selon la règle préannoncée.
-FULL GPU **séquentiel informatif** : 161,899→157,181 /129,755→126,940 /165,756→164,279 ms.
+Lot, report, témoins et census combiné adoptés ; garde et proposition seules rejetées.
+[Retrait L4 livré957e9784f](../receipts/audit_reponses_20261008/b_census_raccord/README.md) : dix fichiers du census retenu exacts ;
+son G mesuré vaut **49,037 /39,199 /45,323 ms**, avec les réserves de base902 ci-dessous.
+FULL GPU **séquentiel informatif** du lot : **157,181 /126,940 /164,279 ms**.
 Ce sont902 et902+B, sans A/C/pool récent ; **aucun transfert au FULL recouvert actuel** ni au lot après retrait de L4.
 K5 garde ses compteurs ; K10 change deux routes d'une unité avec objets identiques. B ne traite pas le catalogue CPU dominant.
 [Raccord B/A](../receipts/audit_reponses_20261008/t2d_b_raccord_a/README.md) favorable sur emprunts et espaces privés, sans temps déduit.

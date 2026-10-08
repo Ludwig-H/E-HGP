@@ -1,0 +1,101 @@
+{
+ "captured_utc": "2026-10-08T08:59:09.115912+00:00",
+ "context_git": "a785b9ef33aad30a825999c02bcd5fcf13f3846b",
+ "status": "uncommitted product candidate, no native replay",
+ "manifest": {
+  "git": "41d4d828b70ad033f8bf392aca20a4af13cea242",
+  "path": "morsehgp3D_v12/microbancs/mes_t2d_b/bras_t2d_b.json",
+  "sha256": "3999a137f3002ca6fcf2a477457dbd9d118023da31f8490d0656350ab826b025"
+ },
+ "before_git": "902041f6675a079deb4a642068b036635171db1f",
+ "source_files": {
+  "src/index/bounds.hpp": {
+   "bytes": 2736,
+   "sha256": "d877fe59756a0686cc825a35bbfca9c1d50cc5d5c595e398767281c802f5a869",
+   "expected_from": "census_postimage"
+  },
+  "src/index/census.cpp": {
+   "bytes": 4616,
+   "sha256": "ca588e5db2bbb4a549f7a599d186029bc44be9a386b8529561fcc439312908b2",
+   "expected_from": "census_postimage"
+  },
+  "src/index/census_workspace.cpp": {
+   "bytes": 6316,
+   "sha256": "bee79fd409488e710660aa788e83001bb68cd918c0f6852187cf0fe868f58fb4",
+   "expected_from": "census_postimage"
+  },
+  "src/index/index.hpp": {
+   "bytes": 10824,
+   "sha256": "a984c29ee8866f8742ac1e637ff2d3c487092e8e541537350c44ac7a278cfe7e",
+   "expected_from": "census_postimage"
+  },
+  "src/num/budgets.hpp": {
+   "bytes": 8277,
+   "sha256": "d3f3fe22d7bfd3bbab1b377d983aa08897f1bfd320625879527fcaf0be61424f",
+   "expected_from": "census_postimage"
+  },
+  "src/num/guard.cpp": {
+   "bytes": 9823,
+   "sha256": "5a5fc29b65e21b1b74f642986614eb1fb0801cc084ae7ec50bc3aedc7e5655fc",
+   "expected_from": "census_postimage"
+  },
+  "src/num/guard.hpp": {
+   "bytes": 5243,
+   "sha256": "6c73d770688b2e35036940e1524ac479f71b41f79d84c6b80fdbfb664d566b48",
+   "expected_from": "census_postimage"
+  },
+  "src/num/power_certificate.hpp": {
+   "bytes": 2987,
+   "sha256": "f5071c6dfe33c14df1911852cf79ac645e85cb6affc05474adf56b5fbffc9ef1",
+   "expected_from": "census_postimage"
+  },
+  "src/tower/proposal.hpp": {
+   "bytes": 7502,
+   "sha256": "92495aa67223577c8acef74967f89853c0dab3c5881afe1fb2c7826327f28c18",
+   "expected_from": "before902"
+  },
+  "src/tower/resolve.cpp": {
+   "bytes": 15191,
+   "sha256": "3d2bd04e02e60b6bab1d27b77a488112f80791f69395805273f539c6773dc1af",
+   "expected_from": "census_postimage"
+  }
+ },
+ "admission_results": {
+  "path": "morsehgp3D_v12/receipts/audit_reponses_20261008/session_b_admission/results.json",
+  "sha256": "076d0abc96c07823d8c8e7653cc79d288c62d2986ea00ffb2c9f1b7c3004f357"
+ },
+ "selected_median_process_ms": {
+  "ng00": {
+   "apres": 48.5758565,
+   "avant": 53.0921405,
+   "census": 49.0369205
+  },
+  "ng01": {
+   "apres": 38.8853035,
+   "avant": 42.0225715,
+   "census": 39.198647
+  },
+  "ng02": {
+   "apres": 45.0066685,
+   "avant": 48.221624,
+   "census": 45.323494
+  }
+ },
+ "docs": {
+  "morsehgp3D_v12/receipts/g4_t2db_20261008/README.md": {
+   "bytes": 5895,
+   "sha256": "239cb7ee01abf735dd4d10a804e5e82947d5984fca64b53215b2b96b632f0db5",
+   "proposed_sha256": "4a3b10a7fd19194ea2cd582162a55f688766ae63d6833b34374d2d2bb1562af0"
+  },
+  "morsehgp3D_v12/docs/PLAN.md": {
+   "bytes": 20822,
+   "sha256": "ae179a0252b30e449a877cfdd6c7a5a816c3bd84d093e0335b5f1b1b4360c6a4",
+   "proposed_sha256": "90b5867449668059976f55be60af7e3c4703ff64deb66a0a0d92c490ef367998"
+  }
+ },
+ "termination": {
+  "path": "morsehgp3D_v12/src/tower/pipeline_run.cpp",
+  "sha256": "f3d260ae51159c5c039082f8b1442434123bdb59114d4364c4d0a4e7ef8f09a6",
+  "fix_applied_at_capture": false
+ }
+}

@@ -1,0 +1,88 @@
+{
+  "auto_tests": {
+    "avant": "pilote_apparie_auto_test_ok cas=8",
+    "propose": "pilote_apparie_auto_test_ok cas=8"
+  },
+  "candidate_sha256": "7577e0ab41c29122a9ec0902595daa448c40318e42119a68fe8d848dab4809a6",
+  "contre_exemples": {
+    "aa_options_differentes_reference": {
+      "avant": "juge",
+      "bras_avant": {
+        "aa": "controle A/A",
+        "cache": "adopte",
+        "seq": "rejete"
+      },
+      "propose": "refuse",
+      "refus": [
+        "reference ou controle A/A incoherent"
+      ],
+      "relecture_brute": true
+    },
+    "cohorte_vide_adopte_meme_le_bras_lent": {
+      "avant": "juge",
+      "bras_avant": {
+        "aa": "controle A/A",
+        "cache": "adopte",
+        "seq": "adopte"
+      },
+      "propose": "refuse",
+      "refus": [
+        "cohorte decisive vide ou mal formee"
+      ],
+      "relecture_brute": true
+    },
+    "deux_trames_decisives_ignorees": {
+      "avant": "juge",
+      "bras_avant": {
+        "aa": "controle A/A",
+        "cache": "adopte",
+        "seq": "rejete"
+      },
+      "propose": "refuse",
+      "refus": [
+        "cohorte identite differente de la configuration"
+      ],
+      "relecture_brute": true
+    },
+    "minimum_passes": {
+      "avant": "juge",
+      "bras_avant": {
+        "aa": "controle A/A",
+        "levier": "adopte"
+      },
+      "propose": "refuse",
+      "refus": [
+        "regime ou minima de campagne invalides"
+      ],
+      "relecture_brute": false
+    },
+    "minimum_tours": {
+      "avant": "juge",
+      "bras_avant": {
+        "aa": "controle A/A",
+        "levier": "adopte"
+      },
+      "propose": "refuse",
+      "refus": [
+        "regime ou minima de campagne invalides"
+      ],
+      "relecture_brute": false
+    },
+    "onzieme_tour_non_prevu_rehache": {
+      "avant": "juge",
+      "bras_avant": {
+        "aa": "controle A/A",
+        "cache": "adopte",
+        "seq": "rejete"
+      },
+      "propose": "refuse",
+      "refus": [
+        "nombre de tours different de la configuration"
+      ],
+      "relecture_brute": true
+    }
+  },
+  "positif": "cache adopte, seq rejete, A/A controle, inchangé",
+  "scope": "sondes Python simulées seulement ; aucune mesure réelle, aucun moteur",
+  "source_commit": "0e62a723202732d69e430349c0b2a7b498cbb49c"
+}

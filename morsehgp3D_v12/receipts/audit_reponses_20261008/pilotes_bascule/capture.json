@@ -1,0 +1,32 @@
+{
+  "commit": "86d7e39d834cae86768d49a23d83bf53454ec2a3",
+  "files": {
+    "morsehgp3D_v12/microbancs/mes_b_scenes/mutants_pilote_b.py": "bffb688e436458c6d3008e2fb7fcc96c48d288ab009038e4c326747b95758600",
+    "morsehgp3D_v12/microbancs/mes_b_scenes/pilote_b.py": "9eb044087bfd95443eb5149bd25a12170158769d4bba07ad47681d9f07a25f32",
+    "morsehgp3D_v12/microbancs/mes_b_scenes/test_pilote_b.py": "347f868c7d0265241d1a6a1df8006fa4b1b30da6b339732eafd79f9b53a977b1",
+    "morsehgp3D_v12/microbancs/mes_c_petits/mutants_pilote_c.py": "6eab93b6dbaf0bd0cdf9eda563d3738be2abee93e22ba206baab1856440de613",
+    "morsehgp3D_v12/microbancs/mes_c_petits/pilote_c.py": "6b435ca48af54e289393a72980625f9e1005a71798b961b13859969d53785df0",
+    "morsehgp3D_v12/microbancs/mes_c_petits/test_pilote_c.py": "b7c19807a9a25d24a07de80e06d707c4634f3165b74391eb9f85f831aba498cc",
+    "morsehgp3D_v12/microbancs/mes_full/pilote_full.py": "407e412bf4f91f4a81d25c27c1a4cd4f34cf83fcd2934890d5bce8aba5eb4432",
+    "morsehgp3D_v12/microbancs/mes_full/test_pilote_full.py": "d797effa61bbd92cd471bcde08b99aab84acc8d7c437be7effed68162a28c54b",
+    "morsehgp3D_v12/microbancs/outils/archives_vm.py": "9db211bc825988be9893f9e8af805a9924470df096e17ce5f7f43ab773a4a928",
+    "morsehgp3D_v12/microbancs/outils/banc_full.py": "7d7f0661b49adf094df51d41268470571d47c51fc7795bb5b34c791a4a539904",
+    "morsehgp3D_v12/microbancs/outils/lecteur_full.py": "c3e9e0f4adbbfda60203c70c902dcd4cc0a04336d5679bce372f157988805e8f",
+    "morsehgp3D_v12/microbancs/outils/mutants_juges.py": "b1c8ccd13a637de71d1acf89b1ea61138a040bb78e2a843f539025ce8111fdd8",
+    "morsehgp3D_v12/microbancs/outils/mutants_lecteur_full.py": "41981ccfc6be95406b311ecf24dcb8dbff8ee25c2cb1948a13f98eb2d6405374",
+    "morsehgp3D_v12/microbancs/outils/publier.py": "934c8b8c170df53c66cce7994b8e08e22dc831543784ce8942df1fcd82231241",
+    "morsehgp3D_v12/microbancs/outils/recu_session.py": "ce95c3393d01e11ec7c3a35eee03ac08715524891eb7baaac87a6e760b34d8f9",
+    "morsehgp3D_v12/microbancs/outils/source_v11.py": "246db434e83e13e22aca7b247b5e0b173b3c38a062dd4960827e5364cf7583df",
+    "morsehgp3D_v12/microbancs/outils/test_lecteur_full.py": "b0e84dcfa9b34f8fba74c6ccf7b7671222b1511c6c9d7cd691eac7c7bb0d5f3d",
+    "morsehgp3D_v12/microbancs/outils/test_recu_session.py": "3e74bc3d3f5240a26b2642f56b43b0aec946df991cd2cfa1a3edc622ec2e2531"
+  },
+  "captured_utc": "2026-10-08T08:27:39.997450+00:00",
+  "patch_sha256": "602bbfa36543d4c2d5f3b2a52246575dc439fafef83444d8c5bbb0d2507fd8b6",
+  "postimage_sha256": "7fd5a628b77ba930a03f52d7dec4dfc8ed869309dc11659b00b1f95be6edd19b",
+  "official_tests": {
+    "mes_full/test_pilote_full.py": "test_pilote_full_ok essai=1 sites_faux=1 empreinte=1 sequentiel=1 schema_croise=1",
+    "mes_b_scenes/test_pilote_b.py": "test_pilote_b_ok verdicts=9 empreintes=3 attendu=1 etiquettes=12 pilote=5",
+    "mes_c_petits/test_pilote_c.py": "test_pilote_c_ok cohorte=9 verdict=5 droites=3 criteres=3 schema_croise=1 difficiles=1 empreintes=1 usage=1"
+  },
+  "official_normal_O": "six executions Python closes, code0 et sorties identiques par porte"
+}

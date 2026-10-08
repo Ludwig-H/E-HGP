@@ -1,0 +1,7 @@
+{
+  "cohort_patch_sha256": "61d8ad957d4b3314c9043d3275d8b37bd6c44aaa685b0d4c1099090ebceed8c7",
+  "composition_patch_sha256": "3119d4cea05b4b14f7fbcdda0bdebd25ec6fe3da0c270d50e8af7821064bbaa8",
+  "composition_source_sha256": "a0f59585fbeea2cbb6de1a2abbdc4ae6b422dcb514f081ac7fb369de3d6d3dc8",
+  "identity_patch_sha256": "4b1e30364560fae10c3065190a70493da79caa029898f6991575c777b62e7455",
+  "source_commit": "0e62a723202732d69e430349c0b2a7b498cbb49c"
+}

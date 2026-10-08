@@ -1,0 +1,51 @@
+--- a/morsehgp3D_v12/microbancs/mes_apparie/pilote_apparie.py
++++ b/morsehgp3D_v12/microbancs/mes_apparie/pilote_apparie.py
+@@ -166,8 +166,48 @@
+                                                                                         state['raison']))
+ 
+ 
++def validate_campaign(report, raw_replay):
++    """Fermer la configuration et les cohortes avant toute statistique ou relecture."""
++    if type(report) is not dict or type(report.get('parametres')) is not dict or \
++            type(report.get('regle_bras')) is not dict:
++        return 'configuration absente ou mal formee'
++    cfg, arms = report['parametres'], report['regle_bras']
++    if len(arms) < 2 or any(type(name) is not str or type(opts) is not list or
++            any(type(o) is not str for o in opts) or parse_arm(name + '=' + ' '.join(opts)) != (name, opts)
++            for name, opts in arms.items()):
++        return 'bras mal formes'
++    ref, aa = cfg.get('reference'), cfg.get('aa')
++    if type(ref) is not str or ref not in arms or (aa is not None and
++            (type(aa) is not str or aa not in arms or aa == ref or arms[aa] != arms[ref])):
++        return 'reference ou controle A/A incoherent'
++    trial = cfg.get('essai', False)
++    if type(trial) is not bool or cfg.get('voie') not in ('cpu', 'appareil') or \
++            any(type(cfg.get(k)) is not int for k in ('k', 'fils', 'passes', 'tours')) or \
++            not 1 <= cfg['k'] <= 12 or cfg['fils'] < 1 or \
++            cfg['passes'] < (2 if trial else REGLE_APPARIEE['passes_min']) or \
++            cfg['tours'] < (1 if trial else REGLE_APPARIEE['tours_min']):
++        return 'regime ou minima de campagne invalides'
++    labels = cfg.get('trames')
++    if type(labels) is not list or not labels or any(type(x) is not str or not x for x in labels) or \
++            len(set(labels)) != len(labels):
++        return 'cohorte decisive vide ou mal formee'
++    for key in ('identite', 'campagne'):
++        if type(report.get(key)) is not dict or set(report[key]) != set(labels):
++            return 'cohorte ' + key + ' differente de la configuration'
++    if raw_replay and (type(report.get('trames')) is not dict or set(report['trames']) != set(labels) or
++            any(type(x) is not dict or type(x.get('sites')) is not int or not 0 < x['sites'] < 2**32
++                for x in report['trames'].values())):
++        return 'metadonnees de trames invalides'
++    if any(type(tours) is not list or len(tours) != cfg['tours'] for tours in report['campagne'].values()):
++        return 'nombre de tours different de la configuration'
++    return ''
++
++
+ def judge(report, folder=None):
+     """Jugement par REGLE_APPARIEE ; folder=None (auto-test seulement) saute le rejeu brut."""
++    invalid = validate_campaign(report, folder is not None)
++    if invalid:
++        return dict(verdict='refuse', refus=[invalid], cas={})
+     cfg, rule = report['parametres'], REGLE_APPARIEE
+     arms, reference, aa = dict(report['regle_bras']), cfg['reference'], cfg.get('aa')
+     refusals, cases = [], {}

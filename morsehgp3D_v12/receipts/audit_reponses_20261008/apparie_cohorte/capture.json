@@ -1,0 +1,13 @@
+{
+  "head": "67b6e6d57d18f0dd08c8b1281b5166b4d908de79",
+  "patch_sha256": "61d8ad957d4b3314c9043d3275d8b37bd6c44aaa685b0d4c1099090ebceed8c7",
+  "proposed_sha256": "7577e0ab41c29122a9ec0902595daa448c40318e42119a68fe8d848dab4809a6",
+  "source_commit": "0e62a723202732d69e430349c0b2a7b498cbb49c",
+  "sources": {
+    "morsehgp3D_v12/microbancs/mes_apparie/mutants_pilote_apparie.py": "092dd1fa64ccabb5a0e638f693dfa30cbadb91aa9d5c57b5d4518fecec6e0c9d",
+    "morsehgp3D_v12/microbancs/mes_apparie/pilote_apparie.py": "fe22a6813ebb4f801de011fb06dc7cc6af754494c9c4e2b1148aa87dfb4925d1",
+    "morsehgp3D_v12/microbancs/mes_apparie/test_pilote_apparie.py": "65a658d8510726286627792bbed9153bbb2c4163977ef14e1b74f74c5035d00e",
+    "morsehgp3D_v12/microbancs/outils/banc_full.py": "7d7f0661b49adf094df51d41268470571d47c51fc7795bb5b34c791a4a539904",
+    "morsehgp3D_v12/microbancs/outils/lecteur_full.py": "c3e9e0f4adbbfda60203c70c902dcd4cc0a04336d5679bce372f157988805e8f"
+  }
+}

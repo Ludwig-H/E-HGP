@@ -1,0 +1,40 @@
+{
+  "portes_officielles": {
+    "mes_b_scenes/test_pilote_b.py": "test_pilote_b_ok verdicts=9 empreintes=3 attendu=1 etiquettes=12 pilote=5",
+    "mes_c_petits/test_pilote_c.py": "test_pilote_c_ok cohorte=9 verdict=5 droites=3 criteres=3 schema_croise=1 difficiles=1 empreintes=1 usage=1",
+    "mes_full/test_pilote_full.py": "test_pilote_full_ok essai=1 sites_faux=1 empreinte=1 sequentiel=1 schema_croise=1"
+  },
+  "scope": "orchestration Python fictive ; aucune qualification moteur ou temporelle",
+  "tableaux": {
+    "recouvert": {
+      "avant": [
+        12,
+        13,
+        13,
+        12
+      ],
+      "propose": [
+        12,
+        12,
+        12,
+        12
+      ],
+      "valeurs_identiques": true
+    },
+    "sequentiel": {
+      "avant": [
+        15,
+        16,
+        16,
+        15
+      ],
+      "propose": [
+        15,
+        15,
+        15,
+        15
+      ],
+      "valeurs_identiques": true
+    }
+  }
+}

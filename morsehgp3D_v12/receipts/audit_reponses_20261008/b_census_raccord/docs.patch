@@ -1,0 +1,21 @@
+--- a/morsehgp3D_v12/receipts/g4_t2db_20261008/README.md
++++ b/morsehgp3D_v12/receipts/g4_t2db_20261008/README.md
+@@ -19,2 +19,3 @@
+-témoins (L3), census (L1 + L2 + L3), proposition (L4), après (le lot). Les fichiers du lot sont identiques entre
+-`902041f66` et `main`, mais pas le Pool ni la Session recouverte, qui sont postérieurs. La règle `REGLE_T2D_B` a été
++témoins (L3), census (L1 + L2 + L3), proposition (L4), après (le lot). Les dix fichiers concernés du code B
++retenu dans `main` correspondent au bras « census » (neuf postimages L1–L3 et DWelzl d’origine). Le catalogue
++T2-d-C, le Pool et la Session recouverte du produit sont postérieurs à `902041f66`. La règle `REGLE_T2D_B` a été
+@@ -48 +49 @@
+-gravée de la porte de déterminisme. Compteurs de travail identiques entre les bras.
++gravée de la porte de déterminisme. Compteurs de travail identiques entre les bras à K5 décisif ; cette égalité ne s’étend pas aux informations K10.
+@@ -50,0 +52 @@
++Le bras retenu « census » mesure respectivement **49,0 / 39,2 / 45,3 ms**, sur cette même base902.
+@@ -63,0 +66,2 @@
++
++Ces comparaisons portent sur avant → lot L1–L4 ; le bras retenu « census » n’a pas de prise FULL ou K10 dans ce lot.
+--- a/morsehgp3D_v12/docs/PLAN.md
++++ b/morsehgp3D_v12/docs/PLAN.md
+@@ -148 +148 @@
+-[bascule](../receipts/developpement_20261008/reponse_audit_t2d_bascule.md)). **T2-d-B qualifié sur G4 le 8 octobre** ([session T2-d-B](../receipts/g4_t2db_20261008/README.md), bras reconstruits sur `902041f66`, `REGLE_T2D_B` écrite d'avance) : étage G **48,6 / 38,9 / 45,0 ms** à K5 sur ng00–02 avec le lot (rapport 0,92 à 0,93) ; census à témoins (L3) et report des compteurs (L2) adoptés, garde seule (L1) et proposition entière (L4) rejetées seules ; L4 retirée du produit, qui est le bras « census » (L1 + L2 + L3), mesuré et adopté (0,92 à 0,94). Suites déclarées (T2-c) : classification des cellules et table de populations
++[bascule](../receipts/developpement_20261008/reponse_audit_t2d_bascule.md)). **T2-d-B qualifié sur G4 le 8 octobre** ([session T2-d-B](../receipts/g4_t2db_20261008/README.md), bras reconstruits sur `902041f66`, `REGLE_T2D_B` écrite d'avance) : étage G du bras retenu « census » **49,0 / 39,2 / 45,3 ms** à K5 sur ng00–02 ; le lot L1–L4 mesure 48,6 / 38,9 / 45,0 ms (rapport 0,92 à 0,93) ; census à témoins (L3) et report des compteurs (L2) adoptés, garde seule (L1) et proposition entière (L4) rejetées seules ; L4 retirée du produit, qui est le bras « census » (L1 + L2 + L3), mesuré et adopté (0,92 à 0,94). Suites déclarées (T2-c) : classification des cellules et table de populations

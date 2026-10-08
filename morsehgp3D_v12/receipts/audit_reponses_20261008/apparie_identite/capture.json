@@ -1,0 +1,23 @@
+{
+  "captured_utc": "2026-10-08T08:29:47.745445+00:00",
+  "head": "67b6e6d57d18f0dd08c8b1281b5166b4d908de79",
+  "stable": true,
+  "files": {
+    "morsehgp3D_v12/microbancs/mes_apparie/pilote_apparie.py": "fe22a6813ebb4f801de011fb06dc7cc6af754494c9c4e2b1148aa87dfb4925d1",
+    "morsehgp3D_v12/microbancs/mes_apparie/test_pilote_apparie.py": "65a658d8510726286627792bbed9153bbb2c4163977ef14e1b74f74c5035d00e",
+    "morsehgp3D_v12/microbancs/mes_apparie/mutants_pilote_apparie.py": "092dd1fa64ccabb5a0e638f693dfa30cbadb91aa9d5c57b5d4518fecec6e0c9d",
+    "morsehgp3D_v12/microbancs/outils/lecteur_full.py": "c3e9e0f4adbbfda60203c70c902dcd4cc0a04336d5679bce372f157988805e8f",
+    "morsehgp3D_v12/microbancs/outils/recu_session.py": "ce95c3393d01e11ec7c3a35eee03ac08715524891eb7baaac87a6e760b34d8f9",
+    "morsehgp3D_v12/microbancs/outils/archives_vm.py": "9db211bc825988be9893f9e8af805a9924470df096e17ce5f7f43ab773a4a928",
+    "morsehgp3D_v12/microbancs/outils/mutants_lecteur_full.py": "41981ccfc6be95406b311ecf24dcb8dbff8ee25c2cb1948a13f98eb2d6405374",
+    "morsehgp3D_v12/microbancs/outils/publier.py": "934c8b8c170df53c66cce7994b8e08e22dc831543784ce8942df1fcd82231241",
+    "morsehgp3D_v12/microbancs/outils/source_v11.py": "246db434e83e13e22aca7b247b5e0b173b3c38a062dd4960827e5364cf7583df",
+    "morsehgp3D_v12/microbancs/outils/banc_full.py": "7d7f0661b49adf094df51d41268470571d47c51fc7795bb5b34c791a4a539904",
+    "morsehgp3D_v12/microbancs/outils/test_recu_session.py": "3e74bc3d3f5240a26b2642f56b43b0aec946df991cd2cfa1a3edc622ec2e2531",
+    "morsehgp3D_v12/microbancs/outils/test_lecteur_full.py": "b0e84dcfa9b34f8fba74c6ccf7b7671222b1511c6c9d7cd691eac7c7bb0d5f3d",
+    "morsehgp3D_v12/microbancs/outils/mutants_juges.py": "b1c8ccd13a637de71d1acf89b1ea61138a040bb78e2a843f539025ce8111fdd8"
+  },
+  "candidate_sha256": "7ca0a8456d3bb66ef742eab8af017fc678254df630cb56296863ac611da25f87",
+  "patch_sha256": "4b1e30364560fae10c3065190a70493da79caa029898f6991575c777b62e7455",
+  "scope": "prototype noncommis, juge et tableaux seulement ; pas de campagne reelle"
+}

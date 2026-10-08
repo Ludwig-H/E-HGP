@@ -1,0 +1,36 @@
+{
+  "ast_unchanged_except_exact_proposed_functions": true,
+  "composition_sha256": "a0f59585fbeea2cbb6de1a2abbdc4ae6b422dcb514f081ac7fb369de3d6d3dc8",
+  "context_conflicts": [
+    {
+      "apply_check": 1,
+      "first": "apparie_identite",
+      "second": "apparie_cohorte"
+    },
+    {
+      "apply_check": 1,
+      "first": "apparie_cohorte",
+      "second": "apparie_identite"
+    }
+  ],
+  "deleted_identity_files": 12,
+  "empty_cohort": {
+    "cas": {},
+    "refus": [
+      "cohorte decisive vide ou mal formee"
+    ],
+    "verdict": "refuse"
+  },
+  "missing_identity": {
+    "refusal_count": 12,
+    "verdict": "refuse"
+  },
+  "official_gate": {
+    "code": 0,
+    "stderr": "",
+    "stdout": "test_pilote_apparie_ok auto_test=1 usage=3 campagne=1 journal_change=1 schema_croise=1 empreinte=1"
+  },
+  "positive": "juge/cache adopte/seq rejete/A-A controle",
+  "scope": "composition proposed only; LF guards and repaired synthetic fixtures; no engine",
+  "source_commit": "0e62a723202732d69e430349c0b2a7b498cbb49c"
+}

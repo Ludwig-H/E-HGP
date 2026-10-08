@@ -1,0 +1,51 @@
+{
+  "candidate_sha256": "7ca0a8456d3bb66ef742eab8af017fc678254df630cb56296863ac611da25f87",
+  "contre_exemples": {
+    "douze_identites_absentes": {
+      "ancien": "juge/cache adopte",
+      "propose": "refuse",
+      "refus": [
+        "journal manquant ou change : identite ng00 aa",
+        "journal manquant ou change : identite ng00 cache",
+        "journal manquant ou change : identite ng00 ref",
+        "journal manquant ou change : identite ng00 seq",
+        "journal manquant ou change : identite ng01 aa",
+        "journal manquant ou change : identite ng01 cache",
+        "journal manquant ou change : identite ng01 ref",
+        "journal manquant ou change : identite ng01 seq",
+        "journal manquant ou change : identite ng02 aa",
+        "journal manquant ou change : identite ng02 cache",
+        "journal manquant ou change : identite ng02 ref",
+        "journal manquant ou change : identite ng02 seq"
+      ]
+    },
+    "empreinte_bras_vide_union_unique": {
+      "ancien": "juge/cache adopte",
+      "propose": "refuse",
+      "refus": [
+        "resume different du journal : identite ng00 cache"
+      ]
+    },
+    "empreinte_brute_modifiee_rehachee": {
+      "ancien": "juge/cache adopte",
+      "propose": "refuse",
+      "refus": [
+        "resume different du journal : identite ng00 cache"
+      ]
+    },
+    "tableaux_ressources_et_etapes_forges": {
+      "ancien": "juge/cache adopte",
+      "propose": "refuse",
+      "refus": [
+        "resume different du journal : campagne ng00 cache tour 0",
+        "resume different du journal : campagne ng00 cache tour 1",
+        "resume different du journal : campagne ng00 cache tour 2",
+        "resume different du journal : campagne ng00 cache tour 3"
+      ],
+      "table_avant": "| ng00 | `cache` | 0.9 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0 |",
+      "table_fausse_admise": "| ng00 | `cache` | 0.9 | 999.0 | 0.0 | 0.0 | 0.0 | 888.0 | 777 |"
+    }
+  },
+  "positif": "juge/cache adopte, seq rejete, A/A controle",
+  "scope": "fixtures Python officielles, cadre essai ; aucun résultat réel ni moteur"
+}
