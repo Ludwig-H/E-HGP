@@ -158,7 +158,11 @@ binaire64 (rapport 0,74 à 0,76) ; census ×9 à ×11 et sondes ×19 à ×22 sur
 [Étape 2](../receipts/g4_gapp2_20261008/README.md) (propositions sur l'appareil) : D2 (voie entière puis binaire32) et D1
 (voie entière puis binaire64, partagée) **rejetés** par leur règle ; aucune tranche « G sur l'appareil » sur cette base. **A6 (chaîne de l'ordre K) rejeté sur G4 le 8 octobre**
 ([sessions A6](../receipts/g4_t2da6_20261008/README.md)) : grandes trames 0,914 (queue de 27–72 à 12–20 ms), mais ng00 et ng01
-ralenties de 3 à 4 % (seuil 1,02) ; retiré de `main`, une A6b sans cette perte reste à concevoir. Suites déclarées (T2-c) : classification des cellules et table de populations
+ralenties de 3 à 4 % (seuil 1,02) ; retiré de `main`, une A6b sans cette perte reste à concevoir. **Lot T2-d-B2 adopté sur G4 le 8 octobre**
+([session T2-d-B2](../receipts/g4_t2db2_20261008/README.md), bras sur `72f622a55`) : mur FULL 0,944 / 0,948 / 0,963 sur ng00–02, 0,982 et 0,984
+sur deux trames moyennes ; B2-T (tables) adopté seul, B2-S et B2-C rejetés seuls ; fin de G −15 % sur ng00, −7 % à la
+médiane. Profil de G à 48 fils sur G4 : LEM-T1 27 %, traces 22 %, sonde 14 %, census 15 %, proposition 10 % ; LEM-T1 est
+le levier suivant. Suites déclarées (T2-c) : classification des cellules et table de populations
 reconstruites à chaque appel (37 ms à K5, 385 ms à K10 à 3 fils) à rendre résidentes ou parallèles ; coût par unité
 de travail au-dessus de la réplique de `MES-M7` (2,67 s contre 2,34 s à un fil sur ng00 K5), sonde de table d'abord ;
 leviers `G-L4` à `G-L7` non implantés. **Premiers temps G4** ([session H](../receipts/g4_t2h_20261007/README.md), 48 fils) : étage G 80 / 63 / 76 ms à K5 sur ng00–02 (tables 15 à 19 ms, à peine parallèles ; résolution 37 à 49 ms, ×30 de 1 à 48 fils), 450 à 634 ms à K10 : 2,5 à 3 fois le budget à K5 ; chantier T2-c en cours (tables, `G-L5`, recherche des supports). **T2-c adopté sur G4 le 8 octobre** ([session J](../receipts/g4_t2cj_20261008/README.md)) : index des naissances parallèle et file de sondes `G-L7`, étage G **53,1 / 42,1 / 48,2 ms à K5** (rapport 0,63 à 0,67, IC 95 % serré, A/A ≈ 1), 443 ms à K10 sur ng00 ; `G-L5` rejeté. Reste 1,6 à 1,8 fois le budget : census gardé, puis `LEM-T1` et proposition.

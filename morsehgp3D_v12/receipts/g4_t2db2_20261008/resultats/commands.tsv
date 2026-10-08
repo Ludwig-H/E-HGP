@@ -1,0 +1,5 @@
+index	name	status	exit_code	wall_seconds	timeout_seconds	max_rss_kb
+0	socle_ctest	ok	0	141.165	600	1063092
+1	t2d_b2_pilote	ok	0	688.504	2100	2583636
+2	mutants_index_num_tour	ok	0	342.227	600	354340
+3	profil_g_info	ok	0	66.376	600	1455600

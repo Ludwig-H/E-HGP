@@ -1,0 +1,5 @@
+pilote_t2d_b2_auto_test_ok cas=8 verdicts=adopte,rejete,refuse
+pilote_t2d_b2_auto_test_ok cas=8 verdicts=adopte,rejete,refuse
+pilote_t2d_b2_verdicts lot_b2=adopte tables=adopte relecture=rejete census=rejete
+pilote_t2d_b2_auto_test_ok cas=8 verdicts=adopte,rejete,refuse
+pilote_t2d_b2_verdicts lot_b2=adopte tables=adopte relecture=rejete census=rejete

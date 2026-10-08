@@ -1,0 +1,599 @@
+{
+ "cmake": [
+  "CMAKE_BUILD_TYPE:STRING=Release",
+  "CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++",
+  "CMAKE_CXX_COMPILER_AR:FILEPATH=/usr/bin/gcc-ar-11",
+  "CMAKE_CXX_COMPILER_RANLIB:FILEPATH=/usr/bin/gcc-ranlib-11",
+  "CMAKE_CXX_FLAGS:STRING=-DMHGP12_TOWER_PROFILE",
+  "CMAKE_CXX_FLAGS_DEBUG:STRING=-g",
+  "CMAKE_CXX_FLAGS_MINSIZEREL:STRING=-Os -DNDEBUG",
+  "CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG",
+  "CMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING=-O2 -g -DNDEBUG",
+  "MHGP12_COORD_BITS:STRING=21",
+  "MHGP12_ENABLE_CUDA:BOOL=OFF",
+  "MHGP12_JUG_EMST:FILEPATH=",
+  "MHGP12_MARCH:STRING=",
+  "MHGP12_MODULES:STRING=",
+  "MHGP12_MUTANT_JOBS:STRING=0",
+  "MHGP12_POISON:BOOL=OFF",
+  "MHGP12_REFERENCE_SHARDS:STRING=16",
+  "MHGP12_SANITIZE:BOOL=OFF",
+  "MHGP12_TOWER_DUMPS:PATH=",
+  "MHGP12_TSAN:BOOL=OFF",
+  "MHGP12_V10_FROZEN_DIR:PATH=",
+  "MHGP12_V11_CATALOGUE_DIR:PATH=",
+  "MHGP12_V11_TOWER_DIR:PATH=",
+  "CMAKE_CXX_COMPILER-ADVANCED:INTERNAL=1",
+  "CMAKE_CXX_COMPILER_AR-ADVANCED:INTERNAL=1",
+  "CMAKE_CXX_COMPILER_RANLIB-ADVANCED:INTERNAL=1",
+  "CMAKE_CXX_FLAGS-ADVANCED:INTERNAL=1",
+  "CMAKE_CXX_FLAGS_DEBUG-ADVANCED:INTERNAL=1",
+  "CMAKE_CXX_FLAGS_MINSIZEREL-ADVANCED:INTERNAL=1",
+  "CMAKE_CXX_FLAGS_RELEASE-ADVANCED:INTERNAL=1",
+  "CMAKE_CXX_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1"
+ ],
+ "echecs": [],
+ "k": 5,
+ "resume": {
+  "maximum, 1 fil": {
+   "mur_ms": 4902.150655,
+   "ordres": {
+    "2": {
+     "table_ms": 22.550878,
+     "temps_fil_ms": 294.24933
+    },
+    "3": {
+     "table_ms": 47.634444,
+     "temps_fil_ms": 654.06829
+    },
+    "4": {
+     "table_ms": 65.919264,
+     "temps_fil_ms": 1213.49292
+    },
+    "5": {
+     "table_ms": 81.937325,
+     "temps_fil_ms": 2368.32222
+    }
+   },
+   "passes": 1,
+   "resolution_ms": 4535.904405,
+   "secondes": 30.3,
+   "sections": {
+    "arret": {
+     "ns_par_occurrence": 207.0856343189272,
+     "occurrences": 1938662,
+     "part": 0.0886219171201508,
+     "temps_fil_ms": 401.46905
+    },
+    "census_complet": {
+     "ns_par_occurrence": 1610.9512045524245,
+     "occurrences": 176082,
+     "part": 0.06261615829554629,
+     "temps_fil_ms": 283.65951
+    },
+    "census_sature": {
+     "ns_par_occurrence": 939.0822652319999,
+     "occurrences": 470539,
+     "part": 0.09754125395653968,
+     "temps_fil_ms": 441.87483
+    },
+    "certificat": {
+     "ns_par_occurrence": 218.47884013145176,
+     "occurrences": 646625,
+     "part": 0.031185373030877796,
+     "temps_fil_ms": 141.27388
+    },
+    "pas": {
+     "ns_par_occurrence": 58.75536661335129,
+     "occurrences": 308854,
+     "part": 0.004005805339797591,
+     "temps_fil_ms": 18.14683
+    },
+    "proposition": {
+     "ns_par_occurrence": 171.84722493847823,
+     "occurrences": 2894098,
+     "part": 0.10978546023891803,
+     "temps_fil_ms": 497.34270999999995
+    },
+    "repli": {
+     "ns_par_occurrence": 0.0,
+     "occurrences": 0,
+     "part": 0.0,
+     "temps_fil_ms": 0.0
+    },
+    "reste": {
+     "ns_par_occurrence": 0.0,
+     "occurrences": 0,
+     "part": 0.0001464040978790211,
+     "temps_fil_ms": 0.66323
+    },
+    "sonde": {
+     "ns_par_occurrence": 59.14166040922526,
+     "occurrences": 10953625,
+     "part": 0.1430014536704218,
+     "temps_fil_ms": 647.81557
+    },
+    "t1": {
+     "ns_par_occurrence": 426.83923972166804,
+     "occurrences": 2894098,
+     "part": 0.2726883858476589,
+     "temps_fil_ms": 1235.31459
+    },
+    "trace": {
+     "ns_par_occurrence": 86.27288001857136,
+     "occurrences": 9998189,
+     "part": 0.1904077884022101,
+     "temps_fil_ms": 862.57256
+    }
+   },
+   "tables_ms": 218.041911
+  },
+  "maximum, 48 fils": {
+   "mur_ms": 159.483063,
+   "ordres": {
+    "2": {
+     "table_ms": 2.787628,
+     "temps_fil_ms": 394.72001
+    },
+    "3": {
+     "table_ms": 3.826428,
+     "temps_fil_ms": 876.79641
+    },
+    "4": {
+     "table_ms": 5.131137,
+     "temps_fil_ms": 1605.1305
+    },
+    "5": {
+     "table_ms": 6.800776,
+     "temps_fil_ms": 3113.81531
+    }
+   },
+   "passes": 3,
+   "resolution_ms": 127.860699,
+   "secondes": 1.6,
+   "sections": {
+    "arret": {
+     "ns_par_occurrence": 283.6327477404519,
+     "occurrences": 1938662,
+     "part": 0.09180283540568315,
+     "temps_fil_ms": 549.86803
+    },
+    "census_complet": {
+     "ns_par_occurrence": 2188.842243954521,
+     "occurrences": 176082,
+     "part": 0.06431660728363559,
+     "temps_fil_ms": 385.41572
+    },
+    "census_sature": {
+     "ns_par_occurrence": 1311.6934196740333,
+     "occurrences": 470539,
+     "part": 0.10308148969540025,
+     "temps_fil_ms": 617.20291
+    },
+    "certificat": {
+     "ns_par_occurrence": 279.05902184419097,
+     "occurrences": 646625,
+     "part": 0.030125690549196883,
+     "temps_fil_ms": 180.44654
+    },
+    "pas": {
+     "ns_par_occurrence": 89.69199039028149,
+     "occurrences": 308854,
+     "part": 0.004626575068383524,
+     "temps_fil_ms": 27.70173
+    },
+    "proposition": {
+     "ns_par_occurrence": 198.5962742104794,
+     "occurrences": 2894098,
+     "part": 0.09595139948128165,
+     "temps_fil_ms": 574.75708
+    },
+    "repli": {
+     "ns_par_occurrence": 0.0,
+     "occurrences": 0,
+     "part": 0.0,
+     "temps_fil_ms": 0.0
+    },
+    "reste": {
+     "ns_par_occurrence": 0.0,
+     "occurrences": 0,
+     "part": 0.00015229905712789356,
+     "temps_fil_ms": 0.9122199999999999
+    },
+    "sonde": {
+     "ns_par_occurrence": 75.7158666651451,
+     "occurrences": 10953625,
+     "part": 0.13830379267418677,
+     "temps_fil_ms": 829.36321
+    },
+    "t1": {
+     "ns_par_occurrence": 571.7532509265409,
+     "occurrences": 2894098,
+     "part": 0.2762987915860034,
+     "temps_fil_ms": 1654.70994
+    },
+    "trace": {
+     "ns_par_occurrence": 117.07348700849724,
+     "occurrences": 9998189,
+     "part": 0.19542383021820917,
+     "temps_fil_ms": 1170.52285
+    }
+   },
+   "tables_ms": 18.5229
+  },
+  "mediane, 1 fil": {
+   "mur_ms": 2269.397812,
+   "ordres": {
+    "2": {
+     "table_ms": 14.415072,
+     "temps_fil_ms": 149.38157
+    },
+    "3": {
+     "table_ms": 26.647896,
+     "temps_fil_ms": 317.03907
+    },
+    "4": {
+     "table_ms": 35.67001,
+     "temps_fil_ms": 559.97931
+    },
+    "5": {
+     "table_ms": 44.301126,
+     "temps_fil_ms": 1042.7182999999998
+    }
+   },
+   "passes": 1,
+   "resolution_ms": 2072.860019,
+   "secondes": 16.0,
+   "sections": {
+    "arret": {
+     "ns_par_occurrence": 183.8065716242445,
+     "occurrences": 1003131,
+     "part": 0.08911142222055216,
+     "temps_fil_ms": 184.38207
+    },
+    "census_complet": {
+     "ns_par_occurrence": 1512.898694154542,
+     "occurrences": 77804,
+     "part": 0.05688875925771763,
+     "temps_fil_ms": 117.70956999999999
+    },
+    "census_sature": {
+     "ns_par_occurrence": 854.2817556091892,
+     "occurrences": 212553,
+     "part": 0.08775726085253949,
+     "temps_fil_ms": 181.58015
+    },
+    "certificat": {
+     "ns_par_occurrence": 218.25080848748263,
+     "occurrences": 290357,
+     "part": 0.03062688659770895,
+     "temps_fil_ms": 63.37064999999999
+    },
+    "pas": {
+     "ns_par_occurrence": 58.5267000980211,
+     "occurrences": 140786,
+     "part": 0.003982247027205912,
+     "temps_fil_ms": 8.23974
+    },
+    "proposition": {
+     "ns_par_occurrence": 166.34411930808005,
+     "occurrences": 1434270,
+     "part": 0.11530630499247686,
+     "temps_fil_ms": 238.58237999999997
+    },
+    "repli": {
+     "ns_par_occurrence": 0.0,
+     "occurrences": 0,
+     "part": 0.0,
+     "temps_fil_ms": 0.0
+    },
+    "reste": {
+     "ns_par_occurrence": 0.0,
+     "occurrences": 0,
+     "part": 0.0001766356272774647,
+     "temps_fil_ms": 0.36548
+    },
+    "sonde": {
+     "ns_par_occurrence": 52.530370066006576,
+     "occurrences": 5909108,
+     "part": 0.1500192799517379,
+     "temps_fil_ms": 310.40763
+    },
+    "t1": {
+     "ns_par_occurrence": 360.655023112803,
+     "occurrences": 1434270,
+     "part": 0.24999860689450687,
+     "temps_fil_ms": 517.2766799999999
+    },
+    "trace": {
+     "ns_par_occurrence": 81.63680736418917,
+     "occurrences": 5477969,
+     "part": 0.21613259657827677,
+     "temps_fil_ms": 447.2039
+    }
+   },
+   "tables_ms": 121.034104
+  },
+  "mediane, 48 fils": {
+   "mur_ms": 81.658246,
+   "ordres": {
+    "2": {
+     "table_ms": 2.193629,
+     "temps_fil_ms": 206.79201
+    },
+    "3": {
+     "table_ms": 2.579109,
+     "temps_fil_ms": 437.89373
+    },
+    "4": {
+     "table_ms": 3.557088,
+     "temps_fil_ms": 760.7258
+    },
+    "5": {
+     "table_ms": 4.353017,
+     "temps_fil_ms": 1394.13882
+    }
+   },
+   "passes": 3,
+   "resolution_ms": 60.322647,
+   "secondes": 0.9,
+   "sections": {
+    "arret": {
+     "ns_par_occurrence": 266.38204780831217,
+     "occurrences": 1003131,
+     "part": 0.09544299976144259,
+     "temps_fil_ms": 267.21608999999995
+    },
+    "census_complet": {
+     "ns_par_occurrence": 2019.4527273662022,
+     "occurrences": 77804,
+     "part": 0.056119926337585065,
+     "temps_fil_ms": 157.1215
+    },
+    "census_sature": {
+     "ns_par_occurrence": 1181.1987598387225,
+     "occurrences": 212553,
+     "part": 0.08967506437103404,
+     "temps_fil_ms": 251.06733999999997
+    },
+    "certificat": {
+     "ns_par_occurrence": 274.89883143853945,
+     "occurrences": 290357,
+     "part": 0.02851676175933788,
+     "temps_fil_ms": 79.8188
+    },
+    "pas": {
+     "ns_par_occurrence": 85.76016081144432,
+     "occurrences": 140786,
+     "part": 0.004311217166790136,
+     "temps_fil_ms": 12.07383
+    },
+    "proposition": {
+     "ns_par_occurrence": 191.69059521568462,
+     "occurrences": 1434270,
+     "part": 0.09820038629942517,
+     "temps_fil_ms": 274.93607
+    },
+    "repli": {
+     "ns_par_occurrence": 0.0,
+     "occurrences": 0,
+     "part": 0.0,
+     "temps_fil_ms": 0.0
+    },
+    "reste": {
+     "ns_par_occurrence": 0.0,
+     "occurrences": 0,
+     "part": 0.00017413369709023174,
+     "temps_fil_ms": 0.48752999999999996
+    },
+    "sonde": {
+     "ns_par_occurrence": 68.03633306414437,
+     "occurrences": 5909108,
+     "part": 0.14363419317033224,
+     "temps_fil_ms": 402.03404
+    },
+    "t1": {
+     "ns_par_occurrence": 520.1014453345605,
+     "occurrences": 1434270,
+     "part": 0.26641457349709635,
+     "temps_fil_ms": 745.9659
+    },
+    "trace": {
+     "ns_par_occurrence": 111.08209630247998,
+     "occurrences": 5477969,
+     "part": 0.21734272756882564,
+     "temps_fil_ms": 608.50428
+    }
+   },
+   "tables_ms": 12.737823
+  },
+  "ng00, 1 fil": {
+   "mur_ms": 1468.910989,
+   "ordres": {
+    "2": {
+     "table_ms": 5.808007,
+     "temps_fil_ms": 91.76727
+    },
+    "3": {
+     "table_ms": 12.709023,
+     "temps_fil_ms": 194.52099
+    },
+    "4": {
+     "table_ms": 18.82591,
+     "temps_fil_ms": 361.24083
+    },
+    "5": {
+     "table_ms": 21.023219,
+     "temps_fil_ms": 714.48593
+    }
+   },
+   "passes": 1,
+   "resolution_ms": 1364.351495,
+   "secondes": 10.3,
+   "sections": {
+    "arret": {
+     "ns_par_occurrence": 168.93077925190343,
+     "occurrences": 650932,
+     "part": 0.0807351228769856,
+     "temps_fil_ms": 109.96245
+    },
+    "census_complet": {
+     "ns_par_occurrence": 1551.789333976834,
+     "occurrences": 58016,
+     "part": 0.0660995720884194,
+     "temps_fil_ms": 90.02861
+    },
+    "census_sature": {
+     "ns_par_occurrence": 832.9942926608151,
+     "occurrences": 194136,
+     "part": 0.1187315687605266,
+     "temps_fil_ms": 161.71418
+    },
+    "certificat": {
+     "ns_par_occurrence": 212.3683730448301,
+     "occurrences": 252152,
+     "part": 0.03931609359197816,
+     "temps_fil_ms": 53.54911
+    },
+    "pas": {
+     "ns_par_occurrence": 59.353135313531354,
+     "occurrences": 109080,
+     "part": 0.004753427755884806,
+     "temps_fil_ms": 6.47424
+    },
+    "proposition": {
+     "ns_par_occurrence": 163.46508114815725,
+     "occurrences": 1012161,
+     "part": 0.12147661925196684,
+     "temps_fil_ms": 165.45298
+    },
+    "repli": {
+     "ns_par_occurrence": 0.0,
+     "occurrences": 0,
+     "part": 0.0,
+     "temps_fil_ms": 0.0
+    },
+    "reste": {
+     "ns_par_occurrence": 0.0,
+     "occurrences": 0,
+     "part": 0.00016690711678054768,
+     "temps_fil_ms": 0.22732999999999998
+    },
+    "sonde": {
+     "ns_par_occurrence": 53.837646691056,
+     "occurrences": 3781161,
+     "part": 0.14946150153322096,
+     "temps_fil_ms": 203.56881
+    },
+    "t1": {
+     "ns_par_occurrence": 294.0671098767884,
+     "occurrences": 1012161,
+     "part": 0.21853155481354383,
+     "temps_fil_ms": 297.64326
+    },
+    "trace": {
+     "ns_par_occurrence": 79.94137017929012,
+     "occurrences": 3419932,
+     "part": 0.20072763221069323,
+     "temps_fil_ms": 273.39405
+    }
+   },
+   "tables_ms": 58.366159
+  },
+  "ng00, 48 fils": {
+   "mur_ms": 51.609019,
+   "ordres": {
+    "2": {
+     "table_ms": 1.233119,
+     "temps_fil_ms": 127.25667999999999
+    },
+    "3": {
+     "table_ms": 1.711349,
+     "temps_fil_ms": 272.67221
+    },
+    "4": {
+     "table_ms": 2.280769,
+     "temps_fil_ms": 501.59166999999997
+    },
+    "5": {
+     "table_ms": 2.639819,
+     "temps_fil_ms": 965.0321099999999
+    }
+   },
+   "passes": 3,
+   "resolution_ms": 40.800735,
+   "secondes": 0.6,
+   "sections": {
+    "arret": {
+     "ns_par_occurrence": 251.00035026700178,
+     "occurrences": 650932,
+     "part": 0.08753343464016228,
+     "temps_fil_ms": 163.38416
+    },
+    "census_complet": {
+     "ns_par_occurrence": 2073.3418367346935,
+     "occurrences": 58016,
+     "part": 0.06433134246039827,
+     "temps_fil_ms": 120.28699999999999
+    },
+    "census_sature": {
+     "ns_par_occurrence": 1146.9437919808795,
+     "occurrences": 194136,
+     "part": 0.11903290274429486,
+     "temps_fil_ms": 222.66308
+    },
+    "certificat": {
+     "ns_par_occurrence": 267.95651035883117,
+     "occurrences": 252152,
+     "part": 0.03620995131372563,
+     "temps_fil_ms": 67.56577
+    },
+    "pas": {
+     "ns_par_occurrence": 81.17042537587092,
+     "occurrences": 109080,
+     "part": 0.0047479953297984625,
+     "temps_fil_ms": 8.85407
+    },
+    "proposition": {
+     "ns_par_occurrence": 187.19229450650639,
+     "occurrences": 1012161,
+     "part": 0.10160261807991118,
+     "temps_fil_ms": 189.46874
+    },
+    "repli": {
+     "ns_par_occurrence": 0.0,
+     "occurrences": 0,
+     "part": 0.0,
+     "temps_fil_ms": 0.0
+    },
+    "reste": {
+     "ns_par_occurrence": 0.0,
+     "occurrences": 0,
+     "part": 0.00015268647189976093,
+     "temps_fil_ms": 0.28473
+    },
+    "sonde": {
+     "ns_par_occurrence": 68.47615851321855,
+     "occurrences": 3781161,
+     "part": 0.13858211206774237,
+     "temps_fil_ms": 258.91938
+    },
+    "t1": {
+     "ns_par_occurrence": 465.0388031153146,
+     "occurrences": 1012161,
+     "part": 0.2524097481139751,
+     "temps_fil_ms": 470.69413999999995
+    },
+    "trace": {
+     "ns_par_occurrence": 106.37515014918425,
+     "occurrences": 3419932,
+     "part": 0.19493582122545008,
+     "temps_fil_ms": 363.79578
+    }
+   },
+   "tables_ms": 7.877686
+  }
+ },
+ "schema": "ehgp.v12.profil_g.v1",
+ "sonde_sha256": "5eec5d6f234c3ca4fe3a2c188f0d77a7c54bcc615a6d5bdf9f3a42d17f578627"
+}
