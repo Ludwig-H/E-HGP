@@ -252,7 +252,7 @@ def table(title, stats):
     tail = ('queue',) if MODE['schema'] == 'recouvert' else ('T', 'M', 'V', 'R')
     head = ('| trame | sites | chaud mediane (ms) | max des medianes par processus | max | 1re passe | P | C | '
             'transferts | G | ' + ' | '.join(tail) + ' | pic (Mo) |')
-    columns = 11 + len(tail)
+    columns = 10 + len(tail)
     lines = ['## ' + title, '', head, '| --- ' + '| ---: ' * columns + '|']
     for frame, v in sorted(stats.items()):
         if v is None:

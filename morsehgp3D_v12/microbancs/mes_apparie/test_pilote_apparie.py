@@ -12,6 +12,9 @@ sous -O).
                  decale d'un bras par tour (chaque position une fois par bras en quatre tours) ; les tableaux portent
                  les quatre bras ; la Session v12set d'information porte ses deux trames par bras ;
   schema_croise  une sonde qui ignore --sequentiel : les prises de ce bras sont illisibles, la campagne est refusee ;
+  fermetures     sur des copies du rapport : resume forge, sonde modifiee pendant la campagne, cohorte decisive vide,
+                 puis un journal d'identite retire : refus (fermetures de l'auditeur, apparie_identite, apparie_cohorte,
+                 apparie_fermeture) ; le rapport intact reste juge ;
   journal_change un journal de campagne modifie apres coup : le rejeu brut du juge refuse la campagne ;
   empreinte      une sonde dont l'empreinte depend des options : identite refusee.
 Codes : 0 conforme ; 1 ecart.
@@ -55,7 +58,7 @@ for i in range(passes):
                    g_ns=dict(ouverture=2, tables=1), memoire_octets=dict(P=[1, 2], C=[3, 9], tour=[4, 5]),
                    recouvrement=dict(tour_ns=7, ouverture_ns=2, fin_g_ns=4, fin_ns=6, queue_ns=2, noyau_reprises=3,
                                      noyau_arrets=1, admis_octets=9),
-                   fins_par_ordre_ns=[[4, 5, 6, 0, 6]] + [[3, 4, 5, 5, 6]] * (k - 1))
+                   fins_par_ordre_ns=[[4, 5, 6, 0, 6]] + [[3, 4, 5, 6, 6]] * (k - 1))
     if digest:
         row['full_sha256'] = ('cd' if MODE == 'empreinte' and '--cache' in args else 'ab') * 32
     row['pass'] = i
@@ -149,6 +152,30 @@ def main():
             if sorted(session) != ['aa', 'cache', 'ref', 'seq'] or any(len(s['trames']) != 2 or s['refus']
                                                                        for s in session.values()):
                 errors.append('campagne : Session v12set %s' % session)
+            # Fermetures de l'auditeur (apparie_identite, apparie_cohorte, apparie_fermeture), sur des copies du
+            # rapport : resume forge, sonde modifiee pendant la campagne, cohorte decisive vide.
+            forged = json.loads(json.dumps(report))
+            forged['campagne']['ng00'][0]['cache']['cpu_ns'] += 1
+            changed = json.loads(json.dumps(report))
+            changed['provenance']['sonde_fin_sha256'] = 'ab' * 32
+            empty = json.loads(json.dumps(report))
+            empty['parametres']['trames'] = []
+            for name, bad, why in (('resume_forge', forged, 'resume different du journal'),
+                                   ('sonde_modifiee', changed, 'sonde absente, modifiee'),
+                                   ('cohorte_vide', empty, 'cohorte decisive vide')):
+                verdict = pa.judge(bad, out_dir)
+                if verdict['verdict'] != 'refuse' or not any(why in r for r in verdict['refus']):
+                    errors.append('%s : %s' % (name, verdict))
+            if pa.judge(json.loads(json.dumps(report)), out_dir)['verdict'] != 'juge':
+                errors.append('rapport intact refuse apres les copies')
+            # Journal d'identite retire : refus.
+            identity = os.path.join(out_dir, 'journaux', 'identite', 'ng02_ref.jsonl')
+            kept = identity + '.garde'
+            os.rename(identity, kept)
+            verdict = pa.judge(report, out_dir)
+            if verdict['verdict'] != 'refuse' or not any('identite ng02 ref' in r for r in verdict['refus']):
+                errors.append('identite_retiree : %s' % verdict)
+            os.rename(kept, identity)
             # Journal de campagne modifie apres coup : le rejeu brut refuse.
             path = os.path.join(out_dir, 'journaux', 'campagne', 'ng01', 'cache_t02.jsonl')
             with open(path, 'a', encoding='utf-8') as handle:
@@ -169,7 +196,8 @@ def main():
         print(error, file=sys.stderr)
     if errors:
         return 1
-    print('test_pilote_apparie_ok auto_test=1 usage=3 campagne=1 journal_change=1 schema_croise=1 empreinte=1')
+    print('test_pilote_apparie_ok auto_test=1 usage=3 campagne=1 fermetures=4 journal_change=1 schema_croise=1 '
+          'empreinte=1')
     return 0
 
 

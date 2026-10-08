@@ -56,7 +56,7 @@ for i in range(passes):
                    g_ns=dict(ouverture=2, tables=1), memoire_octets=dict(P=[1, 2], C=[3, 9], tour=[4, 5]),
                    recouvrement=dict(tour_ns=7, ouverture_ns=2, fin_g_ns=4, fin_ns=6, queue_ns=2, noyau_reprises=3,
                                      noyau_arrets=1, admis_octets=9),
-                   fins_par_ordre_ns=[[4, 5, 6, 0, 6]] + [[3, 4, 5, 5, 6]] * (k - 1))
+                   fins_par_ordre_ns=[[4, 5, 6, 0, 6]] + [[3, 4, 5, 6, 6]] * (k - 1))
     row['pass'] = i
     print(json.dumps(row))
     print(json.dumps({'phase': 'liberation', 'pass': i, 'liberation_ns': 1}))

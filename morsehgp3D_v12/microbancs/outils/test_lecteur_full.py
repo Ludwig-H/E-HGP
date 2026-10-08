@@ -11,9 +11,11 @@ reelles. Python 3.10 nu, aucun assert (tient sous -O).
   issues         refus de la sonde (code 2, ressources ou degenerescence) publie comme resultat, avec ses passes deja
                  jouees ; invariant viole (codes 2 et 3), signal et expiration publies comme echecs du cas ;
   recouvert      schema de la Session recouverte (voie par defaut de la sonde depuis T2-d-A) : sortie conforme admise,
-                 seize incoherences refusees (schema, raccord, partition, fenetres, ouverture, memoire dont le pic
-                 de la tour sous l'usage a la fin de C, recouvrement, fins par ordre), et aucun melange des deux
-                 schemas ;
+                 vingt-cinq incoherences refusees (schema, raccord, partition, fenetres, ouverture, memoire dont le pic
+                 de la tour sous l'usage a la fin de C, recouvrement, fins par ordre, et les neuf corruptions
+                 d'horloges de l'auditeur : tour hors du mur, ouvertures differentes, fins de G avant l'ouverture,
+                 noyau avant G, M avant le noyau, R avant M, V avant M, V avant M de l'ordre inferieur, maximum des
+                 G faux), et aucun melange des deux schemas ;
   session        plusieurs trames en alternance (passe p = trame p modulo n, comme la Session de MES-FULL) : admises
                  dans l'ordre, refusees permutees ; budget de l'appareil attendu « partage » (MES-FULL) ou « separe »
                  (MES-B), l'autre refuse ; empreinte absente quand elle n'est pas demandee, refusee si elle l'est.
@@ -222,6 +224,21 @@ def check_overlapped(errors):
         'fins_ordres_manquants': lambda r: r['fins_par_ordre_ns'].pop(),
         'verticales_ordre_1': lambda r: r['fins_par_ordre_ns'][0].__setitem__(3, 1),
         'fin_g_ordre_tardive': lambda r: r['fins_par_ordre_ns'][2].__setitem__(0, r['recouvrement']['fin_g_ns'] + 1),
+        # Gardes des horloges et dependances (auditeur, lf_recouvert_gardes) : P + C + tour dans le mur, deux
+        # ouvertures egales, ouverture <= G <= noyau <= M <= R par ordre, V(k) apres M(k) et M(k-1), maximum des G.
+        'tour_hors_du_mur': lambda r: r['recouvrement'].update(tour_ns=r['wall_ns']),
+        'ouvertures_differentes': lambda r: r['recouvrement'].update(ouverture_ns=0),
+        'fins_g_avant_ouverture': lambda r: [e.__setitem__(0, 0) for e in r['fins_par_ordre_ns']],
+        'noyau_avant_g': lambda r: r['fins_par_ordre_ns'][0].__setitem__(1, 0),
+        'm_avant_noyau': lambda r: r['fins_par_ordre_ns'][0].__setitem__(2, 0),
+        'r_avant_m': lambda r: r['fins_par_ordre_ns'][0].__setitem__(4, 0),
+        'v_avant_m': lambda r: r['fins_par_ordre_ns'][1].__setitem__(3, 0),
+        # M(3) avance d'une unite (toujours avant R(3) et V(3)) ; V(4) = M(4) < M(3) : seule la dependance a l'ordre
+        # inferieur est violee.
+        'v_avant_m_ordre_inferieur': lambda r: (r['fins_par_ordre_ns'][2].__setitem__(2, r['fins_par_ordre_ns'][2][3]),
+                                               r['fins_par_ordre_ns'][3].__setitem__(3, r['fins_par_ordre_ns'][3][2])),
+        'maximum_g_faux': lambda r: [e.__setitem__(0, r['recouvrement']['ouverture_ns'])
+                                     for e in r['fins_par_ordre_ns']],
     }
     for name, mutate in mutations.items():
         state = lf.parse_output(0, output(mutate), attendu)
@@ -241,7 +258,7 @@ def main():
         print(error, file=sys.stderr)
     if errors:
         return 1
-    print('test_lecteur_full_ok lecture=29 issues=7 session=6 recouvert=19')
+    print('test_lecteur_full_ok lecture=29 issues=7 session=6 recouvert=28')
     return 0
 
 

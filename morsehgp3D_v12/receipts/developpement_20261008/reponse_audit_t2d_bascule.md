@@ -68,3 +68,20 @@ compilés seulement dans une cible de test, Session d'un site à K1, Pool de deu
 sémaphores) est transmis au chantier A, qui porte `pipeline_run.cpp`, pour être intégré avant A6. L'état de
 `CST-0241` reste le vôtre à fixer.
 
+## Lecteur, pilotes et apparié : fermetures intégrées (commits `8dc66863f` et `b2df42983`)
+
+| Point de l'auditeur | Réponse |
+| --- | --- |
+| [Gardes des horloges du lecteur recouvert](../audit_reponses_20261008/lf_recouvert_gardes/README.md) | Patch appliqué tel quel. Vos neuf corruptions sont gravées dans [`test_lecteur_full.py`](../../microbancs/outils/test_lecteur_full.py) : 28 cas du schéma recouvert, chaque corruption isolée (la dépendance V(k) ≥ M(k−1) est violée seule). Cinq mutants du lecteur ajoutés (enveloppe de la tour, égalité des ouvertures, dépendance à l'ordre inférieur, chaîne par ordre, maximum de G), 27 tués |
+| [Fixtures recouvertes incohérentes](../audit_reponses_20261008/pilotes_fixtures_recouvert/README.md) | Corrigées dans les quatre sondes simulées (fin de V des ordres 2 et suivants : 5 → 6). Le patch n'était pas dans le reçu, la même correction est faite à la main |
+| [Séparateur du tableau MES-FULL](../audit_reponses_20261008/pilotes_bascule/README.md) | `tableau.patch` appliqué tel quel |
+| Apparié : [identité et résumés](../audit_reponses_20261008/apparie_identite/README.md), [cohorte](../audit_reponses_20261008/apparie_cohorte/README.md), [fermeture du binaire](../audit_reponses_20261008/apparie_fermeture/README.md) | `apparie_livraison/composition.patch` puis `apparie_composition_triple/fermeture.patch` appliqués tels quels. Les quatre fermetures sont gravées dans la porte du pilote, avec quatre mutants (17 tués). Le contrôle des tours fait en double par le juge est retiré, faute de quoi son mutant était équivalent. Portes MES-FULL, MES-B (17 mutants), MES-C (14) et lecteur vertes en Python nu et sous `-O` |
+
+**Campagne appariée de la session M rejugée** avec le juge fermé, sur ses journaux rapatriés et sans les réécrire.
+Strictement, elle est **refusée** : la fermeture du binaire (`sonde_fin_sha256`) n'était pas relevée par le pilote joué.
+Si l'on admet seulement l'égalité de la sonde en fin de campagne, toutes les autres fermetures passent : journaux
+d'identité relus, résumés recalculés, cohorte fermée. Les verdicts sont alors inchangés : cache adopté (0,929 / 0,924 /
+0,918), voie séquentielle rejetée, A/A dans sa fenêtre. Le cache reste le défaut de la Session sur ce verdict. Il
+sera **rejoué sur G4 avec le pilote fermé** : référence `--cache=0` et bras « défaut », pour réétablir l'adoption avec
+toutes les preuves.
+

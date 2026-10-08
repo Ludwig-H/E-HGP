@@ -12,13 +12,20 @@ import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 MUTANTS = {
+    'sans_fermeture_binaire': ("            provenance.get('sonde_fin_sha256') != provenance['sonde_sha256']):",
+                               "            False):"),
+    'identite_non_relue': ("            one(report.get('identite', {}).get(label, {}).get(arm), path, attendu, "
+                           "'identite %s %s' % (label, arm))", "            pass"),
+    'resume_non_compare': ("        if any(dumped(take.get(key)) != dumped(value) for key, value in summary.items()):",
+                           "        if False:"),
+    'cohorte_vide_admise': ("    if type(labels) is not list or not labels or ", "    if type(labels) is not list or "),
     'borne_basse': ("        case['verdict'] = 'adopte' if all(v['ic95'][1] < rule['seuil_borne_haute']",
                     "        case['verdict'] = 'adopte' if all(v['ic95'][0] < rule['seuil_borne_haute']"),
     'aa_sans_fenetre': ("if abs(v['rapport'] - 1) > rule['fenetre_aa']]", "if False]"),
     'aa_adoptable': ("        if arm == aa:\n            case['verdict'] = 'controle A/A'\n            continue\n", ""),
     'identite_ignoree': ("        if len(digests) != 1:", "        if False:"),
-    'tours_libres': ("if type(rounds) is not list or len(rounds) < max(cfg['tours'], 1):",
-                     "if type(rounds) is not list or not rounds:"),
+    'tours_libres': ("    if any(type(tours) is not list or len(tours) != cfg['tours'] for tours in "
+                     "report['campagne'].values()):", "    if False:"),
     'tour_incomplet_admis': ("            if type(row) is not dict or set(row) != set(arms) or \\\n",
                              "            if type(row) is not dict or \\\n"),
     'sans_rejeu_brut': ("    verdict = judge(report, out_dir)", "    verdict = judge(report)"),

@@ -58,9 +58,17 @@ passage, jugement, information `v12set`), `tableaux_apparie.md`, `journaux/`, `c
   tours courts, empreinte différente, A/A hors de la fenêtre.
 - [`test_pilote_apparie.py`](test_pilote_apparie.py) : sonde simulée, aussi sous `-O`. Elle vérifie l'usage refusé
   avant toute prise, puis une campagne complète : `--cache` à 0,9 adopté, `--sequentiel` à 1,1 rejeté et lu au schéma
-  séquentiel, A/A à 1, ordre décalé, tableaux et information `v12set`. Elle vérifie aussi trois refus : un journal
-  modifié après coup, une sonde qui ignore `--sequentiel` (schéma croisé) et une empreinte qui dépend des options.
-- [`mutants_pilote_apparie.py`](mutants_pilote_apparie.py) : treize mutants du pilote, tous tués.
+  séquentiel, A/A à 1, ordre décalé, tableaux et information `v12set`. Elle vérifie aussi sept refus : un journal
+  modifié après coup, une sonde qui ignore `--sequentiel` (schéma croisé), une empreinte qui dépend des options, et les
+  fermetures de l'auditeur (résumé forgé, sonde modifiée pendant la campagne, cohorte décisive vide, journal
+  d'identité retiré).
+- [`mutants_pilote_apparie.py`](mutants_pilote_apparie.py) : dix-sept mutants du pilote, tous tués.
+
+**Fermetures de l'auditeur (8 octobre, après la session M).** Le juge relit désormais aussi les journaux d'identité. Il
+recalcule chaque résumé publié (types compris, JSON canonique) et ferme la configuration et les cohortes avant toute
+statistique (`validate_campaign`). Il exige que l'empreinte de la sonde relevée en fin de campagne soit égale à
+l'initiale (fermeture du binaire, `sonde_fin_sha256`). Patchs `apparie_livraison` et `apparie_composition_triple`,
+appliqués tels quels ; le contrôle des tours, en double avec `validate_campaign`, est retiré du juge.
 
 **Essai local, 8 octobre, indicatif.** Il a été joué avec la vraie sonde, voie CPU à 4 fils, sur deux petits nuages
 réels (2 413 et 3 454 sites), quatre bras, 2 tours × 3 passes, et une Session d'information de deux trames. Les

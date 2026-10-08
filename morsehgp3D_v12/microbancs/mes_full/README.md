@@ -55,5 +55,5 @@ publie le journal de construction, les empreintes SHA-256 de la sonde, du pilote
 **Portes** : [`test_pilote_full.py`](test_pilote_full.py) (sonde simulée : campagne d'essai conforme, sites faux sur
 une trame refusés, empreinte instable refusée, `--sequentiel` transmis et lu, schéma croisé illisible) et
 [`../outils/test_lecteur_full.py`](../outils/test_lecteur_full.py) (lecture, issues, Session à plusieurs trames, schéma
-recouvert ; vingt-deux mutants du lecteur tués par
+recouvert ; vingt-sept mutants du lecteur tués par
 [`../outils/mutants_lecteur_full.py`](../outils/mutants_lecteur_full.py)).

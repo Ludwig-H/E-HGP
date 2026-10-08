@@ -108,10 +108,12 @@ Sorties : `rapport_b.json`, `tableaux_b.md`, `brut/` (sorties de chaque cas), `c
   refusées ;
 - les refus et échecs publiés comme résultats ;
 - les Sessions à plusieurs trames, le budget de l'appareil attendu et l'empreinte demandée ou non ;
-- le schéma de la Session recouverte : une sortie conforme admise, seize incohérences refusées (schéma, raccord,
-  partition, fenêtres, ouverture de G, mémoire, recouvrement, fins par ordre), et les deux schémas jamais mêlés.
+- le schéma de la Session recouverte : une sortie conforme admise, vingt-cinq incohérences refusées (schéma, raccord,
+  partition, fenêtres, ouverture de G, mémoire, recouvrement, fins par ordre, et les neuf corruptions d'horloges de
+  l'auditeur : tour hors du mur, ouvertures différentes, ordre des fins G, noyau, M, R et V, maximum des fins de G),
+  et les deux schémas jamais mêlés.
 
-[`mutants_lecteur_full.py`](../outils/mutants_lecteur_full.py) tue vingt-deux mutants du lecteur ; un mutant
+[`mutants_lecteur_full.py`](../outils/mutants_lecteur_full.py) tue vingt-sept mutants du lecteur ; un mutant
 équivalent est écarté, et le fichier dit pourquoi. La porte du pilote, [`test_pilote_b.py`](test_pilote_b.py), vérifie
 les verdicts B1 à B4 aux seuils, les empreintes entre passes et entre voies, ce que le pilote demande au lecteur, les
 étiquettes uniques et le pilote complet sur une sonde simulée (délai, seuil d'empreinte, schéma recouvert par défaut,

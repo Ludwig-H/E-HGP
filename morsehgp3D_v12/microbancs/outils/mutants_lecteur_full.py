@@ -14,6 +14,15 @@ import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 MUTANTS = {
+    'sans_enveloppe_tour': (" or \\\n            rec['ouverture_ns'] != g['ouverture'] or st['P'] + st['C'] + "
+                            "rec['tour_ns'] > row['wall_ns']:",
+                            " or \\\n            rec['ouverture_ns'] != g['ouverture']:"),
+    'sans_egalite_ouvertures': ("            rec['ouverture_ns'] != g['ouverture'] or st['P']",
+                                "            st['P']"),
+    'sans_dependance_m_inferieur': ("any(e[3] < max(e[2], ends[j-1][2]) for j, e in enumerate(ends) if j > 0)",
+                                    "any(e[3] < e[2] for j, e in enumerate(ends) if j > 0)"),
+    'sans_chaine_par_ordre': ("any(not (rec['ouverture_ns'] <= e[0] <= e[1] <= e[2] <= e[4]) for e in ends)", "False"),
+    'sans_maximum_g': ("    if rec['fin_g_ns'] != max_g and not", "    if False and not"),
     'pics_successifs_ignores': (" and \\\n        all(mem[b][1] >= mem[a][0] for a, b in zip(stages, stages[1:]))", ""),
     'sans_cles_exactes': ("    if set(row) != keys:\n", "    if not set(row) >= keys:\n"),
     'booleen_admis': ("    return type(value) is int and 0 <= value < (1 << 64)",
