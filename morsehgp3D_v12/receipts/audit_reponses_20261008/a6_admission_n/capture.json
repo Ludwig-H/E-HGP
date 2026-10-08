@@ -1,0 +1,46 @@
+{
+  "constat": "CST-0020",
+  "measurements": false,
+  "native_invocations": 0,
+  "pin": "30a69104a697fa2ea2dadd8499bde6c7cb8d72c0",
+  "scope": "scratch des deux Buffer de number_births_range dans la Session recouverte",
+  "sources": {
+    "src/core/buffer.cpp": {
+      "bytes": 12383,
+      "sha256": "5c885dbf0e4813f1a8ee653115092536348877e6b93aa5b831d7490fe0d6e756"
+    },
+    "src/core/buffer.hpp": {
+      "bytes": 14629,
+      "sha256": "8e4d84665e90308ee9572a729731711bb419e3a565fd4dd11b5bd56ab6a92401"
+    },
+    "src/sched/pool.cpp": {
+      "bytes": 4449,
+      "sha256": "3d3985debc8db6c4513c9ed2d8e87cd1ad1ec02a231a7776595da05a8f3b4368"
+    },
+    "src/tower/forest_births.cpp": {
+      "bytes": 8582,
+      "sha256": "0cd7b8350d43d57bd4d375e33b869e9528bbf849acf2832c6b8e8558fb927bdc"
+    },
+    "src/tower/forest_build.cpp": {
+      "bytes": 10554,
+      "sha256": "675593396ec74c3ba1bd3b68024769ccaecf498597cb4b61d813ff547db9ba02"
+    },
+    "src/tower/pipeline.cpp": {
+      "bytes": 11339,
+      "sha256": "a81dc7a329af6c9b1a90f2dcfac9b0b0a337ec47ae9a745055dc030c2fef5c8e"
+    },
+    "src/tower/pipeline.hpp": {
+      "bytes": 13107,
+      "sha256": "b6c6eb7bc7bbd2446e565b46ca0e99bdee3b26b9653ba6d21a91bd7c521486b2"
+    },
+    "src/tower/pipeline_run.cpp": {
+      "bytes": 19192,
+      "sha256": "543ca7bda001e87a1c2e5ceb38a4cecfb7c5123127877f5d214e679e057b97ba"
+    },
+    "src/tower/pipeline_steps.cpp": {
+      "bytes": 6190,
+      "sha256": "57b88173378d5cd9544aad5848d7ed32ff560c1e481856b03f6b79839e27f765"
+    }
+  },
+  "status": "proposition mathematique non implantee"
+}

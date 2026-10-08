@@ -21,16 +21,15 @@ maximum contractuel **358,86 ms**, ici aussi maximum des185 chaudes. 25/37 médi
 Voie GPU : catalogue CUDA puis tour CPU. FULL couvre Cloud/index→T/M/V/R ; lecture, masque, validation, FUL1
 et libération hors mur. G est une fenêtre recouverte, TMVR la queue après G ; ne pas sommer les médianes.
 
-**[Dernier cache apparié : cache2b](../receipts/audit_reponses_20261008/cache2_admission/README.md), admis.**
-Référence explicitement sans cache ; A/A conforme sur les GM.
-Rapports cache/ref0,9221/0,9254/0,9120, bornes IC95 supérieures0,9273/0,9310/0,9173 : cache adopté.
-**37 trames informatives avec cache : médiane147,77 ms, pire médiane297,53 ms**, contre160,23/318,93 sans cache.
-Deux secondes visites/trame ; bloc informatif distinct du protocole contractuel M.
+**[Cache2b admis](../receipts/audit_reponses_20261008/cache2_admission/README.md), cache adopté.**
+Référence cache0, A/A conforme ; rapports cache/ref 0,9221/0,9254/0,9120,
+IC95 hauts 0,9273/0,9310/0,9173. Lot informatif de 37 trames avec cache :
+**médiane 147,77 ms, pire médiane 297,53 ms**, contre 160,23/318,93 sans cache.
+Deux secondes visites/trame : distinct du protocole contractuel M.
 [Provenance/arrêt clos](../receipts/audit_reponses_20261008/cache2_provenance/README.md) : ELF initial/final identique,
-fermeture après les Sessions ; relevé environnement antérieur au bloc informatif.730 portes CPU/u21 passantes.
-Pic budgété actif hors cache inactif. **Aucun nouveau CPU/K10 dans ce lot.**
-[Défaut8 Gio](../receipts/audit_reponses_20261008/cache_defaut_raccord/README.md) aussi CPU/K10 : ng00–02 encore non mesurés ainsi.
-M précède le correctif0241 ; son [apparié](../receipts/audit_reponses_20261008/session_m_apparie/README.md) reste historique sans ELF final.
+fermeture après les Sessions ; relevé environnement antérieur au bloc informatif. 730 portes CPU/u21 passantes.
+Pic actif hors cache inactif. **Aucun nouveau CPU/K10** ; le défaut cache8 Gio n'y est pas qualifié sur ng00–02.
+M précède le correctif0241 ; ses anciennes fermetures ELF ne sont pas complétées par cache2b.
 
 **Petits LiDAR : [MES-C3 admise](../receipts/audit_reponses_20261008/session_c3_admission/README.md), critères C1–C3 non tenus.**
 132 réels seuls, cache8 Gio, W48 ; médiane des deux chaudes par nuage, puis médiane des132, en ms :
@@ -42,23 +41,24 @@ M précède le correctif0241 ; son [apparié](../receipts/audit_reponses_2026100
 
 Maxima des médianes réelles : K5 CPU/GPU134,07/32,64 ms ; K10 515,63/199,35 ms.
 Huit refus `wide_leaf` persistent dans la cohorte difficile.
-W1 absent ; sur≤150 sites, CPU W4/W48 vaut6,08/10,88 ms ; calcul/coordination non séparés.
-[Deux appariés cache C3](../receipts/audit_reponses_20261008/session_c3_apparies/README.md) :198 journaux/1 836 passes,
-les deux campagnes **refusées par A/A** surp5000 (GPU0,973001 ; CPU1,015474>1,015).
-Aucune adoption ni rejet statistique du bras sans cache. [Sources72/arrêt clos](../receipts/audit_reponses_20261008/session_c3_provenance/README.md),
-ELF final absent ici aussi. Comparaison C2 descriptive, plusieurs changements.
+W1 absent ; sur≤150 sites, CPU W4/W48 vaut6,08/10,88 ms.
+[C3 appariés cache](../receipts/audit_reponses_20261008/session_c3_apparies/README.md) : les deux campagnes
+refusées par A/A, donc aucune conclusion d'absence d'effet. [Provenance](../receipts/audit_reponses_20261008/session_c3_provenance/README.md) :
+arrêt clos, ELF final absent ; comparaison C2 descriptive, plusieurs changements.
 
 **Priorités de calcul.** [CPU](../receipts/audit_reponses_20261008/cpu_feuilles_finition/README.md) : C318,77/272,70/320,92 ms
 sur ng00–02, soit83–84 % FULL. Finition déjà parallèle ; même gratuite, FULL conditionnel268–321 ms.
-Paires uniques et arrêt census intégrés ; feuille16/24 déjà comparée dans I sans gain global à16. V11 historique : GPU plus rapide, CPU encore plus lent ; non apparié.
+Paires uniques et arrêt census intégrés ; feuille16 sans gain global face à24. Comparaison v11 non appariée : GPU plus rapide, CPU encore plus lent.
 [Noyau](../receipts/audit_reponses_20261008/a6_noyau_raccord/README.md) : R5 dernier sur99 099 sites ; les fins ne
 sont pas des durées propres. À P/C/G inchangés, queue gratuite laisse238,32 ms et22/37 médianes>100 ms.
 MSF/rejeu reste écarté du prochain A6. [Publication des indices A6](../receipts/audit_reponses_20261008/a6_indices_concurrence/README.md) :
 pont release/acquire proposé. [Fragment de 47 événements](../receipts/audit_reponses_20261008/a6_prefixe_relaxed/README.md)
 admis par les clauses mémoire examinées, exclu par le pont ; ni trame déclenchante ni échec natif établis.
 [21 grandes trames × 3 bras](../receipts/audit_reponses_20261008/a6_identites_complementaires/README.md) : FUL1 égales,
-CPU/u21/K5/W3. Ces 63 sorties ne closent pas CST-0242. A6 intégré en `30a69104a` avec les mêmes corps concurrents ;
-publication des indices toujours relaxed, preuve de préfixe ouverte. Aucun nouveau gain G4 FULL admis.
+CPU/u21/K5/W3. Ces 63 sorties ne closent pas CST-0242. [A6 livré](../receipts/audit_reponses_20261008/a6_livraison_0242/README.md) en `30a69104a` :
+mêmes corps relaxed, pont applicable, preuve de préfixe ouverte. Aucun nouveau gain G4 FULL admis.
+[Admission N proposée](../receipts/audit_reponses_20261008/a6_admission_n/README.md) : somme des W plus grands
+scratchs par tâche, retrait du doublon par ordre ; borne logique, pas de gain mémoire mesuré.
 
 **[G-APP2 admis ; D1 et D2 rejetés](../receipts/audit_reponses_20261008/gapp2_admission/README.md).**
 Source9815 : 75 chaudes K5 décisives ; identités exactes, aucun refus.
@@ -73,11 +73,11 @@ API/replis conservés, bornes signées vérifiées ; préconditions brutes à ex
 **CST-0241 clos** : [retrait CPU/u21 corrigé, preuve et primaires](../receipts/audit_reponses_20261008/a_terminaison_native/README.md). Concurrence générale non close.
 
 **Juges.** [Livraison85 vérifiée](../receipts/audit_reponses_20261008/lecteurs_livraison_85db/README.md) ;
-[garde de code processus LF proposée](../receipts/audit_reponses_20261008/lf_code_processus/README.md) :
-False/0.0/−0.0/2.0 doivent être refusés, quatre témoins causaux et positif conservé.
+[garde LF proposée](../receipts/audit_reponses_20261008/lf_code_processus/README.md) : codes de type entier strict.
 [Port GAPP2 proposé](../receipts/audit_reponses_20261008/gapp2_journal_strict/README.md) : phases/cohorte/codes,
 22 cas/5 mutants Python ; les cinq contrefaçons refusées, jugement réel inchangé (D1/D2 rejetés).
-K10 informatif et code global conservés. CST-0018 reste partiel ; aucun chrono réel déclaré faux.
+[Juge A6 proposé](../receipts/audit_reponses_20261008/a6_pilote_admission/README.md) : cinq fausses adoptions
+refusées après fermeture du plan/cohorte/A-A ; mode essai corrigé avant Markdown. Aucun chrono réel déclaré faux.
 
 **[Massifs L1p admis](../receipts/audit_reponses_20261008/session_l1p_admission/README.md), sourcec648 :**
 Boreas sans sol1,513M : **GPU7,298s / CPU20,056s** ; GPU Marseille sans sol2,465M8,349s,

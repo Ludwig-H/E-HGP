@@ -1,0 +1,9 @@
+{
+  "CST_0242_closed": false,
+  "bridge_applies": true,
+  "bridge_post_kernel_sha256": "6e6bac761b53478d32ad6a18e8146a4282a7284bf093b7a2f65c35b01ecc7567",
+  "integration_postimages_equal": 17,
+  "native_delta_base_to_pre": 0,
+  "native_invocations": 0,
+  "prefix_witness_sources_equal": 4
+}

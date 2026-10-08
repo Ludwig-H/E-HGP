@@ -1,0 +1,140 @@
+{
+  "source": "30a69104a697fa2ea2dadd8499bde6c7cb8d72c0",
+  "captured_utc": "2026-10-08T11:59:44.967226+00:00",
+  "sources": {
+    "microbancs/mes_t2d_a6/pilote_t2d_a6.py": "1afa27d097b0418c0c84c78b10cd47a254d24ec75d2be7968673f4dec4c006cc",
+    "microbancs/mes_t2d_a6/README.md": "95e803fc7f9c1ca4d3f11e735d6256743a19fc34a51b2b216c94a63ce5968e11",
+    "microbancs/outils/banc_full.py": "7d7f0661b49adf094df51d41268470571d47c51fc7795bb5b34c791a4a539904",
+    "microbancs/outils/lecteur_full.py": "15437e5f09408d5fbdc6288e33a2452490489f13bf9a3b3a24c99f5d109b6554",
+    "microbancs/outils/test_lecteur_full.py": "8eed4403670ced0640e43b1010e07422fef105fe6da242ba1db730643f7a371f",
+    "bench/full_probe.cpp": "1068940a06e386cb80a4802b3dd61e2df87eed69574f08c821c34dabb017179b"
+  },
+  "scope": "synthetic JSON only; native engines and data payloads not executed/read",
+  "normal_optimized_identical": true,
+  "result": {
+    "essai": {
+      "identites": 7,
+      "identity_frames": 2,
+      "journaux": 26,
+      "large_frames": 2,
+      "manifest_cases": 37,
+      "missing_manifest_refused": true,
+      "ng00_1fil_passes": 1,
+      "old_table_verdict": "adopte",
+      "proposed_table_verdict": "essai",
+      "uniformes": 2
+    },
+    "journaux_synthetiques": 85,
+    "native_executed": false,
+    "nominal_grandes": 21,
+    "nominal_identites": 11,
+    "nominal_tours_grandes": 6,
+    "nominal_tours_ng": 5,
+    "official_selftests": 6,
+    "results": {
+      "aa_binaire_distinct_de_avant": {
+        "livre": {
+          "identite_ok": true,
+          "refus": [],
+          "verdict": "adopte"
+        },
+        "propose": {
+          "identite_ok": false,
+          "refus": [
+            "empreintes binaires ou identite A/A invalides"
+          ],
+          "verdict": "refuse"
+        }
+      },
+      "chronos_w1_au_lieu_de_w48": {
+        "livre": {
+          "identite_ok": true,
+          "refus": [],
+          "verdict": "adopte"
+        },
+        "propose": {
+          "identite_ok": false,
+          "refus": [
+            "grandes : ordre, bras ou configuration hors commande"
+          ],
+          "verdict": "refuse"
+        }
+      },
+      "cinq_tours_au_lieu_de_six": {
+        "livre": {
+          "identite_ok": true,
+          "refus": [],
+          "verdict": "adopte"
+        },
+        "propose": {
+          "identite_ok": false,
+          "refus": [
+            "grandes : trames ou nombre de tours hors commande"
+          ],
+          "verdict": "refuse"
+        }
+      },
+      "identite_une_cle_sur_onze": {
+        "livre": {
+          "identite_ok": true,
+          "refus": [],
+          "verdict": "adopte"
+        },
+        "propose": {
+          "identite_ok": false,
+          "refus": [
+            "identite hors cohorte commandee"
+          ],
+          "verdict": "refuse"
+        }
+      },
+      "nominal": {
+        "livre": {
+          "identite_ok": true,
+          "refus": [],
+          "verdict": "adopte"
+        },
+        "propose": {
+          "identite_ok": true,
+          "refus": [],
+          "verdict": "adopte"
+        }
+      },
+      "ordre_une_trame_bruts_42_passes": {
+        "livre": {
+          "identite_ok": true,
+          "refus": [],
+          "verdict": "adopte"
+        },
+        "propose": {
+          "identite_ok": false,
+          "refus": [
+            "grandes : ordre, bras ou configuration hors commande"
+          ],
+          "verdict": "refuse"
+        }
+      },
+      "veto_aa_103": "refuse"
+    },
+    "source": "30a69104a697fa2ea2dadd8499bde6c7cb8d72c0",
+    "verifier_true": true
+  },
+  "comparison": {
+    "before": "bdfca8fb1",
+    "after": "30a69104a697fa2ea2dadd8499bde6c7cb8d72c0",
+    "full_probe_equal": true,
+    "full_probe_sha256": "1068940a06e386cb80a4802b3dd61e2df87eed69574f08c821c34dabb017179b",
+    "product_changed_paths": [
+      "morsehgp3D_v12/src/tower/forest_births.cpp",
+      "morsehgp3D_v12/src/tower/forest_build.cpp",
+      "morsehgp3D_v12/src/tower/forest_internal.hpp",
+      "morsehgp3D_v12/src/tower/forest_kernel.cpp",
+      "morsehgp3D_v12/src/tower/module.cmake",
+      "morsehgp3D_v12/src/tower/pipeline.cpp",
+      "morsehgp3D_v12/src/tower/pipeline.hpp",
+      "morsehgp3D_v12/src/tower/pipeline_run.cpp",
+      "morsehgp3D_v12/src/tower/pipeline_steps.cpp",
+      "morsehgp3D_v12/src/tower/tower.hpp"
+    ]
+  }
+}
