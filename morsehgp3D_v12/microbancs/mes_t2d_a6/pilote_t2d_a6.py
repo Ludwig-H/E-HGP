@@ -24,7 +24,7 @@ Etapes (dans l'ordre si plusieurs) :
               l'autre) ; le second tour du processus fait foi
   ng          GARDE : ng00, ng01, ng02 a K5 : --tours tours ; dans chaque tour, trames en ordre tourne et, pour chacune,
               un processus neuf par bras ; --passes passes (la premiere, a froid, ecartee)
-  rapport     auto-test du juge, puis juge (REGLE_T2D_A6), rapport JSON et tableaux Markdown
+  rapport     exige --archive-v12set (manifeste), puis auto-test, juge, rapport JSON et tableaux Markdown
   tout        auto-test construire identite grandes ng rapport
 
 REGLE_T2D_A6 (ecrite le 8 octobre 2026 a 09:11 UTC, avant toute mesure de ces bras sur G4) :
@@ -364,8 +364,100 @@ def logs_ng(rapport, trame, bras, refus):
     return out
 
 
-def _juger(rapport, sortie, verifier, essai):
+def plan_demande(args):
+    """Cohorte issue de la commande et du SEUL manifeste ; jamais des prises a juger."""
+    if not args.archive_v12set:
+        raise RuntimeError("rapport exige --archive-v12set (manifeste de la cohorte)")
+    with tarfile.open(args.archive_v12set) as tar:
+        members = [m for m in tar.getmembers() if m.name == "bundle_manifest.json"]
+        if len(members) != 1 or not members[0].isfile():
+            raise RuntimeError("manifeste v12set absent ou multiple")
+        raw = tar.extractfile(members[0]).read()
+    manifest = json.loads(raw)
+    return {"cas": [[c["name"], c["count"]] for c in manifest["cases"]],
+            "fils": args.fils, "passes": args.passes, "tours": args.tours,
+            "tours_grandes": args.tours_grandes, "essai": args.essai}
+
+
+def verifier_cohorte(rapport, plan, essai):
+    """Erreur bloquante avant lecture/statistiques ; plan externe a reconstruire de la commande archivee."""
+    try:
+        if not isinstance(plan, dict) or type(plan.get("essai")) is not bool or plan["essai"] != essai:
+            return "plan de cohorte externe absent ou incoherent"
+        if any(type(plan.get(k)) is not int or plan[k] <= 0 for k in ("fils", "passes", "tours", "tours_grandes")):
+            return "configuration de cohorte invalide"
+        if not essai and (plan["fils"] != 48 or plan["passes"] < REGLE_T2D_A6["passes_min"] or
+                          min(plan["tours"], plan["tours_grandes"]) < REGLE_T2D_A6["tours_min"]):
+            return "configuration hors protocole A6"
+        cas = plan["cas"]
+        if type(cas) is not list or len(cas) != 37 or any(
+                type(c) is not list or len(c) != 2 or type(c[0]) is not str or not c[0] or
+                type(c[1]) is not int or c[1] <= 0 for c in cas):
+            return "cohorte v12set invalide"
+        if len({c[0] for c in cas}) != len(cas) or len({c[0][-23:] for c in cas}) != len(cas):
+            return "trames ou labels dupliques"
+        grandes = [c for c in cas if c[1] > SEUIL_GRANDES]
+        if not grandes:
+            return "aucune grande trame"
+        if essai:
+            cas, grandes = cas[:2], grandes[-2:]
+        enc = lambda x: json.dumps(x, sort_keys=True, allow_nan=False)
+        def expected(k, fils, passes, digest, frames):
+            return dict(voie="cpu" if essai else "appareil", k=k, fils=fils, passes=passes,
+                        empreinte=digest, trames=frames, budget_appareil="partage", bits=21, schema="recouvert")
+        def take(p, arm, exp):
+            return (isinstance(p, dict) and p.get("bras") == arm and type(p.get("code")) is int and
+                    p["code"] == 0 and p.get("etat") == "ok" and enc(p.get("attendu")) == enc(exp))
+        ident = {}
+        for name, sites in TRAMES.items():
+            for k, count in ((5, 2),) if essai else ((5, 2), (10, 1)):
+                ident[name + "_k%d" % k] = expected(k, plan["fils"], count, True, [[name, sites]] * count)
+        ident["ng00_k5_1fil"] = expected(5, 1, 1, True, [["ng00", 39885]])
+        for n in UNIFORMES[:2] if essai else UNIFORMES:
+            ident["u%d_k5" % n] = expected(5, plan["fils"], 1, True, [["u%d" % n, n]])
+        ident["v12set_k5"] = expected(5, plan["fils"], len(cas), True, [[n[-23:], s] for n, s in cas])
+        got = rapport["identite"]["prises"]
+        if set(got) != set(ident) or any(set(got[n]) != {"avant", "apres"} or
+                any(not take(got[n][b], b, exp) for b in ("avant", "apres")) for n, exp in ident.items()):
+            return "identite hors cohorte commandee"
+        camp = rapport["grandes"]
+        if camp["trames"] != [n for n, _ in grandes] or len(camp["tours"]) != plan["tours_grandes"]:
+            return "grandes : trames ou nombre de tours hors commande"
+        for t, turn in enumerate(camp["tours"]):
+            j = t % len(grandes)
+            frames = grandes[j:] + grandes[:j]
+            exp = expected(5, plan["fils"], 2 * len(frames), False, [[n[-23:], s] for n, s in frames] * 2)
+            if set(turn) != set(BRAS) | {"ordre"} or turn["ordre"] != [n for n, _ in frames] or any(
+                    not take(turn[b], b, exp) for b in BRAS):
+                return "grandes : ordre, bras ou configuration hors commande"
+        ng = rapport["ng"]
+        if ng["passes"] != plan["passes"] or set(ng["trames"]) != set(TRAMES):
+            return "ng : cohorte ou passes hors commande"
+        for name, sites in TRAMES.items():
+            if len(ng["trames"][name]) != plan["tours"]:
+                return "ng : nombre de tours hors commande"
+            exp = expected(5, plan["fils"], plan["passes"], False, [[name, sites]] * plan["passes"])
+            if any(set(turn) != set(BRAS) or any(not take(turn[b], b, exp) for b in BRAS)
+                   for turn in ng["trames"][name]):
+                return "ng : bras ou configuration hors commande"
+        builds, closed = rapport["construction"]["binaires"], ng["binaires_apres"]
+        if set(builds) != set(BRAS) or set(closed) != set(BRAS):
+            return "construction ou fermeture incomplete"
+        shas = {b: builds[b]["sha256"] for b in BRAS}
+        if any(type(h) is not str or len(h) != 64 or any(c not in "0123456789abcdef" for c in h)
+               for h in shas.values()) or closed != shas or shas["avant_bis"] != shas["avant"]:
+            return "empreintes binaires ou identite A/A invalides"
+    except (KeyError, TypeError, ValueError):
+        return "rapport ou plan mal forme"
+    return ""
+
+
+def _juger(rapport, sortie, verifier, essai, plan=None):
     regle, refus, cas = REGLE_T2D_A6, [], {}
+    if verifier:
+        why = verifier_cohorte(rapport, plan, essai)
+        if why:
+            return {"verdict": "refuse", "refus": [why], "regle": regle, "cas": {}, "identite_ok": False}
     construction = rapport.get("construction", {}).get("binaires", {})
     if set(construction) != set(BRAS):
         refus.append("construction absente ou incomplete")
@@ -403,9 +495,9 @@ def _juger(rapport, sortie, verifier, essai):
     return {"verdict": verdict, "refus": refus, "regle": regle, "cas": cas, "identite_ok": identique}
 
 
-def juger(rapport, sortie, verifier=True, essai=False):
+def juger(rapport, sortie, verifier=True, essai=False, plan=None):
     """Copie JSON du rapport, jamais modifiee par le juge ; la voie sans rejeu est reservee a l'auto-test."""
-    return _juger(json.loads(json.dumps(rapport, allow_nan=False)), sortie, verifier, essai)
+    return _juger(json.loads(json.dumps(rapport, allow_nan=False)), sortie, verifier, essai, plan)
 
 
 # ---- Auto-test du juge ------------------------------------------------------------------------------------------------
@@ -503,7 +595,11 @@ def tableaux(rapport, jugement):
 
 
 def etape_rapport(args, rapport):
-    jugement = juger(rapport, args.sortie, essai=args.essai)
+    plan = plan_demande(args)
+    rapport["cohorte_demandee"] = plan
+    jugement = juger(rapport, args.sortie, essai=args.essai, plan=plan)
+    if args.essai:
+        jugement["verdict"] = "essai"  # avant les tableaux, pas seulement avant le JSON final
     rapport["jugement"] = jugement
     with open(os.path.join(args.sortie, "tableaux_t2d_a6.md"), "w", encoding="utf-8") as f:
         f.write(tableaux(rapport, jugement))

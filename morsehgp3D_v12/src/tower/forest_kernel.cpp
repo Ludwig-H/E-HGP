@@ -54,8 +54,12 @@ inline u32 find_read(UnionCell* c, u32 x) noexcept {
   return x;
 }
 
+// Feuille lue par le noyau (acquire) : si c'est un indice publie par une tache d'aide (store release dans
+// hint_leaves), chaque pointeur up lu par l'aide precede sa publication, qui se synchronise avec cette lecture ; une
+// ecriture ulterieure de up par le noyau lui est donc posterieure (happens-before) et l'aide ne peut pas l'avoir lue :
+// l'indice est une racine du prefixe deja consomme (pont de publication de l'auditeur, CST-0242).
 inline u32 load_leaf(u32* leaves, u64 p) noexcept {
-  return std::atomic_ref<u32>(leaves[p]).load(std::memory_order_relaxed);
+  return std::atomic_ref<u32>(leaves[p]).load(std::memory_order_acquire);
 }
 
 inline u32 top(const UnionCell* c, u32 x) noexcept { return c[x].last == kNone ? x : (c[x].last | kEventBit); }
@@ -238,7 +242,8 @@ u64 hint_leaves(const ForestInput& input, OrderWork& work, u64 begin, u64 end, u
       if (target_index(code) >= processed) continue;  // cellule cible pas encore traitee : feuille gardee
       node = work.element[target_index(code)];
     }
-    std::atomic_ref<u32>(leaves[p]).store(find_read(c, node), std::memory_order_relaxed);
+    // release : publie l'indice apres toutes ses lectures de up (voir load_leaf).
+    std::atomic_ref<u32>(leaves[p]).store(find_read(c, node), std::memory_order_release);
     ++hinted;
   }
   return hinted;

@@ -307,8 +307,8 @@
     {
       "id": "indice_de_la_naissance_zero",
       "fichier": "src/tower/forest_kernel.cpp",
-      "cherche": "    std::atomic_ref<u32>(leaves[p]).store(find_read(c, node), std::memory_order_relaxed);",
-      "remplace": "    std::atomic_ref<u32>(leaves[p]).store(find_read(c, node * 0), std::memory_order_relaxed);",
+      "cherche": "    std::atomic_ref<u32>(leaves[p]).store(find_read(c, node), std::memory_order_release);",
+      "remplace": "    std::atomic_ref<u32>(leaves[p]).store(find_read(c, node * 0), std::memory_order_release);",
       "porte": "mhgp12_tower_levers_indices",
       "note": "levier I : l'indice ecrit est la racine d'une autre composante (celle de la naissance 0) : unions fausses"
     },
