@@ -1,0 +1,43 @@
+[  2%] Building CXX object CMakeFiles/mhgp12.dir/src/core/buffer.cpp.o
+[  4%] Building CXX object CMakeFiles/mhgp12.dir/src/num/sphere.cpp.o
+[  7%] Building CXX object CMakeFiles/mhgp12.dir/src/core/ledger.cpp.o
+[  9%] Building CXX object CMakeFiles/mhgp12.dir/src/num/predicates.cpp.o
+[ 12%] Building CXX object CMakeFiles/mhgp12.dir/src/num/center_region.cpp.o
+[ 17%] Building CXX object CMakeFiles/mhgp12.dir/src/num/guard.cpp.o
+[ 24%] Building CXX object CMakeFiles/mhgp12.dir/src/num/centers.cpp.o
+[ 24%] Building CXX object CMakeFiles/mhgp12.dir/src/num/big.cpp.o
+[ 24%] Building CXX object CMakeFiles/mhgp12.dir/src/num/rational.cpp.o
+[ 24%] Building CXX object CMakeFiles/mhgp12.dir/src/num/lattice.cpp.o
+[ 26%] Building CXX object CMakeFiles/mhgp12.dir/src/num/radical.cpp.o
+[ 29%] Building CXX object CMakeFiles/mhgp12.dir/src/num/roots.cpp.o
+[ 31%] Building CXX object CMakeFiles/mhgp12.dir/src/cloud/cloud.cpp.o
+[ 36%] Building CXX object CMakeFiles/mhgp12.dir/src/num/local.cpp.o
+[ 36%] Building CXX object CMakeFiles/mhgp12.dir/src/sched/pool.cpp.o
+[ 39%] Building CXX object CMakeFiles/mhgp12.dir/src/io/sha256.cpp.o
+[ 41%] Building CXX object CMakeFiles/mhgp12.dir/src/io/writer.cpp.o
+[ 43%] Building CXX object CMakeFiles/mhgp12.dir/src/index/build.cpp.o
+[ 48%] Building CXX object CMakeFiles/mhgp12.dir/src/io/directory.cpp.o
+[ 48%] Building CXX object CMakeFiles/mhgp12.dir/src/io/input.cpp.o
+[ 51%] Building CXX object CMakeFiles/mhgp12.dir/src/index/census.cpp.o
+[ 53%] Building CXX object CMakeFiles/mhgp12.dir/src/index/census_workspace.cpp.o
+[ 56%] Building CXX object CMakeFiles/mhgp12.dir/src/catalogue/leaves.cpp.o
+[ 58%] Building CXX object CMakeFiles/mhgp12.dir/src/catalogue/traversal.cpp.o
+[ 60%] Building CXX object CMakeFiles/mhgp12.dir/src/catalogue/assemble.cpp.o
+[ 63%] Building CXX object CMakeFiles/mhgp12.dir/src/catalogue/export.cpp.o
+[ 65%] Building CXX object CMakeFiles/mhgp12.dir/src/catalogue/catalogue.cpp.o
+[ 68%] Building CXX object CMakeFiles/mhgp12.dir/src/catalogue/table.cpp.o
+[ 70%] Building CXX object CMakeFiles/mhgp12.dir/src/catalogue/device_stub.cpp.o
+[ 73%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/cells_stage.cpp.o
+[ 78%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/radix.cpp.o
+[ 78%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/populations.cpp.o
+[ 80%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/cells.cpp.o
+[ 82%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/supports.cpp.o
+[ 85%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/passes.cpp.o
+[ 87%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/resolve.cpp.o
+[ 90%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/first_probes.cpp.o
+[ 92%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/stage.cpp.o
+[ 95%] Linking CXX static library libmhgp12.a
+[ 95%] Built target mhgp12
+[ 97%] Building CXX object CMakeFiles/mhgp12_tower_probe.dir/bench/tower_probe.cpp.o
+[100%] Linking CXX executable mhgp12_tower_probe
+[100%] Built target mhgp12_tower_probe

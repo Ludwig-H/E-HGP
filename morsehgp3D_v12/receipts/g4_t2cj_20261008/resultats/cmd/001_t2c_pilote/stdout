@@ -1,0 +1,3 @@
+pilote_t2c_auto_test_ok cas=5 verdicts=adopte,rejete,refuse
+pilote_t2c_auto_test_ok cas=5 verdicts=adopte,rejete,refuse
+pilote_t2c_verdicts lot_t2c=adopte G-L7=adopte index_et_corrections=adopte G-L5_au_lieu_de_G-L7=rejete

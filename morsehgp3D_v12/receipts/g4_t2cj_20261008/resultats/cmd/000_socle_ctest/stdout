@@ -1,0 +1,1365 @@
+Test project $HOME/ehgp-v12/ehgp-v12.oQGTRH4oCH/build
+        Start  17: mhgp12_support_abnormal_stop_code_0
+        Start  19: mhgp12_support_abnormal_stop_code_3
+        Start  21: mhgp12_support_abnormal_stop_forged
+        Start  23: mhgp12_support_abnormal_stop_launch_impossible
+        Start  25: mhgp12_support_abnormal_stop_bad_interpreter
+        Start  42: mhgp12_support_gate_helper
+        Start  44: mhgp12_support_check_style
+        Start  46: mhgp12_support_run_mutants
+        Start  48: mhgp12_support_gate_properties
+        Start  66: mhgp12_support_g4_matrix
+        Start 153: mhgp12_num_fraction
+        Start 155: mhgp12_num_bounds_fraction
+        Start 157: mhgp12_num_bounds_model
+        Start 159: mhgp12_num_center_region_fraction
+        Start 161: mhgp12_num_center_region_model
+        Start 164: mhgp12_num_centers_fraction
+        Start 166: mhgp12_num_centers_model
+        Start 168: mhgp12_num_distance_fraction
+        Start 170: mhgp12_num_distance_model
+        Start 172: mhgp12_num_checked_power_fraction
+        Start 174: mhgp12_num_checked_power_model
+        Start 176: mhgp12_num_power_certificate_fraction
+        Start 178: mhgp12_num_power_certificate_model
+        Start 180: mhgp12_num_orientation_certificate_fraction
+        Start 182: mhgp12_num_orientation_certificate_model
+        Start 188: mhgp12_num_q4_presentation_fraction
+        Start 190: mhgp12_num_q4_presentation_model
+        Start 192: mhgp12_num_q4_presentation_process
+        Start 197: mhgp12_num_triangle_kind_fraction
+        Start 199: mhgp12_num_triangle_kind_model
+        Start 209: mhgp12_num_big
+        Start 211: mhgp12_num_radical
+        Start 213: mhgp12_num_roots
+        Start 271: mhgp12_io_sha256
+        Start 283: mhgp12_index_fraction
+        Start 285: mhgp12_index_judge
+        Start 287: mhgp12_index_guarded_fraction
+        Start 289: mhgp12_index_translation
+        Start 295: mhgp12_index_bench_io
+        Start 305: mhgp12_index_borrowed_fraction
+  1/675 Test  #17: mhgp12_support_abnormal_stop_code_0 ..................................   Passed    0.03 sec
+        Start 307: mhgp12_index_borrowed_model
+  2/675 Test  #19: mhgp12_support_abnormal_stop_code_3 ..................................   Passed    0.03 sec
+        Start 332: mhgp12_catalogue_g4_judge
+  3/675 Test  #23: mhgp12_support_abnormal_stop_launch_impossible .......................   Passed    0.03 sec
+        Start 334: mhgp12_catalogue_g4_mutants
+  4/675 Test  #25: mhgp12_support_abnormal_stop_bad_interpreter .........................   Passed    0.03 sec
+        Start 336: mhgp12_catalogue_oracle
+  5/675 Test  #21: mhgp12_support_abnormal_stop_forged ..................................   Passed    0.03 sec
+        Start 345: mhgp12_catalogue_euler_small
+  6/675 Test #159: mhgp12_num_center_region_fraction ....................................   Passed    0.07 sec
+        Start 370: mhgp12_tower_oracle
+  7/675 Test #334: mhgp12_catalogue_g4_mutants ..........................................   Passed    0.06 sec
+        Start 379: mhgp12_tower_juge_temoin
+  8/675 Test #197: mhgp12_num_triangle_kind_fraction ....................................   Passed    0.08 sec
+        Start 381: mhgp12_tower_juge_refus_k1_seul
+  9/675 Test  #66: mhgp12_support_g4_matrix .............................................   Passed    0.09 sec
+        Start 383: mhgp12_tower_juge_refus_ordre_double
+ 10/675 Test #295: mhgp12_index_bench_io ................................................   Passed    0.07 sec
+        Start 385: mhgp12_tower_juge_refus_empreinte_courte
+ 11/675 Test #168: mhgp12_num_distance_fraction .........................................   Passed    0.10 sec
+        Start 387: mhgp12_tower_juge_refus_sans_sortie
+ 12/675 Test #192: mhgp12_num_q4_presentation_process ...................................   Passed    0.09 sec
+        Start 389: mhgp12_tower_juge_refus_sortie_ordre_booleen
+ 13/675 Test #199: mhgp12_num_triangle_kind_model .......................................   Passed    0.10 sec
+        Start 391: mhgp12_tower_juge_refus_sortie_ordre_flottant
+ 14/675 Test #155: mhgp12_num_bounds_fraction ...........................................   Passed    0.12 sec
+        Start 393: mhgp12_tower_juge_ecart_travail_8
+ 15/675 Test #383: mhgp12_tower_juge_refus_ordre_double .................................   Passed    0.05 sec
+        Start 395: mhgp12_tower_juge_ecart_objet_8
+ 16/675 Test #381: mhgp12_tower_juge_refus_k1_seul ......................................   Passed    0.05 sec
+        Start 397: mhgp12_reference_projection_contracts
+ 17/675 Test #385: mhgp12_tower_juge_refus_empreinte_courte .............................   Passed    0.05 sec
+        Start 399: mhgp12_reference_witness_t1
+ 18/675 Test #387: mhgp12_tower_juge_refus_sans_sortie ..................................   Passed    0.05 sec
+        Start 403: mhgp12_reference_witness_t1_refusal
+ 19/675 Test #379: mhgp12_tower_juge_temoin .............................................   Passed    0.07 sec
+        Start 405: mhgp12_reference_witness_forme
+ 20/675 Test #389: mhgp12_tower_juge_refus_sortie_ordre_booleen .........................   Passed    0.05 sec
+        Start 409: mhgp12_reference_witness_forme_refusal
+ 21/675 Test #172: mhgp12_num_checked_power_fraction ....................................   Passed    0.16 sec
+        Start 411: mhgp12_reference_resolution_v12
+ 22/675 Test #391: mhgp12_tower_juge_refus_sortie_ordre_flottant ........................   Passed    0.05 sec
+        Start 421: mhgp12_reference_resolution_v12_refusal
+ 23/675 Test #170: mhgp12_num_distance_model ............................................   Passed    0.17 sec
+        Start 423: mhgp12_reference_transition
+ 24/675 Test #161: mhgp12_num_center_region_model .......................................   Passed    0.18 sec
+        Start 425: mhgp12_reference_transition_refusal
+ 25/675 Test #399: mhgp12_reference_witness_t1 ..........................................   Passed    0.04 sec
+        Start 427: mhgp12_reference_transition_cas_transl
+ 26/675 Test #403: mhgp12_reference_witness_t1_refusal ..................................   Passed    0.04 sec
+        Start 429: mhgp12_reference_transition_cas_transl_v11
+ 27/675 Test #164: mhgp12_num_centers_fraction ..........................................   Passed    0.19 sec
+        Start 431: mhgp12_reference_transition_cas_carre
+ 28/675 Test #393: mhgp12_tower_juge_ecart_travail_8 ....................................   Passed    0.07 sec
+        Start 433: mhgp12_reference_transition_cas_carre_tourne
+ 29/675 Test #409: mhgp12_reference_witness_forme_refusal ...............................   Passed    0.04 sec
+        Start 435: mhgp12_reference_transition_cas_carre_tourne_v11
+ 30/675 Test #405: mhgp12_reference_witness_forme .......................................   Passed    0.04 sec
+        Start 437: mhgp12_reference_transition_cas_carre_tourne_v12_v12
+ 31/675 Test #395: mhgp12_tower_juge_ecart_objet_8 ......................................   Passed    0.07 sec
+        Start 439: mhgp12_reference_transition_cas_carre_tourne_sites_inverses
+ 32/675 Test #421: mhgp12_reference_resolution_v12_refusal ..............................   Passed    0.05 sec
+        Start 441: mhgp12_reference_transition_cas_cardinaux
+ 33/675 Test #397: mhgp12_reference_projection_contracts ................................   Passed    0.08 sec
+        Start 443: mhgp12_reference_transition_cas_cercle_q3
+ 34/675 Test #425: mhgp12_reference_transition_refusal ..................................   Passed    0.06 sec
+        Start 445: mhgp12_reference_transition_cas_sphere_q4
+ 35/675 Test #427: mhgp12_reference_transition_cas_transl ...............................   Passed    0.08 sec
+        Start 447: mhgp12_reference_transition_cas_boule_manquante
+ 36/675 Test #431: mhgp12_reference_transition_cas_carre ................................   Passed    0.08 sec
+        Start 449: mhgp12_reference_transition_cas_niveau_manquant
+ 37/675 Test #289: mhgp12_index_translation .............................................   Passed    0.25 sec
+        Start 451: mhgp12_reference_transition_cas_boule_de_trop
+ 38/675 Test #433: mhgp12_reference_transition_cas_carre_tourne .........................   Passed    0.08 sec
+        Start 453: mhgp12_reference_transition_cas_boule_en_double
+ 39/675 Test #429: mhgp12_reference_transition_cas_transl_v11 ...........................   Passed    0.08 sec
+        Start 455: mhgp12_reference_transition_cas_interieur_omis
+ 40/675 Test #435: mhgp12_reference_transition_cas_carre_tourne_v11 .....................   Passed    0.08 sec
+        Start 457: mhgp12_reference_transition_cas_coquille_omise
+ 41/675 Test #437: mhgp12_reference_transition_cas_carre_tourne_v12_v12 .................   Passed    0.08 sec
+        Start 459: mhgp12_reference_transition_cas_rang_faux
+ 42/675 Test #157: mhgp12_num_bounds_model ..............................................   Passed    0.29 sec
+        Start 461: mhgp12_reference_transition_cas_rangs_faux_partout
+ 43/675 Test #439: mhgp12_reference_transition_cas_carre_tourne_sites_inverses ..........   Passed    0.08 sec
+        Start 463: mhgp12_reference_transition_cas_niveaux_faux_partout
+ 44/675 Test #441: mhgp12_reference_transition_cas_cardinaux ............................   Passed    0.08 sec
+        Start 465: mhgp12_reference_transition_cas_niveaux_decroissants_partout
+ 45/675 Test #443: mhgp12_reference_transition_cas_cercle_q3 ............................   Passed    0.08 sec
+        Start 467: mhgp12_reference_transition_cas_ordre_v11_sous_v12
+ 46/675 Test #445: mhgp12_reference_transition_cas_sphere_q4 ............................   Passed    0.08 sec
+        Start 469: mhgp12_reference_transition_cas_sstar_non_canonique
+ 47/675 Test #213: mhgp12_num_roots .....................................................   Passed    0.32 sec
+        Start 471: mhgp12_reference_transition_cas_sstar_morton_sous_v12
+ 48/675 Test #449: mhgp12_reference_transition_cas_niveau_manquant ......................   Passed    0.09 sec
+        Start 473: mhgp12_reference_transition_cas_sstar_morton_sous_v12_q3
+ 49/675 Test #447: mhgp12_reference_transition_cas_boule_manquante ......................   Passed    0.09 sec
+        Start 475: mhgp12_reference_transition_cas_sstar_morton_sous_v12_q4
+ 50/675 Test #451: mhgp12_reference_transition_cas_boule_de_trop ........................   Passed    0.09 sec
+        Start 477: mhgp12_reference_transition_cas_sstar_v12_sous_v11
+ 51/675 Test #459: mhgp12_reference_transition_cas_rang_faux ............................   Passed    0.08 sec
+        Start 479: mhgp12_reference_transition_cas_sstar_non_minimal
+ 52/675 Test #453: mhgp12_reference_transition_cas_boule_en_double ......................   Passed    0.09 sec
+        Start 481: mhgp12_reference_transition_cas_sstar_non_minimal_partout
+ 53/675 Test #457: mhgp12_reference_transition_cas_coquille_omise .......................   Passed    0.08 sec
+        Start 483: mhgp12_reference_transition_cas_qmin_non_minimal
+ 54/675 Test #174: mhgp12_num_checked_power_model .......................................   Passed    0.36 sec
+        Start 485: mhgp12_reference_transition_cas_qmin_non_minimal_partout
+ 55/675 Test #455: mhgp12_reference_transition_cas_interieur_omis .......................   Passed    0.09 sec
+        Start 487: mhgp12_reference_transition_cas_interieur_non_strict_partout
+ 56/675 Test #461: mhgp12_reference_transition_cas_rangs_faux_partout ...................   Passed    0.08 sec
+        Start 489: mhgp12_reference_transition_cas_coquille_hors_sphere_partout
+ 57/675 Test #463: mhgp12_reference_transition_cas_niveaux_faux_partout .................   Passed    0.08 sec
+        Start 491: mhgp12_reference_transition_cas_support_hors_coquille_partout
+ 58/675 Test #465: mhgp12_reference_transition_cas_niveaux_decroissants_partout .........   Passed    0.08 sec
+        Start 493: mhgp12_reference_transition_cas_admission_partout
+ 59/675 Test #467: mhgp12_reference_transition_cas_ordre_v11_sous_v12 ...................   Passed    0.08 sec
+        Start 495: mhgp12_reference_transition_cas_site_en_trop
+ 60/675 Test #153: mhgp12_num_fraction ..................................................   Passed    0.40 sec
+        Start 497: mhgp12_reference_transition_cas_refus_magie
+ 61/675 Test #469: mhgp12_reference_transition_cas_sstar_non_canonique ..................   Passed    0.08 sec
+        Start 499: mhgp12_reference_transition_cas_refus_genre
+ 62/675 Test #471: mhgp12_reference_transition_cas_sstar_morton_sous_v12 ................   Passed    0.07 sec
+        Start 501: mhgp12_reference_transition_cas_refus_k_differents
+ 63/675 Test #188: mhgp12_num_q4_presentation_fraction ..................................   Passed    0.41 sec
+        Start 503: mhgp12_reference_transition_cas_refus_tronque
+ 64/675 Test  #48: mhgp12_support_gate_properties .......................................   Passed    0.42 sec
+        Start 505: mhgp12_reference_transition_cas_refus_octets_en_trop
+ 65/675 Test #477: mhgp12_reference_transition_cas_sstar_v12_sous_v11 ...................   Passed    0.08 sec
+        Start 507: mhgp12_reference_transition_cas_refus_section_absente
+ 66/675 Test #473: mhgp12_reference_transition_cas_sstar_morton_sous_v12_q3 .............   Passed    0.08 sec
+        Start 509: mhgp12_reference_transition_cas_refus_section_inattendue
+ 67/675 Test #423: mhgp12_reference_transition ..........................................   Passed    0.27 sec
+        Start 511: mhgp12_reference_transition_cas_refus_q_hors_domaine
+ 68/675 Test #485: mhgp12_reference_transition_cas_qmin_non_minimal_partout .............   Passed    0.08 sec
+        Start 513: mhgp12_reference_transition_cas_refus_bourrage
+ 69/675 Test #481: mhgp12_reference_transition_cas_sstar_non_minimal_partout ............   Passed    0.08 sec
+        Start 515: mhgp12_reference_transition_cas_refus_sstar_non_croissant
+ 70/675 Test #479: mhgp12_reference_transition_cas_sstar_non_minimal ....................   Passed    0.09 sec
+        Start 517: mhgp12_reference_transition_cas_refus_index_hors_domaine
+ 71/675 Test #180: mhgp12_num_orientation_certificate_fraction ..........................   Passed    0.44 sec
+        Start 519: mhgp12_reference_transition_cas_refus_positions_en_double
+ 72/675 Test #475: mhgp12_reference_transition_cas_sstar_morton_sous_v12_q4 .............   Passed    0.09 sec
+        Start 521: mhgp12_reference_transition_cas_refus_decalage
+ 73/675 Test #487: mhgp12_reference_transition_cas_interieur_non_strict_partout .........   Passed    0.08 sec
+        Start 523: mhgp12_reference_transition_cas_refus_coordonnee
+ 74/675 Test #489: mhgp12_reference_transition_cas_coquille_hors_sphere_partout .........   Passed    0.08 sec
+        Start 575: mhgp12_reference_fast
+ 75/675 Test #491: mhgp12_reference_transition_cas_support_hors_coquille_partout ........   Passed    0.08 sec
+        Start 579: mhgp12_reference_refusal
+ 76/675 Test #483: mhgp12_reference_transition_cas_qmin_non_minimal .....................   Passed    0.09 sec
+        Start 581: mhgp12_reference_mutant_admission_strict
+ 77/675 Test #176: mhgp12_num_power_certificate_fraction ................................   Passed    0.46 sec
+        Start 583: mhgp12_reference_mutant_ancestor_open
+ 78/675 Test #493: mhgp12_reference_transition_cas_admission_partout ....................   Passed    0.08 sec
+        Start 585: mhgp12_reference_mutant_binarize
+ 79/675 Test #495: mhgp12_reference_transition_cas_site_en_trop .........................   Passed    0.09 sec
+        Start 587: mhgp12_reference_mutant_core_next_neighbour
+ 80/675 Test #497: mhgp12_reference_transition_cas_refus_magie ..........................   Passed    0.08 sec
+        Start 589: mhgp12_reference_mutant_cover_node_open
+ 81/675 Test #271: mhgp12_io_sha256 .....................................................   Passed    0.46 sec
+        Start 591: mhgp12_reference_mutant_cover_population
+ 82/675 Test #499: mhgp12_reference_transition_cas_refus_genre ..........................   Passed    0.08 sec
+        Start 593: mhgp12_reference_mutant_drop_last_rep
+ 83/675 Test #501: mhgp12_reference_transition_cas_refus_k_differents ...................   Passed    0.08 sec
+        Start 595: mhgp12_reference_mutant_edge_at_vertex_level
+ 84/675 Test #503: mhgp12_reference_transition_cas_refus_tronque ........................   Passed    0.08 sec
+        Start 597: mhgp12_reference_mutant_first_rep_last
+ 85/675 Test #509: mhgp12_reference_transition_cas_refus_section_inattendue .............   Passed    0.07 sec
+        Start 599: mhgp12_reference_mutant_hull_no_pairs
+ 86/675 Test #505: mhgp12_reference_transition_cas_refus_octets_en_trop .................   Passed    0.09 sec
+        Start 601: mhgp12_reference_mutant_hull_no_tetra
+ 87/675 Test #507: mhgp12_reference_transition_cas_refus_section_absente ................   Passed    0.08 sec
+        Start 603: mhgp12_reference_mutant_hull_strict_triangle
+ 88/675 Test #515: mhgp12_reference_transition_cas_refus_sstar_non_croissant ............   Passed    0.07 sec
+        Start 605: mhgp12_reference_mutant_join_missing
+ 89/675 Test #166: mhgp12_num_centers_model .............................................   Passed    0.52 sec
+        Start 607: mhgp12_reference_mutant_jump_any
+ 90/675 Test #511: mhgp12_reference_transition_cas_refus_q_hors_domaine .................   Passed    0.08 sec
+        Start 609: mhgp12_reference_mutant_meb_largest
+ 91/675 Test #523: mhgp12_reference_transition_cas_refus_coordonnee .....................   Passed    0.07 sec
+        Start 611: mhgp12_reference_mutant_meb_three
+ 92/675 Test #513: mhgp12_reference_transition_cas_refus_bourrage .......................   Passed    0.08 sec
+        Start 613: mhgp12_reference_mutant_numbering_by_catalogue
+ 93/675 Test #521: mhgp12_reference_transition_cas_refus_decalage .......................   Passed    0.08 sec
+        Start 615: mhgp12_reference_mutant_numbering_by_sweep
+ 94/675 Test #519: mhgp12_reference_transition_cas_refus_positions_en_double ............   Passed    0.08 sec
+        Start 617: mhgp12_reference_mutant_plateau_split
+ 95/675 Test #517: mhgp12_reference_transition_cas_refus_index_hors_domaine .............   Passed    0.09 sec
+        Start 619: mhgp12_reference_mutant_point_open
+ 96/675 Test #579: mhgp12_reference_refusal .............................................   Passed    0.08 sec
+        Start 621: mhgp12_reference_mutant_regular_join_pieces
+ 97/675 Test #583: mhgp12_reference_mutant_ancestor_open ................................   Passed    0.12 sec
+        Start 623: mhgp12_reference_mutant_vertical_merge_child
+ 98/675 Test #585: mhgp12_reference_mutant_binarize .....................................   Passed    0.12 sec
+        Start 625: mhgp12_reference_mutant_vertical_open
+ 99/675 Test #591: mhgp12_reference_mutant_cover_population .............................   Passed    0.11 sec
+        Start 627: mhgp12_reference_mutant_weighted_as_regular
+100/675 Test #581: mhgp12_reference_mutant_admission_strict .............................   Passed    0.14 sec
+        Start 629: mhgp12_reference_mutant_window_low
+101/675 Test #589: mhgp12_reference_mutant_cover_node_open ..............................   Passed    0.12 sec
+        Start 631: mhgp12_reference_supports
+102/675 Test #593: mhgp12_reference_mutant_drop_last_rep ................................   Passed    0.12 sec
+        Start 633: mhgp12_reference_supports_refusal
+103/675 Test #595: mhgp12_reference_mutant_edge_at_vertex_level .........................   Passed    0.11 sec
+        Start 635: mhgp12_reference_supports_primitives
+104/675 Test #332: mhgp12_catalogue_g4_judge ............................................   Passed    0.59 sec
+        Start 637: mhgp12_reference_supports_mutant_ant_coupe_fermee
+105/675 Test #587: mhgp12_reference_mutant_core_next_neighbour ..........................   Passed    0.14 sec
+        Start 639: mhgp12_reference_supports_mutant_att_coupe_ouverte
+106/675 Test #601: mhgp12_reference_mutant_hull_no_tetra ................................   Passed    0.12 sec
+        Start 641: mhgp12_reference_supports_mutant_c3_une_fusion
+107/675 Test #605: mhgp12_reference_mutant_join_missing .................................   Passed    0.12 sec
+        Start 643: mhgp12_reference_supports_mutant_cofaces_ordre_k
+108/675 Test #619: mhgp12_reference_mutant_point_open ...................................   Passed    0.11 sec
+        Start 645: mhgp12_reference_supports_mutant_fenetre_forte
+109/675 Test #617: mhgp12_reference_mutant_plateau_split ................................   Passed    0.12 sec
+        Start 647: mhgp12_reference_supports_mutant_h_fortes_etroites
+110/675 Test #609: mhgp12_reference_mutant_meb_largest ..................................   Passed    0.13 sec
+        Start 649: mhgp12_reference_supports_mutant_interne_vie_inversee
+111/675 Test #633: mhgp12_reference_supports_refusal ....................................   Passed    0.05 sec
+        Start 651: mhgp12_reference_supports_mutant_m1_support_inverse
+112/675 Test #621: mhgp12_reference_mutant_regular_join_pieces ..........................   Passed    0.13 sec
+        Start 653: mhgp12_reference_supports_mutant_populations_naissances_seules
+113/675 Test #613: mhgp12_reference_mutant_numbering_by_catalogue .......................   Passed    0.14 sec
+        Start 655: mhgp12_reference_supports_mutant_premier_support_seul
+114/675 Test #599: mhgp12_reference_mutant_hull_no_pairs ................................   Passed    0.17 sec
+        Start 657: mhgp12_reference_supports_mutant_regle_parent_inversee
+115/675 Test #611: mhgp12_reference_mutant_meb_three ....................................   Passed    0.15 sec
+        Start 659: mhgp12_reference_supports_mutant_triangle_droit_admis
+116/675 Test #615: mhgp12_reference_mutant_numbering_by_sweep ...........................   Passed    0.16 sec
+        Start 661: mhgp12_reference_supports_mutant_w4_gabriel_juge
+117/675 Test #623: mhgp12_reference_mutant_vertical_merge_child .........................   Passed    0.11 sec
+        Start 680: mhgp12_style
+118/675 Test #627: mhgp12_reference_mutant_weighted_as_regular ..........................   Passed    0.10 sec
+        Start   1: mhgp12_support_code_exact
+119/675 Test #637: mhgp12_reference_supports_mutant_ant_coupe_fermee ....................   Passed    0.09 sec
+        Start   2: mhgp12_support_line_present
+120/675 Test #639: mhgp12_reference_supports_mutant_att_coupe_ouverte ...................   Passed    0.09 sec
+        Start   3: mhgp12_support_arguments
+121/675 Test #625: mhgp12_reference_mutant_vertical_open ................................   Passed    0.12 sec
+        Start   4: mhgp12_support_code_mismatch
+122/675 Test   #1: mhgp12_support_code_exact ............................................   Passed    0.02 sec
+        Start   5: mhgp12_support_signal_refused
+123/675 Test #641: mhgp12_reference_supports_mutant_c3_une_fusion .......................   Passed    0.08 sec
+        Start   6: mhgp12_support_program_absent
+124/675 Test   #2: mhgp12_support_line_present ..........................................   Passed    0.01 sec
+        Start   7: mhgp12_support_program_not_executable
+125/675 Test   #3: mhgp12_support_arguments .............................................   Passed    0.02 sec
+        Start   8: mhgp12_support_program_bad_interpreter
+126/675 Test #629: mhgp12_reference_mutant_window_low ...................................   Passed    0.12 sec
+        Start   9: mhgp12_support_program_relative
+127/675 Test #643: mhgp12_reference_supports_mutant_cofaces_ordre_k .....................   Passed    0.08 sec
+        Start  10: mhgp12_support_line_absent
+128/675 Test #645: mhgp12_reference_supports_mutant_fenetre_forte .......................   Passed    0.08 sec
+        Start  11: mhgp12_support_expected_out_of_range
+129/675 Test #647: mhgp12_reference_supports_mutant_h_fortes_etroites ...................   Passed    0.08 sec
+        Start  12: mhgp12_support_skip_token
+130/675 Test   #4: mhgp12_support_code_mismatch .........................................   Passed    0.03 sec
+        Start  13: mhgp12_support_data_present
+131/675 Test #649: mhgp12_reference_supports_mutant_interne_vie_inversee ................   Passed    0.08 sec
+        Start  14: mhgp12_support_skip_token_forged
+132/675 Test   #5: mhgp12_support_signal_refused ........................................   Passed    0.03 sec
+        Start  16: mhgp12_support_abnormal_stop
+133/675 Test #653: mhgp12_reference_supports_mutant_populations_naissances_seules .......   Passed    0.08 sec
+        Start  18: mhgp12_support_abnormal_stop_code_0_opt
+134/675 Test   #6: mhgp12_support_program_absent ........................................   Passed    0.03 sec
+        Start  20: mhgp12_support_abnormal_stop_code_3_opt
+135/675 Test   #9: mhgp12_support_program_relative ......................................   Passed    0.03 sec
+        Start  22: mhgp12_support_abnormal_stop_forged_opt
+136/675 Test  #11: mhgp12_support_expected_out_of_range .................................   Passed    0.02 sec
+        Start  24: mhgp12_support_abnormal_stop_launch_impossible_opt
+137/675 Test   #7: mhgp12_support_program_not_executable ................................   Passed    0.03 sec
+        Start  26: mhgp12_support_abnormal_stop_bad_interpreter_opt
+138/675 Test #651: mhgp12_reference_supports_mutant_m1_support_inverse ..................   Passed    0.09 sec
+        Start  27: mhgp12_support_refusal_ok
+139/675 Test   #8: mhgp12_support_program_bad_interpreter ...............................   Passed    0.03 sec
+        Start  28: mhgp12_support_refusal_control_red
+140/675 Test #657: mhgp12_reference_supports_mutant_regle_parent_inversee ...............   Passed    0.08 sec
+        Start  29: mhgp12_support_refusal_absent
+141/675 Test  #10: mhgp12_support_line_absent ...........................................   Passed    0.03 sec
+        Start  30: mhgp12_support_refusal_token_absent
+142/675 Test #659: mhgp12_reference_supports_mutant_triangle_droit_admis ................   Passed    0.08 sec
+        Start  31: mhgp12_support_refusal_signal
+143/675 Test  #13: mhgp12_support_data_present ..........................................   Passed    0.03 sec
+        Start  32: mhgp12_support_framework_pass
+144/675 Test  #14: mhgp12_support_skip_token_forged .....................................   Passed    0.03 sec
+        Start  33: mhgp12_support_framework_fail
+145/675 Test  #12: mhgp12_support_skip_token ............................................   Passed    0.03 sec
+        Start  34: mhgp12_support_framework_require
+146/675 Test  #16: mhgp12_support_abnormal_stop .........................................   Passed    0.03 sec
+        Start  35: mhgp12_support_framework_floor
+147/675 Test #661: mhgp12_reference_supports_mutant_w4_gabriel_juge .....................   Passed    0.09 sec
+        Start  36: mhgp12_support_framework_throw
+148/675 Test  #32: mhgp12_support_framework_pass ........................................   Passed    0.01 sec
+        Start  37: mhgp12_support_framework_unknown
+149/675 Test  #33: mhgp12_support_framework_fail ........................................   Passed    0.01 sec
+        Start  38: mhgp12_support_framework_repeated
+150/675 Test  #27: mhgp12_support_refusal_ok ............................................   Passed    0.03 sec
+        Start  39: mhgp12_support_framework_all
+151/675 Test  #28: mhgp12_support_refusal_control_red ...................................   Passed    0.03 sec
+        Start  40: mhgp12_support_framework_inventory
+152/675 Test  #29: mhgp12_support_refusal_absent ........................................   Passed    0.03 sec
+        Start  41: mhgp12_support_framework_inventory_missing
+153/675 Test  #30: mhgp12_support_refusal_token_absent ..................................   Passed    0.03 sec
+        Start  49: mhgp12_support_gate_properties_opt
+154/675 Test  #34: mhgp12_support_framework_require .....................................   Passed    0.02 sec
+        Start  50: mhgp12_support_gates_refuse_label
+155/675 Test  #35: mhgp12_support_framework_floor .......................................   Passed    0.02 sec
+        Start  51: mhgp12_support_gates_refuse_no_label
+156/675 Test  #31: mhgp12_support_refusal_signal ........................................   Passed    0.03 sec
+        Start  52: mhgp12_support_gates_refuse_fast_long
+157/675 Test  #36: mhgp12_support_framework_throw .......................................   Passed    0.02 sec
+        Start  53: mhgp12_support_gates_refuse_name
+158/675 Test  #37: mhgp12_support_framework_unknown .....................................   Passed    0.01 sec
+        Start  54: mhgp12_support_gates_refuse_code
+159/675 Test  #38: mhgp12_support_framework_repeated ....................................   Passed    0.01 sec
+        Start  55: mhgp12_support_gates_refuse_duplicate
+160/675 Test  #39: mhgp12_support_framework_all .........................................   Passed    0.01 sec
+        Start  56: mhgp12_support_gates_refuse_program
+161/675 Test #597: mhgp12_reference_mutant_first_rep_last ...............................   Passed    0.29 sec
+        Start  57: mhgp12_support_gates_refuse_timeout
+162/675 Test  #40: mhgp12_support_framework_inventory ...................................   Passed    0.02 sec
+        Start  58: mhgp12_support_gates_refuse_script
+163/675 Test  #41: mhgp12_support_framework_inventory_missing ...........................   Passed    0.02 sec
+        Start  59: mhgp12_support_gates_refuse_direct
+164/675 Test #607: mhgp12_reference_mutant_jump_any .....................................   Passed    0.28 sec
+        Start  60: mhgp12_support_gates_refuse_subdirectory
+165/675 Test #655: mhgp12_reference_supports_mutant_premier_support_seul ................   Passed    0.15 sec
+        Start  61: mhgp12_support_gates_refuse_pass_regex
+166/675 Test  #18: mhgp12_support_abnormal_stop_code_0_opt ..............................   Passed    0.10 sec
+        Start  62: mhgp12_support_gates_refuse_will_fail
+167/675 Test  #24: mhgp12_support_abnormal_stop_launch_impossible_opt ...................   Passed    0.09 sec
+        Start  63: mhgp12_support_gates_refuse_disabled
+168/675 Test  #20: mhgp12_support_abnormal_stop_code_3_opt ..............................   Passed    0.10 sec
+        Start  64: mhgp12_support_gates_refuse_skip_regex
+169/675 Test  #26: mhgp12_support_abnormal_stop_bad_interpreter_opt .....................   Passed    0.09 sec
+        Start  65: mhgp12_support_gates_refuse_lidar_regex
+170/675 Test #211: mhgp12_num_radical ...................................................   Passed    0.83 sec
+        Start  67: mhgp12_support_g4_matrix_opt
+171/675 Test  #22: mhgp12_support_abnormal_stop_forged_opt ..............................   Passed    0.14 sec
+        Start  68: mhgp12_support_configure_fast_math_cxx_flags
+172/675 Test #287: mhgp12_index_guarded_fraction ........................................   Passed    0.88 sec
+        Start  69: mhgp12_support_configure_fast_math_release_ofast
+173/675 Test #283: mhgp12_index_fraction ................................................   Passed    0.96 sec
+        Start  70: mhgp12_support_configure_coord_bits_18
+174/675 Test #178: mhgp12_num_power_certificate_model ...................................   Passed    1.03 sec
+        Start  71: mhgp12_support_configure_coord_bits_33
+175/675 Test  #50: mhgp12_support_gates_refuse_label ....................................   Passed    0.35 sec
+        Start  72: mhgp12_core_unit_types
+176/675 Test  #53: mhgp12_support_gates_refuse_name .....................................   Passed    0.35 sec
+        Start  73: mhgp12_core_unit_reasons
+177/675 Test  #54: mhgp12_support_gates_refuse_code .....................................   Passed    0.35 sec
+        Start  74: mhgp12_core_unit_outcome
+178/675 Test  #52: mhgp12_support_gates_refuse_fast_long ................................   Passed    0.36 sec
+        Start  75: mhgp12_core_unit_macros
+179/675 Test  #56: mhgp12_support_gates_refuse_program ..................................   Passed    0.35 sec
+        Start  76: mhgp12_core_unit_result
+180/675 Test  #51: mhgp12_support_gates_refuse_no_label .................................   Passed    0.36 sec
+        Start  77: mhgp12_core_unit_guarded
+181/675 Test  #72: mhgp12_core_unit_types ...............................................   Passed    0.01 sec
+        Start  78: mhgp12_core_unit_budget
+182/675 Test  #57: mhgp12_support_gates_refuse_timeout ..................................   Passed    0.36 sec
+        Start  79: mhgp12_core_unit_budget_threads
+183/675 Test  #58: mhgp12_support_gates_refuse_script ...................................   Passed    0.36 sec
+        Start  80: mhgp12_core_unit_reservation
+184/675 Test  #59: mhgp12_support_gates_refuse_direct ...................................   Passed    0.36 sec
+        Start  81: mhgp12_core_unit_buffer
+185/675 Test  #55: mhgp12_support_gates_refuse_duplicate ................................   Passed    0.36 sec
+        Start  82: mhgp12_core_unit_csr
+186/675 Test  #42: mhgp12_support_gate_helper ...........................................   Passed    1.16 sec
+        Start  43: mhgp12_support_gate_helper_opt
+187/675 Test  #73: mhgp12_core_unit_reasons .............................................   Passed    0.02 sec
+        Start  83: mhgp12_core_unit_ledger
+188/675 Test  #74: mhgp12_core_unit_outcome .............................................   Passed    0.02 sec
+        Start  84: mhgp12_core_unit_block_cache
+189/675 Test  #75: mhgp12_core_unit_macros ..............................................   Passed    0.02 sec
+        Start  85: mhgp12_core_unit_block_cache_limit
+190/675 Test  #76: mhgp12_core_unit_result ..............................................   Passed    0.02 sec
+        Start  86: mhgp12_core_unit_inventaire
+191/675 Test  #60: mhgp12_support_gates_refuse_subdirectory .............................   Passed    0.37 sec
+        Start  87: mhgp12_core_fault_alloc_fault
+192/675 Test  #61: mhgp12_support_gates_refuse_pass_regex ...............................   Passed    0.36 sec
+        Start  88: mhgp12_core_fault_alloc_fault_cache
+193/675 Test  #77: mhgp12_core_unit_guarded .............................................   Passed    0.02 sec
+        Start  89: mhgp12_core_fault_eviction_admise
+194/675 Test  #78: mhgp12_core_unit_budget ..............................................   Passed    0.02 sec
+        Start  90: mhgp12_core_fault_refusal
+195/675 Test  #80: mhgp12_core_unit_reservation .........................................   Passed    0.02 sec
+        Start  91: mhgp12_core_fault_ledger
+196/675 Test  #81: mhgp12_core_unit_buffer ..............................................   Passed    0.02 sec
+        Start  92: mhgp12_core_fault_inventaire
+197/675 Test  #82: mhgp12_core_unit_csr .................................................   Passed    0.02 sec
+        Start  93: mhgp12_core_result_value_ok
+198/675 Test  #79: mhgp12_core_unit_budget_threads ......................................   Passed    0.02 sec
+        Start  94: mhgp12_core_result_value_on_refusal
+199/675 Test  #83: mhgp12_core_unit_ledger ..............................................   Passed    0.02 sec
+        Start  95: mhgp12_core_result_const_value_on_refusal
+200/675 Test  #65: mhgp12_support_gates_refuse_lidar_regex ..............................   Passed    0.34 sec
+        Start  96: mhgp12_core_result_take_on_refusal
+201/675 Test  #63: mhgp12_support_gates_refuse_disabled .................................   Passed    0.34 sec
+        Start  97: mhgp12_core_fast_math_refusal
+202/675 Test  #62: mhgp12_support_gates_refuse_will_fail ................................   Passed    0.35 sec
+        Start  98: mhgp12_core_ofast_refusal
+203/675 Test  #84: mhgp12_core_unit_block_cache .........................................   Passed    0.02 sec
+        Start  99: mhgp12_core_coord_bits_refusal
+204/675 Test  #85: mhgp12_core_unit_block_cache_limit ...................................   Passed    0.02 sec
+        Start 100: mhgp12_core_coord_bits_18_refusal
+205/675 Test  #86: mhgp12_core_unit_inventaire ..........................................   Passed    0.02 sec
+        Start 101: mhgp12_core_coord_bits_33_refusal
+206/675 Test  #87: mhgp12_core_fault_alloc_fault ........................................   Passed    0.02 sec
+        Start 102: mhgp12_core_coord_bits_absent
+207/675 Test  #88: mhgp12_core_fault_alloc_fault_cache ..................................   Passed    0.02 sec
+        Start 103: mhgp12_core_refusal_ignored
+208/675 Test  #91: mhgp12_core_fault_ledger .............................................   Passed    0.02 sec
+        Start 104: mhgp12_core_strong_id_naked
+209/675 Test  #92: mhgp12_core_fault_inventaire .........................................   Passed    0.02 sec
+        Start 105: mhgp12_core_buffer_trivial_only
+210/675 Test  #93: mhgp12_core_result_value_ok ..........................................   Passed    0.02 sec
+        Start 106: mhgp12_core_strong_id_mixed
+211/675 Test  #90: mhgp12_core_fault_refusal ............................................   Passed    0.02 sec
+        Start 107: mhgp12_core_result_throwing_move
+212/675 Test  #64: mhgp12_support_gates_refuse_skip_regex ...............................   Passed    0.36 sec
+        Start 108: mhgp12_num_unit_wide
+213/675 Test #108: mhgp12_num_unit_wide .................................................   Passed    0.02 sec
+        Start 109: mhgp12_num_unit_budgets
+214/675 Test #190: mhgp12_num_q4_presentation_model .....................................   Passed    1.21 sec
+        Start 110: mhgp12_num_unit_levels
+215/675 Test #109: mhgp12_num_unit_budgets ..............................................   Passed    0.02 sec
+        Start 111: mhgp12_num_unit_domain
+216/675 Test #110: mhgp12_num_unit_levels ...............................................   Passed    0.02 sec
+        Start 112: mhgp12_num_unit_geometry
+217/675 Test #182: mhgp12_num_orientation_certificate_model .............................   Passed    1.23 sec
+        Start 113: mhgp12_num_unit_extremes
+218/675 Test #111: mhgp12_num_unit_domain ...............................................   Passed    0.01 sec
+        Start 114: mhgp12_num_unit_power_paths
+219/675 Test #112: mhgp12_num_unit_geometry .............................................   Passed    0.01 sec
+        Start 115: mhgp12_num_unit_candidate
+220/675 Test  #67: mhgp12_support_g4_matrix_opt .........................................   Passed    0.41 sec
+        Start 116: mhgp12_num_unit_q3_candidate
+221/675 Test #113: mhgp12_num_unit_extremes .............................................   Passed    0.02 sec
+        Start 117: mhgp12_num_unit_bounds
+222/675 Test  #97: mhgp12_core_fast_math_refusal ........................................   Passed    0.07 sec
+        Start 118: mhgp12_num_unit_region_domain
+223/675 Test  #99: mhgp12_core_coord_bits_refusal .......................................   Passed    0.07 sec
+        Start 119: mhgp12_num_unit_region_pair
+224/675 Test #114: mhgp12_num_unit_power_paths ..........................................   Passed    0.02 sec
+        Start 120: mhgp12_num_unit_region_line
+225/675 Test #101: mhgp12_core_coord_bits_33_refusal ....................................   Passed    0.07 sec
+        Start 121: mhgp12_num_unit_region_cubic_width
+226/675 Test #102: mhgp12_core_coord_bits_absent ........................................   Passed    0.08 sec
+        Start 122: mhgp12_num_unit_centers
+227/675 Test #115: mhgp12_num_unit_candidate ............................................   Passed    0.02 sec
+        Start 123: mhgp12_num_unit_distance
+228/675 Test #100: mhgp12_core_coord_bits_18_refusal ....................................   Passed    0.08 sec
+        Start 124: mhgp12_num_unit_checked_limits
+229/675 Test #116: mhgp12_num_unit_q3_candidate .........................................   Passed    0.02 sec
+        Start 125: mhgp12_num_unit_checked_public
+230/675 Test #117: mhgp12_num_unit_bounds ...............................................   Passed    0.02 sec
+        Start 126: mhgp12_num_unit_certificate_limits
+231/675 Test #121: mhgp12_num_unit_region_cubic_width ...................................   Passed    0.02 sec
+        Start 127: mhgp12_num_unit_certificate_public
+232/675 Test #120: mhgp12_num_unit_region_line ..........................................   Passed    0.03 sec
+        Start 128: mhgp12_num_unit_certificate_owners
+233/675 Test #118: mhgp12_num_unit_region_domain ........................................   Passed    0.03 sec
+        Start 129: mhgp12_num_unit_orientation_limits
+234/675 Test #119: mhgp12_num_unit_region_pair ..........................................   Passed    0.03 sec
+        Start 130: mhgp12_num_unit_orientation_public
+235/675 Test #122: mhgp12_num_unit_centers ..............................................   Passed    0.02 sec
+        Start 131: mhgp12_num_unit_orientation_owners
+236/675 Test #123: mhgp12_num_unit_distance .............................................   Passed    0.02 sec
+        Start 132: mhgp12_num_unit_inventaire
+237/675 Test #124: mhgp12_num_unit_checked_limits .......................................   Passed    0.03 sec
+        Start 133: mhgp12_num_local_frame_extents
+238/675 Test #125: mhgp12_num_unit_checked_public .......................................   Passed    0.03 sec
+        Start 134: mhgp12_num_local_frame_refusals
+239/675 Test #603: mhgp12_reference_mutant_hull_strict_triangle .........................   Passed    0.79 sec
+        Start 135: mhgp12_num_local_frame_tiers
+240/675 Test #126: mhgp12_num_unit_certificate_limits ...................................   Passed    0.02 sec
+        Start 136: mhgp12_num_local_lane_side
+241/675 Test  #96: mhgp12_core_result_take_on_refusal ...................................   Passed    0.13 sec
+        Start 137: mhgp12_num_local_lane_orientation
+242/675 Test #127: mhgp12_num_unit_certificate_public ...................................   Passed    0.02 sec
+        Start 138: mhgp12_num_local_lane_midpoint
+243/675 Test #128: mhgp12_num_unit_certificate_owners ...................................   Passed    0.02 sec
+        Start 139: mhgp12_num_local_lane_distance
+244/675 Test #129: mhgp12_num_unit_orientation_limits ...................................   Passed    0.02 sec
+        Start 140: mhgp12_num_local_lane_reservoir
+245/675 Test #130: mhgp12_num_unit_orientation_public ...................................   Passed    0.02 sec
+        Start 141: mhgp12_num_local_lane_center
+246/675 Test #131: mhgp12_num_unit_orientation_owners ...................................   Passed    0.02 sec
+        Start 142: mhgp12_num_local_lane_levels
+247/675 Test #132: mhgp12_num_unit_inventaire ...........................................   Passed    0.02 sec
+        Start 143: mhgp12_num_local_lane_centers_order
+248/675 Test #133: mhgp12_num_local_frame_extents .......................................   Passed    0.01 sec
+        Start 144: mhgp12_num_local_translation
+249/675 Test #134: mhgp12_num_local_frame_refusals ......................................   Passed    0.01 sec
+        Start 145: mhgp12_num_local_certify
+250/675 Test #136: mhgp12_num_local_lane_side ...........................................   Passed    0.01 sec
+        Start 146: mhgp12_num_local_guard_sites
+251/675 Test  #94: mhgp12_core_result_value_on_refusal ..................................   Passed    0.14 sec
+        Start 147: mhgp12_num_local_guard_boxes
+252/675 Test #135: mhgp12_num_local_frame_tiers .........................................   Passed    0.02 sec
+        Start 148: mhgp12_num_local_guard_certificate
+253/675 Test #137: mhgp12_num_local_lane_orientation ....................................   Passed    0.02 sec
+        Start 149: mhgp12_num_local_inventaire
+254/675 Test #138: mhgp12_num_local_lane_midpoint .......................................   Passed    0.02 sec
+        Start 150: mhgp12_num_lattice_lattice_fixtures
+255/675 Test #141: mhgp12_num_local_lane_center .........................................   Passed    0.02 sec
+        Start 151: mhgp12_num_lattice_lattice_random
+256/675 Test #142: mhgp12_num_local_lane_levels .........................................   Passed    0.02 sec
+        Start 152: mhgp12_num_lattice_inventaire
+257/675 Test #143: mhgp12_num_local_lane_centers_order ..................................   Passed    0.02 sec
+        Start 154: mhgp12_num_fraction_opt
+258/675 Test #139: mhgp12_num_local_lane_distance .......................................   Passed    0.02 sec
+        Start 156: mhgp12_num_bounds_fraction_opt
+259/675 Test  #68: mhgp12_support_configure_fast_math_cxx_flags .........................   Passed    0.45 sec
+        Start 158: mhgp12_num_bounds_model_opt
+260/675 Test #140: mhgp12_num_local_lane_reservoir ......................................   Passed    0.02 sec
+        Start 160: mhgp12_num_center_region_fraction_opt
+261/675 Test #146: mhgp12_num_local_guard_sites .........................................   Passed    0.02 sec
+        Start 162: mhgp12_num_center_region_model_opt
+262/675 Test #145: mhgp12_num_local_certify .............................................   Passed    0.02 sec
+        Start 163: mhgp12_num_budget_refusal
+263/675 Test #144: mhgp12_num_local_translation .........................................   Passed    0.02 sec
+        Start 165: mhgp12_num_centers_fraction_opt
+264/675 Test #147: mhgp12_num_local_guard_boxes .........................................   Passed    0.02 sec
+        Start 167: mhgp12_num_centers_model_opt
+265/675 Test #148: mhgp12_num_local_guard_certificate ...................................   Passed    0.02 sec
+        Start 169: mhgp12_num_distance_fraction_opt
+266/675 Test #149: mhgp12_num_local_inventaire ..........................................   Passed    0.02 sec
+        Start 171: mhgp12_num_distance_model_opt
+267/675 Test #150: mhgp12_num_lattice_lattice_fixtures ..................................   Passed    0.02 sec
+        Start 173: mhgp12_num_checked_power_fraction_opt
+268/675 Test  #95: mhgp12_core_result_const_value_on_refusal ............................   Passed    0.17 sec
+        Start 175: mhgp12_num_checked_power_model_opt
+269/675 Test #152: mhgp12_num_lattice_inventaire ........................................   Passed    0.02 sec
+        Start 177: mhgp12_num_power_certificate_fraction_opt
+270/675 Test  #69: mhgp12_support_configure_fast_math_release_ofast .....................   Passed    0.47 sec
+        Start 179: mhgp12_num_power_certificate_model_opt
+271/675 Test #151: mhgp12_num_lattice_lattice_random ....................................   Passed    0.08 sec
+        Start 181: mhgp12_num_orientation_certificate_fraction_opt
+272/675 Test  #70: mhgp12_support_configure_coord_bits_18 ...............................   Passed    0.45 sec
+        Start 183: mhgp12_num_orientation_certificate_model_opt
+273/675 Test #156: mhgp12_num_bounds_fraction_opt .......................................   Passed    0.16 sec
+        Start 184: mhgp12_num_q4_presentation_presentation
+274/675 Test  #71: mhgp12_support_configure_coord_bits_33 ...............................   Passed    0.46 sec
+        Start 185: mhgp12_num_q4_presentation_boundaries
+275/675 Test #184: mhgp12_num_q4_presentation_presentation ..............................   Passed    0.02 sec
+        Start 186: mhgp12_num_q4_presentation_foreign_and_owners
+276/675 Test #169: mhgp12_num_distance_fraction_opt .....................................   Passed    0.17 sec
+        Start 187: mhgp12_num_q4_presentation_inventaire
+277/675 Test #185: mhgp12_num_q4_presentation_boundaries ................................   Passed    0.02 sec
+        Start 189: mhgp12_num_q4_presentation_fraction_opt
+278/675 Test #186: mhgp12_num_q4_presentation_foreign_and_owners ........................   Passed    0.01 sec
+        Start 191: mhgp12_num_q4_presentation_model_opt
+279/675 Test #160: mhgp12_num_center_region_fraction_opt ................................   Passed    0.19 sec
+        Start 193: mhgp12_num_q4_presentation_process_opt
+280/675 Test #187: mhgp12_num_q4_presentation_inventaire ................................   Passed    0.01 sec
+        Start 194: mhgp12_num_triangle_kind_kinds
+281/675 Test #194: mhgp12_num_triangle_kind_kinds .......................................   Passed    0.01 sec
+        Start 195: mhgp12_num_triangle_kind_extremes
+282/675 Test #173: mhgp12_num_checked_power_fraction_opt ................................   Passed    0.21 sec
+        Start 196: mhgp12_num_triangle_kind_inventaire
+283/675 Test #195: mhgp12_num_triangle_kind_extremes ....................................   Passed    0.02 sec
+        Start 198: mhgp12_num_triangle_kind_fraction_opt
+284/675 Test #196: mhgp12_num_triangle_kind_inventaire ..................................   Passed    0.01 sec
+        Start 200: mhgp12_num_triangle_kind_model_opt
+285/675 Test  #89: mhgp12_core_fault_eviction_admise ....................................   Passed    0.42 sec
+        Start 201: mhgp12_num_s8_unit_capacity
+286/675 Test #201: mhgp12_num_s8_unit_capacity ..........................................   Passed    0.02 sec
+        Start 202: mhgp12_num_s8_unit_aliasing
+287/675 Test #165: mhgp12_num_centers_fraction_opt ......................................   Passed    0.27 sec
+        Start 203: mhgp12_num_s8_unit_division
+288/675 Test #202: mhgp12_num_s8_unit_aliasing ..........................................   Passed    0.02 sec
+        Start 204: mhgp12_num_s8_unit_rational_form
+289/675 Test #203: mhgp12_num_s8_unit_division ..........................................   Passed    0.02 sec
+        Start 205: mhgp12_num_s8_unit_square_signature
+290/675 Test #171: mhgp12_num_distance_model_opt ........................................   Passed    0.28 sec
+        Start 206: mhgp12_num_s8_unit_radical_budget
+291/675 Test #162: mhgp12_num_center_region_model_opt ...................................   Passed    0.30 sec
+        Start 207: mhgp12_num_s8_unit_roots_limits
+292/675 Test #204: mhgp12_num_s8_unit_rational_form .....................................   Passed    0.02 sec
+        Start 208: mhgp12_num_s8_unit_inventaire
+293/675 Test #205: mhgp12_num_s8_unit_square_signature ..................................   Passed    0.02 sec
+        Start 212: mhgp12_num_radical_opt
+294/675 Test #206: mhgp12_num_s8_unit_radical_budget ....................................   Passed    0.02 sec
+        Start 214: mhgp12_num_roots_opt
+295/675 Test #208: mhgp12_num_s8_unit_inventaire ........................................   Passed    0.01 sec
+        Start 215: mhgp12_sched_unit_domain
+296/675 Test #207: mhgp12_num_s8_unit_roots_limits ......................................   Passed    0.02 sec
+        Start 216: mhgp12_sched_unit_coverage
+297/675 Test #215: mhgp12_sched_unit_domain .............................................   Passed    0.02 sec
+        Start 217: mhgp12_sched_unit_limits
+298/675 Test #216: mhgp12_sched_unit_coverage ...........................................   Passed    0.02 sec
+        Start 218: mhgp12_sched_unit_short_jobs
+299/675 Test #217: mhgp12_sched_unit_limits .............................................   Passed    0.01 sec
+        Start 219: mhgp12_sched_unit_reentrant
+300/675 Test #219: mhgp12_sched_unit_reentrant ..........................................   Passed    0.02 sec
+        Start 220: mhgp12_sched_unit_concurrent
+301/675 Test #175: mhgp12_num_checked_power_model_opt ...................................   Passed    0.37 sec
+        Start 221: mhgp12_sched_unit_outcomes
+302/675 Test #220: mhgp12_sched_unit_concurrent .........................................   Passed    0.02 sec
+        Start 222: mhgp12_sched_unit_exceptions
+303/675 Test #158: mhgp12_num_bounds_model_opt ..........................................   Passed    0.39 sec
+        Start 223: mhgp12_sched_unit_inventaire
+304/675 Test #154: mhgp12_num_fraction_opt ..............................................   Passed    0.39 sec
+        Start 224: mhgp12_sched_fault_thread_creation
+305/675 Test #218: mhgp12_sched_unit_short_jobs .........................................   Passed    0.05 sec
+        Start 225: mhgp12_sched_fault_allocation
+306/675 Test #221: mhgp12_sched_unit_outcomes ...........................................   Passed    0.01 sec
+        Start 226: mhgp12_sched_fault_allocation_free
+307/675 Test #222: mhgp12_sched_unit_exceptions .........................................   Passed    0.02 sec
+        Start 227: mhgp12_sched_fault_inventaire
+308/675 Test #223: mhgp12_sched_unit_inventaire .........................................   Passed    0.02 sec
+        Start 228: mhgp12_cloud_unit_morton
+309/675 Test #224: mhgp12_sched_fault_thread_creation ...................................   Passed    0.02 sec
+        Start 229: mhgp12_cloud_unit_width
+310/675 Test #225: mhgp12_sched_fault_allocation ........................................   Passed    0.02 sec
+        Start 230: mhgp12_cloud_unit_sizes
+311/675 Test #226: mhgp12_sched_fault_allocation_free ...................................   Passed    0.02 sec
+        Start 231: mhgp12_cloud_unit_refusals
+312/675 Test #227: mhgp12_sched_fault_inventaire ........................................   Passed    0.02 sec
+        Start 232: mhgp12_cloud_unit_fixture
+313/675 Test #229: mhgp12_cloud_unit_width ..............................................   Passed    0.01 sec
+        Start 233: mhgp12_cloud_unit_judge
+314/675 Test #230: mhgp12_cloud_unit_sizes ..............................................   Passed    0.02 sec
+        Start 234: mhgp12_cloud_unit_identity
+315/675 Test #231: mhgp12_cloud_unit_refusals ...........................................   Passed    0.02 sec
+        Start 235: mhgp12_cloud_unit_permutation
+316/675 Test #228: mhgp12_cloud_unit_morton .............................................   Passed    0.03 sec
+        Start 236: mhgp12_cloud_unit_renumbering
+317/675 Test #232: mhgp12_cloud_unit_fixture ............................................   Passed    0.02 sec
+        Start 237: mhgp12_cloud_unit_budget
+318/675 Test #193: mhgp12_num_q4_presentation_process_opt ...............................   Passed    0.25 sec
+        Start 238: mhgp12_cloud_unit_ownership
+319/675 Test #234: mhgp12_cloud_unit_identity ...........................................   Passed    0.02 sec
+        Start 239: mhgp12_cloud_unit_refusal_priority
+320/675 Test #305: mhgp12_index_borrowed_fraction .......................................   Passed    1.76 sec
+        Start 240: mhgp12_cloud_unit_shared_budget
+321/675 Test #236: mhgp12_cloud_unit_renumbering ........................................   Passed    0.01 sec
+        Start 241: mhgp12_cloud_unit_inventaire
+322/675 Test #235: mhgp12_cloud_unit_permutation ........................................   Passed    0.02 sec
+        Start 242: mhgp12_cloud_fault_starvation
+323/675 Test #233: mhgp12_cloud_unit_judge ..............................................   Passed    0.03 sec
+        Start 243: mhgp12_cloud_fault_inventaire
+324/675 Test #237: mhgp12_cloud_unit_budget .............................................   Passed    0.02 sec
+        Start 244: mhgp12_cloud_width_unrepresentable
+325/675 Test #238: mhgp12_cloud_unit_ownership ..........................................   Passed    0.01 sec
+        Start 245: mhgp12_cloud_factory_only
+326/675 Test #177: mhgp12_num_power_certificate_fraction_opt ............................   Passed    0.45 sec
+        Start 246: mhgp12_cloud_const_views
+327/675 Test #239: mhgp12_cloud_unit_refusal_priority ...................................   Passed    0.02 sec
+        Start 247: mhgp12_cloud_copy_refused
+328/675 Test #240: mhgp12_cloud_unit_shared_budget ......................................   Passed    0.02 sec
+        Start 248: mhgp12_cloud_assignment_refused
+329/675 Test #241: mhgp12_cloud_unit_inventaire .........................................   Passed    0.01 sec
+        Start 249: mhgp12_io_unit_sha256
+330/675 Test  #49: mhgp12_support_gate_properties_opt ...................................   Passed    1.02 sec
+        Start 250: mhgp12_io_unit_hex
+331/675 Test #242: mhgp12_cloud_fault_starvation ........................................   Passed    0.02 sec
+        Start 251: mhgp12_io_unit_input
+332/675 Test #243: mhgp12_cloud_fault_inventaire ........................................   Passed    0.01 sec
+        Start 252: mhgp12_io_unit_input_sizes
+333/675 Test #198: mhgp12_num_triangle_kind_fraction_opt ................................   Passed    0.25 sec
+        Start 253: mhgp12_io_unit_input_unreadable
+334/675 Test #250: mhgp12_io_unit_hex ...................................................   Passed    0.01 sec
+        Start 254: mhgp12_io_unit_input_budget
+335/675 Test #249: mhgp12_io_unit_sha256 ................................................   Passed    0.02 sec
+        Start 255: mhgp12_io_unit_inventaire
+336/675 Test #251: mhgp12_io_unit_input .................................................   Passed    0.02 sec
+        Start 256: mhgp12_io_transaction_plan_syntax
+337/675 Test #253: mhgp12_io_unit_input_unreadable ......................................   Passed    0.01 sec
+        Start 257: mhgp12_io_transaction_plan_parent
+338/675 Test #252: mhgp12_io_unit_input_sizes ...........................................   Passed    0.02 sec
+        Start 258: mhgp12_io_transaction_plan_conflicts
+339/675 Test #254: mhgp12_io_unit_input_budget ..........................................   Passed    0.02 sec
+        Start 259: mhgp12_io_transaction_plan_inputs
+340/675 Test #255: mhgp12_io_unit_inventaire ............................................   Passed    0.02 sec
+        Start 260: mhgp12_io_transaction_create_names
+341/675 Test #257: mhgp12_io_transaction_plan_parent ....................................   Passed    0.02 sec
+        Start 261: mhgp12_io_transaction_parent_unwritable
+342/675 Test #258: mhgp12_io_transaction_plan_conflicts .................................   Passed    0.02 sec
+        Start 262: mhgp12_io_transaction_commit
+343/675 Test #256: mhgp12_io_transaction_plan_syntax ....................................   Passed    0.03 sec
+        Start 263: mhgp12_io_transaction_noreplace
+344/675 Test #259: mhgp12_io_transaction_plan_inputs ....................................   Passed    0.01 sec
+        Start 264: mhgp12_io_transaction_orphan
+345/675 Test #261: mhgp12_io_transaction_parent_unwritable ..............................   Passed    0.02 sec
+        Start 265: mhgp12_io_transaction_discard
+346/675 Test #260: mhgp12_io_transaction_create_names ...................................   Passed    0.02 sec
+        Start 266: mhgp12_io_transaction_retract
+347/675 Test #264: mhgp12_io_transaction_orphan .........................................   Passed    0.02 sec
+        Start 267: mhgp12_io_transaction_write_failure
+348/675 Test #265: mhgp12_io_transaction_discard ........................................   Passed    0.01 sec
+        Start 268: mhgp12_io_transaction_inventaire
+349/675 Test #262: mhgp12_io_transaction_commit .........................................   Passed    0.03 sec
+        Start 269: mhgp12_io_fault_starvation
+350/675 Test #263: mhgp12_io_transaction_noreplace ......................................   Passed    0.03 sec
+        Start 270: mhgp12_io_fault_inventaire
+351/675 Test #266: mhgp12_io_transaction_retract ........................................   Passed    0.02 sec
+        Start 272: mhgp12_io_sha256_opt
+352/675 Test #268: mhgp12_io_transaction_inventaire .....................................   Passed    0.02 sec
+        Start 273: mhgp12_index_unit_fixtures
+353/675 Test #267: mhgp12_io_transaction_write_failure ..................................   Passed    0.02 sec
+        Start 274: mhgp12_index_unit_structure
+354/675 Test #270: mhgp12_io_fault_inventaire ...........................................   Passed    0.01 sec
+        Start 275: mhgp12_index_unit_ownership
+355/675 Test #200: mhgp12_num_triangle_kind_model_opt ...................................   Passed    0.32 sec
+        Start 276: mhgp12_index_unit_budget
+356/675 Test #269: mhgp12_io_fault_starvation ...........................................   Passed    0.02 sec
+        Start 277: mhgp12_index_unit_blocks
+357/675 Test #273: mhgp12_index_unit_fixtures ...........................................   Passed    0.01 sec
+        Start 278: mhgp12_index_unit_lattice
+358/675 Test #275: mhgp12_index_unit_ownership ..........................................   Passed    0.02 sec
+        Start 279: mhgp12_index_unit_concurrency
+359/675 Test #274: mhgp12_index_unit_structure ..........................................   Passed    0.02 sec
+        Start 280: mhgp12_index_unit_inventaire
+360/675 Test #276: mhgp12_index_unit_budget .............................................   Passed    0.02 sec
+        Start 281: mhgp12_index_fault_starvation
+361/675 Test #277: mhgp12_index_unit_blocks .............................................   Passed    0.02 sec
+        Start 282: mhgp12_index_fault_inventaire
+362/675 Test #278: mhgp12_index_unit_lattice ............................................   Passed    0.02 sec
+        Start 284: mhgp12_index_fraction_opt
+363/675 Test #279: mhgp12_index_unit_concurrency ........................................   Passed    0.02 sec
+        Start 288: mhgp12_index_guarded_fraction_opt
+364/675 Test #280: mhgp12_index_unit_inventaire .........................................   Passed    0.02 sec
+        Start 290: mhgp12_index_translation_opt
+365/675 Test #281: mhgp12_index_fault_starvation ........................................   Passed    0.02 sec
+        Start 291: mhgp12_index_guarded_fixtures
+366/675 Test #282: mhgp12_index_fault_inventaire ........................................   Passed    0.02 sec
+        Start 292: mhgp12_index_guarded_uncertified
+367/675 Test #291: mhgp12_index_guarded_fixtures ........................................   Passed    0.02 sec
+        Start 293: mhgp12_index_guarded_witnesses
+368/675 Test #181: mhgp12_num_orientation_certificate_fraction_opt ......................   Passed    0.54 sec
+        Start 294: mhgp12_index_guarded_inventaire
+369/675 Test #292: mhgp12_index_guarded_uncertified .....................................   Passed    0.02 sec
+        Start 296: mhgp12_index_bench_io_opt
+370/675 Test #293: mhgp12_index_guarded_witnesses .......................................   Passed    0.02 sec
+        Start 297: mhgp12_index_borrowed_fixtures
+371/675 Test #294: mhgp12_index_guarded_inventaire ......................................   Passed    0.02 sec
+        Start 298: mhgp12_index_borrowed_lattice
+372/675 Test #297: mhgp12_index_borrowed_fixtures .......................................   Passed    0.02 sec
+        Start 299: mhgp12_index_borrowed_ownership
+373/675 Test #214: mhgp12_num_roots_opt .................................................   Passed    0.33 sec
+        Start 300: mhgp12_index_borrowed_callbacks
+374/675 Test #298: mhgp12_index_borrowed_lattice ........................................   Passed    0.02 sec
+        Start 301: mhgp12_index_borrowed_concurrency
+375/675 Test #299: mhgp12_index_borrowed_ownership ......................................   Passed    0.01 sec
+        Start 302: mhgp12_index_borrowed_inventaire
+376/675 Test #301: mhgp12_index_borrowed_concurrency ....................................   Passed    0.01 sec
+        Start 303: mhgp12_index_borrowed_fault_starvation
+377/675 Test #300: mhgp12_index_borrowed_callbacks ......................................   Passed    0.02 sec
+        Start 304: mhgp12_index_borrowed_fault_inventaire
+378/675 Test #680: mhgp12_style .........................................................   Passed    1.31 sec
+        Start 306: mhgp12_index_borrowed_fraction_opt
+379/675 Test #302: mhgp12_index_borrowed_inventaire .....................................   Passed    0.02 sec
+        Start 309: mhgp12_catalogue_unit_witness_square
+380/675 Test #189: mhgp12_num_q4_presentation_fraction_opt ..............................   Passed    0.49 sec
+        Start 310: mhgp12_catalogue_unit_witness_rectangle
+381/675 Test #303: mhgp12_index_borrowed_fault_starvation ...............................   Passed    0.02 sec
+        Start 311: mhgp12_catalogue_unit_witness_transl
+382/675 Test #304: mhgp12_index_borrowed_fault_inventaire ...............................   Passed    0.02 sec
+        Start 312: mhgp12_catalogue_unit_witness_long_triangle
+383/675 Test #309: mhgp12_catalogue_unit_witness_square .................................   Passed    0.02 sec
+        Start 313: mhgp12_catalogue_unit_witness_sphere50
+384/675 Test #310: mhgp12_catalogue_unit_witness_rectangle ..............................   Passed    0.02 sec
+        Start 314: mhgp12_catalogue_unit_witness_leaves
+385/675 Test #311: mhgp12_catalogue_unit_witness_transl .................................   Passed    0.02 sec
+        Start 315: mhgp12_catalogue_unit_depth_witnesses
+386/675 Test #312: mhgp12_catalogue_unit_witness_long_triangle ..........................   Passed    0.02 sec
+        Start 316: mhgp12_catalogue_unit_refusals
+387/675 Test #314: mhgp12_catalogue_unit_witness_leaves .................................   Passed    0.02 sec
+        Start 317: mhgp12_catalogue_unit_counter_overflow
+388/675 Test #317: mhgp12_catalogue_unit_counter_overflow ...............................   Passed    0.01 sec
+        Start 318: mhgp12_catalogue_unit_tiers
+389/675 Test #106: mhgp12_core_strong_id_mixed ..........................................   Passed    0.87 sec
+        Start 319: mhgp12_catalogue_unit_wide_traversal
+390/675 Test #313: mhgp12_catalogue_unit_witness_sphere50 ...............................   Passed    0.05 sec
+        Start 320: mhgp12_catalogue_unit_determinism
+391/675 Test #319: mhgp12_catalogue_unit_wide_traversal .................................   Passed    0.01 sec
+        Start 321: mhgp12_catalogue_unit_inventaire
+392/675 Test #321: mhgp12_catalogue_unit_inventaire .....................................   Passed    0.02 sec
+        Start 322: mhgp12_catalogue_device_unit_level_words
+393/675 Test #167: mhgp12_num_centers_model_opt .........................................   Passed    0.76 sec
+        Start 323: mhgp12_catalogue_device_unit_radix_and_scan
+394/675 Test #322: mhgp12_catalogue_device_unit_level_words .............................   Passed    0.02 sec
+        Start 324: mhgp12_catalogue_device_unit_device_reasons
+395/675 Test #318: mhgp12_catalogue_unit_tiers ..........................................   Passed    0.06 sec
+        Start 325: mhgp12_catalogue_device_unit_finish_random
+396/675 Test #296: mhgp12_index_bench_io_opt ............................................   Passed    0.17 sec
+        Start 326: mhgp12_catalogue_device_unit_finish_ties
+397/675 Test #323: mhgp12_catalogue_device_unit_radix_and_scan ..........................   Passed    0.02 sec
+        Start 327: mhgp12_catalogue_device_unit_finish_plateau
+398/675 Test #324: mhgp12_catalogue_device_unit_device_reasons ..........................   Passed    0.02 sec
+        Start 328: mhgp12_catalogue_device_unit_pipeline_witnesses
+399/675 Test #326: mhgp12_catalogue_device_unit_finish_ties .............................   Passed    0.02 sec
+        Start 329: mhgp12_catalogue_device_unit_pipeline_resident
+400/675 Test #325: mhgp12_catalogue_device_unit_finish_random ...........................   Passed    0.02 sec
+        Start 330: mhgp12_catalogue_device_unit_device_open
+401/675 Test #330: mhgp12_catalogue_device_unit_device_open .............................   Passed    0.02 sec
+        Start 331: mhgp12_catalogue_device_unit_inventaire
+402/675 Test #331: mhgp12_catalogue_device_unit_inventaire ..............................   Passed    0.01 sec
+        Start 333: mhgp12_catalogue_g4_judge_opt
+403/675 Test #327: mhgp12_catalogue_device_unit_finish_plateau ..........................   Passed    0.08 sec
+        Start 335: mhgp12_catalogue_g4_mutants_opt
+404/675 Test #107: mhgp12_core_result_throwing_move .....................................   Passed    1.01 sec
+        Start 338: mhgp12_catalogue_probe_usage
+405/675 Test #104: mhgp12_core_strong_id_naked ..........................................   Passed    1.02 sec
+        Start 353: mhgp12_tower_probe_usage
+406/675 Test #338: mhgp12_catalogue_probe_usage .........................................   Passed    0.02 sec
+        Start 354: mhgp12_tower_unit_targets_capacity
+407/675 Test #353: mhgp12_tower_probe_usage .............................................   Passed    0.01 sec
+        Start 355: mhgp12_tower_unit_witness_d2
+408/675 Test #354: mhgp12_tower_unit_targets_capacity ...................................   Passed    0.01 sec
+        Start 356: mhgp12_tower_unit_witness_memo
+409/675 Test #355: mhgp12_tower_unit_witness_d2 .........................................   Passed    0.02 sec
+        Start 357: mhgp12_tower_unit_witness_t1_square
+410/675 Test #105: mhgp12_core_buffer_trivial_only ......................................   Passed    1.06 sec
+        Start 358: mhgp12_tower_unit_fact_saturated
+411/675 Test #356: mhgp12_tower_unit_witness_memo .......................................   Passed    0.02 sec
+        Start 359: mhgp12_tower_unit_inert_below_window
+412/675 Test #103: mhgp12_core_refusal_ignored ..........................................   Passed    1.06 sec
+        Start 360: mhgp12_tower_unit_capacity_refusals
+413/675 Test #357: mhgp12_tower_unit_witness_t1_square ..................................   Passed    0.02 sec
+        Start 361: mhgp12_tower_unit_budget
+414/675 Test #358: mhgp12_tower_unit_fact_saturated .....................................   Passed    0.02 sec
+        Start 362: mhgp12_tower_unit_determinism
+415/675 Test #359: mhgp12_tower_unit_inert_below_window .................................   Passed    0.02 sec
+        Start 363: mhgp12_tower_unit_inventaire
+416/675 Test #361: mhgp12_tower_unit_budget .............................................   Passed    0.02 sec
+        Start 364: mhgp12_tower_index_radix_stable
+417/675 Test #179: mhgp12_num_power_certificate_model_opt ...............................   Passed    0.91 sec
+        Start 365: mhgp12_tower_index_index_reference
+418/675 Test #363: mhgp12_tower_unit_inventaire .........................................   Passed    0.02 sec
+        Start 366: mhgp12_tower_index_weak_key_resolution
+419/675 Test  #98: mhgp12_core_ofast_refusal ............................................   Passed    1.11 sec
+        Start 367: mhgp12_tower_index_support_table
+420/675 Test #290: mhgp12_index_translation_opt .........................................   Passed    0.37 sec
+        Start 368: mhgp12_tower_index_duplicate_population
+421/675 Test #364: mhgp12_tower_index_radix_stable ......................................   Passed    0.05 sec
+        Start 369: mhgp12_tower_index_inventaire
+422/675 Test #369: mhgp12_tower_index_inventaire ........................................   Passed    0.02 sec
+        Start 380: mhgp12_tower_juge_temoin_opt
+423/675 Test #335: mhgp12_catalogue_g4_mutants_opt ......................................   Passed    0.17 sec
+        Start 382: mhgp12_tower_juge_refus_k1_seul_opt
+424/675 Test #272: mhgp12_io_sha256_opt .................................................   Passed    0.53 sec
+        Start 384: mhgp12_tower_juge_refus_ordre_double_opt
+425/675 Test #163: mhgp12_num_budget_refusal ............................................   Passed    1.10 sec
+        Start 386: mhgp12_tower_juge_refus_empreinte_courte_opt
+426/675 Test  #44: mhgp12_support_check_style ...........................................   Passed    2.48 sec
+        Start  45: mhgp12_support_check_style_opt
+427/675 Test #382: mhgp12_tower_juge_refus_k1_seul_opt ..................................   Passed    0.17 sec
+        Start 388: mhgp12_tower_juge_refus_sans_sortie_opt
+428/675 Test #368: mhgp12_tower_index_duplicate_population ..............................   Passed    0.27 sec
+        Start 390: mhgp12_tower_juge_refus_sortie_ordre_booleen_opt
+429/675 Test #380: mhgp12_tower_juge_temoin_opt .........................................   Passed    0.23 sec
+        Start 392: mhgp12_tower_juge_refus_sortie_ordre_flottant_opt
+430/675 Test #212: mhgp12_num_radical_opt ...............................................   Passed    0.93 sec
+        Start 394: mhgp12_tower_juge_ecart_travail_8_opt
+431/675 Test #384: mhgp12_tower_juge_refus_ordre_double_opt .............................   Passed    0.18 sec
+        Start 396: mhgp12_tower_juge_ecart_objet_8_opt
+432/675 Test #386: mhgp12_tower_juge_refus_empreinte_courte_opt .........................   Passed    0.18 sec
+        Start 398: mhgp12_reference_projection_contracts_opt
+433/675 Test #183: mhgp12_num_orientation_certificate_model_opt .........................   Passed    1.24 sec
+        Start 400: mhgp12_reference_witness_t1_opt
+434/675 Test #388: mhgp12_tower_juge_refus_sans_sortie_opt ..............................   Passed    0.17 sec
+        Start 404: mhgp12_reference_witness_t1_refusal_opt
+435/675 Test #390: mhgp12_tower_juge_refus_sortie_ordre_booleen_opt .....................   Passed    0.16 sec
+        Start 406: mhgp12_reference_witness_forme_opt
+436/675 Test  #43: mhgp12_support_gate_helper_opt .......................................   Passed    1.57 sec
+        Start 410: mhgp12_reference_witness_forme_refusal_opt
+437/675 Test #392: mhgp12_tower_juge_refus_sortie_ordre_flottant_opt ....................   Passed    0.17 sec
+        Start 422: mhgp12_reference_resolution_v12_refusal_opt
+438/675 Test #400: mhgp12_reference_witness_t1_opt ......................................   Passed    0.12 sec
+        Start 424: mhgp12_reference_transition_opt
+439/675 Test #244: mhgp12_cloud_width_unrepresentable ...................................   Passed    1.00 sec
+        Start 426: mhgp12_reference_transition_refusal_opt
+440/675 Test #394: mhgp12_tower_juge_ecart_travail_8_opt ................................   Passed    0.23 sec
+        Start 428: mhgp12_reference_transition_cas_transl_opt
+441/675 Test #404: mhgp12_reference_witness_t1_refusal_opt ..............................   Passed    0.11 sec
+        Start 430: mhgp12_reference_transition_cas_transl_v11_opt
+442/675 Test #396: mhgp12_tower_juge_ecart_objet_8_opt ..................................   Passed    0.24 sec
+        Start 432: mhgp12_reference_transition_cas_carre_opt
+443/675 Test #247: mhgp12_cloud_copy_refused ............................................   Passed    1.04 sec
+        Start 434: mhgp12_reference_transition_cas_carre_tourne_opt
+444/675 Test #410: mhgp12_reference_witness_forme_refusal_opt ...........................   Passed    0.12 sec
+        Start 436: mhgp12_reference_transition_cas_carre_tourne_v11_opt
+445/675 Test #398: mhgp12_reference_projection_contracts_opt ............................   Passed    0.22 sec
+        Start 438: mhgp12_reference_transition_cas_carre_tourne_v12_v12_opt
+446/675 Test #406: mhgp12_reference_witness_forme_opt ...................................   Passed    0.12 sec
+        Start 440: mhgp12_reference_transition_cas_carre_tourne_sites_inverses_opt
+447/675 Test #635: mhgp12_reference_supports_primitives .................................   Passed    2.24 sec
+        Start 442: mhgp12_reference_transition_cas_cardinaux_opt
+448/675 Test #333: mhgp12_catalogue_g4_judge_opt ........................................   Passed    0.68 sec
+        Start 444: mhgp12_reference_transition_cas_cercle_q3_opt
+449/675 Test #365: mhgp12_tower_index_index_reference ...................................   Passed    0.58 sec
+        Start 446: mhgp12_reference_transition_cas_sphere_q4_opt
+450/675 Test #191: mhgp12_num_q4_presentation_model_opt .................................   Passed    1.34 sec
+        Start 448: mhgp12_reference_transition_cas_boule_manquante_opt
+451/675 Test #422: mhgp12_reference_resolution_v12_refusal_opt ..........................   Passed    0.13 sec
+        Start 450: mhgp12_reference_transition_cas_niveau_manquant_opt
+452/675 Test #246: mhgp12_cloud_const_views .............................................   Passed    1.12 sec
+        Start 452: mhgp12_reference_transition_cas_boule_de_trop_opt
+453/675 Test #426: mhgp12_reference_transition_refusal_opt ..............................   Passed    0.13 sec
+        Start 454: mhgp12_reference_transition_cas_boule_en_double_opt
+454/675 Test #248: mhgp12_cloud_assignment_refused ......................................   Passed    1.13 sec
+        Start 456: mhgp12_reference_transition_cas_interieur_omis_opt
+455/675 Test #245: mhgp12_cloud_factory_only ............................................   Passed    1.13 sec
+        Start 458: mhgp12_reference_transition_cas_coquille_omise_opt
+456/675 Test #367: mhgp12_tower_index_support_table .....................................   Passed    0.64 sec
+        Start 460: mhgp12_reference_transition_cas_rang_faux_opt
+457/675 Test #209: mhgp12_num_big .......................................................   Passed    2.93 sec
+        Start 210: mhgp12_num_big_opt
+458/675 Test #284: mhgp12_index_fraction_opt ............................................   Passed    1.03 sec
+        Start 462: mhgp12_reference_transition_cas_rangs_faux_partout_opt
+459/675 Test #285: mhgp12_index_judge ...................................................   Passed    2.96 sec
+        Start 286: mhgp12_index_judge_opt
+460/675 Test #360: mhgp12_tower_unit_capacity_refusals ..................................   Passed    0.74 sec
+        Start 464: mhgp12_reference_transition_cas_niveaux_faux_partout_opt
+461/675 Test #288: mhgp12_index_guarded_fraction_opt ....................................   Passed    1.11 sec
+        Start 466: mhgp12_reference_transition_cas_niveaux_decroissants_partout_opt
+462/675 Test #430: mhgp12_reference_transition_cas_transl_v11_opt .......................   Passed    0.22 sec
+        Start 468: mhgp12_reference_transition_cas_ordre_v11_sous_v12_opt
+463/675 Test #434: mhgp12_reference_transition_cas_carre_tourne_opt .....................   Passed    0.22 sec
+        Start 470: mhgp12_reference_transition_cas_sstar_non_canonique_opt
+464/675 Test #428: mhgp12_reference_transition_cas_transl_opt ...........................   Passed    0.25 sec
+        Start 472: mhgp12_reference_transition_cas_sstar_morton_sous_v12_opt
+465/675 Test #432: mhgp12_reference_transition_cas_carre_opt ............................   Passed    0.23 sec
+        Start 474: mhgp12_reference_transition_cas_sstar_morton_sous_v12_q3_opt
+466/675 Test #442: mhgp12_reference_transition_cas_cardinaux_opt ........................   Passed    0.23 sec
+        Start 476: mhgp12_reference_transition_cas_sstar_morton_sous_v12_q4_opt
+467/675 Test #446: mhgp12_reference_transition_cas_sphere_q4_opt ........................   Passed    0.22 sec
+        Start 478: mhgp12_reference_transition_cas_sstar_v12_sous_v11_opt
+468/675 Test #436: mhgp12_reference_transition_cas_carre_tourne_v11_opt .................   Passed    0.25 sec
+        Start 480: mhgp12_reference_transition_cas_sstar_non_minimal_opt
+469/675 Test #438: mhgp12_reference_transition_cas_carre_tourne_v12_v12_opt .............   Passed    0.25 sec
+        Start 482: mhgp12_reference_transition_cas_sstar_non_minimal_partout_opt
+470/675 Test #444: mhgp12_reference_transition_cas_cercle_q3_opt ........................   Passed    0.24 sec
+        Start 484: mhgp12_reference_transition_cas_qmin_non_minimal_opt
+471/675 Test #440: mhgp12_reference_transition_cas_carre_tourne_sites_inverses_opt ......   Passed    0.25 sec
+        Start 486: mhgp12_reference_transition_cas_qmin_non_minimal_partout_opt
+472/675 Test #448: mhgp12_reference_transition_cas_boule_manquante_opt ..................   Passed    0.24 sec
+        Start 488: mhgp12_reference_transition_cas_interieur_non_strict_partout_opt
+473/675 Test #450: mhgp12_reference_transition_cas_niveau_manquant_opt ..................   Passed    0.25 sec
+        Start 490: mhgp12_reference_transition_cas_coquille_hors_sphere_partout_opt
+474/675 Test #458: mhgp12_reference_transition_cas_coquille_omise_opt ...................   Passed    0.22 sec
+        Start 492: mhgp12_reference_transition_cas_support_hors_coquille_partout_opt
+475/675 Test #454: mhgp12_reference_transition_cas_boule_en_double_opt ..................   Passed    0.24 sec
+        Start 494: mhgp12_reference_transition_cas_admission_partout_opt
+476/675 Test #460: mhgp12_reference_transition_cas_rang_faux_opt ........................   Passed    0.23 sec
+        Start 496: mhgp12_reference_transition_cas_site_en_trop_opt
+477/675 Test #456: mhgp12_reference_transition_cas_interieur_omis_opt ...................   Passed    0.24 sec
+        Start 498: mhgp12_reference_transition_cas_refus_magie_opt
+478/675 Test #452: mhgp12_reference_transition_cas_boule_de_trop_opt ....................   Passed    0.26 sec
+        Start 500: mhgp12_reference_transition_cas_refus_genre_opt
+479/675 Test #462: mhgp12_reference_transition_cas_rangs_faux_partout_opt ...............   Passed    0.26 sec
+        Start 502: mhgp12_reference_transition_cas_refus_k_differents_opt
+480/675 Test #464: mhgp12_reference_transition_cas_niveaux_faux_partout_opt .............   Passed    0.24 sec
+        Start 504: mhgp12_reference_transition_cas_refus_tronque_opt
+481/675 Test #466: mhgp12_reference_transition_cas_niveaux_decroissants_partout_opt .....   Passed    0.24 sec
+        Start 506: mhgp12_reference_transition_cas_refus_octets_en_trop_opt
+482/675 Test #468: mhgp12_reference_transition_cas_ordre_v11_sous_v12_opt ...............   Passed    0.24 sec
+        Start 508: mhgp12_reference_transition_cas_refus_section_absente_opt
+483/675 Test #474: mhgp12_reference_transition_cas_sstar_morton_sous_v12_q3_opt .........   Passed    0.23 sec
+        Start 510: mhgp12_reference_transition_cas_refus_section_inattendue_opt
+484/675 Test #472: mhgp12_reference_transition_cas_sstar_morton_sous_v12_opt ............   Passed    0.24 sec
+        Start 512: mhgp12_reference_transition_cas_refus_q_hors_domaine_opt
+485/675 Test #470: mhgp12_reference_transition_cas_sstar_non_canonique_opt ..............   Passed    0.25 sec
+        Start 514: mhgp12_reference_transition_cas_refus_bourrage_opt
+486/675 Test #478: mhgp12_reference_transition_cas_sstar_v12_sous_v11_opt ...............   Passed    0.23 sec
+        Start 516: mhgp12_reference_transition_cas_refus_sstar_non_croissant_opt
+487/675 Test #476: mhgp12_reference_transition_cas_sstar_morton_sous_v12_q4_opt .........   Passed    0.24 sec
+        Start 518: mhgp12_reference_transition_cas_refus_index_hors_domaine_opt
+488/675 Test #482: mhgp12_reference_transition_cas_sstar_non_minimal_partout_opt ........   Passed    0.23 sec
+        Start 520: mhgp12_reference_transition_cas_refus_positions_en_double_opt
+489/675 Test #315: mhgp12_catalogue_unit_depth_witnesses ................................   Passed    1.31 sec
+        Start 522: mhgp12_reference_transition_cas_refus_decalage_opt
+490/675 Test #480: mhgp12_reference_transition_cas_sstar_non_minimal_opt ................   Passed    0.25 sec
+        Start 524: mhgp12_reference_transition_cas_refus_coordonnee_opt
+491/675 Test #486: mhgp12_reference_transition_cas_qmin_non_minimal_partout_opt .........   Passed    0.24 sec
+        Start 580: mhgp12_reference_refusal_opt
+492/675 Test #484: mhgp12_reference_transition_cas_qmin_non_minimal_opt .................   Passed    0.25 sec
+        Start 582: mhgp12_reference_mutant_admission_strict_opt
+493/675 Test #366: mhgp12_tower_index_weak_key_resolution ...............................   Passed    1.07 sec
+        Start 584: mhgp12_reference_mutant_ancestor_open_opt
+494/675 Test #488: mhgp12_reference_transition_cas_interieur_non_strict_partout_opt .....   Passed    0.26 sec
+        Start 586: mhgp12_reference_mutant_binarize_opt
+495/675 Test #490: mhgp12_reference_transition_cas_coquille_hors_sphere_partout_opt .....   Passed    0.26 sec
+        Start 588: mhgp12_reference_mutant_core_next_neighbour_opt
+496/675 Test #424: mhgp12_reference_transition_opt ......................................   Passed    0.60 sec
+        Start 590: mhgp12_reference_mutant_cover_node_open_opt
+497/675 Test #492: mhgp12_reference_transition_cas_support_hors_coquille_partout_opt ....   Passed    0.24 sec
+        Start 592: mhgp12_reference_mutant_cover_population_opt
+498/675 Test #494: mhgp12_reference_transition_cas_admission_partout_opt ................   Passed    0.25 sec
+        Start 594: mhgp12_reference_mutant_drop_last_rep_opt
+499/675 Test #496: mhgp12_reference_transition_cas_site_en_trop_opt .....................   Passed    0.24 sec
+        Start 596: mhgp12_reference_mutant_edge_at_vertex_level_opt
+500/675 Test #498: mhgp12_reference_transition_cas_refus_magie_opt ......................   Passed    0.24 sec
+        Start 598: mhgp12_reference_mutant_first_rep_last_opt
+501/675 Test #500: mhgp12_reference_transition_cas_refus_genre_opt ......................   Passed    0.25 sec
+        Start 600: mhgp12_reference_mutant_hull_no_pairs_opt
+502/675 Test #504: mhgp12_reference_transition_cas_refus_tronque_opt ....................   Passed    0.23 sec
+        Start 602: mhgp12_reference_mutant_hull_no_tetra_opt
+503/675 Test #316: mhgp12_catalogue_unit_refusals .......................................   Passed    1.44 sec
+        Start 604: mhgp12_reference_mutant_hull_strict_triangle_opt
+504/675 Test #502: mhgp12_reference_transition_cas_refus_k_differents_opt ...............   Passed    0.26 sec
+        Start 606: mhgp12_reference_mutant_join_missing_opt
+505/675 Test #506: mhgp12_reference_transition_cas_refus_octets_en_trop_opt .............   Passed    0.26 sec
+        Start 608: mhgp12_reference_mutant_jump_any_opt
+506/675 Test #580: mhgp12_reference_refusal_opt .........................................   Passed    0.19 sec
+        Start 610: mhgp12_reference_mutant_meb_largest_opt
+507/675 Test #514: mhgp12_reference_transition_cas_refus_bourrage_opt ...................   Passed    0.23 sec
+        Start 612: mhgp12_reference_mutant_meb_three_opt
+508/675 Test #510: mhgp12_reference_transition_cas_refus_section_inattendue_opt .........   Passed    0.25 sec
+        Start 614: mhgp12_reference_mutant_numbering_by_catalogue_opt
+509/675 Test #516: mhgp12_reference_transition_cas_refus_sstar_non_croissant_opt ........   Passed    0.22 sec
+        Start 616: mhgp12_reference_mutant_numbering_by_sweep_opt
+510/675 Test #508: mhgp12_reference_transition_cas_refus_section_absente_opt ............   Passed    0.25 sec
+        Start 618: mhgp12_reference_mutant_plateau_split_opt
+511/675 Test #518: mhgp12_reference_transition_cas_refus_index_hors_domaine_opt .........   Passed    0.22 sec
+        Start 620: mhgp12_reference_mutant_point_open_opt
+512/675 Test #512: mhgp12_reference_transition_cas_refus_q_hors_domaine_opt .............   Passed    0.26 sec
+        Start 622: mhgp12_reference_mutant_regular_join_pieces_opt
+513/675 Test #520: mhgp12_reference_transition_cas_refus_positions_en_double_opt ........   Passed    0.26 sec
+        Start 624: mhgp12_reference_mutant_vertical_merge_child_opt
+514/675 Test #524: mhgp12_reference_transition_cas_refus_coordonnee_opt .................   Passed    0.25 sec
+        Start 626: mhgp12_reference_mutant_vertical_open_opt
+515/675 Test #522: mhgp12_reference_transition_cas_refus_decalage_opt ...................   Passed    0.26 sec
+        Start 628: mhgp12_reference_mutant_weighted_as_regular_opt
+516/675 Test #596: mhgp12_reference_mutant_edge_at_vertex_level_opt .....................   Passed    0.21 sec
+        Start 630: mhgp12_reference_mutant_window_low_opt
+517/675 Test #584: mhgp12_reference_mutant_ancestor_open_opt ............................   Passed    0.27 sec
+        Start 634: mhgp12_reference_supports_refusal_opt
+518/675 Test #582: mhgp12_reference_mutant_admission_strict_opt .........................   Passed    0.28 sec
+        Start 636: mhgp12_reference_supports_primitives_opt
+519/675 Test #590: mhgp12_reference_mutant_cover_node_open_opt ..........................   Passed    0.26 sec
+        Start 638: mhgp12_reference_supports_mutant_ant_coupe_fermee_opt
+520/675 Test #592: mhgp12_reference_mutant_cover_population_opt .........................   Passed    0.27 sec
+        Start 640: mhgp12_reference_supports_mutant_att_coupe_ouverte_opt
+521/675 Test #586: mhgp12_reference_mutant_binarize_opt .................................   Passed    0.30 sec
+        Start 642: mhgp12_reference_supports_mutant_c3_une_fusion_opt
+522/675 Test #588: mhgp12_reference_mutant_core_next_neighbour_opt ......................   Passed    0.29 sec
+        Start 644: mhgp12_reference_supports_mutant_cofaces_ordre_k_opt
+523/675 Test #600: mhgp12_reference_mutant_hull_no_pairs_opt ............................   Passed    0.28 sec
+        Start 646: mhgp12_reference_supports_mutant_fenetre_forte_opt
+524/675 Test #594: mhgp12_reference_mutant_drop_last_rep_opt ............................   Passed    0.29 sec
+        Start 648: mhgp12_reference_supports_mutant_h_fortes_etroites_opt
+525/675 Test #602: mhgp12_reference_mutant_hull_no_tetra_opt ............................   Passed    0.24 sec
+        Start 650: mhgp12_reference_supports_mutant_interne_vie_inversee_opt
+526/675 Test #634: mhgp12_reference_supports_refusal_opt ................................   Passed    0.11 sec
+        Start 652: mhgp12_reference_supports_mutant_m1_support_inverse_opt
+527/675 Test #606: mhgp12_reference_mutant_join_missing_opt .............................   Passed    0.27 sec
+        Start 654: mhgp12_reference_supports_mutant_populations_naissances_seules_opt
+528/675 Test #612: mhgp12_reference_mutant_meb_three_opt ................................   Passed    0.23 sec
+        Start 656: mhgp12_reference_supports_mutant_premier_support_seul_opt
+529/675 Test #614: mhgp12_reference_mutant_numbering_by_catalogue_opt ...................   Passed    0.24 sec
+        Start 658: mhgp12_reference_supports_mutant_regle_parent_inversee_opt
+530/675 Test #638: mhgp12_reference_supports_mutant_ant_coupe_fermee_opt ................   Passed    0.16 sec
+        Start 660: mhgp12_reference_supports_mutant_triangle_droit_admis_opt
+531/675 Test #618: mhgp12_reference_mutant_plateau_split_opt ............................   Passed    0.26 sec
+        Start 662: mhgp12_reference_supports_mutant_w4_gabriel_juge_opt
+532/675 Test #644: mhgp12_reference_supports_mutant_cofaces_ordre_k_opt .................   Passed    0.15 sec
+        Start 681: mhgp12_style_opt
+533/675 Test #642: mhgp12_reference_supports_mutant_c3_une_fusion_opt ...................   Passed    0.15 sec
+534/675 Test #610: mhgp12_reference_mutant_meb_largest_opt ..............................   Passed    0.28 sec
+535/675 Test #628: mhgp12_reference_mutant_weighted_as_regular_opt ......................   Passed    0.22 sec
+        Start 577: mhgp12_reference_fast_split
+536/675 Test #620: mhgp12_reference_mutant_point_open_opt ...............................   Passed    0.28 sec
+537/675 Test #640: mhgp12_reference_supports_mutant_att_coupe_ouverte_opt ...............   Passed    0.17 sec
+538/675 Test #616: mhgp12_reference_mutant_numbering_by_sweep_opt .......................   Passed    0.30 sec
+539/675 Test #622: mhgp12_reference_mutant_regular_join_pieces_opt ......................   Passed    0.29 sec
+540/675 Test #646: mhgp12_reference_supports_mutant_fenetre_forte_opt ...................   Passed    0.15 sec
+541/675 Test #648: mhgp12_reference_supports_mutant_h_fortes_etroites_opt ...............   Passed    0.15 sec
+542/675 Test #650: mhgp12_reference_supports_mutant_interne_vie_inversee_opt ............   Passed    0.15 sec
+543/675 Test #598: mhgp12_reference_mutant_first_rep_last_opt ...........................   Passed    0.46 sec
+544/675 Test #626: mhgp12_reference_mutant_vertical_open_opt ............................   Passed    0.28 sec
+545/675 Test #624: mhgp12_reference_mutant_vertical_merge_child_opt .....................   Passed    0.29 sec
+546/675 Test #654: mhgp12_reference_supports_mutant_populations_naissances_seules_opt ...   Passed    0.14 sec
+547/675 Test #306: mhgp12_index_borrowed_fraction_opt ...................................   Passed    1.90 sec
+548/675 Test #652: mhgp12_reference_supports_mutant_m1_support_inverse_opt ..............   Passed    0.16 sec
+549/675 Test #630: mhgp12_reference_mutant_window_low_opt ...............................   Passed    0.28 sec
+550/675 Test #658: mhgp12_reference_supports_mutant_regle_parent_inversee_opt ...........   Passed    0.12 sec
+551/675 Test #608: mhgp12_reference_mutant_jump_any_opt .................................   Passed    0.39 sec
+552/675 Test #660: mhgp12_reference_supports_mutant_triangle_droit_admis_opt ............   Passed    0.12 sec
+553/675 Test #656: mhgp12_reference_supports_mutant_premier_support_seul_opt ............   Passed    0.17 sec
+554/675 Test #662: mhgp12_reference_supports_mutant_w4_gabriel_juge_opt .................   Passed    0.15 sec
+555/675 Test #336: mhgp12_catalogue_oracle ..............................................   Passed    4.11 sec
+        Start 337: mhgp12_catalogue_oracle_opt
+556/675 Test #604: mhgp12_reference_mutant_hull_strict_triangle_opt .....................   Passed    0.81 sec
+557/675 Test #307: mhgp12_index_borrowed_model ..........................................   Passed    4.42 sec
+        Start 308: mhgp12_index_borrowed_model_opt
+558/675 Test  #46: mhgp12_support_run_mutants ...........................................   Passed    4.57 sec
+        Start  47: mhgp12_support_run_mutants_opt
+559/675 Test #681: mhgp12_style_opt .....................................................   Passed    0.80 sec
+560/675 Test #329: mhgp12_catalogue_device_unit_pipeline_resident .......................   Passed    2.81 sec
+561/675 Test #636: mhgp12_reference_supports_primitives_opt .............................   Passed    1.59 sec
+562/675 Test #210: mhgp12_num_big_opt ...................................................   Passed    2.34 sec
+563/675 Test #328: mhgp12_catalogue_device_unit_pipeline_witnesses ......................   Passed    3.23 sec
+564/675 Test #286: mhgp12_index_judge_opt ...............................................   Passed    2.54 sec
+565/675 Test #370: mhgp12_tower_oracle ..................................................   Passed    5.77 sec
+        Start 371: mhgp12_tower_oracle_opt
+566/675 Test #411: mhgp12_reference_resolution_v12 ......................................   Passed    5.99 sec
+        Start 412: mhgp12_reference_resolution_v12_opt
+567/675 Test #320: mhgp12_catalogue_unit_determinism ....................................   Passed    4.73 sec
+568/675 Test #337: mhgp12_catalogue_oracle_opt ..........................................   Passed    2.84 sec
+569/675 Test #345: mhgp12_catalogue_euler_small .........................................   Passed    7.35 sec
+        Start 346: mhgp12_catalogue_euler_small_opt
+570/675 Test #308: mhgp12_index_borrowed_model_opt ......................................   Passed    3.30 sec
+571/675 Test #362: mhgp12_tower_unit_determinism ........................................   Passed    5.61 sec
+572/675 Test  #45: mhgp12_support_check_style_opt .......................................   Passed    6.23 sec
+573/675 Test #577: mhgp12_reference_fast_split ..........................................   Passed    5.18 sec
+        Start 578: mhgp12_reference_fast_split_opt
+574/675 Test #575: mhgp12_reference_fast ................................................   Passed    9.00 sec
+        Start 576: mhgp12_reference_fast_opt
+575/675 Test #371: mhgp12_tower_oracle_opt ..............................................   Passed    3.92 sec
+576/675 Test #412: mhgp12_reference_resolution_v12_opt ..................................   Passed    4.85 sec
+577/675 Test #346: mhgp12_catalogue_euler_small_opt .....................................   Passed    6.00 sec
+578/675 Test #631: mhgp12_reference_supports ............................................   Passed   12.95 sec
+        Start 632: mhgp12_reference_supports_opt
+579/675 Test  #47: mhgp12_support_run_mutants_opt .......................................   Passed    9.34 sec
+580/675 Test #578: mhgp12_reference_fast_split_opt ......................................   Passed    5.28 sec
+581/675 Test #576: mhgp12_reference_fast_opt ............................................   Passed    7.91 sec
+582/675 Test #632: mhgp12_reference_supports_opt ........................................   Passed   11.89 sec
+        Start 339: mhgp12_catalogue_scale8000
+583/675 Test #339: mhgp12_catalogue_scale8000 ...........................................   Passed    3.56 sec
+        Start 341: mhgp12_catalogue_scale16000
+584/675 Test #341: mhgp12_catalogue_scale16000 ..........................................   Passed    7.46 sec
+        Start 343: mhgp12_catalogue_scale32000
+585/675 Test #343: mhgp12_catalogue_scale32000 ..........................................   Passed   15.43 sec
+        Start 347: mhgp12_catalogue_euler_scale8000
+586/675 Test #347: mhgp12_catalogue_euler_scale8000 .....................................   Passed    4.22 sec
+        Start 372: mhgp12_tower_scale8000
+587/675 Test #372: mhgp12_tower_scale8000 ...............................................   Passed    3.41 sec
+        Start 374: mhgp12_tower_scale16000
+588/675 Test #374: mhgp12_tower_scale16000 ..............................................   Passed    7.41 sec
+        Start 376: mhgp12_tower_scale32000
+589/675 Test #376: mhgp12_tower_scale32000 ..............................................   Passed   15.90 sec
+        Start 401: mhgp12_reference_witness_t1_mutant_sans_inclusion
+590/675 Test #401: mhgp12_reference_witness_t1_mutant_sans_inclusion ....................   Passed    0.03 sec
+        Start 407: mhgp12_reference_witness_forme_mutant_ordre_unique
+591/675 Test #407: mhgp12_reference_witness_forme_mutant_ordre_unique ...................   Passed    0.03 sec
+        Start 413: mhgp12_reference_resolution_v12_mutant_inertes_omises
+592/675 Test #413: mhgp12_reference_resolution_v12_mutant_inertes_omises ................   Passed    0.27 sec
+        Start 415: mhgp12_reference_resolution_v12_mutant_element_sans_racine
+593/675 Test #415: mhgp12_reference_resolution_v12_mutant_element_sans_racine ...........   Passed    0.05 sec
+        Start 417: mhgp12_reference_resolution_v12_mutant_arret_sous_fenetre
+594/675 Test #417: mhgp12_reference_resolution_v12_mutant_arret_sous_fenetre ............   Passed    0.96 sec
+        Start 419: mhgp12_reference_resolution_v12_mutant_plateau_coupe
+595/675 Test #419: mhgp12_reference_resolution_v12_mutant_plateau_coupe .................   Passed    0.08 sec
+        Start 525: mhgp12_reference_transition_mutant_boules_par_support
+596/675 Test #525: mhgp12_reference_transition_mutant_boules_par_support ................   Passed    0.05 sec
+        Start 527: mhgp12_reference_transition_mutant_convention_v12_par_indices
+597/675 Test #527: mhgp12_reference_transition_mutant_convention_v12_par_indices ........   Passed    0.05 sec
+        Start 529: mhgp12_reference_transition_mutant_sans_absence
+598/675 Test #529: mhgp12_reference_transition_mutant_sans_absence ......................   Passed    0.04 sec
+        Start 531: mhgp12_reference_transition_mutant_sans_admission
+599/675 Test #531: mhgp12_reference_transition_mutant_sans_admission ....................   Passed    0.04 sec
+        Start 533: mhgp12_reference_transition_mutant_sans_cardinal_support
+600/675 Test #533: mhgp12_reference_transition_mutant_sans_cardinal_support .............   Passed    0.10 sec
+        Start 535: mhgp12_reference_transition_mutant_sans_convention
+601/675 Test #535: mhgp12_reference_transition_mutant_sans_convention ...................   Passed    0.05 sec
+        Start 537: mhgp12_reference_transition_mutant_sans_coquille_croisee
+602/675 Test #537: mhgp12_reference_transition_mutant_sans_coquille_croisee .............   Passed    0.04 sec
+        Start 539: mhgp12_reference_transition_mutant_sans_coquille_sphere
+603/675 Test #539: mhgp12_reference_transition_mutant_sans_coquille_sphere ..............   Passed    0.04 sec
+        Start 541: mhgp12_reference_transition_mutant_sans_decalages
+604/675 Test #541: mhgp12_reference_transition_mutant_sans_decalages ....................   Passed    0.04 sec
+        Start 543: mhgp12_reference_transition_mutant_sans_domaine_des_indices
+605/675 Test #543: mhgp12_reference_transition_mutant_sans_domaine_des_indices ..........   Passed    0.04 sec
+        Start 545: mhgp12_reference_transition_mutant_sans_doublon
+606/675 Test #545: mhgp12_reference_transition_mutant_sans_doublon ......................   Passed    0.04 sec
+        Start 547: mhgp12_reference_transition_mutant_sans_en_trop
+607/675 Test #547: mhgp12_reference_transition_mutant_sans_en_trop ......................   Passed    0.04 sec
+        Start 549: mhgp12_reference_transition_mutant_sans_interieur_croise
+608/675 Test #549: mhgp12_reference_transition_mutant_sans_interieur_croise .............   Passed    0.04 sec
+        Start 551: mhgp12_reference_transition_mutant_sans_interieur_strict
+609/675 Test #551: mhgp12_reference_transition_mutant_sans_interieur_strict .............   Passed    0.04 sec
+        Start 553: mhgp12_reference_transition_mutant_sans_niveaux
+610/675 Test #553: mhgp12_reference_transition_mutant_sans_niveaux ......................   Passed    0.04 sec
+        Start 555: mhgp12_reference_transition_mutant_sans_niveaux_croissants
+611/675 Test #555: mhgp12_reference_transition_mutant_sans_niveaux_croissants ...........   Passed    0.04 sec
+        Start 557: mhgp12_reference_transition_mutant_sans_ordre
+612/675 Test #557: mhgp12_reference_transition_mutant_sans_ordre ........................   Passed    0.04 sec
+        Start 559: mhgp12_reference_transition_mutant_sans_positions_distinctes
+613/675 Test #559: mhgp12_reference_transition_mutant_sans_positions_distinctes .........   Passed    0.04 sec
+        Start 561: mhgp12_reference_transition_mutant_sans_qmin
+614/675 Test #561: mhgp12_reference_transition_mutant_sans_qmin .........................   Passed    0.04 sec
+        Start 563: mhgp12_reference_transition_mutant_sans_rangs
+615/675 Test #563: mhgp12_reference_transition_mutant_sans_rangs ........................   Passed    0.04 sec
+        Start 565: mhgp12_reference_transition_mutant_sans_rangs_croises
+616/675 Test #565: mhgp12_reference_transition_mutant_sans_rangs_croises ................   Passed    0.10 sec
+        Start 567: mhgp12_reference_transition_mutant_sans_sites
+617/675 Test #567: mhgp12_reference_transition_mutant_sans_sites ........................   Passed    0.04 sec
+        Start 569: mhgp12_reference_transition_mutant_sans_support_dans_coquille
+618/675 Test #569: mhgp12_reference_transition_mutant_sans_support_dans_coquille ........   Passed    0.04 sec
+        Start 571: mhgp12_reference_transition_mutant_sans_support_minimal
+619/675 Test #571: mhgp12_reference_transition_mutant_sans_support_minimal ..............   Passed    0.04 sec
+        Start 573: mhgp12_reference_transition_mutant_sites_par_indice
+620/675 Test #573: mhgp12_reference_transition_mutant_sites_par_indice ..................   Passed    0.04 sec
+        Start 682: mhgp12_mutants_core_manifest
+621/675 Test #682: mhgp12_mutants_core_manifest .........................................   Passed    0.04 sec
+        Start 685: mhgp12_mutants_num_manifest
+622/675 Test #685: mhgp12_mutants_num_manifest ..........................................   Passed    0.04 sec
+        Start 688: mhgp12_mutants_sched_manifest
+623/675 Test #688: mhgp12_mutants_sched_manifest ........................................   Passed    0.03 sec
+        Start 691: mhgp12_mutants_cloud_manifest
+624/675 Test #691: mhgp12_mutants_cloud_manifest ........................................   Passed    0.03 sec
+        Start 694: mhgp12_mutants_io_manifest
+625/675 Test #694: mhgp12_mutants_io_manifest ...........................................   Passed    0.03 sec
+        Start 697: mhgp12_mutants_index_manifest
+626/675 Test #697: mhgp12_mutants_index_manifest ........................................   Passed    0.03 sec
+        Start 700: mhgp12_mutants_catalogue_manifest
+627/675 Test #700: mhgp12_mutants_catalogue_manifest ....................................   Passed    0.03 sec
+        Start 703: mhgp12_mutants_tower_manifest
+628/675 Test #703: mhgp12_mutants_tower_manifest ........................................   Passed    0.03 sec
+        Start  15: mhgp12_support_lidar_sentinel
+629/675 Test  #15: mhgp12_support_lidar_sentinel ........................................   Passed    0.01 sec
+        Start 340: mhgp12_catalogue_scale8000_opt
+630/675 Test #340: mhgp12_catalogue_scale8000_opt .......................................   Passed    3.60 sec
+        Start 342: mhgp12_catalogue_scale16000_opt
+631/675 Test #342: mhgp12_catalogue_scale16000_opt ......................................   Passed    7.53 sec
+        Start 344: mhgp12_catalogue_scale32000_opt
+632/675 Test #344: mhgp12_catalogue_scale32000_opt ......................................   Passed   15.48 sec
+        Start 348: mhgp12_catalogue_euler_scale8000_opt
+633/675 Test #348: mhgp12_catalogue_euler_scale8000_opt .................................   Passed    4.26 sec
+        Start 373: mhgp12_tower_scale8000_opt
+634/675 Test #373: mhgp12_tower_scale8000_opt ...........................................   Passed    3.45 sec
+        Start 375: mhgp12_tower_scale16000_opt
+635/675 Test #375: mhgp12_tower_scale16000_opt ..........................................   Passed    7.46 sec
+        Start 377: mhgp12_tower_scale32000_opt
+636/675 Test #377: mhgp12_tower_scale32000_opt ..........................................   Passed   15.90 sec
+        Start 402: mhgp12_reference_witness_t1_mutant_sans_inclusion_opt
+637/675 Test #402: mhgp12_reference_witness_t1_mutant_sans_inclusion_opt ................   Passed    0.08 sec
+        Start 408: mhgp12_reference_witness_forme_mutant_ordre_unique_opt
+638/675 Test #408: mhgp12_reference_witness_forme_mutant_ordre_unique_opt ...............   Passed    0.07 sec
+        Start 414: mhgp12_reference_resolution_v12_mutant_inertes_omises_opt
+639/675 Test #414: mhgp12_reference_resolution_v12_mutant_inertes_omises_opt ............   Passed    0.31 sec
+        Start 416: mhgp12_reference_resolution_v12_mutant_element_sans_racine_opt
+640/675 Test #416: mhgp12_reference_resolution_v12_mutant_element_sans_racine_opt .......   Passed    0.10 sec
+        Start 418: mhgp12_reference_resolution_v12_mutant_arret_sous_fenetre_opt
+641/675 Test #418: mhgp12_reference_resolution_v12_mutant_arret_sous_fenetre_opt ........   Passed    1.01 sec
+        Start 420: mhgp12_reference_resolution_v12_mutant_plateau_coupe_opt
+642/675 Test #420: mhgp12_reference_resolution_v12_mutant_plateau_coupe_opt .............   Passed    0.13 sec
+        Start 526: mhgp12_reference_transition_mutant_boules_par_support_opt
+643/675 Test #526: mhgp12_reference_transition_mutant_boules_par_support_opt ............   Passed    0.11 sec
+        Start 528: mhgp12_reference_transition_mutant_convention_v12_par_indices_opt
+644/675 Test #528: mhgp12_reference_transition_mutant_convention_v12_par_indices_opt ....   Passed    0.11 sec
+        Start 530: mhgp12_reference_transition_mutant_sans_absence_opt
+645/675 Test #530: mhgp12_reference_transition_mutant_sans_absence_opt ..................   Passed    0.11 sec
+        Start 532: mhgp12_reference_transition_mutant_sans_admission_opt
+646/675 Test #532: mhgp12_reference_transition_mutant_sans_admission_opt ................   Passed    0.10 sec
+        Start 534: mhgp12_reference_transition_mutant_sans_cardinal_support_opt
+647/675 Test #534: mhgp12_reference_transition_mutant_sans_cardinal_support_opt .........   Passed    0.16 sec
+        Start 536: mhgp12_reference_transition_mutant_sans_convention_opt
+648/675 Test #536: mhgp12_reference_transition_mutant_sans_convention_opt ...............   Passed    0.11 sec
+        Start 538: mhgp12_reference_transition_mutant_sans_coquille_croisee_opt
+649/675 Test #538: mhgp12_reference_transition_mutant_sans_coquille_croisee_opt .........   Passed    0.10 sec
+        Start 540: mhgp12_reference_transition_mutant_sans_coquille_sphere_opt
+650/675 Test #540: mhgp12_reference_transition_mutant_sans_coquille_sphere_opt ..........   Passed    0.10 sec
+        Start 542: mhgp12_reference_transition_mutant_sans_decalages_opt
+651/675 Test #542: mhgp12_reference_transition_mutant_sans_decalages_opt ................   Passed    0.10 sec
+        Start 544: mhgp12_reference_transition_mutant_sans_domaine_des_indices_opt
+652/675 Test #544: mhgp12_reference_transition_mutant_sans_domaine_des_indices_opt ......   Passed    0.11 sec
+        Start 546: mhgp12_reference_transition_mutant_sans_doublon_opt
+653/675 Test #546: mhgp12_reference_transition_mutant_sans_doublon_opt ..................   Passed    0.10 sec
+        Start 548: mhgp12_reference_transition_mutant_sans_en_trop_opt
+654/675 Test #548: mhgp12_reference_transition_mutant_sans_en_trop_opt ..................   Passed    0.10 sec
+        Start 550: mhgp12_reference_transition_mutant_sans_interieur_croise_opt
+655/675 Test #550: mhgp12_reference_transition_mutant_sans_interieur_croise_opt .........   Passed    0.10 sec
+        Start 552: mhgp12_reference_transition_mutant_sans_interieur_strict_opt
+656/675 Test #552: mhgp12_reference_transition_mutant_sans_interieur_strict_opt .........   Passed    0.10 sec
+        Start 554: mhgp12_reference_transition_mutant_sans_niveaux_opt
+657/675 Test #554: mhgp12_reference_transition_mutant_sans_niveaux_opt ..................   Passed    0.10 sec
+        Start 556: mhgp12_reference_transition_mutant_sans_niveaux_croissants_opt
+658/675 Test #556: mhgp12_reference_transition_mutant_sans_niveaux_croissants_opt .......   Passed    0.10 sec
+        Start 558: mhgp12_reference_transition_mutant_sans_ordre_opt
+659/675 Test #558: mhgp12_reference_transition_mutant_sans_ordre_opt ....................   Passed    0.10 sec
+        Start 560: mhgp12_reference_transition_mutant_sans_positions_distinctes_opt
+660/675 Test #560: mhgp12_reference_transition_mutant_sans_positions_distinctes_opt .....   Passed    0.10 sec
+        Start 562: mhgp12_reference_transition_mutant_sans_qmin_opt
+661/675 Test #562: mhgp12_reference_transition_mutant_sans_qmin_opt .....................   Passed    0.11 sec
+        Start 564: mhgp12_reference_transition_mutant_sans_rangs_opt
+662/675 Test #564: mhgp12_reference_transition_mutant_sans_rangs_opt ....................   Passed    0.10 sec
+        Start 566: mhgp12_reference_transition_mutant_sans_rangs_croises_opt
+663/675 Test #566: mhgp12_reference_transition_mutant_sans_rangs_croises_opt ............   Passed    0.16 sec
+        Start 568: mhgp12_reference_transition_mutant_sans_sites_opt
+664/675 Test #568: mhgp12_reference_transition_mutant_sans_sites_opt ....................   Passed    0.11 sec
+        Start 570: mhgp12_reference_transition_mutant_sans_support_dans_coquille_opt
+665/675 Test #570: mhgp12_reference_transition_mutant_sans_support_dans_coquille_opt ....   Passed    0.10 sec
+        Start 572: mhgp12_reference_transition_mutant_sans_support_minimal_opt
+666/675 Test #572: mhgp12_reference_transition_mutant_sans_support_minimal_opt ..........   Passed    0.10 sec
+        Start 574: mhgp12_reference_transition_mutant_sites_par_indice_opt
+667/675 Test #574: mhgp12_reference_transition_mutant_sites_par_indice_opt ..............   Passed    0.10 sec
+        Start 683: mhgp12_mutants_core_manifest_opt
+668/675 Test #683: mhgp12_mutants_core_manifest_opt .....................................   Passed    0.11 sec
+        Start 686: mhgp12_mutants_num_manifest_opt
+669/675 Test #686: mhgp12_mutants_num_manifest_opt ......................................   Passed    0.11 sec
+        Start 689: mhgp12_mutants_sched_manifest_opt
+670/675 Test #689: mhgp12_mutants_sched_manifest_opt ....................................   Passed    0.11 sec
+        Start 692: mhgp12_mutants_cloud_manifest_opt
+671/675 Test #692: mhgp12_mutants_cloud_manifest_opt ....................................   Passed    0.11 sec
+        Start 695: mhgp12_mutants_io_manifest_opt
+672/675 Test #695: mhgp12_mutants_io_manifest_opt .......................................   Passed    0.11 sec
+        Start 698: mhgp12_mutants_index_manifest_opt
+673/675 Test #698: mhgp12_mutants_index_manifest_opt ....................................   Passed    0.11 sec
+        Start 701: mhgp12_mutants_catalogue_manifest_opt
+674/675 Test #701: mhgp12_mutants_catalogue_manifest_opt ................................   Passed    0.11 sec
+        Start 704: mhgp12_mutants_tower_manifest_opt
+675/675 Test #704: mhgp12_mutants_tower_manifest_opt ....................................   Passed    0.11 sec
+
+100% tests passed, 0 tests failed out of 675
+
+Label Time Summary:
+fast          = 288.45 sec*proc (661 tests)
+lidar         =   0.01 sec*proc (1 test)
+mutant        =   8.19 sec*proc (78 tests)
+oracle        = 205.15 sec*proc (332 tests)
+scale16000    =  29.85 sec*proc (4 tests)
+scale32000    =  62.72 sec*proc (4 tests)
+scale8000     =  22.50 sec*proc (6 tests)
+unit          =  75.99 sec*proc (284 tests)
+
+Total Test time (real) = 148.76 sec

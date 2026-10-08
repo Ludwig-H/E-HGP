@@ -1,0 +1,14 @@
+gxx=g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0
+clangxx=absent
+cmake=cmake version 3.22.1
+ctest=ctest version 3.22.1
+python3=Python 3.10.12
+nproc=48
+mem_total_kb=185463748
+sanitizer_address_undefined=ok
+sanitizer_thread=ok_setarch
+cpu_avx2=1
+cpu_avx512f=1
+cpu_avx512dq=1
+cpu_avx512vl=1
+cpu_bmi2=1
