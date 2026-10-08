@@ -44,6 +44,10 @@ MUTANTS = {
     'b1_refus_partout': ("            if r['etat'] == 'echec' or (r['etat'] == 'refus' and r['sites'] < 10_000_000)]",
                          "            if r['etat'] in ('echec', 'refus')]"),
     'b4_sans_refus': ("for r in k10 if r['etat'] != 'ok']", "for r in k10 if r['etat'] == 'echec']"),
+    'memoire_sans_coherence': ("mem[k][0] > mem[k][1] for k in MEM_STAGES) or max(mem[k][1] for k in MEM_STAGES) != "
+                               "row['pic_octets']:", "mem[k][0] > mem[k][1] for k in MEM_STAGES):"),
+    'memoire_usage_libre': ("                mem[k][0] > mem[k][1] for k in MEM_STAGES)",
+                            "                False for k in MEM_STAGES)"),
 }
 
 

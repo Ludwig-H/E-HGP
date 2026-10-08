@@ -2,9 +2,10 @@
 """Porte de MES-B (lecteur, verdicts et pilote), sans sonde ni donnees reelles. Python 3.10 nu, aucun assert (tient
 sous -O).
 
-  lecture        une sortie appareil conforme est admise ; dix-sept mutations du schema et les cinq corruptions de la
-                 contrelecture de l'auditeur (cle repetee, booleen, ouverture, 2^64, NaN) sont refusees comme sorties
-                 illisibles (controle manquant), jamais comme resultats ;
+  lecture        une sortie appareil conforme est admise ; vingt et une mutations du schema (dont quatre de la
+                 memoire par etage : etage absent, pic incoherent avec pic_octets, usage au-dela du pic, booleen) et
+                 les cinq corruptions de la contrelecture de l'auditeur (cle repetee, booleen, ouverture, 2^64, NaN)
+                 sont refusees comme sorties illisibles (controle manquant), jamais comme resultats ;
   issues         refus de la sonde (code 2, ressources ou degenerescence) publie comme resultat, avec ses passes deja
                  jouees ; invariant viole (codes 2 et 3), signal et expiration publies comme echecs du cas ;
   verdicts       B1 a B4 aux seuils ecrits d'avance (2 s par million, refus sous 10 millions, pente 1,1, 10 s par
@@ -39,7 +40,8 @@ def full_row(i, wall=4_000_000_000):
                 etapes_ns=dict(P=1, C=wall // 4, G=wall // 4, raccord=1, TMVR=wall // 4, T=wall // 8, M=1, V=1, R=1),
                 c_ns={k: 1 for k in pilote_b.C_KEYS}, g_ns=dict(tables=1, resolution=wall // 8),
                 hors_mur_ns=dict(validation=1, empreinte=1), pic_octets=10, cpu_ns=5, rss_max_octets=10,
-                appareil_octets=7, epinglee_octets=3, pic_appareil_octets=8, full_sha256=SHA)
+                appareil_octets=7, epinglee_octets=3, pic_appareil_octets=8, full_sha256=SHA,
+                memoire_octets=dict(P=[1, 2], C=[4, 10], G=[6, 7], raccord=[6, 6], TMVR=[8, 9]))
 
 
 def dump(rows):
@@ -82,6 +84,10 @@ def check_reading(errors):
         'tmvr': lambda r: r['etapes_ns'].update(T=r['etapes_ns']['TMVR'] + 1),
         'g': lambda r: r['g_ns'].update(tables=r['etapes_ns']['G']),
         'ascii': lambda r: r.update(trame='scène'),
+        'memoire_etage_absent': lambda r: r['memoire_octets'].pop('G'),
+        'memoire_pic_incoherent': lambda r: r['memoire_octets'].update(C=[4, 9]),
+        'memoire_usage_sup_pic': lambda r: r['memoire_octets'].update(TMVR=[9, 8]),
+        'memoire_booleen': lambda r: r['memoire_octets'].update(P=[True, 2]),
     }
     for name, mutate in mutations.items():
         state = pilote_b.parse_output(0, device_output(mutate=mutate), CASE, SITES, LABEL)
@@ -105,7 +111,7 @@ def check_reading(errors):
         'liberation_booleenne': good.replace('{"phase": "liberation", "pass": 0,',
                                              '{"phase": "liberation", "pass": false,'),
         'ouverture_raison': good.replace('"reason": "none", "wall_ns": 5', '"reason": "device_fault", "wall_ns": 5'),
-        'entier_2_64': good.replace('"pic_octets": 10,', '"pic_octets": 18446744073709551616,', 1),
+        'entier_2_64': good.replace('"cpu_ns": 5,', '"cpu_ns": 18446744073709551616,', 1),
         'constante_nan': good.replace('"cpu_ns": 5,', '"cpu_ns": NaN,', 1),
     }
     for name, text in corrupt.items():
@@ -205,7 +211,8 @@ for i in range(passes):
                sites=sites, wall_ns=2000, etapes_ns=dict(P=1, C=1, G=4, raccord=1, TMVR=4, T=1, M=1, V=1, R=1),
                c_ns=dict(parcours=1, feuilles=1, emission=1, fin_etage=1, transferts=0, publication=0),
                g_ns=dict(tables=1, resolution=1), hors_mur_ns=dict(validation=1, empreinte=1), pic_octets=9,
-               cpu_ns=3, rss_max_octets=9, appareil_octets=0, epinglee_octets=0, pic_appareil_octets=0)
+               cpu_ns=3, rss_max_octets=9, appareil_octets=0, epinglee_octets=0, pic_appareil_octets=0,
+               memoire_octets=dict(P=[1, 2], C=[3, 9], G=[4, 5], raccord=[4, 4], TMVR=[6, 7]))
     row['pass'] = i
     if digest:
         row['full_sha256'] = '0f' * 32
@@ -266,7 +273,7 @@ def main():
         print(error, file=sys.stderr)
     if errors:
         return 1
-    print('test_pilote_b_ok lecture=23 issues=7 verdicts=8 empreintes=3 etiquettes=12 pilote=2')
+    print('test_pilote_b_ok lecture=27 issues=7 verdicts=8 empreintes=3 etiquettes=12 pilote=2')
     return 0
 
 

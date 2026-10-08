@@ -5,7 +5,8 @@ Deux petits nuages deterministes ecrits au format u32le (coordonnees de 0 a 2^14
   1. une trame, trois passes, --digest : trois lignes "full" conformes (statut ok, K, fils, sites), une ligne
      "liberation" par passe, la ligne de sortie conforme ; empreinte FUL1 identique d'une passe a l'autre et EGALE a
      celle de mhgp12_tower_chain sur la meme entree (meme chaine, memes octets) ; etages du mur disjoints (somme au plus
-     le mur) ;
+     le mur) ; memoire par etage presente pour P, C, G, raccord et TMVR, usage au plus le pic, plus haut pic egal a
+     pic_octets ;
   2. deux trames en alternance, quatre passes : empreintes alternees (passe 0 = passe 2, passe 1 = passe 3), differentes
      d'une trame a l'autre.
 Usage : full_probe_check.py <mhgp12_full_probe> <mhgp12_tower_chain>. Codes : 0 conforme ; 1 ecart ; 2 usage.
@@ -20,6 +21,7 @@ import tempfile
 
 K = 3
 THREADS = 3
+MEM_STAGES = ('P', 'C', 'G', 'raccord', 'TMVR')
 
 
 def write_cloud(folder, name, count, seed):
@@ -65,6 +67,11 @@ def check_passes(rows, passes, errors, label):
     for i, r in enumerate(fulls):
         stages = r.get('etapes_ns', {})
         disjoint = sum(stages.get(key, 0) for key in ('P', 'C', 'G', 'raccord', 'TMVR'))
+        mem = r.get('memoire_octets')
+        if type(mem) is not dict or sorted(mem) != sorted(MEM_STAGES) or \
+                any(type(mem[k]) is not list or len(mem[k]) != 2 or mem[k][0] > mem[k][1] for k in MEM_STAGES) or \
+                max(mem[k][1] for k in MEM_STAGES) != r.get('pic_octets'):
+            errors.append('%s : passe %d, memoire par etage absente ou incoherente avec pic_octets' % (label, i))
         if r.get('pass') != i or r.get('status') != 'ok' or r.get('kmax') != K or r.get('threads') != THREADS or \
                 r.get('voie') != 'cpu' or disjoint > r.get('wall_ns', 0) or \
                 len(r.get('full_sha256', '')) != 64:

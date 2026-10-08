@@ -69,7 +69,9 @@ G_KEYS = ('tables', 'resolution')
 OUT_KEYS = ('validation', 'empreinte')
 FULL_KEYS = frozenset(('phase', 'pass', 'trame', 'voie', 'status', 'coord_bits', 'kmax', 'threads', 'sites',
                        'wall_ns', 'etapes_ns', 'c_ns', 'g_ns', 'hors_mur_ns', 'pic_octets', 'cpu_ns',
-                       'rss_max_octets', 'appareil_octets', 'epinglee_octets', 'pic_appareil_octets'))
+                       'rss_max_octets', 'appareil_octets', 'epinglee_octets', 'pic_appareil_octets',
+                       'memoire_octets'))
+MEM_STAGES = ('P', 'C', 'G', 'raccord', 'TMVR')  # memoire_octets : [usage a la fin de l'etage, pic de l'etage]
 INT_KEYS = ('pass', 'coord_bits', 'kmax', 'threads', 'sites', 'wall_ns', 'pic_octets', 'cpu_ns', 'rss_max_octets',
             'appareil_octets', 'epinglee_octets', 'pic_appareil_octets')
 OPEN_KEYS = frozenset(('phase', 'status', 'reason', 'wall_ns', 'budget_appareil'))
@@ -240,6 +242,11 @@ def check_full(row, i, case, sites, label):
     for block, keys in blocks:
         if type(block) is not dict or set(block) != set(keys) or any(not is_int(block[k]) for k in keys):
             return 'bloc de durees mal forme (passe %d)' % i
+    mem = row['memoire_octets']
+    if type(mem) is not dict or set(mem) != set(MEM_STAGES) or \
+            any(type(mem[k]) is not list or len(mem[k]) != 2 or not all(is_int(v) for v in mem[k]) or
+                mem[k][0] > mem[k][1] for k in MEM_STAGES) or max(mem[k][1] for k in MEM_STAGES) != row['pic_octets']:
+        return 'memoire par etage mal formee ou incoherente avec pic_octets (passe %d)' % i
     st, g = row['etapes_ns'], row['g_ns']
     if sum(st[k] for k in ('P', 'C', 'G', 'raccord', 'TMVR')) > row['wall_ns'] or \
             sum(st[k] for k in ('T', 'M', 'V', 'R')) > st['TMVR'] or g['tables'] + g['resolution'] > st['G']:
@@ -441,6 +448,17 @@ def tables(report):
             '%.1f' % (smi / 1024) if smi is not None else '—',
             '%.1f' % (warm['pic_octets'] / r['sites'] / 1e3) if warm else '—',
             ('`%s`' % warm['full_sha256'][:12]) if warm and 'full_sha256' in warm else '—'))
+    lines += ['', 'Memoire du budget de l\'hote par etage, passe chaude (Ko par site : en usage a la fin de '
+              'l\'etage / pic pendant l\'etage) :', '',
+              '| Scene | K | voie | ' + ' | '.join(MEM_STAGES) + ' |',
+              '| --- | ---: | --- |' + ' ---: |' * len(MEM_STAGES)]
+    for r in report['cas']:
+        warm, _kind = warm_pass(r['passes'])
+        if warm is None:
+            continue
+        mem = warm['memoire_octets']
+        lines.append('| `%s` | %d | %s | %s |' % (r['nom'], r['k'], r['voie'], ' | '.join(
+            '%.2f / %.2f' % (mem[k][0] / r['sites'] / 1e3, mem[k][1] / r['sites'] / 1e3) for k in MEM_STAGES)))
     lines += ['', 'Etages de la passe chaude (secondes) :', '',
               '| Scene | K | voie | P | C | dont transferts | G | T | M | V | R | validation | empreinte '
               '| liberation |',

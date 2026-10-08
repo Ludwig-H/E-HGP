@@ -14,7 +14,9 @@
 // et epinglee_octets sont la capacite des tableaux de l'appareil et de la memoire epinglee gardes par le contexte a la
 // fin du catalogue ; avec --budget-appareil=OCTETS, les tableaux de l'appareil sont comptes dans un budget propre de
 // cette limite (ligne "open" : budget_appareil "separe", et pic_appareil_octets est son pic pendant le mur), sinon
-// dans celui de la Session ("partage", pic_appareil_octets nul).
+// dans celui de la Session ("partage", pic_appareil_octets nul). Memoire par etage (memoire_octets) : pour P, C, G,
+// raccord et TMVR, les octets du budget de la Session en usage a la fin de l'etage et le pic pendant l'etage (entrees
+// residentes comprises) ; pic_octets est le maximum de ces pics.
 // La passe p joue la trame p mod n (--trame repete : Session qui enchaine des trames successives). Une ligne JSON par
 // passe ; la premiere est publiee comme les autres (aucun prechauffage cache).
 //
@@ -164,9 +166,13 @@ Outcome synthetic(const Options& o, MemoryBudget& budget, io::InputFiles& files)
 }
 
 // Durees d'une passe (nanosecondes) : etages du mur, sous-etapes publiees, hors du mur.
+inline constexpr int kMemStages = 5;  // P, C, G, raccord, TMVR
+inline constexpr std::array<const char*, kMemStages> kMemStageNames = {"P", "C", "G", "raccord", "TMVR"};
+
 struct PassTimes {
   u64 wall = 0, p = 0, c = 0, g = 0, junction = 0, tmvr = 0;
   u64 validation = 0, digest = 0, peak = 0, device_peak = 0;
+  std::array<std::array<u64, 2>, kMemStages> mem{};  // par etage : octets en usage a la fin, pic pendant l'etage
   std::optional<u64> cpu, rss;  // vides si getrusage echoue, ou si le temps CPU reculerait
 };
 
@@ -185,6 +191,8 @@ struct PassState {
 // Le mur : de l'entree en memoire a la tour complete (verticales et registre).
 Outcome run_wall(const Options& o, const Frame& f, MemoryBudget& budget, sched::Pool& pool, CatalogueDevice* device,
                  PassState& s, PassTimes& t) {
+  // Fin d'un etage : usage courant et pic de l'etage, puis le pic repart de l'usage courant (hors du chrono utile).
+  const auto mark = [&](int stage) { t.mem[stage] = {budget.used(), budget.restart_peak()}; };
   const auto t0 = Clock::now();
   auto cloud = prepare_cloud(f.input.x.span(), f.input.y.span(), f.input.z.span(), f.input.ids.span(), CoordWidth(),
                              budget);
@@ -193,6 +201,7 @@ Outcome run_wall(const Options& o, const Frame& f, MemoryBudget& budget, sched::
   if (!index.ok()) return index.outcome();
   s.index.emplace(std::move(index).take());
   t.p = since(t0);
+  mark(0);
   CatalogueParams params;
   params.kmax = o.kmax;
   params.leaf_size = o.leaf;
@@ -202,15 +211,18 @@ Outcome run_wall(const Options& o, const Frame& f, MemoryBudget& budget, sched::
   if (!catalogue.ok()) return catalogue.outcome();
   s.catalogue.emplace(std::move(catalogue).take());
   t.c = since(c0);
+  mark(1);
   c0 = Clock::now();
   auto resolution = resolve_tower(*s.index, *s.catalogue, budget, pool, &s.res_diag);
   if (!resolution.ok()) return resolution.outcome();
   s.resolution.emplace(std::move(resolution).take());
   t.g = since(c0);
+  mark(2);
   c0 = Clock::now();
   for (Order k = 1; k <= s.resolution->orders(); ++k) s.inputs.push_back(tower::forest_input(s.resolution->order(k)));
   const tower::BallSource balls = tower::catalogue_balls(*s.catalogue);
   t.junction = since(c0);
+  mark(3);
   c0 = Clock::now();
   tower::ForestParams forest_params;
   auto forests = tower::build_forests(s.index->cloud(), balls, s.inputs, forest_params, budget, pool, &s.ledger);
@@ -218,6 +230,7 @@ Outcome run_wall(const Options& o, const Frame& f, MemoryBudget& budget, sched::
   s.forests.emplace(std::move(forests).take());
   t.tmvr = since(c0);
   t.wall = since(t0);
+  mark(4);
   return {};
 }
 
@@ -260,9 +273,13 @@ void print_pass(const Options& o, u64 pass, const Frame& f, const PassState& s, 
               (unsigned long long)s.res_diag.tables_ns, (unsigned long long)s.res_diag.resolve_ns,
               (unsigned long long)t.validation, (unsigned long long)t.digest, (unsigned long long)t.peak);
   std::printf(",\"cpu_ns\":%s,\"rss_max_octets\":%s,\"appareil_octets\":%llu,\"epinglee_octets\":%llu,"
-              "\"pic_appareil_octets\":%llu",
+              "\"pic_appareil_octets\":%llu,\"memoire_octets\":{",
               json_u64(t.cpu).c_str(), json_u64(t.rss).c_str(), (unsigned long long)c.device_bytes,
               (unsigned long long)c.pinned_bytes, (unsigned long long)t.device_peak);
+  for (int i = 0; i < kMemStages; ++i)
+    std::printf("%s\"%s\":[%llu,%llu]", i == 0 ? "" : ",", kMemStageNames[i], (unsigned long long)t.mem[i][0],
+                (unsigned long long)t.mem[i][1]);
+  std::printf("}");
   if (o.digest) std::printf(",\"full_sha256\":\"%s\"", digest.c_str());
   std::printf("}\n");
   std::fflush(stdout);
@@ -282,7 +299,7 @@ Outcome passes(const Options& o, std::vector<Frame>& frames, MemoryBudget& budge
     const std::optional<u64> cpu1 = process_cpu_ns();
     if (cpu0 && cpu1 && *cpu1 >= *cpu0) t.cpu = *cpu1 - *cpu0;
     t.rss = process_rss_max_bytes();
-    t.peak = budget.peak();
+    for (const auto& m : t.mem) t.peak = std::max(t.peak, m[1]);  // pic du mur : le plus haut des pics d'etage
     if (device_budget != nullptr) t.device_peak = device_budget->peak();
     MHGP12_TRY(after_wall(o, budget, *s, t, digest));
     print_pass(o, pass, f, *s, t, digest);

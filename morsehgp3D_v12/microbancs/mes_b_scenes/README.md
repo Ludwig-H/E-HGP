@@ -47,7 +47,9 @@ Pour chaque cas, la sonde [`bench/full_probe.cpp`](../../bench/full_probe.cpp) m
 - le temps CPU du processus pendant le mur ;
 - le pic du budget de l'hôte et le pic de mémoire résidente ;
 - la mémoire de l'appareil gardée par le contexte, et le pic de son budget propre (`--budget-appareil`, nouveau : la
-  carte et l'hôte sont deux ressources, un manque de l'une rend `memory_budget` sans faux refus de l'autre).
+  carte et l'hôte sont deux ressources, un manque de l'une rend `memory_budget` sans faux refus de l'autre) ;
+- la mémoire du budget de l'hôte par étage (`memoire_octets`) : pour P, C, G, raccord et TMVR, l'usage à la fin de
+  l'étage et le pic pendant l'étage ; le plus haut de ces pics est `pic_octets`, ce que le lecteur vérifie.
 
 Le pilote échantillonne aussi `memory.used` de nvidia-smi toutes les 250 ms pendant le cas ; l'échantillon peut manquer
 un pic bref. Capacité gardée, pic des réservations, RSS et `memory.used` sont quatre mesures différentes.
@@ -93,12 +95,12 @@ python3 pilote_b.py --essai --sonde <mhgp12_full_probe> ...   # essai local, voi
 Sorties : `rapport_b.json`, `tableaux_b.md`, `brut/` (sorties de chaque cas), `construction.log`.
 
 **Porte** : [`test_pilote_b.py`](test_pilote_b.py) (Python 3.10 nu, aussi sous `-O`) : lecture stricte (une sortie
-conforme admise ; dix-sept mutations du schéma et les cinq corruptions de la
+conforme admise ; vingt et une mutations du schéma, dont quatre de la mémoire par étage, et les cinq corruptions de la
 [contrelecture de l'auditeur](../../receipts/audit_reponses_20261008/mes_b_prelecture/README.md) refusées), refus et
 échecs publiés comme résultats, verdicts B1 à B4 aux seuils, empreintes entre passes et entre voies, étiquettes
 uniques, pilote complet sur une sonde simulée (délai et seuil d'empreinte) ;
-[`mutants_pilote_b.py`](mutants_pilote_b.py) : vingt mutants du pilote, tous tués (un mutant équivalent écarté, dit
-dans le fichier).
+[`mutants_pilote_b.py`](mutants_pilote_b.py) : vingt-deux mutants du pilote, tous tués (un mutant équivalent écarté,
+dit dans le fichier).
 
 ## Premier essai local (8 octobre, indicatif)
 
@@ -107,3 +109,8 @@ Le codespace (6 fils, voie CPU) traite Lyon sans sol découpé à 1 000 141 site
 
 Une trame Boreas entière sans sol (146 316 sites) prend 22,6 s à chaud, dont C 19,5 s : 154 µs par site, plus cher
 par site que l'aérien. La trame avec sol (215 665 sites) prend 25,9 s à froid. Les temps de G4 font foi.
+
+Mémoire par étage sur cette trame (voie CPU, Ko par site, usage à la fin de l'étage / pic pendant l'étage) : à K5,
+P 0,06 / 0,06, C 3,15 / **11,29**, G 5,17 / 5,89, TMVR 7,47 / 7,89 ; à K10, C 14,5 / **48,2**, puis 33 Ko par site à la
+fin. Le pic de toute la passe est celui de la construction du catalogue, 3,3 à 3,6 fois sa taille finale : c'est le
+premier levier pour faire tenir les captations de plusieurs dizaines de millions de sites.
