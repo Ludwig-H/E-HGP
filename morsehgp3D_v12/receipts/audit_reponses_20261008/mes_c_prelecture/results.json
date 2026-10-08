@@ -1,0 +1,53 @@
+{
+  "cases": {
+    "cas_absent": {
+      "avant": "tenu",
+      "propose": "non evalue"
+    },
+    "complete": {
+      "avant": "tenu",
+      "propose": "tenu"
+    },
+    "cpu_seul": {
+      "avant": "tenu",
+      "propose": "non evalue"
+    },
+    "doublon": {
+      "avant": "tenu",
+      "propose": "non evalue"
+    },
+    "expiration": {
+      "avant": "non tenu",
+      "propose": "non tenu"
+    },
+    "k10_informatif": {
+      "avant": "tenu",
+      "propose": "tenu"
+    },
+    "mauvais_fils": {
+      "avant": "tenu",
+      "propose": "non evalue"
+    },
+    "permutation": {
+      "avant": "tenu",
+      "propose": "tenu"
+    },
+    "refus_reel": {
+      "avant": "non tenu",
+      "propose": "non tenu"
+    },
+    "tous_non_joues": {
+      "avant": "non evalue",
+      "propose": "non evalue"
+    },
+    "un_non_joue": {
+      "avant": "tenu",
+      "propose": "non evalue"
+    },
+    "vide": {
+      "avant": "non evalue",
+      "propose": "non evalue"
+    }
+  },
+  "native_execution": false
+}

@@ -1,0 +1,48 @@
+--- a/morsehgp3D_v12/microbancs/mes_c_petits/pilote_c.py
++++ b/morsehgp3D_v12/microbancs/mes_c_petits/pilote_c.py
+@@ -130,7 +130,7 @@
+     return out
+ 
+ 
+-def verdicts(configs, hard):
++def verdicts(configs, hard, hard_names):
+     out = {}
+     ref = configs.get('cpu:5:48')
+     line = ref and ref.get('droites', {}).get('reel')
+@@ -139,10 +139,17 @@
+     out['C2'] = dict(etat='non evalue' if not line else 'tenu' if line['par_site_ns'] <= MAIN_REGIME_NS_PER_SITE
+                      else 'non tenu', detail='%.3f us par site (limite %.3f)' % (
+                          line['par_site_ns'] / 1e3, MAIN_REGIME_NS_PER_SITE / 1e3) if line else '')
+-    k5 = [h for h in hard if h['k'] == 5 and h['etat'] != 'non_joue']
++    # C3 porte sur tous les nuages difficiles, les deux voies, K5 et 48 fils.
++    # Un sous-ensemble joue ne remplace jamais cette cohorte.
++    k5 = [h for h in hard if h['k'] == 5]
++    wanted = {(name, voie) for name in hard_names for voie in ('cpu', 'appareil')}
++    keys = [(h['nom'], h['voie']) for h in k5]
++    complete = bool(wanted) and len(keys) == len(wanted) and set(keys) == wanted and all(
++        h['fils'] == 48 and h['etat'] != 'non_joue' for h in k5)
+     bad = ['%s %s : %s (%s)' % (h['nom'], h['voie'], h['etat'], h['raison']) for h in k5 if h['etat'] != 'ok']
+-    out['C3'] = dict(etat='non evalue' if not k5 else 'non tenu' if bad else 'tenu',
+-                     detail=bad or ['%d nuages difficiles a K5 calcules' % len(k5)])
++    out['C3'] = dict(etat='non evalue' if not complete else 'non tenu' if bad else 'tenu',
++                     detail=['cohorte C3 incomplete ou hors configuration'] if not complete else
++                     bad or ['%d executions difficiles a K5 calculees' % len(k5)])
+     return out
+ 
+ 
+@@ -261,13 +268,13 @@
+         for when in ('avant', 'apres'):
+             if not bf.environment_ok(report['environnement'][when]):
+                 controls.append('environnement %s incomplet ou GPU occupe' % when)
+-    report.update(configurations=configs, difficiles=hard, criteres=verdicts(configs, hard),
++    report.update(configurations=configs, difficiles=hard, criteres=verdicts(configs, hard, [c['nom'] for c in hard_clouds]),
+                   parametres=dict(argv=argv[1:], tours=args.tours, budget_octets=budget),
+                   duree_s=round(time.monotonic() - t_start, 1))
+     crit = report['criteres']
+     if args.essai:
+         report['verdict'] = 'essai'
+-    elif controls:
++    elif controls or any(crit[c]['etat'] == 'non evalue' for c in ('C1', 'C2', 'C3')):
+         report['verdict'] = 'refuse'
+     elif all(crit[c]['etat'] == 'tenu' for c in ('C1', 'C2', 'C3')):
+         report['verdict'] = 'tenu'

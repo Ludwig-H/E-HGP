@@ -1,0 +1,201 @@
+{
+  "captured_utc": "2026-10-08T05:57:54.710244+00:00",
+  "kind": "unpublished_constructor_worktree",
+  "base_commit": "902041f66",
+  "main_observed": "302dc9fe6",
+  "files": {
+    "ctest_cpu.log": {
+      "source": "b902.ctest.log",
+      "bytes": 119523,
+      "sha256": "1339e344741bde7b48d1e7c55acfa8a230981376ccd7ec4b80e3fb781906481d"
+    },
+    "ctest_cuda21.log": {
+      "source": "bcu902_21.ctest.log",
+      "bytes": 8594,
+      "sha256": "cf14d9071414fb282257f5abbf38e443610a81cac4d01d714ac3d93dfa56f127"
+    },
+    "ctest_cuda24.log": {
+      "source": "bcu902_24.ctest.log",
+      "bytes": 8594,
+      "sha256": "97c996acbd9c55d8f85e134117a924b386f535aa436bb535cc3abc8cd517d6df"
+    },
+    "ful1.log": {
+      "source": "essais/ful1_902.log",
+      "bytes": 1617,
+      "sha256": "51245dd20b82dc3f4f6c8030ac2a57a27fc8f354f21dfb2aa6bfefe7fa76c6cb"
+    },
+    "ful1.sh": {
+      "source": "essais/ful1_902.sh",
+      "bytes": 856,
+      "sha256": "4e52d882efaad1e1dfc1f8c790d8959f4214856ac7a7897520c92e6e57a880c6"
+    },
+    "report.md": {
+      "source": "RAPPORT.md",
+      "bytes": 22619,
+      "sha256": "9e0d6067c0754f2816288cd6e4b43a31c77abafa83868c5db3d38083a4479a05"
+    },
+    "reader.py": {
+      "source": "repo902/morsehgp3D_v12/bench/g4_catalogue_flux_lecteur.py",
+      "bytes": 16432,
+      "sha256": "dae75c321217b7fac765150b88ab68560f802c9c9d6947ec57b88f7c0edeb261"
+    },
+    "judge.py": {
+      "source": "repo902/morsehgp3D_v12/bench/g4_catalogue_flux_judge.py",
+      "bytes": 21470,
+      "sha256": "970482edf04d79039c63372a1306e34a31be1139e1dc5426d24e0ae4deccd782"
+    },
+    "selftest.py": {
+      "source": "repo902/morsehgp3D_v12/bench/g4_catalogue_flux_selftest.py",
+      "bytes": 16345,
+      "sha256": "a858041831dba64b64576f17bbd54f2877b5d40d3ab8bfe1e58386431864325c"
+    },
+    "old_reader.py": {
+      "source": "previous_audit/g4_catalogue_flux_lecteur.py",
+      "bytes": 15549,
+      "sha256": "0b68756f0be74e11201737ff6aa4e6b6750454cca35dabb68b4f3f2a049e8cb1"
+    },
+    "release.patch": {
+      "source": "livraison/t2d_c_option_rendu_avant_croissance.patch",
+      "bytes": 2219,
+      "sha256": "c436572d4ecbc2a5181e3bdbe6f35f19c6af4eb7216b0d767fae5b2686b25c5c"
+    },
+    "device_cuda.cu": {
+      "source": "repo902_rendu/morsehgp3D_v12/src/catalogue/device_cuda.cu",
+      "bytes": 15684,
+      "sha256": "8c6b78207058df49f3fabc6bdda8464de7b693be3946e7bc8d13be9f9b8eaaf0"
+    },
+    "device_pipeline.hpp": {
+      "source": "repo902_rendu/morsehgp3D_v12/src/catalogue/device_pipeline.hpp",
+      "bytes": 13704,
+      "sha256": "439c9397c3bb2da2328ddd5969cb130f21c48247fd9a864c09233822020802af"
+    },
+    "device_driver.hpp": {
+      "source": "repo902_rendu/morsehgp3D_v12/src/catalogue/device_driver.hpp",
+      "bytes": 6905,
+      "sha256": "e87f947fd85d9e76447254faf67548a5861502d47b892e79c74749f15c83199d"
+    },
+    "traversal_driver.hpp": {
+      "source": "repo902_rendu/morsehgp3D_v12/src/catalogue/traversal_driver.hpp",
+      "bytes": 8624,
+      "sha256": "971c47dfe40394398d1dc42fb5c14b47031940b9db031be4dc500daa46f5eae9"
+    },
+    "finish_driver.hpp": {
+      "source": "repo902_rendu/morsehgp3D_v12/src/catalogue/finish_driver.hpp",
+      "bytes": 12802,
+      "sha256": "3a46be936021a1dab50d5d13526571b84f2bebb29be511ee4e97cd10a645d2ed"
+    },
+    "leaf_common.hpp": {
+      "source": "repo902_rendu/morsehgp3D_v12/src/catalogue/leaf_common.hpp",
+      "bytes": 10996,
+      "sha256": "a52cca4a03d663e452422e82fcf6395e4733857877e0818921256b7bf7dfe860",
+      "equal_git_902041f66": true
+    },
+    "leaf_j3.hpp": {
+      "source": "repo902_rendu/morsehgp3D_v12/src/catalogue/leaf_j3.hpp",
+      "bytes": 11817,
+      "sha256": "8329fc3fb251ad739ddfacd0174711a64dd22b6a9adf2d9798020f939fe54922",
+      "equal_git_902041f66": true
+    },
+    "simt.hpp": {
+      "source": "repo902_rendu/morsehgp3D_v12/src/catalogue/simt.hpp",
+      "bytes": 13544,
+      "sha256": "acda01afa5e114234be2e22b17815d5b7fe32c5fe5a0ae184675ea6ef5f57122",
+      "equal_git_902041f66": true
+    },
+    "base_cuda.cu": {
+      "source": "repo902/morsehgp3D_v12/src/catalogue/device_cuda.cu",
+      "bytes": 14639,
+      "sha256": "4704ae7f3082c9efdbf50e524e5ba7e7a6079e3d003cd7c8fd3b8001bbc93c86"
+    }
+  },
+  "static_line_refs": {
+    "reader.py": [
+      [
+        221,
+        246
+      ],
+      [
+        250,
+        278
+      ],
+      [
+        130,
+        157
+      ],
+      [
+        202,
+        218
+      ]
+    ],
+    "judge.py": [
+      [
+        172,
+        192
+      ]
+    ],
+    "device_cuda.cu": [
+      [
+        64,
+        77
+      ],
+      [
+        107,
+        150
+      ],
+      [
+        292,
+        296
+      ],
+      [
+        327,
+        344
+      ]
+    ],
+    "device_pipeline.hpp": [
+      [
+        138,
+        146
+      ],
+      [
+        224,
+        236
+      ],
+      [
+        251,
+        262
+      ]
+    ],
+    "device_driver.hpp": [
+      [
+        9,
+        12
+      ],
+      [
+        26,
+        38
+      ]
+    ],
+    "traversal_driver.hpp": [
+      [
+        143,
+        159
+      ]
+    ],
+    "finish_driver.hpp": [
+      [
+        27,
+        28
+      ],
+      [
+        54,
+        77
+      ]
+    ],
+    "ful1.sh": [
+      [
+        1,
+        16
+      ]
+    ]
+  }
+}

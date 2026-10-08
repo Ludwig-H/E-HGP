@@ -1,0 +1,36 @@
+{
+  "source_sha256": "66ef2d8b2a3c0a47ea0bc32e1864b62e5c2e58dfb5924c449e1c042d69fb2841",
+  "postimage_sha256": "6a8870c678452cb13f23d457c20f8b4f3772ec1f35351461f60e4b0d32b7f9a3",
+  "native_execution": false,
+  "global_selector_cases": [
+    {
+      "case": "complete",
+      "verdict": "tenu"
+    },
+    {
+      "case": "C3_non_evalue",
+      "verdict": "refuse"
+    },
+    {
+      "case": "C1_non_evalue",
+      "verdict": "refuse"
+    },
+    {
+      "case": "C2_non_evalue",
+      "verdict": "refuse"
+    },
+    {
+      "case": "refus_observe",
+      "verdict": "non tenu"
+    },
+    {
+      "case": "controle",
+      "verdict": "refuse"
+    },
+    {
+      "case": "essai",
+      "verdict": "essai"
+    }
+  ],
+  "scope": "AST only; main() not executed; cohort manifest validity remains outside this patch"
+}

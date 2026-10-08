@@ -1,0 +1,81 @@
+{
+  "observed_utc": "2026-10-08T05:59:54.356613+00:00",
+  "base": "302dc9fe675816b02c24507aa9a1e1915dfa5dae",
+  "scope": "documentation only; Git/JSON arithmetic; no native/build/GCP/payload",
+  "result": {
+    "agrees_with_admission_columns": [
+      "session_l1_admission",
+      "session_l1r_admission"
+    ],
+    "commit": "302dc9fe675816b02c24507aa9a1e1915dfa5dae",
+    "device_budget_bytes": 94489280512,
+    "engine_sources_equal": true,
+    "host_budget_bytes": 171798691840,
+    "last_wall_ratio_L1_over_L1R_percent": [
+      0.07224504476976978,
+      3.4759532315737696
+    ],
+    "pins": {
+      "README.md": "586e0948cff137b225aa5d7153f54df6bbd7dce86a63cfa81db37e9fb7081f4a",
+      "resultats/cmd/000_archive_l1/files/l1_archive/extrait/results/cmd/000_mes_b/files/b/rapport_b.json": "98beeef76f8d72dfe27e2d9c7a3be09ed93548b1583ddbe4ae45e30bd9f795b9",
+      "resultats/cmd/001_mes_b/files/b/rapport_b.json": "8c9439c3ff1ccd6bcbc732cd9044cc05a1c96cd81e1f9c8707b4391990965623",
+      "resultats/cmd/001_mes_b/time.txt": "b09dc89bf452f2ab6d42d827c1e209792b72bddbfb79e8c34a0303f256e8bf97",
+      "session_l1_admission/mesures.json": "fdd68c14b4be1718711a02915ea803c1848702954ab4c964127f0a3d4944e9f9",
+      "session_l1r_admission/mesures.json": "075f847656455bea410db23069ace6a61999acccea41a82a4839945e5d8f2acb"
+    },
+    "refusal_budget_side": "not_present_in_raw_output",
+    "rss_GiB": 59.54496383666992,
+    "rss_bytes": 63935918080,
+    "rss_decimal_GB": 63.93591808,
+    "sessions": [
+      {
+        "criteria": {
+          "B1": "non tenu",
+          "B2": "non tenu",
+          "B3": "non evalue",
+          "B4": "non tenu"
+        },
+        "full_passes": 18,
+        "processes": 18,
+        "refusals": 8,
+        "scenes": 15,
+        "successful_processes": 10,
+        "warm_passes": 8
+      },
+      {
+        "criteria": {
+          "B1": "non tenu",
+          "B2": "non tenu",
+          "B3": "non evalue",
+          "B4": "non tenu"
+        },
+        "full_passes": 18,
+        "processes": 18,
+        "refusals": 8,
+        "scenes": 15,
+        "successful_processes": 10,
+        "warm_passes": 8
+      }
+    ],
+    "tmvr_residuals": {
+      "max_ns": 742443591,
+      "min_ns": 13417278,
+      "scion_sans_sol_ns": 726354479
+    }
+  },
+  "patch": {
+    "sha256": "58bdfc0bfef41f4c9ed725fb190686a013ef33c6f65538f790626c496f30e38c",
+    "check_code": 0,
+    "apply_code": 0,
+    "files": {
+      "morsehgp3D_v12/receipts/g4_mesb1r_20261008/README.md": {
+        "before": "586e0948cff137b225aa5d7153f54df6bbd7dce86a63cfa81db37e9fb7081f4a",
+        "after": "cc237a52cd2eb88adab5c8379015c9468996829f85eeff39ad68a0a770181fbf"
+      },
+      "morsehgp3D_v12/docs/PLAN.md": {
+        "before": "1673f85e76d386fcd36843df93a8171b2a760a54ea3c65895a4c9a94638d3566",
+        "after": "45d4d7ee8cef1357249b0612b700e2d59572167cb9e887003855951d9f653558"
+      }
+    }
+  }
+}

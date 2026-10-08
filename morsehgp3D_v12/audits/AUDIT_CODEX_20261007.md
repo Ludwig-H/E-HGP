@@ -6,7 +6,7 @@ Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalo
 
 **SemanticKITTI : session K ; contrat de 100 ms non tenu.**
 [Contre-lecture FULL](../receipts/audit_reponses_20261008/session_k_full/README.md), u21/W48,
-trames ng00–02 de 39 885 / 35 551 / 45 845 sites :
+ng00–02 : 39 885 / 35 551 / 45 845 sites :
 
 | Médiane chaude FULL, ms | ng00 | ng01 | ng02 |
 | --- | ---: | ---: | ---: |
@@ -18,9 +18,8 @@ trames ng00–02 de 39 885 / 35 551 / 45 845 sites :
 610 passes admises au total, empreintes concordantes. Mur Cloud/index→T/M/V/R ; lecture, masque, validation, FUL1 et libération exclus. [Provenance et arrêt](../receipts/audit_reponses_20261008/session_k_provenance/README.md),
 [342 sources identiques à `c9ac60f20`](../receipts/audit_reponses_20261008/session_k_sources/README.md) ;
 ni hash binaire/journal de compilation rapatrié, ni CPU·s, ni CPU K10.
-Face à la v11 : GPU plus rapide, CPU plus lent, comparaison historique non appariée.
-Catalogue CPU 274–329 ms ; sur GPU G 44–57 ms, T 26–38 ms, R 12–15 ms.
-Retirer R seul laisse 116–148 ms médians, sous hypothèse d'aval inchangé.
+Face à la v11 : GPU plus rapide, CPU plus lent (historique non apparié).
+R seul retiré laisse 116–148 ms médians si le reste reste inchangé.
 
 **Nouveaux LiDAR massifs : L1r contre-validée**, u21/W48, FULL K5, une seule passe chaude par cas.
 [L1 originale](../receipts/audit_reponses_20261008/session_l1_admission/README.md),
@@ -38,7 +37,8 @@ Retirer R seul laisse 116–148 ms médians, sous hypothèse d'aval inchangé.
 Boreas n10 sans sol **CPU 22,344 s**, FUL1 identique au GPU. Chaque série : 10 succès/8 refus mémoire,
 18 passes complètes sur 30, dont huit chaudes. Deux K10 refusés ; B1/B2/B4 non tenus, B3 non évalué.
 Six refus K5 ; succès à 6,71 M et refus à 5,20 M : aucun plafond universel en sites. Aucun gain causal déduit entre L1 et L1r. Sur les succès GPU, pic hôte à TMVR ;
-Boreas n10 : C/G/TMVR=1,742/2,947/5,261 s. Catalogue seul ne suffit pas à l'objectif massif.
+Boreas n10 : C/G/TMVR=1,742/2,947/5,261 s. Catalogue seul insuffisant. [Errata proposés](../receipts/audit_reponses_20261008/l1r_documentation/README.md) : huit refus,
+RSS en Gio, enveloppes temporelles ; poste mémoire des refus et loi de croissance non établis.
 
 **Aide au développeur et vérifications restantes.**
 
@@ -61,13 +61,17 @@ Boreas n10 : C/G/TMVR=1,742/2,947/5,261 s. Catalogue seul ne suffit pas à l'obj
   [Pilote B](../receipts/audit_reponses_20261008/t2d_b_admission/README.md) : G seul décisif, mur incohérent admis ;
   littéral FULL `device` à corriger. Retirer l’inversion alternée équilibrerait la parité des positions des huit bras
   sur dix tours ; A/A informatif sans veto, protocole à fixer avant campagne. Aucun gain G4 qualifié.
-- **C, catalogue GPU** : [admission réécrite](../receipts/audit_reponses_20261008/t2d_c_admission_reprise/README.md),
-  39 cas passent ; mutant code3 avec cause/configuration incompatible encore admis.
-  [Budgets/identité locale](../receipts/audit_reponses_20261008/t2d_c_budgets/README.md) : neuf paires concordent ;
-  pics du modèle ≠ allocations CUDA, reprise GPU après refus à couvrir. Aucun gain CUDA acquis.
+- **C, catalogue GPU** : [suivi local](../receipts/audit_reponses_20261008/t2d_c_suivi/README.md) : 705 portes + une sautée,
+  modules CUDA u21/u24 56/56 sans GPU, neuf paires FUL1 CPU. Lecteur : huit incohérences nouvellement refusées ;
+  code3/configuration et cohorte encore permissifs. Variante de libération avant croissance : propriétaire cohérent
+  sous libération réussie, capacités après refus différentes ; reprise sur le même contexte GPU à qualifier.
 - **Lecteur FULL commun livré** : [a2 contre-jugé](../receipts/audit_reponses_20261008/lecteur_full_commun/README.md),
   trois portes normal/−O et 28 mutants passent. Cohérence mémoire, type du code et couples statut/raison
   restent à renforcer ; patch partiel fourni. L1/L1r ont leurs contre-lecteurs épinglés indépendants.
+- **MES-C petits** : [cohorte incomplète déclarée tenue](../receipts/audit_reponses_20261008/mes_c_prelecture/README.md),
+  correctif proposé avant campagne ; douze scénarios synthétiques.
+- **T/K1** : [réutiliser les rangs déjà calculés par C](../receipts/audit_reponses_20261008/t_naissances_reutilisees/README.md)
+  évite un tri XYZ ; preuve et modèle, export possédé de 4N octets à compter. Mesurer `births_ns` avant raccord.
 - **R** : [raccourci proposé](../receipts/audit_reponses_20261008/registre_classe_unique_patch/README.md),
   non compilé, différé par le développeur après A ; comparer aussi les CSR absents de FUL1.
 

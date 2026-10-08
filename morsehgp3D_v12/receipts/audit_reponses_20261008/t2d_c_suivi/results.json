@@ -1,0 +1,109 @@
+{
+  "ctest": {
+    "cpu_u21": {
+      "budget_gates": [
+        "mhgp12_catalogue_device_unit_stream_staging",
+        "mhgp12_catalogue_device_unit_finish_budget",
+        "mhgp12_catalogue_device_unit_pipeline_budget_reuse",
+        "mhgp12_catalogue_device_unit_device_open_budget",
+        "mhgp12_catalogue_device_unit_pipeline_budget"
+      ],
+      "passed": 705,
+      "selected": 706,
+      "skipped": [
+        "mhgp12_support_lidar_sentinel"
+      ]
+    },
+    "cuda_build_u21": {
+      "budget_gates": [
+        "mhgp12_catalogue_device_unit_stream_staging",
+        "mhgp12_catalogue_device_unit_finish_budget",
+        "mhgp12_catalogue_device_unit_pipeline_budget_reuse",
+        "mhgp12_catalogue_device_unit_device_open_budget",
+        "mhgp12_catalogue_device_unit_pipeline_budget"
+      ],
+      "passed": 56,
+      "selected": 56,
+      "skipped": []
+    },
+    "cuda_build_u24": {
+      "budget_gates": [
+        "mhgp12_catalogue_device_unit_stream_staging",
+        "mhgp12_catalogue_device_unit_finish_budget",
+        "mhgp12_catalogue_device_unit_pipeline_budget_reuse",
+        "mhgp12_catalogue_device_unit_device_open_budget",
+        "mhgp12_catalogue_device_unit_pipeline_budget"
+      ],
+      "passed": 56,
+      "selected": 56,
+      "skipped": []
+    }
+  },
+  "ful1_cpu": {
+    "hashes": {
+      "ng00:K10": "e9e5f0bdb3e192c0b9f040576b0871ceb099457d43bdacc95ea5395ab23a6398",
+      "ng00:K5": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+      "ng01:K10": "f07ebf5b7aee58430bc693e41b5cf5fab6d05264e447740c9d5dcf388d578a78",
+      "ng01:K5": "2d58a72a623ab293a05f30c215cd65fcb455419a0a118f6d301bb17600645e26",
+      "ng02:K10": "8c9e3c5945e79694727f42ff629848d138d967a5237986e927fffdc53a166c1c",
+      "ng02:K5": "27d7650add157cdd582d55f50305f0b8f9319865c8ffd0737cf12b76ac2197f0",
+      "u16000:K5": "141bc7d6523154cff1dd22b288e4155259e3d97a82877205887642bad8286889",
+      "u32000:K5": "a7563907a5c9f1b273776b811d8a559eb80713eb161460edd948664f5433811b",
+      "u8000:K5": "f87dbb19dd928311fcb65d5a98d30b4fb50eddf7de1d26708bbc278f46dcc7cf"
+    },
+    "pairs": 9,
+    "processes_code0": 18
+  },
+  "ownership_model": {
+    "cases": 192,
+    "retry_example_u32": {
+      "budget_bytes": 6000,
+      "capacity_after_refusal": 0,
+      "first_result": "memory_budget",
+      "first_target": 2560,
+      "n": 1025,
+      "old_cap": 1024,
+      "retry_capacity": 1025,
+      "retry_result": "ok"
+    }
+  },
+  "patch_matches_variant": true,
+  "reader_delta": {
+    "g_over_envelope": {
+      "after": "refused",
+      "before": "accepted"
+    },
+    "nominal": {
+      "after": "accepted",
+      "before": "accepted"
+    },
+    "peak_mismatch": {
+      "after": "refused",
+      "before": "accepted"
+    },
+    "sites_zero": {
+      "after": "refused",
+      "before": "accepted"
+    },
+    "stages_over_wall": {
+      "after": "refused",
+      "before": "accepted"
+    },
+    "tmvr_over_envelope": {
+      "after": "refused",
+      "before": "accepted"
+    },
+    "used_over_peak": {
+      "after": "refused",
+      "before": "accepted"
+    },
+    "wall_zero": {
+      "after": "refused",
+      "before": "accepted"
+    },
+    "wrong_sites": {
+      "after": "refused",
+      "before": "accepted"
+    }
+  }
+}

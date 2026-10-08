@@ -1,0 +1,23 @@
+{
+  "observed_utc": "2026-10-08T06:03:52.460942+00:00",
+  "source_pin": "ea62cd6918a3c3a403f7ff7fc45e85ff47c24386",
+  "sources": {
+    "morsehgp3D_v12/src/tower/forest_births.cpp": "bde6fd96337017565a70de1e660c0353df63cd719540bd0e60a281c3e5f617ae",
+    "morsehgp3D_v12/src/tower/stage.cpp": "35295ecedaf485eb414b8621e0c78f6264882aa3a86299d4ba287c3db068f009",
+    "morsehgp3D_v12/src/tower/forest.hpp": "1f21cdeb598da5492bfa0708551a2bb319685c7d74d197b1d764512ebe6478fb",
+    "morsehgp3D_v12/src/catalogue/finish_driver.hpp": "4d15554c30d8db4332fafc3d62c4a90996e421e579326960c681693db149e59f",
+    "morsehgp3D_v12/src/catalogue/finish_kernels.hpp": "96b1afe896fcbd65afce3cc119a3db4d9149c059e5e8251f53605c2f3f059426",
+    "morsehgp3D_v12/src/catalogue/exec_host.hpp": "93985cfe09c271d8e709b019ca9e2c8c1a3208c35961a78f26718cb9c2e6d1c4",
+    "morsehgp3D_v12/src/catalogue/device_cuda.cu": "c80d349f29a645b842e5300c21f3c60aabd8dbcbceec19ac0beef21c6721c08a",
+    "morsehgp3D_v12/src/catalogue/assemble.cpp": "7c00cc574fc194cfa49dd23942cfa657b91e69163d71ff1a574ef350a7a3e4cd"
+  },
+  "prototype_observation_sha256": {
+    "v12_t2d_A/RAPPORT.md": "b9a4102c4c93039cf27de306d2df69437660affe856d754ca42a884412c11938",
+    "v12_t2d_A/w902/morsehgp3D_v12/src/tower/forest_births.cpp": "bde6fd96337017565a70de1e660c0353df63cd719540bd0e60a281c3e5f617ae",
+    "v12_t2d_C/RAPPORT.md": "58c637a3cc322a68ddd58badd461b3d8cead91b78941693e29df999762e3a648",
+    "v12_t2d_C/repo/morsehgp3D_v12/src/catalogue/finish_driver.hpp": "3a46be936021a1dab50d5d13526571b84f2bebb29be511ee4e97cd10a645d2ed"
+  },
+  "L1r_mesures_sha256": "075f847656455bea410db23069ace6a61999acccea41a82a4839945e5d8f2acb",
+  "native_execution": false,
+  "product_modified": false
+}
