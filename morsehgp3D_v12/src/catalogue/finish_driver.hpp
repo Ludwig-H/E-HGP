@@ -3,18 +3,21 @@
 //   2. par boule : niveau exact (mots), cle F3, cle des positions de S* ;
 //   3. tri par base stable par positions, puis par cle F3 : ordre (cle F3, positions) ;
 //   4. chaque paire de voisins non certainement ordonnee par F4 est comparee en exact (ChainKernel) ; une chaine de
-//      voisins incertains mal ordonnee est retriee en exact sur l'hote (repli, compte), puis tout est reverifie ;
+//      voisins incertains mal ordonnee est retriee en exact sur l'hote (repli compte, finish_repair.hpp), puis tout est
+//      reverifie ;
 //   5. rangs denses (somme prefixe des debuts de niveau), CSR des populations I puis U (somme prefixe des longueurs),
 //      boules canoniques, niveau du premier element de chaque rang ;
-//   6. table S* -> boule : tri par base des (S*[0], S*[1], S*[2], S*[3]) et dichotomie des debuts de ligne.
-// Sorties rendues dans des Buffer hote de taille exacte (take). Refus : catalogue_invariant (enregistrement ou support
-// invalide, niveau nul, doublon, comptes incoherents), index_overflow_u32, memory_budget ; rien n'est publie.
+//   6. table S* -> boule : tri par base des (S*[0], S*[1], S*[2], S*[3]) et dichotomie des debuts de ligne ;
+//   7. sorties en flux (finish_outputs.hpp) vers des Buffer hote de taille exacte : reserves a l'avance par la voie
+//      appareil (sorties anticipees, niveaux compris des que leur nombre est connu), sinon ici ; un tableau de la
+//      voie CPU de taille exacte est adopte sans copie ; niveaux materialises en num::Level au fil du flux.
+// Refus : catalogue_invariant (enregistrement ou support invalide, niveau nul, doublon, comptes incoherents, sortie
+// anticipee d'une autre taille), index_overflow_u32, memory_budget ; rien n'est publie.
 #pragma once
 
-#include <algorithm>
-
 #include "catalogue/finish_kernels.hpp"
-#include "catalogue/transfer_meter.hpp"
+#include "catalogue/finish_outputs.hpp"
+#include "catalogue/finish_repair.hpp"
 
 namespace mhgp12::catalogue_detail::fin {
 
@@ -45,16 +48,6 @@ struct FinishInput {
 struct FinishStats {
   u64 chains_repaired = 0, chain_elements = 0;
   u64 keys_ns = 0, sort_ns = 0, check_ns = 0, emit_ns = 0, table_ns = 0, take_ns = 0;
-};
-
-// Sorties hote : boules canoniques, CSR des populations, niveaux des rangs 1..L-1 (cases 0..L-2), table S* -> boule.
-struct FinishOutput {
-  Buffer<CatalogueBall> balls;
-  Buffer<u64> offsets;
-  Buffer<SiteIdx> values;
-  Buffer<LevelWords> levels;
-  Buffer<u64> table_offsets;
-  Buffer<BallIdx> table_values;
 };
 
 template <class B>
@@ -116,105 +109,6 @@ Result<int> finish_order(B& b, FinishArrays<B>& a, const FinishInput& in, Finish
   return ck.value();
 }
 
-// Chaine de voisins incertains [s, e) autour de la paire (i - 1, i) : bornee par des paires certaines (F4).
-inline void chain_around(const u64* keys, u64 n, u64 i, u64& s, u64& e) noexcept {
-  s = i - 1;
-  while (s > 0 && key_order(keys[s - 1], keys[s]) == 0) --s;
-  e = i + 1;
-  while (e < n && key_order(keys[e - 1], keys[e]) == 0) ++e;
-}
-
-// Chaines mal ordonnees du repli exact : bornes [s, e) et elements (boule et cle F3 d'origine), dans l'ordre.
-struct Chains {
-  Buffer<u64> bounds;   // 2 par chaine
-  Buffer<u32> balls;    // elements, chaine apres chaine
-  Buffer<u64> keys;
-  u64 count = 0, elements = 0;
-};
-
-// Chaines autour des paires mal ordonnees (verdicts, ordre et cles rapatries), en deux passes : compte, puis remplit.
-inline Outcome collect_chains(const u32* verdict, const u32* order, const u64* keys, u64 n, Chains& out,
-                              MemoryBudget& budget) noexcept {
-  for (int pass = 0; pass < 2; ++pass) {
-    u64 chains = 0, count = 0, covered = 0;
-    for (u64 i = 1; i < n; ++i) {
-      if (verdict[i] != kPairMisordered || i < covered) continue;
-      u64 s = 0, e = 0;
-      chain_around(keys, n, i, s, e);
-      if (pass == 1) {
-        out.bounds[2 * chains] = s;
-        out.bounds[2 * chains + 1] = e;
-        for (u64 j = s; j < e; ++j) {
-          out.balls[count + j - s] = order[j];
-          out.keys[count + j - s] = keys[j];
-        }
-      }
-      covered = e;
-      ++chains;
-      count += e - s;
-    }
-    if (pass == 0) {
-      MHGP12_TRY(out.bounds.allocate(2 * chains, budget));
-      MHGP12_TRY(out.balls.allocate(count, budget));
-      MHGP12_TRY(out.keys.allocate(count, budget));
-    }
-    out.count = chains;
-    out.elements = count;
-  }
-  return {};
-}
-
-// Repli exact (rare) : les chaines de voisins incertains mal ordonnees sont retriees sur l'hote par (niveau exact,
-// positions de S*), memes comparaisons que ChainKernel ; leurs niveaux et cles de positions sont rassembles par
-// l'executeur (PickKernel), puis ordre et cles reecrits chaine par chaine.
-template <class B>
-Outcome finish_repair(B& b, FinishArrays<B>& a, int ck, u64 n, MemoryBudget& budget, FinishStats& stats) noexcept {
-  Buffer<u32> verdict, order;
-  Buffer<u64> keys;
-  MHGP12_TRY(verdict.allocate(n, budget));
-  MHGP12_TRY(order.allocate(n, budget));
-  MHGP12_TRY(keys.allocate(n, budget));
-  MHGP12_TRY(b.download(verdict.data(), a.verdict, n, 0));
-  MHGP12_TRY(b.download(order.data(), a.keys.vals[ck], n, 0));
-  MHGP12_TRY(b.download(keys.data(), a.keys.keys[ck], n, 0));
-  Chains chains;
-  MHGP12_TRY(collect_chains(verdict.data(), order.data(), keys.data(), n, chains, budget));
-  const u64 count = chains.elements;
-  MHGP12_TRY(b.ensure(a.pick, count));
-  MHGP12_TRY(b.ensure(a.pick_levels, count));
-  MHGP12_TRY(b.ensure(a.pick_pkey, count));
-  MHGP12_TRY(b.upload(a.pick, chains.balls.data(), count, 0));
-  MHGP12_TRY(b.launch(PickKernel{a.pick.data(), count, a.levels.data(), a.pkey.data(), a.pick_levels.data(),
-                                 a.pick_pkey.data()},
-                      tiles_of(count)));
-  Buffer<LevelWords> levels;
-  Buffer<Key2> pkeys;
-  Buffer<u32> rank;
-  MHGP12_TRY(levels.allocate(count, budget));
-  MHGP12_TRY(pkeys.allocate(count, budget));
-  MHGP12_TRY(rank.allocate(count, budget));
-  MHGP12_TRY(b.download(levels.data(), a.pick_levels, count, 0));
-  MHGP12_TRY(b.download(pkeys.data(), a.pick_pkey, count, 0));
-  for (u64 c = 0, at = 0; c < chains.count; ++c) {
-    const u64 s = chains.bounds[2 * c], e = chains.bounds[2 * c + 1];
-    for (u64 j = 0; j < e - s; ++j) rank[at + j] = static_cast<u32>(at + j);
-    std::sort(rank.data() + at, rank.data() + at + (e - s), [&](u32 x, u32 y) {
-      const int level = compare_levels(levels[x], levels[y]);
-      return level != 0 ? level < 0 : key2_cmp(pkeys[x], pkeys[y]) < 0;
-    });
-    for (u64 j = s; j < e; ++j) {
-      order[j] = chains.balls[rank[at + j - s]];
-      keys[j] = chains.keys[rank[at + j - s]];
-    }
-    MHGP12_TRY(b.upload(a.keys.vals[ck], order.data() + s, e - s, s));
-    MHGP12_TRY(b.upload(a.keys.keys[ck], keys.data() + s, e - s, s));
-    at += e - s;
-  }
-  stats.chains_repaired += chains.count;
-  stats.chain_elements += count;
-  return {};
-}
-
 // Etape 4 : verification exacte des voisins, repli exact si une chaine est mal ordonnee, puis reverification.
 template <class B>
 Outcome finish_check(B& b, FinishArrays<B>& a, int ck, u64 n, MemoryBudget& budget, FinishStats& stats) noexcept {
@@ -226,7 +120,7 @@ Outcome finish_check(B& b, FinishArrays<B>& a, int ck, u64 n, MemoryBudget& budg
   if (!fault.ok()) return fault.outcome();
   if ((fault.value() & ~u32{kFaultMisordered}) != 0) return fail(Reason::catalogue_invariant);
   if (fault.value() != 0) {
-    MHGP12_TRY(finish_repair(b, a, ck, n, budget, stats));
+    MHGP12_TRY(finish_repair(b, a, ck, n, budget, stats.chains_repaired, stats.chain_elements));
     MHGP12_TRY(b.put(a.fault, 0u, 0));
     MHGP12_TRY(b.launch(check, tiles_of(n)));
     MHGP12_TRY(read_fault(b, a, 0));
@@ -235,9 +129,12 @@ Outcome finish_check(B& b, FinishArrays<B>& a, int ck, u64 n, MemoryBudget& budg
   return {};
 }
 
-// Etape 5 : rangs, CSR des populations, boules canoniques, niveaux des rangs ; rend le nombre de niveaux non nuls.
+// Etape 5 : rangs, CSR des populations, boules canoniques, niveaux des rangs ; rend le nombre de niveaux non nuls. Voie
+// appareil (anticipate) : la sortie des niveaux est reservee des que leur nombre est connu et ses pages touchees
+// pendant le noyau Emit.
 template <class B>
-Result<u64> finish_emit(B& b, FinishArrays<B>& a, const FinishInput& in, int ck, FinishStats& stats) noexcept {
+Result<u64> finish_emit(B& b, FinishArrays<B>& a, const FinishInput& in, int ck, FinishOutput& out, bool anticipate,
+                        MemoryBudget& budget, sched::Pool& pool, FinishStats& stats) noexcept {
   const u64 n = in.balls;
   const NetWatch<B> watch(b);
   const auto distinct = exclusive_scan(b, a.scan, a.flag.data(), a.before.data(), n);
@@ -254,6 +151,8 @@ Result<u64> finish_emit(B& b, FinishArrays<B>& a, const FinishInput& in, int ck,
                         a.offset.data(), a.levels.data(), n,             a.balls.data(), a.values.data(),
                         a.level_of_rank.data()};
   MHGP12_TRY(b.launch(emit, tiles_of(n)));
+  if (anticipate && kAnticipateOutputs)  // pendant Emit
+    MHGP12_TRY(prepare_one(out.levels, distinct.value() + 1, budget, pool, b.meter));
   MHGP12_TRY(b.sync());
   stats.emit_ns += watch.nanoseconds();
   return distinct.value();
@@ -276,29 +175,62 @@ Result<int> finish_table(B& b, FinishArrays<B>& a, const FinishInput& in, Finish
   return ct.value();
 }
 
-// Fin d'etage complete ; les tableaux de l'executeur sont gardes d'un appel a l'autre (sauf ceux rendus par take).
+// Sortie d'un tableau de l'executeur vers le Buffer hote `out` de n elements : tableau adopte sans copie (executeur
+// Pool, sortie non reservee, taille exacte), sinon segment de flux vers `out`, reserve ici s'il est vide ; une sortie
+// anticipee d'une autre taille est un invariant viole.
+template <class B, class A, class T>
+Outcome take_segment(B& b, A& a, Buffer<T>& out, u64 n, MemoryBudget& budget, sched::Pool& pool, CopyChunk& copy,
+                     StreamSegment* segments, u64& k) noexcept {
+  static_assert(sizeof(*a.data()) == sizeof(T), "catalogue : sortie de meme taille d'element que son tableau");
+  if (out.empty() && b.adopt(a, out, n)) return {};
+  if (out.empty()) MHGP12_TRY(out.allocate(n, budget));
+  if (out.size() != n) return fail(Reason::catalogue_invariant);
+  copy = CopyChunk{reinterpret_cast<u8*>(out.data()), sizeof(T), &pool};
+  segments[k++] = StreamSegment{a.data(), sizeof(T), n, &CopyChunk::consume, &copy, false};
+  return {};
+}
+
+// Etape 7 : toutes les sorties en un flux (boules, decalages, populations, table, puis niveaux materialises).
 template <class B>
-Result<FinishOutput> finish_stage(B& b, FinishArrays<B>& a, const FinishInput& in, MemoryBudget& budget,
-                                  FinishStats& stats) noexcept {
+Outcome finish_take(B& b, FinishArrays<B>& a, const FinishInput& in, u64 distinct, int ct, FinishOutput& out,
+                    MemoryBudget& budget, sched::Pool& pool) noexcept {
+  if (distinct + 1 > kNone) return fail(Reason::index_overflow_u32);
+  if (out.levels.empty()) MHGP12_TRY(out.levels.allocate(distinct + 1, budget));
+  if (out.levels.size() != distinct + 1) return fail(Reason::catalogue_invariant);
+  out.levels[0] = num::Level{};
+  CopyChunk copies[5] = {};
+  StreamSegment segments[6] = {};
+  u64 k = 0;
+  MHGP12_TRY(take_segment(b, a.balls, out.balls, in.balls, budget, pool, copies[0], segments, k));
+  MHGP12_TRY(take_segment(b, a.offset, out.offsets, in.balls + 1, budget, pool, copies[1], segments, k));
+  MHGP12_TRY(take_segment(b, a.values, out.values, in.incidences, budget, pool, copies[2], segments, k));
+  const u64 rows = u64{in.sites} + 1;
+  MHGP12_TRY(take_segment(b, a.table_offset, out.table_offsets, rows, budget, pool, copies[3], segments, k));
+  MHGP12_TRY(take_segment(b, a.table.vals[ct], out.table_values, in.balls, budget, pool, copies[4], segments, k));
+  LevelChunk levels{out.levels.data() + 1, &pool};
+  segments[k++] = StreamSegment{a.level_of_rank.data(), sizeof(LevelWords), distinct, &LevelChunk::consume, &levels,
+                                true};
+  return b.stream_out(std::span<const StreamSegment>(segments, k));
+}
+
+// Fin d'etage complete dans `out` (sorties anticipees par la voie appareil : anticipate, niveaux compris) ; les
+// tableaux de l'executeur sont gardes d'un appel a l'autre (sauf ceux que l'executeur Pool adopte).
+template <class B>
+Outcome finish_stage(B& b, FinishArrays<B>& a, const FinishInput& in, FinishOutput& out, bool anticipate,
+                     MemoryBudget& budget, sched::Pool& pool, FinishStats& stats) noexcept {
   if (in.balls >= kNone) return fail(Reason::index_overflow_u32);
   MHGP12_TRY(finish_reserve(b, a, in));
   const auto ck = finish_order(b, a, in, stats);
   if (!ck.ok()) return ck.outcome();
   MHGP12_TRY(finish_check(b, a, ck.value(), in.balls, budget, stats));
-  const auto distinct = finish_emit(b, a, in, ck.value(), stats);
+  const auto distinct = finish_emit(b, a, in, ck.value(), out, anticipate, budget, pool, stats);
   if (!distinct.ok()) return distinct.outcome();
   const auto ct = finish_table(b, a, in, stats);
   if (!ct.ok()) return ct.outcome();
   const NetWatch<B> watch(b);
-  FinishOutput out;
-  MHGP12_TRY(b.take(a.balls, out.balls, in.balls));
-  MHGP12_TRY(b.take(a.offset, out.offsets, in.balls + 1));
-  MHGP12_TRY(b.take(a.values, out.values, in.incidences));
-  MHGP12_TRY(b.take(a.level_of_rank, out.levels, distinct.value()));
-  MHGP12_TRY(b.take(a.table_offset, out.table_offsets, u64{in.sites} + 1));
-  MHGP12_TRY(b.take_cast(a.table.vals[ct.value()], out.table_values, in.balls));
+  MHGP12_TRY(finish_take(b, a, in, distinct.value(), ct.value(), out, budget, pool));
   stats.take_ns += watch.nanoseconds();
-  return Result<FinishOutput>(std::move(out));  // deplacement explicite (le frontal de nvcc ne le deduit pas)
+  return {};
 }
 
 }  // namespace mhgp12::catalogue_detail::fin

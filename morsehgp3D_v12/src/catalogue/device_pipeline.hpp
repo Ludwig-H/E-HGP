@@ -1,6 +1,9 @@
 // Voie appareil du catalogue (tranche T1-b) : crochet du parcours (lots de feuilles, rejeu exact des non resolues,
 // admission, ecriture dans l'arene) et voie complete, ecrits une fois pour l'executeur CUDA et l'executeur Pool. Voir
-// device_driver.hpp pour la sequence et la regle de la premiere faute.
+// device_driver.hpp pour la sequence et la regle de la premiere faute. Sorties anticipees (tranche T2-d,
+// finish_outputs.hpp) : au dernier lot, des que ses comptes sont admis, les Buffer hote de sortie (boules, decalages,
+// populations, table) sont reserves a leur taille exacte et leurs pages touchees sur le Pool pendant que l'appareil
+// ecrit le lot (Copy, Replay) ; les niveaux suivent dans la fin d'etage.
 #pragma once
 
 #include "catalogue/device_driver.hpp"
@@ -21,8 +24,10 @@ struct LeafHook {
   const CatalogueParams& params;
   MemoryBudget& budget;
   sched::Pool& pool;
+  fin::FinishOutput& out;  // sorties hote anticipees (voie complete)
   DeviceTotals totals{};
   u64 pending_leaves = 0, pending_sites = 0, balls = 0, incidences = 0;
+  bool finishing = false, prepared = false;
 
   u64 leaf_base() const noexcept { return pending_leaves; }
   u64 leaf_site_base() const noexcept { return pending_sites; }
@@ -36,12 +41,22 @@ struct LeafHook {
     MHGP12_TRY(flush());
     return refusal;
   }
-  Outcome finish() noexcept { return flush(); }
+  Outcome finish() noexcept {
+    finishing = true;
+    return flush();
+  }
   Outcome flush() noexcept {
-    for (u64 first = 0; first < pending_leaves; first += kBatchLeaves)
-      MHGP12_TRY(batch(first, pending_leaves - first < kBatchLeaves ? pending_leaves - first : kBatchLeaves));
+    for (u64 first = 0; first < pending_leaves; first += kBatchLeaves) {
+      const u64 n = pending_leaves - first < kBatchLeaves ? pending_leaves - first : kBatchLeaves;
+      MHGP12_TRY(batch(first, n, finishing && first + n == pending_leaves));
+    }
     pending_leaves = pending_sites = 0;
     return {};
+  }
+  // Sorties anticipees a leur taille exacte (comptes admis de tous les lots), une seule fois.
+  Outcome prepare(u64 total_balls, u64 total_incidences) noexcept {
+    prepared = true;
+    return fin::prepare_outputs(out, total_balls, total_incidences, cloud.sites(), budget, pool, b.meter);
   }
 
   // Feuilles non resolues du lot : compactees, rapatriees, rejouees par LeafStage ; rend leur premiere faute.
@@ -97,7 +112,7 @@ struct LeafHook {
     return {};
   }
 
-  Outcome batch(u64 first, u64 n) noexcept {
+  Outcome batch(u64 first, u64 n, bool last) noexcept {
     const NetWatch<B> watch(b);
     const LeafView v{st.x.data(), st.y.data(), st.z.data(), st.front.leaves.data() + first,
                      st.front.leaf_sites.data(), n, params.kmax};
@@ -129,13 +144,15 @@ struct LeafHook {
       return fail(Reason::memory_budget);
     MHGP12_TRY(b.ensure_keep(st.records, grown, balls));  // admission : comptes exacts, rejeu compris, avant l'ecriture
     MHGP12_TRY(b.ensure_keep(st.population, grown_incidences, incidences));
+    // boules rejouees par l'hote : places disjointes de celles de Copy et Replay, copiees avant leur lancement
+    MHGP12_TRY(upload_replayed(stage, balls + c.balls, incidences + c.incidences));
     LeafArrays<B>& a = st.leaves;
     const FillView fill{a.cls.data(),     a.cases.data(),        a.balls.data(),            a.incidences.data(),
                         a.ball_at.data(), a.population_at.data(), st.records.data() + balls, st.population.data(),
                         incidences,       st.fault.data()};
     MHGP12_TRY(b.launch(CopyKernel{v, fill}, n));
     MHGP12_TRY(b.launch(ReplayKernel{v, fill}, n));
-    MHGP12_TRY(upload_replayed(stage, balls + c.balls, incidences + c.incidences));
+    if (last && fin::kAnticipateOutputs) MHGP12_TRY(prepare(grown, grown_incidences));  // pendant Copy et Replay
     MHGP12_TRY(b.sync());  // diagnostic : l'ecriture du lot est comptee dans l'emission
     MHGP12_TRY(accumulate(c, stage));
     balls = grown;
@@ -146,10 +163,12 @@ struct LeafHook {
 };
 
 // Diagnostics de la voie appareil dans CatalogueDiagnostics, durees disjointes (CST-0235), chacune nette des
-// transferts : parcours (traversal_ns), feuilles (count_ns : classement, comptage J3, decalages), emission (fill_ns :
-// rejeu des non resolues, admission, ecriture), fin d'etage (levels_ns, sort_ns, assemble_ns, table_ns) ; transferts
-// du raccord complet (transfer_ns : TOUTE copie hote <-> appareil de l'appel, nuage, totaux de niveau, feuilles non
-// resolues et boules rejouees, repli des chaines, sorties) ; publication (publish_ns, posee par l'appelant).
+// transferts, de la preparation des sorties et de la publication : parcours (traversal_ns), feuilles (count_ns :
+// classement, comptage J3, decalages), emission (fill_ns : rejeu des non resolues, admission, ecriture), fin d'etage
+// (levels_ns, sort_ns, assemble_ns, table_ns) ; transferts du raccord complet (transfer_ns : TOUTE copie hote <->
+// appareil de l'appel, nuage, totaux de niveau, feuilles non resolues et boules rejouees, repli des chaines, sorties en
+// flux) ; preparation des sorties (outputs_ns : reservation anticipee et premier toucher, tranche T2-d) ; publication
+// (publish_ns : niveaux materialises au fil du flux, puis adoption, dont l'appelant ajoute la duree).
 inline void device_diagnostics(const TraversalDiagnostics& front, const DeviceTotals& t, const fin::FinishStats& f,
                                u64 traversal_wall, u64 traversal_moved, const TransferMeter& moved,
                                CatalogueDiagnostics& d) noexcept {
@@ -174,6 +193,10 @@ inline void device_diagnostics(const TraversalDiagnostics& front, const DeviceTo
   d.transfer_h2d_bytes = moved.h2d_bytes;
   d.transfer_d2h_bytes = moved.d2h_bytes;
   d.transfer_ops = moved.ops;
+  d.outputs_ns = moved.outputs_ns;
+  d.outputs_bytes = moved.outputs_bytes;
+  d.stream_chunks = moved.chunks;
+  d.publish_ns = moved.publish_ns;
   d.chains_repaired = f.chains_repaired;
   d.chain_elements = f.chain_elements;
   d.batches = t.batches;
@@ -205,29 +228,31 @@ Result<Catalogue> device_catalogue(B& b, DeviceState<B>& st, const Cloud& cloud,
   MHGP12_TRY(b.upload(st.z, cloud.z().data(), n, 0));
   MHGP12_TRY(b.ensure(st.fault, 1));
   MHGP12_TRY(b.put(st.fault, 0u, 0));
-  LeafHook<B> hook{b, st, cloud, params, budget, pool};
+  fin::FinishOutput out;
+  LeafHook<B> hook{b, st, cloud, params, budget, pool, out};
   const bfs::Params tp{static_cast<u32>(params.kmax), params.leaf_size, params.max_leaf, static_cast<u32>(kCoordBits)};
   const TraversalInput in{st.x.data(), st.y.data(), st.z.data(), n, traversal_root(cloud.x(), cloud.y(), cloud.z())};
   TraversalLedger walked;
   TraversalDiagnostics front;
   MHGP12_TRY(traverse_with(b, st.front, in, tp, hook, walked, front));
-  const u64 traversal_wall = watch.nanoseconds(), traversal_moved = b.meter.ns - start.ns;
+  const u64 traversal_wall = watch.nanoseconds(), traversal_moved = b.meter.off_stage() - start.off_stage();
   const auto fault = b.read(st.fault, 0);
   if (!fault.ok()) return fault.outcome();
   if (fault.value() != 0) return fail(Reason::catalogue_invariant);
   const CatalogueLedger ledger = make_ledger(walked, hook.totals.counts);
   if (ledger.emitted != hook.balls) return fail(Reason::catalogue_invariant);
+  if (!hook.prepared && fin::kAnticipateOutputs)  // aucun lot final (feuilles toutes remises plus tot)
+    MHGP12_TRY(hook.prepare(hook.balls, hook.incidences));
   const fin::FinishInput fi{st.x.data(), st.y.data(), st.z.data(), cloud.sites(), st.records.data(),
                             st.population.data(), hook.balls, hook.incidences};
   fin::FinishStats fs;
-  auto out = fin::finish_stage(b, st.finish, fi, budget, fs);
-  if (!out.ok()) return out.outcome();
+  MHGP12_TRY(fin::finish_stage(b, st.finish, fi, out, true, budget, pool, fs));
   Stopwatch adopt_watch;
-  auto result = Assembly::adopt(out.value(), static_cast<Order>(params.kmax), ledger, budget, pool);
+  auto result = Assembly::adopt(out, static_cast<Order>(params.kmax), ledger);
   if (!result.ok()) return result.outcome();
   if (result.value().population().size() != ledger.incidences) return fail(Reason::catalogue_invariant);
   device_diagnostics(front, hook.totals, fs, traversal_wall, traversal_moved, meter_since(b.meter, start), diag);
-  diag.publish_ns = adopt_watch.nanoseconds();
+  diag.publish_ns += adopt_watch.nanoseconds();
   diag.arena_bytes = hook.balls * sizeof(BallRecord) + hook.incidences * sizeof(SiteIdx);
   diag.peak_bytes = budget.peak();
   return result;

@@ -6,12 +6,17 @@
 //
 //   mhgp12_catalogue_probe <xyz.u32le> <ids.u32le> [options]
 //   mhgp12_catalogue_probe --uniform=N,GRAINE,BITS [options]      nuage synthetique (SplitMix64, positions distinctes)
-//   options : [--k=K] [--leaf=L] [--max-leaf=M] [--threads=W] [--passes=P] [--budget=OCTETS] [--digest]
-//             [--out=DOSSIER] [--frame=NOM] [--device]
+//   options : [--k=K] [--leaf=L] [--max-leaf=M] [--threads=W] [--passes=P] [--budget=OCTETS] [--cache=OCTETS]
+//             [--digest] [--digest-complet] [--sorties] [--out=DOSSIER] [--frame=NOM] [--device]
 //
-// Defauts : K = 5, feuille 24, max_leaf 256, un fil, une passe, budget illimite, voie CPU. --digest ecrit l'empreinte
-// canonique (catalogue_digest : SHA-256 de l'export MHGP12DP) de chaque passe. --device : la ligne "open" donne la
-// duree d'ouverture du contexte (a froid) ; wall_ns de chaque passe est le temps de l'etage C, transferts compris.
+// Defauts : K = 5, feuille 24, max_leaf 256, un fil, une passe, budget illimite sans cache de blocs, voie CPU. --digest
+// ecrit l'empreinte canonique (catalogue_digest : SHA-256 de l'export MHGP12DP) de chaque passe. --device : la ligne
+// "open" donne la duree d'ouverture du contexte (a froid) ; wall_ns de chaque passe est le temps de l'etage C,
+// transferts compris. Tranche T2-d, lignes ajoutees seulement sur demande (les lecteurs stricts des autres pilotes
+// gardent leur schema) : --sorties ecrit apres chaque passe une ligne "sorties" (preparation des sorties anticipees,
+// octets, tranches du flux) ; --digest-complet ecrit apres chaque empreinte une ligne "digest_complet" (niveaux
+// publies, mots du numerateur et du denominateur ; table S* -> boule : boule rendue pour le S* de chaque boule, et
+// nombre d'ecarts) : l'export MHGP12DP ne porte ni les niveaux ni la table. --cache : cache de blocs du budget.
 // Codes : 0 conforme, 2 refus (usage, entree, parametres, ressources, degenerescence, appareil indisponible),
 // 3 invariant viole (dont device_fault).
 #include <algorithm>
@@ -37,10 +42,10 @@ struct Options {
   u64 uniform = 0, seed = 0, bits = 0;
   bool digest = false;
   CatalogueParams params;
-  u64 threads = 1, passes = 1, budget = MemoryBudget::kUnlimited;
+  u64 threads = 1, passes = 1, budget = MemoryBudget::kUnlimited, cache = 0;
   const char* out = nullptr;
   std::string_view frame = "probe";
-  bool device = false;
+  bool device = false, full_digest = false, outputs = false;
 };
 
 bool number(std::string_view text, u64& value) {
@@ -78,7 +83,10 @@ bool parse(int argc, char** argv, Options& o) {
     else if (number(value("--threads="), v) && v >= 1 && v <= sched::kMaxWorkers) o.threads = v;
     else if (number(value("--passes="), v) && v >= 1 && v <= 1000) o.passes = v;
     else if (number(value("--budget="), v)) o.budget = v;
+    else if (number(value("--cache="), v)) o.cache = v;
     else if (a == "--digest") o.digest = true;
+    else if (a == "--digest-complet") o.full_digest = true;
+    else if (a == "--sorties") o.outputs = true;
     else if (a == "--device") o.device = true;
     else if (a.substr(0, 6) == "--out=" && o.xyz != nullptr) o.out = argv[i] + 6;
     else if (a.substr(0, 8) == "--frame=" && a.size() > 8 && a.size() < 8 + 24) o.frame = a.substr(8);
@@ -130,6 +138,43 @@ void diagnostics_json(const CatalogueDiagnostics& d) {
               (unsigned long long)d.transfer_ns, (unsigned long long)d.transfer_h2d_bytes,
               (unsigned long long)d.transfer_d2h_bytes, (unsigned long long)d.transfer_ops,
               (unsigned long long)d.publish_ns);
+}
+
+// Ligne "sorties" (tranche T2-d) : preparation des sorties anticipees (duree, octets) et tranches du flux de sortie.
+void outputs_json(u64 pass, const CatalogueDiagnostics& d) {
+  std::printf("{\"phase\":\"sorties\",\"pass\":%llu,\"outputs_ns\":%llu,\"outputs_bytes\":%llu,"
+              "\"stream_chunks\":%llu}\n",
+              (unsigned long long)pass, (unsigned long long)d.outputs_ns, (unsigned long long)d.outputs_bytes,
+              (unsigned long long)d.stream_chunks);
+}
+
+// Ligne "digest_complet" : SHA-256 des niveaux publies (pour chaque rang, mots du numerateur puis du denominateur,
+// petit-boutistes) et de la table S* -> boule (pour chaque boule, la boule rendue par find_support pour son S*, ou
+// 0xFFFFFFFF) ; ecarts : boules dont le S* ne rend pas la boule elle-meme.
+void full_digest_json(const Catalogue& c) {
+  io::Sha256 levels, table;
+  const auto put = [](io::Sha256& sha, u64 word) {
+    std::array<u8, 8> bytes{};
+    for (int i = 0; i < 8; ++i) bytes[i] = static_cast<u8>(word >> (8 * i));
+    sha.update(bytes);
+  };
+  for (const num::Level& level : c.levels()) {
+    for (const u64 word : num::to_wide(level.numerator()).words) put(levels, word);
+    for (const u64 word : num::to_wide(level.denominator()).words) put(levels, word);
+  }
+  u64 mismatches = 0;
+  for (u32 i = 0; i < c.balls(); ++i) {
+    const CatalogueBall& ball = c.balls_data()[i];
+    const auto found = c.find_support(std::span<const SiteIdx>(ball.support.data(), ball.qmin));
+    const u32 at = found ? idx(*found) : kNone;
+    mismatches += at == i ? 0u : 1u;
+    put(table, at);
+  }
+  const auto hl = io::to_hex(levels.finish()), ht = io::to_hex(table.finish());
+  std::printf("{\"phase\":\"digest_complet\",\"niveaux_sha256\":\"%s\",\"table_sha256\":\"%s\","
+              "\"table_ecarts\":%llu}\n",
+              std::string(hl.data(), hl.size()).c_str(), std::string(ht.data(), ht.size()).c_str(),
+              (unsigned long long)mismatches);
 }
 
 // Nuage synthetique : N points de [0, 2^BITS)^3 tires par SplitMix64 (Steele, Lea, Flood 2014), positions rendues
@@ -203,6 +248,7 @@ Outcome passes(const Options& o, const Cloud& cloud, sched::Pool& pool, MemoryBu
       diagnostics_json(diag);
     }
     std::printf("}\n");
+    if (catalogue.ok() && o.outputs) outputs_json(pass, diag);
     std::fflush(stdout);
     if (!catalogue.ok()) return catalogue.outcome();
     if (o.digest) {
@@ -210,6 +256,7 @@ Outcome passes(const Options& o, const Cloud& cloud, sched::Pool& pool, MemoryBu
       if (!digest.ok()) return digest.outcome();
       const auto hex = io::to_hex(digest.value());
       std::printf("{\"phase\":\"digest\",\"catalogue_sha256\":\"%s\"}\n", std::string(hex.data(), hex.size()).c_str());
+      if (o.full_digest) full_digest_json(catalogue.value());
     }
     if (pass + 1 == o.passes && o.out != nullptr) MHGP12_TRY(export_to(o, cloud, catalogue.value()));
   }
@@ -217,7 +264,7 @@ Outcome passes(const Options& o, const Cloud& cloud, sched::Pool& pool, MemoryBu
 }
 
 Outcome run(const Options& o) {
-  MemoryBudget budget(o.budget);
+  MemoryBudget budget(o.budget, o.cache);
   Result<io::InputFiles> input = io::InputFiles{};
   if (o.xyz != nullptr) input = io::read_u32le(o.xyz, o.ids, budget);
   else MHGP12_TRY(synthetic(o, budget, input.value()));
@@ -244,8 +291,8 @@ int main(int argc, char** argv) {
   Options o;
   if (!parse(argc, argv, o)) {
     std::fprintf(stderr, "usage : mhgp12_catalogue_probe (<xyz.u32le> <ids.u32le> | --uniform=N,GRAINE,BITS) [--k=K] "
-                         "[--leaf=L] [--max-leaf=M] [--threads=W] [--passes=P] [--budget=OCTETS] [--digest] "
-                         "[--out=DOSSIER] [--frame=NOM] [--device]\n");
+                         "[--leaf=L] [--max-leaf=M] [--threads=W] [--passes=P] [--budget=OCTETS] [--cache=OCTETS] "
+                         "[--digest] [--digest-complet] [--sorties] [--out=DOSSIER] [--frame=NOM] [--device]\n");
     return 2;
   }
   const Outcome outcome = guarded([&]() { return run(o); });

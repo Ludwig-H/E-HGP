@@ -1,6 +1,6 @@
 {
   "module": "catalogue",
-  "plancher": 15,
+  "plancher": 24,
   "mutants": [
     {
       "id": "temoin_perdu_du_reservoir",
@@ -124,6 +124,78 @@
       "remplace": "    totals.rewritten_host += 0;",
       "porte": "mhgp12_catalogue_device_unit_pipeline_witnesses",
       "note": "voie appareil : les reecritures de la reprise exacte sur l'hote (LeafStage) ne seraient pas agregees"
+    },
+    {
+      "id": "flux_case_relancee_avant_consommation",
+      "fichier": "src/catalogue/transfer_meter.hpp",
+      "cherche": "    const Stopwatch watch;\n    MHGP12_TRY(s.consume(s.context, x.slot(slot), q.first, q.count));\n    if (s.publication) publication += watch.nanoseconds();\n    ++chunks;\n    if (next(p)) {\n      MHGP12_TRY(launch(p));\n      ++issued;\n    }\n",
+      "remplace": "    const Stopwatch watch;\n    if (next(p)) {\n      MHGP12_TRY(launch(p));\n      ++issued;\n    }\n    MHGP12_TRY(s.consume(s.context, x.slot(slot), q.first, q.count));\n    if (s.publication) publication += watch.nanoseconds();\n    ++chunks;\n",
+      "porte": "mhgp12_catalogue_device_unit_pipeline_staged",
+      "note": "sorties en flux (tranche T2-d) : la tranche suivante est lancee dans la case avant que sa tranche courante soit consommee (sur l'appareil, le DMA ecraserait la tranche lue) ; le transit simule empoisonne la case au lancement"
+    },
+    {
+      "id": "flux_sans_attente",
+      "fichier": "src/catalogue/transfer_meter.hpp",
+      "cherche": "    MHGP12_TRY(x.wait(slot));\n",
+      "remplace": "",
+      "porte": "mhgp12_catalogue_device_unit_pipeline_staged",
+      "note": "sorties en flux : une tranche consommee sans attendre la fin de sa copie (evenement de la case) ; le transit simule ne copie qu'a l'attente"
+    },
+    {
+      "id": "flux_tranche_mal_placee",
+      "fichier": "src/catalogue/finish_outputs.hpp",
+      "cherche": "    return parallel_copy(c.to + first * c.elem, chunk, count * c.elem, *c.pool);",
+      "remplace": "    return parallel_copy(c.to + first, chunk, count * c.elem, *c.pool);",
+      "porte": "mhgp12_catalogue_device_unit_pipeline_staged",
+      "note": "sorties en flux : une tranche copiee a son indice au lieu de son decalage en octets (invisible quand la sortie tient en une tranche, voie CPU)"
+    },
+    {
+      "id": "niveaux_sans_le_niveau_nul",
+      "fichier": "src/catalogue/finish_driver.hpp",
+      "cherche": "  LevelChunk levels{out.levels.data() + 1, &pool};",
+      "remplace": "  LevelChunk levels{out.levels.data(), &pool};",
+      "porte": "mhgp12_catalogue_device_unit_finish_random",
+      "note": "niveaux materialises au fil du flux (tranche T2-d) : le rang r ecrit a la case r - 1 au lieu de r (la case 0 est le niveau nul)"
+    },
+    {
+      "id": "sorties_anticipees_sans_reprise_hote",
+      "fichier": "src/catalogue/device_pipeline.hpp",
+      "cherche": "    if (last && fin::kAnticipateOutputs) MHGP12_TRY(prepare(grown, grown_incidences));  // pendant Copy et Replay",
+      "remplace": "    if (last && fin::kAnticipateOutputs) MHGP12_TRY(prepare(balls + c.balls, incidences + c.incidences));",
+      "porte": "mhgp12_catalogue_device_unit_pipeline_witnesses",
+      "note": "sorties anticipees (tranche T2-d) : reservees sans les boules de la reprise exacte sur l'hote (coquille de 48 sites) ; la fin d'etage doit refuser une sortie d'une autre taille"
+    },
+    {
+      "id": "niveaux_anticipes_sans_le_niveau_nul",
+      "fichier": "src/catalogue/finish_driver.hpp",
+      "cherche": "    MHGP12_TRY(prepare_one(out.levels, distinct.value() + 1, budget, pool, b.meter));",
+      "remplace": "    MHGP12_TRY(prepare_one(out.levels, distinct.value(), budget, pool, b.meter));",
+      "porte": "mhgp12_catalogue_device_unit_pipeline_witnesses",
+      "note": "sorties anticipees : la sortie des niveaux reservee sans la case du niveau nul ; refus exige"
+    },
+    {
+      "id": "toucher_hors_intervalle",
+      "fichier": "src/catalogue/outputs.cpp",
+      "cherche": "    const std::uintptr_t at = page < begin ? begin : page;  // premier octet de la page dans l'intervalle",
+      "remplace": "    const std::uintptr_t at = page;",
+      "porte": "mhgp12_catalogue_device_unit_prefault_pages",
+      "note": "premier toucher des pages (tranche T2-d) : l'octet ecrit au debut d'une page qui commence avant l'intervalle (un autre bloc du tas)"
+    },
+    {
+      "id": "chaine_fenetre_non_elargie",
+      "fichier": "src/catalogue/finish_repair.hpp",
+      "cherche": "    if ((s > lo || lo == 0) && (e < hi || hi == n)) return {};",
+      "remplace": "    return {};",
+      "porte": "mhgp12_catalogue_device_unit_finish_long_chain",
+      "note": "repli exact a rapatriement compact (tranche T2-d) : les bornes d'une chaine sont prises au bord de la premiere fenetre de cles au lieu d'elargir la fenetre ; une chaine de plus de 2 kChainWindow elements reste mal ordonnee"
+    },
+    {
+      "id": "flux_transit_toujours_plein",
+      "fichier": "src/catalogue/transfer_meter.hpp",
+      "cherche": "  return largest < full ? largest : full;",
+      "remplace": "  return full;",
+      "porte": "mhgp12_catalogue_device_unit_stream_staging",
+      "note": "transit du flux (tranche T2-d, prelecture Codex) : toujours cases * 8 Mio, meme pour de petites sorties ; la demande doit suivre le plus grand segment"
     }
   ]
 }

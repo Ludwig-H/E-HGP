@@ -1,8 +1,8 @@
 // Fin d'etage de la voie CPU : lots de la LeafStage rassembles en tableaux contigus (copie parallele, un lot par
 // tache), fin d'etage partagee avec la voie appareil (finish_driver.hpp : cles, tri par base, verification exacte des
-// voisins, rangs et CSR par sommes prefixes, table S* -> boule) jouee par l'executeur Pool, puis publication
-// (Assembly::adopt, commune aux deux voies) : niveaux exacts materialises pour les rangs distincts, en parallele. Les
-// sorties ne dependent pas du nombre de fils ; un refus ne publie rien.
+// voisins, rangs et CSR par sommes prefixes, table S* -> boule, sorties en flux dont les niveaux exacts materialises
+// pour les rangs distincts, en parallele) jouee par l'executeur Pool, puis publication (Assembly::adopt, commune aux
+// deux voies). Les sorties ne dependent pas du nombre de fils ; un refus ne publie rien.
 #include <cstring>
 
 #include "catalogue/exec_host.hpp"
@@ -37,26 +37,6 @@ struct Gather {
   }
 };
 
-// Niveaux exacts des rangs 1..L-1 depuis leurs mots : num::Level::make, memes numerateur et denominateur non reduits
-// que num::Sphere::through (finish_level.hpp).
-struct Materialize {
-  const fin::LevelWords* words;
-  num::Level* levels;
-  static Outcome body(void* context, u64 begin, u64 end, u32) noexcept {
-    auto& m = *static_cast<Materialize*>(context);
-    for (u64 r = begin; r < end; ++r) {
-      num::Wide<fin::kNumWords> n{};
-      num::Wide<fin::kDenWords> d{};
-      for (int i = 0; i < fin::kNumWords; ++i) n.words[i] = m.words[r].n[i];
-      for (int i = 0; i < fin::kDenWords; ++i) d.words[i] = m.words[r].d[i];
-      const auto level = num::Level::make(n, d);
-      if (!level.ok()) return fail(Reason::catalogue_invariant);
-      m.levels[r + 1] = level.value();
-    }
-    return {};
-  }
-};
-
 // Decalages des lots ; sommes controlees.
 Outcome chunk_offsets(const std::vector<Chunk>& chunks, Buffer<u64>& record_at, Buffer<u64>& population_at,
                       u64 balls, u64& incidences, MemoryBudget& budget) noexcept {
@@ -77,16 +57,10 @@ Outcome chunk_offsets(const std::vector<Chunk>& chunks, Buffer<u64>& record_at, 
 
 }  // namespace
 
-Result<Catalogue> Assembly::adopt(fin::FinishOutput& out, Order kmax, const CatalogueLedger& ledger,
-                                  MemoryBudget& budget, sched::Pool& pool) noexcept {
+Result<Catalogue> Assembly::adopt(fin::FinishOutput& out, Order kmax, const CatalogueLedger& ledger) noexcept {
   Catalogue result;
-  const u64 distinct = out.levels.size();
-  if (distinct + 1 > kNone) return fail(Reason::index_overflow_u32);
-  MHGP12_TRY(result.levels_.allocate(distinct + 1, budget));
-  result.levels_[0] = num::Level{};
-  Materialize materialize{out.levels.data(), result.levels_.data()};
-  MHGP12_TRY(pool.parallel_for(distinct, 4096, &materialize, &Materialize::body));
-  out.levels.reset();
+  if (out.levels.empty() || out.levels.size() > kNone) return fail(Reason::catalogue_invariant);
+  result.levels_.swap(out.levels);
   result.balls_.swap(out.balls);
   result.population_.off.swap(out.offsets);
   result.population_.val.swap(out.values);
@@ -121,16 +95,17 @@ Result<Catalogue> Assembly::finish(const Cloud& cloud, const CatalogueParams& pa
   const fin::FinishInput in{cloud.x().data(), cloud.y().data(), cloud.z().data(), cloud.sites(),
                             records.data(),   population.data(), balls,           incidences};
   fin::FinishStats stats;
-  auto out = fin::finish_stage(executor, arrays, in, budget, stats);
-  if (!out.ok()) return out.outcome();
+  fin::FinishOutput out;
+  MHGP12_TRY(fin::finish_stage(executor, arrays, in, out, false, budget, pool, stats));
   Stopwatch adopt_watch;
-  auto result = adopt(out.value(), static_cast<Order>(params.kmax), ledger, budget, pool);
+  auto result = adopt(out, static_cast<Order>(params.kmax), ledger);
   if (!result.ok()) return result.outcome();
   diagnostics.levels_ns = stats.keys_ns;
   diagnostics.sort_ns = stats.sort_ns;
-  // voie CPU : les copies de l'executeur Pool (sorties prises, lectures) restent dans l'assemblage (transfer_ns nul)
-  diagnostics.assemble_ns =
-      gather_ns + stats.check_ns + stats.emit_ns + stats.take_ns + executor.meter.ns + adopt_watch.nanoseconds();
+  // voie CPU : les copies de l'executeur Pool (sorties prises, lectures) et la materialisation des niveaux restent
+  // dans l'assemblage (transfer_ns et publish_ns nuls)
+  diagnostics.assemble_ns = gather_ns + stats.check_ns + stats.emit_ns + stats.take_ns + executor.meter.off_stage() +
+                            adopt_watch.nanoseconds();
   diagnostics.table_ns = stats.table_ns;
   diagnostics.chains_repaired = stats.chains_repaired;
   diagnostics.chain_elements = stats.chain_elements;

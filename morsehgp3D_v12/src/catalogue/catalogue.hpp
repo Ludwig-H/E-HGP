@@ -90,11 +90,14 @@ struct CatalogueDiagnostics {
   // de l'arene ; transferts du raccord complet (TOUTE copie hote <-> appareil de l'appel : duree, octets par sens,
   // operations) ; publication (niveaux materialises sur l'hote). Durees disjointes et nettes des transferts
   // (CST-0235) : count_ns porte les feuilles (classement, comptage J3, decalages), fill_ns l'emission (reprise des
-  // non resolues, admission, ecriture).
+  // non resolues, admission, ecriture). Tranche T2-d (sorties en flux) : les sorties passent par la memoire epinglee en
+  // tranches (stream_chunks) et les niveaux sont materialises au fil du flux (publish_ns) ; preparation des sorties
+  // (outputs_ns, outputs_bytes : Buffer hote reserves des que leur taille exacte est connue et pages touchees pendant
+  // le calcul de l'appareil), duree disjointe des autres.
   u64 batches = 0, replayed_leaves = 0, replayed_balls = 0, replayed_wide = 0, replayed_span = 0;
   u64 rewritten_device = 0, rewritten_host = 0, device_bytes = 0, pinned_bytes = 0, allocations = 0;
   u64 arena_bytes = 0, transfer_ns = 0, transfer_h2d_bytes = 0, transfer_d2h_bytes = 0, transfer_ops = 0;
-  u64 publish_ns = 0;
+  u64 publish_ns = 0, outputs_ns = 0, outputs_bytes = 0, stream_chunks = 0;
 };
 
 // Proprietaire immuable des tableaux du catalogue ; ses SiteIdx se rapportent au Cloud source. Construction

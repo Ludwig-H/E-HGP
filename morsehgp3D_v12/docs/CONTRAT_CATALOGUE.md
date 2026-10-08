@@ -240,3 +240,83 @@ ng02 à K5, retriée en exact, sortie identique) ; (d) la clé des positions par
 de natures différentes à la même profondeur dans deux lots de la voie CPU peuvent se départager autrement (profondeur
 puis fusion ici, premier lot de 16 384 feuilles là-bas) ; (f) l'ancien tri par blocs de la voie CPU (`sort.cpp`)
 retiré au profit du tri par base partagé.
+
+## 11. Transferts et publication sur l'appareil (tranche T2-d-C, 8 octobre 2026), à juger sur G4
+
+Travail d'agent pour le développeur, livré sur `main` `902041f66` ; **rien n'a tourné sur un GPU** : la voie appareil
+est jouée sur l'hôte par l'exécuteur Pool et par un exécuteur à transit simulé (même code, comptes de l'exécuteur
+CUDA), la construction CUDA est vérifiée sans avertissement aux profils 21, 24 et 32. Constat des sessions I et K : à
+ng00 K5, 134,3 Mo rapatriés en 9,2 ms (14,6 Go/s contre 56,8 Go/s pour une copie épinglée, `MES-M6`) et 3,0 ms de
+publication ; le reste du temps est fait sur l'hôte : copies de la mémoire épinglée vers des `Buffer` neufs (fautes de
+page au premier toucher), un tampon intermédiaire de 52 Mo pour les niveaux, 66 petites lectures. **Le catalogue ne
+change pas** (export `MHGP12DP`, niveaux publiés et table identiques à l'octet ; voie appareil = voie CPU). Quatre
+leviers déclarés d'avance, chacun coupé par une constante (bras d'ablation du pilote, jamais une option) :
+
+1. **Flux de sortie** (`transfer_meter.hpp`, `finish_outputs.hpp`) : les sorties de la fin d'étage sont remises à l'hôte
+   par tranches d'au plus 8 Mio dans la mémoire épinglée de transit et consommées tranche par tranche (copie
+   parallèle vers le `Buffer` final ; niveaux matérialisés en `num::Level` directement depuis la tranche, sans tampon
+   hôte intermédiaire ; la publication n'est plus qu'une adoption). Voie CPU : tableaux de taille exacte adoptés sans
+   copie, comme avant.
+2. **Double tampon** (`kStagingSlots` = 2) : la copie de la tranche suivante recouvre la consommation de la tranche
+   courante (un événement par case ; une case n'est relancée qu'après la consommation de sa tranche).
+3. **Sorties anticipées** (`kAnticipateOutputs`) : boules, décalages, populations et table sont réservés à leur
+   taille exacte dès les comptes du dernier lot, les niveaux dès le balayage des débuts de rang, puis leurs pages sont
+   peuplées sur le Pool (`MADV_POPULATE_WRITE`, repli : un octet écrit par page de l'intervalle) **pendant** que
+   l'appareil écrit le lot, puis pendant `Emit`. Une sortie anticipée d'une autre taille est un invariant violé. Avec
+   `kAnticipateOutputs = false`, la fin d'étage réserve chaque sortie à sa prise, sans premier toucher, comme la base :
+   la constante retire la réservation anticipée **et** le premier toucher.
+4. **Repli compact** (`kChainWindow` = 64) : le repli exact des chaînes ne rapatrie plus verdicts, ordre et clés des
+   n boules (16 n octets, 22,5 Mo à ng02 K5 pour une chaîne de 9 éléments) mais les positions des M paires mal
+   ordonnées, compactées sur l'exécuteur, puis les clés par fenêtres de 64 doublées jusqu'aux bornes de chaque chaîne,
+   puis l'ordre et les clés des R éléments des chaînes : lectures directes de 4 M + 8 Σ|fenêtre lue| + 12 R octets,
+   plus les contrôles du balayage et les transferts communs du tri exact (contre-lecture Codex) ; `bounds` réserve 2 M
+   entrées. Beaucoup de petites chaînes peuvent coûter plus que la lecture d'avant : aucun gain n'est garanti.
+
+**Mémoire (prélecture Codex, point 1).** Le flux demande `min(kStagingSlots × kStreamChunk, plus grand segment)`
+octets de transit (`stream_staging_bytes`, au moins 1 Mio, `kStagingMin`), soit 16 Mio dès que la plus grande sortie
+les dépasse. Avant T2-d, chaque sortie était copiée d'un seul tenant par une mémoire de transit de `min(64 Mio,
+sortie)` octets ; chaque demande de la tranche est donc au plus une demande d'avant pour les mêmes appels, et la
+mémoire épinglée gardée par le contexte (le maximum des demandes, jusqu'à sa destruction) n'est jamais plus grande.
+Les sorties hôte vivent **plus tôt** : dès le dernier lot (boules, décalages, populations, table), dès `Emit` (niveaux),
+au lieu de la prise des sorties ; le tampon des mots de niveaux (48 octets par rang) et la copie d'un seul tenant
+disparaissent. Le pic du budget de l'hôte change donc de valeur **et de moment**, et un petit budget peut refuser à un
+autre endroit qu'avant (au dernier lot ou pendant `Emit` au lieu de la prise) : toujours un refus entier
+(`memory_budget`, rien de publié), jamais au-delà de la limite. Comptes locaux (exécuteur « comptes CUDA » de
+l'essai, budgets hôte et appareil séparés, non mesurés sur G4) : pic de l'hôte 255,9 → 168,5 Mo à ng00 K5 et 219,4 →
+145,9 Mo à ng01 K5, transit 52,1 Mo → 16 Mio ; pic de l'appareil inchangé. Portes : `pipeline_budget` (hôte et
+appareil séparés comme `CatalogueDevice::open(budget, device)` : pic de chaque budget mesuré sur un appel réussi ; au
+pic exact, catalogue identique à la voie CPU ; un octet de moins, trois quarts, moitié, un huitième, 4 Kio et zéro :
+`memory_budget` ; limites tenues ; tout rendu à la destruction), `pipeline_budget_reuse` (le contexte sert encore
+après un refus), `finish_budget` (chaîne longue du repli sous budget serré), `device_open_budget` (la vraie voie
+appareil sur G4 : hôte de 512 Kio, appareil de 1 Kio, puis pic et pic moins un octet de chaque budget),
+`stream_staging` (demande de transit du flux).
+
+**Chronos (point 2).** `transfer_ns` porte les copies chronométrées après l'attente des noyaux en file et, pour le
+flux de sortie, le mur du flux moins la durée de ses consommateurs de publication (matérialisation des niveaux,
+comptée dans `publish_ns`) : c'est une **partition du mur, pas une mesure du DMA** (une copie recouverte par un
+consommateur n'y paraît pas). `outputs_ns` porte la réservation anticipée et le premier toucher, en durée murale de
+l'hôte, même quand un noyau avance pendant ce temps : les étapes nettes ne sont alors pas la durée propre des noyaux.
+Étapes disjointes, leur somme tient dans le total de la passe.
+
+**Diagnostics et sonde.** `outputs_ns`, `outputs_bytes`, `stream_chunks` ; la sonde du catalogue les écrit sur une
+ligne `sorties` et les empreintes des niveaux et de la table sur une ligne `digest_complet`, seulement sur demande
+(`--sorties`, `--digest-complet`) ; `--cache` donne au budget un cache de blocs. Autres portes : `pipeline_staged`
+(séquence des tranches sur le transit simulé, cases de 256 octets empoisonnées au lancement et copiées à l'attente,
+une à trois en vol), `finish_long_chain` (chaîne de 202 éléments, deux élargissements de fenêtre), `prefault_pages`,
+octets des sorties anticipées dans `pipeline_witnesses`, juge, lecteur et substitutions du pilote G4 ; neuf mutants
+(`tests/mutants/catalogue.json`, plancher 24) et un mutant appareil joué sur G4 (`flux_sans_attente_appareil`).
+
+**Session G4 préparée** : pilote `bench/g4_catalogue_flux.py`, lecteur strict `bench/g4_catalogue_flux_lecteur.py`,
+juge `bench/g4_catalogue_flux_judge.py`, auto-test `bench/g4_catalogue_flux_selftest.py`, tableaux
+`bench/g4_catalogue_flux_tables.py` ; règle `REGLE_T2D_C` écrite d'avance (adopté si les empreintes sont identiques
+partout et si la borne haute **non arrondie** de l'IC 95 % du rapport après/avant de l'étage C est sous 1 sur chacune
+de ng00, ng01, ng02 à K5 ; rejeté sinon ; refusé si une prise manque ou sort de sa commande, si le mutant n'est pas
+comparé, ou si le contrôle A/A sort de [0,985 ; 1,015]). Bras par substitution, nommés par ce qu'ils retirent :
+`sans_anticipation`, `sans_double_tampon`, `repli_cles_entieres` (fenêtre infinie : toutes les clés par chaîne, garde
+la compaction des positions ; ce n'est pas l'ancien repli, qui n'a pas de bras) et `flux_et_repli_selectif` (les trois
+substitutions : il isole le flux sur ng00 et ng01, le flux et le repli sélectif sur ng02). Contre-lecture
+d'admission Codex (`receipts/audit_reponses_20261008/t2d_c_admission/`) traitée : sorties natives liées à la commande
+(séquence, statuts, indices, voie, profil, K, feuille, fils, options, u64 hors booléens, blocs complets ; un champ
+absent n'est jamais une mesure nulle, la sonde de la base sans ligne `sorties` étant une exception déclarée), mutant
+sans comparaison refusé, A/A écrit, bornes non arrondies ; un cas d'auto-test par défaut relevé (39 injections dont
+25 d'admission).

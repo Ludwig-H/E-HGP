@@ -3,8 +3,9 @@
 // tranche. Chaque warp n'ecrit que ses sorties (les seuls atomiques sont les OU des mots de fautes), donc le resultat
 // ne depend ni du nombre de fils ni de leur ordonnancement. Tableaux : Buffer du budget de l'appel (FrontArray).
 // Meme interface que l'executeur CUDA de la voie appareil (device_cuda.cu) : ensure, ensure_keep, put, read, upload,
-// download, take, launch, meter ; le pilote du parcours (traversal_driver.hpp), la fin d'etage (finish_driver.hpp) et
-// les lots de feuilles de la voie appareil (device_driver.hpp) sont ecrits une fois pour les deux.
+// download, adopt, stream_out, launch, meter ; le pilote du parcours (traversal_driver.hpp), la fin d'etage
+// (finish_driver.hpp) et les lots de feuilles de la voie appareil (device_driver.hpp) sont ecrits une fois pour
+// les deux.
 #pragma once
 
 #include <cstring>
@@ -93,31 +94,31 @@ struct PoolExecutor {
     meter.note(watch, 0, n * sizeof(T));
     return {};
   }
-  // Sortie de n elements dans un Buffer de taille exacte : le tableau lui-meme s'il a cette taille (aucune copie, le
-  // tableau devient vide), sinon une copie.
+  // Sortie adoptee sans copie : le tableau lui-meme s'il a exactement n elements du type de la sortie (le tableau
+  // devient vide) ; sinon la sortie passe par le flux.
   template <class T>
-  Outcome take(FrontArray<T>& a, Buffer<T>& out, u64 n) noexcept {
-    if (a.buffer.size() == n) {
-      out.swap(a.buffer);
-      a.buffer.reset();
-      return {};
-    }
-    Buffer<T> made;
-    MHGP12_TRY(made.allocate(n, budget));
-    MHGP12_TRY(download(made.data(), a, n, 0));
-    out.swap(made);
-    return {};
+  bool adopt(FrontArray<T>& a, Buffer<T>& out, u64 n) noexcept {
+    if (!out.empty() || a.buffer.size() != n || n == 0) return false;
+    out.swap(a.buffer);
+    a.buffer.reset();
+    return true;
   }
-  // Sortie dans un Buffer d'un type de meme taille (BallIdx depuis u32) : copie d'octets.
-  template <class T, class U>
-  Outcome take_cast(FrontArray<U>& a, Buffer<T>& out, u64 n) noexcept {
-    static_assert(sizeof(T) == sizeof(U), "take_cast : types de meme taille");
-    Buffer<T> made;
-    MHGP12_TRY(made.allocate(n, budget));
-    const Stopwatch watch;
-    MHGP12_TRY(copy(reinterpret_cast<u8*>(made.data()), reinterpret_cast<const u8*>(a.data()), n * sizeof(T)));
-    meter.note(watch, 0, n * sizeof(T));
-    out.swap(made);
+  template <class A, class T>
+  bool adopt(A&, Buffer<T>&, u64) noexcept {
+    return false;
+  }
+  // Flux de sortie (transfer_meter.hpp) : la memoire de l'executeur est celle de l'hote, chaque segment est remis
+  // entier a son consommateur ; une operation et une tranche par segment, duree en transfert ou en publication.
+  Outcome stream_out(std::span<const StreamSegment> segments) noexcept {
+    for (const StreamSegment& s : segments) {
+      if (s.n == 0) continue;
+      const Stopwatch watch;
+      MHGP12_TRY(s.consume(s.context, s.source, 0, s.n));
+      (s.publication ? meter.publish_ns : meter.ns) += watch.nanoseconds();
+      meter.d2h_bytes += s.n * s.elem;
+      ++meter.ops;
+      ++meter.chunks;
+    }
     return {};
   }
   template <class K>

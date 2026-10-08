@@ -11,6 +11,12 @@
 // Erreurs du pilote : device_fault, et le contexte refuse ensuite tout appel (une erreur collante de CUDA rend le
 // contexte inutilisable). Attente en mode yield (MES-M6). Transferts (CST-0235, raccord complet) : chaque copie
 // hote <-> appareil attend d'abord les noyaux en file (hors chrono), puis est chronometree et comptee (TransferMeter).
+// Sorties en flux (tranche T2-d, transfer_meter.hpp et finish_outputs.hpp) : les tableaux de sortie passent par la
+// memoire epinglee de transit, en kStagingSlots cases d'au plus kStreamChunk octets, un evenement par case ; la copie
+// de l'appareil vers une case recouvre la consommation de la case precedente sur l'hote (Pool). Le flux demande
+// min(kStagingSlots * kStreamChunk, plus grand segment) octets de transit (16 Mio des que la plus grande sortie les
+// depasse), au lieu de min(64 Mio, sortie) par sortie copiee avant T2-d : la memoire epinglee gardee par le contexte
+// n'est jamais plus grande qu'avant pour les memes appels (CONTRAT_CATALOGUE.md, paragraphe 11).
 #include <cuda_runtime.h>
 
 #include <type_traits>
@@ -48,6 +54,7 @@ struct CudaExecutor {
   u8* staging = nullptr;
   u64 staging_bytes = 0;
   BudgetReservation staging_reservation;
+  cudaEvent_t slot_events[kMaxSlots] = {};
   u64 allocations = 0, device_bytes = 0;
   TransferMeter meter{};
 
@@ -70,6 +77,8 @@ struct CudaExecutor {
   CudaExecutor& operator=(const CudaExecutor&) = delete;
   ~CudaExecutor() {
     if (stream != nullptr) cudaStreamSynchronize(stream);
+    for (cudaEvent_t e : slot_events)
+      if (e != nullptr) cudaEventDestroy(e);
     if (staging != nullptr) cudaFreeHost(staging);
     if (stream != nullptr) cudaStreamDestroy(stream);
   }
@@ -192,21 +201,55 @@ struct CudaExecutor {
     return value;
   }
   Result<bfs::LevelTotals> read_totals(Array<bfs::LevelTotals>& a) noexcept { return read(a, 0); }
-  template <class T>
-  Outcome take(Array<T>& a, Buffer<T>& out, u64 n) noexcept {
-    Buffer<T> made;
-    MHGP12_TRY(made.allocate(n, budget));
-    if (n != 0) MHGP12_TRY(download(made.data(), a, n, 0));
-    out.swap(made);
+  // Les sorties de l'appareil passent toujours par le flux (aucune adoption sans copie).
+  template <class A, class T>
+  bool adopt(A&, Buffer<T>&, u64) noexcept {
+    return false;
+  }
+  // Cases du flux : kStagingSlots cases d'au plus kStreamChunk octets dans la memoire epinglee de transit.
+  u64 slots() const noexcept { return kStagingSlots; }
+  u64 slot_bytes() const noexcept {
+    const u64 share = (staging_bytes / kStagingSlots) & ~u64{255};
+    return share < kStreamChunk ? share : kStreamChunk;
+  }
+  u8* slot(u64 c) noexcept { return staging + c * slot_bytes(); }
+  Outcome issue(u64 c, const u8* from, u64 bytes) noexcept {
+    MHGP12_TRY(check(cudaMemcpyAsync(slot(c), from, bytes, cudaMemcpyDeviceToHost, stream)));
+    return check(cudaEventRecord(slot_events[c], stream));
+  }
+  Outcome wait(u64 c) noexcept { return check(cudaEventSynchronize(slot_events[c])); }
+  Outcome slot_events_ready() noexcept {
+    for (u64 c = 0; c < kStagingSlots; ++c)
+      if (slot_events[c] == nullptr)
+        MHGP12_TRY(check(cudaEventCreateWithFlags(&slot_events[c], cudaEventDisableTiming)));
     return {};
   }
-  template <class T, class U>
-  Outcome take_cast(Array<U>& a, Buffer<T>& out, u64 n) noexcept {
-    static_assert(sizeof(T) == sizeof(U) && std::is_trivially_copyable_v<T>, "take_cast : types de meme taille");
-    Buffer<T> made;
-    MHGP12_TRY(made.allocate(n, budget));
-    if (n != 0) MHGP12_TRY(download(reinterpret_cast<U*>(static_cast<void*>(made.data())), a, n, 0));
-    out.swap(made);
+  // Flux de sortie : apres l'attente des noyaux en file (hors chrono), duree murale du flux comptee en transfert, moins
+  // celle des consommateurs de publication (niveaux), comptee a part ; une operation par segment. Sur un refus, les
+  // copies encore en vol sont attendues avant de rendre la main (la memoire de transit reste coherente).
+  Outcome stream_out(std::span<const StreamSegment> segments) noexcept {
+    u64 bytes = 0, ops = 0;
+    for (const StreamSegment& s : segments) {
+      bytes += s.n * s.elem;
+      ops += s.n != 0 ? 1u : 0u;
+    }
+    if (bytes == 0) return {};
+    MHGP12_TRY(stage(stream_staging_bytes(segments, kStagingSlots)));  // jamais plus que la copie d'avant T2-d
+    MHGP12_TRY(slot_events_ready());
+    MHGP12_TRY(sync());
+    const Stopwatch watch;
+    u64 chunks = 0;
+    const auto published = stream_staged(*this, segments, chunks);
+    if (!published.ok()) {
+      (void)cudaStreamSynchronize(stream);
+      return published.outcome();
+    }
+    const u64 wall = watch.nanoseconds();
+    meter.ns += wall > published.value() ? wall - published.value() : 0;
+    meter.publish_ns += published.value();
+    meter.d2h_bytes += bytes;
+    meter.ops += ops;
+    meter.chunks += chunks;
     return {};
   }
 

@@ -74,9 +74,8 @@ struct Assembly {
   static Result<Catalogue> finish(const Cloud& cloud, const CatalogueParams& params, std::vector<Chunk>& chunks,
                                   u64 balls, const CatalogueLedger& ledger, MemoryBudget& budget, sched::Pool& pool,
                                   CatalogueDiagnostics& diagnostics) noexcept;
-  // Publication commune aux deux voies : sorties de la fin d'etage (videes), niveaux exacts materialises.
-  static Result<Catalogue> adopt(fin::FinishOutput& out, Order kmax, const CatalogueLedger& ledger,
-                                 MemoryBudget& budget, sched::Pool& pool) noexcept;
+  // Publication commune aux deux voies : sorties de la fin d'etage (videes ; niveaux deja materialises par le flux).
+  static Result<Catalogue> adopt(fin::FinishOutput& out, Order kmax, const CatalogueLedger& ledger) noexcept;
 };
 
 }  // namespace mhgp12::catalogue_detail

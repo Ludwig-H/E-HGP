@@ -5,6 +5,8 @@
 // (paliers, reecritures) et reprises par cause, transferts comptes et durees disjointes (CST-0235) ; memes refus
 // (WIT-SPHERE50 : shell_capacity) ; etat resident reutilise d'un appel a l'autre ; memes octets a 1, 3 et 8 fils. Puis
 // la vraie voie appareil (device_open) : sans GPU device_unavailable, avec GPU la meme comparaison sur l'appareil.
+// Sorties en flux (tranche T2-d) : sorties anticipees a leur taille exacte (octets comptes), et la sequence des
+// tranches de l'executeur CUDA jouee sur un transit simule (cases minuscules, une, deux ou trois en vol).
 #include "device_support.hpp"
 #include "test.hpp"
 
@@ -59,7 +61,15 @@ void check_physical(const CatalogueDiagnostics& got, const CatalogueDiagnostics&
 // duree murale de l'appel.
 u64 parts_of(const CatalogueDiagnostics& d) {
   return d.traversal_ns + d.count_ns + d.fill_ns + d.levels_ns + d.sort_ns + d.assemble_ns + d.table_ns +
-         d.transfer_ns + d.publish_ns;
+         d.transfer_ns + d.publish_ns + d.outputs_ns;
+}
+
+// Octets des sorties hote d'un catalogue (boules, decalages, populations, table, niveaux) : ceux que la voie appareil
+// reserve a l'avance (sorties anticipees), a la taille exacte.
+u64 output_bytes(const Cloud& cloud, const Catalogue& c) {
+  return u64{c.balls()} * (sizeof(CatalogueBall) + sizeof(u64) + sizeof(BallIdx)) + sizeof(u64) +
+         c.population().size() * sizeof(SiteIdx) + (u64{cloud.sites()} + 1) * sizeof(u64) +
+         c.levels().size() * sizeof(num::Level);
 }
 
 }  // namespace
@@ -86,6 +96,8 @@ MHGP12_TEST(pipeline_witnesses, 130) {
     check_physical(diag, ref_diag);
     CHECK(diag.transfer_h2d_bytes >= 3 * sizeof(u32) * cloud.value().sites() && diag.transfer_ops >= 3);
     CHECK(parts_of(diag) <= wall_ns);
+    CHECK_EQ(diag.outputs_bytes, output_bytes(cloud.value(), got.value()));  // sorties anticipees, taille exacte
+    CHECK(diag.stream_chunks >= 1);
     replayed += diag.replayed_leaves;
     wide += diag.replayed_wide;
     span += diag.replayed_span;
@@ -150,6 +162,32 @@ MHGP12_TEST(pipeline_resident, 10) {
     digests.push_back(digest.value());
   }
   CHECK(digests[0] == digests[1] && digests[0] == digests[2]);
+}
+
+// Sorties en flux sur un transit simule (StagedExecutor) : meme sequence de tranches que l'executeur CUDA, cases de 256
+// octets (bien plus de tranches que de sorties), une, deux ou trois cases en vol (deux pour le nuage de 2 500 sites) ;
+// catalogue identique a la voie CPU.
+MHGP12_TEST(pipeline_staged, 40) {
+  MemoryBudget budget(MemoryBudget::kUnlimited);
+  auto pool = sched::make_pool({3});
+  REQUIRE(pool.ok());
+  for (const Case& c : witnesses()) {
+    auto cloud = make_cloud(c.points, budget);
+    REQUIRE(cloud.ok());
+    const CatalogueParams params = params_of(c.k, c.leaf);
+    auto ref = cpu(cloud.value(), params, 3, budget);
+    REQUIRE(ref.ok());
+    for (const u64 slots : {1u, 2u, 3u}) {
+      if (std::string_view(c.name) == "nuage2500" && slots != 2) continue;  // duree de la porte
+      CatalogueDiagnostics diag;
+      auto got = staged_device(cloud.value(), params, *pool.value(), budget, 256, slots, &diag);
+      REQUIRE(got.ok());
+      if (!CHECK(same(cloud.value(), ref.value(), got.value())))
+        std::fprintf(stderr, "ecart flux : %s, %llu cases\n", c.name, static_cast<unsigned long long>(slots));
+      const u64 bytes = output_bytes(cloud.value(), got.value());
+      if (bytes > 4096) CHECK(diag.stream_chunks > 6);  // plusieurs tranches par sortie
+    }
+  }
 }
 
 // Vraie voie appareil : sans GPU (ou construction sans CUDA) device_unavailable ; avec GPU, la voie appareil rend le
