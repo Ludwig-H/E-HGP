@@ -18,7 +18,7 @@
   const FONT = '"DejaVu Sans", "Helvetica Neue", Arial, sans-serif';
   const EPS = 1 + 1e-12;
   // Chronologie d'une scène (secondes)
-  const T_INTRO = 2.4, T_MIX = 0.6, T_SWEEP = 9.0, T_FINAL_IN = 0.8, T_FINAL = 4.6, T_FADE = 0.35, T_PAUSE = 1.7;
+  const T_INTRO = 2.4, T_MIX = 0.6, T_SWEEP = 7.0, T_FINAL_IN = 0.8, T_FINAL = 4.6, T_FADE = 0.35, T_PAUSE = 1.7;
   const SWEEP0 = T_INTRO + T_MIX;
   let SWEEP1 = 0, FINAL0 = 0, DURATION = 0;  // propres à la scène : le balayage s'arrête aux événements importants
 
@@ -177,6 +177,8 @@
       for (const f of m.fusions) if (!f.before.every(Boolean)) ev.push({ r: f.r, key: P.key, good: false, parts: () => [[f.objects.map(keys).join(' + '), null, true], [' merged too early ✗', C.bad, true]], objs: f.objects });
     }
     ev.sort((a, b) => a.r - b.r);
+    // la conclusion est acquise au dernier événement retenu : le balayage s'arrête juste après
+    if (ev.length) S.rend = clamp(1.03 * ev[ev.length - 1].r, S.rmin * 1.5, S.rend);
     const stops = [];
     for (const e of ev) {
       if (e.r < S.rmin || e.r > S.rend) continue;
