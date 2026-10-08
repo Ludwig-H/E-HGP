@@ -1,0 +1,1 @@
+ctest --no-tests=error -R \^mhgp12_mutants_\(index\|num\|tower\)\$ --output-on-failure 

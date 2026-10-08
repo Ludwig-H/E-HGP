@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 45,
+  "plancher": 38,
   "mutants": [
     {
       "id": "t1_sans_s_dans_f",
@@ -319,62 +319,6 @@
       "remplace": "      const std::span<const SiteIdx> witnesses{};",
       "porte": "mhgp12_tower_unit_witness_d2",
       "note": "T2-d : le support certifie ne serait plus transmis au census comme temoins ; resultat inchange mais travail perdu, refuse par le controle du resolveur (decision par temoin a la racine)"
-    },
-    {
-      "id": "entiere_sans_test_diametral",
-      "fichier": "src/tower/proposal.hpp",
-      "cherche": "    if (dot > 0) outside = x;  // hors de la boule diametrale fermee de (a, b)",
-      "remplace": "    if (dot > 0 && x < 0) outside = x;  // mutant : aucun site jamais dehors",
-      "porte": "mhgp12_tower_proposal_witnesses",
-      "note": "T2-d : la voie entiere rendrait la paire la plus eloignee sans tester la boule diametrale : support refuse par le certificat (triangle aigu, tetraedre)"
-    },
-    {
-      "id": "entiere_obtus_pour_aigu",
-      "fichier": "src/tower/proposal.hpp",
-      "cherche": "    if (dot > 0) outside = x;  // hors de la boule diametrale fermee de (a, b)",
-      "remplace": "    if (dot < 0) outside = x;  // hors de la boule diametrale fermee de (a, b)",
-      "porte": "mhgp12_tower_proposal_witnesses",
-      "note": "T2-d : signe du test diametral inverse : un triangle obtus pris pour aigu (centre hors du triangle, certificat refuse)"
-    },
-    {
-      "id": "entiere_departage_inverse",
-      "fichier": "src/tower/proposal.hpp",
-      "cherche": "      if (s > best || (s == best && ordered(i, j) < ordered(a, b))) {",
-      "remplace": "      if (s > best || (s == best && ordered(a, b) < ordered(i, j))) {",
-      "porte": "mhgp12_tower_proposal_witnesses",
-      "note": "T2-d : parmi les paires les plus eloignees ex aequo, la plus GRANDE liste de positions : diagonale non canonique (rectangle, carre), support different de S*"
-    },
-    {
-      "id": "entiere_sans_departage",
-      "fichier": "src/tower/proposal.hpp",
-      "cherche": "      if (s > best || (s == best && ordered(i, j) < ordered(a, b))) {",
-      "remplace": "      if (s > best || (s == best && false && ordered(i, j) < ordered(a, b))) {",
-      "porte": "mhgp12_tower_proposal_witnesses",
-      "note": "T2-d : premiere paire la plus eloignee dans l'ordre de la partie, sans departage par positions : rectangle dont la diagonale BD vient avant AC"
-    },
-    {
-      "id": "entiere_triangle_au_dela_de_trois",
-      "fichier": "src/tower/proposal.hpp",
-      "cherche": "  if (n != 3) return 0;",
-      "remplace": "  if (n < 3) return 0;",
-      "porte": "mhgp12_tower_proposal_witnesses",
-      "note": "T2-d : le triangle (paire, premier site dehors) rendu pour quatre sites ou plus : tetraedre regulier, cercle d'une face, quatrieme sommet dehors"
-    },
-    {
-      "id": "proposition_non_triee",
-      "fichier": "src/tower/resolve.cpp",
-      "cherche": "    for (int i = 0; i < q; ++i) out.s[i] = f.id[exact[i]];\n    std::sort(out.s.begin(), out.s.begin() + q);\n",
-      "remplace": "    for (int i = 0; i < q; ++i) out.s[i] = f.id[exact[i]];\n",
-      "porte": "mhgp12_tower_proposal_routes",
-      "note": "T2-d : support de la voie entiere rendu dans l'ordre (paire, apex) : refuse par sorted_subset (repli fallback_not_in_part) quand l'apex precede le dernier SiteIdx ; la cible ne change pas, la route oui"
-    },
-    {
-      "id": "proposition_indices_de_partie",
-      "fichier": "src/tower/resolve.cpp",
-      "cherche": "    for (int i = 0; i < q; ++i) out.s[i] = f.id[exact[i]];\n",
-      "remplace": "    for (int i = 0; i < q; ++i) out.s[i] = static_cast<u32>(exact[i]);\n",
-      "porte": "mhgp12_tower_proposal_routes",
-      "note": "T2-d : indices de la partie rendus au lieu des SiteIdx : support hors de la partie, repli"
     }
   ]
 }

@@ -1,0 +1,24 @@
+Test project $HOME/ehgp-v12/ehgp-v12.dFsz3kRAqM/build
+    Start  15: mhgp12_support_lidar_sentinel
+1/7 Test  #15: mhgp12_support_lidar_sentinel ............   Passed    0.01 sec
+    Start 364: mhgp12_catalogue_lidar_ng00_k5
+2/7 Test #364: mhgp12_catalogue_lidar_ng00_k5 ...........   Passed   10.58 sec
+    Start 365: mhgp12_catalogue_lidar_ng01_k5
+3/7 Test #365: mhgp12_catalogue_lidar_ng01_k5 ...........   Passed    8.64 sec
+    Start 366: mhgp12_catalogue_lidar_ng02_k5
+4/7 Test #366: mhgp12_catalogue_lidar_ng02_k5 ...........   Passed   10.53 sec
+    Start 367: mhgp12_catalogue_euler_lidar_ng00_k5
+5/7 Test #367: mhgp12_catalogue_euler_lidar_ng00_k5 .....   Passed    9.67 sec
+    Start 397: mhgp12_tower_determinism_lidar_ng00_k5
+6/7 Test #397: mhgp12_tower_determinism_lidar_ng00_k5 ...   Passed    9.81 sec
+    Start 441: mhgp12_tower_chain_m0
+7/7 Test #441: mhgp12_tower_chain_m0 ....................   Passed  714.62 sec
+
+100% tests passed, 0 tests failed out of 7
+
+Label Time Summary:
+fast     =   0.01 sec*proc (1 test)
+lidar    = 763.87 sec*proc (7 tests)
+long     = 763.86 sec*proc (6 tests)
+
+Total Test time (real) = 763.89 sec

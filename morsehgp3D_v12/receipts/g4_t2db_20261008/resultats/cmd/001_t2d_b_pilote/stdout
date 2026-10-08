@@ -1,0 +1,5 @@
+pilote_t2d_b_auto_test_ok cas=6 lectures=17 verdicts=adopte,rejete,refuse
+pilote_t2d_b_auto_test_ok cas=6 lectures=17 verdicts=adopte,rejete,refuse
+pilote_t2d_b_verdicts lot_t2d_b=adopte garde_seule=rejete report_seul=adopte temoins_seuls=adopte census_combine=adopte proposition=rejete
+pilote_t2d_b_auto_test_ok cas=6 lectures=17 verdicts=adopte,rejete,refuse
+pilote_t2d_b_verdicts lot_t2d_b=adopte garde_seule=rejete report_seul=adopte temoins_seuls=adopte census_combine=adopte proposition=rejete

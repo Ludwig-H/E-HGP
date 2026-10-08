@@ -87,27 +87,15 @@ struct Proposal {
   u32 q = 0;
 };
 
-// Proposition dans le repere local de la partie (translation par son premier site) ; ne decide rien. D'abord la voie
-// entiere (paire diametrale, triangle aigu : proposal.hpp), sinon DWelzl sur les memes ecarts.
+// DWelzl dans le repere local de la partie (translation par son premier site) ; ne decide rien.
 Proposal propose(const Domain& d, const Part& f) noexcept {
-  i64 local[kMaxPart][3];
+  DWelzl w;
   const auto& origin = d.points[f.id[0]].coordinates();
   for (u32 i = 0; i < f.k; ++i)
-    for (int a = 0; a < 3; ++a) local[i][a] = i64{d.points[f.id[i]].coordinates()[a]} - i64{origin[a]};
+    for (int a = 0; a < 3; ++a)
+      w.p[i][a] = static_cast<double>(d.points[f.id[i]].coordinates()[a]) - static_cast<double>(origin[a]);
+  const DBall ball = w.run(static_cast<int>(f.k));
   Proposal out;
-  int exact[3] = {0, 0, 0};
-  const auto position = [&](int i) noexcept { return d.points[f.id[i]].coordinates(); };
-  if (const int q = f.k >= 2 ? exact_small_support(local, static_cast<int>(f.k), position, exact) : 0; q > 0) {
-    out.ok = true;
-    out.q = static_cast<u32>(q);
-    for (int i = 0; i < q; ++i) out.s[i] = f.id[exact[i]];
-    std::sort(out.s.begin(), out.s.begin() + q);
-    return out;
-  }
-  DWelzl w;
-  for (u32 i = 0; i < f.k; ++i)
-    for (int a = 0; a < 3; ++a) w.p[i][a] = static_cast<double>(local[i][a]);
-  const DBall ball = w.run(static_cast<int>(f.k), exact[0], exact[1]);  // depart sur la paire la plus eloignee
   if (!w.ok || ball.nr < 2 || ball.nr > 4) return out;
   out.ok = true;
   out.q = static_cast<u32>(ball.nr);

@@ -1,0 +1,18 @@
+-- The CXX compiler identification is GNU 11.4.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Looking for C++ include pthread.h
+-- Looking for C++ include pthread.h - found
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- mhgp12 : unites testees = tower ; modules de la bibliotheque = core;num;sched;cloud;io;index;catalogue;tower ; bits = 21
+-- Found Python3: /usr/bin/python3.10 (found suitable version "3.10.12", minimum required is "3.10") found components: Interpreter 
+-- mhgp12 : portes diff_v11 de la tour absentes (MHGP12_V11_TOWER_DIR='')
+-- mhgp12 : 69 portes enregistrees
+-- Configuring done
+-- Generating done
+-- Build files have been written to: $HOME/ehgp-v12/ehgp-v12.dFsz3kRAqM/build/t2d_b/garde/build
