@@ -1,0 +1,57 @@
+--- a/morsehgp3D_v12/docs/PLAN.md
++++ b/morsehgp3D_v12/docs/PLAN.md
+@@ -163,3 +163,3 @@
+ ([sessions A6](../receipts/g4_t2da6_20261008/README.md)) : grandes trames 0,914 (queue de 27–72 à 12–20 ms), mais ng00 et ng01
+-ralenties de 3 à 4 % (seuil 1,02) ; retiré de `main`, une A6b sans cette perte reste à concevoir. **Lot T2-d-B2 adopté sur G4 le 8 octobre**
++ralenties de 3 à 4 % (seuil 1,02) ; retiré de `main`, la reprise A6b est évaluée ci-dessous. **Lot T2-d-B2 adopté sur G4 le 8 octobre**
+ ([session T2-d-B2](../receipts/g4_t2db2_20261008/README.md), bras sur `72f622a55`) : mur FULL 0,944 / 0,948 / 0,963 sur ng00–02, 0,982 et 0,984
+@@ -169,5 +169,8 @@
+ ([session R1](../receipts/g4_r1_20261008/README.md)) : grandes trames 0,973, ng00–02 0,963 à 0,970, K10 0,95 en
+-information. **A6b (aides après G) rejeté sur G4 le 8 octobre**
+-([sessions A6b](../receipts/g4_a6b_20261008/README.md)) : grandes trames 0,849 (médiane 144 → 125 ms, maximum 281 → 239 ms),
+-mais ng00 1,009 et ng01 1,013 au-dessus du seuil de 1,01 ; retiré de `main`, A6c à concevoir sans cette perte. Suites déclarées (T2-c) : classification des cellules et table de populations
++information. **A6b (tranches G réclamables prioritaires sur les aides) rejeté sur G4 le 8 octobre**
++([sessions A6b](../receipts/g4_a6b_20261008/README.md)) : rapport géométrique grandes trames 0,849 ; médiane des
++21 médianes 152,754 → 132,304 ms, pire médiane 289,255 → 241,637 ms. Les bornes hautes des IC ng00 (1,011640) et
++ng01 (1,019481) dépassent le seuil de 1,01 ; retrait publié en `8a0716e74`, A6c à concevoir sans cette perte.
++L'épuisement des tranches G réclamables ne signifie pas que toutes les tranches en vol sont terminées.
++Suites déclarées (T2-c) : classification des cellules et table de populations
+ reconstruites à chaque appel (37 ms à K5, 385 ms à K10 à 3 fils) à rendre résidentes ou parallèles ; coût par unité
+--- a/morsehgp3D_v12/receipts/g4_a6b_20261008/README.md
++++ b/morsehgp3D_v12/receipts/g4_a6b_20261008/README.md
+@@ -1,2 +1,2 @@
+-# Sessions G4 A6b : la chaîne de l'ordre K, aides après G — rejetée, retirée du produit
++# Sessions G4 A6b : la chaîne de l'ordre K, priorité des réclamations G — rejetée, retirée du produit
+ 
+@@ -16,4 +16,5 @@
+ quel). C'est A6 avec son pont de publication (`CST-0242`), plus un seul changement d'ordonnancement, tiré du diagnostic
+-du rejet d'A6. Le noyau passe d'abord, puis les étapes, puis les tranches de G, puis les aides ; aucune aide ne
+-commence pendant G. Pilote [`pilote_t2d_a6b.py`](../../microbancs/mes_t2d_a6b/pilote_t2d_a6b.py). `REGLE_T2D_A6B`, écrite
++du rejet d'A6. À chaque choix de travail, l'ordre de priorité est noyau, étapes, tranches de G, puis aides.
++Une aide devient réclamable lorsque toutes les tranches de G ont été réclamées ; des tranches déjà en vol peuvent
++encore être actives. Le compteur de priorité ne prouve pas leur achèvement. Pilote [`pilote_t2d_a6b.py`](../../microbancs/mes_t2d_a6b/pilote_t2d_a6b.py). `REGLE_T2D_A6B`, écrite
+ à 14:47 UTC avant toute mesure :
+@@ -59,7 +60,12 @@
+ 
+-**Sur les grandes trames, le gain est massif.** La queue passe de 29–75 ms à 10–22 ms :
++**Sur les 21 grandes trames**, le gain géométrique apparié est de 15,09 %. La médiane des 21 médianes par trame
++passe de **152,754103 à 132,303583 ms** ; la pire médiane de **289,254605 à 241,637358 ms** ; le maximum brut
++chaud de **291,917600 à 242,388635 ms**. Les 21 médianes et les 126 passes chaudes après restent au-dessus de 100 ms.
++Le gain géométrique n'est pas le quotient des deux médianes globales.
+ 
+-- trame médiane `kitti_ng_02_001606` : 144,4 → 124,6 ms ;
+-- `kitti_ng_00_001896` : 289,3 → 241,6 ms ;
+-- trame maximale `kitti_ng_08_002119` : 281,4 → 239,0 ms.
++Exemples de médianes par trame :
++
++- `kitti_ng_02_001606` : 144,4 → 124,6 ms ;
++- `kitti_ng_00_001896` : 289,3 → 241,6 ms (pire médiane dans chacun des deux bras) ;
++- `kitti_ng_08_002119` : 281,4 → 239,0 ms.
+ 
+@@ -76,3 +82,5 @@
+ 
+-**Décision.** La règle rejette A6b. Il est **retiré de `main`** : `src/tower/`, `tests/tower/` et
++**Décision.** La règle rejette A6b : les bornes hautes des IC de ng00 (**1,011640**) et ng01 (**1,019481**)
++dépassent 1,01. Le rapport central de ng00, 1,008600, reste inférieur à 1,01 ; le rejet porte sur sa borne haute.
++A6b est **retiré de `main` au commit `8a0716e74`** : `src/tower/`, `tests/tower/` et
+ `tests/mutants/tower.json` reviennent à leur état de `47feedc96`, plancher 55. Le pilote reste comme banc. Une A6c est

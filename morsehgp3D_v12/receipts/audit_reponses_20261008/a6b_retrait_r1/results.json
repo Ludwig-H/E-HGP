@@ -1,0 +1,35 @@
+{
+  "schema": "a6b-retrait-r1-result-v1",
+  "capture": "état local non commis après 6dfbc4b93e80222a012388e7611be353a3022ae4",
+  "source_r1": "47feedc96ee4b4cb85b5a7c590f38c874bb04855",
+  "source_a6b": "f2c106d93f1c835f129cef60e4e5e65ae185bd65",
+  "fichiers_identiques_r1": 163,
+  "src_identiques_r1": 137,
+  "restaures": 13,
+  "supprimes": [
+    "morsehgp3D_v12/src/tower/pipeline_steps.cpp",
+    "morsehgp3D_v12/tests/tower/pipeline_levers.cpp",
+    "morsehgp3D_v12/tests/tower/pipeline_support.hpp"
+  ],
+  "mutants_supprimes": [
+    "numerotation_cohorte_coupee",
+    "numerotation_sans_controle_de_rang",
+    "indice_sans_borne_du_noyau",
+    "indice_de_la_naissance_zero",
+    "profondeur_decalee",
+    "csr_sans_controle",
+    "noyau_ouvert_avant_numerotation",
+    "cloture_numerotation_partielle",
+    "aide_avant_g",
+    "fermeture_sans_attente",
+    "aide_sans_garde"
+  ],
+  "mutant_relocalise": [
+    "phases_sans_tranches"
+  ],
+  "plancher_restant": 55,
+  "CST-0241": "corps et porte de terminaison conservés à l’identique de R1",
+  "CST-0242": "objet A6b absent du produit capturé, pas de qualification universelle du pont",
+  "R1": "registre conservé à l’identique",
+  "nouvelles_portes_natives_jouees_par_auditeur": 0
+}

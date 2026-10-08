@@ -1,0 +1,41 @@
+{
+  "schema": "a6b-retrait-r1-capture-v1",
+  "lecture_debut_utc": "2026-10-08T17:44:07.686244+00:00",
+  "lecture_fin_utc": "2026-10-08T17:44:10.914646+00:00",
+  "head_observe": "6dfbc4b93e80222a012388e7611be353a3022ae4",
+  "base_r1": "47feedc96ee4b4cb85b5a7c590f38c874bb04855",
+  "prototype_a6b_livre": "f2c106d93f1c835f129cef60e4e5e65ae185bd65",
+  "retrait_commis": null,
+  "nature": "capture locale non commise, deux inventaires égaux ; aucun moteur exécuté",
+  "scopes": [
+    "morsehgp3D_v12/src",
+    "morsehgp3D_v12/tests/tower",
+    "morsehgp3D_v12/tests/mutants/tower.json"
+  ],
+  "fichiers_locaux": 163,
+  "fichiers_src": 137,
+  "inventaire_sha256": "68b8bc902817dd2c2ff7240e7452e57657110c8f2639fe5ff89dd3e2b2a70ed3",
+  "local_identique_base_r1": true,
+  "changements_depuis_a6b": [
+    "morsehgp3D_v12/src/tower/forest_births.cpp",
+    "morsehgp3D_v12/src/tower/forest_build.cpp",
+    "morsehgp3D_v12/src/tower/forest_internal.hpp",
+    "morsehgp3D_v12/src/tower/forest_kernel.cpp",
+    "morsehgp3D_v12/src/tower/module.cmake",
+    "morsehgp3D_v12/src/tower/pipeline.cpp",
+    "morsehgp3D_v12/src/tower/pipeline.hpp",
+    "morsehgp3D_v12/src/tower/pipeline_run.cpp",
+    "morsehgp3D_v12/src/tower/tower.hpp",
+    "morsehgp3D_v12/tests/mutants/tower.json",
+    "morsehgp3D_v12/tests/tower/pipeline_unit.cpp",
+    "morsehgp3D_v12/tests/tower/region_unit.cpp",
+    "morsehgp3D_v12/tests/tower/tests.cmake"
+  ],
+  "supprimes_depuis_a6b": [
+    "morsehgp3D_v12/src/tower/pipeline_steps.cpp",
+    "morsehgp3D_v12/tests/tower/pipeline_levers.cpp",
+    "morsehgp3D_v12/tests/tower/pipeline_support.hpp"
+  ],
+  "ajoutes_depuis_a6b": [],
+  "registry_branches_sha256": "a0a8e045a696124dcc36175fec818e3cad6fa9720dc0bbb0061ca2b4aa125411"
+}
