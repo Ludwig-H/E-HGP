@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-8 octobre 2026. Base publiée **`9c5656029`** ; prototypes distingués des livraisons.
+8 octobre 2026. Base publiée **`eb86468bf`** ; prototypes distingués des livraisons.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
 
@@ -37,7 +37,9 @@ Trois trames d'une seule séquence ; les 100 ms, u24/u32 GPU et les autres régi
 - **T/M/V/R** : [preuves antérieures](../receipts/audit_tmv_profils_20261007/README.md) conservées.
   [Patch `6f0643ac`](../receipts/audit_tmvr_admission_20261008/README.md) : admission CSR corrigée,
   `4 A + 8 Σ(R_k+1)`, garde avant allocation, porte du pic et mutant ciblé sans cache.
-  Qualification repo5 en cours ; `0105/0107` attendent la livraison ; `0212` clos au microbanc seulement.
+  [Repo5 u21 clos](../receipts/audit_tmv_repo5_u21_20261008/README.md) : 680 tests, une sentinelle sautée,
+  neuf chaînes C/G natives conformes et 16 mutants tués ; profils larges en cours.
+  `0105/0107` attendent la livraison ; `0212` clos au microbanc seulement.
 - **Gc `45976be8`** : [table 16 octets retirée](../receipts/audit_reponses_20261007/gc_support_domain_delta/README.md),
   catalogue A/B conservé ; garde de tous les SiteIdx proposée, aucun défaut FULL valide déduit.
   [Nouvelles portes](../receipts/audit_reponses_20261007/gc_rebase_portes/README.md) : 675 rapides + 6 LiDAR,
@@ -52,7 +54,8 @@ Trois trames d'une seule séquence ; les 100 ms, u24/u32 GPU et les autres régi
 **Aide mathématique et coût.** Gc : recherche exacte logarithmique sous collisions ; gain du hash par cellule
 conditionnel, identité G liée à la politique. Les preuves détaillées restent liées au registre.
 [D2/MEMO `0104`](../receipts/audit_reponses_20261008/d2_memo/README.md) : portes natives livrées et passées
-en I, niveaux rationnels confirmés ; reste le mutant de date terminale, sans transfert aux lecteurs TMVR.
+en I, niveaux rationnels confirmés ; [mutant de date proposé](../receipts/audit_reponses_20261008/d2_memo_mutant/README.md),
+application et modèle vérifiés, exécution native attendue ; sans transfert aux lecteurs TMVR.
 [Repli `0009` clos](../receipts/audit_reponses_20261008/repli_unresolved_0009/README.md) : lots de feuilles
 distribués sur le Pool, tampons comptés, portes CPU/GPU acquises ; aucun gain isolé revendiqué.
 `0008` reste ouvert : l'admission exige un seul pilote, contrairement à l'architecture annoncée.

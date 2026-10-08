@@ -1,0 +1,106 @@
+{
+  "base": "c903774b1d16c3b18c15b86fa2a55d11d44b8bc8",
+  "binary_provenance": "hashes observes ; compilation historique non reconstruite independamment",
+  "files_sha256": {
+    "build21e/CMakeCache.txt": "76cc5009139c466e4116fa6fb87f592f459a7a33ec27182637fe0646c9e193f7",
+    "build21e/Testing/Temporary/LastTest.log": "13098e5d747037b3e4a88f2da64d726d428185285539971b5160978e5361b70f",
+    "build21e/mhgp12_tower_chain": "a75b95375975ea699ec523032a4127e30e9e7c361d49661f671f1cc62755849c",
+    "build21e/mhgp12_tower_dumps": "6a8141648d10de37e6e4f29a39e9a7a4a1f7ca541b1af31e086104b1a80974ab",
+    "build21e/mhgp12_tower_forest": "a0e4fa7bb342df232595c15b017d9a02180f9c16775f402dcf2fb1498cffbfa0",
+    "final5/build21.log": "e0bf015ffab46fe2beecbd5de6b94a8c4450436cf10b3dbcaf1176879ebf0d61",
+    "final5/cfg21.log": "417e4740c8fc1baba0cc81865728aa416a6ddd6b78249697098855c2e9a2f876",
+    "final5/chaine_21_a.log": "1678265dc67a5901d6f816ee745273af6e898c8f3459a152b60e32f4bc713ee5",
+    "final5/chaine_21_b.log": "8240538c3451d69143280cfdcb25c42accfae2e12acd2c97f22d9cd8a6dc5c7c",
+    "final5/chaine_21_c.log": "c13ceb3369cc6d7579b7dee2b0815933b8486dde86cc2fe50cd4d124ed204a0a",
+    "final5/ctest21.log": "aeeb9a5c0aa3415961f7217b451d8af2a7311ec8a46848812b8892bf0aa7f71b",
+    "final5/m0_21.log": "9721a689916a3c18c133e71bcf90177e238933d6b4166da387833705b9551c7d",
+    "final5/mutants.log": "aa03d2d3d6447aa31a4cd8c2540d473c0182fa24062a2b525262635e1540a721",
+    "final5/mutants_tower.json": "8e7161ff01e9398909cef917f6ba95333eb0da52e82526d3df900f8bbdb0f735",
+    "outils/etape_final5.sh": "339b152115a7a18888833861fbd9f9c4e4cbb871eb8804d81ead606f7897e918",
+    "patch_tour_TMV.diff": "6f0643acca9d6c27755f1e3dde15b166c810371eb88662a32360f6d5c2136de9"
+  },
+  "prior_reader_sha256": "b1424b987d0c19b2f4eb966fd852e4e1284ebdc491f312dc0943d81694bd86b5",
+  "public_status": "not_claimed",
+  "result": {
+    "admission": {
+      "controls": 685,
+      "equal_peaks": 40,
+      "failures": 0,
+      "retained_rows": 25383,
+      "stages": 160
+    },
+    "chain_cases": [
+      "ng00_k10",
+      "ng00_k5",
+      "ng01_k10",
+      "ng01_k5",
+      "ng02_k10",
+      "ng02_k5",
+      "u16000_k5",
+      "u32000_k5",
+      "u8000_k5"
+    ],
+    "codes": {
+      "build21": {
+        "code": 0,
+        "utc": "00:08:19"
+      },
+      "chaine_21_a": {
+        "code": 0,
+        "utc": "00:33:21"
+      },
+      "chaine_21_b": {
+        "code": 0,
+        "utc": "00:32:20"
+      },
+      "chaine_21_c": {
+        "code": 0,
+        "utc": "00:35:16"
+      },
+      "ctest21": {
+        "code": 0,
+        "utc": "00:15:11"
+      },
+      "m0_octets_21": {
+        "code": 0,
+        "utc": "00:20:33"
+      },
+      "mutants": {
+        "code": 0,
+        "utc": "00:49:34"
+      }
+    },
+    "ctest_passed": 680,
+    "ctest_skipped": 1,
+    "cuda_enabled": false,
+    "gcp_used": false,
+    "m0_cases": 9,
+    "m0_target_modes": 2,
+    "mutants_killed_by_code": [
+      "admission_r_sans_decalages",
+      "arret_sous_la_fenetre",
+      "branches_coupe_fermee",
+      "census_sans_seuil",
+      "cible_cellule_prise_pour_naissance",
+      "cible_de_meme_rang",
+      "controle_croise_decale",
+      "decroissance_apres_le_saut",
+      "element_sans_racine",
+      "etoile_entiere",
+      "naissances_par_cle",
+      "plateau_non_atomique",
+      "t1_sans_s_dans_f",
+      "t6_sans_remontee",
+      "table_s_etoile_muette",
+      "union_par_indice"
+    ],
+    "native_replayed": false,
+    "payloads_read": false
+  },
+  "source_tree": [
+    "848c7a0b771b2e69a8fb9e954b8f1c4e756f1bae3365335a16ab8cab421332d9",
+    376
+  ],
+  "status": "prototype_repo5_u21_traces_closes",
+  "wide_profiles": "non qualifies par ce recu"
+}

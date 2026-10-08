@@ -1,0 +1,38 @@
+{
+ "added_mutant": "date_initiale_remplacee_par_date_terminale",
+ "all_eight_patterns_apply": true,
+ "expected_native_result": "witness_memo fails by code; not yet executed",
+ "gate": "mhgp12_tower_unit_witness_memo",
+ "model": [
+  {
+   "case": "memo_K2_census",
+   "mutant": true,
+   "original": false
+  },
+  {
+   "case": "memo_K3_catalogue",
+   "mutant": true,
+   "original": false
+  },
+  {
+   "case": "valid_D2",
+   "mutant": true,
+   "original": true
+  },
+  {
+   "case": "terminal_equal_junction",
+   "mutant": false,
+   "original": false
+  },
+  {
+   "case": "nondecreasing_step",
+   "mutant": false,
+   "original": false
+  }
+ ],
+ "mutated_source_sha256": "4dc1281404d8e842bcf545b7689065ba50c88098124f03558c85d18407e5c4de",
+ "native_played": false,
+ "patch_applies": true,
+ "real_manifest_reader_accepts": true,
+ "shared_control_functions_unchanged": true
+}

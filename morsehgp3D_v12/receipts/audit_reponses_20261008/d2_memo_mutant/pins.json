@@ -1,0 +1,30 @@
+{
+ "inputs": [
+  {
+   "path": "morsehgp3D_v12/tests/mutants/tower.json",
+   "sha256": "03a635135f82b4c11affb3d5b03879503e676d358da30d92e936e18e5d3e248c"
+  },
+  {
+   "path": "morsehgp3D_v12/src/tower/resolve.cpp",
+   "sha256": "30abe334849164303a0e81623f7345de482ad6f56d523f6c0e94a7aca0621908"
+  },
+  {
+   "path": "morsehgp3D_v12/tests/mutants/run_mutants.py",
+   "sha256": "5ffa023440ab8b47e98b1f31186d0ef8e4f3f1fcdcd6a77671fe3f5ba51b3bec"
+  },
+  {
+   "path": "morsehgp3D_v12/tests/support/mhgp12_gate.py",
+   "sha256": "a3450726456f5ea45c6cd4f7c707dcbd538620e0bf855c2f1e1ea4e5d76fc594"
+  },
+  {
+   "path": "morsehgp3D_v12/tests/tower/unit.cpp",
+   "sha256": "1d163f132ec417b1ada51922733ba37a5bf0b21a4a7af2149c5fee4af79b1ecd"
+  },
+  {
+   "path": "morsehgp3D_v12/tests/tower/unit_support.hpp",
+   "sha256": "c77b98dc0f2f05359526e2ab3c4c797bead5bae720c7d0ac25bf6c9f2606065e"
+  }
+ ],
+ "manifest_after_sha256": "1d81dd19a780f261e922e66f08f70068eeb72cb781aa60cdef93055259f55241",
+ "pin": "d2f39fe8293d31508697b6db113a7954a7fd0d9e"
+}
