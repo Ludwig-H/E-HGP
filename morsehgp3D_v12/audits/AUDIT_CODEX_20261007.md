@@ -45,25 +45,34 @@ Ni panne native de concurrence ni coût causal isolé du pont établis ; A6b doi
 [Borne de scratch proposée](../receipts/audit_reponses_20261008/a6_admission_n/README.md) : aucun gain mesuré.
 **CST-0241 clos séparément** : [retrait des travailleurs corrigé](../receipts/audit_reponses_20261008/a_terminaison_native/README.md).
 
-**T1-d annoncé adopté sur G4, contre-lecture de campagne en cours.** [Lecture produit](../receipts/audit_reponses_20261008/t1d_produit/README.md) :
-frontières F4, rangs/CSR et table cohérents sous leurs invariants ; aucun défaut géométrique trouvé.
-À corriger : métadonnées variables hors budget ; publication des niveaux et rassemblement manquants au détail
-des temps appareil, mais présents dans le mur C. Pas de transfert des essais à transit simulé vers CUDA.
-[Correctif de juge prêt](../receipts/audit_reponses_20261008/t1d_admission/README.md) : FULL recouvert refusé par
-l'ancien lecteur au pin5f. Le développeur choisit ensuite FUL1 séquentiel en c31 et rejoue T1-d2 ;
-le **port_c31.patch** conserve ce choix. Dix admissions partielles indues bloquées,36 injections conformes,
-ancien auto-test39 conservé.
-Pics cumulés propres liés au budget sur chaque passe, cohorte exacte, refus liés à la commande et préfixes
-contrôlés. Le seuil1% porte sur **C seul**, pas FULL. Proposition Python, aucun moteur exécuté par l'auditeur.
+**[T1-d2 admis](../receipts/audit_reponses_20261008/session_t1d_admission/README.md), coût C stable à1% près.**
+168 processus/campagne, C GPU K5 **26,23/23,20/26,46 ms** ; IC95 hauts1,0034/1,0063/1,0082.
+Archives/sources/arrêts clos ; T1-d1 reste refusé pour son format FULL, T1-d2 emploie FUL1 séquentiel.
+Le [port strict c31](../receipts/audit_reponses_20261008/t1d_admission/README.md) conserve ces deux verdicts.
+Sous budgets :12 succès/24 refus initiaux ; jusqu'à3 tranches K5,7 tranches et7 lots K10.
+Pics propres cumulatifs contrôlés. Aucun FULL massif ni nouveau chrono CPU seul dans ces sessions.
+
+**Identité sous budget à compléter** : MHGP12DP omet niveaux et table ; FUL1 est joué sans ces budgets.
+[Complément prêt](../receipts/audit_reponses_20261008/t1d_identite_flux_proposition/README.md), après port_c31 :
+empreintes hors mur, référence CPU→libre→budgets, préfixes avant refus compris ;46 injections/6 mutations Python.
+Cela couvre niveaux exacts et requêtes positives S*, pas les octets internes ni toutes les requêtes négatives.
+Les anciennes campagnes gardent leur portée ; seuil1% sur **C seul**, aucun contrat FULL100ms déduit.
+
+[Lecture produit](../receipts/audit_reponses_20261008/t1d_produit/README.md) : frontières F4/rebasage/table cohérents
+sous leurs invariants. [Correction mémoire proposée](../receipts/audit_reponses_20261008/t1d_metadonnees_proposition/README.md) :
+plan compté, coexistence ancien/nouveau réservée ; raccord des descripteurs propriétaires encore en pseudocode.
+Publication des niveaux et rassemblement manquent au détail appareil, mais restent dans le mur C.
+Aucun code natif exécuté par l'auditeur ; refus/réemploi/identités de ces corrections restent à qualifier.
 
 **[R1 intégré47feed](../receipts/audit_reponses_20261008/r1_raccord_math/README.md), avis mathématique favorable.**
 Critère q=d+1, lignes et ordre des enfants conservés. Admission Session encore conservative ; R ne débloque
-ni G ni V. Source des portes causales lue, aucune exécution native ou mesure G4 R1 qualifiée ici.
+ni G ni V. Source des portes causales lue ; campagne G4 rapatriée, admission des temps en cours.
 **CPU** : [diagnostic antérieur](../receipts/audit_reponses_20261008/cpu_feuilles_finition/README.md), C représente83–84% FULL ;
 finition déjà parallèle, feuille16 sans gain global face à24. Comparaison v11 non appariée : GPU plus rapide,
 CPU encore plus lent. [G-APP2](../receipts/audit_reponses_20261008/gapp2_admission/README.md) rejeté pour D1/D2,
-lots préparés et certification hors chrono : aucun gain FULL GPU de cette piste. Raccord census B2 désormais
-mesuré dans le lot ; branche de norme i64 au profil32 toujours sans fixture, selon la réponse développeur.
+lots préparés et certification hors chrono : aucun gain FULL GPU de cette piste. Raccord census B2 mesuré dans le lot. [Fixtures u32 proposées](../receipts/audit_reponses_20261008/b2_norme_u32/README.md) :
+deux segments d’étendues30/32 atteignent certified et exigent une norme i128, Fraction conforme.
+Aucun défaut actuel trouvé ; porte native u32 restant à exécuter.
 
 **Petits LiDAR** : [C3](../receipts/audit_reponses_20261008/session_c3_admission/README.md),132 réels W48/cache8 Gio,
 K5 CPU/GPU25,003/7,856 ms ; K10 46,420/14,571 ms. Huit refus `wide_leaf` dans la cohorte difficile ;
@@ -77,5 +86,5 @@ Plus grands succès FULL K5 : GPU Marseille brut6,709M en26,602s à froid ;
 [CPU L2](../receipts/audit_reponses_20261008/session_l2_admission/README.md), Paris brut14,552M en165,789s à froid.
 FUL1 seulement jusqu'à1,6M en L1p ; pas de plafond universel en sites ni de contrat100ms massif acquis.
 
-Canal courant compact ; détails et anciens états dans les reçus. Nettoyage machine du8 à12:39 UTC : environ8,4Go
-libérés, sources/builds/preuves préservés. Les nouveaux travaux consomment ensuite une partie de cette marge.
+Canal courant compact ; détails et anciens états dans les reçus. Nettoyage machine antérieur : environ8,4Go libérés,
+sources/builds/preuves préservés.

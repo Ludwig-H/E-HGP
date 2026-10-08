@@ -1,0 +1,64 @@
+{
+  "commande_cout_et_seuils_inchanges": true,
+  "mutations_causales": {
+    "libre_son_propre_oracle": {
+      "mutant": "adopte",
+      "proposition": "rejete",
+      "temoin": "flux_libre_et_budgets_faux"
+    },
+    "sans_comparaison_niveaux": {
+      "mutant": "adopte",
+      "proposition": "rejete",
+      "temoin": "flux_niveaux_modifies"
+    },
+    "sans_comparaison_table": {
+      "mutant": "adopte",
+      "proposition": "rejete",
+      "temoin": "flux_table_modifiee"
+    },
+    "sans_completude": {
+      "mutant": "adopte",
+      "proposition": "refuse",
+      "temoin": "flux_preuve_refuse_apres_C"
+    },
+    "sans_ecarts": {
+      "mutant": "adopte",
+      "proposition": "rejete",
+      "temoin": "flux_table_ecarts"
+    },
+    "sans_prefixes_refuses": {
+      "mutant": "adopte",
+      "proposition": "rejete",
+      "temoin": "flux_prefixe_niveaux_faux"
+    }
+  },
+  "normal_optimise_identiques": true,
+  "nouveaux_cas": {
+    "flux_complet_absent": "refuse",
+    "flux_ecarts_booleen": "refuse",
+    "flux_libre_et_budgets_faux": "rejete",
+    "flux_niveaux_modifies": "rejete",
+    "flux_prefixe_niveaux_faux": "rejete",
+    "flux_prefixe_table_ecarts": "rejete",
+    "flux_prefixe_table_fausse": "rejete",
+    "flux_preuve_refuse_apres_C": "refuse",
+    "flux_table_ecarts": "rejete",
+    "flux_table_modifiee": "rejete"
+  },
+  "pin": "c31beaf2200d1a7f8eed09b0c1c7c0f6af3b74f3",
+  "port_preexistant": "juge_g4_t1d_ok injections=36",
+  "porte": "juge_g4_t1d_ok injections=46",
+  "projection_ancien_protocole": {
+    "flux_complet_absent": "adopte",
+    "flux_ecarts_booleen": "adopte",
+    "flux_libre_et_budgets_faux": "adopte",
+    "flux_niveaux_modifies": "adopte",
+    "flux_prefixe_niveaux_faux": "adopte",
+    "flux_prefixe_table_ecarts": "adopte",
+    "flux_prefixe_table_fausse": "adopte",
+    "flux_preuve_refuse_apres_C": "refuse",
+    "flux_table_ecarts": "adopte",
+    "flux_table_modifiee": "adopte"
+  },
+  "qualification_native": false
+}

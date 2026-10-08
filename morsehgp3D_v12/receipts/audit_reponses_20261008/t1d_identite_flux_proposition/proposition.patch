@@ -1,0 +1,195 @@
+--- a/morsehgp3D_v12/bench/g4_catalogue_t1d.py
++++ b/morsehgp3D_v12/bench/g4_catalogue_t1d.py
+@@ -17,7 +17,8 @@
+   4. identite (apres) : voie appareil (3 passes) = voie CPU = F2 sur ng00-02 a K5 et K10 et uniformes a K5 ;
+   5. voie en flux sur l'appareil reel (apres) : pour ng00-02 a K5 et K10, une prise sans budget (--tranches : octets
+      de l'appareil gardes), puis des budgets de l'appareil de 1/2, 1/3, 1/4, 1/6, 1/8 et 1/32 de ces octets
+-     (--budget-appareil) : arene rapatriee, tranches, empreinte ;
++     (--budget-appareil) : arene rapatriee, tranches, empreinte ; --digest-complet hors wall_ns sur chaque prise,
++     niveaux et requetes positives de table S* identiques a la prise libre et a l'identite CPU, table_ecarts nul ;
+   6. FUL1 (sonde FULL, voie appareil) : avant = apres sur les memes cas ; ng00-02 = session K ;
+   7. campagne : K5, ng00, ng01, ng02, --tours tours ; dans chaque tour et pour chaque trame, un processus neuf par
+      bras, ordre decale d'un bras par tour et a rebours un tour sur deux ; --passes passes a --fils fils ;
+@@ -76,7 +77,8 @@
+ 
+ 
+ def slices(s, probe, threads):
+-    """Voie en flux sur l'appareil reel : prise sans budget, puis budgets de l'appareil en fractions de ses octets."""
++    """Prise libre puis budgets en fractions de ses octets ; empreintes completes hors mur pour chaque succes,
++    y compris les prefixes precedant un refus. Les spec_* communes demandent --digest et --digest-complet."""
+     rows = []
+     for case, k in T.SLICE_CASES:
+         free = F.probe_run(s, 'flux_%s_k%d_libre' % (case, k), probe, case, T.spec_free(k, threads))
+--- a/morsehgp3D_v12/bench/g4_catalogue_t1d_judge.py
++++ b/morsehgp3D_v12/bench/g4_catalogue_t1d_judge.py
+@@ -33,7 +33,9 @@
+                     'contrat ne paie rien a 1 % pres)',
+         'aa': J.RULE['aa'],
+         'flux': 'pour chaque (trame, K) de SLICE_CASES : chaque prise sous budget de l\'appareil rend F2 ou le refus '
+-                'memory_budget ; au moins une prise identique avec au moins 2 tranches et un lot d\'arene rapatrie ; '
++                'memory_budget ; chaque succes, meme avant refus, porte niveaux/table identiques a la prise libre '
++                'et a l\'identite CPU, table_ecarts nul (--digest-complet hors mur) ; au moins une prise identique '
++                'avec au moins 2 tranches et un lot d\'arene rapatrie ; '
+                 'sur l\'ensemble des cas a K10, au moins une prise identique avec au moins 2 lots rapatries (arene en '
+                 'flux lot par lot sur l\'appareil reel)'}
+ 
+@@ -43,11 +45,25 @@
+ 
+ 
+ def spec_free(k, threads):
+-    return L.catalogue_spec('device', k, threads, 2, digest=True, tranches=True)
++    return L.catalogue_spec('device', k, threads, 2, digest=True, complet=True, tranches=True)
+ 
+ 
+ def spec_budget(k, threads, budget):
+-    return L.catalogue_spec('device', k, threads, 2, digest=True, tranches=True, device_budget=budget)
++    return L.catalogue_spec('device', k, threads, 2, digest=True, complet=True, tranches=True, device_budget=budget)
++
++
++def check_complets(parsed, reference, out, label):
++    """Chaque catalogue reussi doit avoir ses niveaux et requetes S* certifies, meme avant un refus ulterieur.
++    MHGP12DP seul ne porte pas ces champs. L'empreinte complementaire est calculee hors wall_ns par la sonde."""
++    if len(parsed['complets']) != len(parsed['passes']):
++        out['refused'].append('flux : preuve complete manquante sur ' + label)
++        return False
++    if reference['table_ecarts'] != 0 or any(
++            c['table_ecarts'] != 0 or c['niveaux_sha256'] != reference['niveaux_sha256'] or
++            c['table_sha256'] != reference['table_sha256'] for c in parsed['complets']):
++        out['rejected'].append('flux : niveaux ou table en defaut sur ' + label)
++        return False
++    return True
+ 
+ 
+ def exact_entries(entries, fields, expected=None):
+@@ -87,6 +103,7 @@
+         out['refused'].append('flux : etape illisible ou prise en double')
+         return
+     stats, streamed_k10 = {}, 0
++    identities = exact_entries(steps.get('identity'), ('case', 'k')) or {}
+     expected = {(case, k, 0) for case, k in SLICE_CASES}
+     for case, k in SLICE_CASES:
+         key, reference = '%s:%d' % (case, k), J.F2_DIGESTS['%s:%d' % (case, k)]
+@@ -94,6 +111,13 @@
+         if state != 'ok' or any(d['catalogue_sha256'] != reference for d in free['digests']):
+             out['refused' if state != 'ok' else 'rejected'].append('flux sans budget : %s (%s)' % (key, why or state))
+             continue
++        # La prise libre n'est pas son propre oracle : l'identite CPU/appareil, deja jugee par check_identity,
++        # porte aussi les niveaux exacts et les requetes positives find_support(S*) absents de MHGP12DP.
++        cs, why, cpu = L.read_catalogue((identities.get((case, k)) or {}).get('cpu'),
++                                        L.catalogue_spec('cpu', k, threads, 1, digest=True, complet=True))
++        if cs != 'ok':
++            out['refused'].append('flux : reference CPU complete absente sur ' + key)
++            continue
+         held = free['tranches'][-1]['device_bytes']
+         ref = refs.get(key)
+         if not memory_ok(free, 0) or not held or ref is None or any(
+@@ -105,6 +129,8 @@
+             out['refused'].append('flux : budgets non distincts ou nuls sur ' + key)
+             continue
+         expected.update((case, k, budget) for budget in budgets)
++        if not check_complets(free, cpu['complets'][0], out, key + ' libre/CPU'):
++            continue
+         best = 0
+         for num, den in FRACTIONS:
+             budget = held * num // den
+@@ -120,6 +146,8 @@
+                     continue
+                 if any(d['catalogue_sha256'] != reference for d in got['digests']):
+                     out['rejected'].append('flux en defaut : %s budget %d/%d' % (key, num, den))
++                    continue
++                if not check_complets(got, free['complets'][0], out, key + ' budget %d/%d' % (num, den)):
+                     continue
+             if state == 'refus' and why == 'resource_exhausted/memory_budget':
+                 continue
+--- a/morsehgp3D_v12/bench/g4_catalogue_t1d_selftest.py
++++ b/morsehgp3D_v12/bench/g4_catalogue_t1d_selftest.py
+@@ -117,10 +117,12 @@
+ 
+ def partial_refusal(report, bad_digest=False, bad_counts=False):
+     e = slice_entry(report, 'ng00', 5, 0)
+-    first = {key: v for key, v in e['run']['rows'][4].items() if key in L.CAT_BASE_KEYS}
++    cut = next(i for i, row in enumerate(e['run']['rows'])
++               if row.get('phase') == 'catalogue' and row['pass'] == 1)
++    first = {key: v for key, v in e['run']['rows'][cut].items() if key in L.CAT_BASE_KEYS}
+     first.update(status='resource_exhausted', reason='memory_budget')
+     e['run']['code'] = 2
+-    e['run']['rows'] = e['run']['rows'][:4] + [first,
++    e['run']['rows'] = e['run']['rows'][:cut] + [first,
+                         dict(phase='exit', status='resource_exhausted', reason='memory_budget')]
+     if bad_digest:
+         e['run']['rows'][3]['catalogue_sha256'] = '0' * 64
+@@ -130,6 +132,36 @@
+ 
+ def full_row(report):
+     return report['steps']['ful1'][0]['run']['rows'][1]
++
++
++def complete_row(report, index=0, p=0):
++    return [x for x in slice_entry(report, 'ng00', 5, index)['run']['rows']
++            if x.get('phase') == 'digest_complet'][p]
++
++
++def partial_complete(report, **change):
++    partial_refusal(report)
++    complete_row(report).update(change)
++
++
++def missing_complete(report, refusal=False):
++    e = slice_entry(report, 'ng00', 5, 0)
++    if refusal:
++        # C et MHGP12DP reussissent, puis la fabrication/ecriture de la preuve complementaire refuse.
++        end = next(i for i, x in enumerate(e['run']['rows']) if x.get('phase') == 'digest_complet')
++        e['run'].update(code=2, rows=e['run']['rows'][:end] + [
++            dict(phase='exit', status='resource_exhausted', reason='memory_budget')])
++    else:
++        e['run']['rows'].remove(complete_row(report, p=1))
++
++
++def common_wrong_complete(report):
++    # Libre et budgets sont coherents entre eux, mais faux par rapport a l'identite CPU.
++    for e in report['steps']['slices']:
++        if (e['case'], e['k']) == ('ng00', 5):
++            for row in e['run']['rows']:
++                if row.get('phase') == 'digest_complet':
++                    row['niveaux_sha256'] = 'e' * 64
+ 
+ 
+ def cases():
+@@ -138,6 +170,16 @@
+            ('borne_1_0101', synthetic_report(ratio=1.0101, constant=True), 'rejete'),
+            ('aa_hors_fenetre', synthetic_report(aa=1.02), 'refuse')]
+     edits = (
++        ('flux_niveaux_modifies', 'rejete', lambda r: complete_row(r).update(niveaux_sha256='e' * 64)),
++        ('flux_table_modifiee', 'rejete', lambda r: complete_row(r, p=1).update(table_sha256='e' * 64)),
++        ('flux_table_ecarts', 'rejete', lambda r: complete_row(r).update(table_ecarts=1)),
++        ('flux_complet_absent', 'refuse', lambda r: missing_complete(r)),
++        ('flux_preuve_refuse_apres_C', 'refuse', lambda r: missing_complete(r, refusal=True)),
++        ('flux_prefixe_niveaux_faux', 'rejete', lambda r: partial_complete(r, niveaux_sha256='e' * 64)),
++        ('flux_prefixe_table_fausse', 'rejete', lambda r: partial_complete(r, table_sha256='e' * 64)),
++        ('flux_prefixe_table_ecarts', 'rejete', lambda r: partial_complete(r, table_ecarts=1)),
++        ('flux_ecarts_booleen', 'refuse', lambda r: complete_row(r).update(table_ecarts=False)),
++        ('flux_libre_et_budgets_faux', 'rejete', common_wrong_complete),
+         ('flux_prefixe_refus_valide', 'adopte', lambda r: partial_refusal(r)),
+         ('flux_prefixe_refus_faux', 'rejete', lambda r: partial_refusal(r, bad_digest=True)),
+         ('flux_prefixe_refus_comptes', 'refuse', lambda r: partial_refusal(r, bad_counts=True)),
+@@ -147,7 +189,8 @@
+         ('flux_pic_nul', 'refuse', lambda r: tranche(r).update(device_peak=0)),
+         ('flux_usage_non_raccorde', 'refuse', lambda r: tranche(r).update(device_bytes=1)),
+         ('flux_pic_decroissant', 'refuse', lambda r: [tranche(r, p=1).update(device_bytes=1, device_peak=1),
+-            slice_entry(r, 'ng00', 5, 0)['run']['rows'][4]['device'].update(device_bytes=1)]),
++            next(x for x in slice_entry(r, 'ng00', 5, 0)['run']['rows']
++                 if x.get('phase') == 'catalogue' and x['pass'] == 1)['device'].update(device_bytes=1)]),
+         ('flux_partage_pic', 'refuse', lambda r: tranche(r, index=-1).update(device_peak=1)),
+         ('flux_budget_surplus', 'refuse', lambda r: extra(r, 'slices', budget=7)),
+         ('campagne_tour_surplus', 'refuse', lambda r: extra(r, 'campaign', round=10)),
+@@ -193,7 +236,9 @@
+         if got['verdict'] != expected:
+             failures.append('%s : %s au lieu de %s (%s)' % (name, got['verdict'], expected,
+                                                            (got['refused'] + got['rejected'])[:2]))
+-    if not T.ratio_check() or L.catalogue_options(T.spec_budget(5, 48, 7))[-1] != '--budget-appareil=7':
++    if not T.ratio_check() or L.catalogue_options(T.spec_budget(5, 48, 7))[-1] != '--budget-appareil=7' or any(
++            '--digest-complet' not in L.catalogue_options(spec) for spec in (T.spec_free(5, 48),
++                                                                           T.spec_budget(5, 48, 7))):
+         failures.append('regle ou options')
+     if failures:
+         print('juge_g4_t1d_ecart ' + ' ; '.join(failures))

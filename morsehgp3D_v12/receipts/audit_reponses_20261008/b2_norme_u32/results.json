@@ -1,0 +1,278 @@
+{
+  "control_spans": [
+    28,
+    29
+  ],
+  "expected_ledger_one_guarded_query": {
+    "certified": 1,
+    "checked": 0,
+    "native": 0,
+    "outside_sites": 0,
+    "wide": 0
+  },
+  "fixtures": [
+    {
+      "anchor": [
+        0,
+        0,
+        0
+      ],
+      "boundary_sign": 1,
+      "box_signs": [
+        -1,
+        1
+      ],
+      "center": [
+        "67108864",
+        "0",
+        "0"
+      ],
+      "denominator": 2,
+      "far": [
+        536870911,
+        536870911,
+        536870911
+      ],
+      "guard_open": [
+        -268435456,
+        536870912
+      ],
+      "lane": "certified",
+      "norm": 864691125233909763,
+      "norm_over_i64": false,
+      "numerator": [
+        134217728,
+        0,
+        0
+      ],
+      "one_square": 288230375077969921,
+      "power_domain": 60,
+      "power_local": 1585267062660399110,
+      "radius_squared": "4503599627370496",
+      "short_norm": true,
+      "signed64_truncation_model_power": 1585267062660399110,
+      "signs": {
+        "anchor": 0,
+        "center": -1,
+        "far": 1,
+        "other_support": 0
+      },
+      "span": 28,
+      "support": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          134217728,
+          0,
+          0
+        ]
+      ],
+      "u32_guard_boundary": [
+        536870912,
+        0,
+        0
+      ]
+    },
+    {
+      "anchor": [
+        0,
+        0,
+        0
+      ],
+      "boundary_sign": 1,
+      "box_signs": [
+        -1,
+        1
+      ],
+      "center": [
+        "134217728",
+        "0",
+        "0"
+      ],
+      "denominator": 2,
+      "far": [
+        1073741823,
+        1073741823,
+        1073741823
+      ],
+      "guard_open": [
+        -536870912,
+        1073741824
+      ],
+      "lane": "certified",
+      "norm": 3458764507378089987,
+      "norm_over_i64": false,
+      "numerator": [
+        268435456,
+        0,
+        0
+      ],
+      "one_square": 1152921502459363329,
+      "power_domain": 60,
+      "power_local": 6341068262989627398,
+      "radius_squared": "18014398509481984",
+      "short_norm": false,
+      "signed64_truncation_model_power": 6341068262989627398,
+      "signs": {
+        "anchor": 0,
+        "center": -1,
+        "far": 1,
+        "other_support": 0
+      },
+      "span": 29,
+      "support": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          268435456,
+          0,
+          0
+        ]
+      ],
+      "u32_guard_boundary": [
+        1073741824,
+        0,
+        0
+      ]
+    },
+    {
+      "anchor": [
+        0,
+        0,
+        0
+      ],
+      "boundary_sign": 1,
+      "box_signs": [
+        -1,
+        1
+      ],
+      "center": [
+        "268435456",
+        "0",
+        "0"
+      ],
+      "denominator": 2,
+      "far": [
+        2147483647,
+        2147483647,
+        2147483647
+      ],
+      "guard_open": [
+        -1073741824,
+        2147483648
+      ],
+      "lane": "certified",
+      "norm": 13835058042397261827,
+      "norm_over_i64": true,
+      "numerator": [
+        536870912,
+        0,
+        0
+      ],
+      "one_square": 4611686014132420609,
+      "power_domain": 60,
+      "power_local": 25364273076654571526,
+      "radius_squared": "72057594037927936",
+      "short_norm": false,
+      "signed64_truncation_model_power": -11529215070764531706,
+      "signs": {
+        "anchor": 0,
+        "center": -1,
+        "far": 1,
+        "other_support": 0
+      },
+      "span": 30,
+      "support": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          536870912,
+          0,
+          0
+        ]
+      ],
+      "u32_guard_boundary": [
+        2147483648,
+        0,
+        0
+      ]
+    },
+    {
+      "anchor": [
+        0,
+        0,
+        0
+      ],
+      "boundary_sign": null,
+      "box_signs": [
+        -1,
+        1
+      ],
+      "center": [
+        "1073741824",
+        "0",
+        "0"
+      ],
+      "denominator": 2,
+      "far": [
+        4294967295,
+        4294967295,
+        4294967295
+      ],
+      "guard_open": [
+        -4294967296,
+        8589934592
+      ],
+      "lane": "certified",
+      "norm": 55340232195358851075,
+      "norm_over_i64": true,
+      "numerator": [
+        2147483648,
+        0,
+        0
+      ],
+      "one_square": 18446744065119617025,
+      "power_domain": 60,
+      "power_local": 92233720321303117830,
+      "radius_squared": "1152921504606846976",
+      "short_norm": false,
+      "signed64_truncation_model_power": -18446744120954191866,
+      "signs": {
+        "anchor": 0,
+        "center": -1,
+        "far": 1,
+        "other_support": 0
+      },
+      "span": 32,
+      "support": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          2147483648,
+          0,
+          0
+        ]
+      ],
+      "u32_guard_boundary": null
+    }
+  ],
+  "native_executed": false,
+  "profile_required": 32,
+  "s29_uniform_norm_upper_exclusive": 3458764513820540928,
+  "target_spans": [
+    30,
+    32
+  ]
+}

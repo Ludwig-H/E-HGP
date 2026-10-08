@@ -1,0 +1,77 @@
+{
+  "captured_utc": "2026-10-08T15:18:14.223666+00:00",
+  "checks": {
+    "independent_math_review": "Source-only approval on same commit; no additional native execution",
+    "normal": {
+      "exit": 0,
+      "stdout_sha256": "60a01713d9c0637479cd440e151bf48478c788b73b08c7c851afb429b7573093"
+    },
+    "optimised": {
+      "exit": 0,
+      "stdout_sha256": "60a01713d9c0637479cd440e151bf48478c788b73b08c7c851afb429b7573093"
+    }
+  },
+  "commit": "a6e3634fcce7f6988a00bdbaacb15488daf4a401",
+  "scope": {
+    "cxx_overflow_model": "Python defines signed-64 reduction only; native signed overflow would be undefined",
+    "full_u32_qualification": false,
+    "gpu_or_gcp": false,
+    "licensed_payloads": false,
+    "native_compiled_or_executed": false,
+    "public_synthetic_supports_only": true
+  },
+  "source_facts": {
+    "lane": "s>16, native-convertible coefficients, power_domain>=s+2 => certified",
+    "norm_long": "Each coordinate is converted to i128 before multiplication.",
+    "q2": "CertifiedBall accepts nondegenerate segment; Sphere stores N=B-A,D=2.",
+    "short_norm": "kCoordBits+2<=30 || s+2<=30",
+    "span": "bit_width(max coordinate width)",
+    "uncovered_gate": "guard_site_lanes exercises spans16,17,19,20,21, not30/32"
+  },
+  "sources": {
+    "receipts/developpement_20261008/reponse_audit_b2_census.md": {
+      "bytes": 3199,
+      "sha256": "f807c2892e64d389cabf4b1cc359d16cfe2cbcea9c032e4ea59b07f6ffc2d72c"
+    },
+    "src/num/budgets.hpp": {
+      "bytes": 8277,
+      "sha256": "d3f3fe22d7bfd3bbab1b377d983aa08897f1bfd320625879527fcaf0be61424f"
+    },
+    "src/num/center_view.hpp": {
+      "bytes": 5213,
+      "sha256": "0ff063db13e3378ae015381364d0142f5b0403153af77658cf9917c796cedf10"
+    },
+    "src/num/frame.hpp": {
+      "bytes": 4109,
+      "sha256": "7bff1619ddd88e4d340e92e4bcd975a6721529de63a3d13ef307e01678aad35d"
+    },
+    "src/num/geometry_internal.hpp": {
+      "bytes": 4960,
+      "sha256": "2220aa8617710136ba3bc1aabe86d377b2584736af25befeff1a2151d086936f"
+    },
+    "src/num/guard.cpp": {
+      "bytes": 7296,
+      "sha256": "ceb51909574c08cb97d02291e52a6beea1ad71498cd82105685d5ce9aee5041c"
+    },
+    "src/num/guard.hpp": {
+      "bytes": 11568,
+      "sha256": "6c2e2325ab5983e05823bca6ee1aeb296d7439bf213aa1a08fc23e3bb5e5ba20"
+    },
+    "src/num/power_certificate.hpp": {
+      "bytes": 2987,
+      "sha256": "f5071c6dfe33c14df1911852cf79ac645e85cb6affc05474adf56b5fbffc9ef1"
+    },
+    "src/num/sphere.cpp": {
+      "bytes": 13955,
+      "sha256": "26fc17965d0cea73763ee4cc63062c19ec601505355043b821c013c4ac6c1290"
+    },
+    "tests/num/guard_test.cpp": {
+      "bytes": 19543,
+      "sha256": "f9fb51051499f5ee383e1cdef607e3011c16ad2e817a38f7c96cbe279c512106"
+    },
+    "tests/num/local_reference.hpp": {
+      "bytes": 3018,
+      "sha256": "9d211f7e901096069441c2fb4d3b8f33c59741a911f9cc65c0f7b077f29c8c71"
+    }
+  }
+}

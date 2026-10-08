@@ -1,0 +1,38 @@
+--- a/morsehgp3D_v12/src/catalogue/slices.cpp
++++ b/morsehgp3D_v12/src/catalogue/slices.cpp
+@@ -104,14 +104,20 @@
+   u64 cap;
+   MemoryBudget& budget;
+   sched::Pool& pool;
+-  std::vector<Bin> slices{};
++  Buffer<Bin> slices{};  // capacite comptee ; seules les cases [0, count) sont initialisees
++  u64 count = 0;
+ 
+   Outcome emit(const Bin& g) noexcept {
+-    try {
+-      slices.push_back(g);
+-    } catch (const std::bad_alloc&) {
+-      return fail(Reason::memory_budget);
+-    }
++    if (count == slices.size()) {
++      const u64 cap = slices.size(), max = Buffer<Bin>::kMaxCount;
++      if (cap == max) return fail(Reason::memory_budget);
++      const u64 next = cap == 0 ? 1 : cap <= max / 2 ? 2 * cap : max;
++      Buffer<Bin> fresh;
++      MHGP12_TRY(fresh.allocate(next, budget));  // ancien et nouveau comptes pendant la copie
++      for (u64 i = 0; i < count; ++i) fresh[i] = slices[i];
++      slices.swap(fresh);  // fresh rend l'ancien stockage avant l'ajout
++    }
++    slices[count++] = g;
+     return {};
+   }
+ 
+@@ -216,7 +222,7 @@
+   }
+   Planner p{arena, keys, slice_bytes, budget, pool};
+   MHGP12_TRY(p.cut(lo, hi));
+-  const u64 count = p.slices.size();
++  const u64 count = p.count;
+   MHGP12_TRY(plan.upper.allocate(count, budget));
+   MHGP12_TRY(plan.balls.allocate(count, budget));
+   MHGP12_TRY(plan.incidences.allocate(count, budget));

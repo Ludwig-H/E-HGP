@@ -1,0 +1,37 @@
+{
+  "captured_utc": "2026-10-08T14:54:52.930213+00:00",
+  "commit": "caf9585e4a89ba101ba86d2d46e77cb340be15bf",
+  "previous_audit_commit": "5f8e777cffbeddfe90e92fc616a920c28c1b985c",
+  "sources": {
+    "morsehgp3D_v12/src/catalogue/slices.cpp": "080ccaddfb0c5666af7ce9e8a0ae2093849c4d92be19a17c05dc2b80f583bae5",
+    "morsehgp3D_v12/src/catalogue/slices.hpp": "f6d1ad7bd4c7b8717100efe0f13b84dfbe2424385754f93892f1b6665eba5c04",
+    "morsehgp3D_v12/src/catalogue/finish_slices.hpp": "4a37dd5d1fb3c77c876b15a26dd4446e3d01f22cf36bd3547f159c80340c9f97",
+    "morsehgp3D_v12/src/catalogue/device_pipeline.hpp": "91c756a6b3c177c70d235d0a6f104ff9077ad56136bebb5ddd76907b92af94ac",
+    "morsehgp3D_v12/src/catalogue/assemble.cpp": "d529959860f4da8748b84db7c6c44611d40705101f2173ccf4f4a87987e3c053",
+    "morsehgp3D_v12/src/catalogue/internal.hpp": "7af114b6a4a56b9f389e537440f1efdd64fc0e4b40d3de91b77e3db6373a6b1f",
+    "morsehgp3D_v12/src/core/buffer.hpp": "8e4d84665e90308ee9572a729731711bb419e3a565fd4dd11b5bd56ab6a92401"
+  },
+  "identical_to_previous": [
+    "morsehgp3D_v12/src/catalogue/slices.cpp",
+    "morsehgp3D_v12/src/catalogue/slices.hpp",
+    "morsehgp3D_v12/src/catalogue/finish_slices.hpp",
+    "morsehgp3D_v12/src/catalogue/device_pipeline.hpp",
+    "morsehgp3D_v12/src/catalogue/assemble.cpp",
+    "morsehgp3D_v12/src/catalogue/internal.hpp",
+    "morsehgp3D_v12/src/core/buffer.hpp"
+  ],
+  "patch": {
+    "scope": "Planner metadata only; uncompiled and unexecuted",
+    "pre_sha256": "080ccaddfb0c5666af7ce9e8a0ae2093849c4d92be19a17c05dc2b80f583bae5",
+    "post_sha256": "e7ff985b326327a8b7eed2d63b816b4ece75768e13c7b17b19a668581d50aee1",
+    "sha256": "16cc8a8928279c2d5ef1505ec8183dca21720cc6de345773694eb1e511bb561e"
+  },
+  "remaining_nontrivial_containers": "pseudocode only; no product implementation or qualification",
+  "prepublication_review": {
+    "utc": "2026-10-08T15:04:05.249324+00:00",
+    "change": "Preserve default member initializer: Buffer<Bin> slices{}; aggregate initializes first five members. Source only; no compiler invoked.",
+    "previous_manifest_sha256": "66b4f0c1253b5d3f583ec39d54300e7b58ba57955d311b9f1e6de6f4553c830e",
+    "previous_patch_sha256": "88bb8ce5c14c1f6599c86b317a26172499001ed933a42b235994bce3001d84a9",
+    "previous_post_sha256": "38a46761c64d0f176353c0462a3396ef1dad956c166befc363b0f0d97fe24819"
+  }
+}
