@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 39,
+  "plancher": 40,
   "mutants": [
     {
       "id": "t1_sans_s_dans_f",
@@ -334,6 +334,21 @@
       ],
       "porte": "mhgp12_tower_pipeline_terminaison",
       "note": "constat de l'auditeur (a_terminaison) : retour a l'ancienne regle de sortie qui relit in_flight apres le retrait ; une annonce concurrente efface le zero et deux fils peuvent se reannoncer sans fin (cycle de seize transitions du modele)"
+    },
+    {
+      "id": "terminaison_relecture_native",
+      "fichier": "src/tower/pipeline_run.cpp",
+      "cherche": "    const bool last = p.in_flight.fetch_sub(1, std::memory_order_acq_rel) == 1;",
+      "remplace": "    p.in_flight.fetch_sub(1, std::memory_order_acq_rel);",
+      "aussi": [
+        {
+          "fichier": "src/tower/pipeline_run.cpp",
+          "cherche": "    if (last && !find_job(p, false, job)) return {};",
+          "remplace": "    if (p.in_flight.load(std::memory_order_acquire) == 0 && !find_job(p, false, job)) return {};"
+        }
+      ],
+      "porte": "mhgp12_tower_region_terminaison",
+      "note": "meme retour a l'ancienne regle, juge par la porte native (a_terminaison_porte) : A suspendu apres son retrait 1 -> 0, B annonce 0 -> 1, A relache relit 1 et attend ; l'assertion attente_A == 0 echoue"
     }
   ]
 }

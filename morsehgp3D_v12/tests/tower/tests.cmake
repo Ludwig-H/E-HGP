@@ -116,6 +116,24 @@ mhgp12_add_unit(mhgp12_tower_pipeline_fault SOURCES pipeline_fault.cpp GROUPS al
 mhgp12_python_gate(mhgp12_tower_pipeline_terminaison 0 pipeline_terminaison.py
                    ${PROJECT_SOURCE_DIR}/src/tower/pipeline_run.cpp
                    LINE "pipeline_terminaison_ok cas=6 periode_ancienne=16 source=conforme" LABELS fast TIMEOUT 120)
+# Meme decision, native et deterministe (protocole de l'auditeur, a_terminaison_porte) : cette seule cible compile
+# pipeline_run.cpp avec MHGP12_REGION_HOOKS (trois points d'observation de run_region, vides dans le produit) ; Session
+# d'un site, K1, Pool de 2, coupe finale, deux fils du harnais ordonnes par semaphores ; l'ancienne regle echoue par
+# l'assertion attente_A == 0. La carte de lien (-Map) prouve que le corps lie est celui de la cible, pas le membre
+# pipeline_run.cpp.o de l'archive, et que l'archive du produit ne porte aucun crochet.
+mhgp12_add_unit(mhgp12_tower_region SOURCES region_unit.cpp ${PROJECT_SOURCE_DIR}/src/tower/pipeline_run.cpp
+                GROUPS terminaison LABELS fast TIMEOUT 120)
+target_compile_definitions(mhgp12_tower_region PRIVATE MHGP12_REGION_HOOKS)
+set(tower_region_map ${PROJECT_BINARY_DIR}/mhgp12_tower_region.map)
+target_link_options(mhgp12_tower_region PRIVATE "LINKER:-Map=${tower_region_map}")
+mhgp12_python_gate(mhgp12_tower_region_carte 0 region_map_check.py ${tower_region_map}
+                   $<TARGET_FILE:mhgp12>
+                   LINE "region_carte_ok corps=instrumente membre_archive=absent archive_sans_crochet=oui"
+                   LABELS fast TIMEOUT 60)
+# Le juge de la carte contre ses faux succes : membre de l'archive lie, objet de la cible absent, crochet dans
+# l'archive (ecarts), carte muette, archive sans le membre ou illisible (refus), sur des entrees fabriquees.
+mhgp12_python_gate(mhgp12_tower_region_carte_juge 0 region_map_check.py --auto-test
+                   LINE "region_carte_auto_test_ok cas=7" LABELS fast TIMEOUT 60)
 # Adaptateur de test des vidages MHGP12DP de la v11 (MES-M0, determinisme, JUG-EMST) : outil joue par la porte
 # MES-M0 ci-dessous et par le pilote du developpeur. Il lit les vidages par le lecteur strict du format, source unique
 # des microbancs (microbancs/mes_m3_m4_tour/common/format.hpp) : construit seulement si ce dossier est present (les

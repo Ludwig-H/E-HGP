@@ -12,6 +12,17 @@
 
 namespace mhgp12::tower::detail {
 
+// Points d'observation de la porte native de terminaison (CST-0241 ; tests/tower/region_unit.cpp) : annonce, retrait
+// sans travail (apres la capture de last), attente (avant la boucle d'attente). VIDES dans le produit : seule la cible
+// de test compile ce fichier avec MHGP12_REGION_HOOKS, fournit region_hook et lie ce corps-ci (marqueur
+// region_hooks_build, carte de lien controlee) ; aucun pointeur ni branche dynamique dans la construction produit.
+#ifdef MHGP12_REGION_HOOKS
+const int region_hooks_build = 1;
+#define MHGP12_REGION_HOOK(point, worker) region_hook(point, worker)
+#else
+#define MHGP12_REGION_HOOK(point, worker) ((void)0)
+#endif
+
 StepDeps step_dependencies(Step s) noexcept {
   switch (s) {
     case kCheck: return {0, {}};
@@ -435,6 +446,7 @@ Outcome run_region(void* raw, u64, u64, u32 w) noexcept {
   u32 idle = 0;
   for (;;) {
     p.in_flight.fetch_add(1, std::memory_order_acq_rel);  // annonce AVANT de reclamer
+    MHGP12_REGION_HOOK(kHookAnnounce, w);
     Job job;
     if (find_job(p, true, job)) {
       idle = 0;
@@ -443,10 +455,12 @@ Outcome run_region(void* raw, u64, u64, u32 w) noexcept {
       continue;
     }
     const bool last = p.in_flight.fetch_sub(1, std::memory_order_acq_rel) == 1;
+    MHGP12_REGION_HOOK(kHookWithdrawn, w);
     const u64 seen = p.epoch.load(std::memory_order_acquire);
     if (last && !find_job(p, false, job)) return {};
     if (find_job(p, false, job)) continue;  // du travail est apparu : reclamer
     // Rien a reclamer : attendre une nouvelle epoque (ou la fin de tout travail en cours) avant d'explorer a nouveau.
+    MHGP12_REGION_HOOK(kHookWait, w);
     while (p.epoch.load(std::memory_order_acquire) == seen && p.in_flight.load(std::memory_order_acquire) != 0)
       relax(idle++);
   }

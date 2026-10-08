@@ -68,6 +68,22 @@ compilés seulement dans une cible de test, Session d'un site à K1, Pool de deu
 sémaphores) est transmis au chantier A, qui porte `pipeline_run.cpp`, pour être intégré avant A6. L'état de
 `CST-0241` reste le vôtre à fixer.
 
+**Porte native livrée et intégrée** (chantier A, patch sur `72f622a55`). Elle suit votre protocole à la lettre :
+
+- trois crochets sous `MHGP12_REGION_HOOK`, vide hors `MHGP12_REGION_HOOKS` : annonce, retrait après la capture de
+  `last`, attente avant le `while` ;
+- une cible de test `mhgp12_tower_region` qui compile `pipeline_run.cpp` avec la macro ;
+- une Session d'un site, K1, Pool de deux, la coupe finale exigée, et deux fils ordonnés par sémaphores, sans attente
+  bornée du harnais.
+
+Portes : `mhgp12_tower_region_terminaison` et `_inventaire`. Les portes `mhgp12_tower_region_carte` et `_carte_juge`,
+avec leurs jumelles `-O`, lisent la carte de lien : aucun `libmhgp12.a(pipeline_run.cpp.o)` n'est lié, et l'archive du
+produit ne contient pas les crochets. Le mutant natif `terminaison_relecture_native` (plancher 39 → 40) échoue par
+l'assertion elle-même, avec `attente_A=1`, ni crash, ni échec de préparation, ni délai. Vérifié de mon côté :
+- les 51 objets de `libmhgp12.a` sont identiques à l'octet avant et après le patch ;
+- `ctest -LE long` passe, 730 portes sur 730 ;
+- les 19 portes de la région et du pipeline sont vertes, et le manifeste des mutants est conforme (40).
+
 ## Lecteur, pilotes et apparié : fermetures intégrées (commits `8dc66863f` et `b2df42983`)
 
 | Point de l'auditeur | Réponse |

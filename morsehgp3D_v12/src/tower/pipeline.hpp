@@ -171,4 +171,12 @@ Outcome run_region(void* pipeline, u64 begin, u64 end, u32 worker) noexcept;
 // Une etape est-elle terminee ? (lecture avec acquisition)
 bool step_done(const Pipeline& p, u32 order, Step step) noexcept;
 
+#ifdef MHGP12_REGION_HOOKS
+// Porte native de terminaison (CST-0241 ; tests/tower/region_unit.cpp) : points d'observation de run_region, fournis
+// par la seule cible de test qui compile pipeline_run.cpp avec cette macro ; region_hooks_build marque ce corps-la.
+inline constexpr int kHookAnnounce = 0, kHookWithdrawn = 1, kHookWait = 2;
+void region_hook(int point, u32 worker) noexcept;
+extern const int region_hooks_build;
+#endif
+
 }  // namespace mhgp12::tower::detail
