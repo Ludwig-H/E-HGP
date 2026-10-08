@@ -14,7 +14,8 @@ Versions courtes du duel HGP contre HDBSCAN, faites pour un écran de téléphon
 
 Chaque scène : les objets, puis HGP (en haut) et HDBSCAN (en bas) balaient l'échelle $\varepsilon$ (le rayon, comme le paramètre de DBSCAN) **en même temps** jusqu'au dernier événement qui décide du résultat, avec une courte pause
 et un bandeau d'une ligne aux événements importants (« A found ✓ », « A, B found ✓ » quand tous sont retrouvés et
-encore séparés, « A + B merged too early ✗ » quand des objets fusionnent avant d'avoir été retrouvés), puis le
+encore séparés, « A + B merged too early ✗ » quand des objets fusionnent avant d'avoir été retrouvés, avec un anneau rouge qui pulse
+autour de leurs points), puis le
 meilleur nœud de chaque hiérarchie pour chaque objet, encadré en vert s'il retrouve l'objet (IoU > 0,5), en rouge
 sinon. Une hiérarchie qui a retrouvé tous ses objets se fige au dernier de leurs maxima (son
 panneau affiche cet $\varepsilon$) pendant que l'autre continue. Seuls textes : HGP, HDBSCAN, $\varepsilon$ et les clusters. Mêmes données et mêmes meilleurs nœuds que les vidéos longues

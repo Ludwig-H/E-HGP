@@ -351,6 +351,14 @@
           const rp = Math.min(r, M.freeze);
           const st = stylesAt(M, rp);
           ctx.globalAlpha = mix * (1 - fin); drawPoints(ctx, P, 'sweep', st); ctx.globalAlpha = 1;
+          // fusion parasite : anneau rouge qui pulse autour des points des objets réunis, pendant sa pause
+          const bad = phase === 'sweep' ? stopAt(t) : null;
+          if (bad && bad.events.some((e) => e.key === P.key && !e.good)) {
+            const pulse = (0.5 + 0.5 * Math.cos(2 * Math.PI * (t - bad.t0) / 0.85)) * Math.min(smooth((t - bad.t0) / 0.25), smooth((bad.t1 - t) / 0.25));
+            ctx.strokeStyle = rgba(C.bad, 0.65 * pulse); ctx.lineWidth = 2.5; ctx.beginPath();
+            for (const i of S.order) if (S.gt[i] >= 0 && st.style[i] === 9) disc(ctx, P.x + S.sx[i], P.y + S.sy[i], 8 + 3 * pulse);
+            ctx.stroke();
+          }
           if (mix > 0.5) { ctx.globalAlpha = (1 - fin); drawLabels(ctx, P, 'sweep', st.marks); ctx.globalAlpha = 1; }
         }
         if (fin > 0) { ctx.globalAlpha = fin; drawBest(ctx, P, M); ctx.globalAlpha = 1; }
