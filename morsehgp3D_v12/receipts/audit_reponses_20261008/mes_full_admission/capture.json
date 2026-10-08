@@ -1,0 +1,67 @@
+{
+  "commit": "c40318ebdab87dbd1ec0509411603ab1ee060247",
+  "constat_existing": "CST-0018",
+  "git_sources_sha256": {
+    "morsehgp3D_v12/bench/full_probe.cpp": "815cb33f4f560943497644031759e25d9dd8b60d86b8aa377e54db53a9099e0d",
+    "morsehgp3D_v12/tests/tower/full_probe_check.py": "a179dc45695b6ab99184883c4e3e7231e2234d9baf36a6ebd1d614e501a9d365"
+  },
+  "pilot_path": "morsehgp3D_v12/microbancs/mes_full/pilote_full.py",
+  "pilot_sha256": "a89ceec92f76c642a508a0c76d5a0a8a31400cab15a7d27141bc37c557b9f92c",
+  "pilot_status": "en_cours_non_commis",
+  "public_status": "not_claimed",
+  "result": {
+    "correction_gate_accepts_missing_measurements": true,
+    "current_isolation_if_sees_truthy_failure": false,
+    "environment_failure_yields_gpu_apps_null": true,
+    "full_campaign_executed": false,
+    "gcp_used": false,
+    "incomplete_cohorts": [
+      {
+        "accepted_by_unpack": true,
+        "case": "une_seule_trame",
+        "returned": 1,
+        "unique": 1
+      },
+      {
+        "accepted_by_unpack": true,
+        "case": "noms_repetes",
+        "returned": 2,
+        "unique": 1
+      }
+    ],
+    "native_executed": false,
+    "pilot_variants": [
+      {
+        "accepted_by_parse": true,
+        "case": "complet_synthetique",
+        "contract_fragment_tenu": true,
+        "rows": 10
+      },
+      {
+        "accepted_by_parse": true,
+        "case": "mur_negatif",
+        "contract_fragment_tenu": true,
+        "rows": 10
+      },
+      {
+        "accepted_by_parse": true,
+        "case": "etape_superieure_au_mur",
+        "contract_fragment_tenu": true,
+        "rows": 10
+      },
+      {
+        "accepted_by_parse": true,
+        "case": "metadonnees_differentes_commande",
+        "contract_fragment_tenu": true,
+        "rows": 10
+      },
+      {
+        "accepted_by_parse": true,
+        "case": "liberations_absentes",
+        "contract_fragment_tenu": true,
+        "rows": 10
+      }
+    ],
+    "real_payloads_read": false
+  }
+}

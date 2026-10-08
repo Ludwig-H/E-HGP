@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-8 octobre 2026, base publiée **`56efbcf92`**.
+8 octobre 2026, base publiée **`4707f6203`**.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
 
@@ -42,10 +42,13 @@ de Cloud/index à T/M/V/R en mémoire ; admission de la future campagne en contr
   u24 clos, u32 interrompu ; aucune qualification transférée à l'assemblage.
 - **D6 `0018`** : [schéma Gc refusé, patch strict proposé](../receipts/audit_reponses_20261008/gc_livraison/README.md),
   deux formats réels admis et 27 corruptions refusées. Composition avec le correctif du plan vérifiée ; quatre plans
-  invalides refusés avant toute prise. Ces deux corrections restent à intégrer.
+  invalides refusés avant toute prise. Corrections livrées en `e37fd8935`, contre-lecture de livraison en cours.
 
 **Aide au développeur et prochains contrôles.**
 
+- **MES-FULL `0018`** : [prélecture du pilote](../receipts/audit_reponses_20261008/mes_full_admission/README.md),
+  capture non commise `a89ceec9` : isolation GPU inconnue, durées/métadonnées incohérentes et cohortes incomplètes
+  encore admises. Contreflux Python reproduits ; correctifs ciblés proposés avant toute déclaration de contrat.
 - **R** : [classes à cellule unique](../receipts/audit_reponses_20261008/registre_classe_unique/README.md) :
   `q=d+1` autorise la copie des enfants sans recherche historique ni tri, mémoire temporaire réduite.
   Preuve, 147 cas et neuf fixtures ; sur les comptes ng00 existants, au moins 78,81 % des requêtes R K5
