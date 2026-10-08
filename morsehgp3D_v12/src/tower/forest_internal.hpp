@@ -76,6 +76,12 @@ inline u32 node_of_top(u32 top, std::span<const u32> event_node) noexcept {
 [[nodiscard]] Outcome number_births(const Cloud& cloud, const BallSource& balls, const ForestInput& input,
                                     std::span<u32> order_out, std::span<u32> node_out, ForestWork& work,
                                     MemoryBudget& budget) noexcept;
+// Morceau [begin, end) de la meme numerotation (levier N de T2-d-A6) : order_out des cohortes qui COMMENCENT dans la
+// plage (une cohorte qui la deborde est triee ici en entier ; celle qui y entre en venant d'avant appartient au morceau
+// precedent), meme tri exact, memes refus ; compteurs de cohortes dans work ; tampon de spheres propre au morceau.
+[[nodiscard]] Outcome number_births_range(const Cloud& cloud, const BallSource& balls, const ForestInput& input,
+                                          std::span<u32> order_out, u64 begin, u64 end, ForestWork& work,
+                                          MemoryBudget& budget) noexcept;
 
 // T, pre-passe (parallele) sur les cellules [begin, end) : feuille canonique de chaque representant, ou son codage
 // << cellule >> ; date de LEM-T3 controlee. Refus tower_invariant (cible hors domaine ou non anterieure).
@@ -89,17 +95,31 @@ inline u32 node_of_top(u32 top, std::span<const u32> event_node) noexcept {
 // tower_capacity, memory_budget. run_kernel enchaine les trois sur toutes les cellules.
 [[nodiscard]] Outcome open_kernel(const ForestInput& input, OrderForest& forest, OrderWork& work,
                                   MemoryBudget& budget) noexcept;
-[[nodiscard]] Outcome advance_kernel(const ForestInput& input, std::span<const u32> leaves, OrderForest& forest,
+[[nodiscard]] Outcome advance_kernel(const ForestInput& input, std::span<u32> leaves, OrderForest& forest,
                                      OrderWork& work, ForestWork& counters, u64 end_cell) noexcept;
 [[nodiscard]] Outcome close_kernel(const ForestInput& input, OrderForest& forest, OrderWork& work,
                                    ForestWork& counters) noexcept;
-[[nodiscard]] Outcome run_kernel(const ForestInput& input, std::span<const u32> leaves, OrderForest& forest,
+[[nodiscard]] Outcome run_kernel(const ForestInput& input, std::span<u32> leaves, OrderForest& forest,
                                  OrderWork& work, ForestWork& counters, MemoryBudget& budget) noexcept;
+// Indices de racine (Session recouverte, levier I de T2-d-A6) : feuilles des cellules [begin, end) remplacees par la
+// racine de leur composante dans l'union-find vivant (lectures atomiques, sans ecriture de up) ; une cible cellule
+// devient la racine de l'element de sa cellule si celle-ci est deja traitee (indice < processed, elements publies par
+// le noyau), sinon elle est gardee. Sortie du noyau inchangee (forest_kernel.cpp). Rend le nombre de feuilles
+// remplacees. L'union-find, les elements et les feuilles doivent survivre a l'appel (garde de la Session).
+u64 hint_leaves(const ForestInput& input, OrderWork& work, u64 begin, u64 end, u64 processed) noexcept;
 
 // T, fin : profondeur d'attache maximale (compteur du travail) et evenements par survivant (CSR de LEM-T5). Lit les
 // evenements du noyau, jamais l'etat de la contraction : peut tourner en meme temps qu'elle.
 [[nodiscard]] Outcome build_history(OrderForest& forest, const OrderWork& work, ForestWork& counters,
                                     MemoryBudget& budget) noexcept;
+// Le meme historique en trois parties (Session recouverte, levier H de T2-d-A6) : controle des evenements
+// [begin, end) (perdant dans le domaine, attache au survivant ; refus tower_invariant) ; profondeur d'attache maximale
+// des noeuds [begin, end), longueur de la chaine d'attaches saturee a 255 (meme valeur que la passe arriere ; maximum
+// dans counters) ; CSR des evenements par survivant (tache seule, apres le controle de tous les evenements).
+[[nodiscard]] Outcome check_history(const OrderForest& forest, const OrderWork& work, u64 begin, u64 end) noexcept;
+void history_depth(const OrderForest& forest, u64 begin, u64 end, ForestWork& counters) noexcept;
+[[nodiscard]] Outcome build_survivor_events(OrderForest& forest, const OrderWork& work,
+                                            MemoryBudget& budget) noexcept;
 
 // M, phases de la contraction d'une tranche (forest_contract.cpp). Phase A : classes et cles ; phase B : noeuds,
 // rangs, plus petites naissances, noeud de chaque evenement ; phase C : parents et nombres d'enfants ; phase D :
@@ -154,12 +174,21 @@ struct BuildState {
 // ne evenements (noeuds au plus naissances + ne) ; V (verticales, noeuds au plus nn) ; R au plus (lignes au plus ne,
 // representants relus au plus nr, branches au plus les representants relus, sortie comprise).
 u64 kernel_bytes(const ForestInput& input) noexcept;
+// Taille de la plus large cohorte de naissances de meme rang (1 si aucune).
+u64 widest_cohort(const ForestInput& input) noexcept;
 u64 contraction_bytes(const ForestInput& input, u64 events) noexcept;
 u64 registry_bytes_bound(const ForestInput& input, u64 events) noexcept;
 
 // ---- Etapes par ordre i (k = i + 1), appelees par les deux pilotes ---------------------------------------------------
 // T : numerotation canonique des naissances et tampon des feuilles (compteurs de cohortes dans state.counters[i]).
 [[nodiscard]] Outcome number_order(BuildState& state, u32 i) noexcept;
+// La meme numerotation par morceaux (Session recouverte, levier N de T2-d-A6) : tampons des cles, des noeuds et de
+// l'ordre ; morceau [begin, end) des naissances (cohortes qui y commencent, number_births_range ; compteurs de cohortes
+// dans counters) ; cloture d'un morceau de positions (noeud et cle de chaque naissance) ; tampon des feuilles.
+[[nodiscard]] Outcome open_numbering(BuildState& state, u32 i) noexcept;
+[[nodiscard]] Outcome number_piece(BuildState& state, u32 i, u64 begin, u64 end, ForestWork& counters) noexcept;
+void close_numbering(BuildState& state, u32 i, u64 begin, u64 end) noexcept;
+[[nodiscard]] Outcome open_leaves(BuildState& state, u32 i) noexcept;
 // M : tranches de l'ordre (au moins params.slice_events evenements, alignees sur les rangs) et tampons par evenement ;
 // apres la phase A, premiers noeuds et noeuds ; apres la phase C, decalages des enfants ; apres la phase D, sommet de
 // chaque cellule, racine unique, liberation du travail de la contraction (les evenements restent : l'historique peut
