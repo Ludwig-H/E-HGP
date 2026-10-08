@@ -1,0 +1,3 @@
+pilote_r1_auto_test_ok cas=6 verdicts=adopte,rejete,refuse
+pilote_r1_auto_test_ok cas=6 verdicts=adopte,rejete,refuse
+pilote_r1_verdict adopte refus=0

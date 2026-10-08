@@ -17,14 +17,15 @@ import g4_catalogue_t1d_judge as T  # noqa: E402
 HELD = 8 << 30  # octets de l'appareil gardes par la voie complete (synthetique)
 
 
-def tranches_rows(run, slices, streamed):
+def tranches_rows(run, slices, streamed, budget=0):
     """Ajoute la ligne << tranches >> apres chaque ligne catalogue (et sa ligne sorties s'il y en a)."""
     rows, out = run['rows'], []
     for row in rows:
         out.append(row)
         if row.get('phase') == 'catalogue':
+            row['device']['device_bytes'] = budget or HELD
             out.append({'phase': 'tranches', 'pass': row['pass'], 'finish_slices': slices,
-                        'arena_streamed': streamed, 'device_bytes': HELD, 'device_peak': HELD})
+                        'arena_streamed': streamed, 'device_bytes': budget or HELD, 'device_peak': budget})
     run['rows'] = out
     return run
 
@@ -39,7 +40,7 @@ def slices_step(threads, best=12):
             budget = HELD * num // den
             run = S.catalogue_run(T.spec_budget(k, threads, budget), [10, 10], counts, digest)
             entries.append({'case': case, 'k': k, 'budget': budget,
-                            'run': tranches_rows(run, 2 + (best - 2) * i // (len(T.FRACTIONS) - 1), 1 + i)})
+                            'run': tranches_rows(run, 2 + (best - 2) * i // (len(T.FRACTIONS) - 1), 1 + i, budget)})
     return entries
 
 
@@ -92,12 +93,73 @@ def edit_digest(report, case, k, index):
             row['catalogue_sha256'] = '1' * 64
 
 
+def tranche(report, index=0, p=0):
+    return next(row for row in slice_entry(report, 'ng00', 5, index)['run']['rows']
+                if row.get('phase') == 'tranches' and row['pass'] == p)
+
+
+def one_refusal(report, foreign=False):
+    e = slice_entry(report, 'ng00', 5, 0)
+    first = {key: v for key, v in e['run']['rows'][1].items() if key in L.CAT_BASE_KEYS}
+    first.update(status='resource_exhausted', reason='memory_budget')
+    if foreign:
+        first['threads'] = 1
+    e['run']['code'] = 2
+    e['run']['rows'] = [e['run']['rows'][0], first,
+                       dict(phase='exit', status='resource_exhausted', reason='memory_budget')]
+
+
+def extra(report, step, **change):
+    e = copy.deepcopy(report['steps'][step][0])
+    e.update(change)
+    report['steps'][step].append(e)
+
+
+def partial_refusal(report, bad_digest=False, bad_counts=False):
+    e = slice_entry(report, 'ng00', 5, 0)
+    first = {key: v for key, v in e['run']['rows'][4].items() if key in L.CAT_BASE_KEYS}
+    first.update(status='resource_exhausted', reason='memory_budget')
+    e['run']['code'] = 2
+    e['run']['rows'] = e['run']['rows'][:4] + [first,
+                        dict(phase='exit', status='resource_exhausted', reason='memory_budget')]
+    if bad_digest:
+        e['run']['rows'][3]['catalogue_sha256'] = '0' * 64
+    if bad_counts:
+        e['run']['rows'][1]['sites'] = 1
+
+
+def full_row(report):
+    return report['steps']['ful1'][0]['run']['rows'][1]
+
+
 def cases():
     out = [('conforme', synthetic_report(), 'adopte'), ('apres_paie', synthetic_report(ratio=1.02), 'rejete'),
            ('borne_1_00999', synthetic_report(ratio=1.00999, constant=True), 'adopte'),
            ('borne_1_0101', synthetic_report(ratio=1.0101, constant=True), 'rejete'),
            ('aa_hors_fenetre', synthetic_report(aa=1.02), 'refuse')]
     edits = (
+        ('flux_prefixe_refus_valide', 'adopte', lambda r: partial_refusal(r)),
+        ('flux_prefixe_refus_faux', 'rejete', lambda r: partial_refusal(r, bad_digest=True)),
+        ('flux_prefixe_refus_comptes', 'refuse', lambda r: partial_refusal(r, bad_counts=True)),
+        ('flux_refus_valide', 'adopte', lambda r: one_refusal(r)),
+        ('flux_refus_hors_commande', 'refuse', lambda r: one_refusal(r, True)),
+        ('flux_pic_depasse', 'refuse', lambda r: tranche(r).update(device_peak=HELD)),
+        ('flux_pic_nul', 'refuse', lambda r: tranche(r).update(device_peak=0)),
+        ('flux_usage_non_raccorde', 'refuse', lambda r: tranche(r).update(device_bytes=1)),
+        ('flux_pic_decroissant', 'refuse', lambda r: [tranche(r, p=1).update(device_bytes=1, device_peak=1),
+            slice_entry(r, 'ng00', 5, 0)['run']['rows'][4]['device'].update(device_bytes=1)]),
+        ('flux_partage_pic', 'refuse', lambda r: tranche(r, index=-1).update(device_peak=1)),
+        ('flux_budget_surplus', 'refuse', lambda r: extra(r, 'slices', budget=7)),
+        ('campagne_tour_surplus', 'refuse', lambda r: extra(r, 'campaign', round=10)),
+        ('campagne_bras_surplus', 'refuse', lambda r: extra(r, 'campaign', arm='inconnu')),
+        ('campagne_tour_booleen', 'refuse', lambda r: r['steps']['campaign'][0].update(round=False)),
+        ('identite_surplus', 'refuse', lambda r: extra(r, 'identity', case='inconnu')),
+        ('ful1_surplus', 'refuse', lambda r: extra(r, 'ful1', case='inconnu')),
+        ('fils_flottants', 'refuse', lambda r: r['options'].update(threads=48.0)),
+        ('ful1_code_booleen', 'refuse', lambda r: r['steps']['ful1'][0]['run'].update(code=False)),
+        ('ful1_etapes_incoherentes', 'refuse', lambda r: full_row(r)['etapes_ns'].update(G=0)),
+        ('ful1_memoire_incoherente', 'refuse', lambda r: full_row(r)['memoire_octets']['P'].__setitem__(1, 0)),
+        ('ful1_schema_hors_commande', 'refuse', lambda r: full_row(r).update(etapes_schema='recouvert')),
         ('flux_en_defaut', 'rejete', lambda r: edit_digest(r, 'ng01', 5, 1)),
         ('flux_tout_refuse', 'rejete', lambda r: refuse_all(r, 'ng02', 10)),
         ('flux_une_seule_tranche', 'rejete', lambda r: [

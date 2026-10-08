@@ -21,3 +21,13 @@ public_status=not_claimed
 | T2-d-B2 | **Lot adopté** sur G4 (session `t2db2` : 0,944 / 0,948 / 0,963 sur ng00–02, 0,982 et 0,984 sur deux trames moyennes) ; B2-T adopté seul ; B2-S et B2-C rejetés seuls. Le produit reste le lot, bras mesuré et adopté. Votre note sur le raccord du census : [réponse](reponse_audit_b2_census.md). [Reçu](../g4_t2db2_20261008/README.md) |
 | T1-d (catalogue en flux) | Intégré (`5f8e777cf`). Première session **refusée** pour un défaut d'outil : l'étape FUL1 lisait la ligne `full` au schéma séquentiel de `902041f66`, alors que la sonde joue la Session recouverte par défaut. Corrigé dans `c31beaf22` (`--sequentiel` pour cette étape ; FUL1 est la même sur les deux voies). La session est rejouée. [Reçu](../g4_t1d_20261008/README.md) |
 | R1 (raccourci du registre, votre critère q = d + 1) | Intégré (`47feedc96`), porté sur les étapes factorisées du registre, chemin de la Session compris. Vos neuf fixtures ont été retrouvées avec les valeurs de votre modèle. 6 mutants. Forêt complète identique sur 43 trames. Session G4 à suivre, sous `REGLE_R1` écrite d'avance |
+
+**Complément, 15 h 30 UTC** (après vos notes `a6e3634fc`) :
+
+| Note | Réponse |
+| --- | --- |
+| [Admission T1-d](../audit_reponses_20261008/t1d_admission/README.md) | `port_c31.patch` appliqué tel quel ; ses 36 injections passent. Le rapport réel de `t1d2` rejugé par le juge durci reste adopté, sans refus ; celui de `t1d` reste refusé |
+| [T1-d, frontières et budget](../audit_reponses_20261008/t1d_produit/README.md) | Accepté. Les trois conteneurs de métadonnées hors budget (`std::vector<Bin>`, descripteurs de `SliceWords`, `std::vector<Chunk>`), le retour de `cudaFree` non contrôlé et la matérialisation des niveaux absente de la ventilation par tranches sont transmis au chantier C pour un correctif T1-d avec portes et refus injecté. Aucun dépassement n'est mesuré à ce jour |
+| [B2 admis](../audit_reponses_20261008/session_b2_admission/README.md) | Pris acte : le lot et B2-T sont adoptés selon la règle ; B2-S et B2-C sont rejetés seuls ; aucun FULL entièrement CPU dans ce lot |
+| [R1, raccord](../audit_reponses_20261008/r1_raccord_math/README.md) | Avis favorable reçu. R1 est **adopté** sur G4 ([session R1](../g4_r1_20261008/README.md) : grandes trames 0,973, ng00–02 0,963 à 0,970) |
+| [A6, retrait](../audit_reponses_20261008/a6_retrait_qualification/README.md) | D'accord pour clore `CST-0242` dans la portée du produit. L'A6b en préparation reprend le pont tel quel ; son admission sera demandée à part |

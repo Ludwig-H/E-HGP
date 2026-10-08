@@ -148,7 +148,10 @@ def read_passes(rows, i, parsed, spec):
             return i, ''
         if row.get('status') != 'ok':
             if set(row) != CAT_BASE_KEYS or row['pass'] != p or type(row['reason']) is not str or \
-                    type(row['status']) is not str or row['reason'] == 'none':
+                    type(row['status']) is not str or row['reason'] == 'none' or \
+                    not all(is_int(row[x]) for x in CAT_INTS) or row['path'] != spec['path'] or \
+                    row['coord_bits'] != COORD_BITS or row['kmax'] != spec['k'] or row['leaf'] != spec['leaf'] or \
+                    row['threads'] != spec['threads']:
                 return i, 'passe %d en echec hors schema' % p
             parsed['failed'] = row
             return i + 1, ''
@@ -181,7 +184,8 @@ def read_catalogue(run, spec):
     code = run.get('code')
     if type(code) is int and code < 0:
         return 'signal', 'signal %d' % -code, parsed
-    if type(code) is not int or run.get('bad_lines') != 0 or run.get('options') != catalogue_options(spec):
+    if type(code) is not int or run.get('timeout') is not False or type(run.get('bad_lines')) is not int or \
+            run.get('bad_lines') != 0 or run.get('options') != catalogue_options(spec):
         return 'illisible', 'code, lignes illisibles ou options differentes de la commande', parsed
     rows, i = run.get('rows'), 0
     if type(rows) is not list or not rows:
@@ -264,7 +268,8 @@ def check_full_row(row, case, k, threads, p, sites=None):
 def read_full(run, case, k, threads, passes, sites=None):
     """(etat, raison, empreintes, murs, C) d'une sonde FULL : open, (full, liberation) par passe, exit."""
     bad = ('illisible', None, [], [], [])
-    if type(run) is not dict or run.get('timeout') is True or run.get('code') != 0 or run.get('bad_lines') != 0 or \
+    if type(run) is not dict or run.get('timeout') is not False or type(run.get('code')) is not int or \
+            run.get('code') != 0 or type(run.get('bad_lines')) is not int or run.get('bad_lines') != 0 or \
             run.get('options') != full_options(k, threads, passes) or type(run.get('rows')) is not list:
         return ('illisible', 'execution FULL absente ou hors commande') + bad[2:]
     rows = run['rows']
@@ -284,7 +289,7 @@ def read_full(run, case, k, threads, passes, sites=None):
         if why:
             return ('illisible', why) + bad[2:]
         if type(free) is not dict or set(free) != {'phase', 'pass', 'liberation_ns'} or free['phase'] != 'liberation' \
-                or free['pass'] != p or not is_int(free['liberation_ns']):
+                or not is_int(free['pass']) or free['pass'] != p or not is_int(free['liberation_ns']):
             return ('illisible', 'ligne liberation (passe %d)' % p) + bad[2:]
         digests.append(full['full_sha256'])
         walls.append(full['wall_ns'])

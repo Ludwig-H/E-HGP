@@ -1,0 +1,23 @@
+	Command being timed: "timeout --foreground --kill-after=10s 1500s python3 $HOME/ehgp-v12/ehgp-v12.wOTC6m90yd/src/morsehgp3D_v12/microbancs/mes_r1/pilote_r1.py tout --src $HOME/ehgp-v12/ehgp-v12.wOTC6m90yd/src --travail $HOME/ehgp-v12/ehgp-v12.wOTC6m90yd/build/r1 --donnees $HOME/ehgp-v12/ehgp-v12.wOTC6m90yd/data --sortie $HOME/ehgp-v12/ehgp-v12.wOTC6m90yd/results/cmd/001_r1_pilote/files/r1 --base 5f8e777cf --avant-archive $HOME/ehgp-v12/ehgp-v12.wOTC6m90yd/data/v12_src_5f8e777cf.tar.gz --avant-sha256 d07df84f1de929d20fb2330efd9c8da9c0e3b2dc592fb2c89582c2f020472dbf --archive-v12set $HOME/ehgp-v12/ehgp-v12.wOTC6m90yd/data/g4_kitti_v12set_xyz.tar --fils 48 --jobs 44 --tours 5 --tours-grandes 6 --passes 10 --tours-k10 3 --passes-k10 5 --delai 600"
+	User time (seconds): 7375.31
+	System time (seconds): 253.43
+	Percent of CPU this job got: 1609%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 7:53.86
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 3958332
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 890
+	Minor (reclaiming a frame) page faults: 53849648
+	Voluntary context switches: 20027777
+	Involuntary context switches: 370766
+	Swaps: 0
+	File system inputs: 228640
+	File system outputs: 617568
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

@@ -50,13 +50,44 @@ def spec_budget(k, threads, budget):
     return L.catalogue_spec('device', k, threads, 2, digest=True, tranches=True, device_budget=budget)
 
 
-def check_slices(steps, out, threads):
+def exact_entries(entries, fields, expected=None):
+    """Types des cles, unicite et ensemble ferme ; aucune observation ignoree."""
+    if type(entries) is not list:
+        return None
+    for e in entries:
+        if type(e) is not dict or any(
+                not L.is_int(e.get(f)) if f in ('round', 'k', 'budget') else type(e.get(f)) is not str
+                for f in fields):
+            return None
+    indexed = J.by_key(entries, *fields)
+    if indexed is None or (expected is not None and set(indexed) != set(expected)):
+        return None
+    return indexed
+
+
+def memory_ok(parsed, budget):
+    """Pic appareil propre cumulatif ; sans budget propre, pic publie nul par contrat de la sonde."""
+    previous = 0
+    for row, t in zip(parsed['passes'], parsed['tranches']):
+        if t['device_bytes'] != row['device']['device_bytes']:
+            return False
+        if budget:
+            if not (t['device_bytes'] <= t['device_peak'] <= budget) or t['device_peak'] < previous:
+                return False
+        elif t['device_peak'] != 0:
+            return False
+        previous = t['device_peak']
+    return True
+
+
+def check_slices(steps, out, threads, refs):
     """Voie en flux sur l'appareil reel : budgets derives de la prise sans budget, F2 ou refus, tranches."""
-    entries = J.by_key(steps.get('slices'), 'case', 'k', 'budget')
+    entries = exact_entries(steps.get('slices'), ('case', 'k', 'budget'))
     if entries is None:
         out['refused'].append('flux : etape illisible ou prise en double')
         return
     stats, streamed_k10 = {}, 0
+    expected = {(case, k, 0) for case, k in SLICE_CASES}
     for case, k in SLICE_CASES:
         key, reference = '%s:%d' % (case, k), J.F2_DIGESTS['%s:%d' % (case, k)]
         state, why, free = L.read_catalogue((entries.get((case, k, 0)) or {}).get('run'), spec_free(k, threads))
@@ -64,19 +95,37 @@ def check_slices(steps, out, threads):
             out['refused' if state != 'ok' else 'rejected'].append('flux sans budget : %s (%s)' % (key, why or state))
             continue
         held = free['tranches'][-1]['device_bytes']
+        ref = refs.get(key)
+        if not memory_ok(free, 0) or not held or ref is None or any(
+                row[f] != ref[f] for row in free['passes'] for f in L.COUNTS):
+            out['refused'].append('flux sans budget : memoire ou comptes incoherents sur ' + key)
+            continue
+        budgets = [held * num // den for num, den in FRACTIONS]
+        if 0 in budgets or len(set(budgets)) != len(budgets):
+            out['refused'].append('flux : budgets non distincts ou nuls sur ' + key)
+            continue
+        expected.update((case, k, budget) for budget in budgets)
         best = 0
         for num, den in FRACTIONS:
             budget = held * num // den
             state, why, got = L.read_catalogue((entries.get((case, k, budget)) or {}).get('run'),
                                                spec_budget(k, threads, budget))
-            if state == 'refus' and why.endswith('/memory_budget'):
+            if not memory_ok(got, budget):
+                out['refused'].append('flux : budget appareil ou pic incoherent sur ' + key)
+                continue
+            # Une passe deja emise ne devient pas neutre si la suivante refuse.
+            if state in ('ok', 'refus'):
+                if any(row[f] != ref[f] for row in got['passes'] for f in L.COUNTS):
+                    out['refused'].append('flux : comptes differents de l identite sur ' + key)
+                    continue
+                if any(d['catalogue_sha256'] != reference for d in got['digests']):
+                    out['rejected'].append('flux en defaut : %s budget %d/%d' % (key, num, den))
+                    continue
+            if state == 'refus' and why == 'resource_exhausted/memory_budget':
                 continue
             if state != 'ok':
                 out['refused' if state != 'invariant' else 'rejected'].append(
                     'flux %s budget %d/%d : %s' % (key, num, den, why or state))
-                continue
-            if any(d['catalogue_sha256'] != reference for d in got['digests']):
-                out['rejected'].append('flux en defaut : %s budget %d/%d' % (key, num, den))
                 continue
             t = got['tranches'][-1]
             if t['arena_streamed'] >= 1 and t['finish_slices'] >= 2:
@@ -89,6 +138,8 @@ def check_slices(steps, out, threads):
     stats['lots_rapatries_k10'] = streamed_k10
     if streamed_k10 < 2:
         out['rejected'].append('flux : aucune arene rapatriee lot par lot a K10 (%d)' % streamed_k10)
+    if set(entries) != expected:
+        out['refused'].append('flux : cohorte differente des budgets commandes')
     out['stats']['tranches'] = stats
 
 
@@ -99,7 +150,8 @@ def stage_total(row, sorties):
 
 
 def campaign_table(steps, out, rounds, passes, threads, refs):
-    table, entries = {}, J.by_key(steps.get('campaign'), 'round', 'frame', 'arm')
+    expected = {(r, f, a) for r in range(rounds) for f in FRAMES for a in ARMS}
+    table, entries = {}, exact_entries(steps.get('campaign'), ('round', 'frame', 'arm'), expected)
     if entries is None:
         out['refused'].append('campagne illisible ou prise en double')
         return table
@@ -158,7 +210,7 @@ def judge(report):
         out['refused'].append('outil absent (nvcc ou GPU)')
     rounds, passes, threads = opts.get('rounds'), opts.get('passes'), opts.get('threads')
     if not L.is_int(rounds) or not L.is_int(passes) or rounds < RULE['rounds_min'] or passes < RULE['passes_min'] or \
-            threads != RULE['threads']:
+            not L.is_int(threads) or threads != RULE['threads']:
         out['refused'].append('contrat de mesure non respecte')
         rounds, passes, threads = RULE['rounds_min'], RULE['passes_min'], RULE['threads']
     builds = steps.get('builds') or {}
@@ -172,9 +224,16 @@ def judge(report):
     J.check_gates(steps, out)
     if steps.get('gpu_quiet_before') is not True or steps.get('gpu_quiet_after') is not True:
         out['refused'].append('GPU non isole avant ou apres les temps')
-    refs = J.check_identity(steps, out, threads)
-    check_slices(steps, out, threads)
-    J.check_ful1(steps, out, threads, refs)
+    identity = exact_entries(steps.get('identity'), ('case', 'k'), J.IDENTITY_CASES)
+    ful1 = exact_entries(steps.get('ful1'), ('arm', 'case', 'k'),
+                         ((a, c, k) for a in BUILT_ARMS for c, k in J.FUL1_CASES))
+    if identity is None or ful1 is None:
+        out['refused'].append('identite ou FUL1 : cohorte non fermee')
+        refs = {}
+    else:
+        refs = J.check_identity(steps, out, threads)
+        J.check_ful1(steps, out, threads, refs)
+    check_slices(steps, out, threads, refs)
     table = campaign_table(steps, out, rounds, passes, threads, refs)
     judge_cost(table, rounds, out)
     out['verdict'] = 'refuse' if out['refused'] else 'rejete' if out['rejected'] else 'adopte'

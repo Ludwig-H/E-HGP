@@ -66,4 +66,9 @@ refus, aucun rejet.
 millions de sites, se rejoue sur ce produit (plans `MES-B` L1 et L2 de l'agent du chantier C). La session L1p
 refusait au budget de l'appareil toute scène de plus de 5 M de sites à K5, et K10 dès 1,5 M.
 
+**Juge durci après coup.** Le port `port_c31.patch` de l'auditeur
+([admission T1-d](../audit_reponses_20261008/t1d_admission/README.md)) a été appliqué tel quel. Il ajoute dix
+contrôles d'admission : mémoire, cohorte, refus et types. Son auto-test passe 36 injections. Le rapport réel de
+`t1d2`, rejugé par ce juge, reste **adopté**, sans refus ni rejet. Celui de `t1d` reste refusé, avec 18 prises FUL1.
+
 GCP utilisé pour ces deux sessions seulement, arrêts certifiés.
