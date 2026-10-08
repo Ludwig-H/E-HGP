@@ -1,0 +1,278 @@
+{
+  "pins": {
+    "b21/CMakeCache.txt": {
+      "bytes": 17349,
+      "sha256": "287e807de04fa81d9284fab3e0e189e2b73ed84fb15f040b45bdbd09a488f83f"
+    },
+    "b21/Testing/Temporary/LastTest.log": {
+      "bytes": 15468,
+      "sha256": "4a3e81dfbe33ad1535bad232a3982b7f8a5af1a48c9aa29d346ab04b82b18bf1"
+    },
+    "bcu21.build.log": {
+      "bytes": 2116,
+      "sha256": "844029d79ab4e497f355d5fae22578185c8aecc134f58d300ae23a16d1db0b60"
+    },
+    "bcu21/CMakeCache.txt": {
+      "bytes": 31240,
+      "sha256": "1f868f7ce949e1e793cdee8ce08257ed76ff03e5825f671630631c167c412de4"
+    },
+    "repo/morsehgp3D_v12/cmake/run_expect.cmake": {
+      "bytes": 7249,
+      "sha256": "82be01f59abc38b2448cbe6844e02f4b0fa8d981497d57cc01c98bbc5b4e2b8b"
+    },
+    "repo/morsehgp3D_v12/src/catalogue/assemble.cpp": {
+      "bytes": 5215,
+      "sha256": "5efddae8de847fb213e874fce108ba63ec693beb7d4a3cab0c29e55314b3439c"
+    },
+    "repo/morsehgp3D_v12/src/catalogue/catalogue.hpp": {
+      "bytes": 12351,
+      "sha256": "6129a0cc7c29e94f02469a60ed0308e3d35b31cf594ff6c84734b9b6c2b4173b"
+    },
+    "repo/morsehgp3D_v12/src/catalogue/device_cuda.cu": {
+      "bytes": 13701,
+      "sha256": "17b7fce9944f48acba0ed43663127e82f3e3e05d3a3466035504a92056688404"
+    },
+    "repo/morsehgp3D_v12/src/catalogue/device_pipeline.hpp": {
+      "bytes": 13574,
+      "sha256": "c1037506b4c2e76e8d87afaf24ed99d7e13d5da75b60f761825e0bcf6951afba"
+    },
+    "repo/morsehgp3D_v12/src/catalogue/exec_host.hpp": {
+      "bytes": 5135,
+      "sha256": "a17bb80bfd1d3b493b0a89a38098bdd2b5ebc28e0eb9505fa2efa8903df69ed6"
+    },
+    "repo/morsehgp3D_v12/src/catalogue/finish_driver.hpp": {
+      "bytes": 12734,
+      "sha256": "9d5599a802f42000f338450604db123f86cf7b2085c35c13e6c94a13a0e1f27d"
+    },
+    "repo/morsehgp3D_v12/src/catalogue/finish_kernels.hpp": {
+      "bytes": 10794,
+      "sha256": "96b1afe896fcbd65afce3cc119a3db4d9149c059e5e8251f53605c2f3f059426"
+    },
+    "repo/morsehgp3D_v12/src/catalogue/finish_level.hpp": {
+      "bytes": 9591,
+      "sha256": "d5dd177a787367330ef6a35e4e949a9e997681dcf2267b392e1bf19d44fa7ecb"
+    },
+    "repo/morsehgp3D_v12/src/catalogue/finish_outputs.hpp": {
+      "bytes": 6484,
+      "sha256": "57a9066a5bf3058d9e2ce11527dd7e11df1cfadb94ae2affa0cf60b255543454"
+    },
+    "repo/morsehgp3D_v12/src/catalogue/finish_repair.hpp": {
+      "bytes": 7377,
+      "sha256": "23245b113948c49c80f55349fd674e9c6a5b0780377b9ad8fbba1d4c980b3f61"
+    },
+    "repo/morsehgp3D_v12/src/catalogue/internal.hpp": {
+      "bytes": 3713,
+      "sha256": "d44c6946741117cdeccd00872c28a15f7ad1a00d1788040a6ba91dec930ee320"
+    },
+    "repo/morsehgp3D_v12/src/catalogue/module.cmake": {
+      "bytes": 814,
+      "sha256": "07a6b05db097db9ff28b3449024dbf36abb203ca94aaed85ebc2b92ee4ab1b2c"
+    },
+    "repo/morsehgp3D_v12/src/catalogue/outputs.cpp": {
+      "bytes": 2637,
+      "sha256": "28762592e3456efe03b6d19d5469a37b0066cc0d7a3ffb72fabf6e8079412245"
+    },
+    "repo/morsehgp3D_v12/src/catalogue/transfer_meter.hpp": {
+      "bytes": 5807,
+      "sha256": "9de558bb2f0763cb109c4b5df0a3ee1d892f5955f76d95fc715e540f4449fca1"
+    },
+    "repo/morsehgp3D_v12/src/core/buffer.cpp": {
+      "bytes": 12383,
+      "sha256": "5c885dbf0e4813f1a8ee653115092536348877e6b93aa5b831d7490fe0d6e756"
+    },
+    "repo/morsehgp3D_v12/src/core/buffer.hpp": {
+      "bytes": 14629,
+      "sha256": "8e4d84665e90308ee9572a729731711bb419e3a565fd4dd11b5bd56ab6a92401"
+    },
+    "repo/morsehgp3D_v12/src/sched/pool.cpp": {
+      "bytes": 3711,
+      "sha256": "eed86be4c20f4812032616b639a009b513c12e3106cc808c66f5ec38d4da176f"
+    },
+    "repo/morsehgp3D_v12/tests/catalogue/device_finish_test.cpp": {
+      "bytes": 14549,
+      "sha256": "f790c7d7116d863e7ad2b3ae2ae52851492320b6d1f5c8d98fead18ca10bce34"
+    },
+    "repo/morsehgp3D_v12/tests/catalogue/device_pipeline_test.cpp": {
+      "bytes": 11205,
+      "sha256": "25853982afc95fbcdec28914d5132d78ea715ceeeb1dec163d8d3f964e5426b0"
+    },
+    "repo/morsehgp3D_v12/tests/catalogue/device_support.hpp": {
+      "bytes": 7105,
+      "sha256": "041f021af1dd95f343620657641f05c2d6b08af2e376f507d589276fa615a807"
+    },
+    "repo/morsehgp3D_v12/tests/catalogue/device_unit.cpp": {
+      "bytes": 8722,
+      "sha256": "5b0b496ba3cd2b2be3056762fb536cdbec8173d4cfc3de50df331fd4a212ec10"
+    },
+    "repo/morsehgp3D_v12/tests/catalogue/tests.cmake": {
+      "bytes": 9073,
+      "sha256": "66cfb2b5879270fe0ce9f154d46b4161ef25325226376f8d4370be3f3a31c37e"
+    }
+  },
+  "result": {
+    "audit_compiled": false,
+    "audit_executed_native": false,
+    "controls": 11734,
+    "ctest_passed": 13,
+    "cuda_execution": false,
+    "cuda_library_build_log_complete": true,
+    "declared_build_configuration": {
+      "b21": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "MHGP12_COORD_BITS": "21",
+        "MHGP12_ENABLE_CUDA": "OFF",
+        "MHGP12_MARCH": "",
+        "MHGP12_MODULES": "",
+        "source_directory_matches_prototype": true
+      },
+      "bcu21": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "MHGP12_COORD_BITS": "21",
+        "MHGP12_ENABLE_CUDA": "ON",
+        "MHGP12_MARCH": "",
+        "MHGP12_MODULES": "catalogue",
+        "source_directory_matches_prototype": true
+      }
+    },
+    "groups": 12,
+    "source_text_checks": {
+      "drain_on_stream_failure": true,
+      "event_after_copy": true,
+      "net_partition_is_wall_minus_publication": true,
+      "prefault_switch_does_not_disable_early_allocation": true,
+      "repair_covered_skips_duplicate_markers": true,
+      "repair_expands_at_non_global_boundary": true,
+      "staging_requested_16_mib": true,
+      "staging_reserved_before_allocation": true,
+      "wait_consume_then_reissue": true
+    },
+    "tests": [
+      {
+        "controls": 1,
+        "ctest": "Passed",
+        "failures": 0,
+        "group": "device_open",
+        "minimum": 1,
+        "name": "mhgp12_catalogue_device_unit_device_open",
+        "wrapper": "conforme"
+      },
+      {
+        "controls": 2,
+        "ctest": "Passed",
+        "failures": 0,
+        "group": "device_reasons",
+        "minimum": 2,
+        "name": "mhgp12_catalogue_device_unit_device_reasons",
+        "wrapper": "conforme"
+      },
+      {
+        "controls": 25,
+        "ctest": "Passed",
+        "failures": 0,
+        "group": "finish_long_chain",
+        "minimum": 8,
+        "name": "mhgp12_catalogue_device_unit_finish_long_chain",
+        "wrapper": "conforme"
+      },
+      {
+        "controls": 22,
+        "ctest": "Passed",
+        "failures": 0,
+        "group": "finish_plateau",
+        "minimum": 8,
+        "name": "mhgp12_catalogue_device_unit_finish_plateau",
+        "wrapper": "conforme"
+      },
+      {
+        "controls": 19,
+        "ctest": "Passed",
+        "failures": 0,
+        "group": "finish_random",
+        "minimum": 10,
+        "name": "mhgp12_catalogue_device_unit_finish_random",
+        "wrapper": "conforme"
+      },
+      {
+        "controls": 22,
+        "ctest": "Passed",
+        "failures": 0,
+        "group": "finish_ties",
+        "minimum": 12,
+        "name": "mhgp12_catalogue_device_unit_finish_ties",
+        "wrapper": "conforme"
+      },
+      {
+        "ctest": "Passed",
+        "inventory_groups": 12,
+        "name": "mhgp12_catalogue_device_unit_inventaire",
+        "wrapper": "conforme"
+      },
+      {
+        "controls": 11224,
+        "ctest": "Passed",
+        "failures": 0,
+        "group": "level_words",
+        "minimum": 3000,
+        "name": "mhgp12_catalogue_device_unit_level_words",
+        "wrapper": "conforme"
+      },
+      {
+        "controls": 27,
+        "ctest": "Passed",
+        "failures": 0,
+        "group": "pipeline_resident",
+        "minimum": 10,
+        "name": "mhgp12_catalogue_device_unit_pipeline_resident",
+        "wrapper": "conforme"
+      },
+      {
+        "controls": 82,
+        "ctest": "Passed",
+        "failures": 0,
+        "group": "pipeline_staged",
+        "minimum": 60,
+        "name": "mhgp12_catalogue_device_unit_pipeline_staged",
+        "wrapper": "conforme"
+      },
+      {
+        "controls": 164,
+        "ctest": "Passed",
+        "failures": 0,
+        "group": "pipeline_witnesses",
+        "minimum": 130,
+        "name": "mhgp12_catalogue_device_unit_pipeline_witnesses",
+        "wrapper": "conforme"
+      },
+      {
+        "controls": 64,
+        "ctest": "Passed",
+        "failures": 0,
+        "group": "prefault_pages",
+        "minimum": 40,
+        "name": "mhgp12_catalogue_device_unit_prefault_pages",
+        "wrapper": "conforme"
+      },
+      {
+        "controls": 82,
+        "ctest": "Passed",
+        "failures": 0,
+        "group": "radix_and_scan",
+        "minimum": 40,
+        "name": "mhgp12_catalogue_device_unit_radix_and_scan",
+        "wrapper": "conforme"
+      }
+    ]
+  },
+  "scope": {
+    "base_declared": "8dc5d6b16",
+    "kind": "prelecture statique et lecture de traces du developpeur",
+    "not_proven": [
+      "chaine de compilation complete",
+      "execution CUDA",
+      "gain chronometrique",
+      "integration des budgets separes de main",
+      "requalification native independante"
+    ],
+    "product_delivery": false
+  }
+}

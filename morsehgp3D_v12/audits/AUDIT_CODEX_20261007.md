@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-8 octobre 2026, base publiée **`23e9e9a49`**.
+8 octobre 2026, base publiée **`bec107f7d`**.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
 
@@ -29,14 +29,13 @@ GPU u24/u32, petits nuages et millions restent à qualifier ; aucun CPU K10 jou�
 **Livraisons et qualifications.**
 
 - **Gc `4df326cc8` + `10050a96e`** : [sources livrées vérifiées](../receipts/audit_reponses_20261008/gc_livraison/README.md).
-  J valide index parallèle et file G-L7 ; G-L5 rejeté. Défaut CLI huit et collecte C restent ouverts.
+  J valide index parallèle et file G-L7 ; G-L5 rejeté. CLI huit et collecte C ouverts.
 - **TMVR `7398aed7d`** : [livraison identique au prototype](../receipts/audit_reponses_20261008/tmvr_livraison/README.md).
-  MES-M0 neuf cas × deux modes, neuf chaînes CPU conformes sémantiquement à la v11, W1/W8 identiques, EMST.
-  Intégration : 716 portes passées + une LiDAR sautée ; [27 mutants](../receipts/audit_tmv_repo6_mutants_20261008/README.md),
-  685 contrôles du pic. Budget fini/cache, FULL GPU et u24/u32 de cet assemblage restent ouverts.
-  Repo6 arrêté pendant la construction u24 ; aucun résultat de repo5 transféré implicitement.
+  MES-M0, neuf chaînes CPU/v11, W1/W8 et EMST ; 716 portes, une LiDAR sautée,
+  [27 mutants](../receipts/audit_tmv_repo6_mutants_20261008/README.md), 685 contrôles du pic.
+  Budget fini/cache et u24/u32 restent ouverts ; construction repo6 u24 interrompue.
 - **D6 `0018/0207`** : [livraison `e37fd8935` vérifiée](../receipts/audit_reponses_20261008/d6_livraison_stricte/README.md),
-  deux schémas et plan stricts. [K rejoué hors ligne](../receipts/audit_reponses_20261008/d6_session_k/README.md) :
+  [K rejoué hors ligne](../receipts/audit_reponses_20261008/d6_session_k/README.md) :
   ancien lecteur → 66 alertes ; corrigé → 126 sorties/630 passes admises, ratios recalculés.
   C u24/u32 ×1 : +0,04–1,04 % ; G u32 : +4,3–11,2 %. ×2048 : C ×2,9, mais coordonnées **<2²⁹**, pas «32 bits pleins».
   Homothétie d'entiers déjà quantifiés, sans détail physique nouveau ; seuil D6 produit <3 % encore ouvert.
@@ -46,37 +45,35 @@ GPU u24/u32, petits nuages et millions restent à qualifier ; aucun CPU K10 jou�
 - **T2-d actif** : [prélecture du recouvrement](../receipts/audit_reponses_20261008/prelecture_t2d_t/README.md) :
   Pool non réentrant, admission commune des coexistences, dépendances V/R et nouvelle enveloppe de temps à déclarer.
   [Protocole G](../receipts/audit_reponses_20261008/t2d_g_prelecture/README.md) : les deux bras sont désormais Gc ;
-  séparer garde, index exact et changement déclaré de sauts. Aucun défaut du futur prototype présumé.
+  séparer garde, index exact et changement déclaré de sauts.
+  [Premiers corps A](../receipts/audit_reponses_20261008/prelecture_t2d_corps/README.md) : `open_session noexcept`
+  peut terminer sur allocation ; numérotation doublée déjà corrigée, frontière `g_end` à préciser.
+  [Flux C](../receipts/audit_reponses_20261008/t2d_c_prelecture/README.md) : lecture favorable, 13 tests Pool relus ;
+  staging demandé à 16 Mio, allocation anticipée et quatrième levier à distinguer. CUDA exécuté : non.
 - **CPU `0233/0234`** : [finition déjà parallèle et piste popcount](../receipts/audit_reponses_20261008/cpu_popcount/README.md).
   Feuilles = 45–48 % de C ; appels logiciels dans l'objet local, pas de preuve binaire K.
   Patch SWAR explicite depuis v11 proposé ; instructions puis gain CPU à qualifier.
 - **MES-FULL `0018`** : [lacunes d’admission](../receipts/audit_reponses_20261008/mes_full_admission/README.md),
-  [pilote livré `c9ac60f20` aux mêmes octets](../receipts/audit_reponses_20261008/mes_full_livraison/README.md), présent
-  dans K : GPU inconnu, contreflux de temps/métadonnées et cohortes incomplètes admis. Bruts à contre-juger ;
-  code de commande zéro insuffisant. [Contre-lecteur strict](../receipts/audit_reponses_20261008/mes_full_contrelecture/README.md) :
+  pilote `c9ac60f20` présent dans K : GPU inconnu, incohérences et cohortes incomplètes admis.
+  [Contre-lecteur strict](../receipts/audit_reponses_20261008/mes_full_contrelecture/README.md) :
   53 corruptions refusées, 38 processus/610 passes K admis ; verdict « non tenu ». Pilote produit encore à renforcer.
+- **MES-B en construction `0018`** : [blocages reproduits et patch](../receipts/audit_reponses_20261008/mes_b_prelecture/README.md) :
+  étiquette longue répétée → boucle ; refus K10 sans passe oublié → bilan tenu ; quatre corruptions JSON admises.
+  Correctifs Python vérifiés ; aucun lancement massif par cet audit. CPU/RSS et budgets séparés relus.
 - **R** : [classes à cellule unique](../receipts/audit_reponses_20261008/registre_classe_unique/README.md) :
   `q=d+1` autorise la copie des enfants sans recherche historique ni tri, mémoire temporaire réduite.
   Preuve et modèle ; sur les comptes ng00, au moins 78,81 % des requêtes K5 et 71,95 % K10 évitables.
   [Patch minimal fourni](../receipts/audit_reponses_20261008/registre_classe_unique_patch/README.md), non compilé,
-  admission et pointeur nul contre-vérifiés. Aucun gain temps acquis. Comparer aussi les lignes/CSR de R :
+  sans gain temps acquis. Comparer aussi les lignes/CSR de R :
   [FUL1](../src/tower/export_full.cpp) ne les encode pas ; la porte native `branches` les compare à la coupe ouverte.
 - **Census G** : [garde resserrée proposée](../receipts/audit_reponses_20261008/garde_census/README.md),
-  preuve MEB, modèles exacts et témoin de débordement intermédiaire. Voies du patch conservées ;
-  promotions plus fines prouvées séparément. Anciens mutants à reclasser, adoption et gain G4 à mesurer.
-- **`0239`** : [tri pur puis contrôle adjacent](../receipts/audit_reponses_20261007/comparateur_naissances/README.md)
-  livré en `7398aed7d` ; faux doublon par auto-comparaison sous `_GLIBCXX_DEBUG`, configuration native non jouée.
-- **`0240`** : [historique altéré accepté par le validateur](../receipts/audit_foret_validation_20261008/README.md),
-  aucune mauvaise sortie produit démontrée. [Certificat de toutes les coupes](../receipts/audit_reponses_20261008/histoire_coupes_0240/README.md)
-  en O(E+B log B), preuve et modèle ; gardes/certificat non intégrés. Header désormais explicite,
-  contrat global encore ouvert ; le lemme ne certifie pas la provenance union-find.
-- **`0104`** : [D2/MEMO natifs acquis](../receipts/audit_reponses_20261008/d2_memo/README.md) ;
-  [mutant de date adapté à Gc](../receipts/audit_reponses_20261008/d2_memo_mutant_gc/README.md), exécution causale attendue.
-- [Translation TMVR](../receipts/audit_reponses_20261008/translation_tmvr/README.md) : modèle vérifié, porte native proposée ;
-  comparer TARG via la composante ouverte. `0105/0107` clos sur u21 (domaine, numérotation, mutant et empreintes),
-  indépendamment de `0240`.
+  preuve MEB et témoin de débordement ; voies du patch conservées, promotions séparées.
+  [Témoins de frontière](../receipts/audit_reponses_20261008/census_temoins/README.md) : 1 288 requêtes du modèle
+  gardent résultats/parcours ; ≤4 supports certifiés du même Cloud à transporter. Intégration/G4 à qualifier.
+Autres portes ouvertes : `0239` (_GLIBCXX_DEBUG non joué), `0240` (historique non certifié par le validateur,
+aucune sortie produit fausse démontrée), `0104` (mutant de date adapté à Gc non joué). Preuves, propositions et
+périmètres dans le [registre](CONSTATS.md). `0105/0107` clos sur u21 ; aucune extension automatique à `0240`.
+`0009` clos ; `0008` ouvert. T7 natif, capacités 256/64, profils élargis et massif restent à qualifier.
 
-`0009` clos (repli de feuilles distribué et compté) ; `0008` ouvert (admission à un seul pilote).
-T7 natif, capacités 256/64 et compactage des réparations GPU restent suivis dans le registre et les reçus liés.
 Quatre fichiers actifs, 75 constats ; détails historiques dans `receipts/`. Aucun GCP lancé ni donnée sous licence
 par cet audit. Contrôles récents : sources, archives et Python ; natifs antérieurs limités aux formats synthétiques.

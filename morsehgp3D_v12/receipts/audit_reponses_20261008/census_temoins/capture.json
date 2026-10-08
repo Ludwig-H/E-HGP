@@ -1,0 +1,27 @@
+{
+  "base_commit": "8dc5d6b1697393616d89d651871d18083f1f1eb7",
+  "guard_cpp_sha256": "87ca932d9de18a18fbca3496f56dd01f8634176f31f1696210477a5574130e90",
+  "prototype_kind": "var_temoin hors produit, pas encore raccorde a G",
+  "receipt_artifacts_sha256": {
+    "README.md": "f764db0f52eed81a2bb38d4175e938fc8fdcfb2aca9452c5bee625d26bd64152",
+    "model.py": "61eb07f7bcb08c4aa85c16e13a2ce264aa51d21bac9a2687e7f72cb585953616",
+    "prototype_index.diff": "4ed101e9154dd9f66d14aa69dadde294ae1e959635cd21761d513178c15f7091"
+  },
+  "sources": {
+    "morsehgp3D_v12/src/index/census_workspace.cpp": {
+      "base_sha256": "dc48110ce8f81094f1374de0f09c352181e71379808a40aec0af79998ba515f8",
+      "prototype_sha256": "7d3de9fd5056682c25b52dfa7af8c65aeb377caf46dcb4ee5b54f0d994210cac"
+    },
+    "morsehgp3D_v12/src/index/index.hpp": {
+      "base_sha256": "fbf64f625ff4d34061cf757796982a4369c6153dffdf9e11541530d9f7aa0530",
+      "prototype_sha256": "c8e34dd2b7dcee3edc35244a9aad848d319346fe4411e1fa396cd45122206714"
+    }
+  },
+  "supporting_sources_sha256": {
+    "morsehgp3D_v12/src/index/bounds.hpp": "61a1d54a2c1386a1cb76ded2af235e99ae69ec10aa17d20e1b8dc33ddf7f2ac4",
+    "morsehgp3D_v12/src/num/guard.cpp": "459b99dfe154f32d8ab468d3a410a1bd74ca4c94363634244f37c8cdf7fc720b",
+    "morsehgp3D_v12/src/num/guard.hpp": "8c2afab759cce1b7fe90336361a5fd7b653862378814c614c95f0b58086a2884",
+    "morsehgp3D_v12/src/tower/internal.hpp": "da31aac66bbeb940b239e1d739f4fd8f7bdf95ce05e59293de413a99543fbc6b",
+    "morsehgp3D_v12/src/tower/resolve.cpp": "583d9778d5b8f6c3f8972c7f19f62c3b8174d897f996461392bc6103be28740d"
+  }
+}

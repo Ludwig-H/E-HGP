@@ -1,0 +1,79 @@
+--- a/morsehgp3D_v12/microbancs/mes_b_scenes/pilote_b.py
++++ b/morsehgp3D_v12/microbancs/mes_b_scenes/pilote_b.py
+@@ -194,14 +194,15 @@
+     base = name[-23:]
+     label, i = base, 1
+     while label in used:
+-        label = ('%d_' % i + name)[-23:]
++        prefix = '%d_' % i
++        label = prefix + name[-(23 - len(prefix)):]
+         i += 1
+     used.add(label)
+     return label
+ 
+ 
+ def is_int(value):
+-    return type(value) is int and value >= 0
++    return type(value) is int and 0 <= value < (1 << 64)
+ 
+ 
+ def check_full(row, i, case, sites, label):
+@@ -229,6 +230,19 @@
+     return ''
+ 
+ 
++def unique_object(pairs):
++    row = {}
++    for key, value in pairs:
++        if key in row:
++            raise ValueError('cle JSON repetee')
++        row[key] = value
++    return row
++
++
++def reject_constant(value):
++    raise ValueError('constante JSON non finie : ' + value)
++
++
+ def parse_output(code, text, case, sites, label):
+     """Rend dict(etat, raison, passes) : etat 'ok' ; 'refus' (code 2 de la sonde, ligne de sortie conforme : un
+     resultat) ; 'echec' (expiration, signal, invariant viole ou sortie inattendue : un resultat du cas) ; 'illisible'
+@@ -242,7 +256,7 @@
+         if not raw.isascii():
+             return dict(etat='illisible', raison='ligne non ASCII', passes=[])
+         try:
+-            row = json.loads(raw)
++            row = json.loads(raw, object_pairs_hook=unique_object, parse_constant=reject_constant)
+         except ValueError:
+             return dict(etat='illisible', raison='ligne illisible', passes=[])
+         if not isinstance(row, dict):
+@@ -258,7 +272,7 @@
+         open_row, body = body[0], body[1:]
+         if set(open_row) != OPEN_KEYS or not is_int(open_row['wall_ns']) or open_row['budget_appareil'] != 'separe':
+             return dict(etat='illisible', raison='ligne open hors schema', passes=[])
+-        if open_row['status'] != 'ok':
++        if open_row['status'] != 'ok' or open_row['reason'] != 'none':
+             return dict(etat='illisible', raison='appareil indisponible : %s' % open_row['reason'], passes=[])
+     if len(body) % 2 != 0:
+         return dict(etat='illisible', raison='passe sans liberation', passes=[])
+@@ -270,7 +284,7 @@
+         reason = check_full(full, i, case, sites, label)
+         if reason:
+             return dict(etat='illisible', raison=reason, passes=[])
+-        if set(free) != {'phase', 'pass', 'liberation_ns'} or free['phase'] != 'liberation' or free['pass'] != i or \
++        if set(free) != {'phase', 'pass', 'liberation_ns'} or free['phase'] != 'liberation' or not is_int(free['pass']) or free['pass'] != i or \
+                 not is_int(free['liberation_ns']):
+             return dict(etat='illisible', raison='liberation hors schema (passe %d)' % i, passes=[])
+         passes.append(dict(full, liberation_ns=free['liberation_ns']))
+@@ -364,6 +378,11 @@
+     bad4 = [(n, v, x) for n, v, x in rows10 if x > 10.0]
+     out['B4'] = dict(etat='non evalue' if not rows10 else 'non tenu' if bad4 else 'tenu',
+                      detail=['%s (%s) : %.3f s par million' % row for row in (bad4 or rows10)])
++    for key, cases in (('B1', k5), ('B4', played(10, 'appareil') + played(10, 'cpu'))):
++        failures = [r for r in cases if r['etat'] != 'ok']
++        if failures:
++            out[key]['etat'] = 'non tenu'
++            out[key]['detail'] += ['%s : %s (%s)' % (r['nom'], r['etat'], r['raison']) for r in failures]
+     return out
+ 
+ 

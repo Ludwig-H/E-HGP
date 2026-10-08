@@ -1,0 +1,33 @@
+{
+  "base": "bec107f7dd4607c95f14a55c222ac042bf7ef782",
+  "capture_utc": "2026-10-08T03:43:20Z",
+  "scope": "copie de travail non commise",
+  "selection_constants": [
+    "BITS_EXPECTED",
+    "C_KEYS",
+    "FULL_KEYS",
+    "G_KEYS",
+    "INT_KEYS",
+    "OPEN_KEYS",
+    "OUT_KEYS",
+    "REFUSALS",
+    "STAGES",
+    "VOIES"
+  ],
+  "selection_functions": [
+    "check_full",
+    "is_int",
+    "label_of",
+    "parse_output",
+    "slope",
+    "verdicts",
+    "warm_pass"
+  ],
+  "sources_sha256": {
+    "morsehgp3D_v12/bench/full_probe.cpp": "52699f4ed4ae0b24c1dbb68c0e7a8ee8eaa1b355c015fd9c00dd55480e077682",
+    "morsehgp3D_v12/microbancs/mes_b_scenes/pilote_b.py": "6255e2cafe4210e7caaadd522c40992c70f287a6ecc4334c946a8324dee98f81",
+    "morsehgp3D_v12/src/catalogue/catalogue.hpp": "9c8c5ccec389c50bd2858d67d7de29560dc2b9e7304017f70e6bc81cdf6cfc41",
+    "morsehgp3D_v12/src/catalogue/device_cuda.cu": "c80d349f29a645b842e5300c21f3c60aabd8dbcbceec19ac0beef21c6721c08a",
+    "morsehgp3D_v12/src/catalogue/device_stub.cpp": "d149433dd8f4ddf16d46c7c5a5e4f315eee348e77efb5b090f347fc4c8b60d5f"
+  }
+}

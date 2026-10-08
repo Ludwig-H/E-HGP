@@ -1,0 +1,95 @@
+--- a/morsehgp3D_v12/src/index/census_workspace.cpp
++++ b/morsehgp3D_v12/src/index/census_workspace.cpp
+@@ -21,8 +21,15 @@
+ struct BorrowedPass {
+   std::span<SiteIdx> storage;
+   u32 threshold;
++  std::span<const SiteIdx> witnesses;
+   CensusLedger ledger;
+   u64 p = 0, m = 0;
++
++  bool holds_witness(const index_detail::Node& node) const noexcept {
++    for (const SiteIdx w : witnesses)
++      if (idx(w) >= node.begin && idx(w) < node.end) return true;
++    return false;
++  }
+ 
+   Outcome inside(u32 begin, u32 end) noexcept {
+     const u64 count = std::min<u64>(end - begin, threshold - p);
+@@ -54,6 +61,13 @@
+     for (u64 cursor = 0; cursor < nodes.size() && p < threshold;) {
+       const auto& node = nodes[cursor];
+       ++ledger.nodes; ++ledger.bounds;
++      if (holds_witness(node)) {
++        ++ledger.guard_witness;
++        if (node.end - node.begin <= index.leaf_size()) {
++          MHGP12_TRY(points(index.cloud(), node.begin, node.end, lattice)); cursor = node.escape;
++        } else { ++cursor; }
++        continue;
++      }
+       auto signs = lattice.bound_signs(node.box, ledger);
+       if (!signs.ok()) return signs.outcome();
+       if (signs.value().lower > 0) {
+@@ -81,13 +95,13 @@
+ }
+ 
+ template <class Bounds, class Ball>
+-Outcome CensusWorkspace::run(const GlobalIndex& index, const Ball& sphere, u32 threshold, void* context,
+-                             Callback callback) noexcept {
++Outcome CensusWorkspace::run(const GlobalIndex& index, const Ball& sphere, u32 threshold,
++                             std::span<const SiteIdx> witnesses, void* context, Callback callback) noexcept {
+   if (active_.test_and_set(std::memory_order_acquire)) return fail(Reason::parameter_out_of_range);
+   const ActiveQuery active(active_);
+   if (&index != index_ || index.cloud().sites() != storage_.size() || threshold == 0 || callback == nullptr)
+     return fail(Reason::parameter_out_of_range);
+-  BorrowedPass<Bounds> pass{storage_.span(), threshold, {}};
++  BorrowedPass<Bounds> pass{storage_.span(), threshold, witnesses, {}};
+   {
+     const Bounds lattice(sphere);
+     MHGP12_TRY(pass.walk(index, lattice));
+@@ -104,11 +118,16 @@
+ 
+ Outcome CensusWorkspace::query(const GlobalIndex& index, const num::Sphere& sphere, u32 threshold,
+                                void* context, Callback callback) noexcept {
+-  return run<index_detail::GenericBounds>(index, sphere, threshold, context, callback);
++  return run<index_detail::GenericBounds>(index, sphere, threshold, {}, context, callback);
+ }
+ 
+ Outcome CensusWorkspace::query(const GlobalIndex& index, const num::CertifiedBall& ball, u32 threshold,
+                                void* context, Callback callback) noexcept {
+-  return run<index_detail::GuardedBounds>(index, ball, threshold, context, callback);
++  return run<index_detail::GuardedBounds>(index, ball, threshold, {}, context, callback);
++}
++
++Outcome CensusWorkspace::query(const GlobalIndex& index, const num::CertifiedBall& ball, u32 threshold,
++                               std::span<const SiteIdx> witnesses, void* context, Callback callback) noexcept {
++  return run<index_detail::GuardedBounds>(index, ball, threshold, witnesses, context, callback);
+ }
+ }  // namespace mhgp12
+--- a/morsehgp3D_v12/src/index/index.hpp
++++ b/morsehgp3D_v12/src/index/index.hpp
+@@ -66,7 +66,7 @@
+ struct CensusLedger {
+   u64 nodes = 0, bounds = 0, point_tests = 0, inside_blocks = 0, outside_blocks = 0, passes = 0;
+   num::LaneCount lanes;
+-  u64 guard_disjoint = 0, guard_partial = 0, guard_outside = 0;
++  u64 guard_disjoint = 0, guard_partial = 0, guard_outside = 0, guard_witness = 0;
+   friend bool operator==(const CensusLedger&, const CensusLedger&) = default;
+ };
+ 
+@@ -157,11 +157,14 @@
+   // Meme requete pour une boule certifiee : census garde, une passe.
+   [[nodiscard]] Outcome query(const GlobalIndex&, const num::CertifiedBall&, u32 threshold,
+                                void* context, Callback) noexcept;
++  [[nodiscard]] Outcome query(const GlobalIndex&, const num::CertifiedBall&, u32 threshold,
++                               std::span<const SiteIdx> witnesses, void* context, Callback) noexcept;
+ 
+  private:
+   explicit CensusWorkspace(const GlobalIndex& index) noexcept : index_(&index) {}
+   template <class Bounds, class Ball>
+-  Outcome run(const GlobalIndex&, const Ball&, u32 threshold, void* context, Callback) noexcept;
++  Outcome run(const GlobalIndex&, const Ball&, u32 threshold, std::span<const SiteIdx> witnesses, void* context,
++              Callback) noexcept;
+   const GlobalIndex* index_;
+   Buffer<SiteIdx> storage_;
+   std::atomic_flag active_ = ATOMIC_FLAG_INIT;
