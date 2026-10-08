@@ -83,8 +83,11 @@ def catalogue_options(spec):
 
 
 def full_options(k, threads, passes):
-    """Options de la sonde FULL apres --trame (voie appareil, empreinte FUL1)."""
-    return ['--k=%d' % k, '--threads=%d' % threads, '--passes=%d' % passes, '--device', '--digest']
+    """Options de la sonde FULL apres --trame (voie appareil, empreinte FUL1). --sequentiel : ce lecteur garde le schema
+    sequentiel de 902041f66 (FULL_KEYS) ; depuis la bascule 86d7e39d8, la sonde joue par defaut la Session recouverte,
+    dont la ligne full a un autre schema (session T1-d du 8 octobre refusee pour cette raison). L'empreinte FUL1 est la
+    meme sur les deux voies (portes mhgp12_full_probe_cpu et _cpu_sequentiel)."""
+    return ['--k=%d' % k, '--threads=%d' % threads, '--passes=%d' % passes, '--device', '--digest', '--sequentiel']
 
 
 def check_catalogue_row(row, spec, p):
