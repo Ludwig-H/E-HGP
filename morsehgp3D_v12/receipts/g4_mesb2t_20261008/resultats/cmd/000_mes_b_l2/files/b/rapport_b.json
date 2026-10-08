@@ -1,0 +1,297 @@
+{
+ "cas": [
+  {
+   "code": 0,
+   "empreinte": false,
+   "etat": "ok",
+   "etiquette": "aris_0651_6863_sans_sol",
+   "fils": 48,
+   "k": 5,
+   "nom": "ign_paris_0651_6863_sans_sol",
+   "open_ns": 359094673,
+   "passes": [
+    {
+     "appareil_octets": 109341160,
+     "c_ns": {
+      "emission": 695680410,
+      "feuilles": 2687470692,
+      "fin_etage": 5431966685,
+      "parcours": 655235551,
+      "publication": 1390,
+      "transferts": 2433765969
+     },
+     "coord_bits": 21,
+     "cpu_ns": 1036246414000,
+     "epinglee_octets": 67108864,
+     "etapes_ns": {
+      "C": 13852636412,
+      "G": 14256867596,
+      "P": 657233896,
+      "TMVR": 17366315726,
+      "raccord": 0
+     },
+     "etapes_schema": "recouvert",
+     "fenetres_ns": {
+      "G": 547436642956,
+      "M": 25465200434,
+      "R": 12743503970,
+      "T": 100276838815,
+      "V": 59832377215,
+      "foret": 198317930844,
+      "foret_apres_g": 145893401245
+     },
+     "fins_par_ordre_ns": [
+      [
+       14256867596,
+       15686854198,
+       15801268839,
+       0,
+       16359164013
+      ],
+      [
+       14200676596,
+       20337919736,
+       20592527418,
+       20750425259,
+       21399094404
+      ],
+      [
+       13454868660,
+       22377962182,
+       22769064405,
+       23077167418,
+       24028869846
+      ],
+      [
+       11727092855,
+       25413820777,
+       25923271454,
+       26313737873,
+       27792860526
+      ],
+      [
+       8397409388,
+       28393440551,
+       29195314051,
+       29787126154,
+       31359238619
+      ]
+     ],
+     "g_ns": {
+      "ouverture": 1750081294,
+      "tables": 1086762249
+     },
+     "hors_mur_ns": {
+      "empreinte": 0,
+      "validation": 20855674531
+     },
+     "kmax": 5,
+     "liberation_ns": 1953213473,
+     "memoire_octets": {
+      "C": [
+       27839725568,
+       42862674024
+      ],
+      "P": [
+       562266112,
+       562266112
+      ],
+      "tour": [
+       69202477056,
+       88150866270
+      ]
+     },
+     "pass": 0,
+     "phase": "full",
+     "pic_appareil_octets": 48322934812,
+     "pic_octets": 88150866270,
+     "recouvrement": {
+      "admis_octets": 73341326718,
+      "fin_g_ns": 14256867596,
+      "fin_ns": 31623183322,
+      "noyau_arrets": 1,
+      "noyau_reprises": 6,
+      "ouverture_ns": 1750081294,
+      "queue_ns": 17366315726,
+      "tour_ns": 31943278662
+     },
+     "rss_max_octets": 89989001216,
+     "sites": 9111422,
+     "status": "ok",
+     "threads": 48,
+     "trame": "aris_0651_6863_sans_sol",
+     "voie": "device",
+     "wall_ns": 46453149620
+    }
+   ],
+   "pic_nvidia_smi_mio": 46675,
+   "prevision_s": 197.7,
+   "raison": "",
+   "secondes": 70.0,
+   "sites": 9111422,
+   "voie": "appareil"
+  },
+  {
+   "code": 2,
+   "empreinte": false,
+   "etat": "refus",
+   "etiquette": "ign_paris_0651_6863",
+   "fils": 48,
+   "k": 5,
+   "nom": "ign_paris_0651_6863",
+   "open_ns": 122024265,
+   "passes": [],
+   "pic_nvidia_smi_mio": 47987,
+   "prevision_s": 165.4,
+   "raison": "resource_exhausted/memory_budget",
+   "secondes": 25.7,
+   "sites": 14551520,
+   "voie": "appareil"
+  },
+  {
+   "code": 2,
+   "empreinte": false,
+   "etat": "refus",
+   "etiquette": "lyon_0842_6521_sans_sol",
+   "fils": 48,
+   "k": 5,
+   "nom": "ign_lyon_0842_6521_sans_sol",
+   "open_ns": 117784495,
+   "passes": [],
+   "pic_nvidia_smi_mio": 67365,
+   "prevision_s": 260.0,
+   "raison": "resource_exhausted/memory_budget",
+   "secondes": 47.7,
+   "sites": 24016862,
+   "voie": "appareil"
+  },
+  {
+   "code": 2,
+   "empreinte": false,
+   "etat": "refus",
+   "etiquette": "ign_lyon_0842_6521",
+   "fils": 48,
+   "k": 5,
+   "nom": "ign_lyon_0842_6521",
+   "open_ns": 117422468,
+   "passes": [],
+   "pic_nvidia_smi_mio": 72847,
+   "prevision_s": 343.9,
+   "raison": "resource_exhausted/memory_budget",
+   "secondes": 62.4,
+   "sites": 32412887,
+   "voie": "appareil"
+  }
+ ],
+ "controles": [],
+ "criteres": {
+  "B1": {
+   "detail": [
+    "ign_paris_0651_6863_sans_sol : 5.098 s par million",
+    "ign_paris_0651_6863 : refus tolere au-dela de 10 millions de sites (resource_exhausted/memory_budget)",
+    "ign_lyon_0842_6521_sans_sol : refus tolere au-dela de 10 millions de sites (resource_exhausted/memory_budget)",
+    "ign_lyon_0842_6521 : refus tolere au-dela de 10 millions de sites (resource_exhausted/memory_budget)"
+   ],
+   "etat": "non tenu"
+  },
+  "B2": {
+   "detail": [
+    "1 scenes jouees sous 10 millions de sites"
+   ],
+   "etat": "tenu"
+  },
+  "B3": {
+   "detail": [],
+   "etat": "non evalue"
+  },
+  "B4": {
+   "detail": [],
+   "etat": "non evalue"
+  }
+ },
+ "duree_s": 217.3,
+ "empreintes": {},
+ "environnement": {
+  "apres": {
+   "cmake": "cmake version 3.22.1\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+   "fils_hote": 48,
+   "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.178.04, Enabled, 97887 MiB",
+   "gpu_apps": "",
+   "memoire_hote": "185463716 kB",
+   "noyau": "6.8.0-1070-gcp",
+   "nvcc": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Apr__9_19:24:57_PDT_2025\nCuda compilation tools, release 12.9, V12.9.41\nBuild cuda_12.9.r12.9/compiler.35813241_0"
+  },
+  "avant": {
+   "cmake": "cmake version 3.22.1\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+   "fils_hote": 48,
+   "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.178.04, Enabled, 97887 MiB",
+   "gpu_apps": "",
+   "memoire_hote": "185463716 kB",
+   "noyau": "6.8.0-1070-gcp",
+   "nvcc": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Apr__9_19:24:57_PDT_2025\nCuda compilation tools, release 12.9, V12.9.41\nBuild cuda_12.9.r12.9/compiler.35813241_0"
+  }
+ },
+ "mesure": "MES-B",
+ "parametres": {
+  "argv": [
+   "--src",
+   "$HOME/ehgp-v12/ehgp-v12.Hedh83psao/src",
+   "--travail",
+   "$HOME/ehgp-v12/ehgp-v12.Hedh83psao/build/b",
+   "--donnees",
+   "$HOME/ehgp-v12/ehgp-v12.Hedh83psao/data",
+   "--sortie",
+   "$HOME/ehgp-v12/ehgp-v12.Hedh83psao/results/cmd/000_mes_b_l2/files/b",
+   "--cas",
+   "ign_paris_0651_6863_sans_sol:5:appareil:1,ign_paris_0651_6863:5:appareil:1,ign_lyon_0842_6521_sans_sol:5:appareil:1,ign_lyon_0842_6521:5:appareil:1",
+   "--fils",
+   "48",
+   "--budget-gio",
+   "160",
+   "--budget-appareil-gio",
+   "88",
+   "--delai-global",
+   "1880",
+   "--empreinte-max-sites",
+   "1600000",
+   "--jobs",
+   "44"
+  ],
+  "budget_appareil_octets": 94489280512,
+  "budget_octets": 171798691840,
+  "delai_global_s": 1880.0,
+  "fils": 48,
+  "schema": "recouvert",
+  "series": []
+ },
+ "provenance": {
+  "cmake": [
+   "CMAKE_BUILD_TYPE:STRING=Release",
+   "CMAKE_CUDA_COMPILER:STRING=/usr/local/cuda/bin/nvcc",
+   "CMAKE_CUDA_FLAGS:STRING=",
+   "CMAKE_CUDA_FLAGS_RELEASE:STRING=-O3 -DNDEBUG",
+   "CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++",
+   "CMAKE_CXX_FLAGS:STRING=",
+   "CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG",
+   "MHGP12_COORD_BITS:STRING=21",
+   "MHGP12_ENABLE_CUDA:BOOL=ON",
+   "MHGP12_JUG_EMST:FILEPATH=",
+   "MHGP12_MARCH:STRING=",
+   "MHGP12_MODULES:STRING=",
+   "MHGP12_MUTANT_JOBS:STRING=0",
+   "MHGP12_POISON:BOOL=OFF",
+   "MHGP12_REFERENCE_SHARDS:STRING=16",
+   "MHGP12_SANITIZE:BOOL=OFF",
+   "MHGP12_TOWER_DUMPS:PATH=",
+   "MHGP12_TSAN:BOOL=OFF",
+   "MHGP12_V10_FROZEN_DIR:PATH=",
+   "MHGP12_V11_CATALOGUE_DIR:PATH=",
+   "MHGP12_V11_TOWER_DIR:PATH="
+  ],
+  "manifeste_sha256": "fa7d1544fc8e6a88ab8d51e2f4de596f5dcbd2d6f6defebeaece00f6af20883f",
+  "pilote_sha256": "9eb044087bfd95443eb5149bd25a12170158769d4bba07ad47681d9f07a25f32",
+  "sonde_sha256": "b1a18fd52562c244134ba9db63c7500aa28436679e047ae8cb2e6eb55fba6357"
+ },
+ "regime": "b",
+ "verdict": "non tenu"
+}

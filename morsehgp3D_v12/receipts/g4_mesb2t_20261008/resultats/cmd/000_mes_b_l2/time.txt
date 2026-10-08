@@ -1,0 +1,23 @@
+	Command being timed: "timeout --foreground --kill-after=10s 1950s python3 $HOME/ehgp-v12/ehgp-v12.Hedh83psao/src/morsehgp3D_v12/microbancs/mes_b_scenes/pilote_b.py --src $HOME/ehgp-v12/ehgp-v12.Hedh83psao/src --travail $HOME/ehgp-v12/ehgp-v12.Hedh83psao/build/b --donnees $HOME/ehgp-v12/ehgp-v12.Hedh83psao/data --sortie $HOME/ehgp-v12/ehgp-v12.Hedh83psao/results/cmd/000_mes_b_l2/files/b --cas ign_paris_0651_6863_sans_sol:5:appareil:1,ign_paris_0651_6863:5:appareil:1,ign_lyon_0842_6521_sans_sol:5:appareil:1,ign_lyon_0842_6521:5:appareil:1 --fils 48 --budget-gio 160 --budget-appareil-gio 88 --delai-global 1880 --empreinte-max-sites 1600000 --jobs 44"
+	User time (seconds): 1896.05
+	System time (seconds): 776.20
+	Percent of CPU this job got: 1229%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 3:37.33
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 136035448
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 932
+	Minor (reclaiming a frame) page faults: 189196133
+	Voluntary context switches: 9829770
+	Involuntary context switches: 15010
+	Swaps: 0
+	File system inputs: 264032
+	File system outputs: 149832
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
