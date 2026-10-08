@@ -1,0 +1,15 @@
+{
+  "observed_utc": "2026-10-08T05:36:52.620059+00:00",
+  "reader_sha256": "58cf7f1aea7db904908faff749e64d7c579969206aeb1ef0c84c65f804658a3e",
+  "reader_capture_sha256": "3df2da2ca2a1572df5663ce39f82cfe017c4c3eb658057a1218710714005a40a",
+  "plan_sha256": "cdc81d109096955fac64f8a822eeac43c7c25e825aa108676b8e53d4b2f8cf11",
+  "original_archive_sha256": "3497c745a7e01e8c8b573268eb89a0da96974ef26e93b4844811f97070db573b",
+  "report_sha256": "803aa13e77e7424bc8efbf34934fb1ebc360ea51028334bd66804f378d46e46d",
+  "raw_inventory_sha256": "77054781750c6965a16593be8ab197dc452c63ee6bb76a58b23414ca1498ee61",
+  "raw_files": 36,
+  "raw_bytes": 17362,
+  "schema_source": "403736300900a709b82316721eeb589fbc4a5350",
+  "normal_optimized_equal": true,
+  "native_execution": false,
+  "payload_read": false
+}

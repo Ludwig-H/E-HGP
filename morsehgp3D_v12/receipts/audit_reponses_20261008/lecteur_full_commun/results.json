@@ -1,0 +1,78 @@
+{
+  "apres_patch_partiel": {
+    "appareil_sup_pic": "illisible",
+    "code_bool": "illisible",
+    "code_float": "illisible",
+    "code_refus_float": "illisible",
+    "couple_incoherent": "refus",
+    "cpu_null": "illisible",
+    "epinglee_sup_pic_hote": "illisible",
+    "liberation_valide_entre_etages": "ok",
+    "nominal": "ok",
+    "pic_suivant_sous_usage_precedent": "illisible",
+    "raison_inconnue": "refus",
+    "rss_null": "illisible"
+  },
+  "avant": {
+    "appareil_sup_pic": {
+      "etat": "ok",
+      "passes": 2,
+      "raison": ""
+    },
+    "code_bool": {
+      "etat": "ok",
+      "passes": 2,
+      "raison": ""
+    },
+    "code_float": {
+      "etat": "ok",
+      "passes": 2,
+      "raison": ""
+    },
+    "code_refus_float": {
+      "etat": "refus",
+      "passes": 1,
+      "raison": "resource_exhausted/memory_budget"
+    },
+    "couple_incoherent": {
+      "etat": "refus",
+      "passes": 1,
+      "raison": "unsupported_degeneracy/memory_budget"
+    },
+    "cpu_null": {
+      "etat": "illisible",
+      "passes": 0,
+      "raison": "entier attendu (passe 1)"
+    },
+    "epinglee_sup_pic_hote": {
+      "etat": "ok",
+      "passes": 2,
+      "raison": ""
+    },
+    "liberation_valide_entre_etages": {
+      "etat": "ok",
+      "passes": 2,
+      "raison": ""
+    },
+    "nominal": {
+      "etat": "ok",
+      "passes": 2,
+      "raison": ""
+    },
+    "pic_suivant_sous_usage_precedent": {
+      "etat": "ok",
+      "passes": 2,
+      "raison": ""
+    },
+    "raison_inconnue": {
+      "etat": "refus",
+      "passes": 1,
+      "raison": "resource_exhausted/not_a_reason"
+    },
+    "rss_null": {
+      "etat": "illisible",
+      "passes": 0,
+      "raison": "entier attendu (passe 1)"
+    }
+  }
+}

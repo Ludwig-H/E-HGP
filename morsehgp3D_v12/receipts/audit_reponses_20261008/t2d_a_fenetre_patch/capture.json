@@ -1,0 +1,19 @@
+{
+  "prepared_utc": "2026-10-08T05:48:12.459072+00:00",
+  "source": "A/w902, base declaree902041f66",
+  "path": "morsehgp3D_v12/src/tower/pipeline_run.cpp",
+  "before_sha256": "08b385e624db1eda20cd214e378e1bd7cd50d2a77c9832c485a66ff564847d02",
+  "proposed_sha256": "f3d260ae51159c5c039082f8b1442434123bdb59114d4364c4d0a4e7ef8f09a6",
+  "patch_sha256": "4f083aa9042e53905b27c4dd5b64acfe295fd3c0894a04afdad1b99c0273e71b",
+  "native_execution": false,
+  "applied_to_product": false,
+  "checks": {
+    "normal_optimized_equal": true,
+    "prepass_model_cases": 1300,
+    "kernel_model_cases": 1600,
+    "targeted_abstract_counterexamples": 4,
+    "apply_reverse_on_temporary_copy": true,
+    "native_execution": false
+  },
+  "independent_review": "lecture statique favorable par latest_perf_e : duree nulle/refus, pointeur seulement run_g, aucun double comptage noyau; aucun natif ou modele rejoue"
+}

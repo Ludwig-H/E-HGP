@@ -1,0 +1,200 @@
+{
+  "captured_utc": "2026-10-08T05:39:14.711048+00:00",
+  "scope": "lecture locale, aucune action cloud, aucun moteur",
+  "original": {
+    "archive": {
+      "bytes": 23176,
+      "sha256": "3497c745a7e01e8c8b573268eb89a0da96974ef26e93b4844811f97070db573b"
+    },
+    "receipt": {
+      "bytes": 36056,
+      "sha256": "ac38bde806b7bdba68717e48f599ae1f0768a500b250f45095485dab8bd65ef9"
+    },
+    "package": {
+      "bytes": 5007961,
+      "sha256": "e547240a3c2afdbf7473e86fa4055cdd5baf56f27217134d58304feadd09f134"
+    },
+    "plan": {
+      "bytes": 2159,
+      "sha256": "cdc81d109096955fac64f8a822eeac43c7c25e825aa108676b8e53d4b2f8cf11"
+    },
+    "manifest_entries_verified": 72,
+    "report": {
+      "bytes": 33368,
+      "sha256": "803aa13e77e7424bc8efbf34934fb1ebc360ea51028334bd66804f378d46e46d"
+    },
+    "verdict_declared": "non tenu",
+    "cases": 18,
+    "successes": 10,
+    "refusals": 8,
+    "completed_passes": 18,
+    "warm_passes": 8,
+    "worker": {
+      "schema": "ehgp.v12.worker_result.v1",
+      "status": "completed",
+      "fatal": "",
+      "build": "not_requested",
+      "commands_total": "1",
+      "commands_ok": "1",
+      "interrupted": "0",
+      "overflow_files": "0",
+      "truncated_streams": "0",
+      "overflow_unresolved": "0",
+      "nproc": "48",
+      "source": "commit:403736300900a709b82316721eeb589fbc4a5350"
+    },
+    "commands": [
+      {
+        "index": "0",
+        "name": "mes_b",
+        "status": "ok",
+        "exit_code": "0",
+        "wall_seconds": "764.968",
+        "timeout_seconds": "2000",
+        "max_rss_kb": "62437804"
+      }
+    ],
+    "provenance": {
+      "manifeste_sha256": "f57f3d0b67924ed8808eb4d69f0b2e521d3b4480b336b63306e8d8e865cec333",
+      "pilote_sha256": "84777f19bdf3fdb380207c813ed3253a2f35961c6e28b45eca32466977c165f7",
+      "sonde_sha256": "5bbd7b02869d11b5d9411d00ed8fed0d3d2c641fb42e5a9e7acc733a72041524"
+    },
+    "cmake_properties": [
+      "CMAKE_BUILD_TYPE:STRING=Release",
+      "MHGP12_COORD_BITS:STRING=21",
+      "MHGP12_ENABLE_CUDA:BOOL=ON"
+    ],
+    "manifest": {
+      "bytes": 8237,
+      "sha256": "b844d7f964acf05ee4209f9cab4e5ecadb8d79344f1351fa257aaeab91c1f6ae"
+    },
+    "plan_script": {
+      "bytes": 1455,
+      "sha256": "11bf866d67ffacffd1355268553bdeb1229d9ffbdf204136ab505bd06768881d"
+    }
+  },
+  "recovery_and_new_run": {
+    "archive": {
+      "bytes": 52145,
+      "sha256": "34eebfbfcdd3e83623c4dd72dfd31d0a8bef40f32fe28ef0cdc4586ac04f030d"
+    },
+    "receipt": {
+      "bytes": 40570,
+      "sha256": "45133ea7f28e31415c1f88d28b8bf88fe80face334a4ac84ede63247f45810ca"
+    },
+    "package": {
+      "bytes": 5057191,
+      "sha256": "64c9c0091fb53d92295226efd195b541f0a0f1f21b9bcf605feb7276db511629"
+    },
+    "plan": {
+      "bytes": 2606,
+      "sha256": "49892867ca82128d258967fc2147b6e790acf045caca26b4ab29fa95488df6cd"
+    },
+    "manifest_entries_verified": 81,
+    "report": {
+      "bytes": 39447,
+      "sha256": "d7357b6c4aad16c5b7a3915dd8f24b7ddcb0cedfc60832f697930c72d1d91735"
+    },
+    "verdict_declared": "non tenu",
+    "cases": 18,
+    "successes": 10,
+    "refusals": 8,
+    "completed_passes": 18,
+    "warm_passes": 8,
+    "worker": {
+      "schema": "ehgp.v12.worker_result.v1",
+      "status": "completed",
+      "fatal": "",
+      "build": "not_requested",
+      "commands_total": "2",
+      "commands_ok": "2",
+      "interrupted": "0",
+      "overflow_files": "0",
+      "truncated_streams": "0",
+      "overflow_unresolved": "0",
+      "nproc": "48",
+      "source": "commit:ea62cd6918a3c3a403f7ff7fc45e85ff47c24386"
+    },
+    "commands": [
+      {
+        "index": "0",
+        "name": "archive_l1",
+        "status": "ok",
+        "exit_code": "0",
+        "wall_seconds": "0.022",
+        "timeout_seconds": "60",
+        "max_rss_kb": "14592"
+      },
+      {
+        "index": "1",
+        "name": "mes_b",
+        "status": "ok",
+        "exit_code": "0",
+        "wall_seconds": "760.757",
+        "timeout_seconds": "1950",
+        "max_rss_kb": "62437420"
+      }
+    ],
+    "provenance": {
+      "manifeste_sha256": "f57f3d0b67924ed8808eb4d69f0b2e521d3b4480b336b63306e8d8e865cec333",
+      "pilote_sha256": "457d0e6ff6f27daca0eb22f5852fe6b1e53fce1611c330fd3931a5b071c8c49d",
+      "sonde_sha256": "3c2c340ec402239aea395bd809622d21c95d1c70c1d492a51cfed127f8a621a9"
+    },
+    "cmake_properties": [
+      "CMAKE_BUILD_TYPE:STRING=Release",
+      "MHGP12_COORD_BITS:STRING=21",
+      "MHGP12_ENABLE_CUDA:BOOL=ON"
+    ],
+    "manifest": {
+      "bytes": 9178,
+      "sha256": "616179dee9b5d826c15211796e9b6498889d9719801bd37b579e5150acbe469a"
+    },
+    "plan_script": {
+      "bytes": 1635,
+      "sha256": "4fd94578fbf922f2c55a6a479c60882eb614e8315dd3e1a7a7e8bb9dcb426bfc"
+    },
+    "closure": {
+      "status": "completed",
+      "worker_exit_code": 0,
+      "results_verified": true,
+      "results_sha256": "34eebfbfcdd3e83623c4dd72dfd31d0a8bef40f32fe28ef0cdc4586ac04f030d",
+      "retrieval": "downloaded",
+      "closure": "stopped",
+      "targeted_shutdown_certified": true,
+      "stop_exit_code": 0,
+      "stop_attempts": 1,
+      "reserve_released": true,
+      "errors_count": 0,
+      "done": 0,
+      "before_status": "RUNNING",
+      "after_status": "TERMINATED"
+    },
+    "source_files": {
+      "morsehgp3D_v12/bench/full_probe.cpp": {
+        "bytes": 18119,
+        "sha256": "201119a78a52ccbe5c8e2ce128a165e9b3774800d55ed8a0935c91e587858d61",
+        "package_equals_git_object": true
+      },
+      "morsehgp3D_v12/microbancs/mes_b_scenes/pilote_b.py": {
+        "bytes": 33013,
+        "sha256": "457d0e6ff6f27daca0eb22f5852fe6b1e53fce1611c330fd3931a5b071c8c49d",
+        "package_equals_git_object": true
+      },
+      "morsehgp3D_v12/microbancs/outils/archives_vm.py": {
+        "bytes": 3236,
+        "sha256": "48646dc05c4f949f83dedee3e33032768bbce3ec810e34f313dd5042bd0de080",
+        "package_equals_git_object": true
+      }
+    }
+  },
+  "same_original_hash_before_and_after_recovery": true,
+  "all_regular_files_except_manifest_listed": true,
+  "source_product_diff_403_to_ea": [],
+  "tool": {
+    "path": "morsehgp3D_v12/microbancs/outils/archives_vm.py",
+    "commit": "ea62cd6918a3c3a403f7ff7fc45e85ff47c24386",
+    "sha256": "48646dc05c4f949f83dedee3e33032768bbce3ec810e34f313dd5042bd0de080",
+    "check_is_on_source_after_copy": true,
+    "independent_local_archive_hash_matches": true
+  }
+}

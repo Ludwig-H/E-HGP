@@ -1,0 +1,233 @@
+{
+  "commit": "a2c2fccfd65f89a4bb874b8bf5e1bd2c737856b1",
+  "gates": [
+    {
+      "code": 0,
+      "optimized": false,
+      "stderr": "",
+      "stdout": "test_lecteur_full_ok lecture=28 issues=7 session=6",
+      "test": "microbancs/outils/test_lecteur_full.py"
+    },
+    {
+      "code": 0,
+      "optimized": true,
+      "stderr": "",
+      "stdout": "test_lecteur_full_ok lecture=28 issues=7 session=6",
+      "test": "microbancs/outils/test_lecteur_full.py"
+    },
+    {
+      "code": 0,
+      "optimized": false,
+      "stderr": "",
+      "stdout": "test_pilote_b_ok verdicts=9 empreintes=3 attendu=1 etiquettes=12 pilote=2",
+      "test": "microbancs/mes_b_scenes/test_pilote_b.py"
+    },
+    {
+      "code": 0,
+      "optimized": true,
+      "stderr": "",
+      "stdout": "test_pilote_b_ok verdicts=9 empreintes=3 attendu=1 etiquettes=12 pilote=2",
+      "test": "microbancs/mes_b_scenes/test_pilote_b.py"
+    },
+    {
+      "code": 0,
+      "optimized": false,
+      "stderr": "",
+      "stdout": "test_pilote_full_ok essai=1 sites_faux=1 empreinte=1",
+      "test": "microbancs/mes_full/test_pilote_full.py"
+    },
+    {
+      "code": 0,
+      "optimized": true,
+      "stderr": "",
+      "stdout": "test_pilote_full_ok essai=1 sites_faux=1 empreinte=1",
+      "test": "microbancs/mes_full/test_pilote_full.py"
+    }
+  ],
+  "runners": [
+    {
+      "children": [
+        {
+          "code": 1,
+          "mutant": "sans_cles_exactes",
+          "stderr": "lecture : mutation cle_en_trop rendue ok\nsession : empreinte presente admise quand elle n'est pas demandee",
+          "stdout": ""
+        },
+        {
+          "code": 1,
+          "mutant": "booleen_admis",
+          "stderr": "lecture : mutation memoire_booleen rendue ok\nlecture : corruption liberation_booleenne admise",
+          "stdout": ""
+        },
+        {
+          "code": 1,
+          "mutant": "entier_non_borne",
+          "stderr": "lecture : corruption entier_2_64 admise",
+          "stdout": ""
+        },
+        {
+          "code": 1,
+          "mutant": "sans_inclusion_mur",
+          "stderr": "lecture : mutation mur rendue ok",
+          "stdout": ""
+        },
+        {
+          "code": 1,
+          "mutant": "refus_tout_statut",
+          "stderr": "issues : invariant viole (code 2) non publie comme echec",
+          "stdout": ""
+        },
+        {
+          "code": 1,
+          "mutant": "cpu_appareil",
+          "stderr": "lecture : memoire de l'appareil admise sur la voie CPU",
+          "stdout": ""
+        },
+        {
+          "code": 1,
+          "mutant": "budget_ignore",
+          "stderr": "lecture : budget de l'appareil partage admis\nsession : budget separe admis quand le partage est attendu",
+          "stdout": ""
+        },
+        {
+          "code": 1,
+          "mutant": "cles_repetees",
+          "stderr": "lecture : corruption cle_repetee admise",
+          "stdout": ""
+        },
+        {
+          "code": 1,
+          "mutant": "liberation_rang",
+          "stderr": "lecture : corruption liberation_booleenne admise",
+          "stdout": ""
+        },
+        {
+          "code": 1,
+          "mutant": "ouverture_raison",
+          "stderr": "lecture : corruption ouverture_raison admise",
+          "stdout": ""
+        },
+        {
+          "code": 1,
+          "mutant": "memoire_sans_coherence",
+          "stderr": "lecture : mutation memoire_pic_incoherent rendue ok",
+          "stdout": ""
+        },
+        {
+          "code": 1,
+          "mutant": "memoire_usage_libre",
+          "stderr": "lecture : mutation memoire_usage_sup_pic rendue ok",
+          "stdout": ""
+        },
+        {
+          "code": 1,
+          "mutant": "mur_nul_admis",
+          "stderr": "lecture : mutation mur_nul rendue ok",
+          "stdout": ""
+        },
+        {
+          "code": 1,
+          "mutant": "trame_ignoree",
+          "stderr": "lecture : mutation trame rendue ok",
+          "stdout": ""
+        },
+        {
+          "code": 1,
+          "mutant": "trame_unique",
+          "stderr": "session : alternance conforme refusee (passe 1 hors contrat (passe, statut, trame, voie, K, fils, profil ou sites))\nsession : sortie sans empreinte refusee quand elle n'est pas demandee",
+          "stdout": ""
+        },
+        {
+          "code": 1,
+          "mutant": "empreinte_toujours",
+          "stderr": "session : sortie sans empreinte refusee quand elle n'est pas demandee\nsession : empreinte presente admise quand elle n'est pas demandee",
+          "stdout": ""
+        }
+      ],
+      "code": 0,
+      "runner": "microbancs/outils/mutants_lecteur_full.py",
+      "stderr": "",
+      "stdout": "mutants_lecteur_full_ok tues=16"
+    },
+    {
+      "children": [
+        {
+          "code": 1,
+          "mutant": "b1_seuil",
+          "stderr": "verdicts : 2,1 s par million admis par B1 ({'etat': 'tenu', 'detail': ['4 scenes, maximum 2.100 s par million']})",
+          "stdout": ""
+        },
+        {
+          "code": 1,
+          "mutant": "b2_tous",
+          "stderr": "verdicts : refus au-dela de 10 millions mal compte ({'etat': 'tenu', 'detail': ['3 scenes, maximum 1.500 s par million', 'g : refus tolere au-dela de 10 millions de sites (x)']}, {'etat': 'non tenu', 'detail': ['g : refus (x)']})",
+          "stdout": ""
+        },
+        {
+          "code": 1,
+          "mutant": "b3_seuil",
+          "stderr": "verdicts : pente 1,4 {'etat': 'tenu', 'detail': ['a < b < c : pente 1.404']}",
+          "stdout": ""
+        },
+        {
+          "code": 1,
+          "mutant": "empreinte_voies",
+          "stderr": "empreintes : ecart entre voies non signale ([])",
+          "stdout": ""
+        },
+        {
+          "code": 1,
+          "mutant": "empreinte_passes",
+          "stderr": "empreintes : ecart entre passes non signale",
+          "stdout": ""
+        },
+        {
+          "code": 1,
+          "mutant": "etiquette_tronquee",
+          "stderr": "etiquettes : ['1358_f4500_n50_sans_sol', '1358_f4500_n50_sans_sol', '1358_f4500_n50_sans_sol', '1358_f4500_n50_sans_sol', '1358_f4500_n50_sans_sol', '1358_f4500_n50_sans_sol', '1358_f4500_n50_sans_sol', '1358_f4500_n50_sans_sol', '1358_f4500_n50_sans_sol', '1358_f4500_n50_sans_sol', '1358_f4500_n50_sans_sol', '1358_f4500_n50_sans_sol']",
+          "stdout": ""
+        },
+        {
+          "code": 1,
+          "mutant": "delai_ignore",
+          "stderr": "pilote : code 0, verdict essai, cas [('petite', 'ok', 2, True), ('enorme', 'illisible', 0, False), ('grande', 'ok', 1, False)], controles ['sortie de enorme K5 cpu : passe 0 hors contrat (passe, statut, trame, voie, K, fils, profil ou sites)']",
+          "stdout": ""
+        },
+        {
+          "code": 1,
+          "mutant": "b1_sans_echec",
+          "stderr": "verdicts : echec au-dela de 10 millions ignore par B1",
+          "stdout": ""
+        },
+        {
+          "code": 1,
+          "mutant": "b1_refus_partout",
+          "stderr": "verdicts : refus au-dela de 10 millions mal compte ({'etat': 'non tenu', 'detail': ['g : refus (x)', 'g : refus tolere au-dela de 10 millions de sites (x)']}, {'etat': 'tenu', 'detail': ['3 scenes jouees sous 10 millions de sites']})",
+          "stdout": ""
+        },
+        {
+          "code": 1,
+          "mutant": "b4_sans_refus",
+          "stderr": "verdicts : refus a K10 ignore par B4",
+          "stdout": ""
+        },
+        {
+          "code": 1,
+          "mutant": "pente_sans_garde",
+          "stderr": "Traceback (most recent call last):\n  File \"<temp>/test_pilote_b.py\", line 195, in <module>\n    sys.exit(main())\n             ^^^^^^\n  File \"<temp>/test_pilote_b.py\", line 185, in main\n    check(errors)\n  File \"<temp>/test_pilote_b.py\", line 77, in check_verdicts\n    if pilote_b.slope([(1_000_000, 0.0), (2_000_000, 1.0)]) is not None:\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<temp>/pilote_b.py\", line 243, in slope\n    ys = [math.log(y) for _, y in points]\n          ^^^^^^^^^^^\nValueError: math domain error",
+          "stdout": ""
+        },
+        {
+          "code": 1,
+          "mutant": "budget_partage_attendu",
+          "stderr": "attendu : {'voie': 'appareil', 'k': 10, 'fils': 48, 'passes': 2, 'empreinte': False, 'trames': [('lbl', 123)], 'budget_appareil': 'partage', 'bits': 21}",
+          "stdout": ""
+        }
+      ],
+      "code": 0,
+      "runner": "microbancs/mes_b_scenes/mutants_pilote_b.py",
+      "stderr": "",
+      "stdout": "mutants_pilote_b_ok tues=12"
+    }
+  ]
+}

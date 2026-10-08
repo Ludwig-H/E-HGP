@@ -1,0 +1,76 @@
+{
+  "schema": "FULL_ea62_902_memoire_octets",
+  "port_reader_k": true,
+  "preparation_capture_sha256": "612e709fdcd147c1713193f7320fac100e907bd8339a4b16ff737fdc9e7ee5d3",
+  "sources": {
+    "morsehgp3D_v12/bench/full_probe.cpp": {
+      "pin": "ea62cd6918a3c3a403f7ff7fc45e85ff47c24386",
+      "sha256": "201119a78a52ccbe5c8e2ce128a165e9b3774800d55ed8a0935c91e587858d61"
+    },
+    "morsehgp3D_v12/microbancs/mes_b_scenes/pilote_b.py": {
+      "pin": "ea62cd6918a3c3a403f7ff7fc45e85ff47c24386",
+      "sha256": "457d0e6ff6f27daca0eb22f5852fe6b1e53fce1611c330fd3931a5b071c8c49d"
+    },
+    "morsehgp3D_v12/src/core/reasons.def": {
+      "pin": "ea62cd6918a3c3a403f7ff7fc45e85ff47c24386",
+      "sha256": "6950b85dc15ed3ebfc51e4597ef06b4ed0b08c1833e83df09579dcb94e9e8cfd"
+    },
+    "morsehgp3D_v12/src/core/status.hpp": {
+      "pin": "ea62cd6918a3c3a403f7ff7fc45e85ff47c24386",
+      "sha256": "d81b3e8aab647c97fe97fa7d91081efa28ab88cdac8706cafdd825b17e4046ea"
+    },
+    "morsehgp3D_v12/receipts/audit_reponses_20261008/mes_full_contrelecture/reader.py": {
+      "pin": "039b2657e8b1deb0c6538a408499d38a5f79d081",
+      "sha256": "d0751369cc915ebbdd51024e2bd19021ad228070e2e8e8c4cb120b09a1cd24ab"
+    },
+    "morsehgp3D_v12/src/io/io.hpp": {
+      "pin": "ea62cd6918a3c3a403f7ff7fc45e85ff47c24386",
+      "sha256": "53c05dccf838583b7226af624d1d8df5e770cbc9b248ce67207fb3dc823901ce"
+    },
+    "morsehgp3D_v12/src/io/input.cpp": {
+      "pin": "ea62cd6918a3c3a403f7ff7fc45e85ff47c24386",
+      "sha256": "36d842ec4e844d91d9fd29f17eeaeee2aaa4b99b7c59cdcc384631847db30f99"
+    },
+    "morsehgp3D_v12/src/core/buffer.hpp": {
+      "pin": "ea62cd6918a3c3a403f7ff7fc45e85ff47c24386",
+      "sha256": "8e4d84665e90308ee9572a729731711bb419e3a565fd4dd11b5bd56ab6a92401"
+    }
+  },
+  "sessions": {
+    "L1r": {
+      "plan_sha256": "49892867ca82128d258967fc2147b6e790acf045caca26b4ab29fa95488df6cd",
+      "manifest_sha256": "f57f3d0b67924ed8808eb4d69f0b2e521d3b4480b336b63306e8d8e865cec333",
+      "sites": {
+        "boreas_202011261358_f4500_n1": 215665,
+        "boreas_202011261358_f4500_n10": 2153342,
+        "boreas_202011261358_f4500_n10_sans_sol": 1513483,
+        "boreas_202011261358_f4500_n1_sans_sol": 146316,
+        "boreas_202011261358_f4500_n50": 10766998,
+        "boreas_202011261358_f4500_n50_sans_sol": 7857268,
+        "eth3d_meadow_scan1": 6181091,
+        "forinst_nibio_plot12": 7825857,
+        "forinst_nibio_plot12_sans_sol": 7793680,
+        "forinst_scion_plot61": 3589247,
+        "forinst_scion_plot61_sans_sol": 3439371,
+        "forinst_tuwien_train": 6236167,
+        "forinst_tuwien_train_sans_sol": 5199758,
+        "ign_marseille_0891_6248": 6709045,
+        "ign_marseille_0891_6248_sans_sol": 2465285
+      },
+      "source_confirmed": true,
+      "command_index": 1
+    }
+  },
+  "qualification_campagne": false,
+  "port_reader_l1_sha256": "58cf7f1aea7db904908faff749e64d7c579969206aeb1ef0c84c65f804658a3e",
+  "prepared_before_real_replay_utc": "2026-10-08T05:42:24.567338+00:00",
+  "tests": {
+    "normal_optimized_equal": true,
+    "synthetic_cohorts": 1,
+    "mutations_refused": 32,
+    "nulls_preserved": 2,
+    "outcomes_checked": 4,
+    "partial_refusal_cold_prefix_preserved": true,
+    "report_corruptions_refused": 2
+  }
+}

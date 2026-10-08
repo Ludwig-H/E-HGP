@@ -1,0 +1,26 @@
+--- a/morsehgp3D_v12/microbancs/outils/lecteur_full.py
++++ b/morsehgp3D_v12/microbancs/outils/lecteur_full.py
+@@ -78,6 +78,12 @@
+             any(type(mem[k]) is not list or len(mem[k]) != 2 or not all(is_int(v) for v in mem[k]) or
+                 mem[k][0] > mem[k][1] for k in MEM_STAGES) or max(mem[k][1] for k in MEM_STAGES) != row['pic_octets']:
+         return 'memoire par etage mal formee ou incoherente avec pic_octets (passe %d)' % i
++    if row['epinglee_octets'] > row['pic_octets'] or any(
++            mem[left][0] > mem[right][1] for left, right in zip(MEM_STAGES, MEM_STAGES[1:])):
++        return 'memoire entre etages incoherente (passe %d)' % i
++    if attendu['voie'] == 'appareil' and attendu['budget_appareil'] == 'separe' and \
++            row['appareil_octets'] > row['pic_appareil_octets']:
++        return 'capacite appareil au-dela de son pic (passe %d)' % i
+     st, g = row['etapes_ns'], row['g_ns']
+     if sum(st[k] for k in ('P', 'C', 'G', 'raccord', 'TMVR')) > row['wall_ns'] or \
+             sum(st[k] for k in ('T', 'M', 'V', 'R')) > st['TMVR'] or g['tables'] + g['resolution'] > st['G']:
+@@ -110,7 +116,9 @@
+     """Rend dict(etat, raison, passes[, open_ns]) ; voir l'en-tete pour les issues."""
+     if code == 'expire':
+         return dict(etat='echec', raison='expire', passes=[])
+-    if type(code) is int and code < 0:
++    if type(code) is not int:
++        return dict(etat='illisible', raison='code non entier', passes=[])
++    if code < 0:
+         return dict(etat='echec', raison='signal %d' % -code, passes=[])
+     rows, why = read_rows(text)
+     if rows is None:

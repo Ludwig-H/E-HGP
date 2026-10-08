@@ -1,0 +1,79 @@
+{
+  "captured_utc_start": "2026-10-08T05:46:24.216185+00:00",
+  "captured_utc_end": "2026-10-08T05:46:24.395358+00:00",
+  "prototype_head": "545b5e5b6de7ed4f46878f4a654fa0e9c0283865",
+  "source_tree": {
+    "files": 385,
+    "sha256": "845776efa2f4ed75c9baef96e80e8ab8122c451f363c15684b6ff3ef9cf27693"
+  },
+  "files": {
+    "runs/mutants_num_garde.json": {
+      "bytes": 1487,
+      "sha256": "72c7b822d9fb4b692fa76227743bfc8d92d097820dbfe81bc67e81de68c2efee"
+    },
+    "runs/mutants_tower_t2d_b.json": {
+      "bytes": 1637,
+      "sha256": "fc5f9f7983c69e09274c216c30a6152d41864e3f44246b47455d852b0093e0c9"
+    },
+    "logs/mutants_num.log": {
+      "bytes": 537,
+      "sha256": "1911f67a1ab0ef54cfb61bf2d65257b090103b4e9483d8bac26df77088c4f277"
+    },
+    "logs/mutants_tower.log": {
+      "bytes": 594,
+      "sha256": "81365502470835a4ebe714af39c0bf7ad5d0aba97ae401982017fa8b6dce7767"
+    },
+    "logs/mutants_locaux.log": {
+      "bytes": 92,
+      "sha256": "8e34189bdbf8ee103086c5c32976584c4422e2b180991d6a25414a31649a0f6c"
+    },
+    "outils/mutants_locaux.sh": {
+      "bytes": 1808,
+      "sha256": "75d83ded52b9398fb35a434bfa370fc2e20491a70147a8268d1f40ff23baa9da"
+    },
+    "live_mutated_sources.json": {
+      "bytes": 1048,
+      "sha256": "198de2a2044545f588cbe48309c980f56820296cd728b728847c813a4bb574d6"
+    }
+  },
+  "selected": {
+    "num": [
+      "certificat_du_support_seul",
+      "garde_un_bit_trop_etroite",
+      "recensement_avant_certificat",
+      "garde_boite_partielle_rejetee",
+      "pave_haut_trop_court",
+      "pave_bas_trop_court",
+      "garde_plancher_au_lieu_du_plus_proche",
+      "garde_coin_proche"
+    ],
+    "tower": [
+      "census_sans_seuil",
+      "census_sans_temoins",
+      "entiere_sans_test_diametral",
+      "entiere_obtus_pour_aigu",
+      "entiere_departage_inverse",
+      "entiere_sans_departage",
+      "entiere_triangle_au_dela_de_trois",
+      "proposition_non_triee",
+      "proposition_indices_de_partie"
+    ]
+  },
+  "scope": "read-only logs and source comparison; no native replay",
+  "limits": [
+    "native individual stdout and binaries removed by producer runner",
+    "three live mutated source comparisons only",
+    "no GPU/G4 adoption or timing qualification"
+  ],
+  "result": {
+    "num": {
+      "code_killed": 8,
+      "witness": "green"
+    },
+    "tower": {
+      "code_killed": 9,
+      "witness": "green"
+    },
+    "last_live_mutated_sources_exact": 3
+  }
+}

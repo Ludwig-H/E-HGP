@@ -1,0 +1,24 @@
+{
+  "observed_utc": "2026-10-08T05:33:47.446408+00:00",
+  "prototype": "A/w902",
+  "base_declared": "902041f66",
+  "baseline": "A/w8da",
+  "source_tree": {
+    "files": 131,
+    "sha256": "034eb23207283b61e44f89129950bd622f328506b6dedea3ec2d52ef5ea2e4f7"
+  },
+  "files": {
+    "src/tower/pipeline_run.cpp": "08b385e624db1eda20cd214e378e1bd7cd50d2a77c9832c485a66ff564847d02",
+    "src/tower/pipeline.cpp": "44e83374113a860519744f4a34dab854e32e50d50febc0e0f905a8aa7f8e437b",
+    "src/tower/pipeline.hpp": "22247870f74e66814b9339c7977df58ff5510592803ed4995f38d02531ede99f",
+    "src/tower/forest_stages.cpp": "5ed33d69bb63fcfa2a7c65c0a9fbed41dc00762e9052446fb9b6ef61f0eb2d6f",
+    "src/tower/tower.hpp": "37f344d67952570d0b0403bf2a9721f39bda2ced842a3b9a5357e8f222586620",
+    "bench/full_probe.cpp": "e3a54104a2e0db3e669751ed407e0935f601a721ac702413eb206d3f597c3143"
+  },
+  "main_observed": "3a7ac8dae58a2964324793f85d7968f8b8989879",
+  "cpulive_files_equal_8da": {
+    "leaf_common.hpp": "a52cca4a03d663e452422e82fcf6395e4733857877e0818921256b7bf7dfe860",
+    "leaf_j3.hpp": "8329fc3fb251ad739ddfacd0174711a64dd22b6a9adf2d9798020f939fe54922"
+  },
+  "native_execution": false
+}

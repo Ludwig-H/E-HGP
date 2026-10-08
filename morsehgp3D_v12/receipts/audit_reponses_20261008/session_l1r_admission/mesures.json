@@ -1,0 +1,779 @@
+{
+  "bruts_admis": true,
+  "conditions": [],
+  "criteres": {
+    "B1": "non tenu",
+    "B2": "non tenu",
+    "B3": "non evalue",
+    "B4": "non tenu"
+  },
+  "verdict": "non tenu",
+  "empreintes": {
+    "boreas_202011261358_f4500_n10_sans_sol:K5": [
+      "49f90d23ad065e63d9a66b18a1000b882cb1585b6e4ef908ffb4f766a946bd72"
+    ],
+    "boreas_202011261358_f4500_n1:K5": [
+      "52c5cf71ee01007d52e40178704b2a0daea6d1ba120114b7e0e006adaefa0a0f"
+    ],
+    "boreas_202011261358_f4500_n1_sans_sol:K5": [
+      "f2ec1106e2745d2361a89e21a7ee4a283c2bb0fbed3fe7058c9b2dc6d27ecf3d"
+    ]
+  },
+  "codes": "declares par le rapport du pilote epingle",
+  "qualification_campagne": false,
+  "processus": 18,
+  "scenes": 15,
+  "succes": 10,
+  "refus": 8,
+  "passes_demandees": 30,
+  "passes_completes": 18,
+  "passes_chaudes": 8,
+  "cpu_null": 0,
+  "rss_null": 0,
+  "cas": [
+    {
+      "nom": "boreas_202011261358_f4500_n1_sans_sol",
+      "k": 5,
+      "voie": "appareil",
+      "sites": 146316,
+      "expected": 2,
+      "etat": "ok",
+      "issue": "none",
+      "empreinte": true,
+      "statistiques": {
+        "cpu_derniere_ns": 9996268000,
+        "derniere_ns": 519049737,
+        "device_capacity_last_octets": 1909509220,
+        "device_peak_octets": 1909509220,
+        "hote_peak_octets": 1221366040,
+        "max_chaud_ns": 519049737,
+        "mediane_chaude_ns": 519049737,
+        "passes": 2,
+        "pinned_capacity_last_octets": 67108864,
+        "premiere_ns": 557376151,
+        "regime_derniere": "chaude",
+        "rss_max_octets": 1736290304
+      },
+      "passes_completes": 2,
+      "open_ns": 367273806,
+      "etapes_derniere_ns": {
+        "C": 124052814,
+        "G": 153055984,
+        "M": 29666391,
+        "P": 5757578,
+        "R": 45828225,
+        "T": 140160307,
+        "TMVR": 236181271,
+        "V": 7109070,
+        "raccord": 1620
+      },
+      "memoire_derniere_octets": {
+        "C": [
+          528147076,
+          671349220
+        ],
+        "G": [
+          823472548,
+          955292016
+        ],
+        "P": [
+          75900016,
+          75900016
+        ],
+        "TMVR": [
+          1159882608,
+          1221366040
+        ],
+        "raccord": [
+          823472548,
+          823472548
+        ]
+      },
+      "hors_mur_derniere_ns": {
+        "empreinte": 3860033850,
+        "validation": 145933715,
+        "liberation": 27585039
+      }
+    },
+    {
+      "nom": "boreas_202011261358_f4500_n1",
+      "k": 5,
+      "voie": "appareil",
+      "sites": 215665,
+      "expected": 2,
+      "etat": "ok",
+      "issue": "none",
+      "empreinte": true,
+      "statistiques": {
+        "cpu_derniere_ns": 13455321000,
+        "derniere_ns": 699519711,
+        "device_capacity_last_octets": 2397435600,
+        "device_peak_octets": 2397435600,
+        "hote_peak_octets": 1620702811,
+        "max_chaud_ns": 699519711,
+        "mediane_chaude_ns": 699519711,
+        "passes": 2,
+        "pinned_capacity_last_octets": 67108864,
+        "premiere_ns": 742280590,
+        "regime_derniere": "chaude",
+        "rss_max_octets": 2114310144
+      },
+      "passes_completes": 2,
+      "open_ns": 114539180,
+      "etapes_derniere_ns": {
+        "C": 166412363,
+        "G": 200959612,
+        "M": 39787846,
+        "P": 11435066,
+        "R": 61878487,
+        "T": 190900198,
+        "TMVR": 320710740,
+        "V": 9827234,
+        "raccord": 1510
+      },
+      "memoire_derniere_octets": {
+        "C": [
+          679645924,
+          865262980
+        ],
+        "G": [
+          1075262139,
+          1253834979
+        ],
+        "P": [
+          79997852,
+          80048772
+        ],
+        "TMVR": [
+          1536252851,
+          1620702811
+        ],
+        "raccord": [
+          1075262139,
+          1075262139
+        ]
+      },
+      "hors_mur_derniere_ns": {
+        "empreinte": 5246716579,
+        "validation": 219678688,
+        "liberation": 39746798
+      }
+    },
+    {
+      "nom": "boreas_202011261358_f4500_n10_sans_sol",
+      "k": 5,
+      "voie": "appareil",
+      "sites": 1513483,
+      "expected": 2,
+      "etat": "ok",
+      "issue": "none",
+      "empreinte": true,
+      "statistiques": {
+        "cpu_derniere_ns": 205171618000,
+        "derniere_ns": 10024964548,
+        "device_capacity_last_octets": 23036138508,
+        "device_peak_octets": 23036138508,
+        "hote_peak_octets": 17049044532,
+        "max_chaud_ns": 10024964548,
+        "mediane_chaude_ns": 10024964548,
+        "passes": 2,
+        "pinned_capacity_last_octets": 67108864,
+        "premiere_ns": 9979660983,
+        "regime_derniere": "chaude",
+        "rss_max_octets": 17482584064
+      },
+      "passes_completes": 2,
+      "open_ns": 114855471,
+      "etapes_derniere_ns": {
+        "C": 1742186378,
+        "G": 2946833333,
+        "M": 462543948,
+        "P": 75147498,
+        "R": 949578572,
+        "T": 3512093050,
+        "TMVR": 5260794909,
+        "V": 140827368,
+        "raccord": 1900
+      },
+      "memoire_derniere_octets": {
+        "C": [
+          6792450468,
+          8812885620
+        ],
+        "G": [
+          11310788972,
+          13149645244
+        ],
+        "P": [
+          158346644,
+          158346644
+        ],
+        "TMVR": [
+          16148465860,
+          17049044532
+        ],
+        "raccord": [
+          11310788972,
+          11310788972
+        ]
+      },
+      "hors_mur_derniere_ns": {
+        "empreinte": 55568032926,
+        "validation": 3246329703,
+        "liberation": 444263497
+      }
+    },
+    {
+      "nom": "boreas_202011261358_f4500_n10_sans_sol",
+      "k": 5,
+      "voie": "cpu",
+      "sites": 1513483,
+      "expected": 2,
+      "etat": "ok",
+      "issue": "none",
+      "empreinte": true,
+      "statistiques": {
+        "cpu_derniere_ns": 806535334000,
+        "derniere_ns": 22344449612,
+        "device_capacity_last_octets": 0,
+        "device_peak_octets": 0,
+        "hote_peak_octets": 24453936844,
+        "max_chaud_ns": 22344449612,
+        "mediane_chaude_ns": 22344449612,
+        "passes": 2,
+        "pinned_capacity_last_octets": 0,
+        "premiere_ns": 22225154008,
+        "regime_derniere": "chaude",
+        "rss_max_octets": 24794165248
+      },
+      "passes_completes": 2,
+      "open_ns": null,
+      "etapes_derniere_ns": {
+        "C": 14089831380,
+        "G": 2979963248,
+        "M": 455470505,
+        "P": 77100869,
+        "R": 952431420,
+        "T": 3453591004,
+        "TMVR": 5197550795,
+        "V": 140606629,
+        "raccord": 2680
+      },
+      "memoire_derniere_octets": {
+        "C": [
+          6725341604,
+          24453936844
+        ],
+        "G": [
+          11243680108,
+          13082536380
+        ],
+        "P": [
+          91237780,
+          91237780
+        ],
+        "TMVR": [
+          16081356996,
+          16981935668
+        ],
+        "raccord": [
+          11243680108,
+          11243680108
+        ]
+      },
+      "hors_mur_derniere_ns": {
+        "empreinte": 55668846214,
+        "validation": 3233155936,
+        "liberation": 444938105
+      }
+    },
+    {
+      "nom": "boreas_202011261358_f4500_n10",
+      "k": 5,
+      "voie": "appareil",
+      "sites": 2153342,
+      "expected": 2,
+      "etat": "ok",
+      "issue": "none",
+      "empreinte": false,
+      "statistiques": {
+        "cpu_derniere_ns": 260054190000,
+        "derniere_ns": 13001688463,
+        "device_capacity_last_octets": 30550678740,
+        "device_peak_octets": 30550678740,
+        "hote_peak_octets": 21692800041,
+        "max_chaud_ns": 13001688463,
+        "mediane_chaude_ns": 13001688463,
+        "passes": 2,
+        "pinned_capacity_last_octets": 67108864,
+        "premiere_ns": 13093090305,
+        "regime_derniere": "chaude",
+        "rss_max_octets": 22139092992
+      },
+      "passes_completes": 2,
+      "open_ns": 155201408,
+      "etapes_derniere_ns": {
+        "C": 2174140977,
+        "G": 3635638812,
+        "M": 604327652,
+        "P": 114450046,
+        "R": 1292963285,
+        "T": 4725819169,
+        "TMVR": 7077456548,
+        "V": 195834492,
+        "raccord": 1580
+      },
+      "memoire_derniere_octets": {
+        "C": [
+          8553285464,
+          11062965176
+        ],
+        "G": [
+          14283012045,
+          16702641553
+        ],
+        "P": [
+          196392040,
+          196392040
+        ],
+        "TMVR": [
+          20533586005,
+          21692800041
+        ],
+        "raccord": [
+          14283012045,
+          14283012045
+        ]
+      },
+      "hors_mur_derniere_ns": {
+        "empreinte": 0,
+        "validation": 4449901418,
+        "liberation": 602407551
+      }
+    },
+    {
+      "nom": "ign_marseille_0891_6248_sans_sol",
+      "k": 5,
+      "voie": "appareil",
+      "sites": 2465285,
+      "expected": 2,
+      "etat": "ok",
+      "issue": "none",
+      "empreinte": false,
+      "statistiques": {
+        "cpu_derniere_ns": 211356827000,
+        "derniere_ns": 10955437370,
+        "device_capacity_last_octets": 24721923728,
+        "device_peak_octets": 24721923728,
+        "hote_peak_octets": 17090823022,
+        "max_chaud_ns": 10955437370,
+        "mediane_chaude_ns": 10955437370,
+        "passes": 2,
+        "pinned_capacity_last_octets": 67108864,
+        "premiere_ns": 11088703813,
+        "regime_derniere": "chaude",
+        "rss_max_octets": 17373048832
+      },
+      "passes_completes": 2,
+      "open_ns": 117143545,
+      "etapes_derniere_ns": {
+        "C": 1782239875,
+        "G": 2839797926,
+        "M": 498281146,
+        "P": 162208572,
+        "R": 1066025369,
+        "T": 4191900401,
+        "TMVR": 6171188517,
+        "V": 199829991,
+        "raccord": 1770
+      },
+      "memoire_derniere_octets": {
+        "C": [
+          6415977448,
+          8059788712
+        ],
+        "G": [
+          10905035210,
+          12914521122
+        ],
+        "P": [
+          214061532,
+          215025972
+        ],
+        "TMVR": [
+          16132002274,
+          17090823022
+        ],
+        "raccord": [
+          10905035210,
+          10905035210
+        ]
+      },
+      "hors_mur_derniere_ns": {
+        "empreinte": 0,
+        "validation": 3726405023,
+        "liberation": 475000647
+      }
+    },
+    {
+      "nom": "forinst_scion_plot61_sans_sol",
+      "k": 5,
+      "voie": "appareil",
+      "sites": 3439371,
+      "expected": 2,
+      "etat": "ok",
+      "issue": "none",
+      "empreinte": false,
+      "statistiques": {
+        "cpu_derniere_ns": 978741219000,
+        "derniere_ns": 41951244348,
+        "device_capacity_last_octets": 86693905144,
+        "device_peak_octets": 86693905144,
+        "hote_peak_octets": 62443133119,
+        "max_chaud_ns": 41951244348,
+        "mediane_chaude_ns": 41951244348,
+        "passes": 2,
+        "pinned_capacity_last_octets": 67108864,
+        "premiere_ns": 41825027760,
+        "regime_derniere": "chaude",
+        "rss_max_octets": 62674477056
+      },
+      "passes_completes": 2,
+      "open_ns": 117202455,
+      "etapes_derniere_ns": {
+        "C": 5803739336,
+        "G": 14631163303,
+        "M": 1666541239,
+        "P": 245049818,
+        "R": 4067155136,
+        "T": 14246490645,
+        "TMVR": 21271289501,
+        "V": 564748002,
+        "raccord": 1800
+      },
+      "memoire_derniere_octets": {
+        "C": [
+          25851917300,
+          34114367492
+        ],
+        "G": [
+          42595171163,
+          49098364939
+        ],
+        "P": [
+          272346436,
+          273471132
+        ],
+        "TMVR": [
+          59288529775,
+          62443133119
+        ],
+        "raccord": [
+          42595171163,
+          42595171163
+        ]
+      },
+      "hors_mur_derniere_ns": {
+        "empreinte": 0,
+        "validation": 15290566543,
+        "liberation": 1802410815
+      }
+    },
+    {
+      "nom": "forinst_tuwien_train_sans_sol",
+      "k": 5,
+      "voie": "appareil",
+      "sites": 5199758,
+      "expected": 2,
+      "etat": "refus",
+      "issue": "memory_budget",
+      "empreinte": false,
+      "statistiques": null,
+      "passes_completes": 0,
+      "open_ns": 118405486
+    },
+    {
+      "nom": "eth3d_meadow_scan1",
+      "k": 5,
+      "voie": "appareil",
+      "sites": 6181091,
+      "expected": 2,
+      "etat": "ok",
+      "issue": "none",
+      "empreinte": false,
+      "statistiques": {
+        "cpu_derniere_ns": 529166101000,
+        "derniere_ns": 35324819967,
+        "device_capacity_last_octets": 50974383516,
+        "device_peak_octets": 50974383516,
+        "hote_peak_octets": 35054164217,
+        "max_chaud_ns": 35324819967,
+        "mediane_chaude_ns": 35324819967,
+        "passes": 2,
+        "pinned_capacity_last_octets": 67108864,
+        "premiere_ns": 35243942883,
+        "regime_derniere": "chaude",
+        "rss_max_octets": 35366649856
+      },
+      "passes_completes": 2,
+      "open_ns": 117329066,
+      "etapes_derniere_ns": {
+        "C": 3397086843,
+        "G": 7729994023,
+        "M": 1144952697,
+        "P": 395862371,
+        "R": 1970237839,
+        "T": 20000275715,
+        "TMVR": 23801873950,
+        "V": 235182689,
+        "raccord": 2070
+      },
+      "memoire_derniere_octets": {
+        "C": [
+          10167566156,
+          10590901292
+        ],
+        "G": [
+          21895210185,
+          26398797561
+        ],
+        "P": [
+          433705796,
+          437974332
+        ],
+        "TMVR": [
+          32915180045,
+          35054164217
+        ],
+        "raccord": [
+          21895210185,
+          21895210185
+        ]
+      },
+      "hors_mur_derniere_ns": {
+        "empreinte": 0,
+        "validation": 5252671688,
+        "liberation": 1084909901
+      }
+    },
+    {
+      "nom": "forinst_nibio_plot12_sans_sol",
+      "k": 5,
+      "voie": "appareil",
+      "sites": 7793680,
+      "expected": 2,
+      "etat": "refus",
+      "issue": "memory_budget",
+      "empreinte": false,
+      "statistiques": null,
+      "passes_completes": 0,
+      "open_ns": 118870295
+    },
+    {
+      "nom": "boreas_202011261358_f4500_n50_sans_sol",
+      "k": 5,
+      "voie": "appareil",
+      "sites": 7857268,
+      "expected": 2,
+      "etat": "refus",
+      "issue": "memory_budget",
+      "empreinte": false,
+      "statistiques": null,
+      "passes_completes": 0,
+      "open_ns": 117013705
+    },
+    {
+      "nom": "boreas_202011261358_f4500_n50",
+      "k": 5,
+      "voie": "appareil",
+      "sites": 10766998,
+      "expected": 2,
+      "etat": "refus",
+      "issue": "memory_budget",
+      "empreinte": false,
+      "statistiques": null,
+      "passes_completes": 0,
+      "open_ns": 117154195
+    },
+    {
+      "nom": "boreas_202011261358_f4500_n10_sans_sol",
+      "k": 10,
+      "voie": "appareil",
+      "sites": 1513483,
+      "expected": 1,
+      "etat": "refus",
+      "issue": "memory_budget",
+      "empreinte": true,
+      "statistiques": null,
+      "passes_completes": 0,
+      "open_ns": 114970435
+    },
+    {
+      "nom": "ign_marseille_0891_6248_sans_sol",
+      "k": 10,
+      "voie": "appareil",
+      "sites": 2465285,
+      "expected": 1,
+      "etat": "refus",
+      "issue": "memory_budget",
+      "empreinte": false,
+      "statistiques": null,
+      "passes_completes": 0,
+      "open_ns": 114206345
+    },
+    {
+      "nom": "forinst_scion_plot61",
+      "k": 5,
+      "voie": "appareil",
+      "sites": 3589247,
+      "expected": 1,
+      "etat": "ok",
+      "issue": "none",
+      "empreinte": false,
+      "statistiques": {
+        "cpu_derniere_ns": 990501169000,
+        "derniere_ns": 42829631857,
+        "device_capacity_last_octets": 87152692652,
+        "device_peak_octets": 87152692652,
+        "hote_peak_octets": 63787597001,
+        "max_chaud_ns": null,
+        "mediane_chaude_ns": null,
+        "passes": 1,
+        "pinned_capacity_last_octets": 67108864,
+        "premiere_ns": 42829631857,
+        "regime_derniere": "froide",
+        "rss_max_octets": 63935918080
+      },
+      "passes_completes": 1,
+      "open_ns": 114084035,
+      "etapes_derniere_ns": {
+        "C": 5961156620,
+        "G": 14730559181,
+        "M": 1697296439,
+        "P": 262817098,
+        "R": 4172440110,
+        "T": 14678010145,
+        "TMVR": 21875095598,
+        "V": 584905313,
+        "raccord": 2740
+      },
+      "memoire_derniere_octets": {
+        "C": [
+          26371625716,
+          34784298052
+        ],
+        "G": [
+          43468903937,
+          50116180593
+        ],
+        "P": [
+          213986036,
+          215354828
+        ],
+        "TMVR": [
+          60559465761,
+          63787597001
+        ],
+        "raccord": [
+          43468903937,
+          43468903937
+        ]
+      },
+      "hors_mur_derniere_ns": {
+        "empreinte": 0,
+        "validation": 15656002833,
+        "liberation": 1798791458
+      }
+    },
+    {
+      "nom": "forinst_tuwien_train",
+      "k": 5,
+      "voie": "appareil",
+      "sites": 6236167,
+      "expected": 1,
+      "etat": "refus",
+      "issue": "memory_budget",
+      "empreinte": false,
+      "statistiques": null,
+      "passes_completes": 0,
+      "open_ns": 117031919
+    },
+    {
+      "nom": "ign_marseille_0891_6248",
+      "k": 5,
+      "voie": "appareil",
+      "sites": 6709045,
+      "expected": 1,
+      "etat": "ok",
+      "issue": "none",
+      "empreinte": false,
+      "statistiques": {
+        "cpu_derniere_ns": 517022192000,
+        "derniere_ns": 31548425998,
+        "device_capacity_last_octets": 59084130680,
+        "device_peak_octets": 59084130680,
+        "hote_peak_octets": 40981606857,
+        "max_chaud_ns": null,
+        "mediane_chaude_ns": null,
+        "passes": 1,
+        "pinned_capacity_last_octets": 67108864,
+        "premiere_ns": 31548425998,
+        "regime_derniere": "froide",
+        "rss_max_octets": 41183313920
+      },
+      "passes_completes": 1,
+      "open_ns": 119713968,
+      "etapes_derniere_ns": {
+        "C": 4027536662,
+        "G": 6146376346,
+        "M": 1336014754,
+        "P": 441969835,
+        "R": 2983222052,
+        "T": 15390935276,
+        "TMVR": 20932540145,
+        "V": 607185053,
+        "raccord": 2540
+      },
+      "memoire_derniere_octets": {
+        "C": [
+          13972400180,
+          16537262084
+        ],
+        "G": [
+          25211884045,
+          30454874765
+        ],
+        "P": [
+          392421708,
+          402542708
+        ],
+        "TMVR": [
+          38543112037,
+          40981606857
+        ],
+        "raccord": [
+          25211884045,
+          25211884045
+        ]
+      },
+      "hors_mur_derniere_ns": {
+        "empreinte": 0,
+        "validation": 14021759911,
+        "liberation": 1166440103
+      }
+    },
+    {
+      "nom": "forinst_nibio_plot12",
+      "k": 5,
+      "voie": "appareil",
+      "sites": 7825857,
+      "expected": 1,
+      "etat": "refus",
+      "issue": "memory_budget",
+      "empreinte": false,
+      "statistiques": null,
+      "passes_completes": 0,
+      "open_ns": 116219410
+    }
+  ]
+}
