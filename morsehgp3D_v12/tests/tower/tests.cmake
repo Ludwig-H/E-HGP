@@ -110,6 +110,12 @@ mhgp12_add_unit(mhgp12_tower_pipeline SOURCES pipeline_unit.cpp
 # terminaison, reprise a l'identique ; penurie, chaque new sans exception de build_tower echoue tour a tour (un fil :
 # toutes ; trois fils : un echantillon) : refus memory_budget ou succes, budget rendu, ni terminaison ni attente.
 mhgp12_add_unit(mhgp12_tower_pipeline_fault SOURCES pipeline_fault.cpp GROUPS allocation penurie LABELS fast)
+# Terminaison de la region (constat de l'auditeur, receipts/audit_reponses_20261008/a_terminaison) : regle de sortie par
+# le retrait qui passe a zero, verifiee dans le source, et modele borne de l'auditeur (ancienne regle : cycle equitable
+# non terminal dans chacun des six graphes ; regle corrigee : aucun ; aucun travail abandonne).
+mhgp12_python_gate(mhgp12_tower_pipeline_terminaison 0 pipeline_terminaison.py
+                   ${PROJECT_SOURCE_DIR}/src/tower/pipeline_run.cpp
+                   LINE "pipeline_terminaison_ok cas=6 periode_ancienne=16 source=conforme" LABELS fast TIMEOUT 120)
 # Adaptateur de test des vidages MHGP12DP de la v11 (MES-M0, determinisme, JUG-EMST) : outil joue par la porte
 # MES-M0 ci-dessous et par le pilote du developpeur. Il lit les vidages par le lecteur strict du format, source unique
 # des microbancs (microbancs/mes_m3_m4_tour/common/format.hpp) : construit seulement si ce dossier est present (les

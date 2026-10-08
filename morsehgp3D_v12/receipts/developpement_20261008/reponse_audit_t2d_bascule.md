@@ -45,3 +45,26 @@ Le pilote T2-d-B construit toutes ses sondes depuis l'archive de `902041f66`. La
 informations FULL restent au schéma séquentiel, et le lecteur les attend ainsi.
 
 GCP : la seule session de ce point est `v12.20261008.t2db`, gardée et lancée par le lanceur. Son reçu suivra.
+
+## Terminaison de la région (`CST-0241`, reçu [`a_terminaison`](../audit_reponses_20261008/a_terminaison/README.md))
+
+Votre `proposition.patch` est appliqué tel quel. Le fil dont le retrait fait passer `in_flight` à zéro (valeur rendue
+par `fetch_sub`) sort si son scan sec est vide ; une réannonce concurrente n'efface plus ce droit. Il est accompagné
+d'une première porte, `mhgp12_tower_pipeline_terminaison`
+([`pipeline_terminaison.py`](../../tests/tower/pipeline_terminaison.py)), qui fait deux contrôles :
+
+- **le source** : la règle corrigée y figure exactement une fois, et la relecture d'`in_flight` dans le test de
+  sortie n'y figure plus ;
+- **votre modèle borné**, porté tel quel en bibliothèque : l'ancienne règle a un cycle équitable non terminal dans
+  chacun des six graphes, la règle corrigée aucun, et aucune fin n'abandonne de travail. Le cycle de seize
+  transitions est atteignable sans `relax`.
+
+Le mutant `terminaison_relecture_du_compte` revient à l'ancienne règle ; il est tué par code (campagne locale isolée,
+10 min 33 s). Plancher des mutants de la tour : 38 → 39.
+
+Cette porte est textuelle et modélisée : elle ne commande pas l'entrelacement natif. Votre
+[protocole de porte native déterministe](../audit_reponses_20261008/a_terminaison_porte/README.md) (trois crochets
+compilés seulement dans une cible de test, Session d'un site à K1, Pool de deux, deux fils du harnais ordonnés par
+sémaphores) est transmis au chantier A, qui porte `pipeline_run.cpp`, pour être intégré avant A6. L'état de
+`CST-0241` reste le vôtre à fixer.
+

@@ -1,8 +1,9 @@
 // Region de la Session recouverte (pipeline.hpp) : graphe des etapes de la foret, reclamation et execution des
 // travaux par les fils, terminaison. Un fil annonce son travail (in_flight) AVANT de reclamer, et tout ce qu'un travail
-// rend reclamable (tranche publiee, etape liberee, noyau rendu) est ecrit AVANT son retrait : un fil qui lit in_flight
-// a zero puis ne trouve rien a reclamer peut sortir, car plus rien ne peut le devenir. Aucun fil n'attend un autre :
-// a defaut de travail, il patiente (pause, puis cession du processeur) et recommence.
+// rend reclamable (tranche publiee, etape liberee, noyau rendu) est ecrit AVANT son retrait. Le dernier retrait
+// conserve son passage par zero : une annonce concurrente ne doit pas effacer ce droit de sortir si le dry-scan
+// est vide. Ce retour est individuel, pas une quiescence globale : un nouveau participant peut encore travailler
+// et reste responsable de ses publications. A defaut de travail, un fil patiente puis recommence.
 #include <algorithm>
 #include <thread>
 
@@ -441,9 +442,9 @@ Outcome run_region(void* raw, u64, u64, u32 w) noexcept {
       p.in_flight.fetch_sub(1, std::memory_order_acq_rel);  // APRES tout ce que le travail rend reclamable
       continue;
     }
-    p.in_flight.fetch_sub(1, std::memory_order_acq_rel);
+    const bool last = p.in_flight.fetch_sub(1, std::memory_order_acq_rel) == 1;
     const u64 seen = p.epoch.load(std::memory_order_acquire);
-    if (p.in_flight.load(std::memory_order_acquire) == 0 && !find_job(p, false, job)) return {};
+    if (last && !find_job(p, false, job)) return {};
     if (find_job(p, false, job)) continue;  // du travail est apparu : reclamer
     // Rien a reclamer : attendre une nouvelle epoque (ou la fin de tout travail en cours) avant d'explorer a nouveau.
     while (p.epoch.load(std::memory_order_acquire) == seen && p.in_flight.load(std::memory_order_acquire) != 0)
