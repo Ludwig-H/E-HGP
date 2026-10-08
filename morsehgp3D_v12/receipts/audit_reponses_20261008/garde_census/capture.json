@@ -1,0 +1,55 @@
+{
+  "pin": "d8c6f7164f7b8117792e7f146487acd975d410e1",
+  "observed_main": "4831fd3ba9778d2c52ab5e92126b19e2a54be2d4",
+  "scope": "proposition mathematique et patch hors produit; aucun natif ni temps mesure",
+  "source_sha256": {
+    "src/num/guard.cpp": "459b99dfe154f32d8ab468d3a410a1bd74ca4c94363634244f37c8cdf7fc720b",
+    "src/num/guard.hpp": "8c2afab759cce1b7fe90336361a5fd7b653862378814c614c95f0b58086a2884",
+    "docs/CONTRAT_NUMERIQUE.md": "85e7a65ad1078c38be68af0cb90a26ba20cba35ab0959f83b3ebbe4105fbd168",
+    "src/num/frame.hpp": "7bff1619ddd88e4d340e92e4bcd975a6721529de63a3d13ef307e01678aad35d",
+    "src/num/power_certificate.hpp": "36151714489a9b73dbac6645fd08476451f771d167702bfadb86eaec100e55c0",
+    "src/index/bounds.hpp": "61a1d54a2c1386a1cb76ded2af235e99ae69ec10aa17d20e1b8dc33ddf7f2ac4",
+    "src/index/census.cpp": "4f3d6f9819f592da0f911482e20f01c11b6e21e58af94ac2a4239dcd521aaa9d",
+    "src/index/census_workspace.cpp": "dc48110ce8f81094f1374de0f09c352181e71379808a40aec0af79998ba515f8",
+    "src/tower/resolve.cpp": "583d9778d5b8f6c3f8972c7f19f62c3b8174d897f996461392bc6103be28740d",
+    "src/tower/supports.cpp": "04c91fc00bfe25373b3afed21900a3d866f333970bd1e2313e6e1e083159dd4d",
+    "tests/num/guard_test.cpp": "075c8428529eccca22093e55998598be6860b85c47ad38df0d6f5bf049565a1b",
+    "tests/index/guarded_test.cpp": "38614899f77d9a8969dd771c2040cb3c370970a4c19cd57cbc64767c37088718",
+    "tests/mutants/num.json": "c1801712013839832037d6cc9d490c9cd4eefecd9dcd909a65a6035ee2da3d9e"
+  },
+  "patched_files": [
+    "src/num/guard.cpp",
+    "src/num/guard.hpp",
+    "docs/CONTRAT_NUMERIQUE.md",
+    "src/num/power_certificate.hpp"
+  ],
+  "patch_sha256": "148235dbe7bea13616dd56cc01a279696705f105bb25471ae2b94d9fe47b5156",
+  "expected_result": {
+    "arities": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "box_powers_saved": 1086,
+    "boxes": 2470,
+    "certified": 43,
+    "native_executed": false,
+    "new_disjoint_boxes": 734,
+    "partial_sum_cases": 512,
+    "performance_qualified": false,
+    "point_powers_saved": 750,
+    "points": 1617,
+    "rejected_candidates": 116,
+    "status": "ok",
+    "upper_powers_saved": 352,
+    "wide_final_bits": 127,
+    "wide_first_bits": 131,
+    "wide_power_domain": 17
+  },
+  "artifact_sha256": {
+    "README.md": "db5c3c03480867597b556f2cf7ae90734be59b1c7b4f37c77de749d5a28aa896",
+    "model.py": "c3ea8b3da8b41df179c61dd3b7887f5492b6bf678b2bf4f7ff8c92a8ee4f3783",
+    "proposition.patch": "148235dbe7bea13616dd56cc01a279696705f105bb25471ae2b94d9fe47b5156"
+  }
+}

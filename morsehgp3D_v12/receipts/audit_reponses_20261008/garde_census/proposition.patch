@@ -1,0 +1,88 @@
+--- a/morsehgp3D_v12/src/num/guard.cpp
++++ b/morsehgp3D_v12/src/num/guard.cpp
+@@ -74,8 +74,8 @@
+   const i64 m = i64{1} << s;
+   for (int j = 0; j < 3; ++j) {
+     anchor_[j] = sphere.anchor().coordinates()[j];
+-    guard_lo_[j] = i64{ball.corner()[j]} - 2 * m;
+-    guard_hi_[j] = i64{ball.corner()[j]} + 3 * m;
++    guard_lo_[j] = i64{ball.corner()[j]} - m;
++    guard_hi_[j] = i64{ball.corner()[j]} + 2 * m;
+   }
+   native_coefficients_ = view.native_coefficients();
+   // Voie uniforme : palier etroit (6s+11 <= 107), sinon certificat au domaine des requetes gardees, t = s+2.
+--- a/morsehgp3D_v12/src/num/guard.hpp
++++ b/morsehgp3D_v12/src/num/guard.hpp
+@@ -7,10 +7,12 @@
+ // conv(S) en exact par les signes barycentriques (q1, q2 toujours ; q3 strictement aigu ; q4 poids de presentation
+ // strictement positifs). Une candidate refusee reste dans la voie generique (LatticeSphere), sans garde.
+ //
+-// NUM-GARDE. Soit s l'etendue du support S, m son coin minimal, M = 2^s. Le centre est dans [m, m+M-1] par axe et
+-// R <= diam(S) < 2M ; tout point x de la boule fermee verifie m_j - 2M < x_j < m_j + 3M : c'est le PAVE (ouvert).
+-//   - site hors du pave : exterieur, sans arithmetique ; site dans le pave : |x_j - o_j| < 3M < 2^(s+2) pour l'ancre
+-//     o de S, d'ou le budget mixte 6s+11 (CST-0111) et le certificat de puissance au domaine t = s+2, jamais s ;
++// NUM-GARDE. Soit s l'etendue du support S, m son coin minimal, M = 2^s. Le centre est dans [m, m+M-1] par axe.
++// Avec c dans conv(S) et S sur la sphere, la boule est MEB(S). La boule au milieu de la boite du support contient S,
++// donc R^2 <= (wx^2+wy^2+wz^2)/4 <= 3(M-1)^2/4 < M^2. Tout point x de la boule fermee verifie ainsi
++// m_j - M < x_j < m_j + 2M : c'est le PAVE (ouvert), y compris s=0.
++//   - site hors du pave : exterieur, sans arithmetique ; site dans le pave : |x_j - o_j| < 2M pour l'ancre o de S.
++//     On conserve ici les budgets anterieurs plus larges : 6s+11 (CST-0111), domaine t = s+2 et voies inchangees ;
+ //   - boite DISJOINTE du pave : exterieure ; sinon minorant au point entier de la boite le plus proche du centre,
+ //     calcule en local (plancher de N_j/D, + o_j, saturation a la boite), qui est dans le pave ;
+ //   - boite NON CONTENUE dans le pave : majorant positif sans arithmetique (elle n'est pas dans la boule) ; une
+--- a/morsehgp3D_v12/docs/CONTRAT_NUMERIQUE.md
++++ b/morsehgp3D_v12/docs/CONTRAT_NUMERIQUE.md
+@@ -80,13 +80,16 @@
+   sur la sphère mais hors du pavé (témoin de l'auditeur Codex). Ces candidates restent dans une voie générique exacte,
+   sans la garde.
+ - **`NUM-GARDE` (garde entière d'une boule certifiée).** Soit $b$ une boule certifiée de support $S$, de coin minimal
+-  $m$ et d'étendue $s$. Son centre $c$ est dans l'enveloppe convexe de $S$, donc $m_i\leq c_i\leq m_i+2^{s}-1$, et
+-  $R\leq\mathrm{diam}(S)<\sqrt{3}\cdot 2^{s}<2^{s+1}$. Tout point $x$ de la boule fermée vérifie donc
+-  $m_i-2^{s+1}<x_i<m_i+3\cdot 2^{s}$ pour chaque axe (le **pavé** de $b$). Conséquences :
++  $m$, de largeurs $w_i$ et d'étendue $s$ ; posons $M=2^s$. Son centre $c$ est dans l'enveloppe convexe de $S$, donc
++  $m_i\leq c_i\leq m_i+M-1$. Comme tous les sites de $S$ sont sur la sphère, $b$ est la plus petite boule de $S$.
++  La boule au milieu de la boîte du support contient $S$, d'où
++  $R^2\leq(w_1^2+w_2^2+w_3^2)/4\leq3(M-1)^2/4<M^2$.
++  Tout point $x$ de la boule fermée vérifie donc $m_i-M<x_i<m_i+2M$ pour chaque axe (le **pavé ouvert**).
++  Cette preuve inclut $s=0$, $M=1$, $R=0$. Conséquences :
+   - un **site** hors du pavé est extérieur à la boule fermée, sans arithmétique ; un site dans le pavé est à moins de
+-    $3\cdot 2^{s}$ de chaque site de $S$ par axe. Le repère d'une requête gardée est celui du support (ancre conservée)
+-    et la preuve se fait **par requête** : deux requêtes gardées peuvent différer de près de $5\cdot 2^{s}$, et le pavé
+-    entier a une étendue de $s+3$ bits ; aucun repère commun à toutes les requêtes n'est construit ;
++    $2M$ de chaque site de $S$ par axe. Le repère d'une requête gardée est celui du support (ancre conservée), sans
++    repère commun à toutes les requêtes. Cette réduction du pavé conserve les budgets antérieurs plus larges
++    $6s+11$, le certificat au domaine $t=s+2$ et les voies numériques ; leur réduction serait une autre tranche ;
+   - une **boîte** de l'index **disjointe** du pavé est extérieure ; pour une boîte qui touche le pavé, le minorant
+     (`LEM-LATTICE`) se calcule sur le point **entier** de la boîte le plus proche du centre : plancher et plafond de
+     $N_j/D$ (en local), puis $+o_j$, puis saturation à la boîte ; ce point est dans le pavé, jamais calculé depuis le
+@@ -97,11 +100,13 @@
+     Une boîte partiellement dans le pavé peut contenir tout le support et le centre (support
+     $\lbrace(100,100,100),(102,100,100)\rbrace$, boîte $[0,200]^{3}$) : elle n'est jamais rejetée, elle est raffinée.
+ 
+-  Preuve des deux faits : $c=\sum\lambda_j s_j$ avec $\lambda_j\geq 0$ et $\sum\lambda_j=1$, d'où $c$ dans le pavé de
+-  $S$ et $\lvert c-s_k\rvert\leq\sum\lambda_j\lvert s_j-s_k\rvert\leq\mathrm{diam}(S)$ ; et $R=\lvert c-s_k\rvert$ pour
+-  tout $s_k\in S$. Toute boule certifiée est la plus petite boule de son support, de centre dans son enveloppe convexe
+-  (q2 milieu, q3 triangle aigu, q4 centre intérieur au tétraèdre), coquilles étendues de `LEM-T7` comprises ; tous les
+-  sites de la coquille $U$ sont sur la sphère, donc dans le pavé. Contre-lu (`2a7a5f346`).
++  Preuve du minimum : $c=\sum\lambda_j s_j$, $\lambda_j\geq0$, $\sum\lambda_j=1$ et $\|s_j-c\|^2=R^2$ donnent,
++  pour tout centre $y$, $\sum\lambda_j\|s_j-y\|^2=R^2+\|c-y\|^2$. Une boule de centre $y$ contenant $S$ a donc un
++  rayon au moins égal à $R$. La boule du milieu de la boîte fournit alors la borne de demi-diagonale ci-dessus.
++  Cette preuve utilise la positivité certifiée, pas seulement une sphère passant par $S$ ; les candidates génériques
++  restent exclues. Tous les sites de la coquille étendue $U$ sont sur la sphère, donc strictement dans le pavé.
++  Les signes des bornes entières et les résultats de census sont inchangés ; les compteurs de garde et de voies
++  peuvent changer. Aucun gain de temps ni de complexité du census ne découle du seul resserrement du pavé.
+ 
+   Ce correctif remplace deux usages de la v11 hors garde (`CST-0109`) : `LatticeSphere` (`src/index/census.cpp`,
+   chemin chaud) calculait le centre absolu $o_jD+N_j$ ($5B+6$ bits, d'où $B\leq 24$) et évaluait la puissance au coin
+--- a/morsehgp3D_v12/src/num/power_certificate.hpp
++++ b/morsehgp3D_v12/src/num/power_certificate.hpp
+@@ -3,7 +3,8 @@
+ // chacun des trois termes lineaires 2|N_j v_j| par 2^125 ; la somme des magnitudes, < 15*2^123 < 2^127, borne chaque
+ // produit ET chaque somme partielle en i128. La preuve ne lit ni l'arite ni l'etendue du support : seulement t et les
+ // coefficients. Le certificat de la v11 (q3_global_power_i128) est le cas t = B, domaine de tous les Point du profil ;
+-// le recensement garde exige t = s+2 (NUM-GARDE : |v_j| < 3M < 2^(s+2)), jamais s.
++// le recensement garde conserve t = s+2 : cette politique reste suffisante apres le resserrement du pave.
++// Les bornes plus fines exploitant CertifiedBall se qualifient separement ; ce certificat generique reste inchange.
+ // Aucun coefficient public forgeable : les fabriques de num calculent le domaine une fois.
+ #pragma once
+ #include <array>

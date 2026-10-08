@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-8 octobre 2026, base publiée **`169f36b69`**.
+8 octobre 2026, base publiée **`4831fd3ba`**.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
 
@@ -28,12 +28,9 @@ Priorité : chaîne entière ; 100 ms, GPU u24/u32, petits nuages et millions re
 
 - **Gc `4df326cc8` + `10050a96e`** : [16 sources tour identiques au prototype](../receipts/audit_reponses_20261008/gc_livraison/README.md),
   cœur/catalogue inchangés. Empreinte objet et contrôle du travail séparés ; index parallèle, file de sondes G-L7.
-  [Journal local](../receipts/audit_reponses_20261008/gc_livraison_complement/README.md) : 700 Passed + une sentinelle
-  sautée sur 701, sans clôture des sources. J : 675 portes, dont la sentinelle, et six LiDAR passées ; les 26
-  différentielles v10 locales sont absentes sur G4. G-L7 et index adoptés, G-L5 rejeté.
-- **Pilote T2-c** : [68 prises/308 passes relues](../receipts/audit_reponses_20261008/gc_pilote_essai/README.md),
-  refus attendu de deux tours sur dix. Erratum du conducteur : statut externe perdu après `date`, bilans primaires
-  conservés. Défaut CLI huit encore présent ; plan G4 explicite dix. Aucune adoption de performance locale.
+  J : 344 sources conformes, 675 portes et six LiDAR passées ; les 26 différentielles v10 locales sont absentes
+  sur G4. Campagne des 18 mutants passée. G-L7 et index adoptés, G-L5 rejeté. Pilote : défaut CLI huit maintenu,
+  plan G4 explicite dix ; erratum de l'ancien conducteur local conservé dans le registre.
 - **TMVR** : [repo5 u21](../receipts/audit_tmv_repo5_u21_20261008/README.md), 680 tests + une sentinelle sautée,
   neuf chaînes CPU C/G conformes, 16 mutants tués. R inclut les offsets CSR ; 685 contrôles du pic, budget fini/cache
   encore ouverts. [Clôture partielle repo5](../receipts/audit_tmv_repo5_profils_20261008/README.md) : u24 neuf chaînes
@@ -45,6 +42,9 @@ Priorité : chaîne entière ; 100 ms, GPU u24/u32, petits nuages et millions re
 
 **Aide au développeur et prochains contrôles.**
 
+- **Census G** : [garde resserrée proposée](../receipts/audit_reponses_20261008/garde_census/README.md),
+  preuve MEB, 1 617 points/2 470 boîtes exacts, nouveau témoin de débordement intermédiaire. Deux lignes exécutables,
+  voies conservées ; promotions plus fines prouvées séparément. Anciens mutants à reclasser, gain G4 à mesurer.
 - **`0239`** : [tri pur puis contrôle adjacent](../receipts/audit_reponses_20261007/comparateur_naissances/README.md)
   repris dans repo6 ; faux doublon par auto-comparaison sous `_GLIBCXX_DEBUG`, configuration native non jouée.
 - **`0240`** : [historique altéré accepté par le validateur](../receipts/audit_foret_validation_20261008/README.md),
