@@ -1,0 +1,12 @@
+{
+  "source_commit": "8fe509df9",
+  "rows": 73,
+  "all_rows_byte_identical": true,
+  "sorted_rows_sha256": "b4aa7e1e553b95a70afa965bc033b889ab2bca7baba549267f7b1c702aeba179",
+  "registry_before_sha256": "ad2831559223dc8dc4d97c51af21d98c8e767b2e74ca9f98d49a9bcf516a0ba3",
+  "registry_after_sha256": "bf10d7432316fabdfd265fb37bc0d9d736133f242119e9ae28027701fb909cc5",
+  "bytes_before": 55183,
+  "bytes_after": 50136,
+  "states_preserved": true,
+  "columns_preserved": 10
+}
