@@ -1,0 +1,65 @@
+{
+  "schema": "audit_full_cpu_refresh_proposal_v1",
+  "executable_controller_plan": false,
+  "execution_pin": null,
+  "source_gate": "choisir et hacher le commit apres decision R1 avant de generer les commandes du controleur",
+  "frames": [
+    "ng00",
+    "ng01",
+    "ng02"
+  ],
+  "phases": [
+    {
+      "k": 5,
+      "processes_per_frame": 10,
+      "passes": 8,
+      "role": "reference CPU chaude descriptive principale"
+    },
+    {
+      "k": 10,
+      "processes_per_frame": 3,
+      "passes": 8,
+      "role": "information CPU K10 ; repetitions reduites"
+    }
+  ],
+  "order": "phase K5 puis K10 ; repetition r, rotation frames[r%3:]+frames[:r%3]",
+  "argv": [
+    "${PROBE}",
+    "--trame=${DATA}/lidar_${frame}.u32le,${DATA}/lidar_${frame}.ids.u32le,${frame}",
+    "--k=${k}",
+    "--threads=48",
+    "--passes=8",
+    "--cache=8589934592",
+    "--recouvert",
+    "--digest"
+  ],
+  "name": "cpu_k${k}_${frame}_r${r:02d}",
+  "cohort": {
+    "processes": 39,
+    "passes": 312,
+    "cold_passes": 39,
+    "warm_passes": 273,
+    "k5_warm_per_frame": 70,
+    "k10_warm_per_frame": 21
+  },
+  "expected_LF": {
+    "voie": "cpu",
+    "fils": 48,
+    "passes": 8,
+    "empreinte": true,
+    "bits": 21,
+    "schema": "recouvert",
+    "budget_appareil": "partage",
+    "k": "${k}",
+    "trames": [
+      [
+        "${frame}",
+        "${sites}"
+      ]
+    ]
+  },
+  "wall_campaign_envelope_proposal_seconds": 600,
+  "per_process_timeout_proposal_seconds": 90,
+  "timeout_policy": "plafond global 600 s depuis premiere prise ; tout processus manquant/expire reste visible, pas de remplacement ni statistiques presentees comme cohorte complete",
+  "measurements": null
+}

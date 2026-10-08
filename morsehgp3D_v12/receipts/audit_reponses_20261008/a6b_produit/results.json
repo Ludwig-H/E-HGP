@@ -1,0 +1,54 @@
+{
+  "historical_comparisons": [
+    {
+      "commit": "30a69104a697fa2ea2dadd8499bde6c7cb8d72c0",
+      "path": "src/tower/forest_births.cpp",
+      "same_bytes": true,
+      "sha256": "0cd7b8350d43d57bd4d375e33b869e9528bbf849acf2832c6b8e8558fb927bdc"
+    },
+    {
+      "commit": "30a69104a697fa2ea2dadd8499bde6c7cb8d72c0",
+      "path": "src/tower/forest_build.cpp",
+      "same_bytes": true,
+      "sha256": "675593396ec74c3ba1bd3b68024769ccaecf498597cb4b61d813ff547db9ba02"
+    },
+    {
+      "commit": "30a69104a697fa2ea2dadd8499bde6c7cb8d72c0",
+      "path": "src/tower/forest_kernel.cpp",
+      "same_bytes": false,
+      "sha256": "136d46a55591f94a3c624b643b815c53222d05a670ddeeb0e7b6dba2a914f22f"
+    },
+    {
+      "commit": "47feedc96ee4b4cb85b5a7c590f38c874bb04855",
+      "path": "src/tower/registry_branches.cpp",
+      "same_bytes": true,
+      "sha256": "a0a8e045a696124dcc36175fec818e3cad6fa9720dc0bbb0061ca2b4aa125411"
+    },
+    {
+      "commit": "30a69104a697fa2ea2dadd8499bde6c7cb8d72c0",
+      "path": "src/core/buffer.cpp",
+      "same_bytes": true,
+      "sha256": "5c885dbf0e4813f1a8ee653115092536348877e6b93aa5b831d7490fe0d6e756"
+    },
+    {
+      "commit": "30a69104a697fa2ea2dadd8499bde6c7cb8d72c0",
+      "path": "src/core/buffer.hpp",
+      "same_bytes": true,
+      "sha256": "8e4d84665e90308ee9572a729731711bb419e3a565fd4dd11b5bd56ab6a92401"
+    },
+    {
+      "commit": "30a69104a697fa2ea2dadd8499bde6c7cb8d72c0",
+      "path": "src/sched/pool.cpp",
+      "same_bytes": true,
+      "sha256": "3d3985debc8db6c4513c9ed2d8e87cd1ad1ec02a231a7776595da05a8f3b4368"
+    },
+    {
+      "commit": "30a69104a697fa2ea2dadd8499bde6c7cb8d72c0",
+      "path": "src/tower/pipeline_steps.cpp",
+      "same_bytes": true,
+      "sha256": "57b88173378d5cd9544aad5848d7ed32ff560c1e481856b03f6b79839e27f765"
+    }
+  ],
+  "native_executed": false,
+  "pinned_sources": 19
+}

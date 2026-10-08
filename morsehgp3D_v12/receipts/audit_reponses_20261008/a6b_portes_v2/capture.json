@@ -1,0 +1,65 @@
+{
+  "captured_utc": "2026-10-08T15:42:52.219979+00:00",
+  "status": "prototype w2 nonlivre",
+  "sources": {
+    "src/tower/forest_kernel.cpp": "3ed611027fb936a7f2f476f24b5540bd3af675af859c24663f1382e87c54393f",
+    "src/tower/forest_births.cpp": "0cd7b8350d43d57bd4d375e33b869e9528bbf849acf2832c6b8e8558fb927bdc",
+    "src/tower/forest_build.cpp": "675593396ec74c3ba1bd3b68024769ccaecf498597cb4b61d813ff547db9ba02",
+    "src/tower/pipeline.cpp": "93eede367c92958e286d2434721de25d63615d49e3e402d62cbb1e3222f5c7c8",
+    "src/tower/pipeline.hpp": "f43f19c15d2f0451f0b632511dc03f4914482f4c1fc6bae6964612556412c447",
+    "src/tower/pipeline_run.cpp": "60ca4cabbc554e051d7997f71d9c353eb502490585c0e733b216766ccad9e6c5",
+    "src/tower/pipeline_steps.cpp": "fe0295e5e6500ee8d2325df052dacd129c85e9e65fe5a62ea2ecd23bbb1626bf",
+    "src/tower/registry_branches.cpp": "a0a8e045a696124dcc36175fec818e3cad6fa9720dc0bbb0061ca2b4aa125411",
+    "tests/tower/region_unit.cpp": "4962091891af42fb045e84126b4605a6f30c569b01ec7ad6d6a358607a83c966",
+    "tests/tower/region_map_check.py": "4b99bbcb7cc3fc0fad766e8ca4004392827ceda1ddbbcc18a55ac6041811f69b",
+    "tests/tower/pipeline_levers.cpp": "992170c8d5dcc587302cbbbc1731d6937b0e3b065c833662dc5310000b57da2f",
+    "tests/tower/tests.cmake": "594c8324d131baeb7c829d455ea66d92d24deaa51b7acc08149ca5af7fb287ff",
+    "tests/mutants/tower.json": "9d1a2170f4384c58350b913973709bd0003b1988936a58ce6bc979a75cf503a5",
+    "microbancs/mes_t2d_a6b/README.md": "7a524696c5b99dcd31ad0bbf3bdcb34ff2706784da894d760c5c927e2016a037"
+  },
+  "traces": {
+    "observed_utc": "2026-10-08T15:45:45.228002+00:00",
+    "ctest_partial_file_sha256": "a905067fa33b1718eb4d3a3f4e6e33aab3f97cdba2fad409544b3c84b8d5b609",
+    "ctest_partial_bytes": 882183,
+    "selected_blocks_sha256": "f28235b41da795d756185d2fb483a4343dc35ee6f1923a14e3593fd5d8926fcc",
+    "cache_sha256": "403992a04026be114c532fcd190f1861d97dcbf8be574317e833cecdace4a6ea",
+    "cmake_declarations": {
+      "build_type": "Release",
+      "coord_bits": 21,
+      "source_tree": "prototype w2"
+    },
+    "driver_lines": [
+      "debut 15:37:23",
+      "construction code=0"
+    ],
+    "ctest_totals_at_capture": {
+      "passed": 663,
+      "skipped": 0,
+      "closed": false
+    },
+    "two_new_mutants_complete": false,
+    "new_native_invocations_by_audit": 0
+  },
+  "same_as_v1": [
+    "src/tower/forest_kernel.cpp",
+    "src/tower/forest_births.cpp",
+    "src/tower/forest_build.cpp",
+    "src/tower/pipeline.cpp",
+    "src/tower/registry_branches.cpp"
+  ],
+  "changed_since_v1": [
+    "src/tower/pipeline.hpp",
+    "src/tower/pipeline_run.cpp",
+    "src/tower/pipeline_steps.cpp",
+    "tests/tower/pipeline_levers.cpp",
+    "tests/tower/tests.cmake",
+    "tests/mutants/tower.json",
+    "microbancs/mes_t2d_a6b/README.md"
+  ],
+  "publication_status": "8b9eab40a changes only T1-d CTest markers; A6b not committed there.",
+  "independent_math_review": "Favorable for forced wait and closed guard; direct run_hint calls, already consumed slice, extra semaphore HB; no weak-memory qualification.",
+  "final_source_check": {
+    "utc": "2026-10-08T15:47:57.556857+00:00",
+    "changed": []
+  }
+}

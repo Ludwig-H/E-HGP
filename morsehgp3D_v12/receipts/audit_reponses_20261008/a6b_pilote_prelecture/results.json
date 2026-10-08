@@ -1,0 +1,42 @@
+{
+  "cache_default_both_bytes": 8589934592,
+  "campaign_admitted": false,
+  "cohort_change": "message_only",
+  "functions": 31,
+  "native_run": false,
+  "normalized_differences": [
+    "etape_auto_test",
+    "tableaux",
+    "verifier_cohorte"
+  ],
+  "normalized_identical": 28,
+  "public_selftests": [
+    {
+      "code": 0,
+      "flags": [],
+      "stderr": "",
+      "stdout": "pilote_t2d_a6b_auto_test_ok cas=8 verdicts=adopte,rejete,refuse\n"
+    },
+    {
+      "code": 0,
+      "flags": [
+        "-O"
+      ],
+      "stderr": "",
+      "stdout": "pilote_t2d_a6b_auto_test_ok cas=8 verdicts=adopte,rejete,refuse\n"
+    }
+  ],
+  "rule_literal_fields": {
+    "base": "47feedc96",
+    "bootstrap": 10000,
+    "borne_grandes": 0.95,
+    "borne_ng": 1.01,
+    "fenetre_aa": 0.015,
+    "graine": 20261008,
+    "k": 5,
+    "passes_min": 6,
+    "tours_min": 5
+  },
+  "sources_before_after": true,
+  "src_reference_equal_capture_head": true
+}

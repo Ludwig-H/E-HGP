@@ -1,0 +1,28 @@
+{
+  "pin": "8b9eab40a902e0322314ac059a3d0c24d76c46a9",
+  "prerequisite": {
+    "path": "morsehgp3D_v12/receipts/audit_reponses_20261008/t1d_identite_flux_proposition/proposition.patch",
+    "sha256": "b11214f6024353840ffb80fd9b2ee58ad82c689ede78bab4821868e9d513b8a4"
+  },
+  "sources": {
+    "morsehgp3D_v12/bench/g4_catalogue_device.py": "c477ffd80533a7e770ae382b9062ca1372699b6ea07a4db4178a4a934e7ae677",
+    "morsehgp3D_v12/bench/g4_catalogue_flux.py": "88ca8e3ff529063b7b7450f0316a68babfda7ac300880520eb70cf2a629f772c",
+    "morsehgp3D_v12/bench/g4_catalogue_flux_judge.py": "805d8303dabc753e810b3e0c42e7df2b19e23eceb3b41a73c05a382fa44a93be",
+    "morsehgp3D_v12/bench/g4_catalogue_flux_lecteur.py": "2bff7f0a16b9da5f6a699a00ccd23d9551e1b31a44209336c43f7bfb4aa8b52d",
+    "morsehgp3D_v12/bench/g4_catalogue_flux_selftest.py": "551179ceb8166122efd0cb70f91509049d84266997ade32dfc2cdca4d1ae4b48",
+    "morsehgp3D_v12/bench/g4_catalogue_flux_tables.py": "db54cf9e7e48e358e08e3c869786c35fce5caaa9249c2d8f92a573b5bbfde810",
+    "morsehgp3D_v12/bench/g4_catalogue_judge.py": "62f8832ff9571219a2d8953a797ecfd68fddf02f192b74519c105bbbfbf07483",
+    "morsehgp3D_v12/bench/g4_catalogue_schema.py": "20d0cc8b9f66e571b7ad9d06d092ac5bf5f9ff66af2632aebdfd4e8659feefad",
+    "morsehgp3D_v12/bench/g4_catalogue_t1d.py": "93ac4e6ba8e41d68f3f7cd528d716b4eaa2c7ec4d1d6cd018c5ffca52192133a",
+    "morsehgp3D_v12/bench/g4_catalogue_t1d_judge.py": "264aed6008745281c4feaca77ff4ff88925a3a385de59a86bb429043c1cf416f",
+    "morsehgp3D_v12/bench/g4_catalogue_t1d_selftest.py": "8d185b01c6a10cd1c70b18f175e8a82b26fd5c5b16f8c9e121ba00d8c961c245",
+    "morsehgp3D_v12/tests/catalogue/tests.cmake": "70d5935ac424f504dc5fbddd65f4ccdfe15d0625718f5cf9906b92173cd4bbbc",
+    "morsehgp3D_v12/cmake/gates.cmake": "b67f964eb11b74e301fa73c2c741a7bd5040e33182f93ccd3ada1311a047021d",
+    "morsehgp3D_v12/cmake/run_expect.cmake": "82be01f59abc38b2448cbe6844e02f4b0fa8d981497d57cc01c98bbc5b4e2b8b"
+  },
+  "post_python": {
+    "morsehgp3D_v12/bench/g4_catalogue_t1d.py": "a32177b26efc3b72569b201e33a75e222ab8f90bef44c9500aaae4ecc6310530",
+    "morsehgp3D_v12/bench/g4_catalogue_t1d_judge.py": "a4d9dd76cb6e34e779331456da193f02c1b3c5980cef51c8493b307611de2630",
+    "morsehgp3D_v12/bench/g4_catalogue_t1d_selftest.py": "d46dee6ccc95c1adf60b09f9ccc560a712ba4cc46b48a6fc7b59b7a15e516d5c"
+  }
+}

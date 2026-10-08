@@ -1,0 +1,20 @@
+{
+  "status": "prelecture_non_commise",
+  "captured_utc": "2026-10-08T15:25:23.504265+00:00",
+  "capture_head": "150392f999166ab1bcfcb81b57aef50d4d475c0b",
+  "previous_pin": "6497ed3b581ed9f22e2ca7932d486b379629b6d7",
+  "reference_pin": "47feedc96ee4b4cb85b5a7c590f38c874bb04855",
+  "later_observed_head": "dbdc71753dcff7acf9eea98155c041557942e500",
+  "pilot": "morsehgp3D_v12/microbancs/mes_t2d_a6b/pilote_t2d_a6b.py",
+  "previous_pilot": "morsehgp3D_v12/microbancs/mes_t2d_a6/pilote_t2d_a6.py",
+  "snapshot_sha256": {
+    "morsehgp3D_v12/microbancs/mes_t2d_a6b/pilote_t2d_a6b.py": "80a59ed7a3aac27888a0916a05bb39f298cd6c1451e00463b5ed1ae0e02f48a6",
+    "morsehgp3D_v12/microbancs/mes_t2d_a6b/README.md": "5e34ff77d45f2af6677587dcdeb4184c6fe8029ff74d079298e85c15759d8b89",
+    "morsehgp3D_v12/microbancs/outils/banc_full.py": "7d7f0661b49adf094df51d41268470571d47c51fc7795bb5b34c791a4a539904",
+    "morsehgp3D_v12/microbancs/outils/lecteur_full.py": "15437e5f09408d5fbdc6288e33a2452490489f13bf9a3b3a24c99f5d109b6554",
+    "morsehgp3D_v12/bench/full_probe.cpp": "1068940a06e386cb80a4802b3dd61e2df87eed69574f08c821c34dabb017179b"
+  },
+  "dependency_pin": "150392f999166ab1bcfcb81b57aef50d4d475c0b",
+  "expected_public_stdout": "pilote_t2d_a6b_auto_test_ok cas=8 verdicts=adopte,rejete,refuse\n",
+  "execution_scope": "public Python auto-test only; no native or campaign"
+}

@@ -1,0 +1,11 @@
+{
+  "closed_gate_blocks": [
+    "mhgp12_tower_levers_tranches",
+    "mhgp12_tower_region_carte",
+    "mhgp12_tower_region_carte_opt",
+    "mhgp12_tower_region_fermeture"
+  ],
+  "full_ctest_closed_at_capture": false,
+  "native_invocations_by_audit": 0,
+  "source_pins": 14
+}

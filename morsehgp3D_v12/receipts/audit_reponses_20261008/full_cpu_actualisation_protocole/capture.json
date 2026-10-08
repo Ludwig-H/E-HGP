@@ -1,0 +1,46 @@
+{
+  "review_pin": "a6e3634fcce7f6988a00bdbaacb15488daf4a401",
+  "execution_pin": null,
+  "status": "proposition non lancee ; figer le code apres decision R1",
+  "sources": {
+    "morsehgp3D_v12/bench/full_probe.cpp": {
+      "sha256": "1068940a06e386cb80a4802b3dd61e2df87eed69574f08c821c34dabb017179b",
+      "bytes": 27989
+    },
+    "morsehgp3D_v12/microbancs/mes_full/pilote_full.py": {
+      "sha256": "7fd5a628b77ba930a03f52d7dec4dfc8ed869309dc11659b00b1f95be6edd19b",
+      "bytes": 20084
+    },
+    "morsehgp3D_v12/microbancs/mes_apparie/pilote_apparie.py": {
+      "sha256": "c795dae5cf30bfa94fb98c94680ffc983dad973574c9185b60bf250f3eedb173",
+      "bytes": 32840
+    },
+    "morsehgp3D_v12/microbancs/outils/lecteur_full.py": {
+      "sha256": "15437e5f09408d5fbdc6288e33a2452490489f13bf9a3b3a24c99f5d109b6554",
+      "bytes": 13663
+    },
+    "morsehgp3D_v12/src/core/buffer.hpp": {
+      "sha256": "8e4d84665e90308ee9572a729731711bb419e3a565fd4dd11b5bd56ab6a92401",
+      "bytes": 14629
+    }
+  },
+  "input_metadata": {
+    "reference": "session M / cache2 ; memes six fichiers declares ng00-02",
+    "sha256_metadata": "c75ec292bc744a9f3042623b3bda66451cd413bfb8832b00b5df3b1e1cfbb7be",
+    "ng": [
+      {
+        "name": "ng00",
+        "sites": 39885
+      },
+      {
+        "name": "ng01",
+        "sites": 35551
+      },
+      {
+        "name": "ng02",
+        "sites": 45845
+      }
+    ],
+    "scene_payload_read": false
+  }
+}

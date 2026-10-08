@@ -1,0 +1,105 @@
+{
+  "capture_utc": "2026-10-08T15:25:23.504265+00:00",
+  "confirmed_unchanged_utc": "2026-10-08T15:29:12.163234+00:00",
+  "head_at_capture": "150392f999166ab1bcfcb81b57aef50d4d475c0b",
+  "head_at_confirmation": "dbdc71753dcff7acf9eea98155c041557942e500",
+  "status": "uncommitted prototype; immutable external snapshot; no native qualification",
+  "sources": {
+    "src/tower/forest_births.cpp": "0cd7b8350d43d57bd4d375e33b869e9528bbf849acf2832c6b8e8558fb927bdc",
+    "src/tower/forest_build.cpp": "675593396ec74c3ba1bd3b68024769ccaecf498597cb4b61d813ff547db9ba02",
+    "src/tower/forest_internal.hpp": "354c3c81c15cb11c91336a7b9dd3bd754019b89399ef69950fe48a633b3d34ef",
+    "src/tower/forest_kernel.cpp": "3ed611027fb936a7f2f476f24b5540bd3af675af859c24663f1382e87c54393f",
+    "src/tower/pipeline.hpp": "91c37f49ce12ed78fc971cdddd89805ce22b1f537daf185ac570caf0a89eb5a3",
+    "src/tower/pipeline.cpp": "93eede367c92958e286d2434721de25d63615d49e3e402d62cbb1e3222f5c7c8",
+    "src/tower/pipeline_run.cpp": "5e3f4d7735a7e820973b312610126be3cb8e122809beee9da8720ef0de8d584a",
+    "src/tower/pipeline_steps.cpp": "57b88173378d5cd9544aad5848d7ed32ff560c1e481856b03f6b79839e27f765",
+    "src/tower/module.cmake": "f887e28077e1756eeeeac9710df2155ca45c69a0799e182da951583a8165e80b",
+    "src/tower/registry_branches.cpp": "a0a8e045a696124dcc36175fec818e3cad6fa9720dc0bbb0061ca2b4aa125411",
+    "src/tower/tower.hpp": "92dc60e6832a28d18864b06f3019a256f7ecffd785aa899e39e5a4ca4ba284d7",
+    "tests/tower/pipeline_levers.cpp": "1aeaec0b089abcb51cc847e06083f61bf28e45015c285ea8d45d84d7f92c9663",
+    "tests/tower/pipeline_unit.cpp": "543adab184347a507c83003ea9ccf947b405fe3544c0812105d5525d188a829a",
+    "tests/tower/tests.cmake": "a5010058730e256aa479a1de87e323b95f6a9e84724ea0b8f225ac7de32739af",
+    "tests/mutants/tower.json": "fac9eeeb2c90bac10ea0a5a9ad945175eba53dfb80cbf430724049e1409c2981",
+    "microbancs/mes_t2d_a6b/README.md": "5e34ff77d45f2af6677587dcdeb4184c6fe8029ff74d079298e85c15759d8b89",
+    "src/core/buffer.cpp": "5c885dbf0e4813f1a8ee653115092536348877e6b93aa5b831d7490fe0d6e756",
+    "src/core/buffer.hpp": "8e4d84665e90308ee9572a729731711bb419e3a565fd4dd11b5bd56ab6a92401",
+    "src/sched/pool.cpp": "3d3985debc8db6c4513c9ed2d8e87cd1ad1ec02a231a7776595da05a8f3b4368"
+  },
+  "comparisons": [
+    {
+      "commit": "30a69104a697fa2ea2dadd8499bde6c7cb8d72c0",
+      "path": "src/tower/forest_births.cpp",
+      "sha256": "0cd7b8350d43d57bd4d375e33b869e9528bbf849acf2832c6b8e8558fb927bdc",
+      "same_bytes": true
+    },
+    {
+      "commit": "30a69104a697fa2ea2dadd8499bde6c7cb8d72c0",
+      "path": "src/tower/forest_build.cpp",
+      "sha256": "675593396ec74c3ba1bd3b68024769ccaecf498597cb4b61d813ff547db9ba02",
+      "same_bytes": true
+    },
+    {
+      "commit": "30a69104a697fa2ea2dadd8499bde6c7cb8d72c0",
+      "path": "src/tower/forest_kernel.cpp",
+      "sha256": "136d46a55591f94a3c624b643b815c53222d05a670ddeeb0e7b6dba2a914f22f",
+      "same_bytes": false
+    },
+    {
+      "commit": "47feedc96ee4b4cb85b5a7c590f38c874bb04855",
+      "path": "src/tower/registry_branches.cpp",
+      "sha256": "a0a8e045a696124dcc36175fec818e3cad6fa9720dc0bbb0061ca2b4aa125411",
+      "same_bytes": true
+    },
+    {
+      "commit": "30a69104a697fa2ea2dadd8499bde6c7cb8d72c0",
+      "path": "src/core/buffer.cpp",
+      "sha256": "5c885dbf0e4813f1a8ee653115092536348877e6b93aa5b831d7490fe0d6e756",
+      "same_bytes": true
+    },
+    {
+      "commit": "30a69104a697fa2ea2dadd8499bde6c7cb8d72c0",
+      "path": "src/core/buffer.hpp",
+      "sha256": "8e4d84665e90308ee9572a729731711bb419e3a565fd4dd11b5bd56ab6a92401",
+      "same_bytes": true
+    },
+    {
+      "commit": "30a69104a697fa2ea2dadd8499bde6c7cb8d72c0",
+      "path": "src/sched/pool.cpp",
+      "sha256": "3d3985debc8db6c4513c9ed2d8e87cd1ad1ec02a231a7776595da05a8f3b4368",
+      "same_bytes": true
+    },
+    {
+      "commit": "30a69104a697fa2ea2dadd8499bde6c7cb8d72c0",
+      "path": "src/tower/pipeline_steps.cpp",
+      "sha256": "57b88173378d5cd9544aad5848d7ed32ff560c1e481856b03f6b79839e27f765",
+      "same_bytes": true
+    }
+  ],
+  "scope": {
+    "native_executed": false,
+    "compiled": false,
+    "gpu_or_gcp": false,
+    "licensed_payloads": false,
+    "source_only": true
+  },
+  "causal_excerpts": {
+    "leaf_consume": "std::atomic_ref<u32>(leaves[p]).load(std::memory_order_acquire)",
+    "hint_publish": "std::atomic_ref<u32>(leaves[p]).store(find_read(c, node), std::memory_order_release)",
+    "claim_order": [
+      "find_kernel",
+      "find_step",
+      "find_g",
+      "find_hint"
+    ],
+    "counter": "if (p.g_next.load(std::memory_order_relaxed) < p.g_total) ++p.totals[w].hints_during_g;",
+    "closure": "hint_closed.store(true, seq_cst); await hint_active == 0; close_kernel; leaves.reset",
+    "number_admission": "threads * widest * (sizeof(num::Sphere) + 4), in addition to per-order kernel_bytes spheres term"
+  },
+  "additional_budget_dependencies_checked_utc": "2026-10-08T15:32:21.914071+00:00",
+  "final_check": {
+    "utc": "2026-10-08T15:33:31.848715+00:00",
+    "head": "dbdc71753dcff7acf9eea98155c041557942e500",
+    "changed_since_snapshot": []
+  },
+  "independent_math_review": "Source-only favorable: acquire/release prefix bridge; SC lifetime guard; claim-vs-completion distinction. No native/model replay."
+}

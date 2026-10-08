@@ -1,0 +1,42 @@
+{
+  "after_identity_proposal": [
+    {
+      "code": 0,
+      "flags": [],
+      "stderr": "",
+      "stdout": "juge_g4_t1d_ok injections=46\n"
+    },
+    {
+      "code": 0,
+      "flags": [
+        "-O"
+      ],
+      "stderr": "",
+      "stdout": "juge_g4_t1d_ok injections=46\n"
+    }
+  ],
+  "before": [
+    {
+      "code": 0,
+      "flags": [],
+      "stderr": "",
+      "stdout": "juge_g4_t1d_ok injections=36\n"
+    },
+    {
+      "code": 0,
+      "flags": [
+        "-O"
+      ],
+      "stderr": "",
+      "stdout": "juge_g4_t1d_ok injections=36\n"
+    }
+  ],
+  "gate_post_sha256": "c99bf63458cbf79f53cea79ca64a03148665da02ccda225efbbb2371916c6ff9",
+  "gate_pre_sha256": "70d5935ac424f504dc5fbddd65f4ccdfe15d0625718f5cf9906b92173cd4bbbc",
+  "line_after": "juge_g4_t1d_ok injections=46",
+  "line_before": "juge_g4_t1d_ok injections=36",
+  "native_or_ctest_executed": false,
+  "new_expected_line_present": true,
+  "old_expected_line_absent": true,
+  "pin": "8b9eab40a902e0322314ac059a3d0c24d76c46a9"
+}
