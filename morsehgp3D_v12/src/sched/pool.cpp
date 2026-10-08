@@ -1,8 +1,9 @@
 // Reclamation saturante ; equipe dimensionnee par le nombre de tranches (8 octobre 2026) : chaque ouvrier engage est
 // reveille par son propre semaphore et acquitte par un compteur atomique ; le dernier libere l'appelant. Une seule
 // tranche s'execute dans l'appelant sans reveil. Aucune file asynchrone, aucune allocation par travail. Remplace
-// l'epoque booleenne et le reveil de TOUS les ouvriers sous un mutex commun, dont le cout dominait les petits nuages
-// a 48 fils (session C, receipts/g4_mesc_20261008 : 15,6 ms vers 150 sites a 48 fils contre 6,8 ms a 4 fils).
+// l'epoque booleenne et le reveil de TOUS les ouvriers sous un mutex commun, candidat (hypothese, a mesurer en
+// paire) a la penalite de largeur des petits nuages (session C, receipts/g4_mesc_20261008 : 15,6 ms vers 150 sites
+// a 48 fils contre 6,8 ms a 4 fils).
 #include "sched/sched.hpp"
 
 #include <algorithm>

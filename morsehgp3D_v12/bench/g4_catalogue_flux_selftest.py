@@ -309,6 +309,29 @@ def cases():
     return out
 
 
+def cohort_cases():
+    """Cohorte de campagne (contre-lecture de l'auditeur, receipts/audit_reponses_20261008/t2dc_integration) : vide,
+    prise manquante, doublon, tour, trame ou bras etranger, tour booleen ou non hachable ; une ancienne decision
+    « adopte » stockee dans le rapport ne doit pas etre republiee par les tableaux."""
+    edits = {
+        'vide': lambda r: r['steps'].update(campaign=[]),
+        'manquante': lambda r: r['steps']['campaign'].pop(),
+        'doublon': lambda r: r['steps']['campaign'].append(copy.deepcopy(r['steps']['campaign'][0])),
+        'tour_etranger': lambda r: r['steps']['campaign'][0].update(round=10),
+        'trame_etrangere': lambda r: r['steps']['campaign'][0].update(frame='autre'),
+        'bras_etranger': lambda r: r['steps']['campaign'][0].update(arm='autre'),
+        'tour_booleen': lambda r: r['steps']['campaign'][0].update(round=False),
+        'tour_non_hashable': lambda r: r['steps']['campaign'][0].update(round=[]),
+    }
+    out = []
+    for name, edit in edits.items():
+        report = synthetic_report()
+        edit(report)
+        report['verdict'] = {'verdict': 'adopte'}
+        out.append(('*cohorte_' + name, report))
+    return out
+
+
 def set_digest_full(e):
     for row in e['run']['rows']:
         if row.get('phase') == 'full':
@@ -323,6 +346,12 @@ def selftest():
         if got['verdict'] != expected:
             failures.append('%s : %s au lieu de %s (%s)' % (name, got['verdict'], expected,
                                                            (got['refused'] + got['rejected'])[:2]))
+    import g4_catalogue_flux_tables as T  # noqa: E402  tableaux : meme cohorte que le juge
+    for name, report in cohort_cases():
+        got = J.judge(copy.deepcopy(report))
+        rendered = T.tables(copy.deepcopy(report))
+        if got['verdict'] != 'refuse' or '**refuse**' not in rendered or '| ng00 |' in rendered:
+            failures.append('%s : verdict %s ou tableau agrege publie' % (name, got['verdict']))
     good = J.judge(all_cases[0][1])
     levers = good['stats']['levers']
     if levers['double_tampon']['verdict'] != 'adopte' or levers['A/A']['verdict'] != 'valide' or \
@@ -331,8 +360,8 @@ def selftest():
     if failures:
         print('juge_g4_t2dc_ecart ' + ' ; '.join(failures))
         return 1
-    print('juge_g4_t2dc_ok injections=%d admission=%d' % (len(all_cases), sum(1 for c in all_cases
-                                                                             if c[0].startswith('*'))))
+    print('juge_g4_t2dc_ok injections=%d admission=%d cohorte=%d' % (
+        len(all_cases), sum(1 for c in all_cases if c[0].startswith('*')), len(cohort_cases())))
     return 0
 
 

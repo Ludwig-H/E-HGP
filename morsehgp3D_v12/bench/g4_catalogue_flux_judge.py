@@ -202,12 +202,32 @@ def stage_sum(arm, row, sorties):
                if not (name == 'sorties' and arm in HISTORICAL))
 
 
+def closed_campaign(steps, rounds):
+    """Cohorte exacte partagee par jugement et publication : aucune observation ignoree."""
+    entries = steps.get('campaign') if type(steps) is dict else None
+    if type(entries) is not list or not is_int(rounds):
+        return None
+    expected = {(r, f, a) for r in range(rounds) for f in FRAMES for a in ARMS}
+    found = {}
+    for entry in entries:
+        if type(entry) is not dict:
+            return None
+        r, frame, arm = (entry.get(k) for k in ('round', 'frame', 'arm'))
+        if not is_int(r) or type(frame) is not str or type(arm) is not str:
+            return None
+        key = (r, frame, arm)
+        if key not in expected or key in found:
+            return None
+        found[key] = entry
+    return found if len(found) == len(expected) else None
+
+
 def campaign_table(steps, out, rounds, passes, threads, refs):
     """Medianes chaudes par (tour, trame, bras) ; refus si une prise manque, sort de sa commande ou si des etapes
     depassent le total d'une passe."""
-    table, entries = {}, by_key(steps.get('campaign'), 'round', 'frame', 'arm')
+    table, entries = {}, closed_campaign(steps, rounds)
     if entries is None:
-        out['refused'].append('campagne illisible ou prise en double')
+        out['refused'].append('campagne illisible, incomplete, hors cohorte ou prise en double')
         return table
     for (r, frame, arm), e in entries.items():
         if arm not in ARMS or frame not in FRAMES or not is_int(r) or r >= rounds:

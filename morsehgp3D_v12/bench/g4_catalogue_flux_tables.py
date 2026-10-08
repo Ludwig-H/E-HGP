@@ -71,6 +71,8 @@ def verdict_lines(report):
 def campaign_lines(report):
     steps, opts = report.get('steps') or {}, report.get('options') or {}
     threads, passes = opts.get('threads'), opts.get('passes')
+    if J.closed_campaign(steps, opts.get('rounds')) is None:
+        return ['', 'Campagne refusee : cohorte absente, incomplete, etrangere ou repetee.']
     lines = ['', '## Etage C a chaud, K5 (mediane des passes 2..P de tous les processus, ms ; transferts : partition '
              'du mur, pas une mesure du DMA ; sorties : reservation et premier toucher)', '',
              '| trame | bras | total | ' + ' | '.join(STAGE_NAMES) + ' | epinglee (Mo) | pic (Mo) |',
@@ -122,4 +124,8 @@ def information_lines(report):
 
 
 def tables(report):
+    if J.closed_campaign(report.get('steps'), (report.get('options') or {}).get('rounds')) is None:
+        return ('# T2-d-C : transferts et publication du catalogue sur G4\n\n'
+                'Verdict de REGLE_T2D_C : **refuse**.\n\n'
+                'Cohorte absente, incomplete, etrangere ou repetee ; aucune agregation publiee.\n')
     return '\n'.join(verdict_lines(report) + campaign_lines(report) + information_lines(report)) + '\n'

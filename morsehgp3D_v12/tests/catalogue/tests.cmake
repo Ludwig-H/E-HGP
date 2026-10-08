@@ -43,7 +43,7 @@ mhgp12_python_gate(mhgp12_catalogue_g4_mutants 0 ${PROJECT_SOURCE_DIR}/bench/g4_
 # par injections dont les cas de la contre-lecture d'admission de l'auditeur (g4_catalogue_flux_selftest.py) ; motifs
 # des bras d'ablation et du mutant appareil presents une seule fois.
 mhgp12_python_gate(mhgp12_catalogue_g4_flux_judge 0 ${PROJECT_SOURCE_DIR}/bench/g4_catalogue_flux.py --selftest-judge
-                   LINE "juge_g4_t2dc_ok injections=39 admission=25" LABELS fast)
+                   LINE "juge_g4_t2dc_ok injections=39 admission=25 cohorte=8" LABELS fast)
 mhgp12_python_gate(mhgp12_catalogue_g4_flux_substitutions 0 ${PROJECT_SOURCE_DIR}/bench/g4_catalogue_flux.py
                    --check-substitutions ${PROJECT_SOURCE_DIR} LINE "substitutions_ok bras=4 mutant=1" LABELS fast)
 
