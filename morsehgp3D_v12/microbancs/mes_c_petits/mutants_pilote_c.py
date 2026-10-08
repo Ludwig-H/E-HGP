@@ -23,6 +23,12 @@ MUTANTS = {
                                 "            if len(v['empreintes']) > 2:"),
     'difficile_dans_session': ("    session = [c for c in clouds if c['groupe'] not in HARD]",
                                "    session = list(clouds)"),
+    'c3_cohorte_ouverte': ("    complete = bool(wanted) and len(keys) == len(wanted)",
+                           "    complete = True or bool(wanted) and len(keys) == len(wanted)"),
+    'c3_fils_libres': ("        h['fils'] == 48 and h['etat'] != 'non_joue' for h in k5)",
+                       "        h['etat'] != 'non_joue' for h in k5)"),
+    'non_evalue_admis': ("    if controls or any(crit[c]['etat'] == 'non evalue' for c in ('C1', 'C2', 'C3')):",
+                         "    if controls:"),
     'archive_admise': ("        print('pilote_c : archive ou manifeste refuses', file=sys.stderr)\n        return 2",
                        "        clouds = []"),
 }

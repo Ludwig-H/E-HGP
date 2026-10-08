@@ -30,8 +30,9 @@ CUDA, et publie le journal de construction, l'empreinte de la sonde et un extrai
 avant K10 :
 
 1. **Sessions** : pour chaque configuration (voie, K, fils), une Session, c'est-à-dire un seul processus, enchaîne
-   les nuages réels et synthétiques sains, `--tours` fois dans le même ordre, avec l'empreinte FUL1. La valeur chaude
-   d'un nuage est la médiane de ses passes à partir du deuxième tour.
+   les 147 nuages réels et synthétiques sains (132 réels, 15 synthétiques), `--tours` fois dans le même ordre, avec
+   l'empreinte FUL1. La valeur chaude d'un nuage est la médiane de ses passes à partir du deuxième tour : le chaud est
+   celui d'une tournée résidente, où 146 autres nuages passent entre deux prises du même nuage.
 2. **Nuages difficiles** : chacun est joué seul, voies CPU et appareil à 48 fils, avec un délai propre. Un refus, un
    échec ou une expiration est un résultat publié.
 
@@ -50,26 +51,33 @@ Les objectifs sont ceux du régime (c) dans [`MESURE.md`](../../docs/MESURE.md).
 
 | Critère | Règle |
 | --- | --- |
-| C1 | voie CPU, K5, 48 fils, groupe réel : coût fixe à chaud a au plus 2 ms |
-| C2 | même configuration : coût par site b au plus celui du régime principal, 3,727 µs par site (session K : 241,3 ms pour 64 740 sites, médiane des trames `v12set`, voie appareil) |
-| C3 | familles difficiles à K5, voies CPU et appareil à 48 fils : aucun nuage refusé, en échec ni expiré |
+| C1 | voie CPU, K5, 48 fils, groupe réel : ordonnée à l'origine de la droite des moindres carrés (coût fixe à chaud extrapolé à zéro site, descriptif) au plus 2 ms |
+| C2 | même configuration : pente des moindres carrés au plus 3 727,2 ns par site, rapport de la médiane des temps (241,3 ms) à la médiane des sites (64 740) des trames `v12set` de la session K, voie appareil |
+| C3 | cohorte complète des nuages difficiles à K5, voies CPU et appareil, 48 fils (une ligne jouée par couple nuage et voie, ni absente ni doublée) : aucun refus, échec ni expiration |
 
-Le verdict d'ensemble est « tenu » si C1, C2 et C3 le sont, « non tenu » sinon, et « refusé » si un contrôle manque.
+C2 juge une pente, pas un plafond par nuage : le libellé de [`MESURE.md`](../../docs/MESURE.md), « coût par site
+jamais supérieur », est plus fort que ce critère, et les points et résidus sont publiés à côté
+([portée des droites](../../receipts/audit_reponses_20261008/mes_c_statistique/README.md)). Une cohorte C3 incomplète
+rend C3 « non évalué » ([correctif de l'auditeur](../../receipts/audit_reponses_20261008/mes_c_livraison/README.md)).
+Le verdict d'ensemble est « tenu » si C1, C2 et C3 le sont, « non tenu » si l'un ne l'est pas, et « refusé » si un
+contrôle manque ou si un critère n'est pas évalué.
 
 ## Portes
 
 [`test_pilote_c.py`](test_pilote_c.py) (sonde simulée ; Python 3.10 nu, aussi sous `-O`) vérifie :
 
+- la cohorte de C3 : complète, cas non joué, absent, voie CPU seule, un seul fil, doublon, refus, expiration, vide ;
+- le verdict d'ensemble hors essai (critère non évalué ou contrôle manquant : refusé) ;
 - les droites retrouvées par groupe sur le tour chaud, le premier tour, froid, étant écarté ;
-- C1 à C3 aux seuils ;
+- C1 et C2 aux seuils ;
 - un refus `wide_leaf` de la quasi-sphère publié comme résultat (C3 non tenu), pas comme contrôle manquant ;
 - une empreinte instable qui fait manquer un contrôle ;
 - une archive à chemin refusée.
 
-[`mutants_pilote_c.py`](mutants_pilote_c.py) : huit mutants du pilote, tous tués.
+[`mutants_pilote_c.py`](mutants_pilote_c.py) : onze mutants du pilote, tous tués.
 
 ## Premier essai local (8 octobre, indicatif)
 
-Le codespace (3 fils, voie CPU, K5, deux tours) joue les 145 nuages sains en une Session, sans refus. La quasi-sphère
+Le codespace (3 fils, voie CPU, K5, deux tours) joue les 147 nuages sains en une Session, sans refus. La quasi-sphère
 est refusée `wide_leaf` à 3 000 et 10 000 sites : c'est la voie large T1-c (`CST-0237`), qui sert aussi la scène ETH3D
 courtyard de 16,8 M de sites ([session L2](../../receipts/g4_mesb2_20261008/README.md)). Les temps de G4 font foi.

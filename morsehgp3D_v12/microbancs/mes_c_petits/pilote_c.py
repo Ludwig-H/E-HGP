@@ -24,12 +24,17 @@ valeurs chaudes (a : cout fixe, b : cout par site) ; jamais une droite qui melan
 (CST-0238).
 
 Verdicts ecrits d'avance (objectifs du regime (c), MESURE.md) :
-  C1 : voie CPU, K5, 48 fils, groupe reel : cout fixe a chaud a au plus 2 ms ;
-  C2 : meme configuration : cout par site b au plus celui du regime principal, 3,727 us par site (session K : 241,3 ms
-       pour 64 740 sites, mediane de v12set, voie appareil) ;
-  C3 : familles difficiles a K5, voies CPU et appareil a 48 fils : aucun nuage refuse, en echec ni expire.
+  C1 : voie CPU, K5, 48 fils, groupe reel : ordonnee a l'origine de la droite des moindres carres (cout fixe a chaud
+       extrapole a zero site, descriptif) au plus 2 ms ;
+  C2 : meme configuration : pente des moindres carres au plus 3 727,2 ns par site, rapport de la mediane des temps
+       (241,3 ms) a la mediane des sites (64 740) des trames v12set de la session K, voie appareil. C2 juge une pente,
+       pas un plafond par nuage : les points et les residus sont publies a cote ;
+  C3 : la cohorte complete des nuages difficiles, a K5, voies CPU et appareil, 48 fils (une ligne jouee par couple
+       nuage et voie, ni absente ni doublee) : aucun refus, echec ni expiration ; cohorte incomplete : non evalue
+       (correctif de l'auditeur Codex, receipts/audit_reponses_20261008/mes_c_livraison).
 Verdict d'ensemble : « tenu » si C1, C2 et C3 sont tenus ; « non tenu » si l'un ne l'est pas ; « refuse » si un
-controle manque (sortie illisible, empreinte instable, environnement incomplet ou GPU occupe, Session en echec).
+controle manque (sortie illisible, empreinte instable, environnement incomplet ou GPU occupe, Session en echec) ou si
+un critere n'est pas evalue.
 
 Usage : pilote_c.py --src SRC --travail DOSSIER --archive TAR --deballage DOSSIER --sortie DOSSIER
                     [--voies cpu,appareil] [--k 5,10] [--fils 1,4,48] [--tours 3] [--tours-difficiles 2]
@@ -131,7 +136,7 @@ def fits_of(values):
     return out
 
 
-def verdicts(configs, hard):
+def verdicts(configs, hard, hard_names):
     out = {}
     ref = configs.get('cpu:5:48')
     line = ref and ref.get('droites', {}).get('reel')
@@ -140,11 +145,28 @@ def verdicts(configs, hard):
     out['C2'] = dict(etat='non evalue' if not line else 'tenu' if line['par_site_ns'] <= MAIN_REGIME_NS_PER_SITE
                      else 'non tenu', detail='%.3f us par site (limite %.3f)' % (
                          line['par_site_ns'] / 1e3, MAIN_REGIME_NS_PER_SITE / 1e3) if line else '')
-    k5 = [h for h in hard if h['k'] == 5 and h['etat'] != 'non_joue']
+    # C3 porte sur tous les nuages difficiles, les deux voies, K5 et 48 fils.
+    # Un sous-ensemble joue ne remplace jamais cette cohorte.
+    k5 = [h for h in hard if h['k'] == 5]
+    wanted = {(name, voie) for name in hard_names for voie in ('cpu', 'appareil')}
+    keys = [(h['nom'], h['voie']) for h in k5]
+    complete = bool(wanted) and len(keys) == len(wanted) and set(keys) == wanted and all(
+        h['fils'] == 48 and h['etat'] != 'non_joue' for h in k5)
     bad = ['%s %s : %s (%s)' % (h['nom'], h['voie'], h['etat'], h['raison']) for h in k5 if h['etat'] != 'ok']
-    out['C3'] = dict(etat='non evalue' if not k5 else 'non tenu' if bad else 'tenu',
-                     detail=bad or ['%d nuages difficiles a K5 calcules' % len(k5)])
+    out['C3'] = dict(etat='non evalue' if not complete else 'non tenu' if bad else 'tenu',
+                     detail=['cohorte C3 incomplete ou hors configuration'] if not complete else
+                     bad or ['%d executions difficiles a K5 calculees' % len(k5)])
     return out
+
+
+def overall(essai, controls, crit):
+    """Verdict d'ensemble : essai ; refuse si un controle manque ou un critere n'est pas evalue ; tenu si C1 a C3
+    sont tenus ; non tenu sinon."""
+    if essai:
+        return 'essai'
+    if controls or any(crit[c]['etat'] == 'non evalue' for c in ('C1', 'C2', 'C3')):
+        return 'refuse'
+    return 'tenu' if all(crit[c]['etat'] == 'tenu' for c in ('C1', 'C2', 'C3')) else 'non tenu'
 
 
 def play_session(probe, session, voie, k, f, tours, budget, remaining, raw, controls):
@@ -269,18 +291,11 @@ def main(argv):
         for when in ('avant', 'apres'):
             if not bf.environment_ok(report['environnement'][when]):
                 controls.append('environnement %s incomplet ou GPU occupe' % when)
-    report.update(configurations=configs, difficiles=hard, criteres=verdicts(configs, hard),
+    criteria = verdicts(configs, hard, [c['nom'] for c in hard_clouds])
+    report.update(configurations=configs, difficiles=hard, criteres=criteria,
                   parametres=dict(argv=argv[1:], tours=args.tours, budget_octets=budget),
                   duree_s=round(time.monotonic() - t_start, 1))
-    crit = report['criteres']
-    if args.essai:
-        report['verdict'] = 'essai'
-    elif controls:
-        report['verdict'] = 'refuse'
-    elif all(crit[c]['etat'] == 'tenu' for c in ('C1', 'C2', 'C3')):
-        report['verdict'] = 'tenu'
-    else:
-        report['verdict'] = 'non tenu'
+    report['verdict'] = overall(args.essai, controls, report['criteres'])
     with open(os.path.join(args.sortie, 'rapport_c.json'), 'w', encoding='utf-8') as handle:
         json.dump(report, handle, indent=1, sort_keys=True)
     with open(os.path.join(args.sortie, 'tableaux_c.md'), 'w', encoding='utf-8') as handle:

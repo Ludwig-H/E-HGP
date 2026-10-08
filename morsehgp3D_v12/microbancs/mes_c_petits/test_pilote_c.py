@@ -6,8 +6,8 @@ sous -O).
                  pilote retrouve a et b sur le tour chaud pour le groupe reel
                  et pour une famille synthetique, sans jamais les melanger ; C1 et C2 jugent la droite reelle de
                  cpu:5:48 aux seuils ecrits (2 ms, 3,727 us par site) ;
-  difficiles     un refus wide_leaf sur la quasi-sphere a K5 rend C3 non tenu et reste un resultat publie (pas un
-                 controle manquant) ; sans refus, C3 est tenu ;
+  difficiles     un refus wide_leaf sur la quasi-sphere a K5 reste un resultat publie (pas un
+                 controle manquant) ; la cohorte complete exige aussi la voie appareil ;
   empreintes     une empreinte qui change d'un tour a l'autre (deux tours) fait manquer un controle ;
   usage          archive refusee (membre a chemin) : code 2 avant toute construction.
 Codes : 0 conforme ; 1 ecart.
@@ -113,8 +113,44 @@ def near(x, y):
     return abs(x - y) <= 1e-6 * max(1.0, abs(y))
 
 
+def check_cohort(errors):
+    # Critere complet : deux voies, K5/W48 ; les essais CPU seuls ne le qualifient pas.
+    config = {'cpu:5:48': {'droites': {'reel': {'fixe_ns': 1e6, 'par_site_ns': 2000}}}}
+    names = ['reseau_fictif', 'sphere_fictive']
+    full = [dict(nom=n, voie=v, k=5, fils=48, etat='ok', raison='')
+            for n in names for v in ('cpu', 'appareil')]
+    scenarios = [
+        ('complet', full, 'tenu'),
+        ('non_joue', full[:-1] + [dict(full[-1], etat='non_joue')], 'non evalue'),
+        ('absent', full[:-1], 'non evalue'),
+        ('cpu_seul', [r for r in full if r['voie'] == 'cpu'], 'non evalue'),
+        ('un_fil', [dict(r, fils=1) for r in full], 'non evalue'),
+        ('double', full + [full[0]], 'non evalue'),
+        ('refus', full[:-1] + [dict(full[-1], etat='refus', raison='wide_leaf')], 'non tenu'),
+        ('expire', full[:-1] + [dict(full[-1], etat='echec', raison='expire')], 'non tenu'),
+        ('vide', [], 'non evalue'),
+    ]
+    for name, rows, wanted in scenarios:
+        actual = pilote_c.verdicts(config, rows, names)['C3']['etat']
+        if actual != wanted:
+            errors.append('cohorte %s : %s au lieu de %s' % (name, actual, wanted))
+
+
+def check_overall(errors):
+    """Verdict d'ensemble hors essai : un critere non evalue ou un controle manquant refuse."""
+    tenu = {c: dict(etat='tenu') for c in ('C1', 'C2', 'C3')}
+    cases = [(False, [], tenu, 'tenu'), (True, [], tenu, 'essai'), (False, ['x'], tenu, 'refuse'),
+             (False, [], dict(tenu, C3=dict(etat='non evalue')), 'refuse'),
+             (False, [], dict(tenu, C2=dict(etat='non tenu')), 'non tenu')]
+    for essai, controls, crit, wanted in cases:
+        if pilote_c.overall(essai, controls, crit) != wanted:
+            errors.append('verdict : %s au lieu de %s' % (pilote_c.overall(essai, controls, crit), wanted))
+
+
 def main():
     errors = []
+    check_cohort(errors)
+    check_overall(errors)
     with tempfile.TemporaryDirectory() as folder:
         code, report = campaign(folder, 'ok')
         lines = (report or {}).get('configurations', {}).get('cpu:5:48', {}).get('droites', {})
@@ -124,13 +160,13 @@ def main():
                 not near(uni['par_site_ns'], 9000) or reel['nuages'] != 3 or set(lines) != {'reel', 'uniform'}:
             errors.append('droites : code %s, droites %s' % (code, lines))
         crit = (report or {}).get('criteres', {})
-        if [crit.get(c, {}).get('etat') for c in ('C1', 'C2', 'C3')] != ['tenu', 'tenu', 'tenu'] or \
+        if [crit.get(c, {}).get('etat') for c in ('C1', 'C2', 'C3')] != ['tenu', 'tenu', 'non evalue'] or \
                 (report or {}).get('controles'):
             errors.append('criteres : %s, controles %s' % (crit, (report or {}).get('controles')))
         code, report = campaign(folder, 'refus_sphere')
         crit = (report or {}).get('criteres', {})
         sphere = [h for h in (report or {}).get('difficiles', []) if h['nom'] == 'sph_1']
-        if code != 0 or crit.get('C3', {}).get('etat') != 'non tenu' or not sphere or sphere[0]['etat'] != 'refus' \
+        if code != 0 or crit.get('C3', {}).get('etat') != 'non evalue' or not sphere or sphere[0]['etat'] != 'refus' \
                 or (report or {}).get('controles'):
             errors.append('difficiles : C3 %s, sphere %s, controles %s' % (crit.get('C3'), sphere,
                                                                             (report or {}).get('controles')))
@@ -144,7 +180,7 @@ def main():
         print(error, file=sys.stderr)
     if errors:
         return 1
-    print('test_pilote_c_ok droites=1 criteres=1 difficiles=1 empreintes=1 usage=1')
+    print('test_pilote_c_ok cohorte=9 verdict=5 droites=1 criteres=1 difficiles=1 empreintes=1 usage=1')
     return 0
 
 
