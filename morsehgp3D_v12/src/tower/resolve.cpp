@@ -53,14 +53,16 @@ bool sorted_subset(std::span<const u32> s, const Part& f) noexcept {
   return true;
 }
 
+// F dans P_b = I u U : la ligne de population de b est exactement I puis U ; elle est lue par les decalages du
+// catalogue et balayee (T2-d-B3), sans relire la fiche de la boule (p et m ne servaient qu'a la couper en deux).
 bool part_in_population(const Catalogue& cat, const Part& f, u32 b) noexcept {
-  const auto inner = cat.interior(make_id<BallIdx>(b)), shell = cat.shell(make_id<BallIdx>(b));
-  auto less = [](SiteIdx a, SiteIdx c) noexcept { return idx(a) < idx(c); };
+  const auto offsets = cat.population_offsets();
+  const SiteIdx* row = cat.population().data() + offsets[b];
+  const u64 n = offsets[u64{b} + 1] - offsets[b];
   for (u32 i = 0; i < f.k; ++i) {
-    const SiteIdx s = make_id<SiteIdx>(f.id[i]);
-    if (!std::binary_search(inner.begin(), inner.end(), s, less) &&
-        !std::binary_search(shell.begin(), shell.end(), s, less))
-      return false;
+    bool found = false;
+    for (u64 j = 0; j < n && !found; ++j) found = idx(row[j]) == f.id[i];
+    if (!found) return false;
   }
   return true;
 }

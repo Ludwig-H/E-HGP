@@ -1,0 +1,360 @@
+{
+ "base": "8a0716e74",
+ "bras": {
+  "apres": {
+   "branche_locale": "b3r_lot",
+   "fichiers": {
+    "src/catalogue/assemble.cpp": {
+     "sha256_apres": "a74d9434b721a51db1eb1d1e878636fffb342a0147664f033ac67a88c2c18d02",
+     "sha256_avant": "d529959860f4da8748b84db7c6c44611d40705101f2173ccf4f4a87987e3c053",
+     "substitutions": [
+      {
+       "cherche": "  result.population_.val.swap(out.values);\n  result.table_.off.swap(out.table_offsets);\n  result.table_.val.swap(out.table_values);\n  result.kmax_ = kmax;\n  result.ledger_ = ledger;\n  return result;\n",
+       "remplace": "  result.population_.val.swap(out.values);\n  result.table_.off.swap(out.table_offsets);\n  result.table_.val.swap(out.table_values);\n  result.table_keys_.swap(out.table_keys);\n  // Une cle par case de la table, toutes voies (complete, par tranches, appareil) ; sinon rien n'est publie.\n  if (result.table_keys_.size() != result.table_.val.size() || result.table_.off.empty())\n    return fail(Reason::catalogue_invariant);\n  result.table_bits_ = fin::width_of(result.table_.off.size() - 1);\n  result.kmax_ = kmax;\n  result.ledger_ = ledger;\n  return result;\n"
+      }
+     ]
+    },
+    "src/catalogue/catalogue.hpp": {
+     "sha256_apres": "b3dbc0ba16449dd660f296eb30cf99f9e4997d629aec3412b1e39b9701a61d1e",
+     "sha256_avant": "639dc07a3629f113e92d84a6154ce2a0db9f9826ad60406a04a669eeff170e7a",
+     "substitutions": [
+      {
+       "cherche": "  u64 finish_slices = 0, arena_streamed = 0;\n};\n\n// Proprietaire immuable des tableaux du catalogue ; ses SiteIdx se rapportent au Cloud source. Construction\n// deplacement seulement ; le budget doit survivre au resultat.\nclass Catalogue {\n",
+       "remplace": "  u64 finish_slices = 0, arena_streamed = 0;\n};\n\n// Cle S* d'une case de la table (tranche T2-d-B3) : les quatre SiteIdx de S* (case absente = nombre de sites) packes sur\n// width_of(sites) bits chacun, le premier en poids fort (catalogue_detail::fin::pack4) ; mot bas puis mot haut. L'ordre\n// (hi, lo) est celui des lignes de la table. Hors de l'export MHGP12DP.\nstruct TableKey {\n  u64 lo = 0, hi = 0;\n};\n\n// Proprietaire immuable des tableaux du catalogue ; ses SiteIdx se rapportent au Cloud source. Construction\n// deplacement seulement ; le budget doit survivre au resultat.\nclass Catalogue {\n"
+      },
+      {
+       "cherche": "  Catalogue& operator=(Catalogue&&) = delete;\n  Catalogue(Catalogue&& other) noexcept\n      : balls_(std::move(other.balls_)), levels_(std::move(other.levels_)), population_(std::move(other.population_)),\n        table_(std::move(other.table_)), kmax_(std::exchange(other.kmax_, 0)),\n        ledger_(std::exchange(other.ledger_, {})) {}\n\n  Order kmax() const noexcept { return kmax_; }\n",
+       "remplace": "  Catalogue& operator=(Catalogue&&) = delete;\n  Catalogue(Catalogue&& other) noexcept\n      : balls_(std::move(other.balls_)), levels_(std::move(other.levels_)), population_(std::move(other.population_)),\n        table_(std::move(other.table_)), table_keys_(std::move(other.table_keys_)),\n        table_bits_(std::exchange(other.table_bits_, 0)), kmax_(std::exchange(other.kmax_, 0)),\n        ledger_(std::exchange(other.ledger_, {})) {}\n\n  Order kmax() const noexcept { return kmax_; }\n"
+      },
+      {
+       "cherche": "  std::span<const SiteIdx> shell(BallIdx b) const noexcept { return population_.row(idx(b)).subspan(balls_[idx(b)].p); }\n  // Table S* -> boule (certificats LEM-T1 de la tranche T2) : la boule dont S* est EXACTEMENT ce support (2 a 4\n  // SiteIdx croissants), sinon rien. Un support minimal non canonique d'une boule n'y est pas (WIT-T1-CARRE).\n  std::optional<BallIdx> find_support(std::span<const SiteIdx> support) const noexcept;\n\n private:\n",
+       "remplace": "  std::span<const SiteIdx> shell(BallIdx b) const noexcept { return population_.row(idx(b)).subspan(balls_[idx(b)].p); }\n  // Table S* -> boule (certificats LEM-T1 de la tranche T2) : la boule dont S* est EXACTEMENT ce support (2 a 4\n  // SiteIdx croissants), sinon rien. Un support minimal non canonique d'une boule n'y est pas (WIT-T1-CARRE).\n  // Dichotomie DIRECTE sur les cles packees de la ligne du premier site (T2-d-B3), sans relire les boules.\n  std::optional<BallIdx> find_support(std::span<const SiteIdx> support) const noexcept;\n\n private:\n"
+      },
+      {
+       "cherche": "  Buffer<num::Level> levels_;\n  Csr<SiteIdx> population_;\n  Csr<BallIdx> table_;  // ligne s : boules dont S* commence par le site s, rangees par (S*[1], S*[2], S*[3])\n  Order kmax_ = 0;\n  CatalogueLedger ledger_;\n};\n",
+       "remplace": "  Buffer<num::Level> levels_;\n  Csr<SiteIdx> population_;\n  Csr<BallIdx> table_;  // ligne s : boules dont S* commence par le site s, rangees par (S*[1], S*[2], S*[3])\n  Buffer<TableKey> table_keys_;  // cle S* de chaque case de table_.val, dans le meme ordre (T2-d-B3)\n  u32 table_bits_ = 0;           // bits par composante des cles : width_of(sites)\n  Order kmax_ = 0;\n  CatalogueLedger ledger_;\n};\n"
+      }
+     ]
+    },
+    "src/catalogue/finish_driver.hpp": {
+     "sha256_apres": "20e91d27704543c4fd0b92685e53e6badc90ad68a463a7bf1590078c76fc4fed",
+     "sha256_avant": "db5a12b480f58c41761b8acc3e16e3d8b0a52718c7c7b180141733916516fd92",
+     "substitutions": [
+      {
+       "cherche": "  if (out.levels.empty()) MHGP12_TRY(out.levels.allocate(distinct + 1, budget));\n  if (out.levels.size() != distinct + 1) return fail(Reason::catalogue_invariant);\n  out.levels[0] = num::Level{};\n  CopyChunk copies[5] = {};\n  StreamSegment segments[6] = {};\n  u64 k = 0;\n  MHGP12_TRY(take_segment(b, a.balls, out.balls, in.balls, budget, pool, copies[0], segments, k));\n  MHGP12_TRY(take_segment(b, a.offset, out.offsets, in.balls + 1, budget, pool, copies[1], segments, k));\n",
+       "remplace": "  if (out.levels.empty()) MHGP12_TRY(out.levels.allocate(distinct + 1, budget));\n  if (out.levels.size() != distinct + 1) return fail(Reason::catalogue_invariant);\n  out.levels[0] = num::Level{};\n  CopyChunk copies[6] = {};\n  StreamSegment segments[7] = {};\n  u64 k = 0;\n  MHGP12_TRY(take_segment(b, a.balls, out.balls, in.balls, budget, pool, copies[0], segments, k));\n  MHGP12_TRY(take_segment(b, a.offset, out.offsets, in.balls + 1, budget, pool, copies[1], segments, k));\n"
+      },
+      {
+       "cherche": "  const u64 rows = u64{in.sites} + 1;\n  MHGP12_TRY(take_segment(b, a.table_offset, out.table_offsets, rows, budget, pool, copies[3], segments, k));\n  MHGP12_TRY(take_segment(b, a.table.vals[ct], out.table_values, in.balls, budget, pool, copies[4], segments, k));\n  LevelChunk levels{out.levels.data() + 1, &pool};\n  segments[k++] = StreamSegment{a.level_of_rank.data(), sizeof(LevelWords), distinct, &LevelChunk::consume, &levels,\n                                true};\n",
+       "remplace": "  const u64 rows = u64{in.sites} + 1;\n  MHGP12_TRY(take_segment(b, a.table_offset, out.table_offsets, rows, budget, pool, copies[3], segments, k));\n  MHGP12_TRY(take_segment(b, a.table.vals[ct], out.table_values, in.balls, budget, pool, copies[4], segments, k));\n  // Cles triees de la table (T2-d-B3) : deja calculees par l'etape 6, gardees hors export pour find_support.\n  MHGP12_TRY(take_segment(b, a.table.keys[ct], out.table_keys, in.balls, budget, pool, copies[5], segments, k));\n  LevelChunk levels{out.levels.data() + 1, &pool};\n  segments[k++] = StreamSegment{a.level_of_rank.data(), sizeof(LevelWords), distinct, &LevelChunk::consume, &levels,\n                                true};\n"
+      }
+     ]
+    },
+    "src/catalogue/finish_outputs.hpp": {
+     "sha256_apres": "df1db2b70d8014cff5e382d796ad6184935c2ed0ae1777f4f6662566f37752d3",
+     "sha256_avant": "0c4fd7551fe4198f81ba59b17b14a6c6fb5549de6913bd66dfe1dfa21df8e5ee",
+     "substitutions": [
+      {
+       "cherche": "  Buffer<num::Level> levels;\n  Buffer<u64> table_offsets;\n  Buffer<BallIdx> table_values;\n};\n\n// Copie parallele de `bytes` octets (blocs de 256 Kio repartis sur le Pool).\n",
+       "remplace": "  Buffer<num::Level> levels;\n  Buffer<u64> table_offsets;\n  Buffer<BallIdx> table_values;\n  Buffer<TableKey> table_keys;  // cles S* triees de la table (T2-d-B3), une par case de table_values\n};\n\n// Copie parallele de `bytes` octets (blocs de 256 Kio repartis sur le Pool).\n"
+      },
+      {
+       "cherche": "  MHGP12_TRY(prepare_one(out.offsets, balls + 1, budget, pool, meter));\n  MHGP12_TRY(prepare_one(out.values, incidences, budget, pool, meter));\n  MHGP12_TRY(prepare_one(out.table_offsets, u64{sites} + 1, budget, pool, meter));\n  return prepare_one(out.table_values, balls, budget, pool, meter);\n}\n\n}  // namespace mhgp12::catalogue_detail::fin\n",
+       "remplace": "  MHGP12_TRY(prepare_one(out.offsets, balls + 1, budget, pool, meter));\n  MHGP12_TRY(prepare_one(out.values, incidences, budget, pool, meter));\n  MHGP12_TRY(prepare_one(out.table_offsets, u64{sites} + 1, budget, pool, meter));\n  MHGP12_TRY(prepare_one(out.table_values, balls, budget, pool, meter));\n  return prepare_one(out.table_keys, balls, budget, pool, meter);\n}\n\n}  // namespace mhgp12::catalogue_detail::fin\n"
+      }
+     ]
+    },
+    "src/catalogue/finish_slices.hpp": {
+     "sha256_apres": "e00e49075d7454cc98556cd82c9225a5d6fbbbd156dff31420d8c540d08cb273",
+     "sha256_avant": "4a37dd5d1fb3c77c876b15a26dd4446e3d01f22cf36bd3547f159c80340c9f97",
+     "substitutions": [
+      {
+       "cherche": "                            sched::Pool& pool, FinishStats& stats) noexcept {\n  MHGP12_TRY(materialize_levels(w.words, w.ranks, out.levels, budget, pool));\n  const Stopwatch table_watch;\n  MHGP12_TRY(host_table(out.balls.span(), in.sites, out.table_offsets, out.table_values, budget, pool));\n  stats.table_ns += table_watch.nanoseconds();\n  return {};\n}\n",
+       "remplace": "                            sched::Pool& pool, FinishStats& stats) noexcept {\n  MHGP12_TRY(materialize_levels(w.words, w.ranks, out.levels, budget, pool));\n  const Stopwatch table_watch;\n  MHGP12_TRY(host_table(out.balls.span(), in.sites, out.table_offsets, out.table_values, out.table_keys, budget,\n                        pool));\n  stats.table_ns += table_watch.nanoseconds();\n  return {};\n}\n"
+      }
+     ]
+    },
+    "src/catalogue/slices.cpp": {
+     "sha256_apres": "72cf315f6325e8873947131357691b9efacd9cdc085f64f9570bb635ef638eef",
+     "sha256_avant": "080ccaddfb0c5666af7ce9e8a0ae2093849c4d92be19a17c05dc2b80f583bae5",
+     "substitutions": [
+      {
+       "cherche": "  }\n};\n\n}  // namespace\n\nOutcome host_table(std::span<const CatalogueBall> balls, u32 sites, Buffer<u64>& offsets, Buffer<BallIdx>& values,\n                   MemoryBudget& budget, sched::Pool& pool) noexcept {\n  const u64 n = balls.size();\n  MHGP12_TRY(offsets.allocate(u64{sites} + 1, budget));\n  std::fill(offsets.begin(), offsets.end(), u64{0});\n",
+       "remplace": "  }\n};\n\n// Cle de chaque case de la table, une fois les lignes triees (T2-d-B3).\nstruct TableKeys {\n  const CatalogueBall* balls;\n  u32 sites, bits;\n  const BallIdx* values;\n  TableKey* keys;\n  static Outcome body(void* context, u64 begin, u64 end, u32) noexcept {\n    const auto& t = *static_cast<const TableKeys*>(context);\n    for (u64 i = begin; i < end; ++i) {\n      const Key2 key = table_key(t.balls[idx(t.values[i])], t.sites, t.bits);\n      t.keys[i] = TableKey{key.lo, key.hi};\n    }\n    return {};\n  }\n};\n\n}  // namespace\n\nOutcome host_table(std::span<const CatalogueBall> balls, u32 sites, Buffer<u64>& offsets, Buffer<BallIdx>& values,\n                   Buffer<TableKey>& keys, MemoryBudget& budget, sched::Pool& pool) noexcept {\n  const u64 n = balls.size();\n  MHGP12_TRY(offsets.allocate(u64{sites} + 1, budget));\n  std::fill(offsets.begin(), offsets.end(), u64{0});\n"
+      },
+      {
+       "cherche": "  std::copy(offsets.begin(), offsets.begin() + sites, cursor.begin());\n  for (u64 i = 0; i < n; ++i) values[cursor[idx(balls[i].support[0])]++] = make_id<BallIdx>(static_cast<u32>(i));\n  TableRows rows{balls.data(), sites, width_of(sites), offsets.data(), values.data()};\n  return sites == 0 ? Outcome{} : pool.parallel_for(sites, 4096, &rows, &TableRows::body);\n}\n\nOutcome materialize_levels(std::vector<Buffer<LevelWords>>& words, u64 distinct, Buffer<num::Level>& levels,\n",
+       "remplace": "  std::copy(offsets.begin(), offsets.begin() + sites, cursor.begin());\n  for (u64 i = 0; i < n; ++i) values[cursor[idx(balls[i].support[0])]++] = make_id<BallIdx>(static_cast<u32>(i));\n  TableRows rows{balls.data(), sites, width_of(sites), offsets.data(), values.data()};\n  if (sites != 0) MHGP12_TRY(pool.parallel_for(sites, 4096, &rows, &TableRows::body));\n  MHGP12_TRY(keys.allocate(n, budget));\n  TableKeys fill{balls.data(), sites, width_of(sites), values.data(), keys.data()};\n  return n == 0 ? Outcome{} : pool.parallel_for(n, 4096, &fill, &TableKeys::body);\n}\n\nOutcome materialize_levels(std::vector<Buffer<LevelWords>>& words, u64 distinct, Buffer<num::Level>& levels,\n"
+      }
+     ]
+    },
+    "src/catalogue/slices.hpp": {
+     "sha256_apres": "4cc8b0c6e7e66f24602c0d55bdefac2bd506e976eda0b3da0b79960d2c2574fb",
+     "sha256_avant": "f6d1ad7bd4c7b8717100efe0f13b84dfbe2424385754f93892f1b6665eba5c04",
+     "substitutions": [
+      {
+       "cherche": "// verdicts, niveaux, cles, drapeaux, debuts, decalages, cles des positions, boules ; populations ; sites). Sous le\n// minimum, la voie complete ne peut pas tenir.\ninline u64 full_finish_upper(u64 balls, u64 incidences, u64 sites) noexcept {\n  return full_finish_bytes(balls, incidences, sites) + balls * (sizeof(num::Level) + sizeof(BallIdx));\n}\ninline u64 full_finish_floor(u64 balls, u64 incidences, u64 sites) noexcept {\n  const u64 sorts = 2 * (sizeof(Key2) + sizeof(u32)) + 2 * (sizeof(u64) + sizeof(u32)) + 2 * (sizeof(Key2) + sizeof(u32));\n",
+       "remplace": "// verdicts, niveaux, cles, drapeaux, debuts, decalages, cles des positions, boules ; populations ; sites). Sous le\n// minimum, la voie complete ne peut pas tenir.\ninline u64 full_finish_upper(u64 balls, u64 incidences, u64 sites) noexcept {\n  return full_finish_bytes(balls, incidences, sites) + balls * (sizeof(num::Level) + sizeof(BallIdx) + sizeof(TableKey));\n}\ninline u64 full_finish_floor(u64 balls, u64 incidences, u64 sites) noexcept {\n  const u64 sorts = 2 * (sizeof(Key2) + sizeof(u32)) + 2 * (sizeof(u64) + sizeof(u32)) + 2 * (sizeof(Key2) + sizeof(u32));\n"
+      },
+      {
+       "cherche": "                                   Buffer<SiteIdx>& population, MemoryBudget& budget, sched::Pool& pool) noexcept;\n\n// Table S* -> boule depuis les boules finales : offsets (sites + 1), values (une par boule), meme ordre que le tri par\n// base de TableKeyKernel (S*[0], S*[1], S*[2], S*[3], case absente = nombre de sites).\n[[nodiscard]] Outcome host_table(std::span<const CatalogueBall> balls, u32 sites, Buffer<u64>& offsets,\n                                 Buffer<BallIdx>& values, MemoryBudget& budget, sched::Pool& pool) noexcept;\n\n// Niveaux finaux : case 0 nulle, puis les mots des tranches dans l'ordre (rangs 1..L-1) ; chaque lot de mots est rendu\n// des qu'il est materialise.\n",
+       "remplace": "                                   Buffer<SiteIdx>& population, MemoryBudget& budget, sched::Pool& pool) noexcept;\n\n// Table S* -> boule depuis les boules finales : offsets (sites + 1), values (une par boule), meme ordre que le tri par\n// base de TableKeyKernel (S*[0], S*[1], S*[2], S*[3], case absente = nombre de sites) ; keys : la cle de chaque case\n// (T2-d-B3).\n[[nodiscard]] Outcome host_table(std::span<const CatalogueBall> balls, u32 sites, Buffer<u64>& offsets,\n                                 Buffer<BallIdx>& values, Buffer<TableKey>& keys, MemoryBudget& budget,\n                                 sched::Pool& pool) noexcept;\n\n// Niveaux finaux : case 0 nulle, puis les mots des tranches dans l'ordre (rangs 1..L-1) ; chaque lot de mots est rendu\n// des qu'il est materialise.\n"
+      }
+     ]
+    },
+    "src/catalogue/table.cpp": {
+     "sha256_apres": "92aa455563bae4dc10a2c5496b5207f0afed6771b1a52d787f1537f10857a258",
+     "sha256_avant": "cb76b465e6453f09684efb747ca8bf2de55f3d1788a15df3181e6f38723f0396",
+     "substitutions": [
+      {
+       "cherche": "// Table S* -> boule (certificats LEM-T1 de la tranche T2) : CSR par premier site de S*, chaque ligne rangee par\n// (S*[1], S*[2], S*[3]), case absente au-dela de tout SiteIdx ; recherche par dichotomie dans la ligne. Construite par\n// la fin d'etage (finish_driver.hpp : tri par base des supports, debuts de ligne par dichotomie), deterministe. Un\n// support minimal NON canonique d'une boule n'y figure pas : le carre et ses deux diagonales (WIT-T1-CARRE) n'y mettent\n// qu'une diagonale.\n#include <algorithm>\n\n#include \"catalogue/internal.hpp\"\n\nnamespace mhgp12 {\nnamespace {\n\nbool tail_less(const CatalogueBall& a, const CatalogueBall& b) noexcept {\n  for (u32 k = 1; k < 4; ++k)\n    if (a.support[k] != b.support[k]) return idx(a.support[k]) < idx(b.support[k]);\n  return false;\n}\n\n}  // namespace\n\nstd::optional<BallIdx> Catalogue::find_support(std::span<const SiteIdx> support) const noexcept {\n  if (support.size() < 2 || support.size() > 4 || table_.off.empty()) return std::nullopt;\n  for (u64 k = 1; k < support.size(); ++k)\n    if (idx(support[k - 1]) >= idx(support[k])) return std::nullopt;  // S* : SiteIdx strictement croissants\n  const u32 first = idx(support[0]);\n  if (u64{first} + 1 >= table_.off.size()) return std::nullopt;\n  CatalogueBall probe;\n  for (u32 k = 0; k < 4; ++k) probe.support[k] = k < support.size() ? support[k] : make_id<SiteIdx>(kNone);\n  const BallIdx* begin = table_.val.data() + table_.off[first];\n  const BallIdx* end = table_.val.data() + table_.off[first + 1];\n  const BallIdx* found = std::lower_bound(begin, end, probe, [&](BallIdx a, const CatalogueBall& key) {\n    return tail_less(balls_[idx(a)], key);\n  });\n  if (found == end || balls_[idx(*found)].support != probe.support) return std::nullopt;\n  return *found;\n}\n\n}  // namespace mhgp12\n",
+       "remplace": "// Table S* -> boule (certificats LEM-T1 de la tranche T2) : CSR par premier site de S*, chaque ligne rangee par\n// (S*[1], S*[2], S*[3]), case absente au-dela de tout SiteIdx. Construite par la fin d'etage (finish_driver.hpp : tri\n// par base des supports, debuts de ligne par dichotomie), deterministe. Un support minimal NON canonique d'une boule n'y\n// figure pas : le carre et ses deux diagonales (WIT-T1-CARRE) n'y mettent qu'une diagonale.\n// T2-d-B3 : la fin d'etage garde aussi la cle packee de chaque case (celle de son tri par base, hors export) ; la\n// recherche est une dichotomie DIRECTE sur les cles de la ligne, sans relire les boules (la dichotomie indirecte par\n// balls_ coutait un defaut de cache dependant par pas).\n#include <algorithm>\n\n#include \"catalogue/finish_kernels.hpp\"\n#include \"catalogue/internal.hpp\"\n\nnamespace mhgp12 {\n\nstd::optional<BallIdx> Catalogue::find_support(std::span<const SiteIdx> support) const noexcept {\n  if (support.size() < 2 || support.size() > 4 || table_.off.empty()) return std::nullopt;\n  for (u64 k = 1; k < support.size(); ++k)\n    if (idx(support[k - 1]) >= idx(support[k])) return std::nullopt;  // S* : SiteIdx strictement croissants\n  const u64 sites = table_.off.size() - 1;\n  if (idx(support.back()) >= sites) return std::nullopt;  // hors du nuage : aucune boule, cle hors de ses bits\n  u32 parts[4];\n  for (u32 k = 0; k < 4; ++k) parts[k] = k < support.size() ? idx(support[k]) : static_cast<u32>(sites);\n  const catalogue_detail::fin::Key2 packed = catalogue_detail::fin::pack4(parts, table_bits_);\n  const TableKey probe{packed.lo, packed.hi};\n  const u64 first = idx(support[0]);\n  const TableKey* begin = table_keys_.data() + table_.off[first];\n  const TableKey* end = table_keys_.data() + table_.off[first + 1];\n  const TableKey* found = std::lower_bound(begin, end, probe, [](const TableKey& a, const TableKey& b) {\n    return a.hi != b.hi ? a.hi < b.hi : a.lo < b.lo;\n  });\n  if (found == end || found->hi != probe.hi || found->lo != probe.lo) return std::nullopt;\n  return table_.val[static_cast<u64>(found - table_keys_.data())];\n}\n\n}  // namespace mhgp12\n"
+      }
+     ]
+    },
+    "src/tower/resolve.cpp": {
+     "sha256_apres": "236819a8ead1b5e8fff49c57b97e0339c97bd3b5476de1ff9aeb03521925d93b",
+     "sha256_avant": "7cf8c95bb67bea274098b2abd9ec653606cdd96ab313338e739c8f145f8e11c1",
+     "substitutions": [
+      {
+       "cherche": "  return true;\n}\n\nbool part_in_population(const Catalogue& cat, const Part& f, u32 b) noexcept {\n  const auto inner = cat.interior(make_id<BallIdx>(b)), shell = cat.shell(make_id<BallIdx>(b));\n  auto less = [](SiteIdx a, SiteIdx c) noexcept { return idx(a) < idx(c); };\n  for (u32 i = 0; i < f.k; ++i) {\n    const SiteIdx s = make_id<SiteIdx>(f.id[i]);\n    if (!std::binary_search(inner.begin(), inner.end(), s, less) &&\n        !std::binary_search(shell.begin(), shell.end(), s, less))\n      return false;\n  }\n  return true;\n}\n",
+       "remplace": "  return true;\n}\n\n// F dans P_b = I u U : la ligne de population de b est exactement I puis U ; elle est lue par les decalages du\n// catalogue et balayee (T2-d-B3), sans relire la fiche de la boule (p et m ne servaient qu'a la couper en deux).\nbool part_in_population(const Catalogue& cat, const Part& f, u32 b) noexcept {\n  const auto offsets = cat.population_offsets();\n  const SiteIdx* row = cat.population().data() + offsets[b];\n  const u64 n = offsets[u64{b} + 1] - offsets[b];\n  for (u32 i = 0; i < f.k; ++i) {\n    bool found = false;\n    for (u64 j = 0; j < n && !found; ++j) found = idx(row[j]) == f.id[i];\n    if (!found) return false;\n  }\n  return true;\n}\n"
+      }
+     ]
+    }
+   }
+  },
+  "balayage": {
+   "branche_locale": "b3r_balayage",
+   "fichiers": {
+    "src/tower/resolve.cpp": {
+     "sha256_apres": "236819a8ead1b5e8fff49c57b97e0339c97bd3b5476de1ff9aeb03521925d93b",
+     "sha256_avant": "7cf8c95bb67bea274098b2abd9ec653606cdd96ab313338e739c8f145f8e11c1",
+     "substitutions": [
+      {
+       "cherche": "  return true;\n}\n\nbool part_in_population(const Catalogue& cat, const Part& f, u32 b) noexcept {\n  const auto inner = cat.interior(make_id<BallIdx>(b)), shell = cat.shell(make_id<BallIdx>(b));\n  auto less = [](SiteIdx a, SiteIdx c) noexcept { return idx(a) < idx(c); };\n  for (u32 i = 0; i < f.k; ++i) {\n    const SiteIdx s = make_id<SiteIdx>(f.id[i]);\n    if (!std::binary_search(inner.begin(), inner.end(), s, less) &&\n        !std::binary_search(shell.begin(), shell.end(), s, less))\n      return false;\n  }\n  return true;\n}\n",
+       "remplace": "  return true;\n}\n\n// F dans P_b = I u U : la ligne de population de b est exactement I puis U ; elle est lue par les decalages du\n// catalogue et balayee (T2-d-B3), sans relire la fiche de la boule (p et m ne servaient qu'a la couper en deux).\nbool part_in_population(const Catalogue& cat, const Part& f, u32 b) noexcept {\n  const auto offsets = cat.population_offsets();\n  const SiteIdx* row = cat.population().data() + offsets[b];\n  const u64 n = offsets[u64{b} + 1] - offsets[b];\n  for (u32 i = 0; i < f.k; ++i) {\n    bool found = false;\n    for (u64 j = 0; j < n && !found; ++j) found = idx(row[j]) == f.id[i];\n    if (!found) return false;\n  }\n  return true;\n}\n"
+      }
+     ]
+    }
+   }
+  },
+  "cles": {
+   "branche_locale": "b3r_cles",
+   "fichiers": {
+    "src/catalogue/assemble.cpp": {
+     "sha256_apres": "a74d9434b721a51db1eb1d1e878636fffb342a0147664f033ac67a88c2c18d02",
+     "sha256_avant": "d529959860f4da8748b84db7c6c44611d40705101f2173ccf4f4a87987e3c053",
+     "substitutions": [
+      {
+       "cherche": "  result.population_.val.swap(out.values);\n  result.table_.off.swap(out.table_offsets);\n  result.table_.val.swap(out.table_values);\n  result.kmax_ = kmax;\n  result.ledger_ = ledger;\n  return result;\n",
+       "remplace": "  result.population_.val.swap(out.values);\n  result.table_.off.swap(out.table_offsets);\n  result.table_.val.swap(out.table_values);\n  result.table_keys_.swap(out.table_keys);\n  // Une cle par case de la table, toutes voies (complete, par tranches, appareil) ; sinon rien n'est publie.\n  if (result.table_keys_.size() != result.table_.val.size() || result.table_.off.empty())\n    return fail(Reason::catalogue_invariant);\n  result.table_bits_ = fin::width_of(result.table_.off.size() - 1);\n  result.kmax_ = kmax;\n  result.ledger_ = ledger;\n  return result;\n"
+      }
+     ]
+    },
+    "src/catalogue/catalogue.hpp": {
+     "sha256_apres": "b3dbc0ba16449dd660f296eb30cf99f9e4997d629aec3412b1e39b9701a61d1e",
+     "sha256_avant": "639dc07a3629f113e92d84a6154ce2a0db9f9826ad60406a04a669eeff170e7a",
+     "substitutions": [
+      {
+       "cherche": "  u64 finish_slices = 0, arena_streamed = 0;\n};\n\n// Proprietaire immuable des tableaux du catalogue ; ses SiteIdx se rapportent au Cloud source. Construction\n// deplacement seulement ; le budget doit survivre au resultat.\nclass Catalogue {\n",
+       "remplace": "  u64 finish_slices = 0, arena_streamed = 0;\n};\n\n// Cle S* d'une case de la table (tranche T2-d-B3) : les quatre SiteIdx de S* (case absente = nombre de sites) packes sur\n// width_of(sites) bits chacun, le premier en poids fort (catalogue_detail::fin::pack4) ; mot bas puis mot haut. L'ordre\n// (hi, lo) est celui des lignes de la table. Hors de l'export MHGP12DP.\nstruct TableKey {\n  u64 lo = 0, hi = 0;\n};\n\n// Proprietaire immuable des tableaux du catalogue ; ses SiteIdx se rapportent au Cloud source. Construction\n// deplacement seulement ; le budget doit survivre au resultat.\nclass Catalogue {\n"
+      },
+      {
+       "cherche": "  Catalogue& operator=(Catalogue&&) = delete;\n  Catalogue(Catalogue&& other) noexcept\n      : balls_(std::move(other.balls_)), levels_(std::move(other.levels_)), population_(std::move(other.population_)),\n        table_(std::move(other.table_)), kmax_(std::exchange(other.kmax_, 0)),\n        ledger_(std::exchange(other.ledger_, {})) {}\n\n  Order kmax() const noexcept { return kmax_; }\n",
+       "remplace": "  Catalogue& operator=(Catalogue&&) = delete;\n  Catalogue(Catalogue&& other) noexcept\n      : balls_(std::move(other.balls_)), levels_(std::move(other.levels_)), population_(std::move(other.population_)),\n        table_(std::move(other.table_)), table_keys_(std::move(other.table_keys_)),\n        table_bits_(std::exchange(other.table_bits_, 0)), kmax_(std::exchange(other.kmax_, 0)),\n        ledger_(std::exchange(other.ledger_, {})) {}\n\n  Order kmax() const noexcept { return kmax_; }\n"
+      },
+      {
+       "cherche": "  std::span<const SiteIdx> shell(BallIdx b) const noexcept { return population_.row(idx(b)).subspan(balls_[idx(b)].p); }\n  // Table S* -> boule (certificats LEM-T1 de la tranche T2) : la boule dont S* est EXACTEMENT ce support (2 a 4\n  // SiteIdx croissants), sinon rien. Un support minimal non canonique d'une boule n'y est pas (WIT-T1-CARRE).\n  std::optional<BallIdx> find_support(std::span<const SiteIdx> support) const noexcept;\n\n private:\n",
+       "remplace": "  std::span<const SiteIdx> shell(BallIdx b) const noexcept { return population_.row(idx(b)).subspan(balls_[idx(b)].p); }\n  // Table S* -> boule (certificats LEM-T1 de la tranche T2) : la boule dont S* est EXACTEMENT ce support (2 a 4\n  // SiteIdx croissants), sinon rien. Un support minimal non canonique d'une boule n'y est pas (WIT-T1-CARRE).\n  // Dichotomie DIRECTE sur les cles packees de la ligne du premier site (T2-d-B3), sans relire les boules.\n  std::optional<BallIdx> find_support(std::span<const SiteIdx> support) const noexcept;\n\n private:\n"
+      },
+      {
+       "cherche": "  Buffer<num::Level> levels_;\n  Csr<SiteIdx> population_;\n  Csr<BallIdx> table_;  // ligne s : boules dont S* commence par le site s, rangees par (S*[1], S*[2], S*[3])\n  Order kmax_ = 0;\n  CatalogueLedger ledger_;\n};\n",
+       "remplace": "  Buffer<num::Level> levels_;\n  Csr<SiteIdx> population_;\n  Csr<BallIdx> table_;  // ligne s : boules dont S* commence par le site s, rangees par (S*[1], S*[2], S*[3])\n  Buffer<TableKey> table_keys_;  // cle S* de chaque case de table_.val, dans le meme ordre (T2-d-B3)\n  u32 table_bits_ = 0;           // bits par composante des cles : width_of(sites)\n  Order kmax_ = 0;\n  CatalogueLedger ledger_;\n};\n"
+      }
+     ]
+    },
+    "src/catalogue/finish_driver.hpp": {
+     "sha256_apres": "20e91d27704543c4fd0b92685e53e6badc90ad68a463a7bf1590078c76fc4fed",
+     "sha256_avant": "db5a12b480f58c41761b8acc3e16e3d8b0a52718c7c7b180141733916516fd92",
+     "substitutions": [
+      {
+       "cherche": "  if (out.levels.empty()) MHGP12_TRY(out.levels.allocate(distinct + 1, budget));\n  if (out.levels.size() != distinct + 1) return fail(Reason::catalogue_invariant);\n  out.levels[0] = num::Level{};\n  CopyChunk copies[5] = {};\n  StreamSegment segments[6] = {};\n  u64 k = 0;\n  MHGP12_TRY(take_segment(b, a.balls, out.balls, in.balls, budget, pool, copies[0], segments, k));\n  MHGP12_TRY(take_segment(b, a.offset, out.offsets, in.balls + 1, budget, pool, copies[1], segments, k));\n",
+       "remplace": "  if (out.levels.empty()) MHGP12_TRY(out.levels.allocate(distinct + 1, budget));\n  if (out.levels.size() != distinct + 1) return fail(Reason::catalogue_invariant);\n  out.levels[0] = num::Level{};\n  CopyChunk copies[6] = {};\n  StreamSegment segments[7] = {};\n  u64 k = 0;\n  MHGP12_TRY(take_segment(b, a.balls, out.balls, in.balls, budget, pool, copies[0], segments, k));\n  MHGP12_TRY(take_segment(b, a.offset, out.offsets, in.balls + 1, budget, pool, copies[1], segments, k));\n"
+      },
+      {
+       "cherche": "  const u64 rows = u64{in.sites} + 1;\n  MHGP12_TRY(take_segment(b, a.table_offset, out.table_offsets, rows, budget, pool, copies[3], segments, k));\n  MHGP12_TRY(take_segment(b, a.table.vals[ct], out.table_values, in.balls, budget, pool, copies[4], segments, k));\n  LevelChunk levels{out.levels.data() + 1, &pool};\n  segments[k++] = StreamSegment{a.level_of_rank.data(), sizeof(LevelWords), distinct, &LevelChunk::consume, &levels,\n                                true};\n",
+       "remplace": "  const u64 rows = u64{in.sites} + 1;\n  MHGP12_TRY(take_segment(b, a.table_offset, out.table_offsets, rows, budget, pool, copies[3], segments, k));\n  MHGP12_TRY(take_segment(b, a.table.vals[ct], out.table_values, in.balls, budget, pool, copies[4], segments, k));\n  // Cles triees de la table (T2-d-B3) : deja calculees par l'etape 6, gardees hors export pour find_support.\n  MHGP12_TRY(take_segment(b, a.table.keys[ct], out.table_keys, in.balls, budget, pool, copies[5], segments, k));\n  LevelChunk levels{out.levels.data() + 1, &pool};\n  segments[k++] = StreamSegment{a.level_of_rank.data(), sizeof(LevelWords), distinct, &LevelChunk::consume, &levels,\n                                true};\n"
+      }
+     ]
+    },
+    "src/catalogue/finish_outputs.hpp": {
+     "sha256_apres": "df1db2b70d8014cff5e382d796ad6184935c2ed0ae1777f4f6662566f37752d3",
+     "sha256_avant": "0c4fd7551fe4198f81ba59b17b14a6c6fb5549de6913bd66dfe1dfa21df8e5ee",
+     "substitutions": [
+      {
+       "cherche": "  Buffer<num::Level> levels;\n  Buffer<u64> table_offsets;\n  Buffer<BallIdx> table_values;\n};\n\n// Copie parallele de `bytes` octets (blocs de 256 Kio repartis sur le Pool).\n",
+       "remplace": "  Buffer<num::Level> levels;\n  Buffer<u64> table_offsets;\n  Buffer<BallIdx> table_values;\n  Buffer<TableKey> table_keys;  // cles S* triees de la table (T2-d-B3), une par case de table_values\n};\n\n// Copie parallele de `bytes` octets (blocs de 256 Kio repartis sur le Pool).\n"
+      },
+      {
+       "cherche": "  MHGP12_TRY(prepare_one(out.offsets, balls + 1, budget, pool, meter));\n  MHGP12_TRY(prepare_one(out.values, incidences, budget, pool, meter));\n  MHGP12_TRY(prepare_one(out.table_offsets, u64{sites} + 1, budget, pool, meter));\n  return prepare_one(out.table_values, balls, budget, pool, meter);\n}\n\n}  // namespace mhgp12::catalogue_detail::fin\n",
+       "remplace": "  MHGP12_TRY(prepare_one(out.offsets, balls + 1, budget, pool, meter));\n  MHGP12_TRY(prepare_one(out.values, incidences, budget, pool, meter));\n  MHGP12_TRY(prepare_one(out.table_offsets, u64{sites} + 1, budget, pool, meter));\n  MHGP12_TRY(prepare_one(out.table_values, balls, budget, pool, meter));\n  return prepare_one(out.table_keys, balls, budget, pool, meter);\n}\n\n}  // namespace mhgp12::catalogue_detail::fin\n"
+      }
+     ]
+    },
+    "src/catalogue/finish_slices.hpp": {
+     "sha256_apres": "e00e49075d7454cc98556cd82c9225a5d6fbbbd156dff31420d8c540d08cb273",
+     "sha256_avant": "4a37dd5d1fb3c77c876b15a26dd4446e3d01f22cf36bd3547f159c80340c9f97",
+     "substitutions": [
+      {
+       "cherche": "                            sched::Pool& pool, FinishStats& stats) noexcept {\n  MHGP12_TRY(materialize_levels(w.words, w.ranks, out.levels, budget, pool));\n  const Stopwatch table_watch;\n  MHGP12_TRY(host_table(out.balls.span(), in.sites, out.table_offsets, out.table_values, budget, pool));\n  stats.table_ns += table_watch.nanoseconds();\n  return {};\n}\n",
+       "remplace": "                            sched::Pool& pool, FinishStats& stats) noexcept {\n  MHGP12_TRY(materialize_levels(w.words, w.ranks, out.levels, budget, pool));\n  const Stopwatch table_watch;\n  MHGP12_TRY(host_table(out.balls.span(), in.sites, out.table_offsets, out.table_values, out.table_keys, budget,\n                        pool));\n  stats.table_ns += table_watch.nanoseconds();\n  return {};\n}\n"
+      }
+     ]
+    },
+    "src/catalogue/slices.cpp": {
+     "sha256_apres": "72cf315f6325e8873947131357691b9efacd9cdc085f64f9570bb635ef638eef",
+     "sha256_avant": "080ccaddfb0c5666af7ce9e8a0ae2093849c4d92be19a17c05dc2b80f583bae5",
+     "substitutions": [
+      {
+       "cherche": "  }\n};\n\n}  // namespace\n\nOutcome host_table(std::span<const CatalogueBall> balls, u32 sites, Buffer<u64>& offsets, Buffer<BallIdx>& values,\n                   MemoryBudget& budget, sched::Pool& pool) noexcept {\n  const u64 n = balls.size();\n  MHGP12_TRY(offsets.allocate(u64{sites} + 1, budget));\n  std::fill(offsets.begin(), offsets.end(), u64{0});\n",
+       "remplace": "  }\n};\n\n// Cle de chaque case de la table, une fois les lignes triees (T2-d-B3).\nstruct TableKeys {\n  const CatalogueBall* balls;\n  u32 sites, bits;\n  const BallIdx* values;\n  TableKey* keys;\n  static Outcome body(void* context, u64 begin, u64 end, u32) noexcept {\n    const auto& t = *static_cast<const TableKeys*>(context);\n    for (u64 i = begin; i < end; ++i) {\n      const Key2 key = table_key(t.balls[idx(t.values[i])], t.sites, t.bits);\n      t.keys[i] = TableKey{key.lo, key.hi};\n    }\n    return {};\n  }\n};\n\n}  // namespace\n\nOutcome host_table(std::span<const CatalogueBall> balls, u32 sites, Buffer<u64>& offsets, Buffer<BallIdx>& values,\n                   Buffer<TableKey>& keys, MemoryBudget& budget, sched::Pool& pool) noexcept {\n  const u64 n = balls.size();\n  MHGP12_TRY(offsets.allocate(u64{sites} + 1, budget));\n  std::fill(offsets.begin(), offsets.end(), u64{0});\n"
+      },
+      {
+       "cherche": "  std::copy(offsets.begin(), offsets.begin() + sites, cursor.begin());\n  for (u64 i = 0; i < n; ++i) values[cursor[idx(balls[i].support[0])]++] = make_id<BallIdx>(static_cast<u32>(i));\n  TableRows rows{balls.data(), sites, width_of(sites), offsets.data(), values.data()};\n  return sites == 0 ? Outcome{} : pool.parallel_for(sites, 4096, &rows, &TableRows::body);\n}\n\nOutcome materialize_levels(std::vector<Buffer<LevelWords>>& words, u64 distinct, Buffer<num::Level>& levels,\n",
+       "remplace": "  std::copy(offsets.begin(), offsets.begin() + sites, cursor.begin());\n  for (u64 i = 0; i < n; ++i) values[cursor[idx(balls[i].support[0])]++] = make_id<BallIdx>(static_cast<u32>(i));\n  TableRows rows{balls.data(), sites, width_of(sites), offsets.data(), values.data()};\n  if (sites != 0) MHGP12_TRY(pool.parallel_for(sites, 4096, &rows, &TableRows::body));\n  MHGP12_TRY(keys.allocate(n, budget));\n  TableKeys fill{balls.data(), sites, width_of(sites), values.data(), keys.data()};\n  return n == 0 ? Outcome{} : pool.parallel_for(n, 4096, &fill, &TableKeys::body);\n}\n\nOutcome materialize_levels(std::vector<Buffer<LevelWords>>& words, u64 distinct, Buffer<num::Level>& levels,\n"
+      }
+     ]
+    },
+    "src/catalogue/slices.hpp": {
+     "sha256_apres": "4cc8b0c6e7e66f24602c0d55bdefac2bd506e976eda0b3da0b79960d2c2574fb",
+     "sha256_avant": "f6d1ad7bd4c7b8717100efe0f13b84dfbe2424385754f93892f1b6665eba5c04",
+     "substitutions": [
+      {
+       "cherche": "// verdicts, niveaux, cles, drapeaux, debuts, decalages, cles des positions, boules ; populations ; sites). Sous le\n// minimum, la voie complete ne peut pas tenir.\ninline u64 full_finish_upper(u64 balls, u64 incidences, u64 sites) noexcept {\n  return full_finish_bytes(balls, incidences, sites) + balls * (sizeof(num::Level) + sizeof(BallIdx));\n}\ninline u64 full_finish_floor(u64 balls, u64 incidences, u64 sites) noexcept {\n  const u64 sorts = 2 * (sizeof(Key2) + sizeof(u32)) + 2 * (sizeof(u64) + sizeof(u32)) + 2 * (sizeof(Key2) + sizeof(u32));\n",
+       "remplace": "// verdicts, niveaux, cles, drapeaux, debuts, decalages, cles des positions, boules ; populations ; sites). Sous le\n// minimum, la voie complete ne peut pas tenir.\ninline u64 full_finish_upper(u64 balls, u64 incidences, u64 sites) noexcept {\n  return full_finish_bytes(balls, incidences, sites) + balls * (sizeof(num::Level) + sizeof(BallIdx) + sizeof(TableKey));\n}\ninline u64 full_finish_floor(u64 balls, u64 incidences, u64 sites) noexcept {\n  const u64 sorts = 2 * (sizeof(Key2) + sizeof(u32)) + 2 * (sizeof(u64) + sizeof(u32)) + 2 * (sizeof(Key2) + sizeof(u32));\n"
+      },
+      {
+       "cherche": "                                   Buffer<SiteIdx>& population, MemoryBudget& budget, sched::Pool& pool) noexcept;\n\n// Table S* -> boule depuis les boules finales : offsets (sites + 1), values (une par boule), meme ordre que le tri par\n// base de TableKeyKernel (S*[0], S*[1], S*[2], S*[3], case absente = nombre de sites).\n[[nodiscard]] Outcome host_table(std::span<const CatalogueBall> balls, u32 sites, Buffer<u64>& offsets,\n                                 Buffer<BallIdx>& values, MemoryBudget& budget, sched::Pool& pool) noexcept;\n\n// Niveaux finaux : case 0 nulle, puis les mots des tranches dans l'ordre (rangs 1..L-1) ; chaque lot de mots est rendu\n// des qu'il est materialise.\n",
+       "remplace": "                                   Buffer<SiteIdx>& population, MemoryBudget& budget, sched::Pool& pool) noexcept;\n\n// Table S* -> boule depuis les boules finales : offsets (sites + 1), values (une par boule), meme ordre que le tri par\n// base de TableKeyKernel (S*[0], S*[1], S*[2], S*[3], case absente = nombre de sites) ; keys : la cle de chaque case\n// (T2-d-B3).\n[[nodiscard]] Outcome host_table(std::span<const CatalogueBall> balls, u32 sites, Buffer<u64>& offsets,\n                                 Buffer<BallIdx>& values, Buffer<TableKey>& keys, MemoryBudget& budget,\n                                 sched::Pool& pool) noexcept;\n\n// Niveaux finaux : case 0 nulle, puis les mots des tranches dans l'ordre (rangs 1..L-1) ; chaque lot de mots est rendu\n// des qu'il est materialise.\n"
+      }
+     ]
+    },
+    "src/catalogue/table.cpp": {
+     "sha256_apres": "92aa455563bae4dc10a2c5496b5207f0afed6771b1a52d787f1537f10857a258",
+     "sha256_avant": "cb76b465e6453f09684efb747ca8bf2de55f3d1788a15df3181e6f38723f0396",
+     "substitutions": [
+      {
+       "cherche": "// Table S* -> boule (certificats LEM-T1 de la tranche T2) : CSR par premier site de S*, chaque ligne rangee par\n// (S*[1], S*[2], S*[3]), case absente au-dela de tout SiteIdx ; recherche par dichotomie dans la ligne. Construite par\n// la fin d'etage (finish_driver.hpp : tri par base des supports, debuts de ligne par dichotomie), deterministe. Un\n// support minimal NON canonique d'une boule n'y figure pas : le carre et ses deux diagonales (WIT-T1-CARRE) n'y mettent\n// qu'une diagonale.\n#include <algorithm>\n\n#include \"catalogue/internal.hpp\"\n\nnamespace mhgp12 {\nnamespace {\n\nbool tail_less(const CatalogueBall& a, const CatalogueBall& b) noexcept {\n  for (u32 k = 1; k < 4; ++k)\n    if (a.support[k] != b.support[k]) return idx(a.support[k]) < idx(b.support[k]);\n  return false;\n}\n\n}  // namespace\n\nstd::optional<BallIdx> Catalogue::find_support(std::span<const SiteIdx> support) const noexcept {\n  if (support.size() < 2 || support.size() > 4 || table_.off.empty()) return std::nullopt;\n  for (u64 k = 1; k < support.size(); ++k)\n    if (idx(support[k - 1]) >= idx(support[k])) return std::nullopt;  // S* : SiteIdx strictement croissants\n  const u32 first = idx(support[0]);\n  if (u64{first} + 1 >= table_.off.size()) return std::nullopt;\n  CatalogueBall probe;\n  for (u32 k = 0; k < 4; ++k) probe.support[k] = k < support.size() ? support[k] : make_id<SiteIdx>(kNone);\n  const BallIdx* begin = table_.val.data() + table_.off[first];\n  const BallIdx* end = table_.val.data() + table_.off[first + 1];\n  const BallIdx* found = std::lower_bound(begin, end, probe, [&](BallIdx a, const CatalogueBall& key) {\n    return tail_less(balls_[idx(a)], key);\n  });\n  if (found == end || balls_[idx(*found)].support != probe.support) return std::nullopt;\n  return *found;\n}\n\n}  // namespace mhgp12\n",
+       "remplace": "// Table S* -> boule (certificats LEM-T1 de la tranche T2) : CSR par premier site de S*, chaque ligne rangee par\n// (S*[1], S*[2], S*[3]), case absente au-dela de tout SiteIdx. Construite par la fin d'etage (finish_driver.hpp : tri\n// par base des supports, debuts de ligne par dichotomie), deterministe. Un support minimal NON canonique d'une boule n'y\n// figure pas : le carre et ses deux diagonales (WIT-T1-CARRE) n'y mettent qu'une diagonale.\n// T2-d-B3 : la fin d'etage garde aussi la cle packee de chaque case (celle de son tri par base, hors export) ; la\n// recherche est une dichotomie DIRECTE sur les cles de la ligne, sans relire les boules (la dichotomie indirecte par\n// balls_ coutait un defaut de cache dependant par pas).\n#include <algorithm>\n\n#include \"catalogue/finish_kernels.hpp\"\n#include \"catalogue/internal.hpp\"\n\nnamespace mhgp12 {\n\nstd::optional<BallIdx> Catalogue::find_support(std::span<const SiteIdx> support) const noexcept {\n  if (support.size() < 2 || support.size() > 4 || table_.off.empty()) return std::nullopt;\n  for (u64 k = 1; k < support.size(); ++k)\n    if (idx(support[k - 1]) >= idx(support[k])) return std::nullopt;  // S* : SiteIdx strictement croissants\n  const u64 sites = table_.off.size() - 1;\n  if (idx(support.back()) >= sites) return std::nullopt;  // hors du nuage : aucune boule, cle hors de ses bits\n  u32 parts[4];\n  for (u32 k = 0; k < 4; ++k) parts[k] = k < support.size() ? idx(support[k]) : static_cast<u32>(sites);\n  const catalogue_detail::fin::Key2 packed = catalogue_detail::fin::pack4(parts, table_bits_);\n  const TableKey probe{packed.lo, packed.hi};\n  const u64 first = idx(support[0]);\n  const TableKey* begin = table_keys_.data() + table_.off[first];\n  const TableKey* end = table_keys_.data() + table_.off[first + 1];\n  const TableKey* found = std::lower_bound(begin, end, probe, [](const TableKey& a, const TableKey& b) {\n    return a.hi != b.hi ? a.hi < b.hi : a.lo < b.lo;\n  });\n  if (found == end || found->hi != probe.hi || found->lo != probe.lo) return std::nullopt;\n  return table_.val[static_cast<u64>(found - table_keys_.data())];\n}\n\n}  // namespace mhgp12\n"
+      }
+     ]
+    }
+   }
+  },
+  "transfert": {
+   "branche_locale": "b3r_transfert",
+   "fichiers": {
+    "src/catalogue/assemble.cpp": {
+     "sha256_apres": "a74d9434b721a51db1eb1d1e878636fffb342a0147664f033ac67a88c2c18d02",
+     "sha256_avant": "d529959860f4da8748b84db7c6c44611d40705101f2173ccf4f4a87987e3c053",
+     "substitutions": [
+      {
+       "cherche": "  result.population_.val.swap(out.values);\n  result.table_.off.swap(out.table_offsets);\n  result.table_.val.swap(out.table_values);\n  result.kmax_ = kmax;\n  result.ledger_ = ledger;\n  return result;\n",
+       "remplace": "  result.population_.val.swap(out.values);\n  result.table_.off.swap(out.table_offsets);\n  result.table_.val.swap(out.table_values);\n  result.table_keys_.swap(out.table_keys);\n  // Une cle par case de la table, toutes voies (complete, par tranches, appareil) ; sinon rien n'est publie.\n  if (result.table_keys_.size() != result.table_.val.size() || result.table_.off.empty())\n    return fail(Reason::catalogue_invariant);\n  result.table_bits_ = fin::width_of(result.table_.off.size() - 1);\n  result.kmax_ = kmax;\n  result.ledger_ = ledger;\n  return result;\n"
+      }
+     ]
+    },
+    "src/catalogue/catalogue.hpp": {
+     "sha256_apres": "b3dbc0ba16449dd660f296eb30cf99f9e4997d629aec3412b1e39b9701a61d1e",
+     "sha256_avant": "639dc07a3629f113e92d84a6154ce2a0db9f9826ad60406a04a669eeff170e7a",
+     "substitutions": [
+      {
+       "cherche": "  u64 finish_slices = 0, arena_streamed = 0;\n};\n\n// Proprietaire immuable des tableaux du catalogue ; ses SiteIdx se rapportent au Cloud source. Construction\n// deplacement seulement ; le budget doit survivre au resultat.\nclass Catalogue {\n",
+       "remplace": "  u64 finish_slices = 0, arena_streamed = 0;\n};\n\n// Cle S* d'une case de la table (tranche T2-d-B3) : les quatre SiteIdx de S* (case absente = nombre de sites) packes sur\n// width_of(sites) bits chacun, le premier en poids fort (catalogue_detail::fin::pack4) ; mot bas puis mot haut. L'ordre\n// (hi, lo) est celui des lignes de la table. Hors de l'export MHGP12DP.\nstruct TableKey {\n  u64 lo = 0, hi = 0;\n};\n\n// Proprietaire immuable des tableaux du catalogue ; ses SiteIdx se rapportent au Cloud source. Construction\n// deplacement seulement ; le budget doit survivre au resultat.\nclass Catalogue {\n"
+      },
+      {
+       "cherche": "  Catalogue& operator=(Catalogue&&) = delete;\n  Catalogue(Catalogue&& other) noexcept\n      : balls_(std::move(other.balls_)), levels_(std::move(other.levels_)), population_(std::move(other.population_)),\n        table_(std::move(other.table_)), kmax_(std::exchange(other.kmax_, 0)),\n        ledger_(std::exchange(other.ledger_, {})) {}\n\n  Order kmax() const noexcept { return kmax_; }\n",
+       "remplace": "  Catalogue& operator=(Catalogue&&) = delete;\n  Catalogue(Catalogue&& other) noexcept\n      : balls_(std::move(other.balls_)), levels_(std::move(other.levels_)), population_(std::move(other.population_)),\n        table_(std::move(other.table_)), table_keys_(std::move(other.table_keys_)),\n        table_bits_(std::exchange(other.table_bits_, 0)), kmax_(std::exchange(other.kmax_, 0)),\n        ledger_(std::exchange(other.ledger_, {})) {}\n\n  Order kmax() const noexcept { return kmax_; }\n"
+      },
+      {
+       "cherche": "  std::span<const SiteIdx> shell(BallIdx b) const noexcept { return population_.row(idx(b)).subspan(balls_[idx(b)].p); }\n  // Table S* -> boule (certificats LEM-T1 de la tranche T2) : la boule dont S* est EXACTEMENT ce support (2 a 4\n  // SiteIdx croissants), sinon rien. Un support minimal non canonique d'une boule n'y est pas (WIT-T1-CARRE).\n  std::optional<BallIdx> find_support(std::span<const SiteIdx> support) const noexcept;\n\n private:\n",
+       "remplace": "  std::span<const SiteIdx> shell(BallIdx b) const noexcept { return population_.row(idx(b)).subspan(balls_[idx(b)].p); }\n  // Table S* -> boule (certificats LEM-T1 de la tranche T2) : la boule dont S* est EXACTEMENT ce support (2 a 4\n  // SiteIdx croissants), sinon rien. Un support minimal non canonique d'une boule n'y est pas (WIT-T1-CARRE).\n  // Dichotomie DIRECTE sur les cles packees de la ligne du premier site (T2-d-B3), sans relire les boules.\n  std::optional<BallIdx> find_support(std::span<const SiteIdx> support) const noexcept;\n\n private:\n"
+      },
+      {
+       "cherche": "  Buffer<num::Level> levels_;\n  Csr<SiteIdx> population_;\n  Csr<BallIdx> table_;  // ligne s : boules dont S* commence par le site s, rangees par (S*[1], S*[2], S*[3])\n  Order kmax_ = 0;\n  CatalogueLedger ledger_;\n};\n",
+       "remplace": "  Buffer<num::Level> levels_;\n  Csr<SiteIdx> population_;\n  Csr<BallIdx> table_;  // ligne s : boules dont S* commence par le site s, rangees par (S*[1], S*[2], S*[3])\n  Buffer<TableKey> table_keys_;  // cle S* de chaque case de table_.val, dans le meme ordre (T2-d-B3)\n  u32 table_bits_ = 0;           // bits par composante des cles : width_of(sites)\n  Order kmax_ = 0;\n  CatalogueLedger ledger_;\n};\n"
+      }
+     ]
+    },
+    "src/catalogue/finish_driver.hpp": {
+     "sha256_apres": "20e91d27704543c4fd0b92685e53e6badc90ad68a463a7bf1590078c76fc4fed",
+     "sha256_avant": "db5a12b480f58c41761b8acc3e16e3d8b0a52718c7c7b180141733916516fd92",
+     "substitutions": [
+      {
+       "cherche": "  if (out.levels.empty()) MHGP12_TRY(out.levels.allocate(distinct + 1, budget));\n  if (out.levels.size() != distinct + 1) return fail(Reason::catalogue_invariant);\n  out.levels[0] = num::Level{};\n  CopyChunk copies[5] = {};\n  StreamSegment segments[6] = {};\n  u64 k = 0;\n  MHGP12_TRY(take_segment(b, a.balls, out.balls, in.balls, budget, pool, copies[0], segments, k));\n  MHGP12_TRY(take_segment(b, a.offset, out.offsets, in.balls + 1, budget, pool, copies[1], segments, k));\n",
+       "remplace": "  if (out.levels.empty()) MHGP12_TRY(out.levels.allocate(distinct + 1, budget));\n  if (out.levels.size() != distinct + 1) return fail(Reason::catalogue_invariant);\n  out.levels[0] = num::Level{};\n  CopyChunk copies[6] = {};\n  StreamSegment segments[7] = {};\n  u64 k = 0;\n  MHGP12_TRY(take_segment(b, a.balls, out.balls, in.balls, budget, pool, copies[0], segments, k));\n  MHGP12_TRY(take_segment(b, a.offset, out.offsets, in.balls + 1, budget, pool, copies[1], segments, k));\n"
+      },
+      {
+       "cherche": "  const u64 rows = u64{in.sites} + 1;\n  MHGP12_TRY(take_segment(b, a.table_offset, out.table_offsets, rows, budget, pool, copies[3], segments, k));\n  MHGP12_TRY(take_segment(b, a.table.vals[ct], out.table_values, in.balls, budget, pool, copies[4], segments, k));\n  LevelChunk levels{out.levels.data() + 1, &pool};\n  segments[k++] = StreamSegment{a.level_of_rank.data(), sizeof(LevelWords), distinct, &LevelChunk::consume, &levels,\n                                true};\n",
+       "remplace": "  const u64 rows = u64{in.sites} + 1;\n  MHGP12_TRY(take_segment(b, a.table_offset, out.table_offsets, rows, budget, pool, copies[3], segments, k));\n  MHGP12_TRY(take_segment(b, a.table.vals[ct], out.table_values, in.balls, budget, pool, copies[4], segments, k));\n  // Cles triees de la table (T2-d-B3) : deja calculees par l'etape 6, gardees hors export pour find_support.\n  MHGP12_TRY(take_segment(b, a.table.keys[ct], out.table_keys, in.balls, budget, pool, copies[5], segments, k));\n  LevelChunk levels{out.levels.data() + 1, &pool};\n  segments[k++] = StreamSegment{a.level_of_rank.data(), sizeof(LevelWords), distinct, &LevelChunk::consume, &levels,\n                                true};\n"
+      }
+     ]
+    },
+    "src/catalogue/finish_outputs.hpp": {
+     "sha256_apres": "df1db2b70d8014cff5e382d796ad6184935c2ed0ae1777f4f6662566f37752d3",
+     "sha256_avant": "0c4fd7551fe4198f81ba59b17b14a6c6fb5549de6913bd66dfe1dfa21df8e5ee",
+     "substitutions": [
+      {
+       "cherche": "  Buffer<num::Level> levels;\n  Buffer<u64> table_offsets;\n  Buffer<BallIdx> table_values;\n};\n\n// Copie parallele de `bytes` octets (blocs de 256 Kio repartis sur le Pool).\n",
+       "remplace": "  Buffer<num::Level> levels;\n  Buffer<u64> table_offsets;\n  Buffer<BallIdx> table_values;\n  Buffer<TableKey> table_keys;  // cles S* triees de la table (T2-d-B3), une par case de table_values\n};\n\n// Copie parallele de `bytes` octets (blocs de 256 Kio repartis sur le Pool).\n"
+      },
+      {
+       "cherche": "  MHGP12_TRY(prepare_one(out.offsets, balls + 1, budget, pool, meter));\n  MHGP12_TRY(prepare_one(out.values, incidences, budget, pool, meter));\n  MHGP12_TRY(prepare_one(out.table_offsets, u64{sites} + 1, budget, pool, meter));\n  return prepare_one(out.table_values, balls, budget, pool, meter);\n}\n\n}  // namespace mhgp12::catalogue_detail::fin\n",
+       "remplace": "  MHGP12_TRY(prepare_one(out.offsets, balls + 1, budget, pool, meter));\n  MHGP12_TRY(prepare_one(out.values, incidences, budget, pool, meter));\n  MHGP12_TRY(prepare_one(out.table_offsets, u64{sites} + 1, budget, pool, meter));\n  MHGP12_TRY(prepare_one(out.table_values, balls, budget, pool, meter));\n  return prepare_one(out.table_keys, balls, budget, pool, meter);\n}\n\n}  // namespace mhgp12::catalogue_detail::fin\n"
+      }
+     ]
+    },
+    "src/catalogue/finish_slices.hpp": {
+     "sha256_apres": "e00e49075d7454cc98556cd82c9225a5d6fbbbd156dff31420d8c540d08cb273",
+     "sha256_avant": "4a37dd5d1fb3c77c876b15a26dd4446e3d01f22cf36bd3547f159c80340c9f97",
+     "substitutions": [
+      {
+       "cherche": "                            sched::Pool& pool, FinishStats& stats) noexcept {\n  MHGP12_TRY(materialize_levels(w.words, w.ranks, out.levels, budget, pool));\n  const Stopwatch table_watch;\n  MHGP12_TRY(host_table(out.balls.span(), in.sites, out.table_offsets, out.table_values, budget, pool));\n  stats.table_ns += table_watch.nanoseconds();\n  return {};\n}\n",
+       "remplace": "                            sched::Pool& pool, FinishStats& stats) noexcept {\n  MHGP12_TRY(materialize_levels(w.words, w.ranks, out.levels, budget, pool));\n  const Stopwatch table_watch;\n  MHGP12_TRY(host_table(out.balls.span(), in.sites, out.table_offsets, out.table_values, out.table_keys, budget,\n                        pool));\n  stats.table_ns += table_watch.nanoseconds();\n  return {};\n}\n"
+      }
+     ]
+    },
+    "src/catalogue/slices.cpp": {
+     "sha256_apres": "72cf315f6325e8873947131357691b9efacd9cdc085f64f9570bb635ef638eef",
+     "sha256_avant": "080ccaddfb0c5666af7ce9e8a0ae2093849c4d92be19a17c05dc2b80f583bae5",
+     "substitutions": [
+      {
+       "cherche": "  }\n};\n\n}  // namespace\n\nOutcome host_table(std::span<const CatalogueBall> balls, u32 sites, Buffer<u64>& offsets, Buffer<BallIdx>& values,\n                   MemoryBudget& budget, sched::Pool& pool) noexcept {\n  const u64 n = balls.size();\n  MHGP12_TRY(offsets.allocate(u64{sites} + 1, budget));\n  std::fill(offsets.begin(), offsets.end(), u64{0});\n",
+       "remplace": "  }\n};\n\n// Cle de chaque case de la table, une fois les lignes triees (T2-d-B3).\nstruct TableKeys {\n  const CatalogueBall* balls;\n  u32 sites, bits;\n  const BallIdx* values;\n  TableKey* keys;\n  static Outcome body(void* context, u64 begin, u64 end, u32) noexcept {\n    const auto& t = *static_cast<const TableKeys*>(context);\n    for (u64 i = begin; i < end; ++i) {\n      const Key2 key = table_key(t.balls[idx(t.values[i])], t.sites, t.bits);\n      t.keys[i] = TableKey{key.lo, key.hi};\n    }\n    return {};\n  }\n};\n\n}  // namespace\n\nOutcome host_table(std::span<const CatalogueBall> balls, u32 sites, Buffer<u64>& offsets, Buffer<BallIdx>& values,\n                   Buffer<TableKey>& keys, MemoryBudget& budget, sched::Pool& pool) noexcept {\n  const u64 n = balls.size();\n  MHGP12_TRY(offsets.allocate(u64{sites} + 1, budget));\n  std::fill(offsets.begin(), offsets.end(), u64{0});\n"
+      },
+      {
+       "cherche": "  std::copy(offsets.begin(), offsets.begin() + sites, cursor.begin());\n  for (u64 i = 0; i < n; ++i) values[cursor[idx(balls[i].support[0])]++] = make_id<BallIdx>(static_cast<u32>(i));\n  TableRows rows{balls.data(), sites, width_of(sites), offsets.data(), values.data()};\n  return sites == 0 ? Outcome{} : pool.parallel_for(sites, 4096, &rows, &TableRows::body);\n}\n\nOutcome materialize_levels(std::vector<Buffer<LevelWords>>& words, u64 distinct, Buffer<num::Level>& levels,\n",
+       "remplace": "  std::copy(offsets.begin(), offsets.begin() + sites, cursor.begin());\n  for (u64 i = 0; i < n; ++i) values[cursor[idx(balls[i].support[0])]++] = make_id<BallIdx>(static_cast<u32>(i));\n  TableRows rows{balls.data(), sites, width_of(sites), offsets.data(), values.data()};\n  if (sites != 0) MHGP12_TRY(pool.parallel_for(sites, 4096, &rows, &TableRows::body));\n  MHGP12_TRY(keys.allocate(n, budget));\n  TableKeys fill{balls.data(), sites, width_of(sites), values.data(), keys.data()};\n  return n == 0 ? Outcome{} : pool.parallel_for(n, 4096, &fill, &TableKeys::body);\n}\n\nOutcome materialize_levels(std::vector<Buffer<LevelWords>>& words, u64 distinct, Buffer<num::Level>& levels,\n"
+      }
+     ]
+    },
+    "src/catalogue/slices.hpp": {
+     "sha256_apres": "4cc8b0c6e7e66f24602c0d55bdefac2bd506e976eda0b3da0b79960d2c2574fb",
+     "sha256_avant": "f6d1ad7bd4c7b8717100efe0f13b84dfbe2424385754f93892f1b6665eba5c04",
+     "substitutions": [
+      {
+       "cherche": "// verdicts, niveaux, cles, drapeaux, debuts, decalages, cles des positions, boules ; populations ; sites). Sous le\n// minimum, la voie complete ne peut pas tenir.\ninline u64 full_finish_upper(u64 balls, u64 incidences, u64 sites) noexcept {\n  return full_finish_bytes(balls, incidences, sites) + balls * (sizeof(num::Level) + sizeof(BallIdx));\n}\ninline u64 full_finish_floor(u64 balls, u64 incidences, u64 sites) noexcept {\n  const u64 sorts = 2 * (sizeof(Key2) + sizeof(u32)) + 2 * (sizeof(u64) + sizeof(u32)) + 2 * (sizeof(Key2) + sizeof(u32));\n",
+       "remplace": "// verdicts, niveaux, cles, drapeaux, debuts, decalages, cles des positions, boules ; populations ; sites). Sous le\n// minimum, la voie complete ne peut pas tenir.\ninline u64 full_finish_upper(u64 balls, u64 incidences, u64 sites) noexcept {\n  return full_finish_bytes(balls, incidences, sites) + balls * (sizeof(num::Level) + sizeof(BallIdx) + sizeof(TableKey));\n}\ninline u64 full_finish_floor(u64 balls, u64 incidences, u64 sites) noexcept {\n  const u64 sorts = 2 * (sizeof(Key2) + sizeof(u32)) + 2 * (sizeof(u64) + sizeof(u32)) + 2 * (sizeof(Key2) + sizeof(u32));\n"
+      },
+      {
+       "cherche": "                                   Buffer<SiteIdx>& population, MemoryBudget& budget, sched::Pool& pool) noexcept;\n\n// Table S* -> boule depuis les boules finales : offsets (sites + 1), values (une par boule), meme ordre que le tri par\n// base de TableKeyKernel (S*[0], S*[1], S*[2], S*[3], case absente = nombre de sites).\n[[nodiscard]] Outcome host_table(std::span<const CatalogueBall> balls, u32 sites, Buffer<u64>& offsets,\n                                 Buffer<BallIdx>& values, MemoryBudget& budget, sched::Pool& pool) noexcept;\n\n// Niveaux finaux : case 0 nulle, puis les mots des tranches dans l'ordre (rangs 1..L-1) ; chaque lot de mots est rendu\n// des qu'il est materialise.\n",
+       "remplace": "                                   Buffer<SiteIdx>& population, MemoryBudget& budget, sched::Pool& pool) noexcept;\n\n// Table S* -> boule depuis les boules finales : offsets (sites + 1), values (une par boule), meme ordre que le tri par\n// base de TableKeyKernel (S*[0], S*[1], S*[2], S*[3], case absente = nombre de sites) ; keys : la cle de chaque case\n// (T2-d-B3).\n[[nodiscard]] Outcome host_table(std::span<const CatalogueBall> balls, u32 sites, Buffer<u64>& offsets,\n                                 Buffer<BallIdx>& values, Buffer<TableKey>& keys, MemoryBudget& budget,\n                                 sched::Pool& pool) noexcept;\n\n// Niveaux finaux : case 0 nulle, puis les mots des tranches dans l'ordre (rangs 1..L-1) ; chaque lot de mots est rendu\n// des qu'il est materialise.\n"
+      }
+     ]
+    }
+   }
+  }
+ },
+ "schema": "ehgp.v12.t2d_b3_bras.v1"
+}

@@ -364,10 +364,26 @@ struct TableRows {
   }
 };
 
+// Cle de chaque case de la table, une fois les lignes triees (T2-d-B3).
+struct TableKeys {
+  const CatalogueBall* balls;
+  u32 sites, bits;
+  const BallIdx* values;
+  TableKey* keys;
+  static Outcome body(void* context, u64 begin, u64 end, u32) noexcept {
+    const auto& t = *static_cast<const TableKeys*>(context);
+    for (u64 i = begin; i < end; ++i) {
+      const Key2 key = table_key(t.balls[idx(t.values[i])], t.sites, t.bits);
+      t.keys[i] = TableKey{key.lo, key.hi};
+    }
+    return {};
+  }
+};
+
 }  // namespace
 
 Outcome host_table(std::span<const CatalogueBall> balls, u32 sites, Buffer<u64>& offsets, Buffer<BallIdx>& values,
-                   MemoryBudget& budget, sched::Pool& pool) noexcept {
+                   Buffer<TableKey>& keys, MemoryBudget& budget, sched::Pool& pool) noexcept {
   const u64 n = balls.size();
   MHGP12_TRY(offsets.allocate(u64{sites} + 1, budget));
   std::fill(offsets.begin(), offsets.end(), u64{0});
@@ -383,7 +399,10 @@ Outcome host_table(std::span<const CatalogueBall> balls, u32 sites, Buffer<u64>&
   std::copy(offsets.begin(), offsets.begin() + sites, cursor.begin());
   for (u64 i = 0; i < n; ++i) values[cursor[idx(balls[i].support[0])]++] = make_id<BallIdx>(static_cast<u32>(i));
   TableRows rows{balls.data(), sites, width_of(sites), offsets.data(), values.data()};
-  return sites == 0 ? Outcome{} : pool.parallel_for(sites, 4096, &rows, &TableRows::body);
+  if (sites != 0) MHGP12_TRY(pool.parallel_for(sites, 4096, &rows, &TableRows::body));
+  MHGP12_TRY(keys.allocate(n, budget));
+  TableKeys fill{balls.data(), sites, width_of(sites), values.data(), keys.data()};
+  return n == 0 ? Outcome{} : pool.parallel_for(n, 4096, &fill, &TableKeys::body);
 }
 
 Outcome materialize_levels(std::vector<Buffer<LevelWords>>& words, u64 distinct, Buffer<num::Level>& levels,
