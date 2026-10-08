@@ -56,19 +56,46 @@ def build(v11_build, jobs):
     return target if done.returncode == 0 and os.path.isfile(target) else None
 
 
+def uint(value):
+    return type(value) is int and 0 <= value < 1 << 64
+
+
 def pass_seconds(line):
-    """Duree d'une passe FULL d'apres une ligne {"phase":"pass"} de la sonde : wall_ns, sinon domaine + forets."""
-    if not isinstance(line, dict) or line.get('phase') != 'pass':
-        return None
-    if isinstance(line.get('wall_ns'), int):
+    """Diagnostic d'une passe : seul wall_ns mesure FULL dans la sonde gelee, aucun repli partiel."""
+    if type(line) is dict and line.get('phase') == 'pass' and uint(line.get('wall_ns')):
         return line['wall_ns'] / 1e9
-    total = 0
-    found = False
-    for key in ('domain_ns', 'forest_ns'):
-        if isinstance(line.get(key), int):
-            total += line[key]
-            found = True
-    return total / 1e9 if found else None
+    return None
+
+
+def admitted(rows, k, threads, passes):
+    """Admission du protocole full_probe.cpp ac081a06f, pas oracle geometrique."""
+    if not all(type(v) is int for v in (k, threads, passes)) or not 1 <= k <= 12 or \
+            threads < 1 or not 2 <= passes <= 64 or len(rows) != passes + 4:
+        return False
+    # Le domaine detaille precede la derniere passe ; full puis exit ferment le flux.
+    phases = ['cloud'] + ['pass'] * (passes - 1) + ['domain', 'pass', 'full', 'exit']
+    if not all(type(row) is dict for row in rows) or [r.get('phase') for r in rows] != phases:
+        return False
+    cloud, domain, full, end = rows[0], rows[-4], rows[-2], rows[-1]
+    if not uint(cloud.get('sites')) or not 1 <= cloud['sites'] <= 0xFFFFFFFF or \
+            end != {'phase': 'exit', 'status': 'ok', 'reason': 'none'} or \
+            full.get('status') != 'ok' or full.get('reason') != 'none':
+        return False
+    if not all(uint(full.get(key)) for key in ('coord_bits', 'kmax', 'workers', 'optimizations')) or \
+            (full['coord_bits'], full['kmax'], full['workers'], full['optimizations']) != (21, k, threads, int(MASK)) or \
+            not uint(domain.get('leaf_size')) or domain['leaf_size'] != (16 if k <= 5 else 24):
+        return False
+    stages = rows[1:passes] + [rows[-3]]
+    times = ('wall_ns', 'index_ns', 'domain_ns', 'forest_ns')
+    for number, row in enumerate(stages, 1):
+        if not uint(row.get('pass')) or row['pass'] != number or row.get('status') != 'ok' or \
+                not all(uint(row.get(key)) for key in times) or \
+                row['wall_ns'] < row['index_ns'] + row['domain_ns'] + row['forest_ns']:
+            return False
+    if not all(uint(full.get(key)) and full[key] == stages[-1][key] for key in times) or \
+            not all(uint(domain.get(key)) and domain[key] == stages[-1][key] for key in ('index_ns', 'domain_ns')):
+        return False
+    return True
 
 
 def run_cloud(binary, data, raw_dir, name, k, threads, passes, delay):
@@ -91,24 +118,34 @@ def run_cloud(binary, data, raw_dir, name, k, threads, passes, delay):
     seconds = time.monotonic() - start
     with open(os.path.join(raw_dir, '%s_k%d_f%d.jsonl' % (name, k, threads)), 'wb') as handle:
         handle.write(out)
-    per_pass, sites = [], None
-    for raw in out.decode('utf-8', 'replace').splitlines():
-        raw = raw.strip()
-        if not raw.startswith('{'):
-            continue
-        try:
-            line = json.loads(raw)
-        except ValueError:
-            continue
-        if isinstance(line, dict) and isinstance(line.get('sites'), int):
-            sites = line['sites']
-        value = pass_seconds(line)
-        if value is not None:
-            per_pass.append(value)
-    # Une prise en echec ou expiree reste incomplete : aucune valeur chaude, meme si des passes ont ete rendues.
-    warm = statistics.median(per_pass[1:]) if code == 0 and len(per_pass) >= 2 else None
+    def unique_object(pairs):
+        row = {}
+        for key, value in pairs:
+            if key in row:
+                raise ValueError('cle JSON repetee')
+            row[key] = value
+        return row
+
+    def bad_constant(_value):
+        raise ValueError('constante JSON non finie')
+
+    try:
+        rows = [json.loads(raw, object_pairs_hook=unique_object, parse_constant=bad_constant)
+                for raw in out.decode('utf-8').splitlines()]
+        if not all(type(row) is dict for row in rows):
+            raise ValueError('ligne non objet')
+    except (ValueError, UnicodeError):
+        rows = []  # brut conserve, aucune ligne invalide ignoree
+    per_pass = [v for row in rows if (v := pass_seconds(row)) is not None]
+    sites = rows[0].get('sites') if rows and rows[0].get('phase') == 'cloud' else None
+    if not uint(sites) or sites == 0:
+        sites = None
+    okay = type(code) is int and code == 0 and admitted(rows, k, threads, passes)
+    # Les passes partielles restent diagnostiques ; aucune valeur chaude ne vient d'un flux incomplet ou refuse.
+    warm = statistics.median(per_pass[1:]) if okay else None
     return dict(nuage=name, k=k, fils=threads, code=code, sites=sites, processus_secondes=round(seconds, 4),
-                passes=[round(v, 6) for v in per_pass], froid=per_pass[0] if per_pass else None, chaud=warm)
+                passes=[round(v, 6) for v in per_pass], froid=per_pass[0] if per_pass else None, chaud=warm,
+                admission='conforme' if okay else 'processus_ou_protocole_invalide')
 
 
 def fit(points):
@@ -189,7 +226,7 @@ def main(argv):
             lines.append('| %s | - | - | - |' % key)
         else:
             lines.append('| %s | %s | %s | %d |' % (key, value['fixe_ms'], value['par_site_us'], value['points']))
-    failed = [e for e in entries if e['code'] != 0]
+    failed = [e for e in entries if e['code'] != 0 or e['chaud'] is None]
     lines += ['', 'Prises : %d ; en echec ou expirees : %d.' % (len(entries), len(failed))]
     with open(os.path.join(args.sortie, 'mes_p.md'), 'w', encoding='utf-8') as out:
         out.write('\n'.join(lines) + '\n')

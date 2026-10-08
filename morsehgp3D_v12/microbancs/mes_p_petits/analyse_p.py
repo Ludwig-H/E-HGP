@@ -124,6 +124,8 @@ def failure_table(failed, brut, out):
     for t in failed:
         exits = [x for x in raw_lines(brut, t) if x.get('phase') == 'exit'] if brut else []
         reason = '%s / %s' % (exits[-1].get('status'), exits[-1].get('reason')) if exits else '-'
+        if t.get('admission') not in (None, 'conforme'):
+            reason = str(t['admission'])  # un exit ok ne valide pas le protocole de la prise
         out.append('| %s | %d | %s | %s | %s | %s |' % (t['nuage'], t['k'], t['fils'], t['sites'], t['code'], reason))
 
 
@@ -136,7 +138,7 @@ def main(argv):
         with open(argv[1], encoding='utf-8') as handle:
             takes = json.load(handle)['prises']
         good = [t for t in takes if t['code'] == 0 and t['chaud'] is not None and t['sites']]
-        failed = [t for t in takes if t['code'] != 0]
+        failed = [t for t in takes if t['code'] != 0 or t['chaud'] is None]
     except (OSError, ValueError, KeyError, TypeError):
         return 2
     out = ['# MES-P par famille de nuages', '', 'Prises : %d ; rendues : %d ; en echec ou expirees : %d.' % (
