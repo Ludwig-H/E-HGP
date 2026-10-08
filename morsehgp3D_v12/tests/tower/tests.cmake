@@ -134,11 +134,6 @@ mhgp12_python_gate(mhgp12_tower_region_carte 0 region_map_check.py ${tower_regio
 # l'archive (ecarts), carte muette, archive sans le membre ou illisible (refus), sur des entrees fabriquees.
 mhgp12_python_gate(mhgp12_tower_region_carte_juge 0 region_map_check.py --auto-test
                    LINE "region_carte_auto_test_ok cas=7" LABELS fast TIMEOUT 60)
-# Leviers de T2-d-A6 dans la Session recouverte : numerotation par morceaux de cohortes (contre number_births), indices
-# de racine (noyau du produit sur feuilles reecrites a plusieurs ages d'instantane, sortie identique), historique par
-# morceaux (controle, profondeur par remontee, CSR par survivant, contre build_history ; attache corrompue refusee).
-mhgp12_add_unit(mhgp12_tower_levers SOURCES pipeline_levers.cpp GROUPS numerotation indices historique LABELS fast
-                TIMEOUT 300)
 # Adaptateur de test des vidages MHGP12DP de la v11 (MES-M0, determinisme, JUG-EMST) : outil joue par la porte
 # MES-M0 ci-dessous et par le pilote du developpeur. Il lit les vidages par le lecteur strict du format, source unique
 # des microbancs (microbancs/mes_m3_m4_tour/common/format.hpp) : construit seulement si ce dossier est present (les

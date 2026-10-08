@@ -1,19 +1,14 @@
 // Session recouverte de la tour (decision D-F2 ; CONTRAT_TOUR.md, paragraphe 4.4 ; ARCHITECTURE.md, paragraphe 4.3) :
 // l'etage G et les etages T, M, V, R dans UNE seule region du Pool (build_tower, pipeline.cpp ; region,
 // pipeline_run.cpp). Les index des naissances de tous les ordres sont construits avant la region (un objet par ordre).
-// Dans la region, chaque fil prend, dans cet ordre de preference : un noyau pret, une tranche a indicer en avance du
-// noyau, un morceau d'une etape prete de la foret, une tranche de G (kCellGrain cellules ; ordres decroissants : la
-// foret de l'ordre K est la plus longue).
+// Dans la region, chaque fil prend, dans cet ordre de preference : un noyau pret, un morceau d'une etape prete de la
+// foret, une tranche de G (kCellGrain cellules ; ordres decroissants : la foret de l'ordre K est la plus longue).
 //   - Tranches de G : memes corps que resolve_orders (passes.cpp), compteurs par (ordre, fil) ; le fil qui finit le
 //     calcul d'une tranche note sa fin (fin de G : maximum des fins de calcul, publie par le fil qui acheve le dernier
 //     calcul, de l'ordre ou de tous les ordres), calcule ensuite ses feuilles (pre-passe de T, travail de la foret) si
 //     la numerotation de l'ordre est finie, puis publie la tranche (drapeau atomique, ecrit une fois, liberation) ;
 //   - noyau de l'ordre k : REPRENABLE, il traite les cellules des tranches terminees, dans l'ordre des cellules (donc
 //     des rangs) ; arrete sur une tranche non terminee, il rend la main sans bloquer de fil ;
-//   - indices de racine (levier I de T2-d-A6) : une tache prend la prochaine tranche, au plus kHintWindow tranches
-//     au-dela du noyau, deja resolue avec ses feuilles, et remplace ses feuilles par leurs racines dans l'union-find
-//     vivant (hint_leaves) ; sortie du noyau inchangee ; le noyau ne rend son union-find qu'apres la fin des taches en
-//     cours (garde hint_closed / hint_active) ;
 //   - autres etapes : graphe ci-dessous, une etape part quand tous ses predecesseurs ont reussi.
 // Les sorties sont aux places fixees par l'entree, par les sommes prefixes ou par l'ordre des cellules : rien ne depend
 // de l'entrelacement des fils. Refus deterministes : toutes les tranches de G sont jouees ; une etape ne part que si ses
@@ -21,7 +16,6 @@
 // build_forests en echec, fusion merge), jamais la premiere arrivee.
 #pragma once
 
-#include <algorithm>
 #include <atomic>
 #include <chrono>
 #include <memory>
@@ -32,20 +26,13 @@
 
 namespace mhgp12::tower::detail {
 
-// Etapes de la foret d'un ordre i (k = i + 1). Etapes << par morceaux >> : kNumber (kNumberItems naissances),
-// kNumberClose (kNumberItems positions), kHistoryCheck (kHistoryItems evenements), kDepth (kHistoryItems noeuds),
-// kClasses, kNodes, kParents, kChildren (une tranche de contraction par morceau), kBirths, kMerges (kVerticalItems
-// noeuds), kCollect, kFill (kRowItems lignes).
+// Etapes de la foret d'un ordre i (k = i + 1). Etapes << par morceaux >> : kClasses, kNodes, kParents, kChildren (une
+// tranche de contraction par morceau), kBirths, kMerges (kVerticalItems noeuds), kCollect, kFill (kRowItems lignes).
 enum Step : u8 {
-  kCheck = 0,     // controle de l'entree
-  kNumberOpen,    // N : tampons de la numerotation
-  kNumber,        // N : cohortes qui commencent dans le morceau, triees
-  kNumberClose,   // N : noeud et cle de chaque naissance
-  kKernelOpen,    // tampon des feuilles, ouverture du noyau
-  kKernel,        // noyau reprenable, puis cloture
-  kHistoryCheck,  // H : controle des evenements (en meme temps que la contraction)
-  kDepth,         // H : profondeur d'attache maximale
-  kHistory,       // H : evenements par survivant
+  kCheck = 0,  // controle de l'entree
+  kNumber,     // numerotation des naissances, tampon des feuilles, ouverture du noyau
+  kKernel,     // noyau reprenable, puis cloture
+  kHistory,    // historique d'attache (en meme temps que la contraction)
   kSlices,     // tranches de la contraction
   kClasses,    // phase A
   kNodes0,     // premiers noeuds, noeuds
@@ -64,9 +51,6 @@ enum Step : u8 {
   kStepCount
 };
 
-inline constexpr u64 kNumberItems = 16384;   // naissances (ou positions) par morceau de la numerotation
-inline constexpr u64 kHistoryItems = 65536;  // evenements ou noeuds par morceau de l'historique
-inline constexpr u64 kHintWindow = 32;       // tranches indicees au plus en avance du noyau
 inline constexpr u64 kVerticalItems = 8192;  // noeuds par morceau de V
 inline constexpr u64 kRowItems = 2048;       // lignes par morceau de R
 inline constexpr u32 kSessionSliceEvents = 4096;  // evenements par tranche de contraction dans la Session
@@ -101,12 +85,11 @@ struct StepState {
 // Drapeaux d'une tranche de G (un octet, ecrit une fois avec liberation) : resolue, en echec, feuilles calculees.
 inline constexpr u8 kSliceDone = 1, kSliceFailed = 2, kSliceLeaves = 4;
 
-// Accumulateurs d'un fil : issues par rang de refus, temps-fils (physiques) de G et de la foret, taches d'indices et
-// feuilles indicees.
+// Accumulateurs d'un fil : issues par rang de refus, temps-fils (physiques) de G et de la foret.
 struct WorkerTotals {
   Outcome g_outcome;
   std::array<Outcome, kRefusalRanks> forest_outcome{};
-  u64 g_ns = 0, forest_ns = 0, forest_after_g_ns = 0, kernel_jobs = 0, kernel_stops = 0, hint_jobs = 0, hinted = 0;
+  u64 g_ns = 0, forest_ns = 0, forest_after_g_ns = 0, kernel_jobs = 0, kernel_stops = 0;
 };
 
 // Etat de la Session recouverte : domaine de G, sorties, index des naissances par ordre, etat de la foret, graphe.
@@ -127,11 +110,6 @@ struct Pipeline {
   std::atomic<u64> g_next{0};
   std::atomic<bool> g_failed{false};
   std::array<std::atomic<u64>, kMaxOrder> kernel_slice{};  // prochaine tranche du noyau de l'ordre
-  // Indices (levier I) : prochaine tranche a indicer ; taches en cours ; noyau clos (plus aucune tache ne demarre, et
-  // la cloture attend la fin de celles en cours avant de rendre l'union-find, les elements et les feuilles).
-  std::array<std::atomic<u64>, kMaxOrder> hint_next{};
-  std::array<std::atomic<u32>, kMaxOrder> hint_active{};
-  std::array<std::atomic<bool>, kMaxOrder> hint_closed{};
   std::array<std::array<StepState, kStepCount>, kMaxOrder> steps;
   // Compteurs de G par (ordre, fil), case i * threads + w ; profils (MHGP12_TOWER_PROFILE) ; compteurs et durees de
   // la foret des morceaux par (ordre, fil).
@@ -192,23 +170,6 @@ void prepare_graph(Pipeline& p) noexcept;
 Outcome run_region(void* pipeline, u64 begin, u64 end, u32 worker) noexcept;
 // Une etape est-elle terminee ? (lecture avec acquisition)
 bool step_done(const Pipeline& p, u32 order, Step step) noexcept;
-
-// Corps des etapes de la foret (pipeline_steps.cpp) : un morceau `item` de l'etape `step` de l'ordre i par le fil w ;
-// rang de refus de la voie sequentielle dans rank. Duree d'un morceau imputee a l'etage de son etape (diagnostic
-// physique par ordre et par fil). Taches d'indices : tranche `slice` de l'ordre i, si l'union-find vit encore (garde) ;
-// rend le nombre de feuilles indicees.
-[[nodiscard]] Outcome step_body(Pipeline& p, u32 w, u32 i, Step step, u64 item, u32& rank) noexcept;
-void charge_stage(Pipeline& p, u32 w, u32 i, Step step, u64 ns) noexcept;
-u64 run_hint(Pipeline& p, u32 i, u64 slice) noexcept;
-// Outils communs : instant depuis le debut de la region ; compteurs et durees d'un fil pour un ordre ; morceaux.
-u64 now_ns(const Pipeline& p) noexcept;
-ForestWork& work_of(Pipeline& p, u32 i, u32 w) noexcept;
-ForestPhysical& physical_of(Pipeline& p, u32 i, u32 w) noexcept;
-inline u64 piece_end(u64 item, u64 size, u64 count) noexcept { return std::min(count, (item + 1) * size); }
-inline u64 pieces(u64 count, u64 size) noexcept { return (count + size - 1) / size; }
-inline void set_items(Pipeline& p, u32 i, Step s, u64 items) noexcept {
-  p.steps[i][s].items.store(items, std::memory_order_relaxed);
-}
 
 #ifdef MHGP12_REGION_HOOKS
 // Porte native de terminaison (CST-0241 ; tests/tower/region_unit.cpp) : points d'observation de run_region, fournis

@@ -35,7 +35,13 @@ namespace detail {
 // representants, noyau, historique.
 u64 kernel_bytes(const ForestInput& in) noexcept {
   const u64 nb = in.birth_key.size(), nc = in.cell_ball.size(), nr = in.targets.size();
-  const u64 widest = widest_cohort(in);
+  u64 widest = 1;
+  for (u64 lo = 0; lo < nb;) {
+    u64 hi = lo + 1;
+    while (hi < nb && in.birth_rank[hi] == in.birth_rank[lo]) ++hi;
+    widest = std::max(widest, hi - lo);
+    lo = hi;
+  }
   const u64 spheres = in.k >= 2 ? widest * (sizeof(num::Sphere) + 4) : 0;
   // naissances (cle, noeud, ordre) ; spheres ; feuilles ; union-find, elements des cellules, evenements et leurs
   // cellules, sommets, attaches ; historique (profondeur, decalages, liste, curseurs)
@@ -68,37 +74,6 @@ Outcome number_order(BuildState& s, u32 i) noexcept {
   MHGP12_TRY(w.leaves.allocate(in.targets.size(), s.budget));
   s.physical[i].births_ns = watch.nanoseconds();
   return {};
-}
-
-Outcome open_numbering(BuildState& s, u32 i) noexcept {
-  const ForestInput& in = s.inputs[i];
-  OrderForest& f = s.forests.orders[i];
-  OrderWork& w = s.work[i];
-  const u32 nb = static_cast<u32>(in.birth_key.size());
-  f.k = in.k;
-  f.births = nb;
-  MHGP12_TRY(f.birth_key.allocate(nb, s.budget));
-  MHGP12_TRY(f.birth_node.allocate(nb, s.budget));
-  return w.birth_order.allocate(nb, s.budget);
-}
-
-Outcome number_piece(BuildState& s, u32 i, u64 begin, u64 end, ForestWork& counters) noexcept {
-  return number_births_range(s.cloud, s.balls, s.inputs[i], s.work[i].birth_order.span(), begin, end, counters,
-                             s.budget);
-}
-
-void close_numbering(BuildState& s, u32 i, u64 begin, u64 end) noexcept {
-  const ForestInput& in = s.inputs[i];
-  OrderForest& f = s.forests.orders[i];
-  const OrderWork& w = s.work[i];
-  for (u64 v = begin; v < end; ++v) {
-    f.birth_node[w.birth_order[v]] = static_cast<u32>(v);
-    f.birth_key[v] = in.birth_key[w.birth_order[v]];
-  }
-}
-
-Outcome open_leaves(BuildState& s, u32 i) noexcept {
-  return s.work[i].leaves.allocate(s.inputs[i].targets.size(), s.budget);
 }
 
 void add_work(ForestWork& t, const ForestWork& p) noexcept {

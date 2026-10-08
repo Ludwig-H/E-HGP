@@ -1,0 +1,1 @@
+ctest --no-tests=error -L lidar --output-on-failure -j 6 

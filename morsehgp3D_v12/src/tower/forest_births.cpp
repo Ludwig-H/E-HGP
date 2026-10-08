@@ -3,9 +3,7 @@
 // croissant, donc les rangs sont croissants au sens large et chaque cohorte de meme rang est contigue (controle). Seules
 // les cohortes de plus d'une naissance sont triees : a l'ordre 1 par (x, y, z) des sites, ensuite par la comparaison
 // exacte en deux temps des centres (num::compare_centers). Deux centres egaux au meme rang : refus tower_invariant
-// (une meme sphere ne peut porter deux naissances d'un ordre). Port de number_births de MES-M4. Les cohortes sont
-// independantes : la Session recouverte les trie par morceaux de naissances (number_births_range, levier N de T2-d-A6),
-// chaque cohorte par le morceau ou elle commence, avec la meme comparaison.
+// (une meme sphere ne peut porter deux naissances d'un ordre). Port de number_births de MES-M4.
 #include <algorithm>
 
 #include "tower/forest_internal.hpp"
@@ -78,72 +76,7 @@ Outcome sort_balls(const Cloud& cloud, const BallSource& balls, const ForestInpu
   return {};
 }
 
-// Une cohorte de plus d'une naissance, triee : a l'ordre 1 par (x, y, z), ensuite par centre exact (tampons de la taille
-// de la cohorte au moins).
-Outcome sort_cohort(const Cloud& cloud, const BallSource& balls, const ForestInput& input, std::span<u32> cohort,
-                    Buffer<num::Sphere>& spheres, Buffer<u32>& local) noexcept {
-  if (input.k == 1) return sort_sites(cloud, input, cohort);
-  else MHGP12_TRY(sort_balls(cloud, balls, input, cohort, spheres.span(), local.span()));
-  return {};
-}
-
-// Fin de la cohorte qui commence en lo ; refus tower_invariant si le rang suivant decroit.
-Result<u64> cohort_end(const ForestInput& input, u64 lo) noexcept {
-  const u64 nb = input.birth_key.size();
-  u64 hi = lo + 1;
-  while (hi < nb && input.birth_rank[hi] == input.birth_rank[lo]) ++hi;
-  if (hi < nb && input.birth_rank[hi] < input.birth_rank[lo]) return fail(Reason::tower_invariant);
-  return hi;
-}
-
 }  // namespace
-
-u64 widest_cohort(const ForestInput& input) noexcept {
-  const u64 nb = input.birth_key.size();
-  u64 widest = 1;
-  for (u64 lo = 0; lo < nb;) {
-    u64 hi = lo + 1;
-    while (hi < nb && input.birth_rank[hi] == input.birth_rank[lo]) ++hi;
-    widest = std::max(widest, hi - lo);
-    lo = hi;
-  }
-  return widest;
-}
-
-Outcome number_births_range(const Cloud& cloud, const BallSource& balls, const ForestInput& input,
-                            std::span<u32> order_out, u64 begin, u64 end, ForestWork& work,
-                            MemoryBudget& budget) noexcept {
-  const u64 nb = input.birth_key.size();
-  if (order_out.size() != nb || end > nb || begin > end) return fail(Reason::tower_invariant);
-  // premiere cohorte qui commence dans [begin, end) : la suite d'une cohorte commencee avant revient a son morceau
-  u64 first = begin;
-  while (first > 0 && first < end && input.birth_rank[first] == input.birth_rank[first - 1]) ++first;
-  u64 widest = 1;
-  for (u64 lo = first; lo < end;) {
-    auto hi = cohort_end(input, lo);
-    if (!hi.ok()) return hi.outcome();
-    widest = std::max(widest, hi.value() - lo);
-    lo = hi.value();
-  }
-  Buffer<num::Sphere> spheres;
-  Buffer<u32> local;
-  if (input.k >= 2 && widest > 1) {
-    MHGP12_TRY(spheres.allocate(widest, budget));
-    MHGP12_TRY(local.allocate(widest, budget));
-  }
-  for (u64 lo = first; lo < end;) {
-    const u64 hi = cohort_end(input, lo).value();
-    for (u64 v = lo; v < hi; ++v) order_out[v] = static_cast<u32>(v);
-    if (hi - lo > 1) {
-      ++work.cohorts;
-      work.max_cohort = std::max<u64>(work.max_cohort, hi - lo);
-      const std::span<u32> cohort = order_out.subspan(lo, hi - lo);
-      MHGP12_TRY(sort_cohort(cloud, balls, input, cohort, spheres, local));
-    }
-    lo = hi;
-  }
-  return {};
-}
 
 Outcome number_births(const Cloud& cloud, const BallSource& balls, const ForestInput& input,
                       std::span<u32> order_out, std::span<u32> node_out, ForestWork& work,
@@ -172,7 +105,8 @@ Outcome number_births(const Cloud& cloud, const BallSource& balls, const ForestI
       ++work.cohorts;
       work.max_cohort = std::max<u64>(work.max_cohort, hi - lo);
       const std::span<u32> cohort = order_out.subspan(lo, hi - lo);
-      MHGP12_TRY(sort_cohort(cloud, balls, input, cohort, spheres, local));
+      if (input.k == 1) MHGP12_TRY(sort_sites(cloud, input, cohort));
+      else MHGP12_TRY(sort_balls(cloud, balls, input, cohort, spheres.span(), local.span()));
     }
     lo = hi;
   }

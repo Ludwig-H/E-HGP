@@ -1,0 +1,1 @@
+python3 $HOME/ehgp-v12/ehgp-v12.gptmxsxl2i/src/morsehgp3D_v12/microbancs/outils/archives_vm.py --repertoire ehgp-v12.MupndkB6uw --sortie $HOME/ehgp-v12/ehgp-v12.gptmxsxl2i/results/cmd/001_archive_t2da6r/files/t2da6r_archive 

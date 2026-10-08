@@ -1,0 +1,11 @@
+Test project $HOME/ehgp-v12/ehgp-v12.gptmxsxl2i/build
+    Start 765: mhgp12_mutants_tower
+1/1 Test #765: mhgp12_mutants_tower .............   Passed  120.47 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Label Time Summary:
+long      = 120.47 sec*proc (1 test)
+mutant    = 120.47 sec*proc (1 test)
+
+Total Test time (real) = 120.49 sec

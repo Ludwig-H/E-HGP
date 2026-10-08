@@ -13,16 +13,13 @@ namespace mhgp12 {
 namespace tower::detail {
 namespace {
 
-// Pre-passe : octets de l'etage T de chaque ordre et sa plus large cohorte de naissances, un ordre par tache.
+// Pre-passe : octets de l'etage T de chaque ordre (plus large cohorte de naissances), un ordre par tache.
 struct KernelBytes {
   std::span<const ForestInput> inputs;
-  std::span<u64> bytes, widest;
+  std::span<u64> bytes;
   static Outcome body(void* raw, u64 begin, u64 end, u32) noexcept {
     auto& s = *static_cast<KernelBytes*>(raw);
-    for (u64 i = begin; i < end; ++i) {
-      s.bytes[i] = kernel_bytes(s.inputs[i]);
-      s.widest[i] = widest_cohort(s.inputs[i]);
-    }
+    for (u64 i = begin; i < end; ++i) s.bytes[i] = kernel_bytes(s.inputs[i]);
     return {};
   }
 };
@@ -30,15 +27,10 @@ struct KernelBytes {
 // Octets de la region : index des naissances de tous les ordres, espaces et compteurs des fils, foret bornee (T exact ;
 // M, V et R avec au plus naissances - 1 evenements, donc au plus 2 naissances - 1 noeuds, au plus ne lignes et des
 // branches au plus les representants relus), drapeaux des tranches, accumulateurs par (ordre, fil).
-u64 region_bytes(const Pipeline& p, std::span<const u64> t_bytes, std::span<const u64> widest_of,
-                 u32 sites) noexcept {
+u64 region_bytes(const Pipeline& p, std::span<const u64> t_bytes, u32 sites) noexcept {
   const u64 per_order = sizeof(OrderCounters) + sizeof(SectionCycles) + sizeof(ForestWork) + sizeof(ForestPhysical);
   u64 bytes = tower_detail::workers_bytes(p.threads, sites) + u64{p.threads} * sizeof(WorkerTotals) +
               u64{p.threads} * p.orders * per_order;
-  // numerotation par morceaux (levier N) : au plus un tampon de spheres vivant par fil, de la plus large cohorte
-  u64 widest = 1;
-  for (u32 i = 1; i < p.orders; ++i) widest = std::max(widest, widest_of[i]);
-  if (p.orders >= 2) bytes += u64{p.threads} * widest * (sizeof(num::Sphere) + 4);
   for (u32 i = 0; i < p.orders; ++i) {
     const ForestInput& in = p.forest.inputs[i];
     const u64 nb = in.birth_key.size(), ne = nb == 0 ? 0 : nb - 1;
@@ -142,8 +134,6 @@ void close_ledger(Pipeline& p, TowerDiagnostics& diag) noexcept {
     diag.forest_after_g_ns += t.forest_after_g_ns;
     diag.kernel_jobs += t.kernel_jobs;
     diag.kernel_stops += t.kernel_stops;
-    diag.hint_jobs += t.hint_jobs;
-    diag.hinted_reps += t.hinted;
   }
   if constexpr (tower_detail::kProfile)
     for (u32 i = 1; i < p.orders; ++i)
@@ -174,11 +164,10 @@ Outcome open_session(SessionRun& r) {  // peut lever std::bad_alloc (pipeline.hp
   for (u32 i = 0; i < orders; ++i)
     p.g_items[i] = (u64{out.order(static_cast<Order>(i + 1)).cells()} + tower_detail::kCellGrain - 1) /
                    tower_detail::kCellGrain;
-  std::array<u64, kMaxOrder> t_bytes{}, widest{};
-  KernelBytes sizes{r.forest->inputs, std::span<u64>(t_bytes.data(), orders), std::span<u64>(widest.data(), orders)};
+  std::array<u64, kMaxOrder> t_bytes{};
+  KernelBytes sizes{r.forest->inputs, std::span<u64>(t_bytes.data(), orders)};
   MHGP12_TRY(r.pool.parallel_for(orders, 1, &sizes, &KernelBytes::body));
-  diag.admitted_bytes = region_bytes(p, std::span<const u64>(t_bytes.data(), orders),
-                                     std::span<const u64>(widest.data(), orders), r.index.cloud().sites());
+  diag.admitted_bytes = region_bytes(p, std::span<const u64>(t_bytes.data(), orders), r.index.cloud().sites());
   diag.open_ns = watch.nanoseconds();
   return {};
 }

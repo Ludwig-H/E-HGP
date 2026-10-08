@@ -1,0 +1,6 @@
+cmake=/usr/bin/cmake
+ctest=/usr/bin/ctest
+g++=/usr/bin/g++
+c++=/usr/bin/c++
+python3=/usr/bin/python3
+tar=/usr/bin/tar
