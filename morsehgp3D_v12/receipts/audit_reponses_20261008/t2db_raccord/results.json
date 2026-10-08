@@ -1,0 +1,39 @@
+{
+  "auto_test": "pilote_t2d_b_auto_test_ok cas=6 lectures=17 verdicts=adopte,rejete,refuse",
+  "delta_livraison": "docstring module seulement",
+  "fonctions_modifiees": [
+    "auto_test_lecture",
+    "etape_informations",
+    "journal_full_synthetique",
+    "lire_full",
+    "prise_full"
+  ],
+  "nominal_FULL": {
+    "ful1": [
+      "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd"
+    ],
+    "g_ns": 10,
+    "mur_ns": 100,
+    "valide": true
+  },
+  "postimages_identiques": {
+    "src/index/bounds.hpp": "d877fe59756a0686cc825a35bbfca9c1d50cc5d5c595e398767281c802f5a869",
+    "src/index/census.cpp": "ca588e5db2bbb4a549f7a599d186029bc44be9a386b8529561fcc439312908b2",
+    "src/index/census_workspace.cpp": "bee79fd409488e710660aa788e83001bb68cd918c0f6852187cf0fe868f58fb4",
+    "src/index/index.hpp": "a984c29ee8866f8742ac1e637ff2d3c487092e8e541537350c44ac7a278cfe7e",
+    "src/num/budgets.hpp": "d3f3fe22d7bfd3bbab1b377d983aa08897f1bfd320625879527fcaf0be61424f",
+    "src/num/guard.cpp": "5a5fc29b65e21b1b74f642986614eb1fb0801cc084ae7ec50bc3aedc7e5655fc",
+    "src/num/guard.hpp": "6c73d770688b2e35036940e1524ac479f71b41f79d84c6b80fdbfb664d566b48",
+    "src/num/power_certificate.hpp": "f5071c6dfe33c14df1911852cf79ac645e85cb6affc05474adf56b5fbffc9ef1",
+    "src/tower/proposal.hpp": "a82de524758fe65a70cd08251530b77e2a44479ff4828e2d827440b69f86eff0",
+    "src/tower/resolve.cpp": "58a78573b5ed04a2266bf004eae86c9ef5ae157ba28a95766ce0ff2dd768bb57"
+  },
+  "published_commit": "41d4d828b70ad033f8bf392aca20a4af13cea242",
+  "residus_FULL_refuses": {
+    "blocs_ignores": "illisible : bloc de durees mal forme (passe 0)",
+    "sous_etages_hors_tmvr": "illisible : etages non inclus dans le mur (passe 0)",
+    "tables_hors_g": "illisible : etages non inclus dans le mur (passe 0)",
+    "usage_sup_pic": "illisible : memoire par etage mal formee ou incoherente avec pic_octets (passe 0)"
+  },
+  "scope": "raccord produit livré ; ni moteur ni mesure"
+}

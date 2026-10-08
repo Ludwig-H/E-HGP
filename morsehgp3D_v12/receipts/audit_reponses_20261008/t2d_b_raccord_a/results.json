@@ -1,0 +1,1 @@
+{"comparaison_prototype_capturee": {"differents": 4, "identiques": 16}, "gain_mesure": false, "moteur_execute": false, "ok": true, "pin": "41d4d828b70ad033f8bf392aca20a4af13cea242", "preuve_semantique": "lecture documentee, pas preuve automatique C++", "prototype_relu": false, "raccord_inchange": 7, "sources_git": 27}

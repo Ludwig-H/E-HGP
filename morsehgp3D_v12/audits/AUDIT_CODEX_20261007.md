@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-8 octobre 2026. Dernière contrelecture : A `5f5c0c83f` contre `27eca166b`, MES-C2 `27eca166b`.
+8 octobre 2026. Code relu : bascule `86d7e39d`, B `41d4d828b`. Mesures : A `5f5c` contre `27eca`, MES-C2 `27eca`.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
 
@@ -26,7 +26,8 @@ Derniers CPU FULL K5, [session K](../receipts/audit_reponses_20261008/session_k_
 **441,07 / 368,33 / 447,08 ms** ; GPU FULL K10 : **793,44 / 603,34 / 715,31 ms**.
 Face à la v11 : GPU plus rapide, CPU plus lent sur l'historique non apparié ; pas de gain causal déduit.
 FULL englobe Cloud/index→T/M/V/R ; lecture, masque, validation, FUL1 et libération hors mur.
-A est mesuré avec `--recouvert` ; bascule de la voie par défaut encore à qualifier.
+A était mesuré avec `--recouvert` ; cette route est devenue le défaut en `86d7e39d`.
+Les prises CPU, petits nuages, K10 et massifs ci-dessous précèdent cette bascule.
 
 [Session G4 arrêtée](../receipts/audit_reponses_20261008/session_a_provenance/README.md), mais **`failed_remote`** :
 719/719 portes rapides et CTest mutants passés ; LiDAR six portes passées, puis MES-M0 interrompu au plafond externe180s.
@@ -61,12 +62,16 @@ Marseille sans sol 2,47 M : GPU 10,955 s ; Scion sans sol 3,44 M : 41,951 s ; Me
 Paris sans sol 9,11 M **112,866 s**, brut 14,55 M **165,789 s** ; ETH3D 16,83 M `wide_leaf`, Lyon 24,02/32,41 M `memory_budget`.
 Aucun chaud/GPU/K10/digest en L2. Aucun plafond universel en sites ni gain causal L1/L1r.
 
-**Autres suivis.** A : [fenêtre réelle des feuilles](../receipts/audit_reponses_20261008/t2d_a_fenetre_patch/README.md)
-toujours à corriger au pin mesuré5f. [Dépendances A](../receipts/audit_reponses_20261008/t2d_a_dependances/README.md) :
-1 578 obligations/399 états, ownership favorable ; terminaison atomique non prouvée. [Comparaison A](../receipts/audit_reponses_20261008/t2d_a_comparaison/README.md) proposée sur le même binaire ;
-[admission A](../receipts/audit_reponses_20261008/t2da_integration/README.md) : route/isolation/cohorte encore permissives, patch proposé. C : [mathématiques relues](../receipts/audit_reponses_20261008/t2d_c_integration_math/README.md) ;
-[cohorte commune 5f5c](../receipts/audit_reponses_20261008/t2dc_cohorte_livree/README.md) close, résidus du lecteur inchangés.
-[Pool 5b](../receipts/audit_reponses_20261008/pool_equipes/README.md) : synchronisation/modèle favorables ; campagne C2 admise, gain isolé non acquis.
-[Extension de feuille](../receipts/audit_reponses_20261008/feuille_large_proposition/README.md) proposée : supports croisés, census K-certifié,
-indices u32 ; shell64 et compteurs à préserver. Complétude modélisée, coût combinatoire non résolu.
-Autres propositions CPU, S*, T/K1, R et limites dans le registre. Audit : sources/Python, aucun moteur ni GCP.
+**Corrections et suite immédiate.** [Bascule A contre-vérifiée](../receipts/audit_reponses_20261008/t2d_a_bascule_cloture/README.md) :
+fenêtre réelle des feuilles et cohorte du juge intégrées exactement ; nominal accepté, trois contre-exemples refusés.
+Patch fourni pour demander `--sequentiel` sur le bras après du pilote A, nécessaire depuis le nouveau défaut.
+[Lecteur recouvert](../receipts/audit_reponses_20261008/lf_recouvert_gardes/README.md) : neuf corruptions d'horloges encore admises en86d ;
+correctif proposé, 61 journaux/850 passes A préservés, quatre mutants causaux. Pas d'ordre imposé entre V et R.
+
+**B : intégré, campagne G4 en cours.** [Quatre résidus FULL corrigés](../receipts/audit_reponses_20261008/t2db_raccord/README.md) ;
+[raccord B/A](../receipts/audit_reponses_20261008/t2d_b_raccord_a/README.md) favorable sur emprunts, espaces privés et admission ;
+aucun temps déduit. [Protocole effectif](../receipts/audit_reponses_20261008/session_b_protocole/README.md) : bras reconstruits depuis902,
+G isolé et FULL séquentiel informatif ; aucun transfert au FULL recouvert actuel. À coûts A inchangés, enlever toute la queue
+laisse 23/37 médianes >100ms : scénario, pas borne globale. B ne traite pas directement le catalogue CPU dominant.
+[Extension de feuille](../receipts/audit_reponses_20261008/feuille_large_proposition/README.md) proposée ; compteurs et coût combinatoire ouverts.
+Dépendances A, pool, C et autres propositions CPU/S*/T/K1/R : registre. Audit sources/Python, aucun moteur ni GCP lancé.

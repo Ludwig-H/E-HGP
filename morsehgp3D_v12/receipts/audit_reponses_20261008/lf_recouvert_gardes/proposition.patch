@@ -1,0 +1,28 @@
+--- a/morsehgp3D_v12/microbancs/outils/lecteur_full.py
++++ b/morsehgp3D_v12/microbancs/outils/lecteur_full.py
+@@ -100,13 +100,23 @@
+         return 'memoire P, C, tour mal formee ou incoherente avec pic_octets (passe %d)' % i
+     if not int_block(rec, OVERLAP) or rec['fin_g_ns'] != st['G'] or rec['queue_ns'] != st['TMVR'] or \
+             rec['queue_ns'] != rec['fin_ns'] - rec['fin_g_ns'] or rec['fin_ns'] > rec['tour_ns'] or \
+-            rec['noyau_arrets'] > rec['noyau_reprises'] or rec['admis_octets'] == 0:
++            rec['noyau_arrets'] > rec['noyau_reprises'] or rec['admis_octets'] == 0 or \
++            rec['ouverture_ns'] != g['ouverture'] or st['P'] + st['C'] + rec['tour_ns'] > row['wall_ns']:
+         return 'recouvrement incoherent (passe %d)' % i
+     ends = row['fins_par_ordre_ns']
+-    if type(ends) is not list or len(ends) != kmax or \
++    if type(ends) is not list or not ends or len(ends) != kmax or \
+             any(type(e) is not list or len(e) != 5 or any(not is_int(x) or x > rec['fin_ns'] for x in e)
+                 for e in ends) or any(e[0] > rec['fin_g_ns'] for e in ends) or ends[0][3] != 0:
+         return 'fins par ordre (passe %d)' % i
++    # G precede la cloture du noyau, puis M ; V(k) attend M(k) et M(k-1), R(k) attend M(k).
++    # Aucune dependance entre V(k) et R(k), qui peuvent finir dans les deux ordres.
++    if any(not (rec['ouverture_ns'] <= e[0] <= e[1] <= e[2] <= e[4]) for e in ends) or \
++            any(e[3] < max(e[2], ends[j-1][2]) for j, e in enumerate(ends) if j > 0):
++        return 'dependances des fins par ordre (passe %d)' % i
++    max_g = max(e[0] for e in ends)
++    # note_g_end publie max(1, g_max) globalement, mais le maximum brut par ordre : cas limite a l'offset nul.
++    if rec['fin_g_ns'] != max_g and not (max_g == rec['ouverture_ns'] and rec['fin_g_ns'] == max_g + 1):
++        return 'maximum des fins de G (passe %d)' % i
+     return ''
+ 
+ 

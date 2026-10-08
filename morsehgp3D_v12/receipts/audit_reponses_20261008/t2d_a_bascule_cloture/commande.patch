@@ -1,0 +1,39 @@
+--- a/morsehgp3D_v12/microbancs/mes_t2d_a/pilote_t2d_a.py
++++ b/morsehgp3D_v12/microbancs/mes_t2d_a/pilote_t2d_a.py
+@@ -8,7 +8,7 @@
+          cpu_ns et memoire par etage), sha256 verifie avant deballage ; schema sequentiel (sans etapes_schema)
+   apres  les sources du paquet ({src}), sonde jouee avec --recouvert : Session recouverte (build_tower) ; lignes
+          etapes_schema = "recouvert" (partition murale P, C, G, raccord, TMVR ; fenetres_ns : sommes de fenetres
+-         murales des taches ; recouvrement ; fins par ordre). Sans --recouvert, la meme sonde joue la voie sequentielle
++         murales des taches ; recouvrement ; fins par ordre). Avec --sequentiel, la meme sonde joue la voie sequentielle
+          refondue (prises d'identite apres_sequentiel)
+ 
+ Etapes (dans l'ordre si plusieurs) :
+@@ -19,7 +19,7 @@
+               (1 passe) ; ng00 a K5 a UN fil (1 passe, determinisme 1 contre --fils fils : memes empreintes que
+               ng00 a K5) ; uniformes de 8 000, 16 000 et 32 000 sites a K5 (--uniform=N,20261007,18, 1 passe) ; les 37
+               trames v12set a K5 (un processus, une passe par trame) ; en plus, ng00, ng01, ng02 a K5 par la sonde
+-              apres SANS --recouvert (voie sequentielle refondue, 2 passes)
++              apres AVEC --sequentiel (voie sequentielle refondue, 2 passes)
+   campagne    K5, ng00 ng01 ng02, --fils fils, voie appareil, sans empreinte : --processus tours ; dans chaque tour,
+               les trames en ordre tourne et, pour chacune, un processus neuf par bras, l'ordre des bras alterne d'un
+               tour a l'autre ; --passes passes par processus (la premiere, a froid, ecartee)
+@@ -301,7 +301,8 @@
+     argv = [binaire] + entrees + ["--k=%d" % attendu["k"], "--threads=%d" % attendu["fils"],
+                                   "--passes=%d" % attendu["passes"]]
+     return argv + (["--device"] if attendu.get("appareil", True) else []) + \
+-        (["--digest"] if attendu["empreinte"] else []) + (["--recouvert"] if attendu["schema"] == "recouvert" else [])
++        (["--digest"] if attendu["empreinte"] else []) + (["--recouvert"] if attendu["schema"] == "recouvert" else
++         ["--sequentiel"] if attendu["bras"] == "apres" else [])
+ 
+ 
+ def trame_args(args, nom):
+@@ -376,7 +377,7 @@
+                    "trames": [n[-23:] for n in noms]}
+         ident["prises"].setdefault("v12set_k5", {})[bras] = prise(args, bras, session_args(v_dossier, noms), attendu,
+                                                                   os.path.join(dossier, "v12set_k5_%s.jsonl" % bras))
+-    # voie sequentielle refondue de la sonde apres (sans --recouvert) : memes empreintes attendues
++    # voie sequentielle refondue de la sonde apres (--sequentiel) : memes empreintes attendues
+     for trame in TRAMES:
+         cle = "%s_k5" % trame
+         attendu = {"k": 5, "fils": args.fils, "passes": 2, "bras": "apres", "schema": "sequentiel", "empreinte": True,

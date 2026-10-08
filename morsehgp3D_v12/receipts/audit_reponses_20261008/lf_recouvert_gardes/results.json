@@ -1,0 +1,69 @@
+{
+  "contre_flux": {
+    "M_avant_noyau": {
+      "avant": "ok",
+      "propose": "illisible",
+      "raison": "dependances des fins par ordre (passe 0)"
+    },
+    "R_avant_M": {
+      "avant": "ok",
+      "propose": "illisible",
+      "raison": "dependances des fins par ordre (passe 0)"
+    },
+    "V_avant_M": {
+      "avant": "ok",
+      "propose": "illisible",
+      "raison": "dependances des fins par ordre (passe 0)"
+    },
+    "V_avant_M_inferieur": {
+      "avant": "ok",
+      "propose": "illisible",
+      "raison": "dependances des fins par ordre (passe 0)"
+    },
+    "fins_G_nulles": {
+      "avant": "ok",
+      "propose": "illisible",
+      "raison": "dependances des fins par ordre (passe 0)"
+    },
+    "maximum_G_faux": {
+      "avant": "ok",
+      "propose": "illisible",
+      "raison": "maximum des fins de G (passe 0)"
+    },
+    "noyau_avant_G": {
+      "avant": "ok",
+      "propose": "illisible",
+      "raison": "dependances des fins par ordre (passe 0)"
+    },
+    "ouverture_incoherente": {
+      "avant": "ok",
+      "propose": "illisible",
+      "raison": "recouvrement incoherent (passe 0)"
+    },
+    "tour_hors_mur": {
+      "avant": "ok",
+      "propose": "illisible",
+      "raison": "recouvrement incoherent (passe 0)"
+    }
+  },
+  "mutants_proposition_exposes": [
+    "enveloppe",
+    "ouverture",
+    "pred_M_inferieur",
+    "maximum_G"
+  ],
+  "positifs_A": {
+    "R_avant_V": 435,
+    "V_avant_R": 1268,
+    "passes": 850,
+    "processus": 61,
+    "recouvert_passes": 422,
+    "recouvert_processus": 29,
+    "sequentiel_passes": 428,
+    "sequentiel_processus": 32
+  },
+  "postimage_sha256": "15437e5f09408d5fbdc6288e33a2452490489f13bf9a3b3a24c99f5d109b6554",
+  "published_commit": "86d7e39d834cae86768d49a23d83bf53454ec2a3",
+  "scope": "compatibilité avec 61 traces déjà admises ; pas de nouvelle qualification native",
+  "sentinelle_offset_G_1ns": "admis"
+}

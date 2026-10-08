@@ -1,0 +1,54 @@
+{
+  "a_scenario_ns": {
+    "P_plus_C": {
+      "max_111_ns": 83731171,
+      "max_des_37_medianes_ns": 82401861,
+      "mediane_111_ns": 46475373,
+      "mediane_des_37_medianes_ns": 46475373,
+      "medianes_trames_superieures_100ms": 0,
+      "trames_avec_passe_superieure_100ms": 0
+    },
+    "P_plus_C_plus_G": {
+      "max_111_ns": 251449433,
+      "max_des_37_medianes_ns": 250827322,
+      "mediane_111_ns": 119437594,
+      "mediane_des_37_medianes_ns": 118452341,
+      "medianes_trames_superieures_100ms": 23,
+      "trames_avec_passe_superieure_100ms": 23
+    },
+    "mur": {
+      "max_111_ns": 327273110,
+      "max_des_37_medianes_ns": 319740140,
+      "mediane_111_ns": 161179414,
+      "mediane_des_37_medianes_ns": 160567405,
+      "medianes_trames_superieures_100ms": 26,
+      "trames_avec_passe_superieure_100ms": 28
+    },
+    "mur_sans_queue": {
+      "max_111_ns": 257723229,
+      "max_des_37_medianes_ns": 252393012,
+      "mediane_111_ns": 120024350,
+      "mediane_des_37_medianes_ns": 120522644,
+      "medianes_trames_superieures_100ms": 23,
+      "trames_avec_passe_superieure_100ms": 23
+    },
+    "residu": {
+      "max_111_ns": 6443147,
+      "max_des_37_medianes_ns": 5775047,
+      "mediane_111_ns": 864610,
+      "mediane_des_37_medianes_ns": 1246769,
+      "medianes_trames_superieures_100ms": 0,
+      "trames_avec_passe_superieure_100ms": 0
+    }
+  },
+  "b_results_qualified": false,
+  "delivered_after_files": 10,
+  "future_pre_postimages": 31,
+  "native_calls": 0,
+  "scope": "A mesuré, 37 trames, trois chaudes par trame ; scénario sans queue à autres coûts inchangés",
+  "shutdown_qualified": false,
+  "sources": {
+    "avant": 342,
+    "paquet": 357
+  }
+}
