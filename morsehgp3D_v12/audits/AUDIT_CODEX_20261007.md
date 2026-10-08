@@ -1,10 +1,10 @@
 # Audit Codex — état courant v12
 
-8 octobre 2026. Base publiée **`eb86468bf`** ; prototypes distingués des livraisons.
+8 octobre 2026. Base publiée **`10050a96e`** ; prototypes distingués des livraisons.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
 
-**Nouvelles mesures G4 contre-vérifiées.** [Session I](../receipts/audit_reponses_20261008/session_i_catalogue/README.md),
+**Derniers temps G4 vérifiés.** [Session I](../receipts/audit_reponses_20261008/session_i_catalogue/README.md),
 catalogue C hybride u21, 48 fils, transferts compris :
 
 | Médiane chaude, ms | ng00 | ng01 | ng02 |
@@ -24,46 +24,46 @@ CPU/F2 : comparaison descriptive, sans attribution à A ou B seuls. Aucun temps 
 **Priorité : réduire G puis mesurer la chaîne entière** ; aucune somme de médianes H+I ne vaut un chrono FULL.
 Trois trames d'une seule séquence ; les 100 ms, u24/u32 GPU et les autres régimes restent ouverts.
 
-**Intégration suivie.**
+**Livraison et qualification suivies.**
 
-- **Juges, `0018`** : [G typé](../receipts/audit_reponses_20261007/livraison_juges/README.md),
-  [CUDA strict](../receipts/audit_reponses_20261008/cuda_juge_livraison/README.md),
-  [MES-P](../receipts/audit_mes_p_livraison_20261008/README.md) et
-  [D6](../receipts/audit_reponses_20261008/d6_compatibilite/README.md) livrés et contre-jugés.
-  CUDA strict effectivement utilisé en I ; **plan D6 encore ouvert** : u21, doublons, combinaison vide.
-- **T2-c** : [lecteur strict du prototype](../receipts/audit_reponses_20261007/t2c_pilote_integration/README.md),
-  21 témoins, trois campagnes, cinq auto-tests, 30 journaux réels. Défaut CLI huit à corriger pour la règle dix.
-  Collecte C séparée retirée ; aucune nouvelle campagne G4 de Gc acquise.
-- **T/M/V/R** : [preuves antérieures](../receipts/audit_tmv_profils_20261007/README.md) conservées.
-  [Patch `6f0643ac`](../receipts/audit_tmvr_admission_20261008/README.md) : admission CSR corrigée,
-  `4 A + 8 Σ(R_k+1)`, garde avant allocation, porte du pic et mutant ciblé sans cache.
-  [Repo5 u21 clos](../receipts/audit_tmv_repo5_u21_20261008/README.md) : 680 tests, une sentinelle sautée,
-  neuf chaînes C/G natives conformes et 16 mutants tués ; profils larges en cours.
-  `0105/0107` attendent la livraison ; `0212` clos au microbanc seulement.
-- **Gc `45976be8`** : [table 16 octets retirée](../receipts/audit_reponses_20261007/gc_support_domain_delta/README.md),
-  catalogue A/B conservé ; garde de tous les SiteIdx proposée, aucun défaut FULL valide déduit.
-  [Nouvelles portes](../receipts/audit_reponses_20261007/gc_rebase_portes/README.md) : 675 rapides + 6 LiDAR,
-  680 distinctes, sans saut, CPU/u21 ; [18 mutants finaux](../receipts/audit_reponses_20261007/gc_mutants_finaux/README.md)
-  tués par code sur les mêmes sources. Anciennes mesures non transférables.
+- **Gc livré `4df326cc8` + `10050a96e`** : empreinte de l'objet séparée du travail, index des naissances,
+  file de sondes, préparation parallèle. [Prototype rebasé](../receipts/audit_reponses_20261007/gc_rebase_portes/README.md) :
+  675 portes rapides + 6 LiDAR, 680 distinctes sans saut ; [18 mutants finaux](../receipts/audit_reponses_20261007/gc_mutants_finaux/README.md)
+  tués par code. La contrelecture de livraison reste distincte de ces campagnes. Aucun nouveau temps G4 de Gc.
+- **Pilote T2-c** : [essai relu](../receipts/audit_reponses_20261008/gc_pilote_essai/README.md), 68 prises/308 passes,
+  jugement identique, refus attendu de deux tours sur dix. **Erratum** : le conducteur perd le statut externe après
+  `date` ; les bilans primaires CTest/mutants restent acquis. Le défaut CLI huit subsiste ; plan G4 explicite dix.
+- **T/M/V/R** : [repo5 u21](../receipts/audit_tmv_repo5_u21_20261008/README.md), 680 tests, une sentinelle sautée,
+  neuf chaînes CPU C/G natives conformes et 16 mutants tués. Admission R corrigée : offsets CSR compris,
+  685 contrôles du pic ; budget fini et cache encore à qualifier. Traces u24 closes (audit groupé en préparation),
+  profil u32 en cours ; TMVR non livré.
+  `0105/0107` attendent l'intégration ; `0212` clos au microbanc seulement.
+- **Juges `0018`** : CUDA strict utilisé en I ; MES-P et D6 livrés et contre-jugés dans les reçus du registre.
+  Plan D6 encore ouvert : u21, doublons, combinaison vide. Nouveau schéma Gc à raccorder au lecteur D6.
 
 [Raccord Gc + TMVR proposé](../receipts/composition_gc_tmvr_20261008/README.md) : deux conflits résolus,
 19 sources, 27 mutants conservés ; aucune qualification native de la combinaison.
-**`0239`, mineur** : [comparateur des naissances](../receipts/audit_reponses_20261007/comparateur_naissances/README.md)
-à rendre sans effet de bord ; auto-comparaison prise pour un doublon sous `_GLIBCXX_DEBUG`, configuration non jouée.
+[Comparateur `0239`](../receipts/audit_reponses_20261007/comparateur_naissances/README.md) : rendre le tri sans effet
+de bord ; faux doublon sous auto-comparaison `_GLIBCXX_DEBUG`, configuration non jouée.
+**`0240`, mineur** : [validateur d'historique](../receipts/audit_foret_validation_20261008/README.md), objet altéré
+accepté malgré une requête erronée ; preuve statique et modèle, aucune mauvaise sortie produit démontrée.
+Gardes structurelles proposées, non compilées ; la sémantique complète des attaches reste à vérifier.
 
-**Aide mathématique et coût.** Gc : recherche exacte logarithmique sous collisions ; gain du hash par cellule
-conditionnel, identité G liée à la politique. Les preuves détaillées restent liées au registre.
-[D2/MEMO `0104`](../receipts/audit_reponses_20261008/d2_memo/README.md) : portes natives livrées et passées
-en I, niveaux rationnels confirmés ; [mutant de date proposé](../receipts/audit_reponses_20261008/d2_memo_mutant/README.md),
-application et modèle vérifiés, exécution native attendue ; sans transfert aux lecteurs TMVR.
-[Repli `0009` clos](../receipts/audit_reponses_20261008/repli_unresolved_0009/README.md) : lots de feuilles
-distribués sur le Pool, tampons comptés, portes CPU/GPU acquises ; aucun gain isolé revendiqué.
-`0008` reste ouvert : l'admission exige un seul pilote, contrairement à l'architecture annoncée.
-[Témoin T7](../receipts/audit_reponses_20261007/t7_cercle25/README.md) prêt ; porte native absente.
-En I, ng02 répare 9/16 éléments mais rapatrie 22,5/87,7 Mo de tableaux complets à K5/K10 :
-[compactage exact proposé](../receipts/audit_reponses_20261008/chaines_compactes/README.md), 10 449 cas et huit mutants ;
-travail GPU O(C), seuls les éléments sélectionnés sont transférés. À mesurer après G, aucun gain temps acquis.
+**Aide mathématique et preuves.**
 
-Quatre fichiers actifs, 74 constats ; clôtures cache/documents/cohorte conservées, capacités 256/64 de `0237` ouvertes.
-Aucun GCP lancé ni donnée sous licence dans cet audit. Natifs antérieurs limités aux formats CPU synthétiques
-(deux points catalogue, deux sondes G à huit points). Derniers contrôles : archives et Python, aucun benchmark.
+- [D2/MEMO `0104`](../receipts/audit_reponses_20261008/d2_memo/README.md) : portes natives livrées et passées en I,
+  niveaux rationnels confirmés. [Mutant proposé](../receipts/audit_reponses_20261008/d2_memo_mutant/README.md),
+  [adapté à Gc](../receipts/audit_reponses_20261008/d2_memo_mutant_gc/README.md) ; exécution causale attendue.
+- [Translation TMVR](../receipts/audit_reponses_20261008/translation_tmvr/README.md) : quatre sites, permutation
+  Morton réelle, 16 traces stockées/13 classes, 30 requêtes et sept verticales exactes. Protocole natif proposé ;
+  TARG général à comparer via la composante ouverte, pas comme indice brut.
+- [Repli `0009` clos](../receipts/audit_reponses_20261008/repli_unresolved_0009/README.md) : lots parallèles,
+  tampons comptés, portes CPU/GPU acquises ; aucun gain isolé. `0008` ouvert : admission à un seul pilote.
+- [Témoin T7](../receipts/audit_reponses_20261007/t7_cercle25/README.md) prêt ; porte native absente.
+  [Compactage des réparations GPU](../receipts/audit_reponses_20261008/chaines_compactes/README.md) proposé :
+  10 449 cas, huit mutants, travail O(C). En I, ng02 répare 9/16 éléments mais rapatrie 22,5/87,7 Mo à K5/K10 ;
+  aucun gain temps acquis. À mesurer après G.
+
+Quatre fichiers actifs, 75 constats ; capacités 256/64 de `0237` ouvertes. Aucun GCP lancé ni donnée sous licence
+par cet audit. Natifs antérieurs limités aux formats CPU synthétiques (deux points catalogue, deux sondes G à huit
+points). Derniers contrôles : archives, sources et Python ; aucun benchmark supplémentaire.

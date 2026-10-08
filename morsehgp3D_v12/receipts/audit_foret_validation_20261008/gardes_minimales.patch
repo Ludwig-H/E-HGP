@@ -1,0 +1,36 @@
+--- a/morsehgp3D_v12/src/tower/forest_validate.cpp
++++ b/morsehgp3D_v12/src/tower/forest_validate.cpp
+@@ -37,6 +37,25 @@
+     if (v > f.births && (f.rank[v] < f.rank[v - 1] || (f.rank[v] == f.rank[v - 1] && f.minleaf[v] <= f.minleaf[v - 1])))
+       return fail(Reason::tower_invariant);
+   }
++  return {};
++}
++
++// Gardes structurelles de l'historique : appelees apres check_shape (births > 0).
++// Ne remplacent pas une verification semantique du survivant et du rang de chaque attache.
++Outcome check_history_shape(const OrderForest& f) noexcept {
++  const u64 nb = f.births, ne = nb - 1;
++  const u32 nn = f.nodes();
++  if (f.attach_rank.size() != nb || f.event_cell.size() != ne || f.event_rank.size() != ne ||
++      f.event_node.size() != ne || f.survivor_events.off.size() != nb + 1 ||
++      f.survivor_events.val.size() != ne || !f.survivor_events.well_formed())
++    return fail(Reason::tower_invariant);
++  for (u64 e = 0; e < ne; ++e) {
++    const u32 v = f.event_node[e];
++    if (v < nb || v >= nn || f.rank[v] != f.event_rank[e] || f.event_cell[e] >= f.cell_node.size())
++      return fail(Reason::tower_invariant);
++  }
++  for (const u32 e : f.survivor_events.val.span())
++    if (e >= ne) return fail(Reason::tower_invariant);
+   return {};
+ }
+ 
+@@ -142,6 +161,7 @@
+       const OrderForest& f = forests.orders[i];
+       if (f.k != i + 1) return fail(Reason::tower_invariant);
+       MHGP12_TRY(check_shape(f));
++      MHGP12_TRY(check_history_shape(f));
+       MHGP12_TRY(check_attach_depth(f, budget));
+       MHGP12_TRY(check_branches(f));
+       if (i > 0) MHGP12_TRY(check_verticals(f, forests.orders[i - 1], budget));

@@ -1,0 +1,285 @@
+{
+  "points": [
+    {
+      "id": 41,
+      "xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "id": 7,
+      "xyz": [
+        2,
+        0,
+        0
+      ]
+    },
+    {
+      "id": 99,
+      "xyz": [
+        0,
+        2,
+        0
+      ]
+    },
+    {
+      "id": 13,
+      "xyz": [
+        2,
+        2,
+        0
+      ]
+    }
+  ],
+  "translation": [
+    2,
+    0,
+    0
+  ],
+  "kmax": 4,
+  "site_point_ids": [
+    [
+      41,
+      7,
+      99,
+      13
+    ],
+    [
+      41,
+      99,
+      7,
+      13
+    ]
+  ],
+  "catalogue": [
+    {
+      "center": [
+        0,
+        1,
+        0
+      ],
+      "radius_squared": 1,
+      "support_point_ids": [
+        41,
+        99
+      ],
+      "shell_point_ids": [
+        41,
+        99
+      ]
+    },
+    {
+      "center": [
+        1,
+        0,
+        0
+      ],
+      "radius_squared": 1,
+      "support_point_ids": [
+        41,
+        7
+      ],
+      "shell_point_ids": [
+        7,
+        41
+      ]
+    },
+    {
+      "center": [
+        1,
+        2,
+        0
+      ],
+      "radius_squared": 1,
+      "support_point_ids": [
+        99,
+        13
+      ],
+      "shell_point_ids": [
+        13,
+        99
+      ]
+    },
+    {
+      "center": [
+        2,
+        1,
+        0
+      ],
+      "radius_squared": 1,
+      "support_point_ids": [
+        7,
+        13
+      ],
+      "shell_point_ids": [
+        7,
+        13
+      ]
+    },
+    {
+      "center": [
+        1,
+        1,
+        0
+      ],
+      "radius_squared": 2,
+      "support_point_ids": [
+        41,
+        13
+      ],
+      "shell_point_ids": [
+        7,
+        13,
+        41,
+        99
+      ]
+    }
+  ],
+  "forests": [
+    {
+      "birth_parts": [
+        [
+          41
+        ],
+        [
+          99
+        ],
+        [
+          7
+        ],
+        [
+          13
+        ]
+      ],
+      "rank": [
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "parent": [
+        4,
+        4,
+        4,
+        4,
+        null
+      ],
+      "children": [
+        [],
+        [],
+        [],
+        [],
+        [
+          0,
+          1,
+          2,
+          3
+        ]
+      ],
+      "root": 4,
+      "lower": []
+    },
+    {
+      "birth_parts": [
+        [
+          41,
+          99
+        ],
+        [
+          41,
+          7
+        ],
+        [
+          99,
+          13
+        ],
+        [
+          7,
+          13
+        ]
+      ],
+      "rank": [
+        1,
+        1,
+        1,
+        1,
+        2
+      ],
+      "parent": [
+        4,
+        4,
+        4,
+        4,
+        null
+      ],
+      "children": [
+        [],
+        [],
+        [],
+        [],
+        [
+          0,
+          1,
+          2,
+          3
+        ]
+      ],
+      "root": 4,
+      "lower": [
+        4,
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "birth_parts": [
+        [
+          41,
+          7,
+          99
+        ]
+      ],
+      "rank": [
+        2
+      ],
+      "parent": [
+        null
+      ],
+      "children": [
+        []
+      ],
+      "root": 0,
+      "lower": [
+        4
+      ]
+    },
+    {
+      "birth_parts": [
+        [
+          41,
+          7,
+          99,
+          13
+        ]
+      ],
+      "rank": [
+        2
+      ],
+      "parent": [
+        null
+      ],
+      "children": [
+        []
+      ],
+      "root": 0,
+      "lower": [
+        0
+      ]
+    }
+  ]
+}

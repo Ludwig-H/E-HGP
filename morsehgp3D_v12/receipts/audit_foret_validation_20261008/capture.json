@@ -1,0 +1,96 @@
+{
+  "files_sha256": {
+    "docs/CONTRAT_TOUR.md": "262b3bb57f68f9deb3f4b6172419b4e4ba105ffc98ce8f9394e5343de4eb09af",
+    "src/core/buffer.hpp": "8e4d84665e90308ee9572a729731711bb419e3a565fd4dd11b5bd56ab6a92401",
+    "src/tower/forest.hpp": "eb14f804a7fe55d16e11b96c39ccbac037f887c998e68f6464495cb21938dd19",
+    "src/tower/forest_kernel.cpp": "9633c2b4e07ffb3f47c2f3b6f49f493b01cf75bbccd6dbf70b4bc86278f119b9",
+    "src/tower/forest_validate.cpp": "f47c7fe23c1f942b2c16e280b3fab724c6810fdac68b6b049c479ca79e282228",
+    "src/tower/vertical_images.cpp": "b0543caf0adb031cf58f59d7eb337aa79c41ad226f28da527456e22f6b0df8eb"
+  },
+  "native_qualification": false,
+  "proposed_validate_sha256": "89c0e45eb612f841f083cc2d08e42e0c5a6830608fd8acba2fc9e3c8018980ea",
+  "public_status": "not_claimed",
+  "result": {
+    "cases": [
+      {
+        "case": "base",
+        "checked_projection_unchanged": true,
+        "event_count": 1,
+        "history_result": 2,
+        "parent_cut_result": 2,
+        "proposed_guard": true,
+        "query": [
+          0,
+          1
+        ],
+        "required_events": 1
+      },
+      {
+        "case": "evenements_vides_csr_bien_formee",
+        "checked_projection_unchanged": true,
+        "event_count": 0,
+        "history_result": 0,
+        "parent_cut_result": 2,
+        "proposed_guard": false,
+        "query": [
+          0,
+          1
+        ],
+        "required_events": 1
+      },
+      {
+        "case": "evenement_vers_naissance",
+        "checked_projection_unchanged": true,
+        "event_count": 1,
+        "history_result": 0,
+        "parent_cut_result": 2,
+        "proposed_guard": false,
+        "query": [
+          0,
+          1
+        ],
+        "required_events": 1
+      },
+      {
+        "case": "attache_tardive_residuelle",
+        "checked_projection_unchanged": true,
+        "event_count": 1,
+        "history_result": 1,
+        "parent_cut_result": 2,
+        "proposed_guard": true,
+        "query": [
+          1,
+          1
+        ],
+        "required_events": 1
+      }
+    ],
+    "cpp_executed": false,
+    "current_validator_acceptance": "inference statique sur projection inchangee",
+    "gcp_used": false,
+    "observed_fields": [
+      "attach_parent",
+      "births",
+      "branches",
+      "children",
+      "k",
+      "lower",
+      "minleaf",
+      "parent",
+      "rank",
+      "retained_ball",
+      "retained_cell",
+      "retained_rank",
+      "root"
+    ],
+    "product_output_corruption_observed": false,
+    "unread_fields": [
+      "attach_rank",
+      "survivor_events",
+      "event_rank",
+      "event_node",
+      "event_cell"
+    ]
+  },
+  "status": "prototype_repo5_faux_positif_validateur_sur_historique_altere"
+}

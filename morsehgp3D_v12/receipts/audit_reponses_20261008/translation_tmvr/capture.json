@@ -1,0 +1,24 @@
+{
+  "main_pin": "eb86468bf015be7e2131b3d0f5200b27b69091e3",
+  "tmvr_base": "c903774b1d16c3b18c15b86fa2a55d11d44b8bc8",
+  "git_sources": {
+    "src/cloud/cloud.cpp": "26c82a1bfc1411606fbe1189541925539cb3c48a4cd1c1c3fe3a5d6a43a5684b",
+    "src/cloud/morton.hpp": "03b6fd1b750ed24a64e481a63bdf2b122a40e6d104a04ce31c7769cd04bd3eda",
+    "src/tower/tower.hpp": "3c22c52f03ec0d78227f390ca01872fa6f04279e219ca26c1e3481458a128607",
+    "src/tower/resolve.cpp": "30abe334849164303a0e81623f7345de482ad6f56d523f6c0e94a7aca0621908",
+    "src/tower/cells.cpp": "67720e8d3ac7eb71eabb7bb957f9c2256537d89fde27cbdc1e740fad6e6d24d2",
+    "docs/CONTRAT_TOUR.md": "262b3bb57f68f9deb3f4b6172419b4e4ba105ffc98ce8f9394e5343de4eb09af",
+    "docs/CONTRAT_CATALOGUE.md": "9eb6ed00b269e3c0f639acc2624232c03d9fa01f42d57256a1475a4cadb6bff1",
+    "src/tower/cells_stage.cpp": "ee8c0294de73f95096f571db5f0fd0718ba99ad17c036e42e84d703f8c9fd720",
+    "src/tower/internal.hpp": "041d7ebc1dde3e397d4b09d5cc0571f0456287420893458ff6d71f89d6071624"
+  },
+  "prototype_sources": {
+    "patch_tour_TMV.diff": "6f0643acca9d6c27755f1e3dde15b166c810371eb88662a32360f6d5c2136de9",
+    "repo5/morsehgp3D_v12/src/tower/forest.hpp": "eb14f804a7fe55d16e11b96c39ccbac037f887c998e68f6464495cb21938dd19",
+    "repo5/morsehgp3D_v12/src/tower/forest_births.cpp": "101184e078e18c45247689a94c3a451ee92387582fc95aa554f1194730c295c1",
+    "repo5/morsehgp3D_v12/src/tower/forest_kernel.cpp": "9633c2b4e07ffb3f47c2f3b6f49f493b01cf75bbccd6dbf70b4bc86278f119b9",
+    "repo5/morsehgp3D_v12/src/tower/forest_build.cpp": "8cbe7fee1e1285dfab43d4b28fc9735cfff4be8b918dfaa578ed8b2d40a5df81",
+    "repo5/morsehgp3D_v12/tests/tower/forest_unit.cpp": "21bc9b9936459a49e60f0600bfa5eef869b2c26af7c3c059ff64bf48a22d36e4"
+  },
+  "fixture_sha256": "9a45da36bccdab8be2bf7bbf79cf521671f2c72760f203896ad6aeeab4304c76"
+}
