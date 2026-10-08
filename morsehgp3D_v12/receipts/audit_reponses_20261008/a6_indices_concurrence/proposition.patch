@@ -1,0 +1,20 @@
+--- a/morsehgp3D_v12/src/tower/forest_kernel.cpp
++++ b/morsehgp3D_v12/src/tower/forest_kernel.cpp
+@@ -55,7 +55,7 @@
+ }
+ 
+ inline u32 load_leaf(u32* leaves, u64 p) noexcept {
+-  return std::atomic_ref<u32>(leaves[p]).load(std::memory_order_relaxed);
++  return std::atomic_ref<u32>(leaves[p]).load(std::memory_order_acquire);
+ }
+ 
+ inline u32 top(const UnionCell* c, u32 x) noexcept { return c[x].last == kNone ? x : (c[x].last | kEventBit); }
+@@ -238,7 +238,7 @@
+       if (target_index(code) >= processed) continue;  // cellule cible pas encore traitee : feuille gardee
+       node = work.element[target_index(code)];
+     }
+-    std::atomic_ref<u32>(leaves[p]).store(find_read(c, node), std::memory_order_relaxed);
++    std::atomic_ref<u32>(leaves[p]).store(find_read(c, node), std::memory_order_release);
+     ++hinted;
+   }
+   return hinted;

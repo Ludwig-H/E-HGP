@@ -1,0 +1,52 @@
+{
+  "counterexamples": [
+    {
+      "after": "illisible",
+      "before": "ok",
+      "case": "boolean_false",
+      "mutant": "ok"
+    },
+    {
+      "after": "illisible",
+      "before": "ok",
+      "case": "float_zero",
+      "mutant": "ok"
+    },
+    {
+      "after": "illisible",
+      "before": "ok",
+      "case": "float_negative_zero",
+      "mutant": "ok"
+    },
+    {
+      "after": "illisible",
+      "before": "refus",
+      "case": "float_two",
+      "mutant": "refus"
+    }
+  ],
+  "native_executed": false,
+  "official_gate": {
+    "after": "test_lecteur_full_ok lecture=29 issues=7 session=6 recouvert=28",
+    "before": "test_lecteur_full_ok lecture=29 issues=7 session=6 recouvert=28"
+  },
+  "positives": [
+    {
+      "code": 0,
+      "state": "ok"
+    },
+    {
+      "code": 2,
+      "state": "refus"
+    },
+    {
+      "code": -9,
+      "state": "echec"
+    },
+    {
+      "code": "expire",
+      "state": "echec"
+    }
+  ],
+  "source": "85db49890e063e9818e4b49d6cd9f968a2db2a9b"
+}

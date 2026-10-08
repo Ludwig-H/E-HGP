@@ -1,0 +1,533 @@
+{
+  "cross_path_identity_equal": true,
+  "native_executed": false,
+  "runs": {
+    "appareil": {
+      "arms": {
+        "aa": [],
+        "ref": [],
+        "sans_cache": [
+          "--cache=0"
+        ]
+      },
+      "configuration": {
+        "aa": "aa",
+        "essai": false,
+        "fils": 48,
+        "k": 5,
+        "passes": 10,
+        "reference": "ref",
+        "tours": 10,
+        "trames": [
+          "p150",
+          "p1000",
+          "p5000"
+        ],
+        "voie": "appareil"
+      },
+      "final_elf_closed": false,
+      "final_elf_hash_present": false,
+      "identities": {
+        "p1000": "dcf3d630b32abf9877a0fdafdcf8bdbcf8825ad86452b92ceb7e06e7eed74054",
+        "p150": "336b834f1541f481f599fba2aff34a49c5b408a7ec3c8eacc21569f03f7c31a6",
+        "p5000": "8e85df0ed63f62024e31ab33d9d5a3e6a205c06f270f5e718702f67900f9b0ff"
+      },
+      "initial_elf_sha256": "cd640e73145475b9c4a425418481e68c10b8677932ef89ec6a495096bea58352",
+      "journal_inventory_sha256": "63cc577116d2e60fb82633747ef10ee82048f138649d3855ae435420f9f5df61",
+      "journals": 99,
+      "passes": 918,
+      "report_sha256": "75c9d8b85b88918a2f59f77057413937c1ded8dab65a847e3f6e7e863ec4123b",
+      "resources": {
+        "p1000": {
+          "aa": {
+            "active_budget_peak_bytes": 27268237,
+            "cold_median_ns": 11525440.0,
+            "cpu_median_ns": 37181500.0,
+            "device_capacity_max_bytes": 15564812,
+            "pinned_capacity_max_bytes": 1101120,
+            "process_rss_max_bytes": 130392064,
+            "stage_medians_ns": {
+              "C": 5249495.0,
+              "G": 2071645.0,
+              "P": 73920.0,
+              "TMVR": 869090.0,
+              "raccord": 0.0
+            },
+            "warm_median_process_medians_ns": 8295195.0,
+            "warm_passes": 90
+          },
+          "ref": {
+            "active_budget_peak_bytes": 27268237,
+            "cold_median_ns": 11933655.5,
+            "cpu_median_ns": 37565000.0,
+            "device_capacity_max_bytes": 15564812,
+            "pinned_capacity_max_bytes": 1101120,
+            "process_rss_max_bytes": 130785280,
+            "stage_medians_ns": {
+              "C": 5249595.5,
+              "G": 2080605.0,
+              "P": 73985.0,
+              "TMVR": 880019.5,
+              "raccord": 0.0
+            },
+            "warm_median_process_medians_ns": 8295735.0,
+            "warm_passes": 90
+          },
+          "sans_cache": {
+            "active_budget_peak_bytes": 26913445,
+            "cold_median_ns": 11595835.0,
+            "cpu_median_ns": 37369500.0,
+            "device_capacity_max_bytes": 15564812,
+            "pinned_capacity_max_bytes": 1101120,
+            "process_rss_max_bytes": 131563520,
+            "stage_medians_ns": {
+              "C": 5235055.0,
+              "G": 2034785.0,
+              "P": 79255.0,
+              "TMVR": 863725.0,
+              "raccord": 0.0
+            },
+            "warm_median_process_medians_ns": 8260000.5,
+            "warm_passes": 90
+          }
+        },
+        "p150": {
+          "aa": {
+            "active_budget_peak_bytes": 10504018,
+            "cold_median_ns": 6930695.0,
+            "cpu_median_ns": 14413500.0,
+            "device_capacity_max_bytes": 3055604,
+            "pinned_capacity_max_bytes": 1048576,
+            "process_rss_max_bytes": 117739520,
+            "stage_medians_ns": {
+              "C": 3818075.5,
+              "G": 704745.0,
+              "P": 22430.0,
+              "TMVR": 283165.0,
+              "raccord": 0.0
+            },
+            "warm_median_process_medians_ns": 4850885.0,
+            "warm_passes": 90
+          },
+          "ref": {
+            "active_budget_peak_bytes": 10504018,
+            "cold_median_ns": 6903395.0,
+            "cpu_median_ns": 14069500.0,
+            "device_capacity_max_bytes": 3055604,
+            "pinned_capacity_max_bytes": 1048576,
+            "process_rss_max_bytes": 117739520,
+            "stage_medians_ns": {
+              "C": 3819780.0,
+              "G": 697320.0,
+              "P": 22700.0,
+              "TMVR": 289545.0,
+              "raccord": 0.0
+            },
+            "warm_median_process_medians_ns": 4850620.0,
+            "warm_passes": 90
+          },
+          "sans_cache": {
+            "active_budget_peak_bytes": 10209106,
+            "cold_median_ns": 6878410.0,
+            "cpu_median_ns": 13736000.0,
+            "device_capacity_max_bytes": 3055604,
+            "pinned_capacity_max_bytes": 1048576,
+            "process_rss_max_bytes": 117723136,
+            "stage_medians_ns": {
+              "C": 3815760.0,
+              "G": 690100.0,
+              "P": 21570.0,
+              "TMVR": 279100.0,
+              "raccord": 0.0
+            },
+            "warm_median_process_medians_ns": 4835990.0,
+            "warm_passes": 90
+          }
+        },
+        "p5000": {
+          "aa": {
+            "active_budget_peak_bytes": 114131731,
+            "cold_median_ns": 20497000.0,
+            "cpu_median_ns": 141986000.0,
+            "device_capacity_max_bytes": 68374220,
+            "pinned_capacity_max_bytes": 4206192,
+            "process_rss_max_bytes": 197533696,
+            "stage_medians_ns": {
+              "C": 7509965.0,
+              "G": 4852195.0,
+              "P": 226900.0,
+              "TMVR": 2234085.5,
+              "raccord": 0.0
+            },
+            "warm_median_process_medians_ns": 14847000.0,
+            "warm_passes": 90
+          },
+          "ref": {
+            "active_budget_peak_bytes": 113983538,
+            "cold_median_ns": 21725656.0,
+            "cpu_median_ns": 141082000.0,
+            "device_capacity_max_bytes": 68374220,
+            "pinned_capacity_max_bytes": 4206192,
+            "process_rss_max_bytes": 195096576,
+            "stage_medians_ns": {
+              "C": 7498305.0,
+              "G": 5149835.0,
+              "P": 229490.0,
+              "TMVR": 2837230.0,
+              "raccord": 0.0
+            },
+            "warm_median_process_medians_ns": 15714660.0,
+            "warm_passes": 90
+          },
+          "sans_cache": {
+            "active_budget_peak_bytes": 112785385,
+            "cold_median_ns": 21767225.5,
+            "cpu_median_ns": 146325500.0,
+            "device_capacity_max_bytes": 68374220,
+            "pinned_capacity_max_bytes": 4206192,
+            "process_rss_max_bytes": 201920512,
+            "stage_medians_ns": {
+              "C": 7542835.0,
+              "G": 5565950.0,
+              "P": 234195.0,
+              "TMVR": 2226155.5,
+              "raccord": 0.0
+            },
+            "warm_median_process_medians_ns": 15475195.0,
+            "warm_passes": 90
+          }
+        }
+      },
+      "roundoff": [],
+      "statistics": {
+        "cas": {
+          "aa": {
+            "trames": {
+              "p1000": {
+                "ic95": [
+                  0.995872100370378,
+                  1.0084005765540522
+                ],
+                "rapport": 1.001577755918005,
+                "tours": 10
+              },
+              "p150": {
+                "ic95": [
+                  0.9947677124944835,
+                  1.0075897199065107
+                ],
+                "rapport": 1.0003371011272826,
+                "tours": 10
+              },
+              "p5000": {
+                "ic95": [
+                  0.9435910269017276,
+                  1.0013350725383368
+                ],
+                "rapport": 0.9730011725240592,
+                "tours": 10
+              }
+            }
+          },
+          "sans_cache": {
+            "trames": {
+              "p1000": {
+                "ic95": [
+                  0.9930253668638178,
+                  1.0060054816235051
+                ],
+                "rapport": 0.9987331809003688,
+                "tours": 10
+              },
+              "p150": {
+                "ic95": [
+                  0.9905387350480804,
+                  1.0033354831052088
+                ],
+                "rapport": 0.996536593810795,
+                "tours": 10
+              },
+              "p5000": {
+                "ic95": [
+                  0.9797585928832115,
+                  1.0745464746962399
+                ],
+                "rapport": 1.0245767118953162,
+                "tours": 10
+              }
+            }
+          }
+        },
+        "refus": [
+          "A/A hors de la fenetre de +/- 1.5 % : p5000"
+        ],
+        "verdict": "refuse"
+      },
+      "warm_decisive_passes": 810
+    },
+    "cpu": {
+      "arms": {
+        "aa": [],
+        "ref": [],
+        "sans_cache": [
+          "--cache=0"
+        ]
+      },
+      "configuration": {
+        "aa": "aa",
+        "essai": false,
+        "fils": 48,
+        "k": 5,
+        "passes": 10,
+        "reference": "ref",
+        "tours": 10,
+        "trames": [
+          "p150",
+          "p1000",
+          "p5000"
+        ],
+        "voie": "cpu"
+      },
+      "final_elf_closed": false,
+      "final_elf_hash_present": false,
+      "identities": {
+        "p1000": "dcf3d630b32abf9877a0fdafdcf8bdbcf8825ad86452b92ceb7e06e7eed74054",
+        "p150": "336b834f1541f481f599fba2aff34a49c5b408a7ec3c8eacc21569f03f7c31a6",
+        "p5000": "8e85df0ed63f62024e31ab33d9d5a3e6a205c06f270f5e718702f67900f9b0ff"
+      },
+      "initial_elf_sha256": "6e03dbb216b7fac0e8aac08d489a8b6326ab6e650caf75deb01ba3fa64a97062",
+      "journal_inventory_sha256": "ff7bb518467cc626efd23375f352ede7898e954b67cf109f5341800da6b397ea",
+      "journals": 99,
+      "passes": 918,
+      "report_sha256": "467205c146d553ca7ae455b1f9ff75b00d1377518f4a47af18f1eeb49c216aea",
+      "resources": {
+        "p1000": {
+          "aa": {
+            "active_budget_peak_bytes": 10602305,
+            "cold_median_ns": 25896130.5,
+            "cpu_median_ns": 293587500.0,
+            "device_capacity_max_bytes": 0,
+            "pinned_capacity_max_bytes": 0,
+            "process_rss_max_bytes": 24989696,
+            "stage_medians_ns": {
+              "C": 24229810.0,
+              "G": 2235560.0,
+              "P": 80030.0,
+              "TMVR": 875500.0,
+              "raccord": 0.0
+            },
+            "warm_median_process_medians_ns": 27522640.5,
+            "warm_passes": 90
+          },
+          "ref": {
+            "active_budget_peak_bytes": 10602305,
+            "cold_median_ns": 26683340.0,
+            "cpu_median_ns": 298291500.0,
+            "device_capacity_max_bytes": 0,
+            "pinned_capacity_max_bytes": 0,
+            "process_rss_max_bytes": 24264704,
+            "stage_medians_ns": {
+              "C": 24376980.0,
+              "G": 2265025.0,
+              "P": 78995.0,
+              "TMVR": 869520.0,
+              "raccord": 0.0
+            },
+            "warm_median_process_medians_ns": 27620930.5,
+            "warm_passes": 90
+          },
+          "sans_cache": {
+            "active_budget_peak_bytes": 10247513,
+            "cold_median_ns": 26270071.0,
+            "cpu_median_ns": 293268000.0,
+            "device_capacity_max_bytes": 0,
+            "pinned_capacity_max_bytes": 0,
+            "process_rss_max_bytes": 23150592,
+            "stage_medians_ns": {
+              "C": 24288551.0,
+              "G": 2126435.0,
+              "P": 70850.0,
+              "TMVR": 878275.0,
+              "raccord": 0.0
+            },
+            "warm_median_process_medians_ns": 27482701.0,
+            "warm_passes": 90
+          }
+        },
+        "p150": {
+          "aa": {
+            "active_budget_peak_bytes": 6399838,
+            "cold_median_ns": 9435825.0,
+            "cpu_median_ns": 49722000.0,
+            "device_capacity_max_bytes": 0,
+            "pinned_capacity_max_bytes": 0,
+            "process_rss_max_bytes": 18874368,
+            "stage_medians_ns": {
+              "C": 9609620.0,
+              "G": 651110.0,
+              "P": 14885.0,
+              "TMVR": 297880.0,
+              "raccord": 0.0
+            },
+            "warm_median_process_medians_ns": 10564725.0,
+            "warm_passes": 90
+          },
+          "ref": {
+            "active_budget_peak_bytes": 6399838,
+            "cold_median_ns": 9426005.0,
+            "cpu_median_ns": 49810500.0,
+            "device_capacity_max_bytes": 0,
+            "pinned_capacity_max_bytes": 0,
+            "process_rss_max_bytes": 18874368,
+            "stage_medians_ns": {
+              "C": 9784995.5,
+              "G": 659955.0,
+              "P": 14425.0,
+              "TMVR": 296695.0,
+              "raccord": 0.0
+            },
+            "warm_median_process_medians_ns": 10748150.5,
+            "warm_passes": 90
+          },
+          "sans_cache": {
+            "active_budget_peak_bytes": 6104926,
+            "cold_median_ns": 9685430.5,
+            "cpu_median_ns": 49917000.0,
+            "device_capacity_max_bytes": 0,
+            "pinned_capacity_max_bytes": 0,
+            "process_rss_max_bytes": 18874368,
+            "stage_medians_ns": {
+              "C": 9695360.0,
+              "G": 663215.0,
+              "P": 14345.0,
+              "TMVR": 307100.0,
+              "raccord": 0.0
+            },
+            "warm_median_process_medians_ns": 10712965.0,
+            "warm_passes": 90
+          }
+        },
+        "p5000": {
+          "aa": {
+            "active_budget_peak_bytes": 48471380,
+            "cold_median_ns": 63656785.0,
+            "cpu_median_ns": 1321881500.0,
+            "device_capacity_max_bytes": 0,
+            "pinned_capacity_max_bytes": 0,
+            "process_rss_max_bytes": 94437376,
+            "stage_medians_ns": {
+              "C": 51880895.5,
+              "G": 5136030.0,
+              "P": 252055.0,
+              "TMVR": 2348510.0,
+              "raccord": 0.0
+            },
+            "warm_median_process_medians_ns": 59837410.5,
+            "warm_passes": 90
+          },
+          "ref": {
+            "active_budget_peak_bytes": 48471380,
+            "cold_median_ns": 63485855.5,
+            "cpu_median_ns": 1327944000.0,
+            "device_capacity_max_bytes": 0,
+            "pinned_capacity_max_bytes": 0,
+            "process_rss_max_bytes": 95145984,
+            "stage_medians_ns": {
+              "C": 50904225.5,
+              "G": 5141015.0,
+              "P": 252025.0,
+              "TMVR": 2311415.0,
+              "raccord": 0.0
+            },
+            "warm_median_process_medians_ns": 58828760.5,
+            "warm_passes": 90
+          },
+          "sans_cache": {
+            "active_budget_peak_bytes": 45855364,
+            "cold_median_ns": 62353270.5,
+            "cpu_median_ns": 1340092000.0,
+            "device_capacity_max_bytes": 0,
+            "pinned_capacity_max_bytes": 0,
+            "process_rss_max_bytes": 104239104,
+            "stage_medians_ns": {
+              "C": 51216855.0,
+              "G": 4719690.0,
+              "P": 234190.0,
+              "TMVR": 2223160.0,
+              "raccord": 0.0
+            },
+            "warm_median_process_medians_ns": 58420225.0,
+            "warm_passes": 90
+          }
+        }
+      },
+      "roundoff": [],
+      "statistics": {
+        "cas": {
+          "aa": {
+            "trames": {
+              "p1000": {
+                "ic95": [
+                  0.9558394871207294,
+                  1.021971992659608
+                ],
+                "rapport": 0.9885907481176684,
+                "tours": 10
+              },
+              "p150": {
+                "ic95": [
+                  0.9653200215335562,
+                  1.021238922176421
+                ],
+                "rapport": 0.9922476693240068,
+                "tours": 10
+              },
+              "p5000": {
+                "ic95": [
+                  0.9861315502547039,
+                  1.0422125624183234
+                ],
+                "rapport": 1.0154739474493801,
+                "tours": 10
+              }
+            }
+          },
+          "sans_cache": {
+            "trames": {
+              "p1000": {
+                "ic95": [
+                  0.9417315771490545,
+                  1.0161131180810716
+                ],
+                "rapport": 0.9796750641365328,
+                "tours": 10
+              },
+              "p150": {
+                "ic95": [
+                  0.9262901762933161,
+                  1.039690388589093
+                ],
+                "rapport": 0.9848458362059402,
+                "tours": 10
+              },
+              "p5000": {
+                "ic95": [
+                  0.9705234131994777,
+                  1.0203265794248482
+                ],
+                "rapport": 0.9952026857046042,
+                "tours": 10
+              }
+            }
+          }
+        },
+        "refus": [
+          "A/A hors de la fenetre de +/- 1.5 % : p5000"
+        ],
+        "verdict": "refuse"
+      },
+      "warm_decisive_passes": 810
+    }
+  },
+  "source_pin": "72f622a556130e25afdadbef84984619417286e2"
+}

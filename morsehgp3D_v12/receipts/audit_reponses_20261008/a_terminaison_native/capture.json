@@ -1,0 +1,178 @@
+{
+  "commit": "bdfca8fb198e6711626c6506b816a2a656315c83",
+  "base_commit": "72f622a556130e25afdadbef84984619417286e2",
+  "source_roots": [
+    "src",
+    "tests",
+    "cmake",
+    "CMakeLists.txt"
+  ],
+  "source_count": 313,
+  "source_inventory_sha256": "03505b5312fe3774cdd1f4528b05f1373c9fb889353ec7163f12dcffb2d58f35",
+  "source_pins": {
+    "src/tower/pipeline.hpp": "cdb3e55b4332e5acbdb0a29bb7f9d00567b913dd2da669c8b8d7c41ab67201d7",
+    "src/tower/pipeline_run.cpp": "15b49b5f0309f546912c8c9571f616c32fdf4136df7bdb888b2ff736a65aaf5a",
+    "tests/tower/region_unit.cpp": "af4b2bc8617b1b90f00f4f6d7563d70a61f479c7ea9ac79ff62973214e5dcb3f",
+    "tests/tower/region_map_check.py": "4b99bbcb7cc3fc0fad766e8ca4004392827ceda1ddbbcc18a55ac6041811f69b",
+    "tests/tower/tests.cmake": "985eb1d2e76c56e726b54fc8e10461b45567bd7bea26da73ae2216709663ea11",
+    "tests/mutants/tower.json": "fef08a551aaa344b23b7134018f9e9d9ea8680817da548d51355ebc2a17d02ed",
+    "tests/mutants/run_mutants.py": "5ffa023440ab8b47e98b1f31186d0ef8e4f3f1fcdcd6a77671fe3f5ba51b3bec",
+    "cmake/run_expect.cmake": "82be01f59abc38b2448cbe6844e02f4b0fa8d981497d57cc01c98bbc5b4e2b8b"
+  },
+  "artifacts": {
+    "ctest_term72_cible.log": {
+      "bytes": 2004,
+      "sha256": "7e9ebe53dac94fb3f927c5aac6e9504afd0603e570534cfdc17fd8b758fc5834"
+    },
+    "build_term72.region.log": {
+      "bytes": 300,
+      "sha256": "a4a03ad6d48bdcba5a8892ce7b3037fcd605dc53a204ae5e15da9f79335fca1c"
+    },
+    "mut_term.json": {
+      "bytes": 615,
+      "sha256": "ec105765ac73b3e7484640ce8dee30bacbce9cd8ec864207d677a6befaa0ec1e"
+    },
+    "mut_term_native_sortie.log": {
+      "bytes": 756,
+      "sha256": "af298163113c6dee16a89909609d468c61ec6c084917747df13bfba0acc16e74"
+    },
+    "objets_base72/sha.txt": {
+      "bytes": 4770,
+      "sha256": "1922ee8178a17b41f26df4941c187f8007bda118f66646f4b15f8290c53df8d4"
+    },
+    "objets_base72/sha_patch.txt": {
+      "bytes": 4770,
+      "sha256": "1922ee8178a17b41f26df4941c187f8007bda118f66646f4b15f8290c53df8d4"
+    },
+    "build_term72/Testing/Temporary/LastTest.log": {
+      "bytes": 15873,
+      "sha256": "3941e1688d913e708646f3839d45514d1142cbabc08df737bd0b6d6f8e9f8cd7"
+    },
+    "build_term72/CTestTestfile.cmake": {
+      "bytes": 1280237,
+      "sha256": "0c7da79038f958a2646dcba6bf76a0af91f7a7d813e724df0377a0e2545c793f"
+    },
+    "build_term72/libmhgp12.a": {
+      "bytes": 1451648,
+      "sha256": "1eeb95e06451b7ceedca5093cdba7b36fe5a8a8800d6d675d05ae5d938a9e09d"
+    },
+    "build_term72/mhgp12_tower_region": {
+      "bytes": 1040920,
+      "sha256": "513a528ae6287f20ce39fcfb0114ea989a390c7b9ae859519657d14cb19fe7af"
+    },
+    "build_term72/mhgp12_tower_region.map": {
+      "bytes": 231749,
+      "sha256": "7812d9732b16eb10d424bab9846484c17f37ba19bc7ca2e3be982d6f17542d45"
+    },
+    "build_term72_tsan/mhgp12_tower_region": {
+      "bytes": 11519952,
+      "sha256": "d42e36d0e3f65b8c399857107d37ad202c6815e98432cc00d5ecc3b8610b3716"
+    },
+    "build_term72_tsan/mhgp12_tower_region.map": {
+      "bytes": 298135,
+      "sha256": "52946bc9d6bf9820765f6dcfa8a45bbf0b3b53fbfda640e574efb5701623079d"
+    },
+    "mut_term/temoin_0/build/Testing/Temporary/LastTest.log": {
+      "bytes": 1383,
+      "sha256": "8ca000dc9b34e8c44e04deb1a2f874ed7a34138d7a36523ee21c7154e2cbfe77"
+    },
+    "mut_term/terminaison_relecture_native/build/Testing/Temporary/LastTest.log": {
+      "bytes": 1733,
+      "sha256": "5df1cace2006f20edeb14738f8c25393236ae0daf193c5476d6524f38b824bb9"
+    },
+    "mut_term/temoin_0/build/mhgp12_tower_region": {
+      "bytes": 1040920,
+      "sha256": "95c5d7c5552042cadc9439c9483bf2659ba488adbc8265a06e7ce03b9e268afd"
+    },
+    "mut_term/terminaison_relecture_native/build/mhgp12_tower_region": {
+      "bytes": 1040920,
+      "sha256": "88dfe08d09e98c0474b20e63decaeecd81d21a465ca644c9ff7123f1042c1cc7"
+    },
+    "build_term72/CMakeCache.txt": {
+      "bytes": 17411,
+      "sha256": "c172c9052da43c7049739ae77e9a0d3598721fd67df31e356d8bb03ff2e76b0e"
+    },
+    "build_term72/CMakeFiles/mhgp12_tower_region.dir/flags.make": {
+      "bytes": 540,
+      "sha256": "9080eb66b203657ff344ed44832db2f5a143a89e66a7a781ef229e36b952a7d3"
+    },
+    "build_term72/CMakeFiles/mhgp12.dir/flags.make": {
+      "bytes": 382,
+      "sha256": "9fc9eb35bb1718024c7654abdbff44b05ecf828002dac9464474b7b4a65b8510"
+    },
+    "build_term72/CMakeFiles/mhgp12_tower_region.dir/link.txt": {
+      "bytes": 334,
+      "sha256": "6690f28f4ca2aa6c9af4afd999be9c991448182c76bda37109cdabc08b222329"
+    },
+    "build_term72_tsan/CMakeCache.txt": {
+      "bytes": 17437,
+      "sha256": "ec7b0b8c6972ad899a928bc4f4a6ddf154464eaa9e4a03592c32ae33aa0ea93d"
+    },
+    "build_term72_tsan/CMakeFiles/mhgp12_tower_region.dir/flags.make": {
+      "bytes": 561,
+      "sha256": "4c943fba82b4e357a69f32450e47c007eede0390d1034d040d597a137704093d"
+    },
+    "build_term72_tsan/CMakeFiles/mhgp12.dir/flags.make": {
+      "bytes": 403,
+      "sha256": "8a232fa02bc156a82763a8f280ecd4e0b96c816948d23bf748212824db511063"
+    },
+    "build_term72_tsan/CMakeFiles/mhgp12_tower_region.dir/link.txt": {
+      "bytes": 360,
+      "sha256": "18f162770af0d3be5409d7254a34a9e5b1be965c6a3d53bc2267ab19938b9b7c"
+    },
+    "tsan_region_1.log": {
+      "bytes": 174,
+      "sha256": "2473bb945996dd88e5d1f2144fde342f6424c8f0ccba8865f30ffe699cb81a70"
+    },
+    "tsan_region_2.log": {
+      "bytes": 174,
+      "sha256": "2473bb945996dd88e5d1f2144fde342f6424c8f0ccba8865f30ffe699cb81a70"
+    },
+    "tsan_region_3.log": {
+      "bytes": 174,
+      "sha256": "2473bb945996dd88e5d1f2144fde342f6424c8f0ccba8865f30ffe699cb81a70"
+    },
+    "tsan_region_4.log": {
+      "bytes": 174,
+      "sha256": "2473bb945996dd88e5d1f2144fde342f6424c8f0ccba8865f30ffe699cb81a70"
+    },
+    "tsan_region_5.log": {
+      "bytes": 174,
+      "sha256": "2473bb945996dd88e5d1f2144fde342f6424c8f0ccba8865f30ffe699cb81a70"
+    }
+  },
+  "mutants_report": {
+    "code": 0,
+    "manifeste_sha256": "fef08a551aaa344b23b7134018f9e9d9ea8680817da548d51355ebc2a17d02ed",
+    "module": "tower",
+    "mutants": [
+      {
+        "detail": "code",
+        "id": "terminaison_relecture_du_compte",
+        "juge": "mhgp12_tower_pipeline_terminaison",
+        "verdict": "TUE"
+      },
+      {
+        "detail": "code",
+        "id": "terminaison_relecture_native",
+        "juge": "mhgp12_tower_region_terminaison",
+        "verdict": "TUE"
+      }
+    ],
+    "plancher": 2,
+    "schema": "mhgp12.mutants.v1",
+    "sources_sha256": "a860f74f4d910e641e04841aeb2c2845dd79d556c8724f67aa446eaa1c572323",
+    "temoin": "vert"
+  },
+  "witness_delta_from_worktree_outside_target": [
+    "bench/full_probe.cpp",
+    "docs/PLAN.md",
+    "docs/ARCHITECTURE.md"
+  ],
+  "qualification_limits": [
+    "12 targeted tests only; 730 global and 20 repeats not independently evidenced here",
+    "TSan five primary output files + instrumented build, no per-run ELF hash or external code",
+    "51 baseline hashes compared; original baseline objects absent; current objects and archive independently rehashed",
+    "CPU u21 only; no G4 or numerical/geometry extension"
+  ]
+}

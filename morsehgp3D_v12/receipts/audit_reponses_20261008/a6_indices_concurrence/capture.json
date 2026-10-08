@@ -1,0 +1,23 @@
+{
+  "captured_utc": "2026-10-08T10:27:44.083646+00:00",
+  "patch_sha256": "e2fe0c0fe282cbc57040dc3208bf4253c44083dc1d7d534d2ff22f612f07bf8f",
+  "postimage_sha256": "6e6bac761b53478d32ad6a18e8146a4282a7284bf093b7a2f65c35b01ecc7567",
+  "prototype_local_commit": "69dd8e9021fb9b4203e72374629aaf6c4c6610dd",
+  "published_base": "72f622a556130e25afdadbef84984619417286e2",
+  "scope": "Static prototype review; no native failure established; two memory-order changes proposed, not integrated",
+  "sources": {
+    "src/tower/forest_births.cpp": "0cd7b8350d43d57bd4d375e33b869e9528bbf849acf2832c6b8e8558fb927bdc",
+    "src/tower/forest_build.cpp": "675593396ec74c3ba1bd3b68024769ccaecf498597cb4b61d813ff547db9ba02",
+    "src/tower/forest_internal.hpp": "354c3c81c15cb11c91336a7b9dd3bd754019b89399ef69950fe48a633b3d34ef",
+    "src/tower/forest_kernel.cpp": "136d46a55591f94a3c624b643b815c53222d05a670ddeeb0e7b6dba2a914f22f",
+    "src/tower/forest_stages.cpp": "5ed33d69bb63fcfa2a7c65c0a9fbed41dc00762e9052446fb9b6ef61f0eb2d6f",
+    "src/tower/pipeline.cpp": "a81dc7a329af6c9b1a90f2dcfac9b0b0a337ec47ae9a745055dc030c2fef5c8e",
+    "src/tower/pipeline.hpp": "b6c6eb7bc7bbd2446e565b46ca0e99bdee3b26b9653ba6d21a91bd7c521486b2",
+    "src/tower/pipeline_run.cpp": "543ca7bda001e87a1c2e5ceb38a4cecfb7c5123127877f5d214e679e057b97ba",
+    "src/tower/pipeline_steps.cpp": "57b88173378d5cd9544aad5848d7ed32ff560c1e481856b03f6b79839e27f765",
+    "tests/tower/pipeline_levers.cpp": "87fad24c03eb3aa6733eabba5ea9d382b308e51a3e6648dbe19908601d81ec2c",
+    "tests/tower/pipeline_unit.cpp": "543adab184347a507c83003ea9ccf947b405fe3544c0812105d5525d188a829a",
+    "tests/tower/tests.cmake": "e5f68e7264148624af18c6f7e20dfc417a27f91d93439bb13778d0742715b00a"
+  },
+  "stable_until_utc": "2026-10-08T10:35:30.142892+00:00"
+}

@@ -1,0 +1,11 @@
+--- a/morsehgp3D_v12/microbancs/outils/lecteur_full.py
++++ b/morsehgp3D_v12/microbancs/outils/lecteur_full.py
+@@ -179,6 +179,8 @@
+     """Rend dict(etat, raison, passes[, open_ns]) ; voir l'en-tete pour les issues."""
+     if code == 'expire':
+         return dict(etat='echec', raison='expire', passes=[])
++    if type(code) is not int:
++        return dict(etat='illisible', raison='code processus non entier', passes=[])
+     if type(code) is int and code < 0:
+         return dict(etat='echec', raison='signal %d' % -code, passes=[])
+     rows, why = read_rows(text)

@@ -1,15 +1,12 @@
 # Audit Codex — état courant v12
 
-8 octobre 2026. Mesures M : `957e9784f` ; défaut cache livré `72f622a55` ; terminaison corrigée `e78904c49`.
+8 octobre 2026. Mesures M : `957e9784f` ; petits C3 : `72f622a55` ; lecteurs `85db49890`, porte native `bdfca8fb1`.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
 
-**Derniers temps LiDAR : FULL M admise, contrat 100 ms non tenu sur les 37 trames.**
-[Provenance et arrêt certifiés](../receipts/audit_reponses_20261008/session_m_provenance/README.md) :
-356 sources et 7 pilotes/fichiers ciblés égaux au Git957, cinq commandes closes à code0, 722 portes socle.
-[Admission FULL](../receipts/audit_reponses_20261008/session_m_admission/README.md) : 38 processus, 610 passes,
-392 chaudes. Les lecteurs livré et renforcé rendent les mêmes objets/statistiques. u21/W48, trames sans sol
-ng00/01/02 : 39 885 / 35 551 / 45 845 sites. Médianes des médianes chaudes par processus, en ms :
+**LiDAR sans sol : les trois ng passent, le contrat multi-séquences 100 ms reste non tenu.**
+[FULL M](../receipts/audit_reponses_20261008/session_m_admission/README.md), u21/W48 à chaud,
+ng00/01/02 : 39 885 / 35 551 / 45 845 sites. Médianes des médianes par processus, en ms :
 
 | FULL | ng00 | ng01 | ng02 |
 | --- | ---: | ---: | ---: |
@@ -18,75 +15,71 @@ ng00/01/02 : 39 885 / 35 551 / 45 845 sites. Médianes des médianes chaudes par
 | CPU K5, cache désactivé | **381,80** | **323,10** | **385,94** |
 | GPU K10, cache désactivé | **593,26** | **442,82** | **504,79** |
 
-GPU K5 sans cache : maximum des médianes processus **95,99 ms**, sous-contrat des trois trames tenu selon
-la règle préétablie ; trois des 135 prises chaudes dépassent néanmoins 100 ms (maximum brut101,61).
-**37 trames, six séquences, sans cache : médiane160,64 ms, pire médiane par trame319,78 ms** ;
-maximum contractuel des médianes processus **358,86 ms** (ici aussi maximum des 185 chaudes).
-25/37 médianes par trame et 127/185 prises dépassent100 ms. Le contrat global reste non tenu.
-FULL couvre Cloud/index→T/M/V/R ; lecture, masque, validation, FUL1 et libération hors mur.
-G recouvert est une fenêtre, TMVR la queue après G : ne pas sommer les médianes de postes.
+Sans cache, maximum des médianes processus K5 **95,99 ms** : sous-contrat ng tenu selon la règle fixée.
+Trois des135 prises chaudes dépassent néanmoins100 ms (maximum brut101,61).
+**37 trames, six séquences : médiane160,64 ms, pire médiane par trame319,78 ms** ;
+maximum contractuel **358,86 ms**, ici aussi maximum des185 chaudes. 25/37 médianes par trame dépassent100 ms.
+Voie GPU : catalogue CUDA puis tour CPU. FULL couvre Cloud/index→T/M/V/R ; lecture, masque, validation, FUL1
+et libération hors mur. G est une fenêtre recouverte, TMVR la queue après G ; ne pas sommer les médianes.
 
-**[Cache adopté dans le banc apparié](../receipts/audit_reponses_20261008/session_m_apparie/README.md)** :
-140 journaux/1 816 passes, A/A conforme ; rapports géométriques0,929/0,924/0,918, bornes hautes IC95<1.
-Séquentiel rejeté :1,515/1,465/1,529. Sur37 trames, deux secondes visites par trame, cache :
-**152,62 ms** de médiane et **305,89 ms** de pire médiane par trame ; bloc informatif, hors règle d'adoption.
-RSS maximal des deux processus environ **3,81 Gio**, contre2,56–2,63 sans cache ; budget actif partagé excluant
-les blocs inactifs, RSS et capacité GPU distingués. Aucun hash ELF final archivé par les pilotes ; aucun indice
-supplémentaire de substitution. Environnement « après » apparié antérieur aux huit Sessions informatives.
-Le [défaut cache72](../receipts/audit_reponses_20261008/cache_defaut_raccord/README.md) vaut aussi sur CPU/K10 :
-leurs temps avec cache restent **non mesurés**. Future ablation : ref/A-A explicitement `--cache=0`.
-M précède le correctif0241 et les corrections de lecteurs proposées. Aucun transfert aux petits nuages/massifs.
+**[Cache apparié M](../receipts/audit_reponses_20261008/session_m_apparie/README.md)** : A/A conforme,
+rapports géométriques0,929/0,924/0,918, IC95 supérieurs<1 ; séquentiel rejeté1,515/1,465/1,529.
+Sur37 trames, cache : médiane152,62 ms, pire médiane305,89 ms (deux secondes visites/trame, bloc informatif).
+RSS maximal environ3,81 Gio, contre2,56–2,63 sans cache ; le budget actif n'inclut pas les blocs inactifs.
+Le [défaut72](../receipts/audit_reponses_20261008/cache_defaut_raccord/README.md) correspond au bras mesuré,
+mais **CPU/K10 avec cache sur ng00–02 restent non mesurés**. Future ablation : ref/A-A explicitement cache0.
+Le pilote joué n'archivait pas l'ELF final : le juge85 refuse cette fermeture, sans invalidation inventée des temps.
+M précède le correctif0241 ; ses [sources et arrêt](../receipts/audit_reponses_20261008/session_m_provenance/README.md)
+sont contre-vérifiés (304 journaux FULL/apparié/D6,3 056 passes ; aucun moteur exécuté par l'audit).
 
-**Priorité CPU : [catalogue et coût total](../receipts/audit_reponses_20261008/cpu_feuilles_finition/README.md).**
-C vaut318,77/272,70/320,92 ms, soit83–84 % du mur par passe. La finition est déjà parallèle ; même gratuite,
-le FULL conditionnel resterait321,28/268,14/320,04 ms. Les paires uniques et l'arrêt du census CPU sont intégrés.
-Feuille16 contre24 a déjà été mesurée dans I : C légèrement plus lent, parcours accru malgré moins de travail
-aux feuilles. Priorité : ventiler levels/sort/assemble/table avec les diagnostics existants, puis mesurer FULL.
-Comparaison historique v11 non appariée : GPU plus rapide, CPU toujours plus lent ; aucune causalité déduite.
+**Petits LiDAR : [MES-C3 admise](../receipts/audit_reponses_20261008/session_c3_admission/README.md), critères C1–C3 non tenus.**
+132 réels seuls, cache8 Gio, W48 ; médiane des deux chaudes par nuage, puis médiane des132, en ms :
 
-**[Noyau : diagnostic et alternative mathématique](../receipts/audit_reponses_20261008/a6_noyau_raccord/README.md).**
-Sur99 099 sites, R5 finit dernier dans5/5 chaudes ; les fins ne sont pas des durées propres.
-À P/C/G inchangés, une queue gratuite laisserait238,32 ms sur cette trame, et22/37 médianes>100 ms.
-Alternative MSF à ordre total puis rejeu : événements/attaches/cellules préservés par induction, Prim sur100 modèles.
-Le développeur écarte cette voie pour son prochain lot A6 afin de garder le recouvrement ; la proposition reste
-un lemme de raccord, aucun gain acquis. `g_end_ns` ne publie pas encore toutes les pré-passes.
+| FULL | CPU | GPU |
+| --- | ---: | ---: |
+| K5 | **25,003** | **7,856** |
+| K10 | **46,420** | **14,571** |
 
-**CST-0241 : [correctif livré](../receipts/audit_reponses_20261008/a_terminaison_raccord/README.md).**
-Postimage exacte `last = fetch_sub(...) == 1` ; cinq fonctions du modèle portées fidèlement.
-Python normal/−O passé ; mutant refusé par contrôle textuel, **pas par entrelacement natif**.
-[Preuve pour N et protocole natif déterministe](../receipts/audit_reponses_20261008/a_terminaison_porte/README.md)
-transmis ; **porte native livrée bdfca8fb1**, source conforme au protocole, preuves d’exécution en contrelecture.
-Aucun incident natif observé, aucun lien établi avec MES-M0.
+Maxima des médianes réelles : K5 CPU/GPU134,07/32,64 ms ; K10 515,63/199,35 ms.
+Cohorte complète :147 réguliers,12 difficiles,56 processus/3 608 passes ; huit refus `wide_leaf` persistants.
+CPU OLS14,90 ms +10,06 µs/site, paramètres statistiques et non coûts physiques. W1 absent ; sur≤150 sites,
+CPU W4/W48 vaut6,08/10,88 ms : le chronomètre C ne suffit pas à séparer calcul et coordination du Pool.
+[Deux appariés cache C3](../receipts/audit_reponses_20261008/session_c3_apparies/README.md) :198 journaux/1 836 passes,
+les deux campagnes **refusées par A/A** surp5000 (GPU0,973001 ; CPU1,015474>1,015).
+Aucune adoption ni rejet statistique du bras sans cache. [Sources72/arrêt clos](../receipts/audit_reponses_20261008/session_c3_provenance/README.md),
+ELF final absent ici aussi. Plusieurs changements depuis C2 ; comparaison descriptive, aucun gain causal isolé.
 
-**[D6 M admise](../receipts/audit_reponses_20261008/session_m_d6/README.md)** : 126 journaux/630 passes,
-504 chaudes. Sur mêmes coordonnées, C u24/u32 +0,8–2,5 % ; G jusqu'à+13,6 %. C et G CPU séparés, pas FULL/GPU :
-seuil produit<3 % non qualifié. ×2048 triple presque C et change les classes de feuilles ; coordonnées<2²⁹,
-pas tout le domaine u32 ni une précision physique nouvelle. Les corps exportés sont seulement déclarés, puis effacés.
+**Priorités de calcul.** [CPU](../receipts/audit_reponses_20261008/cpu_feuilles_finition/README.md) : C318,77/272,70/320,92 ms
+sur ng00–02, soit83–84 % FULL. Finition déjà parallèle ; même gratuite, FULL conditionnel268–321 ms.
+Paires uniques et arrêt census intégrés ; feuille16/24 déjà comparée dans I sans gain global à16. Ventiler les
+sous-postes et mesurer le coût total. V11 historique : GPU plus rapide, CPU encore plus lent, comparaison non appariée.
+[Noyau](../receipts/audit_reponses_20261008/a6_noyau_raccord/README.md) : R5 dernier sur99 099 sites ; les fins ne
+sont pas des durées propres. À P/C/G inchangés, queue gratuite laisse238,32 ms et22/37 médianes>100 ms.
+Notre variante MSF/rejeu conserve l'objet dans le modèle, mais le développeur l'écarte du prochain A6 pour garder
+le recouvrement. [Brouillon A6 N/I](../receipts/audit_reponses_20261008/a6_indices_concurrence/README.md) : propriété des
+cohortes et durée de vie relues ; pont `release/acquire` proposé pour rattacher les indices au préfixe courant
+(CST-0242). Aucun échec natif démontré ni gain qualifié.
 
-**[Lecteurs : raccord85 contre-vérifié](../receipts/audit_reponses_20261008/lecteurs_livraison_85db/README.md).** [Triple correctif apparié](../receipts/audit_reponses_20261008/apparie_composition_triple/README.md) :
-identité/résumés, cohorte/minima et fermeture ELF ; les contre-exemples sont refusés, positif simulé conservé.
-[Gardes LF recouvert](../receipts/audit_reponses_20261008/lf_recouvert_gardes/README.md) : neuf horloges fausses admises
-par le lecteur mesuré957, quatre mutants causaux ; vraies passes A et M compatibles.
-[Fixtures corrigées](../receipts/audit_reponses_20261008/pilotes_fixtures_recouvert/README.md),
-[bascule des commandes A](../receipts/audit_reponses_20261008/t2d_a_bascule_cloture/README.md)
-et [présentation MES-FULL](../receipts/audit_reponses_20261008/pilotes_bascule/README.md).
-Cinq portes Python et27/17 mutants LF/apparié passés normal/−O ; neuf horloges et quatre fermetures refusées
-causalement. Le juge85 refuse M sans hash ELF final ; aucune fermeture inventée. `code=False` partagé reste ouvert.
+**CST-0241 clos : correctif e789 et porte native bdf contre-vérifiés.** [Modèle et raccord](../receipts/audit_reponses_20261008/a_terminaison_raccord/README.md),
+[preuve pour N](../receipts/audit_reponses_20261008/a_terminaison_porte/README.md),
+[preuves natives](../receipts/audit_reponses_20261008/a_terminaison_native/README.md) : témoin11 contrôles, mutant
+causal code1 sur l'attente indue après nettoyage,12 portes ciblées,313 sources raccordées. Portée CPU/u21,
+sans preuve de toute la concurrence ni transfert de730 portes/20 répétitions. Aucun lien établi avec MES-M0.
 
-**Autres régimes : dernières campagnes antérieures à M.**
-[Petits nuages C2](../receipts/audit_reponses_20261008/session_c2_admission/README.md),147 nuages, deux chaudes :
-K5 CPU/GPU W48 **28,95/10,15 ms**, K10 **53,01/24,58 ms** ; C1–C3 non tenus, huit refus `wide_leaf`.
-[Massifs L1r](../receipts/audit_reponses_20261008/session_l1r_admission/README.md) : Boreas sans sol1,51M,
-GPU **10,025s** / CPU **22,344s**, une chaude ; dix succès/huit refus mémoire.
-[L2 CPU froide](../receipts/audit_reponses_20261008/session_l2_admission/README.md) : Paris9,11M **112,866s**,
-14,55M **165,789s** ; ETH3D `wide_leaf`, Lyon `memory_budget`. Aucun plafond universel en sites.
-[Extension de feuille](../receipts/audit_reponses_20261008/feuille_large_proposition/README.md) et
-[raffinement certifié des centres](../receipts/audit_reponses_20261008/feuille_large_raffinement/README.md) proposés ;
-égalités massives persistantes, aucune borne globale ni accélération acquise.
+**Juges.** [Livraison85 contre-vérifiée](../receipts/audit_reponses_20261008/lecteurs_livraison_85db/README.md) :
+postimages, cohortes, horloges, résumés et hash final ; cinq portes Python,27/17 mutants normal/−O.
+[Dernière garde de code processus proposée](../receipts/audit_reponses_20261008/lf_code_processus/README.md) :
+False/0.0/−0.0/2.0 ne doivent pas être pris pour des entiers. Quatre témoins causaux, positif préservé.
+CST-0018 reste partiel ; aucun chrono réel déclaré faux. Les reçus anciens restent immuables.
 
-Historique : [A](../receipts/audit_reponses_20261008/session_t2da_admission/README.md),
-[diagnostic des fins A](../receipts/audit_reponses_20261008/session_a_diagnostic/README.md),
-[B sur902](../receipts/audit_reponses_20261008/session_b_admission/README.md),
-[census retenu957](../receipts/audit_reponses_20261008/b_census_raccord/README.md). M remplace leurs temps pour
-son régime précis, sans réattribuer les gains. Le détail des constats reste dans le registre et les reçus.
-Audit sources/Python uniquement ; aucun moteur ni GCP lancé par l'auditeur.
+**[D6 M](../receipts/audit_reponses_20261008/session_m_d6/README.md)** : C u24/u32 +0,8–2,5 %, G jusqu'à+13,6 %,
+étages CPU séparés. Seuil FULL<3 % ouvert. ×2048 reste sous2²⁹, sans précision physique nouvelle ;
+[erratum proposé](../receipts/audit_reponses_20261008/d6_m_erratum/README.md) : étendues min/max, pas IC.
+
+**Massifs, mesures antérieures à M :** [L1r](../receipts/audit_reponses_20261008/session_l1r_admission/README.md),
+Boreas sans sol1,51M : GPU10,025s / CPU22,344s, une chaude ; dix succès/huit refus mémoire.
+[L2 CPU froide](../receipts/audit_reponses_20261008/session_l2_admission/README.md) : Paris9,11M112,866s,
+14,55M165,789s ; ETH3D `wide_leaf`, Lyon `memory_budget`. Pas de plafond universel en sites.
+[Extension](../receipts/audit_reponses_20261008/feuille_large_proposition/README.md) et
+[raffinement certifié](../receipts/audit_reponses_20261008/feuille_large_raffinement/README.md) proposés,
+égalités massives persistantes ; aucune borne globale ni accélération acquise.

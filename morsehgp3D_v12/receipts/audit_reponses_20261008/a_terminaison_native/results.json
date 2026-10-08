@@ -1,0 +1,16 @@
+{
+  "commit": "bdfca8fb198e6711626c6506b816a2a656315c83",
+  "current_objects_and_archive_rehashed": 51,
+  "declared_object_hashes_equal": 51,
+  "map_check": "conforme",
+  "mutant_extra_logs": 3,
+  "native_executions_by_audit": 0,
+  "native_mutant_primary": "assertion waits_a==0, code1, threads joined",
+  "native_mutation_exact": true,
+  "positive_controls": 11,
+  "source_files_exact": 313,
+  "targeted_ctest_passed": 12,
+  "tsan_build_instrumented": true,
+  "tsan_external_codes_and_run_hash_binding": false,
+  "tsan_logs_positive": 5
+}

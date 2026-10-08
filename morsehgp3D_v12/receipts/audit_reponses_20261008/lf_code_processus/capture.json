@@ -1,0 +1,9 @@
+{
+  "source": "85db49890e063e9818e4b49d6cd9f968a2db2a9b",
+  "files": {
+    "morsehgp3D_v12/microbancs/outils/lecteur_full.py": "15437e5f09408d5fbdc6288e33a2452490489f13bf9a3b3a24c99f5d109b6554",
+    "morsehgp3D_v12/microbancs/outils/test_lecteur_full.py": "8eed4403670ced0640e43b1010e07422fef105fe6da242ba1db730643f7a371f"
+  },
+  "patch_sha256": "85bbce437e6a62abd42ca2814e16d5e99bca6d148af7a02a1d37fdb80ac75f9a",
+  "postimage_sha256": "d32d7acae42761b22be3a350ecd1b9ec02f2f8e593617b7357fbd75edfea219a"
+}

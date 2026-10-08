@@ -1,0 +1,9 @@
+{
+  "changes": 2,
+  "native_runs": 0,
+  "patch_applicable": true,
+  "postimage_sha256": "6e6bac761b53478d32ad6a18e8146a4282a7284bf093b7a2f65c35b01ecc7567",
+  "scope": "hashes/application only; mathematical arguments in README",
+  "source_files": 12,
+  "up_orders_unchanged": true
+}

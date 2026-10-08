@@ -1,0 +1,103 @@
+{
+  "default_cache_bytes": 8589934592,
+  "helper_sha256": "bf7aceeceb6026b68021f484ba5f9c21eb554aa383461fd419425a5c29ab4b92",
+  "input_sizes": {
+    "p1000": {
+      "entries": 1013,
+      "ids_bytes": 4052,
+      "ids_sha256_declared": "bdfc8f424bb16f7d3957883f3751d9fe6bbc262c84eb21664023f7b6b2a6a3b0",
+      "xyz_bytes": 12156,
+      "xyz_sha256_declared": "bcfa96ef8c1792cf5ab614f1c4f223aba3d890b3f381479c3d41841bd8fe8761"
+    },
+    "p150": {
+      "entries": 156,
+      "ids_bytes": 624,
+      "ids_sha256_declared": "5f756859a4c199046d515d32901fdcd882ddfcd97f9d0aad719573b5146d1039",
+      "xyz_bytes": 1872,
+      "xyz_sha256_declared": "aa938dc0070d03fd720692086226e5064e330d87960aa4160075f2e521518f41"
+    },
+    "p5000": {
+      "entries": 4618,
+      "ids_bytes": 18472,
+      "ids_sha256_declared": "2007e36014ae664ade8ce856d50db866a270b9d0ee1ec5d9957f61e0ffcc7174",
+      "xyz_bytes": 55416,
+      "xyz_sha256_declared": "c0122074d4a6a03ff6f9483ca16aa8c844193e6bf510008e287b471c2e5fb844"
+    }
+  },
+  "patches": {
+    "apparie_livraison/composition.patch": "3119d4cea05b4b14f7fbcdda0bdebd25ec6fe3da0c270d50e8af7821064bbaa8",
+    "lf_recouvert_gardes/proposition.patch": "0a64e44b77169b4e747599f1117290d92255bdea24a1c9c0024b5dc8674d61b0"
+  },
+  "plan_sha256": "61b2ed6feb8e9ac9e6ce1702c82efea2cbf9469c794f61baeef4604e685859dd",
+  "provenance_receipt": "../session_c3_provenance/README.md",
+  "readers_after": {
+    "morsehgp3D_v12/microbancs/mes_apparie/pilote_apparie.py": "a0f59585fbeea2cbb6de1a2abbdc4ae6b422dcb514f081ac7fb369de3d6d3dc8",
+    "morsehgp3D_v12/microbancs/outils/banc_full.py": "7d7f0661b49adf094df51d41268470571d47c51fc7795bb5b34c791a4a539904",
+    "morsehgp3D_v12/microbancs/outils/lecteur_full.py": "15437e5f09408d5fbdc6288e33a2452490489f13bf9a3b3a24c99f5d109b6554"
+  },
+  "runs": {
+    "appareil": {
+      "arms": {
+        "aa": [],
+        "ref": [],
+        "sans_cache": [
+          "--cache=0"
+        ]
+      },
+      "command_index": 1,
+      "configuration": {
+        "aa": "aa",
+        "essai": false,
+        "fils": 48,
+        "k": 5,
+        "passes": 10,
+        "reference": "ref",
+        "tours": 10,
+        "trames": [
+          "p150",
+          "p1000",
+          "p5000"
+        ],
+        "voie": "appareil"
+      },
+      "journal_inventory_sha256": "63cc577116d2e60fb82633747ef10ee82048f138649d3855ae435420f9f5df61",
+      "relative_folder": "apparie_petits_appareil",
+      "report_sha256": "75c9d8b85b88918a2f59f77057413937c1ded8dab65a847e3f6e7e863ec4123b"
+    },
+    "cpu": {
+      "arms": {
+        "aa": [],
+        "ref": [],
+        "sans_cache": [
+          "--cache=0"
+        ]
+      },
+      "command_index": 2,
+      "configuration": {
+        "aa": "aa",
+        "essai": false,
+        "fils": 48,
+        "k": 5,
+        "passes": 10,
+        "reference": "ref",
+        "tours": 10,
+        "trames": [
+          "p150",
+          "p1000",
+          "p5000"
+        ],
+        "voie": "cpu"
+      },
+      "journal_inventory_sha256": "ff7bb518467cc626efd23375f352ede7898e954b67cf109f5341800da6b397ea",
+      "relative_folder": "apparie_petits_cpu",
+      "report_sha256": "467205c146d553ca7ae455b1f9ff75b00d1377518f4a47af18f1eeb49c216aea"
+    }
+  },
+  "source_files": {
+    "morsehgp3D_v12/bench/full_probe.cpp": "1068940a06e386cb80a4802b3dd61e2df87eed69574f08c821c34dabb017179b",
+    "morsehgp3D_v12/microbancs/mes_apparie/pilote_apparie.py": "fe22a6813ebb4f801de011fb06dc7cc6af754494c9c4e2b1148aa87dfb4925d1",
+    "morsehgp3D_v12/microbancs/outils/banc_full.py": "7d7f0661b49adf094df51d41268470571d47c51fc7795bb5b34c791a4a539904",
+    "morsehgp3D_v12/microbancs/outils/lecteur_full.py": "c3e9e0f4adbbfda60203c70c902dcd4cc0a04336d5679bce372f157988805e8f"
+  },
+  "source_pin": "72f622a556130e25afdadbef84984619417286e2"
+}

@@ -1,0 +1,1147 @@
+{
+  "cache_default_octets": 8589934592,
+  "codes": "inferes du rapport et du pilote epingle",
+  "cohorte_complete": true,
+  "comparaison_descriptive_C2": {
+    "appareil:10:4": {
+      "reel": {
+        "apres_mediane_ns": 38599161.5,
+        "avant_mediane_ns": 44345042.0,
+        "mediane_ratios_apres_avant": 0.880611988011142,
+        "nuages": 132
+      },
+      "reel_le150": {
+        "apres_mediane_ns": 6486525.0,
+        "avant_mediane_ns": 7840030.0,
+        "mediane_ratios_apres_avant": 0.8409239748563953,
+        "nuages": 20
+      },
+      "tous": {
+        "apres_mediane_ns": 43418864.0,
+        "avant_mediane_ns": 48828738.5,
+        "mediane_ratios_apres_avant": 0.8856500424522105,
+        "nuages": 147
+      }
+    },
+    "appareil:10:48": {
+      "reel": {
+        "apres_mediane_ns": 14571353.5,
+        "avant_mediane_ns": 22293104.0,
+        "mediane_ratios_apres_avant": 0.6752066501420615,
+        "nuages": 132
+      },
+      "reel_le150": {
+        "apres_mediane_ns": 5736240.5,
+        "avant_mediane_ns": 7443892.5,
+        "mediane_ratios_apres_avant": 0.7814065696430108,
+        "nuages": 20
+      },
+      "tous": {
+        "apres_mediane_ns": 15566031.5,
+        "avant_mediane_ns": 24579854.0,
+        "mediane_ratios_apres_avant": 0.6818035478154021,
+        "nuages": 147
+      }
+    },
+    "appareil:5:4": {
+      "reel": {
+        "apres_mediane_ns": 10182032.25,
+        "avant_mediane_ns": 11499693.0,
+        "mediane_ratios_apres_avant": 0.889020711986835,
+        "nuages": 132
+      },
+      "reel_le150": {
+        "apres_mediane_ns": 4051352.25,
+        "avant_mediane_ns": 4533458.0,
+        "mediane_ratios_apres_avant": 0.9004577148922046,
+        "nuages": 20
+      },
+      "tous": {
+        "apres_mediane_ns": 11360899.0,
+        "avant_mediane_ns": 12727886.0,
+        "mediane_ratios_apres_avant": 0.8928307871278642,
+        "nuages": 147
+      }
+    },
+    "appareil:5:48": {
+      "reel": {
+        "apres_mediane_ns": 7855799.5,
+        "avant_mediane_ns": 9682658.75,
+        "mediane_ratios_apres_avant": 0.8018314061849452,
+        "nuages": 132
+      },
+      "reel_le150": {
+        "apres_mediane_ns": 4261724.75,
+        "avant_mediane_ns": 4535363.5,
+        "mediane_ratios_apres_avant": 0.9374847809798079,
+        "nuages": 20
+      },
+      "tous": {
+        "apres_mediane_ns": 8070929.5,
+        "avant_mediane_ns": 10149806.5,
+        "mediane_ratios_apres_avant": 0.8049934992491138,
+        "nuages": 147
+      }
+    },
+    "cpu:10:4": {
+      "reel": {
+        "apres_mediane_ns": 140474876.0,
+        "avant_mediane_ns": 145226448.5,
+        "mediane_ratios_apres_avant": 0.9641477793106463,
+        "nuages": 132
+      },
+      "reel_le150": {
+        "apres_mediane_ns": 14213444.0,
+        "avant_mediane_ns": 15090939.75,
+        "mediane_ratios_apres_avant": 0.9295264983902548,
+        "nuages": 20
+      },
+      "tous": {
+        "apres_mediane_ns": 147192655.5,
+        "avant_mediane_ns": 152565061.0,
+        "mediane_ratios_apres_avant": 0.9647861347494234,
+        "nuages": 147
+      }
+    },
+    "cpu:10:48": {
+      "reel": {
+        "apres_mediane_ns": 46419617.0,
+        "avant_mediane_ns": 52935750.25,
+        "mediane_ratios_apres_avant": 0.8496025641658997,
+        "nuages": 132
+      },
+      "reel_le150": {
+        "apres_mediane_ns": 16548450.0,
+        "avant_mediane_ns": 18638577.75,
+        "mediane_ratios_apres_avant": 0.885757899761564,
+        "nuages": 20
+      },
+      "tous": {
+        "apres_mediane_ns": 47482059.5,
+        "avant_mediane_ns": 53008305.5,
+        "mediane_ratios_apres_avant": 0.8496507470543544,
+        "nuages": 147
+      }
+    },
+    "cpu:5:4": {
+      "reel": {
+        "apres_mediane_ns": 38881863.0,
+        "avant_mediane_ns": 40366276.0,
+        "mediane_ratios_apres_avant": 0.9620533428163368,
+        "nuages": 132
+      },
+      "reel_le150": {
+        "apres_mediane_ns": 6074689.5,
+        "avant_mediane_ns": 6591495.25,
+        "mediane_ratios_apres_avant": 0.9111135201549738,
+        "nuages": 20
+      },
+      "tous": {
+        "apres_mediane_ns": 44188698.0,
+        "avant_mediane_ns": 45922685.5,
+        "mediane_ratios_apres_avant": 0.9624871700110104,
+        "nuages": 147
+      }
+    },
+    "cpu:5:48": {
+      "reel": {
+        "apres_mediane_ns": 25002768.25,
+        "avant_mediane_ns": 28020789.75,
+        "mediane_ratios_apres_avant": 0.8911292818064558,
+        "nuages": 132
+      },
+      "reel_le150": {
+        "apres_mediane_ns": 10883537.0,
+        "avant_mediane_ns": 11134868.75,
+        "mediane_ratios_apres_avant": 0.9660563107587159,
+        "nuages": 20
+      },
+      "tous": {
+        "apres_mediane_ns": 25151044.0,
+        "avant_mediane_ns": 28949450.5,
+        "mediane_ratios_apres_avant": 0.8905115010216649,
+        "nuages": 147
+      }
+    }
+  },
+  "configurations": {
+    "appareil:10:4": {
+      "droites": {
+        "clusters8": {
+          "cout_individuel_max_ns_par_site": 349349.645,
+          "fixe_ns": -84375830.58856444,
+          "nuages": 5,
+          "par_site_ns": 264914.3181210293,
+          "residu_abs_max_ns": 161513790.77452353
+        },
+        "reel": {
+          "cout_individuel_max_ns_par_site": 155030.59083333332,
+          "fixe_ns": -17425242.12090743,
+          "nuages": 132,
+          "par_site_ns": 75958.98347287755,
+          "residu_abs_max_ns": 715233869.8921319
+        },
+        "slab": {
+          "cout_individuel_max_ns_par_site": 43811.75,
+          "fixe_ns": -1275892.6241475781,
+          "nuages": 5,
+          "par_site_ns": 20830.594348662355,
+          "residu_abs_max_ns": 8019525.921839482
+        },
+        "uniform": {
+          "cout_individuel_max_ns_par_site": 1109698.225,
+          "fixe_ns": 289519141.55822694,
+          "nuages": 5,
+          "par_site_ns": 256010.36602144898,
+          "residu_abs_max_ns": 564168717.4203241
+        }
+      },
+      "groupes": {
+        "reel": {
+          "maximum_ns": 1457398462.5,
+          "mediane_ns": 38599161.5,
+          "nuages": 132
+        },
+        "reel_le150": {
+          "maximum_ns": 10109344.5,
+          "mediane_ns": 6486525.0,
+          "nuages": 20
+        },
+        "tous": {
+          "maximum_ns": 2876883379.0,
+          "mediane_ns": 43418864.0,
+          "nuages": 147
+        }
+      }
+    },
+    "appareil:10:48": {
+      "droites": {
+        "clusters8": {
+          "cout_individuel_max_ns_par_site": 245339.625,
+          "fixe_ns": 6929022.3270676695,
+          "nuages": 5,
+          "par_site_ns": 33035.71707393484,
+          "residu_abs_max_ns": 17493396.04887218
+        },
+        "reel": {
+          "cout_individuel_max_ns_par_site": 73924.06,
+          "fixe_ns": 5373804.635936374,
+          "nuages": 132,
+          "par_site_ns": 10941.135343624683,
+          "residu_abs_max_ns": 84568957.42781681
+        },
+        "slab": {
+          "cout_individuel_max_ns_par_site": 43726.85,
+          "fixe_ns": 4883439.447280993,
+          "nuages": 5,
+          "par_site_ns": 3655.829705805211,
+          "residu_abs_max_ns": 876337.4178615143
+        },
+        "uniform": {
+          "cout_individuel_max_ns_par_site": 377551.63,
+          "fixe_ns": 69655039.49868858,
+          "nuages": 5,
+          "par_site_ns": 29212.84010462202,
+          "residu_abs_max_ns": 64604038.3966894
+        }
+      },
+      "groupes": {
+        "reel": {
+          "maximum_ns": 199354115.5,
+          "mediane_ns": 14571353.5,
+          "nuages": 132
+        },
+        "reel_le150": {
+          "maximum_ns": 7392406.0,
+          "mediane_ns": 5736240.5,
+          "nuages": 20
+        },
+        "tous": {
+          "maximum_ns": 363363074.0,
+          "mediane_ns": 15566031.5,
+          "nuages": 147
+        }
+      }
+    },
+    "appareil:5:4": {
+      "droites": {
+        "clusters8": {
+          "cout_individuel_max_ns_par_site": 131943.89,
+          "fixe_ns": 1005418.8079209652,
+          "nuages": 5,
+          "par_site_ns": 25898.294268083,
+          "residu_abs_max_ns": 16762844.61216996
+        },
+        "reel": {
+          "cout_individuel_max_ns_par_site": 48194.25,
+          "fixe_ns": 2594577.157329674,
+          "nuages": 132,
+          "par_site_ns": 9469.256470129832,
+          "residu_abs_max_ns": 60168845.641372
+        },
+        "slab": {
+          "cout_individuel_max_ns_par_site": 33406.995,
+          "fixe_ns": 3063894.1336772162,
+          "nuages": 5,
+          "par_site_ns": 4071.493113306522,
+          "residu_abs_max_ns": 387292.75301626156
+        },
+        "uniform": {
+          "cout_individuel_max_ns_par_site": 328956.8016666667,
+          "fixe_ns": 119103671.90723903,
+          "nuages": 5,
+          "par_site_ns": 15282.837289153116,
+          "residu_abs_max_ns": 166631856.30360785
+        }
+      },
+      "groupes": {
+        "reel": {
+          "maximum_ns": 157455987.5,
+          "mediane_ns": 10182032.25,
+          "nuages": 132
+        },
+        "reel_le150": {
+          "maximum_ns": 5060840.0,
+          "mediane_ns": 4051352.25,
+          "nuages": 20
+        },
+        "tous": {
+          "maximum_ns": 301018365.5,
+          "mediane_ns": 11360899.0,
+          "nuages": 147
+        }
+      }
+    },
+    "appareil:5:48": {
+      "droites": {
+        "clusters8": {
+          "cout_individuel_max_ns_par_site": 131066.145,
+          "fixe_ns": 10556046.943609023,
+          "nuages": 5,
+          "par_site_ns": 4100.3044987468675,
+          "residu_abs_max_ns": 2337826.439849624
+        },
+        "reel": {
+          "cout_individuel_max_ns_par_site": 49889.85,
+          "fixe_ns": 5394124.807609879,
+          "nuages": 132,
+          "par_site_ns": 2176.3168132342653,
+          "residu_abs_max_ns": 5479895.560047466
+        },
+        "slab": {
+          "cout_individuel_max_ns_par_site": 43080.595,
+          "fixe_ns": 4410242.613568806,
+          "nuages": 5,
+          "par_site_ns": 1030.377773066387,
+          "residu_abs_max_ns": 860963.5672320336
+        },
+        "uniform": {
+          "cout_individuel_max_ns_par_site": 247677.69,
+          "fixe_ns": 48049200.99606574,
+          "nuages": 5,
+          "par_site_ns": -75.17885280060617,
+          "residu_abs_max_ns": 28292084.35673486
+        }
+      },
+      "groupes": {
+        "reel": {
+          "maximum_ns": 32637188.5,
+          "mediane_ns": 7855799.5,
+          "nuages": 132
+        },
+        "reel_le150": {
+          "maximum_ns": 5089249.5,
+          "mediane_ns": 4261724.75,
+          "nuages": 20
+        },
+        "tous": {
+          "maximum_ns": 76266106.5,
+          "mediane_ns": 8070929.5,
+          "nuages": 147
+        }
+      }
+    },
+    "cpu:10:4": {
+      "droites": {
+        "clusters8": {
+          "cout_individuel_max_ns_par_site": 554058.13085,
+          "fixe_ns": -170938829.87908724,
+          "nuages": 5,
+          "par_site_ns": 563255.8373538498,
+          "residu_abs_max_ns": 253587899.68246198
+        },
+        "reel": {
+          "cout_individuel_max_ns_par_site": 383566.003,
+          "fixe_ns": -32495718.433346976,
+          "nuages": 132,
+          "par_site_ns": 234809.543912419,
+          "residu_abs_max_ns": 1336444117.809157
+        },
+        "slab": {
+          "cout_individuel_max_ns_par_site": 59253.915,
+          "fixe_ns": -2633564.0542052807,
+          "nuages": 5,
+          "par_site_ns": 50573.273213265726,
+          "residu_abs_max_ns": 9677063.085591886
+        },
+        "uniform": {
+          "cout_individuel_max_ns_par_site": 1171524.517,
+          "fixe_ns": 168689217.4181675,
+          "nuages": 5,
+          "par_site_ns": 563189.2016950807,
+          "residu_abs_max_ns": 439646097.8867518
+        }
+      },
+      "groupes": {
+        "reel": {
+          "maximum_ns": 3652043838.5,
+          "mediane_ns": 140474876.0,
+          "nuages": 132
+        },
+        "reel_le150": {
+          "maximum_ns": 25706849.0,
+          "mediane_ns": 14213444.0,
+          "nuages": 20
+        },
+        "tous": {
+          "maximum_ns": 5846710565.0,
+          "mediane_ns": 147192655.5,
+          "nuages": 147
+        }
+      }
+    },
+    "cpu:10:48": {
+      "droites": {
+        "clusters8": {
+          "cout_individuel_max_ns_par_site": 297076.95,
+          "fixe_ns": 8467683.392201433,
+          "nuages": 5,
+          "par_site_ns": 71178.3649332634,
+          "residu_abs_max_ns": 18940425.19199161
+        },
+        "reel": {
+          "cout_individuel_max_ns_par_site": 182611.55,
+          "fixe_ns": 16852471.844743334,
+          "nuages": 132,
+          "par_site_ns": 33871.970646906426,
+          "residu_abs_max_ns": 160054843.6861924
+        },
+        "slab": {
+          "cout_individuel_max_ns_par_site": 78920.95,
+          "fixe_ns": 10623407.979104739,
+          "nuages": 5,
+          "par_site_ns": 9213.647889199743,
+          "residu_abs_max_ns": 3652677.768024713
+        },
+        "uniform": {
+          "cout_individuel_max_ns_par_site": 448305.995,
+          "fixe_ns": 65348877.26927785,
+          "nuages": 5,
+          "par_site_ns": 68195.61462872296,
+          "residu_abs_max_ns": 54242217.101999186
+        }
+      },
+      "groupes": {
+        "reel": {
+          "maximum_ns": 515627022.0,
+          "mediane_ns": 46419617.0,
+          "nuages": 132
+        },
+        "reel_le150": {
+          "maximum_ns": 20346300.0,
+          "mediane_ns": 16548450.0,
+          "nuages": 20
+        },
+        "tous": {
+          "maximum_ns": 750387775.0,
+          "mediane_ns": 47482059.5,
+          "nuages": 147
+        }
+      }
+    },
+    "cpu:5:4": {
+      "droites": {
+        "clusters8": {
+          "cout_individuel_max_ns_par_site": 119233.34,
+          "fixe_ns": -15057727.01766043,
+          "nuages": 5,
+          "par_site_ns": 100922.51285335432,
+          "residu_abs_max_ns": 28379306.542402517
+        },
+        "reel": {
+          "cout_individuel_max_ns_par_site": 82164.2155,
+          "fixe_ns": -1277287.556891356,
+          "nuages": 132,
+          "par_site_ns": 54110.80678861311,
+          "residu_abs_max_ns": 195228215.67076027
+        },
+        "slab": {
+          "cout_individuel_max_ns_par_site": 32542.35,
+          "fixe_ns": 3135274.807134114,
+          "nuages": 5,
+          "par_site_ns": 15213.82583085621,
+          "residu_abs_max_ns": 3529594.7002972546
+        },
+        "uniform": {
+          "cout_individuel_max_ns_par_site": 334343.58166666667,
+          "fixe_ns": 90513669.49510404,
+          "nuages": 5,
+          "par_site_ns": 88092.31277947777,
+          "residu_abs_max_ns": 134660579.2254182
+        }
+      },
+      "groupes": {
+        "reel": {
+          "maximum_ns": 735058996.0,
+          "mediane_ns": 38881863.0,
+          "nuages": 132
+        },
+        "reel_le150": {
+          "maximum_ns": 9856184.5,
+          "mediane_ns": 6074689.5,
+          "nuages": 20
+        },
+        "tous": {
+          "maximum_ns": 1002823337.0,
+          "mediane_ns": 44188698.0,
+          "nuages": 147
+        }
+      }
+    },
+    "cpu:5:48": {
+      "droites": {
+        "clusters8": {
+          "cout_individuel_max_ns_par_site": 192981.04,
+          "fixe_ns": 18624738.47892988,
+          "nuages": 5,
+          "par_site_ns": 15567.473792038236,
+          "residu_abs_max_ns": 883381.8581337064
+        },
+        "reel": {
+          "cout_individuel_max_ns_par_site": 124156.045,
+          "fixe_ns": 14902287.577596335,
+          "nuages": 132,
+          "par_site_ns": 10063.622429364987,
+          "residu_abs_max_ns": 18532736.6287538
+        },
+        "slab": {
+          "cout_individuel_max_ns_par_site": 59512.795,
+          "fixe_ns": 8194879.929270851,
+          "nuages": 5,
+          "par_site_ns": 3544.5201981698433,
+          "residu_abs_max_ns": 3038028.4762196187
+        },
+        "uniform": {
+          "cout_individuel_max_ns_par_site": 296378.135,
+          "fixe_ns": 49158228.63516349,
+          "nuages": 5,
+          "par_site_ns": 11269.261272512676,
+          "residu_abs_max_ns": 25234906.092323832
+        }
+      },
+      "groupes": {
+        "reel": {
+          "maximum_ns": 134071248.5,
+          "mediane_ns": 25002768.25,
+          "nuages": 132
+        },
+        "reel_le150": {
+          "maximum_ns": 14362529.0,
+          "mediane_ns": 10883537.0,
+          "nuages": 20
+        },
+        "tous": {
+          "maximum_ns": 174373196.5,
+          "mediane_ns": 25151044.0,
+          "nuages": 147
+        }
+      }
+    }
+  },
+  "contreflux": {
+    "continuite_memoire_C_tour": "refuse",
+    "identite_trame": "refuse",
+    "schema_sequentiel": "refuse",
+    "tour_hors_mur": "refuse"
+  },
+  "controles": [],
+  "criteres": {
+    "C1": "non tenu",
+    "C2": "non tenu",
+    "C3": "non tenu"
+  },
+  "differences": [],
+  "difficiles": [
+    {
+      "chaud_ns": 27237119,
+      "etat": "ok",
+      "fils": 48,
+      "k": 5,
+      "nom": "synth_sphere_n100",
+      "raison": "",
+      "sites": 100,
+      "voie": "cpu"
+    },
+    {
+      "chaud_ns": 89437946,
+      "etat": "ok",
+      "fils": 48,
+      "k": 5,
+      "nom": "synth_sphere_n300",
+      "raison": "",
+      "sites": 300,
+      "voie": "cpu"
+    },
+    {
+      "chaud_ns": 259644219,
+      "etat": "ok",
+      "fils": 48,
+      "k": 5,
+      "nom": "synth_sphere_n1000",
+      "raison": "",
+      "sites": 1000,
+      "voie": "cpu"
+    },
+    {
+      "etat": "refus",
+      "fils": 48,
+      "k": 5,
+      "nom": "synth_sphere_n3000",
+      "raison": "unsupported_degeneracy/wide_leaf",
+      "sites": 3000,
+      "voie": "cpu"
+    },
+    {
+      "etat": "refus",
+      "fils": 48,
+      "k": 5,
+      "nom": "synth_sphere_n10000",
+      "raison": "unsupported_degeneracy/wide_leaf",
+      "sites": 10000,
+      "voie": "cpu"
+    },
+    {
+      "chaud_ns": 3113030,
+      "etat": "ok",
+      "fils": 48,
+      "k": 5,
+      "nom": "synth_line_n100",
+      "raison": "",
+      "sites": 100,
+      "voie": "cpu"
+    },
+    {
+      "chaud_ns": 7505619,
+      "etat": "ok",
+      "fils": 48,
+      "k": 5,
+      "nom": "synth_line_n1000",
+      "raison": "",
+      "sites": 1000,
+      "voie": "cpu"
+    },
+    {
+      "chaud_ns": 12224689,
+      "etat": "ok",
+      "fils": 48,
+      "k": 5,
+      "nom": "synth_lattice_n100",
+      "raison": "",
+      "sites": 100,
+      "voie": "cpu"
+    },
+    {
+      "chaud_ns": 27649319,
+      "etat": "ok",
+      "fils": 48,
+      "k": 5,
+      "nom": "synth_lattice_n300",
+      "raison": "",
+      "sites": 300,
+      "voie": "cpu"
+    },
+    {
+      "chaud_ns": 50270358,
+      "etat": "ok",
+      "fils": 48,
+      "k": 5,
+      "nom": "synth_lattice_n1000",
+      "raison": "",
+      "sites": 1000,
+      "voie": "cpu"
+    },
+    {
+      "chaud_ns": 100096956,
+      "etat": "ok",
+      "fils": 48,
+      "k": 5,
+      "nom": "synth_lattice_n3000",
+      "raison": "",
+      "sites": 3000,
+      "voie": "cpu"
+    },
+    {
+      "chaud_ns": 226863650,
+      "etat": "ok",
+      "fils": 48,
+      "k": 5,
+      "nom": "synth_lattice_n10000",
+      "raison": "",
+      "sites": 10000,
+      "voie": "cpu"
+    },
+    {
+      "chaud_ns": 19744629,
+      "etat": "ok",
+      "fils": 48,
+      "k": 5,
+      "nom": "synth_sphere_n100",
+      "raison": "",
+      "sites": 100,
+      "voie": "appareil"
+    },
+    {
+      "chaud_ns": 72119787,
+      "etat": "ok",
+      "fils": 48,
+      "k": 5,
+      "nom": "synth_sphere_n300",
+      "raison": "",
+      "sites": 300,
+      "voie": "appareil"
+    },
+    {
+      "chaud_ns": 242596299,
+      "etat": "ok",
+      "fils": 48,
+      "k": 5,
+      "nom": "synth_sphere_n1000",
+      "raison": "",
+      "sites": 1000,
+      "voie": "appareil"
+    },
+    {
+      "etat": "refus",
+      "fils": 48,
+      "k": 5,
+      "nom": "synth_sphere_n3000",
+      "raison": "unsupported_degeneracy/wide_leaf",
+      "sites": 3000,
+      "voie": "appareil"
+    },
+    {
+      "etat": "refus",
+      "fils": 48,
+      "k": 5,
+      "nom": "synth_sphere_n10000",
+      "raison": "unsupported_degeneracy/wide_leaf",
+      "sites": 10000,
+      "voie": "appareil"
+    },
+    {
+      "chaud_ns": 2320240,
+      "etat": "ok",
+      "fils": 48,
+      "k": 5,
+      "nom": "synth_line_n100",
+      "raison": "",
+      "sites": 100,
+      "voie": "appareil"
+    },
+    {
+      "chaud_ns": 3746690,
+      "etat": "ok",
+      "fils": 48,
+      "k": 5,
+      "nom": "synth_line_n1000",
+      "raison": "",
+      "sites": 1000,
+      "voie": "appareil"
+    },
+    {
+      "chaud_ns": 9438410,
+      "etat": "ok",
+      "fils": 48,
+      "k": 5,
+      "nom": "synth_lattice_n100",
+      "raison": "",
+      "sites": 100,
+      "voie": "appareil"
+    },
+    {
+      "chaud_ns": 22203649,
+      "etat": "ok",
+      "fils": 48,
+      "k": 5,
+      "nom": "synth_lattice_n300",
+      "raison": "",
+      "sites": 300,
+      "voie": "appareil"
+    },
+    {
+      "chaud_ns": 40359388,
+      "etat": "ok",
+      "fils": 48,
+      "k": 5,
+      "nom": "synth_lattice_n1000",
+      "raison": "",
+      "sites": 1000,
+      "voie": "appareil"
+    },
+    {
+      "chaud_ns": 61563567,
+      "etat": "ok",
+      "fils": 48,
+      "k": 5,
+      "nom": "synth_lattice_n3000",
+      "raison": "",
+      "sites": 3000,
+      "voie": "appareil"
+    },
+    {
+      "chaud_ns": 165169803,
+      "etat": "ok",
+      "fils": 48,
+      "k": 5,
+      "nom": "synth_lattice_n10000",
+      "raison": "",
+      "sites": 10000,
+      "voie": "appareil"
+    },
+    {
+      "chaud_ns": 84067525,
+      "etat": "ok",
+      "fils": 48,
+      "k": 10,
+      "nom": "synth_sphere_n100",
+      "raison": "",
+      "sites": 100,
+      "voie": "cpu"
+    },
+    {
+      "chaud_ns": 576177852,
+      "etat": "ok",
+      "fils": 48,
+      "k": 10,
+      "nom": "synth_sphere_n300",
+      "raison": "",
+      "sites": 300,
+      "voie": "cpu"
+    },
+    {
+      "chaud_ns": 1619456818,
+      "etat": "ok",
+      "fils": 48,
+      "k": 10,
+      "nom": "synth_sphere_n1000",
+      "raison": "",
+      "sites": 1000,
+      "voie": "cpu"
+    },
+    {
+      "etat": "refus",
+      "fils": 48,
+      "k": 10,
+      "nom": "synth_sphere_n3000",
+      "raison": "unsupported_degeneracy/wide_leaf",
+      "sites": 3000,
+      "voie": "cpu"
+    },
+    {
+      "etat": "refus",
+      "fils": 48,
+      "k": 10,
+      "nom": "synth_sphere_n10000",
+      "raison": "unsupported_degeneracy/wide_leaf",
+      "sites": 10000,
+      "voie": "cpu"
+    },
+    {
+      "chaud_ns": 3056451,
+      "etat": "ok",
+      "fils": 48,
+      "k": 10,
+      "nom": "synth_line_n100",
+      "raison": "",
+      "sites": 100,
+      "voie": "cpu"
+    },
+    {
+      "chaud_ns": 9844951,
+      "etat": "ok",
+      "fils": 48,
+      "k": 10,
+      "nom": "synth_line_n1000",
+      "raison": "",
+      "sites": 1000,
+      "voie": "cpu"
+    },
+    {
+      "chaud_ns": 108760039,
+      "etat": "ok",
+      "fils": 48,
+      "k": 10,
+      "nom": "synth_lattice_n100",
+      "raison": "",
+      "sites": 100,
+      "voie": "cpu"
+    },
+    {
+      "chaud_ns": 519162642,
+      "etat": "ok",
+      "fils": 48,
+      "k": 10,
+      "nom": "synth_lattice_n300",
+      "raison": "",
+      "sites": 300,
+      "voie": "cpu"
+    },
+    {
+      "chaud_ns": 2495957913,
+      "etat": "ok",
+      "fils": 48,
+      "k": 10,
+      "nom": "synth_lattice_n1000",
+      "raison": "",
+      "sites": 1000,
+      "voie": "cpu"
+    },
+    {
+      "chaud_ns": 7301600438,
+      "etat": "ok",
+      "fils": 48,
+      "k": 10,
+      "nom": "synth_lattice_n3000",
+      "raison": "",
+      "sites": 3000,
+      "voie": "cpu"
+    },
+    {
+      "chaud_ns": 11597621614,
+      "etat": "ok",
+      "fils": 48,
+      "k": 10,
+      "nom": "synth_lattice_n10000",
+      "raison": "",
+      "sites": 10000,
+      "voie": "cpu"
+    },
+    {
+      "chaud_ns": 58449750,
+      "etat": "ok",
+      "fils": 48,
+      "k": 10,
+      "nom": "synth_sphere_n100",
+      "raison": "",
+      "sites": 100,
+      "voie": "appareil"
+    },
+    {
+      "chaud_ns": 554242565,
+      "etat": "ok",
+      "fils": 48,
+      "k": 10,
+      "nom": "synth_sphere_n300",
+      "raison": "",
+      "sites": 300,
+      "voie": "appareil"
+    },
+    {
+      "chaud_ns": 1575808086,
+      "etat": "ok",
+      "fils": 48,
+      "k": 10,
+      "nom": "synth_sphere_n1000",
+      "raison": "",
+      "sites": 1000,
+      "voie": "appareil"
+    },
+    {
+      "etat": "refus",
+      "fils": 48,
+      "k": 10,
+      "nom": "synth_sphere_n3000",
+      "raison": "unsupported_degeneracy/wide_leaf",
+      "sites": 3000,
+      "voie": "appareil"
+    },
+    {
+      "etat": "refus",
+      "fils": 48,
+      "k": 10,
+      "nom": "synth_sphere_n10000",
+      "raison": "unsupported_degeneracy/wide_leaf",
+      "sites": 10000,
+      "voie": "appareil"
+    },
+    {
+      "chaud_ns": 3112480,
+      "etat": "ok",
+      "fils": 48,
+      "k": 10,
+      "nom": "synth_line_n100",
+      "raison": "",
+      "sites": 100,
+      "voie": "appareil"
+    },
+    {
+      "chaud_ns": 4405700,
+      "etat": "ok",
+      "fils": 48,
+      "k": 10,
+      "nom": "synth_line_n1000",
+      "raison": "",
+      "sites": 1000,
+      "voie": "appareil"
+    },
+    {
+      "chaud_ns": 90097421,
+      "etat": "ok",
+      "fils": 48,
+      "k": 10,
+      "nom": "synth_lattice_n100",
+      "raison": "",
+      "sites": 100,
+      "voie": "appareil"
+    },
+    {
+      "chaud_ns": 498429965,
+      "etat": "ok",
+      "fils": 48,
+      "k": 10,
+      "nom": "synth_lattice_n300",
+      "raison": "",
+      "sites": 300,
+      "voie": "appareil"
+    },
+    {
+      "chaud_ns": 2421540623,
+      "etat": "ok",
+      "fils": 48,
+      "k": 10,
+      "nom": "synth_lattice_n1000",
+      "raison": "",
+      "sites": 1000,
+      "voie": "appareil"
+    },
+    {
+      "chaud_ns": 7117667270,
+      "etat": "ok",
+      "fils": 48,
+      "k": 10,
+      "nom": "synth_lattice_n3000",
+      "raison": "",
+      "sites": 3000,
+      "voie": "appareil"
+    },
+    {
+      "chaud_ns": 10946547652,
+      "etat": "ok",
+      "fils": 48,
+      "k": 10,
+      "nom": "synth_lattice_n10000",
+      "raison": "",
+      "sites": 10000,
+      "voie": "appareil"
+    }
+  ],
+  "empreintes_C2_comparees": 1176,
+  "etats": {
+    "ok": 48,
+    "refus": 8
+  },
+  "fonctions_pilote_preservees": [
+    "clouds_of",
+    "play_hard",
+    "session_values",
+    "overall",
+    "group_of",
+    "verdicts",
+    "play_session",
+    "tables",
+    "fit",
+    "fits_of"
+  ],
+  "native_calls": 0,
+  "passes_chaudes": 2392,
+  "passes_completes": 3608,
+  "processus_joues": 56,
+  "processus_prevus": 56,
+  "ressources": {
+    "appareil:10:4": {
+      "capacite_appareil_max": 1974757012,
+      "cpu_chaud_total_ns": 209777607000,
+      "epinglee_max": 16777216,
+      "passes_chaudes": 294,
+      "pic_budget_appareil_max": 1974757012,
+      "pic_budget_hote_max": 1690923284,
+      "rss_processus_max": 4042805248
+    },
+    "appareil:10:48": {
+      "capacite_appareil_max": 1974757012,
+      "cpu_chaud_total_ns": 274254651000,
+      "epinglee_max": 16777216,
+      "passes_chaudes": 294,
+      "pic_budget_appareil_max": 1974757012,
+      "pic_budget_hote_max": 1693857812,
+      "rss_processus_max": 4096393216
+    },
+    "appareil:5:4": {
+      "capacite_appareil_max": 373736380,
+      "cpu_chaud_total_ns": 27611078000,
+      "epinglee_max": 16777216,
+      "passes_chaudes": 294,
+      "pic_budget_appareil_max": 373736380,
+      "pic_budget_hote_max": 284835655,
+      "rss_processus_max": 754065408
+    },
+    "appareil:5:48": {
+      "capacite_appareil_max": 373736380,
+      "cpu_chaud_total_ns": 37074063000,
+      "epinglee_max": 16777216,
+      "passes_chaudes": 294,
+      "pic_budget_appareil_max": 373736380,
+      "pic_budget_hote_max": 288726632,
+      "rss_processus_max": 815935488
+    },
+    "cpu:10:4": {
+      "capacite_appareil_max": 0,
+      "cpu_chaud_total_ns": 607110348000,
+      "epinglee_max": 0,
+      "passes_chaudes": 294,
+      "pic_budget_appareil_max": 0,
+      "pic_budget_hote_max": 1899340308,
+      "rss_processus_max": 7043604480
+    },
+    "cpu:10:48": {
+      "capacite_appareil_max": 0,
+      "cpu_chaud_total_ns": 954450571000,
+      "epinglee_max": 0,
+      "passes_chaudes": 294,
+      "pic_budget_appareil_max": 0,
+      "pic_budget_hote_max": 1899340308,
+      "rss_processus_max": 7035023360
+    },
+    "cpu:5:4": {
+      "capacite_appareil_max": 0,
+      "cpu_chaud_total_ns": 138203500000,
+      "epinglee_max": 0,
+      "passes_chaudes": 294,
+      "pic_budget_appareil_max": 0,
+      "pic_budget_hote_max": 345379500,
+      "rss_processus_max": 1250201600
+    },
+    "cpu:5:48": {
+      "capacite_appareil_max": 0,
+      "cpu_chaud_total_ns": 231754073000,
+      "epinglee_max": 0,
+      "passes_chaudes": 294,
+      "pic_budget_appareil_max": 0,
+      "pic_budget_hote_max": 345379500,
+      "rss_processus_max": 1260494848
+    }
+  },
+  "schema": "recouvert",
+  "source_commit": "72f622a556130e25afdadbef84984619417286e2",
+  "verdict": "non tenu"
+}
