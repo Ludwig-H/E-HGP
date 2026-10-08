@@ -1,0 +1,49 @@
+$ $HOME/ehgp-v12/ehgp-v12.LmS9iFbFLg/build/t1b/mutants/feuille_non_resolue_admise_sans_rejeu/b/mhgp12_catalogue_device_unit
+ECHEC device_pipeline_test.cpp:176: same(cloud.value(), ref.value(), first.value())
+ECHEC device_pipeline_test.cpp:55: got.replayed_leaves >= std::max(got.replayed_wide, got.replayed_span)
+ECHEC device_pipeline_test.cpp:55: got.replayed_leaves >= std::max(got.replayed_wide, got.replayed_span)
+ECHEC device_pipeline_test.cpp:176: same(cloud.value(), ref.value(), first.value())
+ECHEC device_pipeline_test.cpp:55: got.replayed_leaves >= std::max(got.replayed_wide, got.replayed_span)
+ECHEC device_pipeline_test.cpp:55: got.replayed_leaves >= std::max(got.replayed_wide, got.replayed_span)
+ECHEC device_pipeline_test.cpp:176: same(cloud.value(), ref.value(), first.value())
+ECHEC device_pipeline_test.cpp:50: got.leaves_rewritten == ref.leaves_rewritten
+      obtenu 0, attendu 1
+ECHEC device_pipeline_test.cpp:55: got.replayed_leaves >= std::max(got.replayed_wide, got.replayed_span)
+ECHEC device_pipeline_test.cpp:50: got.leaves_rewritten == ref.leaves_rewritten
+      obtenu 0, attendu 1
+ECHEC device_pipeline_test.cpp:55: got.replayed_leaves >= std::max(got.replayed_wide, got.replayed_span)
+device_open : voie appareil jouee sur 9 temoins
+test device_open controles=217 echecs=11 plancher=1
+test device_reasons controles=2 echecs=0 plancher=2
+test finish_plateau controles=22 echecs=0 plancher=8
+test finish_random controles=19 echecs=0 plancher=10
+test finish_ties controles=22 echecs=0 plancher=12
+test level_words controles=11224 echecs=0 plancher=3000
+ECHEC device_pipeline_test.cpp:136: same(cloud.value(), ref.value(), got.value())
+test pipeline_resident controles=27 echecs=1 plancher=10
+ECHEC device_pipeline_test.cpp:85: same(cloud.value(), ref.value(), got.value())
+ECHEC device_pipeline_test.cpp:55: got.replayed_leaves >= std::max(got.replayed_wide, got.replayed_span)
+ECHEC device_pipeline_test.cpp:95: diag.replayed_leaves >= 1 && diag.replayed_span >= 1 && diag.leaves_exact == 1
+ECHEC device_pipeline_test.cpp:85: same(cloud.value(), ref.value(), got.value())
+ECHEC device_pipeline_test.cpp:55: got.replayed_leaves >= std::max(got.replayed_wide, got.replayed_span)
+ECHEC device_pipeline_test.cpp:85: same(cloud.value(), ref.value(), got.value())
+ECHEC device_pipeline_test.cpp:50: got.leaves_rewritten == ref.leaves_rewritten
+      obtenu 0, attendu 1
+ECHEC device_pipeline_test.cpp:55: got.replayed_leaves >= std::max(got.replayed_wide, got.replayed_span)
+ECHEC device_pipeline_test.cpp:97: diag.replayed_leaves >= 8 && diag.replayed_wide == 8 && diag.rewritten_host >= 1
+ECHEC device_pipeline_test.cpp:99: replayed >= 9
+ECHEC device_pipeline_test.cpp:102: rewritten_host >= 1
+ECHEC device_pipeline_test.cpp:114: !refused.ok() && refused.outcome().reason == Reason::shell_capacity
+ECHEC device_pipeline_test.cpp:118: budget.used() == before
+      obtenu 27792, attendu 2360
+test pipeline_witnesses controles=146 echecs=13 plancher=130
+test radix_and_scan controles=82 echecs=0 plancher=40
+ECHECS 25
+
+--- stderr ---
+ecart appareil : triangle_long
+ecart appareil : coquille24
+ecart appareil : coquille48
+ecart : triangle_long
+ecart : coquille24
+ecart : coquille48

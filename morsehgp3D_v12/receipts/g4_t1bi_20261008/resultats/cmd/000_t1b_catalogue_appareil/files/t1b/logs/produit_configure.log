@@ -1,0 +1,30 @@
+$ /usr/bin/cmake -S $HOME/ehgp-v12/ehgp-v12.LmS9iFbFLg/src/morsehgp3D_v12 -B $HOME/ehgp-v12/ehgp-v12.LmS9iFbFLg/build/t1b/b21 -DCMAKE_BUILD_TYPE=Release -DMHGP12_COORD_BITS=21 -DMHGP12_ENABLE_CUDA=ON -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc
+-- The CXX compiler identification is GNU 11.4.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- The CUDA compiler identification is NVIDIA 12.9.41
+-- Detecting CUDA compiler ABI info
+-- Detecting CUDA compiler ABI info - done
+-- Check for working CUDA compiler: /usr/local/cuda/bin/nvcc - skipped
+-- Detecting CUDA compile features
+-- Detecting CUDA compile features - done
+-- Found CUDAToolkit: /usr/local/cuda/include (found version "12.9.41") 
+-- Looking for C++ include pthread.h
+-- Looking for C++ include pthread.h - found
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- mhgp12 : unites testees = core;num;sched;cloud;io;index;catalogue;tower;reference ; modules de la bibliotheque = core;num;sched;cloud;io;index;catalogue;tower ; bits = 21
+-- Found Python3: /usr/bin/python3.10 (found suitable version "3.10.12", minimum required is "3.10") found components: Interpreter 
+-- mhgp12 : portes diff_v11 du catalogue absentes (MHGP12_V11_CATALOGUE_DIR='')
+-- mhgp12 : portes diff_v11 de la tour absentes (MHGP12_V11_TOWER_DIR='')
+-- mhgp12 : portes diff_v10 de la reference absentes (MHGP12_V10_FROZEN_DIR='' sans mhgp10_catalogue ni mhgp10_tower)
+-- mhgp12 : 695 portes enregistrees
+-- Configuring done
+-- Generating done
+-- Build files have been written to: $HOME/ehgp-v12/ehgp-v12.LmS9iFbFLg/build/t1b/b21
+
+--- stderr ---

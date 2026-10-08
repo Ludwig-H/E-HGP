@@ -1,0 +1,26 @@
+$ $HOME/ehgp-v12/ehgp-v12.LmS9iFbFLg/build/t1b/mutants/fin_sans_departage_exact/b/mhgp12_catalogue_device_unit
+device_open : voie appareil jouee sur 9 temoins
+test device_open controles=217 echecs=0 plancher=1
+test device_reasons controles=2 echecs=0 plancher=2
+test finish_plateau controles=22 echecs=0 plancher=8
+test finish_random controles=19 echecs=0 plancher=10
+ECHEC device_finish_test.cpp:161: balls
+ECHEC device_finish_test.cpp:162: std::equal(ref.offsets.begin(), ref.offsets.end(), o.offsets.begin(), o.offsets.end())
+ECHEC device_finish_test.cpp:163: std::equal(ref.values.begin(), ref.values.end(), o.values.begin(), o.values.end())
+ECHEC device_finish_test.cpp:172: levels
+ECHEC device_finish_test.cpp:175: table
+ECHEC device_finish_test.cpp:252: check_finish(cl, r, 1) >= 1
+ECHEC device_finish_test.cpp:161: balls
+ECHEC device_finish_test.cpp:162: std::equal(ref.offsets.begin(), ref.offsets.end(), o.offsets.begin(), o.offsets.end())
+ECHEC device_finish_test.cpp:163: std::equal(ref.values.begin(), ref.values.end(), o.values.begin(), o.values.end())
+ECHEC device_finish_test.cpp:172: levels
+ECHEC device_finish_test.cpp:175: table
+ECHEC device_finish_test.cpp:253: check_finish(cl, r, 2) >= 1
+test finish_ties controles=22 echecs=12 plancher=12
+test level_words controles=11224 echecs=0 plancher=3000
+test pipeline_resident controles=27 echecs=0 plancher=10
+test pipeline_witnesses controles=146 echecs=0 plancher=130
+test radix_and_scan controles=82 echecs=0 plancher=40
+ECHECS 12
+
+--- stderr ---

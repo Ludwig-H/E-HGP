@@ -1,0 +1,6 @@
+$ $HOME/ehgp-v12/ehgp-v12.LmS9iFbFLg/build/t1b/b21/mhgp12_catalogue_device_unit device_open
+device_open : voie appareil jouee sur 9 temoins
+test device_open controles=217 echecs=0 plancher=1
+mhgp12_test_ok tests=1 controles=217
+
+--- stderr ---

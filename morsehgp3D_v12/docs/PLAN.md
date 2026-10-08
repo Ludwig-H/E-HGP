@@ -86,8 +86,11 @@ Euler à K+2 (filet), différentiel du catalogue contre la v11 sur trames entiè
 écart publié.
 
 **État de T1 (7 octobre 2026, soir)** : voie CPU de référence livrée et conforme à la v11 gelée (K5 et K10, profils
-21 et 32, [contrat § 9](CONTRAT_CATALOGUE.md)) ; lecteur de transition livré ; voie appareil (T1-b) à écrire et à
-juger sur G4 (identité à l'octet avec la voie CPU, budget de l'étage C).
+21 et 32, [contrat § 9](CONTRAT_CATALOGUE.md)) ; lecteur de transition livré. **Voie appareil (T1-b) adoptée sur G4
+le 8 octobre** ([session I](../receipts/g4_t1bi_20261008/README.md)) : identité à l'octet avec la voie CPU sur ng00–02 à
+K5 et K10 et sur les uniformes, trois mutants appareil tués, étage C à chaud **35,1 / 30,8 / 37,6 ms à K5** (maximum
+des médianes par processus 35,5 / 31,0 / 37,7 ms, budget 45 ms), dont 8 à 10 ms de transferts ; 113 à 146 ms à K10.
+Voie CPU après la fin d'étage partagée : 281 à 334 ms à K5 (0,71 à 0,77 de F2).
 
 **T1-c — voie large (ouverte le 7 octobre, `CST-0237`)**. L'objectif des petits nuages « aucune famille dégénérée
 refusée ni expirée » ([`MESURE.md`](MESURE.md) § 2) n'est pas couvert par T1 : feuilles d'au plus 256 sites,

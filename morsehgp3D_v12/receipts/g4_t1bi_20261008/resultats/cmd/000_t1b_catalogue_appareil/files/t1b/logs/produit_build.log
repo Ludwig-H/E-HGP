@@ -1,0 +1,202 @@
+$ /usr/bin/cmake --build $HOME/ehgp-v12/ehgp-v12.LmS9iFbFLg/build/t1b/b21 -j 44
+[  0%] Building CXX object CMakeFiles/mhgp12_support_framework_probe.dir/tests/support/framework_probe.cpp.o
+[  1%] Building CXX object CMakeFiles/mhgp12_support_exit_probe.dir/tests/support/exit_probe.cpp.o
+[  1%] Building CXX object CMakeFiles/mhgp12.dir/src/num/sphere.cpp.o
+[  1%] Building CXX object CMakeFiles/mhgp12.dir/src/core/buffer.cpp.o
+[  3%] Building CXX object CMakeFiles/mhgp12.dir/src/num/center_region.cpp.o
+[  3%] Building CXX object CMakeFiles/mhgp12.dir/src/core/ledger.cpp.o
+[  4%] Building CXX object CMakeFiles/mhgp12.dir/src/num/predicates.cpp.o
+[  4%] Building CXX object CMakeFiles/mhgp12.dir/src/num/centers.cpp.o
+[  5%] Building CXX object CMakeFiles/mhgp12.dir/src/num/lattice.cpp.o
+[  6%] Building CXX object CMakeFiles/mhgp12.dir/src/num/guard.cpp.o
+[  7%] Building CXX object CMakeFiles/mhgp12.dir/src/num/big.cpp.o
+[  8%] Building CXX object CMakeFiles/mhgp12.dir/src/num/local.cpp.o
+[  8%] Building CXX object CMakeFiles/mhgp12.dir/src/num/radical.cpp.o
+[  9%] Building CXX object CMakeFiles/mhgp12.dir/src/sched/pool.cpp.o
+[ 10%] Building CXX object CMakeFiles/mhgp12.dir/src/num/rational.cpp.o
+[ 11%] Building CXX object CMakeFiles/mhgp12.dir/src/io/sha256.cpp.o
+[ 12%] Building CXX object CMakeFiles/mhgp12.dir/src/num/roots.cpp.o
+[ 12%] Building CXX object CMakeFiles/mhgp12.dir/src/io/input.cpp.o
+[ 12%] Building CXX object CMakeFiles/mhgp12.dir/src/cloud/cloud.cpp.o
+[ 13%] Building CXX object CMakeFiles/mhgp12.dir/src/io/directory.cpp.o
+[ 13%] Building CXX object CMakeFiles/mhgp12.dir/src/io/writer.cpp.o
+[ 14%] Building CXX object CMakeFiles/mhgp12.dir/src/index/census_workspace.cpp.o
+[ 15%] Building CXX object CMakeFiles/mhgp12.dir/src/index/build.cpp.o
+[ 16%] Building CXX object CMakeFiles/mhgp12.dir/src/catalogue/traversal.cpp.o
+[ 16%] Building CXX object CMakeFiles/mhgp12.dir/src/index/census.cpp.o
+[ 17%] Building CXX object CMakeFiles/mhgp12.dir/src/catalogue/assemble.cpp.o
+[ 17%] Building CXX object CMakeFiles/mhgp12.dir/src/catalogue/leaves.cpp.o
+[ 18%] Building CXX object CMakeFiles/mhgp12.dir/src/catalogue/table.cpp.o
+[ 18%] Building CUDA object CMakeFiles/mhgp12.dir/src/catalogue/device_leaf.cu.o
+[ 18%] Building CXX object CMakeFiles/mhgp12.dir/src/catalogue/catalogue.cpp.o
+[ 20%] Building CXX object CMakeFiles/mhgp12.dir/src/catalogue/export.cpp.o
+[ 20%] Building CUDA object CMakeFiles/mhgp12.dir/src/catalogue/device_cuda.cu.o
+[ 21%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/supports.cpp.o
+[ 22%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/cells.cpp.o
+[ 22%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/cells_stage.cpp.o
+[ 22%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/stage.cpp.o
+[ 23%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/populations.cpp.o
+[ 24%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/resolve.cpp.o
+[ 25%] Linking CXX executable mhgp12_support_exit_probe
+[ 25%] Built target mhgp12_support_exit_probe
+[ 26%] Linking CXX executable mhgp12_support_framework_probe
+[ 26%] Built target mhgp12_support_framework_probe
+[ 27%] Linking CXX static library libmhgp12.a
+[ 27%] Built target mhgp12
+[ 28%] Building CXX object CMakeFiles/mhgp12_core_fault.dir/tests/core/alloc_fault.cpp.o
+[ 29%] Building CXX object CMakeFiles/mhgp12_core_cache_poison_probe.dir/tests/core/cache_poison_probe.cpp.o
+[ 29%] Building CXX object CMakeFiles/mhgp12_core_misuse_probe.dir/tests/core/misuse_probe.cpp.o
+[ 30%] Building CXX object CMakeFiles/mhgp12_core_unit.dir/tests/core/status_test.cpp.o
+[ 31%] Building CXX object CMakeFiles/mhgp12_core_poison_probe.dir/tests/core/poison_test.cpp.o
+[ 32%] Building CXX object CMakeFiles/mhgp12_num_local.dir/tests/num/frame_test.cpp.o
+[ 33%] Building CXX object CMakeFiles/mhgp12_num_bounds_probe.dir/tests/num/bounds_probe.cpp.o
+[ 34%] Building CXX object CMakeFiles/mhgp12_num_unit.dir/tests/num/integer_test.cpp.o
+[ 35%] Building CXX object CMakeFiles/mhgp12_num_probe.dir/tests/num/probe.cpp.o
+[ 36%] Building CXX object CMakeFiles/mhgp12_num_center_region_probe.dir/tests/num/center_region_probe.cpp.o
+[ 36%] Building CXX object CMakeFiles/mhgp12_num_lattice.dir/tests/num/lattice_bounds_test.cpp.o
+[ 37%] Building CXX object CMakeFiles/mhgp12_num_power_certificate_probe.dir/tests/num/power_certificate_probe.cpp.o
+[ 38%] Building CXX object CMakeFiles/mhgp12_num_centers_probe.dir/tests/num/centers_probe.cpp.o
+[ 39%] Building CXX object CMakeFiles/mhgp12_num_triangle_kind.dir/tests/num/triangle_kind_test.cpp.o
+[ 40%] Building CXX object CMakeFiles/mhgp12_num_checked_power_probe.dir/tests/num/checked_power_probe.cpp.o
+[ 41%] Building CXX object CMakeFiles/mhgp12_num_orientation_certificate_probe.dir/tests/num/orientation_certificate_probe.cpp.o
+[ 41%] Building CXX object CMakeFiles/mhgp12_num_q4_presentation_probe.dir/tests/num/q4_presentation_probe.cpp.o
+[ 41%] Building CXX object CMakeFiles/mhgp12_num_q4_presentation.dir/tests/num/q4_presentation_test.cpp.o
+[ 41%] Building CXX object CMakeFiles/mhgp12_num_distance_probe.dir/tests/num/distance_probe.cpp.o
+[ 42%] Building CXX object CMakeFiles/mhgp12_num_triangle_kind_probe.dir/tests/num/triangle_kind_probe.cpp.o
+[ 42%] Building CXX object CMakeFiles/mhgp12_num_big_probe.dir/tests/num/big_probe.cpp.o
+[ 43%] Building CXX object CMakeFiles/mhgp12_num_radical_probe.dir/tests/num/radical_probe.cpp.o
+[ 44%] Building CXX object CMakeFiles/mhgp12_num_s8_unit.dir/tests/num/big_test.cpp.o
+[ 44%] Building CXX object CMakeFiles/mhgp12_cloud_unit.dir/tests/cloud/cloud_test.cpp.o
+[ 44%] Building CXX object CMakeFiles/mhgp12_sched_fault.dir/tests/sched/fault.cpp.o
+[ 44%] Building CXX object CMakeFiles/mhgp12_num_roots_probe.dir/tests/num/roots_probe.cpp.o
+[ 45%] Building CXX object CMakeFiles/mhgp12_cloud_fault.dir/tests/cloud/cloud_fault.cpp.o
+[ 45%] Building CXX object CMakeFiles/mhgp12_io_sha256_probe.dir/tests/io/sha256_probe.cpp.o
+[ 46%] Building CXX object CMakeFiles/mhgp12_io_transaction.dir/tests/io/plan_test.cpp.o
+[ 47%] Building CXX object CMakeFiles/mhgp12_io_unit.dir/tests/io/sha256_test.cpp.o
+[ 48%] Building CXX object CMakeFiles/mhgp12_sched_unit.dir/tests/sched/unit.cpp.o
+[ 49%] Building CXX object CMakeFiles/mhgp12_io_fault.dir/tests/io/fault.cpp.o
+[ 50%] Building CXX object CMakeFiles/mhgp12_index_probe.dir/tests/index/probe.cpp.o
+[ 51%] Building CXX object CMakeFiles/mhgp12_index_fault.dir/tests/index/fault.cpp.o
+[ 52%] Building CXX object CMakeFiles/mhgp12_index_unit.dir/tests/index/unit.cpp.o
+[ 52%] Building CXX object CMakeFiles/mhgp12_index_borrowed_fault.dir/tests/index/borrowed_fault.cpp.o
+[ 52%] Building CXX object CMakeFiles/mhgp12_index_guarded.dir/tests/index/guarded_test.cpp.o
+[ 53%] Building CXX object CMakeFiles/mhgp12_index_bench.dir/bench/index_probe.cpp.o
+[ 53%] Building CXX object CMakeFiles/mhgp12_catalogue_probe.dir/bench/catalogue_probe.cpp.o
+[ 55%] Building CXX object CMakeFiles/mhgp12_tower_probe.dir/bench/tower_probe.cpp.o
+[ 55%] Building CXX object CMakeFiles/mhgp12_catalogue_device_unit.dir/tests/catalogue/device_unit.cpp.o
+[ 56%] Building CXX object CMakeFiles/mhgp12_index_borrowed_probe.dir/tests/index/borrowed_probe.cpp.o
+[ 58%] Building CXX object CMakeFiles/mhgp12_index_borrowed.dir/tests/index/borrowed_test.cpp.o
+[ 58%] Building CXX object CMakeFiles/mhgp12_catalogue_unit.dir/tests/catalogue/unit.cpp.o
+[ 59%] Linking CXX executable mhgp12_num_center_region_probe
+[ 59%] Built target mhgp12_num_center_region_probe
+[ 59%] Building CXX object CMakeFiles/mhgp12_io_transaction.dir/tests/io/transaction_test.cpp.o
+[ 60%] Linking CXX executable mhgp12_io_sha256_probe
+[ 61%] Linking CXX executable mhgp12_core_misuse_probe
+[ 61%] Built target mhgp12_io_sha256_probe
+[ 61%] Building CXX object CMakeFiles/mhgp12_io_unit.dir/tests/io/input_test.cpp.o
+[ 62%] Linking CXX executable mhgp12_num_bounds_probe
+[ 62%] Linking CXX executable mhgp12_core_cache_poison_probe
+[ 62%] Built target mhgp12_core_misuse_probe
+[ 63%] Building CXX object CMakeFiles/mhgp12_core_unit.dir/tests/core/buffer_test.cpp.o
+[ 64%] Linking CXX executable mhgp12_num_triangle_kind_probe
+[ 64%] Built target mhgp12_num_bounds_probe
+[ 64%] Linking CXX executable mhgp12_num_centers_probe
+[ 64%] Building CXX object CMakeFiles/mhgp12_num_unit.dir/tests/num/geometry_test.cpp.o
+[ 64%] Built target mhgp12_core_cache_poison_probe
+[ 64%] Building CXX object CMakeFiles/mhgp12_catalogue_device_unit.dir/tests/catalogue/device_finish_test.cpp.o
+[ 64%] Built target mhgp12_num_triangle_kind_probe
+[ 65%] Building CXX object CMakeFiles/mhgp12_num_local.dir/tests/num/lanes_test.cpp.o
+[ 65%] Built target mhgp12_num_centers_probe
+[ 66%] Building CXX object CMakeFiles/mhgp12_catalogue_device_unit.dir/tests/catalogue/device_pipeline_test.cpp.o
+[ 66%] Linking CXX executable mhgp12_num_q4_presentation_probe
+[ 67%] Linking CXX executable mhgp12_num_orientation_certificate_probe
+[ 67%] Linking CXX executable mhgp12_num_big_probe
+[ 68%] Linking CXX executable mhgp12_num_distance_probe
+[ 69%] Linking CXX executable mhgp12_num_radical_probe
+[ 70%] Linking CXX executable mhgp12_num_checked_power_probe
+[ 70%] Linking CXX executable mhgp12_num_power_certificate_probe
+[ 70%] Built target mhgp12_num_q4_presentation_probe
+[ 70%] Built target mhgp12_num_orientation_certificate_probe
+[ 71%] Building CXX object CMakeFiles/mhgp12_tower_unit.dir/tests/tower/unit.cpp.o
+[ 72%] Building CXX object CMakeFiles/mhgp12_num_unit.dir/tests/num/power_test.cpp.o
+[ 72%] Built target mhgp12_num_big_probe
+[ 72%] Built target mhgp12_num_distance_probe
+[ 72%] Building CXX object CMakeFiles/mhgp12_num_local.dir/tests/num/translation_test.cpp.o
+[ 73%] Building CXX object CMakeFiles/mhgp12_num_local.dir/tests/num/guard_test.cpp.o
+[ 73%] Built target mhgp12_num_checked_power_probe
+[ 74%] Building CXX object CMakeFiles/mhgp12_num_unit.dir/tests/num/candidate_test.cpp.o
+[ 74%] Built target mhgp12_num_power_certificate_probe
+[ 74%] Built target mhgp12_num_radical_probe
+[ 74%] Building CXX object CMakeFiles/mhgp12_core_unit.dir/tests/core/ledger_test.cpp.o
+[ 74%] Building CXX object CMakeFiles/mhgp12_num_unit.dir/tests/num/q3_candidate_test.cpp.o
+[ 75%] Building CXX object CMakeFiles/mhgp12_num_unit.dir/tests/num/bounds_test.cpp.o
+[ 75%] Linking CXX executable mhgp12_index_bench
+[ 76%] Linking CXX executable mhgp12_sched_fault
+[ 77%] Linking CXX executable mhgp12_num_roots_probe
+[ 77%] Linking CXX executable mhgp12_index_borrowed_probe
+[ 77%] Built target mhgp12_sched_fault
+[ 78%] Building CXX object CMakeFiles/mhgp12_num_unit.dir/tests/num/center_region_test.cpp.o
+[ 78%] Built target mhgp12_num_roots_probe
+[ 78%] Built target mhgp12_index_bench
+[ 78%] Linking CXX executable mhgp12_index_probe
+[ 78%] Building CXX object CMakeFiles/mhgp12_num_unit.dir/tests/num/centers_test.cpp.o
+[ 79%] Building CXX object CMakeFiles/mhgp12_num_unit.dir/tests/num/distance_test.cpp.o
+[ 80%] Linking CXX executable mhgp12_num_probe
+[ 80%] Built target mhgp12_index_borrowed_probe
+[ 81%] Building CXX object CMakeFiles/mhgp12_num_unit.dir/tests/num/checked_power_test.cpp.o
+[ 82%] Linking CXX executable mhgp12_num_triangle_kind
+[ 82%] Linking CXX executable mhgp12_core_poison_probe
+[ 82%] Built target mhgp12_index_probe
+[ 82%] Building CXX object CMakeFiles/mhgp12_num_unit.dir/tests/num/power_certificate_test.cpp.o
+[ 82%] Built target mhgp12_num_probe
+[ 83%] Building CXX object CMakeFiles/mhgp12_num_unit.dir/tests/num/orientation_certificate_test.cpp.o
+[ 83%] Built target mhgp12_num_triangle_kind
+[ 83%] Built target mhgp12_core_poison_probe
+[ 84%] Linking CXX executable mhgp12_catalogue_probe
+[ 84%] Linking CXX executable mhgp12_sched_unit
+[ 85%] Linking CXX executable mhgp12_cloud_fault
+[ 85%] Built target mhgp12_catalogue_probe
+[ 85%] Built target mhgp12_sched_unit
+[ 85%] Built target mhgp12_cloud_fault
+[ 85%] Linking CXX executable mhgp12_tower_probe
+[ 85%] Built target mhgp12_tower_probe
+[ 85%] Linking CXX executable mhgp12_num_s8_unit
+[ 86%] Linking CXX executable mhgp12_num_q4_presentation
+[ 87%] Linking CXX executable mhgp12_index_borrowed_fault
+[ 87%] Built target mhgp12_num_s8_unit
+[ 87%] Built target mhgp12_num_q4_presentation
+[ 87%] Built target mhgp12_index_borrowed_fault
+[ 87%] Linking CXX executable mhgp12_num_lattice
+[ 87%] Built target mhgp12_num_lattice
+[ 88%] Linking CXX executable mhgp12_index_fault
+[ 89%] Linking CXX executable mhgp12_io_fault
+[ 89%] Built target mhgp12_io_fault
+[ 89%] Built target mhgp12_index_fault
+[ 90%] Linking CXX executable mhgp12_core_fault
+[ 90%] Built target mhgp12_core_fault
+[ 91%] Linking CXX executable mhgp12_index_guarded
+[ 92%] Linking CXX executable mhgp12_index_borrowed
+[ 92%] Built target mhgp12_index_guarded
+[ 92%] Built target mhgp12_index_borrowed
+[ 92%] Linking CXX executable mhgp12_index_unit
+[ 93%] Linking CXX executable mhgp12_core_unit
+[ 93%] Built target mhgp12_index_unit
+[ 93%] Built target mhgp12_core_unit
+[ 94%] Linking CXX executable mhgp12_io_transaction
+[ 94%] Linking CXX executable mhgp12_catalogue_unit
+[ 95%] Linking CXX executable mhgp12_io_unit
+[ 95%] Built target mhgp12_io_transaction
+[ 95%] Built target mhgp12_io_unit
+[ 95%] Built target mhgp12_catalogue_unit
+[ 96%] Linking CXX executable mhgp12_cloud_unit
+[ 97%] Linking CXX executable mhgp12_num_unit
+[ 97%] Built target mhgp12_cloud_unit
+[ 97%] Built target mhgp12_num_unit
+[ 98%] Linking CXX executable mhgp12_num_local
+[ 98%] Built target mhgp12_num_local
+[ 99%] Linking CXX executable mhgp12_tower_unit
+[ 99%] Built target mhgp12_tower_unit
+[100%] Linking CXX executable mhgp12_catalogue_device_unit
+[100%] Built target mhgp12_catalogue_device_unit
+
+--- stderr ---
