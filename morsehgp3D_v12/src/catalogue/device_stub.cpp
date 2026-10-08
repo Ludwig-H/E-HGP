@@ -15,6 +15,10 @@ Result<CatalogueDevice> CatalogueDevice::open(MemoryBudget&) noexcept {
   return catalogue_detail::dev::device_refusal(false);
 }
 
+Result<CatalogueDevice> CatalogueDevice::open(MemoryBudget&, MemoryBudget&) noexcept {
+  return catalogue_detail::dev::device_refusal(false);
+}
+
 Result<Catalogue> build_catalogue_device(const Cloud&, const CatalogueParams& params, CatalogueDevice&, sched::Pool&,
                                          CatalogueDiagnostics*) noexcept {
   MHGP12_TRY(check_catalogue_params(params));

@@ -149,12 +149,16 @@ class Catalogue {
 // Voie appareil du catalogue (tranche T1-b) : contexte resident de l'appareil (flux CUDA, tableaux de l'appareil,
 // memoire epinglee), ouvert une fois et reutilise d'un appel a l'autre (decision D1, regime a chaud). Toutes ses
 // reservations, appareil et memoire epinglee, sont comptees dans le budget donne a l'ouverture, qui doit lui
-// survivre ; il les garde jusqu'a sa destruction. Construction sans MHGP12_ENABLE_CUDA, ou aucun appareil utilisable :
-// open rend device_unavailable.
+// survivre ; il les garde jusqu'a sa destruction. Seconde forme (regime des scenes de plusieurs millions de sites,
+// ARCHITECTURE.md, paragraphe 4.6) : les tableaux de l'appareil sont comptes dans `device` (la memoire de la carte),
+// la memoire epinglee et les tableaux de l'hote dans `budget` (la memoire de l'hote) ; les deux doivent lui survivre,
+// et un meme budget donne deux fois vaut la premiere forme. Construction sans MHGP12_ENABLE_CUDA, ou aucun appareil
+// utilisable : open rend device_unavailable.
 class CatalogueDevice {
  public:
   struct Impl;
   [[nodiscard]] static Result<CatalogueDevice> open(MemoryBudget& budget) noexcept;
+  [[nodiscard]] static Result<CatalogueDevice> open(MemoryBudget& budget, MemoryBudget& device) noexcept;
   CatalogueDevice(CatalogueDevice&& other) noexcept;
   CatalogueDevice(const CatalogueDevice&) = delete;
   CatalogueDevice& operator=(const CatalogueDevice&) = delete;

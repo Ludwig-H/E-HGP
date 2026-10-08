@@ -7,11 +7,20 @@
 //     entrees de foret, T, M, V et R (noyau, contraction, verticales, registre) ; allocations comprises ;
 //   - hors du mur, publies a part : validation des forets, empreinte FUL1 (--digest), puis liberation (ligne
 //     "liberation").
+// Par passe, en plus des durees : temps CPU du processus pendant le mur (cpu_ns, getrusage RUSAGE_SELF, tous les fils,
+// utilisateur et systeme, appels encadrants compris) et pic de memoire residente du processus a la fin du mur
+// (rss_max_octets, ru_maxrss : maximum depuis le lancement, entrees et passes precedentes comprises) ; null si
+// getrusage echoue ; pic_octets reste le pic du budget de la Session pendant le mur. Voie appareil : appareil_octets
+// et epinglee_octets sont la capacite des tableaux de l'appareil et de la memoire epinglee gardes par le contexte a la
+// fin du catalogue ; avec --budget-appareil=OCTETS, les tableaux de l'appareil sont comptes dans un budget propre de
+// cette limite (ligne "open" : budget_appareil "separe", et pic_appareil_octets est son pic pendant le mur), sinon
+// dans celui de la Session ("partage", pic_appareil_octets nul).
 // La passe p joue la trame p mod n (--trame repete : Session qui enchaine des trames successives). Une ligne JSON par
 // passe ; la premiere est publiee comme les autres (aucun prechauffage cache).
 //
 //   mhgp12_full_probe (--trame=<xyz.u32le>,<ids.u32le>[,NOM] ... | --uniform=N,GRAINE,BITS) [--k=K] [--leaf=L]
 //                     [--threads=W] [--passes=P] [--device] [--digest] [--budget=OCTETS] [--cache=OCTETS]
+//                     [--budget-appareil=OCTETS]
 //
 // Codes : 0 conforme ; 2 refus (usage, entree, ressources, appareil indisponible, degenerescence) ; 3 invariant viole.
 #include <algorithm>
@@ -23,6 +32,8 @@
 #include <string>
 #include <string_view>
 #include <vector>
+
+#include <sys/resource.h>
 
 #include "catalogue/catalogue.hpp"
 #include "index/index.hpp"
@@ -45,7 +56,7 @@ struct Options {
   u64 uniform = 0, seed = 0, bits = 0;
   int kmax = 5;
   u32 leaf = 24, threads = 1;
-  u64 passes = 1, budget = MemoryBudget::kUnlimited, cache = 0;
+  u64 passes = 1, budget = MemoryBudget::kUnlimited, cache = 0, device_budget = 0;
   bool device = false, digest = false;
 };
 
@@ -57,6 +68,26 @@ struct Frame {
 u64 since(Clock::time_point t0) {
   return static_cast<u64>(std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now() - t0).count());
 }
+
+// Temps CPU du processus (tous les fils, utilisateur et systeme) et pic residentiel, en nanosecondes et en octets ;
+// vide si getrusage echoue (publie null, jamais zero ni une difference sans signe qui deborderait).
+std::optional<u64> process_cpu_ns() {
+  rusage u{};
+  if (getrusage(RUSAGE_SELF, &u) != 0) return std::nullopt;
+  const auto ns = [](const timeval& t) {
+    return static_cast<u64>(t.tv_sec) * 1000000000ull + static_cast<u64>(t.tv_usec) * 1000ull;
+  };
+  return ns(u.ru_utime) + ns(u.ru_stime);
+}
+
+std::optional<u64> process_rss_max_bytes() {
+  rusage u{};
+  if (getrusage(RUSAGE_SELF, &u) != 0 || u.ru_maxrss < 0) return std::nullopt;
+  return static_cast<u64>(u.ru_maxrss) * 1024ull;  // Linux : kilooctets
+}
+
+// Entier JSON, ou null si la mesure manque.
+std::string json_u64(const std::optional<u64>& v) { return v ? std::to_string(*v) : std::string("null"); }
 
 bool parse_u64(std::string_view text, u64& out) {
   const auto [end, error] = std::from_chars(text.data(), text.data() + text.size(), out);
@@ -95,11 +126,12 @@ bool parse(int argc, char** argv, Options& o) {
     else if (a.substr(0, 9) == "--passes=" && parse_u64(a.substr(9), v) && v >= 1 && v <= 100000) o.passes = v;
     else if (a.substr(0, 9) == "--budget=" && parse_u64(a.substr(9), v) && v > 0) o.budget = v;
     else if (a.substr(0, 8) == "--cache=" && parse_u64(a.substr(8), v)) o.cache = v;
+    else if (a.substr(0, 18) == "--budget-appareil=" && parse_u64(a.substr(18), v) && v > 0) o.device_budget = v;
     else if (a == "--device") o.device = true;
     else if (a == "--digest") o.digest = true;
     else return false;
   }
-  return (o.uniform == 0) != o.frames.empty();
+  return (o.uniform == 0) != o.frames.empty() && (o.device_budget == 0 || o.device);
 }
 
 // Nuage synthetique des sondes du catalogue et de la tour : SplitMix64, positions distinctes, PointId = rang.
@@ -134,7 +166,8 @@ Outcome synthetic(const Options& o, MemoryBudget& budget, io::InputFiles& files)
 // Durees d'une passe (nanosecondes) : etages du mur, sous-etapes publiees, hors du mur.
 struct PassTimes {
   u64 wall = 0, p = 0, c = 0, g = 0, junction = 0, tmvr = 0;
-  u64 validation = 0, digest = 0, peak = 0;
+  u64 validation = 0, digest = 0, peak = 0, device_peak = 0;
+  std::optional<u64> cpu, rss;  // vides si getrusage echoue, ou si le temps CPU reculerait
 };
 
 // Etat d'une passe : tout ce que le mur construit ; detruit (liberation chronometree) apres la publication.
@@ -226,21 +259,31 @@ void print_pass(const Options& o, u64 pass, const Frame& f, const PassState& s, 
               (unsigned long long)c.transfer_ns, (unsigned long long)c.publish_ns,
               (unsigned long long)s.res_diag.tables_ns, (unsigned long long)s.res_diag.resolve_ns,
               (unsigned long long)t.validation, (unsigned long long)t.digest, (unsigned long long)t.peak);
+  std::printf(",\"cpu_ns\":%s,\"rss_max_octets\":%s,\"appareil_octets\":%llu,\"epinglee_octets\":%llu,"
+              "\"pic_appareil_octets\":%llu",
+              json_u64(t.cpu).c_str(), json_u64(t.rss).c_str(), (unsigned long long)c.device_bytes,
+              (unsigned long long)c.pinned_bytes, (unsigned long long)t.device_peak);
   if (o.digest) std::printf(",\"full_sha256\":\"%s\"", digest.c_str());
   std::printf("}\n");
   std::fflush(stdout);
 }
 
 Outcome passes(const Options& o, std::vector<Frame>& frames, MemoryBudget& budget, sched::Pool& pool,
-               CatalogueDevice* device) {
+               CatalogueDevice* device, MemoryBudget* device_budget) {
   for (u64 pass = 0; pass < o.passes; ++pass) {
     const Frame& f = frames[pass % frames.size()];
     PassTimes t;
     std::string digest;
     budget.restart_peak();
+    if (device_budget != nullptr) device_budget->restart_peak();
     auto s = std::make_unique<PassState>();
+    const std::optional<u64> cpu0 = process_cpu_ns();
     MHGP12_TRY(run_wall(o, f, budget, pool, device, *s, t));
+    const std::optional<u64> cpu1 = process_cpu_ns();
+    if (cpu0 && cpu1 && *cpu1 >= *cpu0) t.cpu = *cpu1 - *cpu0;
+    t.rss = process_rss_max_bytes();
     t.peak = budget.peak();
+    if (device_budget != nullptr) t.device_peak = device_budget->peak();
     MHGP12_TRY(after_wall(o, budget, *s, t, digest));
     print_pass(o, pass, f, *s, t, digest);
     const auto r0 = Clock::now();
@@ -265,14 +308,18 @@ Outcome run(const Options& o) {
     if (!input.ok()) return input.outcome();
     frames.push_back(Frame{spec.name, std::move(input).take()});
   }
-  if (!o.device) return passes(o, frames, budget, *pool.value(), nullptr);
+  if (!o.device) return passes(o, frames, budget, *pool.value(), nullptr, nullptr);
+  std::optional<MemoryBudget> device_budget;
+  if (o.device_budget != 0) device_budget.emplace(o.device_budget);
   const auto t0 = Clock::now();
-  auto device = CatalogueDevice::open(budget);
-  std::printf("{\"phase\":\"open\",\"status\":\"%s\",\"reason\":\"%s\",\"wall_ns\":%llu}\n",
+  auto device = device_budget ? CatalogueDevice::open(budget, *device_budget) : CatalogueDevice::open(budget);
+  std::printf("{\"phase\":\"open\",\"status\":\"%s\",\"reason\":\"%s\",\"wall_ns\":%llu,"
+              "\"budget_appareil\":\"%s\"}\n",
               std::string(status_name(device.outcome().status())).c_str(),
-              std::string(reason_name(device.outcome().reason)).c_str(), (unsigned long long)since(t0));
+              std::string(reason_name(device.outcome().reason)).c_str(), (unsigned long long)since(t0),
+              device_budget ? "separe" : "partage");
   if (!device.ok()) return device.outcome();
-  return passes(o, frames, budget, *pool.value(), &device.value());
+  return passes(o, frames, budget, *pool.value(), &device.value(), device_budget ? &*device_budget : nullptr);
 }
 
 }  // namespace
@@ -282,7 +329,7 @@ int main(int argc, char** argv) {
   if (!parse(argc, argv, o)) {
     std::fprintf(stderr, "usage : mhgp12_full_probe (--trame=<xyz>,<ids>[,NOM] ... | --uniform=N,GRAINE,BITS) "
                          "[--k=K] [--leaf=L] [--threads=W] [--passes=P] [--device] [--digest] [--budget=OCTETS] "
-                         "[--cache=OCTETS]\n");
+                         "[--cache=OCTETS] [--budget-appareil=OCTETS (avec --device)]\n");
     return 2;
   }
   const Outcome outcome = guarded([&]() { return run(o); });

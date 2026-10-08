@@ -4,11 +4,12 @@
 // (J3, borne de registres de MES-M2) sont lances par device_leaf.cu. Les noyaux et les pilotes sont ceux de
 // l'executeur Pool (source unique) ; ce fichier ne fait que les lancer, copier et compter.
 //
-// Memoire : chaque tableau de l'appareil et la memoire epinglee de transit sont reserves dans le budget du contexte
-// (BudgetReservation) AVANT cudaMalloc ou cudaMallocHost ; un refus de l'un ou de l'autre rend memory_budget, sans rien
-// publier. Les tableaux sont gardes d'un appel a l'autre (regime resident, decision D1) et rendus a la destruction du
-// contexte. Erreurs du pilote : device_fault, et le contexte refuse ensuite tout appel (une erreur collante de CUDA
-// rend le contexte inutilisable). Attente en mode yield (MES-M6). Transferts (CST-0235, raccord complet) : chaque copie
+// Memoire : chaque tableau de l'appareil est reserve dans le budget de l'appareil du contexte, la memoire epinglee de
+// transit dans son budget de l'hote (BudgetReservation), AVANT cudaMalloc ou cudaMallocHost ; un refus de l'un ou de
+// l'autre rend memory_budget, sans rien publier. Les deux budgets sont le meme objet sous la premiere forme d'open.
+// Les tableaux sont gardes d'un appel a l'autre (regime resident, decision D1) et rendus a la destruction du contexte.
+// Erreurs du pilote : device_fault, et le contexte refuse ensuite tout appel (une erreur collante de CUDA rend le
+// contexte inutilisable). Attente en mode yield (MES-M6). Transferts (CST-0235, raccord complet) : chaque copie
 // hote <-> appareil attend d'abord les noyaux en file (hors chrono), puis est chronometree et comptee (TransferMeter).
 #include <cuda_runtime.h>
 
@@ -39,7 +40,8 @@ __global__ void __launch_bounds__(kThreads) warp_kernel(K k, u64 n) {
 }  // namespace
 
 struct CudaExecutor {
-  MemoryBudget& budget;
+  MemoryBudget& budget;         // hote : memoire epinglee de transit, tableaux de l'hote de la voie appareil
+  MemoryBudget& device_budget;  // appareil : tableaux de l'appareil (le meme objet sous la premiere forme d'open)
   sched::Pool* pool = nullptr;  // copies hote paralleles, donne a chaque appel
   cudaStream_t stream = nullptr;
   bool broken = false;
@@ -63,7 +65,7 @@ struct CudaExecutor {
     T* data() const noexcept { return ptr; }
   };
 
-  explicit CudaExecutor(MemoryBudget& b) noexcept : budget(b) {}
+  CudaExecutor(MemoryBudget& b, MemoryBudget& d) noexcept : budget(b), device_budget(d) {}
   CudaExecutor(const CudaExecutor&) = delete;
   CudaExecutor& operator=(const CudaExecutor&) = delete;
   ~CudaExecutor() {
@@ -85,14 +87,15 @@ struct CudaExecutor {
   }
   Outcome sync() noexcept { return check(cudaStreamSynchronize(stream)); }
 
-  // Tableau d'au moins n elements ; les `keep` premiers sont gardes. Reservation dans le budget avant cudaMalloc.
+  // Tableau d'au moins n elements ; les `keep` premiers sont gardes. Reservation dans le budget de l'appareil avant
+  // cudaMalloc.
   template <class T>
   Outcome grow(Array<T>& a, u64 n, u64 keep) noexcept {
     if (a.cap >= n) return {};
     const u64 cap = n > a.cap + a.cap / 2 + 1024 ? n : a.cap + a.cap / 2 + 1024;
     if (cap > ~u64{0} / sizeof(T)) return fail(Reason::memory_budget);
     BudgetReservation reservation;
-    MHGP12_TRY(reservation.reserve(cap * sizeof(T), budget));
+    MHGP12_TRY(reservation.reserve(cap * sizeof(T), device_budget));
     T* fresh = nullptr;
     MHGP12_TRY(check(cudaMalloc(reinterpret_cast<void**>(&fresh), cap * sizeof(T))));
     Outcome moved{};
@@ -119,7 +122,7 @@ struct CudaExecutor {
     return grow(a, n, keep);
   }
 
-  // Memoire epinglee de transit d'au moins `bytes` octets (au plus kStagingMax), reservee dans le budget.
+  // Memoire epinglee de transit d'au moins `bytes` octets (au plus kStagingMax), reservee dans le budget de l'hote.
   Outcome stage(u64 bytes) noexcept {
     bytes = bytes < kStagingMin ? kStagingMin : bytes < kStagingMax ? bytes : kStagingMax;
     if (staging_bytes >= bytes) return {};
@@ -227,7 +230,7 @@ struct CudaExecutor {
 }  // namespace catalogue_detail::dev
 
 struct CatalogueDevice::Impl {
-  explicit Impl(MemoryBudget& b) noexcept : exec(b) {}
+  Impl(MemoryBudget& b, MemoryBudget& d) noexcept : exec(b, d) {}
   catalogue_detail::dev::CudaExecutor exec;
   catalogue_detail::dev::DeviceState<catalogue_detail::dev::CudaExecutor> state;  // detruit avant l'executeur
 };
@@ -236,7 +239,9 @@ CatalogueDevice::CatalogueDevice(std::unique_ptr<Impl> impl) noexcept : impl_(st
 CatalogueDevice::CatalogueDevice(CatalogueDevice&& other) noexcept = default;
 CatalogueDevice::~CatalogueDevice() = default;
 
-Result<CatalogueDevice> CatalogueDevice::open(MemoryBudget& budget) noexcept {
+Result<CatalogueDevice> CatalogueDevice::open(MemoryBudget& budget) noexcept { return open(budget, budget); }
+
+Result<CatalogueDevice> CatalogueDevice::open(MemoryBudget& budget, MemoryBudget& device) noexcept {
   using catalogue_detail::dev::device_refusal;
   int count = 0;
   if (cudaGetDeviceCount(&count) != cudaSuccess || count < 1) {
@@ -249,7 +254,7 @@ Result<CatalogueDevice> CatalogueDevice::open(MemoryBudget& budget) noexcept {
   (void)cudaGetLastError();
   if (cudaFree(nullptr) != cudaSuccess) return device_refusal(false);  // contexte
   return guarded([&]() -> Result<CatalogueDevice> {
-    auto impl = std::make_unique<Impl>(budget);
+    auto impl = std::make_unique<Impl>(budget, device);
     if (cudaStreamCreateWithFlags(&impl->exec.stream, cudaStreamNonBlocking) != cudaSuccess) {
       impl->exec.stream = nullptr;
       return device_refusal(false);

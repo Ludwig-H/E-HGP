@@ -1,0 +1,109 @@
+# Microbanc MES-B : la tour FULL de la v12 sur des scènes LiDAR réelles entières
+
+8 octobre 2026. Mesure du régime (b) de la décision D7 (scènes de plusieurs millions de sites), **hors produit**,
+publiée telle quelle avec des verdicts écrits d'avance ; aucune règle d'adoption.
+
+```text
+phase=exploration_v12_hors_registre
+backend=cuda_g4 (catalogue, voie hybride) ; cpu_reference (G, T, M, V, R ; bras CPU identifié)
+objet=full_pi0 (tour FULL K1..K, verticales et registre compris)
+quantification=quantized_u21_input_only
+public_status=not_claimed
+```
+
+## Captations telles quelles
+
+Consigne de l'utilisateur du 8 octobre : garder au plus les captations telles quelles, sans sous-échantillonnage. Les
+cas sont donc les **scènes entières** des paquets de [`bench/data`](../../bench/data) ([`DONNEES.md`](../../docs/DONNEES.md)
+§ 3) :
+
+- **IGN LiDAR HD** : dalles entières de 1 km² ;
+- **ETH3D** : scans entiers ;
+- **FOR-instance** : placettes entières ;
+- **Boreas** : fenêtres de 1, 10 et 50 trames consécutives, accumulées entières.
+
+Il n'y a ni découpe ni décimation ; les découpes de 1 à 8 millions de sites de `MES-E` ne servent pas ici. Deux écarts
+sont déclarés :
+
+- les retours d'une même position au millimètre sont un seul site (variante `.distinct` du paquet ; 0 à 3,7 % des
+  retours selon les jeux ; le moteur refuse les doublons par défaut, décision D8) ;
+- le sol est retiré dans les variantes `sans_sol` (classe du producteur, ou Patchwork++ épinglé pour Boreas).
+
+L'« itinéraire » Boreas (une trame sur 200) n'est pas une captation telle quelle : il reste hors de cette mesure.
+
+## Ce que fait le pilote
+
+[`pilote_b.py`](pilote_b.py) (bibliothèque standard, Python 3.10 nu) :
+
+1. relève l'environnement (nvcc, cmake, GPU, hôte) et exige un GPU vide avant et après ;
+2. construit `mhgp12_full_probe` (Release, profil 21, CUDA), garde le journal de construction, l'empreinte SHA-256
+   de la sonde et un extrait du `CMakeCache` ;
+3. joue chaque cas `NOM:K:VOIE:PASSES` dans un processus neuf.
+
+Pour chaque cas, la sonde [`bench/full_probe.cpp`](../../bench/full_probe.cpp) mesure le même mur que `MES-FULL`
+(de l'entrée quantifiée en mémoire à la tour complète en mémoire). Elle publie par passe :
+
+- les étages P, C (dont transferts), G, T, M, V, R ;
+- le temps CPU du processus pendant le mur ;
+- le pic du budget de l'hôte et le pic de mémoire résidente ;
+- la mémoire de l'appareil gardée par le contexte, et le pic de son budget propre (`--budget-appareil`, nouveau : la
+  carte et l'hôte sont deux ressources, un manque de l'une rend `memory_budget` sans faux refus de l'autre).
+
+Le pilote échantillonne aussi `memory.used` de nvidia-smi toutes les 250 ms pendant le cas ; l'échantillon peut manquer
+un pic bref. Capacité gardée, pic des réservations, RSS et `memory.used` sont quatre mesures différentes.
+
+Un refus de la sonde (code 2 : `memory_budget`, `wide_leaf`, ...) est un **résultat** publié, le point de rupture. Une
+mort par signal, une expiration ou un invariant violé sont des **échecs** du cas, publiés. Une sortie hors schéma ou un
+appareil indisponible font **manquer un contrôle** : le verdict d'ensemble est alors refusé.
+
+**Délai.** Un cas dont la prévision dépasse le temps restant n'est pas lancé (« non joué : délai »). La prévision
+vaut 20 s, plus le débit du dernier cas comparable fois les sites et les passes, fois 1,3. L'ordre des cas est donc
+un ordre de priorité.
+
+**Empreinte FUL1.** Elle hache en un seul flux toute la tour sérialisée, centres exacts compris : environ 34 µs par
+site sur le codespace (7,4 s pour 216 000 sites). Elle n'est calculée que jusqu'à `--empreinte-max-sites`. Au-delà,
+l'identité entre passes et entre voies n'est pas contrôlée et le rapport le dit.
+
+## Verdicts écrits d'avance
+
+Les objectifs du régime (b) sont ceux de [`MESURE.md`](../../docs/MESURE.md), hypothèses du 7 octobre. Le mur chaud est
+celui de la dernière passe jouée si au moins deux le sont, sinon celui de la première, marqué froid.
+
+| Critère | Règle |
+| --- | --- |
+| B1 | K5, voie appareil : chaque scène lancée aboutit et tient au plus 2 s par million de sites ; un échec compte à toute taille, un refus seulement sous 10 millions de sites (au-delà, refus toléré par les objectifs et publié) |
+| B2 | K5, voie appareil : aucune scène de moins de 10 millions de sites refusée ni en échec |
+| B3 | K5, voie appareil : pente des moindres carrés de log(mur) contre log(sites) au plus 1,1 sur chaque série emboîtée de captations entières (`--series`) jouée en entier |
+| B4 | K10 : chaque scène lancée aboutit et tient au plus 10 s par million de sites |
+
+Chaque critère est « tenu », « non tenu » ou « non évalué ». Le verdict d'ensemble est « tenu » si B1 et B2 sont
+évalués et tous les critères évalués tenus, « non tenu » sinon, « refusé » si un contrôle manque. Les séries de la
+session L sont Boreas n1 ⊂ n10 ⊂ n50, sans sol et avec sol : une même trajectoire, 1, 10 puis 50 trames consécutives.
+
+## Usage
+
+```bash
+python3 pilote_b.py --src <depot> --travail <construction> --donnees <paquet> --sortie <dossier> \
+    --cas boreas_202011261358_f4500_n10_sans_sol:5:appareil:2,ign_paris_0651_6863_sans_sol:5:appareil:2 \
+    --series a,b,c --fils 48 --budget-gio 160 --budget-appareil-gio 88 --delai-global 2700 \
+    --empreinte-max-sites 1600000
+python3 pilote_b.py --essai --sonde <mhgp12_full_probe> ...   # essai local, voie CPU, verdict « essai »
+```
+
+Sorties : `rapport_b.json`, `tableaux_b.md`, `brut/` (sorties de chaque cas), `construction.log`.
+
+**Porte** : [`test_pilote_b.py`](test_pilote_b.py) (Python 3.10 nu, aussi sous `-O`) : lecture stricte (une sortie
+conforme admise ; dix-sept mutations du schéma et les cinq corruptions de la
+[contrelecture de l'auditeur](../../receipts/audit_reponses_20261008/mes_b_prelecture/README.md) refusées), refus et
+échecs publiés comme résultats, verdicts B1 à B4 aux seuils, empreintes entre passes et entre voies, étiquettes
+uniques, pilote complet sur une sonde simulée (délai et seuil d'empreinte) ;
+[`mutants_pilote_b.py`](mutants_pilote_b.py) : vingt mutants du pilote, tous tués (un mutant équivalent écarté, dit
+dans le fichier).
+
+## Premier essai local (8 octobre, indicatif)
+
+Le codespace (6 fils, voie CPU) traite Lyon sans sol découpé à 1 000 141 sites (première passe, sans empreinte) en
+99,0 s, dont C 76,7 s, G 13,9 s, T 3,8 s, R 2,5 s, avec un pic de 9,4 Go, soit 9,4 Ko par site.
+
+Une trame Boreas entière sans sol (146 316 sites) prend 22,6 s à chaud, dont C 19,5 s : 154 µs par site, plus cher
+par site que l'aérien. La trame avec sol (215 665 sites) prend 25,9 s à froid. Les temps de G4 font foi.
