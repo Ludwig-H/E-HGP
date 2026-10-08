@@ -1,0 +1,33 @@
+{
+  "patch_sha256": "923d115a6148c8dfe28051b8baf0ba89bf13cbf989c43530406fe8600a84c4e4",
+  "pin": "9815c19b9a69b00cc927dc61837ef7c5dac63615",
+  "prior_receipt": "../gapp_journal_strict/README.md",
+  "raw_hashes": {
+    "campagne.json": "64a860f73046f88e12641cec3e15274c567cf0d98ff6731b816043a259bdebbd",
+    "journaux/information_k10.jsonl": "6200053f1b51f028d801bebcb722dec4d3d51a34dbbd0bd89a4c2a9d02b933bc",
+    "journaux/max_p0.jsonl": "7b9304398304e605ca9454e0d94c5952f3c37dcfae4f43e98f0a6d999c262ac6",
+    "journaux/max_p1.jsonl": "20ff231b336ffeff93af5d2bcba7a4893b2dfa6a35348c4920b6852b7a24f41f",
+    "journaux/max_p2.jsonl": "bf55aeb239a089be34836dafdab2fc6aee2c0b74d1d5d5321370c474ccbdb0c4",
+    "journaux/max_p3.jsonl": "1bd779b9d2ad56fa6c903816a4c7b57ca5bc027b3ba41f1fc69ed99c5099e0e1",
+    "journaux/max_p4.jsonl": "9468aca010cd80e007d3053a47e652ce6cf593fb636008ea4097e3592c77f499",
+    "journaux/mediane_p0.jsonl": "6f4b31fd56b732717d1d532aaefe0804222e4d7d086a68a41e055debc3590ed1",
+    "journaux/mediane_p1.jsonl": "c27dfce274124870e0f21278c0f4c21da281a712be8861ea452ed5300aaf2f71",
+    "journaux/mediane_p2.jsonl": "08a6942f01df59050ccd98bc3e382b955a69901ff40b810524140fdf9ed185ea",
+    "journaux/mediane_p3.jsonl": "c66792fced8662854664e1df9238a2e458122d9687f8410fe481d2d00ea55419",
+    "journaux/mediane_p4.jsonl": "225ac87320d35844136fd0e7a0c6f155ce5a48d8eee6d402271d2be0caa91247",
+    "journaux/mes_g_app_mutant_cote_nul.jsonl": "ae336d0252f61a8372a138521abdbef68d64dcdfbeeb0236709828c130fb4b82",
+    "journaux/mes_g_app_mutant_l4.jsonl": "aa423a8cb1b97e498d3842a6c09a774a7555173cc8a524c4a2b28ed9c23e0dea",
+    "journaux/ng00_p0.jsonl": "41d09c3d0006ed08c9774c9b954ac4fd1543b6135542a862730b05db41b45472",
+    "journaux/ng00_p1.jsonl": "abd656c141e5ce4aef944dcd4e93b6d4222c382165e1d592ba79149af148bb5d",
+    "journaux/ng00_p2.jsonl": "ae0c74ca97e2015e610fd68890b57d29f20843419417e77814bb5c06813d2083",
+    "journaux/ng00_p3.jsonl": "db9a01cb34c95e0e78d561772221c15ac18adb79130ac3eab622d22677a5eb20",
+    "journaux/ng00_p4.jsonl": "f651cd7a3cb7a4db47138b90b7c11eec9bf46e1ab541538dc520a9fb4fab20cf",
+    "rapport_g_appareil.json": "e0546de9597d38eac9dbd4f280b791ec4ea09da6e0a31dec86c5f2eb6a040761"
+  },
+  "scope": "JSON seulement ; aucun moteur ni nouvelle campagne ; seuils et statistiques inchanges",
+  "source_hashes": {
+    "morsehgp3D_v12/microbancs/mes_g_appareil/mes_g_app.cpp": "66350659a920a4b9d62a887ab780e22ab41fba1247f418fd1625be2968d2d423",
+    "morsehgp3D_v12/microbancs/mes_g_appareil/pilote_g_appareil.py": "556e029f3d88065217ec31cfbe6d215ee5e366feb48b882857f47376b15c4d3a",
+    "morsehgp3D_v12/microbancs/mes_g_appareil/test_pilote_g_appareil.py": "e571bdd13650b571de8e997a78157d3e98012985601822f764c47ec8cce69f7c"
+  }
+}

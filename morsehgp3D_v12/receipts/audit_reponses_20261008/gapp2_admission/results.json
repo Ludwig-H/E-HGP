@@ -1,0 +1,687 @@
+{
+  "aa_max": 1.0040031305803034,
+  "aa_min": 0.9846434394063006,
+  "all_passes": 97,
+  "counts": {
+    "max": {
+      "distinctes": 462107,
+      "representants": 9998189,
+      "requetes": 646621,
+      "sites": 99099
+    },
+    "mediane": {
+      "distinctes": 211461,
+      "representants": 5477969,
+      "requetes": 290357,
+      "sites": 64740
+    },
+    "ng00": {
+      "distinctes": 177863,
+      "representants": 3419932,
+      "requetes": 252152,
+      "sites": 39885
+    }
+  },
+  "decision": "aucune tranche sur cette base",
+  "identities": {
+    "max": {
+      "appareil": true,
+      "census": {
+        "comparees_appareil": 646621,
+        "comparees_hote_hd": 646621,
+        "coquilles_larges": 0,
+        "ecarts_appareil": 0,
+        "ecarts_hote_hd": 0,
+        "ecarts_lot_produit": 0,
+        "non_resolues": 0,
+        "requetes": 646621
+      },
+      "identite": true,
+      "phase": "identite",
+      "propositions": {
+        "abouties": 2481101,
+        "ecarts_appareil": 0,
+        "ecarts_hote_hd": 0,
+        "issues": {
+          "census": 498012,
+          "refus": 0,
+          "table": 1983089
+        },
+        "issues_differentes_p64": 0,
+        "mecanismes": {
+          "certificat": 498015,
+          "repli_certificat": 0,
+          "repli_sans_proposition": 0,
+          "t1": 1983086
+        },
+        "parties": 2481101
+      },
+      "propositions_l4": {
+        "ecarts_hote_appareil": 0,
+        "entieres": 1316447,
+        "issues": {
+          "census": 498012,
+          "refus": 0,
+          "table": 1983089
+        },
+        "issues_differentes_p64": 0,
+        "mecanismes": {
+          "certificat": 498015,
+          "repli_certificat": 0,
+          "repli_sans_proposition": 0,
+          "t1": 1983086
+        }
+      },
+      "propositions_l4f32": {
+        "ecarts_hote_appareil": 0,
+        "issues": {
+          "census": 498012,
+          "refus": 0,
+          "table": 1983089
+        },
+        "issues_differentes_p64": 0,
+        "mecanismes": {
+          "certificat": 498012,
+          "repli_certificat": 0,
+          "repli_sans_proposition": 0,
+          "t1": 1983089
+        }
+      },
+      "sondes": {
+        "coherentes": true,
+        "comparees_appareil": 9998189,
+        "ecarts_appareil": 0,
+        "premieres_sondes_reussies_g": 7517088,
+        "reussies_appareil": 7517088,
+        "reussies_produit": 7517088
+      }
+    },
+    "mediane": {
+      "appareil": true,
+      "census": {
+        "comparees_appareil": 290357,
+        "comparees_hote_hd": 290357,
+        "coquilles_larges": 0,
+        "ecarts_appareil": 0,
+        "ecarts_hote_hd": 0,
+        "ecarts_lot_produit": 0,
+        "non_resolues": 0,
+        "requetes": 290357
+      },
+      "identite": true,
+      "phase": "identite",
+      "propositions": {
+        "abouties": 1253601,
+        "ecarts_appareil": 0,
+        "ecarts_hote_hd": 0,
+        "issues": {
+          "census": 224773,
+          "refus": 0,
+          "table": 1028828
+        },
+        "issues_differentes_p64": 0,
+        "mecanismes": {
+          "certificat": 224773,
+          "repli_certificat": 0,
+          "repli_sans_proposition": 0,
+          "t1": 1028828
+        },
+        "parties": 1253601
+      },
+      "propositions_l4": {
+        "ecarts_hote_appareil": 0,
+        "entieres": 683502,
+        "issues": {
+          "census": 224773,
+          "refus": 0,
+          "table": 1028828
+        },
+        "issues_differentes_p64": 0,
+        "mecanismes": {
+          "certificat": 224773,
+          "repli_certificat": 0,
+          "repli_sans_proposition": 0,
+          "t1": 1028828
+        }
+      },
+      "propositions_l4f32": {
+        "ecarts_hote_appareil": 0,
+        "issues": {
+          "census": 224773,
+          "refus": 0,
+          "table": 1028828
+        },
+        "issues_differentes_p64": 0,
+        "mecanismes": {
+          "certificat": 224773,
+          "repli_certificat": 0,
+          "repli_sans_proposition": 0,
+          "t1": 1028828
+        }
+      },
+      "sondes": {
+        "coherentes": true,
+        "comparees_appareil": 5477969,
+        "ecarts_appareil": 0,
+        "premieres_sondes_reussies_g": 4224368,
+        "reussies_appareil": 4224368,
+        "reussies_produit": 4224368
+      }
+    },
+    "ng00": {
+      "appareil": true,
+      "census": {
+        "comparees_appareil": 252152,
+        "comparees_hote_hd": 252152,
+        "coquilles_larges": 0,
+        "ecarts_appareil": 0,
+        "ecarts_hote_hd": 0,
+        "ecarts_lot_produit": 0,
+        "non_resolues": 0,
+        "requetes": 252152
+      },
+      "identite": true,
+      "phase": "identite",
+      "propositions": {
+        "abouties": 847125,
+        "ecarts_appareil": 0,
+        "ecarts_hote_hd": 0,
+        "issues": {
+          "census": 186573,
+          "refus": 0,
+          "table": 660552
+        },
+        "issues_differentes_p64": 0,
+        "mecanismes": {
+          "certificat": 186573,
+          "repli_certificat": 0,
+          "repli_sans_proposition": 0,
+          "t1": 660552
+        },
+        "parties": 847125
+      },
+      "propositions_l4": {
+        "ecarts_hote_appareil": 0,
+        "entieres": 466813,
+        "issues": {
+          "census": 186573,
+          "refus": 0,
+          "table": 660552
+        },
+        "issues_differentes_p64": 0,
+        "mecanismes": {
+          "certificat": 186573,
+          "repli_certificat": 0,
+          "repli_sans_proposition": 0,
+          "t1": 660552
+        }
+      },
+      "propositions_l4f32": {
+        "ecarts_hote_appareil": 0,
+        "issues": {
+          "census": 186573,
+          "refus": 0,
+          "table": 660552
+        },
+        "issues_differentes_p64": 0,
+        "mecanismes": {
+          "certificat": 186573,
+          "repli_certificat": 0,
+          "repli_sans_proposition": 0,
+          "t1": 660552
+        }
+      },
+      "sondes": {
+        "coherentes": true,
+        "comparees_appareil": 3419932,
+        "ecarts_appareil": 0,
+        "premieres_sondes_reussies_g": 2572807,
+        "reussies_appareil": 2572807,
+        "reussies_produit": 2572807
+      }
+    }
+  },
+  "information_k10_passes": 3,
+  "information_k10_processes": 1,
+  "isolated_endpoints": 36,
+  "k10": {
+    "counts": {
+      "distinctes": 979864,
+      "representants": 17187636,
+      "requetes": 1765151,
+      "sites": 39885
+    },
+    "device": {
+      "bus_bits": 512,
+      "cc": "12.0",
+      "census_h2d_ms": 9.702,
+      "census_h2d_octets": 255321284,
+      "execution": 12090,
+      "horloge_khz": 2430000,
+      "horloge_memoire_khz": 12481000,
+      "l2": 134217728,
+      "memoire": 101973819392,
+      "nom": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "phase": "appareil",
+      "pilote": 13000,
+      "propositions_h2d_ms": 8.673,
+      "propositions_h2d_octets": 236326420,
+      "sm": 188,
+      "sondes_h2d_ms": 24.622,
+      "sondes_h2d_octets": 657663592
+    },
+    "identity": {
+      "appareil": true,
+      "census": {
+        "comparees_appareil": 1765151,
+        "comparees_hote_hd": 1765151,
+        "coquilles_larges": 0,
+        "ecarts_appareil": 0,
+        "ecarts_hote_hd": 0,
+        "ecarts_lot_produit": 0,
+        "non_resolues": 0,
+        "requetes": 1765151
+      },
+      "identite": true,
+      "phase": "identite",
+      "propositions": {
+        "abouties": 5371055,
+        "ecarts_appareil": 0,
+        "ecarts_hote_hd": 0,
+        "issues": {
+          "census": 995202,
+          "refus": 0,
+          "table": 4375853
+        },
+        "issues_differentes_p64": 0,
+        "mecanismes": {
+          "certificat": 995206,
+          "repli_certificat": 0,
+          "repli_sans_proposition": 0,
+          "t1": 4375849
+        },
+        "parties": 5371055
+      },
+      "propositions_l4": {
+        "ecarts_hote_appareil": 0,
+        "entieres": 1390772,
+        "issues": {
+          "census": 995202,
+          "refus": 0,
+          "table": 4375853
+        },
+        "issues_differentes_p64": 0,
+        "mecanismes": {
+          "certificat": 995205,
+          "repli_certificat": 0,
+          "repli_sans_proposition": 0,
+          "t1": 4375850
+        }
+      },
+      "propositions_l4f32": {
+        "ecarts_hote_appareil": 0,
+        "issues": {
+          "census": 995202,
+          "refus": 0,
+          "table": 4375853
+        },
+        "issues_differentes_p64": 0,
+        "mecanismes": {
+          "certificat": 995205,
+          "repli_certificat": 5,
+          "repli_sans_proposition": 0,
+          "t1": 4375845
+        }
+      },
+      "sondes": {
+        "coherentes": true,
+        "comparees_appareil": 17187636,
+        "ecarts_appareil": 0,
+        "premieres_sondes_reussies_g": 11816581,
+        "reussies_appareil": 11816581,
+        "reussies_produit": 11816581
+      }
+    },
+    "measures": {
+      "census": {
+        "aa_d": 1.0026508562015333,
+        "aa_h": 0.9972781178599973,
+        "d": 4.6027000000000005,
+        "h": 71.78909999999999
+      },
+      "propositions": {
+        "aa_d": 1.0023711460100708,
+        "aa_h": 0.9995337752556068,
+        "d": 26.808,
+        "h": 31.149949999999997
+      },
+      "propositions_l4": {
+        "aa_d": 1.0017554051263549,
+        "aa_h": 0.9992797065784249,
+        "d": 22.86615,
+        "h": 34.20405
+      },
+      "propositions_l4f32": {
+        "aa_d": 0.9916712685893332,
+        "aa_h": 0.9998882759457979,
+        "d": 47.170500000000004,
+        "h": 65.33070000000001
+      },
+      "sondes": {
+        "aa_d": 1.0004107240752336,
+        "aa_h": 1.000782594167783,
+        "d": 2.24955,
+        "h": 41.58395
+      }
+    },
+    "ratios": {
+      "D1": {
+        "neutralite_hote": 1.0980451011959893,
+        "propositions": 0.7340669888715713,
+        "total": 0.205630937636224
+      },
+      "D2": {
+        "propositions": 1.5143041963149222,
+        "total": 0.37380036395591015
+      }
+    }
+  },
+  "manifest_entries": 92,
+  "mutant_passes": 4,
+  "mutant_processes": 2,
+  "mutants": {
+    "cote_nul": {
+      "census_mismatches": 232162,
+      "code": 1
+    },
+    "l4": {
+      "code": 0,
+      "fallback_count": 429726,
+      "fallback_fraction": 0.5072757857459053,
+      "identity": true,
+      "parts": 847125
+    }
+  },
+  "native_calls_by_audit": 0,
+  "nominal_k5_passes": 90,
+  "nominal_k5_processes": 15,
+  "nominal_k5_warm": 75,
+  "refus": [],
+  "report_float_differences": [
+    {
+      "path": "/trames/ng00/rapports/D1/total/rapport",
+      "replay": 0.1551292343447254,
+      "report": 0.1551292343447253,
+      "ulps": 3.0
+    },
+    {
+      "path": "/trames/ng00/rapports/D1/propositions/rapport",
+      "replay": 0.5222472845221472,
+      "report": 0.5222472845221473,
+      "ulps": 1.0
+    }
+  ],
+  "source": "9815c19b9a69b00cc927dc61837ef7c5dac63615",
+  "sources": 367,
+  "table": {
+    "max": {
+      "measures": {
+        "census": {
+          "aa_cpu": 0.9967647272172786,
+          "aa_gpu": 0.9966239755593456,
+          "cpu_ms": 21.1901,
+          "gpu_ms": 1.9289
+        },
+        "propositions": {
+          "aa_cpu": 0.9977953032233955,
+          "aa_gpu": 0.9995997333244856,
+          "cpu_ms": 7.4412,
+          "gpu_ms": 5.5053
+        },
+        "propositions_l4": {
+          "aa_cpu": 0.9963755349741039,
+          "aa_gpu": 1.0003246350905615,
+          "cpu_ms": 6.9577,
+          "gpu_ms": 3.7854
+        },
+        "propositions_l4f32": {
+          "aa_cpu": 0.9982135141010563,
+          "aa_gpu": 1.0040031305803034,
+          "cpu_ms": 11.6677,
+          "gpu_ms": 7.1164
+        },
+        "sondes": {
+          "aa_cpu": 0.9945677519007949,
+          "aa_gpu": 0.997220221124733,
+          "cpu_ms": 16.5627,
+          "gpu_ms": 0.7685
+        }
+      },
+      "ratios": {
+        "D1": {
+          "neutralite_hote": {
+            "ic95": [
+              0.934588735669975,
+              0.9369465640942795
+            ],
+            "passes": true,
+            "ratio": 0.9355188176419639,
+            "threshold": 1.05
+          },
+          "propositions": {
+            "ic95": [
+              0.5081845484611736,
+              0.5114893490040772
+            ],
+            "passes": false,
+            "ratio": 0.5096833119711045,
+            "threshold": 0.5
+          },
+          "total": {
+            "ic95": [
+              0.14220239475930171,
+              0.14419567918563808
+            ],
+            "passes": true,
+            "ratio": 0.1434301565996098,
+            "threshold": 0.15
+          }
+        },
+        "D2": {
+          "propositions": {
+            "ic95": [
+              0.9557570896904874,
+              0.9599898818900225
+            ],
+            "passes": false,
+            "ratio": 0.9579430153641733,
+            "threshold": 0.2
+          },
+          "total": {
+            "ic95": [
+              0.21568034764850597,
+              0.2182248814115678
+            ],
+            "passes": false,
+            "ratio": 0.21713116764432117,
+            "threshold": 0.1
+          }
+        }
+      }
+    },
+    "mediane": {
+      "measures": {
+        "census": {
+          "aa_cpu": 0.9924089472901476,
+          "aa_gpu": 1.000836235142787,
+          "cpu_ms": 8.7353,
+          "gpu_ms": 0.9335
+        },
+        "propositions": {
+          "aa_cpu": 0.9958746743915885,
+          "aa_gpu": 0.9996017778803418,
+          "cpu_ms": 3.7222,
+          "gpu_ms": 2.7287
+        },
+        "propositions_l4": {
+          "aa_cpu": 0.9964146575443792,
+          "aa_gpu": 0.9980574716854387,
+          "cpu_ms": 3.4386,
+          "gpu_ms": 1.8971
+        },
+        "propositions_l4f32": {
+          "aa_cpu": 0.9983251190439469,
+          "aa_gpu": 0.9995201622672105,
+          "cpu_ms": 5.9798,
+          "gpu_ms": 3.684
+        },
+        "sondes": {
+          "aa_cpu": 0.9905025093743355,
+          "aa_gpu": 1.0018078858096064,
+          "cpu_ms": 8.9368,
+          "gpu_ms": 0.4503
+        }
+      },
+      "ratios": {
+        "D1": {
+          "neutralite_hote": {
+            "ic95": [
+              0.9218069706767696,
+              0.9260016600186813
+            ],
+            "passes": true,
+            "ratio": 0.9239146251880637,
+            "threshold": 1.05
+          },
+          "propositions": {
+            "ic95": [
+              0.5088767157105422,
+              0.5107074676783947
+            ],
+            "passes": false,
+            "ratio": 0.5097912698752592,
+            "threshold": 0.5
+          },
+          "total": {
+            "ic95": [
+              0.15273669159253522,
+              0.15519846738245655
+            ],
+            "passes": false,
+            "ratio": 0.1539626592659025,
+            "threshold": 0.15
+          }
+        },
+        "D2": {
+          "propositions": {
+            "ic95": [
+              0.9886830070157574,
+              0.9934153010145902
+            ],
+            "passes": false,
+            "ratio": 0.990887003983521,
+            "threshold": 0.2
+          },
+          "total": {
+            "ic95": [
+              0.23644821160591775,
+              0.2398345357924363
+            ],
+            "passes": false,
+            "ratio": 0.23800384365836746,
+            "threshold": 0.1
+          }
+        }
+      }
+    },
+    "ng00": {
+      "measures": {
+        "census": {
+          "aa_cpu": 0.9911799374853211,
+          "aa_gpu": 0.9954006258633897,
+          "cpu_ms": 7.5991,
+          "gpu_ms": 0.8494
+        },
+        "propositions": {
+          "aa_cpu": 0.9891464057512057,
+          "aa_gpu": 0.9996817933351597,
+          "cpu_ms": 2.5122,
+          "gpu_ms": 1.8933
+        },
+        "propositions_l4": {
+          "aa_cpu": 0.9950647982876116,
+          "aa_gpu": 1.0020948745864335,
+          "cpu_ms": 2.3157,
+          "gpu_ms": 1.3072
+        },
+        "propositions_l4f32": {
+          "aa_cpu": 0.9985061460755024,
+          "aa_gpu": 0.9950285765947245,
+          "cpu_ms": 4.487,
+          "gpu_ms": 2.7345
+        },
+        "sondes": {
+          "aa_cpu": 0.9846434394063006,
+          "aa_gpu": 0.9981311990874999,
+          "cpu_ms": 5.6586,
+          "gpu_ms": 0.2996
+        }
+      },
+      "ratios": {
+        "D1": {
+          "neutralite_hote": {
+            "ic95": [
+              0.9184453943131731,
+              0.9238629984393327
+            ],
+            "passes": true,
+            "ratio": 0.9210853533739416,
+            "threshold": 1.05
+          },
+          "propositions": {
+            "ic95": [
+              0.5191218649632547,
+              0.525391520948674
+            ],
+            "passes": false,
+            "ratio": 0.5222472845221472,
+            "threshold": 0.5
+          },
+          "total": {
+            "ic95": [
+              0.1534150286977308,
+              0.1568502879047231
+            ],
+            "passes": false,
+            "ratio": 0.1551292343447254,
+            "threshold": 0.15
+          }
+        },
+        "D2": {
+          "propositions": {
+            "ic95": [
+              1.079939368389728,
+              1.0958062898731458
+            ],
+            "passes": false,
+            "ratio": 1.0886640377751802,
+            "threshold": 0.2
+          },
+          "total": {
+            "ic95": [
+              0.24352336425447732,
+              0.24714838775231268
+            ],
+            "passes": false,
+            "ratio": 0.2451671243394958,
+            "threshold": 0.1
+          }
+        }
+      }
+    }
+  },
+  "verdicts": {
+    "D1": "rejete",
+    "D2": "rejete"
+  }
+}

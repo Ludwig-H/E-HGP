@@ -1,0 +1,361 @@
+--- a/morsehgp3D_v12/microbancs/mes_g_appareil/pilote_g_appareil.py
++++ b/morsehgp3D_v12/microbancs/mes_g_appareil/pilote_g_appareil.py
+@@ -45,8 +45,8 @@
+   complete (dont bits de l4 egaux entre l'appareil et l'hote, issues de l4 egales a celles de p64), replis de l4 au plus
+   0,1 %, et sur chaque trame : borne haute de (C_a + S_a + L_a) / (C_h + S_h + P_h) <= 0,15, de L_a / P_h <= 0,50, et
+   neutralite de l'hote L_h / P_h <= 1,05. REJETE sinon.
+-  REFUSE (les deux verdicts) si une prise manque (processus en echec hors code 1, journal incomplet, moins de
+-  --processus processus valides par trame), la recolte est incoherente, l'appareil est absent ou non isole, plus de
++  REFUSE (les deux verdicts) si une prise manque (processus en echec hors code 1, journal incomplet, effectif par trame different de
++  --processus), la recolte est incoherente, l'appareil est absent ou non isole, plus de
+   0,1 % des requetes de census sont non resolues, un mutant n'est pas tue (cote nul : code 1 exige ; L4 sans test
+   diametral : replis de l4 et de l4f32 au-dessus de 0,1 % exiges sur ng00), un binaire ou une source change pendant la
+   campagne, une moyenne geometrique A/A d'une mesure decisive (C_h, C_a, S_h, S_a, P_h, L_h, L_a, F_a) sort de
+@@ -190,19 +190,34 @@
+ # ------------------------------------------------------------------------------------------------ lecture stricte
+ def lire_journal(lignes):
+     """Rend (recolte, appareil, passes, identite, transferts) d'un journal de mes_g_app, ou leve Refus."""
++    if type(lignes) is not list or any(type(ligne) is not str for ligne in lignes):
++        raise Refus("journal non textuel")
+     recolte = appareil = identite = transferts = None
+-    passes = []
++    passes, phases = [], []
++
++    def objet_unique(paires):
++        d = {}
++        for cle, valeur in paires:
++            if cle in d:
++                raise Refus("cle JSON repetee : " + cle)
++            d[cle] = valeur
++        return d
++
++    def constante_invalide(valeur):
++        raise Refus("constante JSON invalide : " + valeur)
++
+     for ligne in lignes:
+         ligne = ligne.strip()
+         if not ligne:
+             continue
+         try:
+-            d = json.loads(ligne)
++            d = json.loads(ligne, object_pairs_hook=objet_unique, parse_constant=constante_invalide)
+         except ValueError:
+             raise Refus("ligne JSON illisible")
+         if type(d) is not dict or type(d.get("phase")) is not str:
+             raise Refus("ligne sans phase")
+         phase = d["phase"]
++        phases.append(phase)
+         if phase == "recolte":
+             recolte = d
+         elif phase == "appareil":
+@@ -215,8 +230,12 @@
+             transferts = d
+         elif phase == "refus":
+             raise Refus("refus du programme : " + json.dumps(d, sort_keys=True))
+-    if recolte is None or identite is None:
+-        raise Refus("journal incomplet (recolte ou identite absente)")
++        else:
++            raise Refus("phase inconnue : " + phase)
++    attendues = (["recolte"] + (["appareil"] if appareil is not None else []) +
++                 ["passe"] * len(passes) + (["transferts"] if appareil is not None else []) + ["identite"])
++    if not passes or phases != attendues:
++        raise Refus("phases manquantes, repetees ou desordonnees")
+     return recolte, appareil, passes, identite, transferts
+ 
+ 
+@@ -244,7 +263,8 @@
+     if avec_appareil and appareil is None:
+         raise Refus("appareil absent du journal")
+     numeros = [p.get("passe") for p in passes]
+-    if numeros != list(range(n_passes + 1)):
++    if type(n_passes) is not int or n_passes < 1 or any(type(n) is not int for n in numeros) or \
++            numeros != list(range(n_passes + 1)):
+         raise Refus("passes manquantes ou desordonnees : %r" % (numeros,))
+     if passes[0].get("echauffement") is not True or any(p.get("echauffement") is not False for p in passes[1:]):
+         raise Refus("echauffement mal marque")
+@@ -292,6 +312,12 @@
+         sortie["census_hd_sur_produit"] = mediane(hd) / mes["census"]["t_hote_ms"]
+     c, s, pr = identite.get("census", {}), identite.get("sondes", {}), identite.get("propositions", {})
+     l4, l4f = identite.get("propositions_l4", {}), identite.get("propositions_l4f32", {})
++    if any(type(bloc) is not dict for bloc in (c, s, pr, l4, l4f)):
++        raise Refus("blocs d'identite invalides")
++    comptes = (recolte.get("representants"), c.get("requetes"), c.get("non_resolues"),
++               c.get("comparees_appareil"), s.get("comparees_appareil"))
++    if any(type(v) is not int or not 0 <= v < (1 << 64) for v in comptes):
++        raise Refus("comptes d'identite invalides")
+     parties = pr.get("parties")
+     if not entier_naturel(parties) or parties == 0:
+         raise Refus("parties illisibles")
+@@ -313,6 +339,12 @@
+                 c.get("requetes") or s.get("comparees_appareil") != recolte.get("representants"):
+             raise Refus("identite de l'appareil incomplete")
+     commun_ok = all(v == 0 for v in ecarts_communs.values()) and s.get("coherentes") is True
++    # Exactement le drapeau/return du producteur ; les verdicts D1/D2 restent distincts.
++    native = commun_ok and all(ecarts[d][cle] == 0 for d, cles in
++                              (("D1", ("bits_l4", "issues_l4")), ("D2", ("bits_l4f32", "issues_l4f32")))
++                              for cle in cles)
++    if type(s.get("coherentes")) is not bool or identite.get("identite") is not native:
++        raise Refus("drapeau d'identite globale incoherent")
+     sortie["identite"] = {"commune": commun_ok,
+                           "D2": commun_ok and all(v == 0 for v in ecarts["D2"].values()),
+                           "D1": commun_ok and all(v == 0 for v in ecarts["D1"].values())}
+@@ -333,13 +365,22 @@
+     return sortie
+ 
+ 
+-def mutant_l4_tue(mutant):
+-    """Le mutant << L4 sans test diametral >> est tue si ses replis de l4 et de l4f32 depassent 0,1 % (ng00)."""
++def lire_processus(prise, n_passes, avec_appareil):
++    """Code natif coherent avec son identite globale ; aucune assimilation aux verdicts D1/D2."""
++    if type(prise) is not dict or type(prise.get("code")) is not int or prise["code"] not in (0, 1):
++        raise Refus("processus ou code invalide")
++    journal = lire_journal(prise.get("lignes", []))
++    resume = resumer_processus(journal, n_passes, avec_appareil)
++    if prise["code"] != (0 if journal[3]["identite"] else 1):
++        raise Refus("code et identite globale incompatibles")
++    return resume
++
++
++def mutant_l4_tue(mutant, avec_appareil):
++    """Le mutant L4 est juge sur ses replis, pas sur un code 1 impose."""
+     try:
+-        recolte, appareil, passes, identite, transferts = lire_journal(mutant.get("lignes", []))
+-        parties = identite.get("propositions", {}).get("parties")
+-        return taux_replis(identite.get("propositions_l4", {}), parties) > PART_REPLIS and \
+-            taux_replis(identite.get("propositions_l4f32", {}), parties) > PART_REPLIS
++        resume = lire_processus(mutant, 1, avec_appareil)
++        return resume["replis"]["D1"] > PART_REPLIS and resume["replis"]["D2"] > PART_REPLIS
+     except Refus:
+         return False
+ 
+@@ -350,6 +391,18 @@
+     refus = []
+     rejets = {"D2": [], "D1": []}
+     resultats = {}
++    if type(campagne) is not dict:
++        raise Refus("campagne non objet")
++    n, p = campagne.get("processus"), campagne.get("passes")
++    trames = campagne.get("trames")
++    cohorte_ok = (type(n) is int and n > 0 and type(p) is int and p > 0 and
++                  type(trames) is dict and set(trames) == {nom for nom, _ in TRAMES} and
++                  all(type(prises) is list and len(prises) == n for prises in trames.values()))
++    if not cohorte_ok:
++        return {"regle": "REGLE_G_APPAREIL_2", "verdicts": {"D2": "refuse", "D1": "refuse"},
++                "decision": "aucune (campagne refusee)", "refus": ["cohorte ou effectifs invalides"],
++                "rejets": rejets, "trames": {}, "information_k10": None, "seuils": SEUILS,
++                "fenetre_aa": list(FENETRE_AA), "part_replis": PART_REPLIS, "tirages": TIRAGES, "graine": GRAINE}
+     avec = campagne.get("appareil") is True
+     if not avec:
+         refus.append("appareil absent (campagne sans --appareil)")
+@@ -358,23 +411,30 @@
+     if campagne.get("empreintes_stables") is not True:
+         refus.append("binaire ou source modifie pendant la campagne")
+     mutants = campagne.get("mutants") or {}
++    if type(mutants) is not dict:
++        mutants = {}
+     cote = mutants.get("cote_nul") or {}
+-    if cote.get("code") != 1 or cote.get("identite") is not False:
++    if type(cote) is not dict:
++        cote = {}
++    cote_valide = type(cote.get("code")) is int and cote.get("code") == 1 and cote.get("identite") is False
++    if "lignes" in cote:
++        try:
++            lire_processus(cote, 1, avec)
++        except Refus:
++            cote_valide = False
++    if not cote_valide:
+         refus.append("mutant cote_nul non tue (code %r, identite %r)" % (cote.get("code"), cote.get("identite")))
+-    if not mutant_l4_tue(mutants.get("l4") or {}):
++    if not mutant_l4_tue(mutants.get("l4") or {}, avec):
+         refus.append("mutant L4 sans test diametral non tue (replis sous 0,1 %)")
+     for nom, _ in TRAMES:
+         prises = campagne.get("trames", {}).get(nom, [])
+         valides = []
+         for prise in prises:
+-            if prise.get("code") not in (0, 1):
+-                refus.append("%s : processus en echec (code %r)" % (nom, prise.get("code")))
+-                continue
+             try:
+-                valides.append(resumer_processus(lire_journal(prise.get("lignes", [])), campagne["passes"], avec))
++                valides.append(lire_processus(prise, campagne["passes"], avec))
+             except Refus as r:
+                 refus.append("%s : %s" % (nom, r))
+-        if len(valides) < campagne["processus"]:
++        if len(valides) != campagne["processus"]:
+             refus.append("%s : %d processus valides sur %d" % (nom, len(valides), campagne["processus"]))
+         if not valides:
+             continue
+@@ -424,13 +484,14 @@
+     information_k10 = None
+     if campagne.get("information_k10") is not None:
+         try:
+-            v = resumer_processus(lire_journal(campagne["information_k10"].get("lignes", [])), PASSES_K10, avec)
++            v = lire_processus(campagne["information_k10"], PASSES_K10, avec)
+             information_k10 = {"code": campagne["information_k10"].get("code"), "rapports": v.get("rapports"),
+                                "mesures": v["mesures"], "identite": v["identite"], "replis": v["replis"],
+                                "parties": v["parties"], "requetes": v["requetes"], "entieres": v["entieres"],
+                                "mecanismes": v["mecanismes"]}
+         except Refus as r:
+-            information_k10 = {"refus": str(r), "code": campagne["information_k10"].get("code")}
++            info = campagne["information_k10"]
++            information_k10 = {"refus": str(r), "code": info.get("code") if type(info) is dict else None}
+     verdicts = {}
+     for d in ("D2", "D1"):
+         verdicts[d] = "refuse" if refus else ("rejete" if rejets[d] else "adopte")
+@@ -463,6 +524,7 @@
+             a = 8.0 * (1.0 + 0.001 * i) * rapports[m] if m.startswith("propositions") else h * rapports[m]
+             p[m] = {"hote_ms": [h, h * aa], "appareil_ms": [a, a * aa], "hote_hd_ms": h * 0.6}
+         lignes.append(json.dumps(p))
++    lignes.append(json.dumps({"phase": "transferts"}))
+     mec = {"t1": parties - 100 - replis, "certificat": 100, "repli_sans_proposition": 0, "repli_certificat": replis}
+     iss = {"table": parties - 100, "census": 100, "refus": 0}
+     ident = {"phase": "identite", "appareil": True, "identite": True,
+@@ -496,7 +558,7 @@
+         if manque and nom == "max":
+             prises = prises[:2]
+         trames[nom] = prises
+-    mutant_l4 = {"code": 0, "lignes": journal_synthetique({m: 0.1 for m in MESURES}, replis=mutant_l4_replis)}
++    mutant_l4 = {"code": 0, "lignes": journal_synthetique({m: 0.1 for m in MESURES}, passes=1, replis=mutant_l4_replis)}
+     return {"processus": 3, "passes": 3, "appareil": True, "isolation_ok": True, "empreintes_stables": True,
+             "mutants": {"cote_nul": {"code": mutant_cote, "identite": mutant_cote != 1}, "l4": mutant_l4},
+             "trames": trames}
+@@ -631,16 +693,13 @@
+     return sortie.strip() == "", sortie.strip()
+ 
+ 
+-def identite_du_journal(lignes):
+-    for ligne in lignes:
+-        try:
+-            d = json.loads(ligne)
+-        except ValueError:
+-            continue
+-        if type(d) is dict and d.get("phase") == "identite":
+-            return d.get("identite")
+-    return None
+-
++def identite_du_journal(lignes, avec_appareil):
++    try:
++        journal = lire_journal(lignes)
++        resumer_processus(journal, 1, avec_appareil)
++        return journal[3]["identite"]
++    except Refus:
++        return None
+ 
+ def campagne(args, construction):
+     avec = construction.get("appareil") is True
+@@ -679,7 +738,7 @@
+     for nom_binaire, _ in MUTANTS:
+         cle = "cote_nul" if nom_binaire.endswith("cote_nul") else "l4"
+         m = jouer(chemins[nom_binaire], "ng00", "lidar_ng00", nom_binaire, 1)
+-        camp["mutants"][cle] = {"code": m["code"], "identite": identite_du_journal(m["lignes"]),
++        camp["mutants"][cle] = {"code": m["code"], "identite": identite_du_journal(m["lignes"], avec),
+                                 "journal": m["journal"], "lignes": m["lignes"]}
+     # Information (sans verdict) : ng00 a K10, un processus, deux passes ; les propositions y pesent trois fois plus.
+     camp["information_k10"] = jouer(chemins["mes_g_app"], "ng00_k10", "lidar_ng00", "information_k10", PASSES_K10, 10)
+--- a/morsehgp3D_v12/microbancs/mes_g_appareil/test_pilote_g_appareil.py
++++ b/morsehgp3D_v12/microbancs/mes_g_appareil/test_pilote_g_appareil.py
+@@ -20,6 +20,12 @@
+ class JugeTest(unittest.TestCase):
+     def test_auto_test(self):
+         self.assertEqual(pg.auto_test(), [])
++
++    def test_journal_strict(self):
++        from test_journal_strict import jouer
++        for cas in jouer(pg):
++            with self.subTest(cas=cas['cas']):
++                self.assertTrue(cas['ok'], cas)
+ 
+     def test_bootstrap_ordonne(self):
+         bas, haut = pg.bootstrap([0.05, 0.07, 0.06, 0.08, 0.05])
+--- /dev/null
++++ b/morsehgp3D_v12/microbancs/mes_g_appareil/test_journal_strict.py
+@@ -0,0 +1,89 @@
++#!/usr/bin/env python3
++"""Portes JSON de GAPP2 ; aucune sonde, compilation ou donnee de scene."""
++import copy
++import json
++
++BON = {'census': .09, 'sondes': .05, 'propositions': .70,
++       'propositions_l4': .40, 'propositions_l4f32': .08, 'neutre': 1.0}
++ADOPTE = {'D1': 'adopte', 'D2': 'adopte'}
++REFUSE = {'D1': 'refuse', 'D2': 'refuse'}
++
++
++def cas(pg):
++    def base():
++        c = pg.campagne_synthetique(BON)
++        c['processus'] = 1
++        for nom in c['trames']:
++            c['trames'][nom] = c['trames'][nom][:1]
++        # Schema reel egal pour les deux versions du juge testees.
++        for p in [v[0] for v in c['trames'].values()] + [c['mutants']['l4']]:
++            rows = p['lignes']
++            if not any(json.loads(x)['phase'] == 'transferts' for x in rows):
++                rows.insert(-1, json.dumps({'phase': 'transferts'}))
++        c['mutants']['l4']['lignes'] = [s for s in c['mutants']['l4']['lignes']
++                                             if json.loads(s)['phase'] != 'passe' or json.loads(s)['passe'] <= 1]
++        return c
++    def prise(c):return c['trames']['ng00'][0]
++    def rows(c):return prise(c)['lignes']
++    def change(c, phase, key, value):
++        r = rows(c);i = next(i for i,s in enumerate(r) if json.loads(s)['phase'] == phase)
++        d = json.loads(r[i]);d[key] = value;r[i] = json.dumps(d)
++    def duplicate(c, phase):
++        r = rows(c);i = next(i for i,s in enumerate(r) if json.loads(s)['phase'] == phase)
++        r.insert(i,r[i])
++    def overwritten(c):
++        d = json.loads(rows(c)[-1]);d['identite'] = False;d['census']['ecarts_appareil'] = 1
++        rows(c).insert(-1,json.dumps(d))
++    cases = [('nominal',base(),ADOPTE)]
++    def add(name,mut,expected=REFUSE):
++        c=base();mut(c);cases.append((name,c,expected))
++    add('identite_ecrasee',overwritten)
++    add('phase_inconnue',lambda c:rows(c).insert(-1,json.dumps({'phase':'inconnue'})))
++    add('surplus_processus',lambda c:c['trames']['ng00'].append(copy.deepcopy(prise(c))))
++    add('code_bool',lambda c:prise(c).__setitem__('code',False))
++    add('passe_bool',lambda c:change(c,'passe','passe',False))
++    for phase in ('recolte','appareil','transferts'):
++        add('double_'+phase,lambda c,p=phase:duplicate(c,p))
++    add('transferts_absents',lambda c:rows(c).__delitem__(-2))
++    add('code1_identite_vraie',lambda c:prise(c).__setitem__('code',1))
++    add('drapeau_incoherent',lambda c:change(c,'identite','identite',False))
++    add('effectif_bool',lambda c:c.__setitem__('processus',True))
++    add('trame_surnumeraire',lambda c:c['trames'].__setitem__('autre',copy.deepcopy(c['trames']['ng00'])))
++    add('mutant_code_bool',lambda c:c['mutants']['cote_nul'].__setitem__('code',True))
++    add('mutant_l4_incomplet',lambda c:c['mutants']['l4']['lignes'].pop(2))
++    add('cle_json_repetee',lambda c:rows(c).__setitem__(2,rows(c)[2].replace('"ok": true','"ok": false, "ok": true')))
++    def difference(c,block):
++        d=json.loads(rows(c)[-1]);d[block]['issues_differentes_p64']=1;d['identite']=False
++        rows(c)[-1]=json.dumps(d);prise(c)['code']=1
++    add('d2_seul_ecart_code1',lambda c:difference(c,'propositions_l4f32'),{'D1':'adopte','D2':'rejete'})
++    add('d1_seul_ecart_code1',lambda c:difference(c,'propositions_l4'),{'D1':'rejete','D2':'adopte'})
++    def bad_zero(c):difference(c,'propositions_l4f32');prise(c)['code']=0
++    add('code0_ecart',bad_zero)
++    def informative(c):
++        p=copy.deepcopy(prise(c));p['code']=False
++        p['lignes']=[s for s in p['lignes'] if json.loads(s)['phase'] != 'passe' or json.loads(s)['passe'] <= 2]
++        c['information_k10']=p
++    add('k10_invalide_informatif',informative,ADOPTE)
++    return cases
++
++
++def jouer(pg):
++    out=[]
++    for name,c,expected in cas(pg):
++        try:
++            r=pg.juger(c);actual=r['verdicts']
++            ok=actual==expected
++            if name=='k10_invalide_informatif':ok=ok and 'refus' in r['information_k10']
++        except Exception as exc:
++            actual={'exception':type(exc).__name__};ok=False
++        out.append({'cas':name,'attendu':expected,'rendu':actual,'ok':ok})
++    # La voie CPU informative reste lisible sans lignes appareil ni transferts.
++    lines=pg.journal_synthetique(BON)
++    ds=[json.loads(s) for s in lines if json.loads(s)['phase'] not in ('appareil','transferts')]
++    ds[-1]['appareil']=False
++    try:
++        pg.resumer_processus(pg.lire_journal([json.dumps(d) for d in ds]),3,False)
++        out.append({'cas':'cpu_sans_appareil','ok':True})
++    except Exception as exc:
++        out.append({'cas':'cpu_sans_appareil','ok':False,'exception':type(exc).__name__})
++    return out

@@ -1,0 +1,34 @@
+{
+  "captured_utc": "2026-10-08T11:39:20.398675+00:00",
+  "commit": "9815c19b9a69b00cc927dc61837ef7c5dac63615",
+  "scope": "contrelecture de source et preuve des issues; sans admission de campagne ni execution native",
+  "sources": {
+    "microbancs/mes_g_appareil/noyau_g.hpp": "aea6c15863c6757dbbe00867a10471ec9777ba08961f7440612997e8170e1332",
+    "microbancs/mes_g_appareil/mes_g_app.cpp": "66350659a920a4b9d62a887ab780e22ab41fba1247f418fd1625be2968d2d423",
+    "microbancs/mes_g_appareil/appareil.cu": "ebe935996d33a484aeef850473f809de23dc078e341a886cecc3dd24c2d5ff0d",
+    "microbancs/mes_g_appareil/generer_l4_hd.py": "5e21fec873e24b2c3003b588af1d24f4baeadfb5ec3a07d0fc1b742c4ec2570a",
+    "microbancs/mes_g_appareil/pilote_g_appareil.py": "556e029f3d88065217ec31cfbe6d215ee5e366feb48b882857f47376b15c4d3a",
+    "microbancs/mes_g_appareil/README.md": "741267bc0675cdd1b6ed30efe7b80025cfe67b6fd203f0a0b30a8b2226a356f7",
+    "microbancs/mes_t2d_b/bras_t2d_b.json": "3999a137f3002ca6fcf2a477457dbd9d118023da31f8490d0656350ab826b025",
+    "src/tower/proposal.hpp": "92495aa67223577c8acef74967f89853c0dab3c5881afe1fb2c7826327f28c18",
+    "src/tower/resolve.cpp": "3d2bd04e02e60b6bab1d27b77a488112f80791f69395805273f539c6773dc1af",
+    "src/tower/supports.cpp": "04c91fc00bfe25373b3afed21900a3d866f333970bd1e2313e6e1e083159dd4d",
+    "src/tower/passes.cpp": "d1f850445a0970628691e0812d1c8c630a0e19294c9b862d6bddef8ffc865ef1",
+    "src/num/guard.cpp": "5a5fc29b65e21b1b74f642986614eb1fb0801cc084ae7ec50bc3aedc7e5655fc",
+    "docs/CONTRAT_TOUR.md": "262b3bb57f68f9deb3f4b6172419b4e4ba105ffc98ce8f9394e5343de4eb09af",
+    "receipts/developpement_20261008/etude_g_appareil_etape2.md": "de0b4eadd9f86c185b4d4c8df64f53c2ecbbd235a9e8135e95667993811287e9"
+  },
+  "verified_utc": "2026-10-08T11:46:08.236727+00:00",
+  "result": {
+    "changed_files": 9,
+    "contract_changed": false,
+    "generated_block_bytes": 14001,
+    "generated_block_occurrences": 1,
+    "generated_block_sha256": "a6ecdd5633c849782a05a46c3d02a4cadef1d48111a42e110c73439e823cec2a",
+    "integer_abs_sum_bound_B30": 3458764507378089987,
+    "native_executed": false,
+    "product_sources_changed": 0,
+    "source_hashes": 14
+  },
+  "python_normal_optimized_identical": true
+}

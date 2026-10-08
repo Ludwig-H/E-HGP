@@ -1,0 +1,604 @@
+{
+  "mutants_causaux": [
+    {
+      "avec_garde": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "garde": "phases",
+      "sans_garde": {
+        "D1": "adopte",
+        "D2": "adopte"
+      },
+      "temoin": "phase_inconnue"
+    },
+    {
+      "avec_garde": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "garde": "code_type",
+      "sans_garde": {
+        "D1": "adopte",
+        "D2": "adopte"
+      },
+      "temoin": "code_bool"
+    },
+    {
+      "avec_garde": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "garde": "passe_type",
+      "sans_garde": {
+        "D1": "adopte",
+        "D2": "adopte"
+      },
+      "temoin": "passe_bool"
+    },
+    {
+      "avec_garde": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "garde": "cohorte",
+      "sans_garde": {
+        "D1": "adopte",
+        "D2": "adopte"
+      },
+      "temoin": "surplus_processus"
+    },
+    {
+      "avec_garde": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "garde": "code_identite",
+      "sans_garde": {
+        "D1": "adopte",
+        "D2": "adopte"
+      },
+      "temoin": "code1_identite_vraie"
+    }
+  ],
+  "native_invocations": 0,
+  "official_python_gates": {
+    "after": {
+      "code": 0,
+      "tests": 15
+    },
+    "before": {
+      "code": 0,
+      "tests": 14
+    }
+  },
+  "post_pilot_sha256": "7ff6e20c5348f7d4cfa6dd76d0d92f0baed29d9e406cbf2af40e72db472a7c71",
+  "reel": {
+    "k10_informatif_code": 0,
+    "mutant_cote_code": 1,
+    "mutant_l4_code": 0,
+    "processus_decisifs": 15,
+    "rapports_avant_apres_egaux": true,
+    "refus": [],
+    "verdicts": {
+      "D1": "rejete",
+      "D2": "rejete"
+    }
+  },
+  "synthetiques_apres": [
+    {
+      "attendu": {
+        "D1": "adopte",
+        "D2": "adopte"
+      },
+      "cas": "nominal",
+      "ok": true,
+      "rendu": {
+        "D1": "adopte",
+        "D2": "adopte"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "identite_ecrasee",
+      "ok": true,
+      "rendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "phase_inconnue",
+      "ok": true,
+      "rendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "surplus_processus",
+      "ok": true,
+      "rendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "code_bool",
+      "ok": true,
+      "rendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "passe_bool",
+      "ok": true,
+      "rendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "double_recolte",
+      "ok": true,
+      "rendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "double_appareil",
+      "ok": true,
+      "rendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "double_transferts",
+      "ok": true,
+      "rendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "transferts_absents",
+      "ok": true,
+      "rendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "code1_identite_vraie",
+      "ok": true,
+      "rendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "drapeau_incoherent",
+      "ok": true,
+      "rendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "effectif_bool",
+      "ok": true,
+      "rendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "trame_surnumeraire",
+      "ok": true,
+      "rendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "mutant_code_bool",
+      "ok": true,
+      "rendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "mutant_l4_incomplet",
+      "ok": true,
+      "rendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "cle_json_repetee",
+      "ok": true,
+      "rendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "adopte",
+        "D2": "rejete"
+      },
+      "cas": "d2_seul_ecart_code1",
+      "ok": true,
+      "rendu": {
+        "D1": "adopte",
+        "D2": "rejete"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "rejete",
+        "D2": "adopte"
+      },
+      "cas": "d1_seul_ecart_code1",
+      "ok": true,
+      "rendu": {
+        "D1": "rejete",
+        "D2": "adopte"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "code0_ecart",
+      "ok": true,
+      "rendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "adopte",
+        "D2": "adopte"
+      },
+      "cas": "k10_invalide_informatif",
+      "ok": true,
+      "rendu": {
+        "D1": "adopte",
+        "D2": "adopte"
+      }
+    },
+    {
+      "cas": "cpu_sans_appareil",
+      "ok": true
+    }
+  ],
+  "synthetiques_avant": [
+    {
+      "attendu": {
+        "D1": "adopte",
+        "D2": "adopte"
+      },
+      "cas": "nominal",
+      "ok": true,
+      "rendu": {
+        "D1": "adopte",
+        "D2": "adopte"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "identite_ecrasee",
+      "ok": false,
+      "rendu": {
+        "D1": "adopte",
+        "D2": "adopte"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "phase_inconnue",
+      "ok": false,
+      "rendu": {
+        "D1": "adopte",
+        "D2": "adopte"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "surplus_processus",
+      "ok": false,
+      "rendu": {
+        "D1": "adopte",
+        "D2": "adopte"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "code_bool",
+      "ok": false,
+      "rendu": {
+        "D1": "adopte",
+        "D2": "adopte"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "passe_bool",
+      "ok": false,
+      "rendu": {
+        "D1": "adopte",
+        "D2": "adopte"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "double_recolte",
+      "ok": false,
+      "rendu": {
+        "D1": "adopte",
+        "D2": "adopte"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "double_appareil",
+      "ok": false,
+      "rendu": {
+        "D1": "adopte",
+        "D2": "adopte"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "double_transferts",
+      "ok": false,
+      "rendu": {
+        "D1": "adopte",
+        "D2": "adopte"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "transferts_absents",
+      "ok": false,
+      "rendu": {
+        "D1": "adopte",
+        "D2": "adopte"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "code1_identite_vraie",
+      "ok": false,
+      "rendu": {
+        "D1": "adopte",
+        "D2": "adopte"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "drapeau_incoherent",
+      "ok": false,
+      "rendu": {
+        "D1": "adopte",
+        "D2": "adopte"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "effectif_bool",
+      "ok": false,
+      "rendu": {
+        "D1": "adopte",
+        "D2": "adopte"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "trame_surnumeraire",
+      "ok": false,
+      "rendu": {
+        "D1": "adopte",
+        "D2": "adopte"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "mutant_code_bool",
+      "ok": false,
+      "rendu": {
+        "D1": "adopte",
+        "D2": "adopte"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "mutant_l4_incomplet",
+      "ok": false,
+      "rendu": {
+        "D1": "adopte",
+        "D2": "adopte"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "cle_json_repetee",
+      "ok": false,
+      "rendu": {
+        "D1": "adopte",
+        "D2": "adopte"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "adopte",
+        "D2": "rejete"
+      },
+      "cas": "d2_seul_ecart_code1",
+      "ok": true,
+      "rendu": {
+        "D1": "adopte",
+        "D2": "rejete"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "rejete",
+        "D2": "adopte"
+      },
+      "cas": "d1_seul_ecart_code1",
+      "ok": true,
+      "rendu": {
+        "D1": "rejete",
+        "D2": "adopte"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "refuse",
+        "D2": "refuse"
+      },
+      "cas": "code0_ecart",
+      "ok": false,
+      "rendu": {
+        "D1": "adopte",
+        "D2": "rejete"
+      }
+    },
+    {
+      "attendu": {
+        "D1": "adopte",
+        "D2": "adopte"
+      },
+      "cas": "k10_invalide_informatif",
+      "ok": false,
+      "rendu": {
+        "D1": "adopte",
+        "D2": "adopte"
+      }
+    },
+    {
+      "cas": "cpu_sans_appareil",
+      "ok": true
+    }
+  ]
+}
