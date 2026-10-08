@@ -1,0 +1,143 @@
+{
+  "files_sha256": {
+    "build24e/CMakeCache.txt": "485356bcd1fba1a019daa29424e50bf2dd72cfc43fb0d82013c5bd05cacd1848",
+    "build24e/Testing/Temporary/LastTest.log": "3fee69f06d8e178738d726d825e054caac5a3efb8146d6bb8284a9ef1a53c19a",
+    "build24e/mhgp12_tower_chain": "77f81e9013843d611d8aa3d55af26ffaf0a5614c9b23983c32bb87c2b520100b",
+    "build24e/mhgp12_tower_dumps": "9c560810d3219714885aa72cf23e9f23506e54b7a5ce9cf6cbda1601fd38c8be",
+    "build32e/CMakeCache.txt": "6e8668e9f964ba36b59695bc72ff42942f5fdfc23844f56037c9a9300f1c6b88",
+    "build32e/Testing/Temporary/LastTest.log": "c84045d0032f04147526f6970e3efdc004b8d42c3849059c6c9a52b630a1d509",
+    "build32e/mhgp12_tower_chain": "71bd4c706f220d4efcaee376bcd6419bdd48cff902ba84dc6d3545660a6dd478",
+    "build32e/mhgp12_tower_dumps": "2ec277ad4c0428a23a6c5d50ab3e5f96f7c1ccb8fce7be3b30c89eea51a2c827",
+    "final5/build24.log": "cc79524cf248a07bb9372afb73d4ac852e1a1bfd11498de82559db2642b884b7",
+    "final5/build32.log": "168e360dd1c70bd79d8e70a62d50d3052881eb1a4e8a0e0705b30945dc54bed4",
+    "final5/cfg24.log": "625c2db4d1f158a1dcba399a7d9868e10ead0b8f1df2a47fcf7bf185f32a113a",
+    "final5/cfg32.log": "01992bbd6d20b6f7e008f99bc9ac6ee550e295b9a5605fcc6fb335bd9158b011",
+    "final5/chaine_24_a.log": "91e9c1a02a9d9350473fdc38c0f05368dbbb314d8cb2c4913e220f5411c0050a",
+    "final5/chaine_24_b.log": "e3e1a89d70770acb55c9487cc0e776260954f6abf8433ba0c4d6beb5b8247eb1",
+    "final5/chaine_24_c.log": "5c95283d1997b026e64ca547f908983bb6cec3b71bba1b6c5fe0b0e03306f99f",
+    "final5/chaine_32_a.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "final5/chaine_32_b.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "final5/chaine_32_c.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "final5/ctest24.log": "b0949d07a84442ad83eabb2b490c4f36749471b82fe8e749fd53f8e630533d5b",
+    "final5/ctest32.log": "0303d729a1125077a2ef57ad7e705c48152bb539128a92bfc0f360f269d0f47c",
+    "final5/m0_24_graines.log": "e5c430713fd4336943f70c804b44e584d712ded51a01e50d1c4adfc3d02a69e8",
+    "final5/m0_24_v12.log": "d69a5c3cd300d93bfbd4d18501acbb852483c3cd7e4cadbb9a5ae87d36dfbea1",
+    "outils/etape_final5.sh": "339b152115a7a18888833861fbd9f9c4e4cbb871eb8804d81ead606f7897e918"
+  },
+  "packaging_observations": {
+    "current_repo6_patch_sha256": "b3c78ae365a99568457bc6cd5d894a1b73d02b7b19ae3d774f9fdfa094a58bab",
+    "intermediate_repo6_patch_sha256": "ef27e03f0e7befbd17cddad271ff322f4e4d01e466a0253bb1cd995dcd683653",
+    "old_patch_bytes_preserved_here": false,
+    "original_repo5_patch_sha256": "6f0643acca9d6c27755f1e3dde15b166c810371eb88662a32360f6d5c2136de9",
+    "shared_patch_used_to_qualify_repo5": false
+  },
+  "prior_reader_sha256": "b1424b987d0c19b2f4eb966fd852e4e1284ebdc491f312dc0943d81694bd86b5",
+  "public_status": "not_claimed",
+  "result": {
+    "combined_gc_tmvr_qualified": false,
+    "gcp_used": false,
+    "input_byte_identity_rehashed": false,
+    "native_replayed": false,
+    "new_quantization_demonstrated": false,
+    "payloads_read": false,
+    "profiles": {
+      "24": {
+        "chain_cases": [
+          "ng00_k10",
+          "ng00_k5",
+          "ng01_k10",
+          "ng01_k5",
+          "ng02_k10",
+          "ng02_k5",
+          "u16000_k5",
+          "u32000_k5",
+          "u8000_k5"
+        ],
+        "codes": {
+          "build24": {
+            "code": 0,
+            "utc": "00:51:37"
+          },
+          "chaine_24_a": {
+            "code": 0,
+            "utc": "01:10:50"
+          },
+          "chaine_24_b": {
+            "code": 0,
+            "utc": "01:09:09"
+          },
+          "chaine_24_c": {
+            "code": 0,
+            "utc": "01:12:25"
+          },
+          "ctest24": {
+            "code": 0,
+            "utc": "00:58:07"
+          },
+          "m0_semantique_24_graines": {
+            "code": 0,
+            "utc": "01:13:21"
+          },
+          "m0_semantique_24_v12": {
+            "code": 0,
+            "utc": "01:14:17"
+          }
+        },
+        "ctest_passed": 680,
+        "ctest_skipped": [
+          "mhgp12_support_lidar_sentinel"
+        ],
+        "cuda_enabled": false,
+        "emst_judge_in_m0": false,
+        "m0_case": "ng00_k5",
+        "m0_modes": [
+          "graines",
+          "v12"
+        ]
+      },
+      "32": {
+        "chain_cases": [],
+        "codes": {
+          "build32": {
+            "code": 0,
+            "utc": "01:15:56"
+          },
+          "ctest32": {
+            "code": 0,
+            "utc": "01:21:42"
+          }
+        },
+        "ctest_passed": 680,
+        "ctest_skipped": [
+          "mhgp12_support_lidar_sentinel"
+        ],
+        "cuda_enabled": false,
+        "emst_judge_in_m0": false,
+        "m0_case": null,
+        "m0_modes": []
+      }
+    },
+    "repo5_stopped_utc": "01:22:17",
+    "stop_evidence": "declaration RAPPORT + traces closes/incompletes, signal non rejoue"
+  },
+  "source_base": "c903774b1d16c3b18c15b86fa2a55d11d44b8bc8",
+  "source_tree": [
+    "848c7a0b771b2e69a8fb9e954b8f1c4e756f1bae3365335a16ab8cab421332d9",
+    376
+  ],
+  "status": "repo5_cloture_partielle_u24_complet_u32_construction_suite_rapide",
+  "stop_report_excerpt": "Batterie repo5 arr\u00eat\u00e9e par son groupe de\n  processus \u00e0 01:22:17.",
+  "successor_observation_only": {
+    "directory": "repo6",
+    "files_sha256": {
+      "src/tower/forest.hpp": "1f21cdeb598da5492bfa0708551a2bb319685c7d74d197b1d764512ebe6478fb",
+      "src/tower/forest_births.cpp": "bde6fd96337017565a70de1e660c0353df63cd719540bd0e60a281c3e5f617ae",
+      "src/tower/forest_validate.cpp": "c8733422f97439d3c40d070fb75a67437315629094f0e9381efc52c97d45d6f6",
+      "src/tower/module.cmake": "12219c37b88fc900fe3949354a54432fa3bced5b892289a6517fde759cc5a378",
+      "src/tower/registry_branches.cpp": "63a86cde27fe8108cf1e2e6753bcf6a4e49dd2b3ac5b7dcad9da179e48865e5a",
+      "tests/mutants/tower.json": "75fa8a676129710045b79e1a0d5543fcb2e76b39548cc61075fe475724127f9b"
+    },
+    "qualification_transferred": false,
+    "source_base": "a5e0dbc776f2817f4e7e3a23fc791f1035948b47"
+  }
+}

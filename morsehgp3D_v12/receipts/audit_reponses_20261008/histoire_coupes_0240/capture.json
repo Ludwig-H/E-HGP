@@ -1,0 +1,11 @@
+{
+  "prototype": "TMVR repo5",
+  "base": "c903774b1d16c3b18c15b86fa2a55d11d44b8bc8",
+  "patch_sha256": "6f0643acca9d6c27755f1e3dde15b166c810371eb88662a32360f6d5c2136de9",
+  "source_sha256": {
+    "src/tower/forest.hpp": "eb14f804a7fe55d16e11b96c39ccbac037f887c998e68f6464495cb21938dd19",
+    "src/tower/forest_validate.cpp": "f47c7fe23c1f942b2c16e280b3fab724c6810fdac68b6b049c479ca79e282228",
+    "src/tower/vertical_images.cpp": "b0543caf0adb031cf58f59d7eb337aa79c41ad226f28da527456e22f6b0df8eb",
+    "src/tower/forest_kernel.cpp": "9633c2b4e07ffb3f47c2f3b6f49f493b01cf75bbccd6dbf70b4bc86278f119b9"
+  }
+}
