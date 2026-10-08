@@ -1,7 +1,7 @@
 # Portes du module io. tests/io/full_march_collector.py est enregistre par tests/tower/tests.cmake (collecteur des
 # recus de la tour) : il n'est pas reenregistre ici.
 mhgp12_add_unit(mhgp12_io_unit SOURCES sha256_test.cpp input_test.cpp
-                GROUPS sha256 hex input input_sizes input_unreadable input_budget LABELS fast)
+                GROUPS sha256 sha256_voies hex input input_sizes input_unreadable input_budget LABELS fast)
 mhgp12_add_unit(mhgp12_io_transaction SOURCES plan_test.cpp transaction_test.cpp
                 GROUPS plan_syntax plan_parent plan_conflicts plan_inputs create_names parent_unwritable
                        commit noreplace orphan discard retract write_failure

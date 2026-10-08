@@ -8,11 +8,26 @@
 // Ce qui change : aucune exception. La source levait sur une mise a jour apres finalisation et sur un debordement du
 // compte de bits ; ici finish() calcule sur une copie de l'etat (il ne finalise rien et peut etre rappele), et la
 // longueur du message est bornee par kMaxMessageBytes, que FileWriter garde avant d'absorber.
-// Portes : mhgp12_io_unit_sha256 (vecteurs de FIPS 180-4 et decoupages), mhgp12_io_sha256 (differentiel contre
-// hashlib, tailles 0 a 200 puis multiblocs) ; mutants sha_tronque, sha_longueur_en_octets.
+// Voie materielle (8 octobre 2026) : sur x86-64, les blocs entiers sont compresses par les instructions SHA
+// (sha256rnds2, sha256msg1, sha256msg2) quand le processeur les annonce (cpuid : feuille 7, EBX bit 29 ; feuille 1,
+// SSSE3 et SSE4.1) ; meme fonction de compression que la voie portable, memes octets d'empreinte. La voie est choisie
+// une fois, a l'initialisation ; detail::set_sha_hardware ne sert qu'aux portes d'equivalence. Motif : l'empreinte
+// FUL1 hache environ 6,7 Ko par site (986 Mo pour 146 316 sites a K5), a 142 Mo/s par la voie portable.
+// Portes : mhgp12_io_unit_sha256 (vecteurs de FIPS 180-4 et decoupages), mhgp12_io_unit_sha256_voies (memes vecteurs
+// et equivalence des deux voies sur des messages et des decoupages graves), mhgp12_io_sha256 (differentiel contre
+// hashlib, tailles 0 a 200 puis multiblocs) ; mutants sha_tronque, sha_longueur_en_octets, sha_materiel_*.
 #include <algorithm>
+#include <atomic>
 #include <bit>
 #include <cstring>
+
+#if defined(__x86_64__) && (defined(__GNUC__) || defined(__clang__))
+#include <cpuid.h>
+#include <immintrin.h>
+#define MHGP12_SHA_HW 1
+#else
+#define MHGP12_SHA_HW 0
+#endif
 
 #include "io/io.hpp"
 
@@ -41,13 +56,79 @@ inline void round_step(u32 a, u32 b, u32 c, u32& d, u32 e, u32 f, u32 g, u32& h,
   h = t1 + sum0 + majority;
 }
 
+#if MHGP12_SHA_HW
+// Compression de `blocks` blocs de 64 octets par les instructions SHA. Mots d'etat ranges comme les attendent
+// sha256rnds2 (ABEF et CDGH), quatre mots de message par groupe, ordonnancement par sha256msg1 et sha256msg2 :
+// W[t..t+3] = msg2(msg1(W[t-16..t-13], W[t-12..t-9]) + W[t-7..t-4], W[t-4..t-1]).
+__attribute__((target("sha,sse4.1,ssse3"))) void compress_hardware(std::array<u32, 8>& state, const u8* data,
+                                                                      u64 blocks) noexcept {
+  const __m128i swap = _mm_set_epi64x(0x0c0d0e0f08090a0bLL, 0x0405060700010203LL);  // mots gros-boutistes
+  __m128i tmp = _mm_shuffle_epi32(_mm_loadu_si128(reinterpret_cast<const __m128i*>(&state[0])), 0xB1);
+  __m128i cdgh = _mm_shuffle_epi32(_mm_loadu_si128(reinterpret_cast<const __m128i*>(&state[4])), 0x1B);
+  __m128i abef = _mm_alignr_epi8(tmp, cdgh, 8);
+  cdgh = _mm_blend_epi16(cdgh, tmp, 0xF0);
+  for (; blocks != 0; --blocks, data += 64) {
+    const __m128i abef_saved = abef, cdgh_saved = cdgh;
+    __m128i w[4];
+    for (int g = 0; g < 16; ++g) {
+      __m128i& cur = w[g & 3];
+      if (g < 4) {
+        cur = _mm_shuffle_epi8(_mm_loadu_si128(reinterpret_cast<const __m128i*>(data + 16 * g)), swap);
+      } else {
+        const __m128i x3 = w[(g + 3) & 3];
+        cur = _mm_sha256msg2_epu32(
+            _mm_add_epi32(_mm_sha256msg1_epu32(cur, w[(g + 1) & 3]), _mm_alignr_epi8(x3, w[(g + 2) & 3], 4)), x3);
+      }
+      __m128i m = _mm_add_epi32(cur, _mm_loadu_si128(reinterpret_cast<const __m128i*>(&kRound[4 * g])));
+      cdgh = _mm_sha256rnds2_epu32(cdgh, abef, m);
+      m = _mm_shuffle_epi32(m, 0x0E);
+      abef = _mm_sha256rnds2_epu32(abef, cdgh, m);
+    }
+    abef = _mm_add_epi32(abef, abef_saved);
+    cdgh = _mm_add_epi32(cdgh, cdgh_saved);
+  }
+  tmp = _mm_shuffle_epi32(abef, 0x1B);
+  cdgh = _mm_shuffle_epi32(cdgh, 0xB1);
+  _mm_storeu_si128(reinterpret_cast<__m128i*>(&state[0]), _mm_blend_epi16(tmp, cdgh, 0xF0));
+  _mm_storeu_si128(reinterpret_cast<__m128i*>(&state[4]), _mm_alignr_epi8(cdgh, tmp, 8));
+}
+
+bool hardware_present() noexcept {
+  unsigned a = 0, b = 0, c = 0, d = 0;
+  if (__get_cpuid_count(7, 0, &a, &b, &c, &d) == 0 || (b & (1u << 29)) == 0) return false;  // SHA
+  if (__get_cpuid(1, &a, &b, &c, &d) == 0) return false;
+  return (c & (1u << 9)) != 0 && (c & (1u << 19)) != 0;  // SSSE3, SSE4.1
+}
+#else
+bool hardware_present() noexcept { return false; }
+#endif
+
+std::atomic<bool>& hardware_enabled() noexcept {
+  static std::atomic<bool> enabled{hardware_present()};
+  return enabled;
+}
+
 }  // namespace
+
+namespace detail {
+bool sha_hardware() noexcept { return hardware_enabled().load(std::memory_order_relaxed); }
+void set_sha_hardware(bool enabled) noexcept {
+  hardware_enabled().store(enabled && hardware_present(), std::memory_order_relaxed);
+}
+}  // namespace detail
 
 Sha256::Sha256() noexcept
     : state_{0x6a09e667U, 0xbb67ae85U, 0x3c6ef372U, 0xa54ff53aU, 0x510e527fU, 0x9b05688cU, 0x1f83d9abU,
              0x5be0cd19U} {}
 
-void Sha256::compress(const u8* block) noexcept {
+void Sha256::compress(const u8* block, u64 blocks) noexcept {
+#if MHGP12_SHA_HW
+  if (hardware_enabled().load(std::memory_order_relaxed)) {
+    compress_hardware(state_, block, blocks);
+    return;
+  }
+#endif
+  for (; blocks > 1; --blocks, block += 64) compress(block, 1);
   std::array<u32, 64> w{};
   for (std::size_t i = 0; i < 16; ++i)
     w[i] = (u32{block[4 * i]} << 24) | (u32{block[4 * i + 1]} << 16) | (u32{block[4 * i + 2]} << 8) |
@@ -94,7 +175,11 @@ void Sha256::update(std::span<const u8> bytes) noexcept {
       buffered_ = 0;
     }
   }
-  for (; n - offset >= 64; offset += 64) compress(bytes.data() + offset);  // blocs entiers, sans recopie
+  if (n - offset >= 64) {  // blocs entiers, sans recopie, en un appel
+    const u64 blocks = (n - offset) / 64;
+    compress(bytes.data() + offset, blocks);
+    offset += 64 * blocks;
+  }
   const u64 rest = n - offset;
   if (rest != 0) {  // garder la queue ; buffered_ est nul ici des que rest > 0
     std::memcpy(buffer_.data(), bytes.data() + offset, rest);

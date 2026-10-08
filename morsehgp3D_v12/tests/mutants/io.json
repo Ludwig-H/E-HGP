@@ -1,6 +1,6 @@
 {
   "module": "io",
-  "plancher": 22,
+  "plancher": 26,
   "mutants": [
     {
       "id": "sha_tronque",
@@ -177,6 +177,38 @@
       "remplace": "  MHGP12_TRY(publish());\n  manifest_sha256_ = writers_[kMaxOutputFiles].digest();\n  return {};",
       "porte": "mhgp12_io_transaction_noreplace",
       "note": "empreinte du manifeste ferme perdue quand la publication echoue ensuite (double echec : D publie sans empreinte)"
+    },
+    {
+      "id": "sha_materiel_masque",
+      "fichier": "src/io/sha256.cpp",
+      "cherche": "const __m128i swap = _mm_set_epi64x(0x0c0d0e0f08090a0bLL, 0x0405060700010203LL);",
+      "remplace": "const __m128i swap = _mm_set_epi64x(0x0f0e0d0c0b0a0908LL, 0x0706050403020100LL);",
+      "porte": "mhgp12_io_unit_sha256",
+      "note": "voie materielle : mots du message lus petit-boutistes (sans la permutation d'octets)"
+    },
+    {
+      "id": "sha_materiel_sans_report",
+      "fichier": "src/io/sha256.cpp",
+      "cherche": "    abef = _mm_add_epi32(abef, abef_saved);",
+      "remplace": "    abef = _mm_xor_si128(abef, abef_saved);",
+      "porte": "mhgp12_io_unit_sha256",
+      "note": "voie materielle : etat ABEF du bloc precedent combine par ou exclusif au lieu de l'addition"
+    },
+    {
+      "id": "sha_materiel_ordonnancement",
+      "fichier": "src/io/sha256.cpp",
+      "cherche": "_mm_alignr_epi8(x3, w[(g + 2) & 3], 4)",
+      "remplace": "_mm_alignr_epi8(x3, w[(g + 2) & 3], 8)",
+      "porte": "mhgp12_io_unit_sha256",
+      "note": "voie materielle : W[t-7] pris un mot trop loin dans l'ordonnancement"
+    },
+    {
+      "id": "sha_voie_portable_seule",
+      "fichier": "src/io/sha256.cpp",
+      "cherche": "  hardware_enabled().store(enabled && hardware_present(), std::memory_order_relaxed);",
+      "remplace": "  hardware_enabled().store(false && enabled && hardware_present(), std::memory_order_relaxed);",
+      "porte": "mhgp12_io_unit_sha256_voies",
+      "note": "la porte d'equivalence ne compare plus la voie materielle (elle doit le voir : etat rendu different)"
     }
   ]
 }

@@ -38,7 +38,8 @@ using Digest = std::array<u8, kDigestBytes>;
 
 // Empreinte SHA-256 (FIPS 180-4) calculee au fil des donnees. finish() ne modifie pas l'etat : il peut etre appele a
 // tout moment et rend l'empreinte du message recu jusque-la. Message de moins de 2^61 octets (FIPS 180-4 : moins de
-// 2^64 bits) : FileWriter refuse de depasser cette longueur.
+// 2^64 bits) : FileWriter refuse de depasser cette longueur. Compression des blocs par les instructions SHA d'x86-64
+// quand le processeur les a (detection a l'execution), sinon par la voie portable : memes octets d'empreinte.
 class Sha256 {
  public:
   Sha256() noexcept;
@@ -48,13 +49,21 @@ class Sha256 {
   u64 bytes() const noexcept { return total_; }
 
  private:
-  void compress(const u8* block) noexcept;
+  void compress(const u8* block, u64 blocks = 1) noexcept;
 
   std::array<u32, 8> state_{};
   std::array<u8, 64> buffer_{};
   u64 buffered_ = 0;
   u64 total_ = 0;
 };
+
+namespace detail {
+// Voie de compression du SHA-256 (portes seulement) : vrai si les instructions SHA servent ; set_sha_hardware(false)
+// force la voie portable, set_sha_hardware(true) rend la voie materielle si le processeur l'a. Jamais appele par le
+// produit.
+bool sha_hardware() noexcept;
+void set_sha_hardware(bool enabled) noexcept;
+}  // namespace detail
 
 // Plus longue suite d'octets que Sha256 et FileWriter acceptent : 2^61 - 1 (le compte de bits tient dans un u64).
 inline constexpr u64 kMaxMessageBytes = (u64{1} << 61) - 1;

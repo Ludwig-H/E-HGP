@@ -1,5 +1,7 @@
 // Portes du SHA-256 du module io : vecteurs de FIPS 180-4 (exemples de l'annexe, et message d'un million de 'a'),
 // decoupages arbitraires d'un meme message, finish sans effet sur l'etat, ecriture hexadecimale.
+#include <algorithm>
+#include <cstdio>
 #include <string>
 #include <vector>
 
@@ -76,6 +78,46 @@ MHGP12_TEST(sha256, 27) {
       {64, "ffe054fe7ae0cb6dc65c3af9b61d5209f439851db43d0ba5997337df154668eb"},
       {65, "635361c48bb9eab14198e76ea8ab7f1a41685d6ad62aa9146d301d4f17eb0ae0"}};
   for (const auto& [length, expected] : borders) CHECK_EQ(hex_text(std::string(length, 'a')), expected);
+}
+
+// Les deux voies de compression (instructions SHA d'x86-64 et voie portable) : memes vecteurs de FIPS 180-4, et memes
+// empreintes sur des messages graves de 0 a 4 100 octets absorbes en un bloc, par morceaux de 1, 63, 64, 65 et 1 000
+// octets, puis par morceaux alternes. Sans instructions SHA (ou hors x86-64), la voie materielle est la voie portable :
+// le test le dit et joue les controles sur la seule voie portable.
+MHGP12_TEST(sha256_voies, 136) {
+  const bool hardware = io::detail::sha_hardware();
+  std::printf("sha256_voies : voie materielle %s\n", hardware ? "presente" : "absente (voie portable seule)");
+  const auto digest_on = [](bool on, std::span<const u8> message, std::size_t chunk) {
+    io::detail::set_sha_hardware(on);
+    Sha256 sha;
+    for (std::size_t at = 0; at < message.size(); at += chunk)
+      sha.update(message.subspan(at, std::min(chunk, message.size() - at)));
+    return sha.finish();
+  };
+  for (bool on : {false, true}) {
+    io::detail::set_sha_hardware(on);
+    CHECK_EQ(hex_text("abc"), std::string("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"));
+    CHECK_EQ(hex_text("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq"),
+             std::string("248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1"));
+  }
+  const std::vector<u8> big = pattern(4100);
+  for (std::size_t length : {0u, 1u, 55u, 56u, 63u, 64u, 65u, 127u, 128u, 129u, 1000u, 4096u, 4100u}) {
+    const auto message = std::span<const u8>(big.data(), length);
+    const Digest reference = digest_on(false, message, length == 0 ? 1 : length);
+    for (std::size_t chunk : {1u, 63u, 64u, 65u, 1000u}) {
+      CHECK(digest_on(true, message, chunk) == reference);
+      CHECK(digest_on(false, message, chunk) == reference);
+    }
+  }
+  // Morceaux alternes : la voie peut changer entre deux mises a jour du meme objet sans changer l'empreinte.
+  Sha256 mixed;
+  for (std::size_t at = 0, i = 0; at < big.size(); at += 300, ++i) {
+    io::detail::set_sha_hardware(i % 2 == 0);
+    mixed.update(std::span<const u8>(big.data() + at, std::min<std::size_t>(300, big.size() - at)));
+  }
+  CHECK(mixed.finish() == digest_on(false, big, big.size()));
+  io::detail::set_sha_hardware(true);
+  CHECK(io::detail::sha_hardware() == hardware);
 }
 
 MHGP12_TEST(hex, 3) {
