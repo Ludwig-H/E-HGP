@@ -1,0 +1,4 @@
+$ nvidia-smi --query-gpu=name,driver_version,persistence_mode,clocks.sm,clocks.max.sm,temperature.gpu,power.draw,memory.used,memory.total --format=csv,noheader
+NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.178.04, Enabled, 180 MHz, 2430 MHz, 33, 47.86 W, 0 MiB, 97887 MiB
+
+--- stderr ---

@@ -1,0 +1,36 @@
+$ /usr/bin/cmake --build $HOME/ehgp-v12/ehgp-v12.vc0imrQwqy/build/t2dc/b_flux_et_repli_selectif -j 44 --target mhgp12_catalogue_probe
+[  6%] Building CXX object CMakeFiles/mhgp12.dir/src/core/ledger.cpp.o
+[  6%] Building CXX object CMakeFiles/mhgp12.dir/src/core/buffer.cpp.o
+[ 12%] Building CXX object CMakeFiles/mhgp12.dir/src/num/predicates.cpp.o
+[ 12%] Building CXX object CMakeFiles/mhgp12.dir/src/num/sphere.cpp.o
+[ 19%] Building CXX object CMakeFiles/mhgp12.dir/src/num/center_region.cpp.o
+[ 19%] Building CXX object CMakeFiles/mhgp12.dir/src/num/centers.cpp.o
+[ 22%] Building CXX object CMakeFiles/mhgp12.dir/src/num/lattice.cpp.o
+[ 25%] Building CXX object CMakeFiles/mhgp12.dir/src/num/guard.cpp.o
+[ 32%] Building CXX object CMakeFiles/mhgp12.dir/src/num/rational.cpp.o
+[ 35%] Building CXX object CMakeFiles/mhgp12.dir/src/sched/pool.cpp.o
+[ 35%] Building CXX object CMakeFiles/mhgp12.dir/src/num/big.cpp.o
+[ 38%] Building CXX object CMakeFiles/mhgp12.dir/src/num/radical.cpp.o
+[ 45%] Building CXX object CMakeFiles/mhgp12.dir/src/io/sha256.cpp.o
+[ 45%] Building CXX object CMakeFiles/mhgp12.dir/src/cloud/cloud.cpp.o
+[ 51%] Building CXX object CMakeFiles/mhgp12.dir/src/num/roots.cpp.o
+[ 51%] Building CXX object CMakeFiles/mhgp12.dir/src/io/input.cpp.o
+[ 58%] Building CXX object CMakeFiles/mhgp12.dir/src/catalogue/traversal.cpp.o
+[ 58%] Building CXX object CMakeFiles/mhgp12.dir/src/io/directory.cpp.o
+[ 64%] Building CXX object CMakeFiles/mhgp12.dir/src/catalogue/leaves.cpp.o
+[ 64%] Building CXX object CMakeFiles/mhgp12.dir/src/num/local.cpp.o
+[ 67%] Building CXX object CMakeFiles/mhgp12.dir/src/catalogue/assemble.cpp.o
+[ 74%] Building CXX object CMakeFiles/mhgp12.dir/src/catalogue/catalogue.cpp.o
+[ 74%] Building CXX object CMakeFiles/mhgp12.dir/src/io/writer.cpp.o
+[ 80%] Building CUDA object CMakeFiles/mhgp12.dir/src/catalogue/device_leaf.cu.o
+[ 80%] Building CXX object CMakeFiles/mhgp12.dir/src/catalogue/export.cpp.o
+[ 83%] Building CXX object CMakeFiles/mhgp12.dir/src/catalogue/table.cpp.o
+[ 87%] Building CXX object CMakeFiles/mhgp12.dir/src/catalogue/outputs.cpp.o
+[ 90%] Building CUDA object CMakeFiles/mhgp12.dir/src/catalogue/device_cuda.cu.o
+[ 93%] Linking CXX static library libmhgp12.a
+[ 93%] Built target mhgp12
+[ 96%] Building CXX object CMakeFiles/mhgp12_catalogue_probe.dir/bench/catalogue_probe.cpp.o
+[100%] Linking CXX executable mhgp12_catalogue_probe
+[100%] Built target mhgp12_catalogue_probe
+
+--- stderr ---

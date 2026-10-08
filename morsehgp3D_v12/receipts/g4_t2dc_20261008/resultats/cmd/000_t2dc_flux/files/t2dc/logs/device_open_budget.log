@@ -1,0 +1,6 @@
+$ $HOME/ehgp-v12/ehgp-v12.vc0imrQwqy/build/t2dc/b_apres/mhgp12_catalogue_device_unit device_open_budget
+device_open_budget : refus sous budget serre joues sur l'appareil (14 appels)
+test device_open_budget controles=15 echecs=0 plancher=1
+mhgp12_test_ok tests=1 controles=15
+
+--- stderr ---
