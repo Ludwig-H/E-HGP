@@ -1,0 +1,44 @@
+{
+  "utc": "2026-10-08T11:03:36.066240+00:00",
+  "source_head": "08ce8485b124e795e8152461ad6657e5a61f6b58",
+  "sources": {
+    "src/index/bounds.hpp": "286b60fb0f466a01f4e8fae74f0c50841c15d06686c6b6e0ff0ecff5d685de09",
+    "src/index/census.cpp": "86facc1fa3368d52abdcef83cbe88d957e58588833880b18f5c52e02474113f0",
+    "src/index/census_workspace.cpp": "91562c83b9ddeeaac09aafadc75f461f20debb2bb4358ed11ae8452e02e8d452",
+    "src/num/guard.cpp": "b127d5b1663579ffe78f5914bf2b3aa1e4d8821b6a155324e314c261b216a682",
+    "src/num/guard.hpp": "081a8acfab8626856dc09f63f1b3cadce3958b23600b559ba6755276e25eded8"
+  },
+  "patch": "45a9fb6c43eb036087a1cdce1ecbdfefd7da0e7bb78ed506929ade2925b4f9f5",
+  "stable_recheck_utc": "2026-10-08T11:06:02.921844+00:00",
+  "base_commit": "72f622a556130e25afdadbef84984619417286e2",
+  "scope": "prototype non publie ; lecture source et preuve algebrique ; pas de natif, compilation, mesure",
+  "base_sources": {
+    "src/index/bounds.hpp": "d877fe59756a0686cc825a35bbfca9c1d50cc5d5c595e398767281c802f5a869",
+    "src/index/census.cpp": "ca588e5db2bbb4a549f7a599d186029bc44be9a386b8529561fcc439312908b2",
+    "src/index/census_workspace.cpp": "bee79fd409488e710660aa788e83001bb68cd918c0f6852187cf0fe868f58fb4",
+    "src/num/guard.cpp": "5a5fc29b65e21b1b74f642986614eb1fb0801cc084ae7ec50bc3aedc7e5655fc",
+    "src/num/guard.hpp": "6c73d770688b2e35036940e1524ac479f71b41f79d84c6b80fdbfb664d566b48",
+    "src/cloud/cloud.hpp": "678e185701cdb0d65664950d32938b8f6dedea0a64ca85ebfdd8a5550f1f6281",
+    "src/cloud/cloud.cpp": "26c82a1bfc1411606fbe1189541925539cb3c48a4cd1c1c3fe3a5d6a43a5684b",
+    "src/index/build.cpp": "be08f0d6fbcd38e9f5f5fc2ae9f9c4054974eced924744bbe917f03717a56166",
+    "src/num/geometry.hpp": "a0438d709c06c7e09f39108624af573e13b97789eb59ada60dee4609c1c7a6ac",
+    "src/num/sphere.cpp": "26fc17965d0cea73763ee4cc63062c19ec601505355043b821c013c4ac6c1290",
+    "src/num/geometry_internal.hpp": "2220aa8617710136ba3bc1aabe86d377b2584736af25befeff1a2151d086936f",
+    "src/num/budgets.hpp": "d3f3fe22d7bfd3bbab1b377d983aa08897f1bfd320625879527fcaf0be61424f"
+  },
+  "proof_excerpts": {
+    "signed_site": "const std::array<i64, 3> point{x, y, z};",
+    "difference": "return power_sign({point[0] - anchor_[0], point[1] - anchor_[1], point[2] - anchor_[2]}, ledger);",
+    "box_corner": "far[j] = (i64{lo[j]} + hi[j] - 2 * anchor_[j] >= threshold_[j] ? i64{hi[j]} : i64{lo[j]}) - anchor_[j];",
+    "short_norm": "short_norm_ = s + 2 <= 30;",
+    "inline_lane": "inline_lane_ = !broken_ && (lane_ == Lane::native || lane_ == Lane::certified);"
+  },
+  "result": {
+    "candidate_files": 5,
+    "base_files": 12,
+    "workspace_run_body_unchanged": true,
+    "side_offset_body_unchanged": true,
+    "wide_sign_body_unchanged": true,
+    "native_run": false
+  }
+}

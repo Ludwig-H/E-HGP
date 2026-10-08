@@ -1,0 +1,450 @@
+{
+  "source_git": "c648b3857c83ec1ed174139eef36106b187d2cf0",
+  "package_sha256": "dfc6faf689e6069783be2dab2202ec957d493ada980b956ccd240cc43001518e",
+  "package_bytes": 13034183,
+  "plan_sha256": "782c6e6a698e4f0a892ab2a299c44d11516dcaa3d30b1ddd87dca376e08e6d8b",
+  "scopes": [
+    "morsehgp3D_v12/src/",
+    "morsehgp3D_v12/bench/",
+    "morsehgp3D_v12/tests/",
+    "morsehgp3D_v12/cmake/",
+    "morsehgp3D_v12/CMakeLists.txt"
+  ],
+  "files_exact": 359,
+  "source_inventory_sha256": "61f9bf7f4038ce4c64db57181c8c20640c2adaf232f8236866b4b036a0d4b7fc",
+  "helpers": {
+    "morsehgp3D_v12/receipts/audit_reponses_20261008/session_l1_recuperation/check.py": {
+      "bytes": 4311,
+      "sha256": "8a80b809106399443ab6dce697e62c083e59241f6a6d1908b36bf087e755d30b"
+    },
+    "morsehgp3D_v12/receipts/audit_reponses_20261008/session_mes_c_provenance/source_check.py": {
+      "bytes": 2964,
+      "sha256": "1d863609d8f6b019cb39753232cf34e0bc3facb7e1ee27971c5941773ba4e070"
+    }
+  },
+  "local_files": {
+    "receipt.json": {
+      "bytes": 39791,
+      "sha256": "210aa76f665db5d8e326c452f545d249e059f3a94f289e1358940ce58633bfe5"
+    },
+    "DONE": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "package/plan.json": {
+      "bytes": 2107,
+      "sha256": "782c6e6a698e4f0a892ab2a299c44d11516dcaa3d30b1ddd87dca376e08e6d8b"
+    },
+    "package/package.tar.gz": {
+      "bytes": 13034183,
+      "sha256": "dfc6faf689e6069783be2dab2202ec957d493ada980b956ccd240cc43001518e"
+    },
+    "package/data/SHA256SUMS": {
+      "bytes": 4975,
+      "sha256": "c41cb3b19ae38fa6e2568d17465080e0c39b07732bad9152c79eeb1ef97a9d43"
+    },
+    "results/results.tar.gz": {
+      "bytes": 32995,
+      "sha256": "6f3b7028032ca52190955d5396538c4c39fac3d803473456ff4527f48967a89a"
+    }
+  },
+  "manifest_count": 72,
+  "commands": [
+    {
+      "index": "0",
+      "name": "mes_b",
+      "status": "ok",
+      "exit_code": "0",
+      "wall_seconds": "531.001",
+      "timeout_seconds": "1950",
+      "max_rss_kb": "79634116"
+    }
+  ],
+  "archive_files": {
+    "results/MANIFEST.sha256": {
+      "bytes": 8237,
+      "sha256": "6dcb5454e26d48037f9f6721d49dd93dd8d6ece3edb69f20720af6dda68eb34f"
+    },
+    "results/commands.tsv": {
+      "bytes": 103,
+      "sha256": "2908e8ef64c29ff37815573382d81d49aa3d1b9457be4202bea6cd3e17cc118d"
+    },
+    "results/cmd/000_mes_b/meta.txt": {
+      "bytes": 390,
+      "sha256": "e612f81fa89ed86bfd5be483cb2b7bd5ec92f4e8a1959da00d677a2b63ec8e54"
+    },
+    "results/cmd/000_mes_b/files/b/rapport_b.json": {
+      "bytes": 55167,
+      "sha256": "1040faa102ec35f3184161304f0cc571d848b305d98e748d46f9b5ce9d393e48"
+    },
+    "results/cmd/000_mes_b/files/b/construction.log": {
+      "bytes": 6093,
+      "sha256": "31dbdf4ca3e7e066bf7c189040287f4f9b0f4b33fb7a7bac7198f02aa1ae5615"
+    }
+  },
+  "command_meta": {
+    "status": "ok",
+    "exit_code": "0",
+    "wall_seconds": "531.001",
+    "requested_timeout_seconds": "1950",
+    "effective_timeout_seconds": "1950",
+    "group_closed": "1",
+    "residual_group_killed": "0",
+    "streams_truncated": "0"
+  },
+  "closure": {
+    "status": "completed",
+    "worker_exit_code": 0,
+    "results_verified": true,
+    "results_sha256": "6f3b7028032ca52190955d5396538c4c39fac3d803473456ff4527f48967a89a",
+    "retrieval": "downloaded",
+    "closure": "stopped",
+    "targeted_shutdown_certified": true,
+    "stop_exit_code": 0,
+    "stop_attempts": 1,
+    "reserve_released": true,
+    "guest_guard_intact": true,
+    "data_verified_remote": true,
+    "errors_count": 0,
+    "done": 0,
+    "before_status": "RUNNING",
+    "after_status": "TERMINATED"
+  },
+  "data_declared": [
+    {
+      "name": "SHA256SUMS.txt",
+      "size": 4807,
+      "sha256": "1611f971318a306ed04fd1251538e7760f982b3b6984df33a9b166b21fe495ae"
+    },
+    {
+      "name": "boreas_202011261358_f4500_n1.ids.u32le",
+      "size": 862660,
+      "sha256": "46bf34e24c78226dea14e376d0aebfd82fcbbbcf4b1ecb63c60d437c29a46f48"
+    },
+    {
+      "name": "boreas_202011261358_f4500_n1.u32le",
+      "size": 2587980,
+      "sha256": "46fae285d9c0d9d6f4b2ef0f472b0bc70d2d2e81e4ed0fc82a2f79482f1a63bc"
+    },
+    {
+      "name": "boreas_202011261358_f4500_n10.distinct.ids.u32le",
+      "size": 8613368,
+      "sha256": "a0894044c704a423a3495a1bd32d1560acf439e6fbf014e5a03cd99d2e61819a"
+    },
+    {
+      "name": "boreas_202011261358_f4500_n10.distinct.mult.u32le",
+      "size": 8613368,
+      "sha256": "81a1ea92408ee86730c474c1035a488a7b1b0a220ef44e590ea67a13f888b93c"
+    },
+    {
+      "name": "boreas_202011261358_f4500_n10.distinct.u32le",
+      "size": 25840104,
+      "sha256": "f304c8e6f1001632ee2b1c7b12a926277e4791c1651e8066fa3bec8cb73a5f47"
+    },
+    {
+      "name": "boreas_202011261358_f4500_n10_sans_sol.distinct.ids.u32le",
+      "size": 6053932,
+      "sha256": "8ecae5cbf6f262fbe6c89a1289c91f4f166b1550e32b5453a795c24de5617294"
+    },
+    {
+      "name": "boreas_202011261358_f4500_n10_sans_sol.distinct.mult.u32le",
+      "size": 6053932,
+      "sha256": "05b076cf9f84975aeb0bb93b729465413bf00b2d555fa53ae231e2a0308aa14f"
+    },
+    {
+      "name": "boreas_202011261358_f4500_n10_sans_sol.distinct.u32le",
+      "size": 18161796,
+      "sha256": "548e3bba27b09813dc51cf84060a724d9e8815804718d225963baaae76cb8cb9"
+    },
+    {
+      "name": "boreas_202011261358_f4500_n1_sans_sol.ids.u32le",
+      "size": 585264,
+      "sha256": "b1f6f1d90f7cd797cf88956f350d53aa9126a30dbd9b458cf033a11f7e52f1c9"
+    },
+    {
+      "name": "boreas_202011261358_f4500_n1_sans_sol.u32le",
+      "size": 1755792,
+      "sha256": "395b1a449602178a666f8aadd3343dd24a8b68661483e0c367fa8b23bf7c27a2"
+    },
+    {
+      "name": "boreas_202011261358_f4500_n50.distinct.ids.u32le",
+      "size": 43067992,
+      "sha256": "8e8a9c00fb222b6afa51441ebba615e4e0867b7bd0344689f43b398204c8d443"
+    },
+    {
+      "name": "boreas_202011261358_f4500_n50.distinct.mult.u32le",
+      "size": 43067992,
+      "sha256": "923a5e305803b49bd7ba437546f840850a2fc9b84a7ffa8f73e6c7d44d600195"
+    },
+    {
+      "name": "boreas_202011261358_f4500_n50.distinct.u32le",
+      "size": 129203976,
+      "sha256": "333c6d2da2a4c0356af30e1ee42792bba1dbae27fe56938c78b65e4617a513ce"
+    },
+    {
+      "name": "boreas_202011261358_f4500_n50_sans_sol.distinct.ids.u32le",
+      "size": 31429072,
+      "sha256": "666f8eba504a8ef37d46ddfbf725db94b51699cece75a8fa5f30b02cb4d39008"
+    },
+    {
+      "name": "boreas_202011261358_f4500_n50_sans_sol.distinct.mult.u32le",
+      "size": 31429072,
+      "sha256": "73b8e0ac8b048bc162e59a6fa1525bd116ab249bd1b79f7d9e2ab55186434a82"
+    },
+    {
+      "name": "boreas_202011261358_f4500_n50_sans_sol.distinct.u32le",
+      "size": 94287216,
+      "sha256": "c71fd814db6951629117154ffceff36faa184b8ba82d16970bda473514031dd9"
+    },
+    {
+      "name": "bundle_manifest.json",
+      "size": 19443,
+      "sha256": "f57f3d0b67924ed8808eb4d69f0b2e521d3b4480b336b63306e8d8e865cec333"
+    },
+    {
+      "name": "eth3d_meadow_scan1.distinct.ids.u32le",
+      "size": 24724364,
+      "sha256": "2e3c7ed44f8acd3328ad083c9759b83f90a136391a6fa37cfb1d458f29ac276e"
+    },
+    {
+      "name": "eth3d_meadow_scan1.distinct.mult.u32le",
+      "size": 24724364,
+      "sha256": "6db8813592a1a3170e22c2d22f3c8873cfb0768dd39653e462f8028e03257558"
+    },
+    {
+      "name": "eth3d_meadow_scan1.distinct.u32le",
+      "size": 74173092,
+      "sha256": "54ca49a3880bd9a92bdf70d8d1ee41905206bb7d262ea46af5214202a31699fe"
+    },
+    {
+      "name": "forinst_nibio_plot12.distinct.ids.u32le",
+      "size": 31303428,
+      "sha256": "1b850a216e0edbbf8abcb421e477700772ab1df2b5d0a15c6d5ceffc745958d7"
+    },
+    {
+      "name": "forinst_nibio_plot12.distinct.mult.u32le",
+      "size": 31303428,
+      "sha256": "f01194e6ef42b22b56031d55b44d82dc1b44d2c2167230fcec4428968eb96271"
+    },
+    {
+      "name": "forinst_nibio_plot12.distinct.u32le",
+      "size": 93910284,
+      "sha256": "c91bd51fea13a7ed033c70862919f798c42c87fc619b1b0f7a607456babccc58"
+    },
+    {
+      "name": "forinst_nibio_plot12_sans_sol.distinct.ids.u32le",
+      "size": 31174720,
+      "sha256": "a122592bb8448491823aff95451580f1188e39d017a20fcfd7903a00a312a3b4"
+    },
+    {
+      "name": "forinst_nibio_plot12_sans_sol.distinct.mult.u32le",
+      "size": 31174720,
+      "sha256": "03366273d23c27278f235e20ff054f185f0d744e5757089d58557d63f6d42b0a"
+    },
+    {
+      "name": "forinst_nibio_plot12_sans_sol.distinct.u32le",
+      "size": 93524160,
+      "sha256": "62f85b9dc81fba45273fe375a48c50d713890b45539126252d39fa063d88daec"
+    },
+    {
+      "name": "forinst_scion_plot61.distinct.ids.u32le",
+      "size": 14356988,
+      "sha256": "08f3f6c1ef8eeff50462082a7053c5e5ef88f6cf42591c2a6c94500951e2fd99"
+    },
+    {
+      "name": "forinst_scion_plot61.distinct.mult.u32le",
+      "size": 14356988,
+      "sha256": "a4eed11dcc24531a7a4c4c7e2233c2604d9c7f35a3e2709cdfefdecc59432072"
+    },
+    {
+      "name": "forinst_scion_plot61.distinct.u32le",
+      "size": 43070964,
+      "sha256": "28e55ca582dee6d048ab8c57b4166fc2b0e80be3d758473ebba57a4a935cef74"
+    },
+    {
+      "name": "forinst_scion_plot61_sans_sol.distinct.ids.u32le",
+      "size": 13757484,
+      "sha256": "736bf3c4456f7046872d4dcd3fcaddd519324d2a2300d780392972b3b5d0f3f3"
+    },
+    {
+      "name": "forinst_scion_plot61_sans_sol.distinct.mult.u32le",
+      "size": 13757484,
+      "sha256": "79e4adc2088b0ed83c87c124545d93f3f8bc7492a8e0473cf2859258a3ba859a"
+    },
+    {
+      "name": "forinst_scion_plot61_sans_sol.distinct.u32le",
+      "size": 41272452,
+      "sha256": "d1d416e9d6bab7fa9c3afee02fccc43f0ca764a85d541d28e51392fdb4a95700"
+    },
+    {
+      "name": "forinst_tuwien_train.distinct.ids.u32le",
+      "size": 24944668,
+      "sha256": "475d037f79fa085b5a76350643fac7c7c6dd00cfbe8614b0836660f80acda0e7"
+    },
+    {
+      "name": "forinst_tuwien_train.distinct.mult.u32le",
+      "size": 24944668,
+      "sha256": "b6984cf860b68243bfad1b3bf6dab0c7df819467667c0cd692430d1273902980"
+    },
+    {
+      "name": "forinst_tuwien_train.distinct.u32le",
+      "size": 74834004,
+      "sha256": "fcac43bb8fc9f8a26ab3e360782981a02978549f2947d6e440745a00a35ae17c"
+    },
+    {
+      "name": "forinst_tuwien_train_sans_sol.distinct.ids.u32le",
+      "size": 20799032,
+      "sha256": "6b04fd1611207975dc02dd374ec777afd0b964fd8712a9d3c2d2166f1d115fad"
+    },
+    {
+      "name": "forinst_tuwien_train_sans_sol.distinct.mult.u32le",
+      "size": 20799032,
+      "sha256": "404620ebc7f79d2990e4a44b47d5a95d3ab5cab19164c1d45fba6002dc9a9bbe"
+    },
+    {
+      "name": "forinst_tuwien_train_sans_sol.distinct.u32le",
+      "size": 62397096,
+      "sha256": "984280b0b1ba7b79024099a0ddd75f950c4995226ff81d5ca77143121fcc878e"
+    },
+    {
+      "name": "ign_marseille_0891_6248.distinct.ids.u32le",
+      "size": 26836180,
+      "sha256": "9440ad953bde476855e50e592d98a881d0f284a224e30dc72ffaf898318116f7"
+    },
+    {
+      "name": "ign_marseille_0891_6248.distinct.mult.u32le",
+      "size": 26836180,
+      "sha256": "c43cb3aadb0677e59990df81ab61246411cd7be2a171a5c81df68dfbc52d922a"
+    },
+    {
+      "name": "ign_marseille_0891_6248.distinct.u32le",
+      "size": 80508540,
+      "sha256": "5beaeae410a97224e7b33414d7ab6e185a336c6045867ad2f41c5174ffca5601"
+    },
+    {
+      "name": "ign_marseille_0891_6248_sans_sol.distinct.ids.u32le",
+      "size": 9861140,
+      "sha256": "39ac1817e863cc4683ae2a3ed676163a247c5e22f944de75cf7f837e3acc057c"
+    },
+    {
+      "name": "ign_marseille_0891_6248_sans_sol.distinct.mult.u32le",
+      "size": 9861140,
+      "sha256": "f37b040bc0cc29a9fd2417c45146664cac948c30e7204cd589940327ae7fef9b"
+    },
+    {
+      "name": "ign_marseille_0891_6248_sans_sol.distinct.u32le",
+      "size": 29583420,
+      "sha256": "46c7597d6a31577b2ce3e5bac2ea3fb0e10097badbfa401d38a4a8b62ebe6c1e"
+    }
+  ],
+  "data_manifest_sha256": "c41cb3b19ae38fa6e2568d17465080e0c39b07732bad9152c79eeb1ef97a9d43",
+  "configuration": {
+    "--fils": "48",
+    "--budget-gio": "160",
+    "--budget-appareil-gio": "88",
+    "--delai-global": "1880",
+    "--empreinte-max-sites": "1600000",
+    "--jobs": "44"
+  },
+  "report_provenance": {
+    "manifeste_sha256": "f57f3d0b67924ed8808eb4d69f0b2e521d3b4480b336b63306e8d8e865cec333",
+    "pilote_sha256": "9eb044087bfd95443eb5149bd25a12170158769d4bba07ad47681d9f07a25f32",
+    "sonde_sha256": "60e658ddda347644aabfd01e6c6f87ff9eca7b667acdf682ee783d56a79cea44"
+  },
+  "construction_fields": {
+    "CMAKE_BUILD_TYPE": [
+      "Release"
+    ],
+    "MHGP12_COORD_BITS": [
+      "21"
+    ],
+    "MHGP12_ENABLE_CUDA": [
+      "ON"
+    ]
+  },
+  "source_files": {
+    "morsehgp3D_v12/bench/full_probe.cpp": {
+      "bytes": 27989,
+      "sha256": "1068940a06e386cb80a4802b3dd61e2df87eed69574f08c821c34dabb017179b"
+    },
+    "morsehgp3D_v12/microbancs/mes_b_scenes/pilote_b.py": {
+      "bytes": 27080,
+      "sha256": "9eb044087bfd95443eb5149bd25a12170158769d4bba07ad47681d9f07a25f32"
+    },
+    "morsehgp3D_v12/microbancs/outils/lecteur_full.py": {
+      "bytes": 13663,
+      "sha256": "15437e5f09408d5fbdc6288e33a2452490489f13bf9a3b3a24c99f5d109b6554"
+    },
+    "morsehgp3D_v12/microbancs/outils/banc_full.py": {
+      "bytes": 5350,
+      "sha256": "7d7f0661b49adf094df51d41268470571d47c51fc7795bb5b34c791a4a539904"
+    },
+    "morsehgp3D_v12/src/tower/pipeline_run.cpp": {
+      "bytes": 20427,
+      "sha256": "15b49b5f0309f546912c8c9571f616c32fdf4136df7bdb888b2ff736a65aaf5a"
+    },
+    "morsehgp3D_v12/src/core/buffer.hpp": {
+      "bytes": 14629,
+      "sha256": "8e4d84665e90308ee9572a729731711bb419e3a565fd4dd11b5bd56ab6a92401"
+    }
+  },
+  "L1r_reference": {
+    "capture_path": "morsehgp3D_v12/receipts/audit_reponses_20261008/session_l1_recuperation/capture.json",
+    "capture_pin": {
+      "bytes": 6397,
+      "sha256": "910b1912494f2b7d8f7fec3b9c1fa4c191d34ab9cd8b821808e6bbab2062013f"
+    },
+    "receipt_pin": {
+      "bytes": 40570,
+      "sha256": "45133ea7f28e31415c1f88d28b8bf88fe80face334a4ac84ede63247f45810ca"
+    },
+    "source_git": "ea62cd6918a3c3a403f7ff7fc45e85ff47c24386",
+    "data_declarations_identical": true
+  },
+  "native_delta_vs_L1r": [
+    "morsehgp3D_v12/src/catalogue/assemble.cpp",
+    "morsehgp3D_v12/src/catalogue/catalogue.hpp",
+    "morsehgp3D_v12/src/catalogue/device_cuda.cu",
+    "morsehgp3D_v12/src/catalogue/device_pipeline.hpp",
+    "morsehgp3D_v12/src/catalogue/exec_host.hpp",
+    "morsehgp3D_v12/src/catalogue/finish_driver.hpp",
+    "morsehgp3D_v12/src/catalogue/finish_outputs.hpp",
+    "morsehgp3D_v12/src/catalogue/finish_repair.hpp",
+    "morsehgp3D_v12/src/catalogue/internal.hpp",
+    "morsehgp3D_v12/src/catalogue/module.cmake",
+    "morsehgp3D_v12/src/catalogue/outputs.cpp",
+    "morsehgp3D_v12/src/catalogue/transfer_meter.hpp",
+    "morsehgp3D_v12/src/index/bounds.hpp",
+    "morsehgp3D_v12/src/index/census.cpp",
+    "morsehgp3D_v12/src/index/census_workspace.cpp",
+    "morsehgp3D_v12/src/index/index.hpp",
+    "morsehgp3D_v12/src/io/io.hpp",
+    "morsehgp3D_v12/src/io/sha256.cpp",
+    "morsehgp3D_v12/src/num/budgets.hpp",
+    "morsehgp3D_v12/src/num/guard.cpp",
+    "morsehgp3D_v12/src/num/guard.hpp",
+    "morsehgp3D_v12/src/num/power_certificate.hpp",
+    "morsehgp3D_v12/src/sched/pool.cpp",
+    "morsehgp3D_v12/src/sched/sched.hpp",
+    "morsehgp3D_v12/src/sched/source_pins.json",
+    "morsehgp3D_v12/src/tower/forest_build.cpp",
+    "morsehgp3D_v12/src/tower/forest_internal.hpp",
+    "morsehgp3D_v12/src/tower/forest_kernel.cpp",
+    "morsehgp3D_v12/src/tower/forest_stages.cpp",
+    "morsehgp3D_v12/src/tower/module.cmake",
+    "morsehgp3D_v12/src/tower/passes.cpp",
+    "morsehgp3D_v12/src/tower/pipeline.cpp",
+    "morsehgp3D_v12/src/tower/pipeline.hpp",
+    "morsehgp3D_v12/src/tower/pipeline_run.cpp",
+    "morsehgp3D_v12/src/tower/registry_branches.cpp",
+    "morsehgp3D_v12/src/tower/resolve.cpp",
+    "morsehgp3D_v12/src/tower/stage.cpp",
+    "morsehgp3D_v12/src/tower/stage.hpp",
+    "morsehgp3D_v12/src/tower/tower.hpp"
+  ],
+  "snapshot": {
+    "files": 39,
+    "bytes": 98570,
+    "jsonl": 18
+  }
+}

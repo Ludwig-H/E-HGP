@@ -1,0 +1,26 @@
+{
+  "cache_default_octets": 8589934592,
+  "code_scope": "codes declared in the pinned report; outer source/build/stop checked separately",
+  "dependencies": {
+    "session_l1r_admission/mesures.json": "075f847656455bea410db23069ace6a61999acccea41a82a4839945e5d8f2acb",
+    "session_l1r_admission/replay.py": "8c8ee0bff57d80da3a5d325a04ad916981ed4c60b36e8c87894e79ca588dbe7e",
+    "session_l1r_contrelecture/capture.json": "418caea4b1333ced450aeb4d7ab0d257567bab3ced8e0449285442d8517407be",
+    "session_l1r_contrelecture/reader.py": "ba47fcd7cf125da479c19a9dc8bbf59a1de156169f042e494fd578186cedbe2a"
+  },
+  "expected_schema": "recouvert",
+  "external_provenance": "../session_b1p_provenance/README.md",
+  "metadata_sha256": "ae71355f918499a09a9fc771f55e7a85d6cde78a9652c15d8b8b31adb026cb2e",
+  "plan_sha256": "782c6e6a698e4f0a892ab2a299c44d11516dcaa3d30b1ddd87dca376e08e6d8b",
+  "raw_files": 36,
+  "raw_inventory_sha256": "4108a5b22c8f2cd9386b421ef925e195cd7979c49bdfd16c8c2a0959067d1ba8",
+  "report_sha256": "1040faa102ec35f3184161304f0cc571d848b305d98e748d46f9b5ce9d393e48",
+  "source_pin": "c648b3857c83ec1ed174139eef36106b187d2cf0",
+  "sources": {
+    "morsehgp3D_v12/bench/full_probe.cpp": "1068940a06e386cb80a4802b3dd61e2df87eed69574f08c821c34dabb017179b",
+    "morsehgp3D_v12/microbancs/mes_b_scenes/pilote_b.py": "9eb044087bfd95443eb5149bd25a12170158769d4bba07ad47681d9f07a25f32",
+    "morsehgp3D_v12/microbancs/outils/lecteur_full.py": "15437e5f09408d5fbdc6288e33a2452490489f13bf9a3b3a24c99f5d109b6554",
+    "morsehgp3D_v12/src/core/buffer.cpp": "5c885dbf0e4813f1a8ee653115092536348877e6b93aa5b831d7490fe0d6e756",
+    "morsehgp3D_v12/src/core/buffer.hpp": "8e4d84665e90308ee9572a729731711bb419e3a565fd4dd11b5bd56ab6a92401",
+    "morsehgp3D_v12/src/core/reasons.def": "6950b85dc15ed3ebfc51e4597ef06b4ed0b08c1833e83df09579dcb94e9e8cfd"
+  }
+}

@@ -1,0 +1,18 @@
+# L1p / MES-B1p : provenance et fermeture du retour massif
+
+Lecture locale du 8 octobre 2026, source **`c648b3857c83ec1ed174139eef36106b187d2cf0`**. La session est close : commande `mes_b` et worker à code 0, `DONE=0`, archive vérifiée, zéro erreur ; arrêt ciblé certifié à la première tentative, réserve libérée, garde intacte et état final `TERMINATED`. Le groupe de commande est fermé sans processus résiduel tué ni flux tronqué. Aucun appel distant, moteur, build ou payload de données n'a été lancé/lu par cet audit.
+
+L'archive de résultats mesure **32 995 octets**, SHA-256 `6f3b7028032ca52190955d5396538c4c39fac3d803473456ff4527f48967a89a` ; ses **72 entrées** sont couvertes par le manifeste. Le paquet `dfc6faf689e6069783be2dab2202ec957d493ada980b956ccd240cc43001518e` et le plan `782c6e6a698e4f0a892ab2a299c44d11516dcaa3d30b1ddd87dca376e08e6d8b` sont liés au reçu. Les **359 fichiers** des périmètres `src`, `bench`, `tests`, `cmake` et `CMakeLists.txt` correspondent exactement aux objets Git ; pilote MES-B, lecteur FULL et banc commun sont vérifiés séparément. La construction annonce Release, u21 et CUDA activé. Le rapport porte le hash du binaire `60e658ddda347644aabfd01e6c6f87ff9eca7b667acdf682ee783d56a79cea44` ; aucune fermeture ELF avant/après supplémentaire n'est déduite de ce seul champ.
+
+Le plan et le rapport concordent : **15 scènes entières**, 18 cas B1–B4, W48, budgets hôte 160 Gio / appareil 88 Gio, délai global 1 880 s, empreinte FUL1 jusqu'à 1 600 000 sites. C'est une campagne FULL massive, avec une voie CPU explicite, et non un microbanc isolant le catalogue. La commande entière dure **531,001 s** (limite externe 1 950 s) ; ce nombre inclut le pilote et la construction, ce n'est pas une latence FULL. Son maximum RSS de commande, 79 634 116 Kio, n'est pas une mesure par scène.
+
+Au pin source, `bench/full_probe.cpp:90–91` fixe un cache de blocs de **8 Gio** et la Session recouverte par défaut ; le rapport annonce `recouvert`. Le lecteur commun est `15437e5f…`. Validation et empreinte ont leurs frontières déclarées hors mur. Le pic du budget actif, les capacités appareil/épinglées et le RSS cumulatif restent des métriques distinctes ; le pic actif n'englobe pas les blocs hôte inactifs conservés en cache.
+
+Les **45 déclarations d'entrée** (noms, tailles, hashes) sont strictement identiques au reçu L1r épinglé par [la récupération L1/L1r](../session_l1_recuperation/README.md). Cela vérifie les déclarations et leurs liens, sans relire les payloads. L1r utilisait `ea62cd691…`, la voie séquentielle et un cache par défaut nul. **39 fichiers natifs ont changé** depuis ce témoin : catalogue 12, index 4, io 2, num 4, ordonnanceur 3, tour 14. Une différence de temps entre ces campagnes ne peut être attribuée à un seul de ces changements. L'admission des passes, empreintes et chronos est distincte de cette preuve de fermeture.
+
+`capture.json` conserve uniquement des champs publics sélectionnés, hashes et inventaires ; aucun reçu brut de contrôleur, commande privée ou donnée géométrique n'est copié. Le rejeu vérifie les hashes avant et après lecture, réutilise les lecteurs d'archive et de sources publiés et compare à nouveau les déclarations L1r. Normal et `-O` passent avec le même résultat. Les 39 petits fichiers du retour sélectionné restent hors Git ; les chemins locaux ci-dessous sont des paramètres et non une preuve de qualification binaire rétroactive.
+
+```sh
+python check.py --repo /chemin/depot --session /chemin/session-mesb1p --previous-session /chemin/session-mesb1r
+python -O check.py --repo /chemin/depot --session /chemin/session-mesb1p --previous-session /chemin/session-mesb1r
+```
