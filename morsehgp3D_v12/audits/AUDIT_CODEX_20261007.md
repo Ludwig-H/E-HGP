@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-8 octobre 2026, base publiée **`4831fd3ba`**.
+8 octobre 2026, base publiée **`4cbcd3852`**.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
 
@@ -31,11 +31,11 @@ Priorité : chaîne entière ; 100 ms, GPU u24/u32, petits nuages et millions re
   J : 344 sources conformes, 675 portes et six LiDAR passées ; les 26 différentielles v10 locales sont absentes
   sur G4. Campagne des 18 mutants passée. G-L7 et index adoptés, G-L5 rejeté. Pilote : défaut CLI huit maintenu,
   plan G4 explicite dix ; erratum de l'ancien conducteur local conservé dans le registre.
-- **TMVR** : [repo5 u21](../receipts/audit_tmv_repo5_u21_20261008/README.md), 680 tests + une sentinelle sautée,
-  neuf chaînes CPU C/G conformes, 16 mutants tués. R inclut les offsets CSR ; 685 contrôles du pic, budget fini/cache
-  encore ouverts. [Clôture partielle repo5](../receipts/audit_tmv_repo5_profils_20261008/README.md) : u24 neuf chaînes
-  conformes ; u32 construction/suite rapide seulement, arrêté à 01:22:17. Repo6 reprend le raccord Gc + TMVR,
-  le tri pur et une promesse du validateur réduite ; campagne distincte en cours, aucun transfert de qualification.
+- **TMVR + Gc** : [repo6 u21](../receipts/audit_tmv_repo6_u21_20261008/README.md), arbre 382 fichiers,
+  690 tests + une sentinelle sautée, MES-M0 neuf cas × deux modes, EMST et neuf chaînes natives CPU conformes.
+  685 contrôles du pic passent ; budget fini/cache restent ouverts. Les 27 mutants, profils larges, livraison
+  produit et FULL GPU restent à qualifier. [Repo5 historique](../receipts/audit_tmv_repo5_profils_20261008/README.md) :
+  u24 clos, u32 interrompu ; aucune qualification transférée à l'assemblage.
 - **D6 `0018`** : [schéma Gc refusé, patch strict proposé](../receipts/audit_reponses_20261008/gc_livraison/README.md),
   deux formats réels admis et 27 corruptions refusées. Composition avec le correctif du plan vérifiée ; quatre plans
   invalides refusés avant toute prise. Ces deux corrections restent à intégrer.

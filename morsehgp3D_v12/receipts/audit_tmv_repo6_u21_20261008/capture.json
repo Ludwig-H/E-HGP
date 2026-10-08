@@ -1,0 +1,82 @@
+{
+  "files_sha256": {
+    "build21f/CMakeCache.txt": "b1ec5f9cbcf056ae99ccc3164b58fd509028581ea8ebb8de941c1ccf87ba7c70",
+    "build21f/Testing/Temporary/LastTest.log": "1cc4041810bd81056cec65c159115fa13e9e5f2b8f07b870e6a730f864225533",
+    "build21f/mhgp12_tower_chain": "1c65dd928998b7234a25a6d018eeda32ed679d336c2e9f3c3bfcb1e565198470",
+    "build21f/mhgp12_tower_dumps": "8aa7fcf64a07c16d292a48222a278417efeda4a89e39fd665c39bfb3a74c268f",
+    "final6/build21.log": "574fd9d4fe7ff0491147391339757b806df14737b334ba80a608b1ba7bb01b71",
+    "final6/cfg21.log": "a4c86c8e8b375f84ff1e0d6f2fda26ef75f90eb3ed391b2a513c5fca2a0110dd",
+    "final6/chaine_21_a.log": "1678265dc67a5901d6f816ee745273af6e898c8f3459a152b60e32f4bc713ee5",
+    "final6/chaine_21_b.log": "8240538c3451d69143280cfdcb25c42accfae2e12acd2c97f22d9cd8a6dc5c7c",
+    "final6/chaine_21_c.log": "c13ceb3369cc6d7579b7dee2b0815933b8486dde86cc2fe50cd4d124ed204a0a",
+    "final6/ctest21.log": "e3dabb61f78102bff630461f9ff4cebcd0fb21659462521a899e5cffa73073fc",
+    "final6/m0_21.log": "9721a689916a3c18c133e71bcf90177e238933d6b4166da387833705b9551c7d",
+    "outils/etape_final6.sh": "ae02e54ef0a2f316de9b71506bdc0cde31ca77d9783e572b5f0069d25ffd20e3",
+    "patch_tour_TMV.diff": "b3c78ae365a99568457bc6cd5d894a1b73d02b7b19ae3d774f9fdfa094a58bab"
+  },
+  "patch_sha256": "b3c78ae365a99568457bc6cd5d894a1b73d02b7b19ae3d774f9fdfa094a58bab",
+  "prior_reader_sha256": "b1424b987d0c19b2f4eb966fd852e4e1284ebdc491f312dc0943d81694bd86b5",
+  "public_status": "not_claimed",
+  "result": {
+    "admission": {
+      "controls": 685,
+      "equal_peaks": 40,
+      "failures": 0,
+      "retained_rows": 25383,
+      "stages": 160
+    },
+    "chain_cases": [
+      "ng00_k10",
+      "ng00_k5",
+      "ng01_k10",
+      "ng01_k5",
+      "ng02_k10",
+      "ng02_k5",
+      "u16000_k5",
+      "u32000_k5",
+      "u8000_k5"
+    ],
+    "codes": {
+      "build21": {
+        "code": 0,
+        "utc": "01:28:03"
+      },
+      "chaine_21_a": {
+        "code": 0,
+        "utc": "01:50:16"
+      },
+      "chaine_21_b": {
+        "code": 0,
+        "utc": "01:49:35"
+      },
+      "chaine_21_c": {
+        "code": 0,
+        "utc": "01:51:27"
+      },
+      "ctest21": {
+        "code": 0,
+        "utc": "01:33:45"
+      },
+      "m0_octets_21": {
+        "code": 0,
+        "utc": "01:38:55"
+      }
+    },
+    "ctest_passed": 690,
+    "ctest_skipped": 1,
+    "cuda_enabled": false,
+    "gcp_used": false,
+    "m0_cases": 9,
+    "m0_target_modes": 2,
+    "mutants_requalified": false,
+    "native_replayed": false,
+    "payloads_read": false,
+    "wide_profiles_qualified": false
+  },
+  "source_base": "a5e0dbc776f2817f4e7e3a23fc791f1035948b47",
+  "source_tree": [
+    "1b5d1fb38c2c2cbcbfaac86525eeaaeeab0f044afb1a4aa490a6f249d5b73279",
+    382
+  ],
+  "status": "repo6_u21_composition_chaines_closes_mutants_et_profils_larges_non_qualifies"
+}

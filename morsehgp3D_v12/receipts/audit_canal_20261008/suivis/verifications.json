@@ -1,0 +1,19 @@
+{
+  "normal_optimized_equal": true,
+  "replay_sha256": "171c4d8d1db46ec3e0f31695557a1dfe706d79014e8d0d6e892a4e1b36f97c6e",
+  "pin": "4cbcd38521fad5cf61e4009b7011da20bdc33755",
+  "saved_bytes": 3094,
+  "old_proof_links": 37,
+  "kept_direct": 11,
+  "archived_only": 26,
+  "temporary_apply_check": true,
+  "temporary_hygiene": "OK: 75 constats, canal 61365 octets, cohérence structurelle seulement",
+  "scope": "Copie temporaire du canal root, aucun registre vivant modifié.",
+  "root_applied": true,
+  "root_first_nine_columns_equal": true,
+  "independent_updates_preserved": [
+    "CST-0105",
+    "CST-0107"
+  ],
+  "root_channel_bytes": 61365
+}
